@@ -295,15 +295,15 @@ int MLI_Method_AMGSA::setupSubdomainNullSpaceUsingFEData( MLI *mli )
    /* --------------------------------------------------------------- */
 
    strcpy( which, "shift" );
-   eigenR = new double[nullspace_dim+1];
-   eigenI = new double[nullspace_dim+1];
-   eigenV = new double[csrNrows*(nullspace_dim+1)];
+   eigenR = new double[nullspaceDim_+1];
+   eigenI = new double[nullspaceDim_+1];
+   eigenV = new double[csrNrows*(nullspaceDim_+1)];
    assert((long) eigenV);
 
 #ifdef MLI_ARPACK
    sigmaR = 1.0e-5;
    sigmaI = 0.0e-1;
-   dnstev_(&csrNrows, &nullspace_dim, which, &sigmaR, &sigmaI, 
+   dnstev_(&csrNrows, &nullspaceDim_, which, &sigmaR, &sigmaI, 
            csrIA, csrJA, csrAA, eigenR, eigenI, eigenV, &csrNrows, &info);
 #else
    printf("MLI_Method_AMGSA::FATAL ERROR : ARPACK not installed.\n");
@@ -315,7 +315,7 @@ int MLI_Method_AMGSA::setupSubdomainNullSpaceUsingFEData( MLI *mli )
    {
       strcpy( which, "destroy" );
 #ifdef MLI_ARPACK
-      dnstev_(&csrNrows, &nullspace_dim, which, &sigmaR, &sigmaI, 
+      dnstev_(&csrNrows, &nullspaceDim_, which, &sigmaR, &sigmaI, 
               csrIA, csrJA, csrAA, eigenR, eigenI, eigenV, &csrNrows, &info);
 #else
    printf("MLI_Method_AMGSA::FATAL ERROR : ARPACK not installed.\n");
@@ -323,7 +323,7 @@ int MLI_Method_AMGSA::setupSubdomainNullSpaceUsingFEData( MLI *mli )
 #endif
    }
 #if 1
-   for ( i = 0; i < nullspace_dim; i++ )
+   for ( i = 0; i < nullspaceDim_; i++ )
       printf("%5d : eigenvalue %5d = %e\n", mypid, i, eigenR[i]);
 #endif
 
@@ -355,9 +355,9 @@ int MLI_Method_AMGSA::setupSubdomainNullSpaceUsingFEData( MLI *mli )
    /* load the null space vectors                                     */
    /* --------------------------------------------------------------- */
 
-   if ( nullspace_vec != NULL ) delete [] nullspace_vec;
-   nullspace_len = localNRows;
-   nullspace_vec = new double[nullspace_len*nullspace_dim];
+   if ( nullspaceVec_ != NULL ) delete [] nullspaceVec_;
+   nullspaceLen_ = localNRows;
+   nullspaceVec_ = new double[nullspaceLen_*nullspaceDim_];
 
    for ( i = 0; i < totalNNodes; i++ )
    {
@@ -369,8 +369,8 @@ int MLI_Method_AMGSA::setupSubdomainNullSpaceUsingFEData( MLI *mli )
       {
          rowInd2 = newNodeEqnList[j1];
          for ( j = 0; j < blockSize; j++ )
-            for ( k = 0; k < nullspace_dim; k++ )
-               nullspace_vec[rowInd1+j+k*nullspace_len] = 
+            for ( k = 0; k < nullspaceDim_; k++ )
+               nullspaceVec_[rowInd1+j+k*nullspaceLen_] = 
                   eigenV[rowInd2+j+k*csrNrows];
       }
    } 
@@ -382,8 +382,8 @@ int MLI_Method_AMGSA::setupSubdomainNullSpaceUsingFEData( MLI *mli )
    fp = fopen( param_string, "w" );
    for ( i = 0; i < localNRows; i++ ) 
    {
-      for ( j = 0; j < nullspace_dim; j++ ) 
-         fprintf(fp, "%25.16e ", nullspace_vec[localNRows*j+i]);
+      for ( j = 0; j < nullspaceDim_; j++ ) 
+         fprintf(fp, "%25.16e ", nullspaceVec_[localNRows*j+i]);
       fprintf(fp, "\n");
    }
    fclose(fp);
@@ -444,10 +444,10 @@ int MLI_Method_AMGSA::setupDDFormSubdomainAggregate( MLI *mli )
 
    aggrMap = new int[localNRows];
    for ( i = 0; i < localNRows; i++ ) aggrMap[i] = 0;
-   sa_data[0]      = aggrMap;
-   sa_counts[0]    = 1;
-   num_levels      = 2;
-   min_coarse_size = nprocs;
+   saData_[0]     = aggrMap;
+   saCounts_[0]   = 1;
+   numLevels_     = 2;
+   minCoarseSize_ = nprocs;
 
 #ifdef MLI_DEBUG_DETAILED
    printf("MLI_Method_AMGSA::setupDDFormSubdomainAggregate ends.\n");
@@ -725,19 +725,19 @@ int MLI_Method_AMGSA::setupDDSuperLUSmoother( MLI *mli, int level )
 
    /* --- store the communication information --- */
 
-   ddObj = new MLI_AMGSA_DD[1];
-   ddObj->sendMap    = sendMap;
-   ddObj->nSendMap   = nSendMap;
-   ddObj->nSends     = nSends;
-   ddObj->nRecvs     = nRecvs;
-   ddObj->sendProcs  = sendProcs;
-   ddObj->recvProcs  = recvProcs;
-   ddObj->sendLengs  = sendLengs;
-   ddObj->recvLengs  = recvLengs;
-   ddObj->NNodes     = newNNodes;
-   ddObj->dofPerNode = blockSize;
-   ddObj->ANodeEqnList = nodeEqnList;
-   ddObj->SNodeEqnList = newNodeEqnList;
+   ddObj_ = new MLI_AMGSA_DD[1];
+   ddObj_->sendMap    = sendMap;
+   ddObj_->nSendMap   = nSendMap;
+   ddObj_->nSends     = nSends;
+   ddObj_->nRecvs     = nRecvs;
+   ddObj_->sendProcs  = sendProcs;
+   ddObj_->recvProcs  = recvProcs;
+   ddObj_->sendLengs  = sendLengs;
+   ddObj_->recvLengs  = recvLengs;
+   ddObj_->NNodes     = newNNodes;
+   ddObj_->dofPerNode = blockSize;
+   ddObj_->ANodeEqnList = nodeEqnList;
+   ddObj_->SNodeEqnList = newNodeEqnList;
    return 1;
 }
 
