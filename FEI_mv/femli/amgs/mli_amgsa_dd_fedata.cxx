@@ -666,8 +666,8 @@ int MLI_Method_AMGSA::setupFEDataBasedSuperLUSmoother(MLI *mli, int level)
 
    for ( iP = 0; iP < nSends; iP++ )
    {
-      MPI_Wait( &(requests[0]), &(statuses[0]) );
-      sendProcs[iP] = statuses[0].MPI_SOURCE;
+      MPI_Wait( &(requests[iP]), &(statuses[iP]) );
+      sendProcs[iP] = statuses[iP].MPI_SOURCE;
    }
    MLI_Utils_IntQSort2(sendProcs, sendLengs, 0, nSends-1);
 
