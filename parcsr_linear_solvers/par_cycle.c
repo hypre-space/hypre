@@ -31,6 +31,7 @@ hypre_ParAMGCycle( void              *amg_vdata,
 
    hypre_ParCSRMatrix    **A_array;
    hypre_ParCSRMatrix    **P_array;
+   hypre_ParCSRMatrix    **R_array;
    hypre_ParVector    *Vtemp;
 
    int     **CF_marker_array;
@@ -75,6 +76,7 @@ hypre_ParAMGCycle( void              *amg_vdata,
 
    A_array           = hypre_ParAMGDataAArray(amg_data);
    P_array           = hypre_ParAMGDataPArray(amg_data);
+   R_array           = hypre_ParAMGDataRArray(amg_data);
    CF_marker_array   = hypre_ParAMGDataCFMarkerArray(amg_data);
    unknown_map_array = hypre_ParAMGDataUnknownMapArray(amg_data);
    point_map_array   = hypre_ParAMGDataPointMapArray(amg_data);
@@ -216,7 +218,7 @@ hypre_ParAMGCycle( void              *amg_vdata,
          alpha = 1.0;
          beta = 0.0;
 
-         hypre_ParMatvecT(alpha,P_array[fine_grid],Vtemp,
+         hypre_ParMatvecT(alpha,R_array[fine_grid],Vtemp,
                           beta,F_array[coarse_grid]);
 
          ++level;
