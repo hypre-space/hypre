@@ -153,7 +153,7 @@ HYPRE_SStructVectorInitialize( HYPRE_SStructVector vector )
    int                     ilower, iupper;
    hypre_ParVector          *par_vector;
    hypre_Vector             *parlocal_vector;
-   int                      pnum,num;
+ 
 
    /* GEC0902 getting the datasizes and indices we need  */
 
@@ -171,14 +171,14 @@ HYPRE_SStructVectorInitialize( HYPRE_SStructVector vector )
   {
      pvector = hypre_SStructVectorPVector(vector,part);
      pdataindices = hypre_SStructPVectorDataIndices(pvector);
-     num   = dataindices[part];
+     /* shift-num   = dataindices[part]; */
      pdata = data + dataindices[part];
      nvars = hypre_SStructPVectorNVars(pvector);
 
      for (var = 0; var < nvars; var++)
      {     
        svector = hypre_SStructPVectorSVector(pvector, var);
-       pnum    = pdataindices[var];
+       /*  shift-pnum    = pdataindices[var]; */ 
        sdata   = pdata + pdataindices[var];
 
        /* GEC1002 initialization of inside data pointer of a svector
