@@ -32,7 +32,7 @@ class MLI_Matrix
 {
    char   name_[100];
    int    gNRows_, maxNNZ_, minNNZ_, totNNZ_;
-   double maxVal_, minVal_;
+   double maxVal_, minVal_, dtotNNZ_;
    void   *matrix_;
    int    (*destroyFunc_)(void *);
    int    subMatrixLength_;

@@ -29,12 +29,13 @@ MLI_Matrix::MLI_Matrix(void *inMatrix,char *inName, MLI_Function *func)
    if (func != NULL) destroyFunc_ = (int (*)(void *)) func->func_;
    else              destroyFunc_ = NULL;
    strncpy(name_, inName, 100);
-   gNRows_ = -1;
-   maxNNZ_ = -1;
-   minNNZ_ = -1;
-   totNNZ_ = -1;
-   maxVal_ = 0.0;
-   minVal_ = 0.0;
+   gNRows_  = -1;
+   maxNNZ_  = -1;
+   minNNZ_  = -1;
+   totNNZ_  = -1;
+   dtotNNZ_ = 0.0;
+   maxVal_  = 0.0;
+   minVal_  = 0.0;
    subMatrixLength_ = 0;
    subMatrixEqnList_ = NULL;
 }
@@ -270,7 +271,7 @@ int MLI_Matrix::getMatrixInfo(char *paramString, int &intParams,
                               double &dbleParams)
 {
    int      matInfo[4];
-   double   valInfo[2];
+   double   valInfo[3];
 
    if (!strcmp(name_, "HYPRE_ParCSR") && !strcmp(name_, "HYPRE_ParCSRT"))
    {
@@ -282,21 +283,23 @@ int MLI_Matrix::getMatrixInfo(char *paramString, int &intParams,
    if (gNRows_ < 0)
    {
       MLI_Utils_HypreMatrixGetInfo(matrix_, matInfo, valInfo);
-      gNRows_ = matInfo[0];
-      maxNNZ_ = matInfo[1];
-      minNNZ_ = matInfo[2];
-      totNNZ_ = matInfo[3];
-      maxVal_ = valInfo[0];
-      minVal_ = valInfo[1];
+      gNRows_  = matInfo[0];
+      maxNNZ_  = matInfo[1];
+      minNNZ_  = matInfo[2];
+      totNNZ_  = matInfo[3];
+      maxVal_  = valInfo[0];
+      minVal_  = valInfo[1];
+      dtotNNZ_ = valInfo[2];
    }
    intParams  = 0;
    dbleParams = 0.0;
-   if      (!strcmp(paramString, "nrows" )) intParams  = gNRows_;
-   else if (!strcmp(paramString, "maxnnz")) intParams  = maxNNZ_;
-   else if (!strcmp(paramString, "minnnz")) intParams  = minNNZ_;
-   else if (!strcmp(paramString, "totnnz")) intParams  = totNNZ_;
-   else if (!strcmp(paramString, "maxval")) dbleParams = maxVal_;
-   else if (!strcmp(paramString, "minval")) dbleParams = minVal_;
+   if      (!strcmp(paramString, "nrows" ))  intParams  = gNRows_;
+   else if (!strcmp(paramString, "maxnnz"))  intParams  = maxNNZ_;
+   else if (!strcmp(paramString, "minnnz"))  intParams  = minNNZ_;
+   else if (!strcmp(paramString, "totnnz"))  intParams  = totNNZ_;
+   else if (!strcmp(paramString, "maxval"))  dbleParams = maxVal_;
+   else if (!strcmp(paramString, "minval"))  dbleParams = minVal_;
+   else if (!strcmp(paramString, "dtotnnz")) dbleParams = dtotNNZ_;
    return 0;
 }
 
