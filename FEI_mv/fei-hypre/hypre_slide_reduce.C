@@ -1604,6 +1604,8 @@ void HYPRE_LinSysCore::buildSlideReducedSystem()
 
     HYA21_    = A21; 
     HYinvA22_ = invA22; 
+    if ( selectedList_    != NULL ) delete [] selectedList_;
+    if ( selectedListAux_ != NULL ) delete [] selectedListAux_;
     selectedList_ = selectedList;
     selectedListAux_ = selectedListAux;
 
@@ -3506,6 +3508,8 @@ void HYPRE_LinSysCore::buildSlideReducedSystem2()
 
     HYA21_    = A21; 
     HYinvA22_ = invA22; 
+    if ( selectedList_    != NULL ) delete [] selectedList_;
+    if ( selectedListAux_ != NULL ) delete [] selectedListAux_;
     selectedList_ = selectedList;
     selectedListAux_ = selectedListAux;
 

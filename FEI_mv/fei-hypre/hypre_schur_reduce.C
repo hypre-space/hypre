@@ -848,6 +848,7 @@ void HYPRE_LinSysCore::buildSchurReducedSystem2()
     //------------------------------------------------------------------
 
     delete [] globalSchurList;
+    if ( selectedList_ != NULL ) delete [] selectedList_;
     selectedList_ = schurList;
     delete [] ProcNRows;
     delete [] ProcNSchur;
