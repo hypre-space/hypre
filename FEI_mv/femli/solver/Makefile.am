@@ -17,6 +17,7 @@ FILES = \
  mli_solver_mls.cxx \
  mli_solver_chebyshev.cxx \
  mli_solver_cg.cxx \
+ mli_solver_gmres.cxx \
  mli_solver_kaczmarz.cxx \
  mli_solver_superlu.cxx \
  mli_solver_seqsuperlu.cxx \
@@ -33,6 +34,7 @@ FILES = \
  mli_solver_mls.h \
  mli_solver_chebyshev.h \
  mli_solver_cg.h \
+ mli_solver_gmres.h \
  mli_solver_kaczmarz.h \
  mli_solver_superlu.h \
  mli_solver_seqsuperlu.h \
