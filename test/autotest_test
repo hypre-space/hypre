@@ -163,7 +163,7 @@ mail_errors () {
           RECIPIENTS=$HYPRE_DEFAULT_EMAIL
         fi
         SUBJECT="Autotest error: ${i} ($HYPRE_ARCH)"
-        ${HYPRE_MAIL} -s $SUBJECT $RECIPIENTS < $i 
+        ${HYPRE_MAIL} -s "$SUBJECT" $RECIPIENTS < $i 
       fi 
     done 
   fi
