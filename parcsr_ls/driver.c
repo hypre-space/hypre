@@ -163,6 +163,11 @@ main( int   argc,
          arg_index++;
          coarsen_type      = 4;
       }    
+      else if ( strcmp(argv[arg_index], "-falgout") == 0 )
+      {
+         arg_index++;
+         coarsen_type      = -6;
+      }    
       else if ( strcmp(argv[arg_index], "-nohybrid") == 0 )
       {
          arg_index++;
@@ -346,6 +351,7 @@ main( int   argc,
       printf("   -ruge3                : third pass on boundary\n");
       printf("   -ruge2b               : 2nd pass is global\n");
       printf("   -rugerlx              : relaxes special points\n");
+      printf("   -falgout              : local ruge followed by LJP\n");
       printf("   -nohybrid             : no switch in coarsening\n");
       printf("   -gm                   : use global measures\n");
       printf("\n");
