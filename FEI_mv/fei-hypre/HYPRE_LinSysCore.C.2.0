@@ -2374,7 +2374,7 @@ int HYPRE_LinSysCore::getFromRHSVector(int num, double* values,
 
 int HYPRE_LinSysCore::matrixLoadComplete()
 {
-    int    i, j, ierr, numLocalEqns, leng, eqnNum, nnz, *newColInd=NULL,
+    int    i, j, ierr, numLocalEqns, leng, eqnNum, nnz, *newColInd=NULL;
     int    maxRowLeng, newLeng;
     double *newColVal=NULL;
 
