@@ -420,6 +420,10 @@ apply_error_filters () {
           'sed:\ Couldn.t\ close\ '
         do process_filter $ErrorFile "${ii}"
         done
+        for ii in \
+          ': In function `f_open'
+        do multi_line_delete $ErrorFile 2 "${ii}"
+        done
       ;;
       vivid*)
         for ii in \
@@ -825,6 +829,7 @@ if [ ${BuildOpt} -ne $Skip ] ; then
     cd ${HYPRE_AUTOTEST_DIR}/${SRC}/test
     makeit "all" $MessageStr "$HYPRE_DEFAULT_EMAIL"
     if [ $NoFeiOpt -ne $Skip ] ; then
+      cd ${HYPRE_AUTOTEST_DIR}/${SRC}
       makeit "nofei" $MessageStr "$HYPRE_FEI_EMAIL"
       makeit "install" $MessageStr "$HYPRE_FEI_EMAIL"
       cd ${HYPRE_AUTOTEST_DIR}/${SRC}/test
