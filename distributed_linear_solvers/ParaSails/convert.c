@@ -2,7 +2,7 @@
 /* Convert - conversion routines from triangular formats */
 /* assumes the matrix has a diagonal */
 
-#define MM_MAX_LINE_LENGTH 80
+#define MM_MAX_LINE_LENGTH 1000
 
 int convert(FILE *infile, FILE *outfile)
 {
