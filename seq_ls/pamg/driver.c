@@ -4,7 +4,7 @@
 #include <math.h>
 
 #include "utilities.h"
-#include "hypre_ls.h"
+#include "ls.h"
 
 /*--------------------------------------------------------------------------
  * Test driver for unstructured matrix interface (csr storage).
@@ -85,6 +85,12 @@ main( int   argc,
          build_matrix_type      = 1;
          build_matrix_arg_index = arg_index;
       }
+      else if ( strcmp(argv[arg_index], "-laplacian9pt") == 0 )
+      {
+         arg_index++;
+         build_matrix_type      = 3;
+         build_matrix_arg_index = arg_index;
+      }
       else if ( strcmp(argv[arg_index], "-solver") == 0 )
       {
          arg_index++;
@@ -153,6 +159,10 @@ main( int   argc,
       BuildParLaplacian(argc, argv, build_matrix_arg_index, &A, &global_part);
 #endif
       BuildLaplacian(argc, argv, build_matrix_arg_index, &A);
+   }
+   else if ( build_matrix_type == 3 )
+   {
+      BuildLaplacian9pt(argc, argv, build_matrix_arg_index, &A);
    }
 
    /*-----------------------------------------------------------
@@ -498,6 +508,146 @@ BuildLaplacian( int               argc,
                                values, &global_part);
 #endif
    A = hypre_GenerateLaplacian(nx, ny, nz, P, Q, R, values);
+
+   hypre_TFree(values);
+
+   *A_ptr = A;
+#if 0
+   *global_part_ptr = global_part;
+#endif
+
+   return (0);
+}
+
+/*----------------------------------------------------------------------
+ * Build standard 9-point laplacian in 2D with grid and anisotropy.
+ * Parameters given in command line.
+ *----------------------------------------------------------------------*/
+
+int
+BuildLaplacian9pt( int               argc,
+                   char             *argv[],
+                   int               arg_index,
+                   hypre_CSRMatrix **A_ptr     )
+{
+   int                 nx, ny;
+   int                 P, Q;
+
+#if 0
+   hypre_ParCSRMatrix *A;
+   int 		      *global_part;
+#endif
+   hypre_CSRMatrix    *A;
+
+   int                 num_procs, myid, volume;
+   int                 p, q;
+   double             *values;
+
+   /*-----------------------------------------------------------
+    * Initialize some stuff
+    *-----------------------------------------------------------*/
+
+#if 0 
+   MPI_Comm_size(MPI_COMM_WORLD, &num_procs );
+   MPI_Comm_rank(MPI_COMM_WORLD, &myid );
+#endif
+
+   num_procs = 1;
+   myid = 0;
+
+   /*-----------------------------------------------------------
+    * Set defaults
+    *-----------------------------------------------------------*/
+ 
+   nx = 10;
+   ny = 10;
+
+   P  = 1;
+   Q  = num_procs;
+
+   /*-----------------------------------------------------------
+    * Parse command line
+    *-----------------------------------------------------------*/
+   arg_index = 0; 
+   while (arg_index < argc)
+   {
+      if ( strcmp(argv[arg_index], "-n") == 0 )
+      {
+         arg_index++;
+         nx = atoi(argv[arg_index++]);
+         ny = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-P") == 0 )
+      {
+         arg_index++;
+         P  = atoi(argv[arg_index++]);
+         Q  = atoi(argv[arg_index++]);
+      }
+      else
+      {
+         arg_index++;
+      }
+   }
+
+   /*-----------------------------------------------------------
+    * Check a few things
+    *-----------------------------------------------------------*/
+/*
+   if ((P*Q) != num_procs)
+   {
+      printf("Error: Invalid number of processors or processor topology \n");
+      exit(1);
+   }
+*/
+   /*-----------------------------------------------------------
+    * Print driver parameters
+    *-----------------------------------------------------------*/
+ 
+   if (myid == 0)
+   {
+      printf("  Laplacian:\n");
+      printf("    (nx, ny) = (%d, %d)\n", nx, ny);
+      printf("    (Px, Py) = (%d, %d)\n", P,  Q);
+   }
+
+   /*-----------------------------------------------------------
+    * Set up the grid structure
+    *-----------------------------------------------------------*/
+
+   volume  = nx*ny;
+
+   /* compute p,q from P,Q and myid */
+   p = myid % P;
+   q = ( myid - p)/P;
+
+   /*-----------------------------------------------------------
+    * Generate the matrix 
+    *-----------------------------------------------------------*/
+ 
+   values = hypre_CTAlloc(double, 2);
+
+   values[1] = -1.0;
+
+   values[0] = 0.0;
+   if (nx > 1)
+   {
+      values[0] += 2.0;
+   }
+   if (ny > 1)
+   {
+      values[0] += 2.0;
+   }
+   if (nx > 1 && ny > 1)
+   {
+      values[0] += 4.0;
+   }
+
+#if 0   
+   A = hypre_GenerateLaplacian9pt(MPI_COMM_WORLD,
+                               nx, ny, P, Q, p, q,
+                               values, &global_part);
+#endif
+   A = hypre_GenerateLaplacian9pt(nx, ny, P, Q, values);
 
    hypre_TFree(values);
 
