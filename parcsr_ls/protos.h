@@ -18,4 +18,7 @@ hypre_CSRMatrix *hypre_ExchangeRAPData P((hypre_CSRMatrix *RAP_int,
 int hypre_GenerateRAPCommPkg P((hypre_ParCSRMatrix *RAP, 
 	hypre_ParCSRMatrix *A, int *partitioning));
 
+/* transpose.c */
+int hypre_CSRMatrixTranspose P((hypre_CSRMatrix *A, hypre_CSRMatrix **AT));
+
 #undef P
