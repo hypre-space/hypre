@@ -21,12 +21,10 @@
 
 class MLI_Solver_SGS : public MLI_Solver
 {
-   MLI_Matrix  *Amat;
-   int         zeroInitialGuess;
-   int         nsweeps;
-   double      *relax_weights;
-   int         useCG_;
-   int         useOffProcData_;
+   MLI_Matrix  *Amat_;
+   int         zeroInitialGuess_;
+   int         nSweeps_;
+   double      *relaxWeights_;
 
 public :
 
@@ -36,7 +34,7 @@ public :
    int solve(MLI_Vector *f, MLI_Vector *u);
 
    int setParams(char *param, int argc, char **argv);
-   int setParams(int ntimes, double *relax_weights);
+   int setParams(int nTimes, double *relaxWeights);
 };
 
 #endif

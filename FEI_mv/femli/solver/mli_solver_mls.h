@@ -21,18 +21,18 @@
 
 class MLI_Solver_MLS : public MLI_Solver
 {
-   MLI_Matrix  *Amat;
-   MLI_Vector  *mli_Vtemp;
-   MLI_Vector  *mli_Wtemp;
-   MLI_Vector  *mli_Ytemp;
-   double      max_eigen;
-   int         mlsDeg; /* degree for current level */
-   double      mlsBoost;
-   double      mlsOver;
-   double      mlsOm[5];
-   double      mlsOm2;
-   double      mlsCf[5];
-   int         zeroInitialGuess;
+   MLI_Matrix  *Amat_;
+   MLI_Vector  *Vtemp_;
+   MLI_Vector  *Wtemp_;
+   MLI_Vector  *Ytemp_;
+   double      maxEigen_;
+   int         mlsDeg_; /* degree for current level */
+   double      mlsBoost_;
+   double      mlsOver_;
+   double      mlsOm_[5];
+   double      mlsOm2_;
+   double      mlsCf_[5];
+   int         zeroInitialGuess_;
 
 public :
 
@@ -41,8 +41,8 @@ public :
    int setup(MLI_Matrix *Amat);
    int solve(MLI_Vector *f, MLI_Vector *u);
 
-   int setParams( char *param_string, int argc, char **argv );
-   int setParams( double max_eigen );
+   int setParams( char *paramString, int argc, char **argv );
+   int setParams( double maxEigen );
 };
 
 #endif
