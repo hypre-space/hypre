@@ -26,8 +26,8 @@ hypre_F90_IFACE(hypre_ijvectorcreate)( int      *comm,
                                        int      *ierr      )
 {
    *ierr = (int) ( HYPRE_IJVectorCreate( (MPI_Comm)         *comm,
-                                      (HYPRE_IJVector *)  vector,
-                                      (int)              *global_n  ) );
+                                         (HYPRE_IJVector *)  vector,
+                                         (int)              *global_n  ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -112,7 +112,7 @@ hypre_F90_IFACE(hypre_ijvectorsetlocalstoragety)( long int *vector,
 
 void
 hypre_F90_IFACE(hypre_ijvectorzerolocalcomps)( long int *vector,
-                                            int      *ierr    )
+                                               int      *ierr    )
 {
    *ierr = (int) ( HYPRE_IJVectorZeroLocalComponents(
                          (HYPRE_IJVector) *vector ) );
@@ -133,9 +133,9 @@ hypre_F90_IFACE(hypre_ijvectorsetlocalcomps)( long int *vector,
    *ierr = (int) ( HYPRE_IJVectorSetLocalComponents(
                          (HYPRE_IJVector) *vector,
                          (int)            *num_values,
-                         (int *)           glob_vec_indices,
-                         (int *)           value_indices,
-                         (double *)        values            ) );
+                         (const int *)     glob_vec_indices,
+                         (const int *)     value_indices,
+                         (const double *)  values            ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -154,8 +154,8 @@ hypre_F90_IFACE(hypre_ijvectorsetlocalcompsinbl)( long int *vector,
                           (HYPRE_IJVector) *vector,
                           (int)            *glob_vec_start,
                           (int)            *glob_vec_stop,
-                          (int *)           value_indices,
-                          (double *)        values          ) );
+                          (const int *)     value_indices,
+                          (const double *)  values          ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -164,18 +164,18 @@ hypre_F90_IFACE(hypre_ijvectorsetlocalcompsinbl)( long int *vector,
 
 void
 hypre_F90_IFACE(hypre_ijvectoraddtolocalcomps)( long int *vector,
-                                             int      *num_values,
-                                             int      *glob_vec_indices,
-                                             int      *value_indices,
-                                             double   *values,
-                                             int      *ierr              )
+                                                int      *num_values,
+                                                int      *glob_vec_indices,
+                                                int      *value_indices,
+                                                double   *values,
+                                                int      *ierr              )
 {
    *ierr = (int) ( HYPRE_IJVectorAddToLocalComponents(
                          (HYPRE_IJVector) *vector,
                          (int)            *num_values,
-                         (int *)           glob_vec_indices,
-                         (int *)           value_indices,
-                         (double *)        values          ) );
+                         (const int *)     glob_vec_indices,
+                         (const int *)     value_indices,
+                         (const double *)  values          ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -194,8 +194,8 @@ hypre_F90_IFACE(hypre_ijvectoraddtolocalcompsbl)( long int *vector,
                          (HYPRE_IJVector) *vector,
                          (int)            *glob_vec_start,
                          (int)            *glob_vec_stop,
-                         (int *)           value_indices,
-                         (double *)        values          ) );
+                         (const int *)     value_indices,
+                         (const double *)  values          ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -215,18 +215,18 @@ hypre_F90_IFACE(hypre_ijvectorassemble)( long int *vector,
 
 void
 hypre_F90_IFACE(hypre_ijvectorgetlocalcomps)( long int *vector,
-                                           int      *num_values,
-                                           int      *glob_vec_indices,
-                                           int      *value_indices,
-                                           double   *values,
-                                           int      *ierr              )
+                                              int      *num_values,
+                                              int      *glob_vec_indices,
+                                              int      *value_indices,
+                                              double   *values,
+                                              int      *ierr              )
 {
    *ierr = (int) ( HYPRE_IJVectorGetLocalComponents(
                          (HYPRE_IJVector) *vector,
                          (int)            *num_values,
-                         (int *)           glob_vec_indices,
-                         (int *)           value_indices,
-                         (double *)        values          ) );
+                         (const int *)     glob_vec_indices,
+                         (const int *)     value_indices,
+                         (double *)        values            ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -245,7 +245,7 @@ hypre_F90_IFACE(hypre_ijvectorgetlocalcompsinbl)( long int *vector,
                         (HYPRE_IJVector) *vector,
                         (int)            *glob_vec_start,
                         (int)            *glob_vec_stop,
-                        (int *)           value_indices,
+                        (const int *)     value_indices,
                         (double *)        values          ) );
 
 }

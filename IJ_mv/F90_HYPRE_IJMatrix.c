@@ -26,7 +26,7 @@ hypre_F90_IFACE(hypre_ijmatrixcreate)( int      *comm,
                                     int      *global_n,
                                     int      *ierr      )
 {
-   *ierr = (int) ( HYPRE_IJMatrixCreate( (MPI_Comm)         *comm,
+   *ierr = (int) ( HYPRE_IJMatrixCreate( (MPI_Comm)      *comm,
                                       (HYPRE_IJMatrix *)  matrix,
                                       (int)              *global_m,
                                       (int)              *global_n  ) );
@@ -181,9 +181,9 @@ hypre_F90_IFACE(hypre_ijmatrixinsertblock)( long int *matrix,
    *ierr = (int) ( HYPRE_IJMatrixInsertBlock( (HYPRE_IJMatrix) *matrix,
                                               (int)            *m,
                                               (int)            *n,
-                                              (int *)           rows,
-                                              (int *)           cols,
-                                              (double *)        values  ) );
+                                              (const int *)     rows,
+                                              (const int *)     cols,
+                                              (const double *)  values  ) );
 
 }
 
@@ -203,9 +203,9 @@ hypre_F90_IFACE(hypre_ijmatrixaddtoblock)( long int *matrix,
    *ierr = (int) ( HYPRE_IJMatrixAddToBlock( (HYPRE_IJMatrix) *matrix,
                                              (int)            *m,
                                              (int)            *n,
-                                             (int *)           rows,
-                                             (int *)           cols,
-                                             (double *)        values  ) );
+                                             (const int *)     rows,
+                                             (const int *)     cols,
+                                             (const double *)  values  ) );
 
 }
 
@@ -224,8 +224,8 @@ hypre_F90_IFACE(hypre_ijmatrixinsertrow)( long int *matrix,
    *ierr = (int) ( HYPRE_IJMatrixInsertRow( (HYPRE_IJMatrix) *matrix,
                                             (int)            *n,
                                             (int)            *row,
-                                            (int *)           cols,
-                                            (double *)        values   ) );
+                                            (const int *)     cols,
+                                            (const double *)  values   ) );
 
 } 
 
