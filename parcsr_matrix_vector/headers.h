@@ -11,6 +11,6 @@
 #include <stdio.h>
 #include <math.h>
 
-#include "hypre_parcsr_mv.h"
+#include "parcsr_mv.h"
 
 

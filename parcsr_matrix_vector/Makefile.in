@@ -41,7 +41,6 @@ LFLAGS =\
  -lHYPRE_parcsr_mv\
  -lHYPRE_mv\
  -lHYPRE_utilities\
- -lmpe\
  ${MPILIBFLAGS} ${LIBFLAGS} ${LDLIBFLAGS}
  
 
@@ -50,7 +49,7 @@ HEADERS =\
  headers.h\
  par_csr_matrix.h\
  par_vector.h\
- hypre_parcsr_mv.h\
+ parcsr_mv.h\
  HYPRE_parcsr_mv.h
 
 FILES =\
