@@ -242,15 +242,15 @@ c Generate a Dirichlet Laplacian
          call GenerateLaplacian(MPI_COMM_WORLD, nx, ny, nz,
      &                          Px, Py, Pz, p, q, r, values, A, ierr)
       else
-         call HYPRE_ReadParCSRMatrix(MPI_COMM_WORLD, A, matfile, ierr)
+         call HYPRE_ParCSRMatrixRead(MPI_COMM_WORLD, A, matfile, ierr)
       endif
 
-      call HYPRE_PrintParCSRMatrix(A, "driver.out.A", ierr)
+      call HYPRE_ParCSRMatrixPrint(A, "driver.out.A", ierr)
 
-c     call HYPRE_CreateParCSRMatrix(MPI_COMM_WORLD, gnrows, gncols,
+c     call HYPRE_ParCSRMatrixCreate(MPI_COMM_WORLD, gnrows, gncols,
 c    &   rstarts, cstarts, ncoloffdg, nonzsdg, nonzsoffdg, A, ierr)
 
-c     call HYPRE_InitializeParCSRMatrix(A, ierr)
+c     call HYPRE_ParCSRMatrixInitialize(A, ierr)
 
       call hypre_ParCSRMatrixGlobalNumRows(A, num_rows, ierr)
       call hypre_ParCSRMatrixRowStarts(A, row_starts, ierr)
@@ -260,24 +260,24 @@ c     Set up the rhs and initial guess
 c-----------------------------------------------------------------------
 
       if (generate_rhs) then
-        call HYPRE_CreateParVector(MPI_COMM_WORLD, num_rows, row_starts,
+        call HYPRE_ParVectorCreate(MPI_COMM_WORLD, num_rows, row_starts,
      &                          b, ierr)
         call hypre_SetParVectorPartitioningO(b, 0, ierr)
-        call HYPRE_InitializeParVector(b, ierr)
+        call HYPRE_ParVectorInitialize(b, ierr)
 c Set up a Dirichlet 0 problem
         call hypre_SetParVectorConstantValue(b, 0d0, ierr)
-        call HYPRE_PrintParVector(b, "driver.out.b", ierr)
+        call HYPRE_ParVectorPrint(b, "driver.out.b", ierr)
       else
-        call HYPRE_ReadParVector(MPI_COMM_WORLD, b, rhsfile, ierr)
+        call HYPRE_ParVectorRead(MPI_COMM_WORLD, b, rhsfile, ierr)
       endif
 
-      call HYPRE_CreateParVector(MPI_COMM_WORLD, num_rows, row_starts,
+      call HYPRE_ParVectorCreate(MPI_COMM_WORLD, num_rows, row_starts,
      &                        x, ierr)
       call hypre_SetParVectorPartitioningO(x, 0, ierr)
-      call HYPRE_InitializeParVector(x, ierr)
+      call HYPRE_ParVectorInitialize(x, ierr)
 c Choose a nonzero initial guess
       call hypre_SetParVectorConstantValue(x, 1d0, ierr)
-      call HYPRE_PrintParVector(x, "driver.out.x0", ierr)
+      call HYPRE_ParVectorPrint(x, "driver.out.x0", ierr)
 
 c-----------------------------------------------------------------------
 c     Solve the linear system
@@ -463,7 +463,7 @@ c-----------------------------------------------------------------------
 c     Print the solution and other info
 c-----------------------------------------------------------------------
 
-      call HYPRE_PrintParVector(x, "driver.out.x", ierr)
+      call HYPRE_ParVectorPrint(x, "driver.out.x", ierr)
 
       if (myid .eq. 0) then
          print *, 'Iterations = ', num_iterations
@@ -474,11 +474,11 @@ c-----------------------------------------------------------------------
 c     Finalize things
 c-----------------------------------------------------------------------
 
-      call HYPRE_DestroyParCSRMatrix(A, ierr)
+      call HYPRE_ParCSRMatrixDestroy(A, ierr)
 
-      call HYPRE_DestroyParVector(b, ierr)
+      call HYPRE_ParVectorDestroy(b, ierr)
 
-      call HYPRE_DestroyParVector(x, ierr)
+      call HYPRE_ParVectorDestroy(x, ierr)
 
 c     Finalize MPI
 
