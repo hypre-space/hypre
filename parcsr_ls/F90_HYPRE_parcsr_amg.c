@@ -457,5 +457,5 @@ hypre_F90_IFACE(hypre_boomeramgsetgsmg, HYPRE_BOOMERAMGSETGSMG)( long int *solve
 {
    *ierr = (int) ( HYPRE_BoomerAMGSetGSMG(
                                 (HYPRE_Solver) *solver,
-                                (int *)         gsmg ) );
+                                (int)          *gsmg ) );
 }
