@@ -36,7 +36,7 @@ thread_MPI_Init( int    *argc,
 }
 
 double
-MPI_Wtime( )
+thread_MPI_Wtime( )
 {
   if (pthread_equal(pthread_self(),hypre_thread[0]))
   {
@@ -49,7 +49,7 @@ MPI_Wtime( )
 }
 
 double
-MPI_Wtick( )
+thread_MPI_Wtick( )
 {
   if (pthread_equal(pthread_self(),hypre_thread[0]))
   {
@@ -62,7 +62,7 @@ MPI_Wtick( )
 }
 
 int
-MPI_Barrier( MPI_Comm comm )
+thread_MPI_Barrier( MPI_Comm comm )
 {
   hypre_barrier(mpi_mtx,mpi_cnd,th_sem);
   if (pthread_equal(pthread_self(),hypre_thread[0]))
@@ -77,7 +77,7 @@ MPI_Barrier( MPI_Comm comm )
 }
 
 int
-MPI_Finalize( )
+thread_MPI_Finalize( )
 {
   hypre_barrier(mpi_mtx,mpi_cnd,th_sem);
   if (pthread_equal(pthread_self(),hypre_thread[0])
@@ -91,7 +91,7 @@ MPI_Finalize( )
 }
 
 int
-MPI_Comm_group( MPI_Comm   comm,
+thread_MPI_Comm_group( MPI_Comm   comm,
                 MPI_Group *group )
 {
   if (pthread_equal(pthread_self(),hypre_thread[0]))
@@ -105,7 +105,7 @@ MPI_Comm_group( MPI_Comm   comm,
 }
 
 int
-MPI_Comm_dup( MPI_Comm  comm,
+thread_MPI_Comm_dup( MPI_Comm  comm,
               MPI_Comm *newcomm )
 {
   if (pthread_equal(pthread_self(),hypre_thread[0]))
@@ -119,7 +119,7 @@ MPI_Comm_dup( MPI_Comm  comm,
 }
 
 int
-MPI_Group_incl( MPI_Group  group,
+thread_MPI_Group_incl( MPI_Group  group,
                 int        n,
                 int       *ranks,
                 MPI_Group *newgroup )
@@ -135,7 +135,7 @@ MPI_Group_incl( MPI_Group  group,
 }
 
 int
-MPI_Comm_create( MPI_Comm  comm,
+thread_MPI_Comm_create( MPI_Comm  comm,
                  MPI_Group group,
                  MPI_Comm *newcomm )
 {
@@ -150,7 +150,7 @@ MPI_Comm_create( MPI_Comm  comm,
 }
 
 int
-MPI_Allgather( void        *sendbuf,
+thread_MPI_Allgather( void        *sendbuf,
                int          sendcount,
                MPI_Datatype sendtype,
                void        *recvbuf,
@@ -208,7 +208,7 @@ MPI_Allgather( void        *sendbuf,
 }
 
 int
-MPI_Allgatherv( void        *sendbuf,
+thread_MPI_Allgatherv( void        *sendbuf,
                 int          sendcount,
                 MPI_Datatype sendtype,
                 void        *recvbuf,
@@ -269,7 +269,7 @@ MPI_Allgatherv( void        *sendbuf,
 }
 
 int
-MPI_Bcast( void        *buffer,
+thread_MPI_Bcast( void        *buffer,
            int          count,
            MPI_Datatype datatype,
            int          root,
@@ -289,7 +289,7 @@ MPI_Bcast( void        *buffer,
 }
 
 int
-MPI_Send( void        *buf,
+thread_MPI_Send( void        *buf,
           int          count,
           MPI_Datatype datatype,
           int          dest,
@@ -309,7 +309,7 @@ MPI_Send( void        *buf,
 }
 
 int
-MPI_Recv( void        *buf,
+thread_MPI_Recv( void        *buf,
           int          count,
           MPI_Datatype datatype,
           int          source,
@@ -330,7 +330,7 @@ MPI_Recv( void        *buf,
 }
 
 int
-MPI_Isend( void        *buf,
+thread_MPI_Isend( void        *buf,
            int          count,
            MPI_Datatype datatype,
            int          dest,
@@ -351,7 +351,7 @@ MPI_Isend( void        *buf,
 }
 
 int
-MPI_Irecv( void        *buf,
+thread_MPI_Irecv( void        *buf,
            int          count,
            MPI_Datatype datatype,
            int          source,
@@ -372,7 +372,7 @@ MPI_Irecv( void        *buf,
 }
 
 int
-MPI_Wait( MPI_Request *request,
+thread_MPI_Wait( MPI_Request *request,
           MPI_Status  *status  )
 {
   hypre_barrier(mpi_mtx,mpi_cnd,th_sem); 
@@ -388,7 +388,7 @@ MPI_Wait( MPI_Request *request,
 }
 
 int
-MPI_Waitall( int          count,
+thread_MPI_Waitall( int          count,
              MPI_Request *array_of_requests,
              MPI_Status  *array_of_statuses )
 {
@@ -405,7 +405,7 @@ MPI_Waitall( int          count,
 }
 
 int
-MPI_Waitany( int          count,
+thread_MPI_Waitany( int          count,
              MPI_Request *array_of_requests,
              int         *index,
              MPI_Status  *status            )
@@ -423,7 +423,7 @@ MPI_Waitany( int          count,
 }
 
 int
-MPI_Comm_size( MPI_Comm comm,
+thread_MPI_Comm_size( MPI_Comm comm,
                int     *size )
 { 
   *size = 1;
@@ -438,7 +438,7 @@ MPI_Comm_size( MPI_Comm comm,
 }
 
 int
-MPI_Comm_rank( MPI_Comm comm,
+thread_MPI_Comm_rank( MPI_Comm comm,
                int     *rank )
 { 
   *rank=0;
@@ -453,7 +453,7 @@ MPI_Comm_rank( MPI_Comm comm,
 }
 
 int
-MPI_Allreduce( void        *sendbuf,
+thread_MPI_Allreduce( void        *sendbuf,
                void        *recvbuf,
                int          count,
                MPI_Datatype datatype,
@@ -500,7 +500,7 @@ MPI_Allreduce( void        *sendbuf,
 }
 
 int
-MPI_Type_hvector( int           count,
+thread_MPI_Type_hvector( int           count,
                   int           blocklength,
                   MPI_Aint      stride,
                   MPI_Datatype  oldtype,
@@ -518,7 +518,7 @@ MPI_Type_hvector( int           count,
 }
 
 int
-MPI_Type_struct( int           count,
+thread_MPI_Type_struct( int           count,
                  int          *array_of_blocklengths,
                  MPI_Aint     *array_of_displacements,
                  MPI_Datatype *array_of_types,
@@ -537,7 +537,7 @@ MPI_Type_struct( int           count,
 }
 
 int
-MPI_Type_free( MPI_Datatype *datatype )
+thread_MPI_Type_free( MPI_Datatype *datatype )
 {
   hypre_barrier(mpi_mtx,mpi_cnd,th_sem);
   if (pthread_equal(pthread_self(),hypre_thread[0]))
@@ -551,7 +551,7 @@ MPI_Type_free( MPI_Datatype *datatype )
 }
 
 int
-MPI_Type_commit( MPI_Datatype *datatype )
+thread_MPI_Type_commit( MPI_Datatype *datatype )
 {
   if (pthread_equal(pthread_self,hypre_thread[0]))
   {
