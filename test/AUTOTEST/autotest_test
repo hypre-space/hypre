@@ -40,7 +40,7 @@ initialize_variables ()
 # a "cd ${HYPRE_AUTOTEST_DIR}", however as long as we are
 # above a "linear_solvers" directory we should be ok.
 #
-  if test ! "${HYPRE_AUTOTEST_DIR}" ; then
+  if [ -z "${HYPRE_AUTOTEST_DIR}" -o "${HYPRE_AUTOTEST_DIR}" = "" ] ; then
     HYPRE_AUTOTEST_DIR=`pwd`
     if [ -d ${HYPRE_AUTOTEST_DIR}/linear_solvers/test ] ; then
       HYPRE_AUTOTEST_DIR=${HYPRE_AUTOTEST_DIR}
@@ -90,7 +90,7 @@ initialize_variables ()
 # If NOT started by autotest (hence no HYPRE_*_EMAIL variable
 # defined) default mail to UID only.
 #
-  if test ! "$HYPRE_MAIL" ; then
+  if [ -z "$HYPRE_MAIL" -o "$HYPRE_MAIL" = "" ] ; then
     if [ "$HYPRE_ARCH" = "linux" ] ; then
       [ -x /usr/bin/Mail ] && HYPRE_MAIL=/usr/bin/Mail
       [ -x /usr/bin/mhmail ] && HYPRE_MAIL=/usr/bin/mhmail
@@ -100,8 +100,8 @@ initialize_variables ()
       [ -x /usr/sbin/mailx ] && HYPRE_MAIL=/usr/sbin/mailx
     fi
   fi
-  if test ! "${HYPRE_DEFAULT_EMAIL}" ; then
-    if test ! "${USER_EMAIL}" ; then
+  if [ -z "${HYPRE_DEFAULT_EMAIL}" -o "${HYPRE_DEFAULT_EMAIL}" = "" ] ; then
+    if [ -z "${USER_EMAIL}" -o "${USER_EMAIL}" = "" ] ; then
       USER_EMAIL=Treadway1@LLNL.gov
     fi
     HYPRE_DEFAULT_EMAIL=${HYPRE_DEFAULT_EMAIL:=$USER_EMAIL}
@@ -399,6 +399,7 @@ apply_error_filters () {
       ;;
       tckk*|tc2k*|gps*)
         for ii in \
+          '^No\ suffix\ list'\
           '^stty:\ tcgetattr:\ Not\ a\ typewriter'\
           'WARNING:\ \ guidef77\ has\ implied\ '\
           '^cc:\ Info:\ '
@@ -496,7 +497,7 @@ mail_summary () {
   printf "Compile machine:    %s\n" $HYPRE_COMPILE_MACHINE >> $SUMFILE
   printf "Execute machine:    %s\n" $HYPRE_RUN_MACHINE >> $SUMFILE
   printf "Operating system:   `uname -a`\n" >> $SUMFILE
-  if test "${HYPRE_DST_DIR}" ; then
+  if [ -n "${HYPRE_DST_DIR}" ] ; then
     printf "Local Directory:    %s\n" $HYPRE_AUTOTEST_DIR >> $SUMFILE
     printf "Directory:          %s\n" $HYPRE_DST_DIR >> $SUMFILE
   else
@@ -656,7 +657,7 @@ mail_summary () {
     fi
   printf "%s\n" "--------------------------------------------" >> $SUMFILE
   chgrp hypre $SUMFILE
-  if test "${HYPRE_DST_DIR}" ; then
+  if [ -d "${HYPRE_DST_DIR}" ] ; then
     cp -p $SUMFILE $HYPRE_DST_DIR 
   fi
   MAIL_HEADER="`uname -n` `uname -s`:`uname -r`.`uname -v`"
@@ -665,7 +666,7 @@ mail_summary () {
   else
     SUBJECT="Autotest $AutotestFailureCount Errors ($MAIL_HEADER)"
   fi
-  if test "${HYPRE_MESSAGE}" ; then
+  if [ -n "${HYPRE_MESSAGE}" ] ; then
     SUBJECT="$HYPRE_MESSAGE $SUBJECT"
   fi
   if [ "$HYPRE_ARCH" = "linux" ] ; then
@@ -823,7 +824,6 @@ if [ ${BuildOpt} -ne $Skip ] ; then
     fi
 
   fi
-  if [ ${BuildOpt} -eq $Run ] ; then
     echo "Autotest starting execution of $MessageStr"
     HYPRE_INSTALL_DIR=${HYPRE_AUTOTEST_DIR}/${SRC}/hypre
     export HYPRE_INSTALL_DIR
@@ -839,7 +839,8 @@ if [ ${BuildOpt} -ne $Skip ] ; then
       cd ${HYPRE_AUTOTEST_DIR}/${SRC}/test
       makeit "fei++" $MessageStr "$HYPRE_FEI_EMAIL"
     fi
-    if test ! "${HYPRE_RUN_MACHINE}" ; then
+  if [ ${BuildOpt} -eq $Run ] ; then
+    if [ -z "${HYPRE_RUN_MACHINE}" -o "${HYPRE_RUN_MACHINE}" = "" ] ; then
       cd $HYPRE_AUTOTEST_DIR/${SRC}/test
       if [ "$DEBUG_MODE" = "yes" ] ; then
         ./runtest.sh -debug $BatchOpt $MailOpt $STD_TEST_DIRS
@@ -905,4 +906,4 @@ SECS=`expr $SECS + $HOUR`
 initialize_variables
 parse_arguments $*
 mail_errors
-cleanup
+cleanup $*
