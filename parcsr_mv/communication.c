@@ -363,33 +363,36 @@ hypre_GenerateMatvecCommunicationInfo ( hypre_ParCSRMatrix *A,
 }
 
 hypre_VectorCommPkg *
-hypre_InitializeVectorCommPkg(MPI_Comm comm, int vec_len)
+hypre_InitializeVectorCommPkg(MPI_Comm comm, int vec_len, int *vec_starts)
 {
    hypre_VectorCommPkg  *vector_comm_pkg;
-   int			*vec_starts;
    MPI_Datatype		*vector_mpi_types;
 
    int          i;
    int          num_procs;
-   int          *len;
+   int          len;
  
    vector_comm_pkg = hypre_CTAlloc(hypre_VectorCommPkg,1);
    MPI_Comm_size( comm, &num_procs);
-   len = hypre_CTAlloc(int,num_procs);
-   vec_starts = hypre_CTAlloc(int, num_procs+1); 
+   if (!vec_starts)
+   {
+   	vec_starts = hypre_CTAlloc(int, num_procs+1); 
+   	for (i=0; i < num_procs; i++)
+   	{
+        	MPE_Decomp1d(vec_len, num_procs, i, &vec_starts[i], &len);
+        	vec_starts[i]--;
+   	}
+   }
+   vec_starts[num_procs] = vec_len;
    vector_mpi_types = hypre_CTAlloc(MPI_Datatype, num_procs); 
 
    for (i=0; i < num_procs; i++)
    {
-        MPE_Decomp1d(vec_len, num_procs, i, &vec_starts[i], &len[i]);
-        vec_starts[i] = vec_starts[i]-1;
-        len[i] = len[i]-vec_starts[i];
-        MPI_Type_vector(len[i],1,1,MPI_DOUBLE, &vector_mpi_types[i]);
+        len = vec_starts[i+1]-vec_starts[i];
+        MPI_Type_vector(len,1,1,MPI_DOUBLE, &vector_mpi_types[i]);
         MPI_Type_commit(&vector_mpi_types[i]);
    }
    vec_starts[num_procs] = vec_len;
-
-   hypre_TFree(len);
 
    hypre_VectorCommPkgComm(vector_comm_pkg) = comm;
    hypre_VectorCommPkgVecStarts(vector_comm_pkg) = vec_starts;
