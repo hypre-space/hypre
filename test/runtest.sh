@@ -15,6 +15,8 @@ NoRun=0
 JobCheckInterval=10      # sleep time between jobs finished check
 InputString=""
 RunString=""
+ExecFileNames=""         #string of executable file names used
+TestDirNames=""          #string of names of TEST_* directories used
 
 usage () {
   printf "\n"
@@ -202,12 +204,14 @@ function CalcProcs
 }
 function CheckPath
 { # check the path to the executable
+  # if the executable exists; save the name to ExecFileNames
   while test "$1"
   do case $1 in
     -np) EXECFILE=$3
       if test -x $StartDir/$EXECFILE
       then
         cp $StartDir/$EXECFILE $EXECFILE
+        ExecFileNames="$ExecFileNames $EXECFILE"
         return 0
       else
         echo "Can not find executable!!!"
@@ -412,29 +416,28 @@ function PostProcess
 }
 function CleanUp
 { # removes executable and hostname files from all TEST_* directories
+  #
   if [ "$DebugMode" -gt 0 ] ; then echo "in CleanUp" ; fi
   if [ "$BatchMode" -eq 0 ]
   then
-     SavePWD=`pwd`
-     while read InputLine
+     for i in $TestDirNames
      do 
-       case $InputLine in
-       TEST*) 
-          cd $InputLine
-          ExecuteFile=`echo $InputLine | sed -e 's/TEST_//g'`
+        for j in $ExecFileNames
+        do 
+          ExecuteFile=$i/$j
           if test -f $ExecuteFile && test -x $ExecuteFile
           then
              rm -f $ExecuteFile
              rm -f hostname
           fi
-          cd $SavePWD
-          ;;
-       *) 
-        ;;
-       esac
-     done < $1
+        done
+        ExecuteFile=$i/hostname
+        if test -f $ExecuteFile
+        then
+           rm -f $ExecuteFile
+        fi
+     done
   fi
- cd $SavePWD
 }
 
 function StartCrunch
@@ -485,14 +488,14 @@ do case $1 in
         then FilePart=`basename $InputString .sh`
           DirPart=`dirname $InputString`
           CurDir=`pwd`
-          echo $DirPart >> ArgsFile
+          TestDirNames="$TestDirNames $DirPart"
           if [ "$BatchMode" -eq 0 ]       # machine DCSP capable
           then
             CheckBatch
             BatchMode=$?
           fi
           if [ "$DebugMode" -gt 0 ]
-          then printf "FilePart:%s DirPart:%s\n" $FilePart $DirPart ; fi
+          then printf "FilePart:%s DirPart:%s CurDir:%s\n" $FilePart $DirPart $CurDir ; fi
           if test -f $DirPart/$FilePart.jobs && test -r $DirPart/$FilePart.jobs
           then StartCrunch $CurDir $DirPart $FilePart # strict serial execution
           else printf "%s: test command file %s/%s.jobs does not exist\n" \
@@ -511,5 +514,4 @@ do case $1 in
     ;;
   esac
 done
-CleanUp ArgsFile
-rm -f ArgsFile
+CleanUp $TestDirNames $ExecFileNames
