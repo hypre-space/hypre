@@ -495,7 +495,7 @@ HYPRE_SStructGridAssemble( HYPRE_SStructGrid grid )
                                   hypre_SStructNeighborDir(vneighbor));
 
                   /* adjust vneighbor ilower appropriately */
-                  ilower = hypre_SStructNeighborILower(neighbor);
+                  ilower = hypre_SStructNeighborILower(vneighbor);
                   imin0  = hypre_BoxIMin(hypre_SStructNeighborBox(neighbor));
                   imin1  = hypre_BoxIMin(hypre_SStructNeighborBox(vneighbor));
                   coord  = hypre_SStructNeighborCoord(vneighbor);
