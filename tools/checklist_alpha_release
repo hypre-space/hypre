@@ -2,36 +2,89 @@ HYPRE Alpha Release Checklist
 
 Alpha releases are primarily used to get new code to close collaborators quickly.
 These releases tend to occur frequently, are available only on the CASC cluster 
-and may not be stable.  The following steps must be completed and
-initialed/reviewed by the responsible project member before the release is made 
+and may not be stable.  The following steps must be completed, initialed & dated
+on the --->> line by the responsible project member before the release is made 
 available to users.
 
 
-Release Number: _______________________________________________________
 
-Date available to users: ______________________________________________
+ 1. Decision made for release
 
+    --->> _________________________________________
 
-_____ 1.  Code adheres to project guidelines
+ 2. Release number: ______________________________________
 
-_____ 2.  Appropriate testing, including memory leak checking, has been 
-          completed by developer
+    --->> _________________________________________
 
-   _____  2.1 Developer provides test cases for regression tests 
+ 3. Copy file checklist_alpha_release to check{verson number}.txt (i.e. check1.9.0a.txt)
+       and commit to the linear_solvers/releases directory
 
-_____ 3.  Documentation has been updated/created with basic information
+    --->> _________________________________________
 
-   _____  3.1 Update CHANGELOG file with information regarding contents of
-              this release 
+ 4. Project personnel advised of release decision and tentative date with
+       a request to not disrupt the repository until the release is complete
 
-_____ 4.  Project Lead review and/or concurrence to release
+    --->> _________________________________________
 
-_____ 5.  Software lead completes the following:
+ 5. Requests for delay in release must be made within 24 hours of notification 
 
-   _____  5.1.  Creates tar file consistent with project guidelines
+    --->> _________________________________________
 
-   _____  5.2.  Runs regression test suite on CASC platforms
+ 6. Update CHANGELOG file with information regarding contents of this release
 
-   _____  5.3.  Install tar file on CASC cluster
+    --->> _________________________________________
 
-   _____  5.4.  Inform project team and other appropriate users of availability
+ 7. Project Lead review and/or concurrence to release
+
+    --->> _________________________________________
+
+ 8. Tag repository with release number
+
+    --->> _________________________________________
+
+ 9. Checkout tagged version
+
+    --->> _________________________________________
+
+10. Create tar file of checked out version by running the mkdist script
+
+    --->> _________________________________________
+
+11. Manually untar the file that was created in step 16
+
+    --->> _________________________________________
+
+12. Manually run the autotest script with the -tux149 and -insure options on
+       the checked out version
+
+    --->> _________________________________________
+
+13. If the test runs properly, proceed to step 14
+    Otherwise, untag the repository, make necessary corrections, return
+       to step 8; iterating until all tests run correctly.
+
+    --->> _________________________________________
+
+14. Copy tar file to /usr/casc/hypre/i686-pc-linux-gnu directory
+
+    --->> _________________________________________
+
+15. Run the mkdistlinks script to create symbolic links to the tar file 
+
+    --->> _________________________________________
+
+16. Run the mklibs script with the '-a install' option to create 
+       and install the release
+
+    --->> _________________________________________
+
+17. If there are no errors in steps 11-16; inform project team and other
+       appropriate users of availability
+
+    --->> _________________________________________
+
+18. FINAL SIGN-OFF
+    Verify that all steps have been signed off and commit this file to
+       the repository
+
+    --->> _________________________________________

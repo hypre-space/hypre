@@ -1,63 +1,150 @@
 HYPRE General Release Checklist
 
-A general release is done when HYPRE is determined to be stable and alpha and 
-beta release bug reports have been resolved.  These releases tend to occur 
-infrequently, are available on the CASC cluster as well as all LLNL supported
-platforms and downloadable from the web.  The following steps must be completed
-and initialed/reviewed by the responsible project member before the release is
-made available to users.
+General releases occur infrequently. They are stable, well-documented and can 
+be downloaded from the HYPRE web site.  The following steps must be completed,
+initialed & dated on the --->> line by the responsible project member before 
+the release is made available to users.
 
 
-Release Number: _______________________________________________________
 
-Date available to users: ______________________________________________
+ 1. Decision made for release
 
+    --->> _________________________________________
 
-_____ 1.  Beta release has been available and used for a reasonable amount of
-          time.  The Project Lead will determine how much time is reasonable, 
-          based on the extent of changes made and other relevant constraints.
+ 2. Release number: ______________________________________
 
-_____ 2.  Code adheres to project guidelines
+    --->> _________________________________________
 
-_____ 3.  Developer corrected all bug reports from alpha release 
+ 3. Copy file checklist_general_release to check{release number}.txt (i.e. check1.9.0.txt)
+       and commit to the linear_solvers/releases directory
 
-   _____  3.1 Developer provides updated test cases for regression tests 
+    --->> _________________________________________
 
-_____ 4.  Developer corrected all bug reports from beta release 
+ 4. Project personnel advised of release decision and tentative date with
+       a request for no new code to be checked into the repository until 
+       the release is complete
 
-   _____  4.1 Developer provides updated test cases for regression tests 
+    --->> _________________________________________
 
-_____ 5.  Appropriate testing, including memory leak checking, has been 
-          completed by developer
+ 5. Requests for delay in release must be made within 24 hours of notification 
 
-   _____  5.1 Developer provides test cases for regression tests 
+    --->> _________________________________________
 
-_____ 6.  Documentation is complete; Developer, User and Reference Manuals
+ 6. Update user, reference and developer manuals with information regarding 
+       contents of this release
 
-   _____  6.1 Update CHANGELOG file with information regarding contents of 
-              this release
+    --->> _________________________________________
 
-   _____  6.2 Additional information resulting from alpha release is included
-              in documents 
+ 7. Update CHANGELOG file with information regarding contents of this release
 
-   _____  6.3 Additional information resulting from beta release is included
-              in documents 
+    --->> _________________________________________
 
-_____ 7.  Project Lead and appropriate project members review documents
+ 8. Initial documentation review meeting
 
-_____ 8.  Software Lead completes the following:
+    --->> _________________________________________
 
-   _____  8.1.  Creates tar file consistent with project guidelines
+ 9. Project Lead review and/or concurrence to release
 
-   _____  8.2.  Runs regression test suite on CASC platforms
+    --->> _________________________________________
 
-   _____  8.3.  Runs regression test suite on all LLNL open platforms
+10. Create beta release and install; if not already done 
 
-   _____  8.4.  Only when 8.2 and 8.3 are correct; move files to LLNL closed
-                platforms
+    --->> _________________________________________
 
-   _____  8.5.  Runs regression test suite on closed platforms
+11. Final documentation review meeting
 
-   _____  8.4.  Install tar file on CASC cluster, open and closed platforms
+    --->> _________________________________________
 
-   _____  8.5.  Send an email to the hypre-announce users list
+12. Verify all agreed upon changes, especially documentation, have been committed
+
+    --->> _________________________________________
+
+13. Project Lead review and/or concurrence to release
+
+    --->> _________________________________________
+
+14. Create a repository tag with branch option for the release number
+
+    --->> _________________________________________
+
+15. Checkout tagged version
+
+    --->> _________________________________________
+
+16. Create tar file of checked out version by running the mkdist script
+
+    --->> _________________________________________
+
+17. Manually untar the file that was created in step 16
+
+    --->> _________________________________________
+
+18. Manually run the autotest script with the following options on the checked
+        out version: -tux149 -insure -frost -gpsmp -pengra
+
+    --->> _________________________________________
+
+19. If the tests run properly, proceed to step 20
+    Otherwise, untag the repository, make necessary corrections, return
+       to step 14; iterating until all tests run correctly.
+
+    --->> _________________________________________
+
+20. Copy tar file to any closed (SCF) computer system, using FIS 
+
+    --->> _________________________________________
+
+21. Copy tar file to /usr/casc/hypre/i686-pc-linux-gnu directory
+
+    --->> _________________________________________
+
+22. Run the mkdistlinks script to create symbolic links to the tar file 
+
+    --->> _________________________________________
+
+23. Run the mklibs script with the '-g install' option to create
+       and install the release
+
+    --->> _________________________________________
+
+24. Log onto any closed (SCF) computer system
+
+    --->> _________________________________________
+
+25. Retrieve the tar file from the FIS system
+
+    --->> _________________________________________
+
+26. Manually untar the file that was retrieved in step 25
+
+    --->> _________________________________________
+
+27. Manually run the autotest script with the following options on the checked
+        out version: -sc -white -emperor
+
+    --->> _________________________________________
+
+28. Copy tar file to the appropriate sub-directory (based on SYS_TYPE) of
+       /usr/gapps/hypre and /usr/casc/hypre
+
+    --->> _________________________________________
+
+29. Run the mkdistlinks script to create symbolic links to the tar file 
+
+    --->> _________________________________________
+
+30. Run the mklibs script with the '-g install' option to create
+       and install the release
+
+    --->> _________________________________________
+
+31. If there are no errors in steps 16-30; inform project team and other
+       appropriate users of availability
+
+    --->> _________________________________________
+
+32. FINAL SIGN-OFF
+    Verify that all steps have been signed off and commit this file to
+       the repository
+
+    --->> _________________________________________

@@ -1,52 +1,143 @@
 HYPRE Beta Release Checklist
 
-Beta releases are used as a testing phase for new code and technologies before 
-making a general release.  These releases tend to occur somewhat frequently, are
-available on the CASC cluster as well as all LLNL supported platforms and are
-expected to be relatively stable.  The following steps must be completed and
-initialed/reviewed by the responsible project member before the release is made 
+Beta releases tend to occur somewhat frequently. They may include new technology
+and are reasonably stable.  The following steps must be completed, initialed & dated
+on the --->> line by the responsible project member before the release is made 
 available to users.
 
 
-Release Number: _______________________________________________________
 
-Date available to users: ______________________________________________
+ 1. Decision made for release
 
+    --->> _________________________________________
 
-_____ 1.  Code adheres to project guidelines
+ 2. Release number: ______________________________________
 
-_____ 2.  Developer corrected any bug reports from alpha release 
+    --->> _________________________________________
 
-   _____  2.1 Developer provides updated test cases for regression tests 
+ 3. Copy file checklist_beta_release to check{release number}.txt (i.e. check1.9.0b.txt)
+       and commit to the linear_solvers/releases directory
 
-_____ 3.  Appropriate testing, including memory leak checking, has been 
-          completed by developer
+    --->> _________________________________________
 
-   _____  3.1 Developer provides test cases for regression tests 
+ 4. Project personnel advised of release decision and tentative date with
+       a request to not disrupt the repository until the release is complete
 
-_____ 4.  Documentation has been updated/created with basic information
+    --->> _________________________________________
 
-   _____  4.1 Update CHANGELOG file with information regarding contents of 
-              this release
+ 5. Requests for delay in release must be made within 24 hours of notification 
 
-   _____  4.2 Additional information resulting from alpha release is included
-              in documents 
+    --->> _________________________________________
 
-_____ 5.  Project Lead review and/or concurrence to release code
+ 6. Update CHANGELOG file with information regarding contents of this release
 
-_____ 6.  Software Lead completes the following:
+    --->> _________________________________________
 
-   _____  6.1.  Creates tar file consistent with project guidelines
+ 7. Verify that user, reference and developer manuals are updated
 
-   _____  6.2.  Runs regression test suite on CASC platforms
+    --->> _________________________________________
 
-   _____  6.3.  Runs regression test suite on all LLNL open platforms
+ 8. Verify all agreed upon changes, especially documentation, have been committed
 
-   _____  6.4.  Only when 6.2 and 6.3 are correct; move files to LLNL closed
-                platforms
+    --->> _________________________________________
 
-   _____  6.5.  Runs regression test suite on closed platforms
+ 9. Project Lead review and/or concurrence to release
 
-   _____  6.4.  Install tar file on CASC cluster, open and closed platforms
+    --->> _________________________________________
 
-   _____  6.5.  Send an email to the hypre-beta-announce users list
+10. Tag repository with release number
+
+    --->> _________________________________________
+
+11. Checkout tagged version
+
+    --->> _________________________________________
+
+12. Manually run the autotest script with the following options on the checked
+        out version: -tux149 -insure -frost -gpsmp -pengra
+
+    --->> _________________________________________
+
+13. If the test runs properly, proceed to step 14
+    Otherwise, untag the repository, make necessary corrections, return
+       to step 10; iterating until all tests run correctly.
+
+    --->> _________________________________________
+
+14. Create tar file of checked out version by running the mkdist script
+
+    --->> _________________________________________
+
+15. Manually untar the file that was created in step 14
+
+    --->> _________________________________________
+
+16. Manually run the autotest script with the following options on the checked
+        out version: -tux149 -insure -frost -gpsmp -pengra
+
+    --->> _________________________________________
+
+17. If the tests run properly, proceed to step 18
+    Otherwise, untag the repository, make necessary corrections, return
+       to step 10; iterating until all tests run correctly.
+
+    --->> _________________________________________
+
+18. Copy tar file to any closed (SCF) computer system, using FIS 
+
+    --->> _________________________________________
+
+19. Copy tar file to /usr/casc/hypre/i686-pc-linux-gnu directory
+
+    --->> _________________________________________
+
+20. Run the mkdistlinks script to create symbolic links to the tar file 
+
+    --->> _________________________________________
+
+21. Run the mklibs script with the '-b install' option to create
+       and install the release
+
+    --->> _________________________________________
+
+22. Log onto any closed (SCF) computer system
+
+    --->> _________________________________________
+
+23. Retrieve the tar file from the FIS system
+
+    --->> _________________________________________
+
+24. Manually untar the file that was retrieved in step 23
+
+    --->> _________________________________________
+
+25. Manually run the autotest script with the following options on the checked
+        out version: -sc -white -emperor
+
+    --->> _________________________________________
+
+26. Copy tar file to the appropriate sub-directory (based on SYS_TYPE) of
+       /usr/gapps/hypre and /usr/casc/hypre
+
+    --->> _________________________________________
+
+27. Run the mkdistlinks script to create symbolic links to the tar file 
+
+    --->> _________________________________________
+
+28. Run the mklibs script with the '-b install' option to create
+       and install the release
+
+    --->> _________________________________________
+
+29. If there are no errors in steps 16-30; inform project team and other
+       appropriate users of availability
+
+    --->> _________________________________________
+
+30. FINAL SIGN-OFF
+    Verify that all steps have been signed off and commit this file to
+       the repository
+
+    --->> _________________________________________
