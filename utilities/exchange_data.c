@@ -302,7 +302,11 @@ int hypre_DataExchangeList(int num_contacts,
       children_complete = 0;
       
    }
-
+   else if (num_procs ==1 && num_contacts > 0 ) /* added 11/08 */
+   {
+      terminate = 0;
+   }
+   
 
    /*---------PROBE LOOP-----------------------------------------*/
 
@@ -411,7 +415,7 @@ int hypre_DataExchangeList(int num_contacts,
       {
 	ierr = MPI_Testall(num_contacts, response_requests, &responses_complete, 
                     response_statuses);
-     
+        if (responses_complete && num_procs == 1) terminate = 1; /*added 11/08 */
 
       }
       else if(!children_complete) /* have all of our children received all of their 
