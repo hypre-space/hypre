@@ -74,6 +74,7 @@ USR_FILES =\
  usr_ij.tex\
  usr_building_code.tex\
  usr_struct.tex\
+ usr_sstruct.tex\
  usr_manual.tex
 
 HYPRE_usr_manual/usr_manual.html: usr_manual.dvi
