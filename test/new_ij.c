@@ -20,6 +20,7 @@
 
 int BuildParFromFile (int argc , char *argv [], int arg_index , HYPRE_ParCSRMatrix *A_ptr );
 int BuildParLaplacian (int argc , char *argv [], int arg_index , HYPRE_ParCSRMatrix *A_ptr );
+int BuildParSysLaplacian (int argc , char *argv [], int arg_index , HYPRE_ParCSRMatrix *A_ptr );
 int BuildParDifConv (int argc , char *argv [], int arg_index , HYPRE_ParCSRMatrix *A_ptr );
 int BuildParFromOneFile (int argc , char *argv [], int arg_index , int num_functions , HYPRE_ParCSRMatrix *A_ptr );
 int BuildFuncsFromFiles (int argc , char *argv [], int arg_index , HYPRE_ParCSRMatrix A , int **dof_func_ptr );
@@ -2662,7 +2663,9 @@ BuildParLaplacian( int                  argc,
 
    int                 num_procs, myid;
    int                 p, q, r;
+   int                 num_fun = 1;
    double             *values;
+   double             *mtrx;
 
    /*-----------------------------------------------------------
     * Initialize some stuff
@@ -2714,6 +2717,11 @@ BuildParLaplacian( int                  argc,
          cy = atof(argv[arg_index++]);
          cz = atof(argv[arg_index++]);
       }
+      else if ( strcmp(argv[arg_index], "-sysL") == 0 )
+      {
+         arg_index++;
+         num_fun = atoi(argv[arg_index++]);
+      }
       else
       {
          arg_index++;
@@ -2736,7 +2744,7 @@ BuildParLaplacian( int                  argc,
  
    if (myid == 0)
    {
-      printf("  Laplacian:\n");
+      printf("  Laplacian:   num_fun = %d\n", num_fun);
       printf("    (nx, ny, nz) = (%d, %d, %d)\n", nx, ny, nz);
       printf("    (Px, Py, Pz) = (%d, %d, %d)\n", P,  Q,  R);
       printf("    (cx, cy, cz) = (%f, %f, %f)\n\n", cx, cy, cz);
@@ -2775,8 +2783,38 @@ BuildParLaplacian( int                  argc,
       values[0] += 2.0*cz;
    }
 
-   A = (HYPRE_ParCSRMatrix) GenerateLaplacian(MPI_COMM_WORLD, 
+   if (num_fun == 1)
+      A = (HYPRE_ParCSRMatrix) GenerateLaplacian(MPI_COMM_WORLD, 
 		nx, ny, nz, P, Q, R, p, q, r, values);
+   else
+   {
+      mtrx = hypre_CTAlloc(double, num_fun*num_fun);
+
+      if (num_fun == 2)
+      {
+         mtrx[0] = 2;
+         mtrx[1] = 1;
+         mtrx[2] = 1;
+         mtrx[3] = 2;
+      }
+      else if (num_fun == 3)
+      {
+         mtrx[0] = 1.01;
+         mtrx[1] = 1;
+         mtrx[2] = 0.0;
+         mtrx[3] = 1;
+         mtrx[4] = 2;
+         mtrx[5] = 1;
+         mtrx[6] = 0.0;
+         mtrx[7] = 1;
+         mtrx[8] = 1.01;
+      }
+
+      A = (HYPRE_ParCSRMatrix) GenerateSysLaplacian(MPI_COMM_WORLD, 
+		nx, ny, nz, P, Q, R, p, q, r, num_fun, mtrx, values);
+
+      hypre_TFree(mtrx);
+   }
 
    hypre_TFree(values);
 
