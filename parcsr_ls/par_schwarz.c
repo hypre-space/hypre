@@ -92,8 +92,6 @@ hypre_SchwarzSetup(void               *schwarz_vdata,
    hypre_CSRMatrix *domain_structure;
    hypre_ParVector *Vtemp;
 
-   int num_variables = hypre_ParCSRMatrixNumRows(A);
-
    int variant = hypre_SchwarzDataVariant(schwarz_data);
    int domain_type = hypre_SchwarzDataDomainType(schwarz_data);
    int overlap = hypre_SchwarzDataOverlap(schwarz_data);

@@ -2108,10 +2108,7 @@ int hypre_ParAdSchwarzSolve(hypre_ParCSRMatrix *A,
 		       hypre_ParVector *Vtemp)
 
 {
-  MPI_Comm comm = hypre_ParCSRMatrixComm(A);
   hypre_ParCSRCommPkg *comm_pkg = hypre_ParCSRMatrixCommPkg(A);
-  int num_recvs = hypre_ParCSRCommPkgNumRecvs(comm_pkg);
-  int *recv_vec_starts = hypre_ParCSRCommPkgRecvVecStarts(comm_pkg);
   int num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
   int *send_map_starts = hypre_ParCSRCommPkgSendMapStarts(comm_pkg);
   int *send_map_elmts = hypre_ParCSRCommPkgSendMapElmts(comm_pkg);
@@ -2129,9 +2126,6 @@ int hypre_ParAdSchwarzSolve(hypre_ParCSRMatrix *A,
   int *j_domain_dof;
   double *domain_matrixinverse;
   hypre_CSRMatrix *A_diag = hypre_ParCSRMatrixDiag(A);
-  int *a_diag_i = hypre_CSRMatrixI(A_diag);
-  int *a_diag_j = hypre_CSRMatrixJ(A_diag);
-  double *a_diag_data = hypre_CSRMatrixData(A_diag);
   int num_variables;
   int num_cols_offd;
   double *scale_ext;
@@ -2144,7 +2138,7 @@ int hypre_ParAdSchwarzSolve(hypre_ParCSRMatrix *A,
   int one = 1;
 #endif
 
-  int jj,i,j,k, j_loc; /*, j_loc, k_loc;*/
+  int jj,i,j, j_loc; /*, j_loc, k_loc;*/
 
 
   int matrix_size, matrix_size_counter = 0;
@@ -2363,14 +2357,10 @@ hypre_ParAMGCreateDomainDof(hypre_ParCSRMatrix   *A,
 			 hypre_CSRMatrix     **domain_structure_pointer)
 
 {
-  MPI_Comm comm = hypre_ParCSRMatrixComm(A);
   hypre_CSRMatrix *domain_structure;
   int *i_domain_dof, *j_domain_dof;
   double *domain_matrixinverse;
   int num_domains;
-  double *scale;
-  double *scale_int;
-  double *scale_ext;
 
   hypre_CSRMatrix *A_diag = hypre_ParCSRMatrixDiag(A);
   int *a_diag_i = hypre_CSRMatrixI(A_diag);
@@ -2389,11 +2379,6 @@ hypre_ParAMGCreateDomainDof(hypre_ParCSRMatrix   *A,
   int *col_map_offd = hypre_ParCSRMatrixColMapOffd(A);
 
   hypre_ParCSRCommPkg *comm_pkg = hypre_ParCSRMatrixCommPkg(A);
-  int num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
-  int *send_map_starts = hypre_ParCSRCommPkgSendMapStarts(comm_pkg);
-  int *send_map_elmts = hypre_ParCSRCommPkgSendMapElmts(comm_pkg);
-
-  hypre_ParCSRCommHandle *comm_handle;
 
   hypre_CSRMatrix *A_ext;
   int *a_ext_i;
@@ -2429,7 +2414,6 @@ hypre_ParAMGCreateDomainDof(hypre_ParCSRMatrix   *A,
 #endif
 
   int cnt;
-  int index, start;
 
   /* --------------------------------------------------------------------- */
 
@@ -2856,7 +2840,6 @@ hypre_ParGenerateScale(hypre_ParCSRMatrix *A,
                     double           relaxation_weight,
                     double         **scale_pointer)
 {
-   MPI_Comm comm = hypre_ParCSRMatrixComm(A);
    int num_domains = hypre_CSRMatrixNumRows(domain_structure);
    int *i_domain_dof = hypre_CSRMatrixI(domain_structure);
    int *j_domain_dof = hypre_CSRMatrixJ(domain_structure);
