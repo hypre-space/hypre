@@ -17,10 +17,6 @@ ONLINE_OPTS =\
  -show_section_numbers\
  -bottom_navigation
 
-#DOCIFIED_DIRS =\
-# struct_linear_solvers\
-# struct_matrix_vector
-
 ##################################################################
 # Targets
 ##################################################################
@@ -31,22 +27,23 @@ install: all
 
 clean:
 	@/bin/rm -f *.aux *.bbl *.blg *.dvi *.log *.dlog *.toc
-	@/bin/rm -f *.idx *.ilg *.ind
+	@/bin/rm -f *.idx *.ilg *.ind 
 
 veryclean: clean
 	@/bin/rm -fr usr_manual
 	@/bin/rm -f  usr_manual.ps
 	@/bin/rm -fr dev_manual
 	@/bin/rm -f  dev_manual.ps
-
+	@/bin/rm -f  code_ref.tex code code_ref.ps
+	@/bin/rm -fr code_ref_html
 
 ##################################################################
 # Rules
 ##################################################################
 
-html: usr_html dev_html
+html: usr_html dev_html code_ref_html
 
-ps: usr_ps dev_ps
+ps: usr_ps dev_ps code_ref.ps
 
 usr: usr_html usr_ps
 usr_html: usr_manual/usr_manual.html
@@ -56,25 +53,14 @@ dev: dev_html dev_ps
 dev_html: dev_manual/dev_manual.html
 dev_ps: dev_manual.ps
 
+code_ref: code_ref_html code_ref.ps
+
 ##########
-
-DOCIFIED_FILES =\
- ../struct_linear_solvers/HYPRE_struct_pcg.c\
- ../struct_matrix_vector/communication.c
-
-DXX = ${DOCIFIED_FILES:.c=.dxx}
-
-TEX = ${DXX:.dxx=.tex}
-
-${DXX}: ${DOCIFIED_FILES}
-
-${TEX}: ${DXX}
 
 USR_FILES =\
  usr_building_code.tex\
- usr_manual.tex\
- ${TEX}
-
+ usr_manual.tex
+ 
 usr_manual/usr_manual.html: usr_manual.dvi
 	latex2html ${ONLINE_OPTS} usr_manual.tex
 
@@ -85,10 +71,47 @@ usr_manual.dvi: version.tex usr_manual.idx
 	latex usr_manual
 	latex usr_manual
 
-usr_manual.idx: ${USR_FILES}
+usr_manual.idx: ${USR_FILES} 
 	latex usr_manual
 	#bibtex usr_manual
 	makeindex usr_manual.idx
+
+##########
+
+INTERFACE_DOCIFIED_FILES =\
+ ../struct_linear_solvers/HYPRE_struct_pcg.c
+
+IMPLEMENTATION_DOCIFIED_FILES =
+# ../struct_matrix_vector/communication.c
+
+INTERFACE_DXX =\
+ ${INTERFACE_DOCIFIED_FILES:.c=.dxx}
+
+IMPLEMENTATION_DXX =\
+ ${IMPLEMENTATION_DOCIFIED_FILES:.c=.dxx}
+
+${INTERFACE_DXX}: ${INTERFACE_DOCIFIED_FILES}
+
+${IMPLEMENTATION_DXX}: ${IMPLEMENTATION_DOCIFIED_FILES}
+
+interface_ref.dxx: ${INTERFACE_DXX} 
+
+implementation_ref.dxx: ${IMPLEMENTATION_DXX}
+
+code_ref.dxx: implementation_ref.dxx interface_ref.dxx
+
+code_ref_html: code_ref.dxx
+	doc++ -d code_ref_html code_ref.dxx
+
+code_ref.tex: code_ref.dxx
+	doc++ -t -o code_ref.tex code_ref.dxx
+
+code_ref.dvi: code_ref.tex
+	latex code_ref.tex
+	latex code_ref.tex
+
+code_ref.ps: code_ref.dvi
+	dvips -o code_ref.ps code_ref.dvi 		
 
 ##########
 
@@ -132,6 +155,3 @@ version.tex:
 
 .c.dxx:
 	docify $< $@
-
-.dxx.tex:
-	doc++ -t -o $@ $<
