@@ -96,7 +96,7 @@ void * hypre_BiCGSCreate( )
 int hypre_BiCGSDestroy( void *bicgs_vdata )
 {
    hypre_BiCGSData *bicgs_data = bicgs_vdata;
-   int i, ierr = 0;
+   int ierr = 0;
  
    if (bicgs_data)
    {
@@ -208,7 +208,7 @@ int hypre_BiCGSSolve(void  *bicgs_vdata, void  *A, void  *b, void  *x)
    
    int               ierr, my_id, num_procs, iter;
    double            rho1, rho2, sigma, alpha, dtmp, r_norm, b_norm;
-   double            beta, epsmac = 1.e-16, epsilon; 
+   double            beta, epsilon; 
 
    hypre_ParKrylovCommInfo(A,&my_id,&num_procs);
    if (logging > 0)

@@ -109,7 +109,7 @@ void * hypre_BiCGSTABLCreate( )
 int hypre_BiCGSTABLDestroy( void *bicgstab_vdata )
 {
    hypre_BiCGSTABLData *bicgstab_data = bicgstab_vdata;
-   int i, ierr = 0;
+   int ierr = 0;
  
    if (bicgstab_data)
    {
@@ -217,7 +217,6 @@ int hypre_BiCGSTABLSetup( void *bicgstab_vdata, void *A, void *b, void *x       
 int hypre_BiCGSTABLSolve(void  *bicgstab_vdata, void  *A, void  *b, void  *x)
 {
    hypre_BiCGSTABLData  *bicgstab_data   = bicgstab_vdata;
-   int               size         = (bicgstab_data -> size);
    int 		     max_iter     = (bicgstab_data -> max_iter);
    int 		     stop_crit    = (bicgstab_data -> stop_crit);
    double 	     accuracy     = (bicgstab_data -> tol);
@@ -247,10 +246,10 @@ int hypre_BiCGSTABLSolve(void  *bicgstab_vdata, void  *A, void  *b, void  *x)
    
    int        ierr = 0;
    int        iter, flag; 
-   int        j, m; 
+   int        m; 
    int        my_id, num_procs;
    double     eta, chi, xi, psi, dtmp, dtmp2, r_norm, b_norm;
-   double     A11, A12, A21, A22, B1, B2, omega, epsmac = 1.e-16; 
+   double     A11, A12, A21, A22, B1, B2, omega; 
    double     epsilon, phi, delta, deltam1, omegam1;
 
    hypre_ParKrylovCommInfo(A,&my_id,&num_procs);

@@ -92,7 +92,7 @@ void * hypre_SymQMRCreate( )
 int hypre_SymQMRDestroy( void *symqmr_vdata )
 {
    hypre_SymQMRData *symqmr_data = symqmr_vdata;
-   int i, ierr = 0;
+   int ierr = 0;
  
    if (symqmr_data)
    {
@@ -194,9 +194,9 @@ int hypre_SymQMRSolve(void  *symqmr_vdata, void  *A, void  *b, void  *x)
    double           *norms         = (symqmr_data -> norms);
    char             *log_file_name = (symqmr_data -> log_file_name);
    
-   int               j, m, ierr=0, my_id, num_procs, iter, flag;
+   int               ierr=0, my_id, num_procs, iter;
    double            theta, tau, rhom1, rho, dtmp, r_norm;
-   double            thetam1, c, epsmac = 1.e-16, epsilon; 
+   double            thetam1, c, epsilon; 
    double            sigma, alpha, beta;
 
    hypre_ParKrylovCommInfo(A,&my_id,&num_procs);

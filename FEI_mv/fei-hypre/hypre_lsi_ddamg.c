@@ -32,6 +32,7 @@ int  HYPRE_DummySetup(HYPRE_Solver solver, HYPRE_ParCSRMatrix A_csr,
 
 void HYPRE_LSI_Get_IJAMatrixFromFile(double**,int**,int**,int*,double**,
                                      char*,char*);
+extern int MPI_Comm_split(MPI_Comm, int, int, MPI_Comm *);
 
 /***************************************************************************/
 /***************************************************************************/
@@ -360,7 +361,7 @@ int HYPRE_ApplyExtensionTranspose(HYPRE_Solver solver, HYPRE_ParVector x_csr,
 int HYPRE_ApplyTransform( HYPRE_Solver solver, HYPRE_ParVector x_csr, 
                   HYPRE_ParVector y_csr )
 {
-   int                i, j, index, local_nrows, *temp_list;
+   int                i, j, local_nrows, *temp_list;
    HYPRE_ParCSRMatrix LA_csr;
    HYPRE_ParVector    Lx_csr;
    HYPRE_ParVector    Lb_csr;
@@ -549,7 +550,7 @@ int HYPRE_IntfaceSolve( HYPRE_Solver solver, HYPRE_ParCSRMatrix A_csr,
    int                local_intface_nrows, global_intface_nrows;
    int                myBegin_int, myEnd_int, *itemp_vec, *itemp_vec2;
    int                icnt, icnt2, its, maxiter=500, mlen=100;
-   double             init_norm, sigma, eps1, tol, **ws, rnorm, t, one=1.0;
+   double             init_norm, eps1, **ws, rnorm, t, one=1.0;
    double             **HH, *RS, *S, *C, ror, *darray, gam, epsmac=1.0e-10;
    double             rnorm2;
 
@@ -885,7 +886,7 @@ int HYPRE_LSI_DDAMGSolve(HYPRE_ParCSRMatrix A_csr, HYPRE_ParVector x_csr,
    int             i, j, k, *row_partition, local_nrows, num_procs, rowSize;
    int             *colInd, *newColInd, rowCnt, eqnNum, *rowLengths;
    int             nnz, relaxType[4], maxRowSize, global_nrows;
-   int             k1, myBegin_int, myEnd_int, *itemp_vec, *itemp_vec2;
+   int             myBegin_int, myEnd_int, *itemp_vec, *itemp_vec2;
    int             local_intface_nrows, global_intface_nrows;
    int             num_iterations;
    double          *colVal, *newColVal;
