@@ -94,12 +94,11 @@ define(PLOOP,<<\
       pthread_cond_wait(&$8, &$7);\
    else if ($6 == NUM_THREADS) {\
       pthread_cond_broadcast(&$8);\
-      $4[$5] =0;\
+      $4[$5] = 0;\
+      $6 = 0;\
    }\
 \
-   pthread_mutex_unlock(&$7);\
-\
-   $6 = 0;\>>)
+   pthread_mutex_unlock(&$7);\>>)
 
 
 >>,<<
