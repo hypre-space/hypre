@@ -14,8 +14,6 @@
 #
 #=============================================================================
 
-- Multiplication of ParCSR Boolean matrices.
-
 - Added SetRelChange option to GMRES solver.
 
 - New draft of the IJ interface: This new draft is not backward compatible
