@@ -29,7 +29,7 @@ MLI_Solver_MLS::MLI_Solver_MLS() : MLI_Solver(MLI_SOLVER_MLS_ID)
    mli_Wtemp = NULL;
    mli_Ytemp = NULL;
    max_eigen = -1.0;
-   mlsDeg    = 2;
+   mlsDeg    = 1;
    mlsBoost  = 1.1;
    mlsOver   = 1.1;
    for ( int i = 0; i < 5; i++ ) mlsOm[i] = 0.0;
@@ -243,7 +243,7 @@ int MLI_Solver_MLS::solve(MLI_Vector *f_in, MLI_Vector *u_in)
 
 #define HYPRE_SMP_PRIVATE i
 #include "utilities/hypre_smp_forloop.h"
-         for (i = 0; i < nrows; i++) Ytemp_data[i] = ( coef * Vtemp_data[i] );
+      for (i = 0; i < nrows; i++) Ytemp_data[i] = ( coef * Vtemp_data[i] );
 
       /* Wtemp = coef * Vtemp */
 
@@ -264,7 +264,7 @@ int MLI_Solver_MLS::solve(MLI_Vector *f_in, MLI_Vector *u_in)
 
 #define HYPRE_SMP_PRIVATE i
 #include "utilities/hypre_smp_forloop.h"
-       for (i = 0; i < nrows; i++) u_data[i] += ( mlsOver * Ytemp_data[i] );
+      for (i = 0; i < nrows; i++) u_data[i] += ( mlsOver * Ytemp_data[i] );
 
       /* compute residual Vtemp = A u - f */
 
