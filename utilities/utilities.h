@@ -1,4 +1,6 @@
 
+#include <HYPRE_config.h>
+
 #include "HYPRE_utilities.h"
 
 #ifndef hypre_UTILITIES_HEADER
@@ -221,9 +223,6 @@ int MPI_Type_commit P((MPI_Datatype *datatype ));
 #ifndef hypre_MEMORY_HEADER
 #define hypre_MEMORY_HEADER
 
-#include <stdlib.h>
-#include <stdio.h>
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -359,8 +358,6 @@ double hypre_Rand P((void ));
 
 #ifdef HYPRE_USE_PTHREADS
 
-#include "mpi.h"
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -463,8 +460,7 @@ int hypre_thread_MPI_Type_commit P((MPI_Datatype *datatype ));
 #define MAX_QUEUE 256
 #endif
 
-#include<pthread.h>
-#include "utilities.h"
+#include <pthread.h>
 
 /* hypre_work_proc_t typedef'd to be a pointer to a function with a void*
    argument and a void return type */

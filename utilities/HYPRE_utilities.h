@@ -15,6 +15,8 @@
 #ifndef HYPRE_UTILITIES_HEADER
 #define HYPRE_UTILITIES_HEADER
 
+#include <HYPRE_config.h>
+
 #ifndef HYPRE_SEQUENTIAL
 #include "mpi.h"
 #endif

@@ -15,9 +15,6 @@
 #ifndef hypre_MEMORY_HEADER
 #define hypre_MEMORY_HEADER
 
-#include <stdlib.h>
-#include <stdio.h>
-
 #ifdef __cplusplus
 extern "C" {
 #endif

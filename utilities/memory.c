@@ -12,9 +12,9 @@
  * Memory management utilities
  *
  *****************************************************************************/
-
-#include "memory.h"
+#include <stdlib.h>
 #include <stdio.h>
+#include "utilities.h"
 
 #ifdef HYPRE_USE_PTHREADS
 #include "threading.h"

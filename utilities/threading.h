@@ -23,8 +23,7 @@
 #define MAX_QUEUE 256
 #endif
 
-#include<pthread.h>
-#include "utilities.h"
+#include <pthread.h>
 
 /* hypre_work_proc_t typedef'd to be a pointer to a function with a void*
    argument and a void return type */

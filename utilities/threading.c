@@ -6,14 +6,14 @@
 *********************************************************************EHEADER*/
 
 #define HYPRE_THREAD_GLOBALS
-#ifdef HYPRE_USE_PTHREADS
 
 #include <malloc.h>
 #include <assert.h>
 #include <stdio.h>
 #include <signal.h>
-#include "mpi.h"
-#include "threading.h"
+#include "utilities.h"
+
+#ifdef HYPRE_USE_PTHREADS
 
 #ifdef HYPRE_USE_UMALLOC
 #include "umalloc_local.h"

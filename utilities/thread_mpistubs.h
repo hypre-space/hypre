@@ -17,8 +17,6 @@
 
 #ifdef HYPRE_USE_PTHREADS
 
-#include "mpi.h"
-
 #ifdef __cplusplus
 extern "C" {
 #endif

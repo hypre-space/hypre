@@ -12,12 +12,11 @@
  *
  *****************************************************************************/
 
+#include "utilities.h"
+
 #ifdef HYPRE_USE_PTHREADS
 
-#define HYPRE_USING_THREAD_MPISTUBS 
-
-#include "utilities.h"
-#include <mpi.h>
+#define HYPRE_USING_THREAD_MPISTUBS
 
 int
 hypre_thread_MPI_Init( int    *argc,

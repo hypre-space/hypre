@@ -12,9 +12,9 @@
  *
  *****************************************************************************/
 
-#ifdef HYPRE_SEQUENTIAL
-
 #include "utilities.h"
+
+#ifdef HYPRE_SEQUENTIAL
 
 int
 MPI_Init( int    *argc,
