@@ -597,7 +597,7 @@ int  hypre_BoomerAMGRelaxT( hypre_ParCSRMatrix *A,
    switch (relax_type)
    {            
 
-      case 2: /* Jacobi (uses ParMatvec) */
+      case 7: /* Jacobi (uses ParMatvec) */
       {
  
          /*-----------------------------------------------------------------

@@ -105,6 +105,7 @@ int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
     *     relax_type = 5 -> hybrid: GS-J mix off-processor, chaotic GS on-node
     *     relax_type = 6 -> hybrid: SSOR-J mix off-processor, SSOR on-processor
     *     		    with outer relaxation parameters 
+    *     relax_type = 7 -> Jacobi (uses Matvec), only needed in CGNR
     *     relax_type = 9 -> Direct Solve
     *-----------------------------------------------------------------------*/
    switch (relax_type)
@@ -2208,6 +2209,36 @@ int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
 	   hypre_TFree(Vext_data);
 	   hypre_TFree(v_buf_data);
         }
+      }
+      break;
+
+      case 7: /* Jacobi (uses ParMatvec) */
+      {
+
+         /*-----------------------------------------------------------------
+          * Copy f into temporary vector.
+          *-----------------------------------------------------------------*/
+
+         hypre_ParVectorCopy(f,Vtemp);
+
+         /*-----------------------------------------------------------------
+          * Perform Matvec Vtemp=f-Au
+          *-----------------------------------------------------------------*/
+
+            hypre_ParCSRMatrixMatvec(-1.0,A, u, 1.0, Vtemp);
+            for (i = 0; i < n; i++)
+            {
+
+               /*-----------------------------------------------------------
+                * If diagonal is nonzero, relax point i; otherwise, skip it.
+                *-----------------------------------------------------------*/
+
+               if (A_diag_data[A_diag_i[i]] != zero)
+               {
+                  u_data[i] += relax_weight * Vtemp_data[i]
+                                / A_diag_data[A_diag_i[i]];
+               }
+            }
       }
       break;
 
