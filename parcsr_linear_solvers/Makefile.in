@@ -62,6 +62,7 @@ FILES =\
  par_amg_solveT.c\
  par_stats.c\
  par_cycle.c\
+ par_difconv.c\
  par_interp.c\
  par_coarsen.c\
  par_relax.c\
