@@ -828,7 +828,8 @@ hypre_CSRMatrixToParCSRMatrix( MPI_Comm comm, hypre_CSRMatrix *A,
                                int *row_starts,
                                int *col_starts )
 {
-   int          global_data[2];
+   int          *global_data;
+   int          global_size;
    int          global_num_rows;
    int          global_num_cols;
    int          *local_num_rows;
@@ -857,17 +858,100 @@ hypre_CSRMatrixToParCSRMatrix( MPI_Comm comm, hypre_CSRMatrix *A,
    MPI_Comm_rank(comm, &my_id);
    MPI_Comm_size(comm, &num_procs);
 
+   global_data = hypre_CTAlloc(int, 2*num_procs+6);
    if (my_id == 0) 
    {
-        global_data[0] = hypre_CSRMatrixNumRows(A);
-        global_data[1] = hypre_CSRMatrixNumCols(A);
-        a_data = hypre_CSRMatrixData(A);
-        a_i = hypre_CSRMatrixI(A);
-        a_j = hypre_CSRMatrixJ(A);
+      global_size = 3;
+      if (row_starts) 
+      {
+	 if (col_starts)
+	 {
+	    if (col_starts != row_starts)
+	    {
+            /* contains code for what to expect, 
+		 if 0:  row_starts = col_starts, only row_starts given
+		 if 1: only row_starts given, col_starts = NULL
+		 if 2: both row_starts and col_starts given 
+		 if 3: only col_starts given, row_starts = NULL */
+               global_data[3] = 2;
+	       global_size = 2*num_procs+6;
+	       for (i=0; i < num_procs+1; i++)
+	    	  global_data[i+4] = row_starts[i];
+	       for (i=0; i < num_procs+1; i++)
+		  global_data[i+num_procs+5] = col_starts[i];
+	    }
+	    else
+	    {
+               global_data[3] = 0;
+	       global_size = num_procs+5;
+	       for (i=0; i < num_procs+1; i++)
+		  global_data[i+4] = row_starts[i];
+	    }
+	 }
+	 else
+	 {
+            global_data[3] = 1;
+	    global_size = num_procs+5;
+	    for (i=0; i < num_procs+1; i++)
+	       global_data[i+4] = row_starts[i];
+	 }
+      }
+      else 
+      {
+	 if (col_starts)
+	 {
+            global_data[3] = 3;
+	    global_size = num_procs+5;
+	    for (i=0; i < num_procs+1; i++)
+	       global_data[i+4] = col_starts[i];
+	 }
+      }
+      global_data[0] = hypre_CSRMatrixNumRows(A);
+      global_data[1] = hypre_CSRMatrixNumCols(A);
+      global_data[2] = global_size;
+      a_data = hypre_CSRMatrixData(A);
+      a_i = hypre_CSRMatrixI(A);
+      a_j = hypre_CSRMatrixJ(A);
    }
-   MPI_Bcast(global_data,2,MPI_INT,0,comm);
+   MPI_Bcast(global_data,3,MPI_INT,0,comm);
    global_num_rows = global_data[0];
    global_num_cols = global_data[1];
+
+   global_size = global_data[2];
+   if (global_size > 3)
+   {
+      MPI_Bcast(&global_data[3],global_size-3,MPI_INT,0,comm);
+      if (my_id > 0)
+      {
+	 if (global_data[3] < 3)
+	 {
+	    row_starts = hypre_CTAlloc(int, num_procs+1);
+	    for (i=0; i< num_procs+1; i++)
+	    {
+	       row_starts[i] = global_data[i+4];
+	    }
+	    if (global_data[3] == 0)
+	       col_starts = row_starts;
+	    if (global_data[3] == 2)
+	    {
+	       col_starts = hypre_CTAlloc(int, num_procs+1);
+	       for (i=0; i < num_procs+1; i++)
+	       {
+	          col_starts[i] = global_data[i+num_procs+5];
+	       }
+	    }
+	 }
+	 else
+	 {
+	    col_starts = hypre_CTAlloc(int, num_procs+1);
+	    for (i=0; i< num_procs+1; i++)
+	    {
+	       col_starts[i] = global_data[i+4];
+	    }
+	 }
+      }
+   }
+   hypre_TFree(global_data);
 
    local_num_rows = hypre_CTAlloc(int, num_procs);
    csr_matrix_datatypes = hypre_CTAlloc(MPI_Datatype, num_procs);
