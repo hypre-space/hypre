@@ -12,9 +12,12 @@ libHYPRE_FEI_la_LDFLAGS = -avoid-version
 
 include_HEADERS = cfei-hypre.h cfei_hypre.h \
  HYPRE_LinSysCore.h HYPRE_FEI_includes.h \
- $(BASE_DIR)/Lookup.h
+ $(BASE_DIR)/Lookup.h  \
+ $(BASE_DIR)/LinearSystemCore.h \
+ $(BASE_DIR)/fei_defs.h
 
 AM_CPPFLAGS = -DHAVE_SUPERLU -DBOOL_NOT_SUPPORTED\
+ $(CSUPERLUFLAGS)\
  -I$(top_srcdir)\
  -I$(top_srcdir)/IJ_mv\
  -I$(top_srcdir)/utilities\
@@ -57,8 +60,6 @@ driver_LDADD = \
 
 #
 FILES = \
- bicgs.c\
- bicgstabl.c\
  FEI_HYPRE_Impl.cxx\
  HYPRE_LSC_aux.cxx\
  HYPRE_LSI_Dsuperlu.c\
@@ -80,6 +81,8 @@ FILES = \
  HYPRE_parcsr_symqmr.c\
  SymQMR.c\
  TFQmr.c\
+ bicgs.c\
+ bicgstabl.c\
  cfei_hypre.cxx\
  fgmres.c\
  hypre_lsi_amge.c\
@@ -116,3 +119,6 @@ FILES = \
  cfei-hypre.h\
  cfei_hypre.h
 
+install-data-local:
+	@ \
+	cp $(BASE_DIR)/LinearSystemCore.h $(includedir)/snl_LinearSystemCore.h
