@@ -252,7 +252,7 @@ int impl_Hypre_ParCSRMatrixBuilder_GetConstructedObject
       return 1;
    };
    *op = (Hypre_LinearOperator) Hypre_ParCSRMatrix_castTo
-      ( newmat, "Hypre_LinearOperator" );
+      ( newmat, "Hypre.LinearOperator" );
    return 0;
 } /* end impl_Hypre_ParCSRMatrixBuilderGetConstructedObject */
 
