@@ -68,6 +68,7 @@ class MLI_Method_AMGSA : public MLI_Method
    double   drop_tol_for_P;          /* tolerance for sparsifying P      */
    int      *sa_counts;              /* store aggregation information at */
    int      **sa_data;               /* each level                       */
+   int      **sa_labels;             /* labels for aggregation           */
    double   *spectral_norms;         /* computed matrix norms            */
    int      calc_norm_scheme;        /* method to estimate matrix norm   */
    int      min_coarse_size;         /* tell when to stop aggregation    */
@@ -111,7 +112,7 @@ public :
    int    setNodalCoordinates(int nNodes,int nDOF,double *coor,double *scale);
    int    setCalibrationSize(int size);
    int    setupCalibration( MLI *mli );
-   int    setupNullSpaceUsingFEData( MLI *mli );
+   int    setupSubdomainNullSpaceUsingFEData( MLI *mli );
    int    setupDDFormSubdomainAggregate( MLI *mli );
    int    setupDDSuperLUSmoother( MLI *mli, int level );
    int    print();
@@ -122,7 +123,8 @@ public :
 private :
 
    double genPLocal( MLI_Matrix *Amat, MLI_Matrix **Pmat, int, int * );
-   int    formLocalGraph( hypre_ParCSRMatrix *Amat, hypre_ParCSRMatrix **graph);
+   int    formLocalGraph( hypre_ParCSRMatrix *Amat, hypre_ParCSRMatrix **graph,
+                          int *labels);
    int    coarsenLocal( hypre_ParCSRMatrix *graph, int *nAggr, int **aggrInfo);
 };
 

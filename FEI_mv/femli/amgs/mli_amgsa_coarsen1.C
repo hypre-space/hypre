@@ -36,7 +36,7 @@
 #define MLI_METHOD_AMGSA_SELECTED  -2
 #define MLI_METHOD_AMGSA_PENDING   -3
 
-#define dabs(x) ((x > 0 ) ? x : -(x))
+#define habs(x) ((x > 0 ) ? x : -(x))
 
 // *********************************************************************
 // external subroutines
@@ -47,12 +47,13 @@ extern "C"
    void qsort1(int *, double *, int, int);
 }
 
-/* ********************************************************************* 
- * Purpose   : Given Amat and aggregation information, create the 
- *             corresponding Pmat using the local aggregation scheme 
- * ------------------------------------------------------------------- */
+// ********************************************************************* 
+// Purpose   : Given Amat and aggregation information, create the 
+//             corresponding Pmat using the local aggregation scheme 
+// ---------------------------------------------------------------------
 
-double MLI_Method_AMGSA::genPLocal(MLI_Matrix *mli_Amat,MLI_Matrix **Pmat_out,
+double MLI_Method_AMGSA::genPLocal(MLI_Matrix *mli_Amat,
+                                   MLI_Matrix **Pmat_out,
                                    int init_count, int *init_aggr)
 {
    HYPRE_IJMatrix         IJPmat;
@@ -74,7 +75,7 @@ double MLI_Method_AMGSA::genPLocal(MLI_Matrix *mli_Amat,MLI_Matrix **Pmat_out,
    int       J_local_nrows, cindex, max_nnz, max_nnz_diag, max_nnz_offd;
    int       *new_col_ind, *K_diag_i, *K_offd_i, old_index, old_offset;
    int       blk_size, max_agg_size, *agg_cnt_array, **agg_ind_array;
-   int       agg_size, info, row_leng, *cols, nzcnt;
+   int       agg_size, info, row_leng, *cols, nzcnt, *local_labels;
    double    *col_val, **P_vecs_ext, *send_buf, **P_vecs, max_eigen=0, alpha;
    double    *J_diag_data, *J_offd_data, *K_diag_data, *K_offd_data, cvalue;
    double    *new_col_val, *new_col_itmp, *q_array, *new_null, *r_array;
@@ -111,8 +112,25 @@ double MLI_Method_AMGSA::genPLocal(MLI_Matrix *mli_Amat,MLI_Matrix **Pmat_out,
    if ( init_aggr == NULL )
    {
       blk_size = curr_node_dofs;
-      if (blk_size > 1) MLI_Matrix_Compress(mli_Amat, blk_size, &mli_A2mat);
-      else              mli_A2mat = mli_Amat;
+      if (blk_size > 1) 
+      {
+         MLI_Matrix_Compress(mli_Amat, blk_size, &mli_A2mat);
+         if ( sa_labels != NULL && sa_labels[curr_level] != NULL )
+         {
+            local_labels = new int[A_local_nrows/blk_size];
+            for ( i = 0; i < A_local_nrows; i+=blk_size )
+               local_labels[i/blk_size] = sa_labels[curr_level][i];
+         }
+         else local_labels = NULL;
+      }
+      else 
+      {
+         mli_A2mat = mli_Amat;
+         if ( sa_labels != NULL && sa_labels[curr_level] != NULL )
+            local_labels = sa_labels[curr_level];
+         else
+            local_labels = NULL;
+      }
       A2mat = (hypre_ParCSRMatrix *) mli_A2mat->getMatrix();
    }
 
@@ -120,7 +138,7 @@ double MLI_Method_AMGSA::genPLocal(MLI_Matrix *mli_Amat,MLI_Matrix **Pmat_out,
     * form aggregation graph by taking out weak edges
     *-----------------------------------------------------------------*/
 
-   if ( init_aggr == NULL ) formLocalGraph(A2mat, &Gmat);
+   if ( init_aggr == NULL ) formLocalGraph(A2mat, &Gmat, local_labels);
 
    /*-----------------------------------------------------------------
     * perform coarsening
@@ -141,7 +159,12 @@ double MLI_Method_AMGSA::genPLocal(MLI_Matrix *mli_Amat,MLI_Matrix **Pmat_out,
 
    if ( init_aggr == NULL )
    {
-      if ( blk_size > 1 ) delete mli_A2mat;
+      if ( blk_size > 1 ) 
+      {
+         delete mli_A2mat;
+         if ( sa_labels != NULL && sa_labels[curr_level] != NULL )
+            delete [] local_labels;
+      }
       ierr = hypre_ParCSRMatrixDestroy(Gmat);
       assert( !ierr );
    }
@@ -184,10 +207,32 @@ double MLI_Method_AMGSA::genPLocal(MLI_Matrix *mli_Amat,MLI_Matrix **Pmat_out,
    else eqn2aggr = node2aggr;
  
    /*-----------------------------------------------------------------
+    * construct the next set of labels for the next level
+    *-----------------------------------------------------------------*/
+
+   if ( sa_labels != NULL && sa_labels[curr_level] != NULL )
+   {
+      if ( (curr_level+1) < max_levels )
+      {
+         if ( sa_labels[curr_level+1] != NULL ) 
+            delete [] sa_labels[curr_level+1];
+         sa_labels[curr_level+1] = new int[P_local_ncols];
+         for ( i = 0; i < naggr; i++ )
+         {
+            for ( j = 0; j < A_local_nrows; j++ )
+               if ( eqn2aggr[j] == i ) break;
+            for ( k = 0; k < nullspace_dim; k++ )
+               sa_labels[curr_level+1][i*nullspace_dim+k] = 
+                                              sa_labels[curr_level][j];
+         }
+      }
+   }
+
+   /*-----------------------------------------------------------------
     * reset row corresponding to boundary conditions
     *-----------------------------------------------------------------*/
 
-/*
+#if 0
    if ( nullspace_vec != NULL )
    {
       for ( irow = 0; irow < A_local_nrows; irow++ )
@@ -203,7 +248,7 @@ double MLI_Method_AMGSA::genPLocal(MLI_Matrix *mli_Amat,MLI_Matrix **Pmat_out,
          hypre_ParCSRMatrixRestoreRow(Amat,row_num,&row_leng,&cols,NULL);
       }
    }
-*/
+#endif
 
    /*-----------------------------------------------------------------
     * compute smoothing factor for the prolongation smoother
@@ -819,7 +864,7 @@ double MLI_Method_AMGSA::genPLocal(MLI_Matrix *mli_Amat,MLI_Matrix **Pmat_out,
    delete [] eqn2aggr;
 
    /*-----------------------------------------------------------------
-    * set the block size of the next coarsening 
+    * set up and return the Pmat 
     *-----------------------------------------------------------------*/
 
    func_ptr = new MLI_Function();
@@ -1143,7 +1188,8 @@ int MLI_Method_AMGSA::coarsenLocal(hypre_ParCSRMatrix *hypre_graph,
  * ------------------------------------------------------------------- */
 
 int MLI_Method_AMGSA::formLocalGraph( hypre_ParCSRMatrix *Amat,
-                               hypre_ParCSRMatrix **graph_in)
+                                      hypre_ParCSRMatrix **graph_in,
+                                      int *local_labels)
 {
    HYPRE_IJMatrix     IJGraph;
    hypre_CSRMatrix    *Adiag_block;
@@ -1153,7 +1199,7 @@ int MLI_Method_AMGSA::formLocalGraph( hypre_ParCSRMatrix *Amat,
    int                start_row, end_row, local_nrow, *row_lengths;
    int                *Adiag_rptr, *Adiag_cols, Adiag_nrows, length;
    int                Aoffd_nrows, global_nrows, global_ncols;
-   int                irow, max_row_nnz, ierr, *col_ind;
+   int                irow, max_row_nnz, ierr, *col_ind, labeli, labelj;
    double             *diag_data=NULL, *col_val;
    double             *Adiag_vals, dcomp1, dcomp2, epsilon;
 
@@ -1230,15 +1276,19 @@ int MLI_Method_AMGSA::formLocalGraph( hypre_ParCSRMatrix *Amat,
    {
       row_lengths[irow] = 0;
       index = start_row + irow;
+      if ( local_labels != NULL ) labeli = local_labels[irow];
+      else                        labeli = 0;
       if ( epsilon > 0.0 )
       {
          for (j = Adiag_rptr[irow]; j < Adiag_rptr[irow+1]; j++)
          {
             jj = Adiag_cols[j];
+            if ( local_labels != NULL ) labelj = local_labels[jj];
+            else                        labelj = 0;
             if ( jj != irow )
             {
                dcomp1 = Adiag_vals[j] * Adiag_vals[j];
-               if ( dcomp1 > 0.0 ) row_lengths[irow]++;
+               if (dcomp1 > 0.0 && labeli == labelj) row_lengths[irow]++;
             }
          }
       }
@@ -1247,7 +1297,10 @@ int MLI_Method_AMGSA::formLocalGraph( hypre_ParCSRMatrix *Amat,
          for (j = Adiag_rptr[irow]; j < Adiag_rptr[irow+1]; j++)
          {
             jj = Adiag_cols[j];
-            if ( jj != irow && Adiag_vals[j] != 0.0 ) row_lengths[irow]++;
+            if ( local_labels != NULL ) labelj = local_labels[jj];
+            else                        labelj = 0;
+            if ( jj != irow && Adiag_vals[j] != 0.0 && labeli == labelj )
+               row_lengths[irow]++;
          }
       }
    }
@@ -1271,19 +1324,23 @@ int MLI_Method_AMGSA::formLocalGraph( hypre_ParCSRMatrix *Amat,
    {
       length = 0;
       index  = start_row + irow;
+      if ( local_labels != NULL ) labeli = local_labels[irow];
+      else                        labeli = 0;
       if ( epsilon > 0.0 )
       {
          for (j = Adiag_rptr[irow]; j < Adiag_rptr[irow+1]; j++)
          {
             jj = Adiag_cols[j];
+            if ( local_labels != NULL ) labelj = local_labels[jj];
+            else                        labelj = 0;
             if ( jj != irow )
             {
                dcomp1 = Adiag_vals[j] * Adiag_vals[j];
                if ( dcomp1 > 0.0 )
                {
-                  dcomp2 = dabs(diag_data[irow] * diag_data[jj]);
+                  dcomp2 = habs(diag_data[irow] * diag_data[jj]);
                   col_val[length] = dcomp2 / dcomp1;
-                  if ( dcomp2 >= epsilon * dcomp1 ) 
+                  if ( (dcomp2 >= epsilon * dcomp1) && (labeli == labelj) ) 
                      col_ind[length++] = jj + start_row;
                   else                              
                      col_ind[length++] = - (jj + start_row) - 1;
@@ -1296,11 +1353,14 @@ int MLI_Method_AMGSA::formLocalGraph( hypre_ParCSRMatrix *Amat,
          for (j = Adiag_rptr[irow]; j < Adiag_rptr[irow+1]; j++)
          {
             jj = Adiag_cols[j];
+            if ( local_labels != NULL ) labelj = local_labels[jj];
+            else                        labelj = 0;
             if ( jj != irow )
             {
                col_val[length] = Adiag_vals[j];
-               if (Adiag_vals[j] != 0.0) col_ind[length++] = jj + start_row;
-               else                      col_ind[length++] = -(jj+start_row)-1;
+               if (Adiag_vals[j] != 0.0 && (labeli == labelj)) 
+                    col_ind[length++] = jj + start_row;
+               else col_ind[length++] = -(jj+start_row)-1;
             }
          }
       }

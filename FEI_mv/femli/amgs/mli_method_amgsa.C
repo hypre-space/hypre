@@ -80,6 +80,7 @@ MLI_Method_AMGSA::MLI_Method_AMGSA( MPI_Comm comm ) : MLI_Method( comm )
    total_time          = 0.0;
    ddObj               = NULL;
    ARPACKSuperLUExists_ = 0;
+   sa_labels            = NULL;
    useSAMGDDFlag_       = 0;
 }
 
@@ -104,6 +105,17 @@ MLI_Method_AMGSA::~MLI_Method_AMGSA()
       }
       delete [] sa_data;
       sa_data = NULL;
+   }
+   if ( sa_labels != NULL )
+   {
+      for ( int i = 0; i < max_levels; i++ )
+      {
+         if ( sa_labels[i] != NULL )
+              delete [] sa_labels[i];
+         else break;
+      }
+      delete [] sa_labels;
+      sa_labels = NULL;
    }
    if ( spectral_norms    != NULL ) delete [] spectral_norms;
    if ( pre_smoother_wgt  != NULL ) delete [] pre_smoother_wgt;
@@ -135,7 +147,7 @@ MLI_Method_AMGSA::~MLI_Method_AMGSA()
 int MLI_Method_AMGSA::setParams(char *in_name, int argc, char *argv[])
 {
    int        level, size, nDOF, numNS, length, nSweeps=1, set_id;
-   int        prePost, nnodes, nAggr, *aggrInfo;
+   int        prePost, nnodes, nAggr, *aggrInfo, *labels, is;
    double     thresh, pweight, *nullspace, *weights=NULL, *coords, *scales;
    char       param1[256], param2[256];
 
@@ -319,7 +331,6 @@ int MLI_Method_AMGSA::setParams(char *in_name, int argc, char *argv[])
       numNS     = *(int *)   argv[1];
       nullspace = (double *) argv[2];
       length    = *(int *)   argv[3];
-printf("amgsa : null dim = %d\n", numNS);
       return ( setNullSpace(nDOF,numNS,nullspace,length) );
    }
    else if ( !strcmp(param1, "setNodalCoord" ))
@@ -335,10 +346,36 @@ printf("amgsa : null dim = %d\n", numNS);
       } 
       nnodes = *(int *)   argv[0];
       nDOF   = *(int *)   argv[1];
-printf("amgsa : set nodal coord = %d\n", nDOF);
       coords = (double *) argv[2];
       if ( argc == 4 ) scales = (double *) argv[3]; else scales = NULL;
       return ( setNodalCoordinates(nnodes,nDOF,coords,scales) );
+   }
+   else if ( !strcmp(param1, "setLabels" ))
+   {
+      if ( argc != 4 )
+      {
+         cout << "MLI::AMGSA ERROR : setLabels needs 4 args.\n";
+         cout << "     argument[0] : vector length\n";
+         cout << "     argument[1] : level number \n";
+         cout << "     argument[2] : label information\n";
+         return 1;
+      } 
+      length = *(int *) argv[0];
+      level  = *(int *) argv[1];
+      labels =  (int *) argv[2];
+      if ( sa_labels == NULL ) 
+      {
+         sa_labels = new int*[max_levels];
+         for ( is = 0; is < max_levels; is++ ) sa_labels[is] = NULL;
+      }
+      if ( level < 0 || level >= max_levels )
+      {
+         cout << "MLI::AMGSA ERROR : setLabels has invalid level no.\n";
+         return 1;
+      }
+      if ( sa_labels[level] != NULL ) delete [] sa_labels[level];
+      sa_labels[level] = new int[length];
+      for ( is = 0; is < length; is++ ) sa_labels[level][is] = labels[is];
    }
    else if ( !strcmp(param1, "print" ))
    {
@@ -413,7 +450,7 @@ int MLI_Method_AMGSA::setup( MLI *mli )
    /* call SAe and/or setupDD if flag is set                          */
    /* --------------------------------------------------------------- */
 
-   if ( useSAMGeFlag_ )  setupNullSpaceUsingFEData(mli);
+   if ( useSAMGeFlag_ )  setupSubdomainNullSpaceUsingFEData(mli);
    if ( useSAMGDDFlag_ ) setupDDFormSubdomainAggregate(mli);
 
    /* --------------------------------------------------------------- */
@@ -509,12 +546,12 @@ int MLI_Method_AMGSA::setup( MLI *mli )
          smoother_ptr->setParams(param_string, 1, targv);
          smoother_ptr->setup(mli_Amat);
          mli->setSmoother( level, MLI_SMOOTHER_PRE, smoother_ptr );
-/*
+#if 0
          smoother_ptr = MLI_Solver_CreateFromID(MLI_SOLVER_ARPACKSUPERLU_ID);
          smoother_ptr->setParams(param_string, 1, targv);
          smoother_ptr->setup(mli_Amat);
          mli->setSmoother( level, MLI_SMOOTHER_POST, smoother_ptr );
-*/
+#endif
          continue;
       }
       smoother_ptr = MLI_Solver_CreateFromID( pre_smoother );
@@ -809,8 +846,8 @@ int MLI_Method_AMGSA::setNullSpace( int nDOF, int ndim, double *nullvec,
  * (abridged from similar function in ML)
  * --------------------------------------------------------------------- */
 
-int MLI_Method_AMGSA::setNodalCoordinates( int num_nodes, int nDOF, 
-                                           double *coords, double *scalings)
+int MLI_Method_AMGSA::setNodalCoordinates(int num_nodes, int nDOF, 
+                                          double *coords, double *scalings)
 {
    int i, j, k, offset, voffset, mypid;
    MPI_Comm comm = getComm();
