@@ -10,6 +10,9 @@
 .SUFFIXES:
 .SUFFIXES: .c .o
 
+srcdir = @srcdir@
+VPATH = @srcdir@
+
 CC = @CC@
 
 C_COMPILE_FLAGS=@CFLAGS@
