@@ -160,7 +160,7 @@ int hypre_ParAMGCycle P((void *amg_vdata , hypre_ParVector **F_array , hypre_Par
 
 /* par_indepset.c */
 int hypre_InitParAMGIndepSet P((hypre_ParCSRMatrix *S , double *measure_array ));
-int hypre_ParAMGIndepSet P((hypre_ParCSRMatrix *S , hypre_CSRMatrix *S_ext , double *measure_array , int *graph_array , int graph_array_size , int *IS_marker ));
+int hypre_ParAMGIndepSet P((hypre_ParCSRMatrix *S , hypre_CSRMatrix *S_ext , double *measure_array , int *graph_array , int graph_array_size , int *IS_marker , int *IS_marker_offd ));
 
 /* par_interp.c */
 int hypre_ParAMGBuildInterp P((hypre_ParCSRMatrix *A , int *CF_marker , hypre_ParCSRMatrix *S , hypre_ParCSRMatrix **P_ptr ));
