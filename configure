@@ -4859,6 +4859,13 @@ unset ac_cv_lib_$ac_lib_var
    fi
    
 
+      elif test "$F77" = "guidef77" ; then
+        
+   if test -z "$FOPT"; then
+      FOPT="-align dcommons -O"
+   fi
+   
+
       else 
         
    if test -z "$FOPT"; then
