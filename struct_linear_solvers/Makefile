@@ -11,36 +11,27 @@
 .SUFFIXES: .c .f .o
 
 HEADERS =\
- box.h\
- communication.h\
- computation.h\
  general.h\
  headers.h\
  protos.h\
- sbox.h\
- struct_grid.h\
- struct_matrix.h\
- struct_stencil.h\
- struct_vector.h
+ smg.h
 
 FILES =\
- box.c\
- box_algebra.c\
- communication.c\
- computation.c\
- grow.c\
- neighbors.c\
- project.c\
- sbox.c\
- struct_grid.c\
- struct_io.c\
- struct_axpy.c\
- struct_copy.c\
- struct_matrix.c\
- struct_matvec.c\
- struct_scale.c\
- struct_stencil.c\
- struct_vector.c
+general.c\
+smg3_setup_rap.c\
+smg.c\
+smg_intadd.c\
+smg_relax.c\
+smg_residual.c\
+smg_restrict.c\
+smg_setup.c\
+smg_setup_interp.c\
+smg_setup_rap.c\
+smg_setup_restrict.c\
+smg_solve.c
+
+#smg1_setup_rap.c\
+#smg2_setup_rap.c\
 
 OBJS = ${FILES:.c=.o}
 
@@ -51,7 +42,7 @@ CFLAGS =\
  -I/usr/local/include\
  -I/home/casc/include\
  -I//usr/local/mpi/mpich/include\
- -g
+ -g -Wall
 
 FFLAGS = -g
 

@@ -24,15 +24,33 @@ typedef struct
 {
    MPI_Comm           *comm;
 
+   double              tol;
    int                 max_iter;
+   int                 zero_guess;
    int                 max_levels;  /* max_level <= 0 means no limit */
                     
    int                 num_levels;
 
-   zzz_Index          *cindex;
-   zzz_Index          *cstride;
-   zzz_Index          *findex;
-   zzz_Index          *fstride;
+   /* base coarsening info */
+   int                 cdir;    /* coarsening direction */
+   int                 ci;      /* 1st coarse index in coarsening direction */
+   int                 fi;      /* 1st fine index in coarsening direction */
+   int                 cs;      /* coarse index stride */
+   int                 fs;      /* fine index stride */
+
+   /* base index space info */
+   zzz_Index          *base_index;
+   zzz_Index          *base_stride;
+
+   /* base index space info for each grid level */
+   zzz_Index         **base_index_l;
+   zzz_Index         **base_stride_l;
+
+   /* coarsening info for each grid level */
+   zzz_Index         **cindex_l;
+   zzz_Index         **findex_l;
+   zzz_Index         **cstride_l;
+   zzz_Index         **fstride_l;
 
    zzz_StructGrid    **grid_l;
                     
@@ -60,8 +78,8 @@ typedef struct
 
    /* additional log info (logged when `logging' > 0) */
    int                 logging;
-   int                *norms;
-   int                *rel_norms;
+   double             *norms;
+   double             *rel_norms;
 
 } zzz_SMGData;
 
@@ -79,7 +97,7 @@ typedef struct
       (zzz_IndexZ(index1) - zzz_IndexZ(cindex)) / zzz_IndexZ(cstride);\
 }
 
-#define zzz_SMGMapCoarseToFine(index1, index2, coarse_dir) \
+#define zzz_SMGMapCoarseToFine(index1, index2, cindex, cstride) \
 {\
    zzz_IndexX(index2) =\
       zzz_IndexX(index1) * zzz_IndexX(cstride) + zzz_IndexX(cindex);\

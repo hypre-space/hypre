@@ -54,7 +54,7 @@ zzz_SMGSolve( void             *smg_vdata,
 {
    zzz_SMGData        *smg_data = smg_vdata;
 
-   MPI_Comm           *comm       = (smg_data -> comm);
+   double              tol        = (smg_data -> tol);
    int                 max_iter   = (smg_data -> max_iter);
    int                 num_levels = (smg_data -> num_levels);
    zzz_StructVector  **b_l        = (smg_data -> b_l);
@@ -75,12 +75,14 @@ zzz_SMGSolve( void             *smg_vdata,
    void              **intadd_data_l =
       (smg_data -> intadd_data_l);
    int                 logging   = (smg_data -> logging);
-   int                *norms     = (smg_data -> norms);
-   int                *rel_norms = (smg_data -> rel_norms);
+   double             *norms     = (smg_data -> norms);
+   double             *rel_norms = (smg_data -> rel_norms);
 
-   int                 ierr;
+   double              b_dot_b, r_dot_r, eps;
 
    int                 i, l;
+
+   int                 ierr;
 
    /*-----------------------------------------------------
     * Do V-cycles:
@@ -101,9 +103,9 @@ zzz_SMGSolve( void             *smg_vdata,
        *--------------------------------------------------*/
 
       if (i == 0)
-         zzz_SMGRelax(pre_relax_data_initial, x_l[0], b_l[0]);
+         zzz_SMGRelax(pre_relax_data_initial, b_l[0], x_l[0]);
       else
-         zzz_SMGRelax(pre_relax_data_l[0], x_l[0], b_l[0]);
+         zzz_SMGRelax(pre_relax_data_l[0], b_l[0], x_l[0]);
       zzz_SMGResidual(residual_data_l[0], x_l[0], b_l[0], r_l[0]);
 
       /* convergence check */
@@ -113,11 +115,11 @@ zzz_SMGSolve( void             *smg_vdata,
 
          if (logging > 0)
          {
-            (smg_data -> norms[i]) = sqrt(r_dot_r);
+            norms[i] = sqrt(r_dot_r);
             if (b_dot_b > 0)
-               (smg_data -> rel_norms[i]) = sqrt(r_dot_r/b_dot_b);
+               rel_norms[i] = sqrt(r_dot_r/b_dot_b);
             else
-               (smg_data -> rel_norms[i]) = 0.0;
+               rel_norms[i] = 0.0;
          }
 
          if (r_dot_r < eps)
@@ -128,7 +130,7 @@ zzz_SMGSolve( void             *smg_vdata,
       {
          if (l > 0)
          {
-            zzz_SMGRelax(pre_relax_data_l[l], x_l[l], b_l[l]);
+            zzz_SMGRelax(pre_relax_data_l[l], b_l[l], x_l[l]);
             zzz_SMGResidual(residual_data_l[l], x_l[l], b_l[l], r_l[l]);
          }
          zzz_SMGRestrict(restrict_data_l[l], r_l[l], b_l[l+1]);
@@ -149,7 +151,7 @@ zzz_SMGSolve( void             *smg_vdata,
 
       if (num_levels > 1)
       {
-         zzz_SMGRelax(coarse_relax_data, x_l[l], b_l[l]);
+         zzz_SMGRelax(coarse_relax_data, b_l[l], x_l[l]);
       }
 
       /*--------------------------------------------------
@@ -168,7 +170,7 @@ zzz_SMGSolve( void             *smg_vdata,
 	 }
 #endif
 	 zzz_SMGIntAdd(intadd_data_l[l], x_l[l+1], x_l[l]);
-         zzz_SMGRelax(post_relax_data_l[l], x_l[l], b_l[l]);
+         zzz_SMGRelax(post_relax_data_l[l], b_l[l], x_l[l]);
       }
 
       (smg_data -> num_iterations) = (i + 1);

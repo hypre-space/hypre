@@ -12,6 +12,108 @@
  *****************************************************************************/
 
 #include "headers.h"
+#include "smg.h"
+
+/*--------------------------------------------------------------------------
+ * zzz_SMGRestrictData data structure
+ *--------------------------------------------------------------------------*/
+
+typedef struct
+{
+   zzz_StructMatrix *R;
+   zzz_ComputePkg   *compute_pkg;
+   zzz_Index        *cindex;
+   zzz_Index        *cstride;
+
+} zzz_SMGRestrictData;
+
+/*--------------------------------------------------------------------------
+ * zzz_SMGRestrictInitialize
+ *--------------------------------------------------------------------------*/
+
+void *
+zzz_SMGRestrictInitialize( )
+{
+   zzz_SMGRestrictData *smg_restrict_data;
+
+   smg_restrict_data = zzz_CTAlloc(zzz_SMGRestrictData, 1);
+
+   return (void *) smg_restrict_data;
+}
+
+/*--------------------------------------------------------------------------
+ * zzz_SMGRestrictSetup
+ *--------------------------------------------------------------------------*/
+
+int
+zzz_SMGRestrictSetup( void             *smg_restrict_vdata,
+                      zzz_StructMatrix *R,
+                      zzz_StructVector *r,
+                      zzz_StructVector *rc,
+                      zzz_Index        *cindex,
+                      zzz_Index        *cstride,
+                      zzz_Index        *findex,
+                      zzz_Index        *fstride            )
+{
+   zzz_SMGRestrictData *smg_restrict_data = smg_restrict_vdata;
+
+   zzz_StructGrid       *grid;
+   zzz_StructStencil    *stencil;
+                       
+   zzz_BoxArrayArray    *send_boxes;
+   zzz_BoxArrayArray    *recv_boxes;
+   int                 **send_box_ranks;
+   int                 **recv_box_ranks;
+   zzz_BoxArrayArray    *indt_boxes;
+   zzz_BoxArrayArray    *dept_boxes;
+                       
+   zzz_SBoxArrayArray   *send_sboxes;
+   zzz_SBoxArrayArray   *recv_sboxes;
+   zzz_SBoxArrayArray   *indt_sboxes;
+   zzz_SBoxArrayArray   *dept_sboxes;
+                       
+   zzz_ComputePkg       *compute_pkg;
+
+   int                   ierr;
+
+   /*----------------------------------------------------------
+    * Set up the compute package
+    *----------------------------------------------------------*/
+
+   grid    = zzz_StructVectorGrid(r);
+   stencil = zzz_StructMatrixStencil(R);
+
+   zzz_GetComputeInfo(&send_boxes, &recv_boxes,
+                      &send_box_ranks, &recv_box_ranks,
+                      &indt_boxes, &dept_boxes,
+                      grid, stencil);
+
+   send_sboxes = zzz_ProjectBoxArrayArray(send_boxes, findex, fstride);
+   recv_sboxes = zzz_ProjectBoxArrayArray(recv_boxes, findex, fstride);
+   indt_sboxes = zzz_ProjectBoxArrayArray(indt_boxes, cindex, cstride);
+   dept_sboxes = zzz_ProjectBoxArrayArray(dept_boxes, cindex, cstride);
+
+   zzz_FreeBoxArrayArray(send_boxes);
+   zzz_FreeBoxArrayArray(recv_boxes);
+   zzz_FreeBoxArrayArray(indt_boxes);
+   zzz_FreeBoxArrayArray(dept_boxes);
+
+   compute_pkg = zzz_NewComputePkg(send_sboxes, recv_sboxes,
+                                   send_box_ranks, recv_box_ranks,
+                                   indt_sboxes, dept_sboxes,
+                                   grid, zzz_StructVectorDataSpace(rc), 1);
+
+   /*----------------------------------------------------------
+    * Set up the intadd data structure
+    *----------------------------------------------------------*/
+
+   (smg_restrict_data -> R)           = R;
+   (smg_restrict_data -> compute_pkg) = compute_pkg;
+   (smg_restrict_data -> cindex)      = cindex;
+   (smg_restrict_data -> cstride)     = cstride;
+
+   return ierr;
+}
 
 /*--------------------------------------------------------------------------
  * zzz_SMGRestrict:
@@ -22,17 +124,17 @@
  *--------------------------------------------------------------------------*/
 
 int
-zzz_SMGRestrict( void             *restrict_vdata,
-                 zzz_StructMatrix *R,
+zzz_SMGRestrict( void             *smg_restrict_vdata,
                  zzz_StructVector *r,
-                 zzz_StructVector *rc             )
+                 zzz_StructVector *rc                 )
 {
    int ierr;
 
-   zzz_SMGRestrictData  *restrict_data = restrict_vdata;
+   zzz_SMGRestrictData  *smg_restrict_data = smg_restrict_vdata;
+
+   zzz_StructMatrix     *R = (smg_restrict_data -> R);
 
    zzz_ComputePkg       *compute_pkg;
-   zzz_SBoxArray        *coarse_points;
    zzz_Index            *cindex;
    zzz_Index            *cstride;
 
@@ -50,12 +152,12 @@ zzz_SMGRestrict( void             *restrict_vdata,
    int                   ri;
    int                   rci;
                        
-   double               *Rp0, Rp1;
-   double               *rp, rp0, rp1;
+   double               *Rp0, *Rp1;
+   double               *rp, *rp0, *rp1;
    double               *rcp;
                        
-   zzz_Box              *box;
-   zzz_Index            *index;
+   zzz_Index            *loop_index;
+   zzz_Index            *loop_size;
    zzz_Index            *start;
    zzz_Index            *stride;
    zzz_Index            *startc;
@@ -64,21 +166,21 @@ zzz_SMGRestrict( void             *restrict_vdata,
    zzz_StructStencil    *stencil;
    zzz_Index           **stencil_shape;
 
-   int                   compute_i, i, j, d;
+   int                   compute_i, i, j;
 
    /*-----------------------------------------------------------------------
     * Initialize some things.
     *-----------------------------------------------------------------------*/
 
-   compute_pkg   = (restrict_data -> compute_pkg);
-   coarse_points = (restrict_data -> coarse_points);
-   cindex        = (restrict_data -> cindex);
-   cstride       = (restrict_data -> cstride);
+   compute_pkg   = (smg_restrict_data -> compute_pkg);
+   cindex        = (smg_restrict_data -> cindex);
+   cstride       = (smg_restrict_data -> cstride);
 
    stencil       = zzz_StructMatrixStencil(R);
    stencil_shape = zzz_StructStencilShape(stencil);
 
-   index = zzz_NewIndex();
+   loop_index = zzz_NewIndex();
+   loop_size  = zzz_NewIndex();
 
    startc = zzz_NewIndex();
 
@@ -129,12 +231,11 @@ zzz_SMGRestrict( void             *restrict_vdata,
          {
             compute_sbox = zzz_SBoxArraySBox(compute_sbox_a, j);
 
-            box    = zzz_SBoxBox(compute_sbox);
-
             start  = zzz_SBoxIMin(compute_sbox);
             zzz_SMGMapFineToCoarse(start, startc, cindex, cstride);
 
-            zzz_BoxLoop3(box, index,
+            zzz_GetSBoxSize(compute_sbox, loop_size);
+            zzz_BoxLoop3(loop_index, loop_size,
                          R_data_box,  startc, stridec, Ri,
                          r_data_box,  start,  stride,  ri,
                          rc_data_box, startc, stridec, rci,
@@ -150,9 +251,30 @@ zzz_SMGRestrict( void             *restrict_vdata,
     * Return
     *-----------------------------------------------------------------------*/
 
-   zzz_FreeIndex(index);
+   zzz_FreeIndex(loop_index);
+   zzz_FreeIndex(loop_size);
    zzz_FreeIndex(startc);
    zzz_FreeIndex(stridec);
+
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
+ * zzz_SMGRestrictFinalize
+ *--------------------------------------------------------------------------*/
+
+int
+zzz_SMGRestrictFinalize( void *smg_restrict_vdata )
+{
+   int ierr;
+
+   zzz_SMGRestrictData *smg_restrict_data = smg_restrict_vdata;
+
+   if (smg_restrict_data)
+   {
+      zzz_FreeComputePkg(smg_restrict_data -> compute_pkg);
+      zzz_TFree(smg_restrict_data);
+   }
 
    return ierr;
 }

@@ -15,34 +15,6 @@
 #include "smg.h"
 
 /*--------------------------------------------------------------------------
- * 
- *--------------------------------------------------------------------------*/
-
-/*--------------------------------------------------------------------------
- * zzz_SMGExtractPointerByIndex
- *    Returns pointer to data for stencil entry coresponding to
- *    `index' in `matrix'. If the index does not exist in the matrix's
- *    stencil, the NULL pointer is returned. 
- *--------------------------------------------------------------------------*/
- 
-double *
-zzz_SMGExtractPointerByIndex( zzz_StructMatrix *matrix,
-                               int b,
-                               zzz_Index *index )
-{
-   zzz_StructStencil   *stencil;
-   int                  rank;
-
-   stencil = zzz_StructMatrixStencil(matrix);
-   rank = zzz_StructStencilElementRank( stencil, index );
-
-   if ( rank >= 0 )
-      return zzz_StructMatrixBoxData(matrix, b, rank);
-   else
-      return NULL;  /* error - invalid index */
-}
-
-/*--------------------------------------------------------------------------
  * zzz_SMG3NewRAPOp 
  *    Sets up new coarse grid operator stucture.
  *--------------------------------------------------------------------------*/
@@ -52,14 +24,16 @@ zzz_SMG3NewRAPOp( zzz_StructMatrix *R,
                   zzz_StructMatrix *A,
                   zzz_StructMatrix *PT )
 {
-   zzz_StructMatrix     *RAP;
+   zzz_StructMatrix    *RAP;
 
-   zzz_Index            **RAP_stencil_shape;
-   zzz_StructStencil    *RAP_stencil;
+   zzz_StructGrid      *coarse_grid;
+
+   zzz_Index          **RAP_stencil_shape;
+   zzz_StructStencil   *RAP_stencil;
    int                  RAP_stencil_size;
    int                  RAP_num_ghost[6];
 
-   zzz_StructStencil    *A_stencil;
+   zzz_StructStencil   *A_stencil;
    int                  A_stencil_size;
 
    int                  k, j, i;
@@ -210,7 +184,8 @@ zzz_SMG3NewRAPOp( zzz_StructMatrix *R,
       }
    }
 
-   RAP = zzz_NewStructMatrix(coarse_grid, RAP_stencil);
+   RAP = zzz_NewStructMatrix(zzz_StructMatrixComm(A),
+                             coarse_grid, RAP_stencil);
 
 /*--------------------------------------------------------------------------
  * Coarse operator in symmetric iff fine operator is
@@ -246,12 +221,10 @@ zzz_SMG3NewRAPOp( zzz_StructMatrix *R,
  *--------------------------------------------------------------------------*/
 
 int
-zzz_SMG3BuildRAPSym(
-                     zzz_StructMatrix *A,
+zzz_SMG3BuildRAPSym( zzz_StructMatrix *A,
                      zzz_StructMatrix *PT,
                      zzz_StructMatrix *R,
-                     zzz_StructMatrix *RAP,
-                   )
+                     zzz_StructMatrix *RAP )
 
 {
 
@@ -260,8 +233,8 @@ zzz_SMG3BuildRAPSym(
    zzz_Index            *cindex;
    zzz_Index            *cstride;
 
-   zzz_StructStencil    *fine_stencil
-   int                  fine_stencil_size
+   zzz_StructStencil    *fine_stencil;
+   int                   fine_stencil_size;
 
    zzz_StructGrid       *cgrid;
    zzz_BoxArray         *cgrid_boxes;
@@ -273,36 +246,39 @@ zzz_SMG3BuildRAPSym(
    zzz_Index            *loop_index;
    zzz_Index            *loop_size;
 
-   int                  i
+   int                  i;
 
    zzz_Box              *A_data_box;
    zzz_Box              *PT_data_box;
    zzz_Box              *R_data_box;
    zzz_Box              *RAP_data_box;
 
-   double               *pa, pb;
-   double               *ra, rb;
+   double               *pa, *pb;
+   double               *ra, *rb;
 
-   double               *a_cc, a_cw, a_ce, a_cs, a_cn;
-   double               *a_ac, a_aw, a_ae, a_as, a_an;
-   double               *a_bc, a_bw, a_be, a_bs, a_bn;
-   double               *a_csw, a_cse, a_cnw, a_cne;
-   double               *a_asw, a_ase, a_anw, a_ane;
-   double               *a_bsw, a_bse, a_bnw, a_bne;
+   double               *a_cc, *a_cw, *a_ce, *a_cs, *a_cn;
+   double               *a_ac, *a_aw, *a_ae, *a_as, *a_an;
+   double               *a_bc, *a_bw, *a_be, *a_bs, *a_bn;
+   double               *a_csw, *a_cse, *a_cnw, *a_cne;
+   double               *a_asw, *a_ase, *a_anw, *a_ane;
+   double               *a_bsw, *a_bse, *a_bnw, *a_bne;
 
-   double               *rap_cc, rap_cw, rap_cs;
-   double               *rap_bc, rap_bw, rap_be, rap_bs, rap_bn;
-   double               *rap_csw, rap_cse;
-   double               *rap_bsw, rap_bse, rap_bnw, rap_bne;
+   double               *rap_cc, *rap_cw, *rap_cs;
+   double               *rap_bc, *rap_bw, *rap_be, *rap_bs, *rap_bn;
+   double               *rap_csw, *rap_cse;
+   double               *rap_bsw, *rap_bse, *rap_bnw, *rap_bne;
 
    int                  iA, iAm1, iAp1;
    int                  iAc;
    int                  iP, iP1;
+   int                  iR;
 
    int                  zOffsetA; 
    int                  xOffsetP; 
    int                  yOffsetP; 
    int                  zOffsetP; 
+
+   int                  ierr;
 
    index_temp = zzz_NewIndex();
    loop_index = zzz_NewIndex();
@@ -323,7 +299,7 @@ zzz_SMG3BuildRAPSym(
    {
       cgrid_box = zzz_BoxArrayBox(cgrid_boxes, i);
 
-      cstart = zzz_BoxImin(cgrid_box);
+      cstart = zzz_BoxIMin(cgrid_box);
       zzz_SMGMapCoarseToFine(cstart, fstart, cindex, cstride) 
 
       A_data_box = zzz_BoxArrayBox(zzz_StructMatrixDataSpace(A), i);
@@ -338,10 +314,10 @@ zzz_SMG3BuildRAPSym(
  *--------------------------------------------------------------------------*/
 
       zzz_SetIndex(index_temp,0,0,1);
-      pa = zzz_SMGExtractPointerByIndex(PT, i, index_temp);
+      pa = zzz_StructMatrixExtractPointerByIndex(PT, i, index_temp);
 
       zzz_SetIndex(index_temp,0,0,-1);
-      pb = zzz_SMGExtractPointerByIndex(PT, i, index_temp);
+      pb = zzz_StructMatrixExtractPointerByIndex(PT, i, index_temp);
  
 /*--------------------------------------------------------------------------
  * Extract pointers for restriction operator:
@@ -350,10 +326,10 @@ zzz_SMG3BuildRAPSym(
  *--------------------------------------------------------------------------*/
 
       zzz_SetIndex(index_temp,0,0,1);
-      ra = zzz_SMGExtractPointerByIndex(R, i, index_temp);
+      ra = zzz_StructMatrixExtractPointerByIndex(R, i, index_temp);
 
       zzz_SetIndex(index_temp,0,0,-1);
-      rb = zzz_SMGExtractPointerByIndex(R, i, index_temp);
+      rb = zzz_StructMatrixExtractPointerByIndex(R, i, index_temp);
  
 /*--------------------------------------------------------------------------
  * Extract pointers for 7-point fine grid operator:
@@ -368,25 +344,25 @@ zzz_SMG3BuildRAPSym(
  *--------------------------------------------------------------------------*/
 
       zzz_SetIndex(index_temp,0,0,0);
-      a_cc = zzz_SMGExtractPointerByIndex(A, i, index_temp);
+      a_cc = zzz_StructMatrixExtractPointerByIndex(A, i, index_temp);
 
       zzz_SetIndex(index_temp,-1,0,0);
-      a_cw = zzz_SMGExtractPointerByIndex(A, i, index_temp);
+      a_cw = zzz_StructMatrixExtractPointerByIndex(A, i, index_temp);
 
       zzz_SetIndex(index_temp,1,0,0);
-      a_ce = zzz_SMGExtractPointerByIndex(A, i, index_temp);
+      a_ce = zzz_StructMatrixExtractPointerByIndex(A, i, index_temp);
 
       zzz_SetIndex(index_temp,0,-1,0);
-      a_cs = zzz_SMGExtractPointerByIndex(A, i, index_temp);
+      a_cs = zzz_StructMatrixExtractPointerByIndex(A, i, index_temp);
 
       zzz_SetIndex(index_temp,0,1,0);
-      a_cn = zzz_SMGExtractPointerByIndex(A, i, index_temp);
+      a_cn = zzz_StructMatrixExtractPointerByIndex(A, i, index_temp);
 
       zzz_SetIndex(index_temp,0,0,1);
-      a_ac = zzz_SMGExtractPointerByIndex(A, i, index_temp);
+      a_ac = zzz_StructMatrixExtractPointerByIndex(A, i, index_temp);
 
       zzz_SetIndex(index_temp,0,0,-1);
-      a_bc = zzz_SMGExtractPointerByIndex(A, i, index_temp);
+      a_bc = zzz_StructMatrixExtractPointerByIndex(A, i, index_temp);
 
 /*--------------------------------------------------------------------------
  * Extract additional pointers for 15-point fine grid operator:
@@ -404,28 +380,28 @@ zzz_SMG3BuildRAPSym(
       if(fine_stencil_size > 7)
       {
          zzz_SetIndex(index_temp,-1,0,1);
-         a_aw = zzz_SMGExtractPointerByIndex(A, i, index_temp);
+         a_aw = zzz_StructMatrixExtractPointerByIndex(A, i, index_temp);
 
          zzz_SetIndex(index_temp,1,0,1);
-         a_ae = zzz_SMGExtractPointerByIndex(A, i, index_temp);
+         a_ae = zzz_StructMatrixExtractPointerByIndex(A, i, index_temp);
 
          zzz_SetIndex(index_temp,0,-1,1);
-         a_as = zzz_SMGExtractPointerByIndex(A, i, index_temp);
+         a_as = zzz_StructMatrixExtractPointerByIndex(A, i, index_temp);
 
          zzz_SetIndex(index_temp,0,1,1);
-         a_an = zzz_SMGExtractPointerByIndex(A, i, index_temp);
+         a_an = zzz_StructMatrixExtractPointerByIndex(A, i, index_temp);
 
          zzz_SetIndex(index_temp,-1,0,-1);
-         a_bw = zzz_SMGExtractPointerByIndex(A, i, index_temp);
+         a_bw = zzz_StructMatrixExtractPointerByIndex(A, i, index_temp);
 
          zzz_SetIndex(index_temp,1,0,-1);
-         a_be = zzz_SMGExtractPointerByIndex(A, i, index_temp);
+         a_be = zzz_StructMatrixExtractPointerByIndex(A, i, index_temp);
 
          zzz_SetIndex(index_temp,0,-1,-1);
-         a_bs = zzz_SMGExtractPointerByIndex(A, i, index_temp);
+         a_bs = zzz_StructMatrixExtractPointerByIndex(A, i, index_temp);
 
          zzz_SetIndex(index_temp,0,1,-1);
-         a_bn = zzz_SMGExtractPointerByIndex(A, i, index_temp);
+         a_bn = zzz_StructMatrixExtractPointerByIndex(A, i, index_temp);
 
       }
   
@@ -441,16 +417,16 @@ zzz_SMG3BuildRAPSym(
       if(fine_stencil_size > 15)
       {
          zzz_SetIndex(index_temp,-1,-1,0);
-         a_csw = zzz_SMGExtractPointerByIndex(A, i, index_temp);
+         a_csw = zzz_StructMatrixExtractPointerByIndex(A, i, index_temp);
 
          zzz_SetIndex(index_temp,1,-1,0);
-         a_cse = zzz_SMGExtractPointerByIndex(A, i, index_temp);
+         a_cse = zzz_StructMatrixExtractPointerByIndex(A, i, index_temp);
 
          zzz_SetIndex(index_temp,-1,1,0);
-         a_cnw = zzz_SMGExtractPointerByIndex(A, i, index_temp);
+         a_cnw = zzz_StructMatrixExtractPointerByIndex(A, i, index_temp);
 
          zzz_SetIndex(index_temp,1,1,0);
-         a_cne = zzz_SMGExtractPointerByIndex(A, i, index_temp);
+         a_cne = zzz_StructMatrixExtractPointerByIndex(A, i, index_temp);
 
       }
 
@@ -470,28 +446,28 @@ zzz_SMG3BuildRAPSym(
       if(fine_stencil_size > 19)
       {
          zzz_SetIndex(index_temp,-1,-1,1);
-         a_asw = zzz_SMGExtractPointerByIndex(A, i, index_temp);
+         a_asw = zzz_StructMatrixExtractPointerByIndex(A, i, index_temp);
 
          zzz_SetIndex(index_temp,1,-1,1);
-         a_ase = zzz_SMGExtractPointerByIndex(A, i, index_temp);
+         a_ase = zzz_StructMatrixExtractPointerByIndex(A, i, index_temp);
 
          zzz_SetIndex(index_temp,-1,1,1);
-         a_anw = zzz_SMGExtractPointerByIndex(A, i, index_temp);
+         a_anw = zzz_StructMatrixExtractPointerByIndex(A, i, index_temp);
 
          zzz_SetIndex(index_temp,1,1,1);
-         a_ane = zzz_SMGExtractPointerByIndex(A, i, index_temp);
+         a_ane = zzz_StructMatrixExtractPointerByIndex(A, i, index_temp);
 
          zzz_SetIndex(index_temp,-1,-1,-1);
-         a_bsw = zzz_SMGExtractPointerByIndex(A, i, index_temp);
+         a_bsw = zzz_StructMatrixExtractPointerByIndex(A, i, index_temp);
 
          zzz_SetIndex(index_temp,1,-1,-1);
-         a_bse = zzz_SMGExtractPointerByIndex(A, i, index_temp);
+         a_bse = zzz_StructMatrixExtractPointerByIndex(A, i, index_temp);
 
          zzz_SetIndex(index_temp,-1,1,-1);
-         a_bnw = zzz_SMGExtractPointerByIndex(A, i, index_temp);
+         a_bnw = zzz_StructMatrixExtractPointerByIndex(A, i, index_temp);
 
          zzz_SetIndex(index_temp,1,1,-1);
-         a_bne = zzz_SMGExtractPointerByIndex(A, i, index_temp);
+         a_bne = zzz_StructMatrixExtractPointerByIndex(A, i, index_temp);
 
       }
 
@@ -504,28 +480,28 @@ zzz_SMG3BuildRAPSym(
  *--------------------------------------------------------------------------*/
 
       zzz_SetIndex(index_temp,0,0,0);
-      rap_cc = zzz_SMGExtractPointerByIndex(RAP, i, index_temp);
+      rap_cc = zzz_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
 
       zzz_SetIndex(index_temp,-1,0,0);
-      rap_cw = zzz_SMGExtractPointerByIndex(RAP, i, index_temp);
+      rap_cw = zzz_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
 
       zzz_SetIndex(index_temp,0,-1,0);
-      rap_cs = zzz_SMGExtractPointerByIndex(RAP, i, index_temp);
+      rap_cs = zzz_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
 
       zzz_SetIndex(index_temp,0,0,-1);
-      rap_bc = zzz_SMGExtractPointerByIndex(RAP, i, index_temp);
+      rap_bc = zzz_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
 
       zzz_SetIndex(index_temp,-1,0,-1);
-      rap_bw = zzz_SMGExtractPointerByIndex(RAP, i, index_temp);
+      rap_bw = zzz_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
 
       zzz_SetIndex(index_temp,1,0,-1);
-      rap_be = zzz_SMGExtractPointerByIndex(RAP, i, index_temp);
+      rap_be = zzz_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
 
       zzz_SetIndex(index_temp,0,-1,-1);
-      rap_bs = zzz_SMGExtractPointerByIndex(RAP, i, index_temp);
+      rap_bs = zzz_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
 
       zzz_SetIndex(index_temp,0,1,-1);
-      rap_bn = zzz_SMGExtractPointerByIndex(RAP, i, index_temp);
+      rap_bn = zzz_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
 
 /*--------------------------------------------------------------------------
  * Extract additional pointers for 27-point coarse grid operator:
@@ -541,22 +517,22 @@ zzz_SMG3BuildRAPSym(
       if(fine_stencil_size > 15)
       {
          zzz_SetIndex(index_temp,-1,-1,0);
-         rap_csw = zzz_SMGExtractPointerByIndex(RAP, i, index_temp);
+         rap_csw = zzz_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
 
          zzz_SetIndex(index_temp,1,-1,0);
-         rap_cse = zzz_SMGExtractPointerByIndex(RAP, i, index_temp);
+         rap_cse = zzz_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
 
          zzz_SetIndex(index_temp,-1,-1,-1);
-         rap_bsw = zzz_SMGExtractPointerByIndex(RAP, i, index_temp);
+         rap_bsw = zzz_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
 
          zzz_SetIndex(index_temp,1,-1,-1);
-         rap_bse = zzz_SMGExtractPointerByIndex(RAP, i, index_temp);
+         rap_bse = zzz_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
 
          zzz_SetIndex(index_temp,-1,1,-1);
-         rap_bnw = zzz_SMGExtractPointerByIndex(RAP, i, index_temp);
+         rap_bnw = zzz_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
 
          zzz_SetIndex(index_temp,1,1,-1);
-         rap_bne = zzz_SMGExtractPointerByIndex(RAP, i, index_temp);
+         rap_bne = zzz_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
 
       }
 
@@ -593,7 +569,7 @@ zzz_SMG3BuildRAPSym(
 
               case 7:
 
-              zzz_GetSBoxSize(cgrid_box, loop_size);
+              zzz_GetBoxSize(cgrid_box, loop_size);
               zzz_BoxLoop4(loop_index, loop_size,
                            PT_data_box, cstart, stridec, iP,
                            R_data_box, cstart, stridec, iR,
@@ -651,7 +627,7 @@ zzz_SMG3BuildRAPSym(
 
               case 15:
 
-              zzz_GetSBoxSize(cgrid_box, loop_size);
+              zzz_GetBoxSize(cgrid_box, loop_size);
               zzz_BoxLoop4(loop_index, loop_size,
                            PT_data_box, cstart, stridec, iP,
                            R_data_box, cstart, stridec, iR,
@@ -727,7 +703,7 @@ zzz_SMG3BuildRAPSym(
 
               case 19:
 
-              zzz_GetSBoxSize(cgrid_box, loop_size);
+              zzz_GetBoxSize(cgrid_box, loop_size);
               zzz_BoxLoop4(loop_index, loop_size,
                            PT_data_box, cstart, stridec, iP,
                            R_data_box, cstart, stridec, iR,
@@ -774,7 +750,7 @@ zzz_SMG3BuildRAPSym(
                             iP1 = iP - zOffsetP + yOffsetP + xOffsetP;
                             rap_bne[iAc] = rb[iR] * a_cne[iAm1] * pa[iP1];
 
-                            iP1 = iP - yOffsetP - xOffset;
+                            iP1 = iP - yOffsetP - xOffsetP;
                             rap_csw[iAc] =          a_csw[iA]
                                          + rb[iR] * a_csw[iAm1] * pb[iP1]
                                          + ra[iR] * a_csw[iAp1] * pa[iP1];
@@ -788,7 +764,7 @@ zzz_SMG3BuildRAPSym(
                                         + rb[iR] * a_as[iAm1]
                                         + ra[iR] * a_bs[iAp1];
  
-                            iP1 = iP - yOffsetP + xOffset;
+                            iP1 = iP - yOffsetP + xOffsetP;
                             rap_cse[iAc] =          a_cse[iA]
                                          + rb[iR] * a_cse[iAm1] * pb[iP1]
                                          + ra[iR] * a_cse[iAp1] * pa[iP1];
@@ -825,7 +801,7 @@ zzz_SMG3BuildRAPSym(
 
               default:
 
-              zzz_GetSBoxSize(cgrid_box, loop_size);
+              zzz_GetBoxSize(cgrid_box, loop_size);
               zzz_BoxLoop4(loop_index, loop_size,
                            PT_data_box, cstart, stridec, iP,
                            R_data_box, cstart, stridec, iR,
@@ -880,7 +856,7 @@ zzz_SMG3BuildRAPSym(
                                          + rb[iR] * a_bne[iAm1]
                                          +          a_bne[iA] * pa[iP1];
 
-                            iP1 = iP - yOffsetP - xOffset;
+                            iP1 = iP - yOffsetP - xOffsetP;
                             rap_csw[iAc] =          a_csw[iA]
                                          + rb[iR] * a_csw[iAm1] * pb[iP1]
                                          + ra[iR] * a_csw[iAp1] * pa[iP1]
@@ -898,7 +874,7 @@ zzz_SMG3BuildRAPSym(
                                         + rb[iR] * a_as[iAm1]
                                         + ra[iR] * a_bs[iAp1];
  
-                            iP1 = iP - yOffsetP + xOffset;
+                            iP1 = iP - yOffsetP + xOffsetP;
                             rap_cse[iAc] =          a_cse[iA]
                                          + rb[iR] * a_cse[iAm1] * pb[iP1]
                                          + ra[iR] * a_cse[iAp1] * pa[iP1]
@@ -928,28 +904,27 @@ zzz_SMG3BuildRAPSym(
 
               break;
 
-      } */ end switch statement */
+      } /* end switch statement */
 
-   } */ end ForBoxI */
+   } /* end ForBoxI */
 
-   zzz_FreeIndex(index_temp)
-   zzz_FreeIndex(stridec)
-   zzz_FreeIndex(loop_index)
-   zzz_FreeIndex(loop_size)
-   zzz_FreeIndex(fstart)
+   zzz_FreeIndex(index_temp);
+   zzz_FreeIndex(stridec);
+   zzz_FreeIndex(loop_index);
+   zzz_FreeIndex(loop_size);
+   zzz_FreeIndex(fstart);
 
+   return ierr;
 }
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
 int
-zzz_SMG3BuildRAPNoSym(
-                       zzz_StructMatrix *A,
+zzz_SMG3BuildRAPNoSym( zzz_StructMatrix *A,
                        zzz_StructMatrix *PT,
                        zzz_StructMatrix *R,
-                       zzz_StructMatrix *RAP,
-                     )
+                       zzz_StructMatrix *RAP )
 
 {
 
@@ -958,8 +933,8 @@ zzz_SMG3BuildRAPNoSym(
    zzz_Index            *cindex;
    zzz_Index            *cstride;
 
-   zzz_StructStencil    *fine_stencil
-   int                  fine_stencil_size
+   zzz_StructStencil    *fine_stencil;
+   int                   fine_stencil_size;
 
    zzz_StructGrid       *cgrid;
    zzz_BoxArray         *cgrid_boxes;
@@ -971,36 +946,39 @@ zzz_SMG3BuildRAPNoSym(
    zzz_Index            *loop_index;
    zzz_Index            *loop_size;
 
-   int                  i
+   int                  i;
 
    zzz_Box              *A_data_box;
    zzz_Box              *PT_data_box;
    zzz_Box              *R_data_box;
    zzz_Box              *RAP_data_box;
 
-   double               *pa, pb;
-   double               *ra, rb;
+   double               *pa, *pb;
+   double               *ra, *rb;
 
-   double               *a_cc, a_cw, a_ce, a_cs, a_cn;
-   double               *a_ac, a_aw, a_ae, a_as, a_an;
-   double               *a_bc, a_bw, a_be, a_bs, a_bn;
-   double               *a_csw, a_cse, a_cnw, a_cne;
-   double               *a_asw, a_ase, a_anw, a_ane;
-   double               *a_bsw, a_bse, a_bnw, a_bne;
+   double               *a_cc, *a_cw, *a_ce, *a_cs, *a_cn;
+   double               *a_ac, *a_aw, *a_ae, *a_as, *a_an;
+   double               *a_bc, *a_bw, *a_be, *a_bs, *a_bn;
+   double               *a_csw, *a_cse, *a_cnw, *a_cne;
+   double               *a_asw, *a_ase, *a_anw, *a_ane;
+   double               *a_bsw, *a_bse, *a_bnw, *a_bne;
 
-   double               *rap_ce, rap_cn;
-   double               *rap_ac, rap_aw, rap_ae, rap_as, rap_an;
-   double               *rap_cnw, rap_cne;
-   double               *rap_asw, rap_ase, rap_anw, rap_ane;
+   double               *rap_ce, *rap_cn;
+   double               *rap_ac, *rap_aw, *rap_ae, *rap_as, *rap_an;
+   double               *rap_cnw, *rap_cne;
+   double               *rap_asw, *rap_ase, *rap_anw, *rap_ane;
 
    int                  iA, iAm1, iAp1;
    int                  iAc;
    int                  iP, iP1;
+   int                  iR;
 
    int                  zOffsetA;
    int                  xOffsetP;
    int                  yOffsetP;
    int                  zOffsetP;
+
+   int                  ierr;
 
    index_temp = zzz_NewIndex();
    loop_index = zzz_NewIndex();
@@ -1021,7 +999,7 @@ zzz_SMG3BuildRAPNoSym(
    {
       cgrid_box = zzz_BoxArrayBox(cgrid_boxes, i);
 
-      cstart = zzz_BoxImin(cgrid_box);
+      cstart = zzz_BoxIMin(cgrid_box);
       zzz_SMGMapCoarseToFine(cstart, fstart, cindex, cstride)
 
       A_data_box = zzz_BoxArrayBox(zzz_StructMatrixDataSpace(A), i);
@@ -1036,10 +1014,10 @@ zzz_SMG3BuildRAPNoSym(
  *--------------------------------------------------------------------------*/
 
       zzz_SetIndex(index_temp,0,0,1);
-      pa = zzz_SMGExtractPointerByIndex(PT, i, index_temp);
+      pa = zzz_StructMatrixExtractPointerByIndex(PT, i, index_temp);
 
       zzz_SetIndex(index_temp,0,0,-1);
-      pb = zzz_SMGExtractPointerByIndex(PT, i, index_temp);
+      pb = zzz_StructMatrixExtractPointerByIndex(PT, i, index_temp);
 
  
 /*--------------------------------------------------------------------------
@@ -1049,10 +1027,10 @@ zzz_SMG3BuildRAPNoSym(
  *--------------------------------------------------------------------------*/
 
       zzz_SetIndex(index_temp,0,0,1);
-      ra = zzz_SMGExtractPointerByIndex(R, i, index_temp);
+      ra = zzz_StructMatrixExtractPointerByIndex(R, i, index_temp);
 
       zzz_SetIndex(index_temp,0,0,-1);
-      rb = zzz_SMGExtractPointerByIndex(R, i, index_temp);
+      rb = zzz_StructMatrixExtractPointerByIndex(R, i, index_temp);
 
  
 /*--------------------------------------------------------------------------
@@ -1068,25 +1046,25 @@ zzz_SMG3BuildRAPNoSym(
  *--------------------------------------------------------------------------*/
 
       zzz_SetIndex(index_temp,0,0,0);
-      a_cc = zzz_SMGExtractPointerByIndex(A, i, index_temp);
+      a_cc = zzz_StructMatrixExtractPointerByIndex(A, i, index_temp);
 
       zzz_SetIndex(index_temp,-1,0,0);
-      a_cw = zzz_SMGExtractPointerByIndex(A, i, index_temp);
+      a_cw = zzz_StructMatrixExtractPointerByIndex(A, i, index_temp);
 
       zzz_SetIndex(index_temp,1,0,0);
-      a_ce = zzz_SMGExtractPointerByIndex(A, i, index_temp);
+      a_ce = zzz_StructMatrixExtractPointerByIndex(A, i, index_temp);
 
       zzz_SetIndex(index_temp,0,-1,0);
-      a_cs = zzz_SMGExtractPointerByIndex(A, i, index_temp);
+      a_cs = zzz_StructMatrixExtractPointerByIndex(A, i, index_temp);
 
       zzz_SetIndex(index_temp,0,1,0);
-      a_cn = zzz_SMGExtractPointerByIndex(A, i, index_temp);
+      a_cn = zzz_StructMatrixExtractPointerByIndex(A, i, index_temp);
 
       zzz_SetIndex(index_temp,0,0,1);
-      a_ac = zzz_SMGExtractPointerByIndex(A, i, index_temp);
+      a_ac = zzz_StructMatrixExtractPointerByIndex(A, i, index_temp);
 
       zzz_SetIndex(index_temp,0,0,-1);
-      a_bc = zzz_SMGExtractPointerByIndex(A, i, index_temp);
+      a_bc = zzz_StructMatrixExtractPointerByIndex(A, i, index_temp);
 
 
 /*--------------------------------------------------------------------------
@@ -1105,28 +1083,28 @@ zzz_SMG3BuildRAPNoSym(
       if(fine_stencil_size > 7)
       {
          zzz_SetIndex(index_temp,-1,0,1);
-         a_aw = zzz_SMGExtractPointerByIndex(A, i, index_temp);
+         a_aw = zzz_StructMatrixExtractPointerByIndex(A, i, index_temp);
 
          zzz_SetIndex(index_temp,1,0,1);
-         a_ae = zzz_SMGExtractPointerByIndex(A, i, index_temp);
+         a_ae = zzz_StructMatrixExtractPointerByIndex(A, i, index_temp);
 
          zzz_SetIndex(index_temp,0,-1,1);
-         a_as = zzz_SMGExtractPointerByIndex(A, i, index_temp);
+         a_as = zzz_StructMatrixExtractPointerByIndex(A, i, index_temp);
 
          zzz_SetIndex(index_temp,0,1,1);
-         a_an = zzz_SMGExtractPointerByIndex(A, i, index_temp);
+         a_an = zzz_StructMatrixExtractPointerByIndex(A, i, index_temp);
 
          zzz_SetIndex(index_temp,-1,0,-1);
-         a_bw = zzz_SMGExtractPointerByIndex(A, i, index_temp);
+         a_bw = zzz_StructMatrixExtractPointerByIndex(A, i, index_temp);
 
          zzz_SetIndex(index_temp,1,0,-1);
-         a_be = zzz_SMGExtractPointerByIndex(A, i, index_temp);
+         a_be = zzz_StructMatrixExtractPointerByIndex(A, i, index_temp);
 
          zzz_SetIndex(index_temp,0,-1,-1);
-         a_bs = zzz_SMGExtractPointerByIndex(A, i, index_temp);
+         a_bs = zzz_StructMatrixExtractPointerByIndex(A, i, index_temp);
 
          zzz_SetIndex(index_temp,0,1,-1);
-         a_bn = zzz_SMGExtractPointerByIndex(A, i, index_temp);
+         a_bn = zzz_StructMatrixExtractPointerByIndex(A, i, index_temp);
 
       }
   
@@ -1142,16 +1120,16 @@ zzz_SMG3BuildRAPNoSym(
       if(fine_stencil_size > 15)
       {
          zzz_SetIndex(index_temp,-1,-1,0);
-         a_csw = zzz_SMGExtractPointerByIndex(A, i, index_temp);
+         a_csw = zzz_StructMatrixExtractPointerByIndex(A, i, index_temp);
 
          zzz_SetIndex(index_temp,1,-1,0);
-         a_cse = zzz_SMGExtractPointerByIndex(A, i, index_temp);
+         a_cse = zzz_StructMatrixExtractPointerByIndex(A, i, index_temp);
 
          zzz_SetIndex(index_temp,-1,1,0);
-         a_cnw = zzz_SMGExtractPointerByIndex(A, i, index_temp);
+         a_cnw = zzz_StructMatrixExtractPointerByIndex(A, i, index_temp);
 
          zzz_SetIndex(index_temp,1,1,0);
-         a_cne = zzz_SMGExtractPointerByIndex(A, i, index_temp);
+         a_cne = zzz_StructMatrixExtractPointerByIndex(A, i, index_temp);
 
       }
 
@@ -1171,28 +1149,28 @@ zzz_SMG3BuildRAPNoSym(
       if(fine_stencil_size > 19)
       {
          zzz_SetIndex(index_temp,-1,-1,1);
-         a_asw = zzz_SMGExtractPointerByIndex(A, i, index_temp);
+         a_asw = zzz_StructMatrixExtractPointerByIndex(A, i, index_temp);
 
          zzz_SetIndex(index_temp,1,-1,1);
-         a_ase = zzz_SMGExtractPointerByIndex(A, i, index_temp);
+         a_ase = zzz_StructMatrixExtractPointerByIndex(A, i, index_temp);
 
          zzz_SetIndex(index_temp,-1,1,1);
-         a_anw = zzz_SMGExtractPointerByIndex(A, i, index_temp);
+         a_anw = zzz_StructMatrixExtractPointerByIndex(A, i, index_temp);
 
          zzz_SetIndex(index_temp,1,1,1);
-         a_ane = zzz_SMGExtractPointerByIndex(A, i, index_temp);
+         a_ane = zzz_StructMatrixExtractPointerByIndex(A, i, index_temp);
 
          zzz_SetIndex(index_temp,-1,-1,-1);
-         a_bsw = zzz_SMGExtractPointerByIndex(A, i, index_temp);
+         a_bsw = zzz_StructMatrixExtractPointerByIndex(A, i, index_temp);
 
          zzz_SetIndex(index_temp,1,-1,-1);
-         a_bse = zzz_SMGExtractPointerByIndex(A, i, index_temp);
+         a_bse = zzz_StructMatrixExtractPointerByIndex(A, i, index_temp);
 
          zzz_SetIndex(index_temp,-1,1,-1);
-         a_bnw = zzz_SMGExtractPointerByIndex(A, i, index_temp);
+         a_bnw = zzz_StructMatrixExtractPointerByIndex(A, i, index_temp);
 
          zzz_SetIndex(index_temp,1,1,-1);
-         a_bne = zzz_SMGExtractPointerByIndex(A, i, index_temp);
+         a_bne = zzz_StructMatrixExtractPointerByIndex(A, i, index_temp);
 
       }
 
@@ -1205,25 +1183,25 @@ zzz_SMG3BuildRAPNoSym(
  *--------------------------------------------------------------------------*/
 
       zzz_SetIndex(index_temp,1,0,0);
-      rap_ce = zzz_SMGExtractPointerByIndex(RAP, i, index_temp);
+      rap_ce = zzz_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
 
       zzz_SetIndex(index_temp,0,1,0);
-      rap_cn = zzz_SMGExtractPointerByIndex(RAP, i, index_temp);
+      rap_cn = zzz_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
 
       zzz_SetIndex(index_temp,0,0,1);
-      rap_ac = zzz_SMGExtractPointerByIndex(RAP, i, index_temp);
+      rap_ac = zzz_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
 
       zzz_SetIndex(index_temp,-1,0,1);
-      rap_aw = zzz_SMGExtractPointerByIndex(RAP, i, index_temp);
+      rap_aw = zzz_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
 
       zzz_SetIndex(index_temp,1,0,1);
-      rap_ae = zzz_SMGExtractPointerByIndex(RAP, i, index_temp);
+      rap_ae = zzz_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
 
       zzz_SetIndex(index_temp,0,-1,1);
-      rap_as = zzz_SMGExtractPointerByIndex(RAP, i, index_temp);
+      rap_as = zzz_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
 
       zzz_SetIndex(index_temp,0,1,1);
-      rap_an = zzz_SMGExtractPointerByIndex(RAP, i, index_temp);
+      rap_an = zzz_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
 
 /*--------------------------------------------------------------------------
  * Extract additional pointers for 27-point coarse grid operator:
@@ -1239,22 +1217,22 @@ zzz_SMG3BuildRAPNoSym(
       if(fine_stencil_size > 15)
       {
          zzz_SetIndex(index_temp,-1,1,0);
-         rap_cnw = zzz_SMGExtractPointerByIndex(RAP, i, index_temp);
+         rap_cnw = zzz_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
 
          zzz_SetIndex(index_temp,1,1,0);
-         rap_cne = zzz_SMGExtractPointerByIndex(RAP, i, index_temp);
+         rap_cne = zzz_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
 
          zzz_SetIndex(index_temp,-1,-1,1);
-         rap_asw = zzz_SMGExtractPointerByIndex(RAP, i, index_temp);
+         rap_asw = zzz_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
 
          zzz_SetIndex(index_temp,1,-1,1);
-         rap_ase = zzz_SMGExtractPointerByIndex(RAP, i, index_temp);
+         rap_ase = zzz_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
 
          zzz_SetIndex(index_temp,-1,1,1);
-         rap_anw = zzz_SMGExtractPointerByIndex(RAP, i, index_temp);
+         rap_anw = zzz_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
 
          zzz_SetIndex(index_temp,1,1,1);
-         rap_ane = zzz_SMGExtractPointerByIndex(RAP, i, index_temp);
+         rap_ane = zzz_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
 
       }
 
@@ -1291,7 +1269,7 @@ zzz_SMG3BuildRAPNoSym(
 
               case 7:
 
-              zzz_GetSBoxSize(cgrid_box, loop_size);
+              zzz_GetBoxSize(cgrid_box, loop_size);
               zzz_BoxLoop4(loop_index, loop_size,
                            PT_data_box, cstart, stridec, iP,
                            R_data_box, cstart, stridec, iR,
@@ -1341,7 +1319,7 @@ zzz_SMG3BuildRAPNoSym(
 
               case 15:
 
-              zzz_GetSBoxSize(cgrid_box, loop_size);
+              zzz_GetBoxSize(cgrid_box, loop_size);
               zzz_BoxLoop4(loop_index, loop_size,
                            PT_data_box, cstart, stridec, iP,
                            R_data_box, cstart, stridec, iR,
@@ -1410,7 +1388,7 @@ zzz_SMG3BuildRAPNoSym(
 
               case 19:
 
-              zzz_GetSBoxSize(cgrid_box, loop_size);
+              zzz_GetBoxSize(cgrid_box, loop_size);
               zzz_BoxLoop4(loop_index, loop_size,
                            PT_data_box, cstart, stridec, iP,
                            R_data_box, cstart, stridec, iR,
@@ -1457,7 +1435,7 @@ zzz_SMG3BuildRAPNoSym(
                             iP1 = iP + zOffsetP - yOffsetP - xOffsetP;
                             rap_asw[iAc] = ra[iR] * a_csw[iAp1] * pb[iP1];
 
-                            iP1 = iP + yOffsetP + xOffset;
+                            iP1 = iP + yOffsetP + xOffsetP;
                             rap_cne[iAc] =          a_cne[iA]
                                          + rb[iR] * a_cne[iAm1] * pb[iP1]
                                          + ra[iR] * a_cne[iAp1] * pa[iP1];
@@ -1471,7 +1449,7 @@ zzz_SMG3BuildRAPNoSym(
                                         + rb[iR] * a_an[iAm1]
                                         + ra[iR] * a_bn[iAp1];
  
-                            iP1 = iP + yOffsetP - xOffset;
+                            iP1 = iP + yOffsetP - xOffsetP;
                             rap_cnw[iAc] =          a_cnw[iA]
                                          + rb[iR] * a_cnw[iAm1] * pb[iP1]
                                          + ra[iR] * a_cnw[iAp1] * pa[iP1];
@@ -1500,7 +1478,7 @@ zzz_SMG3BuildRAPNoSym(
 
               default:
 
-              zzz_GetSBoxSize(cgrid_box, loop_size);
+              zzz_GetBoxSize(cgrid_box, loop_size);
               zzz_BoxLoop4(loop_index, loop_size,
                            PT_data_box, cstart, stridec, iP,
                            R_data_box, cstart, stridec, iR,
@@ -1556,7 +1534,7 @@ zzz_SMG3BuildRAPNoSym(
                                          +          a_asw[iA] * pb[iP1];
 
 
-                            iP1 = iP + yOffsetP + xOffset;
+                            iP1 = iP + yOffsetP + xOffsetP;
                             rap_cne[iAc] =          a_cne[iA]
                                          + rb[iR] * a_cne[iAm1] * pb[iP1]
                                          + ra[iR] * a_cne[iAp1] * pa[iP1]
@@ -1574,7 +1552,7 @@ zzz_SMG3BuildRAPNoSym(
                                         + rb[iR] * a_an[iAm1]
                                         + ra[iR] * a_bn[iAp1];
  
-                            iP1 = iP + yOffsetP - xOffset;
+                            iP1 = iP + yOffsetP - xOffsetP;
                             rap_cnw[iAc] =          a_cnw[iA]
                                          + rb[iR] * a_cnw[iAm1] * pb[iP1]
                                          + ra[iR] * a_cnw[iAp1] * pa[iP1]
@@ -1596,15 +1574,16 @@ zzz_SMG3BuildRAPNoSym(
 
               break;
 
-      } */ end switch statement */
+      } /* end switch statement */
 
-   } */ end ForBoxI */
+   } /* end ForBoxI */
 
-   zzz_FreeIndex(index_temp)
-   zzz_FreeIndex(stridec)
-   zzz_FreeIndex(loop_index)
-   zzz_FreeIndex(loop_size)
-   zzz_FreeIndex(fstart)
+   zzz_FreeIndex(index_temp);
+   zzz_FreeIndex(stridec);
+   zzz_FreeIndex(loop_index);
+   zzz_FreeIndex(loop_size);
+   zzz_FreeIndex(fstart);
 
+   return ierr;
 }
 

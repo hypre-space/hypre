@@ -22,13 +22,15 @@ int   main(argc, argv)
 int   argc;
 char *argv[];
 {
-   int                 matrix_num_ghost[6] = { 1, 1, 0, 0, 0, 0};
-   int                 vector_num_ghost[6] = { 1, 1, 1, 1, 1, 1};
+   int                 A_num_ghost[6] = { 1, 1, 1, 1, 1, 1};
+   int                 b_num_ghost[6] = { 0, 0, 0, 0, 0, 0};
+   int                 x_num_ghost[6] = { 1, 1, 1, 1, 1, 1};
                      
-   zzz_StructGrid     *grid;
-   zzz_StructMatrix   *matrix;
-   zzz_StructVector   *vector;
-   zzz_StructVector   *tmp_vector;
+   zzz_StructMatrix   *A;
+   zzz_StructVector   *b;
+   zzz_StructVector   *x;
+
+   void               *smg_data;
 
    int                 num_procs, myid;
 
@@ -49,67 +51,37 @@ char *argv[];
    sprintf(malloc_logpath, "malloc.log.%04d", myid);
 
    /*-----------------------------------------------------------
-    * Read in the matrix
+    * Set up the linear system
     *-----------------------------------------------------------*/
 
-   matrix = zzz_ReadStructMatrix("zin_matrix", matrix_num_ghost);
+   A = zzz_ReadStructMatrix("zin_A", A_num_ghost);
+   b = zzz_ReadStructVector("zin_b", b_num_ghost);
+
+   x = zzz_NewStructVector(&MPI_COMM_WORLD, zzz_StructMatrixGrid(A));
+   zzz_SetStructVectorNumGhost(x, x_num_ghost);
+   zzz_InitializeStructVector(x);
+   zzz_AssembleStructVector(x);
  
-   zzz_PrintStructMatrix("zout_matrix", matrix, 0);
-
    /*-----------------------------------------------------------
-    * Read in the vector
+    * Solve the system
     *-----------------------------------------------------------*/
 
-   vector = zzz_ReadStructVector("zin_vector", vector_num_ghost);
- 
-   zzz_PrintStructVector("zout_vector", vector, 0);
-
-   /*-----------------------------------------------------------
-    * Do a matvec
-    *-----------------------------------------------------------*/
-
-   tmp_vector = zzz_NewStructVector(zzz_StructVectorGrid(vector));
-   zzz_InitializeStructVector(tmp_vector);
-   zzz_AssembleStructVector(tmp_vector);
-
-   zzz_StructMatvec(1.0, matrix, vector, 0.0, tmp_vector);
-
-   zzz_PrintStructVector("zout_matvec", tmp_vector, 0);
-
-   /*-----------------------------------------------------------
-    * Copy the vector into tmp_vector
-    *-----------------------------------------------------------*/
-
-   zzz_StructCopy(vector, tmp_vector);
-
-   zzz_PrintStructVector("zout_copy", tmp_vector, 0);
-
-   /*-----------------------------------------------------------
-    * Scale tmp_vector
-    *-----------------------------------------------------------*/
-
-   zzz_StructScale(2.0, tmp_vector);
-
-   zzz_PrintStructVector("zout_scale", tmp_vector, 0);
-
-   /*-----------------------------------------------------------
-    * Do an Axpy (2*vector - vector) = vector
-    *-----------------------------------------------------------*/
-
-   zzz_StructAxpy(-1.0, vector, tmp_vector);
-
-   zzz_PrintStructVector("zout_axpy", tmp_vector, 0);
+   smg_data = zzz_SMGInitialize(&MPI_COMM_WORLD);
+   zzz_SMGSetup(smg_data, A, b, x);
+   zzz_SMGSolve(smg_data, b, x);
 
    /*-----------------------------------------------------------
     * Finalize things
     *-----------------------------------------------------------*/
 
-   zzz_FreeStructGrid(zzz_StructMatrixGrid(matrix));
-   zzz_FreeStructStencil(zzz_StructMatrixUserStencil(matrix));
-   zzz_FreeStructMatrix(matrix);
-   zzz_FreeStructGrid(zzz_StructVectorGrid(vector));
-   zzz_FreeStructVector(vector);
-   zzz_FreeStructVector(tmp_vector);
+   zzz_SMGFinalize(smg_data);
+   zzz_FreeStructGrid(zzz_StructMatrixGrid(A));
+   zzz_FreeStructStencil(zzz_StructMatrixUserStencil(A));
+   zzz_FreeStructMatrix(A);
+   zzz_FreeStructGrid(zzz_StructVectorGrid(b));
+   zzz_FreeStructVector(b);
+   zzz_FreeStructGrid(zzz_StructVectorGrid(x));
+   zzz_FreeStructVector(x);
 
    /* malloc debug stuff */
    malloc_verify(0);
@@ -117,5 +89,7 @@ char *argv[];
 
    /* Finalize MPI */
    MPI_Finalize();
+
+   return (0);
 }
 

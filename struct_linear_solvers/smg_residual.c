@@ -20,6 +20,9 @@
 
 typedef struct
 {
+   zzz_Index         *base_index;
+   zzz_Index         *base_stride;
+
    zzz_StructMatrix  *A;
    zzz_StructVector  *x;
    zzz_StructVector  *b;
@@ -39,6 +42,13 @@ zzz_SMGResidualInitialize( )
 
    residual_data = zzz_CTAlloc(zzz_SMGResidualData, 1);
 
+   (residual_data -> base_index)  = zzz_NewIndex();
+   (residual_data -> base_stride) = zzz_NewIndex();
+
+   /* set defaults */
+   zzz_SetIndex((residual_data -> base_index), 0, 0, 0);
+   zzz_SetIndex((residual_data -> base_stride), 1, 1, 1);
+
    return (void *) residual_data;
 }
 
@@ -55,7 +65,10 @@ zzz_SMGResidualSetup( void             *residual_vdata,
 {
    int ierr;
 
-   zzz_SMGResidualData *residual_data = residual_vdata;
+   zzz_SMGResidualData  *residual_data = residual_vdata;
+
+   zzz_Index            *base_index;
+   zzz_Index            *base_stride;
 
    zzz_StructGrid       *grid;
    zzz_StructStencil    *stencil;
@@ -67,16 +80,19 @@ zzz_SMGResidualSetup( void             *residual_vdata,
    zzz_BoxArrayArray    *indt_boxes;
    zzz_BoxArrayArray    *dept_boxes;
                        
-   zzz_SBoxArrayArray    *send_sboxes;
-   zzz_SBoxArrayArray    *recv_sboxes;
-   zzz_SBoxArrayArray    *indt_sboxes;
-   zzz_SBoxArrayArray    *dept_sboxes;
+   zzz_SBoxArrayArray   *send_sboxes;
+   zzz_SBoxArrayArray   *recv_sboxes;
+   zzz_SBoxArrayArray   *indt_sboxes;
+   zzz_SBoxArrayArray   *dept_sboxes;
                        
-   zzz_ComputePkg        *compute_pkg;
+   zzz_ComputePkg       *compute_pkg;
 
    /*----------------------------------------------------------
     * Set up the compute package
     *----------------------------------------------------------*/
+
+   base_index  = (residual_data -> base_index);
+   base_stride = (residual_data -> base_stride);
 
    grid    = zzz_StructMatrixGrid(A);
    stencil = zzz_StructMatrixStencil(A);
@@ -120,15 +136,15 @@ zzz_SMGResidualSetup( void             *residual_vdata,
 
 int
 zzz_SMGResidual( void             *residual_vdata,
-                 zzz_StructMatrix *A,
                  zzz_StructVector *x,
                  zzz_StructVector *b,
                  zzz_StructVector *r              )
 {
    int ierr;
 
-   zzz_SMGResidualData *residual_data = residual_vdata;
+   zzz_SMGResidualData  *residual_data = residual_vdata;
 
+   zzz_StructMatrix     *A           = (residual_data -> A);
    zzz_ComputePkg       *compute_pkg = (residual_data -> compute_pkg);
 
    zzz_CommHandle       *comm_handle;
@@ -139,19 +155,23 @@ zzz_SMGResidual( void             *residual_vdata,
                        
    zzz_Box              *A_data_box;
    zzz_Box              *x_data_box;
-   zzz_Box              *y_data_box;
+   zzz_Box              *b_data_box;
+   zzz_Box              *r_data_box;
                        
    int                   Ai;
-   int                   xi, xoffset;
-   int                   yi;
+   int                   xi;
+   int                   bi;
+   int                   ri;
                        
    double               *Ap;
    double               *xp;
-   double               *yp;
+   double               *bp;
+   double               *rp;
                        
    zzz_BoxArray         *boxes;
    zzz_Box              *box;
-   zzz_Index            *index;
+   zzz_Index            *loop_index;
+   zzz_Index            *loop_size;
    zzz_Index            *start;
    zzz_Index            *stride;
    zzz_Index            *base_stride;
@@ -160,14 +180,14 @@ zzz_SMGResidual( void             *residual_vdata,
    zzz_Index           **stencil_shape;
    int                   stencil_size;
 
-   double                temp;
    int                   compute_i, i, j, si;
 
    /*-----------------------------------------------------------------------
     * Initialize some things
     *-----------------------------------------------------------------------*/
 
-   index = zzz_NewIndex();
+   loop_index = zzz_NewIndex();
+   loop_size = zzz_NewIndex();
 
    base_stride = zzz_NewIndex();
    zzz_SetIndex(base_stride, 1, 1, 1);
@@ -206,7 +226,8 @@ zzz_SMGResidual( void             *residual_vdata,
                bp = zzz_StructVectorBoxData(b, i);
                rp = zzz_StructVectorBoxData(r, i);
 
-               zzz_BoxLoop2(box, index,
+               zzz_GetBoxSize(box, loop_size);
+               zzz_BoxLoop2(loop_index, loop_size,
                             b_data_box, start, base_stride, bi,
                             r_data_box, start, base_stride, ri,
                             {
@@ -242,7 +263,6 @@ zzz_SMGResidual( void             *residual_vdata,
          {
             compute_sbox = zzz_SBoxArraySBox(compute_sbox_a, j);
 
-            box    = zzz_SBoxBox(compute_sbox);
             start  = zzz_SBoxIMin(compute_sbox);
             stride = zzz_SBoxStride(compute_sbox);
 
@@ -252,7 +272,8 @@ zzz_SMGResidual( void             *residual_vdata,
                xp = zzz_StructVectorBoxData(x, i) +
                   zzz_BoxOffsetDistance(x_data_box, stencil_shape[si]);
 
-               zzz_BoxLoop3(box, index,
+               zzz_GetSBoxSize(compute_sbox, loop_size);
+               zzz_BoxLoop3(loop_index, loop_size,
                             A_data_box, start, stride, Ai,
                             x_data_box, start, stride, xi,
                             r_data_box, start, stride, ri,
@@ -268,7 +289,8 @@ zzz_SMGResidual( void             *residual_vdata,
     * Return
     *-----------------------------------------------------------------------*/
 
-   zzz_FreeIndex(index);
+   zzz_FreeIndex(loop_index);
+   zzz_FreeIndex(loop_size);
    zzz_FreeIndex(base_stride);
 
    return ierr;
@@ -291,6 +313,30 @@ zzz_SMGResidualFinalize( void *residual_vdata )
       zzz_TFree(residual_data);
    }
 
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
+ * zzz_SMGResidualSetBase
+ *--------------------------------------------------------------------------*/
+ 
+int
+zzz_SMGResidualSetBase( void      *smg_residual_vdata,
+                        zzz_Index *base_index,
+                        zzz_Index *base_stride )
+{
+   zzz_SMGResidualData *smg_residual_data = smg_residual_vdata;
+   int          d;
+   int          ierr = 0;
+ 
+   for (d = 0; d < 3; d++)
+   {
+      zzz_IndexD((smg_residual_data -> base_index),  d)
+         = zzz_IndexD(base_index,  d);
+      zzz_IndexD((smg_residual_data -> base_stride), d)
+         = zzz_IndexD(base_stride, d);
+   }
+ 
    return ierr;
 }
 

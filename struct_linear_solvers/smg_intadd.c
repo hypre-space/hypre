@@ -12,6 +12,152 @@
  *****************************************************************************/
 
 #include "headers.h"
+#include "smg.h"
+
+/*--------------------------------------------------------------------------
+ * zzz_SMGIntAddData data structure
+ *--------------------------------------------------------------------------*/
+
+typedef struct
+{
+   zzz_StructMatrix *PT;
+   zzz_ComputePkg   *compute_pkg;
+   zzz_SBoxArray    *coarse_points;
+   zzz_Index        *cindex;
+   zzz_Index        *cstride;
+
+} zzz_SMGIntAddData;
+
+/*--------------------------------------------------------------------------
+ * zzz_SMGIntAddInitialize
+ *--------------------------------------------------------------------------*/
+
+void *
+zzz_SMGIntAddInitialize( )
+{
+   zzz_SMGIntAddData *smg_intadd_data;
+
+   smg_intadd_data = zzz_CTAlloc(zzz_SMGIntAddData, 1);
+
+   return (void *) smg_intadd_data;
+}
+
+/*--------------------------------------------------------------------------
+ * zzz_SMGIntAddSetup
+ *--------------------------------------------------------------------------*/
+
+int
+zzz_SMGIntAddSetup( void             *smg_intadd_vdata,
+                    zzz_StructMatrix *PT,
+                    zzz_StructVector *xc,
+                    zzz_StructVector *x,
+                    zzz_Index        *cindex,
+                    zzz_Index        *cstride,
+                    zzz_Index        *findex,
+                    zzz_Index        *fstride          )
+{
+   zzz_SMGIntAddData *smg_intadd_data = smg_intadd_vdata;
+
+   zzz_StructGrid       *grid;
+   zzz_StructStencil    *stencil;
+                       
+   zzz_BoxArrayArray    *send_boxes;
+   zzz_BoxArrayArray    *recv_boxes;
+   int                 **send_box_ranks;
+   int                 **recv_box_ranks;
+   zzz_BoxArrayArray    *indt_boxes;
+   zzz_BoxArrayArray    *dept_boxes;
+                       
+   zzz_SBoxArrayArray   *send_sboxes;
+   zzz_SBoxArrayArray   *recv_sboxes;
+   zzz_SBoxArrayArray   *indt_sboxes;
+   zzz_SBoxArrayArray   *dept_sboxes;
+                       
+   zzz_SBoxArrayArray   *sbox_array_array;
+   zzz_SBoxArray        *sbox_array;
+   zzz_SBox             *sbox;
+
+   zzz_ComputePkg       *compute_pkg;
+   zzz_SBoxArray        *coarse_points;
+
+   int                   i, j, k;
+   int                   ierr;
+
+   /*----------------------------------------------------------
+    * Set up the compute package
+    *----------------------------------------------------------*/
+
+   grid    = zzz_StructVectorGrid(x);
+   stencil = zzz_StructMatrixStencil(PT);
+
+   zzz_GetComputeInfo(&send_boxes, &recv_boxes,
+                      &send_box_ranks, &recv_box_ranks,
+                      &indt_boxes, &dept_boxes,
+                      grid, stencil);
+
+   send_sboxes = zzz_ProjectBoxArrayArray(send_boxes, cindex, cstride);
+   recv_sboxes = zzz_ProjectBoxArrayArray(recv_boxes, cindex, cstride);
+   indt_sboxes = zzz_ProjectBoxArrayArray(indt_boxes, findex, fstride);
+   dept_sboxes = zzz_ProjectBoxArrayArray(dept_boxes, findex, fstride);
+
+   zzz_FreeBoxArrayArray(send_boxes);
+   zzz_FreeBoxArrayArray(recv_boxes);
+   zzz_FreeBoxArrayArray(indt_boxes);
+   zzz_FreeBoxArrayArray(dept_boxes);
+
+   /* Do communications on the coarse grid */
+   for (k = 0; k < 2; k++)
+   {
+      switch (k)
+      {
+         case 0:
+         sbox_array_array = send_sboxes;
+         break;
+
+         case 1:
+         sbox_array_array = recv_sboxes;
+         break;
+      }
+
+      zzz_ForSBoxArrayI(i, send_sboxes)
+      {
+         sbox_array = zzz_SBoxArrayArraySBoxArray(send_sboxes, i);
+         zzz_ForSBoxArrayI(j, sbox_array)
+         {
+            sbox = zzz_SBoxArraySBox(sbox_array, j);
+            zzz_SMGMapFineToCoarse(zzz_SBoxIMin(sbox), zzz_SBoxIMin(sbox),
+                                   cindex, cstride);
+            zzz_SMGMapFineToCoarse(zzz_SBoxIMax(sbox), zzz_SBoxIMax(sbox),
+                                   cindex, cstride);
+            zzz_SetIndex(zzz_SBoxStride(sbox), 1, 1, 1);
+         }
+      }
+   }
+
+   compute_pkg = zzz_NewComputePkg(send_sboxes, recv_sboxes,
+                                   send_box_ranks, recv_box_ranks,
+                                   indt_sboxes, dept_sboxes,
+                                   grid, zzz_StructVectorDataSpace(xc), 1);
+
+   /*----------------------------------------------------------
+    * Set up the coarse points SBoxArray
+    *----------------------------------------------------------*/
+
+   coarse_points = zzz_ProjectBoxArray(zzz_StructGridBoxes(grid),
+                                       cindex, cstride);
+
+   /*----------------------------------------------------------
+    * Set up the intadd data structure
+    *----------------------------------------------------------*/
+
+   (smg_intadd_data -> PT)            = PT;
+   (smg_intadd_data -> compute_pkg)   = compute_pkg;
+   (smg_intadd_data -> coarse_points) = coarse_points;
+   (smg_intadd_data -> cindex)        = cindex;
+   (smg_intadd_data -> cstride)       = cstride;
+
+   return ierr;
+}
 
 /*--------------------------------------------------------------------------
  * zzz_SMGIntAdd:
@@ -22,14 +168,15 @@
  *--------------------------------------------------------------------------*/
 
 int
-zzz_SMGIntAdd( void             *intadd_vdata,
-               zzz_StructMatrix *PT,
+zzz_SMGIntAdd( void             *smg_intadd_vdata,
                zzz_StructVector *xc,
                zzz_StructVector *x           )
 {
    int ierr;
 
-   zzz_SMGIntAddData    *intadd_data = intadd_vdata;
+   zzz_SMGIntAddData    *smg_intadd_data = smg_intadd_vdata;
+
+   zzz_StructMatrix     *PT = (smg_intadd_data -> PT);
 
    zzz_ComputePkg       *compute_pkg;
    zzz_SBoxArray        *coarse_points;
@@ -54,8 +201,8 @@ zzz_SMGIntAdd( void             *intadd_vdata,
    double               *xcp, *xcp0, *xcp1;
    double               *xp;
                        
-   zzz_Box              *box;
-   zzz_Index            *index;
+   zzz_Index            *loop_index;
+   zzz_Index            *loop_size;
    zzz_Index            *start;
    zzz_Index            *stride;
    zzz_Index            *startc;
@@ -70,15 +217,16 @@ zzz_SMGIntAdd( void             *intadd_vdata,
     * Initialize some things
     *-----------------------------------------------------------------------*/
 
-   compute_pkg   = (intadd_data -> compute_pkg);
-   coarse_points = (intadd_data -> coarse_points);
-   cindex        = (intadd_data -> cindex);
-   cstride       = (intadd_data -> cstride);
+   compute_pkg   = (smg_intadd_data -> compute_pkg);
+   coarse_points = (smg_intadd_data -> coarse_points);
+   cindex        = (smg_intadd_data -> cindex);
+   cstride       = (smg_intadd_data -> cstride);
 
    stencil       = zzz_StructMatrixStencil(PT);
    stencil_shape = zzz_StructStencilShape(stencil);
 
-   index = zzz_NewIndex();
+   loop_index = zzz_NewIndex();
+   loop_size  = zzz_NewIndex();
 
    startc = zzz_NewIndex();
 
@@ -121,9 +269,7 @@ zzz_SMGIntAdd( void             *intadd_vdata,
          {
             compute_sbox = zzz_SBoxArraySBox(compute_sbox_a, i);
 
-            box = zzz_SBoxBox(compute_sbox);
-
-            start   = zzz_SBoxIMin(compute_sbox);
+            start = zzz_SBoxIMin(compute_sbox);
             zzz_SMGMapFineToCoarse(start, startc, cindex, cstride);
 
             xc_data_box = zzz_BoxArrayBox(zzz_StructVectorDataSpace(xc), i);
@@ -132,7 +278,8 @@ zzz_SMGIntAdd( void             *intadd_vdata,
             xcp = zzz_StructVectorBoxData(xc, i);
             xp  = zzz_StructVectorBoxData(x, i);
 
-            zzz_BoxLoop2(box, index,
+            zzz_GetSBoxSize(compute_sbox, loop_size);
+            zzz_BoxLoop2(loop_index, loop_size,
                          xc_data_box, startc, stridec, xci,
                          x_data_box,  start,  stride,  xi,
                          {
@@ -168,8 +315,6 @@ zzz_SMGIntAdd( void             *intadd_vdata,
          {
             compute_sbox = zzz_SBoxArraySBox(compute_sbox_a, j);
 
-            box    = zzz_SBoxBox(compute_sbox);
-
             start  = zzz_SBoxIMin(compute_sbox);
             for (d = 0; d < 3; d++)
             {
@@ -178,7 +323,8 @@ zzz_SMGIntAdd( void             *intadd_vdata,
             }
             zzz_SMGMapFineToCoarse(startc, startc, cindex, cstride);
 
-            zzz_BoxLoop3(box, index,
+            zzz_GetSBoxSize(compute_sbox, loop_size);
+            zzz_BoxLoop3(loop_index, loop_size,
                          PT_data_box, startc, stridec, Pi,
                          xc_data_box, startc, stridec, xci,
                          x_data_box,  start,  stride,  xi,
@@ -194,9 +340,31 @@ zzz_SMGIntAdd( void             *intadd_vdata,
     * Return
     *-----------------------------------------------------------------------*/
 
-   zzz_FreeIndex(index);
+   zzz_FreeIndex(loop_index);
+   zzz_FreeIndex(loop_size);
    zzz_FreeIndex(startc);
    zzz_FreeIndex(stridec);
+
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
+ * zzz_SMGIntAddFinalize
+ *--------------------------------------------------------------------------*/
+
+int
+zzz_SMGIntAddFinalize( void *smg_intadd_vdata )
+{
+   int ierr;
+
+   zzz_SMGIntAddData *smg_intadd_data = smg_intadd_vdata;
+
+   if (smg_intadd_data)
+   {
+      zzz_FreeSBoxArray(smg_intadd_data -> coarse_points);
+      zzz_FreeComputePkg(smg_intadd_data -> compute_pkg);
+      zzz_TFree(smg_intadd_data);
+   }
 
    return ierr;
 }
