@@ -199,6 +199,10 @@ int MLI::setCyclesAtLevel( int level, int cycles )
    {
       one_levels[level]->setCycles( cycles );
    }
+   else if ( level == -1 )
+   {
+      for (int i = 0; i < max_levels; i++) one_levels[i]->setCycles( cycles );
+   }
    else
    {
       cout << "MLI::setCyclesAtLevel ERROR : wrong level = " << level << endl;
