@@ -1192,10 +1192,11 @@ int MLI_Utils_singular_vectors(int n, double *uArray)
     double *sArray = (double *) malloc(n*sizeof(double));
     int workLen = 5*n;
     double *workArray = (double *) malloc(workLen*sizeof(double));
-
+#if 0
     void hypre_F90_NAME_BLAS(dgesvd, DGESVD)(char *, char *, int *,
         int *, double *, int *, double *, double *, int *,
         double *, int *, double *, int *, int *);
+#endif
 
     hypre_F90_NAME_BLAS(dgesvd, DGESVD)(&jobu, &jobvt, &n, &n, uArray,
         &n, sArray, NULL, &n, NULL, &n, workArray, &workLen, &info);
