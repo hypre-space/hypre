@@ -77,6 +77,10 @@ main( int   argc,
    MPI_Comm_size(MPI_COMM_WORLD, &num_procs );
    MPI_Comm_rank(MPI_COMM_WORLD, &myid );
 
+#ifdef HYPRE_USE_PTHREADS
+   HYPRE_InitPthreads(MPI_COMM_WORLD);
+#endif  
+
 #ifdef HYPRE_DEBUG
    cegdb(&argc, &argv, myid);
 #endif
@@ -623,6 +627,12 @@ main( int   argc,
    hypre_TFree(offsets);
 
    hypre_FinalizeMemoryDebug();
+
+#ifdef HYPRE_USE_PTHREADS
+   HYPRE_DestroyPthreads();
+#endif  
+
+
 
    /* Finalize MPI */
    MPI_Finalize();
