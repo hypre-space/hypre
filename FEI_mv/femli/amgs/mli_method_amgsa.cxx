@@ -71,7 +71,7 @@ MLI_Method_AMGSA::MLI_Method_AMGSA( MPI_Comm comm ) : MLI_Method( comm )
       spectralNorms_[i] = 0.0;
    }
    calcNormScheme_ = 0;              /* use matrix rowsum norm */
-   minCoarseSize_  = 1000;           /* smallest coarse grid   */
+   minCoarseSize_  = 3000;           /* smallest coarse grid   */
    minAggrSize_    = 3;              /* smallest aggregate size */
    coarsenScheme_  = MLI_METHOD_AMGSA_LOCAL;
    strcpy(preSmoother_, "HSGS");
@@ -179,7 +179,7 @@ int MLI_Method_AMGSA::setParams(char *in_name, int argc, char *argv[])
    comm = getComm();
    MPI_Comm_rank( comm, &mypid );
    sscanf(in_name, "%s", param1);
-   if ( outputLevel_ >= 1 && mypid == 0 ) 
+   if ( outputLevel_ > 1 && mypid == 0 ) 
       printf("\tMLI_Method_AMGSA::setParam = %s\n", in_name);
    if ( !strcmp(param1, "setOutputLevel" ))
    {
@@ -510,7 +510,7 @@ int MLI_Method_AMGSA::getParams(char *in_name, int *argc, char *argv[])
 
 int MLI_Method_AMGSA::setup( MLI *mli ) 
 {
-   int             level, mypid, nRows;
+   int             level, mypid, nRows, nullspaceDimKeep;
    double          startTime, elapsedTime, maxEigen, maxEigenT, dtemp=0.0;
    char            paramString[100], *targv[10];
    MLI_Matrix      *mli_Pmat, *mli_Rmat, *mli_Amat, *mli_ATmat, *mli_cAmat;
@@ -538,6 +538,7 @@ int MLI_Method_AMGSA::setup( MLI *mli )
          saData_[level] = NULL;
       }
    }
+   nullspaceDimKeep = nullspaceDim_;
 
    /* --------------------------------------------------------------- */
    /* if requested, compute null spaces from finite element stiffness */
@@ -711,6 +712,19 @@ int MLI_Method_AMGSA::setup( MLI *mli )
       mli->setRestriction(level, mli_Rmat);
 
       /* -------------------------------------------------- */
+      /* if a global coarsening step has been called, this  */
+      /* is the coarsest grid. So quit.                     */
+      /* -------------------------------------------------- */
+
+      if (spectralNorms_[level] == 1.0e39) 
+      {
+         spectralNorms_[level] = 0.0;
+         level++;
+         currLevel_ = level;
+         break;
+      }
+
+      /* -------------------------------------------------- */
       /* set the smoothers                                  */
       /* (if domain decomposition and ARPACKA SuperLU       */
       /* smoothers is requested, perform special treatment, */
@@ -808,12 +822,6 @@ int MLI_Method_AMGSA::setup( MLI *mli )
          }
          mli->setSmoother( level, MLI_SMOOTHER_POST, smootherPtr );
       }
-      if (spectralNorms_[level] == 1.0e39) 
-      {
-         spectralNorms_[level] = 0.0;
-         level++;
-         break;
-      }
    }
 
    /* --------------------------------------------------------------- */
@@ -822,9 +830,12 @@ int MLI_Method_AMGSA::setup( MLI *mli )
 
    if (mypid == 0 && outputLevel_ > 0) printf("\tCoarse level = %d\n",level);
    mli_Amat = mli->getSystemMatrix(level);
+   strcpy(paramString, "nrows");
    mli_Amat->getMatrixInfo(paramString, nRows, dtemp);
    if (nRows > 6000)
    {
+      if ( outputLevel_ > 1 && mypid == 0 )
+         printf("ML_Method_AMGSA::message - nCoarse too large => GMRESSGS.\n"); 
       strcpy(coarseSolver_, "GMRESSGS");
       csolvePtr = MLI_Solver_CreateFromName( coarseSolver_ );
       sprintf(paramString, "maxIterations %d", coarseSolverNum_);
@@ -857,6 +868,7 @@ int MLI_Method_AMGSA::setup( MLI *mli )
    /* --------------------------------------------------------------- */
 
    if ( outputLevel_ >= 2 ) printStatistics(mli);
+   nullspaceDim_ = nullspaceDimKeep;
 
 #ifdef MLI_DEBUG_DETAILED
    printf("MLI_Method_AMGSA::setup ends.");

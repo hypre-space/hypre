@@ -1339,6 +1339,27 @@ int MLI_Method_AMGSA::formLocalGraph( hypre_ParCSRMatrix *Amat,
    AdiagRPtr  = hypre_CSRMatrixI(AdiagBlock);
    AdiagCols  = hypre_CSRMatrixJ(AdiagBlock);
    AdiagVals  = hypre_CSRMatrixData(AdiagBlock);
+   if ( useSAMGeFlag_ )
+   {
+      if ( saLabels_ != NULL && saLabels_[currLevel_] != NULL )
+      {
+         partition = new int[AdiagNRows/currNodeDofs_];
+         for ( i = 0; i < AdiagNRows; i+=currNodeDofs_ )
+            partition[i/currNodeDofs_] = saLabels_[currLevel_][i];
+         qsort0(partition, 0, AdiagNRows/currNodeDofs_-1);
+         jj = 1;
+         for ( i = 1; i < AdiagNRows/currNodeDofs_; i++ )
+            if (partition[i] != partition[i-1]) jj++;
+         if ( jj * currNodeDofs_ < AdiagNRows/2 ) 
+         {
+            for ( i = 0; i < AdiagNRows; i++ )
+               saLabels_[currLevel_][i] = 0;
+            for ( i = 0; i < AdiagNRows/currNodeDofs_; i++ )
+               localLabels[i] = 0;
+            if ( currNodeDofs_ > 6 ) nullspaceDim_ = currNodeDofs_ = 6;
+         }
+      }
+   }
    
    /*-----------------------------------------------------------------
     * construct the diagonal array (diagData) 
