@@ -1077,6 +1077,11 @@ void ParaSailsSetupPattern(ParaSails *ps, double thresh, int num_levels)
     ps->thresh     = thresh;
     ps->num_levels = num_levels;
 
+#ifdef PARASAILS_TIME
+    if (mype == 0)
+       printf("ParaSails: thresh %e, level %d\n", mype, thresh, num_levels);
+#endif
+
     if (ps->M)
         MatrixDestroy(ps->M);
 
