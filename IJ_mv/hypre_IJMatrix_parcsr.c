@@ -250,11 +250,35 @@ int
 hypre_IJMatrixInitializeParCSR(hypre_IJMatrix *matrix)
 {
    int ierr = 0;
+   MPI_Comm comm = hypre_IJMatrixContext(matrix);
    hypre_ParCSRMatrix *par_matrix = hypre_IJMatrixLocalStorage(matrix);
    hypre_AuxParCSRMatrix *aux_matrix = hypre_IJMatrixTranslator(matrix);
-   int local_num_rows = hypre_AuxParCSRMatrixLocalNumRows(aux_matrix);
-   int local_num_cols = hypre_AuxParCSRMatrixLocalNumCols(aux_matrix);
+   int global_m = hypre_IJMatrixM(matrix); 
+   int global_n = hypre_IJMatrixN(matrix); 
+   int local_num_rows;
+   int local_num_cols;
+   int num_procs, my_id;
+   int rest;
+  
+   MPI_Comm_size(comm,&num_procs);
+   MPI_Comm_rank(comm,&my_id);
 
+   if (!aux_matrix)
+   {
+      local_num_rows = global_m/num_procs;
+      rest = global_m - local_num_rows*num_procs;
+      if (my_id < rest) local_num_rows++;
+      local_num_cols = global_n/num_procs;
+      rest = global_n - local_num_cols*num_procs;
+      if (my_id < rest) local_num_cols++;
+      hypre_AuxParCSRMatrixCreate(&aux_matrix,local_num_rows,
+					local_num_cols,NULL);
+      hypre_IJMatrixTranslator(matrix) = aux_matrix;
+   }
+   
+   local_num_rows = hypre_AuxParCSRMatrixLocalNumRows(aux_matrix);
+   local_num_cols = hypre_AuxParCSRMatrixLocalNumCols(aux_matrix);
+   
    if (par_matrix)
    {
       if (local_num_rows < 0)
