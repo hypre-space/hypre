@@ -5,7 +5,7 @@
 #endif
 
 
-/* amgdrv.c */
+/* SPamg.c */
 void main P((int argc , char *argv []));
 
 /* amg.c */
@@ -63,7 +63,8 @@ int hypre_CSRMatrixTranspose P((hypre_CSRMatrix *A , hypre_CSRMatrix **AT ));
 int hypre_AMGRelax P((hypre_CSRMatrix *A , hypre_Vector *f , int *cf_marker , int relax_type , int relax_points , hypre_Vector *u , hypre_Vector *Vtemp ));
 int gselim P((double *A , double *x , int n ));
 
-/* setupstats.c */
+/* amgstats.c */
 int hypre_AMGSetupStats P((hypre_AMGData *amg_data ));
+void hypre_WriteSolverParams P((void *data ));
 
 #undef P

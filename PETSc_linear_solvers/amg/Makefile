@@ -24,7 +24,7 @@ FILES =\
  transpose.c\
  interp.c\
  rap.c \
- setupstats.c\
+ amgstats.c\
  amg_solve.c \
  cycle.c\
  relax.c
@@ -38,7 +38,8 @@ CFLAGS =\
  -I/usr/local/include\
  -I/home/casc/include\
  -I/usr/local/mpi/mpich/include\
- -g -Wall -DHYPRE_DEBUG -DAMG_MALLOC_DEBUG
+ -g -Wall -DHYPRE_DEBUG 
+#-g -Wall  
 
 FFLAGS = -g
 
@@ -59,8 +60,9 @@ LFLAGS =\
  -lm
 
 
+
 SPAMGFILES =  SPamg.o amg.o amg_setup.o coarsen.o  indepset.o \
-               random.o transpose.o interp.o rap.o setupstats.o \
+               random.o transpose.o interp.o rap.o amgstats.o \
                amg_solve.o cycle.o relax.o
 
 ##################################################################

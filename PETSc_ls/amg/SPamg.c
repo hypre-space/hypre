@@ -16,7 +16,7 @@
 
 #include "headers.h"
 
-#ifdef AMG_MALLOC_DEBUG
+#ifdef HYPRE_DEBUG
 /* malloc debug stuff */
 char amg_malloclog[256];
 #endif  
@@ -56,7 +56,7 @@ char *argv[];
     * Set up debugging tools
     *-------------------------------------------------------*/
 
-#ifdef AMG_MALLOC_DEBUG
+#ifdef HYPRE_DEBUG
    /* malloc debug stuff */
    malloc_logpath = amg_malloclog;
    sprintf(malloc_logpath, "malloc.log");
@@ -91,7 +91,7 @@ char *argv[];
     * Debugging prints
     *-------------------------------------------------------*/
 
-#ifdef AMG_MALLOC_DEBUG
+#ifdef HYPRE_DEBUG
    /* malloc debug stuff */
    malloc_verify(0);
    malloc_shutdown();

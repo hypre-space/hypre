@@ -27,7 +27,7 @@ typedef struct
    int      cycle_type;    
    int     *num_grid_sweeps;  
    int     *grid_relax_type;   
-   int     *grid_relax_points[4]; 
+   int    **grid_relax_points; 
    double   tol;
 
    /* problem data */

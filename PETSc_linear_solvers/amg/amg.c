@@ -37,7 +37,7 @@ void  *hypre_AMGInitialize()
 
    int     *num_grid_sweeps;  
    int     *grid_relax_type;   
-   int     *grid_relax_points[4]; 
+   int    **grid_relax_points; 
 
 
    /* output params */
@@ -64,6 +64,7 @@ void  *hypre_AMGInitialize()
 
    num_grid_sweeps = hypre_CTAlloc(int,4);
    grid_relax_type = hypre_CTAlloc(int,4);
+   grid_relax_points = hypre_CTAlloc(int *,4);
 
    for (j = 0; j < 3; j++)
    {
@@ -247,7 +248,7 @@ void     *data;
 {
    hypre_AMGData  *amg_data = data;
 
-/*   hypre_AMGDataGridRelaxPoints(amg_data) = grid_relax_points; */
+   hypre_AMGDataGridRelaxPoints(amg_data) = grid_relax_points; 
 }
 
    

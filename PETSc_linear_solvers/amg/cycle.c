@@ -45,8 +45,8 @@ int         hypre_AMGCycle(hypre_AMGData *amg_data,
    int      *num_coeffs;
    int      *num_grid_sweeps;   
    int      *grid_relax_type;   
-/*   int     **grid_relax_points;  */
-   int      *grid_relax_points[4];
+   int     **grid_relax_points;  
+ 
 
 
 /* Local variables  */
@@ -84,26 +84,14 @@ int         hypre_AMGCycle(hypre_AMGData *amg_data,
 
    num_grid_sweeps     = hypre_AMGDataNumGridSweeps(amg_data);
    grid_relax_type     = hypre_AMGDataGridRelaxType(amg_data);
-/*   grid_relax_points   =  hypre_AMGDataGridRelaxPoints(amg_data); */
+   grid_relax_points   =  hypre_AMGDataGridRelaxPoints(amg_data); 
 
-/* temporary fix */
-   for (j = 0; j < 3; j++)
-   {
-      grid_relax_points[j] = hypre_CTAlloc(int,2);
-      grid_relax_points[j][0] = 1;
-      grid_relax_points[j][1] = -1;
-   }
-   grid_relax_points[3] = hypre_CTAlloc(int,1);
-   grid_relax_points[3][0] = 9;    
-/*end temporary fix */
+
 
    cycle_op_count = hypre_AMGDataCycleOpCount(amg_data);
 
 
     lev_counter = hypre_CTAlloc(int, num_levels);
-
-/*   D_mat = hypre_CTAlloc(double, num_unknowns * num_unknowns);
-   S_vec = hypre_CTAlloc(double, num_unknowns); */
 
 /* Initialize */
 
@@ -142,17 +130,6 @@ int         hypre_AMGCycle(hypre_AMGData *amg_data,
        lev_counter[k] = cycle_type;
    }
 
-/*------------------------------------------------------------------------
- * Set the initial cycling parameters
- *
- *     1. ntrlx[0] can have several meanings (nr1,nr2)
- *     nr1 defines the first fine grid sweep
- *     nr2 defines any subsequent sweeps
- *     
- *     ntrlx[0] = 0   - (0,0)
- *     ntrlx[0] = 1   - (ntrlx[1],ntrlx[2])
- *     ntrlx[0] > 9   - standard meaning
- *-----------------------------------------------------------------------*/
    
    level = 0;
    cycle_param = 0;
@@ -163,7 +140,6 @@ int         hypre_AMGCycle(hypre_AMGData *amg_data,
   
    while (Not_Finished)
    {
-   
       num_sweep = num_grid_sweeps[cycle_param];
       relax_type = grid_relax_type[cycle_param];
 
@@ -184,10 +160,12 @@ int         hypre_AMGCycle(hypre_AMGData *amg_data,
             switch (relax_points)
             {
                  case 1:
-                    cycle_op_count += num_coeffs[level+1]; 
+                    cycle_op_count += num_coeffs[level+1];
+                    break;
   
                  case -1: 
                     cycle_op_count += (num_coeffs[level]-num_coeffs[level+1]); 
+                    break;
             }
          }
 	 else
@@ -202,7 +180,7 @@ int         hypre_AMGCycle(hypre_AMGData *amg_data,
                                          relax_points,
                                          U_array[level],
                                          Vtemp);
-
+ 
          if (Solve_err_flag != 0) return(Solve_err_flag);
 
             
@@ -237,6 +215,7 @@ int         hypre_AMGCycle(hypre_AMGData *amg_data,
 
           alpha = 1.0;
           beta = 0.0;
+
           hypre_MatvecT(alpha,P_array[fine_grid],Vtemp,
                   beta,F_array[coarse_grid]);
 
@@ -261,7 +240,7 @@ int         hypre_AMGCycle(hypre_AMGData *amg_data,
 
           hypre_Matvec(alpha, P_array[fine_grid], U_array[coarse_grid],
                  beta, U_array[fine_grid]);            
-
+ 
           --level;
           cycle_param = 2;
           if (level == 0) cycle_param = 0;
@@ -275,9 +254,6 @@ int         hypre_AMGCycle(hypre_AMGData *amg_data,
    hypre_AMGDataCycleOpCount(amg_data) = cycle_op_count;
 
    hypre_TFree(lev_counter);
-
-/*   hypre_TFree(D_mat);
-   hypre_TFree(S_vec);  */
 
    return(Solve_err_flag);
 }

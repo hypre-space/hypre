@@ -104,9 +104,15 @@ int hypre_AMGSetup(hypre_AMGData *amg_data,
 
          ++level;
          A_array[level] = A_H;
-         coarse_size = hypre_CSRMatrixNumRows(A_array[level]); 
+         coarse_size = hypre_CSRMatrixNumRows(A_array[level]);
 
-         if (level >= max_levels || 
+         if (coarse_size <= 0)
+         {
+            --level;
+            break;
+         }
+
+         if (level+1 >= max_levels || 
                      coarse_size == fine_size || 
                               coarse_size <= coarse_threshold)
                                      not_finished_coarsening = 0;

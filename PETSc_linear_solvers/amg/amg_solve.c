@@ -108,7 +108,8 @@ int  hypre_AMGSolve(hypre_AMGData  *amg_data,
  *    Write the solver parameters
  *--------------------------------------------------------------------------*/
 
-/*   hypre_WriteSolverParams(tol, amg_data); */
+   if (amg_ioutdat > 1)
+              hypre_WriteSolverParams(amg_data); 
 
 
 /*--------------------------------------------------------------------------
@@ -235,7 +236,7 @@ int  hypre_AMGSolve(hypre_AMGData  *amg_data,
 
     if (amg_ioutdat >= 0)
     { 
-       fclose(fp);
+ /*      fclose(fp); */
     }
 
    hypre_TFree(F_array);
