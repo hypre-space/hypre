@@ -54,7 +54,7 @@ hypre_NewStructGridToCoordTable( hypre_StructGrid    *grid,
     *------------------------------------------------------*/
 
    boxes = hypre_StructGridBoxes(grid);
-   all_boxes = hypre_StructGridAllBoxes(grid);
+   all_boxes = (hypre_BoxArray *)hypre_StructGridAllBoxes(grid);/* Sun C bug */
    box_neighborhood = hypre_FindBoxApproxNeighborhood(boxes, all_boxes, stencil);
 
    boxes = hypre_BoxArrayCreate(0);
