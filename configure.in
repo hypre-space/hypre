@@ -328,9 +328,9 @@ then
          AC_CHECK_PROGS(CXX,cxx KCC g++)
          AC_CHECK_PROGS(F77,f77 kf77 g77)
        else
-         AC_CHECK_PROGS(CC,cc kcc mpicc) 
-         AC_CHECK_PROGS(CXX,cxx KCC mpiCC) 
-         AC_CHECK_PROGS(F77,f77 kf77 mpif77)
+         AC_CHECK_PROGS(CC,mpicc cc kcc) 
+         AC_CHECK_PROGS(CXX,mpiCC cxx KCC) 
+         AC_CHECK_PROGS(F77,mpif77 f77 kf77)
        fi
      fi
 
