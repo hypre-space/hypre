@@ -259,7 +259,7 @@ hypre_GenerateLaplacian( int      nx,
       }
    }
 
-   A = hypre_CreateCSRMatrix(num_rows, num_rows, A_i[num_rows]);
+   A = hypre_CSRMatrixCreate(num_rows, num_rows, A_i[num_rows]);
 
    hypre_CSRMatrixI(A) = A_i;
    hypre_CSRMatrixJ(A) = A_j;

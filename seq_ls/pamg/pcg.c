@@ -92,62 +92,62 @@ void    *data;
    if (two_norm)
    {
       /* eps = (tol^2)*<b,b> */
-      bi_prod = hypre_InnerProd(b, b);
+      bi_prod = hypre_VectorInnerProd(b, b);
       eps = (tol*tol)*bi_prod;
    }
    else
    {
       /* eps = (tol^2)*<C*b,b> */
-      hypre_SetVectorConstantValues(p, 0.0);
+      hypre_VectorSetConstantValues(p, 0.0);
       precond(precond_data, b, p);
-      bi_prod = hypre_InnerProd(p, b);
+      bi_prod = hypre_VectorInnerProd(p, b);
       eps = (tol*tol)*bi_prod;
    }
 
    /* r = b - Ax */
-   hypre_CopyVector(b, r);
-   hypre_Matvec(-1.0, A, x, 1.0, r);
+   hypre_VectorCopy(b, r);
+   hypre_CSRMatrixMatvec(-1.0, A, x, 1.0, r);
  
    /* Set initial residual norm, print to log */
-   norm_log[0] = sqrt(hypre_InnerProd(r,r));
+   norm_log[0] = sqrt(hypre_VectorInnerProd(r,r));
    fprintf(log_fp, "\nInitial residual norm:    %e\n\n", norm_log[0]);
 
 
    /* p = C*r */
-   hypre_SetVectorConstantValues(p, 0.0);
+   hypre_VectorSetConstantValues(p, 0.0);
    precond(precond_data,r,p);
 
    /* gamma = <r,p> */
-   gamma = hypre_InnerProd(r,p);
+   gamma = hypre_VectorInnerProd(r,p);
 
    while ((i+1) <= max_iter)
    {
       i++;
 
       /* s = A*p */
-      hypre_Matvec(1.0, A, p, 0.0, s);
+      hypre_CSRMatrixMatvec(1.0, A, p, 0.0, s);
 
       /* alpha = gamma / <s,p> */
-      alpha = gamma / hypre_InnerProd(s, p);
+      alpha = gamma / hypre_VectorInnerProd(s, p);
 
       gamma_old = gamma;
 
       /* x = x + alpha*p */
-      hypre_Axpy(alpha, p, x);
+      hypre_VectorAxpy(alpha, p, x);
 
       /* r = r - alpha*s */
-      hypre_Axpy(-alpha, s, r);
+      hypre_VectorAxpy(-alpha, s, r);
 	 
       /* s = C*r */
-      hypre_SetVectorConstantValues(s, 0.0);
+      hypre_VectorSetConstantValues(s, 0.0);
       precond(precond_data,r,s);
 
       /* gamma = <r,s> */
-      gamma = hypre_InnerProd(r, s);
+      gamma = hypre_VectorInnerProd(r, s);
 
       /* set i_prod for convergence test */
       if (two_norm)
-	 i_prod = hypre_InnerProd(r,r);
+	 i_prod = hypre_VectorInnerProd(r,r);
       else
 	 i_prod = gamma;
 
@@ -172,8 +172,8 @@ void    *data;
       beta = gamma / gamma_old;
 
       /* p = s + beta p */
-      hypre_ScaleVector(beta, p);   
-      hypre_Axpy(1.0, s, p);
+      hypre_VectorScale(beta, p);   
+      hypre_VectorAxpy(1.0, s, p);
    }
 
 #if 1
@@ -235,14 +235,14 @@ void     *data;
 
    size = hypre_CSRMatrixNumRows(A);
 
-   PCGDataP(pcg_data) = hypre_CreateVector(size);
-   hypre_InitializeVector(PCGDataP(pcg_data));
+   PCGDataP(pcg_data) = hypre_VectorCreate(size);
+   hypre_VectorInitialize(PCGDataP(pcg_data));
 
-   PCGDataS(pcg_data) = hypre_CreateVector(size);
-   hypre_InitializeVector(PCGDataS(pcg_data));
+   PCGDataS(pcg_data) = hypre_VectorCreate(size);
+   hypre_VectorInitialize(PCGDataS(pcg_data));
 
-   PCGDataR(pcg_data) = hypre_CreateVector(size);
-   hypre_InitializeVector(PCGDataR(pcg_data));
+   PCGDataR(pcg_data) = hypre_VectorCreate(size);
+   hypre_VectorInitialize(PCGDataR(pcg_data));
 
 
    PCGDataPrecond(pcg_data)     = precond;

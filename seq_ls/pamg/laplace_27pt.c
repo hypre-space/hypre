@@ -1530,7 +1530,7 @@ hypre_GenerateLaplacian27pt(int      nx,
    }
    }
 
-   A = hypre_CreateCSRMatrix(grid_size, grid_size, A_i[grid_size]);
+   A = hypre_CSRMatrixCreate(grid_size, grid_size, A_i[grid_size]);
 
    hypre_CSRMatrixI(A) = A_i;
    hypre_CSRMatrixJ(A) = A_j;

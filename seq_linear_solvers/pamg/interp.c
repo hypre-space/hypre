@@ -305,7 +305,7 @@ hypre_AMGBuildInterp( hypre_CSRMatrix  *A,
   
    P_i[n_fine] = jj_counter;
 
-   P = hypre_CreateCSRMatrix(n_fine, n_coarse, P_size);
+   P = hypre_CSRMatrixCreate(n_fine, n_coarse, P_size);
    hypre_CSRMatrixData(P) = P_data; 
    hypre_CSRMatrixI(P) = P_i; 
    hypre_CSRMatrixJ(P) = P_j; 

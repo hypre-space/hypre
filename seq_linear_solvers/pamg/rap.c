@@ -318,7 +318,7 @@ hypre_CSRMatrix **RAP_ptr;
 
  
 
-   RAP = hypre_CreateCSRMatrix(n_coarse, n_coarse, RAP_size);
+   RAP = hypre_CSRMatrixCreate(n_coarse, n_coarse, RAP_size);
    hypre_CSRMatrixData(RAP) = RAP_data; 
    hypre_CSRMatrixI(RAP) = RAP_i; 
    hypre_CSRMatrixJ(RAP) = RAP_j; 
@@ -329,7 +329,7 @@ hypre_CSRMatrix **RAP_ptr;
     *  Free R and marker arrays.
     *-----------------------------------------------------------------------*/
 
-   hypre_DestroyCSRMatrix(R);
+   hypre_CSRMatrixDestroy(R);
    hypre_TFree(P_marker);   
    hypre_TFree(A_marker);
 

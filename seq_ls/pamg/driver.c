@@ -238,7 +238,7 @@ main( int   argc,
    hypre_PrintParCSRMatrix(A, "driver.out.A");
 #endif
 #if 0
-   hypre_PrintCSRMatrix(A, "driver.out.A");
+   hypre_CSRMatrixPrint(A, "driver.out.A");
 #endif
 
 #if 0
@@ -257,43 +257,43 @@ main( int   argc,
    {
       BuildRhsFromFile(argc, argv, build_rhs_arg_index, A, &b);
  
-      x = hypre_CreateVector( hypre_CSRMatrixNumRows(A));
-      hypre_InitializeVector(x);
-      hypre_SetVectorConstantValues(x, 0.0);      
+      x = hypre_VectorCreate( hypre_CSRMatrixNumRows(A));
+      hypre_VectorInitialize(x);
+      hypre_VectorSetConstantValues(x, 0.0);      
    }
    else if ( build_rhs_type == 3 )
    {
-      b = hypre_CreateVector( hypre_CSRMatrixNumRows(A));
-      hypre_InitializeVector(b);
-      hypre_SetVectorRandomValues(b, 22775);
-      norm = 1.0/sqrt(hypre_InnerProd(b,b));
-      ierr = hypre_ScaleVector(norm, b);      
+      b = hypre_VectorCreate( hypre_CSRMatrixNumRows(A));
+      hypre_VectorInitialize(b);
+      hypre_VectorSetRandomValues(b, 22775);
+      norm = 1.0/sqrt(hypre_VectorInnerProd(b,b));
+      ierr = hypre_VectorScale(norm, b);      
  
-      x = hypre_CreateVector( hypre_CSRMatrixNumRows(A));
-      hypre_InitializeVector(x);
-      hypre_SetVectorConstantValues(x, 0.0);      
+      x = hypre_VectorCreate( hypre_CSRMatrixNumRows(A));
+      hypre_VectorInitialize(x);
+      hypre_VectorSetConstantValues(x, 0.0);      
    }
    else if ( build_rhs_type == 4 )
    {
-      x = hypre_CreateVector( hypre_CSRMatrixNumRows(A));
-      hypre_InitializeVector(x);
-      hypre_SetVectorConstantValues(x, 1.0);      
+      x = hypre_VectorCreate( hypre_CSRMatrixNumRows(A));
+      hypre_VectorInitialize(x);
+      hypre_VectorSetConstantValues(x, 1.0);      
  
-      b = hypre_CreateVector( hypre_CSRMatrixNumRows(A));
-      hypre_InitializeVector(b);
-      hypre_Matvec(1.0,A,x,0.0,b);
+      b = hypre_VectorCreate( hypre_CSRMatrixNumRows(A));
+      hypre_VectorInitialize(b);
+      hypre_CSRMatrixMatvec(1.0,A,x,0.0,b);
  
-      hypre_SetVectorConstantValues(x, 0.0);      
+      hypre_VectorSetConstantValues(x, 0.0);      
    }
    else
    {
-      b = hypre_CreateVector(hypre_CSRMatrixNumRows(A));
-      hypre_InitializeVector(b);
-      hypre_SetVectorConstantValues(b, 0.0);
+      b = hypre_VectorCreate(hypre_CSRMatrixNumRows(A));
+      hypre_VectorInitialize(b);
+      hypre_VectorSetConstantValues(b, 0.0);
 
-      x = hypre_CreateVector(hypre_CSRMatrixNumRows(A));
-      hypre_InitializeVector(x);
-      hypre_SetVectorConstantValues(x, 1.0);
+      x = hypre_VectorCreate(hypre_CSRMatrixNumRows(A));
+      hypre_VectorInitialize(x);
+      hypre_VectorSetConstantValues(x, 1.0);
    }
    /*-----------------------------------------------------------
     * Solve the system using AMG
@@ -420,9 +420,9 @@ main( int   argc,
    hypre_DestroyParVector(b);
    hypre_DestroyParVector(x);
 #endif
-   hypre_DestroyCSRMatrix(A);
-   hypre_DestroyVector(b);
-   hypre_DestroyVector(x);
+   hypre_CSRMatrixDestroy(A);
+   hypre_VectorDestroy(b);
+   hypre_VectorDestroy(x);
 
 #if 0
    hypre_TFree(global_part);
@@ -496,7 +496,7 @@ BuildFromFile( int               argc,
     * Generate the matrix 
     *-----------------------------------------------------------*/
  
-   A = hypre_ReadCSRMatrix(filename);
+   A = hypre_CSRMatrixRead(filename);
 
    *A_ptr = A;
 #if 0
@@ -1153,7 +1153,7 @@ BuildRhsFromFile( int                  argc,
     * Generate the matrix 
     *-----------------------------------------------------------*/
  
-   b = hypre_ReadVector(filename);
+   b = hypre_VectorRead(filename);
  
    *b_ptr = b;
  

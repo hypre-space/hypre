@@ -74,8 +74,8 @@ hypre_CSRMatrix   **AT;
    num_colsAT = num_rowsA;
    num_nonzerosAT = num_nonzerosA;
 
-   *AT = hypre_CreateCSRMatrix(num_rowsAT, num_colsAT, num_nonzerosAT);
-   hypre_InitializeCSRMatrix(*AT);
+   *AT = hypre_CSRMatrixCreate(num_rowsAT, num_colsAT, num_nonzerosAT);
+   hypre_CSRMatrixInitialize(*AT);
 
    AT_data = hypre_CSRMatrixData(*AT);
    AT_i = hypre_CSRMatrixI(*AT);

@@ -104,16 +104,16 @@ main( int   argc,
    hypre_AMGSetCycleType(cycle_type, amg_data);
 
    filename = argv[1];
-   A = hypre_ReadCSRMatrix(filename);
+   A = hypre_CSRMatrixRead(filename);
 
    num_fine = hypre_CSRMatrixNumRows(A);
 
-   f = hypre_CreateVector(num_fine);
-   hypre_InitializeVector(f);
-   hypre_SetVectorConstantValues(f, 1.0);
+   f = hypre_VectorCreate(num_fine);
+   hypre_VectorInitialize(f);
+   hypre_VectorSetConstantValues(f, 1.0);
                               
-   u = hypre_CreateVector(num_fine);
-   hypre_InitializeVector(u);
+   u = hypre_VectorCreate(num_fine);
+   hypre_VectorInitialize(u);
 
    tmp = hypre_CTAlloc(double, num_fine);
 
@@ -124,7 +124,7 @@ main( int   argc,
    hypre_VectorData(u) = tmp;  
 
 
-/*   hypre_SetVectorConstantValues(u, 0.0); */
+/*   hypre_VectorSetConstantValues(u, 0.0); */
 
    /* Set the relaxation parameters for symmetric cycle */
 

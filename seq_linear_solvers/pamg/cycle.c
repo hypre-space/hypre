@@ -195,26 +195,26 @@ hypre_AMGCycle( void           *amg_vdata,
       {
                                
          /*---------------------------------------------------------------
-          * Visit coarser level next.  Compute residual using hypre_Matvec.
-          * Perform restriction using hypre_MatvecT.
+          * Visit coarser level next.  Compute residual using hypre_CSRMatrixMatvec.
+          * Perform restriction using hypre_CSRMatrixMatvecT.
           * Reset counters and cycling parameters for coarse level
           *--------------------------------------------------------------*/
 
          fine_grid = level;
          coarse_grid = level + 1;
 
-         hypre_SetVectorConstantValues(U_array[coarse_grid], 0.0);
+         hypre_VectorSetConstantValues(U_array[coarse_grid], 0.0);
           
-         hypre_CopyVector(F_array[fine_grid],Vtemp);
+         hypre_VectorCopy(F_array[fine_grid],Vtemp);
          alpha = -1.0;
          beta = 1.0;
-         hypre_Matvec(alpha, A_array[fine_grid], U_array[fine_grid],
+         hypre_CSRMatrixMatvec(alpha, A_array[fine_grid], U_array[fine_grid],
                       beta, Vtemp);
 
          alpha = 1.0;
          beta = 0.0;
 
-         hypre_MatvecT(alpha,P_array[fine_grid],Vtemp,
+         hypre_CSRMatrixMatvecT(alpha,P_array[fine_grid],Vtemp,
                        beta,F_array[coarse_grid]);
 
          ++level;
@@ -228,7 +228,7 @@ hypre_AMGCycle( void           *amg_vdata,
                             
          /*---------------------------------------------------------------
           * Visit finer level next.
-          * Interpolate and add correction using hypre_Matvec.
+          * Interpolate and add correction using hypre_CSRMatrixMatvec.
           * Reset counters and cycling parameters for finer level.
           *--------------------------------------------------------------*/
 
@@ -237,7 +237,7 @@ hypre_AMGCycle( void           *amg_vdata,
          alpha = 1.0;
          beta = 1.0;
 
-         hypre_Matvec(alpha, P_array[fine_grid], U_array[coarse_grid],
+         hypre_CSRMatrixMatvec(alpha, P_array[fine_grid], U_array[coarse_grid],
                       beta, U_array[fine_grid]);            
  
          --level;

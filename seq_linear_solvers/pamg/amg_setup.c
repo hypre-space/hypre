@@ -121,9 +121,9 @@ hypre_AMGSetup( void            *amg_vdata,
 
       if (amg_ioutdat == 5 && level == 0)
       {
-         hypre_PrintCSRMatrix(S,"S_mat");
+         hypre_CSRMatrixPrint(S,"S_mat");
       }
-      hypre_DestroyCSRMatrix(S);
+      hypre_CSRMatrixDestroy(S);
  
       /*-------------------------------------------------------------
        * Build coarse-grid operator, A_array[level+1] by R*A*P
@@ -164,11 +164,11 @@ hypre_AMGSetup( void            *amg_vdata,
 
    for (j = 1; j < num_levels; j++)
    {
-      F_array[j] = hypre_CreateVector(hypre_CSRMatrixNumRows(A_array[j]));
-      hypre_InitializeVector(F_array[j]);
+      F_array[j] = hypre_VectorCreate(hypre_CSRMatrixNumRows(A_array[j]));
+      hypre_VectorInitialize(F_array[j]);
 
-      U_array[j] = hypre_CreateVector(hypre_CSRMatrixNumRows(A_array[j]));
-      hypre_InitializeVector(U_array[j]);
+      U_array[j] = hypre_VectorCreate(hypre_CSRMatrixNumRows(A_array[j]));
+      hypre_VectorInitialize(U_array[j]);
    }
 
    hypre_AMGDataFArray(amg_data) = F_array;
@@ -190,14 +190,14 @@ hypre_AMGSetup( void            *amg_vdata,
       for (j = 0; j < level+1; j++)
       {
          sprintf(fnam,"SP_A_%d.ysmp",j);
-         hypre_PrintCSRMatrix(A_array[j],fnam);
+         hypre_CSRMatrixPrint(A_array[j],fnam);
 
       }                         
 
       for (j = 0; j < level; j++)
       { 
          sprintf(fnam,"SP_P_%d.ysmp",j);
-         hypre_PrintCSRMatrix(P_array[j],fnam);
+         hypre_CSRMatrixPrint(P_array[j],fnam);
       }   
    } 
                      

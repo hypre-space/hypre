@@ -88,8 +88,8 @@ hypre_AMGSolve( void            *amg_vdata,
    F_array[0] = f;
    U_array[0] = u;
 
-   Vtemp = hypre_CreateVector(num_variables[0]);
-   hypre_InitializeVector(Vtemp);
+   Vtemp = hypre_VectorCreate(num_variables[0]);
+   hypre_VectorInitialize(Vtemp);
    hypre_AMGDataVtemp(amg_data) = Vtemp;
 
    for (j = 1; j < num_levels; j++)
@@ -134,12 +134,12 @@ hypre_AMGSolve( void            *amg_vdata,
     *    Compute initial fine-grid residual and print to logfile
     *-----------------------------------------------------------------------*/
 
-   hypre_CopyVector(F_array[0],Vtemp);
-   hypre_Matvec(alpha,A_array[0],U_array[0],beta,Vtemp);
-   resid_nrm = sqrt(hypre_InnerProd(Vtemp,Vtemp));
+   hypre_VectorCopy(F_array[0],Vtemp);
+   hypre_CSRMatrixMatvec(alpha,A_array[0],U_array[0],beta,Vtemp);
+   resid_nrm = sqrt(hypre_VectorInnerProd(Vtemp,Vtemp));
 
    resid_nrm_init = resid_nrm;
-   rhs_norm = sqrt(hypre_InnerProd(f,f));
+   rhs_norm = sqrt(hypre_VectorInnerProd(f,f));
    relative_resid = 9999;
    if (rhs_norm)
    {
@@ -173,9 +173,9 @@ hypre_AMGSolve( void            *amg_vdata,
        *    Compute  fine-grid residual and residual norm
        *----------------------------------------------------------------*/
 
-      hypre_CopyVector(F_array[0],Vtemp);
-      hypre_Matvec(alpha,A_array[0],U_array[0],beta,Vtemp);
-      resid_nrm = sqrt(hypre_InnerProd(Vtemp,Vtemp));
+      hypre_VectorCopy(F_array[0],Vtemp);
+      hypre_CSRMatrixMatvec(alpha,A_array[0],U_array[0],beta,Vtemp);
+      resid_nrm = sqrt(hypre_VectorInnerProd(Vtemp,Vtemp));
 
       conv_factor = resid_nrm / old_resid;
       relative_resid = 9999;

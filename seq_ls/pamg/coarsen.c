@@ -148,9 +148,9 @@ hypre_AMGCoarsen( hypre_CSRMatrix    *A,
     * to "unaccounted-for" dependence.
     *----------------------------------------------------------------*/
 
-   S = hypre_CreateCSRMatrix(num_variables, num_variables,
+   S = hypre_CSRMatrixCreate(num_variables, num_variables,
                              A_i[num_variables]);
-   hypre_InitializeCSRMatrix(S);
+   hypre_CSRMatrixInitialize(S);
 
    S_i           = hypre_CSRMatrixI(S);
    S_j           = hypre_CSRMatrixJ(S);
@@ -348,7 +348,7 @@ hypre_AMGCoarsen( hypre_CSRMatrix    *A,
 
       /* print out strength matrix */
       sprintf(filename, "coarsen.out.strength.%04d", iter);
-      hypre_PrintCSRMatrix(S, filename);
+      hypre_CSRMatrixPrint(S, filename);
 
       /* print out C/F marker */
       sprintf(filename, "coarsen.out.CF.%04d", iter);
@@ -565,8 +565,8 @@ hypre_AMGCoarsenRuge( hypre_CSRMatrix    *A,
     *----------------------------------------------------------------*/
 
    num_strong = A_i[num_variables] - num_variables;
-   S = hypre_CreateCSRMatrix(num_variables, num_variables, num_strong);
-   ST = hypre_CreateCSRMatrix(num_variables, num_variables, num_strong);
+   S = hypre_CSRMatrixCreate(num_variables, num_variables, num_strong);
+   ST = hypre_CSRMatrixCreate(num_variables, num_variables, num_strong);
 
    S_i = hypre_CTAlloc(int,num_variables+1);
    hypre_CSRMatrixI(S) = S_i;
@@ -872,7 +872,7 @@ hypre_AMGCoarsenRuge( hypre_CSRMatrix    *A,
    hypre_TFree(measure_array);
    hypre_TFree(graph_array);
    hypre_TFree(graph_ptr);
-   hypre_DestroyCSRMatrix(ST);
+   hypre_CSRMatrixDestroy(ST);
 
    *S_ptr           = S;
    *CF_marker_ptr   = CF_marker;
@@ -964,8 +964,8 @@ hypre_AMGCoarsenRugeLoL( hypre_CSRMatrix    *A,
     *----------------------------------------------------------------*/
 
    num_strong = A_i[num_variables] - num_variables;
-   S = hypre_CreateCSRMatrix(num_variables, num_variables, num_strong);
-   ST = hypre_CreateCSRMatrix(num_variables, num_variables, num_strong);
+   S = hypre_CSRMatrixCreate(num_variables, num_variables, num_strong);
+   ST = hypre_CSRMatrixCreate(num_variables, num_variables, num_strong);
 
    S_i = hypre_CTAlloc(int,num_variables+1);
    hypre_CSRMatrixI(S) = S_i;
@@ -1283,7 +1283,7 @@ hypre_AMGCoarsenRugeLoL( hypre_CSRMatrix    *A,
    hypre_TFree(measure_array);
    hypre_TFree(graph_array);
    hypre_TFree(graph_ptr);
-   hypre_DestroyCSRMatrix(ST);
+   hypre_CSRMatrixDestroy(ST);
 
    *S_ptr           = S;
    *CF_marker_ptr   = CF_marker;
