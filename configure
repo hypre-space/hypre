@@ -8147,6 +8147,29 @@ fi
 
 
 
+if test "$casc_user_chose_blas" = "yes"
+then
+   for blas_lib in $BLASLIBS; do
+      if test $blas_lib = "-ldxml"
+      then
+
+cat >>confdefs.h <<\_ACEOF
+#define HYPRE_USING_DXML 1
+_ACEOF
+
+      fi
+
+      if test $blas_lib = "-lessl"
+      then
+
+cat >>confdefs.h <<\_ACEOF
+#define HYPRE_USING_ESSL 1
+_ACEOF
+
+      fi
+   done
+fi
+
 if test "$casc_user_chose_blas" = "no"
 then
 
@@ -8385,6 +8408,20 @@ cat >>confdefs.h <<\_ACEOF
 _ACEOF
 
    fi
+fi
+
+if test "$casc_user_chose_lapack" = "yes"
+then
+   for lapack_lib in $LAPACKLIBS; do
+      if test $lapack_lib = "-lessl"
+      then
+
+cat >>confdefs.h <<\_ACEOF
+#define HYPRE_USING_ESSL 1
+_ACEOF
+
+      fi
+   done
 fi
 
 if test "$casc_user_chose_lapack" = "no"

@@ -691,6 +691,24 @@ dnl *********************************************************************
 HYPRE_FIND_G2C
 
 dnl *********************************************************************
+dnl * Define appropriate variables if user set blas to either essl or dxml
+dnl *********************************************************************
+if test "$casc_user_chose_blas" = "yes"
+then
+   for blas_lib in $BLASLIBS; do
+      if test $blas_lib = "-ldxml"
+      then
+         AC_DEFINE(HYPRE_USING_DXML, 1, [Using DXML for Blas.])
+      fi
+
+      if test $blas_lib = "-lessl"
+      then
+         AC_DEFINE(HYPRE_USING_ESSL, 1, [Using ESSL for Blas.])
+      fi
+   done
+fi
+
+dnl *********************************************************************
 dnl * Find BLAS library if not already set by the user 
 dnl * If user specified --without-blas or a system one cannot be found,
 dnl * default to internal HYPRE routines
@@ -717,6 +735,19 @@ then
    else
       AC_DEFINE(HAVE_BLAS, 1, [BLAS library is system provided.])
    fi
+fi
+
+dnl *********************************************************************
+dnl * Define appropriate variables if user set lapack to essl
+dnl *********************************************************************
+if test "$casc_user_chose_lapack" = "yes"
+then
+   for lapack_lib in $LAPACKLIBS; do
+      if test $lapack_lib = "-lessl"
+      then
+         AC_DEFINE(HYPRE_USING_ESSL, 1, [Using ESSL for Lapack.])
+      fi
+   done
 fi
 
 dnl *********************************************************************
