@@ -1094,8 +1094,8 @@ void HYPRE_LinSysCore::buildSchurReducedRHS()
 
     CTNRows = A21NRows_;
     CTNCols = A21NCols_;
-    MPI_Allreduce(&CTGlobalNRows, &CTNRows, 1, MPI_INT, MPI_SUM, comm_);
-    MPI_Allreduce(&CTGlobalNCols, &CTNCols, 1, MPI_INT, MPI_SUM, comm_);
+    MPI_Allreduce(&CTNRows, &CTGlobalNRows, 1, MPI_INT, MPI_SUM, comm_);
+    MPI_Allreduce(&CTNCols, &CTGlobalNCols, 1, MPI_INT, MPI_SUM, comm_);
     Cmat         = HYA12_; 
     Mmat         = HYinvA22_; 
     CNRows       = CTNCols;

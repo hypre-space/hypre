@@ -6421,7 +6421,7 @@ void HYPRE_LinSysCore::addToProjectionSpace(HYPRE_IJVector xvec,
     if ( projectCurrSize_ == 0 && HYpbs_ == NULL )
     {
        nrows = localEndRow_ - localStartRow_ + 1;
-       MPI_Allreduce(&numGlobalRows, &nrows,1,MPI_INT,MPI_SUM,comm_);
+       MPI_Allreduce(&nrows, &numGlobalRows, 1, MPI_INT, MPI_SUM, comm_);
        HYpxs_ = new HYPRE_IJVector[projectSize_];
        HYpbs_ = new HYPRE_IJVector[projectSize_];
        for ( i = 0; i < projectSize_; i++ )
