@@ -441,7 +441,7 @@ FILES = \
 BUILT_SOURCES = hypre-stamp
 
 clean-local:
-	$(RM) -f hypre-stamp
+	rm -f hypre-stamp
 
 hypre-stamp:
 	@ \
@@ -451,9 +451,18 @@ hypre-stamp:
 	do \
 	  if [ -d ../$$i ]; \
 	  then \
-	    cp -f ../$$i/*.lo .; \
-	    cp -f ../$$i/.libs/*.o .libs; \
-	    cp -f ../$$i/*.o .; \
+	    for j1 in ../$$i/*.lo; \
+	    do \
+	      test -f $$j1 || cp -f ../$$j1 .; \
+	    done; \
+	    for j2 in ../$$i/.libs/*.o; \
+	    do \
+	      test -f $$j2 || cp -f ../$$j2 .libs; \
+	    done; \
+	    for j3 in ../$$i/*.o; \
+	    do \
+	      test -f $$j3 || cp -f ../$$j3 .; \
+	    done; \
 	  fi; \
 	done
 
