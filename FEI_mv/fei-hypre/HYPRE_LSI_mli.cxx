@@ -84,6 +84,7 @@ typedef struct HYPRE_LSI_MLI_Struct
    int      cycleType_;           /* 1 for V and 2 for W */
    int      maxIterations_;       /* default - 1 iteration */
    char     method_[20];          /* default - smoothed aggregation */
+   char     coarsenScheme_[20];   /* default - default in MLI */
    char     preSmoother_[20];     /* default - symmetric Gauss Seidel */
    char     postSmoother_ [20];   /* default - symmetric Gauss Seidel */
    int      preNSweeps_;          /* default - 2 smoothing steps */
@@ -161,23 +162,24 @@ int HYPRE_LSI_MLICreate( MPI_Comm comm, HYPRE_Solver *solver )
    *solver = (HYPRE_Solver) mli_object;
    mli_object->mpiComm_             = comm;
    mli_object->outputLevel_         = 0;
-   mli_object->nLevels_             = 30;
+   mli_object->nLevels_             = 0;
    mli_object->maxIterations_       = 1;
    mli_object->cycleType_           = 1;
    strcpy(mli_object->method_ , "AMGSA");
-   strcpy(mli_object->preSmoother_, "HSGS");
-   strcpy(mli_object->postSmoother_, "HSGS");
-   mli_object->preNSweeps_          = 2;
-   mli_object->postNSweeps_         = 2;
+   strcpy(mli_object->coarsenScheme_ , "default"); /* default in MLI */
+   strcpy(mli_object->preSmoother_, "default");
+   strcpy(mli_object->postSmoother_, "default");
+   mli_object->preNSweeps_          = 1;
+   mli_object->postNSweeps_         = 1;
    mli_object->preSmootherWts_      = NULL;
    mli_object->postSmootherWts_     = NULL;
    mli_object->smootherPrintRNorm_  = 0;
    mli_object->smootherFindOmega_   = 0;
    mli_object->strengthThreshold_   = 0.0;
-   strcpy(mli_object->coarseSolver_, "SuperLU");
+   strcpy(mli_object->coarseSolver_, "default"); /* default in MLI */
    mli_object->coarseSolverNSweeps_ = 0;
    mli_object->coarseSolverWts_     = NULL;
-   mli_object->minCoarseSize_       = 500;
+   mli_object->minCoarseSize_       = 0;
    mli_object->scalar_              = 0;
    mli_object->nodeDOF_             = 1;
    mli_object->spaceDim_            = 1;
@@ -187,7 +189,7 @@ int HYPRE_LSI_MLICreate( MPI_Comm comm, HYPRE_Solver *solver )
    mli_object->nCoordAccept_        = 0;
    mli_object->nullScales_          = NULL;
    mli_object->calibrationSize_     = 0;
-   mli_object->Pweight_             = 0.0;
+   mli_object->Pweight_             = -1.0;      /* default in MLI */
    mli_object->adjustNullSpace_     = 0;
    mli_object->numResetNull_        = 0;
    mli_object->resetNullIndices_    = NULL;
@@ -290,12 +292,22 @@ int HYPRE_LSI_MLISetup( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
    /* -------------------------------------------------------- */ 
 
    method = MLI_Method_CreateFromName(mli_object->method_,mpiComm);
-   sprintf(paramString, "setOutputLevel %d", mli_object->outputLevel_);
-   sprintf(paramString, "setNumLevels %d", mli_object->nLevels_);
-   method->setParams( paramString, 0, NULL );
-   sprintf(paramString, "setStrengthThreshold %f",
+   if ( mli_object->outputLevel_ > 0 )
+   {
+      sprintf(paramString, "setOutputLevel %d", mli_object->outputLevel_);
+      method->setParams( paramString, 0, NULL );
+   }
+   if ( mli_object->nLevels_ > 0 )
+   {
+      sprintf(paramString, "setNumLevels %d", mli_object->nLevels_);
+      method->setParams( paramString, 0, NULL );
+   }
+   if ( mli_object->strengthThreshold_ > 0.0 )
+   {
+      sprintf(paramString, "setStrengthThreshold %f",
            mli_object->strengthThreshold_);
-   method->setParams( paramString, 0, NULL );
+      method->setParams( paramString, 0, NULL );
+   }
    if ( mli_object->scalar_ == 1 )
    {
       strcpy(paramString, "scalar");
@@ -326,47 +338,70 @@ int HYPRE_LSI_MLISetup( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
    /* set up presmoother                                       */
    /* -------------------------------------------------------- */ 
 
-   targc    = 2;
-   targv[0] = (char *) &mli_object->preNSweeps_;
-   targv[1] = (char *) mli_object->preSmootherWts_;
-   sprintf(paramString, "setPreSmoother %s", mli_object->preSmoother_);
-   method->setParams( paramString, targc, targv );
+   if ( strcmp(mli_object->preSmoother_, "default") )
+   {
+      targc    = 2;
+      targv[0] = (char *) &mli_object->preNSweeps_;
+      targv[1] = (char *) mli_object->preSmootherWts_;
+      sprintf(paramString, "setPreSmoother %s", mli_object->preSmoother_);
+      method->setParams( paramString, targc, targv );
+   }
 
    /* -------------------------------------------------------- */ 
    /* set up postsmoother                                      */
    /* -------------------------------------------------------- */ 
 
-   targc    = 2;
-   targv[0] = (char *) &mli_object->postNSweeps_;
-   targv[1] = (char *) mli_object->postSmootherWts_;
-   sprintf(paramString, "setPostSmoother %s", mli_object->postSmoother_);
-   method->setParams( paramString, targc, targv );
+   if ( strcmp(mli_object->preSmoother_, "default") )
+   {
+      targc    = 2;
+      targv[0] = (char *) &mli_object->postNSweeps_;
+      targv[1] = (char *) mli_object->postSmootherWts_;
+      sprintf(paramString, "setPostSmoother %s", mli_object->postSmoother_);
+      method->setParams( paramString, targc, targv );
+   }
 
    /* -------------------------------------------------------- */ 
    /* set up coarse solver                                     */
    /* -------------------------------------------------------- */ 
 
-   targc    = 2;
-   targv[0] = (char *) &(mli_object->coarseSolverNSweeps_);
-   targv[1] = (char *) mli_object->coarseSolverWts_;
-   sprintf(paramString, "setCoarseSolver %s", mli_object->coarseSolver_);
-   method->setParams( paramString, targc, targv );
+   if ( strcmp(mli_object->coarseSolver_, "default") )
+   {
+      targc    = 2;
+      targv[0] = (char *) &(mli_object->coarseSolverNSweeps_);
+      targv[1] = (char *) mli_object->coarseSolverWts_;
+      sprintf(paramString, "setCoarseSolver %s", mli_object->coarseSolver_);
+      method->setParams( paramString, targc, targv );
+   }
 
    /* -------------------------------------------------------- */ 
-   /* load minimum coarse grid size                            */
+   /* load minimum coarse grid size and others                 */
    /* -------------------------------------------------------- */ 
 
-   sprintf( paramString, "setMinCoarseSize %d", mli_object->minCoarseSize_ );
-   method->setParams( paramString, 0, NULL );
-   sprintf( paramString, "setPweight %e", mli_object->Pweight_ );
-   method->setParams( paramString, 0, NULL );
+   if ( mli_object->minCoarseSize_ != 0 )
+   {
+      sprintf(paramString, "setMinCoarseSize %d",mli_object->minCoarseSize_);
+      method->setParams( paramString, 0, NULL );
+   }
+   if ( mli_object->Pweight_ >= 0.0 )
+   {
+      sprintf( paramString, "setPweight %e", mli_object->Pweight_ );
+      method->setParams( paramString, 0, NULL );
+   }
+   if ( strcmp(mli_object->coarsenScheme_, "default") )
+   {
+      sprintf(paramString, "setCoarsenScheme %s",mli_object->coarsenScheme_);
+      method->setParams( paramString, 0, NULL );
+   }
 
    /* -------------------------------------------------------- */ 
    /* load calibration size                                    */
    /* -------------------------------------------------------- */ 
 
-   sprintf(paramString, "setCalibrationSize %d", mli_object->calibrationSize_);
-   method->setParams( paramString, 0, NULL );
+   if ( mli_object->calibrationSize_ > 0 )
+   {
+      sprintf(paramString,"setCalibrationSize %d",mli_object->calibrationSize_);
+      method->setParams( paramString, 0, NULL );
+   }
 
    /* -------------------------------------------------------- */ 
    /* load FEData, if there is any                             */
@@ -625,6 +660,7 @@ int HYPRE_LSI_MLISetParams( HYPRE_Solver solver, char *paramString )
          printf("\t      cycleType <'V','W'> \n");
          printf("\t      strengthThreshold <f> \n");
          printf("\t      method <AMGSA, AMGSAe> \n");
+         printf("\t      coarsenScheme <local, hybrid, cljp, falgout> \n");
          printf("\t      smoother <Jacobi,GS,...> \n");
          printf("\t      coarseSolver <Jacobi,GS,...> \n");
          printf("\t      numSweeps <d> \n");
@@ -678,6 +714,11 @@ int HYPRE_LSI_MLISetParams( HYPRE_Solver solver, char *paramString )
    {
       sscanf(paramString,"%s %s %s", param1, param2, param3);
       strcpy( mli_object->method_, param3 );
+   }
+   else if ( !strcmp(param2, "coarsenScheme") )
+   {
+      sscanf(paramString,"%s %s %s", param1, param2, param3);
+      strcpy( mli_object->coarsenScheme_, param3 );
    }
    else if ( !strcmp(param2, "smoother") )
    {
