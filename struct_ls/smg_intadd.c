@@ -297,7 +297,7 @@ hypre_SMGIntAdd( void               *intadd_vdata,
                ep0[ei] = PTp0[PTi]*xcp[xci];
                ep1[ei] = PTp1[PTi]*xcp[xci];
             }
-         hypre_BoxLoop3End;
+         hypre_BoxLoop3End(ei, PTi, xci);
       }
 
    /*--------------------------------------------------------------------
@@ -356,7 +356,7 @@ hypre_SMGIntAdd( void               *intadd_vdata,
                   {
                      xp[xi] += xcp[xci];
                   }
-               hypre_BoxLoop2End;
+               hypre_BoxLoop2End(xi, xci);
             }
       }
 
@@ -392,7 +392,7 @@ hypre_SMGIntAdd( void               *intadd_vdata,
                      {
                         xp[xi] += ep0[ei] + ep1[ei];
                      }
-                  hypre_BoxLoop2End;
+                  hypre_BoxLoop2End(xi, ei);
                }
          }
    }

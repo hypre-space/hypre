@@ -38,6 +38,15 @@ extern int iteration_counter;
 #define MAX_VOL 64000
 #endif
 
+#define hypre_BoxLoopDeclare(loop_size, data_box, stride, iinc, jinc, kinc) \
+int  iinc = (hypre_IndexX(stride));\
+int  jinc = (hypre_IndexY(stride)*hypre_BoxSizeX(data_box) -\
+             hypre_IndexX(loop_size)*hypre_IndexX(stride));\
+int  kinc = (hypre_IndexZ(stride)*\
+             hypre_BoxSizeX(data_box)*hypre_BoxSizeY(data_box) -\
+             hypre_IndexY(loop_size)*\
+             hypre_IndexY(stride)*hypre_BoxSizeX(data_box))
+
 #define vol_cbrt(vol) (int) pow((double)(vol), 1. / 3.) 
 
 #define hypre_ThreadLoopBegin(local_counter, init_val, stop_val, tl_index,\
@@ -187,9 +196,9 @@ extern int iteration_counter;
             for (j = clstart[1]; j < clfinish[1]; j++ )\
             {\
                for (i = clstart[0]; i < clfinish[0]; i++ )\
-               {\
+               {
 
-#define hypre_BoxLoop0End }}}hypre_ThreadLoop(iteration_counter,\
+#define hypre_BoxLoop0End() }}}hypre_ThreadLoop(iteration_counter,\
 			     hypre_thread_counter, hypre_thread_release,\
 					      hypre_mutex_boxloops);}}}
 
@@ -222,9 +231,9 @@ extern int iteration_counter;
                {\
                   i1 = orig_i1 +\
                       (i + hypre__nx*j + hypre__nx*hypre__ny*k)*hypre__iinc1 +\
-                      (j + hypre__ny*k)*hypre__jinc1 + k*hypre__kinc1;\
+                      (j + hypre__ny*k)*hypre__jinc1 + k*hypre__kinc1;
 
-#define hypre_BoxLoopEnd }}}hypre_ThreadLoop(iteration_counter,\
+#define hypre_BoxLoop1End(i1) }}}hypre_ThreadLoop(iteration_counter,\
 			     hypre_thread_counter, hypre_thread_release,\
 					      hypre_mutex_boxloops);}}}
 
@@ -265,7 +274,7 @@ extern int iteration_counter;
                       (i + hypre__nx*j + hypre__nx*hypre__ny*k)*hypre__iinc2 +\
                       (j + hypre__ny*k)*hypre__jinc2 + k*hypre__kinc2;
 
-#define hypre_BoxLoop2End }}}hypre_ThreadLoop(iteration_counter,\
+#define hypre_BoxLoop2End(i1, i2) }}}hypre_ThreadLoop(iteration_counter,\
                        hypre_thread_counter, hypre_thread_release,\
                        hypre_mutex_boxloops);}}}
 					       
@@ -316,7 +325,7 @@ extern int iteration_counter;
                       (i + hypre__nx*j + hypre__nx*hypre__ny*k)*hypre__iinc3 +\
                       (j + hypre__ny*k)*hypre__jinc3 + k*hypre__kinc3;\
 
-#define hypre_BoxLoop3End }}}hypre_ThreadLoop(iteration_counter,\
+#define hypre_BoxLoop3End(i1, i2, i3) }}}hypre_ThreadLoop(iteration_counter,\
 			     hypre_thread_counter, hypre_thread_release,\
 					      hypre_mutex_boxloops);}}}
 
@@ -373,7 +382,7 @@ extern int iteration_counter;
                       (j + hypre__ny*k)*hypre__jinc4 + k*hypre__kinc4;\
 
 
-#define hypre_BoxLoop4End }}}hypre_ThreadLoop(iteration_counter,\
+#define hypre_BoxLoop4End(i1, i2, i3, i4) }}}hypre_ThreadLoop(iteration_counter,\
 			     hypre_thread_counter, hypre_thread_release,\
 					      hypre_mutex_boxloops);}}}
 

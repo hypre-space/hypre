@@ -358,18 +358,14 @@ hypre_InitializeStructMatrixData( hypre_StructMatrix *matrix,
             hypre_GetBoxSize(data_box, loop_size);
 
 	    hypre_BoxLoop1Begin(loop_size,
-                           data_box, start, stride, datai);
-
-
+                                data_box, start, stride, datai);
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,datai
 #include "hypre_box_smp_forloop.h"
-       
 	    hypre_BoxLoop1For(loopi, loopj, loopk, datai)
-	      {
-		 datap[datai] = 1.0;	     
-	      }
-
-	    hypre_BoxLoopEnd;
+               {
+                  datap[datai] = 1.0;	     
+               }
+	    hypre_BoxLoop1End(datai);
          }
       }
 
@@ -523,20 +519,17 @@ hypre_SetStructMatrixBoxValues( hypre_StructMatrix *matrix,
                   hypre_GetBoxSize(box, loop_size);
 
                   hypre_BoxLoop2Begin(loop_size,
-                             data_box, data_start, data_stride, datai,
-                             dval_box, dval_start, dval_stride, dvali);
-
+                                   data_box, data_start, data_stride, datai,
+                                   dval_box, dval_start, dval_stride, dvali);
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,datai,dvali
 #include "hypre_box_smp_forloop.h"
-		     
-	         hypre_BoxLoop2For(loopi, loopj, loopk, datai, dvali)
-	           {
-	             datap[datai] = values[dvali];
-	           }
+                  hypre_BoxLoop2For(loopi, loopj, loopk, datai, dvali)
+                     {
+                        datap[datai] = values[dvali];
+                     }
+                  hypre_BoxLoop2End(datai, dvali);
 
-                 hypre_BoxLoopEnd;
-
-                 hypre_IndexD(dval_start, 0) ++;
+                  hypre_IndexD(dval_start, 0) ++;
                }
             }
          }

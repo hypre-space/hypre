@@ -623,7 +623,7 @@ hypre_SMG3BuildRAPSym( hypre_StructMatrix *A,
                      +                   a_ac[iA]   * pa[iP];
 
                }
-            hypre_BoxLoop4End;
+            hypre_BoxLoop4End(iP, iR, iA, iAc);
 
             break;
 
@@ -702,7 +702,7 @@ hypre_SMG3BuildRAPSym( hypre_StructMatrix *A,
                      +                   a_ac[iA]   * pa[iP];
 
                }
-            hypre_BoxLoop4End;
+            hypre_BoxLoop4End(iP, iR, iA, iAc);
 
             break;
 
@@ -804,7 +804,7 @@ hypre_SMG3BuildRAPSym( hypre_StructMatrix *A,
                      +                   a_ac[iA]   * pa[iP];
 
                }
-            hypre_BoxLoop4End;
+            hypre_BoxLoop4End(iP, iR, iA, iAc);
 
             break;
 
@@ -922,7 +922,7 @@ hypre_SMG3BuildRAPSym( hypre_StructMatrix *A,
                      +                   a_ac[iA]   * pa[iP];
 
                }
-            hypre_BoxLoop4End;
+            hypre_BoxLoop4End(iP, iR, iA, iAc);
 
             break;
 
@@ -1325,7 +1325,7 @@ hypre_SMG3BuildRAPNoSym( hypre_StructMatrix *A,
                      +          ra[iR] * a_ce[iAp1] * pa[iP1];
  
                }
-            hypre_BoxLoop4End;
+            hypre_BoxLoop4End(iP, iR, iA, iAc);
 
             break;
 
@@ -1395,7 +1395,7 @@ hypre_SMG3BuildRAPNoSym( hypre_StructMatrix *A,
                      +          ra[iR] * a_be[iAp1];
  
                }
-            hypre_BoxLoop4End;
+            hypre_BoxLoop4End(iP, iR, iA, iAc);
 
             break;
 
@@ -1490,7 +1490,7 @@ hypre_SMG3BuildRAPNoSym( hypre_StructMatrix *A,
                      +          ra[iR] * a_be[iAp1];
  
                }
-            hypre_BoxLoop4End;
+            hypre_BoxLoop4End(iP, iR, iA, iAc);
 
             break;
 
@@ -1601,7 +1601,7 @@ hypre_SMG3BuildRAPNoSym( hypre_StructMatrix *A,
                      +          ra[iR] * a_be[iAp1];
  
                }
-            hypre_BoxLoop4End;
+            hypre_BoxLoop4End(iP, iR, iA, iAc);
 
             break;
 
@@ -1722,7 +1722,6 @@ hypre_SMG3RAPPeriodicSym( hypre_StructMatrix *RAP,
 
          if(stencil_size == 27)
          {
-
          hypre_SetIndex(index_temp,-1,-1,-1);
          rap_bsw = hypre_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
 
@@ -1740,7 +1739,6 @@ hypre_SMG3RAPPeriodicSym( hypre_StructMatrix *RAP,
 
          hypre_SetIndex(index_temp,1,-1,0);
          rap_cse = hypre_StructMatrixExtractPointerByIndex(RAP, i, index_temp);
-
          }
 
          /*-----------------------------------------------------------------
@@ -1749,49 +1747,34 @@ hypre_SMG3RAPPeriodicSym( hypre_StructMatrix *RAP,
 
          hypre_GetBoxSize(cgrid_box, loop_size);
 
-
          hypre_BoxLoop1Begin(loop_size,
-                                RAP_data_box,  cstart, stridec, iAc);
-
+                             RAP_data_box,  cstart, stridec, iAc);
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,iAc,iAcmx,iAcmy
 #include "hypre_box_smp_forloop.h"
          hypre_BoxLoop1For(loopi, loopj, loopk, iAc)
-               {
-                       iAcmx = iAc - xOffset;
-                       iAcmy = iAc - yOffset;
-
-                       rap_cc[iAc] += (2.0 * rap_bc[iAc]);
-
-                       rap_cw[iAc] += (rap_bw[iAc] + rap_be[iAcmx]);
-
-                       rap_cs[iAc] += (rap_bs[iAc] + rap_bn[iAcmy]);
-
-               }
-
-         hypre_BoxLoopEnd;
+            {
+               iAcmx = iAc - xOffset;
+               iAcmy = iAc - yOffset;
+               
+               rap_cc[iAc] += (2.0 * rap_bc[iAc]);
+               rap_cw[iAc] += (rap_bw[iAc] + rap_be[iAcmx]);
+               rap_cs[iAc] += (rap_bs[iAc] + rap_bn[iAcmy]);
+            }
+         hypre_BoxLoop1End(iAc);
 
          hypre_BoxLoop1Begin(loop_size,
-                                RAP_data_box,  cstart, stridec, iAc);
-
+                             RAP_data_box,  cstart, stridec, iAc);
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,iAc
 #include "hypre_box_smp_forloop.h"
          hypre_BoxLoop1For(loopi, loopj, loopk, iAc)
-               {
-                       rap_bc[iAc]  = zero;
-
-                       rap_bw[iAc]  = zero;
-
-                       rap_be[iAc]  = zero;
-
-                       rap_bs[iAc]  = zero;
-
-                       rap_bn[iAc]  = zero;
-
-
-               }
-
-         hypre_BoxLoopEnd;
-
+            {
+               rap_bc[iAc]  = zero;
+               rap_bw[iAc]  = zero;
+               rap_be[iAc]  = zero;
+               rap_bs[iAc]  = zero;
+               rap_bn[iAc]  = zero;
+            }
+         hypre_BoxLoop1End(iAc);
 
          /*-----------------------------------------------------------------
           * Collapse additional entries for 27 point operator.
@@ -1803,45 +1786,35 @@ hypre_SMG3RAPPeriodicSym( hypre_StructMatrix *RAP,
 
             hypre_BoxLoop1Begin(loop_size,
                                 RAP_data_box,  cstart, stridec, iAc);
-
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,iAc,iAcmxmy,iAcmxpy,iAcpxmy,iAcpxpy
 #include "hypre_box_smp_forloop.h"
             hypre_BoxLoop1For(loopi, loopj, loopk, iAc)
                {
-                          iAcmxmy = iAc - xOffset - yOffset;
-                          iAcmxpy = iAc - xOffset + yOffset;
-                          iAcpxmy = iAc + xOffset - yOffset;
-                          iAcpxpy = iAc + xOffset + yOffset;
-
-                          rap_csw[iAc] += (rap_bsw[iAc] + rap_bne[iAcmxmy]);
-
-                          rap_cse[iAc] += (rap_bse[iAc] + rap_bnw[iAcpxmy]);
-
+                  iAcmxmy = iAc - xOffset - yOffset;
+                  iAcmxpy = iAc - xOffset + yOffset;
+                  iAcpxmy = iAc + xOffset - yOffset;
+                  iAcpxpy = iAc + xOffset + yOffset;
+                  
+                  rap_csw[iAc] += (rap_bsw[iAc] + rap_bne[iAcmxmy]);
+                  
+                  rap_cse[iAc] += (rap_bse[iAc] + rap_bnw[iAcpxmy]);
+                  
                }
-
-            hypre_BoxLoopEnd;
+            hypre_BoxLoop1End(iAc);
 
             hypre_BoxLoop1Begin(loop_size,
                                 RAP_data_box,  cstart, stridec, iAc);
-
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,iAc
 #include "hypre_box_smp_forloop.h"
             hypre_BoxLoop1For(loopi, loopj, loopk, iAc)
                {
-                          rap_bsw[iAc]  = zero;
-   
-                          rap_bse[iAc]  = zero;
-   
-                          rap_bnw[iAc]  = zero;
-   
-                          rap_bne[iAc]  = zero;
-   
+                  rap_bsw[iAc]  = zero;
+                  rap_bse[iAc]  = zero;
+                  rap_bnw[iAc]  = zero;
+                  rap_bne[iAc]  = zero;
                }
-
-            hypre_BoxLoopEnd;
-                
+            hypre_BoxLoop1End(iAc);
          }
-
 
       } /* end ForBoxI */
 
@@ -2016,31 +1989,28 @@ hypre_SMG3RAPPeriodicNoSym( hypre_StructMatrix *RAP,
 #include "hypre_box_smp_forloop.h"
 
          hypre_BoxLoop1For(loopi, loopj, loopk, iAc)
-               {
-                       rap_cc[iAc] += (rap_bc[iAc] + rap_ac[iAc]);
-                       rap_bc[iAc]  = zero;
-                       rap_ac[iAc]  = zero;
-
-                       rap_cw[iAc] += (rap_bw[iAc] + rap_aw[iAc]);
-                       rap_bw[iAc]  = zero;
-                       rap_aw[iAc]  = zero;
-
-                       rap_ce[iAc] += (rap_be[iAc] + rap_ae[iAc]);
-                       rap_be[iAc]  = zero;
-                       rap_ae[iAc]  = zero;
-
-                       rap_cs[iAc] += (rap_bs[iAc] + rap_as[iAc]);
-                       rap_bs[iAc]  = zero;
-                       rap_as[iAc]  = zero;
-
-                       rap_cn[iAc] += (rap_bn[iAc] + rap_an[iAc]);
-                       rap_bn[iAc]  = zero;
-                       rap_an[iAc]  = zero;
-
-               }
-
-         hypre_BoxLoopEnd;
-
+            {
+               rap_cc[iAc] += (rap_bc[iAc] + rap_ac[iAc]);
+               rap_bc[iAc]  = zero;
+               rap_ac[iAc]  = zero;
+               
+               rap_cw[iAc] += (rap_bw[iAc] + rap_aw[iAc]);
+               rap_bw[iAc]  = zero;
+               rap_aw[iAc]  = zero;
+               
+               rap_ce[iAc] += (rap_be[iAc] + rap_ae[iAc]);
+               rap_be[iAc]  = zero;
+               rap_ae[iAc]  = zero;
+               
+               rap_cs[iAc] += (rap_bs[iAc] + rap_as[iAc]);
+               rap_bs[iAc]  = zero;
+               rap_as[iAc]  = zero;
+               
+               rap_cn[iAc] += (rap_bn[iAc] + rap_an[iAc]);
+               rap_bn[iAc]  = zero;
+               rap_an[iAc]  = zero;
+            }
+         hypre_BoxLoop1End(iAc);
 
          /*-----------------------------------------------------------------
           * Collapse additional entries for 27 point operator.
@@ -2050,36 +2020,30 @@ hypre_SMG3RAPPeriodicNoSym( hypre_StructMatrix *RAP,
          {
             hypre_GetBoxSize(cgrid_box, loop_size);
 
-         hypre_BoxLoop1Begin(loop_size,
+            hypre_BoxLoop1Begin(loop_size,
                                 RAP_data_box,  cstart, stridec, iAc);
-
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,iAc
 #include "hypre_box_smp_forloop.h"
-
-         hypre_BoxLoop1For(loopi, loopj, loopk, iAc)
+            hypre_BoxLoop1For(loopi, loopj, loopk, iAc)
                {
-
-                          rap_csw[iAc] += (rap_bsw[iAc] + rap_asw[iAc]);
-                          rap_bsw[iAc]  = zero;
-                          rap_asw[iAc]  = zero;
-
-                          rap_cse[iAc] += (rap_bse[iAc] + rap_ase[iAc]);
-                          rap_bse[iAc]  = zero;
-                          rap_ase[iAc]  = zero;
-
-                          rap_cnw[iAc] += (rap_bnw[iAc] + rap_anw[iAc]);
-                          rap_bnw[iAc]  = zero;
-                          rap_anw[iAc]  = zero;
-
-                          rap_cne[iAc] += (rap_bne[iAc] + rap_ane[iAc]);
-                          rap_bne[iAc]  = zero;
-                          rap_ane[iAc]  = zero;            
+                  rap_csw[iAc] += (rap_bsw[iAc] + rap_asw[iAc]);
+                  rap_bsw[iAc]  = zero;
+                  rap_asw[iAc]  = zero;
+                  
+                  rap_cse[iAc] += (rap_bse[iAc] + rap_ase[iAc]);
+                  rap_bse[iAc]  = zero;
+                  rap_ase[iAc]  = zero;
+                  
+                  rap_cnw[iAc] += (rap_bnw[iAc] + rap_anw[iAc]);
+                  rap_bnw[iAc]  = zero;
+                  rap_anw[iAc]  = zero;
+                  
+                  rap_cne[iAc] += (rap_bne[iAc] + rap_ane[iAc]);
+                  rap_bne[iAc]  = zero;
+                  rap_ane[iAc]  = zero;            
 	       }
-
-         hypre_BoxLoopEnd;
-
+            hypre_BoxLoop1End(iAc);
          }
-
 
       } /* end ForBoxI */
 

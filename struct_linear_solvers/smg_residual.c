@@ -237,7 +237,7 @@ hypre_SMGResidual( void               *residual_vdata,
                      {
                         rp[ri] = bp[bi];
                      }
-                  hypre_BoxLoop2End;
+                  hypre_BoxLoop2End(bi, ri);
                }
          }
          break;
@@ -288,7 +288,7 @@ hypre_SMGResidual( void               *residual_vdata,
                         {
                            rp[ri] -= Ap[Ai] * xp[xi];
                         }
-                     hypre_BoxLoop3End;
+                     hypre_BoxLoop3End(Ai, xi, ri);
                   }
                }
          }

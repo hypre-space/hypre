@@ -214,17 +214,13 @@ hypre_PFMGInterp( void               *interp_vdata,
          hypre_BoxLoop2Begin(loop_size,
                              e_data_box, start, stride, ei,
                              xc_data_box, startc, stridec, xci);
-	 
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,ei,xci
 #include "hypre_box_smp_forloop.h"
-		     
-	 hypre_BoxLoop2For(loopi, loopj, loopk, ei,xci)
-	   {
-	     ep[ei] = xcp[xci];
-	   }
-
-         hypre_BoxLoopEnd;
-
+	 hypre_BoxLoop2For(loopi, loopj, loopk, ei, xci)
+            {
+               ep[ei] = xcp[xci];
+            }
+         hypre_BoxLoop2End(ei, xci);
       }
 
    /*-----------------------------------------------------------------------
@@ -274,22 +270,16 @@ hypre_PFMGInterp( void               *interp_vdata,
                   hypre_GetStrideBoxSize(compute_box, stride, loop_size);
 
                   hypre_BoxLoop2Begin(loop_size,
-                             P_data_box, startc, stridec, Pi,
-                             e_data_box, start, stride, ei);
-	   
-		  
+                                      P_data_box, startc, stridec, Pi,
+                                      e_data_box, start, stride, ei);
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,Pi,ei
 #include "hypre_box_smp_forloop.h"
-	     
-	          hypre_BoxLoop2For(loopi, loopj, loopk, Pi,ei)
-	            {
-		      ep[ei] =  (Pp0[Pi] * ep0[ei] +
-                                Pp1[Pi] * ep1[ei]);
-		    }
-
-                  hypre_BoxLoopEnd;
-                 
-
+	          hypre_BoxLoop2For(loopi, loopj, loopk, Pi, ei)
+                     {
+                        ep[ei] =  (Pp0[Pi] * ep0[ei] +
+                                   Pp1[Pi] * ep1[ei]);
+                     }
+                  hypre_BoxLoop2End(Pi, ei);
                }
          }
    }

@@ -137,41 +137,37 @@ hypre_PFMGSetupInterpOp( hypre_StructMatrix *A,
          hypre_BoxLoop2Begin(loop_size,
                              A_data_box, start, stride, Ai,
                              P_data_box, startc, stridec, Pi);
-	 
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,Ai,Pi,center,si,Ap,Astenc
 #include "hypre_box_smp_forloop.h"
-   
 	 hypre_BoxLoop2For(loopi, loopj, loopk, Ai, Pi)
-	   {
-	                   center  = 0.0;
-                           Pp0[Pi] = 0.0;
-                           Pp1[Pi] = 0.0;
+            {
+               center  = 0.0;
+               Pp0[Pi] = 0.0;
+               Pp1[Pi] = 0.0;
 
-                           for (si = 0; si < stencil_size; si++)
-                           {
-                              Ap = hypre_StructMatrixBoxData(A, i, si);
-                              Astenc = hypre_IndexD(stencil_shape[si], cdir);
+               for (si = 0; si < stencil_size; si++)
+               {
+                  Ap = hypre_StructMatrixBoxData(A, i, si);
+                  Astenc = hypre_IndexD(stencil_shape[si], cdir);
 
-                              if (Astenc == 0)
-                              {
-                                 center += Ap[Ai];
-                              }
-                              else if (Astenc == Pstenc0)
-                              {
-                                 Pp0[Pi] -= Ap[Ai];
-                              }
-                              else if (Astenc == Pstenc1)
-                              {
-                                 Pp1[Pi] -= Ap[Ai];
-                              }
-                           }
+                  if (Astenc == 0)
+                  {
+                     center += Ap[Ai];
+                  }
+                  else if (Astenc == Pstenc0)
+                  {
+                     Pp0[Pi] -= Ap[Ai];
+                  }
+                  else if (Astenc == Pstenc1)
+                  {
+                     Pp1[Pi] -= Ap[Ai];
+                  }
+               }
 
-                           Pp0[Pi] /= center;
-                           Pp1[Pi] /= center;  
-	   }
-
-         hypre_BoxLoopEnd;
-
+               Pp0[Pi] /= center;
+               Pp1[Pi] /= center;  
+            }
+         hypre_BoxLoop2End(Ai, Pi);
       }
 
    hypre_AssembleStructMatrix(P);

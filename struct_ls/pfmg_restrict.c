@@ -225,22 +225,18 @@ hypre_PFMGRestrict( void               *restrict_vdata,
 
                   hypre_GetStrideBoxSize(compute_box, stride, loop_size);
 
-                     hypre_BoxLoop3Begin(loop_size,
-                                   RT_data_box, startc, stridec,RTi,
-                                   r_data_box, start, stride, ri,
-                                   rc_data_box, startc, stridec, rci);
-		     
+                  hypre_BoxLoop3Begin(loop_size,
+                                      RT_data_box, startc, stridec,RTi,
+                                      r_data_box, start, stride, ri,
+                                      rc_data_box, startc, stridec, rci);
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,RTi,ri,rci
 #include "hypre_box_smp_forloop.h"
-     
-		     hypre_BoxLoop3For(loopi, loopj, loopk, RTi, ri, rci)
-		       {
-			 rcp[rci] = rp[ri] + (RTp0[RTi] * rp0[ri] +
-                                    RTp1[RTi] * rp1[ri]);
-		       }
-
-                    hypre_BoxLoopEnd;
-
+                  hypre_BoxLoop3For(loopi, loopj, loopk, RTi, ri, rci)
+                     {
+                        rcp[rci] = rp[ri] + (RTp0[RTi] * rp0[ri] +
+                                             RTp1[RTi] * rp1[ri]);
+                     }
+                  hypre_BoxLoop3End(RTi, ri, rci);
                }
          }
    }

@@ -393,41 +393,38 @@ hypre_PFMG2BuildRAPSym( hypre_StructMatrix *A,
                                 R_data_box, cstart, stridec, iR,
                                 A_data_box, fstart, stridef, iA,
                                 RAP_data_box, cstart, stridec, iAc);
-	       
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,iP,iR,iA,iAc,iAm1,iAp1,iP1
 #include "hypre_box_smp_forloop.h"
-
 	    hypre_BoxLoop4For(loopi, loopj, loopk, iP, iR, iA, iAc)
-	      {
-		iAm1 = iA - yOffsetA;
-                iAp1 = iA + yOffsetA;
+               {
+                  iAm1 = iA - yOffsetA;
+                  iAp1 = iA + yOffsetA;
 
-                iP1 = iP - yOffsetP - xOffsetP;
-                rap_csw[iAc] = rb[iR] * a_cw[iAm1] * pa[iP1];
+                  iP1 = iP - yOffsetP - xOffsetP;
+                  rap_csw[iAc] = rb[iR] * a_cw[iAm1] * pa[iP1];
 
-                iP1 = iP - yOffsetP;
-                rap_cs[iAc] = rb[iR] * a_cc[iAm1] * pa[iP1]
-                   +          rb[iR] * a_cs[iAm1]
-		   +                   a_cs[iA]   * pa[iP1];
+                  iP1 = iP - yOffsetP;
+                  rap_cs[iAc] = rb[iR] * a_cc[iAm1] * pa[iP1]
+                     +          rb[iR] * a_cs[iAm1]
+                     +                   a_cs[iA]   * pa[iP1];
 
-                iP1 = iP - yOffsetP + xOffsetP;
-                rap_cse[iAc] = rb[iR] * a_ce[iAm1] * pa[iP1];
+                  iP1 = iP - yOffsetP + xOffsetP;
+                  rap_cse[iAc] = rb[iR] * a_ce[iAm1] * pa[iP1];
 
-                iP1 = iP - xOffsetP;
-                rap_cw[iAc] =          a_cw[iA]
-                   +          rb[iR] * a_cw[iAm1] * pb[iP1]
-                   +          ra[iR] * a_cw[iAp1] * pa[iP1];
+                  iP1 = iP - xOffsetP;
+                  rap_cw[iAc] =          a_cw[iA]
+                     +          rb[iR] * a_cw[iAm1] * pb[iP1]
+                     +          ra[iR] * a_cw[iAp1] * pa[iP1];
 
-                rap_cc[iAc] =          a_cc[iA]
-                   +          rb[iR] * a_cc[iAm1] * pb[iP]
-                   +          ra[iR] * a_cc[iAp1] * pa[iP]
-                   +          rb[iR] * a_cn[iAm1]
-                   +          ra[iR] * a_cs[iAp1]
-                   +                   a_cs[iA]   * pb[iP]
-                   +                   a_cn[iA]   * pa[iP];
-	      }
-
-            hypre_BoxLoopEnd;
+                  rap_cc[iAc] =          a_cc[iA]
+                     +          rb[iR] * a_cc[iAm1] * pb[iP]
+                     +          ra[iR] * a_cc[iAp1] * pa[iP]
+                     +          rb[iR] * a_cn[iAm1]
+                     +          ra[iR] * a_cs[iAp1]
+                     +                   a_cs[iA]   * pb[iP]
+                     +                   a_cn[iA]   * pa[iP];
+               }
+            hypre_BoxLoop4End(iP, iR, iA, iAc);
 
             break;
 
@@ -447,51 +444,47 @@ hypre_PFMG2BuildRAPSym( hypre_StructMatrix *A,
                                 R_data_box, cstart, stridec, iR,
                                 A_data_box, fstart, stridef, iA,
                                 RAP_data_box, cstart, stridec, iAc);
-	        
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,iP,iR,iA,iAc,iAm1,iAp1,iP1
 #include "hypre_box_smp_forloop.h"
-     
 	    hypre_BoxLoop4For(loopi, loopj, loopk, iP, iR, iA, iAc)
-	      {
-                 iAm1 = iA - yOffsetA;
-                 iAp1 = iA + yOffsetA;
+               {
+                  iAm1 = iA - yOffsetA;
+                  iAp1 = iA + yOffsetA;
 
-                 iP1 = iP - yOffsetP - xOffsetP;
-                 rap_csw[iAc] = rb[iR] * a_cw[iAm1] * pa[iP1]
-                    +           rb[iR] * a_csw[iAm1]
-                    +                    a_csw[iA]  * pa[iP1];
+                  iP1 = iP - yOffsetP - xOffsetP;
+                  rap_csw[iAc] = rb[iR] * a_cw[iAm1] * pa[iP1]
+                     +           rb[iR] * a_csw[iAm1]
+                     +                    a_csw[iA]  * pa[iP1];
 
-                 iP1 = iP - yOffsetP;
-                 rap_cs[iAc] = rb[iR] * a_cc[iAm1] * pa[iP1]
-                    +          rb[iR] * a_cs[iAm1]
-                    +                   a_cs[iA]   * pa[iP1];
+                  iP1 = iP - yOffsetP;
+                  rap_cs[iAc] = rb[iR] * a_cc[iAm1] * pa[iP1]
+                     +          rb[iR] * a_cs[iAm1]
+                     +                   a_cs[iA]   * pa[iP1];
 
-                 iP1 = iP - yOffsetP + xOffsetP;
-                 rap_cse[iAc] = rb[iR] * a_ce[iAm1] * pa[iP1]
-                    +           rb[iR] * a_cse[iAm1]
-                    +                    a_cse[iA]  * pa[iP1];
+                  iP1 = iP - yOffsetP + xOffsetP;
+                  rap_cse[iAc] = rb[iR] * a_ce[iAm1] * pa[iP1]
+                     +           rb[iR] * a_cse[iAm1]
+                     +                    a_cse[iA]  * pa[iP1];
 
-                 iP1 = iP - xOffsetP;
-                 rap_cw[iAc] =          a_cw[iA]
-                    +          rb[iR] * a_cw[iAm1] * pb[iP1]
-                    +          ra[iR] * a_cw[iAp1] * pa[iP1]
-                    +          rb[iR] * a_cnw[iAm1]
-                    +          ra[iR] * a_csw[iAp1]
-                    +                   a_csw[iA]  * pb[iP1]
-                    +                   a_cnw[iA]  * pa[iP1];
+                  iP1 = iP - xOffsetP;
+                  rap_cw[iAc] =          a_cw[iA]
+                     +          rb[iR] * a_cw[iAm1] * pb[iP1]
+                     +          ra[iR] * a_cw[iAp1] * pa[iP1]
+                     +          rb[iR] * a_cnw[iAm1]
+                     +          ra[iR] * a_csw[iAp1]
+                     +                   a_csw[iA]  * pb[iP1]
+                     +                   a_cnw[iA]  * pa[iP1];
 
-                 rap_cc[iAc] =          a_cc[iA]
-                    +          rb[iR] * a_cc[iAm1] * pb[iP]
-                    +          ra[iR] * a_cc[iAp1] * pa[iP]
-                    +          rb[iR] * a_cn[iAm1]
-                    +          ra[iR] * a_cs[iAp1]
-                    +                   a_cs[iA]   * pb[iP]
-                    +                   a_cn[iA]   * pa[iP];
+                  rap_cc[iAc] =          a_cc[iA]
+                     +          rb[iR] * a_cc[iAm1] * pb[iP]
+                     +          ra[iR] * a_cc[iAp1] * pa[iP]
+                     +          rb[iR] * a_cn[iAm1]
+                     +          ra[iR] * a_cs[iAp1]
+                     +                   a_cs[iA]   * pb[iP]
+                     +                   a_cn[iA]   * pa[iP];
 
-	      }
-
-            hypre_BoxLoopEnd;
-    
+               }
+            hypre_BoxLoop4End(iP, iR, iA, iAc);
 
             break;
 
@@ -731,33 +724,30 @@ hypre_PFMG2BuildRAPNoSym( hypre_StructMatrix *A,
                                 R_data_box, cstart, stridec, iR,
                                 A_data_box, fstart, stridef, iA,
                                 RAP_data_box, cstart, stridec, iAc);
-	    	   
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,iP,iR,iA,iAc,iAm1,iAp1,iP1
 #include "hypre_box_smp_forloop.h"
-		     
 	    hypre_BoxLoop4For(loopi, loopj, loopk, iP, iR, iA, iAc)
-	      {
-                 iAm1 = iA - yOffsetA;
-                 iAp1 = iA + yOffsetA;
+               {
+                  iAm1 = iA - yOffsetA;
+                  iAp1 = iA + yOffsetA;
 
-                 iP1 = iP + yOffsetP + xOffsetP;
-                 rap_cne[iAc] = ra[iR] * a_ce[iAp1] * pb[iP1];
+                  iP1 = iP + yOffsetP + xOffsetP;
+                  rap_cne[iAc] = ra[iR] * a_ce[iAp1] * pb[iP1];
 
-                 iP1 = iP + yOffsetP;
-                 rap_cn[iAc] = ra[iR] * a_cc[iAp1] * pb[iP1]
-                    +          ra[iR] * a_cn[iAp1]
-                    +                   a_cn[iA]   * pb[iP1];
+                  iP1 = iP + yOffsetP;
+                  rap_cn[iAc] = ra[iR] * a_cc[iAp1] * pb[iP1]
+                     +          ra[iR] * a_cn[iAp1]
+                     +                   a_cn[iA]   * pb[iP1];
 
-                 iP1 = iP + yOffsetP - xOffsetP;
-                 rap_cnw[iAc] = ra[iR] * a_cw[iAp1] * pb[iP1];
+                  iP1 = iP + yOffsetP - xOffsetP;
+                  rap_cnw[iAc] = ra[iR] * a_cw[iAp1] * pb[iP1];
 
-                 iP1 = iP + xOffsetP;
-                 rap_ce[iAc] =          a_ce[iA]
-                    +          rb[iR] * a_ce[iAm1] * pb[iP1]
-                    +          ra[iR] * a_ce[iAp1] * pa[iP1];
-	      }
-
-            hypre_BoxLoopEnd;
+                  iP1 = iP + xOffsetP;
+                  rap_ce[iAc] =          a_ce[iA]
+                     +          rb[iR] * a_ce[iAm1] * pb[iP1]
+                     +          ra[iR] * a_ce[iAp1] * pa[iP1];
+               }
+            hypre_BoxLoop4End(iP, iR, iA, iAc);
 
             break;
 
@@ -776,42 +766,39 @@ hypre_PFMG2BuildRAPNoSym( hypre_StructMatrix *A,
                                 R_data_box, cstart, stridec, iR,
                                 A_data_box, fstart, stridef, iA,
                                 RAP_data_box, cstart, stridec, iAc);
-	     
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,iP,iR,iA,iAc,iAm1,iAp1,iP1
 #include "hypre_box_smp_forloop.h"
-   
 	    hypre_BoxLoop4For(loopi, loopj, loopk, iP, iR, iA, iAc)
-	      {
-		iAm1 = iA - yOffsetA;
-                iAp1 = iA + yOffsetA;
+               {
+                  iAm1 = iA - yOffsetA;
+                  iAp1 = iA + yOffsetA;
 
-                iP1 = iP + yOffsetP + xOffsetP;
-                rap_cne[iAc] = ra[iR] * a_ce[iAp1] * pb[iP1]
-                   +           ra[iR] * a_cne[iAp1]
-                   +                    a_cne[iA]  * pb[iP1];
+                  iP1 = iP + yOffsetP + xOffsetP;
+                  rap_cne[iAc] = ra[iR] * a_ce[iAp1] * pb[iP1]
+                     +           ra[iR] * a_cne[iAp1]
+                     +                    a_cne[iA]  * pb[iP1];
 
-                iP1 = iP + yOffsetP;
-                rap_cn[iAc] = ra[iR] * a_cc[iAp1] * pb[iP1]
-                   +          ra[iR] * a_cn[iAp1]
-                   +                   a_cn[iA]   * pb[iP1];
+                  iP1 = iP + yOffsetP;
+                  rap_cn[iAc] = ra[iR] * a_cc[iAp1] * pb[iP1]
+                     +          ra[iR] * a_cn[iAp1]
+                     +                   a_cn[iA]   * pb[iP1];
 
-                iP1 = iP + yOffsetP - xOffsetP;
-                rap_cnw[iAc] = ra[iR] * a_cw[iAp1] * pb[iP1]
-                   +           ra[iR] * a_cnw[iAp1]
-                   +                    a_cnw[iA]  * pb[iP1];
+                  iP1 = iP + yOffsetP - xOffsetP;
+                  rap_cnw[iAc] = ra[iR] * a_cw[iAp1] * pb[iP1]
+                     +           ra[iR] * a_cnw[iAp1]
+                     +                    a_cnw[iA]  * pb[iP1];
 
-                iP1 = iP + xOffsetP;
-                rap_ce[iAc] =          a_ce[iA]
-                   +          rb[iR] * a_ce[iAm1] * pb[iP1]
-                   +          ra[iR] * a_ce[iAp1] * pa[iP1]
-                   +          rb[iR] * a_cne[iAm1]
-                   +          ra[iR] * a_cse[iAp1]
-                   +                   a_cse[iA]  * pb[iP1]
-                   +                   a_cne[iA]  * pa[iP1];
+                  iP1 = iP + xOffsetP;
+                  rap_ce[iAc] =          a_ce[iA]
+                     +          rb[iR] * a_ce[iAm1] * pb[iP1]
+                     +          ra[iR] * a_ce[iAp1] * pa[iP1]
+                     +          rb[iR] * a_cne[iAm1]
+                     +          ra[iR] * a_cse[iAp1]
+                     +                   a_cse[iA]  * pb[iP1]
+                     +                   a_cne[iA]  * pa[iP1];
 
-	      }
-
-            hypre_BoxLoopEnd;
+               }
+            hypre_BoxLoop4End(iP, iR, iA, iAc);
 
             break;
 

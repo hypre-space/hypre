@@ -80,19 +80,15 @@ hypre_StructInnerProd(  hypre_StructVector *x,
          hypre_BoxLoop2Begin(loop_size,
                              x_data_box, start, unit_stride, xi,
                              y_data_box, start, unit_stride, yi);
-	 
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,xi,yi
 #define HYPRE_SMP_REDUCTION_OP +
 #define HYPRE_SMP_REDUCTION_VARS local_result
 #include "hypre_box_smp_forloop.h"
-		     
 	 hypre_BoxLoop2For(loopi, loopj, loopk, xi, yi)
-	   {
-             local_result += xp[xi] * yp[yi];
-	   }
-
-         hypre_BoxLoopEnd;
-
+            {
+               local_result += xp[xi] * yp[yi];
+            }
+         hypre_BoxLoop2End(xi, yi);
       }
 
 #ifdef HYPRE_USE_PTHREADS

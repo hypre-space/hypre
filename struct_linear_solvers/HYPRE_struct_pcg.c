@@ -440,20 +440,16 @@ HYPRE_StructDiagScale( HYPRE_StructSolver solver,
          hypre_GetBoxSize(box, loop_size);
 
          hypre_BoxLoop3Begin(loop_size,
-                                    A_data_box, start, stride, Ai,
-                                    x_data_box, start, stride, xi,
-                                    y_data_box, start, stride, yi);
-
+                             A_data_box, start, stride, Ai,
+                             x_data_box, start, stride, xi,
+                             y_data_box, start, stride, yi);
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,yi,xi,Ai
 #include "hypre_box_smp_forloop.h"
-		     
 	 hypre_BoxLoop3For(loopi, loopj, loopk, Ai, xi, yi)
 	    {
-	      xp[xi] = yp[yi] / Ap[Ai];
+               xp[xi] = yp[yi] / Ap[Ai];
 	    }
-
-         hypre_BoxLoopEnd;
-
+         hypre_BoxLoop3End(Ai, xi, yi);
       }
 
    return ierr;

@@ -252,7 +252,7 @@ hypre_SMGResidual( void               *residual_vdata,
                      {
                         rp[ri] = bp[bi];
                      }
-                  hypre_BoxLoop2End;
+                  hypre_BoxLoop2End(bi, ri);
                }
          }
          break;
@@ -625,7 +625,7 @@ hypre_SMGResidual( void               *residual_vdata,
                               - Ap0[Ai] * xp0[xi];
 
                         }
-                     hypre_BoxLoop3End;
+                     hypre_BoxLoop3End(Ai, xi, ri);
 
                      break;
 
@@ -647,7 +647,7 @@ hypre_SMGResidual( void               *residual_vdata,
                               - Ap2[Ai] * xp2[xi];
 
                         }
-                     hypre_BoxLoop3End;
+                     hypre_BoxLoop3End(Ai, xi, ri);
 
                      break;
 
@@ -671,7 +671,7 @@ hypre_SMGResidual( void               *residual_vdata,
                               - Ap4[Ai] * xp4[xi];
 
                         }
-                     hypre_BoxLoop3End;
+                     hypre_BoxLoop3End(Ai, xi, ri);
 
                      break;
 
@@ -697,7 +697,7 @@ hypre_SMGResidual( void               *residual_vdata,
                               - Ap6[Ai] * xp6[xi];
 
                         }
-                     hypre_BoxLoop3End;
+                     hypre_BoxLoop3End(Ai, xi, ri);
 
                      break;
 
@@ -725,7 +725,7 @@ hypre_SMGResidual( void               *residual_vdata,
                               - Ap8[Ai] * xp8[xi];
    
                         }
-                     hypre_BoxLoop3End;
+                     hypre_BoxLoop3End(Ai, xi, ri);
 
                      break;
 
@@ -759,7 +759,7 @@ hypre_SMGResidual( void               *residual_vdata,
                               - Ap14[Ai] * xp14[xi];
 
                         }
-                     hypre_BoxLoop3End;
+                     hypre_BoxLoop3End(Ai, xi, ri);
 
                      break;
 
@@ -797,7 +797,7 @@ hypre_SMGResidual( void               *residual_vdata,
                               - Ap18[Ai] * xp18[xi];
    
                         }
-                     hypre_BoxLoop3End;
+                     hypre_BoxLoop3End(Ai, xi, ri);
    
                      break;
    
@@ -843,7 +843,7 @@ hypre_SMGResidual( void               *residual_vdata,
                               - Ap26[Ai] * xp26[xi];
 
                         }
-                     hypre_BoxLoop3End;
+                     hypre_BoxLoop3End(Ai, xi, ri);
    
                      break;
 
@@ -867,7 +867,7 @@ hypre_SMGResidual( void               *residual_vdata,
                            {
                               rp[ri] -= Ap0[Ai] * xp0[xi];
                            }
-                        hypre_BoxLoop3End;
+                        hypre_BoxLoop3End(Ai, xi, ri);
                      }
                   }
                }

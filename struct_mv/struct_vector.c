@@ -357,19 +357,15 @@ hypre_SetStructVectorBoxValues( hypre_StructVector *vector,
                hypre_GetBoxSize(box, loop_size);
 
                hypre_BoxLoop2Begin(loop_size,
-                             data_box, data_start, data_stride, datai,
-                             dval_box, dval_start, dval_stride, dvali);
-
+                                   data_box, data_start, data_stride, datai,
+                                   dval_box, dval_start, dval_stride, dvali);
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,datai,dvali
 #include "hypre_box_smp_forloop.h"
-		     
 	       hypre_BoxLoop2For(loopi, loopj, loopk, datai, dvali)
-	         {
-	           datap[datai] = values[dvali];
-		 }
-
-               hypre_BoxLoopEnd;
-
+                  {
+                     datap[datai] = values[dvali];
+                  }
+               hypre_BoxLoop2End(datai, dvali);
             }
          }
 
@@ -457,18 +453,15 @@ hypre_GetStructVectorBoxValues( hypre_StructVector *vector,
                hypre_GetBoxSize(box, loop_size);
 
                hypre_BoxLoop2Begin(loop_size,
-                             data_box, data_start, data_stride, datai,
-                             dval_box, dval_start, dval_stride, dvali);
-
+                                   data_box, data_start, data_stride, datai,
+                                   dval_box, dval_start, dval_stride, dvali);
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,datai,dvali
 #include "hypre_box_smp_forloop.h"
-		     
 	       hypre_BoxLoop2For(loopi, loopj, loopk, datai, dvali)
-	         {
-	           values[dvali] = datap[datai];
-	         }
-
-               hypre_BoxLoopEnd;
+                  {
+                     values[dvali] = datap[datai];
+                  }
+               hypre_BoxLoop2End(datai, dvali);
             }
          }
 
@@ -552,18 +545,14 @@ hypre_SetStructVectorConstantValues( hypre_StructVector *vector,
          hypre_GetBoxSize(box, loop_size);
 
          hypre_BoxLoop1Begin(loop_size,
-                           v_data_box, start, unit_stride, vi);
-
+                             v_data_box, start, unit_stride, vi);
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,vi 
 #include "hypre_box_smp_forloop.h"
-       
          hypre_BoxLoop1For(loopi, loopj, loopk, vi)
 	    {
-		vp[vi] = values;
+               vp[vi] = values;
 	    }
-
-         hypre_BoxLoopEnd;
-
+         hypre_BoxLoop1End(vi);
       }
 
    return ierr;
@@ -619,19 +608,14 @@ hypre_ClearStructVectorGhostValues( hypre_StructVector *vector )
                hypre_GetBoxSize(diff_box, loop_size);
 
                hypre_BoxLoop1Begin(loop_size,
-                           v_data_box, start, unit_stride, vi);
-
+                                   v_data_box, start, unit_stride, vi);
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,vi 
-
 #include "hypre_box_smp_forloop.h"
-       
                hypre_BoxLoop1For(loopi, loopj, loopk, vi)
-	         {
-		   vp[vi] = 0.0;
-	         }
-
-              hypre_BoxLoopEnd;
-
+                  {
+                     vp[vi] = 0.0;
+                  }
+               hypre_BoxLoop1End(vi);
             }
       }
    hypre_FreeBoxArray(diff_boxes);
@@ -648,44 +632,38 @@ hypre_ClearStructVectorAllValues( hypre_StructVector *vector )
 {
    int               ierr = 0;
 
-   int               data_size;
+   int               datai;
    double           *data;
 
-   int               i;
-   int               loopi, loopj, loopk;
+   hypre_Index       imin;
+   hypre_Index       imax;
+   hypre_Box        *box;
    hypre_Index       loop_size;
+
+   int               loopi, loopj, loopk;
 
    /*-----------------------------------------------------------------------
     * Set the vector coefficients
     *-----------------------------------------------------------------------*/
 
-   data_size = hypre_StructVectorDataSize(vector);
-   data      = hypre_StructVectorData(vector);
+   box = hypre_NewBox();
+   hypre_SetIndex(imin, 1, 1, 1);
+   hypre_SetIndex(imax, hypre_StructVectorDataSize(vector), 1, 1);
+   hypre_SetBoxExtents(box, imin, imax);
+   data = hypre_StructVectorData(vector);
+   hypre_GetBoxSize(box, loop_size);
 
-   hypre_SetIndex(loop_size, data_size, 1, 1);
-
-   hypre_BoxLoop0Begin(loop_size);
-
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj
-
+   hypre_BoxLoop1Begin(loop_size,
+                       box, imin, imin, datai);
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,datai
 #include "hypre_box_smp_forloop.h"
-       
-   hypre_BoxLoop0For(loopi, loopj, loopk)
-     {
-	data[loopi] = 0.0;
-     }
+   hypre_BoxLoop1For(loopi, loopj, loopk, datai)
+      {
+         data[datai] = 0.0;
+      }
+   hypre_BoxLoop1End(datai);
 
-   hypre_BoxLoopEnd;
-
-#if 0
-   for ( i=0; i < data_size; i++)
-      data[i] = 0.0;
-
-#ifdef HYPRE_USE_PTHREADS
-   hypre_barrier(&hypre_mutex_boxloops, 0);
-#endif
-
-#endif
+   hypre_FreeBox(box);
 
    return ierr;
 }

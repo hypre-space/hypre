@@ -182,159 +182,269 @@ for (i = 0; i < hypre_BoxArraySize(box_array); i++)
 #define hypre_ForBoxArrayI(i, box_array_array) \
 for (i = 0; i < hypre_BoxArrayArraySize(box_array_array); i++)
 
-#define hypre_BoxLoopDeclare(loop_size, data_box, stride, is, js, ks) \
-int  is = (hypre_IndexX(stride));\
-int  js = (hypre_IndexY(stride)*hypre_BoxSizeX(data_box));\
-int  ks = (hypre_IndexZ(stride)*\
-           hypre_BoxSizeX(data_box)*hypre_BoxSizeY(data_box))
-
-/*-------------------------------------------------------------------------
- * Threaded versions of looping macros are in box_pthreads.h.
- *-------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------
+ * BoxLoop macros:
+ *
+ * NOTE: PThreads version of BoxLoop looping macros are in `box_pthreads.h'.
+ *
+ *--------------------------------------------------------------------------*/
 
 #ifndef HYPRE_USE_PTHREADS
 
+#define hypre_NumThreads 1
+
+#define hypre_BoxLoopDeclareS(dbox, stride, sx, sy, sz) \
+int  sx = (hypre_IndexX(stride));\
+int  sy = (hypre_IndexY(stride)*hypre_BoxSizeX(dbox));\
+int  sz = (hypre_IndexZ(stride)*\
+           hypre_BoxSizeX(dbox)*hypre_BoxSizeY(dbox))
+
+#define hypre_BoxLoopDeclareN(loop_size) \
+int  hypre__nx = hypre_IndexX(loop_size);\
+int  hypre__ny = hypre_IndexY(loop_size);\
+int  hypre__nz = hypre_IndexZ(loop_size);\
+int  hypre__dir, hypre__max;\
+int  hypre__div, hypre__mod;\
+int  hypre__block, hypre__num_blocks;\
+hypre__dir = 0;\
+hypre__max = hypre__nx;\
+if (hypre__ny > hypre__max)\
+{\
+   hypre__dir = 1;\
+   hypre__max = hypre__ny;\
+}\
+if (hypre__nz > hypre__max)\
+{\
+   hypre__dir = 2;\
+   hypre__max = hypre__nz;\
+}\
+hypre__num_blocks = hypre_NumThreads;\
+if (hypre__max < hypre__num_blocks)\
+{\
+   hypre__num_blocks = hypre__max;\
+}\
+if (hypre__num_blocks > 0)\
+{\
+   hypre__div = hypre__max / hypre__num_blocks;\
+   hypre__mod = hypre__max % hypre__num_blocks;\
+}
+
+#define hypre_BoxLoopSet(i, j, k) \
+i = 0;\
+j = 0;\
+k = 0;\
+if (hypre__num_blocks > 1)\
+{\
+   if (hypre__dir == 0)\
+   {\
+      i = hypre__block * hypre__div + hypre_min(hypre__mod, hypre__block);\
+      hypre__nx = hypre__div + ((hypre__mod > hypre__block) ? 1 : 0);\
+   }\
+   else if (hypre__dir == 1)\
+   {\
+      j = hypre__block * hypre__div + hypre_min(hypre__mod, hypre__block);\
+      hypre__ny = hypre__div + ((hypre__mod > hypre__block) ? 1 : 0);\
+   }\
+   else if (hypre__dir == 2)\
+   {\
+      k = hypre__block * hypre__div + hypre_min(hypre__mod, hypre__block);\
+      hypre__nz = hypre__div + ((hypre__mod > hypre__block) ? 1 : 0);\
+   }\
+}
+
+/*-----------------------------------*/
+
 #define hypre_BoxLoop0Begin(loop_size)\
 {\
-   int hypre__nx = hypre_IndexX(loop_size);\
-   int hypre__ny = hypre_IndexY(loop_size);\
-   int hypre__nz = hypre_IndexZ(loop_size)
+   hypre_BoxLoopDeclareN(loop_size);
 
 #define hypre_BoxLoop0For(i, j, k)\
-   for (k = 0; k < hypre__nz; k++ )\
+   for (hypre__block = 0; hypre__block < hypre__num_blocks; hypre__block++)\
    {\
-      for (j = 0; j < hypre__ny; j++ )\
+   hypre_BoxLoopSet(i, j, k);\
+   for (k = 0; k < hypre__nz; k++)\
+   {\
+      for (j = 0; j < hypre__ny; j++)\
       {\
-         for (i = 0; i < hypre__nx; i++ )\
-         {\
+         for (i = 0; i < hypre__nx; i++)\
+         {
 
-
-#define hypre_BoxLoop0End }}}}
+#define hypre_BoxLoop0End()\
+         }\
+      }\
+   }\
+   }\
+}
   
-
-
+/*-----------------------------------*/
 
 #define hypre_BoxLoop1Begin(loop_size,\
-			    data_box1, start1, stride1, i1)\
+			    dbox1, start1, stride1, i1)\
 {\
-   hypre_BoxLoopDeclare(loop_size, data_box1, stride1,\
-                        hypre__is1, hypre__js1, hypre__ks1);\
-   int hypre__i1start = hypre_BoxIndexRank(data_box1, start1);\
-   int hypre__nx = hypre_IndexX(loop_size);\
-   int hypre__ny = hypre_IndexY(loop_size);\
-   int hypre__nz = hypre_IndexZ(loop_size)
+   int  hypre__i1start = hypre_BoxIndexRank(dbox1, start1);\
+   hypre_BoxLoopDeclareS(dbox1, stride1, hypre__sx1, hypre__sy1, hypre__sz1);\
+   hypre_BoxLoopDeclareN(loop_size);
 
 #define hypre_BoxLoop1For(i, j, k, i1)\
-   for (k = 0; k < hypre__nz; k++ )\
+   for (hypre__block = 0; hypre__block < hypre__num_blocks; hypre__block++)\
    {\
-      for (j = 0; j < hypre__ny; j++ )\
+   hypre_BoxLoopSet(i, j, k);\
+   i1 = hypre__i1start + i*hypre__sx1 + j*hypre__sy1 + k*hypre__sz1;\
+   for (k = 0; k < hypre__nz; k++)\
+   {\
+      for (j = 0; j < hypre__ny; j++)\
       {\
-         for (i = 0; i < hypre__nx; i++ )\
-         {\
-            i1 = hypre__i1start + i*hypre__is1 + j*hypre__js1 + k*hypre__ks1;
+         for (i = 0; i < hypre__nx; i++)\
+         {
 
-
-#define hypre_BoxLoopEnd }}}}
+#define hypre_BoxLoop1End(i1)\
+            i1 += hypre__sx1;\
+         }\
+         i1 += hypre__sy1 - hypre__nx*hypre__sx1;\
+      }\
+      i1 += hypre__sz1 - hypre__ny*hypre__sy1;\
+   }\
+   }\
+}
   
-
+/*-----------------------------------*/
 
 #define hypre_BoxLoop2Begin(loop_size,\
-			    data_box1, start1, stride1, i1,\
-			    data_box2, start2, stride2, i2)\
+			    dbox1, start1, stride1, i1,\
+			    dbox2, start2, stride2, i2)\
 {\
-   hypre_BoxLoopDeclare(loop_size, data_box1, stride1,\
-                        hypre__is1, hypre__js1, hypre__ks1);\
-   hypre_BoxLoopDeclare(loop_size, data_box2, stride2,\
-                        hypre__is2, hypre__js2, hypre__ks2);\
-   int hypre__i1start = hypre_BoxIndexRank(data_box1, start1);\
-   int hypre__i2start = hypre_BoxIndexRank(data_box2, start2);\
-   int hypre__nx = hypre_IndexX(loop_size);\
-   int hypre__ny = hypre_IndexY(loop_size);\
-   int hypre__nz = hypre_IndexZ(loop_size)
+   int  hypre__i1start = hypre_BoxIndexRank(dbox1, start1);\
+   int  hypre__i2start = hypre_BoxIndexRank(dbox2, start2);\
+   hypre_BoxLoopDeclareS(dbox1, stride1, hypre__sx1, hypre__sy1, hypre__sz1);\
+   hypre_BoxLoopDeclareS(dbox2, stride2, hypre__sx2, hypre__sy2, hypre__sz2);\
+   hypre_BoxLoopDeclareN(loop_size);
 
 #define hypre_BoxLoop2For(i, j, k, i1, i2)\
-   for (k = 0; k < hypre__nz; k++ )\
+   for (hypre__block = 0; hypre__block < hypre__num_blocks; hypre__block++)\
    {\
-      for (j = 0; j < hypre__ny; j++ )\
+   hypre_BoxLoopSet(i, j, k);\
+   i1 = hypre__i1start + i*hypre__sx1 + j*hypre__sy1 + k*hypre__sz1;\
+   i2 = hypre__i2start + i*hypre__sx2 + j*hypre__sy2 + k*hypre__sz2;\
+   for (k = 0; k < hypre__nz; k++)\
+   {\
+      for (j = 0; j < hypre__ny; j++)\
       {\
-         for (i = 0; i < hypre__nx; i++ )\
-         {\
-            i1 = hypre__i1start + i*hypre__is1 + j*hypre__js1 + k*hypre__ks1;\
-            i2 = hypre__i2start + i*hypre__is2 + j*hypre__js2 + k*hypre__ks2;
+         for (i = 0; i < hypre__nx; i++)\
+         {
 
-#define hypre_BoxLoop2End }}}}
+#define hypre_BoxLoop2End(i1, i2)\
+            i1 += hypre__sx1;\
+            i2 += hypre__sx2;\
+         }\
+         i1 += hypre__sy1 - hypre__nx*hypre__sx1;\
+         i2 += hypre__sy2 - hypre__nx*hypre__sx2;\
+      }\
+      i1 += hypre__sz1 - hypre__ny*hypre__sy1;\
+      i2 += hypre__sz2 - hypre__ny*hypre__sy2;\
+   }\
+   }\
+}
 
+/*-----------------------------------*/
 
 #define hypre_BoxLoop3Begin(loop_size,\
-			    data_box1, start1, stride1, i1,\
-			    data_box2, start2, stride2, i2,\
-                            data_box3, start3, stride3, i3)\
+			    dbox1, start1, stride1, i1,\
+			    dbox2, start2, stride2, i2,\
+                            dbox3, start3, stride3, i3)\
 {\
-   hypre_BoxLoopDeclare(loop_size, data_box1, stride1,\
-                        hypre__is1, hypre__js1, hypre__ks1);\
-   hypre_BoxLoopDeclare(loop_size, data_box2, stride2,\
-                        hypre__is2, hypre__js2, hypre__ks2);\
-   hypre_BoxLoopDeclare(loop_size, data_box3, stride3,\
-                        hypre__is3, hypre__js3, hypre__ks3);\
-   int hypre__i1start = hypre_BoxIndexRank(data_box1, start1);\
-   int hypre__i2start = hypre_BoxIndexRank(data_box2, start2);\
-   int hypre__i3start = hypre_BoxIndexRank(data_box3, start3);\
-   int hypre__nx = hypre_IndexX(loop_size);\
-   int hypre__ny = hypre_IndexY(loop_size);\
-   int hypre__nz = hypre_IndexZ(loop_size)
+   int  hypre__i1start = hypre_BoxIndexRank(dbox1, start1);\
+   int  hypre__i2start = hypre_BoxIndexRank(dbox2, start2);\
+   int  hypre__i3start = hypre_BoxIndexRank(dbox3, start3);\
+   hypre_BoxLoopDeclareS(dbox1, stride1, hypre__sx1, hypre__sy1, hypre__sz1);\
+   hypre_BoxLoopDeclareS(dbox2, stride2, hypre__sx2, hypre__sy2, hypre__sz2);\
+   hypre_BoxLoopDeclareS(dbox3, stride3, hypre__sx3, hypre__sy3, hypre__sz3);\
+   hypre_BoxLoopDeclareN(loop_size);
 
 #define hypre_BoxLoop3For(i, j, k, i1, i2, i3)\
-   for (k = 0; k < hypre__nz; k++ )\
+   for (hypre__block = 0; hypre__block < hypre__num_blocks; hypre__block++)\
    {\
-      for (j = 0; j < hypre__ny; j++ )\
+   hypre_BoxLoopSet(i, j, k);\
+   i1 = hypre__i1start + i*hypre__sx1 + j*hypre__sy1 + k*hypre__sz1;\
+   i2 = hypre__i2start + i*hypre__sx2 + j*hypre__sy2 + k*hypre__sz2;\
+   i3 = hypre__i3start + i*hypre__sx3 + j*hypre__sy3 + k*hypre__sz3;\
+   for (k = 0; k < hypre__nz; k++)\
+   {\
+      for (j = 0; j < hypre__ny; j++)\
       {\
-         for (i = 0; i < hypre__nx; i++ )\
-         {\
-            i1 = hypre__i1start + i*hypre__is1 + j*hypre__js1 + k*hypre__ks1;\
-            i2 = hypre__i2start + i*hypre__is2 + j*hypre__js2 + k*hypre__ks2;\
-            i3 = hypre__i3start + i*hypre__is3 + j*hypre__js3 + k*hypre__ks3;
+         for (i = 0; i < hypre__nx; i++)\
+         {
 
-#define hypre_BoxLoop3End }}}}
+#define hypre_BoxLoop3End(i1, i2, i3)\
+            i1 += hypre__sx1;\
+            i2 += hypre__sx2;\
+            i3 += hypre__sx3;\
+         }\
+         i1 += hypre__sy1 - hypre__nx*hypre__sx1;\
+         i2 += hypre__sy2 - hypre__nx*hypre__sx2;\
+         i3 += hypre__sy3 - hypre__nx*hypre__sx3;\
+      }\
+      i1 += hypre__sz1 - hypre__ny*hypre__sy1;\
+      i2 += hypre__sz2 - hypre__ny*hypre__sy2;\
+      i3 += hypre__sz3 - hypre__ny*hypre__sy3;\
+   }\
+   }\
+}
 
+/*-----------------------------------*/
 
 #define hypre_BoxLoop4Begin(loop_size,\
-			    data_box1, start1, stride1, i1,\
-			    data_box2, start2, stride2, i2,\
-                            data_box3, start3, stride3, i3,\
-                            data_box4, start4, stride4, i4)\
+			    dbox1, start1, stride1, i1,\
+			    dbox2, start2, stride2, i2,\
+                            dbox3, start3, stride3, i3,\
+                            dbox4, start4, stride4, i4)\
 {\
-   hypre_BoxLoopDeclare(loop_size, data_box1, stride1,\
-                        hypre__is1, hypre__js1, hypre__ks1);\
-   hypre_BoxLoopDeclare(loop_size, data_box2, stride2,\
-                        hypre__is2, hypre__js2, hypre__ks2);\
-   hypre_BoxLoopDeclare(loop_size, data_box3, stride3,\
-                        hypre__is3, hypre__js3, hypre__ks3);\
-   hypre_BoxLoopDeclare(loop_size, data_box4, stride4,\
-                        hypre__is4, hypre__js4, hypre__ks4);\
-   int hypre__i1start = hypre_BoxIndexRank(data_box1, start1);\
-   int hypre__i2start = hypre_BoxIndexRank(data_box2, start2);\
-   int hypre__i3start = hypre_BoxIndexRank(data_box3, start3);\
-   int hypre__i4start = hypre_BoxIndexRank(data_box4, start4);\
-   int hypre__nx = hypre_IndexX(loop_size);\
-   int hypre__ny = hypre_IndexY(loop_size);\
-   int hypre__nz = hypre_IndexZ(loop_size)
+   int  hypre__i1start = hypre_BoxIndexRank(dbox1, start1);\
+   int  hypre__i2start = hypre_BoxIndexRank(dbox2, start2);\
+   int  hypre__i3start = hypre_BoxIndexRank(dbox3, start3);\
+   int  hypre__i4start = hypre_BoxIndexRank(dbox4, start4);\
+   hypre_BoxLoopDeclareS(dbox1, stride1, hypre__sx1, hypre__sy1, hypre__sz1);\
+   hypre_BoxLoopDeclareS(dbox2, stride2, hypre__sx2, hypre__sy2, hypre__sz2);\
+   hypre_BoxLoopDeclareS(dbox3, stride3, hypre__sx3, hypre__sy3, hypre__sz3);\
+   hypre_BoxLoopDeclareS(dbox4, stride4, hypre__sx4, hypre__sy4, hypre__sz4);\
+   hypre_BoxLoopDeclareN(loop_size);
 
 #define hypre_BoxLoop4For(i, j, k, i1, i2, i3, i4)\
-   for (k = 0; k < hypre__nz; k++ )\
+   for (hypre__block = 0; hypre__block < hypre__num_blocks; hypre__block++)\
    {\
-      for (j = 0; j < hypre__ny; j++ )\
+   hypre_BoxLoopSet(i, j, k);\
+   i1 = hypre__i1start + i*hypre__sx1 + j*hypre__sy1 + k*hypre__sz1;\
+   i2 = hypre__i2start + i*hypre__sx2 + j*hypre__sy2 + k*hypre__sz2;\
+   i3 = hypre__i3start + i*hypre__sx3 + j*hypre__sy3 + k*hypre__sz3;\
+   i4 = hypre__i4start + i*hypre__sx4 + j*hypre__sy4 + k*hypre__sz4;\
+   for (k = 0; k < hypre__nz; k++)\
+   {\
+      for (j = 0; j < hypre__ny; j++)\
       {\
-         for (i = 0; i < hypre__nx; i++ )\
-         {\
-            i1 = hypre__i1start + i*hypre__is1 + j*hypre__js1 + k*hypre__ks1;\
-            i2 = hypre__i2start + i*hypre__is2 + j*hypre__js2 + k*hypre__ks2;\
-            i3 = hypre__i3start + i*hypre__is3 + j*hypre__js3 + k*hypre__ks3;\
-            i4 = hypre__i4start + i*hypre__is4 + j*hypre__js4 + k*hypre__ks4;
+         for (i = 0; i < hypre__nx; i++)\
+         {
 
-#define hypre_BoxLoop4End }}}}
+#define hypre_BoxLoop4End(i1, i2, i3, i4)\
+            i1 += hypre__sx1;\
+            i2 += hypre__sx2;\
+            i3 += hypre__sx3;\
+            i4 += hypre__sx4;\
+         }\
+         i1 += hypre__sy1 - hypre__nx*hypre__sx1;\
+         i2 += hypre__sy2 - hypre__nx*hypre__sx2;\
+         i3 += hypre__sy3 - hypre__nx*hypre__sx3;\
+         i4 += hypre__sy4 - hypre__nx*hypre__sx4;\
+      }\
+      i1 += hypre__sz1 - hypre__ny*hypre__sy1;\
+      i2 += hypre__sz2 - hypre__ny*hypre__sy2;\
+      i3 += hypre__sz3 - hypre__ny*hypre__sy3;\
+      i4 += hypre__sz4 - hypre__ny*hypre__sy4;\
+   }\
+   }\
+}
+
+/*-----------------------------------*/
 
 #endif  /* ifndef HYPRE_USE_PTHREADS */
-
 
 #endif
 /*BHEADER**********************************************************************
@@ -376,6 +486,15 @@ extern int iteration_counter;
 #ifndef MAX_VOL
 #define MAX_VOL 64000
 #endif
+
+#define hypre_BoxLoopDeclare(loop_size, data_box, stride, iinc, jinc, kinc) \
+int  iinc = (hypre_IndexX(stride));\
+int  jinc = (hypre_IndexY(stride)*hypre_BoxSizeX(data_box) -\
+             hypre_IndexX(loop_size)*hypre_IndexX(stride));\
+int  kinc = (hypre_IndexZ(stride)*\
+             hypre_BoxSizeX(data_box)*hypre_BoxSizeY(data_box) -\
+             hypre_IndexY(loop_size)*\
+             hypre_IndexY(stride)*hypre_BoxSizeX(data_box))
 
 #define vol_cbrt(vol) (int) pow((double)(vol), 1. / 3.) 
 
@@ -526,9 +645,9 @@ extern int iteration_counter;
             for (j = clstart[1]; j < clfinish[1]; j++ )\
             {\
                for (i = clstart[0]; i < clfinish[0]; i++ )\
-               {\
+               {
 
-#define hypre_BoxLoop0End }}}hypre_ThreadLoop(iteration_counter,\
+#define hypre_BoxLoop0End() }}}hypre_ThreadLoop(iteration_counter,\
 			     hypre_thread_counter, hypre_thread_release,\
 					      hypre_mutex_boxloops);}}}
 
@@ -561,9 +680,9 @@ extern int iteration_counter;
                {\
                   i1 = orig_i1 +\
                       (i + hypre__nx*j + hypre__nx*hypre__ny*k)*hypre__iinc1 +\
-                      (j + hypre__ny*k)*hypre__jinc1 + k*hypre__kinc1;\
+                      (j + hypre__ny*k)*hypre__jinc1 + k*hypre__kinc1;
 
-#define hypre_BoxLoopEnd }}}hypre_ThreadLoop(iteration_counter,\
+#define hypre_BoxLoop1End(i1) }}}hypre_ThreadLoop(iteration_counter,\
 			     hypre_thread_counter, hypre_thread_release,\
 					      hypre_mutex_boxloops);}}}
 
@@ -604,7 +723,7 @@ extern int iteration_counter;
                       (i + hypre__nx*j + hypre__nx*hypre__ny*k)*hypre__iinc2 +\
                       (j + hypre__ny*k)*hypre__jinc2 + k*hypre__kinc2;
 
-#define hypre_BoxLoop2End }}}hypre_ThreadLoop(iteration_counter,\
+#define hypre_BoxLoop2End(i1, i2) }}}hypre_ThreadLoop(iteration_counter,\
                        hypre_thread_counter, hypre_thread_release,\
                        hypre_mutex_boxloops);}}}
 					       
@@ -655,7 +774,7 @@ extern int iteration_counter;
                       (i + hypre__nx*j + hypre__nx*hypre__ny*k)*hypre__iinc3 +\
                       (j + hypre__ny*k)*hypre__jinc3 + k*hypre__kinc3;\
 
-#define hypre_BoxLoop3End }}}hypre_ThreadLoop(iteration_counter,\
+#define hypre_BoxLoop3End(i1, i2, i3) }}}hypre_ThreadLoop(iteration_counter,\
 			     hypre_thread_counter, hypre_thread_release,\
 					      hypre_mutex_boxloops);}}}
 
@@ -712,7 +831,7 @@ extern int iteration_counter;
                       (j + hypre__ny*k)*hypre__jinc4 + k*hypre__kinc4;\
 
 
-#define hypre_BoxLoop4End }}}hypre_ThreadLoop(iteration_counter,\
+#define hypre_BoxLoop4End(i1, i2, i3, i4) }}}hypre_ThreadLoop(iteration_counter,\
 			     hypre_thread_counter, hypre_thread_release,\
 					      hypre_mutex_boxloops);}}}
 

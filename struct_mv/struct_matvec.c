@@ -195,20 +195,14 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
             hypre_GetBoxSize(box, loop_size);
 
 	    hypre_BoxLoop1Begin(loop_size,
-                           y_data_box, start, stride, yi);
-
-
-
+                                y_data_box, start, stride, yi);
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,yi
 #include "hypre_box_smp_forloop.h"
-       
 	    hypre_BoxLoop1For(loopi, loopj, loopk, yi)
-	      {
-		yp[yi] *= beta;
-	      }
-
-	    hypre_BoxLoopEnd;
-
+               {
+                  yp[yi] *= beta;
+               }
+	    hypre_BoxLoop1End(yi);
          }
 
       return ierr;
@@ -254,41 +248,28 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
                         hypre_GetBoxSize(box, loop_size);
 
 			hypre_BoxLoop1Begin(loop_size,
-                           y_data_box, start, stride, yi);
-
-
-
+                                            y_data_box, start, stride, yi);
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,yi
 #include "hypre_box_smp_forloop.h"
-       
 			hypre_BoxLoop1For(loopi, loopj, loopk, yi)
-			  {
-			    yp[yi] = 0.0;
-			  }
-
-			hypre_BoxLoopEnd;
-
-
+                           {
+                              yp[yi] = 0.0;
+                           }
+			hypre_BoxLoop1End(yi);
                      }
                      else
                      {
                         hypre_GetBoxSize(box, loop_size);
 
 			hypre_BoxLoop1Begin(loop_size,
-                           y_data_box, start, stride, yi);
-
-
-
+                                            y_data_box, start, stride, yi);
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,yi
 #include "hypre_box_smp_forloop.h"
-       
 			hypre_BoxLoop1For(loopi, loopj, loopk, yi)
-			  {
-			    yp[yi] *= temp;
-			  }
-
-			hypre_BoxLoopEnd;
-
+                           {
+                              yp[yi] *= temp;
+                           }
+			hypre_BoxLoop1End(yi);
                      }
                   }
             }
@@ -356,27 +337,23 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
                                                         stencil_shape[si+6]);
 
                         hypre_BoxLoop3Begin(loop_size,
-                                    A_data_box, start, stride, Ai,
-                                    x_data_box, start, stride, xi,
-                                    y_data_box, start, stride, yi);
-
+                                            A_data_box, start, stride, Ai,
+                                            x_data_box, start, stride, xi,
+                                            y_data_box, start, stride, yi);
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,yi,xi,Ai
 #include "hypre_box_smp_forloop.h"
-		     
 			hypre_BoxLoop3For(loopi, loopj, loopk, Ai, xi, yi)
-			  {
-                                          yp[yi] +=
-                                             Ap0[Ai] * xp[xi + xoff0] +
-                                             Ap1[Ai] * xp[xi + xoff1] +
-                                             Ap2[Ai] * xp[xi + xoff2] +
-                                             Ap3[Ai] * xp[xi + xoff3] +
-                                             Ap4[Ai] * xp[xi + xoff4] +
-                                             Ap5[Ai] * xp[xi + xoff5] +
-                                             Ap6[Ai] * xp[xi + xoff6];
-			  
-			  }
-
-			hypre_BoxLoopEnd;
+                           {
+                              yp[yi] +=
+                                 Ap0[Ai] * xp[xi + xoff0] +
+                                 Ap1[Ai] * xp[xi + xoff1] +
+                                 Ap2[Ai] * xp[xi + xoff2] +
+                                 Ap3[Ai] * xp[xi + xoff3] +
+                                 Ap4[Ai] * xp[xi + xoff4] +
+                                 Ap5[Ai] * xp[xi + xoff5] +
+                                 Ap6[Ai] * xp[xi + xoff6];
+                           }
+			hypre_BoxLoop3End(Ai, xi, yi);
 
                         break;
 
@@ -402,25 +379,22 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
                                                         stencil_shape[si+5]);
 
                         hypre_BoxLoop3Begin(loop_size,
-                                    A_data_box, start, stride, Ai,
-                                    x_data_box, start, stride, xi,
-                                    y_data_box, start, stride, yi);
-
+                                            A_data_box, start, stride, Ai,
+                                            x_data_box, start, stride, xi,
+                                            y_data_box, start, stride, yi);
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,yi,xi,Ai
 #include "hypre_box_smp_forloop.h"
-		     
 			hypre_BoxLoop3For(loopi, loopj, loopk, Ai, xi, yi)
-			  {
-                                          yp[yi] +=
-                                             Ap0[Ai] * xp[xi + xoff0] +
-                                             Ap1[Ai] * xp[xi + xoff1] +
-                                             Ap2[Ai] * xp[xi + xoff2] +
-                                             Ap3[Ai] * xp[xi + xoff3] +
-                                             Ap4[Ai] * xp[xi + xoff4] +
-                                             Ap5[Ai] * xp[xi + xoff5];
-			  }
-
-			hypre_BoxLoopEnd;
+                           {
+                              yp[yi] +=
+                                 Ap0[Ai] * xp[xi + xoff0] +
+                                 Ap1[Ai] * xp[xi + xoff1] +
+                                 Ap2[Ai] * xp[xi + xoff2] +
+                                 Ap3[Ai] * xp[xi + xoff3] +
+                                 Ap4[Ai] * xp[xi + xoff4] +
+                                 Ap5[Ai] * xp[xi + xoff5];
+                           }
+			hypre_BoxLoop3End(Ai, xi, yi);
                         
                         break;
 
@@ -443,24 +417,21 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
                                                         stencil_shape[si+4]);
 
                         hypre_BoxLoop3Begin(loop_size,
-                                    A_data_box, start, stride, Ai,
-                                    x_data_box, start, stride, xi,
-                                    y_data_box, start, stride, yi);
-
+                                            A_data_box, start, stride, Ai,
+                                            x_data_box, start, stride, xi,
+                                            y_data_box, start, stride, yi);
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,yi,xi,Ai
 #include "hypre_box_smp_forloop.h"
-		     
 			hypre_BoxLoop3For(loopi, loopj, loopk, Ai, xi, yi)
-			  {
-			    yp[yi] +=
-                                   Ap0[Ai] * xp[xi + xoff0] +
-                                   Ap1[Ai] * xp[xi + xoff1] +
-                                   Ap2[Ai] * xp[xi + xoff2] +
-                                   Ap3[Ai] * xp[xi + xoff3] +
-                                   Ap4[Ai] * xp[xi + xoff4]; 
-
-			  }
-			hypre_BoxLoopEnd;
+                           {
+                              yp[yi] +=
+                                 Ap0[Ai] * xp[xi + xoff0] +
+                                 Ap1[Ai] * xp[xi + xoff1] +
+                                 Ap2[Ai] * xp[xi + xoff2] +
+                                 Ap3[Ai] * xp[xi + xoff3] +
+                                 Ap4[Ai] * xp[xi + xoff4]; 
+                           }
+			hypre_BoxLoop3End(Ai, xi, yi);
 
                         break;
 
@@ -480,23 +451,20 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
                                                         stencil_shape[si+3]);
 
                         hypre_BoxLoop3Begin(loop_size,
-                                    A_data_box, start, stride, Ai,
-                                    x_data_box, start, stride, xi,
-                                    y_data_box, start, stride, yi);
-
+                                            A_data_box, start, stride, Ai,
+                                            x_data_box, start, stride, xi,
+                                            y_data_box, start, stride, yi);
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,yi,xi,Ai
 #include "hypre_box_smp_forloop.h"
-		     
 			hypre_BoxLoop3For(loopi, loopj, loopk, Ai, xi, yi)
-			  {
-                                       yp[yi] +=
-                                             Ap0[Ai] * xp[xi + xoff0] +
-                                             Ap1[Ai] * xp[xi + xoff1] +
-                                             Ap2[Ai] * xp[xi + xoff2] +
-                                             Ap3[Ai] * xp[xi + xoff3];
-			  }
-
-			hypre_BoxLoopEnd;
+                           {
+                              yp[yi] +=
+                                 Ap0[Ai] * xp[xi + xoff0] +
+                                 Ap1[Ai] * xp[xi + xoff1] +
+                                 Ap2[Ai] * xp[xi + xoff2] +
+                                 Ap3[Ai] * xp[xi + xoff3];
+                           }
+			hypre_BoxLoop3End(Ai, xi, yi);
 
                         break;
 
@@ -513,22 +481,19 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
                                                         stencil_shape[si+2]);
 
                         hypre_BoxLoop3Begin(loop_size,
-                                    A_data_box, start, stride, Ai,
-                                    x_data_box, start, stride, xi,
-                                    y_data_box, start, stride, yi);
-
+                                            A_data_box, start, stride, Ai,
+                                            x_data_box, start, stride, xi,
+                                            y_data_box, start, stride, yi);
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,yi,xi,Ai
 #include "hypre_box_smp_forloop.h"
-		     
 			hypre_BoxLoop3For(loopi, loopj, loopk, Ai, xi, yi)
-			  {
-                                        yp[yi] +=
-                                             Ap0[Ai] * xp[xi + xoff0] +
-                                             Ap1[Ai] * xp[xi + xoff1] +
-                                             Ap2[Ai] * xp[xi + xoff2]; 
-			  }
-
-			hypre_BoxLoopEnd;
+                           {
+                              yp[yi] +=
+                                 Ap0[Ai] * xp[xi + xoff0] +
+                                 Ap1[Ai] * xp[xi + xoff1] +
+                                 Ap2[Ai] * xp[xi + xoff2]; 
+                           }
+			hypre_BoxLoop3End(Ai, xi, yi);
 
                         break;
 
@@ -542,21 +507,18 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
                                                         stencil_shape[si+1]);
 
                         hypre_BoxLoop3Begin(loop_size,
-                                    A_data_box, start, stride, Ai,
-                                    x_data_box, start, stride, xi,
-                                    y_data_box, start, stride, yi);
-
+                                            A_data_box, start, stride, Ai,
+                                            x_data_box, start, stride, xi,
+                                            y_data_box, start, stride, yi);
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,yi,xi,Ai
 #include "hypre_box_smp_forloop.h"
-		     
 			hypre_BoxLoop3For(loopi, loopj, loopk, Ai, xi, yi)
-			  {
-                                        yp[yi] +=
-                                             Ap0[Ai] * xp[xi + xoff0] +
-                                             Ap1[Ai] * xp[xi + xoff1];
-			  }
-
-			hypre_BoxLoopEnd;
+                           {
+                              yp[yi] +=
+                                 Ap0[Ai] * xp[xi + xoff0] +
+                                 Ap1[Ai] * xp[xi + xoff1];
+                           }
+			hypre_BoxLoop3End(Ai, xi, yi);
 
                         break;
 
@@ -567,20 +529,17 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
                                                         stencil_shape[si+0]);
 
                         hypre_BoxLoop3Begin(loop_size,
-                                    A_data_box, start, stride, Ai,
-                                    x_data_box, start, stride, xi,
-                                    y_data_box, start, stride, yi);
-
+                                            A_data_box, start, stride, Ai,
+                                            x_data_box, start, stride, xi,
+                                            y_data_box, start, stride, yi);
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,yi,xi,Ai
 #include "hypre_box_smp_forloop.h"
-		     
 			hypre_BoxLoop3For(loopi, loopj, loopk, Ai, xi, yi)
-			  {
-			    yp[yi] +=
-			      Ap0[Ai] * xp[xi + xoff0];
-			  }
-
-			hypre_BoxLoopEnd;
+                           {
+                              yp[yi] +=
+                                 Ap0[Ai] * xp[xi + xoff0];
+                           }
+			hypre_BoxLoop3End(Ai, xi, yi);
 
                         break;
                      }
@@ -588,23 +547,15 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
 
                   if (alpha != 1.0)
                   {
-
-
 		     hypre_BoxLoop1Begin(loop_size,
-                           y_data_box, start, stride, yi);
-
-
-
+                                         y_data_box, start, stride, yi);
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,yi
 #include "hypre_box_smp_forloop.h"
-       
 		     hypre_BoxLoop1For(loopi, loopj, loopk, yi)
-		       {
-			 yp[yi] *= alpha;
+                        {
+                           yp[yi] *= alpha;
 			}
-
-		     hypre_BoxLoopEnd;
-
+		     hypre_BoxLoop1End(yi);
                   }
                }
          }

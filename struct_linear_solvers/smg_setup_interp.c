@@ -289,7 +289,7 @@ hypre_SMGSetupInterpOp( void               *relax_data,
                         {
                            PTp[PTi] = xp[xi];
                         }
-                     hypre_BoxLoop2End;
+                     hypre_BoxLoop2End(xi, PTi);
                   }
             }
       }

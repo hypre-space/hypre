@@ -236,7 +236,7 @@ hypre_SMGRestrict( void               *restrict_vdata,
                         rcp[rci] = rp[ri] + (Rp0[Ri] * rp0[ri] +
                                              Rp1[Ri] * rp1[ri]);
                      }
-                  hypre_BoxLoop3End;
+                  hypre_BoxLoop3End(Ri, ri, rci);
                }
          }
    }
