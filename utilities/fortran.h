@@ -21,7 +21,7 @@
 #define hypre_NAME_FORTRAN_FOR_C(name) name##_
 #elif defined(HYPRE_RS6000)
 #define hypre_NAME_C_FOR_FORTRAN(name) name##__
-#define hypre_NAME_FORTRAN_FOR_C(name) name#
+#define hypre_NAME_FORTRAN_FOR_C(name) name
 #else
 #define hypre_NAME_C_FOR_FORTRAN(name) name##__
 #define hypre_NAME_FORTRAN_FOR_C(name) name##_
