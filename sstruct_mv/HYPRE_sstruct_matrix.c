@@ -218,7 +218,7 @@ HYPRE_SStructMatrixInitialize( HYPRE_SStructMatrix matrix )
    int                     part, var, i;
 
    /* GEC0902 addition of variables for ilower and iupper   */
-   int                     comm;
+   MPI_Comm                 comm;
    hypre_SStructGrid       *grid;
    int                     ilower, iupper;
    int                   matrix_type = hypre_SStructMatrixObjectType(matrix);

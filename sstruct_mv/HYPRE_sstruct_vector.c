@@ -145,8 +145,8 @@ HYPRE_SStructVectorInitialize( HYPRE_SStructVector vector )
   int                     *dataindices;
   int                     *pdataindices;
   int                     vector_type = hypre_SStructVectorObjectType(vector);
-  hypre_SStructGrid        *grid =  hypre_SStructVectorGrid(vector);
-  int                      comm = hypre_SStructVectorComm(vector);
+  hypre_SStructGrid      *grid =  hypre_SStructVectorGrid(vector);
+  MPI_Comm                comm = hypre_SStructVectorComm(vector);
   HYPRE_IJVector          ijvector;
 
  /* GEC0902 addition of variables for ilower and iupper   */
