@@ -27,8 +27,8 @@ hypre_F90_IFACE(hypre_sstructmatrixcreate, HYPRE_SSTRUCTMATRIXCREATE)
                                                          int        *ierr)
 {
    *ierr = (int) (HYPRE_SStructMatrixCreate( (MPI_Comm)              *comm,
-                                             (HYPRE_SStructGraph *)   graph,
-                                             (HYPRE_SStructMatrix)   *matrix_ptr ) );
+                                             (HYPRE_SStructGraph)    *graph,
+                                             (HYPRE_SStructMatrix *)  matrix_ptr ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -291,6 +291,6 @@ hypre_F90_IFACE(hypre_sstructmatrixprint, HYPRE_SSTRUCTMATRIXPRINT)
                                                          int        *ierr)
 {
    *ierr = (int) (HYPRE_SStructMatrixPrint( (const char *)           filename,
-                                            (HYPRE_SStructMatrix *)  matrix,
-                                            (int *)                  all ) );
+                                            (HYPRE_SStructMatrix)   *matrix,
+                                            (int)                   *all ) );
 }
