@@ -113,7 +113,7 @@ HYPRE_ParCSRParaSailsSetup( HYPRE_Solver solver,
       secret->sym);
    if (ierr) return ierr;
 
-   ierr = HYPRE_ParaSailsSetup(secret->obj, secret->sym, secret->thresh, 
+   ierr = HYPRE_ParaSailsSetup(secret->obj, secret->thresh, 
        secret->nlevels, secret->filter);
 
    return ierr;
