@@ -152,8 +152,10 @@ hypre_AMGCoarsenCR( hypre_CSRMatrix    *A,
    measure_array = hypre_VectorData(measure_vector);
 
    for (i=0; i < num_relax_steps; i++)
+   {
       hypre_AMGRelax (A, zero_vector, CF_marker, relax_type, 0, relax_weight, 
 			measure_vector, tmp_vector);
+   }
 
    /*---------------------------------------------------
     * Initialize the graph array
@@ -176,17 +178,18 @@ hypre_AMGCoarsenCR( hypre_CSRMatrix    *A,
  	 graph_array[graph_size++] = i;
    }
 
-/*  for second path of coarse point determination if needed
-   tmp_array   = hypre_CTAlloc(int, graph_size); */
+/*  for second path of coarse point determination if needed */
+/*   tmp_array   = hypre_CTAlloc(int, graph_size);  */
 
    while (graph_size)
    {
 
-      hypre_InitAMGIndepSet(A, measure_array);
-      hypre_AMGIndepSet (A, measure_array, graph_array, graph_size, CF_marker);
+      hypre_InitAMGIndepSet(A, measure_array, 0.001);
+      hypre_AMGIndepSet (A, measure_array, 0.001,
+			graph_array, graph_size, CF_marker);
 
-/*  for second path of coarse point determination if needed
-      tmp_size = 0;
+/*  for second path of coarse point determination if needed */
+/*      tmp_size = 0;
       for (ig = 0; ig < graph_size; ig++)
       {
          i = graph_array[ig];
@@ -196,7 +199,8 @@ hypre_AMGCoarsenCR( hypre_CSRMatrix    *A,
          }
       }
 
-      hypre_AMGIndepSet (A, measure_array, tmp_array, tmp_size, CF_marker);
+      hypre_AMGIndepSet (A, measure_array, 0.001,
+			tmp_array, tmp_size, CF_marker);
 */
 
       hypre_VectorSetConstantValues(measure_vector, 0.0);
@@ -205,14 +209,16 @@ hypre_AMGCoarsenCR( hypre_CSRMatrix    *A,
       {
          if (CF_marker[i] == 0) 
          {
-   	    CF_marker[i] = -2;
+   	    CF_marker[i] = -2; 
    	    measure_array[i] = 1.0;
          }
       }
 
       for (i=0; i < num_relax_steps; i++)
+      {
          hypre_AMGRelax (A, zero_vector, CF_marker, relax_type, -2, 
 			relax_weight, measure_vector, tmp_vector);
+      }
 
       for (ig = 0; ig < graph_size; ig++)
       {

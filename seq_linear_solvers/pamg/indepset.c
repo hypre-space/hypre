@@ -32,7 +32,8 @@
 
 int
 hypre_InitAMGIndepSet( hypre_CSRMatrix *S,
-                       double          *measure_array )
+                       double          *measure_array, 
+                       double           cconst)
 {
    int     S_num_nodes = hypre_CSRMatrixNumRows(S);
    int     i;
@@ -41,7 +42,7 @@ hypre_InitAMGIndepSet( hypre_CSRMatrix *S,
    hypre_SeedRand(2747);
    for (i = 0; i < S_num_nodes; i++)
    {
-      measure_array[i] += hypre_Rand()*0.001;
+      measure_array[i] += hypre_Rand()*cconst;
    }
 
    return (ierr);
@@ -88,6 +89,7 @@ hypre_InitAMGIndepSet( hypre_CSRMatrix *S,
 int
 hypre_AMGIndepSet( hypre_CSRMatrix *S,
                    double          *measure_array,
+                   double           cconst,
                    int             *graph_array,
                    int              graph_array_size,
                    int             *IS_marker        )
@@ -108,7 +110,7 @@ hypre_AMGIndepSet( hypre_CSRMatrix *S,
    for (ig = 0; ig < graph_array_size; ig++)
    {
       i = graph_array[ig];
-      if (measure_array[i] > 0.001) 
+      if (measure_array[i] > cconst) 
       {
          IS_marker[i] = 1;
       }
@@ -122,14 +124,14 @@ hypre_AMGIndepSet( hypre_CSRMatrix *S,
    {
       i = graph_array[ig];
 
-      if (measure_array[i] > 0.001)
+      if (measure_array[i] > cconst)
       {
          for (jS = S_i[i]; jS < S_i[i+1]; jS++)
          {
             j = S_j[jS];
             
             /* only consider valid graph edges */
-            if ( (measure_array[j] > 0.001) && (S_data[jS]) ) 
+            if ( (measure_array[j] > cconst) && (S_data[jS]) ) 
             {
                if (measure_array[i] > measure_array[j])
                {

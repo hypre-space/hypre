@@ -99,11 +99,14 @@ int BuildRhsFromFile( int argc , char *argv [], int arg_index , hypre_CSRMatrix 
 int BuildFuncsFromFile( int argc , char *argv [], int arg_index , int **dof_func_ptr );
 
 /* indepset.c */
-int hypre_InitAMGIndepSet( hypre_CSRMatrix *S , double *measure_array );
-int hypre_AMGIndepSet( hypre_CSRMatrix *S , double *measure_array , int *graph_array , int graph_array_size , int *IS_marker );
+int hypre_InitAMGIndepSet( hypre_CSRMatrix *S , double *measure_array , double cconst );
+int hypre_AMGIndepSet( hypre_CSRMatrix *S , double *measure_array , double cconst , int *graph_array , int graph_array_size , int *IS_marker );
 
 /* interp.c */
 int hypre_AMGBuildInterp( hypre_CSRMatrix *A , int *CF_marker , hypre_CSRMatrix *S , hypre_CSRMatrix **P_ptr );
+
+/* interpCR.c */
+int hypre_AMGBuildCRInterp( hypre_CSRMatrix *A , int *CF_marker , int n_coarse , int num_relax_steps , int relax_type , double relax_weight , hypre_CSRMatrix **P_ptr );
 
 /* interpRBM.c */
 int hypre_AMGBuildRBMInterp( hypre_CSRMatrix *A , int *CF_marker , hypre_CSRMatrix *S , int *dof_func , int num_functions , int **coarse_dof_func_ptr , hypre_CSRMatrix **P_ptr );
@@ -121,6 +124,9 @@ int map3( int ix , int iy , int iz , int p , int q , int r , int P , int Q , int
 /* laplace_9pt.c */
 hypre_CSRMatrix *hypre_GenerateLaplacian9pt( int nx , int ny , int P , int Q , double *value );
 int map2( int ix , int iy , int p , int q , int P , int Q , int *nx_part , int *ny_part , int *global_part );
+
+/* minterp.c */
+int hypre_AMGBuildInterp( hypre_CSRMatrix *A , int *CF_marker , hypre_CSRMatrix *S , hypre_CSRMatrix **P_ptr );
 
 /* pcg.c */
 void PCG( hypre_Vector *x , hypre_Vector *b , double tol , void *data );

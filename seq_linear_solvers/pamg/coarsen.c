@@ -264,7 +264,7 @@ hypre_AMGCoarsen( hypre_CSRMatrix    *A,
    }
 
    /* this augments the measures */
-   hypre_InitAMGIndepSet(S, measure_array);
+   hypre_InitAMGIndepSet(S, measure_array, 1.0);
 
    /*---------------------------------------------------
     * Initialize the graph array
@@ -374,7 +374,7 @@ hypre_AMGCoarsen( hypre_CSRMatrix    *A,
        * maximal measure.
        *------------------------------------------------*/
 
-      hypre_AMGIndepSet(S, measure_array,
+      hypre_AMGIndepSet(S, measure_array, 1.0,
                         graph_array, graph_size, CF_marker);
 
       /*------------------------------------------------
@@ -991,7 +991,6 @@ hypre_AMGCoarsenRugeLoL( hypre_CSRMatrix    *A,
    {
       diag = A_data[A_i[i]];
 
-      /* compute scaling factor */
       row_scale = 0.0;
       if (diag < 0)
       {
