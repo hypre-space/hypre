@@ -12,41 +12,20 @@
 
 #include "headers.h"
 
-/*==========================================================================*/
-/*==========================================================================*/
-/** Return descriptions of communications patterns for a given
-grid-stencil computation.  These patterns are defined by intersecting
-the data dependencies of each box (including data dependencies within
-the box) with its neighbor boxes.
-
-{\bf Note:} It is assumed that the grids neighbor information is
-sufficiently large.
-
-{\bf Note:} No concept of data ownership is assumed.  As a result,
-problematic communications patterns can be produced when the grid
-boxes overlap.  For example, it is likely that some boxes will have
-send and receive patterns that overlap.
-
-{\bf Input files:}
-headers.h
-
-@return Error code.
-
-@param grid [IN]
-  computational grid
-@param stencil [IN]
-  computational stencil
-@param send_boxes_ptr [OUT]
-  description of the grid data to be sent to other processors.
-@param recv_boxes_ptr [OUT]
-  description of the grid data to be received from other processors.
-@param send_procs_ptr [OUT]
-  processors that data is to be sent to.
-@param recv_procs_ptr [OUT]
-  processors that data is to be received from.
-
-@see hypre_CreateComputeInfo */
-/*--------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------
+ * Return descriptions of communications patterns for a given
+ * grid-stencil computation.  These patterns are defined by
+ * intersecting the data dependencies of each box (including data
+ * dependencies within the box) with its neighbor boxes.
+ *
+ * Note It is assumed that the grids neighbor information is
+ * sufficiently large.
+ *
+ * Note: No concept of data ownership is assumed.  As a result,
+ * problematic communications patterns can be produced when the grid
+ * boxes overlap.  For example, it is likely that some boxes will have
+ * send and receive patterns that overlap.
+ *--------------------------------------------------------------------------*/
 
 int
 hypre_CreateCommInfoFromStencil( hypre_StructGrid      *grid,
@@ -298,35 +277,15 @@ hypre_CreateCommInfoFromStencil( hypre_StructGrid      *grid,
    return ierr;
 }
 
-/*==========================================================================*/
-/*==========================================================================*/
-/** Return descriptions of communications patterns for a given grid
-with "ghost zones".  These patterns are defined by intersecting each
-box, "grown" by the number of "ghost zones", with its neighbor boxes.
-
-{\bf Note:} It is assumed that the grids neighbor information is
-sufficiently large.
-
-{\bf Input files:}
-headers.h
-
-@return Error code.
-
-@param grid [IN]
-  computational grid
-@param num_ghost [IN]
-  number of ghost zones in each direction
-@param send_boxes_ptr [OUT]
-  description of the grid data to be sent to other processors.
-@param recv_boxes_ptr [OUT]
-  description of the grid data to be received from other processors.
-@param send_procs_ptr [OUT]
-  processors that data is to be sent to.
-@param recv_procs_ptr [OUT]
-  processors that data is to be received from.
-
-@see hypre_CreateCommInfoFromStencil */
-/*--------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------
+ * Return descriptions of communications patterns for a given grid
+ * based on a specified number of "ghost zones".  These patterns are
+ * defined by intersecting each box, "grown" by the number of ghost
+ * zones, with its neighbor boxes.
+ *
+ * Note: It is assumed that the grids neighbor information is
+ * sufficiently large.
+ *--------------------------------------------------------------------------*/
 
 int
 hypre_CreateCommInfoFromNumGhost( hypre_StructGrid      *grid,
@@ -548,31 +507,10 @@ hypre_CreateCommInfoFromNumGhost( hypre_StructGrid      *grid,
    return ierr;
 }
 
-/*==========================================================================*/
-/*==========================================================================*/
-/** Return descriptions of communications patterns for migrating data
-from one grid distribution to another.
-
-{\bf Input files:}
-headers.h
-
-@return Error code.
-
-@param from_grid [IN]
-  grid distribution to migrate data from.
-@param to_grid [IN]
-  grid distribution to migrate data to.
-@param send_boxes_ptr [OUT]
-  description of the grid data to be sent to other processors.
-@param recv_boxes_ptr [OUT]
-  description of the grid data to be received from other processors.
-@param send_procs_ptr [OUT]
-  processors that data is to be sent to.
-@param recv_procs_ptr [OUT]
-  processors that data is to be received from.
-
-@see hypre_StructMatrixMigrate, hypre_StructVectorMigrate */
-/*--------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------
+ * Return descriptions of communications patterns for migrating data
+ * from one grid distribution to another.
+ *--------------------------------------------------------------------------*/
 
 int
 hypre_CreateCommInfoFromGrids( hypre_StructGrid      *from_grid,

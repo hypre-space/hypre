@@ -12,49 +12,24 @@
 
 #include "headers.h"
 
-/*==========================================================================*/
-/*==========================================================================*/
-/** Return descriptions of communications and computations patterns
-for a given grid-stencil computation.  If HYPRE\_OVERLAP\_COMM\_COMP
-is defined, then the patterns are computed to allow for overlapping
-communications and computations.  The default is no overlap.
+/*--------------------------------------------------------------------------
+ * Return descriptions of communications and computations patterns for
+ * a given grid-stencil computation.  If HYPRE\_OVERLAP\_COMM\_COMP is
+ * defined, then the patterns are computed to allow for overlapping
+ * communications and computations.  The default is no overlap.
+ *
+ * Note: This routine assumes that the grid boxes do not overlap.
+ *--------------------------------------------------------------------------*/
 
-{\bf Note:} This routine assumes that the grid boxes do not overlap.
-
-{\bf Input files:}
-headers.h
-
-@return Error code.
-
-@param grid [IN]
-  computational grid
-@param stencil [IN]
-  computational stencil
-@param send_boxes_ptr [OUT]
-  description of the grid data to be sent to other processors.
-@param recv_boxes_ptr [OUT]
-  description of the grid data to be received from other processors.
-@param send_processes_ptr [OUT]
-  processors that data is to be sent to.
-@param recv_processes_ptr [OUT]
-  processors that data is to be received from.
-@param indt_boxes_ptr [OUT]
-  description of computations that do not depend on communicated data.
-@param dept_boxes_ptr [OUT]
-  description of computations that depend on communicated data.
-
-@see hypre_CreateCommInfoFromStencil */
-/*--------------------------------------------------------------------------*/
-
-  int
-  hypre_CreateComputeInfo( hypre_StructGrid      *grid,
-                        hypre_StructStencil   *stencil,
-                        hypre_BoxArrayArray  **send_boxes_ptr,
-                        hypre_BoxArrayArray  **recv_boxes_ptr,
-                        int                 ***send_processes_ptr,
-                        int                 ***recv_processes_ptr,
-                        hypre_BoxArrayArray  **indt_boxes_ptr,
-                        hypre_BoxArrayArray  **dept_boxes_ptr     )
+int
+hypre_CreateComputeInfo( hypre_StructGrid      *grid,
+                         hypre_StructStencil   *stencil,
+                         hypre_BoxArrayArray  **send_boxes_ptr,
+                         hypre_BoxArrayArray  **recv_boxes_ptr,
+                         int                 ***send_processes_ptr,
+                         int                 ***recv_processes_ptr,
+                         hypre_BoxArrayArray  **indt_boxes_ptr,
+                         hypre_BoxArrayArray  **dept_boxes_ptr )
 {
    int                      ierr = 0;
 
@@ -224,63 +199,27 @@ headers.h
    return ierr;
 }
 
-/*==========================================================================*/
-/*==========================================================================*/
-/** Create a computation package from a grid-based description of a
-communication-computation pattern.
+/*--------------------------------------------------------------------------
+ * Create a computation package from a grid-based description of a
+ * communication-computation pattern.
+ *
+ * Note: The input boxes and processes are destroyed.
+ *--------------------------------------------------------------------------*/
 
-{\bf Note:}
-The input boxes and processes are destroyed.
-
-{\bf Input files:}
-headers.h
-
-@return Error code.
-
-@param send_boxes [IN]
-  description of the grid data to be sent to other processors.
-@param recv_boxes [IN]
-  description of the grid data to be received from other processors.
-@param send_stride [IN]
-  stride to use for send data.
-@param recv_stride [IN]
-  stride to use for receive data.
-@param send_processes [IN]
-  processors that data is to be sent to.
-@param recv_processes [IN]
-  processors that data is to be received from.
-@param indt_boxes_ptr [IN]
-  description of computations that do not depend on communicated data.
-@param dept_boxes_ptr [IN]
-  description of computations that depend on communicated data.
-@param stride [IN]
-  stride to use for computations.
-@param grid [IN]
-  computational grid
-@param data_space [IN]
-  description of the stored data associated with the grid.
-@param num_values [IN]
-  number of data values associated with each grid index.
-@param compute_pkg_ptr [OUT]
-  pointer to a computation package
-
-@see hypre_CommPkgCreate, hypre_ComputePkgDestroy */
-/*--------------------------------------------------------------------------*/
-
-  int
-  hypre_ComputePkgCreate( hypre_BoxArrayArray   *send_boxes,
-                          hypre_BoxArrayArray   *recv_boxes,
-                          hypre_Index            send_stride,
-                          hypre_Index            recv_stride,
-                          int                  **send_processes,
-                          int                  **recv_processes,
-                          hypre_BoxArrayArray   *indt_boxes,
-                          hypre_BoxArrayArray   *dept_boxes,
-                          hypre_Index            stride,
-                          hypre_StructGrid      *grid,
-                          hypre_BoxArray        *data_space,
-                          int                    num_values,
-                          hypre_ComputePkg     **compute_pkg_ptr )
+int
+hypre_ComputePkgCreate( hypre_BoxArrayArray   *send_boxes,
+                        hypre_BoxArrayArray   *recv_boxes,
+                        hypre_Index            send_stride,
+                        hypre_Index            recv_stride,
+                        int                  **send_processes,
+                        int                  **recv_processes,
+                        hypre_BoxArrayArray   *indt_boxes,
+                        hypre_BoxArrayArray   *dept_boxes,
+                        hypre_Index            stride,
+                        hypre_StructGrid      *grid,
+                        hypre_BoxArray        *data_space,
+                        int                    num_values,
+                        hypre_ComputePkg     **compute_pkg_ptr )
 {
    int                ierr = 0;
    hypre_ComputePkg  *compute_pkg;
@@ -308,20 +247,9 @@ headers.h
    return ierr;
 }
 
-/*==========================================================================*/
-/*==========================================================================*/
-/** Destroy a computation package.
-
-{\bf Input files:}
-headers.h
-
-@return Error code.
-
-@param compute_pkg [IN/OUT]
-  computation package.
-
-@see hypre_ComputePkgCreate */
-/*--------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------
+ * Destroy a computation package.
+ *--------------------------------------------------------------------------*/
 
 int
 hypre_ComputePkgDestroy( hypre_ComputePkg *compute_pkg )
@@ -343,27 +271,11 @@ hypre_ComputePkgDestroy( hypre_ComputePkg *compute_pkg )
    return ierr;
 }
 
-/*==========================================================================*/
-/*==========================================================================*/
-/** Initialize a non-blocking communication exchange.  The independent
-computations may be done after a call to this routine, to allow for
-overlap of communications and computations.
-
-{\bf Input files:}
-headers.h
-
-@return Error code.
-
-@param compute_pkg [IN]
-  computation package.
-@param data [IN]
-  pointer to the associated data.
-@param comm_handle [OUT]
-  communication handle.
-
-@see hypre_FinalizeIndtComputations, hypre_ComputePkgCreate,
-hypre_InitializeCommunication */
-/*--------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------
+ * Initialize a non-blocking communication exchange.  The independent
+ * computations may be done after a call to this routine, to allow for
+ * overlap of communications and computations.
+ *--------------------------------------------------------------------------*/
 
 int
 hypre_InitializeIndtComputations( hypre_ComputePkg  *compute_pkg,
@@ -378,21 +290,10 @@ hypre_InitializeIndtComputations( hypre_ComputePkg  *compute_pkg,
    return ierr;
 }
 
-/*==========================================================================*/
-/*==========================================================================*/
-/** Finalize a communication exchange.  The dependent computations may
-be done after a call to this routine.
-
-{\bf Input files:}
-headers.h
-
-@return Error code.
-
-@param comm_handle [IN/OUT]
-  communication handle.
-
-@see hypre_InitializeIndtComputations, hypre_FinalizeCommunication */
-/*--------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------
+ * Finalize a communication exchange.  The dependent computations may
+ * be done after a call to this routine.
+ *--------------------------------------------------------------------------*/
 
 int
 hypre_FinalizeIndtComputations( hypre_CommHandle *comm_handle )

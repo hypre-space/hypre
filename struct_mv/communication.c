@@ -9,69 +9,42 @@
 
 #include "headers.h"
 
-/*==========================================================================*/
-/*==========================================================================*/
-/** Create a communication package.  A grid-based description of a
-communication exchange is passed in.  This description is then
-compiled into an intermediate processor-based description of the
-communication.  It may further be compiled into a form based on the
-message-passing layer in the routine hypre\_CommitCommPkg.  This
-proceeds as follows based on several compiler flags:
+/*--------------------------------------------------------------------------
+ * Create a communication package.  A grid-based description of a
+ * communication exchange is passed in.  This description is then
+ * compiled into an intermediate processor-based description of the
+ * communication.  It may further be compiled into a form based on the
+ * message-passing layer in the routine hypre_CommitCommPkg.  This
+ * proceeds as follows based on several compiler flags:
+ *
+ * If HYPRE_COMM_SIMPLE is defined, the intermediate processor-based
+ * description is not compiled into a form based on the
+ * message-passing layer.  This intermediate description is used
+ * directly to pack and unpack buffers during the communications.  No
+ * MPI derived datatypes are used.
+ *
+ * Else if HYPRE_COMM_VOLATILE is defined, the communication package
+ * is not committed, and the intermediate processor-based description
+ * is retained.  The package is committed at communication time.
+ *
+ * Else the communication package is committed, and the intermediate
+ * processor-based description is freed up.
+ *
+ * Note: The input boxes and processes are destroyed.
+ *--------------------------------------------------------------------------*/
 
-\begin{itemize}
-\item If HYPRE\_COMM\_SIMPLE is defined, the intermediate
-processor-based description is not compiled into a form based on
-the message-passing layer.  This intermediate description is used
-directly to pack and unpack buffers during the communications.
-No MPI derived datatypes are used.
-\item Else if HYPRE\_COMM\_VOLATILE is defined, the communication
-package is not committed, and the intermediate processor-based
-description is retained.  The package is committed at communication
-time.
-\item Else the communication package is committed, and the intermediate
-processor-based description is freed up.
-\end{itemize}
-
-{\bf Note:}
-The input boxes and processes are destroyed.
-
-{\bf Input files:}
-headers.h
-
-@return Communication package.
-
-@param send_boxes [IN]
-  description of the grid data to be sent to other processors.
-@param recv_boxes [IN]
-  description of the grid data to be received from other processors.
-@param send_data_space [IN]
-  description of the stored grid data associated with the sends.
-@param recv_data_space [IN]
-  description of the stored grid data associated with the receives.
-@param send_processes [IN]
-  processors that data is to be sent to.
-@param recv_processes [IN]
-  processors that data is to be received from.
-@param num_values [IN]
-  number of data values to be sent for each grid index.
-@param comm [IN]
-  communicator.
-
-@see hypre_CommPkgCreateInfo, hypre_CommPkgCommit, hypre_CommPkgDestroy */
-/*--------------------------------------------------------------------------*/
-
-  hypre_CommPkg *
-  hypre_CommPkgCreate( hypre_BoxArrayArray   *send_boxes,
-                       hypre_BoxArrayArray   *recv_boxes,
-                       hypre_Index            send_stride,
-                       hypre_Index            recv_stride,
-                       hypre_BoxArray        *send_data_space,
-                       hypre_BoxArray        *recv_data_space,
-                       int                  **send_processes,
-                       int                  **recv_processes,
-                       int                    num_values,
-                       MPI_Comm               comm,
-                       hypre_Index            periodic            )
+hypre_CommPkg *
+hypre_CommPkgCreate( hypre_BoxArrayArray   *send_boxes,
+                     hypre_BoxArrayArray   *recv_boxes,
+                     hypre_Index            send_stride,
+                     hypre_Index            recv_stride,
+                     hypre_BoxArray        *send_data_space,
+                     hypre_BoxArray        *recv_data_space,
+                     int                  **send_processes,
+                     int                  **recv_processes,
+                     int                    num_values,
+                     MPI_Comm               comm,
+                     hypre_Index            periodic            )
 {
    hypre_CommPkg    *comm_pkg;
                   
@@ -152,20 +125,9 @@ headers.h
    return comm_pkg;
 }
 
-/*==========================================================================*/
-/*==========================================================================*/
-/** Destroy a communication package.
-
-{\bf Input files:}
-headers.h
-
-@return Error code.
-
-@param comm_pkg [IN/OUT]
-  communication package.
-
-@see hypre_CommPkgCreate */
-/*--------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------
+ * Destroy a communication package.
+ *--------------------------------------------------------------------------*/
 
 int
 hypre_CommPkgDestroy( hypre_CommPkg *comm_pkg )
@@ -202,36 +164,19 @@ hypre_CommPkgDestroy( hypre_CommPkg *comm_pkg )
    return ierr;
 }
 
-/*==========================================================================*/
-/*==========================================================================*/
-/** Initialize a non-blocking communication exchange.
-
-\begin{itemize}
-\item If HYPRE\_COMM\_SIMPLE is defined, the communication buffers are
-created, the send buffer is manually packed, and the communication
-requests are posted.  No MPI derived datatypes are used.
-\item Else if HYPRE\_COMM\_VOLATILE is defined, the communication
-package is committed, the communication requests are posted, then
-the communication package is un-committed.
-\item Else the communication requests are posted.
-\end{itemize}
-
-{\bf Input files:}
-headers.h
-
-@return Error code.
-
-@param comm_pkg [IN]
-  communication package.
-@param send_data [IN]
-  reference pointer for the send data.
-@param recv_data [IN]
-  reference pointer for the recv data.
-@param comm_handle [OUT]
-  communication handle.
-
-@see hypre_FinalizeCommunication, hypre_CommPkgCreate */
-/*--------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------
+ * Initialize a non-blocking communication exchange.
+ *
+ * If HYPRE_COMM_SIMPLE is defined, the communication buffers are
+ * created, the send buffer is manually packed, and the communication
+ * requests are posted.  No MPI derived datatypes are used.
+ *
+ * Else if HYPRE_COMM_VOLATILE is defined, the communication package
+ * is committed, the communication requests are posted, then the
+ * communication package is un-committed.
+ *
+ * Else the communication requests are posted.
+ *--------------------------------------------------------------------------*/
 
 #if defined(HYPRE_COMM_SIMPLE)
 
@@ -523,29 +468,18 @@ hypre_InitializeCommunication( hypre_CommPkg     *comm_pkg,
 
 #endif
 
-/*==========================================================================*/
-/*==========================================================================*/
-/** Finalize a communication exchange.  This routine blocks until all
-of the communication requests are completed.
-
-\begin{itemize}
-\item If HYPRE\_COMM\_SIMPLE is defined, the communication requests
-are completed, and the receive buffer is manually unpacked.
-\item Else if HYPRE\_COMM\_VOLATILE is defined, the communication requests
-are completed and the communication package is un-committed.
-\item Else the communication requests are completed.
-\end{itemize}
-
-{\bf Input files:}
-headers.h
-
-@return Error code.
-
-@param comm_handle [IN/OUT]
-  communication handle.
-
-@see hypre_InitializeCommunication, hypre_CommPkgCreate */
-/*--------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------
+ * Finalize a communication exchange.  This routine blocks until all
+ * of the communication requests are completed.
+ *
+ * If HYPRE_COMM_SIMPLE is defined, the communication requests are
+ * completed, and the receive buffer is manually unpacked.
+ *
+ * Else if HYPRE_COMM_VOLATILE is defined, the communication requests
+ * are completed and the communication package is un-committed.
+ *
+ * Else the communication requests are completed.
+ *--------------------------------------------------------------------------*/
 
 #if defined(HYPRE_COMM_SIMPLE)
 
@@ -682,24 +616,9 @@ hypre_FinalizeCommunication( hypre_CommHandle *comm_handle )
 
 #endif
 
-/*==========================================================================*/
-/*==========================================================================*/
-/** Execute local data exchanges.
-
-{\bf Input files:}
-headers.h
-
-@return Error code.
-
-@param comm_pkg [IN]
-  communication package.
-@param send_data [IN]
-  reference pointer for the send data.
-@param recv_data [IN]
-  reference pointer for the recv data.
-
-@see hypre_InitializeCommunication */
-/*--------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------
+ * Execute local data exchanges.
+ *--------------------------------------------------------------------------*/
 
 int
 hypre_ExchangeLocalData( hypre_CommPkg *comm_pkg,
@@ -775,22 +694,9 @@ hypre_ExchangeLocalData( hypre_CommPkg *comm_pkg,
    return ( ierr );
 }
 
-/*==========================================================================*/
-/*==========================================================================*/
-/** Create a communication type.
-
-{\bf Input files:}
-headers.h
-
-@return Communication type.
-
-@param comm_entries [IN]
-  array of pointers to communication type entries.
-@param num_entries [IN]
-  number of elements in comm\_entries array.
-
-@see hypre_CommTypeDestroy */
-/*--------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------
+ * Create a communication type.
+ *--------------------------------------------------------------------------*/
 
 hypre_CommType *
 hypre_CommTypeCreate( hypre_CommTypeEntry **comm_entries,
@@ -806,20 +712,9 @@ hypre_CommTypeCreate( hypre_CommTypeEntry **comm_entries,
    return comm_type;
 }
 
-/*==========================================================================*/
-/*==========================================================================*/
-/** Destroy a communication type.
-
-{\bf Input files:}
-headers.h
-
-@return Error code.
-
-@param comm_type [IN]
-  communication type.
-
-@see hypre_CommTypeCreate */
-/*--------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------
+ * Destroy a communication type.
+ *--------------------------------------------------------------------------*/
 
 int 
 hypre_CommTypeDestroy( hypre_CommType *comm_type )
@@ -846,27 +741,9 @@ hypre_CommTypeDestroy( hypre_CommType *comm_type )
    return ierr;
 }
 
-/*==========================================================================*/
-/*==========================================================================*/
-/** Create a communication type entry.
-
-{\bf Input files:}
-headers.h
-
-@return Communication type entry.
-
-@param box [IN]
-  description of the grid data to be communicated.
-@param data_box [IN]
-  description of the stored grid data.
-@param num_values [IN]
-  number of data values to be communicated for each grid index.
-@param data_box_offset [IN]
-  offset from some location in memory of the data associated with the
-  imin index of data_box.
-
-@see hypre_CommTypeEntryDestroy */
-/*--------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------
+ * Create a communication type entry.
+ *--------------------------------------------------------------------------*/
 
 hypre_CommTypeEntry *
 hypre_CommTypeEntryCreate( hypre_Box   *box,
@@ -966,20 +843,9 @@ hypre_CommTypeEntryCreate( hypre_Box   *box,
    return comm_entry;
 }
  
-/*==========================================================================*/
-/*==========================================================================*/
-/** Destroy a communication type entry.
-
-{\bf Input files:}
-headers.h
-
-@return Error code.
-
-@param comm_entry [IN/OUT]
-  communication type entry.
-
-@see hypre_CommTypeEntryCreate */
-/*--------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------
+ * Destroy a communication type entry.
+ *--------------------------------------------------------------------------*/
 
 int
 hypre_CommTypeEntryDestroy( hypre_CommTypeEntry *comm_entry )
@@ -994,40 +860,10 @@ hypre_CommTypeEntryDestroy( hypre_CommTypeEntry *comm_entry )
    return ierr;
 }
 
-/*==========================================================================*/
-/*==========================================================================*/
-/** Compute a processor-based description of a communication from a
-grid-based one.  Used to construct a communication package.
-
-{\bf Input files:}
-headers.h
-
-@return Error code.
-
-@param boxes [IN]
-  description of the grid data to be communicated to other processors.
-@param data_space [IN]
-  description of the stored grid data associated with the communications.
-@param processes [IN]
-  processors that data is to be communicated with.
-@param num_values [IN]
-  number of data values to be communicated for each grid index.
-@param comm [IN]
-  communicator.
-@param num_comms_ptr [OUT]
-  number of communications.  The number of communications is defined
-  by the number of processors involved in the communications, not
-  counting ``my processor''.
-@param comm_processes_ptr [OUT]
-  processor 
-ranks involved in the communications.
-@param comm_types_ptr [OUT]
-  inter-processor communication types.
-@param copy_type_ptr [OUT]
-  intra-processor communication type (copies).
-
-@see hypre_CommPkgCreate, hypre_CommTypeSort */
-/*--------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------
+ * Compute a processor-based description of a communication from a
+ * grid-based one.  Used to construct a communication package.
+ *--------------------------------------------------------------------------*/
 
 int
 hypre_CommPkgCreateInfo( hypre_BoxArrayArray   *boxes,
@@ -1184,26 +1020,10 @@ hypre_CommPkgCreateInfo( hypre_BoxArrayArray   *boxes,
    return ierr;
 }
 
-/*==========================================================================*/
-/*==========================================================================*/
-/** Sort the entries of a communication type.  This routine is used to
-maintain consistency in communications.
-
-{\bf Input files:}
-headers.h
-
-{\bf Note:}
-The entries are sorted by imin first.  Entries with common imin are
-then sorted by imax.  This assumes that imin and imax define a unique
-communication type.
-
-@return Error code.
-
-@param comm_type [IN/OUT]
-  communication type to be sorted.
-
-@see hypre_CommPkgCreateInfo */
-/*--------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------
+ * Sort the entries of a communication type.  This routine is used to
+ * maintain consistency in communications.
+ *--------------------------------------------------------------------------*/
 
 int
 hypre_CommTypeSort( hypre_CommType  *comm_type,
@@ -1214,7 +1034,7 @@ hypre_CommTypeSort( hypre_CommType  *comm_type,
 
    hypre_CommTypeEntry   *comm_entry;
    hypre_IndexRef         imin0, imin1;
-   int                   *imax0, *imax1;
+   hypre_IndexRef         imax0, imax1;
    int                    swap;
    int                    i, j, ii, jj;
    int                    ierr = 0;
@@ -1332,22 +1152,10 @@ hypre_CommTypeSort( hypre_CommType  *comm_type,
    return ierr;
 }
 
-/*==========================================================================*/
-/*==========================================================================*/
-/** Compile a communication package into a form based on the
-message-passing layer.
-
-{\bf Input files:}
-headers.h
-
-@return Error code.
-
-@param comm_pkg [IN/OUT]
-  communication package.
-
-@see hypre_CommPkgCreate, hypre_InitializeCommunication,
-  hypre_CommTypeBuildMPI, hypre_CommPkgUnCommit */
-/*--------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------
+ * Compile a communication package into a form based on the
+ * message-passing layer.
+ *--------------------------------------------------------------------------*/
 
 int
 hypre_CommPkgCommit( hypre_CommPkg *comm_pkg )
@@ -1373,21 +1181,10 @@ hypre_CommPkgCommit( hypre_CommPkg *comm_pkg )
    return ierr;
 }
 
-/*==========================================================================*/
-/*==========================================================================*/
-/** Destroy the message-passing-layer component of the communication
-package.
-
-{\bf Input files:}
-headers.h
-
-@return Error code.
-
-@param comm_pkg [IN/OUT]
-  communication package.
-
-@see hypre_CommPkgCommit */
-/*--------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------
+ * Destroy the message-passing-layer component of the communication
+ * package.
+ *--------------------------------------------------------------------------*/
 
 int
 hypre_CommPkgUnCommit( hypre_CommPkg *comm_pkg )
@@ -1418,27 +1215,10 @@ hypre_CommPkgUnCommit( hypre_CommPkg *comm_pkg )
    return ierr;
 }
 
-/*==========================================================================*/
-/*==========================================================================*/
-/** Create an MPI-based description of a communication from a
-processor-based one.
-
-{\bf Input files:}
-headers.h
-
-@return Error code.
-
-@param num_comms [IN]
-  number of communications.
-@param comm_procs [IN]
-  processor ranks involved in the communications.
-@param comm_types [IN]
-  processor-based communication types.
-@param comm_mpi_types [OUT]
-  MPI derived data-types.
-
-@see hypre_CommPkgCommit, hypre_CommTypeEntryBuildMPI */
-/*--------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------
+ * Create an MPI-based description of a communication from a
+ * processor-based one.
+ *--------------------------------------------------------------------------*/
 
 int
 hypre_CommTypeBuildMPI( int               num_comms,
@@ -1497,22 +1277,9 @@ hypre_CommTypeBuildMPI( int               num_comms,
    return ierr;
 }
 
-/*==========================================================================*/
-/*==========================================================================*/
-/** Create an MPI-based description of a communication entry.
-
-{\bf Input files:}
-headers.h
-
-@return Error code.
-
-@param comm_entry [IN]
-  communication entry.
-@param comm_entry_mpi_type [OUT]
-  MPI derived data-type.
-
-@see hypre_CommTypeBuildMPI */
-/*--------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------
+ * Create an MPI-based description of a communication entry.
+ *--------------------------------------------------------------------------*/
 
 int
 hypre_CommTypeEntryBuildMPI( hypre_CommTypeEntry *comm_entry,
@@ -1565,5 +1332,69 @@ hypre_CommTypeEntryBuildMPI( hypre_CommTypeEntry *comm_entry,
    }
 
    return ierr;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+int 
+hypre_IModPeriod( int   i,
+                  int   period )
+                        
+{
+   int  i_mod_p;
+   int  shift;
+
+   if (period == 0)
+   {
+      i_mod_p = i;
+   }
+   else if (i >= period)
+   {
+      i_mod_p = i % period;
+   }
+   else if (i < 0)
+   {
+      shift = ( -i / period + 1 ) * period;
+      i_mod_p = ( i + shift ) % period;
+   }
+   else
+   {
+      i_mod_p = i;
+   }
+
+   return i_mod_p;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+int
+hypre_IModPeriodX( hypre_Index  index,
+                   hypre_Index  periodic )
+{
+   return hypre_IModPeriod(hypre_IndexX(index), hypre_IndexX(periodic));
+}
+
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+int
+hypre_IModPeriodY( hypre_Index  index,
+                   hypre_Index  periodic )
+{
+   return hypre_IModPeriod(hypre_IndexY(index), hypre_IndexY(periodic));
+}
+
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+int
+hypre_IModPeriodZ( hypre_Index  index,
+                   hypre_Index  periodic )
+{
+   return hypre_IModPeriod(hypre_IndexZ(index), hypre_IndexZ(periodic));
 }
 

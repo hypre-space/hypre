@@ -1528,10 +1528,6 @@ int hypre_DeleteBox( hypre_BoxArray *box_array , int index );
 int hypre_AppendBoxArray( hypre_BoxArray *box_array_0 , hypre_BoxArray *box_array_1 );
 int hypre_BoxGetSize( hypre_Box *box , hypre_Index size );
 int hypre_BoxGetStrideSize( hypre_Box *box , hypre_Index stride , hypre_Index size );
-int hypre_IModPeriod( int i , int period );
-int hypre_IModPeriodX( hypre_Index index , hypre_Index periodic );
-int hypre_IModPeriodY( hypre_Index index , hypre_Index periodic );
-int hypre_IModPeriodZ( hypre_Index index , hypre_Index periodic );
 
 /* box_algebra.c */
 int hypre_IntersectBoxes( hypre_Box *box1 , hypre_Box *box2 , hypre_Box *ibox );
@@ -1569,6 +1565,10 @@ int hypre_CommPkgCommit( hypre_CommPkg *comm_pkg );
 int hypre_CommPkgUnCommit( hypre_CommPkg *comm_pkg );
 int hypre_CommTypeBuildMPI( int num_comms , int *comm_procs , hypre_CommType **comm_types , MPI_Datatype *comm_mpi_types );
 int hypre_CommTypeEntryBuildMPI( hypre_CommTypeEntry *comm_entry , MPI_Datatype *comm_entry_mpi_type );
+int hypre_IModPeriod( int i , int period );
+int hypre_IModPeriodX( hypre_Index index , hypre_Index periodic );
+int hypre_IModPeriodY( hypre_Index index , hypre_Index periodic );
+int hypre_IModPeriodZ( hypre_Index index , hypre_Index periodic );
 
 /* communication_info.c */
 int hypre_CreateCommInfoFromStencil( hypre_StructGrid *grid , hypre_StructStencil *stencil , hypre_BoxArrayArray **send_boxes_ptr , hypre_BoxArrayArray **recv_boxes_ptr , int ***send_procs_ptr , int ***recv_procs_ptr );
