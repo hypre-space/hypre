@@ -119,24 +119,68 @@ int impl_Hypre_ParCSRMatrix_GetLocalRange
 
 /* ********************************************************
  * impl_Hypre_ParCSRMatrixGetRow
-/* >>>>>>> TO DO: implement this
+ * This calls a HYPRE function to return the column indices and values of
+ * nonzero matrix elements in the given row.  The HYPRE function expects to get
+ * the global row number but will return an error if the row be not available
+ * on the local processor.
+ *
+ * How the memory management works: we call hypre_ParCSRMatrixGetRow, which
+ * on the first call allocates two arrays to use for the return values, just once
+ * for all calls of of the function.  Each time it is called, it copies data into
+ * these two arrays, and sets the provided pointers to point to these arrays.
+ * The arrays are locked (to prevent other GetRow calls from overwriting the data)
+ * until the the user calls RestoreRow to signal that he doesn't need to look at
+ * the data any more.
+ *
+ * Typical use (in pseudo-code) :
+ * GetRow( out column_indices, out values )
+ * allocate my data structures
+ * copy data to my data structures
+ * RestoreRow()
+ * use row data
+ * free my data structures
+ *
  **********************************************************/
 int  impl_Hypre_ParCSRMatrix_GetRow
-( Hypre_ParCSRMatrix this, int row, int* size, array1int* col_ind,
-  array1double* values ) {
-   printf("Hypre_ParCSRMatrix_GetRow has not been implemented!\n");
-   return 1;
+( Hypre_ParCSRMatrix this, int row, int* size,
+  array1int* col_ind, array1double* values ) {
+   int ierr = 0;
+   struct Hypre_ParCSRMatrix_private_type * Mp = this->Hypre_ParCSRMatrix_data;
+   HYPRE_IJMatrix * MIJ = Mp->Hmat;
+   hypre_IJMatrix * Mij = (hypre_IJMatrix *) (*MIJ);
+   hypre_ParCSRMatrix *parM = hypre_IJMatrixLocalStorage(Mij);
+   HYPRE_ParCSRMatrix HYPRE_mat = (HYPRE_ParCSRMatrix) parM;
+
+   ierr += HYPRE_ParCSRMatrixGetRow
+      ( HYPRE_mat, row, size, &((*col_ind).data), &((*values).data) );
+
+   /* c.f. par_csr_matrix.c: the arrays returned above are zero-based .. */
+   (*col_ind).lower[0] = 0;   (*col_ind).upper[0] = *size;
+   (*values).lower[0] = 0;   (*values).upper[0] = *size;
+   
+   return ierr;
 } /* end impl_Hypre_ParCSRMatrixGetRow */
 
 /* ********************************************************
  * impl_Hypre_ParCSRMatrixRestoreRow
-/* >>>>>>> TO DO: implement this
+ * This just calls the HYPRE RestoreRow function, which does nothing
+ * but reset an active flag to allow future access to a row.
  **********************************************************/
 int  impl_Hypre_ParCSRMatrix_RestoreRow
-( Hypre_ParCSRMatrix this, int row, int size, array1int col_ind,
-  array1double values) {
-   printf("Hypre_ParCSRMatrix_RestoreRow has not been implemented!\n");
-   return 1;
+( Hypre_ParCSRMatrix this, int row, int size,
+  array1int col_ind, array1double values )
+{
+   int ierr = 0;
+   struct Hypre_ParCSRMatrix_private_type * Mp = this->Hypre_ParCSRMatrix_data;
+   HYPRE_IJMatrix * MIJ = Mp->Hmat;
+   hypre_IJMatrix * Mij = (hypre_IJMatrix *) (*MIJ);
+   hypre_ParCSRMatrix *parM = hypre_IJMatrixLocalStorage(Mij);
+   HYPRE_ParCSRMatrix HYPRE_mat = (HYPRE_ParCSRMatrix) parM;
+
+   ierr += HYPRE_ParCSRMatrixRestoreRow( HYPRE_mat, row, &size,
+                                         &(col_ind.data), &(values.data) );
+
+   return ierr;
 } /* end impl_Hypre_ParCSRMatrixRestoreRow */
 
 
