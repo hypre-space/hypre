@@ -890,7 +890,6 @@ int HYPRE_LSI_DDAMGSolve(HYPRE_ParCSRMatrix A_csr, HYPRE_ParVector x_csr,
    int             local_intface_nrows, global_intface_nrows;
    int             num_iterations;
    double          *colVal, *newColVal;
-   double          *t_par_data;
    HYPRE_ParCSRMatrix  LA_csr;
    HYPRE_IJVector  tvec, Tvec, T2vec;
    HYPRE_ParVector t_csr, T_csr, T2_csr, Lx_csr, Lb_csr;
@@ -1120,7 +1119,6 @@ printf("CHECK 2 = %e\n", ddata);
 
    t_par       = (hypre_ParVector *) t_csr;
    t_par_local = hypre_ParVectorLocalVector(t_par);
-   t_par_data  = hypre_VectorData(t_par_local);
    
 /*
    for ( i = 0; i < global_intface_nrows; i++ )

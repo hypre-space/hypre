@@ -204,7 +204,6 @@ int hypre_BiCGSSolve(void  *bicgs_vdata, void  *A, void  *b, void  *x)
    /* logging variables */
    int               logging       = (bicgs_data -> logging);
    double           *norms         = (bicgs_data -> norms);
-   char             *log_file_name = (bicgs_data -> log_file_name);
    
    int               ierr, my_id, num_procs, iter;
    double            rho1, rho2, sigma, alpha, dtmp, r_norm, b_norm;

@@ -2645,8 +2645,8 @@ int HYPRE_SlideReduction::buildA21Mat()
 
 int HYPRE_SlideReduction::buildInvA22Mat()
 {
-   int    mypid, nprocs, *procNRows, startRow, endRow;
-   int    is, globalNConstr, globalNRows, nConstraints, irow, jcol, rowSize;
+   int    mypid, nprocs, *procNRows, endRow;
+   int    is, globalNConstr, nConstraints, irow, jcol, rowSize;
    int    *colInd, newEndRow, rowIndex, colIndex, searchIndex;
    int    ig, ir, ic, ierr, index, offset, newRowSize, *newColInd;
    int    maxBlkSize=HYPRE_SLIDEMAX, procIndex;
@@ -2664,10 +2664,8 @@ int HYPRE_SlideReduction::buildInvA22Mat()
    MPI_Comm_size(mpiComm_, &nprocs);
    HYPRE_IJMatrixGetObject(Amat_, (void **) &A_csr);
    HYPRE_ParCSRMatrixGetRowPartitioning( A_csr, &procNRows );
-   startRow      = procNRows[mypid];
    endRow        = procNRows[mypid+1] - 1;
    globalNConstr = procNConstr_[nprocs];
-   globalNRows   = procNRows[nprocs];
    nConstraints  = procNConstr_[mypid+1] - procNConstr_[mypid];
    newEndRow     = endRow - nConstraints;
    
@@ -3704,7 +3702,7 @@ int HYPRE_SlideReduction::findSlaveEqns2(int **couplings)
    int    nConstraints, irow, jcol, rowSize, ncnt, *colInd;
    int    nCandidates, *candidateList; 
    int    *constrListAux, colIndex, searchIndex, newEndRow;
-   int    *constrListAux2, rowIndex;
+   int    *constrListAux2;
    int    constrIndex, uBound, lBound, nSum, nPairs, index;
    double *colVal, searchValue;
    HYPRE_ParCSRMatrix A_csr;
@@ -3795,9 +3793,8 @@ int HYPRE_SlideReduction::findSlaveEqns2(int **couplings)
    // ==> slaveEqnList_
    //---------------------------------------------------------------------
     
-   nPairs           = 0;
-   rowIndex         = -1;
-   searchIndex      = 0;
+   nPairs      = 0;
+   searchIndex = 0;
 
    for ( irow = endRow-nConstraints+1; irow <= endRow; irow++ ) 
    {

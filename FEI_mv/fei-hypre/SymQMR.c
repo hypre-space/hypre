@@ -192,7 +192,6 @@ int hypre_SymQMRSolve(void  *symqmr_vdata, void  *A, void  *b, void  *x)
    /* logging variables */
    int               logging       = (symqmr_data -> logging);
    double           *norms         = (symqmr_data -> norms);
-   char             *log_file_name = (symqmr_data -> log_file_name);
    
    int               ierr=0, my_id, num_procs, iter;
    double            theta, tau, rhom1, rho, dtmp, r_norm;

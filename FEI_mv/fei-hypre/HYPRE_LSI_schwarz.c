@@ -547,7 +547,7 @@ int HYPRE_LSI_SchwarzDecompose(HYPRE_LSI_Schwarz *sch_ptr,MH_Matrix *Amat,
            double *ext_aa, int *map, int *map2, int Noffset)
 {
    int               i, j, k, nnz, *mat_ia, *mat_ja;
-   int               **bmat_ia, **bmat_ja, output_level;
+   int               **bmat_ia, **bmat_ja;
    int               mypid, *blk_size, index, **blk_indices, **aux_bmat_ia;
    int               ncnt, rownum, offset, Nrows, extNrows, **aux_bmat_ja;
    int               *tmp_blk_leng, *cols, rowleng;
@@ -564,7 +564,6 @@ int HYPRE_LSI_SchwarzDecompose(HYPRE_LSI_Schwarz *sch_ptr,MH_Matrix *Amat,
    extNrows       = Nrows + total_recv_leng;
    sch_ptr->Nrows = Nrows;
    sch_ptr->extNrows = extNrows;
-   output_level = sch_ptr->output_level;
 
    /* --------------------------------------------------------- */
    /* adjust the off-processor row data                         */

@@ -442,7 +442,7 @@ int HYPRE_LSI_SolveIdentity(HYPRE_Solver solver, HYPRE_ParCSRMatrix Amat,
 int HYPRE_LSI_SolveUsingSuperLU(HYPRE_IJMatrix Amat,
                                 HYPRE_IJVector f, HYPRE_IJVector x)
 {
-   int                i, nnz, nrows, ierr, nprocs, status;
+   int                i, nnz, nrows, ierr, nprocs;
    int                rowSize, *colInd, *new_ia, *new_ja, *ind_array;
    int                nz_ptr, *partition, start_row, end_row;
    double             *colVal, *new_a;
@@ -450,12 +450,10 @@ int HYPRE_LSI_SolveUsingSuperLU(HYPRE_IJMatrix Amat,
    MPI_Comm           mpi_comm;
 
 #ifdef HAVE_SUPERLU
-   int                info, panel_size, permc_spec;
+   int                info, permc_spec;
    int                *perm_r, *perm_c;
    double             *rhs, *soln;
    SuperMatrix        A2, B, L, U;
-   NRformat           *Ustore;
-   SCformat           *Lstore;
 
    /*----------------------------------------------------------------*/
    /* available for sequential processing only for now               */
@@ -519,7 +517,6 @@ int HYPRE_LSI_SolveUsingSuperLU(HYPRE_IJMatrix Amat,
    perm_c = (int *) malloc( nrows * sizeof(int) );
    permc_spec = 0;
    get_perm_c(permc_spec, &A2, perm_c);
-   panel_size = sp_ienv(1);
 
    dgssv(&A2, perm_c, perm_r, &L, &U, &B, &info);
 
@@ -527,15 +524,8 @@ int HYPRE_LSI_SolveUsingSuperLU(HYPRE_IJMatrix Amat,
    /* postprocessing of the return status information                */
    /*----------------------------------------------------------------*/
 
-   if ( info == 0 ) 
+   if ( info != 0 ) 
    {
-      status = 1;
-      Lstore = (SCformat *) L.Store;
-      Ustore = (NRformat *) U.Store;
-   } 
-   else 
-   {
-      status = 0;
       printf("HYPRE_LinSysCore::solveUsingSuperLU - dgssv error = %d\n",info);
    }
 
@@ -756,7 +746,6 @@ int HYPRE_LSI_MatrixInverse( double **Amat, int ndim, double ***Cmat )
       if ( dmax > 1.0e6 ) return 1;
       else                return 0;
    }
-   return -1;
 }
 
 /* ******************************************************************** */

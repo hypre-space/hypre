@@ -198,8 +198,7 @@ int MH_ExchBdryBack(double *vec, void *obj, int *length, double **outvec,
    (*length) = 0;
    return 0;
 #else
-   int         i, j, msgid, leng, src, dest, offset, *tempList;
-   double      *dbuf;
+   int         i, j, msgid, leng, src, dest, offset;
    MH_Context  *context;
    MH_Matrix   *Amat;
    MPI_Comm    comm;
@@ -282,7 +281,6 @@ int MH_ExchBdryBack(double *vec, void *obj, int *length, double **outvec,
 int MH_MatVec(void *obj, int leng1, double p[], int leng2, double ap[])
 {
     MH_Context *context;
-    MPI_Comm   comm;
     MH_Matrix *Amat;
 
     int    i, j, length, nRows, ibeg, iend, k;
@@ -291,7 +289,6 @@ int MH_MatVec(void *obj, int leng1, double p[], int leng2, double ap[])
     double *values;
 
     context = (MH_Context *) obj;
-    comm    = context->comm;
     Amat    = (MH_Matrix*) context->Amat;
     nRows = Amat->Nrows;
     rowptr  = Amat->rowptr;

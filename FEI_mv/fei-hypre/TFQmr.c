@@ -216,7 +216,6 @@ int hypre_TFQmrSolve(void  *tfqmr_vdata, void  *A, void  *b, void  *x)
    /* logging variables */
    int               logging       = (tfqmr_data -> logging);
    double           *norms         = (tfqmr_data -> norms);
-   char             *log_file_name = (tfqmr_data -> log_file_name);
    
    int               ierr=0, my_id, num_procs, iter;
    double            eta, theta, tau, rhom1, rho, dtmp, r_norm, b_norm;

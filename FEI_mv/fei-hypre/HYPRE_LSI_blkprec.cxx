@@ -1272,7 +1272,7 @@ int HYPRE_LSI_BlockP::setup(HYPRE_ParCSRMatrix Amat)
 
 int HYPRE_LSI_BlockP::solve(HYPRE_ParVector fvec, HYPRE_ParVector xvec)
 {
-   int       AStart, ANRows, AEnd, irow, searchInd, ierr;
+   int       AStart, AEnd, irow, searchInd, ierr;
    int       mypid, nprocs, V1Start, V2Start, V1Cnt, V2Cnt;
    double    *fvals, *xvals, ddata;
    MPI_Comm  mpi_comm;
@@ -1296,7 +1296,6 @@ int HYPRE_LSI_BlockP::solve(HYPRE_ParVector fvec, HYPRE_ParVector xvec)
    MPI_Comm_size( mpi_comm, &nprocs );
    AStart  = APartition_[mypid];
    AEnd    = APartition_[mypid+1];
-   ANRows  = AEnd - AStart;
 
    //------------------------------------------------------------------
    // extract subvectors for the right hand side

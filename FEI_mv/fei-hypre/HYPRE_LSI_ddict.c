@@ -860,7 +860,7 @@ int HYPRE_LSI_DDICTFactorize(HYPRE_LSI_DDICT *ict_ptr, double *mat_aa,
                  int *mat_ja, int *mat_ia, double *rowNorms)
 { 
    int    i, j, row_leng, first, row_beg, row_endp1, track_leng, *track_array;
-   int    k, mypid, nnz_count, num_small_pivot,  printstep, extNrows, Nrows;
+   int    k, mypid, nnz_count, num_small_pivot,  printstep, extNrows;
    int    *msr_iptr, *msc_jptr, *msc_jend, rowMax, Lcount, sortcnt, *sortcols;
    int    totalFill, colIndex, index;
    double fillin, tau, rel_tau, *dble_buf, *msr_aptr, *msc_aptr, absval;
@@ -873,7 +873,6 @@ int HYPRE_LSI_DDICTFactorize(HYPRE_LSI_DDICT *ict_ptr, double *mat_aa,
    MPI_Comm_rank(ict_ptr->comm, &mypid);
    tau       = ict_ptr->thresh;
    fillin    = ict_ptr->fillin;
-   Nrows     = ict_ptr->Nrows;
    extNrows  = ict_ptr->extNrows;
    rowMax    = 0;
    for ( i = 0; i < extNrows; i++ ) 

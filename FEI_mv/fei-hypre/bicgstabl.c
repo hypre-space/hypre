@@ -242,11 +242,9 @@ int hypre_BiCGSTABLSolve(void  *bicgstab_vdata, void  *A, void  *b, void  *x)
    /* logging variables */
    int             logging        = (bicgstab_data -> logging);
    double         *norms          = (bicgstab_data -> norms);
-   char           *log_file_name  = (bicgstab_data -> log_file_name);
    
    int        ierr = 0;
    int        iter, flag; 
-   int        m; 
    int        my_id, num_procs;
    double     eta, chi, xi, psi, dtmp, dtmp2, r_norm, b_norm;
    double     A11, A12, A21, A22, B1, B2, omega; 
@@ -352,7 +350,6 @@ hypre_ParKrylovClearVector(x);
       }
       else
       {
-         m = ( iter - 2 ) / 2;
          dtmp = - 1.0;
          hypre_ParKrylovCopyVector(wt,t2);
          hypre_ParKrylovAxpy(dtmp,wh,t2);
