@@ -206,6 +206,7 @@ then
             UPDATE/src/linear_solvers/matrix_matrix \
             UPDATE/src/linear_solvers/IJ_matrix_vector \
             UPDATE/src/linear_solvers/distributed_linear_solvers/pilut \
+            UPDATE/src/linear_solvers/distributed_linear_solvers/ParaSails \
             UPDATE/src/linear_solvers/parcsr_linear_solvers \
             UPDATE/src/linear_solvers/test
         rm -f update
@@ -265,6 +266,19 @@ then
         echo "setting permissions ..."
         chmod -fR $HYPRE_INSTALL_PERMISSIONS $HYPRE_INSTALL_DIR/*
     )
+    (
+        HYPRE_INSTALL_DIR=$HYPRE_INSTALL_DIR/UPDATE/debug
+        export HYPRE_INSTALL_DIR
+	mkdir -p $HYPRE_INSTALL_DIR
+        
+        cd UPDATE/src/linear_solvers
+        ./configure --enable-debug
+        make install
+        make veryclean
+        
+        echo "setting permissions ..."
+        chmod -fR $HYPRE_INSTALL_PERMISSIONS $HYPRE_INSTALL_DIR/*
+    )
 fi
 
 # MPI + threads version. (Do this only once)
@@ -278,6 +292,19 @@ then
         
         cd UPDATE/src/linear_solvers
         ./configure $HYPRE_INSTALL_THREADS
+        make install
+        make veryclean
+        
+        echo "setting permissions ..."
+        chmod -fR $HYPRE_INSTALL_PERMISSIONS $HYPRE_INSTALL_DIR
+    )
+    (
+        HYPRE_INSTALL_DIR=$HYPRE_INSTALL_DIR/UPDATE/threads/debug
+        export HYPRE_INSTALL_DIR
+	mkdir -p $HYPRE_INSTALL_DIR
+        
+        cd UPDATE/src/linear_solvers
+        ./configure $HYPRE_INSTALL_THREADS --enable-debug
         make install
         make veryclean
         
