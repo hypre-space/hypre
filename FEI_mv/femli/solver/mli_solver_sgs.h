@@ -22,6 +22,7 @@
 class MLI_Solver_SGS : public MLI_Solver
 {
    MLI_Matrix  *Amat;
+   int         zeroInitialGuess;
    int         nsweeps;
    double      *relax_weights;
 

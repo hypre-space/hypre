@@ -22,9 +22,10 @@
 
 MLI_Solver_SGS::MLI_Solver_SGS() : MLI_Solver(MLI_SOLVER_SGS_ID)
 {
-   Amat          = NULL;
-   nsweeps       = 1;
-   relax_weights = new double[1];
+   Amat             = NULL;
+   zeroInitialGuess = 0;
+   nsweeps          = 1;
+   relax_weights    = new double[1];
    relax_weights[0] = 0.5;
 }
 
@@ -62,11 +63,14 @@ int MLI_Solver_SGS::solve(MLI_Vector *f_in, MLI_Vector *u_in)
    double              *u_data;
    hypre_Vector        *f_local;
    double              *f_data;
+   register int        iStart, iEnd, jj;
+   int                 *tmp_j;
    int                 i, j, n, is, relax_error = 0;
-   int                 ii, jj, index, num_procs, num_sends, num_cols_offd;
+   int                 ii, index, num_procs, num_sends, num_cols_offd;
    int                 start;
-   double              zero = 0.0, relax_weight, res;
-   double              *v_buf_data;
+   double              zero = 0.0, relax_weight;
+   register double     res;
+   double              *v_buf_data, *tmp_data;
    double              *Vext_data;
    hypre_ParCSRCommPkg *comm_pkg;
    MPI_Comm            comm;
@@ -131,18 +135,22 @@ int MLI_Solver_SGS::solve(MLI_Vector *f_in, MLI_Vector *u_in)
 
       if (num_procs > 1)
       {
-         index = 0;
-         for (i = 0; i < num_sends; i++)
+         if ( ! zeroInitialGuess )
          {
-            start = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
-            for (j=start;j<hypre_ParCSRCommPkgSendMapStart(comm_pkg,i+1);j++)
-               v_buf_data[index++]
+            index = 0;
+            for (i = 0; i < num_sends; i++)
+            {
+               start = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
+               for (j=start;j<hypre_ParCSRCommPkgSendMapStart(comm_pkg,i+1);
+                    j++)
+                  v_buf_data[index++]
                       = u_data[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j)];
-         }
-         comm_handle = hypre_ParCSRCommHandleCreate(1,comm_pkg,v_buf_data,
+            }
+            comm_handle = hypre_ParCSRCommHandleCreate(1,comm_pkg,v_buf_data,
                                                     Vext_data);
-         hypre_ParCSRCommHandleDestroy(comm_handle);
-         comm_handle = NULL;
+            hypre_ParCSRCommHandleDestroy(comm_handle);
+            comm_handle = NULL;
+         }
       }
 
       /*-----------------------------------------------------------------
@@ -157,16 +165,21 @@ int MLI_Solver_SGS::solve(MLI_Vector *f_in, MLI_Vector *u_in)
 
          if ( A_diag_data[A_diag_i[i]] != zero)
          {
-            res = f_data[i];
-            for (jj = A_diag_i[i]; jj < A_diag_i[i+1]; jj++)
+            res      = f_data[i];
+            iStart   = A_diag_i[i];
+            iEnd     = A_diag_i[i+1];
+            tmp_j    = &(A_diag_j[iStart]);
+            tmp_data = &(A_diag_data[iStart]);
+            for (jj = iStart; jj < iEnd; jj++)
+               res -= (*tmp_data++) * u_data[*tmp_j++];
+            if ( ! zeroInitialGuess )
             {
-               ii = A_diag_j[jj];
-               res -= A_diag_data[jj] * u_data[ii];
-            }
-            for (jj = A_offd_i[i]; jj < A_offd_i[i+1]; jj++)
-            {
-               ii = A_offd_j[jj];
-               res -= A_offd_data[jj] * Vext_data[ii];
+               iStart   = A_offd_i[i];
+               iEnd     = A_offd_i[i+1];
+               tmp_j    = &(A_offd_j[iStart]);
+               tmp_data = &(A_offd_data[iStart]);
+               for (jj = iStart; jj < iEnd; jj++)
+                  res -= (*tmp_data++) * Vext_data[*tmp_j++];
             }
             u_data[i] += relax_weight * res / A_diag_data[A_diag_i[i]];
          }
@@ -184,20 +197,26 @@ int MLI_Solver_SGS::solve(MLI_Vector *f_in, MLI_Vector *u_in)
 
          if ( A_diag_data[A_diag_i[i]] != zero)
          {
-            res = f_data[i];
-            for (jj = A_diag_i[i]; jj < A_diag_i[i+1]; jj++)
+            res      = f_data[i];
+            iStart   = A_diag_i[i];
+            iEnd     = A_diag_i[i+1];
+            tmp_j    = &(A_diag_j[iStart]);
+            tmp_data = &(A_diag_data[iStart]);
+            for (jj = iStart; jj < iEnd; jj++)
+               res -= (*tmp_data++) * u_data[*tmp_j++];
+            if ( ! zeroInitialGuess )
             {
-               ii = A_diag_j[jj];
-               res -= A_diag_data[jj] * u_data[ii];
-            }
-            for (jj = A_offd_i[i]; jj < A_offd_i[i+1]; jj++)
-            {
-               ii = A_offd_j[jj];
-               res -= A_offd_data[jj] * Vext_data[ii];
+               iStart   = A_offd_i[i];
+               iEnd     = A_offd_i[i+1];
+               tmp_j    = &(A_offd_j[iStart]);
+               tmp_data = &(A_offd_data[iStart]);
+               for (jj = iStart; jj < iEnd; jj++)
+                  res -= (*tmp_data++) * Vext_data[*tmp_j++];
             }
             u_data[i] += relax_weight * res / A_diag_data[A_diag_i[i]];
          }
       }
+      zeroInitialGuess = 0;
    }
 
    /*-----------------------------------------------------------------
@@ -246,6 +265,11 @@ int MLI_Solver_SGS::setParams( char *param_string, int argc, char **argv )
          relax_weights = new double[nsweeps];
          for ( i = 0; i < nsweeps; i++ ) relax_weights[i] = weights[i];
       }
+   }
+   else if ( !strcmp(param_string, "zeroInitialGuess") )
+   {
+      zeroInitialGuess = 1;
+      return 0;
    }
    else
    {   
