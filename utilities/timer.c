@@ -33,7 +33,7 @@ double time_getWallclockSeconds(void)
    long wallclock = times(&usage);
 #ifdef CLOCKS_PER_SEC
    return(((double) wallclock)/((double) CLOCKS_PER_SEC));
-#ekse
+#else
    return(((double) wallclock)/((double) CLK_TCK));
 #endif
 #endif
