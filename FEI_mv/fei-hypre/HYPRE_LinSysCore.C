@@ -2313,7 +2313,8 @@ void HYPRE_LinSysCore::selectPreconditioner(char *name)
 
 void HYPRE_LinSysCore::formResidual(int* eqnNumbers, double* values, int leng)
 {
-    int                i, index;
+    int                i, index, nrows, startRow, endRow;
+    int                *int_array, *gint_array;
     HYPRE_ParCSRMatrix A_csr;
     HYPRE_ParVector    x_csr;
     HYPRE_ParVector    b_csr;
@@ -2328,9 +2329,55 @@ void HYPRE_LinSysCore::formResidual(int* eqnNumbers, double* values, int leng)
     // error checking
     //-------------------------------------------------------------------
 
-    if (leng != (localEndRow_-localStartRow_+1)) 
+    if (slideReduction_  == 1) 
+    {
+       nrows = localEndRow_ - localStartRow_ + 1 - 2 * nConstraints_;
+       int_array = new int[numProcs_];
+       gint_array = new int[numProcs_];
+       for ( i = 0; i < numProcs_; i++ ) int_array[i] = 0;
+       int_array[mypid_] = 2 * nConstraints_;
+       MPI_Allreduce(int_array,gint_array,numProcs_,MPI_INT,MPI_SUM,comm_);
+       startRow = 0;
+       for ( i = 0; i < mypid_; i++ ) startRow += gint_array[i];
+       startRow = localStartRow_ - 1 - startRow;
+       endRow   = startRow + nrows;
+       delete [] int_array;
+       delete [] gint_array;
+    }
+    else if (slideReduction_  == 2) 
+    {
+       nrows = localEndRow_ - localStartRow_ + 1 - nConstraints_;
+       int_array = new int[numProcs_];
+       gint_array = new int[numProcs_];
+       for ( i = 0; i < numProcs_; i++ ) int_array[i] = 0;
+       int_array[mypid_] = nConstraints_;
+       MPI_Allreduce(int_array,gint_array,numProcs_,MPI_INT,MPI_SUM,comm_);
+       startRow = 0;
+       for ( i = 0; i < mypid_; i++ ) startRow += gint_array[i];
+       startRow = localStartRow_ - 1 - startRow;
+       endRow   = startRow + nrows;
+       delete [] int_array;
+       delete [] gint_array;
+    }
+    else if (schurReduction_ == 1) 
+    {
+       nrows = localEndRow_ - localStartRow_ + 1 - A21NRows_;
+       int_array = new int[numProcs_];
+       gint_array = new int[numProcs_];
+       for ( i = 0; i < numProcs_; i++ ) int_array[i] = 0;
+       int_array[mypid_] = nrows;
+       MPI_Allreduce(int_array,gint_array,numProcs_,MPI_INT,MPI_SUM,comm_);
+       startRow = 0;
+       for ( i = 0; i < mypid_; i++ ) startRow += gint_array[i];
+       endRow   = startRow + nrows;
+       delete [] int_array;
+       delete [] gint_array;
+    }
+
+    if (leng != nrows)
     {
        printf("%4d : HYPRE_LinSysCore::formResidual ERROR - leng != numLocalRows");
+       printf("                        numLocalRows, leng = %d %d",nrows,leng);
        exit(1);
     }
     if ( ! systemAssembled_ )
@@ -2359,9 +2406,9 @@ void HYPRE_LinSysCore::formResidual(int* eqnNumbers, double* values, int leng)
     // fetch residual vector
     //-------------------------------------------------------------------
 
-    for ( i = localStartRow_-1; i = localEndRow_; i++ )
+    for ( i = startRow; i < endRow; i++ )
     {
-       index = i - localStartRow_ + 1;
+       index = i - startRow;
        HYPRE_IJVectorGetLocalComponents(currR_, 1, &i, NULL, &values[index]);
        eqnNumbers[index] = i + 1;
     }
