@@ -730,6 +730,17 @@ HYPRE_BoomerAMGSetNumFunctions( HYPRE_Solver  solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetNodal
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_BoomerAMGSetNodal( HYPRE_Solver  solver,
+                         int          nodal  )
+{
+   return( hypre_BoomerAMGSetNodal( (void *) solver, nodal ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_BoomerAMGSetDofFunc
  *--------------------------------------------------------------------------*/
 

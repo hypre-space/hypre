@@ -69,6 +69,7 @@ FILES = \
  par_laplace.c\
  par_laplace_27pt.c\
  par_laplace_9pt.c\
+ par_nodal_systems.c\
  par_rap.c\
  par_rap_communication.c\
  par_relax.c\

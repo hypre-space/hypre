@@ -504,6 +504,13 @@ int HYPRE_BoomerAMGSetNumFunctions(HYPRE_Solver solver,
                                 int          num_functions);
 
 /*
+ * (Optional) Sets whether to use the nodal systems version.
+ * The default is 0.
+ **/
+int HYPRE_BoomerAMGSetNodal(HYPRE_Solver solver,
+                                int          nodal);
+
+/*
  * (Optional) Sets the mapping that assigns the function to each variable, 
  * if using the systems version. If no assignment is made and the number of
  * functions is k > 1, the mapping generated is (0,1,...,k-1,0,1,...,k-1,...).

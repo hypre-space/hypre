@@ -45,6 +45,7 @@ typedef struct
    hypre_ParCSRMatrix  *A;
    int      num_variables;
    int      num_functions;
+   int      nodal;
    int      num_points;
    int     *dof_func;
    int     *dof_point;           
@@ -140,6 +141,7 @@ typedef struct
 /* problem data parameters */
 #define  hypre_ParAMGDataNumVariables(amg_data)  ((amg_data)->num_variables)
 #define hypre_ParAMGDataNumFunctions(amg_data) ((amg_data)->num_functions)
+#define hypre_ParAMGDataNodal(amg_data) ((amg_data)->nodal)
 #define hypre_ParAMGDataNumPoints(amg_data) ((amg_data)->num_points)
 #define hypre_ParAMGDataDofFunc(amg_data) ((amg_data)->dof_func)
 #define hypre_ParAMGDataDofPoint(amg_data) ((amg_data)->dof_point)

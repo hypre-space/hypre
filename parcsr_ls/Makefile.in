@@ -70,10 +70,10 @@ am__libHYPRE_parcsr_ls_a_SOURCES_DIST = F90_HYPRE_parcsr_ParaSails.c \
 	par_amg.c par_amg_setup.c par_amg_solve.c par_amg_solveT.c \
 	par_cg_relax_wt.c par_coarse_parms.c par_coarsen.c par_cycle.c \
 	par_difconv.c par_gsmg.c par_indepset.c par_interp.c \
-	par_laplace.c par_laplace_27pt.c par_laplace_9pt.c par_rap.c \
-	par_rap_communication.c par_relax.c par_relax_interface.c \
-	par_scaled_matnorm.c par_schwarz.c par_stats.c par_strength.c \
-	pcg_par.c schwarz.c
+	par_laplace.c par_laplace_27pt.c par_laplace_9pt.c \
+	par_nodal_systems.c par_rap.c par_rap_communication.c \
+	par_relax.c par_relax_interface.c par_scaled_matnorm.c \
+	par_schwarz.c par_stats.c par_strength.c pcg_par.c schwarz.c
 am__objects_1 = F90_HYPRE_parcsr_ParaSails.$(OBJEXT) \
 	F90_HYPRE_parcsr_amg.$(OBJEXT) \
 	F90_HYPRE_parcsr_bicgstab.$(OBJEXT) \
@@ -93,11 +93,12 @@ am__objects_1 = F90_HYPRE_parcsr_ParaSails.$(OBJEXT) \
 	par_difconv.$(OBJEXT) par_gsmg.$(OBJEXT) \
 	par_indepset.$(OBJEXT) par_interp.$(OBJEXT) \
 	par_laplace.$(OBJEXT) par_laplace_27pt.$(OBJEXT) \
-	par_laplace_9pt.$(OBJEXT) par_rap.$(OBJEXT) \
-	par_rap_communication.$(OBJEXT) par_relax.$(OBJEXT) \
-	par_relax_interface.$(OBJEXT) par_scaled_matnorm.$(OBJEXT) \
-	par_schwarz.$(OBJEXT) par_stats.$(OBJEXT) \
-	par_strength.$(OBJEXT) pcg_par.$(OBJEXT) schwarz.$(OBJEXT)
+	par_laplace_9pt.$(OBJEXT) par_nodal_systems.$(OBJEXT) \
+	par_rap.$(OBJEXT) par_rap_communication.$(OBJEXT) \
+	par_relax.$(OBJEXT) par_relax_interface.$(OBJEXT) \
+	par_scaled_matnorm.$(OBJEXT) par_schwarz.$(OBJEXT) \
+	par_stats.$(OBJEXT) par_strength.$(OBJEXT) pcg_par.$(OBJEXT) \
+	schwarz.$(OBJEXT)
 @STATICONLY_TRUE@am_libHYPRE_parcsr_ls_a_OBJECTS = $(am__objects_1)
 libHYPRE_parcsr_ls_a_OBJECTS = $(am_libHYPRE_parcsr_ls_a_OBJECTS)
 libLTLIBRARIES_INSTALL = $(INSTALL)
@@ -115,10 +116,10 @@ am__libHYPRE_parcsr_ls_la_SOURCES_DIST = F90_HYPRE_parcsr_ParaSails.c \
 	par_amg.c par_amg_setup.c par_amg_solve.c par_amg_solveT.c \
 	par_cg_relax_wt.c par_coarse_parms.c par_coarsen.c par_cycle.c \
 	par_difconv.c par_gsmg.c par_indepset.c par_interp.c \
-	par_laplace.c par_laplace_27pt.c par_laplace_9pt.c par_rap.c \
-	par_rap_communication.c par_relax.c par_relax_interface.c \
-	par_scaled_matnorm.c par_schwarz.c par_stats.c par_strength.c \
-	pcg_par.c schwarz.c
+	par_laplace.c par_laplace_27pt.c par_laplace_9pt.c \
+	par_nodal_systems.c par_rap.c par_rap_communication.c \
+	par_relax.c par_relax_interface.c par_scaled_matnorm.c \
+	par_schwarz.c par_stats.c par_strength.c pcg_par.c schwarz.c
 am__objects_2 = F90_HYPRE_parcsr_ParaSails.lo F90_HYPRE_parcsr_amg.lo \
 	F90_HYPRE_parcsr_bicgstab.lo F90_HYPRE_parcsr_cgnr.lo \
 	F90_HYPRE_parcsr_gmres.lo F90_HYPRE_parcsr_pcg.lo \
@@ -132,10 +133,10 @@ am__objects_2 = F90_HYPRE_parcsr_ParaSails.lo F90_HYPRE_parcsr_amg.lo \
 	par_cg_relax_wt.lo par_coarse_parms.lo par_coarsen.lo \
 	par_cycle.lo par_difconv.lo par_gsmg.lo par_indepset.lo \
 	par_interp.lo par_laplace.lo par_laplace_27pt.lo \
-	par_laplace_9pt.lo par_rap.lo par_rap_communication.lo \
-	par_relax.lo par_relax_interface.lo par_scaled_matnorm.lo \
-	par_schwarz.lo par_stats.lo par_strength.lo pcg_par.lo \
-	schwarz.lo
+	par_laplace_9pt.lo par_nodal_systems.lo par_rap.lo \
+	par_rap_communication.lo par_relax.lo par_relax_interface.lo \
+	par_scaled_matnorm.lo par_schwarz.lo par_stats.lo \
+	par_strength.lo pcg_par.lo schwarz.lo
 @STATICONLY_FALSE@am_libHYPRE_parcsr_ls_la_OBJECTS = $(am__objects_2)
 libHYPRE_parcsr_ls_la_OBJECTS = $(am_libHYPRE_parcsr_ls_la_OBJECTS)
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)
@@ -354,6 +355,7 @@ FILES = \
  par_laplace.c\
  par_laplace_27pt.c\
  par_laplace_9pt.c\
+ par_nodal_systems.c\
  par_rap.c\
  par_rap_communication.c\
  par_relax.c\

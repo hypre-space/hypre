@@ -36,6 +36,7 @@ hypre_BoomerAMGCreate()
    int      measure_type;
    int      setup_type;
    int 	    num_functions;
+   int 	    nodal;
 
    /* solve params */
    int      min_iter;
@@ -85,6 +86,7 @@ hypre_BoomerAMGCreate()
    measure_type = 0;
    setup_type = 1;
    num_functions = 1;
+   nodal = 0;
 
    variant = 0;
    overlap = 1;
@@ -140,6 +142,7 @@ hypre_BoomerAMGCreate()
    hypre_BoomerAMGSetCoarsenType(amg_data, coarsen_type);
    hypre_BoomerAMGSetSetupType(amg_data, setup_type);
    hypre_BoomerAMGSetNumFunctions(amg_data, num_functions);
+   hypre_BoomerAMGSetNodal(amg_data, nodal);
    hypre_BoomerAMGSetVariant(amg_data, variant);
    hypre_BoomerAMGSetOverlap(amg_data, overlap);
    hypre_BoomerAMGSetSchwarzRlxWeight(amg_data, schwarz_rlx_weight);
@@ -918,6 +921,22 @@ hypre_BoomerAMGSetNumFunctions( void     *data,
    hypre_ParAMGData  *amg_data = data;
  
    hypre_ParAMGDataNumFunctions(amg_data) = num_functions;
+
+   return (ierr);
+}
+
+/*--------------------------------------------------------------------------
+ * Indicate whether to use nodal systems function
+ *--------------------------------------------------------------------------*/
+
+int
+hypre_BoomerAMGSetNodal( void     *data,
+                          int    nodal )
+{
+   int ierr = 0;
+   hypre_ParAMGData  *amg_data = data;
+ 
+   hypre_ParAMGDataNodal(amg_data) = nodal;
 
    return (ierr);
 }

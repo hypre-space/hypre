@@ -36,11 +36,14 @@ hypre_BoomerAMGIndepSetInit( hypre_ParCSRMatrix *S,
                           int   seq_rand)
 {
    hypre_CSRMatrix *S_diag = hypre_ParCSRMatrixDiag(S);
+   MPI_Comm         comm = hypre_ParCSRMatrixComm(S);
    int              S_num_nodes = hypre_CSRMatrixNumRows(S_diag);
-   int              i;
+   int              i, my_id;
    int              ierr = 0;
 
-   hypre_SeedRand(2747);
+   MPI_Comm_rank(comm,&my_id);
+   i = 2747+my_id;
+   hypre_SeedRand(i);
    if (seq_rand)
    {
       for (i = 0; i < hypre_ParCSRMatrixFirstRowIndex(S); i++)
@@ -116,7 +119,6 @@ hypre_BoomerAMGIndepSet( hypre_ParCSRMatrix *S,
    /* double          *S_ext_data; */
 
    int		    local_num_vars = hypre_CSRMatrixNumRows(S_diag);
-   int		    jc;
    int              i, j, ig, jS, jj;
                    
    int              ierr = 0;
@@ -200,50 +202,6 @@ hypre_BoomerAMGIndepSet( hypre_ParCSRMatrix *S,
                }
             }
          }
-      }
-   }
-   for (ig = 0; ig < graph_array_offd_size; ig++)
-   {
-      i = graph_array_offd[ig];
-      if (measure_array[local_num_vars+i] > 1)
-      {
-         for (jS = S_ext_i[i]; jS < S_ext_i[i+1]; jS++)
-         {
-          j = S_ext_j[jS];
-          /* if (j < 0) j = -j-1; */
-          if (j >= 0)
-	  {
-            /* only consider valid graph edges */
-            /* if ( (measure_array[j] > 1) && (S_ext_data[jS]) ) */
-            if (measure_array[j] > 1) 
-            {
-               if (measure_array[i+local_num_vars] > measure_array[j])
-               {
-                  IS_marker[j] = 0;
-               }
-               else if (measure_array[j] > measure_array[i+local_num_vars])
-               {
-                  IS_marker_offd[i] = 0;
-               }
-            }
-	  }
-	  else
-	  {
-	     jc = -j-1+local_num_vars;
-            /* only consider valid graph edges */
-             if (measure_array[jc] > 1)
-             {
-                if (measure_array[i+local_num_vars] > measure_array[jc])
-                {
-                   IS_marker_offd[-j-1] = 0;
-                }
-                else if (measure_array[jc] > measure_array[i+local_num_vars])
-                {
-                   IS_marker_offd[i] = 0;
-                }
-             }
-	  }
-        }
       }
    }
             
