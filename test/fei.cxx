@@ -344,7 +344,6 @@ int readFEMatrix(int *nElemsOut, int *elemNNodesOut, int ***elemConnOut,
 int readFERhs(int nElems, int elemNNodes, double *elemLoad)
 {
    int    mypid, length, i;
-   double *rhs;
    char   *paramString;
    FILE   *fp;
 
