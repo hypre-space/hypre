@@ -148,12 +148,14 @@ hypre_SMGIntAddSetup( void               *intadd_vdata,
       {
          hypre_FreeSBoxArrayShell(hypre_SBoxArrayArraySBoxArray(
             f_send_sboxes, i));
+         hypre_TFree(temp_send_processes[i]);
       }
    hypre_FreeSBoxArrayArrayShell(f_send_sboxes);
    hypre_ForSBoxArrayI(i, f_recv_sboxes)
       {
          hypre_FreeSBoxArrayShell(hypre_SBoxArrayArraySBoxArray(
             f_recv_sboxes, i));
+         hypre_TFree(temp_recv_processes[i]);
       }
    hypre_FreeSBoxArrayArrayShell(f_recv_sboxes);
 

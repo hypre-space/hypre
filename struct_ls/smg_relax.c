@@ -143,13 +143,13 @@ hypre_SMGRelaxFreeARem( void *relax_vdata )
 
    if (relax_data -> A_rem)
    {
-      hypre_FreeStructMatrixMask(relax_data -> A_rem);
-      (relax_data -> A_rem) = NULL;
       for (i = 0; i < (relax_data -> num_spaces); i++)
       {
          hypre_SMGResidualFinalize(relax_data -> residual_data[i]);
       }
       hypre_TFree(relax_data -> residual_data);
+      hypre_FreeStructMatrixMask(relax_data -> A_rem);
+      (relax_data -> A_rem) = NULL;
    }
    (relax_data -> setup_a_rem) = 1;
 
@@ -171,8 +171,6 @@ hypre_SMGRelaxFreeASol( void *relax_vdata )
    if (relax_data -> A_sol)
    {
       stencil_dim = (relax_data -> stencil_dim);
-      hypre_FreeStructMatrixMask(relax_data -> A_sol);
-      (relax_data -> A_sol) = NULL;
       for (i = 0; i < (relax_data -> num_spaces); i++)
       {
          if (stencil_dim > 2)
@@ -181,6 +179,8 @@ hypre_SMGRelaxFreeASol( void *relax_vdata )
             hypre_CyclicReductionFinalize(relax_data -> solve_data[i]);
       }
       hypre_TFree(relax_data -> solve_data);
+      hypre_FreeStructMatrixMask(relax_data -> A_sol);
+      (relax_data -> A_sol) = NULL;
    }
    (relax_data -> setup_a_sol) = 1;
 
