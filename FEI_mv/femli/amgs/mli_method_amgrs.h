@@ -24,6 +24,7 @@
 #define MLI_METHOD_AMGRS_CLJP    0
 #define MLI_METHOD_AMGRS_RUGE    1
 #define MLI_METHOD_AMGRS_FALGOUT 2
+#define MLI_METHOD_AMGRS_CR      3
 
 /* ***********************************************************************
  * definition of the classical Ruge Stuben AMG data structure
@@ -73,6 +74,9 @@ public :
    int    setCoarseSolver( char *stype, int num, double *wgt );
    int    print();
    int    printStatistics(MLI *mli);
+   MLI_Matrix *performCR(MLI_Matrix *, int *, MLI_Matrix **,int,
+                         hypre_ParCSRMatrix *);
+   MLI_Matrix *createPmat(int *, MLI_Matrix *, MLI_Matrix *, MLI_Matrix *);
 };
 
 #endif
