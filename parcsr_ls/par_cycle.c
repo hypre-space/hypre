@@ -159,7 +159,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
 	if (smooth_option[level] == -1)
            num_sweep = num_grid_sweeps[cycle_param];
 	else
-	   num_sweep = 1;
+	   num_sweep = hypre_ParAMGDataSmoothNumSweep(amg_data);
         relax_type = grid_relax_type[cycle_param];
       }
       else if (max_levels > 1)

@@ -272,6 +272,12 @@ int HYPRE_BoomerAMGSetDomainType(HYPRE_Solver solver,
                                 int          domain_type);
 
 /**
+ * (Optional)
+ **/
+int HYPRE_BoomerAMGSetSchwarzRlxWeight(HYPRE_Solver solver,
+                                double    schwarz_rlx_weight);
+
+/**
  * Return the number of iterations taken.
  **/
 int HYPRE_BoomerAMGGetNumIterations(HYPRE_Solver  solver,
@@ -853,6 +859,8 @@ int HYPRE_SchwarzSetVariant(HYPRE_Solver solver, int variant);
 int HYPRE_SchwarzSetOverlap(HYPRE_Solver solver, int overlap);
 
 int HYPRE_SchwarzSetDomainType(HYPRE_Solver solver, int domain_type);
+
+int HYPRE_SchwarzSetRelaxWeight(HYPRE_Solver solver, double relax_weight);
 
 int HYPRE_SchwarzSetDomainStructure(HYPRE_Solver solver,
                                    HYPRE_CSRMatrix domain_structure);

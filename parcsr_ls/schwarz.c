@@ -2089,6 +2089,7 @@ int hypre_AdSchwarzSolve(hypre_ParCSRMatrix *par_A,
 int 
 hypre_GenerateScale(hypre_CSRMatrix *domain_structure,
 		    int              num_variables,
+		    double 	     relaxation_weight,
 		    double         **scale_pointer)
 {
    int num_domains = hypre_CSRMatrixNumRows(domain_structure);
@@ -2105,7 +2106,7 @@ hypre_GenerateScale(hypre_CSRMatrix *domain_structure,
 	 scale[j_domain_dof[j]] += 1.0;
 
    for (i=0; i < num_variables; i++)
-      scale[i] = 1.0/scale[i];
+      scale[i] = relaxation_weight/scale[i];
 
    *scale_pointer = scale;
 

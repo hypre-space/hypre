@@ -64,6 +64,7 @@ int HYPRE_BoomerAMGSetGridRelaxType( HYPRE_Solver solver , int *grid_relax_type 
 int HYPRE_BoomerAMGSetGridRelaxPoints( HYPRE_Solver solver , int **grid_relax_points );
 int HYPRE_BoomerAMGSetRelaxWeight( HYPRE_Solver solver , double *relax_weight );
 int HYPRE_BoomerAMGSetSmoothOption( HYPRE_Solver solver , int *smooth_option );
+int HYPRE_BoomerAMGSetSmoothNumSweep( HYPRE_Solver solver , int smooth_num_sweep );
 int HYPRE_BoomerAMGSetIOutDat( HYPRE_Solver solver , int ioutdat );
 int HYPRE_BoomerAMGSetLogFileName( HYPRE_Solver solver , char *log_file_name );
 int HYPRE_BoomerAMGSetLogging( HYPRE_Solver solver , int ioutdat , char *log_file_name );
@@ -73,6 +74,7 @@ int HYPRE_BoomerAMGGetFinalRelativeResidualNorm( HYPRE_Solver solver , double *r
 int HYPRE_BoomerAMGSetVariant( HYPRE_Solver solver , int variant );
 int HYPRE_BoomerAMGSetOverlap( HYPRE_Solver solver , int overlap );
 int HYPRE_BoomerAMGSetDomainType( HYPRE_Solver solver , int domain_type );
+int HYPRE_BoomerAMGSetSchwarzRlxWeight( HYPRE_Solver solver , double schwarz_rlx_weight );
 int HYPRE_BoomerAMGSetNumFunctions( HYPRE_Solver solver , int num_functions );
 int HYPRE_BoomerAMGSetDofFunc( HYPRE_Solver solver , int *dof_func );
 
@@ -159,6 +161,7 @@ int HYPRE_SchwarzSetOverlap( HYPRE_Solver solver , int overlap );
 int HYPRE_SchwarzSetDomainType( HYPRE_Solver solver , int domain_type );
 int HYPRE_SchwarzSetDomainStructure( HYPRE_Solver solver , HYPRE_CSRMatrix domain_structure );
 int HYPRE_SchwarzSetNumFunctions( HYPRE_Solver solver , int num_functions );
+int HYPRE_SchwarzSetRelaxWeight( HYPRE_Solver solver , double relax_weight );
 int HYPRE_SchwarzSetDofFunc( HYPRE_Solver solver , int *dof_func );
 
 /* driver.c */
@@ -192,6 +195,7 @@ int hypre_BoomerAMGSetGridRelaxType( void *data , int *grid_relax_type );
 int hypre_BoomerAMGSetGridRelaxPoints( void *data , int **grid_relax_points );
 int hypre_BoomerAMGSetRelaxWeight( void *data , double *relax_weight );
 int hypre_BoomerAMGSetSmoothOption( void *data , int *smooth_option );
+int hypre_BoomerAMGSetSmoothNumSweep( void *data , int smooth_num_sweep );
 int hypre_BoomerAMGSetIOutDat( void *data , int ioutdat );
 int hypre_BoomerAMGSetLogFileName( void *data , char *log_file_name );
 int hypre_BoomerAMGSetNumIterations( void *data , int num_iterations );
@@ -207,6 +211,7 @@ int hypre_BoomerAMGGetRelResidualNorm( void *data , double *rel_resid_norm );
 int hypre_BoomerAMGSetVariant( void *data , int variant );
 int hypre_BoomerAMGSetOverlap( void *data , int overlap );
 int hypre_BoomerAMGSetDomainType( void *data , int domain_type );
+int hypre_BoomerAMGSetSchwarzRlxWeight( void *data , double schwarz_rlx_weight );
 
 /* par_amg_setup.c */
 int hypre_BoomerAMGSetup( void *amg_vdata , hypre_ParCSRMatrix *A , hypre_ParVector *f , hypre_ParVector *u );
@@ -277,6 +282,7 @@ int hypre_SchwarzSetVariant( void *data , int variant );
 int hypre_SchwarzSetDomainType( void *data , int domain_type );
 int hypre_SchwarzSetOverlap( void *data , int overlap );
 int hypre_SchwarzSetNumFunctions( void *data , int num_functions );
+int hypre_SchwarzSetRelaxWeight( void *data , double relax_weight );
 int hypre_SchwarzSetDomainStructure( void *data , hypre_CSRMatrix *domain_structure );
 int hypre_SchwarzSetScale( void *data , double *scale );
 int hypre_SchwarzSetDofFunc( void *data , int *dof_func );
@@ -320,7 +326,7 @@ int move_entry( int weight , int *weight_max , int *previous , int *next , int *
 int matinv( double *x , double *a , int k );
 int hypre_parCorrRes( hypre_ParCSRMatrix *A , hypre_ParVector *x , hypre_Vector *rhs , double **tmp_ptr );
 int hypre_AdSchwarzSolve( hypre_ParCSRMatrix *par_A , hypre_ParVector *par_rhs , hypre_CSRMatrix *domain_structure , double *scale , hypre_ParVector *par_x , hypre_ParVector *par_aux );
-int hypre_GenerateScale( hypre_CSRMatrix *domain_structure , int num_variables , double **scale_pointer );
+int hypre_GenerateScale( hypre_CSRMatrix *domain_structure , int num_variables , double relaxation_weight , double **scale_pointer );
 
 /* transpose.c */
 int hypre_CSRMatrixTranspose( hypre_CSRMatrix *A , hypre_CSRMatrix **AT );

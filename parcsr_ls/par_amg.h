@@ -61,9 +61,11 @@ typedef struct
    int                  num_levels;
    int                 *smooth_option;
    HYPRE_Solver        *smoother;
+   int			smooth_num_sweep;
    int                  variant;
    int                  overlap;
    int                  domain_type;
+   double		schwarz_rlx_weight;
 
    /* data generated in the solve phase */
    hypre_ParVector   *Vtemp;
@@ -133,9 +135,12 @@ typedef struct
 #define hypre_ParAMGDataNumLevels(amg_data) ((amg_data)->num_levels)	
 #define hypre_ParAMGDataSmoothOption(amg_data) ((amg_data)->smooth_option)
 #define hypre_ParAMGDataSmoother(amg_data) ((amg_data)->smoother)	
+#define hypre_ParAMGDataSmoothNumSweep(amg_data) ((amg_data)->smooth_num_sweep)	
 #define hypre_ParAMGDataVariant(amg_data) ((amg_data)->variant)	
 #define hypre_ParAMGDataOverlap(amg_data) ((amg_data)->overlap)	
 #define hypre_ParAMGDataDomainType(amg_data) ((amg_data)->domain_type)	
+#define hypre_ParAMGDataSchwarzRlxWeight(amg_data) \
+((amg_data)->schwarz_rlx_weight)
 
 /* data generated in the solve phase */
 #define hypre_ParAMGDataVtemp(amg_data) ((amg_data)->Vtemp)

@@ -438,6 +438,8 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
       HYPRE_SchwarzSetOverlap(smoother[0],hypre_ParAMGDataOverlap(amg_data));
       HYPRE_SchwarzSetDomainType(smoother[0],
 		hypre_ParAMGDataDomainType(amg_data));
+      HYPRE_SchwarzSetRelaxWeight(smoother[0],
+		hypre_ParAMGDataSchwarzRlxWeight(amg_data));
       HYPRE_SchwarzSetup(smoother[0],
                         (HYPRE_ParCSRMatrix) A_array[0],
                         (HYPRE_ParVector) F_array[0],
@@ -489,6 +491,8 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
          HYPRE_SchwarzSetOverlap(smoother[j],hypre_ParAMGDataOverlap(amg_data));
          HYPRE_SchwarzSetDomainType(smoother[j],
 		hypre_ParAMGDataDomainType(amg_data));
+         HYPRE_SchwarzSetRelaxWeight(smoother[j],
+		hypre_ParAMGDataSchwarzRlxWeight(amg_data));
          HYPRE_SchwarzSetup(smoother[j],
                         (HYPRE_ParCSRMatrix) A_array[j],
                         (HYPRE_ParVector) F_array[j],

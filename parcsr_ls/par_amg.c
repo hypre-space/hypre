@@ -48,8 +48,10 @@ hypre_BoomerAMGCreate()
    int    **grid_relax_points; 
    double  *relax_weight;
    int     *smooth_option;  
+   int      smooth_num_sweep;
 
    int      variant, overlap, domain_type;
+   double   schwarz_rlx_weight;
 
    /* log info */
    int      num_iterations;
@@ -80,6 +82,8 @@ hypre_BoomerAMGCreate()
    variant = 0;
    overlap = 1;
    domain_type = 2;
+   schwarz_rlx_weight = 1.0;
+   smooth_num_sweep = 1;
 
    /* solve params */
    min_iter  = 0;
@@ -139,6 +143,7 @@ hypre_BoomerAMGCreate()
    hypre_BoomerAMGSetNumFunctions(amg_data, num_functions);
    hypre_BoomerAMGSetVariant(amg_data, variant);
    hypre_BoomerAMGSetOverlap(amg_data, overlap);
+   hypre_BoomerAMGSetSchwarzRlxWeight(amg_data, schwarz_rlx_weight);
    hypre_BoomerAMGSetDomainType(amg_data, domain_type);
 
    hypre_BoomerAMGSetMinIter(amg_data, min_iter);
@@ -150,6 +155,7 @@ hypre_BoomerAMGCreate()
    hypre_BoomerAMGSetGridRelaxPoints(amg_data, grid_relax_points);
    hypre_BoomerAMGSetRelaxWeight(amg_data, relax_weight);
    hypre_BoomerAMGSetSmoothOption(amg_data, smooth_option);
+   hypre_BoomerAMGSetSmoothNumSweep(amg_data, smooth_num_sweep);
 
    hypre_BoomerAMGSetNumIterations(amg_data, num_iterations);
    hypre_BoomerAMGSetIOutDat(amg_data, ioutdat);
@@ -510,6 +516,17 @@ hypre_BoomerAMGSetSmoothOption( void     *data,
    return (ierr);
 }
 
+hypre_BoomerAMGSetSmoothNumSweep( void     *data,
+                            int   smooth_num_sweep )
+{
+   int ierr = 0;
+   hypre_ParAMGData  *amg_data = data;
+               
+   hypre_ParAMGDataSmoothNumSweep(amg_data) = smooth_num_sweep;
+   
+   return (ierr);
+}
+
 int
 hypre_BoomerAMGSetIOutDat( void     *data,
                         int       ioutdat )
@@ -707,6 +724,18 @@ hypre_BoomerAMGSetDomainType( void     *data,
    hypre_ParAMGData  *amg_data = data;
  
    hypre_ParAMGDataDomainType(amg_data) = domain_type;
+
+   return (ierr);
+}
+
+int
+hypre_BoomerAMGSetSchwarzRlxWeight( void     *data,
+                            double     schwarz_rlx_weight)
+{
+   int ierr = 0;
+   hypre_ParAMGData  *amg_data = data;
+ 
+   hypre_ParAMGDataSchwarzRlxWeight(amg_data) = schwarz_rlx_weight;
 
    return (ierr);
 }

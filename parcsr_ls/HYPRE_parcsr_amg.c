@@ -379,6 +379,17 @@ HYPRE_BoomerAMGSetSmoothOption( HYPRE_Solver  solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetSmoothNumSweep
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_BoomerAMGSetSmoothNumSweep( HYPRE_Solver  solver,
+                            int       smooth_num_sweep  )
+{
+   return( hypre_BoomerAMGSetSmoothNumSweep((void *)solver,smooth_num_sweep ));
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_BoomerAMGSetIOutDat
  *--------------------------------------------------------------------------*/
 
@@ -476,6 +487,18 @@ HYPRE_BoomerAMGSetDomainType( HYPRE_Solver  solver,
                               int          domain_type  )
 {
    return( hypre_BoomerAMGSetDomainType( (void *) solver, domain_type ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetSchwarzRlxWeight
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_BoomerAMGSetSchwarzRlxWeight( HYPRE_Solver  solver,
+                                double schwarz_rlx_weight)
+{
+   return( hypre_BoomerAMGSetSchwarzRlxWeight( (void *) solver, 
+			schwarz_rlx_weight ) );
 }
 
 /*--------------------------------------------------------------------------

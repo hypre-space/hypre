@@ -20,6 +20,7 @@ typedef struct
    int      domain_type;
    int      overlap;
    int      num_functions;
+   double   relax_weight;
 
    hypre_CSRMatrix *domain_structure;
    hypre_ParVector *Vtemp;
@@ -37,6 +38,8 @@ typedef struct
 #define hypre_SchwarzDataOverlap(schwarz_data) ((schwarz_data)->overlap)
 #define hypre_SchwarzDataNumFunctions(schwarz_data) \
 ((schwarz_data)->num_functions)
+#define hypre_SchwarzDataRelaxWeight(schwarz_data) \
+((schwarz_data)->relax_weight)
 #define hypre_SchwarzDataDomainStructure(schwarz_data) \
 ((schwarz_data)->domain_structure)
 #define hypre_SchwarzDataVtemp(schwarz_data) ((schwarz_data)->Vtemp)

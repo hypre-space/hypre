@@ -121,6 +121,17 @@ HYPRE_SchwarzSetNumFunctions( HYPRE_Solver  solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_SchwarzSetRelaxWeight
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_SchwarzSetRelaxWeight( HYPRE_Solver  solver,
+                                double relax_weight)
+{
+   return( hypre_SchwarzSetRelaxWeight((void *) solver,relax_weight));
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_SchwarzSetDofFunc
  *--------------------------------------------------------------------------*/
 
