@@ -58,10 +58,13 @@ FILES =\
  amgstats.c\
  amg_setup.c\
  amg_solve.c \
+ cg.c\
+ cg_fun.c\
  coarsen.c\
  coarsenCR.c\
  cycle.c\
  difconv.c\
+ gmres.c\
  indepset.c\
  interp.c\
  interpCR.c\
@@ -74,7 +77,9 @@ FILES =\
  relax.c\
  scaled_matnorm.c\
  transpose.c\
- HYPRE_amg.c
+ HYPRE_amg.c\
+ HYPRE_csr_pcg.c\
+ HYPRE_csr_gmres.c
 
 OBJS = ${FILES:.c=.o}
 

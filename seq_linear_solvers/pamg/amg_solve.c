@@ -34,11 +34,11 @@ hypre_AMGSolve( void            *amg_vdata,
    int      amg_ioutdat;
    int     *num_coeffs;
    int     *num_variables;
-   int      cycle_op_count;
+   /* int      cycle_op_count; */
    int      num_levels;
-   int      num_functions;
+   /* int      num_functions; */
    double   tol;
-   char    *file_name;
+   /* char    *file_name; */
    hypre_CSRMatrix **A_array;
    hypre_Vector    **F_array;
    hypre_Vector    **U_array;
@@ -54,7 +54,7 @@ hypre_AMGSolve( void            *amg_vdata,
 
    double   alpha = 1.0;
    double   beta = -1.0;
-   double   cycle_cmplxty;
+   /* double   cycle_cmplxty; */
    double   operat_cmplxty;
    double   grid_cmplxty;
    double   conv_factor;
@@ -67,8 +67,8 @@ hypre_AMGSolve( void            *amg_vdata,
    hypre_Vector  *Vtemp;
 
    amg_ioutdat   = hypre_AMGDataIOutDat(amg_data);
-   file_name     = hypre_AMGDataLogFileName(amg_data);
-   num_functions  = hypre_AMGDataNumFunctions(amg_data);
+   /* file_name     = hypre_AMGDataLogFileName(amg_data); */
+   /* num_functions  = hypre_AMGDataNumFunctions(amg_data); */
    num_levels    = hypre_AMGDataNumLevels(amg_data);
    A_array       = hypre_AMGDataAArray(amg_data);
    F_array       = hypre_AMGDataFArray(amg_data);
@@ -205,11 +205,11 @@ hypre_AMGSolve( void            *amg_vdata,
       total_variables += num_variables[j];
    }
 
-   cycle_op_count = hypre_AMGDataCycleOpCount(amg_data);
+   /* cycle_op_count = hypre_AMGDataCycleOpCount(amg_data); */
 
    grid_cmplxty = ((double) total_variables) / ((double) num_variables[0]);
    operat_cmplxty = ((double) total_coeffs) / ((double) num_coeffs[0]);
-   cycle_cmplxty = ((double) cycle_op_count) / ((double) num_coeffs[0]);
+   /* cycle_cmplxty = ((double) cycle_op_count) / ((double) num_coeffs[0]); */
 
    if (amg_ioutdat >= 0)
    {

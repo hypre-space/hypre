@@ -11,7 +11,7 @@ main( int   argc,
       char *argv[] )
 {
    int                 arg_index;
-   int                 time_index;
+/*   int                 time_index; */
    int                 print_usage;
    int                 build_matrix_type;
    int                 build_matrix_arg_index;
@@ -28,7 +28,9 @@ main( int   argc,
    int                 num_functions;
    int                 num_relax_steps;
    double	       norm;
+   double	       tol;
    int                 i, j, k;
+   int                 k_dim;
    int		       ierr = 0;
 
 #if 0
@@ -41,12 +43,25 @@ main( int   argc,
    hypre_Vector       *x;
 
    HYPRE_Solver        amg_solver;
+   HYPRE_Solver        pcg_solver;
+   HYPRE_Solver        pcg_precond;
 
 /*   int                 num_procs, myid;   */
 
 #if 0
    int 		      *global_part;
 #endif
+
+      double   strong_threshold;
+      int      cycle_type;
+      int      ioutdat;
+      int      num_iterations;  
+      int      num_sweep;  
+      int     *num_grid_sweeps;  
+      int     *grid_relax_type;   
+      int    **grid_relax_points; 
+      double  *relax_weight;
+      double   final_res_norm;
 
    /*-----------------------------------------------------------
     * Initialize some stuff
@@ -55,7 +70,7 @@ main( int   argc,
    dof_func = NULL;
 
    /* Initialize MPI */
-   MPI_Init(&argc, &argv);
+   /* MPI_Init(&argc, &argv); */
 
 #if 0 
    MPI_Comm_size(MPI_COMM_WORLD, &num_procs );
@@ -82,6 +97,8 @@ main( int   argc,
    num_relax_steps = 1;
    build_funcs_type = 0;
    build_funcs_arg_index = argc;
+   tol = 1.e-6;
+   k_dim = 5;
 
    solver_id = 0;
    max_levels = 25;
@@ -162,6 +179,16 @@ main( int   argc,
       {
          arg_index++;
          coarsen_type = 3;
+      }
+      else if ( strcmp(argv[arg_index], "-tol") == 0 )
+      {
+         arg_index++;
+         tol = atof(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-k") == 0 )
+      {
+         arg_index++;
+         k_dim = atoi(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-nrlx") == 0 )
       {
@@ -244,7 +271,7 @@ main( int   argc,
       printf("    -a <ax> <ay> <az>    : convection coefficients\n");
       printf("\n");
       printf("  -solver <ID>           : solver ID\n");
-      printf("      currently only 0 (AMG as solver) implemented\n");
+      printf("      0=AMG, 1=AMG-CG, 2=CG, 3=AMG-GMRES, 4=GMRES\n");
       printf("\n");
 
       exit(1);
@@ -356,17 +383,6 @@ main( int   argc,
     * Solve the system using AMG
     *-----------------------------------------------------------*/
 
-   if (solver_id == 0)
-   {
-      double   strong_threshold;
-      int      cycle_type;
-      int      ioutdat;
-      int      num_sweep;
-      int     *num_grid_sweeps;  
-      int     *grid_relax_type;   
-      int    **grid_relax_points; 
-      double  *relax_weight;
-
       strong_threshold = 0.25;
       cycle_type       = 1;
       ioutdat = 3;
@@ -420,6 +436,8 @@ main( int   argc,
          }
       }
 
+   if (solver_id == 0 || solver_id == 1 || solver_id == 3)
+   {
 /*----------------------------------------------------------------
  *
  * Option to have numerous relaxation sweeps per level.  In this case
@@ -434,8 +452,8 @@ main( int   argc,
       grid_relax_points[0] = hypre_CTAlloc(int, 2*num_sweep); 
       for (i=0; i<2*num_sweep; i+=2)
       {
-         grid_relax_points[0][i] = -1;
-         grid_relax_points[0][i+1] = 1;
+         grid_relax_points[0][i] = 1;
+         grid_relax_points[0][i+1] = -1;
       }
 
       /* down cycle */
@@ -444,8 +462,8 @@ main( int   argc,
       grid_relax_points[1] = hypre_CTAlloc(int, 2*num_sweep); 
       for (i=0; i<2*num_sweep; i+=2)
       {
-         grid_relax_points[1][i] = -1;
-         grid_relax_points[1][i+1] = 1;
+         grid_relax_points[1][i] = 1;
+         grid_relax_points[1][i+1] = -1;
       }
 
       /* up cycle */
@@ -464,11 +482,13 @@ main( int   argc,
       grid_relax_type[3] = 9;
       grid_relax_points[3] = hypre_CTAlloc(int, 1);
       grid_relax_points[3][0] = 0;
-      
+   }
 
+   if (solver_id == 0)
+   {
 
-      time_index = hypre_InitializeTiming("Setup");
-      hypre_BeginTiming(time_index);
+      /* time_index = hypre_InitializeTiming("Setup");
+      hypre_BeginTiming(time_index); */
 
       amg_solver = HYPRE_AMGInitialize();
       HYPRE_AMGSetCoarsenType(amg_solver, coarsen_type);
@@ -487,28 +507,185 @@ main( int   argc,
 
       HYPRE_AMGSetup(amg_solver, (HYPRE_CSRMatrix) A, (HYPRE_Vector) b, 
 			(HYPRE_Vector) x);
-      hypre_EndTiming(time_index);
+      /* hypre_EndTiming(time_index);
       hypre_PrintTiming("Setup phase times", MPI_COMM_WORLD);
       hypre_FinalizeTiming(time_index);
-      hypre_ClearTiming();
+      hypre_ClearTiming(); 
  
       time_index = hypre_InitializeTiming("Solve");
-      hypre_BeginTiming(time_index);
+      hypre_BeginTiming(time_index); */
 
       HYPRE_AMGSolve(amg_solver, (HYPRE_CSRMatrix) A, (HYPRE_Vector) b, 
 			(HYPRE_Vector) x);
 
-      hypre_EndTiming(time_index);
+      /* hypre_EndTiming(time_index);
       hypre_PrintTiming("Solve phase times", MPI_COMM_WORLD);
       hypre_FinalizeTiming(time_index);
-      hypre_ClearTiming();
+      hypre_ClearTiming(); */
  
       HYPRE_AMGFinalize(amg_solver);
    }
 
+   /*-----------------------------------------------------
+    * Solve the system using PCG
+    *-----------------------------------------------------*/
+
+   if (solver_id == 1 || solver_id == 2)
+   {
+      /* time_index = hypre_InitializeTiming("PCG Setup");
+      hypre_BeginTiming(time_index); */
+
+      HYPRE_CSRPCGCreate( &pcg_solver);
+      HYPRE_CSRPCGSetMaxIter(pcg_solver, 500);
+      HYPRE_CSRPCGSetTol(pcg_solver, tol);
+      HYPRE_CSRPCGSetTwoNorm(pcg_solver, 1);
+      HYPRE_CSRPCGSetRelChange(pcg_solver, 0);
+      HYPRE_CSRPCGSetLogging(pcg_solver, 1);
+
+      if (solver_id == 1)
+      {
+	 /* use AMG as preconditioner */
+	 printf ("Solver: AMG-PCG\n");
+         pcg_precond = HYPRE_AMGInitialize();
+         HYPRE_AMGSetCoarsenType(pcg_precond, coarsen_type);
+         HYPRE_AMGSetStrongThreshold(pcg_precond, strong_threshold);
+         HYPRE_AMGSetNumRelaxSteps(pcg_precond, num_relax_steps);
+         HYPRE_AMGSetLogging(pcg_precond, ioutdat, "driver.out.log");
+         HYPRE_AMGSetMaxIter(pcg_precond, 1);
+         HYPRE_AMGSetCycleType(pcg_precond, cycle_type);
+         HYPRE_AMGSetNumGridSweeps(pcg_precond, num_grid_sweeps);
+         HYPRE_AMGSetGridRelaxType(pcg_precond, grid_relax_type);
+         HYPRE_AMGSetGridRelaxPoints(pcg_precond, grid_relax_points);
+         HYPRE_AMGSetRelaxWeight(pcg_precond, relax_weight);
+         HYPRE_AMGSetMaxLevels(pcg_precond, max_levels);
+         HYPRE_AMGSetInterpType(pcg_precond, interp_type);
+         HYPRE_AMGSetNumFunctions(pcg_precond, num_functions);
+         HYPRE_AMGSetDofFunc(pcg_precond, dof_func);
+         HYPRE_CSRPCGSetPrecond(pcg_solver, HYPRE_AMGSolve, HYPRE_AMGSetup, 
+				pcg_precond);
+      }
+      else if (solver_id == 2)
+      {
+	 /* use diagonal scaling as preconditioner */
+	 printf ("Solver: DS-PCG\n");
+	 pcg_precond = NULL;
+	 HYPRE_CSRPCGSetPrecond(pcg_solver, HYPRE_CSRDiagScale, 
+				HYPRE_CSRDiagScaleSetup, pcg_precond);
+      }
+
+      HYPRE_CSRPCGSetup(pcg_solver, (HYPRE_CSRMatrix) A, (HYPRE_Vector) b, 
+			(HYPRE_Vector) x);
+      /* hypre_EndTiming(time_index);
+      hypre_PrintTiming("Setup phase times", MPI_COMM_WORLD);
+      hypre_FinalizeTiming(time_index);
+      hypre_ClearTiming();
+ 
+      time_index = hypre_InitializeTiming("PCG Solve");
+      hypre_BeginTiming(time_index); */
+
+      HYPRE_CSRPCGSolve(pcg_solver, (HYPRE_CSRMatrix) A, (HYPRE_Vector) b, 
+			(HYPRE_Vector) x);
+
+      /* hypre_EndTiming(time_index);
+      hypre_PrintTiming("Solve phase times", MPI_COMM_WORLD);
+      hypre_FinalizeTiming(time_index);
+      hypre_ClearTiming(); */
+
+      HYPRE_CSRPCGGetNumIterations(pcg_solver, &num_iterations);
+      HYPRE_CSRPCGGetFinalRelativeResidualNorm(pcg_solver, &final_res_norm);
+
+      HYPRE_CSRPCGDestroy(pcg_solver);
+ 
+      if (solver_id == 1) HYPRE_AMGFinalize(pcg_precond);
    /*-----------------------------------------------------------
     * Print the solution and other info
     *-----------------------------------------------------------*/
+
+         printf("\n");
+         printf("Iterations = %d\n", num_iterations);
+         printf("Final Relative Residual Norm = %e\n", final_res_norm);
+         printf("\n");
+   }
+
+   /*-----------------------------------------------------
+    * Solve the system using GMRES
+    *-----------------------------------------------------*/
+
+   if (solver_id == 3 || solver_id == 4)
+   {
+      /* time_index = hypre_InitializeTiming("GMRES Setup");
+      hypre_BeginTiming(time_index); */
+
+      HYPRE_CSRGMRESCreate( &pcg_solver);
+      HYPRE_CSRGMRESSetMaxIter(pcg_solver, 500);
+      HYPRE_CSRGMRESSetTol(pcg_solver, tol);
+      HYPRE_CSRGMRESSetKDim(pcg_solver, k_dim);
+      HYPRE_CSRGMRESSetLogging(pcg_solver, 1);
+
+      if (solver_id == 3)
+      {
+	 /* use AMG as preconditioner */
+	 printf ("Solver: AMG-GMRES\n");
+         pcg_precond = HYPRE_AMGInitialize();
+         HYPRE_AMGSetCoarsenType(pcg_precond, coarsen_type);
+         HYPRE_AMGSetStrongThreshold(pcg_precond, strong_threshold);
+         HYPRE_AMGSetNumRelaxSteps(pcg_precond, num_relax_steps);
+         HYPRE_AMGSetLogging(pcg_precond, ioutdat, "driver.out.log");
+         HYPRE_AMGSetMaxIter(pcg_precond, 1);
+         HYPRE_AMGSetCycleType(pcg_precond, cycle_type);
+         HYPRE_AMGSetNumGridSweeps(pcg_precond, num_grid_sweeps);
+         HYPRE_AMGSetGridRelaxType(pcg_precond, grid_relax_type);
+         HYPRE_AMGSetGridRelaxPoints(pcg_precond, grid_relax_points);
+         HYPRE_AMGSetRelaxWeight(pcg_precond, relax_weight);
+         HYPRE_AMGSetMaxLevels(pcg_precond, max_levels);
+         HYPRE_AMGSetInterpType(pcg_precond, interp_type);
+         HYPRE_AMGSetNumFunctions(pcg_precond, num_functions);
+         HYPRE_AMGSetDofFunc(pcg_precond, dof_func);
+         HYPRE_CSRGMRESSetPrecond(pcg_solver, HYPRE_AMGSolve, HYPRE_AMGSetup, 
+				pcg_precond);
+      }
+      else if (solver_id == 2)
+      {
+	 /* use diagonal scaling as preconditioner */
+	 printf ("Solver: DS-GMRES\n");
+	 pcg_precond = NULL;
+	 HYPRE_CSRGMRESSetPrecond(pcg_solver, HYPRE_CSRDiagScale, 
+				HYPRE_CSRDiagScaleSetup, pcg_precond);
+      }
+
+      HYPRE_CSRGMRESSetup(pcg_solver, (HYPRE_CSRMatrix) A, (HYPRE_Vector) b, 
+			(HYPRE_Vector) x);
+      /* hypre_EndTiming(time_index);
+      hypre_PrintTiming("Setup phase times", MPI_COMM_WORLD);
+      hypre_FinalizeTiming(time_index);
+      hypre_ClearTiming();
+ 
+      time_index = hypre_InitializeTiming("GMRES Solve");
+      hypre_BeginTiming(time_index); */
+
+      HYPRE_CSRGMRESSolve(pcg_solver, (HYPRE_CSRMatrix) A, (HYPRE_Vector) b, 
+			(HYPRE_Vector) x);
+
+      /* hypre_EndTiming(time_index);
+      hypre_PrintTiming("Solve phase times", MPI_COMM_WORLD);
+      hypre_FinalizeTiming(time_index);
+      hypre_ClearTiming(); */
+
+      HYPRE_CSRGMRESGetNumIterations(pcg_solver, &num_iterations);
+      HYPRE_CSRGMRESGetFinalRelativeResidualNorm(pcg_solver, &final_res_norm);
+
+      HYPRE_CSRGMRESDestroy(pcg_solver);
+ 
+      if (solver_id == 1) HYPRE_AMGFinalize(pcg_precond);
+   /*-----------------------------------------------------------
+    * Print the solution and other info
+    *-----------------------------------------------------------*/
+
+         printf("\n");
+         printf("Iterations = %d\n", num_iterations);
+         printf("Final Relative Residual Norm = %e\n", final_res_norm);
+         printf("\n");
+   }
 
 #if 0
    hypre_PrintCSRVector(x, "driver.out.x");
@@ -534,7 +711,7 @@ main( int   argc,
    hypre_FinalizeMemoryDebug();
 */
    /* Finalize MPI */
-   MPI_Finalize();
+   /* MPI_Finalize(); */
 #if 0
 #endif
 
@@ -627,11 +804,11 @@ BuildLaplacian( int               argc,
 #if 0
    hypre_ParCSRMatrix *A;
    int 		      *global_part;
+   int                 p, q, r;
 #endif
    hypre_CSRMatrix    *A;
 
-   int                 num_procs, myid, volume;
-   int                 p, q, r;
+   int                 num_procs, myid;
    double             *values;
 
    /*-----------------------------------------------------------
@@ -718,17 +895,6 @@ BuildLaplacian( int               argc,
    }
 
    /*-----------------------------------------------------------
-    * Set up the grid structure
-    *-----------------------------------------------------------*/
-
-   volume  = nx*ny*nz;
-
-   /* compute p,q,r from P,Q,R and myid */
-   p = myid % P;
-   q = (( myid - p)/P) % Q;
-   r = ( myid - p - P*q)/( P*Q );
-
-   /*-----------------------------------------------------------
     * Generate the matrix 
     *-----------------------------------------------------------*/
  
@@ -752,7 +918,16 @@ BuildLaplacian( int               argc,
       values[0] += 2.0*cz;
    }
 
+   /*-----------------------------------------------------------
+    * Set up the grid structure
+    *-----------------------------------------------------------*/
+
+   /* compute p,q,r from P,Q,R and myid */
+
 #if 0   
+   p = myid % P;
+   q = (( myid - p)/P) % Q;
+   r = ( myid - p - P*q)/( P*Q );
    A = hypre_GenerateLaplacian(MPI_COMM_WORLD,
                                nx, ny, nz, P, Q, R, p, q, r,
                                values, &global_part);
@@ -786,11 +961,11 @@ BuildLaplacian9pt( int               argc,
 #if 0
    hypre_ParCSRMatrix *A;
    int 		      *global_part;
+   int                 p, q;
 #endif
    hypre_CSRMatrix    *A;
 
-   int                 num_procs, myid, volume;
-   int                 p, q;
+   int                 num_procs, myid;
    double             *values;
 
    /*-----------------------------------------------------------
@@ -861,16 +1036,6 @@ BuildLaplacian9pt( int               argc,
    }
 
    /*-----------------------------------------------------------
-    * Set up the grid structure
-    *-----------------------------------------------------------*/
-
-   volume  = nx*ny;
-
-   /* compute p,q from P,Q and myid */
-   p = myid % P;
-   q = ( myid - p)/P;
-
-   /*-----------------------------------------------------------
     * Generate the matrix 
     *-----------------------------------------------------------*/
  
@@ -892,7 +1057,15 @@ BuildLaplacian9pt( int               argc,
       values[0] += 4.0;
    }
 
+   /*-----------------------------------------------------------
+    * Set up the grid structure
+    *-----------------------------------------------------------*/
+
+   /* compute p,q from P,Q and myid */
+
 #if 0   
+   p = myid % P;
+   q = ( myid - p)/P;
    A = hypre_GenerateLaplacian9pt(MPI_COMM_WORLD,
                                nx, ny, P, Q, p, q,
                                values, &global_part);
@@ -926,20 +1099,28 @@ BuildLaplacian27pt(int               argc,
 #if 0
    hypre_ParCSRMatrix *A;
    int 		      *global_part;
+   int                 p, q, r;
 #endif
    hypre_CSRMatrix    *A;
 
-   int                 num_procs, myid, volume;
-   int                 p, q, r;
+   int                 num_procs, myid;
    double             *values;
 
    /*-----------------------------------------------------------
     * Initialize some stuff
     *-----------------------------------------------------------*/
 
+   /*-----------------------------------------------------------
+    * Set up the grid structure
+    *-----------------------------------------------------------*/
+
+   /* compute p,q,r from P,Q, R and myid */
 #if 0 
    MPI_Comm_size(MPI_COMM_WORLD, &num_procs );
    MPI_Comm_rank(MPI_COMM_WORLD, &myid );
+   p = myid % P;
+   q = ( myid - p)/P;
+
 #endif
 
    num_procs = 1;
@@ -995,16 +1176,6 @@ BuildLaplacian27pt(int               argc,
    }
 
    /*-----------------------------------------------------------
-    * Set up the grid structure
-    *-----------------------------------------------------------*/
-
-   volume  = nx*ny*nz;
-
-   /* compute p,q,r from P,Q, R and myid */
-   p = myid % P;
-   q = ( myid - p)/P;
-
-   /*-----------------------------------------------------------
     * Generate the matrix 
     *-----------------------------------------------------------*/
  
@@ -1058,20 +1229,28 @@ BuildDifConv(   int               argc,
 #if 0
    hypre_ParCSRMatrix *A;
    int 		      *global_part;
+   int                 p, q, r;
 #endif
    hypre_CSRMatrix    *A;
 
-   int                 num_procs, myid, volume;
-   int                 p, q, r;
+   int                 num_procs, myid;
    double             *values;
 
    /*-----------------------------------------------------------
     * Initialize some stuff
     *-----------------------------------------------------------*/
 
+   /*-----------------------------------------------------------
+    * Set up the grid structure
+    *-----------------------------------------------------------*/
+
+   /* compute p,q,r from P,Q,R and myid */
 #if 0 
    MPI_Comm_size(MPI_COMM_WORLD, &num_procs );
    MPI_Comm_rank(MPI_COMM_WORLD, &myid );
+   p = myid % P;
+   q = (( myid - p)/P) % Q;
+   r = ( myid - p - P*q)/( P*Q );
 #endif
 
    num_procs = 1;
@@ -1165,16 +1344,6 @@ BuildDifConv(   int               argc,
       printf("    (ax, ay, az) = (%f, %f, %f)\n", ax, ay, az);
    }
 
-   /*-----------------------------------------------------------
-    * Set up the grid structure
-    *-----------------------------------------------------------*/
-
-   volume  = nx*ny*nz;
-
-   /* compute p,q,r from P,Q,R and myid */
-   p = myid % P;
-   q = (( myid - p)/P) % Q;
-   r = ( myid - p - P*q)/( P*Q );
 
    /*-----------------------------------------------------------
     * Generate the matrix 

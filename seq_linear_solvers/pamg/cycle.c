@@ -34,14 +34,14 @@ hypre_AMGCycle( void           *amg_vdata,
    hypre_Vector    *Vtemp;
 
    int     **CF_marker_array;
-   int     **dof_func_array;
+/* int     **dof_func_array;
    int     **dof_point_array;
-   int     **point_dof_map_array;
+   int     **point_dof_map_array; */
 
    int       cycle_op_count;   
    int       cycle_type;
    int       num_levels;
-   int       num_functions;
+/* int       num_functions; */
 
    int      *num_coeffs;
    int      *num_grid_sweeps;   
@@ -76,9 +76,9 @@ hypre_AMGCycle( void           *amg_vdata,
    A_array           = hypre_AMGDataAArray(amg_data);
    P_array           = hypre_AMGDataPArray(amg_data);
    CF_marker_array   = hypre_AMGDataCFMarkerArray(amg_data);
-   dof_func_array    = hypre_AMGDataDofFuncArray(amg_data);
-   dof_point_array   = hypre_AMGDataDofPointArray(amg_data);
-   point_dof_map_array = hypre_AMGDataPointDofMapArray(amg_data);
+   /* dof_func_array    = hypre_AMGDataDofFuncArray(amg_data); */
+   /* dof_point_array   = hypre_AMGDataDofPointArray(amg_data); */
+   /* point_dof_map_array = hypre_AMGDataPointDofMapArray(amg_data); */
    Vtemp             = hypre_AMGDataVtemp(amg_data);
    num_levels        = hypre_AMGDataNumLevels(amg_data);
    cycle_type        = hypre_AMGDataCycleType(amg_data);

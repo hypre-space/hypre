@@ -23,7 +23,6 @@ hypre_AMGBuildCRInterp( hypre_CSRMatrix  *A,
                    hypre_CSRMatrix     **P_ptr )
 {
    
-   double          *A_data;
    int             *A_i;
    int             *A_j;
 
@@ -47,7 +46,7 @@ hypre_AMGBuildCRInterp( hypre_CSRMatrix  *A,
    int              coarse_counter;
    
    int              i,ic,i1,i2;
-   int              j,jj,jj1;
+   int              j,jj;
    int              kk,k1;
    int              extended_nghbr;
    
@@ -57,7 +56,6 @@ hypre_AMGBuildCRInterp( hypre_CSRMatrix  *A,
     *  Access the CSR vectors for A and S. Also get size of fine grid.
     *-----------------------------------------------------------------------*/
 
-   A_data = hypre_CSRMatrixData(A);
    A_i    = hypre_CSRMatrixI(A);
    A_j    = hypre_CSRMatrixJ(A);
 

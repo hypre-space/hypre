@@ -47,7 +47,6 @@ hypre_AMGInitialize()
 
    /* output params */
    int      ioutdat;
-   int      cycle_op_count;
    char     log_file_name[256];
 
    int      j;
@@ -92,7 +91,6 @@ hypre_AMGInitialize()
    /* output params */
    ioutdat = 0;
    sprintf(log_file_name, "%s", "amg.out.log");
-   cycle_op_count = 0;
 
    /*-----------------------------------------------------------------------
     * Create the hypre_AMGData structure and return
@@ -361,13 +359,10 @@ hypre_AMGSetLogging( void     *data,
    hypre_AMGDataIOutDat(amg_data) = ioutdat;
    if (ioutdat > 0)
    {
-      if (*log_file_name == 0)  
-         sprintf(hypre_AMGDataLogFileName(amg_data), "%s", "amg.out.log");
-      else
          sprintf(hypre_AMGDataLogFileName(amg_data), "%s", log_file_name); 
        
-   fp = fopen(hypre_AMGDataLogFileName(amg_data),"w");
-   fclose(fp);
+   	fp = fopen(hypre_AMGDataLogFileName(amg_data),"w");
+   	fclose(fp);
    }
 
    return (ierr);

@@ -26,7 +26,6 @@ hypre_AMGBuildInterp( hypre_CSRMatrix  *A,
    int             *A_i;
    int             *A_j;
 
-   double          *S_data;
    int             *S_i;
    int             *S_j;
 
@@ -58,6 +57,7 @@ hypre_AMGBuildInterp( hypre_CSRMatrix  *A,
    
    int              i,i1,i2;
    int              jj,jj1;
+   int              sgn;
    
    double           diagonal;
    double           sum;
@@ -74,7 +74,6 @@ hypre_AMGBuildInterp( hypre_CSRMatrix  *A,
    A_i    = hypre_CSRMatrixI(A);
    A_j    = hypre_CSRMatrixJ(A);
 
-   S_data = hypre_CSRMatrixData(S);
    S_i    = hypre_CSRMatrixI(S);
    S_j    = hypre_CSRMatrixJ(S);
 
@@ -253,10 +252,13 @@ hypre_AMGBuildInterp( hypre_CSRMatrix  *A,
                 * of the connections to c-points that strongly influence i.
                 *-----------------------------------------------------------*/
 
+               sgn = 1;
+               if (A_data[A_i[i1]] < 0) sgn = -1;
                for (jj1 = A_i[i1]; jj1 < A_i[i1+1]; jj1++)
                {
                   i2 = A_j[jj1];
-                  if (P_marker[i2] >= jj_begin_row)
+                  if (P_marker[i2] >= jj_begin_row && 
+					(sgn*A_data[jj1]) < 0)
                   {
                      sum += A_data[jj1];
                   }
@@ -271,7 +273,8 @@ hypre_AMGBuildInterp( hypre_CSRMatrix  *A,
                for (jj1 = A_i[i1]; jj1 < A_i[i1+1]; jj1++)
                {
                   i2 = A_j[jj1];
-                  if (P_marker[i2] >= jj_begin_row)
+                  if (P_marker[i2] >= jj_begin_row &&
+					(sgn*A_data[jj1]) < 0)
                   {
                      P_data[P_marker[i2]] += distribute * A_data[jj1];
                   }

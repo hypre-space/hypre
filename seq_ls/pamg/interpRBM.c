@@ -40,7 +40,6 @@ hypre_AMGBuildRBMInterp( hypre_CSRMatrix     *A,
 
 
 
-  double *S_data = hypre_CSRMatrixData(S);
   int *S_i    = hypre_CSRMatrixI(S);
   int *S_j    = hypre_CSRMatrixJ(S);
 
@@ -63,13 +62,13 @@ hypre_AMGBuildRBMInterp( hypre_CSRMatrix     *A,
 
 
   int ierr = 0;
-  int i,j,k,l, l_loc,k_loc, i_loc, j_loc, i_row;
+  int i, j, k, l_loc, i_loc, j_loc;
   int i_dof, j_dof;
   int *i_local_to_global;
   int *i_global_to_local;
 
 
-  int i_dof_on_list =-1;
+/*  int i_dof_on_list =-1; */
 
 
   int local_dof_counter, max_local_dof_counter=0; 
@@ -92,17 +91,12 @@ hypre_AMGBuildRBMInterp( hypre_CSRMatrix     *A,
 
   double *AE;
 
-  double coeff_sum;
+/*  double coeff_sum; */
 
   double *P_ext_int; 
 
   double diag = 0.e0;
  
-  double alpha, beta;
-
-
-
-
 
 
   /*-----------------------------------------------------------------------

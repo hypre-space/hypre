@@ -51,11 +51,6 @@ hypre_AMGSetup( void            *amg_vdata,
    hypre_CSRMatrix  *P;
    hypre_CSRMatrix  *A_H;
 
-   int      *A_i = hypre_CSRMatrixI(A);
-   int      *A_j = hypre_CSRMatrixJ(A);
-   double   *A_data =  hypre_CSRMatrixData(A);
-   int       num_dofsA =  hypre_CSRMatrixNumRows(A);
-
    int       num_levels;
    int       level;
    int       coarse_size;
@@ -63,7 +58,7 @@ hypre_AMGSetup( void            *amg_vdata,
    int       not_finished_coarsening = 1;
    int       Setup_err_flag;
    int       coarse_threshold = 9;
-   int       i, j;
+   int       j;
    int	     coarsen_type;
    int	    *grid_relax_type;
    int	     relax_type;

@@ -28,17 +28,16 @@ hypre_AMGSetupStats( void *amg_vdata )
 
    int      num_levels; 
    int      num_nonzeros;
-   int      amg_ioutdat;
+/*   int      amg_ioutdat;
    char    *log_file_name;
- 
+*/ 
+
    /* Local variables */
 
    int      *A_i;
-   int      *A_j;
    double   *A_data;
 
    int      *P_i;
-   int      *P_j;
    double   *P_data;
 
    int       level;
@@ -60,9 +59,9 @@ hypre_AMGSetupStats( void *amg_vdata )
    A_array = hypre_AMGDataAArray(amg_data);
    P_array = hypre_AMGDataPArray(amg_data);
    num_levels = hypre_AMGDataNumLevels(amg_data);
-   amg_ioutdat = hypre_AMGDataIOutDat(amg_data);
+/*   amg_ioutdat = hypre_AMGDataIOutDat(amg_data);
    log_file_name = hypre_AMGDataLogFileName(amg_data);
-    
+*/    
    printf("\n  AMG SETUP PARAMETERS:\n\n");
    printf(" Strength threshold = %f\n",hypre_AMGDataStrongThreshold(amg_data));
    printf(" Max levels = %d\n",hypre_AMGDataMaxLevels(amg_data));
@@ -85,7 +84,6 @@ hypre_AMGSetupStats( void *amg_vdata )
    for (level = 0; level < num_levels; level++)
    {
        A_i = hypre_CSRMatrixI(A_array[level]);
-       A_j = hypre_CSRMatrixJ(A_array[level]);
        A_data = hypre_CSRMatrixData(A_array[level]);
 
        fine_size = hypre_CSRMatrixNumRows(A_array[level]);
@@ -144,7 +142,6 @@ hypre_AMGSetupStats( void *amg_vdata )
    for (level = 0; level < num_levels-1; level++)
    {
        P_i = hypre_CSRMatrixI(P_array[level]);
-       P_j = hypre_CSRMatrixJ(P_array[level]);
        P_data = hypre_CSRMatrixData(P_array[level]);
 
        fine_size = hypre_CSRMatrixNumRows(P_array[level]);
@@ -209,8 +206,6 @@ void     hypre_WriteSolverParams(data)
 void    *data;
  
 {
-   char    *file_name;
- 
    hypre_AMGData  *amg_data = data;
  
    /* amg solve params */
@@ -230,8 +225,6 @@ void    *data;
    /*----------------------------------------------------------
     * Get the amg_data data
     *----------------------------------------------------------*/
- 
-   file_name = hypre_AMGDataLogFileName(amg_data);
  
  
    max_iter   = hypre_AMGDataMaxIter(amg_data);

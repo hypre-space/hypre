@@ -108,9 +108,6 @@ hypre_AMGCoarsenCR( hypre_CSRMatrix    *A,
                   int               **CF_marker_ptr,
                   int                *coarse_size_ptr     )
 {
-   int             *A_i           = hypre_CSRMatrixI(A);
-   int             *A_j           = hypre_CSRMatrixJ(A);
-   double          *A_data        = hypre_CSRMatrixData(A);
    int              num_variables = hypre_CSRMatrixNumRows(A);
                   
    int             *CF_marker;
@@ -121,12 +118,11 @@ hypre_AMGCoarsenCR( hypre_CSRMatrix    *A,
    hypre_Vector    *zero_vector;
    hypre_Vector    *tmp_vector;
    int             *graph_array;
-   int             *tmp_array;
+   /* int             *tmp_array; */
    int              graph_size;
-   int              tmp_size;
+   /* int              tmp_size; */
 
-   double           diag, row_scale;
-   int              i, j, k, jA, jS, kS, ig;
+   int              i, ig;
 
    int              ierr = 0;
 

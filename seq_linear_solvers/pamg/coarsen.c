@@ -535,9 +535,10 @@ hypre_AMGCoarsenRuge( hypre_CSRMatrix    *A,
 
    double           diag, row_scale;
    int              measure, max_measure;
-   int              i, j, k, jA, jS, kS, ig;
+   int              i, j, jA, jS, ig;
    int		    ic, ji, jj, jl, index;
-   int		    max_ci_size, ci_size, ci_tilde_size;
+   int		    ci_tilde = -1;
+   int		    ci_tilde_mark = -1;
    int		    set_empty = 1;
    int		    C_i_nonempty = 0;
    int		    num_strong;
@@ -801,18 +802,20 @@ hypre_AMGCoarsenRuge( hypre_CSRMatrix    *A,
 
    /* second pass, check fine points for coarse neighbors */
 
+   for (i = 0; i < num_variables; i++)
+   {
+      graph_array[i] = -1;
+   }
    for (i=0; i < num_variables; i++)
    {
+      if (ci_tilde_mark |= i) ci_tilde = -1;
       if (CF_marker[i] == -1)
       {
-	 max_ci_size = S_i[i+1]-S_i[i];
-	 ci_tilde_size = max_ci_size;
-	 ci_size = 0;
 	 for (ji = S_i[i]; ji < S_i[i+1]; ji++)
 	 {
 	    j = S_j[ji];
 	    if (CF_marker[j] > 0)
-	       graph_array[ci_size++] = j;
+	       graph_array[j] = i;
  	 }
 	 for (ji = S_i[i]; ji < S_i[i+1]; ji++)
 	 {
@@ -823,15 +826,11 @@ hypre_AMGCoarsenRuge( hypre_CSRMatrix    *A,
 	       for (jj = S_i[j]; jj < S_i[j+1]; jj++)
 	       {
 		  index = S_j[jj];
-		  for (jl=0; jl < ci_size; jl++)
+		  if (graph_array[index] == i)
 		  {
-		     if (graph_array[jl] == index)
-		     {
-		        set_empty = 0;
-		        break;
-		     }
+		     set_empty = 0;
+		     break;
 	          }
-	          if (!set_empty) break;
 	       }
 	       if (set_empty)
 	       {
@@ -839,17 +838,19 @@ hypre_AMGCoarsenRuge( hypre_CSRMatrix    *A,
 		  {
 		     CF_marker[i] = 1;
 		     coarse_size++;
-		     for (jj=max_ci_size ; jj < ci_tilde_size; jj++)
+		     if (ci_tilde > -1)
 		     {
-			CF_marker[graph_array[jj]] = -1;
+			CF_marker[ci_tilde] = -1;
 		        coarse_size--;
+		        ci_tilde = -1;
 		     }
-		     ci_tilde_size = max_ci_size;
+		     C_i_nonempty = 0;
 		     break;
 		  }
 		  else
 		  {
-		     graph_array[ci_tilde_size++] = j;
+		     ci_tilde = j;
+		     ci_tilde_mark = i;
 		     CF_marker[j] = 1;
 		     coarse_size++;
 		     C_i_nonempty = 1;
@@ -913,13 +914,13 @@ hypre_AMGCoarsenRugeLoL( hypre_CSRMatrix    *A,
 
    int             *measure_array;
    int             *graph_array;
-   int             *graph_ptr;
 
    double           diag, row_scale;
-   int              measure, max_measure;
-   int              i, j, k, jA, jS, kS, ig;
-   int		    ic, ji, jj, jl, index;
-   int		    max_ci_size, ci_size, ci_tilde_size;
+   int              measure;
+   int              i, j, k, jA, jS;
+   int		    ji, jj, index;
+   int		    ci_tilde = -1;
+   int		    ci_tilde_mark = -1;
    int		    set_empty = 1;
    int		    C_i_nonempty = 0;
    int		    num_strong;
@@ -1107,12 +1108,16 @@ hypre_AMGCoarsenRugeLoL( hypre_CSRMatrix    *A,
     *----------------------------------------------------------*/
 
    measure_array = hypre_CTAlloc(int, num_variables);
+   for (j = 0; j < num_variables; j++) 
+   {    
+      measure_array[j] = ST_i[j+1]-ST_i[j];
+   }    
+
    num_left = num_variables;
    coarse_size = 0;
  
    for (j = 0; j < num_variables; j++) 
    {    
-      measure_array[j] = ST_i[j+1]-ST_i[j];
       measure = measure_array[j];
       if (measure > 0) 
       {
@@ -1121,8 +1126,25 @@ hypre_AMGCoarsenRugeLoL( hypre_CSRMatrix    *A,
       else
       {
          if (measure < 0) printf("negative measure!\n");
-         CF_marker[j] = CPOINT;
-         ++coarse_size;
+         CF_marker[j] = FPOINT;
+	 for (k = S_i[j]; k < S_i[j+1]; k++)
+	 {
+	    nabor = S_j[k];
+	    if (nabor < j)
+	    {
+	       new_meas = measure_array[nabor];
+	       if (new_meas > 0)
+		  remove_point(&LoL_head, &LoL_tail, new_meas,
+				nabor, lists, where);
+	       new_meas = ++(measure_array[nabor]);
+	       enter_on_lists(&LoL_head, &LoL_tail, new_meas,
+				nabor, lists, where);
+	    }
+	    else
+	    {
+	       new_meas = ++(measure_array[nabor]);
+	    }
+  	 }
          --num_left;
       }
    }
@@ -1184,7 +1206,43 @@ hypre_AMGCoarsenRugeLoL( hypre_CSRMatrix    *A,
             }
          }
       }
+      for (j = S_i[index]; j < S_i[index+1]; j++)
+      {
+         nabor = S_j[j];
+         if (CF_marker[nabor] == UNDECIDED)
+         {
+            measure = measure_array[nabor];
 
+            remove_point(&LoL_head, &LoL_tail, measure, nabor, lists, where);
+
+            measure_array[nabor] = --measure;
+
+            if (measure > 0)
+               enter_on_lists(&LoL_head, &LoL_tail, measure, nabor,
+                                lists, where);
+            else
+            {
+               CF_marker[nabor] = F_PT;
+               --num_left;
+
+               for (k = S_i[nabor]; k < S_i[nabor+1]; k++)
+               {
+                  nabor_two = S_j[k];
+                  if (CF_marker[nabor_two] == UNDECIDED)
+                  {
+                     new_meas = measure_array[nabor_two];
+                     remove_point(&LoL_head, &LoL_tail, new_meas,
+                               nabor_two, lists, where);
+
+                     new_meas = ++(measure_array[nabor_two]);
+
+                     enter_on_lists(&LoL_head, &LoL_tail, new_meas,
+                                 nabor_two, lists, where);
+                  }
+               }
+            }
+         }
+      }
    }
 
 #if 0 /* debugging */
@@ -1197,6 +1255,8 @@ hypre_AMGCoarsenRugeLoL( hypre_CSRMatrix    *A,
    hypre_TFree(where);
    hypre_TFree(LoL_head);
    hypre_TFree(LoL_tail);
+   hypre_TFree(measure_array);
+   hypre_CSRMatrixDestroy(ST);
 
 
    /*---------------------------------------------------
@@ -1204,12 +1264,10 @@ hypre_AMGCoarsenRugeLoL( hypre_CSRMatrix    *A,
     *---------------------------------------------------*/
 
    graph_array = hypre_CTAlloc(int, num_variables);
-   graph_ptr   = hypre_CTAlloc(int, num_variables);
 
    for (i = 0; i < num_variables; i++)
    {
-      graph_array[i] = i;
-      graph_ptr[i] = i;
+      graph_array[i] = -1;
    }
 
 
@@ -1218,16 +1276,14 @@ hypre_AMGCoarsenRugeLoL( hypre_CSRMatrix    *A,
 
    for (i=0; i < num_variables; i++)
    {
+      if (ci_tilde_mark |= i) ci_tilde = -1;
       if (CF_marker[i] == -1)
       {
-	 max_ci_size = S_i[i+1]-S_i[i];
-	 ci_tilde_size = max_ci_size;
-	 ci_size = 0;
 	 for (ji = S_i[i]; ji < S_i[i+1]; ji++)
 	 {
 	    j = S_j[ji];
 	    if (CF_marker[j] > 0)
-	       graph_array[ci_size++] = j;
+	       graph_array[j] = i;
  	 }
 	 for (ji = S_i[i]; ji < S_i[i+1]; ji++)
 	 {
@@ -1238,15 +1294,11 @@ hypre_AMGCoarsenRugeLoL( hypre_CSRMatrix    *A,
 	       for (jj = S_i[j]; jj < S_i[j+1]; jj++)
 	       {
 		  index = S_j[jj];
-		  for (jl=0; jl < ci_size; jl++)
+		  if (graph_array[index] == i)
 		  {
-		     if (graph_array[jl] == index)
-		     {
-		        set_empty = 0;
-		        break;
-		     }
+		     set_empty = 0;
+		     break;
 	          }
-	          if (!set_empty) break;
 	       }
 	       if (set_empty)
 	       {
@@ -1254,17 +1306,19 @@ hypre_AMGCoarsenRugeLoL( hypre_CSRMatrix    *A,
 		  {
 		     CF_marker[i] = 1;
 		     coarse_size++;
-		     for (jj=max_ci_size ; jj < ci_tilde_size; jj++)
+		     if (ci_tilde > -1)
 		     {
-			CF_marker[graph_array[jj]] = -1;
+			CF_marker[ci_tilde] = -1;
 		        coarse_size--;
+		        ci_tilde = -1;
 		     }
-		     ci_tilde_size = max_ci_size;
+		     C_i_nonempty = 0;
 		     break;
 		  }
 		  else
 		  {
-		     graph_array[ci_tilde_size++] = j;
+		     ci_tilde = j;
+		     ci_tilde_mark = i;
 		     CF_marker[j] = 1;
 		     coarse_size++;
 		     C_i_nonempty = 1;
@@ -1284,10 +1338,7 @@ hypre_AMGCoarsenRugeLoL( hypre_CSRMatrix    *A,
     * Clean up and return
     *---------------------------------------------------*/
 
-   hypre_TFree(measure_array);
    hypre_TFree(graph_array);
-   hypre_TFree(graph_ptr);
-   hypre_CSRMatrixDestroy(ST);
 
    *S_ptr           = S;
    *CF_marker_ptr   = CF_marker;
