@@ -225,14 +225,18 @@ hypre_SMGRestrict( void               *restrict_vdata,
                   hypre_SMGMapFineToCoarse(start, startc, cindex, stride);
 
                   hypre_GetStrideBoxSize(compute_box, stride, loop_size);
-                  hypre_BoxLoop3(loopi, loopj, loopk, loop_size,
-                                 R_data_box,  startc, stridec, Ri,
-                                 r_data_box,  start,  stride,  ri,
-                                 rc_data_box, startc, stridec, rci,
-                                 {
-                                    rcp[rci] = rp[ri] + (Rp0[Ri] * rp0[ri] +
-                                                         Rp1[Ri] * rp1[ri]);
-                                 });
+                  hypre_BoxLoop3Begin(loop_size,
+                                      R_data_box,  startc, stridec, Ri,
+                                      r_data_box,  start,  stride,  ri,
+                                      rc_data_box, startc, stridec, rci);
+#define HYPRE_SMP_PRIVATE loopi,loopj,Ri,ri,rci
+#include "hypre_smp_forloop.h"
+                  hypre_BoxLoop3For(loopi, loopj, loopk, Ri, ri, rci)
+                     {
+                        rcp[rci] = rp[ri] + (Rp0[Ri] * rp0[ri] +
+                                             Rp1[Ri] * rp1[ri]);
+                     }
+                  hypre_BoxLoop3End;
                }
          }
    }

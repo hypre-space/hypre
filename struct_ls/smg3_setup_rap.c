@@ -6,7 +6,7 @@
  *
  * $Revision$
  *********************************************************************EHEADER*/
- /******************************************************************************
+/******************************************************************************
  *
  *
  *****************************************************************************/
@@ -577,51 +577,55 @@ hypre_SMG3BuildRAPSym( hypre_StructMatrix *A,
             case 7:
 
             hypre_GetBoxSize(cgrid_box, loop_size);
-            hypre_BoxLoop4(loopi, loopj, loopk, loop_size,
-                           PT_data_box,  cstart, stridec, iP,
-                           R_data_box,   cstart, stridec, iR,
-                           A_data_box,   fstart, stridef, iA,
-                           RAP_data_box, cstart, stridec, iAc,
-                           {
-                              iAm1 = iA - zOffsetA;
-                              iAp1 = iA + zOffsetA;
+            hypre_BoxLoop4Begin(loop_size,
+                                PT_data_box,  cstart, stridec, iP,
+                                R_data_box,   cstart, stridec, iR,
+                                A_data_box,   fstart, stridef, iA,
+                                RAP_data_box, cstart, stridec, iAc);
+#define HYPRE_SMP_PRIVATE loopi,loopj,iP,iR,iA,iAc,iAm1,iAp1,iP1
+#include "hypre_smp_forloop.h"
+            hypre_BoxLoop4For(loopi, loopj, loopk, iP, iR, iA, iAc)
+               {
+                  iAm1 = iA - zOffsetA;
+                  iAp1 = iA + zOffsetA;
 
-                              iP1 = iP - zOffsetP - yOffsetP;
-                              rap_bs[iAc] = rb[iR] * a_cs[iAm1] * pa[iP1];
+                  iP1 = iP - zOffsetP - yOffsetP;
+                  rap_bs[iAc] = rb[iR] * a_cs[iAm1] * pa[iP1];
 
-                              iP1 = iP - zOffsetP - xOffsetP;
-                              rap_bw[iAc] = rb[iR] * a_cw[iAm1] * pa[iP1];
+                  iP1 = iP - zOffsetP - xOffsetP;
+                  rap_bw[iAc] = rb[iR] * a_cw[iAm1] * pa[iP1];
  
-                              iP1 = iP - zOffsetP; 
-                              rap_bc[iAc] =          a_bc[iA]   * pa[iP1]
-                                 +          rb[iR] * a_cc[iAm1] * pa[iP1]
-                                 +          rb[iR] * a_bc[iAm1];
+                  iP1 = iP - zOffsetP; 
+                  rap_bc[iAc] =          a_bc[iA]   * pa[iP1]
+                     +          rb[iR] * a_cc[iAm1] * pa[iP1]
+                     +          rb[iR] * a_bc[iAm1];
  
-                              iP1 = iP - zOffsetP + xOffsetP;
-                              rap_be[iAc] = rb[iR] * a_ce[iAm1] * pa[iP1];
+                  iP1 = iP - zOffsetP + xOffsetP;
+                  rap_be[iAc] = rb[iR] * a_ce[iAm1] * pa[iP1];
  
-                              iP1 = iP - zOffsetP + yOffsetP;
-                              rap_bn[iAc] = rb[iR] * a_cn[iAm1] * pa[iP1];
+                  iP1 = iP - zOffsetP + yOffsetP;
+                  rap_bn[iAc] = rb[iR] * a_cn[iAm1] * pa[iP1];
  
-                              iP1 = iP - yOffsetP;
-                              rap_cs[iAc] =          a_cs[iA]
-                                 +          rb[iR] * a_cs[iAm1] * pb[iP1]
-                                 +          ra[iR] * a_cs[iAp1] * pa[iP1];
+                  iP1 = iP - yOffsetP;
+                  rap_cs[iAc] =          a_cs[iA]
+                     +          rb[iR] * a_cs[iAm1] * pb[iP1]
+                     +          ra[iR] * a_cs[iAp1] * pa[iP1];
  
-                              iP1 = iP - xOffsetP;
-                              rap_cw[iAc] =          a_cw[iA]
-                                 +          rb[iR] * a_cw[iAm1] * pb[iP1]
-                                 +          ra[iR] * a_cw[iAp1] * pa[iP1];
+                  iP1 = iP - xOffsetP;
+                  rap_cw[iAc] =          a_cw[iA]
+                     +          rb[iR] * a_cw[iAm1] * pb[iP1]
+                     +          ra[iR] * a_cw[iAp1] * pa[iP1];
  
-                              rap_cc[iAc] =          a_cc[iA]
-                                 +          rb[iR] * a_cc[iAm1] * pb[iP]
-                                 +          ra[iR] * a_cc[iAp1] * pa[iP]
-                                 +          rb[iR] * a_ac[iAm1]
-                                 +          ra[iR] * a_bc[iAp1]
-                                 +                   a_bc[iA]   * pb[iP]
-                                 +                   a_ac[iA]   * pa[iP];
+                  rap_cc[iAc] =          a_cc[iA]
+                     +          rb[iR] * a_cc[iAm1] * pb[iP]
+                     +          ra[iR] * a_cc[iAp1] * pa[iP]
+                     +          rb[iR] * a_ac[iAm1]
+                     +          ra[iR] * a_bc[iAp1]
+                     +                   a_bc[iA]   * pb[iP]
+                     +                   a_ac[iA]   * pa[iP];
 
-                           });
+               }
+            hypre_BoxLoop4End;
 
             break;
 
@@ -636,67 +640,71 @@ hypre_SMG3BuildRAPSym( hypre_StructMatrix *A,
             case 15:
 
             hypre_GetBoxSize(cgrid_box, loop_size);
-            hypre_BoxLoop4(loopi, loopj, loopk, loop_size,
-                           PT_data_box,  cstart, stridec, iP,
-                           R_data_box,   cstart, stridec, iR,
-                           A_data_box,   fstart, stridef, iA,
-                           RAP_data_box, cstart, stridec, iAc,
-                           {
-                              iAm1 = iA - zOffsetA;
-                              iAp1 = iA + zOffsetA;
+            hypre_BoxLoop4Begin(loop_size,
+                                PT_data_box,  cstart, stridec, iP,
+                                R_data_box,   cstart, stridec, iR,
+                                A_data_box,   fstart, stridef, iA,
+                                RAP_data_box, cstart, stridec, iAc);
+#define HYPRE_SMP_PRIVATE loopi,loopj,iP,iR,iA,iAc,iAm1,iAp1,iP1
+#include "hypre_smp_forloop.h"
+            hypre_BoxLoop4For(loopi, loopj, loopk, iP, iR, iA, iAc)
+               {
+                  iAm1 = iA - zOffsetA;
+                  iAp1 = iA + zOffsetA;
 
-                              iP1 = iP - zOffsetP - yOffsetP;
-                              rap_bs[iAc] = rb[iR] * a_cs[iAm1] * pa[iP1]
-                                 +          rb[iR] * a_bs[iAm1]
-                                 +                   a_bs[iA]   * pa[iP1];
+                  iP1 = iP - zOffsetP - yOffsetP;
+                  rap_bs[iAc] = rb[iR] * a_cs[iAm1] * pa[iP1]
+                     +          rb[iR] * a_bs[iAm1]
+                     +                   a_bs[iA]   * pa[iP1];
 
-                              iP1 = iP - zOffsetP - xOffsetP;
-                              rap_bw[iAc] = rb[iR] * a_cw[iAm1] * pa[iP1]
-                                 +          rb[iR] * a_bw[iAm1]
-                                 +                   a_bw[iA]   * pa[iP1];
+                  iP1 = iP - zOffsetP - xOffsetP;
+                  rap_bw[iAc] = rb[iR] * a_cw[iAm1] * pa[iP1]
+                     +          rb[iR] * a_bw[iAm1]
+                     +                   a_bw[iA]   * pa[iP1];
  
-                              iP1 = iP - zOffsetP; 
-                              rap_bc[iAc] =          a_bc[iA]   * pa[iP1]
-                                 +          rb[iR] * a_cc[iAm1] * pa[iP1]
-                                 +          rb[iR] * a_bc[iAm1];
+                  iP1 = iP - zOffsetP; 
+                  rap_bc[iAc] =          a_bc[iA]   * pa[iP1]
+                     +          rb[iR] * a_cc[iAm1] * pa[iP1]
+                     +          rb[iR] * a_bc[iAm1];
  
-                              iP1 = iP - zOffsetP + xOffsetP;
-                              rap_be[iAc] = rb[iR] * a_ce[iAm1] * pa[iP1]
-                                 +          rb[iR] * a_be[iAm1]
-                                 +                   a_be[iA]   * pa[iP1];
+                  iP1 = iP - zOffsetP + xOffsetP;
+                  rap_be[iAc] = rb[iR] * a_ce[iAm1] * pa[iP1]
+                     +          rb[iR] * a_be[iAm1]
+                     +                   a_be[iA]   * pa[iP1];
  
-                              iP1 = iP - zOffsetP + yOffsetP;
-                              rap_bn[iAc] = rb[iR] * a_cn[iAm1] * pa[iP1]
-                                 +          rb[iR] * a_bn[iAm1]
-                                 +                   a_bn[iA]   * pa[iP1];
+                  iP1 = iP - zOffsetP + yOffsetP;
+                  rap_bn[iAc] = rb[iR] * a_cn[iAm1] * pa[iP1]
+                     +          rb[iR] * a_bn[iAm1]
+                     +                   a_bn[iA]   * pa[iP1];
  
-                              iP1 = iP - yOffsetP;
-                              rap_cs[iAc] =          a_cs[iA]
-                                 +          rb[iR] * a_cs[iAm1] * pb[iP1]
-                                 +          ra[iR] * a_cs[iAp1] * pa[iP1]
-                                 +                   a_bs[iA]   * pb[iP1]
-                                 +                   a_as[iA]   * pa[iP1]
-                                 +          rb[iR] * a_as[iAm1]
-                                 +          ra[iR] * a_bs[iAp1];
+                  iP1 = iP - yOffsetP;
+                  rap_cs[iAc] =          a_cs[iA]
+                     +          rb[iR] * a_cs[iAm1] * pb[iP1]
+                     +          ra[iR] * a_cs[iAp1] * pa[iP1]
+                     +                   a_bs[iA]   * pb[iP1]
+                     +                   a_as[iA]   * pa[iP1]
+                     +          rb[iR] * a_as[iAm1]
+                     +          ra[iR] * a_bs[iAp1];
  
-                              iP1 = iP - xOffsetP;
-                              rap_cw[iAc] =          a_cw[iA]
-                                 +          rb[iR] * a_cw[iAm1] * pb[iP1]
-                                 +          ra[iR] * a_cw[iAp1] * pa[iP1]
-                                 +                   a_bw[iA]   * pb[iP1]
-                                 +                   a_aw[iA]   * pa[iP1]
-                                 +          rb[iR] * a_aw[iAm1]
-                                 +          ra[iR] * a_bw[iAp1];
+                  iP1 = iP - xOffsetP;
+                  rap_cw[iAc] =          a_cw[iA]
+                     +          rb[iR] * a_cw[iAm1] * pb[iP1]
+                     +          ra[iR] * a_cw[iAp1] * pa[iP1]
+                     +                   a_bw[iA]   * pb[iP1]
+                     +                   a_aw[iA]   * pa[iP1]
+                     +          rb[iR] * a_aw[iAm1]
+                     +          ra[iR] * a_bw[iAp1];
  
-                              rap_cc[iAc] =          a_cc[iA]
-                                 +          rb[iR] * a_cc[iAm1] * pb[iP]
-                                 +          ra[iR] * a_cc[iAp1] * pa[iP]
-                                 +          rb[iR] * a_ac[iAm1]
-                                 +          ra[iR] * a_bc[iAp1]
-                                 +                   a_bc[iA]   * pb[iP]
-                                 +                   a_ac[iA]   * pa[iP];
+                  rap_cc[iAc] =          a_cc[iA]
+                     +          rb[iR] * a_cc[iAm1] * pb[iP]
+                     +          ra[iR] * a_cc[iAp1] * pa[iP]
+                     +          rb[iR] * a_ac[iAm1]
+                     +          ra[iR] * a_bc[iAp1]
+                     +                   a_bc[iA]   * pb[iP]
+                     +                   a_ac[iA]   * pa[iP];
 
-                           });
+               }
+            hypre_BoxLoop4End;
 
             break;
 
@@ -712,89 +720,93 @@ hypre_SMG3BuildRAPSym( hypre_StructMatrix *A,
             case 19:
 
             hypre_GetBoxSize(cgrid_box, loop_size);
-            hypre_BoxLoop4(loopi, loopj, loopk, loop_size,
-                           PT_data_box,  cstart, stridec, iP,
-                           R_data_box,   cstart, stridec, iR,
-                           A_data_box,   fstart, stridef, iA,
-                           RAP_data_box, cstart, stridec, iAc,
-                           {
-                              iAm1 = iA - zOffsetA;
-                              iAp1 = iA + zOffsetA;
+            hypre_BoxLoop4Begin(loop_size,
+                                PT_data_box,  cstart, stridec, iP,
+                                R_data_box,   cstart, stridec, iR,
+                                A_data_box,   fstart, stridef, iA,
+                                RAP_data_box, cstart, stridec, iAc);
+#define HYPRE_SMP_PRIVATE loopi,loopj,iP,iR,iA,iAc,iAm1,iAp1,iP1
+#include "hypre_smp_forloop.h"
+            hypre_BoxLoop4For(loopi, loopj, loopk, iP, iR, iA, iAc)
+               {
+                  iAm1 = iA - zOffsetA;
+                  iAp1 = iA + zOffsetA;
 
-                              iP1 = iP - zOffsetP - yOffsetP - xOffsetP;
-                              rap_bsw[iAc] = rb[iR] * a_csw[iAm1] * pa[iP1];
+                  iP1 = iP - zOffsetP - yOffsetP - xOffsetP;
+                  rap_bsw[iAc] = rb[iR] * a_csw[iAm1] * pa[iP1];
 
-                              iP1 = iP - zOffsetP - yOffsetP;
-                              rap_bs[iAc] = rb[iR] * a_cs[iAm1] * pa[iP1]
-                                 +          rb[iR] * a_bs[iAm1]
-                                 +                   a_bs[iA]   * pa[iP1];
+                  iP1 = iP - zOffsetP - yOffsetP;
+                  rap_bs[iAc] = rb[iR] * a_cs[iAm1] * pa[iP1]
+                     +          rb[iR] * a_bs[iAm1]
+                     +                   a_bs[iA]   * pa[iP1];
 
-                              iP1 = iP - zOffsetP - yOffsetP + xOffsetP;
-                              rap_bse[iAc] = rb[iR] * a_cse[iAm1] * pa[iP1];
+                  iP1 = iP - zOffsetP - yOffsetP + xOffsetP;
+                  rap_bse[iAc] = rb[iR] * a_cse[iAm1] * pa[iP1];
 
-                              iP1 = iP - zOffsetP - xOffsetP;
-                              rap_bw[iAc] = rb[iR] * a_cw[iAm1] * pa[iP1]
-                                 +          rb[iR] * a_bw[iAm1]
-                                 +                   a_bw[iA]   * pa[iP1];
+                  iP1 = iP - zOffsetP - xOffsetP;
+                  rap_bw[iAc] = rb[iR] * a_cw[iAm1] * pa[iP1]
+                     +          rb[iR] * a_bw[iAm1]
+                     +                   a_bw[iA]   * pa[iP1];
  
-                              iP1 = iP - zOffsetP; 
-                              rap_bc[iAc] =          a_bc[iA] * pa[iP1]
-                                 +          rb[iR] * a_cc[iAm1] * pa[iP1]
-                                 +          rb[iR] * a_bc[iAm1];
+                  iP1 = iP - zOffsetP; 
+                  rap_bc[iAc] =          a_bc[iA] * pa[iP1]
+                     +          rb[iR] * a_cc[iAm1] * pa[iP1]
+                     +          rb[iR] * a_bc[iAm1];
  
-                              iP1 = iP - zOffsetP + xOffsetP;
-                              rap_be[iAc] = rb[iR] * a_ce[iAm1] * pa[iP1]
-                                 +          rb[iR] * a_be[iAm1]
-                                 +                   a_be[iA]   * pa[iP1];
+                  iP1 = iP - zOffsetP + xOffsetP;
+                  rap_be[iAc] = rb[iR] * a_ce[iAm1] * pa[iP1]
+                     +          rb[iR] * a_be[iAm1]
+                     +                   a_be[iA]   * pa[iP1];
  
-                              iP1 = iP - zOffsetP + yOffsetP - xOffsetP;
-                              rap_bnw[iAc] = rb[iR] * a_cnw[iAm1] * pa[iP1];
+                  iP1 = iP - zOffsetP + yOffsetP - xOffsetP;
+                  rap_bnw[iAc] = rb[iR] * a_cnw[iAm1] * pa[iP1];
 
-                              iP1 = iP - zOffsetP + yOffsetP;
-                              rap_bn[iAc] = rb[iR] * a_cn[iAm1] * pa[iP1]
-                                 +          rb[iR] * a_bn[iAm1]
-                                 +                   a_bn[iA]   * pa[iP1];
+                  iP1 = iP - zOffsetP + yOffsetP;
+                  rap_bn[iAc] = rb[iR] * a_cn[iAm1] * pa[iP1]
+                     +          rb[iR] * a_bn[iAm1]
+                     +                   a_bn[iA]   * pa[iP1];
  
-                              iP1 = iP - zOffsetP + yOffsetP + xOffsetP;
-                              rap_bne[iAc] = rb[iR] * a_cne[iAm1] * pa[iP1];
+                  iP1 = iP - zOffsetP + yOffsetP + xOffsetP;
+                  rap_bne[iAc] = rb[iR] * a_cne[iAm1] * pa[iP1];
 
-                              iP1 = iP - yOffsetP - xOffsetP;
-                              rap_csw[iAc] =         a_csw[iA]
-                                 +          rb[iR] * a_csw[iAm1] * pb[iP1]
-                                 +          ra[iR] * a_csw[iAp1] * pa[iP1];
+                  iP1 = iP - yOffsetP - xOffsetP;
+                  rap_csw[iAc] =         a_csw[iA]
+                     +          rb[iR] * a_csw[iAm1] * pb[iP1]
+                     +          ra[iR] * a_csw[iAp1] * pa[iP1];
 
-                              iP1 = iP - yOffsetP;
-                              rap_cs[iAc] =          a_cs[iA]
-                                 +          rb[iR] * a_cs[iAm1] * pb[iP1]
-                                 +          ra[iR] * a_cs[iAp1] * pa[iP1]
-                                 +                   a_bs[iA]   * pb[iP1]
-                                 +                   a_as[iA]   * pa[iP1]
-                                 +          rb[iR] * a_as[iAm1]
-                                 +          ra[iR] * a_bs[iAp1];
+                  iP1 = iP - yOffsetP;
+                  rap_cs[iAc] =          a_cs[iA]
+                     +          rb[iR] * a_cs[iAm1] * pb[iP1]
+                     +          ra[iR] * a_cs[iAp1] * pa[iP1]
+                     +                   a_bs[iA]   * pb[iP1]
+                     +                   a_as[iA]   * pa[iP1]
+                     +          rb[iR] * a_as[iAm1]
+                     +          ra[iR] * a_bs[iAp1];
  
-                              iP1 = iP - yOffsetP + xOffsetP;
-                              rap_cse[iAc] =          a_cse[iA]
-                                 +          rb[iR] * a_cse[iAm1] * pb[iP1]
-                                 +          ra[iR] * a_cse[iAp1] * pa[iP1];
+                  iP1 = iP - yOffsetP + xOffsetP;
+                  rap_cse[iAc] =          a_cse[iA]
+                     +          rb[iR] * a_cse[iAm1] * pb[iP1]
+                     +          ra[iR] * a_cse[iAp1] * pa[iP1];
 
-                              iP1 = iP - xOffsetP;
-                              rap_cw[iAc] =          a_cw[iA]
-                                 +          rb[iR] * a_cw[iAm1] * pb[iP1]
-                                 +          ra[iR] * a_cw[iAp1] * pa[iP1]
-                                 +                   a_bw[iA]   * pb[iP1]
-                                 +                   a_aw[iA]   * pa[iP1]
-                                 +          rb[iR] * a_aw[iAm1]
-                                 +          ra[iR] * a_bw[iAp1];
+                  iP1 = iP - xOffsetP;
+                  rap_cw[iAc] =          a_cw[iA]
+                     +          rb[iR] * a_cw[iAm1] * pb[iP1]
+                     +          ra[iR] * a_cw[iAp1] * pa[iP1]
+                     +                   a_bw[iA]   * pb[iP1]
+                     +                   a_aw[iA]   * pa[iP1]
+                     +          rb[iR] * a_aw[iAm1]
+                     +          ra[iR] * a_bw[iAp1];
  
-                              rap_cc[iAc] =          a_cc[iA]
-                                 +          rb[iR] * a_cc[iAm1] * pb[iP]
-                                 +          ra[iR] * a_cc[iAp1] * pa[iP]
-                                 +          rb[iR] * a_ac[iAm1]
-                                 +          ra[iR] * a_bc[iAp1]
-                                 +                   a_bc[iA]   * pb[iP]
-                                 +                   a_ac[iA]   * pa[iP];
+                  rap_cc[iAc] =          a_cc[iA]
+                     +          rb[iR] * a_cc[iAm1] * pb[iP]
+                     +          ra[iR] * a_cc[iAp1] * pa[iP]
+                     +          rb[iR] * a_ac[iAm1]
+                     +          ra[iR] * a_bc[iAp1]
+                     +                   a_bc[iA]   * pb[iP]
+                     +                   a_ac[iA]   * pa[iP];
 
-                           });
+               }
+            hypre_BoxLoop4End;
 
             break;
 
@@ -810,105 +822,109 @@ hypre_SMG3BuildRAPSym( hypre_StructMatrix *A,
             default:
 
             hypre_GetBoxSize(cgrid_box, loop_size);
-            hypre_BoxLoop4(loopi, loopj, loopk, loop_size,
-                           PT_data_box,  cstart, stridec, iP,
-                           R_data_box,   cstart, stridec, iR,
-                           A_data_box,   fstart, stridef, iA,
-                           RAP_data_box, cstart, stridec, iAc,
-                           {
-                              iAm1 = iA - zOffsetA;
-                              iAp1 = iA + zOffsetA;
+            hypre_BoxLoop4Begin(loop_size,
+                                PT_data_box,  cstart, stridec, iP,
+                                R_data_box,   cstart, stridec, iR,
+                                A_data_box,   fstart, stridef, iA,
+                                RAP_data_box, cstart, stridec, iAc);
+#define HYPRE_SMP_PRIVATE loopi,loopj,iP,iR,iA,iAc,iAm1,iAp1,iP1
+#include "hypre_smp_forloop.h"
+            hypre_BoxLoop4For(loopi, loopj, loopk, iP, iR, iA, iAc)
+               {
+                  iAm1 = iA - zOffsetA;
+                  iAp1 = iA + zOffsetA;
 
-                              iP1 = iP - zOffsetP - yOffsetP - xOffsetP;
-                              rap_bsw[iAc] = rb[iR] * a_csw[iAm1] * pa[iP1]
-                                 +           rb[iR] * a_bsw[iAm1]
-                                 +                    a_bsw[iA]   * pa[iP1];
+                  iP1 = iP - zOffsetP - yOffsetP - xOffsetP;
+                  rap_bsw[iAc] = rb[iR] * a_csw[iAm1] * pa[iP1]
+                     +           rb[iR] * a_bsw[iAm1]
+                     +                    a_bsw[iA]   * pa[iP1];
 
-                              iP1 = iP - zOffsetP - yOffsetP;
-                              rap_bs[iAc] = rb[iR] * a_cs[iAm1] * pa[iP1]
-                                 +          rb[iR] * a_bs[iAm1]
-                                 +                   a_bs[iA]   * pa[iP1];
+                  iP1 = iP - zOffsetP - yOffsetP;
+                  rap_bs[iAc] = rb[iR] * a_cs[iAm1] * pa[iP1]
+                     +          rb[iR] * a_bs[iAm1]
+                     +                   a_bs[iA]   * pa[iP1];
 
-                              iP1 = iP - zOffsetP - yOffsetP + xOffsetP;
-                              rap_bse[iAc] = rb[iR] * a_cse[iAm1] * pa[iP1]
-                                 +           rb[iR] * a_bse[iAm1]
-                                 +                    a_bse[iA]   * pa[iP1];
+                  iP1 = iP - zOffsetP - yOffsetP + xOffsetP;
+                  rap_bse[iAc] = rb[iR] * a_cse[iAm1] * pa[iP1]
+                     +           rb[iR] * a_bse[iAm1]
+                     +                    a_bse[iA]   * pa[iP1];
 
-                              iP1 = iP - zOffsetP - xOffsetP;
-                              rap_bw[iAc] = rb[iR] * a_cw[iAm1] * pa[iP1]
-                                 +          rb[iR] * a_bw[iAm1]
-                                 +                   a_bw[iA]   * pa[iP1];
+                  iP1 = iP - zOffsetP - xOffsetP;
+                  rap_bw[iAc] = rb[iR] * a_cw[iAm1] * pa[iP1]
+                     +          rb[iR] * a_bw[iAm1]
+                     +                   a_bw[iA]   * pa[iP1];
  
-                              iP1 = iP - zOffsetP; 
-                              rap_bc[iAc] =          a_bc[iA] * pa[iP1]
-                                 +          rb[iR] * a_cc[iAm1] * pa[iP1]
-                                 +          rb[iR] * a_bc[iAm1];
+                  iP1 = iP - zOffsetP; 
+                  rap_bc[iAc] =          a_bc[iA] * pa[iP1]
+                     +          rb[iR] * a_cc[iAm1] * pa[iP1]
+                     +          rb[iR] * a_bc[iAm1];
  
-                              iP1 = iP - zOffsetP + xOffsetP;
-                              rap_be[iAc] = rb[iR] * a_ce[iAm1] * pa[iP1]
-                                 +          rb[iR] * a_be[iAm1]
-                                 +                   a_be[iA]   * pa[iP1];
+                  iP1 = iP - zOffsetP + xOffsetP;
+                  rap_be[iAc] = rb[iR] * a_ce[iAm1] * pa[iP1]
+                     +          rb[iR] * a_be[iAm1]
+                     +                   a_be[iA]   * pa[iP1];
  
-                              iP1 = iP - zOffsetP + yOffsetP - xOffsetP;
-                              rap_bnw[iAc] = rb[iR] * a_cnw[iAm1] * pa[iP1]
-                                 +           rb[iR] * a_bnw[iAm1]
-                                 +                    a_bnw[iA]   * pa[iP1];
+                  iP1 = iP - zOffsetP + yOffsetP - xOffsetP;
+                  rap_bnw[iAc] = rb[iR] * a_cnw[iAm1] * pa[iP1]
+                     +           rb[iR] * a_bnw[iAm1]
+                     +                    a_bnw[iA]   * pa[iP1];
 
-                              iP1 = iP - zOffsetP + yOffsetP;
-                              rap_bn[iAc] = rb[iR] * a_cn[iAm1] * pa[iP1]
-                                 +          rb[iR] * a_bn[iAm1]
-                                 +                   a_bn[iA]   * pa[iP1];
+                  iP1 = iP - zOffsetP + yOffsetP;
+                  rap_bn[iAc] = rb[iR] * a_cn[iAm1] * pa[iP1]
+                     +          rb[iR] * a_bn[iAm1]
+                     +                   a_bn[iA]   * pa[iP1];
  
-                              iP1 = iP - zOffsetP + yOffsetP + xOffsetP;
-                              rap_bne[iAc] = rb[iR] * a_cne[iAm1] * pa[iP1]
-                                 +           rb[iR] * a_bne[iAm1]
-                                 +                    a_bne[iA]   * pa[iP1];
+                  iP1 = iP - zOffsetP + yOffsetP + xOffsetP;
+                  rap_bne[iAc] = rb[iR] * a_cne[iAm1] * pa[iP1]
+                     +           rb[iR] * a_bne[iAm1]
+                     +                    a_bne[iA]   * pa[iP1];
 
-                              iP1 = iP - yOffsetP - xOffsetP;
-                              rap_csw[iAc] =          a_csw[iA]
-                                 +          rb[iR] * a_csw[iAm1] * pb[iP1]
-                                 +          ra[iR] * a_csw[iAp1] * pa[iP1]
-                                 +                   a_bsw[iA]   * pb[iP1]
-                                 +                   a_asw[iA]   * pa[iP1]
-                                 +          rb[iR] * a_asw[iAm1]
-                                 +          ra[iR] * a_bsw[iAp1];
+                  iP1 = iP - yOffsetP - xOffsetP;
+                  rap_csw[iAc] =          a_csw[iA]
+                     +          rb[iR] * a_csw[iAm1] * pb[iP1]
+                     +          ra[iR] * a_csw[iAp1] * pa[iP1]
+                     +                   a_bsw[iA]   * pb[iP1]
+                     +                   a_asw[iA]   * pa[iP1]
+                     +          rb[iR] * a_asw[iAm1]
+                     +          ra[iR] * a_bsw[iAp1];
 
-                              iP1 = iP - yOffsetP;
-                              rap_cs[iAc] =          a_cs[iA]
-                                 +          rb[iR] * a_cs[iAm1] * pb[iP1]
-                                 +          ra[iR] * a_cs[iAp1] * pa[iP1]
-                                 +                   a_bs[iA]   * pb[iP1]
-                                 +                   a_as[iA]   * pa[iP1]
-                                 +          rb[iR] * a_as[iAm1]
-                                 +          ra[iR] * a_bs[iAp1];
+                  iP1 = iP - yOffsetP;
+                  rap_cs[iAc] =          a_cs[iA]
+                     +          rb[iR] * a_cs[iAm1] * pb[iP1]
+                     +          ra[iR] * a_cs[iAp1] * pa[iP1]
+                     +                   a_bs[iA]   * pb[iP1]
+                     +                   a_as[iA]   * pa[iP1]
+                     +          rb[iR] * a_as[iAm1]
+                     +          ra[iR] * a_bs[iAp1];
  
-                              iP1 = iP - yOffsetP + xOffsetP;
-                              rap_cse[iAc] =          a_cse[iA]
-                                 +          rb[iR] * a_cse[iAm1] * pb[iP1]
-                                 +          ra[iR] * a_cse[iAp1] * pa[iP1]
-                                 +                   a_bse[iA]   * pb[iP1]
-                                 +                   a_ase[iA]   * pa[iP1]
-                                 +          rb[iR] * a_ase[iAm1]
-                                 +          ra[iR] * a_bse[iAp1];
+                  iP1 = iP - yOffsetP + xOffsetP;
+                  rap_cse[iAc] =          a_cse[iA]
+                     +          rb[iR] * a_cse[iAm1] * pb[iP1]
+                     +          ra[iR] * a_cse[iAp1] * pa[iP1]
+                     +                   a_bse[iA]   * pb[iP1]
+                     +                   a_ase[iA]   * pa[iP1]
+                     +          rb[iR] * a_ase[iAm1]
+                     +          ra[iR] * a_bse[iAp1];
 
-                              iP1 = iP - xOffsetP;
-                              rap_cw[iAc] =          a_cw[iA]
-                                 +          rb[iR] * a_cw[iAm1] * pb[iP1]
-                                 +          ra[iR] * a_cw[iAp1] * pa[iP1]
-                                 +                   a_bw[iA]   * pb[iP1]
-                                 +                   a_aw[iA]   * pa[iP1]
-                                 +          rb[iR] * a_aw[iAm1]
-                                 +          ra[iR] * a_bw[iAp1];
+                  iP1 = iP - xOffsetP;
+                  rap_cw[iAc] =          a_cw[iA]
+                     +          rb[iR] * a_cw[iAm1] * pb[iP1]
+                     +          ra[iR] * a_cw[iAp1] * pa[iP1]
+                     +                   a_bw[iA]   * pb[iP1]
+                     +                   a_aw[iA]   * pa[iP1]
+                     +          rb[iR] * a_aw[iAm1]
+                     +          ra[iR] * a_bw[iAp1];
  
-                              rap_cc[iAc] =          a_cc[iA]
-                                 +          rb[iR] * a_cc[iAm1] * pb[iP]
-                                 +          ra[iR] * a_cc[iAp1] * pa[iP]
-                                 +          rb[iR] * a_ac[iAm1]
-                                 +          ra[iR] * a_bc[iAp1]
-                                 +                   a_bc[iA]   * pb[iP]
-                                 +                   a_ac[iA]   * pa[iP];
+                  rap_cc[iAc] =          a_cc[iA]
+                     +          rb[iR] * a_cc[iAm1] * pb[iP]
+                     +          ra[iR] * a_cc[iAp1] * pa[iP]
+                     +          rb[iR] * a_ac[iAm1]
+                     +          ra[iR] * a_bc[iAp1]
+                     +                   a_bc[iA]   * pb[iP]
+                     +                   a_ac[iA]   * pa[iP];
 
-                           });
+               }
+            hypre_BoxLoop4End;
 
             break;
 
@@ -1271,43 +1287,47 @@ hypre_SMG3BuildRAPNoSym( hypre_StructMatrix *A,
             case 7:
 
             hypre_GetBoxSize(cgrid_box, loop_size);
-            hypre_BoxLoop4(loopi, loopj, loopk, loop_size,
-                           PT_data_box,  cstart, stridec, iP,
-                           R_data_box,   cstart, stridec, iR,
-                           A_data_box,   fstart, stridef, iA,
-                           RAP_data_box, cstart, stridec, iAc,
-                           {
-                              iAm1 = iA - zOffsetA;
-                              iAp1 = iA + zOffsetA;
+            hypre_BoxLoop4Begin(loop_size,
+                                PT_data_box,  cstart, stridec, iP,
+                                R_data_box,   cstart, stridec, iR,
+                                A_data_box,   fstart, stridef, iA,
+                                RAP_data_box, cstart, stridec, iAc);
+#define HYPRE_SMP_PRIVATE loopi,loopj,iP,iR,iA,iAc,iAm1,iAp1,iP1
+#include "hypre_smp_forloop.h"
+            hypre_BoxLoop4For(loopi, loopj, loopk, iP, iR, iA, iAc)
+               {
+                  iAm1 = iA - zOffsetA;
+                  iAp1 = iA + zOffsetA;
 
-                              iP1 = iP + zOffsetP + yOffsetP;
-                              rap_an[iAc] = ra[iR] * a_cn[iAp1] * pb[iP1];
+                  iP1 = iP + zOffsetP + yOffsetP;
+                  rap_an[iAc] = ra[iR] * a_cn[iAp1] * pb[iP1];
 
-                              iP1 = iP + zOffsetP + xOffsetP;
-                              rap_ae[iAc] = ra[iR] * a_ce[iAp1] * pb[iP1];
+                  iP1 = iP + zOffsetP + xOffsetP;
+                  rap_ae[iAc] = ra[iR] * a_ce[iAp1] * pb[iP1];
  
-                              iP1 = iP + zOffsetP; 
-                              rap_ac[iAc] =          a_ac[iA]   * pb[iP1]
-                                 +          ra[iR] * a_cc[iAp1] * pb[iP1]
-                                 +          ra[iR] * a_ac[iAp1];
+                  iP1 = iP + zOffsetP; 
+                  rap_ac[iAc] =          a_ac[iA]   * pb[iP1]
+                     +          ra[iR] * a_cc[iAp1] * pb[iP1]
+                     +          ra[iR] * a_ac[iAp1];
  
-                              iP1 = iP + zOffsetP - xOffsetP;
-                              rap_aw[iAc] = ra[iR] * a_cw[iAp1] * pb[iP1];
+                  iP1 = iP + zOffsetP - xOffsetP;
+                  rap_aw[iAc] = ra[iR] * a_cw[iAp1] * pb[iP1];
  
-                              iP1 = iP + zOffsetP - yOffsetP;
-                              rap_as[iAc] = ra[iR] * a_cs[iAp1] * pb[iP1];
+                  iP1 = iP + zOffsetP - yOffsetP;
+                  rap_as[iAc] = ra[iR] * a_cs[iAp1] * pb[iP1];
  
-                              iP1 = iP + yOffsetP;
-                              rap_cn[iAc] =          a_cn[iA]
-                                 +          rb[iR] * a_cn[iAm1] * pb[iP1]
-                                 +          ra[iR] * a_cn[iAp1] * pa[iP1];
+                  iP1 = iP + yOffsetP;
+                  rap_cn[iAc] =          a_cn[iA]
+                     +          rb[iR] * a_cn[iAm1] * pb[iP1]
+                     +          ra[iR] * a_cn[iAp1] * pa[iP1];
  
-                              iP1 = iP + xOffsetP;
-                              rap_ce[iAc] =          a_ce[iA]
-                                 +          rb[iR] * a_ce[iAm1] * pb[iP1]
-                                 +          ra[iR] * a_ce[iAp1] * pa[iP1];
+                  iP1 = iP + xOffsetP;
+                  rap_ce[iAc] =          a_ce[iA]
+                     +          rb[iR] * a_ce[iAm1] * pb[iP1]
+                     +          ra[iR] * a_ce[iAp1] * pa[iP1];
  
-                           });
+               }
+            hypre_BoxLoop4End;
 
             break;
 
@@ -1321,59 +1341,63 @@ hypre_SMG3BuildRAPNoSym( hypre_StructMatrix *A,
             case 15:
 
             hypre_GetBoxSize(cgrid_box, loop_size);
-            hypre_BoxLoop4(loopi, loopj, loopk, loop_size,
-                           PT_data_box,  cstart, stridec, iP,
-                           R_data_box,   cstart, stridec, iR,
-                           A_data_box,   fstart, stridef, iA,
-                           RAP_data_box, cstart, stridec, iAc,
-                           {
-                              iAm1 = iA - zOffsetA;
-                              iAp1 = iA + zOffsetA;
+            hypre_BoxLoop4Begin(loop_size,
+                                PT_data_box,  cstart, stridec, iP,
+                                R_data_box,   cstart, stridec, iR,
+                                A_data_box,   fstart, stridef, iA,
+                                RAP_data_box, cstart, stridec, iAc);
+#define HYPRE_SMP_PRIVATE loopi,loopj,iP,iR,iA,iAc,iAm1,iAp1,iP1
+#include "hypre_smp_forloop.h"
+            hypre_BoxLoop4For(loopi, loopj, loopk, iP, iR, iA, iAc)
+               {
+                  iAm1 = iA - zOffsetA;
+                  iAp1 = iA + zOffsetA;
 
-                              iP1 = iP + zOffsetP + yOffsetP;
-                              rap_an[iAc] = ra[iR] * a_cn[iAp1] * pb[iP1]
-                                 +          ra[iR] * a_an[iAp1]
-                                 +                   a_an[iA]   * pb[iP1];
+                  iP1 = iP + zOffsetP + yOffsetP;
+                  rap_an[iAc] = ra[iR] * a_cn[iAp1] * pb[iP1]
+                     +          ra[iR] * a_an[iAp1]
+                     +                   a_an[iA]   * pb[iP1];
 
-                              iP1 = iP + zOffsetP + xOffsetP;
-                              rap_ae[iAc] = ra[iR] * a_ce[iAp1] * pb[iP1]
-                                 +          ra[iR] * a_ae[iAp1]
-                                 +                   a_ae[iA]   * pb[iP1];
+                  iP1 = iP + zOffsetP + xOffsetP;
+                  rap_ae[iAc] = ra[iR] * a_ce[iAp1] * pb[iP1]
+                     +          ra[iR] * a_ae[iAp1]
+                     +                   a_ae[iA]   * pb[iP1];
  
-                              iP1 = iP + zOffsetP; 
-                              rap_ac[iAc] =          a_ac[iA]   * pb[iP1]
-                                 +          ra[iR] * a_cc[iAp1] * pb[iP1]
-                                 +          ra[iR] * a_ac[iAp1];
+                  iP1 = iP + zOffsetP; 
+                  rap_ac[iAc] =          a_ac[iA]   * pb[iP1]
+                     +          ra[iR] * a_cc[iAp1] * pb[iP1]
+                     +          ra[iR] * a_ac[iAp1];
  
-                              iP1 = iP + zOffsetP - xOffsetP;
-                              rap_aw[iAc] = ra[iR] * a_cw[iAp1] * pb[iP1]
-                                 +          ra[iR] * a_aw[iAp1]
-                                 +                   a_aw[iA]   * pb[iP1];
+                  iP1 = iP + zOffsetP - xOffsetP;
+                  rap_aw[iAc] = ra[iR] * a_cw[iAp1] * pb[iP1]
+                     +          ra[iR] * a_aw[iAp1]
+                     +                   a_aw[iA]   * pb[iP1];
  
-                              iP1 = iP + zOffsetP - yOffsetP;
-                              rap_as[iAc] = ra[iR] * a_cs[iAp1] * pb[iP1]
-                                 +          ra[iR] * a_as[iAp1]
-                                 +                   a_as[iA]   * pb[iP1];
+                  iP1 = iP + zOffsetP - yOffsetP;
+                  rap_as[iAc] = ra[iR] * a_cs[iAp1] * pb[iP1]
+                     +          ra[iR] * a_as[iAp1]
+                     +                   a_as[iA]   * pb[iP1];
  
-                              iP1 = iP + yOffsetP;
-                              rap_cn[iAc] =          a_cn[iA]
-                                 +          rb[iR] * a_cn[iAm1] * pb[iP1]
-                                 +          ra[iR] * a_cn[iAp1] * pa[iP1]
-                                 +                   a_bn[iA]   * pb[iP1]
-                                 +                   a_an[iA]   * pa[iP1]
-                                 +          rb[iR] * a_an[iAm1]
-                                 +          ra[iR] * a_bn[iAp1];
+                  iP1 = iP + yOffsetP;
+                  rap_cn[iAc] =          a_cn[iA]
+                     +          rb[iR] * a_cn[iAm1] * pb[iP1]
+                     +          ra[iR] * a_cn[iAp1] * pa[iP1]
+                     +                   a_bn[iA]   * pb[iP1]
+                     +                   a_an[iA]   * pa[iP1]
+                     +          rb[iR] * a_an[iAm1]
+                     +          ra[iR] * a_bn[iAp1];
  
-                              iP1 = iP + xOffsetP;
-                              rap_ce[iAc] =          a_ce[iA]
-                                 +          rb[iR] * a_ce[iAm1] * pb[iP1]
-                                 +          ra[iR] * a_ce[iAp1] * pa[iP1]
-                                 +                   a_be[iA]   * pb[iP1]
-                                 +                   a_ae[iA]   * pa[iP1]
-                                 +          rb[iR] * a_ae[iAm1]
-                                 +          ra[iR] * a_be[iAp1];
+                  iP1 = iP + xOffsetP;
+                  rap_ce[iAc] =          a_ce[iA]
+                     +          rb[iR] * a_ce[iAm1] * pb[iP1]
+                     +          ra[iR] * a_ce[iAp1] * pa[iP1]
+                     +                   a_be[iA]   * pb[iP1]
+                     +                   a_ae[iA]   * pa[iP1]
+                     +          rb[iR] * a_ae[iAm1]
+                     +          ra[iR] * a_be[iAp1];
  
-                           });
+               }
+            hypre_BoxLoop4End;
 
             break;
 
@@ -1390,81 +1414,85 @@ hypre_SMG3BuildRAPNoSym( hypre_StructMatrix *A,
             case 19:
 
             hypre_GetBoxSize(cgrid_box, loop_size);
-            hypre_BoxLoop4(loopi, loopj, loopk, loop_size,
-                           PT_data_box,  cstart, stridec, iP,
-                           R_data_box,   cstart, stridec, iR,
-                           A_data_box,   fstart, stridef, iA,
-                           RAP_data_box, cstart, stridec, iAc,
-                           {
-                              iAm1 = iA - zOffsetA;
-                              iAp1 = iA + zOffsetA;
+            hypre_BoxLoop4Begin(loop_size,
+                                PT_data_box,  cstart, stridec, iP,
+                                R_data_box,   cstart, stridec, iR,
+                                A_data_box,   fstart, stridef, iA,
+				RAP_data_box, cstart, stridec, iAc);
+#define HYPRE_SMP_PRIVATE loopi,loopj,iP,iR,iA,iAc,iAm1,iAp1,iP1
+#include "hypre_smp_forloop.h"
+            hypre_BoxLoop4For(loopi, loopj, loopk, iP, iR, iA, iAc)
+               {
+                  iAm1 = iA - zOffsetA;
+                  iAp1 = iA + zOffsetA;
 
-                              iP1 = iP + zOffsetP + yOffsetP + xOffsetP;
-                              rap_ane[iAc] = ra[iR] * a_cne[iAp1] * pb[iP1];
+                  iP1 = iP + zOffsetP + yOffsetP + xOffsetP;
+                  rap_ane[iAc] = ra[iR] * a_cne[iAp1] * pb[iP1];
 
-                              iP1 = iP + zOffsetP + yOffsetP;
-                              rap_an[iAc] = ra[iR] * a_cn[iAp1] * pb[iP1]
-                                 +          ra[iR] * a_an[iAp1]
-                                 +                   a_an[iA]   * pb[iP1];
+                  iP1 = iP + zOffsetP + yOffsetP;
+                  rap_an[iAc] = ra[iR] * a_cn[iAp1] * pb[iP1]
+                     +          ra[iR] * a_an[iAp1]
+                     +                   a_an[iA]   * pb[iP1];
 
-                              iP1 = iP + zOffsetP + yOffsetP - xOffsetP;
-                              rap_anw[iAc] = ra[iR] * a_cnw[iAp1] * pb[iP1];
+                  iP1 = iP + zOffsetP + yOffsetP - xOffsetP;
+                  rap_anw[iAc] = ra[iR] * a_cnw[iAp1] * pb[iP1];
 
-                              iP1 = iP + zOffsetP + xOffsetP;
-                              rap_ae[iAc] = ra[iR] * a_ce[iAp1] * pb[iP1]
-                                 +          ra[iR] * a_ae[iAp1]
-                                 +                   a_ae[iA]   * pb[iP1];
+                  iP1 = iP + zOffsetP + xOffsetP;
+                  rap_ae[iAc] = ra[iR] * a_ce[iAp1] * pb[iP1]
+                     +          ra[iR] * a_ae[iAp1]
+                     +                   a_ae[iA]   * pb[iP1];
 
-                              iP1 = iP + zOffsetP; 
-                              rap_ac[iAc] =          a_ac[iA]   * pb[iP1]
-                                 +          ra[iR] * a_cc[iAp1] * pb[iP1]
-                                 +          ra[iR] * a_ac[iAp1];
+                  iP1 = iP + zOffsetP; 
+                  rap_ac[iAc] =          a_ac[iA]   * pb[iP1]
+                     +          ra[iR] * a_cc[iAp1] * pb[iP1]
+                     +          ra[iR] * a_ac[iAp1];
  
-                              iP1 = iP + zOffsetP - xOffsetP;
-                              rap_aw[iAc] = ra[iR] * a_cw[iAp1] * pb[iP1]
-                                 +          ra[iR] * a_aw[iAp1]
-                                 +                   a_aw[iA]   * pb[iP1];
+                  iP1 = iP + zOffsetP - xOffsetP;
+                  rap_aw[iAc] = ra[iR] * a_cw[iAp1] * pb[iP1]
+                     +          ra[iR] * a_aw[iAp1]
+                     +                   a_aw[iA]   * pb[iP1];
  
-                              iP1 = iP + zOffsetP - yOffsetP + xOffsetP;
-                              rap_ase[iAc] = ra[iR] * a_cse[iAp1] * pb[iP1];
+                  iP1 = iP + zOffsetP - yOffsetP + xOffsetP;
+                  rap_ase[iAc] = ra[iR] * a_cse[iAp1] * pb[iP1];
 
-                              iP1 = iP + zOffsetP - yOffsetP;
-                              rap_as[iAc] = ra[iR] * a_cs[iAp1] * pb[iP1]
-                                 +          ra[iR] * a_as[iAp1]
-                                 +                   a_as[iA]   * pb[iP1];
+                  iP1 = iP + zOffsetP - yOffsetP;
+                  rap_as[iAc] = ra[iR] * a_cs[iAp1] * pb[iP1]
+                     +          ra[iR] * a_as[iAp1]
+                     +                   a_as[iA]   * pb[iP1];
  
-                              iP1 = iP + zOffsetP - yOffsetP - xOffsetP;
-                              rap_asw[iAc] = ra[iR] * a_csw[iAp1] * pb[iP1];
+                  iP1 = iP + zOffsetP - yOffsetP - xOffsetP;
+                  rap_asw[iAc] = ra[iR] * a_csw[iAp1] * pb[iP1];
 
-                              iP1 = iP + yOffsetP + xOffsetP;
-                              rap_cne[iAc] =         a_cne[iA]
-                                 +          rb[iR] * a_cne[iAm1] * pb[iP1]
-                                 +          ra[iR] * a_cne[iAp1] * pa[iP1];
+                  iP1 = iP + yOffsetP + xOffsetP;
+                  rap_cne[iAc] =         a_cne[iA]
+                     +          rb[iR] * a_cne[iAm1] * pb[iP1]
+                     +          ra[iR] * a_cne[iAp1] * pa[iP1];
 
-                              iP1 = iP + yOffsetP;
-                              rap_cn[iAc] =          a_cn[iA]
-                                 +          rb[iR] * a_cn[iAm1] * pb[iP1]
-                                 +          ra[iR] * a_cn[iAp1] * pa[iP1]
-                                 +                   a_bn[iA]   * pb[iP1]
-                                 +                   a_an[iA]   * pa[iP1]
-                                 +          rb[iR] * a_an[iAm1]
-                                 +          ra[iR] * a_bn[iAp1];
+                  iP1 = iP + yOffsetP;
+                  rap_cn[iAc] =          a_cn[iA]
+                     +          rb[iR] * a_cn[iAm1] * pb[iP1]
+                     +          ra[iR] * a_cn[iAp1] * pa[iP1]
+                     +                   a_bn[iA]   * pb[iP1]
+                     +                   a_an[iA]   * pa[iP1]
+                     +          rb[iR] * a_an[iAm1]
+                     +          ra[iR] * a_bn[iAp1];
  
-                              iP1 = iP + yOffsetP - xOffsetP;
-                              rap_cnw[iAc] =         a_cnw[iA]
-                                 +          rb[iR] * a_cnw[iAm1] * pb[iP1]
-                                 +          ra[iR] * a_cnw[iAp1] * pa[iP1];
+                  iP1 = iP + yOffsetP - xOffsetP;
+                  rap_cnw[iAc] =         a_cnw[iA]
+                     +          rb[iR] * a_cnw[iAm1] * pb[iP1]
+                     +          ra[iR] * a_cnw[iAp1] * pa[iP1];
 
-                              iP1 = iP + xOffsetP;
-                              rap_ce[iAc] =          a_ce[iA]
-                                 +          rb[iR] * a_ce[iAm1] * pb[iP1]
-                                 +          ra[iR] * a_ce[iAp1] * pa[iP1]
-                                 +                   a_be[iA]   * pb[iP1]
-                                 +                   a_ae[iA]   * pa[iP1]
-                                 +          rb[iR] * a_ae[iAm1]
-                                 +          ra[iR] * a_be[iAp1];
+                  iP1 = iP + xOffsetP;
+                  rap_ce[iAc] =          a_ce[iA]
+                     +          rb[iR] * a_ce[iAm1] * pb[iP1]
+                     +          ra[iR] * a_ce[iAp1] * pa[iP1]
+                     +                   a_be[iA]   * pb[iP1]
+                     +                   a_ae[iA]   * pa[iP1]
+                     +          rb[iR] * a_ae[iAm1]
+                     +          ra[iR] * a_be[iAp1];
  
-                           });
+               }
+            hypre_BoxLoop4End;
 
             break;
 
@@ -1480,98 +1508,102 @@ hypre_SMG3BuildRAPNoSym( hypre_StructMatrix *A,
             default:
 
             hypre_GetBoxSize(cgrid_box, loop_size);
-            hypre_BoxLoop4(loopi, loopj, loopk, loop_size,
-                           PT_data_box,  cstart, stridec, iP,
-                           R_data_box,   cstart, stridec, iR,
-                           A_data_box,   fstart, stridef, iA,
-                           RAP_data_box, cstart, stridec, iAc,
-                           {
-                              iAm1 = iA - zOffsetA;
-                              iAp1 = iA + zOffsetA;
+            hypre_BoxLoop4Begin(loop_size,
+                                PT_data_box,  cstart, stridec, iP,
+                                R_data_box,   cstart, stridec, iR,
+                                A_data_box,   fstart, stridef, iA,
+                                RAP_data_box, cstart, stridec, iAc);
+#define HYPRE_SMP_PRIVATE loopi,loopj,iP,iR,iA,iAc,iAm1,iAp1,iP1
+#include "hypre_smp_forloop.h"
+            hypre_BoxLoop4For(loopi, loopj, loopk, iP, iR, iA, iAc)
+               {
+                  iAm1 = iA - zOffsetA;
+                  iAp1 = iA + zOffsetA;
 
-                              iP1 = iP + zOffsetP + yOffsetP + xOffsetP;
-                              rap_ane[iAc] = ra[iR] * a_cne[iAp1] * pb[iP1]
-                                 +           ra[iR] * a_ane[iAp1]
-                                 +                    a_ane[iA]   * pb[iP1];
+                  iP1 = iP + zOffsetP + yOffsetP + xOffsetP;
+                  rap_ane[iAc] = ra[iR] * a_cne[iAp1] * pb[iP1]
+                     +           ra[iR] * a_ane[iAp1]
+                     +                    a_ane[iA]   * pb[iP1];
 
-                              iP1 = iP + zOffsetP + yOffsetP;
-                              rap_an[iAc] = ra[iR] * a_cn[iAp1] * pb[iP1]
-                                 +          ra[iR] * a_an[iAp1]
-                                 +                   a_an[iA]   * pb[iP1];
+                  iP1 = iP + zOffsetP + yOffsetP;
+                  rap_an[iAc] = ra[iR] * a_cn[iAp1] * pb[iP1]
+                     +          ra[iR] * a_an[iAp1]
+                     +                   a_an[iA]   * pb[iP1];
 
-                              iP1 = iP + zOffsetP + yOffsetP - xOffsetP;
-                              rap_anw[iAc] = ra[iR] * a_cnw[iAp1] * pb[iP1]
-                                 +           ra[iR] * a_anw[iAp1]
-                                 +                    a_anw[iA]   * pb[iP1];
+                  iP1 = iP + zOffsetP + yOffsetP - xOffsetP;
+                  rap_anw[iAc] = ra[iR] * a_cnw[iAp1] * pb[iP1]
+                     +           ra[iR] * a_anw[iAp1]
+                     +                    a_anw[iA]   * pb[iP1];
 
-                              iP1 = iP + zOffsetP + xOffsetP;
-                              rap_ae[iAc] = ra[iR] * a_ce[iAp1] * pb[iP1]
-                                 +          ra[iR] * a_ae[iAp1]
-                                 +                   a_ae[iA]   * pb[iP1];
+                  iP1 = iP + zOffsetP + xOffsetP;
+                  rap_ae[iAc] = ra[iR] * a_ce[iAp1] * pb[iP1]
+                     +          ra[iR] * a_ae[iAp1]
+                     +                   a_ae[iA]   * pb[iP1];
 
-                              iP1 = iP + zOffsetP; 
-                              rap_ac[iAc] =          a_ac[iA]   * pb[iP1]
-                                 +          ra[iR] * a_cc[iAp1] * pb[iP1]
-                                 +          ra[iR] * a_ac[iAp1];
+                  iP1 = iP + zOffsetP; 
+                  rap_ac[iAc] =          a_ac[iA]   * pb[iP1]
+                     +          ra[iR] * a_cc[iAp1] * pb[iP1]
+                     +          ra[iR] * a_ac[iAp1];
  
-                              iP1 = iP + zOffsetP - xOffsetP;
-                              rap_aw[iAc] = ra[iR] * a_cw[iAp1] * pb[iP1]
-                                 +          ra[iR] * a_aw[iAp1]
-                                 +                   a_aw[iA]   * pb[iP1];
+                  iP1 = iP + zOffsetP - xOffsetP;
+                  rap_aw[iAc] = ra[iR] * a_cw[iAp1] * pb[iP1]
+                     +          ra[iR] * a_aw[iAp1]
+                     +                   a_aw[iA]   * pb[iP1];
  
-                              iP1 = iP + zOffsetP - yOffsetP + xOffsetP;
-                              rap_ase[iAc] = ra[iR] * a_cse[iAp1] * pb[iP1]
-                                 +           ra[iR] * a_ase[iAp1]
-                                 +                    a_ase[iA]   * pb[iP1];
+                  iP1 = iP + zOffsetP - yOffsetP + xOffsetP;
+                  rap_ase[iAc] = ra[iR] * a_cse[iAp1] * pb[iP1]
+                     +           ra[iR] * a_ase[iAp1]
+                     +                    a_ase[iA]   * pb[iP1];
 
-                              iP1 = iP + zOffsetP - yOffsetP;
-                              rap_as[iAc] = ra[iR] * a_cs[iAp1] * pb[iP1]
-                                 +          ra[iR] * a_as[iAp1]
-                                 +                   a_as[iA]   * pb[iP1];
+                  iP1 = iP + zOffsetP - yOffsetP;
+                  rap_as[iAc] = ra[iR] * a_cs[iAp1] * pb[iP1]
+                     +          ra[iR] * a_as[iAp1]
+                     +                   a_as[iA]   * pb[iP1];
  
-                              iP1 = iP + zOffsetP - yOffsetP - xOffsetP;
-                              rap_asw[iAc] = ra[iR] * a_csw[iAp1] * pb[iP1]
-                                 +           ra[iR] * a_asw[iAp1]
-                                 +                    a_asw[iA]   * pb[iP1];
+                  iP1 = iP + zOffsetP - yOffsetP - xOffsetP;
+                  rap_asw[iAc] = ra[iR] * a_csw[iAp1] * pb[iP1]
+                     +           ra[iR] * a_asw[iAp1]
+                     +                    a_asw[iA]   * pb[iP1];
 
 
-                              iP1 = iP + yOffsetP + xOffsetP;
-                              rap_cne[iAc] =         a_cne[iA]
-                                 +          rb[iR] * a_cne[iAm1] * pb[iP1]
-                                 +          ra[iR] * a_cne[iAp1] * pa[iP1]
-                                 +                   a_bne[iA]   * pb[iP1]
-                                 +                   a_ane[iA]   * pa[iP1]
-                                 +          rb[iR] * a_ane[iAm1]
-                                 +          ra[iR] * a_bne[iAp1];
+                  iP1 = iP + yOffsetP + xOffsetP;
+                  rap_cne[iAc] =         a_cne[iA]
+                     +          rb[iR] * a_cne[iAm1] * pb[iP1]
+                     +          ra[iR] * a_cne[iAp1] * pa[iP1]
+                     +                   a_bne[iA]   * pb[iP1]
+                     +                   a_ane[iA]   * pa[iP1]
+                     +          rb[iR] * a_ane[iAm1]
+                     +          ra[iR] * a_bne[iAp1];
 
-                              iP1 = iP + yOffsetP;
-                              rap_cn[iAc] =          a_cn[iA]
-                                 +          rb[iR] * a_cn[iAm1] * pb[iP1]
-                                 +          ra[iR] * a_cn[iAp1] * pa[iP1]
-                                 +                   a_bn[iA]   * pb[iP1]
-                                 +                   a_an[iA]   * pa[iP1]
-                                 +          rb[iR] * a_an[iAm1]
-                                 +          ra[iR] * a_bn[iAp1];
+                  iP1 = iP + yOffsetP;
+                  rap_cn[iAc] =          a_cn[iA]
+                     +          rb[iR] * a_cn[iAm1] * pb[iP1]
+                     +          ra[iR] * a_cn[iAp1] * pa[iP1]
+                     +                   a_bn[iA]   * pb[iP1]
+                     +                   a_an[iA]   * pa[iP1]
+                     +          rb[iR] * a_an[iAm1]
+                     +          ra[iR] * a_bn[iAp1];
  
-                              iP1 = iP + yOffsetP - xOffsetP;
-                              rap_cnw[iAc] =         a_cnw[iA]
-                                 +          rb[iR] * a_cnw[iAm1] * pb[iP1]
-                                 +          ra[iR] * a_cnw[iAp1] * pa[iP1]
-                                 +                   a_bnw[iA]   * pb[iP1]
-                                 +                   a_anw[iA]   * pa[iP1]
-                                 +          rb[iR] * a_anw[iAm1]
-                                 +          ra[iR] * a_bnw[iAp1];
+                  iP1 = iP + yOffsetP - xOffsetP;
+                  rap_cnw[iAc] =         a_cnw[iA]
+                     +          rb[iR] * a_cnw[iAm1] * pb[iP1]
+                     +          ra[iR] * a_cnw[iAp1] * pa[iP1]
+                     +                   a_bnw[iA]   * pb[iP1]
+                     +                   a_anw[iA]   * pa[iP1]
+                     +          rb[iR] * a_anw[iAm1]
+                     +          ra[iR] * a_bnw[iAp1];
 
-                              iP1 = iP + xOffsetP;
-                              rap_ce[iAc] =          a_ce[iA]
-                                 +          rb[iR] * a_ce[iAm1] * pb[iP1]
-                                 +          ra[iR] * a_ce[iAp1] * pa[iP1]
-                                 +                   a_be[iA]   * pb[iP1]
-                                 +                   a_ae[iA]   * pa[iP1]
-                                 +          rb[iR] * a_ae[iAm1]
-                                 +          ra[iR] * a_be[iAp1];
+                  iP1 = iP + xOffsetP;
+                  rap_ce[iAc] =          a_ce[iA]
+                     +          rb[iR] * a_ce[iAm1] * pb[iP1]
+                     +          ra[iR] * a_ce[iAp1] * pa[iP1]
+                     +                   a_be[iA]   * pb[iP1]
+                     +                   a_ae[iA]   * pa[iP1]
+                     +          rb[iR] * a_ae[iAm1]
+                     +          ra[iR] * a_be[iAp1];
  
-                           });
+               }
+            hypre_BoxLoop4End;
 
             break;
 
@@ -1719,9 +1751,14 @@ hypre_SMG3RAPPeriodicSym( hypre_StructMatrix *RAP,
 
          hypre_GetBoxSize(cgrid_box, loop_size);
 
-         hypre_BoxLoop1(loopi, loopj, loopk, loop_size,
-                      RAP_data_box, cstart, stridec, iAc,
-                      {
+
+         hypre_BoxLoop1Begin(loop_size,
+                                RAP_data_box,  cstart, stridec, iAc);
+
+#define HYPRE_SMP_PRIVATE loopi,loopj,iAc,iAcmx,iAcmy
+#include "hypre_smp_forloop.h"
+         hypre_BoxLoop1For(loopi, loopj, loopk, iAc)
+               {
                        iAcmx = iAc - xOffset;
                        iAcmy = iAc - yOffset;
 
@@ -1731,11 +1768,17 @@ hypre_SMG3RAPPeriodicSym( hypre_StructMatrix *RAP,
 
                        rap_cs[iAc] += (rap_bs[iAc] + rap_bn[iAcmy]);
 
-                      });
+               }
 
-         hypre_BoxLoop1(loopi, loopj, loopk, loop_size,
-                      RAP_data_box, cstart, stridec, iAc,
-                      {
+         hypre_BoxLoopEnd;
+
+         hypre_BoxLoop1Begin(loop_size,
+                                RAP_data_box,  cstart, stridec, iAc);
+
+#define HYPRE_SMP_PRIVATE loopi,loopj,iAc
+#include "hypre_smp_forloop.h"
+         hypre_BoxLoop1For(loopi, loopj, loopk, iAc)
+               {
                        rap_bc[iAc]  = zero;
 
                        rap_bw[iAc]  = zero;
@@ -1746,7 +1789,11 @@ hypre_SMG3RAPPeriodicSym( hypre_StructMatrix *RAP,
 
                        rap_bn[iAc]  = zero;
 
-                      });
+
+               }
+
+         hypre_BoxLoopEnd;
+
 
          /*-----------------------------------------------------------------
           * Collapse additional entries for 27 point operator.
@@ -1756,9 +1803,13 @@ hypre_SMG3RAPPeriodicSym( hypre_StructMatrix *RAP,
          {
             hypre_GetBoxSize(cgrid_box, loop_size);
 
-            hypre_BoxLoop1(loopi, loopj, loopk, loop_size,
-                         RAP_data_box, cstart, stridec, iAc,
-                         {
+            hypre_BoxLoop1Begin(loop_size,
+                                RAP_data_box,  cstart, stridec, iAc);
+
+#define HYPRE_SMP_PRIVATE loopi,loopj,iAc,iAcmxmy,iAcmxpy,iAcpxmy,iAcpxpy
+#include "hypre_smp_forloop.h"
+            hypre_BoxLoop1For(loopi, loopj, loopk, iAc)
+               {
                           iAcmxmy = iAc - xOffset - yOffset;
                           iAcmxpy = iAc - xOffset + yOffset;
                           iAcpxmy = iAc + xOffset - yOffset;
@@ -1768,11 +1819,17 @@ hypre_SMG3RAPPeriodicSym( hypre_StructMatrix *RAP,
 
                           rap_cse[iAc] += (rap_bse[iAc] + rap_bnw[iAcpxmy]);
 
-                         });
+               }
 
-            hypre_BoxLoop1(loopi, loopj, loopk, loop_size,
-                         RAP_data_box, cstart, stridec, iAc,
-                         {
+            hypre_BoxLoopEnd;
+
+            hypre_BoxLoop1Begin(loop_size,
+                                RAP_data_box,  cstart, stridec, iAc);
+
+#define HYPRE_SMP_PRIVATE loopi,loopj,iAc
+#include "hypre_smp_forloop.h"
+            hypre_BoxLoop1For(loopi, loopj, loopk, iAc)
+               {
                           rap_bsw[iAc]  = zero;
    
                           rap_bse[iAc]  = zero;
@@ -1781,7 +1838,9 @@ hypre_SMG3RAPPeriodicSym( hypre_StructMatrix *RAP,
    
                           rap_bne[iAc]  = zero;
    
-                         });
+               }
+
+            hypre_BoxLoopEnd;
                 
          }
 
@@ -1951,9 +2010,15 @@ hypre_SMG3RAPPeriodicNoSym( hypre_StructMatrix *RAP,
           *-----------------------------------------------------------------*/
 
          hypre_GetBoxSize(cgrid_box, loop_size);
-         hypre_BoxLoop1(loopi, loopj, loopk, loop_size,
-                      RAP_data_box, cstart, stridec, iAc,
-                      {
+
+         hypre_BoxLoop1Begin(loop_size,
+                                RAP_data_box,  cstart, stridec, iAc);
+
+#define HYPRE_SMP_PRIVATE loopi,loopj,iAc
+#include "hypre_smp_forloop.h"
+
+         hypre_BoxLoop1For(loopi, loopj, loopk, iAc)
+               {
                        rap_cc[iAc] += (rap_bc[iAc] + rap_ac[iAc]);
                        rap_bc[iAc]  = zero;
                        rap_ac[iAc]  = zero;
@@ -1974,7 +2039,10 @@ hypre_SMG3RAPPeriodicNoSym( hypre_StructMatrix *RAP,
                        rap_bn[iAc]  = zero;
                        rap_an[iAc]  = zero;
 
-                      });
+               }
+
+         hypre_BoxLoopEnd;
+
 
          /*-----------------------------------------------------------------
           * Collapse additional entries for 27 point operator.
@@ -1983,9 +2051,16 @@ hypre_SMG3RAPPeriodicNoSym( hypre_StructMatrix *RAP,
          if (stencil_size == 27)
          {
             hypre_GetBoxSize(cgrid_box, loop_size);
-            hypre_BoxLoop1(loopi, loopj, loopk, loop_size,
-                         RAP_data_box, cstart, stridec, iAc,
-                         {
+
+         hypre_BoxLoop1Begin(loop_size,
+                                RAP_data_box,  cstart, stridec, iAc);
+
+#define HYPRE_SMP_PRIVATE loopi,loopj,iAc
+#include "hypre_smp_forloop.h"
+
+         hypre_BoxLoop1For(loopi, loopj, loopk, iAc)
+               {
+
                           rap_csw[iAc] += (rap_bsw[iAc] + rap_asw[iAc]);
                           rap_bsw[iAc]  = zero;
                           rap_asw[iAc]  = zero;
@@ -2000,9 +2075,11 @@ hypre_SMG3RAPPeriodicNoSym( hypre_StructMatrix *RAP,
 
                           rap_cne[iAc] += (rap_bne[iAc] + rap_ane[iAc]);
                           rap_bne[iAc]  = zero;
-                          rap_ane[iAc]  = zero;
+                          rap_ane[iAc]  = zero;            
+	       }
 
-                         });
+         hypre_BoxLoopEnd;
+
          }
 
 

@@ -459,13 +459,21 @@ hypre_PointRelax( void               *relax_vdata,
                      start  = hypre_BoxIMin(compute_box);
                      hypre_GetStrideBoxSize(compute_box, stride, loop_size);
 
-                     hypre_BoxLoop3(loopi, loopj, loopk, loop_size,
+                     hypre_BoxLoop3Begin(loop_size,
                                     A_data_box, start, stride, Ai,
                                     b_data_box, start, stride, bi,
-                                    x_data_box, start, stride, xi,
-                                    {
-                                       xp[xi] = bp[bi] / Ap[Ai];
-                                    });
+                                    x_data_box, start, stride, xi);
+		     		 
+#define HYPRE_SMP_PRIVATE loopi,loopj,Ai,bi,xi
+#include "hypre_smp_forloop.h"
+	     
+		     hypre_BoxLoop3For(loopi, loopj, loopk, Ai, bi, xi)
+		       {
+		         xp[xi] = bp[bi] / Ap[Ai];
+		       }
+
+                    hypre_BoxLoopEnd;
+
                   }
             }
       }
@@ -534,12 +542,19 @@ hypre_PointRelax( void               *relax_vdata,
                      start  = hypre_BoxIMin(compute_box);
                      hypre_GetStrideBoxSize(compute_box, stride, loop_size);
 
-                     hypre_BoxLoop2(loopi, loopj, loopk, loop_size,
-                                    b_data_box, start, stride, bi,
-                                    t_data_box, start, stride, ti,
-                                    {
-                                       tp[ti] = bp[bi];
-                                    });
+               hypre_BoxLoop2Begin(loop_size,
+                             b_data_box, start, stride, bi,
+                             t_data_box, start, stride, ti);
+	       
+#define HYPRE_SMP_PRIVATE loopi,loopj,bi,ti
+#include "hypre_smp_forloop.h"
+		     
+	       hypre_BoxLoop2For(loopi, loopj, loopk, bi, ti)
+		 {
+		   tp[ti] = bp[bi];
+		 }
+
+               hypre_BoxLoopEnd;
 
                      for (si = 0; si < stencil_size; si++)
                      {
@@ -550,23 +565,41 @@ hypre_PointRelax( void               *relax_vdata,
                               hypre_BoxOffsetDistance(x_data_box,
                                                       stencil_shape[si]);
 
-                           hypre_BoxLoop3(loopi, loopj, loopk, loop_size,
-                                          A_data_box, start, stride, Ai,
-                                          x_data_box, start, stride, xi,
-                                          t_data_box, start, stride, ti,
-                                          {
-                                             tp[ti] -= Ap[Ai] * xp[xi];
-                                          });
+                           hypre_BoxLoop3Begin(loop_size,
+                                    A_data_box, start, stride, Ai,
+                                    x_data_box, start, stride, xi,
+                                    t_data_box, start, stride, ti);
+			   
+#define HYPRE_SMP_PRIVATE loopi,loopj,Ai,xi,ti
+#include "hypre_smp_forloop.h"
+     
+		           hypre_BoxLoop3For(loopi, loopj, loopk, Ai, xi, ti)
+			     {
+			       tp[ti] -= Ap[Ai] * xp[xi];
+			     }
+
+                           hypre_BoxLoopEnd;
+
+
                         }
                      }
 
                      Ap = hypre_StructMatrixBoxData(A, i, diag_rank);
-                     hypre_BoxLoop2(loopi, loopj, loopk, loop_size,
-                                    A_data_box, start, stride, Ai,
-                                    t_data_box, start, stride, ti,
-                                    {
-                                       tp[ti] /= Ap[Ai];
-                                    });
+
+                     hypre_BoxLoop2Begin(loop_size,
+                             A_data_box, start, stride, Ai,
+                             t_data_box, start, stride, ti);
+		     
+#define HYPRE_SMP_PRIVATE loopi,loopj,Ai,ti
+#include "hypre_smp_forloop.h"
+	     
+	             hypre_BoxLoop2For(loopi, loopj, loopk, Ai, ti)
+		       {
+			 tp[ti] /= Ap[Ai];
+		       }
+
+                     hypre_BoxLoopEnd;
+
                   }
             }
       }

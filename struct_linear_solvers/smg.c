@@ -403,11 +403,22 @@ hypre_SMGSetStructVectorConstantValues( hypre_StructVector *vector,
          vp = hypre_StructVectorBoxData(vector, i);
 
          hypre_GetStrideBoxSize(box, stride, loop_size);
-         hypre_BoxLoop1(loopi, loopj, loopk, loop_size,
-                        v_data_box, start, stride, vi,
-                        {
-                           vp[vi] = values;
-                        });
+
+	 hypre_BoxLoop1Begin(loop_size,
+                        v_data_box, start, stride, vi);
+
+
+      
+#define HYPRE_SMP_PRIVATE loopi,loopj,vi
+#include "hypre_smp_forloop.h"
+       
+	 hypre_BoxLoop1For(loopi, loopj, loopk, vi)
+	   {
+	     vp[vi] = values;
+	   }
+
+	 hypre_BoxLoopEnd;
+
       }
 
    return ierr;

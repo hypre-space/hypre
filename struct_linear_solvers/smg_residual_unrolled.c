@@ -243,12 +243,16 @@ hypre_SMGResidual( void               *residual_vdata,
                   rp = hypre_StructVectorBoxData(r, i);
 
                   hypre_GetStrideBoxSize(compute_box, base_stride, loop_size);
-                  hypre_BoxLoop2(loopi, loopj, loopk, loop_size,
-                                 b_data_box, start, base_stride, bi,
-                                 r_data_box, start, base_stride, ri,
-                                 {
-                                    rp[ri] = bp[bi];
-                                 });
+                  hypre_BoxLoop2Begin(loop_size,
+                                      b_data_box, start, base_stride, bi,
+                                      r_data_box, start, base_stride, ri);
+#define HYPRE_SMP_PRIVATE loopi,loopj,bi,ri
+#include "hypre_smp_forloop.h"
+                  hypre_BoxLoop2For(loopi, loopj, loopk, bi, ri)
+                     {
+                        rp[ri] = bp[bi];
+                     }
+                  hypre_BoxLoop2End;
                }
          }
          break;
@@ -282,313 +286,313 @@ hypre_SMGResidual( void               *residual_vdata,
 
             switch (stencil_size)
             {
-            case 1:
+               case 1:
 
-            Ap0 = hypre_StructMatrixBoxData(A, i, 0);
-            xp0 = hypre_StructVectorBoxData(x, i) +
-                hypre_BoxOffsetDistance(x_data_box, stencil_shape[0]);
+               Ap0 = hypre_StructMatrixBoxData(A, i, 0);
+               xp0 = hypre_StructVectorBoxData(x, i) +
+                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[0]);
 
-            break;
+               break;
 
-            case 3:
+               case 3:
 
-            Ap0 = hypre_StructMatrixBoxData(A, i, 0);
-            Ap1 = hypre_StructMatrixBoxData(A, i, 1);
-            Ap2 = hypre_StructMatrixBoxData(A, i, 2);
+               Ap0 = hypre_StructMatrixBoxData(A, i, 0);
+               Ap1 = hypre_StructMatrixBoxData(A, i, 1);
+               Ap2 = hypre_StructMatrixBoxData(A, i, 2);
 
-            xp0 = hypre_StructVectorBoxData(x, i) +
-                hypre_BoxOffsetDistance(x_data_box, stencil_shape[0]);
-            xp1 = hypre_StructVectorBoxData(x, i) +
-                hypre_BoxOffsetDistance(x_data_box, stencil_shape[1]);
-            xp2 = hypre_StructVectorBoxData(x, i) +
-                hypre_BoxOffsetDistance(x_data_box, stencil_shape[2]);
+               xp0 = hypre_StructVectorBoxData(x, i) +
+                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[0]);
+               xp1 = hypre_StructVectorBoxData(x, i) +
+                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[1]);
+               xp2 = hypre_StructVectorBoxData(x, i) +
+                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[2]);
 
-            break;
+               break;
 
-            case 5:
+               case 5:
 
-            Ap0 = hypre_StructMatrixBoxData(A, i, 0);
-            Ap1 = hypre_StructMatrixBoxData(A, i, 1);
-            Ap2 = hypre_StructMatrixBoxData(A, i, 2);
-            Ap3 = hypre_StructMatrixBoxData(A, i, 3);
-            Ap4 = hypre_StructMatrixBoxData(A, i, 4);
+               Ap0 = hypre_StructMatrixBoxData(A, i, 0);
+               Ap1 = hypre_StructMatrixBoxData(A, i, 1);
+               Ap2 = hypre_StructMatrixBoxData(A, i, 2);
+               Ap3 = hypre_StructMatrixBoxData(A, i, 3);
+               Ap4 = hypre_StructMatrixBoxData(A, i, 4);
 
-            xp0 = hypre_StructVectorBoxData(x, i) +
-                hypre_BoxOffsetDistance(x_data_box, stencil_shape[0]);
-            xp1 = hypre_StructVectorBoxData(x, i) +
-                hypre_BoxOffsetDistance(x_data_box, stencil_shape[1]);
-            xp2 = hypre_StructVectorBoxData(x, i) +
-                hypre_BoxOffsetDistance(x_data_box, stencil_shape[2]);
-            xp3 = hypre_StructVectorBoxData(x, i) +
-                hypre_BoxOffsetDistance(x_data_box, stencil_shape[3]);
-            xp4 = hypre_StructVectorBoxData(x, i) +
-                hypre_BoxOffsetDistance(x_data_box, stencil_shape[4]);
+               xp0 = hypre_StructVectorBoxData(x, i) +
+                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[0]);
+               xp1 = hypre_StructVectorBoxData(x, i) +
+                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[1]);
+               xp2 = hypre_StructVectorBoxData(x, i) +
+                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[2]);
+               xp3 = hypre_StructVectorBoxData(x, i) +
+                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[3]);
+               xp4 = hypre_StructVectorBoxData(x, i) +
+                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[4]);
 
-            break;
+               break;
 
-            case 7:
+               case 7:
 
-            Ap0 = hypre_StructMatrixBoxData(A, i, 0);
-            Ap1 = hypre_StructMatrixBoxData(A, i, 1);
-            Ap2 = hypre_StructMatrixBoxData(A, i, 2);
-            Ap3 = hypre_StructMatrixBoxData(A, i, 3);
-            Ap4 = hypre_StructMatrixBoxData(A, i, 4);
-            Ap5 = hypre_StructMatrixBoxData(A, i, 5);
-            Ap6 = hypre_StructMatrixBoxData(A, i, 6);
+               Ap0 = hypre_StructMatrixBoxData(A, i, 0);
+               Ap1 = hypre_StructMatrixBoxData(A, i, 1);
+               Ap2 = hypre_StructMatrixBoxData(A, i, 2);
+               Ap3 = hypre_StructMatrixBoxData(A, i, 3);
+               Ap4 = hypre_StructMatrixBoxData(A, i, 4);
+               Ap5 = hypre_StructMatrixBoxData(A, i, 5);
+               Ap6 = hypre_StructMatrixBoxData(A, i, 6);
 
-            xp0 = hypre_StructVectorBoxData(x, i) +
-                hypre_BoxOffsetDistance(x_data_box, stencil_shape[0]);
-            xp1 = hypre_StructVectorBoxData(x, i) +
-                hypre_BoxOffsetDistance(x_data_box, stencil_shape[1]);
-            xp2 = hypre_StructVectorBoxData(x, i) +
-                hypre_BoxOffsetDistance(x_data_box, stencil_shape[2]);
-            xp3 = hypre_StructVectorBoxData(x, i) +
-                hypre_BoxOffsetDistance(x_data_box, stencil_shape[3]);
-            xp4 = hypre_StructVectorBoxData(x, i) +
-                hypre_BoxOffsetDistance(x_data_box, stencil_shape[4]);
-            xp5 = hypre_StructVectorBoxData(x, i) +
-                hypre_BoxOffsetDistance(x_data_box, stencil_shape[5]);
-            xp6 = hypre_StructVectorBoxData(x, i) +
-                hypre_BoxOffsetDistance(x_data_box, stencil_shape[6]);
+               xp0 = hypre_StructVectorBoxData(x, i) +
+                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[0]);
+               xp1 = hypre_StructVectorBoxData(x, i) +
+                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[1]);
+               xp2 = hypre_StructVectorBoxData(x, i) +
+                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[2]);
+               xp3 = hypre_StructVectorBoxData(x, i) +
+                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[3]);
+               xp4 = hypre_StructVectorBoxData(x, i) +
+                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[4]);
+               xp5 = hypre_StructVectorBoxData(x, i) +
+                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[5]);
+               xp6 = hypre_StructVectorBoxData(x, i) +
+                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[6]);
 
-            break;
+               break;
 
-            case 9:
+               case 9:
 
-            Ap0 = hypre_StructMatrixBoxData(A, i, 0);
-            Ap1 = hypre_StructMatrixBoxData(A, i, 1);
-            Ap2 = hypre_StructMatrixBoxData(A, i, 2);
-            Ap3 = hypre_StructMatrixBoxData(A, i, 3);
-            Ap4 = hypre_StructMatrixBoxData(A, i, 4);
-            Ap5 = hypre_StructMatrixBoxData(A, i, 5);
-            Ap6 = hypre_StructMatrixBoxData(A, i, 6);
-            Ap7 = hypre_StructMatrixBoxData(A, i, 7);
-            Ap8 = hypre_StructMatrixBoxData(A, i, 8);
+               Ap0 = hypre_StructMatrixBoxData(A, i, 0);
+               Ap1 = hypre_StructMatrixBoxData(A, i, 1);
+               Ap2 = hypre_StructMatrixBoxData(A, i, 2);
+               Ap3 = hypre_StructMatrixBoxData(A, i, 3);
+               Ap4 = hypre_StructMatrixBoxData(A, i, 4);
+               Ap5 = hypre_StructMatrixBoxData(A, i, 5);
+               Ap6 = hypre_StructMatrixBoxData(A, i, 6);
+               Ap7 = hypre_StructMatrixBoxData(A, i, 7);
+               Ap8 = hypre_StructMatrixBoxData(A, i, 8);
 
-            xp0 = hypre_StructVectorBoxData(x, i) +
-                hypre_BoxOffsetDistance(x_data_box, stencil_shape[0]);
-            xp1 = hypre_StructVectorBoxData(x, i) +
-                hypre_BoxOffsetDistance(x_data_box, stencil_shape[1]);
-            xp2 = hypre_StructVectorBoxData(x, i) +
-                hypre_BoxOffsetDistance(x_data_box, stencil_shape[2]);
-            xp3 = hypre_StructVectorBoxData(x, i) +
-                hypre_BoxOffsetDistance(x_data_box, stencil_shape[3]);
-            xp4 = hypre_StructVectorBoxData(x, i) +
-                hypre_BoxOffsetDistance(x_data_box, stencil_shape[4]);
-            xp5 = hypre_StructVectorBoxData(x, i) +
-                hypre_BoxOffsetDistance(x_data_box, stencil_shape[5]);
-            xp6 = hypre_StructVectorBoxData(x, i) +
-                hypre_BoxOffsetDistance(x_data_box, stencil_shape[6]);
-            xp7 = hypre_StructVectorBoxData(x, i) +
-                hypre_BoxOffsetDistance(x_data_box, stencil_shape[7]);
-            xp8 = hypre_StructVectorBoxData(x, i) +
-                hypre_BoxOffsetDistance(x_data_box, stencil_shape[8]);
+               xp0 = hypre_StructVectorBoxData(x, i) +
+                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[0]);
+               xp1 = hypre_StructVectorBoxData(x, i) +
+                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[1]);
+               xp2 = hypre_StructVectorBoxData(x, i) +
+                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[2]);
+               xp3 = hypre_StructVectorBoxData(x, i) +
+                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[3]);
+               xp4 = hypre_StructVectorBoxData(x, i) +
+                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[4]);
+               xp5 = hypre_StructVectorBoxData(x, i) +
+                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[5]);
+               xp6 = hypre_StructVectorBoxData(x, i) +
+                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[6]);
+               xp7 = hypre_StructVectorBoxData(x, i) +
+                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[7]);
+               xp8 = hypre_StructVectorBoxData(x, i) +
+                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[8]);
 
-            break;
+               break;
 
-            case 15:
+               case 15:
 
-            Ap0 = hypre_StructMatrixBoxData(A, i, 0);
-            Ap1 = hypre_StructMatrixBoxData(A, i, 1);
-            Ap2 = hypre_StructMatrixBoxData(A, i, 2);
-            Ap3 = hypre_StructMatrixBoxData(A, i, 3);
-            Ap4 = hypre_StructMatrixBoxData(A, i, 4);
-            Ap5 = hypre_StructMatrixBoxData(A, i, 5);
-            Ap6 = hypre_StructMatrixBoxData(A, i, 6);
-            Ap7 = hypre_StructMatrixBoxData(A, i, 7);
-            Ap8 = hypre_StructMatrixBoxData(A, i, 8);
-            Ap9 = hypre_StructMatrixBoxData(A, i, 9);
-            Ap10 = hypre_StructMatrixBoxData(A, i, 10);
-            Ap11 = hypre_StructMatrixBoxData(A, i, 11);
-            Ap12 = hypre_StructMatrixBoxData(A, i, 12);
-            Ap13 = hypre_StructMatrixBoxData(A, i, 13);
-            Ap14 = hypre_StructMatrixBoxData(A, i, 14);
+               Ap0 = hypre_StructMatrixBoxData(A, i, 0);
+               Ap1 = hypre_StructMatrixBoxData(A, i, 1);
+               Ap2 = hypre_StructMatrixBoxData(A, i, 2);
+               Ap3 = hypre_StructMatrixBoxData(A, i, 3);
+               Ap4 = hypre_StructMatrixBoxData(A, i, 4);
+               Ap5 = hypre_StructMatrixBoxData(A, i, 5);
+               Ap6 = hypre_StructMatrixBoxData(A, i, 6);
+               Ap7 = hypre_StructMatrixBoxData(A, i, 7);
+               Ap8 = hypre_StructMatrixBoxData(A, i, 8);
+               Ap9 = hypre_StructMatrixBoxData(A, i, 9);
+               Ap10 = hypre_StructMatrixBoxData(A, i, 10);
+               Ap11 = hypre_StructMatrixBoxData(A, i, 11);
+               Ap12 = hypre_StructMatrixBoxData(A, i, 12);
+               Ap13 = hypre_StructMatrixBoxData(A, i, 13);
+               Ap14 = hypre_StructMatrixBoxData(A, i, 14);
 
-            xp0 = hypre_StructVectorBoxData(x, i) +
-                hypre_BoxOffsetDistance(x_data_box, stencil_shape[0]);
-            xp1 = hypre_StructVectorBoxData(x, i) +
-                hypre_BoxOffsetDistance(x_data_box, stencil_shape[1]);
-            xp2 = hypre_StructVectorBoxData(x, i) +
-                hypre_BoxOffsetDistance(x_data_box, stencil_shape[2]);
-            xp3 = hypre_StructVectorBoxData(x, i) +
-                hypre_BoxOffsetDistance(x_data_box, stencil_shape[3]);
-            xp4 = hypre_StructVectorBoxData(x, i) +
-                hypre_BoxOffsetDistance(x_data_box, stencil_shape[4]);
-            xp5 = hypre_StructVectorBoxData(x, i) +
-                hypre_BoxOffsetDistance(x_data_box, stencil_shape[5]);
-            xp6 = hypre_StructVectorBoxData(x, i) +
-                hypre_BoxOffsetDistance(x_data_box, stencil_shape[6]);
-            xp7 = hypre_StructVectorBoxData(x, i) +
-                hypre_BoxOffsetDistance(x_data_box, stencil_shape[7]);
-            xp8 = hypre_StructVectorBoxData(x, i) +
-                hypre_BoxOffsetDistance(x_data_box, stencil_shape[8]);
-            xp9 = hypre_StructVectorBoxData(x, i) +
-                hypre_BoxOffsetDistance(x_data_box, stencil_shape[9]);
-            xp10 = hypre_StructVectorBoxData(x, i) +
-                hypre_BoxOffsetDistance(x_data_box, stencil_shape[10]);
-            xp11 = hypre_StructVectorBoxData(x, i) +
-                hypre_BoxOffsetDistance(x_data_box, stencil_shape[11]);
-            xp12 = hypre_StructVectorBoxData(x, i) +
-                hypre_BoxOffsetDistance(x_data_box, stencil_shape[12]);
-            xp13 = hypre_StructVectorBoxData(x, i) +
-                hypre_BoxOffsetDistance(x_data_box, stencil_shape[13]);
-            xp14 = hypre_StructVectorBoxData(x, i) +
-                hypre_BoxOffsetDistance(x_data_box, stencil_shape[14]);
+               xp0 = hypre_StructVectorBoxData(x, i) +
+                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[0]);
+               xp1 = hypre_StructVectorBoxData(x, i) +
+                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[1]);
+               xp2 = hypre_StructVectorBoxData(x, i) +
+                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[2]);
+               xp3 = hypre_StructVectorBoxData(x, i) +
+                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[3]);
+               xp4 = hypre_StructVectorBoxData(x, i) +
+                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[4]);
+               xp5 = hypre_StructVectorBoxData(x, i) +
+                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[5]);
+               xp6 = hypre_StructVectorBoxData(x, i) +
+                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[6]);
+               xp7 = hypre_StructVectorBoxData(x, i) +
+                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[7]);
+               xp8 = hypre_StructVectorBoxData(x, i) +
+                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[8]);
+               xp9 = hypre_StructVectorBoxData(x, i) +
+                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[9]);
+               xp10 = hypre_StructVectorBoxData(x, i) +
+                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[10]);
+               xp11 = hypre_StructVectorBoxData(x, i) +
+                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[11]);
+               xp12 = hypre_StructVectorBoxData(x, i) +
+                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[12]);
+               xp13 = hypre_StructVectorBoxData(x, i) +
+                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[13]);
+               xp14 = hypre_StructVectorBoxData(x, i) +
+                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[14]);
 
-            break;
+               break;
 
-            case 19:
+               case 19:
 
-            Ap0 = hypre_StructMatrixBoxData(A, i, 0);
-            Ap1 = hypre_StructMatrixBoxData(A, i, 1);
-            Ap2 = hypre_StructMatrixBoxData(A, i, 2);
-            Ap3 = hypre_StructMatrixBoxData(A, i, 3);
-            Ap4 = hypre_StructMatrixBoxData(A, i, 4);
-            Ap5 = hypre_StructMatrixBoxData(A, i, 5);
-            Ap6 = hypre_StructMatrixBoxData(A, i, 6);
-            Ap7 = hypre_StructMatrixBoxData(A, i, 7);
-            Ap8 = hypre_StructMatrixBoxData(A, i, 8);
-            Ap9 = hypre_StructMatrixBoxData(A, i, 9);
-            Ap10 = hypre_StructMatrixBoxData(A, i, 10);
-            Ap11 = hypre_StructMatrixBoxData(A, i, 11);
-            Ap12 = hypre_StructMatrixBoxData(A, i, 12);
-            Ap13 = hypre_StructMatrixBoxData(A, i, 13);
-            Ap14 = hypre_StructMatrixBoxData(A, i, 14);
-            Ap15 = hypre_StructMatrixBoxData(A, i, 15);
-            Ap16 = hypre_StructMatrixBoxData(A, i, 16);
-            Ap17 = hypre_StructMatrixBoxData(A, i, 17);
-            Ap18 = hypre_StructMatrixBoxData(A, i, 18);
+               Ap0 = hypre_StructMatrixBoxData(A, i, 0);
+               Ap1 = hypre_StructMatrixBoxData(A, i, 1);
+               Ap2 = hypre_StructMatrixBoxData(A, i, 2);
+               Ap3 = hypre_StructMatrixBoxData(A, i, 3);
+               Ap4 = hypre_StructMatrixBoxData(A, i, 4);
+               Ap5 = hypre_StructMatrixBoxData(A, i, 5);
+               Ap6 = hypre_StructMatrixBoxData(A, i, 6);
+               Ap7 = hypre_StructMatrixBoxData(A, i, 7);
+               Ap8 = hypre_StructMatrixBoxData(A, i, 8);
+               Ap9 = hypre_StructMatrixBoxData(A, i, 9);
+               Ap10 = hypre_StructMatrixBoxData(A, i, 10);
+               Ap11 = hypre_StructMatrixBoxData(A, i, 11);
+               Ap12 = hypre_StructMatrixBoxData(A, i, 12);
+               Ap13 = hypre_StructMatrixBoxData(A, i, 13);
+               Ap14 = hypre_StructMatrixBoxData(A, i, 14);
+               Ap15 = hypre_StructMatrixBoxData(A, i, 15);
+               Ap16 = hypre_StructMatrixBoxData(A, i, 16);
+               Ap17 = hypre_StructMatrixBoxData(A, i, 17);
+               Ap18 = hypre_StructMatrixBoxData(A, i, 18);
 
-            xp0 = hypre_StructVectorBoxData(x, i) +
-                hypre_BoxOffsetDistance(x_data_box, stencil_shape[0]);
-            xp1 = hypre_StructVectorBoxData(x, i) +
-                hypre_BoxOffsetDistance(x_data_box, stencil_shape[1]);
-            xp2 = hypre_StructVectorBoxData(x, i) +
-                hypre_BoxOffsetDistance(x_data_box, stencil_shape[2]);
-            xp3 = hypre_StructVectorBoxData(x, i) +
-                hypre_BoxOffsetDistance(x_data_box, stencil_shape[3]);
-            xp4 = hypre_StructVectorBoxData(x, i) +
-                hypre_BoxOffsetDistance(x_data_box, stencil_shape[4]);
-            xp5 = hypre_StructVectorBoxData(x, i) +
-                hypre_BoxOffsetDistance(x_data_box, stencil_shape[5]);
-            xp6 = hypre_StructVectorBoxData(x, i) +
-                hypre_BoxOffsetDistance(x_data_box, stencil_shape[6]);
-            xp7 = hypre_StructVectorBoxData(x, i) +
-                hypre_BoxOffsetDistance(x_data_box, stencil_shape[7]);
-            xp8 = hypre_StructVectorBoxData(x, i) +
-                hypre_BoxOffsetDistance(x_data_box, stencil_shape[8]);
-            xp9 = hypre_StructVectorBoxData(x, i) +
-                hypre_BoxOffsetDistance(x_data_box, stencil_shape[9]);
-            xp10 = hypre_StructVectorBoxData(x, i) +
-                hypre_BoxOffsetDistance(x_data_box, stencil_shape[10]);
-            xp11 = hypre_StructVectorBoxData(x, i) +
-                hypre_BoxOffsetDistance(x_data_box, stencil_shape[11]);
-            xp12 = hypre_StructVectorBoxData(x, i) +
-                hypre_BoxOffsetDistance(x_data_box, stencil_shape[12]);
-            xp13 = hypre_StructVectorBoxData(x, i) +
-                hypre_BoxOffsetDistance(x_data_box, stencil_shape[13]);
-            xp14 = hypre_StructVectorBoxData(x, i) +
-                hypre_BoxOffsetDistance(x_data_box, stencil_shape[14]);
-            xp15 = hypre_StructVectorBoxData(x, i) +
-                hypre_BoxOffsetDistance(x_data_box, stencil_shape[15]);
-            xp16 = hypre_StructVectorBoxData(x, i) +
-                hypre_BoxOffsetDistance(x_data_box, stencil_shape[16]);
-            xp17 = hypre_StructVectorBoxData(x, i) +
-                hypre_BoxOffsetDistance(x_data_box, stencil_shape[17]);
-            xp18 = hypre_StructVectorBoxData(x, i) +
-                hypre_BoxOffsetDistance(x_data_box, stencil_shape[18]);
+               xp0 = hypre_StructVectorBoxData(x, i) +
+                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[0]);
+               xp1 = hypre_StructVectorBoxData(x, i) +
+                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[1]);
+               xp2 = hypre_StructVectorBoxData(x, i) +
+                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[2]);
+               xp3 = hypre_StructVectorBoxData(x, i) +
+                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[3]);
+               xp4 = hypre_StructVectorBoxData(x, i) +
+                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[4]);
+               xp5 = hypre_StructVectorBoxData(x, i) +
+                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[5]);
+               xp6 = hypre_StructVectorBoxData(x, i) +
+                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[6]);
+               xp7 = hypre_StructVectorBoxData(x, i) +
+                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[7]);
+               xp8 = hypre_StructVectorBoxData(x, i) +
+                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[8]);
+               xp9 = hypre_StructVectorBoxData(x, i) +
+                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[9]);
+               xp10 = hypre_StructVectorBoxData(x, i) +
+                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[10]);
+               xp11 = hypre_StructVectorBoxData(x, i) +
+                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[11]);
+               xp12 = hypre_StructVectorBoxData(x, i) +
+                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[12]);
+               xp13 = hypre_StructVectorBoxData(x, i) +
+                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[13]);
+               xp14 = hypre_StructVectorBoxData(x, i) +
+                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[14]);
+               xp15 = hypre_StructVectorBoxData(x, i) +
+                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[15]);
+               xp16 = hypre_StructVectorBoxData(x, i) +
+                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[16]);
+               xp17 = hypre_StructVectorBoxData(x, i) +
+                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[17]);
+               xp18 = hypre_StructVectorBoxData(x, i) +
+                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[18]);
 
-            break;
+               break;
 
-            case 27:
+               case 27:
 
-            Ap0 = hypre_StructMatrixBoxData(A, i, 0);
-            Ap1 = hypre_StructMatrixBoxData(A, i, 1);
-            Ap2 = hypre_StructMatrixBoxData(A, i, 2);
-            Ap3 = hypre_StructMatrixBoxData(A, i, 3);
-            Ap4 = hypre_StructMatrixBoxData(A, i, 4);
-            Ap5 = hypre_StructMatrixBoxData(A, i, 5);
-            Ap6 = hypre_StructMatrixBoxData(A, i, 6);
-            Ap7 = hypre_StructMatrixBoxData(A, i, 7);
-            Ap8 = hypre_StructMatrixBoxData(A, i, 8);
-            Ap9 = hypre_StructMatrixBoxData(A, i, 9);
-            Ap10 = hypre_StructMatrixBoxData(A, i, 10);
-            Ap11 = hypre_StructMatrixBoxData(A, i, 11);
-            Ap12 = hypre_StructMatrixBoxData(A, i, 12);
-            Ap13 = hypre_StructMatrixBoxData(A, i, 13);
-            Ap14 = hypre_StructMatrixBoxData(A, i, 14);
-            Ap15 = hypre_StructMatrixBoxData(A, i, 15);
-            Ap16 = hypre_StructMatrixBoxData(A, i, 16);
-            Ap17 = hypre_StructMatrixBoxData(A, i, 17);
-            Ap18 = hypre_StructMatrixBoxData(A, i, 18);
-            Ap19 = hypre_StructMatrixBoxData(A, i, 19);
-            Ap20 = hypre_StructMatrixBoxData(A, i, 20);
-            Ap21 = hypre_StructMatrixBoxData(A, i, 21);
-            Ap22 = hypre_StructMatrixBoxData(A, i, 22);
-            Ap23 = hypre_StructMatrixBoxData(A, i, 23);
-            Ap24 = hypre_StructMatrixBoxData(A, i, 24);
-            Ap25 = hypre_StructMatrixBoxData(A, i, 25);
-            Ap26 = hypre_StructMatrixBoxData(A, i, 26);
+               Ap0 = hypre_StructMatrixBoxData(A, i, 0);
+               Ap1 = hypre_StructMatrixBoxData(A, i, 1);
+               Ap2 = hypre_StructMatrixBoxData(A, i, 2);
+               Ap3 = hypre_StructMatrixBoxData(A, i, 3);
+               Ap4 = hypre_StructMatrixBoxData(A, i, 4);
+               Ap5 = hypre_StructMatrixBoxData(A, i, 5);
+               Ap6 = hypre_StructMatrixBoxData(A, i, 6);
+               Ap7 = hypre_StructMatrixBoxData(A, i, 7);
+               Ap8 = hypre_StructMatrixBoxData(A, i, 8);
+               Ap9 = hypre_StructMatrixBoxData(A, i, 9);
+               Ap10 = hypre_StructMatrixBoxData(A, i, 10);
+               Ap11 = hypre_StructMatrixBoxData(A, i, 11);
+               Ap12 = hypre_StructMatrixBoxData(A, i, 12);
+               Ap13 = hypre_StructMatrixBoxData(A, i, 13);
+               Ap14 = hypre_StructMatrixBoxData(A, i, 14);
+               Ap15 = hypre_StructMatrixBoxData(A, i, 15);
+               Ap16 = hypre_StructMatrixBoxData(A, i, 16);
+               Ap17 = hypre_StructMatrixBoxData(A, i, 17);
+               Ap18 = hypre_StructMatrixBoxData(A, i, 18);
+               Ap19 = hypre_StructMatrixBoxData(A, i, 19);
+               Ap20 = hypre_StructMatrixBoxData(A, i, 20);
+               Ap21 = hypre_StructMatrixBoxData(A, i, 21);
+               Ap22 = hypre_StructMatrixBoxData(A, i, 22);
+               Ap23 = hypre_StructMatrixBoxData(A, i, 23);
+               Ap24 = hypre_StructMatrixBoxData(A, i, 24);
+               Ap25 = hypre_StructMatrixBoxData(A, i, 25);
+               Ap26 = hypre_StructMatrixBoxData(A, i, 26);
 
-            xp0 = hypre_StructVectorBoxData(x, i) +
-                hypre_BoxOffsetDistance(x_data_box, stencil_shape[0]);
-            xp1 = hypre_StructVectorBoxData(x, i) +
-                hypre_BoxOffsetDistance(x_data_box, stencil_shape[1]);
-            xp2 = hypre_StructVectorBoxData(x, i) +
-                hypre_BoxOffsetDistance(x_data_box, stencil_shape[2]);
-            xp3 = hypre_StructVectorBoxData(x, i) +
-                hypre_BoxOffsetDistance(x_data_box, stencil_shape[3]);
-            xp4 = hypre_StructVectorBoxData(x, i) +
-                hypre_BoxOffsetDistance(x_data_box, stencil_shape[4]);
-            xp5 = hypre_StructVectorBoxData(x, i) +
-                hypre_BoxOffsetDistance(x_data_box, stencil_shape[5]);
-            xp6 = hypre_StructVectorBoxData(x, i) +
-                hypre_BoxOffsetDistance(x_data_box, stencil_shape[6]);
-            xp7 = hypre_StructVectorBoxData(x, i) +
-                hypre_BoxOffsetDistance(x_data_box, stencil_shape[7]);
-            xp8 = hypre_StructVectorBoxData(x, i) +
-                hypre_BoxOffsetDistance(x_data_box, stencil_shape[8]);
-            xp9 = hypre_StructVectorBoxData(x, i) +
-                hypre_BoxOffsetDistance(x_data_box, stencil_shape[9]);
-            xp10 = hypre_StructVectorBoxData(x, i) +
-                hypre_BoxOffsetDistance(x_data_box, stencil_shape[10]);
-            xp11 = hypre_StructVectorBoxData(x, i) +
-                hypre_BoxOffsetDistance(x_data_box, stencil_shape[11]);
-            xp12 = hypre_StructVectorBoxData(x, i) +
-                hypre_BoxOffsetDistance(x_data_box, stencil_shape[12]);
-            xp13 = hypre_StructVectorBoxData(x, i) +
-                hypre_BoxOffsetDistance(x_data_box, stencil_shape[13]);
-            xp14 = hypre_StructVectorBoxData(x, i) +
-                hypre_BoxOffsetDistance(x_data_box, stencil_shape[14]);
-            xp15 = hypre_StructVectorBoxData(x, i) +
-                hypre_BoxOffsetDistance(x_data_box, stencil_shape[15]);
-            xp16 = hypre_StructVectorBoxData(x, i) +
-                hypre_BoxOffsetDistance(x_data_box, stencil_shape[16]);
-            xp17 = hypre_StructVectorBoxData(x, i) +
-                hypre_BoxOffsetDistance(x_data_box, stencil_shape[17]);
-            xp18 = hypre_StructVectorBoxData(x, i) +
-                hypre_BoxOffsetDistance(x_data_box, stencil_shape[18]);
-            xp19 = hypre_StructVectorBoxData(x, i) +
-                hypre_BoxOffsetDistance(x_data_box, stencil_shape[19]);
-            xp20 = hypre_StructVectorBoxData(x, i) +
-                hypre_BoxOffsetDistance(x_data_box, stencil_shape[20]);
-            xp21 = hypre_StructVectorBoxData(x, i) +
-                hypre_BoxOffsetDistance(x_data_box, stencil_shape[21]);
-            xp22 = hypre_StructVectorBoxData(x, i) +
-                hypre_BoxOffsetDistance(x_data_box, stencil_shape[22]);
-            xp23 = hypre_StructVectorBoxData(x, i) +
-                hypre_BoxOffsetDistance(x_data_box, stencil_shape[23]);
-            xp24 = hypre_StructVectorBoxData(x, i) +
-                hypre_BoxOffsetDistance(x_data_box, stencil_shape[24]);
-            xp25 = hypre_StructVectorBoxData(x, i) +
-                hypre_BoxOffsetDistance(x_data_box, stencil_shape[25]);
-            xp26 = hypre_StructVectorBoxData(x, i) +
-                hypre_BoxOffsetDistance(x_data_box, stencil_shape[26]);
+               xp0 = hypre_StructVectorBoxData(x, i) +
+                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[0]);
+               xp1 = hypre_StructVectorBoxData(x, i) +
+                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[1]);
+               xp2 = hypre_StructVectorBoxData(x, i) +
+                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[2]);
+               xp3 = hypre_StructVectorBoxData(x, i) +
+                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[3]);
+               xp4 = hypre_StructVectorBoxData(x, i) +
+                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[4]);
+               xp5 = hypre_StructVectorBoxData(x, i) +
+                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[5]);
+               xp6 = hypre_StructVectorBoxData(x, i) +
+                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[6]);
+               xp7 = hypre_StructVectorBoxData(x, i) +
+                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[7]);
+               xp8 = hypre_StructVectorBoxData(x, i) +
+                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[8]);
+               xp9 = hypre_StructVectorBoxData(x, i) +
+                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[9]);
+               xp10 = hypre_StructVectorBoxData(x, i) +
+                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[10]);
+               xp11 = hypre_StructVectorBoxData(x, i) +
+                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[11]);
+               xp12 = hypre_StructVectorBoxData(x, i) +
+                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[12]);
+               xp13 = hypre_StructVectorBoxData(x, i) +
+                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[13]);
+               xp14 = hypre_StructVectorBoxData(x, i) +
+                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[14]);
+               xp15 = hypre_StructVectorBoxData(x, i) +
+                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[15]);
+               xp16 = hypre_StructVectorBoxData(x, i) +
+                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[16]);
+               xp17 = hypre_StructVectorBoxData(x, i) +
+                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[17]);
+               xp18 = hypre_StructVectorBoxData(x, i) +
+                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[18]);
+               xp19 = hypre_StructVectorBoxData(x, i) +
+                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[19]);
+               xp20 = hypre_StructVectorBoxData(x, i) +
+                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[20]);
+               xp21 = hypre_StructVectorBoxData(x, i) +
+                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[21]);
+               xp22 = hypre_StructVectorBoxData(x, i) +
+                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[22]);
+               xp23 = hypre_StructVectorBoxData(x, i) +
+                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[23]);
+               xp24 = hypre_StructVectorBoxData(x, i) +
+                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[24]);
+               xp25 = hypre_StructVectorBoxData(x, i) +
+                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[25]);
+               xp26 = hypre_StructVectorBoxData(x, i) +
+                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[26]);
 
-            break;
+               break;
 
-            default:
-            ;
+               default:
+               ;
             }
 
             hypre_ForBoxI(j, compute_box_a)
@@ -597,238 +601,274 @@ hypre_SMGResidual( void               *residual_vdata,
 
                   start  = hypre_BoxIMin(compute_box);
 
-                 /*------------------------------------------------------
-                  * Switch statement to direct control to appropriate
-                  * box loop depending on stencil size
-                  *------------------------------------------------------*/
+                  /*------------------------------------------------------
+                   * Switch statement to direct control to appropriate
+                   * box loop depending on stencil size
+                   *------------------------------------------------------*/
 
                   switch (stencil_size)
                   {
 
-                  case 1:
+                     case 1:
    
-                  hypre_GetStrideBoxSize(compute_box, base_stride, loop_size);
-                  hypre_BoxLoop3(loopi, loopj, loopk, loop_size,
-                                  A_data_box, start, base_stride, Ai,
-                                  x_data_box, start, base_stride, xi,
-                                  r_data_box, start, base_stride, ri,
-                                  {
+                     hypre_GetStrideBoxSize(compute_box, base_stride, loop_size);
+                     hypre_BoxLoop3Begin(loop_size,
+                                         A_data_box, start, base_stride, Ai,
+                                         x_data_box, start, base_stride, xi,
+                                         r_data_box, start, base_stride, ri);
+#define HYPRE_SMP_PRIVATE loopi,loopj,Ai,xi,ri
+#include "hypre_smp_forloop.h"
+                     hypre_BoxLoop3For(loopi, loopj, loopk, Ai, xi, ri)
+                        {
 
-                                     rp[ri] = rp[ri]
-                                              - Ap0[Ai] * xp0[xi];
+                           rp[ri] = rp[ri]
+                              - Ap0[Ai] * xp0[xi];
 
-                                  });
+                        }
+                     hypre_BoxLoop3End;
 
-                  break;
+                     break;
 
-                  case 3:
+                     case 3:
 
-                  hypre_GetStrideBoxSize(compute_box, base_stride, loop_size);
-                  hypre_BoxLoop3(loopi, loopj, loopk, loop_size,
-                                  A_data_box, start, base_stride, Ai,
-                                  x_data_box, start, base_stride, xi,
-                                  r_data_box, start, base_stride, ri,
-                                  {
+                     hypre_GetStrideBoxSize(compute_box, base_stride, loop_size);
+                     hypre_BoxLoop3Begin(loop_size,
+                                         A_data_box, start, base_stride, Ai,
+                                         x_data_box, start, base_stride, xi,
+                                         r_data_box, start, base_stride, ri);
+#define HYPRE_SMP_PRIVATE loopi,loopj,Ai,xi,ri
+#include "hypre_smp_forloop.h"
+                     hypre_BoxLoop3For(loopi, loopj, loopk, Ai, xi, ri)
+                        {
  
-                                     rp[ri] = rp[ri]
-                                              - Ap0[Ai] * xp0[xi]
-                                              - Ap1[Ai] * xp1[xi]
-                                              - Ap2[Ai] * xp2[xi];
+                           rp[ri] = rp[ri]
+                              - Ap0[Ai] * xp0[xi]
+                              - Ap1[Ai] * xp1[xi]
+                              - Ap2[Ai] * xp2[xi];
 
-                                  });
+                        }
+                     hypre_BoxLoop3End;
 
-                  break;
+                     break;
 
-                  case 5:
+                     case 5:
 
-                  hypre_GetStrideBoxSize(compute_box, base_stride, loop_size);
-                  hypre_BoxLoop3(loopi, loopj, loopk, loop_size,
-                                  A_data_box, start, base_stride, Ai,
-                                  x_data_box, start, base_stride, xi,
-                                  r_data_box, start, base_stride, ri,
-                                  {
+                     hypre_GetStrideBoxSize(compute_box, base_stride, loop_size);
+                     hypre_BoxLoop3Begin(loop_size,
+                                         A_data_box, start, base_stride, Ai,
+                                         x_data_box, start, base_stride, xi,
+                                         r_data_box, start, base_stride, ri);
+#define HYPRE_SMP_PRIVATE loopi,loopj,Ai,xi,ri
+#include "hypre_smp_forloop.h"
+                     hypre_BoxLoop3For(loopi, loopj, loopk, Ai, xi, ri)
+                        {
  
-                                     rp[ri] = rp[ri]
-                                              - Ap0[Ai] * xp0[xi]
-                                              - Ap1[Ai] * xp1[xi]
-                                              - Ap2[Ai] * xp2[xi]
-                                              - Ap3[Ai] * xp3[xi]
-                                              - Ap4[Ai] * xp4[xi];
+                           rp[ri] = rp[ri]
+                              - Ap0[Ai] * xp0[xi]
+                              - Ap1[Ai] * xp1[xi]
+                              - Ap2[Ai] * xp2[xi]
+                              - Ap3[Ai] * xp3[xi]
+                              - Ap4[Ai] * xp4[xi];
 
-                                  });
+                        }
+                     hypre_BoxLoop3End;
 
-                  break;
+                     break;
 
-                  case 7:
+                     case 7:
 
-                  hypre_GetStrideBoxSize(compute_box, base_stride, loop_size);
-                  hypre_BoxLoop3(loopi, loopj, loopk, loop_size,
-                                  A_data_box, start, base_stride, Ai,
-                                  x_data_box, start, base_stride, xi,
-                                  r_data_box, start, base_stride, ri,
-                                  {
+                     hypre_GetStrideBoxSize(compute_box, base_stride, loop_size);
+                     hypre_BoxLoop3Begin(loop_size,
+                                         A_data_box, start, base_stride, Ai,
+                                         x_data_box, start, base_stride, xi,
+                                         r_data_box, start, base_stride, ri);
+#define HYPRE_SMP_PRIVATE loopi,loopj,Ai,xi,ri
+#include "hypre_smp_forloop.h"
+                     hypre_BoxLoop3For(loopi, loopj, loopk, Ai, xi, ri)
+                        {
 
-                                     rp[ri] = rp[ri]
-                                              - Ap0[Ai] * xp0[xi]
-                                              - Ap1[Ai] * xp1[xi]
-                                              - Ap2[Ai] * xp2[xi]
-                                              - Ap3[Ai] * xp3[xi]
-                                              - Ap4[Ai] * xp4[xi]
-                                              - Ap5[Ai] * xp5[xi]
-                                              - Ap6[Ai] * xp6[xi];
+                           rp[ri] = rp[ri]
+                              - Ap0[Ai] * xp0[xi]
+                              - Ap1[Ai] * xp1[xi]
+                              - Ap2[Ai] * xp2[xi]
+                              - Ap3[Ai] * xp3[xi]
+                              - Ap4[Ai] * xp4[xi]
+                              - Ap5[Ai] * xp5[xi]
+                              - Ap6[Ai] * xp6[xi];
 
-                                  });
+                        }
+                     hypre_BoxLoop3End;
 
-                  break;
+                     break;
 
-                  case 9:
+                     case 9:
 
-                  hypre_GetStrideBoxSize(compute_box, base_stride, loop_size);
-                  hypre_BoxLoop3(loopi, loopj, loopk, loop_size,
-                                  A_data_box, start, base_stride, Ai,
-                                  x_data_box, start, base_stride, xi,
-                                  r_data_box, start, base_stride, ri,
-                                  {
+                     hypre_GetStrideBoxSize(compute_box, base_stride, loop_size);
+                     hypre_BoxLoop3Begin(loop_size,
+                                         A_data_box, start, base_stride, Ai,
+                                         x_data_box, start, base_stride, xi,
+                                         r_data_box, start, base_stride, ri);
+#define HYPRE_SMP_PRIVATE loopi,loopj,Ai,xi,ri
+#include "hypre_smp_forloop.h"
+                     hypre_BoxLoop3For(loopi, loopj, loopk, Ai, xi, ri)
+                        {
    
-                                     rp[ri] = rp[ri]
-                                              - Ap0[Ai] * xp0[xi]
-                                              - Ap1[Ai] * xp1[xi]
-                                              - Ap2[Ai] * xp2[xi]
-                                              - Ap3[Ai] * xp3[xi]
-                                              - Ap4[Ai] * xp4[xi]
-                                              - Ap5[Ai] * xp5[xi]
-                                              - Ap6[Ai] * xp6[xi]
-                                              - Ap7[Ai] * xp7[xi]
-                                              - Ap8[Ai] * xp8[xi];
+                           rp[ri] = rp[ri]
+                              - Ap0[Ai] * xp0[xi]
+                              - Ap1[Ai] * xp1[xi]
+                              - Ap2[Ai] * xp2[xi]
+                              - Ap3[Ai] * xp3[xi]
+                              - Ap4[Ai] * xp4[xi]
+                              - Ap5[Ai] * xp5[xi]
+                              - Ap6[Ai] * xp6[xi]
+                              - Ap7[Ai] * xp7[xi]
+                              - Ap8[Ai] * xp8[xi];
    
-                                  });
+                        }
+                     hypre_BoxLoop3End;
 
-                  break;
+                     break;
 
-                  case 15:
+                     case 15:
 
-                  hypre_GetStrideBoxSize(compute_box, base_stride, loop_size);
-                  hypre_BoxLoop3(loopi, loopj, loopk, loop_size,
-                                  A_data_box, start, base_stride, Ai,
-                                  x_data_box, start, base_stride, xi,
-                                  r_data_box, start, base_stride, ri,
-                                  {
+                     hypre_GetStrideBoxSize(compute_box, base_stride, loop_size);
+                     hypre_BoxLoop3Begin(loop_size,
+                                         A_data_box, start, base_stride, Ai,
+                                         x_data_box, start, base_stride, xi,
+                                         r_data_box, start, base_stride, ri);
+#define HYPRE_SMP_PRIVATE loopi,loopj,Ai,xi,ri
+#include "hypre_smp_forloop.h"
+                     hypre_BoxLoop3For(loopi, loopj, loopk, Ai, xi, ri)
+                        {
    
-                                     rp[ri] = rp[ri]
-                                              - Ap0[Ai] * xp0[xi]
-                                              - Ap1[Ai] * xp1[xi]
-                                              - Ap2[Ai] * xp2[xi]
-                                              - Ap3[Ai] * xp3[xi]
-                                              - Ap4[Ai] * xp4[xi]
-                                              - Ap5[Ai] * xp5[xi]
-                                              - Ap6[Ai] * xp6[xi]
-                                              - Ap7[Ai] * xp7[xi]
-                                              - Ap8[Ai] * xp8[xi]
-                                              - Ap9[Ai] * xp9[xi]
-                                              - Ap10[Ai] * xp10[xi]
-                                              - Ap11[Ai] * xp11[xi]
-                                              - Ap12[Ai] * xp12[xi]
-                                              - Ap13[Ai] * xp13[xi]
-                                              - Ap14[Ai] * xp14[xi];
+                           rp[ri] = rp[ri]
+                              - Ap0[Ai] * xp0[xi]
+                              - Ap1[Ai] * xp1[xi]
+                              - Ap2[Ai] * xp2[xi]
+                              - Ap3[Ai] * xp3[xi]
+                              - Ap4[Ai] * xp4[xi]
+                              - Ap5[Ai] * xp5[xi]
+                              - Ap6[Ai] * xp6[xi]
+                              - Ap7[Ai] * xp7[xi]
+                              - Ap8[Ai] * xp8[xi]
+                              - Ap9[Ai] * xp9[xi]
+                              - Ap10[Ai] * xp10[xi]
+                              - Ap11[Ai] * xp11[xi]
+                              - Ap12[Ai] * xp12[xi]
+                              - Ap13[Ai] * xp13[xi]
+                              - Ap14[Ai] * xp14[xi];
 
-                                  });
+                        }
+                     hypre_BoxLoop3End;
 
-                  break;
+                     break;
 
-                  case 19:
+                     case 19:
 
-                  hypre_GetStrideBoxSize(compute_box, base_stride, loop_size);
-                  hypre_BoxLoop3(loopi, loopj, loopk, loop_size,
-                                  A_data_box, start, base_stride, Ai,
-                                  x_data_box, start, base_stride, xi,
-                                  r_data_box, start, base_stride, ri,
-                                  {
+                     hypre_GetStrideBoxSize(compute_box, base_stride, loop_size);
+                     hypre_BoxLoop3Begin(loop_size,
+                                         A_data_box, start, base_stride, Ai,
+                                         x_data_box, start, base_stride, xi,
+                                         r_data_box, start, base_stride, ri);
+#define HYPRE_SMP_PRIVATE loopi,loopj,Ai,xi,ri
+#include "hypre_smp_forloop.h"
+                     hypre_BoxLoop3For(loopi, loopj, loopk, Ai, xi, ri)
+                        {
    
-                                     rp[ri] = rp[ri]
-                                              - Ap0[Ai] * xp0[xi]
-                                              - Ap1[Ai] * xp1[xi]
-                                              - Ap2[Ai] * xp2[xi]
-                                              - Ap3[Ai] * xp3[xi]
-                                              - Ap4[Ai] * xp4[xi]
-                                              - Ap5[Ai] * xp5[xi]
-                                              - Ap6[Ai] * xp6[xi]
-                                              - Ap7[Ai] * xp7[xi]
-                                              - Ap8[Ai] * xp8[xi]
-                                              - Ap9[Ai] * xp9[xi]
-                                              - Ap10[Ai] * xp10[xi]
-                                              - Ap11[Ai] * xp11[xi]
-                                              - Ap12[Ai] * xp12[xi]
-                                              - Ap13[Ai] * xp13[xi]
-                                              - Ap14[Ai] * xp14[xi]
-                                              - Ap15[Ai] * xp15[xi]
-                                              - Ap16[Ai] * xp16[xi]
-                                              - Ap17[Ai] * xp17[xi]
-                                              - Ap18[Ai] * xp18[xi];
+                           rp[ri] = rp[ri]
+                              - Ap0[Ai] * xp0[xi]
+                              - Ap1[Ai] * xp1[xi]
+                              - Ap2[Ai] * xp2[xi]
+                              - Ap3[Ai] * xp3[xi]
+                              - Ap4[Ai] * xp4[xi]
+                              - Ap5[Ai] * xp5[xi]
+                              - Ap6[Ai] * xp6[xi]
+                              - Ap7[Ai] * xp7[xi]
+                              - Ap8[Ai] * xp8[xi]
+                              - Ap9[Ai] * xp9[xi]
+                              - Ap10[Ai] * xp10[xi]
+                              - Ap11[Ai] * xp11[xi]
+                              - Ap12[Ai] * xp12[xi]
+                              - Ap13[Ai] * xp13[xi]
+                              - Ap14[Ai] * xp14[xi]
+                              - Ap15[Ai] * xp15[xi]
+                              - Ap16[Ai] * xp16[xi]
+                              - Ap17[Ai] * xp17[xi]
+                              - Ap18[Ai] * xp18[xi];
    
-                                  });
+                        }
+                     hypre_BoxLoop3End;
    
-                  break;
+                     break;
    
-                  case 27:
+                     case 27:
 
-                  hypre_GetStrideBoxSize(compute_box, base_stride, loop_size);
-                  hypre_BoxLoop3(loopi, loopj, loopk, loop_size,
-                                  A_data_box, start, base_stride, Ai,
-                                  x_data_box, start, base_stride, xi,
-                                  r_data_box, start, base_stride, ri,
-                                  {
+                     hypre_GetStrideBoxSize(compute_box, base_stride, loop_size);
+                     hypre_BoxLoop3Begin(loop_size,
+                                         A_data_box, start, base_stride, Ai,
+                                         x_data_box, start, base_stride, xi,
+                                         r_data_box, start, base_stride, ri);
+#define HYPRE_SMP_PRIVATE loopi,loopj,Ai,xi,ri
+#include "hypre_smp_forloop.h"
+                     hypre_BoxLoop3For(loopi, loopj, loopk, Ai, xi, ri)
+                        {
    
-                                     rp[ri] = rp[ri]
-                                              - Ap0[Ai] * xp0[xi]
-                                              - Ap1[Ai] * xp1[xi]
-                                              - Ap2[Ai] * xp2[xi]
-                                              - Ap3[Ai] * xp3[xi]
-                                              - Ap4[Ai] * xp4[xi]
-                                              - Ap5[Ai] * xp5[xi]
-                                              - Ap6[Ai] * xp6[xi]
-                                              - Ap7[Ai] * xp7[xi]
-                                              - Ap8[Ai] * xp8[xi]
-                                              - Ap9[Ai] * xp9[xi]
-                                              - Ap10[Ai] * xp10[xi]
-                                              - Ap11[Ai] * xp11[xi]
-                                              - Ap12[Ai] * xp12[xi]
-                                              - Ap13[Ai] * xp13[xi]
-                                              - Ap14[Ai] * xp14[xi]
-                                              - Ap15[Ai] * xp15[xi]
-                                              - Ap16[Ai] * xp16[xi]
-                                              - Ap17[Ai] * xp17[xi]
-                                              - Ap18[Ai] * xp18[xi]
-                                              - Ap19[Ai] * xp19[xi]
-                                              - Ap20[Ai] * xp20[xi]
-                                              - Ap21[Ai] * xp21[xi]
-                                              - Ap22[Ai] * xp22[xi]
-                                              - Ap23[Ai] * xp23[xi]
-                                              - Ap24[Ai] * xp24[xi]
-                                              - Ap25[Ai] * xp25[xi]
-                                              - Ap26[Ai] * xp26[xi];
+                           rp[ri] = rp[ri]
+                              - Ap0[Ai] * xp0[xi]
+                              - Ap1[Ai] * xp1[xi]
+                              - Ap2[Ai] * xp2[xi]
+                              - Ap3[Ai] * xp3[xi]
+                              - Ap4[Ai] * xp4[xi]
+                              - Ap5[Ai] * xp5[xi]
+                              - Ap6[Ai] * xp6[xi]
+                              - Ap7[Ai] * xp7[xi]
+                              - Ap8[Ai] * xp8[xi]
+                              - Ap9[Ai] * xp9[xi]
+                              - Ap10[Ai] * xp10[xi]
+                              - Ap11[Ai] * xp11[xi]
+                              - Ap12[Ai] * xp12[xi]
+                              - Ap13[Ai] * xp13[xi]
+                              - Ap14[Ai] * xp14[xi]
+                              - Ap15[Ai] * xp15[xi]
+                              - Ap16[Ai] * xp16[xi]
+                              - Ap17[Ai] * xp17[xi]
+                              - Ap18[Ai] * xp18[xi]
+                              - Ap19[Ai] * xp19[xi]
+                              - Ap20[Ai] * xp20[xi]
+                              - Ap21[Ai] * xp21[xi]
+                              - Ap22[Ai] * xp22[xi]
+                              - Ap23[Ai] * xp23[xi]
+                              - Ap24[Ai] * xp24[xi]
+                              - Ap25[Ai] * xp25[xi]
+                              - Ap26[Ai] * xp26[xi];
 
-                                  });
+                        }
+                     hypre_BoxLoop3End;
    
-                  break;
+                     break;
 
-                  default:
+                     default:
 
-                  for (si = 0; si < stencil_size; si++)
-                  {
-                     Ap0 = hypre_StructMatrixBoxData(A, i, si);
-                     xp0 = hypre_StructVectorBoxData(x, i) +
-                        hypre_BoxOffsetDistance(x_data_box, stencil_shape[si]);
+                     for (si = 0; si < stencil_size; si++)
+                     {
+                        Ap0 = hypre_StructMatrixBoxData(A, i, si);
+                        xp0 = hypre_StructVectorBoxData(x, i) +
+                           hypre_BoxOffsetDistance(x_data_box, stencil_shape[si]);
 
-                     hypre_GetStrideBoxSize(compute_box, base_stride,
-                                            loop_size);
-                     hypre_BoxLoop3(loopi, loopj, loopk, loop_size,
-                                    A_data_box, start, base_stride, Ai,
-                                    x_data_box, start, base_stride, xi,
-                                    r_data_box, start, base_stride, ri,
-                                    {
-                                       rp[ri] -= Ap0[Ai] * xp0[xi];
-                                    });
-                  }
+                        hypre_GetStrideBoxSize(compute_box, base_stride,
+                                               loop_size);
+                        hypre_BoxLoop3Begin(loop_size,
+                                            A_data_box, start, base_stride, Ai,
+                                            x_data_box, start, base_stride, xi,
+                                            r_data_box, start, base_stride, ri);
+#define HYPRE_SMP_PRIVATE loopi,loopj,Ai,xi,ri
+#include "hypre_smp_forloop.h"
+                        hypre_BoxLoop3For(loopi, loopj, loopk, Ai, xi, ri)
+                           {
+                              rp[ri] -= Ap0[Ai] * xp0[xi];
+                           }
+                        hypre_BoxLoop3End;
+                     }
                   }
                }
          }

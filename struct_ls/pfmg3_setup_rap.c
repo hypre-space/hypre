@@ -14,6 +14,7 @@
 #include "headers.h"
 #include "pfmg.h"
 
+
 /*--------------------------------------------------------------------------
  * Macro to "change coordinates".  This routine is written as though
  * coarsening is being done in the z-direction.  This macro is used to
@@ -561,12 +562,18 @@ hypre_PFMG3BuildRAPSym( hypre_StructMatrix *A,
             case 7:
 
             hypre_GetBoxSize(cgrid_box, loop_size);
-            hypre_BoxLoop4(loopi, loopj, loopk, loop_size,
-                           P_data_box,   cstart, stridec, iP,
-                           R_data_box,   cstart, stridec, iR,
-                           A_data_box,   fstart, stridef, iA,
-                           RAP_data_box, cstart, stridec, iAc,
-                           {
+
+            hypre_BoxLoop4Begin(loop_size,
+                                P_data_box, cstart, stridec, iP,
+                                R_data_box, cstart, stridec, iR,
+                                A_data_box, fstart, stridef, iA,
+                                RAP_data_box, cstart, stridec, iAc);
+	    
+#define HYPRE_SMP_PRIVATE loopi,loopj,iP,iR,iA,iAc,iAm1,iAp1,iP1
+#include "hypre_smp_forloop.h"
+		     
+	    hypre_BoxLoop4For(loopi, loopj, loopk, iP, iR, iA, iAc)
+	      {
                               iAm1 = iA - zOffsetA;
                               iAp1 = iA + zOffsetA;
 
@@ -608,7 +615,10 @@ hypre_PFMG3BuildRAPSym( hypre_StructMatrix *A,
                                  +          ra[iR] * a_bc[iAp1]
                                  +                   a_bc[iA]   * pb[iP]
                                  +                   a_ac[iA]   * pa[iP];
-                           });
+
+	      }
+
+            hypre_BoxLoopEnd;
 
             break;
 
@@ -624,12 +634,18 @@ hypre_PFMG3BuildRAPSym( hypre_StructMatrix *A,
             case 19:
 
             hypre_GetBoxSize(cgrid_box, loop_size);
-            hypre_BoxLoop4(loopi, loopj, loopk, loop_size,
-                           P_data_box,   cstart, stridec, iP,
-                           R_data_box,   cstart, stridec, iR,
-                           A_data_box,   fstart, stridef, iA,
-                           RAP_data_box, cstart, stridec, iAc,
-                           {
+
+            hypre_BoxLoop4Begin(loop_size,
+                                P_data_box, cstart, stridec, iP,
+                                R_data_box, cstart, stridec, iR,
+                                A_data_box, fstart, stridef, iA,
+                                RAP_data_box, cstart, stridec, iAc);
+	   
+#define HYPRE_SMP_PRIVATE loopi,loopj,iP,iR,iA,iAc,iAm1,iAp1,iP1
+#include "hypre_smp_forloop.h"
+     
+	    hypre_BoxLoop4For(loopi, loopj, loopk, iP, iR, iA, iAc)
+	      {
                               iAm1 = iA - zOffsetA;
                               iAp1 = iA + zOffsetA;
 
@@ -705,7 +721,10 @@ hypre_PFMG3BuildRAPSym( hypre_StructMatrix *A,
                                  +          ra[iR] * a_bc[iAp1]
                                  +                   a_bc[iA]   * pb[iP]
                                  +                   a_ac[iA]   * pa[iP];
-                           });
+
+	      }
+
+            hypre_BoxLoopEnd;
 
             break;
 
@@ -721,12 +740,18 @@ hypre_PFMG3BuildRAPSym( hypre_StructMatrix *A,
             default:
 
             hypre_GetBoxSize(cgrid_box, loop_size);
-            hypre_BoxLoop4(loopi, loopj, loopk, loop_size,
-                           P_data_box,   cstart, stridec, iP,
-                           R_data_box,   cstart, stridec, iR,
-                           A_data_box,   fstart, stridef, iA,
-                           RAP_data_box, cstart, stridec, iAc,
-                           {
+
+            hypre_BoxLoop4Begin(loop_size,
+                                P_data_box, cstart, stridec, iP,
+                                R_data_box, cstart, stridec, iR,
+                                A_data_box, fstart, stridef, iA,
+                                RAP_data_box, cstart, stridec, iAc);
+	    
+#define HYPRE_SMP_PRIVATE loopi,loopj,iP,iR,iA,iAc,iAm1,iAp1,iP1
+#include "hypre_smp_forloop.h"
+         
+	    hypre_BoxLoop4For(loopi, loopj, loopk, iP, iR, iA, iAc)
+	      {
                               iAm1 = iA - zOffsetA;
                               iAp1 = iA + zOffsetA;
 
@@ -818,7 +843,9 @@ hypre_PFMG3BuildRAPSym( hypre_StructMatrix *A,
                                  +          ra[iR] * a_bc[iAp1]
                                  +                   a_bc[iA]   * pb[iP]
                                  +                   a_ac[iA]   * pa[iP];
-                           });
+	      }
+
+            hypre_BoxLoopEnd;
 
             break;
 
@@ -1212,12 +1239,18 @@ hypre_PFMG3BuildRAPNoSym( hypre_StructMatrix *A,
             case 7:
 
             hypre_GetBoxSize(cgrid_box, loop_size);
-            hypre_BoxLoop4(loopi, loopj, loopk, loop_size,
-                           P_data_box,   cstart, stridec, iP,
-                           R_data_box,   cstart, stridec, iR,
-                           A_data_box,   fstart, stridef, iA,
-                           RAP_data_box, cstart, stridec, iAc,
-                           {
+
+            hypre_BoxLoop4Begin(loop_size,
+                                P_data_box, cstart, stridec, iP,
+                                R_data_box, cstart, stridec, iR,
+                                A_data_box, fstart, stridef, iA,
+                                RAP_data_box, cstart, stridec, iAc);
+	   
+#define HYPRE_SMP_PRIVATE loopi,loopj,iP,iR,iA,iAc,iAm1,iAp1,iP1
+#include "hypre_smp_forloop.h"
+	     
+	    hypre_BoxLoop4For(loopi, loopj, loopk, iP, iR, iA, iAc)
+	      {
                               iAm1 = iA - zOffsetA;
                               iAp1 = iA + zOffsetA;
 
@@ -1251,7 +1284,9 @@ hypre_PFMG3BuildRAPNoSym( hypre_StructMatrix *A,
                               rap_cnw[iAc] = 0.0;
  
                               rap_cne[iAc] = 0.0;
-                           });
+	      }
+
+            hypre_BoxLoopEnd;
 
             break;
 
@@ -1267,12 +1302,18 @@ hypre_PFMG3BuildRAPNoSym( hypre_StructMatrix *A,
             case 19:
 
             hypre_GetBoxSize(cgrid_box, loop_size);
-            hypre_BoxLoop4(loopi, loopj, loopk, loop_size,
-                           P_data_box,   cstart, stridec, iP,
-                           R_data_box,   cstart, stridec, iR,
-                           A_data_box,   fstart, stridef, iA,
-                           RAP_data_box, cstart, stridec, iAc,
-                           {
+
+            hypre_BoxLoop4Begin(loop_size,
+                                P_data_box, cstart, stridec, iP,
+                                R_data_box, cstart, stridec, iR,
+                                A_data_box, fstart, stridef, iA,
+                                RAP_data_box, cstart, stridec, iAc);
+	    
+#define HYPRE_SMP_PRIVATE loopi,loopj,iP,iR,iA,iAc,iAm1,iAp1,iP1
+#include "hypre_smp_forloop.h"
+     
+	    hypre_BoxLoop4For(loopi, loopj, loopk, iP, iR, iA, iAc)
+	      {
                               iAm1 = iA - zOffsetA;
                               iAp1 = iA + zOffsetA;
 
@@ -1340,7 +1381,10 @@ hypre_PFMG3BuildRAPNoSym( hypre_StructMatrix *A,
                                  +                   a_ae[iA]   * pa[iP1]
                                  +          rb[iR] * a_ae[iAm1]
                                  +          ra[iR] * a_be[iAp1];
-                           });
+
+	      }
+
+            hypre_BoxLoopEnd;
 
             break;
 
@@ -1356,12 +1400,18 @@ hypre_PFMG3BuildRAPNoSym( hypre_StructMatrix *A,
             default:
 
             hypre_GetBoxSize(cgrid_box, loop_size);
-            hypre_BoxLoop4(loopi, loopj, loopk, loop_size,
-                           P_data_box,   cstart, stridec, iP,
-                           R_data_box,   cstart, stridec, iR,
-                           A_data_box,   fstart, stridef, iA,
-                           RAP_data_box, cstart, stridec, iAc,
-                           {
+
+            hypre_BoxLoop4Begin(loop_size,
+                                P_data_box, cstart, stridec, iP,
+                                R_data_box, cstart, stridec, iR,
+                                A_data_box, fstart, stridef, iA,
+                                RAP_data_box, cstart, stridec, iAc);
+	    
+#define HYPRE_SMP_PRIVATE loopi,loopj,iP,iR,iA,iAc,iAm1,iAp1,iP1
+#include "hypre_smp_forloop.h"
+		     
+            hypre_BoxLoop4For(loopi, loopj, loopk, iP, iR, iA, iAc)
+	      {
                               iAm1 = iA - zOffsetA;
                               iAp1 = iA + zOffsetA;
 
@@ -1446,7 +1496,13 @@ hypre_PFMG3BuildRAPNoSym( hypre_StructMatrix *A,
                                  +                   a_ae[iA]   * pa[iP1]
                                  +          rb[iR] * a_ae[iAm1]
                                  +          ra[iR] * a_be[iAp1];
-                           });
+
+	      }
+
+            hypre_BoxLoopEnd;
+
+
+
 
             break;
 

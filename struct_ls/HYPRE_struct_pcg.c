@@ -241,14 +241,14 @@ headers.h
 
 int
 HYPRE_StructPCGSetPrecond( HYPRE_StructSolver  solver,
-                           int  (*precond)(HYPRE_StructSolver,
-                                           HYPRE_StructMatrix,
-                                           HYPRE_StructVector,
-                                           HYPRE_StructVector),
-                           int  (*precond_setup)(HYPRE_StructSolver,
-                                                 HYPRE_StructMatrix,
-                                                 HYPRE_StructVector,
-                                                 HYPRE_StructVector),
+                           int               (*precond)(HYPRE_StructSolver,
+							HYPRE_StructMatrix,
+							HYPRE_StructVector,
+							HYPRE_StructVector),
+                           int             (*precond_setup)(HYPRE_StructSolver,
+							HYPRE_StructMatrix,
+							HYPRE_StructVector,
+							HYPRE_StructVector),
                            HYPRE_StructSolver  precond_solver   )
 {
    return( hypre_PCGSetPrecond( (void *) solver,
@@ -438,13 +438,22 @@ HYPRE_StructDiagScale( HYPRE_StructSolver solver,
          start  = hypre_BoxIMin(box);
 
          hypre_GetBoxSize(box, loop_size);
-         hypre_BoxLoop3(loopi, loopj, loopk, loop_size,
-                        A_data_box,  start,  stride,  Ai,
-                        x_data_box,  start,  stride,  xi,
-                        y_data_box,  start,  stride,  yi,
-                        {
-                           xp[xi] = yp[yi] / Ap[Ai];
-                        });
+
+         hypre_BoxLoop3Begin(loop_size,
+                                    A_data_box, start, stride, Ai,
+                                    x_data_box, start, stride, xi,
+                                    y_data_box, start, stride, yi);
+
+#define HYPRE_SMP_PRIVATE loopi,loopj,yi,xi,Ai
+#include "hypre_smp_forloop.h"
+		     
+	 hypre_BoxLoop3For(loopi, loopj, loopk, Ai, xi, yi)
+	    {
+	      xp[xi] = yp[yi] / Ap[Ai];
+	    }
+
+         hypre_BoxLoopEnd;
+
       }
 
    return ierr;

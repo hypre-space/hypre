@@ -281,12 +281,16 @@ hypre_SMGSetupInterpOp( void               *relax_data,
                      }
 
                      hypre_GetStrideBoxSize(compute_box, stride, loop_size);
-                     hypre_BoxLoop2(loopi, loopj, loopk, loop_size,
-                                    x_data_box,  start,  stride,  xi,
-                                    PT_data_box, startc, stridec, PTi,
-                                    {
-                                       PTp[PTi] = xp[xi];
-                                    });
+                     hypre_BoxLoop2Begin(loop_size,
+                                         x_data_box,  start,  stride,  xi,
+                                         PT_data_box, startc, stridec, PTi);
+#define HYPRE_SMP_PRIVATE loopi,loopj,xi,PTi
+#include "hypre_smp_forloop.h"
+                     hypre_BoxLoop2For(loopi, loopj, loopk, xi, PTi)
+                        {
+                           PTp[PTi] = xp[xi];
+                        }
+                     hypre_BoxLoop2End;
                   }
             }
       }

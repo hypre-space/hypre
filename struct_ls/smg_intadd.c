@@ -286,14 +286,18 @@ hypre_SMGIntAdd( void               *intadd_vdata,
          xcp = hypre_StructVectorBoxData(xc, i);
 
          hypre_GetStrideBoxSize(compute_box, stride, loop_size);
-         hypre_BoxLoop3(loopi, loopj, loopk, loop_size,
-                        e_data_box,  start,  stride,  ei,
-                        PT_data_box, startc, stridec, PTi,
-                        xc_data_box, startc, stridec, xci,
-                        {
-                           ep0[ei] = PTp0[PTi]*xcp[xci];
-                           ep1[ei] = PTp1[PTi]*xcp[xci];
-                        });
+         hypre_BoxLoop3Begin(loop_size,
+                             e_data_box,  start,  stride,  ei,
+                             PT_data_box, startc, stridec, PTi,
+                             xc_data_box, startc, stridec, xci);
+#define HYPRE_SMP_PRIVATE loopi,loopj,ei,PTi,xci
+#include "hypre_smp_forloop.h"
+         hypre_BoxLoop3For(loopi, loopj, loopk, ei, PTi, xci)
+            {
+               ep0[ei] = PTp0[PTi]*xcp[xci];
+               ep1[ei] = PTp1[PTi]*xcp[xci];
+            }
+         hypre_BoxLoop3End;
       }
 
    /*--------------------------------------------------------------------
@@ -343,12 +347,16 @@ hypre_SMGIntAdd( void               *intadd_vdata,
                xcp = hypre_StructVectorBoxData(xc, i);
 
                hypre_GetStrideBoxSize(compute_box, stride, loop_size);
-               hypre_BoxLoop2(loopi, loopj, loopk, loop_size,
-                              x_data_box,  start,  stride,  xi,
-                              xc_data_box, startc, stridec, xci,
-                              {
-                                 xp[xi] += xcp[xci];
-                              });
+               hypre_BoxLoop2Begin(loop_size,
+                                   x_data_box,  start,  stride,  xi,
+                                   xc_data_box, startc, stridec, xci);
+#define HYPRE_SMP_PRIVATE loopi,loopj,xi,xci
+#include "hypre_smp_forloop.h"
+               hypre_BoxLoop2For(loopi, loopj, loopk, xi, xci)
+                  {
+                     xp[xi] += xcp[xci];
+                  }
+               hypre_BoxLoop2End;
             }
       }
 
@@ -375,12 +383,16 @@ hypre_SMGIntAdd( void               *intadd_vdata,
                   start  = hypre_BoxIMin(compute_box);
 
                   hypre_GetStrideBoxSize(compute_box, stride, loop_size);
-                  hypre_BoxLoop2(loopi, loopj, loopk, loop_size,
-                                 x_data_box, start, stride, xi,
-                                 e_data_box, start, stride, ei,
-                                 {
-                                    xp[xi] += ep0[ei] + ep1[ei];
-                                 });
+                  hypre_BoxLoop2Begin(loop_size,
+                                      x_data_box, start, stride, xi,
+                                      e_data_box, start, stride, ei);
+#define HYPRE_SMP_PRIVATE loopi,loopj,xi,ei
+#include "hypre_smp_forloop.h"
+                  hypre_BoxLoop2For(loopi, loopj, loopk, xi, ei)
+                     {
+                        xp[xi] += ep0[ei] + ep1[ei];
+                     }
+                  hypre_BoxLoop2End;
                }
          }
    }

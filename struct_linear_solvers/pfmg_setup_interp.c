@@ -134,11 +134,17 @@ hypre_PFMGSetupInterpOp( hypre_StructMatrix *A,
          hypre_PFMGMapCoarseToFine(startc, findex, stride, start);
 
          hypre_GetStrideBoxSize(compute_box, stridec, loop_size);
-         hypre_BoxLoop2(loopi, loopj, loopk, loop_size,
-                        A_data_box, start,  stride,  Ai,
-                        P_data_box, startc, stridec, Pi,
-                        {
-                           center  = 0.0;
+
+         hypre_BoxLoop2Begin(loop_size,
+                             A_data_box, start, stride, Ai,
+                             P_data_box, startc, stridec, Pi);
+	 
+#define HYPRE_SMP_PRIVATE loopi,loopj,Ai,Pi,center,si,Ap,Astenc
+#include "hypre_smp_forloop.h"
+   
+	 hypre_BoxLoop2For(loopi, loopj, loopk, Ai, Pi)
+	   {
+	                   center  = 0.0;
                            Pp0[Pi] = 0.0;
                            Pp1[Pi] = 0.0;
 
@@ -162,8 +168,11 @@ hypre_PFMGSetupInterpOp( hypre_StructMatrix *A,
                            }
 
                            Pp0[Pi] /= center;
-                           Pp1[Pi] /= center;
-                        });
+                           Pp1[Pi] /= center;  
+	   }
+
+         hypre_BoxLoopEnd;
+
       }
 
    hypre_AssembleStructMatrix(P);

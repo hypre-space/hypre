@@ -13,6 +13,7 @@
 
 #include "headers.h"
 
+
 /*--------------------------------------------------------------------------
  * Macros
  *--------------------------------------------------------------------------*/
@@ -329,22 +330,31 @@ hypre_CycRedSetupCoarseOp( hypre_StructMatrix *A,
          if(!hypre_StructMatrixSymmetric(A))
          {
             hypre_GetBoxSize(cgrid_box, loop_size);
-            hypre_BoxLoop2(loopi, loopj, loopk, loop_size,
-                           A_data_box, fstart, stridef, iA,
-                           Ac_data_box, cstart, stridec, iAc,
-                           {
-                              iAm1 = iA - xOffsetA;
-                              iAp1 = iA + xOffsetA;
 
-                              ac_cw[iAc] = - a_cw[iA] *a_cw[iAm1] / a_cc[iAm1];
+            hypre_BoxLoop2Begin(loop_size,
+                                A_data_box, fstart, stridef, iA,
+                                Ac_data_box, cstart, stridec, iAc);
 
-                              ac_cc[iAc] = a_cc[iA]
-                                 - a_cw[iA] * a_ce[iAm1] / a_cc[iAm1]   
-                                 - a_ce[iA] * a_cw[iAp1] / a_cc[iAp1];   
+#define HYPRE_SMP_PRIVATE loopi,loopj,iA,iAc,iAm1,iAp1
+#include "hypre_smp_forloop.h"
+		     
+	    hypre_BoxLoop2For(loopi, loopj, loopk, iA, iAc)
+	      {
+		 iAm1 = iA - xOffsetA;
+                 iAp1 = iA + xOffsetA;
 
-                              ac_ce[iAc] = - a_ce[iA] *a_ce[iAp1] / a_cc[iAp1];
+                 ac_cw[iAc] = - a_cw[iA] *a_cw[iAm1] / a_cc[iAm1];
 
-                           });
+                 ac_cc[iAc] = a_cc[iA]
+                             - a_cw[iA] * a_ce[iAm1] / a_cc[iAm1]   
+                             - a_ce[iA] * a_cw[iAp1] / a_cc[iAp1];   
+
+                 ac_ce[iAc] = - a_ce[iA] *a_ce[iAp1] / a_cc[iAp1];
+
+	      }
+
+            hypre_BoxLoopEnd;
+
          }
 
          /*-----------------------------------------------
@@ -354,19 +364,29 @@ hypre_CycRedSetupCoarseOp( hypre_StructMatrix *A,
          else
          {
             hypre_GetBoxSize(cgrid_box, loop_size);
-            hypre_BoxLoop2(loopi, loopj, loopk, loop_size,
-                           A_data_box, fstart, stridef, iA,
-                           Ac_data_box, cstart, stridec, iAc,
-                           {
-                              iAm1 = iA - xOffsetA;
-                              iAp1 = iA + xOffsetA;
 
-                              ac_cw[iAc] = - a_cw[iA] *a_cw[iAm1] / a_cc[iAm1];
+            hypre_BoxLoop2Begin(loop_size,
+                                A_data_box, fstart, stridef, iA,
+                                Ac_data_box, cstart, stridec, iAc);
 
-                              ac_cc[iAc] = a_cc[iA]
-                                 - a_cw[iA] * a_ce[iAm1] / a_cc[iAm1]   
-                                 - a_ce[iA] * a_cw[iAp1] / a_cc[iAp1];   
-                           });
+#define HYPRE_SMP_PRIVATE loopi,loopj,iA,iAc,iAm1,iAp1
+#include "hypre_smp_forloop.h"
+		     
+	    hypre_BoxLoop2For(loopi, loopj, loopk, iA, iAc)
+	      {
+		 iAm1 = iA - xOffsetA;
+                 iAp1 = iA + xOffsetA;
+
+                 ac_cw[iAc] = - a_cw[iA] *a_cw[iAm1] / a_cc[iAm1];
+
+                 ac_cc[iAc] = a_cc[iA]
+                             - a_cw[iA] * a_ce[iAm1] / a_cc[iAm1]   
+                             - a_ce[iA] * a_cw[iAp1] / a_cc[iAp1];   
+
+	      }
+
+            hypre_BoxLoopEnd;
+
          }
 
       } /* end ForBoxI */
@@ -827,12 +847,21 @@ hypre_CyclicReduction( void               *cyc_red_vdata,
          start  = hypre_BoxIMin(compute_box);
 
          hypre_GetStrideBoxSize(compute_box, base_stride, loop_size);
-         hypre_BoxLoop2(loopi, loopj, loopk, loop_size,
-                        x_data_box, start, base_stride, xi,
-                        b_data_box, start, base_stride, bi,
-                        {
-                           xp[xi] = bp[bi];
-                        });
+
+         hypre_BoxLoop2Begin(loop_size,
+                                x_data_box, start, base_stride, xi,
+                                b_data_box, start, base_stride, bi);
+
+#define HYPRE_SMP_PRIVATE loopi,loopj,xi,bi
+#include "hypre_smp_forloop.h"
+		     
+	 hypre_BoxLoop2For(loopi, loopj, loopk, xi, bi)
+	      {
+		xp[xi] = bp[bi];
+	      }
+
+         hypre_BoxLoopEnd;
+
       }
 
    /*--------------------------------------------------
@@ -880,12 +909,21 @@ hypre_CyclicReduction( void               *cyc_red_vdata,
             start  = hypre_BoxIMin(compute_box);
 
             hypre_GetStrideBoxSize(compute_box, stride, loop_size);
-            hypre_BoxLoop2(loopi, loopj, loopk, loop_size,
-                           A_data_box,  start,  stride,  Ai,
-                           x_data_box,  start,  stride,  xi,
-                           {
-                              xp[xi] /= Ap[Ai];
-                           });
+
+            hypre_BoxLoop2Begin(loop_size,
+                                A_data_box, start, stride, Ai,
+                                x_data_box, start, stride, xi);
+
+#define HYPRE_SMP_PRIVATE loopi,loopj,Ai,xi
+#include "hypre_smp_forloop.h"
+		     
+	    hypre_BoxLoop2For(loopi, loopj, loopk, Ai, xi)
+	      {
+		xp[xi] /= Ap[Ai]; 
+	      }
+
+            hypre_BoxLoopEnd;
+
          }
 
       if (l == (num_levels - 1))
@@ -949,15 +987,24 @@ hypre_CyclicReduction( void               *cyc_red_vdata,
                                                  cindex, stride);
 
                      hypre_GetStrideBoxSize(compute_box, stride, loop_size);
-                     hypre_BoxLoop3(loopi, loopj, loopk, loop_size,
-                                    A_data_box,  start,  stride,  Ai,
-                                    x_data_box,  start,  stride,  xi,
-                                    xc_data_box, startc, stridec, xci,
-                                    {
-                                       xcp[xci] = xp[xi] -
-                                          Awp[Ai]*xwp[xi] -
-                                          Aep[Ai]*xep[xi];
-                                    });
+
+                     hypre_BoxLoop3Begin(loop_size,
+                                    A_data_box, start, stride, Ai,
+                                    x_data_box, start, stride, xi,
+                                   xc_data_box, startc, stridec, xci);
+
+#define HYPRE_SMP_PRIVATE loopi,loopj,Ai,xi,xci
+#include "hypre_smp_forloop.h"
+		     
+		     hypre_BoxLoop3For(loopi, loopj, loopk, Ai, xi, xci)
+		       {
+			 xcp[xci] = xp[xi] -
+                                   Awp[Ai]*xwp[xi] -
+                                   Aep[Ai]*xep[xi];
+		       }
+
+                    hypre_BoxLoopEnd;
+
                   }
             }
       }
@@ -998,12 +1045,21 @@ hypre_CyclicReduction( void               *cyc_red_vdata,
             hypre_CycRedMapFineToCoarse(start, startc, cindex, stride);
 
             hypre_GetStrideBoxSize(compute_box, stride, loop_size);
-            hypre_BoxLoop2(loopi, loopj, loopk, loop_size,
-                           x_data_box,  start,  stride,  xi,
-                           xc_data_box, startc, stridec, xci,
-                           {
-                              xp[xi] = xcp[xci];
-                           });
+
+            hypre_BoxLoop2Begin(loop_size,
+                                x_data_box, start, stride, xi,
+                                xc_data_box, startc, stridec, xci);
+
+#define HYPRE_SMP_PRIVATE loopi,loopj,xi,xci
+#include "hypre_smp_forloop.h"
+		     
+	    hypre_BoxLoop2For(loopi, loopj, loopk, xi, xci)
+	      {
+		xp[xi] = xcp[xci];
+	      }
+
+            hypre_BoxLoopEnd;
+
          }
 
       /* Step 2 */
@@ -1061,13 +1117,22 @@ hypre_CyclicReduction( void               *cyc_red_vdata,
                      start  = hypre_BoxIMin(compute_box);
 
                      hypre_GetStrideBoxSize(compute_box, stride, loop_size);
-                     hypre_BoxLoop2(loopi, loopj, loopk, loop_size,
-                                    A_data_box,  start,  stride,  Ai,
-                                    x_data_box,  start,  stride,  xi,
-                                    {
-                                       xp[xi] -= (Awp[Ai]*xwp[xi] +
-                                                  Aep[Ai]*xep[xi]  ) / Ap[Ai];
-                                    });
+
+                     hypre_BoxLoop2Begin(loop_size,
+                                A_data_box, start, stride, Ai,
+                                x_data_box, start, stride, xi);
+
+#define HYPRE_SMP_PRIVATE loopi,loopj,Ai,xi
+#include "hypre_smp_forloop.h"
+		     
+	             hypre_BoxLoop2For(loopi, loopj, loopk, Ai, xi)
+		       {
+			  xp[xi] -= (Awp[Ai]*xwp[xi] +
+                                    Aep[Ai]*xep[xi]  ) / Ap[Ai];
+		       }
+
+		     hypre_BoxLoopEnd;
+
                   }
             }
       }

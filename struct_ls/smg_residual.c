@@ -228,12 +228,16 @@ hypre_SMGResidual( void               *residual_vdata,
                   rp = hypre_StructVectorBoxData(r, i);
 
                   hypre_GetStrideBoxSize(compute_box, base_stride, loop_size);
-                  hypre_BoxLoop2(loopi, loopj, loopk, loop_size,
-                                 b_data_box, start, base_stride, bi,
-                                 r_data_box, start, base_stride, ri,
-                                 {
-                                    rp[ri] = bp[bi];
-                                 });
+                  hypre_BoxLoop2Begin(loop_size,
+                                      b_data_box, start, base_stride, bi,
+                                      r_data_box, start, base_stride, ri);
+#define HYPRE_SMP_PRIVATE loopi,loopj,bi,ri
+#include "hypre_smp_forloop.h"
+                  hypre_BoxLoop2For(loopi, loopj, loopk, bi, ri)
+                     {
+                        rp[ri] = bp[bi];
+                     }
+                  hypre_BoxLoop2End;
                }
          }
          break;
@@ -274,13 +278,17 @@ hypre_SMGResidual( void               *residual_vdata,
 
                      hypre_GetStrideBoxSize(compute_box, base_stride,
                                             loop_size);
-                     hypre_BoxLoop3(loopi, loopj, loopk, loop_size,
-                                    A_data_box, start, base_stride, Ai,
-                                    x_data_box, start, base_stride, xi,
-                                    r_data_box, start, base_stride, ri,
-                                    {
-                                       rp[ri] -= Ap[Ai] * xp[xi];
-                                    });
+                     hypre_BoxLoop3Begin(loop_size,
+                                         A_data_box, start, base_stride, Ai,
+                                         x_data_box, start, base_stride, xi,
+                                         r_data_box, start, base_stride, ri);
+#define HYPRE_SMP_PRIVATE loopi,loopj,Ai,xi,ri
+#include "hypre_smp_forloop.h"
+                     hypre_BoxLoop3For(loopi, loopj, loopk, Ai, xi, ri)
+                        {
+                           rp[ri] -= Ap[Ai] * xp[xi];
+                        }
+                     hypre_BoxLoop3End;
                   }
                }
          }

@@ -550,6 +550,7 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
    int                    loopi, loopj, loopk;
 
    int                    ierr = 0;
+   double                 cx, cy, cz;
 
    /*----------------------------------------------------------
     * Initialize some things
@@ -579,10 +580,22 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
          start  = hypre_BoxIMin(compute_box);
 
          hypre_GetStrideBoxSize(compute_box, stride, loop_size);
-         hypre_BoxLoop1(loopi, loopj, loopk, loop_size,
-                        A_data_box, start,  stride,  Ai,
-                        {
-                           tcxyz[0] = 0.0;
+
+	 hypre_BoxLoop1Begin(loop_size,
+                           A_data_box, start, stride, Ai);
+
+	 cx = cxyz[0];
+	 cy = cxyz[1];
+	 cz = cxyz[2];
+	 
+#define HYPRE_SMP_PRIVATE loopi,loopj,Ai
+#define HYPRE_SMP_REDUCTION_OP +
+#define HYPRE_SMP_REDUCTION_VARS cx,cy,cz
+#include "hypre_smp_forloop.h"
+       
+	 hypre_BoxLoop1For(loopi, loopj, loopk, Ai)
+	   {
+	                               tcxyz[0] = 0.0;
                            tcxyz[1] = 0.0;
                            tcxyz[2] = 0.0;
 
@@ -612,10 +625,17 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
                               }
                            }
 
-                           cxyz[0] += tcxyz[0];
-                           cxyz[1] += tcxyz[1];
-                           cxyz[2] += tcxyz[2];
-                        });
+                           cx += tcxyz[0];
+                           cy += tcxyz[1];
+                           cz += tcxyz[2];
+	   }
+
+	 hypre_BoxLoopEnd;
+
+	 cxyz[0] = cx;
+	 cxyz[1] = cy;
+	 cxyz[2] = cz;
+
       }
 
    /*----------------------------------------------------------

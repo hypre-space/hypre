@@ -14,6 +14,7 @@
 #include "headers.h"
 #include "pfmg.h"
 
+
 /*--------------------------------------------------------------------------
  * hypre_PFMGInterpData data structure
  *--------------------------------------------------------------------------*/
@@ -209,12 +210,21 @@ hypre_PFMGInterp( void               *interp_vdata,
          xcp = hypre_StructVectorBoxData(xc, i);
 
          hypre_GetStrideBoxSize(compute_box, stride, loop_size);
-         hypre_BoxLoop2(loopi, loopj, loopk, loop_size,
-                        e_data_box,  start,  stride,  ei,
-                        xc_data_box, startc, stridec, xci,
-                        {
-                           ep[ei] = xcp[xci];
-                        });
+
+         hypre_BoxLoop2Begin(loop_size,
+                             e_data_box, start, stride, ei,
+                             xc_data_box, startc, stridec, xci);
+	 
+#define HYPRE_SMP_PRIVATE loopi,loopj,ei,xci
+#include "hypre_smp_forloop.h"
+		     
+	 hypre_BoxLoop2For(loopi, loopj, loopk, ei,xci)
+	   {
+	     ep[ei] = xcp[xci];
+	   }
+
+         hypre_BoxLoopEnd;
+
       }
 
    /*-----------------------------------------------------------------------
@@ -262,13 +272,24 @@ hypre_PFMGInterp( void               *interp_vdata,
                   hypre_PFMGMapFineToCoarse(start, findex, stride, startc);
 
                   hypre_GetStrideBoxSize(compute_box, stride, loop_size);
-                  hypre_BoxLoop2(loopi, loopj, loopk, loop_size,
-                                 P_data_box, startc, stridec, Pi,
-                                 e_data_box, start,  stride,  ei,
-                                 {
-                                    ep[ei] = (Pp0[Pi] * ep0[ei] +
-                                              Pp1[Pi] * ep1[ei]);
-                                 });
+
+                  hypre_BoxLoop2Begin(loop_size,
+                             P_data_box, startc, stridec, Pi,
+                             e_data_box, start, stride, ei);
+	   
+		  
+#define HYPRE_SMP_PRIVATE loopi,loopj,Pi,ei
+#include "hypre_smp_forloop.h"
+	     
+	          hypre_BoxLoop2For(loopi, loopj, loopk, Pi,ei)
+	            {
+		      ep[ei] =  (Pp0[Pi] * ep0[ei] +
+                                Pp1[Pi] * ep1[ei]);
+		    }
+
+                  hypre_BoxLoopEnd;
+                 
+
                }
          }
    }

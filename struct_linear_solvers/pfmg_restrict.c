@@ -14,6 +14,7 @@
 #include "headers.h"
 #include "pfmg.h"
 
+
 /*--------------------------------------------------------------------------
  * hypre_PFMGRestrictData data structure
  *--------------------------------------------------------------------------*/
@@ -223,14 +224,23 @@ hypre_PFMGRestrict( void               *restrict_vdata,
                   hypre_PFMGMapFineToCoarse(start, cindex, stride, startc);
 
                   hypre_GetStrideBoxSize(compute_box, stride, loop_size);
-                  hypre_BoxLoop3(loopi, loopj, loopk, loop_size,
-                                 RT_data_box, startc, stridec, RTi,
-                                 r_data_box,  start,  stride,  ri,
-                                 rc_data_box, startc, stridec, rci,
-                                 {
-                                    rcp[rci] = rp[ri] + (RTp0[RTi] * rp0[ri] +
-                                                         RTp1[RTi] * rp1[ri]);
-                                 });
+
+                     hypre_BoxLoop3Begin(loop_size,
+                                   RT_data_box, startc, stridec,RTi,
+                                   r_data_box, start, stride, ri,
+                                   rc_data_box, startc, stridec, rci);
+		     
+#define HYPRE_SMP_PRIVATE loopi,loopj,RTi,ri,rci
+#include "hypre_smp_forloop.h"
+     
+		     hypre_BoxLoop3For(loopi, loopj, loopk, RTi, ri, rci)
+		       {
+			 rcp[rci] = rp[ri] + (RTp0[RTi] * rp0[ri] +
+                                    RTp1[RTi] * rp1[ri]);
+		       }
+
+                    hypre_BoxLoopEnd;
+
                }
          }
    }
