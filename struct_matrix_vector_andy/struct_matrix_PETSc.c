@@ -80,7 +80,6 @@ hypre_SetStructInterfaceMatrixPETScCoeffs( hypre_StructInterfaceMatrix *struct_m
    {
       grid_to_coord_table = hypre_NewStructGridToCoordTable(grid, stencil);
 
-      ierr = OptionsSetValue( "-mat_aij_oneindex", PETSC_NULL );
       ierr = MatCreateMPIAIJ( hypre_StructInterfaceMatrixContext(struct_matrix), 
 			      hypre_StructGridLocalSize(grid),
 			      hypre_StructGridLocalSize(grid), 
@@ -132,9 +131,11 @@ hypre_SetStructInterfaceMatrixPETScCoeffs( hypre_StructInterfaceMatrix *struct_m
 					    grid_to_coord_table_entry );
 
 	    ierr = MatSetValues ( PETSc_matrix, 1, &row_coord, 1, &col_coord,
-				  &(coeffs[i]), INSERT_VALUES );    
-            /* ADD THE FOLLOWING LINE FOR SYMMETRIC MATRICES...     */
-            if (row_coord != col_coord)
+				  &(coeffs[i]), INSERT_VALUES );   
+ 
+            /*The following line is for symmetric matrices   */
+            if ( hypre_StructInterfaceMatrixSymmetric(struct_matrix) &&
+                (row_coord != col_coord) )
 	       ierr = MatSetValues ( PETSc_matrix, 1, &col_coord, 1, &row_coord,
 				  &(coeffs[i]), INSERT_VALUES );    
 	 }

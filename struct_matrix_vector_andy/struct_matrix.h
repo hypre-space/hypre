@@ -28,6 +28,7 @@ typedef struct
    hypre_StructStencil  *stencil;
 
    int      	 storage_type;
+   int           symmetric;
    void     	*translator;
    void     	*data;
 
@@ -42,6 +43,7 @@ typedef struct
 #define hypre_StructInterfaceMatrixStructStencil(matrix)      ((matrix) -> stencil)
 
 #define hypre_StructInterfaceMatrixStorageType(matrix)  ((matrix) -> storage_type)
+#define hypre_StructInterfaceMatrixSymmetric(matrix)  ((matrix) -> symmetric)
 #define hypre_StructInterfaceMatrixTranslator(matrix)   ((matrix) -> translator)
 #define hypre_StructInterfaceMatrixData(matrix)         ((matrix) -> data)
 

@@ -31,11 +31,12 @@ hypre_NewStructInterfaceMatrix( MPI_Comm     context,
    hypre_StructInterfaceMatrixStructGrid(matrix)    = grid;
    hypre_StructInterfaceMatrixStructStencil(matrix) = stencil;
 
-   hypre_StructInterfaceMatrixTranslator(matrix) = NULL;
+   /* set defaults */
    hypre_StructInterfaceMatrixStorageType(matrix) = 0;
+   hypre_StructInterfaceMatrixSymmetric(matrix) = 0;
+   hypre_StructInterfaceMatrixTranslator(matrix) = NULL;
    hypre_StructInterfaceMatrixData(matrix) = NULL;
 
-   /* set defaults */
    hypre_SetStructInterfaceMatrixStorageType(matrix, HYPRE_PETSC_MATRIX);
 
    return matrix;
@@ -118,6 +119,19 @@ hypre_SetStructInterfaceMatrixStorageType( hypre_StructInterfaceMatrix *matrix,
 				 int                type   )
 {
    hypre_StructInterfaceMatrixStorageType(matrix) = type;
+
+   return(0);
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_SetStructInterfaceMatrixSymmetric
+ *--------------------------------------------------------------------------*/
+
+int 
+hypre_SetStructInterfaceMatrixSymmetric( hypre_StructInterfaceMatrix *matrix,
+				 int                type   )
+{
+   hypre_StructInterfaceMatrixSymmetric(matrix) = type;
 
    return(0);
 }

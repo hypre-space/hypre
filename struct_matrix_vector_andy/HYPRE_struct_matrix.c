@@ -112,3 +112,15 @@ HYPRE_SetStructInterfaceMatrixStorageType( HYPRE_StructInterfaceMatrix struct_ma
       (hypre_StructInterfaceMatrix *) struct_matrix, type ) );
 }
 
+/*--------------------------------------------------------------------------
+ * HYPRE_SetStructInterfaceMatrixSymmetric
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_SetStructInterfaceMatrixSymmetric( HYPRE_StructInterfaceMatrix struct_matrix,
+				 int               type           )
+{
+   return( hypre_SetStructInterfaceMatrixSymmetric(
+      (hypre_StructInterfaceMatrix *) struct_matrix, type ) );
+}
+

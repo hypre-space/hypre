@@ -19,6 +19,7 @@ int HYPRE_AssembleStructInterfaceMatrix P((HYPRE_StructInterfaceMatrix matrix ))
 void *HYPRE_StructInterfaceMatrixGetData P((HYPRE_StructInterfaceMatrix matrix ));
 int HYPRE_PrintStructInterfaceMatrix P((HYPRE_StructInterfaceMatrix matrix ));
 int HYPRE_SetStructInterfaceMatrixStorageType P((HYPRE_StructInterfaceMatrix struct_matrix , int type ));
+int HYPRE_SetStructInterfaceMatrixSymmetric P((HYPRE_StructInterfaceMatrix struct_matrix , int type ));
 
 /* HYPRE_struct_stencil.c */
 HYPRE_StructStencil HYPRE_NewStructStencil P((int dim , int size ));
@@ -73,6 +74,7 @@ int hypre_SetStructInterfaceMatrixCoeffs P((hypre_StructInterfaceMatrix *matrix 
 int hypre_AssembleStructInterfaceMatrix P((hypre_StructInterfaceMatrix *matrix ));
 int hypre_PrintStructInterfaceMatrix P((hypre_StructInterfaceMatrix *matrix ));
 int hypre_SetStructInterfaceMatrixStorageType P((hypre_StructInterfaceMatrix *matrix , int type ));
+int hypre_SetStructInterfaceMatrixSymmetric P((hypre_StructInterfaceMatrix *matrix , int type ));
 int *hypre_FindBoxNeighborhood P((hypre_BoxArray *boxes , hypre_BoxArray *all_boxes , hypre_StructStencil *stencil ));
 int *hypre_FindBoxApproxNeighborhood P((hypre_BoxArray *boxes , hypre_BoxArray *all_boxes , hypre_StructStencil *stencil ));
 

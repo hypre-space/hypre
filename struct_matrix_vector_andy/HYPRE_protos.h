@@ -19,6 +19,7 @@ int HYPRE_AssembleStructInterfaceMatrix P((HYPRE_StructInterfaceMatrix matrix ))
 void *HYPRE_StructInterfaceMatrixGetData P((HYPRE_StructInterfaceMatrix matrix ));
 int HYPRE_PrintStructInterfaceMatrix P((HYPRE_StructInterfaceMatrix matrix ));
 int HYPRE_SetStructInterfaceMatrixStorageType P((HYPRE_StructInterfaceMatrix struct_matrix , int type ));
+int HYPRE_SetStructInterfaceMatrixSymmetric P((HYPRE_StructInterfaceMatrix struct_matrix , int type ));
 
 /* HYPRE_struct_stencil.c */
 HYPRE_StructStencil HYPRE_NewStructStencil P((int dim , int size ));
