@@ -68,6 +68,8 @@ int ZZZ_GetStructVectorValues P((ZZZ_StructVector vector , int *grid_index , dou
 int ZZZ_SetStructVectorBoxValues P((ZZZ_StructVector vector , int *ilower , int *iupper , int num_stencil_indices , int *stencil_indices , double *values ));
 int ZZZ_AssembleStructVector P((ZZZ_StructVector vector ));
 void ZZZ_PrintStructVector P(( char *filename , ZZZ_StructVector vector , int all ));
+void ZZZ_SetStructVectorNumGhost P((ZZZ_StructMatrix vector , int *num_ghost ));
+int ZZZ_SetStructVectorConstantValues P((ZZZ_StructMatrix  vector , double values ));
  
 #undef P
 
