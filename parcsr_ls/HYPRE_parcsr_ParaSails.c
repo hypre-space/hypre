@@ -102,6 +102,9 @@ HYPRE_ParCSRParaSailsSetup( HYPRE_Solver solver,
    ierr = HYPRE_ConvertParCSRMatrixToDistributedMatrix( A, &matrix );
    if (ierr) return ierr;
 
+   if (secret->obj != NULL)
+       HYPRE_ParaSailsDestroy(secret->obj);
+
    ierr = HYPRE_ParaSailsCreate(secret->comm, matrix, &secret->obj);
    if (ierr) return ierr;
 
