@@ -1731,6 +1731,10 @@ void ParaSailsSetupValues(ParaSails *ps, Matrix *A, double filter)
 
     if (ps->M->numb != NULL)
     {
+        /* Make a new numbering object in case pattern of A has changed */
+        if (ps->numb) NumberingDestroy(ps->numb);
+        ps->numb = NumberingCreateCopy(A->numb);
+
         for (row=0; row<=ps->M->end_row - ps->M->beg_row; row++)
         {
            MatrixGetRow(ps->M, row, &len, &ind, &val);
