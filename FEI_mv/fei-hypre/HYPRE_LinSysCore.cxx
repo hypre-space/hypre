@@ -3857,7 +3857,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
            HYPRE_ParCSRHybridSetConvergenceTol(HYSolver_, 0.9);
            HYPRE_ParCSRHybridSetDSCGMaxIter(HYSolver_, 20);
            if ( HYOutputLevel_ & HYFEI_AMGDEBUG )
-              HYPRE_ParCSRHybridSetPLogging(HYSolver_, 3);
+              HYPRE_ParCSRHybridSetPrintLevel(HYSolver_, 32);
            HYPRE_ParCSRHybridSetCoarsenType(HYSolver_, amgCoarsenType_);
            HYPRE_ParCSRHybridSetMeasureType(HYSolver_, amgMeasureType_);
            HYPRE_ParCSRHybridSetStrongThreshold(HYSolver_,amgStrongThreshold_);
