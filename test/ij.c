@@ -110,8 +110,8 @@ main( int   argc,
    int     *num_grid_sweeps;  
    int     *grid_relax_type;   
    int    **grid_relax_points;
-   int	    smooth_lev;
-   int	    smooth_rlx = 8;
+/* int	    smooth_lev; */
+/* int	    smooth_rlx = 8; */
    int	    smooth_type = 6;
    int	    smooth_num_levels = 0;
    int      relax_default;

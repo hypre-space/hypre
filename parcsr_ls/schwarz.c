@@ -449,7 +449,7 @@ int hypre_ParMPSchwarzSolve(hypre_ParCSRMatrix *par_A,
   double *vtemp_data;
   double *aux;
   double *buf_data;
-  hypre_Vector *x_vector;
+/*hypre_Vector *x_vector;*/
   MPI_Comm comm = hypre_ParCSRMatrixComm(par_A);
   int num_domains = hypre_CSRMatrixNumRows(domain_structure);
   int max_domain_size = hypre_CSRMatrixNumCols(domain_structure);
@@ -488,7 +488,7 @@ int hypre_ParMPSchwarzSolve(hypre_ParCSRMatrix *par_A,
   vtemp_data = hypre_VectorData(hypre_ParVectorLocalVector(Vtemp));
   rhs = hypre_VectorData(hypre_ParVectorLocalVector(rhs_vector));
 
-  x_vector = hypre_ParVectorLocalVector(par_x);
+/*x_vector = hypre_ParVectorLocalVector(par_x);*/
   A_diag_i = hypre_CSRMatrixI(A_diag);
   A_diag_j = hypre_CSRMatrixJ(A_diag);
   A_diag_data = hypre_CSRMatrixData(A_diag);

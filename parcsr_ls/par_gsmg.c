@@ -470,7 +470,6 @@ hypre_BoomerAMGCreateSmoothVecs(void         *data,
    int nsamples = hypre_ParAMGDataNumSamples(amg_data);
    int ret;
    double *datax, *bp, *p;
-   double rlx_wt, omega;
 
    int rlx_type;
    int smooth_type;
@@ -499,8 +498,8 @@ hypre_BoomerAMGCreateSmoothVecs(void         *data,
       num_sweeps = hypre_ParAMGDataSmoothNumSweeps(amg_data);
    }
    rlx_type = hypre_ParAMGDataGridRelaxType(amg_data)[0];
-   rlx_wt = hypre_ParAMGDataRelaxWeight(amg_data)[level];
-   omega = hypre_ParAMGDataOmega(amg_data)[level];
+   /* rlx_wt = hypre_ParAMGDataRelaxWeight(amg_data)[level]; */
+   /* omega = hypre_ParAMGDataOmega(amg_data)[level]; */
 
    /* generate par vectors */
 
@@ -749,17 +748,17 @@ hypre_BoomerAMGBuildInterpLS( hypre_ParCSRMatrix   *A,
    hypre_ParCSRCommHandle  *comm_handle;
 
    hypre_CSRMatrix *S_diag = hypre_ParCSRMatrixDiag(S);
-   double          *S_diag_data = hypre_CSRMatrixData(S_diag);
+/* double          *S_diag_data = hypre_CSRMatrixData(S_diag); */
    int             *S_diag_i = hypre_CSRMatrixI(S_diag);
    int             *S_diag_j = hypre_CSRMatrixJ(S_diag);
 
    hypre_CSRMatrix *S_offd = hypre_ParCSRMatrixOffd(S);   
-   double          *S_offd_data = hypre_CSRMatrixData(S_offd);
+/* double          *S_offd_data = hypre_CSRMatrixData(S_offd);
    int             *S_offd_i = hypre_CSRMatrixI(S_offd);
-   int             *S_offd_j = hypre_CSRMatrixJ(S_offd);
+   int             *S_offd_j = hypre_CSRMatrixJ(S_offd); */
 
    int              num_cols_S_offd = hypre_CSRMatrixNumCols(S_offd);
-   int             *col_map_offd = hypre_ParCSRMatrixColMapOffd(S);
+/* int             *col_map_offd = hypre_ParCSRMatrixColMapOffd(S); */
 
    hypre_ParCSRMatrix *P;
    int		      *col_map_offd_P;
@@ -769,9 +768,9 @@ hypre_BoomerAMGBuildInterpLS( hypre_ParCSRMatrix   *A,
 
    hypre_CSRMatrix *S_ext;
    
-   double          *S_ext_data;
+/* double          *S_ext_data;
    int             *S_ext_i;
-   int             *S_ext_j;
+   int             *S_ext_j; */
 
    hypre_CSRMatrix    *P_diag;
    hypre_CSRMatrix    *P_offd;   
@@ -785,12 +784,13 @@ hypre_BoomerAMGBuildInterpLS( hypre_ParCSRMatrix   *A,
 
    int              P_diag_size, P_offd_size;
    
-   int             *P_marker, *P_marker_offd;
+   int             *P_marker;
+/* int             *P_marker_offd; */
 
    int              jj_counter,jj_counter_offd;
    int             *jj_count, *jj_count_offd;
-   int              jj_begin_row,jj_begin_row_offd;
-   int              jj_end_row,jj_end_row_offd;
+/* int              jj_begin_row,jj_begin_row_offd;
+   int              jj_end_row,jj_end_row_offd; */
    
    int              start_indexing = 0; /* start indexing for P_data at 0 */
 
@@ -807,7 +807,6 @@ hypre_BoomerAMGBuildInterpLS( hypre_ParCSRMatrix   *A,
    int              j,jl,jj;
    int              start;
    
-   double           zero = 0.0;
    double           one  = 1.0;
    
    int              my_id;
@@ -898,9 +897,11 @@ hypre_BoomerAMGBuildInterpLS( hypre_ParCSRMatrix   *A,
    if (num_procs > 1)
    {
       S_ext      = hypre_ParCSRMatrixExtractBExt(S,S,1);
+/*
       S_ext_i    = hypre_CSRMatrixI(S_ext);
       S_ext_j    = hypre_CSRMatrixJ(S_ext);
       S_ext_data = hypre_CSRMatrixData(S_ext);
+*/
    }
    
    if (debug_flag==4)
