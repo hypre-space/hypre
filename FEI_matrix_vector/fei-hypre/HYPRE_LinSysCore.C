@@ -3647,7 +3647,11 @@ void HYPRE_LinSysCore::loadConstraintNumbers(int nConstr, int *constrList)
 // this function extracts the matrix in a CSR format
 //---------------------------------------------------------------------------
 
+#ifdef FEI_V13
 void HYPRE_LinSysCore::writeSystem(char *name)
+#else
+void HYPRE_LinSysCore::writeSystem(const char *name)
+#endif
 {
     printf("HYPRE_LinsysCore : writeSystem not implemented.\n");
     return;

@@ -253,7 +253,11 @@ class HYPRE_LinSysCore
    // other functions
    // ----------------------------------------------------------------------
 
+#ifdef FEI_V13
    void  writeSystem(char *);
+#else
+   void  writeSystem(const char *);
+#endif
 
    // ----------------------------------------------------------------------
    // HYPRE-specific public functions
