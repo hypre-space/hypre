@@ -140,12 +140,11 @@ int hypre_BoomerAMGBuildCoarseOperator(    hypre_ParCSRMatrix  *RT,
    int		   *temp;
 
    int              n_coarse;
-   int              n_fine;
    int              num_cols_offd_Pext = 0;
    
    int              ic, i, j, k;
    int              i1, i2, i3, ii, ns, ne, size, rest;
-   int              index, index2, cnt, cnt_offd, cnt_diag, value;
+   int              cnt, cnt_offd, cnt_diag, value;
    int              jj1, jj2, jj3, jcol;
    
    int             *jj_count, *jj_cnt_diag, *jj_cnt_offd;
@@ -153,7 +152,6 @@ int hypre_BoomerAMGBuildCoarseOperator(    hypre_ParCSRMatrix  *RT,
    int              jj_row_begining, jj_row_begin_diag, jj_row_begin_offd;
    int              start_indexing = 0; /* start indexing for RAP_data at 0 */
    int		    num_nz_cols_A;
-   int		    count;
    int		    num_procs;
 
    double           r_entry;
@@ -195,7 +193,6 @@ int hypre_BoomerAMGBuildCoarseOperator(    hypre_ParCSRMatrix  *RT,
    R_diag_i    = hypre_CSRMatrixI(R_diag);
    R_diag_j    = hypre_CSRMatrixJ(R_diag);
 
-   n_fine   = hypre_ParCSRMatrixGlobalNumRows(A);
    n_coarse = hypre_ParCSRMatrixGlobalNumCols(P);
    num_nz_cols_A = num_cols_diag_A + num_cols_offd_A;
 
@@ -1637,7 +1634,6 @@ hypre_ExchangeRAPData( 	hypre_CSRMatrix *RAP_int,
 
    int num_rows;
    int num_nonzeros;
-   int start_index;
    int i, j;
    int num_procs, my_id;
 

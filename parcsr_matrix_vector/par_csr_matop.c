@@ -87,7 +87,7 @@ hypre_ParCSRMatrix *hypre_ParMatmul( hypre_ParCSRMatrix  *A,
    int              i1, i2, i3;
    int              jj2, jj3;
    
-   int              jj_counter, jj_count_diag, jj_count_offd;
+   int              jj_count_diag, jj_count_offd;
    int              jj_row_begin_diag, jj_row_begin_offd;
    int              start_indexing = 0; /* start indexing for C_data at 0 */
    int		    count;
@@ -140,7 +140,6 @@ hypre_ParCSRMatrix *hypre_ParMatmul( hypre_ParCSRMatrix  *A,
     *  Initialize some stuff.
     *-----------------------------------------------------------------------*/
 
-   jj_counter = start_indexing;
    for (i1 = 0; i1 < n_cols_B; i1++)
    {      
       B_marker[i1] = -1;
@@ -553,15 +552,11 @@ hypre_ParCSRMatrixExtractBExt( hypre_ParCSRMatrix *B, hypre_ParCSRMatrix *A, int
    int *diag_j = hypre_CSRMatrixJ(diag);
    double *diag_data = hypre_CSRMatrixData(diag);
 
-   int num_cols_diag = hypre_CSRMatrixNumCols(diag);
-
    hypre_CSRMatrix *offd = hypre_ParCSRMatrixOffd(B);
 
    int *offd_i = hypre_CSRMatrixI(offd);
    int *offd_j = hypre_CSRMatrixJ(offd);
    double *offd_data = hypre_CSRMatrixData(offd);
-
-   int num_cols_offd = hypre_CSRMatrixNumCols(offd);
 
    int *B_int_i;
    int *B_int_j;

@@ -33,10 +33,8 @@ hypre_ParCSRMatrixScaledNorm( hypre_ParCSRMatrix *A, double *scnorm)
    int			*offd_j = hypre_CSRMatrixJ(offd);
    double		*offd_data = hypre_CSRMatrixData(offd);
    int         		 global_num_rows = hypre_ParCSRMatrixGlobalNumRows(A);
-   int         		 global_num_cols = hypre_ParCSRMatrixGlobalNumCols(A);
    int	                *row_starts = hypre_ParCSRMatrixRowStarts(A);
    int			 num_rows = hypre_CSRMatrixNumRows(diag);
-   int			 num_cols = hypre_CSRMatrixNumCols(diag);
 
    hypre_ParVector      *dinvsqrt;
    double		*dis_data;

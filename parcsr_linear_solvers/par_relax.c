@@ -76,8 +76,6 @@ int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
    int		   index, start;
    int		   num_procs, my_id, ip, p;
    int		   vec_start, vec_len;
-   int		   send_flag = 1;
-   int		   recv_flag = 0;
    MPI_Status     *status;
    MPI_Request    *requests;
 

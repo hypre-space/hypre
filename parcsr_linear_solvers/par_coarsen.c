@@ -167,10 +167,8 @@ hypre_BoomerAMGCoarsen( hypre_ParCSRMatrix    *A,
    int                 break_var = 1;
 
    int		       num_data, start_index;
-   int		       *recv_vec_starts;
    double	    wall_time;
    double	    wall_time_ip = 0;
-   double	    wall_time_bp = 0;
    double	    wall_time_rs = 0;
    double	    sum_time_ip = 0;
    double	    sum_time_bp = 0;
@@ -210,7 +208,6 @@ hypre_BoomerAMGCoarsen( hypre_ParCSRMatrix    *A,
 
    num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
    num_recvs = hypre_ParCSRCommPkgNumRecvs(comm_pkg);
-   recv_vec_starts = hypre_ParCSRCommPkgRecvVecStarts(comm_pkg);
 
    int_buf_data = hypre_CTAlloc(int, hypre_ParCSRCommPkgSendMapStart(comm_pkg,
                                                 num_sends));
@@ -1022,8 +1019,8 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *A,
    hypre_LinkList   LoL_tail;
 
    int             *lists, *where;
-   int              points_left, new_C;
-   int              new_meas, bumps, top_max;
+   int              new_C;
+   int              new_meas;
    int              num_left, elmt;
    int              nabor, nabor_two;
 
@@ -2244,7 +2241,6 @@ hypre_BoomerAMGCoarsenFalgout( hypre_ParCSRMatrix    *A,
    int		    col_0, iter;
                       
    int		       num_data, start_index;
-   int		       *recv_vec_starts;
 
 #if 0 /* debugging */
    char  filename[256];
@@ -2257,8 +2253,8 @@ hypre_BoomerAMGCoarsenFalgout( hypre_ParCSRMatrix    *A,
    hypre_LinkList   LoL_tail;
 
    int             *lists, *where;
-   int              points_left, new_C;
-   int              new_meas, bumps, top_max;
+   int              new_C;
+   int              new_meas;
    int              num_left;
    int              nabor, nabor_two, cnt;
 
@@ -2266,7 +2262,6 @@ hypre_BoomerAMGCoarsenFalgout( hypre_ParCSRMatrix    *A,
    int              break_var = 0;
    double	    wall_time;
    double	    wall_time_ip = 0;
-   double	    wall_time_bp = 0;
    double	    wall_time_rs = 0;
    double	    sum_time_ip = 0;
    double	    sum_time_bp = 0;
@@ -2798,7 +2793,6 @@ hypre_BoomerAMGCoarsenFalgout( hypre_ParCSRMatrix    *A,
    if (debug_flag == 3) wall_time = time_getWallclockSeconds();
    num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
    num_recvs = hypre_ParCSRCommPkgNumRecvs(comm_pkg);
-   recv_vec_starts = hypre_ParCSRCommPkgRecvVecStarts(comm_pkg);
 
    int_buf_data = hypre_CTAlloc(int, hypre_ParCSRCommPkgSendMapStart(comm_pkg,
                                                 num_sends));
