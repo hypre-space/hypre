@@ -14,6 +14,13 @@
 #
 #=============================================================================
 
+- Added SetRelChange option to GMRES solver.
+
+- New draft of the IJ interface: This new draft is not backward compatible
+  with the previous draft.  See the file `TRANSITION_INFO' for details
+  on transitioning to the new interface.  See the User's Manual and
+  Reference Manual for usage information.
+
 Version 1.4.0b released, 2001/01/10.
 
 - Changed SStruct interface: The SStructGraphAddEntries routine now
