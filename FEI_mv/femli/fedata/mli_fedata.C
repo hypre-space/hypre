@@ -3650,7 +3650,7 @@ int MLI_FEData::impSpecificRequests(char *data_key, int argc, char **argv)
             pnum  = mypid;
             for ( j = 0; j < sharedNodeNProcs[i]; j++ )
                if ( sharedNodeProc[i][j] < pnum )
-                  pnum = sharedNodeProc_[i][j];
+                  pnum = sharedNodeProc[i][j];
             owner[index] = pnum;
          }
       }
