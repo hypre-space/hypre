@@ -2337,7 +2337,8 @@ void HYPRE_LinSysCore::formResidual(int* eqnNumbers, double* values, int leng)
     nrows = localEndRow_ - localStartRow_ + 1;
     if (leng != nrows)
     {
-       printf("%4d : HYPRE_LinSysCore::formResidual ERROR - inleng != numLocalRows");
+       printf("%4d : HYPRE_LinSysCore::formResidual ERROR - inleng != numLocalRows",
+              mypid_);
        printf("                        numLocalRows, inleng = %d %d",nrows,leng);
        return;
     }
