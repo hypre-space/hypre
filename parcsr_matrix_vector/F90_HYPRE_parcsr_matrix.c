@@ -67,6 +67,23 @@ hypre_F90_IFACE(hypre_initializeparcsrmatrix)( long int *matrix,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_ReadParCSRMatrix
+ *--------------------------------------------------------------------------*/
+
+void 
+hypre_F90_IFACE(hypre_readparcsrmatrix)( int      *comm,
+                                         long int *matrix,
+                                         char     *file_name,
+                                         int      *ierr       )
+{
+   *matrix = (long int) ( HYPRE_ReadParCSRMatrix(
+                                (MPI_Comm) *comm,
+                                (char *)    file_name ) );
+
+   *ierr = !(*matrix);
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_PrintParCSRMatrix
  *--------------------------------------------------------------------------*/
 

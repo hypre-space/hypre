@@ -57,6 +57,22 @@ hypre_F90_IFACE(hypre_initializeparvector)( long int *vector,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_ReadParVector
+ *--------------------------------------------------------------------------*/
+
+void 
+hypre_F90_IFACE(hypre_readparvector)( int      *comm,
+                                      long int *vector,
+                                      char     *file_name,
+                                      int      *ierr       )
+{
+   *vector = (long int) ( HYPRE_ReadParVector( (MPI_Comm) *comm,
+                                               (char *)    file_name ) );
+
+   *ierr = !(*vector);
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_PrintParVector
  *--------------------------------------------------------------------------*/
 

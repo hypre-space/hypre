@@ -274,6 +274,7 @@ hypre_CSRMatrixNumCols(hypre_ParCSRMatrixDiag(matrix))
 void hypre_F90_IFACE P((int hypre_newparcsrmatrix ));
 void hypre_F90_IFACE P((int hypre_destroyparcsrmatrix ));
 void hypre_F90_IFACE P((int hypre_initializeparcsrmatrix ));
+void hypre_F90_IFACE P((int hypre_readparcsrmatrix ));
 void hypre_F90_IFACE P((int hypre_printparcsrmatrix ));
 void hypre_F90_IFACE P((int hypre_getcommparcsr ));
 void hypre_F90_IFACE P((int hypre_getdimsparcsr ));
@@ -285,6 +286,7 @@ void hypre_F90_IFACE P((int hypre_restorerowparcsrmatrix ));
 void hypre_F90_IFACE P((int hypre_newparvector ));
 void hypre_F90_IFACE P((int hypre_destroyparvector ));
 void hypre_F90_IFACE P((int hypre_initializeparvector ));
+void hypre_F90_IFACE P((int hypre_readparvector ));
 void hypre_F90_IFACE P((int hypre_printparvector ));
 
 /* F90_par_vector.c */
@@ -325,6 +327,7 @@ int HYPRE_ParMatvec P((double alpha , HYPRE_ParCSRMatrix A , HYPRE_ParVector x ,
 HYPRE_ParVector HYPRE_CreateParVector P((MPI_Comm comm , int global_size , int *partitioning ));
 int HYPRE_DestroyParVector P((HYPRE_ParVector vector ));
 int HYPRE_InitializeParVector P((HYPRE_ParVector vector ));
+HYPRE_ParVector HYPRE_ReadParVector P((MPI_Comm comm , char *file_name ));
 int HYPRE_PrintParVector P((HYPRE_ParVector vector , char *file_name ));
 int HYPRE_SetParVectorConstantValues P((HYPRE_ParVector vector , double value ));
 int HYPRE_SetParVectorRandomValues P((HYPRE_ParVector vector , int seed ));
