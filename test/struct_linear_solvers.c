@@ -70,6 +70,11 @@ main( int   argc,
    /*-----------------------------------------------------------
     * Initialize some stuff
     *-----------------------------------------------------------*/
+
+#ifdef HYPRE_USE_PTHREADS
+   HYPRE_InitPthreads(MPI_COMM_WORLD);
+#endif  
+
  
    /* Initialize MPI */
    MPI_Init(&argc, &argv);
@@ -77,9 +82,6 @@ main( int   argc,
    MPI_Comm_size(MPI_COMM_WORLD, &num_procs );
    MPI_Comm_rank(MPI_COMM_WORLD, &myid );
 
-#ifdef HYPRE_USE_PTHREADS
-   HYPRE_InitPthreads(MPI_COMM_WORLD);
-#endif  
 
 #ifdef HYPRE_DEBUG
    cegdb(&argc, &argv, myid);
@@ -628,14 +630,12 @@ main( int   argc,
 
    hypre_FinalizeMemoryDebug();
 
+   /* Finalize MPI */
+   MPI_Finalize();
+
 #ifdef HYPRE_USE_PTHREADS
    HYPRE_DestroyPthreads();
 #endif  
-
-
-
-   /* Finalize MPI */
-   MPI_Finalize();
 
    return (0);
 }
