@@ -444,7 +444,7 @@ then
 
       AC_DEFINE(HYPRE_SOLARIS)
 
-      casc_using_HYPRE_blas = yes
+      casc_using_HYPRE_blas=yes
 
    ;;
 
@@ -541,7 +541,7 @@ then
            AC_CHECK_PROGS(F77,xlf g77)
          else
 	   if test "$casc_using_pthreads" = "yes"
-           then
+         then
              AC_CHECK_PROGS(CC,xlc_r gcc)
              AC_CHECK_PROGS(CXX,xlC_r g++)
              AC_CHECK_PROGS(F77,xlf_r g77)  
