@@ -26,7 +26,9 @@
 #include "solver/mli_solver_bjacobi.h"
 #include "solver/mli_solver_gs.h"
 #include "solver/mli_solver_sgs.h"
+#include "solver/mli_solver_hsgs.h"
 #include "solver/mli_solver_bsgs.h"
+#include "solver/mli_solver_hschwarz.h"
 #include "solver/mli_solver_parasails.h"
 #include "solver/mli_solver_mls.h"
 #include "solver/mli_solver_chebyshev.h"
@@ -58,6 +60,8 @@ MLI_Solver *MLI_Solver_CreateFromName( char *str )
    else if (!strcmp(str,"BJacobi")) solver_ptr = new MLI_Solver_BJacobi(str);
    else if (!strcmp(str,"GS"))      solver_ptr = new MLI_Solver_GS(str);
    else if (!strcmp(str,"SGS"))     solver_ptr = new MLI_Solver_SGS(str);
+   else if (!strcmp(str,"HSGS"))    solver_ptr = new MLI_Solver_HSGS(str);
+   else if (!strcmp(str,"HSchwarz"))solver_ptr = new MLI_Solver_HSchwarz(str);
    else if (!strcmp(str,"MCSGS")) 
    {
       solver_ptr = new MLI_Solver_SGS(str);
@@ -139,6 +143,8 @@ MLI_Solver *MLI_Solver_CreateFromName( char *str )
       printf("\t SGS \n");
       printf("\t MCSGS \n");
       printf("\t BSGS \n");
+      printf("\t HSGS (BoomerAMG SGS) \n");
+      printf("\t HSchwarz (BoomerAMG Schwarz) \n");
       printf("\t MCBSGS \n");
       printf("\t ParaSails \n");
       printf("\t MLS \n");

@@ -60,6 +60,7 @@ HEADERS =\
  mli_solver_sgs.h \
  mli_solver_bsgs.h \
  mli_solver_hsgs.h \
+ mli_solver_hschwarz.h \
  mli_solver_parasails.h \
  mli_solver_mls.h \
  mli_solver_chebyshev.h \
@@ -77,6 +78,7 @@ FILES =\
  mli_solver_sgs.cxx \
  mli_solver_bsgs.cxx \
  mli_solver_hsgs.cxx \
+ mli_solver_hschwarz.cxx \
  mli_solver_parasails.cxx \
  mli_solver_mls.cxx \
  mli_solver_chebyshev.cxx \
