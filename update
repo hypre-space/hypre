@@ -208,6 +208,7 @@ then
             UPDATE/src/linear_solvers/distributed_linear_solvers/pilut \
             UPDATE/src/linear_solvers/distributed_linear_solvers/ParaSails \
             UPDATE/src/linear_solvers/parcsr_linear_solvers \
+            UPDATE/src/linear_solvers/FEI_matrix_vector \
             UPDATE/src/linear_solvers/test
         rm -f update
     fi

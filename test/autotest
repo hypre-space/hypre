@@ -40,6 +40,10 @@ HYPRE_IJ_EMAIL="$HYPRE_DEFAULT_EMAIL\
  mlambert@llnl.gov\
  chtong@llnl.gov"
 
+HYPRE_FEI_EMAIL="$HYPRE_DEFAULT_EMAIL\
+ chow8@llnl.gov\
+ chtong@llnl.gov"
+
 HYPRE_ALL_EMAIL="$HYPRE_STRUCT_EMAIL $HYPRE_IJ_EMAIL"
 
 HYPRE_BETA_EMAIL="$HYPRE_ALL_EMAIL"
@@ -75,8 +79,10 @@ echo "$HYPRE_STRUCT_EMAIL" > $0.struct.err.email
 $MAKE IJ 1> $0.IJ.log 2> $0.IJ.err
 echo "$HYPRE_IJ_EMAIL" > $0.IJ.err.email 
 
+$MAKE fei 1> $0.fei.log 2> $0.fei.err
+echo "$HYPRE_FEI_EMAIL" > $0.fei.err.email 
+
 $MAKE
-(cd test; $MAKE fei++)
 
 $MAKE beta 1> $0.beta.log 2> $0.beta.err
 echo "$HYPRE_BETA_EMAIL" > $0.beta.err.email 
@@ -91,6 +97,9 @@ echo "$HYPRE_BETA_EMAIL" > $0.beta.err.email
 #==============================
 # Run test suites
 #==============================
+
+$MAKE nofei
+(cd test; $MAKE fei++)
 
 cd $HYPRE_AUTOTEST_DIR/linear_solvers/test
 ./test_drivers.sh -mail
@@ -301,6 +310,7 @@ ssh ${HYPRE_COMPILE_MACHINE} "\
 	. test/env.${HYPRE_ARCH};\
         ./configure ;\
         make -k beta;\
+        make -k nofei;\
         cd ${HYPRE_REMOTE_DIR}/linear_solvers/test; make fei++; \
     )"
 

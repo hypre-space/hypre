@@ -57,7 +57,7 @@ HYPRE_EXTRA_DIRS =\
  CI_struct_matrix_vector\
  CI_struct_linear_solvers @HYPRE_PETSCLIBDIRS@
 
-all: struct IJ
+all: struct IJ fei
 	@ \
 	echo "Making test drivers ..."; \
 	(cd test; make veryclean; make); \
@@ -107,28 +107,6 @@ IJ: base
 	    echo ""; \
 	  fi; \
 	done
-	HYPRE_INSTALL_DIR=`pwd`/hypre; \
-	export HYPRE_INSTALL_DIR; \
-	for i in ${HYPRE_FEI_DIRS}; \
-	do \
-	  if [ -d $$i ]; \
-	  then \
-	    echo "Making $$i ..."; \
-	    (cd $$i; make DEFINES=-DNOFEI install); \
-	    echo ""; \
-	  fi; \
-	done; \
-	mkdir -p hypre/tmp; \
-	for i in ${HYPRE_FEI_LIBFILES}; \
-	do \
-	   (cp hypre/lib/$$i hypre/tmp; cd hypre/tmp; ar x $$i; rm -f ___*;);\
-	   if [ $$i = "libHYPRE_DistributedMatrixPilutSolver.a" ]; then \
-	      (cd hypre/tmp; mv -f qsort.o psort.o;); \
-	      (cd hypre/tmp; mv -f qsort_si.o psort_si.o;); \
-	   fi; \
-	done; \
-	(cd hypre/tmp; ar rcu ../lib/libHYPRE_LSI.a *.o;); \
-	rm -rf hypre/tmp; \
 	echo ""
 
 fei: base
@@ -151,8 +129,35 @@ fei: base
 	  if [ -d $$i ]; \
 	  then \
 	    echo "Making $$i ..."; \
-	    (cd $$i; make veryclean); \
 	    (cd $$i; make install); \
+	    echo ""; \
+	  fi; \
+	done; \
+	mkdir -p hypre/tmp; \
+	for i in ${HYPRE_FEI_LIBFILES}; \
+	do \
+	   (cp hypre/lib/$$i hypre/tmp; cd hypre/tmp; ar x $$i; rm -f ___*;);\
+	   if [ $$i = "libHYPRE_DistributedMatrixPilutSolver.a" ]; then \
+	      (cd hypre/tmp; mv -f qsort.o psort.o;); \
+	      (cd hypre/tmp; mv -f qsort_si.o psort_si.o;); \
+	   fi; \
+	done; \
+	(cd hypre/tmp; ar rcu ../lib/libHYPRE_LSI.a *.o;); \
+	rm -rf hypre/tmp; \
+	echo ""
+
+# special autotest target
+nofei:
+	@ \
+	HYPRE_INSTALL_DIR=`pwd`/hypre; \
+	export HYPRE_INSTALL_DIR; \
+	for i in ${HYPRE_FEI_DIRS}; \
+	do \
+	  if [ -d $$i ]; \
+	  then \
+	    echo "Making $$i ..."; \
+	    (cd $$i; make veryclean); \
+	    (cd $$i; make DEFINES=-DNOFEI install); \
 	    echo ""; \
 	  fi; \
 	done; \
@@ -177,7 +182,7 @@ base:
 	cp -f HYPRE_config.h $$HYPRE_INSTALL_DIR/include/.;\
 	cp -f HYPRE.h $$HYPRE_INSTALL_DIR/include/.
 
-install: all fei
+install: all
 	@ \
 	if [ ! "$$HYPRE_INSTALL_DIR" ]; \
 	then \
