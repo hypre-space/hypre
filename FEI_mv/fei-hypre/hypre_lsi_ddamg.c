@@ -893,8 +893,6 @@ int HYPRE_LSI_DDAMGSolve(HYPRE_ParCSRMatrix A_csr, HYPRE_ParVector x_csr,
    HYPRE_ParCSRMatrix  LA_csr;
    HYPRE_IJVector  tvec, Tvec, T2vec;
    HYPRE_ParVector t_csr, T_csr, T2_csr, Lx_csr, Lb_csr;
-   hypre_ParVector *t_par;
-   hypre_Vector    *t_par_local;
    MPI_Comm        newComm, dummyComm;
    HYPRE_Solver    PSolver, SeqPrecon;
 
@@ -1117,9 +1115,6 @@ printf("CHECK 2 = %e\n", ddata);
    HYPRE_IJVectorGetObject(T2vec, (void **) &T2_csr);
    HYPRE_IJVectorGetObject(tvec, (void **) &t_csr);
 
-   t_par       = (hypre_ParVector *) t_csr;
-   t_par_local = hypre_ParVectorLocalVector(t_par);
-   
 /*
    for ( i = 0; i < global_intface_nrows; i++ )
    { 

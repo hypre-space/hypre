@@ -611,8 +611,11 @@ FEI_HYPRE_Impl::~FEI_HYPRE_Impl()
  -------------------------------------------------------------------------*/
 int FEI_HYPRE_Impl::parameters(int numParams, char **paramString)
 {
-   int  i, olevel, nprocs;
+   int  i, olevel;
    char param[256], param1[256];
+#if HAVE_SUPERLU
+   int  nprocs;
+#endif
 
    for ( i = 0; i < numParams; i++ )
    {
