@@ -11,16 +11,19 @@ else !STATICONLY
  libHYPRE_lobpcg_la_LDFLAGS = -avoid-version
 endif !STATICONLY
 
-noinst_HEADERS = \
+include_HEADERS = \
  $(top_srcdir)/eigensolvers/krylov/HYPRE_interpreter.h\
- $(top_srcdir)/eigensolvers/krylov/HYPRE_lobpcg.h\
+ $(top_srcdir)/eigensolvers/krylov/HYPRE_lobpcg.h
+
+noinst_HEADERS = \
  $(top_srcdir)/eigensolvers/krylov/lobpcg.h\
  $(top_srcdir)/eigensolvers/multivector/multivector.h\
  $(top_srcdir)/eigensolvers/parcsr_ls/HYPRE_parcsr_int.h\
  $(top_srcdir)/eigensolvers/sstruct_ls/HYPRE_sstruct_int.h\
  $(top_srcdir)/eigensolvers/struct_ls/HYPRE_struct_int.h\
  $(top_srcdir)/eigensolvers/utilities/fortran_matrix.h
-dependent_includes = $(noinst_HEADERS)
+
+dependent_includes = $(include_HEADERS) $(noinst_HEADERS)
 
 AM_CPPFLAGS = \
  -I$(top_builddir)/utilities\

@@ -40,8 +40,8 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 host_triplet = @host@
 subdir = eigensolvers/lib
-DIST_COMMON = $(noinst_HEADERS) $(srcdir)/Makefile.am \
-	$(srcdir)/Makefile.in
+DIST_COMMON = $(include_HEADERS) $(noinst_HEADERS) \
+	$(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/config/acinclude.m4 \
 	$(top_srcdir)/config/acx_blas.m4 \
@@ -53,7 +53,7 @@ mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/HYPRE_config.h
 CONFIG_CLEAN_FILES =
 ARFLAGS = cru
-am__installdirs = $(DESTDIR)$(libdir) $(DESTDIR)$(libdir)
+am__installdirs = $(DESTDIR)$(libdir) $(DESTDIR)$(libdir) $(DESTDIR)$(includedir)
 libLIBRARIES_INSTALL = $(INSTALL_DATA)
 LIBRARIES = $(lib_LIBRARIES)
 libHYPRE_lobpcg_a_AR = $(AR) $(ARFLAGS)
@@ -101,7 +101,8 @@ LINK = $(LIBTOOL) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 SOURCES = $(libHYPRE_lobpcg_a_SOURCES) $(libHYPRE_lobpcg_la_SOURCES)
 DIST_SOURCES = $(am__libHYPRE_lobpcg_a_SOURCES_DIST) \
 	$(am__libHYPRE_lobpcg_la_SOURCES_DIST)
-HEADERS = $(noinst_HEADERS)
+includeHEADERS_INSTALL = $(INSTALL_HEADER)
+HEADERS = $(include_HEADERS) $(noinst_HEADERS)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -243,9 +244,11 @@ target_alias = @target_alias@
 @STATICONLY_FALSE@lib_LTLIBRARIES = libHYPRE_lobpcg.la
 @STATICONLY_FALSE@libHYPRE_lobpcg_la_SOURCES = $(FILES)
 @STATICONLY_FALSE@libHYPRE_lobpcg_la_LDFLAGS = -avoid-version
-noinst_HEADERS = \
+include_HEADERS = \
  $(top_srcdir)/eigensolvers/krylov/HYPRE_interpreter.h\
- $(top_srcdir)/eigensolvers/krylov/HYPRE_lobpcg.h\
+ $(top_srcdir)/eigensolvers/krylov/HYPRE_lobpcg.h
+
+noinst_HEADERS = \
  $(top_srcdir)/eigensolvers/krylov/lobpcg.h\
  $(top_srcdir)/eigensolvers/multivector/multivector.h\
  $(top_srcdir)/eigensolvers/parcsr_ls/HYPRE_parcsr_int.h\
@@ -253,7 +256,7 @@ noinst_HEADERS = \
  $(top_srcdir)/eigensolvers/struct_ls/HYPRE_struct_int.h\
  $(top_srcdir)/eigensolvers/utilities/fortran_matrix.h
 
-dependent_includes = $(noinst_HEADERS)
+dependent_includes = $(include_HEADERS) $(noinst_HEADERS)
 AM_CPPFLAGS = \
  -I$(top_builddir)/utilities\
  -I$(top_srcdir)/blas\
@@ -472,6 +475,23 @@ clean-libtool:
 distclean-libtool:
 	-rm -f libtool
 uninstall-info-am:
+install-includeHEADERS: $(include_HEADERS)
+	@$(NORMAL_INSTALL)
+	$(mkdir_p) $(DESTDIR)$(includedir)
+	@list='$(include_HEADERS)'; for p in $$list; do \
+	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
+	  f="`echo $$p | sed -e 's|^.*/||'`"; \
+	  echo " $(includeHEADERS_INSTALL) $$d$$p $(DESTDIR)$(includedir)/$$f"; \
+	  $(includeHEADERS_INSTALL) $$d$$p $(DESTDIR)$(includedir)/$$f; \
+	done
+
+uninstall-includeHEADERS:
+	@$(NORMAL_UNINSTALL)
+	@list='$(include_HEADERS)'; for p in $$list; do \
+	  f="`echo $$p | sed -e 's|^.*/||'`"; \
+	  echo " rm -f $(DESTDIR)$(includedir)/$$f"; \
+	  rm -f $(DESTDIR)$(includedir)/$$f; \
+	done
 
 ID: $(HEADERS) $(SOURCES) $(LISP) $(TAGS_FILES)
 	list='$(SOURCES) $(HEADERS) $(LISP) $(TAGS_FILES)'; \
@@ -551,7 +571,7 @@ check-am: all-am
 check: check-am
 all-am: Makefile $(LIBRARIES) $(LTLIBRARIES) $(HEADERS)
 installdirs:
-	$(mkdir_p) $(DESTDIR)$(libdir) $(DESTDIR)$(libdir)
+	$(mkdir_p) $(DESTDIR)$(libdir) $(DESTDIR)$(libdir) $(DESTDIR)$(includedir)
 install: install-am
 install-exec: install-exec-am
 install-data: install-data-am
@@ -596,7 +616,7 @@ info: info-am
 
 info-am:
 
-install-data-am:
+install-data-am: install-includeHEADERS
 
 install-exec-am: install-libLIBRARIES install-libLTLIBRARIES
 
@@ -623,21 +643,23 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am: uninstall-libLIBRARIES uninstall-libLTLIBRARIES
+uninstall-am: uninstall-includeHEADERS uninstall-libLIBRARIES \
+	uninstall-libLTLIBRARIES
 
 .PHONY: CTAGS GTAGS all all-am check check-am clean clean-generic \
 	clean-libLIBRARIES clean-libLTLIBRARIES clean-libtool ctags \
 	distclean distclean-compile distclean-generic \
 	distclean-libtool distclean-tags distdir dvi dvi-am html \
 	html-am info info-am install install-am install-data \
-	install-data-am install-exec install-exec-am install-info \
-	install-info-am install-libLIBRARIES install-libLTLIBRARIES \
-	install-man install-strip installcheck installcheck-am \
-	installdirs maintainer-clean maintainer-clean-generic \
-	mostlyclean mostlyclean-compile mostlyclean-generic \
-	mostlyclean-libtool pdf pdf-am ps ps-am tags uninstall \
-	uninstall-am uninstall-info-am uninstall-libLIBRARIES \
-	uninstall-libLTLIBRARIES
+	install-data-am install-exec install-exec-am \
+	install-includeHEADERS install-info install-info-am \
+	install-libLIBRARIES install-libLTLIBRARIES install-man \
+	install-strip installcheck installcheck-am installdirs \
+	maintainer-clean maintainer-clean-generic mostlyclean \
+	mostlyclean-compile mostlyclean-generic mostlyclean-libtool \
+	pdf pdf-am ps ps-am tags uninstall uninstall-am \
+	uninstall-includeHEADERS uninstall-info-am \
+	uninstall-libLIBRARIES uninstall-libLTLIBRARIES
 
 
 $(OBJECTS): $(dependent_includes)
