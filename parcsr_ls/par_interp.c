@@ -129,7 +129,7 @@ hypre_ParAMGBuildInterp( hypre_ParCSRMatrix   *A,
 
    if (!comm_pkg)
    {
-	hypre_GenerateMatvecCommunicationInfo(A, NULL, NULL);
+	hypre_GenerateMatvecCommunicationInfo(A);
 	comm_pkg = hypre_ParCSRMatrixCommPkg(A); 
    }
 
@@ -697,11 +697,9 @@ if (num_procs > 1)
 
    P = hypre_CreateParCSRMatrix(comm, 
                                 hypre_ParCSRMatrixGlobalNumRows(A), 
-                                total_global_cpts, 
-                                col_1, 
-                	        my_first_cpt, 
-                                n_fine,
-                                num_cpts_local,
+                                total_global_cpts,
+                                hypre_ParCSRMatrixRowStarts(A),
+                                num_cpts_global,
                                 num_cols_P_offd, 
                                 P_diag_i[n_fine],
                                 P_offd_i[n_fine]);
@@ -719,7 +717,7 @@ if (num_procs > 1)
    	hypre_CSRMatrixJ(P_offd) = P_offd_j; 
    	hypre_ParCSRMatrixOffd(P) = P_offd;
    	hypre_ParCSRMatrixColMapOffd(P) = col_map_offd_P;
-        hypre_GetCommPkgRTFromCommPkgA(P,A,num_cpts_global);
+        hypre_GetCommPkgRTFromCommPkgA(P,A);
    }   
 
    *P_ptr = P;
