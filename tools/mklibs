@@ -174,9 +174,9 @@ fi
 # MPI + threads version. (Do this only once)
 if [ ! -d threads/lib ]
 then
-  if [ "$SYS_TYPE" != "SunOS" &&
-       "$SYS_TYPE" != "Linux" &&
-       "$SYS_TYPE" != "IRIX64" ]
+  if [[ "$SYS_TYPE" != "SunOS" && 
+	"$SYS_TYPE" != "Linux" && 
+	"$SYS_TYPE" != "IRIX64" ]]
   then
     (
         HYPRE_INSTALL_DIR=$DIST_DIR/threads
