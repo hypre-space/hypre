@@ -99,7 +99,9 @@ c
 c===> find initial residual
 c
       if(iprtc.ge.0) then
-        call rsdl(1,enrg,res,resv,0,imin,imax,u,f,a,ia,ja,iu)
+cveh        call rsdl(1,enrg,res,resv,0,imin,imax,u,f,a,ia,ja,iu)
+        call rsdl(1,enrg,res,resv,aip,fu,ru,uu,0,
+     *            imin,imax,u,f,a,ia,ja,iu)
         resi = res
         write(6,1000)
         write(6,1100) res,enrg
@@ -138,12 +140,16 @@ c
 cveh
 cveh relative residual temporarily added: relres,
 cveh
+        engold = enrg
         resold=res
-        call rsdl(1,enrg,res,resv,0,imin,imax,u,f,a,ia,ja,iu)
+cveh        call rsdl(1,enrg,res,resv,0,imin,imax,u,f,a,ia,ja,iu)
+        call rsdl(1,enrg,res,resv,aip,fu,ru,uu,0,
+     *            imin,imax,u,f,a,ia,ja,iu)
         factor=res/resold
         relres = res/fnorm
+        delteng=enrg-engold
 cveh        write(6,1200) ncy,res,enrg,factor
-        write(6,1200) ncy,res,enrg,factor,relres
+        write(6,1200) ncy,res,enrg,factor,relres,aip,delteng,fu,ru,uu
       endif
 
   100 continue
@@ -164,10 +170,11 @@ cveh        write(6,1200) ncy,res,enrg,factor
       return
 
 1000  format(/14x,'                              relative'/,
-     *  14x,'residual    energy    factor  residual'/,
+     *  14x,'residual    energy    factor  residual'
+     *               '   <Au,u>   delteng     <f,u>    <r,u>    <u,u>'/,
      *  14x,'--------    ------    ------  --------')
 1100  format(3x,' Initial ',1p,5(1x,e9.2))
-1200  format(3x,' Cycle ',i2,1p,5(1x,e9.2))
+1200  format(3x,' Cycle ',i2,1p,9(1x,e9.2))
 1300  format(/3x,' Average convergence factor   =  ',1p,e9.2)
 cveh        New format statement 2000 replaces above ccccccccccccccccc
 2000  format(/5x,'Solution times:'/
@@ -357,7 +364,8 @@ c
           lltop=0
         endif
 
-        call rsdl(k,enrg,res,resv,0,imin,imax,u,f,a,ia,ja,iu)
+cveh        call rsdl(k,enrg,res,resv,0,imin,imax,u,f,a,ia,ja,iu)
+        call rsdl(k,enrg,res,resv,aip,0,imin,imax,u,f,a,ia,ja,iu)
         enrgt=enrg+enrgf(k)
 c       write(6,6001) k,res,enrgt,(resv(i),i=1,nun1)
         write(6,6001) k,res,enrgt,(resv(i),i=1,nun)
@@ -380,7 +388,8 @@ c
 c     compute & print residuals
 c
       if(iprtc.ge.k) then
-        call rsdl(k,enrg,res,resv,0,imin,imax,u,f,a,ia,ja,iu)
+cveh        call rsdl(k,enrg,res,resv,0,imin,imax,u,f,a,ia,ja,iu)
+        call rsdl(k,enrg,res,resv,aip,0,imin,imax,u,f,a,ia,ja,iu)
         enrgt=enrg+enrgf(k)
 c       write(6,6000) k,ity(i),ipt(i),ieq(i),iun(i),res,enrgt,
 c    *                (resv(iii),iii=1,nun1)

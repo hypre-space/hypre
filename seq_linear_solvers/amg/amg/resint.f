@@ -211,7 +211,8 @@ c     residual calculation routines
 c
 c=====================================================================
 c
-      subroutine rsdl(k,enrg,res,resv,iprt,imin,imax,u,f,a,ia,ja,iu)
+      subroutine rsdl(k,enrg,res,resv,aip,fu,ru,
+     *                uu,iprt,imin,imax,u,f,a,ia,ja,iu)
 c
 c---------------------------------------------------------------------
 c
@@ -241,6 +242,12 @@ c
 10    continue
       resp=res
       enrg=0.e0
+cveh  test. compute <Au,u>, <r,u>, <f,u>
+      aip=0.e0
+      fu=0.e0
+      ru=0.e0
+      uu=0.e0
+cveh
       r2=0.e0
       ilo=imin(k)
       ihi=imax(k)
@@ -252,6 +259,12 @@ c
 20    s=s+a(j)*u(ja(j))
       r=s-f(i)
       r2=r*r
+cveh
+      aip = aip + s*u(i)
+      fu = fu + f(i)*u(i)
+      ru = ru + r*u(i)
+      uu = uu + u(i)*u(i)
+cveh
       enrg=enrg+r*u(i)-u(i)*f(i)
       resv(iu(i))=resv(iu(i))+r2
 30    continue
