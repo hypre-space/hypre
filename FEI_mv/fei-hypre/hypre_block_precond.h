@@ -33,42 +33,48 @@
 
 class HYPRE_IncFlow_BlockPrecond
 {
-   HYPRE_IJMatrix Amat_;
-   HYPRE_IJMatrix A11mat_;
-   HYPRE_IJMatrix A12mat_;
-   HYPRE_IJMatrix A22mat_;
-   int            P22Size_, P22GSize_;
-   int            *P22LocalInds_, *P22GlobalInds_;
-   int            *APartition_;
-   int            assembled_;
-   int            *P22Offsets_;
-   int            outputLevel_;
-   double         diffusionCoef_;
-   double         timeStep_;
-   int            M22Length_;
-   double         *M22Diag_;
-   int            scheme_;
-   HYPRE_Solver   A11Solver_;
-   HYPRE_Solver   A11Precond_;
-   HYPRE_Solver   A22Solver_;
-   HYPRE_Solver   A22Precond_;
+   HYPRE_IJMatrix Amat_;             // incoming system matrix
+   HYPRE_IJMatrix A11mat_;           // velocity matrix
+   HYPRE_IJMatrix A12mat_;           // gradient (divergence) matrix
+   HYPRE_IJMatrix A22mat_;           // pressure Poisson 
+   HYPRE_IJVector F1vec_;            // rhs for velocity
+   HYPRE_IJVector F2vec_;            // rhs for pressure
+   HYPRE_IJVector X1vec_;            // solution for velocity
+   HYPRE_IJVector X2vec_;            // solution for pressure
+   HYPRE_IJVector X1aux_;            // auxiliary vector for velocity
+   int            *APartition_;      // processor partition of matrix A
+   int            P22Size_;          // number of pressure variables
+   int            P22GSize_;         // global number of pressure variables
+   int            *P22LocalInds_;    // pressure local row indices (global)
+   int            *P22GlobalInds_;   // pressure off-processor row indices
+   int            *P22Offsets_;      // processor partiton of matrix A22
+   int            assembled_;        // set up complete flag
+   int            outputLevel_;      // for diagnostics
+   int            lumpedMassLength_; // length of M_v and M_p
+   double         *lumpedMassDiag_;  // M_v and M_p lumped
+   int            scheme_;           // which preconditioning ?
+   HYPRE_Solver   A11Solver_;        // solver for velocity matrix
+   HYPRE_Solver   A11Precond_;       // preconditioner for velocity matrix
+   HYPRE_Solver   A22Solver_;        // solver for pressure Poisson 
+   HYPRE_Solver   A22Precond_;       // preconditioner for pressure Poisson
 
  public:
 
    HYPRE_IncFlow_BlockPrecond(HYPRE_IJMatrix Amat);
    virtual ~HYPRE_IncFlow_BlockPrecond();
-   int     setSchemeBDiag()   {scheme_ = HYPRE_INCFLOW_BDIAG; return 0;}
-   int     setSchemeBTRI()    {scheme_ = HYPRE_INCFLOW_BTRI;  return 0;}
-   int     setSchemeBAI()     {scheme_ = HYPRE_INCFLOW_BAI;   return 0;}
-   int     setScalarParams( double timeStep, double diffusion );
-   int     setVectorParams( int length, double *Mdiag );
-   int     computeBlockInfo();
-   int     buildBlocks();
+   int     setSchemeBlockDiagonal()   {scheme_ = HYPRE_INCFLOW_BDIAG; return 0;}
+   int     setSchemeBlockTriangular() {scheme_ = HYPRE_INCFLOW_BTRI;  return 0;}
+   int     setSchemeBlockInverse()    {scheme_ = HYPRE_INCFLOW_BAI;   return 0;}
+   int     setLumpedMasses( int length, double *Mdiag );
    int     setup();
    int     solve( HYPRE_IJVector xvec, HYPRE_IJVector fvec );
-   int     solveBSolve( HYPRE_IJVector x1, HYPRE_IJVector x2,
+
+ private:
+   int     computeBlockInfo();
+   int     buildBlocks();
+   int     solveBSolve (HYPRE_IJVector x1, HYPRE_IJVector x2,
                         HYPRE_IJVector f1, HYPRE_IJVector f2 );
-   int     solveBAI   ( HYPRE_IJVector x1, HYPRE_IJVector x2,
+   int     solveBISolve(HYPRE_IJVector x1, HYPRE_IJVector x2,
                         HYPRE_IJVector f1, HYPRE_IJVector f2 );
 };
 
