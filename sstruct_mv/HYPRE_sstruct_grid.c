@@ -84,7 +84,7 @@ HYPRE_SStructGridDestroy( HYPRE_SStructGrid grid )
    hypre_SStructMapInfo    ***info;
    hypre_SStructNMapInfo   ***ninfo;
    int                        nvars;
-   int                        part, var, i;
+   int                        part, var;
 
    if (grid)
    {

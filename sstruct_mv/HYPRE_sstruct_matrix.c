@@ -433,17 +433,14 @@ HYPRE_SStructMatrixAssemble( HYPRE_SStructMatrix matrix )
    int                      nparts      = hypre_SStructMatrixNParts(matrix);
    hypre_SStructPMatrix   **pmatrices   = hypre_SStructMatrixPMatrices(matrix);
    hypre_SStructGrid       *grid        = hypre_SStructGraphGrid(graph);
-   hypre_SStructPGrid     **pgrids      = hypre_SStructGridPGrids(grid);
    int                    **nvneighbors = hypre_SStructGridNVNeighbors(grid);
    hypre_SStructNeighbor ***vneighbors  = hypre_SStructGridVNeighbors(grid);
-   hypre_SStructNMapInfo ***ninfo       = hypre_SStructGridNInfo(grid);
 
    hypre_SStructPMatrix    *pmatrix;
    hypre_SStructStencil    *stencil;
    hypre_Index             *shape;
    int                     *smap;
    int                     *vars;
-   hypre_StructStencil     *sstencil;
    hypre_StructMatrix      *smatrix;
    hypre_StructGrid        *sgrid;
    hypre_SStructNeighbor   *vneighbor;
