@@ -9,454 +9,600 @@
 #include <stdio.h>
 #include <math.h>
 
+/*---------------------------------------------------------------------
+ * hypre includes
+ *---------------------------------------------------------------------*/
 #include "utilities.h"
 #include "HYPRE.h"
 #include "HYPRE_parcsr_mv.h"
-
 #include "HYPRE_IJ_mv.h"
 #include "HYPRE_parcsr_ls.h"
-#include "HYPRE_LinSysCore.h"
+#include "FEI_mv/fei-hypre/LLNL_FEI_Impl.h"
 
-int BuildParLaplacian27pt (int argc , char *argv [], int arg_index , 
-                             HYPRE_ParCSRMatrix *A_ptr );
+/*---------------------------------------------------------------------
+ * local functions
+ *---------------------------------------------------------------------*/
+int setupFEProblem(LLNL_FEI_Impl *feiPtr);
+int readFERhs(int nElems, int elemNNodes, double *rhs);
+int readFEMatrix(int *nElemsOut, int *elemNNodesOut, int ***elemConnOut,
+           double ****elemStiffOut, int *startRowOut, int *endRowOut);
+int readFEMBC(int *nBCsOut, int **BCEqnOut, double ***alphaOut, 
+           double ***betaOut, double ***gammaOut);
+int composeSharedNodes(int nElems, int elemNNodes, int **elemConn,
+           int *partition, int *nSharedOut, int **sharedIDsOut, 
+           int **sharedLengsOut, int ***sharedProcsOut);
 
-#define SECOND_TIME 0
- 
-int main( int   argc, char *argv[] )
+/*---------------------------------------------------------------------
+ * main 
+ *---------------------------------------------------------------------*/
+int main(int argc, char *argv[])
 {
-   int                 arg_index;
-   int                 print_usage;
-   int                 build_matrix_arg_index;
-   int                 solver_id;
-   int                 ierr,i,j; 
-   int                 num_iterations; 
-
-   HYPRE_ParCSRMatrix  parcsr_A;
-   int                 num_procs, myid;
-   int                 local_row;
-   int		       time_index;
-   MPI_Comm            comm;
-   int                 M, N;
-   int                 first_local_row, last_local_row;
-   int                 first_local_col, last_local_col;
-   int                 size, *col_ind;
-   double              *values;
-
-   /* parameters for BoomerAMG */
-   double              strong_threshold;
-   int                 num_grid_sweeps;  
-   double              relax_weight; 
-
-   /* parameters for GMRES */
-   int	               k_dim;
-
-   char *paramString = new char[100];
+   int  nprocs, mypid, printUsage, argIndex, solverID=0, nParams, i, status;
+   char **paramStrings;
+   LLNL_FEI_Impl *feiPtr;
 
    /*-----------------------------------------------------------
     * Initialize some stuff
     *-----------------------------------------------------------*/
 
    MPI_Init(&argc, &argv);
-   MPI_Comm_size(MPI_COMM_WORLD, &num_procs );
-   MPI_Comm_rank(MPI_COMM_WORLD, &myid );
-
-   /*-----------------------------------------------------------
-    * Set defaults
-    *-----------------------------------------------------------*/
- 
-   build_matrix_arg_index = argc;
-   solver_id              = 0;
-   strong_threshold       = 0.25;
-   num_grid_sweeps        = 2;
-   relax_weight           = 0.5;
-   k_dim                  = 20;
+   MPI_Comm_size(MPI_COMM_WORLD, &nprocs);
+   MPI_Comm_rank(MPI_COMM_WORLD, &mypid);
 
    /*-----------------------------------------------------------
     * Parse command line
     *-----------------------------------------------------------*/
- 
-   print_usage = 0;
-   arg_index = 1;
 
-   while ( (arg_index < argc) && (!print_usage) )
+   printUsage = 0;
+   argIndex = 1;
+
+   while ((argIndex < argc) && (!printUsage))
    {
-      if ( strcmp(argv[arg_index], "-solver") == 0 )
-      {
-         arg_index++;
-         solver_id = atoi(argv[arg_index++]);
-      }
-      else if ( strcmp(argv[arg_index], "-dbg") == 0 )
-      {
-         arg_index++;
-         atoi(argv[arg_index++]);
-      }
-      else if ( strcmp(argv[arg_index], "-help") == 0 )
-      {
-         print_usage = 1;
-      }
-      else
-      {
-         arg_index++;
-      }
+      if (strcmp(argv[argIndex], "-solver") == 0)
+         solverID = atoi(argv[++argIndex]);
+      else if (strcmp(argv[argIndex], "-help") == 0)
+         printUsage = 1;
+      argIndex++;
    }
 
    /*-----------------------------------------------------------
     * Print usage info
     *-----------------------------------------------------------*/
- 
-   if ( (print_usage) && (myid == 0) )
+
+   if ((printUsage) && (mypid == 0))
    {
       printf("\n");
       printf("Usage: %s [<options>]\n", argv[0]);
       printf("\n");
       printf("  -solver <ID>           : solver ID\n");
       printf("       0=DS-PCG      1=ParaSails-PCG \n");
-      printf("       2=AMG-PCG     3=DS-GMRES     \n");
-      printf("       4=PILUT-GMRES 5=AMG-GMRES    \n");     
+      printf("       2=AMG-PCG     3=AMGSA-PCG \n");
+      printf("       4=DS-GMRES    5=AMG-GMRES \n");
+      printf("       6=AMGSA-GMRES 7=LLNL_FEI-CGDiag \n");
       printf("\n");
-      printf("  -rlx <val>             : relaxation type\n");
-      printf("       0=Weighted Jacobi  \n");
-      printf("       1=Gauss-Seidel (very slow!)  \n");
-      printf("       3=Hybrid Jacobi/Gauss-Seidel  \n");
-      printf("\n");  
       exit(1);
    }
 
    /*-----------------------------------------------------------
-    * Print driver parameters
+    * instantiate the finite element interface
     *-----------------------------------------------------------*/
- 
-   if (myid == 0)
+
+   feiPtr = new LLNL_FEI_Impl(MPI_COMM_WORLD);
+   nParams = 18;
+   paramStrings = new char*[nParams];
+   for (i = 0; i < nParams; i++) paramStrings[i] = new char[100];
+   strcpy(paramStrings[0], "externalSolver HYPRE");
+   strcpy(paramStrings[1], "outputLevel 0");
+   switch(solverID)
    {
-      printf("Running with these driver parameters:\n");
-      printf("  solver ID    = %d\n", solver_id);
+      case 0:  strcpy(paramStrings[2], "solver cg");
+               strcpy(paramStrings[3], "preconditioner diagonal");
+               break;
+      case 1:  strcpy(paramStrings[2], "solver cg");
+               strcpy(paramStrings[3], "preconditioner parasails");
+               break;
+      case 2:  strcpy(paramStrings[2], "solver cg");
+               strcpy(paramStrings[3], "preconditioner boomeramg");
+               break;
+      case 3:  strcpy(paramStrings[2], "solver cg");
+               strcpy(paramStrings[3], "preconditioner mli");
+               break;
+      case 4:  strcpy(paramStrings[2], "solver gmres");
+               strcpy(paramStrings[3], "preconditioner diagonal");
+               break;
+      case 5:  strcpy(paramStrings[2], "solver gmres");
+               strcpy(paramStrings[3], "preconditioner boomeramg");
+               break;
+      case 6:  strcpy(paramStrings[2], "solver gmres");
+               strcpy(paramStrings[3], "preconditioner mli");
+               break;
+      case 7:  strcpy(paramStrings[0], "outputLevel 0");
+               break;
+      default: strcpy(paramStrings[2], "solver cg");
+               strcpy(paramStrings[3], "preconditioner diagonal");
+               break;
    }
+   strcpy(paramStrings[4], "gmresDim 100");
+   strcpy(paramStrings[5], "amgNumSweeps 1");
+   strcpy(paramStrings[6], "amgRelaxType hybridsym");
+   strcpy(paramStrings[7], "amgSystemSize 3");
+   strcpy(paramStrings[8], "amgRelaxWeight -10.0");
+   strcpy(paramStrings[9], "amgStrongThreshold 0.5");
+   strcpy(paramStrings[10], "MLI smoother HSGS");
+   strcpy(paramStrings[11], "MLI numSweeps 1");
+   strcpy(paramStrings[12], "MLI smootherWeight 1.0");
+   strcpy(paramStrings[13], "MLI nodeDOF 3");
+   strcpy(paramStrings[14], "MLI nullSpaceDim 3");
+   strcpy(paramStrings[15], "MLI minCoarseSize 50");
+   strcpy(paramStrings[16], "MLI outputLevel 0");
+   strcpy(paramStrings[17], "parasailsSymmetric outputLevel 0");
+   feiPtr->parameters(nParams, paramStrings);
+   for (i = 0; i < nParams; i++) delete [] paramStrings[i];
+   delete [] paramStrings;
 
    /*-----------------------------------------------------------
-    * Set up matrix
+    * set up the finite element interface
     *-----------------------------------------------------------*/
-
-   strcpy(paramString, "LS Interface");
-   time_index = hypre_InitializeTiming(paramString);
-   hypre_BeginTiming(time_index);
-
-   BuildParLaplacian27pt(argc, argv, build_matrix_arg_index, &parcsr_A);
-    
-   /*-----------------------------------------------------------
-    * Copy the parcsr matrix into the LSI through interface calls
-    *-----------------------------------------------------------*/
-
-   ierr = HYPRE_ParCSRMatrixGetComm( parcsr_A, &comm );
-   ierr += HYPRE_ParCSRMatrixGetDims( parcsr_A, &M, &N );
-   ierr = HYPRE_ParCSRMatrixGetLocalRange( parcsr_A,
-             &first_local_row, &last_local_row ,
-             &first_local_col, &last_local_col );
-
-   HYPRE_LinSysCore H(MPI_COMM_WORLD);
-   int numLocalEqns = last_local_row - first_local_row + 1;
-   H.createMatricesAndVectors(M,first_local_row+1,numLocalEqns);
-
-   int index;
-   int *rowLengths = new int[numLocalEqns];
-   int **colIndices = new int*[numLocalEqns];
-
-   local_row = 0;
-   for (i=first_local_row; i<= last_local_row; i++)
-   {
-      ierr += HYPRE_ParCSRMatrixGetRow(parcsr_A,i,&size,&col_ind,&values );
-      rowLengths[local_row] = size;
-      colIndices[local_row] = new int[size];
-      for (j=0; j<size; j++) colIndices[local_row][j] = col_ind[j] + 1;
-      local_row++;
-      HYPRE_ParCSRMatrixRestoreRow(parcsr_A,i,&size,&col_ind,&values);
-   }
-   H.allocateMatrix(colIndices, rowLengths);
-   delete [] rowLengths;
-   for (i=0; i< numLocalEqns; i++) delete [] colIndices[i];
-   delete [] colIndices;
-
-   int *newColInd;
-
-   for (i=first_local_row; i<= last_local_row; i++)
-   {
-      ierr += HYPRE_ParCSRMatrixGetRow(parcsr_A,i,&size,&col_ind,&values );
-      newColInd = new int[size];
-      for (j=0; j<size; j++) newColInd[j] = col_ind[j] + 1;
-      H.sumIntoSystemMatrix(i+1,size,(const double*)values,
-                                     (const int*)newColInd);
-      delete [] newColInd;
-      ierr += HYPRE_ParCSRMatrixRestoreRow(parcsr_A,i,&size,&col_ind,&values);
-   }
-   H.matrixLoadComplete();
-   HYPRE_ParCSRMatrixDestroy(parcsr_A);
+ 
+   setupFEProblem(feiPtr);
 
    /*-----------------------------------------------------------
-    * Set up the RHS and initial guess
+    * set up finite element problem parameters
     *-----------------------------------------------------------*/
 
-   double ddata=1.0;
-   int  status;
+   feiPtr->solve(&status);
 
-   for (i=first_local_row; i<= last_local_row; i++)
-   {
-      index = i + 1;
-      H.sumIntoRHSVector(1,(const double*) &ddata, (const int*) &index);
-   }
-
-   hypre_EndTiming(time_index);
-   strcpy(paramString, "LS Interface");
-   hypre_PrintTiming(paramString, MPI_COMM_WORLD);
-   hypre_FinalizeTiming(time_index);
-   hypre_ClearTiming();
- 
-   /*-----------------------------------------------------------
-    * Solve the system using PCG 
-    *-----------------------------------------------------------*/
-
-   if ( solver_id == 0 ) 
-   {
-      strcpy(paramString, "solver cg");
-      H.parameters(1, &paramString);
-      if (myid == 0) printf("Solver: DS-PCG\n");
-
-      strcpy(paramString, "preconditioner diagonal");
-      H.parameters(1, &paramString);
-   } 
-   else if ( solver_id == 1 )
-   {
-      strcpy(paramString, "solver cg");
-      H.parameters(1, &paramString);
-      if (myid == 0) printf("Solver: ParaSails-PCG\n");
-
-      strcpy(paramString, "preconditioner parasails");
-      H.parameters(1, &paramString);
-      strcpy(paramString, "parasailsNlevels 1");
-      H.parameters(1, &paramString);
-      strcpy(paramString, "parasailsThreshold 0.1");
-      H.parameters(1, &paramString);
-   }
-   else if ( solver_id == 2 )
-   {
-      strcpy(paramString, "solver cg");
-      H.parameters(1, &paramString);
-      if (myid == 0) printf("Solver: AMG-PCG\n");
-
-      strcpy(paramString, "preconditioner boomeramg");
-      H.parameters(1, &paramString);
-      strcpy(paramString, "amgCoarsenType falgout");
-      H.parameters(1, &paramString);
-      sprintf(paramString, "amgStrongThreshold %e", strong_threshold);
-      H.parameters(1, &paramString);
-      sprintf(paramString, "amgNumSweeps %d", num_grid_sweeps);
-      H.parameters(1, &paramString);
-      strcpy(paramString, "amgRelaxType jacobi");
-      H.parameters(1, &paramString);
-      sprintf(paramString, "amgRelaxWeight %e", relax_weight);
-      H.parameters(1, &paramString);
-   }
-   else if ( solver_id == 3 )
-   {
-      strcpy(paramString, "solver cg");
-      H.parameters(1, &paramString);
-      if (myid == 0) printf("Solver: Poly-PCG\n");
-
-      strcpy(paramString, "preconditioner poly");
-      H.parameters(1, &paramString);
-      strcpy(paramString, "polyOrder 9");
-      H.parameters(1, &paramString);
-   }
-   else if ( solver_id == 4 )
-   {
-      strcpy(paramString, "solver gmres");
-      H.parameters(1, &paramString);
-      sprintf(paramString, "gmresDim %d", k_dim);
-      H.parameters(1, &paramString);
-      if (myid == 0) printf("Solver: DS-GMRES\n");
-
-      strcpy(paramString, "preconditioner diagonal");
-      H.parameters(1, &paramString);
-   }
-   else if ( solver_id == 5 ) 
-   {
-      strcpy(paramString, "solver gmres");
-      H.parameters(1, &paramString);
-      sprintf(paramString, "gmresDim %d", k_dim);
-      H.parameters(1, &paramString);
-      if (myid == 0) printf("Solver: PILUT-GMRES\n");
-
-      strcpy(paramString, "preconditioner pilut");
-      H.parameters(1, &paramString);
-      strcpy(paramString, "pilutRowSize 0");
-      H.parameters(1, &paramString);
-      strcpy(paramString, "pilutDropTol 0.0");
-      H.parameters(1, &paramString);
-   }
-   else if ( solver_id == 6 )
-   {
-      strcpy(paramString, "solver gmres");
-      H.parameters(1, &paramString);
-      sprintf(paramString, "gmresDim %d", k_dim);
-      H.parameters(1, &paramString);
-      if (myid == 0) printf("Solver: AMG-GMRES\n");
-
-      strcpy(paramString, "preconditioner boomeramg");
-      H.parameters(1, &paramString);
-      strcpy(paramString, "amgCoarsenType falgout");
-      H.parameters(1, &paramString);
-      sprintf(paramString, "amgStrongThreshold %e", strong_threshold);
-      H.parameters(1, &paramString);
-      sprintf(paramString, "amgNumSweeps %d", num_grid_sweeps);
-      H.parameters(1, &paramString);
-      strcpy(paramString, "amgRelaxType jacobi");
-      H.parameters(1, &paramString);
-      sprintf(paramString, "amgRelaxWeight %e", relax_weight);
-      H.parameters(1, &paramString);
-   }
-   else if ( solver_id == 7 )
-   {
-      strcpy(paramString, "solver gmres");
-      H.parameters(1, &paramString);
-      sprintf(paramString, "gmresDim %d", k_dim);
-      H.parameters(1, &paramString);
-      if (myid == 0) printf("Solver: DDILUT-GMRES\n");
-
-      strcpy(paramString, "preconditioner ddilut");
-      H.parameters(1, &paramString);
-      strcpy(paramString, "ddilutFillin 5.0");
-      H.parameters(1, &paramString);
-      strcpy(paramString, "ddilutDropTol 0.0");
-      H.parameters(1, &paramString);
-   }
-   else if ( solver_id == 8 )
-   {
-      strcpy(paramString, "solver gmres");
-      H.parameters(1, &paramString);
-      sprintf(paramString, "gmresDim %d", k_dim);
-      H.parameters(1, &paramString);
-      if (myid == 0) printf("Solver: POLY-GMRES\n");
-
-      strcpy(paramString, "preconditioner poly");
-      H.parameters(1, &paramString);
-      strcpy(paramString, "polyOrder 5");
-      H.parameters(1, &paramString);
-   }
- 
-   strcpy(paramString, "Krylov Solve");
-   time_index = hypre_InitializeTiming(paramString);
-   hypre_BeginTiming(time_index);
- 
-   H.launchSolver(status, num_iterations);
- 
-   hypre_EndTiming(time_index);
-   strcpy(paramString, "Solve phase times");
-   hypre_PrintTiming(paramString, MPI_COMM_WORLD);
-   hypre_FinalizeTiming(time_index);
-   hypre_ClearTiming();
- 
-   if (myid == 0)
-   {
-      printf("\n Iterations = %d\n", num_iterations);
-      printf("\n");
-   }
- 
    /*-----------------------------------------------------------
     * Finalize things
     *-----------------------------------------------------------*/
 
-   delete [] paramString;
+   delete feiPtr;
    MPI_Finalize();
 
    return (0);
 }
 
-/*----------------------------------------------------------------------
- * Build 27-point laplacian in 3D, 
- * Parameters given in command line.
- *----------------------------------------------------------------------*/
-
-int
-BuildParLaplacian27pt( int                  argc,
-                       char                *argv[],
-                       int                  arg_index,
-                       HYPRE_ParCSRMatrix  *A_ptr     )
+/***************************************************************************
+ * set up the finite element problem
+ *--------------------------------------------------------------------------*/
+int setupFEProblem(LLNL_FEI_Impl *feiPtr)
 {
-   int                 nx, ny, nz;
-   int                 P, Q, R;
-
-   HYPRE_ParCSRMatrix  A;
-
-   int                 num_procs, myid;
-   int                 p, q, r;
-   double             *values;
+   int    nprocs, mypid, nElems, elemNNodes, **elemConn, startRow, endRow;
+   int    *partition, *iArray, i, j, nBCs, *BCEqn, nFields, *fieldSizes; 
+   int    *fieldIDs, elemBlkID, elemDOF, elemFormat, interleave;
+   int    *nodeNFields, **nodeFieldIDs, nShared, *sharedIDs, *sharedLengs;
+   int    **sharedProcs;
+   double ***elemStiff, **alpha, **beta, **gamma, *elemLoad;
 
    /*-----------------------------------------------------------
-    * Initialize some stuff
+    * Initialize parallel machine information
     *-----------------------------------------------------------*/
 
-   MPI_Comm_size(MPI_COMM_WORLD, &num_procs );
-   MPI_Comm_rank(MPI_COMM_WORLD, &myid );
+   MPI_Comm_size(MPI_COMM_WORLD, &nprocs);
+   MPI_Comm_rank(MPI_COMM_WORLD, &mypid);
 
    /*-----------------------------------------------------------
-    * Set defaults
+    * read finite element connectivities and stiffness matrices
+    *-----------------------------------------------------------*/
+
+   readFEMatrix(&nElems,&elemNNodes,&elemConn,&elemStiff,&startRow,&endRow);
+   elemLoad = new double[nElems * elemNNodes];
+   readFERhs(nElems, elemNNodes, elemLoad);
+
+   /*-----------------------------------------------------------
+    * create a processor partition table
+    *-----------------------------------------------------------*/
+
+   partition = new int[nprocs];
+   iArray = new int[nprocs];
+   for (i = 0; i < nprocs; i++) iArray[i] = 0;
+   iArray[mypid] = endRow - startRow + 1;
+   MPI_Allreduce(iArray,partition,nprocs,MPI_INT,MPI_SUM,MPI_COMM_WORLD);
+   for (i = 1; i < nprocs; i++) partition[i] += partition[i-1];
+   delete [] iArray;
+
+   /*-----------------------------------------------------------
+    * read finite element mesh boundary conditions
+    *-----------------------------------------------------------*/
+
+   readFEMBC(&nBCs, &BCEqn, &alpha, &beta, &gamma);
+
+   /*-----------------------------------------------------------
+    * initialize elementwise information
+    *-----------------------------------------------------------*/
+
+   nFields = 1;
+   fieldSizes = new int[1];
+   fieldSizes[0] = 1;
+   fieldIDs = new int[1];
+   fieldIDs[0] = 0;
+   elemBlkID = 0;
+   elemDOF = 0;
+   elemFormat = 0;
+   interleave = 0;
+   nodeNFields = new int[elemNNodes];
+   for (i = 0; i < elemNNodes; i++) nodeNFields[i] = 1; 
+   nodeFieldIDs = new int*[elemNNodes];
+   for (i = 0; i < elemNNodes; i++) 
+   {
+      nodeFieldIDs[i] = new int[1]; 
+      nodeFieldIDs[i][0] = 0;
+   }
+
+   /*-----------------------------------------------------------
+    * compose shared node list
+    *-----------------------------------------------------------*/
+
+   composeSharedNodes(nElems,elemNNodes,elemConn,partition,&nShared,
+                      &sharedIDs, &sharedLengs, &sharedProcs);
+
+   /*-----------------------------------------------------------
+    * initialize and load the finite element interface
+    *-----------------------------------------------------------*/
+
+   feiPtr->initFields(nFields, fieldSizes, fieldIDs);
+   feiPtr->initElemBlock(elemBlkID, nElems, elemNNodes, nodeNFields, 
+                         nodeFieldIDs, elemDOF, NULL, interleave);
+   for (i = 0; i < nElems; i++) feiPtr->initElem(elemBlkID, i, elemConn[i]);
+   if (nShared > 0)
+      feiPtr->initSharedNodes(nShared, sharedIDs, sharedLengs, sharedProcs);
+   feiPtr->initComplete();
+   feiPtr->loadNodeBCs(nBCs, BCEqn, fieldIDs[0], alpha, beta, gamma);
+   for (i = 0; i < nElems; i++) 
+   {
+      feiPtr->sumInElem(elemBlkID,i,elemConn[i], elemStiff[i], 
+                        &(elemLoad[i*elemNNodes]), elemFormat);
+   }
+   feiPtr->loadComplete();
+
+   /*-----------------------------------------------------------
+    * clean up
     *-----------------------------------------------------------*/
  
-   nx = 20;
-   ny = 20;
-   nz = 20;
-
-   P  = 1;
-   Q  = num_procs;
-   R  = 1;
-
-   /*-----------------------------------------------------------
-    * Check a few things
-    *-----------------------------------------------------------*/
-
-   if ((P*Q*R) != num_procs)
+   for (i = 0; i < nElems; i++) delete [] elemConn[i];
+   delete [] elemConn;
+   for (i = 0; i < nElems; i++) 
    {
-      printf("Error: Invalid number of processors or processor topology \n");
+      for (j = 0; j < elemNNodes; j++) delete [] elemStiff[i][j];
+      delete [] elemStiff[i];
+   }
+   delete [] elemStiff;
+   delete [] partition;
+   delete [] BCEqn;
+   for (i = 0; i < nBCs; i++) 
+   {
+      delete [] alpha[i];
+      delete [] beta[i];
+      delete [] gamma[i];
+   }
+   delete [] alpha;
+   delete [] beta;
+   delete [] gamma;
+   delete [] nodeNFields;
+   for (i = 0; i < elemNNodes; i++) delete [] nodeFieldIDs[i];
+   delete [] nodeFieldIDs;
+   delete [] elemLoad;
+   if (nShared > 0)
+   {
+      delete [] sharedIDs;
+      delete [] sharedLengs;
+      for (i = 0; i < nShared; i++) delete [] sharedProcs[i]; 
+      delete [] sharedProcs;
+   }
+   return 0;
+}
+
+/***************************************************************************
+ * read finite element matrices
+ *--------------------------------------------------------------------------*/
+int readFEMatrix(int *nElemsOut, int *elemNNodesOut, int ***elemConnOut,
+                 double ****elemStiffOut, int *startRowOut, int *endRowOut)
+{
+   int    mypid, nElems, elemNNodes, startRow, endRow, **elemConn, i, j, k;
+   double ***elemStiff;
+   char   *paramString;
+   FILE   *fp;
+
+   MPI_Comm_rank(MPI_COMM_WORLD, &mypid);
+   paramString = new char[100];
+   sprintf(paramString, "SFEI.%d", mypid);
+   fp = fopen(paramString, "r");
+   if (fp == NULL)
+   {
+      printf("%3d : feiTest ERROR - sfei file does not exist.\n",mypid);
       exit(1);
    }
-
-   /*-----------------------------------------------------------
-    * Print driver parameters
-    *-----------------------------------------------------------*/
- 
-   if (myid == 0)
+   fscanf(fp,"%d %d %d %d", &nElems, &elemNNodes, &startRow, &endRow);
+   elemConn = new int*[nElems];
+   elemStiff = new double**[nElems];
+   for (i = 0; i < nElems; i++) 
    {
-      printf("  Laplacian_27pt:\n");
-      printf("    (nx, ny, nz) = (%d, %d, %d)\n", nx, ny, nz);
-      printf("    (Px, Py, Pz) = (%d, %d, %d)\n", P,  Q,  R);
+      elemConn[i] = new int[elemNNodes];
+      elemStiff[i] = new double*[elemNNodes];
+      for (j = 0; j < elemNNodes; j++) fscanf(fp,"%d", &(elemConn[i][j]));
+      for (j = 0; j < elemNNodes; j++) 
+      {
+         elemStiff[i][j] = new double[elemNNodes];
+         for (k = 0; k < elemNNodes; k++) 
+            fscanf(fp,"%lg", &(elemStiff[i][j][k]));
+      }
+   }
+   fclose(fp);
+   delete [] paramString;
+   (*nElemsOut) = nElems;
+   (*elemNNodesOut) = elemNNodes;
+   (*elemConnOut) = elemConn;
+   (*elemStiffOut) = elemStiff;
+   (*startRowOut) = startRow;
+   (*endRowOut) = endRow;
+   return 0;
+}
+
+/***************************************************************************
+ * read finite element right hand sides
+ *--------------------------------------------------------------------------*/
+int readFERhs(int nElems, int elemNNodes, double *elemLoad)
+{
+   int    mypid, length, i;
+   double *rhs;
+   char   *paramString;
+   FILE   *fp;
+
+   MPI_Comm_rank(MPI_COMM_WORLD, &mypid);
+   paramString = new char[100];
+   sprintf(paramString, "RHS.%d", mypid);
+   fp = fopen(paramString, "r");
+   if (fp == NULL)
+   {
+      printf("%3d : feiTest ERROR - rhs file does not exist.\n",mypid);
+      exit(1);
+   }
+   length = nElems * elemNNodes;
+   for (i = 0; i < length; i++) fscanf(fp,"%lg",&(elemLoad[i]));
+   fclose(fp);
+   delete [] paramString;
+   return 0;
+}
+
+/***************************************************************************
+ * read BC from file
+ *--------------------------------------------------------------------------*/
+int readFEMBC(int *nBCsOut, int **BCEqnOut, double ***alphaOut, 
+              double ***betaOut, double ***gammaOut)
+{
+   int    mypid, nBCs=0, *BCEqn, i;
+   double **alpha, **beta, **gamma;
+   char   *paramString;
+   FILE   *fp;
+
+   MPI_Comm_rank(MPI_COMM_WORLD, &mypid);
+   paramString = new char[100];
+   sprintf(paramString, "BC.%d", mypid);
+   fp = fopen(paramString, "r");
+   if (fp == NULL)
+   {
+      printf("%3d : feiTest ERROR - BC file does not exist.\n",mypid);
+      exit(1);
+   }
+   fscanf(fp,"%d", &nBCs);
+   BCEqn = new int[nBCs];
+   alpha = new double*[nBCs];
+   beta  = new double*[nBCs];
+   gamma = new double*[nBCs];
+   for (i = 0; i < nBCs; i++) 
+   {
+      alpha[i] = new double[1];
+      beta[i]  = new double[1];
+      gamma[i] = new double[1];
+   }
+   for (i = 0; i < nBCs; i++) 
+      fscanf(fp,"%d %lg %lg %lg",&(BCEqn[i]),&(alpha[i][0]),
+             &(beta[i][0]),&(gamma[i][0]));
+   fclose(fp);
+   delete [] paramString;
+   (*nBCsOut) = nBCs;
+   (*BCEqnOut) = BCEqn;
+   (*alphaOut) = alpha; 
+   (*betaOut) = beta; 
+   (*gammaOut) = gamma; 
+   return 0;
+}
+
+/***************************************************************************
+ * compose shared node list
+ *--------------------------------------------------------------------------*/
+
+int composeSharedNodes(int nElems, int elemNNodes, int **elemConn,
+                       int *partition, int *nSharedOut, int **sharedIDsOut, 
+                       int **sharedLengsOut, int ***sharedProcsOut)
+{
+   int nShared, i, j, index, startRow, endRow, mypid, nprocs, ncnt;
+   int *sharedIDs, *iArray1, *iArray2, **iRecvBufs, **iSendBufs;
+   int nRecvs, *recvProcs, *recvLengs, nSends, *sendProcs, *sendLengs;
+   MPI_Request *mpiRequests;
+   MPI_Status  mpiStatus;
+
+   /* --- get machine and matrix information --- */
+
+   MPI_Comm_size(MPI_COMM_WORLD, &nprocs);
+   MPI_Comm_rank(MPI_COMM_WORLD, &mypid);
+   if (mypid == 0) startRow = 0;
+   else            startRow = partition[mypid-1];
+   endRow = partition[mypid] - 1;
+   
+   /* --- get a rough count of nShared --- */
+
+   nShared = 0;
+   for (i = 0; i < nElems; i++)
+   {
+      for (j = 0; j < elemNNodes; j++)
+      {
+         index = elemConn[i][j];
+         if (index < startRow || index > endRow) nShared++;
+      }
    }
 
-   /*-----------------------------------------------------------
-    * Set up the grid structure
-    *-----------------------------------------------------------*/
+   /* --- allocate and fill sharedIDs array, then sort and compress --- */
 
-   /* compute p,q,r from P,Q,R and myid */
-   p = myid % P;
-   q = (( myid - p)/P) % Q;
-   r = ( myid - p - P*q)/( P*Q );
+   if (nShared <= 0) sharedIDs = NULL;
+   else
+   {
+      sharedIDs = new int[nShared];
+      nShared = 0;
+      for (i = 0; i < nElems; i++)
+      {
+         for (j = 0; j < elemNNodes; j++)
+         {
+            index = elemConn[i][j];
+            if (index < startRow || index > endRow) 
+               sharedIDs[nShared++] = index;
+         }
+      }
+      qsort0(sharedIDs, 0, nShared-1);
+      ncnt = 1;
+      for (i = 1; i < nShared; i++)
+      {
+         if (sharedIDs[i] != sharedIDs[ncnt-1])
+            sharedIDs[ncnt++] = sharedIDs[i];
+      }
+      nShared = ncnt;
+   }   
 
-   /*-----------------------------------------------------------
-    * Generate the matrix 
-    *-----------------------------------------------------------*/
- 
-   values = hypre_CTAlloc(double, 2);
+   /* --- tabulate recv processors and send processors --- */
 
-   values[0] = 26.0;
-   if (nx == 1 || ny == 1 || nz == 1)
-	values[0] = 8.0;
-   if (nx*ny == 1 || nx*nz == 1 || ny*nz == 1)
-	values[0] = 2.0;
-   values[1] = -1.0;
+   iArray1 = new int[nprocs];
+   iArray2 = new int[nprocs];
+   for (i = 0; i < nprocs; i++) iArray1[i] = 0;
+   for (i = 0; i < nShared; i++)
+   {
+      for (j = 0; j < nprocs; j++)
+         if (sharedIDs[i] < partition[j]) break;
+      if (j != mypid) iArray1[j] = 1;
+   } 
+   MPI_Allreduce(iArray1,iArray2,nprocs,MPI_INT,MPI_SUM,MPI_COMM_WORLD);
+   for (i = 0; i < nprocs; i++) iArray1[i] = 0;
+   for (i = 0; i < nShared; i++)
+   {
+      for (j = 0; j < nprocs; j++)
+         if (sharedIDs[i] < partition[j]) break;
+      if (j != mypid) iArray1[j]++;
+   } 
 
-   A = (HYPRE_ParCSRMatrix) GenerateLaplacian27pt(MPI_COMM_WORLD,
-                               nx, ny, nz, P, Q, R, p, q, r, values);
+   nSends = 0;
+   for (i = 0; i < nprocs; i++)
+      if (iArray1[i] != 0) nSends++;
+   if (nSends > 0)
+   {
+      sendLengs = new int[nSends];
+      sendProcs = new int[nSends];
+      nSends = 0;
+      for (i = 0; i < nprocs; i++)
+      {
+         if (iArray1[i] != 0) 
+         {
+            sendLengs[nSends] = iArray1[i];
+            sendProcs[nSends++] = i;
+         }
+      }
+   }
+   nRecvs = iArray2[mypid];
+   if (nRecvs > 0)
+   {
+      recvLengs = new int[nRecvs];
+      recvProcs = new int[nRecvs];
+      mpiRequests = new MPI_Request[nRecvs];
+   }
 
-   hypre_TFree(values);
+   for (i = 0; i < nRecvs; i++)
+      MPI_Irecv(&(recvLengs[i]), 1, MPI_INT, MPI_ANY_SOURCE, 12233, 
+                MPI_COMM_WORLD, &(mpiRequests[i]));
+   for (i = 0; i < nSends; i++)
+      MPI_Send(&(sendLengs[i]), 1, MPI_INT, sendProcs[i], 12233, 
+                MPI_COMM_WORLD);
+   for (i = 0; i < nRecvs; i++)
+   {
+      MPI_Wait(&(mpiRequests[i]), &mpiStatus);
+      recvProcs[i] = mpiStatus.MPI_SOURCE;
+   }
 
-   *A_ptr = A;
+   /* get the shared nodes */
 
-   return (0);
+   if (nRecvs > 0) iRecvBufs = new int*[nRecvs];
+   for (i = 0; i < nRecvs; i++)
+   {
+      iRecvBufs[i] = new int[recvLengs[i]];
+      MPI_Irecv(iRecvBufs[i], recvLengs[i], MPI_INT, recvProcs[i], 12234, 
+                MPI_COMM_WORLD, &(mpiRequests[i]));
+   }
+   if (nSends > 0) iSendBufs = new int*[nSends];
+   for (i = 0; i < nSends; i++)
+   {
+      iSendBufs[i] = new int[sendLengs[i]];
+      sendLengs[i] = 0;
+   }
+   for (i = 0; i < nShared; i++)
+   {
+      for (j = 0; j < nprocs; j++)
+         if (sharedIDs[i] < partition[j]) break;
+      iSendBufs[j][sendLengs[j]++] = sharedIDs[i];
+   }
+   for (i = 0; i < nSends; i++)
+      MPI_Send(iSendBufs[i],sendLengs[i],MPI_INT,sendProcs[i],12234,
+               MPI_COMM_WORLD);
+   for (i = 0; i < nRecvs; i++) MPI_Wait(&(mpiRequests[i]), &mpiStatus);
+
+   /* --- finally construct the shared information --- */
+
+   ncnt = nShared;
+   for (i = 0; i < nRecvs; i++) ncnt += recvLengs[i];
+   (*nSharedOut) = ncnt;
+   (*sharedIDsOut) = new int[ncnt];
+   (*sharedLengsOut) = new int[ncnt];
+   (*sharedProcsOut) = new int*[ncnt];
+   for (i = 0; i < ncnt; i++) (*sharedProcsOut)[i] = new int[2];
+   for (i = 0; i < nShared; i++)
+   {
+      (*sharedIDsOut)[i] = sharedIDs[i];
+      for (j = 0; j < nprocs; j++)
+         if (sharedIDs[i] < partition[j]) break;
+      (*sharedLengsOut)[i] = 2;
+      (*sharedProcsOut)[i][0] = j;
+      (*sharedProcsOut)[i][1] = mypid;
+   } 
+   ncnt = nShared;
+   for (i = 0; i < nRecvs; i++)
+   {
+      for (j = 0; j < recvLengs[i]; j++)
+      {
+         index = iRecvBufs[i][j];
+         (*sharedIDsOut)[ncnt] = index;
+         (*sharedLengsOut)[ncnt] = 2;
+         (*sharedProcsOut)[ncnt][0] = mypid;
+         (*sharedProcsOut)[ncnt][1] = recvProcs[i];
+         ncnt++;
+      }
+   }   
+
+   /* --- finally clean up --- */
+   
+   if (nShared > 0) delete [] sharedIDs;
+   if (nSends > 0)
+   {
+      delete [] sendProcs;
+      delete [] sendLengs;
+      for (i = 0; i < nSends; i++) delete [] iSendBufs[i];
+      delete [] iSendBufs;
+   }
+   if (nRecvs > 0)
+   {
+      delete [] recvProcs;
+      delete [] recvLengs;
+      for (i = 0; i < nRecvs; i++) delete [] iRecvBufs[i];
+      delete [] iRecvBufs;
+      delete [] mpiRequests;
+   }
+   delete [] iArray1;
+   delete [] iArray2;
+   return 0;
 }
+ 
