@@ -9,7 +9,7 @@ libhypre_class_a_SOURCES = ${PREBUILT_SRCS} ${GENERATED_SRCS} ${PREBUILT_HDRS} $
 
 HYPRE_INCLUDES = -I../../hypre/include -I../../struct_matrix_vector -I../babel_stubs_c
 # BABEL_INCLUDES  = -I${BABELDIR}/include -I${BABELDIR}/include/babel
-BABEL_INCLUDES = -I${BABELDIR}/babel-0.4.0/source/runtime/  -I${BABELDIR}/babel-0.4.0/source/runtime/babel
+BABEL_INCLUDES = -I${BABELDIR}/babel-0.4.1/source/runtime/  -I${BABELDIR}/babel-0.4.1/source/runtime/babel
 INCLUDES = -I.. ${HYPRE_INCLUDES} ${BABEL_INCLUDES} 
 
 # these are implementations of the babel objects.
