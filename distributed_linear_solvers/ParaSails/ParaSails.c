@@ -1865,6 +1865,31 @@ void ParaSailsApply(ParaSails *ps, double *u, double *v)
 }
 
 /*--------------------------------------------------------------------------
+ * ParaSailsApplyTrans - Apply the ParaSails preconditioner, transposed
+ *
+ * ps - input ParaSails object
+ * u  - input array of doubles
+ * v  - output array of doubles
+ *
+ * Although this computation can be done in place, it typically will not
+ * be used this way, since the caller usually needs to preserve the input
+ * vector.
+ *--------------------------------------------------------------------------*/
+
+void ParaSailsApplyTrans(ParaSails *ps, double *u, double *v)
+{
+    if (ps->symmetric)
+    {
+        MatrixMatvec(ps->M, u, v);      /* need to preserve u */
+        MatrixMatvecTrans(ps->M, v, v); /* do the second mult in place */
+    }
+    else
+    {
+        MatrixMatvecTrans(ps->M, u, v);
+    }
+}
+
+/*--------------------------------------------------------------------------
  * ParaSailsStatsPattern - Print some statistics about ParaSailsSetupPattern.
  * Returns a cost, which can be used to preempt ParaSailsSetupValues if the
  * cost is too high.

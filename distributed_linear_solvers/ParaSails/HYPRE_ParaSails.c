@@ -193,3 +193,17 @@ int HYPRE_ParaSailsApply(HYPRE_ParaSails obj, double *u, double *v)
 
     return 0;
 }
+
+/*--------------------------------------------------------------------------
+ * HYPRE_ParaSailsApplyTrans - Apply the ParaSails preconditioner, transposed
+ * to an array "u", and return the result in the array "v".
+ *--------------------------------------------------------------------------*/
+
+int HYPRE_ParaSailsApplyTrans(HYPRE_ParaSails obj, double *u, double *v)
+{
+    hypre_ParaSails *internal = (hypre_ParaSails *) obj;
+
+    ParaSailsApplyTrans(internal->ps, u, v);
+
+    return 0;
+}

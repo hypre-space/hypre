@@ -28,3 +28,4 @@ int HYPRE_ParaSailsSetupValues(HYPRE_ParaSails obj,
   HYPRE_DistributedMatrix *distmat, double filter, double loadbal, 
   int logging);
 int HYPRE_ParaSailsApply(HYPRE_ParaSails ps, double *u, double *v);
+int HYPRE_ParaSailsApplyTrans(HYPRE_ParaSails ps, double *u, double *v);
