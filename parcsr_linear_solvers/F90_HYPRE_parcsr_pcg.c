@@ -151,7 +151,7 @@ hypre_F90_IFACE(hypre_parcsrpcgsetprecond)( long int *solver,
                                (HYPRE_Solver) *solver,
                                HYPRE_ParAMGSolve,
                                HYPRE_ParAMGSetup,
-                               (void *)        precond_solver) );
+                               (void *)       *precond_solver) );
    }
    else if (*precond_id == 7)
    {
@@ -159,7 +159,7 @@ hypre_F90_IFACE(hypre_parcsrpcgsetprecond)( long int *solver,
                                (HYPRE_Solver) *solver,
                                HYPRE_ParCSRPilutSolve,
                                HYPRE_ParCSRPilutSetup,
-                               (void *)        precond_solver) );
+                               (void *)       *precond_solver) );
    }
    else if (*precond_id == 8)
    {
@@ -167,7 +167,7 @@ hypre_F90_IFACE(hypre_parcsrpcgsetprecond)( long int *solver,
                                (HYPRE_Solver) *solver,
                                HYPRE_ParCSRDiagScale,
                                HYPRE_ParCSRDiagScaleSetup,
-                               (void *)        precond_solver) );
+                               (void *)       *precond_solver) );
    }
    else if (*precond_id == 9)
    {
