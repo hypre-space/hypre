@@ -20,7 +20,7 @@
 
 #include "../HYPRE.h"
 
-#include "./HYPRE_IJ_matrix_types.h"
+/* #include "./HYPRE_IJ_matrix_types.h" */
 
 /*--------------------------------------------------------------------------
  * hypre_IJMatrix:
@@ -64,6 +64,6 @@ typedef struct
 /*--------------------------------------------------------------------------
  * prototypes for operations on local objects
  *--------------------------------------------------------------------------*/
-#include "./internal_protos.h"
+/* #include "./internal_protos.h" */
 
 #endif
