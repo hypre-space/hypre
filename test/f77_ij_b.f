@@ -364,12 +364,12 @@ c
       call Hypre_IJBuildMatrix_deleteref_f( Hypre_ij_A )
 c     
 c     The Queryint below checks to see if the returned object can
-c     return a Hypre.ParCSRMatrix. The "cast" is necessary because of the
+c     return a Hypre.IJParCSRMatrix. The "cast" is necessary because of the
 c     restrictions of the C language, and is merely to please the compiler.
 c     It is the Queryint that actually has semantic meaning.
 c     ( cast removed for Fortran )
       call SIDL_BaseInterface_queryint_f(
-     1     Hypre_object, "Hypre.ParCSRMatrix", Hypre_parcsr_A )
+     1     Hypre_object, "Hypre.IJParCSRMatrix", Hypre_parcsr_A )
       if ( Hypre_parcsr_A .eq. 0 ) then
          write (6,*) 'Matrix cast/QI failed\n'
          stop
@@ -433,9 +433,9 @@ c-----------------------------------------------------------------------
 
       call Hypre_IJBuildVector_deleteref_f( Hypre_ij_b )
       call SIDL_BaseInterface_queryint_f(
-     1     Hypre_object, "Hypre.ParCSRVector", Hypre_object_tmp )
+     1     Hypre_object, "Hypre.IJParCSRVector", Hypre_object_tmp )
       call SIDL_BaseInterface__cast_f(
-     1     Hypre_object_tmp, "Hypre.ParCSRVector", Hypre_parcsr_b )
+     1     Hypre_object_tmp, "Hypre.IJParCSRVector", Hypre_parcsr_b )
       if ( Hypre_parcsr_b .eq. 0 ) then
          write (6,*) 'Cast/QI failed\n'
          stop
@@ -487,9 +487,9 @@ c-----------------------------------------------------------------------
 
       call Hypre_IJBuildVector_deleteref_f( Hypre_ij_x )
       call SIDL_BaseInterface_queryint_f(
-     1     Hypre_object, "Hypre.ParCSRVector", Hypre_object_tmp )
+     1     Hypre_object, "Hypre.IJParCSRVector", Hypre_object_tmp )
       call SIDL_BaseInterface__cast_f(
-     1     Hypre_object_tmp, "Hypre.ParCSRVector", Hypre_parcsr_x )
+     1     Hypre_object_tmp, "Hypre.IJParCSRVector", Hypre_parcsr_x )
       if ( Hypre_parcsr_x .eq. 0 ) then
          write (6,*) 'Cast/QI failed\n'
          stop
