@@ -16,6 +16,17 @@
 #define __MLIH__
 
 #include "utilities.h"
+
+/*--------------------------------------------------------------------------
+ * type definition 
+ *--------------------------------------------------------------------------*/
+
+typedef struct MLI_Struct MLI;
+
+/*--------------------------------------------------------------------------
+ * include files 
+ *--------------------------------------------------------------------------*/
+
 #include "mli_onelevel.h"
 #include "../solver/mli_solver.h"
 #include "../amg/mli_method.h"
@@ -37,7 +48,7 @@ ML_Timing;
  * MLI data structure declaration
  *--------------------------------------------------------------------------*/
 
-typedef struct
+typedef struct MLI_Struct
 {
    int            assembled;        /* indicate MG hierarchy is assembled */
    int            method;           /* which multilevel method to use     */
@@ -51,8 +62,7 @@ typedef struct
    MPI_Comm       mpi_comm;         /* MPI communicator                   */
    MLI_Solver     *coarse_solver;   /* temporarily store the coarse solver*/
    MLI_Method     *method_data;     /* data object for a given method     */
-} 
-MLI;
+};
 
 /*--------------------------------------------------------------------------
  * functions for MLI 

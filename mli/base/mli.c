@@ -54,6 +54,7 @@ int MLI_Destroy( MLI *mli )
 {
    for (i = 0; i < mli->max_levels; i++) MLI_OneLevelDestroy(mli->one_levels[i]);
    free( mli->one_levels );
+   free( mli );
    return 0;
 }
 
