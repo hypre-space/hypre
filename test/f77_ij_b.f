@@ -6,7 +6,11 @@ c     of the inputs deleted.  The idea is to narrow this down for simplicity.
       
 c-----------------------------------------------------------------------
 c     Standard 7-point laplacian in 3D with grid and anisotropy determined
-c     as user settings.
+c     as user settings (now hardwired early in the code).
+c     The problem is first set up with some calls of special-purpose
+c     functions in the older hypre interface, which don't exist in the
+c     Babel-based interface.  Then the data is converted to a form suitable
+c     for the Babel-based interface, which is used to call the solver.
 c-----------------------------------------------------------------------
 
       program test
@@ -54,11 +58,6 @@ c     parameters for BoomerAMG
       integer             hybrid, coarsen_type, measure_type
       integer             cycle_type
       integer             smooth_num_sweep
-c     The next two lines may become the only place so far where I have substantively changed the
-c     original Fortran code. num_grid_sweeps and grid_relax_type are actually pointers
-c     set in the Fortran-called C code.  One C function sets the pointer.  Then the Fortran
-c     passes it on to another C function.  But the Babel-based code actually wants to get
-c     data out of them.  I'm still working on getting this to work...
       integer*8           num_grid_sweeps
       integer*8           grid_relax_type
       integer*8           grid_relax_points
@@ -122,17 +121,13 @@ c     Babel-interface variables
       integer*8 Hypre_grid_relax_type
       integer*8 Hypre_relax_weight
       integer max_levels
-c original:      data   max_levels /25/
-      data   max_levels /1/
+      data   max_levels /25/
       double precision relax_weight(25)
       double precision double_zero
       data   double_zero /0.0/
-      integer num_grid_sweeps_f(1)
-      integer grid_relax_type_f(1)
+      double precision double_one
+      data   double_one /1.0/
       integer*8 linop;
-
-c     equivalence ( num_grid_sweeps_f(1), num_grid_sweeps )
-c     equivalence ( grid_relax_type_f(1), grid_relax_type )
 
 
 c-----------------------------------------------------------------------
@@ -144,7 +139,7 @@ c-----------------------------------------------------------------------
       call MPI_COMM_SIZE(MPI_COMM_WORLD, num_procs, ierr)
 
 c-----------------------------------------------------------------------
-c     Set defaults
+c     Set the former input parameters
 c-----------------------------------------------------------------------
 
       dim = 3
@@ -168,10 +163,6 @@ c-----------------------------------------------------------------------
       n_pre  = 1
       n_post = 1
 
-c-----------------------------------------------------------------------
-c     Read options
-c-----------------------------------------------------------------------
-      
       generate_matrix = 1
       generate_rhs = 1
       solver_id = 0
@@ -342,13 +333,14 @@ c     Loop through all locally stored rows and insert them into ij_matrix
          call HYPRE_ParCSRMatrixGetRow(
      1        A_parcsr, i, size, col_inds, values, ierrtmp )
          ierr = ierr + ierrtmp
+
          call SIDL_int__array_set1_f( Hypre_row_sizes, 0, size )
          call SIDL_int__array_set1_f( Hypre_ncols, 0, i )
          upper(1) = size - 1
-         call SIDL_int__array_borrow_f(
+         call SIDL_int__array_borrow_deref_f(
      1        col_inds, 1, lower, upper, stride, Hypre_col_inds )
-         call SIDL_double__array_borrow_f(
-     1        col_inds, 1, lower, upper, stride, Hypre_values )
+         call SIDL_double__array_borrow_deref_f(
+     1        values, 1, lower, upper, stride, Hypre_values )
          call Hypre_IJBuildMatrix_SetValues_f(
      1        Hypre_ij_A, 1, Hypre_row_sizes, Hypre_ncols,
      1        Hypre_col_inds, Hypre_values, ierrtmp )
@@ -369,11 +361,6 @@ c     Loop through all locally stored rows and insert them into ij_matrix
 c     
 c     Fetch the resulting underlying matrix out
 c     
-c     At this point we could destroy A_parcsr if this were a pure Babel-interface
-c     code.  But as long as the direct HYPRE_ interface is in use, we have to keep
-c     it around.
-c     call HYPRE_ParCSRMatrixDestroy( A_parcsr, ierrtmp )
-c     ierr = ierr + ierrtmp
       call Hypre_IJBuildMatrix_GetObject_f(
      1     Hypre_ij_A, Hypre_object, ierrtmp )
       ierr = ierr + ierrtmp
@@ -393,58 +380,13 @@ c     >>> keep the cast for now, take it out once this works.  This isn't C>>>
          stop
       endif
 
-c     
-c     {
-
-c     /* Break encapsulation so that the rest of the driver stays the same */
-c     struct Hypre_ParCSRMatrix__data * temp_data;
-c     jfp This isn't very doable in Fortran.
-c     temp_data = Hypre_ParCSRMatrix__get_data( Hypre_parcsr_A );
-c     
-c     ij_A = temp_data ->ij_A ;
-c     
-c     ierr += HYPRE_IJMatrixGetObject( ij_A, &object);
-c     parcsr_A = (HYPRE_ParCSRMatrix) object;
-c     
-c     }
-
+      call Hypre_ParCSRMatrix_Print_f( Hypre_parcsr_A, "DA", ierrtmp )
+      ierr = ierr + ierrtmp
 
 
 c-----------------------------------------------------------------------
 c     Set up the rhs and initial guess
 c-----------------------------------------------------------------------
-
-      call HYPRE_IJVectorCreate(MPI_COMM_WORLD, first_local_col,
-     &     last_local_col, b, ierr)
-      call HYPRE_IJVectorSetObjectType(b, HYPRE_PARCSR, ierr)
-      call HYPRE_IJVectorInitialize(b, ierr)
-
-c     Set up a Dirichlet 0 problem
-      do i = 1, last_local_col - first_local_col + 1
-         indices(i) = first_local_col - 1 + i
-         vals(i) = 1.
-      enddo
-
-      call HYPRE_IJVectorSetValues(b,
-     &     last_local_col - first_local_col + 1, indices, vals, ierr)
-
-      call HYPRE_IJVectorGetObject(b, b_storage, ierr)
-
-      vecfile(1)  = 'd'
-      vecfile(2)  = 'r'
-      vecfile(3)  = 'i'
-      vecfile(4)  = 'v'
-      vecfile(5)  = 'e'
-      vecfile(6)  = 'r'
-      vecfile(7)  = '.'
-      vecfile(8)  = 'o'
-      vecfile(9)  = 'u'
-      vecfile(10) = 't'
-      vecfile(11) = '.'
-      vecfile(12) = 'b'
-      vecfile(13) = char(0)
-      
-      call HYPRE_IJVectorPrint(b, vecfile, ierr)
 
       call HYPRE_IJVectorCreate(MPI_COMM_WORLD, first_local_col,
      &     last_local_col, x, ierr)
@@ -483,7 +425,7 @@ c     Set up a Dirichlet 0 problem
       do i=0, local_num_cols-1
          call SIDL_int__array_set1_f( Hypre_indices, i,
      1        first_local_col + i )
-         call SIDL_double__array_set1_f( Hypre_values, i, double_zero )
+         call SIDL_double__array_set1_f( Hypre_values, i, double_one )
       enddo
       call Hypre_IJBuildVector_SetValues_f( Hypre_ij_b,
      1     local_num_cols, Hypre_indices, Hypre_values, ierrtmp )
@@ -509,6 +451,10 @@ c     Set up a Dirichlet 0 problem
       endif
 
 
+      call Hypre_ParCSRVector_print_f(
+     1     Hypre_parcsr_b, "driver.out.b", ierrtmp )
+      ierr = ierr + ierrtmp
+
       call Hypre_ParCSRVector__create_f( Hypre_parcsr_x )
       call Hypre_ParCSRVector__cast_f
      1     ( Hypre_parcsr_x, "Hypre.IJBuildVector", Hypre_ij_x )
@@ -518,7 +464,6 @@ c     Set up a Dirichlet 0 problem
          stop
       endif
       call Hypre_IJBuildVector_addReference_f( Hypre_ij_x )
-      call Hypre_ParCSRVector_deleteReference_f( Hypre_parcsr_x )
       call Hypre_IJBuildVector_SetCommunicator_f( Hypre_ij_x,
      1     MPI_COMM_WORLD, ierrtmp )
       ierr = ierr + ierrtmp
@@ -560,31 +505,9 @@ c     Set up a Dirichlet 0 problem
          stop
       endif
 
-
-c     The C program did this:
-c     /* Break encapsulation so that the rest of the driver stays the same */
-c     That's not so easily done in Fortran.
-
-
-c     Choose a nonzero initial guess
-      call HYPRE_IJVectorGetObject(x, x_storage, ierr)
-
-      vecfile(1)  = 'd'
-      vecfile(2)  = 'r'
-      vecfile(3)  = 'i'
-      vecfile(4)  = 'v'
-      vecfile(5)  = 'e'
-      vecfile(6)  = 'r'
-      vecfile(7)  = '.'
-      vecfile(8)  = 'o'
-      vecfile(9)  = 'u'
-      vecfile(10) = 't'
-      vecfile(11) = '.'
-      vecfile(12) = 'x'
-      vecfile(13) = '0'
-      vecfile(14) = char(0)
-      
-      call HYPRE_IJVectorPrint(x, vecfile, ierr)
+      call Hypre_ParCSRVector_print_f(
+     1     Hypre_parcsr_x, "driver.out.x0", ierrtmp )
+      ierr = ierr + ierrtmp
 
 c-----------------------------------------------------------------------
 c     Solve the linear system
@@ -597,7 +520,8 @@ c     will break the interface.
       maxiter = 100
       convtol = 0.9
       debug_flag = 0
-      ioutdat = 1
+c      ioutdat = 1
+      ioutdat = 3
 
 c     Set defaults for BoomerAMG
       maxiter = 500
@@ -611,58 +535,13 @@ c     Set defaults for BoomerAMG
 
       print *, 'Solver: AMG'
 
-c     The direct HYPRE interfaces and the Babel interface will have to live together
-c     until the Babel one is completely working.  (jfp)  Here are the
-c     HYPRE interface calls.
+      call HYPRE_BoomerAMGInitGridRelaxatn(num_grid_sweeps,
+     &     grid_relax_type,
+     &     grid_relax_points,
+     &     coarsen_type,
+     &     relax_weights,
+     &     MAXLEVELS,ierr)
 
-cold      call HYPRE_BoomerAMGCreate(solver, ierr)
-cold      call HYPRE_BoomerAMGSetCoarsenType(solver,
-cold     &     (hybrid*coarsen_type), ierr)
-cold      call HYPRE_BoomerAMGSetMeasureType(solver, measure_type, ierr)
-cold      call HYPRE_BoomerAMGSetTol(solver, tol, ierr)
-cold      call HYPRE_BoomerAMGSetStrongThrshld(solver,
-cold     &     strong_threshold, ierr)
-cold      call HYPRE_BoomerAMGSetTruncFactor(solver, trunc_factor, ierr)
-cold      call HYPRE_BoomerAMGSetPrintLevel(solver, ioutdat,ierr)
-coldc     the old Fortran interface isn't handling the string right:
-coldc     call HYPRE_BoomerAMGSetPrintFileName(solver,"test.out.log",ierr)
-cold      call HYPRE_BoomerAMGSetMaxIter(solver, maxiter, ierr)
-cold      call HYPRE_BoomerAMGSetCycleType(solver, cycle_type, ierr)
-cold      call HYPRE_BoomerAMGInitGridRelaxatn(num_grid_sweeps,
-cold     &     grid_relax_type,
-cold     &     grid_relax_points,
-cold     &     coarsen_type,
-cold     &     relax_weights,
-cold     &     MAXLEVELS,ierr)
-cold      call HYPRE_BoomerAMGSetNumGridSweeps(solver,
-cold     &     num_grid_sweeps, ierr)
-cold      call HYPRE_BoomerAMGSetGridRelaxType(solver,
-cold     &     grid_relax_type, ierr)
-cold      call HYPRE_BoomerAMGSetRelaxWeight(solver,
-cold     &     relax_weights, ierr)
-coldc     call HYPRE_BoomerAMGSetSmoothOption(solver, smooth_option,
-coldc     &                                      ierr)
-coldc     call HYPRE_BoomerAMGSetSmoothNumSwp(solver, smooth_num_sweep,
-coldc     &                                      ierr)
-cold      call HYPRE_BoomerAMGSetGridRelaxPnts(solver,
-cold     &     grid_relax_points,
-cold     &     ierr)
-cold      call HYPRE_BoomerAMGSetMaxLevels(solver, MAXLEVELS, ierr)
-cold      call HYPRE_BoomerAMGSetMaxRowSum(solver, max_row_sum,
-cold     &     ierr)
-cold      call HYPRE_BoomerAMGSetDebugFlag(solver, debug_flag, ierr)
-cold      call HYPRE_BoomerAMGSetup(solver, A_storage, b_storage,
-cold     &     x_storage, ierr)
-cold      call HYPRE_BoomerAMGSolve(solver, A_storage, b_storage,
-cold     &     x_storage, ierr)
-cold      call HYPRE_BoomerAMGGetNumIterations(solver, num_iterations, 
-cold     &     ierr)
-cold      call HYPRE_BoomerAMGGetFinalReltvRes(solver, final_res_norm,
-cold     &     ierr)
-cold      call HYPRE_BoomerAMGDestroy(solver, ierr)
-
-
-c     and here are of the Babel interface calls, adapted from the C/Babel code:
       call Hypre_ParAMG__create_f( Hypre_AMG )
       call Hypre_ParCSRVector__cast_f
      1     ( Hypre_parcsr_b, "Hypre.Vector", Hypre_Vector_b )
@@ -674,7 +553,6 @@ c     and here are of the Babel interface calls, adapted from the C/Babel code:
      1     Hypre_AMG, MPI_COMM_WORLD, ierrtmp )
       ierr = ierr + ierrtmp
       call Hypre_ParAMG_SetOperator_f( Hypre_AMG, Hypre_op_A )
-c     write (6,*) "**** before calling Hypre_ParAMGSet*Parameter"
       call Hypre_ParAMG_SetIntParameter_f(
      1     Hypre_AMG, "CoarsenType", hybrid*coarsen_type, ierrtmp )
       ierr = ierr + ierrtmp
@@ -694,55 +572,40 @@ c     /* note: log output not specified ... */
       call Hypre_ParAMG_SetIntParameter_f(
      1     Hypre_AMG, "CycleType", cycle_type, ierrtmp )
       ierr = ierr + ierrtmp
-c     dimsl[0] = 0;   dimsu[0] = 4;
-c     Hypre_num_grid_sweeps = SIDL_int__array_create( 1, dimsl, dimsu );
-c     for ( i=0; i<4; ++i )
-c     SIDL_int__array_set1( Hypre_num_grid_sweeps, i, num_grid_sweeps[i] );
-c     Hypre_ParAMG_SetIntArrayParameter( Hypre_AMG, "NumGridSweeps", Hypre_num_grid_sweeps );
-c     dimsl[0] = 0;   dimsu[0] = 4;
-c     Hypre_grid_relax_type = SIDL_int__array_create( 1, dimsl, dimsu );
-c     for ( i=0; i<4; ++i )
-c     SIDL_int__array_set1( Hypre_grid_relax_type, i, grid_relax_type[i] );
-c     Hypre_ParAMG_SetIntArrayParameter( Hypre_AMG, "GridRelaxType", Hypre_grid_relax_type );
-cdbug      dimsl(1) = 1
-cdbug      dimsu(1) = 4
-cdbug      call SIDL_int__array_create1d_f(
-cdbug     1     4, Hypre_num_grid_sweeps )
-cdbug      do i = 1, 4
-cdbug         call SIDL_int__array_set1_f(
-cdbug     1        Hypre_num_grid_sweeps, i-1, num_grid_sweeps_f(i) )
-cdbug      enddo
-cdbug      call Hypre_ParAMG_SetIntArrayParameter_f( Hypre_AMG,
-cdbug     1     "NumGridSweeps", Hypre_num_grid_sweeps, ierrtmp )
-cdbug      ierr = ierr + ierrtmp
-cdbug      dimsl(1) = 1
-cdbug      dimsu(1) = 4
-cdbug      call SIDL_int__array_create1d_f(
-cdbug     1     4, Hypre_grid_relax_type )
-cdbug      do i = 1, 4
-cdbug         call SIDL_int__array_set1_f(
-cdbug     1        Hypre_grid_relax_type, i-1, grid_relax_type_f(i) )
-cdbug      enddo
-cdbug      call Hypre_ParAMG_SetIntArrayParameter_f( Hypre_AMG,
-cdbug     1     "GridRelaxType", Hypre_grid_relax_type, ierrtmp )
-cdbug      ierr = ierr + ierrtmp
+      dimsl(1) = 1
+      dimsu(1) = 4
+      call SIDL_int__array_create1d_f(
+     1     4, Hypre_num_grid_sweeps )
+      do i = 1, 4
+         call SIDL_int__array_set1_deref_f(
+     1        Hypre_num_grid_sweeps, i-1, num_grid_sweeps, i-1 )
+      enddo
+      call Hypre_ParAMG_SetIntArrayParameter_f( Hypre_AMG,
+     1     "NumGridSweeps", Hypre_num_grid_sweeps, ierrtmp )
+      ierr = ierr + ierrtmp
+      dimsl(1) = 1
+      dimsu(1) = 4
+      call SIDL_int__array_create1d_f(
+     1     4, Hypre_grid_relax_type )
+      do i = 1, 4
+        call SIDL_int__array_set1_deref_f(
+     1        Hypre_grid_relax_type, i-1, grid_relax_type, i-1 )
+      enddo
+      call Hypre_ParAMG_SetIntArrayParameter_f( Hypre_AMG,
+     1     "GridRelaxType", Hypre_grid_relax_type, ierrtmp )
+      ierr = ierr + ierrtmp
 
-c     dimsl[0] = 0;   dimsu[0] = max_levels;
-c     Hypre_relax_weight = SIDL_double__array_create( 1, dimsl, dimsu );
-c     for ( i=0; i<max_levels; ++i )
-c     SIDL_double__array_set1( Hypre_relax_weight, i, relax_weight[i] );
-c     Hypre_ParAMG_SetDoubleArrayParameter( Hypre_AMG, "RelaxWeight", Hypre_relax_weight );
       dimsl(1) = 0
       dimsu(1) = max_levels
       call SIDL_double__array_create1d_f(
      1     max_levels+1, Hypre_relax_weight )
       do i=1, max_levels
-c     relax_weight(i)=1.0: simple to set, fine for testing:
+c        relax_weight(i)=1.0: simple to set, fine for testing:
          relax_weight(i) = 1.0
       enddo
       do i=1, max_levels
          call SIDL_double__array_set1_f(
-     1        Hypre_relax_weight, i, relax_weight(i) )
+     1        Hypre_relax_weight, i-1, relax_weight(i) )
       enddo
       call Hypre_ParAMG_SetDoubleArrayParameter_f(
      1     Hypre_AMG, "RelaxWeight", Hypre_relax_weight, ierrtmp )
@@ -759,14 +622,13 @@ c left at default: GridRelaxPoints
      1     Hypre_AMG, "MaxRowSum", max_row_sum, ierrtmp )
       ierr = ierr + ierrtmp
 
-c      linop = (Hypre_LinearOperator) Hypre_ParCSRMatrix_castTo(
-c         ij_matrix_Hypre, "Hypre.LinearOperator" );
-c      ierr += Hypre_ParAMG_Setup( AMG_Solver, linop, b_HypreV, x_HypreV );
-c      ierr += Hypre_ParAMG_Apply( AMG_Solver, b_HypreV, &x_HypreV );
       call Hypre_ParCSRMatrix__cast_f(
      1     Hypre_ParCSR_A, "Hypre.LinearOperator", linop )
       call Hypre_ParAMG_Setup_f(
      1     Hypre_AMG, linop, Hypre_Vector_b, Hypre_Vector_x, ierrtmp )
+      ierr = ierr + ierrtmp
+      call Hypre_ParCSRVector_print_f(
+     1     Hypre_parcsr_x, "driver.out.x2", ierrtmp )
       ierr = ierr + ierrtmp
       call Hypre_ParAMG_Apply_f(
      1     Hypre_AMG, Hypre_Vector_b, Hypre_Vector_x, ierrtmp )
@@ -778,33 +640,30 @@ c-----------------------------------------------------------------------
 c     Print the solution and other info
 c-----------------------------------------------------------------------
 
-      vecfile(1)  = 'd'
-      vecfile(2)  = 'r'
-      vecfile(3)  = 'i'
-      vecfile(4)  = 'v'
-      vecfile(5)  = 'e'
-      vecfile(6)  = 'r'
-      vecfile(7)  = '.'
-      vecfile(8)  = 'o'
-      vecfile(9)  = 'u'
-      vecfile(10) = 't'
-      vecfile(11) = '.'
-      vecfile(12) = 'x'
-      vecfile(13) = char(0)
-      
-      call HYPRE_IJVectorPrint(x, vecfile, ierr)
+      call Hypre_ParCSRVector_print_f(
+     1     Hypre_parcsr_x, "driver.out.x", ierrtmp )
+      ierr = ierr + ierrtmp
 
       if (myid .eq. 0) then
+         call Hypre_ParAMG_GetIntValue_f(
+     1        Hypre_AMG, "Iterations", num_iterations, ierrtmp )
+         ierr = ierr + ierrtmp
+         call Hypre_ParAMG_GetDoubleValue_f(
+     1        Hypre_AMG, "Final Relative Residual Norm", final_res_norm,
+     1        ierrtmp )
+         ierr = ierr + ierrtmp
          print *, 'Iterations = ', num_iterations
          print *, 'Final Residual Norm = ', final_res_norm
+         print *, 'Error Flag = ', ierr
       endif
 
 c-----------------------------------------------------------------------
 c     Finalize things
 c-----------------------------------------------------------------------
 
+      call Hypre_ParCSRVector_deleteReference_f( Hypre_parcsr_x )
       call HYPRE_ParCSRMatrixDestroy(A_storage, ierr)
-      call HYPRE_IJVectorDestroy(b, ierr)
+c      call HYPRE_IJVectorDestroy(b, ierr)
       call HYPRE_IJVectorDestroy(x, ierr)
 
 c     Finalize MPI
