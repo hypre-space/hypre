@@ -17,19 +17,21 @@
  
 /*----------------------------------------------------------------------
  * Standard 7-point laplacian in 3D with grid and anisotropy determined
- * as command line arguments.
- *
- * Command line arguments: nx ny nz P Q R dx dy dz [solver]
- *   n[xyz] = size of local problem
- *   [PQR]  = process topology
- *   d[xyz] = diffusion coefficients
- *   solver = an optional ID to indicate a specific solver
+ * as command line arguments.  Do `driver -help' for usage info.
  *----------------------------------------------------------------------*/
 
 int   main(argc, argv)
 int   argc;
 char *argv[];
 {
+   int                 arg_index;
+   int                 print_usage;
+   int                 nx, ny, nz;
+   int                 P, Q, R;
+   int                 bx, by, bz;
+   double              cx, cy, cz;
+   int                 solver_id;
+
    int                 A_num_ghost[6] = { 1, 1, 1, 1, 1, 1};
                      
    HYPRE_StructMatrix  A;
@@ -44,15 +46,10 @@ char *argv[];
 
    int                 num_procs, myid;
 
-   int                 nx, ny, nz;
-   int                 P, Q, R;
-   double              dx, dy, dz;
    int                 p, q, r;
-   int                 ilower[3];
-   int                 iupper[3];
-   int                 volume;
-
-   int                 solver_id;
+   int                 ilower[50][3];
+   int                 iupper[50][3];
+   int                 nblocks, volume;
 
    int                 dim = 3;
    int                 offsets[4][3] = {{-1,  0,  0},
@@ -67,6 +64,7 @@ char *argv[];
    double             *values;
 
    int                 i, s, d;
+   int                 ix, iy, iz, ib;
 
    /*-----------------------------------------------------------
     * Initialize some stuff
@@ -84,57 +82,162 @@ char *argv[];
 
    hypre_InitMemoryDebug(myid);
 
-   if (argc > 9)
+   /*-----------------------------------------------------------
+    * Set defaults
+    *-----------------------------------------------------------*/
+ 
+   nx = 10;
+   ny = 10;
+   nz = 10;
+
+   P  = num_procs;
+   Q  = 1;
+   R  = 1;
+
+   bx = 1;
+   by = 1;
+   bz = 1;
+
+   cx = 1.0;
+   cy = 1.0;
+   cz = 1.0;
+
+   solver_id = 0;
+
+   /*-----------------------------------------------------------
+    * Parse command line
+    *-----------------------------------------------------------*/
+ 
+   print_usage = 0;
+   arg_index = 1;
+   while (arg_index < argc)
    {
-      nx = atoi(argv[1]);
-      ny = atoi(argv[2]);
-      nz = atoi(argv[3]);
-      P  = atoi(argv[4]);
-      Q  = atoi(argv[5]);
-      R  = atoi(argv[6]);
-      dx = atof(argv[7]);
-      dy = atof(argv[8]);
-      dz = atof(argv[9]);
+      if ( strcmp(argv[arg_index], "-n") == 0 )
+      {
+         arg_index++;
+         nx = atoi(argv[arg_index++]);
+         ny = atoi(argv[arg_index++]);
+         nz = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-P") == 0 )
+      {
+         arg_index++;
+         P  = atoi(argv[arg_index++]);
+         Q  = atoi(argv[arg_index++]);
+         R  = atoi(argv[arg_index++]);
+      }
+      if ( strcmp(argv[arg_index], "-b") == 0 )
+      {
+         arg_index++;
+         bx = atoi(argv[arg_index++]);
+         by = atoi(argv[arg_index++]);
+         bz = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-c") == 0 )
+      {
+         arg_index++;
+         cx = atof(argv[arg_index++]);
+         cy = atof(argv[arg_index++]);
+         cz = atof(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-solver") == 0 )
+      {
+         arg_index++;
+         solver_id = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-help") == 0 )
+      {
+         print_usage = 1;
+         break;
+      }
+      else
+      {
+         print_usage = 1;
+         break;
+      }
    }
-   else
+
+   /*-----------------------------------------------------------
+    * Print usage info
+    *-----------------------------------------------------------*/
+ 
+   if ( (print_usage) && (myid == 0) )
    {
-      printf("Usage: mpirun -np %d %s <nx,ny,nz,P,Q,R,dx,dy,dz> ,\n\n",
-             num_procs, argv[0]);
-      printf("     where nx X ny X nz is the problem size per processor;\n");
-      printf("           P  X  Q X  R is the processor topology;\n");
-      printf("           dx, dy, dz   are the diffusion coefficients.\n");
+      printf("\n");
+      printf("Usage: %s [<options>]\n", argv[0]);
+      printf("\n");
+      printf("  -n <nx> <ny> <nz>    : problem size per processor\n");
+      printf("  -P <Px> <Py> <Pz>    : processor topology\n");
+      printf("  -b <bx> <by> <bz>    : blocking per processor\n");
+      printf("  -c <cx> <cy> <cz>    : diffusion coefficients\n");
+      printf("  -solver <ID>         : solver ID\n");
+      printf("\n");
 
       exit(1);
    }
 
-   volume = nx*ny*nz;
+   /*-----------------------------------------------------------
+    * Check a few things
+    *-----------------------------------------------------------*/
 
-   /* determine solver_id */
-   solver_id = 0;
-   if (argc > 10)
+   if ((P*Q*R) != num_procs)
    {
-      solver_id = atoi(argv[10]);
+      printf("Error: Invalid number of processors or processor topology \n");
+      exit(1);
+   }
+
+   if (bx*by*bz > 50)
+   {
+      printf("Error: Maximum number of blocks allowed per processor is 50\n");
+      exit(1);
+   }
+
+   /*-----------------------------------------------------------
+    * Print driver parameters
+    *-----------------------------------------------------------*/
+ 
+   if (myid == 0)
+   {
+      printf("Running with these driver parameters:\n");
+      printf("  (nx, ny, nz) = (%d, %d, %d)\n", nx, ny, nz);
+      printf("  (Px, Py, Pz) = (%d, %d, %d)\n", P,  Q,  R);
+      printf("  (bx, by, bz) = (%d, %d, %d)\n", bx, by, bz);
+      printf("  (cx, cy, cz) = (%f, %f, %f)\n", cx, cy, cz);
+      printf("  solver ID    = %d\n", solver_id);
    }
 
    /*-----------------------------------------------------------
     * Set up the grid structure
     *-----------------------------------------------------------*/
- 
+
+   volume  = nx*ny*nz;
+   nblocks = bx*by*bz;
+
    /* compute p,q,r from P,Q,R and myid */
    p = myid % P;
    q = (( myid - p)/P) % Q;
    r = ( myid - p - P*q)/( P*Q );
 
-   /* compute ilower and iupper from p,q,r and nx,ny,nz */
-   ilower[0] = nx*p;
-   iupper[0] = nx*(p+1) - 1;
-   ilower[1] = ny*q;
-   iupper[1] = ny*(q+1) - 1;
-   ilower[2] = nz*r;
-   iupper[2] = nz*(r+1) - 1;
+   /* compute ilower and iupper from (p,q,r), (bx,by,bz), and (nx,ny,nz) */
+   ib = 0;
+   for (iz = 0; iz < bz; iz++)
+      for (iy = 0; iy < by; iy++)
+         for (ix = 0; ix < bx; ix++)
+         {
+            ilower[ib][0] = nx*(bx*p+ix);
+            iupper[ib][0] = nx*(bx*p+ix+1) - 1;
+            ilower[ib][1] = ny*(by*q+iy);
+            iupper[ib][1] = ny*(by*q+iy+1) - 1;
+            ilower[ib][2] = nz*(bz*r+iz);
+            iupper[ib][2] = nz*(bz*r+iz+1) - 1;
+            ib++;
+         }
 
    grid = HYPRE_NewStructGrid(MPI_COMM_WORLD, dim);
-   HYPRE_SetStructGridExtents(grid, ilower, iupper);
+   for (ib = 0; ib < nblocks; ib++)
+   {
+      HYPRE_SetStructGridExtents(grid, ilower[ib], iupper[ib]);
+   }
    HYPRE_AssembleStructGrid(grid);
 
    /*-----------------------------------------------------------
@@ -168,14 +271,17 @@ char *argv[];
       for (s = 0; s < 4; s++)
       {
          stencil_indices[s] = s;
-         values[i  ] = -dx;
-         values[i+1] = -dy;
-         values[i+2] = -dz;
-         values[i+3] = 2.0*(dx+dy+dz);
+         values[i  ] = -cx;
+         values[i+1] = -cy;
+         values[i+2] = -cz;
+         values[i+3] = 2.0*(cx+cy+cz);
       }
    }
-   HYPRE_SetStructMatrixBoxValues(A, ilower, iupper, 4,
-                                  stencil_indices, values);
+   for (ib = 0; ib < nblocks; ib++)
+   {
+      HYPRE_SetStructMatrixBoxValues(A, ilower[ib], iupper[ib], 4,
+                                     stencil_indices, values);
+   }
 
    /* Zero out stencils reaching to real boundary */
    for (i = 0; i < volume; i++)
@@ -184,18 +290,24 @@ char *argv[];
    }
    for (d = 0; d < 3; d++)
    {
-      if( ilower[d] == 0 )
+      for (ib = 0; ib < nblocks; ib++)
       {
-         i = iupper[d];
-         iupper[d] = 0;
-         stencil_indices[0] = d;
-         HYPRE_SetStructMatrixBoxValues(A, ilower, iupper,
-                                        1, stencil_indices, values);
-         iupper[d] = i;
+         if( ilower[ib][d] == 0 )
+         {
+            i = iupper[ib][d];
+            iupper[ib][d] = 0;
+            stencil_indices[0] = d;
+            HYPRE_SetStructMatrixBoxValues(A, ilower[ib], iupper[ib],
+                                           1, stencil_indices, values);
+            iupper[ib][d] = i;
+         }
       }
    }
 
    HYPRE_AssembleStructMatrix(A);
+#if 0
+   HYPRE_PrintStructMatrix("driver.out.A", A, 0);
+#endif
 
    hypre_TFree(values);
 
@@ -211,8 +323,14 @@ char *argv[];
    {
       values[i] = 1.0;
    }
-   HYPRE_SetStructVectorBoxValues(b, ilower, iupper, values);
+   for (ib = 0; ib < nblocks; ib++)
+   {
+      HYPRE_SetStructVectorBoxValues(b, ilower[ib], iupper[ib], values);
+   }
    HYPRE_AssembleStructVector(b);
+#if 0
+   HYPRE_PrintStructVector("driver.out.b", b, 0);
+#endif
 
    x = HYPRE_NewStructVector(MPI_COMM_WORLD, grid, stencil);
    HYPRE_InitializeStructVector(x);
@@ -220,8 +338,14 @@ char *argv[];
    {
       values[i] = 0.0;
    }
-   HYPRE_SetStructVectorBoxValues(x, ilower, iupper, values);
+   for (ib = 0; ib < nblocks; ib++)
+   {
+      HYPRE_SetStructVectorBoxValues(x, ilower[ib], iupper[ib], values);
+   }
    HYPRE_AssembleStructVector(x);
+#if 0
+   HYPRE_PrintStructVector("driver.out.x0", x, 0);
+#endif
  
    hypre_TFree(values);
 
@@ -335,7 +459,7 @@ char *argv[];
     *-----------------------------------------------------------*/
 
 #if 0
-   HYPRE_PrintStructVector("zout_x", x, 0);
+   HYPRE_PrintStructVector("driver.out.x", x, 0);
 #endif
 
    if (myid == 0)
