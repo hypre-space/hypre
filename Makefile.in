@@ -323,3 +323,4 @@ veryclean:
 	echo "Very-cleaning test ..."; \
 	(cd test; $(MAKE) veryclean)
 
+distclean: veryclean
