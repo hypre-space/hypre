@@ -178,6 +178,7 @@ typedef struct
 
    int     		global_num_rows;
    int     		global_num_cols;
+   int			num_nonzeros;  /* total number of nonzeros */
    int			first_row_index;
    int			first_col_diag;
    hypre_CSRMatrix	*diag;
@@ -212,6 +213,7 @@ typedef struct
 #define hypre_ParCSRMatrixComm(matrix)		  ((matrix) -> comm)
 #define hypre_ParCSRMatrixGlobalNumRows(matrix)   ((matrix) -> global_num_rows)
 #define hypre_ParCSRMatrixGlobalNumCols(matrix)   ((matrix) -> global_num_cols)
+#define hypre_ParCSRMatrixNumNonzeros(matrix)     ((matrix) -> num_nonzeros)
 #define hypre_ParCSRMatrixFirstRowIndex(matrix)   ((matrix) -> first_row_index)
 #define hypre_ParCSRMatrixFirstColDiag(matrix)    ((matrix) -> first_col_diag)
 #define hypre_ParCSRMatrixDiag(matrix)  	  ((matrix) -> diag)
@@ -227,9 +229,6 @@ typedef struct
 hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(matrix))
 #define hypre_ParCSRMatrixNumCols(matrix) \
 hypre_CSRMatrixNumCols(hypre_ParCSRMatrixDiag(matrix))
-
-/* need to add */
-#define hypre_ParCSRMatrixNumNonzeros(matrix) 1
 
 #endif
 #ifdef __STDC__
@@ -276,6 +275,7 @@ hypre_CSRMatrix *hypre_ExtractBExt P((hypre_ParCSRMatrix *B , hypre_ParCSRMatrix
 hypre_ParCSRMatrix *hypre_CreateParCSRMatrix P((MPI_Comm comm , int global_num_rows , int global_num_cols , int *row_starts , int *col_starts , int num_cols_offd , int num_nonzeros_diag , int num_nonzeros_offd ));
 int hypre_DestroyParCSRMatrix P((hypre_ParCSRMatrix *matrix ));
 int hypre_InitializeParCSRMatrix P((hypre_ParCSRMatrix *matrix ));
+int hypre_SetParCSRMatrixNumNonzeros P((hypre_ParCSRMatrix *matrix ));
 int hypre_SetParCSRMatrixDataOwner P((hypre_ParCSRMatrix *matrix , int owns_data ));
 int hypre_SetParCSRMatrixRowStartsOwner P((hypre_ParCSRMatrix *matrix , int owns_row_starts ));
 int hypre_SetParCSRMatrixColStartsOwner P((hypre_ParCSRMatrix *matrix , int owns_col_starts ));
