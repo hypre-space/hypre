@@ -465,7 +465,7 @@ int HYPRE_LSI_BlockP::setParams(char *params)
       if ( A11Params_.Tol_ >= 1.0 || A11Params_.Tol_ <= 0.0 ) 
          A11Params_.Tol_ = 1.0e-12;
       if (outputLevel_ > 0) 
-         printf("HYPRE_LSI_BlockP::A11 tol = %d\n", A11Params_.Tol_);
+         printf("HYPRE_LSI_BlockP::A11 tol = %e\n", A11Params_.Tol_);
    }
    else if ( !strcmp(param2, "A22Tolerance") )
    {
@@ -473,7 +473,7 @@ int HYPRE_LSI_BlockP::setParams(char *params)
       if ( A22Params_.Tol_ >= 1.0 || A22Params_.Tol_ <= 0.0 ) 
          A22Params_.Tol_ = 1.0e-12;
       if (outputLevel_ > 0) 
-         printf("HYPRE_LSI_BlockP::A22 tol = %d\n", A22Params_.Tol_);
+         printf("HYPRE_LSI_BlockP::A22 tol = %e\n", A22Params_.Tol_);
    }
    else if ( !strcmp(param2, "A11MaxIterations") )
    {
