@@ -15,6 +15,7 @@
 
 #include "utilities/utilities.h"
 #ifndef NOFEI
+#include "fei_defs.h"
 #include "Data.h"
 #include "basicTypes.h"
 #include "Lookup.h"
