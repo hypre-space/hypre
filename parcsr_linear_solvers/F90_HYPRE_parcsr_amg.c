@@ -131,6 +131,20 @@ hypre_F90_IFACE(hypre_paramgsetstrongthreshold)( long int *solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_ParAMGSetMaxRowSum
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_paramgsetMaxRowSum)( long int *solver,
+                                           double   *max_row_sum,
+                                           int      *ierr              )
+{
+   *ierr = (int)
+           ( HYPRE_ParAMGSetMaxRowSum( (HYPRE_Solver) *solver,
+                                       (double)       *max_row_sum ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_ParAMGSetTruncFactor
  *--------------------------------------------------------------------------*/
 

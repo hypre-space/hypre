@@ -36,6 +36,7 @@ hypre_ParAMGSetup( void               *amg_vdata,
    int                **CF_marker_array;   
    double              *relax_weight;
    double               strong_threshold;
+   double               max_row_sum;
    double               trunc_factor;
 
    int      num_variables;
@@ -124,6 +125,7 @@ hypre_ParAMGSetup( void               *amg_vdata,
    level = 0;
   
    strong_threshold = hypre_ParAMGDataStrongThreshold(amg_data);
+   max_row_sum = hypre_ParAMGDataMaxRowSum(amg_data);
    trunc_factor = hypre_ParAMGDataTruncFactor(amg_data);
 
    /*-----------------------------------------------------
@@ -156,18 +158,21 @@ hypre_ParAMGSetup( void               *amg_vdata,
       }
       if (coarsen_type == 6)
       {
-	 hypre_ParAMGCoarsenFalgout(A_array[level], strong_threshold,
+	 hypre_ParAMGCoarsenFalgout(A_array[level],
+                                    strong_threshold, max_row_sum,
                                     debug_flag, &S, &CF_marker, &coarse_size); 
       }
       else if (coarsen_type)
       {
-	 hypre_ParAMGCoarsenRuge(A_array[level], strong_threshold,
+	 hypre_ParAMGCoarsenRuge(A_array[level],
+                                 strong_threshold, max_row_sum,
                                  measure_type, coarsen_type, debug_flag,
                                  &S, &CF_marker, &coarse_size); 
       }
       else
       {
-	 hypre_ParAMGCoarsen(A_array[level], strong_threshold,
+	 hypre_ParAMGCoarsen(A_array[level],
+                             strong_threshold, max_row_sum,
                              debug_flag, &S, &CF_marker, &coarse_size); 
       }
  
@@ -202,9 +207,33 @@ hypre_ParAMGSetup( void               *amg_vdata,
       S = NULL;
       coarse_size = hypre_ParCSRMatrixGlobalNumCols(P);
 
-      /* if no coarse-grid, stop coarsening */
-      if (coarse_size == 0)
+      /* if no coarse-grid, stop coarsening, and set the
+       * coarsest solve to be a single sweep of Jacobi */
+      /* RDF/JEJ: Why is coarse_size being set twice? The following
+       * code should move up just behind the coarsening routines */
+      if ((coarse_size == 0) ||
+          (coarse_size == fine_size))
+      {
+         int     *num_grid_sweeps =
+            hypre_ParAMGDataNumGridSweeps(amg_data);
+         int     *grid_relax_type =
+            hypre_ParAMGDataGridRelaxType(amg_data);
+         int    **grid_relax_points =
+            hypre_ParAMGDataGridRelaxPoints(amg_data);
+         num_grid_sweeps[3] = 1;
+         grid_relax_type[3] = 0;
+         grid_relax_points[3][0] = 0;
+
+         hypre_ParCSRMatrixDestroy(P_array[level]);
+         if (level > 0)
+         {
+            /* note special case treatment of CF_marker is necessary
+             * to do CF relaxation correctly when num_levels = 1 */
+            hypre_TFree(CF_marker_array[level]);
+         }
+
          break; 
+      }
 
       /*-------------------------------------------------------------
        * Build coarse-grid operator, A_array[level+1] by R*A*P
@@ -234,7 +263,6 @@ hypre_ParAMGSetup( void               *amg_vdata,
       }
 
       if ( (level+1 >= max_levels) || 
-           (coarse_size == fine_size) || 
            (coarse_size <= coarse_threshold) )
       {
          not_finished_coarsening = 0;
@@ -247,13 +275,6 @@ hypre_ParAMGSetup( void               *amg_vdata,
     *-----------------------------------------------------------------------*/
 
    num_levels = level+1;
-   if (coarse_size == fine_size) 
-   {
-      num_levels = level;
-      hypre_ParCSRMatrixDestroy(A_array[level]);
-      hypre_ParCSRMatrixDestroy(P_array[level-1]);
-      hypre_TFree(CF_marker_array[level-1]);
-   }
    hypre_ParAMGDataNumLevels(amg_data) = num_levels;
    hypre_ParAMGDataCFMarkerArray(amg_data) = CF_marker_array;
    hypre_ParAMGDataAArray(amg_data) = A_array;

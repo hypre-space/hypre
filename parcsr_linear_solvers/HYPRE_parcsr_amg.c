@@ -122,6 +122,18 @@ HYPRE_ParAMGSetStrongThreshold( HYPRE_Solver solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_ParAMGSetMaxRowSum
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_ParAMGSetMaxRowSum( HYPRE_Solver solver,
+                          double       max_row_sum  )
+{
+   return( hypre_ParAMGSetMaxRowSum( (void *) solver,
+                                     max_row_sum ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_ParAMGSetTruncFactor
  *--------------------------------------------------------------------------*/
 

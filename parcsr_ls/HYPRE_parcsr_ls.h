@@ -43,6 +43,7 @@ int HYPRE_ParAMGSolve P((HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE_ParV
 int HYPRE_ParAMGSolveT P((HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE_ParVector b , HYPRE_ParVector x ));
 int HYPRE_ParAMGSetMaxLevels P((HYPRE_Solver solver , int max_levels ));
 int HYPRE_ParAMGSetStrongThreshold P((HYPRE_Solver solver , double strong_threshold ));
+int HYPRE_ParAMGSetMaxRowSum P((HYPRE_Solver solver , double max_row_sum ));
 int HYPRE_ParAMGSetTruncFactor P((HYPRE_Solver solver , double trunc_factor ));
 int HYPRE_ParAMGSetInterpType P((HYPRE_Solver solver , int interp_type ));
 int HYPRE_ParAMGSetMaxIter P((HYPRE_Solver solver , int max_iter ));

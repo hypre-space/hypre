@@ -20,6 +20,7 @@ typedef struct
    /* setup params */
    int      max_levels;
    double   strong_threshold;
+   double   max_row_sum;
    double   trunc_factor;
    int      measure_type;
    int      coarsen_type;
@@ -82,6 +83,7 @@ typedef struct
 #define hypre_ParAMGDataMaxLevels(amg_data) ((amg_data)->max_levels)
 #define hypre_ParAMGDataStrongThreshold(amg_data) \
 ((amg_data)->strong_threshold)
+#define hypre_ParAMGDataMaxRowSum(amg_data) ((amg_data)->max_row_sum)
 #define hypre_ParAMGDataTruncFactor(amg_data) ((amg_data)->trunc_factor)
 #define hypre_ParAMGDataInterpType(amg_data) ((amg_data)->interp_type)
 #define hypre_ParAMGDataCoarsenType(amg_data) ((amg_data)->coarsen_type)

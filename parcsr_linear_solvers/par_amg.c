@@ -28,6 +28,7 @@ hypre_ParAMGCreate()
    /* setup params */
    int      max_levels;
    double   strong_threshold;
+   double   max_row_sum;
    double   trunc_factor;
    int      interp_type;
    int      coarsen_type;
@@ -62,6 +63,7 @@ hypre_ParAMGCreate()
    /* setup params */
    max_levels = 25;
    strong_threshold = 0.25;
+   max_row_sum = 0.9;
    trunc_factor = 0.0;
    interp_type = 200;
    coarsen_type = 0;
@@ -112,6 +114,7 @@ hypre_ParAMGCreate()
 
    hypre_ParAMGSetMaxLevels(amg_data, max_levels);
    hypre_ParAMGSetStrongThreshold(amg_data, strong_threshold);
+   hypre_ParAMGSetMaxRowSum(amg_data, max_row_sum);
    hypre_ParAMGSetTruncFactor(amg_data, trunc_factor);
    hypre_ParAMGSetInterpType(amg_data, interp_type);
    hypre_ParAMGSetCoarsenType(amg_data, coarsen_type);
@@ -176,6 +179,11 @@ hypre_ParAMGDestroy( void *data )
 	hypre_ParCSRMatrixDestroy(hypre_ParAMGDataPArray(amg_data)[i-1]);
 	hypre_TFree(hypre_ParAMGDataCFMarkerArray(amg_data)[i-1]);
    }
+   /* see comments in par_coarsen.c regarding special case for CF_marker */
+   if (num_levels == 1)
+   {
+      hypre_TFree(hypre_ParAMGDataCFMarkerArray(amg_data)[0]);
+   }
    hypre_ParVectorDestroy(hypre_ParAMGDataVtemp(amg_data));
    hypre_TFree(hypre_ParAMGDataFArray(amg_data));
    hypre_TFree(hypre_ParAMGDataUArray(amg_data));
@@ -224,6 +232,18 @@ hypre_ParAMGSetStrongThreshold( void     *data,
    hypre_ParAMGData  *amg_data = data;
  
    hypre_ParAMGDataStrongThreshold(amg_data) = strong_threshold;
+
+   return (ierr);
+}
+
+int
+hypre_ParAMGSetMaxRowSum( void     *data,
+                          double    max_row_sum )
+{
+   int ierr = 0;
+   hypre_ParAMGData  *amg_data = data;
+ 
+   hypre_ParAMGDataMaxRowSum(amg_data) = max_row_sum;
 
    return (ierr);
 }

@@ -95,6 +95,7 @@
 int
 hypre_ParAMGCoarsen( hypre_ParCSRMatrix    *A,
                      double                 strength_threshold,
+                     double                 max_row_sum,
                      int                    debug_flag,
                      hypre_ParCSRMatrix   **S_ptr,
                      int                  **CF_marker_ptr,
@@ -157,7 +158,7 @@ hypre_ParAMGCoarsen( hypre_ParCSRMatrix    *A,
    int                 graph_size;
    int                 global_graph_size;
                       
-   double              diag, row_scale;
+   double              diag, row_scale, row_sum;
    int                 i, j, k, ic, jc, kc, jj, kk, jA, jS, kS, ig;
    int		       index, index_S, start, my_id, num_procs, jrow;
                       
@@ -261,17 +262,20 @@ hypre_ParAMGCoarsen( hypre_ParCSRMatrix    *A,
    {
       diag = A_diag_data[A_diag_i[i]];
 
-      /* compute scaling factor */
+      /* compute scaling factor and row sum */
       row_scale = 0.0;
+      row_sum = diag;
       if (diag < 0)
       {
          for (jA = A_diag_i[i]+1; jA < A_diag_i[i+1]; jA++)
          {
             row_scale = hypre_max(row_scale, A_diag_data[jA]);
+            row_sum += A_diag_data[jA];
          }
          for (jA = A_offd_i[i]; jA < A_offd_i[i+1]; jA++)
          {
             row_scale = hypre_max(row_scale, A_offd_data[jA]);
+            row_sum += A_offd_data[jA];
          }
       }
       else
@@ -279,46 +283,64 @@ hypre_ParAMGCoarsen( hypre_ParCSRMatrix    *A,
          for (jA = A_diag_i[i]+1; jA < A_diag_i[i+1]; jA++)
          {
             row_scale = hypre_min(row_scale, A_diag_data[jA]);
+            row_sum += A_diag_data[jA];
          }
          for (jA = A_offd_i[i]; jA < A_offd_i[i+1]; jA++)
          {
             row_scale = hypre_min(row_scale, A_offd_data[jA]);
+            row_sum += A_diag_data[jA];
          }
       }
+      row_sum = fabs( row_sum / diag );
 
       /* compute row entries of S */
       S_diag_j[A_diag_i[i]] = -1;
-      if (diag < 0) 
-      { 
+      if ((row_sum > max_row_sum) && (max_row_sum < 1.0))
+      {
+         /* make all dependencies weak */
          for (jA = A_diag_i[i]+1; jA < A_diag_i[i+1]; jA++)
          {
-            if (A_diag_data[jA] <= strength_threshold * row_scale)
-            {
-               S_diag_j[jA] = -1;
-            }
+            S_diag_j[jA] = -1;
          }
-         for (jA = A_offd_i[i]; jA < A_offd_i[i+1]; jA++)
+         for (jA = A_offd_i[i]+1; jA < A_offd_i[i+1]; jA++)
          {
-            if (A_offd_data[jA] <= strength_threshold * row_scale)
-            {
-               S_offd_j[jA] = -1;
-            }
+            S_offd_j[jA] = -1;
          }
       }
       else
       {
-         for (jA = A_diag_i[i]+1; jA < A_diag_i[i+1]; jA++)
-         {
-            if (A_diag_data[jA] >= strength_threshold * row_scale)
+         if (diag < 0) 
+         { 
+            for (jA = A_diag_i[i]+1; jA < A_diag_i[i+1]; jA++)
             {
-               S_diag_j[jA] = -1;
+               if (A_diag_data[jA] <= strength_threshold * row_scale)
+               {
+                  S_diag_j[jA] = -1;
+               }
+            }
+            for (jA = A_offd_i[i]; jA < A_offd_i[i+1]; jA++)
+            {
+               if (A_offd_data[jA] <= strength_threshold * row_scale)
+               {
+                  S_offd_j[jA] = -1;
+               }
             }
          }
-         for (jA = A_offd_i[i]; jA < A_offd_i[i+1]; jA++)
+         else
          {
-            if (A_offd_data[jA] >= strength_threshold * row_scale)
+            for (jA = A_diag_i[i]+1; jA < A_diag_i[i+1]; jA++)
             {
-               S_offd_j[jA] = -1;
+               if (A_diag_data[jA] >= strength_threshold * row_scale)
+               {
+                  S_diag_j[jA] = -1;
+               }
+            }
+            for (jA = A_offd_i[i]; jA < A_offd_i[i+1]; jA++)
+            {
+               if (A_offd_data[jA] >= strength_threshold * row_scale)
+               {
+                  S_offd_j[jA] = -1;
+               }
             }
          }
       }
@@ -1193,6 +1215,7 @@ hypre_ParAMGCoarsen( hypre_ParCSRMatrix    *A,
 int
 hypre_ParAMGCoarsenRuge( hypre_ParCSRMatrix    *A,
                          double                 strength_threshold,
+                         double                 max_row_sum,
                          int                    measure_type,
                          int                    coarsen_type,
                          int                    debug_flag,
@@ -1246,7 +1269,7 @@ hypre_ParAMGCoarsenRuge( hypre_ParCSRMatrix    *A,
    int 	           *int_buf_data;
    int 	           *ci_array;
 
-   double           diag, row_scale;
+   double           diag, row_scale, row_sum;
    int              measure, max_measure;
    int              i, j, k, jA, jS, jS_offd, kS, ig;
    int		    ic, ji, jj, jk, jl, jm, index;
@@ -1377,15 +1400,18 @@ hypre_ParAMGCoarsenRuge( hypre_ParCSRMatrix    *A,
 
       /* compute scaling factor */
       row_scale = 0.0;
+      row_sum = diag;
       if (diag < 0)
       {
          for (jA = A_i[i]+1; jA < A_i[i+1]; jA++)
          {
             row_scale = hypre_max(row_scale, A_data[jA]);
+            row_sum += A_data[jA];
          }
          for (jA = A_offd_i[i]; jA < A_offd_i[i+1]; jA++)
          {
             row_scale = hypre_max(row_scale, A_offd_data[jA]);
+            row_sum += A_offd_data[jA];
          }
       }
       else
@@ -1393,47 +1419,66 @@ hypre_ParAMGCoarsenRuge( hypre_ParCSRMatrix    *A,
          for (jA = A_i[i]+1; jA < A_i[i+1]; jA++)
          {
             row_scale = hypre_min(row_scale, A_data[jA]);
+            row_sum += A_data[jA];
          }
          for (jA = A_offd_i[i]; jA < A_offd_i[i+1]; jA++)
          {
             row_scale = hypre_min(row_scale, A_offd_data[jA]);
+            row_sum += A_offd_data[jA];
          }
       }
+      row_sum = fabs( row_sum / diag );
 
       /* compute row entries of S */
-      if (diag < 0) 
+      if ((row_sum > max_row_sum) && (max_row_sum < 1.0))
       {
+         /* make all dependencies weak */
          for (jA = A_i[i]+1; jA < A_i[i+1]; jA++)
          {
-            if (A_data[jA] <= strength_threshold * row_scale)
-            {
-               ST_j[jA] = -1;
-	       num_strong--;
-            }
+            ST_j[jA] = -1;
+            num_strong--;
          }
-         for (jA = A_offd_i[i]; jA < A_offd_i[i+1]; jA++)
+         for (jA = A_offd_i[i]+1; jA < A_offd_i[i+1]; jA++)
          {
-            if (A_offd_data[jA] <= strength_threshold * row_scale)
-            {
-               S_offd_j[jA] = -1;
-            }
+            S_offd_j[jA] = -1;
          }
       }
       else
       {
-         for (jA = A_i[i]+1; jA < A_i[i+1]; jA++)
+         if (diag < 0) 
          {
-            if (A_data[jA] >= strength_threshold * row_scale)
+            for (jA = A_i[i]+1; jA < A_i[i+1]; jA++)
             {
-               ST_j[jA] = -1;
-	       num_strong--;
+               if (A_data[jA] <= strength_threshold * row_scale)
+               {
+                  ST_j[jA] = -1;
+                  num_strong--;
+               }
+            }
+            for (jA = A_offd_i[i]; jA < A_offd_i[i+1]; jA++)
+            {
+               if (A_offd_data[jA] <= strength_threshold * row_scale)
+               {
+                  S_offd_j[jA] = -1;
+               }
             }
          }
-         for (jA = A_offd_i[i]; jA < A_offd_i[i+1]; jA++)
+         else
          {
-            if (A_offd_data[jA] >= strength_threshold * row_scale)
+            for (jA = A_i[i]+1; jA < A_i[i+1]; jA++)
             {
-               S_offd_j[jA] = -1;
+               if (A_data[jA] >= strength_threshold * row_scale)
+               {
+                  ST_j[jA] = -1;
+                  num_strong--;
+               }
+            }
+            for (jA = A_offd_i[i]; jA < A_offd_i[i+1]; jA++)
+            {
+               if (A_offd_data[jA] >= strength_threshold * row_scale)
+               {
+                  S_offd_j[jA] = -1;
+               }
             }
          }
       }
@@ -2315,11 +2360,12 @@ hypre_ParAMGCoarsenRuge( hypre_ParCSRMatrix    *A,
 
 int
 hypre_ParAMGCoarsenFalgout( hypre_ParCSRMatrix    *A,
-                     double                 strength_threshold,
-                     int                    debug_flag,
-                     hypre_ParCSRMatrix   **S_ptr,
-                     int                  **CF_marker_ptr,
-                     int                   *coarse_size_ptr     )
+                            double                 strength_threshold,
+                            double                 max_row_sum,
+                            int                    debug_flag,
+                            hypre_ParCSRMatrix   **S_ptr,
+                            int                  **CF_marker_ptr,
+                            int                   *coarse_size_ptr     )
 {
    MPI_Comm 	       comm            = hypre_ParCSRMatrixComm(A);
    hypre_ParCSRCommPkg      *comm_pkg        = hypre_ParCSRMatrixCommPkg(A);
@@ -2384,7 +2430,7 @@ hypre_ParAMGCoarsenFalgout( hypre_ParCSRMatrix    *A,
    int                 global_graph_size;
 
                       
-   double              diag, row_scale;
+   double              diag, row_scale, row_sum;
    int                 i, j, k, ic, jc, kc, jj, kk, jA, jS, kS, ig;
    int		       index, index_S, jrow;
    int              measure, max_measure;
@@ -2516,15 +2562,18 @@ hypre_ParAMGCoarsenFalgout( hypre_ParCSRMatrix    *A,
 
       /* compute scaling factor */
       row_scale = 0.0;
+      row_sum = diag;
       if (diag < 0)
       {
          for (jA = A_diag_i[i]+1; jA < A_diag_i[i+1]; jA++)
          {
             row_scale = hypre_max(row_scale, A_diag_data[jA]);
+            row_sum += A_diag_data[jA];
          }
          for (jA = A_offd_i[i]; jA < A_offd_i[i+1]; jA++)
          {
             row_scale = hypre_max(row_scale, A_offd_data[jA]);
+            row_sum += A_offd_data[jA];
          }
       }
       else
@@ -2532,46 +2581,64 @@ hypre_ParAMGCoarsenFalgout( hypre_ParCSRMatrix    *A,
          for (jA = A_diag_i[i]+1; jA < A_diag_i[i+1]; jA++)
          {
             row_scale = hypre_min(row_scale, A_diag_data[jA]);
+            row_sum += A_diag_data[jA];
          }
          for (jA = A_offd_i[i]; jA < A_offd_i[i+1]; jA++)
          {
             row_scale = hypre_min(row_scale, A_offd_data[jA]);
+            row_sum += A_diag_data[jA];
          }
       }
+      row_sum = fabs( row_sum / diag );
 
       /* compute row entries of S */
       S_diag_j[A_diag_i[i]] = -1;
-      if (diag < 0) 
-      { 
+      if ((row_sum > max_row_sum) && (max_row_sum < 1.0))
+      {
+         /* make all dependencies weak */
          for (jA = A_diag_i[i]+1; jA < A_diag_i[i+1]; jA++)
          {
-            if (A_diag_data[jA] <= strength_threshold * row_scale)
-            {
-               S_diag_j[jA] = -1;
-            }
+            S_diag_j[jA] = -1;
          }
-         for (jA = A_offd_i[i]; jA < A_offd_i[i+1]; jA++)
+         for (jA = A_offd_i[i]+1; jA < A_offd_i[i+1]; jA++)
          {
-            if (A_offd_data[jA] <= strength_threshold * row_scale)
-            {
-               S_offd_j[jA] = -1;
-            }
+            S_offd_j[jA] = -1;
          }
       }
       else
       {
-         for (jA = A_diag_i[i]+1; jA < A_diag_i[i+1]; jA++)
-         {
-            if (A_diag_data[jA] >= strength_threshold * row_scale)
+         if (diag < 0) 
+         { 
+            for (jA = A_diag_i[i]+1; jA < A_diag_i[i+1]; jA++)
             {
-               S_diag_j[jA] = -1;
+               if (A_diag_data[jA] <= strength_threshold * row_scale)
+               {
+                  S_diag_j[jA] = -1;
+               }
+            }
+            for (jA = A_offd_i[i]; jA < A_offd_i[i+1]; jA++)
+            {
+               if (A_offd_data[jA] <= strength_threshold * row_scale)
+               {
+                  S_offd_j[jA] = -1;
+               }
             }
          }
-         for (jA = A_offd_i[i]; jA < A_offd_i[i+1]; jA++)
+         else
          {
-            if (A_offd_data[jA] >= strength_threshold * row_scale)
+            for (jA = A_diag_i[i]+1; jA < A_diag_i[i+1]; jA++)
             {
-               S_offd_j[jA] = -1;
+               if (A_diag_data[jA] >= strength_threshold * row_scale)
+               {
+                  S_diag_j[jA] = -1;
+               }
+            }
+            for (jA = A_offd_i[i]; jA < A_offd_i[i+1]; jA++)
+            {
+               if (A_offd_data[jA] >= strength_threshold * row_scale)
+               {
+                  S_offd_j[jA] = -1;
+               }
             }
          }
       }
