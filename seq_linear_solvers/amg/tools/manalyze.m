@@ -2,42 +2,36 @@ function [nv,ia,ja,a] = manalyze(A);
 %-----------------------------------------
 %function [nv,ia,ja,a] = manalyze(A);
 %   Analyzes matrix A, yields ysmp format
-%
-%   A must be a matrix in "full" form
 %-----------------------------------------
-[nv, cols]=size(A);
-ia=zeros(nv+1,1);
-ip = zeros(nv,1);
-iu = ip;
-iv = ia;
-u = rand(nv,1);
-f = ip;
 
-disp('analyzing matrix')
-iaend=1;
-a=[];
-ja=[];
-for k=1:nv,
-    if rem(k,100) == 0, disp(['Row ' num2str(k)]);end
-    ia(k)=iaend;
-    nzind = find(A(k,:)~=0);
-    numnz = length(nzind);
-    iaend = iaend+numnz;
-    ctr = find(nzind==k);
-    lft = nzind(1:ctr-1);
-    rowind = [nzind(ctr:numnz) lft];
-    ja = [ja rowind];
-    a = [a A(k,rowind)];
+% determine row/column indices of nonzero entries
+[ja, I, a] = find(A');
+
+nv = size(A, 1);
+na = size(a, 1);
+
+% compute ia and put diagonal entry first on each row
+ia = zeros(nv+1, 1);
+ia(1) = 1;
+for i = 1 : nv
+   k = ia(i);
+   while (k <= na)
+      if (I(k) ~= i)
+         break;
+      end
+
+      % swap diagonal entry with first entry
+      if (ja(k) == i)
+         tmp = a(ia(i));
+         a(ia(i)) = a(k);
+         a(k) = tmp;
+         tmp = ja(ia(i));
+         ja(ia(i)) = ja(k);
+         ja(k) = tmp;
+      end
+
+      k = k + 1;
+   end
+   ia(i+1) = k;
 end
-ia(nv+1)=iaend;
-ja=ja';
-a=a';
 
-
-   
-
-nu = 1;         % there is but one function
-np = nv;      % number of points equals number vars
-iu = iu+1;      % (all variables are unknown number 1)
-ip = [1:nv]'; % each variable is at it's own point
-iv = [1:nv+1]'; % each variable is at it's own point
