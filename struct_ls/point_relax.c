@@ -19,6 +19,11 @@
 #endif
 #define MAX_DEPTH 7
 
+/* Turn this variable on to enable special code which helps the compiler
+   do a better job ...*/
+/*#define USE_ONESTRIDE*/
+
+
 /*--------------------------------------------------------------------------
  * hypre_PointRelaxData data structure
  *--------------------------------------------------------------------------*/
@@ -352,6 +357,7 @@ hypre_PointRelax( void               *relax_vdata,
    int                    ti;
                         
    double                *Ap;
+   double                *Apd;
    double                *Ap0;
    double                *Ap1;
    double                *Ap2;
@@ -359,10 +365,29 @@ hypre_PointRelax( void               *relax_vdata,
    double                *Ap4;
    double                *Ap5;
    double                *Ap6;
+   double                AAp0;
+   double                AAp1;
+   double                AAp2;
+   double                AAp3;
+   double                AAp4;
+   double                AAp5;
+   double                AAp6;
+   double                AApd;
    double                *bp;
    double                *xp;
    double                *tp;
                         
+#ifdef USE_ONESTRIDE
+   double                *p_tp ;
+   double                *p_xp0;
+   double                *p_xp1;
+   double                *p_xp2;
+   double                *p_xp3;
+   double                *p_xp4;
+   double                *p_xp5;
+   double                *p_xp6;
+#endif
+
    hypre_IndexRef         stride;
    hypre_IndexRef         start;
    hypre_Index            loop_size;
@@ -379,14 +404,10 @@ hypre_PointRelax( void               *relax_vdata,
    int                    pointset;
 
    int                    ierr = 0;
-   double xdotx, bdotb;
 
    /*----------------------------------------------------------
     * Initialize some things and deal with special cases
     *----------------------------------------------------------*/
-
-   bdotb = hypre_StructInnerProd(b,b);
-   xdotx = hypre_StructInnerProd(x,x);
 
    hypre_BeginTiming(relax_data -> time_index);
 
@@ -477,6 +498,7 @@ hypre_PointRelax( void               *relax_vdata,
                      if ( constant_coefficient )
                      {
                         Ai = hypre_CCBoxIndexRank( A_data_box, start );
+                        AAp0 = 1/Ap[Ai];
                         hypre_BoxLoop2Begin(loop_size,
                                             b_data_box, start, stride, bi,
                                             x_data_box, start, stride, xi);
@@ -484,7 +506,7 @@ hypre_PointRelax( void               *relax_vdata,
 #include "hypre_box_smp_forloop.h"
                         hypre_BoxLoop2For(loopi, loopj, loopk, bi, xi)
                            {
-                              xp[xi] = bp[bi] / Ap[Ai];
+                              xp[xi] = bp[bi] * AAp0;
                            }
                         hypre_BoxLoop2End(bi, xi);
                      }
@@ -524,8 +546,6 @@ hypre_PointRelax( void               *relax_vdata,
       pointset = pointset_ranks[p];
       compute_pkg = compute_pkgs[pointset];
       stride = pointset_strides[pointset];
-
-      hypre_StructCopy(x, t);
 
       for (compute_i = 0; compute_i < 2; compute_i++)
       {
@@ -571,21 +591,22 @@ hypre_PointRelax( void               *relax_vdata,
                      start  = hypre_BoxIMin(compute_box);
                      hypre_BoxGetStrideSize(compute_box, stride, loop_size);
 
-                     hypre_BoxLoop2Begin(loop_size,
-                                         b_data_box, start, stride, bi,
-                                         t_data_box, start, stride, ti);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,bi,ti
-#include "hypre_box_smp_forloop.h"
-                     hypre_BoxLoop2For(loopi, loopj, loopk, bi, ti)
-                        {
-                           tp[ti] = bp[bi];
-                        }
-                     hypre_BoxLoop2End(bi, ti);
-
-
                      if ( constant_coefficient )
                      {
                         Ai = hypre_CCBoxIndexRank( A_data_box, start );
+                        Apd = hypre_StructMatrixBoxData(A, i, diag_rank);
+                        AApd = 1/Apd[Ai];
+
+                        hypre_BoxLoop2Begin(loop_size,
+                                            b_data_box, start, stride, bi,
+                                            t_data_box, start, stride, ti);
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,bi,ti
+#include "hypre_box_smp_forloop.h"
+                        hypre_BoxLoop2For(loopi, loopj, loopk, bi, ti)
+                           {
+                              tp[ti] = AApd * bp[bi];
+                           }
+                        hypre_BoxLoop2End(bi, ti);
 
                         /* unroll up to depth MAX_DEPTH */
                         for (si = 0; si < stencil_size; si += MAX_DEPTH)
@@ -646,125 +667,301 @@ hypre_PointRelax( void               *relax_vdata,
 
                               break;
                            }
+
                            switch(depth)
                            {
                            case 7:
+                              AAp0 = Ap0[Ai]*AApd;
+                              AAp1 = Ap1[Ai]*AApd;
+                              AAp2 = Ap2[Ai]*AApd;
+                              AAp3 = Ap3[Ai]*AApd;
+                              AAp4 = Ap4[Ai]*AApd;
+                              AAp5 = Ap5[Ai]*AApd;
+                              AAp6 = Ap6[Ai]*AApd;
                               hypre_BoxLoop2Begin(loop_size,
                                                   x_data_box, start, stride, xi,
                                                   t_data_box, start, stride, ti);
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,xi,ti
 #include "hypre_box_smp_forloop.h"
+#ifdef USE_ONESTRIDE
+#define hypre_UserOutsideInnerLoop\
+                                    p_tp = &tp[ti];\
+                                    p_xp0 = &xp[xi+xoff0];\
+                                    p_xp1 = &xp[xi+xoff1];\
+                                    p_xp2 = &xp[xi+xoff2];\
+                                    p_xp3 = &xp[xi+xoff3];\
+                                    p_xp4 = &xp[xi+xoff4];\
+                                    p_xp5 = &xp[xi+xoff5];\
+                                    p_xp6 = &xp[xi+xoff6];
+
+                              hypre_BoxLoop2For_OneStride(loopi, loopj, loopk, xi, ti)
+                                 {
+                                       p_tp[loopi] -=
+                                          AAp0 * p_xp0[loopi] +
+                                          AAp1 * p_xp1[loopi] +
+                                          AAp2 * p_xp2[loopi] +
+                                          AAp3 * p_xp3[loopi] +
+                                          AAp4 * p_xp4[loopi] +
+                                          AAp5 * p_xp5[loopi] +
+                                          AAp6 * p_xp6[loopi];
+                                 }
+                              hypre_BoxLoop2End_OneStride(xi, ti);
+#define hypre_UserOutsideInnerLoop
+#else
+/* normal loop */
                               hypre_BoxLoop2For(loopi, loopj, loopk, xi, ti)
                                  {
                                     tp[ti] -=
-                                       Ap0[Ai] * xp[xi + xoff0] +
-                                       Ap1[Ai] * xp[xi + xoff1] +
-                                       Ap2[Ai] * xp[xi + xoff2] +
-                                       Ap3[Ai] * xp[xi + xoff3] +
-                                       Ap4[Ai] * xp[xi + xoff4] +
-                                       Ap5[Ai] * xp[xi + xoff5] +
-                                       Ap6[Ai] * xp[xi + xoff6];
+                                       AAp0 * xp[xi + xoff0] +
+                                       AAp1 * xp[xi + xoff1] +
+                                       AAp2 * xp[xi + xoff2] +
+                                       AAp3 * xp[xi + xoff3] +
+                                       AAp4 * xp[xi + xoff4] +
+                                       AAp5 * xp[xi + xoff5] +
+                                       AAp6 * xp[xi + xoff6];
                                  }
                               hypre_BoxLoop2End(xi, ti);
+#endif
                               break;
                       
                            case 6:
+                              AAp0 = Ap0[Ai]*AApd;
+                              AAp1 = Ap1[Ai]*AApd;
+                              AAp2 = Ap2[Ai]*AApd;
+                              AAp3 = Ap3[Ai]*AApd;
+                              AAp4 = Ap4[Ai]*AApd;
+                              AAp5 = Ap5[Ai]*AApd;
                               hypre_BoxLoop2Begin(loop_size,
                                                   x_data_box, start, stride, xi,
                                                   t_data_box, start, stride, ti);
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,xi,ti
 #include "hypre_box_smp_forloop.h"
+#ifdef USE_ONESTRIDE
+#define hypre_UserOutsideInnerLoop\
+                                    p_tp = &tp[ti];\
+                                    p_xp0 = &xp[xi+xoff0];\
+                                    p_xp1 = &xp[xi+xoff1];\
+                                    p_xp2 = &xp[xi+xoff2];\
+                                    p_xp3 = &xp[xi+xoff3];\
+                                    p_xp4 = &xp[xi+xoff4];\
+                                    p_xp5 = &xp[xi+xoff5];
+
+                              hypre_BoxLoop2For_OneStride(loopi, loopj, loopk, xi, ti)
+                                 {
+                                    p_tp[loopi] -=
+                                          AAp0 * p_xp0[loopi] +
+                                          AAp1 * p_xp1[loopi] +
+                                          AAp2 * p_xp2[loopi] +
+                                          AAp3 * p_xp3[loopi] +
+                                          AAp4 * p_xp4[loopi] +
+                                          AAp5 * p_xp5[loopi];
+                                 }
+                              hypre_BoxLoop2End_OneStride(xi, ti);
+#define hypre_UserOutsideInnerLoop
+#else
+/* normal loop */
                               hypre_BoxLoop2For(loopi, loopj, loopk, xi, ti)
                                  {
                                     tp[ti] -=
-                                       Ap0[Ai] * xp[xi + xoff0] +
-                                       Ap1[Ai] * xp[xi + xoff1] +
-                                       Ap2[Ai] * xp[xi + xoff2] +
-                                       Ap3[Ai] * xp[xi + xoff3] +
-                                       Ap4[Ai] * xp[xi + xoff4] +
-                                       Ap5[Ai] * xp[xi + xoff5];
+                                       AAp0 * xp[xi + xoff0] +
+                                       AAp1 * xp[xi + xoff1] +
+                                       AAp2 * xp[xi + xoff2] +
+                                       AAp3 * xp[xi + xoff3] +
+                                       AAp4 * xp[xi + xoff4] +
+                                       AAp5 * xp[xi + xoff5];
                                  }
                               hypre_BoxLoop2End(xi, ti);
+#endif
                               break;
                       
                            case 5:
+                              AAp0 = Ap0[Ai]*AApd;
+                              AAp1 = Ap1[Ai]*AApd;
+                              AAp2 = Ap2[Ai]*AApd;
+                              AAp3 = Ap3[Ai]*AApd;
+                              AAp4 = Ap4[Ai]*AApd;
                               hypre_BoxLoop2Begin(loop_size,
                                                   x_data_box, start, stride, xi,
                                                   t_data_box, start, stride, ti);
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,xi,ti
 #include "hypre_box_smp_forloop.h"
+#ifdef USE_ONESTRIDE
+#define hypre_UserOutsideInnerLoop\
+                                    p_tp = &tp[ti];\
+                                    p_xp0 = &xp[xi+xoff0];\
+                                    p_xp1 = &xp[xi+xoff1];\
+                                    p_xp2 = &xp[xi+xoff2];\
+                                    p_xp3 = &xp[xi+xoff3];\
+                                    p_xp4 = &xp[xi+xoff4];
+
+                              hypre_BoxLoop2For_OneStride(loopi, loopj, loopk, xi, ti)
+                                 {
+                                    p_tp[loopi] -=
+                                       AAp0 * p_xp0[loopi] +
+                                       AAp1 * p_xp1[loopi] +
+                                       AAp2 * p_xp2[loopi] +
+                                       AAp3 * p_xp3[loopi] +
+                                       AAp4 * p_xp4[loopi];
+                                 }
+                              hypre_BoxLoop2End_OneStride(xi, ti);
+#define hypre_UserOutsideInnerLoop
+#else
+/* normal loop */
                               hypre_BoxLoop2For(loopi, loopj, loopk, xi, ti)
                                  {
                                     tp[ti] -=
-                                       Ap0[Ai] * xp[xi + xoff0] +
-                                       Ap1[Ai] * xp[xi + xoff1] +
-                                       Ap2[Ai] * xp[xi + xoff2] +
-                                       Ap3[Ai] * xp[xi + xoff3] +
-                                       Ap4[Ai] * xp[xi + xoff4];
+                                       AAp0 * xp[xi + xoff0] +
+                                       AAp1 * xp[xi + xoff1] +
+                                       AAp2 * xp[xi + xoff2] +
+                                       AAp3 * xp[xi + xoff3] +
+                                       AAp4 * xp[xi + xoff4];
                                  }
                               hypre_BoxLoop2End(xi, ti);
+#endif
                               break;
                       
                            case 4:
+                              AAp0 = Ap0[Ai]*AApd;
+                              AAp1 = Ap1[Ai]*AApd;
+                              AAp2 = Ap2[Ai]*AApd;
+                              AAp3 = Ap3[Ai]*AApd;
                               hypre_BoxLoop2Begin(loop_size,
                                                   x_data_box, start, stride, xi,
                                                   t_data_box, start, stride, ti);
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,xi,ti
 #include "hypre_box_smp_forloop.h"
+#ifdef USE_ONESTRIDE
+#define hypre_UserOutsideInnerLoop\
+                                    p_tp = &tp[ti];\
+                                    p_xp0 = &xp[xi+xoff0];\
+                                    p_xp1 = &xp[xi+xoff1];\
+                                    p_xp2 = &xp[xi+xoff2];\
+                                    p_xp3 = &xp[xi+xoff3];
+
+                              hypre_BoxLoop2For_OneStride(loopi, loopj, loopk, xi, ti)
+                                 {
+                                    p_tp[loopi] -=
+                                       AAp0 * p_xp0[loopi] +
+                                       AAp1 * p_xp1[loopi] +
+                                       AAp2 * p_xp2[loopi] +
+                                       AAp3 * p_xp3[loopi];
+                                 }
+                              hypre_BoxLoop2End_OneStride(xi, ti);
+#define hypre_UserOutsideInnerLoop
+#else
+/* normal loop */
                               hypre_BoxLoop2For(loopi, loopj, loopk, xi, ti)
                                  {
                                     tp[ti] -=
-                                       Ap0[Ai] * xp[xi + xoff0] +
-                                       Ap1[Ai] * xp[xi + xoff1] +
-                                       Ap2[Ai] * xp[xi + xoff2] +
-                                       Ap3[Ai] * xp[xi + xoff3];
+                                       AAp0 * xp[xi + xoff0] +
+                                       AAp1 * xp[xi + xoff1] +
+                                       AAp2 * xp[xi + xoff2] +
+                                       AAp3 * xp[xi + xoff3];
                                  }
                               hypre_BoxLoop2End(xi, ti);
+#endif
                               break;
                       
                            case 3:
+                              AAp0 = Ap0[Ai]*AApd;
+                              AAp1 = Ap1[Ai]*AApd;
+                              AAp2 = Ap2[Ai]*AApd;
                               hypre_BoxLoop2Begin(loop_size,
                                                   x_data_box, start, stride, xi,
                                                   t_data_box, start, stride, ti);
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,xi,ti
 #include "hypre_box_smp_forloop.h"
+#ifdef USE_ONESTRIDE
+#define hypre_UserOutsideInnerLoop\
+                                    p_tp = &tp[ti];\
+                                    p_xp0 = &xp[xi+xoff0];\
+                                    p_xp1 = &xp[xi+xoff1];\
+                                    p_xp2 = &xp[xi+xoff2];
+
+                              hypre_BoxLoop2For_OneStride(loopi, loopj, loopk, xi, ti)
+                                 {
+                                    p_tp[loopi] -=
+                                       AAp0 * p_xp0[loopi] +
+                                       AAp1 * p_xp1[loopi] +
+                                       AAp2 * p_xp2[loopi];
+                                 }
+                              hypre_BoxLoop2End_OneStride(xi, ti);
+#define hypre_UserOutsideInnerLoop
+#else
+/* normal loop */
                               hypre_BoxLoop2For(loopi, loopj, loopk, xi, ti)
                                  {
                                     tp[ti] -=
-                                       Ap0[Ai] * xp[xi + xoff0] +
-                                       Ap1[Ai] * xp[xi + xoff1] +
-                                       Ap2[Ai] * xp[xi + xoff2];
+                                       AAp0 * xp[xi + xoff0] +
+                                       AAp1 * xp[xi + xoff1] +
+                                       AAp2 * xp[xi + xoff2];
                                  }
                               hypre_BoxLoop2End(xi, ti);
+#endif
                               break;
                       
                            case 2:
+                              AAp0 = Ap0[Ai]*AApd;
+                              AAp1 = Ap1[Ai]*AApd;
                               hypre_BoxLoop2Begin(loop_size,
                                                   x_data_box, start, stride, xi,
                                                   t_data_box, start, stride, ti);
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,xi,ti
 #include "hypre_box_smp_forloop.h"
+#ifdef USE_ONESTRIDE
+#define hypre_UserOutsideInnerLoop\
+                                    p_tp = &tp[ti];\
+                                    p_xp0 = &xp[xi+xoff0];\
+                                    p_xp1 = &xp[xi+xoff1];
+
+                              hypre_BoxLoop2For_OneStride(loopi, loopj, loopk, xi, ti)
+                                 {
+                                    p_tp[loopi] -=
+                                       AAp0 * p_xp0[loopi] +
+                                       AAp1 * p_xp1[loopi];
+                                 }
+                              hypre_BoxLoop2End_OneStride(xi, ti);
+#define hypre_UserOutsideInnerLoop
+#else
+/* normal loop */
                               hypre_BoxLoop2For(loopi, loopj, loopk, xi, ti)
                                  {
                                     tp[ti] -=
-                                       Ap0[Ai] * xp[xi + xoff0] +
-                                       Ap1[Ai] * xp[xi + xoff1];
+                                       AAp0 * xp[xi + xoff0] +
+                                       AAp1 * xp[xi + xoff1];
                                  }
                               hypre_BoxLoop2End(xi, ti);
+#endif
                               break;
                       
                            case 1:
+                              AAp0 = Ap0[Ai]*AApd;
                               hypre_BoxLoop2Begin(loop_size,
                                                   x_data_box, start, stride, xi,
                                                   t_data_box, start, stride, ti);
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,xi,ti
 #include "hypre_box_smp_forloop.h"
+#ifdef USE_ONESTRIDE
+#define hypre_UserOutsideInnerLoop\
+                                    p_tp = &tp[ti];\
+                                    p_xp0 = &xp[xi+xoff0];
+
+                              hypre_BoxLoop2For_OneStride(loopi, loopj, loopk, xi, ti)
+                                 {
+                                    p_tp[loopi] -=
+                                       AAp0 * p_xp0[loopi];
+                                 }
+                              hypre_BoxLoop2End_OneStride(xi, ti);
+#define hypre_UserOutsideInnerLoop
+#else
+/* normal loop */
                               hypre_BoxLoop2For(loopi, loopj, loopk, xi, ti)
                                  {
                                     tp[ti] -=
-                                       Ap0[Ai] * xp[xi + xoff0];
+                                       AAp0 * xp[xi + xoff0];
                                  }
                               hypre_BoxLoop2End(xi, ti);
+#endif
                               break;
 
                            case 0:
@@ -775,6 +972,17 @@ hypre_PointRelax( void               *relax_vdata,
                      }
                      else
                      {
+                        hypre_BoxLoop2Begin(loop_size,
+                                            b_data_box, start, stride, bi,
+                                            t_data_box, start, stride, ti);
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,bi,ti
+#include "hypre_box_smp_forloop.h"
+                        hypre_BoxLoop2For(loopi, loopj, loopk, bi, ti)
+                           {
+                              tp[ti] = bp[bi];
+                           }
+                        hypre_BoxLoop2End(bi, ti);
+
                         /* unroll up to depth MAX_DEPTH */
                         for (si = 0; si < stencil_size; si += MAX_DEPTH)
                         {
@@ -970,20 +1178,7 @@ hypre_PointRelax( void               *relax_vdata,
 
                      Ap = hypre_StructMatrixBoxData(A, i, diag_rank);
 
-                     if ( constant_coefficient )
-                     {
-                        Ai = hypre_CCBoxIndexRank( A_data_box, start );
-                        hypre_BoxLoop1Begin(loop_size,
-                                            t_data_box, start, stride, ti);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,ti
-#include "hypre_box_smp_forloop.h"
-                        hypre_BoxLoop1For(loopi, loopj, loopk, ti)
-                           {
-                              tp[ti] /= Ap[Ai];
-                           }
-                        hypre_BoxLoop1End(ti);
-                     }
-                     else
+                     if ( ! constant_coefficient )
                      {
                         hypre_BoxLoop2Begin(loop_size,
                                             A_data_box, start, stride, Ai,
@@ -1002,12 +1197,14 @@ hypre_PointRelax( void               *relax_vdata,
 
       if (weight != 1.0)
       {
-         hypre_StructScale((1.0 - weight), x);
-         hypre_StructAxpy(weight, t, x);
+         /*        hypre_StructScale((1.0 - weight), x);
+                   hypre_StructAxpy(weight, t, x);*/
+         hypre_relax_wtx( relax_data, t, x );
       }
       else
       {
-         hypre_StructCopy(t, x);
+         /*         hypre_StructCopy(t, x);*/
+         hypre_relax_copy( relax_data, t, x );
       }
 
       p    = (p + 1) % num_pointsets;
@@ -1022,9 +1219,6 @@ hypre_PointRelax( void               *relax_vdata,
 
    hypre_IncFLOPCount(relax_data -> flops);
    hypre_EndTiming(relax_data -> time_index);
-
-   bdotb = hypre_StructInnerProd(b,b);
-   xdotx = hypre_StructInnerProd(x,x);
 
    return ierr;
 }
@@ -1200,3 +1394,190 @@ hypre_PointRelaxSetTempVec( void               *relax_vdata,
    return ierr;
 }
 
+
+/*--------------------------------------------------------------------------
+ * hypre_relax_wtx
+ * Special vector operation for use in hypre_PointRelax -
+ * convex combination of vectors on specified pointsets.
+ *--------------------------------------------------------------------------*/
+
+int hypre_relax_wtx( void *relax_vdata,
+                     hypre_StructVector *t, hypre_StructVector *x )
+/* Sets x to a convex combination of x and t,  x = weight * t + (1-weight) * x,
+   but only in the specified pointsets */
+{
+   hypre_PointRelaxData  *relax_data = relax_vdata;
+   double                 weight           = (relax_data -> weight);
+   int                    num_pointsets    = (relax_data -> num_pointsets);
+   int                   *pointset_ranks   = (relax_data -> pointset_ranks);
+   hypre_Index           *pointset_strides = (relax_data -> pointset_strides);
+   hypre_ComputePkg     **compute_pkgs     = (relax_data -> compute_pkgs);
+   hypre_ComputePkg      *compute_pkg;
+
+   hypre_IndexRef         stride;
+   hypre_IndexRef         start;
+   hypre_Index            loop_size;
+
+   double weightc = 1 - weight;
+   double *xp, *tp;
+   int p, compute_i, i, j, loopi, loopj, loopk, xi, ti;
+   int pointset;
+   int ierr = 0;
+
+   hypre_BoxArrayArray   *compute_box_aa;
+   hypre_BoxArray        *compute_box_a;
+   hypre_Box             *compute_box;
+   hypre_Box             *x_data_box;
+   hypre_Box             *t_data_box;
+
+   for ( p=0; p<num_pointsets; ++p )
+   {
+      pointset = pointset_ranks[p];
+      compute_pkg = compute_pkgs[pointset];
+      stride = pointset_strides[pointset];
+
+      for (compute_i = 0; compute_i < 2; compute_i++)
+      {
+         switch(compute_i)
+         {
+         case 0:
+         {
+            compute_box_aa = hypre_ComputePkgIndtBoxes(compute_pkg);
+         }
+         break;
+
+         case 1:
+         {
+            compute_box_aa = hypre_ComputePkgDeptBoxes(compute_pkg);
+         }
+         break;
+         }
+
+         hypre_ForBoxArrayI(i, compute_box_aa)
+            {
+               compute_box_a = hypre_BoxArrayArrayBoxArray(compute_box_aa, i);
+
+               x_data_box =
+                  hypre_BoxArrayBox(hypre_StructVectorDataSpace(x), i);
+               t_data_box =
+                  hypre_BoxArrayBox(hypre_StructVectorDataSpace(t), i);
+
+               xp = hypre_StructVectorBoxData(x, i);
+               tp = hypre_StructVectorBoxData(t, i);
+
+               hypre_ForBoxI(j, compute_box_a)
+                  {
+                     compute_box = hypre_BoxArrayBox(compute_box_a, j);
+
+                     start  = hypre_BoxIMin(compute_box);
+                     hypre_BoxGetStrideSize(compute_box, stride, loop_size);
+
+                     hypre_BoxLoop2Begin(loop_size,
+                                         x_data_box, start, stride, xi,
+                                         t_data_box, start, stride, ti);
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,xi,ti
+#include "hypre_box_smp_forloop.h"
+                     hypre_BoxLoop2For(loopi, loopj, loopk, xi, ti)
+                        {
+                           xp[xi] = weight*tp[ti] + weightc*xp[xi];
+                        }
+                     hypre_BoxLoop2End(xi, ti);
+                  }
+            }
+      }
+   }
+
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_relax_copy
+ * Special vector operation for use in hypre_PointRelax -
+ * vector copy on specified pointsets.
+ *--------------------------------------------------------------------------*/
+
+int hypre_relax_copy( void *relax_vdata,
+                     hypre_StructVector *t, hypre_StructVector *x )
+/* Sets x to t, x=t, but only in the specified pointsets */
+{
+   hypre_PointRelaxData  *relax_data = relax_vdata;
+   int                    num_pointsets    = (relax_data -> num_pointsets);
+   int                   *pointset_ranks   = (relax_data -> pointset_ranks);
+   hypre_Index           *pointset_strides = (relax_data -> pointset_strides);
+   hypre_ComputePkg     **compute_pkgs     = (relax_data -> compute_pkgs);
+   hypre_ComputePkg      *compute_pkg;
+
+   hypre_IndexRef         stride;
+   hypre_IndexRef         start;
+   hypre_Index            loop_size;
+
+   double *xp, *tp;
+   int p, compute_i, i, j, loopi, loopj, loopk, xi, ti;
+   int pointset;
+   int ierr = 0;
+
+   hypre_BoxArrayArray   *compute_box_aa;
+   hypre_BoxArray        *compute_box_a;
+   hypre_Box             *compute_box;
+   hypre_Box             *x_data_box;
+   hypre_Box             *t_data_box;
+
+   for ( p=0; p<num_pointsets; ++p )
+   {
+      pointset = pointset_ranks[p];
+      compute_pkg = compute_pkgs[pointset];
+      stride = pointset_strides[pointset];
+
+      for (compute_i = 0; compute_i < 2; compute_i++)
+      {
+         switch(compute_i)
+         {
+         case 0:
+         {
+            compute_box_aa = hypre_ComputePkgIndtBoxes(compute_pkg);
+         }
+         break;
+
+         case 1:
+         {
+            compute_box_aa = hypre_ComputePkgDeptBoxes(compute_pkg);
+         }
+         break;
+         }
+
+         hypre_ForBoxArrayI(i, compute_box_aa)
+            {
+               compute_box_a = hypre_BoxArrayArrayBoxArray(compute_box_aa, i);
+
+               x_data_box =
+                  hypre_BoxArrayBox(hypre_StructVectorDataSpace(x), i);
+               t_data_box =
+                  hypre_BoxArrayBox(hypre_StructVectorDataSpace(t), i);
+
+               xp = hypre_StructVectorBoxData(x, i);
+               tp = hypre_StructVectorBoxData(t, i);
+
+               hypre_ForBoxI(j, compute_box_a)
+                  {
+                     compute_box = hypre_BoxArrayBox(compute_box_a, j);
+
+                     start  = hypre_BoxIMin(compute_box);
+                     hypre_BoxGetStrideSize(compute_box, stride, loop_size);
+
+                     hypre_BoxLoop2Begin(loop_size,
+                                         x_data_box, start, stride, xi,
+                                         t_data_box, start, stride, ti);
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,xi,ti
+#include "hypre_box_smp_forloop.h"
+                     hypre_BoxLoop2For(loopi, loopj, loopk, xi, ti)
+                        {
+                           xp[xi] = tp[ti];
+                        }
+                     hypre_BoxLoop2End(xi, ti);
+                  }
+            }
+      }
+   }
+
+   return ierr;
+}
