@@ -464,7 +464,8 @@ hypre_KrylovSolve( void *pcg_vdata,
    }
 
    (pcg_data -> num_iterations) = i;
-   (pcg_data -> rel_residual_norm) = rel_norms[i];
+   if (logging > 0)
+      (pcg_data -> rel_residual_norm) = rel_norms[i];
 
    return ierr;
 }
