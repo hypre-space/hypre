@@ -155,7 +155,7 @@ ReadData( char         *filename,
 
    char               key[50];
 
-   int                part, var, entry, s, i, j, k;
+   int                part, var, entry, s, i;
 
    /*-----------------------------------------------------------
     * Read data file from process 0, then broadcast
@@ -411,7 +411,7 @@ DistributeData( ProblemData   global_data,
                 int           myid,
                 ProblemData  *data_ptr )
 {
-   ProblemData        data;
+   /*ProblemData        data;*/
 
    /* TODO */
 
@@ -504,13 +504,14 @@ DestroyData( ProblemData   data )
  *--------------------------------------------------------------------------*/
 
 int
-GetVariableBox( Index                  cell_ilower,
-                Index                  cell_iupper,
-                HYPRE_SStructVariable  vartype,
-                Index                  var_ilower,
-                Index                  var_iupper )
+GetVariableBox( Index  cell_ilower,
+                Index  cell_iupper,
+                int    int_vartype,
+                Index  var_ilower,
+                Index  var_iupper )
 {
    int ierr = 0;
+   HYPRE_SStructVariable  vartype = (HYPRE_SStructVariable) int_vartype;
 
    var_ilower[0] = cell_ilower[0];
    var_ilower[1] = cell_ilower[1];
@@ -580,6 +581,8 @@ PrintUsage( char *progname,
       printf("                        42 - GMRES with ParaSails precond\n");
       printf("\n");
    }
+
+   return 0;
 }
 
 /*--------------------------------------------------------------------------
