@@ -1643,7 +1643,7 @@ main( int   argc,
 
       bHYPRE_IJParCSRMatrix_Print( bHYPRE_parcsr_A, "test.A" );
       bHYPRE_IJParCSRVector_Print( bHYPRE_y, "test.apply" );
-      bHYPRE_Vector_deleteRef( y );
+      bHYPRE_IJBuildVector_deleteRef( bHYPRE_ij_y );
 
       /* SetValues, x=1; result is all 1's */
       dimsl[0] = 0;   dimsu[0] = local_num_cols;
@@ -1760,7 +1760,7 @@ main( int   argc,
       {
          SIDL_int__array_set1( bHYPRE_num_grid_sweeps, i, num_grid_sweeps[i] );
       }
-      bHYPRE_BoomerAMG_SetIntArrayParameter( bHYPRE_AMG, "NumGridSweeps",
+      bHYPRE_BoomerAMG_SetIntArray1Parameter( bHYPRE_AMG, "NumGridSweeps",
                                             bHYPRE_num_grid_sweeps );
       dimsl[0] = 0;   dimsu[0] = 4;
       bHYPRE_grid_relax_type = SIDL_int__array_create1d( 4 );
@@ -1768,7 +1768,7 @@ main( int   argc,
       {
          SIDL_int__array_set1( bHYPRE_grid_relax_type, i, grid_relax_type[i] );
       }
-      bHYPRE_BoomerAMG_SetIntArrayParameter( bHYPRE_AMG, "GridRelaxType",
+      bHYPRE_BoomerAMG_SetIntArray1Parameter( bHYPRE_AMG, "GridRelaxType",
                                             bHYPRE_grid_relax_type );
       dimsl[0] = 0;   dimsu[0] = max_levels;
       bHYPRE_relax_weight = SIDL_double__array_create1d( max_levels );
@@ -1776,14 +1776,14 @@ main( int   argc,
       {
          SIDL_double__array_set1( bHYPRE_relax_weight, i, relax_weight[i] );
       }
-      bHYPRE_BoomerAMG_SetDoubleArrayParameter( bHYPRE_AMG, "RelaxWeight",
+      bHYPRE_BoomerAMG_SetDoubleArray1Parameter( bHYPRE_AMG, "RelaxWeight",
                                                bHYPRE_relax_weight );
       bHYPRE_BoomerAMG_SetIntParameter( bHYPRE_AMG, "SmoothType",
                                        smooth_type );
       bHYPRE_BoomerAMG_SetIntParameter( bHYPRE_AMG, "SmoothNumSweeps",
                                        smooth_num_sweep);
       dimsl[0] = 0;   dimsl[1] = 0;   dimsu[0] = 4;   dimsu[1] = 4;
-      bHYPRE_grid_relax_points = SIDL_int__array_createRow( 2, dimsl, dimsu );
+      bHYPRE_grid_relax_points = SIDL_int__array_createCol( 2, dimsl, dimsu );
       for ( i=0; i<4; ++i )
       {
          for ( j=0; j<num_grid_sweeps[i]; ++j )
@@ -1792,7 +1792,7 @@ main( int   argc,
                                   grid_relax_points[i][j] );
          }
       }
-      bHYPRE_BoomerAMG_SetIntArrayParameter( bHYPRE_AMG, "GridRelaxPoints",
+      bHYPRE_BoomerAMG_SetIntArray2Parameter( bHYPRE_AMG, "GridRelaxPoints",
                                             bHYPRE_grid_relax_points );
 
       bHYPRE_BoomerAMG_SetIntParameter( bHYPRE_AMG, "MaxLevels", max_levels);
@@ -1815,7 +1815,7 @@ main( int   argc,
          {
             SIDL_int__array_set1( bHYPRE_dof_func, i, dof_func[i] );
          }
-	 bHYPRE_BoomerAMG_SetIntArrayParameter( bHYPRE_AMG, "DOFFunc",
+	 bHYPRE_BoomerAMG_SetIntArray1Parameter( bHYPRE_AMG, "DOFFunc",
                                                bHYPRE_dof_func );
       }
       log_level = 3;
@@ -2651,6 +2651,7 @@ main( int   argc,
 /*
    hypre_FinalizeMemoryDebug();
 */
+   printf("about to call MPI_Finalize\n");
 
    MPI_Finalize();
 
