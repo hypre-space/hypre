@@ -29,16 +29,13 @@ perform_test()
 #=============================================================================
   if [ "${HYPRE_COMPILE_MACHINE}" = "`hostname | sed 's/\..*$//'`" ]
   then
-    echo "deleting old AUTOTEST directory on host machine and copying new source...."
-    rm -fR ${HYPRE_DIST_DIR}/linear_solvers
-    cp -pr linear_solvers ${HYPRE_DIST_DIR}
-    cd ${HYPRE_DIST_DIR}
     [ -f linear_solvers/test/AUTOTEST/autotest_env ] && \
       . linear_solvers/test/AUTOTEST/autotest_env;\
     [ -f linear_solvers/test/AUTOTEST/env.${HYPRE_ARCH} ] && \
       . linear_solvers/test/AUTOTEST/env.${HYPRE_ARCH} ${COMPILERSELECT};\
     linear_solvers/test/AUTOTEST/autotest_test \
       ${HYPRE_MACHINE_COMMANDS} -v ${HYPRE_MESSAGE};\
+    cp -fpr linear_solvers ${HYPRE_DIST_DIR}
 
 #=============================================================================
 #   Running tests on remote machine
