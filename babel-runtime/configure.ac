@@ -27,13 +27,25 @@
 
 ############################################################
 #
+# Variable initialization
+#
+enable_static=yes
+enable_shared=yes
+with_fortran77=yes
+with_fortran90=yes
+with_cxx=yes
+with_python=yes
+with_java=yes
+msgs="
+	Recap:"
+
+############################################################
+#
 # Basic startup stuff
 #
 AC_INIT(babel-runtime, 0.8.0, components@llnl.gov)
 AC_CONFIG_SRCDIR([sidl/SIDLArray.h])
 AC_CONFIG_AUX_DIR([config])
-# following line added for hypre...
-AC_PREFIX_DEFAULT(`pwd`/../hypre)
 AC_CANONICAL_TARGET
 
 AM_INIT_AUTOMAKE
@@ -45,21 +57,13 @@ LLNL_CHECK_AUTOCONF(2.54)
 
 ############################################################
 #
-# Variable initialization
+# Additions for hypre
 #
-enable_static=yes
-# following two lines changed for hypre...
-enable_shared=no
-disable_shared=yes
-# ... was enable_shared=yes   but hypre uses static
-with_fortran77=yes
+AC_PREFIX_DEFAULT(`pwd`/../hypre)
 with_fortran90=no
 # ... was with_fortran90=yes    which doesn't work on frost
-with_cxx=yes
-with_python=yes
-with_java=yes
-msgs="
-	Recap:"
+enable_shared=no
+
 
 ############################################################
 #

@@ -50,7 +50,7 @@ build_libtool_libs=no
 build_old_libs=yes
 
 # Whether or not to add -lc for building shared libraries.
-build_libtool_need_lc=no
+build_libtool_need_lc=yes
 
 # Whether or not to optimize for fast installation.
 fast_install=needless
@@ -67,7 +67,7 @@ AR="ar"
 AR_FLAGS="cru"
 
 # The default C compiler.
-CC="gcc"
+CC=" mpicc"
 
 # Is the compiler the GNU C compiler?
 with_gcc=yes
@@ -116,14 +116,14 @@ libext="a"
 exeext=""
 
 # Additional compiler flags for building library objects.
-pic_flag="                                        -fPIC"
+pic_flag="  -fPIC"
 pic_mode=default
 
 # Does compiler simultaneously support -c and -o options?
 compiler_c_o="yes"
 
 # Can we write directly to a .lo ?
-compiler_o_lo="no"
+compiler_o_lo="yes"
 
 # Must we lock files when doing compilation ?
 need_locks="no"
@@ -172,7 +172,7 @@ library_names_spec="\${libname}\${release}.so\$versuffix \${libname}\${release}.
 soname_spec="\${libname}\${release}.so\$major"
 
 # Commands used to build and install an old-style archive.
-RANLIB="ranlib"
+RANLIB=":"
 old_archive_cmds="\$AR \$AR_FLAGS \$oldlib\$oldobjs\$old_deplibs~\$RANLIB \$oldlib"
 old_postinstall_cmds="\$RANLIB \$oldlib~chmod 644 \$oldlib"
 old_postuninstall_cmds=""
@@ -218,7 +218,7 @@ global_symbol_pipe="sed -n -e 's/^.*[ 	]\\([ABCDGISTW][ABCDGISTW]*\\)[ 	][ 	]*\\
 global_symbol_to_cdecl="sed -n -e 's/^. .* \\(.*\\)\$/extern char \\1;/p'"
 
 # Transform the output of nm in a C name address pair
-global_symbol_to_c_name_address=""
+global_symbol_to_c_name_address="sed -n -e 's/^: \\([^ ]*\\) \$/  {\\\"\\1\\\", (lt_ptr) 0},/p' -e 's/^[BCDEGRST] \\([^ ]*\\) \\([^ ]*\\)\$/  {\"\\2\", (lt_ptr) \\&\\2},/p'"
 
 # This is the shared library runtime path variable.
 runpath_var=LD_RUN_PATH

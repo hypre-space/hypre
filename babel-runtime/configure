@@ -38,9 +38,12 @@ PS2='> '
 PS4='+ '
 
 # NLS nuisances.
-for as_var in LANG LANGUAGE LC_ALL LC_COLLATE LC_CTYPE LC_NUMERIC LC_MESSAGES LC_TIME
+for as_var in \
+  LANG LANGUAGE LC_ADDRESS LC_ALL LC_COLLATE LC_CTYPE LC_IDENTIFICATION \
+  LC_MEASUREMENT LC_MESSAGES LC_MONETARY LC_NAME LC_NUMERIC LC_PAPER \
+  LC_TELEPHONE LC_TIME
 do
-  if (set +x; test -n "`(eval $as_var=C; export $as_var) 2>&1`"); then
+  if (set +x; test -z "`(eval $as_var=C; export $as_var) 2>&1`"); then
     eval $as_var=C; export $as_var
   else
     $as_unset $as_var
@@ -1484,8 +1487,6 @@ ac_config_guess="$SHELL $ac_aux_dir/config.guess"
 ac_config_sub="$SHELL $ac_aux_dir/config.sub"
 ac_configure="$SHELL $ac_aux_dir/configure" # This should be Cygnus configure.
 
-# following line added for hypre...
-
 # Make sure we can run config.sub.
 $ac_config_sub sun4 >/dev/null 2>&1 ||
   { { echo "$as_me:$LINENO: error: cannot run $ac_config_sub" >&5
@@ -1973,21 +1974,13 @@ echo "${ECHO_T}$llnl_autoconf_version (disabled)" >&6
 
 ############################################################
 #
-# Variable initialization
+# Additions for hypre
 #
-enable_static=yes
-# following two lines changed for hypre...
-enable_shared=no
-disable_shared=yes
-# ... was enable_shared=yes   but hypre uses static
-with_fortran77=yes
+
 with_fortran90=no
 # ... was with_fortran90=yes    which doesn't work on frost
-with_cxx=yes
-with_python=yes
-with_java=yes
-msgs="
-	Recap:"
+enable_shared=no
+
 
 ############################################################
 #
@@ -7220,7 +7213,7 @@ fi
 
 
 # Provide some information about the compiler.
-echo "$as_me:7223:" \
+echo "$as_me:7216:" \
      "checking for Fortran 77 compiler version" >&5
 ac_compiler=`set X $ac_compile; echo $2`
 { (eval echo "$as_me:$LINENO: \"$ac_compiler --version </dev/null >&5\"") >&5
@@ -7426,7 +7419,7 @@ _ACEOF
 # flags.
 ac_save_FFLAGS=$FFLAGS
 FFLAGS="$FFLAGS $ac_verb"
-(eval echo $as_me:7429: \"$ac_link\") >&5
+(eval echo $as_me:7422: \"$ac_link\") >&5
 ac_f77_v_output=`eval $ac_link 5>&1 2>&1 | grep -v 'Driving:'`
 echo "$ac_f77_v_output" >&5
 FFLAGS=$ac_save_FFLAGS
@@ -7505,7 +7498,7 @@ _ACEOF
 # flags.
 ac_save_FFLAGS=$FFLAGS
 FFLAGS="$FFLAGS $ac_cv_prog_f77_v"
-(eval echo $as_me:7508: \"$ac_link\") >&5
+(eval echo $as_me:7501: \"$ac_link\") >&5
 ac_f77_v_output=`eval $ac_link 5>&1 2>&1 | grep -v 'Driving:'`
 echo "$ac_f77_v_output" >&5
 FFLAGS=$ac_save_FFLAGS
@@ -9769,7 +9762,7 @@ else
 JAVA_TEST=Test.java
 CLASS_TEST=Test.class
 cat << \EOF > $JAVA_TEST
-/* #line 9772 "configure" */
+/* #line 9765 "configure" */
 public class Test {
 }
 EOF
@@ -9939,7 +9932,7 @@ EOF
 if uudecode$EXEEXT Test.uue; then
         ac_cv_prog_uudecode_base64=yes
 else
-        echo "configure: 9942: uudecode had trouble decoding base 64 file 'Test.uue'" >&5
+        echo "configure: 9935: uudecode had trouble decoding base 64 file 'Test.uue'" >&5
         echo "configure: failed file was:" >&5
         cat Test.uue >&5
         ac_cv_prog_uudecode_base64=no
@@ -10057,7 +10050,7 @@ else
 JAVA_TEST=Test.java
 CLASS_TEST=Test.class
 cat << \EOF > $JAVA_TEST
-/* #line 10060 "configure" */
+/* #line 10053 "configure" */
 public class Test {
 }
 EOF
@@ -10094,7 +10087,7 @@ JAVA_TEST=Test.java
 CLASS_TEST=Test.class
 TEST=Test
 cat << \EOF > $JAVA_TEST
-/* [#]line 10097 "configure" */
+/* [#]line 10090 "configure" */
 public class Test {
 public static void main (String args[]) {
         System.exit (0);
@@ -10318,7 +10311,7 @@ echo "$as_me: error: no acceptable jdb program found in \$PATH" >&2;}
 
 
 cat << \EOF > Test.java
-/* #line 10321 "configure" */
+/* #line 10314 "configure" */
 
 public class Test {
 
@@ -11428,7 +11421,7 @@ chmod -w .
 save_CFLAGS="$CFLAGS"
 CFLAGS="$CFLAGS -o out/conftest2.$ac_objext"
 compiler_c_o=no
-if { (eval echo configure:11431: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>out/conftest.err; } && test -s out/conftest2.$ac_objext; then
+if { (eval echo configure:11424: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>out/conftest.err; } && test -s out/conftest2.$ac_objext; then
   # The compiler can only warn and ignore the option if not recognized
   # So say no if there are warnings
   if test -s out/conftest.err; then
@@ -13253,7 +13246,7 @@ else
     lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 13256 "configure"
+#line 13249 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -13351,7 +13344,7 @@ else
     lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 13354 "configure"
+#line 13347 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -14416,7 +14409,7 @@ fi
 #
 # LLNL:  Added to be consistent with F77
 # Provide some information about the compiler.
-echo "$as_me:14419:" \
+echo "$as_me:14412:" \
      "checking for Fortran 90 compiler version" >&5
 ac_compiler=`set X $ac_compile; echo $2`
 { (eval echo "$as_me:$LINENO: \"$ac_compiler --version </dev/null >&5\"") >&5
@@ -14577,7 +14570,7 @@ _ACEOF
 # flags.
 ac_save_F90FLAGS=$F90FLAGS
 F90FLAGS="$F90FLAGS $ac_verb"
-(eval echo $as_me:14580: \"$ac_link\") >&5
+(eval echo $as_me:14573: \"$ac_link\") >&5
 ac_f90_v_output=`eval $ac_link 5>&1 2>&1 | grep -v 'Driving:'`
 echo "$ac_f90_v_output" >&5
 F90FLAGS=$ac_save_F90FLAGS
@@ -14651,7 +14644,7 @@ _ACEOF
 # flags.
 ac_save_F90FLAGS=$F90FLAGS
 F90FLAGS="$F90FLAGS $ac_cv_prog_f90_v"
-(eval echo $as_me:14654: \"$ac_link\") >&5
+(eval echo $as_me:14647: \"$ac_link\") >&5
 ac_f90_v_output=`eval $ac_link 5>&1 2>&1 | grep -v 'Driving:'`
 echo "$ac_f90_v_output" >&5
 F90FLAGS=$ac_save_F90FLAGS
@@ -16122,7 +16115,7 @@ test "x$enable_libtool_lock" != xno && enable_libtool_lock=yes
 case $host in
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 16125 "configure"' > conftest.$ac_ext
+  echo '#line 16118 "configure"' > conftest.$ac_ext
   if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -16663,7 +16656,7 @@ chmod -w .
 save_CFLAGS="$CFLAGS"
 CFLAGS="$CFLAGS -o out/conftest2.$ac_objext"
 compiler_c_o=no
-if { (eval echo configure:16666: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>out/conftest.err; } && test -s out/conftest2.$ac_objext; then
+if { (eval echo configure:16659: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>out/conftest.err; } && test -s out/conftest2.$ac_objext; then
   # The compiler can only warn and ignore the option if not recognized
   # So say no if there are warnings
   if test -s out/conftest.err; then
@@ -18488,7 +18481,7 @@ else
     lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 18491 "configure"
+#line 18484 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -18586,7 +18579,7 @@ else
     lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 18589 "configure"
+#line 18582 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -20087,7 +20080,7 @@ else
     lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 20090 "configure"
+#line 20083 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -21492,9 +21485,12 @@ PS2='> '
 PS4='+ '
 
 # NLS nuisances.
-for as_var in LANG LANGUAGE LC_ALL LC_COLLATE LC_CTYPE LC_NUMERIC LC_MESSAGES LC_TIME
+for as_var in \
+  LANG LANGUAGE LC_ADDRESS LC_ALL LC_COLLATE LC_CTYPE LC_IDENTIFICATION \
+  LC_MEASUREMENT LC_MESSAGES LC_MONETARY LC_NAME LC_NUMERIC LC_PAPER \
+  LC_TELEPHONE LC_TIME
 do
-  if (set +x; test -n "`(eval $as_var=C; export $as_var) 2>&1`"); then
+  if (set +x; test -z "`(eval $as_var=C; export $as_var) 2>&1`"); then
     eval $as_var=C; export $as_var
   else
     $as_unset $as_var
