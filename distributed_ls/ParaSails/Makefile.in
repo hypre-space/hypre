@@ -1,0 +1,113 @@
+#BHEADER***********************************************************************
+# (c) 1997   The Regents of the University of California
+#
+# See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
+# notice, contact person, and disclaimer.
+#
+# $Revision$
+#EHEADER***********************************************************************
+
+.SUFFIXES: .c .f .o
+
+CC = @CC@
+
+C_COMPILE_FLAGS=@CFLAGS@
+CXX_COMPILE_FLAGS=@CXXFLAGS@
+F77_COMPILE_FLAGS=@F77FLAGS@
+CINCLUDES=@INCLUDES@ @MPIINCLUDE@
+ 
+CFLAGS = \
+ ${C_COMPILE_FLAGS}\
+ -I../..\
+ -I../../utilities\
+ -I../../distributed_matrix\
+ ${CINCLUDES}\
+ ${CDEFS}
+
+RANLIB = @RANLIB@
+
+MPILIBFLAGS = @MPILIBDIRS@ @MPILIBS@ @MPIFLAGS@ 
+LIBFLAGS = @LIBDIRS@ @LIBS@
+LDLIBFLAGS = @LDLIBDIRS@ @LDLIBS@
+BLASLIBFLAGS = @BLASLIBFLAGS@
+
+LFLAGS =\
+ -L../../utilities\
+ -L../../distributed_matrix\
+ ${BLASLIBFLAGS}\
+ ${MPILIBFLAGS} ${LIBFLAGS} ${LDLIBFLAGS}
+
+
+HEADERS =\
+ ConjGrad.h\
+ DiagScale.h\
+ HYPRE_ParaSails.h\
+ Hash.h\
+ Matrix.h\
+ Mem.h\
+ OrderStat.h\
+ ParaSails.h\
+ PrunedRows.h\
+ RowPatt.h\
+ StoredRows.h
+
+FILES =\
+ ConjGrad.c\
+ Convert.c\
+ DiagScale.c\
+ HYPRE_ParaSails.c\
+ Hash.c\
+ Matrix.c\
+ Mem.c\
+ OrderStat.c\
+ ParaSails.c\
+ PrunedRows.c\
+ RowPatt.c\
+ StoredRows.c
+
+OBJS = ${FILES:.c=.o}
+
+##################################################################
+# Targets
+##################################################################
+
+all: libHYPRE_ParaSails.a 
+
+driver: driver.o libHYPRE_ParaSails.a
+	@echo  "Linking" $@ "... "
+	${CC} -o $@ driver.o ${LFLAGS}
+
+install: all
+	@cp -f HYPRE_*.h $$HYPRE_INSTALL_DIR/include/.
+	@cp -f libHYPRE_*.a $$HYPRE_INSTALL_DIR/lib/.
+clean:
+	@rm -f *.o
+
+veryclean: clean
+	@rm -f libHYPRE_*.a
+
+
+##################################################################
+# Rules
+##################################################################
+
+libHYPRE_ParaSails.a: ${OBJS}
+	@echo  "Building $@ ... "
+	ar -rcu $@ ${OBJS}
+	${RANLIB} $@
+
+${OBJS}: ${HEADERS}
+
+
+
+##################################################################
+# Generic rules
+##################################################################
+
+.c.o:
+	${CC} -o $@ -c ${CFLAGS} $<
+
+.f.o:
+	${F77} -o $@ -c ${FFLAGS} $<
+
+
