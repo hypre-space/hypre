@@ -219,6 +219,12 @@ int HYPRE_BoomerAMGSetSmoothOption(HYPRE_Solver  solver,
 /**
  * (Optional)
  **/
+int HYPRE_BoomerAMGSetSmoothNumSweep(HYPRE_Solver  solver,
+                                  int       smooth_num_sweep);
+
+/**
+ * (Optional)
+ **/
 int HYPRE_BoomerAMGSetIOutDat(HYPRE_Solver solver,
                               int          ioutdat);
 
