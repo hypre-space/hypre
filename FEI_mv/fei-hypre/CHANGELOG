@@ -139,4 +139,7 @@
 12/03/02    2.0.0R25
             - add variable tolerance for block preconditioning
             - fix autotest bug (unused variables) in mli_method_amgrs.C
+12/18/02    2.0.0R26
+            - add Kaczmarz smoother
+            - correct a bug in mli_solver_gs.C
 
