@@ -70,6 +70,12 @@ double MLI_Method_AMGSA::genP(MLI_Matrix *mli_Amat,
     *-----------------------------------------------------------------*/
 
    Amat = (hypre_ParCSRMatrix *) mli_Amat->getMatrix();
+
+sprintf(paramString, "matrix%d", currLevel_);
+hypre_ParCSRMatrixPrintIJ(Amat, 1, 1, paramString);
+printf("matrix %s printed\n", paramString);
+fflush(stdout);
+
    comm = hypre_ParCSRMatrixComm(Amat);
    MPI_Comm_rank(comm,&mypid);
    MPI_Comm_size(comm,&numProcs);
@@ -178,6 +184,7 @@ double MLI_Method_AMGSA::genP(MLI_Matrix *mli_Amat,
     * create global P 
     *-----------------------------------------------------------------*/
 
+#if 0
    if ( initAggr == NULL ) 
    {
       if ( GGlobalNRows <= minAggrSize_*numProcs ) 
@@ -187,6 +194,7 @@ double MLI_Method_AMGSA::genP(MLI_Matrix *mli_Amat,
          return 1.0e39;
       }
    }
+#endif
 
    /*-----------------------------------------------------------------
     * fetch the coarse grid information and instantiate P
@@ -502,6 +510,7 @@ double MLI_Method_AMGSA::genP(MLI_Matrix *mli_Amat,
       workArray = new double[5*(maxAggSize + numSmoothVec_)];
       newNull = new double[naggr*nullspaceDim_*numSmoothVec_]; 
 
+#if edmond
       for (i=0; i<naggr; i++)
       {
           printf("aggregate %d\n", i);
@@ -509,6 +518,7 @@ double MLI_Method_AMGSA::genP(MLI_Matrix *mli_Amat,
           for (k=0; k<aggSize; k++)
               printf("%d\n", aggIndArray[i][k]+1);
       }
+#endif
 
       /* ------ perform SVD on each aggregate ------ */
 
@@ -1644,6 +1654,7 @@ int MLI_Method_AMGSA::formSmoothVec(MLI_Matrix *mli_Amat)
    int i, j;
 
    printf("Setting up smooth vectors\n");
+
    /* warn if nullspaceVec_ is not NULL */
    if (nullspaceVec_ != NULL)
    {
@@ -1695,7 +1706,7 @@ int MLI_Method_AMGSA::formSmoothVec(MLI_Matrix *mli_Amat)
        for (j=0; j<local_nrows; j++)
            sol_data[j] = 2.*((double)rand() / (double)RAND_MAX)-1.;
 
-#if 0
+#if edmond
        printf("in = [\n");
        for (j=0; j<local_nrows; j++)
            printf("%f\n", sol_data[j]);
@@ -1704,15 +1715,20 @@ int MLI_Method_AMGSA::formSmoothVec(MLI_Matrix *mli_Amat)
 
        /* call smoother */
        smoother->solve(mli_rhs, mli_sol);
+       MLI_Utils_ScaleVec(Amat, trial_sol);
 
        /* extract solution */
        for (j=0; j<local_nrows; j++)
            *nsptr++ = sol_data[j];
 
+#if 0
        for (j=0; j<local_nrows; j++)
            printf("S(%d,%d)=%f\n", j+1,i+1,sol_data[j]);
+#endif
    }
 
+   hypre_ParVectorDestroy(zero_rhs);
+   hypre_ParVectorDestroy(trial_sol);
    delete smoother;
 
    return 0;
