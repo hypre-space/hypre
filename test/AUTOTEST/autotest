@@ -165,7 +165,7 @@ do
         HYPRE_COMPILE_MACHINE="achilles"
         HYPRE_RUN_MACHINE="achilles"
         HYPRE_REMOTE_DIR="/usr/casc/hypre/sparc-sun-solaris2.8/AUTOTEST"
-	HYPRE_MACHINE_COMMANDS="-mn -a 2 -dcf"
+	HYPRE_MACHINE_COMMANDS="-mn -a 2 -cf"
         HYPRE_MESSAGE='SECONDARY[cc-5.3]'
 	perform_test
         shift;;
@@ -204,7 +204,7 @@ do
         HYPRE_COMPILE_MACHINE="poincare"
         HYPRE_RUN_MACHINE="poincare"
         HYPRE_REMOTE_DIR="/usr/casc/hypre/sparc-sun-solaris2.7/AUTOTEST"
-	HYPRE_MACHINE_COMMANDS="-mns -a 2 -dcf"
+	HYPRE_MACHINE_COMMANDS="-mns -a 2 -cf"
         HYPRE_MESSAGE='SECONDARY[cc-5.0]'
 ###	print_header
 ###     ./autotest_test $HYPRE_MACHINE_COMMANDS
@@ -250,7 +250,7 @@ do
         HYPRE_COMPILE_MACHINE="ilx"
         HYPRE_RUN_MACHINE="ilx"
         HYPRE_REMOTE_DIR="/usr/casc/hypre/i686-pc-linux-gnu-ilx/AUTOTEST"
-	HYPRE_MACHINE_COMMANDS="-mnsa 2 -dcf"
+	HYPRE_MACHINE_COMMANDS="-mnsa 2 -cf"
         HYPRE_MESSAGE='OTHER[gcc-2.96]'
 	perform_test
         shift;;
@@ -271,7 +271,7 @@ do
         HYPRE_COMPILE_MACHINE="pengra"
         HYPRE_RUN_MACHINE="pengra"
         HYPRE_REMOTE_DIR="/usr/casc/hypre/i686-pc-linux-gnu-pengra/AUTOTEST"
-	HYPRE_MACHINE_COMMANDS="-mna 2 -dcf"
+	HYPRE_MACHINE_COMMANDS="-mna 2 -cf"
         HYPRE_MESSAGE='OTHER[icc-6.0]'
 	perform_test
         shift;;
@@ -280,7 +280,7 @@ do
         HYPRE_COMPILE_MACHINE="poincare"
         HYPRE_RUN_MACHINE="poincare"
         HYPRE_REMOTE_DIR="/usr/casc/hypre/sparc-sun-solaris2.7/AUTOTEST"
-	HYPRE_MACHINE_COMMANDS="-mnsa 1 -dcf -q 2"
+	HYPRE_MACHINE_COMMANDS="-mnsa 1 -cf -q 2"
         HYPRE_MESSAGE='SECONDARY[purify]'
 ###     print_header
 ###     ./autotest_test $HYPRE_MACHINE_COMMANDS -v $HYPRE_MESSAGE

@@ -107,11 +107,11 @@ parse_arguments () {
   do
     argcur=$arg
     case $arg in
-      a) confbuildtest $OPTARG  " "             "default"   0 0 0 0 1 1 1;;
+      a) confbuildtest $OPTARG  " "             "default"   0 0 0 0 1 0 1;;
       c) build $Build "all++"   "all++"         "test";;
       D) DEBUG_MODE="yes";;
       d) build $Build "all"     "docs"          "docs";;
-      e) confbuildtest $OPTARG  "--enable-debug" "debug"    0 0 0 0 1 1 1;;
+      e) confbuildtest $OPTARG  "--enable-debug" "debug"    0 0 0 0 1 0 1;;
       f) build $Build "all77"   "all77"         "test";;
       h) usage; exit 2;;
       i) confbuildtest 1        "--enable-debug" "debug"    0 0 0 0 1 0 1
@@ -120,14 +120,14 @@ parse_arguments () {
                                                 "insure"    0 0 0 0 1 0 1;;
       m) HYPRE_SEND_MAIL="no"; MailOpt=""; MailCmd="yes";;
      +m) HYPRE_SEND_MAIL="yes"; MailOpt="-mail"; MailCmd="yes";;
-      n) confbuildtest $Build   "--without-MPI" "no_mpi"    0 0 0 0 1 1 0;;
-      o) confbuildtest $OPTARG  "--with-openmp" "openmp"    0 0 0 0 1 1 1;;
+      n) confbuildtest $Build   "--without-MPI" "no_mpi"    0 0 0 0 1 0 0;;
+      o) confbuildtest $OPTARG  "--with-openmp" "openmp"    0 0 0 0 1 0 1;;
       q) confbuildtest $OPTARG  "--with-purify-to-file" \
                                                 "purify"    0 0 0 0 1 0 1;;
      +q) confbuildtest $OPTARG  "--with-purify" "purify"    0 0 0 0 1 0 1;;
       r) HYPRE_RUN_MACHINE=$OPTARG;;
       s) confbuildtest $Build   "--with-strict-checking" \
-                                         "strict_checking"  0 0 0 0 1 1 0;;
+                                         "strict_checking"  0 0 0 0 1 0 0;;
       v) HYPRE_MESSAGE=$OPTARG;;
       :) echo "$0: \"$argcur\" requires a value"; exit 2;;
      \?) echo "$0: INVALID option \"$argcur\" at $OPTIND"; exit 2;;
@@ -502,7 +502,7 @@ confbuildtest ()
 BuildOpt=$1	 ConfigOption=$2  MessageStr=$3
 IJOpt=$4	 FeiOpt=$5	  StructOpt=$6
 SstructOpt=$7	 MakeOpt=$8	  BetaOpt=$9
-shift
+shift                           # problem getting $10 on some systems
 NoFeiOpt=$9
 if [ ${BuildOpt} -ne $Skip ] ; then
   seconds; TIME=$SECS
@@ -536,6 +536,10 @@ if [ ${BuildOpt} -ne $Skip ] ; then
 
     if [ $MakeOpt -ne $Skip ] ; then
       makeit "all" $MessageStr "$HYPRE_DEFAULT_EMAIL"
+    fi
+
+    if [ $BetaOpt -ne $Skip ] ; then
+      makeit "beta" $MessageStr "$HYPRE_DEFAULT_EMAIL"
     fi
 
   fi
