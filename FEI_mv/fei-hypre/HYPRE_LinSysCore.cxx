@@ -3952,7 +3952,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
          }
       }
       MLI_NumNodes_ = ncount;
-      assert( MLI_NumNodes_ == (localEndRow_-localStartRow_+1) );
+      assert((MLI_NumNodes_*MLI_FieldSize_) == (localEndRow_-localStartRow_+1));
       delete [] tempNodalCoord;
       delete [] iArray;
       for (i = 0; i < MLI_NumNodes_; i++) 
