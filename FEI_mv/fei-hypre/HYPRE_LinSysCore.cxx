@@ -10,6 +10,7 @@
 // system includes
 //---------------------------------------------------------------------------
 
+#include "utilities/utilities.h"
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -24,9 +25,7 @@
 // HYPRE includes
 //---------------------------------------------------------------------------
 
-#include "utilities/utilities.h"
 #include "HYPRE.h"
-#include "HYPRE_config.h"
 #include "IJ_mv/HYPRE_IJ_mv.h"
 #include "parcsr_mv/HYPRE_parcsr_mv.h"
 #include "parcsr_ls/HYPRE_parcsr_ls.h"

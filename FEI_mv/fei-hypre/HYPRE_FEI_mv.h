@@ -9,7 +9,6 @@
 #ifndef HYPRE_FEI_MV_HEADER
 #define HYPRE_FEI_MV_HEADER
 
-#include "HYPRE_config.h"
 #include "HYPRE_utilities.h"
 
 #ifdef __cplusplus

@@ -1,7 +1,7 @@
 #ifndef __SUPERLU_UTIL /* allow multiple inclusions */
 #define __SUPERLU_UTIL
 
-#include "HYPRE_config.h"
+#include "HYPRE_utilities.h"
 #include <stdio.h>
 #if HAVE_STDLIB_H
 #include <stdlib.h>

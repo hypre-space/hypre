@@ -44,7 +44,7 @@
 /* system include files                                                     */
 /*--------------------------------------------------------------------------*/
 
-#include "HYPRE_config.h"
+#include "HYPRE_utilities.h"
 #if HAVE_STRING_H
 #  include <string.h>
 #endif /* HAVE_STRING_H */
