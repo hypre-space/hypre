@@ -2,6 +2,7 @@
  * Also, functions for error handling and message logging.
  */
 
+#include "sig_dh.h"
 #include "euclid_common.h"
 #include "Parser_dh.h"
 #include "Mem_dh.h"
