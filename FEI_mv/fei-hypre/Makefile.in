@@ -92,7 +92,8 @@ LFLAGS =\
 FILES = HYPRE_LinSysCore.cc cfei.cc hypre_fei_reduce.cc hypre_fei_schur.cc \
         hypre_fei_misc.cc hypre_fei_ddamg.cc HYPRE_parcsr_ml.c
 
-OBJS = ${FILES:.c=.o} ${FILES:.cc=.o}
+OBJS = HYPRE_LinSysCore.o cfei.o hypre_fei_reduce.o hypre_fei_schur.o \
+        hypre_fei_misc.o hypre_fei_ddamg.o HYPRE_parcsr_ml.o
 
 ##################################################################
 # Main rules
