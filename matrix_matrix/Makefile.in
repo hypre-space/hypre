@@ -49,5 +49,5 @@ ${OBJS}: ${HEADERS}
 ##################################################################
 
 .c.o:
-	${CC} -o $@ -c ${CFLAGS} -I../seq_matrix_vector -I../parcsr_matrix_vector $<
+	${CC} -o $@ -c ${CFLAGS} -I../seq_matrix_vector -I../parcsr_matrix_vector -I../distributed_matrix -I../IJ_matrix_vector $<
 
