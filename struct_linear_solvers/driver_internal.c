@@ -48,6 +48,7 @@ char *argv[];
    /* Initialize MPI */
    MPI_Init(&argc, &argv);
 
+   comm = zzz_TAlloc(MPI_Comm, 1);
    MPI_Comm_dup(MPI_COMM_WORLD, comm);
    MPI_Comm_size(*comm, &num_procs );
    MPI_Comm_rank(*comm, &myid );
@@ -120,6 +121,7 @@ char *argv[];
    zzz_FreeStructMatrix(A);
    zzz_FreeStructVector(b);
    zzz_FreeStructVector(x);
+   zzz_TFree(comm);
 
 #ifdef ZZZ_DEBUG
    malloc_verify(0);
