@@ -23,7 +23,7 @@ hypre_SMGCreateRestrictOp( hypre_StructMatrix *A,
                            hypre_StructGrid   *cgrid,
                            int                 cdir  )
 {
-   hypre_StructMatrix *R;
+   hypre_StructMatrix *R = NULL;
 
    return R;
 }
