@@ -65,9 +65,13 @@ c
 c     
 c     =>   set form of fine grid matrix & print statistics
 c     
-      call trunc(1,imin,imax,a,ia,ja)
+cveh 
+cveh  calls to trunc and symm are removed to preserve original
+cveh  matrix as much as possible.
+cveh
+cveh      call trunc(1,imin,imax,a,ia,ja)
 c     
-      call symm(1,1,imin,imax,a,ia,ja,icg,ifg)
+cveh      call symm(1,1,imin,imax,a,ia,ja,icg,ifg)
 c     
       if(levels.le.1) then
          if (ioutdat .ne. 0) close(9)
