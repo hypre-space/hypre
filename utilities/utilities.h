@@ -636,6 +636,10 @@ int hypre_EndTiming P((int time_index ));
 int hypre_ClearTiming P((void ));
 int hypre_PrintTiming P((char *heading , MPI_Comm comm ));
 
+/* random.c */
+void hypre_SeedRand P((int seed));
+double hypre_Rand P(());
+
 #undef P
 
 #ifdef HYPRE_USE_PTHREADS
