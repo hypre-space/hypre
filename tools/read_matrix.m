@@ -40,6 +40,10 @@ s = fscanf(fid, '%s',1);
 s = fscanf(fid,'%s',1);
 symmetric = fscanf(fid,'%d',1);
 
+% read constant-coefficient info
+s = fscanf(fid,'%s',1);
+constcoeff = fscanf(fid,'%d',1);
+
 % read grid info
 s = fscanf(fid, '%s',1);
 dim = fscanf(fid, '%d', 1);
@@ -64,7 +68,10 @@ s = fscanf(fid,'%1s',1);
 nx = imax - imin + 1;
 ny = jmax - jmin + 1;
 nz = kmax - kmin + 1;
-grid = zeros(6,1);
+grid = zeros(6,1)
+imin
+jmin
+kmin
 grid(1,1) = imin; grid(2,1) = jmin; grid(3,1) = kmin;
 grid(4,1) = imax; grid(5,1) = jmax; grid(6,1) = kmax;
 
@@ -84,20 +91,25 @@ A = spalloc(nx*ny*nz,nx*ny*nz, stencil_size*nx*ny*nz);
 for kz = 1:nz,
   for jy = 1:ny,
     for ix = 1:nx,
-      for j = 1:stencil_size;
-	l = ix + (jy-1)*nx + (kz-1)*ny*nx;
-	m = ix+stencil(j,1) + (jy+stencil(j,2)-1)*nx + ...
-	    (kz+stencil(j,3)-1)*ny*nx;
+      for es = 1:stencil_size;
 	s = fscanf(fid,'%s',1);
-	s = fscanf(fid,'%s',1);
-	s = fscanf(fid,'%s',1);
-	s = fscanf(fid,'%s',1);
-	s = fscanf(fid,'%s',1);
+	s = fscanf(fid,'%1s',1);
+	i = fscanf(fid,'%d',1) + 1;
+	s = fscanf(fid,'%1s',1);
+	j = fscanf(fid,'%d',1) + 1;
+	s = fscanf(fid,'%1s',1);
+	k = fscanf(fid,'%d',1) + 1;
+	s = fscanf(fid,'%1s',1);
+	e = fscanf(fid,'%d',1) + 1;
+	s = fscanf(fid,'%1s',1);
 	data = fscanf(fid,'%e',1);
-	if ((ix+stencil(j,1) > 0) & (jy+stencil(j,2) > 0) & ...
-	      (kz+stencil(j,3) > 0) & ...
-	      (ix+stencil(j,1) <= nx) & (jy+stencil(j,2) <= ny) & ...
-	      (kz+stencil(j,3) <= nz)) ...	      
+	l = i + (j-1)*nx + (k-1)*ny*nx;
+	m = i+stencil(e,1) + (j+stencil(e,2)-1)*nx + ...
+	    (k+stencil(e,3)-1)*ny*nx;
+	if ((i+stencil(e,1) > 0) & (j+stencil(e,2) > 0) & ...
+	      (k+stencil(e,3) > 0) & ...
+	      (i+stencil(e,1) <= nx) & (j+stencil(e,2) <= ny) & ...
+	      (k+stencil(e,3) <= nz)) ...	      
 	      A(l,m) = data;
 	end
       end
