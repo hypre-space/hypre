@@ -403,11 +403,37 @@ function ExecuteTest
   fi
   cd $SavePWD
 }
+function PostProcess
+{ #   
+  if (( DebugMode > 0 )) ; then print "In function PostProcess" ; fi
+  WorkingDir=$1
+  InputFile=$2
+  SavePWD=$(pwd)
+  cd $WorkingDir
+  if (( BatchMode == 0 ))
+  then
+    if [[ -f purify.log ]]
+    then
+      mv purify.log $InputFile.purify.log
+      mv $InputFile.err $InputFile.err.log
+      grep -i hypre_ $InputFile.purify.log > $InputFile.err
+    elif [[ -f insure.log ]]
+    then
+      mv insure.log $InputFile.insure.log
+      mv $InputFile.err $InputFile.err.log
+      grep -i hypre_ $InputFile.insure.log > $InputFile.err
+    fi
+  fi
+  cd $SavePWD
+}
 
 function StartCrunch
 { # process files
   ExecuteJobs "$@"
   if (( $? == 0 ))
   then ExecuteTest "$@"
+  fi
+  if (( $? == 0 ))
+  then PostProcess "$@"
   fi
 }
