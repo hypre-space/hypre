@@ -82,6 +82,8 @@ then
    for j in $AMG_PROGS
    do
    AMG_FDRIVER="$j"
+   export AMG_FDRIVER
+
    $AMG_INSTALL $AMG_SRC/amg_fdrive/$AMG_FDRIVER.$AMG_ARCH \
                 $AMG_BIN_DIR/$AMG_FDRIVER
    done
