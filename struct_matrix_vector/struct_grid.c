@@ -291,7 +291,7 @@ zzz_PrintStructGrid( FILE           *file,
  *--------------------------------------------------------------------------*/
  
 zzz_StructGrid *
-zzz_ReadStructGrid( FILE *file )
+zzz_ReadStructGrid( MPI_Comm *comm, FILE *file )
 {
    zzz_StructGrid *grid;
 
@@ -304,7 +304,7 @@ zzz_ReadStructGrid( FILE *file )
    int             i, idummy;
 
    fscanf(file, "%d\n", &dim);
-   grid = zzz_NewStructGrid(&MPI_COMM_WORLD, dim);
+   grid = zzz_NewStructGrid(comm, dim);
 
    fscanf(file, "%d\n", &num_boxes);
    ilower = zzz_NewIndex();
