@@ -74,7 +74,6 @@ HEADERS =\
  HYPRE_parcsr_ls.h
 
 FILES =\
- driver.c\
  cgnr.c\
  gmres.c\
  par_amg.c\
@@ -115,7 +114,7 @@ OBJS = ${FILES:.c=.o}
 # Targets
 ##################################################################
 
-all: libHYPRE_parcsr_ls.a driver
+all: libHYPRE_parcsr_ls.a 
  
 install: all
 	@cp -f HYPRE_*.h parcsr_linear_solvers.h $$HYPRE_INSTALL_DIR/include/.
@@ -125,7 +124,6 @@ clean:
 	@rm -f *.o
 
 veryclean: clean
-	@rm -f driver driver_interp driver_rap
 	@rm -f libHYPRE_parcsr_ls.a
 
 ##################################################################
@@ -155,18 +153,6 @@ ${AMGE_OBJS}: ${AMGE_HEADERS}
 ##################################################################
 # Rules
 ##################################################################
-
-driver: driver.o libHYPRE_parcsr_ls.a
-	@echo  "Linking" $@ "... "
-	${CC} -o driver driver.o ${LFLAGS} 
-
-driver_interp: driver_interp.o libHYPRE_parcsr_ls.a
-	@echo  "Linking" $@ "... "
-	${CC} -o driver_interp driver_interp.o ${LFLAGS} 
-
-driver_rap: driver_rap.o libHYPRE_parcsr_ls.a
-	@echo  "Linking" $@ "... "
-	${CC} -o driver_rap driver_rap.o ${LFLAGS} 
 
 libHYPRE_parcsr_ls.a: ${OBJS}
 	@echo  "Building $@ ... "
