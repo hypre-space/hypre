@@ -32,7 +32,7 @@ AC_CONFIG_SRCDIR([HYPRE.h])
 dnl Determine the host type
 AC_CANONICAL_HOST
 # Turn off shared libraries by default, since build process takes longer.
-#AC_DISABLE_SHARED
+AC_DISABLE_SHARED
 AM_MAINTAINER_MODE
 
 AM_INIT_AUTOMAKE([1.7.5 foreign no-dependencies no-installinfo no-installman no-texinfo.tex])
