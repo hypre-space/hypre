@@ -9392,7 +9392,15 @@ CXX="$PREPEND $CXX"
  krylov\
  matrix_matrix\
  mli\
+ mli/amgs\
+ mli/base\
+ mli/cintface\
+ mli/fedata\
+ mli/lib\
  mli/matrix\
+ mli/solver\
+ mli/util\
+ mli/vector\
  parcsr_ls\
  parcsr_mv\
  PETSc_ls\
