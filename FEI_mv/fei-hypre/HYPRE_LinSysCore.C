@@ -133,7 +133,7 @@ HYPRE_LinSysCore::HYPRE_LinSysCore(MPI_Comm comm) :
                   colValues_(NULL),
                   selectedList_(NULL),
                   selectedListAux_(NULL),
-                  HYOutputLevel_(2),
+                  HYOutputLevel_(0),
                   lookup_(NULL),
                   haveLookup_(0),
                   projectionScheme_(0),
@@ -152,7 +152,6 @@ HYPRE_LinSysCore::HYPRE_LinSysCore(MPI_Comm comm) :
     // find my processor ID 
     //-------------------------------------------------------------------
 
-printf("HYPRE_LSC constructor\n");
     MPI_Comm_rank(comm, &mypid_);
     MPI_Comm_size(comm, &numProcs_);
 
@@ -241,7 +240,6 @@ printf("HYPRE_LSC constructor\n");
 
     FEGridInfo *gridinfo = new FEGridInfo(mypid_);
     fegrid               = (void *) gridinfo;
-printf("HYPRE_LSC constructor done\n");
 }
 
 //***************************************************************************
