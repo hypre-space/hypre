@@ -77,7 +77,7 @@ initialize_variables ()
     . ./hypre_arch.sh
   fi
 #
-# Set some architecure specific configurations
+# Set some architecture specific configurations
 #
   if [ -r $StdTestDir/AUTOTEST/env.${HYPRE_ARCH} ] ; then
     . $StdTestDir/AUTOTEST/env.${HYPRE_ARCH}
