@@ -861,7 +861,7 @@ int MLI_Utils_HyprePCGSolve( CMLI *cmli, HYPRE_Matrix A,
    HYPRE_PCGSetMaxIter(pcg_solver, max_iter );
    HYPRE_PCGSetTol(pcg_solver, tol);
    HYPRE_PCGSetTwoNorm(pcg_solver, 1);
-   HYPRE_PCGSetRelChange(pcg_solver, 0);
+   HYPRE_PCGSetRelChange(pcg_solver, 1);
    HYPRE_PCGSetLogging(pcg_solver, 2);
    pcg_precond = (HYPRE_Solver) cmli;
    HYPRE_PCGSetPrecond(pcg_solver,
