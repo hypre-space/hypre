@@ -89,7 +89,7 @@ int
 HYPRE_ParCSRCGNRSetTol( HYPRE_Solver solver,
                          double             tol    )
 {
-   return( hypre_CGNRSetTol( (void *) solver, tol ) );
+   return( HYPRE_CGNRSetTol( solver, tol ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -100,7 +100,7 @@ int
 HYPRE_ParCSRCGNRSetMinIter( HYPRE_Solver solver,
                              int                min_iter )
 {
-   return( hypre_CGNRSetMinIter( (void *) solver, min_iter ) );
+   return( HYPRE_CGNRSetMinIter( solver, min_iter ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -111,7 +111,7 @@ int
 HYPRE_ParCSRCGNRSetMaxIter( HYPRE_Solver solver,
                              int                max_iter )
 {
-   return( hypre_CGNRSetMaxIter( (void *) solver, max_iter ) );
+   return( HYPRE_CGNRSetMaxIter( solver, max_iter ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -122,7 +122,7 @@ int
 HYPRE_ParCSRCGNRSetStopCrit( HYPRE_Solver solver,
                              int                stop_crit )
 {
-   return( hypre_CGNRSetStopCrit( (void *) solver, stop_crit ) );
+   return( HYPRE_CGNRSetStopCrit( solver, stop_crit ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -136,9 +136,11 @@ HYPRE_ParCSRCGNRSetPrecond( HYPRE_Solver         solver,
                             HYPRE_PtrToParSolverFcn precond_setup,
                             HYPRE_Solver         precond_solver )
 {
-   return( hypre_CGNRSetPrecond( (void *) solver,
-                                 precond, precondT, precond_setup,
-                                 (void *) precond_solver ) );
+   return( HYPRE_CGNRSetPrecond( solver,
+                                 (HYPRE_PtrToSolverFcn) precond,
+                                 (HYPRE_PtrToSolverFcn) precondT,
+                                 (HYPRE_PtrToSolverFcn) precond_setup,
+                                 precond_solver ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -149,8 +151,7 @@ int
 HYPRE_ParCSRCGNRGetPrecond( HYPRE_Solver   solver,
                             HYPRE_Solver  *precond_data_ptr )
 {
-   return( hypre_CGNRGetPrecond( (void *)         solver,
-                                 (HYPRE_Solver *) precond_data_ptr ) );
+   return( HYPRE_CGNRGetPrecond( solver, precond_data_ptr ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -161,7 +162,7 @@ int
 HYPRE_ParCSRCGNRSetLogging( HYPRE_Solver solver,
                              int logging)
 {
-   return( hypre_CGNRSetLogging( (void *) solver, logging ) );
+   return( HYPRE_CGNRSetLogging( solver, logging ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -172,7 +173,7 @@ int
 HYPRE_ParCSRCGNRGetNumIterations( HYPRE_Solver  solver,
                                    int                *num_iterations )
 {
-   return( hypre_CGNRGetNumIterations( (void *) solver, num_iterations ) );
+   return( HYPRE_CGNRGetNumIterations( solver, num_iterations ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -183,5 +184,5 @@ int
 HYPRE_ParCSRCGNRGetFinalRelativeResidualNorm( HYPRE_Solver  solver,
                                                double             *norm   )
 {
-   return( hypre_CGNRGetFinalRelativeResidualNorm( (void *) solver, norm ) );
+   return( HYPRE_CGNRGetFinalRelativeResidualNorm( solver, norm ) );
 }
