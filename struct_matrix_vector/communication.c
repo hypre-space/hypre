@@ -37,6 +37,8 @@ zzz_GetCommInfo( zzz_BoxArrayArray  **send_boxes_ptr,
 
    zzz_BoxArray          *neighbors;
    int                   *neighbor_ranks;
+   zzz_BoxArray          *trans_neighbors;
+   int                   *trans_neighbor_ranks;
    int                    num_neighbors;
                          
    zzz_BoxArrayArray     *shift_boxes;
@@ -69,11 +71,28 @@ zzz_GetCommInfo( zzz_BoxArrayArray  **send_boxes_ptr,
    processes = zzz_StructGridProcesses(grid);
 
    /*------------------------------------------------------
-    * Determine neighbors (use transpose of stencil)
+    * Determine neighbors:
+    *   Use stencil and it's transpose.
     *------------------------------------------------------*/
 
-   zzz_FindBoxNeighbors(boxes, all_boxes, stencil, 1,
+   zzz_FindBoxNeighbors(boxes, all_boxes, stencil, 0,
                         &neighbors, &neighbor_ranks);
+   zzz_FindBoxNeighbors(boxes, all_boxes, stencil, 1,
+                        &trans_neighbors, &trans_neighbor_ranks);
+
+   neighbor_ranks = zzz_TRealloc(neighbor_ranks, int,
+                                 (zzz_BoxArraySize(neighbors) +
+                                  zzz_BoxArraySize(trans_neighbors)));
+   j = zzz_BoxArraySize(neighbors);
+   zzz_ForBoxI(i, trans_neighbors)
+   {
+      neighbor_ranks[j] = trans_neighbor_ranks[i];
+      j++;
+   }
+   zzz_AppendBoxArray(trans_neighbors, neighbors);
+
+   zzz_FreeBoxArrayShell(trans_neighbors);
+   zzz_TFree(trans_neighbor_ranks);
 
    /*------------------------------------------------------
     * Determine shift_boxes and shift_neighbors

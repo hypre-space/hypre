@@ -69,6 +69,7 @@ zzz_FindBoxNeighbors( zzz_BoxArray       *boxes,
       for (s = 0; s < zzz_StructStencilSize(stencil); s++)
       {
          if (transpose)
+         {
             for (d = 0; d < 3; d++)
             {
                zzz_BoxIMinD(shift_box, d) =
@@ -76,13 +77,17 @@ zzz_FindBoxNeighbors( zzz_BoxArray       *boxes,
                zzz_BoxIMaxD(shift_box, d) =
                   zzz_BoxIMaxD(box, d) - zzz_IndexD(stencil_shape[s], d);
             }
+         }
          else
+         {
+            for (d = 0; d < 3; d++)
             {
                zzz_BoxIMinD(shift_box, d) =
                   zzz_BoxIMinD(box, d) + zzz_IndexD(stencil_shape[s], d);
                zzz_BoxIMaxD(shift_box, d) =
                   zzz_BoxIMaxD(box, d) + zzz_IndexD(stencil_shape[s], d);
             }
+         }
 
          zzz_ForBoxI(j, all_boxes)
          {
@@ -176,6 +181,7 @@ zzz_FindBoxApproxNeighbors( zzz_BoxArray       *boxes,
    for (s = 0; s < zzz_StructStencilSize(stencil); s++)
    {
       if (transpose)
+      {
          for (d = 0; d < 3; d++)
          {
             min_offset[d] =
@@ -183,13 +189,17 @@ zzz_FindBoxApproxNeighbors( zzz_BoxArray       *boxes,
             max_offset[d] =
                max(max_offset[d], -zzz_IndexD(stencil_shape[s], d));
          }
+      }
       else
+      {
+         for (d = 0; d < 3; d++)
          {
             min_offset[d] =
                min(min_offset[d], zzz_IndexD(stencil_shape[s], d));
             max_offset[d] =
                max(max_offset[d], zzz_IndexD(stencil_shape[s], d));
          }
+      }
    }
 
    /*-----------------------------------------------------------------------
