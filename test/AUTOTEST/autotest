@@ -29,10 +29,10 @@ perform_test()
     )"
 
   echo "copying new source...."
-  if test -z "${HYPRE_DIST_DIR}" ; then
-    ${SCP_COMMAND} -pr linear_solvers ${HYPRE_REMOTE_DIR}
-  else
+  if test "${HYPRE_DIST_DIR}" ; then
     scp -pr linear_solvers ${HYPRE_COMPILE_MACHINE}:${HYPRE_REMOTE_DIR}
+  else
+    ${SCP_COMMAND} -pr linear_solvers ${HYPRE_REMOTE_DIR}
   fi
 
   echo "scheduling remote autotest...."
@@ -42,12 +42,12 @@ perform_test()
 	. linear_solvers/test/AUTOTEST/autotest_env;\
 	[ -f linear_solvers/test/AUTOTEST/env.${HYPRE_ARCH} ] && \
           . linear_solvers/test/AUTOTEST/env.${HYPRE_ARCH};\
-        if test -z "${HYPRE_DIST_DIR}" ; then\
+        if test "${HYPRE_DIST_DIR}" ; then\
           linear_solvers/test/AUTOTEST/autotest_test \
-            ${HYPRE_MACHINE_COMMANDS} -v ${HYPRE_MESSAGE};\
+            ${HYPRE_MACHINE_COMMANDS} -v ${HYPRE_MESSAGE} -p ${HYPRE_DIST_DIR};\
         else\
           linear_solvers/test/AUTOTEST/autotest_test \
-            ${HYPRE_MACHINE_COMMANDS} -p ${HYPRE_DIST_DIR} -v ${HYPRE_MESSAGE};\
+            ${HYPRE_MACHINE_COMMANDS} -v ${HYPRE_MESSAGE};\
         fi;\
   chmod -fR a+rX,u+w,go-w linear_solvers;\
   chgrp -fR hypre linear_solvers;\
