@@ -41,7 +41,7 @@ perform_test()
         cd ${HYPRE_REMOTE_DIR##*:};\
 	. linear_solvers/test/AUTOTEST/autotest_env;\
 	[ -f linear_solvers/test/AUTOTEST/env.${HYPRE_ARCH} ] && \
-          . linear_solvers/test/AUTOTEST/env.${HYPRE_ARCH};\
+          . linear_solvers/test/AUTOTEST/env.${HYPRE_ARCH} ${COMPILERSELECT};\
         if test "${HYPRE_DIST_DIR}" ; then\
           linear_solvers/test/AUTOTEST/autotest_test \
             ${HYPRE_MACHINE_COMMANDS} -v ${HYPRE_MESSAGE} -p ${HYPRE_DIST_DIR};\
@@ -63,7 +63,7 @@ perform_test()
 # Function for display of help/usage
 #=============================================================================
 help () {
-  printf "Usage: %s [-nocvs|-rev Rev#] [-debug] host [host ... ]\n" $0
+  printf "Usage: %s [-nocvs|-rev Rev#] [-automake] [-debug] host [host ... ]\n" $0
   printf "HYPRE autotest script. This is the high level autotest_test wrapper\n"
   printf "script, usually run nightly from cron. This script determines which\n"
   printf "systems autotest_test is to be executed on, and the test options\n"
@@ -72,6 +72,7 @@ help () {
   printf "%s\n" "-nocvs    Do perform cvs checkout, use existing"
   printf "          ./linear_solvers/ directory for autotest.\n"
   printf "%s\n" "-rev Rev# Check out revision or tag." 
+  printf "%s\n" "-automake Run automake/autoconf."
   printf "host       Host ID or configuration on which autotest is to be run.\n"
   printf "           Valid host IDs are:\n"
   printf "%s\n" "     -achilles CASC Solaris 8, 128.115 subnet"
@@ -99,16 +100,25 @@ help () {
   printf "%s\n" "     -tc2kmp   Compaq TC2K systum, executing OpenMP, DPCS."
   printf "%s\n" "     -tc       # obsolute"
   printf "%s\n" "     -tcmp     # obsolute"
-  printf "%s\n" "     -tux      CASC Intel running RedHat Linux (pgi-3.3)."
+  printf "%s\n" "     -tux71    CASC Intel running RedHat Linux (pgi-3.3)."
   printf "%s\n" "     -tux83    CASC Intel running RedHat Linux."
-  printf "%s\n" "     -tux71    CASC Intel running RedHat Linux (gcc-3.3)."
+  printf "%s\n" "     -tuxgcc2  Linux running gcc-2.95.3 compilers"
+  printf "%s\n" "     -tuxgcc30 Linux running gcc-3.0.4 compilers"
+  printf "%s\n" "     -tuxgcc31 Linux running gcc-3.1.1 compilers"
+  printf "%s\n" "     -tuxgcc32 Linux running gcc-3.2.2 compilers"
+  printf "%s\n" "     -tuxgcc33 Linux running gcc-3.3.x compilers"
+  printf "%s\n" "     -tuxpgi   Linux running PGI-3.3 compilers"
+  printf "%s\n" "     -tuxabsoftLinux running Absoft-Pro8.0 Fortran 90"
+  printf "%s\n" "     -tuxlahey Linux running Lahey Frotran compiler"
+  printf "%s\n" "     -tuxintel Linux running Intel-7.0 compilers"
+  printf "%s\n" "     -tuxkai   Linux running KAI KCC-4.0f compiler"
   printf "%s\n" "     -vivid    ASCI VIS Intel running RedHat Linux."
   printf "\n"
 }
 
 usage ()
 {
-  printf "usage: $0 [-nocvs|-rev Rev#|-help] HostOptions [Hostoptions . . .]\n"
+  printf "usage: $0 [-nocvs|-rev Rev#|-help] [-automake] HostOptions [Hostoptions . . .]\n"
 }
 
 #==============================================================================
@@ -119,7 +129,8 @@ SUBMSG=""
 export SUBMSG
 AUTOMAKEMODE=""
 HYPRE_MESSAGE=""
-export AUTOMAKEMODE HYPRE_MESSAGE
+COMPILERSELECT=""
+export AUTOMAKEMODE HYPRE_MESSAGE COMPILERSELECT
 # OpenSSH to F-Secure communication for RSA authentication
 SSH_COMMAND="ssh -1"
 ##SCP_COMMAND="scp -q -oProtocol=1"
@@ -201,6 +212,7 @@ chgrp -fR hypre linear_solvers
 while [ "$*" != "" ]
 do
   HYPRE_DIST_DIR=""
+  COMPILERSELECT=""
   case $1 in
     -automake)
         if [ -x linear_solvers/config/bootstrap ] ; then
@@ -484,7 +496,55 @@ do
 ##      ./autotest_test $HYPRE_MACHINE_COMMANDS -v $HYPRE_MESSAGE
 	perform_test
         shift;;
-    -tuxgcc3)
+    -tuxgcc2)
+        HYPRE_ARCH="linux"
+        HYPRE_COMPILE_MACHINE="tux71"
+        HYPRE_RUN_MACHINE="tux71"
+        HYPRE_REMOTE_DIR="/tmp"
+        HYPRE_DIST_DIR="/usr/casc/hypre/i686-pc-linux-gnu-gcc3.x/AUTOTEST"
+        if [ "$AUTOMAKEMODE" = "yes" ] ; then
+	  HYPRE_MACHINE_COMMANDS="-mb 1 -nde 1 -a 1 -cfl 2"
+          HYPRE_MESSAGE='TEST[automake-gcc-2.95.3]'
+        else
+	  HYPRE_MACHINE_COMMANDS="-mb 1 -nde 1 -a 2 -cf"
+          HYPRE_MESSAGE='SECONDARY[gcc-2.95.3]'
+        fi
+        COMPILERSELECT="gcc2"
+	perform_test
+        shift;;
+    -tuxgcc30)
+        HYPRE_ARCH="linux"
+        HYPRE_COMPILE_MACHINE="tux71"
+        HYPRE_RUN_MACHINE="tux71"
+        HYPRE_REMOTE_DIR="/tmp"
+        HYPRE_DIST_DIR="/usr/casc/hypre/i686-pc-linux-gnu-gcc3.x/AUTOTEST"
+        if [ "$AUTOMAKEMODE" = "yes" ] ; then
+	  HYPRE_MACHINE_COMMANDS="-mb 1 -nde 1 -a 1 -cfl 2"
+          HYPRE_MESSAGE='TEST[automake-gcc-3.0.4]'
+        else
+	  HYPRE_MACHINE_COMMANDS="-mb 1 -nde 1 -a 2 -cf"
+          HYPRE_MESSAGE='SECONDARY[gcc-3.0.4]'
+        fi
+        COMPILERSELECT="gcc30"
+	perform_test
+        shift;;
+    -tuxgcc31)
+        HYPRE_ARCH="linux"
+        HYPRE_COMPILE_MACHINE="tux71"
+        HYPRE_RUN_MACHINE="tux71"
+        HYPRE_REMOTE_DIR="/tmp"
+        HYPRE_DIST_DIR="/usr/casc/hypre/i686-pc-linux-gnu-gcc3.x/AUTOTEST"
+        if [ "$AUTOMAKEMODE" = "yes" ] ; then
+	  HYPRE_MACHINE_COMMANDS="-mb 1 -nde 1 -a 1 -cfl 2"
+          HYPRE_MESSAGE='TEST[automake-gcc-3.1.1]'
+        else
+	  HYPRE_MACHINE_COMMANDS="-mb 1 -nde 1 -a 2 -cf"
+          HYPRE_MESSAGE='SECONDARY[gcc-3.1.1]'
+        fi
+        COMPILERSELECT="gcc31"
+	perform_test
+        shift;;
+    -tuxgcc32)
         HYPRE_ARCH="linux"
         HYPRE_COMPILE_MACHINE="tux71"
         HYPRE_RUN_MACHINE="tux71"
@@ -497,6 +557,103 @@ do
 	  HYPRE_MACHINE_COMMANDS="-mb 1 -nde 1 -a 2 -cf"
           HYPRE_MESSAGE='SECONDARY[gcc-3.2.2]'
         fi
+        COMPILERSELECT="gcc32"
+	perform_test
+        shift;;
+    -tuxgcc33)
+        HYPRE_ARCH="linux"
+        HYPRE_COMPILE_MACHINE="tux71"
+        HYPRE_RUN_MACHINE="tux71"
+        HYPRE_REMOTE_DIR="/tmp"
+        HYPRE_DIST_DIR="/usr/casc/hypre/i686-pc-linux-gnu-gcc3.x/AUTOTEST"
+        if [ "$AUTOMAKEMODE" = "yes" ] ; then
+	  HYPRE_MACHINE_COMMANDS="-mb 1 -nde 1 -a 1 -cfl 2"
+          HYPRE_MESSAGE='TEST[automake-gcc-3.3.x]'
+        else
+	  HYPRE_MACHINE_COMMANDS="-mb 1 -nde 1 -a 2 -cf"
+          HYPRE_MESSAGE='SECONDARY[gcc-3.3.x]'
+        fi
+        COMPILERSELECT="gcc33"
+	perform_test
+        shift;;
+    -tuxpgi)
+        HYPRE_ARCH="linux"
+        HYPRE_COMPILE_MACHINE="tux71"
+        HYPRE_RUN_MACHINE="tux71"
+        HYPRE_REMOTE_DIR="/tmp"
+        HYPRE_DIST_DIR="/usr/casc/hypre/i686-pc-linux-gnu-pgi3.x/AUTOTEST"
+        if [ "$AUTOMAKEMODE" = "yes" ] ; then
+	  HYPRE_MACHINE_COMMANDS="-mnse 1 -a 1 -cfl 2"
+          HYPRE_MESSAGE='TEST[automake-pgi-3.3]'
+        else
+	  HYPRE_MACHINE_COMMANDS="-mnse 1 -a 2 -cf"
+          HYPRE_MESSAGE='SECONDARY[pgi-3.3]'
+        fi
+        COMPILERSELECT="pgi"
+	perform_test
+        shift;;
+    -tuxabsoft)
+        HYPRE_ARCH="linux"
+        HYPRE_COMPILE_MACHINE="tux71"
+        HYPRE_RUN_MACHINE="tux71"
+        HYPRE_REMOTE_DIR="/tmp"
+        HYPRE_DIST_DIR="/usr/casc/hypre/i686-pc-linux-gnu-gcc3.x/AUTOTEST"
+        if [ "$AUTOMAKEMODE" = "yes" ] ; then
+	  HYPRE_MACHINE_COMMANDS="-mb 1 -nde 1 -a 1 -cfl 2"
+          HYPRE_MESSAGE='TEST[automake-Absoft-Pro8.0]'
+        else
+	  HYPRE_MACHINE_COMMANDS="-mb 1 -nde 1 -a 2 -cf"
+          HYPRE_MESSAGE='SECONDARY[Absoft-Pro8.0]'
+        fi
+        COMPILERSELECT="absoft"
+	perform_test
+        shift;;
+    -tuxlahey)
+        HYPRE_ARCH="linux"
+        HYPRE_COMPILE_MACHINE="tux71"
+        HYPRE_RUN_MACHINE="tux71"
+        HYPRE_REMOTE_DIR="/tmp"
+        HYPRE_DIST_DIR="/usr/casc/hypre/i686-pc-linux-gnu-gcc3.x/AUTOTEST"
+        if [ "$AUTOMAKEMODE" = "yes" ] ; then
+	  HYPRE_MACHINE_COMMANDS="-mb 1 -nde 1 -a 1 -cfl 2"
+          HYPRE_MESSAGE='TEST[automake-lahey]'
+        else
+	  HYPRE_MACHINE_COMMANDS="-mb 1 -nde 1 -a 2 -cf"
+          HYPRE_MESSAGE='SECONDARY[lahey]'
+        fi
+        COMPILERSELECT="lahey"
+	perform_test
+        shift;;
+    -tuxintel)
+        HYPRE_ARCH="linux"
+        HYPRE_COMPILE_MACHINE="tux71"
+        HYPRE_RUN_MACHINE="tux71"
+        HYPRE_REMOTE_DIR="/tmp"
+        HYPRE_DIST_DIR="/usr/casc/hypre/i686-pc-linux-gnu-gcc3.x/AUTOTEST"
+        if [ "$AUTOMAKEMODE" = "yes" ] ; then
+	  HYPRE_MACHINE_COMMANDS="-mb 1 -nde 1 -a 1 -cfl 2"
+          HYPRE_MESSAGE='TEST[automake-Intel-7.0]'
+        else
+	  HYPRE_MACHINE_COMMANDS="-mb 1 -nde 1 -a 2 -cf"
+          HYPRE_MESSAGE='SECONDARY[Intel-7.0]'
+        fi
+        COMPILERSELECT="intel"
+	perform_test
+        shift;;
+    -tuxkai)
+        HYPRE_ARCH="linux"
+        HYPRE_COMPILE_MACHINE="tux71"
+        HYPRE_RUN_MACHINE="tux71"
+        HYPRE_REMOTE_DIR="/tmp"
+        HYPRE_DIST_DIR="/usr/casc/hypre/i686-pc-linux-gnu-gcc3.x/AUTOTEST"
+        if [ "$AUTOMAKEMODE" = "yes" ] ; then
+	  HYPRE_MACHINE_COMMANDS="-mb 1 -nde 1 -a 1 -cfl 2"
+          HYPRE_MESSAGE='TEST[automake-KCC-4.0f]'
+        else
+	  HYPRE_MACHINE_COMMANDS="-mb 1 -nde 1 -a 2 -cf"
+          HYPRE_MESSAGE='SECONDARY[KCC-4.0f]'
+        fi
+        COMPILERSELECT="kai"
 	perform_test
         shift;;
     -tux71)
