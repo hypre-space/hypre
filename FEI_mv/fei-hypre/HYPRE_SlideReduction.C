@@ -229,7 +229,7 @@ int HYPRE_SlideReduction::findConstraints()
    // (==> nConstraints)
    //------------------------------------------------------------------
 
-#define PRINTC
+//#define PRINTC
 #ifdef PRINTC
    char filename[100];
    FILE *fp; 
