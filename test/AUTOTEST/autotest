@@ -86,7 +86,7 @@ help () {
   printf "%s\n" "     -frostmp  ASCI Frost executing OpenMP, DPCS."
   printf "%s\n" "     -gps      Compaq gps320 system, DPCS."
   printf "%s\n" "     -gpsmp    Compaq gps320 system, executing OpenMP, DPCS."
-  printf "%s\n" "     -lx       Compaq running RatHat Linux."
+  printf "%s\n" "     -lx       # obsolute"
   printf "%s\n" "     -ilx      Intel running Linux."
   printf "%s\n" "     -insure   CASC Linux, executing insure++."
   printf "%s\n" "     -pengra   Intel running Linux, DPCS."
@@ -363,7 +363,7 @@ do
         COMPILERSELECT="gcc2"
    	perform_test
         shift;;
-    -lx) 
+    -lx) # obsolute
         HYPRE_ARCH="linux"
         HYPRE_COMPILE_MACHINE="lx01"
         HYPRE_RUN_MACHINE="lx01"
