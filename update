@@ -1,0 +1,206 @@
+#!/bin/sh
+#BHEADER***********************************************************************
+# (c) 1998   The Regents of the University of California
+#
+# See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
+# notice, contact person, and disclaimer.
+#
+# $Revision$
+#EHEADER***********************************************************************
+
+#=============================================================================
+# Parse arguments
+#=============================================================================
+
+case $1 in
+    -h|-help) 
+	echo "$0 internal|external [-dec|-blue|-red] [install]"
+	echo 
+	echo "Where:"
+	echo "-dec            LC DEC cluster"
+	echo "-blue           ASCI Blue-Pacific"
+	echo "-red            ASCI Red"
+	echo " install        builds, installs, and cleans source"
+	exit;;
+esac
+
+HYPRE_INSTALL_TYPE=$1
+if [ "$HYPRE_INSTALL_TYPE" != "internal" ] && 
+   [ "$HYPRE_INSTALL_TYPE" != "external" ]
+then
+    echo "Error: check usage: $0 -help"
+    exit
+fi
+shift
+
+HYPRE_ARCH=""
+HYPRE_INSTALL=""
+while [ "$*" != "" ]
+do
+case $1 in
+    -dec)
+	HYPRE_ARCH="dec"
+	HYPRE_INSTALL_DIR="/usr/apps/hypre"
+	shift;;
+    -blue)
+	HYPRE_ARCH="blue"
+	HYPRE_INSTALL_DIR="/usr/apps/hypre"
+	shift;;
+    -red)
+	HYPRE_ARCH="red"
+	HYPRE_INSTALL_DIR="/usr/apps/hypre"
+	shift;;
+    install) 
+	HYPRE_INSTALL="install"
+	shift;;
+    *)
+	echo "Unknown option: $1"
+	exit;;
+esac
+done
+
+# CASC cluster
+if [ "$HYPRE_ARCH" = "" ]
+then
+    HYPRE_ARCH="opt"
+    if [ "$HYPRE_INSTALL_TYPE" = "internal" ]
+    then
+	HYPRE_INSTALL_DIR="/home/casc/software/hypre/internal"
+    else
+	HYPRE_INSTALL_DIR="/home/casc/software/hypre/external"
+    fi
+fi
+
+#===========================================================================
+# Update the source
+#===========================================================================
+
+# Create install directory
+if [ ! -d $HYPRE_INSTALL_DIR ]
+then
+    mkdir $HYPRE_INSTALL_DIR
+fi
+
+(
+    cd $HYPRE_INSTALL_DIR
+
+    # create directory UPDATE and protect with permissions
+    if [ ! -d UPDATE ]
+    then
+	mkdir UPDATE
+	chmod 700 UPDATE
+    fi
+
+    # update only if no VERSION_DATE file
+    if [ ! -f UPDATE/VERSION_DATE ]
+    then
+	rm -fr UPDATE/*
+	mkdir UPDATE/src
+
+	# if on the CASC cluster, checkout source from repository
+	if [ "$HYPRE_ARCH" = "opt" ]
+	then
+	    if [ ! -d "$CVSROOT" ]
+	    then
+		echo "Error: no CVS repository, CVSROOT = $CVSROOT"
+		exit
+	    fi
+	    (cd UPDATE/src; cvs checkout linear_solvers)
+	    # store a representative date for this version of the source
+	    date > UPDATE/VERSION_DATE
+	    # store a representative name for this version
+	    date '+V%y-%m-%d' > UPDATE/VERSION_NAME
+	fi
+
+	# if not on the CASC cluster, something's wrong
+	if [ "$HYPRE_ARCH" != "opt" ]
+	then
+	    echo "Error: invalid update source in $HYPRE_INSTALL_DIR/UPDATE"
+	    exit
+	fi
+
+	# create the UPDATE.tar file for updating on non-CASC machines
+	tar cf UPDATE.tar UPDATE
+    fi
+
+    if [ ! -f UPDATE/VERSION_NAME ]
+    then
+	echo "Error: invalid update source in $HYPRE_INSTALL_DIR/UPDATE"
+	exit
+    fi
+)
+
+#===========================================================================
+# Build and possibly install the libraries
+#===========================================================================
+
+# export UPDATE directory as HYPRE_INSTALL_DIR for build
+DIR=$HYPRE_INSTALL_DIR
+HYPRE_INSTALL_DIR=$DIR/UPDATE
+export HYPRE_INSTALL_DIR
+
+(
+    cd $HYPRE_INSTALL_DIR/src/linear_solvers
+    ./build -$HYPRE_ARCH $HYPRE_INSTALL
+)
+
+# reset HYPRE_INSTALL_DIR
+HYPRE_INSTALL_DIR=$DIR
+
+#===========================================================================
+# Complete the install
+#===========================================================================
+
+if [ "HYPRE_INSTALL" ]
+then
+    (
+	cd $HYPRE_INSTALL_DIR
+
+	# set permissions: give everybody `rx', and give user/group `w'
+	chmod -fR a+rX,ug+w UPDATE/*
+
+	# move the current installed version into an "old" directory
+	if [ -f VERSION_NAME ]
+	then
+	    OLD=`cat VERSION_NAME`
+	    if [ -d $OLD ]
+	    then
+		rm -fr $OLD
+	    fi
+	    mkdir $OLD
+
+	    mv VERSION_DATE $OLD
+	    mv VERSION_NAME $OLD
+	    for i in [!UV]*
+	    do
+		mv $i $OLD
+	    done
+	fi
+
+	# move the updated version into the install directory
+	mv UPDATE/* .
+	rmdir UPDATE
+
+	# don't keep any old copies of the library
+	if [ "$HYPRE_INSTALL_TYPE" = "internal" ]
+	then
+	    if [ -d $OLD ]
+	    then
+		rm -fr $OLD
+	    fi
+	fi
+
+	# keep 3 old copies of the library
+	# (note: * will expand alphabetically in the Bourne shell)
+	if [ "$HYPRE_INSTALL_TYPE" = "external" ]
+	then
+	    set - V[0-9]*
+	    if [ $# -gt 3 ]
+	    then
+		shift 3
+		rm -fr $*
+	    fi
+	fi
+    )
+fi
+
