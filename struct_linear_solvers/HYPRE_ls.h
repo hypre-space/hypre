@@ -50,6 +50,21 @@ typedef HYPRE_StructSolverArray HYPRE_StructSolver;
 
 #ifndef HYPRE_NO_PTHREAD_MANGLING
 
+#define HYPRE_StructHybridInitialize HYPRE_StructHybridInitializePush
+#define HYPRE_StructHybridFinalize HYPRE_StructHybridFinalizePush
+#define HYPRE_StructHybridSetup HYPRE_StructHybridSetupPush
+#define HYPRE_StructHybridSolve HYPRE_StructHybridSolvePush
+#define HYPRE_StructHybridSetTol HYPRE_StructHybridSetTolPush
+#define HYPRE_StructHybridSetConvergenceTol HYPRE_StructHybridSetConvergenceTolPush
+#define HYPRE_StructHybridSetMaxDSIterations HYPRE_StructHybridSetMaxDSIterationsPush
+#define HYPRE_StructHybridSetMaxMGIterations HYPRE_StructHybridSetMaxMGIterationsPush
+#define HYPRE_StructHybridSetTwoNorm HYPRE_StructHybridSetTwoNormPush
+#define HYPRE_StructHybridSetRelChange HYPRE_StructHybridSetRelChangePush
+#define HYPRE_StructHybridSetLogging HYPRE_StructHybridSetLoggingPush
+#define HYPRE_StructHybridGetNumIterations HYPRE_StructHybridGetNumIterationsPush
+#define HYPRE_StructHybridGetNumDSIterations HYPRE_StructHybridGetNumDSIterationsPush
+#define HYPRE_StructHybridGetNumMGIterations HYPRE_StructHybridGetNumMGIterationsPush
+#define HYPRE_StructHybridGetFinalRelativeResidualNorm HYPRE_StructHybridGetFinalRelativeResidualNormPush
 #define HYPRE_StructPCGInitialize HYPRE_StructPCGInitializePush
 #define HYPRE_StructPCGFinalize HYPRE_StructPCGFinalizePush
 #define HYPRE_StructPCGSetup HYPRE_StructPCGSetupPush
@@ -87,6 +102,23 @@ typedef HYPRE_StructSolverArray HYPRE_StructSolver;
 # define P(s) ()
 #endif
 
+
+/* HYPRE_struct_hybrid.c */
+int HYPRE_StructHybridInitialize P((MPI_Comm comm , HYPRE_StructSolver *solver ));
+int HYPRE_StructHybridFinalize P((HYPRE_StructSolver solver ));
+int HYPRE_StructHybridSetup P((HYPRE_StructSolver solver , HYPRE_StructMatrix A , HYPRE_StructVector b , HYPRE_StructVector x ));
+int HYPRE_StructHybridSolve P((HYPRE_StructSolver solver , HYPRE_StructMatrix A , HYPRE_StructVector b , HYPRE_StructVector x ));
+int HYPRE_StructHybridSetTol P((HYPRE_StructSolver solver , double tol ));
+int HYPRE_StructHybridSetConvergenceTol P((HYPRE_StructSolver solver , double cf_tol ));
+int HYPRE_StructHybridSetMaxDSIterations P((HYPRE_StructSolver solver , int max_ds_its ));
+int HYPRE_StructHybridSetMaxMGIterations P((HYPRE_StructSolver solver , int max_mg_its ));
+int HYPRE_StructHybridSetTwoNorm P((HYPRE_StructSolver solver , int two_norm ));
+int HYPRE_StructHybridSetRelChange P((HYPRE_StructSolver solver , int rel_change ));
+int HYPRE_StructHybridSetLogging P((HYPRE_StructSolver solver , int logging ));
+int HYPRE_StructHybridGetNumIterations P((HYPRE_StructSolver solver , int *num_its ));
+int HYPRE_StructHybridGetNumDSIterations P((HYPRE_StructSolver solver , int *num_ds_its ));
+int HYPRE_StructHybridGetNumMGIterations P((HYPRE_StructSolver solver , int *num_mg_its ));
+int HYPRE_StructHybridGetFinalRelativeResidualNorm P((HYPRE_StructSolver solver , double *norm ));
 
 /* HYPRE_struct_pcg.c */
 int HYPRE_StructPCGInitialize P((MPI_Comm comm , HYPRE_StructSolver *solver ));
