@@ -90,12 +90,6 @@ if test "$casc_using_mpi" = "yes"; then
       HYPREDEFS="$HYPREDEFS -DHYPRE_SEQUENTIAL"
    else
       TIMERDEFS="$TIMERDEFS -DTIMER_USE_MPI"
-      case $ARCH in
-      	 sun4 | solaris)
-            MPIINCLUDE="-I/usr/local/mpi/mpich/include"
-            MPIINCLUDE="$MPIINCLUDE -I/usr/local/mpi/mpich/lib/solaris/ch_p4"
-      	 ;;
-      esac
    fi
 fi
 
