@@ -63,7 +63,7 @@ FILES =\
  cycle.c\
  difconv.c\
  indepset.c\
- interp.c\
+ interpCR.c\
  interpRBM.c\
  laplace.c\
  laplace_9pt.c\

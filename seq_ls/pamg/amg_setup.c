@@ -153,7 +153,17 @@ hypre_AMGSetup( void            *amg_vdata,
        * Build prolongation matrix, P, and place in P_array[level] 
        *--------------------------------------------------------------*/
 
-      if (interp_type == 1)
+      if (interp_type == 2)
+      {
+          hypre_AMGBuildCRInterp(A_array[level], 
+                                 CF_marker_array[level], 
+                                 coarse_size,
+                                 num_relax_steps,
+                                 relax_type,
+                                 relax_weight[level],
+                                 &P);
+      }
+      else if (interp_type == 1)
       {
 	  if (coarsen_type == 3)
              hypre_AMGBuildRBMInterp(A_array[level], 

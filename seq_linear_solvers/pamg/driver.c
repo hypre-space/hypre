@@ -184,6 +184,11 @@ main( int   argc,
          arg_index++;
          interp_type      = 1;
       }
+      else if ( strcmp(argv[arg_index], "-cri") == 0 )
+      {
+         arg_index++;
+         interp_type      = 2;
+      }
       else if ( strcmp(argv[arg_index], "-nf") == 0 )
       {
          arg_index++;
