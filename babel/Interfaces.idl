@@ -51,7 +51,7 @@ package Hypre {
       // it would be better to encode the "values" data structure in a more
       // natural form.
       void New( in StructuredGrid grid, in StructStencil stencil,
-                      	in int symmetric );
+                in int symmetric, in array<int,1> num_ghost );
       int Setup( in StructuredGrid grid, in StructStencil stencil,
                           in int symmetric );
       StructMatrix GetConstructedObject();
@@ -111,7 +111,16 @@ package Hypre {
 // ---------------- Classes ----------------
 
    class MPI_Com 
-   {};
+   {
+      // This class contains MPI information.  Potentially this can be
+      // the object which answers questions like "how many processors
+      // are there?". So the MPI communicator has to be passed into it
+      // upon construction.
+      // The problem is that I have to build into this the "secret"
+      // knowledge that an MPI communicator handle is really an integer.
+      void New( in int comm );
+      static MPI_Com Constructor( in int comm );
+   };
    
    // ---------------- Grid, matrix, vector classes
 
@@ -157,9 +166,10 @@ package Hypre {
       void Apply( in StructVector b, out StructVector x );
       StructMatrix GetConstructedObject();
       void New( in StructuredGrid grid, in StructStencil stencil,
-                      	in int symmetric );
+                in int symmetric, in array<int,1> num_ghost  );
       static StructMatrix Constructor
-         ( in StructuredGrid grid, in StructStencil stencil, in int symmetric );
+         ( in StructuredGrid grid, in StructStencil stencil, in int symmetric,
+           in array<int,1> num_ghost );
       int Setup( in StructuredGrid grid, in StructStencil stencil,
                           in int symmetric );
       };
@@ -203,7 +213,7 @@ package Hypre {
      void New( in MPI_Com comm );
      void Setup( in StructMatrix A, in StructVector b, in StructVector x );
      static StructJacobi Constructor( in MPI_Com comm );
-     SolverBuilder GetConstructedObject();
+     Solver GetConstructedObject();
   };
 
   class PCG extends StructSolver implements PreconditionedSolver, PreconditionedSolverBuilder {
@@ -221,7 +231,7 @@ package Hypre {
      void New( in MPI_Com comm );
      static PCG Constructor( in MPI_Com comm );
      void Setup( in StructMatrix A, in StructVector b, in StructVector x );
-     SolverBuilder GetConstructedObject();    
+     Solver GetConstructedObject();    
 
      void SetPreconditioner( in StructSolver precond );
 
