@@ -69,7 +69,7 @@ double MLI_Method_AMGSA::genPLocal(MLI_Matrix *mli_Amat,
    int       blk_size, max_agg_size, *agg_cnt_array, **agg_ind_array;
    int       agg_size, info, nzcnt, *local_labels, A_global_nrows;
    double    *col_val, **P_vecs, max_eigen=0, alpha;
-   double    *q_array, *new_null, *r_array;
+   double    *q_array, *new_null, *r_array, ritzValues[2];
    char      param_string[200];
 
    /*-----------------------------------------------------------------
@@ -252,7 +252,8 @@ double MLI_Method_AMGSA::genPLocal(MLI_Matrix *mli_Amat,
         || pre_smoother == MLI_SOLVER_MLS_ID ||
         postsmoother == MLI_SOLVER_MLS_ID || init_aggr != NULL )
    {
-      MLI_Utils_ComputeSpectralRadius(Amat, &max_eigen);
+      MLI_Utils_ComputeExtremeRitzValues(Amat, ritzValues, 0);
+      max_eigen = ritzValues[0];
       if ( mypid == 0 && output_level > 1 )
          printf("\tEstimated spectral radius of A = %e\n", max_eigen);
       assert ( max_eigen > 0.0 );
@@ -430,7 +431,6 @@ double MLI_Method_AMGSA::genPLocal(MLI_Matrix *mli_Amat,
     * if damping factor for prolongator smoother = 0
     *-----------------------------------------------------------------*/
 
-// Charles : Note this change
 // if ( curr_level == 0 || P_weight == 0.0 )
    if ( P_weight == 0.0 )
    {
