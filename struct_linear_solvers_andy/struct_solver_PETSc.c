@@ -119,4 +119,20 @@ hypre_StructSolverPETScSetDropTolerance( hypre_StructSolver *struct_solver,
    return(ierr);
 }
 
+/*--------------------------------------------------------------------------
+ * hypre_StructSolverPETScSetFactorRowSize
+ *--------------------------------------------------------------------------*/
+
+int 
+hypre_StructSolverPETScSetFactorRowSize( hypre_StructSolver *struct_solver, 
+                                       int size )
+{
+   int ierr=0;
+
+   ierr = HYPRE_PETScSolverParILUTSetFactorRowSize
+      ( (HYPRE_PETScSolverParILUT) hypre_StructSolverData( struct_solver ), size );
+
+   return(ierr);
+}
+
 

@@ -13,6 +13,9 @@ int HYPRE_StructSolverInitialize P((HYPRE_StructSolver solver ));
 int HYPRE_StructSolverSetup P((HYPRE_StructSolver solver , HYPRE_StructMatrix matrix , HYPRE_StructVector soln , HYPRE_StructVector rhs ));
 int HYPRE_StructSolverSolve P((HYPRE_StructSolver solver ));
 int HYPRE_StructSolverSetDropTolerance P((HYPRE_StructSolver solver , double tol ));
+int HYPRE_StructSolverSetFactorRowSize P((HYPRE_StructSolver solver , int size ));
+
+/* hypre.c */
 
 /* struct_solver.c */
 hypre_StructSolver *hypre_NewStructSolver P((MPI_Comm context , HYPRE_StructGrid grid , HYPRE_StructStencil stencil ));
@@ -22,6 +25,7 @@ int hypre_StructSolverInitialize P((hypre_StructSolver *solver ));
 int hypre_StructSolverSetup P((hypre_StructSolver *solver , HYPRE_StructMatrix matrix , HYPRE_StructVector soln , HYPRE_StructVector rhs ));
 int hypre_StructSolverSolve P((hypre_StructSolver *solver ));
 int hypre_StructSolverSetDropTolerance P((hypre_StructSolver *solver , double tol ));
+int hypre_StructSolverSetFactorRowSize P((hypre_StructSolver *solver , int size ));
 
 /* struct_solver_PETSc.c */
 int hypre_FreeStructSolverPETSc P((hypre_StructSolver *struct_solver ));
@@ -29,7 +33,6 @@ int hypre_StructSolverInitializePETSc P((hypre_StructSolver *struct_solver ));
 int hypre_StructSolverSetupPETSc P((hypre_StructSolver *struct_solver ));
 int hypre_StructSolverSolvePETSc P((hypre_StructSolver *struct_solver ));
 int hypre_StructSolverPETScSetDropTolerance P((hypre_StructSolver *struct_solver , double tol ));
-
-/* hypre.c */
+int hypre_StructSolverPETScSetFactorRowSize P((hypre_StructSolver *struct_solver , int size ));
 
 #undef P

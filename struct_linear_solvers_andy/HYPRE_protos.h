@@ -13,5 +13,6 @@ int HYPRE_StructSolverInitialize P((HYPRE_StructSolver solver ));
 int HYPRE_StructSolverSetup P((HYPRE_StructSolver solver , HYPRE_StructMatrix matrix , HYPRE_StructVector soln , HYPRE_StructVector rhs ));
 int HYPRE_StructSolverSolve P((HYPRE_StructSolver solver ));
 int HYPRE_StructSolverSetDropTolerance P((HYPRE_StructSolver solver , double tol ));
+int HYPRE_StructSolverSetFactorRowSize P((HYPRE_StructSolver solver , int size ));
 
 #undef P

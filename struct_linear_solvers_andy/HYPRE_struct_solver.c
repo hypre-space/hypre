@@ -93,3 +93,13 @@ HYPRE_StructSolverSetDropTolerance( HYPRE_StructSolver solver, double tol )
    return( hypre_StructSolverSetDropTolerance( (hypre_StructSolver *) solver, tol ) );
 }
 
+/*--------------------------------------------------------------------------
+ * HYPRE_StructSolverSetFactorRowSize
+ *--------------------------------------------------------------------------*/
+
+int 
+HYPRE_StructSolverSetFactorRowSize( HYPRE_StructSolver solver, int size )
+{
+   return( hypre_StructSolverSetFactorRowSize( (hypre_StructSolver *) solver, size) );
+}
+

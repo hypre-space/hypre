@@ -144,3 +144,23 @@ hypre_StructSolverSetDropTolerance( hypre_StructSolver *solver, double tol )
    }
 }
 
+/*--------------------------------------------------------------------------
+ * hypre_StructSolverSetFactorRowSize
+ *--------------------------------------------------------------------------*/
+
+int 
+hypre_StructSolverSetFactorRowSize( hypre_StructSolver *solver, int size )
+{
+   if( hypre_StructSolverSolverType( solver ) == HYPRE_PETSC_MAT_PARILUT_SOLVER )
+   {
+     return( hypre_StructSolverPETScSetFactorRowSize( solver, size ) );
+   }
+   else
+   {
+#ifdef HYPRE_DEBUG
+      printf("Warning: attempt to set factor' row size for solver that does not use it.\n");
+#endif
+      return(1);
+   }
+}
+
