@@ -143,6 +143,34 @@ MPI_Allgatherv( void        *sendbuf,
 }
 
 int
+MPI_Gather( void        *sendbuf,
+            int          sendcount,
+            MPI_Datatype sendtype,
+            void        *recvbuf,
+            int          recvcount,
+            MPI_Datatype recvtype,
+            int          root,
+            MPI_Comm     comm     )
+{
+   return ( MPI_Allgather(sendbuf, sendcount, sendtype,
+                          recvbuf, recvcount, recvtype, comm) );
+}
+
+int
+MPI_Scatter( void        *sendbuf,
+            int          sendcount,
+            MPI_Datatype sendtype,
+            void        *recvbuf,
+            int          recvcount,
+            MPI_Datatype recvtype,
+            int          root,
+            MPI_Comm     comm     )
+{
+   return ( MPI_Allgather(sendbuf, sendcount, sendtype,
+                          recvbuf, recvcount, recvtype, comm) );
+}
+
+int
 MPI_Bcast( void        *buffer,
            int          count,
            MPI_Datatype datatype,
@@ -270,108 +298,6 @@ MPI_Allreduce( void        *sendbuf,
          char *crecvbuf = (char *)recvbuf;
          char *csendbuf = (char *)sendbuf;
          crecvbuf[0] = csendbuf[0];
-      } 
-      break;
-   }
-
-   return(0);
-}
-
-int
-MPI_Gather( void        *sendbuf,
-            int          sendcount,
-            MPI_Datatype sendtype,
-            void        *recvbuf,
-            int          recvcount,
-            MPI_Datatype recvtype,
-            int          root,
-            MPI_Comm     comm     )
-{
-   int i;
-
-   switch (sendtype)
-   {
-      case MPI_INT:
-      {
-         int *crecvbuf = (int *)recvbuf;
-         int *csendbuf = (int *)sendbuf;
-         for (i = 0; i < sendcount; i++)
-         {
-	    crecvbuf[i] = csendbuf[i];
-         }
-      } 
-      break;
-
-      case MPI_DOUBLE:
-      {
-         double *crecvbuf = (double *)recvbuf;
-         double *csendbuf = (double *)sendbuf;
-         for (i = 0; i < sendcount; i++)
-         {
-	    crecvbuf[i] = csendbuf[i];
-         }
-      } 
-      break;
-
-      case MPI_CHAR:
-      {
-         char *crecvbuf = (char *)recvbuf;
-         char *csendbuf = (char *)sendbuf;
-         for (i = 0; i < sendcount; i++)
-         {
-	    crecvbuf[i] = csendbuf[i];
-         }
-      } 
-      break;
-   }
-
-   return(0);
-}
-
-int
-MPI_Scatter( void        *sendbuf,
-            int          sendcount,
-            MPI_Datatype sendtype,
-            void        *recvbuf,
-            int          recvcount,
-            MPI_Datatype recvtype,
-            int          root,
-            MPI_Comm     comm     )
-{
-   int i;
-
-   switch (sendtype)
-   {
-      case MPI_INT:
-      {
-         int *crecvbuf = (int *)recvbuf;
-         int *csendbuf = (int *)sendbuf;
-         for (i = 0; i < sendcount; i++)
-         {
-	    crecvbuf[i] = csendbuf[i];
-         }
-      } 
-      break;
-
-      case MPI_DOUBLE:
-      {
-         double *crecvbuf = (double *)recvbuf;
-         double *csendbuf = (double *)sendbuf;
-         for (i = 0; i < sendcount; i++)
-         {
-	    crecvbuf[i] = csendbuf[i];
-         }
-      } 
-      break;
-
-      case MPI_CHAR:
-      {
-         char *crecvbuf = (char *)recvbuf;
-         char *csendbuf = (char *)sendbuf;
-         for (i = 0; i < sendcount; i++)
-         {
-	    crecvbuf[i] = csendbuf[i];
-         }
       } 
       break;
    }

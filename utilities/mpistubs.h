@@ -28,84 +28,84 @@ extern "C" {
  * and is defined in `HYPRE_utilities.h'.
  *--------------------------------------------------------------------------*/
 
-#define MPI_Status         hypre_MPI_Status           
-#define MPI_Request        hypre_MPI_Request          
-#define MPI_Op             hypre_MPI_Op               
-#define MPI_Datatype       hypre_MPI_Datatype         
-#define MPI_Group          hypre_MPI_Group            
-#define MPI_Aint           hypre_MPI_Aint             
+#define MPI_Status          hypre_MPI_Status           
+#define MPI_Request         hypre_MPI_Request          
+#define MPI_Op              hypre_MPI_Op               
+#define MPI_Datatype        hypre_MPI_Datatype         
+#define MPI_Group           hypre_MPI_Group            
+#define MPI_Aint            hypre_MPI_Aint             
 
-#define MPI_COMM_WORLD     hypre_MPI_COMM_WORLD       
+#define MPI_COMM_WORLD      hypre_MPI_COMM_WORLD       
 
-#define MPI_BOTTOM  	   hypre_MPI_BOTTOM
+#define MPI_BOTTOM  	    hypre_MPI_BOTTOM
 
-#define MPI_DOUBLE         hypre_MPI_DOUBLE           
-#define MPI_INT            hypre_MPI_INT              
-#define MPI_CHAR           hypre_MPI_CHAR             
+#define MPI_DOUBLE          hypre_MPI_DOUBLE           
+#define MPI_INT             hypre_MPI_INT              
+#define MPI_CHAR            hypre_MPI_CHAR             
 
-#define MPI_SUM            hypre_MPI_SUM              
-#define MPI_MIN            hypre_MPI_MIN              
-#define MPI_MAX            hypre_MPI_MAX              
+#define MPI_SUM             hypre_MPI_SUM              
+#define MPI_MIN             hypre_MPI_MIN              
+#define MPI_MAX             hypre_MPI_MAX              
 
-#define MPI_UNDEFINED      hypre_MPI_UNDEFINED        
+#define MPI_UNDEFINED       hypre_MPI_UNDEFINED        
 
-#define MPI_Init           hypre_MPI_Init             
-#define MPI_Wtime          hypre_MPI_Wtime            
-#define MPI_Wtick          hypre_MPI_Wtick            
-#define MPI_Barrier        hypre_MPI_Barrier          
-#define MPI_Finalize       hypre_MPI_Finalize         
-#define MPI_Comm_group     hypre_MPI_Comm_group       
-#define MPI_Comm_dup       hypre_MPI_Comm_dup         
-#define MPI_Group_incl     hypre_MPI_Group_incl       
-#define MPI_Comm_create    hypre_MPI_Comm_create      
-#define MPI_Allgather      hypre_MPI_Allgather        
-#define MPI_Allgatherv     hypre_MPI_Allgatherv       
-#define MPI_Gather         hypre_MPI_Gather       
-#define MPI_Scatter        hypre_MPI_Scatter       
-#define MPI_Bcast          hypre_MPI_Bcast            
-#define MPI_Send           hypre_MPI_Send             
-#define MPI_Recv           hypre_MPI_Recv             
-#define MPI_Isend          hypre_MPI_Isend            
-#define MPI_Irecv          hypre_MPI_Irecv            
-#define MPI_Wait           hypre_MPI_Wait             
-#define MPI_Waitall        hypre_MPI_Waitall          
-#define MPI_Waitany        hypre_MPI_Waitany          
-#define MPI_Comm_size      hypre_MPI_Comm_size        
-#define MPI_Comm_rank      hypre_MPI_Comm_rank        
-#define MPI_Allreduce      hypre_MPI_Allreduce        
-#define MPI_Address        hypre_MPI_Address        
+#define MPI_Init            hypre_MPI_Init             
+#define MPI_Wtime           hypre_MPI_Wtime            
+#define MPI_Wtick           hypre_MPI_Wtick            
+#define MPI_Barrier         hypre_MPI_Barrier          
+#define MPI_Finalize        hypre_MPI_Finalize         
+#define MPI_Comm_group      hypre_MPI_Comm_group       
+#define MPI_Comm_dup        hypre_MPI_Comm_dup         
+#define MPI_Group_incl      hypre_MPI_Group_incl       
+#define MPI_Comm_create     hypre_MPI_Comm_create      
+#define MPI_Allgather       hypre_MPI_Allgather        
+#define MPI_Allgatherv      hypre_MPI_Allgatherv       
+#define MPI_Gather          hypre_MPI_Gather       
+#define MPI_Scatter         hypre_MPI_Scatter       
+#define MPI_Bcast           hypre_MPI_Bcast            
+#define MPI_Send            hypre_MPI_Send             
+#define MPI_Recv            hypre_MPI_Recv             
+#define MPI_Isend           hypre_MPI_Isend            
+#define MPI_Irecv           hypre_MPI_Irecv            
+#define MPI_Wait            hypre_MPI_Wait             
+#define MPI_Waitall         hypre_MPI_Waitall          
+#define MPI_Waitany         hypre_MPI_Waitany          
+#define MPI_Comm_size       hypre_MPI_Comm_size        
+#define MPI_Comm_rank       hypre_MPI_Comm_rank        
+#define MPI_Allreduce       hypre_MPI_Allreduce        
+#define MPI_Address         hypre_MPI_Address        
 #define MPI_Type_contiguous hypre_MPI_Type_contiguous     
-#define MPI_Type_hvector   hypre_MPI_Type_hvector     
-#define MPI_Type_struct    hypre_MPI_Type_struct      
-#define MPI_Type_free      hypre_MPI_Type_free        
-#define MPI_Type_commit    hypre_MPI_Type_commit        
+#define MPI_Type_hvector    hypre_MPI_Type_hvector     
+#define MPI_Type_struct     hypre_MPI_Type_struct      
+#define MPI_Type_free       hypre_MPI_Type_free        
+#define MPI_Type_commit     hypre_MPI_Type_commit        
 
 /*--------------------------------------------------------------------------
  * Types, etc.
  *--------------------------------------------------------------------------*/
 
-typedef struct {int dummy;} hypre_MPI_Comm;
+typedef struct {int dummy;}  hypre_MPI_Comm;
 
-typedef int hypre_MPI_Status;
-typedef int hypre_MPI_Request;
-typedef int hypre_MPI_Op;
-typedef int hypre_MPI_Datatype;
-typedef int hypre_MPI_Group;
-typedef int hypre_MPI_Aint;
+typedef int  hypre_MPI_Status;
+typedef int  hypre_MPI_Request;
+typedef int  hypre_MPI_Op;
+typedef int  hypre_MPI_Datatype;
+typedef int  hypre_MPI_Group;
+typedef int  hypre_MPI_Aint;
 
-#define hypre_MPI_COMM_WORLD 0
+#define  hypre_MPI_COMM_WORLD 0
 
-#define hypre_MPI_BOTTOM  0x0
+#define  hypre_MPI_BOTTOM  0x0
 
-#define hypre_MPI_DOUBLE 0
-#define hypre_MPI_INT 1
-#define hypre_MPI_CHAR 2
+#define  hypre_MPI_DOUBLE 0
+#define  hypre_MPI_INT 1
+#define  hypre_MPI_CHAR 2
 
-#define hypre_MPI_SUM 0
-#define hypre_MPI_MIN 1
-#define hypre_MPI_MAX 2
+#define  hypre_MPI_SUM 0
+#define  hypre_MPI_MIN 1
+#define  hypre_MPI_MAX 2
 
-#define hypre_MPI_UNDEFINED -9999
+#define  hypre_MPI_UNDEFINED -9999
 
 /*--------------------------------------------------------------------------
  * Prototypes
