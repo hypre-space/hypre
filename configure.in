@@ -616,7 +616,7 @@ dnl *Libraries and their directories that must be used at compile time
 AC_SUBST(LDLIBS)
 AC_SUBST(LDLIBDIRS)
 
-dnl *AC_SUBST(ARCH)
+
 AC_SUBST(RANLIB)
 
 dnl * contains compiler flags such as optimization or debugging flags
@@ -628,9 +628,6 @@ dnl *needed when compiling with another command prior to the compiler command
 dnl * for example: purify cc ....
 AC_SUBST(PREPEND)
 
-
-dnl *AC_SUBST(HAVE_PETSC)
-dnl *AC_SUBST(LACKS_PETSC)
 
 dnl *PETSC-related header files, libraries and directories for those
 dnl * libraries
