@@ -88,7 +88,15 @@ extern "C" {
 #define hypre_SharedTFree(ptr) \
 ( hypre_SharedFree((char *)ptr), ptr = NULL )
 
+#else
+
+#define hypre_SharedTAlloc(type, count) hypre_TAlloc(type, (count))
+#define hypre_SharedCTAlloc(type, count) hypre_CTAlloc(type, (count))
+#define hypre_SharedTReAlloc(type, count) hypre_TReAlloc(type, (count))
+#define hypre_SharedTFree(ptr) hypre_TFree(ptr)
+
 #endif
+
 /*--------------------------------------------------------------------------
  * Prototypes
  *--------------------------------------------------------------------------*/

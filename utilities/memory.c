@@ -217,9 +217,11 @@ hypre_SharedFree( char *ptr )
    int I_call_free = unthreaded ||
                      pthread_equal(hypre_thread[0],pthread_self());
 
+   hypre_barrier(&talloc_mtx, unthreaded);
    if (I_call_free) {
       hypre_Free(ptr);
    }
+   hypre_barrier(&talloc_mtx, unthreaded);
 }
 
 /*--------------------------------------------------------------------------
