@@ -57,10 +57,10 @@ char *argv[];
 
    HYPRE_StructGrid          grid;    /* grid structure */
    HYPRE_StructStencil       stencil; /* stencil structure */
-   HYPRE_StructMatrix matrix;  /* matrix structure */
-   HYPRE_StructVector rhs;     /* vector structure */
-   HYPRE_StructVector soln;    /* vector structure */
-   HYPRE_StructSolver solver;  /* solver structure */
+   HYPRE_StructInterfaceMatrix matrix;  /* matrix structure */
+   HYPRE_StructInterfaceVector rhs;     /* vector structure */
+   HYPRE_StructInterfaceVector soln;    /* vector structure */
+   HYPRE_StructInterfaceSolver solver;  /* solver structure */
 
    int         num_procs, myid;
    int         P, Q, p, q;
@@ -119,60 +119,60 @@ char *argv[];
       HYPRE_SetStructStencilElement(stencil, i, offsets[i]);
 
    /* set up the matrix structure */
-   matrix = HYPRE_NewStructMatrix( MPI_COMM_WORLD, grid, stencil);
+   matrix = HYPRE_NewStructInterfaceMatrix( MPI_COMM_WORLD, grid, stencil);
 
-   HYPRE_SetStructMatrixStorageType( matrix, HYPRE_PETSC_MATRIX );
+   HYPRE_SetStructInterfaceMatrixStorageType( matrix, HYPRE_PETSC_MATRIX );
 
    /* Fill in the matrix elements */
    for (index[1] = ilower[1]; index[1] <= iupper[1]; index[1]++)
       for (index[0] = ilower[0]; index[0] <= iupper[0]; index[0]++)
-         HYPRE_SetStructMatrixCoeffs(matrix, index, coeffs);
+         HYPRE_SetStructInterfaceMatrixCoeffs(matrix, index, coeffs);
    if ((p == 1) && (q == 0))
    {
       for (index[1] = ilower2[1]; index[1] <= iupper2[1]; index[1]++)
 	 for (index[0] = ilower2[0]; index[0] <= iupper2[0]; index[0]++)
-	    HYPRE_SetStructMatrixCoeffs(matrix, index, coeffs);
+	    HYPRE_SetStructInterfaceMatrixCoeffs(matrix, index, coeffs);
    }
-   ierr = HYPRE_AssembleStructMatrix(matrix);
-   if( ierr ) {printf("Error returned by AssembleStructMatrix\n"); return;}
+   ierr = HYPRE_AssembleStructInterfaceMatrix(matrix);
+   if( ierr ) {printf("Error returned by AssembleStructInterfaceMatrix\n"); return;}
 
    /* Output information about the matrix */
-   /* HYPRE_PrintStructMatrix(matrix); */
+   /* HYPRE_PrintStructInterfaceMatrix(matrix); */
 
    /* set up the vector structures for RHS and soln */
-   rhs = HYPRE_NewStructVector( MPI_COMM_WORLD, grid, stencil );
-   soln = HYPRE_NewStructVector( MPI_COMM_WORLD, grid, stencil );
+   rhs = HYPRE_NewStructInterfaceVector( MPI_COMM_WORLD, grid, stencil );
+   soln = HYPRE_NewStructInterfaceVector( MPI_COMM_WORLD, grid, stencil );
 
    /* Fill in elements for RHS and soln */
-   HYPRE_SetStructVector( rhs, &one );
-   HYPRE_SetStructVector( soln, &zero );
+   HYPRE_SetStructInterfaceVector( rhs, &one );
+   HYPRE_SetStructInterfaceVector( soln, &zero );
 
    /* Set up the solver structure */
-   solver = HYPRE_NewStructSolver( MPI_COMM_WORLD, grid, stencil );
+   solver = HYPRE_NewStructInterfaceSolver( MPI_COMM_WORLD, grid, stencil );
 
-   ierr = HYPRE_StructSolverSetType( solver, HYPRE_PETSC_MAT_PARILUT_SOLVER );
-   if( ierr ) {printf("Error returned by StructSolverSetType\n"); return;}
+   ierr = HYPRE_StructInterfaceSolverSetType( solver, HYPRE_PETSC_MAT_PARILUT_SOLVER );
+   if( ierr ) {printf("Error returned by StructInterfaceSolverSetType\n"); return;}
 
-   ierr = HYPRE_StructSolverInitialize( solver );
-   if( ierr ) {printf("Error returned by StructSolverInitialize\n"); return;}
+   ierr = HYPRE_StructInterfaceSolverInitialize( solver );
+   if( ierr ) {printf("Error returned by StructInterfaceSolverInitialize\n"); return;}
 
-   ierr = HYPRE_StructSolverSetDropTolerance( solver, 0.00001 ); 
-   ierr = HYPRE_StructSolverSetFactorRowSize( solver, 5 ); 
+   ierr = HYPRE_StructInterfaceSolverSetDropTolerance( solver, 0.00001 ); 
+   ierr = HYPRE_StructInterfaceSolverSetFactorRowSize( solver, 5 ); 
 
-   ierr = HYPRE_StructSolverSetup( solver, matrix, soln, rhs );
-   if( ierr ) {printf("Error returned by StructSolverSetup\n"); return;}
+   ierr = HYPRE_StructInterfaceSolverSetup( solver, matrix, soln, rhs );
+   if( ierr ) {printf("Error returned by StructInterfaceSolverSetup\n"); return;}
 
    /* Solve the linear system represented in the solver structure */
-   HYPRE_StructSolverSolve( solver );
+   HYPRE_StructInterfaceSolverSolve( solver );
 
    /* Output pertinent information on solver */
-   /* HYPRE_PrintStructVector( soln ); */
+   /* HYPRE_PrintStructInterfaceVector( soln ); */
 
    /* Free stuff up in opposite order of allocating */
-   HYPRE_FreeStructSolver( solver );
-   HYPRE_FreeStructVector( soln );
-   HYPRE_FreeStructVector( rhs );
-   HYPRE_FreeStructMatrix( matrix );
+   HYPRE_FreeStructInterfaceSolver( solver );
+   HYPRE_FreeStructInterfaceVector( soln );
+   HYPRE_FreeStructInterfaceVector( rhs );
+   HYPRE_FreeStructInterfaceMatrix( matrix );
    HYPRE_FreeStructStencil( stencil );
    HYPRE_FreeStructGrid( grid );
 

@@ -15,8 +15,8 @@
 # Default
 ##################################################################
 
-#DRIVER = StructMatrixAndyDriver
-DRIVER = PETScSolverParILUTDriver
+DRIVER = StructMatrixAndyDriver
+#DRIVER = PETScSolverParILUTDriver
 
 default: $(DRIVER)
 
