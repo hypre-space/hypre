@@ -447,7 +447,7 @@ int MLI_Method_AMGCR::selectIndepSet(MLI_Matrix *mli_Amat, int **indepSet)
       measureArray[ADiagJ[irow]] += 1;
 
    hypre_BoomerAMGCreateS(hypreA, 0.0e0, 0.0e0, 1, NULL, &hypreS);
-   hypre_BoomerAMGIndepSetInit(hypreS, measureArray);
+   hypre_BoomerAMGIndepSetInit(hypreS, measureArray, 0);
 
    graphArraySize = localNRows;
    graphArray = new int[localNRows];
