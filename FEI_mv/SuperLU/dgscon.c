@@ -12,8 +12,8 @@
  * History:     Modified from lapack routines DGECON.
  */
 #include <math.h>
-#include "superlu_util.h"
 #include "dsp_defs.h"
+#include "superlu_util.h"
 
 void
 dgscon(char *norm, SuperMatrix *L, SuperMatrix *U,
