@@ -23,7 +23,7 @@
 #include "solver/mli_solver_gs.h"
 #include "solver/mli_solver_sgs.h"
 #include "solver/mli_solver_parasails.h"
-#include "solver/mli_solver_schwarz.h"
+#include "solver/mli_solver_bsgs.h"
 #include "solver/mli_solver_mls.h"
 #include "solver/mli_solver_superlu.h"
 #include "solver/mli_solver_arpacksuperlu.h"
@@ -57,9 +57,9 @@ MLI_Solver::MLI_Solver( int sid )
            exit(1);
 #endif
            break;
-      case MLI_SOLVER_SCHWARZ_ID :
-           strcpy( solver_name, "Schwarz" );
-           solver_id  = MLI_SOLVER_SCHWARZ_ID;
+      case MLI_SOLVER_BSGS_ID :
+           strcpy( solver_name, "BSGS" );
+           solver_id  = MLI_SOLVER_BSGS_ID;
            break;
       case MLI_SOLVER_MLS_ID :
            strcpy( solver_name, "MLS" );
@@ -86,7 +86,7 @@ MLI_Solver::MLI_Solver( int sid )
       default :
            printf("MLI_Solver::constructor ERROR - invalid solver.\n");
            printf("Valid ones are : Jacobi, GS, SGS, ParaSails, \n");
-           printf("Schwarz, MLS, SuperLU, ARPACKSuperLU.\n");
+           printf("BSGS, MLS, SuperLU, ARPACKSuperLU.\n");
            fflush(stdout);
            exit(1);
    }
@@ -123,10 +123,10 @@ MLI_Solver::MLI_Solver( char *str )
       exit(1);
 #endif
    }
-   else if ( !strcasecmp(str, "Schwarz" ) )
+   else if ( !strcasecmp(str, "BSGS" ) )
    {
       strcpy( solver_name, str );
-      solver_id  = MLI_SOLVER_SCHWARZ_ID;
+      solver_id  = MLI_SOLVER_BSGS_ID;
    }
    else if ( !strcasecmp(str, "MLS" ) )
    {
@@ -180,7 +180,7 @@ MLI_Solver *MLI_Solver_CreateFromName( char *str )
       exit(1);
 #endif
    }
-   else if (!strcasecmp(str, "Schwarz")) solver_ptr = new MLI_Solver_Schwarz();
+   else if (!strcasecmp(str, "BSGS")) solver_ptr = new MLI_Solver_BSGS();
    else if (!strcasecmp(str, "MLS"))     solver_ptr = new MLI_Solver_MLS();
    else if (!strcasecmp(str, "SuperLU"))   
    {
@@ -236,8 +236,8 @@ MLI_Solver *MLI_Solver_CreateFromID( int solver_id )
            exit(1);
 #endif
            break;
-      case MLI_SOLVER_SCHWARZ_ID :
-           solver_ptr = new MLI_Solver_Schwarz();
+      case MLI_SOLVER_BSGS_ID :
+           solver_ptr = new MLI_Solver_BSGS();
            break;
       case MLI_SOLVER_MLS_ID :
            solver_ptr = new MLI_Solver_MLS();
@@ -265,7 +265,7 @@ MLI_Solver *MLI_Solver_CreateFromID( int solver_id )
            printf("\t %5d (GS)           \n", MLI_SOLVER_GS_ID);
            printf("\t %5d (SGS)          \n", MLI_SOLVER_SGS_ID);
            printf("\t %5d (ParaSails)    \n", MLI_SOLVER_PARASAILS_ID);
-           printf("\t %5d (Schwarz)      \n", MLI_SOLVER_SCHWARZ_ID);
+           printf("\t %5d (BSGS)         \n", MLI_SOLVER_BSGS_ID);
            printf("\t %5d (MLS)          \n", MLI_SOLVER_MLS_ID);
            printf("\t %5d (SuperLU)      \n", MLI_SOLVER_SUPERLU_ID);
            printf("\t %5d (ARPACKSuperLU)\n", MLI_SOLVER_ARPACKSUPERLU_ID); 

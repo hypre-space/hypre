@@ -6,8 +6,8 @@
  *
  *********************************************************************EHEADER*/
 
-#ifndef __MLI_SOLVER_SCHWARZH__
-#define __MLI_SOLVER_SCHWARZH__
+#ifndef __MLI_SOLVER_BSGSH__
+#define __MLI_SOLVER_BSGSH__
 
 #include <stdio.h>
 #include "matrix/mli_matrix.h"
@@ -15,10 +15,10 @@
 #include "solver/mli_solver.h"
 
 /******************************************************************************
- * data structure for the Schwarz relaxation scheme
+ * data structure for the BSGS relaxation scheme
  *---------------------------------------------------------------------------*/
 
-class MLI_Solver_Schwarz : public MLI_Solver
+class MLI_Solver_BSGS : public MLI_Solver
 {
    MLI_Matrix *Amat_;
    int        nBlocks_;
@@ -29,20 +29,24 @@ class MLI_Solver_Schwarz : public MLI_Solver
    int        nSweeps_;
    double     *relaxWeights_;
    int        useOverlap_;
+   int        offNRows_;
+   int        *offRowIndices_;
+   int        *offRowLengths_;
+   int        *offCols_;
+   double     *offVals_;
 
 public :
 
-   MLI_Solver_Schwarz();
-   ~MLI_Solver_Schwarz();
+   MLI_Solver_BSGS();
+   ~MLI_Solver_BSGS();
    int setup(MLI_Matrix *Amat);
    int solve(MLI_Vector *f, MLI_Vector *u);
    int setParams( char *param_string, int argc, char **argv);
 
    int setNBlocks(int nblocks);
-   int composedOverlappedMatrix(int *off_nrows, int **off_rows, 
-                 int **off_row_lengths, int **off_cols, double **off_vals);
-   int buildBlocks(int off_nrows, int *off_rows, int *off_row_lengths, 
-                   int *off_cols, double *off_vals);
+   int composeOverlappedMatrix();
+   int buildBlocks();
+   int adjustOffColIndices();
 };
 
 #endif

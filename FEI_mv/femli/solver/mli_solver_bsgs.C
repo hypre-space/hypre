@@ -9,18 +9,18 @@
 #include <string.h>
 #include "parcsr_mv/parcsr_mv.h"
 #include "base/mli_defs.h"
-#include "solver/mli_solver_schwarz.h"
+#include "solver/mli_solver_bsgs.h"
 #include "util/mli_utils.h"
 
 /******************************************************************************
- * Schwarz relaxation scheme 
+ * BSGS relaxation scheme 
  *****************************************************************************/
 
 /******************************************************************************
  * constructor
  *--------------------------------------------------------------------------*/
 
-MLI_Solver_Schwarz::MLI_Solver_Schwarz() : MLI_Solver(MLI_SOLVER_SCHWARZ_ID)
+MLI_Solver_BSGS::MLI_Solver_BSGS() : MLI_Solver(MLI_SOLVER_BSGS_ID)
 {
    Amat_             = NULL;
    nBlocks_          = 0;
@@ -31,13 +31,18 @@ MLI_Solver_Schwarz::MLI_Solver_Schwarz() : MLI_Solver(MLI_SOLVER_SCHWARZ_ID)
    nSweeps_          = 1;
    zeroInitialGuess_ = 0;
    useOverlap_       = 1;
+   offNRows_         = 0;
+   offRowIndices_    = NULL;
+   offRowLengths_    = NULL;
+   offCols_          = NULL;
+   offVals_          = NULL;
 }
 
 /******************************************************************************
  * destructor
  *--------------------------------------------------------------------------*/
 
-MLI_Solver_Schwarz::~MLI_Solver_Schwarz()
+MLI_Solver_BSGS::~MLI_Solver_BSGS()
 {
    if (relaxWeights_ != NULL) delete [] relaxWeights_;
    if (blockLengths_ != NULL) delete [] blockLengths_;
@@ -57,17 +62,19 @@ MLI_Solver_Schwarz::~MLI_Solver_Schwarz()
          delete [] blockInverses_;
       }
    }
+   if ( offRowIndices_ != NULL ) delete [] offRowIndices_;
+   if ( offRowLengths_ != NULL ) delete [] offRowLengths_;
+   if ( offCols_       != NULL ) delete [] offCols_;
+   if ( offVals_       != NULL ) delete [] offVals_;
 }
 
 /******************************************************************************
  * setup 
  *--------------------------------------------------------------------------*/
 
-int MLI_Solver_Schwarz::setup(MLI_Matrix *Amat_in)
+int MLI_Solver_BSGS::setup(MLI_Matrix *Amat_in)
 {
-   int                mypid, nprocs, *offRowIndices=NULL, offNRows=0;
-   int                *offRowLengths=NULL, *offCols=NULL;
-   double             *offVals=NULL;
+   int                nprocs;
    MPI_Comm           comm;
    hypre_ParCSRMatrix *A;
 
@@ -79,30 +86,19 @@ int MLI_Solver_Schwarz::setup(MLI_Matrix *Amat_in)
    A     = (hypre_ParCSRMatrix *) Amat_->getMatrix();
    comm  = hypre_ParCSRMatrixComm(A);
    MPI_Comm_size(comm,&nprocs);  
-   MPI_Comm_rank(comm,&mypid);  
    
    /*-----------------------------------------------------------------
     * fetch the extended (to other processors) portion of the matrix 
     *-----------------------------------------------------------------*/
 
-   if ( nprocs > 1 && useOverlap_ != 0 )
-      composedOverlappedMatrix(&offNRows, &offRowIndices, 
-                  &offRowLengths, &offCols, &offVals);
+   if ( nprocs > 1 && useOverlap_ != 0 ) composeOverlappedMatrix();
 
    /*-----------------------------------------------------------------
     * construct the extended matrix
     *-----------------------------------------------------------------*/
 
-   buildBlocks(offNRows,offRowIndices,offRowLengths,offCols,offVals);
-
-   /*-----------------------------------------------------------------
-    * clean up
-    *-----------------------------------------------------------------*/
-
-   if ( offRowIndices != NULL ) delete [] offRowIndices;
-   if ( offRowLengths != NULL ) delete [] offRowLengths;
-   if ( offCols       != NULL ) delete [] offCols;
-   if ( offVals       != NULL ) delete [] offVals;
+   buildBlocks();
+   adjustOffColIndices();
 
    return 0;
 }
@@ -111,15 +107,15 @@ int MLI_Solver_Schwarz::setup(MLI_Matrix *Amat_in)
  * solve function
  *---------------------------------------------------------------------------*/
 
-int MLI_Solver_Schwarz::solve(MLI_Vector *f_in, MLI_Vector *u_in)
+int MLI_Solver_BSGS::solve(MLI_Vector *f_in, MLI_Vector *u_in)
 {
-   int     ip, nRecvs, *recvProcs, *recvStarts, nRecvBefore, offNRows;
+   int     ip, nRecvs, *recvProcs, *recvStarts, nRecvBefore;
    int     blockStartRow, ib, is, js, blockSize, blockEndRow, blkLeng;
    int     localNRows, iStart, iEnd, irow, jcol, colIndex, index, mypid;
    int     nSends, numColsOffd, start, relaxError=0, maxBlkLeng;
-   int     nprocs, *partition, startRow, endRow, *tmpJ;
-   int     *ADiagI, *ADiagJ, *AOffdI, *AOffdJ;
-   double  *ADiagA, *AOffdA, *uData, *fData, *tmpA, ddiag;
+   int     nprocs, *partition, startRow, endRow, offOffset, *tmpJ;
+   int     *ADiagI, *ADiagJ, *AOffdI, *AOffdJ, offIRow, totalOffNNZ;
+   double  *ADiagA, *AOffdA, *uData, *fData, *tmpA, ddiag, *fExtData;
    double  relaxWeight, *vBufData, *vExtData, res, *blkAX, *blkX;
    MPI_Comm               comm;
    hypre_ParCSRMatrix     *A;
@@ -154,8 +150,9 @@ int MLI_Solver_Schwarz::solve(MLI_Vector *f_in, MLI_Vector *u_in)
    MPI_Comm_size(comm,&nprocs);  
    startRow    = partition[mypid];
    endRow      = partition[mypid+1] - 1;
+   free( partition );
    nRecvBefore = 0;
-   offNRows    = 0;
+   totalOffNNZ = 0;
    if ( nprocs > 1 )
    {
       nRecvs      = hypre_ParCSRCommPkgNumRecvs(commPkg);
@@ -166,10 +163,14 @@ int MLI_Solver_Schwarz::solve(MLI_Vector *f_in, MLI_Vector *u_in)
          for ( ip = 0; ip < nRecvs; ip++ )
             if ( recvProcs[ip] > mypid ) break;
          nRecvBefore = recvStarts[ip];
-         offNRows    = recvStarts[nRecvs];
+         offNRows_   = recvStarts[nRecvs];
+         totalOffNNZ = 0;
+         for ( ip = 0; ip < offNRows_; ip++ )
+            totalOffNNZ += offRowLengths_[ip];
       } 
    }
-   blockSize = ( localNRows + offNRows ) / nBlocks_;
+   blockSize = ( localNRows + offNRows_ ) / nBlocks_;
+printf("%d : nRecvBefore = %d\n", mypid, nRecvBefore);
 
    /*-----------------------------------------------------------------
     * setting up for interprocessor communication
@@ -180,6 +181,7 @@ int MLI_Solver_Schwarz::solve(MLI_Vector *f_in, MLI_Vector *u_in)
       nSends = hypre_ParCSRCommPkgNumSends(commPkg);
       vBufData = new double[hypre_ParCSRCommPkgSendMapStart(commPkg,nSends)];
       vExtData = new double[numColsOffd];
+      fExtData = new double[numColsOffd];
 
       if (numColsOffd)
       {
@@ -188,6 +190,27 @@ int MLI_Solver_Schwarz::solve(MLI_Vector *f_in, MLI_Vector *u_in)
       }
    }
 
+   /*--------------------------------------------------------------------
+    * communicate right hand side
+    *--------------------------------------------------------------------*/
+
+   if (nprocs > 1 && useOverlap_)
+   {
+      index = 0;
+      for (is = 0; is < nSends; is++)
+      {
+         start = hypre_ParCSRCommPkgSendMapStart(commPkg, is);
+         for (js=start;js<hypre_ParCSRCommPkgSendMapStart(commPkg,is+1);js++)
+            vBufData[index++]
+                      = fData[hypre_ParCSRCommPkgSendMapElmt(commPkg,js)];
+      }
+      commHandle = hypre_ParCSRCommHandleCreate(1,commPkg,vBufData,
+                                                fExtData);
+      hypre_ParCSRCommHandleDestroy(commHandle);
+      commHandle = NULL;
+   }
+
+printf("%d : %d %d \n", mypid, startRow, endRow);
    /*-----------------------------------------------------------------
     * perform block SGS sweeps
     *-----------------------------------------------------------------*/
@@ -224,16 +247,19 @@ int MLI_Solver_Schwarz::solve(MLI_Vector *f_in, MLI_Vector *u_in)
                       = uData[hypre_ParCSRCommPkgSendMapElmt(commPkg,js)];
             }
             commHandle = hypre_ParCSRCommHandleCreate(1,commPkg,vBufData,
-                                                    vExtData);
+                                                      vExtData);
             hypre_ParCSRCommHandleDestroy(commHandle);
             commHandle = NULL;
          }
       }
 
+printf("%d : %d %d \n", mypid, startRow, endRow);
       /*-----------------------------------------------------------------
        * process each block forward
        *-----------------------------------------------------------------*/
 
+      offOffset = 0;
+      offIRow   = 0;
       for ( ib = 0; ib < nBlocks_; ib++ )
       {
          if ( blockLengths_ != NULL ) blkLeng = blockLengths_[ib];
@@ -246,7 +272,23 @@ int MLI_Solver_Schwarz::solve(MLI_Vector *f_in, MLI_Vector *u_in)
             index  = irow - startRow;
             if ( irow < startRow )
             {
-               ddiag = 1.0;
+               iStart = 0;
+               iEnd   = offRowLengths_[offIRow];
+               tmpA   = &(offVals_[offOffset]);
+               tmpJ   = &(offCols_[offOffset]);
+               res    = fExtData[offIRow++];
+               ddiag  = 1.0 / tmpA[0];
+               for (jcol = iStart; jcol < iEnd; jcol++)
+               {
+                  colIndex = *tmpJ++;
+                  if ( colIndex >= localNRows )   
+                     res -= *tmpA++ * vExtData[colIndex-localNRows];
+                  else if ( colIndex >= 0 )   
+                     res -= *tmpA++ * uData[colIndex];
+                  else tmpA++;
+               }
+               offOffset += iEnd;
+               blkX[irow-blockStartRow] = res;
             }
             else if ( irow <= endRow )
             {
@@ -271,7 +313,23 @@ int MLI_Solver_Schwarz::solve(MLI_Vector *f_in, MLI_Vector *u_in)
             } 
             else if ( irow > endRow )
             {
-               ddiag = 1.0;
+               iStart = 0;
+               iEnd   = offRowLengths_[offIRow];
+               tmpA   = &(offVals_[offOffset]);
+               tmpJ   = &(offCols_[offOffset]);
+               res    = fExtData[offIRow++];
+               ddiag  = 1.0 / tmpA[0];
+               for (jcol = iStart; jcol < iEnd; jcol++)
+               {
+                  colIndex = *tmpJ++;
+                  if ( colIndex >= localNRows )   
+                     res -= *tmpA++ * vExtData[colIndex-localNRows];
+                  else if ( colIndex >= 0 )   
+                     res -= *tmpA++ * uData[colIndex];
+                  else tmpA++;
+               }
+               offOffset += iEnd;
+               blkX[irow-blockStartRow] = res;
             }
          }
 
@@ -283,6 +341,8 @@ int MLI_Solver_Schwarz::solve(MLI_Vector *f_in, MLI_Vector *u_in)
          {
             if ( irow < startRow )
             {
+               vExtData[offIRow-blockSize+irow-blockStartRow] += 
+                               relaxWeight * blkAX[irow-blockStartRow];
             }
             else if ( irow <= endRow )
             { 
@@ -290,6 +350,8 @@ int MLI_Solver_Schwarz::solve(MLI_Vector *f_in, MLI_Vector *u_in)
             }
             else 
             {
+               vExtData[offIRow-blockSize+irow-blockStartRow] += 
+                               relaxWeight * blkAX[irow-blockStartRow];
             }
          }
       }
@@ -298,6 +360,12 @@ int MLI_Solver_Schwarz::solve(MLI_Vector *f_in, MLI_Vector *u_in)
        * process each block backward
        *-----------------------------------------------------------------*/
 
+      offOffset = offIRow = 0;
+      if ( offRowLengths_ != NULL ) 
+      {
+         offOffset = totalOffNNZ - offRowLengths_[offNRows_-1];
+         offIRow   = offNRows_ - 1;
+      }
       for ( ib = nBlocks_-1; ib >= 0; ib-- )
       {
          if ( blockLengths_ != NULL ) blkLeng = blockLengths_[ib];
@@ -310,7 +378,23 @@ int MLI_Solver_Schwarz::solve(MLI_Vector *f_in, MLI_Vector *u_in)
             index  = irow - startRow;
             if ( irow < startRow )
             {
-               ddiag = 1.0;
+               iStart = 0;
+               iEnd   = offRowLengths_[offIRow];
+               tmpA   = &(offVals_[offOffset]);
+               tmpJ   = &(offCols_[offOffset]);
+               res    = fExtData[offIRow--];
+               ddiag  = 1.0 / tmpA[0];
+               for (jcol = iStart; jcol < iEnd; jcol++)
+               {
+                  colIndex = *tmpJ++;
+                  if ( colIndex >= localNRows )   
+                     res -= *tmpA++ * vExtData[colIndex-localNRows];
+                  else if ( colIndex >= 0 )   
+                     res -= *tmpA++ * uData[colIndex];
+                  else tmpA++;
+               }
+               offOffset -= iEnd;
+               blkX[irow-blockStartRow] = res;
             }
             else if ( irow <= endRow )
             {
@@ -335,7 +419,23 @@ int MLI_Solver_Schwarz::solve(MLI_Vector *f_in, MLI_Vector *u_in)
             } 
             else if ( irow > endRow )
             {
-               ddiag = 1.0;
+               iStart = 0;
+               iEnd   = offRowLengths_[offIRow];
+               tmpA   = &(offVals_[offOffset]);
+               tmpJ   = &(offCols_[offOffset]);
+               res    = fExtData[offIRow--];
+               ddiag  = 1.0 / tmpA[0];
+               for (jcol = iStart; jcol < iEnd; jcol++)
+               {
+                  colIndex = *tmpJ++;
+                  if ( colIndex >= localNRows )   
+                     res -= *tmpA++ * vExtData[colIndex-localNRows];
+                  else if ( colIndex >= 0 )   
+                     res -= *tmpA++ * uData[colIndex];
+                  else tmpA++;
+               }
+               offOffset -= iEnd;
+               blkX[irow-blockStartRow] = res;
             }
          }
 
@@ -347,6 +447,8 @@ int MLI_Solver_Schwarz::solve(MLI_Vector *f_in, MLI_Vector *u_in)
          {
             if ( irow < startRow )
             {
+               vExtData[offIRow-blockSize+irow-blockStartRow] += 
+                               relaxWeight * blkAX[irow-blockStartRow];
             }
             else if ( irow <= endRow )
             { 
@@ -354,6 +456,8 @@ int MLI_Solver_Schwarz::solve(MLI_Vector *f_in, MLI_Vector *u_in)
             }
             else 
             {
+               vExtData[offIRow-blockSize+irow-blockStartRow] += 
+                               relaxWeight * blkAX[irow-blockStartRow];
             }
          }
       }
@@ -368,6 +472,7 @@ int MLI_Solver_Schwarz::solve(MLI_Vector *f_in, MLI_Vector *u_in)
    {
       delete [] vExtData;
       delete [] vBufData;
+      delete [] fExtData;
    }
    delete [] blkAX;
    delete [] blkX;
@@ -378,7 +483,7 @@ int MLI_Solver_Schwarz::solve(MLI_Vector *f_in, MLI_Vector *u_in)
  * set parameters
  *---------------------------------------------------------------------------*/
 
-int MLI_Solver_Schwarz::setParams(char *param_string, int argc, char **argv)
+int MLI_Solver_BSGS::setParams(char *param_string, int argc, char **argv)
 {
    int    i;
    double *weights;
@@ -400,7 +505,7 @@ int MLI_Solver_Schwarz::setParams(char *param_string, int argc, char **argv)
    {
       if ( argc != 2 && argc != 1 ) 
       {
-         printf("Solver_Schwarz::setParams ERROR : needs 1 or 2 args.\n");
+         printf("Solver_BSGS::setParams ERROR : needs 1 or 2 args.\n");
          return 1;
       }
       if ( argc >= 1 ) nSweeps_ = *(int*)   argv[0];
@@ -426,9 +531,7 @@ int MLI_Solver_Schwarz::setParams(char *param_string, int argc, char **argv)
  * compose overlapped matrix
  *--------------------------------------------------------------------------*/
 
-int MLI_Solver_Schwarz::composedOverlappedMatrix(int *offNRows, 
-                          int **offRowNumbers, int **offRowLengths, 
-                          int **offCols, double **offVals)
+int MLI_Solver_BSGS::composeOverlappedMatrix()
 {
    hypre_ParCSRMatrix *A;
    MPI_Comm    comm;
@@ -439,12 +542,12 @@ int MLI_Solver_Schwarz::composedOverlappedMatrix(int *offNRows,
    int         *recvProcs, *recvStarts, proc, offset, length, reqNum; 
    int         totalSendNnz, totalRecvNnz, index, base, totalSends;
    int         totalRecvs, rowNum, rowSize, *colInd, *sendStarts;
-   int         limit, *iSendBuf, *cols, curNnz, *recvIndices; 
-   double      *dSendBuf, *vals, *colVal;
+   int         limit, *iSendBuf, curNnz, *recvIndices; 
+   double      *dSendBuf, *colVal;
    hypre_ParCSRCommPkg *commPkg;
 
    /*-----------------------------------------------------------------
-    * fetch machine and matrix parameters (off_offset)
+    * fetch machine and matrix parameters 
     *-----------------------------------------------------------------*/
 
    A = (hypre_ParCSRMatrix *) Amat_->getMatrix();
@@ -455,9 +558,10 @@ int MLI_Solver_Schwarz::composedOverlappedMatrix(int *offNRows,
    startRow   = partition[mypid];
    endRow     = partition[mypid+1] - 1;
    localNRows = endRow - startRow + 1;
+   free( partition );
 
    /*-----------------------------------------------------------------
-    * fetch matrix communication information (offNRows)
+    * fetch matrix communication information (offNRows_)
     *-----------------------------------------------------------------*/
 
    extNRows = localNRows;
@@ -475,16 +579,16 @@ int MLI_Solver_Schwarz::composedOverlappedMatrix(int *offNRows,
       requests = new MPI_Request[nRecvs+nSends];
       totalSends  = sendStarts[nSends];
       totalRecvs  = recvStarts[nRecvs];
-      if ( totalRecvs > 0 ) (*offRowLengths) = new int[totalRecvs];
-      else                  (*offRowLengths) = NULL;
+      if ( totalRecvs > 0 ) offRowLengths_ = new int[totalRecvs];
+      else                  offRowLengths_ = NULL;
       recvIndices = hypre_ParCSRMatrixColMapOffd(A);
-      if ( totalRecvs > 0 ) (*offRowNumbers) = new int[totalRecvs];
-      else                  (*offRowNumbers) = NULL;
+      if ( totalRecvs > 0 ) offRowIndices_ = new int[totalRecvs];
+      else                  offRowIndices_ = NULL;
       for ( i = 0; i < totalRecvs; i++ ) 
-         (*offRowNumbers)[i] = recvIndices[i];
-      (*offNRows) = totalRecvs;
+         offRowIndices_[i] = recvIndices[i];
+      offNRows_ = totalRecvs;
    }
-   else nRecvs = nSends = (*offNRows) = totalRecvs = totalSends = 0;
+   else nRecvs = nSends = offNRows_ = totalRecvs = totalSends = 0;
 
    /*-----------------------------------------------------------------
     * construct offRowLengths 
@@ -496,8 +600,8 @@ int MLI_Solver_Schwarz::composedOverlappedMatrix(int *offNRows,
       proc   = recvProcs[i];
       offset = recvStarts[i];
       length = recvStarts[i+1] - offset;
-      MPI_Irecv(offRowLengths[offset], length, MPI_INT, proc, 17304, comm, 
-                &requests[reqNum++]);
+      MPI_Irecv(&(offRowLengths_[offset]), length, MPI_INT, proc, 
+                17304, comm, &(requests[reqNum++]));
    }
    if ( totalSends > 0 ) iSendBuf = new int[totalSends];
 
@@ -516,8 +620,8 @@ int MLI_Solver_Schwarz::composedOverlappedMatrix(int *offNRows,
          totalSendNnz += rowSize;
          hypre_ParCSRMatrixRestoreRow(A,rowNum,&rowSize,&colInd,NULL);
       }
-      MPI_Isend(&iSendBuf[offset], length, MPI_INT, proc, 17304, comm, 
-                &requests[reqNum++]);
+      MPI_Isend(&(iSendBuf[offset]), length, MPI_INT, proc, 17304, comm, 
+                &(requests[reqNum++]));
    }
    status = new MPI_Status[reqNum];
    MPI_Waitall( reqNum, requests, status );
@@ -529,11 +633,11 @@ int MLI_Solver_Schwarz::composedOverlappedMatrix(int *offNRows,
     *-----------------------------------------------------------------*/
 
    totalRecvNnz = 0;
-   for (i = 0; i < totalRecvs; i++) totalRecvNnz += (*offRowLengths)[i];
+   for (i = 0; i < totalRecvs; i++) totalRecvNnz += offRowLengths_[i];
    if ( totalRecvNnz > 0 )
    {
-      cols = new int[totalRecvNnz];
-      vals = new double[totalRecvNnz];
+      offCols_ = new int[totalRecvNnz];
+      offVals_ = new double[totalRecvNnz];
    }
    reqNum = totalRecvNnz = 0;
    for (i = 0; i < nRecvs; i++)
@@ -542,9 +646,9 @@ int MLI_Solver_Schwarz::composedOverlappedMatrix(int *offNRows,
       offset = recvStarts[i];
       length = recvStarts[i+1] - offset;
       curNnz = 0;
-      for (j = 0; j < length; j++) curNnz += (*offRowLengths)[offset+j];
-      MPI_Irecv(&cols[totalRecvNnz], curNnz, MPI_INT, proc, 17305, comm, 
-                &requests[reqNum++]);
+      for (j = 0; j < length; j++) curNnz += offRowLengths_[offset+j];
+      MPI_Irecv(&(offCols_[totalRecvNnz]), curNnz, MPI_INT, proc, 17305, 
+                comm, &(requests[reqNum++]));
       totalRecvNnz += curNnz;
    }
    if ( totalSendNnz > 0 ) iSendBuf = new int[totalSendNnz];
@@ -566,8 +670,8 @@ int MLI_Solver_Schwarz::composedOverlappedMatrix(int *offNRows,
          hypre_ParCSRMatrixRestoreRow(A,rowNum,&rowSize,&colInd,NULL);
       }
       length = totalSendNnz - base;
-      MPI_Isend(&iSendBuf[base], length, MPI_INT, proc, 17305, comm, 
-                &requests[reqNum++]);
+      MPI_Isend(&(iSendBuf[base]), length, MPI_INT, proc, 17305, comm, 
+                &(requests[reqNum++]));
    }
    status = new MPI_Status[reqNum];
    if ( reqNum > 0 ) MPI_Waitall( reqNum, requests, status );
@@ -585,9 +689,9 @@ int MLI_Solver_Schwarz::composedOverlappedMatrix(int *offNRows,
       offset  = recvStarts[i];
       length  = recvStarts[i+1] - offset;
       curNnz = 0;
-      for (j = 0; j < length; j++) curNnz += (*offRowLengths)[offset+j];
-      MPI_Irecv(&vals[totalRecvNnz], curNnz, MPI_DOUBLE, proc, 17306, comm, 
-                &requests[reqNum++]);
+      for (j = 0; j < length; j++) curNnz += offRowLengths_[offset+j];
+      MPI_Irecv(&(offVals_[totalRecvNnz]), curNnz, MPI_DOUBLE, proc, 
+                17306, comm, &(requests[reqNum++]));
       totalRecvNnz += curNnz;
    }
    if ( totalSendNnz > 0 ) dSendBuf = new double[totalSendNnz];
@@ -609,8 +713,8 @@ int MLI_Solver_Schwarz::composedOverlappedMatrix(int *offNRows,
          hypre_ParCSRMatrixRestoreRow(A,rowNum,&rowSize,NULL,&colVal);
       }
       length = totalSendNnz - base;
-      MPI_Isend(&dSendBuf[base], length, MPI_DOUBLE, proc, 17306, comm, 
-                &requests[reqNum++]);
+      MPI_Isend(&(dSendBuf[base]), length, MPI_DOUBLE, proc, 17306, comm, 
+                &(requests[reqNum++]));
    }
    status = new MPI_Status[reqNum];
    if ( reqNum > 0 ) MPI_Waitall( reqNum, requests, status );
@@ -618,17 +722,6 @@ int MLI_Solver_Schwarz::composedOverlappedMatrix(int *offNRows,
    if ( totalSendNnz > 0 ) delete [] dSendBuf;
 
    if ( nprocs > 1 && useOverlap_ ) delete [] requests;
-
-   if ( totalRecvNnz > 0 )
-   {
-      (*offCols) = cols;
-      (*offVals) = vals;
-   }
-   else
-   {
-      (*offCols) = NULL;
-      (*offVals) = NULL;
-   }
    return 0;
 }
 
@@ -636,9 +729,7 @@ int MLI_Solver_Schwarz::composedOverlappedMatrix(int *offNRows,
  * build the blocks 
  *--------------------------------------------------------------------------*/
 
-int MLI_Solver_Schwarz::buildBlocks(int offNRows, 
-                          int *offRowNumbers, int *offRowLengths, 
-                          int *offCols, double *offVals)
+int MLI_Solver_BSGS::buildBlocks()
 {
    int         ib, ii, ip, mypid, nprocs, *partition, startRow, endRow;
    int         localNRows, nRecvs;
@@ -654,8 +745,6 @@ int MLI_Solver_Schwarz::buildBlocks(int offNRows,
    /*-----------------------------------------------------------------
     * clean up first 
     *-----------------------------------------------------------------*/
-
-   (void) offRowNumbers;
 
    if ( nBlocks_ > 0 ) 
    {
@@ -707,16 +796,16 @@ int MLI_Solver_Schwarz::buildBlocks(int offNRows,
     * for now assuming contiguity)
     *-----------------------------------------------------------------*/
 
-   if ( nBlocks_ <= 0 ) nBlocks_ = ( localNRows + offNRows ) / 10;
-   if ( nBlocks_ >= (localNRows+offNRows) ) 
+   if ( nBlocks_ <= 0 ) nBlocks_ = ( localNRows + offNRows_ );
+   if ( nBlocks_ >= (localNRows+offNRows_) ) 
    {
-      nBlocks_ = localNRows + offNRows;
+      nBlocks_ = localNRows + offNRows_;
       return 0;
    }
-   else blockSize = (localNRows + offNRows) / nBlocks_;
+   else blockSize = (localNRows + offNRows_) / nBlocks_;
    blockLengths_ = new int[nBlocks_];
    for ( ib = 0; ib < nBlocks_; ib++ ) blockLengths_[ib] = blockSize;
-   blockLengths_[nBlocks_-1] = localNRows+offNRows-blockSize*(nBlocks_-1);
+   blockLengths_[nBlocks_-1] = localNRows+offNRows_-blockSize*(nBlocks_-1);
 
    /*-----------------------------------------------------------------
     * build inverses (blockInverses_)
@@ -749,9 +838,9 @@ int MLI_Solver_Schwarz::buildBlocks(int offNRows,
       {
          if ( irow < startRow )
          {
-            rowSize = offRowLengths[rowOffset];
-            colInd = &(offCols[nnzOffset]);
-            colVal = &(offVals[nnzOffset]);
+            rowSize = offRowLengths_[rowOffset];
+            colInd = &(offCols_[nnzOffset]);
+            colVal = &(offVals_[nnzOffset]);
             for ( jcol = 0; jcol < rowSize; jcol++ )
             {
                colIndex = colInd[jcol];
@@ -776,9 +865,9 @@ int MLI_Solver_Schwarz::buildBlocks(int offNRows,
          }
          else
          {
-            rowSize = offRowLengths[rowOffset];
-            colInd = &(offCols[nnzOffset]);
-            colVal = &(offVals[nnzOffset]);
+            rowSize = offRowLengths_[rowOffset];
+            colInd = &(offCols_[nnzOffset]);
+            colVal = &(offVals_[nnzOffset]);
             for ( jcol = 0; jcol < rowSize; jcol++ )
             {
                colIndex = colInd[jcol];
@@ -806,6 +895,53 @@ int MLI_Solver_Schwarz::buildBlocks(int offNRows,
    }
    for ( ib = 0; ib < maxBlkSize; ib++ ) delete [] tempBlock[ib];
    delete [] tempBlock;
+   return 0;
+}
+
+/******************************************************************************
+ * adjust the off processor incoming matrix
+ *--------------------------------------------------------------------------*/
+
+int MLI_Solver_BSGS::adjustOffColIndices()
+{
+   int                mypid, *partition, startRow, endRow;
+   int                offset, index, colIndex, irow, jcol;
+   hypre_ParCSRMatrix *A;
+   MPI_Comm           comm;
+
+   /*-----------------------------------------------------------------
+    * fetch machine and matrix parameters 
+    *-----------------------------------------------------------------*/
+
+   A = (hypre_ParCSRMatrix *) Amat_->getMatrix();
+   comm = hypre_ParCSRMatrixComm(A);
+   MPI_Comm_rank(comm,&mypid);  
+   HYPRE_ParCSRMatrixGetRowPartitioning((HYPRE_ParCSRMatrix) A, &partition);
+   startRow   = partition[mypid];
+   endRow     = partition[mypid+1] - 1;
+   free( partition );
+
+   /*-----------------------------------------------------------------
+    * convert column indices
+    *-----------------------------------------------------------------*/
+
+   offset = 0;
+   for ( irow = 0; irow < offNRows_; irow++ )
+   {
+      for ( jcol = 0; jcol < offRowLengths_[irow]; jcol++ )
+      {
+         colIndex = offCols_[offset];
+         if ( colIndex >= startRow && colIndex <= endRow )
+            offCols_[offset] = colIndex - startRow;
+         else
+         {
+            index = MLI_Utils_BinarySearch(colIndex,offRowIndices_,offNRows_);
+            if ( index >= 0 ) offCols_[offset] = index;
+            else              offCols_[offset] = -1;
+         }
+         offset++;
+      }
+   }
    return 0;
 }
 

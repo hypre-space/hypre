@@ -56,7 +56,7 @@ HEADERS =\
  mli_solver_gs.h \
  mli_solver_sgs.h \
  mli_solver_parasails.h \
- mli_solver_schwarz.h \
+ mli_solver_bsgs.h \
  mli_solver_mls.h \
  mli_solver_superlu.h \
  mli_solver_arpacksuperlu.h
@@ -67,7 +67,7 @@ FILES =\
  mli_solver_gs.C \
  mli_solver_sgs.C \
  mli_solver_parasails.C \
- mli_solver_schwarz.C \
+ mli_solver_bsgs.C \
  mli_solver_mls.C \
  mli_solver_superlu.C \
  mli_solver_arpacksuperlu.C
