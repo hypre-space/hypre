@@ -153,6 +153,7 @@ main( int   argc,
    fscanf(file_root, "\nData:\n");
    zzz_ReadBoxArrayData(file_root, boxes, data_space, num_values,
                         zzz_StructMatrixData(matrix_root));
+   zzz_AssembleStructMatrix(matrix_root);
 
    /*----------------------------------------
     * Close input file
@@ -260,6 +261,7 @@ main( int   argc,
 				    boxes_2, data_space_2, num_values_2,
 				    zzz_StructMatrixData(sub_matrices[i_file]));
 
+	       zzz_AssembleStructMatrix(sub_matrices[i_file]);
 	     }
 	 }
      }
