@@ -125,6 +125,8 @@ int MLI_Solver_ParaSails::solve(MLI_Vector *f_in, MLI_Vector *u_in)
    if (transpose) return (applyParaSailsTrans( f_in, u_in ));
    else           return (applyParaSails( f_in, u_in ));
 #else
+   (void) f_in;
+   (void) u_in;
    cout << "ParaSails smoother not available.\n";
    exit(1);
    return 1;
