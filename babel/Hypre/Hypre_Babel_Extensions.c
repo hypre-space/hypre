@@ -40,3 +40,22 @@ SIDLFortranSymbol(sidl_double__array_borrow_deref_f,
 }
 
 
+/* same as SIDL_int__array_set1_f, but the third argument is, not the value,
+   but a pointer to an array; and there is a fourth argument, the index to the array.
+    */
+void
+SIDLFortranSymbol(sidl_int__array_set1_deref_f,
+                  SIDL_INT__ARRAY_SET1_DEREF_F,
+                  SIDL_int__array_set1_deref_f)
+  (int64_t *array,
+   int32_t *i1,
+   int32_t ***value,
+   int32_t *i2)
+{
+  SIDL_int__array_set1((struct SIDL_int__array *)(ptrdiff_t)*array,
+   *i1,
+   (**value)[*i2]);
+}
+
+
+
