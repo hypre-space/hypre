@@ -56,11 +56,11 @@ UTILITIES_HEADERS =\
  timing.h
 
 UTILITIES_FILES =\
+ @UTILITIESEXTRAFILES@\
  memory.c\
  mpistubs.c\
  timer.c\
- timing.c\
- @UTILITIESEXTRAFILES@
+ timing.c
 
 UTILITIES_OBJS = ${UTILITIES_FILES:.c=.o}
  
