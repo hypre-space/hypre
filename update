@@ -9,6 +9,14 @@
 #EHEADER***********************************************************************
 
 #=============================================================================
+# Define install permissions:
+#   - give everybody read/execute permission
+#   - give user/group write permission
+#=============================================================================
+
+HYPRE_INSTALL_PERMISSIONS="a+rX,ug+w"
+
+#=============================================================================
 # Set install directories:
 #=============================================================================
 
@@ -117,6 +125,7 @@ fi
     if [ ! -d UPDATE ]
     then
 	mkdir UPDATE
+	chmod $HYPRE_INSTALL_PERMISSIONS UPDATE
 	chmod go-w UPDATE
     fi
 
@@ -169,7 +178,7 @@ fi
 )
 
 #===========================================================================
-# Build and possibly install the libraries
+# Build and do a temporary install in the UPDATE subdirectory
 #===========================================================================
 
 # export UPDATE directory as HYPRE_INSTALL_DIR for build
@@ -177,10 +186,20 @@ DIR=$HYPRE_INSTALL_DIR
 HYPRE_INSTALL_DIR=$DIR/UPDATE
 export HYPRE_INSTALL_DIR
 
-(
-    cd $HYPRE_INSTALL_DIR/src/linear_solvers
-    ./build -$HYPRE_ARCH $HYPRE_INSTALL
-)
+# Do this only once
+if [ ! -d $HYPRE_INSTALL_DIR/lib ]
+then
+    (
+	cd $HYPRE_INSTALL_DIR/src/linear_solvers
+	./build -$HYPRE_ARCH install
+    )
+
+    (
+	cd $HYPRE_INSTALL_DIR
+	chmod -fR $HYPRE_INSTALL_PERMISSIONS *
+    )
+fi
+
 
 # reset HYPRE_INSTALL_DIR
 HYPRE_INSTALL_DIR=$DIR
@@ -198,14 +217,14 @@ then
 	echo "saving the current installed version ..."
 	if [ -f VERSION_NAME ]
 	then
-	    OLD=`cat VERSION_NAME`
-	    mkdir $OLD
-	    mv VERSION_DATE $OLD
-	    mv VERSION_NAME $OLD
-	    for i in [!UV]*
+	    mkdir UPDATE_OLD
+	    chmod $HYPRE_INSTALL_PERMISSIONS UPDATE_OLD
+	    for i in [!U]*
 	    do
-		mv $i $OLD
+		mv $i UPDATE_OLD
 	    done
+	    OLD=`cat VERSION_NAME`
+	    mv UPDATE_OLD $OLD
 
 	    # don't keep an old copy if the new version is "the same"
 	    NEW=`cat UPDATE/VERSION_NAME`
@@ -243,10 +262,6 @@ then
 	    cd src/linear_solvers
 	    ./build -$HYPRE_ARCH veryclean
 	)
-
-	# set permissions: give everybody `rx', and give user/group `w'
-	echo "setting permissions ..."
-	chmod -fR a+rX,ug+w *
     )
 fi
 
