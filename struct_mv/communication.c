@@ -328,7 +328,7 @@ hypre_InitializeCommunication( hypre_CommPkg *comm_pkg,
          length_array = hypre_CommTypeEntryLengthArray(send_entry);
          stride_array = hypre_CommTypeEntryStrideArray(send_entry);
 
-         lptr = send_data + hypre_CommTypeEntrySBoxOffset(send_entry);
+         lptr = send_data + hypre_CommTypeEntryOffset(send_entry);
          for (ll = 0; ll < length_array[3]; ll++)
          {
             kptr = lptr;
@@ -563,7 +563,7 @@ hypre_FinalizeCommunication( hypre_CommHandle *comm_handle )
          stride_array = hypre_CommTypeEntryStrideArray(recv_entry);
 
          lptr = hypre_CommHandleRecvData(comm_handle) +
-            hypre_CommTypeEntrySBoxOffset(recv_entry);
+            hypre_CommTypeEntryOffset(recv_entry);
          for (ll = 0; ll < length_array[3]; ll++)
          {
             kptr = lptr;
@@ -675,20 +675,16 @@ hypre_ExchangeLocalData( hypre_CommPkg *comm_pkg,
    hypre_CommTypeEntry *copy_to_entry;
 
    double              *from_dp;
-   double              *to_dp;
+   int                 *from_stride_array;
    int                  from_i;
+   double              *to_dp;
+   int                 *to_stride_array;
    int                  to_i;
                       
-   hypre_SBox          *sbox;
-   hypre_Box           *from_data_box;
-   hypre_Box           *to_data_box;
-                      
-   hypre_Index          loop_size;
-   hypre_IndexRef       start;
-   hypre_IndexRef       stride;
-                        
+   int                 *length_array;
+   int                  i0, i1, i2, i3;
+
    int                  i;
-   int                  loopi, loopj, loopk;
    int                  ierr = 0;
 
    /*--------------------------------------------------------------------
@@ -703,26 +699,39 @@ hypre_ExchangeLocalData( hypre_CommPkg *comm_pkg,
       copy_from_entry = hypre_CommTypeCommEntry(copy_from_type, i);
       copy_to_entry   = hypre_CommTypeCommEntry(copy_to_type, i);
 
-      from_dp = send_data + hypre_CommTypeEntryDataBoxOffset(copy_from_entry);
-      to_dp   = recv_data + hypre_CommTypeEntryDataBoxOffset(copy_to_entry);
+      from_dp = send_data + hypre_CommTypeEntryOffset(copy_from_entry);
+      to_dp   = recv_data + hypre_CommTypeEntryOffset(copy_to_entry);
 
       /* copy data only when necessary */
       if (to_dp != from_dp)
       {
-         sbox          = hypre_CommTypeEntrySBox(copy_from_entry);
-         from_data_box = hypre_CommTypeEntryDataBox(copy_from_entry);
-         to_data_box   = hypre_CommTypeEntryDataBox(copy_to_entry);
+         length_array = hypre_CommTypeEntryLengthArray(copy_from_entry);
 
-         hypre_GetSBoxSize(sbox, loop_size);
-         start  = hypre_SBoxIMin(sbox);
-         stride = hypre_SBoxStride(sbox);
-         hypre_BoxLoop2(loopi, loopj, loopk, loop_size,
-                        from_data_box, start, stride, from_i,
-                        to_data_box,   start, stride, to_i,
-                        {
-                           to_dp[to_i] = from_dp[from_i];
-                        });
+         from_stride_array = hypre_CommTypeEntryStrideArray(copy_from_entry);
+         to_stride_array = hypre_CommTypeEntryStrideArray(copy_to_entry);
 
+         for (i3 = 0; i3 < length_array[3]; i3++)
+         {
+            for (i2 = 0; i2 < length_array[2]; i2++)
+            {
+               for (i1 = 0; i1 < length_array[1]; i1++)
+               {
+                  from_i = (i3*from_stride_array[3] +
+                            i2*from_stride_array[2] +
+                            i1*from_stride_array[1]  );
+                  to_i = (i3*to_stride_array[3] +
+                          i2*to_stride_array[2] +
+                          i1*to_stride_array[1]  );
+                  for (i0 = 0; i0 < length_array[0]; i0++)
+                  {
+                     to_dp[to_i] = from_dp[from_i];
+
+                     from_i += from_stride_array[0];
+                     to_i += to_stride_array[0];
+                  }
+               }
+            }
+         }
       }
    }
 
@@ -817,14 +826,9 @@ headers.h
   description of the stored grid data.
 @param num_values [IN]
   number of data values to be communicated for each grid index.
-@param sbox_offset [IN]
-  offset from some location in memory
-  (same location as for data\_box\_offset) of the data associated with
-  the imin index of sbox.
 @param data_box_offset [IN]
-  offset from some location in memory
-  (same location as for sbox\_offset) of the data associated with
-  the imin index of data\_box.
+  offset from some location in memory of the data associated with the
+  imin index of data_box.
 
 @see hypre_FreeCommTypeEntry
 */
@@ -834,11 +838,10 @@ hypre_CommTypeEntry *
 hypre_NewCommTypeEntry( hypre_SBox  *sbox,
                         hypre_Box   *data_box,
                         int          num_values,
-                        int          sbox_offset,
                         int          data_box_offset )
 {
    hypre_CommTypeEntry  *comm_entry;
- 
+
    int                  *length_array;
    int                  *stride_array;
                        
@@ -847,7 +850,19 @@ hypre_NewCommTypeEntry( hypre_SBox  *sbox,
    comm_entry = hypre_TAlloc(hypre_CommTypeEntry, 1);
 
    /*------------------------------------------------------
-    * Compute length_array, stride_array, and dim
+    * Set imin, imax, and offset
+    *------------------------------------------------------*/
+
+   hypre_CopyIndex(hypre_SBoxIMin(sbox),
+                   hypre_CommTypeEntryIMin(comm_entry));
+   hypre_CopyIndex(hypre_SBoxIMax(sbox),
+                   hypre_CommTypeEntryIMax(comm_entry));
+
+   hypre_CommTypeEntryOffset(comm_entry) =
+      data_box_offset + hypre_BoxIndexRank(data_box, hypre_SBoxIMin(sbox));
+
+   /*------------------------------------------------------
+    * Set length_array, stride_array, and dim
     *------------------------------------------------------*/
 
    length_array = hypre_CommTypeEntryLengthArray(comm_entry);
@@ -869,7 +884,8 @@ hypre_NewCommTypeEntry( hypre_SBox  *sbox,
 
    /* eliminate dimensions with length_array = 1 */
    dim = 4;
-   for(i = 0; i < dim; i++)
+   i = 0;
+   while (i < dim)
    {
       if(length_array[i] == 1)
       {
@@ -881,6 +897,10 @@ hypre_NewCommTypeEntry( hypre_SBox  *sbox,
          length_array[dim - 1] = 1;
          stride_array[dim - 1] = 1;
          dim--;
+      }
+      else
+      {
+         i++;
       }
    }
 
@@ -904,15 +924,7 @@ hypre_NewCommTypeEntry( hypre_SBox  *sbox,
    if(!dim)
       dim = 1;
 
-   /*------------------------------------------------------
-    * Set up comm_entry and return
-    *------------------------------------------------------*/
-
-   hypre_CommTypeEntrySBox(comm_entry)          = sbox;
-   hypre_CommTypeEntryDataBox(comm_entry)       = data_box;
-   hypre_CommTypeEntrySBoxOffset(comm_entry)    = sbox_offset;
-   hypre_CommTypeEntryDataBoxOffset(comm_entry) = data_box_offset;
-   hypre_CommTypeEntryDim(comm_entry)           = dim;
+   hypre_CommTypeEntryDim(comm_entry) = dim;
  
    return comm_entry;
 }
@@ -1001,7 +1013,6 @@ hypre_NewCommPkgInfo( hypre_SBoxArrayArray  *sboxes,
    hypre_SBoxArray       *sbox_array;
    hypre_SBox            *sbox;
    hypre_Box             *data_box;
-   int                    sbox_offset;
    int                    data_box_offset;
                         
    int                    i, j, p, m;
@@ -1079,11 +1090,9 @@ hypre_NewCommPkgInfo( hypre_SBoxArrayArray  *sboxes,
                      }
                   }
 
-                  sbox_offset = data_box_offset +
-                     hypre_BoxIndexRank(data_box, hypre_SBoxIMin(sbox));
                   comm_entries[p][num_entries[p]] =
                      hypre_NewCommTypeEntry(sbox, data_box, num_values,
-                                            sbox_offset, data_box_offset);
+                                            data_box_offset);
 
                   num_entries[p]++;
                }
@@ -1145,9 +1154,9 @@ maintain consistency in communications.
 headers.h
 
 {\bf Note:}
-The entries are sorted by the imin of each sbox.
-This assumes that all sboxes describing communications between any
-pair of processes is distinct.
+The entries are sorted by imin first.  Entries with common imin's are
+then sorted by imax.  This assumes that imin and imax define a unique
+communication type.
 
 @return Error code.
 
@@ -1166,8 +1175,9 @@ hypre_SortCommType( hypre_CommType  *comm_type )
 
    hypre_CommTypeEntry   *comm_entry;
    hypre_IndexRef         imin0, imin1;
+   int                   *imax0, *imax1;
    int                    swap;
-   int                    i, j;
+   int                    i, j, ii, jj;
    int                    ierr = 0;
                       
    /*------------------------------------------------
@@ -1179,8 +1189,8 @@ hypre_SortCommType( hypre_CommType  *comm_type )
       for (j = 0; j < i; j++)
       {
          swap = 0;
-         imin0 = hypre_SBoxIMin( hypre_CommTypeEntrySBox(comm_entries[j]) );
-         imin1 = hypre_SBoxIMin( hypre_CommTypeEntrySBox(comm_entries[j+1]) );
+         imin0 = hypre_CommTypeEntryIMin(comm_entries[j]);
+         imin1 = hypre_CommTypeEntryIMin(comm_entries[j+1]);
          if ( hypre_IndexZ(imin0) > hypre_IndexZ(imin1) )
          {
             swap = 1;
@@ -1205,6 +1215,62 @@ hypre_SortCommType( hypre_CommType  *comm_type )
             comm_entry        = comm_entries[j];
             comm_entries[j]   = comm_entries[j+1];
             comm_entries[j+1] = comm_entry;
+         }
+      }
+   }
+
+   /*------------------------------------------------
+    * Sort entries with common imin's by imax:
+    *------------------------------------------------*/
+
+   for (ii = 0; ii < (num_entries - 1); ii = jj)
+   {
+      /* want jj where entries ii through jj-1 have common imin's */
+      imin0 = hypre_CommTypeEntryIMin(comm_entries[ii]);
+      for (jj = (ii + 1); jj < num_entries; jj++)
+      {
+         imin1 = hypre_CommTypeEntryIMin(comm_entries[jj]);
+         if ( ( hypre_IndexX(imin0) != hypre_IndexX(imin1) ) ||
+              ( hypre_IndexY(imin0) != hypre_IndexY(imin1) ) ||
+              ( hypre_IndexZ(imin0) != hypre_IndexZ(imin1) ) )
+         {
+            break;
+         }
+      }
+
+      /* sort entries ii through jj-1 by imax */
+      for (i = (jj - 1); i > ii; i--)
+      {
+         for (j = ii; j < i; j++)
+         {
+            swap = 0;
+            imax0 = hypre_CommTypeEntryIMax(comm_entries[j]);
+            imax1 = hypre_CommTypeEntryIMax(comm_entries[j+1]);
+            if ( hypre_IndexZ(imax0) > hypre_IndexZ(imax1) )
+            {
+               swap = 1;
+            }
+            else if ( hypre_IndexZ(imax0) == hypre_IndexZ(imax1) )
+            {
+               if ( hypre_IndexY(imax0) > hypre_IndexY(imax1) )
+               {
+                  swap = 1;
+               }
+               else if ( hypre_IndexY(imax0) == hypre_IndexY(imax1) )
+               {
+                  if ( hypre_IndexX(imax0) > hypre_IndexX(imax1) )
+                  {
+                     swap = 1;
+                  }
+               }
+            }
+
+            if (swap)
+            {
+               comm_entry        = comm_entries[j];
+               comm_entries[j]   = comm_entries[j+1];
+               comm_entries[j+1] = comm_entry;
+            }
          }
       }
    }
@@ -1360,7 +1426,7 @@ hypre_BuildCommMPITypes( int               num_comms,
 
          /* compute displacements */
          comm_entry_displacements[i] =
-            hypre_CommTypeEntrySBoxOffset(comm_entry) * sizeof(double);
+            hypre_CommTypeEntryOffset(comm_entry) * sizeof(double);
 
          /* compute types */
          hypre_BuildCommEntryMPIType(comm_entry, &comm_entry_mpi_types[i]);

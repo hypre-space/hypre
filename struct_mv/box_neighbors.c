@@ -87,7 +87,7 @@ hypre_NewBoxNeighbors( int             *local_ranks,
    hypre_BoxNeighborsRankLinks(neighbors) =
       hypre_CTAlloc(hypre_RankLinkArray, num_local);
 
-   new_boxes_ranks = hypre_TAlloc(int, hypre_BoxArraySize(boxes));
+   new_boxes_ranks = hypre_TAlloc(int, hypre_BoxArraySize(boxes) + 1);
    num_new_boxes = 0;
    new_boxes_ranks[num_new_boxes] = -1;
    hypre_ForBoxI(i, boxes)

@@ -723,10 +723,9 @@ hypre_ForBoxI(i, hypre_StructGridBoxes(grid))
 
 typedef struct
 {
-   hypre_SBox  *sbox;
-   hypre_Box   *data_box;
-   int          sbox_offset;      /* offset for sbox imin */
-   int          data_box_offset;  /* offset for data_box imin */
+   hypre_Index  imin;             /* global imin for the data */
+   hypre_Index  imax;             /* global imin for the data */
+   int          offset;           /* offset for the data */
 
    int          dim;              /* dimension of the communication */
    int          length_array[4];
@@ -796,10 +795,9 @@ typedef struct
  * Accessor macros: hypre_CommTypeEntry
  *--------------------------------------------------------------------------*/
  
-#define hypre_CommTypeEntrySBox(entry)          (entry -> sbox)
-#define hypre_CommTypeEntryDataBox(entry)       (entry -> data_box)
-#define hypre_CommTypeEntrySBoxOffset(entry)    (entry -> sbox_offset)
-#define hypre_CommTypeEntryDataBoxOffset(entry) (entry -> data_box_offset)
+#define hypre_CommTypeEntryIMin(entry)          (entry -> imin)
+#define hypre_CommTypeEntryIMax(entry)          (entry -> imax)
+#define hypre_CommTypeEntryOffset(entry)        (entry -> offset)
 #define hypre_CommTypeEntryDim(entry)           (entry -> dim)
 #define hypre_CommTypeEntryLengthArray(entry)   (entry -> length_array)
 #define hypre_CommTypeEntryStrideArray(entry)   (entry -> stride_array)
@@ -1142,7 +1140,7 @@ int hypre_FinalizeCommunication P((hypre_CommHandle *comm_handle ));
 int hypre_ExchangeLocalData P((hypre_CommPkg *comm_pkg , double *send_data , double *recv_data ));
 hypre_CommType *hypre_NewCommType P((hypre_CommTypeEntry **comm_entries , int num_entries ));
 void hypre_FreeCommType P((hypre_CommType *comm_type ));
-hypre_CommTypeEntry *hypre_NewCommTypeEntry P((hypre_SBox *sbox , hypre_Box *data_box , int num_values , int sbox_offset , int data_box_offset ));
+hypre_CommTypeEntry *hypre_NewCommTypeEntry P((hypre_SBox *sbox , hypre_Box *data_box , int num_values , int data_box_offset ));
 void hypre_FreeCommTypeEntry P((hypre_CommTypeEntry *comm_entry ));
 int hypre_NewCommPkgInfo P((hypre_SBoxArrayArray *sboxes , hypre_BoxArray *data_space , int **processes , int num_values , MPI_Comm comm , int *num_comms_ptr , int **comm_processes_ptr , hypre_CommType ***comm_types_ptr , hypre_CommType **copy_type_ptr ));
 int hypre_SortCommType P((hypre_CommType *comm_type ));
