@@ -44,6 +44,61 @@ hypre_NewIJVectorPar(hypre_IJVector *vector)
 
 /******************************************************************************
  *
+ * hypre_SetIJVectorParPartitioning
+ *
+ * initializes IJVectorPar ParVector partitioning
+ *
+ *****************************************************************************/
+
+int
+hypre_InitializeIJVectorParPartitioning(hypre_IJVector *vector,
+                                        int            *partitioning )
+{
+   int ierr = 0;
+   hypre_ParVector *par_vector = hypre_IJVectorLocalStorage(vector);
+
+   hypre_ParVectorPartitioning(par_vector) = partitioning;
+
+   return ierr;
+}
+
+/******************************************************************************
+ *
+ * hypre_SetIJVectorParLocalPartitioning
+ *
+ * initializes IJVectorPar ParVector local partitioning
+ *
+ *****************************************************************************/
+
+int
+hypre_InitializeIJVectorParLocalPartitioning(hypre_IJVector *vector,
+                                             int             vec_start,
+                                             int             vec_stop   )
+{
+   int ierr = 0;
+   hypre_ParVector *par_vector = hypre_IJVectorLocalStorage(vector);
+   int *partitioning = hypre_ParVectorPartitioning(par_vector);
+   int num_procs, my_id;
+   MPI_Comm comm = hypre_IJVectorContext(vector);
+
+   MPI_Comm_size(comm, &num_procs);
+   MPI_Comm_rank(comm, &my_id);
+
+   if (!partitioning)
+   {
+      partitioning = hypre_CTAlloc(int, num_procs);
+   };
+
+   partitioning[my_id] = vec_start;
+   partitioning[my_id+1] = vec_stop + 1;
+
+   hypre_ParVectorPartitioning(par_vector) = partitioning;
+
+   return ierr;
+}
+
+/******************************************************************************
+ *
  * hypre_InitializeIJVectorPar
  *
  * initializes ParVector of IJVectorPar
