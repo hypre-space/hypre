@@ -14,18 +14,27 @@ HYPRE_BABEL_DIRS =\
  bHYPREClient-C\
  bHYPREClient-F
 
-all: 
+all:
 	@ \
 	for i in ${HYPRE_BABEL_DIRS}; \
 	do \
 	  if [ -d $$i ]; \
 	  then \
 	    echo "Making $$i ..."; \
-	    (cd $$i && $(MAKE) install); \
+	    (cd $$i && $(MAKE) $@); \
 	  fi; \
-	done;
+	done
 
-install: all
+install:
+	@ \
+	for i in ${HYPRE_BABEL_DIRS}; \
+	do \
+	  if [ -d $$i ]; \
+	  then \
+	    echo "Making $$i ..."; \
+	    (cd $$i && $(MAKE) $@); \
+	  fi; \
+	done
 
 clean:
 	@ \
@@ -37,7 +46,7 @@ clean:
 	  fi; \
 	done
 
-veryclean:
+distclean:
 	@ \
 	for i in ${HYPRE_BABEL_DIRS}; \
 	do \
