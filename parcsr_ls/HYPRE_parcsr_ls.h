@@ -450,6 +450,20 @@ int HYPRE_ParaSailsSetLogging(HYPRE_Solver solver,
  * @name ParCSR Euclid Preconditioner 
  *
  * MPI Parallel ILU preconditioner 
+ *
+ * Options summary:
+ * \begin{center}
+ * \begin{tabular}{|l|c|l|}
+ * \hline
+ * Option & Default & Synopsis \\
+ * \hline
+ * -level    & 1 & ILU($k$) factorization level \\ \hline
+ * -bj       & 0 (false) & Use Block Jacobi ILU instead of PILU \\ \hline
+ * -eu\_stats & 0 (false) & Print  internal timing and statistics \\ \hline
+ * -eu\_mem   & 0 (false) & Print  internal memory usage \\ \hline
+ * \end{tabular}
+ * \end{center}
+ *
  **/
 /*@{*/
 
@@ -498,12 +512,7 @@ int HYPRE_EuclidSolve(HYPRE_Solver       solver,
  * All Euclid options (e.g, level, drop-tolerance) are stored in
  * this database.  
  * If a (name, value) pair already exists, this call updates the value.
- *
- * To insert (name, value) pairs from a file instead
- * of the command line, use HYPRE\_EuclidSetParamsFromFile().
- *
- * See Euclid documentation for comprehensive listing
- * of settable parameters.
+ * See also: HYPRE\_EuclidSetParam, HYPRE\_EuclidSetParamsFromFile.
  *
  * @param argc [IN] Length of argv array
  * @param argv [IN] Array of strings
@@ -513,10 +522,21 @@ int HYPRE_EuclidSetParams(HYPRE_Solver solver,
                           char *argv[]);
 
 /**
+ * Insert a single (name, value) pair in Euclid's options database.
+ * If the (name, value) pair already exists, this call updates the value.
+ * See also: HYPRE\_EuclidSetParams, HYPRE\_EuclidSetParamsFromFile.
+ *
+ * @param argc [IN] Length of argv array
+ * @param argv [IN] Array of strings
+ **/
+int HYPRE_EuclidSetParam(HYPRE_Solver solver,
+                         char *name, char *value);
+
+/**
  * Insert (name, value) pairs in Euclid's options database.
  * Each line of the file should either begin with a ``\#,''
  * indicating a comment line, or contain a (name value)
- * pair, e.g:
+ * pair, e.g: \\
  *
  * >cat optionsFile
  * \#sample runtime parameter file \\
@@ -525,8 +545,7 @@ int HYPRE_EuclidSetParams(HYPRE_Solver solver,
  * -doSomething true \\
  * -xx\_coeff -1.0
  *
- * See Euclid documentation for comprehensive listing
- * of settable parameters.
+ * See also: HYPRE\_EuclidSetParams, HYPRE\_EuclidSetParams.
  *
  * @param filename[IN] Pathname/filename to read
  **/
