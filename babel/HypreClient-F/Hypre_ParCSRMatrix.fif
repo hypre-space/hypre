@@ -1,0 +1,607 @@
+C       
+C       File:          Hypre_ParCSRMatrix_Impl.f
+C       Symbol:        Hypre.ParCSRMatrix-v0.1.6
+C       Symbol Type:   class
+C       Babel Version: 0.8.0
+C       SIDL Created:  20030121 14:39:22 PST
+C       Generated:     20030121 14:39:26 PST
+C       Description:   Client-side documentation text for Hypre.ParCSRMatrix
+C       
+C       WARNING: Automatically generated; changes will be lost
+C       
+C       babel-version = 0.8.0
+C       source-line   = 433
+C       source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
+C       
+
+        THIS FILE IS DOCUMENTATION - DO NOT COMPILE IT!
+
+C       
+C       Symbol "Hypre.ParCSRMatrix" (version 0.1.6)
+C       
+C       A single class that implements both a build interface and an operator
+C       interface. It returns itself for <code>GetConstructedObject</code>.
+C       
+
+
+
+
+C       
+C       Create an instance of class Hypre.ParCSRMatrix
+C       
+
+        subroutine Hypre_ParCSRMatrix__create_f(retval)
+        implicit none
+C       out Hypre.ParCSRMatrix retval
+        integer*8 retval
+        end
+
+
+C       
+C       Cast method for interface and class type conversions.
+C       
+
+        subroutine Hypre_ParCSRMatrix__cast_f(self, name, retval)
+        implicit none
+C       in Hypre.ParCSRMatrix self
+        integer*8 self
+C       in string name
+        character*(*) name
+C       out opaque retval
+        integer*8 retval
+        end
+
+
+C       
+C       <p>
+C       Add one to the intrinsic reference count in the underlying object.
+C       Object in <code>SIDL</code> have an intrinsic reference count.
+C       Objects continue to exist as long as the reference count is
+C       positive. Clients should call this method whenever they
+C       create another ongoing reference to an object or interface.
+C       </p>
+C       <p>
+C       This does not have a return value because there is no language
+C       independent type that can refer to an interface or a
+C       class.
+C       </p>
+C       
+
+        subroutine Hypre_ParCSRMatrix_addRef_f(self)
+        implicit none
+C       in Hypre.ParCSRMatrix self
+        integer*8 self
+        end
+
+
+C       
+C       Decrease by one the intrinsic reference count in the underlying
+C       object, and delete the object if the reference is non-positive.
+C       Objects in <code>SIDL</code> have an intrinsic reference count.
+C       Clients should call this method whenever they remove a
+C       reference to an object or interface.
+C       
+
+        subroutine Hypre_ParCSRMatrix_deleteRef_f(self)
+        implicit none
+C       in Hypre.ParCSRMatrix self
+        integer*8 self
+        end
+
+
+C       
+C       Return true if and only if <code>obj</code> refers to the same
+C       object as this object.
+C       
+
+        subroutine Hypre_ParCSRMatrix_isSame_f(self, iobj, retval)
+        implicit none
+C       in Hypre.ParCSRMatrix self
+        integer*8 self
+C       in SIDL.BaseInterface iobj
+        integer*8 iobj
+C       out bool retval
+        logical retval
+        end
+
+
+C       
+C       Check whether the object can support the specified interface or
+C       class.  If the <code>SIDL</code> type name in <code>name</code>
+C       is supported, then a reference to that object is returned with the
+C       reference count incremented.  The callee will be responsible for
+C       calling <code>deleteRef</code> on the returned object.  If
+C       the specified type is not supported, then a null reference is
+C       returned.
+C       
+
+        subroutine Hypre_ParCSRMatrix_queryInt_f(self, name, retval)
+        implicit none
+C       in Hypre.ParCSRMatrix self
+        integer*8 self
+C       in string name
+        character*(*) name
+C       out SIDL.BaseInterface retval
+        integer*8 retval
+        end
+
+
+C       
+C       Return whether this object is an instance of the specified type.
+C       The string name must be the <code>SIDL</code> type name.  This
+C       routine will return <code>true</code> if and only if a cast to
+C       the string type name would succeed.
+C       
+
+        subroutine Hypre_ParCSRMatrix_isType_f(self, name, retval)
+        implicit none
+C       in Hypre.ParCSRMatrix self
+        integer*8 self
+C       in string name
+        character*(*) name
+C       out bool retval
+        logical retval
+        end
+
+
+C       
+C       Return the meta-data about the class implementing this interface.
+C       
+
+        subroutine Hypre_ParCSRMatrix_getClassInfo_f(self, retval)
+        implicit none
+C       in Hypre.ParCSRMatrix self
+        integer*8 self
+C       out SIDL.ClassInfo retval
+        integer*8 retval
+        end
+
+
+C       
+C       Method:  SetCommunicator[]
+C       
+
+        subroutine Hypre_ParCSRMatrix_SetCommunicator_f(self, comm,
+     &     retval)
+        implicit none
+C       in Hypre.ParCSRMatrix self
+        integer*8 self
+C       in opaque comm
+        integer*8 comm
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Method:  GetDoubleValue[]
+C       
+
+        subroutine Hypre_ParCSRMatrix_GetDoubleValue_f(self, name,
+     &     value, retval)
+        implicit none
+C       in Hypre.ParCSRMatrix self
+        integer*8 self
+C       in string name
+        character*(*) name
+C       out double value
+        double precision value
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Method:  GetIntValue[]
+C       
+
+        subroutine Hypre_ParCSRMatrix_GetIntValue_f(self, name, value,
+     &     retval)
+        implicit none
+C       in Hypre.ParCSRMatrix self
+        integer*8 self
+C       in string name
+        character*(*) name
+C       out int value
+        integer*4 value
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Method:  SetDoubleParameter[]
+C       
+
+        subroutine Hypre_ParCSRMatrix_SetDoubleParameter_f(self, name,
+     &     value, retval)
+        implicit none
+C       in Hypre.ParCSRMatrix self
+        integer*8 self
+C       in string name
+        character*(*) name
+C       in double value
+        double precision value
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Method:  SetIntParameter[]
+C       
+
+        subroutine Hypre_ParCSRMatrix_SetIntParameter_f(self, name,
+     &     value, retval)
+        implicit none
+C       in Hypre.ParCSRMatrix self
+        integer*8 self
+C       in string name
+        character*(*) name
+C       in int value
+        integer*4 value
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Method:  SetStringParameter[]
+C       
+
+        subroutine Hypre_ParCSRMatrix_SetStringParameter_f(self, name,
+     &     value, retval)
+        implicit none
+C       in Hypre.ParCSRMatrix self
+        integer*8 self
+C       in string name
+        character*(*) name
+C       in string value
+        character*(*) value
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Method:  SetIntArrayParameter[]
+C       
+
+        subroutine Hypre_ParCSRMatrix_SetIntArrayParameter_f(self, name,
+     &     value, retval)
+        implicit none
+C       in Hypre.ParCSRMatrix self
+        integer*8 self
+C       in string name
+        character*(*) name
+C       in array<int> value
+        integer*8 value
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Method:  SetDoubleArrayParameter[]
+C       
+
+        subroutine Hypre_ParCSRMatrix_SetDoubleArrayParameter_f(self,
+     &     name, value, retval)
+        implicit none
+C       in Hypre.ParCSRMatrix self
+        integer*8 self
+C       in string name
+        character*(*) name
+C       in array<double> value
+        integer*8 value
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Method:  Setup[]
+C       
+
+        subroutine Hypre_ParCSRMatrix_Setup_f(self, b, x, retval)
+        implicit none
+C       in Hypre.ParCSRMatrix self
+        integer*8 self
+C       in Hypre.Vector b
+        integer*8 b
+C       in Hypre.Vector x
+        integer*8 x
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Method:  Apply[]
+C       
+
+        subroutine Hypre_ParCSRMatrix_Apply_f(self, b, x, retval)
+        implicit none
+C       in Hypre.ParCSRMatrix self
+        integer*8 self
+C       in Hypre.Vector b
+        integer*8 b
+C       inout Hypre.Vector x
+        integer*8 x
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Method:  GetRow[]
+C       
+
+        subroutine Hypre_ParCSRMatrix_GetRow_f(self, row, size, col_ind,
+     &     values, retval)
+        implicit none
+C       in Hypre.ParCSRMatrix self
+        integer*8 self
+C       in int row
+        integer*4 row
+C       out int size
+        integer*4 size
+C       out array<int> col_ind
+        integer*8 col_ind
+C       out array<double> values
+        integer*8 values
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Prepare an object for setting coefficient values, whether for
+C       the first time or subsequently.
+C       
+C       
+C       
+
+        subroutine Hypre_ParCSRMatrix_Initialize_f(self, retval)
+        implicit none
+C       in Hypre.ParCSRMatrix self
+        integer*8 self
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Finalize the construction of an object before using, either for
+C       the first time or on subsequent uses. "Initialize" and "Assemble"
+C       always appear in a matched set, with Initialize preceding Assemble. Values
+C       can only be set in between a call to Initialize and Assemble.
+C       
+C       
+C       
+
+        subroutine Hypre_ParCSRMatrix_Assemble_f(self, retval)
+        implicit none
+C       in Hypre.ParCSRMatrix self
+        integer*8 self
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       The problem definition interface is a "builder" that creates an object
+C       that contains the problem definition information, e.g. a matrix. To
+C       perform subsequent operations with that object, it must be returned from
+C       the problem definition object. "GetObject" performs this function.
+C       <note>At compile time, the type of the returned object is unknown.
+C       Thus, the returned type is a SIDL.BaseInterface. QueryInterface or Cast must
+C       be used on the returned object to convert it into a known type.</note>
+C       
+C       
+C       
+
+        subroutine Hypre_ParCSRMatrix_GetObject_f(self, A, retval)
+        implicit none
+C       in Hypre.ParCSRMatrix self
+        integer*8 self
+C       out SIDL.BaseInterface A
+        integer*8 A
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Create a matrix object.  Each process owns some unique consecutive
+C       range of rows, indicated by the global row indices {\tt ilower} and
+C       {\tt iupper}.  The row data is required to be such that the value
+C       of {\tt ilower} on any process $p$ be exactly one more than the
+C       value of {\tt iupper} on process $p-1$.  Note that the first row of
+C       the global matrix may start with any integer value.  In particular,
+C       one may use zero- or one-based indexing.
+C       
+C       For square matrices, {\tt jlower} and {\tt jupper} typically should
+C       match {\tt ilower} and {\tt iupper}, respectively.  For rectangular
+C       matrices, {\tt jlower} and {\tt jupper} should define a
+C       partitioning of the columns.  This partitioning must be used for
+C       any vector $v$ that will be used in matrix-vector products with the
+C       rectangular matrix.  The matrix data structure may use {\tt jlower}
+C       and {\tt jupper} to store the diagonal blocks (rectangular in
+C       general) of the matrix separately from the rest of the matrix.
+C       
+C       Collective.
+C       
+C       
+C       
+
+        subroutine Hypre_ParCSRMatrix_Create_f(self, ilower, iupper,
+     &     jlower, jupper, retval)
+        implicit none
+C       in Hypre.ParCSRMatrix self
+        integer*8 self
+C       in int ilower
+        integer*4 ilower
+C       in int iupper
+        integer*4 iupper
+C       in int jlower
+        integer*4 jlower
+C       in int jupper
+        integer*4 jupper
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Sets values for {\tt nrows} of the matrix.  The arrays {\tt ncols}
+C       and {\tt rows} are of dimension {\tt nrows} and contain the number
+C       of columns in each row and the row indices, respectively.  The
+C       array {\tt cols} contains the column indices for each of the {\tt
+C       rows}, and is ordered by rows.  The data in the {\tt values} array
+C       corresponds directly to the column entries in {\tt cols}.  Erases
+C       any previous values at the specified locations and replaces them
+C       with new ones, or, if there was no value there before, inserts a
+C       new one.
+C       
+C       Not collective.
+C       
+C       
+C       
+
+        subroutine Hypre_ParCSRMatrix_SetValues_f(self, nrows, ncols,
+     &     rows, cols, values, retval)
+        implicit none
+C       in Hypre.ParCSRMatrix self
+        integer*8 self
+C       in int nrows
+        integer*4 nrows
+C       in array<int> ncols
+        integer*8 ncols
+C       in array<int> rows
+        integer*8 rows
+C       in array<int> cols
+        integer*8 cols
+C       in array<double> values
+        integer*8 values
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Adds to values for {\tt nrows} of the matrix.  Usage details are
+C       analogous to \Ref{HYPRE_IJMatrixSetValues}.  Adds to any previous
+C       values at the specified locations, or, if there was no value there
+C       before, inserts a new one.
+C       
+C       Not collective.
+C       
+C       
+C       
+
+        subroutine Hypre_ParCSRMatrix_AddToValues_f(self, nrows, ncols,
+     &     rows, cols, values, retval)
+        implicit none
+C       in Hypre.ParCSRMatrix self
+        integer*8 self
+C       in int nrows
+        integer*4 nrows
+C       in array<int> ncols
+        integer*8 ncols
+C       in array<int> rows
+        integer*8 rows
+C       in array<int> cols
+        integer*8 cols
+C       in array<double> values
+        integer*8 values
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       (Optional) Set the max number of nonzeros to expect in each row.
+C       The array {\tt sizes} contains estimated sizes for each row on this
+C       process.  This call can significantly improve the efficiency of
+C       matrix construction, and should always be utilized if possible.
+C       
+C       Not collective.
+C       
+C       DEVELOPER NOTES: None.
+C       
+C       
+
+        subroutine Hypre_ParCSRMatrix_SetRowSizes_f(self, sizes, retval)
+        implicit none
+C       in Hypre.ParCSRMatrix self
+        integer*8 self
+C       in array<int> sizes
+        integer*8 sizes
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       (Optional) Set the max number of nonzeros to expect in each row of
+C       the diagonal and off-diagonal blocks.  The diagonal block is the
+C       submatrix whose column numbers correspond to rows owned by this
+C       process, and the off-diagonal block is everything else.  The arrays
+C       {\tt diag\_sizes} and {\tt offdiag\_sizes} contain estimated sizes
+C       for each row of the diagonal and off-diagonal blocks, respectively.
+C       This routine can significantly improve the efficiency of matrix
+C       construction, and should always be utilized if possible.
+C       
+C       Not collective.
+C       
+C       
+C       
+
+        subroutine Hypre_ParCSRMatrix_SetDiagOffdSizes_f(self,
+     &     diag_sizes, offdiag_sizes, retval)
+        implicit none
+C       in Hypre.ParCSRMatrix self
+        integer*8 self
+C       in array<int> diag_sizes
+        integer*8 diag_sizes
+C       in array<int> offdiag_sizes
+        integer*8 offdiag_sizes
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Read the matrix from file.  This is mainly for debugging purposes.
+C       
+C       
+
+        subroutine Hypre_ParCSRMatrix_Read_f(self, filename, comm,
+     &     retval)
+        implicit none
+C       in Hypre.ParCSRMatrix self
+        integer*8 self
+C       in string filename
+        character*(*) filename
+C       in opaque comm
+        integer*8 comm
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Print the matrix to file.  This is mainly for debugging purposes.
+C       
+C       
+
+        subroutine Hypre_ParCSRMatrix_Print_f(self, filename, retval)
+        implicit none
+C       in Hypre.ParCSRMatrix self
+        integer*8 self
+C       in string filename
+        character*(*) filename
+C       out int retval
+        integer*4 retval
+        end

@@ -1,0 +1,582 @@
+C       
+C       File:          Hypre_ParCSRVector_Impl.f
+C       Symbol:        Hypre.ParCSRVector-v0.1.6
+C       Symbol Type:   class
+C       Babel Version: 0.8.0
+C       SIDL Created:  20030121 14:39:22 PST
+C       Generated:     20030121 14:39:30 PST
+C       Description:   Client-side documentation text for Hypre.ParCSRVector
+C       
+C       WARNING: Automatically generated; changes will be lost
+C       
+C       babel-version = 0.8.0
+C       source-line   = 435
+C       source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
+C       
+
+        THIS FILE IS DOCUMENTATION - DO NOT COMPILE IT!
+
+C       
+C       Symbol "Hypre.ParCSRVector" (version 0.1.6)
+C       
+
+
+
+
+C       
+C       Create an instance of class Hypre.ParCSRVector
+C       
+
+        subroutine Hypre_ParCSRVector__create_f(retval)
+        implicit none
+C       out Hypre.ParCSRVector retval
+        integer*8 retval
+        end
+
+
+C       
+C       Cast method for interface and class type conversions.
+C       
+
+        subroutine Hypre_ParCSRVector__cast_f(self, name, retval)
+        implicit none
+C       in Hypre.ParCSRVector self
+        integer*8 self
+C       in string name
+        character*(*) name
+C       out opaque retval
+        integer*8 retval
+        end
+
+
+C       
+C       <p>
+C       Add one to the intrinsic reference count in the underlying object.
+C       Object in <code>SIDL</code> have an intrinsic reference count.
+C       Objects continue to exist as long as the reference count is
+C       positive. Clients should call this method whenever they
+C       create another ongoing reference to an object or interface.
+C       </p>
+C       <p>
+C       This does not have a return value because there is no language
+C       independent type that can refer to an interface or a
+C       class.
+C       </p>
+C       
+
+        subroutine Hypre_ParCSRVector_addRef_f(self)
+        implicit none
+C       in Hypre.ParCSRVector self
+        integer*8 self
+        end
+
+
+C       
+C       Decrease by one the intrinsic reference count in the underlying
+C       object, and delete the object if the reference is non-positive.
+C       Objects in <code>SIDL</code> have an intrinsic reference count.
+C       Clients should call this method whenever they remove a
+C       reference to an object or interface.
+C       
+
+        subroutine Hypre_ParCSRVector_deleteRef_f(self)
+        implicit none
+C       in Hypre.ParCSRVector self
+        integer*8 self
+        end
+
+
+C       
+C       Return true if and only if <code>obj</code> refers to the same
+C       object as this object.
+C       
+
+        subroutine Hypre_ParCSRVector_isSame_f(self, iobj, retval)
+        implicit none
+C       in Hypre.ParCSRVector self
+        integer*8 self
+C       in SIDL.BaseInterface iobj
+        integer*8 iobj
+C       out bool retval
+        logical retval
+        end
+
+
+C       
+C       Check whether the object can support the specified interface or
+C       class.  If the <code>SIDL</code> type name in <code>name</code>
+C       is supported, then a reference to that object is returned with the
+C       reference count incremented.  The callee will be responsible for
+C       calling <code>deleteRef</code> on the returned object.  If
+C       the specified type is not supported, then a null reference is
+C       returned.
+C       
+
+        subroutine Hypre_ParCSRVector_queryInt_f(self, name, retval)
+        implicit none
+C       in Hypre.ParCSRVector self
+        integer*8 self
+C       in string name
+        character*(*) name
+C       out SIDL.BaseInterface retval
+        integer*8 retval
+        end
+
+
+C       
+C       Return whether this object is an instance of the specified type.
+C       The string name must be the <code>SIDL</code> type name.  This
+C       routine will return <code>true</code> if and only if a cast to
+C       the string type name would succeed.
+C       
+
+        subroutine Hypre_ParCSRVector_isType_f(self, name, retval)
+        implicit none
+C       in Hypre.ParCSRVector self
+        integer*8 self
+C       in string name
+        character*(*) name
+C       out bool retval
+        logical retval
+        end
+
+
+C       
+C       Return the meta-data about the class implementing this interface.
+C       
+
+        subroutine Hypre_ParCSRVector_getClassInfo_f(self, retval)
+        implicit none
+C       in Hypre.ParCSRVector self
+        integer*8 self
+C       out SIDL.ClassInfo retval
+        integer*8 retval
+        end
+
+
+C       
+C       Method:  SetCommunicator[]
+C       
+
+        subroutine Hypre_ParCSRVector_SetCommunicator_f(self, mpi_comm,
+     &     retval)
+        implicit none
+C       in Hypre.ParCSRVector self
+        integer*8 self
+C       in opaque mpi_comm
+        integer*8 mpi_comm
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Prepare an object for setting coefficient values, whether for
+C       the first time or subsequently.
+C       
+C       
+C       
+
+        subroutine Hypre_ParCSRVector_Initialize_f(self, retval)
+        implicit none
+C       in Hypre.ParCSRVector self
+        integer*8 self
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Finalize the construction of an object before using, either for
+C       the first time or on subsequent uses. "Initialize" and "Assemble"
+C       always appear in a matched set, with Initialize preceding Assemble. Values
+C       can only be set in between a call to Initialize and Assemble.
+C       
+C       
+C       
+
+        subroutine Hypre_ParCSRVector_Assemble_f(self, retval)
+        implicit none
+C       in Hypre.ParCSRVector self
+        integer*8 self
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       The problem definition interface is a "builder" that creates an object
+C       that contains the problem definition information, e.g. a matrix. To
+C       perform subsequent operations with that object, it must be returned from
+C       the problem definition object. "GetObject" performs this function.
+C       <note>At compile time, the type of the returned object is unknown.
+C       Thus, the returned type is a SIDL.BaseInterface. QueryInterface or Cast must
+C       be used on the returned object to convert it into a known type.</note>
+C       
+C       
+C       
+
+        subroutine Hypre_ParCSRVector_GetObject_f(self, A, retval)
+        implicit none
+C       in Hypre.ParCSRVector self
+        integer*8 self
+C       out SIDL.BaseInterface A
+        integer*8 A
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Method:  SetGlobalSize[]
+C       
+
+        subroutine Hypre_ParCSRVector_SetGlobalSize_f(self, n, retval)
+        implicit none
+C       in Hypre.ParCSRVector self
+        integer*8 self
+C       in int n
+        integer*4 n
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Method:  SetPartitioning[]
+C       
+
+        subroutine Hypre_ParCSRVector_SetPartitioning_f(self,
+     &     partitioning, retval)
+        implicit none
+C       in Hypre.ParCSRVector self
+        integer*8 self
+C       in array<int> partitioning
+        integer*8 partitioning
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Method:  SetLocalComponents[]
+C       
+
+        subroutine Hypre_ParCSRVector_SetLocalComponents_f(self,
+     &     num_values, glob_vec_indices, value_indices, values, retval)
+        implicit none
+C       in Hypre.ParCSRVector self
+        integer*8 self
+C       in int num_values
+        integer*4 num_values
+C       in array<int> glob_vec_indices
+        integer*8 glob_vec_indices
+C       in array<int> value_indices
+        integer*8 value_indices
+C       in array<double> values
+        integer*8 values
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Method:  AddtoLocalComponents[]
+C       
+
+        subroutine Hypre_ParCSRVector_AddtoLocalComponents_f(self,
+     &     num_values, glob_vec_indices, value_indices, values, retval)
+        implicit none
+C       in Hypre.ParCSRVector self
+        integer*8 self
+C       in int num_values
+        integer*4 num_values
+C       in array<int> glob_vec_indices
+        integer*8 glob_vec_indices
+C       in array<int> value_indices
+        integer*8 value_indices
+C       in array<double> values
+        integer*8 values
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Method:  SetLocalComponentsInBlock[]
+C       
+
+        subroutine Hypre_ParCSRVector_SetLocalComponentsInBlock_f(self,
+     &     glob_vec_index_start, glob_vec_index_stop, value_indices,
+     &     values, retval)
+        implicit none
+C       in Hypre.ParCSRVector self
+        integer*8 self
+C       in int glob_vec_index_start
+        integer*4 glob_vec_index_start
+C       in int glob_vec_index_stop
+        integer*4 glob_vec_index_stop
+C       in array<int> value_indices
+        integer*8 value_indices
+C       in array<double> values
+        integer*8 values
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Method:  AddToLocalComponentsInBlock[]
+C       
+
+        subroutine 
+     &     Hypre_ParCSRVector_AddToLocalComponentsInBlock_f(self,
+     &     glob_vec_index_start, glob_vec_index_stop, value_indices,
+     &     values, retval)
+        implicit none
+C       in Hypre.ParCSRVector self
+        integer*8 self
+C       in int glob_vec_index_start
+        integer*4 glob_vec_index_start
+C       in int glob_vec_index_stop
+        integer*4 glob_vec_index_stop
+C       in array<int> value_indices
+        integer*8 value_indices
+C       in array<double> values
+        integer*8 values
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Create a vector object.  Each process owns some unique consecutive
+C       range of vector unknowns, indicated by the global indices {\tt
+C       jlower} and {\tt jupper}.  The data is required to be such that the
+C       value of {\tt jlower} on any process $p$ be exactly one more than
+C       the value of {\tt jupper} on process $p-1$.  Note that the first
+C       index of the global vector may start with any integer value.  In
+C       particular, one may use zero- or one-based indexing.
+C       
+C       Collective.
+C       
+C       
+C       
+
+        subroutine Hypre_ParCSRVector_Create_f(self, comm, jlower,
+     &     jupper, retval)
+        implicit none
+C       in Hypre.ParCSRVector self
+        integer*8 self
+C       in opaque comm
+        integer*8 comm
+C       in int jlower
+        integer*4 jlower
+C       in int jupper
+        integer*4 jupper
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Sets values in vector.  The arrays {\tt values} and {\tt indices}
+C       are of dimension {\tt nvalues} and contain the vector values to be
+C       set and the corresponding global vector indices, respectively.
+C       Erases any previous values at the specified locations and replaces
+C       them with new ones.
+C       
+C       Not collective.
+C       
+C       
+C       
+
+        subroutine Hypre_ParCSRVector_SetValues_f(self, nvalues,
+     &     indices, values, retval)
+        implicit none
+C       in Hypre.ParCSRVector self
+        integer*8 self
+C       in int nvalues
+        integer*4 nvalues
+C       in array<int> indices
+        integer*8 indices
+C       in array<double> values
+        integer*8 values
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Adds to values in vector.  Usage details are analogous to
+C       \Ref{SetValues}.
+C       
+C       Not collective.
+C       
+C       
+C       
+
+        subroutine Hypre_ParCSRVector_AddToValues_f(self, nvalues,
+     &     indices, values, retval)
+        implicit none
+C       in Hypre.ParCSRVector self
+        integer*8 self
+C       in int nvalues
+        integer*4 nvalues
+C       in array<int> indices
+        integer*8 indices
+C       in array<double> values
+        integer*8 values
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Read the vector from file.  This is mainly for debugging purposes.
+C       
+C       
+C       
+
+        subroutine Hypre_ParCSRVector_Read_f(self, filename, comm,
+     &     retval)
+        implicit none
+C       in Hypre.ParCSRVector self
+        integer*8 self
+C       in string filename
+        character*(*) filename
+C       in opaque comm
+        integer*8 comm
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Print the vector to file.  This is mainly for debugging purposes.
+C       
+C       
+
+        subroutine Hypre_ParCSRVector_Print_f(self, filename, retval)
+        implicit none
+C       in Hypre.ParCSRVector self
+        integer*8 self
+C       in string filename
+        character*(*) filename
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Method:  GetRow[]
+C       
+
+        subroutine Hypre_ParCSRVector_GetRow_f(self, row, size, col_ind,
+     &     values, retval)
+        implicit none
+C       in Hypre.ParCSRVector self
+        integer*8 self
+C       in int row
+        integer*4 row
+C       out int size
+        integer*4 size
+C       out array<int> col_ind
+        integer*8 col_ind
+C       out array<double> values
+        integer*8 values
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       y <- 0 (where y=self)
+C       
+
+        subroutine Hypre_ParCSRVector_Clear_f(self, retval)
+        implicit none
+C       in Hypre.ParCSRVector self
+        integer*8 self
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       y <- x 
+C       
+
+        subroutine Hypre_ParCSRVector_Copy_f(self, x, retval)
+        implicit none
+C       in Hypre.ParCSRVector self
+        integer*8 self
+C       in Hypre.Vector x
+        integer*8 x
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       create an x compatible with y
+C       
+
+        subroutine Hypre_ParCSRVector_Clone_f(self, x, retval)
+        implicit none
+C       in Hypre.ParCSRVector self
+        integer*8 self
+C       out Hypre.Vector x
+        integer*8 x
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       y <- a*y 
+C       
+
+        subroutine Hypre_ParCSRVector_Scale_f(self, a, retval)
+        implicit none
+C       in Hypre.ParCSRVector self
+        integer*8 self
+C       in double a
+        double precision a
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       d <- (y,x)
+C       
+
+        subroutine Hypre_ParCSRVector_Dot_f(self, x, d, retval)
+        implicit none
+C       in Hypre.ParCSRVector self
+        integer*8 self
+C       in Hypre.Vector x
+        integer*8 x
+C       out double d
+        double precision d
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       y <- a*x + y
+C       
+
+        subroutine Hypre_ParCSRVector_Axpy_f(self, a, x, retval)
+        implicit none
+C       in Hypre.ParCSRVector self
+        integer*8 self
+C       in double a
+        double precision a
+C       in Hypre.Vector x
+        integer*8 x
+C       out int retval
+        integer*4 retval
+        end
