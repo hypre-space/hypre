@@ -8187,28 +8187,28 @@ CC="$PREPEND $CC"
       
       for casc_dir in \
  .\
+ blas\
  utilities\
  struct_matrix_vector\
  struct_linear_solvers\
- parcsr_matrix_vector\
- parcsr_linear_solvers\
  seq_matrix_vector\
- seq_linear_solvers/pamg\
- IJ_matrix_vector\
- FEI_matrix_vector/fei-hypre\
- FEI_matrix_vector/isis-mv\
- CI_struct_linear_solvers\
- CI_struct_matrix_vector\
- PETScMat_linear_solvers/pilut\
- PETSc_linear_solvers/ParILUT\
- distributed_linear_solvers/pilut\
- distributed_linear_solvers/ParaSAILS\
+ parcsr_matrix_vector\
  distributed_matrix\
  matrix_matrix\
+ IJ_matrix_vector\
+ distributed_linear_solvers/pilut\
+ parcsr_linear_solvers\
+ seq_linear_solvers/pamg\
+ CI_struct_linear_solvers\
+ CI_struct_matrix_vector\
+ FEI_matrix_vector/fei-hypre\
+ FEI_matrix_vector/isis-mv\
+ PETScMat_linear_solvers/pilut\
+ PETSc_linear_solvers/ParILUT\
+ distributed_linear_solvers/ParaSAILS\
  test\
  tools\
- docs\
- blas; do
+ docs; do
       if test -f $srcdir/$casc_dir/$casc_output_file.in; then
          Makefile_list="$Makefile_list $casc_dir/$casc_output_file"
       fi

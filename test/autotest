@@ -30,6 +30,32 @@ export PATH
 
 HYPRE_AUTOTEST_DIR="/home/casc/software/hypre/autotest"
 
+#==============================================================================
+# Email lists
+#==============================================================================
+
+HYPRE_DEFAULT_EMAIL="\
+ dwalker@llnl.gov\
+ rfalgout@llnl.gov"
+
+HYPRE_CHECKOUT_EMAIL="$HYPRE_DEFAULT_EMAIL"
+
+HYPRE_CONFIGURE_EMAIL="$HYPRE_DEFAULT_EMAIL"
+
+HYPRE_STRUCT_EMAIL="$HYPRE_DEFAULT_EMAIL\
+ jones97@llnl.gov"
+
+HYPRE_IJ_EMAIL="$HYPRE_DEFAULT_EMAIL\
+ jones97@llnl.gov\
+ yang11@llnl.gov\
+ vhenson@llnl.gov\
+ cleary1@llnl.gov\
+ mlambert@llnl.gov"
+
+HYPRE_ALL_EMAIL="$HYPRE_STRUCT_EMAIL $HYPRE_IJ_EMAIL"
+
+HYPRE_BETA_EMAIL="$HYPRE_ALL_EMAIL"
+
 #=============================================================================
 # Check out the repository in the HYPRE_AUTOTEST_DIR directory
 #=============================================================================
@@ -43,7 +69,7 @@ fi
 cd $HYPRE_AUTOTEST_DIR
 rm -fR linear_solvers
 cvs -q checkout -P linear_solvers 1> $0.checkout.log 2> $0.checkout.err
-echo "dwalker@llnl.gov rfalgout@llnl.gov" > $0.checkout.err.email 
+echo "$HYPRE_CHECKOUT_EMAIL" > $0.checkout.err.email 
 
 #=============================================================================
 # Make libraries and test drivers (using configure)
@@ -52,27 +78,20 @@ echo "dwalker@llnl.gov rfalgout@llnl.gov" > $0.checkout.err.email
 cd $HYPRE_AUTOTEST_DIR/linear_solvers
 rm config.cache
 ./configure  1> $0.configure.log 2> $0.configure.err
-echo "dwalker@llnl.gov rfalgout@llnl.gov elliott22@llnl.gov" > $0.configure.err.email 
+echo "$HYPRE_CONFIGURE_EMAIL" > $0.configure.err.email 
 
 make veryclean
 
 make struct 1> $0.struct.log 2> $0.struct.err
-echo "dwalker@llnl.gov rfalgout@llnl.gov jones97@llnl.gov" > $0.struct.err.email 
+echo "$HYPRE_STRUCT_EMAIL" > $0.struct.err.email 
+
+make IJ 1> $0.IJ.log 2> $0.IJ.err
+echo "$HYPRE_IJ_EMAIL" > $0.IJ.err.email 
 
 make
 
-make parcsr 1> $0.parcsr.log 2> $0.parcsr.err
-echo "dwalker@llnl.gov rfalgout@llnl.gov yang11@llnl.gov vhenson@llnl.gov cleary1@llnl.gov mlambert@llnl.gov" > $0.parcsr.err.email 
-
-make pilut 1> $0.ci_struct.log 2> $0.ci_struct.err
-echo "dwalker@llnl.gov rfalgout@llnl.gov cleary1@llnl.gov" > $0.ci_struct.err.email 
-
-make seq 1> $0.seq.log 2> $0.seq.err
-echo "dwalker@llnl.gov rfalgout@llnl.gov yang11@llnl.gov vhenson@llnl.gov" > $0.seq.err.email 
-
 make beta 1> $0.beta.log 2> $0.beta.err
-echo "dwalker@llnl.gov rfalgout@llnl.gov yang11@llnl.gov vhenson@llnl.gov cleary1@llnl.gov mlambert@llnl.gov" > $0.beta.err.email 
-
+echo "$HYPRE_BETA_EMAIL" > $0.beta.err.email 
 
 # make documentation
 (cd docs; make)
@@ -90,10 +109,11 @@ cd $HYPRE_AUTOTEST_DIR/linear_solvers/test
 
 cd $HYPRE_AUTOTEST_DIR/linear_solvers/test
 make all++ 1> $0.all++.log 2> $0.all++.err
-echo "dwalker@llnl.gov rfalgout@llnl.gov" > $0.all++.err.email 
+echo "$HYPRE_ALL_EMAIL" > $0.all++.err.email 
+
 cd $HYPRE_AUTOTEST_DIR/linear_solvers/test
 make beta++ 1> $0.beta++.log 2> $0.beta++.err
-echo "dwalker@llnl.gov rfalgout@llnl.gov" > $0.beta++.err.email 
+echo "$HYPRE_BETA_EMAIL" > $0.beta++.err.email 
 
 #==============================
 # Run test suites
@@ -108,10 +128,11 @@ echo "dwalker@llnl.gov rfalgout@llnl.gov" > $0.beta++.err.email
 
 cd $HYPRE_AUTOTEST_DIR/linear_solvers/test
 make all77 1> $0.all77.log 2> $0.all77.err
-echo "dwalker@llnl.gov rfalgout@llnl.gov baldwin5@llnl.gov" > $0.all77.err.email 
+echo "$HYPRE_ALL_EMAIL" > $0.all77.err.email 
+
 cd $HYPRE_AUTOTEST_DIR/linear_solvers/test
 make beta77 1> $0.beta77.log 2> $0.beta77.err
-echo "dwalker@llnl.gov rfalgout@llnl.gov baldwin5@llnl.gov" > $0.beta77.err.email 
+echo "$HYPRE_BETA_EMAIL" > $0.beta77.err.email 
 
 #==============================
 # Run test suites
@@ -127,27 +148,20 @@ echo "dwalker@llnl.gov rfalgout@llnl.gov baldwin5@llnl.gov" > $0.beta77.err.emai
 cd $HYPRE_AUTOTEST_DIR/linear_solvers
 rm config.cache
 ./configure  --with-pthreads 1> $0.configure_threads.log 2> $0.configure_threads.err
-echo "dwalker@llnl.gov rfalgout@llnl.gov elliott22@llnl.gov" > $0.configure_threads.err.email 
+echo "$HYPRE_CONFIGURE_EMAIL" > $0.configure_threads.err.email 
 
 make veryclean
 
 make struct 1> $0.struct_threads.log 2> $0.struct_threads.err
-echo "dwalker@llnl.gov rfalgout@llnl.gov jones97@llnl.gov elliott22@llnl.gov" > $0.struct_threads.err.email 
+echo "$HYPRE_STRUCT_EMAIL" > $0.struct_threads.err.email 
+
+make IJ 1> $0.IJ_threads.log 2> $0.IJ_threads.err
+echo "$HYPRE_IJ_EMAIL" > $0.IJ_threads.err.email 
 
 make
 
-make parcsr 1> $0.parcsr_threads.log 2> $0.parcsr_threads.err
-echo "dwalker@llnl.gov rfalgout@llnl.gov yang11@llnl.gov vhenson@llnl.gov cleary1@llnl.gov mlambert@llnl.gov" > $0.parcsr_threads.err.email 
-
-make pilut 1> $0.ci_struct_threads.log 2> $0.ci_struct_threads.err
-echo "dwalker@llnl.gov rfalgout@llnl.gov cleary1@llnl.gov" > $0.ci_struct_threads.err.email 
-
-make seq 1> $0.seq_threads.log 2> $0.seq_threads.err
-echo "dwalker@llnl.gov rfalgout@llnl.gov yang11@llnl.gov vhenson@llnl.gov" > $0.seq_threads.err.email 
-
 make beta 1> $0.beta_threads.log 2> $0.beta_threads.err
-echo "dwalker@llnl.gov rfalgout@llnl.gov yang11@llnl.gov vhenson@llnl.gov cleary1@llnl.gov mlambert@llnl.gov" > $0.beta_threads.err.email 
-
+echo "$HYPRE_BETA_EMAIL" > $0.beta_threads.err.email 
 
 #==============================
 # Run test suites
@@ -163,27 +177,20 @@ echo "dwalker@llnl.gov rfalgout@llnl.gov yang11@llnl.gov vhenson@llnl.gov cleary
 cd $HYPRE_AUTOTEST_DIR/linear_solvers
 rm config.cache
 ./configure  --without-MPI 1> $0.configure_no_mpi.log 2> $0.configure_no_mpi.err
-echo "dwalker@llnl.gov rfalgout@llnl.gov elliott22@llnl.gov" > $0.configure_no_mpi.err.email 
+echo "$HYPRE_CONFIGURE_EMAIL" > $0.configure_no_mpi.err.email 
 
 make veryclean
 
 make struct 1> $0.struct_no_mpi.log 2> $0.struct_no_mpi.err
-echo "dwalker@llnl.gov rfalgout@llnl.gov jones97@llnl.gov" > $0.struct_no_mpi.err.email 
+echo "$HYPRE_STRUCT_EMAIL" > $0.struct_no_mpi.err.email 
+
+make IJ 1> $0.IJ_no_mpi.log 2> $0.IJ_no_mpi.err
+echo "$HYPRE_IJ_EMAIL" > $0.IJ_no_mpi.err.email 
 
 make
 
-make parcsr 1> $0.parcsr_no_mpi.log 2> $0.parcsr_no_mpi.err
-echo "dwalker@llnl.gov rfalgout@llnl.gov yang11@llnl.gov vhenson@llnl.gov cleary1@llnl.gov mlambert@llnl.gov" > $0.parcsr_no_mpi.err.email 
-
-make pilut 1> $0.ci_struct_no_mpi.log 2> $0.ci_struct_no_mpi.err
-echo "dwalker@llnl.gov rfalgout@llnl.gov cleary1@llnl.gov" > $0.ci_struct_no_mpi.err.email 
-
-make seq 1> $0.seq_no_mpi.log 2> $0.seq_no_mpi.err
-echo "dwalker@llnl.gov rfalgout@llnl.gov yang11@llnl.gov vhenson@llnl.gov" > $0.seq_no_mpi.err.email 
-
 make beta 1> $0.beta_no_mpi.log 2> $0.beta_no_mpi.err
-echo "dwalker@llnl.gov rfalgout@llnl.gov yang11@llnl.gov vhenson@llnl.gov cleary1@llnl.gov mlambert@llnl.gov" > $0.beta_no_mpi.err.email 
-
+echo "$HYPRE_BETA_EMAIL" > $0.beta_no_mpi.err.email 
 
 #==============================
 # Run test suites

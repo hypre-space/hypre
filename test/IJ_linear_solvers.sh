@@ -21,52 +21,52 @@
 . ./autotest_arch.sh
 
 MPIRUN="./mpirun.$HYPRE_ARCH"
-SLS="IJ_linear_solvers"
+DRIVER="IJ_linear_solvers"
 
 #=============================================================================
 # IJ_linear_solvers: Run default case, weigthed Jacobi, BoomerAMG
 #=============================================================================
 
-$MPIRUN -np 1 $SLS -rlx 0 -xisone
-tail -21 $SLS.log > $SLS.testdata.tmp0
-head $SLS.testdata.tmp0 > $SLS.testdata
+$MPIRUN -np 1 $DRIVER -rlx 0 -xisone
+tail -21 $DRIVER.log > $DRIVER.testdata.tmp0
+head $DRIVER.testdata.tmp0 > $DRIVER.testdata
 
 #=============================================================================
 # IJ_linear_solvers: Run 2 and 3 proc parallel case, weighted Jacobi, BoomerAMG 
 #		     diffs it against 1 proc case
 #=============================================================================
 
-$MPIRUN -np 2 $SLS -P 1 1 2 -rlx 0 -xisone -P 1 1 2 
-tail -21 $SLS.log > $SLS.testdata.tmp0
-head $SLS.testdata.tmp0 > $SLS.testdata.temp
-diff $SLS.testdata $SLS.testdata.temp >&2
+$MPIRUN -np 2 $DRIVER -P 1 1 2 -rlx 0 -xisone -P 1 1 2 
+tail -21 $DRIVER.log > $DRIVER.testdata.tmp0
+head $DRIVER.testdata.tmp0 > $DRIVER.testdata.temp
+diff $DRIVER.testdata $DRIVER.testdata.temp >&2
 
-$MPIRUN -np 3 $SLS -P 1 1 3 -rlx 0 -xisone -P 1 1 3 
-tail -21 $SLS.log > $SLS.testdata.tmp0
-head $SLS.testdata.tmp0 > $SLS.testdata.temp
-diff $SLS.testdata $SLS.testdata.temp >&2
+$MPIRUN -np 3 $DRIVER -P 1 1 3 -rlx 0 -xisone -P 1 1 3 
+tail -21 $DRIVER.log > $DRIVER.testdata.tmp0
+head $DRIVER.testdata.tmp0 > $DRIVER.testdata.temp
+diff $DRIVER.testdata $DRIVER.testdata.temp >&2
 
-rm -f $SLS.testdata $SLS.testdata.tmp0 $SLS.testdata.temp
+rm -f $DRIVER.testdata $DRIVER.testdata.tmp0 $DRIVER.testdata.temp
 
 #=============================================================================
 # IJ_linear_solvers: tests different ways of generating IJMatrix
 #=============================================================================
 
-$MPIRUN -np 2 $SLS -rhsrand
-tail -21 $SLS.log > $SLS.testdata.tmp0
-head $SLS.testdata.tmp0 > $SLS.testdata
+$MPIRUN -np 2 $DRIVER -rhsrand
+tail -21 $DRIVER.log > $DRIVER.testdata.tmp0
+head $DRIVER.testdata.tmp0 > $DRIVER.testdata
 
-$MPIRUN -np 2 $SLS -rhsrand -exact_size
-tail -21 $SLS.log > $SLS.testdata.tmp0
-head $SLS.testdata.tmp0 > $SLS.testdata.temp
-diff $SLS.testdata $SLS.testdata.temp >&2
+$MPIRUN -np 2 $DRIVER -rhsrand -exact_size
+tail -21 $DRIVER.log > $DRIVER.testdata.tmp0
+head $DRIVER.testdata.tmp0 > $DRIVER.testdata.temp
+diff $DRIVER.testdata $DRIVER.testdata.temp >&2
 
-$MPIRUN -np 2 $SLS -rhsrand -low_storage
-tail -21 $SLS.log > $SLS.testdata.tmp0
-head $SLS.testdata.tmp0 > $SLS.testdata.temp
-diff $SLS.testdata $SLS.testdata.temp >&2
+$MPIRUN -np 2 $DRIVER -rhsrand -low_storage
+tail -21 $DRIVER.log > $DRIVER.testdata.tmp0
+head $DRIVER.testdata.tmp0 > $DRIVER.testdata.temp
+diff $DRIVER.testdata $DRIVER.testdata.temp >&2
 
-rm -f $SLS.testdata $SLS.testdata.tmp0 $SLS.testdata.temp
+rm -f $DRIVER.testdata $DRIVER.testdata.tmp0 $DRIVER.testdata.temp
 
 #=============================================================================
 # IJ_linear_solvers: Run default case with different coarsenings, hybrid GS,
@@ -76,13 +76,13 @@ rm -f $SLS.testdata $SLS.testdata.tmp0 $SLS.testdata.temp
 #    4: Falgout
 #=============================================================================
 
-$MPIRUN -np 4 $SLS -rhsrand -n 15 15 10 -P 2 2 1 -27pt
+$MPIRUN -np 4 $DRIVER -rhsrand -n 15 15 10 -P 2 2 1 -27pt
 
-$MPIRUN -np 4 $SLS -rhsrand -n 15 15 10 -P 2 2 1 -ruge -27pt
+$MPIRUN -np 4 $DRIVER -rhsrand -n 15 15 10 -P 2 2 1 -ruge -27pt
 
-$MPIRUN -np 4 $SLS -rhsrand -n 15 15 10 -P 2 2 1 -ruge3c -gm -27pt
+$MPIRUN -np 4 $DRIVER -rhsrand -n 15 15 10 -P 2 2 1 -ruge3c -gm -27pt
 
-$MPIRUN -np 4 $SLS -rhsrand -n 15 15 10 -P 2 2 1 -falgout -27pt
+$MPIRUN -np 4 $DRIVER -rhsrand -n 15 15 10 -P 2 2 1 -falgout -27pt
 
 #=============================================================================
 #=============================================================================
@@ -94,11 +94,11 @@ $MPIRUN -np 4 $SLS -rhsrand -n 15 15 10 -P 2 2 1 -falgout -27pt
 #    4: DS_GMRES
 #=============================================================================
 
-$MPIRUN -np 2 $SLS -solver 1 -rhsrand
+$MPIRUN -np 2 $DRIVER -solver 1 -rhsrand
 
-$MPIRUN -np 2 $SLS -solver 2 -rhsrand
+$MPIRUN -np 2 $DRIVER -solver 2 -rhsrand
 
-$MPIRUN -np 2 $SLS -solver 3 -rhsrand
+$MPIRUN -np 2 $DRIVER -solver 3 -rhsrand
 
-$MPIRUN -np 2 $SLS -solver 4 -rhsrand
+$MPIRUN -np 2 $DRIVER -solver 4 -rhsrand
 
