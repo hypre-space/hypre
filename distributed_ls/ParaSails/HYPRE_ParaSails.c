@@ -97,7 +97,7 @@ int HYPRE_ParaSailsSetup(HYPRE_ParaSails obj,
   HYPRE_DistributedMatrix *distmat, int sym, double thresh, int nlevels,
   double filter, double loadbal, int logging)
 {
-    double cost;
+    /* double cost; */
     Matrix *mat;
     hypre_ParaSails *internal = (hypre_ParaSails *) obj;
 
@@ -111,7 +111,7 @@ int HYPRE_ParaSailsSetup(HYPRE_ParaSails obj,
     ParaSailsSetupPattern(internal->ps, mat, thresh, nlevels);
 
     if (logging)
-        cost = ParaSailsStatsPattern(internal->ps, mat);
+        /* cost = */ ParaSailsStatsPattern(internal->ps, mat);
 
     internal->ps->loadbal_beta = loadbal;
 
@@ -133,7 +133,7 @@ int HYPRE_ParaSailsSetupPattern(HYPRE_ParaSails obj,
   HYPRE_DistributedMatrix *distmat, int sym, double thresh, int nlevels,
   int logging)
 {
-    double cost;
+    /* double cost; */
     Matrix *mat;
     hypre_ParaSails *internal = (hypre_ParaSails *) obj;
 
@@ -147,7 +147,7 @@ int HYPRE_ParaSailsSetupPattern(HYPRE_ParaSails obj,
     ParaSailsSetupPattern(internal->ps, mat, thresh, nlevels);
 
     if (logging)
-        cost = ParaSailsStatsPattern(internal->ps, mat);
+        /* cost = */ ParaSailsStatsPattern(internal->ps, mat);
 
     MatrixDestroy(mat);
 
