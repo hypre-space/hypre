@@ -138,8 +138,11 @@ c     veh relative residual temporarily added: relres,
             factor=res/resold
             relres = res/fnorm
             delteng=enrg-engold
-            write(6,1200) ncy,res,enrg,factor,relres,
-     *           aip,delteng,fu,ru,uu
+cveh extraneous debugging printout
+c           write(6,1200) ncy,res,enrg,factor,relres,
+c    *           aip,delteng,fu,ru,uu
+cveh
+            write(6,1200) ncy,res,enrg,factor,relres
          endif
 
  100  continue
@@ -167,8 +170,8 @@ c     veh relative residual temporarily added: relres,
 
  1000 format(/14x,'                              relative'/,
      *     14x,'residual    energy    factor  residual'
-     *     '   <Au,u>   delteng     <f,u>    <r,u>    <u,u>'/,
-     *     14x,'--------    ------    ------  --------')
+cveh     *     '   <Au,u>   delteng     <f,u>    <r,u>    <u,u>',
+     *     /,14x,'--------    ------    ------  --------')
  1100 format(3x,' Initial ',1p,5(1x,e9.2))
  1200 format(3x,' Cycle ',i2,1p,9(1x,e9.2))
  1300 format(/3x,' Average convergence factor   =  ',1p,e9.2)
