@@ -238,6 +238,11 @@ libHYPRE_LSI_la_LDFLAGS = -avoid-version
 @LAPACKNEEDED_TRUE@ $(top_srcdir)/lapack/dlascl.c\
 @LAPACKNEEDED_TRUE@ $(top_srcdir)/lapack/dlaset.c\
 @LAPACKNEEDED_TRUE@ $(top_srcdir)/lapack/dlasq1.c\
+@LAPACKNEEDED_TRUE@ $(top_srcdir)/lapack/dlasq2.c\
+@LAPACKNEEDED_TRUE@ $(top_srcdir)/lapack/dlasq3.c\
+@LAPACKNEEDED_TRUE@ $(top_srcdir)/lapack/dlasq4.c\
+@LAPACKNEEDED_TRUE@ $(top_srcdir)/lapack/dlasq5.c\
+@LAPACKNEEDED_TRUE@ $(top_srcdir)/lapack/dlasq6.c\
 @LAPACKNEEDED_TRUE@ $(top_srcdir)/lapack/dlasr.c\
 @LAPACKNEEDED_TRUE@ $(top_srcdir)/lapack/dlasrt.c\
 @LAPACKNEEDED_TRUE@ $(top_srcdir)/lapack/dlassq.c\
@@ -718,22 +723,25 @@ am__libHYPRE_la_SOURCES_DIST = $(top_srcdir)/blas/dasum.c \
 	$(top_srcdir)/lapack/dlarfg.c $(top_srcdir)/lapack/dlarft.c \
 	$(top_srcdir)/lapack/dlartg.c $(top_srcdir)/lapack/dlas2.c \
 	$(top_srcdir)/lapack/dlascl.c $(top_srcdir)/lapack/dlaset.c \
-	$(top_srcdir)/lapack/dlasq1.c $(top_srcdir)/lapack/dlasr.c \
-	$(top_srcdir)/lapack/dlasrt.c $(top_srcdir)/lapack/dlassq.c \
-	$(top_srcdir)/lapack/dlasv2.c $(top_srcdir)/lapack/dlatrd.c \
-	$(top_srcdir)/lapack/dorg2l.c $(top_srcdir)/lapack/dorg2r.c \
-	$(top_srcdir)/lapack/dorgbr.c $(top_srcdir)/lapack/dorgl2.c \
-	$(top_srcdir)/lapack/dorglq.c $(top_srcdir)/lapack/dorgql.c \
-	$(top_srcdir)/lapack/dorgqr.c $(top_srcdir)/lapack/dorgtr.c \
-	$(top_srcdir)/lapack/dorm2r.c $(top_srcdir)/lapack/dormbr.c \
-	$(top_srcdir)/lapack/dorml2.c $(top_srcdir)/lapack/dormlq.c \
-	$(top_srcdir)/lapack/dormqr.c $(top_srcdir)/lapack/dpotf2.c \
-	$(top_srcdir)/lapack/dpotrf.c $(top_srcdir)/lapack/dpotrs.c \
-	$(top_srcdir)/lapack/dsteqr.c $(top_srcdir)/lapack/dsterf.c \
-	$(top_srcdir)/lapack/dsyev.c $(top_srcdir)/lapack/dsygs2.c \
-	$(top_srcdir)/lapack/dsygst.c $(top_srcdir)/lapack/dsygv.c \
-	$(top_srcdir)/lapack/dsytd2.c $(top_srcdir)/lapack/dsytrd.c \
-	$(top_srcdir)/lapack/ieeeck.c $(top_srcdir)/lapack/ilaenv.c \
+	$(top_srcdir)/lapack/dlasq1.c $(top_srcdir)/lapack/dlasq2.c \
+	$(top_srcdir)/lapack/dlasq3.c $(top_srcdir)/lapack/dlasq4.c \
+	$(top_srcdir)/lapack/dlasq5.c $(top_srcdir)/lapack/dlasq6.c \
+	$(top_srcdir)/lapack/dlasr.c $(top_srcdir)/lapack/dlasrt.c \
+	$(top_srcdir)/lapack/dlassq.c $(top_srcdir)/lapack/dlasv2.c \
+	$(top_srcdir)/lapack/dlatrd.c $(top_srcdir)/lapack/dorg2l.c \
+	$(top_srcdir)/lapack/dorg2r.c $(top_srcdir)/lapack/dorgbr.c \
+	$(top_srcdir)/lapack/dorgl2.c $(top_srcdir)/lapack/dorglq.c \
+	$(top_srcdir)/lapack/dorgql.c $(top_srcdir)/lapack/dorgqr.c \
+	$(top_srcdir)/lapack/dorgtr.c $(top_srcdir)/lapack/dorm2r.c \
+	$(top_srcdir)/lapack/dormbr.c $(top_srcdir)/lapack/dorml2.c \
+	$(top_srcdir)/lapack/dormlq.c $(top_srcdir)/lapack/dormqr.c \
+	$(top_srcdir)/lapack/dpotf2.c $(top_srcdir)/lapack/dpotrf.c \
+	$(top_srcdir)/lapack/dpotrs.c $(top_srcdir)/lapack/dsteqr.c \
+	$(top_srcdir)/lapack/dsterf.c $(top_srcdir)/lapack/dsyev.c \
+	$(top_srcdir)/lapack/dsygs2.c $(top_srcdir)/lapack/dsygst.c \
+	$(top_srcdir)/lapack/dsygv.c $(top_srcdir)/lapack/dsytd2.c \
+	$(top_srcdir)/lapack/dsytrd.c $(top_srcdir)/lapack/ieeeck.c \
+	$(top_srcdir)/lapack/ilaenv.c \
 	$(top_srcdir)/lapack/lapack_utils.c \
 	$(top_srcdir)/lapack/lsame.c $(top_srcdir)/lapack/xerbla.c \
 	$(top_srcdir)/FEI_mv/SuperLU/colamd.c \
@@ -1128,15 +1136,16 @@ am__libHYPRE_la_SOURCES_DIST = $(top_srcdir)/blas/dasum.c \
 @LAPACKNEEDED_TRUE@	dlange.lo dlanst.lo dlansy.lo dlapy2.lo \
 @LAPACKNEEDED_TRUE@	dlarf.lo dlarfb.lo dlarfg.lo dlarft.lo \
 @LAPACKNEEDED_TRUE@	dlartg.lo dlas2.lo dlascl.lo dlaset.lo \
-@LAPACKNEEDED_TRUE@	dlasq1.lo dlasr.lo dlasrt.lo dlassq.lo \
-@LAPACKNEEDED_TRUE@	dlasv2.lo dlatrd.lo dorg2l.lo dorg2r.lo \
-@LAPACKNEEDED_TRUE@	dorgbr.lo dorgl2.lo dorglq.lo dorgql.lo \
-@LAPACKNEEDED_TRUE@	dorgqr.lo dorgtr.lo dorm2r.lo dormbr.lo \
-@LAPACKNEEDED_TRUE@	dorml2.lo dormlq.lo dormqr.lo dpotf2.lo \
-@LAPACKNEEDED_TRUE@	dpotrf.lo dpotrs.lo dsteqr.lo dsterf.lo \
-@LAPACKNEEDED_TRUE@	dsyev.lo dsygs2.lo dsygst.lo dsygv.lo \
-@LAPACKNEEDED_TRUE@	dsytd2.lo dsytrd.lo ieeeck.lo ilaenv.lo \
-@LAPACKNEEDED_TRUE@	lapack_utils.lo lsame.lo xerbla.lo
+@LAPACKNEEDED_TRUE@	dlasq1.lo dlasq2.lo dlasq3.lo dlasq4.lo \
+@LAPACKNEEDED_TRUE@	dlasq5.lo dlasq6.lo dlasr.lo dlasrt.lo \
+@LAPACKNEEDED_TRUE@	dlassq.lo dlasv2.lo dlatrd.lo dorg2l.lo \
+@LAPACKNEEDED_TRUE@	dorg2r.lo dorgbr.lo dorgl2.lo dorglq.lo \
+@LAPACKNEEDED_TRUE@	dorgql.lo dorgqr.lo dorgtr.lo dorm2r.lo \
+@LAPACKNEEDED_TRUE@	dormbr.lo dorml2.lo dormlq.lo dormqr.lo \
+@LAPACKNEEDED_TRUE@	dpotf2.lo dpotrf.lo dpotrs.lo dsteqr.lo \
+@LAPACKNEEDED_TRUE@	dsterf.lo dsyev.lo dsygs2.lo dsygst.lo \
+@LAPACKNEEDED_TRUE@	dsygv.lo dsytd2.lo dsytrd.lo ieeeck.lo \
+@LAPACKNEEDED_TRUE@	ilaenv.lo lapack_utils.lo lsame.lo xerbla.lo
 @LAPACKNEEDED_FALSE@am__objects_2 =
 am__objects_3 = $(am__objects_1) $(am__objects_2) colamd.lo \
 	dcolumn_bmod.lo dcolumn_dfs.lo dcopy_to_ucol.lo dgscon.lo \
@@ -1289,22 +1298,25 @@ am__libHYPRE_LSI_la_SOURCES_DIST = $(top_srcdir)/blas/dasum.c \
 	$(top_srcdir)/lapack/dlarfg.c $(top_srcdir)/lapack/dlarft.c \
 	$(top_srcdir)/lapack/dlartg.c $(top_srcdir)/lapack/dlas2.c \
 	$(top_srcdir)/lapack/dlascl.c $(top_srcdir)/lapack/dlaset.c \
-	$(top_srcdir)/lapack/dlasq1.c $(top_srcdir)/lapack/dlasr.c \
-	$(top_srcdir)/lapack/dlasrt.c $(top_srcdir)/lapack/dlassq.c \
-	$(top_srcdir)/lapack/dlasv2.c $(top_srcdir)/lapack/dlatrd.c \
-	$(top_srcdir)/lapack/dorg2l.c $(top_srcdir)/lapack/dorg2r.c \
-	$(top_srcdir)/lapack/dorgbr.c $(top_srcdir)/lapack/dorgl2.c \
-	$(top_srcdir)/lapack/dorglq.c $(top_srcdir)/lapack/dorgql.c \
-	$(top_srcdir)/lapack/dorgqr.c $(top_srcdir)/lapack/dorgtr.c \
-	$(top_srcdir)/lapack/dorm2r.c $(top_srcdir)/lapack/dormbr.c \
-	$(top_srcdir)/lapack/dorml2.c $(top_srcdir)/lapack/dormlq.c \
-	$(top_srcdir)/lapack/dormqr.c $(top_srcdir)/lapack/dpotf2.c \
-	$(top_srcdir)/lapack/dpotrf.c $(top_srcdir)/lapack/dpotrs.c \
-	$(top_srcdir)/lapack/dsteqr.c $(top_srcdir)/lapack/dsterf.c \
-	$(top_srcdir)/lapack/dsyev.c $(top_srcdir)/lapack/dsygs2.c \
-	$(top_srcdir)/lapack/dsygst.c $(top_srcdir)/lapack/dsygv.c \
-	$(top_srcdir)/lapack/dsytd2.c $(top_srcdir)/lapack/dsytrd.c \
-	$(top_srcdir)/lapack/ieeeck.c $(top_srcdir)/lapack/ilaenv.c \
+	$(top_srcdir)/lapack/dlasq1.c $(top_srcdir)/lapack/dlasq2.c \
+	$(top_srcdir)/lapack/dlasq3.c $(top_srcdir)/lapack/dlasq4.c \
+	$(top_srcdir)/lapack/dlasq5.c $(top_srcdir)/lapack/dlasq6.c \
+	$(top_srcdir)/lapack/dlasr.c $(top_srcdir)/lapack/dlasrt.c \
+	$(top_srcdir)/lapack/dlassq.c $(top_srcdir)/lapack/dlasv2.c \
+	$(top_srcdir)/lapack/dlatrd.c $(top_srcdir)/lapack/dorg2l.c \
+	$(top_srcdir)/lapack/dorg2r.c $(top_srcdir)/lapack/dorgbr.c \
+	$(top_srcdir)/lapack/dorgl2.c $(top_srcdir)/lapack/dorglq.c \
+	$(top_srcdir)/lapack/dorgql.c $(top_srcdir)/lapack/dorgqr.c \
+	$(top_srcdir)/lapack/dorgtr.c $(top_srcdir)/lapack/dorm2r.c \
+	$(top_srcdir)/lapack/dormbr.c $(top_srcdir)/lapack/dorml2.c \
+	$(top_srcdir)/lapack/dormlq.c $(top_srcdir)/lapack/dormqr.c \
+	$(top_srcdir)/lapack/dpotf2.c $(top_srcdir)/lapack/dpotrf.c \
+	$(top_srcdir)/lapack/dpotrs.c $(top_srcdir)/lapack/dsteqr.c \
+	$(top_srcdir)/lapack/dsterf.c $(top_srcdir)/lapack/dsyev.c \
+	$(top_srcdir)/lapack/dsygs2.c $(top_srcdir)/lapack/dsygst.c \
+	$(top_srcdir)/lapack/dsygv.c $(top_srcdir)/lapack/dsytd2.c \
+	$(top_srcdir)/lapack/dsytrd.c $(top_srcdir)/lapack/ieeeck.c \
+	$(top_srcdir)/lapack/ilaenv.c \
 	$(top_srcdir)/lapack/lapack_utils.c \
 	$(top_srcdir)/lapack/lsame.c $(top_srcdir)/lapack/xerbla.c \
 	$(top_srcdir)/FEI_mv/SuperLU/colamd.c \
@@ -1857,17 +1869,19 @@ am__depfiles_maybe = depfiles
 @AMDEP_TRUE@	./$(DEPDIR)/dlarft.Plo ./$(DEPDIR)/dlartg.Plo \
 @AMDEP_TRUE@	./$(DEPDIR)/dlas2.Plo ./$(DEPDIR)/dlascl.Plo \
 @AMDEP_TRUE@	./$(DEPDIR)/dlaset.Plo ./$(DEPDIR)/dlasq1.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/dlasr.Plo ./$(DEPDIR)/dlasrt.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/dlassq.Plo ./$(DEPDIR)/dlasv2.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/dlatrd.Plo ./$(DEPDIR)/dmemory.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/dnrm2.Plo ./$(DEPDIR)/dorg2l.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/dorg2r.Plo ./$(DEPDIR)/dorgbr.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/dorgl2.Plo ./$(DEPDIR)/dorglq.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/dorgql.Plo ./$(DEPDIR)/dorgqr.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/dorgtr.Plo ./$(DEPDIR)/dorm2r.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/dormbr.Plo ./$(DEPDIR)/dorml2.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/dormlq.Plo ./$(DEPDIR)/dormqr.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/dpanel_bmod.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/dlasq2.Plo ./$(DEPDIR)/dlasq3.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/dlasq4.Plo ./$(DEPDIR)/dlasq5.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/dlasq6.Plo ./$(DEPDIR)/dlasr.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/dlasrt.Plo ./$(DEPDIR)/dlassq.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/dlasv2.Plo ./$(DEPDIR)/dlatrd.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/dmemory.Plo ./$(DEPDIR)/dnrm2.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/dorg2l.Plo ./$(DEPDIR)/dorg2r.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/dorgbr.Plo ./$(DEPDIR)/dorgl2.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/dorglq.Plo ./$(DEPDIR)/dorgql.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/dorgqr.Plo ./$(DEPDIR)/dorgtr.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/dorm2r.Plo ./$(DEPDIR)/dormbr.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/dorml2.Plo ./$(DEPDIR)/dormlq.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/dormqr.Plo ./$(DEPDIR)/dpanel_bmod.Plo \
 @AMDEP_TRUE@	./$(DEPDIR)/dpanel_dfs.Plo ./$(DEPDIR)/dpivotL.Plo \
 @AMDEP_TRUE@	./$(DEPDIR)/dpivotgrowth.Plo ./$(DEPDIR)/dpotf2.Plo \
 @AMDEP_TRUE@	./$(DEPDIR)/dpotrf.Plo ./$(DEPDIR)/dpotrs.Plo \
@@ -2337,6 +2351,11 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlascl.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlaset.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlasq1.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlasq2.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlasq3.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlasq4.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlasq5.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlasq6.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlasr.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlasrt.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dlassq.Plo@am__quote@
@@ -4208,6 +4227,171 @@ dlasq1.lo: $(top_srcdir)/lapack/dlasq1.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/dlasq1.Plo' tmpdepfile='$(DEPDIR)/dlasq1.TPlo' @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dlasq1.lo `test -f '$(top_srcdir)/lapack/dlasq1.c' || echo '$(srcdir)/'`$(top_srcdir)/lapack/dlasq1.c
+
+dlasq2.o: $(top_srcdir)/lapack/dlasq2.c
+@am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT dlasq2.o -MD -MP -MF "$(DEPDIR)/dlasq2.Tpo" \
+@am__fastdepCC_TRUE@	  -c -o dlasq2.o `test -f '$(top_srcdir)/lapack/dlasq2.c' || echo '$(srcdir)/'`$(top_srcdir)/lapack/dlasq2.c; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/dlasq2.Tpo" "$(DEPDIR)/dlasq2.Po"; \
+@am__fastdepCC_TRUE@	else rm -f "$(DEPDIR)/dlasq2.Tpo"; exit 1; \
+@am__fastdepCC_TRUE@	fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(top_srcdir)/lapack/dlasq2.c' object='dlasq2.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/dlasq2.Po' tmpdepfile='$(DEPDIR)/dlasq2.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dlasq2.o `test -f '$(top_srcdir)/lapack/dlasq2.c' || echo '$(srcdir)/'`$(top_srcdir)/lapack/dlasq2.c
+
+dlasq2.obj: $(top_srcdir)/lapack/dlasq2.c
+@am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT dlasq2.obj -MD -MP -MF "$(DEPDIR)/dlasq2.Tpo" \
+@am__fastdepCC_TRUE@	  -c -o dlasq2.obj `if test -f '$(top_srcdir)/lapack/dlasq2.c'; then $(CYGPATH_W) '$(top_srcdir)/lapack/dlasq2.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/lapack/dlasq2.c'; fi`; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/dlasq2.Tpo" "$(DEPDIR)/dlasq2.Po"; \
+@am__fastdepCC_TRUE@	else rm -f "$(DEPDIR)/dlasq2.Tpo"; exit 1; \
+@am__fastdepCC_TRUE@	fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(top_srcdir)/lapack/dlasq2.c' object='dlasq2.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/dlasq2.Po' tmpdepfile='$(DEPDIR)/dlasq2.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dlasq2.obj `if test -f '$(top_srcdir)/lapack/dlasq2.c'; then $(CYGPATH_W) '$(top_srcdir)/lapack/dlasq2.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/lapack/dlasq2.c'; fi`
+
+dlasq2.lo: $(top_srcdir)/lapack/dlasq2.c
+@am__fastdepCC_TRUE@	if $(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT dlasq2.lo -MD -MP -MF "$(DEPDIR)/dlasq2.Tpo" \
+@am__fastdepCC_TRUE@	  -c -o dlasq2.lo `test -f '$(top_srcdir)/lapack/dlasq2.c' || echo '$(srcdir)/'`$(top_srcdir)/lapack/dlasq2.c; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/dlasq2.Tpo" "$(DEPDIR)/dlasq2.Plo"; \
+@am__fastdepCC_TRUE@	else rm -f "$(DEPDIR)/dlasq2.Tpo"; exit 1; \
+@am__fastdepCC_TRUE@	fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(top_srcdir)/lapack/dlasq2.c' object='dlasq2.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/dlasq2.Plo' tmpdepfile='$(DEPDIR)/dlasq2.TPlo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dlasq2.lo `test -f '$(top_srcdir)/lapack/dlasq2.c' || echo '$(srcdir)/'`$(top_srcdir)/lapack/dlasq2.c
+
+dlasq3.o: $(top_srcdir)/lapack/dlasq3.c
+@am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT dlasq3.o -MD -MP -MF "$(DEPDIR)/dlasq3.Tpo" \
+@am__fastdepCC_TRUE@	  -c -o dlasq3.o `test -f '$(top_srcdir)/lapack/dlasq3.c' || echo '$(srcdir)/'`$(top_srcdir)/lapack/dlasq3.c; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/dlasq3.Tpo" "$(DEPDIR)/dlasq3.Po"; \
+@am__fastdepCC_TRUE@	else rm -f "$(DEPDIR)/dlasq3.Tpo"; exit 1; \
+@am__fastdepCC_TRUE@	fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(top_srcdir)/lapack/dlasq3.c' object='dlasq3.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/dlasq3.Po' tmpdepfile='$(DEPDIR)/dlasq3.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dlasq3.o `test -f '$(top_srcdir)/lapack/dlasq3.c' || echo '$(srcdir)/'`$(top_srcdir)/lapack/dlasq3.c
+
+dlasq3.obj: $(top_srcdir)/lapack/dlasq3.c
+@am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT dlasq3.obj -MD -MP -MF "$(DEPDIR)/dlasq3.Tpo" \
+@am__fastdepCC_TRUE@	  -c -o dlasq3.obj `if test -f '$(top_srcdir)/lapack/dlasq3.c'; then $(CYGPATH_W) '$(top_srcdir)/lapack/dlasq3.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/lapack/dlasq3.c'; fi`; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/dlasq3.Tpo" "$(DEPDIR)/dlasq3.Po"; \
+@am__fastdepCC_TRUE@	else rm -f "$(DEPDIR)/dlasq3.Tpo"; exit 1; \
+@am__fastdepCC_TRUE@	fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(top_srcdir)/lapack/dlasq3.c' object='dlasq3.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/dlasq3.Po' tmpdepfile='$(DEPDIR)/dlasq3.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dlasq3.obj `if test -f '$(top_srcdir)/lapack/dlasq3.c'; then $(CYGPATH_W) '$(top_srcdir)/lapack/dlasq3.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/lapack/dlasq3.c'; fi`
+
+dlasq3.lo: $(top_srcdir)/lapack/dlasq3.c
+@am__fastdepCC_TRUE@	if $(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT dlasq3.lo -MD -MP -MF "$(DEPDIR)/dlasq3.Tpo" \
+@am__fastdepCC_TRUE@	  -c -o dlasq3.lo `test -f '$(top_srcdir)/lapack/dlasq3.c' || echo '$(srcdir)/'`$(top_srcdir)/lapack/dlasq3.c; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/dlasq3.Tpo" "$(DEPDIR)/dlasq3.Plo"; \
+@am__fastdepCC_TRUE@	else rm -f "$(DEPDIR)/dlasq3.Tpo"; exit 1; \
+@am__fastdepCC_TRUE@	fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(top_srcdir)/lapack/dlasq3.c' object='dlasq3.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/dlasq3.Plo' tmpdepfile='$(DEPDIR)/dlasq3.TPlo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dlasq3.lo `test -f '$(top_srcdir)/lapack/dlasq3.c' || echo '$(srcdir)/'`$(top_srcdir)/lapack/dlasq3.c
+
+dlasq4.o: $(top_srcdir)/lapack/dlasq4.c
+@am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT dlasq4.o -MD -MP -MF "$(DEPDIR)/dlasq4.Tpo" \
+@am__fastdepCC_TRUE@	  -c -o dlasq4.o `test -f '$(top_srcdir)/lapack/dlasq4.c' || echo '$(srcdir)/'`$(top_srcdir)/lapack/dlasq4.c; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/dlasq4.Tpo" "$(DEPDIR)/dlasq4.Po"; \
+@am__fastdepCC_TRUE@	else rm -f "$(DEPDIR)/dlasq4.Tpo"; exit 1; \
+@am__fastdepCC_TRUE@	fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(top_srcdir)/lapack/dlasq4.c' object='dlasq4.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/dlasq4.Po' tmpdepfile='$(DEPDIR)/dlasq4.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dlasq4.o `test -f '$(top_srcdir)/lapack/dlasq4.c' || echo '$(srcdir)/'`$(top_srcdir)/lapack/dlasq4.c
+
+dlasq4.obj: $(top_srcdir)/lapack/dlasq4.c
+@am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT dlasq4.obj -MD -MP -MF "$(DEPDIR)/dlasq4.Tpo" \
+@am__fastdepCC_TRUE@	  -c -o dlasq4.obj `if test -f '$(top_srcdir)/lapack/dlasq4.c'; then $(CYGPATH_W) '$(top_srcdir)/lapack/dlasq4.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/lapack/dlasq4.c'; fi`; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/dlasq4.Tpo" "$(DEPDIR)/dlasq4.Po"; \
+@am__fastdepCC_TRUE@	else rm -f "$(DEPDIR)/dlasq4.Tpo"; exit 1; \
+@am__fastdepCC_TRUE@	fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(top_srcdir)/lapack/dlasq4.c' object='dlasq4.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/dlasq4.Po' tmpdepfile='$(DEPDIR)/dlasq4.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dlasq4.obj `if test -f '$(top_srcdir)/lapack/dlasq4.c'; then $(CYGPATH_W) '$(top_srcdir)/lapack/dlasq4.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/lapack/dlasq4.c'; fi`
+
+dlasq4.lo: $(top_srcdir)/lapack/dlasq4.c
+@am__fastdepCC_TRUE@	if $(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT dlasq4.lo -MD -MP -MF "$(DEPDIR)/dlasq4.Tpo" \
+@am__fastdepCC_TRUE@	  -c -o dlasq4.lo `test -f '$(top_srcdir)/lapack/dlasq4.c' || echo '$(srcdir)/'`$(top_srcdir)/lapack/dlasq4.c; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/dlasq4.Tpo" "$(DEPDIR)/dlasq4.Plo"; \
+@am__fastdepCC_TRUE@	else rm -f "$(DEPDIR)/dlasq4.Tpo"; exit 1; \
+@am__fastdepCC_TRUE@	fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(top_srcdir)/lapack/dlasq4.c' object='dlasq4.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/dlasq4.Plo' tmpdepfile='$(DEPDIR)/dlasq4.TPlo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dlasq4.lo `test -f '$(top_srcdir)/lapack/dlasq4.c' || echo '$(srcdir)/'`$(top_srcdir)/lapack/dlasq4.c
+
+dlasq5.o: $(top_srcdir)/lapack/dlasq5.c
+@am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT dlasq5.o -MD -MP -MF "$(DEPDIR)/dlasq5.Tpo" \
+@am__fastdepCC_TRUE@	  -c -o dlasq5.o `test -f '$(top_srcdir)/lapack/dlasq5.c' || echo '$(srcdir)/'`$(top_srcdir)/lapack/dlasq5.c; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/dlasq5.Tpo" "$(DEPDIR)/dlasq5.Po"; \
+@am__fastdepCC_TRUE@	else rm -f "$(DEPDIR)/dlasq5.Tpo"; exit 1; \
+@am__fastdepCC_TRUE@	fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(top_srcdir)/lapack/dlasq5.c' object='dlasq5.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/dlasq5.Po' tmpdepfile='$(DEPDIR)/dlasq5.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dlasq5.o `test -f '$(top_srcdir)/lapack/dlasq5.c' || echo '$(srcdir)/'`$(top_srcdir)/lapack/dlasq5.c
+
+dlasq5.obj: $(top_srcdir)/lapack/dlasq5.c
+@am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT dlasq5.obj -MD -MP -MF "$(DEPDIR)/dlasq5.Tpo" \
+@am__fastdepCC_TRUE@	  -c -o dlasq5.obj `if test -f '$(top_srcdir)/lapack/dlasq5.c'; then $(CYGPATH_W) '$(top_srcdir)/lapack/dlasq5.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/lapack/dlasq5.c'; fi`; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/dlasq5.Tpo" "$(DEPDIR)/dlasq5.Po"; \
+@am__fastdepCC_TRUE@	else rm -f "$(DEPDIR)/dlasq5.Tpo"; exit 1; \
+@am__fastdepCC_TRUE@	fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(top_srcdir)/lapack/dlasq5.c' object='dlasq5.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/dlasq5.Po' tmpdepfile='$(DEPDIR)/dlasq5.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dlasq5.obj `if test -f '$(top_srcdir)/lapack/dlasq5.c'; then $(CYGPATH_W) '$(top_srcdir)/lapack/dlasq5.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/lapack/dlasq5.c'; fi`
+
+dlasq5.lo: $(top_srcdir)/lapack/dlasq5.c
+@am__fastdepCC_TRUE@	if $(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT dlasq5.lo -MD -MP -MF "$(DEPDIR)/dlasq5.Tpo" \
+@am__fastdepCC_TRUE@	  -c -o dlasq5.lo `test -f '$(top_srcdir)/lapack/dlasq5.c' || echo '$(srcdir)/'`$(top_srcdir)/lapack/dlasq5.c; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/dlasq5.Tpo" "$(DEPDIR)/dlasq5.Plo"; \
+@am__fastdepCC_TRUE@	else rm -f "$(DEPDIR)/dlasq5.Tpo"; exit 1; \
+@am__fastdepCC_TRUE@	fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(top_srcdir)/lapack/dlasq5.c' object='dlasq5.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/dlasq5.Plo' tmpdepfile='$(DEPDIR)/dlasq5.TPlo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dlasq5.lo `test -f '$(top_srcdir)/lapack/dlasq5.c' || echo '$(srcdir)/'`$(top_srcdir)/lapack/dlasq5.c
+
+dlasq6.o: $(top_srcdir)/lapack/dlasq6.c
+@am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT dlasq6.o -MD -MP -MF "$(DEPDIR)/dlasq6.Tpo" \
+@am__fastdepCC_TRUE@	  -c -o dlasq6.o `test -f '$(top_srcdir)/lapack/dlasq6.c' || echo '$(srcdir)/'`$(top_srcdir)/lapack/dlasq6.c; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/dlasq6.Tpo" "$(DEPDIR)/dlasq6.Po"; \
+@am__fastdepCC_TRUE@	else rm -f "$(DEPDIR)/dlasq6.Tpo"; exit 1; \
+@am__fastdepCC_TRUE@	fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(top_srcdir)/lapack/dlasq6.c' object='dlasq6.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/dlasq6.Po' tmpdepfile='$(DEPDIR)/dlasq6.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dlasq6.o `test -f '$(top_srcdir)/lapack/dlasq6.c' || echo '$(srcdir)/'`$(top_srcdir)/lapack/dlasq6.c
+
+dlasq6.obj: $(top_srcdir)/lapack/dlasq6.c
+@am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT dlasq6.obj -MD -MP -MF "$(DEPDIR)/dlasq6.Tpo" \
+@am__fastdepCC_TRUE@	  -c -o dlasq6.obj `if test -f '$(top_srcdir)/lapack/dlasq6.c'; then $(CYGPATH_W) '$(top_srcdir)/lapack/dlasq6.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/lapack/dlasq6.c'; fi`; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/dlasq6.Tpo" "$(DEPDIR)/dlasq6.Po"; \
+@am__fastdepCC_TRUE@	else rm -f "$(DEPDIR)/dlasq6.Tpo"; exit 1; \
+@am__fastdepCC_TRUE@	fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(top_srcdir)/lapack/dlasq6.c' object='dlasq6.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/dlasq6.Po' tmpdepfile='$(DEPDIR)/dlasq6.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dlasq6.obj `if test -f '$(top_srcdir)/lapack/dlasq6.c'; then $(CYGPATH_W) '$(top_srcdir)/lapack/dlasq6.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/lapack/dlasq6.c'; fi`
+
+dlasq6.lo: $(top_srcdir)/lapack/dlasq6.c
+@am__fastdepCC_TRUE@	if $(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT dlasq6.lo -MD -MP -MF "$(DEPDIR)/dlasq6.Tpo" \
+@am__fastdepCC_TRUE@	  -c -o dlasq6.lo `test -f '$(top_srcdir)/lapack/dlasq6.c' || echo '$(srcdir)/'`$(top_srcdir)/lapack/dlasq6.c; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/dlasq6.Tpo" "$(DEPDIR)/dlasq6.Plo"; \
+@am__fastdepCC_TRUE@	else rm -f "$(DEPDIR)/dlasq6.Tpo"; exit 1; \
+@am__fastdepCC_TRUE@	fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(top_srcdir)/lapack/dlasq6.c' object='dlasq6.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	depfile='$(DEPDIR)/dlasq6.Plo' tmpdepfile='$(DEPDIR)/dlasq6.TPlo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dlasq6.lo `test -f '$(top_srcdir)/lapack/dlasq6.c' || echo '$(srcdir)/'`$(top_srcdir)/lapack/dlasq6.c
 
 dlasr.o: $(top_srcdir)/lapack/dlasr.c
 @am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT dlasr.o -MD -MP -MF "$(DEPDIR)/dlasr.Tpo" \
