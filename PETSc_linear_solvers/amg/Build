@@ -1,0 +1,11 @@
+#!\bin\sh
+cd ../../utilities
+make clean
+make
+cd ../seq_matrix_vector
+make clean
+make
+cd ../PETSc_linear_solvers/amg
+make clean
+make
+
