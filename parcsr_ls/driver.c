@@ -40,6 +40,7 @@ main( int   argc,
    double   strong_threshold;
    int      cycle_type;
    int      coarsen_type = 0;
+   int      measure_type = 0;
    int     *num_grid_sweeps;  
    int     *grid_relax_type;   
    int    **grid_relax_points;
@@ -141,6 +142,21 @@ main( int   argc,
       {
          arg_index++;
          coarsen_type      = 1;
+      }    
+      else if ( strcmp(argv[arg_index], "-ruge2b") == 0 )
+      {
+         arg_index++;
+         coarsen_type      = 2;
+      }    
+      else if ( strcmp(argv[arg_index], "-ruge3") == 0 )
+      {
+         arg_index++;
+         coarsen_type      = 3;
+      }    
+      else if ( strcmp(argv[arg_index], "-gm") == 0 )
+      {
+         arg_index++;
+         measure_type      = 1;
       }    
       else if ( strcmp(argv[arg_index], "-xisone") == 0 )
       {
@@ -407,6 +423,7 @@ main( int   argc,
 
       amg_solver = HYPRE_ParAMGInitialize(); 
       HYPRE_ParAMGSetCoarsenType(amg_solver, coarsen_type);
+      HYPRE_ParAMGSetMeasureType(amg_solver, measure_type);
       HYPRE_ParAMGSetStrongThreshold(amg_solver, strong_threshold);
       HYPRE_ParAMGSetLogging(amg_solver, ioutdat, "driver.out.log");
       HYPRE_ParAMGSetCycleType(amg_solver, cycle_type);
@@ -1249,6 +1266,10 @@ BuildParLaplacian27pt( int                  argc,
    values = hypre_CTAlloc(double, 2);
 
    values[0] = 26.0;
+   if (nx == 1 || ny == 1 || nz == 1)
+	values[0] = 8.0;
+   if (nx*ny == 1 || nx*nz == 1 || ny*nz == 1)
+	values[0] = 2.0;
    values[1] = -1.0;
 
    A = hypre_GenerateLaplacian27pt(MPI_COMM_WORLD,
