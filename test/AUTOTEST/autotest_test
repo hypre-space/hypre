@@ -109,6 +109,7 @@ parse_arguments () {
     case $arg in
       a) confbuildtest $OPTARG  " "             "default"   0 0 0 0 1 0 1;;
       c) build $Build "all++"   "all++"         "test";;
+      b) confbuildtest $OPTARG  "--with-babel"  "babel"     0 0 0 0 1 0 0;;
       D) DEBUG_MODE="yes";;
       d) build $Build "all"     "docs"          "docs";;
       e) confbuildtest $OPTARG  "--enable-debug" "debug"    0 0 0 0 1 0 1;;
@@ -156,6 +157,7 @@ usage () {
   printf "         performs make struct, IJ, fei, all, nofei, and\n"
   printf "         fei++, followed by the runtest script (when opt=2).\n"
   printf "%s\n" "-c       C++; make all++ (no configure, or execute)."
+  printf "%s\n" "-b       Babel; configure --with-babel, make, and execute)."
   printf "%s\n" "-D       Turn on debug messages."
   printf "%s\n" "-d       Docs; make the documentation directory."
   printf "%s\n" "-e       Debug; configure --enable-debug, make, and execute)."
@@ -247,7 +249,7 @@ mail_summary () {
   printf "Directory:          %s\n" ${HYPRE_AUTOTEST_DIR} >> $SUMFILE
   printf "%s\n" "--------------------------------------------" >> $SUMFILE
   printf "Compile summary: Status: Warnings: Errors\n" >> $SUMFILE
-  for ConfOpt in default no_mpi openmp \
+  for ConfOpt in babel debug default no_mpi openmp \
            insure purify strict_checking \
            docs all++ all77
   do

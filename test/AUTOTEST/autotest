@@ -178,7 +178,7 @@ do
         HYPRE_RUN_MACHINE="blue"
         HYPRE_REMOTE_DIR="/usr/casc/hypre/powerpc-ibm-aix5.1.0.0/AUTOTEST"
         if [ "$1" = "-blue" ] ; then
-	  HYPRE_MACHINE_COMMANDS="-m -o 1 -a 2 -cf"
+	  HYPRE_MACHINE_COMMANDS="-m -b 1 -o 1 -a 2 -cf"
           HYPRE_MESSAGE='SECONDARY'
         else
           SUBMSG="from OpenMP"
@@ -193,7 +193,7 @@ do
         HYPRE_RUN_MACHINE="frost"
         HYPRE_REMOTE_DIR="/usr/casc/hypre/powerpcll-ibm-aix5.1.0.0/AUTOTEST"
         if [ "$1" = "-frost" ] ; then
-	  HYPRE_MACHINE_COMMANDS="-m -o 1 -a 2 -cf"
+	  HYPRE_MACHINE_COMMANDS="-m -b 1 -o 1 -a 2 -cf"
           HYPRE_MESSAGE='SECONDARY'
         else
           SUBMSG="from OpenMP"
@@ -207,7 +207,7 @@ do
         HYPRE_COMPILE_MACHINE="poincare"
         HYPRE_RUN_MACHINE="poincare"
         HYPRE_REMOTE_DIR="/usr/casc/hypre/sparc-sun-solaris2.7/AUTOTEST"
-	HYPRE_MACHINE_COMMANDS="-mns -a 2 -cf"
+	HYPRE_MACHINE_COMMANDS="-mns -b 1 -a 2 -cf"
         HYPRE_MESSAGE='SECONDARY[cc-5.0]'
 ###	print_header
 ###     ./autotest_test $HYPRE_MACHINE_COMMANDS
@@ -339,7 +339,7 @@ do
         HYPRE_COMPILE_MACHINE="tux83"
         HYPRE_RUN_MACHINE="tux83"
         HYPRE_REMOTE_DIR="/usr/casc/hypre/i686-pc-linux-gnu/AUTOTEST"
-	HYPRE_MACHINE_COMMANDS="-mns -a 2 -dcf"
+	HYPRE_MACHINE_COMMANDS="-mns -b 1 -a 2 -dcf"
         HYPRE_MESSAGE='PRIMARY[gcc-2.96]'
         print_header
         ./autotest_test $HYPRE_MACHINE_COMMANDS -v $HYPRE_MESSAGE
@@ -350,8 +350,8 @@ do
         HYPRE_COMPILE_MACHINE="tux71"
         HYPRE_RUN_MACHINE="tux71"
         HYPRE_REMOTE_DIR="/usr/casc/hypre/i686-pc-linux-gnu-gcc3.x/AUTOTEST"
-	HYPRE_MACHINE_COMMANDS="-mn -a 2 -dcf"
-        HYPRE_MESSAGE='SECONDARY[gcc-3.1.1]'
+	HYPRE_MACHINE_COMMANDS="-mn -b 1 -a 2 -dcf"
+        HYPRE_MESSAGE='SECONDARY[gcc-3.2]'
 	perform_test
         shift;;
     -tux)
