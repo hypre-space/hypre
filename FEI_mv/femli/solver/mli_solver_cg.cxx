@@ -13,6 +13,7 @@
 #include "solver/mli_solver_bjacobi.h"
 #include "solver/mli_solver_sgs.h"
 #include "solver/mli_solver_bsgs.h"
+#include "solver/mli_solver_hsgs.h"
 
 /******************************************************************************
  * constructor
@@ -86,9 +87,9 @@ int MLI_Solver_CG::setup(MLI_Matrix *Amat_in)
                                   argv[0] = (char *) &numSweeps;
                                   baseSolver_->setParams(paramString,1,argv);
                                   break;
-      case MLI_SOLVER_SGS_ID :    sprintf(paramString, "SGS");
+      case MLI_SOLVER_SGS_ID :    sprintf(paramString, "HSGS");
                                   baseSolver_ = 
-                                     new MLI_Solver_SGS(paramString);
+                                     new MLI_Solver_HSGS(paramString);
                                   sprintf(paramString, "numSweeps");
                                   numSweeps = 1;
                                   argv[0] = (char *) &numSweeps;
