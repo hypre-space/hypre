@@ -20,7 +20,12 @@
 #include "headers.h"
 #include "par_amg.h"
 
+#ifndef ABS
 #define ABS(x) ((x)>0 ? (x) : -(x))
+#endif
+#ifndef MAX
+#define MAX(a,b) ((a)>(b)?(a):(b))
+#endif
 
 static double dnrm2(int n, double *x)
 {
