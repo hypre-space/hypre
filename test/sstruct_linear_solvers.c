@@ -142,17 +142,17 @@ SScanProblemIndex( char          *sdata_ptr,
    switch (ndim)
    {
       case 1:
-      sscanf(sdata_ptr, "%d%[+-]",
+      sscanf(sdata_ptr, "%d%c",
              &index[0], &sign[0]);
       break;
 
       case 2:
-      sscanf(sdata_ptr, "%d%[+-]%d%[+-]",
+      sscanf(sdata_ptr, "%d%c%d%c",
              &index[0], &sign[0], &index[1], &sign[1]);
       break;
 
       case 3:
-      sscanf(sdata_ptr, "%d%[+-]%d%[+-]%d%[+-]",
+      sscanf(sdata_ptr, "%d%c%d%c%d%c",
              &index[0], &sign[0], &index[1], &sign[1], &index[2], &sign[2]);
       break;
    }
