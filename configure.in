@@ -60,125 +60,61 @@ casc_using_sgi_smp=no
 casc_using_pgcc_smp=no
 
 
-AC_ARG_WITH(CC, \[
-  --with-CC=ARG           User can manually set C compiler to ARG],
-  if test "$withval" = "no"
-  then
-    casc_user_chose_compilers=no
-  elif test "$withval" = "yes"
-  then
-    casc_user_chose_compilers=no
-  else
-    CC=$withval
-    casc_user_chose_compilers=yes
-  fi, 
-  casc_user_chose_compilers=no
+AC_ARG_WITH(CC,
+[  --with-CC=ARG           User can manually set C compiler to ARG],
+[case "${withval}" in
+   yes) casc_user_chose_compilers=no ;;
+   no)  casc_user_chose_compilers=no ;;
+   *)   casc_user_chose_compilers=yes
+        CC=$withval ;;
+ esac],
+[casc_user_chose_compilers=no]
 )
 
-AC_ARG_WITH(CXX, [\
-  --with-CXX=ARG          User can manually set C++ compiler to ARG],
-  if test "$withval" = "no"
-  then
-    casc_user_chose_compilers=no
-  elif test "$withval" = "yes"
-  then
-    casc_user_chose_compilers=no
-  else
-    CXX=$withval
-    casc_user_chose_compilers=yes
-  fi 
+AC_ARG_WITH(CXX,
+[  --with-CXX=ARG          User can manually set C++ compiler to ARG],
+[case "${withval}" in
+   yes) casc_user_chose_compilers=no ;;
+   no)  casc_user_chose_compilers=no ;;
+   *)   casc_user_chose_compilers=yes
+        CXX=$withval ;;
+ esac]
 )
 
-AC_ARG_WITH(F77, [\
-  --with-f77=ARG          User can manually set f77 compiler to ARG],
-  if test "$withval" = "no"
-  then
-    casc_user_chose_compilers=no
-  elif test "$withval" = "yes"
-  then
-    casc_user_chose_compilers=no
-  else
-    F77=$withval
-    casc_user_chose_compilers=yes
-  fi 
+AC_ARG_WITH(F77,
+[  --with-f77=ARG          User can manually set f77 compiler to ARG],
+[case "${withval}" in
+   yes) casc_user_chose_compilers=no ;;
+   no)  casc_user_chose_compilers=no ;;
+   *)   casc_user_chose_compilers=yes
+        F77=$withval ;;
+ esac]
 )
 
-AC_ARG_WITH(CFLAGS, [\
-  --with-CFLAGS=ARG       User can manually set c compiler flags.  This option
+AC_ARG_WITH(CFLAGS,
+[  --with-CFLAGS=ARG       User can manually set c compiler flags.  This option
 		          is not necessary to turn on optimization or debug
 			  flags unless you want to use an opt or debug flag
 		          that is not the default.  To choose the default
 			  use --enable-opt or --enable-debug],
-  CFLAGS=$withval,
-  CFLAGS=
+[CFLAGS=$withval],
+[CFLAGS=""]
 )
 
-AC_ARG_WITH(CXXFLAGS, [\
-  --with-CXXFLAGS=ARG     User can manually set c++ compiler flags.],
-  CXXFLAGS=$withval,
-  CXXFLAGS=
+AC_ARG_WITH(CXXFLAGS,
+[  --with-CXXFLAGS=ARG     User can manually set c++ compiler flags.],
+[CXXFLAGS=$withval],
+[CXXFLAGS=""]
 )
 
-AC_ARG_WITH(F77FLAGS, [\
-  --with-F77FLAGS=ARG     User can manually set f77 compiler flags],
-  F77FLAGS=$withval,
-  F77FLAGS=
+AC_ARG_WITH(F77FLAGS,
+[  --with-F77FLAGS=ARG     User can manually set f77 compiler flags],
+[F77FLAGS=$withval],
+[F77FLAGS=""]
 )
 
-AC_ARG_WITH(mpi-include, [\
-  --with-mpi-include=DIR  User specifies that mpi.h is in DIR.  The options
-			  --with-mpi-include --with-mpi-libs and 
-			  --with-mpi-lib-dirs must be used together.],
-  for mpi_dir in $withval; do
-    MPIINCLUDE="$MPIINCLUDE -I$withval"
-  done; casc_user_chose_mpi=yes,
-  casc_user_chose_mpi=no
-)
-
-AC_ARG_WITH(mpi-libs, [\
-  --with-mpi-libs=LIBS    LIBS is space-separated list of library names 
-			  needed for MPI, e.g. \"nsl socket mpi\".  The 
-			  options --with-mpi-include --with-mpi-libs and 
-			  --with-mpi-lib-dirs must be used together.],  
-  for mpi_lib in $withval; do
-    MPILIBS="$MPILIBS -l$mpi_lib"
-  done; casc_user_chose_mpi=yes
-)
-
-AC_ARG_WITH(mpi-lib-dirs, [\
-  --with-mpi-lib-dirs=DIRS 
-                          DIRS is space-separated list of directories
-                          containing the libraries specified by
-                          \`--with-mpi-libs',
-                          e.g \"/usr/lib /usr/local/mpi/lib\".  The options
-			  --with-mpi-include --with-mpi-libs and 
-			  --with-mpi-lib-dirs must be used together.],
-  for mpi_lib_dir in $withval; do
-    MPILIBDIRS="-L$mpi_lib_dir $MPILIBDIRS"
-  done; casc_user_chose_mpi=yes
-)
-
-AC_ARG_WITH(mpi-flags, [\
-  --with-mpi-flags=FLAGS  FLAGS is a space seperated list of whatever
-                       	  flags other than -l and -L are needed to link
-                          with MPI libraries-- Does not de-activate auto
-                          search for other MPI information. May be used with
-			  the other three mpi options or alone in conjunction
-			  with the automatic mpi search.],
-  if test "$withval" = "no"
-  then
-    MPIFLAGS=
-  elif test "$withval" = "yes"
-  then
-    MPIFLAGS=
-  else
-    MPIFLAGS=$withval
-  fi ,
-  MPIFLAGS=
-)
-
-AC_ARG_WITH(purify, [\
-  --with-purify=FLAGS     FLAGS are optional to pass to purify, e.g.
+AC_ARG_WITH(purify,
+[  --with-purify=FLAGS     FLAGS are optional to pass to purify, e.g.
 			  \"-log-file=struct_linear_solvers.purify 
 			  -append-logfile=yes\" will send output to a file.
 			  assign cc and CC as the C and C++ compilers 
@@ -186,78 +122,69 @@ AC_ARG_WITH(purify, [\
 			  prepends "purify" to compile/link line-- no 
 			  checking is done to ensure purify is present on 
 			  the machine],
-  if test "$casc_user_chose_compilers" = "no"
-  then
-    CC=cc
-    CXX=CC
-    CFLAGS="$CFLAGS -g"
-    CXXFLAGS="$CXXFLAGS -g"
-    casc_user_chose_compilers=yes
-  fi
-  if test "$withval" = "no"
-  then
-    PREPEND=""
-  elif test "$withval" = "yes"
-  then
-    PREPEND="purify"
-  else
-    PREPEND="purify $withval"
-  fi
+[if test "$casc_user_chose_compilers" = "no"
+ then
+   CC=cc
+   CXX=CC
+   CFLAGS="$CFLAGS -g"
+   CXXFLAGS="$CXXFLAGS -g"
+   casc_user_chose_compilers=yes
+ fi
+ case "${withval}" in
+   yes) PREPEND="purify" ;;
+   no)  PREPEND="" ;;
+   *)   PREPEND="purify $withval" ;;
+ esac],
+[PREPEND=""]
 )
 
-AC_ARG_WITH(purify-to-file, [\
-  --with-purify-to-file   direct purify output to the file \"purify.log\"],
-  if test "$casc_user_chose_compilers" = "no"
-  then
-    CC=cc
-    CXX=CC
-    CFLAGS="$CFLAGS -g"
-    CXXFLAGS="$CXXFLAGS -g"
-    casc_user_chose_compilers=yes
-  fi
-  if test "$withval" = "no"
-  then
-    PREPEND=""
-  elif test "$withval" = "yes"
-  then
-    PREPEND="purify -log-file=purify.log -append-logfile=yes -best-effort"
-  else
-    PREPEND="purify $withval"
-  fi
+AC_ARG_WITH(purify-to-file,
+[  --with-purify-to-file   direct purify output to the file \"purify.log\"],
+[if test "$casc_user_chose_compilers" = "no"
+ then
+   CC=cc
+   CXX=CC
+   CFLAGS="$CFLAGS -g"
+   CXXFLAGS="$CXXFLAGS -g"
+   casc_user_chose_compilers=yes
+ fi
+ case "${withval}" in
+   yes) PREPEND="purify -log-file=purify.log -append-logfile=yes -best-effort";;
+   no)  PREPEND="" ;;
+   *)   PREPEND="purify $withval" ;;
+ esac]
 )
 
-AC_ARG_WITH(cegdb, [\
-  --with-cegdb            assign gcc and g++ as the c and c++ compilers 
+AC_ARG_WITH(cegdb,
+[  --with-cegdb            assign gcc and g++ as the c and c++ compilers 
 			  and -g as the compiler flag and link in -lcegdb and
                           include cegdb.h-- no checking is done to ensure
 			  cegdb is on the machine],
-  CC=gcc
-  CXX=g++
-  casc_users_chose_compilers=yes
-  CFLAGS="$CFLAGS -g"
-  CXXFLAGS="$CXXFLAGS -g"
-  CASC_CHECK_HEADER(cegdb.h, /home/casc/include,
-    CASC_ADD_LIB(cegdb, cegdb, /home/casc/lib, LD)
-  )
+[CC=gcc
+ CXX=g++
+ CFLAGS="$CFLAGS -g"
+ CXXFLAGS="$CXXFLAGS -g"
+ CASC_CHECK_HEADER(cegdb.h, /home/casc/include,
+   CASC_ADD_LIB(cegdb, cegdb, /home/casc/lib, LD))
+ casc_users_chose_compilers=yes]
 )
 
-AC_ARG_WITH(gdb, [\
-  --with-gdb              assign gcc and g++ as the C and c++ compilers
+AC_ARG_WITH(gdb,
+[  --with-gdb              assign gcc and g++ as the C and c++ compilers
 			  and -g and the compiler flag and link in -lgdb and
                           include gdb.h--not checking is done to ensure
 			  gdb is on the machine],
-  CC=gcc
-  CXX=g++
-  casc_users_chose_compilers=yes
-  CFLAGS="$CFLAGS -g"
-  CXXFLAGS="$CXXFLAGS -g"
-  CASC_CHECK_HEADER(gdb.h, /usr/local/include /usr/include,
-    CASC_ADD_LIB(gdb, gdb, /usr/local/lib /usr/lib, LD)
-  )
+[CC=gcc
+ CXX=g++
+ CFLAGS="$CFLAGS -g"
+ CXXFLAGS="$CXXFLAGS -g"
+ CASC_CHECK_HEADER(gdb.h, /usr/local/include /usr/include,
+   CASC_ADD_LIB(gdb, gdb, /usr/local/lib /usr/lib, LD))
+ casc_users_chose_compilers=yes]
 )
 
-AC_ARG_WITH(strict-checking, [\
-  --with-strict-checking  compiles with out MPI ('--without-MPI') and
+AC_ARG_WITH(strict-checking,
+[  --with-strict-checking  compiles with out MPI ('--without-MPI') and
 			  assigns kcc and KCC as the c and c++ compilers 
 			  and --c --strict as the compiler flag this 
 			  enforces syntax described by ISO 9899-1990, 
@@ -267,14 +194,65 @@ AC_ARG_WITH(strict-checking, [\
 			  warnings can be suppressed using --diag_suppress
 			  and the error numbers provided by 
 			  --display_error_number],
-  [CC=kcc
-  CXX=KCC
-  CFLAGS="$CFLAGS --c --strict --lint --display_error_number"
-  CFLAGS="$CFLAGS --diag_suppress 236,826,1018,1021,1022,1023,1024,1030,1041"
-  CXXFLAGS="$CXXFLAGS --strict --lint --display_error_number"]
-  casc_users_chose_compilers=yes
-  casc_using_mpi=no
-  AC_DEFINE(HYPRE_SEQUENTIAL)
+[CC=kcc
+ CXX=KCC
+ CFLAGS="$CFLAGS --c --strict --lint --display_error_number"
+ CFLAGS="$CFLAGS --diag_suppress 236,826,1018,1021,1022,1023,1024,1030,1041"
+ CXXFLAGS="$CXXFLAGS --strict --lint --display_error_number"
+ casc_users_chose_compilers=yes
+ casc_using_mpi=no
+ AC_DEFINE(HYPRE_SEQUENTIAL)]
+)
+
+AC_ARG_WITH(mpi-include,
+[  --with-mpi-include=DIR  User specifies that mpi.h is in DIR.  The options
+			  --with-mpi-include --with-mpi-libs and 
+			  --with-mpi-lib-dirs must be used together.],
+[for mpi_dir in $withval; do
+   MPIINCLUDE="$MPIINCLUDE -I$withval"
+ done;
+ casc_user_chose_mpi=yes],
+[casc_user_chose_mpi=no]
+)
+
+AC_ARG_WITH(mpi-libs,
+[  --with-mpi-libs=LIBS    LIBS is space-separated list of library names 
+			  needed for MPI, e.g. \"nsl socket mpi\".  The 
+			  options --with-mpi-include --with-mpi-libs and 
+			  --with-mpi-lib-dirs must be used together.],  
+[for mpi_lib in $withval; do
+   MPILIBS="$MPILIBS -l$mpi_lib"
+ done;
+ casc_user_chose_mpi=yes]
+)
+
+AC_ARG_WITH(mpi-lib-dirs,
+[  --with-mpi-lib-dirs=DIRS 
+                          DIRS is space-separated list of directories
+                          containing the libraries specified by
+                          \`--with-mpi-libs',
+                          e.g \"/usr/lib /usr/local/mpi/lib\".  The options
+			  --with-mpi-include --with-mpi-libs and 
+			  --with-mpi-lib-dirs must be used together.],
+[for mpi_lib_dir in $withval; do
+   MPILIBDIRS="-L$mpi_lib_dir $MPILIBDIRS"
+ done;
+ casc_user_chose_mpi=yes]
+)
+
+AC_ARG_WITH(mpi-flags,
+[  --with-mpi-flags=FLAGS  FLAGS is a space seperated list of whatever
+                       	  flags other than -l and -L are needed to link
+                          with MPI libraries-- Does not de-activate auto
+                          search for other MPI information. May be used with
+			  the other three mpi options or alone in conjunction
+			  with the automatic mpi search.],
+[case "${withval}" in
+   yes) MPIFLAGS="" ;;
+   no)  MPIFLAGS="" ;;
+   *)   MPIFLAGS=$withval ;;
+ esac],
+[MPIFLAGS=""]
 )
 
 dnl *********************************************************************
@@ -284,114 +262,143 @@ dnl * options and assigns yes or no values to appropriate macros.  These
 dnl * values will be used to determine compilers, flags and libraries needed.
 dnl *********************************************************************
 
-AC_ARG_WITH(MPI, [\
-  --with-MPI              compiles with MPI (this is the default).
+AC_ARG_WITH(MPI,
+[  --with-MPI              compiles with MPI (this is the default).
                           Selecting '--without-MPI' may affect
 			  which compiler is chosen],
-  if test "$withval" = "no"
-  then
-    casc_using_mpi=no
-  elif test "$withval" = "yes"
-  then
-    casc_using_mpi=yes
-  else
-    casc_using_mpi=$withval
-  fi ,
-  casc_using_mpi=yes
+[case "${withval}" in
+   yes) casc_using_mpi=yes ;;
+   no)  casc_using_mpi=no ;;
+   *)   casc_using_mpi=$withval ;;
+ esac],
+[casc_using_mpi=yes]
 )
 if test $casc_using_mpi = "no"
 then
   AC_DEFINE(HYPRE_SEQUENTIAL)
 fi
 
-AC_ARG_WITH(COMM_SIMPLE, [\
-  --with-COMM_SIMPLE      Do not use MPI derived data types.  This option
+AC_ARG_WITH(COMM_SIMPLE,
+[  --with-COMM_SIMPLE      Do not use MPI derived data types.  This option
 			  is automatically chosen for IBM, but may be
 			  selected for other platforms as well.],
-  CFLAGS="$CFLAGS -DHYPRE_COMM_SIMPLE"
+[if test "$withval" = "yes"
+ then
+   CFLAGS="$CFLAGS -DHYPRE_COMM_SIMPLE"
+ fi]
 )
 
-AC_ARG_WITH(dmalloc, [\
-  --with-dmalloc          use dmalloc package--no checking is done to ensure
+AC_ARG_WITH(dmalloc,
+[  --with-dmalloc          use dmalloc package--no checking is done to ensure
 			  the package is on the machine],
-  CASC_ADD_LIB(dmalloc, malloc, /home/casc/lib /usr/local/lib,
+[if test "$withval" = "yes"
+ then
+   CASC_ADD_LIB(dmalloc, malloc, /home/casc/lib /usr/local/lib,
     LD,  AC_DEFINE(HYPRE_MEMORY_DMALLOC) )
+ fi]
 )
 
-AC_ARG_WITH(timing, [\
-  --with-timing           use HYPRE timing routines],
-  AC_DEFINE(HYPRE_TIMING)
+AC_ARG_WITH(timing,
+[  --with-timing           use HYPRE timing routines],
+[if test "$withval" = "yes"
+ then
+   AC_DEFINE(HYPRE_TIMING)
+ fi]
 )
 
-AC_ARG_WITH(pthreads, [\
-  --with-pthreads         use pthreads-- this may affect which compiler
+AC_ARG_WITH(pthreads,
+[  --with-pthreads         use pthreads-- this may affect which compiler
 			  is chosen.  Tests are done to check for the
 			  pthread library.  Supported on IBM only.],
-  casc_using_pthreads=yes
-  CASC_CHECK_LIB(pthread, pthread_create, ,
-    [CASC_CHECK_LIB(pthreads, pthread_create)])
-
-  if test "$ac_cv_lib_pthread_pthread_create" = "yes" ||
-     test "$ac_cv_lib_pthreads_pthread_create" = "yes"
-  then
-    AC_DEFINE(HYPRE_USE_PTHREADS)
-  fi,
-  casc_using_pthreads=no
+[case "${withval}" in
+   yes) casc_using_pthreads=yes
+     CASC_CHECK_LIB(pthread, pthread_create, ,
+       CASC_CHECK_LIB(pthreads, pthread_create))
+     if test "$ac_cv_lib_pthread_pthread_create" = "yes" ||
+       test "$ac_cv_lib_pthreads_pthread_create" = "yes"
+     then
+       AC_DEFINE(HYPRE_USE_PTHREADS)
+     fi ;;
+   no)  casc_using_pthreads=no ;;
+ esac],
+[casc_using_pthreads=no]
 )
 
-AC_ARG_WITH(openmp, [\
-  --with-openmp           use openMP--this may affect which compiler is 
+AC_ARG_WITH(openmp,
+[  --with-openmp           use openMP--this may affect which compiler is 
                           chosen.  Supported on IBM and DECS only.],
-  casc_using_openmp=yes
-  AC_DEFINE(HYPRE_USING_OPENMP),
-  casc_using_openmp=no
+[case "${withval}" in
+   yes) casc_using_openmp=yes
+   AC_DEFINE(HYPRE_USING_OPENMP) ;;
+   no)  casc_using_openmp=no ;;
+ esac],
+[casc_using_openmp=no]
 )
 
-AC_ARG_WITH(IBM_smp, [\
-  --with-IBM_smp          use IBM SMP--not yet supported],
-  casc_using_ibm_smp=yes
-  AC_DEFINE(HYPRE_USING_IBM_SMP),
-  casc_using_ibm_smp=no
+AC_ARG_WITH(IBM_smp,
+[  --with-IBM_smp          use IBM SMP--not yet supported],
+[case "${withval}" in
+   yes) casc_using_ibm_smp=yes
+     AC_DEFINE(HYPRE_USING_IBM_SMP) ;;
+   no)  casc_using_ibm_smp=no ;;
+ esac],
+[casc_using_ibm_smp=no]
 )
 
-AC_ARG_WITH(SGI_smp, [\
-  --with-SGI_smp          use SGI SMP--not yet supported],
-  casc_using_sgi_smp=yes
-  AC_DEFINE(HYPRE_USING_SGI_SMP),
-  casc_using_sgi_smp=no
+AC_ARG_WITH(SGI_smp,
+[  --with-SGI_smp          use SGI SMP--not yet supported],
+[case "${withval}" in
+   yes) casc_using_sgi_smp=yes
+     AC_DEFINE(HYPRE_USING_SGI_SMP) ;;
+   no)  casc_using_sgi_smp=no ;;
+ esac],
+[casc_using_sgi_smp=no]
 )
 
-AC_ARG_WITH(pgcc_smp, [\
-  --with-pgcc_smp         use pgcc SMP (Red)--not yet supported],
-  casc_using_pgcc_smp=yes 
-  AC_DEFINE(HYPRE_USING_PGCC_SMP),
-  casc_using_pgcc_smp=no
+AC_ARG_WITH(pgcc_smp,
+[  --with-pgcc_smp         use pgcc SMP (Red)--not yet supported],
+[case "${withval}" in
+   yes) casc_using_pgcc_smp=yes 
+     AC_DEFINE(HYPRE_USING_PGCC_SMP) ;;
+   no)  casc_using_sgi_smp=no ;;
+ esac],
+[casc_using_pgcc_smp=no]
 )
 
-AC_ARG_WITH(blas, [\
-  --with-blas             search for and use the BLAS], 
-  casc_using_blas=$withval,
-  casc_using_blas=
+AC_ARG_WITH(blas,
+[  --with-blas             search for and use the BLAS], 
+[case "${withval}" in
+   yes) casc_using_blas="" ;;
+   no)  casc_using_blas="" ;;
+   *)   casc_using_blas=$withval ;;
+ esac],
+[casc_using_blas=""]
 )
 
 dnl top level source directory
 HYPRE_TOP_SRC_DIR=`pwd`
 
-AC_ARG_WITH(babel, [\
-  --with-babel            use babel],
-  casc_using_babel=yes,
-  casc_using_babel=no
+AC_ARG_WITH(babel,
+[  --with-babel            use babel],
+[case "${withval}" in
+   yes) casc_using_babel=yes ;;
+   no)  casc_using_babel=no ;;
+ esac],
+[casc_using_babel=no]
 )
 
-AC_ARG_WITH(petsc, [\
-  --with-petsc            use petsc],
-  casc_using_petsc=yes
-  HYPRE_PETSCDEFS="$HYPRE_PETSCDEFS -DPETSC_AVAILABLE"
-  HYPRE_PETSCLIBDIRS="$HYPRE_TOP_SRC_DIR/PETScMat_linear_solvers/pilut \
+AC_ARG_WITH(petsc,
+[  --with-petsc            use petsc],
+[case "${withval}" in
+   yes) casc_using_petsc=yes
+     HYPRE_PETSCDEFS="$HYPRE_PETSCDEFS -DPETSC_AVAILABLE"
+     HYPRE_PETSCLIBDIRS="$HYPRE_TOP_SRC_DIR/PETScMat_linear_solvers/pilut \
 $HYPRE_TOP_SRC_DIR/PETSc_linear_solvers/ParILUT "
-  HYPRE_PETSCLIBS=" -l_HYPRE_PETScSolverParILUT \
--l_HYPRE_PETScMatPilutSolver ",
-  casc_using_petsc=no
+     HYPRE_PETSCLIBS=" -l_HYPRE_PETScSolverParILUT \
+-l_HYPRE_PETScMatPilutSolver " ;;
+   no)  casc_using_petsc=no ;;
+ esac],
+[casc_using_petsc=no]
 )
 
 AC_PROG_RANLIB
