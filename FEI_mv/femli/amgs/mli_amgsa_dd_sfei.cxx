@@ -338,7 +338,7 @@ int MLI_Method_AMGSA::setupSFEIBasedNullSpaces( MLI *mli )
          }
       }
       delete [] elemNodeList1D;
-#if 1
+#if 0
       FILE *fptr2 = fopen("arpackEigenV", "w");
       for ( k = 0; k < nullspaceDim_; k++ ) 
       {
