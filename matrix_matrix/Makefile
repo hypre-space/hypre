@@ -31,71 +31,8 @@ PROTOS =\
  
 OBJS = ${FILES:.c=.o}
 
-CC = gcc
-
-F77 = /home/casc/g77/bin/g77
-
-PETSC_CFLAGS =\
- -I${PETSC_DIR}/src/mat/impls/aij/mpi\
- -I${PETSC_DIR}/src/mat/impls/aij/seq\
- -I${PETSC_DIR}/src/mat\
- -I${PETSC_DIR}\
- -I${PETSC_DIR}/include\
- -I/usr/local/mpi/mpich/include
-CFLAGS =\
- ${PETSC_CFLAGS}\
- ${PAR_SOLVER_FLAGS}\
- ${SEQ_SOLVER_FLAGS}\
- -I/usr/local/include\
- -I/home/casc/include\
- -I../includes\
- -DHYPRE_MEMORY_CHECK\
- -DHYPRE_DEBUG\
- -g
-
-FFLAGS = -g
-
-include ${PETSC_DIR}/bmake/${PETSC_ARCH}/base.site
-PETSC_OPT = g
-PETSC_LFLAGS =\
- -L${PETSC_DIR}/lib/lib${PETSC_OPT}/${PETSC_ARCH}\
- -lpetscsles\
- -lpetscmat\
- -lpetscvec\
- -lpetscsys\
- ${SUPERLU_LIB}\
- ${BS_LIB}\
- ${LAPACK_LIB}\
- ${BLAS_LIB}\
- ${X11_LIB}\
- ${MPE_LIB}\
- ${MPI_LIB}\
- ${SYS_LIB}
-LFLAGS =\
- -Wl,"-zmuldefs"\
- -L/usr/local/lib\
- -L/home/casc/lib\
- -L/home/casc/g77/lib\
- -L../PETSc_linear_solvers/Block_Preconditioned\
- -L../PETSc_linear_solvers/ParILUT\
- -L../PETSc_linear_solvers/ParILUT/pilut\
- -L../seq_linear_solvers/ilut\
- -L../seq_linear_solvers/ict\
- -L../seq_linear_solvers/sparskit\
- -L../seq_matrix_vector \
- -L.\
- -lHYPRE\
- -lHYPREILU -lHYPREIC\
- -lHYPREParILUT \
- -lHYPREpilut\
- -lilu -lic -ldsparskit\
- -lHYPREseq_mat_vec\
- ${PETSC_LFLAGS}\
- -lf2c\
- -lcegdb\
- -lmalloc\
- -lm
-
+#include site-specific information
+include ../bmakes/base
 
 ##################################################################
 # Main rules
