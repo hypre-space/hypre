@@ -132,9 +132,13 @@ c
 c
 c=>   test level k-1 matrix
 c
-      call stats(k-1,levels,idump,
-     *           nun,imin,imax,a,ia,ja,iu,ip,icg,ifg,
-     *           b,ib,jb,ipmn,ipmx,iv,xp,yp)
+cveh    following call to stats is a debugging call
+cveh    uncomment to get stats AS matrix is coarsened
+cveh    and interpolation operators defined
+cveh
+cveh  call stats(k-1,levels,idump,
+cveh *           nun,imin,imax,a,ia,ja,iu,ip,icg,ifg,
+cveh *           b,ib,jb,ipmn,ipmx,iv,xp,yp)
 
 c     call memoryx(k-1,imin,imax,ia,ib,ipmn,ipmx)
 c
@@ -171,6 +175,13 @@ c
 c
 30    continue
 c
+c     compute & print statistics after coarsening
+
+      call fstats(k-1,levels,idump,
+     *           nun,imin,imax,a,ia,ja,iu,ip,icg,ifg,
+     *           b,ib,jb,ipmn,ipmx,iv,xp,yp)
+
+
       call msample
 c
 c     test operators

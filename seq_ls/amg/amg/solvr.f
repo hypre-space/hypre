@@ -70,7 +70,7 @@ c---------------------------------------------------------------------
       open(6,file=lfname,access='append')
 
       write(6,9000)
- 9000  format(/'AMG SOLVE INFO:'/)
+ 9000  format(/'AMG SOLUTION INFO:'/)
 
 c
 c---------------------------------------------------------------------
@@ -103,8 +103,23 @@ c
         resi = res
         write(6,1000)
         write(6,1100) res,enrg
-        write(6,*) ' energy = ',enrg
       endif
+cveh ------------------------------------------------------------
+cveh  test: compute 2-norm of rhs for relative residual
+cveh
+      nv = imax(1)
+      fnorm = 0.0
+      do 11, i=1,nv
+         fnorm = fnorm + f(i)*f(i)
+11    continue
+      fnorm = sqrt(fnorm)
+      relres = res/fnorm
+cveh
+cveh  end test: compute 2-norm of rhs for relative residual
+cveh ------------------------------------------------------------
+
+
+
 c
 c===> cycling
 c
@@ -120,10 +135,15 @@ c
      *           ndimu,ndimp,ndima,ndimb)
 
       if(iprtc.ge.0) then
+cveh
+cveh relative residual temporarily added: relres,
+cveh
         resold=res
         call rsdl(1,enrg,res,resv,0,imin,imax,u,f,a,ia,ja,iu)
         factor=res/resold
-        write(6,1200) ncy,res,enrg,factor
+        relres = res/fnorm
+cveh        write(6,1200) ncy,res,enrg,factor
+        write(6,1200) ncy,res,enrg,factor,relres
       endif
 
   100 continue
@@ -132,8 +152,7 @@ c
       write(6,1300) afactor
       call ctime(tnew)
       ttot=ttot+tnew-told
-cveh      tcyc=ttot/ncycle
-      tcyc=float(ttot/ncycle)
+      tcyc=float(ttot)/float(ncycle)
       write(6,2000) tcyc,ttot
       cmpcy=float(icycmp)/float(ia(imax(1)+1)-1)
       cmpop=float(ia(imax(levels)+1)-1)/float(ia(imax(1)+1)-1)
@@ -144,15 +163,12 @@ cveh      tcyc=ttot/ncycle
 
       return
 
-1000  format(/'               residual     energy     factor'/,
-     *        '               --------     ------     ------')
-1100  format(3x,' Initial ',1p,5(2x,e9.2))
+1000  format(/14x,'                              relative'/,
+     *  14x,'residual    energy    factor  residual'/,
+     *  14x,'--------    ------    ------  --------')
+1100  format(3x,' Initial ',1p,5(1x,e9.2))
 1200  format(3x,' Cycle ',i2,1p,5(1x,e9.2))
 1300  format(/3x,' Average convergence factor   =  ',1p,e9.2)
-cveh        New format statement 2000 replaces following ccccccccccccc
-cveh 2000  format(/5x,'Solution times:'/
-cveh     *       10x,'per cycle :',f10.5/
-cveh     *       10x,'total     :',f10.5)
 cveh        New format statement 2000 replaces above ccccccccccccccccc
 2000  format(/5x,'Solution times:'/
      *       10x,'per cycle :',F10.5/
