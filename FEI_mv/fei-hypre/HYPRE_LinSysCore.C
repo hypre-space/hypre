@@ -6176,9 +6176,12 @@ void HYPRE_LinSysCore::writeSystem(const char *name)
 
 char *HYPRE_LinSysCore::getVersion()
 {
-    char *name = (char *) malloc( 200 * sizeof(char) );
-    sprintf(name, "%s %s", HYPRE_FEI_Version(), HYPRE_Version());
-    return name;
+    char hypre[200], hypre_version[50], version[100], ctmp[50];
+
+    sprintf(hypre, "%s", HYPRE_Version());
+    sscanf("%s %s", ctmp, hypre_version);
+    sprintf(version, "%s-%s", HYPRE_FEI_Version(), hypre_version);
+    return version;
 }
 
 //***************************************************************************
