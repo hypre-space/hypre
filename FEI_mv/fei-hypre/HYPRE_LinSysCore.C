@@ -3810,9 +3810,10 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
           HYPRE_ParCSRPCGSetTwoNorm(HYSolver_, 1);
           if ( normAbsRel_ == 0 ) HYPRE_ParCSRPCGSetStopCrit(HYSolver_,0);
           else                    HYPRE_ParCSRPCGSetStopCrit(HYSolver_,1);
-          if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0 )
+          if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 )
           {
-             printf("***************************************************\n");
+             if ( mypid_ == 0 )
+                printf("***************************************************\n");
              HYPRE_ParCSRPCGSetLogging(HYSolver_, 1);
           }
           HYPRE_ParCSRPCGSetup(HYSolver_, A_csr, b_csr, x_csr);
@@ -4080,9 +4081,10 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
           HYPRE_ParCSRGMRESSetTol(HYSolver_, tolerance_*oldnorm/newnorm);
           if ( normAbsRel_ == 0 ) HYPRE_ParCSRGMRESSetStopCrit(HYSolver_,0);
           else                    HYPRE_ParCSRGMRESSetStopCrit(HYSolver_,1);
-          if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0 )
+          if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 )
           {
-             printf("***************************************************\n");
+             if ( mypid_ == 0 )
+                printf("***************************************************\n");
              HYPRE_ParCSRGMRESSetLogging(HYSolver_, 1);
           }
           HYPRE_ParCSRGMRESSetup(HYSolver_, A_csr, b_csr, x_csr);
@@ -4346,9 +4348,10 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
           HYPRE_ParCSRBiCGSTABSetTol(HYSolver_, tolerance_*oldnorm/newnorm);
           if ( normAbsRel_ == 0 ) HYPRE_ParCSRBiCGSTABSetStopCrit(HYSolver_,0);
           else                    HYPRE_ParCSRBiCGSTABSetStopCrit(HYSolver_,1);
-          if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0 )
+          if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 )
           {
-             printf("***************************************************\n");
+             if ( mypid_ == 0 )
+                printf("***************************************************\n");
              HYPRE_ParCSRBiCGSTABSetLogging(HYSolver_, 1);
           }
           HYPRE_ParCSRBiCGSTABSetup(HYSolver_, A_csr, b_csr, x_csr);
@@ -4612,9 +4615,10 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
           HYPRE_ParCSRBiCGSTABLSetTol(HYSolver_, tolerance_*oldnorm/newnorm);
           if ( normAbsRel_ == 0 ) HYPRE_ParCSRBiCGSTABLSetStopCrit(HYSolver_,0);
           else                    HYPRE_ParCSRBiCGSTABLSetStopCrit(HYSolver_,1);
-          if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0 )
+          if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 )
           {
-             printf("***************************************************\n");
+             if ( mypid_ == 0 )
+                printf("***************************************************\n");
              HYPRE_ParCSRBiCGSTABLSetLogging(HYSolver_, 1);
           }
           HYPRE_ParCSRBiCGSTABLSetup(HYSolver_, A_csr, b_csr, x_csr);
@@ -4873,9 +4877,10 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
           HYPRE_ParCSRTFQmrSetTol(HYSolver_, tolerance_*oldnorm/newnorm);
           if ( normAbsRel_ == 0 ) HYPRE_ParCSRTFQmrSetStopCrit(HYSolver_,0);
           else                    HYPRE_ParCSRTFQmrSetStopCrit(HYSolver_,1);
-          if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0 )
+          if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 )
           {
-             printf("***************************************************\n");
+             if ( mypid_ == 0 )
+                printf("***************************************************\n");
              HYPRE_ParCSRTFQmrSetLogging(HYSolver_, 1);
           }
           HYPRE_ParCSRTFQmrSetup(HYSolver_, A_csr, b_csr, x_csr);
@@ -5134,9 +5139,10 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
           HYPRE_ParCSRBiCGSSetTol(HYSolver_, tolerance_*oldnorm/newnorm);
           if ( normAbsRel_ == 0 ) HYPRE_ParCSRBiCGSSetStopCrit(HYSolver_,0);
           else                    HYPRE_ParCSRBiCGSSetStopCrit(HYSolver_,1);
-          if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0 )
+          if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 )
           {
-             printf("***************************************************\n");
+             if ( mypid_ == 0 )
+                printf("***************************************************\n");
              HYPRE_ParCSRBiCGSSetLogging(HYSolver_, 1);
           }
           HYPRE_ParCSRBiCGSSetup(HYSolver_, A_csr, b_csr, x_csr);
