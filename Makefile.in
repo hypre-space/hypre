@@ -23,7 +23,7 @@ HYPRE_EXTRA_DIRS =\
  seq_matrix_vector\
  parcsr_matrix_vector\
  parcsr_linear_solvers\
- seq_linear_solvers/pamg\
+ seq_linear_solvers/pamg
 # bmakes
 
 #These are the directories for structured matrices
