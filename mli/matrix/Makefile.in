@@ -60,7 +60,7 @@ LFLAGS =\
  ${MPILIBFLAGS} ${LIBFLAGS} ${LDLIBFLAGS}
 
 HEADERS =\
- headers.h\
+ mli_matrix.h\
  mli_pcsr_bool_mat.h
 
 FILES =\
@@ -79,7 +79,7 @@ DRIVER_OBJS = ${DRIVER_FILES:.c=.o}
 # Targets
 ##################################################################
 
-all: libHYPRE_mli.a 
+all: libHYPRE_mli_mat.a 
  
 driver_matmul: driver_matmul.o libHYPRE_mli.a
 	@echo  "Linking" $@ "... "
@@ -93,14 +93,14 @@ clean:
 	@rm -f *.o
 
 veryclean: clean
-	@rm -f libHYPRE_parcsr_ls.a
+	@rm -f libHYPRE_mli_mat.a
 	@rm -f driver 
 
 ##################################################################
 # Rules
 ##################################################################
 
-libHYPRE_mli.a: ${OBJS}
+libHYPRE_mli_mat.a: ${OBJS}
 	@echo  "Building $@ ... "
 	ar -rcu $@ ${OBJS}
 	@RANLIB@ $@
