@@ -71,8 +71,6 @@ int MLI_Solver_MLS::setup(MLI_Matrix *mat)
       MLI_Utils_ComputeExtremeRitzValues( (hypre_ParCSRMatrix *)
                               Amat_->getMatrix(), ritzValues, 0 );
       maxEigen_ = ritzValues[0];
-printf("MLS : maxEigen_ boosted another 20 percent\n");
-maxEigen_ *= 1.2;
       delete [] ritzValues;
    }
 
@@ -80,7 +78,6 @@ maxEigen_ *= 1.2;
     * compute the coefficients
     *-----------------------------------------------------------------*/
 
-printf("MLS : maxEigen_, deg = %e %d\n", maxEigen_, mlsDeg_);
    for ( i = 0; i < MAX_DEG; i++ ) mlsOm_[i] = 0.e0;
    rho  = mlsOver_ * maxEigen_;
    cosData1 = 1.e0 / (2.e0 * (double) mlsDeg_ + 1.e0);
