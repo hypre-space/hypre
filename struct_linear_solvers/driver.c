@@ -306,7 +306,7 @@ main( int   argc,
    }
 
    HYPRE_AssembleStructMatrix(A);
-#if 1
+#if 0
    HYPRE_PrintStructMatrix("driver.out.A", A, 0);
 #endif
 
@@ -329,7 +329,7 @@ main( int   argc,
       HYPRE_SetStructVectorBoxValues(b, ilower[ib], iupper[ib], values);
    }
    HYPRE_AssembleStructVector(b);
-#if 1
+#if 0
    HYPRE_PrintStructVector("driver.out.b", b, 0);
 #endif
 
@@ -344,7 +344,7 @@ main( int   argc,
       HYPRE_SetStructVectorBoxValues(x, ilower[ib], iupper[ib], values);
    }
    HYPRE_AssembleStructVector(x);
-#if 1
+#if 0
    HYPRE_PrintStructVector("driver.out.x0", x, 0);
 #endif
  
@@ -459,7 +459,7 @@ main( int   argc,
     * Print the solution and other info
     *-----------------------------------------------------------*/
 
-#if 1
+#if 0
    HYPRE_PrintStructVector("driver.out.x", x, 0);
 #endif
 
