@@ -42,32 +42,33 @@ typedef struct
 Secret;
 
 /*--------------------------------------------------------------------------
- * HYPRE_ParCSRParaSailsCreate
+ * HYPRE_ParCSRParaSailsCreate - Return a ParaSails preconditioner object 
+ * "solver".  The default parameters for the preconditioner are also set,
+ * so a call to HYPRE_ParCSRParaSailsSetParams is not absolutely necessary.
  *--------------------------------------------------------------------------*/
 
 int 
 HYPRE_ParCSRParaSailsCreate( MPI_Comm comm, HYPRE_Solver *solver )
 {
-   int ierr = 0;
    Secret *secret;
    
    secret = (Secret *) malloc(sizeof(Secret));
 
    if (secret == NULL)
-       ierr = 1;
+       return 1;
 
    secret->comm    = comm;
    secret->obj     = (HYPRE_ParaSails) NULL;
-   secret->thresh  = 0.75; /* defaults */
+   secret->thresh  = 0.1; /* defaults */
    secret->nlevels = 1;
 
    *solver = (HYPRE_Solver) secret;
 
-   return ierr;
+   return 0;
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_ParCSRParaSailsDestroy
+ * HYPRE_ParCSRParaSailsDestroy - Destroy a ParaSails object.
  *--------------------------------------------------------------------------*/
 
 int 
@@ -85,7 +86,7 @@ HYPRE_ParCSRParaSailsDestroy( HYPRE_Solver solver )
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_ParCSRParaSailsSetup
+ * HYPRE_ParCSRParaSailsSetup - Set up function for ParaSails.
  *--------------------------------------------------------------------------*/
 
 int 
@@ -110,7 +111,7 @@ HYPRE_ParCSRParaSailsSetup( HYPRE_Solver solver,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_ParCSRParaSailsSolve
+ * HYPRE_ParCSRParaSailsSolve - Solve function for ParaSails.
  *--------------------------------------------------------------------------*/
 
 int 
@@ -132,7 +133,8 @@ HYPRE_ParCSRParaSailsSolve( HYPRE_Solver solver,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_ParCSRParaSailsSetParams
+ * HYPRE_ParCSRParaSailsSetParams - Set the parameters "thresh" and "nlevels"
+ * for a ParaSails object.
  *--------------------------------------------------------------------------*/
 
 int
