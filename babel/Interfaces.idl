@@ -342,6 +342,12 @@ package Hypre {
      int GetPreconditionedResidual (out Vector r);
   }
 
+  /**
+   * The GetRow method will allocate space for its two output arrays on
+   * the first call.  The space will be reused on subsequent calls.
+   * Thus the user must not delete them, yet must not depend on the
+   * data from GetRow to persist beyond the next GetRow call.
+   */
   interface CoefficientAccess 
   {
      int GetRow (in int row, 

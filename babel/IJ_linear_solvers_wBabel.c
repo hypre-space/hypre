@@ -10,6 +10,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
+#include <assert.h>
 
 #include "utilities.h"
 #include "HYPRE.h"
@@ -58,7 +59,7 @@ main( int   argc,
    int                 indx, rest, tms;
    int                 max_levels = 25;
    int                 num_iterations; 
-   double              norm;
+   double              norm, tmp;
    double              final_res_norm;
    void               *object;
    SIDL_BaseInterface  Hypre_object;
@@ -70,6 +71,7 @@ main( int   argc,
    Hypre_IJBuildVector Hypre_ij_b;
    Hypre_IJBuildVector Hypre_ij_x;
    Hypre_IJBuildVector Hypre_ij_y;
+   Hypre_IJBuildVector Hypre_ij_y2;
 
    HYPRE_ParCSRMatrix  parcsr_A;
    Hypre_ParCSRMatrix  Hypre_parcsr_A;
@@ -78,7 +80,8 @@ main( int   argc,
    Hypre_ParCSRVector     Hypre_b;
    Hypre_ParCSRVector     Hypre_x;
    Hypre_ParCSRVector     Hypre_y;
-   Hypre_Vector        y;
+   Hypre_ParCSRVector     Hypre_y2;
+   Hypre_Vector        y,Hypre_Vector_x;
 
    HYPRE_Solver        amg_solver;
    HYPRE_Solver        pcg_solver;
@@ -994,8 +997,8 @@ main( int   argc,
        /* Loop through all locally stored rows and insert them into ij_matrix */
        for (i=first_local_row; i<= last_local_row; i++)
        {
-         ierr += HYPRE_ParCSRMatrixGetRow( parcsr_A, i, &size,
-                                           &col_inds, &values );
+          ierr += HYPRE_ParCSRMatrixGetRow( parcsr_A, i, &size,
+                                            &col_inds, &values );
          SIDL_int__array_set1( Hypre_row_sizes, 0, size );
          SIDL_int__array_set1( Hypre_ncols, 0, i );
 
@@ -1011,9 +1014,6 @@ main( int   argc,
                                           Hypre_col_inds,
                                           Hypre_values );
 
-         SIDL_int__array_destroy( Hypre_col_inds );
-         SIDL_double__array_destroy( Hypre_values );
-
          ierr += HYPRE_ParCSRMatrixRestoreRow( parcsr_A, i, &size,
                                                &col_inds, &values );
        }
@@ -1022,6 +1022,9 @@ main( int   argc,
      }
 
      ierr += Hypre_IJBuildMatrix_Assemble( Hypre_ij_A );
+
+     SIDL_int__array_destroy( Hypre_col_inds );
+     SIDL_double__array_destroy( Hypre_values );
 
    }
 
@@ -1595,7 +1598,8 @@ main( int   argc,
  
 
    /*-----------------------------------------------------------
-    * Matrix-Vector and Vector Operation Debugging code from Rob Falgout's sstruct tests
+    * Matrix-Vector and Vector Operation Debugging code begun by adapting
+    * from Rob Falgout's sstruct tests
     *-----------------------------------------------------------*/
 
 #define DEBUG 1
@@ -1604,7 +1608,7 @@ main( int   argc,
       FILE *file;
       char  filename[255];
                        
-      /* result is 1's on the interior of the grid */
+      /*  Apply, y=A*b: result is 1's on the interior of the grid */
       Hypre_y = Hypre_ParCSRVector__create();
       Hypre_ij_y = (Hypre_IJBuildVector) Hypre_ParCSRVector__cast2
          ( Hypre_y, "Hypre.IJBuildVector" );
@@ -1618,79 +1622,85 @@ main( int   argc,
 
       Hypre_ParCSRMatrix_Apply( Hypre_parcsr_A, Hypre_ParCSRVector__cast2( Hypre_b, "Hypre.Vector" ),
                                 &y );
-      Hypre_ParCSRMatrix_Print( Hypre_parcsr_A, "test.A.out" );
-      Hypre_ParCSRVector_Print( Hypre_y, "test.y.out" );
+      Hypre_ParCSRMatrix_Print( Hypre_parcsr_A, "test.A" );
+      Hypre_ParCSRVector_Print( Hypre_y, "test.apply" );
+      Hypre_IJBuildVector_deleteReference( Hypre_ij_y ); /* delete y */
 
-
-      /* result is all 1's */
-/*
-      hypre_SStructCopy(b, x);
-      HYPRE_SStructVectorPrint("sstruct.out.copy", x, 0);
-*/
-      /* result is all 2's */
-/*
-      hypre_SStructScale(2.0, x);
-      HYPRE_SStructVectorPrint("sstruct.out.scale", x, 0);
-*/
-      /* result is all 0's */
-      Hypre_ParCSRVector_Axpy( Hypre_b, -2.0, Hypre_ParCSRVector__cast2( Hypre_x, "Hypre.Vector" ) );
-/*      HYPRE_SStructVectorPrint("sstruct.out.axpy", x, 0);*/
-
-      /* result is 1's with 0's on some boundaries */
-/*
-      hypre_SStructCopy(b, x);
-      sprintf(filename, "sstruct.out.gatherpre.%05d", myid);
-      file = fopen(filename, "w");
-      for (part = 0; part < data.nparts; part++)
-      {
-         pdata = data.pdata[part];
-         for (var = 0; var < pdata.nvars; var++)
-         {
-            for (box = 0; box < pdata.nboxes; box++)
-            {
-               GetVariableBox(pdata.ilowers[box], pdata.iuppers[box], var,
-                              ilower, iupper);
-               HYPRE_SStructVectorGetBoxValues(x, part, ilower, iupper,
-                                               var, values);
-               fprintf(file, "\nPart %d, var %d, box %d:\n", part, var, box);
-               for (i = 0; i < pdata.boxsizes[box]; i++)
-               {
-                  fprintf(file, "%e\n", values[i]);
-               }
-            }
-         }
+      /* SetValues, x=1; result is all 1's */
+      Hypre_indices = SIDL_int__array_create( 1, &zero, &local_num_cols );
+      Hypre_values = SIDL_double__array_create( 1, &zero, &local_num_cols );
+      for ( i=0; i<local_num_cols; ++i ) {
+         SIDL_int__array_set1( Hypre_indices, i, i );
+         SIDL_double__array_set1( Hypre_values, i, 1.0 );
       }
-      fclose(file);
-*/
-      /* result is all 1's */
-/*
-      HYPRE_SStructVectorGather(x);
-      sprintf(filename, "sstruct.out.gatherpost.%05d", myid);
-      file = fopen(filename, "w");
-      for (part = 0; part < data.nparts; part++)
-      {
-         pdata = data.pdata[part];
-         for (var = 0; var < pdata.nvars; var++)
-         {
-            for (box = 0; box < pdata.nboxes; box++)
-            {
-               GetVariableBox(pdata.ilowers[box], pdata.iuppers[box], var,
-                              ilower, iupper);
-               HYPRE_SStructVectorGetBoxValues(x, part, ilower, iupper,
-                                               var, values);
-               fprintf(file, "\nPart %d, var %d, box %d:\n", part, var, box);
-               for (i = 0; i < pdata.boxsizes[box]; i++)
-               {
-                  fprintf(file, "%e\n", values[i]);
-               }
-            }
-         }
+      Hypre_IJBuildVector_SetValues( Hypre_ij_x, local_num_cols, Hypre_indices, Hypre_values );
+      SIDL_int__array_destroy( Hypre_indices );
+      SIDL_double__array_destroy( Hypre_values );
+      Hypre_ParCSRVector_Print( Hypre_x, "test.setvalues" );
+
+      /* Copy, b=x; result is all 1's */
+      Hypre_Vector_x = (Hypre_Vector)Hypre_ParCSRVector__cast2( Hypre_x, "Hypre.Vector" );
+      Hypre_ParCSRVector_Copy( Hypre_b, Hypre_Vector_x );
+      Hypre_ParCSRVector_Print( Hypre_b, "test.copy" );
+
+      /* Clone y=b; result is all 1's */
+      Hypre_ParCSRVector_Clone( Hypre_b, &y );
+      Hypre_y = Hypre_Vector__cast2( y, "Hypre.ParCSRVector" );
+      Hypre_ParCSRVector_Print( Hypre_y, "test.clone" );
+      Hypre_Vector_deleteReference( y );
+
+      /* Read y2=y; result is all 1's */
+      Hypre_y2 = Hypre_ParCSRVector__create();
+      Hypre_ij_y2 = (Hypre_IJBuildVector) Hypre_ParCSRVector__cast2
+         ( Hypre_y2, "Hypre.IJBuildVector" );
+      Hypre_IJBuildVector_addReference( Hypre_ij_y2 );
+      Hypre_ParCSRVector_deleteReference( Hypre_y2 );
+      ierr += Hypre_IJBuildVector_SetCommunicator( Hypre_ij_y2, &comm );
+      ierr += Hypre_IJBuildVector_Create( Hypre_ij_y2, comm, first_local_col,last_local_col );
+      ierr += Hypre_IJBuildVector_Initialize( Hypre_ij_y2 );
+      Hypre_ParCSRVector_Read( Hypre_y2, "test.clone", comm );
+      Hypre_ParCSRVector_Print( Hypre_y2, "test.read" );
+      Hypre_IJBuildVector_deleteReference( Hypre_ij_y2 );
+
+      /* GetRow, b[i], tested but not printed */
+      Hypre_indices = SIDL_int__array_create( 1, &zero, &local_num_cols );
+      Hypre_values = SIDL_double__array_create( 1, &zero, &local_num_cols );
+      Hypre_ParCSRVector_GetRow( Hypre_b, 6, &local_num_cols, &Hypre_indices, &Hypre_values );
+      tmp = SIDL_double__array_get1( Hypre_values, 0 );
+      assert( tmp == 1.0 );
+      SIDL_int__array_destroy( Hypre_indices );
+      SIDL_double__array_destroy( Hypre_values );
+
+      /* Scale, x=2*x; result is all 2's */
+      Hypre_ParCSRVector_Scale( Hypre_x, 2.0 );
+      Hypre_ParCSRVector_Print( Hypre_x, "test.scale" );
+
+      /* Dot, tmp = b.x; at this point all b[i]==1, all x[i]==2 */
+      Hypre_ParCSRVector_Dot( Hypre_b, Hypre_Vector_x, &tmp );
+      assert( tmp==2*local_num_cols );
+
+      /* Axpy, b=b-0.5*x; result is all 0's */
+      Hypre_ParCSRVector_Axpy( Hypre_b, -0.5, Hypre_Vector_x );
+      Hypre_ParCSRVector_Print( Hypre_b, "test.axpy" );
+
+      /* tested by other parts of this driver program: ParCSRVector_GetObject */
+
+      /* Clear and AddToValues, b=1, which restores its initial value of 1 */
+      Hypre_indices = SIDL_int__array_create( 1, &zero, &local_num_cols );
+      Hypre_values = SIDL_double__array_create( 1, &zero, &local_num_cols );
+      for ( i=0; i<local_num_cols; ++i ) {
+         SIDL_int__array_set1( Hypre_indices, i, i );
+         SIDL_double__array_set1( Hypre_values, i, 1.0 );
       }
-*/
-      /* re-initializes x to 0 */
-/*
-      hypre_SStructAxpy(-1.0, b, x);
-*/
+      Hypre_ParCSRVector_Clear( Hypre_b );
+      Hypre_IJBuildVector_AddToValues( Hypre_ij_b, local_num_cols, Hypre_indices, Hypre_values );
+      SIDL_int__array_destroy( Hypre_indices );
+      SIDL_double__array_destroy( Hypre_values );
+      Hypre_ParCSRVector_Print( Hypre_b, "test.addtovalues" );
+
+      /* Clear,x=0, which restores its initial value of 0 */
+      Hypre_ParCSRVector_Clear( Hypre_x );
+      Hypre_ParCSRVector_Print( Hypre_x, "test.clear" );
    }
 #endif
 
