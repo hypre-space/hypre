@@ -360,10 +360,10 @@ int HYPRE_LSI_SplitDSort2(double *dlist, int nlist, int *ilist, int limit)
    free( iarray1 );
    if ( count1+1 == limit ) return 0;
    else if ( count1+1 < limit )
-      HYPRE_LSI_SplitDSort(&(dlist[count1+1]),count2,&(ilist[count1+1]),
+      HYPRE_LSI_SplitDSort2(&(dlist[count1+1]),count2,&(ilist[count1+1]),
                      limit-count1-1);
    else
-      HYPRE_LSI_SplitDSort( dlist, count1, ilist, limit );
+      HYPRE_LSI_SplitDSort2( dlist, count1, ilist, limit );
    return 0;
 }
 
