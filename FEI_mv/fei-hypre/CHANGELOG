@@ -117,4 +117,5 @@
             - take out iostream.h again because it creates problem on solaris
             - improve slideReduction for intersecting slide surfaces
             - fix resetInitialGuess for Schur reduction
+            - take out diagnostic messages in SuperLU
 
