@@ -23,7 +23,7 @@ CFLAGS =\
  ${PETSC_CFLAGS}\
  -I/usr/local/include\
  -I/home/casc/include\
- -I../includes\
+ -I${HYPRE_DIR}/includes\
  -DHYPRE_MEMORY_CHECK\
  -DHYPRE_DEBUG\
  -g
@@ -51,19 +51,19 @@ LFLAGS =\
  -L/usr/local/lib\
  -L/home/casc/lib\
  -L/home/casc/g77/lib\
- -L../PETScMat_linear_solvers/pilut\
- -L../PETSc_linear_solvers/Block_Preconditioned\
- -L../PETSc_linear_solvers/ParILUT\
- -L../distributed_linear_solvers/pilut\
- -L../distributed_matrix\
- -L../matrix_matrix\
- -L../seq_linear_solvers/ilut\
- -L../seq_linear_solvers/ict\
- -L../seq_linear_solvers/sparskit\
- -L../seq_matrix_vector \
- -L../struct_linear_solvers_andy \
- -L../struct_matrix_vector_andy\
- -L../utilities\
+ -L${HYPRE_DIR}/PETScMat_linear_solvers/pilut\
+ -L${HYPRE_DIR}/PETSc_linear_solvers/Block_Preconditioned\
+ -L${HYPRE_DIR}/PETSc_linear_solvers/ParILUT\
+ -L${HYPRE_DIR}/distributed_linear_solvers/pilut\
+ -L${HYPRE_DIR}/distributed_matrix\
+ -L${HYPRE_DIR}/matrix_matrix\
+ -L${HYPRE_DIR}/seq_linear_solvers/ilut\
+ -L${HYPRE_DIR}/seq_linear_solvers/ict\
+ -L${HYPRE_DIR}/seq_linear_solvers/sparskit\
+ -L${HYPRE_DIR}/seq_matrix_vector \
+ -L${HYPRE_DIR}/struct_linear_solvers_andy \
+ -L${HYPRE_DIR}/struct_matrix_vector_andy\
+ -L${HYPRE_DIR}/utilities\
  -lHYPRE_StructSolver \
  -lHYPREPETScSolverParILUT \
  -lHYPREPETScMatPilutSolver \
