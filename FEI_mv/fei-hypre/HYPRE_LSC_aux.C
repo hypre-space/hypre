@@ -47,6 +47,7 @@
 #include "HYPRE_LSI_poly.h"
 #include "HYPRE_LSI_block.h"
 #include "HYPRE_LSI_Uzawa.h"
+#include "HYPRE_LSI_Dsuperlu.h"
 
 //---------------------------------------------------------------------------
 // FEI include files
@@ -3910,6 +3911,38 @@ void HYPRE_LinSysCore::solveUsingSuperLUX(int& status)
    status = -1;
    printf("HYPRE_LSC::solveUsingSuperLUX : not available.\n");
 #endif
+}
+
+//***************************************************************************
+// this function solve the incoming linear system using distributed SuperLU
+//---------------------------------------------------------------------------
+
+void HYPRE_LinSysCore::solveUsingDSuperLU(int& status)
+{
+   int                ierr;
+   double             rnorm;
+   HYPRE_ParCSRMatrix A_csr;
+   HYPRE_ParVector    x_csr, b_csr, r_csr;
+
+   HYPRE_IJMatrixGetObject(currA_, (void **) &A_csr);
+   HYPRE_IJVectorGetObject(currX_, (void **) &x_csr);
+   HYPRE_IJVectorGetObject(currB_, (void **) &b_csr);
+   HYPRE_IJVectorGetObject(currR_, (void **) &r_csr);
+
+   HYPRE_LSI_DSuperLUCreate(comm_, &HYSolver_);  
+   HYPRE_LSI_DSuperLUSetOutputLevel(HYSolver_, HYOutputLevel_);
+   HYPRE_LSI_DSuperLUSetup(HYSolver_, A_csr, b_csr, x_csr);
+   HYPRE_LSI_DSuperLUSolve(HYSolver_, A_csr, b_csr, x_csr);
+   HYPRE_LSI_DSuperLUDestroy(HYSolver_);
+   ierr = HYPRE_ParVectorCopy( b_csr, r_csr );
+   assert(!ierr);
+   ierr = HYPRE_ParCSRMatrixMatvec( -1.0, A_csr, x_csr, 1.0, r_csr );
+   assert(!ierr);
+   ierr = HYPRE_ParVectorInnerProd( r_csr, r_csr, &rnorm);
+   assert(!ierr);
+   rnorm = sqrt( rnorm );
+   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 )
+      printf("HYPRE_LSC::solveUsingDSuperLU - FINAL NORM = %e.\n",rnorm);
 }
 
 //***************************************************************************

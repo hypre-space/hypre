@@ -36,7 +36,7 @@
 // -------------------------------------------------------------------------
 
 enum HYsolverID {HYPCG,HYGMRES,HYFGMRES,HYCGSTAB,HYCGSTABL,HYTFQMR,HYBICGS,
-                 HYSYMQMR,HYAMG,HYSUPERLU,HYSUPERLUX,HYY12M,HYAMGE};
+                 HYSYMQMR,HYAMG,HYSUPERLU,HYSUPERLUX,HYDSUPERLU,HYY12M,HYAMGE};
 enum HYpreconID {HYIDENTITY,HYDIAGONAL,HYPILUT,HYPARASAILS,HYBOOMERAMG,HYML,
                  HYDDILUT,HYPOLY,HYDDICT,HYSCHWARZ,HYEUCLID,HYBLOCK,HYMLI,
                  HYUZAWA};
@@ -415,6 +415,7 @@ class HYPRE_LinSysCore
    void   solveUsingBoomeramg(int&);
    void   solveUsingSuperLU(int&);
    void   solveUsingSuperLUX(int&);
+   void   solveUsingDSuperLU(int&);
    void   solveUsingY12M(int&);
    void   solveUsingAMGe(int&);
    void   buildSlideReducedSystem();

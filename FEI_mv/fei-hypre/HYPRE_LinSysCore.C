@@ -2823,6 +2823,17 @@ void HYPRE_LinSysCore::selectSolver(char* name)
       strcpy( HYSolverName_, name );
       HYSolverID_ = HYSUPERLUX;
    }
+   else if ( !strcmp(name, "dsuperlu") )
+   {
+      strcpy( HYSolverName_, name );
+#ifdef HAVE_DSUPERLU
+      HYSolverID_ = HYDSUPERLU;
+#else
+      printf("HYPRE_LinSysCore:: DSuperLU not available.\n");
+      printf("                   default solver to be GMRES.\n");
+      HYSolverID_ = HYGMRES;
+#endif
+   }
    else if ( !strcmp(name, "y12m") )
    {
       strcpy( HYSolverName_, name );
@@ -3775,6 +3786,29 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
 #endif      
            numIterations = 1;
            //printf("SuperLUX solver - return status = %d\n",status);
+           break;
+
+      //----------------------------------------------------------------
+      // choose distributed SuperLU 
+      //----------------------------------------------------------------
+
+      case HYDSUPERLU :
+#ifdef HAVE_DSUPERLU
+           if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0 )
+           {
+              printf("***************************************************\n");
+              printf("* distributed SuperLU solver \n");
+              printf("*--------------------------------------------------\n");
+           }
+           solveUsingDSuperLU(status);
+#ifndef NOFEI
+           if ( status == 1 ) status = 0; 
+#endif      
+           numIterations = 1;
+#else
+           printf("distributed SuperLU not available.\n");
+           exit(1);
+#endif
            break;
 
       //----------------------------------------------------------------
