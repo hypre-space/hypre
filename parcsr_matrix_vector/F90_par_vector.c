@@ -55,8 +55,8 @@ hypre_F90_IFACE(hypre_setparvectorpartitioningo)( long int *vector,
                                                   int      *ierr    )
 {
    *ierr = (int) ( hypre_SetParVectorPartitioningOwner
-                         ( (HYPRE_ParVector) *vector,
-                           (int)             *owns_partitioning ) );
+                         ( (hypre_ParVector *) *vector,
+                           (int)               *owns_partitioning ) );
 }
 
 /*--------------------------------------------------------------------------
