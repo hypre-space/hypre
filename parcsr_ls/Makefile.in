@@ -116,7 +116,7 @@ FILES =\
  HYPRE_parcsr_schwarz.c\
  HYPRE_parcsr_ParaSails.c\
  HYPRE_parcsr_Euclid.c\
- F90_par_laplace.c\
+ F90_HYPRE_par_laplace.c\
  F90_HYPRE_parcsr_amg.c\
  F90_HYPRE_parcsr_bicgstab.c\
  F90_HYPRE_parcsr_cgnr.c\
