@@ -294,10 +294,8 @@ int MLI_Solver_HSGS::calcOmega()
    hypre_ParCSRMatrix *A;
    hypre_ParVector    *vTemp;
    hypre_ParAMGData   *amgData;
-   MPI_Comm           comm;
 
    A = (hypre_ParCSRMatrix *) Amat_->getMatrix();
-   comm       = hypre_ParCSRMatrixComm(A);
    amgData = (hypre_ParAMGData *) hypre_BoomerAMGCreate();
    amgData->CF_marker_array = new int*[1];
    amgData->CF_marker_array[0] = NULL;
