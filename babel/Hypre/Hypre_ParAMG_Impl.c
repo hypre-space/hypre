@@ -198,12 +198,22 @@ impl_Hypre_ParAMG_SetDoubleArrayParameter(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.ParAMG.SetDoubleArrayParameter) */
   /* Insert the implementation of the SetDoubleArrayParameter method here... */
-   int ierr = 0;
+   int ierr = 0, stride, dim;
    HYPRE_Solver solver;
    struct Hypre_ParAMG__data * data;
 
    data = Hypre_ParAMG__get_data( self );
    solver = data->solver;
+
+   dim = SIDL_double__array_dimen( value );
+/* strides don't seem to be supported in babel 0.6:   stride = SIDL_double__array_stride( value, 0 );
+   assert( stride==1 );*/
+
+   if ( name=="RelaxWeight" || name=="Relax Weight" ) {
+      assert( dim==1 );
+      HYPRE_BoomerAMGSetRelaxWeight( solver, value->d_firstElement );
+   }
+   else ierr=1;
 
    return ierr;
   /* DO-NOT-DELETE splicer.end(Hypre.ParAMG.SetDoubleArrayParameter) */
@@ -231,6 +241,25 @@ impl_Hypre_ParAMG_SetDoubleParameter(
    data = Hypre_ParAMG__get_data( self );
    solver = data->solver;
 
+   if ( name=="Tolerance" || name=="Tol" ) {
+      HYPRE_BoomerAMGSetTol( solver, value );
+   }
+   else if ( name=="StrongThreshold" || name=="Strong Threshold" ) {
+      HYPRE_BoomerAMGSetStrongThreshold( solver, value );
+   }
+   else if ( name=="TruncFactor" || name=="Trunc Factor" || name=="Truncation Factor" ) {
+      HYPRE_BoomerAMGSetTruncFactor( solver, value );
+   }
+   else if ( name=="SchwarzRlxWeight" || name=="Schwarz Rlx Weight" ||
+             name=="SchwarzRelaxWeight" || name=="Schwarz Relax Weight" ||
+             name=="SchwarzRelaxationWeight" || name=="Schwarz Relaxation Weight" ){
+      HYPRE_BoomerAMGSetSchwarzRlxWeight( solver, value );
+   }
+   else if ( name=="MaxRowSum" || name=="Max Row Sum" ) {
+      HYPRE_BoomerAMGSetMaxRowSum( solver, value );
+   }
+   else ierr=1;
+
    return ierr;
   /* DO-NOT-DELETE splicer.end(Hypre.ParAMG.SetDoubleParameter) */
 }
@@ -251,11 +280,56 @@ impl_Hypre_ParAMG_SetIntArrayParameter(
   /* DO-NOT-DELETE splicer.begin(Hypre.ParAMG.SetIntArrayParameter) */
   /* Insert the implementation of the SetIntArrayParameter method here... */
    int ierr = 0;
+   int stride, dim, lb0, ub0, lb1, ub1, i, j;
+   int * data1_c;  /* the data in a C 1d array */
+   int ** data2_c; /* the data in a C 2d array */
    HYPRE_Solver solver;
    struct Hypre_ParAMG__data * data;
 
    data = Hypre_ParAMG__get_data( self );
    solver = data->solver;
+   data1_c = value->d_firstElement;
+
+   dim = SIDL_int__array_dimen( value );
+/* strides don't seem to be supported in babel 0.6:   stride = SIDL_int__array_stride( value, 0 );
+   assert( stride==1 );*/
+
+   if ( name=="NumGridSweeps" || name=="Num Grid Sweeps" ||
+             name=="NumberGridSweeps" || name=="Number Grid Sweeps" ||
+             name=="Number of Grid Sweeps" ) {
+      assert( dim==1 );
+      HYPRE_BoomerAMGSetNumGridSweeps( solver, data1_c );
+   }
+   else if ( name=="GridRelaxType" || name=="Grid Relax Type" ) {
+      assert( dim==1 );
+      HYPRE_BoomerAMGSetGridRelaxType( solver, data1_c );
+   }
+   else if ( name=="SmoothOption" || name=="Smooth Option" ) {
+      assert( dim==1 );
+      HYPRE_BoomerAMGSetSmoothOption( solver, data1_c );
+   }
+   else if ( name=="GridRelaxPoints" || name=="Grid Relax Points" ) {
+      assert( dim==2 );
+/* strides don't seem to be supported in babel 0.6:      stride = SIDL_int__array_stride( value, 1 );
+   assert( stride==1 );*/
+      lb0 = SIDL_int__array_lower( value, 0 );
+      ub0 = SIDL_int__array_upper( value, 0 );
+      lb1 = SIDL_int__array_lower( value, 1 );
+      ub1 = SIDL_int__array_upper( value, 1 );
+      assert( lb0==0 );
+      assert( lb1==0 );
+      data2_c = hypre_CTAlloc(int *,ub0+1);
+      for ( i=0; i<4; ++i ) {
+         data2_c[i] = hypre_CTAlloc(int,ub1+1);
+         for ( j=0; j<ub1+1; ++j ) data2_c[i][j] == SIDL_int__array_get2( value, i, j );
+      };
+      HYPRE_BoomerAMGSetGridRelaxPoints( solver, data2_c );
+   }
+   else if ( name=="DofFunc" || name=="Dof Func" || name=="DOF Func" ) {
+      assert( dim==1 );
+      HYPRE_BoomerAMGSetDofFunc( solver, data1_c );
+   }
+   else ierr=1;
 
    return ierr;
   /* DO-NOT-DELETE splicer.end(Hypre.ParAMG.SetIntArrayParameter) */
@@ -283,21 +357,11 @@ impl_Hypre_ParAMG_SetIntParameter(
    data = Hypre_ParAMG__get_data( self );
    solver = data->solver;
 
-/* the following have not been checked for whether they are int >>>>> */
    if ( name=="CoarsenType" || name=="Coarsen Type" ) {
       HYPRE_BoomerAMGSetCoarsenType( solver, value );      
    }
    else if ( name=="MeasureType" || name=="Measure Type" ) {
       HYPRE_BoomerAMGSetMeasureType( solver, value );
-   }
-   else if ( name=="Tolerance" || name=="Tol" ) {
-      HYPRE_BoomerAMGSetTol( solver, value );
-   }
-   else if ( name=="StrongThreshold" || name=="Strong Threshold" ) {
-      HYPRE_BoomerAMGSetStrongThreshold( solver, value );
-   }
-   else if ( name=="TruncFactor" || name=="Trunc Factor" || name=="Truncation Factor" ) {
-      HYPRE_BoomerAMGSetTruncFactor( solver, value );
    }
    else if ( name=="Logging" ) {  /* >>> need a way to set the filename */
       HYPRE_BoomerAMGSetLogging( solver, value, "driver.out.log");
@@ -305,36 +369,11 @@ impl_Hypre_ParAMG_SetIntParameter(
    else if ( name=="CycleType" || name=="Cycle Type" ) {
       HYPRE_BoomerAMGSetCycleType( solver, value );
    }
-   else if ( name=="NumGridSweeps" || name=="Num Grid Sweeps" ||
-             name=="NumberGridSweeps" || name=="Number Grid Sweeps" ||
-             name=="Number of Grid Sweeps" ) {
-      assert( "cannot set an array here"==NULL ); /* >>> need a way to set an array */
-      /* HYPRE_BoomerAMGSetNumGridSweeps( solver, value );*/
-   }
-   else if ( name=="GridRelaxType" || name=="Grid Relax Type" ) {
-      assert( "cannot set an array here"==NULL ); /* >>> need a way to set an array */
-      /* HYPRE_BoomerAMGSetGridRelaxType( solver, value );*/
-   }
-   else if ( name=="RelaxWeight" || name=="Relax Weight" ) {
-      assert( "cannot set an array here"==NULL ); /* >>> need a way to set an array */
-      /* HYPRE_BoomerAMGSetRelaxWeight( solver, value );*/
-   }
-   else if ( name=="SmoothOption" || name=="Smooth Option" ) {
-      assert( "cannot set an array here"==NULL ); /* >>> need a way to set an array */
-      /* HYPRE_BoomerAMGSetSmoothOption( solver, value );*/
-   }
    else if ( name=="SmothNumSweep" || name=="Smooth Num Sweep" ) {
       HYPRE_BoomerAMGSetSmoothNumSweep( solver, value );
    }
-   else if ( name=="GridRelaxPoints" || name=="Grid Relax Points" ) {
-      assert( "cannot set an array here"==NULL ); /* >>> need a way to set an array */
-      /* HYPRE_BoomerAMGSetGridRelaxPoints(amg_solver, grid_relax_points);*/
-   }
    else if ( name=="MaxLevels" || name=="Max Levels" ) {
       HYPRE_BoomerAMGSetMaxLevels( solver, value );
-   }
-   else if ( name=="MaxRowSum" || name=="Max Row Sum" ) {
-      HYPRE_BoomerAMGSetMaxRowSum( solver, value );
    }
    else if ( name=="DebugFlag" || name=="Debug Flag" ) {
       HYPRE_BoomerAMGSetDebugFlag( solver, value );
@@ -348,19 +387,11 @@ impl_Hypre_ParAMG_SetIntParameter(
    else if ( name=="DomainType" || name=="Domain Type" ) {
       HYPRE_BoomerAMGSetDomainType( solver, value );
    }
-   else if ( name=="SchwarzRlxWeight" || name=="Schwarz Rlx Weight" ||
-             name=="SchwarzRelaxWeight" || name=="Schwarz Relax Weight" ||
-             name=="SchwarzRelaxationWeight" || name=="Schwarz Relaxation Weight" ){
-      HYPRE_BoomerAMGSetSchwarzRlxWeight( solver, value );
-   }
    else if ( name=="NumFunctions" || name=="Num Functions" ||
              name=="NumberFunctions" || name=="Number Functions" ) {
       HYPRE_BoomerAMGSetNumFunctions( solver, value );
    }
-   else if ( name=="DofFunc" || name=="Dof Func" || name=="DOF Func" ) {
-      assert( "cannot set an array here"==NULL ); /* >>> need a way to set an array */
-      /* HYPRE_BoomerAMGSetDofFunc( solver, value );*/
-   };
+   else ierr=1;
 
    return ierr;
   /* DO-NOT-DELETE splicer.end(Hypre.ParAMG.SetIntParameter) */
@@ -452,6 +483,8 @@ impl_Hypre_ParAMG_SetStringParameter(
 
    data = Hypre_ParAMG__get_data( self );
    solver = data->solver;
+
+   ierr=1; /* There is no string parameter */
 
    return ierr;
   /* DO-NOT-DELETE splicer.end(Hypre.ParAMG.SetStringParameter) */
