@@ -161,9 +161,6 @@ hypre_PFMGBuildCoarseOp7( hypre_StructMatrix *A,
    hypre_Index           index;
    hypre_Index           index_temp;
 
-   hypre_StructStencil  *fine_stencil;
-   int                   fine_stencil_size;
-
    hypre_StructGrid     *fgrid;
    int                  *fgrid_ids;
    hypre_StructGrid     *cgrid;
@@ -181,7 +178,6 @@ hypre_PFMGBuildCoarseOp7( hypre_StructMatrix *A,
 
    hypre_Box            *A_dbox;
    hypre_Box            *P_dbox;
-   hypre_Box            *R_dbox;
    hypre_Box            *RAP_dbox;
 
    double               *pa, *pb;
@@ -196,15 +192,11 @@ hypre_PFMGBuildCoarseOp7( hypre_StructMatrix *A,
    int                   iA, iAm1, iAp1;
    int                   iAc;
    int                   iP, iPm1, iPp1;
-   int                   iR;
                       
    int                   zOffsetA; 
    int                   zOffsetP; 
                       
    int                   ierr = 0;
-
-   fine_stencil = hypre_StructMatrixStencil(A);
-   fine_stencil_size = hypre_StructStencilSize(fine_stencil);
 
    stridef = cstride;
    hypre_SetIndex(stridec, 1, 1, 1);
@@ -231,7 +223,6 @@ hypre_PFMGBuildCoarseOp7( hypre_StructMatrix *A,
 
          A_dbox = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(A), fi);
          P_dbox = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(P), fi);
-         R_dbox = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(R), fi);
          RAP_dbox = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(RAP), ci);
 
          /*-----------------------------------------------------------------
