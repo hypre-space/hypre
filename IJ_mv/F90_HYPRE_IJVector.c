@@ -42,6 +42,34 @@ hypre_F90_IFACE(hypre_freeijvector)( long int *vector,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_SetIJVectorPartitioning
+ *--------------------------------------------------------------------------*/
+
+void 
+hypre_F90_IFACE(hypre_setijvectorpartitioning)( long int *vector,
+                                                int      *partitioning,
+                                                int      *ierr    )
+{
+   *ierr = (int) ( HYPRE_SetIJVectorPartitioning( (HYPRE_IJVector) *vector,
+                                                  (int *)           partitioning ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_SetIJVectorLocalPartitioning
+ *--------------------------------------------------------------------------*/
+
+void 
+hypre_F90_IFACE(hypre_setijvectorlocalpartition)( long int *vector,
+                                                  int      *vec_start,
+                                                  int      *vec_stop,
+                                                  int      *ierr    )
+{
+   *ierr = (int) ( HYPRE_SetIJVectorLocalPartitioning( (HYPRE_IJVector) *vector,
+                                                       (int)             vec_start,
+                                                       (int)             vec_stop ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_InitializeIJVector
  *--------------------------------------------------------------------------*/
 
