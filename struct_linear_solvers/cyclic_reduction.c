@@ -11,10 +11,10 @@
  *
  *****************************************************************************/
 
-#include "headers.h"
 #ifdef HYPRE_USE_PTHREADS
 #include "box_pthreads.h"
 #endif
+#include "headers.h"
 /*--------------------------------------------------------------------------
  * Macros
  *--------------------------------------------------------------------------*/
@@ -111,7 +111,13 @@ hypre_CyclicReductionInitialize( MPI_Comm  comm )
 
    (cyc_red_data -> comm) = comm;
    (cyc_red_data -> cdir) = 0;
+#ifdef HYPRE_USE_PTHREADS
+   hypre_TimingThreadWrapper({
+      (cyc_red_data -> time_index)  = hypre_InitializeTiming("CyclicReduction");
+   });
+#else
    (cyc_red_data -> time_index)  = hypre_InitializeTiming("CyclicReduction");
+#endif
 
    /* set defaults */
    hypre_SetIndex((cyc_red_data -> base_index), 0, 0, 0);
@@ -790,7 +796,14 @@ hypre_CyclicReduction( void               *cyc_red_vdata,
                       
    int                   ierr = 0;
 
+#ifdef HYPRE_USE_PTHREADS
+   hypre_TimingThreadWrapper({
+      hypre_BeginTiming(cyc_red_data -> time_index);
+   });
+#else
    hypre_BeginTiming(cyc_red_data -> time_index);
+#endif
+
 
    /*--------------------------------------------------
     * Initialize some things
@@ -1070,9 +1083,15 @@ hypre_CyclicReduction( void               *cyc_red_vdata,
    /*-----------------------------------------------------
     * Finalize some things
     *-----------------------------------------------------*/
-
+#ifdef HYPRE_USE_PTHREADS
+   hypre_TimingThreadWrapper({
+      hypre_IncFLOPCount(cyc_red_data -> solve_flops);
+      hypre_EndTiming(cyc_red_data -> time_index);
+   });
+#else
    hypre_IncFLOPCount(cyc_red_data -> solve_flops);
    hypre_EndTiming(cyc_red_data -> time_index);
+#endif
 
    return ierr;
 }
@@ -1136,7 +1155,13 @@ hypre_CyclicReductionFinalize( void *cyc_red_vdata )
       hypre_TFree(cyc_red_data -> down_compute_pkg_l);
       hypre_TFree(cyc_red_data -> up_compute_pkg_l);
 
+#ifdef HYPRE_USE_PTHREADS
+      hypre_TimingThreadWrapper({
+         hypre_FinalizeTiming(cyc_red_data -> time_index);
+      });
+#else
       hypre_FinalizeTiming(cyc_red_data -> time_index);
+#endif
       hypre_TFree(cyc_red_data);
    }
 

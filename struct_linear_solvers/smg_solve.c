@@ -84,8 +84,13 @@ hypre_SMGSolve( void               *smg_vdata,
                     
    int                   ierr = 0;
 
+#ifdef HYPRE_USE_PTHREADS
+   hypre_TimingThreadWrapper({
+      hypre_BeginTiming(smg_data -> time_index);
+   });
+#else
    hypre_BeginTiming(smg_data -> time_index);
-
+#endif
    /*-----------------------------------------------------
     * Do V-cycles:
     *   For each index l, "fine" = l, "coarse" = (l+1)
@@ -264,7 +269,13 @@ hypre_SMGSolve( void               *smg_vdata,
       (smg_data -> num_iterations) = (i + 1);
    }
 
+#ifdef HYPRE_USE_PTHREADS
+   hypre_TimingThreadWrapper({
+      hypre_EndTiming(smg_data -> time_index);
+   });
+#else
    hypre_EndTiming(smg_data -> time_index);
+#endif
 
    return ierr;
 }

@@ -11,11 +11,11 @@
  *
  *****************************************************************************/
 
-#include "headers.h"
-#include "smg.h"
 #ifdef HYPRE_USE_PTHREADS
 #include "box_pthreads.h"
 #endif
+#include "headers.h"
+#include "smg.h"
 
 /*--------------------------------------------------------------------------
  * hypre_SMGRestrictData data structure
@@ -42,8 +42,14 @@ hypre_SMGRestrictInitialize( )
    hypre_SMGRestrictData *restrict_data;
 
    restrict_data = hypre_CTAlloc(hypre_SMGRestrictData, 1);
+#ifdef HYPRE_USE_PTHREADS
+   hypre_TimingThreadWrapper({
+      (restrict_data -> time_index)  = hypre_InitializeTiming("SMGRestrict");
+   });
+#else
    (restrict_data -> time_index)  = hypre_InitializeTiming("SMGRestrict");
-
+#endif
+   
    return (void *) restrict_data;
 }
 
@@ -173,7 +179,13 @@ hypre_SMGRestrict( void               *restrict_vdata,
    int                     compute_i, i, j;
    int                     loopi, loopj, loopk;
 
+#ifdef HYPRE_USE_PTHREADS
+   hypre_TimingThreadWrapper({
+      hypre_BeginTiming(restrict_data -> time_index);
+   });
+#else
    hypre_BeginTiming(restrict_data -> time_index);
+#endif
 
    /*-----------------------------------------------------------------------
     * Initialize some things.
@@ -253,8 +265,15 @@ hypre_SMGRestrict( void               *restrict_vdata,
     * Return
     *-----------------------------------------------------------------------*/
 
+#ifdef HYPRE_USE_PTHREADS
+   hypre_TimingThreadWrapper({
+      hypre_IncFLOPCount(4*hypre_StructVectorGlobalSize(rc));
+      hypre_EndTiming(restrict_data -> time_index);
+   });
+#else
    hypre_IncFLOPCount(4*hypre_StructVectorGlobalSize(rc));
    hypre_EndTiming(restrict_data -> time_index);
+#endif
 
    return ierr;
 }
@@ -273,7 +292,13 @@ hypre_SMGRestrictFinalize( void *restrict_vdata )
    if (restrict_data)
    {
       hypre_FreeComputePkg(restrict_data -> compute_pkg);
+#ifdef HYPRE_USE_PTHREADS
+      hypre_TimingThreadWrapper({
+         hypre_FinalizeTiming(restrict_data -> time_index);
+      });
+#else
       hypre_FinalizeTiming(restrict_data -> time_index);
+#endif
       hypre_TFree(restrict_data);
    }
 
