@@ -14,6 +14,7 @@ INCLUDES = -I.. ${HYPRE_INCLUDES} ${BABEL_INCLUDES}
 # these are implementations of the babel objects.
 PREBUILT_SRCS = Hypre_Box.c\
 	Hypre_MPI_Com.c\
+	Hypre_StructSolver.c\
 	Hypre_PCG.c\
 	Hypre_StructJacobi.c\
 	Hypre_StructMatrix.c\
@@ -23,6 +24,7 @@ PREBUILT_SRCS = Hypre_Box.c\
 
 PREBUILT_HDRS = Hypre_Box_Data.h\
 	Hypre_MPI_Com_Data.h\
+	Hypre_StructSolver_Data.h\
 	Hypre_PCG_Data.h\
 	Hypre_StructJacobi_Data.h\
 	Hypre_StructMatrix_Data.h\
@@ -36,6 +38,7 @@ GENERATED_SRCS = Hypre_Box_Skel.c\
 	Hypre_LinearOperator_Skel.c\
 	Hypre_MPI_Com_Skel.c\
 	Hypre_Operator_Skel.c\
+	Hypre_StructSolver_Skel.c\
 	Hypre_PCG_Skel.c\
 	Hypre_PreconditionedSolver_Skel.c\
 	Hypre_PreconditionedSolverBuilder_Skel.c\
@@ -60,6 +63,8 @@ GENERATED_HDRS = Hypre.h\
 	Hypre_MPI_Com_Skel.h\
 	Hypre_Operator.h\
 	Hypre_Operator_Skel.h\
+	Hypre_StructSolver.h\
+	Hypre_StructSolver_Skel.h\
 	Hypre_PCG.h\
 	Hypre_PCG_Skel.h\
 	Hypre_PreconditionedSolver.h\
