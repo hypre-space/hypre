@@ -407,6 +407,15 @@ hypre_SMGSetup( void               *smg_vdata,
    hypre_SMGRelaxSetNumPostRelax( relax_data_l[l], n_post);
    hypre_SMGRelaxSetup(relax_data_l[l], A_l[l], b_l[l], x_l[l]);
 
+   /* set up the residual routine in case of a single grid level */
+   if( l == 0 )
+   {
+      residual_data_l[l] = hypre_SMGResidualInitialize();
+      hypre_SMGResidualSetBase(residual_data_l[l], bindex, bstride);
+      hypre_SMGResidualSetup(residual_data_l[l],
+                             A_l[l], x_l[l], b_l[l], r_l[l]);
+   }
+
    /* set the data for x_l[0] and b_l[0] the way they were */
    hypre_InitializeStructVectorData(b_l[0], b_data);
    hypre_InitializeStructVectorData(x_l[0], x_data);
