@@ -155,6 +155,10 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
        relative_resid = resid_nrm_init;
      }
    }
+   else
+   {
+     relative_resid = 1.;
+   }
 
    if (my_id == 0 && amg_ioutdat > 1 && tol > 0.)
    {     
