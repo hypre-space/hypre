@@ -283,7 +283,7 @@ HYPRE_SStructMatrixInitialize( HYPRE_SStructMatrix matrix )
      iupper = ilower + hypre_SStructGridLocalSize(grid) - 1;
    }
    
-    if(matrix_type == HYPRE_SSTRUCT)
+    if(matrix_type == HYPRE_SSTRUCT || matrix_type == HYPRE_STRUCT)
    {
      ilower = hypre_SStructGridGhstartRank(grid);
      iupper = ilower + hypre_SStructGridGhlocalSize(grid) - 1;
@@ -803,7 +803,7 @@ HYPRE_SStructMatrixSetObjectType( HYPRE_SStructMatrix  matrix,
 
    /* RDF: This and all other modifications to 'split' really belong
     * in the Initialize routine */
-   if (type != HYPRE_SSTRUCT)
+   if (type != HYPRE_SSTRUCT && type != HYPRE_STRUCT)
    {
       for (part = 0; part < nparts; part++)
       {
@@ -831,9 +831,33 @@ HYPRE_SStructMatrixGetObject( HYPRE_SStructMatrix   matrix,
                               void                **object )
 {
    int ierr = 0;
-   HYPRE_IJMatrix ijmatrix = hypre_SStructMatrixIJMatrix(matrix);
 
-   HYPRE_IJMatrixGetObject(ijmatrix, object);
+   int            type     = hypre_SStructMatrixObjectType(matrix);
+   HYPRE_IJMatrix ijmatrix = hypre_SStructMatrixIJMatrix(matrix);
+   hypre_SStructPMatrix *pA;
+   hypre_StructMatrix   *sA;
+   int                   part, var;
+ 
+
+   if (type == HYPRE_PARCSR)
+   {
+       HYPRE_IJMatrixGetObject(ijmatrix, object);
+   }
+
+   else if (type == HYPRE_SSTRUCT)
+   {
+      *object= matrix;
+   }
+
+   else if (type == HYPRE_STRUCT)
+   {
+      /* only one part & one variable */
+      part= 0;
+      pA  = hypre_SStructMatrixPMatrix(matrix, part);
+      var = 0;
+      sA  = hypre_SStructPMatrixSMatrix(pA, var, var);
+     *object= sA;
+   }
 
    return ierr;
 }
