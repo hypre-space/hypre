@@ -238,10 +238,16 @@ is enables mpicc will be the preferred compiler for C, while
 mpiCC or mpicxx will be used for C++, and mpif77 for Fortran.
 
 If when running \kbd{./configure} on AIX you get the error:
+\begin{ttfamily}
+\begin{mdseries}
+\begin{verbatim}
 checking for C compiler default output file name... a.out
 checking whether the C compiler works... configure: error: cannot run C compiled programs.
 If you meant to cross compile, use `--host'.
 See `config.log' for more details.
+\end{verbatim}
+\end{mdseries}
+\end{ttfamily}
 Rerun configure using \kbd{./nopoe ./configure}.
 
 %==========================================================================
