@@ -72,6 +72,12 @@ HYPRE_SetStructMatrixValues( HYPRE_StructMatrix  matrix,
    {
       hypre_IndexD(new_grid_index, d) = grid_index[d];
    }
+   for (d = hypre_StructGridDim(hypre_StructMatrixGrid(new_matrix));
+        d < 3;
+        d++)
+   {
+      hypre_IndexD(new_grid_index, d) = 0;
+   }
 
    ierr = hypre_SetStructMatrixValues( new_matrix,
                                        new_grid_index,
@@ -107,6 +113,13 @@ HYPRE_SetStructMatrixBoxValues( HYPRE_StructMatrix  matrix,
    {
       hypre_IndexD(new_ilower, d) = ilower[d];
       hypre_IndexD(new_iupper, d) = iupper[d];
+   }
+   for (d = hypre_StructGridDim(hypre_StructMatrixGrid(new_matrix));
+        d < 3;
+        d++)
+   {
+      hypre_IndexD(new_ilower, d) = 0;
+      hypre_IndexD(new_iupper, d) = 0;
    }
    new_value_box = hypre_NewBox(new_ilower, new_iupper);
 
