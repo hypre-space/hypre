@@ -615,20 +615,41 @@ hypre_GetIJVectorParLocalComponents(hypre_IJVector *vector,
    data = hypre_VectorData(local_vector);
    if (!ierr && !value_indices)
    {
-      for (j = 0; j < num_values; j++)
+      if (glob_vec_indices)
       {
-         i = glob_vec_indices[j] - vec_start;
-         values[i] = data[i];
+         for (j = 0; j < num_values; j++)
+         {
+            i = glob_vec_indices[j] - vec_start;
+            values[j] = data[i];
+         };
+      }
+      else
+      {
+         for (j = 0; j < num_values; j++)
+         {
+            values[j] = data[j];
+         };
       };
    } 
    else if (!ierr && value_indices)
    {
-      for (j = 0; j < num_values; j++)
+      if (glob_vec_indices)
       {
-         i = glob_vec_indices[j] - vec_start;
-         values[value_indices[i]] = data[i];
+         for (j = 0; j < num_values; j++)
+         {
+            i = glob_vec_indices[j] - vec_start;
+            values[value_indices[j]] = data[i];
+         };
+      }
+      else
+      {
+         for (j = 0; j < num_values; j++)
+         {
+            values[value_indices[j]] = data[j];
+         };
       };
    }; 
+
   
    return ierr;
 }
