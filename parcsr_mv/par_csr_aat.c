@@ -327,6 +327,7 @@ hypre_ParCSRMatrix *hypre_ParCSRAAt( hypre_ParCSRMatrix  *A )
    double          *C_offd_data;
    int             *C_offd_i;
    int             *C_offd_j;
+   int             *new_C_offd_j;
 
    int              C_diag_size;
    int              C_offd_size;
@@ -726,31 +727,41 @@ hypre_ParCSRMatrix *hypre_ParCSRAAt( hypre_ParCSRMatrix  *A )
 
    /*-----------------------------------------------------------------------
     *  Delete 0-columns in C_offd, i.e. generate col_map_offd and reset
-    *  C_offd_j.
+    *  C_offd_j.  Note that (with the indexing we have coming into this
+    *  block) col_map_offd_C[i3]==A_ext_row_map[i3].
     *-----------------------------------------------------------------------*/
 
-   for (i=0; i < C_offd_size; i++)
-	B_marker[C_offd_j[i]] = -2;
-
-   num_cols_offd_C = 0;
-   for (i=0; i < num_rows_diag_A; i++)
-	if (B_marker[i] == -2) 
-		num_cols_offd_C++;
-
-   if (num_cols_offd_C)
-	col_map_offd_C = hypre_CTAlloc(int,num_cols_offd_C);
+   for ( i=0; i<num_rows_diag_A+num_rows_A_ext; ++i )
+      B_marker[i] = -1;
+   for ( i=0; i<C_offd_size; i++ )
+      B_marker[ C_offd_j[i] ] = -2;
 
    count = 0;
-   for (i=0; i < num_rows_diag_A; i++)
-	if (B_marker[i] == -2) 
-	{
-		col_map_offd_C[count] = i;
-		B_marker[i] = count;
-		count++;
-	}
+   for (i=0; i < num_rows_diag_A + num_rows_A_ext; i++) {
+      if (B_marker[i] == -2) {
+         B_marker[i] = count;
+         count++;
+      }
+   }
+   num_cols_offd_C = count;
 
-   for (i=0; i < C_offd_size; i++)
-	C_offd_j[i] = B_marker[C_offd_j[i]];
+   if (num_cols_offd_C) {
+      col_map_offd_C = hypre_CTAlloc(int,num_cols_offd_C);
+      new_C_offd_j = hypre_CTAlloc(int,num_cols_offd_C);
+
+      for (i=0; i < C_offd_size; i++) {
+         new_C_offd_j[i] = B_marker[C_offd_j[i]];
+         col_map_offd_C[ new_C_offd_j[i] ] = A_ext_row_map[ C_offd_j[i] ];
+      }
+
+      hypre_TFree(C_offd_j);
+      C_offd_j = new_C_offd_j;
+
+   }
+
+   /*---------------------------------------------------------------- 
+    * Create C
+    *----------------------------------------------------------------*/
 
    C = hypre_ParCSRMatrixCreate(comm, n_rows_A, n_rows_A, row_starts_A,
 	row_starts_A, num_cols_offd_C, C_diag_size, C_offd_size);
