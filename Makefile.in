@@ -68,7 +68,8 @@ HYPRE_EXTRA_DIRS =\
  seq_ls\
  structIJ_mv\
  CI_struct_mv\
- CI_struct_ls @HYPRE_PETSCLIBDIRS@ @HYPRE_BABELLIBDIR@
+ CI_struct_ls @HYPRE_PETSCLIBDIRS@ @HYPRE_BABELLIBDIR@\
+ @MLI_DIR@
 
 all: krylov struct sstruct IJ fei
 	@ \

@@ -50,6 +50,7 @@ casc_user_chose_compilers=no
 casc_user_chose_mpi=no
 casc_using_pthreads=no
 casc_using_babel=no
+casc_using_mli=no
 casc_using_petsc=no
 casc_using_openmp=no   
 casc_using_ibm_smp=no
@@ -418,6 +419,15 @@ AC_ARG_WITH(babel,
    no)  casc_using_babel=no ;;
  esac],
 [casc_using_babel=no]
+)
+
+AC_ARG_WITH(mli,
+[  --with-mli             use MLI],
+[case "${withval}" in
+   yes) casc_using_mli=yes ;;
+   no)  casc_using_mli=no ;;
+ esac],
+[casc_using_mli=no]
 )
 
 AC_ARG_WITH(petsc,
@@ -896,6 +906,17 @@ dnl   CASC_FIND_BABEL
   AM_INIT_AUTOMAKE()
 fi
 
+if test "$casc_using_mli" = "yes"
+then
+dnl CASC_FIND_MLI etc. would simply set the following:
+   MLI_DIR="$HYPRE_TOP_SRC_DIR/mli/matrix"
+   MLILIBS="-lHYPRE_mli_mat"
+   MLILIBDIRS="-L $MLI_DIR"
+   MLIINCLUDE="-I $MLI_DIR"
+   MLILIBDIRS="$MLILIBDIRS -L/usr/openwin/lib"
+   MLILIBS="$MLILIBS -lX11"
+fi
+
 if test "$casc_using_petsc" = "yes"
 then
    CASC_FIND_PETSC
@@ -1009,6 +1030,13 @@ AC_SUBST(BABEL_HYPRE_INCLUDES)
 AC_SUBST(BABELLIBFLAGS)
 AC_SUBST(HYPRE_BABELLIBDIR)
 
+dnl *MLI-related header files, libraries and directories for those
+dnl * libraries
+AC_SUBST(MLI_DIR)
+AC_SUBST(MLILIBS)
+AC_SUBST(MLILIBDIRS)
+AC_SUBST(MLIINCLUDE)
+
 dnl *PETSC-related header files, libraries and directories for those
 dnl * libraries
 AC_SUBST(PETSCLIBS)
@@ -1050,6 +1078,8 @@ CASC_CONFIG_OUTPUT_LIST(\
  IJ_mv\
  krylov\
  matrix_matrix\
+ mli\
+ mli/matrix\
  parcsr_ls\
  parcsr_mv\
  PETSc_ls\
