@@ -12,6 +12,8 @@
 #=============================================================================
 
 AMG_CC="gcc"
+AMG_CC_FLAGS="-I/home/casc/include"
+AMG_CC_DEBUG="-g -DAMG_MALLOC_DEBUG"
 
 AMG_F77="/home/casc/g77/bin/g77"
 AMG_F77_FLAGS=""

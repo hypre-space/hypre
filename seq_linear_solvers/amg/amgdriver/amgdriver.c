@@ -11,6 +11,11 @@
 #include "timing.h"
 
 
+#ifdef AMG_MALLOC_DEBUG
+/* malloc debug stuff */
+char amg_malloclog[256];
+#endif
+
 /*--------------------------------------------------------------------------
  * Main driver for AMG
  *--------------------------------------------------------------------------*/
@@ -49,6 +54,16 @@ char *argv[];
       fprintf(stderr, "Usage:  amg <run name>\n");
       exit(1);
    }
+
+   /*-------------------------------------------------------
+    * Set up debugging tools
+    *-------------------------------------------------------*/
+
+#ifdef AMG_MALLOC_DEBUG
+   /* malloc debug stuff */
+   malloc_logpath = amg_malloclog;
+   sprintf(malloc_logpath, "malloc.log");
+#endif
 
    /*-------------------------------------------------------
     * Set up globals
@@ -175,6 +190,13 @@ char *argv[];
    /*-------------------------------------------------------
     * Debugging prints
     *-------------------------------------------------------*/
+
+#ifdef AMG_MALLOC_DEBUG
+   /* malloc debug stuff */
+   malloc_verify(0);
+   malloc_shutdown();
+#endif
+
 #if 0
    sprintf(file_name, "%s.lastu", GlobalsOutFileName);
    WriteVec(file_name, u);

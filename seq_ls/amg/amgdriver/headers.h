@@ -33,5 +33,10 @@
 
 #include "protos.h"
 
+/* malloc debug stuff */
+#ifdef AMG_MALLOC_DEBUG
+#include <gmalloc.h>
+#endif
+
 
 #endif
