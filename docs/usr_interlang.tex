@@ -80,11 +80,11 @@ Fortran interface makes extensive use of this technique.
   C called:
 \begin{verbatim}
 
-    void hypre_C_NAME(sub_name)( long int  *struct_addr,
-                                 int       *intg,
-                                 char      *charact,
-                                 double    *double_prec,
-                                 int       *ierr          )
+    void hypre_F90_NAME(sub_name)( long int  *struct_addr,
+                                   int       *intg,
+                                   char      *charact,
+                                   double    *double_prec,
+                                   int       *ierr          )
 
 \end{verbatim}
 
@@ -104,8 +104,8 @@ Fortran interface makes extensive use of this technique.
     char     charact;
     double   double_prec;
 
-    hypre_FORTRAN_NAME(sub_name)( &struct_addr, &intg, &charact,
-                                  &double_prec, &ierr )
+    hypre_F90_NAME(sub_name)( &struct_addr, &intg, &charact,
+                              &double_prec, &ierr )
 
 \end{verbatim}
 
