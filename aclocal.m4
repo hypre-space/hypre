@@ -1017,6 +1017,32 @@ extern "C"
             fi
          )
 
+         if test -n "`echo $MPILIBS | grep pmpich`" &&
+            test -z "`echo $MPILIBS | grep pthread`"; then
+               LIBS_SAVE=$LIBS
+               LIBS="$MPIINCLUDE $MPIFLAGS $MPILIBDIRS $MPILIBS -lpthread"
+               AC_TRY_LINK(
+                  ifelse(AC_LANG, CPLUSPLUS,
+
+[#ifdef __cplusplus
+extern "C"
+#endif
+])dnl
+[#include "mpi.h"
+], [int rank, size;
+   int argc;
+   char **argv;
+   MPI_Init(&argc, &argv);
+   MPI_Comm_size(MPI_COMM_WORLD, &size);
+   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+   MPI_Finalize();
+],
+                  MPILIBS="$MPILIBS -lpthread")
+               LIBS=$LIBS_SAVE
+         fi
+          
+
+
          AC_MSG_RESULT($MPIINCLUDE)
          AC_MSG_CHECKING(for MPI library directories)
          AC_MSG_RESULT($MPILIBDIRS)
