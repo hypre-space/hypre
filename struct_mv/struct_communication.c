@@ -111,6 +111,10 @@ hypre_CommPkgCreate( hypre_CommInfo   *comm_info,
    /* set send_data_offsets and send_data_space */
    data_offsets = hypre_TAlloc(int, hypre_BoxArraySize(send_data_space));
    data_offset = 0;
+   if (constant_coefficient==2)
+   {
+      data_offset= diag_rank;
+   }
    hypre_ForBoxI(i, send_data_space)
       {
          data_offsets[i] = data_offset;
@@ -129,8 +133,7 @@ hypre_CommPkgCreate( hypre_CommInfo   *comm_info,
             /*  the whole matrix: data_offset += num_values + hypre_BoxVolume(data_box)-1;*/
             /* communicate the (variable) diagonal only, skipping the off-diagonal
                constant coefficients ... */
-            data_offsets[i] += diag_rank;
-            data_offset += hypre_BoxVolume(data_box);
+            data_offset += hypre_BoxVolume(data_box) + diag_rank;
          }
       }
 
@@ -280,6 +283,10 @@ hypre_CommPkgCreate( hypre_CommInfo   *comm_info,
    /* set data_offsets and recv_data_space */
    data_offsets = hypre_TAlloc(int, hypre_BoxArraySize(recv_data_space));
    data_offset = 0;
+   if (constant_coefficient==2)
+   {
+      data_offset= diag_rank;
+   }
    hypre_ForBoxI(i, recv_data_space)
       {
          data_offsets[i] = data_offset;
@@ -298,8 +305,7 @@ hypre_CommPkgCreate( hypre_CommInfo   *comm_info,
             /* the whole matrix: data_offset += num_values + hypre_BoxVolume(data_box)-1;*/
             /* communicate the (variable) diagonal only, skipping the off-diagonal
                constant coefficients ... */
-            data_offsets[i] += diag_rank;
-            data_offset += hypre_BoxVolume(data_box);
+            data_offset += hypre_BoxVolume(data_box) + diag_rank;
          }
       }
    hypre_CommPkgRecvDataOffsets(comm_pkg) = data_offsets;
