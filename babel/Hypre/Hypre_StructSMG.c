@@ -60,8 +60,6 @@ int  impl_Hypre_StructSMG_Apply
    struct Hypre_StructVector_private_type *SVbp, *SVxp;
    HYPRE_StructVector *Vb, *Vx;
 
-   printf( "starting impl_Hypre_StructSMG_Apply\n" );
-
    Sb = (Hypre_StructVector) Hypre_Vector_castTo( b, "Hypre_StructVector" );
    if ( Sb == NULL ) return -1;
 
