@@ -263,7 +263,7 @@ int  impl_Hypre_ParCSRMatrixBuilder_SetMap
 int  impl_Hypre_ParCSRMatrixBuilder_GetMap
 ( Hypre_ParCSRMatrixBuilder this, Hypre_Map* map ) {
    Hypre_ParCSRMatrix mat = this->Hypre_ParCSRMatrixBuilder_data->newmat;
-   return Hypre_ParCSRVector_GetMap( mat, map );
+   return Hypre_ParCSRMatrix_GetMap( mat, map );
 } /* end impl_Hypre_ParCSRMatrixBuilder_GetMap */
 
 /* ********************************************************
