@@ -451,7 +451,7 @@ IntersectBoxes( ProblemIndex ilower1,
    {
       int_ilower[d] = hypre_max(ilower1[d], ilower2[d]);
       int_iupper[d] = hypre_min(iupper1[d], iupper2[d]);
-      size *= hypre_max(0, (int_iupper[d] - int_ilower[d]));
+      size *= hypre_max(0, (int_iupper[d] - int_ilower[d] + 1));
    }
 
    return size;
@@ -595,10 +595,10 @@ DistributeData( ProblemData   global_data,
                            pdata.graph_to_ilowers[entry][dmap] + sign *
                            (int_iupper[d] - pdata.graph_ilowers[entry][d]);
                         pdata.graph_to_ilowers[i][dmap] =
-                           pdata.graph_ilowers[entry][dmap] + sign *
+                           pdata.graph_to_ilowers[entry][dmap] + sign *
                            (int_ilower[d] - pdata.graph_ilowers[entry][d]);
                         pdata.graph_ilowers[i][d] = int_ilower[d];
-                        pdata.graph_ilowers[i][d] = int_iupper[d];
+                        pdata.graph_iuppers[i][d] = int_iupper[d];
                         pdata.graph_index_maps[i][d]  = dmap;
                         pdata.graph_index_signs[i][d] = sign;
                      }
