@@ -339,3 +339,18 @@ HYPRE_StructMatrixPrint( const char         *filename,
    return ( hypre_StructMatrixPrint(filename, matrix, all) );
 }
 
+/*--------------------------------------------------------------------------
+ * HYPRE_StructMatrixMatvec
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_StructMatrixMatvec( double alpha,
+                          HYPRE_StructMatrix A,
+                          HYPRE_StructVector x,
+                          double beta,
+                          HYPRE_StructVector y     )
+{
+   return ( hypre_StructMatvec( alpha, (hypre_StructMatrix *) A,
+                                (hypre_StructVector *) x, beta, (hypre_StructVector *) y) );
+}
+

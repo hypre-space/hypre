@@ -1771,6 +1771,7 @@ int HYPRE_StructMatrixGetGrid( HYPRE_StructMatrix matrix , HYPRE_StructGrid *gri
 int HYPRE_StructMatrixSetSymmetric( HYPRE_StructMatrix matrix , int symmetric );
 int HYPRE_StructMatrixSetConstantEntries( HYPRE_StructMatrix matrix , int nentries , int *entries );
 int HYPRE_StructMatrixPrint( const char *filename , HYPRE_StructMatrix matrix , int all );
+int HYPRE_StructMatrixMatvec( double alpha , HYPRE_StructMatrix A , HYPRE_StructVector x , double beta , HYPRE_StructVector y );
 
 /* HYPRE_struct_stencil.c */
 int HYPRE_StructStencilCreate( int dim , int size , HYPRE_StructStencil *stencil );
@@ -1785,11 +1786,13 @@ int HYPRE_StructVectorSetValues( HYPRE_StructVector vector , int *grid_index , d
 int HYPRE_StructVectorSetBoxValues( HYPRE_StructVector vector , int *ilower , int *iupper , double *values );
 int HYPRE_StructVectorAddToValues( HYPRE_StructVector vector , int *grid_index , double values );
 int HYPRE_StructVectorAddToBoxValues( HYPRE_StructVector vector , int *ilower , int *iupper , double *values );
+int HYPRE_StructVectorScaleValues( HYPRE_StructVector vector , double factor );
 int HYPRE_StructVectorGetValues( HYPRE_StructVector vector , int *grid_index , double *values_ptr );
 int HYPRE_StructVectorGetBoxValues( HYPRE_StructVector vector , int *ilower , int *iupper , double *values );
 int HYPRE_StructVectorAssemble( HYPRE_StructVector vector );
 int HYPRE_StructVectorPrint( const char *filename , HYPRE_StructVector vector , int all );
 int HYPRE_StructVectorSetNumGhost( HYPRE_StructVector vector , int *num_ghost );
+int HYPRE_StructVectorCopy( HYPRE_StructVector x , HYPRE_StructVector y );
 int HYPRE_StructVectorSetConstantValues( HYPRE_StructVector vector , double values );
 int HYPRE_StructVectorGetMigrateCommPkg( HYPRE_StructVector from_vector , HYPRE_StructVector to_vector , HYPRE_CommPkg *comm_pkg );
 int HYPRE_StructVectorMigrate( HYPRE_CommPkg comm_pkg , HYPRE_StructVector from_vector , HYPRE_StructVector to_vector );
@@ -1900,10 +1903,12 @@ int hypre_StructVectorGetValues( hypre_StructVector *vector , hypre_Index grid_i
 int hypre_StructVectorGetBoxValues( hypre_StructVector *vector , hypre_Box *value_box , double *values );
 int hypre_StructVectorSetNumGhost( hypre_StructVector *vector , int *num_ghost );
 int hypre_StructVectorAssemble( hypre_StructVector *vector );
+int hypre_StructVectorCopy( hypre_StructVector *x , hypre_StructVector *y );
 int hypre_StructVectorSetConstantValues( hypre_StructVector *vector , double values );
 int hypre_StructVectorSetFunctionValues( hypre_StructVector *vector , double (*fcn )());
 int hypre_StructVectorClearGhostValues( hypre_StructVector *vector );
 int hypre_StructVectorClearBoundGhostValues( hypre_StructVector *vector );
+int hypre_StructVectorScaleValues( hypre_StructVector *vector , double factor );
 int hypre_StructVectorClearAllValues( hypre_StructVector *vector );
 hypre_CommPkg *hypre_StructVectorGetMigrateCommPkg( hypre_StructVector *from_vector , hypre_StructVector *to_vector );
 int hypre_StructVectorMigrate( hypre_CommPkg *comm_pkg , hypre_StructVector *from_vector , hypre_StructVector *to_vector );

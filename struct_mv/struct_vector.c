@@ -528,6 +528,72 @@ hypre_StructVectorAssemble( hypre_StructVector *vector )
 }
 
 /*--------------------------------------------------------------------------
+ * hypre_StructVectorCopy
+ * copies data from x to y
+ * y has its own data array, so this is a deep copy in that sense.
+ * The grid and other size information are not copied - they are
+ * assumed to have already been set up to be consistent.
+ *--------------------------------------------------------------------------*/
+
+int
+hypre_StructVectorCopy( hypre_StructVector *x,
+                        hypre_StructVector *y )
+{
+
+
+/*   for (i = 0; i < size; i++)
+     y_data[i] = x_data[i];*/
+
+   int    ierr = 0;
+
+   hypre_Box          *x_data_box;
+                    
+   int                 vi;
+   double             *xp, *yp;
+
+   hypre_BoxArray     *boxes;
+   hypre_Box          *box;
+   hypre_Index         loop_size;
+   hypre_IndexRef      start;
+   hypre_Index         unit_stride;
+
+   int                 i;
+   int                 loopi, loopj, loopk;
+
+   /*-----------------------------------------------------------------------
+    * Set the vector coefficients
+    *-----------------------------------------------------------------------*/
+
+   hypre_SetIndex(unit_stride, 1, 1, 1);
+ 
+   boxes = hypre_StructGridBoxes( hypre_StructVectorGrid(x) );
+   hypre_ForBoxI(i, boxes)
+      {
+         box      = hypre_BoxArrayBox(boxes, i);
+         start = hypre_BoxIMin(box);
+
+         x_data_box =
+            hypre_BoxArrayBox(hypre_StructVectorDataSpace(x), i);
+         xp = hypre_StructVectorBoxData(x, i);
+         yp = hypre_StructVectorBoxData(y, i);
+ 
+         hypre_BoxGetSize(box, loop_size);
+
+         hypre_BoxLoop1Begin(loop_size,
+                             x_data_box, start, unit_stride, vi);
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,vi 
+#include "hypre_box_smp_forloop.h"
+         hypre_BoxLoop1For(loopi, loopj, loopk, vi)
+            {
+               yp[vi] = xp[vi];
+            }
+         hypre_BoxLoop1End(vi);
+      }
+
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
  * hypre_StructVectorSetConstantValues
  *--------------------------------------------------------------------------*/
 
@@ -785,6 +851,51 @@ hypre_StructVectorClearBoundGhostValues( hypre_StructVector *vector )
          hypre_BoxArrayDestroy(work_boxarray);
          hypre_BoxArrayDestroy(array_of_box);
       }
+
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_StructVectorScaleValues
+ *--------------------------------------------------------------------------*/
+
+int 
+hypre_StructVectorScaleValues( hypre_StructVector *vector, double factor )
+{
+   int               ierr = 0;
+
+   int               datai;
+   double           *data;
+
+   hypre_Index       imin;
+   hypre_Index       imax;
+   hypre_Box        *box;
+   hypre_Index       loop_size;
+
+   int               loopi, loopj, loopk;
+
+   /*-----------------------------------------------------------------------
+    * Set the vector coefficients
+    *-----------------------------------------------------------------------*/
+
+   box = hypre_BoxCreate();
+   hypre_SetIndex(imin, 1, 1, 1);
+   hypre_SetIndex(imax, hypre_StructVectorDataSize(vector), 1, 1);
+   hypre_BoxSetExtents(box, imin, imax);
+   data = hypre_StructVectorData(vector);
+   hypre_BoxGetSize(box, loop_size);
+
+   hypre_BoxLoop1Begin(loop_size,
+                       box, imin, imin, datai);
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,datai
+#include "hypre_box_smp_forloop.h"
+   hypre_BoxLoop1For(loopi, loopj, loopk, datai)
+      {
+         data[datai] *= factor;
+      }
+   hypre_BoxLoop1End(datai);
+
+   hypre_BoxDestroy(box);
 
    return ierr;
 }

@@ -169,6 +169,17 @@ HYPRE_StructVectorAddToBoxValues( HYPRE_StructVector  vector,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_StructVectorScaleValues
+ *--------------------------------------------------------------------------*/
+
+int 
+HYPRE_StructVectorScaleValues( HYPRE_StructVector  vector,
+                               double              factor )
+{
+   return hypre_StructVectorScaleValues( vector, factor );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_StructVectorGetValues
  *--------------------------------------------------------------------------*/
 
@@ -258,6 +269,19 @@ HYPRE_StructVectorSetNumGhost( HYPRE_StructVector  vector,
                                int                *num_ghost )
 {
    return ( hypre_StructVectorSetNumGhost(vector, num_ghost) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_StructVectorCopy
+ * copies data from x to y
+ * y has its own data array, so this is a deep copy in that sense.
+ * The grid and other size information are not copied - they are
+ * assumed to be consistent already.
+ *--------------------------------------------------------------------------*/
+int
+HYPRE_StructVectorCopy( HYPRE_StructVector x, HYPRE_StructVector y )
+{
+   return( hypre_StructVectorCopy( x, y ) );
 }
 
 /*--------------------------------------------------------------------------
