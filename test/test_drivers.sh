@@ -14,7 +14,7 @@
 # NOTE: Assumes test driver names are of the form <prefix>_linear_solvers
 #=============================================================================
 
-HYPRE_TESTS="struct IJ fei"
+HYPRE_TESTS="struct sstruct IJ fei"
  
 #=============================================================================
 # Parse arguments and define test driver names
