@@ -1,0 +1,297 @@
+
+       Zero-based vs. One-based Indexing in HYPRE Matrices
+
+
+I. The issues and a suggested decision
+
+The issues are as follows:
+
+ 1. We want the code to be natural to write.
+ 2. We want to interoperate with other codes as much as possible.
+ 3. We want the code to be as efficient as possible.
+
+Section III below contains 4 different ways to write 1 sample code in C.
+The sample code does a simple matvec, allocates an int array that will
+mark the coarse grid variables in a multigrid scheme, directly calls
+a fortran subroutine to fill in the coarse grid array (we might
+typically have a C wrapper around the fortran subroutine, but the
+intention here is to explicitely demonstrate the parameter translation
+required to interface with the routine), then de-allocates the coarse
+grid array.
+
+The A and B examples use 0-based and 1-based indexing with no pointer
+tricks.  Example C uses 1-based indexing with a pointer trick that is
+left fully exposed for illustrative purposes.  Example D supports both 0
+and 1-based indexing and uses a hypre_BaseArray "class" (see section II
+below for details on this class) to hide the tricks illustrated in
+example C.  In these examples, it is assumed that the fortran subroutine
+provides the same indexing support as the calling C-routines.
+
+Issue 1:  Example A is the most straightforward and least confusing
+of all the examples.  That is, 0-based indexing is the most natural for
+C programming.  However, examples C and D are not all that bad either.
+Example B is horribly confusing.  The most natural style for fortran is
+1-based, but a fortran variant of examples C and D for 0-based indexing
+would also be fairly natural.  Arrays would be declared like this:
+
+     integer  Ai(base:An+base)
+
+and the iiA loop would look like this:
+
+     do iiA = base, An-1+base
+
+Issue 2:  We cannot dictate what other code groups support regarding
+indexing.  So, if we want to interoperate with other codes, we need to
+support both 0-based and 1-based indexing as in example D below.
+
+Issue 3:  To keep efficiency high, we do *not* want to have to modify
+the data in the A_i and A_j arrays.  That is, we want to use the pointer
+tricks below to interoperate with other codes.  However, this means that
+the whole code does *either* 0-based *or* 1-based indexing during any single
+run, and *not* both.
+
+Suggested decision: Support both 0-based and 1-based indexing.
+
+
+II. Hiding the details
+
+Although code for supporting both 0-based and 1-based indexing is not
+too ugly even when the tricks are exposed, it is easier to make mistakes
+and/or get confused during code development and debugging.  In an attempt
+to minimize this, we introduce a hypre_BaseArray "class" in subsection II.1,
+and a set of coding rules and guidelines in subsection II.2.
+
+II.1. The BaseArray class
+
+Types:
+  hypre_IntBaseArray, hypre_DoubleBaseArray, ...
+
+  Note: These types are just typedefs for `int' and `double', so
+  compilers will not treat them at distinct types (strong typing).
+  It would be nice to have compilers do strong typing on them
+  to help reduce mistakes, but it is apparantly not possible to
+  do this in C *and* retain the ability to use the `[]' operators
+  and do casting.
+
+Constructor/destructor macros:
+  base_array = hypre_AllocBaseArray(type, size, base)
+  hypre_FreeBaseArray(base_array, base)
+
+Macro that returns a pointer to the real data:
+  base_array_data = hypre_BaseArrayData(base_array, base)
+
+Function that converts from 1 base to another (This function actually
+modifies the data in the array, so it should be used only when necessary):
+  converted_base_array = hypre_ConvertBaseArray(base_array, base, new_base)
+
+II.2. Coding Rules and Guidelines
+
+- All arrays such that either the array indices or the array contents
+  refer to rows and/or columns of matrices must be hypre_BaseArray types.
+  This reduces the possibility of making coding errors.
+
+- All hypre_BaseArray types in the same routine should use the same base.
+  It is recommended that only one `base' variable be defined for each
+  routine in an attempt to enforce this.
+
+
+III. Sample code
+
+/*--------------------------------------------------------------------------
+ * Indexing example code:
+ *--------------------------------------------------------------------------*/
+
+/*-----------------------------------------------
+ * A) 0-based indexing
+ *-----------------------------------------------*/
+
+int
+hypre_SampleA( hypre_Matrix *A,
+               hypre_Vector *x,
+               hypre_Vector *y )
+{
+   double  *A_data = hypre_MatrixData(A);
+   int     *A_i    = hypre_MatrixI(A);
+   int     *A_j    = hypre_MatrixJ(A);
+   int     *A_n    = hypre_MatrixN(A);
+
+   double  *x_data = hypre_VectorData(x);
+   double  *y_data = hypre_VectorData(y);
+
+   int      iiA, jjA;
+
+   int     *coarse_grid;
+
+   /* ... */
+
+   /* matvec */
+   for (iiA = 0; iiA < A_n; iiA++ )
+   {
+      for (jjA = A_i[iiA]; jjA < A_i[iiA+1]; jjA++)
+      {
+         y_data[iiA] += A_data[jjA] * x_data[A_j[jjA]];
+      }
+   }
+
+   /* coarse-grid allocation */
+   coarse_grid = hypre_TAlloc(int, A_n);
+
+   /* coarse-grid selection function call */
+   hypre_coarsen_( ..., coarse_grid);
+
+   /* coarse-grid de-allocation */
+   hypre_TFree(coarse_grid);
+
+   return 0;
+}
+
+/*-----------------------------------------------
+ * B) 1-based indexing (no tricks)
+ *-----------------------------------------------*/
+
+int
+hypre_SampleB( hypre_Matrix *A,
+               hypre_Vector *x,
+               hypre_Vector *y )
+{
+   double  *A_data = hypre_MatrixData(A);
+   int     *A_i    = hypre_MatrixI(A);
+   int     *A_j    = hypre_MatrixJ(A);
+   int     *A_n    = hypre_MatrixN(A);
+
+   double  *x_data = hypre_VectorData(x);
+   double  *y_data = hypre_VectorData(y);
+
+   int      iiA, jjA;
+
+   int     *coarse_grid;
+
+   /* ... */
+
+   /* matvec */
+   for (iiA = 1; iiA <= A_n; iiA++ )
+   {
+      for (jjA = A_i[iiA-1]; jjA < A_i[iiA]; jjA++)
+      {
+         y_data[iiA-1] += A_data[jjA-1] * x_data[A_j[jjA-1]-1];
+      }
+   }
+
+   /* coarse-grid allocation */
+   coarse_grid = hypre_TAlloc(int, A_n);
+
+   /* coarse-grid selection function call */
+   hypre_coarsen_( ..., coarse_grid);
+
+   /* coarse-grid de-allocation */
+   hypre_TFree(coarse_grid);
+
+   return 0;
+}
+
+/*-----------------------------------------------
+ * C) 1-based indexing (with tricks):
+ *-----------------------------------------------*/
+
+int
+hypre_SampleC( hypre_Matrix *A,
+               hypre_Vector *x,
+               hypre_Vector *y )
+{
+   double  *A_data = hypre_MatrixData(A) - 1;
+   int     *A_i    = hypre_MatrixI(A) - 1;
+   int     *A_j    = hypre_MatrixJ(A) - 1;
+   int     *A_n    = hypre_MatrixN(A);
+
+   double  *x_data = hypre_VectorData(x) - 1;
+   double  *y_data = hypre_VectorData(y) - 1;
+
+   int      iiA, jjA;
+
+   int     *coarse_grid;
+
+   /* ... */
+
+   /* matvec */
+   for (iiA = 1; iiA < A_n+1; iiA++ )
+   {
+      for (jjA = A_i[iiA]; jjA < A_i[iiA+1]; jjA++)
+      {
+         y_data[iiA] += A_data[jjA] * x_data[A_j[jjA]];
+      }
+   }
+
+   /* coarse-grid allocation */
+   coarse_grid = hypre_TAlloc(int, A_n) - 1;
+
+   /* coarse-grid selection function call */
+   hypre_coarsen_( ..., coarse_grid + 1);
+
+   /* coarse-grid de-allocation */
+   hypre_TFree(coarse_grid + 1);
+
+   return 0;
+}
+
+/*-----------------------------------------------
+ * D) 0 & 1-based indexing:
+ *
+ * We use the same tricks as in example C, except
+ * that we "hide" most of them in the following
+ * macros and functions:
+ *
+ * hypre_MatrixData, hypre_MatrixI, hypre_MatrixJ
+ * hypre_VectorData
+ * hypre_AllocBaseArray
+ * hypre_FreeBaseArray
+ * hypre_BaseArrayData
+ *
+ * The integer `base' is either a 0 or a 1 depending
+ * on whether the storage is 0 or 1-based.
+ *
+ * We also use the following types so that the
+ * code is more explicit about which variables
+ * we are applying "tricks" to.
+ *-----------------------------------------------*/
+
+int
+hypre_SampleD( hypre_Matrix *A,
+               hypre_Vector *x,
+               hypre_Vector *y )
+{
+   hypre_DoubleBaseArray  *A_data = hypre_MatrixData(A);
+   hypre_IntBaseArray     *A_i    = hypre_MatrixI(A);
+   hypre_IntBaseArray     *A_j    = hypre_MatrixJ(A);
+   hypre_IntBaseArray     *A_n    = hypre_MatrixN(A);
+
+   hypre_DoubleBaseArray  *x_data = hypre_VectorData(x);
+   hypre_DoubleBaseArray  *y_data = hypre_VectorData(y);
+
+   hypre_IntBaseArray     *coarse_grid;
+
+   int                     iiA, jjA;
+
+   /* ... */
+
+   /* matvec */
+   for (iiA = base; iiA < A_n+base; iiA++ )
+   {
+      for (jjA = A_i[iiA]; jjA < A_i[iiA+1]; jjA++)
+      {
+         y_data[iiA] += A_data[jjA] * x_data[A_j[jjA]];
+      }
+   }
+
+   /* coarse-grid allocation ( = hypre_TAlloc(int, A_n) - base ) */
+   coarse_grid = hypre_AllocBaseArray(int, A_n, base);
+
+   /* coarse-grid selection function call */
+   hypre_coarsen_( ..., &base,
+                   hypre_BaseArrayData(coarse_grid, base);
+
+   /* coarse-grid de-allocation ( = hypre_TFree(coarse_grid + base) ) */
+   hypre_FreeBaseArray(coarse_grid, base);
+
+   return 0;
+}
+
