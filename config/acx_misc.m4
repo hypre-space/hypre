@@ -193,8 +193,7 @@ provided by --display_error_number]),
 [ if test "x$GCC" = "xyes"; then
   CFLAGS="$CFLAGS -Wall -Wunused -Wmissing-prototypes"
   CFLAGS="$CFLAGS -Wmissing-declarations -ansi -pedantic"
-  CXXFLAGS="$CXXFLAGS -Wall -Wno-unused -Wmissing-prototypes"
-  CXXFLAGS="$CXXFLAGS -Wmissing-declarations -Wshadow"
+  CXXFLAGS="$CXXFLAGS -Wall -Wshadow -fno-implicit-templates"
   CXXFLAGS="$CXXFLAGS -Woverloaded-virtual -ansi -pedantic"
 else
   CC=KCC
