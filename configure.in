@@ -795,6 +795,7 @@ CASC_CONFIG_OUTPUT_LIST(\
  parcsr_linear_solvers\
  seq_matrix_vector\
  seq_linear_solvers/pamg\
+ IJ_matrix_vector\
  CI_struct_linear_solvers\
  CI_struct_matrix_vector\
  PETScMat_linear_solvers/pilut\
