@@ -272,6 +272,10 @@ void hypre_F90_IFACE P((int hypre_parinnerprod ));
 void hypre_F90_IFACE P((int hypre_vectortoparvector ));
 void hypre_F90_IFACE P((int hypre_parvectortovectorall ));
 
+/* F90_parcsr_matrix.c */
+void hypre_F90_IFACE P((int hypre_parcsrmatrixglobalnumrows ));
+void hypre_F90_IFACE P((int hypre_parcsrmatrixrowstarts ));
+
 /* HYPRE_parcsr_matrix.c */
 HYPRE_ParCSRMatrix HYPRE_CreateParCSRMatrix P((MPI_Comm comm , int global_num_rows , int global_num_cols , int *row_starts , int *col_starts , int num_cols_offd , int num_nonzeros_diag , int num_nonzeros_offd ));
 int HYPRE_DestroyParCSRMatrix P((HYPRE_ParCSRMatrix matrix ));
