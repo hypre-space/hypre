@@ -32,6 +32,7 @@ extern void Euclid_dhSetup(Euclid_dh ctx);
 extern void Euclid_dhSolve(Euclid_dh ctx, Vec_dh lhs, Vec_dh rhs, int *its);
 extern void Euclid_dhApply(Euclid_dh ctx, double *lhs, double *rhs);
 
+extern void Euclid_dhPrintTestData(Euclid_dh ctx, FILE *fp);
 extern void Euclid_dhPrintScaling(Euclid_dh ctx, FILE *fp);
 
 extern void Euclid_dhPrintStatsShort(Euclid_dh ctx, double setup, double solve, FILE *fp);

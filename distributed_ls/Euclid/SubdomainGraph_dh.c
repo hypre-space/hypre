@@ -1659,8 +1659,9 @@ void SubdomainGraph_dhPrintRatios(SubdomainGraph_dh s, FILE *fp)
     if (np_dh == 1) blocks = s->blocks;
     if (blocks > 25) blocks = 25;
 
-    fprintf(fp, "\nSubdomain interior/boundary node ratios (smallest 25 or less)\n");
-    fprintf(fp, "----------------------------------------------------------------\n");
+    fprintf(fp, "\n");
+    fprintf(fp, "Subdomain interior/boundary node ratios\n");
+    fprintf(fp, "---------------------------------------\n");
 
     /* compute ratios */
     for (i=0; i<blocks; ++i) {
@@ -1675,10 +1676,29 @@ void SubdomainGraph_dhPrintRatios(SubdomainGraph_dh s, FILE *fp)
     shellSort_float(blocks, ratio);
 
     /* print ratios */
-    for (i=0; i<blocks; ++i) {
-      fprintf(fp, "%0.2g  ", ratio[i]);
+    if (blocks <= 20) {  /* print all ratios */
+      int j = 0;
+      for (i=0; i<blocks; ++i) {
+        fprintf(fp, "%0.2g  ", ratio[i]);
+        ++j;
+        if (j == 10) { fprintf(fp, "\n"); }
+      }
+      fprintf(fp, "\n");
+    } 
+    else {  /* print 10 largest and 10 smallest ratios */
+      fprintf(fp, "10 smallest ratios: ");
+      for (i=0; i<10; ++i) {
+        fprintf(fp, "%0.2g  ", ratio[i]);
+      }
+      fprintf(fp, "\n");
+      fprintf(fp, "10 largest ratios:  ");
+      { int start = blocks-6, stop = blocks-1;
+      for (i=start; i < stop; ++i) {
+        fprintf(fp, "%0.2g  ", ratio[i]);
+      }
+      fprintf(fp, "\n");
     }
-    fprintf(fp, "\n");
+  }
  }
 
   END_FUNC_DH

@@ -15,7 +15,7 @@ static void get_runtime_params_private(Euclid_dh ctx);
 static void invert_diagonals_private(Euclid_dh ctx);
 static void compute_rho_private(Euclid_dh ctx); 
 static void factor_private(Euclid_dh ctx); 
-static void discard_indices_private(Euclid_dh ctx);
+/* static void discard_indices_private(Euclid_dh ctx); */
 static void reduce_timings_private(Euclid_dh ctx);
 
 #undef __FUNC__
@@ -85,6 +85,14 @@ void Euclid_dhCreate(Euclid_dh *ctxOUT)
 void Euclid_dhDestroy(Euclid_dh ctx)
 {
   START_FUNC_DH
+
+  if (Parser_dhHasSwitch(parser_dh, "-eu_stats")
+      || ctx->logging) {
+    /* insert switch so memory report will also be printed */
+    Parser_dhInsert(parser_dh, "-eu_mem", "1"); CHECK_V_ERROR;
+    Euclid_dhPrintHypreReport(ctx, stdout); CHECK_V_ERROR;
+  }
+
   if (ctx->setupCount > 1 && ctx->printStats) {
     Euclid_dhPrintStatsShorter(ctx, stdout); CHECK_V_ERROR;
   }
@@ -563,6 +571,8 @@ DO_NOTHING: ;
   END_FUNC_DH
 }
 
+#if 0
+
 #undef __FUNC__
 #define __FUNC__ "discard_indices_private"
 void discard_indices_private(Euclid_dh ctx)
@@ -635,6 +645,7 @@ void discard_indices_private(Euclid_dh ctx)
 #endif
   END_FUNC_DH
 }
+#endif
 
 #undef __FUNC__
 #define __FUNC__ "Euclid_dhSolve"
@@ -877,8 +888,83 @@ void reduce_timings_private(Euclid_dh ctx)
 void Euclid_dhPrintHypreReport(Euclid_dh ctx, FILE *fp)
 {
   START_FUNC_DH
-  fprintf(fp, "---------------------- in Euclid_dhPrintHypreReport()\n");
-  fprintf(fp, "  (to be written)\n");
+  double *timing;
+  int nz;
+
+  nz = Factor_dhReadNz(ctx->F); CHECK_V_ERROR;
+  timing = ctx->timing;
+
+  /* add in timing from lasst setup (if any) */
+  ctx->timing[TOTAL_SOLVE_T] += ctx->timing[TOTAL_SOLVE_TEMP_T];
+  ctx->timing[TOTAL_SOLVE_TEMP_T] = 0.0;
+
+  reduce_timings_private(ctx); CHECK_V_ERROR;
+
+ if (myid_dh == 0) {
+
+  fprintf(fp, "@@@@@@@@@@@@@@@@@@@@@@ Euclid statistical report (start)\n");
+  fprintf_dh(fp, "\nruntime parameters\n");
+  fprintf_dh(fp, "------------------\n");
+  fprintf_dh(fp, "   setups:                 %i\n", ctx->setupCount);
+  fprintf_dh(fp, "   tri solves:             %i\n", ctx->itsTotal);
+  fprintf_dh(fp, "   parallelization method: %s\n", ctx->algo_par);
+  fprintf_dh(fp, "   factorization method:   %s\n", ctx->algo_ilu);
+  if (! strcmp(ctx->algo_ilu, "iluk")) {
+    fprintf_dh(fp, "      level:               %i\n", ctx->level);
+  }
+
+  if (ctx->isScaled) {
+    fprintf_dh(fp, "   matrix was row scaled\n");
+  }
+
+  fprintf_dh(fp, "   global matrix row count: %i\n", ctx->n);
+  fprintf_dh(fp, "   nzF:                     %i\n", nz);
+  fprintf_dh(fp, "   rho:                     %g\n", ctx->rho_final);
+  fprintf_dh(fp, "   sparseA:                 %g\n", ctx->sparseTolA);
+
+  fprintf_dh(fp, "\nEuclid timing report\n");
+  fprintf_dh(fp, "--------------------\n");
+  fprintf_dh(fp, "   solves total:  %0.2f (see docs)\n", timing[TOTAL_SOLVE_T]);
+  fprintf_dh(fp, "   tri solves:    %0.2f\n", timing[TRI_SOLVE_T]);
+  fprintf_dh(fp, "   setups:        %0.2f\n", timing[SETUP_T]);
+  fprintf_dh(fp, "      subdomain graph setup:  %0.2f\n", timing[SUB_GRAPH_T]);
+  fprintf_dh(fp, "      factorization:          %0.2f\n", timing[FACTOR_T]);
+  fprintf_dh(fp, "      solve setup:            %0.2f\n", timing[SOLVE_SETUP_T]);
+  fprintf_dh(fp, "      rho:                    %0.2f\n", ctx->timing[COMPUTE_RHO_T]);
+  fprintf_dh(fp, "      misc (should be small): %0.2f\n", 
+                timing[SETUP_T] - 
+               (timing[SUB_GRAPH_T]+timing[FACTOR_T]+
+                timing[SOLVE_SETUP_T]+timing[COMPUTE_RHO_T]));
+
+  if (ctx->sg != NULL) {
+    SubdomainGraph_dhPrintStats(ctx->sg, fp); CHECK_V_ERROR;
+    SubdomainGraph_dhPrintRatios(ctx->sg, fp); CHECK_V_ERROR;
+  }
+
+  fprintf(fp, "@@@@@@@@@@@@@@@@@@@@@@ Euclid statistical report (end)\n");
+
+ }
+
   END_FUNC_DH
 }
 
+#undef __FUNC__
+#define __FUNC__ "Euclid_dhPrintTestData"
+void Euclid_dhPrintTestData(Euclid_dh ctx, FILE *fp)
+{
+  START_FUNC_DH
+  /* Print data that should remain that will hopefully 
+     remain the same for any platform.
+     Possibly "tri solves" may change . . .
+  */
+  if (myid_dh == 0) {
+    fprintf(fp, "   setups:                 %i\n", ctx->setupCount);
+    fprintf(fp, "   tri solves:             %i\n", ctx->its);
+    fprintf(fp, "   parallelization method: %s\n", ctx->algo_par);
+    fprintf(fp, "   factorization method:   %s\n", ctx->algo_ilu);
+    fprintf(fp, "   level:                  %i\n", ctx->level);
+    fprintf(fp, "   row scaling:            %i\n", ctx->isScaled);
+  }
+  SubdomainGraph_dhPrintRatios(ctx->sg, fp); CHECK_V_ERROR;
+  END_FUNC_DH
+}

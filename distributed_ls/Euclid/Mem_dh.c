@@ -43,6 +43,10 @@ void Mem_dhCreate(Mem_dh *m)
 void Mem_dhDestroy(Mem_dh m)
 {
   START_FUNC_DH
+  if (Parser_dhHasSwitch(parser_dh, "-eu_mem")) {
+    Mem_dhPrint(m, stdout, false); CHECK_V_ERROR;
+  }
+
   PRIVATE_FREE(m);
   END_FUNC_DH
 }
@@ -112,17 +116,16 @@ void  Mem_dhPrint(Mem_dh m, FILE* fp, bool allPrint)
   if (fp == NULL) SET_V_ERROR("fp == NULL");
   if (myid_dh == 0 || allPrint) {
     double tmp;
-    fprintf(fp, "\n----------------------------------------- memory report\n");
+    fprintf(fp, "---------------------- Euclid memory report (start)\n");
     fprintf(fp, "malloc calls = %g\n", m->mallocCount);
     fprintf(fp, "free   calls = %g\n", m->freeCount);
-    fprintf(fp, "curMem          = %g Mbytes (if not zero, something's wrong)\n", 
-                                                                   m->curMem/1000000);
+    fprintf(fp, "curMem          = %g Mbytes (should be zero)\n", 
+                                                   m->curMem/1000000);
     tmp = m->totalMem / 1000000;
     fprintf(fp, "total allocated = %g Mbytes\n", tmp);
-    fprintf(fp, "max malloc      = %g Mbytes (max allocated at any point in time)\n", 
-                                                                    m->maxMem/1000000);
+    fprintf(fp, "max malloc      = %g Mbytes (max allocated at any point in time)\n", m->maxMem/1000000);
     fprintf(fp, "\n");
+    fprintf(fp, "---------------------- Euclid memory report (end)\n");
   } 
   END_FUNC_DH_2
 }
-
