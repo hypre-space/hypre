@@ -795,19 +795,20 @@ int HYPRE_LSI_DDIlutDecompose(HYPRE_LSI_DDIlut *ilut_ptr,MH_Matrix *Amat,
    mat_ia[0] = 0;
    for ( i = 0; i < Nrows; i++ )
    {
-      if ( i % 1000 == 0 && ilut_ptr->outputLevel > 0 ) 
+      /*if ( i % 1000 == 0 && ilut_ptr->outputLevel > 0 ) 
          printf("%4d : Processing row %d(%d)\n",mypid,i,extNrows);
+      */
       for ( j = 0; j < extNrows; j++ ) dble_buf[j] = 0.0;
       MH_GetRow(context,1,&i,allocated_space,cols,vals,&m);
       if ( m < 0 )
-         printf("IlutDecompose warning(1): row nnz = %d\n",m);
+         printf("IlutDecompose WARNING(1): row nnz = %d\n",m);
 
       for ( j = 0; j < m; j++ ) 
       {
          if ( cols[j] < extNrows ) dble_buf[cols[j]] = vals[j];
          else if ( extNrows > Nrows ) 
          {
-            printf("IlutDecompose warning(2) : index = %d(%d)\n",cols[j],extNrows);
+            printf("IlutDecompose WARNING(2) : index = %d(%d)\n",cols[j],extNrows);
          }
       }
       Lcount = Ucount = first = 0;
@@ -914,8 +915,10 @@ int HYPRE_LSI_DDIlutDecompose(HYPRE_LSI_DDIlut *ilut_ptr,MH_Matrix *Amat,
    offset = 0;
    for ( i = 0; i < total_recv_leng; i++ )
    {
+      /*
       if ( (i+Nrows) % 1000 == 0 && ilut_ptr->outputLevel > 0 ) 
          printf("%4d : Processing row %d(%d)\n",mypid,i+Nrows,extNrows);
+      */
       for ( j = 0; j < extNrows; j++ ) dble_buf[j] = 0.0;
       for ( j = offset; j < offset+recv_lengths[i]; j++ )
       {

@@ -72,7 +72,7 @@ void HYPRE_LinSysCore::buildSchurReducedSystem()
     // initial set up 
     //------------------------------------------------------------------
 
-    if ( HYOutputLevel_ > 0 && mypid_ == 0 ) 
+    if ( mypid_ == 0 && (HYOutputLevel_ & HYFEI_SCHURREDUCE1) )
     {
        printf("buildSchurSystem begins....\n");
     }
@@ -80,7 +80,7 @@ void HYPRE_LinSysCore::buildSchurReducedSystem()
     EndRow   = localEndRow_ - 1;
     nRows    = localEndRow_ - localStartRow_ + 1;
     A_csr    = (HYPRE_ParCSRMatrix) HYPRE_IJMatrixGetLocalStorage(HYA_);
-    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) > 1 )
+    if ( HYOutputLevel_ & HYFEI_SCHURREDUCE1 )
     {
        printf("%4d buildSchurSystem : StartRow/EndRow = %d %d\n",mypid_,
                                          StartRow,EndRow);
@@ -122,7 +122,7 @@ void HYPRE_LinSysCore::buildSchurReducedSystem()
        if ( diag_found == 0 ) nSchur++;
        HYPRE_ParCSRMatrixRestoreRow(A_csr,i,&rowSize,&colInd,&colVal);
     }
-    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) > 1 )
+    if ( HYOutputLevel_ & HYFEI_SCHURREDUCE1 )
     {
        printf("%4d buildSchurSystem : nSchur = %d\n",mypid_,nSchur);
     }
@@ -157,7 +157,7 @@ void HYPRE_LinSysCore::buildSchurReducedSystem()
 
     MPI_Allreduce(&nSchur, &globalNSchur, 1, MPI_INT, MPI_SUM,comm_);
 
-    if ( globalNSchur == 0 && mypid_ == 0 )
+    if ( globalNSchur == 0 && mypid_ == 0 && (HYOutputLevel_ & HYFEI_SCHURREDUCE1))
     {
        printf("buildSchurSystem WARNING : no row has 0 diagonal element.\n");
        schurReduction_ = 0;
@@ -179,7 +179,7 @@ void HYPRE_LinSysCore::buildSchurReducedSystem()
     delete [] recvCntArray;
     delete [] displArray;
 
-    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) > 2 )
+    if ( HYOutputLevel_ & HYFEI_SCHURREDUCE2 )
     {
        for ( i = 0; i < nSchur; i++ )
           printf("%4d buildSchurSystem : schurList %d = %d\n",mypid_,
@@ -221,7 +221,7 @@ void HYPRE_LinSysCore::buildSchurReducedSystem()
     CGlobalNCols = globalNRows - globalNSchur;
     CStartRow    = ProcNSchur[mypid_];
 
-    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) > 1 )
+    if ( HYOutputLevel_ & HYFEI_SCHURREDUCE1 )
     {
        printf("%4d buildSchurSystem : CStartRow  = %d\n",mypid_,CStartRow);
        printf("%4d buildSchurSystem : CGlobalDim = %d %d\n", mypid_, 
@@ -259,8 +259,11 @@ void HYPRE_LinSysCore::buildSchurReducedSystem()
           if (searchIndex < 0) newRowSize++;
           else if ( colVal[j] != 0.0 )
           {
-             printf("buildSchurSystem WARNING : lower diag block != 0.\n");
-             printf("%4d : Cmat[%4d,%4d] = %e\n",rowIndex,colIndex,colVal[j]);
+             if ( HYOutputLevel_ & HYFEI_SCHURREDUCE1 )
+             {
+                printf("buildSchurSystem WARNING : lower diag block != 0.\n");
+                printf("%4d : Cmat[%4d,%4d] = %e\n",rowIndex,colIndex,colVal[j]);
+             }
           }
        }
        CMatSize[i] = newRowSize;
@@ -303,14 +306,20 @@ void HYPRE_LinSysCore::buildSchurReducedSystem()
                 newColVal[newRowSize++] = colVal[j];
                 if ( colIndex < 0 || colIndex >= CGlobalNCols )
                 {
-                   printf("%4d buildSchurSystem WARNING : Cmat ", mypid_);
-                   printf("out of range %d - %d (%d)\n", rowCount, colIndex, 
-                           CGlobalNCols);
+                   if ( HYOutputLevel_ & HYFEI_SCHURREDUCE1 )
+                   {
+                      printf("%4d buildSchurSystem WARNING : Cmat ", mypid_);
+                      printf("out of range %d - %d (%d)\n", rowCount, colIndex, 
+                              CGlobalNCols);
+                   } 
                 } 
                 if ( newRowSize > maxRowSize+1 ) 
                 {
-                   printf("%4d buildSchurSystem : WARNING - ",mypid_);
-                   printf("passing array boundary(1).\n");
+                   if ( HYOutputLevel_ & HYFEI_SCHURREDUCE1 )
+                   {
+                      printf("%4d buildSchurSystem : WARNING - ",mypid_);
+                      printf("passing array boundary(1).\n");
+                   }
                 }
              }
           } 
@@ -330,7 +339,7 @@ void HYPRE_LinSysCore::buildSchurReducedSystem()
     C_csr = (HYPRE_ParCSRMatrix) HYPRE_IJMatrixGetLocalStorage(Cmat);
     hypre_MatvecCommPkgCreate((hypre_ParCSRMatrix *) C_csr);
 
-    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) > 3 )
+    if ( HYOutputLevel_ & HYFEI_SCHURREDUCE3 )
     {
        ncnt = 0;
        MPI_Barrier(MPI_COMM_WORLD);
@@ -370,7 +379,7 @@ void HYPRE_LinSysCore::buildSchurReducedSystem()
     MGlobalNRows = globalNRows - globalNSchur;
     MGlobalNCols = globalNRows - globalNSchur;
     MStartRow    = ProcNRows[mypid_] - ProcNSchur[mypid_];
-    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) > 1 )
+    if ( HYOutputLevel_ & HYFEI_SCHURREDUCE1 )
     {
        printf("%4d buildSchurSystem : MStartRow  = %d\n",mypid_,MStartRow);
        printf("%4d buildSchurSystem : MGlobalDim = %d %d\n", mypid_, 
@@ -423,7 +432,8 @@ void HYPRE_LinSysCore::buildSchurReducedSystem()
           }
           if ( j == rowSize )
           {
-             printf("%4d : buildSchurSystem WARNING : diag[%d] not found.\n",
+             if ( HYOutputLevel_ & HYFEI_SCHURREDUCE1 )
+                printf("%4d : buildSchurSystem WARNING : diag[%d] not found.\n",
                      mypid_, i);
              ierr = 1;
           } 
@@ -439,7 +449,7 @@ void HYPRE_LinSysCore::buildSchurReducedSystem()
     ddata = -mindiag;
     MPI_Allreduce(&ddata, &mindiag, 1, MPI_DOUBLE, MPI_MAX, comm_);
     mindiag = - mindiag;
-    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) > 1 && mypid_ == 0 )
+    if ( mypid_ == 0 && (HYOutputLevel_ & HYFEI_SCHURREDUCE1))
     {
        printf("buildSchurSystem : max diagonal = %e\n", maxdiag);
        printf("buildSchurSystem : min diagonal = %e\n", mindiag);
@@ -460,8 +470,11 @@ void HYPRE_LinSysCore::buildSchurReducedSystem()
     MPI_Allreduce(&ierr, &ncnt, 1, MPI_INT, MPI_SUM, comm_);
     if ( ncnt > 0 )
     {
-       printf("buildSchurSystem WARNING : A11 not diagonal\n");
-       printf("buildSchurSystem WARNING : reduction not performed.\n");
+       if ( HYOutputLevel_ & HYFEI_SCHURREDUCE1 )
+       {
+          printf("buildSchurSystem WARNING : A11 not diagonal\n");
+          printf("buildSchurSystem WARNING : reduction not performed.\n");
+       }
        schurReduction_ = 0;
        delete [] ProcNRows;
        delete [] ProcNSchur;  
@@ -485,7 +498,7 @@ void HYPRE_LinSysCore::buildSchurReducedSystem()
     CTGlobalNCols = CGlobalNRows;
     CTStartRow    = ProcNRows[mypid_] - ProcNSchur[mypid_];
 
-    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) > 1 )
+    if ( HYOutputLevel_ & HYFEI_SCHURREDUCE1 )
     {
        printf("%4d buildSchurSystem : CTStartRow  = %d\n",mypid_,CTStartRow);
        printf("%4d buildSchurSystem : CTGlobalDim = %d %d\n", mypid_, 
@@ -583,7 +596,7 @@ void HYPRE_LinSysCore::buildSchurReducedSystem()
     CT_csr = (HYPRE_ParCSRMatrix) HYPRE_IJMatrixGetLocalStorage(CTmat);
     hypre_MatvecCommPkgCreate((hypre_ParCSRMatrix *) CT_csr);
 
-    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) > 3 )
+    if ( HYOutputLevel_ & HYFEI_SCHURREDUCE3 )
     {
        ncnt = 0;
        MPI_Barrier(MPI_COMM_WORLD);
@@ -614,7 +627,7 @@ void HYPRE_LinSysCore::buildSchurReducedSystem()
     // perform the triple matrix product
     //------------------------------------------------------------------
 
-    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) > 1 )
+    if ( HYOutputLevel_ & HYFEI_SCHURREDUCE1 )
     {
        printf("%4d buildSchurSystem : Triple matrix product starts\n",mypid_);
     }
@@ -622,12 +635,12 @@ void HYPRE_LinSysCore::buildSchurReducedSystem()
                                      (hypre_ParCSRMatrix *) M_csr,
                                      (hypre_ParCSRMatrix *) CT_csr,
                                      (hypre_ParCSRMatrix **) &S_csr);
-    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) > 1 )
+    if ( HYOutputLevel_ & HYFEI_SCHURREDUCE1 )
     {
        printf("%4d buildSchurSystem : Triple matrix product ends\n",mypid_);
     }
 
-    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) > 3 )
+    if ( HYOutputLevel_ & HYFEI_SCHURREDUCE3 )
     {
        MPI_Barrier(MPI_COMM_WORLD);
        ncnt = 0;
@@ -810,7 +823,7 @@ void HYPRE_LinSysCore::buildSchurReducedSystem()
        }
     }
 */
-    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) > 0 && mypid_ == 0 )
+    if ( mypid_ == 0 && (HYOutputLevel_ & HYFEI_SCHURREDUCE1) )
     {
        printf("buildSchurSystem ends....\n");
     }
@@ -933,7 +946,7 @@ void HYPRE_LinSysCore::buildSchurReducedSoln()
        HYPRE_ParCSRMatrixMatvec( -1.0, A_csr, x_csr, 1.0, r_csr );
        HYPRE_ParVectorInnerProd( r_csr, r_csr, &rnorm);
        rnorm = sqrt( rnorm );
-       if ( mypid_ == 0 )
+       if ( mypid_ == 0 && ( HYOutputLevel_ & HYFEI_SCHURREDUCE1 ) )
           printf("buildReducedSystemSoln::final residual norm = %e\n", rnorm);
     } 
     currX_ = HYx_;

@@ -41,6 +41,9 @@ enum HYpreconID {HYDIAGONAL,HYPILUT,HYPARASAILS,HYBOOMERAMG,HYNONE,HYML,
 #define HYFEI_PRINTREDMAT         4096
 #define HYFEI_PRINTSOL            8192
 #define HYFEI_DDILUT             16384
+#define HYFEI_SCHURREDUCE1       32768
+#define HYFEI_SCHURREDUCE2       65536
+#define HYFEI_SCHURREDUCE3      131072
 
 // *************************************************************************
 // class definition
