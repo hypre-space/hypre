@@ -7,6 +7,8 @@
 #include <malloc.h>
 #include <assert.h>
 
+#include "fortran.h"
+
 /* Macros */
 #ifndef USER_ABORT
 #define USER_ABORT(msg) superlu_abort_and_exit(msg)
@@ -100,10 +102,8 @@ extern int     spcoletree (int *, int *, int *, int, int, int *);
 extern int     *TreePostorder (int, int *);
 extern double  SuperLU_timer_ ();
 extern int     sp_ienv (int);
-/*
 extern int     hypre_F90_NAME_BLAS(lsame,LSAME) (char *, char *);
 extern int     hypre_F90_NAME_BLAS(xerbla,XERBLA) (char *, int *);
-*/
 extern void    ifill (int *, int, int);
 extern void    snode_profile (int, int *);
 extern void    super_stats (int, int *);
