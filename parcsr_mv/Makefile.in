@@ -23,6 +23,7 @@ CDEFS =
  
 CFLAGS =\
  ${C_COMPILE_FLAGS}\
+ -I..\
  -I$(srcdir)\
  -I$(srcdir)/..\
  -I$(srcdir)/../utilities\

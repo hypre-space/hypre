@@ -23,6 +23,7 @@ CINCLUDES=@INCLUDES@ @MPIINCLUDE@
  
 CFLAGS =\
  ${C_COMPILE_FLAGS}\
+ -I..\
  -I$(srcdir)/..\
  -I$(srcdir)/../utilities\
  ${CINCLUDES}
