@@ -53,10 +53,14 @@ enable_shared=no
 disable_shared=yes
 # ... was enable_shared=yes   but hypre uses static
 with_fortran77=yes
-with_fortran90=yes
+with_fortran90=no
+# ... was with_fortran90=yes    which doesn't work on frost
 with_cxx=yes
 with_python=yes
-with_java=yes
+with_java=no
+# ... was with_java=yes   which doesn't work on frost without help
+# in the form of an additional configure argument
+#  JNI_INCLUDES="-I /usr/java130/include"
 msgs="
 	Recap:"
 
