@@ -17,6 +17,14 @@
 #ifndef included_bHYPRE_GMRES_Impl_h
 #define included_bHYPRE_GMRES_Impl_h
 
+/* DO-NOT-DELETE splicer.begin(bHYPRE.GMRES._includes) */
+/* Put additional include files here... */
+#include "HYPRE.h"
+#include "utilities.h"
+#include "krylov.h"
+#include "HYPRE_parcsr_ls.h"
+/* DO-NOT-DELETE splicer.end(bHYPRE.GMRES._includes) */
+
 #ifndef included_SIDL_header_h
 #include "SIDL_header.h"
 #endif
@@ -32,14 +40,6 @@
 #ifndef included_bHYPRE_Vector_h
 #include "bHYPRE_Vector.h"
 #endif
-
-/* DO-NOT-DELETE splicer.begin(bHYPRE.GMRES._includes) */
-/* Put additional include files here... */
-#include "HYPRE.h"
-#include "utilities.h"
-#include "krylov.h"
-#include "HYPRE_parcsr_ls.h"
-/* DO-NOT-DELETE splicer.end(bHYPRE.GMRES._includes) */
 
 /*
  * Private data for class bHYPRE.GMRES

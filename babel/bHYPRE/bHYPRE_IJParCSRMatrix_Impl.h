@@ -17,6 +17,13 @@
 #ifndef included_bHYPRE_IJParCSRMatrix_Impl_h
 #define included_bHYPRE_IJParCSRMatrix_Impl_h
 
+/* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRMatrix._includes) */
+/* Put additional include files here... */
+#include "HYPRE_IJ_mv.h"
+#include "HYPRE.h"
+#include "utilities.h"
+/* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRMatrix._includes) */
+
 #ifndef included_SIDL_header_h
 #include "SIDL_header.h"
 #endif
@@ -29,13 +36,6 @@
 #ifndef included_bHYPRE_IJParCSRMatrix_h
 #include "bHYPRE_IJParCSRMatrix.h"
 #endif
-
-/* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRMatrix._includes) */
-/* Put additional include files here... */
-#include "HYPRE_IJ_mv.h"
-#include "HYPRE.h"
-#include "utilities.h"
-/* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRMatrix._includes) */
 
 /*
  * Private data for class bHYPRE.IJParCSRMatrix

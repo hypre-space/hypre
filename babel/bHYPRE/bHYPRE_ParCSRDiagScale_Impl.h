@@ -17,6 +17,13 @@
 #ifndef included_bHYPRE_ParCSRDiagScale_Impl_h
 #define included_bHYPRE_ParCSRDiagScale_Impl_h
 
+/* DO-NOT-DELETE splicer.begin(bHYPRE.ParCSRDiagScale._includes) */
+/* Put additional include files here... */
+#include "HYPRE.h"
+#include "utilities.h"
+#include "bHYPRE_IJParCSRMatrix.h"
+/* DO-NOT-DELETE splicer.end(bHYPRE.ParCSRDiagScale._includes) */
+
 #ifndef included_SIDL_header_h
 #include "SIDL_header.h"
 #endif
@@ -29,13 +36,6 @@
 #ifndef included_bHYPRE_ParCSRDiagScale_h
 #include "bHYPRE_ParCSRDiagScale.h"
 #endif
-
-/* DO-NOT-DELETE splicer.begin(bHYPRE.ParCSRDiagScale._includes) */
-/* Put additional include files here... */
-#include "HYPRE.h"
-#include "utilities.h"
-#include "bHYPRE_IJParCSRMatrix.h"
-/* DO-NOT-DELETE splicer.end(bHYPRE.ParCSRDiagScale._includes) */
 
 /*
  * Private data for class bHYPRE.ParCSRDiagScale

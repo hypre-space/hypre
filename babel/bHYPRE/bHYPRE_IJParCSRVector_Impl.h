@@ -17,6 +17,13 @@
 #ifndef included_bHYPRE_IJParCSRVector_Impl_h
 #define included_bHYPRE_IJParCSRVector_Impl_h
 
+/* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRVector._includes) */
+/* Put additional include files here... */
+#include "HYPRE_IJ_mv.h"
+#include "HYPRE.h"
+#include "utilities.h"
+/* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRVector._includes) */
+
 #ifndef included_SIDL_header_h
 #include "SIDL_header.h"
 #endif
@@ -29,13 +36,6 @@
 #ifndef included_bHYPRE_Vector_h
 #include "bHYPRE_Vector.h"
 #endif
-
-/* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRVector._includes) */
-/* Put additional include files here... */
-#include "HYPRE_IJ_mv.h"
-#include "HYPRE.h"
-#include "utilities.h"
-/* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRVector._includes) */
 
 /*
  * Private data for class bHYPRE.IJParCSRVector

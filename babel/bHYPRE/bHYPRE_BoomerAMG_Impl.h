@@ -17,6 +17,15 @@
 #ifndef included_bHYPRE_BoomerAMG_Impl_h
 #define included_bHYPRE_BoomerAMG_Impl_h
 
+/* DO-NOT-DELETE splicer.begin(bHYPRE.BoomerAMG._includes) */
+/* Put additional include files here... */
+#include "HYPRE_parcsr_ls.h"
+#include "HYPRE.h"
+#include "utilities.h"
+#include "bHYPRE_IJParCSRMatrix.h"
+#include "bHYPRE_IJParCSRVector.h"
+/* DO-NOT-DELETE splicer.end(bHYPRE.BoomerAMG._includes) */
+
 #ifndef included_SIDL_header_h
 #include "SIDL_header.h"
 #endif
@@ -29,15 +38,6 @@
 #ifndef included_bHYPRE_Vector_h
 #include "bHYPRE_Vector.h"
 #endif
-
-/* DO-NOT-DELETE splicer.begin(bHYPRE.BoomerAMG._includes) */
-/* Put additional include files here... */
-#include "HYPRE_parcsr_ls.h"
-#include "HYPRE.h"
-#include "utilities.h"
-#include "bHYPRE_IJParCSRMatrix.h"
-#include "bHYPRE_IJParCSRVector.h"
-/* DO-NOT-DELETE splicer.end(bHYPRE.BoomerAMG._includes) */
 
 /*
  * Private data for class bHYPRE.BoomerAMG
