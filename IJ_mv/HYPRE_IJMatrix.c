@@ -158,12 +158,8 @@ HYPRE_IJMatrixDestroy( HYPRE_IJMatrix matrix )
          ierr = hypre_IJMatrixDestroyParCSR( ijmatrix );
       else
       {
-         /* Tong : to be able to destroy IJ without destroying the underlying
-                   matrix 
          printf("Unrecognized object type -- HYPRE_IJMatrixDestroy\n");
          exit(1);
-         */
-         ierr = 1;
       }
    }
 
