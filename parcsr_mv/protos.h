@@ -46,6 +46,12 @@ hypre_ParCSRMatrix *hypre_CreateParCSRMatrix P((MPI_Comm comm,
 		int num_nonzeros_diag, int num_nonzeros_offd));
 int hypre_DestroyParCSRMatrix P(( hypre_ParCSRMatrix *matrix));
 int hypre_InitializeParCSRMatrix P(( hypre_ParCSRMatrix *matrix));
+int hypre_SetParCSRMatrixDataOwner P(( hypre_ParCSRMatrix *matrix, 
+	int owns_data));
+int hypre_SetParCSRMatrixRowStartsOwner P(( hypre_ParCSRMatrix *matrix, 
+	int owns_row_starts));
+int hypre_SetParCSRMatrixColStartsOwner P(( hypre_ParCSRMatrix *matrix, 
+	int owns_col_starts));
 hypre_ParCSRMatrix *hypre_ReadParCSRMatrix P(( MPI_Comm comm, char *file_name));
 int hypre_PrintParCSRMatrix P(( hypre_ParCSRMatrix *matrix, char *file_name));
 hypre_ParCSRMatrix *hypre_CSRMatrixToParCSRMatrix P((MPI_Comm comm,
