@@ -600,7 +600,8 @@ hypre_PFMG2BuildRAPNoSym( hypre_StructMatrix *A,
 
          hypre_SetIndex(index_temp,0,1,0);
          MapIndex(index_temp, cdir, index);
-         pb = hypre_StructMatrixExtractPointerByIndex(P, fi, index);
+         pb = hypre_StructMatrixExtractPointerByIndex(P, fi, index) -
+            hypre_BoxOffsetDistance(P_dbox, index);
  
          /*-----------------------------------------------------------------
           * Extract pointers for restriction operator:
@@ -610,8 +611,7 @@ hypre_PFMG2BuildRAPNoSym( hypre_StructMatrix *A,
 
          hypre_SetIndex(index_temp,0,-1,0);
          MapIndex(index_temp, cdir, index);
-         ra = hypre_StructMatrixExtractPointerByIndex(R, fi, index) -
-            hypre_BoxOffsetDistance(R_dbox, index);
+         ra = hypre_StructMatrixExtractPointerByIndex(R, fi, index);
 
          hypre_SetIndex(index_temp,0,1,0);
          MapIndex(index_temp, cdir, index);
