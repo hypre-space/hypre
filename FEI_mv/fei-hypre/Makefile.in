@@ -122,6 +122,7 @@ install: all
 	@cp -f $(srcdir)/../fei-base/Lookup.h $$HYPRE_INSTALL_DIR/include
 	@cp -f $(srcdir)/../fei-base/LinearSystemCore.h \
          $$HYPRE_INSTALL_DIR/include/snl_LinearSystemCore.h
+	@cp -f $(srcdir)/../fei-base/fei_defs.h $$HYPRE_INSTALL_DIR/include
 	@cp -f $(srcdir)/cfei_hypre.h $$HYPRE_INSTALL_DIR/include
 	@cp -f $(srcdir)/cfei-hypre.h $$HYPRE_INSTALL_DIR/include
 	@cp -f $(srcdir)/HYPRE_FEI_includes.h $$HYPRE_INSTALL_DIR/include
