@@ -79,18 +79,24 @@ do
         HYPRE_RUN_MACHINE="blue"
         HYPRE_REMOTE_DIR="/usr/gapps/hypre/powerpc-ibm-aix4.3.3.0/AUTOTEST"
         if [ "$1" = "-blue" ] ; then
-	  HYPRE_MACHINE_COMMANDS="-m -o 1 -a 2 -cf"
+	  HYPRE_MACHINE_COMMANDS="-ml -o 1 -a 2 -cf"
         else
-	  HYPRE_MACHINE_COMMANDS="-m -o 2 -cf"
+          SUBMSG="from OpenMP"
+	  HYPRE_MACHINE_COMMANDS="-ml -o 2 -cf"
         fi
 	perform_test
         shift;;
-    -frost)
+    -frost | -frostmp)
         HYPRE_ARCH="blue"
         HYPRE_COMPILE_MACHINE="frost"
         HYPRE_RUN_MACHINE="frost"
         HYPRE_REMOTE_DIR="/usr/gapps/hypre/powerpcll-ibm-aix4.3.3.0/AUTOTEST"
-	HYPRE_MACHINE_COMMANDS="-m -o 1 -a 2 -cf"
+        if [ "$1" = "-frost" ] ; then
+	HYPRE_MACHINE_COMMANDS="-ml -o 1 -a 2 -cf"
+        else
+          SUBMSG="from OpenMP"
+	  HYPRE_MACHINE_COMMANDS="-ml -o 2 -cf"
+        fi
 	perform_test
         shift;;
     -casc)
@@ -114,12 +120,24 @@ do
         fi
 	perform_test
         shift;;
+    -gps | -gpsmp)
+        HYPRE_ARCH="dec"
+        HYPRE_COMPILE_MACHINE="gps320"
+        HYPRE_RUN_MACHINE="gps320"
+        HYPRE_REMOTE_DIR="/usr/gapps/hypre/alphaev68-dec-osf5.1/AUTOTEST"
+        if [ "$1" = "-gps" ] ; then
+	  HYPRE_MACHINE_COMMANDS="-m -r $HYPRE_RUN_MACHINE -o 1 -a 2 -cf"
+        else
+	  HYPRE_MACHINE_COMMANDS="-m -r $HYPRE_RUN_MACHINE -o 2 -cf"
+        fi
+	perform_test
+        shift;;
     -lx)
         HYPRE_ARCH="linux"
         HYPRE_COMPILE_MACHINE="lx10"
         HYPRE_RUN_MACHINE="lx10"
         HYPRE_REMOTE_DIR="/usr/gapps/hypre/alphaev67-unknown-linux-gnu/AUTOTEST"
-	HYPRE_MACHINE_COMMANDS="-m -a 2 -cf"
+	HYPRE_MACHINE_COMMANDS="-ml -a 2 -cf"
 	perform_test
         shift;;
     -insure)
@@ -162,18 +180,19 @@ do
         HYPRE_RUN_MACHINE="tc2k"
         HYPRE_REMOTE_DIR="/usr/gapps/hypre/alphaev67-dec-osf5.1/AUTOTEST"
         if [ "$1" = "-tc2k" ] ; then
-	  HYPRE_MACHINE_COMMANDS="-m -o 1 -a 2 -cf"
+	  HYPRE_MACHINE_COMMANDS="-ml -o 1 -a 2 -cf"
         else
-	  HYPRE_MACHINE_COMMANDS="-m -a 1 -cf -o 2 -cf"
+          SUBMSG="from OpenMP"
+	  HYPRE_MACHINE_COMMANDS="-ml -a 1 -cf -o 2 -cf"
         fi
 	perform_test
         shift;;
     -tc )
         HYPRE_ARCH="dec"
         HYPRE_COMPILE_MACHINE="tc01"
-        HYPRE_RUN_MACHINE="tc01"
+        HYPRE_RUN_MACHINE="tc10"
         HYPRE_REMOTE_DIR="/usr/gapps/hypre/alphaev56-dec-osf5.1/AUTOTEST"
-	HYPRE_MACHINE_COMMANDS="-m -o 1 -a 2 -cf"
+	HYPRE_MACHINE_COMMANDS="-ml -o 1 -a 2 -cf"
 	perform_test
         shift;;
     -tcmp)
@@ -181,6 +200,7 @@ do
         HYPRE_COMPILE_MACHINE="tc10"
         HYPRE_RUN_MACHINE="tc10"
         HYPRE_REMOTE_DIR="/usr/gapps/hypre/alphaev56-dec-osf5.1/AUTOTEST"
+        SUBMSG="from OpenMP"
 	HYPRE_MACHINE_COMMANDS="-m -o 2 -cf"
 	perform_test
         shift;;

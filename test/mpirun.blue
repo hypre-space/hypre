@@ -11,7 +11,13 @@
 DRIVER_ARGS=""
 POE_NUM_PROCS="1"
 POE_NUM_NODES="1"
-CPUS_PER_NODE="4"
+HOST=`hostname -s`
+case $HOST in
+  frost*) CPUS_PER_NODE="16"
+    ;;
+  blue*) CPUS_PER_NODE="4"
+    ;;
+esac
 while [ "$*" != "" ]
 do
 case $1 in
