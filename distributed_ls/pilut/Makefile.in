@@ -32,7 +32,7 @@ HYPRE_INCLUDES = \
  -I$(srcdir)/../../utilities\
  -I$(srcdir)/../../distributed_matrix
 
-INCLUDES = $(HYPRE_INCLUDES) $(MPI_INCLUDES) $(PETSC_INCLUDES)
+INCLUDES = $(HYPRE_INCLUDES) $(MPI_INCLUDES)
 LIBDIR   = $(MPI_LIBDIR)
 LIBS     = -L. -lHYPREpilut -lm $(MPI_LIBS) $(OTHER_LIBS)
 
