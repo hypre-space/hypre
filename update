@@ -122,13 +122,15 @@ fi
 
 	# create the UPDATE.tar file for updating on non-CASC machines
 	echo "creating the UPDATE.tar file ..."
+	cp UPDATE/src/linear_solvers/update .
 	tar cf UPDATE.tar \
+	    update \
 	    UPDATE/VER* \
 	    UPDATE/src/linear_solvers/build \
-	    UPDATE/src/linear_solvers/update \
 	    UPDATE/src/linear_solvers/utilities \
 	    UPDATE/src/linear_solvers/struct_matrix_vector \
 	    UPDATE/src/linear_solvers/struct_linear_solvers
+	rm -f update
     fi
 
     if [ ! -f UPDATE/VERSION_NAME ]
