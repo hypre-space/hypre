@@ -21,6 +21,7 @@ FILES =\
  communication.c\
  par_csr_matrix.c\
  par_csr_matvec.c\
+ par_csr_matop.c\
  par_vector.c
 
 OBJS = ${FILES:.c=.o}
