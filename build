@@ -158,18 +158,18 @@ then
     # SMG
     (
 	cd utilities
-	cp -f memory.h mpistubs.h timer.h timing.h $HYPRE_INSTALL_DIR/include
-	cp -f *.a $HYPRE_INSTALL_DIR/lib
+	cp -f hypre_utilities.h $HYPRE_INSTALL_DIR/include
+	cp -f libHYPRE_utilities.a $HYPRE_INSTALL_DIR/lib
     )
     (
 	cd struct_matrix_vector
 	cp -f HYPRE_mv.h hypre_mv.h $HYPRE_INSTALL_DIR/include
-	cp -f *.a $HYPRE_INSTALL_DIR/lib
+	cp -f libHYPRE_mv.a $HYPRE_INSTALL_DIR/lib
     )
     (
 	cd struct_linear_solvers
 	cp -f HYPRE_ls.h hypre_ls.h $HYPRE_INSTALL_DIR/include
-	cp -f *.a $HYPRE_INSTALL_DIR/lib
+	cp -f libHYPRE_ls.a $HYPRE_INSTALL_DIR/lib
     )
 fi
 
