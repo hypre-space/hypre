@@ -97,6 +97,8 @@ hypre_SMGSolve( void               *smg_vdata,
 
    for (i = 0; i < max_iter; i++)
    {
+      (smg_data -> num_iterations) = (i + 1);
+
       /*--------------------------------------------------
        * Down cycle
        *--------------------------------------------------*/
@@ -196,8 +198,6 @@ hypre_SMGSolve( void               *smg_vdata,
          hypre_SMGRelaxSetNonZeroGuess(relax_data_l[l]);
          hypre_SMGRelax(relax_data_l[l], A_l[l], b_l[l], x_l[l]);
       }
-
-      (smg_data -> num_iterations) = (i + 1);
    }
 
    hypre_EndTiming(smg_data -> time_index);
