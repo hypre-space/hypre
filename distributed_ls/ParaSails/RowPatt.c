@@ -79,6 +79,7 @@ void RowPattDestroy(RowPatt *p)
 {
     free(p->ind);
     free(p->mark);
+    free(p->buffer);
     free(p);
 }
 
