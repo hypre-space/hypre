@@ -59,27 +59,28 @@ LIBRARIES = $(lib_LIBRARIES)
 libHYPRE_utilities_a_AR = $(AR) $(ARFLAGS)
 libHYPRE_utilities_a_LIBADD =
 am__libHYPRE_utilities_a_SOURCES_DIST = amg_linklist.c binsearch.c \
-	hypre_memory.c hypre_qsort.c memory_dmalloc.c mpistubs.c \
-	qsplit.c random.c thread_mpistubs.c threading.c timer.c \
-	timing.c umalloc_local.c
+	exchange_data.c hypre_memory.c hypre_qsort.c memory_dmalloc.c \
+	mpistubs.c qsplit.c random.c thread_mpistubs.c threading.c \
+	timer.c timing.c umalloc_local.c
 am__objects_1 = amg_linklist.$(OBJEXT) binsearch.$(OBJEXT) \
-	hypre_memory.$(OBJEXT) hypre_qsort.$(OBJEXT) \
-	memory_dmalloc.$(OBJEXT) mpistubs.$(OBJEXT) qsplit.$(OBJEXT) \
-	random.$(OBJEXT) thread_mpistubs.$(OBJEXT) threading.$(OBJEXT) \
-	timer.$(OBJEXT) timing.$(OBJEXT) umalloc_local.$(OBJEXT)
+	exchange_data.$(OBJEXT) hypre_memory.$(OBJEXT) \
+	hypre_qsort.$(OBJEXT) memory_dmalloc.$(OBJEXT) \
+	mpistubs.$(OBJEXT) qsplit.$(OBJEXT) random.$(OBJEXT) \
+	thread_mpistubs.$(OBJEXT) threading.$(OBJEXT) timer.$(OBJEXT) \
+	timing.$(OBJEXT) umalloc_local.$(OBJEXT)
 @STATICONLY_TRUE@am_libHYPRE_utilities_a_OBJECTS = $(am__objects_1)
 libHYPRE_utilities_a_OBJECTS = $(am_libHYPRE_utilities_a_OBJECTS)
 libLTLIBRARIES_INSTALL = $(INSTALL)
 LTLIBRARIES = $(lib_LTLIBRARIES)
 libHYPRE_utilities_la_LIBADD =
 am__libHYPRE_utilities_la_SOURCES_DIST = amg_linklist.c binsearch.c \
-	hypre_memory.c hypre_qsort.c memory_dmalloc.c mpistubs.c \
-	qsplit.c random.c thread_mpistubs.c threading.c timer.c \
-	timing.c umalloc_local.c
-am__objects_2 = amg_linklist.lo binsearch.lo hypre_memory.lo \
-	hypre_qsort.lo memory_dmalloc.lo mpistubs.lo qsplit.lo \
-	random.lo thread_mpistubs.lo threading.lo timer.lo timing.lo \
-	umalloc_local.lo
+	exchange_data.c hypre_memory.c hypre_qsort.c memory_dmalloc.c \
+	mpistubs.c qsplit.c random.c thread_mpistubs.c threading.c \
+	timer.c timing.c umalloc_local.c
+am__objects_2 = amg_linklist.lo binsearch.lo exchange_data.lo \
+	hypre_memory.lo hypre_qsort.lo memory_dmalloc.lo mpistubs.lo \
+	qsplit.lo random.lo thread_mpistubs.lo threading.lo timer.lo \
+	timing.lo umalloc_local.lo
 @STATICONLY_FALSE@am_libHYPRE_utilities_la_OBJECTS = $(am__objects_2)
 libHYPRE_utilities_la_OBJECTS = $(am_libHYPRE_utilities_la_OBJECTS)
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)
@@ -242,6 +243,7 @@ target_alias = @target_alias@
 include_HEADERS = utilities.h HYPRE_utilities.h
 noinst_HEADERS = \
  amg_linklist.h\
+ exchange_data.h\
  fortran.h\
  general.h\
  hypre_memory.h\
@@ -259,6 +261,7 @@ AM_CPPFLAGS = -DHYPRE_TIMING
 FILES = \
  amg_linklist.c\
  binsearch.c\
+ exchange_data.c\
  hypre_memory.c\
  hypre_qsort.c\
  memory_dmalloc.c\
