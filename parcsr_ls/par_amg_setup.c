@@ -403,7 +403,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                              debug_flag, &CF_marker);
          }
          CF_marker_array[level] = CF_marker;
- 
+
          if (relax_weight[level] == 0.0)
          {
 	    hypre_ParCSRMatrixScaledNorm(A_array[level], &relax_weight[level]);
@@ -515,6 +515,12 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                  coarse_pnts_global, num_functions, dof_func_array[level], 
 		 debug_flag, trunc_factor, 
                  hypre_ParAMGDataNumSamples(amg_data), SmoothVecs, &P);
+      }
+      else if (hypre_ParAMGDataInterpType(amg_data) == 2)
+      {
+          hypre_BoomerAMGBuildInterpHE(A_array[level], CF_marker_array[level], 
+                 S, coarse_pnts_global, num_functions, dof_func_array[level], 
+		 debug_flag, trunc_factor, &P);
       }
       else if (hypre_ParAMGDataGSMG(amg_data) == 0)
       {
