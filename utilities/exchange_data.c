@@ -472,6 +472,20 @@ int hypre_DataExchangeList(int num_contacts,
 
    /* end of (!terminate) loop */
 
+
+   /* ----some clean up before post-processing ----*/
+   if (recv_contact_buf_size > 0)
+   {
+      hypre_TFree(recv_contact_buf);
+   }
+  
+   hypre_Free(send_response_buf);
+   hypre_TFree(contact_ptrs);
+   hypre_TFree(response_ptrs);
+     
+
+
+
    /*-----------------POST PROCESSING------------------------------*/
 
    /* more data to receive? */
@@ -539,17 +553,8 @@ int hypre_DataExchangeList(int num_contacts,
 
    /*--------------CLEAN UP------------------- */
   
-   if (recv_contact_buf_size > 0)
-   {
-      hypre_TFree(recv_contact_buf);
-   }
-   
-   hypre_Free(send_response_buf);
    hypre_Free(initial_recv_buf);
       
-   hypre_TFree(contact_ptrs);
-   hypre_TFree(response_ptrs);
-     
 
    if (num_contacts > 0 ) 
    {
