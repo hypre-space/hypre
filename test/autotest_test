@@ -197,10 +197,10 @@ mail_summary () {
   do
     printf "%-15s: " $ConfOpt >> $SUMFILE
     COLFLG=0; COLCNT=0;
+    DWRNCNT=0; DERRCNT=0;
     for MakeOpt in ""  all beta configure IJ fei++ \
            fei nofei sstruct struct
     do
-      DWRNCNT=0; DERRCNT=0;
       FILE=autotest.$ConfOpt.$MakeOpt
       LFILE=`echo $FILE|sed -e 's/\.$//'`.log
       for i in $LFILE ${SRC}/${LFILE} \
