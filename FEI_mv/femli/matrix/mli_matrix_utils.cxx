@@ -477,7 +477,7 @@ int MLI_Matrix_Transpose(MLI_Matrix *Amat, MLI_Matrix **AmatT)
     * construct MLI_Matrix
     * ----------------------------------------------------------------------*/
 
-   sprintf( paramString, "HYPRE_ParVector" );
+   sprintf( paramString, "HYPRE_ParCSRMatrix" );
    funcPtr = new MLI_Function();
    MLI_Utils_HypreParCSRMatrixGetDestroyFunc(funcPtr); 
    mli_AmatT = new MLI_Matrix((void*) hypreAT, paramString, funcPtr);
