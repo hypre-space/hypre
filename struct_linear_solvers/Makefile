@@ -41,7 +41,7 @@ CFLAGS =\
  -I/usr/local/include\
  -I/home/casc/include\
  -I//usr/local/mpi/mpich/include\
- -g -Wall -DZZZ_MALLOC_DEBUG
+ -g -Wall -DZZZ_DEBUG
 
 FFLAGS = -g
 

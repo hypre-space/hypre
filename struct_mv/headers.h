@@ -29,7 +29,7 @@
 
 #include "protos.h"
 
-#ifdef ZZZ_MALLOC_DEBUG
+#ifdef ZZZ_DEBUG
 #include <gmalloc.h>
 #endif
 

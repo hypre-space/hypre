@@ -1,10 +1,11 @@
  
 #include "headers.h"
  
-/* debugging header */
+#ifdef ZZZ_DEBUG
 #include <cegdb.h>
+#endif
 
-#ifdef ZZZ_MALLOC_DEBUG
+#ifdef ZZZ_DEBUG
 char malloc_logpath_memory[256];
 #endif
  
@@ -65,9 +66,11 @@ main( int   argc,
    MPI_Comm_rank(MPI_COMM_WORLD, &myid );
    MPI_Comm_dup(MPI_COMM_WORLD, comm);
 
+#ifdef ZZZ_DEBUG
    cegdb(&argc, &argv, myid);
+#endif
 
-#ifdef ZZZ_MALLOC_DEBUG
+#ifdef ZZZ_DEBUG
    malloc_logpath = malloc_logpath_memory;
    sprintf(malloc_logpath, "malloc.log.%04d", myid);
 #endif
@@ -289,7 +292,7 @@ main( int   argc,
    zzz_TFree(sub_grids);
    zzz_TFree(sub_vectors);
 
-#ifdef ZZZ_MALLOC_DEBUG
+#ifdef ZZZ_DEBUG
    malloc_verify(0);
    malloc_shutdown();
 #endif
