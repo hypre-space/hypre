@@ -34,7 +34,7 @@
 // include the Hypre package header here
 
 #include "HYPRE_IJ_mv.h"
-#include "HYPRE.h" // needed for HYPRE_PARCSR_MATRIX
+#include "HYPRE.h"
 
 #include "HYPRE_parcsr_mv.h"
 #include "HYPRE_parcsr_ls.h"
@@ -74,14 +74,11 @@ HYPRE_SLE::HYPRE_SLE(MPI_Comm PASSED_COMM_WORLD, int masterRank) :
 }
 
 //------------------------------------------------------------------------------
-HYPRE_SLE::~HYPRE_SLE() {
-//
 //  Destructor function. Free allocated memory, etc.
 //
-printf("call delete\n");fflush(stdout);
+HYPRE_SLE::~HYPRE_SLE()
+{
     deleteLinearAlgebraCore();
-printf("exiting delete\n");fflush(stdout);
-
 }
 
 
@@ -119,19 +116,6 @@ void HYPRE_SLE::selectPreconditioner(char *name)
     else if (!strcmp(name, "boomeramg")) 
     {
          pcg_precond = HYPRE_ParAMGCreate();
-#if 0
-         HYPRE_ParAMGSetCoarsenType(pcg_precond, (hybrid*coarsen_type));
-         HYPRE_ParAMGSetMeasureType(pcg_precond, measure_type);
-         HYPRE_ParAMGSetStrongThreshold(pcg_precond, strong_threshold);
-         HYPRE_ParAMGSetLogging(pcg_precond, ioutdat, "driver.out.log");
-         HYPRE_ParAMGSetMaxIter(pcg_precond, 1);
-         HYPRE_ParAMGSetCycleType(pcg_precond, cycle_type);
-         HYPRE_ParAMGSetNumGridSweeps(pcg_precond, num_grid_sweeps);
-         HYPRE_ParAMGSetGridRelaxType(pcg_precond, grid_relax_type);
-         HYPRE_ParAMGSetRelaxWeight(pcg_precond, relax_weight);
-         HYPRE_ParAMGSetGridRelaxPoints(pcg_precond, grid_relax_points);
-         HYPRE_ParAMGSetMaxLevels(pcg_precond, max_levels);
-#endif
 
          HYPRE_ParCSRPCGSetPrecond(pcg_solver,
                                    HYPRE_ParAMGSolve,
@@ -190,7 +174,6 @@ void HYPRE_SLE::createLinearAlgebraCore(int globalNumEqns,
   int localStartRow, int localEndRow, int localStartCol, int localEndCol)
 {
     int ierr;
-    const int *partitioning;
 
     first_row = localStartRow;
     last_row = localEndRow;
@@ -202,19 +185,12 @@ void HYPRE_SLE::createLinearAlgebraCore(int globalNumEqns,
     ierr = HYPRE_IJMatrixSetLocalSize(A, localEndRow-localStartRow+1, 
       globalNumEqns);
     assert(!ierr);
-    ierr = HYPRE_IJMatrixInitialize(A);
-    assert(!ierr);
-
-    HYPRE_IJMatrixGetRowPartitioning(A, &partitioning);
-printf("%d %d %d\n", partitioning[0], partitioning[1], partitioning[2]);
-fflush(stdout);
-exit(0);
 
     ierr = HYPRE_IJVectorCreate(comm, &b, globalNumEqns);
     assert(!ierr);
     ierr = HYPRE_IJVectorSetLocalStorageType(b, HYPRE_PARCSR);
     assert(!ierr);
-    ierr = HYPRE_IJVectorSetPartitioning(b, partitioning);
+    ierr = HYPRE_IJVectorSetLocalPartitioning(b, localStartRow-1, localEndRow);
     assert(!ierr);
     ierr = HYPRE_IJVectorInitialize(b);
     assert(!ierr);
@@ -223,24 +199,29 @@ exit(0);
     assert(!ierr);
     ierr = HYPRE_IJVectorSetLocalStorageType(x, HYPRE_PARCSR);
     assert(!ierr);
-    ierr = HYPRE_IJVectorSetPartitioning(x, partitioning);
+    ierr = HYPRE_IJVectorSetLocalPartitioning(x, localStartRow-1, localEndRow);
     assert(!ierr);
     ierr = HYPRE_IJVectorInitialize(x);
     assert(!ierr);
 }
 
 //------------------------------------------------------------------------------
+// Set the number of rows in the diagonal part and off diagonal part
+// of the matrix, using the structure of the matrix, stored in rows.
+// rows is an array that is 0-based.  first_row and last_row are 1-based.
+//
 void HYPRE_SLE::matrixConfigure(IntArray* rows)
 {
+
     int *sizes1 = new int[last_row-first_row+1];
     int *sizes2 = new int[last_row-first_row+1];
 
-    int i, j;
+    int i, j, ierr;
 
     for (i=0; i<last_row-first_row+1; i++)
     {
-	int  num_indices = rows[i].size();
-	int *indices = &((rows[i])[0]);
+	int  num_indices = rows[first_row+i-1].size();
+	int *indices = &((rows[first_row+i-1])[0]);
 
 	int  num1 = 0;
 	int  num2 = 0;
@@ -255,10 +236,17 @@ void HYPRE_SLE::matrixConfigure(IntArray* rows)
 
 	sizes1[i] = num1;
 	sizes2[i] = num2;
+
     }
 
-    HYPRE_IJMatrixSetDiagRowSizes(A, sizes1);
-    HYPRE_IJMatrixSetOffDiagRowSizes(A, sizes2);
+    ierr = HYPRE_IJMatrixSetDiagRowSizes(A, sizes1);
+    assert(!ierr);
+
+    ierr = HYPRE_IJMatrixSetOffDiagRowSizes(A, sizes2);
+    assert(!ierr);
+
+    ierr = HYPRE_IJMatrixInitialize(A);
+    assert(!ierr);
 
     delete sizes1;
     delete sizes2;
@@ -336,13 +324,15 @@ void HYPRE_SLE::sumIntoSystemMatrix(int row, int numValues,
   const double* values, const int* scatterIndices)
 {
     int i;
+    int ierr;
 
     int *ind = (int *) scatterIndices; // cast away const-ness
 
     for (i=0; i<numValues; i++)
 	ind[i]--;               // change indices to 0-based
 
-    HYPRE_IJMatrixAddToRow(A, numValues, row-1, ind, values);
+    ierr = HYPRE_IJMatrixAddToRow(A, numValues, row-1, ind, values);
+    assert(ierr == 0);
 
     for (i=0; i<numValues; i++)
 	ind[i]++;               // change indices back to 1-based
@@ -384,9 +374,13 @@ void HYPRE_SLE::matrixLoadComplete()
 {
     HYPRE_IJMatrixAssemble(A);
 
-    HYPRE_ParCSRMatrix a = (HYPRE_ParCSRMatrix) HYPRE_IJMatrixGetLocalStorage(A);
+#if 0
+    HYPRE_ParCSRMatrix a = (HYPRE_ParCSRMatrix) 
+        HYPRE_IJMatrixGetLocalStorage(A);
+
     HYPRE_ParCSRMatrixPrint(a, "driver.out.a");
     exit(0);
+#endif
 }
 
 //------------------------------------------------------------------------------
@@ -480,13 +474,16 @@ void fei_hypre_test(int argc, char *argv[])
 
     HYPRE_SLE H(MPI_COMM_WORLD, 0);
 
+    if (my_rank == 0)
+        H.createLinearAlgebraCore(6, 1, 3, 1, 6);
+    else
+        H.createLinearAlgebraCore(6, 4, 6, 1, 6);
+
     H.matrixConfigure(rows);
 
     switch (my_rank)
     {
 	case 0:
-printf("%d %d\n", my_rank, num_procs);fflush(stdout);
-            H.createLinearAlgebraCore(6, 1, 3, 1, 6);
 
             H.sumIntoSystemMatrix(1, 2, val1, ind1);
             H.sumIntoSystemMatrix(2, 2, val2, ind1);
@@ -504,8 +501,6 @@ printf("%d %d\n", my_rank, num_procs);fflush(stdout);
 	    break;
 
 	case 1:
-printf("%d %d\n", my_rank, num_procs);fflush(stdout);
-            H.createLinearAlgebraCore(6, 4, 6, 1, 6);
 
             H.sumIntoSystemMatrix(4, 2, val2, ind3);
 
@@ -518,12 +513,16 @@ printf("%d %d\n", my_rank, num_procs);fflush(stdout);
             H.putIntoSolnVector(3, indg2, valg); // initial guess
 
 	    break;
+
+        default:
+	    assert(0);
     }
 
     H.matrixLoadComplete();
 
     H.selectSolver("pcg");
     H.selectPreconditioner("diagonal");
+
     H.launchSolver(&status);
     assert(status == 0);
 
