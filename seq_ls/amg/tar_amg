@@ -24,7 +24,8 @@ mkdir -p $TOP_DIR/amg/docs
 (cd $AMG_SRC/config;     cp `cat rcs_files` $TOP_DIR/amg/config)
 (cd $AMG_SRC/amg_fdrive; cp `cat rcs_files` $TOP_DIR/amg/examples)
 (cd $AMG_SRC/docs;       cp `cat rcs_files` $TOP_DIR/amg/docs)
+(cd $AMG_SRC;            cp amg.readme      $TOP_DIR)
 
-(cd $TOP_DIR; gtar czf $AMG_SRC/amg.tgz amg)
+(cd $TOP_DIR; gtar czf $AMG_SRC/amg.tgz amg amg.readme)
 
 rm -fr $TOP_DIR
