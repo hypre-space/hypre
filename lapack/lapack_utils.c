@@ -91,6 +91,7 @@ while(--ll >= 0)
 	*lp++ = ' ';
 return 0;
 }
+#include <stdio.h>
 #include "hypre_lapack.h"
 #include "f2c.h"
 
@@ -454,13 +455,13 @@ L100:
 
 /*        EBCDIC character set */
 
-	if (ic >= 129 && ic <= 137 || ic >= 145 && ic <= 153 || ic >= 162 && 
-		ic <= 169) {
+	if ((ic >= 129 && ic <= 137) || (ic >= 145 && ic <= 153) || 
+            (ic >= 162 && ic <= 169)) {
 	    *(unsigned char *)subnam = (char) (ic + 64);
 	    for (i__ = 2; i__ <= 6; ++i__) {
 		ic = *(unsigned char *)&subnam[i__ - 1];
-		if (ic >= 129 && ic <= 137 || ic >= 145 && ic <= 153 || ic >= 
-			162 && ic <= 169) {
+		if ((ic >= 129 && ic <= 137) || (ic >= 145 && ic <= 153) || 
+                    (ic >= 162 && ic <= 169)) {
 		    *(unsigned char *)&subnam[i__ - 1] = (char) (ic + 64);
 		}
 /* L20: */
@@ -962,12 +963,12 @@ r
  or   
           upper case 'Z'. */
 
-	if (inta >= 129 && inta <= 137 || inta >= 145 && inta <= 153 || inta 
-		>= 162 && inta <= 169) {
+	if ((inta >= 129 && inta <= 137) || (inta >= 145 && inta <= 153) || 
+            (inta >= 162 && inta <= 169)) {
 	    inta += 64;
 	}
-	if (intb >= 129 && intb <= 137 || intb >= 145 && intb <= 153 || intb 
-		>= 162 && intb <= 169) {
+	if ((intb >= 129 && intb <= 137) || (intb >= 145 && intb <= 153) || 
+            (intb >= 162 && intb <= 169)) {
 	    intb += 64;
 	}
 
@@ -1334,6 +1335,7 @@ L30:
 
 } /* dlamc1_ */
 
+#include <stdio.h>
 #include "f2c.h"
 
 /* Subroutine */ int dlamc2_(integer *beta, integer *t, logical *rnd, 
@@ -1403,7 +1405,7 @@ L30:
    ===================================================================== 
 */
     /* Table of constant values */
-    static integer c__1 = 1;
+/***static integer c__1 = 1;***/
     
     /* Initialized data */
     static logical first = TRUE_;
@@ -5123,7 +5125,8 @@ L30:
 	*info = -4;
     } else if (*m < 0) {
 	*info = -6;
-    } else if (*n < 0 || itype == 4 && *n != *m || itype == 5 && *n != *m) {
+    } else if ((*n < 0) || ((itype == 4) && (*n != *m)) || 
+               ((itype == 5) && (*n != *m))) {
 	*info = -7;
     } else if (itype <= 3 && *lda < max(1,*m)) {
 	*info = -9;
@@ -5135,11 +5138,12 @@ L30:
 	} else /* if(complicated condition) */ {
 /* Computing MAX */
 	    i__1 = *n - 1;
-	    if (*ku < 0 || *ku > max(i__1,0) || (itype == 4 || itype == 5) && 
-		    *kl != *ku) {
+	    if ((*ku < 0) || (*ku > max(i__1,0)) || 
+                ((itype == 4 || itype == 5) && (*kl != *ku))) {
 		*info = -3;
-	    } else if (itype == 4 && *lda < *kl + 1 || itype == 5 && *lda < *
-		    ku + 1 || itype == 6 && *lda < (*kl << 1) + *ku + 1) {
+	    } else if (((itype == 4) && (*lda < (*kl + 1))) || 
+                       ((itype == 5) && (*lda < (*ku + 1))) || 
+                       ((itype == 6) && (*lda < ((*kl << 1) + *ku + 1)))) {
 		*info = -9;
 	    }
 	}
@@ -7731,7 +7735,7 @@ L110:
 	return 0;
     }
 
-    if (left && ! notran || ! left && notran) {
+    if ((left && ! notran) || (! left && notran)) {
 	i1 = 1;
 	i2 = *k;
 	i3 = 1;
@@ -7940,7 +7944,7 @@ L110:
 	return 0;
     }
 
-    if (left && notran || ! left && ! notran) {
+    if ((left && notran) || (! left && ! notran)) {
 	i1 = 1;
 	i2 = *k;
 	i3 = 1;
@@ -8550,7 +8554,7 @@ L110:
 
 /*        Use blocked code */
 
-	if (left && ! notran || ! left && notran) {
+	if ((left && ! notran) || (! left && notran)) {
 	    i1 = 1;
 	    i2 = *k;
 	    i3 = nb;
@@ -9329,7 +9333,7 @@ L40:
 	*info = -1;
     } else if (*n < 0) {
 	*info = -2;
-    } else if (*ldz < 1 || icompz > 0 && *ldz < max(1,*n)) {
+    } else if ((*ldz < 1) || ((icompz > 0) && (*ldz < max(1,*n)))) {
 	*info = -6;
     }
     if (*info != 0) {
