@@ -3,8 +3,48 @@
 
 The finite element interface (FEI) provides access to the \hypre{}
 library using an interface suitable for finite element applications.
+Solving a linear system from a finite element problem consists of
+four steps in the FEI:
+\begin{enumerate}
+\item Initialize the structure of the finite-element data,
+      including loading the element connectivity data
+\item Load the element or super-element stiffness matrices and forcing terms
+\item Solve the linear system
+\item Retrieve the solution to the linear system
+\end{enumerate}
 
-\section{HYPRE-FEI Capabilities}
+These steps and the associated
+interface functions are described in \cite{FEI-ref}.
+In the remainder of this chapter, we describe step 3, the solution step.
+
+Parameters to the \hypre{} solvers are specified by calling
+\begin{display}
+\begin{verbatim}
+void FEI_parameters(int sysHandle, int numParams, char **paramStrings);
+\end{verbatim}
+\end{display}
+where {\tt sysHandle} is an identifier for the linear system being solved,
+{\tt numParams} is the number of parameter strings, and {\tt paramStrings} is
+an array of null-terminated strings with the format: 
+``{\em parameter\_name value}''.
+For example, setting the preconditioner can be accomplished by:
+\begin{display}
+\begin{verbatim}
+char **paramStrings[1];
+paramStrings[0] = (char *) malloc(64*sizeof(char));
+strcpy(paramStrings[0], "preconditioner parasails");
+FEI_parameters(sysHandle, 1, paramStrings);
+\end{verbatim}
+\end{display}
+
+A linear system is then solved by calling 
+\begin{display}
+\begin{verbatim}
+void FEI_iterateToSolve(int sysHandle);
+\end{verbatim}
+\end{display}
+
+\section{Solvers and preconditioners available}
 
 Several direct and iterative solvers are
 currently available to users:
@@ -26,21 +66,17 @@ The \hypre{} preconditioners currently available via the FEI are:
 \item parallel sparse approximate inverse (ParaSails).
 \end{enumerate}
 
-To choose between these options as well as the parameters specific to a
-particular method, users are only required to call the FEI {\sf parameters}
-functions with the corresponding settings.  (Refer to later sections on   
-a list of parameter options.)
-
 Capabilities under development are :
 \begin{enumerate}
 \item to form and solve a reduced linear system (in view of constraints), and
 \item a link to the ML's parallel smoothed aggregation method.
 \end{enumerate}
 
-\section{HYPRE-FEI Usage}
+To choose between these options as well as the parameters specific to a
+particular method, the {\tt FEI\_parameters} function is used, as described
+above.
 
-Again, the HYPRE-FEI users interact directly with \hypre{} only via the {\sf parameters}
-function.  In this section we list all parameters recognized by the HYPRE-FEI.
+\section{Parameters}
 
 \begin{description}
 \item[solver XXX] - where XXX specifies one of {\sf cg}, {\sf gmres},
@@ -96,22 +132,22 @@ function.  In this section we list all parameters recognized by the HYPRE-FEI.
 \end{description}
 
 
-\section{HYPRE-FEI Extensions}
-
-In order to support the reduced system formulation for applications
-with slide surface constraints,
-two additional functions are provided via HYPRE-FEI
-on top of the base FEI specification :
-
-\begin{description}
-\item[loadSlaveList(int,int*)] - this function is used to load information
-                        about which unknowns are the slave nodes in the
-                        slide surfaces.  This information is useful for
-                        the construction of reduced linear system.
-\item[buildReducedSystem() ] - this function can be called to reduced a linear
-                        system with constraints to a better-conditioned reduced
-                        form.
-\end{description}
+%\section{HYPRE-FEI Extensions}
+%
+%In order to support the reduced system formulation for applications
+%with slide surface constraints,
+%two additional functions are provided via HYPRE-FEI
+%on top of the base FEI specification :
+%
+%\begin{description}
+%\item[loadSlaveList(int,int*)] - this function is used to load information
+%                        about which unknowns are the slave nodes in the
+%                        slide surfaces.  This information is useful for
+%                        the construction of reduced linear system.
+%\item[buildReducedSystem() ] - this function can be called to reduced a linear
+%                        system with constraints to a better-conditioned reduced
+%                        form.
+%\end{description}
 
 %\section{HYPRE-FEI Comments and Contacts}
 %
