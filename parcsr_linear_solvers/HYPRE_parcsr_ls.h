@@ -12,8 +12,8 @@
  *
  *****************************************************************************/
 
-#ifndef HYPRE_LS_HEADER
-#define HYPRE_LS_HEADER
+#ifndef HYPRE_PARCSR_LS_HEADER
+#define HYPRE_PARCSR_LS_HEADER
 
 #include "HYPRE_utilities.h"
 #include "HYPRE_seq_mv.h"
