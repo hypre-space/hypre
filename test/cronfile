@@ -1,4 +1,4 @@
-0 6 * * 0 cd /home/casc/software/hypre/autotest/; ./autotest -casc | tee autotest.cron.log
+0 6 * * 0 cd /home/casc/software/hypre/autotest/; ./autotest -tc2k | tee autotest.cron.log
 0 1 * * 1 cd /home/casc/software/hypre/autotest/; ./autotest -casc | tee autotest.cron.log
 0 1 * * 2 cd /home/casc/software/hypre/autotest/; ./autotest -purify | tee autotest.cron.log
 0 1 * * 3 cd /home/casc/software/hypre/autotest/; ./autotest -blue | tee autotest.cron.log
