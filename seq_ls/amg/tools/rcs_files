@@ -15,7 +15,9 @@ vector.c
 lapmake.m
 lapmake9.m
 manalyze.m
+matvec.m
 readysmp.m
 readvec.m
+truncysmp.m
 writevec.m
 writeysmp.m

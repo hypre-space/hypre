@@ -64,8 +64,9 @@ then
      $AMG_MKDIR $AMG_BIN
    fi
 
-   UTILITIES="amgstrip amgmvio convert_icf3d readysmp.m readvec.m \
-              writevec.m writeysmp.m manalyze.m lapmake.m lapmake9.m"
+   UTILITIES="amgstrip amgmvio convert_icf3d convert_ale3d readysmp.m  \
+              readvec.m  writevec.m writeysmp.m manalyze.m lapmake.m \
+              lapmake9.m matvec.m truncysmp.m"
 
    for i in $UTILITIES
    do
@@ -84,7 +85,7 @@ fi
 
 if [ "$AMG_VERYCLEAN_FLAG" ]
 then
-   UTILITIES="convert_icf3d"
+   UTILITIES="convert_icf3d convert_ale3d"
 
    for i in $UTILITIES
    do
