@@ -16,9 +16,9 @@
 CVSROOT=/home/casc/repository
 export CVSROOT
 
-PATH=/usr/xpg4/bin:/opt/SUNWspro/bin:/usr/bin:/bin
-PATH=${PATH}:/usr/sbin:/usr/ucb:/usr/ccs/bin:/usr/local/scripts
-PATH=${PATH}:/usr/local/bin:/home/casc/bin:/usr/apps/bin
+#PATH=/usr/xpg4/bin:/opt/SUNWspro/bin:/usr/bin:/bin
+PATH=/bin:/usr/bin:/sbin:/usr/sbin
+PATH=${PATH}:/usr/X11R6/bin:/usr/local/bin:/usr/apps/bin
 export PATH
 
 #==============================================================================
@@ -48,6 +48,7 @@ HYPRE_STRUCT_EMAIL="$HYPRE_DEFAULT_EMAIL\
 
 HYPRE_IJ_EMAIL="$HYPRE_DEFAULT_EMAIL\
  painter1@llnl.gov\
+ castilla1@llnl.gov\
  hysom1@llnl.gov\
  jones97@llnl.gov\
  yang11@llnl.gov\
