@@ -1,7 +1,7 @@
-0 4 * * 0 cd /usr/casc/hypre/sparc-sun-solaris2.8/AUTOTEST/; ./autotest -tc2k -achilles -tux83 -perrin | tee autotest.cron.Sun.log
+0 4 * * 0 cd /usr/casc/hypre/sparc-sun-solaris2.8/AUTOTEST/; ./autotest -tc2k -ilx -tux83 -perrin | tee autotest.cron.Sun.log
 0 1 * * 1 cd /usr/casc/hypre/sparc-sun-solaris2.8/AUTOTEST/; ./autotest -riptide -gpsmp -bluemp -insure -casc | tee autotest.cron.Mon.log
 0 1 * * 2 cd /usr/casc/hypre/sparc-sun-solaris2.8/AUTOTEST/; ./autotest -blue -frostmp -tc2kmp -insure -purify | tee autotest.cron.Tue.log
-0 1 * * 3 cd /usr/casc/hypre/sparc-sun-solaris2.8/AUTOTEST/; ./autotest -frost -vivid -insure -purifyo -achilles | tee autotest.cron.Wed.log
+0 1 * * 3 cd /usr/casc/hypre/sparc-sun-solaris2.8/AUTOTEST/; ./autotest -frost -vivid -insure -purifyo -casc | tee autotest.cron.Wed.log
 0 1 * * 4 cd /usr/casc/hypre/sparc-sun-solaris2.8/AUTOTEST/; ./autotest -gps -frost -tux71 -tux83 -casc | tee autotest.cron.Thu.log
-0 1 * * 5 cd /usr/casc/hypre/sparc-sun-solaris2.8/AUTOTEST/; ./autotest -tux83 -achilles | tee autotest.cron.Fri.log
-0 1 * * 6 cd /usr/casc/hypre/sparc-sun-solaris2.8/AUTOTEST/; ./autotest -pengra -tux -poincare | tee autotest.cron.Sat.log
+0 1 * * 5 cd /usr/casc/hypre/sparc-sun-solaris2.8/AUTOTEST/; ./autotest -tux83 -purifyo -purify | tee autotest.cron.Fri.log
+0 1 * * 6 cd /usr/casc/hypre/sparc-sun-solaris2.8/AUTOTEST/; ./autotest -pengra -lx -tux -poincare | tee autotest.cron.Sat.log

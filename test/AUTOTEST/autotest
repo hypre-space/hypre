@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/ksh
 #BHEADER***********************************************************************
 # (c) 1998   The Regents of the University of California
 #
@@ -18,6 +18,9 @@ print_header()
 }
 perform_test()
 {
+  if [ "$DEBUGMODE" = "yes" ] ; then
+    set -xv
+  fi
   print_header
   echo "deleting old AUTOTEST directory...."
   ${SSH_COMMAND} ${HYPRE_COMPILE_MACHINE} "\
@@ -98,6 +101,16 @@ usage ()
 #==============================================================================
 # This script is the top-level script used to regression test hypre.
 #==============================================================================
+DEBUGMODE=""
+SUBMSG=""
+export SUBMSG
+AUTOMAKEMODE=""
+HYPRE_MESSAGE=""
+export AUTOMAKEMODE HYPRE_MESSAGE
+# OpenSSH to F-Secure communication for RSA authentication
+SSH_COMMAND="ssh -1"
+##SCP_COMMAND="scp -q -oProtocol=1"
+SCP_COMMAND="cp"
 
 if [ $# -lt 1 ]
 then
@@ -108,6 +121,10 @@ case $1 in
     -h|-help) 
         help
         exit;;
+    -d|-debug) 
+        DEBUGMODE="yes"
+        set -xv
+        shift;;
 esac
 
 OldMask=`umask -S`
@@ -154,15 +171,6 @@ fi
 chmod -fR a+rX,u+w,go-w linear_solvers
 chgrp -fR hypre linear_solvers
 
-SUBMSG=""
-export SUBMSG
-AUTOMAKEMODE=""
-HYPRE_MESSAGE=""
-export AUTOMAKEMODE HYPRE_MESSAGE
-# OpenSSH to F-Secure communication for RSA authentication
-SSH_COMMAND="ssh -1"
-##SCP_COMMAND="scp -q -oProtocol=1"
-SCP_COMMAND="cp"
 #==============================================================================
 # Run test suites on remote machines
 #==============================================================================
@@ -186,7 +194,7 @@ do
         if [ "$AUTOMAKEMODE" = "yes" ] ; then
 	  HYPRE_MACHINE_COMMANDS="-m -b 1 -o 1 -l 2 -cf"
           HYPRE_MESSAGE='TEST[automake-ASCI-Blue]'
-        ielif [ "$1" = "-bluemp" ] ; then
+        elif [ "$1" = "-bluemp" ] ; then
           SUBMSG="from OpenMP"
 	  HYPRE_MACHINE_COMMANDS="-m -o 2"
           HYPRE_MESSAGE='SECONDARY[OpenMP-ASCI-Blue]'
@@ -195,6 +203,10 @@ do
           HYPRE_MESSAGE='SECONDARY[ASCI-Blue]'
         fi
 	perform_test
+        shift;;
+    -d|-debug) 
+        DEBUGMODE="yes"
+        set -xv
         shift;;
     -frost | -frostmp)
         HYPRE_ARCH="blue"
@@ -225,6 +237,9 @@ do
         else
 	  HYPRE_MACHINE_COMMANDS="-mns -b 1 -a 2 -cf"
           HYPRE_MESSAGE='SECONDARY[cc-5.3]'
+        fi
+        if [ "$DEBUGMODE" = "yes" ] ; then
+          HYPRE_MACHINE_COMMANDS="-D $HYPRE_MACHINE_COMMANDS"
         fi
    	print_header
         ./autotest_test $HYPRE_MACHINE_COMMANDS

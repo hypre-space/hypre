@@ -290,7 +290,7 @@ apply_error_filters () {
       achi*|sunup*)
         for ii in \
           'Option -fexceptions passed to ld'\
-          '(autoconf|automake|autoheader) has been disabled'\
+          '\(autoconf|automake|autoheader\) has been disabled'\
           '^configure: WARNING: '
         do process_filter $ErrorFile "${ii}"
         done
