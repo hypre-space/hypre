@@ -34,6 +34,9 @@ int HYPRE_AssembleStructInterfaceVector P((HYPRE_StructInterfaceVector vector ))
 int HYPRE_SetStructInterfaceVectorStorageType P((HYPRE_StructInterfaceVector struct_vector , int type ));
 void *HYPRE_StructInterfaceVectorGetData P((HYPRE_StructInterfaceVector vector ));
 int HYPRE_PrintStructInterfaceVector P((HYPRE_StructInterfaceVector vector ));
+int HYPRE_RetrievalOnStructInterfaceVector P((HYPRE_StructInterfaceVector vector ));
+int HYPRE_RetrievalOffStructInterfaceVector P((HYPRE_StructInterfaceVector vector ));
+int HYPRE_GetStructInterfaceVectorValue P((HYPRE_StructInterfaceVector vector , int *index , double *value ));
 
 /* box.c */
 hypre_Box *hypre_NewBox P((hypre_Index *imin , hypre_Index *imax ));
@@ -92,6 +95,9 @@ int hypre_SetStructInterfaceVector P((hypre_StructInterfaceVector *vector , doub
 int hypre_AssembleStructInterfaceVector P((hypre_StructInterfaceVector *vector ));
 int hypre_SetStructInterfaceVectorStorageType P((hypre_StructInterfaceVector *vector , int type ));
 int hypre_PrintStructInterfaceVector P((hypre_StructInterfaceVector *vector ));
+int hypre_RetrievalOnStructInterfaceVector P((hypre_StructInterfaceVector *vector ));
+int hypre_RetreivalOffStructInterfaceVector P((hypre_StructInterfaceVector *vector ));
+int hypre_GetStructInterfaceVector P((hypre_StructInterfaceVector *vector , int *index , double *value ));
 
 /* struct_vector_PETSc.c */
 int hypre_FreeStructInterfaceVectorPETSc P((hypre_StructInterfaceVector *struct_vector ));
@@ -99,5 +105,8 @@ int hypre_SetStructInterfaceVectorPETScCoeffs P((hypre_StructInterfaceVector *st
 int hypre_SetStructInterfaceVectorPETSc P((hypre_StructInterfaceVector *struct_vector , double *val ));
 int hypre_AssembleStructInterfaceVectorPETSc P((hypre_StructInterfaceVector *struct_vector ));
 int hypre_PrintStructInterfaceVectorPETSc P((hypre_StructInterfaceVector *struct_vector ));
+int hypre_RetrievalOnStructInterfaceVectorPETSc P((hypre_StructInterfaceVector *vector ));
+int hypre_RetrievalOffStructInterfaceVectorPETSc P((hypre_StructInterfaceVector *vector ));
+int hypre_GetStructInterfaceVectorPETScValue P((hypre_StructInterfaceVector *vector , int *index , double *value ));
 
 #undef P

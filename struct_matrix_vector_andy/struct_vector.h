@@ -27,9 +27,12 @@ typedef struct
    hypre_StructGrid     *grid;
    hypre_StructStencil  *stencil;
 
+   int           retrieval_on;
+
    int      	 storage_type;
    void     	*translator;
    void     	*data;
+   void         *auxiliary_data;
 
 } hypre_StructInterfaceVector;
 
@@ -40,10 +43,27 @@ typedef struct
 #define hypre_StructInterfaceVectorContext(vector)      ((vector) -> context)
 #define hypre_StructInterfaceVectorStructGrid(vector)         ((vector) -> grid)
 #define hypre_StructInterfaceVectorStructStencil(vector)      ((vector) -> stencil)
+#define hypre_StructInterfaceVectorRetrievalOn(vector)      ((vector) -> retrieval_on)
 
 #define hypre_StructInterfaceVectorStorageType(vector)  ((vector) -> storage_type)
 #define hypre_StructInterfaceVectorTranslator(vector)   ((vector) -> translator)
 #define hypre_StructInterfaceVectorData(vector)         ((vector) -> data)
+#define hypre_StructInterfaceVectorAuxData(vector)         ((vector) -> auxiliary_data)
+
+/*--------------------------------------------------------------------------
+ * Auxiliary Data Structure definitions
+ *--------------------------------------------------------------------------*/
+
+/* PETSc Matrix */
+
+typedef struct
+{
+  double     *VecArray;
+} hypre_StructInterfaceVectorPETScAD;
+
+#define hypre_StructInterfaceVectorVecArray(vector) \
+  (( (hypre_StructInterfaceVectorPETScAD *) hypre_StructInterfaceVectorAuxData(vector)) -> \
+       VecArray)
 
 
 #endif

@@ -131,3 +131,34 @@ HYPRE_PrintStructInterfaceVector( HYPRE_StructInterfaceVector vector )
 {
    return( hypre_PrintStructInterfaceVector( (hypre_StructInterfaceVector *) vector ) );
 }
+
+/*--------------------------------------------------------------------------
+ * HYPRE_RetrievalOnStructInterfaceVector
+ *--------------------------------------------------------------------------*/
+
+int 
+HYPRE_RetrievalOnStructInterfaceVector( HYPRE_StructInterfaceVector vector )
+{
+   return( hypre_RetrievalOnStructInterfaceVector( (hypre_StructInterfaceVector *) vector ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_RetrievalOffStructInterfaceVector
+ *--------------------------------------------------------------------------*/
+
+int 
+HYPRE_RetrievalOffStructInterfaceVector( HYPRE_StructInterfaceVector vector )
+{
+   return( hypre_RetrievalOffStructInterfaceVector( (hypre_StructInterfaceVector *) vector ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_GetStructInterfaceVectorValue
+ *--------------------------------------------------------------------------*/
+
+int 
+HYPRE_GetStructInterfaceVectorValue( HYPRE_StructInterfaceVector vector, 
+       int *index, double *value )
+{
+   return( hypre_GetStructInterfaceVectorValue( (hypre_StructInterfaceVector *) vector, index, value ) );
+}

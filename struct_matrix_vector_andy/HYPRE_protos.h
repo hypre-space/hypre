@@ -34,5 +34,8 @@ int HYPRE_AssembleStructInterfaceVector P((HYPRE_StructInterfaceVector vector ))
 int HYPRE_SetStructInterfaceVectorStorageType P((HYPRE_StructInterfaceVector struct_vector , int type ));
 void *HYPRE_StructInterfaceVectorGetData P((HYPRE_StructInterfaceVector vector ));
 int HYPRE_PrintStructInterfaceVector P((HYPRE_StructInterfaceVector vector ));
+int HYPRE_RetrievalOnStructInterfaceVector P((HYPRE_StructInterfaceVector vector ));
+int HYPRE_RetrievalOffStructInterfaceVector P((HYPRE_StructInterfaceVector vector ));
+int HYPRE_GetStructInterfaceVectorValue P((HYPRE_StructInterfaceVector vector , int *index , double *value ));
 
 #undef P

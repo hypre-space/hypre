@@ -195,3 +195,91 @@ hypre_PrintStructInterfaceVectorPETSc( hypre_StructInterfaceVector *struct_vecto
 
 }
 
+/*--------------------------------------------------------------------------
+ * hypre_RetrievalOnStructInterfaceVectorPETSc
+ *--------------------------------------------------------------------------*/
+
+int 
+hypre_RetrievalOnStructInterfaceVectorPETSc( hypre_StructInterfaceVector *vector )
+{
+   int  ierr=0;
+#ifdef PETSC_AVAILABLE
+   Vec PETSc_vector = (Vec) hypre_StructInterfaceVectorData(vector);
+
+   /* Allocate Auxialiary data space to hold VecArray */
+   hypre_StructInterfaceVectorAuxData(vector) =
+      hypre_CTAlloc( hypre_StructInterfaceVectorPETScAD, 1);
+
+   ierr = VecGetArray( PETSc_vector, &(hypre_StructInterfaceVectorVecArray(vector)) );
+
+#endif
+   return( ierr );
+
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_RetrievalOffStructInterfaceVectorPETSc
+ *--------------------------------------------------------------------------*/
+
+int 
+hypre_RetrievalOffStructInterfaceVectorPETSc( hypre_StructInterfaceVector *vector )
+{
+   int  ierr=0;
+#ifdef PETSC_AVAILABLE
+   Vec PETSc_vector = (Vec) hypre_StructInterfaceVectorData(vector);
+
+   ierr = VecRestoreArray( PETSc_vector, &(hypre_StructInterfaceVectorVecArray(vector)) );
+
+   /* DeAllocate Auxialiary data space to hold VecArray */
+   hypre_TFree( hypre_StructInterfaceVectorAuxData(vector) );
+
+#endif
+   return( ierr );
+
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_GetStructInterfaceVectorPETScValue
+ *--------------------------------------------------------------------------*/
+
+int 
+hypre_GetStructInterfaceVectorPETScValue( 
+       hypre_StructInterfaceVector *vector, int *index, double *value )
+{
+   int  ierr=0;
+#ifdef PETSC_AVAILABLE
+   Vec PETSc_vector ;
+
+   /* variables meaningful to the interface */
+   hypre_StructGrid                   *grid;
+   hypre_StructStencil                *stencil;
+
+   /* variables meaningful to the storage format and translator */
+   int                         row_coord, col_coord;
+   hypre_StructGridToCoordTable       *grid_to_coord_table;
+   hypre_StructGridToCoordTableEntry  *grid_to_coord_table_entry;
+
+   int low, high;
+
+
+   grid    = hypre_StructInterfaceVectorStructGrid(vector);
+   stencil = hypre_StructInterfaceVectorStructStencil(vector);
+
+   grid_to_coord_table =
+	 (hypre_StructGridToCoordTable *) hypre_StructInterfaceVectorTranslator(vector);
+   PETSc_vector =
+	 (Vec) hypre_StructInterfaceVectorData(vector);
+
+   grid_to_coord_table_entry =
+      hypre_FindStructGridToCoordTableEntry( index, grid_to_coord_table );
+
+   row_coord = hypre_MapStructGridToCoord( index, grid_to_coord_table_entry );
+        
+   ierr = VecGetOwnershipRange ( PETSc_vector, &low, &high );         
+
+   *value = hypre_StructInterfaceVectorVecArray(vector)[row_coord-low];
+#endif
+   return( ierr );
+
+}
+
