@@ -612,18 +612,13 @@ int MLI_Method_AMGSA::setupExtendedDomainDecomp( MLI *mli )
    /* will be the 2,2 block of my expanded matrix)                    */
    /* --------------------------------------------------------------- */
 
-   int                *ACPartition, ACNRows, ACStart, *PdiagI;
-   double             *PdiagA;
+   int                *ACPartition, ACNRows, ACStart;
    MLI_Matrix         *mli_Pmat, *mli_cAmat;
    hypre_ParCSRMatrix *hypreAc, *hypreP;
    hypre_ParCSRCommPkg *commPkg;
-   hypre_CSRMatrix     *Pdiag;
 
    genP_DD(mli_Amat, &mli_Pmat);
    hypreP = (hypre_ParCSRMatrix *) mli_Pmat->getMatrix();
-   Pdiag   = hypre_ParCSRMatrixDiag(hypreP);
-   PdiagI  = hypre_CSRMatrixI(Pdiag);
-   PdiagA  = hypre_CSRMatrixData(Pdiag);
    commPkg = hypre_ParCSRMatrixCommPkg(hypreP);
    if ( commPkg == NULL ) hypre_MatvecCommPkgCreate(hypreP);
 
@@ -1059,10 +1054,10 @@ double MLI_Method_AMGSA::genP_DD(MLI_Matrix *mli_Amat,MLI_Matrix **PmatOut)
 {
    int    mypid, nprocs, *partition, AStartRow, AEndRow, ALocalNRows;
    int    blkSize, naggr, *node2aggr, ierr, PLocalNCols, PStartCol;
-   int    PGlobalNCols, PLocalNRows, PStartRow, *eqn2aggr, irow, jcol, ig;
+   int    PLocalNRows, PStartRow, *eqn2aggr, irow, jcol, ig;
    int    *PCols, maxAggSize, *aggCntArray, index, **aggIndArray;
    int    aggSize, info, nzcnt, *rowLengths, rowNum, *colInd;
-   double **PVecs, *newNull, *qArray, *rArray, *colVal, dtemp;
+   double **PVecs, *newNull, *qArray, *rArray, *colVal;
    char   paramString[200];
    HYPRE_IJMatrix      IJPmat;
    hypre_ParCSRMatrix  *Amat, *A2mat, *Pmat;
@@ -1117,10 +1112,9 @@ double MLI_Method_AMGSA::genP_DD(MLI_Matrix *mli_Amat,MLI_Matrix **PmatOut)
     * fetch the coarse grid information and instantiate P
     *-----------------------------------------------------------------*/
 
-   PLocalNCols  = naggr * nullspaceDim_;
+   PLocalNCols = naggr * nullspaceDim_;
    MLI_Utils_GenPartition(comm, PLocalNCols, &partition);
-   PStartCol    = partition[mypid];
-   PGlobalNCols = partition[nprocs];
+   PStartCol = partition[mypid];
    free( partition );
    PLocalNRows = ALocalNRows;
    PStartRow   = AStartRow;
@@ -1386,12 +1380,15 @@ int MLI_Method_AMGSA::coarsenGraded(hypre_ParCSRMatrix *hypreG,
    MPI_Comm  comm;
    int       mypid, nprocs, *partition, startRow, endRow, maxInd;
    int       localNRows, naggr=0, *node2aggr, *aggrSizes, nUndone;
-   int       irow, jcol, colNum, rowNum, rowLeng, *cols, globalNRows;
+   int       irow, jcol, colNum, rowLeng, *cols, globalNRows;
    int       *nodeStat, selectFlag, nSelected=0, nNotSelected=0, count;
    int       ibuf[2], itmp[2], *bdrySet, localMinSize, index, maxCount;
    int       *GDiagI, *GDiagJ, *GOffdI;
-   double    maxVal, *vals, *GDiagA, *GOffdA;
+   double    maxVal, *vals, *GDiagA;
    hypre_CSRMatrix *GDiag, *GOffd;
+#ifdef MLI_DEBUG_DETAILED
+   int       rowNum;
+#endif
 
    /*-----------------------------------------------------------------
     * fetch machine and matrix parameters
