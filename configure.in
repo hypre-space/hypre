@@ -59,7 +59,7 @@ casc_using_openmp=no
 casc_using_ibm_smp=no
 casc_using_sgi_smp=no
 casc_using_pgcc_smp=no
-casc_using_blas=yes
+casc_using_HYPRE_blas=no
 
 
 AC_ARG_WITH(CC, \[
@@ -269,11 +269,11 @@ AC_ARG_WITH(pgcc_smp,
    AC_DEFINE(HYPRE_USING_PGCC_SMP)
 )
 
-AC_ARG_WITH(blas,
-   [  --with-blas             locate BLAS internal to hypre library **THIS 
+AC_ARG_WITH(HYPRE_blas,
+   [  --with-HYPRE_blas       locate BLAS internal to hypre library **THIS 
 			      OPTION MUST BE NOT BE USED FOR IJ_MATRIX_VECTOR
                               CODE ON THE DECS], 
-   casc_using_blas=no
+   casc_using_HYPRE_blas=yes
 )
 
 
@@ -748,7 +748,7 @@ CFLAGS="$CFLAGS $COPT $CDEBUG"
 CXXFLAGS="$CXXFLAGS $CXXOPT $CXXDEBUG"
 F77FLAGS="$F77FLAGS $FOPT $FDEBUG"
 
-if test "$casc_using_blas" = "yes"
+if test "$casc_using_HYPRE_blas" = "no"
 then
  CASC_FIND_BLAS
  if test "$BLASLIBFLAGS" = "-lessl"
@@ -760,11 +760,11 @@ then
  elif test "$BLASLIBFLAGS" = ""
  then
    BLASLIBFLAGS=-lHYPRE_blas
-   AC_DEFINE(HYPRE_BLAS)
+   AC_DEFINE(HYPRE_USING_HYPRE_BLAS)
  fi
 else
  BLASLIBFLAGS=-lHYPRE_blas
- AC_DEFINE(HYPRE_BLAS)
+ AC_DEFINE(HYPRE_USING_HYPRE_BLAS)
 fi
 
 dnl *********************************************************************
