@@ -778,8 +778,8 @@ int HYPRE_ParaSailsSetLogging(HYPRE_Solver solver,
  * Build IJ Matrix of the sparse approximate inverse (factor).
  * This function explicitly creates the IJ Matrix corresponding to 
  * the sparse approximate inverse or the inverse factor.
- * Example:  HYPRE_IJMatrix ij_A;
- *           HYPRE_ParaSailsBuildIJMatrix(solver, &ij_A);
+ * Example:  HYPRE\_IJMatrix ij\_A;
+ *           HYPRE\_ParaSailsBuildIJMatrix(solver, \&ij\_A);
  *
  * @param solver [IN] Preconditioner object.
  * @param pij_A [OUT] Pointer to the IJ Matrix.
