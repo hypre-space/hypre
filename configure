@@ -7768,20 +7768,20 @@ HYPRE_BABELLIBDIR=""
 if test "$casc_using_babel" = "yes"
 then
 # jfp still unsatisfactory...
- BABEL_DIR="${HOME}/babel-0.4.1/source/runtime/"
+ BABEL_INSTALL_DIR="${HOME}"
+ BABEL_DIR="${HOME}/babel-0.6.3/source/runtime/"
  BABEL_HYPRE_INCLUDES="\
- -I../hypre/include\
- -I../babel/Hypre\
- -I../babel\
- -I../babel/babel\
- -I../babel/babel_stubs_c\
+ -I$HYPRE_TOP_SRC_DIR/hypre/include\
+ -I$HYPRE_TOP_SRC_DIR/babel/Hypre\
+ -I$HYPRE_TOP_SRC_DIR/babel\
+ -I$HYPRE_TOP_SRC_DIR/babel/babel\
+ -I$HYPRE_TOP_SRC_DIR/babel/babel_stubs_c\
  -I${BABEL_DIR}\
- -I${BABEL_DIR}/babel"
-BABELLIBFLAGS="-L../babel/Hypre -lhypre_class -L${BABEL_DIR}/babel -lbabel"
-# jfp: ...above line is normal, following is for temporary Fortran+C work...
-#BABELLIBFLAGS="-L../babel/Hypre -lhypre_class -L../babel/Hypre_C1 -lhypre_class_C1 -L${BABEL_DIR}/babel -lbabel"
+ -I${BABEL_DIR}/babel\
+ -I${HOME}/include"
+BABELLIBFLAGS="-L../babel/Hypre -lHypreBabel -L${BABEL_INSTALL_DIR}/lib -lsidl"
 
- babeldir="$HOME"
+ babeldir="${BABEL_INSTALL_DIR}"
  
 
  HYPRE_BABELLIBDIR="$HYPRE_TOP_SRC_DIR/babel/Hypre"
