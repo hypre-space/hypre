@@ -14,6 +14,8 @@
 #
 #=============================================================================
 
+Version 1.8.0b released, 2003/04/08.
+
 - PFMG: bug fix for red/black relaxation.
 - LOBPCG has been added. 
 
