@@ -835,8 +835,8 @@ static void ComputeValuesNonsym(StoredRows *stored_rows, Matrix *mat,
     double time0, time1, timet = 0.0, timea = 0.0;
 
     int npat;
-    int *patt = NULL;
-    int pattsize = 0;
+    int pattsize = 1000;
+    int *patt = (int *) malloc(pattsize*sizeof(int));
 
     int info;
 
@@ -865,6 +865,11 @@ static void ComputeValuesNonsym(StoredRows *stored_rows, Matrix *mat,
         MatrixGetRow(mat, row - mat->beg_row, &len, &ind, &val);
 
 	npat = 0;
+
+	/* Put the diagonal entry into the marker array */
+	NumberingGlobalToLocal(numb, 1, &row, &loc);
+	marker[loc] = npat;
+	patt[npat++] = loc;
 
 	/* Fill marker array */
         for (i=0; i<len; i++)

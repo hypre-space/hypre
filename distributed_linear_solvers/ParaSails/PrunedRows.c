@@ -55,12 +55,12 @@ PrunedRows *PrunedRowsCreate(Matrix *mat, int size, DiagScale *diag_scale,
     {
         MatrixGetRow(mat, row, &len, &ind, &val);
 
-        count = 0;
+        count = 1; /* automatically include the diagonal */
         for (j=0; j<len; j++)
         {
             temp = DiagScaleGet(diag_scale, row);
             if (temp*ABS(val[j])*DiagScaleGet(diag_scale, ind[j]) 
-              >= thresh || ind[j] == row)
+              >= thresh && ind[j] != row)
                 count++;
         }
 
@@ -68,11 +68,12 @@ PrunedRows *PrunedRowsCreate(Matrix *mat, int size, DiagScale *diag_scale,
         p->len[row] = count;
 
         data = p->ind[row];
+        *data++ = row; /* the diagonal entry */
         for (j=0; j<len; j++)
         {
             temp = DiagScaleGet(diag_scale, row);
             if (temp*ABS(val[j])*DiagScaleGet(diag_scale, ind[j]) 
-              >= thresh || ind[j] == row)
+              >= thresh && ind[j] != row)
                 *data++ = ind[j];
         }
     }

@@ -99,7 +99,7 @@ void StoredRowsPut(StoredRows *p, int index, int len, int *ind, double *val)
     int i = index - p->num_loc;
 
     /* Reallocate if necessary */
-    if (i > p->size)
+    if (i >= p->size)
     {
         int j;
         int newsize;
