@@ -192,4 +192,9 @@
             - re-do the outputlevel stuff
 11/19/03    2.5.3R1
             - fix the vendor blas/lapack problem in superlu
+12/04/03    2.5.4R1
+            - change the blas/lapack problem in superlu one more time
+            - add gmres smoother
+            - add one more coarsening in AMGSA
+
 
