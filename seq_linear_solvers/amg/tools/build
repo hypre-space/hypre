@@ -70,7 +70,7 @@ if [ "$AMG_INSTALL_FLAG" ]
 then
    if [ ! -d "$AMG_BIN_DIR" ]
    then
-      $AMG_MKDIR $i
+      $AMG_MKDIR $AMG_BIN_DIR
    fi
 
    $AMG_MAKE install
