@@ -20,9 +20,6 @@
  * Structures
  *--------------------------------------------------------------------------*/
 
-typedef void *HYPRE_StructStencil;
-typedef void *HYPRE_StructGrid;
-
 #include "../struct_matrix_vector_andy/HYPRE_types.h"
 #include "../struct_linear_solvers_andy/HYPRE_types.h"
 #include "../distributed_matrix/HYPRE_types.h"
@@ -63,14 +60,6 @@ typedef void *HYPRE_StructGrid;
 #else
 # define P(s) ()
 #endif
-
-HYPRE_StructGrid HYPRE_NewStructGrid P((int dim ));
-void HYPRE_FreeStructGrid P((HYPRE_StructGrid grid ));
-void HYPRE_SetStructGridExtents P((HYPRE_StructGrid grid , int *ilower , int *iupper ));
-void HYPRE_AssembleStructGrid P((HYPRE_StructGrid grid ));
-HYPRE_StructStencil HYPRE_NewStructStencil P((int dim , int size ));
-void HYPRE_SetStructStencilElement P((HYPRE_StructStencil stencil , int element_index , int *offset ));
-void HYPRE_FreeStructStencil P((HYPRE_StructStencil stencil ));
 
 #undef P
 
