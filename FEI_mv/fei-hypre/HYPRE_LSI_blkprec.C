@@ -265,7 +265,11 @@ HYPRE_LSI_BlockP::~HYPRE_LSI_BlockP()
    if ( P22GlobalInds_  != NULL ) delete [] P22GlobalInds_;
    if ( P22Offsets_     != NULL ) delete [] P22Offsets_;
    if ( lumpedMassDiag_ != NULL ) delete [] lumpedMassDiag_;
-   if ( A11Solver_      != NULL ) HYPRE_ParCSRPCGDestroy(A11Solver_);
+   if ( A11Solver_      != NULL )
+   {
+      if (scheme_ == HYPRE_INCFLOW_BTRI) HYPRE_ParCSRGMRESDestroy(A11Solver_);
+      else                               HYPRE_ParCSRPCGDestroy(A11Solver_);
+   }
    if ( A11Precond_     != NULL ) HYPRE_BoomerAMGDestroy(A11Precond_);
    if ( A22Solver_      != NULL ) HYPRE_ParCSRPCGDestroy(A22Solver_);
    if ( A22Precond_     != NULL ) HYPRE_BoomerAMGDestroy(A22Precond_);
@@ -1162,7 +1166,10 @@ int HYPRE_LSI_BlockP::solveBSolve(HYPRE_IJVector x1,HYPRE_IJVector x2,
    {
       HYPRE_ParCSRMatrixMatvec(-1.0, A12mat_csr, x2_csr, 1.0, f1_csr);
    }
-   HYPRE_ParCSRPCGSolve(A11Solver_, A11mat_csr, f1_csr, x1_csr);
+   if ( scheme_ == HYPRE_INCFLOW_BTRI )
+      HYPRE_ParCSRGMRESSolve(A11Solver_, A11mat_csr, f1_csr, x1_csr);
+   else
+      HYPRE_ParCSRPCGSolve(A11Solver_, A11mat_csr, f1_csr, x1_csr);
    //solveUsingSuperLU(A11mat_, F1vec_, X1vec_);
    return 0;
 }
@@ -1292,12 +1299,18 @@ int HYPRE_LSI_BlockP::solveBISolve(HYPRE_IJVector x1,HYPRE_IJVector x2,
    // (3) x1 = y1 - A11 \ ( C * x2 )
    //------------------------------------------------------------------
 
-   HYPRE_ParCSRPCGSolve(A11Solver_, A11mat_csr, f1_csr, y1_csr);
+   if ( scheme_ == HYPRE_INCFLOW_BTRI )
+      HYPRE_ParCSRGMRESSolve(A11Solver_, A11mat_csr, f1_csr, y1_csr);
+   else
+      HYPRE_ParCSRPCGSolve(A11Solver_, A11mat_csr, f1_csr, y1_csr);
    //solveUsingSuperLU(A11mat_, F1vec_, X1aux_);
    HYPRE_ParCSRMatrixMatvecT(1.0, A12mat_csr, y1_csr, -1.0, f2_csr);
    HYPRE_ParCSRPCGSolve(A22Solver_, A22mat_csr, f2_csr, x2_csr);
    HYPRE_ParCSRMatrixMatvec(-1.0, A12mat_csr, x2_csr, 0.0, f1_csr);
-   HYPRE_ParCSRPCGSolve(A11Solver_, A11mat_csr, f1_csr, x1_csr);
+   if ( scheme_ == HYPRE_INCFLOW_BTRI )
+      HYPRE_ParCSRGMRESSolve(A11Solver_, A11mat_csr, f1_csr, x1_csr);
+   else
+      HYPRE_ParCSRPCGSolve(A11Solver_, A11mat_csr, f1_csr, x1_csr);
    //solveUsingSuperLU(A11mat_, F1vec_, X1vec_);
    hypre_ParVectorAxpy((double) 1.0, (hypre_ParVector *) y1_csr, 
                                      (hypre_ParVector *) x1_csr);
