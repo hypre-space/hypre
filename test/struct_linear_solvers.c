@@ -613,6 +613,8 @@ main( int   argc,
     * Solve the system using SMG
     *-----------------------------------------------------------*/
 
+#if !HYPRE_MFLOPS
+
    if (solver_id == 0)
    {
       time_index = hypre_InitializeTiming("SMG Setup");
@@ -1140,6 +1142,8 @@ main( int   argc,
       printf("Final Relative Residual Norm = %e\n", final_res_norm);
       printf("\n");
    }
+
+#endif
 
    /*-----------------------------------------------------------
     * Compute MFLOPs for Matvec
