@@ -45,8 +45,8 @@ perform_test()
 # This script is the top-level script used to regression test hypre.
 #==============================================================================
 
-OldMask=umask
-umask 022
+OldMask=umask -S
+umask u=rwx,g=rx,o=rx
 . ./autotest_env
 
 #=============================================================================
