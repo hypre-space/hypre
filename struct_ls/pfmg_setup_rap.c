@@ -34,7 +34,9 @@ hypre_PFMGCreateRAPOp( hypre_StructMatrix *R,
    hypre_StructMatrix    *RAP;
    hypre_StructStencil   *stencil;
 
-   int                    P_stored_as_transpose = 0;
+   int                    P_stored_as_transpose;
+
+   P_stored_as_transpose = 0;
 
 #if OLDRAP
    stencil = hypre_StructMatrixStencil(A);
@@ -81,7 +83,9 @@ hypre_PFMGSetupRAPOp( hypre_StructMatrix *R,
  
    hypre_StructStencil   *stencil;
 
-   int                    P_stored_as_transpose = 0;
+   int                    P_stored_as_transpose;
+
+   P_stored_as_transpose = 0;
 
 
 #if OLDRAP
