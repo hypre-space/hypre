@@ -119,7 +119,7 @@ int LLNL_FEI_Impl::solve(int *status)
    {
       int    localNRows, *diagIA, *diagJA, *indices, *offsets, rowSize;
       int    extNRows, *offdIA, *offdJA, *colMap, maxRowSize, *colInds;
-      int    i, j, rowInd, one=1, iter, , mypid;
+      int    i, j, rowInd, one=1, iter, mypid;
       double *diagAA, *offdAA, *colVals;
       char   format[20];
 
