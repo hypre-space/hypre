@@ -551,7 +551,7 @@ HYPRE_IJMatrixInsertRow( HYPRE_IJMatrix IJmatrix, int n,
  *--------------------------------------------------------------------------*/
 
 /** 
-Adds a row to the row of a matrix. 
+Adds a row to the row of a matrix before assembly. 
 
 Not collective.
 
@@ -589,6 +589,49 @@ HYPRE_IJMatrixAddToRow( HYPRE_IJMatrix IJmatrix, int n,
    return(ierr);
 }
 
+/*--------------------------------------------------------------------------
+ * HYPRE_IJMatrixAddToRowAfter
+ *--------------------------------------------------------------------------*/
+
+/** 
+Adds a row to the row of a matrix after assembly.
+Note: Adds only to already existing elements.
+
+Not collective.
+
+@return integer error code
+@param HYPRE_IJMatrix &matrix [IN]
+the matrix to be operated on.
+@param int n [IN]
+the number of values in the row to be added.
+@param int row [IN]
+index of row to be added.
+@param int *cols [IN]
+an integer vector of length n giving the indices in the global matrix
+corresponding to the columns in "values".
+@param double *values {IN]
+The values to be added to the matrix.
+*/
+
+int 
+HYPRE_IJMatrixAddToRowAfter( HYPRE_IJMatrix IJmatrix, int n,
+                           int row, const int *cols, const double *values)
+{
+   int ierr = 0;
+   hypre_IJMatrix *matrix = (hypre_IJMatrix *) IJmatrix;
+
+   /* if ( hypre_IJMatrixLocalStorageType(matrix) == HYPRE_PETSC )
+      ierr = hypre_IJMatrixAddToRowafterPETSc( matrix, n, row, cols, values );
+   else if ( hypre_IJMatrixLocalStorageType(matrix) == HYPRE_ISIS )
+      ierr = hypre_IJMatrixAddToRowAfterISIS( matrix, n, row, cols, values );
+   else */ if ( hypre_IJMatrixLocalStorageType(matrix) == HYPRE_PARCSR )
+     /* Currently a slight mismatch between "Insert" and "Set" */
+      ierr = hypre_IJMatrixAddToRowAfterParCSR( matrix, n, row, cols, values );
+   else
+      ierr = -1;
+
+   return(ierr);
+}
 /*********************************************************************************/
 /* The following are routines that are not generally used by or supported for users */
 
