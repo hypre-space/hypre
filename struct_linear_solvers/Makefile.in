@@ -58,6 +58,7 @@ HEADERS =\
 FILES =\
  cyclic_reduction.c\
  general.c\
+ hybrid.c\
  pcg.c\
  pcg_struct.c\
  smg2_setup_rap.c\
@@ -73,6 +74,7 @@ FILES =\
  smg_setup_restrict.c\
  smg_solve.c\
  thread_wrappers.c\
+ HYPRE_struct_hybrid.c\
  HYPRE_struct_smg.c\
  HYPRE_struct_pcg.c
 
