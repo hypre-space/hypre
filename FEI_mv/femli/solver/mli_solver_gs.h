@@ -21,9 +21,10 @@
 
 class MLI_Solver_GS : public MLI_Solver
 {
-   MLI_Matrix  *Amat;
-   int         nsweeps;
-   double      *relax_weights;
+   MLI_Matrix  *Amat_;
+   int         nSweeps_;
+   double      *relaxWeights_;
+   int         zeroInitialGuess_;
 
 public :
 

@@ -11,8 +11,8 @@
 #include <strings.h>
 #include <stdio.h>
 
-#include "parcsr_mv/parcsr_mv.h"
 #include "base/mli_defs.h"
+#include "util/mli_utils.h"
 #include "solver/mli_solver_jacobi.h"
 
 /******************************************************************************
@@ -21,10 +21,14 @@
 
 MLI_Solver_Jacobi::MLI_Solver_Jacobi() : MLI_Solver(MLI_SOLVER_JACOBI_ID)
 {
-   Amat             = NULL;
-   nsweeps          = 1;
-   relax_weights    = new double[10];
-   for ( int i = 0; i < 10; i++ ) relax_weights[i] = 0.5;
+   Amat_             = NULL;
+   nSweeps_          = 1;
+   relaxWeights_     = new double[1];
+   relaxWeights_[0]  = 0.0;
+   zeroInitialGuess_ = 0;
+   diagonal_         = NULL;
+   auxVec_           = NULL;
+   maxEigen_         = 0.0;
 }
 
 /******************************************************************************
@@ -33,17 +37,84 @@ MLI_Solver_Jacobi::MLI_Solver_Jacobi() : MLI_Solver(MLI_SOLVER_JACOBI_ID)
 
 MLI_Solver_Jacobi::~MLI_Solver_Jacobi()
 {
-   if ( relax_weights != NULL ) delete [] relax_weights;
-   relax_weights = NULL;
+   if ( relaxWeights_ != NULL ) delete [] relaxWeights_;
+   if ( diagonal_     != NULL ) delete [] diagonal_;
+   if ( auxVec_       != NULL ) delete auxVec_;
 }
 
 /******************************************************************************
  * set up the smoother
  *---------------------------------------------------------------------------*/
 
-int MLI_Solver_Jacobi::setup(MLI_Matrix *mat)
+int MLI_Solver_Jacobi::setup(MLI_Matrix *Amat)
 {
-   Amat = mat;
+   int                i, startRow, globalNRows, *partition, *ADiagI, *ADiagJ;
+   int                j, localNRows, status;
+   double             *ADiagA, *ritzValues;
+   MPI_Comm           comm;
+   hypre_ParCSRMatrix *A;
+   hypre_CSRMatrix    *ADiag;
+   hypre_ParVector    *hypreVec;
+   MLI_Function       *funcPtr;
+
+   /*-----------------------------------------------------------------
+    * fetch machine and matrix parameters
+    *-----------------------------------------------------------------*/
+
+   Amat_       = Amat;
+   A           = (hypre_ParCSRMatrix *) Amat_->getMatrix();
+   comm        = hypre_ParCSRMatrixComm(A);
+   ADiag       = hypre_ParCSRMatrixDiag(A);
+   ADiagI      = hypre_CSRMatrixI(ADiag);
+   ADiagJ      = hypre_CSRMatrixJ(ADiag);
+   ADiagA      = hypre_CSRMatrixData(ADiag);
+   localNRows  = hypre_CSRMatrixNumRows(ADiag);
+   globalNRows = hypre_ParCSRMatrixGlobalNumRows( A );
+   startRow    = hypre_ParCSRMatrixFirstRowIndex(A);
+
+   /*-----------------------------------------------------------------
+    * extract and store matrix diagonal
+    *-----------------------------------------------------------------*/
+
+   if ( localNRows > 0 ) diagonal_ = new double[localNRows];
+   for ( i = 0; i < localNRows; i++ )
+   {
+      diagonal_[i] = 0.0;
+      for ( j = ADiagI[i]; j < ADiagI[i+1]; j++ )
+      {
+         if ( ADiagJ[j] == i && ADiagA[j] != 0.0 ) 
+         {
+            diagonal_[i] = 1.0 / ADiagA[j];
+            break;
+         }
+      }
+   }
+
+   /*-----------------------------------------------------------------
+    * create temporary vector
+    *-----------------------------------------------------------------*/
+
+   funcPtr = (MLI_Function *) malloc( sizeof( MLI_Function ) );
+   MLI_Utils_HypreVectorGetDestroyFunc(funcPtr);
+   HYPRE_ParCSRMatrixGetRowPartitioning((HYPRE_ParCSRMatrix) A, &partition);
+   hypreVec = hypre_ParVectorCreate(comm, globalNRows, partition);
+   hypre_ParVectorInitialize(hypreVec);
+   auxVec_ = new MLI_Vector(hypreVec, "HYPRE_ParVector", funcPtr);
+   free( funcPtr );
+
+   /*-----------------------------------------------------------------
+    * compute spectral radius of A
+    *-----------------------------------------------------------------*/
+
+   if ( maxEigen_ == 0.0 && relaxWeights_[0] == 0.0 )
+   {
+      ritzValues = new double[2];
+      status = MLI_Utils_ComputeExtremeRitzValues(A, ritzValues, 1);
+      if ( status != 0 ) MLI_Utils_ComputeMatrixMaxNorm(A, ritzValues, 1);
+      maxEigen_ = ritzValues[0]; 
+      delete [] ritzValues;
+   }
+   for (i = 0; i < nSweeps_; i++) relaxWeights_[i] = 2.0 / (3.0*maxEigen_);
    return 0;
 }
 
@@ -51,126 +122,106 @@ int MLI_Solver_Jacobi::setup(MLI_Matrix *mat)
  * apply function
  *---------------------------------------------------------------------------*/
 
-int MLI_Solver_Jacobi::solve(MLI_Vector *f_in, MLI_Vector *u_in)
+int MLI_Solver_Jacobi::solve(MLI_Vector *fIn, MLI_Vector *uIn)
 {
-   hypre_ParCSRMatrix  *A;
-   hypre_CSRMatrix     *A_diag;
-   double              *A_diag_data;
-   int                 *A_diag_i;
-   hypre_Vector        *u_local, *Vtemp_local;
-   double              *u_data, *Vtemp_data;
-   hypre_ParVector     *Vtemp;
-   int                 i, n, relax_error = 0, global_size, *partitioning1;
-   int                 is, num_procs, *partitioning2;
-   double              zero = 0.0, relax_weight;
-   MPI_Comm            comm;
-   hypre_ParVector     *f, *u;
+   int                i, is, localNRows;
+   double             *ADiagA, *rData, *uData, weight;
+   hypre_ParCSRMatrix *A;
+   hypre_CSRMatrix    *ADiag;
+   hypre_ParVector    *f, *u, *r;
 
    /*-----------------------------------------------------------------
-    * fetch machine and smoother parameters
+    * fetch machine and matrix parameters
     *-----------------------------------------------------------------*/
 
-   A               = (hypre_ParCSRMatrix *) Amat->getMatrix();
-   comm            = hypre_ParCSRMatrixComm(A);
-   A_diag          = hypre_ParCSRMatrixDiag(A);
-   A_diag_data     = hypre_CSRMatrixData(A_diag);
-   A_diag_i        = hypre_CSRMatrixI(A_diag);
-   n               = hypre_CSRMatrixNumRows(A_diag);
-   f               = (hypre_ParVector *) f_in->getVector();
-   u               = (hypre_ParVector *) u_in->getVector();
-   u_local         = hypre_ParVectorLocalVector(u);
-   u_data          = hypre_VectorData(u_local);
-   MPI_Comm_size(comm,&num_procs);  
+   A          = (hypre_ParCSRMatrix *) Amat_->getMatrix();
+   ADiag      = hypre_ParCSRMatrixDiag(A);
+   localNRows = hypre_CSRMatrixNumRows(ADiag);
+   f          = (hypre_ParVector *) fIn->getVector();
+   u          = (hypre_ParVector *) uIn->getVector();
+   r          = (hypre_ParVector *) auxVec_->getVector();
+   rData      = hypre_VectorData(hypre_ParVectorLocalVector(r));
+   uData      = hypre_VectorData(hypre_ParVectorLocalVector(u));
    
    /*-----------------------------------------------------------------
-    * create temporary vector
+    * loop 
     *-----------------------------------------------------------------*/
 
-   global_size   = hypre_ParVectorGlobalSize(f);
-   partitioning1 = hypre_ParVectorPartitioning(f);
-   partitioning2 = hypre_CTAlloc( int, num_procs+1 );
-   for ( i = 0; i <= num_procs; i++ ) partitioning2[i] = partitioning1[i];
-   Vtemp = hypre_ParVectorCreate(comm, global_size, partitioning2);
-   hypre_ParVectorInitialize(Vtemp);
-   Vtemp_local = hypre_ParVectorLocalVector(Vtemp);
-   Vtemp_data  = hypre_VectorData(Vtemp_local);
-
-   /*-----------------------------------------------------------------
-    * Perform Jacobi iterations
-    *-----------------------------------------------------------------*/
- 
-   for( is = 0; is < nsweeps; is++ )
+   for ( is = 0; is < nSweeps_; is++ )
    {
-      if ( relax_weights != NULL ) relax_weight = relax_weights[is];
-      else                         relax_weight = 1.0;
+      weight = relaxWeights_[is];
 
-      hypre_ParVectorCopy(f,Vtemp); 
-      hypre_ParCSRMatrixMatvec(-1.0, A, u, 1.0, Vtemp);
+      hypre_ParVectorCopy(f, r); 
+      if ( zeroInitialGuess_ == 0 )
+         hypre_ParCSRMatrixMatvec(-1.0, A, u, 1.0, r);
 
 #define HYPRE_SMP_PRIVATE i
 #include "utilities/hypre_smp_forloop.h"
-      for (i = 0; i < n; i++)
-      {
-         /*-----------------------------------------------------------
-          * If diagonal is nonzero, relax point i; otherwise, skip it.
-          *-----------------------------------------------------------*/
-           
-         if (A_diag_data[A_diag_i[i]] != zero)
-         {
-            u_data[i] += relax_weight * Vtemp_data[i] 
-                                   / A_diag_data[A_diag_i[i]];
-         }
-      }
+      for ( i = 0; i < localNRows; i++ ) 
+         uData[i] += weight * rData[i] * diagonal_[i];
+
+      zeroInitialGuess_ = 0;
    }
-
-   /*-----------------------------------------------------------------
-    * clean up and return
-    *-----------------------------------------------------------------*/
-
-   hypre_ParVectorDestroy( Vtemp ); 
-
-   return(relax_error); 
+   return 0;
 }
 
 /******************************************************************************
  * set Jacobi parameters
  *---------------------------------------------------------------------------*/
 
-int MLI_Solver_Jacobi::setParams( char *param_string, int argc, char **argv )
+int MLI_Solver_Jacobi::setParams( char *paramString, int argc, char **argv )
 {
    int    i;
    double *weights;
-   char   param1[200];
 
-   if ( !strcasecmp(param_string, "numSweeps") )
+   if ( !strcasecmp(paramString, "numSweeps") )
    {
-      sscanf(param_string, "%s %d", param1, &nsweeps);
-      if ( nsweeps < 1 ) nsweeps = 1;
-      
+      if ( argc != 1 ) 
+      {
+         printf("MLI_Solver_Jacobi::setParams ERROR : needs 1 arg.\n");
+         return 1;
+      }
+      nSweeps_ = *(int*) argv[0];
+      if ( nSweeps_ < 1 ) nSweeps_ = 1;
       return 0;
    }
-   else if ( !strcasecmp(param_string, "relaxWeight") )
+   else if ( !strcasecmp(paramString, "setMaxEigen") )
+   {
+      if ( argc != 1 ) 
+      {
+         printf("MLI_Solver_Jacobi::setParams ERROR : needs 1 arg.\n");
+         return 1;
+      }
+      maxEigen_ = *(double*) argv[0];
+      return 0;
+   }
+   else if ( !strcasecmp(paramString, "relaxWeight") )
    {
       if ( argc != 2 && argc != 1 ) 
       {
          printf("MLI_Solver_Jacobi::setParams ERROR : needs 1 or 2 args.\n");
          return 1;
       }
-      if ( argc >= 1 ) nsweeps = *(int*)   argv[0];
+      if ( argc >= 1 ) nSweeps_ = *(int*)  argv[0];
       if ( argc == 2 ) weights = (double*) argv[1];
-      if ( nsweeps < 1 ) nsweeps = 1;
-      if ( relax_weights != NULL ) delete [] relax_weights;
-      relax_weights = NULL;
+      if ( nSweeps_ < 1 ) nSweeps_ = 1;
+      if ( relaxWeights_ != NULL ) delete [] relaxWeights_;
+      relaxWeights_ = NULL;
       if ( weights != NULL )
       {
-         relax_weights = new double[nsweeps];
-         for ( i = 0; i < nsweeps; i++ ) relax_weights[i] = weights[i];
+         relaxWeights_ = new double[nSweeps_];
+         for ( i = 0; i < nSweeps_; i++ ) relaxWeights_[i] = weights[i];
       }
    }
-   else if ( strcasecmp(param_string, "zeroInitialGuess") )
+   else if ( !strcasecmp(paramString, "zeroInitialGuess") )
+   {
+      zeroInitialGuess_ = 1;
+      return 0;
+   }
+   else
    {   
       printf("MLI_Solver_Jacobi::setParams - parameter not recognized.\n");
-      printf("                Params = %s\n", param_string);
+      printf("                Params = %s\n", paramString);
       return 1;
    }
    return 0;
@@ -182,32 +233,60 @@ int MLI_Solver_Jacobi::setParams( char *param_string, int argc, char **argv )
 
 int MLI_Solver_Jacobi::setParams( int ntimes, double *weights )
 {
+   int i, nsweeps;
+
    if ( ntimes <= 0 )
    {
-      printf("MLI_Solver_Jacobi::setParams WARNING : nsweeps set to 1.\n");
-      ntimes = 1;
+      printf("MLI_Solver_Jacobi::setParams WARNING : nSweeps set to 1.\n");
+      nsweeps = 1;
    }
-   nsweeps = ntimes;
-   if ( relax_weights != NULL ) delete [] relax_weights;
-   relax_weights = new double[ntimes];
+   nSweeps_ = nsweeps;
+   if ( relaxWeights_ != NULL ) delete [] relaxWeights_;
+   relaxWeights_ = new double[nsweeps];
    if ( weights == NULL )
    {
-      printf("MLI_Solver_Jacobi::setParams - relax_weights set to 0.5.\n");
-      for ( int i = 0; i < ntimes; i++ ) relax_weights[i] = 0.5;
+      printf("MLI_Solver_Jacobi::setParams - relaxWeights set to 0.0.\n");
+      for ( i = 0; i < nsweeps; i++ ) relaxWeights_[i] = 0.0;
    }
    else
    {
-      for ( int j = 0; j < ntimes; j++ ) 
+      for ( i = 0; i < nsweeps; i++ ) 
       {
-         if (weights[j] >= 0. && weights[j] <= 2.) 
-            relax_weights[j] = weights[j];
+         if (weights[i] >= 0. && weights[i] <= 2.) 
+            relaxWeights_[i] = weights[i];
          else 
          {
-            printf("MLI_Solver_Jacobi::setParams - weights set to 0.5.\n");
-            relax_weights[j] = 0.5;
+            printf("MLI_Solver_Jacobi::setParams - weights set to 0.0.\n");
+            relaxWeights_[i] = 0.0;
          }
       }
    }
    return 0;
+}
+
+/******************************************************************************
+ * get Jacobi parameters
+ *---------------------------------------------------------------------------*/
+
+int MLI_Solver_Jacobi::getParams( char *paramString, int *argc, char **argv )
+{
+   double *ddata, *ritzValues;
+
+   if ( !strcasecmp(paramString, "getMaxEigen") )
+   {
+      if ( maxEigen_ == 0.0 )
+      {
+         ritzValues = new double[2];
+         MLI_Utils_ComputeExtremeRitzValues((hypre_ParCSRMatrix *) 
+                                 Amat_->getMatrix(), ritzValues, 1);
+         maxEigen_ = ritzValues[0]; 
+         delete [] ritzValues;
+      }
+      ddata = (double *) argv[0];
+      ddata[0] = maxEigen_;
+      *argc = 1;
+      return 0;
+   }
+   else return -1;
 }
 

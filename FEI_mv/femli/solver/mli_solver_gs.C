@@ -22,10 +22,11 @@
 
 MLI_Solver_GS::MLI_Solver_GS() : MLI_Solver(MLI_SOLVER_GS_ID)
 {
-   Amat          = NULL;
-   nsweeps       = 1;
-   relax_weights = new double[1];
-   relax_weights = NULL;
+   Amat_             = NULL;
+   nSweeps_          = 1;
+   relaxWeights_     = new double[1];
+   relaxWeights_[0]  = 1.0;
+   zeroInitialGuess_ = 0;
 }
 
 /******************************************************************************
@@ -34,8 +35,8 @@ MLI_Solver_GS::MLI_Solver_GS() : MLI_Solver(MLI_SOLVER_GS_ID)
 
 MLI_Solver_GS::~MLI_Solver_GS()
 {
-   if ( relax_weights != NULL ) delete [] relax_weights;
-   relax_weights = NULL;
+   if ( relaxWeights_ != NULL ) delete [] relaxWeights_;
+   relaxWeights_ = NULL;
 }
 
 /******************************************************************************
@@ -44,7 +45,7 @@ MLI_Solver_GS::~MLI_Solver_GS()
 
 int MLI_Solver_GS::setup(MLI_Matrix *mat)
 {
-   Amat = mat;
+   Amat_ = mat;
    return 0;
 }
 
@@ -52,110 +53,101 @@ int MLI_Solver_GS::setup(MLI_Matrix *mat)
  * apply function
  *---------------------------------------------------------------------------*/
 
-int MLI_Solver_GS::solve(MLI_Vector *f_in, MLI_Vector *u_in)
+int MLI_Solver_GS::solve(MLI_Vector *fIn, MLI_Vector *uIn)
 {
    hypre_ParCSRMatrix  *A;
-   hypre_CSRMatrix     *A_diag, *A_offd;
-   int                 *A_diag_i, *A_diag_j, *A_offd_i, *A_offd_j;
-   double              *A_diag_data, *A_offd_data;
-   hypre_Vector        *u_local;
-   double              *u_data;
-   hypre_Vector        *f_local;
-   double              *f_data;
-   int                 i, j, n, is, relax_error=0;
-   int                 ii, jj, num_procs, num_threads;
-   int                 num_sends, num_cols_offd, index, size, ns, ne, rest;
-   int                 start;
-   double              zero = 0.0, relax_weight, res;
-   double              *v_buf_data;
-   double              *Vext_data, *tmp_data;
-   hypre_ParCSRCommPkg *comm_pkg;
+   hypre_CSRMatrix     *ADiag, *AOffd;
+   int                 *ADiagI, *ADiagJ, *AOffdI, *AOffdJ;
+   double              *ADiagA, *AOffdA, *uData, *fData;
+   int                 i, j, is, localNRows, relaxError=0;
+   int                 ii, jj, nprocs, nthreads, start;
+   int                 nSends, extNRows, index, size, ns, ne, rest;
+   double              zero = 0.0, relaxWeight, res;
+   double              *vBufData;
+   double              *vExtData, *tmpData;
    MPI_Comm            comm;
-   hypre_ParCSRCommHandle *comm_handle;
-   hypre_ParVector     *f, *u;
+   hypre_ParCSRCommPkg     *commPkg;
+   hypre_ParVector         *f, *u;
+   hypre_ParCSRCommHandle *commHandle;
 
    /*-----------------------------------------------------------------
     * fetch machine and smoother parameters
     *-----------------------------------------------------------------*/
 
-   num_threads   = hypre_NumThreads();
-   A             = (hypre_ParCSRMatrix *) Amat->getMatrix();
-   comm          = hypre_ParCSRMatrixComm(A);
-   comm_pkg      = hypre_ParCSRMatrixCommPkg(A);
-   A_diag        = hypre_ParCSRMatrixDiag(A);
-   n             = hypre_CSRMatrixNumRows(A_diag);
-   A_diag_i      = hypre_CSRMatrixI(A_diag);
-   A_diag_j      = hypre_CSRMatrixJ(A_diag);
-   A_diag_data   = hypre_CSRMatrixData(A_diag);
-   A_offd        = hypre_ParCSRMatrixOffd(A);
-   num_cols_offd = hypre_CSRMatrixNumCols(A_offd);
-   A_offd_i      = hypre_CSRMatrixI(A_offd);
-   A_offd_j      = hypre_CSRMatrixJ(A_offd);
-   A_offd_data   = hypre_CSRMatrixData(A_offd);
-   u             = (hypre_ParVector *) u_in->getVector();
-   u_local       = hypre_ParVectorLocalVector(u);
-   u_data        = hypre_VectorData(u_local);
-   f             = (hypre_ParVector *) f_in->getVector();
-   f_local       = hypre_ParVectorLocalVector(f);
-   f_data        = hypre_VectorData(f_local);
-   MPI_Comm_size(comm,&num_procs);  
+   nthreads   = hypre_NumThreads();
+   A          = (hypre_ParCSRMatrix *) Amat_->getMatrix();
+   comm       = hypre_ParCSRMatrixComm(A);
+   commPkg    = hypre_ParCSRMatrixCommPkg(A);
+   ADiag      = hypre_ParCSRMatrixDiag(A);
+   localNRows = hypre_CSRMatrixNumRows(ADiag);
+   ADiagI     = hypre_CSRMatrixI(ADiag);
+   ADiagJ     = hypre_CSRMatrixJ(ADiag);
+   ADiagA     = hypre_CSRMatrixData(ADiag);
+   AOffd      = hypre_ParCSRMatrixOffd(A);
+   extNRows   = hypre_CSRMatrixNumCols(AOffd);
+   AOffdI     = hypre_CSRMatrixI(AOffd);
+   AOffdJ     = hypre_CSRMatrixJ(AOffd);
+   AOffdA     = hypre_CSRMatrixData(AOffd);
+   u          = (hypre_ParVector *) uIn->getVector();
+   f          = (hypre_ParVector *) fIn->getVector();
+   uData      = hypre_VectorData(hypre_ParVectorLocalVector(u));
+   fData      = hypre_VectorData(hypre_ParVectorLocalVector(f));
+   MPI_Comm_size(comm,&nprocs);  
 
    /*-----------------------------------------------------------------
     * setting up for interprocessor communication
     *-----------------------------------------------------------------*/
 
-   if (num_procs > 1)
+   if (nprocs > 1)
    {
-      num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
-      v_buf_data = hypre_CTAlloc(double,
-                   hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends));
-      Vext_data = hypre_CTAlloc(double,num_cols_offd);
+      nSends = hypre_ParCSRCommPkgNumSends(commPkg);
+      vBufData = new double[hypre_ParCSRCommPkgSendMapStart(commPkg,nSends)];
+      vExtData = new double[extNRows];
 
-      if (num_cols_offd)
+      if (extNRows)
       {
-         A_offd_j = hypre_CSRMatrixJ(A_offd);
-         A_offd_data = hypre_CSRMatrixData(A_offd);
+         AOffdJ = hypre_CSRMatrixJ(AOffd);
+         AOffdA = hypre_CSRMatrixData(AOffd);
       }
    }
-   if (num_threads > 1) tmp_data = hypre_CTAlloc(double,n);
+   if (nthreads > 1) tmpData = new double[localNRows];
 
    /*-----------------------------------------------------------------
     * perform GS sweeps
     *-----------------------------------------------------------------*/
  
-   for( is = 0; is < nsweeps; is++ )
+   for( is = 0; is < nSweeps_; is++ )
    {
-      if ( relax_weights != NULL ) relax_weight = relax_weights[is];
-      else                         relax_weight = 1.0;
+      relaxWeight = relaxWeights_[is];
 
-      if (num_procs > 1)
+      if (nprocs > 1 && zeroInitialGuess_ != 1 )
       {
          index = 0;
-         for (i = 0; i < num_sends; i++)
+         for (i = 0; i < nSends; i++)
          {
-            start = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
-            for (j=start;j<hypre_ParCSRCommPkgSendMapStart(comm_pkg,i+1);j++)
-               v_buf_data[index++]
-                      = u_data[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j)];
+            start = hypre_ParCSRCommPkgSendMapStart(commPkg, i);
+            for (j=start;j<hypre_ParCSRCommPkgSendMapStart(commPkg,i+1);j++)
+               vBufData[index++]
+                      = uData[hypre_ParCSRCommPkgSendMapElmt(commPkg,j)];
          }
-         comm_handle = hypre_ParCSRCommHandleCreate(1,comm_pkg,v_buf_data,
-                                                    Vext_data);
-         hypre_ParCSRCommHandleDestroy(comm_handle);
-         comm_handle = NULL;
+         commHandle = hypre_ParCSRCommHandleCreate(1,commPkg,vBufData,
+                                                   vExtData);
+         hypre_ParCSRCommHandleDestroy(commHandle);
+         commHandle = NULL;
       }
 
-      if (num_threads > 1)
+      if (nthreads > 1)
       {
 #define HYPRE_SMP_PRIVATE i
 #include "utilities/hypre_smp_forloop.h"
-         for (i = 0; i < n; i++) tmp_data[i] = u_data[i];
+         for (i = 0; i < localNRows; i++) tmpData[i] = uData[i];
 
 #define HYPRE_SMP_PRIVATE i,ii,j,jj,ns,ne,res,rest,size
 #include "utilities/hypre_smp_forloop.h"
-         for (j = 0; j < num_threads; j++)
+         for (j = 0; j < nthreads; j++)
          {
-            size = n/num_threads;
-            rest = n - size*num_threads;
+            size = localNRows/nthreads;
+            rest = localNRows - size*nthreads;
             if (j < rest)
             {
                ns = j*size+j;
@@ -172,104 +164,105 @@ int MLI_Solver_GS::solve(MLI_Vector *f_in, MLI_Vector *u_in)
                 * If diagonal is nonzero, relax point i; otherwise, skip it.
                 *-----------------------------------------------------------*/
 
-               if ( A_diag_data[A_diag_i[i]] != zero)
+               if ( ADiagA[ADiagI[i]] != zero)
                {
-                  res = f_data[i];
-                  for (jj = A_diag_i[i]; jj < A_diag_i[i+1]; jj++)
+                  res = fData[i];
+                  for (jj = ADiagI[i]; jj < ADiagI[i+1]; jj++)
                   {
-                     ii = A_diag_j[jj];
+                     ii = ADiagJ[jj];
                      if (ii >= ns && ii < ne)
-                        res -= A_diag_data[jj] * u_data[ii];
+                        res -= ADiagA[jj] * uData[ii];
                      else
-                        res -= A_diag_data[jj] * tmp_data[ii];
+                        res -= ADiagA[jj] * tmpData[ii];
                   }
-                  for (jj = A_offd_i[i]; jj < A_offd_i[i+1]; jj++)
+                  for (jj = AOffdI[i]; jj < AOffdI[i+1]; jj++)
                   {
-                     ii = A_offd_j[jj];
-                     res -= A_offd_data[jj] * Vext_data[ii];
+                     ii = AOffdJ[jj];
+                     res -= AOffdA[jj] * vExtData[ii];
                   }
-                  u_data[i] += relax_weight * (res / A_diag_data[A_diag_i[i]]);
+                  uData[i] += relaxWeight * (res / ADiagA[ADiagI[i]]);
                }
             }
          }
       }
       else
       {
-         for (i = 0; i < n; i++)     /* interior points first */
+         for (i = 0; i < localNRows; i++)     /* interior points first */
          {
             /*-----------------------------------------------------------
              * If diagonal is nonzero, relax point i; otherwise, skip it.
              *-----------------------------------------------------------*/
 
-            if ( A_diag_data[A_diag_i[i]] != zero)
+            if ( ADiagA[ADiagI[i]] != zero)
             {
-               res = f_data[i];
-               for (jj = A_diag_i[i]; jj < A_diag_i[i+1]; jj++)
+               res = fData[i];
+               for (jj = ADiagI[i]; jj < ADiagI[i+1]; jj++)
                {
-                  ii = A_diag_j[jj];
-                  res -= A_diag_data[jj] * u_data[ii];
+                  ii = ADiagJ[jj];
+                  res -= ADiagA[jj] * uData[ii];
                }
-               for (jj = A_offd_i[i]; jj < A_offd_i[i+1]; jj++)
+               for (jj = AOffdI[i]; jj < AOffdI[i+1]; jj++)
                {
-                  ii = A_offd_j[jj];
-                  res -= A_offd_data[jj] * Vext_data[ii];
+                  ii = AOffdJ[jj];
+                  res -= AOffdA[jj] * vExtData[ii];
                }
-               u_data[i] += relax_weight * (res / A_diag_data[A_diag_i[i]]);
+               uData[i] += relaxWeight * (res / ADiagA[ADiagI[i]]);
             }
          }
       }
+      zeroInitialGuess_ = 0;
    }
 
    /*-----------------------------------------------------------------
     * clean up and return
     *-----------------------------------------------------------------*/
 
-   if (num_procs > 1)
+   if (nprocs > 1)
    {
-      hypre_TFree(Vext_data);
-      hypre_TFree(v_buf_data);
+      delete [] vExtData;
+      delete [] vBufData;
    }
-   if (num_threads > 1) hypre_TFree(tmp_data);
-   return(relax_error); 
+   if (nthreads > 1) delete [] tmpData;
+   return(relaxError); 
 }
 
 /******************************************************************************
  * set parameters
  *---------------------------------------------------------------------------*/
 
-int MLI_Solver_GS::setParams(char *param_string, int argc, char **argv)
+int MLI_Solver_GS::setParams(char *paramString, int argc, char **argv)
 {
    int    i;
    double *weights;
 
-   if ( !strcasecmp(param_string, "numSweeps") )
+   if ( !strcasecmp(paramString, "numSweeps") )
    {
-      if ( argc == 1 ) nsweeps = *(int*) argv[0];
-      if ( nsweeps < 1 ) nsweeps = 1;
+      if ( argc == 1 ) nSweeps_ = *(int*) argv[0];
+      if ( nSweeps_ < 1 ) nSweeps_ = 1;
       return 0;
    }
-   else if ( !strcasecmp(param_string, "relaxWeight") )
+   else if ( !strcasecmp(paramString, "relaxWeight") )
    {
       if ( argc != 2 && argc != 1 ) 
       {
          printf("MLI_Solver_GS::setParams ERROR : needs 1 or 2 args.\n");
          return 1;
       }
-      if ( argc >= 1 ) nsweeps = *(int*)   argv[0];
+      if ( argc >= 1 ) nSweeps_ = *(int*)  argv[0];
       if ( argc == 2 ) weights = (double*) argv[1];
-      if ( nsweeps < 1 ) nsweeps = 1;
-      if ( relax_weights != NULL ) delete [] relax_weights;
-      relax_weights = NULL;
+      if ( nSweeps_ < 1 ) nSweeps_ = 1;
+      if ( relaxWeights_ != NULL ) delete [] relaxWeights_;
+      relaxWeights_ = NULL;
       if ( weights != NULL )
       {
-         relax_weights = new double[nsweeps];
-         for ( i = 0; i < nsweeps; i++ ) relax_weights[i] = weights[i];
+         relaxWeights_ = new double[nSweeps_];
+         for ( i = 0; i < nSweeps_; i++ ) relaxWeights_[i] = weights[i];
       }
    }
-   else if ( strcasecmp(param_string, "zeroInitialGuess") )
+   else if ( strcasecmp(paramString, "zeroInitialGuess") )
    {   
       printf("MLI_Solver_GS::setParams - parameter not recognized.\n");
-      printf("              Params = %s\n", param_string);
+      printf("              Params = %s\n", paramString);
       return 1;
    }
    return 0;
@@ -281,29 +274,31 @@ int MLI_Solver_GS::setParams(char *param_string, int argc, char **argv)
 
 int MLI_Solver_GS::setParams( int ntimes, double *weights )
 {
+   int i, nsweeps;
+
    if ( ntimes <= 0 )
    {
       printf("MLI_Solver_GS::setParams WARNING : nsweeps set to 1.\n");
-      ntimes = 1;
+      nsweeps = 1;
    }
-   nsweeps = ntimes;
-   if ( relax_weights != NULL ) delete [] relax_weights;
-   relax_weights = new double[ntimes];
+   nSweeps_ = nsweeps;
+   if ( relaxWeights_ != NULL ) delete [] relaxWeights_;
+   relaxWeights_ = new double[ntimes];
    if ( weights == NULL )
    {
-      printf("MLI_Solver_GS::setParams - relax_weights set to 0.5.\n");
-      for ( int i = 0; i < ntimes; i++ ) relax_weights[i] = 0.5;
+      printf("MLI_Solver_GS::setParams - relaxWeights set to 0.5.\n");
+      for ( int i = 0; i < nsweeps; i++ ) relaxWeights_[i] = 0.5;
    }
    else
    {
-      for ( int j = 0; j < ntimes; j++ ) 
+      for ( i = 0; i < nsweeps; i++ ) 
       {
-         if (weights[j] >= 0. && weights[j] <= 2.) 
-            relax_weights[j] = weights[j];
+         if (weights[i] >= 0. && weights[i] <= 2.) 
+            relaxWeights_[i] = weights[i];
          else 
          {
-            printf("MLI_Solver_GS::setParams - some weights set to 0.5.\n");
-            relax_weights[j] = 0.5;
+            printf("MLI_Solver_GS::setParams - some weights set to 1.0.\n");
+            relaxWeights_[i] = 1.0;
          }
       }
    }

@@ -20,9 +20,13 @@
 
 class MLI_Solver_Jacobi : public MLI_Solver
 {
-   MLI_Matrix  *Amat;
-   int         nsweeps;
-   double      *relax_weights;
+   MLI_Matrix  *Amat_;
+   int         nSweeps_;
+   double      *relaxWeights_;
+   double      *diagonal_;
+   double      maxEigen_;
+   MLI_Vector  *auxVec_;
+   int         zeroInitialGuess_;
 
 public :
 
@@ -33,6 +37,7 @@ public :
 
    int setParams( char *param_string, int argc, char **argv );
    int setParams( int ntimes, double *relax_weights );
+   int getParams( char *param_string, int *argc, char **argv );
 };
 
 #endif
