@@ -21,6 +21,7 @@ void zzz_AppendBox P((zzz_Box *box , zzz_BoxArray *box_array ));
 void zzz_DeleteBox P((zzz_BoxArray *box_array , int index ));
 void zzz_AppendBoxArray P((zzz_BoxArray *box_array_0 , zzz_BoxArray *box_array_1 ));
 void zzz_AppendBoxArrayArray P((zzz_BoxArrayArray *box_array_array_0 , zzz_BoxArrayArray *box_array_array_1 ));
+void zzz_CopyBoxArrayData P((zzz_BoxArray *box_array_in , zzz_BoxArray *data_space_in , int num_values_in , double *data_in , zzz_BoxArray *box_array_out , zzz_BoxArray *data_space_out , int num_values_out , double *data_out ));
 
 /* box_algebra.c */
 zzz_Box *zzz_IntersectBoxes P((zzz_Box *box1 , zzz_Box *box2 ));
@@ -54,6 +55,9 @@ zzz_BoxArrayArray *zzz_GrowBoxArrayByStencil P((zzz_BoxArray *box_array , zzz_St
 /* neighbors.c */
 void zzz_FindBoxNeighbors P((zzz_BoxArray *boxes , zzz_BoxArray *all_boxes , zzz_StructStencil *stencil , zzz_BoxArray **neighbors_ptr , int **neighbor_ranks_ptr ));
 void zzz_FindBoxApproxNeighbors P((zzz_BoxArray *boxes , zzz_BoxArray *all_boxes , zzz_StructStencil *stencil , zzz_BoxArray **neighbors_ptr , int **neighbor_ranks_ptr ));
+
+/* one_to_many.c */
+int main P((int argc , char *argv []));
 
 /* project.c */
 zzz_SBox *zzz_ProjectBox P((zzz_Box *box , zzz_Index *index , zzz_Index *stride ));
@@ -104,6 +108,7 @@ void zzz_PrintBoxArrayData P((FILE *file , zzz_BoxArray *box_array , zzz_BoxArra
 void zzz_ReadBoxArrayData P((FILE *file , zzz_BoxArray *box_array , zzz_BoxArray *data_space , int num_values , double *data ));
 
 /* struct_matrix.c */
+double *zzz_StructMatrixExtractPointerByIndex P((zzz_StructMatrix *matrix , int b , zzz_Index *index ));
 zzz_StructMatrix *zzz_NewStructMatrix P((MPI_Comm *comm , zzz_StructGrid *grid , zzz_StructStencil *user_stencil ));
 int zzz_FreeStructMatrix P((zzz_StructMatrix *matrix ));
 int zzz_InitializeStructMatrixShell P((zzz_StructMatrix *matrix ));

@@ -15,6 +15,30 @@
 #include "headers.h"
 
 /*--------------------------------------------------------------------------
+ * zzz_StructMatrixExtractPointerByIndex
+ *    Returns pointer to data for stencil entry coresponding to
+ *    `index' in `matrix'. If the index does not exist in the matrix's
+ *    stencil, the NULL pointer is returned. 
+ *--------------------------------------------------------------------------*/
+ 
+double *
+zzz_StructMatrixExtractPointerByIndex( zzz_StructMatrix *matrix,
+                                       int               b,
+                                       zzz_Index        *index  )
+{
+   zzz_StructStencil   *stencil;
+   int                  rank;
+
+   stencil = zzz_StructMatrixStencil(matrix);
+   rank = zzz_StructStencilElementRank( stencil, index );
+
+   if ( rank >= 0 )
+      return zzz_StructMatrixBoxData(matrix, b, rank);
+   else
+      return NULL;  /* error - invalid index */
+}
+
+/*--------------------------------------------------------------------------
  * zzz_NewStructMatrix
  *--------------------------------------------------------------------------*/
 
