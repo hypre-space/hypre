@@ -1038,7 +1038,7 @@ main( int   argc,
     * Fetch the resulting underlying matrix out
     *-----------------------------------------------------------*/
 
-   if (build_matrix_type > 1)
+   if (build_matrix_type > -1)
      ierr += HYPRE_ParCSRMatrixDestroy(parcsr_A);
 
    ierr += HYPRE_IJMatrixGetObject( ij_A, &object);
