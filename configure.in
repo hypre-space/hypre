@@ -24,7 +24,7 @@ define([AC_CACHE_LOAD], )dnl
 define([AC_CACHE_SAVE], )dnl
 
 AC_INIT(utilities/memory.c)
-AM_CONFIG_HEADER(./HYPRE_config.h)
+AC_CONFIG_HEADER(HYPRE_config.h)
 AC_PREFIX_DEFAULT("..")
 
 
