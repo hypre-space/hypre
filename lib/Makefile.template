@@ -356,6 +356,7 @@ MOSTFILES = \
  $(top_srcdir)/parcsr_mv/HYPRE_parcsr_matrix.o\
  $(top_srcdir)/parcsr_mv/HYPRE_parcsr_vector.o\
  $(top_srcdir)/parcsr_mv/communicationT.o\
+ $(top_srcdir)/parcsr_mv/new_commpkg.o\
  $(top_srcdir)/parcsr_mv/numbers.o\
  $(top_srcdir)/parcsr_mv/par_csr_aat.o\
  $(top_srcdir)/parcsr_mv/par_csr_bool_matop.o\
@@ -493,6 +494,7 @@ MOSTFILES = \
  $(top_srcdir)/struct_mv/struct_vector.o\
  $(top_srcdir)/utilities/amg_linklist.o\
  $(top_srcdir)/utilities/binsearch.o\
+ $(top_srcdir)/utilities/exchange_data.o\
  $(top_srcdir)/utilities/hypre_memory.o\
  $(top_srcdir)/utilities/hypre_qsort.o\
  $(top_srcdir)/utilities/memory_dmalloc.o\
