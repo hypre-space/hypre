@@ -577,11 +577,7 @@ hypre_CyclicReductionSetup( void               *cyc_red_vdata,
       data_size += hypre_StructVectorDataSize(x_l[l+1]);
    }
 
-#ifdef HYPRE_USE_PTHREADS
    data = hypre_SharedCTAlloc(double, data_size);
-#else
-   data = hypre_CTAlloc(double, data_size);
-#endif
 
    (cyc_red_data -> data) = data;
 
@@ -1132,11 +1128,7 @@ hypre_CyclicReductionFinalize( void *cyc_red_vdata )
          hypre_FreeComputePkg(cyc_red_data -> up_compute_pkg_l[l]);
       }
       hypre_FreeBoxArray(cyc_red_data -> fine_points_l[l]);
-#ifdef HYPRE_USE_PTHREADS
       hypre_SharedTFree(cyc_red_data -> data); 
-#else
-      hypre_TFree(cyc_red_data -> data); 
-#endif
       hypre_TFree(cyc_red_data -> grid_l);
       hypre_TFree(cyc_red_data -> fine_points_l);
       hypre_TFree(cyc_red_data -> coarse_points_l);

@@ -111,11 +111,7 @@ hypre_SMGFinalize( void *smg_vdata )
          hypre_FreeStructVectorShell(smg_data -> tb_l[l+1]);
          hypre_FreeStructVectorShell(smg_data -> tx_l[l+1]);
       }
-#ifdef HYPRE_USE_PTHREADS
       hypre_SharedTFree(smg_data -> data);
-#else
-      hypre_TFree(smg_data -> data);
-#endif
       hypre_TFree(smg_data -> grid_l);
       hypre_TFree(smg_data -> A_l);
       hypre_TFree(smg_data -> PT_l);

@@ -248,11 +248,7 @@ hypre_SMGSetup( void               *smg_vdata,
       hypre_InitializeStructVectorShell(tx_l[l+1]);
    }
 
-#ifdef HYPRE_USE_PTHREADS
    data = hypre_SharedCTAlloc(double, data_size);
-#else
-   data = hypre_CTAlloc(double, data_size);
-#endif
    (smg_data -> data) = data;
 
    hypre_InitializeStructVectorData(tb_l[0], data);
