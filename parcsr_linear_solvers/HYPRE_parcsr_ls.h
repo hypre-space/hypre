@@ -71,6 +71,18 @@ int HYPRE_ParCSRGMRESSetPrecond P((HYPRE_Solver solver , int (*precond )(), int 
 int HYPRE_ParCSRGMRESSetLogging P((HYPRE_Solver solver , int logging ));
 int HYPRE_ParCSRGMRESGetNumIterations P((HYPRE_Solver solver , int *num_iterations));
 int HYPRE_ParCSRGMRESGetFinalRelativeResidualNorm P((HYPRE_Solver solver , double *norm ));
+
+/* HYPRE_parcsr_cgnr.c */
+int HYPRE_ParCSRCGNRInitialize P((MPI_Comm comm , HYPRE_Solver *solver ));
+int HYPRE_ParCSRCGNRFinalize P((HYPRE_Solver solver ));
+int HYPRE_ParCSRCGNRSetup P((HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE_ParVector b , HYPRE_ParVector x ));
+int HYPRE_ParCSRCGNRSolve P((HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE_ParVector b , HYPRE_ParVector x ));
+int HYPRE_ParCSRCGNRSetTol P((HYPRE_Solver solver , double tol ));
+int HYPRE_ParCSRCGNRSetMaxIter P((HYPRE_Solver solver , int max_iter ));
+int HYPRE_ParCSRCGNRSetPrecond P((HYPRE_Solver solver , int (*precond )(), int (*precondT )(), int (*precond_setup )(), void *precond_data ));
+int HYPRE_ParCSRCGNRSetLogging P((HYPRE_Solver solver , int logging ));
+int HYPRE_ParCSRCGNRGetNumIterations P((HYPRE_Solver solver , int *num_iterations));
+int HYPRE_ParCSRCGNRGetFinalRelativeResidualNorm P((HYPRE_Solver solver , double *norm ));
  
 /* HYPRE_parcsr_pcg.c */
 int HYPRE_ParCSRPCGInitialize P((MPI_Comm comm , HYPRE_Solver *solver ));
