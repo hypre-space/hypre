@@ -142,6 +142,8 @@ BASE_SLE::BASE_SLE(MPI_Comm PASSED_COMM_WORLD, int masterRank) :
 
     sharedNodes_ = new SharedNodeRecord;
 
+    ceqn_MultConstraints = NULL;
+    storeNumWorksets = NULL;
     loadRecvsLaunched_ = false;
     shNodeInfo_ = NULL;
     shRequests_ = NULL;
