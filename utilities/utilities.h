@@ -669,7 +669,7 @@ int hypre_PrintTiming P((char *heading , MPI_Comm comm ));
 
 #endif
 /*BHEADER**********************************************************************
- * (c) 1999   The Regents of the University of California
+ * (c) 1997   The Regents of the University of California
  *
  * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
  * notice, contact person, and disclaimer.
@@ -677,33 +677,54 @@ int hypre_PrintTiming P((char *heading , MPI_Comm comm ));
  * $Revision$
  *********************************************************************EHEADER*/
 
-#ifndef UMALLOC_LOCAL_HEADER
-#define UMALLOC_LOCAL_HEADER
+/******************************************************************************
+ *
+ * Header file link lists
+ *
+ *****************************************************************************/
 
-#ifdef HYPRE_USE_UMALLOC
-#include <umalloc.h>
+#ifndef HYPRE_LINKLIST_HEADER
+#define HYPRE_LINKLIST_HEADER
 
-#define MAX_THREAD_COUNT 10 
-#define INITIAL_HEAP_SIZE 500000
-#define GET_MISS_COUNTS
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
 
-struct upc_struct
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#define LIST_HEAD -1
+#define LIST_TAIL -2
+
+struct double_linked_list
 {
-	Heap_t myheap;
+       int                        data;
+       struct double_linked_list *next_elt;
+       struct double_linked_list *prev_elt;
+       int                        head;
+       int                        tail;
 };
 
-void *_uinitial_block[MAX_THREAD_COUNT];
-struct upc_struct _uparam[MAX_THREAD_COUNT];
+typedef struct double_linked_list hypre_ListElement;
+typedef hypre_ListElement  *hypre_LinkList;  
 
-int _uheapReleasesCount=0;
-int _uheapGetsCount=0;
-
-void *_uget_fn(Heap_t usrheap, size_t *length, int *clean);
-void _urelease_fn(Heap_t usrheap, void *p, size_t size);
 
 #endif
-
+#ifdef __STDC__
+# define	P(s) s
+#else
+# define P(s) ()
 #endif
+
+
+/* amg_linklist.c */
+void dispose_elt P((hypre_LinkList element_ptr ));
+void remove_point P((hypre_LinkList *LoL_head_ptr , hypre_LinkList *LoL_tail_ptr , int measure , int index , int *lists , int *where ));
+hypre_LinkList create_elt P((int Item ));
+void enter_on_lists P((hypre_LinkList *LoL_head_ptr , hypre_LinkList *LoL_tail_ptr , int measure , int index , int *lists , int *where ));
+
+#undef P
 
 #ifdef __cplusplus
 }
