@@ -466,7 +466,7 @@ int MLI_Method_AMGCR::selectIndepSet(MLI_Matrix *mli_Amat, int **indepSet)
    }
    if (nprocs > 1) SExt = hypre_ParCSRMatrixExtractBExt(hypreA,hypreA,0);
 
-   hypre_BoomerAMGIndepSet(SExt, measureArray, graphArray,
+   hypre_BoomerAMGIndepSet(hypreS, measureArray, graphArray,
                            graphArraySize, graphArrayOffd, numColsOffd,
                            ISMarker, ISMarkerOffd);
    
