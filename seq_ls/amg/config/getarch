@@ -1,0 +1,38 @@
+#!/bin/sh
+
+#=============================================================================
+# This Script attempts to determine the architecture to use.
+#=============================================================================
+
+AMG_OS=""
+AMG_ARCH=""
+
+#=============================================================================
+# Determine the OS
+#=============================================================================
+
+if [ -f /bin/uname ] 
+then
+   AMG_OS="`/bin/uname -s`"
+   AMG_OS_Release="`/bin/uname -r`"
+fi
+
+#=============================================================================
+# Based on what we found from system queries set AMG_ARCH
+#=============================================================================
+
+if [ -z "$AMG_ARCH" ]
+then
+   case "$AMG_OS" in
+      SunOS)
+         case "$AMG_OS_Release" in	
+            4.1.3) AMG_ARCH="sunos";;
+            5.4)   AMG_ARCH="solaris";;
+         esac;;
+      IRIX)
+         AMG_ARCH="irix";;
+   esac
+fi
+
+export AMG_ARCH
+

@@ -1,0 +1,138 @@
+
+SHELL=/bin/sh
+export SHELL
+
+#=============================================================================
+# Parse generic arguments
+#=============================================================================
+
+if [ -n "$1" ]
+then
+
+   AMG_ARGS=""
+   AMG_ALL_FLAG=1
+   
+   while [ -n "$1" ]
+   do
+      case $1 in
+        -h|-help) 
+	   echo "$0 [ARGS] [install|clean|all] "
+	   echo ""
+	   echo "all             builds but does not install"
+	   echo "install         builds and installs"
+	   echo "clean           cleans temporary build files (e.g. *.o)"
+	   echo "veryclean       cleans everything"
+	   echo ""
+	   echo "ARGS:"
+	   echo "-arch <arch>    architecture of the machine"
+	   echo "-g              debug"
+	   exit 0;;
+	all)
+	   shift;;
+	install) 
+	   AMG_INSTALL_FLAG=1
+	   shift;;
+	clean)
+	   AMG_CLEAN_FLAG=1
+	   AMG_ALL_FLAG=""
+	   shift;;
+	veryclean)
+	   AMG_CLEAN_FLAG=1
+	   AMG_VERYCLEAN_FLAG=1
+	   AMG_ALL_FLAG=""
+	   shift;;
+	-arch)
+	   AMG_ARCH=$2
+	   shift 2;;
+	-port)
+	   AMG_PORT=$2
+	   shift 2;;
+	-g)
+	   AMG_DEBUG_FLAG=1
+	   shift;;
+	*)
+	   AMG_ARGS="$AMG_ARGS $1"
+	   shift;;
+      esac
+   done
+   
+   export \
+     AMG_ALL_FLAG \
+     AMG_INSTALL_FLAG \
+     AMG_CLEAN_FLAG \
+     AMG_VERYCLEAN_FLAG \
+     AMG_ARCH \
+     AMG_DEBUG_FLAG \
+     AMG_ARGS
+
+fi
+
+#=============================================================================
+# Determine the architecture and port
+#=============================================================================
+
+if [ -z "$AMG_ARCH" ]
+then
+   . $AMG_SRC/config/getarch
+fi
+
+if [ -z "$AMG_ARCH" ]
+then
+   echo "I don't know what architecture I am on."
+   echo "Please specify with the -arch option."
+   exit 1
+fi
+
+#=============================================================================
+# Record the last arch built on
+#=============================================================================
+
+if [ -f .current_arch ] 
+then
+   AMG_OLD_ARCH=`cat .current_arch`
+else
+   AMG_OLD_ARCH="NONE"
+fi
+echo "$AMG_ARCH" > .current_arch
+
+export AMG_OLD_ARCH AMG_ARCH
+
+#=============================================================================
+# Set configurations
+#=============================================================================
+
+. $AMG_SRC/config/defaults.config
+
+if [ -f $AMG_SRC/config/$AMG_ARCH.config ]
+then
+   . $AMG_SRC/config/$AMG_ARCH.config
+else
+   echo "Can't find config file: using the defaults"
+fi
+
+#=============================================================================
+# Install
+#=============================================================================
+
+if [ "$AMG_INSTALL_FLAG" ]
+then
+   if [ -z "$AMG_DIR" ]; then
+      echo "Error: set the AMG_DIR environment variable"
+      exit 1
+   fi
+
+   if [ ! -d $AMG_DIR ]
+   then
+      $AMG_MKDIR $AMG_DIR
+   fi
+fi
+
+#=============================================================================
+# Clean
+#=============================================================================
+
+if [ "$AMG_CLEAN_FLAG" ]
+then
+   rm -f .current_arch
+fi
+
