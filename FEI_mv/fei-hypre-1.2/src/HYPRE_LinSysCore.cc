@@ -143,10 +143,10 @@ HYPRE_LinSysCore::HYPRE_LinSysCore(MPI_Comm comm) :
     //-------------------------------------------------------------------
 
     amgCoarsenType_     = 0;    // default coarsening
-    amgNumSweeps_[0]    = 3;    // no. of sweeps for fine grid
-    amgNumSweeps_[1]    = 3;    // no. of presmoothing sweeps 
-    amgNumSweeps_[2]    = 3;    // no. of postsmoothing sweeps 
-    amgNumSweeps_[3]    = 3;    // no. of sweeps for coarsest grid
+    amgNumSweeps_[0]    = 2;    // no. of sweeps for fine grid
+    amgNumSweeps_[1]    = 2;    // no. of presmoothing sweeps 
+    amgNumSweeps_[2]    = 2;    // no. of postsmoothing sweeps 
+    amgNumSweeps_[3]    = 2;    // no. of sweeps for coarsest grid
     amgRelaxType_[0]    = 3;    // hybrid for the fine grid
     amgRelaxType_[1]    = 3;    // hybrid for presmoothing 
     amgRelaxType_[2]    = 3;    // hybrid for postsmoothing
@@ -2245,9 +2245,7 @@ void HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
     fprintf(fp, "%6d  %7d \n", nrows, nnz);
     for ( i = startRow; i < startRow+nrows; i++ )
     {
-       if ( mypid_ == 0 ) printf("PROCESSING row %d (1)\n", i);
        HYPRE_ParCSRMatrixGetRow(A_csr,i,&rowSize,&colInd,&colVal);
-       if ( mypid_ == 0 ) printf("PROCESSING row %d (2) - %d\n", i, rowSize);
        for (j = 0; j < rowSize; j++)
           fprintf(fp, "%6d  %6d  %e \n", i+1, colInd[j]+1, colVal[j]);
        HYPRE_ParCSRMatrixRestoreRow(A_csr,i,&rowSize,&colInd,&colVal);
@@ -5138,7 +5136,7 @@ void fei_hypre_test(int argc, char *argv[])
 {
     int    i, j, k, my_rank, num_procs, nrows, nnz, mybegin, myend, status;
     int    *ia, *ja, ncnt, index, chunksize, iterations, local_nrows;
-    int    *rowLengths, **colIndices, blksize=1, *list;
+    int    *rowLengths, **colIndices, blksize=1, *list, prec;
     double *val, *rhs, ddata, ddata_max;
 
     //------------------------------------------------------------------
@@ -5251,7 +5249,26 @@ void fei_hypre_test(int argc, char *argv[])
 
     strcpy(paramString, "solver gmres");
     H.parameters(1, &paramString);
-    strcpy(paramString, "preconditioner ml");
+    if ( my_rank == 0 )
+    {
+       printf("preconditioner (diagonal,parasails,boomeramg,ml) : ");
+       scanf("%d", &prec);
+    }
+    MPI_Bcast(&prec,  1, MPI_INT, 0, MPI_COMM_WORLD);
+    switch (prec)
+    {
+       case 0 : strcpy(paramString, "preconditioner diagonal");
+                break;
+       case 1 : strcpy(paramString, "preconditioner parasails");
+                break;
+       case 2 : strcpy(paramString, "preconditioner boomeramg");
+                break;
+       case 3 : strcpy(paramString, "preconditioner ml");
+                break;
+       default : strcpy(paramString, "preconditioner parasails");
+                break;
+    }
+
     H.parameters(1, &paramString);
     strcpy(paramString, "gmresDim 300");
     H.parameters(1, &paramString);
@@ -5263,6 +5280,8 @@ void fei_hypre_test(int argc, char *argv[])
     strcpy(paramString, "amgRelaxWeight 0.5");
     H.parameters(1, &paramString);
     strcpy(paramString, "amgStrongThreshold 0.25");
+    H.parameters(1, &paramString);
+    strcpy(paramString, "amgNumSweeps 3");
     H.parameters(1, &paramString);
 
     strcpy(paramString, "mlNumPresweeps 2");
