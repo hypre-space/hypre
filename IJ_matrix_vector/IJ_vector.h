@@ -37,20 +37,6 @@ typedef struct
 n */
    int           local_storage_type;       /* Indicates the type of "local stora
 ge" */
-   void         *translator;               /* optional storage_type specfic stru
-cture
-                                              for holding additional local info
-*/
-
-   int           insertion_semantics;      /* Flag that indicates for the curren
-t
-                                              object to what extent values can b
-e set
-                                              from different processors than the
- one that
-                                              stores the row. */
-                                           /* 0: minimum definition, values can
-only be set on-processor. */
    int           ref_count;                /* reference count for memory managem
 ent */
 } hypre_IJVector;
@@ -63,10 +49,8 @@ ent */
 #define hypre_IJVectorN(vector)                    ((vector) -> N)
 
 #define hypre_IJVectorLocalStorageType(vector)     ((vector) -> local_storage_type)
-#define hypre_IJVectorTranslator(vector)           ((vector) -> translator)
 #define hypre_IJVectorLocalStorage(vector)         ((vector) -> local_storage)
 
-#define hypre_IJVectorInsertionSemantics(vector)   ((vector) -> insertion_semantics)
 #define hypre_IJVectorReferenceCount(vector)       ((vector) -> ref_count)
 
 /*--------------------------------------------------------------------------
