@@ -112,7 +112,6 @@ hypre_InitializeIJVectorPar(hypre_IJVector *vector)
    hypre_ParVector *par_vector = hypre_IJVectorLocalStorage(vector);
    int *partitioning = hypre_ParVectorPartitioning(par_vector);
    hypre_Vector *local_vector = hypre_ParVectorLocalVector(par_vector);
-   int local_num_rows;
    int my_id;
    MPI_Comm  comm = hypre_IJVectorContext(vector);
 
@@ -259,18 +258,38 @@ hypre_InsertIJVectorParLocalComponents(hypre_IJVector *vector,
    data = hypre_VectorData(local_vector);
    if (!ierr && !value_indices)
    {
-       for (j = 0; j < num_values; j++)
+       if (glob_vec_indices)
        {
-          i = glob_vec_indices[j] - vec_start;
-          data[i] = values[j];
-       };
+          for (j = 0; j < num_values; j++)
+          {
+             i = glob_vec_indices[j] - vec_start;
+             data[i] = values[j];
+          };
+        }
+        else
+        {
+          for (j = 0; j < num_values; j++)
+          {
+             data[j] = values[j];
+          };
+        };
    } 
    else if (!ierr && value_indices)
    {
-       for (j = 0; j < num_values; j++)
+       if (glob_vec_indices)
        {
-          i = glob_vec_indices[j] - vec_start;
-          data[i] = values[value_indices[j]];
+          for (j = 0; j < num_values; j++)
+          {
+             i = glob_vec_indices[j] - vec_start;
+             data[i] = values[value_indices[j]];
+          };
+       }
+       else
+       {
+          for (j = 0; j < num_values; j++)
+          {
+             data[j] = values[value_indices[j]];
+          };
        };
    }; 
   
@@ -371,18 +390,38 @@ hypre_AddToIJVectorParLocalComponents(hypre_IJVector *vector,
    data = hypre_VectorData(local_vector);
    if (!ierr && !value_indices)
    {
-      for (j = 0; j < num_values; j++)
+      if (glob_vec_indices)
       {
-         i = glob_vec_indices[j] - vec_start;
-         data[i] += values[i];
+         for (j = 0; j < num_values; j++)
+         {
+            i = glob_vec_indices[j] - vec_start;
+            data[i] += values[j];
+         };
+      }
+      else
+      {
+         for (j = 0; j < num_values; j++)
+         {
+            data[j] += values[j];
+         };
       };
    } 
    else if (!ierr && value_indices)
    {
-      for (j = 0; j < num_values; j++)
+      if (glob_vec_indices)
       {
-         i = glob_vec_indices[j] - vec_start;
-         data[i] += values[value_indices[i]];
+         for (j = 0; j < num_values; j++)
+         {
+            i = glob_vec_indices[j] - vec_start;
+            data[i] += values[value_indices[j]];
+         };
+      }
+      else
+      {
+         for (j = 0; j < num_values; j++)
+         {
+            data[j] += values[value_indices[j]];
+         };
       };
    }; 
   
