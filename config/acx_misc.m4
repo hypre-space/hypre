@@ -197,13 +197,13 @@ provided by --display_error_number]),
   CXXFLAGS="$CXXFLAGS -Wmissing-declarations -Wshadow"
   CXXFLAGS="$CXXFLAGS -Woverloaded-virtual -ansi -pedantic"
 else
-  CC=kcc
+  CC=KCC
   CXX=KCC
   CFLAGS="$CFLAGS --c --strict --lint --display_error_number"
   CFLAGS="$CFLAGS --diag_suppress 45,236,450,826"
   CFLAGS="$CFLAGS,1018,1021,1022,1023,1024,1030,1041"
   CXXFLAGS="$CXXFLAGS --strict --lint --display_error_number"
-  CXXFLAGS="$CXXFLAGS --diag_suppress 381,450"
+  CXXFLAGS="$CXXFLAGS --diag_suppress 381,450,1023,1024"
 fi
 casc_user_chose_compilers=yes
 casc_using_mpi=no])
