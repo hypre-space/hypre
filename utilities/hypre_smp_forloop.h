@@ -17,7 +17,6 @@
 #endif
 
 #ifdef HYPRE_USING_OPENMP
-#include "hypre_smp_setup.h"
 #ifndef HYPRE_SMP_REDUCTION_OP
 #pragma omp parallel for private(HYPRE_SMP_PRIVATE) schedule(static)
 #endif
