@@ -68,9 +68,10 @@ am__libHYPRE_struct_ls_a_SOURCES_DIST = F90_HYPRE_struct_hybrid.c \
 	pfmg.c pfmg2_setup_rap.c pfmg3_setup_rap.c pfmg_relax.c \
 	pfmg_setup.c pfmg_setup_interp.c pfmg_setup_rap.c \
 	pfmg_setup_rap5.c pfmg_setup_rap7.c pfmg_solve.c point_relax.c \
-	semi_interp.c semi_restrict.c semi_setup_rap.c smg.c \
-	smg2_setup_rap.c smg3_setup_rap.c smg_axpy.c smg_relax.c \
-	smg_residual.c smg_setup.c smg_setup_interp.c smg_setup_rap.c \
+	red_black_gs.c red_black_constantcoef_gs.c semi_interp.c \
+	semi_restrict.c semi_setup_rap.c smg.c smg2_setup_rap.c \
+	smg3_setup_rap.c smg_axpy.c smg_relax.c smg_residual.c \
+	smg_setup.c smg_setup_interp.c smg_setup_rap.c \
 	smg_setup_restrict.c smg_solve.c sparse_msg.c \
 	sparse_msg2_setup_rap.c sparse_msg3_setup_rap.c \
 	sparse_msg_filter.c sparse_msg_interp.c sparse_msg_restrict.c \
@@ -89,6 +90,7 @@ am__objects_1 = F90_HYPRE_struct_hybrid.$(OBJEXT) \
 	pfmg_setup_interp.$(OBJEXT) pfmg_setup_rap.$(OBJEXT) \
 	pfmg_setup_rap5.$(OBJEXT) pfmg_setup_rap7.$(OBJEXT) \
 	pfmg_solve.$(OBJEXT) point_relax.$(OBJEXT) \
+	red_black_gs.$(OBJEXT) red_black_constantcoef_gs.$(OBJEXT) \
 	semi_interp.$(OBJEXT) semi_restrict.$(OBJEXT) \
 	semi_setup_rap.$(OBJEXT) smg.$(OBJEXT) \
 	smg2_setup_rap.$(OBJEXT) smg3_setup_rap.$(OBJEXT) \
@@ -116,9 +118,10 @@ am__libHYPRE_struct_ls_la_SOURCES_DIST = F90_HYPRE_struct_hybrid.c \
 	pfmg.c pfmg2_setup_rap.c pfmg3_setup_rap.c pfmg_relax.c \
 	pfmg_setup.c pfmg_setup_interp.c pfmg_setup_rap.c \
 	pfmg_setup_rap5.c pfmg_setup_rap7.c pfmg_solve.c point_relax.c \
-	semi_interp.c semi_restrict.c semi_setup_rap.c smg.c \
-	smg2_setup_rap.c smg3_setup_rap.c smg_axpy.c smg_relax.c \
-	smg_residual.c smg_setup.c smg_setup_interp.c smg_setup_rap.c \
+	red_black_gs.c red_black_constantcoef_gs.c semi_interp.c \
+	semi_restrict.c semi_setup_rap.c smg.c smg2_setup_rap.c \
+	smg3_setup_rap.c smg_axpy.c smg_relax.c smg_residual.c \
+	smg_setup.c smg_setup_interp.c smg_setup_rap.c \
 	smg_setup_restrict.c smg_solve.c sparse_msg.c \
 	sparse_msg2_setup_rap.c sparse_msg3_setup_rap.c \
 	sparse_msg_filter.c sparse_msg_interp.c sparse_msg_restrict.c \
@@ -133,11 +136,12 @@ am__objects_2 = F90_HYPRE_struct_hybrid.lo F90_HYPRE_struct_pcg.lo \
 	pfmg2_setup_rap.lo pfmg3_setup_rap.lo pfmg_relax.lo \
 	pfmg_setup.lo pfmg_setup_interp.lo pfmg_setup_rap.lo \
 	pfmg_setup_rap5.lo pfmg_setup_rap7.lo pfmg_solve.lo \
-	point_relax.lo semi_interp.lo semi_restrict.lo \
-	semi_setup_rap.lo smg.lo smg2_setup_rap.lo smg3_setup_rap.lo \
-	smg_axpy.lo smg_relax.lo smg_residual.lo smg_setup.lo \
-	smg_setup_interp.lo smg_setup_rap.lo smg_setup_restrict.lo \
-	smg_solve.lo sparse_msg.lo sparse_msg2_setup_rap.lo \
+	point_relax.lo red_black_gs.lo red_black_constantcoef_gs.lo \
+	semi_interp.lo semi_restrict.lo semi_setup_rap.lo smg.lo \
+	smg2_setup_rap.lo smg3_setup_rap.lo smg_axpy.lo smg_relax.lo \
+	smg_residual.lo smg_setup.lo smg_setup_interp.lo \
+	smg_setup_rap.lo smg_setup_restrict.lo smg_solve.lo \
+	sparse_msg.lo sparse_msg2_setup_rap.lo \
 	sparse_msg3_setup_rap.lo sparse_msg_filter.lo \
 	sparse_msg_interp.lo sparse_msg_restrict.lo \
 	sparse_msg_setup.lo sparse_msg_setup_rap.lo \
@@ -305,6 +309,7 @@ include_HEADERS = struct_ls.h HYPRE_struct_ls.h
 noinst_HEADERS = \
  headers.h\
  pfmg.h\
+ red_black_gs.h\
  smg.h\
  sparse_msg.h
 
@@ -347,6 +352,8 @@ FILES = \
  pfmg_setup_rap7.c\
  pfmg_solve.c\
  point_relax.c\
+ red_black_gs.c\
+ red_black_constantcoef_gs.c\
  semi_interp.c\
  semi_restrict.c\
  semi_setup_rap.c\
