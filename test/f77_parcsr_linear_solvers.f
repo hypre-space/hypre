@@ -32,11 +32,11 @@ c-----------------------------------------------------------------------
       integer             precond_id
 
       integer             hybrid, coarsen_type, measure_type
-      integer             ioutdat, cycle_type, k_dim
+      integer             debug_flag, ioutdat, cycle_type, k_dim
       integer             num_rows
 
       integer             i, zero, one, maxiter, num_iterations
-      integer             num_grid_sweeps(4),grid_relax_type(4)
+      integer             num_grid_sweeps(4), grid_relax_type(4)
 
       double precision    tol, convtol
       double precision    final_res_norm, relax_weight(MAXLEVELS)
@@ -100,7 +100,7 @@ c-----------------------------------------------------------------------
       n_pre  = 1
       n_post = 1
 
-      solver_id = 3
+      solver_id = 0
 
 c-----------------------------------------------------------------------
 c     Read options
@@ -251,8 +251,48 @@ c     will break the interface.
       maxiter = 50
       tol = 0.000001
       convtol = 0.9
+      debug_flag = 0
 
-      if (solver_id .eq. 0 .or. solver_id .eq. 3 .or.
+      if (solver_id .eq. 0) then
+
+        print *, 'AMG'
+
+        call HYPRE_ParAMGInitialize(solver, ierr)
+        call HYPRE_ParAMGSetCoarsenType(solver,
+     &                                  (hybrid*coarsen_type), ierr)
+        call HYPRE_ParAMGSetMeasureType(solver, measure_type, ierr)
+        call HYPRE_ParAMGSetTol(solver, tol, ierr)
+        call HYPRE_ParAMGSetStrongThreshold(solver,
+     &                                      strong_threshold, ierr)
+        call HYPRE_ParAMGSetTruncFactor(solver, trunc_factor, ierr)
+        call HYPRE_ParAMGSetLogging(solver, ioutdat,
+     &                              "test.out.log", ierr)
+        call HYPRE_ParAMGSetMaxIter(solver, maxiter, ierr)
+        call HYPRE_ParAMGSetCycleType(solver, cycle_type, ierr)
+        call HYPRE_ParAMGInitGridRelaxation(num_grid_sweeps,
+     &                                      grid_relax_type,
+     &                                      grid_relax_points,
+     &                                      coarsen_type, ierr)
+        call HYPRE_ParAMGSetNumGridSweeps(solver,
+     &                                    num_grid_sweeps, ierr)
+        call HYPRE_ParAMGSetGridRelaxType(solver,
+     &                                    grid_relax_type, ierr)
+        call HYPRE_ParAMGSetRelaxWeight(solver,
+     &                                  relax_weight, ierr)
+        call HYPRE_ParAMGSetGridRelaxPoints(solver,
+     &                                      grid_relax_points, ierr)
+        call HYPRE_ParAMGSetMaxLevels(solver, MAXLEVELS, ierr)
+        call HYPRE_ParAMGSetDebugFlag(solver, debug_flag, ierr)
+        call HYPRE_ParAMGSetup(solver, A, b, x, ierr)
+        call HYPRE_ParAMGSolve(solver, A, b, x, ierr)
+        call HYPRE_ParAMGGetNumIterations(solver, num_iterations, ierr)
+        call HYPRE_ParAMGGetFinalRelativeRes(solver,
+     &                                       final_res_norm, ierr)
+        call HYPRE_ParAMGFinalize(solver, ierr)
+
+      endif
+
+      if (solver_id .eq. 2 .or. solver_id .eq. 3 .or.
      &    solver_id .eq. 4 .or. solver_id .eq. 7) then
 
         k_dim = 5
@@ -265,7 +305,7 @@ c       Solve the system using preconditioned GMRES
         call HYPRE_ParCSRGMRESSetTol(solver, tol, ierr)
         call HYPRE_ParCSRGMRESSetLogging(solver, solver, one, ierr)
 
-        if (solver_id .eq. 0) then
+        if (solver_id .eq. 2) then
 
           print *, 'GMRES'
 
@@ -282,20 +322,6 @@ c Set defaults for BoomerAMG
           strong_threshold = 0.25
           trunc_factor = 0.0
           cycle_type = 1
-
-          do i = 1, 4
-            num_grid_sweeps(1) = 2
-            num_grid_sweeps(2) = 2
-            num_grid_sweeps(3) = 2
-            num_grid_sweeps(4) = 1
-          enddo
-
-          do i = 1, 4
-            grid_relax_type(1) = 3
-            grid_relax_type(2) = 3
-            grid_relax_type(3) = 3
-            grid_relax_type(4) = 9
-          enddo
 
           do i = 1, MAXLEVELS
             relax_weight(i) = 0.0
