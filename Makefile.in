@@ -32,6 +32,12 @@ HYPRE_IJ_DIRS =\
  distributed_linear_solvers/ParaSails\
  parcsr_linear_solvers
 
+#These are the directories for FEI interface
+HYPRE_FEI_DIRS =\
+ FEI_matrix_vector/fei-hypre\
+ FEI_matrix_vector/fei-isis/src\
+ FEI_matrix_vector/isis-mv
+
 # These are directories that are officially in HYPRE
 HYPRE_DIRS =\
  ${HYPRE_STRUCT_DIRS}\
@@ -82,6 +88,19 @@ beta: all
 	(cd test; make beta); \
 	echo ""
 
+fei: all
+	@ \
+	for i in ${HYPRE_FEI_DIRS}; \
+	do \
+	  if [ -d $$i ]; \
+	  then \
+	    echo "Making $$i ..."; \
+	    (cd $$i; make install); \
+	    echo ""; \
+	  fi; \
+	done; \
+	echo ""
+
 install: all
 	@ \
 	if [ ! "$$HYPRE_INSTALL_DIR" ]; \
@@ -100,7 +119,7 @@ install: all
 
 clean:
 	@ \
-	for i in ${HYPRE_DIRS} ${HYPRE_EXTRA_DIRS}; \
+	for i in ${HYPRE_DIRS} ${HYPRE_EXTRA_DIRS} ${HYPRE_FEI_DIRS}; \
 	do \
 	  if [ -d $$i ]; \
 	  then \
@@ -114,7 +133,7 @@ clean:
 veryclean:
 	@ \
 	rm -Rf hypre; \
-	for i in ${HYPRE_DIRS} ${HYPRE_EXTRA_DIRS}; \
+	for i in ${HYPRE_DIRS} ${HYPRE_EXTRA_DIRS} ${HYPRE_FEI_DIRS}; \
 	do \
 	  if [ -d $$i ]; \
 	  then \
