@@ -587,7 +587,7 @@ double sludlamch_(char *cmach)
     int i__1;
     double ret_val;
     /* Builtin functions */
-    double pow_di(double *, int *);
+    double slupow_di(double *, int *);
     /* Local variables */
     static double base;
     static int beta;
@@ -610,11 +610,11 @@ double sludlamch_(char *cmach)
 	if (lrnd) {
 	    rnd = 1.;
 	    i__1 = 1 - it;
-	    eps = pow_di(&base, &i__1) / 2;
+	    eps = slupow_di(&base, &i__1) / 2;
 	} else {
 	    rnd = 0.;
 	    i__1 = 1 - it;
-	    eps = pow_di(&base, &i__1);
+	    eps = slupow_di(&base, &i__1);
 	}
 	prec = eps * base;
 	emin = (double) imin;
@@ -944,7 +944,7 @@ L30:
     int i__1;
     double d__1, d__2, d__3, d__4, d__5;
     /* Builtin functions */
-    double pow_di(double *, int *);
+    double slupow_di(double *, int *);
     /* Local variables */
     static int ieee;
     static double half;
@@ -991,7 +991,7 @@ ure
 
 	b = (double) lbeta;
 	i__1 = -lt;
-	a = pow_di(&b, &i__1);
+	a = slupow_di(&b, &i__1);
 	leps = a;
 
 /*        Try some tricks to see whether or not this is the correct  E
@@ -1463,7 +1463,7 @@ it
 
 } /* sludlamc5_ */
 
-double pow_di(double *ap, int *bp)
+double slupow_di(double *ap, int *bp)
 {
     double pow, x;
     int n;
