@@ -171,6 +171,31 @@ then
     )
 fi
 
+# serial version. (Do this only once)
+if [ ! -d serial/lib ]
+then
+    (
+        HYPRE_INSTALL_DIR=$DIST_DIR/serial
+        export HYPRE_INSTALL_DIR
+	mkdir -p $HYPRE_INSTALL_DIR
+        
+        cd src
+        ./configure --without-MPI --with-COMM_SIMPLE
+        make install
+        make veryclean
+    )
+    (
+        HYPRE_INSTALL_DIR=$DIST_DIR/serial/debug
+        export HYPRE_INSTALL_DIR
+	mkdir -p $HYPRE_INSTALL_DIR
+        
+        cd src
+        ./configure --without-MPI --with-COMM_SIMPLE --enable-debug
+        make install
+        make veryclean
+    )
+fi
+
 # MPI + threads version. (Do this only once)
 if [ ! -d threads/lib ]
 then
