@@ -85,11 +85,11 @@ fi
 (
     cd $HYPRE_INSTALL_DIR
 
-    # create directory UPDATE and protect with permissions
+    # create directory UPDATE and protect
     if [ ! -d UPDATE ]
     then
 	mkdir UPDATE
-	chmod 700 UPDATE
+	chmod go-w UPDATE
     fi
 
     # update only if no VERSION_DATE file
@@ -122,7 +122,10 @@ fi
 
 	# create the UPDATE.tar file for updating on non-CASC machines
 	echo "creating the UPDATE.tar file ..."
-	tar cf UPDATE.tar UPDATE
+	tar cf UPDATE.tar \
+	    UPDATE/src/linear_solvers/utilities \
+	    UPDATE/src/linear_solvers/struct_matrix_vector \
+	    UPDATE/src/linear_solvers/struct_linear_solvers
     fi
 
     if [ ! -f UPDATE/VERSION_NAME ]
@@ -158,27 +161,25 @@ then
     (
 	cd $HYPRE_INSTALL_DIR
 
-	# set permissions: give everybody `rx', and give user/group `w'
-	echo "setting permissions ..."
-	chmod -fR a+rX,ug+w UPDATE/*
-
 	# move the current installed version into an "old" directory
 	echo "saving the current installed version ..."
 	if [ -f VERSION_NAME ]
 	then
 	    OLD=`cat VERSION_NAME`
-	    if [ -d $OLD ]
-	    then
-		rm -fr $OLD
-	    fi
 	    mkdir $OLD
-
 	    mv VERSION_DATE $OLD
 	    mv VERSION_NAME $OLD
 	    for i in [!UV]*
 	    do
 		mv $i $OLD
 	    done
+
+	    # don't keep an old copy if the new version is "the same"
+	    NEW=`cat UPDATE/VERSION_NAME`
+	    if [ "$NEW" = "$OLD" ]
+	    then
+		rm -fr $OLD
+	    fi
 	fi
 
 	# move the updated version into the install directory
@@ -186,26 +187,22 @@ then
 	mv UPDATE/* .
 	rmdir UPDATE
 
-	# don't keep any old copies of the library
+	# keep some number of old copies of the library
 	echo "removing old installations ..."
-	if [ "$HYPRE_INSTALL_TYPE" = "internal" ]
-	then
-	    if [ -d $OLD ]
-	    then
-		rm -fr $OLD
-	    fi
-	fi
-	# keep 3 old copies of the library
-	# (note: * will expand alphabetically in the Bourne shell)
+	NUM_COPIES=1
 	if [ "$HYPRE_INSTALL_TYPE" = "external" ]
 	then
-	    set - V[0-9]*
-	    if [ $# -gt 3 ]
-	    then
-		shift 3
-		rm -fr $*
-	    fi
+	    NUM_COPIES=3
 	fi
+	# note: `*' will expand alphabetically in the Bourne shell
+	set - V[0-9]*
+	COUNT=`expr $# - $NUM_COPIES`
+	while [ $COUNT -gt 0 ]
+	do
+	    rm -fr $1
+	    shift
+	    COUNT=`expr $COUNT - 1`
+	done
 
 	# clean the source directory
 	echo "cleaning the source directories ..."
@@ -213,6 +210,10 @@ then
 	    cd src/linear_solvers
 	    ./build -$HYPRE_ARCH veryclean
 	)
+
+	# set permissions: give everybody `rx', and give user/group `w'
+	echo "setting permissions ..."
+	chmod -fR a+rX,ug+w .
     )
 fi
 
