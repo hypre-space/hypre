@@ -26,7 +26,6 @@
 #==============================================================================
 
 RECIPIENTS="\
- dwalker@llnl.gov\
  rfalgout@llnl.gov\
  cleary1@llnl.gov\
  treadway1@llnl.gov"
