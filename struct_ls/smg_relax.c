@@ -250,14 +250,18 @@ zzz_SMGRelax( void             *relax_vdata,
    void              **solve_data      = (relax_data -> solve_data);
 
    int                 i, is;
+   int                 first_residual = 1;
 
    int                 ierr;
 
    /*----------------------------------------------------------
-    * Zero out initial guess if necessary
+    * Note: The zero_guess stuff is not handled correctly
+    * for general relaxation parameters.  It is correct when
+    * the spaces are independent sets in the direction of
+    * relaxation.
     *----------------------------------------------------------*/
 
-   if (zero_guess)
+   if (zero_guess && (stencil_dim > 2))
    {
       zzz_SetStructVectorConstantValues(x, 0.0);
    }
@@ -270,7 +274,15 @@ zzz_SMGRelax( void             *relax_vdata,
    {
       is = pre_space_ranks[i];
 
-      zzz_SMGResidual(residual_data[is], x, b, temp_vec);
+      if (zero_guess && first_residual)
+      {
+         zzz_StructCopy(b, temp_vec);
+         first_residual = 0;
+      }
+      else
+      {
+         zzz_SMGResidual(residual_data[is], x, b, temp_vec);
+      }
 
       if (stencil_dim > 2)
          zzz_SMGSolve(solve_data[is], temp_vec, x);
@@ -286,7 +298,15 @@ zzz_SMGRelax( void             *relax_vdata,
    {
       for (is = 0; is < num_spaces; is++)
       {
-         zzz_SMGResidual(residual_data[is], x, b, temp_vec);
+         if (zero_guess && first_residual)
+         {
+            zzz_StructCopy(b, temp_vec);
+            first_residual = 0;
+         }
+         else
+         {
+            zzz_SMGResidual(residual_data[is], x, b, temp_vec);
+         }
 
          if (stencil_dim > 2)
             zzz_SMGSolve(solve_data[is], temp_vec, x);
