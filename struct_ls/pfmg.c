@@ -45,6 +45,9 @@ hypre_PFMGInitialize( MPI_Comm  comm )
    (pfmg_data -> num_post_relax) = 1;
    (pfmg_data -> logging)        = 0;
 
+   /* initialize */
+   (pfmg_data -> num_levels) = -1;
+
    return (void *) pfmg_data;
 }
 
@@ -68,42 +71,45 @@ hypre_PFMGFinalize( void *pfmg_vdata )
          hypre_TFree(pfmg_data -> rel_norms);
       }
 
-      for (l = 0; l < (pfmg_data -> num_levels); l++)
+      if ((pfmg_data -> num_levels) > -1)
       {
-         hypre_PFMGRelaxFinalize(pfmg_data -> relax_data_l[l]);
-         hypre_StructMatvecFinalize(pfmg_data -> matvec_data_l[l]);
-      }
-      for (l = 0; l < ((pfmg_data -> num_levels) - 1); l++)
-      {
-         hypre_PFMGRestrictFinalize(pfmg_data -> restrict_data_l[l]);
-         hypre_PFMGInterpFinalize(pfmg_data -> interp_data_l[l]);
-      }
-      hypre_TFree(pfmg_data -> relax_data_l);
-      hypre_TFree(pfmg_data -> matvec_data_l);
-      hypre_TFree(pfmg_data -> restrict_data_l);
-      hypre_TFree(pfmg_data -> interp_data_l);
+         for (l = 0; l < (pfmg_data -> num_levels); l++)
+         {
+            hypre_PFMGRelaxFinalize(pfmg_data -> relax_data_l[l]);
+            hypre_StructMatvecFinalize(pfmg_data -> matvec_data_l[l]);
+         }
+         for (l = 0; l < ((pfmg_data -> num_levels) - 1); l++)
+         {
+            hypre_PFMGRestrictFinalize(pfmg_data -> restrict_data_l[l]);
+            hypre_PFMGInterpFinalize(pfmg_data -> interp_data_l[l]);
+         }
+         hypre_TFree(pfmg_data -> relax_data_l);
+         hypre_TFree(pfmg_data -> matvec_data_l);
+         hypre_TFree(pfmg_data -> restrict_data_l);
+         hypre_TFree(pfmg_data -> interp_data_l);
  
-      hypre_FreeStructVectorShell(pfmg_data -> tx_l[0]);
-      for (l = 0; l < ((pfmg_data -> num_levels) - 1); l++)
-      {
-         hypre_FreeStructGrid(pfmg_data -> grid_l[l+1]);
-         hypre_FreeStructGrid(pfmg_data -> P_grid_l[l+1]);
-         hypre_FreeStructMatrixShell(pfmg_data -> A_l[l+1]);
-         hypre_FreeStructMatrixShell(pfmg_data -> P_l[l]);
-         hypre_FreeStructVectorShell(pfmg_data -> b_l[l+1]);
-         hypre_FreeStructVectorShell(pfmg_data -> x_l[l+1]);
-         hypre_FreeStructVectorShell(pfmg_data -> tx_l[l+1]);
+         hypre_FreeStructVectorShell(pfmg_data -> tx_l[0]);
+         for (l = 0; l < ((pfmg_data -> num_levels) - 1); l++)
+         {
+            hypre_FreeStructGrid(pfmg_data -> grid_l[l+1]);
+            hypre_FreeStructGrid(pfmg_data -> P_grid_l[l+1]);
+            hypre_FreeStructMatrixShell(pfmg_data -> A_l[l+1]);
+            hypre_FreeStructMatrixShell(pfmg_data -> P_l[l]);
+            hypre_FreeStructVectorShell(pfmg_data -> b_l[l+1]);
+            hypre_FreeStructVectorShell(pfmg_data -> x_l[l+1]);
+            hypre_FreeStructVectorShell(pfmg_data -> tx_l[l+1]);
+         }
+         hypre_SharedTFree(pfmg_data -> data);
+         hypre_TFree(pfmg_data -> cdir_l);
+         hypre_TFree(pfmg_data -> grid_l);
+         hypre_TFree(pfmg_data -> P_grid_l);
+         hypre_TFree(pfmg_data -> A_l);
+         hypre_TFree(pfmg_data -> P_l);
+         hypre_TFree(pfmg_data -> RT_l);
+         hypre_TFree(pfmg_data -> b_l);
+         hypre_TFree(pfmg_data -> x_l);
+         hypre_TFree(pfmg_data -> tx_l);
       }
-      hypre_SharedTFree(pfmg_data -> data);
-      hypre_TFree(pfmg_data -> cdir_l);
-      hypre_TFree(pfmg_data -> grid_l);
-      hypre_TFree(pfmg_data -> P_grid_l);
-      hypre_TFree(pfmg_data -> A_l);
-      hypre_TFree(pfmg_data -> P_l);
-      hypre_TFree(pfmg_data -> RT_l);
-      hypre_TFree(pfmg_data -> b_l);
-      hypre_TFree(pfmg_data -> x_l);
-      hypre_TFree(pfmg_data -> tx_l);
  
       hypre_FinalizeTiming(pfmg_data -> time_index);
       hypre_TFree(pfmg_data);

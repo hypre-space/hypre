@@ -26,17 +26,19 @@ typedef struct
 
    double                tol;
    double                cf_tol;
-   int                   max_ds_its;
-   int                   max_mg_its;
+   int                   dscg_max_its;
+   int                   pcg_max_its;
    int                   two_norm;
    int                   rel_change;
 
-   void                 *pcg_solver;
+   int                   pcg_default;              /* boolean */
+   int                 (*pcg_precond_solve)();
+   int                 (*pcg_precond_setup)();
    void                 *pcg_precond;
 
    /* log info (always logged) */
-   int                   num_ds_its;
-   int                   num_mg_its;
+   int                   dscg_num_its;
+   int                   pcg_num_its;
    double                final_rel_res_norm;
    int                   time_index;
 
@@ -44,17 +46,6 @@ typedef struct
    int                   logging;
 
 } hypre_HybridData;
-
-/*--------------------------------------------------------------------------
- * Accessor macros: hypre_HybridData
- *--------------------------------------------------------------------------*/
-
-#define hypre_HybridPCGSolver(data)           ((data) -> pcg_solver)
-#define hypre_HybridPCGPrecond(data)          ((data) -> pcg_precond)
-#define hypre_HybridNumDSIterations(data)     ((data) -> num_ds_its)
-#define hypre_HybridNumMGIterations(data)     ((data) -> num_mg_its)
-#define hypre_HybridFinalRelResNorm(data)     ((data) -> final_rel_res_norm)
-
 
 /*--------------------------------------------------------------------------
  * hypre_HybridInitialize
@@ -68,22 +59,24 @@ hypre_HybridInitialize( MPI_Comm  comm )
    hybrid_data = hypre_CTAlloc(hypre_HybridData, 1);
 
    (hybrid_data -> comm)        = comm;
-   (hybrid_data -> time_index)  = hypre_InitializeTiming("HYBRID");
+   (hybrid_data -> time_index)  = hypre_InitializeTiming("Hybrid");
 
    /* set defaults */
    (hybrid_data -> tol)               = 1.0e-06;
    (hybrid_data -> cf_tol)            = 0.90;
-   (hybrid_data -> max_ds_its)        = 1000;
-   (hybrid_data -> max_mg_its)        = 200;
+   (hybrid_data -> dscg_max_its)      = 1000;
+   (hybrid_data -> pcg_max_its)       = 200;
    (hybrid_data -> two_norm)          = 0;
    (hybrid_data -> rel_change)        = 0;
-   (hybrid_data -> logging)           = 0;
+   (hybrid_data -> pcg_default)       = 1;
+   (hybrid_data -> pcg_precond_solve) = NULL;
+   (hybrid_data -> pcg_precond_setup) = NULL;
+   (hybrid_data -> pcg_precond)       = NULL;
 
    /* initialize */
-   (hybrid_data -> num_ds_its)        = 0; 
-   (hybrid_data -> num_mg_its)        = 0;
-   (hybrid_data -> pcg_solver)        = NULL;
-   (hybrid_data -> pcg_precond)       = NULL;
+   (hybrid_data -> dscg_num_its)      = 0; 
+   (hybrid_data -> pcg_num_its)       = 0;
+   (hybrid_data -> logging)           = 0;
    
    return (void *) hybrid_data;
 }
@@ -96,12 +89,13 @@ int
 hypre_HybridFinalize( void  *hybrid_vdata )
 {
    hypre_HybridData *hybrid_data = hybrid_vdata;
-
    int ierr = 0;
+
    if (hybrid_data)
    {
       hypre_TFree(hybrid_data);
    }
+
    return ierr;
 }
 
@@ -138,33 +132,33 @@ hypre_HybridSetConvergenceTol( void   *hybrid_vdata,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_HybridSetMaxDSIterations
+ * hypre_HybridSetDSCGMaxIter
  *--------------------------------------------------------------------------*/
 
 int
-hypre_HybridSetMaxDSIterations( void   *hybrid_vdata,
-                                int     max_ds_its   )
+hypre_HybridSetDSCGMaxIter( void   *hybrid_vdata,
+                            int     dscg_max_its )
 {
    hypre_HybridData *hybrid_data = hybrid_vdata;
    int               ierr = 0;
 
-   (hybrid_data -> max_ds_its) = max_ds_its;
+   (hybrid_data -> dscg_max_its) = dscg_max_its;
 
    return ierr;
 }
 
 /*--------------------------------------------------------------------------
- * hypre_HybridSetMaxMGIterations
+ * hypre_HybridSetPCGMaxIter
  *--------------------------------------------------------------------------*/
 
 int
-hypre_HybridSetMaxMGIterations( void   *hybrid_vdata,
-                                int     max_mg_its   )
+hypre_HybridSetPCGMaxIter( void   *hybrid_vdata,
+                           int     pcg_max_its  )
 {
    hypre_HybridData *hybrid_data = hybrid_vdata;
    int               ierr = 0;
 
-   (hybrid_data -> max_mg_its) = max_mg_its;
+   (hybrid_data -> pcg_max_its) = pcg_max_its;
 
    return ierr;
 }
@@ -202,6 +196,27 @@ hypre_HybridSetRelChange( void *hybrid_vdata,
 }
 
 /*--------------------------------------------------------------------------
+ * hypre_HybridSetPrecond
+ *--------------------------------------------------------------------------*/
+
+int
+hypre_HybridSetPrecond( void  *pcg_vdata,
+                        int  (*pcg_precond_solve)(),
+                        int  (*pcg_precond_setup)(),
+                        void  *pcg_precond          )
+{
+   hypre_HybridData *pcg_data = pcg_vdata;
+   int               ierr = 0;
+ 
+   (pcg_data -> pcg_default)       = 0;
+   (pcg_data -> pcg_precond_solve) = pcg_precond_solve;
+   (pcg_data -> pcg_precond_setup) = pcg_precond_setup;
+   (pcg_data -> pcg_precond)       = pcg_precond;
+ 
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
  * hypre_HybridSetLogging
  *--------------------------------------------------------------------------*/
 
@@ -218,49 +233,49 @@ hypre_HybridSetLogging( void *hybrid_vdata,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_HybridGetNumDSIterations
+ * hypre_HybridGetNumIterations
  *--------------------------------------------------------------------------*/
 
 int
 hypre_HybridGetNumIterations( void   *hybrid_vdata,
-                              int    *num_its   )
+                              int    *num_its      )
 {
    hypre_HybridData *hybrid_data = hybrid_vdata;
    int               ierr = 0;
 
-   *num_its = (hybrid_data -> num_ds_its) + (hybrid_data -> num_mg_its);
+   *num_its = (hybrid_data -> dscg_num_its) + (hybrid_data -> pcg_num_its);
 
    return ierr;
 }
 
 /*--------------------------------------------------------------------------
- * hypre_HybridGetNumDSIterations
+ * hypre_HybridGetDSCGNumIterations
  *--------------------------------------------------------------------------*/
 
 int
-hypre_HybridGetNumDSIterations( void   *hybrid_vdata,
-                                int    *num_ds_its   )
+hypre_HybridGetDSCGNumIterations( void   *hybrid_vdata,
+                                  int    *dscg_num_its )
 {
    hypre_HybridData *hybrid_data = hybrid_vdata;
    int               ierr = 0;
 
-   *num_ds_its = (hybrid_data -> num_ds_its);
+   *dscg_num_its = (hybrid_data -> dscg_num_its);
 
    return ierr;
 }
 
 /*--------------------------------------------------------------------------
- * hypre_HybridGetNumMGIterations
+ * hypre_HybridGetPCGNumIterations
  *--------------------------------------------------------------------------*/
 
 int
-hypre_HybridGetNumMGIterations( void   *hybrid_vdata,
-                                int    *num_mg_its   )
+hypre_HybridGetPCGNumIterations( void   *hybrid_vdata,
+                                 int    *pcg_num_its  )
 {
    hypre_HybridData *hybrid_data = hybrid_vdata;
    int               ierr = 0;
 
-   *num_mg_its = (hybrid_data -> num_mg_its);
+   *pcg_num_its = (hybrid_data -> pcg_num_its);
 
    return ierr;
 }
@@ -289,12 +304,12 @@ int
 hypre_HybridSetup( void               *hybrid_vdata,
                    hypre_StructMatrix *A,
                    hypre_StructVector *b,
-                   hypre_StructVector *x         )
+                   hypre_StructVector *x            )
 {
-   hypre_HybridData  *hybrid_data    = hybrid_vdata;
-   int                logging        = (hybrid_data -> logging);
-   int                max_ds_its     = (hybrid_data -> max_ds_its);
-   int                max_mg_its     = (hybrid_data -> max_mg_its);
+   hypre_HybridData  *hybrid_data  = hybrid_vdata;
+   int                logging      = (hybrid_data -> logging);
+   int                dscg_max_its = (hybrid_data -> dscg_max_its);
+   int                pcg_max_its  = (hybrid_data -> pcg_max_its);
 
    int                ierr = 0;
     
@@ -306,9 +321,9 @@ hypre_HybridSetup( void               *hybrid_vdata,
  *--------------------------------------------------------------------------
  *
  * This solver is designed to solve Ax=b using a hybrid algorithm. First
- * the solver uses diagonally scaled conjugate gradients. If suffiecient
- * progress is not made, the algorithm switches to SMG preconditioned
- * conjugate gradients.
+ * the solver uses diagonally scaled conjugate gradients. If sufficient
+ * progress is not made, the algorithm switches to preconditioned
+ * conjugate gradients with user-specified preconditioner.
  *
  *--------------------------------------------------------------------------*/
 
@@ -316,7 +331,7 @@ int
 hypre_HybridSolve( void               *hybrid_vdata,
                    hypre_StructMatrix *A,
                    hypre_StructVector *b,
-                   hypre_StructVector *x         )
+                   hypre_StructVector *x            )
 {
    hypre_HybridData  *hybrid_data    = hybrid_vdata;
 
@@ -324,18 +339,22 @@ hypre_HybridSolve( void               *hybrid_vdata,
 
    double             tol            = (hybrid_data -> tol);
    double             cf_tol         = (hybrid_data -> cf_tol);
-   int                max_ds_its     = (hybrid_data -> max_ds_its);
-   int                max_mg_its     = (hybrid_data -> max_mg_its);
+   int                dscg_max_its   = (hybrid_data -> dscg_max_its);
+   int                pcg_max_its    = (hybrid_data -> pcg_max_its);
    int                two_norm       = (hybrid_data -> two_norm);
    int                rel_change     = (hybrid_data -> rel_change);
    int                logging        = (hybrid_data -> logging);
   
-   void              *pcg_solver     = (hybrid_data -> pcg_solver);
-   void              *pcg_precond    = (hybrid_data -> pcg_precond);
+   int                pcg_default    = (hybrid_data -> pcg_default);
+   int              (*pcg_precond_solve)();
+   int              (*pcg_precond_setup)();
+   void              *pcg_precond;
+
+   void              *pcg_solver;
 
    int                num_its;
-   int                num_ds_its;
-   int                num_mg_its;
+   int                dscg_num_its;
+   int                pcg_num_its;
 
    double             res_norm;
    int                myid;
@@ -347,8 +366,7 @@ hypre_HybridSolve( void               *hybrid_vdata,
     * Setup DSCG.
     *-----------------------------------------------------------------------*/
    pcg_solver = hypre_PCGInitialize();
-   hypre_HybridPCGSolver(hybrid_data) = pcg_solver;
-   hypre_PCGSetMaxIter(pcg_solver, max_ds_its);
+   hypre_PCGSetMaxIter(pcg_solver, dscg_max_its);
    hypre_PCGSetTol(pcg_solver, tol);
    hypre_PCGSetConvergenceFactorTol(pcg_solver, cf_tol);
    hypre_PCGSetTwoNorm(pcg_solver, two_norm);
@@ -356,7 +374,6 @@ hypre_HybridSolve( void               *hybrid_vdata,
    hypre_PCGSetLogging(pcg_solver, 1);
 
    pcg_precond = NULL;
-   hypre_HybridPCGPrecond(hybrid_data) = pcg_precond;
 
    hypre_PCGSetPrecond(pcg_solver,
                        HYPRE_StructDiagScale,
@@ -373,8 +390,8 @@ hypre_HybridSolve( void               *hybrid_vdata,
    /*-----------------------------------------------------------------------
     * Get information for DSCG.
     *-----------------------------------------------------------------------*/
-   hypre_PCGGetNumIterations(pcg_solver, &num_ds_its);
-   hypre_HybridNumDSIterations(hybrid_data)  = num_ds_its;
+   hypre_PCGGetNumIterations(pcg_solver, &dscg_num_its);
+   (hybrid_data -> dscg_num_its) = dscg_num_its;
    hypre_PCGGetFinalRelativeResidualNorm(pcg_solver, &res_norm);
 
    /*-----------------------------------------------------------------------
@@ -392,7 +409,7 @@ hypre_HybridSolve( void               *hybrid_vdata,
     *-----------------------------------------------------------------------*/
    if( res_norm < tol )
    {
-      hypre_HybridFinalRelResNorm( hybrid_data ) = res_norm;
+      (hybrid_data -> final_rel_res_norm) = res_norm;
       hypre_PCGFinalize(pcg_solver);
    }
 
@@ -401,46 +418,50 @@ hypre_HybridSolve( void               *hybrid_vdata,
     *-----------------------------------------------------------------------*/
    else
    {
-      
       /*--------------------------------------------------------------------
        * Free up previous PCG solver structure and set up a new one.
        *--------------------------------------------------------------------*/
       hypre_PCGFinalize(pcg_solver);
 
       pcg_solver = hypre_PCGInitialize();
-      hypre_HybridPCGSolver(hybrid_data) = pcg_solver;
-      hypre_PCGSetMaxIter(pcg_solver, max_mg_its);
+      hypre_PCGSetMaxIter(pcg_solver, pcg_max_its);
       hypre_PCGSetTol(pcg_solver, tol);
       hypre_PCGSetTwoNorm(pcg_solver, two_norm);
       hypre_PCGSetRelChange(pcg_solver, rel_change);
       hypre_PCGSetLogging(pcg_solver, 1);
 
-
-
-      /* Setup SMG preconditioner */
-      pcg_precond = hypre_SMGInitialize(comm);
-      hypre_HybridPCGPrecond(hybrid_data) = pcg_precond;
-      hypre_SMGSetMaxIter(pcg_precond, 1);
-      hypre_SMGSetTol(pcg_precond, 0.0);
-      hypre_SMGSetNumPreRelax(pcg_precond, 1);
-      hypre_SMGSetNumPostRelax(pcg_precond, 1);
-      hypre_SMGSetLogging(pcg_precond, 0);
+      /* Setup preconditioner */
+      if (pcg_default)
+      {
+         pcg_precond = hypre_SMGInitialize(comm);
+         hypre_SMGSetMaxIter(pcg_precond, 1);
+         hypre_SMGSetTol(pcg_precond, 0.0);
+         hypre_SMGSetNumPreRelax(pcg_precond, 1);
+         hypre_SMGSetNumPostRelax(pcg_precond, 1);
+         hypre_SMGSetLogging(pcg_precond, 0);
+         pcg_precond_solve = hypre_SMGSolve;
+         pcg_precond_setup = hypre_SMGSetup;
+      }
+      else
+      {
+         pcg_precond       = (hybrid_data -> pcg_precond);
+         pcg_precond_solve = (hybrid_data -> pcg_precond_solve);
+         pcg_precond_setup = (hybrid_data -> pcg_precond_setup);
+      }
 
       /* Complete setup of PCG+SMG */
       hypre_PCGSetPrecond(pcg_solver,
-                          hypre_SMGSolve,
-                          hypre_SMGSetup,
-                          pcg_precond);
+                          pcg_precond_solve, pcg_precond_setup, pcg_precond);
       hypre_PCGSetup(pcg_solver, (void*) A, (void*) b, (void*) x);
 
       /* Solve */
       hypre_PCGSolve(pcg_solver, (void*) A, (void*) b, (void*) x);
 
       /* Get information from PCG that is always logged in hybrid solver*/
-      hypre_PCGGetNumIterations(pcg_solver, &num_mg_its);
-      hypre_HybridNumMGIterations(hybrid_data)  = num_mg_its;
+      hypre_PCGGetNumIterations(pcg_solver, &pcg_num_its);
+      (hybrid_data -> pcg_num_its)  = pcg_num_its;
       hypre_PCGGetFinalRelativeResidualNorm(pcg_solver, &res_norm);
-      hypre_HybridFinalRelResNorm( hybrid_data ) = res_norm;
+      (hybrid_data -> final_rel_res_norm) = res_norm;
 
       /*--------------------------------------------------------------------
        * Get additional information from PCG if logging on for hybrid solver.
@@ -449,12 +470,15 @@ hypre_HybridSolve( void               *hybrid_vdata,
       if( logging > 1 )
       {
          MPI_Comm_rank(comm, &myid );
-         hypre_PCGPrintLogging( pcg_solver, myid);
+         hypre_PCGPrintLogging(pcg_solver, myid);
       }
 
-      /* Free PCG and SMG preconditioner */
+      /* Free PCG and preconditioner */
       hypre_PCGFinalize(pcg_solver);
-      hypre_SMGFinalize(pcg_precond);
+      if (pcg_default)
+      {
+         hypre_SMGFinalize(pcg_precond);
+      }
    }
 
    return ierr;

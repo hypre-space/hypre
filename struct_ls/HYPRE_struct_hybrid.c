@@ -94,25 +94,25 @@ HYPRE_StructHybridSetConvergenceTol( HYPRE_StructSolver solver,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_StructHybridSetMaxDSIterations
+ * HYPRE_StructHybridSetDSCGMaxIter
  *--------------------------------------------------------------------------*/
 
 int
-HYPRE_StructHybridSetMaxDSIterations( HYPRE_StructSolver solver,
-                                      int                max_ds_its    )
+HYPRE_StructHybridSetDSCGMaxIter( HYPRE_StructSolver solver,
+                                  int                dscg_max_its )
 {
-   return( hypre_HybridSetMaxDSIterations( (void *) solver, max_ds_its ) );
+   return( hypre_HybridSetDSCGMaxIter( (void *) solver, dscg_max_its ) );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_StructHybridSetMaxMGIterations
+ * HYPRE_StructHybridSetPCGMaxIter
  *--------------------------------------------------------------------------*/
 
 int
-HYPRE_StructHybridSetMaxMGIterations( HYPRE_StructSolver solver,
-                                      int                max_mg_its    )
+HYPRE_StructHybridSetPCGMaxIter( HYPRE_StructSolver solver,
+                                 int                pcg_max_its )
 {
-   return( hypre_HybridSetMaxMGIterations( (void *) solver, max_mg_its ) );
+   return( hypre_HybridSetPCGMaxIter( (void *) solver, pcg_max_its ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -138,6 +138,21 @@ HYPRE_StructHybridSetRelChange( HYPRE_StructSolver solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_StructHybridSetPrecond
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_StructHybridSetPrecond( HYPRE_StructSolver  solver,
+                              int               (*precond)(),
+                              int               (*precond_setup)(),
+                              HYPRE_StructSolver  precond_solver   )
+{
+   return( hypre_HybridSetPrecond( (void *) solver,
+                                   precond, precond_setup,
+                                   (void *) precond_solver ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_StructHybridSetLogging
  *--------------------------------------------------------------------------*/
 
@@ -160,25 +175,25 @@ HYPRE_StructHybridGetNumIterations( HYPRE_StructSolver solver,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_StructHybridGetNumDSIterations
+ * HYPRE_StructHybridGetDSCGNumIterations
  *--------------------------------------------------------------------------*/
 
 int
-HYPRE_StructHybridGetNumDSIterations( HYPRE_StructSolver solver,
-                                      int               *num_ds_its    )
+HYPRE_StructHybridGetDSCGNumIterations( HYPRE_StructSolver solver,
+                                        int               *dscg_num_its )
 {
-   return( hypre_HybridGetNumDSIterations( (void *) solver, num_ds_its ) );
+   return( hypre_HybridGetDSCGNumIterations( (void *) solver, dscg_num_its ) );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_StructHybridGetNumMGIterations
+ * HYPRE_StructHybridGetPCGNumIterations
  *--------------------------------------------------------------------------*/
 
 int
-HYPRE_StructHybridGetNumMGIterations( HYPRE_StructSolver solver,
-                                      int               *num_mg_its    )
+HYPRE_StructHybridGetPCGNumIterations( HYPRE_StructSolver solver,
+                                       int               *pcg_num_its )
 {
-   return( hypre_HybridGetNumMGIterations( (void *) solver, num_mg_its ) );
+   return( hypre_HybridGetPCGNumIterations( (void *) solver, pcg_num_its ) );
 }
 
 /*--------------------------------------------------------------------------

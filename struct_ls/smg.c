@@ -45,6 +45,9 @@ hypre_SMGInitialize( MPI_Comm  comm )
    hypre_SetIndex((smg_data -> base_stride), 1, 1, 1);
    (smg_data -> logging) = 0;
 
+   /* initialize */
+   (smg_data -> num_levels) = -1;
+
    return (void *) smg_data;
 }
 
@@ -68,52 +71,55 @@ hypre_SMGFinalize( void *smg_vdata )
          hypre_TFree(smg_data -> rel_norms);
       }
 
-      for (l = 0; l < ((smg_data -> num_levels) - 1); l++)
+      if ((smg_data -> num_levels) > -1)
       {
+         for (l = 0; l < ((smg_data -> num_levels) - 1); l++)
+         {
+            hypre_SMGRelaxFinalize(smg_data -> relax_data_l[l]);
+            hypre_SMGResidualFinalize(smg_data -> residual_data_l[l]);
+            hypre_SMGRestrictFinalize(smg_data -> restrict_data_l[l]);
+            hypre_SMGIntAddFinalize(smg_data -> intadd_data_l[l]);
+         }
          hypre_SMGRelaxFinalize(smg_data -> relax_data_l[l]);
-         hypre_SMGResidualFinalize(smg_data -> residual_data_l[l]);
-         hypre_SMGRestrictFinalize(smg_data -> restrict_data_l[l]);
-         hypre_SMGIntAddFinalize(smg_data -> intadd_data_l[l]);
-      }
-      hypre_SMGRelaxFinalize(smg_data -> relax_data_l[l]);
-      if (l == 0)
-      {
-         hypre_SMGResidualFinalize(smg_data -> residual_data_l[l]);
-      }
-      hypre_TFree(smg_data -> relax_data_l);
-      hypre_TFree(smg_data -> residual_data_l);
-      hypre_TFree(smg_data -> restrict_data_l);
-      hypre_TFree(smg_data -> intadd_data_l);
+         if (l == 0)
+         {
+            hypre_SMGResidualFinalize(smg_data -> residual_data_l[l]);
+         }
+         hypre_TFree(smg_data -> relax_data_l);
+         hypre_TFree(smg_data -> residual_data_l);
+         hypre_TFree(smg_data -> restrict_data_l);
+         hypre_TFree(smg_data -> intadd_data_l);
  
-      hypre_FreeStructVectorShell(smg_data -> tb_l[0]);
-      hypre_FreeStructVectorShell(smg_data -> tx_l[0]);
-      for (l = 0; l < ((smg_data -> num_levels) - 1); l++)
-      {
-         hypre_FreeStructGrid(smg_data -> grid_l[l+1]);
-         hypre_FreeStructMatrixShell(smg_data -> A_l[l+1]);
-         if (smg_data -> PT_l[l] == smg_data -> R_l[l])
+         hypre_FreeStructVectorShell(smg_data -> tb_l[0]);
+         hypre_FreeStructVectorShell(smg_data -> tx_l[0]);
+         for (l = 0; l < ((smg_data -> num_levels) - 1); l++)
          {
-            hypre_FreeStructMatrixShell(smg_data -> PT_l[l]);
+            hypre_FreeStructGrid(smg_data -> grid_l[l+1]);
+            hypre_FreeStructMatrixShell(smg_data -> A_l[l+1]);
+            if (smg_data -> PT_l[l] == smg_data -> R_l[l])
+            {
+               hypre_FreeStructMatrixShell(smg_data -> PT_l[l]);
+            }
+            else
+            {
+               hypre_FreeStructMatrixShell(smg_data -> PT_l[l]);
+               hypre_FreeStructMatrixShell(smg_data -> R_l[l]);
+            }
+            hypre_FreeStructVectorShell(smg_data -> b_l[l+1]);
+            hypre_FreeStructVectorShell(smg_data -> x_l[l+1]);
+            hypre_FreeStructVectorShell(smg_data -> tb_l[l+1]);
+            hypre_FreeStructVectorShell(smg_data -> tx_l[l+1]);
          }
-         else
-         {
-            hypre_FreeStructMatrixShell(smg_data -> PT_l[l]);
-            hypre_FreeStructMatrixShell(smg_data -> R_l[l]);
-         }
-         hypre_FreeStructVectorShell(smg_data -> b_l[l+1]);
-         hypre_FreeStructVectorShell(smg_data -> x_l[l+1]);
-         hypre_FreeStructVectorShell(smg_data -> tb_l[l+1]);
-         hypre_FreeStructVectorShell(smg_data -> tx_l[l+1]);
+         hypre_SharedTFree(smg_data -> data);
+         hypre_TFree(smg_data -> grid_l);
+         hypre_TFree(smg_data -> A_l);
+         hypre_TFree(smg_data -> PT_l);
+         hypre_TFree(smg_data -> R_l);
+         hypre_TFree(smg_data -> b_l);
+         hypre_TFree(smg_data -> x_l);
+         hypre_TFree(smg_data -> tb_l);
+         hypre_TFree(smg_data -> tx_l);
       }
-      hypre_SharedTFree(smg_data -> data);
-      hypre_TFree(smg_data -> grid_l);
-      hypre_TFree(smg_data -> A_l);
-      hypre_TFree(smg_data -> PT_l);
-      hypre_TFree(smg_data -> R_l);
-      hypre_TFree(smg_data -> b_l);
-      hypre_TFree(smg_data -> x_l);
-      hypre_TFree(smg_data -> tb_l);
-      hypre_TFree(smg_data -> tx_l);
  
       hypre_FinalizeTiming(smg_data -> time_index);
       hypre_TFree(smg_data);

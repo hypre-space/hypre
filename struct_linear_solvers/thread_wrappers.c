@@ -287,42 +287,42 @@ HYPRE_StructHybridSetConvergenceTolPush(
 }
 
 /*----------------------------------------------------------------
- * HYPRE_StructHybridSetMaxDSIterations thread wrappers
+ * HYPRE_StructHybridSetDSCGMaxIter thread wrappers
  *----------------------------------------------------------------*/
 
 typedef struct {
    HYPRE_StructSolverArray *solver;
-   int max_ds_its;
+   int dscg_max_its;
    int  returnvalue[hypre_MAX_THREADS];
-} HYPRE_StructHybridSetMaxDSIterationsArgs;
+} HYPRE_StructHybridSetDSCGMaxIterArgs;
 
 void
-HYPRE_StructHybridSetMaxDSIterationsVoidPtr( void *argptr )
+HYPRE_StructHybridSetDSCGMaxIterVoidPtr( void *argptr )
 {
    int threadid = hypre_GetThreadID();
 
-   HYPRE_StructHybridSetMaxDSIterationsArgs *localargs =
-      (HYPRE_StructHybridSetMaxDSIterationsArgs *) argptr;
+   HYPRE_StructHybridSetDSCGMaxIterArgs *localargs =
+      (HYPRE_StructHybridSetDSCGMaxIterArgs *) argptr;
 
    (localargs -> returnvalue[threadid]) =
-      HYPRE_StructHybridSetMaxDSIterations(
+      HYPRE_StructHybridSetDSCGMaxIter(
          (*(localargs -> solver))[threadid],
-         localargs -> max_ds_its );
+         localargs -> dscg_max_its );
 }
 
 int 
-HYPRE_StructHybridSetMaxDSIterationsPush(
+HYPRE_StructHybridSetDSCGMaxIterPush(
    HYPRE_StructSolverArray solver,
-   int max_ds_its )
+   int dscg_max_its )
 {
-   HYPRE_StructHybridSetMaxDSIterationsArgs pushargs;
+   HYPRE_StructHybridSetDSCGMaxIterArgs pushargs;
    int i;
    int  returnvalue;
 
    pushargs.solver = (HYPRE_StructSolverArray *)solver;
-   pushargs.max_ds_its = max_ds_its;
+   pushargs.dscg_max_its = dscg_max_its;
    for (i = 0; i < hypre_NumThreads; i++)
-      hypre_work_put( HYPRE_StructHybridSetMaxDSIterationsVoidPtr, (void *)&pushargs );
+      hypre_work_put( HYPRE_StructHybridSetDSCGMaxIterVoidPtr, (void *)&pushargs );
 
    hypre_work_wait();
 
@@ -332,42 +332,42 @@ HYPRE_StructHybridSetMaxDSIterationsPush(
 }
 
 /*----------------------------------------------------------------
- * HYPRE_StructHybridSetMaxMGIterations thread wrappers
+ * HYPRE_StructHybridSetPCGMaxIter thread wrappers
  *----------------------------------------------------------------*/
 
 typedef struct {
    HYPRE_StructSolverArray *solver;
-   int max_mg_its;
+   int pcg_max_its;
    int  returnvalue[hypre_MAX_THREADS];
-} HYPRE_StructHybridSetMaxMGIterationsArgs;
+} HYPRE_StructHybridSetPCGMaxIterArgs;
 
 void
-HYPRE_StructHybridSetMaxMGIterationsVoidPtr( void *argptr )
+HYPRE_StructHybridSetPCGMaxIterVoidPtr( void *argptr )
 {
    int threadid = hypre_GetThreadID();
 
-   HYPRE_StructHybridSetMaxMGIterationsArgs *localargs =
-      (HYPRE_StructHybridSetMaxMGIterationsArgs *) argptr;
+   HYPRE_StructHybridSetPCGMaxIterArgs *localargs =
+      (HYPRE_StructHybridSetPCGMaxIterArgs *) argptr;
 
    (localargs -> returnvalue[threadid]) =
-      HYPRE_StructHybridSetMaxMGIterations(
+      HYPRE_StructHybridSetPCGMaxIter(
          (*(localargs -> solver))[threadid],
-         localargs -> max_mg_its );
+         localargs -> pcg_max_its );
 }
 
 int 
-HYPRE_StructHybridSetMaxMGIterationsPush(
+HYPRE_StructHybridSetPCGMaxIterPush(
    HYPRE_StructSolverArray solver,
-   int max_mg_its )
+   int pcg_max_its )
 {
-   HYPRE_StructHybridSetMaxMGIterationsArgs pushargs;
+   HYPRE_StructHybridSetPCGMaxIterArgs pushargs;
    int i;
    int  returnvalue;
 
    pushargs.solver = (HYPRE_StructSolverArray *)solver;
-   pushargs.max_mg_its = max_mg_its;
+   pushargs.pcg_max_its = pcg_max_its;
    for (i = 0; i < hypre_NumThreads; i++)
-      hypre_work_put( HYPRE_StructHybridSetMaxMGIterationsVoidPtr, (void *)&pushargs );
+      hypre_work_put( HYPRE_StructHybridSetPCGMaxIterVoidPtr, (void *)&pushargs );
 
    hypre_work_wait();
 
@@ -467,6 +467,59 @@ HYPRE_StructHybridSetRelChangePush(
 }
 
 /*----------------------------------------------------------------
+ * HYPRE_StructHybridSetPrecond thread wrappers
+ *----------------------------------------------------------------*/
+
+typedef struct {
+   HYPRE_StructSolverArray *solver;
+   int (*precond)();
+   int (*precond_setup)();
+   HYPRE_StructSolverArray *precond_solver;
+   int  returnvalue[hypre_MAX_THREADS];
+} HYPRE_StructHybridSetPrecondArgs;
+
+void
+HYPRE_StructHybridSetPrecondVoidPtr( void *argptr )
+{
+   int threadid = hypre_GetThreadID();
+
+   HYPRE_StructHybridSetPrecondArgs *localargs =
+      (HYPRE_StructHybridSetPrecondArgs *) argptr;
+
+   (localargs -> returnvalue[threadid]) =
+      HYPRE_StructHybridSetPrecond(
+         (*(localargs -> solver))[threadid],
+         localargs -> precond,
+         localargs -> precond_setup,
+         (*(localargs -> precond_solver))[threadid] );
+}
+
+int 
+HYPRE_StructHybridSetPrecondPush(
+   HYPRE_StructSolverArray solver,
+   int (*precond)(),
+   int (*precond_setup)(),
+   HYPRE_StructSolverArray precond_solver )
+{
+   HYPRE_StructHybridSetPrecondArgs pushargs;
+   int i;
+   int  returnvalue;
+
+   pushargs.solver = (HYPRE_StructSolverArray *)solver;
+   pushargs.precond = precond;
+   pushargs.precond_setup = precond_setup;
+   pushargs.precond_solver = (HYPRE_StructSolverArray *)precond_solver;
+   for (i = 0; i < hypre_NumThreads; i++)
+      hypre_work_put( HYPRE_StructHybridSetPrecondVoidPtr, (void *)&pushargs );
+
+   hypre_work_wait();
+
+   returnvalue = pushargs.returnvalue[0];
+
+   return returnvalue;
+}
+
+/*----------------------------------------------------------------
  * HYPRE_StructHybridSetLogging thread wrappers
  *----------------------------------------------------------------*/
 
@@ -557,42 +610,42 @@ HYPRE_StructHybridGetNumIterationsPush(
 }
 
 /*----------------------------------------------------------------
- * HYPRE_StructHybridGetNumDSIterations thread wrappers
+ * HYPRE_StructHybridGetDSCGNumIterations thread wrappers
  *----------------------------------------------------------------*/
 
 typedef struct {
    HYPRE_StructSolverArray *solver;
-   int *num_ds_its;
+   int *dscg_num_its;
    int  returnvalue[hypre_MAX_THREADS];
-} HYPRE_StructHybridGetNumDSIterationsArgs;
+} HYPRE_StructHybridGetDSCGNumIterationsArgs;
 
 void
-HYPRE_StructHybridGetNumDSIterationsVoidPtr( void *argptr )
+HYPRE_StructHybridGetDSCGNumIterationsVoidPtr( void *argptr )
 {
    int threadid = hypre_GetThreadID();
 
-   HYPRE_StructHybridGetNumDSIterationsArgs *localargs =
-      (HYPRE_StructHybridGetNumDSIterationsArgs *) argptr;
+   HYPRE_StructHybridGetDSCGNumIterationsArgs *localargs =
+      (HYPRE_StructHybridGetDSCGNumIterationsArgs *) argptr;
 
    (localargs -> returnvalue[threadid]) =
-      HYPRE_StructHybridGetNumDSIterations(
+      HYPRE_StructHybridGetDSCGNumIterations(
          (*(localargs -> solver))[threadid],
-         localargs -> num_ds_its );
+         localargs -> dscg_num_its );
 }
 
 int 
-HYPRE_StructHybridGetNumDSIterationsPush(
+HYPRE_StructHybridGetDSCGNumIterationsPush(
    HYPRE_StructSolverArray solver,
-   int *num_ds_its )
+   int *dscg_num_its )
 {
-   HYPRE_StructHybridGetNumDSIterationsArgs pushargs;
+   HYPRE_StructHybridGetDSCGNumIterationsArgs pushargs;
    int i;
    int  returnvalue;
 
    pushargs.solver = (HYPRE_StructSolverArray *)solver;
-   pushargs.num_ds_its = num_ds_its;
+   pushargs.dscg_num_its = dscg_num_its;
    for (i = 0; i < hypre_NumThreads; i++)
-      hypre_work_put( HYPRE_StructHybridGetNumDSIterationsVoidPtr, (void *)&pushargs );
+      hypre_work_put( HYPRE_StructHybridGetDSCGNumIterationsVoidPtr, (void *)&pushargs );
 
    hypre_work_wait();
 
@@ -602,42 +655,42 @@ HYPRE_StructHybridGetNumDSIterationsPush(
 }
 
 /*----------------------------------------------------------------
- * HYPRE_StructHybridGetNumMGIterations thread wrappers
+ * HYPRE_StructHybridGetPCGNumIterations thread wrappers
  *----------------------------------------------------------------*/
 
 typedef struct {
    HYPRE_StructSolverArray *solver;
-   int *num_mg_its;
+   int *pcg_num_its;
    int  returnvalue[hypre_MAX_THREADS];
-} HYPRE_StructHybridGetNumMGIterationsArgs;
+} HYPRE_StructHybridGetPCGNumIterationsArgs;
 
 void
-HYPRE_StructHybridGetNumMGIterationsVoidPtr( void *argptr )
+HYPRE_StructHybridGetPCGNumIterationsVoidPtr( void *argptr )
 {
    int threadid = hypre_GetThreadID();
 
-   HYPRE_StructHybridGetNumMGIterationsArgs *localargs =
-      (HYPRE_StructHybridGetNumMGIterationsArgs *) argptr;
+   HYPRE_StructHybridGetPCGNumIterationsArgs *localargs =
+      (HYPRE_StructHybridGetPCGNumIterationsArgs *) argptr;
 
    (localargs -> returnvalue[threadid]) =
-      HYPRE_StructHybridGetNumMGIterations(
+      HYPRE_StructHybridGetPCGNumIterations(
          (*(localargs -> solver))[threadid],
-         localargs -> num_mg_its );
+         localargs -> pcg_num_its );
 }
 
 int 
-HYPRE_StructHybridGetNumMGIterationsPush(
+HYPRE_StructHybridGetPCGNumIterationsPush(
    HYPRE_StructSolverArray solver,
-   int *num_mg_its )
+   int *pcg_num_its )
 {
-   HYPRE_StructHybridGetNumMGIterationsArgs pushargs;
+   HYPRE_StructHybridGetPCGNumIterationsArgs pushargs;
    int i;
    int  returnvalue;
 
    pushargs.solver = (HYPRE_StructSolverArray *)solver;
-   pushargs.num_mg_its = num_mg_its;
+   pushargs.pcg_num_its = pcg_num_its;
    for (i = 0; i < hypre_NumThreads; i++)
-      hypre_work_put( HYPRE_StructHybridGetNumMGIterationsVoidPtr, (void *)&pushargs );
+      hypre_work_put( HYPRE_StructHybridGetPCGNumIterationsVoidPtr, (void *)&pushargs );
 
    hypre_work_wait();
 
@@ -1069,8 +1122,8 @@ HYPRE_StructPCGSetRelChangePush(
 
 typedef struct {
    HYPRE_StructSolverArray *solver;
-   int               (*precond)();
-   int               (*precond_setup)();
+   int (*precond)();
+   int (*precond_setup)();
    HYPRE_StructSolverArray *precond_solver;
    int  returnvalue[hypre_MAX_THREADS];
 } HYPRE_StructPCGSetPrecondArgs;
