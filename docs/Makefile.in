@@ -158,7 +158,9 @@ version.tex:
 	@ \
 	VINFO=`grep HYPRE_Version ../utilities/HYPRE_utilities.h`; \
 	VNUM=`echo $$VINFO | awk '{print $$4}'`; \
-	echo "\def\HYPREVersion{Revision: $$VNUM}" > version.tex
+	VDATE=`echo $$VINFO | awk '{print $$6}'`; \
+	echo "\def\HYPREVersion{$$VNUM}" > version.tex; \
+	echo "\def\HYPREVersionDate{$$VDATE}" >> version.tex
 
 ##################################################################
 # Generic rules
