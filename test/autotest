@@ -144,8 +144,8 @@ do
         shift;;
     -insure)
         HYPRE_ARCH="linux"
-        HYPRE_COMPILE_MACHINE="tux03"
-        HYPRE_RUN_MACHINE="tux03"
+        HYPRE_COMPILE_MACHINE="tux71"
+        HYPRE_RUN_MACHINE="tux71"
         HYPRE_REMOTE_DIR="/usr/casc/hypre/i686-pc-linux-gnu/AUTOTEST"
 	HYPRE_MACHINE_COMMANDS="-m -dt 1 -nsa 1 -cxfy -i 2"
 #	print_header
@@ -209,8 +209,8 @@ do
         shift;;
     -tux)
         HYPRE_ARCH="linux"
-        HYPRE_COMPILE_MACHINE="tux03"
-        HYPRE_RUN_MACHINE="tux03"
+        HYPRE_COMPILE_MACHINE="tux71"
+        HYPRE_RUN_MACHINE="tux71"
         HYPRE_REMOTE_DIR="/usr/casc/hypre/i686-pc-linux-gnu/AUTOTEST"
 	HYPRE_MACHINE_COMMANDS="-m -t 1 -ns -a 2 -dcxfy"
 	perform_test
