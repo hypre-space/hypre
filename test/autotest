@@ -54,7 +54,7 @@ make
 make struct
 make parcsr
 #make ci_struct
-make doc
+make docs
 
 #=============================================================================
 # Run test suites
@@ -75,7 +75,7 @@ make
 make struct
 make parcsr
 #make ci_struct
-make doc
+make docs
 
 
 #=============================================================================
@@ -98,7 +98,7 @@ make
 make struct
 make parcsr
 #make ci_struct
-make doc
+make docs
 
 
 #=============================================================================
