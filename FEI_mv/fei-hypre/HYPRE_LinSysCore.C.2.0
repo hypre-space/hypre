@@ -2045,6 +2045,16 @@ int HYPRE_LinSysCore::sumIntoSystemMatrix(int numPtRows, const int* ptRows,
     if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )
     {
        printf("%4d : HYPRE_LSC::entering sumIntoSystemMatrix(2).\n",mypid_);
+       if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 4 )
+       {
+          for ( i = 0; i < numPtRows; i++ )
+          {
+             localRow = ptRows[i] - localStartRow_ + 1;
+             for ( j = 0; j < numPtCols; j++ )
+                printf("  %4d : row,col,val = %8d %8d %e\n",mypid_,
+                       localRow, ptCols[j], values[i][j]); 
+          }
+       }
     }
 
     //-------------------------------------------------------------------
@@ -2428,13 +2438,13 @@ int HYPRE_LinSysCore::matrixLoadComplete()
           {
              if ( colValues_[i][j] != 0.0 )
              {
-                newColInd[newLeng]   = colIndices_[i][j]--;
+                newColInd[newLeng]   = colIndices_[i][j] - 1;
                 newColVal[newLeng++] = colValues_[i][j];
              }
           }
           HYPRE_IJMatrixInsertRow(HYA_,newLeng,eqnNum,newColInd,newColVal);
           delete [] colValues_[i];
-          nnz   += newLeng;
+          nnz += newLeng;
        }
        if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
        {
@@ -2613,17 +2623,6 @@ int HYPRE_LinSysCore::enforceEssentialBC(int* globalEqn, double* alpha,
                 }
              }
           }// end for(j<rowSize) loop
-          for ( j = 0; j < rowLengths_[localEqnNum]; j++ ) 
-          {
-             if ( colIndices_[localEqnNum][j] == globalEqn[i]+1 )
-             {
-                colValues_[localEqnNum][j] = 1.0;
-             }
-             else
-             {
-                colValues_[localEqnNum][j] = 0.0;
-             }
-          }
 
           // Set rhs for boundary point
           rhs_term = gamma[i] / alpha[i];

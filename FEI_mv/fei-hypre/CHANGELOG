@@ -32,4 +32,8 @@
             - remove extra zeros in rows that at BC's
 03/06/01    version 1.5.0R6 and 2.0.0R6
             - fix a bug in buildReducedRHS (ProcNRows)
+04/10/01    2.0.0R7
+            - fix a bug in BC handling (reset values, not take out columns)
+            - optimize by taking out zeros in loading matrix to parcsr
+            - revert Schur complement reduction to old ways 
 
