@@ -10,6 +10,7 @@ void print_triples_to_file_private(int n, int m, int beg_row, int *rp,
 #include "Mem_dh.h"
 #include "Mat_dh.h"
 #include "Hash_dh.h"  /* needed for print_triples_to_file_private */
+#include  "getRow_dh.h"
 
 static char *algo_par_strings[] = { "None", "Block Jacobi", 
                                      "Parallel ILU", "Graph Color ILU" };
@@ -43,7 +44,7 @@ void Euclid_dhCreate(Euclid_dh *ctxOUT)
   ctx->rpF  = NULL;
   ctx->cvalF = NULL;
   ctx->avalF = NULL;
-  ctx->avalFD = NULL;
+  ctx->avalD = NULL;
   ctx->diagF = NULL;
   ctx->fillF = NULL;
   ctx->allocF = 0;
@@ -71,10 +72,10 @@ void Euclid_dhCreate(Euclid_dh *ctxOUT)
   ctx->nabors = 0;
   ctx->externalRows = 0;
 
-  ctx->scale = NULL;
+  ctx->scaleF = NULL;
   ctx->scaleD = NULL;
   ctx->isScaled = false;
-  ctx->work = NULL;
+  ctx->workF = NULL;
   ctx->workD = NULL;
   ctx->from = 0;
   ctx->to = 0;
@@ -112,7 +113,7 @@ void Euclid_dhDestroy(Euclid_dh ctx)
   if (ctx->rpF != NULL) { FREE_DH(ctx->rpF); CHECK_V_ERROR; }
   if (ctx->cvalF != NULL) { FREE_DH(ctx->cvalF); CHECK_V_ERROR; }
   if (ctx->avalF != NULL) { FREE_DH(ctx->avalF); CHECK_V_ERROR; }
-  if (ctx->avalFD != NULL) { FREE_DH(ctx->avalFD); CHECK_V_ERROR; }
+  if (ctx->avalD != NULL) { FREE_DH(ctx->avalD); CHECK_V_ERROR; }
   if (ctx->fillF != NULL) { FREE_DH(ctx->fillF); CHECK_V_ERROR; }
   if (ctx->diagF != NULL) { FREE_DH(ctx->diagF); CHECK_V_ERROR; }
   if (ctx->n2o_row!= NULL) { FREE_DH(ctx->n2o_row); CHECK_V_ERROR; }
@@ -126,9 +127,9 @@ void Euclid_dhDestroy(Euclid_dh ctx)
   }
   if (ctx->colorCounter != NULL) { FREE_DH(ctx->colorCounter); CHECK_V_ERROR; }
   if (ctx->externalRows != NULL) { Hash_dhDestroy(ctx->externalRows); CHECK_V_ERROR; }
-  if (ctx->scale != NULL) { FREE_DH(ctx->scale); CHECK_V_ERROR; }
+  if (ctx->scaleF != NULL) { FREE_DH(ctx->scaleF); CHECK_V_ERROR; }
   if (ctx->scaleD != NULL) { FREE_DH(ctx->scaleD); CHECK_V_ERROR; }
-  if (ctx->work != NULL) { FREE_DH(ctx->work); CHECK_V_ERROR; }
+  if (ctx->workF != NULL) { FREE_DH(ctx->workF); CHECK_V_ERROR; }
   if (ctx->workD != NULL) { FREE_DH(ctx->workD); CHECK_V_ERROR; }
   if (ctx->n2o_nonLocal != NULL) { Hash_dhDestroy(ctx->n2o_nonLocal); CHECK_V_ERROR; }
   if (ctx->o2n_nonLocal != NULL) { Hash_dhDestroy(ctx->o2n_nonLocal); CHECK_V_ERROR; }
@@ -189,11 +190,15 @@ void Euclid_dhSetup(Euclid_dh ctx)
     euclid_setup_private_mpi(ctx); CHECK_V_ERROR;
   }
 
+  if (printMat) {
+    PrintPermutedMat(ctx->A, ctx->beg_row, ctx->m, ctx->n2o_row, ctx->n2o_col, "Aperm.trip"); CHECK_V_ERROR;
+  }
+
   /* allocate and initialize storage for row-scaling values */
   if (ctx->algo_ilu != NONE_ILU) {
     int i; 
     if (ctx->isSinglePrecision) {
-      float *tmp = ctx->scale = (float*)MALLOC_DH(m*sizeof(float)); CHECK_V_ERROR;
+      float *tmp = ctx->scaleF = (float*)MALLOC_DH(m*sizeof(float)); CHECK_V_ERROR;
       for (i=0; i<m; ++i) tmp[i] = 1.0;
     } else {
       double *tmp = ctx->scaleD = (double*)MALLOC_DH(m*sizeof(double)); CHECK_V_ERROR;
@@ -208,6 +213,15 @@ void Euclid_dhSetup(Euclid_dh ctx)
 
   /* perform symbolic and numeric factorization */
   if (! Parser_dhHasSwitch(parser_dh, "-doNotFactor")) {
+
+  /* allocate work vector for factorization and triangular solves */
+  if (ctx->algo_ilu != NONE_ILU) {
+    if (ctx->isSinglePrecision) {
+      ctx->workF = (float*)MALLOC_DH(ctx->m*sizeof(float)); CHECK_V_ERROR;
+    } else {
+      ctx->workD = (double*)MALLOC_DH(ctx->m*sizeof(double)); CHECK_V_ERROR;
+    }
+  }
 
     factor_private(ctx); CHECK_V_ERROR;
 
@@ -227,15 +241,6 @@ void Euclid_dhSetup(Euclid_dh ctx)
     }
   }
 
-  /* allocate work vector for triangular solves */
-  if (ctx->algo_ilu != NONE_ILU) {
-    if (ctx->isSinglePrecision) {
-      ctx->work = (float*)MALLOC_DH(ctx->m*sizeof(float)); CHECK_V_ERROR;
-    } else {
-      ctx->workD = (double*)MALLOC_DH(ctx->m*sizeof(double)); CHECK_V_ERROR;
-    }
-  }
-
   END_FUNC_DH
 }
 
@@ -248,7 +253,7 @@ void get_runtime_params_private(Euclid_dh ctx)
   ctx->isScaled = (! Parser_dhHasSwitch(parser_dh, "-doNotScale"));
   Parser_dhReadInt(parser_dh,    "-level",&(ctx->level));    /* for ILUK */
   Parser_dhReadInt(parser_dh, "-gColor",&(ctx->cLevel));  /* for graph color ILU */
-  Parser_dhReadDouble(parser_dh, "-dt",&(ctx->droptol));     /* for ILUT */
+  Parser_dhReadDouble(parser_dh, "-ilut",&(ctx->droptol));     /* for ILUT */
   Parser_dhReadDouble(parser_dh, "-sparseA",&(ctx->sparseTolA));  /* sparsify A before factoring */
   Parser_dhReadDouble(parser_dh, "-sparseF",&(ctx->sparseTolF));  /* sparsify after factoring */
   Parser_dhReadDouble(parser_dh, "-pivotMin", &(ctx->pivotMin));    /* adjust pivots if smaller than this */
@@ -304,7 +309,6 @@ void Euclid_dhPrintParams(Euclid_dh ctx, FILE *fp)
   START_FUNC_DH
   if (myid_dh == 0) {
     fprintf(fp, "\n------------------------------ Euclid Settings Summary\n");
-    fprintf(fp, "preconditioner density:  %0.2f (nonzeros in factor/nonzeros in A)\n", ctx->rho_final);
 
     if (ctx->isSinglePrecision) {
       fprintf(fp, "SINGLE precision\n");
@@ -312,23 +316,29 @@ void Euclid_dhPrintParams(Euclid_dh ctx, FILE *fp)
       fprintf(fp, "DOUBLE precision\n");
     }
 
-    fprintf(fp, "global matrix rows:      %i\n", ctx->n);
-    fprintf(fp, "local matrix rows:       %i (on P_0)\n", ctx->m);
-    fprintf(fp, "number of MPI tasks:     %i\n", np_dh);
-    fprintf(fp, "nonzeros in A (global):  %i\n", ctx->nzAglobal);
-    fprintf(fp, "nonzeros in A (local):   %i (on P_0)\n", ctx->nzA);
-
     if (ctx->isScaled) {
       fprintf(fp, "row scaling in effect\n");
     } else {
       fprintf(fp, "row scaling NOT in effect\n");
     }
 
-    fprintf(fp, "level:   %i (used for ILU(k))\n", ctx->level);
-    fprintf(fp, "droptol: %0.3e (used for ILUT(dt))\n", ctx->droptol);
-    fprintf(fp, "sparseA: %0.3e (used for sparsification of input)\n", ctx->sparseTolA);
+    fprintf(fp, "\n");
+    fprintf(fp, "preconditioner density:   %0.2f (nonzeros in factor/nonzeros in A)\n", ctx->rho_final);
+    fprintf(fp, "global matrix rows:       %i\n", ctx->n);
+    fprintf(fp, "local matrix rows:        %i (on P_0)\n", ctx->m);
+    fprintf(fp, "nonzeros in A (global):   %i\n", ctx->nzAglobal);
+    fprintf(fp, "nonzeros in A (local):    %i (on P_0)\n", ctx->nzA);
+
+    fprintf(fp, "\n");
+    fprintf(fp, "level:                    %-9i (used for ILU(k))\n", ctx->level);
+    fprintf(fp, "droptol:                  %9.3e (used for ILUT(dt))\n", ctx->droptol);
+    fprintf(fp, "sparseA:                  %9.3e (used for sparsification of input)\n", ctx->sparseTolA);
+
+    fprintf(fp, "\n");
+    fprintf(fp, "number of MPI tasks:      %i\n", np_dh);
     fprintf(fp, "parallelization strategy: %s\n", algo_par_strings[ctx->algo_par]);
     fprintf(fp, "factorization method:     %s\n", algo_ilu_strings[ctx->algo_ilu]);
+    fprintf(fp, "subdomains per processor: %i\n", ctx->blockCount);
   }
   END_FUNC_DH
 }
@@ -370,13 +380,13 @@ void reallocate_private(int row, int newEntries, int *nzHave,
     FREE_DH(*fill);
     *fill = fillTMP;
   }
-  if (aval != NULL) {
+  if (*aval != NULL) {
     avalTMP = (float*)MALLOC_DH(nz*sizeof(float)); 
     memcpy(avalTMP, *aval, idx*sizeof(float));
     FREE_DH(*aval);
     *aval = avalTMP;
   }
-  if (avalD != NULL) {
+  if (*avalD != NULL) {
     avalTMP_D = (double*)MALLOC_DH(nz*sizeof(double)); 
     memcpy(avalTMP_D, *avalD, idx*sizeof(double));
     FREE_DH(*avalD);
@@ -487,7 +497,7 @@ void invert_diagonals_private(Euclid_dh ctx)
         if (aval[diag[i]] != 0.0) aval[diag[i]] = 1.0/aval[diag[i]]; 
       }
     } else {
-      double *aval = ctx->avalFD;
+      double *aval = ctx->avalD;
       for (i=0; i<m; ++i) {
         if (aval[diag[i]] != 0.0) aval[diag[i]] = 1.0/aval[diag[i]]; 
       }
@@ -537,8 +547,8 @@ void factor_private(Euclid_dh ctx)
 
   if (ctx->isSinglePrecision && ctx->avalF == NULL) {
     ctx->avalF = (float*)MALLOC_DH(nzmax*sizeof(float));  CHECK_V_ERROR;
-  } else if (ctx->avalFD == NULL) {
-    ctx->avalFD = (double*)MALLOC_DH(nzmax*sizeof(double));  CHECK_V_ERROR;
+  } else if (ctx->avalD == NULL) {
+    ctx->avalD = (double*)MALLOC_DH(nzmax*sizeof(double));  CHECK_V_ERROR;
   }
 
   /* case for block-jacobi with multiple mpi tasks;
@@ -548,12 +558,15 @@ void factor_private(Euclid_dh ctx)
 
     ctx->from = 0;
     ctx->to = m;
-    if (ctx->isSinglePrecision) {
+    if (ctx->algo_ilu == ILUK_ILU) {
       iluk_seq(ctx); CHECK_V_ERROR;
+      ctx->nzF = ctx->rpF[m];
+    } else if (ctx->algo_ilu == ILUT_ILU) {
+      ilut_seq(ctx); CHECK_V_ERROR;
     } else {
-      iluk_seq_D(ctx); CHECK_V_ERROR;
+      sprintf(msgBuf_dh, "unknown ILU algorithm = %i", ctx->algo_ilu);
+      SET_V_ERROR(msgBuf_dh);
     }
-    ctx->nzF = ctx->rpF[m];
   }
 
   else if (ctx->algo_par == PILU_PAR) {
@@ -638,10 +651,10 @@ void print_factor_private(Euclid_dh ctx, char *filename)
           for (j=ctx->rpF[i]; j<ctx->rpF[i+1]; ++j) {
             if (ctx->avalF != NULL) {
               fprintf(logFile, "%i,%g  ", 1+ctx->cvalF[j], ctx->avalF[j]);
-            } else if (ctx->avalFD != NULL) {
-              fprintf(logFile, "%i,%g  ", 1+ctx->cvalF[j], ctx->avalFD[j]);
+            } else if (ctx->avalD != NULL) {
+              fprintf(logFile, "%i,%g  ", 1+ctx->cvalF[j], ctx->avalD[j]);
             } else {
-              SET_V_ERROR("both avalF and avalFD are NULL");
+              SET_V_ERROR("both avalF and avalD are NULL");
             }
           }
           fprintf(logFile, "\n");
@@ -658,10 +671,10 @@ void print_factor_private(Euclid_dh ctx, char *filename)
             for (j=ctx->rpF[i]; j<ctx->rpF[i+1]; ++j) {
               if (ctx->avalF != NULL) {
                 fprintf(fp, "%i %i %g\n", 1+i+beg_row, 1+ctx->cvalF[j]+beg_row, ctx->avalF[j]);
-              } else if (ctx->avalFD != NULL) {
-                fprintf(fp, "%i %i %g\n", 1+i+beg_row, 1+ctx->cvalF[j]+beg_row, ctx->avalFD[j]);
+              } else if (ctx->avalD != NULL) {
+                fprintf(fp, "%i %i %g\n", 1+i+beg_row, 1+ctx->cvalF[j]+beg_row, ctx->avalD[j]);
               } else {
-                SET_V_ERROR("both avalF and avalFD are NULL");
+                SET_V_ERROR("both avalF and avalD are NULL");
               }
             }
           }
@@ -730,5 +743,71 @@ void find_nzF_private(Euclid_dh ctx)
       ctx->rho_final = rhoGlobal;
     }
   }
+  END_FUNC_DH
+}
+
+
+#undef __FUNC__
+#define __FUNC__ "PrintPermutedMat"
+void PrintPermutedMat(void* A, int beg_row, int m,
+                      int *n2o_row, int *n2o_col, char *filename)
+{
+  START_FUNC_DH
+
+fprintf(stderr, "[%i] STARTING PrintPermutedMat @@@@@@@@@@@@@@@@@@@\n", myid_dh);
+
+#if 0
+  FILE *fp;
+  int *o2n_col, pe, i, j, *cval, len;
+  int newCol, newRow;
+  double *aval;
+
+  /* form inverse column permutation */
+  if (n2o_col != NULL) {
+    o2n_col = (int*)MALLOC_DH(m*sizeof(int)); CHECK_V_ERROR;
+    for (i=0; i<m; ++i) o2n_col[n2o_col[i]] = i;
+  }
+
+  for (pe=0; pe<np_dh; ++pe) {
+
+    MPI_Barrier(comm_dh);
+
+    if (myid_dh == pe) {
+      if (pe == 0) {
+        fp=fopen(filename, "w");
+      } else {
+        fp=fopen(filename, "a");
+      }
+      if (fp == NULL) {
+        sprintf(msgBuf_dh, "can't open %s for writing\n", filename);
+        SET_V_ERROR(msgBuf_dh);
+      }
+
+      for (i=0; i<m; ++i) {
+
+        if (n2o_row == NULL) {
+          EuclidGetRow(A, i+beg_row, &len, &cval, &aval); CHECK_V_ERROR;
+          for (j=0; j<len; ++j) {
+            fprintf(fp, "%i %i %g\n", i+1, cval[j], aval[j]);
+          }
+          EuclidRestoreRow(A, i, &len, &cval, &aval); CHECK_V_ERROR;
+        } else {
+          newRow = n2o_row[i] + beg_row;
+          EuclidGetRow(A, newRow, &len, &cval, &aval); CHECK_V_ERROR;
+          for (j=0; j<len; ++j) {
+            newCol = o2n_col[cval[j]-beg_row] + beg_row; 
+            fprintf(fp, "%i %i %g\n", i+1, newCol, aval[j]);
+          }
+          EuclidRestoreRow(A, i, &len, &cval, &aval); CHECK_V_ERROR;
+        }
+      }
+    }
+  }
+  fclose(fp);
+
+  if (n2o_col != NULL) {
+    FREE_DH(o2n_col); CHECK_V_ERROR;
+  }
+#endif
   END_FUNC_DH
 }

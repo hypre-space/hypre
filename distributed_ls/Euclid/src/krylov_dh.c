@@ -163,7 +163,8 @@ void cg_euclid(Mat_dh A, Euclid_dh ctx, double *x, double *b, int *itsOUT)
   double alpha, beta, gamma, gamma_old, eps, bi_prod, i_prod;
   bool monitor;
   int maxIts = ctx->maxIts;
-  double atol = ctx->atol, rtol = ctx->rtol;
+  /* double atol = ctx->atol */
+  double  rtol = ctx->rtol;
 
   monitor = Parser_dhHasSwitch(parser_dh, "-monitor");
 

@@ -10,9 +10,80 @@
 void euclid_setup_private_mpi(Euclid_dh ctx)
 {
   START_FUNC_DH
+  /* mpi parallel ILU */
   if (ctx->algo_par == PILU_PAR) {
+    /* Permit only a single subdomain per processor
+       (may change this later)
+     */
+    ctx->block[0].beg_row = 0;
+    ctx->block[0].end_row = ctx->m;
+
     setup_pilu_private_mpi(ctx); CHECK_V_ERROR;
+  } 
+
+  /* mpi block jacobi */
+  else {
+    /* Permit only a single subdomain per processor
+       (may change this later)
+     */
+    ctx->block[0].beg_row = 0;
+    ctx->block[0].end_row = ctx->m;
+
+    /*  must fix factorization functions first! 
+    partition_private_seq(ctx); CHECK_V_ERROR;
+    */
   }
+  END_FUNC_DH
+}
+
+
+#undef __FUNC__
+#define __FUNC__ "setup_pilu_private_mpi"
+void setup_pilu_private_mpi(Euclid_dh ctx)
+{
+  START_FUNC_DH
+
+  /* setup ctx->beg_rows and ctx->end_rows arrays;
+   * these are used  for mapping rows to processors 
+   */
+  int firstLocal = ctx->beg_row, lastLocal = firstLocal+ctx->m;
+  ctx->beg_rows = (int*)MALLOC_DH(np_dh*sizeof(int)); CHECK_V_ERROR;
+  ctx->end_rows = (int*)MALLOC_DH(np_dh*sizeof(int)); CHECK_V_ERROR;
+  MPI_Allgather(&firstLocal, 1, MPI_INT, ctx->beg_rows, 1, MPI_INT, comm_dh); 
+  MPI_Allgather(&lastLocal, 1, MPI_INT, ctx->end_rows, 1, MPI_INT, comm_dh); 
+
+  /* order interior nodes, then boundary nodes, in local portion of G(A) */
+  order_bdry_nodes_private_mpi(ctx); CHECK_V_ERROR;
+  ctx->isNaturallyOrdered = false;
+
+  /* find nearest-nabors in subdomain graph */
+/* fix! 
+  find_nabors_private_mpi(ctx); CHECK_V_ERROR;
+*/
+
+  /* exchange information for number of boundary nodes, and
+     nonzero counts in boundary rows.
+   */
+  ctx->bdryNodeCounts = (int*)MALLOC_DH(np_dh*sizeof(int)); CHECK_V_ERROR;
+  ctx->bdryRowNzCounts = (int*)MALLOC_DH(np_dh*sizeof(int)); CHECK_V_ERROR;
+
+#if 0
+
+fix
+
+  { int nodeCount = ctx->m - ctx->first_bdry;
+    int nzCount = ctx->rp[ctx->m] - ctx->rp[ctx->first_bdry];
+    MPI_Allgather(&nodeCount, 1, MPI_INT, ctx->bdryNodeCounts, 1, MPI_INT, comm_dh); 
+    MPI_Allgather(&nzCount, 1, MPI_INT, ctx->bdryRowNzCounts, 1, MPI_INT, comm_dh); 
+  }
+
+#endif
+
+  /* exchange boundary node permutations with neighboring subdomains */ 
+/*
+  exchange_permutations_private_mpi(ctx); CHECK_V_ERROR;
+*/
+
   END_FUNC_DH
 }
 
@@ -23,15 +94,11 @@ void euclid_setup_private_mpi(Euclid_dh ctx)
 void order_bdry_nodes_private_mpi(Euclid_dh ctx)
 {
   START_FUNC_DH
-#if 0
-
-fix
-
-  int h, i, j, k, m = ctx->m, beg_row = ctx->beg_row;
+  int h, j, k, m = ctx->m, beg_row = ctx->beg_row;
   int end_row = beg_row + m;
-  int *n2o_row = ctx->n2o_row, *n2o_col = ctx->n2o_col;
-  int *rp = ctx->rp, *cval = ctx->cval;
-  int *tmp, *tmp2, idxLO, idxHI, count;
+  int len, *CVAL;
+  int *tmp, *tmp2, count, row;
+  int idxLO = 0, idxHI = m-1;
   bool localFlag;
 
   /* order nodes within each subdomain so that boundary rows are ordered last */
@@ -39,22 +106,22 @@ fix
   tmp = (int*)MALLOC_DH(m*sizeof(int));
   tmp2 = (int*)MALLOC_DH(m*sizeof(int));
 
-  idxLO = 0;
-  idxHI = m-1;
-
-  for (j=0; j<m; ++j) { 
-    int row = j;
+  for (row = beg_row; row<end_row; ++row) {
+    EuclidGetRow(ctx->A, row, &len, &CVAL, NULL); CHECK_V_ERROR
     localFlag = true;
-    for (k=rp[row]; k<rp[row+1]; ++k) {
-      int col = cval[k];
+    for (k=0; k<len; ++k) {
+      int col = CVAL[k];
       if (col  < beg_row || col >= end_row) {
         localFlag = false;
         break;
       }
     }
-    if (localFlag) { tmp[idxLO++] = row; } 
-    else           { tmp[idxHI--] = row; }
+    if (localFlag) { tmp[idxLO++] = row - beg_row; } 
+    else           { tmp[idxHI--] = row - beg_row; }
+
+    EuclidRestoreRow(ctx->A, row, &len, &CVAL, NULL); CHECK_V_ERROR
   }
+
   ++idxHI;
   ctx->first_bdry = idxHI;
 
@@ -74,9 +141,6 @@ fix
   FREE_DH(tmp);  CHECK_V_ERROR;
   FREE_DH(tmp2); CHECK_V_ERROR;
 
-fix
-
-#endif 
   END_FUNC_DH
 }
 
@@ -250,49 +314,6 @@ void exchange_permutations_private_mpi(Euclid_dh ctx)
   END_FUNC_DH
 }
 
-
-#undef __FUNC__
-#define __FUNC__ "setup_pilu_private_mpi"
-void setup_pilu_private_mpi(Euclid_dh ctx)
-{
-  START_FUNC_DH
-
-  /* setup arrays for mapping rows to processors */
-  int firstLocal = ctx->beg_row, lastLocal = firstLocal+ctx->m;
-  ctx->beg_rows = (int*)MALLOC_DH(np_dh*sizeof(int)); CHECK_V_ERROR;
-  ctx->end_rows = (int*)MALLOC_DH(np_dh*sizeof(int)); CHECK_V_ERROR;
-  MPI_Allgather(&firstLocal, 1, MPI_INT, ctx->beg_rows, 1, MPI_INT, comm_dh); 
-  MPI_Allgather(&lastLocal, 1, MPI_INT, ctx->end_rows, 1, MPI_INT, comm_dh); 
-
-  /* locally order interior nodes, then boundary nodes in G(A) */
-  order_bdry_nodes_private_mpi(ctx); CHECK_V_ERROR;
-
-  /* find nearest-nabors in subdomain graph */
-  find_nabors_private_mpi(ctx); CHECK_V_ERROR;
-
-  /* exchange information for number of boundary nodes, and
-     nonzero counts in boundary rows.
-   */
-  ctx->bdryNodeCounts = (int*)MALLOC_DH(np_dh*sizeof(int)); CHECK_V_ERROR;
-  ctx->bdryRowNzCounts = (int*)MALLOC_DH(np_dh*sizeof(int)); CHECK_V_ERROR;
-
-#if 0
-
-fix
-
-  { int nodeCount = ctx->m - ctx->first_bdry;
-    int nzCount = ctx->rp[ctx->m] - ctx->rp[ctx->first_bdry];
-    MPI_Allgather(&nodeCount, 1, MPI_INT, ctx->bdryNodeCounts, 1, MPI_INT, comm_dh); 
-    MPI_Allgather(&nzCount, 1, MPI_INT, ctx->bdryRowNzCounts, 1, MPI_INT, comm_dh); 
-  }
-
-#endif
-
-  /* exchange boundary node permutations with neighboring subdomains */ 
-  exchange_permutations_private_mpi(ctx); CHECK_V_ERROR;
-
-  END_FUNC_DH
-}
 
 #undef __FUNC__
 #define __FUNC__ "exchange_bdry_rows_private_mpi"

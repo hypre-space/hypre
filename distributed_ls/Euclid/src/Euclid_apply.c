@@ -1,27 +1,7 @@
 #include "Euclid_dh.h"
-
-static void apply_seq_nat_private(Euclid_dh ctx, double *xx, double *yy);
-static void apply_seq_nat_private_D(Euclid_dh ctx, double *xx, double *yy);
-static void apply_seq_nat_threaded_private(Euclid_dh ctx, double *xx, double *yy);
-
-static void apply_seq_nat_threaded_private_D(Euclid_dh ctx, double *xx, double *yy)
-{}
-static void apply_seq_perm_threaded_private(Euclid_dh ctx, double *xx, double *yy)
-{}
-static void apply_seq_perm_threaded_private_D(Euclid_dh ctx, double *xx, double *yy)
-{}
-
-
-/* stop compiler from complaining about unreferenced static
-   functions when configured --with-strict-checking.
- */   
-void junk(Euclid_dh ctx)
-{
-  double *x = NULL, *y = NULL;
-  apply_seq_nat_threaded_private_D(ctx,x,y);
-  apply_seq_perm_threaded_private(ctx,x,y);
-  apply_seq_perm_threaded_private_D(ctx,x,y);
-}
+ 
+static void apply_blockJacobi_private(Euclid_dh ctx, double *xx, double *yy);
+static void apply_pilu_seq_private(Euclid_dh ctx, double *xx, double *yy);
 
 #undef __FUNC__ 
 #define __FUNC__ "not_implemented_private"
@@ -44,7 +24,9 @@ void not_implemented_private(Euclid_dh ctx)
 void Euclid_dhApply_private(Euclid_dh ctx, double *xx, double *yy)
 {
   START_FUNC_DH
-  bool single = (ctx->avalF != NULL) ? true : false;
+  /* default; for everything except PILU */
+  ctx->from = 0;
+  ctx->to = ctx->m;
 
   /* case 1: no preconditioning */
   if (ctx->algo_ilu == NONE_ILU) {
@@ -56,20 +38,14 @@ void Euclid_dhApply_private(Euclid_dh ctx, double *xx, double *yy)
   else if (np_dh == 1) {
 
     /* natural ording -> block-jacobi */
-    if (ctx->isNaturallyOrdered) {
-      if (single) {
-        apply_seq_nat_threaded_private(ctx, xx, yy); CHECK_V_ERROR;
-      } else {
-        /* apply_seq_nat_threaded_private_D(ctx, xx, yy); CHECK_V_ERROR; */
-        not_implemented_private(ctx); CHECK_V_ERROR;
-      }
-
-    } else {
-      if (single) {
-        not_implemented_private(ctx); CHECK_V_ERROR;
+    if (ctx->algo_par == BJILU_PAR) {
+      if (ctx->isNaturallyOrdered) {
+        apply_blockJacobi_private(ctx, xx, yy); CHECK_V_ERROR;
       } else {
         not_implemented_private(ctx); CHECK_V_ERROR;
       }
+    } else if (ctx->algo_par == PILU_PAR) {
+      apply_pilu_seq_private(ctx, xx, yy); CHECK_V_ERROR;
     }
   }
 
@@ -79,22 +55,10 @@ void Euclid_dhApply_private(Euclid_dh ctx, double *xx, double *yy)
 
     /* MPI Block Jacobi cases */
     if (ctx->algo_par == BJILU_PAR) {
-
-      /* matrix has NOT been reordered */
       if (ctx->isNaturallyOrdered) {
-        if (single) {
-          apply_seq_nat_private(ctx, xx, yy); CHECK_V_ERROR;
-        } else {
-          apply_seq_nat_private_D(ctx, xx, yy); CHECK_V_ERROR;
-        } 
-
-      /* matrix HAS been reordered */
+        apply_blockJacobi_private(ctx, xx, yy); CHECK_V_ERROR;
       }  else {
-        if (single) {
-          not_implemented_private(ctx); CHECK_V_ERROR;
-        } else {
-          not_implemented_private(ctx); CHECK_V_ERROR;
-        }
+        not_implemented_private(ctx); CHECK_V_ERROR;
       }
     }
 
@@ -103,11 +67,7 @@ void Euclid_dhApply_private(Euclid_dh ctx, double *xx, double *yy)
      * needn't worry about that).
      */
     else if (ctx->algo_par == PILU_PAR) {
-      if (single) {
-        not_implemented_private(ctx); CHECK_V_ERROR;
-      } else {
-        not_implemented_private(ctx); CHECK_V_ERROR;
-      }
+      not_implemented_private(ctx); CHECK_V_ERROR;
     } 
 
 
@@ -122,179 +82,109 @@ void Euclid_dhApply_private(Euclid_dh ctx, double *xx, double *yy)
 
 
 
-/* for single precision and:
+/*  For blockJacobi, single or multiple MPI tasks,
+ *  one or more diagonal blocks per MPI task
  *
- *      (1) natural ordering, 1 subdomain (mpi task), 1 processor;
- *      (2) mpi parallel block jacobi, natural ordering 
- *
- * (unthreaded)
- */
-#undef __FUNC__ 
-#define __FUNC__ "apply_seq_nat_private"
-void apply_seq_nat_private(Euclid_dh ctx, double *xx, double *yy)
-{
-  START_FUNC_DH
-  int m = ctx->m, i;
-  int *rp = ctx->rpF, *cval = ctx->cvalF;
-  float *aval = ctx->avalF;
-  int nz, *vi, *diag = ctx->diagF;
-  float *scale = ctx->scale;
-  float sum, *v, *work = ctx->work;
-
-  /* if matrix was scaled, must scale the rhs */
-  if (scale != NULL) {
-    for (i=0; i<m; ++i) { xx[i] *= scale[i]; }
-  } 
-
-  work[0] = xx[0];
-  for ( i=0; i<m; i++ ) {
-    v   = aval + rp[i];
-    vi  = cval + rp[i];
-    nz  = diag[i] - rp[i];
-    sum = xx[i];
-    while (nz--) sum -= (*v++ * work[*vi++]);
-    work[i] = sum;
-  }
-
-  /* backward solve the upper triangular */
-  for ( i=m-1; i>=0; i-- ){
-    v   = aval + diag[i] + 1;
-    vi  = cval + diag[i] + 1;
-    nz  = rp[i+1] - diag[i] - 1;
-    sum = work[i];
-    while (nz--) sum -= (*v++ * work[*vi++]);
-    yy[i] = work[i] = sum*aval[diag[i]];
-  }
-
-  /* put rhs back the way it was */
-  if (scale != NULL) {
-    for (i=0; i<m; ++i) { xx[i] /= scale[i]; }
-  } 
-
-  END_FUNC_DH
-}
-
-
-/* for double precision and:
- *
- *      (1) natural ordering, 1 subdomain (mpi task), 1 processor;
- *      (2) mpi parallel block jacobi, natural ordering 
- *
- * (unthreaded)
- */
-#undef __FUNC__ 
-#define __FUNC__ "apply_seq_nat_private_D"
-void apply_seq_nat_private_D(Euclid_dh ctx, double *xx, double *yy)
-{
-  START_FUNC_DH
-
-  int m = ctx->m, i;
-  int *rp = ctx->rpF, *cval = ctx->cvalF;
-  double *aval = ctx->avalFD;
-  int nz, *vi, *diag = ctx->diagF;
-  double *scale = ctx->scaleD;
-  double sum, *v, *work = ctx->workD;
-
-  /* if matrix was scaled, must scale the rhs */
-  if (scale != NULL) {
-    for (i=0; i<m; ++i) { xx[i] *= scale[i]; }
-  } 
-
-    work[0] = xx[0];
-    for ( i=0; i<m; i++ ) {
-      v   = aval + rp[i];
-      vi  = cval + rp[i];
-      nz  = diag[i] - rp[i];
-      sum = xx[i];
-      while (nz--) sum -= (*v++ * work[*vi++]);
-      work[i] = sum;
-    }
-
-    /* backward solve the upper triangular */
-    for ( i=m-1; i>=0; i-- ){
-      v   = aval + diag[i] + 1;
-      vi  = cval + diag[i] + 1;
-      nz  = rp[i+1] - diag[i] - 1;
-      sum = work[i];
-      while (nz--) sum -= (*v++ * work[*vi++]);
-      yy[i] = work[i] = sum*aval[diag[i]];
-    }
-
-    /* put rhs back the way it was */
-    if (scale != NULL) {
-      for (i=0; i<m; ++i) { xx[i] /= scale[i]; }
-    } 
-
-  END_FUNC_DH
-}
-
-
-
-/* for single precision, single mpi task, threaded, block-jacobi
  */
 #undef __FUNC__
-#define __FUNC__ "apply_seq_nat_threaded_private"
-void apply_seq_nat_threaded_private(Euclid_dh ctx, double *xx, double *yy)
+#define __FUNC__ "apply_blockJacobi_private"
+void apply_blockJacobi_private(Euclid_dh ctx, double *xx, double *yy)
 {
   START_FUNC_DH
-  int       h, n;
+  int       h, i, m, *vi, nz;
   int       *rp, *cval, *diag;
-  float     *aval, *scale;
+  float     *avalF, *scaleF, *workF, *vF, sumF;
+  double    *avalD, *scaleD, *workD, *vD, sumD;
   int       pn = ctx->blockCount;
-  PartNode  *part = ctx->block;
-  float     *v, *work;
-  double    sum;
-  int       i, *vi, nz;
+  PartNode  *part;
+  bool      isSingle = ctx->isSinglePrecision;
 
-    n = ctx->n;
-    rp = ctx->rpF;
-    cval = ctx->cvalF;
-    aval = ctx->avalF;
-    diag = ctx->diagF;
-    scale = ctx->scale;
-    work = ctx->work;
+  m = ctx->m;
+  rp = ctx->rpF;
+  cval = ctx->cvalF;
+  avalF = ctx->avalF;
+  avalD = ctx->avalD;
+  diag = ctx->diagF;
+  scaleF = ctx->scaleF;
+  scaleD = ctx->scaleD;
+  workF = ctx->workF;
+  workD = ctx->workD;
+  part = ctx->block;
 
   #pragma omp parallel 
   {
-     /* if matrix was scaled, must scale the rhs */
-     if (scale != NULL) {
-       #pragma omp for schedule(static)
-       for (i=0; i<n; ++i) { xx[i] *= scale[i]; }
-     } 
+
+    /* if matrix was scaled, must scale the rhs */
+    if (scaleF != NULL && scaleD != NULL) {
+      #pragma omp for schedule(static)
+      if (isSingle) {
+        for (i=0; i<m; ++i) { xx[i] *= scaleF[i]; }
+      } else {
+        for (i=0; i<m; ++i) { xx[i] *= scaleD[i]; }
+      }
+    }
 
    #pragma omp for schedule(static) private(v,vi,nz,sum,i)
     for (h=0; h<pn; ++h) {    /* fwd solve diagonal block h */
       int from = part[h].beg_row;
       int to = part[h].end_row;
 
-      work[from] = xx[from];
-      for ( i=from+1; i<to; i++ ) {
-        v   = aval + rp[i];
-        vi  = cval + rp[i];
-        nz  = diag[i] - rp[i];
-        sum = xx[i];
-        while (nz--) sum -= (*v++ * work[*vi++]);
-        work[i] = sum;
+      if (isSingle) {
+        workF[from] = xx[from];
+        for ( i=from+1; i<to; i++ ) {
+          vF  = avalF + rp[i];
+          vi  = cval + rp[i];
+          nz  = diag[i] - rp[i];
+          sumF = xx[i];
+          while (nz--) sumF -= (*vF++ * workF[*vi++]);
+          workF[i] = sumF;
+        }
+      } else {
+        workD[from] = xx[from];
+        for ( i=from+1; i<to; i++ ) {
+          vD  = avalD + rp[i];
+          vi  = cval + rp[i];
+          nz  = diag[i] - rp[i];
+          sumD = xx[i];
+          while (nz--) sumD -= (*vD++ * workD[*vi++]);
+          workD[i] = sumD;
+        }
       }
 
       /* backward solve the upper triangular */
-      for ( i=to-1; i>=from; i-- ){
-        v   = aval + diag[i] + 1;
-        vi  = cval + diag[i] + 1;
-        nz  = rp[i+1] - diag[i] - 1;
-        sum = work[i];
-        while (nz--) sum -= (*v++ * work[*vi++]);
-        yy[i] = work[i] = sum*aval[diag[i]];
+      if (isSingle) {
+        for ( i=to-1; i>=from; i-- ){
+          vF   = avalF + diag[i] + 1;
+          vi  = cval + diag[i] + 1;
+          nz  = rp[i+1] - diag[i] - 1;
+          sumF = workF[i];
+          while (nz--) sumF -= (*vF++ * workF[*vi++]);
+          yy[i] = workF[i] = sumF*avalF[diag[i]];
+        }
+      } else {
+        for ( i=to-1; i>=from; i-- ){
+          vD  = avalD + diag[i] + 1;
+          vi  = cval + diag[i] + 1;
+          nz  = rp[i+1] - diag[i] - 1;
+          sumD = workD[i];
+          while (nz--) sumD -= (*vD++ * workD[*vi++]);
+          yy[i] = workD[i] = sumD*avalD[diag[i]];
+        }
       }
     }
 
-     /* put rhs back the way it was */
-     if (scale != NULL) {
-       #pragma omp for schedule(static) 
-       for (i=0; i<n; ++i) { xx[i] /= scale[i]; }
-     } 
+    /* put rhs back the way it was */
+    if (scaleF != NULL && scaleD != NULL) {
+      #pragma omp for schedule(static)
+      if (isSingle) {
+        for (i=0; i<m; ++i) { xx[i] /= scaleF[i]; }
+      } else {
+        for (i=0; i<m; ++i) { xx[i] /= scaleD[i]; }
+      }
+    }
 
-    } /* #pragma omp parallel */
+
+  } /* #pragma omp parallel */
 
   END_FUNC_DH
 }
@@ -371,16 +261,25 @@ void Euclid_dhApplyPermuted_private(Euclid_dh ctx, double *xx, double *yy)
   END_FUNC_DH
 }
 
+#endif /* #if 0 */
 
-/* there is room for additional parallelism here, when
+
+/* 
+   For single MPI task, shared-memory version of PILU.
+
+   There is room for additional parallelism here, when
    factoring boundary rows.  For possible future development . . .
    (as written, factoring of boundary rows is entirely sequential)
 */
 #undef __FUNC__
-#define __FUNC__ "Euclid_dhApplyPILU_private"
-void Euclid_dhApplyPILU_private(Euclid_dh ctx, double *xx, double *yy)
+#define __FUNC__ "apply_pilu_seq_private"
+void apply_pilu_seq_private(Euclid_dh ctx, double *xx, double *yy)
 {
   START_FUNC_DH
+
+  not_implemented_private(ctx); CHECK_V_ERROR;
+
+#if 0
   int       h, n;
   int       *rp, *cval, *diag;
   REAL_DH   *aval, *scale;
@@ -472,7 +371,7 @@ void Euclid_dhApplyPILU_private(Euclid_dh ctx, double *xx, double *yy)
     for (i=0; i<n; ++i) { xx[i] /= scale[i]; }
   } 
 
+#endif
   END_FUNC_DH
 }
 
-#endif /* #if 0 */

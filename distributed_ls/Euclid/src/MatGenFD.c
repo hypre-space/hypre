@@ -3,7 +3,7 @@
 #include "Vec_dh.h"
 #include "Parser_dh.h"
 #include "Mem_dh.h"
-
+ 
 static char buf[128];
 
   /* handles for values in the 5-point (2D) or 7-point (for 3D) stencil */
@@ -32,8 +32,11 @@ static void generateStriped(MatGenFD mg, int *rp, int *cval,
 static void generateBlocked(MatGenFD mg, int *rp, int *cval, 
                                     double *aval, double *rhs);
 static void getstencil(MatGenFD g, int ix, int iy, int iz);
+
+#if 0
 static void fdaddbc(int nx, int ny, int nz, int *rp, int *cval, 
              int *diag, double *aval, double *rhs, double h);
+#endif
 
 #undef __FUNC__
 #define __FUNC__ "MatGenFDCreate"
@@ -222,7 +225,7 @@ void generateStriped(MatGenFD mg, int *rp, int *cval, double *aval, double *rhs)
   for (i = zStart; i < zEnd; ++i) {   /* loop over planes (z-direction) */
     for (j = yStart; j < yEnd; ++j) {  /* loop over rows (y-direction) */
       for (k = xStart; k < xEnd; ++k) { /* loop over columns (x-direction) */
-        bool bdryFlag = false;
+         bool bdryFlag;
 
         /* compute column values and rhs entry for the current node */
         getstencil(mg,k,j,i);
@@ -240,12 +243,12 @@ void generateStriped(MatGenFD mg, int *rp, int *cval, double *aval, double *rhs)
         }
 
         /* it's a boundary node */
-/*
         if (bdryFlag) {
+/*
           cval[idx] = row;
           aval[idx++] = 1.0;
-        }
 */
+        }
 
        /* it's an iterior node */
        /* else */{
@@ -491,12 +494,13 @@ mg->print(mg, stdout);
         getstencil(mg,k,j,i);
 
         /* it's a boundary node */
-/*
+
         if (bdryFlag) {
+/*
           cval[idx] = node;
           aval[idx++] = 1.0;
-        }
 */
+        }
 
        /* it's an interior node */
 /*       else*/ {
@@ -556,6 +560,8 @@ mg->print(mg, stdout);
   }
   END_FUNC_DH
 }
+
+#if 0
 
 #undef __FUNC__
 #define __FUNC__ "fdaddbc"
@@ -838,3 +844,5 @@ c
   }
 */
 }
+
+#endif /* #if 0 */

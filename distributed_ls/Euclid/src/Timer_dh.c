@@ -15,7 +15,7 @@ void Timer_dhCreate(Timer_dh *t)
   tmp->sc_clk_tck = sysconf(_SC_CLK_TCK);
 
 #if defined(EUCLID_TIMING)
-  sprintf(msgBuf_dh, "using EUCLID_TIMING; _SC_CLK_TCK = %i", tmp->sc_clk_tck);
+  sprintf(msgBuf_dh, "using EUCLID_TIMING; _SC_CLK_TCK = %i", (int)tmp->sc_clk_tck);
   SET_INFO(msgBuf_dh);
 #elif defined(MPI_TIMING) 
   SET_INFO("using MPI timing")

@@ -181,7 +181,7 @@ struct _mpi_interface_dh {
   int *rpF;
   int *cvalF;
   float  *avalF; 
-  double *avalFD; 
+  double *avalD; 
   int *diagF;
   int *fillF;
   int allocF;  /* allocated lengths of cvalF and avalF */
@@ -215,12 +215,12 @@ struct _mpi_interface_dh {
   Hash_dh externalRows; 
 
   /* row scaling vector */
-  float   *scale;
+  float   *scaleF;
   double  *scaleD;
   bool    isScaled;
 
   /* workspace for triangular solves */
-  float *work;
+  float *workF;
   double *workD;
 
   /* used for factorization and triangular solves */

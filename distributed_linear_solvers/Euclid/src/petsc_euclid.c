@@ -1,9 +1,14 @@
-#ifdef PETSC_MODE
+/* include this, so compiler won't complain about empty translation unit */
+#include "euclid_common.h"
 
+
+#ifdef PETSC_MODE
 #include "petsc_euclid.h"
 #include "src/mat/matimpl.h"
 #include "Euclid_dh.h"
 #include "Mat_dh.h"
+
+
 
 
 #if 0

@@ -28,8 +28,10 @@
 
 #if defined(USING_MPI) && !defined(HYPRE_MODE) && !defined(PETSC_MODE)
 #include <mpi.h>
-#else
-/* #include "fake_mpi.h" */
+#endif
+
+#if defined (SEQUENTIAL_MODE)
+#include "fake_mpi.h"
 #endif
 
 #if defined(USING_OPENMP) && !defined(HYPRE_MODE)

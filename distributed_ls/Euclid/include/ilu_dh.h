@@ -18,6 +18,9 @@ extern void iluk_seq_D(Euclid_dh ctx);
      1st version is for single precision, 2nd is for double.
    */
 
+extern void ilut_seq(Euclid_dh ctx);
+extern void ilut_seq_D(Euclid_dh ctx);
+
 
 #endif
 

@@ -115,6 +115,8 @@ void partition_private_seq(Euclid_dh ctx)
   START_FUNC_DH
   int i, m = ctx->m, blockCount = ctx->blockCount;
   PartNode *part = ctx->block;
+ 
+  if (blockCount < 1) ctx->blockCount = blockCount = 1;
 
   switch (ctx->partMethod) {
     case SIMPLE_PART:
@@ -124,6 +126,7 @@ void partition_private_seq(Euclid_dh ctx)
               part[i].beg_row = c;
               c += rowsPerBlock;
               part[i].end_row = c;
+              part[i].first_bdry = c;
             }
             part[blockCount-1].end_row = m;
           }

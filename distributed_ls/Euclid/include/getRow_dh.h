@@ -11,6 +11,10 @@ extern void EuclidRestoreRow(void *A, int row, int *len, int **ind, double **val
 extern void PrintMatUsingGetRow(void* A, int beg_row, int m,
                           int *n2o_row, int *n2o_col, char *filename);
 
+extern void PrintPermutedMat(void* A, int beg_row, int m,
+                      int *n2o_row, int *n2o_col, char *filename);
+
+
 
 #endif
 

@@ -7,6 +7,14 @@ but with added "-solver <int>" switches for Euclid:
 
 -------------------------------------------------------------------
 Euclid recognizes the following command-line switches:
+  
+   -eu_double
+
+       preconditioner is computed in double precision; default
+       is to use single precision.  Note that single precision
+       reduces memory requirements while making better use
+       of the memory hierarchy; hence, it may lead to faster
+       solution times, even if it increases iterations.
 
    -level <int>   
 
