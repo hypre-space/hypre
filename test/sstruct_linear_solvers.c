@@ -2170,10 +2170,10 @@ main( int   argc,
       HYPRE_SStructStencilDestroy(stencils[s]);
    }
    hypre_TFree(stencils);
+   HYPRE_SStructGraphDestroy(graph);
    HYPRE_SStructMatrixDestroy(A);
    HYPRE_SStructVectorDestroy(b);
    HYPRE_SStructVectorDestroy(x);
-   HYPRE_SStructGraphDestroy(graph);
 
    DestroyData(data);
 
