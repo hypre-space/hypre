@@ -148,9 +148,20 @@ HYPRE_ParAMGSetMaxIter( HYPRE_Solver solver,
 
 int
 HYPRE_ParAMGSetCoarsenType( HYPRE_Solver solver,
-                          int          coarsen_type  )
+                            int          coarsen_type  )
 {
    return( hypre_ParAMGSetCoarsenType( (void *) solver, coarsen_type ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_ParAMGSetMeasureType
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_ParAMGSetMeasureType( HYPRE_Solver solver,
+                            int          measure_type  )
+{
+   return( hypre_ParAMGSetMeasureType( (void *) solver, measure_type ) );
 }
 
 /*--------------------------------------------------------------------------
