@@ -4,25 +4,24 @@
 \section{Calls to {\slshape hypre} from Fortran source code}
 
 Fortran 77 subroutine arguments always pass copies of the argument addresses
-on execution of the call.  This is referred to as call-by-address, or
-call-by-reference.  In the called subroutine, the memory space at the
-argument address can be altered.  The calling address, however, cannot be
+upon execution of the subroutine call.
+This is referred to as call-by-address or call-by-reference.
+In the called subroutine, the memory space at the
+argument address can be altered, but the calling address cannot be
 altered.
 
-C function parameters, on the other hand, are often directly copied upon
-entry to the function.  These parameters do not have to be addresses.
-This is referred to as call-by-value.  Altering the copied C parameter in the
-called function has no effect on the parameter in the calling function.  So,
-C essentially has more freedom than Fortran.  A pointer parameter in C can
-achieve the same effect as call-by-reference, but all parameters do not have
-to be pointers.
+C function parameters, whether pointers (addresses) or not, are
+directly copied upon
+entry to the function. This is referred to as call-by-value.
+Altering the copied C parameter in the
+called function has no effect on the parameter in the calling function. 
+A pointer parameter in C can achieve the same effect as call-by-reference,
+and by this mechanism the languages can interoperate in a straightforward
+manner.
 
-The simplicity of Fortran, and the flexibility of C, allow the languages to
-interoperate.  However, portability might introduce complexities to
-configuration of the interoperating codes.
-
-Portability across DEC Compass, DEC Tera, and IBM ASCI-Blue platforms is
-currently achieved with the specific Fortran-calling-C mapping: 
+Portability across typical platforms 
+\footnote{DEC Compass, DEC Tera, and IBM ASCI-Blue at LLNL}
+is currently achieved with the specific Fortran-calling-C mapping: 
 
 \vspace{0.2in}
 
@@ -44,18 +43,19 @@ currently achieved with the specific Fortran-calling-C mapping:
 
 \vspace{0.2in}
 
-In particular, on DEC Compass, DEC Tera, and IBM ASCI-Blue, C-type
+In particular, C-type
 \verb+long int *+ points to a space that can hold an address, a space
 which happens to be the size of that allocated by a Fortran
 \verb+integer*8+ declaration.
 In orther words, C can hold an address to anything in a \verb+long int+ and
-assign that address to a Fortran integer*8 memory space (using \verb+long int *+ call-by-value).
+assign that address to a Fortran \verb+integer*8+ memory space
+(using \verb+long int *+ call-by-value).
 
 So, on the above platforms, Fortran can carry addresses in \verb+integer*8+
-variables.  These addresses might not have originated in any Fortran call,
-and if they are addresses to inhomogeneously typed collections of data
+variables.  These addresses might not have originated in any Fortran call.
+Furthermore, if these addresses to inhomogeneously typed collections of data
 (e.g. C structures), Fortran might not have enough information to dereference
-the addresses.  But Fortran can still carry around such addresses, and in
+the addresses.  But Fortran can still pass around such addresses, and in
 particular hand them back and forth between various C functions.  The
 {\slshape hypre} Fortran interface makes extensive use of this technique.
 
@@ -76,17 +76,19 @@ particular hand them back and forth between various C functions.  The
 \end{verbatim}
 
 The interface is designed so that the label \verb+subroutine_name+ is exactly
-the label of the {\slshape hypre} C-function.  The {\slshape} Hypre interlanguage interface
+the label of the {\slshape hypre} C-function.  The {\slshape hypre}
+interlanguage interface
 accounts for related compilation/linking issues involving appended
-underscores.  Fortran variables like \verb+addr+
+underscores, and for Fortran name length limitations.
+Fortran variables like \verb+addr+
 are convenient for receiving, from C, pointers to arrays or other
-collections of data.  Such pointers need not point to data allocated by Fortran.
-Fortran variable \verb+ierr+ exemplifies a convenient approach to error
-handling through the interface.
+collections of data.  Such pointers need not point to data allocated by
+Fortran.  Fortran variable \verb+ierr+ exemplifies a convenient approach
+to error handling through the interface.
 
-The above implementation might not have the portability needed over a larger set
-of platforms.  Reliance on the previous mapping might be a weakness.
-Furthermore,
+The typical implementation above might not have the portability needed
+over a larger set of platforms.  The previous mapping might
+not be universal.  Furthermore,
 the implementation is hand-programmed, slow, and prone to human error.
 It will probably be replaced by a more automated implementation in accordance
 with the {\slshape Babel} project. 
