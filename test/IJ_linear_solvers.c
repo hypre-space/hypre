@@ -1543,7 +1543,7 @@ main( int   argc,
       HYPRE_PCGSetTol(pcg_solver, tol);
       HYPRE_PCGSetTwoNorm(pcg_solver, 1);
       HYPRE_PCGSetRelChange(pcg_solver, 0);
-      HYPRE_PCGSetLogging(pcg_solver, 1);
+      HYPRE_PCGSetLogging(pcg_solver, 2);
  
       if (solver_id == 1)
       {
@@ -1794,13 +1794,14 @@ main( int   argc,
       HYPRE_GMRESSetKDim(pcg_solver, k_dim);
       HYPRE_GMRESSetMaxIter(pcg_solver, 1000);
       HYPRE_GMRESSetTol(pcg_solver, tol);
-      HYPRE_GMRESSetLogging(pcg_solver, 1);
+      HYPRE_GMRESSetLogging(pcg_solver, 2);
  
       if (solver_id == 3)
       {
          /* use BoomerAMG as preconditioner */
          if (myid == 0) printf("Solver: AMG-GMRES\n");
 
+	 ioutdat = 1;
          HYPRE_BoomerAMGCreate(&pcg_precond); 
          HYPRE_BoomerAMGSetTol(pcg_precond, pc_tol);
          HYPRE_BoomerAMGSetCoarsenType(pcg_precond, (hybrid*coarsen_type));
@@ -1980,13 +1981,13 @@ main( int   argc,
       HYPRE_ParCSRBiCGSTABCreate(MPI_COMM_WORLD, &pcg_solver);
       HYPRE_BiCGSTABSetMaxIter(pcg_solver, 1000);
       HYPRE_BiCGSTABSetTol(pcg_solver, tol);
-      HYPRE_BiCGSTABSetLogging(pcg_solver, 1);
+      HYPRE_BiCGSTABSetLogging(pcg_solver, 2);
  
       if (solver_id == 9)
       {
          /* use BoomerAMG as preconditioner */
          if (myid == 0) printf("Solver: AMG-BiCGSTAB\n");
-
+         ioutdat = 1;
          HYPRE_BoomerAMGCreate(&pcg_precond); 
          HYPRE_BoomerAMGSetTol(pcg_precond, pc_tol);
          HYPRE_BoomerAMGSetCoarsenType(pcg_precond, (hybrid*coarsen_type));
@@ -2134,13 +2135,13 @@ main( int   argc,
       HYPRE_ParCSRCGNRCreate(MPI_COMM_WORLD, &pcg_solver);
       HYPRE_CGNRSetMaxIter(pcg_solver, 1000);
       HYPRE_CGNRSetTol(pcg_solver, tol);
-      HYPRE_CGNRSetLogging(pcg_solver, 1);
+      HYPRE_CGNRSetLogging(pcg_solver, 2);
  
       if (solver_id == 5)
       {
          /* use BoomerAMG as preconditioner */
          if (myid == 0) printf("Solver: AMG-CGNR\n");
-
+         ioutdat = 1;
          HYPRE_BoomerAMGCreate(&pcg_precond); 
          HYPRE_BoomerAMGSetTol(pcg_precond, pc_tol);
          HYPRE_BoomerAMGSetCoarsenType(pcg_precond, (hybrid*coarsen_type));
@@ -2181,8 +2182,7 @@ main( int   argc,
                               (HYPRE_PtrToSolverFcn) HYPRE_ParCSRDiagScale,
                               (HYPRE_PtrToSolverFcn) HYPRE_ParCSRDiagScaleSetup,
                               pcg_precond);
-         hypre_TFree(smooth_option);
-      }
+         hypre_TFree(smooth_option); }
  
       HYPRE_CGNRGetPrecond(pcg_solver, &pcg_precond_gotten);
       if (pcg_precond_gotten != pcg_precond)
