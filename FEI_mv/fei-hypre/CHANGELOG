@@ -22,4 +22,6 @@
 02/22/01    version 1.5.0R5
             - add in debug versions of A-Conjugate and MinRes projections
             - change Schur reduction to look for Schur rows from top
+02/23/01    still version 1.5.0R5
+            - debug Schur reduction when a pressure BC is imposed (not SPD)
 
