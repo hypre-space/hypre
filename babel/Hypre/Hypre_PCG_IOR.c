@@ -1,16 +1,16 @@
 /*
  * File:          Hypre_PCG_IOR.c
- * Symbol:        Hypre.PCG-v0.1.5
+ * Symbol:        Hypre.PCG-v0.1.6
  * Symbol Type:   class
- * Babel Version: 0.7.4
- * SIDL Created:  20021217 16:38:33 PST
- * Generated:     20021217 16:38:36 PST
+ * Babel Version: 0.8.0
+ * SIDL Created:  20030121 14:39:01 PST
+ * Generated:     20030121 14:39:04 PST
  * Description:   Intermediate Object Representation for Hypre.PCG
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.7.4
- * source-line   = 463
+ * babel-version = 0.8.0
+ * source-line   = 462
  * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 
@@ -18,10 +18,35 @@
 #include <stddef.h>
 #include <string.h>
 #include "Hypre_PCG_IOR.h"
+#ifndef included_SIDL_BaseClass_Impl_h
+#include "SIDL_BaseClass_Impl.h"
+#endif
+#ifndef included_SIDL_BaseClass_h
+#include "SIDL_BaseClass.h"
+#endif
+#ifndef included_SIDL_ClassInfo_h
+#include "SIDL_ClassInfo.h"
+#endif
+#ifndef included_SIDL_ClassInfoI_h
+#include "SIDL_ClassInfoI.h"
+#endif
 
 #ifndef NULL
 #define NULL 0
 #endif
+
+/*
+ * Static variables to hold version of IOR
+ */
+
+static const int32_t s_IOR_MAJOR_VERSION = 0;
+static const int32_t s_IOR_MINOR_VERSION = 8;
+/*
+ * Static variable to hold shared ClassInfo interface.
+ */
+
+static SIDL_ClassInfo s_classInfo = NULL;
+static int s_classInfo_init = 1;
 
 /*
  * Static variables for managing EPV initialization.
@@ -61,7 +86,7 @@ extern void Hypre_PCG__set_epv(
  * CAST: dynamic type casting support.
  */
 
-static void* Hypre_PCG__cast(
+static void* ior_Hypre_PCG__cast(
   struct Hypre_PCG__object* self,
   const char* name)
 {
@@ -91,7 +116,7 @@ static void* Hypre_PCG__cast(
  * DELETE: call destructor and free object memory.
  */
 
-static void Hypre_PCG__delete(
+static void ior_Hypre_PCG__delete(
   struct Hypre_PCG__object* self)
 {
   Hypre_PCG__fini(self);
@@ -120,20 +145,22 @@ static void Hypre_PCG__init_epv(
   s_old__sidl_baseinterface = s1->d_sidl_baseinterface.d_epv;
   s_old__sidl_baseclass     = s1->d_epv;
 
-  epv->f__cast                     = Hypre_PCG__cast;
-  epv->f__delete                   = Hypre_PCG__delete;
+  epv->f__cast                     = ior_Hypre_PCG__cast;
+  epv->f__delete                   = ior_Hypre_PCG__delete;
   epv->f__ctor                     = NULL;
   epv->f__dtor                     = NULL;
-  epv->f_addReference              = (void (*)(struct Hypre_PCG__object*)) 
-    s1->d_epv->f_addReference;
-  epv->f_deleteReference           = (void (*)(struct Hypre_PCG__object*)) 
-    s1->d_epv->f_deleteReference;
+  epv->f_addRef                    = (void (*)(struct Hypre_PCG__object*)) 
+    s1->d_epv->f_addRef;
+  epv->f_deleteRef                 = (void (*)(struct Hypre_PCG__object*)) 
+    s1->d_epv->f_deleteRef;
   epv->f_isSame                    = (SIDL_bool (*)(struct Hypre_PCG__object*,
     struct SIDL_BaseInterface__object*)) s1->d_epv->f_isSame;
-  epv->f_queryInterface            = (struct SIDL_BaseInterface__object* 
-    (*)(struct Hypre_PCG__object*,const char*)) s1->d_epv->f_queryInterface;
-  epv->f_isInstanceOf              = (SIDL_bool (*)(struct Hypre_PCG__object*,
-    const char*)) s1->d_epv->f_isInstanceOf;
+  epv->f_queryInt                  = (struct SIDL_BaseInterface__object* 
+    (*)(struct Hypre_PCG__object*,const char*)) s1->d_epv->f_queryInt;
+  epv->f_isType                    = (SIDL_bool (*)(struct Hypre_PCG__object*,
+    const char*)) s1->d_epv->f_isType;
+  epv->f_getClassInfo              = (struct SIDL_ClassInfo__object* (*)(struct 
+    Hypre_PCG__object*)) s1->d_epv->f_getClassInfo;
   epv->f_SetCommunicator           = NULL;
   epv->f_GetDoubleValue            = NULL;
   epv->f_GetIntValue               = NULL;
@@ -155,14 +182,14 @@ static void Hypre_PCG__init_epv(
 
   e0->f__cast                   = (void* (*)(void*,const char*)) epv->f__cast;
   e0->f__delete                 = (void (*)(void*)) epv->f__delete;
-  e0->f_addReference            = (void (*)(void*)) epv->f_addReference;
-  e0->f_deleteReference         = (void (*)(void*)) epv->f_deleteReference;
+  e0->f_addRef                  = (void (*)(void*)) epv->f_addRef;
+  e0->f_deleteRef               = (void (*)(void*)) epv->f_deleteRef;
   e0->f_isSame                  = (SIDL_bool (*)(void*,
     struct SIDL_BaseInterface__object*)) epv->f_isSame;
-  e0->f_queryInterface          = (struct SIDL_BaseInterface__object* (*)(void*,
-    const char*)) epv->f_queryInterface;
-  e0->f_isInstanceOf            = (SIDL_bool (*)(void*,
-    const char*)) epv->f_isInstanceOf;
+  e0->f_queryInt                = (struct SIDL_BaseInterface__object* (*)(void*,
+    const char*)) epv->f_queryInt;
+  e0->f_isType                  = (SIDL_bool (*)(void*,
+    const char*)) epv->f_isType;
   e0->f_SetCommunicator         = (int32_t (*)(void*,
     void*)) epv->f_SetCommunicator;
   e0->f_GetDoubleValue          = (int32_t (*)(void*,const char*,
@@ -186,14 +213,14 @@ static void Hypre_PCG__init_epv(
 
   e1->f__cast                     = (void* (*)(void*,const char*)) epv->f__cast;
   e1->f__delete                   = (void (*)(void*)) epv->f__delete;
-  e1->f_addReference              = (void (*)(void*)) epv->f_addReference;
-  e1->f_deleteReference           = (void (*)(void*)) epv->f_deleteReference;
+  e1->f_addRef                    = (void (*)(void*)) epv->f_addRef;
+  e1->f_deleteRef                 = (void (*)(void*)) epv->f_deleteRef;
   e1->f_isSame                    = (SIDL_bool (*)(void*,
     struct SIDL_BaseInterface__object*)) epv->f_isSame;
-  e1->f_queryInterface            = (struct SIDL_BaseInterface__object* 
-    (*)(void*,const char*)) epv->f_queryInterface;
-  e1->f_isInstanceOf              = (SIDL_bool (*)(void*,
-    const char*)) epv->f_isInstanceOf;
+  e1->f_queryInt                  = (struct SIDL_BaseInterface__object* 
+    (*)(void*,const char*)) epv->f_queryInt;
+  e1->f_isType                    = (SIDL_bool (*)(void*,
+    const char*)) epv->f_isType;
   e1->f_SetCommunicator           = (int32_t (*)(void*,
     void*)) epv->f_SetCommunicator;
   e1->f_GetDoubleValue            = (int32_t (*)(void*,const char*,
@@ -229,14 +256,14 @@ static void Hypre_PCG__init_epv(
 
   e2->f__cast                   = (void* (*)(void*,const char*)) epv->f__cast;
   e2->f__delete                 = (void (*)(void*)) epv->f__delete;
-  e2->f_addReference            = (void (*)(void*)) epv->f_addReference;
-  e2->f_deleteReference         = (void (*)(void*)) epv->f_deleteReference;
+  e2->f_addRef                  = (void (*)(void*)) epv->f_addRef;
+  e2->f_deleteRef               = (void (*)(void*)) epv->f_deleteRef;
   e2->f_isSame                  = (SIDL_bool (*)(void*,
     struct SIDL_BaseInterface__object*)) epv->f_isSame;
-  e2->f_queryInterface          = (struct SIDL_BaseInterface__object* (*)(void*,
-    const char*)) epv->f_queryInterface;
-  e2->f_isInstanceOf            = (SIDL_bool (*)(void*,
-    const char*)) epv->f_isInstanceOf;
+  e2->f_queryInt                = (struct SIDL_BaseInterface__object* (*)(void*,
+    const char*)) epv->f_queryInt;
+  e2->f_isType                  = (SIDL_bool (*)(void*,
+    const char*)) epv->f_isType;
   e2->f_SetCommunicator         = (int32_t (*)(void*,
     void*)) epv->f_SetCommunicator;
   e2->f_GetDoubleValue          = (int32_t (*)(void*,const char*,
@@ -266,33 +293,78 @@ static void Hypre_PCG__init_epv(
   e2->f_SetPrintLevel           = (int32_t (*)(void*,
     int32_t)) epv->f_SetPrintLevel;
 
-  e3->f__cast           = (void* (*)(struct SIDL_BaseClass__object*,
+  e3->f__cast        = (void* (*)(struct SIDL_BaseClass__object*,
     const char*)) epv->f__cast;
-  e3->f__delete         = (void (*)(struct SIDL_BaseClass__object*)) 
+  e3->f__delete      = (void (*)(struct SIDL_BaseClass__object*)) 
     epv->f__delete;
-  e3->f_addReference    = (void (*)(struct SIDL_BaseClass__object*)) 
-    epv->f_addReference;
-  e3->f_deleteReference = (void (*)(struct SIDL_BaseClass__object*)) 
-    epv->f_deleteReference;
-  e3->f_isSame          = (SIDL_bool (*)(struct SIDL_BaseClass__object*,
+  e3->f_addRef       = (void (*)(struct SIDL_BaseClass__object*)) epv->f_addRef;
+  e3->f_deleteRef    = (void (*)(struct SIDL_BaseClass__object*)) 
+    epv->f_deleteRef;
+  e3->f_isSame       = (SIDL_bool (*)(struct SIDL_BaseClass__object*,
     struct SIDL_BaseInterface__object*)) epv->f_isSame;
-  e3->f_queryInterface  = (struct SIDL_BaseInterface__object* (*)(struct 
-    SIDL_BaseClass__object*,const char*)) epv->f_queryInterface;
-  e3->f_isInstanceOf    = (SIDL_bool (*)(struct SIDL_BaseClass__object*,
-    const char*)) epv->f_isInstanceOf;
+  e3->f_queryInt     = (struct SIDL_BaseInterface__object* (*)(struct 
+    SIDL_BaseClass__object*,const char*)) epv->f_queryInt;
+  e3->f_isType       = (SIDL_bool (*)(struct SIDL_BaseClass__object*,
+    const char*)) epv->f_isType;
+  e3->f_getClassInfo = (struct SIDL_ClassInfo__object* (*)(struct 
+    SIDL_BaseClass__object*)) epv->f_getClassInfo;
 
-  e4->f__cast           = (void* (*)(void*,const char*)) epv->f__cast;
-  e4->f__delete         = (void (*)(void*)) epv->f__delete;
-  e4->f_addReference    = (void (*)(void*)) epv->f_addReference;
-  e4->f_deleteReference = (void (*)(void*)) epv->f_deleteReference;
-  e4->f_isSame          = (SIDL_bool (*)(void*,
+  e4->f__cast     = (void* (*)(void*,const char*)) epv->f__cast;
+  e4->f__delete   = (void (*)(void*)) epv->f__delete;
+  e4->f_addRef    = (void (*)(void*)) epv->f_addRef;
+  e4->f_deleteRef = (void (*)(void*)) epv->f_deleteRef;
+  e4->f_isSame    = (SIDL_bool (*)(void*,
     struct SIDL_BaseInterface__object*)) epv->f_isSame;
-  e4->f_queryInterface  = (struct SIDL_BaseInterface__object* (*)(void*,
-    const char*)) epv->f_queryInterface;
-  e4->f_isInstanceOf    = (SIDL_bool (*)(void*,
-    const char*)) epv->f_isInstanceOf;
+  e4->f_queryInt  = (struct SIDL_BaseInterface__object* (*)(void*,
+    const char*)) epv->f_queryInt;
+  e4->f_isType    = (SIDL_bool (*)(void*,const char*)) epv->f_isType;
 
   s_method_initialized = 1;
+}
+
+/*
+ * initClassInfo: create a ClassInfo interface if necessary.
+ */
+
+static void
+initClassInfo(SIDL_ClassInfo *info)
+{
+  if (s_classInfo_init) {
+    SIDL_ClassInfoI impl;
+    s_classInfo_init = 0;
+    impl = SIDL_ClassInfoI__create();
+    s_classInfo = SIDL_ClassInfo__cast(impl);
+    if (impl) {
+      SIDL_ClassInfoI_setName(impl, "Hypre.PCG");
+      SIDL_ClassInfoI_setIORVersion(impl, s_IOR_MAJOR_VERSION,
+        s_IOR_MINOR_VERSION);
+    }
+  }
+  if (s_classInfo) {
+    if (*info) {
+      SIDL_ClassInfo_deleteRef(*info);
+    }
+    *info = s_classInfo;
+    SIDL_ClassInfo_addRef(*info);
+  }
+}
+
+/*
+ * initMetadata: store IOR version & class in SIDL.BaseClass's data
+ */
+
+static void
+initMetadata(struct Hypre_PCG__object* self)
+{
+  if (self) {
+    struct SIDL_BaseClass__data *data = 
+      SIDL_BaseClass__get_data(SIDL_BaseClass__cast(self));
+    if (data) {
+      data->d_IOR_major_version = s_IOR_MAJOR_VERSION;
+      data->d_IOR_minor_version = s_IOR_MINOR_VERSION;
+      initClassInfo(&(data->d_classinfo));
+    }
+  }
 }
 
 /*
@@ -306,6 +378,7 @@ Hypre_PCG__new(void)
     (struct Hypre_PCG__object*) malloc(
       sizeof(struct Hypre_PCG__object));
   Hypre_PCG__init(self);
+  initMetadata(self);
   return self;
 }
 
@@ -362,6 +435,16 @@ void Hypre_PCG__fini(
   SIDL_BaseClass__fini(s1);
 }
 
+/*
+ * VERSION: Return the version of the IOR used to generate this IOR.
+ */
+
+void
+Hypre_PCG__IOR_version(int32_t *major, int32_t *minor)
+{
+  *major = s_IOR_MAJOR_VERSION;
+  *minor = s_IOR_MINOR_VERSION;
+}
 static const struct Hypre_PCG__external
 s_externalEntryPoints = {
   Hypre_PCG__new,
@@ -403,21 +486,21 @@ static void remote_Hypre_PCG__delete(
 }
 
 /*
- * REMOTE METHOD STUB:addReference
+ * REMOTE METHOD STUB:addRef
  */
 
 static void
-remote_Hypre_PCG_addReference(
+remote_Hypre_PCG_addRef(
   struct Hypre_PCG__object* self)
 {
 }
 
 /*
- * REMOTE METHOD STUB:deleteReference
+ * REMOTE METHOD STUB:deleteRef
  */
 
 static void
-remote_Hypre_PCG_deleteReference(
+remote_Hypre_PCG_deleteRef(
   struct Hypre_PCG__object* self)
 {
 }
@@ -435,11 +518,11 @@ remote_Hypre_PCG_isSame(
 }
 
 /*
- * REMOTE METHOD STUB:queryInterface
+ * REMOTE METHOD STUB:queryInt
  */
 
 static struct SIDL_BaseInterface__object*
-remote_Hypre_PCG_queryInterface(
+remote_Hypre_PCG_queryInt(
   struct Hypre_PCG__object* self,
   const char* name)
 {
@@ -447,15 +530,26 @@ remote_Hypre_PCG_queryInterface(
 }
 
 /*
- * REMOTE METHOD STUB:isInstanceOf
+ * REMOTE METHOD STUB:isType
  */
 
 static SIDL_bool
-remote_Hypre_PCG_isInstanceOf(
+remote_Hypre_PCG_isType(
   struct Hypre_PCG__object* self,
   const char* name)
 {
   return 0;
+}
+
+/*
+ * REMOTE METHOD STUB:getClassInfo
+ */
+
+static struct SIDL_ClassInfo__object*
+remote_Hypre_PCG_getClassInfo(
+  struct Hypre_PCG__object* self)
+{
+  return (struct SIDL_ClassInfo__object*) 0;
 }
 
 /*
@@ -677,11 +771,12 @@ static void Hypre_PCG__init_remote_epv(void)
   epv->f__delete                   = remote_Hypre_PCG__delete;
   epv->f__ctor                     = NULL;
   epv->f__dtor                     = NULL;
-  epv->f_addReference              = remote_Hypre_PCG_addReference;
-  epv->f_deleteReference           = remote_Hypre_PCG_deleteReference;
+  epv->f_addRef                    = remote_Hypre_PCG_addRef;
+  epv->f_deleteRef                 = remote_Hypre_PCG_deleteRef;
   epv->f_isSame                    = remote_Hypre_PCG_isSame;
-  epv->f_queryInterface            = remote_Hypre_PCG_queryInterface;
-  epv->f_isInstanceOf              = remote_Hypre_PCG_isInstanceOf;
+  epv->f_queryInt                  = remote_Hypre_PCG_queryInt;
+  epv->f_isType                    = remote_Hypre_PCG_isType;
+  epv->f_getClassInfo              = remote_Hypre_PCG_getClassInfo;
   epv->f_SetCommunicator           = remote_Hypre_PCG_SetCommunicator;
   epv->f_GetDoubleValue            = remote_Hypre_PCG_GetDoubleValue;
   epv->f_GetIntValue               = remote_Hypre_PCG_GetIntValue;
@@ -701,14 +796,14 @@ static void Hypre_PCG__init_remote_epv(void)
 
   e0->f__cast                   = (void* (*)(void*,const char*)) epv->f__cast;
   e0->f__delete                 = (void (*)(void*)) epv->f__delete;
-  e0->f_addReference            = (void (*)(void*)) epv->f_addReference;
-  e0->f_deleteReference         = (void (*)(void*)) epv->f_deleteReference;
+  e0->f_addRef                  = (void (*)(void*)) epv->f_addRef;
+  e0->f_deleteRef               = (void (*)(void*)) epv->f_deleteRef;
   e0->f_isSame                  = (SIDL_bool (*)(void*,
     struct SIDL_BaseInterface__object*)) epv->f_isSame;
-  e0->f_queryInterface          = (struct SIDL_BaseInterface__object* (*)(void*,
-    const char*)) epv->f_queryInterface;
-  e0->f_isInstanceOf            = (SIDL_bool (*)(void*,
-    const char*)) epv->f_isInstanceOf;
+  e0->f_queryInt                = (struct SIDL_BaseInterface__object* (*)(void*,
+    const char*)) epv->f_queryInt;
+  e0->f_isType                  = (SIDL_bool (*)(void*,
+    const char*)) epv->f_isType;
   e0->f_SetCommunicator         = (int32_t (*)(void*,
     void*)) epv->f_SetCommunicator;
   e0->f_GetDoubleValue          = (int32_t (*)(void*,const char*,
@@ -732,14 +827,14 @@ static void Hypre_PCG__init_remote_epv(void)
 
   e1->f__cast                     = (void* (*)(void*,const char*)) epv->f__cast;
   e1->f__delete                   = (void (*)(void*)) epv->f__delete;
-  e1->f_addReference              = (void (*)(void*)) epv->f_addReference;
-  e1->f_deleteReference           = (void (*)(void*)) epv->f_deleteReference;
+  e1->f_addRef                    = (void (*)(void*)) epv->f_addRef;
+  e1->f_deleteRef                 = (void (*)(void*)) epv->f_deleteRef;
   e1->f_isSame                    = (SIDL_bool (*)(void*,
     struct SIDL_BaseInterface__object*)) epv->f_isSame;
-  e1->f_queryInterface            = (struct SIDL_BaseInterface__object* 
-    (*)(void*,const char*)) epv->f_queryInterface;
-  e1->f_isInstanceOf              = (SIDL_bool (*)(void*,
-    const char*)) epv->f_isInstanceOf;
+  e1->f_queryInt                  = (struct SIDL_BaseInterface__object* 
+    (*)(void*,const char*)) epv->f_queryInt;
+  e1->f_isType                    = (SIDL_bool (*)(void*,
+    const char*)) epv->f_isType;
   e1->f_SetCommunicator           = (int32_t (*)(void*,
     void*)) epv->f_SetCommunicator;
   e1->f_GetDoubleValue            = (int32_t (*)(void*,const char*,
@@ -775,14 +870,14 @@ static void Hypre_PCG__init_remote_epv(void)
 
   e2->f__cast                   = (void* (*)(void*,const char*)) epv->f__cast;
   e2->f__delete                 = (void (*)(void*)) epv->f__delete;
-  e2->f_addReference            = (void (*)(void*)) epv->f_addReference;
-  e2->f_deleteReference         = (void (*)(void*)) epv->f_deleteReference;
+  e2->f_addRef                  = (void (*)(void*)) epv->f_addRef;
+  e2->f_deleteRef               = (void (*)(void*)) epv->f_deleteRef;
   e2->f_isSame                  = (SIDL_bool (*)(void*,
     struct SIDL_BaseInterface__object*)) epv->f_isSame;
-  e2->f_queryInterface          = (struct SIDL_BaseInterface__object* (*)(void*,
-    const char*)) epv->f_queryInterface;
-  e2->f_isInstanceOf            = (SIDL_bool (*)(void*,
-    const char*)) epv->f_isInstanceOf;
+  e2->f_queryInt                = (struct SIDL_BaseInterface__object* (*)(void*,
+    const char*)) epv->f_queryInt;
+  e2->f_isType                  = (SIDL_bool (*)(void*,
+    const char*)) epv->f_isType;
   e2->f_SetCommunicator         = (int32_t (*)(void*,
     void*)) epv->f_SetCommunicator;
   e2->f_GetDoubleValue          = (int32_t (*)(void*,const char*,
@@ -812,31 +907,31 @@ static void Hypre_PCG__init_remote_epv(void)
   e2->f_SetPrintLevel           = (int32_t (*)(void*,
     int32_t)) epv->f_SetPrintLevel;
 
-  e3->f__cast           = (void* (*)(struct SIDL_BaseClass__object*,
+  e3->f__cast        = (void* (*)(struct SIDL_BaseClass__object*,
     const char*)) epv->f__cast;
-  e3->f__delete         = (void (*)(struct SIDL_BaseClass__object*)) 
+  e3->f__delete      = (void (*)(struct SIDL_BaseClass__object*)) 
     epv->f__delete;
-  e3->f_addReference    = (void (*)(struct SIDL_BaseClass__object*)) 
-    epv->f_addReference;
-  e3->f_deleteReference = (void (*)(struct SIDL_BaseClass__object*)) 
-    epv->f_deleteReference;
-  e3->f_isSame          = (SIDL_bool (*)(struct SIDL_BaseClass__object*,
+  e3->f_addRef       = (void (*)(struct SIDL_BaseClass__object*)) epv->f_addRef;
+  e3->f_deleteRef    = (void (*)(struct SIDL_BaseClass__object*)) 
+    epv->f_deleteRef;
+  e3->f_isSame       = (SIDL_bool (*)(struct SIDL_BaseClass__object*,
     struct SIDL_BaseInterface__object*)) epv->f_isSame;
-  e3->f_queryInterface  = (struct SIDL_BaseInterface__object* (*)(struct 
-    SIDL_BaseClass__object*,const char*)) epv->f_queryInterface;
-  e3->f_isInstanceOf    = (SIDL_bool (*)(struct SIDL_BaseClass__object*,
-    const char*)) epv->f_isInstanceOf;
+  e3->f_queryInt     = (struct SIDL_BaseInterface__object* (*)(struct 
+    SIDL_BaseClass__object*,const char*)) epv->f_queryInt;
+  e3->f_isType       = (SIDL_bool (*)(struct SIDL_BaseClass__object*,
+    const char*)) epv->f_isType;
+  e3->f_getClassInfo = (struct SIDL_ClassInfo__object* (*)(struct 
+    SIDL_BaseClass__object*)) epv->f_getClassInfo;
 
-  e4->f__cast           = (void* (*)(void*,const char*)) epv->f__cast;
-  e4->f__delete         = (void (*)(void*)) epv->f__delete;
-  e4->f_addReference    = (void (*)(void*)) epv->f_addReference;
-  e4->f_deleteReference = (void (*)(void*)) epv->f_deleteReference;
-  e4->f_isSame          = (SIDL_bool (*)(void*,
+  e4->f__cast     = (void* (*)(void*,const char*)) epv->f__cast;
+  e4->f__delete   = (void (*)(void*)) epv->f__delete;
+  e4->f_addRef    = (void (*)(void*)) epv->f_addRef;
+  e4->f_deleteRef = (void (*)(void*)) epv->f_deleteRef;
+  e4->f_isSame    = (SIDL_bool (*)(void*,
     struct SIDL_BaseInterface__object*)) epv->f_isSame;
-  e4->f_queryInterface  = (struct SIDL_BaseInterface__object* (*)(void*,
-    const char*)) epv->f_queryInterface;
-  e4->f_isInstanceOf    = (SIDL_bool (*)(void*,
-    const char*)) epv->f_isInstanceOf;
+  e4->f_queryInt  = (struct SIDL_BaseInterface__object* (*)(void*,
+    const char*)) epv->f_queryInt;
+  e4->f_isType    = (SIDL_bool (*)(void*,const char*)) epv->f_isType;
 
   s_remote_initialized = 1;
 }

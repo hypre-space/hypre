@@ -1,16 +1,16 @@
 /*
  * File:          Hypre_StructMatrix_Skel.c
- * Symbol:        Hypre.StructMatrix-v0.1.5
+ * Symbol:        Hypre.StructMatrix-v0.1.6
  * Symbol Type:   class
- * Babel Version: 0.7.4
- * SIDL Created:  20021217 16:38:33 PST
- * Generated:     20021217 16:38:42 PST
+ * Babel Version: 0.8.0
+ * SIDL Created:  20030121 14:39:01 PST
+ * Generated:     20030121 14:39:10 PST
  * Description:   Server-side glue code for Hypre.StructMatrix
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.7.4
- * source-line   = 426
+ * babel-version = 0.8.0
+ * source-line   = 425
  * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 
@@ -30,56 +30,6 @@ extern int32_t
 impl_Hypre_StructMatrix_SetCommunicator(
   Hypre_StructMatrix,
   void*);
-
-extern int32_t
-impl_Hypre_StructMatrix_Initialize(
-  Hypre_StructMatrix);
-
-extern int32_t
-impl_Hypre_StructMatrix_Assemble(
-  Hypre_StructMatrix);
-
-extern int32_t
-impl_Hypre_StructMatrix_GetObject(
-  Hypre_StructMatrix,
-  SIDL_BaseInterface*);
-
-extern int32_t
-impl_Hypre_StructMatrix_SetGrid(
-  Hypre_StructMatrix,
-  Hypre_StructGrid);
-
-extern int32_t
-impl_Hypre_StructMatrix_SetStencil(
-  Hypre_StructMatrix,
-  Hypre_StructStencil);
-
-extern int32_t
-impl_Hypre_StructMatrix_SetValues(
-  Hypre_StructMatrix,
-  struct SIDL_int__array*,
-  int32_t,
-  struct SIDL_int__array*,
-  struct SIDL_double__array*);
-
-extern int32_t
-impl_Hypre_StructMatrix_SetBoxValues(
-  Hypre_StructMatrix,
-  struct SIDL_int__array*,
-  struct SIDL_int__array*,
-  int32_t,
-  struct SIDL_int__array*,
-  struct SIDL_double__array*);
-
-extern int32_t
-impl_Hypre_StructMatrix_SetNumGhost(
-  Hypre_StructMatrix,
-  struct SIDL_int__array*);
-
-extern int32_t
-impl_Hypre_StructMatrix_SetSymmetric(
-  Hypre_StructMatrix,
-  int32_t);
 
 extern int32_t
 impl_Hypre_StructMatrix_GetDoubleValue(
@@ -135,21 +85,62 @@ impl_Hypre_StructMatrix_Apply(
   Hypre_Vector,
   Hypre_Vector*);
 
+extern int32_t
+impl_Hypre_StructMatrix_Initialize(
+  Hypre_StructMatrix);
+
+extern int32_t
+impl_Hypre_StructMatrix_Assemble(
+  Hypre_StructMatrix);
+
+extern int32_t
+impl_Hypre_StructMatrix_GetObject(
+  Hypre_StructMatrix,
+  SIDL_BaseInterface*);
+
+extern int32_t
+impl_Hypre_StructMatrix_SetGrid(
+  Hypre_StructMatrix,
+  Hypre_StructGrid);
+
+extern int32_t
+impl_Hypre_StructMatrix_SetStencil(
+  Hypre_StructMatrix,
+  Hypre_StructStencil);
+
+extern int32_t
+impl_Hypre_StructMatrix_SetValues(
+  Hypre_StructMatrix,
+  struct SIDL_int__array*,
+  int32_t,
+  struct SIDL_int__array*,
+  struct SIDL_double__array*);
+
+extern int32_t
+impl_Hypre_StructMatrix_SetBoxValues(
+  Hypre_StructMatrix,
+  struct SIDL_int__array*,
+  struct SIDL_int__array*,
+  int32_t,
+  struct SIDL_int__array*,
+  struct SIDL_double__array*);
+
+extern int32_t
+impl_Hypre_StructMatrix_SetNumGhost(
+  Hypre_StructMatrix,
+  struct SIDL_int__array*);
+
+extern int32_t
+impl_Hypre_StructMatrix_SetSymmetric(
+  Hypre_StructMatrix,
+  int32_t);
+
 void
 Hypre_StructMatrix__set_epv(struct Hypre_StructMatrix__epv *epv)
 {
   epv->f__ctor = impl_Hypre_StructMatrix__ctor;
   epv->f__dtor = impl_Hypre_StructMatrix__dtor;
   epv->f_SetCommunicator = impl_Hypre_StructMatrix_SetCommunicator;
-  epv->f_Initialize = impl_Hypre_StructMatrix_Initialize;
-  epv->f_Assemble = impl_Hypre_StructMatrix_Assemble;
-  epv->f_GetObject = impl_Hypre_StructMatrix_GetObject;
-  epv->f_SetGrid = impl_Hypre_StructMatrix_SetGrid;
-  epv->f_SetStencil = impl_Hypre_StructMatrix_SetStencil;
-  epv->f_SetValues = impl_Hypre_StructMatrix_SetValues;
-  epv->f_SetBoxValues = impl_Hypre_StructMatrix_SetBoxValues;
-  epv->f_SetNumGhost = impl_Hypre_StructMatrix_SetNumGhost;
-  epv->f_SetSymmetric = impl_Hypre_StructMatrix_SetSymmetric;
   epv->f_GetDoubleValue = impl_Hypre_StructMatrix_GetDoubleValue;
   epv->f_GetIntValue = impl_Hypre_StructMatrix_GetIntValue;
   epv->f_SetDoubleParameter = impl_Hypre_StructMatrix_SetDoubleParameter;
@@ -160,6 +151,15 @@ Hypre_StructMatrix__set_epv(struct Hypre_StructMatrix__epv *epv)
     impl_Hypre_StructMatrix_SetDoubleArrayParameter;
   epv->f_Setup = impl_Hypre_StructMatrix_Setup;
   epv->f_Apply = impl_Hypre_StructMatrix_Apply;
+  epv->f_Initialize = impl_Hypre_StructMatrix_Initialize;
+  epv->f_Assemble = impl_Hypre_StructMatrix_Assemble;
+  epv->f_GetObject = impl_Hypre_StructMatrix_GetObject;
+  epv->f_SetGrid = impl_Hypre_StructMatrix_SetGrid;
+  epv->f_SetStencil = impl_Hypre_StructMatrix_SetStencil;
+  epv->f_SetValues = impl_Hypre_StructMatrix_SetValues;
+  epv->f_SetBoxValues = impl_Hypre_StructMatrix_SetBoxValues;
+  epv->f_SetNumGhost = impl_Hypre_StructMatrix_SetNumGhost;
+  epv->f_SetSymmetric = impl_Hypre_StructMatrix_SetSymmetric;
 }
 
 struct Hypre_StructMatrix__data*

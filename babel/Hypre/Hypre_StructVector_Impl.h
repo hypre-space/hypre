@@ -1,16 +1,16 @@
 /*
  * File:          Hypre_StructVector_Impl.h
- * Symbol:        Hypre.StructVector-v0.1.5
+ * Symbol:        Hypre.StructVector-v0.1.6
  * Symbol Type:   class
- * Babel Version: 0.7.4
- * SIDL Created:  20021217 16:38:33 PST
- * Generated:     20021217 16:38:42 PST
+ * Babel Version: 0.8.0
+ * SIDL Created:  20030121 14:39:01 PST
+ * Generated:     20030121 14:39:10 PST
  * Description:   Server-side implementation for Hypre.StructVector
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.7.4
- * source-line   = 428
+ * babel-version = 0.8.0
+ * source-line   = 427
  * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 
@@ -81,37 +81,6 @@ impl_Hypre_StructVector__dtor(
  */
 
 extern int32_t
-impl_Hypre_StructVector_Clear(
-  Hypre_StructVector);
-
-extern int32_t
-impl_Hypre_StructVector_Copy(
-  Hypre_StructVector,
-  Hypre_Vector);
-
-extern int32_t
-impl_Hypre_StructVector_Clone(
-  Hypre_StructVector,
-  Hypre_Vector*);
-
-extern int32_t
-impl_Hypre_StructVector_Scale(
-  Hypre_StructVector,
-  double);
-
-extern int32_t
-impl_Hypre_StructVector_Dot(
-  Hypre_StructVector,
-  Hypre_Vector,
-  double*);
-
-extern int32_t
-impl_Hypre_StructVector_Axpy(
-  Hypre_StructVector,
-  double,
-  Hypre_Vector);
-
-extern int32_t
 impl_Hypre_StructVector_SetCommunicator(
   Hypre_StructVector,
   void*);
@@ -151,6 +120,37 @@ impl_Hypre_StructVector_SetBoxValues(
   struct SIDL_int__array*,
   struct SIDL_int__array*,
   struct SIDL_double__array*);
+
+extern int32_t
+impl_Hypre_StructVector_Clear(
+  Hypre_StructVector);
+
+extern int32_t
+impl_Hypre_StructVector_Copy(
+  Hypre_StructVector,
+  Hypre_Vector);
+
+extern int32_t
+impl_Hypre_StructVector_Clone(
+  Hypre_StructVector,
+  Hypre_Vector*);
+
+extern int32_t
+impl_Hypre_StructVector_Scale(
+  Hypre_StructVector,
+  double);
+
+extern int32_t
+impl_Hypre_StructVector_Dot(
+  Hypre_StructVector,
+  Hypre_Vector,
+  double*);
+
+extern int32_t
+impl_Hypre_StructVector_Axpy(
+  Hypre_StructVector,
+  double,
+  Hypre_Vector);
 
 #ifdef __cplusplus
 }

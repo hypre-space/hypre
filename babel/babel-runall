@@ -13,6 +13,7 @@
 #   setenv BABEL /usr/casc/babel/babel-0.7.4/casc-linux-gcc2.96/
 #   setenv BABEL_EXEC ${BABEL}
 #   setenv LD_LIBRARY_PATH /usr/casc/babel/babel-0.7.4/casc-linux-gcc2.96/lib:${LD_LIBRARY_PATH}
+# As of January 2002, I have switched to babel-0.8.0, which is not yet in /usr/casc/babel.
 
 babel --output-directory=Hypre -sC Interfaces.idl
 babel --output-directory=HypreClient-C -cC Interfaces.idl

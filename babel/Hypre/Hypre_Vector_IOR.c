@@ -1,16 +1,16 @@
 /*
  * File:          Hypre_Vector_IOR.c
- * Symbol:        Hypre.Vector-v0.1.5
+ * Symbol:        Hypre.Vector-v0.1.6
  * Symbol Type:   interface
- * Babel Version: 0.7.4
- * SIDL Created:  20021217 16:38:32 PST
- * Generated:     20021217 16:38:34 PST
+ * Babel Version: 0.8.0
+ * SIDL Created:  20030121 14:39:00 PST
+ * Generated:     20030121 14:39:01 PST
  * Description:   Intermediate Object Representation for Hypre.Vector
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.7.4
- * source-line   = 35
+ * babel-version = 0.8.0
+ * source-line   = 34
  * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 
@@ -23,6 +23,12 @@
 #define NULL 0
 #endif
 
+/*
+ * Static variables to hold version of IOR
+ */
+
+static const int32_t s_IOR_MAJOR_VERSION = 0;
+static const int32_t s_IOR_MINOR_VERSION = 8;
 /*
  * Static variables for managing EPV initialization.
  */
@@ -53,21 +59,21 @@ static void remote_Hypre_Vector__delete(
 }
 
 /*
- * REMOTE METHOD STUB:addReference
+ * REMOTE METHOD STUB:addRef
  */
 
 static void
-remote_Hypre_Vector_addReference(
+remote_Hypre_Vector_addRef(
   void* self)
 {
 }
 
 /*
- * REMOTE METHOD STUB:deleteReference
+ * REMOTE METHOD STUB:deleteRef
  */
 
 static void
-remote_Hypre_Vector_deleteReference(
+remote_Hypre_Vector_deleteRef(
   void* self)
 {
 }
@@ -85,11 +91,11 @@ remote_Hypre_Vector_isSame(
 }
 
 /*
- * REMOTE METHOD STUB:queryInterface
+ * REMOTE METHOD STUB:queryInt
  */
 
 static struct SIDL_BaseInterface__object*
-remote_Hypre_Vector_queryInterface(
+remote_Hypre_Vector_queryInt(
   void* self,
   const char* name)
 {
@@ -97,11 +103,11 @@ remote_Hypre_Vector_queryInterface(
 }
 
 /*
- * REMOTE METHOD STUB:isInstanceOf
+ * REMOTE METHOD STUB:isType
  */
 
 static SIDL_bool
-remote_Hypre_Vector_isInstanceOf(
+remote_Hypre_Vector_isType(
   void* self,
   const char* name)
 {
@@ -189,19 +195,19 @@ static void Hypre_Vector__init_remote_epv(void)
 {
   struct Hypre_Vector__epv* epv = &s_rem__hypre_vector;
 
-  epv->f__cast           = remote_Hypre_Vector__cast;
-  epv->f__delete         = remote_Hypre_Vector__delete;
-  epv->f_addReference    = remote_Hypre_Vector_addReference;
-  epv->f_deleteReference = remote_Hypre_Vector_deleteReference;
-  epv->f_isSame          = remote_Hypre_Vector_isSame;
-  epv->f_queryInterface  = remote_Hypre_Vector_queryInterface;
-  epv->f_isInstanceOf    = remote_Hypre_Vector_isInstanceOf;
-  epv->f_Clear           = remote_Hypre_Vector_Clear;
-  epv->f_Copy            = remote_Hypre_Vector_Copy;
-  epv->f_Clone           = remote_Hypre_Vector_Clone;
-  epv->f_Scale           = remote_Hypre_Vector_Scale;
-  epv->f_Dot             = remote_Hypre_Vector_Dot;
-  epv->f_Axpy            = remote_Hypre_Vector_Axpy;
+  epv->f__cast     = remote_Hypre_Vector__cast;
+  epv->f__delete   = remote_Hypre_Vector__delete;
+  epv->f_addRef    = remote_Hypre_Vector_addRef;
+  epv->f_deleteRef = remote_Hypre_Vector_deleteRef;
+  epv->f_isSame    = remote_Hypre_Vector_isSame;
+  epv->f_queryInt  = remote_Hypre_Vector_queryInt;
+  epv->f_isType    = remote_Hypre_Vector_isType;
+  epv->f_Clear     = remote_Hypre_Vector_Clear;
+  epv->f_Copy      = remote_Hypre_Vector_Copy;
+  epv->f_Clone     = remote_Hypre_Vector_Clone;
+  epv->f_Scale     = remote_Hypre_Vector_Scale;
+  epv->f_Dot       = remote_Hypre_Vector_Dot;
+  epv->f_Axpy      = remote_Hypre_Vector_Axpy;
   s_remote_initialized = 1;
 }
 

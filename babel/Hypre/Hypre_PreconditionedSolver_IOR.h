@@ -1,16 +1,16 @@
 /*
  * File:          Hypre_PreconditionedSolver_IOR.h
- * Symbol:        Hypre.PreconditionedSolver-v0.1.5
+ * Symbol:        Hypre.PreconditionedSolver-v0.1.6
  * Symbol Type:   interface
- * Babel Version: 0.7.4
- * SIDL Created:  20021217 16:38:33 PST
- * Generated:     20021217 16:38:36 PST
+ * Babel Version: 0.8.0
+ * SIDL Created:  20030121 14:39:00 PST
+ * Generated:     20030121 14:39:03 PST
  * Description:   Intermediate Object Representation for Hypre.PreconditionedSolver
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.7.4
- * source-line   = 368
+ * babel-version = 0.8.0
+ * source-line   = 367
  * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 
@@ -25,7 +25,7 @@ extern "C" {
 #endif
 
 /*
- * Symbol "Hypre.PreconditionedSolver" (version 0.1.5)
+ * Symbol "Hypre.PreconditionedSolver" (version 0.1.6)
  */
 
 struct Hypre_PreconditionedSolver__array;
@@ -58,21 +58,21 @@ struct Hypre_PreconditionedSolver__epv {
     const char* name);
   void (*f__delete)(
     void* self);
-  /* Methods introduced in SIDL.BaseInterface-v0.7.4 */
-  void (*f_addReference)(
+  /* Methods introduced in SIDL.BaseInterface-v0.8.1 */
+  void (*f_addRef)(
     void* self);
-  void (*f_deleteReference)(
+  void (*f_deleteRef)(
     void* self);
   SIDL_bool (*f_isSame)(
     void* self,
     struct SIDL_BaseInterface__object* iobj);
-  struct SIDL_BaseInterface__object* (*f_queryInterface)(
+  struct SIDL_BaseInterface__object* (*f_queryInt)(
     void* self,
     const char* name);
-  SIDL_bool (*f_isInstanceOf)(
+  SIDL_bool (*f_isType)(
     void* self,
     const char* name);
-  /* Methods introduced in Hypre.Operator-v0.1.5 */
+  /* Methods introduced in Hypre.Operator-v0.1.6 */
   int32_t (*f_SetCommunicator)(
     void* self,
     void* comm);
@@ -112,7 +112,7 @@ struct Hypre_PreconditionedSolver__epv {
     void* self,
     struct Hypre_Vector__object* b,
     struct Hypre_Vector__object** x);
-  /* Methods introduced in Hypre.Solver-v0.1.5 */
+  /* Methods introduced in Hypre.Solver-v0.1.6 */
   int32_t (*f_SetOperator)(
     void* self,
     struct Hypre_Operator__object* A);
@@ -125,7 +125,7 @@ struct Hypre_PreconditionedSolver__epv {
   int32_t (*f_SetPrintLevel)(
     void* self,
     int32_t level);
-  /* Methods introduced in Hypre.PreconditionedSolver-v0.1.5 */
+  /* Methods introduced in Hypre.PreconditionedSolver-v0.1.6 */
   int32_t (*f_SetPreconditioner)(
     void* self,
     struct Hypre_Solver__object* s);

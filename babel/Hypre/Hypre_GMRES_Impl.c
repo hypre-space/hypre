@@ -1,16 +1,16 @@
 /*
  * File:          Hypre_GMRES_Impl.c
- * Symbol:        Hypre.GMRES-v0.1.5
+ * Symbol:        Hypre.GMRES-v0.1.6
  * Symbol Type:   class
- * Babel Version: 0.7.4
- * SIDL Created:  20021217 16:38:33 PST
- * Generated:     20021217 16:38:41 PST
+ * Babel Version: 0.8.0
+ * SIDL Created:  20030121 14:39:01 PST
+ * Generated:     20030121 14:39:08 PST
  * Description:   Server-side implementation for Hypre.GMRES
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.7.4
- * source-line   = 465
+ * babel-version = 0.8.0
+ * source-line   = 464
  * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 
@@ -20,7 +20,7 @@
  */
 
 /*
- * Symbol "Hypre.GMRES" (version 0.1.5)
+ * Symbol "Hypre.GMRES" (version 0.1.6)
  */
 
 #include "Hypre_GMRES_Impl.h"
@@ -135,7 +135,7 @@ impl_Hypre_GMRES__dtor(
 
 /* >>> TO DO switch according to vector_type; it's not always ParCSR */
    ierr += HYPRE_ParCSRGMRESDestroy( data->solver );
-   Hypre_Operator_deleteReference( data->matrix );
+   Hypre_Operator_deleteRef( data->matrix );
    /* delete any nontrivial data components here */
    hypre_TFree( data );
 
@@ -430,7 +430,7 @@ impl_Hypre_GMRES_Setup(
    if ( data -> vector_type == NULL ) {
       /* This is the first time this Babel GMRES object has seen a vector.
          So we are ready to create the Hypre GMRES object. */
-      if ( Hypre_Vector_queryInterface( b, "Hypre.ParCSRVector") ) {
+      if ( Hypre_Vector_queryInt( b, "Hypre.ParCSRVector") ) {
          data -> vector_type = "ParVector";
          HYPRE_ParCSRGMRESCreate( comm, psolver );
          assert( solver != NULL );
@@ -453,7 +453,7 @@ impl_Hypre_GMRES_Setup(
    ierr += impl_Hypre_GMRES_Copy_Parameters_to_HYPRE_struct( self );
    if ( data->vector_type == "ParVector" ) {
          HypreP_b = Hypre_Vector__cast2
-            ( Hypre_Vector_queryInterface( b, "Hypre.ParCSRVector"),
+            ( Hypre_Vector_queryInt( b, "Hypre.ParCSRVector"),
               "Hypre.ParCSRVector" );
          datab = Hypre_ParCSRVector__get_data( HypreP_b );
          ij_b = datab -> ij_b;
@@ -462,7 +462,7 @@ impl_Hypre_GMRES_Setup(
          HYPRE_b = (HYPRE_Vector) bb;
 
          HypreP_x = Hypre_Vector__cast2
-            ( Hypre_Vector_queryInterface( x, "Hypre.ParCSRVector"),
+            ( Hypre_Vector_queryInt( x, "Hypre.ParCSRVector"),
               "Hypre.ParCSRVector" );
          datax = Hypre_ParCSRVector__get_data( HypreP_x );
          ij_x = datax -> ij_b;
@@ -471,7 +471,7 @@ impl_Hypre_GMRES_Setup(
          HYPRE_x = (HYPRE_Vector) xx;
 
          HypreP_A = Hypre_Operator__cast2
-            ( Hypre_Operator_queryInterface( mat, "Hypre.ParCSRMatrix"),
+            ( Hypre_Operator_queryInt( mat, "Hypre.ParCSRMatrix"),
               "Hypre.ParCSRMatrix" );
          assert( HypreP_A != NULL );
          dataA = Hypre_ParCSRMatrix__get_data( HypreP_A );
@@ -540,7 +540,7 @@ impl_Hypre_GMRES_Apply(
    if ( data -> vector_type == NULL ) {
       /* This is the first time this Babel GMRES object has seen a vector.
          So we are ready to create the Hypre GMRES object. */
-      if ( Hypre_Vector_queryInterface( b, "Hypre.ParCSRVector") ) {
+      if ( Hypre_Vector_queryInt( b, "Hypre.ParCSRVector") ) {
          data -> vector_type = "ParVector";
          HYPRE_ParCSRGMRESCreate( comm, psolver );
          assert( solver != NULL );
@@ -563,7 +563,7 @@ impl_Hypre_GMRES_Apply(
    ierr += impl_Hypre_GMRES_Copy_Parameters_to_HYPRE_struct( self );
    if ( data->vector_type == "ParVector" ) {
          HypreP_b = Hypre_Vector__cast2
-            ( Hypre_Vector_queryInterface( b, "Hypre.ParCSRVector"),
+            ( Hypre_Vector_queryInt( b, "Hypre.ParCSRVector"),
               "Hypre.ParCSRVector" );
          datab = Hypre_ParCSRVector__get_data( HypreP_b );
          ij_b = datab -> ij_b;
@@ -572,7 +572,7 @@ impl_Hypre_GMRES_Apply(
          HYPRE_b = (HYPRE_Vector) bb;
 
          HypreP_x = Hypre_Vector__cast2
-            ( Hypre_Vector_queryInterface( *x, "Hypre.ParCSRVector"),
+            ( Hypre_Vector_queryInt( *x, "Hypre.ParCSRVector"),
               "Hypre.ParCSRVector" );
          datax = Hypre_ParCSRVector__get_data( HypreP_x );
          ij_x = datax -> ij_b;
@@ -581,7 +581,7 @@ impl_Hypre_GMRES_Apply(
          HYPRE_x = (HYPRE_Vector) xx;
 
          HypreP_A = Hypre_Operator__cast2
-            ( Hypre_Operator_queryInterface( mat, "Hypre.ParCSRMatrix"),
+            ( Hypre_Operator_queryInt( mat, "Hypre.ParCSRMatrix"),
               "Hypre.ParCSRMatrix" );
          assert( HypreP_A != NULL );
          dataA = Hypre_ParCSRMatrix__get_data( HypreP_A );
@@ -665,7 +665,7 @@ impl_Hypre_GMRES_GetResidual(
 
    if ( vector_type=="ParVector" ) {
       HypreP_r = Hypre_Vector__cast2
-         ( Hypre_Vector_queryInterface( *r, "Hypre.ParCSRVector"),
+         ( Hypre_Vector_queryInt( *r, "Hypre.ParCSRVector"),
            "Hypre.ParCSRVector" );
       assert( HypreP_r!=NULL );
       datar = Hypre_ParCSRVector__get_data( HypreP_r );
@@ -764,10 +764,10 @@ impl_Hypre_GMRES_SetPreconditioner(
 /*   solver = dataself->solver;
      assert( solver != NULL );*/
 
-   if ( Hypre_Solver_queryInterface( s, "Hypre.ParAMG" ) ) {
+   if ( Hypre_Solver_queryInt( s, "Hypre.ParAMG" ) ) {
       /* s is a Hypre_ParAMG */
       AMG_s = Hypre_Operator__cast2
-         ( Hypre_Solver_queryInterface( s, "Hypre.ParAMG"),
+         ( Hypre_Solver_queryInt( s, "Hypre.ParAMG"),
            "Hypre.ParAMG" );
       AMG_dataprecond = Hypre_ParAMG__get_data( AMG_s );
       solverprecond = &AMG_dataprecond->solver;
@@ -775,10 +775,10 @@ impl_Hypre_GMRES_SetPreconditioner(
       precond = (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSolve;
       precond_setup = (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSetup;
    }
-   else if ( Hypre_Solver_queryInterface( s, "Hypre.ParDiagScale" ) ) {
+   else if ( Hypre_Solver_queryInt( s, "Hypre.ParDiagScale" ) ) {
       /* s is a Hypre_ParDiagScale */
 /* not used      DiagScale_s = Hypre_Operator__cast2
-         ( Hypre_Solver_queryInterface( s, "Hypre.ParDiagScale"),
+         ( Hypre_Solver_queryInt( s, "Hypre.ParDiagScale"),
          "Hypre.ParDiagScale" );*/
 /* not used      DiagScale_dataprecond = Hypre_ParDiagScale__get_data( DiagScale_s );*/
       solverprecond = (HYPRE_Solver *) hypre_CTAlloc( double, 1 );

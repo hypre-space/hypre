@@ -1,16 +1,16 @@
 /*
  * File:          Hypre_StructVector_Skel.c
- * Symbol:        Hypre.StructVector-v0.1.5
+ * Symbol:        Hypre.StructVector-v0.1.6
  * Symbol Type:   class
- * Babel Version: 0.7.4
- * SIDL Created:  20021217 16:38:33 PST
- * Generated:     20021217 16:38:42 PST
+ * Babel Version: 0.8.0
+ * SIDL Created:  20030121 14:39:01 PST
+ * Generated:     20030121 14:39:10 PST
  * Description:   Server-side glue code for Hypre.StructVector
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.7.4
- * source-line   = 428
+ * babel-version = 0.8.0
+ * source-line   = 427
  * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 
@@ -25,37 +25,6 @@ impl_Hypre_StructVector__ctor(
 extern void
 impl_Hypre_StructVector__dtor(
   Hypre_StructVector);
-
-extern int32_t
-impl_Hypre_StructVector_Clear(
-  Hypre_StructVector);
-
-extern int32_t
-impl_Hypre_StructVector_Copy(
-  Hypre_StructVector,
-  Hypre_Vector);
-
-extern int32_t
-impl_Hypre_StructVector_Clone(
-  Hypre_StructVector,
-  Hypre_Vector*);
-
-extern int32_t
-impl_Hypre_StructVector_Scale(
-  Hypre_StructVector,
-  double);
-
-extern int32_t
-impl_Hypre_StructVector_Dot(
-  Hypre_StructVector,
-  Hypre_Vector,
-  double*);
-
-extern int32_t
-impl_Hypre_StructVector_Axpy(
-  Hypre_StructVector,
-  double,
-  Hypre_Vector);
 
 extern int32_t
 impl_Hypre_StructVector_SetCommunicator(
@@ -98,17 +67,42 @@ impl_Hypre_StructVector_SetBoxValues(
   struct SIDL_int__array*,
   struct SIDL_double__array*);
 
+extern int32_t
+impl_Hypre_StructVector_Clear(
+  Hypre_StructVector);
+
+extern int32_t
+impl_Hypre_StructVector_Copy(
+  Hypre_StructVector,
+  Hypre_Vector);
+
+extern int32_t
+impl_Hypre_StructVector_Clone(
+  Hypre_StructVector,
+  Hypre_Vector*);
+
+extern int32_t
+impl_Hypre_StructVector_Scale(
+  Hypre_StructVector,
+  double);
+
+extern int32_t
+impl_Hypre_StructVector_Dot(
+  Hypre_StructVector,
+  Hypre_Vector,
+  double*);
+
+extern int32_t
+impl_Hypre_StructVector_Axpy(
+  Hypre_StructVector,
+  double,
+  Hypre_Vector);
+
 void
 Hypre_StructVector__set_epv(struct Hypre_StructVector__epv *epv)
 {
   epv->f__ctor = impl_Hypre_StructVector__ctor;
   epv->f__dtor = impl_Hypre_StructVector__dtor;
-  epv->f_Clear = impl_Hypre_StructVector_Clear;
-  epv->f_Copy = impl_Hypre_StructVector_Copy;
-  epv->f_Clone = impl_Hypre_StructVector_Clone;
-  epv->f_Scale = impl_Hypre_StructVector_Scale;
-  epv->f_Dot = impl_Hypre_StructVector_Dot;
-  epv->f_Axpy = impl_Hypre_StructVector_Axpy;
   epv->f_SetCommunicator = impl_Hypre_StructVector_SetCommunicator;
   epv->f_Initialize = impl_Hypre_StructVector_Initialize;
   epv->f_Assemble = impl_Hypre_StructVector_Assemble;
@@ -117,6 +111,12 @@ Hypre_StructVector__set_epv(struct Hypre_StructVector__epv *epv)
   epv->f_SetStencil = impl_Hypre_StructVector_SetStencil;
   epv->f_SetValue = impl_Hypre_StructVector_SetValue;
   epv->f_SetBoxValues = impl_Hypre_StructVector_SetBoxValues;
+  epv->f_Clear = impl_Hypre_StructVector_Clear;
+  epv->f_Copy = impl_Hypre_StructVector_Copy;
+  epv->f_Clone = impl_Hypre_StructVector_Clone;
+  epv->f_Scale = impl_Hypre_StructVector_Scale;
+  epv->f_Dot = impl_Hypre_StructVector_Dot;
+  epv->f_Axpy = impl_Hypre_StructVector_Axpy;
 }
 
 struct Hypre_StructVector__data*

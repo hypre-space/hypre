@@ -1,16 +1,16 @@
 /*
  * File:          Hypre_Operator.h
- * Symbol:        Hypre.Operator-v0.1.5
+ * Symbol:        Hypre.Operator-v0.1.6
  * Symbol Type:   interface
- * Babel Version: 0.7.4
- * SIDL Created:  20021217 16:38:33 PST
- * Generated:     20021217 16:38:39 PST
+ * Babel Version: 0.8.0
+ * SIDL Created:  20030121 14:39:00 PST
+ * Generated:     20030121 14:39:07 PST
  * Description:   Client-side glue code for Hypre.Operator
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.7.4
- * source-line   = 327
+ * babel-version = 0.8.0
+ * source-line   = 326
  * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 
@@ -18,7 +18,7 @@
 #define included_Hypre_Operator_h
 
 /**
- * Symbol "Hypre.Operator" (version 0.1.5)
+ * Symbol "Hypre.Operator" (version 0.1.6)
  * 
  * An Operator is anything that maps one Vector to another.
  * The terms "Setup" and "Apply" are reserved for Operators.
@@ -48,36 +48,36 @@ extern "C" {
 #endif
 
 /**
- * &lt;p&gt;
+ * <p>
  * Add one to the intrinsic reference count in the underlying object.
- * Object in &lt;code&gt;SIDL&lt;/code&gt; have an intrinsic reference count.
+ * Object in <code>SIDL</code> have an intrinsic reference count.
  * Objects continue to exist as long as the reference count is
  * positive. Clients should call this method whenever they
  * create another ongoing reference to an object or interface.
- * &lt;/p&gt;
- * &lt;p&gt;
+ * </p>
+ * <p>
  * This does not have a return value because there is no language
  * independent type that can refer to an interface or a
  * class.
- * &lt;/p&gt;
+ * </p>
  */
 void
-Hypre_Operator_addReference(
+Hypre_Operator_addRef(
   Hypre_Operator self);
 
 /**
  * Decrease by one the intrinsic reference count in the underlying
  * object, and delete the object if the reference is non-positive.
- * Objects in &lt;code&gt;SIDL&lt;/code&gt; have an intrinsic reference count.
+ * Objects in <code>SIDL</code> have an intrinsic reference count.
  * Clients should call this method whenever they remove a
  * reference to an object or interface.
  */
 void
-Hypre_Operator_deleteReference(
+Hypre_Operator_deleteRef(
   Hypre_Operator self);
 
 /**
- * Return true if and only if &lt;code&gt;obj&lt;/code&gt; refers to the same
+ * Return true if and only if <code>obj</code> refers to the same
  * object as this object.
  */
 SIDL_bool
@@ -87,26 +87,26 @@ Hypre_Operator_isSame(
 
 /**
  * Check whether the object can support the specified interface or
- * class.  If the &lt;code&gt;SIDL&lt;/code&gt; type name in &lt;code&gt;name&lt;/code&gt;
+ * class.  If the <code>SIDL</code> type name in <code>name</code>
  * is supported, then a reference to that object is returned with the
  * reference count incremented.  The callee will be responsible for
- * calling &lt;code&gt;deleteReference&lt;/code&gt; on the returned object.  If
+ * calling <code>deleteRef</code> on the returned object.  If
  * the specified type is not supported, then a null reference is
  * returned.
  */
 SIDL_BaseInterface
-Hypre_Operator_queryInterface(
+Hypre_Operator_queryInt(
   Hypre_Operator self,
   const char* name);
 
 /**
  * Return whether this object is an instance of the specified type.
- * The string name must be the &lt;code&gt;SIDL&lt;/code&gt; type name.  This
- * routine will return &lt;code&gt;true&lt;/code&gt; if and only if a cast to
+ * The string name must be the <code>SIDL</code> type name.  This
+ * routine will return <code>true</code> if and only if a cast to
  * the string type name would succeed.
  */
 SIDL_bool
-Hypre_Operator_isInstanceOf(
+Hypre_Operator_isType(
   Hypre_Operator self,
   const char* name);
 
@@ -273,7 +273,7 @@ Hypre_Operator__array_create2dRow(int32_t m, int32_t n);
  * source. The initial contents are determined by the
  * data being borrowed.
  * Any time an element in the borrowed array is replaced
- * via a set call, deleteReference will be called on the
+ * via a set call, deleteRef will be called on the
  * value being replaced if it is not NULL.
  */
 struct Hypre_Operator__array*
@@ -299,7 +299,7 @@ Hypre_Operator__array_smartCopy(struct Hypre_Operator__array *array);
  * Increment the array's internal reference count by one.
  */
 void
-Hypre_Operator__array_addReference(struct Hypre_Operator__array* array);
+Hypre_Operator__array_addRef(struct Hypre_Operator__array* array);
 
 /**
  * Decrement the array's internal reference count by one.
@@ -308,7 +308,7 @@ Hypre_Operator__array_addReference(struct Hypre_Operator__array* array);
  * object references held by the array.
  */
 void
-Hypre_Operator__array_deleteReference(struct Hypre_Operator__array* array);
+Hypre_Operator__array_deleteRef(struct Hypre_Operator__array* array);
 
 /**
  * Retrieve element i1 of a(n) 1-dimensional array.

@@ -9,7 +9,7 @@
 /* same as SIDL_int__array_borrow_f, but the first argument is a pointer
    that gets dereferenced */
 void
-SIDLFortranSymbol(sidl_int__array_borrow_deref_f,
+SIDLFortran77Symbol(sidl_int__array_borrow_deref_f,
                   SIDL_INT__ARRAY_BORROW_DEREF_F,
                   SIDL_int__array_borrow_deref_f)
   (int32_t **firstElement, int32_t *dimen, int32_t lower[], int32_t upper[], int32_t stride[], int64_t *result)
@@ -26,7 +26,7 @@ SIDLFortranSymbol(sidl_int__array_borrow_deref_f,
 /* same as SIDL_double__array_borrow_f, but the first argument is a pointer
    that gets dereferenced */
 void
-SIDLFortranSymbol(sidl_double__array_borrow_deref_f,
+SIDLFortran77Symbol(sidl_double__array_borrow_deref_f,
                   SIDL_DOUBLE__ARRAY_BORROW_DEREF_F,
                   SIDL_double__array_borrow_deref_f)
   (double **firstElement, int32_t *dimen, int32_t lower[], int32_t upper[], int32_t stride[], int64_t *result)
@@ -44,7 +44,7 @@ SIDLFortranSymbol(sidl_double__array_borrow_deref_f,
    but a pointer to an array; and there is a fourth argument, the index to the array.
     */
 void
-SIDLFortranSymbol(sidl_int__array_set1_deref_f,
+SIDLFortran77Symbol(sidl_int__array_set1_deref_f,
                   SIDL_INT__ARRAY_SET1_DEREF_F,
                   SIDL_int__array_set1_deref_f)
   (int64_t *array,

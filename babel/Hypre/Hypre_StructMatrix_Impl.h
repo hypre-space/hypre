@@ -1,16 +1,16 @@
 /*
  * File:          Hypre_StructMatrix_Impl.h
- * Symbol:        Hypre.StructMatrix-v0.1.5
+ * Symbol:        Hypre.StructMatrix-v0.1.6
  * Symbol Type:   class
- * Babel Version: 0.7.4
- * SIDL Created:  20021217 16:38:33 PST
- * Generated:     20021217 16:38:42 PST
+ * Babel Version: 0.8.0
+ * SIDL Created:  20030121 14:39:01 PST
+ * Generated:     20030121 14:39:10 PST
  * Description:   Server-side implementation for Hypre.StructMatrix
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.7.4
- * source-line   = 426
+ * babel-version = 0.8.0
+ * source-line   = 425
  * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 
@@ -86,56 +86,6 @@ impl_Hypre_StructMatrix_SetCommunicator(
   void*);
 
 extern int32_t
-impl_Hypre_StructMatrix_Initialize(
-  Hypre_StructMatrix);
-
-extern int32_t
-impl_Hypre_StructMatrix_Assemble(
-  Hypre_StructMatrix);
-
-extern int32_t
-impl_Hypre_StructMatrix_GetObject(
-  Hypre_StructMatrix,
-  SIDL_BaseInterface*);
-
-extern int32_t
-impl_Hypre_StructMatrix_SetGrid(
-  Hypre_StructMatrix,
-  Hypre_StructGrid);
-
-extern int32_t
-impl_Hypre_StructMatrix_SetStencil(
-  Hypre_StructMatrix,
-  Hypre_StructStencil);
-
-extern int32_t
-impl_Hypre_StructMatrix_SetValues(
-  Hypre_StructMatrix,
-  struct SIDL_int__array*,
-  int32_t,
-  struct SIDL_int__array*,
-  struct SIDL_double__array*);
-
-extern int32_t
-impl_Hypre_StructMatrix_SetBoxValues(
-  Hypre_StructMatrix,
-  struct SIDL_int__array*,
-  struct SIDL_int__array*,
-  int32_t,
-  struct SIDL_int__array*,
-  struct SIDL_double__array*);
-
-extern int32_t
-impl_Hypre_StructMatrix_SetNumGhost(
-  Hypre_StructMatrix,
-  struct SIDL_int__array*);
-
-extern int32_t
-impl_Hypre_StructMatrix_SetSymmetric(
-  Hypre_StructMatrix,
-  int32_t);
-
-extern int32_t
 impl_Hypre_StructMatrix_GetDoubleValue(
   Hypre_StructMatrix,
   const char*,
@@ -188,6 +138,56 @@ impl_Hypre_StructMatrix_Apply(
   Hypre_StructMatrix,
   Hypre_Vector,
   Hypre_Vector*);
+
+extern int32_t
+impl_Hypre_StructMatrix_Initialize(
+  Hypre_StructMatrix);
+
+extern int32_t
+impl_Hypre_StructMatrix_Assemble(
+  Hypre_StructMatrix);
+
+extern int32_t
+impl_Hypre_StructMatrix_GetObject(
+  Hypre_StructMatrix,
+  SIDL_BaseInterface*);
+
+extern int32_t
+impl_Hypre_StructMatrix_SetGrid(
+  Hypre_StructMatrix,
+  Hypre_StructGrid);
+
+extern int32_t
+impl_Hypre_StructMatrix_SetStencil(
+  Hypre_StructMatrix,
+  Hypre_StructStencil);
+
+extern int32_t
+impl_Hypre_StructMatrix_SetValues(
+  Hypre_StructMatrix,
+  struct SIDL_int__array*,
+  int32_t,
+  struct SIDL_int__array*,
+  struct SIDL_double__array*);
+
+extern int32_t
+impl_Hypre_StructMatrix_SetBoxValues(
+  Hypre_StructMatrix,
+  struct SIDL_int__array*,
+  struct SIDL_int__array*,
+  int32_t,
+  struct SIDL_int__array*,
+  struct SIDL_double__array*);
+
+extern int32_t
+impl_Hypre_StructMatrix_SetNumGhost(
+  Hypre_StructMatrix,
+  struct SIDL_int__array*);
+
+extern int32_t
+impl_Hypre_StructMatrix_SetSymmetric(
+  Hypre_StructMatrix,
+  int32_t);
 
 #ifdef __cplusplus
 }

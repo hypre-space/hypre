@@ -1,16 +1,16 @@
 /*
  * File:          Hypre_StructVector_IOR.h
- * Symbol:        Hypre.StructVector-v0.1.5
+ * Symbol:        Hypre.StructVector-v0.1.6
  * Symbol Type:   class
- * Babel Version: 0.7.4
- * SIDL Created:  20021217 16:38:33 PST
- * Generated:     20021217 16:38:35 PST
+ * Babel Version: 0.8.0
+ * SIDL Created:  20030121 14:39:01 PST
+ * Generated:     20030121 14:39:02 PST
  * Description:   Intermediate Object Representation for Hypre.StructVector
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.7.4
- * source-line   = 428
+ * babel-version = 0.8.0
+ * source-line   = 427
  * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 
@@ -38,7 +38,7 @@ extern "C" {
 #endif
 
 /*
- * Symbol "Hypre.StructVector" (version 0.1.5)
+ * Symbol "Hypre.StructVector" (version 0.1.6)
  */
 
 struct Hypre_StructVector__array;
@@ -54,6 +54,7 @@ extern void Hypre_StructVector__init(
   struct Hypre_StructVector__object* self);
 extern void Hypre_StructVector__fini(
   struct Hypre_StructVector__object* self);
+extern void Hypre_StructVector__IOR_version(int32_t *major, int32_t *minor);
 
 /*
  * Forward references for external classes and interfaces.
@@ -65,6 +66,8 @@ struct Hypre_StructStencil__array;
 struct Hypre_StructStencil__object;
 struct SIDL_BaseInterface__array;
 struct SIDL_BaseInterface__object;
+struct SIDL_ClassInfo__array;
+struct SIDL_ClassInfo__object;
 
 /*
  * Declare the method entry point vector.
@@ -81,23 +84,25 @@ struct Hypre_StructVector__epv {
     struct Hypre_StructVector__object* self);
   void (*f__dtor)(
     struct Hypre_StructVector__object* self);
-  /* Methods introduced in SIDL.BaseInterface-v0.7.4 */
-  void (*f_addReference)(
+  /* Methods introduced in SIDL.BaseInterface-v0.8.1 */
+  void (*f_addRef)(
     struct Hypre_StructVector__object* self);
-  void (*f_deleteReference)(
+  void (*f_deleteRef)(
     struct Hypre_StructVector__object* self);
   SIDL_bool (*f_isSame)(
     struct Hypre_StructVector__object* self,
     struct SIDL_BaseInterface__object* iobj);
-  struct SIDL_BaseInterface__object* (*f_queryInterface)(
+  struct SIDL_BaseInterface__object* (*f_queryInt)(
     struct Hypre_StructVector__object* self,
     const char* name);
-  SIDL_bool (*f_isInstanceOf)(
+  SIDL_bool (*f_isType)(
     struct Hypre_StructVector__object* self,
     const char* name);
-  /* Methods introduced in SIDL.BaseClass-v0.7.4 */
-  /* Methods introduced in SIDL.BaseInterface-v0.7.4 */
-  /* Methods introduced in Hypre.ProblemDefinition-v0.1.5 */
+  /* Methods introduced in SIDL.BaseClass-v0.8.1 */
+  struct SIDL_ClassInfo__object* (*f_getClassInfo)(
+    struct Hypre_StructVector__object* self);
+  /* Methods introduced in SIDL.BaseInterface-v0.8.1 */
+  /* Methods introduced in Hypre.ProblemDefinition-v0.1.6 */
   int32_t (*f_SetCommunicator)(
     struct Hypre_StructVector__object* self,
     void* mpi_comm);
@@ -108,7 +113,7 @@ struct Hypre_StructVector__epv {
   int32_t (*f_GetObject)(
     struct Hypre_StructVector__object* self,
     struct SIDL_BaseInterface__object** A);
-  /* Methods introduced in Hypre.StructuredGridBuildVector-v0.1.5 */
+  /* Methods introduced in Hypre.StructuredGridBuildVector-v0.1.6 */
   int32_t (*f_SetGrid)(
     struct Hypre_StructVector__object* self,
     struct Hypre_StructGrid__object* grid);
@@ -124,8 +129,8 @@ struct Hypre_StructVector__epv {
     struct SIDL_int__array* ilower,
     struct SIDL_int__array* iupper,
     struct SIDL_double__array* values);
-  /* Methods introduced in SIDL.BaseInterface-v0.7.4 */
-  /* Methods introduced in Hypre.Vector-v0.1.5 */
+  /* Methods introduced in SIDL.BaseInterface-v0.8.1 */
+  /* Methods introduced in Hypre.Vector-v0.1.6 */
   int32_t (*f_Clear)(
     struct Hypre_StructVector__object* self);
   int32_t (*f_Copy)(
@@ -145,7 +150,7 @@ struct Hypre_StructVector__epv {
     struct Hypre_StructVector__object* self,
     double a,
     struct Hypre_Vector__object* x);
-  /* Methods introduced in Hypre.StructVector-v0.1.5 */
+  /* Methods introduced in Hypre.StructVector-v0.1.6 */
 };
 
 /*

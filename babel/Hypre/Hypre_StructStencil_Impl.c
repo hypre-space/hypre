@@ -1,16 +1,16 @@
 /*
  * File:          Hypre_StructStencil_Impl.c
- * Symbol:        Hypre.StructStencil-v0.1.5
+ * Symbol:        Hypre.StructStencil-v0.1.6
  * Symbol Type:   class
- * Babel Version: 0.7.4
- * SIDL Created:  20021217 16:38:33 PST
- * Generated:     20021217 16:38:42 PST
+ * Babel Version: 0.8.0
+ * SIDL Created:  20030121 14:39:00 PST
+ * Generated:     20030121 14:39:11 PST
  * Description:   Server-side implementation for Hypre.StructStencil
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.7.4
- * source-line   = 399
+ * babel-version = 0.8.0
+ * source-line   = 398
  * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 
@@ -20,7 +20,7 @@
  */
 
 /*
- * Symbol "Hypre.StructStencil" (version 0.1.5)
+ * Symbol "Hypre.StructStencil" (version 0.1.6)
  * 
  * Define a structured stencil for a structured problem description.
  * More than one implementation is not envisioned, thus the decision has

@@ -1,16 +1,16 @@
 /*
  * File:          Hypre_StructSMG_IOR.h
- * Symbol:        Hypre.StructSMG-v0.1.5
+ * Symbol:        Hypre.StructSMG-v0.1.6
  * Symbol Type:   class
- * Babel Version: 0.7.4
- * SIDL Created:  20021217 16:38:33 PST
- * Generated:     20021217 16:38:34 PST
+ * Babel Version: 0.8.0
+ * SIDL Created:  20030121 14:39:01 PST
+ * Generated:     20030121 14:39:02 PST
  * Description:   Intermediate Object Representation for Hypre.StructSMG
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.7.4
- * source-line   = 457
+ * babel-version = 0.8.0
+ * source-line   = 456
  * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 
@@ -35,7 +35,7 @@ extern "C" {
 #endif
 
 /*
- * Symbol "Hypre.StructSMG" (version 0.1.5)
+ * Symbol "Hypre.StructSMG" (version 0.1.6)
  */
 
 struct Hypre_StructSMG__array;
@@ -51,6 +51,7 @@ extern void Hypre_StructSMG__init(
   struct Hypre_StructSMG__object* self);
 extern void Hypre_StructSMG__fini(
   struct Hypre_StructSMG__object* self);
+extern void Hypre_StructSMG__IOR_version(int32_t *major, int32_t *minor);
 
 /*
  * Forward references for external classes and interfaces.
@@ -60,6 +61,8 @@ struct Hypre_Vector__array;
 struct Hypre_Vector__object;
 struct SIDL_BaseInterface__array;
 struct SIDL_BaseInterface__object;
+struct SIDL_ClassInfo__array;
+struct SIDL_ClassInfo__object;
 
 /*
  * Declare the method entry point vector.
@@ -76,23 +79,25 @@ struct Hypre_StructSMG__epv {
     struct Hypre_StructSMG__object* self);
   void (*f__dtor)(
     struct Hypre_StructSMG__object* self);
-  /* Methods introduced in SIDL.BaseInterface-v0.7.4 */
-  void (*f_addReference)(
+  /* Methods introduced in SIDL.BaseInterface-v0.8.1 */
+  void (*f_addRef)(
     struct Hypre_StructSMG__object* self);
-  void (*f_deleteReference)(
+  void (*f_deleteRef)(
     struct Hypre_StructSMG__object* self);
   SIDL_bool (*f_isSame)(
     struct Hypre_StructSMG__object* self,
     struct SIDL_BaseInterface__object* iobj);
-  struct SIDL_BaseInterface__object* (*f_queryInterface)(
+  struct SIDL_BaseInterface__object* (*f_queryInt)(
     struct Hypre_StructSMG__object* self,
     const char* name);
-  SIDL_bool (*f_isInstanceOf)(
+  SIDL_bool (*f_isType)(
     struct Hypre_StructSMG__object* self,
     const char* name);
-  /* Methods introduced in SIDL.BaseClass-v0.7.4 */
-  /* Methods introduced in SIDL.BaseInterface-v0.7.4 */
-  /* Methods introduced in Hypre.Operator-v0.1.5 */
+  /* Methods introduced in SIDL.BaseClass-v0.8.1 */
+  struct SIDL_ClassInfo__object* (*f_getClassInfo)(
+    struct Hypre_StructSMG__object* self);
+  /* Methods introduced in SIDL.BaseInterface-v0.8.1 */
+  /* Methods introduced in Hypre.Operator-v0.1.6 */
   int32_t (*f_SetCommunicator)(
     struct Hypre_StructSMG__object* self,
     void* comm);
@@ -132,7 +137,7 @@ struct Hypre_StructSMG__epv {
     struct Hypre_StructSMG__object* self,
     struct Hypre_Vector__object* b,
     struct Hypre_Vector__object** x);
-  /* Methods introduced in Hypre.Solver-v0.1.5 */
+  /* Methods introduced in Hypre.Solver-v0.1.6 */
   int32_t (*f_SetOperator)(
     struct Hypre_StructSMG__object* self,
     struct Hypre_Operator__object* A);
@@ -145,7 +150,7 @@ struct Hypre_StructSMG__epv {
   int32_t (*f_SetPrintLevel)(
     struct Hypre_StructSMG__object* self,
     int32_t level);
-  /* Methods introduced in Hypre.StructSMG-v0.1.5 */
+  /* Methods introduced in Hypre.StructSMG-v0.1.6 */
 };
 
 /*

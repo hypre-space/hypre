@@ -1,16 +1,16 @@
 /*
  * File:          Hypre_ParDiagScale_Impl.c
- * Symbol:        Hypre.ParDiagScale-v0.1.5
+ * Symbol:        Hypre.ParDiagScale-v0.1.6
  * Symbol Type:   class
- * Babel Version: 0.7.4
- * SIDL Created:  20021217 16:38:33 PST
- * Generated:     20021217 16:38:41 PST
+ * Babel Version: 0.8.0
+ * SIDL Created:  20030121 14:39:01 PST
+ * Generated:     20030121 14:39:09 PST
  * Description:   Server-side implementation for Hypre.ParDiagScale
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.7.4
- * source-line   = 455
+ * babel-version = 0.8.0
+ * source-line   = 454
  * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 
@@ -20,7 +20,7 @@
  */
 
 /*
- * Symbol "Hypre.ParDiagScale" (version 0.1.5)
+ * Symbol "Hypre.ParDiagScale" (version 0.1.6)
  */
 
 #include "Hypre_ParDiagScale_Impl.h"
@@ -86,7 +86,7 @@ impl_Hypre_ParDiagScale__dtor(
    struct Hypre_ParDiagScale__data * data;
    data = Hypre_ParDiagScale__get_data( self );
 
-   Hypre_Operator_deleteReference( data->matrix );
+   Hypre_Operator_deleteRef( data->matrix );
    /* delete any nontrivial data components here */
    hypre_TFree( data );
   /* DO-NOT-DELETE splicer.end(Hypre.ParDiagScale._dtor) */
@@ -297,7 +297,7 @@ impl_Hypre_ParDiagScale_Apply(
    }
 
    HypreP_b = Hypre_Vector__cast2
-      ( Hypre_Vector_queryInterface( b, "Hypre.ParCSRVector"),
+      ( Hypre_Vector_queryInt( b, "Hypre.ParCSRVector"),
         "Hypre.ParCSRVector" );
    datab = Hypre_ParCSRVector__get_data( HypreP_b );
    ij_b = datab -> ij_b;
@@ -306,7 +306,7 @@ impl_Hypre_ParDiagScale_Apply(
    /* not used HYPRE_b = (HYPRE_Vector) bb;*/
 
    HypreP_x = Hypre_Vector__cast2
-      ( Hypre_Vector_queryInterface( *x, "Hypre.ParCSRVector"),
+      ( Hypre_Vector_queryInt( *x, "Hypre.ParCSRVector"),
         "Hypre.ParCSRVector" );
    datax = Hypre_ParCSRVector__get_data( HypreP_x );
    ij_x = datax -> ij_b;
@@ -315,7 +315,7 @@ impl_Hypre_ParDiagScale_Apply(
    /* not used HYPRE_b = (HYPRE_Vector) xx;*/
 
    HypreP_A = Hypre_Operator__cast2
-      ( Hypre_Operator_queryInterface( mat, "Hypre.ParCSRVector"),
+      ( Hypre_Operator_queryInt( mat, "Hypre.ParCSRVector"),
         "Hypre.ParCSRVector" );
    dataA = Hypre_ParCSRMatrix__get_data( HypreP_A );
    ij_A = dataA -> ij_A;

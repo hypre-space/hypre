@@ -1,16 +1,16 @@
 /*
  * File:          Hypre_ParCSRMatrix_Skel.c
- * Symbol:        Hypre.ParCSRMatrix-v0.1.5
+ * Symbol:        Hypre.ParCSRMatrix-v0.1.6
  * Symbol Type:   class
- * Babel Version: 0.7.4
- * SIDL Created:  20021217 16:38:33 PST
- * Generated:     20021217 16:38:41 PST
+ * Babel Version: 0.8.0
+ * SIDL Created:  20030121 14:39:01 PST
+ * Generated:     20030121 14:39:09 PST
  * Description:   Server-side glue code for Hypre.ParCSRMatrix
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.7.4
- * source-line   = 434
+ * babel-version = 0.8.0
+ * source-line   = 433
  * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 
@@ -30,6 +30,68 @@ extern int32_t
 impl_Hypre_ParCSRMatrix_SetCommunicator(
   Hypre_ParCSRMatrix,
   void*);
+
+extern int32_t
+impl_Hypre_ParCSRMatrix_GetDoubleValue(
+  Hypre_ParCSRMatrix,
+  const char*,
+  double*);
+
+extern int32_t
+impl_Hypre_ParCSRMatrix_GetIntValue(
+  Hypre_ParCSRMatrix,
+  const char*,
+  int32_t*);
+
+extern int32_t
+impl_Hypre_ParCSRMatrix_SetDoubleParameter(
+  Hypre_ParCSRMatrix,
+  const char*,
+  double);
+
+extern int32_t
+impl_Hypre_ParCSRMatrix_SetIntParameter(
+  Hypre_ParCSRMatrix,
+  const char*,
+  int32_t);
+
+extern int32_t
+impl_Hypre_ParCSRMatrix_SetStringParameter(
+  Hypre_ParCSRMatrix,
+  const char*,
+  const char*);
+
+extern int32_t
+impl_Hypre_ParCSRMatrix_SetIntArrayParameter(
+  Hypre_ParCSRMatrix,
+  const char*,
+  struct SIDL_int__array*);
+
+extern int32_t
+impl_Hypre_ParCSRMatrix_SetDoubleArrayParameter(
+  Hypre_ParCSRMatrix,
+  const char*,
+  struct SIDL_double__array*);
+
+extern int32_t
+impl_Hypre_ParCSRMatrix_Setup(
+  Hypre_ParCSRMatrix,
+  Hypre_Vector,
+  Hypre_Vector);
+
+extern int32_t
+impl_Hypre_ParCSRMatrix_Apply(
+  Hypre_ParCSRMatrix,
+  Hypre_Vector,
+  Hypre_Vector*);
+
+extern int32_t
+impl_Hypre_ParCSRMatrix_GetRow(
+  Hypre_ParCSRMatrix,
+  int32_t,
+  int32_t*,
+  struct SIDL_int__array**,
+  struct SIDL_double__array**);
 
 extern int32_t
 impl_Hypre_ParCSRMatrix_Initialize(
@@ -92,85 +154,12 @@ impl_Hypre_ParCSRMatrix_Print(
   Hypre_ParCSRMatrix,
   const char*);
 
-extern int32_t
-impl_Hypre_ParCSRMatrix_GetRow(
-  Hypre_ParCSRMatrix,
-  int32_t,
-  int32_t*,
-  struct SIDL_int__array**,
-  struct SIDL_double__array**);
-
-extern int32_t
-impl_Hypre_ParCSRMatrix_GetDoubleValue(
-  Hypre_ParCSRMatrix,
-  const char*,
-  double*);
-
-extern int32_t
-impl_Hypre_ParCSRMatrix_GetIntValue(
-  Hypre_ParCSRMatrix,
-  const char*,
-  int32_t*);
-
-extern int32_t
-impl_Hypre_ParCSRMatrix_SetDoubleParameter(
-  Hypre_ParCSRMatrix,
-  const char*,
-  double);
-
-extern int32_t
-impl_Hypre_ParCSRMatrix_SetIntParameter(
-  Hypre_ParCSRMatrix,
-  const char*,
-  int32_t);
-
-extern int32_t
-impl_Hypre_ParCSRMatrix_SetStringParameter(
-  Hypre_ParCSRMatrix,
-  const char*,
-  const char*);
-
-extern int32_t
-impl_Hypre_ParCSRMatrix_SetIntArrayParameter(
-  Hypre_ParCSRMatrix,
-  const char*,
-  struct SIDL_int__array*);
-
-extern int32_t
-impl_Hypre_ParCSRMatrix_SetDoubleArrayParameter(
-  Hypre_ParCSRMatrix,
-  const char*,
-  struct SIDL_double__array*);
-
-extern int32_t
-impl_Hypre_ParCSRMatrix_Setup(
-  Hypre_ParCSRMatrix,
-  Hypre_Vector,
-  Hypre_Vector);
-
-extern int32_t
-impl_Hypre_ParCSRMatrix_Apply(
-  Hypre_ParCSRMatrix,
-  Hypre_Vector,
-  Hypre_Vector*);
-
 void
 Hypre_ParCSRMatrix__set_epv(struct Hypre_ParCSRMatrix__epv *epv)
 {
   epv->f__ctor = impl_Hypre_ParCSRMatrix__ctor;
   epv->f__dtor = impl_Hypre_ParCSRMatrix__dtor;
   epv->f_SetCommunicator = impl_Hypre_ParCSRMatrix_SetCommunicator;
-  epv->f_Initialize = impl_Hypre_ParCSRMatrix_Initialize;
-  epv->f_Assemble = impl_Hypre_ParCSRMatrix_Assemble;
-  epv->f_GetObject = impl_Hypre_ParCSRMatrix_GetObject;
-  epv->f_Create = impl_Hypre_ParCSRMatrix_Create;
-  epv->f_SetValues = impl_Hypre_ParCSRMatrix_SetValues;
-  epv->f_AddToValues = impl_Hypre_ParCSRMatrix_AddToValues;
-  epv->f_SetRowSizes = impl_Hypre_ParCSRMatrix_SetRowSizes;
-  epv->f_SetDiagOffdSizes = impl_Hypre_ParCSRMatrix_SetDiagOffdSizes;
-  epv->f_Read = impl_Hypre_ParCSRMatrix_Read;
-  epv->f_Print = impl_Hypre_ParCSRMatrix_Print;
-  epv->f_GetRow = impl_Hypre_ParCSRMatrix_GetRow;
   epv->f_GetDoubleValue = impl_Hypre_ParCSRMatrix_GetDoubleValue;
   epv->f_GetIntValue = impl_Hypre_ParCSRMatrix_GetIntValue;
   epv->f_SetDoubleParameter = impl_Hypre_ParCSRMatrix_SetDoubleParameter;
@@ -181,6 +170,17 @@ Hypre_ParCSRMatrix__set_epv(struct Hypre_ParCSRMatrix__epv *epv)
     impl_Hypre_ParCSRMatrix_SetDoubleArrayParameter;
   epv->f_Setup = impl_Hypre_ParCSRMatrix_Setup;
   epv->f_Apply = impl_Hypre_ParCSRMatrix_Apply;
+  epv->f_GetRow = impl_Hypre_ParCSRMatrix_GetRow;
+  epv->f_Initialize = impl_Hypre_ParCSRMatrix_Initialize;
+  epv->f_Assemble = impl_Hypre_ParCSRMatrix_Assemble;
+  epv->f_GetObject = impl_Hypre_ParCSRMatrix_GetObject;
+  epv->f_Create = impl_Hypre_ParCSRMatrix_Create;
+  epv->f_SetValues = impl_Hypre_ParCSRMatrix_SetValues;
+  epv->f_AddToValues = impl_Hypre_ParCSRMatrix_AddToValues;
+  epv->f_SetRowSizes = impl_Hypre_ParCSRMatrix_SetRowSizes;
+  epv->f_SetDiagOffdSizes = impl_Hypre_ParCSRMatrix_SetDiagOffdSizes;
+  epv->f_Read = impl_Hypre_ParCSRMatrix_Read;
+  epv->f_Print = impl_Hypre_ParCSRMatrix_Print;
 }
 
 struct Hypre_ParCSRMatrix__data*

@@ -1,16 +1,16 @@
 /*
  * File:          Hypre_ParAMG_Impl.c
- * Symbol:        Hypre.ParAMG-v0.1.5
+ * Symbol:        Hypre.ParAMG-v0.1.6
  * Symbol Type:   class
- * Babel Version: 0.7.4
- * SIDL Created:  20021217 16:38:33 PST
- * Generated:     20021217 16:38:43 PST
+ * Babel Version: 0.8.0
+ * SIDL Created:  20030121 14:39:01 PST
+ * Generated:     20030121 14:39:11 PST
  * Description:   Server-side implementation for Hypre.ParAMG
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.7.4
- * source-line   = 459
+ * babel-version = 0.8.0
+ * source-line   = 458
  * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 
@@ -20,7 +20,7 @@
  */
 
 /*
- * Symbol "Hypre.ParAMG" (version 0.1.5)
+ * Symbol "Hypre.ParAMG" (version 0.1.6)
  */
 
 #include "Hypre_ParAMG_Impl.h"
@@ -75,7 +75,7 @@ impl_Hypre_ParAMG__dtor(
    struct Hypre_ParAMG__data * data;
    data = Hypre_ParAMG__get_data( self );
    ierr += HYPRE_BoomerAMGDestroy( data->solver );
-   Hypre_ParCSRMatrix_deleteReference( data->matrix );
+   Hypre_ParCSRMatrix_deleteRef( data->matrix );
    /* delete any nontrivial data components here */
    hypre_TFree( data );
   /* DO-NOT-DELETE splicer.end(Hypre.ParAMG._dtor) */
@@ -442,7 +442,7 @@ impl_Hypre_ParAMG_Setup(
    ierr += HYPRE_IJMatrixGetObject( ij_A, &objectA );
    HypreP_A = (HYPRE_ParCSRMatrix) objectA;
 
-   if ( Hypre_Vector_queryInterface(b, "Hypre.ParCSRVector" ) ) {
+   if ( Hypre_Vector_queryInt(b, "Hypre.ParCSRVector" ) ) {
       /* perhaps Hypre_Vector_isInstanceOf( x, "ParCSRVector" ) might do the same job */
       HypreP_b = Hypre_Vector__cast2( b, "Hypre.ParCSRVector" );
    }
@@ -451,17 +451,17 @@ impl_Hypre_ParAMG_Setup(
    }
    /* This is the old code for the above.
       HypreP_b = Hypre_Vector__cast2
-         ( Hypre_Vector_queryInterface( b, "Hypre.ParCSRVector"), "Hypre.ParCSRVector" );
+         ( Hypre_Vector_queryInt( b, "Hypre.ParCSRVector"), "Hypre.ParCSRVector" );
       assert( HypreP_b!=NULL );
    */
 
    datab = Hypre_ParCSRVector__get_data( HypreP_b );
-   Hypre_ParCSRVector_deleteReference( HypreP_b );
+   Hypre_ParCSRVector_deleteRef( HypreP_b );
    ij_b = datab -> ij_b;
    ierr += HYPRE_IJVectorGetObject( ij_b, &objectb );
    bb = (HYPRE_ParVector) objectb;
 
-   if ( Hypre_Vector_queryInterface( x, "Hypre.ParCSRVector" ) ) {
+   if ( Hypre_Vector_queryInt( x, "Hypre.ParCSRVector" ) ) {
       HypreP_x = Hypre_Vector__cast2( x, "Hypre.ParCSRVector" );
    }
    else {
@@ -469,12 +469,12 @@ impl_Hypre_ParAMG_Setup(
    }
    /* This is the old code for the above.
       HypreP_x = Hypre_Vector__cast2
-         ( Hypre_Vector_queryInterface( x, "Hypre.ParCSRVector"), "Hypre.ParCSRVector" );
+         ( Hypre_Vector_queryInt( x, "Hypre.ParCSRVector"), "Hypre.ParCSRVector" );
       assert( HypreP_x!=NULL );
    */
 
    datax = Hypre_ParCSRVector__get_data( HypreP_x );
-   Hypre_ParCSRVector_deleteReference( HypreP_x );
+   Hypre_ParCSRVector_deleteRef( HypreP_x );
    ij_x = datax -> ij_b;
    ierr += HYPRE_IJVectorGetObject( ij_x, &objectx );
    xx = (HYPRE_ParVector) objectx;
@@ -519,7 +519,7 @@ impl_Hypre_ParAMG_Apply(
    ierr += HYPRE_IJMatrixGetObject( ij_A, &objectA );
    HypreP_A = (HYPRE_ParCSRMatrix) objectA;
 
-   if ( Hypre_Vector_queryInterface(b, "Hypre.ParCSRVector" ) ) {
+   if ( Hypre_Vector_queryInt(b, "Hypre.ParCSRVector" ) ) {
       /* perhaps Hypre_Vector_isInstanceOf( x, "ParCSRVector" ) might do the same job */
       HypreP_b = Hypre_Vector__cast2( b, "Hypre.ParCSRVector" );
    }
@@ -528,12 +528,12 @@ impl_Hypre_ParAMG_Apply(
    }
    /* This is the old code for the above.
       HypreP_b = Hypre_Vector__cast2
-         ( Hypre_Vector_queryInterface( b, "Hypre.ParCSRVector"), "Hypre.ParCSRVector" );
+         ( Hypre_Vector_queryInt( b, "Hypre.ParCSRVector"), "Hypre.ParCSRVector" );
       assert( HypreP_b!=NULL );
    */
 
    datab = Hypre_ParCSRVector__get_data( HypreP_b );
-   Hypre_ParCSRVector_deleteReference( HypreP_b );
+   Hypre_ParCSRVector_deleteRef( HypreP_b );
    ij_b = datab -> ij_b;
    ierr += HYPRE_IJVectorGetObject( ij_b, &objectb );
    bb = (HYPRE_ParVector) objectb;
@@ -544,7 +544,7 @@ impl_Hypre_ParAMG_Apply(
       Hypre_Vector_Clone( b, x );
       Hypre_Vector_Clear( *x );
    }
-   if ( Hypre_Vector_queryInterface( *x, "Hypre.ParCSRVector" ) ) {
+   if ( Hypre_Vector_queryInt( *x, "Hypre.ParCSRVector" ) ) {
       HypreP_x = Hypre_Vector__cast2( *x, "Hypre.ParCSRVector" );
    }
    else {
@@ -552,12 +552,12 @@ impl_Hypre_ParAMG_Apply(
    }
    /* This is the old code for the above.
       HypreP_x = Hypre_Vector__cast2
-         ( Hypre_Vector_queryInterface( *x, "Hypre.ParCSRVector"), "Hypre.ParCSRVector" );
+         ( Hypre_Vector_queryInt( *x, "Hypre.ParCSRVector"), "Hypre.ParCSRVector" );
       assert( HypreP_x!=NULL );
    */
 
    datax = Hypre_ParCSRVector__get_data( HypreP_x );
-   Hypre_ParCSRVector_deleteReference( HypreP_x );
+   Hypre_ParCSRVector_deleteRef( HypreP_x );
    ij_x = datax -> ij_b;
    ierr += HYPRE_IJVectorGetObject( ij_x, &objectx );
    xx = (HYPRE_ParVector) objectx;
@@ -586,7 +586,7 @@ impl_Hypre_ParAMG_SetOperator(
    struct Hypre_ParAMG__data * data;
    Hypre_ParCSRMatrix Amat;
 
-   if ( Hypre_Operator_queryInterface( A, "Hypre.ParCSRMatrix" ) ) {
+   if ( Hypre_Operator_queryInt( A, "Hypre.ParCSRMatrix" ) ) {
       Amat = Hypre_Operator__cast2( A, "Hypre.ParCSRMatrix" );
    }
    else {
@@ -594,7 +594,7 @@ impl_Hypre_ParAMG_SetOperator(
    }
    /* This is the old code for the above.
       Amat = Hypre_Operator__cast2
-         ( Hypre_Operator_queryInterface( A, "Hypre.ParCSRMatrix"), "Hypre.ParCSRMatrix" );
+         ( Hypre_Operator_queryInt( A, "Hypre.ParCSRMatrix"), "Hypre.ParCSRMatrix" );
       assert( Amat!=NULL );
    */
 
@@ -635,7 +635,7 @@ impl_Hypre_ParAMG_GetResidual(
    data = Hypre_ParAMG__get_data( self );
    solver = data->solver;
 
-   if ( Hypre_Vector_queryInterface( *r, "Hypre.ParCSRVector" ) ) {
+   if ( Hypre_Vector_queryInt( *r, "Hypre.ParCSRVector" ) ) {
       HypreP_r = Hypre_Vector__cast2( *r, "Hypre.ParCSRVector" );
    }
    else {
@@ -643,7 +643,7 @@ impl_Hypre_ParAMG_GetResidual(
    }
    /* This is the old code for the above.
       HypreP_r = Hypre_Vector__cast2
-         ( Hypre_Vector_queryInterface( *r, "Hypre.ParCSRVector"), "Hypre.ParCSRVector" );
+         ( Hypre_Vector_queryInt( *r, "Hypre.ParCSRVector"), "Hypre.ParCSRVector" );
       assert( HypreP_r!=NULL );
    */
 

@@ -1,16 +1,16 @@
 /*
  * File:          Hypre.h
- * Symbol:        Hypre-v0.1.5
+ * Symbol:        Hypre-v0.1.6
  * Symbol Type:   package
- * Babel Version: 0.7.4
- * SIDL Created:  20021217 16:38:32 PST
- * Generated:     20021217 16:38:40 PST
+ * Babel Version: 0.8.0
+ * SIDL Created:  20030121 14:39:00 PST
+ * Generated:     20030121 14:39:08 PST
  * Description:   Client-side glue code for Hypre
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.7.4
- * source-line   = 28
+ * babel-version = 0.8.0
+ * source-line   = 26
  * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 

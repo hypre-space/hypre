@@ -1,16 +1,16 @@
 /*
  * File:          Hypre_StructMatrix_Impl.c
- * Symbol:        Hypre.StructMatrix-v0.1.5
+ * Symbol:        Hypre.StructMatrix-v0.1.6
  * Symbol Type:   class
- * Babel Version: 0.7.4
- * SIDL Created:  20021217 16:38:33 PST
- * Generated:     20021217 16:38:42 PST
+ * Babel Version: 0.8.0
+ * SIDL Created:  20030121 14:39:01 PST
+ * Generated:     20030121 14:39:10 PST
  * Description:   Server-side implementation for Hypre.StructMatrix
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.7.4
- * source-line   = 426
+ * babel-version = 0.8.0
+ * source-line   = 425
  * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 
@@ -20,7 +20,7 @@
  */
 
 /*
- * Symbol "Hypre.StructMatrix" (version 0.1.5)
+ * Symbol "Hypre.StructMatrix" (version 0.1.6)
  * 
  * A single class that implements both a build interface and an operator
  * interface. It returns itself for <code>GetConstructedObject</code>.
@@ -73,12 +73,165 @@ impl_Hypre_StructMatrix__dtor(
 
 int32_t
 impl_Hypre_StructMatrix_SetCommunicator(
-  Hypre_StructMatrix self, void* mpi_comm)
+  Hypre_StructMatrix self, void* comm)
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.StructMatrix.SetCommunicator) */
   /* Insert the implementation of the SetCommunicator method here... */
    return 1;
   /* DO-NOT-DELETE splicer.end(Hypre.StructMatrix.SetCommunicator) */
+}
+
+/*
+ * Method:  GetDoubleValue[]
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_Hypre_StructMatrix_GetDoubleValue"
+
+int32_t
+impl_Hypre_StructMatrix_GetDoubleValue(
+  Hypre_StructMatrix self, const char* name, double* value)
+{
+  /* DO-NOT-DELETE splicer.begin(Hypre.StructMatrix.GetDoubleValue) */
+  /* Insert the implementation of the GetDoubleValue method here... */
+   return 1;
+  /* DO-NOT-DELETE splicer.end(Hypre.StructMatrix.GetDoubleValue) */
+}
+
+/*
+ * Method:  GetIntValue[]
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_Hypre_StructMatrix_GetIntValue"
+
+int32_t
+impl_Hypre_StructMatrix_GetIntValue(
+  Hypre_StructMatrix self, const char* name, int32_t* value)
+{
+  /* DO-NOT-DELETE splicer.begin(Hypre.StructMatrix.GetIntValue) */
+  /* Insert the implementation of the GetIntValue method here... */
+   return 1;
+  /* DO-NOT-DELETE splicer.end(Hypre.StructMatrix.GetIntValue) */
+}
+
+/*
+ * Method:  SetDoubleParameter[]
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_Hypre_StructMatrix_SetDoubleParameter"
+
+int32_t
+impl_Hypre_StructMatrix_SetDoubleParameter(
+  Hypre_StructMatrix self, const char* name, double value)
+{
+  /* DO-NOT-DELETE splicer.begin(Hypre.StructMatrix.SetDoubleParameter) */
+  /* Insert the implementation of the SetDoubleParameter method here... */
+   return 1;
+  /* DO-NOT-DELETE splicer.end(Hypre.StructMatrix.SetDoubleParameter) */
+}
+
+/*
+ * Method:  SetIntParameter[]
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_Hypre_StructMatrix_SetIntParameter"
+
+int32_t
+impl_Hypre_StructMatrix_SetIntParameter(
+  Hypre_StructMatrix self, const char* name, int32_t value)
+{
+  /* DO-NOT-DELETE splicer.begin(Hypre.StructMatrix.SetIntParameter) */
+  /* Insert the implementation of the SetIntParameter method here... */
+   return 1;
+  /* DO-NOT-DELETE splicer.end(Hypre.StructMatrix.SetIntParameter) */
+}
+
+/*
+ * Method:  SetStringParameter[]
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_Hypre_StructMatrix_SetStringParameter"
+
+int32_t
+impl_Hypre_StructMatrix_SetStringParameter(
+  Hypre_StructMatrix self, const char* name, const char* value)
+{
+  /* DO-NOT-DELETE splicer.begin(Hypre.StructMatrix.SetStringParameter) */
+  /* Insert the implementation of the SetStringParameter method here... */
+   return 1;
+  /* DO-NOT-DELETE splicer.end(Hypre.StructMatrix.SetStringParameter) */
+}
+
+/*
+ * Method:  SetIntArrayParameter[]
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_Hypre_StructMatrix_SetIntArrayParameter"
+
+int32_t
+impl_Hypre_StructMatrix_SetIntArrayParameter(
+  Hypre_StructMatrix self, const char* name, struct SIDL_int__array* value)
+{
+  /* DO-NOT-DELETE splicer.begin(Hypre.StructMatrix.SetIntArrayParameter) */
+  /* Insert the implementation of the SetIntArrayParameter method here... */
+   return 1;
+  /* DO-NOT-DELETE splicer.end(Hypre.StructMatrix.SetIntArrayParameter) */
+}
+
+/*
+ * Method:  SetDoubleArrayParameter[]
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_Hypre_StructMatrix_SetDoubleArrayParameter"
+
+int32_t
+impl_Hypre_StructMatrix_SetDoubleArrayParameter(
+  Hypre_StructMatrix self, const char* name, struct SIDL_double__array* value)
+{
+  /* DO-NOT-DELETE splicer.begin(Hypre.StructMatrix.SetDoubleArrayParameter) */
+  /* Insert the implementation of the SetDoubleArrayParameter method here... */
+   return 1;
+  /* DO-NOT-DELETE splicer.end(Hypre.StructMatrix.SetDoubleArrayParameter) */
+}
+
+/*
+ * Method:  Setup[]
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_Hypre_StructMatrix_Setup"
+
+int32_t
+impl_Hypre_StructMatrix_Setup(
+  Hypre_StructMatrix self, Hypre_Vector b, Hypre_Vector x)
+{
+  /* DO-NOT-DELETE splicer.begin(Hypre.StructMatrix.Setup) */
+  /* Insert the implementation of the Setup method here... */
+   return 1;
+  /* DO-NOT-DELETE splicer.end(Hypre.StructMatrix.Setup) */
+}
+
+/*
+ * Method:  Apply[]
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_Hypre_StructMatrix_Apply"
+
+int32_t
+impl_Hypre_StructMatrix_Apply(
+  Hypre_StructMatrix self, Hypre_Vector b, Hypre_Vector* x)
+{
+  /* DO-NOT-DELETE splicer.begin(Hypre.StructMatrix.Apply) */
+  /* Insert the implementation of the Apply method here... */
+   return 1;
+  /* DO-NOT-DELETE splicer.end(Hypre.StructMatrix.Apply) */
 }
 
 /*
@@ -252,159 +405,6 @@ impl_Hypre_StructMatrix_SetSymmetric(
   /* Insert the implementation of the SetSymmetric method here... */
    return 1;
   /* DO-NOT-DELETE splicer.end(Hypre.StructMatrix.SetSymmetric) */
-}
-
-/*
- * Method:  GetDoubleValue[]
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_Hypre_StructMatrix_GetDoubleValue"
-
-int32_t
-impl_Hypre_StructMatrix_GetDoubleValue(
-  Hypre_StructMatrix self, const char* name, double* value)
-{
-  /* DO-NOT-DELETE splicer.begin(Hypre.StructMatrix.GetDoubleValue) */
-  /* Insert the implementation of the GetDoubleValue method here... */
-   return 1;
-  /* DO-NOT-DELETE splicer.end(Hypre.StructMatrix.GetDoubleValue) */
-}
-
-/*
- * Method:  GetIntValue[]
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_Hypre_StructMatrix_GetIntValue"
-
-int32_t
-impl_Hypre_StructMatrix_GetIntValue(
-  Hypre_StructMatrix self, const char* name, int32_t* value)
-{
-  /* DO-NOT-DELETE splicer.begin(Hypre.StructMatrix.GetIntValue) */
-  /* Insert the implementation of the GetIntValue method here... */
-   return 1;
-  /* DO-NOT-DELETE splicer.end(Hypre.StructMatrix.GetIntValue) */
-}
-
-/*
- * Method:  SetDoubleParameter[]
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_Hypre_StructMatrix_SetDoubleParameter"
-
-int32_t
-impl_Hypre_StructMatrix_SetDoubleParameter(
-  Hypre_StructMatrix self, const char* name, double value)
-{
-  /* DO-NOT-DELETE splicer.begin(Hypre.StructMatrix.SetDoubleParameter) */
-  /* Insert the implementation of the SetDoubleParameter method here... */
-   return 1;
-  /* DO-NOT-DELETE splicer.end(Hypre.StructMatrix.SetDoubleParameter) */
-}
-
-/*
- * Method:  SetIntParameter[]
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_Hypre_StructMatrix_SetIntParameter"
-
-int32_t
-impl_Hypre_StructMatrix_SetIntParameter(
-  Hypre_StructMatrix self, const char* name, int32_t value)
-{
-  /* DO-NOT-DELETE splicer.begin(Hypre.StructMatrix.SetIntParameter) */
-  /* Insert the implementation of the SetIntParameter method here... */
-   return 1;
-  /* DO-NOT-DELETE splicer.end(Hypre.StructMatrix.SetIntParameter) */
-}
-
-/*
- * Method:  SetStringParameter[]
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_Hypre_StructMatrix_SetStringParameter"
-
-int32_t
-impl_Hypre_StructMatrix_SetStringParameter(
-  Hypre_StructMatrix self, const char* name, const char* value)
-{
-  /* DO-NOT-DELETE splicer.begin(Hypre.StructMatrix.SetStringParameter) */
-  /* Insert the implementation of the SetStringParameter method here... */
-   return 1;
-  /* DO-NOT-DELETE splicer.end(Hypre.StructMatrix.SetStringParameter) */
-}
-
-/*
- * Method:  SetIntArrayParameter[]
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_Hypre_StructMatrix_SetIntArrayParameter"
-
-int32_t
-impl_Hypre_StructMatrix_SetIntArrayParameter(
-  Hypre_StructMatrix self, const char* name, struct SIDL_int__array* value)
-{
-  /* DO-NOT-DELETE splicer.begin(Hypre.StructMatrix.SetIntArrayParameter) */
-  /* Insert the implementation of the SetIntArrayParameter method here... */
-   return 1;
-  /* DO-NOT-DELETE splicer.end(Hypre.StructMatrix.SetIntArrayParameter) */
-}
-
-/*
- * Method:  SetDoubleArrayParameter[]
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_Hypre_StructMatrix_SetDoubleArrayParameter"
-
-int32_t
-impl_Hypre_StructMatrix_SetDoubleArrayParameter(
-  Hypre_StructMatrix self, const char* name, struct SIDL_double__array* value)
-{
-  /* DO-NOT-DELETE splicer.begin(Hypre.StructMatrix.SetDoubleArrayParameter) */
-  /* Insert the implementation of the SetDoubleArrayParameter method here... */
-   return 1;
-  /* DO-NOT-DELETE splicer.end(Hypre.StructMatrix.SetDoubleArrayParameter) */
-}
-
-/*
- * Method:  Setup[]
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_Hypre_StructMatrix_Setup"
-
-int32_t
-impl_Hypre_StructMatrix_Setup(
-  Hypre_StructMatrix self, Hypre_Vector b, Hypre_Vector x)
-{
-  /* DO-NOT-DELETE splicer.begin(Hypre.StructMatrix.Setup) */
-  /* Insert the implementation of the Setup method here... */
-   return 1;
-  /* DO-NOT-DELETE splicer.end(Hypre.StructMatrix.Setup) */
-}
-
-/*
- * Method:  Apply[]
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_Hypre_StructMatrix_Apply"
-
-int32_t
-impl_Hypre_StructMatrix_Apply(
-  Hypre_StructMatrix self, Hypre_Vector b, Hypre_Vector* x)
-{
-  /* DO-NOT-DELETE splicer.begin(Hypre.StructMatrix.Apply) */
-  /* Insert the implementation of the Apply method here... */
-   return 1;
-  /* DO-NOT-DELETE splicer.end(Hypre.StructMatrix.Apply) */
 }
 
 /**

@@ -1,16 +1,16 @@
 /*
  * File:          Hypre_IJBuildMatrix_IOR.h
- * Symbol:        Hypre.IJBuildMatrix-v0.1.5
+ * Symbol:        Hypre.IJBuildMatrix-v0.1.6
  * Symbol Type:   interface
- * Babel Version: 0.7.4
- * SIDL Created:  20021217 16:38:33 PST
- * Generated:     20021217 16:38:37 PST
+ * Babel Version: 0.8.0
+ * SIDL Created:  20030121 14:39:00 PST
+ * Generated:     20030121 14:39:04 PST
  * Description:   Intermediate Object Representation for Hypre.IJBuildMatrix
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.7.4
- * source-line   = 156
+ * babel-version = 0.8.0
+ * source-line   = 155
  * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 
@@ -25,7 +25,7 @@ extern "C" {
 #endif
 
 /*
- * Symbol "Hypre.IJBuildMatrix" (version 0.1.5)
+ * Symbol "Hypre.IJBuildMatrix" (version 0.1.6)
  * 
  * 
  * This interface represents a linear-algebraic conceptual view of a
@@ -59,21 +59,21 @@ struct Hypre_IJBuildMatrix__epv {
     const char* name);
   void (*f__delete)(
     void* self);
-  /* Methods introduced in SIDL.BaseInterface-v0.7.4 */
-  void (*f_addReference)(
+  /* Methods introduced in SIDL.BaseInterface-v0.8.1 */
+  void (*f_addRef)(
     void* self);
-  void (*f_deleteReference)(
+  void (*f_deleteRef)(
     void* self);
   SIDL_bool (*f_isSame)(
     void* self,
     struct SIDL_BaseInterface__object* iobj);
-  struct SIDL_BaseInterface__object* (*f_queryInterface)(
+  struct SIDL_BaseInterface__object* (*f_queryInt)(
     void* self,
     const char* name);
-  SIDL_bool (*f_isInstanceOf)(
+  SIDL_bool (*f_isType)(
     void* self,
     const char* name);
-  /* Methods introduced in Hypre.ProblemDefinition-v0.1.5 */
+  /* Methods introduced in Hypre.ProblemDefinition-v0.1.6 */
   int32_t (*f_SetCommunicator)(
     void* self,
     void* mpi_comm);
@@ -84,7 +84,7 @@ struct Hypre_IJBuildMatrix__epv {
   int32_t (*f_GetObject)(
     void* self,
     struct SIDL_BaseInterface__object** A);
-  /* Methods introduced in Hypre.IJBuildMatrix-v0.1.5 */
+  /* Methods introduced in Hypre.IJBuildMatrix-v0.1.6 */
   int32_t (*f_Create)(
     void* self,
     int32_t ilower,

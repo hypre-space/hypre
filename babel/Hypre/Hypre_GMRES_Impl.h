@@ -1,16 +1,16 @@
 /*
  * File:          Hypre_GMRES_Impl.h
- * Symbol:        Hypre.GMRES-v0.1.5
+ * Symbol:        Hypre.GMRES-v0.1.6
  * Symbol Type:   class
- * Babel Version: 0.7.4
- * SIDL Created:  20021217 16:38:33 PST
- * Generated:     20021217 16:38:41 PST
+ * Babel Version: 0.8.0
+ * SIDL Created:  20030121 14:39:01 PST
+ * Generated:     20030121 14:39:08 PST
  * Description:   Server-side implementation for Hypre.GMRES
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.7.4
- * source-line   = 465
+ * babel-version = 0.8.0
+ * source-line   = 464
  * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 

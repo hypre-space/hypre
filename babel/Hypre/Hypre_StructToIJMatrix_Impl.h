@@ -1,16 +1,16 @@
 /*
  * File:          Hypre_StructToIJMatrix_Impl.h
- * Symbol:        Hypre.StructToIJMatrix-v0.1.5
+ * Symbol:        Hypre.StructToIJMatrix-v0.1.6
  * Symbol Type:   class
- * Babel Version: 0.7.4
- * SIDL Created:  20021217 16:38:33 PST
- * Generated:     20021217 16:38:42 PST
+ * Babel Version: 0.8.0
+ * SIDL Created:  20030121 14:39:01 PST
+ * Generated:     20030121 14:39:10 PST
  * Description:   Server-side implementation for Hypre.StructToIJMatrix
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.7.4
- * source-line   = 445
+ * babel-version = 0.8.0
+ * source-line   = 444
  * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 

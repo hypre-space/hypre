@@ -17,15 +17,14 @@
  *
  * Additional edits and mods begun by Andy Cleary, July 2001 
  */
-version Hypre 0.1.5;
-
 
 /**
  * The <code>Hypre</code> package defines interfaces for an experimental
  * version of the HYPRE software package that used SIDL and Babel to generate
  * foreign language bindings. 
  */
-package Hypre {
+package Hypre version 0.1.6
+ {
 
 //
 // -------------------------- Interfaces ---------------------------
@@ -353,7 +352,7 @@ package Hypre {
         have saved its residual vector, so the error flag will be set.  */
 
      int SetLogging ( in int level );
-     /* ... logging levels; defaults to 0.
+     /* ... logging levels; defaults to 0. */
      /* 0=no logging, 1=minimal cheap logging, >=2=do some work */
      /* Only level 0 must be implemented.  Details of other levels are
         implementation-specific. */

@@ -1,16 +1,16 @@
 /*
  * File:          Hypre_Operator_IOR.c
- * Symbol:        Hypre.Operator-v0.1.5
+ * Symbol:        Hypre.Operator-v0.1.6
  * Symbol Type:   interface
- * Babel Version: 0.7.4
- * SIDL Created:  20021217 16:38:33 PST
- * Generated:     20021217 16:38:36 PST
+ * Babel Version: 0.8.0
+ * SIDL Created:  20030121 14:39:00 PST
+ * Generated:     20030121 14:39:03 PST
  * Description:   Intermediate Object Representation for Hypre.Operator
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.7.4
- * source-line   = 327
+ * babel-version = 0.8.0
+ * source-line   = 326
  * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 
@@ -23,6 +23,12 @@
 #define NULL 0
 #endif
 
+/*
+ * Static variables to hold version of IOR
+ */
+
+static const int32_t s_IOR_MAJOR_VERSION = 0;
+static const int32_t s_IOR_MINOR_VERSION = 8;
 /*
  * Static variables for managing EPV initialization.
  */
@@ -53,21 +59,21 @@ static void remote_Hypre_Operator__delete(
 }
 
 /*
- * REMOTE METHOD STUB:addReference
+ * REMOTE METHOD STUB:addRef
  */
 
 static void
-remote_Hypre_Operator_addReference(
+remote_Hypre_Operator_addRef(
   void* self)
 {
 }
 
 /*
- * REMOTE METHOD STUB:deleteReference
+ * REMOTE METHOD STUB:deleteRef
  */
 
 static void
-remote_Hypre_Operator_deleteReference(
+remote_Hypre_Operator_deleteRef(
   void* self)
 {
 }
@@ -85,11 +91,11 @@ remote_Hypre_Operator_isSame(
 }
 
 /*
- * REMOTE METHOD STUB:queryInterface
+ * REMOTE METHOD STUB:queryInt
  */
 
 static struct SIDL_BaseInterface__object*
-remote_Hypre_Operator_queryInterface(
+remote_Hypre_Operator_queryInt(
   void* self,
   const char* name)
 {
@@ -97,11 +103,11 @@ remote_Hypre_Operator_queryInterface(
 }
 
 /*
- * REMOTE METHOD STUB:isInstanceOf
+ * REMOTE METHOD STUB:isType
  */
 
 static SIDL_bool
-remote_Hypre_Operator_isInstanceOf(
+remote_Hypre_Operator_isType(
   void* self,
   const char* name)
 {
@@ -247,11 +253,11 @@ static void Hypre_Operator__init_remote_epv(void)
 
   epv->f__cast                   = remote_Hypre_Operator__cast;
   epv->f__delete                 = remote_Hypre_Operator__delete;
-  epv->f_addReference            = remote_Hypre_Operator_addReference;
-  epv->f_deleteReference         = remote_Hypre_Operator_deleteReference;
+  epv->f_addRef                  = remote_Hypre_Operator_addRef;
+  epv->f_deleteRef               = remote_Hypre_Operator_deleteRef;
   epv->f_isSame                  = remote_Hypre_Operator_isSame;
-  epv->f_queryInterface          = remote_Hypre_Operator_queryInterface;
-  epv->f_isInstanceOf            = remote_Hypre_Operator_isInstanceOf;
+  epv->f_queryInt                = remote_Hypre_Operator_queryInt;
+  epv->f_isType                  = remote_Hypre_Operator_isType;
   epv->f_SetCommunicator         = remote_Hypre_Operator_SetCommunicator;
   epv->f_GetDoubleValue          = remote_Hypre_Operator_GetDoubleValue;
   epv->f_GetIntValue             = remote_Hypre_Operator_GetIntValue;

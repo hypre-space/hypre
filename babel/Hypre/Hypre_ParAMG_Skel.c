@@ -1,16 +1,16 @@
 /*
  * File:          Hypre_ParAMG_Skel.c
- * Symbol:        Hypre.ParAMG-v0.1.5
+ * Symbol:        Hypre.ParAMG-v0.1.6
  * Symbol Type:   class
- * Babel Version: 0.7.4
- * SIDL Created:  20021217 16:38:33 PST
- * Generated:     20021217 16:38:43 PST
+ * Babel Version: 0.8.0
+ * SIDL Created:  20030121 14:39:01 PST
+ * Generated:     20030121 14:39:11 PST
  * Description:   Server-side glue code for Hypre.ParAMG
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.7.4
- * source-line   = 459
+ * babel-version = 0.8.0
+ * source-line   = 458
  * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 
