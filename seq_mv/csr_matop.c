@@ -325,7 +325,7 @@ int hypre_CSRMatrixTranspose(hypre_CSRMatrix   *A, hypre_CSRMatrix   **AT,
 
    if (num_rowsA && ! num_colsA)
    {
-      max_col = 0;
+      max_col = -1;
       for (i = 0; i < num_rowsA; ++i)
       {
           for (j = A_i[i]; j < A_i[i+1]; j++)
