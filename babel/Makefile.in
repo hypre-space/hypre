@@ -114,7 +114,9 @@ babel-interfaces:
 	  echo ""; \
 	fi; \
 
-install:
+install: all
+	@cp -f $(srcdir)/Hypre*/*.h $$HYPRE_INSTALL_DIR/include/.
+	@cp -f $(srcdir)/Hypre*/libHypre*.a $$HYPRE_INSTALL_DIR/lib/.
 
 clean:
 	@rm -f *.o
