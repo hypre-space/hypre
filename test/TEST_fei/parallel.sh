@@ -28,6 +28,4 @@ head parallel.testdata.tmp0 > parallel.testdata.temp
 tail -21 parallel.out.4 > parallel.testdata.tmp0
 head parallel.testdata.tmp0 > parallel.testdata.temp
 
-#rm -f parallel.out.0 parallel.out.1 parallel.out.2
-#rm -f parallel.out.3 parallel.out.4 
-#rm -f parallel.testdata parallel.testdata.tmp0 parallel.testdata.temp
+rm -f parallel.testdata parallel.testdata.tmp0 parallel.testdata.temp
