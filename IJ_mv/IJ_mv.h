@@ -243,29 +243,46 @@ int hypre_IJMatrixInsertBlockParCSR P((hypre_IJMatrix *matrix , int m , int n , 
 int hypre_IJMatrixAddToBlockParCSR P((hypre_IJMatrix *matrix , int m , int n , const int *rows , const int *cols , const double *coeffs ));
 int hypre_IJMatrixInsertRowParCSR P((hypre_IJMatrix *matrix , int n , int row , const int *indices , const double *coeffs ));
 int hypre_IJMatrixAddToRowParCSR P((hypre_IJMatrix *matrix , int n , int row , const int *indices , const double *coeffs ));
+int hypre_IJMatrixAddToRowAfterParCSR P((hypre_IJMatrix *matrix , int n , int row , const int *indices , const double *coeffs ));
+int hypre_IJMatrixAssembleParCSR P((hypre_IJMatrix *matrix ));
+int hypre_IJMatrixDistributeParCSR P((hypre_IJMatrix *matrix , const int *row_starts , const int *col_starts ));
+int hypre_IJMatrixApplyParCSR P((hypre_IJMatrix *matrix , hypre_ParVector *x , hypre_ParVector *b ));
+int hypre_IJMatrixDestroyParCSR P((hypre_IJMatrix *matrix ));
+int hypre_IJMatrixGetRowPartitioningParCSR P((hypre_IJMatrix *matrix , const int **row_partitioning ));
+int hypre_IJMatrixGetColPartitioningParCSR P((hypre_IJMatrix *matrix , const int **col_partitioning ));
 
 /* hypre_IJMatrix_petsc.c */
-/*BHEADER ***********************************************************************P((int c ));
-/********************************************************************************hypre_IJMatrixSetRowSizesPETSc ******************************************************************************/int hypre_IJMatrixSetRowSizesPETSc P((hypre_IJMatrix *matrix , int *sizes ));
-/********************************************************************************hypre_IJMatrixInitializePETSc **initializes AuxParCSRMatrix and ParCSRMatrix as necessary ******************************************************************************/int hypre_IJMatrixInitializePETSc P((hypre_IJMatrix *matrix ));
-/********************************************************************************hypre_IJMatrixAssemblePETSc **assembles IJMAtrix from AuxParCSRMatrix auxiliary structure *****************************************************************************/int hypre_IJMatrixAssemblePETSc P((hypre_IJMatrix *matrix ));
-/********************************************************************************hypre_IJMatrixApplyPETSc **NOT IMPLEMENTED YET ******************************************************************************/int hypre_IJMatrixApplyPETSc P((hypre_IJMatrix *matrix , hypre_ParVector *x , hypre_ParVector *b ));
-/********************************************************************************hypre_IJMatrixDestroyPETSc **frees an IJMatrix ******************************************************************************/int hypre_IJMatrixDestroyPETSc P((hypre_IJMatrix *matrix ));
+int hypre_IJMatrixSetLocalSizePETSc P((hypre_IJMatrix *matrix , int local_m , int local_n ));
+int hypre_IJMatrixCreatePETSc P((hypre_IJMatrix *matrix ));
+int hypre_IJMatrixSetRowSizesPETSc P((hypre_IJMatrix *matrix , int *sizes ));
+int hypre_IJMatrixSetDiagRowSizesPETSc P((hypre_IJMatrix *matrix , int *sizes ));
+int hypre_IJMatrixSetOffDiagRowSizesPETSc P((hypre_IJMatrix *matrix , int *sizes ));
+int hypre_IJMatrixInitializePETSc P((hypre_IJMatrix *matrix ));
+int hypre_IJMatrixInsertBlockPETSc P((hypre_IJMatrix *matrix , int m , int n , int *rows , int *cols , double *coeffs ));
+int hypre_IJMatrixAddToBlockPETSc P((hypre_IJMatrix *matrix , int m , int n , int *rows , int *cols , double *coeffs ));
+int hypre_IJMatrixInsertRowPETSc P((hypre_IJMatrix *matrix , int n , int row , int *indices , double *coeffs ));
+int hypre_IJMatrixAddToRowPETSc P((hypre_IJMatrix *matrix , int n , int row , int *indices , double *coeffs ));
+int hypre_IJMatrixAssemblePETSc P((hypre_IJMatrix *matrix ));
+int hypre_IJMatrixDistributePETSc P((hypre_IJMatrix *matrix , int *row_starts , int *col_starts ));
+int hypre_IJMatrixApplyPETSc P((hypre_IJMatrix *matrix , hypre_ParVector *x , hypre_ParVector *b ));
+int hypre_IJMatrixDestroyPETSc P((hypre_IJMatrix *matrix ));
+int hypre_IJMatrixSetTotalSizePETSc P((hypre_IJMatrix *matrix , int size ));
 
 /* hypre_IJVector_parcsr.c */
-/*BHEADER ***********************************************************************P((int c ));
-/********************************************************************************hypre_IJVectorDestroyPar **frees ParVector local storage of an IJVectorPar ******************************************************************************/int hypre_IJVectorDestroyPar P((hypre_IJVector *vector ));
-/********************************************************************************hypre_IJVectorSetPartitioningPar **initializes IJVectorPar ParVector partitioning ******************************************************************************/int hypre_IJVectorSetPartitioningPar P((hypre_IJVector *vector , const int *partitioning ));
-/********************************************************************************hypre_IJVectorSetLocalPartitioningPar **initializes IJVectorPar ParVector local partitioning ******************************************************************************/int hypre_IJVectorSetLocalPartitioningPar P((hypre_IJVector *vector , int vec_start_this_proc , int vec_start_next_proc ));
-/********************************************************************************hypre_IJVectorInitializePar **initializes ParVector of IJVectorPar ******************************************************************************/int hypre_IJVectorInitializePar P((hypre_IJVector *vector ));
-/********************************************************************************hypre_IJVectorZeroLocalComponentsPar **inserts a potentially noncontiguous set of rows into an IJVectorPar ******************************************************************************/int hypre_IJVectorZeroLocalComponentsPar P((hypre_IJVector *vector ));
-/********************************************************************************hypre_IJVectorSetLocalComponentsPar **sets a potentially noncontiguous set of components of an IJVectorPar ******************************************************************************/int hypre_IJVectorSetLocalComponentsPar P((hypre_IJVector *vector , int num_values , const int *glob_vec_indices , const int *value_indices , const double *values ));
-/********************************************************************************hypre_IJVectorSetLocalComponentsInBlockPar **sets a contiguous set of components of an IJVectorPar ******************************************************************************/int hypre_IJVectorSetLocalComponentsInBlockPar P((hypre_IJVector *vector , int glob_vec_index_start , int glob_vec_index_stop , const int *value_indices , const double *values ));
-/********************************************************************************hypre_IJVectorAddToLocalComponentsPar **adds to a potentially noncontiguous set of IJVectorPar components ******************************************************************************/int hypre_IJVectorAddToLocalComponentsPar P((hypre_IJVector *vector , int num_values , const int *glob_vec_indices , const int *value_indices , const double *values ));
-/********************************************************************************hypre_IJVectorAddToLocalComponentsInBlockPar **adds to a contiguous set of components in an IJVectorPar ******************************************************************************/int hypre_IJVectorAddToLocalComponentsInBlockPar P((hypre_IJVector *vector , int glob_vec_index_start , int glob_vec_index_stop , const int *value_indices , const double *values ));
-/********************************************************************************hypre_IJVectorAssemblePar **assemble the partitioning of the vector ******************************************************************************/int hypre_IJVectorAssemblePar P((hypre_IJVector *vector ));
-/********************************************************************************hypre_IJVectorGetLocalComponentsPar **get a potentially noncontiguous set of IJVectorPar components ******************************************************************************/int hypre_IJVectorGetLocalComponentsPar P((hypre_IJVector *vector , int num_values , const int *glob_vec_indices , const int *value_indices , double *values ));
-/********************************************************************************hypre_IJVectorGetLocalComponentsInBlockPar **gets a contiguous set of components in an IJVectorPar ******************************************************************************/int hypre_IJVectorGetLocalComponentsInBlockPar P((hypre_IJVector *vector , int glob_vec_index_start , int glob_vec_index_stop , const int *value_indices , double *values ));
+int hypre_IJVectorCreatePar P((hypre_IJVector *vector , const int *partitioning ));
+int hypre_IJVectorDestroyPar P((hypre_IJVector *vector ));
+int hypre_IJVectorSetPartitioningPar P((hypre_IJVector *vector , const int *partitioning ));
+int hypre_IJVectorSetLocalPartitioningPar P((hypre_IJVector *vector , int vec_start_this_proc , int vec_start_next_proc ));
+int hypre_IJVectorInitializePar P((hypre_IJVector *vector ));
+int hypre_IJVectorDistributePar P((hypre_IJVector *vector , const int *vec_starts ));
+int hypre_IJVectorZeroLocalComponentsPar P((hypre_IJVector *vector ));
+int hypre_IJVectorSetLocalComponentsPar P((hypre_IJVector *vector , int num_values , const int *glob_vec_indices , const int *value_indices , const double *values ));
+int hypre_IJVectorSetLocalComponentsInBlockPar P((hypre_IJVector *vector , int glob_vec_index_start , int glob_vec_index_stop , const int *value_indices , const double *values ));
+int hypre_IJVectorAddToLocalComponentsPar P((hypre_IJVector *vector , int num_values , const int *glob_vec_indices , const int *value_indices , const double *values ));
+int hypre_IJVectorAddToLocalComponentsInBlockPar P((hypre_IJVector *vector , int glob_vec_index_start , int glob_vec_index_stop , const int *value_indices , const double *values ));
+int hypre_IJVectorAssemblePar P((hypre_IJVector *vector ));
+int hypre_IJVectorGetLocalComponentsPar P((hypre_IJVector *vector , int num_values , const int *glob_vec_indices , const int *value_indices , double *values ));
+int hypre_IJVectorGetLocalComponentsInBlockPar P((hypre_IJVector *vector , int glob_vec_index_start , int glob_vec_index_stop , const int *value_indices , double *values ));
 
 #undef P
 # define	P(s) s
