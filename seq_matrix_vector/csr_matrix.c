@@ -191,7 +191,7 @@ hypre_PrintCSRMatrix( hypre_CSRMatrix *matrix,
 
    fprintf(fp, "%d\n", num_rows);
 
-   for (j = 0; j < num_rows; j++)
+   for (j = 0; j <= num_rows; j++)
    {
       fprintf(fp, "%d\n", matrix_i[j] + file_base);
    }
