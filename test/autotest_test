@@ -200,6 +200,7 @@ mail_summary () {
     for MakeOpt in ""  all beta configure IJ fei++ \
            fei nofei sstruct struct
     do
+      DWRNCNT=0; DERRCNT=0;
       FILE=autotest.$ConfOpt.$MakeOpt
       LFILE=`echo $FILE|sed -e 's/\.$//'`.log
       for i in $LFILE ${SRC}/${LFILE} \
@@ -213,8 +214,11 @@ mail_summary () {
             CERRCNT=`expr $CERRCNT + 1`
             COLCNT=`expr $COLCNT + 1`
             CLIST="${CLIST}${EFILE}\n"
-            DWRNCNT=`grep -i warning ${EFILE}|wc -l`
-            DERRCNT=`grep -i error ${EFILE}|wc -l`
+            DWRNNUM=0; DERRNUM=0;
+            DWRNNUM=`grep -i warning ${EFILE}|wc -l`
+            DERRNUM=`grep -i error ${EFILE}|wc -l`
+            DWRNCNT=`expr $DWRNCNT + $DWRNNUM`
+            DERRCNT=`expr $DERRCNT + $DERRNUM`
           else
             CLOGCNT=`expr $CLOGCNT + 1`
             COLFLG=`expr $COLFLG + 1`
