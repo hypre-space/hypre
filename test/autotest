@@ -244,7 +244,7 @@ HYPRE_MAIL=mailx
 cd $HYPRE_AUTOTEST_DIR
 for i in *.err linear_solvers/*.err linear_solvers/test/*.err
 do 
-    if [ -s "$i"  && -r ${i}.email ] 
+    if [ -s "$i"  -o -r ${i}.email ] 
     then 
 	RECIPIENTS=`cat ${i}.email` 
 	${HYPRE_MAIL} -s "Autotest error: $i" $RECIPIENTS < $i 
@@ -323,7 +323,7 @@ ssh ${HYPRE_RUN_MACHINE} "\
         cd ${HYPRE_REMOTE_DIR}/linear_solvers/test;\
 	. ./env.${HYPRE_ARCH};\
 	$MAKE all++ 1> $0.all++.log 2> $0.all++.err
-	$MAKE beta++ 1> $0.beta++.log 2> $0.beta++.err
+#	$MAKE beta++ 1> $0.beta++.log 2> $0.beta++.err
 	$MAKE all77 1> $0.all77.log 2> $0.all77.err
 #	$MAKE beta77 1> $0.beta77.log 2> $0.beta77.err
     )"
