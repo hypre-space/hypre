@@ -15,6 +15,7 @@ C_COMPILE_FLAGS = \
  -I..\
  -I$(srcdir)\
  -I$(srcdir)/..\
+ -I$(srcdir)/../multivector\
  -I$(srcdir)/../utilities\
  -I$(srcdir)/../krylov\
  -I$(srcdir)/../struct_mv\
@@ -28,6 +29,7 @@ C_COMPILE_FLAGS = \
 
 HEADERS =\
  headers.h\
+ HYPRE_sstruct_int.h\
  HYPRE_sstruct_ls.h\
  sstruct_ls.h\
  sys_pfmg.h\
@@ -45,6 +47,7 @@ FILES =\
  HYPRE_sstruct_bicgstab.c\
  HYPRE_sstruct_gmres.c\
  HYPRE_sstruct_InterFAC.c\
+ HYPRE_sstruct_int.c\
  HYPRE_sstruct_pcg.c\
  HYPRE_sstruct_split.c\
  HYPRE_sstruct_sys_pfmg.c\
