@@ -20,6 +20,7 @@ int
 main( int   argc,
       char *argv[] )
 {
+   MPI_Comm           *comm;
    int                 matrix_num_ghost[6] = { 1, 1, 0, 0, 0, 0};
    int                 vector_num_ghost[6] = { 1, 1, 1, 1, 1, 1};
                      
@@ -38,6 +39,7 @@ main( int   argc,
 
    MPI_Comm_size(MPI_COMM_WORLD, &num_procs );
    MPI_Comm_rank(MPI_COMM_WORLD, &myid );
+   MPI_Comm_dup(MPI_COMM_WORLD, comm);
 
    cegdb(&argc, &argv, myid);
 
@@ -49,30 +51,30 @@ main( int   argc,
     * Read in the matrix
     *-----------------------------------------------------------*/
 
-   matrix = zzz_ReadStructMatrix("zin_matrix", matrix_num_ghost);
+   matrix = zzz_ReadStructMatrix(comm, "zin_matrix", matrix_num_ghost);
  
-   zzz_PrintStructMatrix("zout_matrix", matrix, 0);
+   zzz_PrintStructMatrix(comm, "zout_matrix", matrix, 0);
 
    /*-----------------------------------------------------------
     * Read in the vector
     *-----------------------------------------------------------*/
 
-   vector = zzz_ReadStructVector("zin_vector", vector_num_ghost);
+   vector = zzz_ReadStructVector(comm, "zin_vector", vector_num_ghost);
  
-   zzz_PrintStructVector("zout_vector", vector, 0);
+   zzz_PrintStructVector(comm, "zout_vector", vector, 0);
 
    /*-----------------------------------------------------------
     * Do a matvec
     *-----------------------------------------------------------*/
 
    tmp_vector =
-      zzz_NewStructVector(&MPI_COMM_WORLD, zzz_StructVectorGrid(vector));
+      zzz_NewStructVector(comm, zzz_StructVectorGrid(vector));
    zzz_InitializeStructVector(tmp_vector);
    zzz_AssembleStructVector(tmp_vector);
 
    zzz_StructMatvec(1.0, matrix, vector, 0.0, tmp_vector);
 
-   zzz_PrintStructVector("zout_matvec", tmp_vector, 0);
+   zzz_PrintStructVector(comm, "zout_matvec", tmp_vector, 0);
 
    /*-----------------------------------------------------------
     * Copy the vector into tmp_vector
@@ -80,7 +82,7 @@ main( int   argc,
 
    zzz_StructCopy(vector, tmp_vector);
 
-   zzz_PrintStructVector("zout_copy", tmp_vector, 0);
+   zzz_PrintStructVector(comm, "zout_copy", tmp_vector, 0);
 
    /*-----------------------------------------------------------
     * Scale tmp_vector
@@ -88,7 +90,7 @@ main( int   argc,
 
    zzz_StructScale(2.0, tmp_vector);
 
-   zzz_PrintStructVector("zout_scale", tmp_vector, 0);
+   zzz_PrintStructVector(comm, "zout_scale", tmp_vector, 0);
 
    /*-----------------------------------------------------------
     * Do an Axpy (2*vector - vector) = vector
@@ -96,7 +98,7 @@ main( int   argc,
 
    zzz_StructAxpy(-1.0, vector, tmp_vector);
 
-   zzz_PrintStructVector("zout_axpy", tmp_vector, 0);
+   zzz_PrintStructVector(comm, "zout_axpy", tmp_vector, 0);
 
    /*-----------------------------------------------------------
     * Finalize things
