@@ -36,8 +36,8 @@
 
 #define  NDIMU(nv)  (50*nv)
 #define  NDIMP(np)  (50*np)
-#define  NDIMA(na)  (4*na)
-#define  NDIMB(na)  (2*na)
+#define  NDIMA(na)  (6*na)
+#define  NDIMB(na)  (3*na)
 
 
 #endif
