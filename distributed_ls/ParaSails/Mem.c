@@ -118,6 +118,7 @@ char *MemAlloc(Mem *m, int size)
     p = m->avail;
     m->avail += size;
     m->bytes_left -= size;
+    m->total_bytes += size;
 
     return p;
 }
