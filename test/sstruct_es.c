@@ -2616,7 +2616,7 @@ main( int   argc,
        if ( lobpcgSeed )
 	 hypre_MultiVectorSetRandom( eigenvectors, lobpcgSeed );
        else
-	 hypre_MultiVectorSetRandom( eigenvectors, (unsigned int)time(0) );
+	 hypre_MultiVectorSetRandom( eigenvectors, (unsigned int)time_index);
        
        time_index = hypre_InitializeTiming("LOBPCG Solve");
        hypre_BeginTiming(time_index);
