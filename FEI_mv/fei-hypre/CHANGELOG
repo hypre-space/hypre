@@ -7,10 +7,11 @@
             - modify the matrixLoadComplete function to output matrix
               to a file even when it has been previously assembled
               (per Tim Dunn's request)
-02/14/01    version 1.5.0R3 
+02/15/01    version 1.5.0R3 
             - correct an error in MPI_Allreduce in buildSchurRHS.
             - take out a duplicate destroy(f1) in buildSchurRHS
             - in matrixLoadComplete, change to print original matrix
             - fix the SuperLU nrows for Schur reduced systems
             - in BuildSchurReducedRHS, set currX and currB
+            - in BuildSchurReducedRHS, multiply ddata instead of divide
 
