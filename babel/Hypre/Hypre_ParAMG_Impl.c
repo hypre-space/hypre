@@ -113,6 +113,21 @@ impl_Hypre_ParAMG_GetDoubleValue(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.ParAMG.GetDoubleValue) */
   /* Insert the implementation of the GetDoubleValue method here... */
+   int ierr = 0;
+   HYPRE_Solver solver;
+   struct Hypre_ParAMG__data * data;
+
+   data = Hypre_ParAMG__get_data( self );
+   solver = data->solver;
+
+   if ( strcmp(name,"FinalRelativeResidualNorm")==0 ||
+        strcmp(name,"Final Relative Residual Norm")==0 ) {
+      ierr += HYPRE_BoomerAMGGetFinalRelativeResidualNorm( solver, value );
+   }
+   else
+      ierr = 1;
+
+   return ierr;
   /* DO-NOT-DELETE splicer.end(Hypre.ParAMG.GetDoubleValue) */
 }
 
@@ -129,6 +144,20 @@ impl_Hypre_ParAMG_GetIntValue(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.ParAMG.GetIntValue) */
   /* Insert the implementation of the GetIntValue method here... */
+   int ierr = 0;
+   HYPRE_Solver solver;
+   struct Hypre_ParAMG__data * data;
+
+   data = Hypre_ParAMG__get_data( self );
+   solver = data->solver;
+
+   if ( strcmp(name,"Iterations")==0 || strcmp(name,"Iteration Count")==0 ) {
+      ierr += HYPRE_BoomerAMGGetNumIterations( solver, value );
+   }
+   else
+      ierr = 1;
+
+   return ierr;
   /* DO-NOT-DELETE splicer.end(Hypre.ParAMG.GetIntValue) */
 }
 
@@ -455,7 +484,9 @@ impl_Hypre_ParAMG_Apply(
    count.  Or we could change the SIDL spec, make y inout.  But Andy Cleary prefers output only.
    Cf the email conversation of Tuesday November 19.  >>>> TO DO: change this to be correct.<<<<
    But don't forget to accomodate typical big-code users who like to use the same vector over
-   and over again. */
+   and over again. Note Dec10: the user may well want to specify the initial value of y
+   (tremendous performance advantage is you're doing multiple similar problems).
+   Thus y MUST be input/output.  */
    if ( *y==NULL ) {
       Hypre_Vector_Clone( x, y );
    }
