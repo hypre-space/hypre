@@ -469,9 +469,10 @@ struct_dependencies = \
 # optiontional target, fei++
 # fei
 fei_SOURCES = fei.cxx
-fei_CPPFLAGS = \
+fei_CXXFLAGS = \
  -DNOFEI\
  -DHYPRE_TIMING\
+ -DMPICH_SKIP_MPICXX\
  -I$(includedir)
 
 fei_LDADD = \
@@ -908,13 +909,13 @@ distclean-compile:
 	$(LTCXXCOMPILE) -c -o $@ $<
 
 fei-fei.o: fei.cxx
-	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(fei_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o fei-fei.o `test -f 'fei.cxx' || echo '$(srcdir)/'`fei.cxx
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(fei_CXXFLAGS) $(CXXFLAGS) -c -o fei-fei.o `test -f 'fei.cxx' || echo '$(srcdir)/'`fei.cxx
 
 fei-fei.obj: fei.cxx
-	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(fei_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o fei-fei.obj `if test -f 'fei.cxx'; then $(CYGPATH_W) 'fei.cxx'; else $(CYGPATH_W) '$(srcdir)/fei.cxx'; fi`
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(fei_CXXFLAGS) $(CXXFLAGS) -c -o fei-fei.obj `if test -f 'fei.cxx'; then $(CYGPATH_W) 'fei.cxx'; else $(CYGPATH_W) '$(srcdir)/fei.cxx'; fi`
 
 fei-fei.lo: fei.cxx
-	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(fei_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o fei-fei.lo `test -f 'fei.cxx' || echo '$(srcdir)/'`fei.cxx
+	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(fei_CXXFLAGS) $(CXXFLAGS) -c -o fei-fei.lo `test -f 'fei.cxx' || echo '$(srcdir)/'`fei.cxx
 
 .f.o:
 	$(F77COMPILE) -c -o $@ $<

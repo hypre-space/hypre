@@ -188,9 +188,10 @@ $(struct_OBJECTS): $(struct_dependencies)
 # optiontional target, fei++
 # fei
 fei_SOURCES = fei.cxx
-fei_CPPFLAGS = \
+fei_CXXFLAGS = \
  -DNOFEI\
  -DHYPRE_TIMING\
+ -DMPICH_SKIP_MPICXX\
  -I$(includedir)
 fei_LDADD = \
  -L$(libdir)\
