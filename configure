@@ -6605,7 +6605,7 @@ unset ac_cv_lib_$ac_lib_var
     if test -z "$CXXFLAGS"; then
       
    if test -z "$CXXOPT"; then
-      CXXOPT="-O"
+      CXXOPT="-O -OPT:Olimit=0"
    fi
    
 
