@@ -12,16 +12,22 @@
 
 HEADERS =\
  HYPRE_amg.h\
- amg.h
+ headers.h
 
 FILES =\
- HYPRE_amg.c\
+ SPamg.c\
  amg.c\
  amg_setup.c\
- amg_solve.c\
  coarsen.c\
+ indepset.c\
+ random.c\
+ transpose.c\
+ interp.c\
+ rap.c \
+ setupstats.c\
+ amg_solve.c \
  cycle.c\
- rap.c
+ relax.c
 
 OBJS = ${FILES:.c=.o}
 
@@ -31,7 +37,8 @@ F77 = /home/casc/g77/bin/g77
 CFLAGS =\
  -I/usr/local/include\
  -I/home/casc/include\
- -g -Wall -DHYPRE_DEBUG
+ -I/usr/local/mpi/mpich/include\
+ -g -Wall -DHYPRE_DEBUG -DAMG_MALLOC_DEBUG
 
 FFLAGS = -g
 
@@ -39,6 +46,7 @@ LFLAGS =\
  -L/usr/local/lib\
  -L/home/casc/lib\
  -L/home/casc/g77/lib\
+ -L/usr/local/mpi/mpich/lib/solaris/ch_p4\
  -L.\
  -L../../seq_matrix_vector\
  -L../../utilities\
@@ -51,13 +59,17 @@ LFLAGS =\
  -lm
 
 
+SPAMGFILES =  SPamg.o amg.o amg_setup.o coarsen.o  indepset.o \
+               random.o transpose.o interp.o rap.o setupstats.o \
+               amg_solve.o cycle.o relax.o
+
 ##################################################################
 # Main rules
 ##################################################################
 
-driver_internal: driver_internal.o libHYPRE_ls.a
+SPamg: ${SPAMGFILES} libHYPRE_ls.a
 	@echo  "Linking" $@ "... "
-	${CC} -o driver_internal driver_internal.o ${LFLAGS}
+	${CC} -o SPamg ${SPAMGFILES}  ${LFLAGS}
 
 libHYPRE_ls.a: ${OBJS}
 	@echo  "Building $@ ... "
@@ -84,7 +96,7 @@ ${OBJS}: ${HEADERS}
 
 veryclean: clean
 	@rm -f libHYPRE_ls.a
-	@rm -f driver driver_internal
+	@rm -f SPamg
 
 clean:
 	@rm -f *.o
