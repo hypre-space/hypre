@@ -117,7 +117,7 @@ hypre_ParAMGSetup( void               *amg_vdata,
       {
 	 hypre_ParCSRMatrixScaledNorm(A_array[level], &relax_weight[level]);
 	 if (relax_weight[level] != 0.0)
-	    relax_weight[level] = 1.0/relax_weight[level];
+	    relax_weight[level] = (4.0/3.0)/relax_weight[level];
 	 else
 	   printf (" Warning ! Matrix norm is zero !!!");
       }
