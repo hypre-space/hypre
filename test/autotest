@@ -108,7 +108,7 @@ do
         HYPRE_COMPILE_MACHINE="lx10"
         HYPRE_RUN_MACHINE="lx10"
         HYPRE_REMOTE_DIR="/usr/gapps/hypre/AUTOTEST"
-	HYPRE_MACHINE_COMMANDS="-m -a 2 -cf -o 1"
+	HYPRE_MACHINE_COMMANDS="-m -a 2 -cf"
 	perform_test
 	HYPRE_MACHINE_COMMANDS="-m -a 2 -dcxfy -t 1 -ns"
         shift;;
