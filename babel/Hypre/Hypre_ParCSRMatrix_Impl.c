@@ -50,8 +50,6 @@ impl_Hypre_ParCSRMatrix__ctor(
   /* Insert the implementation of the constructor method here... */
    struct Hypre_ParCSRMatrix__data * data;
 
-   printf("impl_Hypre_ParCSRMatrix__ctor\n");
-
    data = hypre_CTAlloc(struct Hypre_ParCSRMatrix__data,1);
    /* data = (struct Hypre_ParCSRMatrix__data *)
       malloc( sizeof ( struct Hypre_ParCSRMatrix__data ) ); */
@@ -84,8 +82,6 @@ impl_Hypre_ParCSRMatrix__dtor(
    data = Hypre_ParCSRMatrix__get_data( self );
 
    ij_A = data -> ij_A;
-
-   printf("impl_Hypre_ParCSRMatrix__dtor\n");
 
    ierr = HYPRE_IJMatrixDestroy( ij_A );
 
@@ -365,8 +361,6 @@ impl_Hypre_ParCSRMatrix_Setup(
 
    ij_A = data -> ij_A;
 
-   printf("impl_Hypre_ParCSRMatrix_Setup\n");
-
    ierr = HYPRE_IJMatrixAssemble( ij_A );
 
    return( ierr );
@@ -445,8 +439,6 @@ impl_Hypre_ParCSRMatrix_Apply(
 
    ierr += HYPRE_ParCSRMatrixMatvec( 1.0, A, xx, 0.0, yy );
 
-   printf("impl_Hypre_ParCSRMatrix_Apply\n");
-
    return( ierr );
   /* DO-NOT-DELETE splicer.end(Hypre.ParCSRMatrix.Apply) */
 }
@@ -474,8 +466,6 @@ impl_Hypre_ParCSRMatrix_Initialize(
    data = Hypre_ParCSRMatrix__get_data( self );
 
    ij_A = data -> ij_A;
-
-   printf("impl_Hypre_ParCSRMatrix_Initialize\n");
 
    ierr = HYPRE_IJMatrixInitialize( ij_A );
 
@@ -510,8 +500,6 @@ impl_Hypre_ParCSRMatrix_Assemble(
 
    ij_A = data -> ij_A;
 
-   printf("impl_Hypre_ParCSRMatrix_Assemble\n");
-
    ierr = HYPRE_IJMatrixAssemble( ij_A );
 
    return( ierr );
@@ -539,7 +527,6 @@ impl_Hypre_ParCSRMatrix_GetObject(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.ParCSRMatrix.GetObject) */
   /* Insert the implementation of the GetObject method here... */
-   printf("impl_Hypre_ParCSRMatrix_GetObject\n");
 
    /* This class is implemented
       so that it returns *itself* as the returned Object, because it is both
@@ -592,7 +579,6 @@ impl_Hypre_ParCSRMatrix_Create(
    data = Hypre_ParCSRMatrix__get_data( self );
 
    ij_A = data -> ij_A;
-   printf("impl_Hypre_ParCSRMatrix_Create\n");
 
    if ( data-> comm == (MPI_Comm)NULL )    
    {
@@ -654,8 +640,6 @@ impl_Hypre_ParCSRMatrix_SetValues(
 
    ij_A = data -> ij_A;
 
-/*   printf("impl_Hypre_ParCSRMatrix_SetValues\n"); annoying (jfp) */
-
    ierr = HYPRE_IJMatrixSetValues( ij_A,
                             nrows,
                             SIDLArrayAddr1(ncols, 0),
@@ -698,8 +682,6 @@ impl_Hypre_ParCSRMatrix_AddToValues(
 
    ij_A = data -> ij_A;
 
-   printf("impl_Hypre_ParCSRMatrix_AddToValues\n");
-
    ierr = HYPRE_IJMatrixAddToValues( ij_A,
                             nrows,
                             SIDLArrayAddr1(ncols, 0) ,
@@ -741,8 +723,6 @@ impl_Hypre_ParCSRMatrix_SetRowSizes(
 
    ij_A = data -> ij_A;
 
-   printf("impl_Hypre_ParCSRMatrix_SetRowSizes\n");
-
    ierr = HYPRE_IJMatrixSetRowSizes( ij_A, SIDLArrayAddr1(sizes, 0) );
 
    return( ierr );
@@ -782,8 +762,6 @@ impl_Hypre_ParCSRMatrix_SetDiagOffdSizes(
 
    ij_A = data -> ij_A;
 
-   printf("impl_Hypre_ParCSRMatrix_SetDiagOffdSizes\n");
-
    ierr = HYPRE_IJMatrixSetDiagOffdSizes( ij_A, 
                                           SIDLArrayAddr1(diag_sizes, 0), 
                                           SIDLArrayAddr1(offdiag_sizes, 0) );
@@ -813,8 +791,6 @@ impl_Hypre_ParCSRMatrix_Read(
    data = Hypre_ParCSRMatrix__get_data( self );
 
    ij_A = data -> ij_A;
-
-   printf("impl_Hypre_ParCSRMatrix_Read\n");
 
    ierr = HYPRE_IJMatrixRead( filename,
 		              data -> comm,
@@ -846,8 +822,6 @@ impl_Hypre_ParCSRMatrix_Print(
    data = Hypre_ParCSRMatrix__get_data( self );
 
    ij_A = data -> ij_A;
-
-   printf("impl_Hypre_ParCSRMatrix_Print\n");
 
    ierr = HYPRE_IJMatrixPrint( ij_A, filename);
 

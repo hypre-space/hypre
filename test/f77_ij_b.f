@@ -283,11 +283,9 @@ c     Generate a Dirichlet Laplacian
 
 
       call Hypre_ParCSRMatrix__create_f( Hypre_parcsr_A )
-      print *, 'finished _create_f'
 
       call Hypre_ParCSRMatrix__cast_f
      1     ( Hypre_parcsr_A, "Hypre.IJBuildMatrix", Hypre_ij_A )
-      print *, 'finished cast'
       if ( Hypre_ij_A .eq. 0 ) then
          write(6,*) 'Cast failed'
          stop
@@ -306,7 +304,6 @@ c     to perform them.
      1     first_local_row, last_local_row,
      1     first_local_col, last_local_col, ierrtmp )
       ierr = ierr + ierrtmp
-      write(6,*) 'finished Create'
 
       call SIDL_int__array_create1d_f( local_num_rows, Hypre_row_sizes )
       size = 7
@@ -380,9 +377,6 @@ c     >>> keep the cast for now, take it out once this works.  This isn't C>>>
          stop
       endif
 
-      call Hypre_ParCSRMatrix_Print_f( Hypre_parcsr_A, "DA", ierrtmp )
-      ierr = ierr + ierrtmp
-
 
 c-----------------------------------------------------------------------
 c     Set up the rhs and initial guess
@@ -402,7 +396,6 @@ c-----------------------------------------------------------------------
       call Hypre_ParCSRVector__create_f( Hypre_parcsr_b )
       call Hypre_ParCSRVector__cast_f
      1     ( Hypre_parcsr_b, "Hypre.IJBuildVector", Hypre_ij_b )
-      print *, 'finished cast'
       if ( Hypre_ij_b .eq. 0 ) then
          write(6,*) 'Cast failed'
          stop
@@ -458,7 +451,6 @@ c-----------------------------------------------------------------------
       call Hypre_ParCSRVector__create_f( Hypre_parcsr_x )
       call Hypre_ParCSRVector__cast_f
      1     ( Hypre_parcsr_x, "Hypre.IJBuildVector", Hypre_ij_x )
-      print *, 'finished cast'
       if ( Hypre_ij_x .eq. 0 ) then
          write(6,*) 'Cast failed'
          stop
@@ -513,7 +505,7 @@ c-----------------------------------------------------------------------
 c     Solve the linear system
 c-----------------------------------------------------------------------
 
-      write (6,*) "solver_id", solver_id
+c      write (6,*) "solver_id", solver_id
 c     General solver parameters, passing hard coded constants
 c     will break the interface.
 
@@ -533,7 +525,7 @@ c     Set defaults for BoomerAMG
       cycle_type = 1
       smooth_num_sweep = 1
 
-      print *, 'Solver: AMG'
+c      print *, 'Solver: AMG'
 
       call HYPRE_BoomerAMGInitGridRelaxatn(num_grid_sweeps,
      &     grid_relax_type,
