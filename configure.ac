@@ -115,12 +115,6 @@ AC_HELP_STRING([--with-FEI_INC_DIR],
 )
 AM_CONDITIONAL([USE_FEI_INC_DIR_DEFAULT], [test "$FEI_INC_DIR_DEFINED" = "no"])
 
-ACX_INSURE
-
-ACX_PURIFY
-
-ACX_STRICT_CHECKING
-
 if test "$casc_user_chose_compilers" != "yes" ; then
   if test "$casc_using_openmp" = "yes" ; then
     AC_CHECK_PROGS(CC, guidec icc pgcc xlc cc)
@@ -128,11 +122,11 @@ if test "$casc_user_chose_compilers" != "yes" ; then
     AC_CHECK_PROGS(F77, guidef77 ifc pgf77 xlf f77)
   elif test "$casc_using_mpi" = "no" ; then
     AC_CHECK_PROGS(CC, icc pgcc xlc cc kcc c89 gcc)
-    AC_CHECK_PROGS(CXX, icc pgCC xlC CC KCC cxx c++ cc++ cl g++ gcc)
+    AC_CHECK_PROGS(CXX, icc pgCC xlC c++ cxx CC KCC cl g++ gcc)
     AC_CHECK_PROGS(F77, ifc pgf77 xlf f77 kf77 fort77 fort g77)
   else
     AC_CHECK_PROGS(CC, mpcc mpikcc mpicc hcc icc pgcc xlc cc kcc c89 gcc)
-    AC_CHECK_PROGS(CXX, mpCC mpiKCC mpiCC hcp icc pgCC xlC CC KCC cxx c++ g++)
+    AC_CHECK_PROGS(CXX, mpCC mpiKCC mpicxx mpiCC hcp icc pgCC xlC c++ cxx CC KCC g++)
     AC_CHECK_PROGS(F77, mpxlf mpf77 mpikf77 mpif77 ifc pgf77 xlf f77 kf77 fort77 f90 g77)
   fi
 fi
@@ -148,6 +142,13 @@ AC_PROG_CXX
 AC_PROG_F77
 AC_F77_LIBRARY_LDFLAGS
 AC_EXEEXT
+
+ACX_INSURE
+
+ACX_PURIFY
+
+ACX_STRICT_CHECKING
+
 
 dnl Initialize libtool
 ##AC_LIBLTDL_CONVENIENCE
@@ -298,6 +299,8 @@ if test "$casc_user_chose_compilers" = "yes" ; then
   fi
 fi
 
+ACX_OPTIMIZATION_FLAGS
+
 dnl *BABEL-related header files, libraries and directories for those
 dnl * libraries
 AC_SUBST(BABEL_DIR)
@@ -381,6 +384,8 @@ if test "$casc_using_babel" = "yes"; then
     BABELDIR=babel
   fi
   if test -d babel-runtime; then
+    export CC CXX F77 F90 CPP LD
+    export CFLAGS CXXFLAGS FFLAGS F90FLAGS CPPFLAGS LDFLAGS 
     AC_CONFIG_SUBDIRS(babel-runtime)
     BABELDIR="$BABELDIR babel-runtime"
   fi
