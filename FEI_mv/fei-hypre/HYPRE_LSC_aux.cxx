@@ -255,7 +255,7 @@ int HYPRE_LinSysCore::parameters(int numParams, char **params)
          printf("    - superluOrdering <natural,mmd>\n");
          printf("    - superluScale <y,n>\n");
          printf("    - amgMaxLevels <d>\n");
-         printf("    - amgCoarsenType <cljp,falgout,ruge,ruge3c>\n");
+         printf("    - amgCoarsenType <cljp,falgout,ruge,ruge3c,pmis,hmis>\n");
          printf("    - amgMeasureType <global,local>\n");
          printf("    - amgRelaxType <jacobi,gsFast,hybrid,hybridsym>\n");
          printf("    - amgNumSweeps <d>\n");
@@ -858,6 +858,8 @@ int HYPRE_LinSysCore::parameters(int numParams, char **params)
          else if ( !strcmp(param2, "ruge" ) )    amgCoarsenType_ = 1;
          else if ( !strcmp(param2, "ruge3c" ) )  amgCoarsenType_ = 4;
          else if ( !strcmp(param2, "falgout" ) ) amgCoarsenType_ = 6;
+         else if ( !strcmp(param2, "pmis" ) )    amgCoarsenType_ = 8;
+         else if ( !strcmp(param2, "hmis" ) )    amgCoarsenType_ = 10;
          else                                    amgCoarsenType_ = 0;
          if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
             printf("       HYPRE_LSC::parameters amgCoarsenType = %s\n",
