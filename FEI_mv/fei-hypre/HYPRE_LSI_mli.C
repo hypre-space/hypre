@@ -212,9 +212,9 @@ int HYPRE_LSI_MLISetup( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
                         HYPRE_ParVector b,   HYPRE_ParVector x )
 {
 #ifdef HAVE_MLI
-   int           targc, nNodes;
+   int           targc, nNodes, iZero=0;
    double        tol=1.0e-8;
-   char          *targv[4], paramString[100];;
+   char          *targv[5], paramString[100];;
    HYPRE_LSI_MLI *mli_object;
    MLI_Matrix    *mli_mat;   
    MLI_Method    *method;   
@@ -310,11 +310,12 @@ int HYPRE_LSI_MLISetup( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
    if ( mli_object->nCoordinates_ != NULL )
    {
       nNodes = mli_object->localNEqns_ / mli_object->nodeDOF_;
-      targc    = 4;
+      targc    = 5;
       targv[0] = (char *) &nNodes;
       targv[1] = (char *) &(mli_object->nodeDOF_);
       targv[2] = (char *) mli_object->nCoordinates_;
       targv[3] = (char *) mli_object->nullScales_;
+      targv[4] = (char *) &(mli_object->nSpaceDim_);
       strcpy( paramString, "setNodalCoord" );
       method->setParams( paramString, targc, targv );
 #if 0
@@ -399,6 +400,18 @@ int HYPRE_LSI_MLISetup( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
       }
 #endif
    }
+   else
+   {
+      targc    = 4;
+      targv[0] = (char *) &(mli_object->nodeDOF_);
+      if ( mli_object->nSpaceDim_ > mli_object->nodeDOF_ ) 
+         mli_object->nSpaceDim_ = mli_object->nodeDOF_; 
+      targv[1] = (char *) &(mli_object->nSpaceDim_);
+      targv[2] = (char *) NULL;
+      targv[3] = (char *) iZero;
+      strcpy( paramString, "setNullSpace" );
+      method->setParams( paramString, targc, targv );
+   }
    if ( mli_object->correctionMatrix_ != NULL )
    {
       HYPRE_ParCSRMatrixDestroy( mli_object->correctionMatrix_ );
@@ -416,6 +429,11 @@ int HYPRE_LSI_MLISetup( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
       strcpy( paramString, "setParamFile" );
       method->setParams( paramString, targc, targv );
    }
+   if ( mli_object->outputLevel_ >= 1 )
+   {
+      strcpy( paramString, "print" );
+      method->setParams( paramString, 0, NULL );
+   }
 
    /* -------------------------------------------------------- */ 
    /* finally, set up                                          */
@@ -428,11 +446,6 @@ int HYPRE_LSI_MLISetup( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
    mli->setup();
    mli->setMaxIterations( mli_object->maxIterations_ );
    mli->setCyclesAtLevel( -1, mli_object->cycleType_ );
-   if ( mli_object->outputLevel_ >= 1 )
-   {
-      strcpy( paramString, "print" );
-      method->setParams( paramString, 0, NULL );
-   }
    return 0;
 #else
    printf("MLI not available.\n");
