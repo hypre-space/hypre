@@ -25,14 +25,17 @@
  * HYPRE_NewStructVector
  *--------------------------------------------------------------------------*/
 
-HYPRE_StructVector
+int
 HYPRE_NewStructVector( MPI_Comm             comm,
                        HYPRE_StructGrid     grid,
-                       HYPRE_StructStencil  stencil )
+                       HYPRE_StructStencil  stencil,
+                       HYPRE_StructVector  *vector )
 {
-   return ( (HYPRE_StructVector)
-            hypre_NewStructVector( comm,
-                                   (hypre_StructGrid *) grid ) );
+   *vector = ( (HYPRE_StructVector)
+              hypre_NewStructVector( comm,
+                                     (hypre_StructGrid *) grid ) );
+
+   return 0;
 }
 
 /*--------------------------------------------------------------------------

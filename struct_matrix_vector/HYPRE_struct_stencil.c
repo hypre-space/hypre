@@ -18,15 +18,18 @@
  * HYPRE_NewStructStencil
  *--------------------------------------------------------------------------*/
 
-HYPRE_StructStencil
-HYPRE_NewStructStencil( int dim,
-                        int size )
+int
+HYPRE_NewStructStencil( int                  dim,
+                        int                  size,
+                        HYPRE_StructStencil *stencil )
 {
    hypre_Index  *shape;
  
    shape = hypre_CTAlloc(hypre_Index, size);
  
-   return ( (HYPRE_StructStencil) hypre_NewStructStencil( dim, size, shape ) );
+   *stencil = ((HYPRE_StructStencil) hypre_NewStructStencil(dim, size,shape));
+
+   return 0;
 }
 
 /*--------------------------------------------------------------------------

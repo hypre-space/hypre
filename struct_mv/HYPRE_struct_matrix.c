@@ -24,15 +24,18 @@
  * HYPRE_NewStructMatrix
  *--------------------------------------------------------------------------*/
 
-HYPRE_StructMatrix 
+int
 HYPRE_NewStructMatrix( MPI_Comm             comm,
                        HYPRE_StructGrid     grid,
-                       HYPRE_StructStencil  stencil )
+                       HYPRE_StructStencil  stencil,
+                       HYPRE_StructMatrix  *matrix )
 {
-   return ( (HYPRE_StructMatrix)
-            hypre_NewStructMatrix( comm,
-                                   (hypre_StructGrid *) grid,
-                                   (hypre_StructStencil *) stencil ) );
+   *matrix = ( (HYPRE_StructMatrix)
+              hypre_NewStructMatrix( comm,
+                                    (hypre_StructGrid *) grid,
+                                    (hypre_StructStencil *) stencil ) );
+
+   return 0;
 }
 
 /*--------------------------------------------------------------------------

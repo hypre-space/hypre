@@ -18,11 +18,14 @@
  * HYPRE_NewStructGrid
  *--------------------------------------------------------------------------*/
 
-HYPRE_StructGrid
-HYPRE_NewStructGrid( MPI_Comm  comm,
-                     int       dim )
+int
+HYPRE_NewStructGrid( MPI_Comm          comm,
+                     int               dim,
+                     HYPRE_StructGrid *grid )
 {
-   return ( (HYPRE_StructGrid) hypre_NewStructGrid( comm, dim ) );
+   *grid = ( (HYPRE_StructGrid) hypre_NewStructGrid( comm, dim ) );
+
+   return 0;
 }
 
 /*--------------------------------------------------------------------------
@@ -65,10 +68,8 @@ HYPRE_SetStructGridExtents( HYPRE_StructGrid  grid,
  * HYPRE_AssembleStructGrid
  *--------------------------------------------------------------------------*/
 
-void 
+void
 HYPRE_AssembleStructGrid( HYPRE_StructGrid grid )
 {
    hypre_AssembleStructGrid( (hypre_StructGrid *) grid, NULL, NULL, NULL );
 }
-
-
