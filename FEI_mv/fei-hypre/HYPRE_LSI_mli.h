@@ -59,7 +59,7 @@ extern int  HYPRE_LSI_MLISetStrengthThreshold( HYPRE_Solver, double );
 extern int  HYPRE_LSI_MLISetMethod( HYPRE_Solver, char * );
 
 extern int  HYPRE_LSI_MLILoadNodalCoordinates( HYPRE_Solver, int, int, int *, 
-                                   int, double * );
+                                   int, double *, int );
 extern int  HYPRE_LSI_MLILoadMatrixScalings( HYPRE_Solver, int, double * );
 extern int  HYPRE_LSI_MLILoadMaterialLabels( HYPRE_Solver, int, int * );
 
