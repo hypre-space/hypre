@@ -3,14 +3,14 @@
  * Symbol:        Hypre.ParCSRVector-v0.1.6
  * Symbol Type:   class
  * Babel Version: 0.8.0
- * SIDL Created:  20030121 14:39:13 PST
- * Generated:     20030121 14:39:16 PST
+ * SIDL Created:  20030210 16:05:40 PST
+ * Generated:     20030210 16:05:44 PST
  * Description:   Intermediate Object Representation for Hypre.ParCSRVector
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
  * babel-version = 0.8.0
- * source-line   = 435
+ * source-line   = 437
  * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 

@@ -3,14 +3,14 @@
  * Symbol:        Hypre.ParCSRVector-v0.1.6
  * Symbol Type:   class
  * Babel Version: 0.8.0
- * SIDL Created:  20030121 14:39:22 PST
- * Generated:     20030121 14:39:30 PST
+ * SIDL Created:  20030210 16:05:50 PST
+ * Generated:     20030210 16:05:58 PST
  * Description:   Client-side glue code for Hypre.ParCSRVector
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
  * babel-version = 0.8.0
- * source-line   = 435
+ * source-line   = 437
  * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 
@@ -296,6 +296,41 @@ SIDLFortran77Symbol(hypre_parcsrvector_getclassinfo_f,HYPRE_PARCSRVECTOR_GETCLAS
       _proxy_self
     );
   *retval = (ptrdiff_t)_proxy_retval;
+}
+
+/*
+ * Method:  GetRow[]
+ */
+
+void
+SIDLFortran77Symbol(hypre_parcsrvector_getrow_f,HYPRE_PARCSRVECTOR_GETROW_F,Hypre_ParCSRVector_GetRow_f)
+(
+  int64_t *self,
+  int32_t *row,
+  int32_t *size,
+  int64_t *col_ind,
+  int64_t *values,
+  int32_t *retval
+)
+{
+  struct Hypre_ParCSRVector__epv *_epv = NULL;
+  struct Hypre_ParCSRVector__object* _proxy_self = NULL;
+  struct SIDL_int__array* _proxy_col_ind = NULL;
+  struct SIDL_double__array* _proxy_values = NULL;
+  _proxy_self =
+    (struct Hypre_ParCSRVector__object*)
+    (ptrdiff_t)(*self);
+  _epv = _proxy_self->d_epv;
+  *retval = 
+    (*(_epv->f_GetRow))(
+      _proxy_self,
+      *row,
+      size,
+      &_proxy_col_ind,
+      &_proxy_values
+    );
+  *col_ind = (ptrdiff_t)_proxy_col_ind;
+  *values = (ptrdiff_t)_proxy_values;
 }
 
 /*
@@ -835,41 +870,6 @@ SIDLFortran77Symbol(hypre_parcsrvector_print_f,HYPRE_PARCSRVECTOR_PRINT_F,Hypre_
       _proxy_filename
     );
   free((void *)_proxy_filename);
-}
-
-/*
- * Method:  GetRow[]
- */
-
-void
-SIDLFortran77Symbol(hypre_parcsrvector_getrow_f,HYPRE_PARCSRVECTOR_GETROW_F,Hypre_ParCSRVector_GetRow_f)
-(
-  int64_t *self,
-  int32_t *row,
-  int32_t *size,
-  int64_t *col_ind,
-  int64_t *values,
-  int32_t *retval
-)
-{
-  struct Hypre_ParCSRVector__epv *_epv = NULL;
-  struct Hypre_ParCSRVector__object* _proxy_self = NULL;
-  struct SIDL_int__array* _proxy_col_ind = NULL;
-  struct SIDL_double__array* _proxy_values = NULL;
-  _proxy_self =
-    (struct Hypre_ParCSRVector__object*)
-    (ptrdiff_t)(*self);
-  _epv = _proxy_self->d_epv;
-  *retval = 
-    (*(_epv->f_GetRow))(
-      _proxy_self,
-      *row,
-      size,
-      &_proxy_col_ind,
-      &_proxy_values
-    );
-  *col_ind = (ptrdiff_t)_proxy_col_ind;
-  *values = (ptrdiff_t)_proxy_values;
 }
 
 /*

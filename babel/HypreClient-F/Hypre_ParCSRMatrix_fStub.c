@@ -3,8 +3,8 @@
  * Symbol:        Hypre.ParCSRMatrix-v0.1.6
  * Symbol Type:   class
  * Babel Version: 0.8.0
- * SIDL Created:  20030121 14:39:22 PST
- * Generated:     20030121 14:39:26 PST
+ * SIDL Created:  20030210 16:05:50 PST
+ * Generated:     20030210 16:05:54 PST
  * Description:   Client-side glue code for Hypre.ParCSRMatrix
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -37,6 +37,7 @@
 #include "Hypre_Vector_IOR.h"
 #include "SIDL_BaseInterface_IOR.h"
 #include "SIDL_ClassInfo_IOR.h"
+#include "Hypre_IJBuildMatrix_IOR.h"
 
 /*
  * Return pointer to internal IOR functions.
@@ -296,6 +297,31 @@ SIDLFortran77Symbol(hypre_parcsrmatrix_getclassinfo_f,HYPRE_PARCSRMATRIX_GETCLAS
   _epv = _proxy_self->d_epv;
   _proxy_retval = 
     (*(_epv->f_getClassInfo))(
+      _proxy_self
+    );
+  *retval = (ptrdiff_t)_proxy_retval;
+}
+
+/*
+ * Method:  Get_IJBuildMatrix[]
+ */
+
+void
+SIDLFortran77Symbol(hypre_parcsrmatrix_get_ijbuildmatrix_f,HYPRE_PARCSRMATRIX_GET_IJBUILDMATRIX_F,Hypre_ParCSRMatrix_Get_IJBuildMatrix_f)
+(
+  int64_t *self,
+  int64_t *retval
+)
+{
+  struct Hypre_ParCSRMatrix__epv *_epv = NULL;
+  struct Hypre_ParCSRMatrix__object* _proxy_self = NULL;
+  struct Hypre_IJBuildMatrix__object* _proxy_retval = NULL;
+  _proxy_self =
+    (struct Hypre_ParCSRMatrix__object*)
+    (ptrdiff_t)(*self);
+  _epv = _proxy_self->d_epv;
+  _proxy_retval = 
+    (*(_epv->f_Get_IJBuildMatrix))(
       _proxy_self
     );
   *retval = (ptrdiff_t)_proxy_retval;

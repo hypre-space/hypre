@@ -3,14 +3,14 @@
  * Symbol:        Hypre.ParCSRVector-v0.1.6
  * Symbol Type:   class
  * Babel Version: 0.8.0
- * SIDL Created:  20030121 14:39:01 PST
- * Generated:     20030121 14:39:04 PST
+ * SIDL Created:  20030210 16:05:28 PST
+ * Generated:     20030210 16:05:32 PST
  * Description:   Intermediate Object Representation for Hypre.ParCSRVector
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
  * babel-version = 0.8.0
- * source-line   = 435
+ * source-line   = 437
  * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 
@@ -167,6 +167,7 @@ static void Hypre_ParCSRVector__init_epv(
     Hypre_ParCSRVector__object*,const char*)) s1->d_epv->f_isType;
   epv->f_getClassInfo                = (struct SIDL_ClassInfo__object* 
     (*)(struct Hypre_ParCSRVector__object*)) s1->d_epv->f_getClassInfo;
+  epv->f_GetRow                      = NULL;
   epv->f_SetCommunicator             = NULL;
   epv->f_Initialize                  = NULL;
   epv->f_Assemble                    = NULL;
@@ -182,7 +183,6 @@ static void Hypre_ParCSRVector__init_epv(
   epv->f_AddToValues                 = NULL;
   epv->f_Read                        = NULL;
   epv->f_Print                       = NULL;
-  epv->f_GetRow                      = NULL;
   epv->f_Clear                       = NULL;
   epv->f_Copy                        = NULL;
   epv->f_Clone                       = NULL;
@@ -546,6 +546,21 @@ remote_Hypre_ParCSRVector_getClassInfo(
 }
 
 /*
+ * REMOTE METHOD STUB:GetRow
+ */
+
+static int32_t
+remote_Hypre_ParCSRVector_GetRow(
+  struct Hypre_ParCSRVector__object* self,
+  int32_t row,
+  int32_t* size,
+  struct SIDL_int__array** col_ind,
+  struct SIDL_double__array** values)
+{
+  return 0;
+}
+
+/*
  * REMOTE METHOD STUB:SetCommunicator
  */
 
@@ -743,21 +758,6 @@ remote_Hypre_ParCSRVector_Print(
 }
 
 /*
- * REMOTE METHOD STUB:GetRow
- */
-
-static int32_t
-remote_Hypre_ParCSRVector_GetRow(
-  struct Hypre_ParCSRVector__object* self,
-  int32_t row,
-  int32_t* size,
-  struct SIDL_int__array** col_ind,
-  struct SIDL_double__array** values)
-{
-  return 0;
-}
-
-/*
  * REMOTE METHOD STUB:Clear
  */
 
@@ -854,6 +854,7 @@ static void Hypre_ParCSRVector__init_remote_epv(void)
   epv->f_queryInt                    = remote_Hypre_ParCSRVector_queryInt;
   epv->f_isType                      = remote_Hypre_ParCSRVector_isType;
   epv->f_getClassInfo                = remote_Hypre_ParCSRVector_getClassInfo;
+  epv->f_GetRow                      = remote_Hypre_ParCSRVector_GetRow;
   epv->f_SetCommunicator             = 
     remote_Hypre_ParCSRVector_SetCommunicator;
   epv->f_Initialize                  = remote_Hypre_ParCSRVector_Initialize;
@@ -875,7 +876,6 @@ static void Hypre_ParCSRVector__init_remote_epv(void)
   epv->f_AddToValues                 = remote_Hypre_ParCSRVector_AddToValues;
   epv->f_Read                        = remote_Hypre_ParCSRVector_Read;
   epv->f_Print                       = remote_Hypre_ParCSRVector_Print;
-  epv->f_GetRow                      = remote_Hypre_ParCSRVector_GetRow;
   epv->f_Clear                       = remote_Hypre_ParCSRVector_Clear;
   epv->f_Copy                        = remote_Hypre_ParCSRVector_Copy;
   epv->f_Clone                       = remote_Hypre_ParCSRVector_Clone;

@@ -3,14 +3,14 @@
  * Symbol:        Hypre.ParCSRVector-v0.1.6
  * Symbol Type:   class
  * Babel Version: 0.8.0
- * SIDL Created:  20030121 14:39:01 PST
- * Generated:     20030121 14:39:11 PST
+ * SIDL Created:  20030210 16:05:28 PST
+ * Generated:     20030210 16:05:39 PST
  * Description:   Server-side implementation for Hypre.ParCSRVector
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
  * babel-version = 0.8.0
- * source-line   = 435
+ * source-line   = 437
  * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 
@@ -129,6 +129,35 @@ impl_Hypre_ParCSRVector__dtor(
    assert( ierr==0 );
    hypre_TFree( data );
   /* DO-NOT-DELETE splicer.end(Hypre.ParCSRVector._dtor) */
+}
+
+/*
+ * Method:  GetRow[]
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_Hypre_ParCSRVector_GetRow"
+
+int32_t
+impl_Hypre_ParCSRVector_GetRow(
+  Hypre_ParCSRVector self, int32_t row, int32_t* size,
+    struct SIDL_int__array** col_ind, struct SIDL_double__array** values)
+{
+  /* DO-NOT-DELETE splicer.begin(Hypre.ParCSRVector.GetRow) */
+  /* Insert the implementation of the GetRow method here... */
+   /* The standard vector is a column vector, so GetRow simply returns one value.
+      Thus we ignore the size and col_ind argumens, and simply set
+      values[0][0] = vector[row]
+   */
+   int ierr = 0;
+   struct Hypre_ParCSRVector__data * data;
+   HYPRE_IJVector ij_b;
+   data = Hypre_ParCSRVector__get_data( self );
+   ij_b = data -> ij_b;
+
+   ierr += HYPRE_IJVectorGetValues( ij_b, 1, &row, SIDLArrayAddr1( values[0], 0 ) );
+   return( ierr );
+  /* DO-NOT-DELETE splicer.end(Hypre.ParCSRVector.GetRow) */
 }
 
 /*
@@ -514,35 +543,6 @@ impl_Hypre_ParCSRVector_Print(
 
    return ierr;
   /* DO-NOT-DELETE splicer.end(Hypre.ParCSRVector.Print) */
-}
-
-/*
- * Method:  GetRow[]
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_Hypre_ParCSRVector_GetRow"
-
-int32_t
-impl_Hypre_ParCSRVector_GetRow(
-  Hypre_ParCSRVector self, int32_t row, int32_t* size,
-    struct SIDL_int__array** col_ind, struct SIDL_double__array** values)
-{
-  /* DO-NOT-DELETE splicer.begin(Hypre.ParCSRVector.GetRow) */
-  /* Insert the implementation of the GetRow method here... */
-   /* The standard vector is a column vector, so GetRow simply returns one value.
-      Thus we ignore the size and col_ind argumens, and simply set
-      values[0][0] = vector[row]
-   */
-   int ierr = 0;
-   struct Hypre_ParCSRVector__data * data;
-   HYPRE_IJVector ij_b;
-   data = Hypre_ParCSRVector__get_data( self );
-   ij_b = data -> ij_b;
-
-   ierr += HYPRE_IJVectorGetValues( ij_b, 1, &row, SIDLArrayAddr1( values[0], 0 ) );
-   return( ierr );
-  /* DO-NOT-DELETE splicer.end(Hypre.ParCSRVector.GetRow) */
 }
 
 /*

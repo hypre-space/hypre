@@ -4,7 +4,7 @@
  * Symbol Type:   class
  * Babel Version: 0.8.0
  * SIDL Created:  20030121 13:48:00 PST
- * Generated:     20030121 14:39:27 PST
+ * Generated:     20030210 16:05:55 PST
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Client-side glue code for SIDL.BaseClass

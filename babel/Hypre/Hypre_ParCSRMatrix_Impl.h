@@ -3,8 +3,8 @@
  * Symbol:        Hypre.ParCSRMatrix-v0.1.6
  * Symbol Type:   class
  * Babel Version: 0.8.0
- * SIDL Created:  20030121 14:39:01 PST
- * Generated:     20030121 14:39:09 PST
+ * SIDL Created:  20030210 16:05:28 PST
+ * Generated:     20030210 16:05:36 PST
  * Description:   Server-side implementation for Hypre.ParCSRMatrix
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
@@ -28,6 +28,9 @@
 #endif
 #ifndef included_SIDL_BaseInterface_h
 #include "SIDL_BaseInterface.h"
+#endif
+#ifndef included_Hypre_IJBuildMatrix_h
+#include "Hypre_IJBuildMatrix.h"
 #endif
 
 /* DO-NOT-DELETE splicer.begin(Hypre.ParCSRMatrix._includes) */
@@ -88,6 +91,10 @@ impl_Hypre_ParCSRMatrix__dtor(
 /*
  * User-defined object methods
  */
+
+extern Hypre_IJBuildMatrix
+impl_Hypre_ParCSRMatrix_Get_IJBuildMatrix(
+  Hypre_ParCSRMatrix);
 
 extern int32_t
 impl_Hypre_ParCSRMatrix_SetCommunicator(

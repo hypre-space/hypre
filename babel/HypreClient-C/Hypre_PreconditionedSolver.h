@@ -3,8 +3,8 @@
  * Symbol:        Hypre.PreconditionedSolver-v0.1.6
  * Symbol Type:   interface
  * Babel Version: 0.8.0
- * SIDL Created:  20030121 14:39:12 PST
- * Generated:     20030121 14:39:19 PST
+ * SIDL Created:  20030210 16:05:40 PST
+ * Generated:     20030210 16:05:47 PST
  * Description:   Client-side glue code for Hypre.PreconditionedSolver
  * 
  * WARNING: Automatically generated; changes will be lost

@@ -3,8 +3,8 @@
  * Symbol:        Hypre.ParCSRMatrix-v0.1.6
  * Symbol Type:   class
  * Babel Version: 0.8.0
- * SIDL Created:  20030121 14:39:01 PST
- * Generated:     20030121 14:39:02 PST
+ * SIDL Created:  20030210 16:05:28 PST
+ * Generated:     20030210 16:05:29 PST
  * Description:   Intermediate Object Representation for Hypre.ParCSRMatrix
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -199,6 +199,8 @@ struct Hypre_ParCSRMatrix__epv {
     struct Hypre_Vector__object* b,
     struct Hypre_Vector__object** x);
   /* Methods introduced in Hypre.ParCSRMatrix-v0.1.6 */
+  struct Hypre_IJBuildMatrix__object* (*f_Get_IJBuildMatrix)(
+    struct Hypre_ParCSRMatrix__object* self);
 };
 
 /*

@@ -3,14 +3,14 @@
  * Symbol:        Hypre.PCG-v0.1.6
  * Symbol Type:   class
  * Babel Version: 0.8.0
- * SIDL Created:  20030121 14:39:01 PST
- * Generated:     20030121 14:39:04 PST
+ * SIDL Created:  20030210 16:05:28 PST
+ * Generated:     20030210 16:05:31 PST
  * Description:   Intermediate Object Representation for Hypre.PCG
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
  * babel-version = 0.8.0
- * source-line   = 462
+ * source-line   = 464
  * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 

@@ -3,8 +3,8 @@
  * Symbol:        Hypre.ParCSRMatrix-v0.1.6
  * Symbol Type:   class
  * Babel Version: 0.8.0
- * SIDL Created:  20030121 14:39:01 PST
- * Generated:     20030121 14:39:05 PST
+ * SIDL Created:  20030210 16:05:28 PST
+ * Generated:     20030210 16:05:32 PST
  * Description:   Client-side glue code for Hypre.ParCSRMatrix
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -33,6 +33,9 @@ typedef struct Hypre_ParCSRMatrix__object* Hypre_ParCSRMatrix;
 
 #ifndef included_SIDL_header_h
 #include "SIDL_header.h"
+#endif
+#ifndef included_Hypre_IJBuildMatrix_h
+#include "Hypre_IJBuildMatrix.h"
 #endif
 #ifndef included_Hypre_Vector_h
 #include "Hypre_Vector.h"
@@ -122,6 +125,13 @@ Hypre_ParCSRMatrix_isType(
  */
 SIDL_ClassInfo
 Hypre_ParCSRMatrix_getClassInfo(
+  Hypre_ParCSRMatrix self);
+
+/**
+ * Method:  Get_IJBuildMatrix[]
+ */
+Hypre_IJBuildMatrix
+Hypre_ParCSRMatrix_Get_IJBuildMatrix(
   Hypre_ParCSRMatrix self);
 
 /**

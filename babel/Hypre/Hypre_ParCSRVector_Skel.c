@@ -3,14 +3,14 @@
  * Symbol:        Hypre.ParCSRVector-v0.1.6
  * Symbol Type:   class
  * Babel Version: 0.8.0
- * SIDL Created:  20030121 14:39:01 PST
- * Generated:     20030121 14:39:11 PST
+ * SIDL Created:  20030210 16:05:28 PST
+ * Generated:     20030210 16:05:39 PST
  * Description:   Server-side glue code for Hypre.ParCSRVector
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
  * babel-version = 0.8.0
- * source-line   = 435
+ * source-line   = 437
  * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 
@@ -25,6 +25,14 @@ impl_Hypre_ParCSRVector__ctor(
 extern void
 impl_Hypre_ParCSRVector__dtor(
   Hypre_ParCSRVector);
+
+extern int32_t
+impl_Hypre_ParCSRVector_GetRow(
+  Hypre_ParCSRVector,
+  int32_t,
+  int32_t*,
+  struct SIDL_int__array**,
+  struct SIDL_double__array**);
 
 extern int32_t
 impl_Hypre_ParCSRVector_SetCommunicator(
@@ -119,14 +127,6 @@ impl_Hypre_ParCSRVector_Print(
   const char*);
 
 extern int32_t
-impl_Hypre_ParCSRVector_GetRow(
-  Hypre_ParCSRVector,
-  int32_t,
-  int32_t*,
-  struct SIDL_int__array**,
-  struct SIDL_double__array**);
-
-extern int32_t
 impl_Hypre_ParCSRVector_Clear(
   Hypre_ParCSRVector);
 
@@ -162,6 +162,7 @@ Hypre_ParCSRVector__set_epv(struct Hypre_ParCSRVector__epv *epv)
 {
   epv->f__ctor = impl_Hypre_ParCSRVector__ctor;
   epv->f__dtor = impl_Hypre_ParCSRVector__dtor;
+  epv->f_GetRow = impl_Hypre_ParCSRVector_GetRow;
   epv->f_SetCommunicator = impl_Hypre_ParCSRVector_SetCommunicator;
   epv->f_Initialize = impl_Hypre_ParCSRVector_Initialize;
   epv->f_Assemble = impl_Hypre_ParCSRVector_Assemble;
@@ -179,7 +180,6 @@ Hypre_ParCSRVector__set_epv(struct Hypre_ParCSRVector__epv *epv)
   epv->f_AddToValues = impl_Hypre_ParCSRVector_AddToValues;
   epv->f_Read = impl_Hypre_ParCSRVector_Read;
   epv->f_Print = impl_Hypre_ParCSRVector_Print;
-  epv->f_GetRow = impl_Hypre_ParCSRVector_GetRow;
   epv->f_Clear = impl_Hypre_ParCSRVector_Clear;
   epv->f_Copy = impl_Hypre_ParCSRVector_Copy;
   epv->f_Clone = impl_Hypre_ParCSRVector_Clone;

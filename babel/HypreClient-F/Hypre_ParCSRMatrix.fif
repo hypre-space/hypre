@@ -3,8 +3,8 @@ C       File:          Hypre_ParCSRMatrix_Impl.f
 C       Symbol:        Hypre.ParCSRMatrix-v0.1.6
 C       Symbol Type:   class
 C       Babel Version: 0.8.0
-C       SIDL Created:  20030121 14:39:22 PST
-C       Generated:     20030121 14:39:26 PST
+C       SIDL Created:  20030210 16:05:50 PST
+C       Generated:     20030210 16:05:54 PST
 C       Description:   Client-side documentation text for Hypre.ParCSRMatrix
 C       
 C       WARNING: Automatically generated; changes will be lost
@@ -153,6 +153,19 @@ C
 C       in Hypre.ParCSRMatrix self
         integer*8 self
 C       out SIDL.ClassInfo retval
+        integer*8 retval
+        end
+
+
+C       
+C       Method:  Get_IJBuildMatrix[]
+C       
+
+        subroutine Hypre_ParCSRMatrix_Get_IJBuildMatrix_f(self, retval)
+        implicit none
+C       in Hypre.ParCSRMatrix self
+        integer*8 self
+C       out Hypre.IJBuildMatrix retval
         integer*8 retval
         end
 

@@ -430,7 +430,9 @@ package Hypre version 0.1.6
    * A single class that implements both a build interface and an operator
    * interface. It returns itself for <code>GetConstructedObject</code>.
    */
-  class ParCSRMatrix implements-all IJBuildMatrix, Operator, CoefficientAccess { }
+  class ParCSRMatrix implements-all IJBuildMatrix, Operator, CoefficientAccess {
+     IJBuildMatrix Get_IJBuildMatrix();
+  }
 
   class ParCSRVector implements-all IJBuildVector, Vector, CoefficientAccess { }
 

@@ -3,14 +3,14 @@
  * Symbol:        Hypre.ParDiagScale-v0.1.6
  * Symbol Type:   class
  * Babel Version: 0.8.0
- * SIDL Created:  20030121 14:39:13 PST
- * Generated:     20030121 14:39:17 PST
+ * SIDL Created:  20030210 16:05:41 PST
+ * Generated:     20030210 16:05:45 PST
  * Description:   Client-side glue code for Hypre.ParDiagScale
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
  * babel-version = 0.8.0
- * source-line   = 454
+ * source-line   = 456
  * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 

@@ -4,7 +4,7 @@
  * Symbol Type:   interface
  * Babel Version: 0.8.0
  * SIDL Created:  20030121 13:48:00 PST
- * Generated:     20030121 14:39:30 PST
+ * Generated:     20030210 16:05:57 PST
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Client-side glue code for SIDL.ClassInfo

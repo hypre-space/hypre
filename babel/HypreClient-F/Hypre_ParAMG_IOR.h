@@ -3,14 +3,14 @@
  * Symbol:        Hypre.ParAMG-v0.1.6
  * Symbol Type:   class
  * Babel Version: 0.8.0
- * SIDL Created:  20030121 14:39:22 PST
- * Generated:     20030121 14:39:25 PST
+ * SIDL Created:  20030210 16:05:50 PST
+ * Generated:     20030210 16:05:53 PST
  * Description:   Intermediate Object Representation for Hypre.ParAMG
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
  * babel-version = 0.8.0
- * source-line   = 458
+ * source-line   = 460
  * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 

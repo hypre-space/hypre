@@ -3,8 +3,8 @@
  * Symbol:        Hypre.StructMatrix-v0.1.6
  * Symbol Type:   class
  * Babel Version: 0.8.0
- * SIDL Created:  20030121 14:39:13 PST
- * Generated:     20030121 14:39:15 PST
+ * SIDL Created:  20030210 16:05:40 PST
+ * Generated:     20030210 16:05:43 PST
  * Description:   Intermediate Object Representation for Hypre.StructMatrix
  * 
  * WARNING: Automatically generated; changes will be lost

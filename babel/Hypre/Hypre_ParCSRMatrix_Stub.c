@@ -3,8 +3,8 @@
  * Symbol:        Hypre.ParCSRMatrix-v0.1.6
  * Symbol Type:   class
  * Babel Version: 0.8.0
- * SIDL Created:  20030121 14:39:01 PST
- * Generated:     20030121 14:39:05 PST
+ * SIDL Created:  20030210 16:05:28 PST
+ * Generated:     20030210 16:05:33 PST
  * Description:   Client-side glue code for Hypre.ParCSRMatrix
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -171,6 +171,18 @@ Hypre_ParCSRMatrix_getClassInfo(
   Hypre_ParCSRMatrix self)
 {
   return (*self->d_epv->f_getClassInfo)(
+    self);
+}
+
+/*
+ * Method:  Get_IJBuildMatrix[]
+ */
+
+Hypre_IJBuildMatrix
+Hypre_ParCSRMatrix_Get_IJBuildMatrix(
+  Hypre_ParCSRMatrix self)
+{
+  return (*self->d_epv->f_Get_IJBuildMatrix)(
     self);
 }
 

@@ -3,14 +3,14 @@ C       File:          Hypre_StructSMG_Impl.f
 C       Symbol:        Hypre.StructSMG-v0.1.6
 C       Symbol Type:   class
 C       Babel Version: 0.8.0
-C       SIDL Created:  20030121 14:39:22 PST
-C       Generated:     20030121 14:39:27 PST
+C       SIDL Created:  20030210 16:05:50 PST
+C       Generated:     20030210 16:05:54 PST
 C       Description:   Client-side documentation text for Hypre.StructSMG
 C       
 C       WARNING: Automatically generated; changes will be lost
 C       
 C       babel-version = 0.8.0
-C       source-line   = 456
+C       source-line   = 458
 C       source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
 C       
 

@@ -3,8 +3,8 @@
  * Symbol:        Hypre.StructStencil-v0.1.6
  * Symbol Type:   class
  * Babel Version: 0.8.0
- * SIDL Created:  20030121 14:39:00 PST
- * Generated:     20030121 14:39:10 PST
+ * SIDL Created:  20030210 16:05:28 PST
+ * Generated:     20030210 16:05:38 PST
  * Description:   Server-side glue code for Hypre.StructStencil
  * 
  * WARNING: Automatically generated; changes will be lost

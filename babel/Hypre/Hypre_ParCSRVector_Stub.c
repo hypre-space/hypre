@@ -3,14 +3,14 @@
  * Symbol:        Hypre.ParCSRVector-v0.1.6
  * Symbol Type:   class
  * Babel Version: 0.8.0
- * SIDL Created:  20030121 14:39:01 PST
- * Generated:     20030121 14:39:08 PST
+ * SIDL Created:  20030210 16:05:28 PST
+ * Generated:     20030210 16:05:36 PST
  * Description:   Client-side glue code for Hypre.ParCSRVector
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
  * babel-version = 0.8.0
- * source-line   = 435
+ * source-line   = 437
  * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 
@@ -172,6 +172,26 @@ Hypre_ParCSRVector_getClassInfo(
 {
   return (*self->d_epv->f_getClassInfo)(
     self);
+}
+
+/*
+ * Method:  GetRow[]
+ */
+
+int32_t
+Hypre_ParCSRVector_GetRow(
+  Hypre_ParCSRVector self,
+  int32_t row,
+  int32_t* size,
+  struct SIDL_int__array** col_ind,
+  struct SIDL_double__array** values)
+{
+  return (*self->d_epv->f_GetRow)(
+    self,
+    row,
+    size,
+    col_ind,
+    values);
 }
 
 /*
@@ -458,26 +478,6 @@ Hypre_ParCSRVector_Print(
   return (*self->d_epv->f_Print)(
     self,
     filename);
-}
-
-/*
- * Method:  GetRow[]
- */
-
-int32_t
-Hypre_ParCSRVector_GetRow(
-  Hypre_ParCSRVector self,
-  int32_t row,
-  int32_t* size,
-  struct SIDL_int__array** col_ind,
-  struct SIDL_double__array** values)
-{
-  return (*self->d_epv->f_GetRow)(
-    self,
-    row,
-    size,
-    col_ind,
-    values);
 }
 
 /*

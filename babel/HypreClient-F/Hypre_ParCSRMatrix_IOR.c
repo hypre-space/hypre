@@ -3,8 +3,8 @@
  * Symbol:        Hypre.ParCSRMatrix-v0.1.6
  * Symbol Type:   class
  * Babel Version: 0.8.0
- * SIDL Created:  20030121 14:39:22 PST
- * Generated:     20030121 14:39:23 PST
+ * SIDL Created:  20030210 16:05:50 PST
+ * Generated:     20030210 16:05:51 PST
  * Description:   Intermediate Object Representation for Hypre.ParCSRMatrix
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -167,6 +167,7 @@ static void Hypre_ParCSRMatrix__init_epv(
     Hypre_ParCSRMatrix__object*,const char*)) s1->d_epv->f_isType;
   epv->f_getClassInfo            = (struct SIDL_ClassInfo__object* (*)(struct 
     Hypre_ParCSRMatrix__object*)) s1->d_epv->f_getClassInfo;
+  epv->f_Get_IJBuildMatrix       = NULL;
   epv->f_SetCommunicator         = NULL;
   epv->f_GetDoubleValue          = NULL;
   epv->f_GetIntValue             = NULL;
@@ -541,6 +542,17 @@ remote_Hypre_ParCSRMatrix_getClassInfo(
 }
 
 /*
+ * REMOTE METHOD STUB:Get_IJBuildMatrix
+ */
+
+static struct Hypre_IJBuildMatrix__object*
+remote_Hypre_ParCSRMatrix_Get_IJBuildMatrix(
+  struct Hypre_ParCSRMatrix__object* self)
+{
+  return (struct Hypre_IJBuildMatrix__object*) 0;
+}
+
+/*
  * REMOTE METHOD STUB:SetCommunicator
  */
 
@@ -839,6 +851,7 @@ static void Hypre_ParCSRMatrix__init_remote_epv(void)
   epv->f_queryInt                = remote_Hypre_ParCSRMatrix_queryInt;
   epv->f_isType                  = remote_Hypre_ParCSRMatrix_isType;
   epv->f_getClassInfo            = remote_Hypre_ParCSRMatrix_getClassInfo;
+  epv->f_Get_IJBuildMatrix       = remote_Hypre_ParCSRMatrix_Get_IJBuildMatrix;
   epv->f_SetCommunicator         = remote_Hypre_ParCSRMatrix_SetCommunicator;
   epv->f_GetDoubleValue          = remote_Hypre_ParCSRMatrix_GetDoubleValue;
   epv->f_GetIntValue             = remote_Hypre_ParCSRMatrix_GetIntValue;

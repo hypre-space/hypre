@@ -3,8 +3,8 @@
  * Symbol:        Hypre.ParCSRMatrix-v0.1.6
  * Symbol Type:   class
  * Babel Version: 0.8.0
- * SIDL Created:  20030121 14:39:01 PST
- * Generated:     20030121 14:39:09 PST
+ * SIDL Created:  20030210 16:05:28 PST
+ * Generated:     20030210 16:05:36 PST
  * Description:   Server-side implementation for Hypre.ParCSRMatrix
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
@@ -126,6 +126,24 @@ impl_Hypre_ParCSRMatrix__dtor(
    hypre_TFree( data );
 
   /* DO-NOT-DELETE splicer.end(Hypre.ParCSRMatrix._dtor) */
+}
+
+/*
+ * Method:  Get_IJBuildMatrix[]
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_Hypre_ParCSRMatrix_Get_IJBuildMatrix"
+
+Hypre_IJBuildMatrix
+impl_Hypre_ParCSRMatrix_Get_IJBuildMatrix(
+  Hypre_ParCSRMatrix self)
+{
+  /* DO-NOT-DELETE splicer.begin(Hypre.ParCSRMatrix.Get_IJBuildMatrix) */
+  /* Insert the implementation of the Get_IJBuildMatrix method here... */
+   return (Hypre_IJBuildMatrix) Hypre_ParCSRMatrix__cast2
+      ( self, "Hypre.IJBuildMatrix" );
+  /* DO-NOT-DELETE splicer.end(Hypre.ParCSRMatrix.Get_IJBuildMatrix) */
 }
 
 /*

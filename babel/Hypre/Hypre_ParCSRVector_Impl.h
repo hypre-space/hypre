@@ -3,14 +3,14 @@
  * Symbol:        Hypre.ParCSRVector-v0.1.6
  * Symbol Type:   class
  * Babel Version: 0.8.0
- * SIDL Created:  20030121 14:39:01 PST
- * Generated:     20030121 14:39:11 PST
+ * SIDL Created:  20030210 16:05:28 PST
+ * Generated:     20030210 16:05:39 PST
  * Description:   Server-side implementation for Hypre.ParCSRVector
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
  * babel-version = 0.8.0
- * source-line   = 435
+ * source-line   = 437
  * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 
@@ -86,6 +86,14 @@ impl_Hypre_ParCSRVector__dtor(
 /*
  * User-defined object methods
  */
+
+extern int32_t
+impl_Hypre_ParCSRVector_GetRow(
+  Hypre_ParCSRVector,
+  int32_t,
+  int32_t*,
+  struct SIDL_int__array**,
+  struct SIDL_double__array**);
 
 extern int32_t
 impl_Hypre_ParCSRVector_SetCommunicator(
@@ -178,14 +186,6 @@ extern int32_t
 impl_Hypre_ParCSRVector_Print(
   Hypre_ParCSRVector,
   const char*);
-
-extern int32_t
-impl_Hypre_ParCSRVector_GetRow(
-  Hypre_ParCSRVector,
-  int32_t,
-  int32_t*,
-  struct SIDL_int__array**,
-  struct SIDL_double__array**);
 
 extern int32_t
 impl_Hypre_ParCSRVector_Clear(

@@ -3,8 +3,8 @@
  * Symbol:        Hypre.IJBuildMatrix-v0.1.6
  * Symbol Type:   interface
  * Babel Version: 0.8.0
- * SIDL Created:  20030121 14:39:00 PST
- * Generated:     20030121 14:39:08 PST
+ * SIDL Created:  20030210 16:05:28 PST
+ * Generated:     20030210 16:05:35 PST
  * Description:   Client-side glue code for Hypre.IJBuildMatrix
  * 
  * WARNING: Automatically generated; changes will be lost

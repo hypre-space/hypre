@@ -3,8 +3,8 @@
  * Symbol:        Hypre.ParCSRMatrix-v0.1.6
  * Symbol Type:   class
  * Babel Version: 0.8.0
- * SIDL Created:  20030121 14:39:01 PST
- * Generated:     20030121 14:39:09 PST
+ * SIDL Created:  20030210 16:05:28 PST
+ * Generated:     20030210 16:05:36 PST
  * Description:   Server-side glue code for Hypre.ParCSRMatrix
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -24,6 +24,10 @@ impl_Hypre_ParCSRMatrix__ctor(
 
 extern void
 impl_Hypre_ParCSRMatrix__dtor(
+  Hypre_ParCSRMatrix);
+
+extern Hypre_IJBuildMatrix
+impl_Hypre_ParCSRMatrix_Get_IJBuildMatrix(
   Hypre_ParCSRMatrix);
 
 extern int32_t
@@ -159,6 +163,7 @@ Hypre_ParCSRMatrix__set_epv(struct Hypre_ParCSRMatrix__epv *epv)
 {
   epv->f__ctor = impl_Hypre_ParCSRMatrix__ctor;
   epv->f__dtor = impl_Hypre_ParCSRMatrix__dtor;
+  epv->f_Get_IJBuildMatrix = impl_Hypre_ParCSRMatrix_Get_IJBuildMatrix;
   epv->f_SetCommunicator = impl_Hypre_ParCSRMatrix_SetCommunicator;
   epv->f_GetDoubleValue = impl_Hypre_ParCSRMatrix_GetDoubleValue;
   epv->f_GetIntValue = impl_Hypre_ParCSRMatrix_GetIntValue;

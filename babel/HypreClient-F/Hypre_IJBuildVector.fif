@@ -3,8 +3,8 @@ C       File:          Hypre_IJBuildVector_Impl.f
 C       Symbol:        Hypre.IJBuildVector-v0.1.6
 C       Symbol Type:   interface
 C       Babel Version: 0.8.0
-C       SIDL Created:  20030121 14:39:22 PST
-C       Generated:     20030121 14:39:30 PST
+C       SIDL Created:  20030210 16:05:49 PST
+C       Generated:     20030210 16:05:57 PST
 C       Description:   Client-side documentation text for Hypre.IJBuildVector
 C       
 C       WARNING: Automatically generated; changes will be lost
