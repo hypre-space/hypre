@@ -262,6 +262,9 @@ hypre_StructCoarsen( hypre_StructGrid  *fgrid,
    /*-----------------------------------------
     * Coarsen neighborhood boxes & determine
     * send / recv procs
+    *
+    * NOTE: Currently, this always communicates
+    * with all neighboring processes.
     *-----------------------------------------*/
 
    local_cbox = hypre_BoxCreate();
@@ -292,6 +295,8 @@ hypre_StructCoarsen( hypre_StructGrid  *fgrid,
              * Receive info?
              *-----------------------*/
 
+/* always communicate */
+#if 0
             perimeter_count = 0;
             cperimeter_count = 0;
             for (d = 0; d < 3; d++)
@@ -332,6 +337,10 @@ hypre_StructCoarsen( hypre_StructGrid  *fgrid,
                   cperimeter_count++;
                }
             }
+#else
+            perimeter_count = 0;
+            cperimeter_count = 1;
+#endif
             if (cperimeter_count > perimeter_count)
             {
                if (num_recvs == 0)
@@ -351,6 +360,8 @@ hypre_StructCoarsen( hypre_StructGrid  *fgrid,
              * Send info?
              *-----------------------*/
 
+/* always communicate */
+#if 0
             perimeter_count = 0;
             cperimeter_count = 0;
             for (d = 0; d < 3; d++)
@@ -391,6 +402,10 @@ hypre_StructCoarsen( hypre_StructGrid  *fgrid,
                   cperimeter_count++;
                }
             }
+#else
+            perimeter_count = 0;
+            cperimeter_count = 1;
+#endif
             if (cperimeter_count > perimeter_count)
             {
                if (num_sends == 0)
