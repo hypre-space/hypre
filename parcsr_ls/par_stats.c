@@ -134,12 +134,12 @@ hypre_ParAMGSetupStats( void               *amg_vdata,
 
       printf( "\nOperator Matrix Information:\n\n");
 
-      printf("         nonzero         entries p");
+      printf("            nonzero         entries p");
       printf("er row        row sums\n");
-      printf("lev rows entries  sparse  min max  ");
+      printf("lev   rows  entries  sparse  min  max   ");
       printf("avg       min         max\n");
       printf("=======================================");
-      printf("==========================\n");
+      printf("============================\n");
    }
   
    /*-----------------------------------------------------
@@ -229,7 +229,7 @@ hypre_ParAMGSetupStats( void               *amg_vdata,
               global_max_rsum = max(global_max_rsum, gather_buff[j*4 +3]);
           }
 
-          printf( "%2d %5d %7d  %0.3f  %3d %3d",
+          printf( "%2d %7d %8d  %0.3f  %4d %4d",
                     level, fine_size, global_nonzeros, sparse, global_min_e, 
                     global_max_e);
           printf("  %4.1f  %10.3e  %10.3e\n", avg_entries,
