@@ -13,10 +13,10 @@
 
 AMG_MAKE="gmake"
 
-AMG_CC="gcc"
+AMG_CC="cc"
  
 AMG_F77_FLAGS="-silent"
  
 AMG_F90_FLAGS="-silent"
  
-AMG_LINK="gcc"
+AMG_LINK="cc"

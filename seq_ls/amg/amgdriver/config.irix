@@ -13,14 +13,14 @@
 
 AMG_MAKE="gmake"
 
-AMG_CC="gcc"
+AMG_CC="cc"
 AMG_CC_FLAGS="-I$AMG_DIR/include -I/usr/local/include"
  
 AMG_F77_FLAGS="-silent"
  
 AMG_F90_FLAGS="-silent"
  
-AMG_LINK="gcc"
+AMG_LINK="cc"
 AMG_LINK_FLAGS="-L$AMG_DIR/lib -lamg -L$AMG_DIR/lib/cvode -lcvode \
-                -lF77 -lU77 -lI77 -lisam -lfpe -lm"
+                -lF77 -lI77 -lisam -lm"
 
