@@ -26,4 +26,5 @@ extern int  MLI_Matrix_GetOverlappedMatrix(MLI_Matrix *, int *offNRows,
 extern void MLI_Matrix_GetExtRows(MLI_Matrix *, MLI_Matrix *, int *extNRows,
                        int **extRowLengs, int **extCols, double **extVals);
 extern void MLI_Matrix_MatMatMult(MLI_Matrix *, MLI_Matrix *, MLI_Matrix **);
+extern void MLI_Matrix_Transpose(MLI_Matrix *, MLI_Matrix **);
 

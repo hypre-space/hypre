@@ -112,7 +112,7 @@ void MLI_Matrix_MatMatMult( MLI_Matrix *Amat, MLI_Matrix *Bmat,
     * BExtCols[j] to its offset in extColList.
     * ----------------------------------------------------------------------*/
 
-   if ( BExtNRows == 0 ) BExtNnz = 0;
+   if ( BExtNRows == 0 ) BExtNnz = BExtNumUniqueCols = 0;
    else
    {
       BExtNnz = BExtRowLengs[BExtNRows*2];
@@ -535,9 +535,42 @@ void MLI_Matrix_MatMatMult( MLI_Matrix *Amat, MLI_Matrix *Bmat,
       CDiagIA[ia+1] = CDiagNnz;
       COffdIA[ia+1] = COffdNnz;
    }
-   if ( CNRows    > 0 ) delete [] CDiagReg;
-   if ( CExtNCols > 0 ) delete [] COffdReg;
-   if ( CExtNCols > 0 ) delete [] CColMapAux;
+   if ( CNRows    > 0 )  delete [] CDiagReg;
+   if ( CExtNCols > 0 )  delete [] COffdReg;
+   if ( COffdNCols > 0 ) delete [] CColMapAux;
+
+   /* -----------------------------------------------------------------------
+    * move the diagonal entry to the beginning of the row
+    * ----------------------------------------------------------------------*/
+
+   for ( ia = 0; ia < CNRows; ia++ ) 
+   {
+      iTemp = -1;
+      for ( ia2 = CDiagIA[ia]; ia2 < CDiagIA[ia+1]; ia2++ ) 
+      {
+         if ( CDiagJA[ia2] == ia ) 
+         {
+            iTemp = CDiagJA[ia2];
+            dTemp = CDiagAA[ia2];
+            break;
+         }
+      }
+      if ( iTemp >= 0 )
+      {
+         for ( ib = ia2; ib > CDiagIA[ia]; ib-- ) 
+         {
+            CDiagJA[ib] = CDiagJA[ib-1];
+            CDiagAA[ib] = CDiagAA[ib-1];
+         }
+         CDiagJA[CDiagIA[ia]] = iTemp;
+         CDiagAA[CDiagIA[ia]] = dTemp;
+      }  
+   }  
+
+   /* -----------------------------------------------------------------------
+    * finally form HYPRE_ParCSRMatrix for the product
+    * ----------------------------------------------------------------------*/
+
 #if 0
    if ( mypid == 1 )
    {
@@ -552,10 +585,6 @@ void MLI_Matrix_MatMatMult( MLI_Matrix *Amat, MLI_Matrix *Bmat,
       }
    }
 #endif
-
-   /* -----------------------------------------------------------------------
-    * finally form HYPRE_ParCSRMatrix for the product
-    * ----------------------------------------------------------------------*/
 
    CRowStarts = (int *) malloc( (nprocs+1) * sizeof(int) );
    CColStarts = (int *) malloc( (nprocs+1) * sizeof(int) );
@@ -811,33 +840,35 @@ void MLI_Matrix_GetExtRows( MLI_Matrix *Amat, MLI_Matrix *Bmat, int *extNRowsP,
    if ( nRecvs + nSends > 0 ) delete [] statuses;
 
    /* -----------------------------------------------------------------------
-    * return received rows
+    * diagnostics
     * ----------------------------------------------------------------------*/
 
-   BRowStarts = hypre_ParCSRMatrixRowStarts(hypreB);
-totalRecvNnz = 0;
-if ( mypid == -1 )
-for ( ip = 0; ip < nprocs; ip++ )
-printf("processor has range : %5d %5d\n", BRowStarts[ip], BRowStarts[ip+1]);
-
-if ( mypid == -1 )
-for ( ip = 0; ip < nRecvs; ip++ )
-{
-offset = recvStarts[ip];
-length = recvStarts[ip+1] - offset;
-curNnz = 0;
-for (jp = 0; jp < length*2; jp++) curNnz += recvRowLengs[offset*2+jp];
-for (jp = 0; jp < curNnz; jp++) 
-{
-printf("%d : recvData = %5d %e\n", mypid, recvCols[totalRecvNnz], 
-recvVals[totalRecvNnz]);
-totalRecvNnz++;
-}
-}
    (*extRowLengsP) = recvRowLengs;
    (*extColsP)     = recvCols;
    (*extValsP)     = recvVals;
    (*extNRowsP)    = recvNRows;
-   return;
+
+#if 0
+   BRowStarts = hypre_ParCSRMatrixRowStarts(hypreB);
+   totalRecvNnz = 0;
+   if ( mypid == 0 )
+   {
+      for ( ip = 0; ip < nprocs; ip++ )
+         printf("processor has range %d %d\n",BRowStarts[ip],BRowStarts[ip+1]);
+      for ( ip = 0; ip < nprocs; ip++ )
+      {
+         offset = recvStarts[ip];
+         length = recvStarts[ip+1] - offset;
+         curNnz = 0;
+         for (jp = 0; jp < length*2; jp++) curNnz += recvRowLengs[offset*2+jp];
+         for (jp = 0; jp < curNnz; jp++) 
+         {
+            printf("%d : recvData = %5d %e\n", mypid, recvCols[totalRecvNnz], 
+                   recvVals[totalRecvNnz]);
+            totalRecvNnz++;
+         }
+      }
+   }
+#endif
 }
 

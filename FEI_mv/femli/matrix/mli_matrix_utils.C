@@ -421,3 +421,69 @@ int MLI_Matrix_GetOverlappedMatrix(MLI_Matrix *mli_mat, int *offNRows,
    return 0;
 }
 
+/***************************************************************************
+ * perform matrix transpose (modified from parcsr_mv function by putting
+ * diagonal entries at the beginning of the row)
+ *--------------------------------------------------------------------------*/
+
+int MLI_Matrix_Transpose(MLI_Matrix *Amat, MLI_Matrix **AmatT)
+{
+   int                one=1, ia, ia2, ib, iTemp, *ATDiagI, *ATDiagJ;
+   int                localNRows;
+   double             dTemp, *ATDiagA;
+   char               paramString[30];
+   hypre_CSRMatrix    *ATDiag;
+   hypre_ParCSRMatrix *hypreA, *hypreAT;
+   MLI_Matrix         *mli_AmatT;
+   MLI_Function       *funcPtr;
+
+   hypreA = (hypre_ParCSRMatrix *) Amat->getMatrix();
+   hypre_ParCSRMatrixTranspose( hypreA, &hypreAT, one );
+   ATDiag = hypre_ParCSRMatrixDiag(hypreAT);
+   localNRows = hypre_CSRMatrixNumRows(ATDiag);
+   ATDiagI = hypre_CSRMatrixI(ATDiag);
+   ATDiagJ = hypre_CSRMatrixJ(ATDiag);
+   ATDiagA = hypre_CSRMatrixData(ATDiag);
+
+   /* -----------------------------------------------------------------------
+    * move the diagonal entry to the beginning of the row
+    * ----------------------------------------------------------------------*/
+
+   for ( ia = 0; ia < localNRows; ia++ ) 
+   {
+      iTemp = -1;
+      for ( ia2 = ATDiagI[ia]; ia2 < ATDiagI[ia+1]; ia2++ ) 
+      {
+         if ( ATDiagJ[ia2] == ia ) 
+         {
+            iTemp = ATDiagJ[ia2];
+            dTemp = ATDiagA[ia2];
+            break;
+         }
+      }
+      if ( iTemp >= 0 )
+      {
+         for ( ib = ia2; ib > ATDiagI[ia]; ib-- ) 
+         {
+            ATDiagJ[ib] = ATDiagJ[ib-1];
+            ATDiagA[ib] = ATDiagA[ib-1];
+         }
+         ATDiagJ[ATDiagI[ia]] = iTemp;
+         ATDiagA[ATDiagI[ia]] = dTemp;
+      }  
+   }  
+
+   /* -----------------------------------------------------------------------
+    * construct MLI_Matrix
+    * ----------------------------------------------------------------------*/
+
+   sprintf( paramString, "HYPRE_ParVector" );
+   funcPtr = new MLI_Function();
+   MLI_Utils_HypreParCSRMatrixGetDestroyFunc(funcPtr); 
+   mli_AmatT = new MLI_Matrix((void*) hypreAT, paramString, funcPtr);
+   delete funcPtr;
+
+   *AmatT = mli_AmatT;
+  
+   return 0;
+}
