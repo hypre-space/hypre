@@ -1559,6 +1559,8 @@ main( int   argc,
     * Finalize things
     *-----------------------------------------------------------*/
 
+   hypre_TFree(smooth_option);
+
    HYPRE_IJMatrixDestroy(ij_matrix);
    if (build_rhs_type == 1)
       HYPRE_IJVectorDestroy(ij_b);
