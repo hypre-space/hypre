@@ -82,6 +82,7 @@ typedef struct HYPRE_LSI_MLI_Struct
    int      postNSweeps_;         /* default - 2 smoothing steps */
    double   *preSmootherWts_;     /* relaxation weights */
    double   *postSmootherWts_;    /* relaxation weights */
+   int      smootherPrintRNorm_;  /* for smoother diagnostics */
    double   strengthThreshold_;   /* strength threshold */
    char     coarseSolver_[20];    /* default = SuperLU */
    int      coarseSolverNSweeps_; /* number of sweeps (if iterative used) */
@@ -141,10 +142,11 @@ int HYPRE_LSI_MLICreate( MPI_Comm comm, HYPRE_Solver *solver )
    strcpy(mli_object->method_ , "AMGSA");
    strcpy(mli_object->preSmoother_, "SGS");
    strcpy(mli_object->postSmoother_, "SGS");
-   mli_object->preNSweeps_          = 2;
-   mli_object->postNSweeps_         = 2;
+   mli_object->preNSweeps_          = 1;
+   mli_object->postNSweeps_         = 1;
    mli_object->preSmootherWts_      = NULL;
    mli_object->postSmootherWts_     = NULL;
+   mli_object->smootherPrintRNorm_  = 0;
    mli_object->strengthThreshold_   = 0.08;
    strcpy(mli_object->coarseSolver_, "SuperLU");
    mli_object->coarseSolverNSweeps_ = 0;
@@ -167,7 +169,7 @@ int HYPRE_LSI_MLICreate( MPI_Comm comm, HYPRE_Solver *solver )
    mli_object->numMatLabels_        = 0;
    mli_object->matLabels_           = NULL;
    mli_object->printNullSpace_      = 0;
-   mli_object->symmetric_           = 0;
+   mli_object->symmetric_           = 1;
 #ifdef HAVE_MLI
    mli_object->mli_                 = NULL;
    mli_object->feData_              = NULL;
@@ -256,6 +258,7 @@ int HYPRE_LSI_MLISetup( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
    /* -------------------------------------------------------- */ 
 
    method = MLI_Method_CreateFromName(mli_object->method_,mpiComm);
+   sprintf(paramString, "setOutputLevel %d", mli_object->outputLevel_);
    sprintf(paramString, "setNumLevels %d", mli_object->nLevels_);
    method->setParams( paramString, 0, NULL );
    sprintf(paramString, "setStrengthThreshold %f",
@@ -264,6 +267,11 @@ int HYPRE_LSI_MLISetup( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
    if ( mli_object->symmetric_ == 0 )
    {
       strcpy(paramString, "nonsymmetric");
+      method->setParams( paramString, 0, NULL );
+   }
+   if ( mli_object->smootherPrintRNorm_ == 1 )
+   {
+      strcpy(paramString, "setSmootherPrintRNorm");
       method->setParams( paramString, 0, NULL );
    }
 
@@ -325,6 +333,11 @@ int HYPRE_LSI_MLISetup( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
    /* load null space, if there is any                         */
    /* -------------------------------------------------------- */ 
 
+   if ( mli_object->printNullSpace_ == 1 )
+   {
+      strcpy( paramString, "printNullSpace" );
+      method->setParams( paramString, 0, NULL );
+   }
    if ( mli_object->nCoordinates_ != NULL )
    {
       nNodes = mli_object->localNEqns_ / mli_object->nodeDOF_;
@@ -455,16 +468,6 @@ int HYPRE_LSI_MLISetup( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
    /* set parameter file                                       */
    /* -------------------------------------------------------- */ 
    
-   if ( mli_object->printNullSpace_ == 1 )
-   {
-      strcpy( paramString, "printNullSpace" );
-      method->setParams( paramString, 0, NULL );
-   }
-
-   /* -------------------------------------------------------- */ 
-   /* set parameter file                                       */
-   /* -------------------------------------------------------- */ 
-   
    if ( strcmp(mli_object->paramFile_, "empty") )
    {
       targc    = 1;
@@ -533,7 +536,7 @@ int HYPRE_LSI_MLISolve( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
 extern "C"
 int HYPRE_LSI_MLISetParams( HYPRE_Solver solver, char *paramString )
 {
-   int           mypid, i;
+   int           i, mypid;
    double        weight;
    MPI_Comm      mpiComm;
    HYPRE_LSI_MLI *mli_object;
@@ -562,6 +565,8 @@ int HYPRE_LSI_MLISetParams( HYPRE_Solver solver, char *paramString )
          printf("\t      smoother <Jacobi,GS,...> \n");
          printf("\t      coarseSolver <Jacobi,GS,...> \n");
          printf("\t      numSweeps <d> \n");
+         printf("\t      smootherWeight <f> \n");
+         printf("\t      smootherPrintRNorm \n");
          printf("\t      minCoarseSize <d> \n");
          printf("\t      Pweight <f> \n");
          printf("\t      nodeDOF <d> \n");
@@ -617,46 +622,50 @@ int HYPRE_LSI_MLISetParams( HYPRE_Solver solver, char *paramString )
       sscanf(paramString,"%s %s %s", param1, param2, param3);
       strcpy( mli_object->coarseSolver_, param3 );
    }
-   else if ( !strcasecmp(param2, "smootherWeight") )
-   {
-      sscanf(paramString,"%s %s %e",param1,param2,&weight);
-      if ( weight <= 0.0 || weight > 2.0 ) weight = 1.0; 
-      if ( mli_object->preNSweeps_ > 0 ) 
-      {
-         if ( mli_object->preSmootherWts_ != NULL ) 
-            delete [] mli_object->preSmootherWts_; 
-         mli_object->preSmootherWts_ = new double[mli_object->preNSweeps_];
-         for ( i = 0; i < mli_object->preNSweeps_; i++ )
-            mli_object->preSmootherWts_[i] = weight;
-         mli_object->postNSweeps_ = mli_object->preNSweeps_;  
-         if ( mli_object->postSmootherWts_ != NULL ) 
-            delete [] mli_object->postSmootherWts_; 
-         mli_object->postSmootherWts_ = new double[mli_object->preNSweeps_];
-         for ( i = 0; i < mli_object->preNSweeps_; i++ )
-            mli_object->postSmootherWts_[i] = weight;
-      }
-   }
    else if ( !strcasecmp(param2, "numSweeps") )
    {
       sscanf(paramString,"%s %s %d",param1,param2,&(mli_object->preNSweeps_));
       if ( mli_object->preNSweeps_ <= 0 ) mli_object->preNSweeps_ = 1;
       mli_object->postNSweeps_ = mli_object->preNSweeps_; 
-      if ( mli_object->preSmootherWts_ != NULL ) 
+      if ( mli_object->preSmootherWts_ != NULL )
       {
          weight = mli_object->preSmootherWts_[0];
-         delete [] mli_object->preSmootherWts_; 
+         delete [] mli_object->preSmootherWts_;
          mli_object->preSmootherWts_ = new double[mli_object->preNSweeps_];
          for ( i = 0; i < mli_object->preNSweeps_; i++ )
             mli_object->preSmootherWts_[i] = weight;
       }
-      if ( mli_object->postSmootherWts_ != NULL ) 
+      if ( mli_object->postSmootherWts_ != NULL )
       {
          weight = mli_object->postSmootherWts_[0];
-         delete [] mli_object->postSmootherWts_; 
+         delete [] mli_object->postSmootherWts_;
          mli_object->postSmootherWts_ = new double[mli_object->postNSweeps_];
          for ( i = 0; i < mli_object->postNSweeps_; i++ )
             mli_object->postSmootherWts_[i] = weight;
       }
+   }
+   else if ( !strcasecmp(param2, "smootherWeight") )
+   {
+      sscanf(paramString,"%s %s %lg",param1,param2,&weight);
+      if ( weight <= 0.0 || weight > 2.0 ) weight = 1.0;
+      if ( mli_object->preNSweeps_ > 0 )
+      {
+         if ( mli_object->preSmootherWts_ != NULL )
+            delete [] mli_object->preSmootherWts_;
+         mli_object->preSmootherWts_ = new double[mli_object->preNSweeps_];
+         for ( i = 0; i < mli_object->preNSweeps_; i++ )
+            mli_object->preSmootherWts_[i] = weight;
+         mli_object->postNSweeps_ = mli_object->preNSweeps_;
+         if ( mli_object->postSmootherWts_ != NULL )
+            delete [] mli_object->postSmootherWts_;
+         mli_object->postSmootherWts_ = new double[mli_object->preNSweeps_];
+         for ( i = 0; i < mli_object->preNSweeps_; i++ )
+            mli_object->postSmootherWts_[i] = weight;
+      }
+   }
+   else if ( !strcasecmp(param2, "smootherPrintRNorm") )
+   {
+      mli_object->smootherPrintRNorm_ = 1;
    }
    else if ( !strcasecmp(param2, "minCoarseSize") )
    {
@@ -721,6 +730,7 @@ int HYPRE_LSI_MLISetParams( HYPRE_Solver solver, char *paramString )
          printf("\t      smoother <Jacobi,GS,...> \n");
          printf("\t      coarseSolver <Jacobi,GS,...> \n");
          printf("\t      numSweeps <d> \n");
+         printf("\t      smootherWeight <f> \n");
          printf("\t      minCoarseSize <d> \n");
          printf("\t      nodeDOF <d> \n");
          printf("\t      nullSpaceDim <d> \n");
@@ -1047,9 +1057,10 @@ int HYPRE_LSI_MLI_SetMethod( HYPRE_Solver solver, char *paramString )
 
 extern "C"
 int HYPRE_LSI_MLILoadNodalCoordinates(HYPRE_Solver solver, int nNodes,
-              int nodeDOF, int *eqnNumbers, int nDim, double *coords)
+              int nodeDOF, int *eqnNumbers, int nDim, double *coords,
+              int localNRows)
 {
-   int           iN, iD, eqnInd, mypid;
+   int           iN, iD, eqnInd, mypid, *flags, arrayLeng;
    double        *nCoords;
    MPI_Comm      mpiComm;
 #ifdef FEI_250
@@ -1070,6 +1081,8 @@ int HYPRE_LSI_MLILoadNodalCoordinates(HYPRE_Solver solver, int nNodes,
    /* -------------------------------------------------------- */ 
 
    if ( ! mli_object->nCoordAccept_ ) return 1;
+   mpiComm = mli_object->mpiComm_;
+   MPI_Comm_rank( mpiComm, &mypid );
 
    /* -------------------------------------------------------- */ 
    /* clean up previously allocated space                      */
@@ -1088,8 +1101,6 @@ int HYPRE_LSI_MLILoadNodalCoordinates(HYPRE_Solver solver, int nNodes,
    /* -------------------------------------------------------- */ 
 
 #ifdef FEI_250
-   mpiComm = mli_object->mpiComm_;
-   MPI_Comm_rank( mpiComm, &mypid );
    mli_object->spaceDim_ = nDim;
    mli_object->nodeDOF_  = nodeDOF;
    iMin = 1000000000; iMax = 0;
@@ -1125,7 +1136,6 @@ int HYPRE_LSI_MLILoadNodalCoordinates(HYPRE_Solver solver, int nNodes,
    /* fetch machine information                                */
    /* -------------------------------------------------------- */ 
 
-   MPI_Comm_rank( mpiComm, &mypid );
    MPI_Comm_size( mpiComm, &nprocs );
 
    /* -------------------------------------------------------- */
@@ -1135,7 +1145,10 @@ int HYPRE_LSI_MLILoadNodalCoordinates(HYPRE_Solver solver, int nNodes,
    procNRows = new int[nprocs+1];
    iTempArray = new int[nprocs];
    for ( iP = 0; iP <= nprocs; iP++ ) procNRows[iP] = 0;
-   procNRows[mypid] = nNodes * nodeDOF;
+/*
+procNRows[mypid] = nNodes * nodeDOF;
+*/
+   procNRows[mypid] = localNRows;
    MPI_Allreduce(procNRows,iTempArray,nprocs,MPI_INT,MPI_SUM,mpiComm);
    procNRows[0] = 0;
    for ( iP = 1; iP <= nprocs; iP++ ) 
@@ -1279,26 +1292,25 @@ int HYPRE_LSI_MLILoadNodalCoordinates(HYPRE_Solver solver, int nNodes,
    for ( iP = 0; iP < nRecvs; iP++ ) MPI_Wait(&(mpiRequests[iP]), &mpiStatus);
 
    /* -------------------------------------------------------- */
-   /* set up nodal coordinate information in correct order     */
+   /* check any duplicate coordinate information               */
    /* -------------------------------------------------------- */
 
-   mli_object->spaceDim_   = nDim;
-   mli_object->nodeDOF_    = nodeDOF;
-   mli_object->localNEqns_ = procNRows[mypid+1] - procNRows[mypid];
-   coordLength = nNodes * nDim;
-   mli_object->nCoordinates_ = new double[coordLength];
-   nCoords                   = mli_object->nCoordinates_;
-   for (iN = 0; iN < coordLength; iN++) nCoords[iN] = -999999.0;  
-
-   numNodes = 0;
+   arrayLeng = nNodes;
+   for ( iP = 0; iP < nRecvs; iP++ ) arrayLeng += recvLengs[iP];
+   flags = new int[arrayLeng];
+   for ( iN = 0; iN < arrayLeng; iN++ ) flags[iN] = 0;
    for ( iN = 0; iN < nNodes; iN++ )  
    {
       if ( nodeProcMap[iN] < 0 ) 
       {
          eqnInd = (eqnNumbers[iN] - procNRows[mypid]) / nodeDOF;
-         if ( nCoords[eqnInd*nDim] == -999999.0 ) numNodes++;
-         for ( iD = 0; iD < nDim; iD++ )  
-            nCoords[eqnInd*nDim+iD] = coords[iN*nDim+iD]; 
+         if ( eqnInd >= arrayLeng )
+         {
+            printf("%d : HYPRE_LSI_MLILoadNodalCoordinates - ERROR(1).\n",
+                   mypid);
+            exit(1);
+         }
+         flags[eqnInd] = 1;
       }
    }
    for ( iP = 0; iP < nRecvs; iP++ )
@@ -1306,9 +1318,51 @@ int HYPRE_LSI_MLILoadNodalCoordinates(HYPRE_Solver solver, int nNodes,
       for ( iR = 0; iR < recvLengs[iP]; iR++ )
       {
          eqnInd = (iRecvBufs[iP][iR] - procNRows[mypid]) / nodeDOF;
-         if ( nCoords[eqnInd*nDim] == -999999.0 ) numNodes++;
-         for ( iD = 0; iD < nDim; iD++ )  
-            nCoords[eqnInd*nDim+iD] = dRecvBufs[iP][iR*nDim+iD];
+         if ( eqnInd >= arrayLeng )
+         {
+            printf("%d : HYPRE_LSI_MLILoadNodalCoordinates - ERROR(2).\n",
+                   mypid);
+            exit(1);
+         }
+         flags[eqnInd] = 1;
+      }
+   }
+   numNodes = 0;
+   for ( iN = 0; iN < arrayLeng; iN++ ) 
+      if ( flags[iN] == 0 ) break;
+      else                  numNodes++;
+   delete [] flags;
+
+   /* -------------------------------------------------------- */
+   /* set up nodal coordinate information in correct order     */
+   /* -------------------------------------------------------- */
+
+   mli_object->spaceDim_     = nDim;
+   mli_object->nodeDOF_      = nodeDOF;
+   mli_object->localNEqns_   = numNodes * nodeDOF;
+   coordLength               = numNodes * nodeDOF * nDim;
+   mli_object->nCoordinates_ = new double[coordLength];
+   nCoords                   = mli_object->nCoordinates_;
+
+   arrayLeng = numNodes * nodeDOF;
+   for ( iN = 0; iN < nNodes; iN++ )  
+   {
+      if ( nodeProcMap[iN] < 0 ) 
+      {
+         eqnInd = (eqnNumbers[iN] - procNRows[mypid]) / nodeDOF;
+         if ( eqnInd >= 0 && eqnInd < arrayLeng ) 
+            for ( iD = 0; iD < nDim; iD++ )  
+               nCoords[eqnInd*nDim+iD] = coords[iN*nDim+iD]; 
+      }
+   }
+   for ( iP = 0; iP < nRecvs; iP++ )
+   {
+      for ( iR = 0; iR < recvLengs[iP]; iR++ )
+      {
+         eqnInd = (iRecvBufs[iP][iR] - procNRows[mypid]) / nodeDOF;
+         if ( eqnInd >= 0 && eqnInd < arrayLeng ) 
+            for ( iD = 0; iD < nDim; iD++ )  
+               nCoords[eqnInd*nDim+iD] = dRecvBufs[iP][iR*nDim+iD];
       }
    }
 
