@@ -946,10 +946,11 @@ if test "${with_insure_to_file+set}" = set; then
   withval="$with_insure_to_file"
   if test "$casc_user_chose_compilers" = "no"
  then
-   CC=insure
-   CXX=insure
-   CFLAGS="$CFLAGS -Zoi \"report_file insure.log\""
-   CXXFLAGS="$CXXFLAGS -Zoi \"report_file insure.log\""
+   CC="insure -Zoi \"report_file insure.log\" -Zoi \"report_overwrite off\""
+   CXX="insure -Zoi \"report_file insure.log\" -Zoi \"report_overwrite off\""
+   LD="insure -Zoi \"report_file insure.log\" -Zoi \"report_overwrite off\""
+   CFLAGS="$CFLAGS -g"
+   CXXFLAGS="$CXXFLAGS -g"
    casc_user_chose_compilers=yes
  fi
  case "${withval}" in
@@ -958,6 +959,7 @@ if test "${with_insure_to_file+set}" = set; then
    *)   PREPEND=""
      CC="$CC $withval"
      CXX="$CXX $withval"
+     LD="$LD $withval"
      ;;
  esac
 
