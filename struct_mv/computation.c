@@ -13,6 +13,95 @@
 #include "headers.h"
 
 /*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+int
+hypre_ComputeInfoCreate( hypre_CommInfo       *comm_info,
+                         hypre_BoxArrayArray  *indt_boxes,
+                         hypre_BoxArrayArray  *dept_boxes,
+                         hypre_ComputeInfo   **compute_info_ptr )
+{
+   int  ierr = 0;
+   hypre_ComputeInfo  *compute_info;
+
+   compute_info = hypre_TAlloc(hypre_ComputeInfo, 1);
+
+   hypre_ComputeInfoCommInfo(compute_info)  = comm_info;
+   hypre_ComputeInfoIndtBoxes(compute_info) = indt_boxes;
+   hypre_ComputeInfoDeptBoxes(compute_info) = dept_boxes;
+
+   hypre_SetIndex(hypre_ComputeInfoStride(compute_info), 1, 1, 1);
+
+   *compute_info_ptr = compute_info;
+
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+int
+hypre_ComputeInfoProjectSend( hypre_ComputeInfo  *compute_info,
+                              hypre_Index         index,
+                              hypre_Index         stride )
+{
+   int  ierr = 0;
+
+   hypre_CommInfoProjectSend(hypre_ComputeInfoCommInfo(compute_info),
+                             index, stride);
+
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+int
+hypre_ComputeInfoProjectRecv( hypre_ComputeInfo  *compute_info,
+                              hypre_Index         index,
+                              hypre_Index         stride )
+{
+   int  ierr = 0;
+
+   hypre_CommInfoProjectRecv(hypre_ComputeInfoCommInfo(compute_info),
+                             index, stride);
+
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+int
+hypre_ComputeInfoProjectComp( hypre_ComputeInfo  *compute_info,
+                              hypre_Index         index,
+                              hypre_Index         stride )
+{
+   int  ierr = 0;
+
+   hypre_ProjectBoxArrayArray(hypre_ComputeInfoIndtBoxes(compute_info),
+                              index, stride);
+   hypre_ProjectBoxArrayArray(hypre_ComputeInfoDeptBoxes(compute_info),
+                              index, stride);
+   hypre_CopyIndex(stride, hypre_ComputeInfoStride(compute_info));
+
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+int
+hypre_ComputeInfoDestroy( hypre_ComputeInfo  *compute_info )
+{
+   int  ierr = 0;
+
+   hypre_TFree(compute_info);
+
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
  * Return descriptions of communications and computations patterns for
  * a given grid-stencil computation.  If HYPRE\_OVERLAP\_COMM\_COMP is
  * defined, then the patterns are computed to allow for overlapping
@@ -24,22 +113,14 @@
 int
 hypre_CreateComputeInfo( hypre_StructGrid      *grid,
                          hypre_StructStencil   *stencil,
-                         hypre_BoxArrayArray  **send_boxes_ptr,
-                         hypre_BoxArrayArray  **recv_boxes_ptr,
-                         int                 ***send_processes_ptr,
-                         int                 ***recv_processes_ptr,
-                         int                  **send_order_ptr,
-                         int                  **recv_order_ptr,
-                         hypre_BoxArrayArray  **indt_boxes_ptr,
-                         hypre_BoxArrayArray  **dept_boxes_ptr )
+                         hypre_ComputeInfo    **compute_info_ptr )
 {
    int                      ierr = 0;
 
-   /* output variables */
+   hypre_CommInfo          *comm_info;
    hypre_BoxArrayArray     *indt_boxes;
    hypre_BoxArrayArray     *dept_boxes;
 
-   /* internal variables */
    hypre_BoxArray          *boxes;
 
    hypre_BoxArray          *cbox_array;
@@ -65,10 +146,7 @@ hypre_CreateComputeInfo( hypre_StructGrid      *grid,
     * Get communication info
     *------------------------------------------------------*/
 
-   hypre_CreateCommInfoFromStencil(grid, stencil,
-                                   send_boxes_ptr, recv_boxes_ptr,
-                                   send_processes_ptr, recv_processes_ptr,
-                                   send_order_ptr, recv_order_ptr);
+   hypre_CreateCommInfoFromStencil(grid, stencil, &comm_info);
 
 #ifdef HYPRE_OVERLAP_COMM_COMP
 
@@ -188,8 +266,8 @@ hypre_CreateComputeInfo( hypre_StructGrid      *grid,
     * Return
     *------------------------------------------------------*/
 
-   *indt_boxes_ptr = indt_boxes;
-   *dept_boxes_ptr = dept_boxes;
+   hypre_ComputeInfoCreate(comm_info, indt_boxes, dept_boxes,
+                           compute_info_ptr);
 
    return ierr;
 }
@@ -202,43 +280,35 @@ hypre_CreateComputeInfo( hypre_StructGrid      *grid,
  *--------------------------------------------------------------------------*/
 
 int
-hypre_ComputePkgCreate( hypre_BoxArrayArray   *send_boxes,
-                        hypre_BoxArrayArray   *recv_boxes,
-                        hypre_Index            send_stride,
-                        hypre_Index            recv_stride,
-                        int                  **send_processes,
-                        int                  **recv_processes,
-                        int                   *send_order,
-                        int                   *recv_order,
-                        hypre_BoxArrayArray   *indt_boxes,
-                        hypre_BoxArrayArray   *dept_boxes,
-                        hypre_Index            stride,
-                        hypre_StructGrid      *grid,
+hypre_ComputePkgCreate( hypre_ComputeInfo     *compute_info,
                         hypre_BoxArray        *data_space,
                         int                    num_values,
+                        hypre_StructGrid      *grid,
                         hypre_ComputePkg     **compute_pkg_ptr )
 {
    int                ierr = 0;
    hypre_ComputePkg  *compute_pkg;
+   hypre_CommPkg     *comm_pkg;
 
    compute_pkg = hypre_CTAlloc(hypre_ComputePkg, 1);
 
-   hypre_ComputePkgCommPkg(compute_pkg)     =
-      hypre_CommPkgCreate(send_boxes, recv_boxes,
-                          send_stride, recv_stride,
-                          data_space, data_space,
-                          send_processes, recv_processes,
-                          send_order, recv_order,
-                          num_values, hypre_StructGridComm(grid),
-                          hypre_StructGridPeriodic(grid));
+   hypre_CommPkgCreate(hypre_ComputeInfoCommInfo(compute_info),
+                       data_space, data_space, num_values,
+                       hypre_StructGridComm(grid), &comm_pkg);
+   hypre_ComputePkgCommPkg(compute_pkg) = comm_pkg;
 
-   hypre_ComputePkgIndtBoxes(compute_pkg)   = indt_boxes;
-   hypre_ComputePkgDeptBoxes(compute_pkg)   = dept_boxes;
-   hypre_CopyIndex(stride, hypre_ComputePkgStride(compute_pkg));
+   hypre_ComputePkgIndtBoxes(compute_pkg) = 
+      hypre_ComputeInfoIndtBoxes(compute_info);
+   hypre_ComputePkgDeptBoxes(compute_pkg) =
+      hypre_ComputeInfoDeptBoxes(compute_info);
+   hypre_CopyIndex(hypre_ComputeInfoStride(compute_info),
+                   hypre_ComputePkgStride(compute_pkg));
 
    hypre_StructGridRef(grid, &hypre_ComputePkgGrid(compute_pkg));
-   hypre_ComputePkgDataSpace(compute_pkg)   = data_space;
-   hypre_ComputePkgNumValues(compute_pkg)   = num_values;
+   hypre_ComputePkgDataSpace(compute_pkg) = data_space;
+   hypre_ComputePkgNumValues(compute_pkg) = num_values;
+
+   hypre_ComputeInfoDestroy(compute_info);
 
    *compute_pkg_ptr = compute_pkg;
 

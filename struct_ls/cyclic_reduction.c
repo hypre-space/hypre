@@ -490,20 +490,12 @@ hypre_CyclicReductionSetup( void               *cyc_red_vdata,
    hypre_StructVector    **x_l;
    hypre_ComputePkg      **down_compute_pkg_l;
    hypre_ComputePkg      **up_compute_pkg_l;
+   hypre_ComputeInfo      *compute_info;
 
    hypre_Index             cindex;
    hypre_Index             findex;
    hypre_Index             stride;
 
-   hypre_BoxArrayArray    *send_boxes;
-   hypre_BoxArrayArray    *recv_boxes;
-   int                   **send_processes;
-   int                   **recv_processes;
-   int                    *send_order;
-   int                    *recv_order;
-   hypre_BoxArrayArray    *indt_boxes;
-   hypre_BoxArrayArray    *dept_boxes;
-                       
    hypre_StructGrid       *grid;
 
    hypre_Box              *cbox;
@@ -658,45 +650,25 @@ hypre_CyclicReductionSetup( void               *cyc_red_vdata,
       hypre_CycRedSetFIndex(base_index, base_stride, l, cdir, findex);
       hypre_CycRedSetStride(base_index, base_stride, l, cdir, stride);
 
+       /* down-cycle */
       hypre_CreateComputeInfo(grid_l[l], hypre_StructMatrixStencil(A_l[l]),
-                              &send_boxes, &recv_boxes,
-                              &send_processes, &recv_processes,
-                              &send_order, &recv_order,
-                              &indt_boxes, &dept_boxes);
- 
-      /* down-cycle */
-      hypre_ProjectBoxArrayArray(send_boxes, findex, stride);
-      hypre_ProjectBoxArrayArray(recv_boxes, findex, stride);
-      hypre_ProjectBoxArrayArray(indt_boxes, cindex, stride);
-      hypre_ProjectBoxArrayArray(dept_boxes, cindex, stride);
-      hypre_ComputePkgCreate(send_boxes, recv_boxes,
-                             stride, stride,
-                             send_processes, recv_processes,
-                             send_order, recv_order,
-                             indt_boxes, dept_boxes,
-                             stride, grid_l[l],
+                              &compute_info);
+      hypre_ComputeInfoProjectSend(compute_info, findex, stride);
+      hypre_ComputeInfoProjectRecv(compute_info, findex, stride);
+      hypre_ComputeInfoProjectComp(compute_info, cindex, stride);
+      hypre_ComputePkgCreate(compute_info,
                              hypre_StructVectorDataSpace(x_l[l]), 1,
-                             &down_compute_pkg_l[l]);
-
-      hypre_CreateComputeInfo(grid_l[l], hypre_StructMatrixStencil(A_l[l]),
-                              &send_boxes, &recv_boxes,
-                              &send_processes, &recv_processes,
-                              &send_order, &recv_order,
-                              &indt_boxes, &dept_boxes);
+                             grid_l[l], &down_compute_pkg_l[l]);
 
       /* up-cycle */
-      hypre_ProjectBoxArrayArray(send_boxes, cindex, stride);
-      hypre_ProjectBoxArrayArray(recv_boxes, cindex, stride);
-      hypre_ProjectBoxArrayArray(indt_boxes, findex, stride);
-      hypre_ProjectBoxArrayArray(dept_boxes, findex, stride);
-      hypre_ComputePkgCreate(send_boxes, recv_boxes,
-                             stride, stride,
-                             send_processes, recv_processes,
-                             send_order, recv_order,
-                             indt_boxes, dept_boxes,
-                             stride, grid_l[l],
+      hypre_CreateComputeInfo(grid_l[l], hypre_StructMatrixStencil(A_l[l]),
+                              &compute_info);
+      hypre_ComputeInfoProjectSend(compute_info, cindex, stride);
+      hypre_ComputeInfoProjectRecv(compute_info, cindex, stride);
+      hypre_ComputeInfoProjectComp(compute_info, findex, stride);
+      hypre_ComputePkgCreate(compute_info,
                              hypre_StructVectorDataSpace(x_l[l]), 1,
-                             &up_compute_pkg_l[l]);
+                             grid_l[l], &up_compute_pkg_l[l]);
    }
 
    (cyc_red_data -> down_compute_pkg_l) = down_compute_pkg_l;

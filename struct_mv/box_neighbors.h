@@ -35,6 +35,7 @@ typedef struct hypre_BoxNeighbors_struct
 {
    hypre_BoxArray      *boxes;            /* boxes in the neighborhood */
    int                 *procs;            /* procs for 'boxes' */
+   int                 *boxnums;          /* local boxnums for 'boxes' */
    int                 *ids;              /* ids for 'boxes' */
    int                  first_local;      /* first local box address */
    int                  num_local;        /* number of local boxes */
@@ -42,6 +43,7 @@ typedef struct hypre_BoxNeighbors_struct
    hypre_Index          periodic;         /* directions of periodicity */
    int                  id_period;        /* period used for box ids */
    int                  num_periods;      /* number of box set periods */
+   hypre_Index         *pshifts;          /* shifts of periodicity */
 
    hypre_RankLink     **rank_links;       /* neighbors of local boxes */
 
@@ -61,12 +63,15 @@ typedef struct hypre_BoxNeighbors_struct
 
 #define hypre_BoxNeighborsBoxes(neighbors)       ((neighbors) -> boxes)
 #define hypre_BoxNeighborsProcs(neighbors)       ((neighbors) -> procs)
+#define hypre_BoxNeighborsBoxnums(neighbors)     ((neighbors) -> boxnums)
 #define hypre_BoxNeighborsIDs(neighbors)         ((neighbors) -> ids)
 #define hypre_BoxNeighborsFirstLocal(neighbors)  ((neighbors) -> first_local)
 #define hypre_BoxNeighborsNumLocal(neighbors)    ((neighbors) -> num_local)
 #define hypre_BoxNeighborsPeriodic(neighbors)    ((neighbors) -> periodic)
 #define hypre_BoxNeighborsIDPeriod(neighbors)    ((neighbors) -> id_period)
 #define hypre_BoxNeighborsNumPeriods(neighbors)  ((neighbors) -> num_periods)
+#define hypre_BoxNeighborsPShifts(neighbors)     ((neighbors) -> pshifts)
+#define hypre_BoxNeighborsPShift(neighbors, i)   ((neighbors) -> pshifts[i])
 #define hypre_BoxNeighborsRankLinks(neighbors)   ((neighbors) -> rank_links)
 
 #define hypre_BoxNeighborsNumBoxes(neighbors) \

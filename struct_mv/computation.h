@@ -16,6 +16,20 @@
 #define hypre_COMPUTATION_HEADER
 
 /*--------------------------------------------------------------------------
+ * hypre_ComputeInfo:
+ *--------------------------------------------------------------------------*/
+
+typedef struct hypre_ComputeInfo_struct
+{
+   hypre_CommInfo        *comm_info;
+
+   hypre_BoxArrayArray   *indt_boxes;
+   hypre_BoxArrayArray   *dept_boxes;
+   hypre_Index            stride;
+
+} hypre_ComputeInfo;
+
+/*--------------------------------------------------------------------------
  * hypre_ComputePkg:
  *   Structure containing information for doing computations.
  *--------------------------------------------------------------------------*/
@@ -33,6 +47,15 @@ typedef struct hypre_ComputePkg_struct
    int                    num_values;
 
 } hypre_ComputePkg;
+
+/*--------------------------------------------------------------------------
+ * Accessor macros: hypre_ComputeInfo
+ *--------------------------------------------------------------------------*/
+ 
+#define hypre_ComputeInfoCommInfo(info)     (info -> comm_info)
+#define hypre_ComputeInfoIndtBoxes(info)    (info -> indt_boxes)
+#define hypre_ComputeInfoDeptBoxes(info)    (info -> dept_boxes)
+#define hypre_ComputeInfoStride(info)       (info -> stride)
 
 /*--------------------------------------------------------------------------
  * Accessor macros: hypre_ComputePkg

@@ -14,6 +14,14 @@
 
 #include "headers.h"
 
+#define DEBUG 0
+
+#if DEBUG
+char       filename[255];
+FILE      *file;
+int        my_rank;
+#endif
+
 /*--------------------------------------------------------------------------
  * hypre_StructGridCreate
  *--------------------------------------------------------------------------*/
@@ -170,7 +178,6 @@ hypre_StructGridSetHood( hypre_StructGrid *grid,
                          int              *hood_ids,
                          int               first_local,
                          int               num_local,
-                         int               id_period,
                          hypre_Box        *bounding_box )
 {
    int                  ierr = 0;
@@ -196,7 +203,7 @@ hypre_StructGridSetHood( hypre_StructGrid *grid,
    hypre_StructGridIDs(grid)   = ids;
 
    hypre_BoxNeighborsCreate(hood_boxes, hood_procs, hood_ids,
-                            first_local, num_local, id_period, &neighbors);
+                            first_local, num_local, &neighbors);
    hypre_StructGridNeighbors(grid) = neighbors;
 
    hypre_BoxDestroy(hypre_StructGridBoundingBox(grid));
@@ -210,7 +217,7 @@ hypre_StructGridSetHood( hypre_StructGrid *grid,
  *
  * NOTE: Box ids are set here for the non-periodic boxes.  They are
  * globally unique, and appear in increasing order.  The periodic
- * boxes are defined and ids are assigned in BoxNeighborsAssemble.
+ * boxes are definedin BoxNeighborsAssemble.
  *
  * NOTE: Box procs are set here.  They appear in non-decreasing order
  * for the non-periodic boxes.
@@ -305,8 +312,7 @@ hypre_StructGridAssemble( hypre_StructGrid *grid )
       /* set neighbors */
       num_local = hypre_BoxArraySize(boxes);
       hypre_BoxNeighborsCreate(all_boxes, all_procs, all_ids,
-                               first_local, num_local,
-                               hypre_BoxArraySize(all_boxes), &neighbors);
+                               first_local, num_local, &neighbors);
       hypre_StructGridNeighbors(grid) = neighbors;
 
       /* set ids */
@@ -362,6 +368,41 @@ hypre_StructGridAssemble( hypre_StructGrid *grid )
    hypre_StructGridGhlocalSize(grid) = ghostsize;
    hypre_BoxDestroy(ghostbox);
 
+#if DEBUG
+{
+   hypre_BoxNeighbors *neighbors;
+   int                *procs, *boxnums;
+   int                 num_neighbors, i;
+
+   MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
+
+   sprintf(filename, "zgrid.%05d", my_rank);
+
+   if ((file = fopen(filename, "a")) == NULL)
+   {
+      printf("Error: can't open output file %s\n", filename);
+      exit(1);
+   }
+
+   fprintf(file, "\n\n============================\n\n");
+
+   hypre_StructGridPrint(file, grid);
+
+   neighbors = hypre_StructGridNeighbors(grid);
+   num_neighbors = hypre_BoxArraySize(hypre_BoxNeighborsBoxes(neighbors));
+   procs   = hypre_BoxNeighborsProcs(neighbors);
+   boxnums = hypre_BoxNeighborsBoxnums(neighbors);
+   fprintf(file, "num_neighbors = %d\n", num_neighbors);
+   for (i = 0; i < num_neighbors; i++)
+   {
+      fprintf(file, "%d: (%d, %d)\n", i, procs[i], boxnums[i]);
+   }
+
+   fflush(file);
+   fclose(file);
+}
+#endif
+   
    return ierr;
 }
 
@@ -394,7 +435,7 @@ hypre_GatherAllBoxes(MPI_Comm         comm,
    int               *displs;
    int                recvbuf_size;
                      
-   int                i, p, b, ab, d;
+   int                i, p, b, d;
    int                ierr = 0;
 
    /*-----------------------------------------------------
@@ -443,36 +484,34 @@ hypre_GatherAllBoxes(MPI_Comm         comm,
    /* sort recvbuf by process rank? */
 
    /*-----------------------------------------------------
-    * Create all_boxes, all_procs, and first_local
+    * Create all_boxes, etc.
     *-----------------------------------------------------*/
 
    /* unpack recvbuf box info */
    all_boxes_size = recvbuf_size / 7;
-   all_boxes = hypre_BoxArrayCreate(all_boxes_size);
-   all_procs = hypre_TAlloc(int, all_boxes_size);
+   all_boxes   = hypre_BoxArrayCreate(all_boxes_size);
+   all_procs   = hypre_TAlloc(int, all_boxes_size);
    first_local = -1;
-   i  = 0;
-   p  = 0;
-   ab = 0;
+   i = 0;
+   b = 0;
    box = hypre_BoxCreate();
    while (i < recvbuf_size)
    {
-      all_procs[p] = recvbuf[i++];
+      all_procs[b] = recvbuf[i++];
       for (d = 0; d < 3; d++)
       {
          hypre_IndexD(imin, d) = recvbuf[i++];
          hypre_IndexD(imax, d) = recvbuf[i++];
       }
       hypre_BoxSetExtents(box, imin, imax);
-      hypre_CopyBox(box, hypre_BoxArrayBox(all_boxes, ab));
-      ab++;
+      hypre_CopyBox(box, hypre_BoxArrayBox(all_boxes, b));
 
-      if ((first_local < 0) && (all_procs[p] == my_rank))
+      if ((first_local < 0) && (all_procs[b] == my_rank))
       {
-         first_local = p;
+         first_local = b;
       }
 
-      p++;
+      b++;
    }
    hypre_BoxDestroy(box);
 
@@ -485,9 +524,55 @@ hypre_GatherAllBoxes(MPI_Comm         comm,
    hypre_SharedTFree(recvcounts);
    hypre_TFree(displs);
 
-   *all_boxes_ptr = all_boxes;
-   *all_procs_ptr = all_procs;
+   *all_boxes_ptr   = all_boxes;
+   *all_procs_ptr   = all_procs;
    *first_local_ptr = first_local;
+
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_ComputeBoxnums
+ *
+ * It is assumed that, for any process number in 'procs', all of that
+ * processes local boxes appear in the 'boxes' array.
+ *
+ * It is assumed that the boxes in 'boxes' are ordered by associated
+ * process number then by their local ordering on that process.
+ *
+ *--------------------------------------------------------------------------*/
+
+int
+hypre_ComputeBoxnums(hypre_BoxArray *boxes,
+                     int            *procs,
+                     int           **boxnums_ptr)
+{
+   int                ierr = 0;
+
+   int               *boxnums;
+   int                num_boxes;
+   int                p, b, boxnum;
+
+   /*-----------------------------------------------------
+    *-----------------------------------------------------*/
+
+   num_boxes = hypre_BoxArraySize(boxes);
+   boxnums = hypre_TAlloc(int, num_boxes);
+
+   p = -1;
+   for(b = 0; b < num_boxes; b++)
+   {
+      /* start boxnum count at zero for each new process */
+      if (procs[b] != p)
+      {
+         boxnum = 0;
+         p = procs[b];
+      }
+      boxnums[b] = boxnum;
+      boxnum++;
+   }
+
+   *boxnums_ptr = boxnums;
 
    return ierr;
 }

@@ -139,6 +139,26 @@ hypre_max(0, (hypre_BoxIMaxD(box, d) - hypre_BoxIMinD(box, d) + 1))
 #define hypre_BoxVolume(box) \
 (hypre_BoxSizeX(box) * hypre_BoxSizeY(box) * hypre_BoxSizeZ(box))
 
+#define hypre_BoxShiftPos(box, shift) \
+{\
+   hypre_BoxIMinX(box) += hypre_IndexX(shift);\
+   hypre_BoxIMinY(box) += hypre_IndexY(shift);\
+   hypre_BoxIMinZ(box) += hypre_IndexZ(shift);\
+   hypre_BoxIMaxX(box) += hypre_IndexX(shift);\
+   hypre_BoxIMaxY(box) += hypre_IndexY(shift);\
+   hypre_BoxIMaxZ(box) += hypre_IndexZ(shift);\
+}
+
+#define hypre_BoxShiftNeg(box, shift) \
+{\
+   hypre_BoxIMinX(box) -= hypre_IndexX(shift);\
+   hypre_BoxIMinY(box) -= hypre_IndexY(shift);\
+   hypre_BoxIMinZ(box) -= hypre_IndexZ(shift);\
+   hypre_BoxIMaxX(box) -= hypre_IndexX(shift);\
+   hypre_BoxIMaxY(box) -= hypre_IndexY(shift);\
+   hypre_BoxIMaxZ(box) -= hypre_IndexZ(shift);\
+}
+
 #define hypre_BoxIndexRank(box, index) \
 ((hypre_IndexX(index) - hypre_BoxIMinX(box)) + \
  ((hypre_IndexY(index) - hypre_BoxIMinY(box)) + \

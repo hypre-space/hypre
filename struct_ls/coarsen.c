@@ -90,7 +90,7 @@ hypre_StructMapCoarseToFine( hypre_Index cindex,
  * 1. All non-periodic neighborhood info is sent.
  *
  * 2. Neighborhoods must contain all (non-periodic) boxes associated
- * with the process where it lives.  The neighbor class routines
+ * with any given neighborhood process.  The neighbor class routines
  * insure this.
  *
  * 3. Process numbers for non-periodic boxes must appear in the hood
@@ -131,7 +131,6 @@ hypre_StructCoarsen( hypre_StructGrid  *fgrid,
    int                *hood_ids;
    int                 first_local;
    int                 num_local;
-   int                 id_period;
    int                 num_periods;
    int                 max_distance;
    hypre_Box          *bounding_box;
@@ -182,7 +181,6 @@ hypre_StructCoarsen( hypre_StructGrid  *fgrid,
    hood_procs   = hypre_BoxNeighborsProcs(neighbors);
    hood_ids     = hypre_BoxNeighborsIDs(neighbors);
    num_hood     = hypre_BoxArraySize(hood_boxes);
-   id_period    = hypre_BoxNeighborsIDPeriod(neighbors);
    num_periods  = hypre_BoxNeighborsNumPeriods(neighbors);
 
    /* adjust num_hood to focus only on non-periodic boxes */
@@ -527,7 +525,7 @@ hypre_StructCoarsen( hypre_StructGrid  *fgrid,
 
    /* set neighborhood */
    hypre_StructGridSetHood(cgrid, hood_boxes, hood_procs, hood_ids,
-                           first_local, num_local, id_period, bounding_box);
+                           first_local, num_local, bounding_box);
 
    hypre_StructGridSetHoodInfo(cgrid, max_distance);
 

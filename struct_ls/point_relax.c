@@ -147,6 +147,7 @@ hypre_PointRelaxSetup( void               *relax_vdata,
    hypre_Index          **pointset_indices = (relax_data -> pointset_indices);
    hypre_StructVector    *t;
    int                    diag_rank;
+   hypre_ComputeInfo     *compute_info;
    hypre_ComputePkg     **compute_pkgs;
 
    hypre_Index            unit_stride;
@@ -157,15 +158,6 @@ hypre_PointRelaxSetup( void               *relax_vdata,
    hypre_StructGrid      *grid;
    hypre_StructStencil   *stencil;
                        
-   hypre_BoxArrayArray   *send_boxes;
-   hypre_BoxArrayArray   *recv_boxes;
-   int                  **send_processes;
-   int                  **recv_processes;
-   int                   *send_order;
-   int                   *recv_order;
-   hypre_BoxArrayArray   *indt_boxes;
-   hypre_BoxArrayArray   *dept_boxes;
-
    hypre_BoxArrayArray   *orig_indt_boxes;
    hypre_BoxArrayArray   *orig_dept_boxes;
    hypre_BoxArrayArray   *box_aa;
@@ -217,11 +209,9 @@ hypre_PointRelaxSetup( void               *relax_vdata,
 
    for (p = 0; p < num_pointsets; p++)
    {
-      hypre_CreateComputeInfo(grid, stencil,
-                              &send_boxes, &recv_boxes,
-                              &send_processes, &recv_processes,
-                              &send_order, &recv_order,
-                              &orig_indt_boxes, &orig_dept_boxes);
+      hypre_CreateComputeInfo(grid, stencil, &compute_info);
+      orig_indt_boxes = hypre_ComputeInfoIndtBoxes(compute_info);
+      orig_dept_boxes = hypre_ComputeInfoDeptBoxes(compute_info);
 
       stride = pointset_strides[p];
 
@@ -268,23 +258,19 @@ hypre_PointRelaxSetup( void               *relax_vdata,
          switch(compute_i)
          {
             case 0:
-            indt_boxes = new_box_aa;
+            hypre_ComputeInfoIndtBoxes(compute_info) = new_box_aa;
             break;
 
             case 1:
-            dept_boxes = new_box_aa;
+            hypre_ComputeInfoDeptBoxes(compute_info) = new_box_aa;
             break;
          }
       }
 
-      hypre_ComputePkgCreate(send_boxes, recv_boxes,
-                             unit_stride, unit_stride,
-                             send_processes, recv_processes,
-                             send_order, recv_order,
-                             indt_boxes, dept_boxes,
-                             stride, grid,
-                             hypre_StructVectorDataSpace(x), 1,
-                             &compute_pkgs[p]);
+      hypre_CopyIndex(stride, hypre_ComputeInfoStride(compute_info));
+
+      hypre_ComputePkgCreate(compute_info, hypre_StructVectorDataSpace(x), 1,
+                             grid, &compute_pkgs[p]);
 
       hypre_BoxArrayArrayDestroy(orig_indt_boxes);
       hypre_BoxArrayArrayDestroy(orig_dept_boxes);

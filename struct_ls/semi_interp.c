@@ -64,15 +64,7 @@ hypre_SemiInterpSetup( void               *interp_vdata,
    hypre_StructGrid       *grid;
    hypre_StructStencil    *stencil;
                        
-   hypre_BoxArrayArray    *send_boxes;
-   hypre_BoxArrayArray    *recv_boxes;
-   int                   **send_processes;
-   int                   **recv_processes;
-   int                    *send_order;
-   int                    *recv_order;
-   hypre_BoxArrayArray    *indt_boxes;
-   hypre_BoxArrayArray    *dept_boxes;
-                       
+   hypre_ComputeInfo      *compute_info;
    hypre_ComputePkg       *compute_pkg;
 
    int                     ierr = 0;
@@ -84,25 +76,12 @@ hypre_SemiInterpSetup( void               *interp_vdata,
    grid    = hypre_StructVectorGrid(e);
    stencil = hypre_StructMatrixStencil(P);
 
-   hypre_CreateComputeInfo(grid, stencil,
-                           &send_boxes, &recv_boxes,
-                           &send_processes, &recv_processes,
-                           &send_order, &recv_order,
-                           &indt_boxes, &dept_boxes);
-
-   hypre_ProjectBoxArrayArray(send_boxes, cindex, stride);
-   hypre_ProjectBoxArrayArray(recv_boxes, cindex, stride);
-   hypre_ProjectBoxArrayArray(indt_boxes, findex, stride);
-   hypre_ProjectBoxArrayArray(dept_boxes, findex, stride);
-
-   hypre_ComputePkgCreate(send_boxes, recv_boxes,
-                          stride, stride,
-                          send_processes, recv_processes,
-                          send_order, recv_order,
-                          indt_boxes, dept_boxes,
-                          stride, grid,
-                          hypre_StructVectorDataSpace(e), 1,
-                          &compute_pkg);
+   hypre_CreateComputeInfo(grid, stencil, &compute_info);
+   hypre_ComputeInfoProjectSend(compute_info, cindex, stride);
+   hypre_ComputeInfoProjectRecv(compute_info, cindex, stride);
+   hypre_ComputeInfoProjectComp(compute_info, findex, stride);
+   hypre_ComputePkgCreate(compute_info, hypre_StructVectorDataSpace(e), 1,
+                          grid, &compute_pkg);
 
    /*----------------------------------------------------------
     * Set up the interp data structure

@@ -702,41 +702,20 @@ hypre_CommPkg *
 hypre_StructVectorGetMigrateCommPkg( hypre_StructVector *from_vector,
                                      hypre_StructVector *to_vector   )
 {
-   hypre_BoxArrayArray   *send_boxes;
-   hypre_BoxArrayArray   *recv_boxes;
-   int                  **send_processes;
-   int                  **recv_processes;
-   int                   *send_order;
-   int                   *recv_order;
-   int                    num_values;
-
-   hypre_Index            unit_stride;
-
+   hypre_CommInfo        *comm_info;
    hypre_CommPkg         *comm_pkg;
 
    /*------------------------------------------------------
     * Set up hypre_CommPkg
     *------------------------------------------------------*/
  
-   num_values = 1;
-   hypre_SetIndex(unit_stride, 1, 1, 1);
-
    hypre_CreateCommInfoFromGrids(hypre_StructVectorGrid(from_vector),
                                  hypre_StructVectorGrid(to_vector),
-                                 &send_boxes, &recv_boxes,
-                                 &send_processes, &recv_processes,
-                                 &send_order, &recv_order);
-
-   comm_pkg = hypre_CommPkgCreate(send_boxes, recv_boxes,
-                                  unit_stride, unit_stride,
-                                  hypre_StructVectorDataSpace(from_vector),
-                                  hypre_StructVectorDataSpace(to_vector),
-                                  send_processes, recv_processes,
-                                  send_order, recv_order,
-                                  num_values,
-                                  hypre_StructVectorComm(from_vector),
-                                  hypre_StructGridPeriodic(
-                                     hypre_StructVectorGrid(from_vector)));
+                                 &comm_info);
+   hypre_CommPkgCreate(comm_info,
+                       hypre_StructVectorDataSpace(from_vector),
+                       hypre_StructVectorDataSpace(to_vector), 1,
+                       hypre_StructVectorComm(from_vector), &comm_pkg);
    /* is this correct for periodic? */
 
    return comm_pkg;

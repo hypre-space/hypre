@@ -200,22 +200,15 @@ hypre_SStructPVectorAssemble( hypre_SStructPVector *pvector )
    hypre_StructVector   **svectors  = hypre_SStructPVectorSVectors(pvector);
    hypre_CommPkg        **comm_pkgs = hypre_SStructPVectorCommPkgs(pvector);
 
+   hypre_CommInfo        *comm_info;
+
    int                    ndim      = hypre_SStructPGridNDim(pgrid);
    HYPRE_SStructVariable *vartypes  = hypre_SStructPGridVarTypes(pgrid);
 
    hypre_Index            varoffset;
    int                    num_ghost[6];
    hypre_StructGrid      *sgrid;
-   hypre_BoxArrayArray   *send_boxes;
-   hypre_BoxArrayArray   *recv_boxes;
-   int                  **send_processes;
-   int                  **recv_processes;
-   int                   *send_order;
-   int                   *recv_order;
-   hypre_Index            unit_stride;
    int                    var, d;
-
-   hypre_SetIndex(unit_stride, 1, 1, 1);
 
    for (var = 0; var < nvars; var++)
    {
@@ -231,21 +224,13 @@ hypre_SStructPVectorAssemble( hypre_SStructPVector *pvector )
             num_ghost[2*d+1] = hypre_IndexD(varoffset, d);
          }
          
-         hypre_CreateCommInfoFromNumGhost(sgrid, num_ghost,
-                                          &send_boxes, &recv_boxes,
-                                          &send_processes, &recv_processes,
-                                          &send_order, &recv_order);
-         
+         hypre_CreateCommInfoFromNumGhost(sgrid, num_ghost, &comm_info);
          hypre_CommPkgDestroy(comm_pkgs[var]);
-         comm_pkgs[var] =
-            hypre_CommPkgCreate(send_boxes, recv_boxes,
-                                unit_stride, unit_stride,
-                                hypre_StructVectorDataSpace(svectors[var]),
-                                hypre_StructVectorDataSpace(svectors[var]),
-                                send_processes, recv_processes,
-                                send_order, recv_order,
-                                1, hypre_StructVectorComm(svectors[var]),
-                                hypre_StructGridPeriodic(sgrid));
+         hypre_CommPkgCreate(comm_info,
+                             hypre_StructVectorDataSpace(svectors[var]),
+                             hypre_StructVectorDataSpace(svectors[var]),
+                             1, hypre_StructVectorComm(svectors[var]),
+                             &comm_pkgs[var]);
       }
    }
 

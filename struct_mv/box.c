@@ -364,6 +364,33 @@ hypre_BoxGetStrideSize( hypre_Box   *box,
 }
 
 /*--------------------------------------------------------------------------
+ * hypre_BoxGetStrideVolume:
+ *--------------------------------------------------------------------------*/
+
+int 
+hypre_BoxGetStrideVolume( hypre_Box   *box,
+                          hypre_Index  stride,
+                          int         *volume_ptr   )
+{
+   int  volume = 1;
+   int  d, s;
+
+   for (d = 0; d < 3; d++)
+   {
+      s = hypre_BoxSizeD(box, d);
+      if (s > 0)
+      {
+         s = (s - 1) / hypre_IndexD(stride, d) + 1;
+      }
+      volume *= s;
+   }
+
+   *volume_ptr = volume;
+
+   return 0;
+}
+
+/*--------------------------------------------------------------------------
  * GEC0209 function to expand a box given a ghostvector numexp
  * the idea is to dilatate the box using two vectors.
  *

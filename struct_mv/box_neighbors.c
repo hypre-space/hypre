@@ -73,10 +73,10 @@ hypre_BoxNeighborsCreate( hypre_BoxArray      *boxes,
                           int                 *ids,
                           int                  first_local,
                           int                  num_local,
-                          int                  id_period,
                           hypre_BoxNeighbors **neighbors_ptr )
 {
    hypre_BoxNeighbors  *neighbors;
+   int                 *boxnums;
 
    neighbors = hypre_CTAlloc(hypre_BoxNeighbors, 1);
    hypre_BoxNeighborsRankLinks(neighbors) =
@@ -84,10 +84,11 @@ hypre_BoxNeighborsCreate( hypre_BoxArray      *boxes,
 
    hypre_BoxNeighborsBoxes(neighbors)      = boxes;
    hypre_BoxNeighborsProcs(neighbors)      = procs;
+   hypre_ComputeBoxnums(boxes, procs, &boxnums);
+   hypre_BoxNeighborsBoxnums(neighbors)    = boxnums;
    hypre_BoxNeighborsIDs(neighbors)        = ids;
    hypre_BoxNeighborsFirstLocal(neighbors) = first_local;
    hypre_BoxNeighborsNumLocal(neighbors)   = num_local;
-   hypre_BoxNeighborsIDPeriod(neighbors)   = id_period;
 
    *neighbors_ptr = neighbors;
 
@@ -109,16 +110,9 @@ hypre_BoxNeighborsCreate( hypre_BoxArray      *boxes,
  *
  * NOTE: A box is not a neighbor of itself.
  *
- * NOTE: Periodic boxes are assigned unique ids based on the
- * non-periodic boxes, and have the form: id + p*id_period.
- *
- * NOTE: The box ids for the boxes in the 'boxes' array remain in
- * increasing order, and the box procs remain in non-decreasing order
- * for the non-periodic boxes.  For example, with id_period = 100:
- *
- *   proc:     0 0 1 2 2 ...   0   0   1   2   2 ...   0   0   1   2   2 ...
- *   ID:       0 1 2 3 4 ... 100 101 102 103 104 ... 200 201 202 203 204 ...
- *   periodic:                 *   *   *   *   *       *   *   *   *   *
+ * NOTE: Periodic boxes are not assigned unique ids.  The generating
+ * box and its associated processor/ID information can be found with
+ * index 'i % num_boxes', where 'i' is the index for the periodic box.
  *
  *--------------------------------------------------------------------------*/
 
@@ -130,13 +124,15 @@ hypre_BoxNeighborsAssemble( hypre_BoxNeighbors *neighbors,
 {
    hypre_BoxArray      *boxes;
    int                 *procs;
+   int                 *boxnums;
    int                 *ids;
    int                  first_local;
    int                  num_local;
-   int                  id_period;
    int                  num_periods;
-   int                  period;
+   hypre_Index         *pshifts;
 
+   hypre_IndexRef       pshift;
+   int                  period;
    int                  keep_box;
    int                  num_boxes;
 
@@ -165,21 +161,21 @@ hypre_BoxNeighborsAssemble( hypre_BoxNeighbors *neighbors,
     * Create periodic boxes
     *--------------------------------------------------*/
 
-   boxes = hypre_BoxNeighborsBoxes(neighbors);
-   procs = hypre_BoxNeighborsProcs(neighbors);
-   ids   = hypre_BoxNeighborsIDs(neighbors);
-   id_period = hypre_BoxNeighborsIDPeriod(neighbors);
+   boxes     = hypre_BoxNeighborsBoxes(neighbors);
+   procs     = hypre_BoxNeighborsProcs(neighbors);
+   boxnums   = hypre_BoxNeighborsBoxnums(neighbors);
+   ids       = hypre_BoxNeighborsIDs(neighbors);
    num_boxes = hypre_BoxArraySize(boxes);
 
    num_periods = (1+2*i_periodic) * (1+2*j_periodic) * (1+2*k_periodic);
+   pshifts = hypre_CTAlloc(hypre_Index, num_periods);
 
    if( num_periods > 1 )
    {
       int  ip, jp, kp;
 
-      hypre_BoxArraySetSize(boxes,       num_periods*num_boxes);
+      hypre_BoxArraySetSize(boxes, num_periods*num_boxes);
       procs = hypre_TReAlloc(procs, int, num_periods*num_boxes);
-      ids   = hypre_TReAlloc(ids,   int, num_periods*num_boxes);
 
       p = 1;
       for (ip = -i_periodic; ip <= i_periodic; ip++)
@@ -190,28 +186,17 @@ hypre_BoxNeighborsAssemble( hypre_BoxNeighbors *neighbors,
             {
                if( !(ip == 0 && jp == 0 && kp == 0) )
                {
+                  pshift = pshifts[p];
+                  hypre_SetIndex(pshift, ip*px, jp*py, kp*pz);
+
                   for (i = 0; i < num_boxes; i++)
                   {
                      inew = i + p*num_boxes;
                      local_box = hypre_BoxArrayBox(boxes, inew);
                      hypre_CopyBox(hypre_BoxArrayBox(boxes, i), local_box);
-                        
-                     /* shift box */
-                     hypre_BoxIMinD(local_box, 0) =
-                        hypre_BoxIMinD(local_box, 0) + (ip * px);
-                     hypre_BoxIMinD(local_box, 1) =
-                        hypre_BoxIMinD(local_box, 1) + (jp * py);
-                     hypre_BoxIMinD(local_box, 2) =
-                        hypre_BoxIMinD(local_box, 2) + (kp * pz);
-                     hypre_BoxIMaxD(local_box, 0) =
-                        hypre_BoxIMaxD(local_box, 0) + (ip * px);
-                     hypre_BoxIMaxD(local_box, 1) =
-                        hypre_BoxIMaxD(local_box, 1) + (jp * py);
-                     hypre_BoxIMaxD(local_box, 2) =
-                        hypre_BoxIMaxD(local_box, 2) + (kp * pz);
+                     hypre_BoxShiftPos(local_box, pshift);
 
                      procs[inew] = procs[i];
-                     ids[inew]   = ids[i] + p*id_period;
                   }
 
                   p++;
@@ -223,9 +208,9 @@ hypre_BoxNeighborsAssemble( hypre_BoxNeighbors *neighbors,
    
    hypre_BoxNeighborsBoxes(neighbors)      = boxes;
    hypre_BoxNeighborsProcs(neighbors)      = procs;
-   hypre_BoxNeighborsIDs(neighbors)        = ids;
    hypre_CopyIndex(periodic, hypre_BoxNeighborsPeriodic(neighbors));
    hypre_BoxNeighborsNumPeriods(neighbors) = num_periods;
+   hypre_BoxNeighborsPShifts(neighbors)    = pshifts;
 
    /*-----------------------------------------------------------------
     * Find neighboring boxes:
@@ -368,7 +353,11 @@ hypre_BoxNeighborsAssemble( hypre_BoxNeighbors *neighbors,
             }
             hypre_CopyBox(hypre_BoxArrayBox(boxes, i + p*period),
                           hypre_BoxArrayBox(boxes, inew + p*num_boxes));
-            ids[inew + p*num_boxes] = ids[i + p*period];
+            if (p == 0)
+            {
+               boxnums[inew] = boxnums[i];
+               ids[inew] = ids[i];
+            }
             
             i++;
          }
@@ -431,7 +420,6 @@ hypre_BoxNeighborsAssemble( hypre_BoxNeighbors *neighbors,
    fprintf(file, "num_local    = %d\n", num_local);
    fprintf(file, "periodic     = %d %d %d\n",
            periodic[0], periodic[1], periodic[2]);
-   fprintf(file, "id_period    = %d\n", id_period);
    fprintf(file, "num_periods  = %d\n", num_periods);
    fprintf(file, "max_distance = %d\n", max_distance);
    fprintf(file, "prune        = %d\n", prune);
@@ -499,7 +487,9 @@ hypre_BoxNeighborsDestroy( hypre_BoxNeighbors  *neighbors )
       }
       hypre_BoxArrayDestroy(hypre_BoxNeighborsBoxes(neighbors));
       hypre_TFree(hypre_BoxNeighborsProcs(neighbors));
+      hypre_TFree(hypre_BoxNeighborsBoxnums(neighbors));
       hypre_TFree(hypre_BoxNeighborsIDs(neighbors));
+      hypre_TFree(hypre_BoxNeighborsPShifts(neighbors));
       hypre_TFree(hypre_BoxNeighborsRankLinks(neighbors));
       hypre_TFree(neighbors);
    }
