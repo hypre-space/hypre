@@ -15,18 +15,18 @@
 
 #include "headers.h"
 
-
 /*--------------------------------------------------------------------------
  * hypre_AMGCycle
  *--------------------------------------------------------------------------*/
 
-int         hypre_AMGCycle(hypre_AMGData *amg_data, 
-                           hypre_Vector  **F_array,
-                           hypre_Vector  **U_array)
-
+int
+hypre_AMGCycle( void           *amg_vdata, 
+                hypre_Vector  **F_array,
+                hypre_Vector  **U_array   )
 {
+   hypre_AMGData *amg_data = amg_vdata;
 
-/* Data Structure variables */
+   /* Data Structure variables */
 
    hypre_CSRMatrix    **A_array;
    hypre_CSRMatrix    **P_array;
@@ -47,9 +47,7 @@ int         hypre_AMGCycle(hypre_AMGData *amg_data,
    int      *grid_relax_type;   
    int     **grid_relax_points;  
  
-
-
-/* Local variables  */
+   /* Local variables  */
 
    int      *lev_counter;
    int       Solve_err_flag;
@@ -66,10 +64,12 @@ int         hypre_AMGCycle(hypre_AMGData *amg_data,
 
    double    alpha;
    double    beta;
-/*   double   *D_mat;
-   double   *S_vec;  */
+#if 0
+   double   *D_mat;
+   double   *S_vec;
+#endif
    
-/* Acquire data and allocate storage */
+   /* Acquire data and allocate storage */
 
    A_array           = hypre_AMGDataAArray(amg_data);
    P_array           = hypre_AMGDataPArray(amg_data);
@@ -86,14 +86,11 @@ int         hypre_AMGCycle(hypre_AMGData *amg_data,
    grid_relax_type     = hypre_AMGDataGridRelaxType(amg_data);
    grid_relax_points   =  hypre_AMGDataGridRelaxPoints(amg_data); 
 
-
-
    cycle_op_count = hypre_AMGDataCycleOpCount(amg_data);
 
+   lev_counter = hypre_CTAlloc(int, num_levels);
 
-    lev_counter = hypre_CTAlloc(int, num_levels);
-
-/* Initialize */
+   /* Initialize */
 
    Solve_err_flag = 0;
 
@@ -101,51 +98,49 @@ int         hypre_AMGCycle(hypre_AMGData *amg_data,
    num_coeffs[0]    = hypre_CSRMatrixNumNonzeros(A_array[0]);
 
    for (j = 1; j < num_levels; j++)
-       num_coeffs[j] = hypre_CSRMatrixNumNonzeros(A_array[j]);
+      num_coeffs[j] = hypre_CSRMatrixNumNonzeros(A_array[j]);
 
-
-/*------------------------------------------------------------------------
- *    Initialize cycling control counter
- *
- *     Cycling is controlled using a level counter: lev_counter[k]
- *     
- *     Each time relaxation is performed on level k, the
- *     counter is decremented by 1. If the counter is then
- *     negative, we go to the next finer level. If non-
- *     negative, we go to the next coarser level. The
- *     following actions control cycling:
- *     
- *     a. lev_counter[0] is initialized to 1.
- *     b. lev_counter[k] is initialized to cycle_type for k>0.
- *     
- *     c. During cycling, when going down to level k,
- *        lev_counter[k] is set to the max of (lev_counter[k],cycle_type)
-*------------------------------------------------------------------------*/
+   /*---------------------------------------------------------------------
+    *    Initialize cycling control counter
+    *
+    *     Cycling is controlled using a level counter: lev_counter[k]
+    *     
+    *     Each time relaxation is performed on level k, the
+    *     counter is decremented by 1. If the counter is then
+    *     negative, we go to the next finer level. If non-
+    *     negative, we go to the next coarser level. The
+    *     following actions control cycling:
+    *     
+    *     a. lev_counter[0] is initialized to 1.
+    *     b. lev_counter[k] is initialized to cycle_type for k>0.
+    *     
+    *     c. During cycling, when going down to level k, lev_counter[k]
+    *        is set to the max of (lev_counter[k],cycle_type)
+    *---------------------------------------------------------------------*/
 
    Not_Finished = 1;
 
    lev_counter[0] = 1;
    for (k = 1; k < num_levels; ++k) 
    {
-       lev_counter[k] = cycle_type;
+      lev_counter[k] = cycle_type;
    }
 
-   
    level = 0;
    cycle_param = 0;
 
-/*------------------------------------------------------------------------
- * Main loop of cycling
- *-----------------------------------------------------------------------*/
+   /*---------------------------------------------------------------------
+    * Main loop of cycling
+    *--------------------------------------------------------------------*/
   
    while (Not_Finished)
    {
       num_sweep = num_grid_sweeps[cycle_param];
       relax_type = grid_relax_type[cycle_param];
 
-/*------------------------------------------------------------------------
- * Do the relaxation num_sweep times
- *-----------------------------------------------------------------------*/
+      /*------------------------------------------------------------------
+       * Do the relaxation num_sweep times
+       *-----------------------------------------------------------------*/
 
       for (j = 0; j < num_sweep; j++)
       {
@@ -159,13 +154,13 @@ int         hypre_AMGCycle(hypre_AMGData *amg_data,
          {
             switch (relax_points)
             {
-                 case 1:
-                    cycle_op_count += num_coeffs[level+1];
-                    break;
+               case 1:
+               cycle_op_count += num_coeffs[level+1];
+               break;
   
-                 case -1: 
-                    cycle_op_count += (num_coeffs[level]-num_coeffs[level+1]); 
-                    break;
+               case -1: 
+               cycle_op_count += (num_coeffs[level]-num_coeffs[level+1]); 
+               break;
             }
          }
 	 else
@@ -181,73 +176,73 @@ int         hypre_AMGCycle(hypre_AMGData *amg_data,
                                          U_array[level],
                                          Vtemp);
  
-         if (Solve_err_flag != 0) return(Solve_err_flag);
-
-            
+         if (Solve_err_flag != 0)
+            return(Solve_err_flag);
       }
 
 
-/*------------------------------------------------------------------------
- * Decrement the control counter and determine which grid to visit next
- *-----------------------------------------------------------------------*/
+      /*------------------------------------------------------------------
+       * Decrement the control counter and determine which grid to visit next
+       *-----------------------------------------------------------------*/
 
       --lev_counter[level];
        
       if (lev_counter[level] >= 0 && level != num_levels-1)
       {
                                
-/*------------------------------------------------------------------------
- * Visit coarser level next.  Compute residual using hypre_Matvec.
- * Perform restriction using hypre_MatvecT.
- * Reset counters and cycling parameters for coarse level
- *-----------------------------------------------------------------------*/
+         /*---------------------------------------------------------------
+          * Visit coarser level next.  Compute residual using hypre_Matvec.
+          * Perform restriction using hypre_MatvecT.
+          * Reset counters and cycling parameters for coarse level
+          *--------------------------------------------------------------*/
 
-          fine_grid = level;
-          coarse_grid = level + 1;
+         fine_grid = level;
+         coarse_grid = level + 1;
 
-          hypre_SetVectorConstantValues(U_array[coarse_grid], 0.0);
+         hypre_SetVectorConstantValues(U_array[coarse_grid], 0.0);
           
-          hypre_CopyVector(F_array[fine_grid],Vtemp);
-          alpha = -1.0;
-          beta = 1.0;
-          hypre_Matvec(alpha, A_array[fine_grid], U_array[fine_grid],
-                 beta, Vtemp);
+         hypre_CopyVector(F_array[fine_grid],Vtemp);
+         alpha = -1.0;
+         beta = 1.0;
+         hypre_Matvec(alpha, A_array[fine_grid], U_array[fine_grid],
+                      beta, Vtemp);
 
-          alpha = 1.0;
-          beta = 0.0;
+         alpha = 1.0;
+         beta = 0.0;
 
-          hypre_MatvecT(alpha,P_array[fine_grid],Vtemp,
-                  beta,F_array[coarse_grid]);
+         hypre_MatvecT(alpha,P_array[fine_grid],Vtemp,
+                       beta,F_array[coarse_grid]);
 
-          ++level;
-          lev_counter[level] = max(lev_counter[level],cycle_type);
-          cycle_param = 1;
-          if (level == num_levels-1) cycle_param = 3;
+         ++level;
+         lev_counter[level] = max(lev_counter[level],cycle_type);
+         cycle_param = 1;
+         if (level == num_levels-1) cycle_param = 3;
       }
 
       else if (level != 0)
       {
                             
-/*------------------------------------------------------------------------
- * Visit finer level next.  Interpolate and add correction using hypre_Matvec.
- * Reset counters and cycling parameters for finer level.
- *-----------------------------------------------------------------------*/
+         /*---------------------------------------------------------------
+          * Visit finer level next.
+          * Interpolate and add correction using hypre_Matvec.
+          * Reset counters and cycling parameters for finer level.
+          *--------------------------------------------------------------*/
 
-          fine_grid = level - 1;
-          coarse_grid = level;
-          alpha = 1.0;
-          beta = 1.0;
+         fine_grid = level - 1;
+         coarse_grid = level;
+         alpha = 1.0;
+         beta = 1.0;
 
-          hypre_Matvec(alpha, P_array[fine_grid], U_array[coarse_grid],
-                 beta, U_array[fine_grid]);            
+         hypre_Matvec(alpha, P_array[fine_grid], U_array[coarse_grid],
+                      beta, U_array[fine_grid]);            
  
-          --level;
-          cycle_param = 2;
-          if (level == 0) cycle_param = 0;
+         --level;
+         cycle_param = 2;
+         if (level == 0) cycle_param = 0;
       }
       else
       {
-             Not_Finished = 0;
+         Not_Finished = 0;
       }
    }
 

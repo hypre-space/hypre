@@ -19,8 +19,8 @@
  * hypre_AMGInitialize
  *--------------------------------------------------------------------------*/
 
-void  *hypre_AMGInitialize()
-
+void *
+hypre_AMGInitialize()
 {
    hypre_AMGData  *amg_data;
 
@@ -46,7 +46,6 @@ void  *hypre_AMGInitialize()
    char     log_file_name[256];
 
    int      j;
-
 
    /*-----------------------------------------------------------------------
     * Setup default values for parameters
@@ -88,199 +87,188 @@ void  *hypre_AMGInitialize()
     * Create the hypre_AMGData structure and return
     *-----------------------------------------------------------------------*/
 
-   amg_data = hypre_AMGNewData(max_levels, strong_threshold, interp_type,
-                               max_iter, cycle_type, tol, num_grid_sweeps,
-                               grid_relax_type, grid_relax_points, 
-                               ioutdat, log_file_name);
-
-                     
-   return (void *) amg_data;
-}
-
-
-
-
-
-/*--------------------------------------------------------------------------
- * hypre_AMGNewData
- *--------------------------------------------------------------------------*/
- 
-hypre_AMGData *hypre_AMGNewData(max_levels, strong_threshold, interp_type,
-                               max_iter, cycle_type, tol, num_grid_sweeps,
-                               grid_relax_type, grid_relax_points, 
-                               ioutdat, log_file_name)
-
-int      max_levels;
-double   strong_threshold;
-int      interp_type;
-int      max_iter;
-int      cycle_type;    
-double   tol;
-int     *num_grid_sweeps;  
-int     *grid_relax_type;   
-int     *grid_relax_points[4]; 
-int      ioutdat;
-char     log_file_name[256];
-
-{
-   hypre_AMGData  *amg_data;
-
    amg_data = hypre_CTAlloc(hypre_AMGData, 1);
 
-   hypre_AMGSetMaxLevels(max_levels, amg_data);
-   hypre_AMGSetStrongThreshold(strong_threshold, amg_data);
-   hypre_AMGSetInterpType(interp_type, amg_data);
+   hypre_AMGSetMaxLevels(amg_data, max_levels);
+   hypre_AMGSetStrongThreshold(amg_data, strong_threshold);
+   hypre_AMGSetInterpType(amg_data, interp_type);
 
-   hypre_AMGSetMaxIter(max_iter, amg_data);
-   hypre_AMGSetCycleType(cycle_type, amg_data);
-   hypre_AMGSetTol(tol, amg_data); 
-   hypre_AMGSetNumGridSweeps(num_grid_sweeps, amg_data);
-   hypre_AMGSetGridRelaxType(grid_relax_type, amg_data);
-   hypre_AMGSetGridRelaxPoints(grid_relax_points, amg_data);
+   hypre_AMGSetMaxIter(amg_data, max_iter);
+   hypre_AMGSetCycleType(amg_data, cycle_type);
+   hypre_AMGSetTol(amg_data, tol); 
+   hypre_AMGSetNumGridSweeps(amg_data, num_grid_sweeps);
+   hypre_AMGSetGridRelaxType(amg_data, grid_relax_type);
+   hypre_AMGSetGridRelaxPoints(amg_data, grid_relax_points);
 
-   hypre_AMGSetIOutDat(ioutdat, amg_data);
-   hypre_AMGSetLogFileName(log_file_name, amg_data); 
+   hypre_AMGSetIOutDat(amg_data, ioutdat);
+   hypre_AMGSetLogFileName(amg_data, log_file_name); 
    
-   return amg_data;
+   return (void *) amg_data;
 }
 
 /*--------------------------------------------------------------------------
  * hypre_AMGFinalize
  *--------------------------------------------------------------------------*/
 
-void   hypre_AMGFinalize(data)
-void  *data;
+int
+hypre_AMGFinalize( void *data )
 {
+   int ierr = 0;
 /*   hypre_AMGData  *amg_data = data;*/
 
 /*   hypre_AMGFreeData(amg_data);*/
+
+   return (ierr);
 }
 
 /*--------------------------------------------------------------------------
  * Routines to set the setup phase parameters
  *--------------------------------------------------------------------------*/
 
-void      hypre_AMGSetMaxLevels(max_levels, data)
-int       max_levels;
-void     *data;
+int
+hypre_AMGSetMaxLevels( void *data,
+                       int   max_levels )
 {
+   int ierr = 0;
    hypre_AMGData  *amg_data = data;
  
    hypre_AMGDataMaxLevels(amg_data) = max_levels;
+
+   return (ierr);
 }
 
-
-
-void      hypre_AMGSetStrongThreshold(strong_threshold, data)
-double    strong_threshold;
-void     *data;
+int
+hypre_AMGSetStrongThreshold( void     *data,
+                             double    strong_threshold )
 {
+   int ierr = 0;
    hypre_AMGData  *amg_data = data;
  
    hypre_AMGDataStrongThreshold(amg_data) = strong_threshold;
+
+   return (ierr);
 }
 
-
-void      hypre_AMGSetInterpType(interp_type, data)
-int       interp_type;
-void     *data;
+int
+hypre_AMGSetInterpType( void     *data,
+                        int       interp_type )
 {
+   int ierr = 0;
    hypre_AMGData  *amg_data = data;
 
    hypre_AMGDataInterpType(amg_data) = interp_type;
+
+   return (ierr);
 }
 
-void hypre_AMGSetMaxIter(max_iter, data)
-int       max_iter;
-void     *data;
+int
+hypre_AMGSetMaxIter( void     *data,
+                     int       max_iter )
 {
+   int ierr = 0;
    hypre_AMGData  *amg_data = data;
  
    hypre_AMGDataMaxIter(amg_data) = max_iter;
+
+   return (ierr);
 } 
 
-
-void  hypre_AMGSetCycleType(cycle_type, data)
-int    cycle_type;
-void     *data;
+int
+hypre_AMGSetCycleType( void  *data,
+                       int    cycle_type )
 {
+   int ierr = 0;
    hypre_AMGData  *amg_data = data;
 
    hypre_AMGDataCycleType(amg_data) = cycle_type;
+
+   return (ierr);
 }
 
-
-void   hypre_AMGSetTol(tol, data) 
-double    tol;
-void     *data;
+int
+hypre_AMGSetTol( void     *data,
+                 double    tol  )
 {
+   int ierr = 0;
    hypre_AMGData  *amg_data = data;
 
    hypre_AMGDataTol(amg_data) = tol;
+
+   return (ierr);
 }
 
-
-void   hypre_AMGSetNumGridSweeps(num_grid_sweeps, data)
-int      *num_grid_sweeps;
-void     *data;
+int
+hypre_AMGSetNumGridSweeps( void     *data,
+                           int      *num_grid_sweeps )
 {
+   int ierr = 0;
    hypre_AMGData  *amg_data = data;
 
    hypre_TFree(hypre_AMGDataNumGridSweeps(amg_data));
    hypre_AMGDataNumGridSweeps(amg_data) = num_grid_sweeps;
+
+   return (ierr);
 }
  
-  
-void   hypre_AMGSetGridRelaxType(grid_relax_type, data)
-int      *grid_relax_type;
-void     *data;
+int
+hypre_AMGSetGridRelaxType( void     *data,
+                           int      *grid_relax_type )
 {
+   int ierr = 0;
    hypre_AMGData  *amg_data = data;
 
    hypre_TFree(hypre_AMGDataGridRelaxType(amg_data));
    hypre_AMGDataGridRelaxType(amg_data) = grid_relax_type;
+
+   return (ierr);
 }
 
-void   hypre_AMGSetGridRelaxPoints(grid_relax_points, data)
-int      **grid_relax_points;
-void     *data;
+int
+hypre_AMGSetGridRelaxPoints( void     *data,
+                             int      **grid_relax_points )
 {
+   int ierr = 0;
    hypre_AMGData  *amg_data = data;
 
    hypre_AMGDataGridRelaxPoints(amg_data) = grid_relax_points; 
+
+   return (ierr);
 }
 
-   
-void   hypre_AMGSetIOutDat(ioutdat, data)
-int       ioutdat;
-void     *data;
+int
+hypre_AMGSetIOutDat( void     *data,
+                     int       ioutdat )
 {
+   int ierr = 0;
    hypre_AMGData  *amg_data = data;
 
    hypre_AMGDataIOutDat(amg_data) = ioutdat;
+
+   return (ierr);
 }
 
-void   hypre_AMGSetLogFileName(log_file_name, data) 
-char   *log_file_name;
-void   *data;
+int
+hypre_AMGSetLogFileName( void   *data,
+                         char   *log_file_name )
 {
+   int ierr = 0;
    hypre_AMGData  *amg_data = data;
 
    sprintf(hypre_AMGDataLogFileName(amg_data), "%s", log_file_name);
+
+   return (ierr);
 }
 
- 
-
-
-void      hypre_AMGSetLogging(ioutdat, log_file_name, data)
-int       ioutdat;
-char     *log_file_name;
-void     *data;
+int
+hypre_AMGSetLogging( void     *data,
+                     int       ioutdat,
+                     char     *log_file_name )
 {
-   FILE *fp;
-
+   int ierr = 0;
    hypre_AMGData  *amg_data = data;
  
+   FILE *fp;
+
    hypre_AMGDataIOutDat(amg_data) = ioutdat;
    if (ioutdat > 0)
    {
@@ -292,59 +280,74 @@ void     *data;
    fp = fopen(hypre_AMGDataLogFileName(amg_data),"w");
    fclose(fp);
    }
+
+   return (ierr);
 }
 
 /*--------------------------------------------------------------------------
  * Routines to set the problem data parameters
  *--------------------------------------------------------------------------*/
 
-void      hypre_AMGSetNumUnknowns(num_unknowns, data)
-int       num_unknowns;  
-void     *data;
+int
+hypre_AMGSetNumUnknowns( void     *data,
+                         int       num_unknowns )
 {
+   int ierr = 0;
    hypre_AMGData  *amg_data = data;
  
    hypre_AMGDataNumUnknowns(amg_data) = num_unknowns;
+
+   return (ierr);
 }
 
-void      hypre_AMGSetNumPoints(num_points, data)
-int       num_points;    
-void     *data;
+int
+hypre_AMGSetNumPoints( void     *data,
+                       int       num_points )
 {
+   int ierr = 0;
    hypre_AMGData  *amg_data = data;
  
    hypre_AMGDataNumPoints(amg_data) = num_points;
+
+   return (ierr);
 }
 
-
-void      hypre_AMGSetUnknownMap(unknown_map, data)
-int      *unknown_map;            
-void     *data;
+int
+hypre_AMGSetUnknownMap( void     *data,
+                        int      *unknown_map )
 {
+   int ierr = 0;
    hypre_AMGData  *amg_data = data;
  
    hypre_TFree(hypre_AMGDataUnknownMap(amg_data));
    hypre_AMGDataUnknownMap(amg_data) = unknown_map;
+
+   return (ierr);
 }
 
-void      hypre_AMGSetPointMap(point_map, data)
-int      *point_map;            
-void     *data;
+int
+hypre_AMGSetPointMap( void     *data,
+                      int      *point_map )
 {
+   int ierr = 0;
    hypre_AMGData  *amg_data = data;
  
    hypre_TFree(hypre_AMGDataPointMap(amg_data));
    hypre_AMGDataPointMap(amg_data) = point_map;
+
+   return (ierr);
 }
 
-void      hypre_AMGSetVatPoint(v_at_point, data)
-int      *v_at_point;            
-void     *data;
+int
+hypre_AMGSetVatPoint( void     *data,
+                      int      *v_at_point )
 {
+   int ierr = 0;
    hypre_AMGData  *amg_data = data;
  
    hypre_TFree(hypre_AMGDataVatPoint(amg_data));
    hypre_AMGDataVatPoint(amg_data) = v_at_point;
-}
 
+   return (ierr);
+}
 

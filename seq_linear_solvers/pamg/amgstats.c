@@ -9,16 +9,16 @@
 
 #include "headers.h"
 
-/******************************************************************************
+/*****************************************************************************
  *
  * Routine for getting matrix statistics from setup
  *
- ******************************************************************************/
+ *****************************************************************************/
 
-
-int hypre_AMGSetupStats(hypre_AMGData *amg_data)
-
+int
+hypre_AMGSetupStats( void *amg_vdata )
 {
+   hypre_AMGData *amg_data = amg_vdata;
 
    /* Data Structure variables */
 

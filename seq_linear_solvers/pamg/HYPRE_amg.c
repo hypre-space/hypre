@@ -19,9 +19,9 @@
  *--------------------------------------------------------------------------*/
 
 HYPRE_Solver
-HYPRE_AMGInitialize( MPI_Comm comm )
+HYPRE_AMGInitialize( )
 {
-   return ( (HYPRE_Solver) hypre_AMGInitialize( comm ) );
+   return ( (HYPRE_Solver) hypre_AMGInitialize( ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -40,12 +40,12 @@ HYPRE_AMGFinalize( HYPRE_Solver solver )
 
 int 
 HYPRE_AMGSetup( HYPRE_Solver solver,
-                HYPRE_Matrix A,
+                HYPRE_CSRMatrix A,
                 HYPRE_Vector b,
                 HYPRE_Vector x      )
 {
    return( hypre_AMGSetup( (void *) solver,
-                           (hypre_Matrix *) A,
+                           (hypre_CSRMatrix *) A,
                            (hypre_Vector *) b,
                            (hypre_Vector *) x ) );
 }
@@ -56,25 +56,49 @@ HYPRE_AMGSetup( HYPRE_Solver solver,
 
 int 
 HYPRE_AMGSolve( HYPRE_Solver solver,
-                HYPRE_Matrix A,
+                HYPRE_CSRMatrix A,
                 HYPRE_Vector b,
                 HYPRE_Vector x      )
 {
+
+
    return( hypre_AMGSolve( (void *) solver,
-                           (hypre_Matrix *) A,
+                           (hypre_CSRMatrix *) A,
                            (hypre_Vector *) b,
                            (hypre_Vector *) x ) );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_AMGSetTol
+ * HYPRE_AMGSetMaxLevels
  *--------------------------------------------------------------------------*/
 
 int
-HYPRE_AMGSetTol( HYPRE_Solver solver,
-                 double           tol    )
+HYPRE_AMGSetMaxLevels( HYPRE_Solver solver,
+                       int          max_levels  )
 {
-   return( hypre_AMGSetTol( (void *) solver, tol ) );
+   return( hypre_AMGSetMaxLevels( (void *) solver, max_levels ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_AMGSetStrongThreshold
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_AMGSetStrongThreshold( HYPRE_Solver solver,
+                             double       strong_threshold  )
+{
+   return( hypre_AMGSetStrongThreshold( (void *) solver, strong_threshold ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_AMGSetInterpType
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_AMGSetInterpType( HYPRE_Solver solver,
+                        int          interp_type  )
+{
+   return( hypre_AMGSetInterpType( (void *) solver, interp_type ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -83,41 +107,97 @@ HYPRE_AMGSetTol( HYPRE_Solver solver,
 
 int
 HYPRE_AMGSetMaxIter( HYPRE_Solver solver,
-                     int              max_iter  )
+                     int          max_iter  )
 {
    return( hypre_AMGSetMaxIter( (void *) solver, max_iter ) );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_AMGSetZeroGuess
+ * HYPRE_AMGSetCycleType
  *--------------------------------------------------------------------------*/
- 
+
 int
-HYPRE_AMGSetZeroGuess( HYPRE_Solver solver )
+HYPRE_AMGSetCycleType( HYPRE_Solver solver,
+                       int          cycle_type  )
 {
-   return( hypre_AMGSetZeroGuess( (void *) solver ) );
+   return( hypre_AMGSetCycleType( (void *) solver, cycle_type ) );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_AMGGetNumIterations
+ * HYPRE_AMGSetTol
  *--------------------------------------------------------------------------*/
 
 int
-HYPRE_AMGGetNumIterations( HYPRE_Solver  solver,
-                           int              *num_iterations )
+HYPRE_AMGSetTol( HYPRE_Solver solver,
+                 double       tol    )
 {
-   return( hypre_AMGGetNumIterations( (void *) solver, num_iterations ) );
+   return( hypre_AMGSetTol( (void *) solver, tol ) );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_AMGGetFinalRelativeResidualNorm
+ * HYPRE_AMGSetNumGridSweeps
  *--------------------------------------------------------------------------*/
 
 int
-HYPRE_AMGGetFinalRelativeResidualNorm( HYPRE_Solver  solver,
-                                       double       *relative_residual_norm )
+HYPRE_AMGSetNumGridSweeps( HYPRE_Solver  solver,
+                           int          *num_grid_sweeps  )
 {
-   return( hypre_AMGGetFinalRelativeResidualNorm( (void *) solver,
-                                                  relative_residual_norm ) );
+   return( hypre_AMGSetNumGridSweeps( (void *) solver, num_grid_sweeps ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_AMGSetGridRelaxType
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_AMGSetGridRelaxType( HYPRE_Solver  solver,
+                           int          *grid_relax_type  )
+{
+   return( hypre_AMGSetGridRelaxType( (void *) solver, grid_relax_type ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_AMGSetGridRelaxPoints
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_AMGSetGridRelaxPoints( HYPRE_Solver   solver,
+                             int          **grid_relax_points  )
+{
+   return( hypre_AMGSetGridRelaxPoints( (void *) solver, grid_relax_points ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_AMGSetIOutDat
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_AMGSetIOutDat( HYPRE_Solver solver,
+                     int          ioutdat  )
+{
+   return( hypre_AMGSetIOutDat( (void *) solver, ioutdat ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_AMGSetLogFileName
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_AMGSetLogFileName( HYPRE_Solver  solver,
+                         char         *log_file_name  )
+{
+   return( hypre_AMGSetLogFileName( (void *) solver, log_file_name ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_AMGSetLogging
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_AMGSetLogging( HYPRE_Solver  solver,
+                     int           ioutdat,
+                     char         *log_file_name  )
+{
+   return( hypre_AMGSetLogging( (void *) solver, ioutdat, log_file_name ) );
 }
 

@@ -11,23 +11,28 @@
 .SUFFIXES: .c .o
 
 HEADERS =\
- HYPRE_amg.h\
- headers.h
+ headers.h\
+ amg.h\
+ pcg.h\
+ hypre_ls.h\
+ HYPRE_ls.h
 
 FILES =\
- SPamg.c\
+ driver.c\
  amg.c\
- amg_setup.c\
- coarsen.c\
- indepset.c\
- random.c\
- transpose.c\
- interp.c\
- rap.c \
  amgstats.c\
+ amg_setup.c\
  amg_solve.c \
+ coarsen.c\
  cycle.c\
- relax.c
+ indepset.c\
+ interp.c\
+ laplace.c\
+ random.c\
+ rap.c \
+ relax.c\
+ transpose.c\
+ HYPRE_amg.c
 
 OBJS = ${FILES:.c=.o}
 
@@ -37,9 +42,10 @@ CFLAGS =\
  -I/usr/local/include\
  -I/home/casc/include\
  -I/usr/local/mpi/mpich/include\
- -I../..\
- -g -Wall -DHYPRE_MEMORY_DMALLOC
-#-g -Wall  
+ -I../../utilities\
+ -I../../seq_matrix_vector\
+ -g -Wall -DHYPRE_SEQUENTIAL -DHYPRE_MEMORY_DMALLOC
+#-g -Wall -DHYPRE_SEQUENTIAL
 
 FFLAGS = -g
 
@@ -58,12 +64,27 @@ LFLAGS =\
  -lm
 
 ##################################################################
-# Main rules
+# Targets
 ##################################################################
 
-SPamg: SPamg.o libHYPRE_ls.a
+all: libHYPRE_ls.a driver
+
+install: all
+
+clean:
+	@rm -f *.o
+
+veryclean: clean
+	@rm -f driver
+	@rm -f libHYPRE_ls.a
+
+##################################################################
+# Rules
+##################################################################
+
+driver: driver.o libHYPRE_ls.a
 	@echo  "Linking" $@ "... "
-	${CC} -o SPamg SPamg.o ${LFLAGS}
+	${CC} -o driver driver.o ${LFLAGS}
 
 libHYPRE_ls.a: ${OBJS}
 	@echo  "Building $@ ... "
@@ -79,15 +100,4 @@ ${OBJS}: ${HEADERS}
 .c.o:
 	@echo "Making (c) " $@
 	@${CC} -o $@ -c ${CFLAGS} $<
-
-##################################################################
-# Miscellaneous rules
-##################################################################
-
-veryclean: clean
-	@rm -f libHYPRE_ls.a
-	@rm -f SPamg
-
-clean:
-	@rm -f *.o
 

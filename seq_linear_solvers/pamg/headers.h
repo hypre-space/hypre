@@ -11,17 +11,10 @@
 #include <stdio.h>
 #include <math.h>
 
-#include "utilities/hypre_utilities.h"
-#include "seq_matrix_vector/headers.h"
-
-/* #include "HYPRE_amg.h" */
+#include "hypre_ls.h"
 
 #include "general.h" 
 
 #include "amg.h"
 #include "pcg.h"
-
-#include "protos.h"
-
-#include <dmalloc.h>
 

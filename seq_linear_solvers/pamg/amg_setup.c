@@ -9,21 +9,25 @@
 
 #include "headers.h"
 
-/******************************************************************************
+/*****************************************************************************
  *
  * Routine for driving the setup phase of AMG
  *
- ******************************************************************************/
+ *****************************************************************************/
 
-
-int hypre_AMGSetup(hypre_AMGData *amg_data,
-                   hypre_CSRMatrix *A)
-
+int
+hypre_AMGSetup( void            *amg_vdata,
+                hypre_CSRMatrix *A,
+                hypre_Vector    *f,
+                hypre_Vector    *u         )
 {
+   hypre_AMGData   *amg_data = amg_vdata;
 
    /* Data Structure variables */
 
    hypre_CSRMatrix **A_array;
+   hypre_Vector    **F_array;
+   hypre_Vector    **U_array;
    hypre_CSRMatrix **P_array;
    int             **CF_marker_array;   
    double            strong_threshold;
@@ -38,15 +42,14 @@ int hypre_AMGSetup(hypre_AMGData *amg_data,
    hypre_CSRMatrix  *P;
    hypre_CSRMatrix  *A_H;
 
-
+   int       num_levels;
    int       level;
    int       coarse_size;
    int       fine_size;
    int       not_finished_coarsening = 1;
-
    int       Setup_err_flag;
-
    int       coarse_threshold = 9;
+   int       j;
 
    max_levels = hypre_AMGDataMaxLevels(amg_data);
    amg_ioutdat = hypre_AMGDataIOutDat(amg_data);
@@ -77,43 +80,43 @@ int hypre_AMGSetup(hypre_AMGData *amg_data,
 
    while (not_finished_coarsening)
    {
-         fine_size = hypre_CSRMatrixNumRows(A_array[level]);
+      fine_size = hypre_CSRMatrixNumRows(A_array[level]);
 
-         /*-------------------------------------------------------------
-          * Select coarse-grid points on 'level' : returns CF_marker
-          * for the level.  Returns strength matrix, S  
-          *--------------------------------------------------------------*/
+      /*-------------------------------------------------------------
+       * Select coarse-grid points on 'level' : returns CF_marker
+       * for the level.  Returns strength matrix, S  
+       *--------------------------------------------------------------*/
 
-         hypre_AMGCoarsen(A_array[level], strong_threshold,
-                          &S, &CF_marker, &coarse_size); 
+      hypre_AMGCoarsen(A_array[level], strong_threshold,
+                       &S, &CF_marker, &coarse_size); 
 
-         /* if no coarse-grid, stop coarsening */
-         if (coarse_size == 0)
-            break;
+      /* if no coarse-grid, stop coarsening */
+      if (coarse_size == 0)
+         break;
 
-         CF_marker_array[level] = CF_marker;
+      CF_marker_array[level] = CF_marker;
       
-         /*-------------------------------------------------------------
-          * Build prolongation matrix, P, and place in P_array[level] 
-          *--------------------------------------------------------------*/
+      /*-------------------------------------------------------------
+       * Build prolongation matrix, P, and place in P_array[level] 
+       *--------------------------------------------------------------*/
 
-         hypre_AMGBuildInterp(A_array[level], CF_marker_array[level], S, &P);
-         P_array[level] = P; 
+      hypre_AMGBuildInterp(A_array[level], CF_marker_array[level], S, &P);
+      P_array[level] = P; 
 
-         /*-------------------------------------------------------------
-          * Build coarse-grid operator, A_array[level+1] by R*A*P
-          *--------------------------------------------------------------*/
+      /*-------------------------------------------------------------
+       * Build coarse-grid operator, A_array[level+1] by R*A*P
+       *--------------------------------------------------------------*/
 
-         hypre_AMGBuildCoarseOperator(P_array[level], A_array[level] , 
-                                     P_array[level], &A_H);
+      hypre_AMGBuildCoarseOperator(P_array[level], A_array[level] , 
+                                   P_array[level], &A_H);
 
-         ++level;
-         A_array[level] = A_H;
+      ++level;
+      A_array[level] = A_H;
 
-         if (level+1 >= max_levels || 
-                     coarse_size == fine_size || 
-                              coarse_size <= coarse_threshold)
-                                     not_finished_coarsening = 0;
+      if (level+1 >= max_levels || 
+          coarse_size == fine_size || 
+          coarse_size <= coarse_threshold)
+         not_finished_coarsening = 0;
    } 
    
    /*-----------------------------------------------------------------------
@@ -121,19 +124,46 @@ int hypre_AMGSetup(hypre_AMGData *amg_data,
     * for levels 1 through coarsest, into amg_data data structure
     *-----------------------------------------------------------------------*/
 
-   hypre_AMGDataNumLevels(amg_data) = level+1;
+   num_levels = level+1;
+   hypre_AMGDataNumLevels(amg_data) = num_levels;
    hypre_AMGDataCFMarkerArray(amg_data) = CF_marker_array;
    hypre_AMGDataAArray(amg_data) = A_array;
    hypre_AMGDataPArray(amg_data) = P_array;
 
+   /*-----------------------------------------------------------------------
+    * Setup F and U arrays
+    *-----------------------------------------------------------------------*/
+
+   F_array = hypre_CTAlloc(hypre_Vector*, num_levels);
+   U_array = hypre_CTAlloc(hypre_Vector*, num_levels);
+
+   F_array[0] = f;
+   U_array[0] = u;
+
+   for (j = 1; j < num_levels; j++)
+   {
+      F_array[j] = hypre_CreateVector(hypre_CSRMatrixNumRows(A_array[j]));
+      hypre_InitializeVector(F_array[j]);
+
+      U_array[j] = hypre_CreateVector(hypre_CSRMatrixNumRows(A_array[j]));
+      hypre_InitializeVector(U_array[j]);
+   }
+
+   hypre_AMGDataFArray(amg_data) = F_array;
+   hypre_AMGDataUArray(amg_data) = U_array;
+
+   /*-----------------------------------------------------------------------
+    * Print some stuff
+    *-----------------------------------------------------------------------*/
+
    if (amg_ioutdat == 1 || amg_ioutdat == 3)
-                     hypre_AMGSetupStats(amg_data);
+      hypre_AMGSetupStats(amg_data);
 
    if (amg_ioutdat == -3)
    {  
-     char     fnam[255];
+      char     fnam[255];
 
-     int j;
+      int j;
 
       for (j = 1; j < level+1; j++)
       {
@@ -152,5 +182,4 @@ int hypre_AMGSetup(hypre_AMGData *amg_data,
    Setup_err_flag = 0;
    return(Setup_err_flag);
 }  
-
 
