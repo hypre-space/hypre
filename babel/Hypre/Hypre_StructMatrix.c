@@ -181,7 +181,6 @@ void  impl_Hypre_StructMatrix_New
 
    struct Hypre_StructMatrix_private_type *SMp = this->d_table;
    HYPRE_StructMatrix *M = SMp->hsmat;
-   hypre_StructMatrix *m = (hypre_StructMatrix *) *M;
 
    struct Hypre_StructuredGrid_private_type *Gp = grid->d_table;
    HYPRE_StructGrid *G = Gp->hsgrid;
