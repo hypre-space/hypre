@@ -65,7 +65,9 @@ typedef struct HYPRE_LSI_BLOCKP_PARAMS_Struct
    double         PSThresh_;      // threshold for ParaSails
    double         PSFilter_;      // filter for ParaSails
    double         AMGThresh_;     // threshold for BoomerAMG
+   int            AMGRelaxType_;  // smoother for BoomerAMG
    int            AMGNSweeps_;    // no. of relaxations for BoomerAMG
+   int            AMGSystemSize_; // system size for BoomerAMG
    int            PilutFillin_;   // Fillin for Pilut
    double         PilutDropTol_;  // drop tolerance for Pilut
    int            EuclidNLevels_; // nlevels for Euclid
@@ -75,6 +77,7 @@ typedef struct HYPRE_LSI_BLOCKP_PARAMS_Struct
    double         MLThresh_;      // threshold for SA AMG
    int            MLNSweeps_;     // no. of relaxations for SA AMG
    double         MLIThresh_;     // threshold for MLI's SA AMG
+   int            MLIRelaxType_;  // smoother for MLI's SA AMG
    int            MLINSweeps_;    // no. of relaxations for MLI's SA AMG
    double         MLIPweight_;    // prolongation smoother weight
    int            MLINodeDOF_;    // nodal degree of freedom

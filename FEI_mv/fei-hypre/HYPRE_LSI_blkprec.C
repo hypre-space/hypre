@@ -274,8 +274,12 @@ HYPRE_LSI_BlockP::HYPRE_LSI_BlockP()
    A22Params_.PSFilter_      = 2.0e-1;
    A11Params_.AMGThresh_     = 5.0e-1;
    A22Params_.AMGThresh_     = 5.0e-1;
+   A11Params_.AMGRelaxType_  = 6;
+   A22Params_.AMGRelaxType_  = 6;
    A11Params_.AMGNSweeps_    = 2;
    A22Params_.AMGNSweeps_    = 2;
+   A11Params_.AMGSystemSize_ = 1;
+   A22Params_.AMGSystemSize_ = 1;
    A11Params_.PilutFillin_   = 100;
    A22Params_.PilutFillin_   = 100;
    A11Params_.PilutDropTol_  = 0.1;
@@ -296,6 +300,8 @@ HYPRE_LSI_BlockP::HYPRE_LSI_BlockP()
    A22Params_.MLIThresh_     = 0.08;
    A11Params_.MLINSweeps_    = 1;
    A22Params_.MLINSweeps_    = 1;
+   A11Params_.MLIRelaxType_  = 2;
+   A22Params_.MLIRelaxType_  = 2;
    A11Params_.MLIPweight_    = 0.0;
    A22Params_.MLIPweight_    = 0.0;
    A11Params_.MLINodeDOF_    = 3;
@@ -380,7 +386,9 @@ int HYPRE_LSI_BlockP::setParams(char *params)
       printf("      A11PreconPSThresh <f> \n");
       printf("      A11PreconPSFilter <f> \n");
       printf("      A11PreconAMGThresh <f> \n");
+      printf("      A11PreconAMGRelaxType <jacobi,hybrid,hybridsym> \n");
       printf("      A11PreconAMGNumSweeps <d> \n");
+      printf("      A11PreconAMGSystemSize <d> \n");
       printf("      A11PreconEuclidNLevels <d> \n");
       printf("      A11PreconEuclidThresh <f> \n");
       printf("      A11PreconPilutFillin <d> \n");
@@ -388,10 +396,11 @@ int HYPRE_LSI_BlockP::setParams(char *params)
       printf("      A11PreconDDIlutFillin <f> \n");
       printf("      A11PreconDDIlutDropTol <f> \n");
       printf("      A11PreconMLIThresh <f> \n");
+      printf("      A11PreconMLIRelaxType <jacobi,gs,sgs,bsgs,parasails> \n");
       printf("      A11PreconMLINumSweeps <d> \n");
-      printf("      A11PreconPweight <f> \n");
-      printf("      A11PreconNodeDOF <d> \n");
-      printf("      A11PreconNullDim <d> \n");
+      printf("      A11PreconMLIPweight <f> \n");
+      printf("      A11PreconMLINodeDOF <d> \n");
+      printf("      A11PreconMLINullDim <d> \n");
       printf("      A22Solver <cg,gmres> \n");
       printf("      A22Tolerance <f> \n");
       printf("      A22MaxIterations <d> \n");
@@ -400,7 +409,9 @@ int HYPRE_LSI_BlockP::setParams(char *params)
       printf("      A22PreconPSThresh <f> \n");
       printf("      A22PreconPSFilter <f> \n");
       printf("      A22PreconAMGThresh <f> \n");
+      printf("      A22PreconAMGRelaxType <jacobi,hybrid,hybridsym> \n");
       printf("      A22PreconAMGNumSweeps <d> \n");
+      printf("      A22PreconAMGSystemSize <d> \n");
       printf("      A22PreconEuclidNLevels <d> \n");
       printf("      A22PreconEuclidThresh <f> \n");
       printf("      A22PreconPilutFillin <d> \n");
@@ -408,10 +419,11 @@ int HYPRE_LSI_BlockP::setParams(char *params)
       printf("      A22PreconDDIlutFillin <f> \n");
       printf("      A22PreconDDIlutDropTol <f> \n");
       printf("      A22PreconMLIThresh <f> \n");
+      printf("      A22PreconMLIRelaxType <jacobi,gs,sgs,bsgs,parasails> \n");
       printf("      A22PreconMLINumSweeps <d> \n");
-      printf("      A22PreconPweight <f> \n");
-      printf("      A22PreconNodeDOF <d> \n");
-      printf("      A22PreconNullDim <d> \n");
+      printf("      A22PreconMLIPweight <f> \n");
+      printf("      A22PreconMLINodeDOF <d> \n");
+      printf("      A22PreconMLINullDim <d> \n");
    }
    else if ( !strcasecmp(param2, "blockD") )
    {
@@ -691,6 +703,28 @@ int HYPRE_LSI_BlockP::setParams(char *params)
       if ( A22Params_.AMGThresh_ < 0 ) A22Params_.AMGThresh_ = 0;
       if (outputLevel_ > 0) printf("HYPRE_LSI_BlockP::A22PreconAMGThresh\n");
    }
+   else if ( !strcasecmp(param2, "A11PreconAMGRelaxType") )
+   {
+      sscanf(params,"%s %s %s", param1, param2, param3);
+      if      ( !strcasecmp(param3, "jacobi" ) ) A11Params_.AMGRelaxType_ = 0;
+      else if ( !strcasecmp(param3, "gsSlow") )  A11Params_.AMGRelaxType_ = 1;
+      else if ( !strcasecmp(param3, "gsFast") )  A11Params_.AMGRelaxType_ = 4;
+      else if ( !strcasecmp(param3, "hybrid" ) ) A11Params_.AMGRelaxType_ = 3;
+      else if ( !strcasecmp(param3, "hybridsym"))A11Params_.AMGRelaxType_ = 6;
+      else                                       A11Params_.AMGRelaxType_ = 4;
+      if (outputLevel_ > 0) printf("HYPRE_LSI_BlockP::A11PreconAMGRelaxType\n");
+   }
+   else if ( !strcasecmp(param2, "A22PreconAMGRelaxType") )
+   {
+      sscanf(params,"%s %s %s", param1, param2, param3);
+      if      ( !strcasecmp(param3, "jacobi" ) ) A22Params_.AMGRelaxType_ = 0;
+      else if ( !strcasecmp(param3, "gsSlow") )  A22Params_.AMGRelaxType_ = 1;
+      else if ( !strcasecmp(param3, "gsFast") )  A22Params_.AMGRelaxType_ = 4;
+      else if ( !strcasecmp(param3, "hybrid" ) ) A22Params_.AMGRelaxType_ = 3;
+      else if ( !strcasecmp(param3, "hybridsym"))A22Params_.AMGRelaxType_ = 6;
+      else                                       A22Params_.AMGRelaxType_ = 4;
+      if (outputLevel_ > 0) printf("HYPRE_LSI_BlockP::A22PreconAMGRelaxType\n");
+   }
    else if ( !strcasecmp(param2, "A11PreconAMGNumSweeps") )
    {
       sscanf(params,"%s %s %d", param1, param2, &(A11Params_.AMGNSweeps_));
@@ -702,6 +736,18 @@ int HYPRE_LSI_BlockP::setParams(char *params)
       sscanf(params,"%s %s %d", param1, param2, &(A22Params_.AMGNSweeps_));
       if ( A22Params_.AMGNSweeps_ < 0 ) A22Params_.AMGNSweeps_ = 0;
       if (outputLevel_ > 0) printf("HYPRE_LSI_BlockP::A22PreconAMGNSweeps\n");
+   }
+   else if ( !strcasecmp(param2, "A11PreconAMGSystemSize") )
+   {
+      sscanf(params,"%s %s %d", param1, param2, &(A11Params_.AMGSystemSize_));
+      if ( A11Params_.AMGSystemSize_ < 0 ) A11Params_.AMGSystemSize_ = 1;
+      if (outputLevel_ > 0) printf("HYPRE_LSI_BlockP::A11PreconAMGSystemSize\n");
+   }
+   else if ( !strcasecmp(param2, "A22PreconAMGSystemSize") )
+   {
+      sscanf(params,"%s %s %d", param1, param2, &(A22Params_.AMGSystemSize_));
+      if ( A22Params_.AMGSystemSize_ < 0 ) A22Params_.AMGSystemSize_ = 0;
+      if (outputLevel_ > 0) printf("HYPRE_LSI_BlockP::A22PreconAMGSystemSize\n");
    }
    else if ( !strcasecmp(param2, "A11PreconEuclidNLevels") )
    {
@@ -810,6 +856,28 @@ int HYPRE_LSI_BlockP::setParams(char *params)
       sscanf(params,"%s %s %lg", param1, param2, &(A22Params_.MLIThresh_));
       if ( A22Params_.MLIThresh_ < 0.0 ) A22Params_.MLIThresh_ = 0.0;
       if (outputLevel_ > 0) printf("HYPRE_LSI_BlockP::A22PreconMLIThresh\n");
+   }
+   else if ( !strcasecmp(param2, "A11PreconMLIRelaxType") )
+   {
+      sscanf(params,"%s %s %s", param1, param2, param3);
+      if      ( !strcasecmp(param3, "jacobi" ) ) A11Params_.MLIRelaxType_ = 0;
+      else if ( !strcasecmp(param3, "gs") )      A11Params_.MLIRelaxType_ = 1;
+      else if ( !strcasecmp(param3, "sgs") )     A11Params_.MLIRelaxType_ = 2;
+      else if ( !strcasecmp(param3, "bsgs") )    A11Params_.MLIRelaxType_ = 3;
+      else if ( !strcasecmp(param3, "parasails"))A11Params_.MLIRelaxType_ = 4;
+      else                                       A11Params_.MLIRelaxType_ = 2;
+      if (outputLevel_ > 0) printf("HYPRE_LSI_BlockP::A11PreconMLIRelaxType\n");
+   }
+   else if ( !strcasecmp(param2, "A22PreconMLIRelaxType") )
+   {
+      sscanf(params,"%s %s %s", param1, param2, param3);
+      if      ( !strcasecmp(param3, "jacobi" ) ) A22Params_.MLIRelaxType_ = 0;
+      else if ( !strcasecmp(param3, "gs") )      A22Params_.MLIRelaxType_ = 1;
+      else if ( !strcasecmp(param3, "sgs") )     A22Params_.MLIRelaxType_ = 2;
+      else if ( !strcasecmp(param3, "bsgs") )    A22Params_.MLIRelaxType_ = 3;
+      else if ( !strcasecmp(param3, "parasails"))A22Params_.MLIRelaxType_ = 4;
+      else                                       A22Params_.MLIRelaxType_ = 2;
+      if (outputLevel_ > 0) printf("HYPRE_LSI_BlockP::A22PreconMLIRelaxType\n");
    }
    else if ( !strcasecmp(param2, "A11PreconMLINumSweeps") )
    {
@@ -1200,7 +1268,6 @@ int HYPRE_LSI_BlockP::solve(HYPRE_ParVector fvec, HYPRE_ParVector xvec)
    // extract matrix and machine information
    //------------------------------------------------------------------
 
-printf("LSI_blkprec solve, P22Size = %d\n", P22Size_);
    HYPRE_ParCSRMatrixGetComm( Amat_, &mpi_comm );
    MPI_Comm_rank( mpi_comm, &mypid );
    MPI_Comm_size( mpi_comm, &nprocs );
@@ -1937,17 +2004,18 @@ int HYPRE_LSI_BlockP::setupPrecon(HYPRE_Solver *precon, HYPRE_IJMatrix Amat,
           HYPRE_BoomerAMGCreate(precon);
           HYPRE_BoomerAMGSetMaxIter(*precon, 1);
           HYPRE_BoomerAMGSetCycleType(*precon, 1);
-          HYPRE_BoomerAMGSetPrintLevel(*precon, outputLevel_);
+          HYPRE_BoomerAMGSetPrintLevel(*precon, outputLevel_-1);
           HYPRE_BoomerAMGSetMaxLevels(*precon, 25);
           HYPRE_BoomerAMGSetMeasureType(*precon, 0);
           HYPRE_BoomerAMGSetCoarsenType(*precon, 0);
           HYPRE_BoomerAMGSetMeasureType(*precon, 1);
           HYPRE_BoomerAMGSetStrongThreshold(*precon,param_ptr.AMGThresh_);
+          HYPRE_BoomerAMGSetNumFunctions(*precon, param_ptr.AMGSystemSize_);
           nsweeps = hypre_CTAlloc(int,4);
           for ( i = 0; i < 4; i++ ) nsweeps[i] = param_ptr.AMGNSweeps_;
           HYPRE_BoomerAMGSetNumGridSweeps(*precon, nsweeps);
           relaxType = hypre_CTAlloc(int,4);
-          for ( i = 0; i < 4; i++ ) relaxType[i] = 6;
+          for ( i = 0; i < 4; i++ ) relaxType[i] = param_ptr.AMGRelaxType_;
           HYPRE_BoomerAMGSetGridRelaxType(*precon, relaxType);
           break;
       case 4 :
@@ -1992,11 +2060,18 @@ int HYPRE_LSI_BlockP::setupPrecon(HYPRE_Solver *precon, HYPRE_IJMatrix Amat,
           HYPRE_LSI_MLICreate( mpi_comm, precon );
           sprintf(paramString, "MLI outputLevel %d", outputLevel_); 
           HYPRE_LSI_MLISetParams(*precon, paramString); 
-          sprintf(paramString, "MLI strengthThreshold %e",param_ptr.MLIThresh_); 
+          sprintf(paramString,"MLI strengthThreshold %e",param_ptr.MLIThresh_); 
           HYPRE_LSI_MLISetParams(*precon, paramString); 
           sprintf(paramString, "MLI method AMGSA");
           HYPRE_LSI_MLISetParams(*precon, paramString); 
-          sprintf(paramString, "MLI smoother SGS");
+          switch (param_ptr.MLIRelaxType_)
+          {
+             case 0 : strcpy(paramString,"MLI smoother Jacobi"); break;
+             case 1 : strcpy(paramString,"MLI smoother GS"); break;
+             case 2 : strcpy(paramString,"MLI smoother SGS"); break;
+             case 3 : strcpy(paramString,"MLI smoother BSGS"); break;
+             case 4 : strcpy(paramString,"MLI smoother ParaSails"); break;
+          }
           HYPRE_LSI_MLISetParams(*precon, paramString); 
           sprintf(paramString, "MLI numSweeps %d",param_ptr.MLINSweeps_);
           HYPRE_LSI_MLISetParams(*precon, paramString); 
