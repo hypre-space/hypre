@@ -244,6 +244,8 @@ void hypre_F90_IFACE P((int hypre_parcsrmatrixgetdims ));
 void hypre_F90_IFACE P((int hypre_parcsrmatrixgetlocalrange ));
 void hypre_F90_IFACE P((int hypre_parcsrmatrixgetrow ));
 void hypre_F90_IFACE P((int hypre_parcsrmatrixrestorerow ));
+void hypre_F90_IFACE P((int hypre_parcsrmatrixmatvec ));
+void hypre_F90_IFACE P((int hypre_parcsrmatrixmatvect ));
 
 /* F90_HYPRE_parcsr_vector.c */
 void hypre_F90_IFACE P((int hypre_parvectorcreate ));
