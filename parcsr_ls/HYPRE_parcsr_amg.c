@@ -406,7 +406,7 @@ HYPRE_BoomerAMGSetIOutDat( HYPRE_Solver solver,
 
 int
 HYPRE_BoomerAMGSetLogFileName( HYPRE_Solver  solver,
-                            char         *log_file_name  )
+                               const char   *log_file_name  )
 {
    return( hypre_BoomerAMGSetLogFileName( (void *) solver, log_file_name ) );
 }
@@ -417,8 +417,8 @@ HYPRE_BoomerAMGSetLogFileName( HYPRE_Solver  solver,
 
 int
 HYPRE_BoomerAMGSetLogging( HYPRE_Solver  solver,
-                        int           ioutdat,
-                        char         *log_file_name  )
+                           int           ioutdat,
+                           const char   *log_file_name  )
 {
    return( hypre_BoomerAMGSetLogging( (void *) solver, ioutdat, log_file_name ) );
 }

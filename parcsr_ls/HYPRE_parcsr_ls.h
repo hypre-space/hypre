@@ -232,14 +232,14 @@ int HYPRE_BoomerAMGSetIOutDat(HYPRE_Solver solver,
  * (Optional)
  **/
 int HYPRE_BoomerAMGSetLogFileName(HYPRE_Solver  solver,
-                                  char         *log_file_name);
+                                  const char   *log_file_name);
 
 /**
  * (Optional)
  **/
 int HYPRE_BoomerAMGSetLogging(HYPRE_Solver  solver,
                               int           ioutdat,
-                              char         *log_file_name);
+                              const char   *log_file_name);
 
 /**
  * (Optional)

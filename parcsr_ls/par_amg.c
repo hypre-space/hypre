@@ -540,8 +540,8 @@ hypre_BoomerAMGSetIOutDat( void     *data,
 }
 
 int
-hypre_BoomerAMGSetLogFileName( void   *data,
-                            char   *log_file_name )
+hypre_BoomerAMGSetLogFileName( void       *data,
+                               const char *log_file_name )
 {
    int ierr = 0;
    hypre_ParAMGData  *amg_data = data;
@@ -564,9 +564,9 @@ hypre_BoomerAMGSetNumIterations( void    *data,
 }
 
 int
-hypre_BoomerAMGSetLogging( void     *data,
-                        int       ioutdat,
-                        char     *log_file_name )
+hypre_BoomerAMGSetLogging( void       *data,
+                           int         ioutdat,
+                           const char *log_file_name )
 {
    int ierr = 0;
    hypre_ParAMGData  *amg_data = data;
