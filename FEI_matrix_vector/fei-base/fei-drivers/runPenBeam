@@ -1,0 +1,9 @@
+#!/bin/sh
+
+MPI_ROOT=/usr/local/mpi
+
+prob=beam
+p=3
+echo ${prob}.dat
+${MPI_ROOT}/bin/mpirun -np $p distExtPenDriver.x ${prob}.dat
+

@@ -1,0 +1,11 @@
+#!/bin/sh
+
+MPI_ROOT=/usr/local/mpi
+
+prob=beam
+p=2
+echo "data input file: ${prob}.dat"
+echo "number of processors: ${p}"
+
+$MPI_ROOT/bin/mpirun -np $p distBeamDriver.x ${prob}.dat
+

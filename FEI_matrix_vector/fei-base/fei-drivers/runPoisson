@@ -1,0 +1,11 @@
+#!/bin/sh
+
+MPI_ROOT=/usr/local/mpi
+
+input=poisson.in
+np=4
+
+echo "number of processors: ${np}"
+
+${MPI_ROOT}/bin/mpirun -np $np poisson-isis.x ${input}
+
