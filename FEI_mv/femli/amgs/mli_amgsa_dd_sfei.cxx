@@ -311,7 +311,7 @@ int MLI_Method_AMGSA::setupSFEIBasedNullSpaces( MLI *mli )
       sigmaI = 0.0e0;
       dnstev_(&csrNrows, &nullspaceDim_, which, &sigmaR, &sigmaI, 
            csrIA, csrJA, csrAA, eigenR, eigenI, eigenV, &csrNrows, &info);
-      if ( outputLevel_ > 0 )
+      if ( outputLevel_ > 2 )
       {
          printf("%5d : Subdomain %3d (%3d) (size=%d) : \n",mypid,iD,
                 nSubdomains,csrNrows);
