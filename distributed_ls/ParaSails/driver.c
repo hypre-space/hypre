@@ -5,6 +5,8 @@
 #include "ParaSails.h"
 #include "ConjGrad.h"
 
+extern double beta;
+
 int main(int argc, char *argv[])
 {
     int mype, npes;
@@ -63,17 +65,20 @@ int main(int argc, char *argv[])
         selparam = 1.0;
 	nlevels = 0;
 #else
+	fflush(NULL);
+        MPI_Barrier(MPI_COMM_WORLD);
+
         if (mype == 0)
         {
-	    fflush(stdout);
-            printf("Enter parameters selparam (0.75), nlevels (1): ");
-            scanf("%lf %d", &selparam, &nlevels);
-            printf("selparam %f, nlevels %d\n", selparam, nlevels);
+            printf("Enter parameters selparam (0.75), nlevels (1), beta: ");
+            scanf("%lf %d %lf", &selparam, &nlevels, &beta);
+            printf("selparam %f, nlevels %d, beta %f\n", selparam, nlevels, beta);
             fflush(stdout);
 	}
 
 	MPI_Bcast(&selparam, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
 	MPI_Bcast(&nlevels,  1, MPI_INT,    0, MPI_COMM_WORLD);
+	MPI_Bcast(&beta,     1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
 
         if (nlevels < 0)
             break;
