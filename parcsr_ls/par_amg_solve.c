@@ -211,7 +211,10 @@ hypre_ParAMGSolve( void               *amg_vdata,
     *    Compute closing statistics
     *-----------------------------------------------------------------------*/
 
-   conv_factor = pow((resid_nrm/resid_nrm_init),(1.0/((double) cycle_count)));
+   if (cycle_count > 0) 
+     conv_factor = pow((resid_nrm/resid_nrm_init),(1.0/((double) cycle_count)));
+   else
+     conv_factor = 1.;
 
 
    for (j=0;j<hypre_ParAMGDataNumLevels(amg_data);j++)
