@@ -26,6 +26,7 @@ GridSetVariables: 1 1 [0]
 #                     nbor_part nbor_ilower(ndim) nbor_iupper(ndim) \
 #                     index_map[ndim]
 GridSetNeighborBox: 0 (0- 0- 2-) (3+ 3+ 2-) 1 (0- 0- 1-) (3+ 3+ 1-) [0 1 2]
+GridSetNeighborBox: 0 (2- 2- 2-) (3+ 3+ 2-) 1 (2- 2- 1-) (3+ 3+ 1-) [0 1 2]
 GridSetNeighborBox: 1 (0- 0- 0+) (3+ 3+ 0+) 0 (0- 0- 1+) (3+ 3+ 1+) [0 1 2]
 
 # GridSetPeriodic: part periodic[ndim]
