@@ -22,7 +22,10 @@ int  SetStencilBndry(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,int* perio
 int  AddValuesMatrix(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,
                                      double            cx,
 				     double            cy,
-				     double            cz) ;
+				     double            cz,
+				     double            conx,
+				     double            cony,
+				     double            conz) ;
 
 int AddValuesVector( hypre_StructGrid  *gridvector,
                      hypre_StructVector *zvector,
@@ -49,6 +52,7 @@ main( int   argc,
    int                 bx, by, bz;
    int                 px, py, pz;
    double              cx, cy, cz;
+   double              conx, cony, conz;
    int                 solver_id;
    int                 solver_type;
 
@@ -75,6 +79,7 @@ main( int   argc,
    int                 n_pre, n_post;
    int                 nblocks ;
    int                 skip;
+   int                 sym;
    int                 rap;
    int                 relax;
    int                 jump;
@@ -134,6 +139,7 @@ main( int   argc,
    dim = 3;
 
    skip  = 0;
+   sym  = 1;
    rap = 0;
    relax = 1;
    jump  = 0;
@@ -153,6 +159,9 @@ main( int   argc,
    cx = 1.0;
    cy = 1.0;
    cz = 1.0;
+   conx = 0.0;
+   cony = 0.0;
+   conz = 0.0;
 
    n_pre  = 1;
    n_post = 1;
@@ -232,6 +241,13 @@ main( int   argc,
          cy = atof(argv[arg_index++]);
          cz = atof(argv[arg_index++]);
       }
+      else if ( strcmp(argv[arg_index], "-convect") == 0 )
+      {
+         arg_index++;
+         conx = atof(argv[arg_index++]);
+         cony = atof(argv[arg_index++]);
+         conz = atof(argv[arg_index++]);
+      }
       else if ( strcmp(argv[arg_index], "-d") == 0 )
       {
          arg_index++;
@@ -275,6 +291,11 @@ main( int   argc,
       {
          arg_index++;
          relax = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-sym") == 0 )
+      {
+         arg_index++;
+         sym = atoi(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-skip") == 0 )
       {
@@ -328,6 +349,7 @@ main( int   argc,
       printf("  -b <bx> <by> <bz>   : blocking per processor\n");
       printf("  -p <px> <py> <pz>   : periodicity in each dimension\n");
       printf("  -c <cx> <cy> <cz>   : diffusion coefficients\n");
+      printf("  -convect <x> <y> <z>: convection coefficients\n");
       printf("  -d <dim>            : problem dimension (2 or 3)\n");
       printf("  -fromfile <name>    : prefix name for matrixfiles\n");
       printf("  -rhsfromfile <name> : prefix name for rhsfiles\n");
@@ -368,6 +390,7 @@ main( int   argc,
       printf("                        2 - R/B Gauss-Seidel\n");
       printf("                        3 - R/B Gauss-Seidel (nonsymmetric)\n");
       printf("  -skip <s>           : skip levels in PFMG (0 or 1)\n");
+      printf("  -sym <s>            : symmetric storage (1) or not (0)\n");
       printf("  -jump <num>         : num levels to jump in SparseMSG\n");
       printf("  -solver_type <ID>   : solver type for Hybrid\n");
       printf("                        1 - PCG (default)\n");
@@ -391,11 +414,12 @@ main( int   argc,
       exit(1);
    }
 
-   if ((px+py+pz) != 0 && solver_id != 0 )
+   if ((conx != 0.0 || cony !=0 || conz != 0) && sym == 1 )
    {
-      printf("\n*** Warning: Periodic implemented only for solver 0 ***\n\n");
-      /* exit(1); */
+      printf("\n*** Warning: convection produces non-symetric matrix ***\n\n");
+      sym = 0;
    }
+
 
    /*-----------------------------------------------------------
     * Print driver parameters
@@ -409,9 +433,11 @@ main( int   argc,
       printf("  (bx, by, bz)    = (%d, %d, %d)\n", bx, by, bz);
       printf("  (px, py, pz)    = (%d, %d, %d)\n", px, py, pz);
       printf("  (cx, cy, cz)    = (%f, %f, %f)\n", cx, cy, cz);
+      printf("  (conx,cony,conz)= (%f, %f, %f)\n", conx, cony, conz);
       printf("  (n_pre, n_post) = (%d, %d)\n", n_pre, n_post);
       printf("  dim             = %d\n", dim);
       printf("  skip            = %d\n", skip);
+      printf("  sym             = %d\n", sym);
       printf("  rap             = %d\n", rap);
       printf("  relax           = %d\n", relax);
       printf("  jump            = %d\n", jump);
@@ -422,9 +448,11 @@ main( int   argc,
    {
       printf("Running with these driver parameters:\n");
       printf("  (cx, cy, cz)    = (%f, %f, %f)\n", cx, cy, cz);
+      printf("  (conx,cony,conz)= (%f, %f, %f)\n", conx, cony, conz);
       printf("  (n_pre, n_post) = (%d, %d)\n", n_pre, n_post);
       printf("  dim             = %d\n", dim);
       printf("  skip            = %d\n", skip);
+      printf("  sym             = %d\n", sym);
       printf("  rap             = %d\n", rap);
       printf("  relax           = %d\n", relax);
       printf("  jump            = %d\n", jump);
@@ -453,49 +481,119 @@ main( int   argc,
    {
       case 1:
          nblocks = bx;
-         offsets = hypre_CTAlloc(int*, 2);
-         offsets[0] = hypre_CTAlloc(int, 1);
-         offsets[0][0] = -1; 
-         offsets[1] = hypre_CTAlloc(int, 1);
-         offsets[1][0] = 0; 
+         if(sym)
+         {
+            offsets = hypre_CTAlloc(int*, 2);
+            offsets[0] = hypre_CTAlloc(int, 1);
+            offsets[0][0] = -1; 
+            offsets[1] = hypre_CTAlloc(int, 1);
+            offsets[1][0] = 0; 
+         }
+         else
+         {
+            offsets = hypre_CTAlloc(int*, 3);
+            offsets[0] = hypre_CTAlloc(int, 1);
+            offsets[0][0] = -1;
+            offsets[1] = hypre_CTAlloc(int, 1);
+            offsets[1][0] = 0;
+            offsets[2] = hypre_CTAlloc(int, 1);
+            offsets[2][0] = 1;
+         }
          /* compute p from P and myid */
          p = myid % P;
          break;
       case 2:
          nblocks = bx*by;
-         offsets = hypre_CTAlloc(int*, 3);
-         offsets[0] = hypre_CTAlloc(int, 2);
-         offsets[0][0] = -1; 
-         offsets[0][1] = 0; 
-         offsets[1] = hypre_CTAlloc(int, 2);
-         offsets[1][0] = 0; 
-         offsets[1][1] = -1; 
-         offsets[2] = hypre_CTAlloc(int, 2);
-         offsets[2][0] = 0; 
-         offsets[2][1] = 0; 
+         if(sym)
+         {
+            offsets = hypre_CTAlloc(int*, 3);
+            offsets[0] = hypre_CTAlloc(int, 2);
+            offsets[0][0] = -1; 
+            offsets[0][1] = 0; 
+            offsets[1] = hypre_CTAlloc(int, 2);
+            offsets[1][0] = 0; 
+            offsets[1][1] = -1; 
+            offsets[2] = hypre_CTAlloc(int, 2);
+            offsets[2][0] = 0; 
+            offsets[2][1] = 0; 
+         }
+         else
+         {
+            offsets = hypre_CTAlloc(int*, 5);
+            offsets[0] = hypre_CTAlloc(int, 2);
+            offsets[0][0] = -1; 
+            offsets[0][1] = 0; 
+            offsets[1] = hypre_CTAlloc(int, 2);
+            offsets[1][0] = 0; 
+            offsets[1][1] = -1; 
+            offsets[2] = hypre_CTAlloc(int, 2);
+            offsets[2][0] = 0; 
+            offsets[2][1] = 0; 
+            offsets[3] = hypre_CTAlloc(int, 2);
+            offsets[3][0] = 1; 
+            offsets[3][1] = 0; 
+            offsets[4] = hypre_CTAlloc(int, 2);
+            offsets[4][0] = 0; 
+            offsets[4][1] = 1; 
+         }
          /* compute p,q from P,Q and myid */
          p = myid % P;
          q = (( myid - p)/P) % Q;
          break;
       case 3:
          nblocks = bx*by*bz;
-         offsets = hypre_CTAlloc(int*, 4);
-         offsets[0] = hypre_CTAlloc(int, 3);
-         offsets[0][0] = -1; 
-         offsets[0][1] = 0; 
-         offsets[0][2] = 0; 
-         offsets[1] = hypre_CTAlloc(int, 3);
-         offsets[1][0] = 0; 
-         offsets[1][1] = -1; 
-         offsets[1][2] = 0; 
-         offsets[2] = hypre_CTAlloc(int, 3);
-         offsets[2][0] = 0; 
-         offsets[2][1] = 0; 
-         offsets[2][2] = -1; 
-         offsets[3] = hypre_CTAlloc(int, 3);
-         offsets[3][0] = 0; 
-         offsets[3][1] = 0; 
-         offsets[3][2] = 0; 
+         if(sym)
+         {
+            offsets = hypre_CTAlloc(int*, 4);
+            offsets[0] = hypre_CTAlloc(int, 3);
+            offsets[0][0] = -1; 
+            offsets[0][1] = 0; 
+            offsets[0][2] = 0; 
+            offsets[1] = hypre_CTAlloc(int, 3);
+            offsets[1][0] = 0; 
+            offsets[1][1] = -1; 
+            offsets[1][2] = 0; 
+            offsets[2] = hypre_CTAlloc(int, 3);
+            offsets[2][0] = 0; 
+            offsets[2][1] = 0; 
+            offsets[2][2] = -1; 
+            offsets[3] = hypre_CTAlloc(int, 3);
+            offsets[3][0] = 0; 
+            offsets[3][1] = 0; 
+            offsets[3][2] = 0; 
+         }
+         else
+         {
+            offsets = hypre_CTAlloc(int*, 7);
+            offsets[0] = hypre_CTAlloc(int, 3);
+            offsets[0][0] = -1; 
+            offsets[0][1] = 0; 
+            offsets[0][2] = 0; 
+            offsets[1] = hypre_CTAlloc(int, 3);
+            offsets[1][0] = 0; 
+            offsets[1][1] = -1; 
+            offsets[1][2] = 0; 
+            offsets[2] = hypre_CTAlloc(int, 3);
+            offsets[2][0] = 0; 
+            offsets[2][1] = 0; 
+            offsets[2][2] = -1; 
+            offsets[3] = hypre_CTAlloc(int, 3);
+            offsets[3][0] = 0; 
+            offsets[3][1] = 0; 
+            offsets[3][2] = 0; 
+            offsets[4] = hypre_CTAlloc(int, 3);
+            offsets[4][0] = 1; 
+            offsets[4][1] = 0; 
+            offsets[4][2] = 0; 
+            offsets[5] = hypre_CTAlloc(int, 3);
+            offsets[5][0] = 0; 
+            offsets[5][1] = 1; 
+            offsets[5][2] = 0; 
+            offsets[6] = hypre_CTAlloc(int, 3);
+            offsets[6][0] = 0; 
+            offsets[6][1] = 0; 
+            offsets[6][2] = 1; 
+         }
          /* compute p,q,r from P,Q,R and myid */
          p = myid % P;
          q = (( myid - p)/P) % Q;
@@ -508,8 +606,8 @@ main( int   argc,
     * which is always the case for read_fromfile_param == 0
     *-----------------------------------------------------------*/
  
-   HYPRE_StructStencilCreate(dim, dim + 1, &stencil);
-   for (s = 0; s < dim + 1; s++)
+   HYPRE_StructStencilCreate(dim, (2-sym)*dim + 1, &stencil);
+   for (s = 0; s < (2-sym)*dim + 1; s++)
    {
       HYPRE_StructStencilSetElement(stencil, s, offsets[s]);
    }
@@ -651,7 +749,7 @@ main( int   argc,
       }
 
       HYPRE_StructMatrixCreate(MPI_COMM_WORLD, grid, stencil, &A);
-      HYPRE_StructMatrixSetSymmetric(A, 1);
+      HYPRE_StructMatrixSetSymmetric(A, sym);
       HYPRE_StructMatrixSetNumGhost(A, A_num_ghost);
       HYPRE_StructMatrixInitialize(A);
 
@@ -659,7 +757,7 @@ main( int   argc,
        * Fill in the matrix elements
        *-----------------------------------------------------------*/
    
-      AddValuesMatrix(A,grid,cx,cy,cz);
+      AddValuesMatrix(A,grid,cx,cy,cz,conx,cony,conz);
 
       /* Zero out stencils reaching to real boundary */
 
@@ -749,7 +847,7 @@ main( int   argc,
             * Fill in the matrix elements
             *-----------------------------------------------------------*/
    
-            AddValuesMatrix(A,readgrid,cx,cy,cz);
+            AddValuesMatrix(A,readgrid,cx,cy,cz,conx,cony,conz);
            
             /* Zero out stencils reaching to real boundary */
            
@@ -796,7 +894,7 @@ main( int   argc,
              * Fill in the matrix elements
              *-----------------------------------------------------------*/
    
-            AddValuesMatrix(A,readgrid,cx,cy,cz);
+            AddValuesMatrix(A,readgrid,cx,cy,cz,conx,cony,conz);
 
             /* Zero out stencils reaching to real boundary */
 
@@ -845,7 +943,7 @@ main( int   argc,
              * Fill in the matrix elements
              *-----------------------------------------------------------*/
    
-            AddValuesMatrix(A,readgrid,cx,cy,cz);
+            AddValuesMatrix(A,readgrid,cx,cy,cz,conx,cony,conz);
 
             /* Zero out stencils reaching to real boundary */
 
@@ -1786,75 +1884,173 @@ AddValuesVector( hypre_StructGrid  *gridvector,
 }
 /******************************************************************************
 * Adds values to matrix based on a 7 point (3d) 
-* symmetric stencil for a pure laplacian problem.
+* symmetric stencil for a convection-diffusion problem.
 * It need an initialized matrix, an assembled grid, and the constants
-* that determine the 7 point (3d) laplacian.
+* that determine the 7 point (3d) convection-diffusion.
 ******************************************************************************/
 int
 AddValuesMatrix(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,
                                      double            cx,
 				     double            cy,
-				     double            cz)
+				     double            cz,
+				     double            conx,
+				     double            cony,
+				     double            conz)
 {
 
   int ierr=0;
   hypre_BoxArray     *gridboxes;
- int                i,s,bi;
- hypre_IndexRef     ilower;
- hypre_IndexRef     iupper;
- hypre_Box          *box;
- double             *values;
- int                volume,dim;
-  int               *stencil_indices;
+  int                 i,s,bi;
+  hypre_IndexRef      ilower;
+  hypre_IndexRef      iupper;
+  hypre_Box          *box;
+  double             *values;
+  double              east,west;
+  double              north,south;
+  double              top,bottom;
+  double              center;
+  int                 volume,dim,sym;
+  int                *stencil_indices;
+  int                 stencil_size;
 
- gridboxes =  hypre_StructGridBoxes(gridmatrix);
- dim       =  hypre_StructGridDim(gridmatrix);
+  gridboxes =  hypre_StructGridBoxes(gridmatrix);
+  dim       =  hypre_StructGridDim(gridmatrix);
+  sym       =  hypre_StructMatrixSymmetric(A);
 
   bi=0;
-  hypre_ForBoxI(bi, gridboxes)
-       {
-            box      = hypre_BoxArrayBox(gridboxes, bi);
-            volume   =  hypre_BoxVolume(box);
-            values   = hypre_CTAlloc(double, (dim +1)*volume);
-            stencil_indices = hypre_CTAlloc(int, (dim +1));
 
-	    for (i = 0; i < (dim + 1)*volume; i += (dim + 1))
-            {
-               for (s = 0; s < (dim + 1); s++)
-               {
-                   stencil_indices[s] = s;
-                   switch (dim)
-                  {
-                     case 1:
-                       values[i  ] = -cx;
-                       values[i+1] = 2.0*(cx);
-                       break;
-                     case 2:
-                       values[i  ] = -cx;
-                       values[i+1] = -cy;
-                       values[i+2] = 2.0*(cx+cy);
-                       break;
-                     case 3:
-                        values[i  ] = -cx;
-                        values[i+1] = -cy;
-                        values[i+2] = -cz;
-                        values[i+3] = 2.0*(cx+cy+cz);
-                        break;
-                  }
-               }
-               
+  east = -cx;
+  west = -cx;
+  north = -cy;
+  south = -cy;
+  top = -cz;
+  bottom = -cz;
+  center = 2.0*cx;
+  if (dim > 1) center += 2.0*cy;
+  if (dim > 2) center += 2.0*cz;
+
+  stencil_size = 1 + (2 - sym) * dim;
+  stencil_indices = hypre_CTAlloc(int, stencil_size);
+  for (s = 0; s < stencil_size; s++)
+  {
+     stencil_indices[s] = s;
+  }
+
+  if(sym)
+  {
+     hypre_ForBoxI(bi, gridboxes)
+        {
+           box      = hypre_BoxArrayBox(gridboxes, bi);
+           volume   =  hypre_BoxVolume(box);
+           values   = hypre_CTAlloc(double, stencil_size*volume);
+
+           for (i = 0; i < stencil_size*volume; i += stencil_size)
+           {
+              switch (dim)
+              {
+                 case 1:
+                   values[i  ] = west;
+                   values[i+1] = center;
+                   break;
+                 case 2:
+                   values[i  ] = west;
+                   values[i+1] = south;
+                   values[i+2] = center;
+                   break;
+                 case 3:
+                    values[i  ] = west;
+                    values[i+1] = south;
+                    values[i+2] = bottom;
+                    values[i+3] = center;
+                    break;
+              }
            }
-
            ilower = hypre_BoxIMin(box);
 	   iupper = hypre_BoxIMax(box);
-           HYPRE_StructMatrixSetBoxValues(A, ilower, iupper, (dim+1),
+           HYPRE_StructMatrixSetBoxValues(A, ilower, iupper, stencil_size,
                                      stencil_indices, values);
 
-	    hypre_TFree(values);
-            hypre_TFree(stencil_indices);
-       }
+	   hypre_TFree(values);
+        }
+  }
+  else
+  {
+     if (conx > 0.0)
+     {
+        west   -= conx;
+        center += conx;
+     }
+     else if (conx < 0.0) 
+     {
+        east   += conx;
+        center -= conx;
+     }
+     if (cony > 0.0)
+     {
+        south  -= cony;
+        center += cony;
+     }
+     else if (cony < 0.0) 
+     {
+        north  += cony;
+        center -= cony;
+     }
+     if (conz > 0.0)
+     {
+        bottom -= conz;
+        center += conz;
+     }
+     else if (cony < 0.0) 
+     {
+        top    += conz;
+        center -= conz;
+     }
 
-     return ierr;
+     hypre_ForBoxI(bi, gridboxes)
+        {
+           box      = hypre_BoxArrayBox(gridboxes, bi);
+           volume   =  hypre_BoxVolume(box);
+           values   = hypre_CTAlloc(double, stencil_size*volume);
+
+           for (i = 0; i < stencil_size*volume; i += stencil_size)
+           {
+              switch (dim)
+              {
+                 case 1:
+                   values[i  ] = west;
+                   values[i+1] = center;
+                   values[i+2] = east;
+                   break;
+                 case 2:
+                   values[i  ] = west;
+                   values[i+1] = south;
+                   values[i+2] = center;
+                   values[i+3] = east;
+                   values[i+4] = north;
+                   break;
+                 case 3:
+                    values[i  ] = west;
+                    values[i+1] = south;
+                    values[i+2] = bottom;
+                    values[i+3] = center;
+                    values[i+4] = east;
+                    values[i+5] = north;
+                    values[i+6] = top;
+                    break;
+              }
+           }
+           ilower = hypre_BoxIMin(box);
+	   iupper = hypre_BoxIMax(box);
+           HYPRE_StructMatrixSetBoxValues(A, ilower, iupper, stencil_size,
+                                     stencil_indices, values);
+
+	   hypre_TFree(values);
+        }
+  }
+
+  hypre_TFree(stencil_indices);
+
+  return ierr;
 }
 
 
@@ -1869,88 +2065,99 @@ SetStencilBndry(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,int* period)
 {
 
   int ierr=0;
-  hypre_BoxArray     *gridboxes;
+  hypre_BoxArray    *gridboxes;
   int                size,i,j,d,ib;
-  int                **ilower;
-  int                **iupper;
-  int                 *vol;
-  int                *istart;
-  hypre_Box          *box;
-  hypre_Box          *dummybox;
-  hypre_Box          *boundingbox;
-  double             *values;
-  int                volume,dim;
+  int              **ilower;
+  int              **iupper;
+  int               *vol;
+  int               *istart, *iend;
+  hypre_Box         *box;
+  hypre_Box         *dummybox;
+  hypre_Box         *boundingbox;
+  double            *values;
+  int                volume, dim;
   int               *stencil_indices;
 
-  gridboxes =  hypre_StructGridBoxes(gridmatrix);
-  boundingbox = hypre_StructGridBoundingBox(gridmatrix);
-  istart      = hypre_BoxIMin(boundingbox);
-  size      =  hypre_StructGridNumBoxes(gridmatrix);
-  dim       =  hypre_StructGridDim(gridmatrix);
-  stencil_indices = hypre_CTAlloc(int, (dim +1));
+  gridboxes       = hypre_StructGridBoxes(gridmatrix);
+  boundingbox     = hypre_StructGridBoundingBox(gridmatrix);
+  istart          = hypre_BoxIMin(boundingbox);
+  iend            = hypre_BoxIMax(boundingbox);
+  size            = hypre_StructGridNumBoxes(gridmatrix);
+  dim             = hypre_StructGridDim(gridmatrix);
+  stencil_indices = hypre_CTAlloc(int, 1);
 
   vol    = hypre_CTAlloc(int, size);
   ilower = hypre_CTAlloc(int*, size);
   iupper = hypre_CTAlloc(int*, size);
-   for (i = 0; i < size; i++)
-   {
-      ilower[i] = hypre_CTAlloc(int, dim);
-      iupper[i] = hypre_CTAlloc(int, dim);
-   }
+  for (i = 0; i < size; i++)
+  {
+     ilower[i] = hypre_CTAlloc(int, dim);
+     iupper[i] = hypre_CTAlloc(int, dim);
+  }
 
   i = 0;
   ib = 0;
   hypre_ForBoxI(i, gridboxes)
-       {
-	    dummybox = hypre_BoxCreate( );
-            box      = hypre_BoxArrayBox(gridboxes, i);
-            volume   =  hypre_BoxVolume(box);
-            vol[i]   = volume;
-            hypre_CopyBox(box,dummybox);
-            for (d = 0; d < dim; d++)
-	    {
-	      ilower[ib][d] = hypre_BoxIMinD(dummybox,d);
-	      iupper[ib][d] = hypre_BoxIMaxD(dummybox,d);
-            }
-	    ib++ ;
-            hypre_BoxDestroy(dummybox);
-      	}
+     {
+        dummybox = hypre_BoxCreate( );
+        box      = hypre_BoxArrayBox(gridboxes, i);
+        volume   =  hypre_BoxVolume(box);
+        vol[i]   = volume;
+        hypre_CopyBox(box,dummybox);
+        for (d = 0; d < dim; d++)
+        {
+	   ilower[ib][d] = hypre_BoxIMinD(dummybox,d);
+	   iupper[ib][d] = hypre_BoxIMaxD(dummybox,d);
+        }
+	ib++ ;
+        hypre_BoxDestroy(dummybox);
+     }
 
   for (d = 0; d < dim; d++)
   {
-      for (ib = 0; ib < size; ib++)
-      {
-         values = hypre_CTAlloc(double, vol[ib]);
+     for (ib = 0; ib < size; ib++)
+     {
+        values = hypre_CTAlloc(double, vol[ib]);
         
-         for (i = 0; i < vol[ib]; i++)
-	 {
-	      values[i] = 0.0;
+        for (i = 0; i < vol[ib]; i++)
+        {
+           values[i] = 0.0;
 	 }
 
-         if( ilower[ib][d] == istart[d] && period[d] == 0 )
-         {
-            j = iupper[ib][d];
-            iupper[ib][d] = istart[d];
-            stencil_indices[0] = d;
-            HYPRE_StructMatrixSetBoxValues(A, ilower[ib], iupper[ib],
-                                           1, stencil_indices, values);
-            iupper[ib][d] = j;
-         }
-         hypre_TFree(values);
-      }
+        if( ilower[ib][d] == istart[d] && period[d] == 0 )
+        {
+           j = iupper[ib][d];
+           iupper[ib][d] = istart[d];
+           stencil_indices[0] = d;
+           HYPRE_StructMatrixSetBoxValues(A, ilower[ib], iupper[ib],
+                                          1, stencil_indices, values);
+           iupper[ib][d] = j;
+        }
+
+        if( iupper[ib][d] == iend[d] && period[d] == 0 )
+        {
+           j = ilower[ib][d];
+           ilower[ib][d] = iend[d];
+           stencil_indices[0] = dim + 1 + d;
+           HYPRE_StructMatrixSetBoxValues(A, ilower[ib], iupper[ib],
+                                          1, stencil_indices, values);
+           ilower[ib][d] = j;
+        }
+        hypre_TFree(values);
+     }
   }
   
-   hypre_TFree(vol);
-   hypre_TFree(stencil_indices);
-   for (ib =0 ; ib < size ; ib++)
-   {
+  hypre_TFree(vol);
+  hypre_TFree(stencil_indices);
+  for (ib =0 ; ib < size ; ib++)
+  {
      hypre_TFree(ilower[ib]);
      hypre_TFree(iupper[ib]);
-   }
-   hypre_TFree(ilower);
-   hypre_TFree(iupper);
+  }
+  hypre_TFree(ilower);
+  hypre_TFree(iupper);
 
   
 
-   return ierr;
+  return ierr;
 }
