@@ -185,7 +185,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
       CF_marker_array = hypre_CTAlloc(int*, max_levels);
    if (dof_func_array == NULL)
       dof_func_array = hypre_CTAlloc(int*, max_levels);
-   if (dof_func == NULL)
+   if (num_functions > 1 && dof_func == NULL)
    {
       first_local_row = hypre_ParCSRMatrixFirstRowIndex(A);
       dof_func = hypre_CTAlloc(int,local_size);
