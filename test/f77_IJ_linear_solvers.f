@@ -644,7 +644,7 @@ c    &                                        ierr)
         call HYPRE_ParCSRPCGSetTol(solver, tol, ierr)
         call HYPRE_ParCSRPCGSetTwoNorm(solver, one, ierr)
         call HYPRE_ParCSRPCGSetRelChange(solver, zero, ierr)
-        call HYPRE_ParCSRPCGSetLogging(solver, one, ierr)
+        call HYPRE_ParCSRPCGSetPrintLevel(solver, one, ierr)
   
         if (solver_id .eq. 2) then
 

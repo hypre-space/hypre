@@ -1040,14 +1040,14 @@ main( int   argc,
       ierr += Hypre_PCG_SetParameterInt( PCG_Solver, "2-norm", 1 );
       ierr += Hypre_PCG_SetParameterInt( PCG_Solver,
                                          "relative change test", 0 );
-      ierr += Hypre_PCG_SetParameterInt( PCG_Solver, "logging", 1 );
+      ierr += Hypre_PCG_SetParameterInt( PCG_Solver, "print level", 1 );
 /* 
       HYPRE_ParCSRPCGCreate(MPI_COMM_WORLD, &pcg_solver);
       HYPRE_ParCSRPCGSetMaxIter(pcg_solver, 500);
       HYPRE_ParCSRPCGSetTol(pcg_solver, tol);
       HYPRE_ParCSRPCGSetTwoNorm(pcg_solver, 1);
       HYPRE_ParCSRPCGSetRelChange(pcg_solver, 0);
-      HYPRE_ParCSRPCGSetLogging(pcg_solver, 1);
+      HYPRE_ParCSRPCGSetPrintLevel(pcg_solver, 1);
 */
  
       if (solver_id == 1)
