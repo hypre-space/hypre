@@ -68,14 +68,11 @@ HYPRE_ParCSRMatrix A;
 //Instantiate the preconditioner.
 HYPRE_EuclidCreate(comm, &eu);
 
-//Optionally use the following three calls to set runtime options.
+//Optionally use the following two calls to set runtime options.
 // 1. pass options from command line or string array.
 HYPRE_EuclidSetParams(eu, argc, argv);
 
-// 2. pass individual options from within your  code.
-HYPRE_EuclidSetParam(eu, "-level", "3");
-
-// 3. pass options from a configuration file.
+// 2. pass options from a configuration file.
 HYPRE_EuclidSetParamsFromFile(eu, "filename");
 
 //Set Euclid as the preconditioning method for some
@@ -174,15 +171,6 @@ configuration file, either the ``1'' or ``0'' must
 stated explicitly.
 
 {\bf Method 3.}
-Individual options can be hardcoded via calls such as the following.
-
-\begin{display}
-\begin{verbatim}
-HYPRE_EuclidSetParams(solver, "-level", "3");
-\end{verbatim}
-\end{display}
-
-{\bf Method 4.}
 There are two ways in which you can read in options from a file
 whose name is other than ``database.''
 First, you can call {\tt HYPRE\_EuclidSetParamsFromFile}
