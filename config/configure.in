@@ -29,7 +29,7 @@ dnl *********************************************************************
 m4_define([HYPRE_NAME], [hypre])
 m4_define([HYPRE_VERSION], [1.9.0a])
 m4_define([HYPRE_DATE], [2005/01/18])
-m4_define([HYPRE_TIME], [08:30:00])
+m4_define([HYPRE_TIME], [15:00:00])
 m4_define([HYPRE_DATETIME], [HYPRE_DATE HYPRE_TIME])
 m4_define([HYPRE_BUGS], [http://www-casc.llnl.gov/bugs/enter_bug.cgi?product=HYPRE])
 m4_define([HYPRE_TOP_SRC_DIR], [`pwd`])
@@ -805,16 +805,6 @@ else
 fi
 
 dnl *********************************************************************
-dnl * Set documentation installation directory, if not already set by the user 
-dnl *********************************************************************
-if test "$libdir" = "${exec_prefix}/lib"
-then
-   HYPRE_DOCSINSTALL="${prefix}/docs"
-else
-   HYPRE_DOCSINSTALL="${libdir}/../docs"
-fi
-
-dnl *********************************************************************
 dnl * Define machine architectures
 dnl *********************************************************************
 HYPRE_GUESS_ARCH
@@ -859,11 +849,10 @@ AC_SUBST(CC)
 AC_SUBST(CXX)
 
 dnl *********************************************************************
-dnl * Instalalation Directories
+dnl * Installation Directories
 dnl *********************************************************************
 AC_SUBST(HYPRE_LIBINSTALL)
 AC_SUBST(HYPRE_INCINSTALL)
-AC_SUBST(HYPRE_DOCSINSTALL)
 
 dnl *********************************************************************
 dnl * General purpose header files and libraries and directories for
@@ -950,7 +939,6 @@ dnl * Define the files to be configured and made
 dnl *********************************************************************
 
 if test -d docs; then
-   AC_DEFINE(DOCSDIR)
    AC_CONFIG_FILES([docs/bref_manual.dxx
                     docs/ref_manual.dxx])
 fi

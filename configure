@@ -322,7 +322,7 @@ ac_includes_default="\
 #endif"
 
 ac_subdirs_all="$ac_subdirs_all babel-runtime"
-ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS build build_cpu build_vendor build_os host host_cpu host_vendor host_os PACKAGE_DATETIME HYPRE_TOP_SRCDIR CC CXX F77 RANLIB ac_ct_RANLIB INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA AWK CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT CPP LN_S SET_MAKE CXXFLAGS ac_ct_CXX FFLAGS ac_ct_F77 FLIBS CXXCPP FPP EGREP POW_LIB LIBOBJS MPILIBS subdirs BABELDIR HYPRE_ARCH HOSTNAME HYPRE_LIBINSTALL HYPRE_INCINSTALL HYPRE_DOCSINSTALL INCLUDES LIBDIRS MPIINCLUDE MPILIBDIRS MPIFLAGS TIMERDEFS LDLIBS LDLIBDIRS F77FLAGS PREPEND FEILIBS FEILIBDIRS FEIINCLUDE FEINEEDED MLI_DIR MLILIBS MLILIBDIRS MLIINCLUDE BLASLIBDIRS BLASLIBS BLASNEEDED LAPACKLIBDIRS LAPACKLIBS LAPACKNEEDED LTLIBOBJS'
+ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS build build_cpu build_vendor build_os host host_cpu host_vendor host_os PACKAGE_DATETIME HYPRE_TOP_SRCDIR CC CXX F77 RANLIB ac_ct_RANLIB INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA AWK CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT CPP LN_S SET_MAKE CXXFLAGS ac_ct_CXX FFLAGS ac_ct_F77 FLIBS CXXCPP FPP EGREP POW_LIB LIBOBJS MPILIBS subdirs BABELDIR HYPRE_ARCH HOSTNAME HYPRE_LIBINSTALL HYPRE_INCINSTALL INCLUDES LIBDIRS MPIINCLUDE MPILIBDIRS MPIFLAGS TIMERDEFS LDLIBS LDLIBDIRS F77FLAGS PREPEND FEILIBS FEILIBDIRS FEIINCLUDE FEINEEDED MLI_DIR MLILIBS MLILIBDIRS MLIINCLUDE BLASLIBDIRS BLASLIBS BLASNEEDED LAPACKLIBDIRS LAPACKLIBS LAPACKNEEDED LTLIBOBJS'
 ac_subst_files=''
 
 # Initialize some variables set by options.
@@ -1573,15 +1573,15 @@ _ACEOF
 
 
 cat >>confdefs.h <<\_ACEOF
-#define PACKAGE_TIME "08:30:00"
+#define PACKAGE_TIME "15:00:00"
 _ACEOF
 
 
 cat >>confdefs.h <<\_ACEOF
-#define PACKAGE_DATETIME "2005/01/18 08:30:00"
+#define PACKAGE_DATETIME "2005/01/18 15:00:00"
 _ACEOF
 
-PACKAGE_DATETIME="2005/01/18 08:30:00"
+PACKAGE_DATETIME="2005/01/18 15:00:00"
 
 
 HYPRE_TOP_SRCDIR="`pwd`"
@@ -9146,13 +9146,6 @@ else
    HYPRE_INCINSTALL="${includedir}"
 fi
 
-if test "$libdir" = "${exec_prefix}/lib"
-then
-   HYPRE_DOCSINSTALL="${prefix}/docs"
-else
-   HYPRE_DOCSINSTALL="${libdir}/../docs"
-fi
-
 
    echo "$as_me:$LINENO: checking the hostname" >&5
 echo $ECHO_N "checking the hostname... $ECHO_C" >&6
@@ -9311,12 +9304,7 @@ CXX="$PREPEND $CXX"
 
 
 
-
 if test -d docs; then
-   cat >>confdefs.h <<\_ACEOF
-#define DOCSDIR 1
-_ACEOF
-
                        ac_config_files="$ac_config_files docs/bref_manual.dxx docs/ref_manual.dxx"
 
 fi
@@ -9998,7 +9986,6 @@ s,@HYPRE_ARCH@,$HYPRE_ARCH,;t t
 s,@HOSTNAME@,$HOSTNAME,;t t
 s,@HYPRE_LIBINSTALL@,$HYPRE_LIBINSTALL,;t t
 s,@HYPRE_INCINSTALL@,$HYPRE_INCINSTALL,;t t
-s,@HYPRE_DOCSINSTALL@,$HYPRE_DOCSINSTALL,;t t
 s,@INCLUDES@,$INCLUDES,;t t
 s,@LIBDIRS@,$LIBDIRS,;t t
 s,@MPIINCLUDE@,$MPIINCLUDE,;t t

@@ -1,718 +1,263 @@
 \chapter{Finite Element Interface (FEI)}
 \label{Finite Element Interface}
 
-User applications access \hypre{} via a pipeline of two interfaces - 
-user to finite element interface or FEI (for information on how to
-use this interface, see \cite{FEI-ref}),  and FEI to linear solver
-interface (called {\sf LinearSystemCore}). The purpose of FEI is
-to allow users to submit the global matrices in the form of element
-connectivities, element stiffness matrices, element loads, and
-boundary conditions. These element information are processed by an
-implementation of the FEI which loads the global matrix and right
-hand side vectors to the selected linear solver libraries via the
-{\sf LinearSystemCore} interface.  The {\sf LinearSystemCore} 
-interface also facilitates using multiple linear system solver
-packages (such as PetSC or Aztec) with little change in the user code.
+The finite element interface (FEI) defines a linear solver interface 
+for finite element applications.  For information on how to use this
+interface, see \cite{FEI-ref}.  
+This chapter describes the iterative methods and 
+preconditioners in the \hypre{} implementation
+of this interface.
 
-The specification of the FEI and its implementation was first
-developed at Sandia. A simplified implementation has been implemented
-at LLNL in \hypre{}'s finite element module. In Section 2, we describe
-the basic FEI functions and a sample program to demonstrate how to
-use them. A brief description of \hypre{}'s internal data structure 
-and solver capabilities is presented in Section 3.  Associated with 
-\hypre{}'s finite element conceptual interface is an FE-based gray-box
-multilevel preconditioning module called {\sf MLI} which provides fast
-multilevel preconditioners.  A description of the {\sf MLI} is given 
-in Section 4.  In Section 5, we describe the available options for
-using \hypre{}'s rich solver capabilities.  Finally, some
-installation and usage issues are discussed in Section 7.
-
-\section{A Brief Description of The Finite Element Interface}
-                                                                                
-Embedded in application finite element codes are data structures
-storing element connectivities, element stiffness matrices, element
-loads, boundary conditions, nodal coordinates, etc. An implicit finite
-element problem can be solved by assembling the global stiffness matrix
-and the corresponding right hand side vector, and then calling linear
-solver to calculate the solution. The first step in this process is
-thus to instantiate an FEI object by
-\begin{tabbing}
-\hspace{0.5in} \= {\sf feiPtr = new FEI\_Implementation(mpiComm);}
-\end{tabbing}
-where {\sf mpiComm} is an MPI communicator (e.g. {\sf MPI\_COMM\_WORLD}).
-Next, various finite element information need to be sent into the FEI
-object.  The first entity to be submitted to the FEI is {\it field}
-information.  A {\it field} has an identifier called {\it fieldID} and
-a rank or {\it fieldSize} (number of degree of freedom). For example,
-for a simple 3D incompressible Navier Stokes equation, the nodal variable
-is the velocity vector which has $3$ degrees of freedom; and the element
-variable (constant over the element) is the pressure (scalar). If these
-are the only variables, and if we assign {\it fieldID} $7$ and $8$ to
-them, respectively, then the finite element field information can be set
-up by
-\begin{tabbing}
-\hspace{0.5in} \= {\sf nFields = 2;} \\
-               \> {\sf fieldID = new int[nFields];} \\
-               \> {\sf fieldID[0] = $7$; /* velocity vector */} \\
-               \> {\sf fieldID[1] = $8$; /* pressure */} \\
-               \> {\sf fieldSize = new int[nFields];} \\
-               \> {\sf fieldSize[0] = $3$; /* velocity vector */} \\
-               \> {\sf fieldSize[1] = $1$; /* pressure */ } \\
-               \> {\sf feiPtr$->$initFields(nFields, fieldSize, fieldID);}
-\end{tabbing}
-                                                                                
-Once the field information has been established, we are ready to initialize
-an element block. An element block is characterized by the block identifier,
-the number of elements, the number of nodes per element, the nodal fields
-and the element fields (fields that have been defined previously). Suppose
-we use $1000$ hexahedral elements in the element block $0$, the setup
-consists of
-\begin{tabbing}
-\hspace{0.5in} \= {\sf elemBlkID = 0;} \\
-               \> {\sf nElems = 1000;} \\
-               \> {\sf elemNNodes = 8; /* number of nodes per element */} \\
-               \> {\sf nodeNFields = 1; /* nodal field - velocity */} \\
-               \> {\sf nodeFieldIDs = new[nodeNFields];} \\
-               \> {\sf nodeFieldIDs[0] = fieldID[0]; /* velocity */ } \\
-               \> {\sf elemNFields = 1; /* element field - pressure */} \\
-               \> {\sf elemFieldIDs = new[elemNFields];} \\
-               \> {\sf elemFieldIDs[0] = fieldID[1]; /* pressure */ } \\
- \> {\sf feiPtr$->$initElemBlock(elemBlkID, nElems, elemNNodes, nodeNFields, nodeFieldIDs,}\\
- \> \hspace{1.0in} {\sf elemNFields, elemFieldIDs, 0);}
-\end{tabbing}
-The last argument is to specify how the dependent variables are arranged in
-the element matrices. A value of $0$ indicates that each variable is to be
-arranged in a separate block (as opposed to interleaving).
-                                                                                
-In a parallel environment, each processor has one or more element blocks.
-Unless the element blocks are all disjoint, some of the element blocks
-share a common set of nodes on the subdomain boundaries. To facilitate
-setting up interprocessor communications, shared nodes between subdomains
-on different processors are to be identified and sent to the FEI.
-Hence, each node in the whole domain is assigned a unique global
-identifier. The shared node list on each processor contains a subset
-of the global node list corresponding to the local nodes that are shared
-with the other processors.  The syntax for setting up the shared nodes is
-\begin{tabbing}
-\hspace{0.5in} \= {\sf feiPtr$->$initSharedNodes(nShared, sharedIDs, sharedLengs, sharedProcs);}
-\end{tabbing}
-This completes the initialization phase, and a completion signal is sent to
-the FEI via
-\begin{tabbing}
-\hspace{0.5in} \= {\sf feiPtr$->$initComplete();}
-\end{tabbing}
-                                                                                
-Next we begin the {\it load} phase. The first entity for loading is the
-nodal boundary conditions. Here we need to specify the number of boundary
-equations and the boundary values given by {\sf alpha, beta}, and {\sf gamma}.
-Depending whether the boundary conditions are Dirichlet, Neumann, or mixed,
-the three values should be passed into the FEI accordingly.
-                                                                                
-The element stiffness matrices are to be loaded in the next step. We need
-to specify the element number $i$, the element block to which element $i$
-belongs, the element connectivity information, the element load, and the
-element matrix format. The element connectivity specifies a set of $8$ node
-global IDs (for hexahedral elements), and the element load is the load or
-force for each degree of freedom.  The element format specifies how the
-equations are arranged (similar to the interleaving scheme mentioned above).
-The calling sequence for loading element stiffness matrices is
-\begin{tabbing}
-\hspace{0.5in} \= {\sf for (iE = 0; iE < nElems; iE++)} \\
- \> \hspace{0.5in} {\sf feiPtr$->$sumInElem(elemBlkID, elemID, elemConn[iE], elemStiff[iE],} \\
- \> \hspace{1.5in} {\sf elemLoads[iE], elemFormat);}
-\end{tabbing}
-Again, to complete the loading phase, a completion signal is sent to
-the FEI via
-\begin{tabbing}
-\hspace{0.5in} \= {\sf feiPtr$->$loadComplete();}
-\end{tabbing}
-                                                                                
-Now the global stiffness matrix and the corresponding right hand side
-have been assembled. Before the linear system is solved, a number of
-solver parameters have to be passed into the {\sf FEI}. A detailed
-description of the solver parameters is given in Section 3. An example
-is given below
-\begin{tabbing}
-\hspace{0.5in} \= {\sf nParams = 5;} \\
-               \> {\sf paramStrings = new char*[nParams];} \\
-               \> {\sf for (i = 0; i < nParams; i++) }\\
-               \> \hspace{0.5in} {\sf paramStrings[i] = new char[100];} \\
-               \> {\sf strcpy(paramStrings[0], "solver cg");} \\
-               \> {\sf strcpy(paramStrings[1], "preconditioner diag");} \\
-               \> {\sf strcpy(paramStrings[2], "maxiterations 100");} \\
-               \> {\sf strcpy(paramStrings[3], "tolerance 1.0e-6");} \\
-               \> {\sf strcpy(paramStrings[4], "outputLevel 1");} \\
-               \> {\sf feiPtr$->$parameters(nParams, paramStrings);}
-\end{tabbing}
-                                                                                
-To solve the linear system of equations, we call
-\begin{tabbing}
-\hspace{0.5in} \= {\sf feiPtr$->$solve(\&status);}
-\end{tabbing}
-where {\sf status} is returned from the {\sf FEI} indicating whether
-the solve is successful. Finally, the solution can be retrieved by
-\begin{tabbing}
-\hspace{0.5in} \= {\sf feiPtr->getBlockNodeSolution(elemBlkID, nNodes, nodeIDList, solnOffsets, solnValues);}
-\end{tabbing}
-where {\sf solnOffsets[i]} is the index pointing to the first location
-where the variables at node $i$ is returned in {\sf solnValues}.
-                                                                                
-\section{\hypre{} Solvers}
-                                                                                
-On the other side of the {\sf LinearSystemCore} interface is the linear
-solver package. Any linear solver package can be used as long as there
-is an implementation of the interface in the solver package itself. The
-{\sf LinearSystemCore} implementation in \hypre{} is encapsulated in the
-\hypre{} finite element conceptual interface called {\sf HYPRE\_LinSysCore}.
-The incoming element stiffness matrices and other information are
-converted into \hypre{}'s internal data structures. In this section we
-briefly describe some of these internal data structures and capabilities.
-                                                                                
-\subsection{Parallel Matrix and Vector Construction}
-                                                                                
-The matrix class in \hypre{} accessible via the {\sf LinearSystemCore}
-interface is the parallel compressed sparse row ({\sf ParCSR}) matrix.
-The requirements about how the global matrix is partitioned among the
-processors are that each processor holds a contiguous block of rows and
-columns and the equation numbers in processors of lower rank are lower
-than those in processors of higher rank.  The FEI is responsible for
-ensuring that these two requirements are followed. The matrix can be
-loaded in parallel - a row or a block of rows at a time.  The solution
-and right hand side vectors are constructed accordingly. The matrix rows
-corresponding to the shared nodes can be assigned to either processor, 
-and is determined by the FEI itself. Once the incoming matrix and vector
-data have been captured in the \hypre{} {\sf ParCSR} format, a whole 
-suite of matrix and vector operators are available for use in the \hypre{}
-solvers.
-                                                                                
-\subsection{Sequential and Parallel Solvers}
-                                                                                
-\hypre{} currently has many iterative solvers. There is also internally a
-version of the sequential {\sf SuperLU} direct solver (developed at U.C.
-Berkeley) suitable to small problems (up to about $10000$ equations).
-In the following we list some of these internal solvers.
-                                                                                
+Solving a linear system from a finite element problem consists of
+four steps in the FEI:
 \begin{enumerate}
-\item Krylov solvers (CG, GMRES, FGMRES, TFQMR, BiCGSTAB, symmetric QMR),
-\item BoomerAMG (a parallel algebraic multigrid solver),
-\item SuperLU direct solver (sequential),
-\item SuperLU direct solver with iterative refinement (sequential),
-\end{enumerate}
-                                                                                
-\subsection{Parallel Preconditioners}
-                                                                                
-The performance of the Krylov solvers can be improved by clever selection
-of preconditioners. \hypre{} currently has the following preconditioners
-available via the {\sf LinearSystemCore} interface:
-                                                                                
-\begin{enumerate}
-\item no preconditioning,
-\item diagonal,
-\item another parallel incomplete LU ({\sf Euclid}),
-\item parallel sparse approximate inverse ({\sf ParaSails}),
-\item parallel algebraic multigrid ({\sf BoomerAMG}),
-\item another parallel algebraic multigrid ({\sf MLI} based on
-the smoothed aggregation multigrid methods),
-\item parallel domain decomposition with inexact local solves ({\sf DDIlut}),
-\item least-squares polynomial preconditioner,
-\item $2 \times 2$ block preconditioner, and
-\item $2 \times 2$ Uzawa preconditioner.
-\end{enumerate}
-                                                                                
-Some of these preconditioners can be tuned by a number of internal parameters
-modifiable by users. A description of these parameters is given in later
-sections.
-                                                                                
-\subsection{Matrix Reduction}
-                                                                                
-For some structural mechanics problems with multi-point constraints the
-discretization matrix is indefinite (eigenvalues lie in both sides of
-the imaginary axis). Indefinite matrices are much more different to solve
-than definite matrices. Methods have been developed to reduce these
-indefinite matrices to definite matrices.  Two matrix reduction algorithms
-have been implemented in \hypre{}, as presented in the following subsections.
-                                                                                
-\subsubsection{Schur Complement Reduction}
-                                                                                
-The incoming linear system of equations is assumed to be in the form :
-\[ \left[
-\begin{array}{cc}
-   D   & B \\
-   B^T & 0
-\end{array}
-  \right]
-  \left[
-\begin{array}{c}
-   x_1 \\
-   x_2
-\end{array}
-  \right]
-  =
-  \left[
-\begin{array}{c}
-   b_1 \\
-   b_2
-\end{array}
-  \right]
-\]
-where $D$ is a diagonal matrix.  After Schur complement reduction is applied,
-the resulting linear system becomes
-$$
-- B^T D^{-1} B x_2 = b_2 - B^T D^{-1} b_1.
-$$
-                                                                                
-\subsubsection{Slide Surface Reduction}
-                                                                                
-With the presence of slide surfaces, the matrix is in the same form as in the
-case of Schur complement reduction.  Here $A$ represents the relationship
-between the master, slave, and other degrees of freedom.  The matrix block
-$[B^T 0]$ corresponds to the constraint equations.  The goal of reduction
-is to eliminate the constraints.  As proposed by Manteuffel, the trick is
-to re-order the system into a $3 \times 3$ block matrix.
-\[
-\left[
-\begin{array}{ccc}
-   A_{11}  & A_{12} & N \\
-   A_{21}  & A_{22} & D \\
-   N_{T}   & D      & 0 \\
-\end{array}
-\right]
-=
-\left[
-\begin{array}{ccc}
-   A_{11}       & \hat{A}_{12} \\
-   \hat{A}_{21} & \hat{A}_{22}.
-\end{array}
-\right]
-\]
-The reduced system has the form :
-$$
-(A_{11} - \hat{A}_{21} \hat{A}_{22}^{-1} \hat{A}_{12}) x_1 =
-b_1 - \hat{A}_{21} \hat{A}_{22}^{-1} b_2,
-$$
-which is symmetric positive definite (SPD) if the original matrix is PD.
-In addition, $\hat{A}_{22}^{-1}$ is easy to compute.
-                                                                                
-There are three slide surface reduction algorithms in \hypre{}.  The first
-follows the matrix formulation in this section.  The second is similar 
-except that it replaces the eliminated slave equations with identity rows
-so that the degree of freedom at each node is preserved.  This is essential
-for certain block algorithms such as the smoothed aggregation multilevel
-preconditioners.  The third is similar to the second except that it is 
-more general and can be applied to problems with intersecting slide surfaces
-(sequential only for intersecting slide surfaces).
-                                                                                
-\subsection{Other Features}
-                                                                                
-To improve the efficiency of the \hypre{} solvers, a few other features have
-been incorporated.  We list a few of these features below :
-                                                                                
-\begin{enumerate}
-\item Preconditioner reuse - For multiple linear solves with matrices that are
-      slightly perturbed from each other, oftentimes the use of the same
-      preconditioners can save preconditioner setup times but suffer little
-      convergence rate degradation.
-\item Projection methods - For multiple solves that use the same matrix,
-      previous solution vectors can sometimes be used to give a better initial
-      guess for subsequent solves.  Two projection schemes have been implemented
-      in \hypre{} - A-conjugate projection (for SPD matrices) and minimal residual
-      projection (for both SPD and non-SPD matrices).
-\item The sparsity pattern of the matrix is in general not destroyed after
-      it has been loaded to an HYPRE matrix.  But if the matrix is not to
-      be reused, an option is provided to clean up this pattern matrix to
-      conserve memory usage.
-\end{enumerate}
-                                                                                
-\section{The MLI Package}
-                                                                                
-MLI is an object-oriented module that implements the class of algebraic
-multigrid algorithms based on Vanek and Brezina's smoothed aggregation
-method.  There are two main algorithms in this module - the original
-smoothed aggregation algorithm and the modified version that uses
-the finite element substructure matrices to construct the prolongation
-operators.  As such, the latter algorithm can only be used in the
-finite element context via the finite element interface.  In addition,
-the nodal coordinates obtained via the finite element interface can be
-used to construct a better prolongation operator than the pure
-translation modes.
-                                                                                
-\section{\hypre{} {\sf LinearSystemCore} Parameters}
-                                                                                
-User applications interact directly with \hypre{} via the {\sf parameters}
-function. In this section we list the parameters recognized by
-{\sf HYPRE\_LinSysCore}.
-                                                                                
-\subsection{Parameters for Solvers and Preconditioners}
-                                                                                
-\begin{description}
-\item[solver xxx] where xxx specifies one of \code{cg}, 
-     \code{gmres} (default), \code{fgmres}, \code{bicgs}, \code{bicgstab},
-     \code{tfqmr}, \code{symqmr}, \code{superlu}, or \code{superlux}. 
-     The solver type can be followed by \code{override} to specify its 
-     priority when multiple solvers are declared at random order.
-\item[preconditioner xxx] where xxx is one of \code{diagonal} (default), 
-     \code{euclid}, \code{parasails}, \code{boomeramg}, \code{ddilut},
-     \code{poly}, \code{blockP}, \code{Uzawa}, or \code{mli}.  Another
-     option for xxx is \code{reuse} which allows the preconditioner to be
-     reused (this is to be set after a preconditioner has been set up already).
-     The preconditioner type can be followed by \code{override} to specify
-     its priority when multiple preconditioners are declared at random order.
-\item[maxIterations xxx] where xxx is an integer specifying the maximum
-     number of iterations permitted for the iterative solvers.  The default
-     value is 1000.
-\item[tolerance xxx] where xxx is a floating point number specifying the
-     termination criterion for the iterative solvers.  The default
-     value is 1.0E-6.
-\item[gmresDim xxx] where xxx is an integer specifying the value of m in
-     restarted GMRES(m).  The default value is 100.
-\item[stopCrit xxx] where xxx is one of \code{absolute} or 
-     \code{relative} (default) stopping criterion.
-\item[superluOrdering xxx] - where xxx specifies one of \code{natural}
-     (default) or \code{mmd} (minimum degree ordering).  This ordering
-     is used to minimize the number of nonzeros generated in the LU
-     decomposition.
-\item[superluScale xxx] where xxx specifies one of \code{y} (perform row
-     and column scalings before decomposition) or \code{n} (default).
-\end{description}
-                                                                                
-\subsection{Parameters for ILUT, SPAI, and Polynomial Preconditioners}
-                                                                                
-\begin{description}
-\item[ddilutFillin xxx] where xxx is a floating point number specifying
-     the maximum number of nonzeros kept in the formation of local
-     incomplete L and U (a value of $0.0$ means same sparsity as $A$,
-     and a value of $1.0$ means two times the number of nonzeros as
-     $A$.).  If this is not called, a value will be selected
-     based on the sparsity of the matrix.
-\item[ddilutDropTol xxx] where xxx is a floating point number specifying the
-     threshold to drop small entries in L and U.  The default value is 0.0.
-\item[euclidNlevels xxx] where xxx is an non-negative integer specifying
-     the desired sparsity of the incomplete factors.  The default value is 0.
-\item[euclidThreshold xxx] where xxx is a floating point number specifying
-     the threshold used to sparsify the incomplete factors.  The default
-     value is 0.0.
-\item[parasailsThreshold xxx] where xxx is a floating point number between 0
-     and 1 specifying the threshold used to prune small entries in setting
-     up the sparse approximate inverse.  The default value is 0.0.
-\item[parasailsNlevels xxx] where xxx is an integer larger than 0 specifying
-     the desired sparsity of the approximate inverse.  The default value is 1.
-\item[parasailsFilter xxx] where xxx is a floating point number between 0
-     and 1 specifying the threshold used to prune small entries in $A$.  The
-     default value is 0.0.
-\item[parasailsLoadbal xxx] where xxx is a floating point number between 0
-     and 1 specifying how load balancing has to be done.  The default value 
-     is 0.0.
-\item[parasailsSymmetric] sets Parasails to take $A$ as symmetric.
-\item[parasailsUnSymmetric] sets Parasails to take $A$ as nonsymmetric
-                            (default).
-\item[parasailsReuse] sets Parasails to reuse the sparsity pattern of $A$.
-\item[polyorder xxx] where xxx is the order of the least-squares polynomial
-     preconditioner.
-\end{description}
-                                                                                
-\subsection{Parameters for Multilevel Preconditioners}
-                                                                                
-\subsubsection{Parameters for BoomerAMG Preconditioner}
-\begin{description}
-\item[amgCoarsenType xxx] where xxx specifies one of \code{falgout} or
-     \code{ruge}, or \code{CLJP} (default) coarsening for BoomerAMG.
-\item[amgMeasureType xxx] where xxx specifies one of \code{local} (default)
-     or or \code{global}.  This parameter affects how coarsening is performed
-     in parallel.
-\item[amgNumSweeps xxx] where xxx is an integer specifying the number of
-     pre- and post-smoothing at each level of BoomerAMG.
-     The default is two pre- and two post-smoothings.
-\item[amgRelaxType xxx] where xxx is one of \code{jacobi} (Damped Jacobi),
-     \code{gs-slow} (sequential Gauss-Seidel), \code{gs-fast} (Gauss-Seidel
-     on interior nodes), or \code{hybrid} (default).
-\item[amgRelaxWeight xxx] where xxx is a floating point number between
-     0 and 1 specifying the damping factor for BoomerAMG's damped
-     Jacobi and GS smoothers.  The default value is 1.0.
-\item[amgRelaxOmega xxx] where xxx is a floating point number between
-     0 and 1 specifying the damping factor for BoomerAMG's hybrid
-     smoother for multiple processors.  The default value is 1.0.
-\item[amgStrongThreshold xxx] where xxx is a floating point number between 0
-     and 1 specifying the threshold used to determine
-     strong coupling in BoomerAMG's coasening.  The default value is 0.25.
-\item[amgSystemSize xxx] where xxx is the degree of freedom per node.
-\item[amgUseGSMG] - tells BoomerAMG to use a different coarsening called GSMG.
-\item[amgGSMGNumSamples] where xxx is the number of samples to generate
-           to determine how to coarsen for GSMG.
-\end{description}
-                                                                                
-\subsubsection{Parameters for MLI Preconditioner}
-                                                                                
-\begin{description}
-\item[outputLevel xxx] where xxx is the output level for diagnostics.
-\item[method xxx] where xxx is either \code{AMGSA} (default), \code{AMGSAe},
-     to indicate which MLI algorithm is to be used.
-\item[numLevels xxx] where xxx is the maximum number of levels (default=30)
-     used.
-\item[maxIterations xxx] where xxx is the maximum number of iterations
-     (default = 1 as preconditioner).
-\item[cycleType xxx] where xxx is either 'V' or 'W' cycle (default = 'V').
-\item[strengthThreshold xxx] strength threshold for coarsening (default = 0).
-\item[smoother xxx] where xxx is either \code{Jacobi}, \code{BJacobi}, \code{GS},
-     \code{SGS}, \code{HSGS} (SSOR,default), \code{BSGS}, \code{ParaSails},
-     \code{MLS}, \code{CGJacobi}, \code{CGBJacobi}, or \code{Chebyshev}.
-\item[numSweeps xxx] where xxx is the number of smoother sweeps (default = 2).
-\item[coarseSolver xxx] where xxx is one of those in 'smoother' or
-     \code{SuperLU} (default).
-\item[minCoarseSize xxx] where xxx is the minimum coarse grid size to
-     control the number of levels used (default = 3000).
-\item[Pweight xxx] where xxx is the relaxation parameter for the prolongation
-     smoother (default 0.0).
-\item[nodeDOF xxx] where xxx is the degree of freedom for each node
-     (default = 1).
-\item[nullSpaceDim xxx] where xxx is the dimension of the null space for
-     the coarse grid (default = 1).
-\item[useNodalCoord xxx] where xxx is either 'on' or 'off' (default)
-     to indicate whether the nodal coordinates are used to generate the
-     initial null space.
-\item[saAMGCalibrationSize xxx] where xxx is the additional null space
-     vectors to be generated via calibration (default = 0).
-\item[numSmoothVecs xxx] where xxx is the number of near null space
-     vectors used to create the prolongation operator (default = 0).
-\item[smoothVecSteps xxx] where xxx is the number of smoothing steps
-     used to generate the smooth vectors (default = 0).
-\end{description}
-                                                                                
-In addition, to use \code{AMGSAe}, the parameter \code{haveSFEI} has to be sent
-into the FEI using the parameters function (this option is valid only for the
-Sandia FEI implementation).
-                                                                                
-\subsection{Parameters for Block and Uzawa Preconditioners}
-\subsubsection{Parameters for Block Preconditioners}
-The parameters for this preconditioner are preceded by the keyword 
-\code{blockP}.
-The available parameters after this keywords are:
-\begin{description}
-\item[blockD] turns on block diagonal preconditioning.
-\item[blockT] turns on block tridiagonal preconditioning.
-\item[blockLU] turns on block LU preconditioning.
-\item[outputLevel xxx] where xxx is the output level for diagnostics.
-\item[block1FieldID xxx] where xxx is field ID for the (1,1) block.
-\item[block2FieldID xxx] where xxx is field ID for the (2,2) block (for
-    ALE3D's implicit hydrodynamics with slide surfaces, the field ID for
-    both blocks are -3.)
-\item[printInfo] prints information about internal parameter settings.
-\item[lumpedMassScheme xxx] where is either {\sf diag} (take the diagonal
-     of the (1,1) block) or \code{ainv} (take the approximate inverse of
-     the (1,1) block.
-\item[invA11PSNlevels xxx] where xxx is 0 or 1 to indicate the ParaSails
-     nlevels to use to generate the lumped mass matrix \code{ainv} is
-     selected.)
-\item[invA11PSThresh xxx] where xxx is a floating point number between 0
-     and 1 to indicate the ParaSails threshold to use to generate the lumped
-     mass matrix (if \code{ainv} is selected.)
-\item[A11Solver xxx] where xxx is either \code{cg} or \code{gmres} as solver
-     for the (1,1) block.
-\item[A11Tolerance xxx] where xxx is convergence tolerance for the
-     (1,1) block.
-\item[A11MaxIterations xxx] where xxx is maximum number of iterations for
-     the (1,1) block.
-\item[A11Precon xxx] where xxx is either \code{boomeramg}, \code{euclid}, 
-     \code{parasails}, \code{ddilut}, or \code{mli}.
-\item[A11PreconPSNlevels xxx] - ParaSails' nlevels.
-\item[A11PreconPSThresh xxx] - ParaSails' threshold.
-\item[A11PreconPSFilter xxx] - ParaSails' filter.
-\item[A11PreconAMGThresh xxx] - BoomerAMG's threshold.
-\item[A11PreconAMGRelaxType xxx] - BoomerAMG's smoother.
-\item[A11PreconAMGNumSweeps xxx] - BoomerAMG's numSweeps.
-\item[A11PreconAMGSystemSize xxx] - BoomerAMG's systemSize.
-\item[A11PreconEuclidNLevels xxx] - Euclid's nlevels.
-\item[A11PreconEuclidThresh xxx] - Euclid's threshold.
-\item[A11PreconDDIlutFillin xxx] - ddilut's fillin.
-\item[A11PreconDDIlutDropTol xxx] - ddilut's drop tolerance.
-\item[A11PreconMLIRelaxType xxx] - MLI's smoother.
-\item[A11PreconMLIThresh xxx] - MLI's threshold.
-\item[A11PreconMLIPweight xxx] - MLI's Pweight.
-\item[A11PreconMLINumSweeps xxx] - MLI's numSweeps.
-\item[A11PreconMLINodeDOF xxx] - MLI's nodeDOF.
-\item[A11PreconMLINullDim xxx] - MLI's null space dimension.
-\item[A22Solver xxx] where xxx is either \code{cg} or \code{gmres} as solver
-     for the (2,2) block.
-\item[A22Tolerance xxx] where xxx is convergence tolerance for the
-     (2,2) block.
-\item[A22MaxIterations xxx] where xxx is maximum number of iterations for
-     the (2,2) block.
-\item[A22Precon xxx] where xxx is either \code{boomeramg}, \code{euclid}, 
-     \code{parasails}, \code{ddilut}, or \code{mli}.
-\item[A22PreconPSNlevels xxx] - ParaSails nlevels.
-\item[A22PreconPSThresh xxx] - ParaSails' threshold.
-\item[A22PreconPSFilter xxx] - ParaSails' filter.
-\item[A22PreconAMGThresh xxx] - BoomerAMG's threshold.
-\item[A22PreconAMGRelaxType xxx] - BoomerAMG's smoother.
-\item[A22PreconAMGNumSweeps xxx] - BoomerAMG's numSweeps.
-\item[A22PreconAMGSystemSize xxx] - BoomerAMG's systemSize.
-\item[A22PreconEuclidNLevels xxx] - Euclid's nlevels.
-\item[A22PreconEuclidThresh xxx] - Euclid's threshold.
-\item[A22PreconDDIlutFillin xxx] - ddilut's fillin.
-\item[A22PreconDDIlutDropTol xxx] - ddilut's drop tolerance.
-\item[A22PreconMLIRelaxType xxx] - MLI's smoother.
-\item[A22PreconMLIThresh xxx] - MLI's threshold.
-\item[A22PreconMLIPweight xxx] - MLI's Pweight.
-\item[A22PreconMLINumSweeps xxx] - MLI's numSweeps.
-\item[A22PreconMLINodeDOF xxx] - MLI's nodeDOF.
-\item[A22PreconMLINullDim xxx] - MLI's null space dimension.
-\end{description}
-
-\subsubsection{Parameters for Uzawa Preconditioner}
-The Uzawa preconditioner has a similar parameter set as block preconditioner,
-as described in the following (except that DDIlut is not available here).
-\begin{description}
-\item[outputLevel xxx] -  where xxx is the output level for diagnostics.
-\item[A11Solver xxx] where xxx is either \code{cg} or \code{gmres} as solver
-     for the (1,1) block.
-\item[A11Tolerance xxx] where xxx is convergence tolerance for the
-     (1,1) block.
-\item[A11MaxIterations xxx] where xxx is maximum number of iterations for
-     the (1,1) block.
-\item[A11Precon xxx] where xxx is either \code{boomeramg},
-     \code{euclid}, \code{parasails}, {ddilut}, or \code{mli}.
-\item[A11PreconPSNlevels xxx] - ParaSails' nlevels.
-\item[A11PreconPSThresh xxx] - ParaSails' threshold.
-\item[A11PreconPSFilter xxx] - ParaSails' filter.
-\item[A11PreconAMGThresh xxx] - BoomerAMG's threshold.
-\item[A11PreconAMGRelaxType xxx] - BoomerAMG's smoother.
-\item[A11PreconAMGNumSweeps xxx] - BoomerAMG's numSweeps.
-\item[A11PreconAMGSystemSize xxx] - BoomerAMG's systemSize.
-\item[A11PreconEuclidNLevels xxx] - Euclid's nlevels.
-\item[A11PreconEuclidThresh xxx] - Euclid's threshold.
-\item[A11PreconMLIRelaxType xxx] - MLI's smoother.
-\item[A11PreconMLIThresh xxx] - MLI's threshold.
-\item[A11PreconMLIPweight xxx] - MLI's Pweight.
-\item[A11PreconMLINumSweeps xxx] - MLI's numSweeps.
-\item[A11PreconMLINodeDOF xxx] - MLI's nodeDOF.
-\item[A11PreconMLINullDim xxx] - MLI's null space dimension.
-\item[S22SolverDampingFactor xxx] where xxx is the damping (scaling) factor
-     for the Schur complement approximation of the (2,2) block.
-\item[S22Solver xxx] where xxx is either \code{cg} or \code{gmres} as solver
-     for the (2,2) block.
-\item[S22Tolerance xxx] where xxx is convergence tolerance for the
-     (2,2) block.
-\item[S22MaxIterations xxx] where xxx is maximum number of iterations for
-     the (2,2) block.
-\item[S22Precon xxx] where xxx is either \code{boomeramg},
-     \code{euclid}, \code{parasails}, {ddilut}, or \code{mli}.
-\item[S22PreconPSNlevels xxx] - ParaSails' nlevels.
-\item[S22PreconPSThresh xxx] - ParaSails' threshold.
-\item[S22PreconPSFilter xxx] - ParaSails' filter.
-\item[S22PreconAMGThresh xxx] - BoomerAMG's threshold.
-\item[S22PreconAMGRelaxType xxx] - BoomerAMG's smoother.
-\item[S22PreconAMGNumSweeps xxx] - BoomerAMG's numSweeps.
-\item[S22PreconAMGSystemSize xxx] - BoomerAMG's systemSize.
-\item[S22PreconEuclidNLevels xxx] - Euclid's nlevels.
-\item[S22PreconEuclidThresh xxx] - Euclid's threshold.
-\item[S22PreconMLIRelaxType xxx] - MLI's smoother.
-\item[S22PreconMLIThresh xxx] - MLI's threshold.
-\item[S22PreconMLIPweight xxx] - MLI's Pweight.
-\item[S22PreconMLINumSweeps xxx] - MLI's numSweeps.
-\item[S22PreconMLINodeDOF xxx] - MLI's nodeDOF.
-\item[S22PreconMLINullDim xxx] - MLI's null space dimension.
-\end{description}
-                                                                                
-\subsection{Parameters for Matrix Reduction}
-\begin{description}
-\item[schurReduction] turns on the Schur reduction mode.
-\item[slideReduction] turns on the slide reduction mode.
-\item[slideReduction2] turns on the slide reduction mode version 2
-(see section 2).
-\item[slideReduction3] turns on the slide reduction mode version 3
-(see section 2).
-\end{description}
-                                                                                
-\subsection{Parameters for Diagnostics and Performance Tuning}
-\begin{description}
-\item[outputLevel xxx] where xxx is an integer specifying the output
-     level.  An output level of $1$ prints only the solver
-     information such as number of iterations and timings.
-     An output level of $2$ prints debug information such as
-     the functions visited and preconditioner information.
-     An output level of $3$ or higher prints more debug information
-     such as the matrix and right hand side loaded via the
-     {\sf LinearSystemCore} functions to the standard output.
-\item[setDebug xxx] where xxx is one of \code{slideReduction1},
-     \code{slideReduction2}, \code{slideReduction3} (level 1,2,3 
-     diagnostics in the slide surface reduction code), 
-     \code{printMat} (print the original matrix into a file), 
-     \code{printReducedMat} (print the reduced matrix
-     into a file),  \code{printSol} (print the solution into a file),
-     \code{ddilut} (output diagnostic information for ddilut
-     preconditioner setup), and \code{amgDebug} (output diagnostic
-     information for BoomerAMG).
-\item[optimizeMemory] cleans up the matrix sparsity pattern after the matrix
-     has been loaded. (It has been kept to allow matrix reuse.)
-\item[imposeNoBC] turns off the boundary condition to allow diagnosing the
-     matrix (for example, checking the null space.)
-\end{description}
-                                                                                
-\subsection{Miscellaneous Parameters}
-\begin{description}
-\item[AConjugateProjection xxx] where xxx specifies the number of previous
-     solution vectors to keep for the A-conjugate projection.
-     The default is 0 (the projection is off).
-\item[minResProjection xxx] where xxx specifies the number of previous
-     solution vectors to keep for projection.
-     The default is 0 (the projection is off).
-\item[haveFEData] indicates that additional finite element information are
-     available to assist in building more efficient solvers.
-\item[haveSFEI] indicates that the simplified finite element information are
-     available to assist in building more efficient solvers.
-\end{description}
-                                                                                
-\section{\hypre{} {\sf LinearSystemCore} Installation}
-                                                                                
-The ultimate objective is for application users to have immediate access
-to the latest FEI/\hypre{} library files on different computing platforms
-via public {\sf lib} directories.  While this feature is forthcoming, careful
-version control is needed for users to keep track of capabilities and bug fixes
-for different installations.  Users who would like to set up the FEI/\hypre{}
-on their own should do the following:
-                                                                                
-\begin{enumerate}
-                                                                                
-\item get \hypre{} and FEI (from Sandia) source codes (alternatively, use
-      the FEI implementation in \hypre{}),
-\item compile the FEI (fei-2.5.0, or fei-2.10.0) to create the
-      {\sf libfei\_base.a} file.
-\item configure and compile \hypre{}
-\begin{enumerate}
-\item download \hypre{} from the web, ungzip and untar it
-\item go into the {\sf linear\_solvers} directory
-\item do a 'configure' with the {\sf --with-FEI\_BASE\_DIR} option set to
-      the {\sf FEI} include directory plus other compile options
-\item compile with {\sf make install} which will create the
-      {\sf libHYPRE\_LSI.a} file in the {\sf linear\_solvers/hypre/lib}
-      directory.
-\end{enumerate}
-\item call FEI functions in your application code (example given
-      previously)
-\begin{enumerate}
-\item include {\sf cfei\-hypre.h} in your file
-\item include {\sf FEI\_Implementation.h} in your file
-\item make sure your application has an {\sf include} and an {\sf lib} path
-      to the {\sf include} and {\sf lib} directories created above.
+\item Initialize the structure of the finite-element data,
+      including loading the element connectivity data
+\item Load the element or super-element stiffness matrices and forcing terms
+\item Set solver parameters and solve the linear system
+\item Retrieve the solution to the linear system
 \end{enumerate}
 
+Parameters to the \hypre{} solvers are specified by calling
+\begin{display}
+\begin{verbatim}
+void FEI_parameters(int sysHandle, int numParams, char **paramStrings);
+\end{verbatim}
+\end{display}
+where {\tt sysHandle} is an identifier for the linear system being solved,
+{\tt numParams} is the number of parameter strings, and {\tt paramStrings} is
+an array of null-terminated strings with the format: 
+``{\em parameter\_name value}''.
+For example, setting the preconditioner can be accomplished by:
+\begin{display}
+\begin{verbatim}
+char **paramStrings[1];
+paramStrings[0] = (char *) malloc(64*sizeof(char));
+strcpy(paramStrings[0], "preconditioner parasails");
+FEI_parameters(sysHandle, 1, paramStrings);
+\end{verbatim}
+\end{display}
+All possible parameters are listed in Table \ref{table-fei-param}.
+
+
+A linear system is then solved by calling 
+\begin{display}
+\begin{verbatim}
+void FEI_iterateToSolve(int sysHandle);
+\end{verbatim}
+\end{display}
+
+\section{Iterative methods and preconditioners available}
+
+\subsection{Iterative methods}
+
+\begin{enumerate}
+\item Krylov solvers (conjugate gradient, GMRES, TFQMR, BiCGSTAB)
+\item BoomerAMG (a parallel algebraic multigrid solver)
+\item SuperLU direct solver (sequential)
+\item SuperLU direct solver with iterative refinement (sequential)
+%\item Y12M direct solver
 \end{enumerate}
-                                                                                
-\subsection{Linking with the library files}
-                                                                                
-To link the FEI and \hypre{} into the executable, the following has to be
-attached to the linking command :
-                                                                                
-\begin{tabbing}
-\hspace{0.5in} \= {\sf -L\$\{LIBPATHS\} -lfei\_base -lHYPRE\_LSI -lHYPRE_superlu}
-\end{tabbing}
-along with all the other libraries (Note : the order in which the libraries are
-listed may be important), where {\sf LIBPATHS} are where
-\hypre{} and FEI libraray files can be found.
-                                                                                
-Since some of these library files make calls to LAPACK and BLAS functions,
-the corresponding libraries need to be linked along with (placed after) these
-library files.  For example, on the DEC cluster, it suffices to link
-with the {\sf dxml} library, (So {\sf -ldxml} is placed after the above link
-sequence, with {\sf -lm} placed after {\sf -ldxml}.) while the {\it essl}
-library can be used on the blue machine.
+
+\subsection{Preconditioners}
+
+\begin{enumerate}
+\item diagonal
+\item parallel incomplete LU with threshold (PILUT)
+\item another parallel incomplete LU (Euclid)
+\item parallel algebraic multigrid (BoomerAMG)
+\item parallel sparse approximate inverse (ParaSails)
+\end{enumerate}
+
+%Capabilities under development are :
+%\begin{enumerate}
+%\item to form and solve a reduced linear system (in view of constraints), and
+%\item a link to the ML's parallel smoothed aggregation method.
+%\end{enumerate}
+
+\begin{table}[h]
+\center
+\begin{tabular}{|l|p{4.5in}|}
+\hline
+Parameter Name & Parameter Values \\
+\hline\hline
+solver &
+\code{cg}, \code{gmres} (default), \code{bicgstab}, \code{tfqmr}, \code{boomeramg}, \code{superlu}, \code{superlux}
+\\
+preconditioner &
+\code{diagonal} (default), \code{pilut}, \code{parasails}, \code{boomeramg}, \code{euclid}
+\\
+gmresDim &
+an integer specifying the value of \code{m} in restarted GMRES(m).
+The default value is 50.
+\\
+maxIterations &
+an integer specifying the maximum number of iterations permitted for
+CG or GMRES.  The default value is 1000.
+\\
+tolerance &
+a floating point number specifying the termination criterion for CG or
+GMRES.  The default value is 1.0E-10.
+\\
+pilutFillin &
+an integer specifying the maximum number of nonzeros kept in the
+formation of incomplete L and U.  If this is not called, a value will
+be selected based on the sparsity of the matrix.
+\\
+pilutDropTol &
+a floating point number specifying the threshold to drop small entries
+in L and U.  The default value is 0.0.
+\\
+euclidNlevels &
+a non-negative integer specifying the desired sparsity of the incomplete
+factors. The default value is 0.
+\\
+euclidThreshold &
+a floating point number specifying the threshold used to sparsify the 
+incomplete factors. The default value is 0.0.
+\\
+superluOrdering &
+\code{natural} (default) or \code{mmd} (minimum degree ordering).  This
+ordering is used to minimize the number of nonzeros generated in the
+LU decomposition.  The default is natural ordering.
+\\
+superluScale &
+\code{y} (yes; perform row and column scalings before decomposition) or
+\code{n} (no; default).
+\\
+amgCoarsenType &
+\code{falgout}, \code{ruge}, or \code{default} (CLJP) coarsening for BoomerAMG.
+\\
+amgNumSweeps &
+an integer specifying the number of pre- and post-smoothing at each
+level of BoomerAMG.  The default is one pre- and one post-smoothings.
+\\
+amgRelaxType &
+\code{jacobi} (Damped Jacobi), \code{gs-slow} (sequential Gauss-Seidel),
+\code{gs-fast} (Gauss-Seidel on interior nodes), \code{hybrid}, or
+\code{direct}. The default is \code{hybrid}.
+\\
+amgRelaxWeight &
+a floating point number between 0 and 1 specifying the damping factor
+for BoomerAMG's damped Jacobi smoother.  The default value is 0.5.
+\\
+amgStrongThreshold &
+a floating point number between 0 and 1 specifying the threshold used
+to determine strong coupling in BoomerAMG's coasening.  The default
+value is 0.25.
+\\
+parasailsThreshold &
+a floating point number between 0 and 1 specifying the threshold used
+to prune small entries in setting up the sparse approximate inverse.
+The default value is 0.0.
+\\
+parasailsNlevels &
+an integer larger than 0 specifying the desired sparsity of the
+approximate inverse.  The default value is 1.
+\\
+parasailsFilter &
+a floating point number between 0 and 1 defining the threshold used to
+prune small entries in A. The default is 0.0.
+\\
+parasailsLoadbal &
+a floating point number between 0 and 1 specifying how load balancing has 
+to be done. The default is 0.0.
+\\
+parasailsSymmetric &
+set ParaSails to take A as symmetric.
+\\
+parasailsUnSymmetric &
+set ParaSails to take A as nonsymmetric (default).
+\\
+parasailsReuse &
+set ParaSails to reuse the sparsity pattern of A.
+\\
+\hline
+\end{tabular}
+\caption{%
+Parameters.
+}
+\label{table-fei-param}
+\end{table}
+
+
+
+
+%\label{sec:fei-param}
+%
+%\begin{description}
+%\item[solver XXX] - where XXX specifies one of {\sf cg}, {\sf gmres},
+%                    {\sf superlu}, or {\sf superlux}.  The default is {\sf gmres}.
+%\item[preconditioner XXX] - where XXX is one of {\sf diagonal}, {\sf pilut},
+%                    {\sf parasails}, or {\sf boomeramg}. The default 
+%                    is {\sf diagonal}.
+%\item[gmres-dim XXX] - where XXX is an integer specifying the value of m in
+%                       restarted GMRES(m).  The default value is 50.
+%\item[maxIterations XXX] - where XXX is an integer specifying the maximum number
+%                           of iterations permitted for CG or GMRES.
+%                           The default value is 1000.
+%\item[tolerance XXX] - where XXX is a floating point number specifying the 
+%                       termination criterion for CG or GMRES.  The default value is
+%                       1.0E-10.
+%\item[pilut-row-size XXX] - where XXX is an integer specifying the maximum
+%                       number of nonzeros kept in the formation of imcomplete L
+%                       and U).  If this is not called, a value will be selected
+%                       based on the sparsity of the matrix.
+%\item[pilut-drop-tol XXX] - where XXX is a floating point number specifying the 
+%                       threshold to drop small entries in L and U.  The default
+%                       value is 0.0.
+%\item[superlu-ordering XXX] - where XXX specifies on of {\sf natural} or
+%                       {\sf mmd} (minimum degree ordering).  This ordering
+%                       is used to minimize the number of nonzeros generated
+%                       in the LU decomposition.  The default is natural ordering.
+%\item[superlu-scale XXX] - where XXX specifies on of {\sf y} (perform row
+%                       and column scalings before decomposition) or {\sf n}.
+%                       The default is no scaling.
+%\item[amg-coarsen-type XXX] - where XXX specifies one of {\sf falgout},
+%                       {\sf ruge}, or {\sf default} coarsening for BOOMERAMG.
+%\item[amg-num-sweeps XXX] - where XXX is an integer specifying the number of
+%                       pre- and post-smoothing at each level of BOOMERAMG.
+%                       The default is one pre- and one post-smoothings.
+%\item[amg-relax-type XXX] - where XXX is one of {\sf jacobi} (Damped Jacobi),
+%                       {\sf gs-slow} (sequential Gauss-Seidel), {\sf gs-fast}
+%                       (Gauss-Seidel on interior nodes), {\sf hybrid},
+%                       or {\sf direct}. The default is {\sf hybrid}.
+%\item[amg-relax-weight XXX] - where XXX is a floating point number between 0 and 1
+%                       specifying the damping factor for BOOMERAMG's damped
+%                       Jacobi smoother.  The default value is 0.5.
+%\item[amg-strong-threshold XXX] - where XXX is a floating point number between 0 
+%                       and 1 specifying the threshold used to determine
+%                       strong coupling in BOOMERAMG's coasening.  The default 
+%                       value is 0.25.
+%\item[parasails-threshold XXX] - where XXX is a floating point number between 0 
+%                       and 1 specifying the threshold used to prune small entries
+%                       in setting up the sparse approximate inverse.  The default
+%                       value is 0.0.
+%\item[parasails-nlevels XXX] - where XXX is an integer larger than 0 specifying 
+%                       the desired sparsity of the approximate inverse.  The
+%                       default value is 1.
+%\end{description}
+%
+%
+%%\section{HYPRE-FEI Extensions}
+%%
+%%In order to support the reduced system formulation for applications
+%%with slide surface constraints,
+%%two additional functions are provided via HYPRE-FEI
+%%on top of the base FEI specification :
+%%
+%%\begin{description}
+%%\item[loadSlaveList(int,int*)] - this function is used to load information
+%%                        about which unknowns are the slave nodes in the
+%%                        slide surfaces.  This information is useful for
+%%                        the construction of reduced linear system.
+%%\item[buildReducedSystem() ] - this function can be called to reduced a linear
+%%                        system with constraints to a better-conditioned reduced
+%%                        form.
+%%\end{description}
+%
+%%\section{HYPRE-FEI Comments and Contacts}
+%%
+%%Any comments about this HYPRE-FEI interface can be directed to Charles Tong
+%%(X23411 or chtong@llnl.gov) or Edmond Chow (X31915 or chow8@llnl.gov).
 
