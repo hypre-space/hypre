@@ -22,8 +22,16 @@ PETSC_CFLAGS =\
  -I${PETSC_DIR}\
  -I${PETSC_DIR}/include\
  -I/usr/local/mpi/mpich/include
+
+ISIS_DIR = /home/cleary/iter/isis
+ISIS_FLAGS =\
+ -I${ISIS_DIR}/include\
+ -DBOOL_SUPPORTED
+
+
 CFLAGS =\
  ${PETSC_CFLAGS}\
+ ${ISIS_FLAGS}\
  -I/usr/local/include\
  -I/home/casc/include\
  -I${HYPRE_DIR}/includes\
@@ -31,6 +39,7 @@ CFLAGS =\
  -DHYPRE_DEBUG\
  -I/home/cleary/ale3d/isis/include\
  -g
+
 
 FFLAGS = -g
 
@@ -50,6 +59,11 @@ PETSC_LFLAGS =\
  ${MPE_LIB}\
  ${MPI_LIB}\
  ${SYS_LIB}
+
+ISIS_LFLAGS =\
+ -L${ISIS_DIR}/lib/${PETSC_ARCH}\
+ -lisis_mpi
+
 LFLAGS =\
  -Wl,"-zmuldefs"\
  -L/usr/local/lib\
@@ -77,6 +91,7 @@ LFLAGS =\
  -lHYPRE_MatrixMatrix\
  -lHYPRE_memory\
  ${PETSC_LFLAGS}\
+ ${ISIS_LFLAGS}\
  -lf2c\
  -lcegdb\
  -lmalloc\
@@ -84,13 +99,13 @@ LFLAGS =\
 
 #Automatically generate prototypes when necessary
 HYPRE_protos.h: $(HYPREFILES)
-        mkproto HYPRE*.c > HYPRE_protos.h
+	mkproto HYPRE*.c > HYPRE_protos.h
  
 hypre_protos.h: $(FILES)
-        mkproto hypre*.c > hypre_protos.h
+	mkproto hypre*.c > hypre_protos.h
  
 internal_protos.h: $(FILES)
-        mkproto *.c > internal_protos.h
+	mkproto *.c > internal_protos.h
  
 PROTOS = HYPRE_protos.h hypre_protos.h internal_protos.h
 
