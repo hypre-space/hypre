@@ -1,0 +1,8 @@
+#!/bin/sh
+set -x
+rm -f aclocal.m4 configure
+libtoolize --force --copy
+aclocal -I config
+autoheader --force --include=config
+automake --add-missing --copy --force-missing --foreign
+autoconf --include=config
