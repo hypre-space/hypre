@@ -289,8 +289,8 @@ ACX_BLAS([casc_user_chose_blas=yes;BLASLIBFLAGS=$BLAS_LIBS],
   [casc_user_chose_blas=no;BLASLIBFLAGS="-lHYPRE_blas"]) 
 AM_CONDITIONAL(BLASNEEDED, test "$casc_user_chose_blas" = no)
 AC_SUBST(BLASLIBFLAGS)
-ACX_LAPACK([casc_user_chose_lapack=yes;LAPACKLIBFLAGS=$BLAS_LIBS], 
-  [casc_user_chose_lapack=no;LAPACKLIBFLAGS="-lHYPRE_blas"]) 
+ACX_LAPACK([casc_user_chose_lapack=yes;LAPACKLIBFLAGS=$LAPACK_LIBS], 
+  [casc_user_chose_lapack=no;LAPACKLIBFLAGS="-lHYPRE_lapack"]) 
 AM_CONDITIONAL(LAPACKNEEDED, test "$casc_user_chose_lapack" = no)
 AC_SUBST(LAPACKLIBFLAGS)
 AC_CHECK_LIBM
