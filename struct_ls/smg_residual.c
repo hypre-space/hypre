@@ -72,7 +72,6 @@ hypre_SMGResidualSetup( void               *residual_vdata,
 
    hypre_IndexRef          base_index  = (residual_data -> base_index);
    hypre_IndexRef          base_stride = (residual_data -> base_stride);
-   hypre_Index             unit_stride;
 
    hypre_StructGrid       *grid;
    hypre_StructStencil    *stencil;
@@ -87,8 +86,6 @@ hypre_SMGResidualSetup( void               *residual_vdata,
 
    grid    = hypre_StructMatrixGrid(A);
    stencil = hypre_StructMatrixStencil(A);
-
-   hypre_SetIndex(unit_stride, 1, 1, 1);
 
    base_points = hypre_BoxArrayDuplicate(hypre_StructGridBoxes(grid));
    hypre_ProjectBoxArray(base_points, base_index, base_stride);

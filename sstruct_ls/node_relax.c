@@ -203,7 +203,6 @@ hypre_NodeRelaxSetup(  void                 *relax_vdata,
    hypre_ComputePkg    ***svec_compute_pkgs;
    hypre_CommHandle     **comm_handle;
 
-   hypre_Index            unit_stride;
    hypre_Index            diag_index;
    hypre_IndexRef         stride;
    hypre_IndexRef         index;
@@ -310,7 +309,6 @@ hypre_NodeRelaxSetup(  void                 *relax_vdata,
    sgrid = hypre_StructMatrixGrid(hypre_SStructPMatrixSMatrix(A, 0, 0));
    dim = hypre_StructStencilDim(
                           hypre_SStructPMatrixSStencil(A, 0, 0));
-   hypre_SetIndex(unit_stride, 1, 1, 1);
 
    compute_pkgs = hypre_CTAlloc(hypre_ComputePkg *, num_nodesets);
    svec_compute_pkgs = hypre_CTAlloc(hypre_ComputePkg **, num_nodesets);
