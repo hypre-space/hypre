@@ -141,17 +141,15 @@ then
     fi
 
     # create install subdirectories
-    DIRS="\
-	$HYPRE_INSTALL_DIR/bin\
-	$HYPRE_INSTALL_DIR/docs\
-	$HYPRE_INSTALL_DIR/include\
-	$HYPRE_INSTALL_DIR/lib\
-	"
-    for i in $DIRS
-    do
-	rm -fr $i
-	mkdir $i
-    done
+    (
+	cd $HYPRE_INSTALL_DIR
+	DIRS="bin docs include lib"
+	for i in $DIRS
+	do
+	    rm -fr $i
+	    mkdir $i
+	done
+    )
 
     # SMG
     (
