@@ -135,7 +135,7 @@ hypre_BoomerAMGCoarsen( hypre_ParCSRMatrix    *S,
    int                 graph_offd_size;
    int                 global_graph_size;
                       
-   int                 i, j, k, kc, jS, kS, ig;
+   int                 i, j, k, kc, jS, kS, ig, elmt;
    int		       index, start, my_id, num_procs, jrow, cnt;
                       
    int                 ierr = 0;
@@ -502,31 +502,56 @@ hypre_BoomerAMGCoarsen( hypre_ParCSRMatrix    *S,
        * maximal measure.
        *------------------------------------------------*/
       if (iter || (CF_init != 1))
+      {
          hypre_BoomerAMGIndepSet(S, S_ext, measure_array, graph_array, 
 				graph_size, 
-				graph_array_offd, graph_offd_size,
+				graph_array_offd, graph_offd_size, 
 				CF_marker, CF_marker_offd);
+         if (num_procs > 1)
+         {
+            comm_handle = hypre_ParCSRCommHandleCreate(12, comm_pkg,
+                CF_marker_offd, int_buf_data);
+
+            hypre_ParCSRCommHandleDestroy(comm_handle);
+         }
+
+         index = 0;
+         for (i = 0; i < num_sends; i++)
+         {
+            start = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
+            for (j=start; j < hypre_ParCSRCommPkgSendMapStart(comm_pkg,i+1);j++)            {
+               elmt = hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j);
+               if (!int_buf_data[index++] && CF_marker[elmt] > 0)
+               {
+                  CF_marker[elmt] = 0;
+               }
+            }
+         }
+      }
 
       iter++;
       /*------------------------------------------------
        * Exchange boundary data for CF_marker
        *------------------------------------------------*/
 
+
       index = 0;
       for (i = 0; i < num_sends; i++)
       {
         start = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
         for (j = start; j < hypre_ParCSRCommPkgSendMapStart(comm_pkg, i+1); j++)
-                int_buf_data[index++] 
-                 = CF_marker[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j)];
+        {
+           elmt = hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j);
+          int_buf_data[index++] = CF_marker[elmt];
+        }
       }
- 
+
       if (num_procs > 1)
       {
-      comm_handle = hypre_ParCSRCommHandleCreate(11, comm_pkg, int_buf_data, 
-        CF_marker_offd);
+         comm_handle = hypre_ParCSRCommHandleCreate(11, comm_pkg, int_buf_data, 
+        	CF_marker_offd);
  
-      hypre_ParCSRCommHandleDestroy(comm_handle);   
+         hypre_ParCSRCommHandleDestroy(comm_handle);   
       }
  
       for (ig = 0; ig < graph_offd_size; ig++)
