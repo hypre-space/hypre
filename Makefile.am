@@ -18,6 +18,11 @@ MAINTAINERCLEANFILES = Makefile.in\
 # by uncommenting here and in configure.ac. The SUBDIRS controls
 # the build directories, while DIST_SUBDIRS determine the directories
 # in the distribution (make dist).
+if DOCSDIR
+DOCS = tools
+else !DOCSDIR
+DOCS =
+endif !DOCSDIR
 #if PARCHORDLSDIR
 #PARCHORDLS = "parchord_ls"
 #else !PARCHORDLSDIR
@@ -28,11 +33,11 @@ PARCHORDLS =
 #else
 SEQLS =
 #endif
-#if TOOLSDIR
-#TOOLS = tools
-#else !TOOLSDIR
+if TOOLSDIR
+TOOLS = tools
+else !TOOLSDIR
 TOOLS =
-#endif !TOOLSDIR
+endif !TOOLSDIR
 
 #EXTRA_DIRS = $(SEQLS) $(TOOLS) test
 if BLASNEEDED
@@ -83,7 +88,7 @@ config\
  sstruct_mv sstruct_ls\
  seq_mv parcsr_mv distributed_matrix matrix_matrix\
  IJ_mv distributed_ls parcsr_ls parcsr_es\
- FEI_mv $(BABELDIR) test lib docs .
+ FEI_mv $(BABELDIR) test lib $(DOCSDIR) .
 # causes problems with "make distclean"
 # FEI_mv babel babel-runtime test lib docs .
 

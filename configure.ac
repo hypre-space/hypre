@@ -370,9 +370,13 @@ AC_SUBST(FEI_LIB_DIR)
 AC_SUBST(FEI_INC_DIR)
 
 # subsitute output variables in these files
-AC_CONFIG_FILES([
-  docs/bref_manual.dxx
-  docs/ref_manual.dxx])
+if test -d docs; then
+  AC_CONFIG_FILES([
+    docs/bref_manual.dxx
+    docs/ref_manual.dxx
+    docs/Makefile])
+fi
+AM_CONDITIONAL(DOCSDIR, test -d docs)
 
 AC_CONFIG_FILES([
   Makefile
@@ -401,7 +405,6 @@ AC_CONFIG_FILES([
   distributed_ls/ParaSails/Makefile
   distributed_ls/pilut/Makefile
   distributed_matrix/Makefile
-  docs/Makefile
   krylov/Makefile
   lapack/Makefile
   matrix_matrix/Makefile
@@ -455,10 +458,10 @@ AC_SUBST(BABELDIR)
 #    seq_ls/pamg/Makefile])
 #fi
 #AM_CONDITIONAL(SEQLSDIR, test -d seq_ls)
-#if test -d tools; then
-#  AC_CONFIG_FILES([tools/Makefile])
-#fi
-#AM_CONDITIONAL(TOOLSDIR, test -d tools)
+if test -d tools; then
+  AC_CONFIG_FILES([tools/Makefile])
+fi
+AM_CONDITIONAL(TOOLSDIR, test -d tools)
 if test "$casc_using_libdir" = "yes"; then
   if test -d lib; then
     AC_CONFIG_FILES([lib/Makefile])
