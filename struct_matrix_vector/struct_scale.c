@@ -22,7 +22,7 @@ int
 hypre_StructScale( double              alpha,
                    hypre_StructVector *y     )
 {
-   int ierr;
+   int ierr = 0;
 
    hypre_Box       *y_data_box;
                    

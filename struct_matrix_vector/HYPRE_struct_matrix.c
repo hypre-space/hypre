@@ -64,7 +64,7 @@ HYPRE_SetStructMatrixValues( HYPRE_StructMatrix  matrix,
    hypre_Index         new_grid_index;
 
    int                 d;
-   int                 ierr;
+   int                 ierr = 0;
 
    hypre_ClearIndex(new_grid_index);
    for (d = 0;
@@ -100,7 +100,7 @@ HYPRE_SetStructMatrixBoxValues( HYPRE_StructMatrix  matrix,
    hypre_Box          *new_value_box;
                     
    int                 d;
-   int                 ierr;
+   int                 ierr = 0;
 
    hypre_ClearIndex(new_ilower);
    hypre_ClearIndex(new_iupper);

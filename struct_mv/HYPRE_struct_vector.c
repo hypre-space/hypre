@@ -61,7 +61,7 @@ HYPRE_SetStructVectorValues( HYPRE_StructVector  vector,
    hypre_Index         new_grid_index;
 
    int                 d;
-   int                 ierr;
+   int                 ierr = 0;
 
    hypre_ClearIndex(new_grid_index);
    for (d = 0;
@@ -89,7 +89,7 @@ HYPRE_GetStructVectorValues( HYPRE_StructVector  vector,
    hypre_Index         new_grid_index;
 
    int                 d;
-   int                 ierr;
+   int                 ierr = 0;
 
    hypre_ClearIndex(new_grid_index);
    for (d = 0;
@@ -123,7 +123,7 @@ HYPRE_SetStructVectorBoxValues( HYPRE_StructVector  vector,
    hypre_Box          *new_value_box;
                     
    int                 d;
-   int                 ierr;
+   int                 ierr = 0;
 
    hypre_ClearIndex(new_ilower);
    hypre_ClearIndex(new_iupper);
@@ -161,7 +161,7 @@ HYPRE_GetStructVectorBoxValues( HYPRE_StructVector  vector,
    hypre_Box          *new_value_box;
                     
    int                 d;
-   int                 ierr;
+   int                 ierr = 0;
 
    hypre_ClearIndex(new_ilower);
    hypre_ClearIndex(new_iupper);

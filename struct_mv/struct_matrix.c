@@ -72,7 +72,7 @@ hypre_NewStructMatrix( MPI_Comm             comm,
 int 
 hypre_FreeStructMatrix( hypre_StructMatrix *matrix )
 {
-   int  ierr;
+   int  ierr = 0;
 
    int  i;
 
@@ -104,7 +104,7 @@ hypre_FreeStructMatrix( hypre_StructMatrix *matrix )
 int 
 hypre_InitializeStructMatrixShell( hypre_StructMatrix *matrix )
 {
-   int    ierr;
+   int    ierr = 0;
 
    hypre_StructGrid     *grid;
 
@@ -337,7 +337,7 @@ hypre_InitializeStructMatrixData( hypre_StructMatrix *matrix,
 int 
 hypre_InitializeStructMatrix( hypre_StructMatrix *matrix )
 {
-   int    ierr;
+   int    ierr = 0;
 
    double *data;
 
@@ -360,7 +360,7 @@ hypre_SetStructMatrixValues( hypre_StructMatrix *matrix,
                              int                *stencil_indices,
                              double             *values              )
 {
-   int    ierr;
+   int    ierr = 0;
 
    hypre_BoxArray     *boxes;
    hypre_Box          *box;
@@ -406,7 +406,7 @@ hypre_SetStructMatrixBoxValues( hypre_StructMatrix *matrix,
                                 int                *stencil_indices,
                                 double             *values              )
 {
-   int    ierr;
+   int    ierr = 0;
 
    hypre_BoxArray  *grid_boxes;
    hypre_Box       *grid_box;
@@ -501,7 +501,7 @@ hypre_SetStructMatrixBoxValues( hypre_StructMatrix *matrix,
 int 
 hypre_AssembleStructMatrix( hypre_StructMatrix *matrix )
 {
-   int    ierr;
+   int    ierr = 0;
 
    int                   *num_ghost = hypre_StructMatrixNumGhost(matrix);
 

@@ -22,7 +22,7 @@ int
 hypre_StructCopy( hypre_StructVector *x,
                   hypre_StructVector *y     )
 {
-   int ierr;
+   int ierr = 0;
 
    hypre_Box       *x_data_box;
    hypre_Box       *y_data_box;

@@ -110,7 +110,7 @@ hypre_NewStructMatrixMask( hypre_StructMatrix *matrix,
 int 
 hypre_FreeStructMatrixMask( hypre_StructMatrix *mask )
 {
-   int  ierr;
+   int  ierr = 0;
 
    int  i;
 
