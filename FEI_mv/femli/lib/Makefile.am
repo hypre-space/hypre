@@ -64,10 +64,13 @@ FILES = \
  $(top_srcdir)/FEI_mv/femli/base/mli_defs.h\
  $(top_srcdir)/FEI_mv/femli/base/mli_oneLevel.h\
  $(top_srcdir)/FEI_mv/femli/cintface/cmli.h\
- $(top_srcdir)/FEI_mv/femli/fedata/mli_festruct.h\
+ $(top_srcdir)/FEI_mv/femli/fedata/mli_febase.h\
  $(top_srcdir)/FEI_mv/femli/fedata/mli_fedata.h\
+ $(top_srcdir)/FEI_mv/femli/fedata/mli_sfei.h\
+ $(top_srcdir)/FEI_mv/femli/fedata/mli_fedata_utils.h\
  $(top_srcdir)/FEI_mv/femli/mapper/mli_mapper.h\
  $(top_srcdir)/FEI_mv/femli/matrix/mli_matrix.h\
+ $(top_srcdir)/FEI_mv/femli/matrix/mli_matrix_misc.h\
  $(top_srcdir)/FEI_mv/femli/solver/mli_solver.h\
  $(top_srcdir)/FEI_mv/femli/solver/mli_solver_jacobi.h\
  $(top_srcdir)/FEI_mv/femli/solver/mli_solver_bjacobi.h\
