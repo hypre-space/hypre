@@ -275,7 +275,7 @@ mail_summary () {
         TotalTestCount=`expr $TotalTestCount + 1`
         TestCaseFailedFlag=0
         ErrFile=`echo $j | sed -e 's/\.sh$/.err/'`
-        BatchFile=`echo $j | sed -e 's/\.sh$/.batch/'`
+        OutFile=`echo $j | sed -e 's/\.sh$/.out/'`
 # look for non-zero length subtest, TEST_*/test.err.* files
         for k in ${ErrFile}.*; do
           if [ -s "${k}" ] ; then
@@ -287,12 +287,11 @@ mail_summary () {
             break
           fi
         done
-        if [ "TestCaseFailedFlag" = "0" ] ; then
-# look for all of the TEST_*/test.batch.* files
-          for k in ${BatchFile}.*; do
-            OutFile=`echo $k | sed -e 's/\.batch\./.out./'`
+        if [ "$TestCaseFailedFlag" = "0" ] ; then
+# look for all of the TEST_*/test.out.* files
+          for k in ${OutFile}.*; do
 # look for non-zero length subtest, TEST_*/test.out.* files
-            if [ ! -e "${OutFile}" ] ; then
+            if [ ! -s "${OutFile}" ] ; then
               AutotestFailureCount=`expr $AutotestFailureCount + 1`
               TotalFailureCount=`expr $TotalFailureCount + 1`
               TestCaseFailedCount=`expr $TestCaseFailedCount + 1`
@@ -302,7 +301,7 @@ mail_summary () {
             fi
           done
         fi
-        if [ "TestCaseFailedFlag" = "0" ] ; then
+        if [ "$TestCaseFailedFlag" = "0" ] ; then
 # look for a TEST_*/test.err files
           if [ -s "${ErrFile}" ] ; then
             AutotestFailureCount=`expr $AutotestFailureCount + 1`
@@ -312,7 +311,7 @@ mail_summary () {
             TestCaseFailedFlag=1
           fi
         fi
-        if [ "TestCaseFailedFlag" = "0" ] ; then
+        if [ "$TestCaseFailedFlag" = "0" ] ; then
           TotalSuccessCount=`expr $TotalSuccessCount + 1`
           TestCaseSuccessCount=`expr $TestCaseSuccessCount + 1`
         fi
