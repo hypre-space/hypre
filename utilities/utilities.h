@@ -714,6 +714,10 @@ void enter_on_lists( hypre_LinkList *LoL_head_ptr , hypre_LinkList *LoL_tail_ptr
 int hypre_BinarySearch( int *list , int value , int list_length );
 
 
+/* qsplit.c */
+int hypre_DoubleQuickSplit( double *values , int *indices , int list_length , int NumberKept );
+
+
 #ifdef __cplusplus
 }
 #endif

@@ -53,6 +53,8 @@ cat amg_linklist.h             >> $INTERNAL_HEADER
 		          
 ./protos binsearch.c           >> $INTERNAL_HEADER
 		          
+./protos qsplit.c              >> $INTERNAL_HEADER
+		          
 #===========================================================================
 # Include guards
 #===========================================================================
