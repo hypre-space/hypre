@@ -32,32 +32,46 @@ typedef struct
    int                   relax_type;     /* type of relaxation to use */
    int                   num_pre_relax;  /* number of pre relaxation sweeps */
    int                   num_post_relax; /* number of post relaxation sweeps */
+   int                   num_fine_relax; /* number of fine relaxation sweeps */
 
-   int                   num_levels[3];  /* number of levels in each direction */
-   int    		 total_num_levels;  /* actual number of levels */
-   int                   num_grids;      /* number of total grids */
+   int                   num_grids[3];   /* number of grids in each dim */
+   int    		 num_all_grids;
+   int    		 num_levels;
                       
-   double               *restrict_weights; /* restriction weights and coarsening directions */
-   double               *interp_weights;   /* interpolation weights */
-
    hypre_StructGrid    **grid_array;
-   hypre_StructGrid    **P_grid_array;
-                    
+   hypre_StructGrid    **Px_grid_array;
+   hypre_StructGrid    **Py_grid_array;
+   hypre_StructGrid    **Pz_grid_array;
+
+   double               *data;
    hypre_StructMatrix  **A_array;
-   hypre_StructMatrix  **P_array;
-   hypre_StructMatrix  **RT_array;
+   hypre_StructMatrix  **Px_array;
+   hypre_StructMatrix  **Py_array;
+   hypre_StructMatrix  **Pz_array;
+   hypre_StructMatrix  **RTx_array;
+   hypre_StructMatrix  **RTy_array;
+   hypre_StructMatrix  **RTz_array;
    hypre_StructVector  **b_array;
    hypre_StructVector  **x_array;
 
    /* temp vectors */
-   hypre_StructVector  **tx_array;
+   hypre_StructVector  **t_array;
    hypre_StructVector  **r_array;
    hypre_StructVector  **e_array;
 
-   void                **relax_data_array;
-   void                **matvec_data_array;
-   void                **restrict_data_array;
-   void                **interp_data_array;
+   hypre_StructVector  **visitx_array;
+   hypre_StructVector  **visity_array;
+   hypre_StructVector  **visitz_array;
+   int                  *grid_on;
+
+   void                **relax_array;
+   void                **matvec_array;
+   void                **restrictx_array;
+   void                **restricty_array;
+   void                **restrictz_array;
+   void                **interpx_array;
+   void                **interpy_array;
+   void                **interpz_array;
 
    /* log info (always logged) */
    int                   num_iterations;
@@ -74,9 +88,7 @@ typedef struct
  * Utility routines:
  *--------------------------------------------------------------------------*/
 
-#define hypre_SparseMSGSetArrayIndex(lx, ly, lz, nl, index) \
-{\
-   index = lx + (ly * nl[0]) + (lz * nl[0] * nl[1]);\
-}
+#define hypre_SparseMSGMapIndex(lx, ly, lz, nl, index) \
+index = (lx) + ((ly) * nl[0]) + ((lz) * nl[0] * nl[1])
 
 #endif

@@ -166,6 +166,17 @@ HYPRE_StructSparseMSGSetNumPostRelax( HYPRE_StructSolver solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_StructSparseMSGSetNumFineRelax
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_StructSparseMSGSetNumFineRelax( HYPRE_StructSolver solver,
+                                 int                num_fine_relax )
+{
+   return( hypre_SparseMSGSetNumFineRelax( (void *) solver, num_fine_relax) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_StructSparseMSGSetLogging
  *--------------------------------------------------------------------------*/
 

@@ -73,8 +73,13 @@ FILES =\
  semi_interp.c\
  semi_restrict.c\
  sparse_msg.c\
+ sparse_msg2_setup_rap.c\
+ sparse_msg3_setup_rap.c\
+ sparse_msg_filter.c\
+ sparse_msg_interp.c\
+ sparse_msg_restrict.c\
  sparse_msg_setup.c\
- sparse_msg_setup_interp.c\
+ sparse_msg_setup_rap.c\
  sparse_msg_solve.c\
  smg2_setup_rap.c\
  smg3_setup_rap.c\

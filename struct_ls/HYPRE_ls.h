@@ -143,6 +143,7 @@ typedef int (*hypre_PtrToStructSolverFcn)(HYPRE_StructSolver,
 #define HYPRE_StructSparseMSGSetRelaxType HYPRE_StructSparseMSGSetRelaxTypePush
 #define HYPRE_StructSparseMSGSetNumPreRelax HYPRE_StructSparseMSGSetNumPreRelaxPush
 #define HYPRE_StructSparseMSGSetNumPostRelax HYPRE_StructSparseMSGSetNumPostRelaxPush
+#define HYPRE_StructSparseMSGSetNumFineRelax HYPRE_StructSparseMSGSetNumFineRelaxPush
 #define HYPRE_StructSparseMSGSetLogging HYPRE_StructSparseMSGSetLoggingPush
 #define HYPRE_StructSparseMSGGetNumIterations HYPRE_StructSparseMSGGetNumIterationsPush
 #define HYPRE_StructSparseMSGGetFinalRelativeResidualNorm HYPRE_StructSparseMSGGetFinalRelativeResidualNormPush
@@ -246,6 +247,7 @@ int HYPRE_StructSparseMSGSetNonZeroGuess( HYPRE_StructSolver solver );
 int HYPRE_StructSparseMSGSetRelaxType( HYPRE_StructSolver solver , int relax_type );
 int HYPRE_StructSparseMSGSetNumPreRelax( HYPRE_StructSolver solver , int num_pre_relax );
 int HYPRE_StructSparseMSGSetNumPostRelax( HYPRE_StructSolver solver , int num_post_relax );
+int HYPRE_StructSparseMSGSetNumFineRelax( HYPRE_StructSolver solver , int num_fine_relax );
 int HYPRE_StructSparseMSGSetLogging( HYPRE_StructSolver solver , int logging );
 int HYPRE_StructSparseMSGGetNumIterations( HYPRE_StructSolver solver , int *num_iterations );
 int HYPRE_StructSparseMSGGetFinalRelativeResidualNorm( HYPRE_StructSolver solver , double *norm );

@@ -21,55 +21,60 @@
  *--------------------------------------------------------------------------*/
 
 int
-hypre_SparseMSGSolve( void               *SparseMSG_vdata,
+hypre_SparseMSGSolve( void               *smsg_vdata,
                       hypre_StructMatrix *A,
                       hypre_StructVector *b,
-                      hypre_StructVector *x               )
+                      hypre_StructVector *x          )
 {
-   hypre_SparseMSGData       *SparseMSG_data = SparseMSG_vdata;
+   hypre_SparseMSGData  *smsg_data = smsg_vdata;
 
-   double                tol                 = (SparseMSG_data -> tol);
-   int                   max_iter            = (SparseMSG_data -> max_iter);
-   int                   rel_change          = (SparseMSG_data -> rel_change);
-   int                   zero_guess          = (SparseMSG_data -> zero_guess);
-   int                   jump                = (SparseMSG_data -> jump);
-   int                   num_pre_relax       = (SparseMSG_data ->
-                                                num_pre_relax);
-   int                   num_post_relax      = (SparseMSG_data ->
-                                                num_post_relax);
-   int                   total_num_levels    = (SparseMSG_data ->
-                                                total_num_levels);
-   int                   num_grids           = (SparseMSG_data -> num_grids);
-   int                  *num_levels          = (SparseMSG_data -> num_levels);
-   hypre_StructMatrix  **A_array             = (SparseMSG_data -> A_array);
-   hypre_StructMatrix  **P_array             = (SparseMSG_data -> P_array);
-   hypre_StructMatrix  **RT_array            = (SparseMSG_data -> RT_array);
-   hypre_StructVector  **b_array             = (SparseMSG_data -> b_array);
-   hypre_StructVector  **x_array             = (SparseMSG_data -> x_array);
-   hypre_StructVector  **r_array             = (SparseMSG_data -> r_array);
-   hypre_StructVector  **e_array             = (SparseMSG_data -> e_array);
-   hypre_StructVector  **tx_array            = (SparseMSG_data -> tx_array);
-   void                **relax_data_array    = (SparseMSG_data ->
-                                                relax_data_array);
-   void                **matvec_data_array   = (SparseMSG_data ->
-                                                matvec_data_array);
-   void                **restrict_data_array = (SparseMSG_data ->
-                                                restrict_data_array);
-   void                **interp_data_array   = (SparseMSG_data ->
-                                                interp_data_array);
-   int                   logging             = (SparseMSG_data -> logging);
-   double               *restrict_weights    = (SparseMSG_data ->
-                                                restrict_weights);
-   double               *interp_weights      = (SparseMSG_data ->
-                                                interp_weights);
-   double               *norms               = (SparseMSG_data -> norms);
-   double               *rel_norms           = (SparseMSG_data -> rel_norms);
+   double                tol                 = (smsg_data -> tol);
+   int                   max_iter            = (smsg_data -> max_iter);
+   int                   rel_change          = (smsg_data -> rel_change);
+   int                   zero_guess          = (smsg_data -> zero_guess);
+   int                   jump                = (smsg_data -> jump);
+   int                   num_pre_relax       = (smsg_data -> num_pre_relax);
+   int                   num_post_relax      = (smsg_data -> num_post_relax);
+   int                   num_fine_relax      = (smsg_data -> num_fine_relax);
+   int                  *num_grids           = (smsg_data -> num_grids);
+   int                   num_all_grids       = (smsg_data -> num_all_grids);
+   int                   num_levels          = (smsg_data -> num_levels);
+   hypre_StructMatrix  **A_array             = (smsg_data -> A_array);
+   hypre_StructMatrix  **Px_array            = (smsg_data -> Px_array);
+   hypre_StructMatrix  **Py_array            = (smsg_data -> Py_array);
+   hypre_StructMatrix  **Pz_array            = (smsg_data -> Pz_array);
+   hypre_StructMatrix  **RTx_array           = (smsg_data -> RTx_array);
+   hypre_StructMatrix  **RTy_array           = (smsg_data -> RTy_array);
+   hypre_StructMatrix  **RTz_array           = (smsg_data -> RTz_array);
+   hypre_StructVector  **b_array             = (smsg_data -> b_array);
+   hypre_StructVector  **x_array             = (smsg_data -> x_array);
+   hypre_StructVector  **t_array             = (smsg_data -> t_array);
+   hypre_StructVector  **r_array             = (smsg_data -> r_array);
+   hypre_StructVector  **e_array             = (smsg_data -> e_array);
+   hypre_StructVector  **visitx_array        = (smsg_data -> visitx_array);
+   hypre_StructVector  **visity_array        = (smsg_data -> visity_array);
+   hypre_StructVector  **visitz_array        = (smsg_data -> visitz_array);
+   int                  *grid_on             = (smsg_data -> grid_on);
+   void                **relax_array         = (smsg_data -> relax_array);
+   void                **matvec_array        = (smsg_data -> matvec_array);
+   void                **restrictx_array     = (smsg_data -> restrictx_array);
+   void                **restricty_array     = (smsg_data -> restricty_array);
+   void                **restrictz_array     = (smsg_data -> restrictz_array);
+   void                **interpx_array       = (smsg_data -> interpx_array);
+   void                **interpy_array       = (smsg_data -> interpy_array);
+   void                **interpz_array       = (smsg_data -> interpz_array);
+   int                   logging             = (smsg_data -> logging);
+   double               *norms               = (smsg_data -> norms);
+   double               *rel_norms           = (smsg_data -> rel_norms);
+
+   int                  *restrict_count;
 
    double                b_dot_b, r_dot_r, eps;
    double                e_dot_e, x_dot_x;
                     
-   int                   i,l,lx,ly,lz;
-   int                   index,index2;                              
+   int                   i, l, lx, ly, lz;
+   int                   lymin, lymax, lzmin, lzmax;
+   int                   fi, ci;                              
    int                   ierr = 0;
 
 #if DEBUG
@@ -80,7 +85,7 @@ hypre_SparseMSGSolve( void               *SparseMSG_vdata,
     * Initialize some things and deal with special cases
     *-----------------------------------------------------*/
 
-   hypre_BeginTiming(SparseMSG_data -> time_index);
+   hypre_BeginTiming(smsg_data -> time_index);
 
    hypre_StructMatrixDestroy(A_array[0]);
    hypre_StructVectorDestroy(b_array[0]);
@@ -89,7 +94,7 @@ hypre_SparseMSGSolve( void               *SparseMSG_vdata,
    b_array[0] = hypre_StructVectorRef(b);
    x_array[0] = hypre_StructVectorRef(x);
 
-   (SparseMSG_data -> num_iterations) = 0;
+   (smsg_data -> num_iterations) = 0;
 
    /* if max_iter is zero, return */
    if (max_iter == 0)
@@ -100,16 +105,16 @@ hypre_SparseMSGSolve( void               *SparseMSG_vdata,
          hypre_StructVectorSetConstantValues(x, 0.0);
       }
 
-      hypre_EndTiming(SparseMSG_data -> time_index);
+      hypre_EndTiming(smsg_data -> time_index);
       return ierr;
    }
 
    /* part of convergence check */
    if (tol > 0.0)
    {
-      /* eps = (tol^2)*<b,b> */
+      /* eps = (tol^2) */
       b_dot_b = hypre_StructInnerProd(b_array[0], b_array[0]);
-      eps = (tol*tol)*b_dot_b;
+      eps = tol*tol;
 
       /* if rhs is zero, return a zero solution */
       if (b_dot_b == 0.0)
@@ -121,10 +126,12 @@ hypre_SparseMSGSolve( void               *SparseMSG_vdata,
             rel_norms[0] = 0.0;
          }
 
-         hypre_EndTiming(SparseMSG_data -> time_index);
+         hypre_EndTiming(smsg_data -> time_index);
          return ierr;
       }
    }
+
+   restrict_count = hypre_TAlloc(int, num_all_grids);
 
    /*-----------------------------------------------------
     * Do V-cycles:
@@ -134,19 +141,20 @@ hypre_SparseMSGSolve( void               *SparseMSG_vdata,
    for (i = 0; i < max_iter; i++)
    {
       /*--------------------------------------------------
-       * Down cycle
+       * Down cycle:
+       *   Note that r = b = x through the jump region
        *--------------------------------------------------*/
 
       /* fine grid pre-relaxation */
-      hypre_PFMGRelaxSetPreRelax(relax_data_array[0]);
-      hypre_PFMGRelaxSetMaxIter(relax_data_array[0], num_pre_relax);
-      hypre_PFMGRelaxSetZeroGuess(relax_data_array[0], zero_guess);
-      hypre_PFMGRelax(relax_data_array[0], A_array[0], b_array[0], x_array[0]);
+      hypre_PFMGRelaxSetPreRelax(relax_array[0]);
+      hypre_PFMGRelaxSetMaxIter(relax_array[0], num_fine_relax);
+      hypre_PFMGRelaxSetZeroGuess(relax_array[0], zero_guess);
+      hypre_PFMGRelax(relax_array[0], A_array[0], b_array[0], x_array[0]);
       zero_guess = 0;
 
       /* compute fine grid residual (b - Ax) */
       hypre_StructCopy(b_array[0], r_array[0]);
-      hypre_StructMatvecCompute(matvec_data_array[0],
+      hypre_StructMatvecCompute(matvec_array[0],
                                 -1.0, A_array[0], x_array[0], 1.0, r_array[0]);
 
       /* convergence check */
@@ -157,24 +165,22 @@ hypre_SparseMSGSolve( void               *SparseMSG_vdata,
          if (logging > 0)
          {
             norms[i] = sqrt(r_dot_r);
-#if 0
-            if (i)
-            {
-               printf("Convergence rate : %f\n",(norms[i]/norms[i-1]));
-            }
-#endif
             if (b_dot_b > 0)
                rel_norms[i] = sqrt(r_dot_r/b_dot_b);
             else
                rel_norms[i] = 0.0;
          }
+/* RDF */
+#if 0
+printf("iter = %d, rel_norm = %e\n", i, rel_norms[i]);
+#endif
 
          /* always do at least 1 V-cycle */
-         if ((r_dot_r < eps) && (i > 0))
+         if ((r_dot_r/b_dot_b < eps) && (i > 0))
          {
             if (rel_change)
             {
-               if ((e_dot_e/x_dot_x) < (eps/b_dot_b))
+               if ((e_dot_e/x_dot_x) < eps)
                   break;
             }
             else
@@ -184,242 +190,128 @@ hypre_SparseMSGSolve( void               *SparseMSG_vdata,
          }
       }
 
-      if (total_num_levels > 1)
+      if (num_levels > 1)
       {
-         /* compute the restricted residuals through the jump */
-         for (l = 1; l <= (jump+1); l++)
-         { 
-            for (lz = 0; lz <= hypre_min(l,(num_levels[2]-1)); lz++)
-            {
-               for (ly = 0; ly <= hypre_min(l,(num_levels[1]-1)); ly++)
-               {
-                  lx = l - (lz + ly);
-                  
-                  /* if lx is a viable index then restriction can proceed */
-                  if (lx >= 0 && lx <= (num_levels[0]-1))
-                  {
-                     /* compute the array index */
-                     hypre_SparseMSGSetArrayIndex(
-                        lx,ly,lz,num_levels,index);
-
-                     /* initialize b_array */
-                     hypre_StructVectorSetConstantValues(b_array[index], 0.0);
-                        
-                     if (lx > 0)
-                     {
-                        /* restrict from ((lx-1),ly,lz) to (lx,ly,lz) */
-                        hypre_SparseMSGSetArrayIndex(
-                           (lx-1),ly,lz,num_levels,index2);
-                        hypre_SemiRestrict(restrict_data_array[3*index2],
-                                           RT_array[3*index2],
-                                           r_array[index2],
-                                           tx_array[index]);
-                        hypre_StructAxpy(restrict_weights[3*index],
-                                         tx_array[index], b_array[index]);
-#if DEBUG
-                        sprintf(filename, "zoutSMSG_xdown.%02d_%02d",
-                                index2, 0);
-                        hypre_StructVectorPrint(filename, x_array[index2], 0);
-                        sprintf(filename, "zoutSMSG_rdown.%02d_%02d",
-                                index2, 0);
-                        hypre_StructVectorPrint(filename, r_array[index2], 0);
-                        sprintf(filename, "zoutSMSG_txdown.%02d_%02d",
-                                index, 0);
-                        hypre_StructVectorPrint(filename, tx_array[index], 0);
-#endif
-                     }
-                     if (ly > 0)
-                     {
-                        /* restrict from (lx,(ly-1),lz) to (lx,ly,lz) */
-                        hypre_SparseMSGSetArrayIndex(
-                           lx,(ly-1),lz,num_levels,index2);
-                        hypre_SemiRestrict(restrict_data_array[(3*index2)+1],
-                                           RT_array[(3*index2)+1],
-                                           r_array[index2],
-                                           tx_array[index]);
-                        hypre_StructAxpy(restrict_weights[(3*index)+1],
-                                         tx_array[index], b_array[index]);
-#if DEBUG
-                        sprintf(filename, "zoutSMSG_xdown.%02d_%02d",
-                                index2, 1);
-                        hypre_StructVectorPrint(filename, x_array[index2], 0);
-                        sprintf(filename, "zoutSMSG_rdown.%02d_%02d",
-                                index2, 1);
-                        hypre_StructVectorPrint(filename, r_array[index2], 0);
-                        sprintf(filename, "zoutSMSG_txdown.%02d_%02d",
-                                index, 1);
-                        hypre_StructVectorPrint(filename, tx_array[index], 0);
-#endif
-                     }
-                     if (lz > 0)
-                     {
-                        /* restrict from (lx,ly,(lz-1)) to (lx,ly,lz) */
-                        hypre_SparseMSGSetArrayIndex(
-                           lx,ly,(lz-1),num_levels,index2);
-                        hypre_SemiRestrict(restrict_data_array[(3*index2)+2],
-                                           RT_array[(3*index2)+2],
-                                           r_array[index2],
-                                           tx_array[index]);
-                        hypre_StructAxpy(restrict_weights[(3*index)+2],
-                                         tx_array[index], b_array[index]);
-#if DEBUG
-                        sprintf(filename, "zoutSMSG_xdown.%02d_%02d",
-                                index2, 2);
-                        hypre_StructVectorPrint(filename, x_array[index2], 0);
-                        sprintf(filename, "zoutSMSG_rdown.%02d_%02d",
-                                index2, 2);
-                        hypre_StructVectorPrint(filename, r_array[index2], 0);
-                        sprintf(filename, "zoutSMSG_txdown.%02d_%02d",
-                                index, 2);
-                        hypre_StructVectorPrint(filename, tx_array[index], 0);
-#endif
-                     }
-#if DEBUG
-                     sprintf(filename, "zoutSMSG_b.%02d", index);
-                     hypre_StructVectorPrint(filename, b_array[index], 0);
-#endif
-                        
-                     if (l == (jump+1))
-                     {
-                        /* pre-relaxation */
-                        hypre_PFMGRelaxSetPreRelax(relax_data_array[index]);
-                        hypre_PFMGRelaxSetMaxIter(relax_data_array[index],
-                                                  num_pre_relax);
-                        hypre_PFMGRelaxSetZeroGuess(relax_data_array[index],
-                                                    1);
-                        hypre_PFMGRelax(relax_data_array[index],
-                                        A_array[index], b_array[index],
-                                        x_array[index]);
-                        /* compute residual (b - Ax) */
-                        hypre_StructCopy(b_array[index], r_array[index]);
-                        hypre_StructMatvecCompute(
-                           matvec_data_array[index],-1.0, A_array[index], 
-                           x_array[index],1.0, r_array[index]);
-                     }
-                     else
-                     {
-                        /* set x = 0, so r = (b-Ax) = b */
-                        hypre_StructVectorSetConstantValues(
-                           x_array[index], 0.0);
-                        hypre_StructCopy(b_array[index], r_array[index]);
-                     }
-                  }
-               }
-            }
+         /* initialize restrict_count */
+         for (fi = 0; fi < num_all_grids; fi++)
+         {
+            restrict_count[fi] = 0;
          }
 
-
-         /* complete down cycle after jump */
-         for (l = (jump+2); l <= (total_num_levels-1); l++)
-         { 
-            for (lz = 0; lz <= hypre_min(l,(num_levels[2]-1)); lz++)
+         for (l = 0; l <= (num_levels - 2); l++)
+         {
+            lzmin = hypre_max((l - num_grids[1] - num_grids[0] + 2), 0);
+            lzmax = hypre_min((l), (num_grids[2] - 1));
+            for (lz = lzmin; lz <= lzmax; lz++)
             {
-               for (ly = 0; ly <= hypre_min(l,(num_levels[1]-1)); ly++)
+               lymin = hypre_max((l - lz - num_grids[0] + 1), 0);
+               lymax = hypre_min((l - lz), (num_grids[1] - 1));
+               for (ly = lymin; ly <= lymax; ly++)
                {
-                  lx = l - (lz + ly);
-                  
-                  /* if lx is a viable index then restriction can proceed */
-                  if (lx >= 0 && lx <= (num_levels[0]-1))
+                  lx = l - lz - ly;
+
+                  hypre_SparseMSGMapIndex(lx, ly, lz, num_grids, fi);
+
+                  if (!grid_on[fi])
                   {
-                     /* compute the array index */
-                     hypre_SparseMSGSetArrayIndex(
-                        lx,ly,lz,num_levels,index);   
+                     break;
+                  }
 
-                     /* initialize b_array */
-                     hypre_StructVectorSetConstantValues(b_array[index], 0.0);
-                     
-                     if (lx > 0)
-                     {
-                        /* restrict from ((lx-1),ly,lz) to (lx,ly,lz) */
-                        hypre_SparseMSGSetArrayIndex(
-                           (lx-1),ly,lz,num_levels,index2);
-                        hypre_SemiRestrict(restrict_data_array[3*index2],
-                                           RT_array[3*index2],
-                                           r_array[index2],
-                                           tx_array[index]);
-                        hypre_StructAxpy(restrict_weights[3*index],
-                                         tx_array[index], b_array[index]);
-#if DEBUG
-                        sprintf(filename, "zoutSMSG_xdown.%02d_%02d",
-                                index2, 0);
-                        hypre_StructVectorPrint(filename, x_array[index2], 0);
-                        sprintf(filename, "zoutSMSG_rdown.%02d_%02d",
-                                index2, 0);
-                        hypre_StructVectorPrint(filename, r_array[index2], 0);
-                        sprintf(filename, "zoutSMSG_txdown.%02d_%02d",
-                                index, 0);
-                        hypre_StructVectorPrint(filename, tx_array[index], 0);
-#endif
-                     }
-                     if (ly > 0)
-                     {
-                        /* restrict from (lx,(ly-1),lz) to (lx,ly,lz) */
-                        hypre_SparseMSGSetArrayIndex(
-                           lx,(ly-1),lz,num_levels,index2);
-                        hypre_SemiRestrict(restrict_data_array[(3*index2)+1],
-                                           RT_array[(3*index2)+1],
-                                           r_array[index2],
-                                           tx_array[index]);
-                        hypre_StructAxpy(restrict_weights[(3*index)+1],
-                                         tx_array[index], b_array[index]);
-#if DEBUG
-                        sprintf(filename, "zoutSMSG_xdown.%02d_%02d",
-                                index2, 1);
-                        hypre_StructVectorPrint(filename, x_array[index2], 0);
-                        sprintf(filename, "zoutSMSG_rdown.%02d_%02d",
-                                index2, 1);
-                        hypre_StructVectorPrint(filename, r_array[index2], 0);
-                        sprintf(filename, "zoutSMSG_txdown.%02d_%02d",
-                                index, 1);
-                        hypre_StructVectorPrint(filename, tx_array[index], 0);
-#endif
-                     }
-                     if (lz > 0)
-                     {
-                        /* restrict from (lx,ly,(lz-1)) to (lx,ly,lz) */
-                        hypre_SparseMSGSetArrayIndex(
-                           lx,ly,(lz-1),num_levels,index2);
-                        hypre_SemiRestrict(restrict_data_array[(3*index2)+2],
-                                           RT_array[(3*index2)+2],
-                                           r_array[index2],
-                                           tx_array[index]);
-                        hypre_StructAxpy(restrict_weights[(3*index)+2],
-                                         tx_array[index], b_array[index]);
-#if DEBUG
-                        sprintf(filename, "zoutSMSG_xdown.%02d_%02d",
-                                index2, 2);
-                        hypre_StructVectorPrint(filename, x_array[index2], 0);
-                        sprintf(filename, "zoutSMSG_rdown.%02d_%02d",
-                                index2, 2);
-                        hypre_StructVectorPrint(filename, r_array[index2], 0);
-                        sprintf(filename, "zoutSMSG_txdown.%02d_%02d",
-                                index, 2);
-                        hypre_StructVectorPrint(filename, tx_array[index], 0);
-#endif
-                     }
+                  if (restrict_count[fi] > 1)
+                  {
+                     hypre_StructScale((1.0/restrict_count[fi]), b_array[fi]);
+                  }
 
-#if DEBUG
-                     sprintf(filename, "zoutSMSG_b.%02d", index);
-                     hypre_StructVectorPrint(filename, b_array[index], 0);
-#endif
-                     if (l < (total_num_levels-1))
+                  if (l > jump)
+                  {
+                     /* pre-relaxation */
+                     hypre_PFMGRelaxSetPreRelax(relax_array[fi]);
+                     hypre_PFMGRelaxSetMaxIter(relax_array[fi], num_pre_relax);
+                     hypre_PFMGRelaxSetZeroGuess(relax_array[fi], 1);
+                     hypre_PFMGRelax(relax_array[fi], A_array[fi], b_array[fi],
+                                     x_array[fi]);
+
+                     /* compute residual (b - Ax) */
+                     hypre_StructCopy(b_array[fi], r_array[fi]);
+                     hypre_StructMatvecCompute(matvec_array[fi],
+                                               -1.0, A_array[fi], x_array[fi],
+                                               1.0, r_array[fi]);
+                  }
+                        
+                  if ((lx+1) < num_grids[0])
+                  {
+                     /* restrict to ((lx+1), ly, lz) */
+                     hypre_SparseMSGMapIndex((lx+1), ly, lz, num_grids, ci);
+                     if (grid_on[ci])
                      {
-                        /* pre-relaxation */
-                        hypre_PFMGRelaxSetPreRelax(relax_data_array[index]);
-                        hypre_PFMGRelaxSetMaxIter(relax_data_array[index],
-                                                  num_pre_relax);
-                        hypre_PFMGRelaxSetZeroGuess(relax_data_array[index],
-                                                    1);
-                        hypre_PFMGRelax(relax_data_array[index],
-                                        A_array[index], b_array[index],
-                                        x_array[index]);
-                        /* compute residual (b - Ax) */
-                        hypre_StructCopy(b_array[index], r_array[index]);
-                        hypre_StructMatvecCompute(
-                           matvec_data_array[index],-1.0, A_array[index], 
-                           x_array[index], 1.0, r_array[index]);
+                        if (restrict_count[ci])
+                        {
+                           hypre_SparseMSGRestrict(restrictx_array[fi],
+                                                   RTx_array[lx], r_array[fi],
+                                                   t_array[ci]);
+                           hypre_StructAxpy(1.0, t_array[ci], b_array[ci]);
+                        }
+                        else
+                        {
+                           hypre_SparseMSGRestrict(restrictx_array[fi],
+                                                   RTx_array[lx], r_array[fi],
+                                                   b_array[ci]);
+                        }
+                        restrict_count[ci]++;
                      }
                   }
+                  if ((ly+1) < num_grids[1])
+                  {
+                     /* restrict to (lx, (ly+1), lz) */
+                     hypre_SparseMSGMapIndex(lx, (ly+1), lz, num_grids, ci);
+                     if (grid_on[ci])
+                     {
+                        if (restrict_count[ci])
+                        {
+                           hypre_SparseMSGRestrict(restricty_array[fi],
+                                                   RTy_array[ly], r_array[fi],
+                                                   t_array[ci]);
+                           hypre_StructAxpy(1.0, t_array[ci], b_array[ci]);
+                        }
+                        else
+                        {
+                           hypre_SparseMSGRestrict(restricty_array[fi],
+                                                   RTy_array[ly], r_array[fi],
+                                                   b_array[ci]);
+                        }
+                        restrict_count[ci]++;
+                     }
+                  }
+                  if ((lz+1) < num_grids[2])
+                  {
+                     /* restrict to (lx, ly, (lz+1)) */
+                     hypre_SparseMSGMapIndex(lx, ly, (lz+1), num_grids, ci);
+                     if (grid_on[ci])
+                     {
+                        if (restrict_count[ci])
+                        {
+                           hypre_SparseMSGRestrict(restrictz_array[fi],
+                                                   RTz_array[lz], r_array[fi],
+                                                   t_array[ci]);
+                           hypre_StructAxpy(1.0, t_array[ci], b_array[ci]);
+                        }
+                        else
+                        {
+                           hypre_SparseMSGRestrict(restrictz_array[fi],
+                                                   RTz_array[lz], r_array[fi],
+                                                   b_array[ci]);
+                        }
+                        restrict_count[ci]++;
+                     }
+                  }
+#if DEBUG
+                  sprintf(filename, "zoutSMSG_bdown.%d.%d.%d", lx, ly, lz);
+                  hypre_StructVectorPrint(filename, b_array[fi], 0);
+                  sprintf(filename, "zoutSMSG_xdown.%d.%d.%d", lx, ly, lz);
+                  hypre_StructVectorPrint(filename, x_array[fi], 0);
+                  sprintf(filename, "zoutSMSG_rdown.%d.%d.%d", lx, ly, lz);
+                  hypre_StructVectorPrint(filename, r_array[fi], 0);
+#endif
                }
             }
          }
@@ -428,165 +320,107 @@ hypre_SparseMSGSolve( void               *SparseMSG_vdata,
           * Bottom
           *--------------------------------------------------*/
       
-         hypre_PFMGRelaxSetZeroGuess(relax_data_array[index], 1);
-         hypre_PFMGRelax(relax_data_array[index], A_array[index], 
-                         b_array[index], x_array[index]);
+         fi = num_all_grids - 1;
+
+         if (restrict_count[fi] > 1)
+         {
+            hypre_StructScale((1.0/restrict_count[fi]), b_array[fi]);
+         }
+
+         hypre_PFMGRelaxSetZeroGuess(relax_array[fi], 1);
+         hypre_PFMGRelax(relax_array[fi], A_array[fi], b_array[fi],
+                         x_array[fi]);
 
 #if DEBUG
-         sprintf(filename, "zoutSMSG_xbottom.%02d", index);
-         hypre_StructVectorPrint(filename, x_array[index], 0);
+         sprintf(filename, "zoutSMSG_bbottom.%d.%d.%d", lx, ly, lz);
+         hypre_StructVectorPrint(filename, b_array[fi], 0);
+         sprintf(filename, "zoutSMSG_xbottom.%d.%d.%d", lx, ly, lz);
+         hypre_StructVectorPrint(filename, x_array[fi], 0);
 #endif
 
          /*--------------------------------------------------
           * Up cycle
+          *   Note that r = b = x through the jump region
           *--------------------------------------------------*/
 
-         for (l = (total_num_levels - 2); l >= (jump + 1); l--)
+         for (l = (num_levels - 2); l >= 0; l--)
          {
-            for (lz = hypre_min(l,(num_levels[2]-1)); lz >= 0; lz--)
+            lzmin = hypre_max((l - num_grids[1] - num_grids[0] + 2), 0);
+            lzmax = hypre_min((l), (num_grids[2] - 1));
+            for (lz = lzmax; lz >= lzmin; lz--)
             {
-               for (ly = hypre_min(l,(num_levels[1]-1)); ly >= 0; ly--)
+               lymin = hypre_max((l - lz - num_grids[0] + 1), 0);
+               lymax = hypre_min((l - lz), (num_grids[1] - 1));
+               for (ly = lymax; ly >= lymin; ly--)
                {
-                  lx = l - (lz + ly);
+                  lx = l - lz - ly;
 
-                  if (lx >= 0 &&  lx <= (num_levels[0]-1))
-                  {
-                     /* compute the array index */
-                     hypre_SparseMSGSetArrayIndex(
-                        lx,ly,lz,num_levels,index);
+                  hypre_SparseMSGMapIndex(lx, ly, lz, num_grids, fi);
                      
-                     if (lx < (num_levels[0]-1))
-                     {
-                        /* interpolate from ((lx+1),ly,lz) to (lx,ly,lz) */
-                        hypre_SparseMSGSetArrayIndex(
-                           (lx+1),ly,lz,num_levels,index2);
-                        hypre_SemiInterp(interp_data_array[3*index],
-                                         P_array[3*index],
-                                         x_array[index2],
-                                         e_array[index]);
-                        hypre_StructAxpy(interp_weights[3*index],
-                                         e_array[index], x_array[index]);
-#if DEBUG
-                        sprintf(filename, "zoutSMSG_eup.%02d_%02d", index, 0);
-                        hypre_StructVectorPrint(filename, e_array[index], 0);
-#endif
-                     }
-                     if (ly < (num_levels[1]-1))
-                     {
-                        /* interpolate from (lx,(ly+1),lz) to (lx,ly,lz) */
-                        hypre_SparseMSGSetArrayIndex(
-                           lx,(ly+1),lz,num_levels,index2);
-                        hypre_SemiInterp(interp_data_array[(3*index)+1],
-                                         P_array[(3*index)+1],
-                                         x_array[index2],
-                                         e_array[index]);
-                        hypre_StructAxpy(interp_weights[(3*index)+1],
-                                         e_array[index], x_array[index]);
-#if DEBUG
-                        sprintf(filename, "zoutSMSG_eup.%02d_%02d", index, 1);
-                        hypre_StructVectorPrint(filename, e_array[index], 0);
-#endif
-                     }
-                     if (lz < (num_levels[2]-1))
-                     {
-                        /* interpolate from (lx,ly,(lz+1)) to (lx,ly,lz) */
-                        hypre_SparseMSGSetArrayIndex(
-                           lx,ly,(lz+1),num_levels,index2);
-                        hypre_SemiInterp(interp_data_array[(3*index)+2],
-                                         P_array[(3*index)+2],
-                                         x_array[index2],
-                                         e_array[index]);
-                        hypre_StructAxpy(interp_weights[(3*index)+2],
-                                         e_array[index], x_array[index]);
-#if DEBUG
-                        sprintf(filename, "zoutSMSG_eup.%02d_%02d", index, 2);
-                        hypre_StructVectorPrint(filename, e_array[index], 0);
-#endif
-                     }               
-#if DEBUG
-                     sprintf(filename, "zoutSMSG_xup.%02d", index);
-                     hypre_StructVectorPrint(filename, x_array[index], 0);
-#endif
-                     /* post-relaxation */
-                     hypre_PFMGRelaxSetPostRelax(relax_data_array[index]);
-                     hypre_PFMGRelaxSetMaxIter(relax_data_array[index],
-                                               num_post_relax);
-                     hypre_PFMGRelaxSetZeroGuess(relax_data_array[index], 0);
-                     hypre_PFMGRelax(relax_data_array[index], A_array[index],
-                                     b_array[index], x_array[index]);
-                  }
-               }
-            }
-         }
-   
-         
-         /* compute the interpolated error after the jump */
-         for (l = jump; l >= 0; l--)
-         {
-            for (lz = hypre_min(l,(num_levels[2]-1)); lz >= 0; lz--)
-            {
-               for (ly = hypre_min(l,(num_levels[1]-1)); ly >= 0; ly--)
-               {
-                  lx = l - (lz + ly);
-
-                  if (lx >= 0 &&  lx <= (num_levels[0]-1))
+                  if (!grid_on[fi])
                   {
-                     /* compute the array index */
-                     hypre_SparseMSGSetArrayIndex(
-                        lx,ly,lz,num_levels,index);
+                     break;
+                  }
 
-                     if (lx < (num_levels[0]-1))
+                  if ((l >= 1) && (l <= jump))
+                  {
+                     hypre_StructVectorSetConstantValues(x_array[fi], 0.0);
+                  }
+                  if ((lx+1) < num_grids[0])
+                  {
+                     /* interpolate from ((lx+1), ly, lz) */
+                     hypre_SparseMSGMapIndex((lx+1), ly, lz, num_grids, ci);
+                     if (grid_on[ci])
                      {
-                        /* interpolate from ((lx+1),ly,lz) to (lx,ly,lz) */
-                        hypre_SparseMSGSetArrayIndex(
-                           (lx+1),ly,lz,num_levels,index2);
-                        hypre_SemiInterp(interp_data_array[3*index],
-                                         P_array[3*index],
-                                         x_array[index2],
-                                         e_array[index]);
-                        hypre_StructAxpy(interp_weights[3*index],
-                                         e_array[index], x_array[index]);
-#if DEBUG
-                        sprintf(filename, "zoutSMSG_eup.%02d_%02d", index, 0);
-                        hypre_StructVectorPrint(filename, e_array[index], 0);
-#endif
+                        hypre_SparseMSGInterp(interpx_array[fi],
+                                              Px_array[lx], x_array[ci],
+                                              e_array[fi]);
+                        hypre_SparseMSGFilter(visitx_array[fi], e_array[fi],
+                                              lx, ly, lz, jump);
+                        hypre_StructAxpy(1.0, e_array[fi], x_array[fi]);
                      }
-                     if (ly < (num_levels[1]-1))
+                  }
+                  if ((ly+1) < num_grids[1])
+                  {
+                     /* interpolate from (lx, (ly+1), lz) */
+                     hypre_SparseMSGMapIndex(lx, (ly+1), lz, num_grids, ci);
+                     if (grid_on[ci])
                      {
-                        /* interpolate from (lx,(ly+1),lz) to (lx,ly,lz) */
-                        hypre_SparseMSGSetArrayIndex(
-                           lx,(ly+1),lz,num_levels,index2);
-                        hypre_SemiInterp(interp_data_array[(3*index)+1],
-                                         P_array[(3*index)+1],
-                                         x_array[index2],
-                                         e_array[index]);
-                        hypre_StructAxpy(interp_weights[(3*index)+1],
-                                         e_array[index], x_array[index]);
-#if DEBUG
-                        sprintf(filename, "zoutSMSG_eup.%02d_%02d", index, 1);
-                        hypre_StructVectorPrint(filename, e_array[index], 0);
-#endif
+                        hypre_SparseMSGInterp(interpy_array[fi],
+                                              Py_array[ly], x_array[ci],
+                                              e_array[fi]);
+                        hypre_SparseMSGFilter(visity_array[fi], e_array[fi],
+                                              lx, ly, lz, jump);
+                        hypre_StructAxpy(1.0, e_array[fi], x_array[fi]);
                      }
-                     if (lz < (num_levels[2]-1))
+                  }
+                  if ((lz+1) < num_grids[2])
+                  {
+                     /* interpolate from (lx, ly, (lz+1)) */
+                     hypre_SparseMSGMapIndex(lx, ly, (lz+1), num_grids, ci);
+                     if (grid_on[ci])
                      {
-                        /* interpolate from (lx,ly,(lz+1)) to (lx,ly,lz) */
-                        hypre_SparseMSGSetArrayIndex(
-                           lx,ly,(lz+1),num_levels,index2);
-                        hypre_SemiInterp(interp_data_array[(3*index)+2],
-                                         P_array[(3*index)+2],
-                                         x_array[index2],
-                                         e_array[index]);
-                        hypre_StructAxpy(interp_weights[(3*index)+2],
-                                         e_array[index], x_array[index]);
-#if DEBUG
-                        sprintf(filename, "zoutSMSG_eup.%02d_%02d", index, 2);
-                        hypre_StructVectorPrint(filename, e_array[index], 0);
-#endif
+                        hypre_SparseMSGInterp(interpz_array[fi],
+                                              Pz_array[lz], x_array[ci],
+                                              e_array[fi]);
+                        hypre_SparseMSGFilter(visitz_array[fi], e_array[fi],
+                                              lx, ly, lz, jump);
+                        hypre_StructAxpy(1.0, e_array[fi], x_array[fi]);
                      }
+                  }               
 #if DEBUG
-                     sprintf(filename, "zoutSMSG_xup.%02d", index);
-                     hypre_StructVectorPrint(filename, x_array[index], 0);
+                  sprintf(filename, "zoutSMSG_xup.%d.%d.%d", lx, ly, lz);
+                  hypre_StructVectorPrint(filename, x_array[fi], 0);
 #endif
+                  if (l > jump)
+                  {
+                     /* post-relaxation */
+                     hypre_PFMGRelaxSetPostRelax(relax_array[fi]);
+                     hypre_PFMGRelaxSetMaxIter(relax_array[fi],
+                                               num_post_relax);
+                     hypre_PFMGRelaxSetZeroGuess(relax_array[fi], 0);
+                     hypre_PFMGRelax(relax_array[fi], A_array[fi], b_array[fi],
+                                     x_array[fi]);
                   }
                }
             }
@@ -596,7 +430,7 @@ hypre_SparseMSGSolve( void               *SparseMSG_vdata,
       /* part of convergence check */
       if ((tol > 0.0) && (rel_change))
       {
-         if (total_num_levels > 1)
+         if (num_levels > 1)
          {
             e_dot_e = hypre_StructInnerProd(e_array[0], e_array[0]);
             x_dot_x = hypre_StructInnerProd(x_array[0], x_array[0]);
@@ -609,15 +443,15 @@ hypre_SparseMSGSolve( void               *SparseMSG_vdata,
       }
 
       /* fine grid post-relaxation */
-      hypre_PFMGRelaxSetPostRelax(relax_data_array[0]);
-      hypre_PFMGRelaxSetMaxIter(relax_data_array[0], num_post_relax);
-      hypre_PFMGRelaxSetZeroGuess(relax_data_array[0], 0);
-      hypre_PFMGRelax(relax_data_array[0], A_array[0], b_array[0], x_array[0]);
+      hypre_PFMGRelaxSetPostRelax(relax_array[0]);
+      hypre_PFMGRelaxSetMaxIter(relax_array[0], num_fine_relax);
+      hypre_PFMGRelaxSetZeroGuess(relax_array[0], 0);
+      hypre_PFMGRelax(relax_array[0], A_array[0], b_array[0], x_array[0]);
 
-      (SparseMSG_data -> num_iterations) = (i + 1);
+      (smsg_data -> num_iterations) = (i + 1);
    }
 
-   hypre_EndTiming(SparseMSG_data -> time_index);
+   hypre_EndTiming(smsg_data -> time_index);
 
    return ierr;
 }

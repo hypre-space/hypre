@@ -179,6 +179,7 @@ int HYPRE_StructSparseMSGSetNonZeroGuess( HYPRE_StructSolver solver );
 int HYPRE_StructSparseMSGSetRelaxType( HYPRE_StructSolver solver , int relax_type );
 int HYPRE_StructSparseMSGSetNumPreRelax( HYPRE_StructSolver solver , int num_pre_relax );
 int HYPRE_StructSparseMSGSetNumPostRelax( HYPRE_StructSolver solver , int num_post_relax );
+int HYPRE_StructSparseMSGSetNumFineRelax( HYPRE_StructSolver solver , int num_fine_relax );
 int HYPRE_StructSparseMSGSetLogging( HYPRE_StructSolver solver , int logging );
 int HYPRE_StructSparseMSGGetNumIterations( HYPRE_StructSolver solver , int *num_iterations );
 int HYPRE_StructSparseMSGGetFinalRelativeResidualNorm( HYPRE_StructSolver solver , double *norm );
@@ -438,30 +439,58 @@ int hypre_SMGSolve( void *smg_vdata , hypre_StructMatrix *A , hypre_StructVector
 
 /* sparse_msg.c */
 void *hypre_SparseMSGCreate( MPI_Comm comm );
-int hypre_SparseMSGDestroy( void *SparseMSG_vdata );
-int hypre_SparseMSGSetTol( void *SparseMSG_vdata , double tol );
-int hypre_SparseMSGSetMaxIter( void *SparseMSG_vdata , int max_iter );
-int hypre_SparseMSGSetJump( void *SparseMSG_vdata , int jump );
-int hypre_SparseMSGSetRelChange( void *SparseMSG_vdata , int rel_change );
-int hypre_SparseMSGSetZeroGuess( void *SparseMSG_vdata , int zero_guess );
-int hypre_SparseMSGSetRelaxType( void *SparseMSG_vdata , int relax_type );
-int hypre_SparseMSGSetNumPreRelax( void *SparseMSG_vdata , int num_pre_relax );
-int hypre_SparseMSGSetNumPostRelax( void *SparseMSG_vdata , int num_post_relax );
-int hypre_SparseMSGSetLogging( void *SparseMSG_vdata , int logging );
-int hypre_SparseMSGGetNumIterations( void *SparseMSG_vdata , int *num_iterations );
-int hypre_SparseMSGPrintLogging( void *SparseMSG_vdata , int myid );
-int hypre_SparseMSGGetFinalRelativeResidualNorm( void *SparseMSG_vdata , double *relative_residual_norm );
+int hypre_SparseMSGDestroy( void *smsg_vdata );
+int hypre_SparseMSGSetTol( void *smsg_vdata , double tol );
+int hypre_SparseMSGSetMaxIter( void *smsg_vdata , int max_iter );
+int hypre_SparseMSGSetJump( void *smsg_vdata , int jump );
+int hypre_SparseMSGSetRelChange( void *smsg_vdata , int rel_change );
+int hypre_SparseMSGSetZeroGuess( void *smsg_vdata , int zero_guess );
+int hypre_SparseMSGSetRelaxType( void *smsg_vdata , int relax_type );
+int hypre_SparseMSGSetNumPreRelax( void *smsg_vdata , int num_pre_relax );
+int hypre_SparseMSGSetNumPostRelax( void *smsg_vdata , int num_post_relax );
+int hypre_SparseMSGSetNumFineRelax( void *smsg_vdata , int num_fine_relax );
+int hypre_SparseMSGSetLogging( void *smsg_vdata , int logging );
+int hypre_SparseMSGGetNumIterations( void *smsg_vdata , int *num_iterations );
+int hypre_SparseMSGPrintLogging( void *smsg_vdata , int myid );
+int hypre_SparseMSGGetFinalRelativeResidualNorm( void *smsg_vdata , double *relative_residual_norm );
+
+/* sparse_msg2_setup_rap.c */
+hypre_StructMatrix *hypre_SparseMSG2CreateRAPOp( hypre_StructMatrix *R , hypre_StructMatrix *A , hypre_StructMatrix *P , hypre_StructGrid *coarse_grid , int cdir );
+int hypre_SparseMSG2BuildRAPSym( hypre_StructMatrix *A , hypre_StructMatrix *P , hypre_StructMatrix *R , int cdir , hypre_Index cindex , hypre_Index cstride , hypre_Index stridePR , hypre_StructMatrix *RAP );
+int hypre_SparseMSG2BuildRAPNoSym( hypre_StructMatrix *A , hypre_StructMatrix *P , hypre_StructMatrix *R , int cdir , hypre_Index cindex , hypre_Index cstride , hypre_Index stridePR , hypre_StructMatrix *RAP );
+
+/* sparse_msg3_setup_rap.c */
+hypre_StructMatrix *hypre_SparseMSG3CreateRAPOp( hypre_StructMatrix *R , hypre_StructMatrix *A , hypre_StructMatrix *P , hypre_StructGrid *coarse_grid , int cdir );
+int hypre_SparseMSG3BuildRAPSym( hypre_StructMatrix *A , hypre_StructMatrix *P , hypre_StructMatrix *R , int cdir , hypre_Index cindex , hypre_Index cstride , hypre_Index stridePR , hypre_StructMatrix *RAP );
+int hypre_SparseMSG3BuildRAPNoSym( hypre_StructMatrix *A , hypre_StructMatrix *P , hypre_StructMatrix *R , int cdir , hypre_Index cindex , hypre_Index cstride , hypre_Index stridePR , hypre_StructMatrix *RAP );
+
+/* sparse_msg_filter.c */
+int hypre_SparseMSGFilterSetup( hypre_StructMatrix *A , int *num_grids , int lx , int ly , int lz , int jump , hypre_StructVector *visitx , hypre_StructVector *visity , hypre_StructVector *visitz );
+int hypre_SparseMSGFilter( hypre_StructVector *visit , hypre_StructVector *e , int lx , int ly , int lz , int jump );
+int hypre_SparseMSGFilterSetup( hypre_StructMatrix *A , int *num_grids , int lx , int ly , int lz , int jump , hypre_StructVector *visitx , hypre_StructVector *visity , hypre_StructVector *visitz );
+int hypre_SparseMSGFilter( hypre_StructVector *visit , hypre_StructVector *e , int lx , int ly , int lz , int jump );
+
+/* sparse_msg_interp.c */
+void *hypre_SparseMSGInterpCreate( void );
+int hypre_SparseMSGInterpSetup( void *interp_vdata , hypre_StructMatrix *P , hypre_StructVector *xc , hypre_StructVector *e , hypre_Index cindex , hypre_Index findex , hypre_Index stride , hypre_Index strideP );
+int hypre_SparseMSGInterp( void *interp_vdata , hypre_StructMatrix *P , hypre_StructVector *xc , hypre_StructVector *e );
+int hypre_SparseMSGInterpDestroy( void *interp_vdata );
+
+/* sparse_msg_restrict.c */
+void *hypre_SparseMSGRestrictCreate( void );
+int hypre_SparseMSGRestrictSetup( void *restrict_vdata , hypre_StructMatrix *R , hypre_StructVector *r , hypre_StructVector *rc , hypre_Index cindex , hypre_Index findex , hypre_Index stride , hypre_Index strideR );
+int hypre_SparseMSGRestrict( void *restrict_vdata , hypre_StructMatrix *R , hypre_StructVector *r , hypre_StructVector *rc );
+int hypre_SparseMSGRestrictDestroy( void *restrict_vdata );
 
 /* sparse_msg_setup.c */
-int hypre_SparseMSGSetup( void *SparseMSG_vdata , hypre_StructMatrix *A , hypre_StructVector *b , hypre_StructVector *x );
-int hypre_SparseMSGComputeRestrictWeights( int *num_levels , double *restrict_weights );
-int hypre_SparseMSGComputeInterpWeights( int *num_levels , double *interp_weights );
+int hypre_SparseMSGSetup( void *smsg_vdata , hypre_StructMatrix *A , hypre_StructVector *b , hypre_StructVector *x );
 
-/* sparse_msg_setup_interp.c */
-int hypre_SparseMSGSetupInterpOp( hypre_StructMatrix *Q , hypre_Index findex , hypre_Index stride , hypre_StructMatrix *P );
+/* sparse_msg_setup_rap.c */
+hypre_StructMatrix *hypre_SparseMSGCreateRAPOp( hypre_StructMatrix *R , hypre_StructMatrix *A , hypre_StructMatrix *P , hypre_StructGrid *coarse_grid , int cdir );
+int hypre_SparseMSGSetupRAPOp( hypre_StructMatrix *R , hypre_StructMatrix *A , hypre_StructMatrix *P , int cdir , hypre_Index cindex , hypre_Index cstride , hypre_Index stridePR , hypre_StructMatrix *Ac );
 
 /* sparse_msg_solve.c */
-int hypre_SparseMSGSolve( void *SparseMSG_vdata , hypre_StructMatrix *A , hypre_StructVector *b , hypre_StructVector *x );
+int hypre_SparseMSGSolve( void *smsg_vdata , hypre_StructMatrix *A , hypre_StructVector *b , hypre_StructVector *x );
 
 /* thread_wrappers.c */
 void HYPRE_StructHybridCreateVoidPtr( void *argptr );
