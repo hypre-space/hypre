@@ -58,6 +58,17 @@ HYPRE_InitializeParCSRMatrix( HYPRE_ParCSRMatrix matrix )
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_ReadParCSRMatrix
+ *--------------------------------------------------------------------------*/
+
+HYPRE_ParCSRMatrix 
+HYPRE_ReadParCSRMatrix( MPI_Comm comm,
+                        char    *file_name )
+{
+   return ( (HYPRE_ParCSRMatrix) hypre_ReadParCSRMatrix( comm, file_name ));
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_PrintParCSRMatrix
  *--------------------------------------------------------------------------*/
 
@@ -96,6 +107,54 @@ HYPRE_GetDimsParCSR( HYPRE_ParCSRMatrix  matrix,
    *M = hypre_ParCSRMatrixGlobalNumRows((hypre_ParCSRMatrix *) matrix);
    *N = hypre_ParCSRMatrixGlobalNumRows((hypre_ParCSRMatrix *) matrix);
 
+   return( ierr );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_GetRowPartitioningParCSR
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_GetRowPartitioningParCSR( HYPRE_ParCSRMatrix  matrix,
+                                int **row_partitioning_ptr)
+{  
+   int ierr = 0;
+   int *row_partitioning, *row_starts;
+   int num_procs, i;
+
+   MPI_Comm_size(hypre_ParCSRMatrixComm((hypre_ParCSRMatrix *) matrix), 
+			&num_procs);
+   row_starts = hypre_ParCSRMatrixRowStarts((hypre_ParCSRMatrix *) matrix);
+   if (!row_starts) return -1;
+   row_partitioning = hypre_CTAlloc(int, num_procs+1);
+   for (i=0; i < num_procs + 1; i++)
+	row_partitioning[i] = row_starts[i];
+
+   *row_partitioning_ptr = row_partitioning;
+   return( ierr );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_GetColPartitioningParCSR
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_GetColPartitioningParCSR( HYPRE_ParCSRMatrix  matrix,
+                                int **col_partitioning_ptr)
+{  
+   int ierr = 0;
+   int *col_partitioning, *col_starts;
+   int num_procs, i;
+
+   MPI_Comm_size(hypre_ParCSRMatrixComm((hypre_ParCSRMatrix *) matrix), 
+			&num_procs);
+   col_starts = hypre_ParCSRMatrixColStarts((hypre_ParCSRMatrix *) matrix);
+   if (!col_starts) return -1;
+   col_partitioning = hypre_CTAlloc(int, num_procs+1);
+   for (i=0; i < num_procs + 1; i++)
+	col_partitioning[i] = col_starts[i];
+
+   *col_partitioning_ptr = col_partitioning;
    return( ierr );
 }
 
@@ -153,4 +212,31 @@ HYPRE_RestoreRowParCSRMatrix( HYPRE_ParCSRMatrix  matrix,
    ierr = hypre_RestoreRowParCSRMatrix( (hypre_ParCSRMatrix *) matrix,
                             row, size, col_ind, values );
    return( ierr );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_CSRMatrixToParCSRMatrix
+ *--------------------------------------------------------------------------*/
+
+HYPRE_ParCSRMatrix 
+HYPRE_CSRMatrixToParCSRMatrix( MPI_Comm comm,
+			       HYPRE_CSRMatrix A_CSR,
+			       int *row_partitioning,
+                               int *col_partitioning)
+{
+   return ( (HYPRE_ParCSRMatrix) hypre_CSRMatrixToParCSRMatrix( comm, 	
+		(hypre_CSRMatrix *) A_CSR, row_partitioning, 
+		col_partitioning) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_ParMatvec
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_ParMatvec( double alpha, HYPRE_ParCSRMatrix A, HYPRE_ParVector x,
+		 double beta, HYPRE_ParVector y)
+{
+   return ( hypre_ParMatvec( alpha, (hypre_ParCSRMatrix *) A,
+		(hypre_ParVector *) x, beta, (hypre_ParVector *) y) );
 }

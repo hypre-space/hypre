@@ -59,3 +59,69 @@ HYPRE_PrintParVector( HYPRE_ParVector  vector,
                                   file_name ) );
 }
 
+/*--------------------------------------------------------------------------
+ * HYPRE_SetParVectorConstantValues
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_SetParVectorConstantValues( HYPRE_ParVector  vector,
+                      		  double	   value )
+{
+   return ( hypre_SetParVectorConstantValues( (hypre_ParVector *) vector,
+                                  value ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_SetParVectorRandomValues
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_SetParVectorRandomValues( HYPRE_ParVector  vector,
+                      		int	         seed  )
+{
+   return ( hypre_SetParVectorRandomValues( (hypre_ParVector *) vector,
+                                  seed ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_CopyParVector
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_CopyParVector( HYPRE_ParVector x, HYPRE_ParVector y)
+{
+   return ( hypre_CopyParVector( (hypre_ParVector *) x,
+                                 (hypre_ParVector *) y ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_ScaleParVector
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_ScaleParVector( double value, HYPRE_ParVector x)
+{
+   return ( hypre_ScaleParVector( value, (hypre_ParVector *) x) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_ParInnerProd
+ *--------------------------------------------------------------------------*/
+
+double
+HYPRE_ParInnerProd( HYPRE_ParVector x, HYPRE_ParVector y)
+{
+   return ( hypre_ParInnerProd( (hypre_ParVector *) x, 
+				(hypre_ParVector *) y) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_VectorToParVector
+ *--------------------------------------------------------------------------*/
+
+HYPRE_ParVector
+HYPRE_VectorToParVector( MPI_Comm comm, HYPRE_Vector b, int *partitioning)
+{
+   return ( (HYPRE_ParVector) hypre_VectorToParVector (comm, 
+		(hypre_Vector *) b, partitioning ));
+}
