@@ -478,11 +478,7 @@ mail_summary () {
   AutotestFailureCount=0
   CLIST=""; ELIST=""
   DWRNCNT=0; DERRCNT=0
-  if test "${HYPRE_DST_DIR}" ; then
-    cd $HYPRE_DST_DIR
-  else
-    cd $HYPRE_AUTOTEST_DIR
-  fi
+  cd $HYPRE_AUTOTEST_DIR
   SUMFILE="autotest.$HYPRE_ARCH.`date '+%Y%m%d'`"
   if [ -z "$HYPRE_COMPILE_MACHINE" -o "$HYPRE_COMPILE_MACHINE" = "" ] ; then
     HYPRE_COMPILE_MACHINE=`hostname`
@@ -657,7 +653,7 @@ mail_summary () {
   printf "%s\n" "--------------------------------------------" >> $SUMFILE
   chgrp hypre $SUMFILE
   if test "${HYPRE_DST_DIR}" ; then
-    cp -p $SUMFILE $HYPRE_AUTOTEST_DIR 
+    cp -p $SUMFILE $HYPRE_DST_DIR 
   fi
   MAIL_HEADER="`uname -n` `uname -s`:`uname -r`.`uname -v`"
   if [ "$AutotestFailureCount" = "0" ] ; then
