@@ -92,9 +92,9 @@ hypre_PFMGSolve( void               *pfmg_vdata,
    /* part of convergence check */
    if (tol > 0.0)
    {
-      /* eps = (tol^2)*<b,b> */
+      /* eps = (tol^2) */
       b_dot_b = hypre_StructInnerProd(b_l[0], b_l[0]);
-      eps = (tol*tol)*b_dot_b;
+      eps = tol*tol;
 
       /* if rhs is zero, return a zero solution */
       if (b_dot_b == 0.0)
@@ -149,11 +149,11 @@ hypre_PFMGSolve( void               *pfmg_vdata,
          }
 
          /* always do at least 1 V-cycle */
-         if ((r_dot_r < eps) && (i > 0))
+         if ((r_dot_r/b_dot_b < eps) && (i > 0))
          {
             if (rel_change)
             {
-               if ((e_dot_e/x_dot_x) < (eps/b_dot_b))
+               if ((e_dot_e/x_dot_x) < eps)
                   break;
             }
             else

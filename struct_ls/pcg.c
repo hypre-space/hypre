@@ -224,7 +224,7 @@ hypre_PCGSetup( void *pcg_vdata,
  * where we let (for the time being) kappa_A(CA) = 1.
  * We implement the test as:
  *
- *       gamma = <C*r,r>  <  (tol^2)*<C*b,b> = eps
+ *       gamma = <C*r,r>/<C*b,b>  <  (tol^2) = eps
  *
  *--------------------------------------------------------------------------*/
 
@@ -292,7 +292,7 @@ hypre_PCGSolve( void *pcg_vdata,
       precond(precond_data, A, b, p);
       bi_prod = hypre_PCGInnerProd(p, b);
    }
-   eps = (tol*tol)*bi_prod;
+   eps = tol*tol;
 
    /* Check to see if the rhs vector b is zero */
    if (bi_prod == 0.0)
@@ -374,13 +374,13 @@ hypre_PCGSolve( void *pcg_vdata,
       }
 
       /* check for convergence */
-      if (i_prod < eps)
+      if (i_prod / bi_prod < eps)
       {
          if (rel_change && i_prod > guard_zero_residual)
          {
             pi_prod = hypre_PCGInnerProd(p,p);
             xi_prod = hypre_PCGInnerProd(x,x);
-            if ((alpha*alpha*pi_prod/xi_prod) < (eps/bi_prod))
+            if ((alpha*alpha*pi_prod/xi_prod) < eps)
                break;
          }
          else
