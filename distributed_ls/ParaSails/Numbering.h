@@ -14,13 +14,13 @@
 
 #include <stdio.h>
 #include "Common.h"
-/*#include "Matrix.h"*/
+#include "Matrix.h"
 #include "Hash.h"
 
 #ifndef _NUMBERING_H
 #define _NUMBERING_H
 
-typedef struct
+struct numbering
 {
     int   size;    /* max number of indices that can be stored */
     int   beg_row;
@@ -31,10 +31,11 @@ typedef struct
 
     int  *local_to_global;
     Hash *hash;
-}
-Numbering;
+};
 
-Numbering *NumberingCreate(int size, int beg_row, int end_row);
+typedef struct numbering Numbering;
+
+Numbering *NumberingCreate(Matrix *m, int size);
 void NumberingDestroy(Numbering *numb);
 void NumberingLocalToGlobal(Numbering *numb, int len, int *local, int *global);
 void NumberingGlobalToLocal(Numbering *numb, int len, int *global, int *local);

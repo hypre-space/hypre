@@ -15,7 +15,6 @@
 #include <stdio.h>
 #include "Common.h"
 #include "Mem.h"
-#include "Numbering.h"
 
 #ifndef _MATRIX_H
 #define _MATRIX_H
@@ -51,7 +50,7 @@ typedef struct
     MPI_Request *send_req2;
     MPI_Status  *statuses;
 
-    Numbering *numb;
+    struct numbering *numb;
 }
 Matrix;
 
@@ -66,8 +65,6 @@ void MatrixRead(Matrix *mat, char *filename);
 void RhsRead(double *rhs, Matrix *mat, char *filename);
 int  MatrixNnz(Matrix *mat);
 
-Numbering *MatrixNumbering(Matrix *mat);
-Numbering *MatrixNumberingCreate(Matrix *mat, int size);
 void MatrixComplete(Matrix *mat);
 void MatrixMatvec(Matrix *mat, double *x, double *y);
 void MatrixMatvecTrans(Matrix *mat, double *x, double *y);

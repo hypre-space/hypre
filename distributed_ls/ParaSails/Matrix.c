@@ -654,13 +654,10 @@ static void SetupSends(Matrix *mat, int *inlist)
 
 void MatrixComplete(Matrix *mat)
 {
-    int mype, npes, len;
+    int mype, npes;
     int *outlist, *inlist;
-    Hash *hash;
-
-    int row, i, *ind;
+    int row, len, *ind;
     double *val;
-    int num_external = 0;
 
     MPI_Comm_rank(mat->comm, &mype);
     MPI_Comm_size(mat->comm, &npes);
@@ -674,21 +671,8 @@ void MatrixComplete(Matrix *mat)
     outlist = (int *) calloc(npes, sizeof(int));
     inlist  = (int *) calloc(npes, sizeof(int));
 
-    /* determine number of external indices, and use as upper bound to
-       number of unique external indices */
-    for (row=0; row<=mat->end_row - mat->beg_row; row++)
-    {
-        MatrixGetRow(mat, row, &len, &ind, &val);
-	for (i=0; i<len; i++)
-	{
-	    if (ind[i] < mat->beg_row || ind[i] > mat->end_row)
-	        num_external++;
-	}
-    }
-
     /* Create Numbering object */
-    mat->numb = MatrixNumberingCreate(mat, 
-        num_external + mat->end_row - mat->beg_row + 20000);
+    mat->numb = NumberingCreate(mat, 50000);
 
     SetupReceives(mat, mat->numb->num_ind - mat->numb->num_loc,
         &mat->numb->local_to_global[mat->numb->num_loc], outlist);
@@ -800,103 +784,5 @@ void MatrixMatvecTrans(Matrix *mat, double *x, double *y)
         y[mat->sendind[i]] += mat->sendbuf[i];
 
     MPI_Waitall(mat->num_recv, mat->send_req2, mat->statuses);
-}
-
-/*--------------------------------------------------------------------------
- * MatrixNumbering - return numbering object stored in matrix
- *--------------------------------------------------------------------------*/
-
-Numbering *MatrixNumbering(Matrix *mat)
-{
-    return mat->numb;
-}
-
-/*--------------------------------------------------------------------------
- * MatrixNumberingCreate - Return (a pointer to) a numbering object.
- * size = maximum number of indices (size of local_to_global array)
- * size is also the maximum number of external indices (size will actually
- * be much larger than the number of external indices, but its hash table
- * needs to be this large.
- *
- * local indices start at 0
- * 0 .. num_loc-1, num_loc .. num_ind-1
- *
- * "local_to_global" and also construct a hash table "hash" and the array
- * "global_to_local" which are required to convert from global indexing
- * to local indexing.  The number of external indices is returned through
- * "lenp".
- *
- * local_to_global = external indices using base 0 (input buffer filled on out)
- * global_to_local = indexed by hash table (input buffer filled on output)
- *
- * new:
-for each row of the matrix, call
-NumberingGlobalToLocal, which will update the numbering object.
-However, we want the numbers from a processor to be contiguous.
-So, we want to sort the global indices in the local_to_global list,
-and this means we have to reconstruct global_to_local and the hash
-table.  This means we only need to construct local to global initially.
-IS THERE ANY other way of doing this?
-
- *--------------------------------------------------------------------------*/
-
-Numbering *MatrixNumberingCreate(Matrix *mat, int size)
-{
-    Numbering *numb = (Numbering *) malloc(sizeof(Numbering));
-    int row, i, len, *ind;
-    double *val;
-    int num_external = 0;
-    int *local_to_global; /* temp pointer */
-
-    numb->size    = size;
-    numb->beg_row = mat->beg_row;
-    numb->end_row = mat->end_row;
-    numb->num_loc = mat->end_row - mat->beg_row + 1;
-    numb->num_ind = mat->end_row - mat->beg_row + 1;
-    numb->num_ext = -1; /* not set yet */
-
-    numb->local_to_global = (int *) malloc(size * sizeof(int));
-    numb->hash            = HashCreate(size);
-
-    /* Set up the local part of local_to_global */
-    for (i=0; i<numb->num_loc; i++)
-        numb->local_to_global[i] = mat->beg_row + i;
-
-    /* Set up pointer to external part of local_to_global array */
-    local_to_global = &numb->local_to_global[numb->num_loc];
-
-    /* Fill local_to_global array */
-    for (row=0; row<=mat->end_row - mat->beg_row; row++)
-    {
-        MatrixGetRow(mat, row, &len, &ind, &val);
-
-        for (i=0; i<len; i++)
-        {
-            /* Only interested in external indices */
-	    if (ind[i] < mat->beg_row || ind[i] > mat->end_row)
-            {
-		if (HashLookup(numb->hash, ind[i]) == HASH_NOTFOUND)
-		{
-                    HashInsert(numb->hash, ind[i], num_external);
-                    local_to_global[num_external] = ind[i];
-		    num_external++;
-		}
-            }
-        }
-    }
-
-    /* Sort the indices */
-    shell_sort(num_external, local_to_global);
-
-    /* Redo the hash table for the sorted indices */
-    HashReset(numb->hash);
-
-    for (i=0; i<num_external; i++)
-        HashInsert(numb->hash, local_to_global[i], i + numb->num_loc);
-
-    numb->num_ind += num_external;
-    numb->num_ext = num_external;
-
-    return numb;
 }
 
