@@ -283,7 +283,7 @@ int MLI_Solver_GS::setParams( int ntimes, double *weights )
    if ( weights == NULL )
    {
       printf("MLI_Solver_GS::setParams - relaxWeights set to 0.5.\n");
-      for ( int i = 0; i < nsweeps; i++ ) relaxWeights_[i] = 0.5;
+      for ( i = 0; i < nsweeps; i++ ) relaxWeights_[i] = 0.5;
    }
    else
    {
