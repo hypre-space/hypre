@@ -7,12 +7,12 @@
 #include "mli_aggregation.h"
  
 /***********************************************************************
- * Function  : MLI_AMG_SA_GenProlongator
+ * Function  : MLI_AMG_SA_GenProlongators
  * Purpose   : create a prolongator matrix from Amat 
- * Inputs    : Amat, aggregation information 
+ * Inputs    : Amat (in Amat_array), aggregation information 
  **********************************************************************/
 
-int MLI_AMG_SA_GenAllProlongator(MLI_Aggregation *mli_aggr, 
+int MLI_AMG_SA_GenProlongators(MLI_Aggregation *mli_aggr, 
                                  hypre_ParCSRMatrix **Amat_array)
                                  hypre_ParCSRMatrix **Pmat_array)
 {
