@@ -104,6 +104,24 @@
 /* Define to 1 if you have the <unistd.h> header file. */
 #undef HAVE_UNISTD_H
 
+/* Define to 1 for Solaris. */
+#undef HYPRE_SOLARIS
+
+/* Define to 1 for Linux on platforms running Chaos2 with Elan. */
+#undef HYPRE_LINUX_CHAOS2
+
+/* Define to 1 for Linux platforms. */
+#undef HYPRE_LINUX
+
+/* Define to 1 for Alpha platforms. */
+#undef HYPRE_ALPHA
+
+/* Define to 1 for RS6000 platforms. */
+#undef HYPRE_RS6000
+
+/* Define to 1 for IRIX64 platforms. */
+#undef HYPRE_IRIX64
+
 /* Disable MPI, enable serial codes */
 #undef HYPRE_SEQUENTIAL
 

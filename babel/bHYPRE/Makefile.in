@@ -7,7 +7,7 @@
 # $Revision$
 #EHEADER***********************************************************************
 
-include $(top_srcdir)/config/Makefile.config
+include ../../config/Makefile.config
 include babel.make
 
 C_COMPILE_FLAGS=@CFLAGS@
@@ -163,7 +163,7 @@ veryclean: clean
 
 libbHYPRE.a: ${OBJS}
 	@echo  "Building $@ ... "
-	ar -rcu $@ ${OBJS}
-	@RANLIB@ $@
+	${AR} $@ ${OBJS}
+	${RANLIB} $@
 
 ${OBJS}: ${HEADERS}

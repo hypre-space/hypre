@@ -45,28 +45,28 @@ AC_DEFUN([HYPRE_FIND_BLAS],
                 hypre_blas_ok=internal ;;
   esac
 
-# Get fortran linker names of BLAS functions to check for.
-  AC_F77_FUNC(dgemm)
-
   hypre_blas_save_LIBS="$LIBS"
   LIBS="$LIBS $FLIBS"
+
+# Get fortran linker names of BLAS functions to check for.
+  AC_F77_FUNC(dgemm)
 
 # Is BLASLIBS environment variable set?
   if test $hypre_blas_ok = no; then
     if test "x$BLASLIBS" != x; then
-	save_LIBS="$LIBS"; LIBS="$BLASLIBS $LIBS"
+        save_LIBS="$LIBS"; LIBS="$BLASLIBS $LIBS"
 	AC_MSG_CHECKING([for $dgemm in $BLASLIBS])
 	AC_TRY_LINK_FUNC($dgemm, [hypre_blas_ok=yes], [BLASLIBS=""])
 	AC_MSG_RESULT($hypre_blas_ok)
-	LIBS="$save_LIBS"
+        LIBS="$save_LIBS"
     fi
   fi
 
 # BLAS linked to by default?  (happens on some supercomputers)
   if test $hypre_blas_ok = no; then
-	save_LIBS="$LIBS"; LIBS="$LIBS"
+        save_LIBS="$LIBS"; LIBS="$LIBS"
 	AC_CHECK_FUNC($dgemm, [hypre_blas_ok=yes; BLASLIBS="$LIBS"])
-	LIBS="$save_LIBS"
+        LIBS="$save_LIBS"
   fi
 
 # Generic BLAS library? 
@@ -124,7 +124,7 @@ AC_DEFUN([HYPRE_FIND_BLAS],
 	AC_DEFINE(HYPRE_USING_ESSL, 1, [Using essl for Blas])])
   fi
 
-  LIBS="$hypre_blas_save_LIBS"
+LIBS="$hypre_blas_save_LIBS"
 
 ### if no blas library was found; set to force configuring without-blas
   if test $hypre_blas_ok = no; then

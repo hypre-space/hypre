@@ -7,12 +7,27 @@
 # $Revision$
 #EHEADER***********************************************************************
 
+###############################################################################
+##  All configurable variables are defined in the file named Makefile.config.in
+##  When Autoconf is run, it will create a file named Makefile.config which
+##  will have all of the configurable variables replaced with their values.
+###############################################################################
+
 @SET_MAKE@
 
 SHELL = /bin/sh
 
 srcdir = @srcdir@
+top_srcdir = @top_srcdir@
+
 VPATH = @srcdir@
+
+HYPRE_SRC_TOP_DIR = @HYPRE_TOP_SRCDIR@
+HYPRE_BUILD_DIR = @HYPRE_TOP_SRCDIR@/hypre
+
+HYPRE_LIB_INSTALL = @HYPRE_LIBINSTALL@
+HYPRE_INC_INSTALL = @HYPRE_INCINSTALL@
+HYPRE_DOCS_INSTALL = @HYPRE_DOCSINSTALL@
 
 
 .SUFFIXES:
@@ -29,18 +44,54 @@ VPATH = @srcdir@
 
 
 F77       = @F77@
-FFLAGS    = @FFLAGS@ @F77FLAGS@
+FFLAGS    = @FFLAGS@ @F77FLAGS@ $(F77_COMPILE_FLAGS)
 
 CC        = @CC@
-CFLAGS    = @CFLAGS@
+CFLAGS    = @CFLAGS@ $(C_COMPILE_FLAGS)
 
 CXX       = @CXX@
-CXXFLAGS  = @CXX_FLAGS@
+CXXFLAGS  = @CXXFLAGS@ $(CXX_COMPILE_FLAGS)
 
 CPPFLAGS  = @DEFS@
 
-AR	  = @AR@ -rcu
+AR	  = ar -rcu
 RANLIB    = @RANLIB@
 
-LDFLAGS   = @LDFLAGS@
+LDFLAGS   = @LDFLAGS@ $(LOAD_FLAGS)
 LDLIBS    = @LDLIBS@
+LDLIBDIRS = @LDLIBDIRS@
+
+INCLUDES = @INCLUDES@
+LIBDIRS = @LIBDIRS@
+LIBS = @LIBS@
+FLIBS = @FLIBS@
+
+##################################################################
+##  LAPACK Library Flags 
+##################################################################
+LAPACKNEED = @LAPACKNEEDED@
+LAPACKLIBS = @LAPACKLIBS@
+LAPACKLIBDIRS = @LAPACKLIBDIRS@
+
+##################################################################
+##  BLAS Library Flags 
+##################################################################
+BLASNEED = @BLASNEEDED@
+BLASLIBS = @BLASLIBS@
+BLASLIBDIRS = @BLASLIBDIRS@
+
+##################################################################
+##  MPI options
+##################################################################
+MPIINCLUDE = @MPIINCLUDE@
+MPILIBDIRS = @MPILIBDIRS@
+MPILIBS = @MPILIBS@
+MPIFLAGS = @MPIFLAGS@
+
+##################################################################
+##  FEI options
+##################################################################
+FEINEED = @FEINEEDED@
+FEIINCLUDE = @FEIINCLUDE@
+FEILIBS = @FEILIBS@
+FEILIBDIRS = @FEILIBDIRS@

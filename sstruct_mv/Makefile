@@ -1,0 +1,85 @@
+#BHEADER***********************************************************************
+# (c) 2000   The Regents of the University of California
+#
+# See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
+# notice, contact person, and disclaimer.
+#
+# $Revision$
+#EHEADER***********************************************************************
+
+include ../config/Makefile.config
+
+CINCLUDES = ${INCLUDES} ${MPIINCLUDE}
+
+C_COMPILE_FLAGS = \
+ -I..\
+ -I$(srcdir)\
+ -I$(srcdir)/..\
+ -I$(srcdir)/../utilities\
+ -I$(srcdir)/../struct_mv\
+ -I$(srcdir)/../seq_mv\
+ -I$(srcdir)/../parcsr_mv\
+ -I$(srcdir)/../IJ_mv\
+ ${CINCLUDES}
+
+HEADERS =\
+ box_map.h\
+ headers.h\
+ HYPRE_sstruct_mv.h\
+ sstruct_graph.h\
+ sstruct_grid.h\
+ sstruct_matrix.h\
+ sstruct_mv.h\
+ sstruct_stencil.h\
+ sstruct_vector.h
+
+FILES =\
+ box_map.c\
+ HYPRE_sstruct_graph.c\
+ HYPRE_sstruct_grid.c\
+ HYPRE_sstruct_matrix.c\
+ HYPRE_sstruct_stencil.c\
+ HYPRE_sstruct_vector.c\
+ sstruct_axpy.c\
+ sstruct_copy.c\
+ sstruct_graph.c\
+ sstruct_grid.c\
+ sstruct_innerprod.c\
+ sstruct_matrix.c\
+ sstruct_matvec.c\
+ sstruct_overlap_innerprod.c\
+ sstruct_scale.c\
+ sstruct_stencil.c\
+ sstruct_vector.c
+
+OBJS = ${FILES:.c=.o}
+
+##################################################################
+# Targets
+##################################################################
+
+all: libHYPRE_sstruct_mv.a
+	cp -fp $(srcdir)/HYPRE_*.h $(HYPRE_BUILD_DIR)/include/.
+	cp -fp $(srcdir)/sstruct_mv.h $(HYPRE_BUILD_DIR)/include/.
+	cp -fp libHYPRE_*.a $(HYPRE_BUILD_DIR)/lib/.
+
+install: libHYPRE_sstruct_mv.a
+	cp -fp $(srcdir)/HYPRE_*.h $(HYPRE_INC_INSTALL)/.
+	cp -fp $(srcdir)/sstruct_mv.h $(HYPRE_INC_INSTALL)/.
+	cp -fp libHYPRE_*.a $(HYPRE_LIB_INSTALL)/.
+
+clean:
+	rm -f *.o lib*.a
+
+distclean: clean
+
+##################################################################
+# Rules
+##################################################################
+
+libHYPRE_sstruct_mv.a: ${OBJS}
+	@echo  "Building $@ ... "
+	${AR} $@ ${OBJS}
+	${RANLIB} $@
+
+${OBJS}: ${HEADERS}

@@ -16,6 +16,10 @@
 #ifndef HYPRE_FORT_HEADER
 #define HYPRE_FORT_HEADER
 
+#ifdef WIN32
+#include "mkl.h"
+#endif
+
 #if defined(F77_FUNC_)
 /* F77_FUNC_ macro assumes underscores exist in name */
 #  define hypre_NAME_C_CALLING_FORT(name,NAME) F77_FUNC_(name,NAME)
@@ -36,10 +40,19 @@
 #  define hypre_NAME_C_CALLING_FORT(name,NAME) name##__
 #  define hypre_NAME_FORT_CALLING_C(name,NAME) name##__
 
+#elif defined(HYPRE_LINUX_CHAOS2)
+
+#  define hypre_NAME_C_CALLING_FORT(name,NAME) name##_
+#  define hypre_NAME_FORT_CALLING_C(name,NAME) name##_
+
 #elif defined(HYPRE_HPPA)
 
 #  define hypre_NAME_C_CALLING_FORT(name,NAME) name
 #  define hypre_NAME_FORT_CALLING_C(name,NAME) name
+
+#elif defined(WIN32)
+#  define hypre_NAME_C_CALLING_FORT(name,NAME) NAME
+#  define hypre_NAME_FORT_CALLING_C(name,NAME) NAME
 
 #else
 
@@ -51,6 +64,10 @@
 #define hypre_F90_IFACE(name,NAME) hypre_NAME_FORT_CALLING_C(name,NAME)
 #define hypre_F90_NAME(name,NAME)  hypre_NAME_C_CALLING_FORT(name,NAME)
 
+#ifdef WIN32
+#define hypre_F90_NAME_BLAS(name,NAME) NAME
+#else
+
 #ifdef HYPRE_USING_HYPRE_BLAS
 #define hypre_F90_NAME_BLAS(name,NAME)  name##_
 #else
@@ -59,6 +76,7 @@
 #define hypre_F90_NAME_BLAS(name,NAME) F77_FUNC(name,NAME)
 #else
 #define hypre_F90_NAME_BLAS(name,NAME) hypre_NAME_C_CALLING_FORT(name,NAME)
+#endif
 #endif
 #endif
 

@@ -37,7 +37,7 @@ m4_define([HYPRE_TOP_SRC_DIR], [`pwd`])
 AC_PREREQ(2.59)
 AC_REVISION($Id$)
 AC_INIT(HYPRE_NAME, HYPRE_VERSION, HYPRE_BUGS, HYPRE_NAME)
-AC_CONFIG_HEADER([HYPRE_config.h:config/HYPRE_config.h.in])
+AC_CONFIG_HEADERS([HYPRE_config.h:config/HYPRE_config.h.in])
 AC_COPYRIGHT([This work was produced at the University of California,
 Lawrence Livermore National Laboratory (UC LLNL) under contract
 No. W-7405-ENG-48 (Contract 48) between the U.S. Department of Energy
@@ -67,6 +67,9 @@ AC_DEFINE([PACKAGE_TIME], ["HYPRE_TIME"], [Time of release])
 AC_DEFINE([PACKAGE_DATETIME], ["HYPRE_DATETIME"], [Date and time of release])
 PACKAGE_DATETIME="HYPRE_DATE HYPRE_TIME"
 AC_SUBST([PACKAGE_DATETIME])
+
+HYPRE_TOP_SRCDIR="HYPRE_TOP_SRC_DIR"
+AC_SUBST([HYPRE_TOP_SRCDIR])
 
 dnl *********************************************************************
 dnl * Define optional features
@@ -434,7 +437,7 @@ AC_ARG_WITH(blas-libs,
 [for blas_lib in $withval; do
    BLASLIBS="$BLASLIBS -l$blas_lib"
  done;
- BLASNEEDED="#";
+ BLASNEEDED="\##";
  casc_user_chose_blas=yes]
 )
 
@@ -448,7 +451,7 @@ AC_ARG_WITH(blas-lib-dirs,
 [for blas_lib_dir in $withval; do
    BLASLIBDIRS="-L$blas_lib_dir $BLASLIBDIRS"
  done;
- BLASNEEDED="#";
+ BLASNEEDED="\##";
  casc_user_chose_blas=yes]
 )
 
@@ -460,7 +463,7 @@ AC_ARG_WITH(lapack-libs,
 [for lapack_lib in $withval; do
    LAPACKLIBS="$LAPACKLIBS -l$lapack_lib"
  done;
- LAPACKNEEDED="#";
+ LAPACKNEEDED="\##";
  casc_user_chose_lapack=yes]
 )
 
@@ -474,7 +477,7 @@ AC_ARG_WITH(lapack-lib-dirs,
 [for lapack_lib_dir in $withval; do
    LAPACKLIBDIRS="-L$lapack_lib_dir $LAPACKLIBDIRS"
  done;
- LAPACKNEEDED="#";
+ LAPACKNEEDED="\##";
  casc_user_chose_lapack=yes]
 )
 
@@ -486,7 +489,7 @@ AC_ARG_WITH(fei-libs,
 [for fei_lib in $withval; do
    FEILIBS="$FEILIBS -l$fei_lib"
  done;
- FEINEEDED="#";
+ FEINEEDED="\##";
  casc_user_chose_fei=yes],
  [FEINEEDED=""; FEILIBS=""]
 )
@@ -501,7 +504,7 @@ AC_ARG_WITH(fei-lib-dir,
 [for fei_lib_dir in $withval; do
    FEILIBDIRS="-L$fei_lib_dir $FEILIBDIRS"
  done;
- FEINEEDED="#";
+ FEINEEDED="\##";
  casc_user_chose_fei=yes],
  [FEINEEDED=""; FEILIBDIRS=""]
 )
@@ -516,7 +519,7 @@ AC_ARG_WITH(fei-inc-dir,
 [for fei_inc in $withval; do
    FEIINCLUDE="$FEIINCLUDE $fei_inc"
  done;
- FEINEEDED="#";
+ FEINEEDED="\##";
  casc_user_chose_fei=yes],
  [FEINEEDED=""; FEIINCLUDE=""]
 )
@@ -619,8 +622,14 @@ AC_F77_WRAPPERS
 AC_EXEEXT
 
 AC_PROG_CXXCPP
-CASC_PROG_FPP
 
+
+dnl **********************************************************************
+dnl * Search PATH for a preprocessor for Fortran files
+dnl * with preprocessor directives
+dnl **********************************************************************
+AC_CHECK_PROGS(FPP, fpp cpp "$CC -E" "cc -E" "gcc -E")
+test -z "$FPP" && AC_MSG_ERROR([no acceptable fpp found in \$PATH])
 
 dnl *********************************************************************
 dnl * Check for header files, typedefs, structs, compiler characteristics
@@ -681,8 +690,8 @@ if test "$casc_using_mli" = "yes"
 then
    MLI_DIR="HYPRE_TOP_SRC_DIR/mli/matrix"
    MLILIBS="-lHYPRE_mli_mat"
-   MLILIBDIRS="-L $MLI_DIR"
-   MLIINCLUDE="-I $MLI_DIR"
+   MLILIBDIRS="-L$MLI_DIR"
+   MLIINCLUDE="-I$MLI_DIR"
    MLILIBDIRS="$MLILIBDIRS -L/usr/openwin/lib"
    MLILIBS="$MLILIBS -lX11"
 fi
@@ -702,26 +711,29 @@ then
       AC_MSG_WARN([  configuring --without-blas])
       AC_MSG_WARN([***************************************])
       BLAS_DIR="HYPRE_TOP_SRC_DIR/hypre/lib"
-      BLASLIBDIRS="-L $BLAS_DIR"
+      BLASLIBDIRS="-L$BLAS_DIR"
       BLASLIBS="-lHYPRE_utilities"
       BLASNEEDED=
       AC_DEFINE(HYPRE_USING_HYPRE_BLAS, 1, [Using internal HYPRE routines.])
    elif test "$BLASLIBS" = "internal"
    then
       BLAS_DIR="HYPRE_TOP_SRC_DIR/hypre/lib"
-      BLASLIBDIRS="-L $BLAS_DIR"
+      BLASLIBDIRS="-L$BLAS_DIR"
       BLASLIBS="-lHYPRE_utilities"
       BLASNEEDED=
       AC_DEFINE(HYPRE_USING_HYPRE_BLAS, 1, [Using internal HYPRE routines.])
    else
-      BLASNEEDED="#"
+      BLASNEEDED="\##"
       AC_DEFINE(HAVE_BLAS, 1, [BLAS library is system provided.])
+      BLASLIBDIRS="-L/usr/lib -L/usr/local/lib"
    fi
 fi
 
+dnl *********************************************************************
 dnl * Find LAPACK library if not already set by the user 
 dnl * If user specified --without-lapack or a system one cannot be found,
 dnl * default to internal HYPRE routines
+dnl *********************************************************************
 if test "$casc_user_chose_lapack" = "no"
 then
    HYPRE_FIND_LAPACK
@@ -732,28 +744,28 @@ then
       AC_MSG_WARN([  configuring --without-lapack])
       AC_MSG_WARN([***************************************])
       LAPACK_DIR="HYPRE_TOP_SRC_DIR/hypre/lib"
-      LAPACKLIBDIRS="-L $LAPACK_DIR"
+      LAPACKLIBDIRS="-L$LAPACK_DIR"
       LAPACKLIBS="-lHYPRE_utilities"
       LAPACKNEEDED=
       AC_DEFINE(HYPRE_USING_HYPRE_LAPACK, 1, [Using internal HYPRE routines.])
    elif test "$LAPACKLIBS" = "internal"
    then
       LAPACK_DIR="HYPRE_TOP_SRC_DIR/hypre/lib"
-      LAPACKLIBDIRS="-L $LAPACK_DIR"
+      LAPACKLIBDIRS="-L$LAPACK_DIR"
       LAPACKLIBS="-lHYPRE_utilities"
       LAPACKNEEDED=
       AC_DEFINE(HYPRE_USING_HYPRE_LAPACK, 1, [Using internal HYPRE routines.])
    else
-      LAPACKNEEDED="#"
+      LAPACKNEEDED="\##"
       AC_DEFINE(HAVE_LAPACK, 1, [LAPACK library is system provided.])
+      LAPACKLIBDIRS="-L/usr/lib -L/usr/local/lib"
    fi
 fi
 
 dnl *********************************************************************
 dnl * Find libm.a
 dnl *********************************************************************
-AC_CHECK_LIBM
-AC_SUBST(LIBM)
+AC_CHECK_LIB(m, cabs, LIBS="$LIBS -lm")
 
 dnl *********************************************************************
 dnl * Find g2c library
@@ -761,7 +773,7 @@ dnl *********************************************************************
 AC_CHECK_LIB(g2c, e_wsfe, LIBS="$LIBS -lg2c")
 
 dnl *********************************************************************
-dnl *Set debug/optimization flags  
+dnl * Set debug/optimization flags  
 dnl *********************************************************************
 if test "$casc_using_debug" = "yes"
 then
@@ -769,6 +781,74 @@ then
 else
    ACX_OPTIMIZATION_FLAGS
 fi
+
+dnl *********************************************************************
+dnl * Define prefix value if not already set by the user 
+dnl *********************************************************************
+if test "$prefix" = "NONE"
+then
+   prefix="HYPRE_TOP_SRC_DIR/hypre"
+   exec_prefix="HYPRE_TOP_SRC_DIR/hypre"
+fi
+
+dnl *********************************************************************
+dnl * Set library installation directory, if not already set by the user 
+dnl *********************************************************************
+if test "$libdir" = "${exec_prefix}/lib"
+then
+   HYPRE_LIBINSTALL="${exec_prefix}/lib"
+else
+   HYPRE_LIBINSTALL="${libdir}"
+fi
+
+dnl *********************************************************************
+dnl * Set includes installation directory, if not already set by the user 
+dnl *********************************************************************
+if test "$includedir" = "${prefix}/lib"
+then
+   HYPRE_INCINSTALL="${prefix}/include"
+else
+   HYPRE_INCINSTALL="${includedir}"
+fi
+
+dnl *********************************************************************
+dnl * Set documentation installation directory, if not already set by the user 
+dnl *********************************************************************
+if test "$libdir" = "${exec_prefix}/lib"
+then
+   HYPRE_DOCSINSTALL="${prefix}/docs"
+else
+   HYPRE_DOCSINSTALL="${libdir}/../docs"
+fi
+
+dnl *********************************************************************
+dnl * Define machine architectures
+dnl *********************************************************************
+HYPRE_GUESS_ARCH
+case $HYPRE_ARCH in
+  sun* | solaris*)
+       AC_DEFINE(HYPRE_SOLARIS)
+       ;;
+  LINUX | Linux)
+       case $HOSTNAME in
+          mcr* | thunder*)
+            AC_DEFINE(HYPRE_LINUX_CHAOS2)
+            ;;
+          *)
+            AC_DEFINE(HYPRE_LINUX)
+            ;;
+       esac
+       ;;
+  alpha)
+       AC_DEFINE(HYPRE_ALPHA)
+       ;;
+  rs6000)
+       AC_DEFINE(HYPRE_RS6000)
+       ;;
+  IRIX64)
+       AC_DEFINE(HYPRE_IRIX64)
+       ;;
+esac
 
 dnl *********************************************************************
 dnl * AC_SUBST performs the variable substitutions
@@ -785,53 +865,81 @@ CXX="$PREPEND $CXX"
 AC_SUBST(CC)
 AC_SUBST(CXX)
 
+dnl *********************************************************************
+dnl * Instalalation Directories
+dnl *********************************************************************
+AC_SUBST(HYPRE_LIBINSTALL)
+AC_SUBST(HYPRE_INCINSTALL)
+AC_SUBST(HYPRE_DOCSINSTALL)
+
+dnl *********************************************************************
 dnl * General purpose header files and libraries and directories for
 dnl * those libraries.  
+dnl *********************************************************************
 AC_SUBST(INCLUDES)
 AC_SUBST(LIBS)
+AC_SUBST(FLIBS)
 AC_SUBST(LIBDIRS)
 
+dnl *********************************************************************
 dnl * MPI-related header files and libraries and directories for
 dnl * those libraries
+dnl *********************************************************************
 AC_SUBST(MPIINCLUDE)
 AC_SUBST(MPILIBS)
 AC_SUBST(MPILIBDIRS)
 AC_SUBST(MPIFLAGS)
 
+dnl *********************************************************************
 dnl * macro definitions that should be included on compile line
+dnl *********************************************************************
 AC_SUBST(TIMERDEFS)
 
+dnl *********************************************************************
 dnl *Libraries and their directories that must be used at compile time 
+dnl *********************************************************************
 AC_SUBST(LDLIBS)
 AC_SUBST(LDLIBDIRS)
 
+dnl *********************************************************************
 dnl * contains compiler flags such as optimization or debugging flags
+dnl *********************************************************************
 AC_SUBST(CFLAGS)
 AC_SUBST(CXXFLAGS)
 AC_SUBST(F77FLAGS)
 AC_SUBST(LDFLAGS)
 
+dnl *********************************************************************
 dnl *needed when compiling with another command prior to the compiler command
 dnl * for example: purify cc ....
+dnl *********************************************************************
 AC_SUBST(PREPEND)
 
+dnl *********************************************************************
 dnl *BABEL-related files, libraries and directories
+dnl *********************************************************************
 AC_SUBST(BABELDIR)
 
+dnl *********************************************************************
 dnl * FEI-related files, libraries and directories
+dnl *********************************************************************
 AC_SUBST(FEILIBS)
 AC_SUBST(FEILIBDIRS)
 AC_SUBST(FEIINCLUDE)
 AC_SUBST(FEINEEDED)
 
+dnl *********************************************************************
 dnl *MLI-related header files, libraries and directories for those
 dnl * libraries
+dnl *********************************************************************
 AC_SUBST(MLI_DIR)
 AC_SUBST(MLILIBS)
 AC_SUBST(MLILIBDIRS)
 AC_SUBST(MLIINCLUDE)
 
+dnl *********************************************************************
 dnl * BLAS & LAPACK related information
+dnl *********************************************************************
 AC_SUBST(BLASLIBDIRS)
 AC_SUBST(BLASLIBS)
 AC_SUBST(BLASNEEDED)
@@ -839,20 +947,18 @@ AC_SUBST(LAPACKLIBDIRS)
 AC_SUBST(LAPACKLIBS)
 AC_SUBST(LAPACKNEEDED)
 
-dnl * HYPRE source root directory
-AC_SUBST(HYPRE_TOP_SRC_DIR)
-
+dnl *********************************************************************
 dnl * ranlib substitution
+dnl *********************************************************************
 AC_SUBST(RANLIB)
+
 dnl *********************************************************************
 dnl * Define the files to be configured and made 
 dnl *********************************************************************
 
 if test -d docs; then
    AC_DEFINE(DOCSDIR)
-   AC_CONFIG_FILES([docs/Makefile])
-   AC_CONFIG_FILES([
-                    docs/bref_manual.dxx
+   AC_CONFIG_FILES([docs/bref_manual.dxx
                     docs/ref_manual.dxx])
 fi
 
@@ -866,58 +972,8 @@ fi
 
 if test -d tools; then
    AC_DEFINE(TOOLSDIR)
-   AC_CONFIG_FILES([tools/Makefile])
 fi
 
-AC_CONFIG_FILES([
- Makefile
- FEI_mv/Makefile
- FEI_mv/SuperLU/Makefile
- FEI_mv/fei-base/Makefile
- FEI_mv/fei-hypre/Makefile
- FEI_mv/femli/Makefile
- FEI_mv/femli/amgs/Makefile
- FEI_mv/femli/base/Makefile
- FEI_mv/femli/blas/Makefile
- FEI_mv/femli/cintface/Makefile
- FEI_mv/femli/fedata/Makefile
- FEI_mv/femli/lib/Makefile
- FEI_mv/femli/mapper/Makefile
- FEI_mv/femli/matrix/Makefile
- FEI_mv/femli/solver/Makefile
- FEI_mv/femli/test/Makefile
- FEI_mv/femli/util/Makefile
- FEI_mv/femli/vector/Makefile
- blas/Makefile
- config/Makefile.config
- distributed_ls/Makefile
- distributed_ls/Euclid/Makefile
- distributed_ls/pilut/Makefile
- distributed_ls/ParaSails/Makefile
- distributed_matrix/Makefile
- eigensolvers/Makefile
- eigensolvers/krylov/Makefile
- eigensolvers/lib/Makefile
- eigensolvers/multivector/Makefile
- eigensolvers/parcsr_ls/Makefile
- eigensolvers/sstruct_ls/Makefile
- eigensolvers/struct_ls/Makefile
- eigensolvers/utilities/Makefile
- IJ_mv/Makefile
- krylov/Makefile
- lapack/Makefile
- lib/Makefile
- matrix_matrix/Makefile
- parcsr_ls/Makefile
- parcsr_mv/Makefile
- seq_ls/Makefile
- seq_ls/pamg/Makefile
- seq_mv/Makefile
- sstruct_ls/Makefile
- sstruct_mv/Makefile
- struct_ls/Makefile
- struct_mv/Makefile
- test/Makefile
- utilities/Makefile])
+AC_CONFIG_FILES([config/Makefile.config])
 
 AC_OUTPUT

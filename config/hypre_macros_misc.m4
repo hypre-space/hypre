@@ -503,4 +503,80 @@ then
         ;;
     esac
   fi
-fi])
+fi]) dnl
+
+dnl **********************************************************************
+dnl * HYPRE_GUESS_ARCH
+dnl * First find the hostname and assigns it to an exported macro $HOSTNAME.
+dnl * Guesses a one-word name for the current architecture, unless ARCH
+dnl * has been preset.  This is an alternative to the built-in macro
+dnl * AC_CANONICAL_HOST, which gives a three-word name.  Uses the utility
+dnl * 'tarch', which is a Bourne shell script that should be in the same  
+dnl * directory as the configure script.  If tarch is not present or if it
+dnl * fails, ARCH is set to the value, if any, of shell variable HOSTTYPE,
+dnl * otherwise ARCH is set to "unknown".
+dnl **********************************************************************
+
+AC_DEFUN([HYPRE_GUESS_ARCH],
+[
+   AC_MSG_CHECKING(the hostname)
+   casc_hostname=hostname
+   HOSTNAME="`$casc_hostname`"
+
+   if test -z "$HOSTNAME" 
+   then
+   dnl * if $HOSTNAME is still empty, give it the value "unknown".
+      HOSTNAME=unknown
+      AC_MSG_WARN(hostname is unknown)
+   else
+      AC_MSG_RESULT($HOSTNAME)
+   fi
+   
+
+   AC_MSG_CHECKING(the architecture)
+
+   dnl * $ARCH could already be set in the environment or earlier in configure
+   dnl * Use the preset value if it exists, otherwise go through the procedure
+   if test -z "$ARCH"; then
+
+      dnl * configure searches for the tool "tarch".  It should be in the
+      dnl * same directory as configure.in, but a couple of other places
+      dnl * will be checked.  casc_tarch stores a relative path for "tarch".
+      casc_tarch_dir=
+      for casc_dir in $srcdir $srcdir/.. $srcdir/../.. $srcdir/config; do
+         if test -f $casc_dir/tarch; then
+            casc_tarch_dir=$casc_dir
+            casc_tarch=$casc_tarch_dir/tarch
+            break
+         fi
+      done
+
+      dnl * if tarch was not found or doesn't work, try using env variable
+      dnl * $HOSTTYPE
+      if test -z "$casc_tarch_dir"; then
+         AC_MSG_WARN(cannot find tarch, using \$HOSTTYPE as the architecture)
+         HYPRE_ARCH=$HOSTTYPE
+      else
+         HYPRE_ARCH="`$casc_tarch`"
+
+         if test -z "$HYPRE_ARCH" || test "$HYPRE_ARCH" = "unknown"; then
+            HYPRE_ARCH=$HOSTTYPE
+         fi
+      fi
+
+      dnl * if $HYPRE_ARCH is still empty, give it the value "unknown".
+      if test -z "$HYPRE_ARCH"; then
+         HYPRE_ARCH=unknown
+         AC_MSG_WARN(architecture is unknown)
+      else
+         AC_MSG_RESULT($HYPRE_ARCH)
+      fi    
+   else
+      HYPRE_ARCH = $ARCH
+      AC_MSG_RESULT($HYPRE_ARCH)
+   fi
+
+   AC_SUBST(HYPRE_ARCH)
+   AC_SUBST(HOSTNAME)
+
+])dnl

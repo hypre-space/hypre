@@ -45,12 +45,12 @@ AC_DEFUN([HYPRE_FIND_LAPACK],
 # Get fortran linker name of LAPACK function to check for.
   AC_F77_FUNC(dsygv)
 
-  hypre_lapack_save_libs="$LIBS"
+  hypre_lapack_save_LIBS="$LIBS"
 
 # Is LAPACKLIBS environment variable set?
   if test $hypre_lapack_ok = no; then
     if test "x$LAPACKLIBS" != x; then
-        save_LIBS="$LIBS"; LIBS="$LAPACKLIBS $LIBS"
+        save_LIBS="$LIBS"; LIBS="$LAPACKLIBS $BLASLIBS $LIBS $FLIBS"
         AC_MSG_CHECKING([for $dsygv in $LAPACKLIBS])
         AC_TRY_LINK_FUNC($dsygv, [hypre_lapack_ok=yes], [LAPACKLIBS=""])
         AC_MSG_RESULT($hypre_lapack_ok)
@@ -74,16 +74,11 @@ AC_DEFUN([HYPRE_FIND_LAPACK],
 
 # Generic LAPACK library
   if test $hypre_lapack_ok = no; then
-     if test "$BLASLIBS" = "-lHYPRE_utilities"; then
-       TEMPBLAS=
-     else
-       TEMPBLAS="$BLASLIBS"
-     fi
      save_LIBS="$LIBS"; LIBS="$LIBS $FLIBS"
      save_LDFLAGS="$LDFLAGS"
      LDFLAGS="-L/usr/lib -L/usr/local/lib $LDFLAGS"
      AC_CHECK_LIB(lapack, $dsygv, [hypre_lapack_ok=yes; LAPACKLIBS="-llapack"],
-                              [], [$TEMPBLAS])
+                              [], [-lblas])
      LIBS="$save_LIBS"
      LDFLAGS="$save_LDFLAGS"
   fi
@@ -94,7 +89,7 @@ AC_DEFUN([HYPRE_FIND_LAPACK],
      save_LDFLAGS="$LDFLAGS"
      LDFLAGS="-L/usr/lib -L/usr/local/lib $LDFLAGS"
      AC_CHECK_LIB(lapack_rs6k, $dsygv, [hypre_lapack_ok=yes; LAPACKLIBS="-llapack_rs6k"],
-                              [], [$BLASLIBS])
+                              [], [-lblas])
      LIBS="$save_LIBS"
      LDFLAGS="$save_LDFLAGS"
   fi
