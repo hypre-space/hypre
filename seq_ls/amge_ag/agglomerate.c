@@ -61,7 +61,8 @@ int hypre_AMGeAgglomerate(int *i_AE_element, int *j_AE_element,
 
 
 
-  next = hypre_CTAlloc(int, num_faces);
+ if (num_faces > 0)
+   next = hypre_CTAlloc(int, num_faces);
 
 
   previous = hypre_CTAlloc(int, num_faces+1);
@@ -189,7 +190,8 @@ int hypre_AMGeAgglomerate(int *i_AE_element, int *j_AE_element,
 
       i_AE_element[1] = num_elements;
 
-      return ierr;
+      goto end;
+
     }
 
   for (k=0; k < num_faces; k++)
@@ -535,11 +537,12 @@ end_agglomerate:
   for (i=0; i < num_faces; i++)
     if (i_face_to_prefer_weight[i] == -1) i_face_weight[i] = -1;
 
-
+end:
   hypre_TFree(i_element_to_AE);
 
   hypre_TFree(previous);
-  hypre_TFree(next);
+  if (num_faces >0) 
+    hypre_TFree(next);
   hypre_TFree(first);
 
   return ierr;
