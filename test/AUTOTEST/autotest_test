@@ -16,7 +16,7 @@ initialize_variables ()
 {
   seconds; TOTAL=$SECS
   OldMask=`umask`
-  umask 007
+  umask 002
   Hdr="autotest"
   HYPRE_BATCH_MODE="no"
   HYPRE_SEND_MAIL="no"
@@ -112,6 +112,7 @@ parse_arguments () {
       c) build $Build "all++"   "all++"         "test";;
       D) DEBUG_MODE="yes";;
       d) build $Build "all"     "docs"          "docs";;
+      e) confbuildtest $OPTARG  "--enable-debug" "debug"    1 1 1 1 1 1 1;;
       f) build $Build "all77"   "all77"         "test";;
       h) usage; exit 2;;
       i) confbuildtest 1        "--enable-debug" "debug"    0 0 0 0 1 0 1
@@ -162,6 +163,7 @@ usage () {
   printf "%s\n" "-c       C++; make all++ (no configure, or execute)."
   printf "%s\n" "-D       Turn on debug messages."
   printf "%s\n" "-d       Docs; make the documentation directory."
+  printf "%s\n" "-e       Debug; configure --enable-debug, make, and execute)."
   printf "%s\n" "-f       F77; make all77 (no configure, or execute)."
   printf "%s\n" "-i opt   Insure++; perform configure --with-insure. Output"
   printf "         is appended to a file called insure.log.\n"
@@ -393,6 +395,7 @@ mail_summary () {
       printf "${ELIST}" >> $SUMFILE
     fi
   printf "%s\n" "--------------------------------------------" >> $SUMFILE
+  chgrp hypre $SUMFILE
   MAIL_HEADER="`uname -n` `uname -s`:`uname -r`.`uname -v`"
   if [ "$AutotestFailureCount" = "0" ] ; then
     SUBJECT="Autotest NO Errors ($MAIL_HEADER)"
