@@ -104,11 +104,17 @@ hypre_ParAMGSetup( void               *amg_vdata,
        *--------------------------------------------------------------*/
      
       if (debug_flag) wall_time = time_getWallclockSeconds();
-      if (coarsen_type)
+      if (coarsen_type > 0 && coarsen_type < 4)
       {
 	 hypre_ParAMGCoarsenRuge(A_array[level], strong_threshold,
                           measure_type, coarsen_type, debug_flag,
 			  &S, &CF_marker, &coarse_size); 
+      }
+      else if (coarsen_type > 3)
+      {
+	 hypre_ParAMGCoarsenRugeLoL(A_array[level], strong_threshold,
+                         measure_type, coarsen_type, debug_flag,
+                         &S, &CF_marker, &coarse_size); 
       }
       else
       {
