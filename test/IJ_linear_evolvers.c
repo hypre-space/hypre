@@ -815,7 +815,10 @@ main( int   argc,
    else
    {
       if (myid == 0)
+      {
         printf("  Initial unknown is random in the range 0 - 1\n");
+        printf("  Initial unknown used in the linear system initial guess\n");
+      }
 
       HYPRE_IJVectorCreate(MPI_COMM_WORLD, &ij_b, global_n);
       HYPRE_IJVectorSetLocalStorageType(ij_b,ij_vector_storage_type );
@@ -832,13 +835,23 @@ main( int   argc,
                                               part_x[myid+1]-1,
                                               NULL,
                                               values);
-      hypre_TFree(values);
 
       HYPRE_IJVectorCreate(MPI_COMM_WORLD, &ij_x, global_n);
       HYPRE_IJVectorSetLocalStorageType(ij_x,ij_vector_storage_type );
       HYPRE_IJVectorSetPartitioning(ij_x, (const int *) part_x);
       HYPRE_IJVectorInitialize(ij_x);
-      HYPRE_IJVectorZeroLocalComponents(ij_x); 
+
+/* For backward Euler the previous backward Euler iterate is usually
+   used in the initial guess, but a zero initial guess can be
+   instructive */
+/*    HYPRE_IJVectorZeroLocalComponents(ij_x);  */
+
+      HYPRE_IJVectorSetLocalComponentsInBlock(ij_x,
+                                              part_x[myid],
+                                              part_x[myid+1]-1,
+                                              NULL,
+                                              values);
+      hypre_TFree(values);
 
       b = (HYPRE_ParVector) HYPRE_IJVectorGetLocalStorage( ij_b );
       x = (HYPRE_ParVector) HYPRE_IJVectorGetLocalStorage( ij_x );
