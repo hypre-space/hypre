@@ -144,3 +144,20 @@ ifetchadd( int *w, pthread_mutex_t *mutex_fetchadd )
  
    return n;
 }
+
+
+void hypre_barrier(mutex *mpi_mtx, cond *mpi_cnd,int *th_sem)
+{
+  ifetchadd(&th_sem,&mpi_mtx);
+  pthread_mutex_lock(&_mpimtx);
+
+  if (th_sem < NUMTHREADS)
+    pthread_cond_wait(&mpi_cnd,&mpi_mtx);
+  else if (th_sem == NUMTHREADS)
+    {
+      pthread_cond_broadcast(&mpi_cnd);
+      th_sem=0;
+    }
+}
+
+
