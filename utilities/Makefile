@@ -15,7 +15,6 @@ CFLAGS =\
  -I/home/casc/include\
  -I/usr/local/mpi/mpich/include\
  -g -Wall\
- -DHYPRE_MEMORY_DMALLOC\
  -DHYPRE_TIMING -DTIMER_USE_MPI
 
 FFLAGS = -g
