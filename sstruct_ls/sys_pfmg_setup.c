@@ -500,12 +500,13 @@ hypre_SysStructCoarsen( hypre_SStructPGrid  *fgrid,
    hypre_CopyIndex(hypre_StructGridPeriodic(scgrid),
                    hypre_SStructPGridPeriodic(cgrid));
 
-   hypre_SStructPGridCellSGrid(cgrid) = scgrid;
+   hypre_SStructPGridSetCellSGrid(cgrid, scgrid);
 
    hypre_SStructPGridPNeighbors(cgrid) = hypre_BoxArrayCreate(0);
 
    hypre_SStructPGridLocalSize(cgrid)  = 0;
    hypre_SStructPGridGlobalSize(cgrid) = 0;
+   hypre_SStructPGridGhlocalSize(cgrid)= 0;
 
    hypre_SStructPGridAssemble(cgrid);
 
