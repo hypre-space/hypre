@@ -131,6 +131,26 @@ int hypre_AMGSetup(hypre_AMGData *amg_data,
    if (amg_ioutdat == 1 || amg_ioutdat == 3)
                      hypre_AMGSetupStats(amg_data);
 
+   if (amg_ioutdat == -3)
+   {  
+     char     fnam[255];
+
+     int j;
+
+      for (j = 1; j < level+1; j++)
+      {
+         sprintf(fnam,"SP_A_%d.ysmp",j);
+         hypre_PrintCSRMatrix(A_array[j],fnam);
+
+      }                         
+
+      for (j = 0; j < level; j++)
+      { 
+         sprintf(fnam,"SP_P_%d.ysmp",j);
+         hypre_PrintCSRMatrix(P_array[j],fnam);
+      }   
+   } 
+                     
    Setup_err_flag = 0;
    return(Setup_err_flag);
 }  
