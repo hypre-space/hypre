@@ -150,7 +150,7 @@ int  impl_Hypre_StructVector_Clone(Hypre_StructVector this, Hypre_Vector* x) {
    Hypre_StructVectorBldr SVB = Hypre_StructVectorBldr_Constructor( G );
    /* ... SVB ignores G */
 
-   dim = Hypre_StructuredGrid_GetIntParameter( "dim" );
+   dim = Hypre_StructuredGrid_GetIntParameter( G, "dim" );
    Hypre_StructVectorBldr_New( SVB, G );
 
    num_ghost.lower[0] = 0;
