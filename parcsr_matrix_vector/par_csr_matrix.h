@@ -53,4 +53,3 @@ typedef struct
 #define hypre_ParCSRMatrixCommPkg(matrix)	((matrix) -> comm_pkg)
 #define hypre_ParCSRMatrixOwnsData(matrix)      ((matrix) -> owns_data)
 
-#endif
