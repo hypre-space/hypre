@@ -111,16 +111,32 @@ SScanIntArray( char  *sdata_ptr,
 int
 SScanProblemIndex( char          *sdata_ptr,
                    char         **sdata_ptr_ptr,
+                   int            ndim,
                    ProblemIndex   index )
 {
    int  i;
    char sign[3];
 
    sdata_ptr += strspn(sdata_ptr, " \t\n(");
-   sscanf(sdata_ptr, "%d%[+-]%d%[+-]%d%[+-]",
-          &index[0], &sign[0], &index[1], &sign[1], &index[2], &sign[2]);
+   switch (ndim)
+   {
+      case 1:
+      sscanf(sdata_ptr, "%d%[+-]",
+             &index[0], &sign[0]);
+      break;
+
+      case 2:
+      sscanf(sdata_ptr, "%d%[+-]%d%[+-]",
+             &index[0], &sign[0], &index[1], &sign[1]);
+      break;
+
+      case 3:
+      sscanf(sdata_ptr, "%d%[+-]%d%[+-]%d%[+-]",
+             &index[0], &sign[0], &index[1], &sign[1], &index[2], &sign[2]);
+      break;
+   }
    sdata_ptr += strcspn(sdata_ptr, ")") + 1;
-   for (i = 0; i < 3; i++)
+   for (i = 0; i < ndim; i++)
    {
       if (sign[i] == '+')
       {
@@ -130,6 +146,11 @@ SScanProblemIndex( char          *sdata_ptr,
       {
          index[i+3] = 0;
       }
+   }
+   for (i = ndim; i < 3; i++)
+   {
+      index[i]   = 0;
+      index[i+3] = 1;
    }
 
    *sdata_ptr_ptr = sdata_ptr;
@@ -232,9 +253,9 @@ ReadData( char         *filename,
                pdata.boxsizes =
                   hypre_TReAlloc(pdata.boxsizes, int, size);
             }
-            SScanProblemIndex(sdata_ptr, &sdata_ptr,
+            SScanProblemIndex(sdata_ptr, &sdata_ptr, data.ndim,
                               pdata.ilowers[pdata.nboxes]);
-            SScanProblemIndex(sdata_ptr, &sdata_ptr,
+            SScanProblemIndex(sdata_ptr, &sdata_ptr, data.ndim,
                               pdata.iuppers[pdata.nboxes]);
             if ( (pdata.ilowers[pdata.nboxes][3]*
                   pdata.ilowers[pdata.nboxes][4]*
@@ -304,7 +325,7 @@ ReadData( char         *filename,
             s = strtol(sdata_ptr, &sdata_ptr, 10);
             entry = strtol(sdata_ptr, &sdata_ptr, 10);
             SScanIntArray(sdata_ptr, &sdata_ptr,
-                          3, data.stencil_offsets[s][entry]);
+                          data.ndim, data.stencil_offsets[s][entry]);
             data.stencil_vars[s][entry] = strtol(sdata_ptr, &sdata_ptr, 10);
             data.stencil_values[s][entry] = strtod(sdata_ptr, &sdata_ptr);
          }
@@ -353,22 +374,26 @@ ReadData( char         *filename,
                pdata.graph_boxsizes =
                   hypre_TReAlloc(pdata.graph_boxsizes, int, size);
             }
-            SScanProblemIndex(sdata_ptr, &sdata_ptr,
+            SScanProblemIndex(sdata_ptr, &sdata_ptr, data.ndim,
                               pdata.graph_ilowers[pdata.graph_nentries]);
-            SScanProblemIndex(sdata_ptr, &sdata_ptr,
+            SScanProblemIndex(sdata_ptr, &sdata_ptr, data.ndim,
                               pdata.graph_iuppers[pdata.graph_nentries]);
             pdata.graph_vars[pdata.graph_nentries] =
                strtol(sdata_ptr, &sdata_ptr, 10);
             pdata.graph_to_parts[pdata.graph_nentries] =
                strtol(sdata_ptr, &sdata_ptr, 10);
-            SScanProblemIndex(sdata_ptr, &sdata_ptr,
+            SScanProblemIndex(sdata_ptr, &sdata_ptr, data.ndim,
                               pdata.graph_to_ilowers[pdata.graph_nentries]);
-            SScanProblemIndex(sdata_ptr, &sdata_ptr,
+            SScanProblemIndex(sdata_ptr, &sdata_ptr, data.ndim,
                               pdata.graph_to_iuppers[pdata.graph_nentries]);
             pdata.graph_to_vars[pdata.graph_nentries] =
                strtol(sdata_ptr, &sdata_ptr, 10);
-            SScanIntArray(sdata_ptr, &sdata_ptr, 3,
+            SScanIntArray(sdata_ptr, &sdata_ptr, data.ndim,
                           pdata.graph_index_maps[pdata.graph_nentries]);
+            for (i = data.ndim; i < 3; i++)
+            {
+               pdata.graph_index_maps[pdata.graph_nentries][i] = i;
+            }
             for (i = 0; i < 3; i++)
             {
                pdata.graph_index_signs[pdata.graph_nentries][i] = 1;

@@ -4,7 +4,7 @@
 # GridCreate: ndim nparts
 GridCreate: 3 2
 
-# GridSetExtents: part ilower(3) iupper(3)
+# GridSetExtents: part ilower(ndim) iupper(ndim)
 GridSetExtents: 0 (1- 1- 1-) (10+ 10+ 10+)
 GridSetExtents: 1 (1- 1- 1-) (10+ 10+ 10+)
 
@@ -20,17 +20,18 @@ GridSetExtents: 1 (1- 1- 1-) (10+ 10+ 10+)
 GridSetVariables: 0 2 [0 1]
 GridSetVariables: 1 2 [0 1]
 
-# GridAddVariables: part index(3) vartype
+# GridAddVariables: part index(ndim) vartype
 
-# GridSetNeighborBox: part      ilower(3)      iupper(3) \
-#                     nbor_part nbor_ilower(3) nbor_iupper(3) index_map[3]
+# GridSetNeighborBox: part      ilower(ndim)      iupper(ndim) \
+#                     nbor_part nbor_ilower(ndim) nbor_iupper(ndim) \
+#                     index_map[ndim]
 
 ###########################################################
 
 # StencilCreate: nstencils sizes[nstencils]
 StencilCreate: 2 [15 15]
 
-# StencilSetEntry: stencil_num entry offset[3] var value
+# StencilSetEntry: stencil_num entry offset[ndim] var value
 StencilSetEntry: 0  0 [ 0  0  0] 0 15.0
 StencilSetEntry: 0  1 [-1  0  0] 0 -1.0
 StencilSetEntry: 0  2 [ 1  0  0] 0 -1.0
@@ -47,7 +48,7 @@ StencilSetEntry: 0 12 [ 0 -1  0] 1 -1.0
 StencilSetEntry: 0 13 [-1  0  0] 1 -1.0
 StencilSetEntry: 0 14 [ 0  0  0] 1 -1.0
 
-# StencilSetEntry: stencil_num entry offset[3] var value
+# StencilSetEntry: stencil_num entry offset[ndim] var value
 StencilSetEntry: 1  0 [ 0  0  0] 1 15.0
 StencilSetEntry: 1  1 [-1  0  0] 1 -1.0
 StencilSetEntry: 1  2 [ 1  0  0] 1 -1.0
@@ -72,9 +73,9 @@ GraphSetStencil: 0 1 1
 GraphSetStencil: 1 0 0
 GraphSetStencil: 1 1 1
 
-# GraphAddEntries: part    ilower(3)    iupper(3)    var \
-#                  to_part to_ilower(3) to_iupper(3) to_var \
-#                  index_map[3] entry value
+# GraphAddEntries: part    ilower(ndim)    iupper(ndim)    var \
+#                  to_part to_ilower(ndim) to_iupper(ndim) to_var \
+#                  index_map[ndim] entry value
 GraphAddEntries: 0 (10+ 1- 1-) (10+ 10+ 10+) 0 1 ( 1- 1- 1-) ( 1- 10+ 10+) 0 [0 1 2] 15 -1.0
 GraphAddEntries: 1 ( 1- 1- 1-) ( 1- 10+ 10+) 0 0 (10+ 1- 1-) (10+ 10+ 10+) 0 [0 1 2] 15 -1.0
 
