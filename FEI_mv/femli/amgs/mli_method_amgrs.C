@@ -69,11 +69,9 @@ MLI_Method_AMGRS::~MLI_Method_AMGRS()
 
 int MLI_Method_AMGRS::setParams(char *in_name, int argc, char *argv[])
 {
-   int        level, size, nDOF, numNS, length, nSweeps=1, offset, nsDim;
-   int        prePost, nnodes, nAggr, *aggrInfo, *labels, is, *indices;
-   double     thresh, pweight, *nullspace, *weights=NULL, *coords, *scales;
-   double     *nsAdjust;
-   char       param1[256], param2[256], *param3;
+   int        level, size, nSweeps=1;
+   double     thresh, *weights=NULL;
+   char       param1[256], param2[256];
 
    sscanf(in_name, "%s", param1);
    if ( !strcasecmp(param1, "setOutputLevel" ))
@@ -198,7 +196,7 @@ int MLI_Method_AMGRS::setParams(char *in_name, int argc, char *argv[])
 
 int MLI_Method_AMGRS::setup( MLI *mli ) 
 {
-   int             k, level, irow, local_nrows, start_row, mypid, nprocs;
+   int             k, level, irow, local_nrows, mypid, nprocs;
    int             num_nodes, one=1, global_nrows, *coarse_partition;
    int             *CF_markers, coarse_nrows, *dof_array, *cdof_array;
    double          start_time, elapsed_time;
@@ -209,7 +207,8 @@ int MLI_Method_AMGRS::setup( MLI *mli )
    MPI_Comm        comm;
    MLI_Function    *func_ptr;
    hypre_ParCSRMatrix *hypreA, *hypreS, *hypreAT, *hypreST, *hypreP, *hypreR;
-   hypre_ParCSRMatrix *hypreRT, *hypreAP, *hypreCA;
+   hypre_ParCSRMatrix *hypreRT;
+// hypre_ParCSRMatrix *hypreAP, *hypreCA;
 
 #ifdef MLI_DEBUG_DETAILED
    printf("MLI_Method_AMGRS::setup begins...\n");
@@ -400,16 +399,16 @@ int MLI_Method_AMGRS::setup( MLI *mli )
          MLI_Matrix_MatMatMult(mli_Amat, mli_Pmat, &mli_APmat);
          MLI_Matrix_MatMatMult(mli_Rmat, mli_APmat, &mli_cAmat);
          delete mli_APmat;
-         hypreP  = (hypre_ParCSRMatrix *) mli_Pmat->getMatrix();
-         hypreR  = (hypre_ParCSRMatrix *) mli_Rmat->getMatrix();
-         hypreAP = hypre_ParMatmul( hypreA, hypreP );
-         hypreCA = hypre_ParMatmul( hypreR, hypreAP );
-//         hypre_ParCSRMatrixDestroy( hypreAP );
-         func_ptr = new MLI_Function();
-         MLI_Utils_HypreParCSRMatrixGetDestroyFunc(func_ptr);
-         sprintf(param_string, "HYPRE_ParCSR" ); 
+//hypreP  = (hypre_ParCSRMatrix *) mli_Pmat->getMatrix();
+//hypreR  = (hypre_ParCSRMatrix *) mli_Rmat->getMatrix();
+//hypreAP = hypre_ParMatmul( hypreA, hypreP );
+//hypreCA = hypre_ParMatmul( hypreR, hypreAP );
+//hypre_ParCSRMatrixDestroy( hypreAP );
+//func_ptr = new MLI_Function();
+//MLI_Utils_HypreParCSRMatrixGetDestroyFunc(func_ptr);
+//sprintf(param_string, "HYPRE_ParCSR" ); 
 //mli_cAmat = new MLI_Matrix((void *) hypreCA, param_string, func_ptr);
-         delete func_ptr;
+//delete func_ptr;
       }
       mli->setSystemMatrix(level+1, mli_cAmat);
       elapsed_time = (MLI_Utils_WTime() - start_time);
