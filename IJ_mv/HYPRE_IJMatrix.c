@@ -69,6 +69,7 @@ int HYPRE_IJMatrixCreate( MPI_Comm comm, int ilower, int iupper,
       i4 = 4*i;
       if ( recv_buf[i4+1] != (recv_buf[i4+4]-1) )
       {
+	 printf("Warning -- row partitioning does not line up!\n");
 	 ierr = -9;
 	 break;
       }
@@ -83,9 +84,11 @@ int HYPRE_IJMatrixCreate( MPI_Comm comm, int ilower, int iupper,
    }	
    i4 = (num_procs-1)*4;
    row_partitioning[num_procs] = recv_buf[i4+1]+1;
+
+   if ((recv_buf[i4] != recv_buf[i4+2]) || (recv_buf[i4+1] != recv_buf[i4+3]))
+      square = 0;
  
-   if (square && ((recv_buf[i4] != recv_buf[i4+2]) ||
-                        (recv_buf[i4+1] != recv_buf[i4+3])))
+   if (square)
       col_partitioning = row_partitioning;
    else
    {   
@@ -96,6 +99,7 @@ int HYPRE_IJMatrixCreate( MPI_Comm comm, int ilower, int iupper,
          i4 = 4*i;
          if (recv_buf[i4+3] != recv_buf[i4+6]-1)
          {
+	   printf("Warning -- col partitioning does not line up!\n");
    	   ierr = -10;
    	   break;
          }
