@@ -46,10 +46,8 @@ int amg_Setup P((Matrix *A , void *data ));
 int amg_Solve P((Vector *u , Vector *f , double tol , void *data ));
 
 /* data.c */
-AMGData *amg_NewData P((int levmax , int ncg , double ecg , int nwt , double ewt , int nstr , int ncyc , int *mu , int *ntrlx , int *iprlx , int *ierlx , int *iurlx , int ioutdat , char *log_file_name ));
+AMGData *amg_NewData P((int levmax , int ncg , double ecg , int nwt , double ewt , int nstr , int ncyc , int *mu , int *ntrlx , int *iprlx , int *ierlx , int *iurlx , int ioutdat , int cycle_op_count , char *log_file_name ));
 void amg_FreeData P((AMGData *amg_data ));
-
-/* fortran.c */
 
 /* matrix.c */
 Matrix *NewMatrix P((double *data , int *ia , int *ja , int size ));
