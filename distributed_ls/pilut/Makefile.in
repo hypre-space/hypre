@@ -19,10 +19,10 @@ install:all
 	@cp -f $(srcdir)/HYPRE_*.h $$HYPRE_INSTALL_DIR/include/.
 	@cp -f libHYPRE_*.a $$HYPRE_INSTALL_DIR/lib/.
 
-MPI_INCLUDES = -I/usr/local/mpi/mpich/include
-MPI_LIBDIR   = -L/usr/local/mpi/mpich/lib/solaris/ch_p4/
-MPI_LIBS     = -lmpi -lnsl -lsocket -lgen
-MPIRUN       = mpirun -np 4
+#MPI_INCLUDES = -I/usr/local/mpi/mpich/include
+#MPI_LIBDIR   = -L/usr/local/mpi/mpich/lib/solaris/ch_p4/
+#MPI_LIBS     = -lmpi -lnsl -lsocket -lgen
+#MPIRUN       = mpirun -np 4
 
 # General
 HYPRE_INCLUDES = \
@@ -32,9 +32,9 @@ HYPRE_INCLUDES = \
  -I$(srcdir)/../../utilities\
  -I$(srcdir)/../../distributed_matrix
 
-INCLUDES = $(HYPRE_INCLUDES) $(MPI_INCLUDES)
-LIBDIR   = $(MPI_LIBDIR)
-LIBS     = -L. -lHYPREpilut -lm $(MPI_LIBS) $(OTHER_LIBS)
+INCLUDES = $(HYPRE_INCLUDES) @INCLUDES@
+LIBDIR   = @MPILIBDIRS@
+LIBS     = -L. -lHYPREpilut -lm @MPILIBS@ $(OTHER_LIBS)
 
 # Debugging via asserts
 #DEBUGFLAGS = -DHYPRE_DEBUG -DHYPRE_MEMORY_CHECK #-DNDEBUG #-DTIME
