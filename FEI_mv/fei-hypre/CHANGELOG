@@ -102,4 +102,7 @@
             - add Uzawa algorithm 
             - debug/improve slide reduction capability
             - debug problems on blue (abs function)
+05/30/02    2.0.1R17
+            - add distribute SuperLU (not working yet)
+            - problem probably in DSuperLU
 
