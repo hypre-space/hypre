@@ -755,11 +755,17 @@ main( int   argc,
       {
          HYPRE_ParAMGFinalize(pcg_precond);
       }
+
+      if (solver_id == 7)
+      {
+         HYPRE_ParCSRPilutFinalize(pcg_precond);
+      }
+
       if (myid == 0)
       {
          printf("\n");
-         printf("Iterations = %d\n", num_iterations);
-         printf("Final Relative Residual Norm = %e\n", final_res_norm);
+         printf("GMRES Iterations = %d\n", num_iterations);
+         printf("Final GMRES Relative Residual Norm = %e\n", final_res_norm);
          printf("\n");
       }
    }

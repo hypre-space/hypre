@@ -81,15 +81,15 @@ HYPRE_ParCSRPilutSetup( HYPRE_Solver solver,
                    HYPRE_ParVector x      )
 {
    int ierr = 0;
-   HYPRE_DistributedMatrix *matrix;
+   HYPRE_DistributedMatrix matrix;
    HYPRE_DistributedMatrixPilutSolver distributed_solver = 
       (HYPRE_DistributedMatrixPilutSolver) solver;
 
    ierr = HYPRE_ConvertParCSRMatrixToDistributedMatrix(
-             A, matrix );
+             A, &matrix );
    if (ierr) return(ierr);
 
-   ierr = HYPRE_DistributedMatrixPilutSolverSetMatrix( distributed_solver, *matrix );
+   ierr = HYPRE_DistributedMatrixPilutSolverSetMatrix( distributed_solver, matrix );
    if (ierr) return(ierr);
 
    ierr = HYPRE_DistributedMatrixPilutSolverSetup( distributed_solver );
