@@ -55,14 +55,14 @@ void EraseMap P((CommInfoType *cinfo , int *newperm , int nmis , hypre_PilutSolv
 void ParINIT P((ReduceMatType *nrmat , CommInfoType *cinfo , int *rowdist , hypre_PilutSolverGlobals *globals ));
 
 /* parutil.c */
-void errexit P((char *f_str , ...));
+void errexit (char *f_str , ...);
 void my_abort P((int inSignal , hypre_PilutSolverGlobals *globals ));
 int *idx_malloc P((int n , char *msg ));
 int *idx_malloc_init P((int n , int ival , char *msg ));
 double *fp_malloc P((int n , char *msg ));
 double *fp_malloc_init P((int n , double ival , char *msg ));
 void *mymalloc P((int nbytes , char *msg ));
-void free_multi P((void *ptr1 , ...));
+void free_multi (void *ptr1 , ...);
 void memcpy_int P((int *dest , const int *src , size_t n ));
 void memcpy_idx P((int *dest , const int *src , size_t n ));
 void memcpy_fp P((double *dest , const double *src , size_t n ));
