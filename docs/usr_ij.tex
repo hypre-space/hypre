@@ -212,7 +212,8 @@ indexed subsets (shown for \verb+ij_b+ only) ...
                                       glob_vec_index_start,
                                       glob_vec_index_stop,
                                       b_indices, b);
-
+\end{verbatim}
+\begin{verbatim}
    ierr = HYPRE_IJVectorSetLocalComponents(ij_b, num_components,
                                       glob_vec_indices,
                                       b_indices, b);
@@ -220,8 +221,25 @@ indexed subsets (shown for \verb+ij_b+ only) ...
 
 \noindent To assign values to all components in a domain, one would
 choose \verb+glob_vec_index_start+ \verb+=+ \verb+domain_pt_start+,
-and 
-\verb+glob_vec_index_stop+ \verb+=+\verb+next_domain_pt_start-1+.
+and \verb+glob_vec_index_stop+ \verb+=+\verb+next_domain_pt_start-1+.
+
+\begin{figure}[b]
+\label{loc_comps_map}
+\centerline{\epsfig{figure=loc_comps.eps,height=2.5in}}
+\parbox{6in}{\hspace{1in}
+             {\tt ierr = HYPRE\_IJVectorSetLocalComponents(ij\_vec,}}
+\parbox{6in}{\hspace{4.15in}
+             {\tt num\_values,}}
+\parbox{6in}{\hspace{4.15in}
+             {\tt glob\_vec\_indices,}}
+\parbox{6in}{\hspace{4.15in}
+             {\tt value\_indices,}}
+\parbox{6in}{\hspace{4.15in}
+             {\tt values);}}
+\caption{Mapping between underlying vector data and external
+    array values}
+\end{figure}
+
 One can also add to vector components that are already set, in
 contiguous or indexed subsets of components.
 In the following example,
@@ -233,7 +251,8 @@ contains values to be added to components of \verb+ij_b+:
                                       glob_vec_index_start,
                                       glob_vec_index_stop,
                                       b_indices, b_plus); 
-
+\end{verbatim}
+\begin{verbatim}
    ierr = HYPRE_IJVectorAddToLocalComponents(ij_b, num_components,
                                       glob_vec_indices,
                                       b_indices, b_plus);
@@ -248,7 +267,8 @@ the underlying vector data array, ...
                                       glob_vec_index_start,
                                       glob_vec_index_stop,
                                       x_indices, x);
-
+\end{verbatim}
+\begin{verbatim}
    ierr = HYPRE_IJVectorGetLocalComponents(ij_x, num_components,
                                       glob_vec_indices,
                                       x_indices, x);
