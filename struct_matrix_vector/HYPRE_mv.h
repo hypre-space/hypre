@@ -25,11 +25,11 @@ extern "C" {
  * Structures
  *--------------------------------------------------------------------------*/
 
-typedef void *HYPRE_StructStencil;
-typedef void *HYPRE_StructGrid;
-typedef void *HYPRE_StructMatrix;
-typedef void *HYPRE_StructVector;
-typedef void *HYPRE_CommPkg;
+typedef struct {int opaque;} *HYPRE_StructStencil;
+typedef struct {int opaque;} *HYPRE_StructGrid;
+typedef struct {int opaque;} *HYPRE_StructMatrix;
+typedef struct {int opaque;} *HYPRE_StructVector;
+typedef struct {int opaque;} *HYPRE_CommPkg;
 
 /*--------------------------------------------------------------------------
  * Prototypes

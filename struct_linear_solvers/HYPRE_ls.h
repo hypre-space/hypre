@@ -25,7 +25,7 @@ extern "C" {
  * Structures
  *--------------------------------------------------------------------------*/
 
-typedef void *HYPRE_StructSolver;
+typedef struct {int opaque;} *HYPRE_StructSolver;
 
 /*--------------------------------------------------------------------------
  * Prototypes

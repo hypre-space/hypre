@@ -166,13 +166,13 @@ HYPRE_StructDiagScaleSetup( HYPRE_StructSolver solver,
 
 int 
 HYPRE_StructDiagScale( HYPRE_StructSolver solver,
-                       HYPRE_StructMatrix vA,
-                       HYPRE_StructVector vy,
-                       HYPRE_StructVector vx      )
+                       HYPRE_StructMatrix HA,
+                       HYPRE_StructVector Hy,
+                       HYPRE_StructVector Hx      )
 {
-   hypre_StructMatrix   *A = vA;
-   hypre_StructVector   *y = vy;
-   hypre_StructVector   *x = vx;
+   hypre_StructMatrix   *A = (hypre_StructMatrix *) HA;
+   hypre_StructVector   *y = (hypre_StructVector *) Hy;
+   hypre_StructVector   *x = (hypre_StructVector *) Hx;
 
    hypre_BoxArray       *boxes;
    hypre_Box            *box;
