@@ -522,12 +522,13 @@ impl_bHYPRE_BoomerAMG_GetIntValue(
   /* Insert the implementation of the GetIntValue method here... */
 
    int ierr = 0;
+/* not needed until we have something to return...
    HYPRE_Solver solver;
    struct bHYPRE_BoomerAMG__data * data;
 
    data = bHYPRE_BoomerAMG__get_data( self );
    solver = data->solver;
-
+*/
    ierr = 1;
 
    return ierr;
@@ -551,12 +552,13 @@ impl_bHYPRE_BoomerAMG_GetDoubleValue(
   /* Insert the implementation of the GetDoubleValue method here... */
 
    int ierr = 0;
+/* not needed until we have something to return...
    HYPRE_Solver solver;
    struct bHYPRE_BoomerAMG__data * data;
 
    data = bHYPRE_BoomerAMG__get_data( self );
    solver = data->solver;
-
+*/
    ierr = 1;
 
    return ierr;
