@@ -73,7 +73,7 @@ HYPRE_StructVectorSetValues( HYPRE_StructVector  vector,
 
    ierr = hypre_StructVectorSetValues(vector, new_grid_index, values, 0);
 
-   return (ierr);
+   return ierr;
 }
 
 /*--------------------------------------------------------------------------
@@ -107,7 +107,7 @@ HYPRE_StructVectorSetBoxValues( HYPRE_StructVector  vector,
 
    hypre_BoxDestroy(new_value_box);
 
-   return (ierr);
+   return ierr;
 }
 
 /*--------------------------------------------------------------------------
@@ -132,7 +132,7 @@ HYPRE_StructVectorAddToValues( HYPRE_StructVector  vector,
 
    ierr = hypre_StructVectorSetValues(vector, new_grid_index, values, 1);
 
-   return (ierr);
+   return ierr;
 }
 
 /*--------------------------------------------------------------------------
@@ -166,7 +166,7 @@ HYPRE_StructVectorAddToBoxValues( HYPRE_StructVector  vector,
 
    hypre_BoxDestroy(new_value_box);
 
-   return (ierr);
+   return ierr;
 }
 
 /*--------------------------------------------------------------------------
@@ -191,7 +191,7 @@ HYPRE_StructVectorGetValues( HYPRE_StructVector  vector,
 
    ierr = hypre_StructVectorGetValues(vector, new_grid_index, values_ptr);
 
-   return (ierr);
+   return ierr;
 }
 
 /*--------------------------------------------------------------------------
@@ -225,7 +225,7 @@ HYPRE_StructVectorGetBoxValues( HYPRE_StructVector  vector,
 
    hypre_BoxDestroy(new_value_box);
 
-   return (ierr);
+   return ierr;
 }
 
 /*--------------------------------------------------------------------------
@@ -281,7 +281,7 @@ HYPRE_StructVectorGetMigrateCommPkg( HYPRE_StructVector  from_vector,
                                      HYPRE_StructVector  to_vector,
                                      HYPRE_CommPkg      *comm_pkg )
 {
-   int ierr;
+   int ierr = 0;
 
    *comm_pkg = hypre_StructVectorGetMigrateCommPkg(from_vector, to_vector);
 
