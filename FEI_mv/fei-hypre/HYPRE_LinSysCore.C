@@ -39,6 +39,7 @@
 #include "HYPRE_LSI_ddict.h"
 #include "HYPRE_LSI_poly.h"
 #include "HYPRE_LSI_block.h"
+#include "HYPRE_LSI_Uzawa.h"
 #include "HYPRE_SlideReduction.h"
 
 //***************************************************************************
@@ -776,7 +777,8 @@ int HYPRE_LinSysCore::setLoadVectors(GlobalID elemBlock, int numElems,
 
 int HYPRE_LinSysCore::allocateMatrix(int **colIndices, int *rowLengths)
 {
-   int i, j, nsize, maxSize, minSize;
+   int i, j, nsize, rowLeng, maxSize, minSize, searchFlag, *indPtr, *indPtr2;
+   double *vals;
 
    //-------------------------------------------------------------------
    // diagnoistic message and error checking 
@@ -824,18 +826,29 @@ int HYPRE_LinSysCore::allocateMatrix(int **colIndices, int *rowLengths)
    minSize     = 1000000;
    for ( i = 0; i < nsize; i++ )
    {
-      rowLengths_[i] = rowLengths[i];
-      if ( rowLengths[i] > 0 ) colIndices_[i] = new int[rowLengths[i]];
-      else                     colIndices_[i] = NULL;
-      for ( j = 0; j < rowLengths[i]; j++ )
+      rowLeng = rowLengths_[i] = rowLengths[i];
+      if ( rowLeng > 0 ) 
       {
-         colIndices_[i][j] = colIndices[i][j];
+         colIndices_[i] = new int[rowLeng];
+         assert( colIndices_[i] );
       }
-      qsort0( colIndices_[i], 0, rowLengths[i]-1);
-      maxSize = ( rowLengths[i] > maxSize ) ? rowLengths[i] : maxSize;
-      minSize = ( rowLengths[i] < minSize ) ? rowLengths[i] : minSize;
-      if ( rowLengths[i] > 0 ) colValues_[i] = new double[rowLengths[i]];
-      for ( j = 0; j < rowLengths[i]; j++ ) colValues_[i][j] = 0.0;
+      else               colIndices_[i] = NULL;
+      indPtr  = colIndices_[i];
+      indPtr2 = colIndices[i];
+      for ( j = 0; j < rowLeng; j++ ) indPtr[j] = indPtr2[j];
+      searchFlag = 0;
+      for ( j = 1; j < rowLeng; j++ )
+         if ( indPtr[j] < indPtr[j-1]) {searchFlag = 1; break;}
+      if ( searchFlag ) qsort0( indPtr, 0, rowLeng-1);
+      maxSize = ( rowLeng > maxSize ) ? rowLeng : maxSize;
+      minSize = ( rowLeng < minSize ) ? rowLeng : minSize;
+      if ( rowLeng > 0 ) 
+      {
+         colValues_[i] = new double[rowLeng];
+         assert( colValues_[i] );
+      }
+      vals = colValues_[i];
+      for ( j = 0; j < rowLeng; j++ ) vals[j] = 0.0;
    }
    MPI_Allreduce(&maxSize, &pilutMaxNnzPerRow_,1,MPI_INT,MPI_MAX,comm_);
 
@@ -2930,6 +2943,8 @@ void HYPRE_LinSysCore::selectPreconditioner(char *name)
       else if ( HYPreconID_ == HYMLI )
          HYPRE_LSI_MLIDestroy( HYPrecon_ );
 #endif
+      else if ( HYPreconID_ == HYUZAWA)   
+         HYPRE_LSI_UzawaDestroy( HYPrecon_ );
    }
 
    //-------------------------------------------------------------------
@@ -3021,6 +3036,11 @@ void HYPRE_LinSysCore::selectPreconditioner(char *name)
       HYPreconID_ = HYDIAGONAL;
 #endif
    }
+   else if ( !strcmp(name, "uzawa") )
+   {
+      strcpy( HYPreconName_, name );
+      HYPreconID_ = HYUZAWA;
+   }
    else
    {
       if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
@@ -3105,6 +3125,9 @@ void HYPRE_LinSysCore::selectPreconditioner(char *name)
            ierr = HYPRE_LSI_MLICreate( comm_, &HYPrecon_ );
            break;
 #endif
+      case HYUZAWA :
+           HYPRE_LSI_UzawaCreate( comm_, &HYPrecon_ );
+           break;
    }
 
    //-------------------------------------------------------------------
@@ -3191,6 +3214,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
 {
    int                i, j, numIterations=0, status, ierr, localNRows;
    int                startRow, *procNRows, rowSize, *colInd, nnz, nrows;
+   int                *constrMap;
    double             rnorm=0.0, ddata, *colVal;
    double             stime, etime, ptime, rtime1, rtime2, newnorm;
    char               fname[40];
@@ -3241,6 +3265,16 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
          if ( HYOutputLevel_ & HYFEI_SLIDEREDUCE3 )
             slideObj->setOutputLevel(3);
          slideObj->setup(currA_, currX_, currB_);
+#ifdef HAVE_MLI
+         if ( HYPreconID_ == HYMLI )
+         {
+            HYPRE_IJMatrixGetObject(currA_, (void **) &A_csr);
+            HYPRE_ParCSRMatrixGetRowPartitioning( A_csr, &procNRows );
+            slideObj->getProcConstraintMap(&constrMap);
+            HYPRE_LSI_MLIAdjustNodeEqnMap(HYPrecon_, procNRows, constrMap);
+            free(procNRows);
+         }
+#endif
          slideObj->getReducedMatrix(&currA_);
          slideObj->getReducedSolnVector(&currX_);
          slideObj->getReducedRHSVector(&currB_);

@@ -745,18 +745,19 @@ int HYPRE_LSI_MatrixInverse( double **Amat, int ndim, double ***Cmat )
       for ( i = 0; i < ndim; i++ ) 
          for ( j = 0; j < ndim; j++ ) 
             if ( abs(Bmat[i][j]) < 1.0e-17 ) Bmat[i][j] = 0.0;
-/*
+      dmax = 0.0;
       for ( i = 0; i < ndim; i++ ) 
       {
-         dmax = 0.0;
          for ( j = 0; j < ndim; j++ ) 
             if ( abs(Bmat[i][j]) > dmax ) dmax = abs(Bmat[i][j]);
+/*
          for ( j = 0; j < ndim; j++ ) 
             if ( abs(Bmat[i][j]/dmax) < 1.0e-15 ) Bmat[i][j] = 0.0;
-      }
 */
+      }
       (*Cmat) = Bmat;
-      return 0;
+      if ( dmax > 1.0e6 ) return 1;
+      else                return 0;
    }
    return -1;
 }
