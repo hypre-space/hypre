@@ -52,7 +52,7 @@ enum HYpreconID {HYDIAGONAL,HYPILUT,HYPARASAILS,HYBOOMERAMG,HYML,HYDDILUT,
 
 class HYPRE_LinSysCore
 #ifndef NOFEI
-           : public LSC 
+           : public LinearSystemCore 
 #endif
 {
  public:
@@ -99,8 +99,8 @@ class HYPRE_LinSysCore
            int** nodeNumbers, int** eqnNumbers, int* fieldIDs);
 
    // ----------------------------------------------------------------------
-   // setGlobalOffsets : provide info for initial creation of 
-   //      matrix/vector data, Equation numbers are 1-based, and local sets 
+   // setGlobalOffsets : provide info for initial creation of
+   //      matrix/vector data, Equation numbers are 1-based, and local sets
    //      of equation numbers are contiguous.
    // ----------------------------------------------------------------------
 
@@ -108,7 +108,7 @@ class HYPRE_LinSysCore
                         int* blkEqnOffsets);
 
    // ----------------------------------------------------------------------
-   // setMatrixStructure : provide enough info to allocate the matrix -- 
+   // setMatrixStructure : provide enough info to allocate the matrix --
    //                      i.e., define the structure.
    // ----------------------------------------------------------------------
 
@@ -116,7 +116,7 @@ class HYPRE_LinSysCore
            int** blkColIndices, int* blkRowLengths, int* ptRowsPerBlkRow);
 
    // ----------------------------------------------------------------------
-   // resetMatrixAndVector : don't destroy the structure of the matrix, 
+   // resetMatrixAndVector : don't destroy the structure of the matrix,
    //      but set the value 's' throughout the matrix and vectors.
    // ----------------------------------------------------------------------
 
@@ -137,7 +137,7 @@ class HYPRE_LinSysCore
    // ----------------------------------------------------------------------
 
    int sumIntoSystemMatrix(int numPtRows, const int* ptRows,
-           int numPtCols, const int* ptCols, int numBlkRows, 
+           int numPtCols, const int* ptCols, int numBlkRows,
            const int* blkRows, int numBlkCols, const int* blkCols,
            const double* const* values);
 
@@ -149,8 +149,8 @@ class HYPRE_LinSysCore
    // ----------------------------------------------------------------------
 
    int sumIntoSystemMatrix(int numPtRows, const int* ptRows,
-                            int numPtCols, const int* ptCols,
-                            const double* const* values);
+                           int numPtCols, const int* ptCols,
+                           const double* const* values);
 
    // ----------------------------------------------------------------------
    // Point-entry matrix data as for 'sumIntoSystemMatrix', but in this case
@@ -158,7 +158,7 @@ class HYPRE_LinSysCore
    // already present) rather than being "summed" into the matrix.
    // ----------------------------------------------------------------------
 
-   int putIntoSystemMatrix(int numPtRows, const int* ptRows, int numPtCols, 
+   int putIntoSystemMatrix(int numPtRows, const int* ptRows, int numPtCols,
                            const int* ptCols, const double* const* values);
 
    // ----------------------------------------------------------------------
@@ -227,7 +227,7 @@ class HYPRE_LinSysCore
    // getMatrixPtr:
    // obtain a pointer to the 'A' matrix. This should be considered a
    // constant pointer -- i.e., this class remains responsible for the
-   // matrix (e.g., de-allocation upon destruction). 
+   // matrix (e.g., de-allocation upon destruction).
    // ----------------------------------------------------------------------
 
 #ifndef NOFEI
@@ -301,14 +301,14 @@ class HYPRE_LinSysCore
    int setNumRHSVectors(int numRHSs, const int* rhsIDs);
 
    // ----------------------------------------------------------------------
-   // void setRHSID:
+   // setRHSID:
    // set the 'current' rhs context, assuming multiple rhs vectors.
    // ----------------------------------------------------------------------
 
    int setRHSID(int rhsID);
 
    // ----------------------------------------------------------------------
-   // void putInitialGuess:
+   // putInitialGuess:
    // function for setting (a subset of) the initial-guess
    // solution values (i.e., in the 'x' vector).
    // ----------------------------------------------------------------------
@@ -329,7 +329,7 @@ class HYPRE_LinSysCore
 
    // ----------------------------------------------------------------------
    // This will be called to request that LinearSystemCore form the residual
-   // vector r = b - A*x, and pass the coefficients for r back out in the 
+   // vector r = b - A*x, and pass the coefficients for r back out in the
    // 'values' list.
    // ----------------------------------------------------------------------
 
@@ -372,7 +372,7 @@ class HYPRE_LinSysCore
    void   buildSchurReducedRHS();
    double buildSchurReducedSoln();
    void   computeMinResProjection(HYPRE_ParCSRMatrix A_csr, HYPRE_ParVector x, 
-                                  HYPRE_ParVector b, double& nrm1, double& nrm2);
+                                  HYPRE_ParVector b,double& nrm1,double& nrm2);
    void   addToProjectionSpace(HYPRE_IJVector x, HYPRE_IJVector b);
    void   getVersion(char**);
    void   beginCreateMapFromSoln();
@@ -384,18 +384,11 @@ class HYPRE_LinSysCore
  private:        //functions
 
    // ----------------------------------------------------------------------
-   //functions for selecting solver/preconditioner
+   // functions for selecting solver/preconditioner
    // ----------------------------------------------------------------------
 
    void selectSolver(char* name);
    void selectPreconditioner(char* name);
-
-   // ----------------------------------------------------------------------
-   // not implemented in HYPRE
-   //void setDebugOutput(char* path, char* name);
-   //void debugOutput(char* mesg) const;
-   //void messageAbort(char* msg) const;
-   // ----------------------------------------------------------------------
 
    // ----------------------------------------------------------------------
    // HYPRE specific private functions
@@ -514,7 +507,7 @@ class HYPRE_LinSysCore
    int             HYPreconReuse_;
 
    // ----------------------------------------------------------------------
-   // preconditioner specific variables 
+   // preconditioner specific variables
    // ----------------------------------------------------------------------
 
    int             amgCoarsenType_;
@@ -550,7 +543,7 @@ class HYPRE_LinSysCore
    int             polyOrder_;
 
    // ----------------------------------------------------------------------
-   // map and others 
+   // map and others
    // ----------------------------------------------------------------------
 
    void            *fegrid;
