@@ -34,7 +34,7 @@ Version 1.7.7b released, 2002/08/08.
 - limited release SStruct optimizations testing
 - the krylov library has been renamed to HYPRE_krylov
 
-Version 1.7.6b released, 2002/01/27.
+Version 1.7.6b released, 2002/03/27.
 
 - SStruct: Changed SetNeighborBox function to allow the case where the
   NeighborBox does not even intersect the grid.  This functionality
