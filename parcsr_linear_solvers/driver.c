@@ -346,7 +346,7 @@ BuildParLaplacian( int                  argc,
    /*-----------------------------------------------------------
     * Parse command line
     *-----------------------------------------------------------*/
- 
+   arg_index = 0;
    while (arg_index < argc)
    {
       if ( strcmp(argv[arg_index], "-n") == 0 )
@@ -372,7 +372,7 @@ BuildParLaplacian( int                  argc,
       }
       else
       {
-         break;
+         arg_index++;
       }
    }
 
