@@ -327,9 +327,6 @@ BuildParLaplacian( int                  argc,
    MPI_Comm_size(MPI_COMM_WORLD, &num_procs );
    MPI_Comm_rank(MPI_COMM_WORLD, &myid );
 
-   num_procs = 1;
-   myid = 0;
-
    /*-----------------------------------------------------------
     * Set defaults
     *-----------------------------------------------------------*/
