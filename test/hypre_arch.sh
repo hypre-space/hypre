@@ -40,6 +40,8 @@ then
 	    HYPRE_ARCH="blue";;
 	"TFLOPS O/S")
 	    HYPRE_ARCH="red";;
+	Linux)
+	    HYPRE_ARCH="linux";;
     esac
 fi
 
