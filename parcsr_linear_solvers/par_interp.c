@@ -767,8 +767,10 @@ hypre_ParAMGBuildInterp( hypre_ParCSRMatrix   *A,
    hypre_TFree(int_buf_data);
    hypre_TFree(fine_to_coarse);
    hypre_TFree(fine_to_coarse_offd);
-/*   hypre_TFree(P_marker);  */
+   hypre_TFree(P_marker);  
    hypre_TFree(P_marker_offd);
+
+   if (num_procs > 1) hypre_DestroyCSRMatrix(A_ext);
 
 
    return(0);  
