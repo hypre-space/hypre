@@ -35,6 +35,7 @@
 #define MLI_SOLVER_GMRES_ID         314
 #define MLI_SOLVER_MLI_ID           315
 #define MLI_SOLVER_ILU_ID           316
+#define MLI_SOLVER_AMG_ID           317
 
 /*--------------------------------------------------------------------------
  * include files 
