@@ -29,7 +29,11 @@ perform_test()
     )"
 
   echo "copying new source...."
-  ${SCP_COMMAND} -pr linear_solvers ${HYPRE_REMOTE_DIR}
+  if test -z "${HYPRE_DIST_DIR}" ; then
+    ${SCP_COMMAND} -pr linear_solvers ${HYPRE_REMOTE_DIR}
+  else
+    scp -pr linear_solvers ${HYPRE_COMPILE_MACHINE}:${HYPRE_REMOTE_DIR}
+  fi
 
   echo "scheduling remote autotest...."
   ${SSH_COMMAND} -f ${HYPRE_COMPILE_MACHINE} "\
@@ -42,6 +46,9 @@ perform_test()
           ${HYPRE_MACHINE_COMMANDS} -v ${HYPRE_MESSAGE};\
   chmod -fR a+rX,u+w,go-w linear_solvers;\
   chgrp -fR hypre linear_solvers;\
+        [ ! -z ${HYPRE_DIST_DIR} ] && \
+          rm -fR ${HYPRE_DIST_DIR}/linear_solvers && \
+          ${SCP_COMMAND} -pr ${HYPRE_REMOTE_DIR}/linear_solvers ${HYPRE_DIST_DIR};\
     )" 
   echo "returning to autotest...."
   
@@ -51,7 +58,7 @@ perform_test()
 # Function for display of help/usage
 #=============================================================================
 help () {
-  printf "Usage: %s [-nocvs|-rev Rev#] host [host ... ]\n" $0
+  printf "Usage: %s [-nocvs|-rev Rev#] [-debug] host [host ... ]\n" $0
   printf "HYPRE autotest script. This is the high level autotest_test wrapper\n"
   printf "script, usually run nightly from cron. This script determines which\n"
   printf "systems autotest_test is to be executed on, and the test options\n"
@@ -65,11 +72,12 @@ help () {
   printf "%s\n" "     -achilles CASC Solaris 8, 128.115 subnet"
   printf "%s\n" "     -blue     ASCI Blue, DPCS."
   printf "%s\n" "     -bluemp   ASCI Blue executing OpenMP versions, DPCS."
-  printf "%s\n" "     -frost    ASCI Frost, DPCS."
-  printf "%s\n" "     -frostmp  ASCI Frost executing OpenMP, DPCS."
   printf "%s\n" "     -casc     CASC Solaris 8"
   printf "%s\n" "     -compass  # obsolute"
   printf "%s\n" "     -compassmp# obsolute"
+  printf "%s\n" "     -dwbug    Turn on debug mode."
+  printf "%s\n" "     -frost    ASCI Frost, DPCS."
+  printf "%s\n" "     -frostmp  ASCI Frost executing OpenMP, DPCS."
   printf "%s\n" "     -gps      Compaq gps320 system, DPCS."
   printf "%s\n" "     -gpsmp    Compaq gps320 system, executing OpenMP, DPCS."
   printf "%s\n" "     -lx       Compaq running RatHat Linux."
@@ -177,6 +185,7 @@ chgrp -fR hypre linear_solvers
 
 while [ "$*" != "" ]
 do
+  HYPRE_DIST_DIR=""
   case $1 in
     -automake)
         if [ -x linear_solvers/config/bootstrap ] ; then
@@ -287,7 +296,8 @@ do
         HYPRE_ARCH="linux"
         HYPRE_COMPILE_MACHINE="tux83"
         HYPRE_RUN_MACHINE="tux83"
-        HYPRE_REMOTE_DIR="/usr/casc/hypre/i686-pc-linux-gnu/AUTOTEST"
+        HYPRE_REMOTE_DIR="/tmp"
+        HYPRE_DIST_DIR="/usr/casc/hypre/i686-pc-linux-gnu/AUTOTEST"
 	HYPRE_MACHINE_COMMANDS="-mnsde 1 -a 1 -cf -i 2"
         HYPRE_MESSAGE='PRIMARY[insure++]'
         HYPRE_MACHINE_COMMANDS="$HYPRE_MACHINE_COMMANDS -v $HYPRE_MESSAGE"
@@ -413,7 +423,8 @@ do
         HYPRE_ARCH="linux"
         HYPRE_COMPILE_MACHINE="tux83"
         HYPRE_RUN_MACHINE="tux83"
-        HYPRE_REMOTE_DIR="/usr/casc/hypre/i686-pc-linux-gnu/AUTOTEST"
+        HYPRE_REMOTE_DIR="/tmp"
+        HYPRE_DIST_DIR="/usr/casc/hypre/i686-pc-linux-gnu/AUTOTEST"
         if [ "$AUTOMAKEMODE" = "yes" ] ; then
 	  HYPRE_MACHINE_COMMANDS="-mnsde 1 -a 1 -cfb 1 -l 2"
           HYPRE_MESSAGE='TEST[autotest-gcc-2.96]'
@@ -428,7 +439,8 @@ do
         HYPRE_ARCH="linux"
         HYPRE_COMPILE_MACHINE="tux71"
         HYPRE_RUN_MACHINE="tux71"
-        HYPRE_REMOTE_DIR="/usr/casc/hypre/i686-pc-linux-gnu-gcc3.x/AUTOTEST"
+        HYPRE_REMOTE_DIR="/tmp"
+        HYPRE_DIST_DIR="/usr/casc/hypre/i686-pc-linux-gnu-gcc3.x/AUTOTEST"
         if [ "$AUTOMAKEMODE" = "yes" ] ; then
 	  HYPRE_MACHINE_COMMANDS="-mnde 1 -a 1 -cfb 1 -l 2"
           HYPRE_MESSAGE='TEST[automake-gcc-3.2]'
@@ -442,7 +454,8 @@ do
         HYPRE_ARCH="linux"
         HYPRE_COMPILE_MACHINE="tux68"
         HYPRE_RUN_MACHINE="tux68"
-        HYPRE_REMOTE_DIR="/usr/casc/hypre/i686-pc-linux-gnu-pgi3.3/AUTOTEST"
+        HYPRE_REMOTE_DIR="/tmp"
+        HYPRE_DIST_DIR="/usr/casc/hypre/i686-pc-linux-gnu-pgi3.3/AUTOTEST"
         if [ "$AUTOMAKEMODE" = "yes" ] ; then
 	  HYPRE_MACHINE_COMMANDS="-mnse 1 -a 1 -cfl 2"
           HYPRE_MESSAGE='TEST[automake-pgi-3.3]'
