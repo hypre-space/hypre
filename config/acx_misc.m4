@@ -382,7 +382,7 @@ AC_HELP_STRING([--enable-debug], [compile for debugging.]),
   yes) casc_using_debug=yes
     CFLAGS="-g $CFLAGS"
     CXXFLAGS="-g $CXXFLAGS"
-    F77FLAGS="-g $F77FLAGS" ;;
+    FFLAGS="-g $FFLAGS" ;;
   no)  casc_using_debug=no;;
   *) AC_MSG_ERROR(bad value ${enableval} for --enable-debug) ;;
 esac],[casc_using_debug=no])
@@ -579,67 +579,67 @@ then
     esac
   fi
 fi
-if test "x${F77FLAGS}" = "x"
+if test "x${FFLAGS}" = "x"
 then
   if test "x${G77}" = "xyes"
   then
-    F77FLAGS="-O"
+    FFLAGS="-O"
   else
     case "${CXX}" in
       kf77|mpikf77)
-        F77FLAGS="-fast +K3"
+        FFLAGS="-fast +K3"
         ;;
       ifc)
-        F77FLAGS="-O3 -xW -tpp7"
+        FFLAGS="-O3 -xW -tpp7"
         if test "$casc_using_openmp" = "yes" ; then
-          F77FLAGS="$F77FLAGS -openmp"
+          FFLAGS="$FFLAGS -openmp"
         fi
         ;;
       pgf77|mpipgf77)
-        F77FLAGS="-fast"
+        FFLAGS="-fast"
         if test "$casc_using_openmp" = "yes" ; then
-          F77FLAGS="$F77FLAGS -mp"
+          FFLAGS="$FFLAGS -mp"
         fi
         ;;
       f77|f90|mpxlf|mpif77|mpiifc|xlf|cxx)
         case "${host}" in
           alpha*-dec-osf4.*)
-            F77FLAGS="-std1 -w0 -O2"
+            FFLAGS="-std1 -w0 -O2"
             ;;
           alpha*-dec-osf5.*)
-            F77FLAGS="-fast"
+            FFLAGS="-fast"
             if test "$casc_using_openmp" = "yes" ; then
-              F77FLAGS="$F77FLAGS -omp"
+              FFLAGS="$FFLAGS -omp"
             fi
             ;;
           mips-sgi-irix6.[[4-9]]*)
-            F77FLAGS="-O -64"
+            FFLAGS="-O -64"
             if test "$casc_using_openmp" = "yes" ; then
-              F77FLAGS="$F77FLAGS -mp"
+              FFLAGS="$FFLAGS -mp"
             fi
             ;;
           mips-sgi-irix*)
-            F77FLAGS="-fullwarn -woff 835 -O2 -Olimit 3500"
+            FFLAGS="-fullwarn -woff 835 -O2 -Olimit 3500"
             ;;
           rs6000-ibm-aix*)
-            F77FLAGS="-D_ALL_SOURCE -O2"
+            FFLAGS="-D_ALL_SOURCE -O2"
             ;;
           powerpc-ibm-aix*)
-            F77FLAGS="-O3 -qstrict"
+            FFLAGS="-O3 -qstrict"
             if test "$casc_using_openmp" = "yes" ; then
-              F77FLAGS="$F77FLAGS -qsmp=omp"
+              FFLAGS="$FFLAGS -qsmp=omp"
             fi
             ;;
           sparc-sun-solaris2*)
-            F77FLAGS="-silent -O"
+            FFLAGS="-silent -O"
             ;;
           *)
-            F77FLAGS="-O"
+            FFLAGS="-O"
             ;;
         esac
         ;;
       *)
-        F77FLAGS="-O"
+        FFLAGS="-O"
         ;;
     esac
   fi
@@ -702,7 +702,7 @@ AC_DEFUN([ACX_ASCI_HOST],
         fi
         CFLAGS="$CFLAGS -64"
         CXXFLAGS="$CXXFLAGS -64"
-        F77FLAGS="$F77FLAGS -64"
+        FFLAGS="$FFLAGS -64"
         LDFLAGS="$LDFLAGS -64"
       ;;
       tckk*|tc2k* )
