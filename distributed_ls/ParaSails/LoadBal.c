@@ -376,8 +376,8 @@ void LoadBalReturn(LoadBal *p, MPI_Comm comm, Matrix *mat)
     MPI_Request *requests;
     MPI_Status  *statuses;
 
-    requests = (MPI_Request *) malloc(p->num_given * sizeof(MPI_Request));
-    statuses = (MPI_Status  *) malloc(p->num_given * sizeof(MPI_Status));
+    requests = (MPI_Request *) malloc(p->num_taken * sizeof(MPI_Request));
+    statuses = (MPI_Status  *) malloc(p->num_taken * sizeof(MPI_Status));
 
     LoadBalRecipSend(comm, p->num_taken, p->recip_data, requests);
 
