@@ -97,6 +97,7 @@ hypre_BoomerAMGBuildInterp( hypre_ParCSRMatrix   *A,
    int              start;
    int              sgn;
    int              c_num;
+   /*int              bin = 0;*/
    
    double           diagonal;
    double           sum;
@@ -701,10 +702,19 @@ hypre_BoomerAMGBuildInterp( hypre_ParCSRMatrix   *A,
                      else                       
                      {                          
                                            /* in the off_diagonal block  */
-                        j = hypre_BinarySearch(col_map_offd,i2,num_cols_A_offd);
-                        if (j != -1)
+			if (i2 > -1)
+			{
+                           /*bin++;*/
+                           j = hypre_BinarySearch(col_map_offd,i2,num_cols_A_offd);
+			   if (j != -1)
+			      i2 = -j-2;
+			   else 
+			      i2 = -1;
+			   A_ext_j[jj1] = i2;
+		        }
+                        if (i2 != -1)
                         { 
-                           if (P_marker_offd[j] >= jj_begin_row_offd
+                           if (P_marker_offd[-i2-2] >= jj_begin_row_offd
 				&& (sgn*A_ext_data[jj1]) < 0)
                            {
 			      sum += A_ext_data[jj1];
@@ -741,12 +751,21 @@ hypre_BoomerAMGBuildInterp( hypre_ParCSRMatrix   *A,
                      else
                      {
                         /* check to see if it is in the off_diagonal block  */
-                        j = hypre_BinarySearch(col_map_offd,i2,num_cols_A_offd);
-                        if (j != -1)
+                        if (i2 > -1)
+	                {
+                           /*bin++;*/
+                           j = hypre_BinarySearch(col_map_offd,i2,num_cols_A_offd);
+			   if (j != -1)
+			      i2 = -1;
+			   else
+			      i2 = -j-2;
+			   A_ext_j[jj1] = i2;
+	                }
+                        if (i2 != -1)
                         { 
-                           if (P_marker_offd[j] >= jj_begin_row_offd
+                           if (P_marker_offd[-i2-2] >= jj_begin_row_offd
 				&& (sgn*A_ext_data[jj1]) < 0)
-                                  P_offd_data[P_marker_offd[j]]
+                                  P_offd_data[P_marker_offd[-i2-2]]
                                      += distribute * A_ext_data[jj1];
                         }
                      }
@@ -970,7 +989,7 @@ hypre_BoomerAMGBuildInterp( hypre_ParCSRMatrix   *A,
    hypre_TFree(jj_count_offd);
 
    if (num_procs > 1) hypre_CSRMatrixDestroy(A_ext);
-
+   /* printf (" bin count : %d\n", bin);*/
 
    return(0);  
 
