@@ -7,17 +7,21 @@
  * $Revision$
 *********************************************************************EHEADER*/
 
+#include "headers.h"
+
 /*--------------------------------------------------------------------------
- * hypre_BuildRAP
+ * hypre_AMGBuildCoarseOperator
  *--------------------------------------------------------------------------*/
 
-int
-hypre_BuildRAP( hypre_Matrix  *RT
-                hypre_Matrix  *A,
-                hypre_Matrix  *P,
-                hypre_Matrix **RAP_ptr )
+int hypre_AMGBuildCoarseOperator(RT, A, P, RAP_ptr) 
+
+hypre_CSRMatrix  *RT;
+hypre_CSRMatrix  *A;
+hypre_CSRMatrix  *P;
+hypre_CSRMatrix **RAP_ptr;
+
 {
-   hypre_Matrix    *RAP;
+   hypre_CSRMatrix    *RAP;
    
    double          *A_data;
    int             *A_i;
@@ -33,7 +37,7 @@ hypre_BuildRAP( hypre_Matrix  *RT
 
    int              RAP_size;
    
-   hypre_Matrix    *R;
+   hypre_CSRMatrix    *R;
    
    double          *R_data;
    int             *R_i;
@@ -63,33 +67,33 @@ hypre_BuildRAP( hypre_Matrix  *RT
     *  Copy RT into R so that we have row-wise access to restriction.
     *-----------------------------------------------------------------------*/
 
-   hypre_TransposeMatrix(RT, R);   /* could call PETSc MatTranspose */
+   hypre_CSRMatrixTranspose(RT, &R);   /* could call PETSc MatTranspose */
 
    /*-----------------------------------------------------------------------
     *  Access the CSR vectors for R, A, P. Also get sizes of fine and
     *  coarse grids.
     *-----------------------------------------------------------------------*/
 
-   R_data = hypre_MatrixData(R);
-   R_i    = hypre_MatrixI(R);
-   R_j    = hypre_MatrixJ(R);
+   R_data = hypre_CSRMatrixData(R);
+   R_i    = hypre_CSRMatrixI(R);
+   R_j    = hypre_CSRMatrixJ(R);
 
-   A_data = hypre_MatrixData(A);
-   A_i    = hypre_MatrixI(A);
-   A_j    = hypre_MatrixJ(A);
+   A_data = hypre_CSRMatrixData(A);
+   A_i    = hypre_CSRMatrixI(A);
+   A_j    = hypre_CSRMatrixJ(A);
 
-   P_data = hypre_MatrixData(P);
-   P_i    = hypre_MatrixI(P);
-   P_j    = hypre_MatrixJ(P);
+   P_data = hypre_CSRMatrixData(P);
+   P_i    = hypre_CSRMatrixI(P);
+   P_j    = hypre_CSRMatrixJ(P);
 
-   n_fine   = hypre_MatrixNumRows(A);
-   n_coarse = hypre_MatrixNumRows(R);
+   n_fine   = hypre_CSRMatrixNumRows(A);
+   n_coarse = hypre_CSRMatrixNumRows(R);
 
    /*-----------------------------------------------------------------------
     *  Allocate RAP_i and marker arrays.
     *-----------------------------------------------------------------------*/
 
-   RAP_i    = hypre_CTAlloc(int, n_coarse);
+   RAP_i    = hypre_CTAlloc(int, n_coarse+1);
    P_marker = hypre_CTAlloc(int, n_coarse);
    A_marker = hypre_CTAlloc(int, n_fine);
 
@@ -187,7 +191,9 @@ hypre_BuildRAP( hypre_Matrix  *RT
       RAP_i[ic] = jj_row_begining;
       
    }
-   
+  
+   RAP_i[n_coarse] = jj_counter;
+ 
    /*-----------------------------------------------------------------------
     *  Allocate RAP_data and RAP_j arrays.
     *-----------------------------------------------------------------------*/
@@ -310,17 +316,24 @@ hypre_BuildRAP( hypre_Matrix  *RT
       }
    }
 
-   RAP = hypre_NewMatrix(RAP_data, RAP_i, RAP_j, RAP_size, n_coarse, n_coarse)
+ 
 
+   RAP = hypre_CreateCSRMatrix(n_coarse, n_coarse, RAP_size);
+   hypre_CSRMatrixData(RAP) = RAP_data; 
+   hypre_CSRMatrixI(RAP) = RAP_i; 
+   hypre_CSRMatrixJ(RAP) = RAP_j; 
+   
    *RAP_ptr = RAP;
 
    /*-----------------------------------------------------------------------
     *  Free R and marker arrays.
     *-----------------------------------------------------------------------*/
 
-   hypre_FreeMatrix(R);
+   hypre_DestroyCSRMatrix(R);
    hypre_TFree(P_marker);   
    hypre_TFree(A_marker);
+
+   return(0);
    
 }            
 
