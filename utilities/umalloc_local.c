@@ -28,5 +28,8 @@ void _urelease_fn(Heap_t usrheap, void *p, size_t size)
    free (p);
    return;
 }
+#else
+/* this is used only to eliminate compiler warnings */
+int umalloc_empty;
 #endif
 
