@@ -89,13 +89,7 @@ $(ij_OBJECTS): $(ij_dependencies)
 
 # ij_mv, build
 ij_mv_SOURCES = ij_mv.c
-ij_mv_libraries = \
- -L$(libdir)\
- -lHYPRE_parcsr_ls\
- -lHYPRE_IJ_mv\
- -lHYPRE_parcsr_mv\
- -lHYPRE_seq_mv\
- -lHYPRE_utilities
+ij_mv_libraries = $(ij_libraries)
 ij_mv_LDADD = $(ij_mv_libraries)
 ij_mv_dependencies = \
  $(includedir)/utilities.h\

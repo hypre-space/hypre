@@ -1,4 +1,4 @@
-#!/bin/ksh
+#!/bin/sh
 #BHEADER***********************************************************************
 # (c) 2000   The Regents of the University of California
 #
@@ -33,23 +33,24 @@ usage () {
   printf "  -help          prints usage information\n"
   printf "  -debug         turn on debug messages\n"
   printf "  -norun         turn off execute, echo mode\n"
+  printf "  -trace         turn on debug, and echo each command\n"
   printf "\n"
 }
-typeset -fx StartCrunch ParseJobFile 
-typeset -fx ExecuteJobs ExecuteTest
-typeset -fx MpirunString CheckBatch
-typeset -fx CalcNodes CalcProcs PsubCmdStub
-typeset -i BatchMode=0
-typeset -i SendMail=0
-typeset -i DebugMode=0
-typeset -i NoRun=0
-typeset -i JobCheckInterval=10      # sleep time between jobs finished check
-typeset -i GiveUpOnJob=10           # number of hours to wait for job finish
+#typeset -fx StartCrunch ParseJobFile 
+#typeset -fx ExecuteJobs ExecuteTest
+#typeset -fx MpirunString CheckBatch
+#typeset -fx CalcNodes CalcProcs PsubCmdStub
+BatchMode=0
+SendMail=0
+DebugMode=0
+NoRun=0
+JobCheckInterval=10      # sleep time between jobs finished check
+GiveUpOnJob=10           # number of hours to wait for job finish
 InputString=""
 RunString=""
 . ./AUTOTEST/hypre_arch.sh
 . ./funcs.sh
-while [ "$*" != "" ]
+while [ "$*" ]
 do case $1 in
     -h|-help)
       usage
@@ -63,30 +64,37 @@ do case $1 in
       NoRun=1
       shift
     ;;
+    -t|-trace)
+      DebugMode=1
+      set -xv
+      shift
+    ;;
     *) InputString=$1
-      if [[ $InputString != "" ]]
+      if [ "$InputString" ]
       then
-        if [[ -f $InputString ]] && [[ -r $InputString ]]
-        then FilePart=$(basename $InputString .sh)
-          DirPart=$(dirname $InputString)
-          CurDir=$(pwd)
-          if (( BatchMode == 0 ))       # machine DCSP capable
+        if test -f $InputString && test -r $InputString
+        then FilePart=`basename $InputString .sh`
+          DirPart=`dirname $InputString`
+          CurDir=`pwd`
+          if [ "$BatchMode" -eq 0 ]       # machine DCSP capable
           then
             CheckBatch
             BatchMode=$?
           fi
-          if (( DebugMode > 0 ))
-          then print "FilePart:$FilePart DirPart:$DirPart" ; fi
-          if [[ -f $DirPart/$FilePart.jobs ]] && [[ -r $DirPart/$FilePart.jobs ]]
+          if [ "$DebugMode" -gt 0 ]
+          then printf "FilePart:%s DirPart:%s\n" $FilePart $DirPart ; fi
+          if test -f $DirPart/$FilePart.jobs && test -r $DirPart/$FilePart.jobs
           then StartCrunch $CurDir $DirPart $FilePart # strict serial execution
-          else print "$0: test command file $DirPart/$FilePart.jobs does not exist"
+          else printf "%s: test command file %s/%s.jobs does not exist\n" \
+              $0 $DirPart $FilePart
             exit 1
           fi
-        else print "$0: test command file $InputString does not exist"
-          print "can not find .sh file"
+        else printf "%s: test command file %s does not exist\n" \
+            $0 $InputString
+          printf "can not find .sh file\n"
           exit 1
         fi
-      else print "$0: Strange input parameter=$InputString"
+      else printf "%s: Strange input parameter=%s\n" $0 $InputString
         exit 1
       fi
       shift

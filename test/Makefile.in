@@ -68,11 +68,12 @@ f77_ij_b_OBJECTS = $(am_f77_ij_b_OBJECTS)
 f77_ij_b_DEPENDENCIES = $(am__DEPENDENCIES_2)
 am_f77_ij_mv_OBJECTS = f77_ij_mv.$(OBJEXT)
 f77_ij_mv_OBJECTS = $(am_f77_ij_mv_OBJECTS)
-f77_ij_mv_DEPENDENCIES = $(am__DEPENDENCIES_1)
+am__DEPENDENCIES_3 = $(am__DEPENDENCIES_2)
+f77_ij_mv_DEPENDENCIES = $(am__DEPENDENCIES_3)
 am_f77_struct_OBJECTS = f77_struct.$(OBJEXT)
 f77_struct_OBJECTS = $(am_f77_struct_OBJECTS)
-am__DEPENDENCIES_3 = $(am__DEPENDENCIES_1)
-f77_struct_DEPENDENCIES = $(am__DEPENDENCIES_3)
+am__DEPENDENCIES_4 = $(am__DEPENDENCIES_1)
+f77_struct_DEPENDENCIES = $(am__DEPENDENCIES_4)
 am_fei_OBJECTS = fei-fei.$(OBJEXT)
 fei_OBJECTS = $(am_fei_OBJECTS)
 fei_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
@@ -88,10 +89,10 @@ ij_b_OBJECTS = $(am_ij_b_OBJECTS)
 ij_b_DEPENDENCIES = $(am__DEPENDENCIES_2)
 am_ij_mv_OBJECTS = ij_mv.$(OBJEXT)
 ij_mv_OBJECTS = $(am_ij_mv_OBJECTS)
-ij_mv_DEPENDENCIES = $(am__DEPENDENCIES_1)
+ij_mv_DEPENDENCIES = $(am__DEPENDENCIES_3)
 nodist_ij_mv_C___OBJECTS = ij_mv.C++.$(OBJEXT)
 ij_mv_C___OBJECTS = $(nodist_ij_mv_C___OBJECTS)
-ij_mv_C___DEPENDENCIES = $(am__DEPENDENCIES_1)
+ij_mv_C___DEPENDENCIES = $(am__DEPENDENCIES_3)
 am_new_ij_OBJECTS = new_ij.$(OBJEXT)
 new_ij_OBJECTS = $(am_new_ij_OBJECTS)
 new_ij_DEPENDENCIES = $(am__DEPENDENCIES_2)
@@ -106,10 +107,10 @@ sstruct_C___OBJECTS = $(nodist_sstruct_C___OBJECTS)
 sstruct_C___DEPENDENCIES = $(am__DEPENDENCIES_2)
 am_struct_OBJECTS = struct.$(OBJEXT)
 struct_OBJECTS = $(am_struct_OBJECTS)
-struct_DEPENDENCIES = $(am__DEPENDENCIES_3)
+struct_DEPENDENCIES = $(am__DEPENDENCIES_4)
 nodist_struct_C___OBJECTS = struct.C++.$(OBJEXT)
 struct_C___OBJECTS = $(nodist_struct_C___OBJECTS)
-struct_C___DEPENDENCIES = $(am__DEPENDENCIES_3)
+struct_C___DEPENDENCIES = $(am__DEPENDENCIES_4)
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)
 depcomp =
 am__depfiles_maybe =
@@ -356,14 +357,7 @@ ij_dependencies = \
 
 # ij_mv, build
 ij_mv_SOURCES = ij_mv.c
-ij_mv_libraries = \
- -L$(libdir)\
- -lHYPRE_parcsr_ls\
- -lHYPRE_IJ_mv\
- -lHYPRE_parcsr_mv\
- -lHYPRE_seq_mv\
- -lHYPRE_utilities
-
+ij_mv_libraries = $(ij_libraries)
 ij_mv_LDADD = $(ij_mv_libraries)
 ij_mv_dependencies = \
  $(includedir)/utilities.h\
