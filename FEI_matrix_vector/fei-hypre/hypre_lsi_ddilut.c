@@ -332,7 +332,7 @@ int HYPRE_LSI_DDIlutGetRowLengths(MH_Matrix *Amat, int *leng, int **recv_leng)
    int         nRecv, *recvProc, *recvLeng, *cols, total_recv, mtype, msgtype;
    int         nSend, *sendProc, *sendLeng, **sendList, proc_id, offset;
    double      *vals;
-   MPI_Request *request;
+   MPI_Status  status;
    MH_Context  *context;
 
    /* ---------------------------------------------------------------- */
@@ -394,7 +394,6 @@ int HYPRE_LSI_DDIlutGetRowLengths(MH_Matrix *Amat, int *leng, int **recv_leng)
    /* receives for all messages                                        */
    /* ---------------------------------------------------------------- */
 
-   request      = (MPI_Request *) malloc(nRecv*sizeof(MPI_Request));
    (*recv_leng) = (int  *)        malloc(total_recv * sizeof(int));
    offset = 0;
    for (i = 0; i < nRecv; i++)
@@ -403,11 +402,10 @@ int HYPRE_LSI_DDIlutGetRowLengths(MH_Matrix *Amat, int *leng, int **recv_leng)
       msgtype = mtype;
       length  = recvLeng[i];
       MPI_Recv((void *) &((*recv_leng)[offset]), length, MPI_INT, proc_id,
-               msgtype, MPI_COMM_WORLD, request+i);
+               msgtype, MPI_COMM_WORLD, &status);
       offset += length;
    }
 
-   free(request);
    return 0;
 }
 
