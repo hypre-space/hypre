@@ -88,7 +88,7 @@ AC_DEFUN([ACX_INSURE],
 AC_HELP_STRING(
 [--with-insure=FLAGS],
 [FLAGS are optionals to pass to insure. To redirect output to a
-file; FLAG="-Zoi \"report_file insure.log\". Its probably best
+file; FLAG="-Zoi "report_file insure.log". Its probably best
 to supply options to insure through the .psrc file.
 -- no checking is done to ensure insure is present on the machine]),
 [case "${withval}" in
@@ -110,30 +110,30 @@ to supply options to insure through the .psrc file.
     ;;
 esac])
 
-AC_ARG_WITH([insure-to-file],
-AC_HELP_STRING(
-[--with-insure-to-file],
-[direct insure output to the file \"insure.log\"]),
-[case "${withval}" in
-  yes) PREPEND=insure
-    CFLAGS="$CFLAGS -g"
-    CXXFLAGS="$CXXFLAGS -g"
-    XCCFLAGS="-Zoi \"report_file insure.log\""
-    XCXXFLAGS="-Zoi \"report_file insure.log\""
-    casc_using_debug=yes
-    casc_using_mpi=no
-    ;;
-  no) casc_user_chose_compilers=no
-    ;;
-  *) PREPEND=insure
-    CFLAGS="$CFLAGS -g"
-    CXXFLAGS="$CXXFLAGS -g"
-    XCCFLAGS="-Zoi \"report_file insure.log\""
-    XCXXFLAGS="-Zoi \"report_file insure.log\""
-    casc_using_debug=yes
-    casc_using_mpi=no
-    ;;
-esac])
+#AC_ARG_WITH([insure-to-file],
+#AC_HELP_STRING(
+#[--with-insure-to-file],
+#[direct insure output to the file "insure.log"]),
+#[case "${withval}" in
+#  yes) PREPEND=insure
+#    CFLAGS="$CFLAGS -g"
+#    CXXFLAGS="$CXXFLAGS -g"
+#    XCCFLAGS="-Zoi \"report_file insure.log\""
+#    XCXXFLAGS="-Zoi \"report_file insure.log\""
+#    casc_using_debug=yes
+#    casc_using_mpi=no
+#    ;;
+#  no) casc_user_chose_compilers=no
+#    ;;
+#  *) PREPEND=insure
+#    CFLAGS="$CFLAGS -g"
+#    CXXFLAGS="$CXXFLAGS -g"
+#    XCCFLAGS="-Zoi \"report_file insure.log\""
+#    XCXXFLAGS="-Zoi \"report_file insure.log\""
+#    casc_using_debug=yes
+#    casc_using_mpi=no
+#    ;;
+#esac])
 ])
 
 dnl **********************************************************************
@@ -143,7 +143,7 @@ dnl compile using purify
 dnl [FLAGS are optionals to pass to insure, the default is for 
 dnl FLAG="-log-file=purify.log -append-logfile=yes -best-effort" which 
 dnl appends output to a file called purify.log. To redirect output to 
-dnl the Viewer, use FLAGS=\"-windows=yes\". Assign cc and CC as the C 
+dnl the Viewer, use FLAGS="-windows=yes". Assign cc and CC as the C 
 dnl and C++ compilers and prepends "purify" to compile/link line-- no 
 dnl checking is done to ensure purify is present on the machine]),
 dnl 
@@ -160,7 +160,7 @@ AC_HELP_STRING(
 [--with-purify=FLAGS],
 [FLAGS are optionals to pass to insure. To appends output to a file
 use FLAG="-log-file=purify.log -append-logfile=yes -best-effort".
-To redirect output to the Viewer, use FLAGS=\"-windows=yes\". 
+To redirect output to the Viewer, use FLAGS="-windows=yes". 
 -- no checking is done to ensure purify is present on the machine]),
 [case "${withval}" in
   yes) PREPEND="purify"
@@ -183,7 +183,7 @@ esac])
 AC_ARG_WITH([purify-to-file],
 AC_HELP_STRING(
 [--with-purify-to-file],
-[direct purify output to the file \"purify.log\"]),
+[direct purify output to the file "purify.log"]),
 [case "${withval}" in
   yes) PREPEND="purify"
     CFLAGS="$CFLAGS -g"
