@@ -1,6 +1,6 @@
 #include "headers.h"
 
-void RowsWithColumn
+void RowsWithColumn_original
 ( int * rowmin, int * rowmax, int column, hypre_ParCSRMatrix * A )
 /* Finds rows of A which have a nonzero at the given (global) column number.
    Sets rowmin to the minimum (local) row number of such rows, and rowmax
@@ -54,23 +54,86 @@ void RowsWithColumn
 
 }
 
-/* ----------------------------------------------------------------------
- * hypre_MatTCommPkgCreate
- * generates a special comm_pkg for A - for use in multiplying by its
- * transpose, A * A^T
- * if no row and/or column partitioning is given, the routine determines
- * them with MPE_Decomp1d 
- * ---------------------------------------------------------------------*/
-
-int
-hypre_MatTCommPkgCreate ( hypre_ParCSRMatrix *A)
+void RowsWithColumn
+( int * rowmin, int * rowmax, int column,
+  int num_rows_diag, int firstColDiag, int * colMapOffd,
+  int * mat_i_diag, int * mat_j_diag, int * mat_i_offd, int * mat_j_offd )
+/* Finds rows of A which have a nonzero at the given (global) column number.
+   Sets rowmin to the minimum (local) row number of such rows, and rowmax
+   to the max.  If there are no such rows, will return rowmax<0<=rowmin
+   The matrix A, normally a hypre_ParCSRMatrix or MLI_ParCSRBooleanMatrix,
+   is specified by:
+ num_rows_diag, (number of rows in diag, assumed to be same in offd)
+ firstColDiag, colMapOffd (to map CSR-type matrix columns to ParCSR-type columns
+ mat_i_diag, mat_j_diag: indices in the hypre_CSRMatrix or MLI_CSRBooleanMatrix for
+   diag block of A
+ mat_i_offd, mat_j_offd: indices in the hypre_CSRMatrix or MLI_CSRBooleanMatrix for
+   offd block of A
+ */
 {
-   hypre_ParCSRCommPkg	*comm_pkg;
-   
-   MPI_Comm             comm = hypre_ParCSRMatrixComm(A);
-/*   MPI_Datatype         *recv_mpi_types;
-   MPI_Datatype         *send_mpi_types;
+   int i, j;
+
+   *rowmin = num_rows_diag;
+   *rowmax = -1;
+
+   for ( i=0; i<num_rows_diag; ++i ) {
+      /* global number: row = i + firstRowIndex;*/
+      for ( j=mat_i_diag[i]; j<mat_i_diag[i+1]; ++j ) {
+         if ( mat_j_diag[j]+firstColDiag==column ) {
+            /* row i (local row number) has column mat_j[j] (local column number) */
+            *rowmin = i<*rowmin ? i : *rowmin;
+            *rowmax = i>*rowmax ? i : *rowmax;
+            break;
+         }
+      }
+   }
+   for ( i=0; i<num_rows_diag; ++i ) {
+      /* global number: row = i + firstRowIndex;*/
+      for ( j=mat_i_offd[i]; j<mat_i_offd[i+1]; ++j ) {
+         if ( colMapOffd[ mat_j_offd[j] ]==column ) {
+            /* row i (local row number) has column mat_j[j] (local column number) */
+            *rowmin = i<*rowmin ? i : *rowmin;
+            *rowmax = i>*rowmax ? i : *rowmax;
+            break;
+         }
+      }
+   }
+
+/*      global col no.:  mat_j[j]+hypre_ParCSRMatrixFirstColDiag(A)
+                      or hypre_ParCSRMatrixColMapOffd(A)[ mat_j[j] ]
+        global row no.: i + hypre_ParCSRMatrixFirstRowIndex(A)
 */
+
+}
+
+
+/* hypre_MatTCommPkgCreate_core does all the communications and computations for
+       hypre_MatTCommPkgCreate ( hypre_ParCSRMatrix *A)
+ and   hypre_BoolMatTCommPkgCreate ( MLI_ParCSRBooleanMatrix *A)
+ To support both data types, it has hardly any data structures other than int*.
+
+*/
+/* >>>> TO DO: same thing for A*B; presently the Boolean A*B function calls
+  >>>>> the non-Boolean CommPkgCreate function, which is a bug.
+*/
+
+hypre_MatTCommPkgCreate_core (
+
+/* input args: */
+   MPI_Comm comm, int * col_map_offd, int first_col_diag, int * col_starts,
+   int num_rows_diag, int num_cols_diag, int num_cols_offd, int * row_starts,
+   int firstColDiag, int * colMapOffd,
+   int * mat_i_diag, int * mat_j_diag, int * mat_i_offd, int * mat_j_offd,
+
+   int data,  /* = 1 for a matrix with floating-point data, =0 for Boolean matrix */
+
+/* pointers to output args: */
+   int * p_num_recvs, int ** p_recv_procs, int ** p_recv_vec_starts,
+   int * p_num_sends, int ** p_send_procs, int ** p_send_map_starts,
+   int ** p_send_map_elmts
+
+   )
+{
    int			num_sends;
    int			*send_procs;
    int			*send_map_starts;
@@ -78,11 +141,6 @@ hypre_MatTCommPkgCreate ( hypre_ParCSRMatrix *A)
    int			num_recvs;
    int			*recv_procs;
    int			*recv_vec_starts;
-   
-   int  *col_map_offd = hypre_ParCSRMatrixColMapOffd(A);
-   int  first_col_diag = hypre_ParCSRMatrixFirstColDiag(A);
-   int  *col_starts = hypre_ParCSRMatrixColStarts(A);
-
    int	i, j, j2, k, ir, rowmin, rowmax;
    int	*tmp, *recv_buf, *displs, *info, *send_buf, *all_num_sends2;
    int	num_procs, my_id, num_elmts;
@@ -91,10 +149,7 @@ hypre_MatTCommPkgCreate ( hypre_ParCSRMatrix *A)
    int pmatch, col, kc, p;
    int * recv_sz_buf;
    int * row_marker;
-   int	num_rows_diag = hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A));
-   int	num_cols_diag = hypre_CSRMatrixNumCols(hypre_ParCSRMatrixDiag(A));
-   int	num_cols_offd = hypre_CSRMatrixNumCols(hypre_ParCSRMatrixOffd(A));
-
+   
    MPI_Comm_size(comm, &num_procs);  
    MPI_Comm_rank(comm, &my_id);
 
@@ -245,7 +300,11 @@ hypre_MatTCommPkgCreate ( hypre_ParCSRMatrix *A)
                      ++send_map_starts[index+1];
                      send_map_elmts[index2++] = col - offset; */
                   /* Plan to send all of my rows which use this column... */
-                  RowsWithColumn( &rowmin, &rowmax, col, A );
+                  RowsWithColumn( &rowmin, &rowmax, col,
+                                  num_rows_diag, 
+                                  firstColDiag, colMapOffd,
+                                  mat_i_diag, mat_j_diag, mat_i_offd, mat_j_offd
+                     );
                   for ( ir=rowmin; ir<=rowmax; ++ir ) {
                      if ( row_marker[ir]==0 ) {
                         row_marker[ir] = 1;
@@ -269,8 +328,7 @@ hypre_MatTCommPkgCreate ( hypre_ParCSRMatrix *A)
                }
             }
 */
-            for ( kc=hypre_ParCSRMatrixRowStarts(A)[my_id];
-                  kc<hypre_ParCSRMatrixRowStarts(A)[my_id+1]; kc++ ) {
+            for ( kc=row_starts[my_id]; kc<row_starts[my_id+1]; kc++ ) {
                if ( kc==col && i!=my_id ) {
                   /* this processor has the same column as proc. i (but is different) */
                   pmatch = 1;
@@ -279,7 +337,11 @@ hypre_MatTCommPkgCreate ( hypre_ParCSRMatrix *A)
                   ++send_map_starts[index+1];
                   send_map_elmts[index2++] = col - offset;*/
                   /* Plan to send all of my rows which use this column... */
-                  RowsWithColumn( &rowmin, &rowmax, col, A );
+                  RowsWithColumn( &rowmin, &rowmax, col,
+                                  num_rows_diag, 
+                                  firstColDiag, colMapOffd,
+                                  mat_i_diag, mat_j_diag, mat_i_offd, mat_j_offd
+                     );
                   for ( ir=rowmin; ir<=rowmax; ++ir ) {
                      if ( row_marker[ir]==0 ) {
                         row_marker[ir] = 1;
@@ -360,8 +422,87 @@ hypre_MatTCommPkgCreate ( hypre_ParCSRMatrix *A)
       }
       else {
          j++;
-      };
-   };
+      }
+   }
+   /* fill in the rest of recv_vec_starts to indicate no more data */
+   for ( j=j2+1; j<num_recvs+1; ++j ) recv_vec_starts[j] = recv_vec_starts[j2];
+
+   hypre_TFree(send_buf);
+   hypre_TFree(all_num_sends2);
+   hypre_TFree(tmp);
+   hypre_TFree(recv_buf);
+   hypre_TFree(displs);
+   hypre_TFree(info);
+   hypre_TFree(recv_sz_buf);
+   hypre_TFree(row_marker);
+
+
+   /* finish up with the hand-coded call-by-reference... */
+   *p_num_recvs = num_recvs;
+   *p_recv_procs = recv_procs;
+   *p_recv_vec_starts = recv_vec_starts;
+   *p_num_sends = num_sends;
+   *p_send_procs = send_procs;
+   *p_send_map_starts = send_map_starts;
+   *p_send_map_elmts = send_map_elmts;
+
+};
+
+/* ----------------------------------------------------------------------
+ * hypre_MatTCommPkgCreate
+ * generates a special comm_pkg for A - for use in multiplying by its
+ * transpose, A * A^T
+ * if no row and/or column partitioning is given, the routine determines
+ * them with MPE_Decomp1d 
+ * ---------------------------------------------------------------------*/
+
+int
+hypre_MatTCommPkgCreate ( hypre_ParCSRMatrix *A)
+{
+   hypre_ParCSRCommPkg	*comm_pkg;
+   
+   MPI_Comm             comm = hypre_ParCSRMatrixComm(A);
+/*   MPI_Datatype         *recv_mpi_types;
+   MPI_Datatype         *send_mpi_types;
+*/
+   int			num_sends;
+   int			*send_procs;
+   int			*send_map_starts;
+   int			*send_map_elmts;
+   int			num_recvs;
+   int			*recv_procs;
+   int			*recv_vec_starts;
+   
+   int  *col_map_offd = hypre_ParCSRMatrixColMapOffd(A);
+   int  first_col_diag = hypre_ParCSRMatrixFirstColDiag(A);
+   int  *col_starts = hypre_ParCSRMatrixColStarts(A);
+
+   int	i, j, j2, k, ir, rowmin, rowmax;
+   int	num_procs, my_id, num_elmts;
+   int	local_info, index, index2;
+   int	ierr = 0;
+   int pmatch, col, kc, p;
+   int * recv_sz_buf;
+   int * row_marker;
+   int	num_rows_diag = hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A));
+   int	num_cols_diag = hypre_CSRMatrixNumCols(hypre_ParCSRMatrixDiag(A));
+   int	num_cols_offd = hypre_CSRMatrixNumCols(hypre_ParCSRMatrixOffd(A));
+   int * row_starts = hypre_ParCSRMatrixRowStarts(A);
+
+   hypre_MatTCommPkgCreate_core (
+      comm, col_map_offd, first_col_diag, col_starts,
+      num_rows_diag, num_cols_diag, num_cols_offd, row_starts,
+                                  hypre_ParCSRMatrixFirstColDiag(A),
+                                  hypre_ParCSRMatrixColMapOffd(A),
+                                  hypre_CSRMatrixI( hypre_ParCSRMatrixDiag(A) ),
+                                  hypre_CSRMatrixJ( hypre_ParCSRMatrixDiag(A) ),
+                                  hypre_CSRMatrixI( hypre_ParCSRMatrixOffd(A) ),
+      hypre_CSRMatrixJ( hypre_ParCSRMatrixOffd(A) ),
+      1,
+      &num_recvs, &recv_procs, &recv_vec_starts,
+      &num_sends, &send_procs, &send_map_starts,
+      &send_map_elmts
+      );
 
    comm_pkg = hypre_CTAlloc(hypre_ParCSRCommPkg, 1);
 
@@ -376,15 +517,6 @@ hypre_MatTCommPkgCreate ( hypre_ParCSRMatrix *A)
    hypre_ParCSRCommPkgSendMapElmts(comm_pkg) = send_map_elmts;
 
    hypre_ParCSRMatrixCommPkgT(A) = comm_pkg;
-
-   hypre_TFree(send_buf);
-   hypre_TFree(all_num_sends2);
-   hypre_TFree(tmp);
-   hypre_TFree(recv_buf);
-   hypre_TFree(displs);
-   hypre_TFree(info);
-   hypre_TFree(recv_sz_buf);
-   hypre_TFree(row_marker);
 
    return ierr;
 }

@@ -277,7 +277,9 @@ int hypre_BuildCSRMatrixMPIDataType( int num_nonzeros , int num_rows , double *a
 int hypre_BuildCSRJDataType( int num_nonzeros , double *a_data , int *a_j , MPI_Datatype *csr_jdata_datatype );
 
 /* communicationT.c */
-void RowsWithColumn( int *rowmin , int *rowmax , int column , hypre_ParCSRMatrix *A );
+void RowsWithColumn_original( int *rowmin , int *rowmax , int column , hypre_ParCSRMatrix *A );
+void RowsWithColumn( int *rowmin , int *rowmax , int column , int num_rows_diag , int firstColDiag , int *colMapOffd , int *mat_i_diag , int *mat_j_diag , int *mat_i_offd , int *mat_j_offd );
+int hypre_MatTCommPkgCreate_core( MPI_Comm comm , int *col_map_offd , int first_col_diag , int *col_starts , int num_rows_diag , int num_cols_diag , int num_cols_offd , int *row_starts , int firstColDiag , int *colMapOffd , int *mat_i_diag , int *mat_j_diag , int *mat_i_offd , int *mat_j_offd , int data , int *p_num_recvs , int **p_recv_procs , int **p_recv_vec_starts , int *p_num_sends , int **p_send_procs , int **p_send_map_starts , int **p_send_map_elmts );
 int hypre_MatTCommPkgCreate( hypre_ParCSRMatrix *A );
 
 /* driver.c */
