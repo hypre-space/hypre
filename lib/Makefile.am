@@ -128,7 +128,7 @@ HYPRE_SRC_DIRS = \
  distributed_matrix\
  krylov\
  matrix_matrix\
- parcsr_es/LOBPCG\
+ eigensolvers/lib\
  parcsr_ls\
  parcsr_mv\
  seq_mv\
@@ -330,9 +330,13 @@ MOSTFILES = \
  $(top_srcdir)/krylov/pcg.c\
  $(top_srcdir)/matrix_matrix/HYPRE_ConvertPETScMatrixToDistributedMatrix.c\
  $(top_srcdir)/matrix_matrix/HYPRE_ConvertParCSRMatrixToDistributedMatrix.c\
- $(top_srcdir)/parcsr_es/LOBPCG/lobpcg.c\
- $(top_srcdir)/parcsr_es/LOBPCG/lobpcg_matrix.c\
- $(top_srcdir)/parcsr_es/LOBPCG/lobpcg_utilities.c\
+ $(top_srcdir)/eigensolvers/krylov/HYPRE_lobpcg.c\
+ $(top_srcdir)/eigensolvers/krylov/lobpcg.c\
+ $(top_srcdir)/eigensolvers/multivector/multivector.c\
+ $(top_srcdir)/eigensolvers/parcsr_ls/HYPRE_parcsr_int.c\
+ $(top_srcdir)/eigensolvers/struct_ls/HYPRE_struct_int.c\
+ $(top_srcdir)/eigensolvers/sstruct_ls/HYPRE_sstruct_int.c\
+ $(top_srcdir)/eigensolvers/utilities/fortran_matrix.c\
  $(top_srcdir)/parcsr_ls/F90_HYPRE_parcsr_ParaSails.c\
  $(top_srcdir)/parcsr_ls/F90_HYPRE_parcsr_amg.c\
  $(top_srcdir)/parcsr_ls/F90_HYPRE_parcsr_bicgstab.c\
