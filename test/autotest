@@ -272,7 +272,7 @@ scp -r linear_solvers ${HYPRE_COMPILE_MACHINE}:${HYPRE_REMOTE_DIR}
 ssh ${HYPRE_COMPILE_MACHINE} "\
     (\
         cd ${HYPRE_REMOTE_DIR}/linear_solvers;\
-	source $HYPRE_AUTOTEST_DIR/linear_solvers/test/env.${HYPRE_COMPILE_MACHINE};\
+	source test/env.${HYPRE_COMPILE_MACHINE};\
         ./configure ;\
         make beta;\
     )"
@@ -288,7 +288,7 @@ ssh ${HYPRE_COMPILE_MACHINE} "\
     (\
 	
         cd ${HYPRE_REMOTE_DIR}/linear_solvers;\
-	source $HYPRE_AUTOTEST_DIR/linear_solvers/test/env.${HYPRE_COMPILE_MACHINE};\
+	source test/env.${HYPRE_COMPILE_MACHINE};\
         ./configure --with-openmp;\
 	make veryclean;\
         make beta;\
