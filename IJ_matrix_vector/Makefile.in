@@ -59,7 +59,6 @@ HEADERS =\
  IJ_matrix.h
 
 FILES =\
- qsort.c\
  aux_parcsr_matrix.c\
  hypre_IJMatrix_parcsr.c\
  hypre_IJVector_parcsr.c\

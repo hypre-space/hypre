@@ -178,6 +178,12 @@ int
 hypre_GetIJMatrixParCSRMatrix( HYPRE_IJMatrix IJmatrix, Mat *reference )
 #endif
   
+#ifdef ISIS_AVAILABLE
+/* IJMatrix_isis.c */
+int
+hypre_GetIJMatrixISISMatrix( HYPRE_IJMatrix IJmatrix, RowMatrix *reference )
+#endif
+
 /* #include "./internal_protos.h" */
 
 #endif
@@ -242,15 +248,6 @@ ent */
 /* #include "./internal_protos.h" */
 
 #endif
-# define	P(s) s
-
-/* qsort.c */
-void swap P((int *v , int i , int j ));
-void swap2 P((int *v , double *w , int i , int j ));
-void qsort0 P((int *v , int left , int right ));
-void qsort1 P((int *v , double *w , int left , int right ));
-
-#undef P
 # define	P(s) s
 
 /* aux_parcsr_matrix.c */
@@ -394,7 +391,6 @@ void hypre_F90_IFACE P((int hypre_setijmatrixlocalsize ));
 void hypre_F90_IFACE P((int hypre_setijmatrixrowsizes ));
 void hypre_F90_IFACE P((int hypre_setijmatrixdiagrowsizes ));
 void hypre_F90_IFACE P((int hypre_setijmatrixoffdiagrowsize ));
-void hypre_F90_IFACE P((int hypre_setijmatrixtotalsize ));
 void hypre_F90_IFACE P((int hypre_queryijmatrixinsertionsem ));
 void hypre_F90_IFACE P((int hypre_insertijmatrixblock ));
 void hypre_F90_IFACE P((int hypre_addblocktoijmatrix ));
@@ -408,7 +404,6 @@ void hypre_F90_IFACE P((int hypre_setijvectorlocalpartition ));
 void hypre_F90_IFACE P((int hypre_initializeijvector ));
 void hypre_F90_IFACE P((int hypre_distributeijvector ));
 void hypre_F90_IFACE P((int hypre_setijvectorlocalstoragety ));
-void hypre_F90_IFACE P((int hypre_setijvectorlocalsize ));
 void hypre_F90_IFACE P((int hypre_zeroijveclocalcomps ));
 void hypre_F90_IFACE P((int hypre_setijveclocalcomps ));
 void hypre_F90_IFACE P((int hypre_setijveclocalcompsinblock ));

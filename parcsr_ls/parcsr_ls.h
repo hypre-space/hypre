@@ -93,7 +93,7 @@ void hypre_F90_IFACE P((int hypre_parcsrpilutsetdroptoleran ));
 void hypre_F90_IFACE P((int hypre_parcsrpilutsetfacrowsize ));
 
 /* F90_par_laplace.c */
-void hypre_F90_IFACE P((int hypre_generatelaplacian ));
+void hypre_F90_IFACE P((int generatelaplacian ));
 
 /* HYPRE_parcsr_amg.c */
 HYPRE_Solver HYPRE_ParAMGInitialize P((void ));
@@ -185,6 +185,22 @@ int hypre_CGNRSetLogging P((void *cgnr_vdata , int logging ));
 int hypre_CGNRGetNumIterations P((void *cgnr_vdata , int *num_iterations ));
 int hypre_CGNRGetFinalRelativeResidualNorm P((void *cgnr_vdata , double *relative_residual_norm ));
 
+/* driver.c */
+int main P((int argc , char *argv []));
+int BuildParFromFile P((int argc , char *argv [], int arg_index , HYPRE_ParCSRMatrix *A_ptr ));
+int BuildParLaplacian P((int argc , char *argv [], int arg_index , HYPRE_ParCSRMatrix *A_ptr ));
+int BuildParDifConv P((int argc , char *argv [], int arg_index , HYPRE_ParCSRMatrix *A_ptr ));
+int BuildParFromOneFile P((int argc , char *argv [], int arg_index , HYPRE_ParCSRMatrix *A_ptr ));
+int BuildRhsParFromOneFile P((int argc , char *argv [], int arg_index , HYPRE_ParCSRMatrix A , HYPRE_ParVector *b_ptr ));
+int BuildParLaplacian9pt P((int argc , char *argv [], int arg_index , HYPRE_ParCSRMatrix *A_ptr ));
+int BuildParLaplacian27pt P((int argc , char *argv [], int arg_index , HYPRE_ParCSRMatrix *A_ptr ));
+
+/* driver_interp.c */
+int main P((int argc , char *argv []));
+
+/* driver_rap.c */
+int main P((int argc , char *argv []));
+
 /* gmres.c */
 void *hypre_GMRESInitialize P((void ));
 int hypre_GMRESFinalize P((void *gmres_vdata ));
@@ -260,8 +276,6 @@ int hypre_ParAMGBuildInterp P((hypre_ParCSRMatrix *A , int *CF_marker , hypre_Pa
 /* par_laplace.c */
 hypre_ParCSRMatrix *GenerateLaplacian P((MPI_Comm comm , int nx , int ny , int nz , int P , int Q , int R , int p , int q , int r , double *value ));
 int map P((int ix , int iy , int iz , int p , int q , int r , int P , int Q , int R , int *nx_part , int *ny_part , int *nz_part , int *global_part ));
-void qsort0 P((int *v , int left , int right ));
-void swap P((int *v , int i , int j ));
 
 /* par_laplace_27pt.c */
 hypre_ParCSRMatrix *GenerateLaplacian27pt P((MPI_Comm comm , int nx , int ny , int nz , int P , int Q , int R , int p , int q , int r , double *value ));

@@ -73,6 +73,7 @@ UTILITIES_FILES =\
  amg_linklist.c\
  binsearch.c\
  umalloc_local.c\
+ qsort.c\
  random.c
 
 UTILITIES_OBJS = ${UTILITIES_FILES:.c=.o}
