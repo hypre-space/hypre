@@ -333,6 +333,7 @@ int hypre_KrylovCopyVector P((void *x , void *y ));
 int hypre_KrylovClearVector P((void *x ));
 int hypre_KrylovScaleVector P((double alpha , void *x ));
 int hypre_KrylovAxpy P((double alpha , void *x , void *y ));
+int hypre_KrylovCommInfo P(( void *A , int *my_id, int *num_procs ));
 
 /* transpose.c */
 int hypre_CSRMatrixTranspose P((hypre_CSRMatrix *A , hypre_CSRMatrix **AT ));

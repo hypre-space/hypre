@@ -183,9 +183,11 @@ hypre_GMRESSolve(void  *gmres_vdata,
    int	      i, j, k;
    double     *rs, **hh, *c, *s;
    int        iter; 
+   int        my_id, num_procs;
    double     epsilon, gamma, t, r_norm, b_norm;
    double     epsmac = 1.e-16; 
 
+   hypre_KrylovCommInfo(A,&my_id,&num_procs);
    if (logging > 0)
    {
       norms          = (gmres_data -> norms);
@@ -214,10 +216,13 @@ hypre_GMRESSolve(void  *gmres_vdata,
    if (logging > 0)
    {
       norms[0] = r_norm;
-      printf("L2 norm of b: %e\n", b_norm);
-      if (b_norm == 0.0)
-         printf("Rel_resid_norm actually contains the residual norm\n");
-      printf("Initial L2 norm of residual: %e\n", r_norm);
+      if (my_id == 0)
+      {
+  	 printf("L2 norm of b: %e\n", b_norm);
+         if (b_norm == 0.0)
+            printf("Rel_resid_norm actually contains the residual norm\n");
+         printf("Initial L2 norm of residual: %e\n", r_norm);
+      }
       
    }
    iter = 0;
@@ -310,7 +315,7 @@ hypre_GMRESSolve(void  *gmres_vdata,
 		hypre_KrylovCopyVector(b,r);
           	hypre_KrylovMatvec(matvec_data,-1.0,A,x,1.0,r);
 		r_norm = sqrt(hypre_KrylovInnerProd(r,r));
-                if (logging > 0)
+                if (logging > 0 && my_id == 0)
                    printf("Final L2 norm of residual: %e\n\n", r_norm);
 		if (r_norm <= epsilon) break;
 	}
@@ -327,7 +332,7 @@ hypre_GMRESSolve(void  *gmres_vdata,
 		hypre_KrylovAxpy(rs[j],p[j],p[0]);	
    }
 
-   if (logging > 0)
+   if (logging > 0 && my_id == 0)
    {
       if (b_norm > 0.0)
          {printf("=============================================\n\n");

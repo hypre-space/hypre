@@ -217,3 +217,16 @@ hypre_KrylovAxpy( double alpha,
                               (hypre_ParVector *) y ) );
 }
 
+/*--------------------------------------------------------------------------
+ * hypre_KrylovCommInfo
+ *--------------------------------------------------------------------------*/
+
+int
+hypre_KrylovCommInfo( void   *A, int *my_id, int *num_procs)
+{
+   MPI_Comm comm = hypre_ParCSRMatrixComm ( (hypre_ParCSRMatrix *) A);
+   MPI_Comm_size(comm,num_procs);
+   MPI_Comm_rank(comm,my_id);
+   return 0;
+}
+

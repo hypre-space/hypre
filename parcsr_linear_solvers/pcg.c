@@ -254,13 +254,15 @@ hypre_KrylovSolve( void *pcg_vdata,
                 
    int             i = 0, j;
    int             ierr = 0;
+   int             my_id, num_procs;
    char		  *log_file_name;
 /*   FILE		  *fp; */
 
    /*-----------------------------------------------------------------------
     * Start pcg solve
     *-----------------------------------------------------------------------*/
-
+   
+   hypre_KrylovCommInfo(A,&my_id,&num_procs);
    if (logging > 0)
    {
       log_file_name = (pcg_data -> log_file_name);
@@ -273,7 +275,7 @@ hypre_KrylovSolve( void *pcg_vdata,
    {
       /* bi_prod = <b,b> */
       bi_prod = hypre_KrylovInnerProd(b, b);
-      if (logging > 0)
+      if (logging > 0 && my_id == 0)
           printf("<b,b>: %e\n",bi_prod);
    }
    else
@@ -282,7 +284,7 @@ hypre_KrylovSolve( void *pcg_vdata,
       hypre_KrylovClearVector(p);
       precond(precond_data, A, b, p);
       bi_prod = hypre_KrylovInnerProd(p, b);
-      if (logging > 0)
+      if (logging > 0 && my_id == 0)
           printf("<C*b,b>: %e\n",bi_prod);
    }
 
@@ -324,12 +326,12 @@ hypre_KrylovSolve( void *pcg_vdata,
    else
       {if (two_norm)
           {eps = (tol*tol)*hypre_KrylovInnerProd(r,r);
-           if (logging > 0)
+           if (logging > 0 && my_id == 0)
               {printf("Exiting when ||r||_2 < tol * ||r0||_2\n");
                printf("Initial ||r0||_2: %e\n",norms[0]);};}
        else
           {eps = (tol*tol)*gamma;
-           if (logging > 0)
+           if (logging > 0 && my_id == 0)
               {printf("Exiting when ||r||_C < tol * ||r0||_C\n");
                printf("Initial ||r0||_C: %e\n",sqrt(gamma));};};};
 
@@ -417,7 +419,7 @@ hypre_KrylovSolve( void *pcg_vdata,
     * Print log
     *-----------------------------------------------------------------------*/
 
-   if (logging > 0)
+   if (logging > 0 && my_id == 0)
    {
       if (bi_prod > 0.0)
          {if (two_norm)

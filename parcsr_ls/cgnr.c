@@ -180,6 +180,7 @@ hypre_CGNRSolve(void *cgnr_vdata,
                 
    int             i = 0, j;
    int             ierr = 0;
+   int             my_id, num_procs;
    int             x_not_set = 1;
    char		  *log_file_name;
    FILE		  *fp;
@@ -187,7 +188,7 @@ hypre_CGNRSolve(void *cgnr_vdata,
    /*-----------------------------------------------------------------------
     * Start cgnr solve
     *-----------------------------------------------------------------------*/
-
+   hypre_KrylovCommInfo(A,&my_id,&num_procs);
    if (logging > 0)
    {
       log_file_name = (cgnr_data -> log_file_name);
@@ -313,7 +314,7 @@ hypre_CGNRSolve(void *cgnr_vdata,
 
    bi_prod = sqrt(bi_prod);
 
-   if (logging > 0)
+   if (logging > 0 && my_id == 0)
    {
       fprintf(fp,"Iters       ||r||_2      conv.rate  ||r||_2/||b||_2\n");
       fprintf(fp,"-----    ------------    ---------  ------------ \n");
