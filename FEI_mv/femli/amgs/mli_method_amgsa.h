@@ -54,6 +54,7 @@ class MLI_Method_AMGSA : public MLI_Method
    int      numLevels_;              /* number of levels requested       */
    int      currLevel_;              /* current level being processed    */
    int      outputLevel_;            /* for diagnostics                  */
+   int      scalar_;                 /* aggregate in scalar manner       */
    int      nodeDofs_;               /* equation block size (fixed)      */
    int      currNodeDofs_ ;          /* current block size (this stage)  */
    double   threshold_;              /* for creating aggregation graph   */

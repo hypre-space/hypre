@@ -49,6 +49,7 @@ MLI_Method_AMGSA::MLI_Method_AMGSA( MPI_Comm comm ) : MLI_Method( comm )
    numLevels_     = 40;
    currLevel_     = 0;
    outputLevel_   = 0;
+   scalar_        = 0;
    nodeDofs_      = 1;
    currNodeDofs_  = 1;
    threshold_     = 0.08;
@@ -425,6 +426,10 @@ int MLI_Method_AMGSA::setParams(char *in_name, int argc, char *argv[])
       saLabels_[level] = new int[length];
       for ( is = 0; is < length; is++ ) saLabels_[level][is] = labels[is];
       return 0;
+   }
+   else if ( !strcasecmp(param1, "scalar" ))
+   {
+      scalar_ = 1;
    }
    else if ( !strcasecmp(param1, "setParamFile" ))
    {
@@ -995,6 +1000,7 @@ int MLI_Method_AMGSA::setNullSpace( int nDOF, int ndim, double *nullvec,
    nodeDofs_     = nDOF;
    currNodeDofs_ = nDOF;
    nullspaceDim_ = ndim;
+printf("method_amgsa: set ndim = %d\n", ndim);
    nullspaceLen_ = length;
    if ( nullspaceVec_ != NULL ) delete [] nullspaceVec_;
    if ( nullvec != NULL )
@@ -1064,12 +1070,14 @@ int MLI_Method_AMGSA::setNodalCoordinates(int num_nodes, int nDOF, int nsDim,
       currNodeDofs_ = 1;
       nullspaceLen_ = num_nodes;
       nullspaceDim_ = numNS;
+#if 0
       if ( numNS != 1 && !(numNS == 4 && nsDim == 3) ) 
       {
          printf("setNodalCoordinates: nDOF,numNS,nsDim = %d %d %d\n",nDOF,
                 numNS,nsDim);
          exit(1);
       }
+#endif
    }
    else if ( nDOF == 3 )
    {
@@ -1078,10 +1086,13 @@ int MLI_Method_AMGSA::setNodalCoordinates(int num_nodes, int nDOF, int nsDim,
       nullspaceLen_ = num_nodes * 3;
       nullspaceDim_ = numNS;
       if ( nullspaceDim_ <= 3 ) nullspaceDim_  = 6;
-      if ( numNS != 3 && numNS != 6 && numNS != 9 && numNS != 12 ) 
+      if ( useSAMGeFlag_ == 0 )
       {
-         printf("setNodalCoordinates: numNS reset to 3 (%d)\n",numNS);
-         nullspaceDim_ = numNS = 3;
+         if ( numNS != 3 && numNS != 6 && numNS != 9 && numNS != 12 ) 
+         {
+            printf("setNodalCoordinates: numNS reset to 3 (%d)\n",numNS);
+            nullspaceDim_ = numNS = 3;
+         }
       }
    }
    else
@@ -1097,6 +1108,8 @@ int MLI_Method_AMGSA::setNodalCoordinates(int num_nodes, int nDOF, int nsDim,
    {
       if ( nodeDofs_ == 1 )
       {
+         for( k = 0; k < nsDim; k++ )
+            nullspaceVec_[k*nullspaceLen_+i] = 0.0;
          nullspaceVec_[i] = 1.0;
          if ( nullspaceDim_ == 4 ) 
          {
