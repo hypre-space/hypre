@@ -16,8 +16,7 @@ install:all
 
 CXX = @CXX@
 
-CXXFLAGS = \
-  @MPIINCLUDE@\
+CXXFLAGS = -w \
  -I../fei-isis\
  -I../isis-mv\
  -I../../IJ_matrix_vector\
@@ -33,24 +32,32 @@ LDLIBFLAGS = @LDLIBDIRS@ @LDLIBS@
 
 LFLAGS =\
  -L.\
+ -L../fei-isis\
  -L../fei-isis/src\
  -L../isis-mv\
  -L../../IJ_matrix_vector\
  -L../../utilities\
  -L../../parcsr_matrix_vector\
  -L../../parcsr_linear_solvers\
+ -L../../distributed_matrix\
+ -L../../distributed_linear_solvers/pilut\
+ -L../../distributed_linear_solvers/ParaSails\
  -L../../seq_matrix_vector\
- -lHYPRE_FEI\
- -lHYPRE_FEI_base\
- -lHYPRE_FEI_isismv\
- -lHYPRE_IJ_mv\
- -lHYPRE_parcsr_ls\
- -lHYPRE_parcsr_mv\
- -lHYPRE_seq_mv\
- -lHYPRE_utilities\
+ -L../../matrix_matrix\
+ -lHYPRE_FEI \
+ -lHYPRE_FEI_base \
+ -lHYPRE_parcsr_ls \
+ -lHYPRE_ParaSails \
+ -lHYPRE_FEI_isismv \
+ -lHYPRE_IJ_mv \
+ -lHYPRE_utilities \
+ -lHYPRE_parcsr_mv \
+ -lHYPRE_MatrixMatrix \
+ -lHYPRE_DistributedMatrix \
+ -lHYPRE_DistributedMatrixPilutSolver \
+ -lHYPRE_seq_mv \
  ${MPILIBFLAGS} ${LIBFLAGS} ${LDLIBFLAGS}\
- -lm
-
+ -ldxml -lm
 
 HEADERS =\
  HYPRE_SLE.h
@@ -89,11 +96,12 @@ lib: ${OBJS}
 ##################################################################
 
 clean:
-	@rm -rf *.o ti_files driver
+	@touch erase.tmp
+	@rm -rf erase.tmp *.o ti_files driver
 
 veryclean: clean
-	@rm -f libHYPRE_*.a
-
+	@touch erase.tmp
+	@rm -rf erase.tmp *.o *.a ti_files driver
 
 
 ##################################################################
