@@ -21,8 +21,9 @@ HEADERS =
  
 HYPREFILES =\
  HYPRE_ConvertPETScMatrixToDistributedMatrix.c \
- HYPRE_ConvertParCSRMatrixToDistributedMatrix.c \
- HYPRE_BuildIJMatrixFromDistributedMatrix.c
+ HYPRE_ConvertParCSRMatrixToDistributedMatrix.c 
+ 
+#HYPRE_BuildIJMatrixFromDistributedMatrix.c
 
 FILES = $(HYPREFILES) $(LOCALFILES)
 
