@@ -49,10 +49,8 @@ dnl *********************************************************************dnl *
 
 casc_user_chose_compilers=no
 casc_user_chose_mpi=no
-casc_using_pthreads=no
 casc_using_babel=no
 casc_using_mli=no
-casc_using_petsc=no
 casc_using_openmp=no   
 #casc_using_ibm_smp=no
 #casc_using_sgi_smp=no
@@ -339,7 +337,7 @@ AC_ARG_WITH(mpi-flags,
 
 dnl *********************************************************************
 dnl * If the user has specified any other command line options (without-MPI, 
-dnl * with-pthreads, with-dmalloc etc.) then this section identifies the 
+dnl * with-dmalloc etc.) then this section identifies the 
 dnl * options and assigns yes or no values to appropriate macros.  These
 dnl * values will be used to determine compilers, flags and libraries needed.
 dnl *********************************************************************
@@ -386,24 +384,6 @@ AC_ARG_WITH(timing,
  then
    AC_DEFINE(HYPRE_TIMING)
  fi]
-)
-
-AC_ARG_WITH(pthreads,
-[  --with-pthreads         use pthreads-- this may affect which compiler
-			  is chosen.  Tests are done to check for the
-			  pthread library.  Supported on IBM only.],
-[case "${withval}" in
-   yes) casc_using_pthreads=yes
-     CHECK_LIB(pthread, pthread_create, ,
-       CHECK_LIB(pthreads, pthread_create))
-     if test "$ac_cv_lib_pthread_pthread_create" = "yes" ||
-       test "$ac_cv_lib_pthreads_pthread_create" = "yes"
-     then
-       AC_DEFINE(HYPRE_USE_PTHREADS)
-     fi ;;
-   no)  casc_using_pthreads=no ;;
- esac],
-[casc_using_pthreads=no]
 )
 
 AC_ARG_WITH(openmp,
@@ -478,20 +458,6 @@ AC_ARG_WITH(mli,
 [casc_using_mli=no]
 )
 
-AC_ARG_WITH(petsc,
-[  --with-petsc            use petsc],
-[case "${withval}" in
-   yes) casc_using_petsc=yes
-     HYPRE_PETSCDEFS="$HYPRE_PETSCDEFS -DPETSC_AVAILABLE"
-     HYPRE_PETSCLIBDIRS="$HYPRE_TOP_SRC_DIR/PETScMat_ls/pilut \
-$HYPRE_TOP_SRC_DIR/PETSc_ls/ParILUT "
-     HYPRE_PETSCLIBS=" -l_HYPRE_PETScSolverParILUT \
--l_HYPRE_PETScMatPilutSolver " ;;
-   no)  casc_using_petsc=no ;;
- esac],
-[casc_using_petsc=no]
-)
-
 AC_ARG_WITH(FEI_BASE_DIR,
 [  --with-FEI_BASE_DIR     specify the directory where the fei header
                           files live.], 
@@ -528,7 +494,7 @@ AC_ARG_WITH(FEI_INC_DIR,
 dnl *********************************************************************
 dnl * For each ARCH (6 supported platforms and 1 default) the "best" 
 dnl * compilers are chosen based on, the architecture, MPI  or no-MPI, 
-dnl * pthreads or no pthreads, and the preference list of compilers.
+dnl * and the preference list of compilers.
 dnl * If none of the preferred compilers are available then the default
 dnl * compilers will be searched for (using CASC_FIND_MPI or AC_PROG_CC,
 dnl * AC_PROG_CXX, and AC_PROG_F77). Depending on the compiler chosen,
@@ -971,27 +937,19 @@ case $ARCH in
   rs6000)
     if test -z "$CC"; then
       if test "$casc_using_mpi" = "no" ; then
-        if test "$casc_using_pthreads" = "no" &&
-          test "$casc_using_openmp" = "no"
+        if test "$casc_using_openmp" = "no"
         then
           AC_CHECK_PROGS(CC,xlc gcc cc c89)
         else
-          if test "$casc_using_pthreads" = "yes" ; then
-            AC_CHECK_PROGS(CC,xlc_r gcc)
-          fi
           if test "$casc_using_openmp" = "yes" ; then
             AC_CHECK_PROGS(CC,guidec)
           fi
         fi
       else
-        if test "$casc_using_pthreads" = "no" &&
-          test "$casc_using_openmp" = "no"
+        if test "$casc_using_openmp" = "no"
         then
           AC_CHECK_PROGS(CC,mpcc mpicc)
         else
-          if test "$casc_using_pthreads" = "yes" ; then
-            AC_CHECK_PROGS(CC,mpxlc_r mpcc_r mpicc)
-          fi
           if test "$casc_using_openmp" = "yes" ; then
             AC_CHECK_PROGS(CC,mpguidec)
           fi
@@ -1000,28 +958,20 @@ case $ARCH in
     fi
     if test -z "$CXX"; then
       if test "$casc_using_mpi" = "no" ; then
-        if test "$casc_using_pthreads" = "no" &&
-          test "$casc_using_openmp" = "no"
+        if test "$casc_using_openmp" = "no"
         then
           AC_CHECK_PROGS(CXX,xlC KCC g++)
         else
-          if test "$casc_using_pthreads" = "yes" ; then
-            AC_CHECK_PROGS(CXX,xlC_r g++)
-          fi
           if test "$casc_using_openmp" = "yes" ; then
             AC_CHECK_PROGS(CXX,guidec++)
           fi
         fi
       else
-        if test "$casc_using_pthreads" = "no" &&
-          test "$casc_using_openmp" = "no"
+        if test "$casc_using_openmp" = "no"
         then
           AC_CHECK_PROGS(CXX,mpCC mpKCC mpiCC)
           AC_PROG_CPP
         else
-          if test "$casc_using_pthreads" = "yes" ; then
-            AC_CHECK_PROGS(CXX,mpxlC_r mpCC_r mpiCC)
-          fi
           if test "$casc_using_openmp" = "yes" ; then
             AC_CHECK_PROGS(CXX,mpguidec++)
           fi
@@ -1030,27 +980,19 @@ case $ARCH in
     fi
     if test -z "$F77"; then
       if test "$casc_using_mpi" = "no" ; then
-        if test "$casc_using_pthreads" = "no" &&
-          test "$casc_using_openmp" = "no"
+        if test "$casc_using_openmp" = "no"
         then
           AC_CHECK_PROGS(F77,xlf g77)
         else
-          if test "$casc_using_pthreads" = "yes" ; then
-            AC_CHECK_PROGS(F77,xlf_r g77)
-          fi
           if test "$casc_using_openmp" = "yes" ; then
             AC_CHECK_PROGS(F77,guidef77)
           fi
         fi
       else
-        if test "$casc_using_pthreads" = "no" &&
-          test "$casc_using_openmp" = "no"
+        if test "$casc_using_openmp" = "no"
         then
           AC_CHECK_PROGS(F77,mpxlf mpif77)
         else
-          if test "$casc_using_pthreads" = "yes" ; then
-            AC_CHECK_PROGS(F77,mpxlf_r mpif77)
-          fi
           if test "$casc_using_openmp" = "yes" ; then
             AC_CHECK_PROGS(F77,mpguidef77)
           fi
@@ -1293,14 +1235,6 @@ dnl CASC_FIND_MLI etc. would simply set the following:
    MLILIBS="$MLILIBS -lX11"
 fi
 
-if test "$casc_using_petsc" = "yes"
-then
-   CASC_FIND_PETSC
-dnl *** this is a hack; should go in above macro ***
-   PETSCLIBDIRS="$PETSCLIBDIRS -L/usr/openwin/lib"
-   PETSCLIBS="$PETSCLIBS -lX11"
-fi
-
 dnl *********************************************************************
 dnl * This macro uses the values assigned to CASC_SET_COPT and 
 dnl * CASC_SET_CDEBUG (and C++ and Fortan counterparts) to set either
@@ -1337,12 +1271,12 @@ then
  else
    casc_using_blas=no
  fi
-fi
-
-if test "$casc_using_blas" = "no"
+elif test "$casc_using_blas" = "no"
 then
  BLASLIBFLAGS=-lHYPRE_blas
  AC_DEFINE(HYPRE_USING_HYPRE_BLAS)
+else
+ BLASLIBFLAGS=$casc_using_blas
 fi
 
 dnl *********************************************************************
@@ -1412,15 +1346,6 @@ AC_SUBST(MLI_DIR)
 AC_SUBST(MLILIBS)
 AC_SUBST(MLILIBDIRS)
 AC_SUBST(MLIINCLUDE)
-
-dnl *PETSC-related header files, libraries and directories for those
-dnl * libraries
-AC_SUBST(PETSCLIBS)
-AC_SUBST(PETSCLIBDIRS)
-AC_SUBST(PETSCINCLUDE)
-AC_SUBST(HYPRE_PETSCDEFS)
-AC_SUBST(HYPRE_PETSCLIBS)
-AC_SUBST(HYPRE_PETSCLIBDIRS)
 
 dnl *FEI-helper variables for installing libraries, and includes, and
 dnl * build options
