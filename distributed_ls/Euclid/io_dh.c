@@ -7,6 +7,29 @@
 /* #include "euclid_petsc.h" */
 #include "mat_dh_private.h"
 
+#undef __FUNC__
+#define __FUNC__ "openFile_dh"
+FILE * openFile_dh(const char *filenameIN, const char *modeIN)
+{
+  START_FUNC_DH
+  FILE *fp = NULL;
+
+  if ((fp = fopen(filenameIN, modeIN)) == NULL) {
+    sprintf(msgBuf_dh, "can't open file: %s for mode %s\n", filenameIN, modeIN);
+    SET_ERROR(NULL, msgBuf_dh);
+  }
+  END_FUNC_VAL(fp)
+}
+
+#undef __FUNC__
+#define __FUNC__ "closeFile_dh"
+void closeFile_dh(FILE *fpIN)
+{
+  if (fclose(fpIN)) {
+    SET_V_ERROR("attempt to close file failed");
+  }
+}
+
 
 /* ---------------------------------------------------------------------------
     NOTES/CAUTIONS/WARNINGS/REMARKS:
@@ -36,7 +59,10 @@
                                      of file)
  * ---------------------------------------------------------------------------*/
 
-
+/*
+@@@@@@@@
+*/
+if 0
 
 /*===== (start) header formatting secret decoder ring ========================*/
 
@@ -810,13 +836,13 @@ void check_type_lengths()
 }
 
 /* assumes rows are stored contiguously (are ordered within the file) */
-#if 0
 #undef __FUNC__
 #define __FUNC__ "compute_rowstorage_mpi_private"
 void compute_rowstorage_mpi_private(FILE *fpIN, int begRowIN, 
                                     int rowCountIN, int *nzOUT)
 {
   START_FUNC_DH
+#if 0
   int num, i, nz = 0;
   int len, buf[2];
   int smallEndian = isSmallEndian();
@@ -846,16 +872,16 @@ void compute_rowstorage_mpi_private(FILE *fpIN, int begRowIN,
   }
 
   *nzOUT = nz;
+#endif
   END_FUNC_DH
 }
-#endif
 
-#if 0
 #undef __FUNC__
 #define __FUNC__ "position_fp_at_row_private"
 void position_fp_at_row_private(FILE *fpIN, int begRowIN)
 {
   START_FUNC_DH
+#if 0
   fpos_t fpos;
   /* bool success = false; */
   int num, row, len, buf[2];
@@ -893,9 +919,9 @@ void position_fp_at_row_private(FILE *fpIN, int begRowIN)
       SET_V_ERROR("fsetpos failed!");
     }
   }
+#endif
   END_FUNC_DH
 }
-#endif
 
 #undef __FUNC__
 #define __FUNC__ "write_footer_private"
@@ -942,3 +968,7 @@ void computeLocalDimensions(char *filenameIN, int num_procsIN, int myidIN,
 }
 
 
+/*
+@@@@@@@@
+*/
+endif

@@ -14,26 +14,34 @@ DRIVER="../../../test/IJ_linear_solvers"
 
 rm -rf *.out* *temp *database
 
-#cp input/test3.options ./database
-#$MPIRUN -np 1 $DRIVER -solver 43 -laplacian -printTestData test3.temp
-#diff test3.temp  output/test3.temp >&2
+#
+#read options from "database" (the default configuration filename)
+#
+cp input/level.3 ./database
+$MPIRUN -np 1 $DRIVER -solver 43 -laplacian -printTestData eu.temp
+diff eu.temp  output/test3.out >&2
+rm -f database eu.temp
 
+#
+#specify a different configuration filename, and read options therefrom
+#
+cp input/level.3 .
+$MPIRUN -np 1 $DRIVER -solver 43 -laplacian -db_filename level.3 -printTestData eu.temp
+diff eu.temp output/test3.out >&2
+rm -f level.3 eu.temp
 
-cp input/test3.options ./test3.database
-$MPIRUN -np 1 $DRIVER -solver 43 -laplacian -db_filename test3.database -printTestData test3.temp
-diff test3.temp  output/test3.temp >&2
-
-exit
-
-$MPIRUN -np 1 $DRIVER -solver 43 -laplacian -printTestData test1.temp
-diff test1.temp  output/test1.temp >&2
-
-$MPIRUN -np 1 $DRIVER -solver 43 -laplacian -printTestData -level 3 test2.temp
-diff test2.temp  output/test2.temp >&2
-
-
+#
+#ensure command line options override options in the configuration file
+#
+cp input/level.3  ./database
+$MPIRUN -np 1 $DRIVER -solver 43 -laplacian -printTestData eu.temp
+diff eu.temp output/test2.out >&2
+rm -f database eu.temp
 
 
 #=================================================================
 # mulitple cpu tests
 #=================================================================
+
+
+rm -rf *.out* *temp *database
