@@ -1051,7 +1051,7 @@ int MLI_Method_AMGSA::formLocalGraph( hypre_ParCSRMatrix *Amat,
                if ( dcomp1 > 0.0 )
                {
                   dcomp2 = habs(diagData[irow] * diagData[jj]);
-                  if ( (dcomp2 >= epsilon * dcomp1) && (labeli == labelj) ) 
+                  if ( (dcomp1 >= epsilon * dcomp2) && (labeli == labelj) ) 
                   {
                      colVal[length] = dcomp2 / dcomp1;
                      colInd[length++] = jj + startRow;
