@@ -76,139 +76,42 @@ void  impl_Hypre_StructMatrix_print(Hypre_StructMatrix this) {
    fclose(file);
 } /* end impl_Hypre_StructMatrixprint */
 
-/* ********************************************************
- * impl_Hypre_StructMatrixSetStencil
- **********************************************************/
-int  impl_Hypre_StructMatrix_SetStencil
-(Hypre_StructMatrix this, Hypre_StructStencil stencil) {
-
-/* not implemented; this functionality isn't in Hypre (though doesn't
-   look too hard to put in)
-   */
-   printf( "unimplemented function, Hypre_StructMatrix_SetStencil, was called" );
-
-} /* end impl_Hypre_StructMatrixSetStencil */
-
-/* ********************************************************
- * impl_Hypre_StructMatrixSetValues
- *       Note that Setup needs to be called afterwards.
- **********************************************************/
-int  impl_Hypre_StructMatrix_SetValues
-(Hypre_StructMatrix this, Hypre_Box box,
- array1int stencil_indices, array1double values) {
-
-   int i, ssize, lower[3], upper[3];
-
-   struct Hypre_StructMatrix_private_type *SMp = this->d_table;
-   HYPRE_StructMatrix *M = SMp->hsmat;
-   hypre_StructMatrix *m = (hypre_StructMatrix *) *M;
-
-   struct Hypre_Box_object_ BO = *box;
-   struct Hypre_Box_private_type *Bp = BO.d_table;
-   hypre_Box *B = Bp->hbox;
-
-   for ( i=0; i<Bp->dimension; ++i ) {
-      lower[i] = B->imin[i];
-      upper[i] = B->imax[i];
-   };
-
-   ssize = stencil_indices.upper[0] - stencil_indices.lower[0];
-   
-   /*   printf(
-      "lower[0]=%i, upper[0]=%i, stencil size=%i, first stencil data=%i, first matrix value=%f\n",
-      lower[0], upper[0], ssize, stencil_indices.data[*(stencil_indices.lower)],
-      values.data[*(values.lower)]  );
-   */
-
-   HYPRE_StructMatrixSetBoxValues(
-      *M, lower, upper, ssize,
-      &(stencil_indices.data[*(stencil_indices.lower)]),
-      &(values.data[*(values.lower)]) );
-
-} /* end impl_Hypre_StructMatrixSetValues */
 
 /* ********************************************************
  * impl_Hypre_StructMatrixApply
  **********************************************************/
 int impl_Hypre_StructMatrix_Apply
-(Hypre_StructMatrix this, Hypre_StructVector b, Hypre_StructVector* x) {
+(Hypre_StructMatrix this, Hypre_Vector b, Hypre_Vector* x) {
    /* x = A * b   where this = A  */
+/* was...
+(Hypre_StructMatrix this, Hypre_StructVector b, Hypre_StructVector* x) */
 
    struct Hypre_StructMatrix_private_type *SMp = this->d_table;
    HYPRE_StructMatrix *M = SMp->hsmat;
    hypre_StructMatrix *hA = (hypre_StructMatrix *) *M;
 
-   struct Hypre_StructVector_private_type *SVxp = (*x)->d_table;
-   HYPRE_StructVector *Vx = SVxp->hsvec;
-   hypre_StructVector *hx = (hypre_StructVector *) *Vx;
+   Hypre_StructVector SVb, SVx;
+   struct Hypre_StructVector_private_type * SVbp;
+   HYPRE_StructVector * Vb;
+   hypre_StructVector * hb;
+   struct Hypre_StructVector_private_type * SVxp;
+   HYPRE_StructVector * Vx;
+   hypre_StructVector * hx;
 
-   struct Hypre_StructVector_private_type *SVyp = b->d_table;
-   HYPRE_StructVector *Vb = SVyp->hsvec;
-   hypre_StructVector *hb = (hypre_StructVector *) *Vb;
+   SVb = (Hypre_StructVector) Hypre_Vector_castTo( b, "Hypre_StructVector" );
+   if ( SVb==NULL ) return -1;
+   SVx = (Hypre_StructVector) Hypre_Vector_castTo( *x, "Hypre_StructVector" );
+   if ( SVb==NULL ) return -1;
+
+   SVxp = SVx->d_table;
+   Vx = SVxp->hsvec;
+   hx = (hypre_StructVector *) *Vx;
+
+   SVbp = SVb->d_table;
+   Vb = SVbp->hsvec;
+   hb = (hypre_StructVector *) *Vb;
 
    return hypre_StructMatvec( 1.0, hA, hb, 1.0, hx );  /* x = A*b */
 
 } /* end impl_Hypre_StructMatrixApply */
-
-/* ********************************************************
- * impl_Hypre_StructMatrixGetConstructedObject
- **********************************************************/
-Hypre_StructMatrix  impl_Hypre_StructMatrix_GetConstructedObject(Hypre_StructMatrix this) {
-   return this;
-} /* end impl_Hypre_StructMatrixGetConstructedObject */
-
-/* ********************************************************
- * impl_Hypre_StructMatrixNew
- *    Note that Setup also needs to be called.
- **********************************************************/
-void  impl_Hypre_StructMatrix_New
-(Hypre_StructMatrix this, Hypre_StructuredGrid grid,
- Hypre_StructStencil stencil, int symmetric, array1int num_ghost ) {
-
-   int i;
-
-   struct Hypre_StructMatrix_private_type *SMp = this->d_table;
-   HYPRE_StructMatrix *M = SMp->hsmat;
-
-   struct Hypre_StructuredGrid_private_type *Gp = grid->d_table;
-   HYPRE_StructGrid *G = Gp->hsgrid;
-   hypre_StructGrid *g = (hypre_StructGrid *) *G;
-
-   struct Hypre_StructStencil_private_type *SSp = stencil->d_table;
-   HYPRE_StructStencil *SS = SSp->hsstencil;
-
-   MPI_Comm comm = hypre_StructGridComm( g );
-
-   HYPRE_StructMatrixCreate( comm, *G, *SS, M );
-
-   HYPRE_StructMatrixSetSymmetric( *M, symmetric );
-
-   HYPRE_StructMatrixSetNumGhost( *M, num_ghost.data );
-   HYPRE_StructMatrixInitialize( *M );
-
-} /* end impl_Hypre_StructMatrixNew */
-
-/* ********************************************************
- * impl_Hypre_StructMatrixConstructor
- **********************************************************/
-Hypre_StructMatrix  impl_Hypre_StructMatrix_Constructor
-(Hypre_StructuredGrid grid, Hypre_StructStencil stencil, int symmetric,
- array1int num_ghost ) {
-   /* declared static; just combines the new and New functions */
-   Hypre_StructMatrix SM = Hypre_StructMatrix_new();
-   Hypre_StructMatrix_New( SM, grid, stencil, symmetric, num_ghost );
-   return SM;
-} /* end impl_Hypre_StructMatrixConstructor */
-
-/* ********************************************************
- * impl_Hypre_StructMatrixSetup
- **********************************************************/
-int  impl_Hypre_StructMatrix_Setup
-(Hypre_StructMatrix this) {
-
-   struct Hypre_StructMatrix_private_type *SMp = this->d_table;
-   HYPRE_StructMatrix *M = SMp->hsmat;
-   HYPRE_StructMatrixAssemble( *M );
-
-} /* end impl_Hypre_StructMatrixSetup */
 
