@@ -28,6 +28,7 @@ case $1 in
 	echo "-dec            LC DEC cluster"
 	echo "-blue           ASCI Blue-Pacific"
 	echo "-red            ASCI Red"
+	echo "-seq            Sequential (non-parallel) version"
 	echo " install        builds and installs"
 	echo " clean          cleans temporary build files (i.e., .o)"
 	echo " veryclean      cleans everything"
