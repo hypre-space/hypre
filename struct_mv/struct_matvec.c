@@ -279,7 +279,7 @@ zzz_StructMatvecCompute( void             *matvec_vdata,
          {
             compute_sbox = zzz_SBoxArraySBox(compute_sbox_a, j);
 
-            box    = zzz_SBoxBox(compute_sbox);
+            zzz_GetSBoxSize(compute_sbox, loop_size);
             start  = zzz_SBoxIMin(compute_sbox);
             stride = zzz_SBoxStride(compute_sbox);
 
@@ -289,7 +289,6 @@ zzz_StructMatvecCompute( void             *matvec_vdata,
 
                xoffset = zzz_BoxOffsetDistance(x_data_box, stencil_shape[si]);
 
-               zzz_GetBoxSize(box, loop_size);
                zzz_BoxLoop3(loop_index, loop_size,
                             A_data_box, start, stride, Ai,
                             x_data_box, start, stride, xi,
@@ -301,7 +300,6 @@ zzz_StructMatvecCompute( void             *matvec_vdata,
 
             if (alpha != 1.0)
             {
-               zzz_GetBoxSize(box, loop_size);
                zzz_BoxLoop1(loop_index, loop_size,
                             y_data_box, start, stride, yi,
                             {
