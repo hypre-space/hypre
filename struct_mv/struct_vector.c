@@ -584,6 +584,72 @@ hypre_StructVectorSetConstantValues( hypre_StructVector *vector,
 }
 
 /*--------------------------------------------------------------------------
+ * hypre_StructVectorSetFunctionValues
+ *
+ * Takes a function pointer of the form:
+ *
+ *   double  f(i,j,k)
+ *--------------------------------------------------------------------------*/
+
+int 
+hypre_StructVectorSetFunctionValues( hypre_StructVector *vector,
+                                     double            (*fcn)() )
+{
+   int    ierr = 0;
+
+   hypre_Box          *v_data_box;
+                    
+   int                 vi;
+   double             *vp;
+
+   hypre_BoxArray     *boxes;
+   hypre_Box          *box;
+   hypre_Index         loop_size;
+   hypre_IndexRef      start;
+   hypre_Index         unit_stride;
+
+   int                 b, i, j, k;
+   int                 loopi, loopj, loopk;
+
+   /*-----------------------------------------------------------------------
+    * Set the vector coefficients
+    *-----------------------------------------------------------------------*/
+
+   hypre_SetIndex(unit_stride, 1, 1, 1);
+ 
+   boxes = hypre_StructGridBoxes(hypre_StructVectorGrid(vector));
+   hypre_ForBoxI(b, boxes)
+      {
+         box      = hypre_BoxArrayBox(boxes, b);
+         start = hypre_BoxIMin(box);
+
+         v_data_box =
+            hypre_BoxArrayBox(hypre_StructVectorDataSpace(vector), b);
+         vp = hypre_StructVectorBoxData(vector, b);
+ 
+         hypre_BoxGetSize(box, loop_size);
+
+         hypre_BoxLoop1Begin(loop_size,
+                             v_data_box, start, unit_stride, vi);
+         i = hypre_IndexX(start);
+         j = hypre_IndexY(start);
+         k = hypre_IndexZ(start);
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,vi 
+#include "hypre_box_smp_forloop.h"
+         hypre_BoxLoop1For(loopi, loopj, loopk, vi)
+            {
+               vp[vi] = fcn(i, j, k);
+               i++;
+               j++;
+               k++;
+            }
+         hypre_BoxLoop1End(vi);
+      }
+
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
  * hypre_StructVectorClearGhostValues
  *--------------------------------------------------------------------------*/
 

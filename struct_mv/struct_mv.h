@@ -1841,6 +1841,7 @@ int hypre_StructVectorGetBoxValues( hypre_StructVector *vector , hypre_Box *valu
 int hypre_StructVectorSetNumGhost( hypre_StructVector *vector , int *num_ghost );
 int hypre_StructVectorAssemble( hypre_StructVector *vector );
 int hypre_StructVectorSetConstantValues( hypre_StructVector *vector , double values );
+int hypre_StructVectorSetFunctionValues( hypre_StructVector *vector , double (*fcn )());
 int hypre_StructVectorClearGhostValues( hypre_StructVector *vector );
 int hypre_StructVectorClearBoundGhostValues( hypre_StructVector *vector );
 int hypre_StructVectorClearAllValues( hypre_StructVector *vector );
