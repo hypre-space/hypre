@@ -241,12 +241,14 @@ hypre_PCGSolve( void *pcg_vdata,
    double          cf_ave_0 = 0.0;
    double          cf_ave_1 = 0.0;
    double          weight;
+   double          ratio;
 
    double          guard_zero_residual; 
 
    int             i = 0;
    int             ierr = 0;
-   int              my_id, num_procs;
+   int             my_id, num_procs;
+   int             stop_2 = 0;
 
    (*(pcg_functions->CommInfo))(A,&my_id,&num_procs);
 
@@ -417,9 +419,12 @@ hypre_PCGSolve( void *pcg_vdata,
       {
          if (rel_change && i_prod > guard_zero_residual)
          {
-            pi_prod = (*(pcg_functions->InnerProd))(p,p);
-            xi_prod = (*(pcg_functions->InnerProd))(x,x);
-            if ((alpha*alpha*pi_prod/xi_prod) < eps)
+            stop_2 = 1;
+            cf_ave_1 = 0;
+	    pi_prod = (*(pcg_functions->InnerProd))(p,p); 
+ 	    xi_prod = (*(pcg_functions->InnerProd))(x,x);
+            ratio = alpha*alpha*pi_prod/xi_prod;
+            if (ratio < eps)
  	    {
                (pcg_data -> converged) = 1;
                break;
@@ -443,7 +448,10 @@ hypre_PCGSolve( void *pcg_vdata,
       if (cf_tol > 0.0)
       {
          cf_ave_0 = cf_ave_1;
-         cf_ave_1 = pow( i_prod / i_prod_0, 1.0/(2.0*i)); 
+         if (stop_2)
+	    cf_ave_1 = pow( ratio, 1.0/(2.0*i)); 
+         else
+	    cf_ave_1 = pow( i_prod / i_prod_0, 1.0/(2.0*i)); 
 
          weight   = fabs(cf_ave_1 - cf_ave_0);
          weight   = weight / max(cf_ave_1, cf_ave_0);
