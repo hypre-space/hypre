@@ -1,4 +1,3 @@
-
 /*--------------------------------------------------------------------------
  * Test driver for unstructured matrix interface (IJ_matrix interface).
  * Do `driver -help' for usage info.
@@ -15,6 +14,7 @@
 /* Users and test drivers shouldn't do the following; fix later. AJC */
 #include "../seq_matrix_vector/csr_matrix.h"
 #include "../seq_matrix_vector/vector.h"
+#include "../seq_matrix_vector/seq_matrix_vector.h"
 #include "../parcsr_matrix_vector/parcsr_matrix_vector.h"
 
 #include "../IJ_matrix_vector/HYPRE_IJ_mv.h"
@@ -46,20 +46,25 @@ main( int   argc,
    double              final_res_norm;
 
    HYPRE_IJMatrix      ij_matrix;
+   HYPRE_IJVector      ij_b;
+   HYPRE_IJVector      ij_x;
    HYPRE_DistributedMatrix distributed_matrix;
-   hypre_ParCSRMatrix *A;
    /* concrete underlying type for ij_matrix defaults to parcsr. AJC. */
    int                 ij_matrix_storage_type=HYPRE_PARCSR_MATRIX;
+   int                 ij_vector_storage_type=HYPRE_PARCSR;
 
-   hypre_ParCSRMatrix *hypre_A;
-   hypre_ParVector    *b;
-   hypre_ParVector    *x;
+   HYPRE_ParCSRMatrix  parcsr_A;
+   HYPRE_ParCSRMatrix  A;
+   HYPRE_ParVector     b;
+   HYPRE_ParVector     x;
 
    HYPRE_Solver        amg_solver;
    HYPRE_Solver        pcg_solver;
    HYPRE_Solver        pcg_precond;
 
    int                 num_procs, myid;
+   int                 global_n;
+   int                *partitioning;
 
    int		       time_index;
 
@@ -464,27 +469,27 @@ main( int   argc,
 
    if ( build_matrix_type == 0 )
    {
-      BuildParFromFile(argc, argv, build_matrix_arg_index, &hypre_A);
+      BuildParFromFile(argc, argv, build_matrix_arg_index, &parcsr_A);
    }
    else if ( build_matrix_type == 1 )
    {
-      BuildParLaplacian(argc, argv, build_matrix_arg_index, &hypre_A);
+      BuildParLaplacian(argc, argv, build_matrix_arg_index, &parcsr_A);
    }
    else if ( build_matrix_type == 2 )
    {
-      BuildParFromOneFile(argc, argv, build_matrix_arg_index, &hypre_A);
+      BuildParFromOneFile(argc, argv, build_matrix_arg_index, &parcsr_A);
    }
    else if ( build_matrix_type == 3 )
    {
-      BuildParLaplacian9pt(argc, argv, build_matrix_arg_index, &hypre_A);
+      BuildParLaplacian9pt(argc, argv, build_matrix_arg_index, &parcsr_A);
    }
    else if ( build_matrix_type == 4 )
    {
-      BuildParLaplacian27pt(argc, argv, build_matrix_arg_index, &hypre_A);
+      BuildParLaplacian27pt(argc, argv, build_matrix_arg_index, &parcsr_A);
    }
    else if ( build_matrix_type == 5 )
    {
-      BuildParDifConv(argc, argv, build_matrix_arg_index, &hypre_A);
+      BuildParDifConv(argc, argv, build_matrix_arg_index, &parcsr_A);
    }
    else
    {
@@ -492,12 +497,13 @@ main( int   argc,
       return(-1);
    }
 
+    
    /*-----------------------------------------------------------
     * Wrap the parcsr matrix up as a distributed_matrix
     *-----------------------------------------------------------*/
 
-    ierr = HYPRE_ConvertParCSRMatrixToDistributedMatrix( 
-              (HYPRE_ParCSRMatrix) hypre_A, &distributed_matrix );
+    ierr = HYPRE_ConvertParCSRMatrixToDistributedMatrix( parcsr_A, 
+				&distributed_matrix );
     if (ierr)
       {
        printf("Error in driver converting parcsr to distributed matrix. \n");
@@ -508,8 +514,8 @@ main( int   argc,
     * Copy the distributed matrix into the IJMatrix through interface calls
     *-----------------------------------------------------------*/
 
-    ierr = HYPRE_BuildIJMatrixFromDistributedMatrix( distributed_matrix, &ij_matrix,
-              HYPRE_PARCSR_MATRIX );
+    ierr = HYPRE_BuildIJMatrixFromDistributedMatrix( distributed_matrix, 
+		&ij_matrix, HYPRE_PARCSR_MATRIX );
     if (ierr)
     {
        printf("Error in driver building IJMatrix from distributed matrix. \n");
@@ -520,101 +526,118 @@ main( int   argc,
     * Fetch the resulting underlying matrix out
     *-----------------------------------------------------------*/
 
-    A = (hypre_ParCSRMatrix *) 
-        hypre_GetIJMatrixLocalStorage( ij_matrix );
+    A = (HYPRE_ParCSRMatrix) HYPRE_GetIJMatrixLocalStorage( ij_matrix);
 
 #if 0
     /* compare the two matrices that should be the same */
-    hypre_PrintParCSRMatrix(hypre_A, "driver.out.hypre_A");
-    hypre_PrintParCSRMatrix(A, "driver.out.A");
+    HYPRE_PrintParCSRMatrix(parcsr_A, "driver.out.parcsr_A");
+    HYPRE_PrintParCSRMatrix(A, "driver.out.A");
 #endif
 
    /*-----------------------------------------------------------
     * Set up the RHS and initial guess
     *-----------------------------------------------------------*/
 
+   HYPRE_GetRowPartitioningParCSR(A, &partitioning);
+   HYPRE_GetDimsParCSR(A, &global_n, &global_n);
+
    if (build_rhs_type == 1)
    {
       /* BuildRHSParFromFile(argc, argv, build_rhs_arg_index, &b); */
       printf("Rhs from file not yet implemented.  Defaults to b=0\n");
-      b = hypre_CreateParVector(MPI_COMM_WORLD,
-                                hypre_ParCSRMatrixGlobalNumRows(A),
-                                hypre_ParCSRMatrixRowStarts(A));
-      hypre_SetParVectorPartitioningOwner(b, 0);
-      hypre_InitializeParVector(b);
-      hypre_SetParVectorConstantValues(b, 0.0);
+      HYPRE_NewIJVector(MPI_COMM_WORLD, &ij_b, global_n);
+      HYPRE_SetIJVectorLocalStorageType(ij_b,ij_vector_storage_type );
+      HYPRE_SetIJVectorPartitioning(ij_b, partitioning);
+      HYPRE_InitializeIJVector(ij_b);
+      HYPRE_SetIJVectorLocalComponentsInBlock(ij_b, 
+					      partitioning[myid], 
+					      partitioning[myid+1]-1, 
+					      0.0);
 
-      x = hypre_CreateParVector(MPI_COMM_WORLD,
-                                hypre_ParCSRMatrixGlobalNumRows(A),
-                                hypre_ParCSRMatrixRowStarts(A));
-      hypre_SetParVectorPartitioningOwner(x, 0);
-      hypre_InitializeParVector(x);
-      hypre_SetParVectorConstantValues(x, 1.0);
+      HYPRE_NewIJVector(MPI_COMM_WORLD, &ij_x, global_n);
+      HYPRE_SetIJVectorLocalStorageType(ij_x,ij_vector_storage_type );
+      HYPRE_SetIJVectorPartitioning(ij_x, partitioning);
+      HYPRE_InitializeIJVector(ij_x);
+      HYPRE_SetIJVectorLocalComponentsInBlock(ij_x, 
+						 partitioning[myid], 
+						 partitioning[myid+1]-1, 
+						 1.0);
+   /*-----------------------------------------------------------
+    * Fetch the resulting underlying vectors out
+    *-----------------------------------------------------------*/
+
+      b = (HYPRE_ParVector) HYPRE_GetIJVectorLocalStorage( ij_b );
+      x = (HYPRE_ParVector) HYPRE_GetIJVectorLocalStorage( ij_x );
+
    }
    else if ( build_rhs_type == 2 )
    {
       BuildRhsParFromOneFile(argc, argv, build_rhs_arg_index, A, &b);
 
-      x = hypre_CreateParVector(MPI_COMM_WORLD,
-                                hypre_ParCSRMatrixGlobalNumRows(A),
-                                hypre_ParCSRMatrixRowStarts(A));
-      hypre_SetParVectorPartitioningOwner(x, 0);
-      hypre_InitializeParVector(x);
-      hypre_SetParVectorConstantValues(x, 0.0);      
+      HYPRE_NewIJVector(MPI_COMM_WORLD, &ij_x, global_n);
+      HYPRE_SetIJVectorLocalStorageType(ij_x,ij_vector_storage_type );
+      HYPRE_SetIJVectorPartitioning(ij_x, partitioning);
+      HYPRE_InitializeIJVector(ij_x);
+      HYPRE_SetIJVectorLocalComponentsInBlock(ij_x, 
+						 partitioning[myid], 
+						 partitioning[myid+1]-1, 
+						 0.0);
+      x = (HYPRE_ParVector) HYPRE_GetIJVectorLocalStorage( ij_x );
+
    }
    else if ( build_rhs_type == 3 )
    {
 
-      b = hypre_CreateParVector(MPI_COMM_WORLD,
-                                hypre_ParCSRMatrixGlobalNumRows(A),
-                                hypre_ParCSRMatrixRowStarts(A));
-      hypre_SetParVectorPartitioningOwner(b, 0);
-      hypre_InitializeParVector(b);
-      hypre_SetParVectorRandomValues(b, 22775);
-      norm = 1.0/sqrt(hypre_ParInnerProd(b,b));
-      ierr = hypre_ScaleParVector(norm, b);      
+      b = HYPRE_CreateParVector(MPI_COMM_WORLD, global_n, partitioning);
+      HYPRE_InitializeParVector(b);
+      HYPRE_SetParVectorRandomValues(b, 22775);
+      norm = 1.0/sqrt(HYPRE_ParInnerProd(b,b));
+      ierr = HYPRE_ScaleParVector(norm, b);      
 
-      x = hypre_CreateParVector(MPI_COMM_WORLD,
-                                hypre_ParCSRMatrixGlobalNumRows(A),
-                                hypre_ParCSRMatrixRowStarts(A));
-      hypre_SetParVectorPartitioningOwner(x, 0);
-      hypre_InitializeParVector(x);
-      hypre_SetParVectorConstantValues(x, 0.0);      
+      HYPRE_NewIJVector(MPI_COMM_WORLD, &ij_x, global_n);
+      HYPRE_SetIJVectorLocalStorageType(ij_x,ij_vector_storage_type );
+      HYPRE_SetIJVectorPartitioning(ij_x, partitioning);
+      HYPRE_InitializeIJVector(ij_x);
+      HYPRE_SetIJVectorLocalComponentsInBlock(ij_x, 
+						 partitioning[myid], 
+						 partitioning[myid+1]-1, 
+						 0.0);
+      x = (HYPRE_ParVector) HYPRE_GetIJVectorLocalStorage( ij_x );
    }
    else if ( build_rhs_type == 4 )
    {
 
-      x = hypre_CreateParVector(MPI_COMM_WORLD,
-                                hypre_ParCSRMatrixGlobalNumRows(A),
-                                hypre_ParCSRMatrixRowStarts(A));
-      hypre_SetParVectorPartitioningOwner(x, 0);
-      hypre_InitializeParVector(x);
-      hypre_SetParVectorConstantValues(x, 1.0);      
+      x = HYPRE_CreateParVector(MPI_COMM_WORLD, global_n, partitioning);
+      HYPRE_InitializeParVector(x);
+      HYPRE_SetParVectorConstantValues(x, 1.0);
 
-      b = hypre_CreateParVector(MPI_COMM_WORLD,
-                                hypre_ParCSRMatrixGlobalNumRows(A),
-                                hypre_ParCSRMatrixRowStarts(A));
-      hypre_SetParVectorPartitioningOwner(b, 0);
-      hypre_InitializeParVector(b);
-      hypre_ParMatvec(1.0,A,x,0.0,b);
+      b = HYPRE_CreateParVector(MPI_COMM_WORLD, global_n, partitioning);
+      HYPRE_InitializeParVector(b);
+      HYPRE_ParMatvec(1.0,A,x,0.0,b);
 
-      hypre_SetParVectorConstantValues(x, 0.0);      
+      HYPRE_SetParVectorConstantValues(x, 0.0);
    }
    else /* if ( build_rhs_type == 0 ) */
    {
-      b = hypre_CreateParVector(MPI_COMM_WORLD,
-                                hypre_ParCSRMatrixGlobalNumRows(A),
-                                hypre_ParCSRMatrixRowStarts(A));
-      hypre_SetParVectorPartitioningOwner(b, 0);
-      hypre_InitializeParVector(b);
-      hypre_SetParVectorConstantValues(b, 0.0);
+      HYPRE_NewIJVector(MPI_COMM_WORLD, &ij_b, global_n);
+      HYPRE_SetIJVectorLocalStorageType(ij_b,ij_vector_storage_type );
+      HYPRE_SetIJVectorPartitioning(ij_b, partitioning);
+      HYPRE_InitializeIJVector(ij_b);
+      HYPRE_SetIJVectorLocalComponentsInBlock(ij_b, 
+						 partitioning[myid], 
+						 partitioning[myid+1]-1, 
+						 0.0);
+      b = (HYPRE_ParVector) HYPRE_GetIJVectorLocalStorage( ij_b );
 
-      x = hypre_CreateParVector(MPI_COMM_WORLD,
-                                hypre_ParCSRMatrixGlobalNumRows(A),
-                                hypre_ParCSRMatrixRowStarts(A));
-      hypre_SetParVectorPartitioningOwner(x, 0);
-      hypre_InitializeParVector(x);
-      hypre_SetParVectorConstantValues(x, 1.0);
+      HYPRE_NewIJVector(MPI_COMM_WORLD, &ij_x, global_n);
+      HYPRE_SetIJVectorLocalStorageType(ij_x,ij_vector_storage_type );
+      HYPRE_SetIJVectorPartitioning(ij_x, partitioning);
+      HYPRE_InitializeIJVector(ij_x);
+      HYPRE_SetIJVectorLocalComponentsInBlock(ij_x, 
+						 partitioning[myid], 
+						 partitioning[myid+1]-1, 
+						 1.0);
+      x = (HYPRE_ParVector) HYPRE_GetIJVectorLocalStorage( ij_x );
    }
    /*-----------------------------------------------------------
     * Solve the system using AMG
@@ -937,7 +960,7 @@ main( int   argc,
     *-----------------------------------------------------------*/
 
 #if 0
-   hypre_PrintCSRVector(x, "driver.out.x");
+   HYPRE_PrintCSRVector(x, "driver.out.x");
 #endif
 
 
@@ -945,9 +968,9 @@ main( int   argc,
     * Finalize things
     *-----------------------------------------------------------*/
 
-   hypre_DestroyParCSRMatrix(A);
-   hypre_DestroyParVector(b);
-   hypre_DestroyParVector(x);
+   HYPRE_FreeIJMatrix(ij_matrix);
+   HYPRE_FreeIJVector(ij_b);
+   HYPRE_FreeIJVector(ij_x);
 /*
    hypre_FinalizeMemoryDebug();
 */
@@ -970,11 +993,11 @@ int
 BuildParFromFile( int                  argc,
                   char                *argv[],
                   int                  arg_index,
-                  hypre_ParCSRMatrix **A_ptr     )
+                  HYPRE_ParCSRMatrix  *A_ptr     )
 {
    char               *filename;
 
-   hypre_ParCSRMatrix *A;
+   HYPRE_ParCSRMatrix A;
 
    int                 myid;
 
@@ -1011,7 +1034,7 @@ BuildParFromFile( int                  argc,
     * Generate the matrix 
     *-----------------------------------------------------------*/
  
-   A = hypre_ReadParCSRMatrix(MPI_COMM_WORLD, filename);
+   A = HYPRE_ReadParCSRMatrix(MPI_COMM_WORLD, filename);
 
    *A_ptr = A;
 
@@ -1027,13 +1050,13 @@ int
 BuildParLaplacian( int                  argc,
                    char                *argv[],
                    int                  arg_index,
-                   hypre_ParCSRMatrix **A_ptr     )
+                   HYPRE_ParCSRMatrix  *A_ptr     )
 {
    int                 nx, ny, nz;
    int                 P, Q, R;
    double              cx, cy, cz;
 
-   hypre_ParCSRMatrix *A;
+   HYPRE_ParCSRMatrix  A;
 
    int                 num_procs, myid;
    int                 p, q, r;
@@ -1150,7 +1173,7 @@ BuildParLaplacian( int                  argc,
       values[0] += 2.0*cz;
    }
 
-   A = hypre_GenerateLaplacian(MPI_COMM_WORLD,
+   A = (HYPRE_ParCSRMatrix) GenerateLaplacian(MPI_COMM_WORLD,
                                nx, ny, nz, P, Q, R, p, q, r, values);
 
    hypre_TFree(values);
@@ -1171,9 +1194,9 @@ BuildParLaplacian( int                  argc,
 
 int
 BuildParDifConv( int                  argc,
-                   char                *argv[],
-                   int                  arg_index,
-                   hypre_ParCSRMatrix **A_ptr     )
+                 char                *argv[],
+                 int                  arg_index,
+                 HYPRE_ParCSRMatrix  *A_ptr     )
 {
    int                 nx, ny, nz;
    int                 P, Q, R;
@@ -1181,7 +1204,7 @@ BuildParDifConv( int                  argc,
    double              ax, ay, az;
    double              hinx,hiny,hinz;
 
-   hypre_ParCSRMatrix *A;
+   HYPRE_ParCSRMatrix  A;
 
    int                 num_procs, myid;
    int                 p, q, r;
@@ -1318,7 +1341,7 @@ BuildParDifConv( int                  argc,
       values[0] += 2.0*cz/(hinz*hinz) - 1.0*az/hinz;
    }
 
-   A = hypre_GenerateDifConv(MPI_COMM_WORLD,
+   A = (HYPRE_ParCSRMatrix) GenerateDifConv(MPI_COMM_WORLD,
                                nx, ny, nz, P, Q, R, p, q, r, values);
 
    hypre_TFree(values);
@@ -1339,12 +1362,12 @@ int
 BuildParFromOneFile( int                  argc,
                      char                *argv[],
                      int                  arg_index,
-                     hypre_ParCSRMatrix **A_ptr     )
+                     HYPRE_ParCSRMatrix  *A_ptr     )
 {
    char               *filename;
 
-   hypre_ParCSRMatrix *A;
-   hypre_CSRMatrix *A_CSR;
+   HYPRE_ParCSRMatrix  A;
+   HYPRE_CSRMatrix  A_CSR;
 
    int                 myid;
 
@@ -1380,13 +1403,13 @@ BuildParFromOneFile( int                  argc,
        * Generate the matrix 
        *-----------------------------------------------------------*/
  
-      A_CSR = hypre_ReadCSRMatrix(filename);
+      A_CSR = HYPRE_ReadCSRMatrix(filename);
    }
-   A = hypre_CSRMatrixToParCSRMatrix(MPI_COMM_WORLD, A_CSR, NULL, NULL);
+   A = HYPRE_CSRMatrixToParCSRMatrix(MPI_COMM_WORLD, A_CSR, NULL, NULL);
 
    *A_ptr = A;
 
-   hypre_DestroyCSRMatrix(A_CSR);
+   HYPRE_DestroyCSRMatrix(A_CSR);
 
    return (0);
 }
@@ -1400,15 +1423,16 @@ int
 BuildRhsParFromOneFile( int                  argc,
                         char                *argv[],
                         int                  arg_index,
-                        hypre_ParCSRMatrix  *A,
-                        hypre_ParVector    **b_ptr     )
+                        HYPRE_ParCSRMatrix   A,
+                        HYPRE_ParVector     *b_ptr     )
 {
-   char               *filename;
+   char           *filename;
 
-   hypre_ParVector *b;
-   hypre_Vector    *b_CSR;
+   HYPRE_ParVector b;
+   HYPRE_Vector    b_CSR;
 
-   int                 myid;
+   int             myid;
+   int            *partitioning;
 
    /*-----------------------------------------------------------
     * Initialize some stuff
@@ -1442,14 +1466,14 @@ BuildRhsParFromOneFile( int                  argc,
        * Generate the matrix 
        *-----------------------------------------------------------*/
  
-      b_CSR = hypre_ReadVector(filename);
+      b_CSR = HYPRE_ReadVector(filename);
    }
-   b = hypre_VectorToParVector(MPI_COMM_WORLD, b_CSR, 
-                               hypre_ParCSRMatrixRowStarts(A));
+   HYPRE_GetRowPartitioningParCSR(A, &partitioning);
+   b = HYPRE_VectorToParVector(MPI_COMM_WORLD, b_CSR, partitioning); 
 
    *b_ptr = b;
 
-   hypre_DestroyVector(b_CSR);
+   HYPRE_DestroyVector(b_CSR);
 
    return (0);
 }
@@ -1463,12 +1487,12 @@ int
 BuildParLaplacian9pt( int                  argc,
                       char                *argv[],
                       int                  arg_index,
-                      hypre_ParCSRMatrix **A_ptr     )
+                      HYPRE_ParCSRMatrix  *A_ptr     )
 {
    int                 nx, ny;
    int                 P, Q;
 
-   hypre_ParCSRMatrix *A;
+   HYPRE_ParCSRMatrix  A;
 
    int                 num_procs, myid;
    int                 p, q;
@@ -1566,7 +1590,7 @@ BuildParLaplacian9pt( int                  argc,
       values[0] += 4.0;
    }
 
-   A = hypre_GenerateLaplacian9pt(MPI_COMM_WORLD,
+   A = (HYPRE_ParCSRMatrix) GenerateLaplacian9pt(MPI_COMM_WORLD,
                                   nx, ny, P, Q, p, q, values);
 
    hypre_TFree(values);
@@ -1584,12 +1608,12 @@ int
 BuildParLaplacian27pt( int                  argc,
                        char                *argv[],
                        int                  arg_index,
-                       hypre_ParCSRMatrix **A_ptr     )
+                       HYPRE_ParCSRMatrix  *A_ptr     )
 {
    int                 nx, ny, nz;
    int                 P, Q, R;
 
-   hypre_ParCSRMatrix *A;
+   HYPRE_ParCSRMatrix  A;
 
    int                 num_procs, myid;
    int                 p, q, r;
@@ -1683,7 +1707,7 @@ BuildParLaplacian27pt( int                  argc,
 	values[0] = 2.0;
    values[1] = -1.0;
 
-   A = hypre_GenerateLaplacian27pt(MPI_COMM_WORLD,
+   A = (HYPRE_ParCSRMatrix) GenerateLaplacian27pt(MPI_COMM_WORLD,
                                nx, ny, nz, P, Q, R, p, q, r, values);
 
    hypre_TFree(values);
