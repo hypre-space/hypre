@@ -167,24 +167,23 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
       }
       if (max_levels > 1)
       {
+	 hypre_BoomerAMGCreateS(A_array[level], 
+				strong_threshold, max_row_sum, &S);
          if (coarsen_type == 6)
          {
-	    hypre_BoomerAMGCoarsenFalgout(A_array[level],
-                                    strong_threshold, max_row_sum,
-                                    debug_flag, &S, &CF_marker, &coarse_size); 
+	    hypre_BoomerAMGCoarsenFalgout(S, A_array[level],
+                                    debug_flag, &CF_marker, &coarse_size); 
          }
          else if (coarsen_type)
          {
-	    hypre_BoomerAMGCoarsenRuge(A_array[level],
-                                 strong_threshold, max_row_sum,
+	    hypre_BoomerAMGCoarsenRuge(S, A_array[level],
                                  measure_type, coarsen_type, debug_flag,
-                                 &S, &CF_marker, &coarse_size); 
+                                 &CF_marker, &coarse_size); 
          }
          else
          {
-	    hypre_BoomerAMGCoarsen(A_array[level],
-                             strong_threshold, max_row_sum,
-                             debug_flag, &S, &CF_marker, &coarse_size); 
+	    hypre_BoomerAMGCoarsen(S, A_array[level],
+                             debug_flag, &CF_marker, &coarse_size); 
          }
  
          if (debug_flag==1)

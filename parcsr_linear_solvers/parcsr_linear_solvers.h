@@ -298,9 +298,9 @@ int hypre_BoomerAMGCycleT( void *amg_vdata , hypre_ParVector **F_array , hypre_P
 int hypre_BoomerAMGRelaxT( hypre_ParCSRMatrix *A , hypre_ParVector *f , int *cf_marker , int relax_type , int relax_points , double relax_weight , hypre_ParVector *u , hypre_ParVector *Vtemp );
 
 /* par_coarsen.c */
-int hypre_BoomerAMGCoarsen( hypre_ParCSRMatrix *A , double strength_threshold , double max_row_sum , int debug_flag , hypre_ParCSRMatrix **S_ptr , int **CF_marker_ptr , int *coarse_size_ptr );
-int hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix *A , double strength_threshold , double max_row_sum , int measure_type , int coarsen_type , int debug_flag , hypre_ParCSRMatrix **S_ptr , int **CF_marker_ptr , int *coarse_size_ptr );
-int hypre_BoomerAMGCoarsenFalgout( hypre_ParCSRMatrix *A , double strength_threshold , double max_row_sum , int debug_flag , hypre_ParCSRMatrix **S_ptr , int **CF_marker_ptr , int *coarse_size_ptr );
+int hypre_BoomerAMGCoarsen( hypre_ParCSRMatrix *S , hypre_ParCSRMatrix *A , int debug_flag , int **CF_marker_ptr , int *coarse_size_ptr );
+int hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix *S , hypre_ParCSRMatrix *A , int measure_type , int coarsen_type , int debug_flag , int **CF_marker_ptr , int *coarse_size_ptr );
+int hypre_BoomerAMGCoarsenFalgout( hypre_ParCSRMatrix *S , hypre_ParCSRMatrix *A , int debug_flag , int **CF_marker_ptr , int *coarse_size_ptr );
 
 /* par_cycle.c */
 int hypre_BoomerAMGCycle( void *amg_vdata , hypre_ParVector **F_array , hypre_ParVector **U_array );
