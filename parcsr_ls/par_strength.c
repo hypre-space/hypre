@@ -236,13 +236,8 @@ hypre_BoomerAMGCreateS(hypre_ParCSRMatrix    *A,
 #pragma omp parallel private(i,diag,row_scale,row_sum,jA,jS)
 #endif
    {
-   HYPRE_Int my_thread_num = hypre_GetThreadNum();
-   HYPRE_Int num_threads = hypre_NumActiveThreads();
-   HYPRE_Int variable_per_thread = (num_variables + num_threads - 1)/num_threads;
-
-   HYPRE_Int start = hypre_min(my_thread_num*variable_per_thread, num_variables);
-   HYPRE_Int stop = hypre_min(start + variable_per_thread, num_variables);
-
+   HYPRE_Int start, stop;
+   hypre_GetSimpleThreadPartition(&start, &stop, num_variables);
    HYPRE_Int jS_diag = 0, jS_offd = 0;
 
    for (i = start; i < stop; i++)
@@ -1240,14 +1235,10 @@ HYPRE_Int hypre_BoomerAMGCreate2ndS( hypre_ParCSRMatrix *S, HYPRE_Int *CF_marker
 #pragma omp parallel private(i)
 #endif
    {
-      HYPRE_Int num_threads = hypre_NumActiveThreads();
-      HYPRE_Int my_thread_num = hypre_GetThreadNum();
-
       HYPRE_Int num_coarse_local = 0;
 
-      HYPRE_Int i_per_thread = (num_cols_diag_S + num_threads - 1)/num_threads;
-      HYPRE_Int i_begin = hypre_min(i_per_thread*my_thread_num, num_cols_diag_S);
-      HYPRE_Int i_end = hypre_min(i_begin + i_per_thread, num_cols_diag_S);
+      HYPRE_Int i_begin, i_end;
+      hypre_GetSimpleThreadPartition(&i_begin, &i_end, num_cols_diag_S);
 
       for (i = i_begin; i < i_end; i++)
       {
@@ -1430,15 +1421,11 @@ HYPRE_Int hypre_BoomerAMGCreate2ndS( hypre_ParCSRMatrix *S, HYPRE_Int *CF_marker
 #pragma omp parallel private(i,j)
 #endif
       {
-         HYPRE_Int num_threads = hypre_NumActiveThreads();
-         HYPRE_Int my_thread_num = hypre_GetThreadNum();
-
          HYPRE_Int S_ext_offd_size_local = 0;
          HYPRE_Int S_ext_diag_size_local = 0;
 
-         HYPRE_Int i_per_thread = (num_cols_offd_S + num_threads - 1)/num_threads;
-         HYPRE_Int i_begin = hypre_min(i_per_thread*my_thread_num, num_cols_offd_S);
-         HYPRE_Int i_end = hypre_min(i_begin + i_per_thread, num_cols_offd_S);
+         HYPRE_Int i_begin, i_end;
+         hypre_GetSimpleThreadPartition(&i_begin, &i_end, num_cols_offd_S);
 
          HYPRE_IntSet *temp_set = hypre_IntSetCreate();
 
@@ -1543,12 +1530,8 @@ HYPRE_Int hypre_BoomerAMGCreate2ndS( hypre_ParCSRMatrix *S, HYPRE_Int *CF_marker
 #pragma omp parallel private(i)
 #endif
          {
-            HYPRE_Int num_threads = hypre_NumActiveThreads();
-            HYPRE_Int my_thread_num = hypre_GetThreadNum();
-
-            HYPRE_Int i_per_thread = (num_cols_offd_S + num_threads - 1)/num_threads;
-            HYPRE_Int i_begin = hypre_min(i_per_thread*my_thread_num, num_cols_offd_S);
-            HYPRE_Int i_end = hypre_min(i_begin + i_per_thread, num_cols_offd_S);
+            HYPRE_Int i_begin, i_end;
+            hypre_GetSimpleThreadPartition(&i_begin, &i_end, num_cols_offd_S);
 
             HYPRE_Int cnt = 0;
             for (i = i_begin; i < i_end; i++)
@@ -1594,12 +1577,10 @@ HYPRE_Int hypre_BoomerAMGCreate2ndS( hypre_ParCSRMatrix *S, HYPRE_Int *CF_marker
 #pragma omp parallel private(i1,i2,i3,jj1,jj2,cnt,jcol,index)
 #endif
    {
-      HYPRE_Int num_threads = hypre_NumActiveThreads();
       HYPRE_Int my_thread_num = hypre_GetThreadNum();
 
-      HYPRE_Int i1_per_thread = (num_cols_diag_S + num_threads - 1)/num_threads;
-      HYPRE_Int i1_begin = hypre_min(i1_per_thread*my_thread_num, num_cols_diag_S);
-      HYPRE_Int i1_end = hypre_min(i1_begin + i1_per_thread, num_cols_diag_S);
+      HYPRE_Int i1_begin, i1_end;
+      hypre_GetSimpleThreadPartition(&i1_begin, &i1_end, num_cols_diag_S);
 
       hypre_CSRMatrix C_temp_diag, C_temp_offd;
       C_temp_diag.j = C_temp_diag_j_array + S_diag_i[i1_begin];

@@ -27,4 +27,6 @@ HYPRE_Int hypre_GetThreadNum( void );
 
 #endif
 
+void hypre_GetSimpleThreadPartition( HYPRE_Int *begin, HYPRE_Int *end, HYPRE_Int n );
+
 #endif

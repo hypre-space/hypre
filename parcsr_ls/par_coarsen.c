@@ -2508,19 +2508,14 @@ hypre_BoomerAMGCoarsenPMIS( hypre_ParCSRMatrix    *S,
 #pragma omp parallel private(ig,i)
 #endif
      {
-        HYPRE_Int my_thread_num = hypre_GetThreadNum();
-        HYPRE_Int num_threads = hypre_NumActiveThreads();
-
         HYPRE_Int private_graph_size_cnt = 0;
         HYPRE_Int private_graph_offd_size_cnt = 0;
 
-        HYPRE_Int ig_per_thread = (graph_size + num_threads - 1)/num_threads;
-        HYPRE_Int ig_begin = hypre_min(ig_per_thread*my_thread_num, graph_size);
-        HYPRE_Int ig_end = hypre_min(ig_begin + ig_per_thread, graph_size);
+        HYPRE_Int ig_begin, ig_end;
+        hypre_GetSimpleThreadPartition(&ig_begin, &ig_end, graph_size);
 
-        HYPRE_Int ig_offd_per_thread = (graph_offd_size + num_threads - 1)/num_threads;
-        HYPRE_Int ig_offd_begin = hypre_min(ig_offd_per_thread*my_thread_num, graph_offd_size);
-        HYPRE_Int ig_offd_end = hypre_min(ig_offd_begin + ig_offd_per_thread, graph_offd_size);
+        HYPRE_Int ig_offd_begin, ig_offd_end;
+        hypre_GetSimpleThreadPartition(&ig_offd_begin, &ig_offd_end, graph_offd_size);
 
         for (ig = ig_begin; ig < ig_end; ig++)
         {
