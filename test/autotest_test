@@ -62,14 +62,20 @@ initialize_variables ()
 # If NOT started by autotest (hence no HYPRE_*_EMAIL variable
 # defined) default mail to UID only.
 #
-  User=`who am I|cut -f 1 -d \ `
-  HYPRE_DEFAULT_EMAIL=${HYPRE_DEFAULT_EMAIL:=$User}
-  YPRE_CHECKOUT_EMAIL=${HYPRE_CHECKOUT_EMAIL:=$User}
-  HYPRE_CONFIGURE_EMAIL=${HYPRE_CONFIGURE_EMAIL:=$User}
-  HYPRE_STRUCT_EMAIL=${HYPRE_STRUCT_EMAIL:=$User}
-  HYPRE_IJ_EMAIL=${HYPRE_IJ_EMAIL:=$User}
-  HYPRE_FEI_EMAIL=${HYPRE_FEI_EMAIL:=$User}
-  HYPRE_ALL_EMAIL=${HYPRE_ALL_EMAIL:=$User}
+  if test ! "${HYPRE_DEFAULT_EMAIL}"
+  then
+    if test ! "${USER}"
+    then
+      USER=`who am I|cut -f 1 -d \ `
+    fi
+    HYPRE_DEFAULT_EMAIL=${HYPRE_DEFAULT_EMAIL:=$USER}
+    HYPRE_CHECKOUT_EMAIL=${HYPRE_CHECKOUT_EMAIL:=$USER}
+    HYPRE_CONFIGURE_EMAIL=${HYPRE_CONFIGURE_EMAIL:=$USER}
+    HYPRE_STRUCT_EMAIL=${HYPRE_STRUCT_EMAIL:=$USER}
+    HYPRE_IJ_EMAIL=${HYPRE_IJ_EMAIL:=$USER}
+    HYPRE_FEI_EMAIL=${HYPRE_FEI_EMAIL:=$USER}
+    HYPRE_ALL_EMAIL=${HYPRE_ALL_EMAIL:=$USER}
+  fi
 }
 
 #=============================================================================
@@ -197,8 +203,13 @@ makeit ()
 {
 MakeOpt=$1	 MessageStr=$2
 MailGroup=$3
-$MAKE $MakeOpt 1> ${Hdr}.${MessageStr}.${MakeOpt}.log \
+if [ "$MessageStr" = "purify" ]
+then				# don't need extra purify status messages
+  $MAKE $MakeOpt 1> ${Hdr}.${MessageStr}.${MakeOpt}.log 2>&1
+else
+  $MAKE $MakeOpt 1> ${Hdr}.${MessageStr}.${MakeOpt}.log \
         2> ${Hdr}.${MessageStr}.${MakeOpt}.err
+fi
 echo "$MailGroup" > ${Hdr}.${MessageStr}.${MakeOpt}.err.email
 }
 #=============================================================================
