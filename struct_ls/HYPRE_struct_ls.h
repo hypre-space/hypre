@@ -421,6 +421,12 @@ int HYPRE_StructPCGSetLogging(HYPRE_StructSolver solver,
                               int                logging);
 
 /**
+ * (Optional) Set the print level
+ **/
+int HYPRE_StructPCGSetPrintLevel(HYPRE_StructSolver solver,
+                              int                level);
+
+/**
  * Return the number of iterations taken.
  **/
 int HYPRE_StructPCGGetNumIterations(HYPRE_StructSolver  solver,
@@ -431,6 +437,12 @@ int HYPRE_StructPCGGetNumIterations(HYPRE_StructSolver  solver,
  **/
 int HYPRE_StructPCGGetFinalRelativeResidualNorm(HYPRE_StructSolver  solver,
                                                 double             *norm);
+
+/**
+ * Return the residual.
+ **/
+int HYPRE_StructPCGGetResidual(HYPRE_StructSolver  solver,
+                              void  **residual);
 
 /**
  * Setup routine for diagonal preconditioning.
@@ -524,6 +536,12 @@ HYPRE_StructGMRESSetLogging( HYPRE_StructSolver solver,
                              int                logging );
 
 /**
+ * (Optional) Set the print level
+ **/
+int
+HYPRE_StructGMRESSetPrintLevel( HYPRE_StructSolver solver,
+                             int                level );
+/**
  * Return the number of iterations taken.
  **/
 int
@@ -537,6 +555,113 @@ int
 HYPRE_StructGMRESGetFinalRelativeResidualNorm( HYPRE_StructSolver  solver,
                                                double             *norm   );
 
+/**
+ * Return the residual.
+ **/
+int
+HYPRE_StructGMRESGetResidual( HYPRE_StructSolver  solver,
+                             void   **residual);
+/*@}*/
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+/**
+ * @name Struct BiCGSTAB Solver
+ **/
+/*@{*/
+
+/**
+ * Create a solver object.
+ **/
+int
+HYPRE_StructBiCGSTABCreate( MPI_Comm comm, HYPRE_StructSolver *solver );
+
+
+/**
+ * Destroy a solver object.
+ **/
+int 
+HYPRE_StructBiCGSTABDestroy( HYPRE_StructSolver solver );
+
+
+/**
+ * set up
+ **/
+int 
+HYPRE_StructBiCGSTABSetup( HYPRE_StructSolver solver,
+                      HYPRE_StructMatrix A,
+                      HYPRE_StructVector b,
+                        HYPRE_StructVector x      );
+
+
+/**
+ * Solve the system.
+ **/
+int 
+HYPRE_StructBiCGSTABSolve( HYPRE_StructSolver solver,
+                      HYPRE_StructMatrix A,
+                      HYPRE_StructVector b,
+                        HYPRE_StructVector x      );
+
+
+/**
+ * (Optional) Set the convergence tolerance.
+ **/
+int
+HYPRE_StructBiCGSTABSetTol( HYPRE_StructSolver solver,
+                         double             tol    );
+
+/**
+ * (Optional) Set maximum number of iterations.
+ **/
+int
+HYPRE_StructBiCGSTABSetMaxIter( HYPRE_StructSolver solver,
+                             int                max_iter );
+
+
+/**
+ * (Optional) Set the preconditioner to use.
+ **/
+int
+HYPRE_StructBiCGSTABSetPrecond( HYPRE_StructSolver         solver,
+                           HYPRE_PtrToStructSolverFcn precond,
+                           HYPRE_PtrToStructSolverFcn precond_setup,
+                             HYPRE_StructSolver         precond_solver );
+
+/**
+ * (Optional) Set the amount of logging to do.
+ **/
+int
+HYPRE_StructBiCGSTABSetLogging( HYPRE_StructSolver solver,
+                             int                logging );
+
+/**
+ * (Optional) Set the print level
+ **/
+int
+HYPRE_StructBiCGSTABSetPrintLevel( HYPRE_StructSolver solver,
+                             int                level );
+/**
+ * Return the number of iterations taken.
+ **/
+int
+HYPRE_StructBiCGSTABGetNumIterations( HYPRE_StructSolver  solver,
+                                   int                *num_iterations );
+
+/**
+ * Return the norm of the final relative residual.
+ **/
+int
+HYPRE_StructBiCGSTABGetFinalRelativeResidualNorm( HYPRE_StructSolver  solver,
+                                               double             *norm   );
+
+/**
+ * Return the residual.
+ **/
+int
+HYPRE_StructBiCGSTABGetResidual( HYPRE_StructSolver  solver,
+                                void  **residual);
 /*@}*/
 
 /*--------------------------------------------------------------------------

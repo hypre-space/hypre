@@ -44,6 +44,7 @@ typedef struct
 
    /* additional information (place-holder currently used to print norms) */
    int                   logging;
+   int                   print_level;
 
 } hypre_HybridData;
 
@@ -80,6 +81,7 @@ hypre_HybridCreate( MPI_Comm  comm )
    (hybrid_data -> dscg_num_its)      = 0; 
    (hybrid_data -> pcg_num_its)       = 0;
    (hybrid_data -> logging)           = 0;
+   (hybrid_data -> print_level)       = 0;
    
    return (void *) hybrid_data;
 }
@@ -284,6 +286,22 @@ hypre_HybridSetLogging( void *hybrid_vdata,
 }
 
 /*--------------------------------------------------------------------------
+ * hypre_HybridSetPrintLevel
+ *--------------------------------------------------------------------------*/
+
+int
+hypre_HybridSetPrintLevel( void *hybrid_vdata,
+                        int   print_level  )
+{
+   hypre_HybridData *hybrid_data = hybrid_vdata;
+   int               ierr = 0;
+
+   (hybrid_data -> print_level) = print_level;
+
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
  * hypre_HybridGetNumIterations
  *--------------------------------------------------------------------------*/
 
@@ -391,6 +409,7 @@ hypre_HybridSolve( void               *hybrid_vdata,
    int                stop_crit      = (hybrid_data -> stop_crit);
    int                rel_change     = (hybrid_data -> rel_change);
    int                logging        = (hybrid_data -> logging);
+   int                print_level    = (hybrid_data -> print_level);
    int                solver_type    = (hybrid_data -> solver_type);
    int                k_dim          = (hybrid_data -> k_dim);
   
@@ -402,6 +421,7 @@ hypre_HybridSolve( void               *hybrid_vdata,
    void              *pcg_solver;
    hypre_PCGFunctions * pcg_functions;
    hypre_GMRESFunctions * gmres_functions;
+   hypre_BiCGSTABFunctions * bicgstab_functions;
 
    int                dscg_num_its;
    int                pcg_num_its;
@@ -437,7 +457,8 @@ hypre_HybridSolve( void               *hybrid_vdata,
       hypre_PCGSetTwoNorm(pcg_solver, two_norm);
       hypre_PCGSetStopCrit(pcg_solver, stop_crit);
       hypre_PCGSetRelChange(pcg_solver, rel_change);
-      hypre_PCGSetPrintLevel(pcg_solver, 1);
+      hypre_PCGSetPrintLevel(pcg_solver, print_level);
+      hypre_PCGSetLogging(pcg_solver, logging);
 
       pcg_precond = NULL;
 
@@ -475,7 +496,7 @@ hypre_HybridSolve( void               *hybrid_vdata,
        *--------------------------------------------------------------------*/
       hypre_PCGGetConverged(pcg_solver, &converged);
    }
-   else 
+   else if (solver_type == 2)
    {
       /*--------------------------------------------------------------------
        * Setup GMRES
@@ -500,7 +521,8 @@ hypre_HybridSolve( void               *hybrid_vdata,
       hypre_GMRESSetConvergenceFactorTol(pcg_solver, cf_tol);
       hypre_GMRESSetStopCrit(pcg_solver, stop_crit);
       hypre_GMRESSetRelChange(pcg_solver, rel_change);
-      hypre_GMRESSetPrintLevel(pcg_solver, logging);
+      hypre_GMRESSetPrintLevel(pcg_solver, print_level);
+      hypre_GMRESSetLogging(pcg_solver, logging);
 
       pcg_precond = NULL;
 
@@ -529,6 +551,56 @@ hypre_HybridSolve( void               *hybrid_vdata,
       hypre_GMRESGetConverged(pcg_solver, &converged);
    }
 
+   else 
+   {
+      /*--------------------------------------------------------------------
+       * Setup BiCGSTAB
+       *--------------------------------------------------------------------*/
+      bicgstab_functions =
+         hypre_BiCGSTABFunctionsCreate(
+         hypre_StructKrylovCreateVector,
+         hypre_StructKrylovDestroyVector, hypre_StructKrylovMatvecCreate,
+         hypre_StructKrylovMatvec, hypre_StructKrylovMatvecDestroy,
+         hypre_StructKrylovInnerProd, hypre_StructKrylovCopyVector,
+         hypre_StructKrylovScaleVector, hypre_StructKrylovAxpy,
+         hypre_StructKrylovCommInfo,
+         hypre_StructKrylovIdentitySetup, hypre_StructKrylovIdentity );
+      pcg_solver = hypre_BiCGSTABCreate( bicgstab_functions );
+
+      hypre_BiCGSTABSetMaxIter(pcg_solver, dscg_max_its);
+      hypre_BiCGSTABSetTol(pcg_solver, tol);
+      hypre_BiCGSTABSetConvergenceFactorTol(pcg_solver, cf_tol);
+      hypre_BiCGSTABSetStopCrit(pcg_solver, stop_crit);
+      hypre_BiCGSTABSetPrintLevel(pcg_solver, print_level);
+      hypre_BiCGSTABSetLogging(pcg_solver, logging);
+
+      pcg_precond = NULL;
+
+      hypre_BiCGSTABSetPrecond(pcg_solver,
+                       HYPRE_StructDiagScale,
+                       HYPRE_StructDiagScaleSetup,
+                       pcg_precond);
+      hypre_BiCGSTABSetup(pcg_solver, (void*) A, (void*) b, (void*) x);
+
+
+      /*--------------------------------------------------------------------
+       * Solve with BiCGSTAB
+       *--------------------------------------------------------------------*/
+      hypre_BiCGSTABSolve(pcg_solver, (void*) A, (void*) b, (void*) x);
+
+      /*--------------------------------------------------------------------
+       * Get information for BiCGSTAB
+       *--------------------------------------------------------------------*/
+      hypre_BiCGSTABGetNumIterations(pcg_solver, &dscg_num_its);
+      (hybrid_data -> dscg_num_its) = dscg_num_its;
+      hypre_BiCGSTABGetFinalRelativeResidualNorm(pcg_solver, &res_norm);
+
+      /*--------------------------------------------------------------------
+       * check if converged.
+       *--------------------------------------------------------------------*/
+      hypre_BiCGSTABGetConverged(pcg_solver, &converged);
+   }
+
 
    /*-----------------------------------------------------------------------
     * if converged, done... 
@@ -538,12 +610,14 @@ hypre_HybridSolve( void               *hybrid_vdata,
       (hybrid_data -> final_rel_res_norm) = res_norm;
       if (solver_type == 1)
 	 hypre_PCGDestroy(pcg_solver);
-      else
+      else if (solver_type == 2)
 	 hypre_GMRESDestroy(pcg_solver);
+      else
+	 hypre_BiCGSTABDestroy(pcg_solver);
    }
 
    /*-----------------------------------------------------------------------
-    * ... otherwise, use SMG+PCG.
+    * ... otherwise, use SMG+solver
     *-----------------------------------------------------------------------*/
    else
    {
@@ -572,9 +646,10 @@ hypre_HybridSolve( void               *hybrid_vdata,
          hypre_PCGSetTwoNorm(pcg_solver, two_norm);
          hypre_PCGSetStopCrit(pcg_solver, stop_crit);
          hypre_PCGSetRelChange(pcg_solver, rel_change);
-         hypre_PCGSetPrintLevel(pcg_solver, 1);
+         hypre_PCGSetPrintLevel(pcg_solver, print_level);
+         hypre_PCGSetLogging(pcg_solver, logging);
       }
-      else
+      else if (solver_type == 2)
       {
          hypre_GMRESDestroy(pcg_solver);
 
@@ -597,8 +672,31 @@ hypre_HybridSolve( void               *hybrid_vdata,
          hypre_GMRESSetKDim(pcg_solver, k_dim);
          hypre_GMRESSetStopCrit(pcg_solver, stop_crit);
          hypre_GMRESSetRelChange(pcg_solver, rel_change);
-         hypre_GMRESSetPrintLevel(pcg_solver, logging);
+         hypre_GMRESSetPrintLevel(pcg_solver, print_level);
+         hypre_GMRESSetLogging(pcg_solver, logging);
          hypre_GMRESSetConvergenceFactorTol(pcg_solver, 0.0);
+      }
+      else
+      {
+         hypre_BiCGSTABDestroy(pcg_solver);
+
+         bicgstab_functions =
+         hypre_BiCGSTABFunctionsCreate(
+            hypre_StructKrylovCreateVector,
+            hypre_StructKrylovDestroyVector, hypre_StructKrylovMatvecCreate,
+            hypre_StructKrylovMatvec, hypre_StructKrylovMatvecDestroy,
+            hypre_StructKrylovInnerProd, hypre_StructKrylovCopyVector,
+            hypre_StructKrylovScaleVector, hypre_StructKrylovAxpy,
+            hypre_StructKrylovCommInfo,
+            hypre_StructKrylovIdentitySetup, hypre_StructKrylovIdentity );
+         pcg_solver = hypre_BiCGSTABCreate( bicgstab_functions );
+
+         hypre_BiCGSTABSetMaxIter(pcg_solver, pcg_max_its);
+         hypre_BiCGSTABSetTol(pcg_solver, tol);
+         hypre_BiCGSTABSetStopCrit(pcg_solver, stop_crit);
+         hypre_BiCGSTABSetPrintLevel(pcg_solver, print_level);
+         hypre_BiCGSTABSetLogging(pcg_solver, logging);
+         hypre_BiCGSTABSetConvergenceFactorTol(pcg_solver, 0.0);
       }
 
          /* Setup preconditioner */
@@ -649,7 +747,7 @@ hypre_HybridSolve( void               *hybrid_vdata,
          /* Free PCG and preconditioner */
          hypre_PCGDestroy(pcg_solver);
       }
-      else
+      else if (solver_type == 2)
       {
          hypre_GMRESSetPrecond(pcg_solver,
                           pcg_precond_solve, pcg_precond_setup, pcg_precond);
@@ -666,6 +764,24 @@ hypre_HybridSolve( void               *hybrid_vdata,
 
          /* Free GMRES and preconditioner */
          hypre_GMRESDestroy(pcg_solver);
+      }
+      else
+      {
+         hypre_BiCGSTABSetPrecond(pcg_solver,
+                          pcg_precond_solve, pcg_precond_setup, pcg_precond);
+         hypre_BiCGSTABSetup(pcg_solver, (void*) A, (void*) b, (void*) x);
+
+         /* Solve */
+         hypre_BiCGSTABSolve(pcg_solver, (void*) A, (void*) b, (void*) x);
+
+         /* Get information from BiCGSTAB that is always logged in hybrid solver*/
+         hypre_BiCGSTABGetNumIterations(pcg_solver, &pcg_num_its);
+         (hybrid_data -> pcg_num_its)  = pcg_num_its;
+         hypre_BiCGSTABGetFinalRelativeResidualNorm(pcg_solver, &res_norm);
+         (hybrid_data -> final_rel_res_norm) = res_norm;
+
+         /* Free BiCGSTAB and preconditioner */
+         hypre_BiCGSTABDestroy(pcg_solver);
       }
 
       if (pcg_default)

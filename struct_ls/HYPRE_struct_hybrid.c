@@ -193,6 +193,17 @@ HYPRE_StructHybridSetLogging( HYPRE_StructSolver solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_StructHybridSetPrintLevel
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_StructHybridSetPrintLevel( HYPRE_StructSolver solver,
+                              int                print_level    )
+{
+   return( hypre_HybridSetPrintLevel( (void *) solver, print_level ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_StructHybridGetNumIterations
  *--------------------------------------------------------------------------*/
 
