@@ -2002,6 +2002,7 @@ int HYPRE_LSI_BlockP::solveBTSolve(HYPRE_IJVector x1,HYPRE_IJVector x2,
       HYPRE_ParCSRPCGSolve(A22Solver_, A22mat_csr, f2_csr, x2_csr);
    else if ( A22Params_.SolverID_ == 1 )
       HYPRE_ParCSRGMRESSolve(A22Solver_, A22mat_csr, f2_csr, x2_csr);
+   else
    {
       printf("HYPRE_LSI_BlockP ERROR : invalid A22 solver.\n");
       exit(1);

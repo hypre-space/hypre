@@ -168,6 +168,7 @@ int HYPRE_LinSysCore::parameters(int numParams, char **params)
    for ( i = 0; i < numParams; i++ )
    {
       sscanf(params[i],"%s", param1);
+      strcpy(param3, "invalid");
       if ( !strcmp(param1, "solver") && (!solver_override) )
       {
          sscanf(params[i],"%s %s %s", param, param2, param3);
