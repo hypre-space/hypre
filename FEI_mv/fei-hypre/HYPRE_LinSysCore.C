@@ -17,11 +17,6 @@
 #include "basicTypes.h"
 #include "utilities/utilities.h"
 
-#ifndef NOFEI
-#include "Lookup.h"
-#include "LinearSystemCore.h"
-#endif
-
 #include "HYPRE.h"
 #include "HYPRE_config.h"
 #include "../../IJ_mv/HYPRE_IJ_mv.h"
@@ -31,8 +26,9 @@
 #include "HYPRE_parcsr_TFQmr.h"
 #include "HYPRE_parcsr_bicgs.h"
 #include "HYPRE_parcsr_symqmr.h"
-#include "HYPRE_LinSysCore.h"
+#include "LinearSystemCore.h"
 #include "fegridinfo.h"
+#include "HYPRE_LinSysCore.h"
 
 //---------------------------------------------------------------------------
 // parcsr_mv.h is put here instead of in HYPRE_LinSysCore.h 

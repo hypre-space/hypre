@@ -24,14 +24,8 @@
 #include <string.h>
 #include <assert.h>
 #include <math.h>
-
-#ifdef NOFEI
-#define GlobalID int
-class Lookup
-{
-   int bogus;
-};
-#endif
+#define  GlobalID int
+#include "Lookup.h"
 
 // *************************************************************************
 // local enumerations and defines

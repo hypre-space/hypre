@@ -42,9 +42,8 @@
 #include "fei_defs.h"
 #include "Data.h"
 #include "basicTypes.h"
-#ifndef NOFEI
+#define  GlobalID int
 #include "Lookup.h"
-#endif
 
 typedef struct HYPRE_Lookup_Struct
 {
