@@ -90,6 +90,8 @@ hypre_MatTCommPkgCreate ( hypre_ParCSRMatrix *A)
    int	ierr = 0;
    int pmatch, col, kc, p;
    int * recv_sz_buf;
+   int * row_marker;
+   int	num_rows_diag = hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A));
    int	num_cols_diag = hypre_CSRMatrixNumCols(hypre_ParCSRMatrixDiag(A));
    int	num_cols_offd = hypre_CSRMatrixNumCols(hypre_ParCSRMatrixOffd(A));
 
@@ -208,15 +210,17 @@ hypre_MatTCommPkgCreate ( hypre_ParCSRMatrix *A)
      column number for a column in the offd block of p which is to be multiplied
      by data from this processor.
      For A*B, send_map_elmts[i] is therefore a row of B belonging to this
-     processor, to be sent to p.  For A*A^T, send_map_elmts[i] is a column of A
-     belonging to this processor, to be sent to p.
+     processor, to be sent to p.  For A*A^T, send_map_elmts[i] is a row of A
+     belonging to this processor, to be sent to p; this row was selected
+     because it has a nonzero on a _column_ needed by p.
 */
    num_sends = num_procs;   /* may turn out to be less, but we can't know yet */
-   num_elmts = num_cols_offd+num_cols_diag;
-   /* ... may turn out to be less, but we can't know yet */
+   num_elmts = (num_procs-1)*num_rows_diag;
+   /* ... a crude upper bound; should try to do better even if more comm required */
    send_procs = hypre_CTAlloc(int, num_sends);
    send_map_starts = hypre_CTAlloc(int, num_sends+1);
    send_map_elmts = hypre_CTAlloc(int, num_elmts);
+   row_marker = hypre_CTAlloc(int,num_rows_diag);
  
    index = 0;
    index2 = 0; 
@@ -225,6 +229,7 @@ hypre_MatTCommPkgCreate ( hypre_ParCSRMatrix *A)
       send_map_starts[index+1] = send_map_starts[index];
       j = displs[i];
       pmatch = 0;
+      for ( ir=0; ir<num_rows_diag; ++ir ) row_marker[ir] = 0;
       while ( j < displs[i+1])
       {
          num_elmts = recv_buf[j++];  /* no. of columns proc. i wants */
@@ -242,9 +247,12 @@ hypre_MatTCommPkgCreate ( hypre_ParCSRMatrix *A)
                   /* Plan to send all of my rows which use this column... */
                   RowsWithColumn( &rowmin, &rowmax, col, A );
                   for ( ir=rowmin; ir<=rowmax; ++ir ) {
-                     ++send_map_starts[index+1];
-                     send_map_elmts[index2++] = ir;
-                  };
+                     if ( row_marker[ir]==0 ) {
+                        row_marker[ir] = 1;
+                        ++send_map_starts[index+1];
+                        send_map_elmts[index2++] = ir;
+                     }
+                  }
                }
             }
 /* alternative way of doing the following for-loop:
@@ -273,9 +281,12 @@ hypre_MatTCommPkgCreate ( hypre_ParCSRMatrix *A)
                   /* Plan to send all of my rows which use this column... */
                   RowsWithColumn( &rowmin, &rowmax, col, A );
                   for ( ir=rowmin; ir<=rowmax; ++ir ) {
-                     ++send_map_starts[index+1];
-                     send_map_elmts[index2++] = ir;
-                  };
+                     if ( row_marker[ir]==0 ) {
+                        row_marker[ir] = 1;
+                        ++send_map_starts[index+1];
+                        send_map_elmts[index2++] = ir;
+                     }
+                  }
                }
             }
          }
@@ -311,7 +322,6 @@ hypre_MatTCommPkgCreate ( hypre_ParCSRMatrix *A)
      implementations
 */
    send_buf = hypre_CTAlloc( int, 2*num_sends );
-   recv_sz_buf = hypre_CTAlloc( int, num_procs*num_sends );
    all_num_sends2 = hypre_CTAlloc( int, num_procs );
 
    /* scatter-gather num_sends, to set up the size for the main comm. step */
@@ -321,6 +331,7 @@ hypre_MatTCommPkgCreate ( hypre_ParCSRMatrix *A)
    for ( p=0; p<num_procs; ++p ) {
       displs[p+1] = displs[p] + all_num_sends2[p];
    };
+   recv_sz_buf = hypre_CTAlloc( int, displs[num_procs] );
    
    /* scatter-gather size of row info to send, and proc. to send to */
    index = 0;
@@ -330,12 +341,12 @@ hypre_MatTCommPkgCreate ( hypre_ParCSRMatrix *A)
       /* ... sizes of info to send */
    };
 #if 0
-      printf("send_map_starts (%i):",num_sends+1);
+      printf("num_procs=%i send_map_starts (%i):",num_procs,num_sends+1);
       for( i=0; i<=num_sends; ++i ) printf(" %i", send_map_starts[i] );
       printf("\n");
       printf("my_id=%i num_sends=%i send_buf[0,1]=%i %i",
              my_id, num_sends, send_buf[0], send_buf[1] );
-      printf(" all_num_sends2[0]=%i\n", all_num_sends2[0] );
+      printf(" all_num_sends2[0,1]=%i %i\n", all_num_sends2[0], all_num_sends2[1] );
 #endif
    MPI_Allgatherv( send_buf, 2*num_sends, MPI_INT,
                    recv_sz_buf, all_num_sends2, displs, MPI_INT, comm);
@@ -363,13 +374,17 @@ hypre_MatTCommPkgCreate ( hypre_ParCSRMatrix *A)
    hypre_ParCSRCommPkgSendProcs(comm_pkg) = send_procs;
    hypre_ParCSRCommPkgSendMapStarts(comm_pkg) = send_map_starts;
    hypre_ParCSRCommPkgSendMapElmts(comm_pkg) = send_map_elmts;
+
    hypre_ParCSRMatrixCommPkgT(A) = comm_pkg;
 
+   hypre_TFree(send_buf);
+   hypre_TFree(all_num_sends2);
    hypre_TFree(tmp);
    hypre_TFree(recv_buf);
    hypre_TFree(displs);
    hypre_TFree(info);
    hypre_TFree(recv_sz_buf);
+   hypre_TFree(row_marker);
 
    return ierr;
 }
