@@ -710,7 +710,11 @@ static void ExchangeStoredRows(MPI_Comm comm, Matrix *A, Matrix *M,
 
     patt = RowPattCreate(PARASAILS_MAXLEN);
 
-    for (row=load_bal->beg_row; row<=M->end_row; row++)
+    /* for (row=load_bal->beg_row; row<=M->end_row; row++) */
+    /* We need the additional rows if we need to Rescale */
+    /* i.e., if filter is nonzero and we are in symmetric case */
+
+    for (row=M->beg_row; row<=M->end_row; row++)
     {
         MatrixGetRow(M, row - M->beg_row, &len, &ind, &val);
         RowPattMergeExt(patt, len, ind, numb->num_loc);
