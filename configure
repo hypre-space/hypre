@@ -476,7 +476,7 @@ ac_includes_default="\
 #endif"
 
 ac_subdirs_all="$ac_subdirs_all babel-runtime"
-ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS build build_cpu build_vendor build_os host host_cpu host_vendor host_os STATICONLY_TRUE STATICONLY_FALSE MAINTAINER_MODE_TRUE MAINTAINER_MODE_FALSE MAINT INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA CYGPATH_W PACKAGE VERSION ACLOCAL AUTOCONF AUTOMAKE AUTOHEADER MAKEINFO AMTAR install_sh STRIP ac_ct_STRIP INSTALL_STRIP_PROGRAM mkdir_p AWK SET_MAKE am__leading_dot PACKAGE_DATETIME CC CXX F77 babeldir USE_FEI_BASE_DIR_DEFAULT_TRUE USE_FEI_BASE_DIR_DEFAULT_FALSE USE_FEI_LIB_DIR_DEFAULT_TRUE USE_FEI_LIB_DIR_DEFAULT_FALSE USE_FEI_INC_DIR_DEFAULT_TRUE USE_FEI_INC_DIR_DEFAULT_FALSE CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT CPP LN_S CXXFLAGS ac_ct_CXX FFLAGS ac_ct_F77 FLIBS EGREP ECHO AR ac_ct_AR RANLIB ac_ct_RANLIB DLLTOOL ac_ct_DLLTOOL AS ac_ct_AS OBJDUMP ac_ct_OBJDUMP CXXCPP LIBTOOL LIBTOOL_DEPS LIBOBJS POW_LIB MPILIBS CSUPERLUFLAGS BLAS_LIBS BLASNEEDED_TRUE BLASNEEDED_FALSE BLASLIBFLAGS LAPACK_LIBS LAPACKNEEDED_TRUE LAPACKNEEDED_FALSE LAPACKLIBFLAGS LIBM CCLD CXXLD BABEL_DIR BABEL_HYPRE_INCLUDES BABELLIBFLAGS HYPRE_BABELLIBDIR MLI_DIR MLILIBS MLILIBDIRS MLIINCLUDE FEI_BASE_DIR FEI_LIB_DIR FEI_INC_DIR subdirs BABELDIR LIBDIRNEEDED_TRUE LIBDIRNEEDED_FALSE LTLIBOBJS'
+ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS build build_cpu build_vendor build_os host host_cpu host_vendor host_os STATICONLY_TRUE STATICONLY_FALSE MAINTAINER_MODE_TRUE MAINTAINER_MODE_FALSE MAINT INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA CYGPATH_W PACKAGE VERSION ACLOCAL AUTOCONF AUTOMAKE AUTOHEADER MAKEINFO AMTAR install_sh STRIP ac_ct_STRIP INSTALL_STRIP_PROGRAM mkdir_p AWK SET_MAKE am__leading_dot PACKAGE_DATETIME CC CXX F77 babeldir USE_FEI_BASE_DIR_DEFAULT_TRUE USE_FEI_BASE_DIR_DEFAULT_FALSE USE_FEI_LIB_DIR_DEFAULT_TRUE USE_FEI_LIB_DIR_DEFAULT_FALSE USE_FEI_INC_DIR_DEFAULT_TRUE USE_FEI_INC_DIR_DEFAULT_FALSE CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT CPP LN_S CXXFLAGS ac_ct_CXX FFLAGS ac_ct_F77 FLIBS EGREP ECHO AR ac_ct_AR RANLIB ac_ct_RANLIB DLLTOOL ac_ct_DLLTOOL AS ac_ct_AS OBJDUMP ac_ct_OBJDUMP CXXCPP LIBTOOL LIBTOOL_DEPS LIBOBJS POW_LIB MPILIBS CSUPERLUFLAGS BLAS_LIBS BLASNEEDED_TRUE BLASNEEDED_FALSE BLASLIBFLAGS LAPACK_LIBS LAPACKNEEDED_TRUE LAPACKNEEDED_FALSE LAPACKLIBFLAGS LIBM CCLD CXXLD BABEL_DIR BABEL_HYPRE_INCLUDES BABELLIBFLAGS HYPRE_BABELLIBDIR MLI_DIR MLILIBS MLILIBDIRS MLIINCLUDE FEI_BASE_DIR FEI_LIB_DIR FEI_INC_DIR DOCSDIR_TRUE DOCSDIR_FALSE subdirs BABELDIR TOOLSDIR_TRUE TOOLSDIR_FALSE LIBDIRNEEDED_TRUE LIBDIRNEEDED_FALSE LTLIBOBJS'
 ac_subst_files=''
 
 # Initialize some variables set by options.
@@ -27177,10 +27177,22 @@ fi
 
 
 # subsitute output variables in these files
-                    ac_config_files="$ac_config_files docs/bref_manual.dxx docs/ref_manual.dxx"
+if test -d docs; then
+                                ac_config_files="$ac_config_files docs/bref_manual.dxx docs/ref_manual.dxx docs/Makefile"
+
+fi
 
 
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      ac_config_files="$ac_config_files Makefile FEI_mv/Makefile FEI_mv/SuperLU/Makefile FEI_mv/fei-base/Makefile FEI_mv/fei-hypre/Makefile FEI_mv/femli/Makefile FEI_mv/femli/amgs/Makefile FEI_mv/femli/base/Makefile FEI_mv/femli/blas/Makefile FEI_mv/femli/cintface/Makefile FEI_mv/femli/fedata/Makefile FEI_mv/femli/lib/Makefile FEI_mv/femli/mapper/Makefile FEI_mv/femli/matrix/Makefile FEI_mv/femli/solver/Makefile FEI_mv/femli/test/Makefile FEI_mv/femli/util/Makefile FEI_mv/femli/vector/Makefile IJ_mv/Makefile blas/Makefile config/Makefile distributed_ls/Makefile distributed_ls/Euclid/Makefile distributed_ls/ParaSails/Makefile distributed_ls/pilut/Makefile distributed_matrix/Makefile docs/Makefile krylov/Makefile lapack/Makefile matrix_matrix/Makefile parcsr_es/Makefile parcsr_es/LOBPCG/Makefile parcsr_ls/Makefile parcsr_mv/Makefile seq_mv/Makefile sstruct_ls/Makefile sstruct_mv/Makefile struct_ls/Makefile struct_mv/Makefile test/Makefile test/AUTOTEST/Makefile test/TEST_fei/Makefile test/TEST_ij/Makefile test/TEST_sstruct/Makefile test/TEST_struct/Makefile test/TEST_timing/Makefile utilities/Makefile"
+if test -d docs; then
+  DOCSDIR_TRUE=
+  DOCSDIR_FALSE='#'
+else
+  DOCSDIR_TRUE='#'
+  DOCSDIR_FALSE=
+fi
+
+
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                            ac_config_files="$ac_config_files Makefile FEI_mv/Makefile FEI_mv/SuperLU/Makefile FEI_mv/fei-base/Makefile FEI_mv/fei-hypre/Makefile FEI_mv/femli/Makefile FEI_mv/femli/amgs/Makefile FEI_mv/femli/base/Makefile FEI_mv/femli/blas/Makefile FEI_mv/femli/cintface/Makefile FEI_mv/femli/fedata/Makefile FEI_mv/femli/lib/Makefile FEI_mv/femli/mapper/Makefile FEI_mv/femli/matrix/Makefile FEI_mv/femli/solver/Makefile FEI_mv/femli/test/Makefile FEI_mv/femli/util/Makefile FEI_mv/femli/vector/Makefile IJ_mv/Makefile blas/Makefile config/Makefile distributed_ls/Makefile distributed_ls/Euclid/Makefile distributed_ls/ParaSails/Makefile distributed_ls/pilut/Makefile distributed_matrix/Makefile krylov/Makefile lapack/Makefile matrix_matrix/Makefile parcsr_es/Makefile parcsr_es/LOBPCG/Makefile parcsr_ls/Makefile parcsr_mv/Makefile seq_mv/Makefile sstruct_ls/Makefile sstruct_mv/Makefile struct_ls/Makefile struct_mv/Makefile test/Makefile test/AUTOTEST/Makefile test/TEST_fei/Makefile test/TEST_ij/Makefile test/TEST_sstruct/Makefile test/TEST_struct/Makefile test/TEST_timing/Makefile utilities/Makefile"
 
 if test "$casc_using_babel" = "yes"; then
   if test -d babel; then
@@ -27216,10 +27228,20 @@ fi
 #    seq_ls/pamg/Makefile])
 #fi
 #AM_CONDITIONAL(SEQLSDIR, test -d seq_ls)
-#if test -d tools; then
-#  AC_CONFIG_FILES([tools/Makefile])
-#fi
-#AM_CONDITIONAL(TOOLSDIR, test -d tools)
+if test -d tools; then
+            ac_config_files="$ac_config_files tools/Makefile"
+
+fi
+
+
+if test -d tools; then
+  TOOLSDIR_TRUE=
+  TOOLSDIR_FALSE='#'
+else
+  TOOLSDIR_TRUE='#'
+  TOOLSDIR_FALSE=
+fi
+
 if test "$casc_using_libdir" = "yes"; then
   if test -d lib; then
               ac_config_files="$ac_config_files lib/Makefile"
@@ -27373,6 +27395,20 @@ if test -z "${LAPACKNEEDED_TRUE}" && test -z "${LAPACKNEEDED_FALSE}"; then
   { { echo "$as_me:$LINENO: error: conditional \"LAPACKNEEDED\" was never defined.
 Usually this means the macro was only invoked conditionally." >&5
 echo "$as_me: error: conditional \"LAPACKNEEDED\" was never defined.
+Usually this means the macro was only invoked conditionally." >&2;}
+   { (exit 1); exit 1; }; }
+fi
+if test -z "${DOCSDIR_TRUE}" && test -z "${DOCSDIR_FALSE}"; then
+  { { echo "$as_me:$LINENO: error: conditional \"DOCSDIR\" was never defined.
+Usually this means the macro was only invoked conditionally." >&5
+echo "$as_me: error: conditional \"DOCSDIR\" was never defined.
+Usually this means the macro was only invoked conditionally." >&2;}
+   { (exit 1); exit 1; }; }
+fi
+if test -z "${TOOLSDIR_TRUE}" && test -z "${TOOLSDIR_FALSE}"; then
+  { { echo "$as_me:$LINENO: error: conditional \"TOOLSDIR\" was never defined.
+Usually this means the macro was only invoked conditionally." >&5
+echo "$as_me: error: conditional \"TOOLSDIR\" was never defined.
 Usually this means the macro was only invoked conditionally." >&2;}
    { (exit 1); exit 1; }; }
 fi
@@ -27819,6 +27855,7 @@ do
   # Handling of arguments.
   "docs/bref_manual.dxx" ) CONFIG_FILES="$CONFIG_FILES docs/bref_manual.dxx" ;;
   "docs/ref_manual.dxx" ) CONFIG_FILES="$CONFIG_FILES docs/ref_manual.dxx" ;;
+  "docs/Makefile" ) CONFIG_FILES="$CONFIG_FILES docs/Makefile" ;;
   "Makefile" ) CONFIG_FILES="$CONFIG_FILES Makefile" ;;
   "FEI_mv/Makefile" ) CONFIG_FILES="$CONFIG_FILES FEI_mv/Makefile" ;;
   "FEI_mv/SuperLU/Makefile" ) CONFIG_FILES="$CONFIG_FILES FEI_mv/SuperLU/Makefile" ;;
@@ -27845,7 +27882,6 @@ do
   "distributed_ls/ParaSails/Makefile" ) CONFIG_FILES="$CONFIG_FILES distributed_ls/ParaSails/Makefile" ;;
   "distributed_ls/pilut/Makefile" ) CONFIG_FILES="$CONFIG_FILES distributed_ls/pilut/Makefile" ;;
   "distributed_matrix/Makefile" ) CONFIG_FILES="$CONFIG_FILES distributed_matrix/Makefile" ;;
-  "docs/Makefile" ) CONFIG_FILES="$CONFIG_FILES docs/Makefile" ;;
   "krylov/Makefile" ) CONFIG_FILES="$CONFIG_FILES krylov/Makefile" ;;
   "lapack/Makefile" ) CONFIG_FILES="$CONFIG_FILES lapack/Makefile" ;;
   "matrix_matrix/Makefile" ) CONFIG_FILES="$CONFIG_FILES matrix_matrix/Makefile" ;;
@@ -27870,6 +27906,7 @@ do
   "babel/bHYPRE/Makefile" ) CONFIG_FILES="$CONFIG_FILES babel/bHYPRE/Makefile" ;;
   "babel/bHYPREClient-C/Makefile" ) CONFIG_FILES="$CONFIG_FILES babel/bHYPREClient-C/Makefile" ;;
   "babel/bHYPREClient-F/Makefile" ) CONFIG_FILES="$CONFIG_FILES babel/bHYPREClient-F/Makefile" ;;
+  "tools/Makefile" ) CONFIG_FILES="$CONFIG_FILES tools/Makefile" ;;
   "lib/Makefile" ) CONFIG_FILES="$CONFIG_FILES lib/Makefile" ;;
   "HYPRE_config.h" ) CONFIG_HEADERS="$CONFIG_HEADERS HYPRE_config.h:config/HYPRE_config.h.in" ;;
   *) { { echo "$as_me:$LINENO: error: invalid argument: $ac_config_target" >&5
@@ -28054,8 +28091,12 @@ s,@MLIINCLUDE@,$MLIINCLUDE,;t t
 s,@FEI_BASE_DIR@,$FEI_BASE_DIR,;t t
 s,@FEI_LIB_DIR@,$FEI_LIB_DIR,;t t
 s,@FEI_INC_DIR@,$FEI_INC_DIR,;t t
+s,@DOCSDIR_TRUE@,$DOCSDIR_TRUE,;t t
+s,@DOCSDIR_FALSE@,$DOCSDIR_FALSE,;t t
 s,@subdirs@,$subdirs,;t t
 s,@BABELDIR@,$BABELDIR,;t t
+s,@TOOLSDIR_TRUE@,$TOOLSDIR_TRUE,;t t
+s,@TOOLSDIR_FALSE@,$TOOLSDIR_FALSE,;t t
 s,@LIBDIRNEEDED_TRUE@,$LIBDIRNEEDED_TRUE,;t t
 s,@LIBDIRNEEDED_FALSE@,$LIBDIRNEEDED_FALSE,;t t
 s,@LTLIBOBJS@,$LTLIBOBJS,;t t

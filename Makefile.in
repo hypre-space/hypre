@@ -110,6 +110,8 @@ CXXLD = @CXXLD@
 CYGPATH_W = @CYGPATH_W@
 DEFS = @DEFS@
 DLLTOOL = @DLLTOOL@
+DOCSDIR_FALSE = @DOCSDIR_FALSE@
+DOCSDIR_TRUE = @DOCSDIR_TRUE@
 ECHO = @ECHO@
 ECHO_C = @ECHO_C@
 ECHO_N = @ECHO_N@
@@ -167,6 +169,8 @@ SHELL = @SHELL@
 STATICONLY_FALSE = @STATICONLY_FALSE@
 STATICONLY_TRUE = @STATICONLY_TRUE@
 STRIP = @STRIP@
+TOOLSDIR_FALSE = @TOOLSDIR_FALSE@
+TOOLSDIR_TRUE = @TOOLSDIR_TRUE@
 USE_FEI_BASE_DIR_DEFAULT_FALSE = @USE_FEI_BASE_DIR_DEFAULT_FALSE@
 USE_FEI_BASE_DIR_DEFAULT_TRUE = @USE_FEI_BASE_DIR_DEFAULT_TRUE@
 USE_FEI_INC_DIR_DEFAULT_FALSE = @USE_FEI_INC_DIR_DEFAULT_FALSE@
@@ -221,12 +225,14 @@ MAINTAINERCLEANFILES = Makefile.in\
  aclocal.m4\
  configure
 
+@DOCSDIR_FALSE@DOCS = 
 
 # this is really ulgy, but there are different directory structures
 # seq_ls tools are not in the distribution, but could be added
 # by uncommenting here and in configure.ac. The SUBDIRS controls
 # the build directories, while DIST_SUBDIRS determine the directories
 # in the distribution (make dist).
+@DOCSDIR_TRUE@DOCS = tools
 #if PARCHORDLSDIR
 #PARCHORDLS = "parchord_ls"
 #else !PARCHORDLSDIR
@@ -236,13 +242,10 @@ PARCHORDLS =
 #SEQLS = "seq_ls"
 #else
 SEQLS = 
+@TOOLSDIR_FALSE@TOOLS = 
 #endif
-#if TOOLSDIR
-#TOOLS = tools
-#else !TOOLSDIR
-TOOLS = 
+@TOOLSDIR_TRUE@TOOLS = tools
 @BLASNEEDED_FALSE@BLASDIR = 
-#endif !TOOLSDIR
 
 #EXTRA_DIRS = $(SEQLS) $(TOOLS) test
 @BLASNEEDED_TRUE@BLASDIR = blas
@@ -278,7 +281,7 @@ config\
  sstruct_mv sstruct_ls\
  seq_mv parcsr_mv distributed_matrix matrix_matrix\
  IJ_mv distributed_ls parcsr_ls parcsr_es\
- FEI_mv $(BABELDIR) test lib docs .
+ FEI_mv $(BABELDIR) test lib $(DOCSDIR) .
 
 all: HYPRE_config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-recursive
