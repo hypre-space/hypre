@@ -212,6 +212,9 @@ nullspace_dim = 6;
    while ( elemStart < nElems )
    {
       currMacroNumber = macroNumbers[elemStart];
+      if ( output_level >= 1 && currMacroNumber % 10 == 0 )
+         printf("Computing null spaces of aggregate %d (%d)\n", 
+                currMacroNumber, nMacros);
       elemCount = elemStart + 1;
       while (macroNumbers[elemCount] == currMacroNumber && elemCount < nElems) 
          elemCount++;
