@@ -556,6 +556,115 @@ int HYPRE_SStructSplitGetFinalRelativeResidualNorm(HYPRE_SStructSolver  solver,
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
+/**
+ * @name SStruct FAC Solver
+ **/
+/*@{*/
+                                                                                                            
+/**
+ * Create a FAC solver object.
+ **/
+int HYPRE_SStructtFACCreate( MPI_Comm             comm,
+                             HYPRE_SStructSolver *solver );
+/**
+ * Destroy a FAC solver object.
+ **/
+int HYPRE_SStructFACDestroy2( HYPRE_SStructSolver solver );
+                                                                                                            
+/**
+ * Set up the FAC solver structure .
+ **/
+int HYPRE_SStructFACSetup2(HYPRE_SStructSolver solver,
+                          HYPRE_SStructMatrix A,
+                          HYPRE_SStructVector b,
+                          HYPRE_SStructVector x);
+                                                                                                            
+/**
+ * Solve the system.
+ **/
+int HYPRE_SStructFACSolve3(HYPRE_SStructSolver solver,
+                           HYPRE_SStructMatrix A,
+                           HYPRE_SStructVector b,
+                           HYPRE_SStructVector x);
+                                                                                                            
+/**
+ * Set up amr structure
+ **/
+int HYPRE_SStructFACSetPLevels(HYPRE_SStructSolver solver,
+                               int                 nparts,
+                               int                *plevels);
+                                                                                                            
+/**
+ * (Optional) Set the convergence tolerance.
+ **/
+int HYPRE_SStructFACSetTol(HYPRE_SStructSolver solver,
+                           double              tol);
+/**
+ * (Optional) Set maximum number of iterations.
+ **/
+int HYPRE_SStructFACSetMaxIter(HYPRE_SStructSolver solver,
+                               int                 max_iter);
+                                                                                                            
+/**
+ * (Optional) Additionally require that the relative difference in
+ * successive iterates be small.
+ **/
+int HYPRE_SStructFACSetRelChange(HYPRE_SStructSolver solver,
+                                 int                 rel_change);
+                                                                                                            
+                                                                                                            
+/**
+ * (Optional) Use a zero initial guess.
+ **/
+int HYPRE_SStructFACSetZeroGuess(HYPRE_SStructSolver solver);
+                                                                                                            
+/**
+ * (Optional) Use a nonzero initial guess.
+ **/
+int HYPRE_SStructFACSetNonZeroGuess(HYPRE_SStructSolver solver);
+                                                                                                            
+/**
+ * (Optional) Set relaxation type.
+ **/
+int HYPRE_SStructFACSetRelaxType(HYPRE_SStructSolver solver,
+                                 int                 relax_type);
+/**
+ * (Optional) Set number of pre-relaxation sweeps.
+ **/
+int HYPRE_SStructFACSetNumPreRelax(HYPRE_SStructSolver solver,
+                                   int                 num_pre_relax);
+                                                                                                            
+/**
+ * (Optional) Set number of post-relaxation sweeps.
+ **/
+int HYPRE_SStructFACSetNumPostRelax(HYPRE_SStructSolver solver,
+                                    int                 num_post_relax);
+/**
+ * (Optional) Set coarsest solver type.
+ **/
+int HYPRE_SStructFACSetCoarseSolverType(HYPRE_SStructSolver solver,
+                                        int                 csolver_type);
+                                                                                                            
+/**
+ * (Optional) Set the amount of logging to do.
+ **/
+int HYPRE_SStructFACSetLogging(HYPRE_SStructSolver solver,
+                               int                 logging);
+                                                                                                            
+/**
+ * Return the number of iterations taken.
+ **/
+int HYPRE_SStructFACGetNumIterations(HYPRE_SStructSolver  solver,
+                                     int                 *num_iterations);
+                                                                                                            
+/**
+ * Return the norm of the final relative residual.
+ **/
+int HYPRE_SStructFACGetFinalRelativeResidualNorm(
+                                          HYPRE_SStructSolver solver,
+                                          double             *norm);
+                                                                                                            
+
 /*@}*/
 
 #ifdef __cplusplus
