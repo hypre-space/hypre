@@ -1023,7 +1023,7 @@ hypre_StructVectorMaxValue( hypre_StructVector *vector,
       /* if more than one box, the return system max_xyz_index is too simple
          if needed, fix later */
       ierr = 1;
-      return;
+      return ierr;
    }
    hypre_SetIndex(unit_stride, 1, 1, 1);
    hypre_ForBoxI(i, boxes)
