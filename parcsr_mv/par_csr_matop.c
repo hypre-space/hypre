@@ -632,7 +632,7 @@ void hypre_ParCSRMatrixExtractBExt_Arrays
  
    int i, j, k, counter;
    int start_index;
-   int j_cnt, jrow;
+   int j_cnt, j_cnt_rm, jrow;
    int num_rows_B_ext;
 
    MPI_Comm_size(comm,&num_procs);
@@ -665,6 +665,7 @@ void hypre_ParCSRMatrixExtractBExt_Arrays
  *--------------------------------------------------------------------------*/
    B_int_i[0] = 0;
    j_cnt = 0;
+   j_cnt_rm = 0;
    *num_nonzeros = 0;
    for (i=0; i < num_sends; i++)
    {
@@ -676,10 +677,9 @@ void hypre_ParCSRMatrixExtractBExt_Arrays
 	    *num_nonzeros += B_int_i[j_cnt];
 	}
         if ( find_row_map ) {
-           j_cnt = 0;
            for (j = send_map_starts[i]; j < send_map_starts[i+1]; j++) {
               jrow = send_map_elmts[j];
-              B_int_row_map[j_cnt++] = jrow + first_row_index;
+              B_int_row_map[j_cnt_rm++] = jrow + first_row_index;
            }
         }
    }
