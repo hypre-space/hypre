@@ -94,30 +94,30 @@ C_COMPILE_FLAGS =\
 ##################################################################
 # Blas Header & Object Files
 ##################################################################
- BLAS_HEADERS = hypre_blas.h f2c.h
- BLAS_FILES = \
- blas_utils.o\
- dasum.o\
- daxpy.o\
- dcopy.o\
- ddot.o\
- dgemm.o\
- dgemv.o\
- dger.o\
- dnrm2.o\
- drot.o\
- dscal.o\
- dswap.o\
- dsymm.o\
- dsymv.o\
- dsyr2.o\
- dsyr2k.o\
- dsyrk.o\
- dtrmm.o\
- dtrmv.o\
- dtrsm.o\
- dtrsv.o\
- idamax.o
+#BLAS_HEADERS = hypre_blas.h f2c.h
+#BLAS_FILES = \
+#blas_utils.o\
+#dasum.o\
+#daxpy.o\
+#dcopy.o\
+#ddot.o\
+#dgemm.o\
+#dgemv.o\
+#dger.o\
+#dnrm2.o\
+#drot.o\
+#dscal.o\
+#dswap.o\
+#dsymm.o\
+#dsymv.o\
+#dsyr2.o\
+#dsyr2k.o\
+#dsyrk.o\
+#dtrmm.o\
+#dtrmv.o\
+#dtrsm.o\
+#dtrsv.o\
+#idamax.o
 
 ##################################################################
 # Utilities Header Files
@@ -165,14 +165,14 @@ OBJS = ${FILES:.c=.o}
 all: libHYPRE_utilities.a 
 	cp -fp $(srcdir)/HYPRE_*.h $(HYPRE_BUILD_DIR)/include/.
 	cp -fp $(srcdir)/utilities.h $(HYPRE_BUILD_DIR)/include/.
-	 cp -fp ${BLAS_HEADERS} $(HYPRE_BUILD_DIR)/include/.
+	#cp -fp ${BLAS_HEADERS} $(HYPRE_BUILD_DIR)/include/.
 	#cp -fp ${LAPACK_HEADERS} $(HYPRE_BUILD_DIR)/include/.
 	cp -fp libHYPRE_*.a $(HYPRE_BUILD_DIR)/lib/.
 
 install: libHYPRE_utilities.a 
 	cp -fp $(srcdir)/HYPRE_*.h $(HYPRE_INC_INSTALL)/.
 	cp -fp $(srcdir)/utilities.h $(HYPRE_INC_INSTALL)/.
-	 cp -fp ${BLAS_HEADERS} $(HYPRE_INC_INSTALL)/.
+	#cp -fp ${BLAS_HEADERS} $(HYPRE_INC_INSTALL)/.
 	#cp -fp ${LAPACK_HEADERS} $(HYPRE_INC_INSTALL)/.
 	cp -fp libHYPRE_*.a $(HYPRE_LIB_INSTALL)/.
 
