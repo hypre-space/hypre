@@ -62,6 +62,8 @@ int    MLI_Utils_ParCSRMLISolve(HYPRE_Solver, HYPRE_ParCSRMatrix,
                                 HYPRE_ParVector, HYPRE_ParVector);
 int    MLI_Utils_HyprePCGSolve(CMLI *, HYPRE_Matrix, HYPRE_Vector, 
                                HYPRE_Vector);
+int    MLI_Utils_HypreGMRESSolve(CMLI *, HYPRE_Matrix, HYPRE_Vector, 
+                               HYPRE_Vector);
 
 #ifdef __cplusplus
 }

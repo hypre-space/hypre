@@ -242,11 +242,9 @@ int MLI_Utils_ComputeSpectralRadius(hypre_ParCSRMatrix *Amat, double *max_eigen)
 */
    HYPRE_ParCSRMatrixMatvec(1.0,(HYPRE_ParCSRMatrix) Amat,vec1,0.0,vec2 );
    HYPRE_ParVectorInnerProd( vec2, vec2, &norm2);
-printf("Utils : radius = %e\n", norm2);
    for ( it = 0; it < maxits; it++ )
    {
       HYPRE_ParVectorInnerProd( vec2, vec2, &norm2);
-printf("Utils : radius = %e\n", norm2);
       HYPRE_ParVectorCopy( vec2, vec1);
       norm2 = 1.0 / sqrt(norm2);
       HYPRE_ParVectorScale( norm2, vec1 );
@@ -882,4 +880,45 @@ int MLI_Utils_HyprePCGSolve( CMLI *cmli, HYPRE_Matrix A,
    printf("\tPCG final relative residual norm = %e\n", norm);
    return 0;
 }
+
+/***************************************************************************
+ * solve the system using HYPRE gmres
+ *--------------------------------------------------------------------------*/
+ 
+int MLI_Utils_HypreGMRESSolve( CMLI *cmli, HYPRE_Matrix A,
+                             HYPRE_Vector b, HYPRE_Vector x )
+{
+   int          ierr, num_iterations, max_iter=500;
+   double       tol=1.0e-6, norm;
+   CMLI_Vector  *csol, *crhs;
+   MPI_Comm     mpi_comm;
+   HYPRE_Solver gmres_solver, gmres_precond;
+   HYPRE_ParCSRMatrix hypreA;
+
+   hypreA = (HYPRE_ParCSRMatrix) A;
+   MLI_SetMaxIterations( cmli, 1 );
+   MLI_SetOutputLevel( cmli, 1 );
+   HYPRE_ParCSRMatrixGetComm( hypreA , &mpi_comm );
+   HYPRE_ParCSRGMRESCreate(mpi_comm, &gmres_solver);
+   HYPRE_GMRESSetMaxIter(gmres_solver, max_iter );
+   HYPRE_GMRESSetTol(gmres_solver, tol);
+   HYPRE_GMRESSetRelChange(gmres_solver, 0);
+   HYPRE_GMRESSetLogging(gmres_solver, 2);
+   gmres_precond = (HYPRE_Solver) cmli;
+   HYPRE_GMRESSetPrecond(gmres_solver,
+                       (HYPRE_PtrToSolverFcn) MLI_Utils_ParCSRMLISolve,
+                       (HYPRE_PtrToSolverFcn) MLI_Utils_ParCSRMLISetup,
+                       gmres_precond);
+   HYPRE_GMRESSetup(gmres_solver, A, b, x);
+   HYPRE_GMRESSolve(gmres_solver, A, b, x);
+   HYPRE_GMRESGetNumIterations(gmres_solver, &num_iterations);
+   HYPRE_ParCSRGMRESGetFinalRelativeResidualNorm(gmres_solver, &norm);
+   HYPRE_ParCSRGMRESDestroy(gmres_solver);
+   printf("\tGMRES maximum iterations           = %d\n", max_iter);
+   printf("\tGMRES convergence tolerance        = %e\n", tol);
+   printf("\tGMRES number of iterations         = %d\n", num_iterations);
+   printf("\tGMRES final relative residual norm = %e\n", norm);
+   return 0;
+}
+
 
