@@ -54,8 +54,6 @@ MLI_OneLevel::~MLI_OneLevel()
 #ifdef MLI_DEBUG_DETAILED
    printf("MLI_OneLevel::~MLI_OneLevel\n");
 #endif
-   if ( fedata_ != NULL ) delete fedata_;
-   if ( sfei_   != NULL ) delete sfei_;
    if ( Amat_   != NULL ) delete Amat_;
    if ( Rmat_   != NULL ) delete Rmat_;
    if ( Pmat_   != NULL ) delete Pmat_;
@@ -194,7 +192,6 @@ int MLI_OneLevel::setFEData( MLI_FEData *data, MLI_Mapper *map )
 #ifdef MLI_DEBUG_DETAILED
    printf("MLI_OneLevel::setFEData\n");
 #endif
-   if ( fedata_ != NULL ) delete fedata_;
    fedata_ = data;
    if ( nodeEqnMap_ != NULL ) delete nodeEqnMap_;
    nodeEqnMap_ = map;
@@ -210,7 +207,6 @@ int MLI_OneLevel::setSFEI( MLI_SFEI *data )
 #ifdef MLI_DEBUG_DETAILED
    printf("MLI_OneLevel::setSFEI\n");
 #endif
-   if ( sfei_ != NULL ) delete sfei_;
    sfei_ = data;
    return 0;
 }
