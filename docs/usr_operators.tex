@@ -3,7 +3,8 @@
 
 {\bf Operators:} Mathematically, the line between "solver" and "preconditioner" is
 somewhat blurry (discussed 
-below), and \hypre{} takes advantage of that to call them both of type "Operator".
+below), and \hypre{} takes advantage of this property
+to unify them into a single type: "Operator".
 We can unify much of 
 the discussion of solvers and preconditioners under the heading of Operators,
 and then specialize those 
@@ -13,15 +14,18 @@ The defining characteristics of Operators are that they take a vector as input
 and return another vector as 
 output. Thus, this generalization also includes matrices, as well as nonlinear
 operators, transpose matrices, 
-etc. The fundamental "use" function of an Operator is the \code{Apply} function. For
+etc. 
+The fundamental "use" function of an Operator is the \code{Apply} function. For
 components that 
 encapsulate "matrices", the \code{Apply} function corresponds to the traditional
 matrix-vector multiplication. For 
-solvers, \code{Apply} is the traditional "solve" function. Preconditioners are also
+solvers, \code{Apply} is the traditional "solve" function. 
+Preconditioners are traditionally
 referred to as being "applied", 
-and the \code{Apply} function quite naturally corresponds to this application. Thus,
+and the \code{Apply} function quite naturally corresponds to this application. 
+Thus,
 use of matrices, solvers, and 
-preconditioners are done through the \code{Apply} function.
+preconditioners is done through the \code{Apply} function.
 
 \section{Preconditioners are Solvers}
 
@@ -32,7 +36,7 @@ no class or interface called
 both traditional solvers and preconditioners are in some senses "approximations
 to the inverse" of the linear 
 operator defining the system to be solved. The difference between them is one
-of degrees, in that 
+of degrees more than a fundamental distinction, in that 
 preconditioners generally are very crude and very easy to compute
 approximations to the inverse, while 
 solvers are more accurate, i.e. within the desired convergence tolerance. By
@@ -47,6 +51,7 @@ straightforward to use matrices as preconditioners, should a direct
 approximation to the inverse exist. 
 
 \section{Setup}
+
 Most components that correspond to the traditional "matrix", as well as
 some solvers in which the 
 construction of the underlying matrix is handled by the solver for the user,
@@ -54,3 +59,10 @@ are set up through one or more
 of the conceptual interfaces discussed in a later chapter. Here we will
 concentrate on other ways to 
 construct Operators.
+
+\subsection{Building a Krylov Solver with an Operator}
+
+Various Krylov solvers are included in \hypre{}.
+Such methods are very flexible in that they can be used to attempt
+the solution of any system defined by any component that supports the
+Operator interface.
