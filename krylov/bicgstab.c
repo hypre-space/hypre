@@ -267,7 +267,8 @@ hypre_BiCGSTABSolve(void  *bicgstab_vdata,
       return ierr;
    }
 
-   r_norm = sqrt((*(bicgstab_functions->InnerProd))(r0,r0));
+   res = (*(bicgstab_functions->InnerProd))(r0,r0);
+   r_norm = sqrt(res);
 
    /* Since it is does not diminish performance, attempt to return an error flag
       and notify users when they supply bad input. */
@@ -291,7 +292,6 @@ hypre_BiCGSTABSolve(void  *bicgstab_vdata,
       return ierr;
    }
 
-   res = r_norm;
    if (logging > 0)
    {
       norms[0] = r_norm;
