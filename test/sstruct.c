@@ -266,7 +266,7 @@ ReadData( char         *filename,
 
    char               key[250];
 
-   int                part, var, entry, s, i;
+   int                part, var, entry, s, i, il, iu;
 
    /*-----------------------------------------------------------
     * Read data file from process 0, then broadcast
@@ -354,12 +354,15 @@ ReadData( char         *filename,
                               pdata.ilowers[pdata.nboxes]);
             SScanProblemIndex(sdata_ptr, &sdata_ptr, data.ndim,
                               pdata.iuppers[pdata.nboxes]);
-            if ( (pdata.ilowers[pdata.nboxes][3]*
-                  pdata.ilowers[pdata.nboxes][4]*
-                  pdata.ilowers[pdata.nboxes][5] != 0) ||
-                 (pdata.iuppers[pdata.nboxes][3]*
-                  pdata.iuppers[pdata.nboxes][4]*
-                  pdata.iuppers[pdata.nboxes][5] != 1) )
+            /* check use of +- in GridSetExtents */
+            il = 1;
+            iu = 1;
+            for (i = 0; i < data.ndim; i++)
+            {
+               il *= pdata.ilowers[pdata.nboxes][i+3];
+               iu *= pdata.iuppers[pdata.nboxes][i+3];
+            }
+            if ( (il != 0) || (iu != 1) )
             {
                printf("Error: Invalid use of `+-' in GridSetExtents\n");
                exit(1);
