@@ -36,6 +36,7 @@ void        *data;
    VectorInt **IP_array;
    VectorInt **IV_array;
    VectorInt **ICG_array;
+   Vector    *Vtemp;
 
    int       Fcycle_flag;
    int       Vstar_flag;
@@ -76,6 +77,9 @@ void        *data;
    int       num_digits;
    int       num_sweep;
    int       base_lev;
+
+   double    alpha;
+   double    beta;
    
 /* Acquire data and allocate storage */
 
@@ -87,6 +91,7 @@ void        *data;
    IP_array = AMGDataIPArray(amg_data);
    IV_array = AMGDataIVArray(amg_data);
    ICG_array = AMGDataICGArray(amg_data);
+   Vtemp = AMGDataVtemp(amg_data);
 
    imin = AMGDataIMin(amg_data);
    imax = AMGDataIMax(amg_data);
@@ -240,7 +245,8 @@ void        *data;
       {
                                
 /*------------------------------------------------------------------------
- * Visit coarser level next.  Compute and restrict residual (RSCALI).
+ * Visit coarser level next.  Compute residual using Matvec.
+ * Perform restriction using MatvecT.
  * Reset counters and cycling parameters for coarse level
  *-----------------------------------------------------------------------*/
 
@@ -248,9 +254,17 @@ void        *data;
           coarse_grid = level + 1;
 
           InitVector(U_array[coarse_grid],0.0);
+          
+          CopyVector(F_array[fine_grid],Vtemp);
+          alpha = -1.0;
+          beta = 1.0;
+          Matvec(alpha, A_array[fine_grid], U_array[fine_grid],
+                 beta, Vtemp);
 
-    
-          CALL_RSCALI(coarse_grid,fine_grid,numv,F_array,U_array,amg_data);
+          alpha = 1.0;
+          beta = 0.0;
+          MatvecT(alpha,P_array[fine_grid],Vtemp,
+                  beta,F_array[coarse_grid]);
 
           ++level;
           lev_counter[level] = max(lev_counter[level],mu[level-1]);
@@ -262,16 +276,26 @@ void        *data;
       {
                             
 /*------------------------------------------------------------------------
- * Visit finer level next.  Interpolate and add correction (INTAD).
+ * Visit finer level next.  Interpolate and add correction using Matvec.
  * Reset counters and cycling parameters for finer level.
  *-----------------------------------------------------------------------*/
 
           fine_grid = level - 1;
           coarse_grid = level;
 
-          CALL_INTAD(coarse_grid,fine_grid,numv,Vstar_flag,
-                     F_array,U_array,amg_data);
-
+          if (Vstar_flag != 0)
+          {
+              CALL_INTAD(coarse_grid,fine_grid,numv,Vstar_flag,
+                         F_array,U_array,amg_data);
+          }
+          else
+          {
+              alpha = 1.0;
+              beta = 1.0;
+              Matvec(alpha, P_array[fine_grid], U_array[coarse_grid],
+                     beta, U_array[fine_grid]);
+         }
+              
           --level;
           cycle_param = 2;
           if (level == 0 && ntrlx[0] > 9) cycle_param = 0;
