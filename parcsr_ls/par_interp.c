@@ -94,6 +94,7 @@ hypre_ParAMGBuildInterp( hypre_ParCSRMatrix   *A,
    int              i,i1,i2;
    int              j,jj,jj1;
    int              start;
+   int              sgn;
    int              c_num;
    
    double           diagonal;
@@ -505,12 +506,14 @@ hypre_ParAMGBuildInterp( hypre_ParCSRMatrix   *A,
                 * Loop over row of A for point i1 and calculate the sum
                 * of the connections to c-points that strongly influence i.
                 *-----------------------------------------------------------*/
-
+	       sgn = 1;
+	       if (A_diag_data[A_diag_i[i1]] < 0) sgn = -1;
                /* Diagonal block part of row i1 */
                for (jj1 = A_diag_i[i1]; jj1 < A_diag_i[i1+1]; jj1++)
                {
                   i2 = A_diag_j[jj1];
-                  if (P_marker[i2] >= jj_begin_row)
+                  if (P_marker[i2] >= jj_begin_row && 
+					(sgn*A_diag_data[jj1]) < 0)
                   {
                      sum += A_diag_data[jj1];
                   }
@@ -522,7 +525,8 @@ hypre_ParAMGBuildInterp( hypre_ParCSRMatrix   *A,
                   for (jj1 = A_offd_i[i1]; jj1 < A_offd_i[i1+1]; jj1++)
                   {
                      i2 = A_offd_j[jj1];
-                     if (P_marker_offd[i2] >= jj_begin_row_offd)
+                     if (P_marker_offd[i2] >= jj_begin_row_offd
+				&& (sgn*A_offd_data[jj1]) < 0)
                      {
                         sum += A_offd_data[jj1];
                      }
@@ -541,7 +545,8 @@ hypre_ParAMGBuildInterp( hypre_ParCSRMatrix   *A,
                for (jj1 = A_diag_i[i1]; jj1 < A_diag_i[i1+1]; jj1++)
                {
                   i2 = A_diag_j[jj1];
-                  if (P_marker[i2] >= jj_begin_row)
+                  if (P_marker[i2] >= jj_begin_row 
+				&& (sgn*A_diag_data[jj1]) < 0)
                   {
                      P_diag_data[P_marker[i2]]
                                   += distribute * A_diag_data[jj1];
@@ -554,7 +559,8 @@ hypre_ParAMGBuildInterp( hypre_ParCSRMatrix   *A,
                   for (jj1 = A_offd_i[i1]; jj1 < A_offd_i[i1+1]; jj1++)
                   {
                      i2 = A_offd_j[jj1];
-                     if (P_marker_offd[i2] >= jj_begin_row_offd)
+                     if (P_marker_offd[i2] >= jj_begin_row_offd
+				&& (sgn*A_offd_data[jj1]) < 0)
                      {
                          P_offd_data[P_marker_offd[i2]]    
                                   += distribute * A_offd_data[jj1]; 
@@ -620,6 +626,8 @@ hypre_ParAMGBuildInterp( hypre_ParCSRMatrix   *A,
                   /* find row number */
                   c_num = A_offd_j[jj];
 
+		  sgn = 1;
+		  if (A_ext_data[A_ext_i[c_num]] < 0) sgn = -1;
                   for (jj1 = A_ext_i[c_num]; jj1 < A_ext_i[c_num+1]; jj1++)
                   {
                      i2 = A_ext_j[jj1];
@@ -627,7 +635,8 @@ hypre_ParAMGBuildInterp( hypre_ParCSRMatrix   *A,
                      if (i2 >= col_1 && i2 < col_n)    
                      {                            
                                            /* in the diagonal block */
-                        if (P_marker[i2-col_1] >= jj_begin_row)
+                        if (P_marker[i2-col_1] >= jj_begin_row
+				&& (sgn*A_ext_data[jj1]) < 0)
                         {
                            sum += A_ext_data[jj1];
                         }
@@ -638,22 +647,12 @@ hypre_ParAMGBuildInterp( hypre_ParCSRMatrix   *A,
                         j = hypre_BinarySearch(col_map_offd,i2,num_cols_A_offd);
                         if (j != -1)
                         { 
-                           if (P_marker_offd[j] >= jj_begin_row_offd)
+                           if (P_marker_offd[j] >= jj_begin_row_offd
+				&& (sgn*A_ext_data[jj1]) < 0)
                            {
 			      sum += A_ext_data[jj1];
                            }
                         }
-			/* for (j = 0; j < num_cols_A_offd; j++)
-                        {
-                            if (i2 == abs(CF_marker_offd[j]) )
-                            { 
-                                if (P_marker_offd[j] >= jj_begin_row_offd)
-                                {
-				   sum += A_ext_data[jj1];
-                                }
-				break;
-                            }
-                        } */
  
                      }
 
@@ -675,7 +674,8 @@ hypre_ParAMGBuildInterp( hypre_ParCSRMatrix   *A,
 
                      if (i2 >= col_1 && i2 < col_n) /* in the diagonal block */           
                      {
-                        if (P_marker[i2-col_1] >= jj_begin_row)
+                        if (P_marker[i2-col_1] >= jj_begin_row
+				&& (sgn*A_ext_data[jj1]) < 0)
                         {
                            P_diag_data[P_marker[i2-col_1]]
                                      += distribute * A_ext_data[jj1];
@@ -687,20 +687,11 @@ hypre_ParAMGBuildInterp( hypre_ParCSRMatrix   *A,
                         j = hypre_BinarySearch(col_map_offd,i2,num_cols_A_offd);
                         if (j != -1)
                         { 
-                           if (P_marker_offd[j] >= jj_begin_row_offd)
+                           if (P_marker_offd[j] >= jj_begin_row_offd
+				&& (sgn*A_ext_data[jj1]) < 0)
                                   P_offd_data[P_marker_offd[j]]
                                      += distribute * A_ext_data[jj1];
                         }
-                        /* for (j = 0; j < num_cols_A_offd; j++)
-                        {
-                            if (i2 == abs(CF_marker_offd[j])) 
-                            { 
-                               if (P_marker_offd[j] >= jj_begin_row_offd)
-                                  P_offd_data[P_marker_offd[j]]
-                                     += distribute * A_ext_data[jj1];
-                               break;
-                            }
-                        } */
                      }
                   }
                   }
