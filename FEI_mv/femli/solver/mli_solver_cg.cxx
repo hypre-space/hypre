@@ -16,6 +16,7 @@
 #include "solver/mli_solver_bsgs.h"
 #include "solver/mli_solver_hsgs.h"
 #include "solver/mli_solver_mli.h"
+#include "solver/mli_solver_amg.h"
 
 /******************************************************************************
  * constructor
@@ -128,6 +129,10 @@ int MLI_Solver_CG::setup(MLI_Matrix *Amat_in)
                                   numSweeps = 1;
                                   argv[0] = (char *) &numSweeps;
                                   baseSolver_->setParams(paramString,1,argv);
+                                  break;
+      case MLI_SOLVER_AMG_ID :    sprintf(paramString, "AMG");
+                                  baseSolver_ = 
+                                     new MLI_Solver_AMG(paramString);
                                   break;
       case MLI_SOLVER_MLI_ID :    sprintf(paramString, "MLI");
                                   baseSolver_ = 
@@ -356,6 +361,8 @@ int MLI_Solver_CG::setParams( char *paramString, int argc, char **argv )
          baseMethod_ = MLI_SOLVER_SGS_ID;
       else if ( !strcmp(param2, "BSGS") )
          baseMethod_ = MLI_SOLVER_BSGS_ID;
+      else if ( !strcmp(param2, "AMG") )
+         baseMethod_ = MLI_SOLVER_AMG_ID;
       else if ( !strcmp(param2, "MLI") )
          baseMethod_ = MLI_SOLVER_MLI_ID;
       else if ( !strcmp(param2, "ILU") )

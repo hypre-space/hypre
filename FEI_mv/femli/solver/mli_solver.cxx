@@ -39,6 +39,7 @@
 #include "solver/mli_solver_arpacksuperlu.h"
 #include "solver/mli_solver_kaczmarz.h"
 #include "solver/mli_solver_mli.h"
+#include "solver/mli_solver_amg.h"
 
 /*****************************************************************************
  * constructor 
@@ -151,6 +152,12 @@ MLI_Solver *MLI_Solver_CreateFromName( char *str )
       strcpy( paramString, "baseMethod MLI");
       solver_ptr->setParams(paramString, 0, NULL);
    }
+   else if (!strcmp(str,"CGAMG")) 
+   {
+      solver_ptr = new MLI_Solver_CG(str);
+      strcpy( paramString, "baseMethod AMG");
+      solver_ptr->setParams(paramString, 0, NULL);
+   }
    else if (!strcmp(str,"CGILU")) 
    {
       solver_ptr = new MLI_Solver_CG(str);
@@ -227,6 +234,7 @@ MLI_Solver *MLI_Solver_CreateFromName( char *str )
       printf("\t CGSGS \n");
       printf("\t CGBSGS \n");
       printf("\t CGMLI \n");
+      printf("\t CGAMG \n");
       printf("\t CGILU \n");
       printf("\t GMRESJacobi \n");
       printf("\t GMRESSGS \n");

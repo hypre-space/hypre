@@ -41,6 +41,7 @@ HEADERS =\
  mli_solver_jacobi.h\
  mli_solver_kaczmarz.h\
  mli_solver_mli.h\
+ mli_solver_amg.h\
  mli_solver_mls.h\
  mli_solver_parasails.h\
  mli_solver_seqsuperlu.h\
@@ -61,6 +62,7 @@ FILES =\
  mli_solver_jacobi.cxx\
  mli_solver_kaczmarz.cxx\
  mli_solver_mli.cxx\
+ mli_solver_amg.cxx\
  mli_solver_mls.cxx\
  mli_solver_parasails.cxx\
  mli_solver_seqsuperlu.cxx\
