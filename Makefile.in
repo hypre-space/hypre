@@ -28,9 +28,7 @@ HYPRE_EXTRA_DIRS =\
  parcsr_linear_solvers\
  seq_linear_solvers/pamg\
  CI_struct_matrix_vector\
- CI_struct_linear_solvers\
- @HYPRE_PETSCLIBDIRS@
-
+ CI_struct_linear_solvers @HYPRE_PETSCLIBDIRS@
 
 #These are the directories for structured matrices
 HYPRE_STRUCT_DIRS =\
@@ -59,10 +57,9 @@ HYPRE_CIPETSCPILUT_DIRS =\
  utilities\
  CI_struct_matrix_vector\
  CI_struct_linear_solvers\
- @HYPRE_PETSCLIBDIRS@\
  matrix_matrix\
  distributed_linear_solvers/pilut\
- distributed_matrix
+ distributed_matrix @HYPRE_PETSCLIBDIRS@
 
 all:
 	@ \
