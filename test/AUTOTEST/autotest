@@ -209,9 +209,9 @@ do
         HYPRE_REMOTE_DIR="/usr/casc/hypre/sparc-sun-solaris2.7/AUTOTEST"
 	HYPRE_MACHINE_COMMANDS="-mns -b 1 -a 2 -cf"
         HYPRE_MESSAGE='SECONDARY[cc-5.0]'
-###	print_header
-###     ./autotest_test $HYPRE_MACHINE_COMMANDS
-	perform_test
+   	print_header
+        ./autotest_test $HYPRE_MACHINE_COMMANDS
+##	perform_test
         shift;;
     -compass | -compassmp) # obsolute
         HYPRE_ARCH="dec"
@@ -266,8 +266,8 @@ do
         HYPRE_MESSAGE='PRIMARY[insure++]'
         HYPRE_MACHINE_COMMANDS="$HYPRE_MACHINE_COMMANDS -v $HYPRE_MESSAGE"
  	print_header
- 	./autotest_test $HYPRE_MACHINE_COMMANDS
-###	perform_test
+## 	./autotest_test $HYPRE_MACHINE_COMMANDS
+   	perform_test
         shift;;
     -pengra)
         HYPRE_ARCH="linux"
@@ -285,9 +285,9 @@ do
         HYPRE_REMOTE_DIR="/usr/casc/hypre/sparc-sun-solaris2.7/AUTOTEST"
 	HYPRE_MACHINE_COMMANDS="-mnsa 1 -cf -q 2"
         HYPRE_MESSAGE='SECONDARY[purify]'
-###     print_header
-###     ./autotest_test $HYPRE_MACHINE_COMMANDS -v $HYPRE_MESSAGE
-	perform_test
+        print_header
+        ./autotest_test $HYPRE_MACHINE_COMMANDS -v $HYPRE_MESSAGE
+##	perform_test
         shift;;
     -red)
         HYPRE_ARCH="red"
@@ -342,8 +342,8 @@ do
 	HYPRE_MACHINE_COMMANDS="-mns -b 1 -a 2 -dcf"
         HYPRE_MESSAGE='PRIMARY[gcc-2.96]'
         print_header
-        ./autotest_test $HYPRE_MACHINE_COMMANDS -v $HYPRE_MESSAGE
-###	perform_test
+##      ./autotest_test $HYPRE_MACHINE_COMMANDS -v $HYPRE_MESSAGE
+	perform_test
         shift;;
     -tux71)
         HYPRE_ARCH="linux"
@@ -362,8 +362,8 @@ do
 	HYPRE_MACHINE_COMMANDS="-mns -a 2 -dcf"
         HYPRE_MESSAGE='SECONDARY[pgi-3.3]'
         print_header
-        ./autotest_test $HYPRE_MACHINE_COMMANDS -v $HYPRE_MESSAGE
-###	perform_test
+##      ./autotest_test $HYPRE_MACHINE_COMMANDS -v $HYPRE_MESSAGE
+	perform_test
         shift;;
     -vivid)
         HYPRE_ARCH="linux"

@@ -16,8 +16,8 @@
 CVSROOT=/home/casc/repository
 export CVSROOT
 
-#PATH=/usr/xpg4/bin:/opt/SUNWspro/bin:/usr/bin:/bin
-PATH=/bin:/usr/bin:/sbin:/usr/sbin
+PATH=/usr/xpg4/bin:/opt/SUNWspro/bin:/usr/bin:/bin # Solaris version
+#PATH=/bin:/usr/bin:/sbin:/usr/sbin                # Linux version
 PATH=${PATH}:/usr/X11R6/bin:/usr/local/bin:/usr/apps/bin
 export PATH
 
