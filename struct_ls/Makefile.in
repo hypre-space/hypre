@@ -57,6 +57,7 @@ FILES =\
  cyclic_reduction.c\
  general.c\
  hybrid.c\
+ jacobi.c\
  pcg.c\
  pcg_struct.c\
  pfmg.c\
@@ -84,6 +85,7 @@ FILES =\
  smg_solve.c\
  thread_wrappers.c\
  HYPRE_struct_hybrid.c\
+ HYPRE_struct_jacobi.c\
  HYPRE_struct_pfmg.c\
  HYPRE_struct_smg.c\
  HYPRE_struct_pcg.c\

@@ -100,6 +100,18 @@ int HYPRE_StructHybridGetDSCGNumIterations P((HYPRE_StructSolver solver , int *d
 int HYPRE_StructHybridGetPCGNumIterations P((HYPRE_StructSolver solver , int *pcg_num_its ));
 int HYPRE_StructHybridGetFinalRelativeResidualNorm P((HYPRE_StructSolver solver , double *norm ));
 
+/* HYPRE_struct_jacobi.c */
+int HYPRE_StructJacobiInitialize P((MPI_Comm comm , HYPRE_StructSolver *solver ));
+int HYPRE_StructJacobiFinalize P((HYPRE_StructSolver solver ));
+int HYPRE_StructJacobiSetup P((HYPRE_StructSolver solver , HYPRE_StructMatrix A , HYPRE_StructVector b , HYPRE_StructVector x ));
+int HYPRE_StructJacobiSolve P((HYPRE_StructSolver solver , HYPRE_StructMatrix A , HYPRE_StructVector b , HYPRE_StructVector x ));
+int HYPRE_StructJacobiSetTol P((HYPRE_StructSolver solver , double tol ));
+int HYPRE_StructJacobiSetMaxIter P((HYPRE_StructSolver solver , int max_iter ));
+int HYPRE_StructJacobiSetZeroGuess P((HYPRE_StructSolver solver ));
+int HYPRE_StructJacobiSetNonZeroGuess P((HYPRE_StructSolver solver ));
+int HYPRE_StructJacobiGetNumIterations P((HYPRE_StructSolver solver , int *num_iterations ));
+int HYPRE_StructJacobiGetFinalRelativeResidualNorm P((HYPRE_StructSolver solver , double *norm ));
+
 /* HYPRE_struct_pcg.c */
 int HYPRE_StructPCGInitialize P((MPI_Comm comm , HYPRE_StructSolver *solver ));
 int HYPRE_StructPCGFinalize P((HYPRE_StructSolver solver ));
@@ -180,6 +192,16 @@ int hypre_HybridGetPCGNumIterations P((void *hybrid_vdata , int *pcg_num_its ));
 int hypre_HybridGetFinalRelativeResidualNorm P((void *hybrid_vdata , double *final_rel_res_norm ));
 int hypre_HybridSetup P((void *hybrid_vdata , hypre_StructMatrix *A , hypre_StructVector *b , hypre_StructVector *x ));
 int hypre_HybridSolve P((void *hybrid_vdata , hypre_StructMatrix *A , hypre_StructVector *b , hypre_StructVector *x ));
+
+/* jacobi.c */
+void *hypre_JacobiInitialize P((MPI_Comm comm ));
+int hypre_JacobiFinalize P((void *jacobi_vdata ));
+int hypre_JacobiSetup P((void *jacobi_vdata , hypre_StructMatrix *A , hypre_StructVector *b , hypre_StructVector *x ));
+int hypre_JacobiSolve P((void *jacobi_vdata , hypre_StructMatrix *A , hypre_StructVector *b , hypre_StructVector *x ));
+int hypre_JacobiSetTol P((void *jacobi_vdata , double tol ));
+int hypre_JacobiSetMaxIter P((void *jacobi_vdata , int max_iter ));
+int hypre_JacobiSetZeroGuess P((void *jacobi_vdata , int zero_guess ));
+int hypre_JacobiSetTempVec P((void *jacobi_vdata , hypre_StructVector *t ));
 
 /* pcg.c */
 int hypre_PCGIdentitySetup P((void *vdata , void *A , void *b , void *x ));
