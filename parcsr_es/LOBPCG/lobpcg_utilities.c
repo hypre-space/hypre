@@ -11,12 +11,15 @@
 
 *********************************************************************EHEADER*/ 
 
+#include "HYPRE_config.h"
 #include <stdio.h> 
 #include <stdlib.h> 
 #include <stdarg.h> 
 #include <assert.h> 
 #include <string.h> 
+#if HAVE_MALLOC_H
 #include <malloc.h> 
+#endif
 #include <ctype.h> 
 
 #include "lobpcg.h" 
