@@ -47,6 +47,7 @@ main( int   argc,
    int                 build_funcs_arg_index;
    int                 solver_id;
    int                 ioutdat;
+   int                 poutdat;
    int                 debug_flag;
    int                 ierr = 0;
    int                 i,j,k; 
@@ -55,6 +56,8 @@ main( int   argc,
    int                 num_iterations; 
    int                 pcg_num_its; 
    int                 dscg_num_its; 
+   int                 pcg_max_its; 
+   int                 dscg_max_its; 
    double              cf_tol = 0.9;
    double              norm;
    double              final_res_norm;
@@ -159,7 +162,8 @@ main( int   argc,
 
    solver_id = 0;
 
-   ioutdat = 3;
+   ioutdat = 2;
+   poutdat = 1;
 
    /*-----------------------------------------------------------
     * Parse command line
@@ -431,7 +435,8 @@ main( int   argc,
 
    /* defaults for BoomerAMG */
    if (solver_id == 0 || solver_id == 1 || solver_id == 3 || solver_id == 5
-	|| solver_id == 9 || solver_id == 13 || solver_id == 14)
+	|| solver_id == 9 || solver_id == 13 || solver_id == 14
+ 	|| solver_id == 20)
    {
    strong_threshold = 0.25;
    trunc_factor = 0.;
@@ -597,6 +602,11 @@ main( int   argc,
       {
          arg_index++;
          ioutdat  = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-pout") == 0 )
+      {
+         arg_index++;
+         poutdat  = atoi(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-var") == 0 )
       {
@@ -1387,7 +1397,8 @@ main( int   argc,
 
    if (solver_id == 20)
    {
-      ioutdat = 2;
+      dscg_max_its = 1000;
+      pcg_max_its = 200;
       if (myid == 0) printf("Solver:  AMG\n");
       time_index = hypre_InitializeTiming("AMG_hybrid Setup");
       hypre_BeginTiming(time_index);
@@ -1396,9 +1407,10 @@ main( int   argc,
       HYPRE_ParCSRHybridSetTol(amg_solver, tol);
       HYPRE_ParCSRHybridSetConvergenceTol(amg_solver, cf_tol);
       HYPRE_ParCSRHybridSetLogging(amg_solver, ioutdat);
-      /* HYPRE_ParCSRHybridSetDSCGMaxIter(amg_solver, dscg_max_its );
-      HYPRE_ParCSRHybridSetPCGMaxIter(amg_solver, pcg_max_its ); */
-      /* HYPRE_ParCSRHybridSetCoarsenType(amg_solver, (hybrid*coarsen_type));
+      HYPRE_ParCSRHybridSetPLogging(amg_solver, poutdat);
+      HYPRE_ParCSRHybridSetDSCGMaxIter(amg_solver, dscg_max_its );
+      HYPRE_ParCSRHybridSetPCGMaxIter(amg_solver, pcg_max_its ); 
+      HYPRE_ParCSRHybridSetCoarsenType(amg_solver, (hybrid*coarsen_type));
       HYPRE_ParCSRHybridSetStrongThreshold(amg_solver, strong_threshold);
       HYPRE_ParCSRHybridSetTruncFactor(amg_solver, trunc_factor);
       HYPRE_ParCSRHybridSetNumGridSweeps(amg_solver, num_grid_sweeps);
@@ -1406,7 +1418,7 @@ main( int   argc,
       HYPRE_ParCSRHybridSetRelaxWeight(amg_solver, relax_weight);
       HYPRE_ParCSRHybridSetGridRelaxPoints(amg_solver, grid_relax_points);
       HYPRE_ParCSRHybridSetMaxLevels(amg_solver, max_levels);
-      HYPRE_ParCSRHybridSetMaxRowSum(amg_solver, max_row_sum); */
+      HYPRE_ParCSRHybridSetMaxRowSum(amg_solver, max_row_sum);
   
       HYPRE_ParCSRHybridSetup(amg_solver, parcsr_A, b, x);
 
@@ -1441,6 +1453,7 @@ main( int   argc,
          printf("\n");
       }
       HYPRE_ParCSRHybridDestroy(amg_solver);
+      hypre_TFree(smooth_option);
    }
    /*-----------------------------------------------------------
     * Solve the system using AMG
@@ -1639,12 +1652,11 @@ main( int   argc,
       HYPRE_PCGSetTol(pcg_solver, tol);
       HYPRE_PCGSetTwoNorm(pcg_solver, 1);
       HYPRE_PCGSetRelChange(pcg_solver, 0);
-      HYPRE_PCGSetLogging(pcg_solver, 2);
+      HYPRE_PCGSetLogging(pcg_solver, ioutdat);
  
       if (solver_id == 1)
       {
          /* use BoomerAMG as preconditioner */
-	 ioutdat = 1;
          if (myid == 0) printf("Solver: AMG-PCG\n");
          HYPRE_BoomerAMGCreate(&pcg_precond); 
          HYPRE_BoomerAMGSetTol(pcg_precond, pc_tol);
@@ -1652,7 +1664,7 @@ main( int   argc,
          HYPRE_BoomerAMGSetMeasureType(pcg_precond, measure_type);
          HYPRE_BoomerAMGSetStrongThreshold(pcg_precond, strong_threshold);
          HYPRE_BoomerAMGSetTruncFactor(pcg_precond, trunc_factor);
-         HYPRE_BoomerAMGSetLogging(pcg_precond, ioutdat, "driver.out.log");
+         HYPRE_BoomerAMGSetLogging(pcg_precond, poutdat, "driver.out.log");
          HYPRE_BoomerAMGSetMaxIter(pcg_precond, 1);
          HYPRE_BoomerAMGSetCycleType(pcg_precond, cycle_type);
          HYPRE_BoomerAMGSetNumGridSweeps(pcg_precond, num_grid_sweeps);
@@ -1696,7 +1708,7 @@ main( int   argc,
 	 HYPRE_ParaSailsCreate(MPI_COMM_WORLD, &pcg_precond);
          HYPRE_ParaSailsSetParams(pcg_precond, sai_threshold, max_levels);
          HYPRE_ParaSailsSetFilter(pcg_precond, sai_filter);
-         HYPRE_ParaSailsSetLogging(pcg_precond, ioutdat);
+         HYPRE_ParaSailsSetLogging(pcg_precond, poutdat);
 
          HYPRE_PCGSetPrecond(pcg_solver,
                              (HYPRE_PtrToSolverFcn) HYPRE_ParaSailsSolve,
@@ -1754,7 +1766,6 @@ main( int   argc,
       grid_relax_points[3] = hypre_CTAlloc(int, 1);
       grid_relax_points[3][0] = 0;
  
-	 ioutdat = 1;
          if (myid == 0) printf("Solver: GSMG-PCG\n");
          HYPRE_BoomerAMGCreate(&pcg_precond); 
          HYPRE_BoomerAMGSetGSMG(pcg_precond, 4); 
@@ -1763,7 +1774,7 @@ main( int   argc,
          HYPRE_BoomerAMGSetMeasureType(pcg_precond, measure_type);
          HYPRE_BoomerAMGSetStrongThreshold(pcg_precond, strong_threshold);
          HYPRE_BoomerAMGSetTruncFactor(pcg_precond, trunc_factor);
-         HYPRE_BoomerAMGSetLogging(pcg_precond, ioutdat, "driver.out.log");
+         HYPRE_BoomerAMGSetLogging(pcg_precond, poutdat, "driver.out.log");
          HYPRE_BoomerAMGSetMaxIter(pcg_precond, 1);
          HYPRE_BoomerAMGSetCycleType(pcg_precond, cycle_type);
          HYPRE_BoomerAMGSetNumGridSweeps(pcg_precond, num_grid_sweeps);
@@ -1890,21 +1901,20 @@ main( int   argc,
       HYPRE_GMRESSetKDim(pcg_solver, k_dim);
       HYPRE_GMRESSetMaxIter(pcg_solver, 1000);
       HYPRE_GMRESSetTol(pcg_solver, tol);
-      HYPRE_GMRESSetLogging(pcg_solver, 2);
+      HYPRE_GMRESSetLogging(pcg_solver, ioutdat);
  
       if (solver_id == 3)
       {
          /* use BoomerAMG as preconditioner */
          if (myid == 0) printf("Solver: AMG-GMRES\n");
 
-	 ioutdat = 1;
          HYPRE_BoomerAMGCreate(&pcg_precond); 
          HYPRE_BoomerAMGSetTol(pcg_precond, pc_tol);
          HYPRE_BoomerAMGSetCoarsenType(pcg_precond, (hybrid*coarsen_type));
          HYPRE_BoomerAMGSetMeasureType(pcg_precond, measure_type);
          HYPRE_BoomerAMGSetStrongThreshold(pcg_precond, strong_threshold);
          HYPRE_BoomerAMGSetTruncFactor(pcg_precond, trunc_factor);
-         HYPRE_BoomerAMGSetLogging(pcg_precond, ioutdat, "driver.out.log");
+         HYPRE_BoomerAMGSetLogging(pcg_precond, poutdat, "driver.out.log");
          HYPRE_BoomerAMGSetMaxIter(pcg_precond, 1);
          HYPRE_BoomerAMGSetCycleType(pcg_precond, cycle_type);
          HYPRE_BoomerAMGSetNumGridSweeps(pcg_precond, num_grid_sweeps);
@@ -1970,7 +1980,7 @@ main( int   argc,
 	 HYPRE_ParaSailsCreate(MPI_COMM_WORLD, &pcg_precond);
 	 HYPRE_ParaSailsSetParams(pcg_precond, sai_threshold, max_levels);
          HYPRE_ParaSailsSetFilter(pcg_precond, sai_filter);
-         HYPRE_ParaSailsSetLogging(pcg_precond, ioutdat);
+         HYPRE_ParaSailsSetLogging(pcg_precond, poutdat);
 	 HYPRE_ParaSailsSetSym(pcg_precond, 0);
 
          HYPRE_GMRESSetPrecond(pcg_solver,
@@ -2077,20 +2087,19 @@ main( int   argc,
       HYPRE_ParCSRBiCGSTABCreate(MPI_COMM_WORLD, &pcg_solver);
       HYPRE_BiCGSTABSetMaxIter(pcg_solver, 1000);
       HYPRE_BiCGSTABSetTol(pcg_solver, tol);
-      HYPRE_BiCGSTABSetLogging(pcg_solver, 2);
+      HYPRE_BiCGSTABSetLogging(pcg_solver, ioutdat);
  
       if (solver_id == 9)
       {
          /* use BoomerAMG as preconditioner */
          if (myid == 0) printf("Solver: AMG-BiCGSTAB\n");
-         ioutdat = 1;
          HYPRE_BoomerAMGCreate(&pcg_precond); 
          HYPRE_BoomerAMGSetTol(pcg_precond, pc_tol);
          HYPRE_BoomerAMGSetCoarsenType(pcg_precond, (hybrid*coarsen_type));
          HYPRE_BoomerAMGSetMeasureType(pcg_precond, measure_type);
          HYPRE_BoomerAMGSetStrongThreshold(pcg_precond, strong_threshold);
          HYPRE_BoomerAMGSetTruncFactor(pcg_precond, trunc_factor);
-         HYPRE_BoomerAMGSetLogging(pcg_precond, ioutdat, "driver.out.log");
+         HYPRE_BoomerAMGSetLogging(pcg_precond, poutdat, "driver.out.log");
          HYPRE_BoomerAMGSetMaxIter(pcg_precond, 1);
          HYPRE_BoomerAMGSetCycleType(pcg_precond, cycle_type);
          HYPRE_BoomerAMGSetNumGridSweeps(pcg_precond, num_grid_sweeps);
@@ -2231,20 +2240,19 @@ main( int   argc,
       HYPRE_ParCSRCGNRCreate(MPI_COMM_WORLD, &pcg_solver);
       HYPRE_CGNRSetMaxIter(pcg_solver, 1000);
       HYPRE_CGNRSetTol(pcg_solver, tol);
-      HYPRE_CGNRSetLogging(pcg_solver, 2);
+      HYPRE_CGNRSetLogging(pcg_solver, ioutdat);
  
       if (solver_id == 5)
       {
          /* use BoomerAMG as preconditioner */
          if (myid == 0) printf("Solver: AMG-CGNR\n");
-         ioutdat = 1;
          HYPRE_BoomerAMGCreate(&pcg_precond); 
          HYPRE_BoomerAMGSetTol(pcg_precond, pc_tol);
          HYPRE_BoomerAMGSetCoarsenType(pcg_precond, (hybrid*coarsen_type));
          HYPRE_BoomerAMGSetMeasureType(pcg_precond, measure_type);
          HYPRE_BoomerAMGSetStrongThreshold(pcg_precond, strong_threshold);
          HYPRE_BoomerAMGSetTruncFactor(pcg_precond, trunc_factor);
-         HYPRE_BoomerAMGSetLogging(pcg_precond, ioutdat, "driver.out.log");
+         HYPRE_BoomerAMGSetLogging(pcg_precond, poutdat, "driver.out.log");
          HYPRE_BoomerAMGSetMaxIter(pcg_precond, 1);
          HYPRE_BoomerAMGSetCycleType(pcg_precond, cycle_type);
          HYPRE_BoomerAMGSetNumGridSweeps(pcg_precond, num_grid_sweeps);
