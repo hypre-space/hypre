@@ -126,7 +126,6 @@ main( int   argc,
    struct SIDL_int__array* Hypre_num_grid_sweeps=NULL;
    struct SIDL_int__array* Hypre_grid_relax_type=NULL;
    struct SIDL_double__array* Hypre_relax_weight=NULL;
-   struct SIDL_int__array* Hypre_smooth_option=NULL;
    struct SIDL_int__array* Hypre_grid_relax_points=NULL;
    struct SIDL_int__array* Hypre_dof_func=NULL;
 
@@ -147,8 +146,8 @@ main( int   argc,
    int     *grid_relax_type;   
    int    **grid_relax_points;
    int	    smooth_lev;   
-   int	    smooth_rlx = 8;
-   int	   *smooth_option;
+   int	    smooth_type = 6;
+   int	    smooth_num_levels = 0;
    int      relax_default;
    int      smooth_num_sweep = 1;
    int      num_sweep = 1;
@@ -204,11 +203,6 @@ main( int   argc,
  
    print_usage = 0;
    arg_index = 1;
-   smooth_option = hypre_CTAlloc(int, max_levels);
-   for (i=0; i < max_levels; i++)
-   {
-        smooth_option[i] = -1;
-   }
 
    while ( (arg_index < argc) && (!print_usage) )
    {
@@ -407,13 +401,15 @@ main( int   argc,
          arg_index++;
          relax_default = atoi(argv[arg_index++]);
       }
-      else if ( strcmp(argv[arg_index], "-smooth") == 0 )
+      else if ( strcmp(argv[arg_index], "-smtype") == 0 )
       {
          arg_index++;
-         smooth_lev = atoi(argv[arg_index++]);
-         smooth_rlx = atoi(argv[arg_index++]);
-         for (i=0; i < smooth_lev; i++)
-            smooth_option[i] = smooth_rlx;
+         smooth_type = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-smlv") == 0 )
+      {
+         arg_index++;
+         smooth_num_levels = atoi(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-mxl") == 0 )
       {
@@ -1773,12 +1769,8 @@ main( int   argc,
         for ( i=0; i<max_levels; ++i )
            SIDL_double__array_set1( Hypre_relax_weight, i, relax_weight[i] );
       Hypre_ParAMG_SetDoubleArrayParameter( Hypre_AMG, "RelaxWeight", Hypre_relax_weight );
-        dimsl[0] = 0;   dimsu[0] = max_levels;
-        Hypre_smooth_option = SIDL_int__array_create1d( max_levels );
-        for ( i=0; i<max_levels; ++i )
-           SIDL_int__array_set1( Hypre_smooth_option, i, smooth_option[i] );
-      Hypre_ParAMG_SetIntArrayParameter( Hypre_AMG, "SmoothOption", Hypre_smooth_option );
-      Hypre_ParAMG_SetIntParameter( Hypre_AMG, "SmoothNumSweep", smooth_num_sweep);
+      Hypre_ParAMG_SetIntParameter( Hypre_AMG, "SmoothType", smooth_type );
+      Hypre_ParAMG_SetIntParameter( Hypre_AMG, "SmoothNumSweeps", smooth_num_sweep);
         dimsl[0] = 0;   dimsl[1] = 0;   dimsu[0] = 4;   dimsu[1] = 4;
         Hypre_grid_relax_points = SIDL_int__array_createRow( 2, dimsl, dimsu );
         for ( i=0; i<4; ++i ) for ( j=0; j<4; ++j )
@@ -1856,8 +1848,8 @@ main( int   argc,
       HYPRE_BoomerAMGSetNumGridSweeps(amg_solver, num_grid_sweeps);
       HYPRE_BoomerAMGSetGridRelaxType(amg_solver, grid_relax_type);
       HYPRE_BoomerAMGSetRelaxWeight(amg_solver, relax_weight);
-      HYPRE_BoomerAMGSetSmoothOption(amg_solver, smooth_option);
-      HYPRE_BoomerAMGSetSmoothNumSweep(amg_solver, smooth_num_sweep);
+      HYPRE_BoomerAMGSetSmoothType(amg_solver, smooth_type);
+      HYPRE_BoomerAMGSetSmoothNumSweeps(amg_solver, smooth_num_sweep);
       HYPRE_BoomerAMGSetGridRelaxPoints(amg_solver, grid_relax_points);
       HYPRE_BoomerAMGSetMaxLevels(amg_solver, max_levels);
       HYPRE_BoomerAMGSetMaxRowSum(amg_solver, max_row_sum);
@@ -1949,8 +1941,8 @@ main( int   argc,
          HYPRE_BoomerAMGSetNumGridSweeps(pcg_precond, num_grid_sweeps);
          HYPRE_BoomerAMGSetGridRelaxType(pcg_precond, grid_relax_type);
          HYPRE_BoomerAMGSetRelaxWeight(pcg_precond, relax_weight);
-         HYPRE_BoomerAMGSetSmoothOption(pcg_precond, smooth_option);
-         HYPRE_BoomerAMGSetSmoothNumSweep(pcg_precond, smooth_num_sweep);
+         HYPRE_BoomerAMGSetSmoothType(pcg_precond, smooth_type);
+         HYPRE_BoomerAMGSetSmoothNumSweeps(pcg_precond, smooth_num_sweep);
          HYPRE_BoomerAMGSetGridRelaxPoints(pcg_precond, grid_relax_points);
          HYPRE_BoomerAMGSetMaxLevels(pcg_precond, max_levels);
          HYPRE_BoomerAMGSetMaxRowSum(pcg_precond, max_row_sum);
@@ -1990,7 +1982,6 @@ main( int   argc,
                              (HYPRE_PtrToSolverFcn) HYPRE_ParCSRDiagScale,
                              (HYPRE_PtrToSolverFcn) HYPRE_ParCSRDiagScaleSetup,
                              pcg_precond);
-         hypre_TFree(smooth_option);
 #endif /* USE_BABEL_INTERFACE */
 
       }
@@ -2008,7 +1999,6 @@ main( int   argc,
                              (HYPRE_PtrToSolverFcn) HYPRE_ParaSailsSolve,
                              (HYPRE_PtrToSolverFcn) HYPRE_ParaSailsSetup,
                              pcg_precond);
-         hypre_TFree(smooth_option);
       }
       else if (solver_id == 12)
       {
@@ -2025,7 +2015,6 @@ main( int   argc,
                              (HYPRE_PtrToSolverFcn) HYPRE_SchwarzSolve,
                              (HYPRE_PtrToSolverFcn) HYPRE_SchwarzSetup,
                              pcg_precond);
-         hypre_TFree(smooth_option);
       }
       else if (solver_id == 43)
       {
@@ -2045,7 +2034,6 @@ main( int   argc,
                              (HYPRE_PtrToSolverFcn) HYPRE_EuclidSolve,
                              (HYPRE_PtrToSolverFcn) HYPRE_EuclidSetup,
                              pcg_precond);
-         hypre_TFree(smooth_option);
       }
  
 #ifdef USE_BABEL_INTERFACE
@@ -2196,8 +2184,8 @@ main( int   argc,
          HYPRE_BoomerAMGSetNumGridSweeps(pcg_precond, num_grid_sweeps);
          HYPRE_BoomerAMGSetGridRelaxType(pcg_precond, grid_relax_type);
          HYPRE_BoomerAMGSetRelaxWeight(pcg_precond, relax_weight);
-         HYPRE_BoomerAMGSetSmoothOption(pcg_precond, smooth_option);
-         HYPRE_BoomerAMGSetSmoothNumSweep(pcg_precond, smooth_num_sweep);
+         HYPRE_BoomerAMGSetSmoothType(pcg_precond, smooth_type);
+         HYPRE_BoomerAMGSetSmoothNumSweeps(pcg_precond, smooth_num_sweep);
          HYPRE_BoomerAMGSetGridRelaxPoints(pcg_precond, grid_relax_points);
          HYPRE_BoomerAMGSetMaxLevels(pcg_precond, max_levels);
          HYPRE_BoomerAMGSetMaxRowSum(pcg_precond, max_row_sum);
@@ -2222,7 +2210,6 @@ main( int   argc,
                                (HYPRE_PtrToSolverFcn) HYPRE_ParCSRDiagScale,
                                (HYPRE_PtrToSolverFcn) HYPRE_ParCSRDiagScaleSetup,
                                pcg_precond);
-         hypre_TFree(smooth_option);
       }
       else if (solver_id == 7)
       {
@@ -2238,7 +2225,6 @@ main( int   argc,
                                (HYPRE_PtrToSolverFcn) HYPRE_ParCSRPilutSolve,
                                (HYPRE_PtrToSolverFcn) HYPRE_ParCSRPilutSetup,
                                pcg_precond);
-         hypre_TFree(smooth_option);
 
          if (drop_tol >= 0 )
             HYPRE_ParCSRPilutSetDropTolerance( pcg_precond,
@@ -2263,7 +2249,6 @@ main( int   argc,
                                (HYPRE_PtrToSolverFcn) HYPRE_ParaSailsSolve,
                                (HYPRE_PtrToSolverFcn) HYPRE_ParaSailsSetup,
                                pcg_precond);
-         hypre_TFree(smooth_option);
       }
       else if (solver_id == 44)
       {
@@ -2283,7 +2268,6 @@ main( int   argc,
                                 (HYPRE_PtrToSolverFcn) HYPRE_EuclidSolve,
                                 (HYPRE_PtrToSolverFcn) HYPRE_EuclidSetup,
                                 pcg_precond);
-         hypre_TFree(smooth_option);
       }
  
       HYPRE_GMRESGetPrecond(pcg_solver, &pcg_precond_gotten);
@@ -2384,8 +2368,8 @@ main( int   argc,
          HYPRE_BoomerAMGSetNumGridSweeps(pcg_precond, num_grid_sweeps);
          HYPRE_BoomerAMGSetGridRelaxType(pcg_precond, grid_relax_type);
          HYPRE_BoomerAMGSetRelaxWeight(pcg_precond, relax_weight);
-         HYPRE_BoomerAMGSetSmoothOption(pcg_precond, smooth_option);
-         HYPRE_BoomerAMGSetSmoothNumSweep(pcg_precond, smooth_num_sweep);
+         HYPRE_BoomerAMGSetSmoothType(pcg_precond, smooth_type);
+         HYPRE_BoomerAMGSetSmoothNumSweeps(pcg_precond, smooth_num_sweep);
          HYPRE_BoomerAMGSetGridRelaxPoints(pcg_precond, grid_relax_points);
          HYPRE_BoomerAMGSetMaxLevels(pcg_precond, max_levels);
          HYPRE_BoomerAMGSetMaxRowSum(pcg_precond, max_row_sum);
@@ -2410,7 +2394,6 @@ main( int   argc,
                                   (HYPRE_PtrToSolverFcn) HYPRE_ParCSRDiagScale,
                                   (HYPRE_PtrToSolverFcn) HYPRE_ParCSRDiagScaleSetup,
                                   pcg_precond);
-         hypre_TFree(smooth_option);
       }
       else if (solver_id == 11)
       {
@@ -2426,7 +2409,6 @@ main( int   argc,
                                   (HYPRE_PtrToSolverFcn) HYPRE_ParCSRPilutSolve,
                                   (HYPRE_PtrToSolverFcn) HYPRE_ParCSRPilutSetup,
                                   pcg_precond);
-         hypre_TFree(smooth_option);
 
          if (drop_tol >= 0 )
             HYPRE_ParCSRPilutSetDropTolerance( pcg_precond,
@@ -2454,7 +2436,6 @@ main( int   argc,
                                   (HYPRE_PtrToSolverFcn) HYPRE_EuclidSolve,
                                   (HYPRE_PtrToSolverFcn) HYPRE_EuclidSetup,
                                   pcg_precond);
-         hypre_TFree(smooth_option);
       }
  
       HYPRE_BiCGSTABSetup(pcg_solver, (HYPRE_Matrix)parcsr_A, (HYPRE_Vector)b, (HYPRE_Vector)x);
@@ -2540,8 +2521,8 @@ main( int   argc,
          HYPRE_BoomerAMGSetNumGridSweeps(pcg_precond, num_grid_sweeps);
          HYPRE_BoomerAMGSetGridRelaxType(pcg_precond, grid_relax_type);
          HYPRE_BoomerAMGSetRelaxWeight(pcg_precond, relax_weight);
-         HYPRE_BoomerAMGSetSmoothOption(pcg_precond, smooth_option);
-         HYPRE_BoomerAMGSetSmoothNumSweep(pcg_precond, smooth_num_sweep);
+         HYPRE_BoomerAMGSetSmoothType(pcg_precond, smooth_type);
+         HYPRE_BoomerAMGSetSmoothNumSweeps(pcg_precond, smooth_num_sweep);
          HYPRE_BoomerAMGSetGridRelaxPoints(pcg_precond, grid_relax_points);
          HYPRE_BoomerAMGSetMaxLevels(pcg_precond, max_levels);
          HYPRE_BoomerAMGSetMaxRowSum(pcg_precond, max_row_sum);
@@ -2568,7 +2549,6 @@ main( int   argc,
                               (HYPRE_PtrToSolverFcn) HYPRE_ParCSRDiagScale,
                               (HYPRE_PtrToSolverFcn) HYPRE_ParCSRDiagScaleSetup,
                               pcg_precond);
-         hypre_TFree(smooth_option);
       }
  
       HYPRE_CGNRGetPrecond(pcg_solver, &pcg_precond_gotten);
@@ -2645,8 +2625,6 @@ main( int   argc,
       SIDL_int__array_deleteReference( Hypre_grid_relax_type );
    if( Hypre_relax_weight )
       SIDL_double__array_deleteReference( Hypre_relax_weight );
-   if( Hypre_smooth_option )
-      SIDL_int__array_deleteReference( Hypre_smooth_option );
    if( Hypre_grid_relax_points )
       SIDL_int__array_deleteReference( Hypre_grid_relax_points );
    if( Hypre_dof_func )

@@ -2,13 +2,16 @@
  * File:          Hypre_IOR.h
  * Symbol:        Hypre-v0.1.5
  * Symbol Type:   package
- * Babel Version: 0.6.3
- * SIDL Created:  20021001 09:48:41 PDT
- * Generated:     20021001 09:48:48 PDT
+ * Babel Version: 0.7.4
+ * SIDL Created:  20021101 15:14:27 PST
+ * Generated:     20021101 15:14:30 PST
  * Description:   Intermediate Object Representation for Hypre
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
+ * babel-version = 0.7.4
+ * source-line   = 28
+ * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 
 #ifndef included_Hypre_IOR_h

@@ -2,13 +2,16 @@
  * File:          Hypre_StructToIJMatrix_Skel.c
  * Symbol:        Hypre.StructToIJMatrix-v0.1.5
  * Symbol Type:   class
- * Babel Version: 0.6.3
- * SIDL Created:  20021001 09:48:43 PDT
- * Generated:     20021001 09:48:53 PDT
+ * Babel Version: 0.7.4
+ * SIDL Created:  20021101 15:14:28 PST
+ * Generated:     20021101 15:14:35 PST
  * Description:   Server-side glue code for Hypre.StructToIJMatrix
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
+ * babel-version = 0.7.4
+ * source-line   = 445
+ * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 
 #include "Hypre_StructToIJMatrix_IOR.h"
@@ -24,6 +27,20 @@ impl_Hypre_StructToIJMatrix__dtor(
   Hypre_StructToIJMatrix);
 
 extern int32_t
+impl_Hypre_StructToIJMatrix_SetIJMatrix(
+  Hypre_StructToIJMatrix,
+  Hypre_IJBuildMatrix);
+
+extern int32_t
+impl_Hypre_StructToIJMatrix_SetCommunicator(
+  Hypre_StructToIJMatrix,
+  void*);
+
+extern int32_t
+impl_Hypre_StructToIJMatrix_Initialize(
+  Hypre_StructToIJMatrix);
+
+extern int32_t
 impl_Hypre_StructToIJMatrix_Assemble(
   Hypre_StructToIJMatrix);
 
@@ -33,8 +50,22 @@ impl_Hypre_StructToIJMatrix_GetObject(
   SIDL_BaseInterface*);
 
 extern int32_t
-impl_Hypre_StructToIJMatrix_Initialize(
-  Hypre_StructToIJMatrix);
+impl_Hypre_StructToIJMatrix_SetGrid(
+  Hypre_StructToIJMatrix,
+  Hypre_StructGrid);
+
+extern int32_t
+impl_Hypre_StructToIJMatrix_SetStencil(
+  Hypre_StructToIJMatrix,
+  Hypre_StructStencil);
+
+extern int32_t
+impl_Hypre_StructToIJMatrix_SetValues(
+  Hypre_StructToIJMatrix,
+  struct SIDL_int__array*,
+  int32_t,
+  struct SIDL_int__array*,
+  struct SIDL_double__array*);
 
 extern int32_t
 impl_Hypre_StructToIJMatrix_SetBoxValues(
@@ -46,59 +77,31 @@ impl_Hypre_StructToIJMatrix_SetBoxValues(
   struct SIDL_double__array*);
 
 extern int32_t
-impl_Hypre_StructToIJMatrix_SetCommunicator(
-  Hypre_StructToIJMatrix,
-  void*);
-
-extern int32_t
-impl_Hypre_StructToIJMatrix_SetGrid(
-  Hypre_StructToIJMatrix,
-  Hypre_StructGrid);
-
-extern int32_t
-impl_Hypre_StructToIJMatrix_SetIJMatrix(
-  Hypre_StructToIJMatrix,
-  Hypre_IJBuildMatrix);
-
-extern int32_t
 impl_Hypre_StructToIJMatrix_SetNumGhost(
   Hypre_StructToIJMatrix,
   struct SIDL_int__array*);
-
-extern int32_t
-impl_Hypre_StructToIJMatrix_SetStencil(
-  Hypre_StructToIJMatrix,
-  Hypre_StructStencil);
 
 extern int32_t
 impl_Hypre_StructToIJMatrix_SetSymmetric(
   Hypre_StructToIJMatrix,
   int32_t);
 
-extern int32_t
-impl_Hypre_StructToIJMatrix_SetValues(
-  Hypre_StructToIJMatrix,
-  struct SIDL_int__array*,
-  int32_t,
-  struct SIDL_int__array*,
-  struct SIDL_double__array*);
-
 void
 Hypre_StructToIJMatrix__set_epv(struct Hypre_StructToIJMatrix__epv *epv)
 {
   epv->f__ctor = impl_Hypre_StructToIJMatrix__ctor;
   epv->f__dtor = impl_Hypre_StructToIJMatrix__dtor;
+  epv->f_SetIJMatrix = impl_Hypre_StructToIJMatrix_SetIJMatrix;
+  epv->f_SetCommunicator = impl_Hypre_StructToIJMatrix_SetCommunicator;
+  epv->f_Initialize = impl_Hypre_StructToIJMatrix_Initialize;
+  epv->f_Assemble = impl_Hypre_StructToIJMatrix_Assemble;
+  epv->f_GetObject = impl_Hypre_StructToIJMatrix_GetObject;
+  epv->f_SetGrid = impl_Hypre_StructToIJMatrix_SetGrid;
+  epv->f_SetStencil = impl_Hypre_StructToIJMatrix_SetStencil;
+  epv->f_SetValues = impl_Hypre_StructToIJMatrix_SetValues;
   epv->f_SetBoxValues = impl_Hypre_StructToIJMatrix_SetBoxValues;
   epv->f_SetNumGhost = impl_Hypre_StructToIJMatrix_SetNumGhost;
-  epv->f_SetStencil = impl_Hypre_StructToIJMatrix_SetStencil;
-  epv->f_SetGrid = impl_Hypre_StructToIJMatrix_SetGrid;
-  epv->f_SetCommunicator = impl_Hypre_StructToIJMatrix_SetCommunicator;
-  epv->f_GetObject = impl_Hypre_StructToIJMatrix_GetObject;
   epv->f_SetSymmetric = impl_Hypre_StructToIJMatrix_SetSymmetric;
-  epv->f_SetValues = impl_Hypre_StructToIJMatrix_SetValues;
-  epv->f_SetIJMatrix = impl_Hypre_StructToIJMatrix_SetIJMatrix;
-  epv->f_Assemble = impl_Hypre_StructToIJMatrix_Assemble;
-  epv->f_Initialize = impl_Hypre_StructToIJMatrix_Initialize;
 }
 
 struct Hypre_StructToIJMatrix__data*

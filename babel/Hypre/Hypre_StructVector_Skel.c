@@ -2,13 +2,16 @@
  * File:          Hypre_StructVector_Skel.c
  * Symbol:        Hypre.StructVector-v0.1.5
  * Symbol Type:   class
- * Babel Version: 0.6.3
- * SIDL Created:  20021001 09:48:43 PDT
- * Generated:     20021001 09:48:52 PDT
+ * Babel Version: 0.7.4
+ * SIDL Created:  20021101 15:14:28 PST
+ * Generated:     20021101 15:14:36 PST
  * Description:   Server-side glue code for Hypre.StructVector
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
+ * babel-version = 0.7.4
+ * source-line   = 428
+ * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 
 #include "Hypre_StructVector_IOR.h"
@@ -24,60 +27,22 @@ impl_Hypre_StructVector__dtor(
   Hypre_StructVector);
 
 extern int32_t
-impl_Hypre_StructVector_Assemble(
-  Hypre_StructVector);
-
-extern int32_t
-impl_Hypre_StructVector_Axpy(
+impl_Hypre_StructVector_SetCommunicator(
   Hypre_StructVector,
-  double,
-  Hypre_Vector);
-
-extern int32_t
-impl_Hypre_StructVector_Clear(
-  Hypre_StructVector);
-
-extern int32_t
-impl_Hypre_StructVector_Clone(
-  Hypre_StructVector,
-  Hypre_Vector*);
-
-extern int32_t
-impl_Hypre_StructVector_Copy(
-  Hypre_StructVector,
-  Hypre_Vector);
-
-extern int32_t
-impl_Hypre_StructVector_Dot(
-  Hypre_StructVector,
-  Hypre_Vector,
-  double*);
-
-extern int32_t
-impl_Hypre_StructVector_GetObject(
-  Hypre_StructVector,
-  SIDL_BaseInterface*);
+  void*);
 
 extern int32_t
 impl_Hypre_StructVector_Initialize(
   Hypre_StructVector);
 
 extern int32_t
-impl_Hypre_StructVector_Scale(
-  Hypre_StructVector,
-  double);
+impl_Hypre_StructVector_Assemble(
+  Hypre_StructVector);
 
 extern int32_t
-impl_Hypre_StructVector_SetBoxValues(
+impl_Hypre_StructVector_GetObject(
   Hypre_StructVector,
-  struct SIDL_int__array*,
-  struct SIDL_int__array*,
-  struct SIDL_double__array*);
-
-extern int32_t
-impl_Hypre_StructVector_SetCommunicator(
-  Hypre_StructVector,
-  void*);
+  SIDL_BaseInterface*);
 
 extern int32_t
 impl_Hypre_StructVector_SetGrid(
@@ -95,24 +60,62 @@ impl_Hypre_StructVector_SetValue(
   struct SIDL_int__array*,
   double);
 
+extern int32_t
+impl_Hypre_StructVector_SetBoxValues(
+  Hypre_StructVector,
+  struct SIDL_int__array*,
+  struct SIDL_int__array*,
+  struct SIDL_double__array*);
+
+extern int32_t
+impl_Hypre_StructVector_Clear(
+  Hypre_StructVector);
+
+extern int32_t
+impl_Hypre_StructVector_Copy(
+  Hypre_StructVector,
+  Hypre_Vector);
+
+extern int32_t
+impl_Hypre_StructVector_Clone(
+  Hypre_StructVector,
+  Hypre_Vector*);
+
+extern int32_t
+impl_Hypre_StructVector_Scale(
+  Hypre_StructVector,
+  double);
+
+extern int32_t
+impl_Hypre_StructVector_Dot(
+  Hypre_StructVector,
+  Hypre_Vector,
+  double*);
+
+extern int32_t
+impl_Hypre_StructVector_Axpy(
+  Hypre_StructVector,
+  double,
+  Hypre_Vector);
+
 void
 Hypre_StructVector__set_epv(struct Hypre_StructVector__epv *epv)
 {
   epv->f__ctor = impl_Hypre_StructVector__ctor;
   epv->f__dtor = impl_Hypre_StructVector__dtor;
-  epv->f_SetValue = impl_Hypre_StructVector_SetValue;
-  epv->f_Clear = impl_Hypre_StructVector_Clear;
-  epv->f_Clone = impl_Hypre_StructVector_Clone;
-  epv->f_SetBoxValues = impl_Hypre_StructVector_SetBoxValues;
+  epv->f_SetCommunicator = impl_Hypre_StructVector_SetCommunicator;
+  epv->f_Initialize = impl_Hypre_StructVector_Initialize;
+  epv->f_Assemble = impl_Hypre_StructVector_Assemble;
+  epv->f_GetObject = impl_Hypre_StructVector_GetObject;
+  epv->f_SetGrid = impl_Hypre_StructVector_SetGrid;
   epv->f_SetStencil = impl_Hypre_StructVector_SetStencil;
+  epv->f_SetValue = impl_Hypre_StructVector_SetValue;
+  epv->f_SetBoxValues = impl_Hypre_StructVector_SetBoxValues;
+  epv->f_Clear = impl_Hypre_StructVector_Clear;
+  epv->f_Copy = impl_Hypre_StructVector_Copy;
+  epv->f_Clone = impl_Hypre_StructVector_Clone;
   epv->f_Scale = impl_Hypre_StructVector_Scale;
   epv->f_Dot = impl_Hypre_StructVector_Dot;
-  epv->f_SetGrid = impl_Hypre_StructVector_SetGrid;
-  epv->f_SetCommunicator = impl_Hypre_StructVector_SetCommunicator;
-  epv->f_GetObject = impl_Hypre_StructVector_GetObject;
-  epv->f_Copy = impl_Hypre_StructVector_Copy;
-  epv->f_Assemble = impl_Hypre_StructVector_Assemble;
-  epv->f_Initialize = impl_Hypre_StructVector_Initialize;
   epv->f_Axpy = impl_Hypre_StructVector_Axpy;
 }
 

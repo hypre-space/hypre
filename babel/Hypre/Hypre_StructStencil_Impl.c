@@ -2,13 +2,16 @@
  * File:          Hypre_StructStencil_Impl.c
  * Symbol:        Hypre.StructStencil-v0.1.5
  * Symbol Type:   class
- * Babel Version: 0.6.3
- * SIDL Created:  20021001 09:48:43 PDT
- * Generated:     20021001 09:48:53 PDT
+ * Babel Version: 0.7.4
+ * SIDL Created:  20021101 15:14:28 PST
+ * Generated:     20021101 15:14:36 PST
  * Description:   Server-side implementation for Hypre.StructStencil
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
+ * babel-version = 0.7.4
+ * source-line   = 399
+ * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 
 /*
@@ -63,7 +66,7 @@ impl_Hypre_StructStencil__dtor(
 }
 
 /*
- * Method:  SetDimension
+ * Method:  SetDimension[]
  */
 
 #undef __FUNC__
@@ -71,8 +74,7 @@ impl_Hypre_StructStencil__dtor(
 
 int32_t
 impl_Hypre_StructStencil_SetDimension(
-  Hypre_StructStencil self,
-  int32_t dim)
+  Hypre_StructStencil self, int32_t dim)
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.StructStencil.SetDimension) */
   /* Insert the implementation of the SetDimension method here... */
@@ -80,25 +82,7 @@ impl_Hypre_StructStencil_SetDimension(
 }
 
 /*
- * Method:  SetElement
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_Hypre_StructStencil_SetElement"
-
-int32_t
-impl_Hypre_StructStencil_SetElement(
-  Hypre_StructStencil self,
-  int32_t index,
-  struct SIDL_int__array* offset)
-{
-  /* DO-NOT-DELETE splicer.begin(Hypre.StructStencil.SetElement) */
-  /* Insert the implementation of the SetElement method here... */
-  /* DO-NOT-DELETE splicer.end(Hypre.StructStencil.SetElement) */
-}
-
-/*
- * Method:  SetSize
+ * Method:  SetSize[]
  */
 
 #undef __FUNC__
@@ -106,10 +90,25 @@ impl_Hypre_StructStencil_SetElement(
 
 int32_t
 impl_Hypre_StructStencil_SetSize(
-  Hypre_StructStencil self,
-  int32_t size)
+  Hypre_StructStencil self, int32_t size)
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.StructStencil.SetSize) */
   /* Insert the implementation of the SetSize method here... */
   /* DO-NOT-DELETE splicer.end(Hypre.StructStencil.SetSize) */
+}
+
+/*
+ * Method:  SetElement[]
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_Hypre_StructStencil_SetElement"
+
+int32_t
+impl_Hypre_StructStencil_SetElement(
+  Hypre_StructStencil self, int32_t index, struct SIDL_int__array* offset)
+{
+  /* DO-NOT-DELETE splicer.begin(Hypre.StructStencil.SetElement) */
+  /* Insert the implementation of the SetElement method here... */
+  /* DO-NOT-DELETE splicer.end(Hypre.StructStencil.SetElement) */
 }

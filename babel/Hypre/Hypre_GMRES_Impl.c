@@ -2,13 +2,16 @@
  * File:          Hypre_GMRES_Impl.c
  * Symbol:        Hypre.GMRES-v0.1.5
  * Symbol Type:   class
- * Babel Version: 0.6.3
- * SIDL Created:  20021001 09:48:43 PDT
- * Generated:     20021001 09:48:52 PDT
+ * Babel Version: 0.7.4
+ * SIDL Created:  20021101 15:14:28 PST
+ * Generated:     20021101 15:14:35 PST
  * Description:   Server-side implementation for Hypre.GMRES
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
+ * babel-version = 0.7.4
+ * source-line   = 465
+ * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 
 /*
@@ -140,7 +143,273 @@ impl_Hypre_GMRES__dtor(
 }
 
 /*
- * Method:  Apply
+ * Method:  SetCommunicator[]
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_Hypre_GMRES_SetCommunicator"
+
+int32_t
+impl_Hypre_GMRES_SetCommunicator(
+  Hypre_GMRES self, void* comm)
+{
+  /* DO-NOT-DELETE splicer.begin(Hypre.GMRES.SetCommunicator) */
+  /* Insert the implementation of the SetCommunicator method here... */
+   int ierr = 0;
+   struct Hypre_GMRES__data * data;
+   data = Hypre_GMRES__get_data( self );
+   data -> comm = (MPI_Comm) comm;
+
+   return ierr;
+  /* DO-NOT-DELETE splicer.end(Hypre.GMRES.SetCommunicator) */
+}
+
+/*
+ * Method:  GetDoubleValue[]
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_Hypre_GMRES_GetDoubleValue"
+
+int32_t
+impl_Hypre_GMRES_GetDoubleValue(
+  Hypre_GMRES self, const char* name, double* value)
+{
+  /* DO-NOT-DELETE splicer.begin(Hypre.GMRES.GetDoubleValue) */
+  /* Insert the implementation of the GetDoubleValue method here... */
+   /* >>> We should add a Get for everything in SetParameter.
+      There are two values for each parameter: the Hypre cache, and the HYPRE value.
+      The cache gets copied to HYPRE when Apply is called.  What we want to return
+      is the cache value if the corresponding Set had been called, otherwise the
+      real (HYPRE) value.  Assuming the HYPRE interface is not used simultaneously
+      with the Babel interface, it is sufficient to initialize the cache with
+      whatever HYPRE is using. */
+   int ierr = 0;
+   HYPRE_Solver solver;
+   struct Hypre_GMRES__data * data;
+
+   data = Hypre_GMRES__get_data( self );
+   assert( data->solver != NULL );
+   solver = data->solver;
+
+   if ( strcmp(name,"FinalRelativeResidualNorm")==0 ||
+        strcmp(name,"Final Relative Residual Norm")==0 ) {
+      ierr += HYPRE_GMRESGetFinalRelativeResidualNorm( solver, value );
+   }
+   /* Get other values here. */
+   else ierr=1;
+
+   return ierr;
+  /* DO-NOT-DELETE splicer.end(Hypre.GMRES.GetDoubleValue) */
+}
+
+/*
+ * Method:  GetIntValue[]
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_Hypre_GMRES_GetIntValue"
+
+int32_t
+impl_Hypre_GMRES_GetIntValue(
+  Hypre_GMRES self, const char* name, int32_t* value)
+{
+  /* DO-NOT-DELETE splicer.begin(Hypre.GMRES.GetIntValue) */
+  /* Insert the implementation of the GetIntValue method here... */
+   /* >>> We should add a Get for everything in SetParameter.
+      There are two values for each parameter: the Hypre cache, and the HYPRE value.
+      The cache gets copied to HYPRE when Apply is called.  What we want to return
+      is the cache value if the corresponding Set had been called, otherwise the
+      real (HYPRE) value.  Assuming the HYPRE interface is not used simultaneously
+      with the Babel interface, it is sufficient to initialize the cache with
+      whatever HYPRE is using. */
+   int ierr = 0;
+   HYPRE_Solver solver;
+   struct Hypre_GMRES__data * data;
+
+   data = Hypre_GMRES__get_data( self );
+   assert( data->solver != NULL );
+   solver = data->solver;
+
+   if ( strcmp(name,"NumIterations")==0 || strcmp(name,"Num Iterations")==0
+      || strcmp(name,"Number of Iterations")==0 ) {
+      ierr += HYPRE_GMRESGetNumIterations( solver, value );
+      printf("num iterations=%i",*value);
+   }
+   /* Get other values here. */
+   else ierr=1;
+
+   return ierr;
+  /* DO-NOT-DELETE splicer.end(Hypre.GMRES.GetIntValue) */
+}
+
+/*
+ * Method:  SetDoubleParameter[]
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_Hypre_GMRES_SetDoubleParameter"
+
+int32_t
+impl_Hypre_GMRES_SetDoubleParameter(
+  Hypre_GMRES self, const char* name, double value)
+{
+  /* DO-NOT-DELETE splicer.begin(Hypre.GMRES.SetDoubleParameter) */
+  /* Insert the implementation of the SetDoubleParameter method here... */
+   /* The normal way to implement this function would be to call the corresponding
+      HYPRE function to set the parameter.  That can't always be done because the
+      HYPRE struct may not exist.  The HYPRE struct may not exist because it can't
+      be created until we know the vector type - and that is not known until Apply
+      is first called.  So what we do is save the parameter in a cache belonging to
+      this Babel interface, and copy it into the HYPRE struct once Apply is called.
+   */
+   int ierr = 0;
+   struct Hypre_GMRES__data * data;
+   data = Hypre_GMRES__get_data( self );
+
+   if ( strcmp(name,"Tol")==0 || strcmp(name,"Tolerance")==0 ) {
+      data -> tol = value;
+   }
+   /* Set other parameters here. */
+   else ierr=1;
+
+   return ierr;
+  /* DO-NOT-DELETE splicer.end(Hypre.GMRES.SetDoubleParameter) */
+}
+
+/*
+ * Method:  SetIntParameter[]
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_Hypre_GMRES_SetIntParameter"
+
+int32_t
+impl_Hypre_GMRES_SetIntParameter(
+  Hypre_GMRES self, const char* name, int32_t value)
+{
+  /* DO-NOT-DELETE splicer.begin(Hypre.GMRES.SetIntParameter) */
+  /* Insert the implementation of the SetIntParameter method here... */
+   /* The normal way to implement this function would be to call the corresponding
+      HYPRE function to set the parameter.  That can't always be done because the
+      HYPRE struct may not exist.  The HYPRE struct may not exist because it can't
+      be created until we know the vector type - and that is not known until Apply
+      is first called.  So what we do is save the parameter in a cache belonging to
+      this Babel interface, and copy it into the HYPRE struct once Apply is called.
+   */
+   int ierr = 0;
+   struct Hypre_GMRES__data * data;
+   data = Hypre_GMRES__get_data( self );
+
+   if ( strcmp(name,"KDim")==0 || strcmp(name,"K Dim")==0 ) {
+      data -> k_dim = value;
+   }
+   if ( strcmp(name,"MaxIter")==0 || strcmp(name,"Max Iter")==0 ||
+      strcmp(name,"Maximum Number of Iterations")==0 ) {
+      data -> max_iter = value;
+   }
+   if ( strcmp(name,"MinIter")==0 || strcmp(name,"Min Iter")==0 ||
+      strcmp(name,"Minimum Number of Iterations")==0 ) {
+      data -> min_iter = value;
+   }
+   else if ( strcmp(name,"RelChange")==0 || strcmp(name,"Rel Change")==0 ||
+            strcmp(name,"Relative Change Test")==0 ) {
+      data -> rel_change = value;
+   }
+   else if ( strcmp(name,"StopCrit")==0 || strcmp(name,"Stop Crit")==0 ||
+             strcmp(name,"Pure Absolute Error Stopping Criterion")==0 ) {
+      /* this parameter is obsolete but still supported */
+      data -> stop_crit = value;
+   }
+   else if ( strcmp(name,"PrintLevel")==0 || strcmp(name,"Print Level")==0 ) {
+      /* also settable through SetPrintLevel */
+      data -> printlevel = value;
+   }
+   else if ( strcmp(name,"LogLevel")==0 || strcmp(name,"Log Level")==0 ) {
+      /* also settable through SetLogging */
+      data -> log_level = value;
+   }
+   /* Set other parameters here. */
+   else ierr=1;
+
+   return ierr;
+  /* DO-NOT-DELETE splicer.end(Hypre.GMRES.SetIntParameter) */
+}
+
+/*
+ * Method:  SetStringParameter[]
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_Hypre_GMRES_SetStringParameter"
+
+int32_t
+impl_Hypre_GMRES_SetStringParameter(
+  Hypre_GMRES self, const char* name, const char* value)
+{
+  /* DO-NOT-DELETE splicer.begin(Hypre.GMRES.SetStringParameter) */
+  /* Insert the implementation of the SetStringParameter method here... */
+   /* There are no string parameters, so return an error. */
+   return 1;
+  /* DO-NOT-DELETE splicer.end(Hypre.GMRES.SetStringParameter) */
+}
+
+/*
+ * Method:  SetIntArrayParameter[]
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_Hypre_GMRES_SetIntArrayParameter"
+
+int32_t
+impl_Hypre_GMRES_SetIntArrayParameter(
+  Hypre_GMRES self, const char* name, struct SIDL_int__array* value)
+{
+  /* DO-NOT-DELETE splicer.begin(Hypre.GMRES.SetIntArrayParameter) */
+  /* Insert the implementation of the SetIntArrayParameter method here... */
+   /* no such parameters, return error if called */
+   return 1;
+  /* DO-NOT-DELETE splicer.end(Hypre.GMRES.SetIntArrayParameter) */
+}
+
+/*
+ * Method:  SetDoubleArrayParameter[]
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_Hypre_GMRES_SetDoubleArrayParameter"
+
+int32_t
+impl_Hypre_GMRES_SetDoubleArrayParameter(
+  Hypre_GMRES self, const char* name, struct SIDL_double__array* value)
+{
+  /* DO-NOT-DELETE splicer.begin(Hypre.GMRES.SetDoubleArrayParameter) */
+  /* Insert the implementation of the SetDoubleArrayParameter method here... */
+   /* no such parameters, return error if called */
+   return 1;
+  /* DO-NOT-DELETE splicer.end(Hypre.GMRES.SetDoubleArrayParameter) */
+}
+
+/*
+ * Method:  Setup[]
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_Hypre_GMRES_Setup"
+
+int32_t
+impl_Hypre_GMRES_Setup(
+  Hypre_GMRES self, Hypre_Vector x, Hypre_Vector y)
+{
+  /* DO-NOT-DELETE splicer.begin(Hypre.GMRES.Setup) */
+  /* Insert the implementation of the Setup method here... */
+   /* Setup is not done here because it requires the entire problem.
+      It is done in Apply instead. */
+  /* DO-NOT-DELETE splicer.end(Hypre.GMRES.Setup) */
+}
+
+/*
+ * Method:  Apply[]
  */
 
 #undef __FUNC__
@@ -148,9 +417,7 @@ impl_Hypre_GMRES__dtor(
 
 int32_t
 impl_Hypre_GMRES_Apply(
-  Hypre_GMRES self,
-  Hypre_Vector x,
-  Hypre_Vector* y)
+  Hypre_GMRES self, Hypre_Vector x, Hypre_Vector* y)
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.GMRES.Apply) */
   /* Insert the implementation of the Apply method here... */
@@ -252,109 +519,30 @@ impl_Hypre_GMRES_Apply(
 }
 
 /*
- * Method:  GetDoubleValue
+ * Method:  SetOperator[]
  */
 
 #undef __FUNC__
-#define __FUNC__ "impl_Hypre_GMRES_GetDoubleValue"
+#define __FUNC__ "impl_Hypre_GMRES_SetOperator"
 
 int32_t
-impl_Hypre_GMRES_GetDoubleValue(
-  Hypre_GMRES self,
-  const char* name,
-  double* value)
+impl_Hypre_GMRES_SetOperator(
+  Hypre_GMRES self, Hypre_Operator A)
 {
-  /* DO-NOT-DELETE splicer.begin(Hypre.GMRES.GetDoubleValue) */
-  /* Insert the implementation of the GetDoubleValue method here... */
-   /* >>> We should add a Get for everything in SetParameter.
-      There are two values for each parameter: the Hypre cache, and the HYPRE value.
-      The cache gets copied to HYPRE when Apply is called.  What we want to return
-      is the cache value if the corresponding Set had been called, otherwise the
-      real (HYPRE) value.  Assuming the HYPRE interface is not used simultaneously
-      with the Babel interface, it is sufficient to initialize the cache with
-      whatever HYPRE is using. */
+  /* DO-NOT-DELETE splicer.begin(Hypre.GMRES.SetOperator) */
+  /* Insert the implementation of the SetOperator method here... */
    int ierr = 0;
-   HYPRE_Solver solver;
    struct Hypre_GMRES__data * data;
 
    data = Hypre_GMRES__get_data( self );
-   assert( data->solver != NULL );
-   solver = data->solver;
-
-   if ( strcmp(name,"FinalRelativeResidualNorm")==0 ||
-        strcmp(name,"Final Relative Residual Norm")==0 ) {
-      ierr += HYPRE_GMRESGetFinalRelativeResidualNorm( solver, value );
-   }
-   /* Get other values here. */
-   else ierr=1;
+   data->matrix = A;
 
    return ierr;
-  /* DO-NOT-DELETE splicer.end(Hypre.GMRES.GetDoubleValue) */
+  /* DO-NOT-DELETE splicer.end(Hypre.GMRES.SetOperator) */
 }
 
 /*
- * Method:  GetIntValue
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_Hypre_GMRES_GetIntValue"
-
-int32_t
-impl_Hypre_GMRES_GetIntValue(
-  Hypre_GMRES self,
-  const char* name,
-  int32_t* value)
-{
-  /* DO-NOT-DELETE splicer.begin(Hypre.GMRES.GetIntValue) */
-  /* Insert the implementation of the GetIntValue method here... */
-   /* >>> We should add a Get for everything in SetParameter.
-      There are two values for each parameter: the Hypre cache, and the HYPRE value.
-      The cache gets copied to HYPRE when Apply is called.  What we want to return
-      is the cache value if the corresponding Set had been called, otherwise the
-      real (HYPRE) value.  Assuming the HYPRE interface is not used simultaneously
-      with the Babel interface, it is sufficient to initialize the cache with
-      whatever HYPRE is using. */
-   int ierr = 0;
-   HYPRE_Solver solver;
-   struct Hypre_GMRES__data * data;
-
-   data = Hypre_GMRES__get_data( self );
-   assert( data->solver != NULL );
-   solver = data->solver;
-
-   if ( strcmp(name,"NumIterations")==0 || strcmp(name,"Num Iterations")==0
-      || strcmp(name,"Number of Iterations")==0 ) {
-      ierr += HYPRE_GMRESGetNumIterations( solver, value );
-      printf("num iterations=%i",*value);
-   }
-   /* Get other values here. */
-   else ierr=1;
-
-   return ierr;
-  /* DO-NOT-DELETE splicer.end(Hypre.GMRES.GetIntValue) */
-}
-
-/*
- * Method:  GetPreconditionedResidual
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_Hypre_GMRES_GetPreconditionedResidual"
-
-int32_t
-impl_Hypre_GMRES_GetPreconditionedResidual(
-  Hypre_GMRES self,
-  Hypre_Vector* r)
-{
-  /* DO-NOT-DELETE splicer.begin(Hypre.GMRES.GetPreconditionedResidual) */
-  /* Insert the implementation of the GetPreconditionedResidual method here... 
-    */
-   return 1;
-  /* DO-NOT-DELETE splicer.end(Hypre.GMRES.GetPreconditionedResidual) */
-}
-
-/*
- * Method:  GetResidual
+ * Method:  GetResidual[]
  */
 
 #undef __FUNC__
@@ -362,8 +550,7 @@ impl_Hypre_GMRES_GetPreconditionedResidual(
 
 int32_t
 impl_Hypre_GMRES_GetResidual(
-  Hypre_GMRES self,
-  Hypre_Vector* r)
+  Hypre_GMRES self, Hypre_Vector* r)
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.GMRES.GetResidual) */
   /* Insert the implementation of the GetResidual method here... */
@@ -413,167 +600,7 @@ impl_Hypre_GMRES_GetResidual(
 }
 
 /*
- * Method:  SetCommunicator
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_Hypre_GMRES_SetCommunicator"
-
-int32_t
-impl_Hypre_GMRES_SetCommunicator(
-  Hypre_GMRES self,
-  void* comm)
-{
-  /* DO-NOT-DELETE splicer.begin(Hypre.GMRES.SetCommunicator) */
-  /* Insert the implementation of the SetCommunicator method here... */
-   int ierr = 0;
-   struct Hypre_GMRES__data * data;
-   data = Hypre_GMRES__get_data( self );
-   data -> comm = (MPI_Comm) comm;
-
-   return ierr;
-  /* DO-NOT-DELETE splicer.end(Hypre.GMRES.SetCommunicator) */
-}
-
-/*
- * Method:  SetDoubleArrayParameter
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_Hypre_GMRES_SetDoubleArrayParameter"
-
-int32_t
-impl_Hypre_GMRES_SetDoubleArrayParameter(
-  Hypre_GMRES self,
-  const char* name,
-  struct SIDL_double__array* value)
-{
-  /* DO-NOT-DELETE splicer.begin(Hypre.GMRES.SetDoubleArrayParameter) */
-  /* Insert the implementation of the SetDoubleArrayParameter method here... */
-   /* no such parameters, return error if called */
-   return 1;
-  /* DO-NOT-DELETE splicer.end(Hypre.GMRES.SetDoubleArrayParameter) */
-}
-
-/*
- * Method:  SetDoubleParameter
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_Hypre_GMRES_SetDoubleParameter"
-
-int32_t
-impl_Hypre_GMRES_SetDoubleParameter(
-  Hypre_GMRES self,
-  const char* name,
-  double value)
-{
-  /* DO-NOT-DELETE splicer.begin(Hypre.GMRES.SetDoubleParameter) */
-  /* Insert the implementation of the SetDoubleParameter method here... */
-   /* The normal way to implement this function would be to call the corresponding
-      HYPRE function to set the parameter.  That can't always be done because the
-      HYPRE struct may not exist.  The HYPRE struct may not exist because it can't
-      be created until we know the vector type - and that is not known until Apply
-      is first called.  So what we do is save the parameter in a cache belonging to
-      this Babel interface, and copy it into the HYPRE struct once Apply is called.
-   */
-   int ierr = 0;
-   struct Hypre_GMRES__data * data;
-   data = Hypre_GMRES__get_data( self );
-
-   if ( strcmp(name,"Tol")==0 || strcmp(name,"Tolerance")==0 ) {
-      data -> tol = value;
-   }
-   /* Set other parameters here. */
-   else ierr=1;
-
-   return ierr;
-  /* DO-NOT-DELETE splicer.end(Hypre.GMRES.SetDoubleParameter) */
-}
-
-/*
- * Method:  SetIntArrayParameter
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_Hypre_GMRES_SetIntArrayParameter"
-
-int32_t
-impl_Hypre_GMRES_SetIntArrayParameter(
-  Hypre_GMRES self,
-  const char* name,
-  struct SIDL_int__array* value)
-{
-  /* DO-NOT-DELETE splicer.begin(Hypre.GMRES.SetIntArrayParameter) */
-  /* Insert the implementation of the SetIntArrayParameter method here... */
-   /* no such parameters, return error if called */
-   return 1;
-  /* DO-NOT-DELETE splicer.end(Hypre.GMRES.SetIntArrayParameter) */
-}
-
-/*
- * Method:  SetIntParameter
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_Hypre_GMRES_SetIntParameter"
-
-int32_t
-impl_Hypre_GMRES_SetIntParameter(
-  Hypre_GMRES self,
-  const char* name,
-  int32_t value)
-{
-  /* DO-NOT-DELETE splicer.begin(Hypre.GMRES.SetIntParameter) */
-  /* Insert the implementation of the SetIntParameter method here... */
-   /* The normal way to implement this function would be to call the corresponding
-      HYPRE function to set the parameter.  That can't always be done because the
-      HYPRE struct may not exist.  The HYPRE struct may not exist because it can't
-      be created until we know the vector type - and that is not known until Apply
-      is first called.  So what we do is save the parameter in a cache belonging to
-      this Babel interface, and copy it into the HYPRE struct once Apply is called.
-   */
-   int ierr = 0;
-   struct Hypre_GMRES__data * data;
-   data = Hypre_GMRES__get_data( self );
-
-   if ( strcmp(name,"KDim")==0 || strcmp(name,"K Dim")==0 ) {
-      data -> k_dim = value;
-   }
-   if ( strcmp(name,"MaxIter")==0 || strcmp(name,"Max Iter")==0 ||
-      strcmp(name,"Maximum Number of Iterations")==0 ) {
-      data -> max_iter = value;
-   }
-   if ( strcmp(name,"MinIter")==0 || strcmp(name,"Min Iter")==0 ||
-      strcmp(name,"Minimum Number of Iterations")==0 ) {
-      data -> min_iter = value;
-   }
-   else if ( strcmp(name,"RelChange")==0 || strcmp(name,"Rel Change")==0 ||
-            strcmp(name,"Relative Change Test")==0 ) {
-      data -> rel_change = value;
-   }
-   else if ( strcmp(name,"StopCrit")==0 || strcmp(name,"Stop Crit")==0 ||
-             strcmp(name,"Pure Absolute Error Stopping Criterion")==0 ) {
-      /* this parameter is obsolete but still supported */
-      data -> stop_crit = value;
-   }
-   else if ( strcmp(name,"PrintLevel")==0 || strcmp(name,"Print Level")==0 ) {
-      /* also settable through SetPrintLevel */
-      data -> printlevel = value;
-   }
-   else if ( strcmp(name,"LogLevel")==0 || strcmp(name,"Log Level")==0 ) {
-      /* also settable through SetLogging */
-      data -> log_level = value;
-   }
-   /* Set other parameters here. */
-   else ierr=1;
-
-   return ierr;
-  /* DO-NOT-DELETE splicer.end(Hypre.GMRES.SetIntParameter) */
-}
-
-/*
- * Method:  SetLogging
+ * Method:  SetLogging[]
  */
 
 #undef __FUNC__
@@ -581,8 +608,7 @@ impl_Hypre_GMRES_SetIntParameter(
 
 int32_t
 impl_Hypre_GMRES_SetLogging(
-  Hypre_GMRES self,
-  int32_t level)
+  Hypre_GMRES self, int32_t level)
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.GMRES.SetLogging) */
   /* Insert the implementation of the SetLogging method here... */
@@ -597,31 +623,37 @@ impl_Hypre_GMRES_SetLogging(
 }
 
 /*
- * Method:  SetOperator
+ * Method:  SetPrintLevel[]
  */
 
 #undef __FUNC__
-#define __FUNC__ "impl_Hypre_GMRES_SetOperator"
+#define __FUNC__ "impl_Hypre_GMRES_SetPrintLevel"
 
 int32_t
-impl_Hypre_GMRES_SetOperator(
-  Hypre_GMRES self,
-  Hypre_Operator A)
+impl_Hypre_GMRES_SetPrintLevel(
+  Hypre_GMRES self, int32_t level)
 {
-  /* DO-NOT-DELETE splicer.begin(Hypre.GMRES.SetOperator) */
-  /* Insert the implementation of the SetOperator method here... */
+  /* DO-NOT-DELETE splicer.begin(Hypre.GMRES.SetPrintLevel) */
+  /* Insert the implementation of the SetPrintLevel method here... */
+   /* The normal way to implement this function would be to call the corresponding
+      HYPRE function to set the print level.  That can't always be done because the
+      HYPRE struct may not exist.  The HYPRE struct may not exist because it can't
+      be created until we know the vector type - and that is not known until Apply
+      is first called.  So what we do is save the print level in a cache belonging to
+      this Babel interface, and copy it into the HYPRE struct once Apply is called.
+   */
    int ierr = 0;
    struct Hypre_GMRES__data * data;
-
    data = Hypre_GMRES__get_data( self );
-   data->matrix = A;
+
+   data -> printlevel = level;
 
    return ierr;
-  /* DO-NOT-DELETE splicer.end(Hypre.GMRES.SetOperator) */
+  /* DO-NOT-DELETE splicer.end(Hypre.GMRES.SetPrintLevel) */
 }
 
 /*
- * Method:  SetPreconditioner
+ * Method:  SetPreconditioner[]
  */
 
 #undef __FUNC__
@@ -629,8 +661,7 @@ impl_Hypre_GMRES_SetOperator(
 
 int32_t
 impl_Hypre_GMRES_SetPreconditioner(
-  Hypre_GMRES self,
-  Hypre_Solver s)
+  Hypre_GMRES self, Hypre_Solver s)
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.GMRES.SetPreconditioner) */
   /* Insert the implementation of the SetPreconditioner method here... */
@@ -692,73 +723,19 @@ impl_Hypre_GMRES_SetPreconditioner(
 }
 
 /*
- * Method:  SetPrintLevel
+ * Method:  GetPreconditionedResidual[]
  */
 
 #undef __FUNC__
-#define __FUNC__ "impl_Hypre_GMRES_SetPrintLevel"
+#define __FUNC__ "impl_Hypre_GMRES_GetPreconditionedResidual"
 
 int32_t
-impl_Hypre_GMRES_SetPrintLevel(
-  Hypre_GMRES self,
-  int32_t level)
+impl_Hypre_GMRES_GetPreconditionedResidual(
+  Hypre_GMRES self, Hypre_Vector* r)
 {
-  /* DO-NOT-DELETE splicer.begin(Hypre.GMRES.SetPrintLevel) */
-  /* Insert the implementation of the SetPrintLevel method here... */
-   /* The normal way to implement this function would be to call the corresponding
-      HYPRE function to set the print level.  That can't always be done because the
-      HYPRE struct may not exist.  The HYPRE struct may not exist because it can't
-      be created until we know the vector type - and that is not known until Apply
-      is first called.  So what we do is save the print level in a cache belonging to
-      this Babel interface, and copy it into the HYPRE struct once Apply is called.
-   */
-   int ierr = 0;
-   struct Hypre_GMRES__data * data;
-   data = Hypre_GMRES__get_data( self );
-
-   data -> printlevel = level;
-
-   return ierr;
-  /* DO-NOT-DELETE splicer.end(Hypre.GMRES.SetPrintLevel) */
-}
-
-/*
- * Method:  SetStringParameter
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_Hypre_GMRES_SetStringParameter"
-
-int32_t
-impl_Hypre_GMRES_SetStringParameter(
-  Hypre_GMRES self,
-  const char* name,
-  const char* value)
-{
-  /* DO-NOT-DELETE splicer.begin(Hypre.GMRES.SetStringParameter) */
-  /* Insert the implementation of the SetStringParameter method here... */
-   /* There are no string parameters, so return an error. */
+  /* DO-NOT-DELETE splicer.begin(Hypre.GMRES.GetPreconditionedResidual) */
+  /* Insert the implementation of the GetPreconditionedResidual method here... 
+    */
    return 1;
-  /* DO-NOT-DELETE splicer.end(Hypre.GMRES.SetStringParameter) */
-}
-
-/*
- * Method:  Setup
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_Hypre_GMRES_Setup"
-
-int32_t
-impl_Hypre_GMRES_Setup(
-  Hypre_GMRES self,
-  Hypre_Vector x,
-  Hypre_Vector y)
-{
-  /* DO-NOT-DELETE splicer.begin(Hypre.GMRES.Setup) */
-  /* Insert the implementation of the Setup method here... */
-   /* Setup is not done here because it requires the entire problem.
-      It is done in Apply instead. */
-  /* DO-NOT-DELETE splicer.end(Hypre.GMRES.Setup) */
-   return 0;
+  /* DO-NOT-DELETE splicer.end(Hypre.GMRES.GetPreconditionedResidual) */
 }

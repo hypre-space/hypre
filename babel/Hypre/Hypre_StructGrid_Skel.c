@@ -2,13 +2,16 @@
  * File:          Hypre_StructGrid_Skel.c
  * Symbol:        Hypre.StructGrid-v0.1.5
  * Symbol Type:   class
- * Babel Version: 0.6.3
- * SIDL Created:  20021001 09:48:43 PDT
- * Generated:     20021001 09:48:52 PDT
+ * Babel Version: 0.7.4
+ * SIDL Created:  20021101 15:14:28 PST
+ * Generated:     20021101 15:14:35 PST
  * Description:   Server-side glue code for Hypre.StructGrid
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
+ * babel-version = 0.7.4
+ * source-line   = 409
+ * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 
 #include "Hypre_StructGrid_IOR.h"
@@ -21,10 +24,6 @@ impl_Hypre_StructGrid__ctor(
 
 extern void
 impl_Hypre_StructGrid__dtor(
-  Hypre_StructGrid);
-
-extern int32_t
-impl_Hypre_StructGrid_Assemble(
   Hypre_StructGrid);
 
 extern int32_t
@@ -48,15 +47,19 @@ impl_Hypre_StructGrid_SetPeriodic(
   Hypre_StructGrid,
   struct SIDL_int__array*);
 
+extern int32_t
+impl_Hypre_StructGrid_Assemble(
+  Hypre_StructGrid);
+
 void
 Hypre_StructGrid__set_epv(struct Hypre_StructGrid__epv *epv)
 {
   epv->f__ctor = impl_Hypre_StructGrid__ctor;
   epv->f__dtor = impl_Hypre_StructGrid__dtor;
-  epv->f_SetPeriodic = impl_Hypre_StructGrid_SetPeriodic;
-  epv->f_SetExtents = impl_Hypre_StructGrid_SetExtents;
   epv->f_SetCommunicator = impl_Hypre_StructGrid_SetCommunicator;
   epv->f_SetDimension = impl_Hypre_StructGrid_SetDimension;
+  epv->f_SetExtents = impl_Hypre_StructGrid_SetExtents;
+  epv->f_SetPeriodic = impl_Hypre_StructGrid_SetPeriodic;
   epv->f_Assemble = impl_Hypre_StructGrid_Assemble;
 }
 

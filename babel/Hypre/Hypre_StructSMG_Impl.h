@@ -2,13 +2,16 @@
  * File:          Hypre_StructSMG_Impl.h
  * Symbol:        Hypre.StructSMG-v0.1.5
  * Symbol Type:   class
- * Babel Version: 0.6.3
- * SIDL Created:  20021001 09:48:43 PDT
- * Generated:     20021001 09:48:52 PDT
+ * Babel Version: 0.7.4
+ * SIDL Created:  20021101 15:14:28 PST
+ * Generated:     20021101 15:14:37 PST
  * Description:   Server-side implementation for Hypre.StructSMG
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
+ * babel-version = 0.7.4
+ * source-line   = 457
+ * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 
 #ifndef included_Hypre_StructSMG_Impl_h
@@ -20,11 +23,11 @@
 #ifndef included_Hypre_Vector_h
 #include "Hypre_Vector.h"
 #endif
-#ifndef included_Hypre_StructSMG_h
-#include "Hypre_StructSMG.h"
-#endif
 #ifndef included_Hypre_Operator_h
 #include "Hypre_Operator.h"
+#endif
+#ifndef included_Hypre_StructSMG_h
+#include "Hypre_StructSMG.h"
 #endif
 
 /* DO-NOT-DELETE splicer.begin(Hypre.StructSMG._includes) */
@@ -72,10 +75,9 @@ impl_Hypre_StructSMG__dtor(
  */
 
 extern int32_t
-impl_Hypre_StructSMG_Apply(
+impl_Hypre_StructSMG_SetCommunicator(
   Hypre_StructSMG,
-  Hypre_Vector,
-  Hypre_Vector*);
+  void*);
 
 extern int32_t
 impl_Hypre_StructSMG_GetDoubleValue(
@@ -90,52 +92,15 @@ impl_Hypre_StructSMG_GetIntValue(
   int32_t*);
 
 extern int32_t
-impl_Hypre_StructSMG_GetResidual(
-  Hypre_StructSMG,
-  Hypre_Vector*);
-
-extern int32_t
-impl_Hypre_StructSMG_SetCommunicator(
-  Hypre_StructSMG,
-  void*);
-
-extern int32_t
-impl_Hypre_StructSMG_SetDoubleArrayParameter(
-  Hypre_StructSMG,
-  const char*,
-  struct SIDL_double__array*);
-
-extern int32_t
 impl_Hypre_StructSMG_SetDoubleParameter(
   Hypre_StructSMG,
   const char*,
   double);
 
 extern int32_t
-impl_Hypre_StructSMG_SetIntArrayParameter(
-  Hypre_StructSMG,
-  const char*,
-  struct SIDL_int__array*);
-
-extern int32_t
 impl_Hypre_StructSMG_SetIntParameter(
   Hypre_StructSMG,
   const char*,
-  int32_t);
-
-extern int32_t
-impl_Hypre_StructSMG_SetLogging(
-  Hypre_StructSMG,
-  int32_t);
-
-extern int32_t
-impl_Hypre_StructSMG_SetOperator(
-  Hypre_StructSMG,
-  Hypre_Operator);
-
-extern int32_t
-impl_Hypre_StructSMG_SetPrintLevel(
-  Hypre_StructSMG,
   int32_t);
 
 extern int32_t
@@ -145,10 +110,48 @@ impl_Hypre_StructSMG_SetStringParameter(
   const char*);
 
 extern int32_t
+impl_Hypre_StructSMG_SetIntArrayParameter(
+  Hypre_StructSMG,
+  const char*,
+  struct SIDL_int__array*);
+
+extern int32_t
+impl_Hypre_StructSMG_SetDoubleArrayParameter(
+  Hypre_StructSMG,
+  const char*,
+  struct SIDL_double__array*);
+
+extern int32_t
 impl_Hypre_StructSMG_Setup(
   Hypre_StructSMG,
   Hypre_Vector,
   Hypre_Vector);
+
+extern int32_t
+impl_Hypre_StructSMG_Apply(
+  Hypre_StructSMG,
+  Hypre_Vector,
+  Hypre_Vector*);
+
+extern int32_t
+impl_Hypre_StructSMG_SetOperator(
+  Hypre_StructSMG,
+  Hypre_Operator);
+
+extern int32_t
+impl_Hypre_StructSMG_GetResidual(
+  Hypre_StructSMG,
+  Hypre_Vector*);
+
+extern int32_t
+impl_Hypre_StructSMG_SetLogging(
+  Hypre_StructSMG,
+  int32_t);
+
+extern int32_t
+impl_Hypre_StructSMG_SetPrintLevel(
+  Hypre_StructSMG,
+  int32_t);
 
 #ifdef __cplusplus
 }

@@ -2,13 +2,16 @@
  * File:          Hypre_StructStencil_Impl.h
  * Symbol:        Hypre.StructStencil-v0.1.5
  * Symbol Type:   class
- * Babel Version: 0.6.3
- * SIDL Created:  20021001 09:48:43 PDT
- * Generated:     20021001 09:48:53 PDT
+ * Babel Version: 0.7.4
+ * SIDL Created:  20021101 15:14:28 PST
+ * Generated:     20021101 15:14:36 PST
  * Description:   Server-side implementation for Hypre.StructStencil
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
+ * babel-version = 0.7.4
+ * source-line   = 399
+ * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 
 #ifndef included_Hypre_StructStencil_Impl_h
@@ -71,15 +74,15 @@ impl_Hypre_StructStencil_SetDimension(
   int32_t);
 
 extern int32_t
+impl_Hypre_StructStencil_SetSize(
+  Hypre_StructStencil,
+  int32_t);
+
+extern int32_t
 impl_Hypre_StructStencil_SetElement(
   Hypre_StructStencil,
   int32_t,
   struct SIDL_int__array*);
-
-extern int32_t
-impl_Hypre_StructStencil_SetSize(
-  Hypre_StructStencil,
-  int32_t);
 
 #ifdef __cplusplus
 }

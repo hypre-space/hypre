@@ -2,13 +2,16 @@
  * File:          Hypre_Pilut_Impl.h
  * Symbol:        Hypre.Pilut-v0.1.5
  * Symbol Type:   class
- * Babel Version: 0.6.3
- * SIDL Created:  20021001 09:48:43 PDT
- * Generated:     20021001 09:48:52 PDT
+ * Babel Version: 0.7.4
+ * SIDL Created:  20021101 15:14:28 PST
+ * Generated:     20021101 15:14:36 PST
  * Description:   Server-side implementation for Hypre.Pilut
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
+ * babel-version = 0.7.4
+ * source-line   = 461
+ * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 
 #ifndef included_Hypre_Pilut_Impl_h
@@ -17,11 +20,11 @@
 #ifndef included_SIDL_header_h
 #include "SIDL_header.h"
 #endif
-#ifndef included_Hypre_Vector_h
-#include "Hypre_Vector.h"
-#endif
 #ifndef included_Hypre_Pilut_h
 #include "Hypre_Pilut.h"
+#endif
+#ifndef included_Hypre_Vector_h
+#include "Hypre_Vector.h"
 #endif
 #ifndef included_Hypre_Operator_h
 #include "Hypre_Operator.h"
@@ -72,10 +75,9 @@ impl_Hypre_Pilut__dtor(
  */
 
 extern int32_t
-impl_Hypre_Pilut_Apply(
+impl_Hypre_Pilut_SetCommunicator(
   Hypre_Pilut,
-  Hypre_Vector,
-  Hypre_Vector*);
+  void*);
 
 extern int32_t
 impl_Hypre_Pilut_GetDoubleValue(
@@ -90,52 +92,15 @@ impl_Hypre_Pilut_GetIntValue(
   int32_t*);
 
 extern int32_t
-impl_Hypre_Pilut_GetResidual(
-  Hypre_Pilut,
-  Hypre_Vector*);
-
-extern int32_t
-impl_Hypre_Pilut_SetCommunicator(
-  Hypre_Pilut,
-  void*);
-
-extern int32_t
-impl_Hypre_Pilut_SetDoubleArrayParameter(
-  Hypre_Pilut,
-  const char*,
-  struct SIDL_double__array*);
-
-extern int32_t
 impl_Hypre_Pilut_SetDoubleParameter(
   Hypre_Pilut,
   const char*,
   double);
 
 extern int32_t
-impl_Hypre_Pilut_SetIntArrayParameter(
-  Hypre_Pilut,
-  const char*,
-  struct SIDL_int__array*);
-
-extern int32_t
 impl_Hypre_Pilut_SetIntParameter(
   Hypre_Pilut,
   const char*,
-  int32_t);
-
-extern int32_t
-impl_Hypre_Pilut_SetLogging(
-  Hypre_Pilut,
-  int32_t);
-
-extern int32_t
-impl_Hypre_Pilut_SetOperator(
-  Hypre_Pilut,
-  Hypre_Operator);
-
-extern int32_t
-impl_Hypre_Pilut_SetPrintLevel(
-  Hypre_Pilut,
   int32_t);
 
 extern int32_t
@@ -145,10 +110,48 @@ impl_Hypre_Pilut_SetStringParameter(
   const char*);
 
 extern int32_t
+impl_Hypre_Pilut_SetIntArrayParameter(
+  Hypre_Pilut,
+  const char*,
+  struct SIDL_int__array*);
+
+extern int32_t
+impl_Hypre_Pilut_SetDoubleArrayParameter(
+  Hypre_Pilut,
+  const char*,
+  struct SIDL_double__array*);
+
+extern int32_t
 impl_Hypre_Pilut_Setup(
   Hypre_Pilut,
   Hypre_Vector,
   Hypre_Vector);
+
+extern int32_t
+impl_Hypre_Pilut_Apply(
+  Hypre_Pilut,
+  Hypre_Vector,
+  Hypre_Vector*);
+
+extern int32_t
+impl_Hypre_Pilut_SetOperator(
+  Hypre_Pilut,
+  Hypre_Operator);
+
+extern int32_t
+impl_Hypre_Pilut_GetResidual(
+  Hypre_Pilut,
+  Hypre_Vector*);
+
+extern int32_t
+impl_Hypre_Pilut_SetLogging(
+  Hypre_Pilut,
+  int32_t);
+
+extern int32_t
+impl_Hypre_Pilut_SetPrintLevel(
+  Hypre_Pilut,
+  int32_t);
 
 #ifdef __cplusplus
 }

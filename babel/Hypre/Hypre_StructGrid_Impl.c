@@ -2,13 +2,16 @@
  * File:          Hypre_StructGrid_Impl.c
  * Symbol:        Hypre.StructGrid-v0.1.5
  * Symbol Type:   class
- * Babel Version: 0.6.3
- * SIDL Created:  20021001 09:48:43 PDT
- * Generated:     20021001 09:48:52 PDT
+ * Babel Version: 0.7.4
+ * SIDL Created:  20021101 15:14:28 PST
+ * Generated:     20021101 15:14:35 PST
  * Description:   Server-side implementation for Hypre.StructGrid
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
+ * babel-version = 0.7.4
+ * source-line   = 409
+ * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 
 /*
@@ -61,7 +64,72 @@ impl_Hypre_StructGrid__dtor(
 }
 
 /*
- * Method:  Assemble
+ * Method:  SetCommunicator[]
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_Hypre_StructGrid_SetCommunicator"
+
+int32_t
+impl_Hypre_StructGrid_SetCommunicator(
+  Hypre_StructGrid self, void* MPI_comm)
+{
+  /* DO-NOT-DELETE splicer.begin(Hypre.StructGrid.SetCommunicator) */
+  /* Insert the implementation of the SetCommunicator method here... */
+  /* DO-NOT-DELETE splicer.end(Hypre.StructGrid.SetCommunicator) */
+}
+
+/*
+ * Method:  SetDimension[]
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_Hypre_StructGrid_SetDimension"
+
+int32_t
+impl_Hypre_StructGrid_SetDimension(
+  Hypre_StructGrid self, int32_t dim)
+{
+  /* DO-NOT-DELETE splicer.begin(Hypre.StructGrid.SetDimension) */
+  /* Insert the implementation of the SetDimension method here... */
+  /* DO-NOT-DELETE splicer.end(Hypre.StructGrid.SetDimension) */
+}
+
+/*
+ * Method:  SetExtents[]
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_Hypre_StructGrid_SetExtents"
+
+int32_t
+impl_Hypre_StructGrid_SetExtents(
+  Hypre_StructGrid self, struct SIDL_int__array* ilower,
+    struct SIDL_int__array* iupper)
+{
+  /* DO-NOT-DELETE splicer.begin(Hypre.StructGrid.SetExtents) */
+  /* Insert the implementation of the SetExtents method here... */
+  /* DO-NOT-DELETE splicer.end(Hypre.StructGrid.SetExtents) */
+}
+
+/*
+ * Method:  SetPeriodic[]
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_Hypre_StructGrid_SetPeriodic"
+
+int32_t
+impl_Hypre_StructGrid_SetPeriodic(
+  Hypre_StructGrid self, struct SIDL_int__array* periodic)
+{
+  /* DO-NOT-DELETE splicer.begin(Hypre.StructGrid.SetPeriodic) */
+  /* Insert the implementation of the SetPeriodic method here... */
+  /* DO-NOT-DELETE splicer.end(Hypre.StructGrid.SetPeriodic) */
+}
+
+/*
+ * Method:  Assemble[]
  */
 
 #undef __FUNC__
@@ -74,73 +142,4 @@ impl_Hypre_StructGrid_Assemble(
   /* DO-NOT-DELETE splicer.begin(Hypre.StructGrid.Assemble) */
   /* Insert the implementation of the Assemble method here... */
   /* DO-NOT-DELETE splicer.end(Hypre.StructGrid.Assemble) */
-}
-
-/*
- * Method:  SetCommunicator
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_Hypre_StructGrid_SetCommunicator"
-
-int32_t
-impl_Hypre_StructGrid_SetCommunicator(
-  Hypre_StructGrid self,
-  void* MPI_comm)
-{
-  /* DO-NOT-DELETE splicer.begin(Hypre.StructGrid.SetCommunicator) */
-  /* Insert the implementation of the SetCommunicator method here... */
-  /* DO-NOT-DELETE splicer.end(Hypre.StructGrid.SetCommunicator) */
-}
-
-/*
- * Method:  SetDimension
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_Hypre_StructGrid_SetDimension"
-
-int32_t
-impl_Hypre_StructGrid_SetDimension(
-  Hypre_StructGrid self,
-  int32_t dim)
-{
-  /* DO-NOT-DELETE splicer.begin(Hypre.StructGrid.SetDimension) */
-  /* Insert the implementation of the SetDimension method here... */
-  /* DO-NOT-DELETE splicer.end(Hypre.StructGrid.SetDimension) */
-}
-
-/*
- * Method:  SetExtents
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_Hypre_StructGrid_SetExtents"
-
-int32_t
-impl_Hypre_StructGrid_SetExtents(
-  Hypre_StructGrid self,
-  struct SIDL_int__array* ilower,
-  struct SIDL_int__array* iupper)
-{
-  /* DO-NOT-DELETE splicer.begin(Hypre.StructGrid.SetExtents) */
-  /* Insert the implementation of the SetExtents method here... */
-  /* DO-NOT-DELETE splicer.end(Hypre.StructGrid.SetExtents) */
-}
-
-/*
- * Method:  SetPeriodic
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_Hypre_StructGrid_SetPeriodic"
-
-int32_t
-impl_Hypre_StructGrid_SetPeriodic(
-  Hypre_StructGrid self,
-  struct SIDL_int__array* periodic)
-{
-  /* DO-NOT-DELETE splicer.begin(Hypre.StructGrid.SetPeriodic) */
-  /* Insert the implementation of the SetPeriodic method here... */
-  /* DO-NOT-DELETE splicer.end(Hypre.StructGrid.SetPeriodic) */
 }

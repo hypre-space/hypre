@@ -2,13 +2,16 @@
  * File:          Hypre_ParDiagScale_Impl.c
  * Symbol:        Hypre.ParDiagScale-v0.1.5
  * Symbol Type:   class
- * Babel Version: 0.6.3
- * SIDL Created:  20021001 09:48:43 PDT
- * Generated:     20021001 09:48:52 PDT
+ * Babel Version: 0.7.4
+ * SIDL Created:  20021101 15:14:28 PST
+ * Generated:     20021101 15:14:35 PST
  * Description:   Server-side implementation for Hypre.ParDiagScale
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
+ * babel-version = 0.7.4
+ * source-line   = 455
+ * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 
 /*
@@ -80,7 +83,164 @@ impl_Hypre_ParDiagScale__dtor(
 }
 
 /*
- * Method:  Apply
+ * Method:  SetCommunicator[]
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_Hypre_ParDiagScale_SetCommunicator"
+
+int32_t
+impl_Hypre_ParDiagScale_SetCommunicator(
+  Hypre_ParDiagScale self, void* comm)
+{
+  /* DO-NOT-DELETE splicer.begin(Hypre.ParDiagScale.SetCommunicator) */
+  /* Insert the implementation of the SetCommunicator method here... */
+   int ierr = 0;
+   struct Hypre_ParDiagScale__data * data;
+   data = Hypre_ParDiagScale__get_data( self );
+   data -> comm = (MPI_Comm *) comm;
+   Hypre_ParDiagScale__set_data( self, data );
+
+   return ierr;
+  /* DO-NOT-DELETE splicer.end(Hypre.ParDiagScale.SetCommunicator) */
+}
+
+/*
+ * Method:  GetDoubleValue[]
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_Hypre_ParDiagScale_GetDoubleValue"
+
+int32_t
+impl_Hypre_ParDiagScale_GetDoubleValue(
+  Hypre_ParDiagScale self, const char* name, double* value)
+{
+  /* DO-NOT-DELETE splicer.begin(Hypre.ParDiagScale.GetDoubleValue) */
+  /* Insert the implementation of the GetDoubleValue method here... */
+  /* DO-NOT-DELETE splicer.end(Hypre.ParDiagScale.GetDoubleValue) */
+}
+
+/*
+ * Method:  GetIntValue[]
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_Hypre_ParDiagScale_GetIntValue"
+
+int32_t
+impl_Hypre_ParDiagScale_GetIntValue(
+  Hypre_ParDiagScale self, const char* name, int32_t* value)
+{
+  /* DO-NOT-DELETE splicer.begin(Hypre.ParDiagScale.GetIntValue) */
+  /* Insert the implementation of the GetIntValue method here... */
+  /* DO-NOT-DELETE splicer.end(Hypre.ParDiagScale.GetIntValue) */
+}
+
+/*
+ * Method:  SetDoubleParameter[]
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_Hypre_ParDiagScale_SetDoubleParameter"
+
+int32_t
+impl_Hypre_ParDiagScale_SetDoubleParameter(
+  Hypre_ParDiagScale self, const char* name, double value)
+{
+  /* DO-NOT-DELETE splicer.begin(Hypre.ParDiagScale.SetDoubleParameter) */
+  /* Insert the implementation of the SetDoubleParameter method here... */
+   /* hypre diagonal scaling has no parameters */
+  /* DO-NOT-DELETE splicer.end(Hypre.ParDiagScale.SetDoubleParameter) */
+}
+
+/*
+ * Method:  SetIntParameter[]
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_Hypre_ParDiagScale_SetIntParameter"
+
+int32_t
+impl_Hypre_ParDiagScale_SetIntParameter(
+  Hypre_ParDiagScale self, const char* name, int32_t value)
+{
+  /* DO-NOT-DELETE splicer.begin(Hypre.ParDiagScale.SetIntParameter) */
+  /* Insert the implementation of the SetIntParameter method here... */
+   /* hypre diagonal scaling has no parameters */
+  /* DO-NOT-DELETE splicer.end(Hypre.ParDiagScale.SetIntParameter) */
+}
+
+/*
+ * Method:  SetStringParameter[]
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_Hypre_ParDiagScale_SetStringParameter"
+
+int32_t
+impl_Hypre_ParDiagScale_SetStringParameter(
+  Hypre_ParDiagScale self, const char* name, const char* value)
+{
+  /* DO-NOT-DELETE splicer.begin(Hypre.ParDiagScale.SetStringParameter) */
+  /* Insert the implementation of the SetStringParameter method here... */
+   /* hypre diagonal scaling has no parameters */
+  /* DO-NOT-DELETE splicer.end(Hypre.ParDiagScale.SetStringParameter) */
+}
+
+/*
+ * Method:  SetIntArrayParameter[]
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_Hypre_ParDiagScale_SetIntArrayParameter"
+
+int32_t
+impl_Hypre_ParDiagScale_SetIntArrayParameter(
+  Hypre_ParDiagScale self, const char* name, struct SIDL_int__array* value)
+{
+  /* DO-NOT-DELETE splicer.begin(Hypre.ParDiagScale.SetIntArrayParameter) */
+  /* Insert the implementation of the SetIntArrayParameter method here... */
+   /* hypre diagonal scaling has no parameters */
+  /* DO-NOT-DELETE splicer.end(Hypre.ParDiagScale.SetIntArrayParameter) */
+}
+
+/*
+ * Method:  SetDoubleArrayParameter[]
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_Hypre_ParDiagScale_SetDoubleArrayParameter"
+
+int32_t
+impl_Hypre_ParDiagScale_SetDoubleArrayParameter(
+  Hypre_ParDiagScale self, const char* name, struct SIDL_double__array* value)
+{
+  /* DO-NOT-DELETE splicer.begin(Hypre.ParDiagScale.SetDoubleArrayParameter) */
+  /* Insert the implementation of the SetDoubleArrayParameter method here... */
+   /* hypre diagonal scaling has no parameters */
+  /* DO-NOT-DELETE splicer.end(Hypre.ParDiagScale.SetDoubleArrayParameter) */
+}
+
+/*
+ * Method:  Setup[]
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_Hypre_ParDiagScale_Setup"
+
+int32_t
+impl_Hypre_ParDiagScale_Setup(
+  Hypre_ParDiagScale self, Hypre_Vector x, Hypre_Vector y)
+{
+  /* DO-NOT-DELETE splicer.begin(Hypre.ParDiagScale.Setup) */
+  /* Insert the implementation of the Setup method here... */
+   /* hypre diagonal scaling has no setup */
+  /* DO-NOT-DELETE splicer.end(Hypre.ParDiagScale.Setup) */
+}
+
+/*
+ * Method:  Apply[]
  */
 
 #undef __FUNC__
@@ -88,9 +248,7 @@ impl_Hypre_ParDiagScale__dtor(
 
 int32_t
 impl_Hypre_ParDiagScale_Apply(
-  Hypre_ParDiagScale self,
-  Hypre_Vector x,
-  Hypre_Vector* y)
+  Hypre_ParDiagScale self, Hypre_Vector x, Hypre_Vector* y)
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.ParDiagScale.Apply) */
   /* Insert the implementation of the Apply method here... */
@@ -152,185 +310,7 @@ impl_Hypre_ParDiagScale_Apply(
 }
 
 /*
- * Method:  GetDoubleValue
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_Hypre_ParDiagScale_GetDoubleValue"
-
-int32_t
-impl_Hypre_ParDiagScale_GetDoubleValue(
-  Hypre_ParDiagScale self,
-  const char* name,
-  double* value)
-{
-  /* DO-NOT-DELETE splicer.begin(Hypre.ParDiagScale.GetDoubleValue) */
-  /* Insert the implementation of the GetDoubleValue method here... */
-  /* DO-NOT-DELETE splicer.end(Hypre.ParDiagScale.GetDoubleValue) */
-}
-
-/*
- * Method:  GetIntValue
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_Hypre_ParDiagScale_GetIntValue"
-
-int32_t
-impl_Hypre_ParDiagScale_GetIntValue(
-  Hypre_ParDiagScale self,
-  const char* name,
-  int32_t* value)
-{
-  /* DO-NOT-DELETE splicer.begin(Hypre.ParDiagScale.GetIntValue) */
-  /* Insert the implementation of the GetIntValue method here... */
-  /* DO-NOT-DELETE splicer.end(Hypre.ParDiagScale.GetIntValue) */
-}
-
-/*
- * Method:  GetResidual
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_Hypre_ParDiagScale_GetResidual"
-
-int32_t
-impl_Hypre_ParDiagScale_GetResidual(
-  Hypre_ParDiagScale self,
-  Hypre_Vector* r)
-{
-  /* DO-NOT-DELETE splicer.begin(Hypre.ParDiagScale.GetResidual) */
-  /* Insert the implementation of the GetResidual method here... */
-   /* >>>>>>>>>>>> TO DO <<<<<<<<<<<<<<<<< 
-      but shouldn't be needed.  And it requires setting a log level flag,
-      allocating an array, etc. Much better for the user to do his own
-      computation. */
-   printf("***** Diagonal Scaling does not support GetResidual *****\n" );
-   return 1;
-  /* DO-NOT-DELETE splicer.end(Hypre.ParDiagScale.GetResidual) */
-}
-
-/*
- * Method:  SetCommunicator
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_Hypre_ParDiagScale_SetCommunicator"
-
-int32_t
-impl_Hypre_ParDiagScale_SetCommunicator(
-  Hypre_ParDiagScale self,
-  void* comm)
-{
-  /* DO-NOT-DELETE splicer.begin(Hypre.ParDiagScale.SetCommunicator) */
-  /* Insert the implementation of the SetCommunicator method here... */
-   int ierr = 0;
-   struct Hypre_ParDiagScale__data * data;
-   data = Hypre_ParDiagScale__get_data( self );
-   data -> comm = (MPI_Comm *) comm;
-   Hypre_ParDiagScale__set_data( self, data );
-
-   return ierr;
-  /* DO-NOT-DELETE splicer.end(Hypre.ParDiagScale.SetCommunicator) */
-}
-
-/*
- * Method:  SetDoubleArrayParameter
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_Hypre_ParDiagScale_SetDoubleArrayParameter"
-
-int32_t
-impl_Hypre_ParDiagScale_SetDoubleArrayParameter(
-  Hypre_ParDiagScale self,
-  const char* name,
-  struct SIDL_double__array* value)
-{
-  /* DO-NOT-DELETE splicer.begin(Hypre.ParDiagScale.SetDoubleArrayParameter) */
-  /* Insert the implementation of the SetDoubleArrayParameter method here... */
-   /* hypre diagonal scaling has no parameters */
-  /* DO-NOT-DELETE splicer.end(Hypre.ParDiagScale.SetDoubleArrayParameter) */
-}
-
-/*
- * Method:  SetDoubleParameter
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_Hypre_ParDiagScale_SetDoubleParameter"
-
-int32_t
-impl_Hypre_ParDiagScale_SetDoubleParameter(
-  Hypre_ParDiagScale self,
-  const char* name,
-  double value)
-{
-  /* DO-NOT-DELETE splicer.begin(Hypre.ParDiagScale.SetDoubleParameter) */
-  /* Insert the implementation of the SetDoubleParameter method here... */
-   /* hypre diagonal scaling has no parameters */
-  /* DO-NOT-DELETE splicer.end(Hypre.ParDiagScale.SetDoubleParameter) */
-}
-
-/*
- * Method:  SetIntArrayParameter
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_Hypre_ParDiagScale_SetIntArrayParameter"
-
-int32_t
-impl_Hypre_ParDiagScale_SetIntArrayParameter(
-  Hypre_ParDiagScale self,
-  const char* name,
-  struct SIDL_int__array* value)
-{
-  /* DO-NOT-DELETE splicer.begin(Hypre.ParDiagScale.SetIntArrayParameter) */
-  /* Insert the implementation of the SetIntArrayParameter method here... */
-   /* hypre diagonal scaling has no parameters */
-  /* DO-NOT-DELETE splicer.end(Hypre.ParDiagScale.SetIntArrayParameter) */
-}
-
-/*
- * Method:  SetIntParameter
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_Hypre_ParDiagScale_SetIntParameter"
-
-int32_t
-impl_Hypre_ParDiagScale_SetIntParameter(
-  Hypre_ParDiagScale self,
-  const char* name,
-  int32_t value)
-{
-  /* DO-NOT-DELETE splicer.begin(Hypre.ParDiagScale.SetIntParameter) */
-  /* Insert the implementation of the SetIntParameter method here... */
-   /* hypre diagonal scaling has no parameters */
-  /* DO-NOT-DELETE splicer.end(Hypre.ParDiagScale.SetIntParameter) */
-}
-
-/*
- * Method:  SetLogging
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_Hypre_ParDiagScale_SetLogging"
-
-int32_t
-impl_Hypre_ParDiagScale_SetLogging(
-  Hypre_ParDiagScale self,
-  int32_t level)
-{
-  /* DO-NOT-DELETE splicer.begin(Hypre.ParDiagScale.SetLogging) */
-  /* Insert the implementation of the SetLogging method here... */
-   /* hypre diagonal scaling does no logging */
-   return 0;
-  /* DO-NOT-DELETE splicer.end(Hypre.ParDiagScale.SetLogging) */
-}
-
-/*
- * Method:  SetOperator
+ * Method:  SetOperator[]
  */
 
 #undef __FUNC__
@@ -338,8 +318,7 @@ impl_Hypre_ParDiagScale_SetLogging(
 
 int32_t
 impl_Hypre_ParDiagScale_SetOperator(
-  Hypre_ParDiagScale self,
-  Hypre_Operator A)
+  Hypre_ParDiagScale self, Hypre_Operator A)
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.ParDiagScale.SetOperator) */
   /* Insert the implementation of the SetOperator method here... */
@@ -354,7 +333,47 @@ impl_Hypre_ParDiagScale_SetOperator(
 }
 
 /*
- * Method:  SetPrintLevel
+ * Method:  GetResidual[]
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_Hypre_ParDiagScale_GetResidual"
+
+int32_t
+impl_Hypre_ParDiagScale_GetResidual(
+  Hypre_ParDiagScale self, Hypre_Vector* r)
+{
+  /* DO-NOT-DELETE splicer.begin(Hypre.ParDiagScale.GetResidual) */
+  /* Insert the implementation of the GetResidual method here... */
+   /* >>>>>>>>>>>> TO DO <<<<<<<<<<<<<<<<< 
+      but shouldn't be needed.  And it requires setting a log level flag,
+      allocating an array, etc. Much better for the user to do his own
+      computation. */
+   printf("***** Diagonal Scaling does not support GetResidual *****\n" );
+   return 1;
+  /* DO-NOT-DELETE splicer.end(Hypre.ParDiagScale.GetResidual) */
+}
+
+/*
+ * Method:  SetLogging[]
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_Hypre_ParDiagScale_SetLogging"
+
+int32_t
+impl_Hypre_ParDiagScale_SetLogging(
+  Hypre_ParDiagScale self, int32_t level)
+{
+  /* DO-NOT-DELETE splicer.begin(Hypre.ParDiagScale.SetLogging) */
+  /* Insert the implementation of the SetLogging method here... */
+   /* hypre diagonal scaling does no logging */
+   return 0;
+  /* DO-NOT-DELETE splicer.end(Hypre.ParDiagScale.SetLogging) */
+}
+
+/*
+ * Method:  SetPrintLevel[]
  */
 
 #undef __FUNC__
@@ -362,49 +381,10 @@ impl_Hypre_ParDiagScale_SetOperator(
 
 int32_t
 impl_Hypre_ParDiagScale_SetPrintLevel(
-  Hypre_ParDiagScale self,
-  int32_t level)
+  Hypre_ParDiagScale self, int32_t level)
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.ParDiagScale.SetPrintLevel) */
   /* Insert the implementation of the SetPrintLevel method here... */
    /* hypre diagonal scaling does no printing */
   /* DO-NOT-DELETE splicer.end(Hypre.ParDiagScale.SetPrintLevel) */
-}
-
-/*
- * Method:  SetStringParameter
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_Hypre_ParDiagScale_SetStringParameter"
-
-int32_t
-impl_Hypre_ParDiagScale_SetStringParameter(
-  Hypre_ParDiagScale self,
-  const char* name,
-  const char* value)
-{
-  /* DO-NOT-DELETE splicer.begin(Hypre.ParDiagScale.SetStringParameter) */
-  /* Insert the implementation of the SetStringParameter method here... */
-   /* hypre diagonal scaling has no parameters */
-  /* DO-NOT-DELETE splicer.end(Hypre.ParDiagScale.SetStringParameter) */
-}
-
-/*
- * Method:  Setup
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_Hypre_ParDiagScale_Setup"
-
-int32_t
-impl_Hypre_ParDiagScale_Setup(
-  Hypre_ParDiagScale self,
-  Hypre_Vector x,
-  Hypre_Vector y)
-{
-  /* DO-NOT-DELETE splicer.begin(Hypre.ParDiagScale.Setup) */
-  /* Insert the implementation of the Setup method here... */
-   /* hypre diagonal scaling has no setup */
-  /* DO-NOT-DELETE splicer.end(Hypre.ParDiagScale.Setup) */
 }

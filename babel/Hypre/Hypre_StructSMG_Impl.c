@@ -2,13 +2,16 @@
  * File:          Hypre_StructSMG_Impl.c
  * Symbol:        Hypre.StructSMG-v0.1.5
  * Symbol Type:   class
- * Babel Version: 0.6.3
- * SIDL Created:  20021001 09:48:43 PDT
- * Generated:     20021001 09:48:52 PDT
+ * Babel Version: 0.7.4
+ * SIDL Created:  20021101 15:14:28 PST
+ * Generated:     20021101 15:14:37 PST
  * Description:   Server-side implementation for Hypre.StructSMG
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
+ * babel-version = 0.7.4
+ * source-line   = 457
+ * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 
 /*
@@ -59,78 +62,7 @@ impl_Hypre_StructSMG__dtor(
 }
 
 /*
- * Method:  Apply
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_Hypre_StructSMG_Apply"
-
-int32_t
-impl_Hypre_StructSMG_Apply(
-  Hypre_StructSMG self,
-  Hypre_Vector x,
-  Hypre_Vector* y)
-{
-  /* DO-NOT-DELETE splicer.begin(Hypre.StructSMG.Apply) */
-  /* Insert the implementation of the Apply method here... */
-  /* DO-NOT-DELETE splicer.end(Hypre.StructSMG.Apply) */
-}
-
-/*
- * Method:  GetDoubleValue
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_Hypre_StructSMG_GetDoubleValue"
-
-int32_t
-impl_Hypre_StructSMG_GetDoubleValue(
-  Hypre_StructSMG self,
-  const char* name,
-  double* value)
-{
-  /* DO-NOT-DELETE splicer.begin(Hypre.StructSMG.GetDoubleValue) */
-  /* Insert the implementation of the GetDoubleValue method here... */
-  /* DO-NOT-DELETE splicer.end(Hypre.StructSMG.GetDoubleValue) */
-}
-
-/*
- * Method:  GetIntValue
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_Hypre_StructSMG_GetIntValue"
-
-int32_t
-impl_Hypre_StructSMG_GetIntValue(
-  Hypre_StructSMG self,
-  const char* name,
-  int32_t* value)
-{
-  /* DO-NOT-DELETE splicer.begin(Hypre.StructSMG.GetIntValue) */
-  /* Insert the implementation of the GetIntValue method here... */
-  /* DO-NOT-DELETE splicer.end(Hypre.StructSMG.GetIntValue) */
-}
-
-/*
- * Method:  GetResidual
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_Hypre_StructSMG_GetResidual"
-
-int32_t
-impl_Hypre_StructSMG_GetResidual(
-  Hypre_StructSMG self,
-  Hypre_Vector* r)
-{
-  /* DO-NOT-DELETE splicer.begin(Hypre.StructSMG.GetResidual) */
-  /* Insert the implementation of the GetResidual method here... */
-  /* DO-NOT-DELETE splicer.end(Hypre.StructSMG.GetResidual) */
-}
-
-/*
- * Method:  SetCommunicator
+ * Method:  SetCommunicator[]
  */
 
 #undef __FUNC__
@@ -138,8 +70,7 @@ impl_Hypre_StructSMG_GetResidual(
 
 int32_t
 impl_Hypre_StructSMG_SetCommunicator(
-  Hypre_StructSMG self,
-  void* comm)
+  Hypre_StructSMG self, void* comm)
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.StructSMG.SetCommunicator) */
   /* Insert the implementation of the SetCommunicator method here... */
@@ -147,25 +78,39 @@ impl_Hypre_StructSMG_SetCommunicator(
 }
 
 /*
- * Method:  SetDoubleArrayParameter
+ * Method:  GetDoubleValue[]
  */
 
 #undef __FUNC__
-#define __FUNC__ "impl_Hypre_StructSMG_SetDoubleArrayParameter"
+#define __FUNC__ "impl_Hypre_StructSMG_GetDoubleValue"
 
 int32_t
-impl_Hypre_StructSMG_SetDoubleArrayParameter(
-  Hypre_StructSMG self,
-  const char* name,
-  struct SIDL_double__array* value)
+impl_Hypre_StructSMG_GetDoubleValue(
+  Hypre_StructSMG self, const char* name, double* value)
 {
-  /* DO-NOT-DELETE splicer.begin(Hypre.StructSMG.SetDoubleArrayParameter) */
-  /* Insert the implementation of the SetDoubleArrayParameter method here... */
-  /* DO-NOT-DELETE splicer.end(Hypre.StructSMG.SetDoubleArrayParameter) */
+  /* DO-NOT-DELETE splicer.begin(Hypre.StructSMG.GetDoubleValue) */
+  /* Insert the implementation of the GetDoubleValue method here... */
+  /* DO-NOT-DELETE splicer.end(Hypre.StructSMG.GetDoubleValue) */
 }
 
 /*
- * Method:  SetDoubleParameter
+ * Method:  GetIntValue[]
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_Hypre_StructSMG_GetIntValue"
+
+int32_t
+impl_Hypre_StructSMG_GetIntValue(
+  Hypre_StructSMG self, const char* name, int32_t* value)
+{
+  /* DO-NOT-DELETE splicer.begin(Hypre.StructSMG.GetIntValue) */
+  /* Insert the implementation of the GetIntValue method here... */
+  /* DO-NOT-DELETE splicer.end(Hypre.StructSMG.GetIntValue) */
+}
+
+/*
+ * Method:  SetDoubleParameter[]
  */
 
 #undef __FUNC__
@@ -173,9 +118,7 @@ impl_Hypre_StructSMG_SetDoubleArrayParameter(
 
 int32_t
 impl_Hypre_StructSMG_SetDoubleParameter(
-  Hypre_StructSMG self,
-  const char* name,
-  double value)
+  Hypre_StructSMG self, const char* name, double value)
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.StructSMG.SetDoubleParameter) */
   /* Insert the implementation of the SetDoubleParameter method here... */
@@ -183,25 +126,7 @@ impl_Hypre_StructSMG_SetDoubleParameter(
 }
 
 /*
- * Method:  SetIntArrayParameter
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_Hypre_StructSMG_SetIntArrayParameter"
-
-int32_t
-impl_Hypre_StructSMG_SetIntArrayParameter(
-  Hypre_StructSMG self,
-  const char* name,
-  struct SIDL_int__array* value)
-{
-  /* DO-NOT-DELETE splicer.begin(Hypre.StructSMG.SetIntArrayParameter) */
-  /* Insert the implementation of the SetIntArrayParameter method here... */
-  /* DO-NOT-DELETE splicer.end(Hypre.StructSMG.SetIntArrayParameter) */
-}
-
-/*
- * Method:  SetIntParameter
+ * Method:  SetIntParameter[]
  */
 
 #undef __FUNC__
@@ -209,9 +134,7 @@ impl_Hypre_StructSMG_SetIntArrayParameter(
 
 int32_t
 impl_Hypre_StructSMG_SetIntParameter(
-  Hypre_StructSMG self,
-  const char* name,
-  int32_t value)
+  Hypre_StructSMG self, const char* name, int32_t value)
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.StructSMG.SetIntParameter) */
   /* Insert the implementation of the SetIntParameter method here... */
@@ -219,58 +142,7 @@ impl_Hypre_StructSMG_SetIntParameter(
 }
 
 /*
- * Method:  SetLogging
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_Hypre_StructSMG_SetLogging"
-
-int32_t
-impl_Hypre_StructSMG_SetLogging(
-  Hypre_StructSMG self,
-  int32_t level)
-{
-  /* DO-NOT-DELETE splicer.begin(Hypre.StructSMG.SetLogging) */
-  /* Insert the implementation of the SetLogging method here... */
-  /* DO-NOT-DELETE splicer.end(Hypre.StructSMG.SetLogging) */
-}
-
-/*
- * Method:  SetOperator
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_Hypre_StructSMG_SetOperator"
-
-int32_t
-impl_Hypre_StructSMG_SetOperator(
-  Hypre_StructSMG self,
-  Hypre_Operator A)
-{
-  /* DO-NOT-DELETE splicer.begin(Hypre.StructSMG.SetOperator) */
-  /* Insert the implementation of the SetOperator method here... */
-  /* DO-NOT-DELETE splicer.end(Hypre.StructSMG.SetOperator) */
-}
-
-/*
- * Method:  SetPrintLevel
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_Hypre_StructSMG_SetPrintLevel"
-
-int32_t
-impl_Hypre_StructSMG_SetPrintLevel(
-  Hypre_StructSMG self,
-  int32_t level)
-{
-  /* DO-NOT-DELETE splicer.begin(Hypre.StructSMG.SetPrintLevel) */
-  /* Insert the implementation of the SetPrintLevel method here... */
-  /* DO-NOT-DELETE splicer.end(Hypre.StructSMG.SetPrintLevel) */
-}
-
-/*
- * Method:  SetStringParameter
+ * Method:  SetStringParameter[]
  */
 
 #undef __FUNC__
@@ -278,9 +150,7 @@ impl_Hypre_StructSMG_SetPrintLevel(
 
 int32_t
 impl_Hypre_StructSMG_SetStringParameter(
-  Hypre_StructSMG self,
-  const char* name,
-  const char* value)
+  Hypre_StructSMG self, const char* name, const char* value)
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.StructSMG.SetStringParameter) */
   /* Insert the implementation of the SetStringParameter method here... */
@@ -288,7 +158,39 @@ impl_Hypre_StructSMG_SetStringParameter(
 }
 
 /*
- * Method:  Setup
+ * Method:  SetIntArrayParameter[]
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_Hypre_StructSMG_SetIntArrayParameter"
+
+int32_t
+impl_Hypre_StructSMG_SetIntArrayParameter(
+  Hypre_StructSMG self, const char* name, struct SIDL_int__array* value)
+{
+  /* DO-NOT-DELETE splicer.begin(Hypre.StructSMG.SetIntArrayParameter) */
+  /* Insert the implementation of the SetIntArrayParameter method here... */
+  /* DO-NOT-DELETE splicer.end(Hypre.StructSMG.SetIntArrayParameter) */
+}
+
+/*
+ * Method:  SetDoubleArrayParameter[]
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_Hypre_StructSMG_SetDoubleArrayParameter"
+
+int32_t
+impl_Hypre_StructSMG_SetDoubleArrayParameter(
+  Hypre_StructSMG self, const char* name, struct SIDL_double__array* value)
+{
+  /* DO-NOT-DELETE splicer.begin(Hypre.StructSMG.SetDoubleArrayParameter) */
+  /* Insert the implementation of the SetDoubleArrayParameter method here... */
+  /* DO-NOT-DELETE splicer.end(Hypre.StructSMG.SetDoubleArrayParameter) */
+}
+
+/*
+ * Method:  Setup[]
  */
 
 #undef __FUNC__
@@ -296,14 +198,100 @@ impl_Hypre_StructSMG_SetStringParameter(
 
 int32_t
 impl_Hypre_StructSMG_Setup(
-  Hypre_StructSMG self,
-  Hypre_Vector x,
-  Hypre_Vector y)
+  Hypre_StructSMG self, Hypre_Vector x, Hypre_Vector y)
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.StructSMG.Setup) */
   /* Insert the implementation of the Setup method here... */
   /* DO-NOT-DELETE splicer.end(Hypre.StructSMG.Setup) */
 }
+
+/*
+ * Method:  Apply[]
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_Hypre_StructSMG_Apply"
+
+int32_t
+impl_Hypre_StructSMG_Apply(
+  Hypre_StructSMG self, Hypre_Vector x, Hypre_Vector* y)
+{
+  /* DO-NOT-DELETE splicer.begin(Hypre.StructSMG.Apply) */
+  /* Insert the implementation of the Apply method here... */
+  /* DO-NOT-DELETE splicer.end(Hypre.StructSMG.Apply) */
+}
+
+/*
+ * Method:  SetOperator[]
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_Hypre_StructSMG_SetOperator"
+
+int32_t
+impl_Hypre_StructSMG_SetOperator(
+  Hypre_StructSMG self, Hypre_Operator A)
+{
+  /* DO-NOT-DELETE splicer.begin(Hypre.StructSMG.SetOperator) */
+  /* Insert the implementation of the SetOperator method here... */
+  /* DO-NOT-DELETE splicer.end(Hypre.StructSMG.SetOperator) */
+}
+
+/*
+ * Method:  GetResidual[]
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_Hypre_StructSMG_GetResidual"
+
+int32_t
+impl_Hypre_StructSMG_GetResidual(
+  Hypre_StructSMG self, Hypre_Vector* r)
+{
+  /* DO-NOT-DELETE splicer.begin(Hypre.StructSMG.GetResidual) */
+  /* Insert the implementation of the GetResidual method here... */
+  /* DO-NOT-DELETE splicer.end(Hypre.StructSMG.GetResidual) */
+}
+
+/*
+ * Method:  SetLogging[]
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_Hypre_StructSMG_SetLogging"
+
+int32_t
+impl_Hypre_StructSMG_SetLogging(
+  Hypre_StructSMG self, int32_t level)
+{
+  /* DO-NOT-DELETE splicer.begin(Hypre.StructSMG.SetLogging) */
+  /* Insert the implementation of the SetLogging method here... */
+  /* DO-NOT-DELETE splicer.end(Hypre.StructSMG.SetLogging) */
+}
+
+/*
+ * Method:  SetPrintLevel[]
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_Hypre_StructSMG_SetPrintLevel"
+
+int32_t
+impl_Hypre_StructSMG_SetPrintLevel(
+  Hypre_StructSMG self, int32_t level)
+{
+  /* DO-NOT-DELETE splicer.begin(Hypre.StructSMG.SetPrintLevel) */
+  /* Insert the implementation of the SetPrintLevel method here... */
+  /* DO-NOT-DELETE splicer.end(Hypre.StructSMG.SetPrintLevel) */
+}
+
+/**
+ * ================= BEGIN UNREFERENCED METHOD(S) ================
+ * The following code segment(s) belong to unreferenced method(s).
+ * This can result from a method rename/removal in the SIDL file.
+ * Move or remove the code in order to compile cleanly.
+ */
   /* DO-NOT-DELETE splicer.begin(Hypre.StructSMG.SetParameter) */
   /* Insert the implementation of the SetParameter method here... */
   /* DO-NOT-DELETE splicer.end(Hypre.StructSMG.SetParameter) */
+/* ================== END UNREFERENCED METHOD(S) ================= */

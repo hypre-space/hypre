@@ -2,13 +2,16 @@
  * File:          Hypre_StructGrid_Impl.h
  * Symbol:        Hypre.StructGrid-v0.1.5
  * Symbol Type:   class
- * Babel Version: 0.6.3
- * SIDL Created:  20021001 09:48:43 PDT
- * Generated:     20021001 09:48:52 PDT
+ * Babel Version: 0.7.4
+ * SIDL Created:  20021101 15:14:28 PST
+ * Generated:     20021101 15:14:35 PST
  * Description:   Server-side implementation for Hypre.StructGrid
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
+ * babel-version = 0.7.4
+ * source-line   = 409
+ * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 
 #ifndef included_Hypre_StructGrid_Impl_h
@@ -66,10 +69,6 @@ impl_Hypre_StructGrid__dtor(
  */
 
 extern int32_t
-impl_Hypre_StructGrid_Assemble(
-  Hypre_StructGrid);
-
-extern int32_t
 impl_Hypre_StructGrid_SetCommunicator(
   Hypre_StructGrid,
   void*);
@@ -89,6 +88,10 @@ extern int32_t
 impl_Hypre_StructGrid_SetPeriodic(
   Hypre_StructGrid,
   struct SIDL_int__array*);
+
+extern int32_t
+impl_Hypre_StructGrid_Assemble(
+  Hypre_StructGrid);
 
 #ifdef __cplusplus
 }

@@ -2,13 +2,16 @@
  * File:          Hypre_StructToIJMatrix_Impl.c
  * Symbol:        Hypre.StructToIJMatrix-v0.1.5
  * Symbol Type:   class
- * Babel Version: 0.6.3
- * SIDL Created:  20021001 09:48:43 PDT
- * Generated:     20021001 09:48:53 PDT
+ * Babel Version: 0.7.4
+ * SIDL Created:  20021101 15:14:28 PST
+ * Generated:     20021101 15:14:35 PST
  * Description:   Server-side implementation for Hypre.StructToIJMatrix
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
+ * babel-version = 0.7.4
+ * source-line   = 445
+ * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 
 /*
@@ -64,6 +67,57 @@ impl_Hypre_StructToIJMatrix__dtor(
 }
 
 /*
+ * Method:  SetIJMatrix[]
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_Hypre_StructToIJMatrix_SetIJMatrix"
+
+int32_t
+impl_Hypre_StructToIJMatrix_SetIJMatrix(
+  Hypre_StructToIJMatrix self, Hypre_IJBuildMatrix I)
+{
+  /* DO-NOT-DELETE splicer.begin(Hypre.StructToIJMatrix.SetIJMatrix) */
+  /* Insert the implementation of the SetIJMatrix method here... */
+  /* DO-NOT-DELETE splicer.end(Hypre.StructToIJMatrix.SetIJMatrix) */
+}
+
+/*
+ * Method:  SetCommunicator[]
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_Hypre_StructToIJMatrix_SetCommunicator"
+
+int32_t
+impl_Hypre_StructToIJMatrix_SetCommunicator(
+  Hypre_StructToIJMatrix self, void* mpi_comm)
+{
+  /* DO-NOT-DELETE splicer.begin(Hypre.StructToIJMatrix.SetCommunicator) */
+  /* Insert the implementation of the SetCommunicator method here... */
+  /* DO-NOT-DELETE splicer.end(Hypre.StructToIJMatrix.SetCommunicator) */
+}
+
+/*
+ * Prepare an object for setting coefficient values, whether for
+ * the first time or subsequently.
+ * 
+ * 
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_Hypre_StructToIJMatrix_Initialize"
+
+int32_t
+impl_Hypre_StructToIJMatrix_Initialize(
+  Hypre_StructToIJMatrix self)
+{
+  /* DO-NOT-DELETE splicer.begin(Hypre.StructToIJMatrix.Initialize) */
+  /* Insert the implementation of the Initialize method here... */
+  /* DO-NOT-DELETE splicer.end(Hypre.StructToIJMatrix.Initialize) */
+}
+
+/*
  * Finalize the construction of an object before using, either for
  * the first time or on subsequent uses. "Initialize" and "Assemble"
  * always appear in a matched set, with Initialize preceding Assemble. Values
@@ -101,8 +155,7 @@ impl_Hypre_StructToIJMatrix_Assemble(
 
 int32_t
 impl_Hypre_StructToIJMatrix_GetObject(
-  Hypre_StructToIJMatrix self,
-  SIDL_BaseInterface* A)
+  Hypre_StructToIJMatrix self, SIDL_BaseInterface* A)
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.StructToIJMatrix.GetObject) */
   /* Insert the implementation of the GetObject method here... */
@@ -110,64 +163,7 @@ impl_Hypre_StructToIJMatrix_GetObject(
 }
 
 /*
- * Prepare an object for setting coefficient values, whether for
- * the first time or subsequently.
- * 
- * 
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_Hypre_StructToIJMatrix_Initialize"
-
-int32_t
-impl_Hypre_StructToIJMatrix_Initialize(
-  Hypre_StructToIJMatrix self)
-{
-  /* DO-NOT-DELETE splicer.begin(Hypre.StructToIJMatrix.Initialize) */
-  /* Insert the implementation of the Initialize method here... */
-  /* DO-NOT-DELETE splicer.end(Hypre.StructToIJMatrix.Initialize) */
-}
-
-/*
- * Method:  SetBoxValues
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_Hypre_StructToIJMatrix_SetBoxValues"
-
-int32_t
-impl_Hypre_StructToIJMatrix_SetBoxValues(
-  Hypre_StructToIJMatrix self,
-  struct SIDL_int__array* ilower,
-  struct SIDL_int__array* iupper,
-  int32_t num_stencil_indices,
-  struct SIDL_int__array* stencil_indices,
-  struct SIDL_double__array* values)
-{
-  /* DO-NOT-DELETE splicer.begin(Hypre.StructToIJMatrix.SetBoxValues) */
-  /* Insert the implementation of the SetBoxValues method here... */
-  /* DO-NOT-DELETE splicer.end(Hypre.StructToIJMatrix.SetBoxValues) */
-}
-
-/*
- * Method:  SetCommunicator
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_Hypre_StructToIJMatrix_SetCommunicator"
-
-int32_t
-impl_Hypre_StructToIJMatrix_SetCommunicator(
-  Hypre_StructToIJMatrix self,
-  void* mpi_comm)
-{
-  /* DO-NOT-DELETE splicer.begin(Hypre.StructToIJMatrix.SetCommunicator) */
-  /* Insert the implementation of the SetCommunicator method here... */
-  /* DO-NOT-DELETE splicer.end(Hypre.StructToIJMatrix.SetCommunicator) */
-}
-
-/*
- * Method:  SetGrid
+ * Method:  SetGrid[]
  */
 
 #undef __FUNC__
@@ -175,8 +171,7 @@ impl_Hypre_StructToIJMatrix_SetCommunicator(
 
 int32_t
 impl_Hypre_StructToIJMatrix_SetGrid(
-  Hypre_StructToIJMatrix self,
-  Hypre_StructGrid grid)
+  Hypre_StructToIJMatrix self, Hypre_StructGrid grid)
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.StructToIJMatrix.SetGrid) */
   /* Insert the implementation of the SetGrid method here... */
@@ -184,41 +179,7 @@ impl_Hypre_StructToIJMatrix_SetGrid(
 }
 
 /*
- * Method:  SetIJMatrix
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_Hypre_StructToIJMatrix_SetIJMatrix"
-
-int32_t
-impl_Hypre_StructToIJMatrix_SetIJMatrix(
-  Hypre_StructToIJMatrix self,
-  Hypre_IJBuildMatrix I)
-{
-  /* DO-NOT-DELETE splicer.begin(Hypre.StructToIJMatrix.SetIJMatrix) */
-  /* Insert the implementation of the SetIJMatrix method here... */
-  /* DO-NOT-DELETE splicer.end(Hypre.StructToIJMatrix.SetIJMatrix) */
-}
-
-/*
- * Method:  SetNumGhost
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_Hypre_StructToIJMatrix_SetNumGhost"
-
-int32_t
-impl_Hypre_StructToIJMatrix_SetNumGhost(
-  Hypre_StructToIJMatrix self,
-  struct SIDL_int__array* num_ghost)
-{
-  /* DO-NOT-DELETE splicer.begin(Hypre.StructToIJMatrix.SetNumGhost) */
-  /* Insert the implementation of the SetNumGhost method here... */
-  /* DO-NOT-DELETE splicer.end(Hypre.StructToIJMatrix.SetNumGhost) */
-}
-
-/*
- * Method:  SetStencil
+ * Method:  SetStencil[]
  */
 
 #undef __FUNC__
@@ -226,8 +187,7 @@ impl_Hypre_StructToIJMatrix_SetNumGhost(
 
 int32_t
 impl_Hypre_StructToIJMatrix_SetStencil(
-  Hypre_StructToIJMatrix self,
-  Hypre_StructStencil stencil)
+  Hypre_StructToIJMatrix self, Hypre_StructStencil stencil)
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.StructToIJMatrix.SetStencil) */
   /* Insert the implementation of the SetStencil method here... */
@@ -235,24 +195,7 @@ impl_Hypre_StructToIJMatrix_SetStencil(
 }
 
 /*
- * Method:  SetSymmetric
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_Hypre_StructToIJMatrix_SetSymmetric"
-
-int32_t
-impl_Hypre_StructToIJMatrix_SetSymmetric(
-  Hypre_StructToIJMatrix self,
-  int32_t symmetric)
-{
-  /* DO-NOT-DELETE splicer.begin(Hypre.StructToIJMatrix.SetSymmetric) */
-  /* Insert the implementation of the SetSymmetric method here... */
-  /* DO-NOT-DELETE splicer.end(Hypre.StructToIJMatrix.SetSymmetric) */
-}
-
-/*
- * Method:  SetValues
+ * Method:  SetValues[]
  */
 
 #undef __FUNC__
@@ -260,13 +203,61 @@ impl_Hypre_StructToIJMatrix_SetSymmetric(
 
 int32_t
 impl_Hypre_StructToIJMatrix_SetValues(
-  Hypre_StructToIJMatrix self,
-  struct SIDL_int__array* index,
-  int32_t num_stencil_indices,
-  struct SIDL_int__array* stencil_indices,
-  struct SIDL_double__array* values)
+  Hypre_StructToIJMatrix self, struct SIDL_int__array* index,
+    int32_t num_stencil_indices, struct SIDL_int__array* stencil_indices,
+    struct SIDL_double__array* values)
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.StructToIJMatrix.SetValues) */
   /* Insert the implementation of the SetValues method here... */
   /* DO-NOT-DELETE splicer.end(Hypre.StructToIJMatrix.SetValues) */
+}
+
+/*
+ * Method:  SetBoxValues[]
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_Hypre_StructToIJMatrix_SetBoxValues"
+
+int32_t
+impl_Hypre_StructToIJMatrix_SetBoxValues(
+  Hypre_StructToIJMatrix self, struct SIDL_int__array* ilower,
+    struct SIDL_int__array* iupper, int32_t num_stencil_indices,
+    struct SIDL_int__array* stencil_indices, struct SIDL_double__array* values)
+{
+  /* DO-NOT-DELETE splicer.begin(Hypre.StructToIJMatrix.SetBoxValues) */
+  /* Insert the implementation of the SetBoxValues method here... */
+  /* DO-NOT-DELETE splicer.end(Hypre.StructToIJMatrix.SetBoxValues) */
+}
+
+/*
+ * Method:  SetNumGhost[]
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_Hypre_StructToIJMatrix_SetNumGhost"
+
+int32_t
+impl_Hypre_StructToIJMatrix_SetNumGhost(
+  Hypre_StructToIJMatrix self, struct SIDL_int__array* num_ghost)
+{
+  /* DO-NOT-DELETE splicer.begin(Hypre.StructToIJMatrix.SetNumGhost) */
+  /* Insert the implementation of the SetNumGhost method here... */
+  /* DO-NOT-DELETE splicer.end(Hypre.StructToIJMatrix.SetNumGhost) */
+}
+
+/*
+ * Method:  SetSymmetric[]
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_Hypre_StructToIJMatrix_SetSymmetric"
+
+int32_t
+impl_Hypre_StructToIJMatrix_SetSymmetric(
+  Hypre_StructToIJMatrix self, int32_t symmetric)
+{
+  /* DO-NOT-DELETE splicer.begin(Hypre.StructToIJMatrix.SetSymmetric) */
+  /* Insert the implementation of the SetSymmetric method here... */
+  /* DO-NOT-DELETE splicer.end(Hypre.StructToIJMatrix.SetSymmetric) */
 }

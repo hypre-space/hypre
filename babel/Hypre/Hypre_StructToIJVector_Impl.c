@@ -2,13 +2,16 @@
  * File:          Hypre_StructToIJVector_Impl.c
  * Symbol:        Hypre.StructToIJVector-v0.1.5
  * Symbol Type:   class
- * Babel Version: 0.6.3
- * SIDL Created:  20021001 09:48:43 PDT
- * Generated:     20021001 09:48:53 PDT
+ * Babel Version: 0.7.4
+ * SIDL Created:  20021101 15:14:28 PST
+ * Generated:     20021101 15:14:36 PST
  * Description:   Server-side implementation for Hypre.StructToIJVector
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
+ * babel-version = 0.7.4
+ * source-line   = 450
+ * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 
 /*
@@ -59,6 +62,57 @@ impl_Hypre_StructToIJVector__dtor(
 }
 
 /*
+ * Method:  SetIJVector[]
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_Hypre_StructToIJVector_SetIJVector"
+
+int32_t
+impl_Hypre_StructToIJVector_SetIJVector(
+  Hypre_StructToIJVector self, Hypre_IJBuildVector I)
+{
+  /* DO-NOT-DELETE splicer.begin(Hypre.StructToIJVector.SetIJVector) */
+  /* Insert the implementation of the SetIJVector method here... */
+  /* DO-NOT-DELETE splicer.end(Hypre.StructToIJVector.SetIJVector) */
+}
+
+/*
+ * Method:  SetCommunicator[]
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_Hypre_StructToIJVector_SetCommunicator"
+
+int32_t
+impl_Hypre_StructToIJVector_SetCommunicator(
+  Hypre_StructToIJVector self, void* mpi_comm)
+{
+  /* DO-NOT-DELETE splicer.begin(Hypre.StructToIJVector.SetCommunicator) */
+  /* Insert the implementation of the SetCommunicator method here... */
+  /* DO-NOT-DELETE splicer.end(Hypre.StructToIJVector.SetCommunicator) */
+}
+
+/*
+ * Prepare an object for setting coefficient values, whether for
+ * the first time or subsequently.
+ * 
+ * 
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_Hypre_StructToIJVector_Initialize"
+
+int32_t
+impl_Hypre_StructToIJVector_Initialize(
+  Hypre_StructToIJVector self)
+{
+  /* DO-NOT-DELETE splicer.begin(Hypre.StructToIJVector.Initialize) */
+  /* Insert the implementation of the Initialize method here... */
+  /* DO-NOT-DELETE splicer.end(Hypre.StructToIJVector.Initialize) */
+}
+
+/*
  * Finalize the construction of an object before using, either for
  * the first time or on subsequent uses. "Initialize" and "Assemble"
  * always appear in a matched set, with Initialize preceding Assemble. Values
@@ -96,8 +150,7 @@ impl_Hypre_StructToIJVector_Assemble(
 
 int32_t
 impl_Hypre_StructToIJVector_GetObject(
-  Hypre_StructToIJVector self,
-  SIDL_BaseInterface* A)
+  Hypre_StructToIJVector self, SIDL_BaseInterface* A)
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.StructToIJVector.GetObject) */
   /* Insert the implementation of the GetObject method here... */
@@ -105,62 +158,7 @@ impl_Hypre_StructToIJVector_GetObject(
 }
 
 /*
- * Prepare an object for setting coefficient values, whether for
- * the first time or subsequently.
- * 
- * 
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_Hypre_StructToIJVector_Initialize"
-
-int32_t
-impl_Hypre_StructToIJVector_Initialize(
-  Hypre_StructToIJVector self)
-{
-  /* DO-NOT-DELETE splicer.begin(Hypre.StructToIJVector.Initialize) */
-  /* Insert the implementation of the Initialize method here... */
-  /* DO-NOT-DELETE splicer.end(Hypre.StructToIJVector.Initialize) */
-}
-
-/*
- * Method:  SetBoxValues
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_Hypre_StructToIJVector_SetBoxValues"
-
-int32_t
-impl_Hypre_StructToIJVector_SetBoxValues(
-  Hypre_StructToIJVector self,
-  struct SIDL_int__array* ilower,
-  struct SIDL_int__array* iupper,
-  struct SIDL_double__array* values)
-{
-  /* DO-NOT-DELETE splicer.begin(Hypre.StructToIJVector.SetBoxValues) */
-  /* Insert the implementation of the SetBoxValues method here... */
-  /* DO-NOT-DELETE splicer.end(Hypre.StructToIJVector.SetBoxValues) */
-}
-
-/*
- * Method:  SetCommunicator
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_Hypre_StructToIJVector_SetCommunicator"
-
-int32_t
-impl_Hypre_StructToIJVector_SetCommunicator(
-  Hypre_StructToIJVector self,
-  void* mpi_comm)
-{
-  /* DO-NOT-DELETE splicer.begin(Hypre.StructToIJVector.SetCommunicator) */
-  /* Insert the implementation of the SetCommunicator method here... */
-  /* DO-NOT-DELETE splicer.end(Hypre.StructToIJVector.SetCommunicator) */
-}
-
-/*
- * Method:  SetGrid
+ * Method:  SetGrid[]
  */
 
 #undef __FUNC__
@@ -168,8 +166,7 @@ impl_Hypre_StructToIJVector_SetCommunicator(
 
 int32_t
 impl_Hypre_StructToIJVector_SetGrid(
-  Hypre_StructToIJVector self,
-  Hypre_StructGrid grid)
+  Hypre_StructToIJVector self, Hypre_StructGrid grid)
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.StructToIJVector.SetGrid) */
   /* Insert the implementation of the SetGrid method here... */
@@ -177,24 +174,7 @@ impl_Hypre_StructToIJVector_SetGrid(
 }
 
 /*
- * Method:  SetIJVector
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_Hypre_StructToIJVector_SetIJVector"
-
-int32_t
-impl_Hypre_StructToIJVector_SetIJVector(
-  Hypre_StructToIJVector self,
-  Hypre_IJBuildVector I)
-{
-  /* DO-NOT-DELETE splicer.begin(Hypre.StructToIJVector.SetIJVector) */
-  /* Insert the implementation of the SetIJVector method here... */
-  /* DO-NOT-DELETE splicer.end(Hypre.StructToIJVector.SetIJVector) */
-}
-
-/*
- * Method:  SetStencil
+ * Method:  SetStencil[]
  */
 
 #undef __FUNC__
@@ -202,8 +182,7 @@ impl_Hypre_StructToIJVector_SetIJVector(
 
 int32_t
 impl_Hypre_StructToIJVector_SetStencil(
-  Hypre_StructToIJVector self,
-  Hypre_StructStencil stencil)
+  Hypre_StructToIJVector self, Hypre_StructStencil stencil)
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.StructToIJVector.SetStencil) */
   /* Insert the implementation of the SetStencil method here... */
@@ -211,7 +190,7 @@ impl_Hypre_StructToIJVector_SetStencil(
 }
 
 /*
- * Method:  SetValue
+ * Method:  SetValue[]
  */
 
 #undef __FUNC__
@@ -219,11 +198,26 @@ impl_Hypre_StructToIJVector_SetStencil(
 
 int32_t
 impl_Hypre_StructToIJVector_SetValue(
-  Hypre_StructToIJVector self,
-  struct SIDL_int__array* grid_index,
-  double value)
+  Hypre_StructToIJVector self, struct SIDL_int__array* grid_index, double value)
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.StructToIJVector.SetValue) */
   /* Insert the implementation of the SetValue method here... */
   /* DO-NOT-DELETE splicer.end(Hypre.StructToIJVector.SetValue) */
+}
+
+/*
+ * Method:  SetBoxValues[]
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_Hypre_StructToIJVector_SetBoxValues"
+
+int32_t
+impl_Hypre_StructToIJVector_SetBoxValues(
+  Hypre_StructToIJVector self, struct SIDL_int__array* ilower,
+    struct SIDL_int__array* iupper, struct SIDL_double__array* values)
+{
+  /* DO-NOT-DELETE splicer.begin(Hypre.StructToIJVector.SetBoxValues) */
+  /* Insert the implementation of the SetBoxValues method here... */
+  /* DO-NOT-DELETE splicer.end(Hypre.StructToIJVector.SetBoxValues) */
 }

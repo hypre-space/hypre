@@ -2,13 +2,16 @@
  * File:          Hypre_StructToIJVector_Impl.h
  * Symbol:        Hypre.StructToIJVector-v0.1.5
  * Symbol Type:   class
- * Babel Version: 0.6.3
- * SIDL Created:  20021001 09:48:43 PDT
- * Generated:     20021001 09:48:53 PDT
+ * Babel Version: 0.7.4
+ * SIDL Created:  20021101 15:14:28 PST
+ * Generated:     20021101 15:14:36 PST
  * Description:   Server-side implementation for Hypre.StructToIJVector
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
+ * babel-version = 0.7.4
+ * source-line   = 450
+ * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 
 #ifndef included_Hypre_StructToIJVector_Impl_h
@@ -17,20 +20,20 @@
 #ifndef included_SIDL_header_h
 #include "SIDL_header.h"
 #endif
+#ifndef included_Hypre_StructGrid_h
+#include "Hypre_StructGrid.h"
+#endif
+#ifndef included_Hypre_StructToIJVector_h
+#include "Hypre_StructToIJVector.h"
+#endif
+#ifndef included_Hypre_IJBuildVector_h
+#include "Hypre_IJBuildVector.h"
+#endif
 #ifndef included_Hypre_StructStencil_h
 #include "Hypre_StructStencil.h"
 #endif
 #ifndef included_SIDL_BaseInterface_h
 #include "SIDL_BaseInterface.h"
-#endif
-#ifndef included_Hypre_StructGrid_h
-#include "Hypre_StructGrid.h"
-#endif
-#ifndef included_Hypre_IJBuildVector_h
-#include "Hypre_IJBuildVector.h"
-#endif
-#ifndef included_Hypre_StructToIJVector_h
-#include "Hypre_StructToIJVector.h"
 #endif
 
 /* DO-NOT-DELETE splicer.begin(Hypre.StructToIJVector._includes) */
@@ -78,6 +81,20 @@ impl_Hypre_StructToIJVector__dtor(
  */
 
 extern int32_t
+impl_Hypre_StructToIJVector_SetIJVector(
+  Hypre_StructToIJVector,
+  Hypre_IJBuildVector);
+
+extern int32_t
+impl_Hypre_StructToIJVector_SetCommunicator(
+  Hypre_StructToIJVector,
+  void*);
+
+extern int32_t
+impl_Hypre_StructToIJVector_Initialize(
+  Hypre_StructToIJVector);
+
+extern int32_t
 impl_Hypre_StructToIJVector_Assemble(
   Hypre_StructToIJVector);
 
@@ -87,30 +104,9 @@ impl_Hypre_StructToIJVector_GetObject(
   SIDL_BaseInterface*);
 
 extern int32_t
-impl_Hypre_StructToIJVector_Initialize(
-  Hypre_StructToIJVector);
-
-extern int32_t
-impl_Hypre_StructToIJVector_SetBoxValues(
-  Hypre_StructToIJVector,
-  struct SIDL_int__array*,
-  struct SIDL_int__array*,
-  struct SIDL_double__array*);
-
-extern int32_t
-impl_Hypre_StructToIJVector_SetCommunicator(
-  Hypre_StructToIJVector,
-  void*);
-
-extern int32_t
 impl_Hypre_StructToIJVector_SetGrid(
   Hypre_StructToIJVector,
   Hypre_StructGrid);
-
-extern int32_t
-impl_Hypre_StructToIJVector_SetIJVector(
-  Hypre_StructToIJVector,
-  Hypre_IJBuildVector);
 
 extern int32_t
 impl_Hypre_StructToIJVector_SetStencil(
@@ -122,6 +118,13 @@ impl_Hypre_StructToIJVector_SetValue(
   Hypre_StructToIJVector,
   struct SIDL_int__array*,
   double);
+
+extern int32_t
+impl_Hypre_StructToIJVector_SetBoxValues(
+  Hypre_StructToIJVector,
+  struct SIDL_int__array*,
+  struct SIDL_int__array*,
+  struct SIDL_double__array*);
 
 #ifdef __cplusplus
 }

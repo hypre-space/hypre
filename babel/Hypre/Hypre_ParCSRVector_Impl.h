@@ -2,13 +2,16 @@
  * File:          Hypre_ParCSRVector_Impl.h
  * Symbol:        Hypre.ParCSRVector-v0.1.5
  * Symbol Type:   class
- * Babel Version: 0.6.3
- * SIDL Created:  20021001 09:48:43 PDT
- * Generated:     20021001 09:48:54 PDT
+ * Babel Version: 0.7.4
+ * SIDL Created:  20021101 15:14:28 PST
+ * Generated:     20021101 15:14:36 PST
  * Description:   Server-side implementation for Hypre.ParCSRVector
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
+ * babel-version = 0.7.4
+ * source-line   = 436
+ * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 
 #ifndef included_Hypre_ParCSRVector_Impl_h
@@ -20,11 +23,11 @@
 #ifndef included_Hypre_Vector_h
 #include "Hypre_Vector.h"
 #endif
-#ifndef included_SIDL_BaseInterface_h
-#include "SIDL_BaseInterface.h"
-#endif
 #ifndef included_Hypre_ParCSRVector_h
 #include "Hypre_ParCSRVector.h"
+#endif
+#ifndef included_SIDL_BaseInterface_h
+#include "SIDL_BaseInterface.h"
 #endif
 
 /* DO-NOT-DELETE splicer.begin(Hypre.ParCSRVector._includes) */
@@ -76,71 +79,6 @@ impl_Hypre_ParCSRVector__dtor(
  */
 
 extern int32_t
-impl_Hypre_ParCSRVector_AddToLocalComponentsInBlock(
-  Hypre_ParCSRVector,
-  int32_t,
-  int32_t,
-  struct SIDL_int__array*,
-  struct SIDL_double__array*);
-
-extern int32_t
-impl_Hypre_ParCSRVector_AddToValues(
-  Hypre_ParCSRVector,
-  int32_t,
-  struct SIDL_int__array*,
-  struct SIDL_double__array*);
-
-extern int32_t
-impl_Hypre_ParCSRVector_AddtoLocalComponents(
-  Hypre_ParCSRVector,
-  int32_t,
-  struct SIDL_int__array*,
-  struct SIDL_int__array*,
-  struct SIDL_double__array*);
-
-extern int32_t
-impl_Hypre_ParCSRVector_Assemble(
-  Hypre_ParCSRVector);
-
-extern int32_t
-impl_Hypre_ParCSRVector_Axpy(
-  Hypre_ParCSRVector,
-  double,
-  Hypre_Vector);
-
-extern int32_t
-impl_Hypre_ParCSRVector_Clear(
-  Hypre_ParCSRVector);
-
-extern int32_t
-impl_Hypre_ParCSRVector_Clone(
-  Hypre_ParCSRVector,
-  Hypre_Vector*);
-
-extern int32_t
-impl_Hypre_ParCSRVector_Copy(
-  Hypre_ParCSRVector,
-  Hypre_Vector);
-
-extern int32_t
-impl_Hypre_ParCSRVector_Create(
-  Hypre_ParCSRVector,
-  void*,
-  int32_t,
-  int32_t);
-
-extern int32_t
-impl_Hypre_ParCSRVector_Dot(
-  Hypre_ParCSRVector,
-  Hypre_Vector,
-  double*);
-
-extern int32_t
-impl_Hypre_ParCSRVector_GetObject(
-  Hypre_ParCSRVector,
-  SIDL_BaseInterface*);
-
-extern int32_t
 impl_Hypre_ParCSRVector_GetRow(
   Hypre_ParCSRVector,
   int32_t,
@@ -149,19 +87,18 @@ impl_Hypre_ParCSRVector_GetRow(
   struct SIDL_double__array**);
 
 extern int32_t
-impl_Hypre_ParCSRVector_Initialize(
+impl_Hypre_ParCSRVector_Clear(
   Hypre_ParCSRVector);
 
 extern int32_t
-impl_Hypre_ParCSRVector_Print(
+impl_Hypre_ParCSRVector_Copy(
   Hypre_ParCSRVector,
-  const char*);
+  Hypre_Vector);
 
 extern int32_t
-impl_Hypre_ParCSRVector_Read(
+impl_Hypre_ParCSRVector_Clone(
   Hypre_ParCSRVector,
-  const char*,
-  void*);
+  Hypre_Vector*);
 
 extern int32_t
 impl_Hypre_ParCSRVector_Scale(
@@ -169,9 +106,34 @@ impl_Hypre_ParCSRVector_Scale(
   double);
 
 extern int32_t
+impl_Hypre_ParCSRVector_Dot(
+  Hypre_ParCSRVector,
+  Hypre_Vector,
+  double*);
+
+extern int32_t
+impl_Hypre_ParCSRVector_Axpy(
+  Hypre_ParCSRVector,
+  double,
+  Hypre_Vector);
+
+extern int32_t
 impl_Hypre_ParCSRVector_SetCommunicator(
   Hypre_ParCSRVector,
   void*);
+
+extern int32_t
+impl_Hypre_ParCSRVector_Initialize(
+  Hypre_ParCSRVector);
+
+extern int32_t
+impl_Hypre_ParCSRVector_Assemble(
+  Hypre_ParCSRVector);
+
+extern int32_t
+impl_Hypre_ParCSRVector_GetObject(
+  Hypre_ParCSRVector,
+  SIDL_BaseInterface*);
 
 extern int32_t
 impl_Hypre_ParCSRVector_SetGlobalSize(
@@ -179,7 +141,20 @@ impl_Hypre_ParCSRVector_SetGlobalSize(
   int32_t);
 
 extern int32_t
+impl_Hypre_ParCSRVector_SetPartitioning(
+  Hypre_ParCSRVector,
+  struct SIDL_int__array*);
+
+extern int32_t
 impl_Hypre_ParCSRVector_SetLocalComponents(
+  Hypre_ParCSRVector,
+  int32_t,
+  struct SIDL_int__array*,
+  struct SIDL_int__array*,
+  struct SIDL_double__array*);
+
+extern int32_t
+impl_Hypre_ParCSRVector_AddtoLocalComponents(
   Hypre_ParCSRVector,
   int32_t,
   struct SIDL_int__array*,
@@ -195,9 +170,19 @@ impl_Hypre_ParCSRVector_SetLocalComponentsInBlock(
   struct SIDL_double__array*);
 
 extern int32_t
-impl_Hypre_ParCSRVector_SetPartitioning(
+impl_Hypre_ParCSRVector_AddToLocalComponentsInBlock(
   Hypre_ParCSRVector,
-  struct SIDL_int__array*);
+  int32_t,
+  int32_t,
+  struct SIDL_int__array*,
+  struct SIDL_double__array*);
+
+extern int32_t
+impl_Hypre_ParCSRVector_Create(
+  Hypre_ParCSRVector,
+  void*,
+  int32_t,
+  int32_t);
 
 extern int32_t
 impl_Hypre_ParCSRVector_SetValues(
@@ -205,6 +190,24 @@ impl_Hypre_ParCSRVector_SetValues(
   int32_t,
   struct SIDL_int__array*,
   struct SIDL_double__array*);
+
+extern int32_t
+impl_Hypre_ParCSRVector_AddToValues(
+  Hypre_ParCSRVector,
+  int32_t,
+  struct SIDL_int__array*,
+  struct SIDL_double__array*);
+
+extern int32_t
+impl_Hypre_ParCSRVector_Read(
+  Hypre_ParCSRVector,
+  const char*,
+  void*);
+
+extern int32_t
+impl_Hypre_ParCSRVector_Print(
+  Hypre_ParCSRVector,
+  const char*);
 
 #ifdef __cplusplus
 }

@@ -2,13 +2,16 @@
  * File:          Hypre_StructToIJMatrix_Impl.h
  * Symbol:        Hypre.StructToIJMatrix-v0.1.5
  * Symbol Type:   class
- * Babel Version: 0.6.3
- * SIDL Created:  20021001 09:48:43 PDT
- * Generated:     20021001 09:48:53 PDT
+ * Babel Version: 0.7.4
+ * SIDL Created:  20021101 15:14:28 PST
+ * Generated:     20021101 15:14:35 PST
  * Description:   Server-side implementation for Hypre.StructToIJMatrix
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
+ * babel-version = 0.7.4
+ * source-line   = 445
+ * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 
 #ifndef included_Hypre_StructToIJMatrix_Impl_h
@@ -17,20 +20,20 @@
 #ifndef included_SIDL_header_h
 #include "SIDL_header.h"
 #endif
+#ifndef included_Hypre_StructGrid_h
+#include "Hypre_StructGrid.h"
+#endif
 #ifndef included_Hypre_StructToIJMatrix_h
 #include "Hypre_StructToIJMatrix.h"
 #endif
 #ifndef included_Hypre_StructStencil_h
 #include "Hypre_StructStencil.h"
 #endif
-#ifndef included_SIDL_BaseInterface_h
-#include "SIDL_BaseInterface.h"
-#endif
-#ifndef included_Hypre_StructGrid_h
-#include "Hypre_StructGrid.h"
-#endif
 #ifndef included_Hypre_IJBuildMatrix_h
 #include "Hypre_IJBuildMatrix.h"
+#endif
+#ifndef included_SIDL_BaseInterface_h
+#include "SIDL_BaseInterface.h"
 #endif
 
 /* DO-NOT-DELETE splicer.begin(Hypre.StructToIJMatrix._includes) */
@@ -78,6 +81,20 @@ impl_Hypre_StructToIJMatrix__dtor(
  */
 
 extern int32_t
+impl_Hypre_StructToIJMatrix_SetIJMatrix(
+  Hypre_StructToIJMatrix,
+  Hypre_IJBuildMatrix);
+
+extern int32_t
+impl_Hypre_StructToIJMatrix_SetCommunicator(
+  Hypre_StructToIJMatrix,
+  void*);
+
+extern int32_t
+impl_Hypre_StructToIJMatrix_Initialize(
+  Hypre_StructToIJMatrix);
+
+extern int32_t
 impl_Hypre_StructToIJMatrix_Assemble(
   Hypre_StructToIJMatrix);
 
@@ -87,8 +104,22 @@ impl_Hypre_StructToIJMatrix_GetObject(
   SIDL_BaseInterface*);
 
 extern int32_t
-impl_Hypre_StructToIJMatrix_Initialize(
-  Hypre_StructToIJMatrix);
+impl_Hypre_StructToIJMatrix_SetGrid(
+  Hypre_StructToIJMatrix,
+  Hypre_StructGrid);
+
+extern int32_t
+impl_Hypre_StructToIJMatrix_SetStencil(
+  Hypre_StructToIJMatrix,
+  Hypre_StructStencil);
+
+extern int32_t
+impl_Hypre_StructToIJMatrix_SetValues(
+  Hypre_StructToIJMatrix,
+  struct SIDL_int__array*,
+  int32_t,
+  struct SIDL_int__array*,
+  struct SIDL_double__array*);
 
 extern int32_t
 impl_Hypre_StructToIJMatrix_SetBoxValues(
@@ -100,42 +131,14 @@ impl_Hypre_StructToIJMatrix_SetBoxValues(
   struct SIDL_double__array*);
 
 extern int32_t
-impl_Hypre_StructToIJMatrix_SetCommunicator(
-  Hypre_StructToIJMatrix,
-  void*);
-
-extern int32_t
-impl_Hypre_StructToIJMatrix_SetGrid(
-  Hypre_StructToIJMatrix,
-  Hypre_StructGrid);
-
-extern int32_t
-impl_Hypre_StructToIJMatrix_SetIJMatrix(
-  Hypre_StructToIJMatrix,
-  Hypre_IJBuildMatrix);
-
-extern int32_t
 impl_Hypre_StructToIJMatrix_SetNumGhost(
   Hypre_StructToIJMatrix,
   struct SIDL_int__array*);
 
 extern int32_t
-impl_Hypre_StructToIJMatrix_SetStencil(
-  Hypre_StructToIJMatrix,
-  Hypre_StructStencil);
-
-extern int32_t
 impl_Hypre_StructToIJMatrix_SetSymmetric(
   Hypre_StructToIJMatrix,
   int32_t);
-
-extern int32_t
-impl_Hypre_StructToIJMatrix_SetValues(
-  Hypre_StructToIJMatrix,
-  struct SIDL_int__array*,
-  int32_t,
-  struct SIDL_int__array*,
-  struct SIDL_double__array*);
 
 #ifdef __cplusplus
 }

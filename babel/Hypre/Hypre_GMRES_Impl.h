@@ -2,13 +2,16 @@
  * File:          Hypre_GMRES_Impl.h
  * Symbol:        Hypre.GMRES-v0.1.5
  * Symbol Type:   class
- * Babel Version: 0.6.3
- * SIDL Created:  20021001 09:48:43 PDT
- * Generated:     20021001 09:48:51 PDT
+ * Babel Version: 0.7.4
+ * SIDL Created:  20021101 15:14:28 PST
+ * Generated:     20021101 15:14:35 PST
  * Description:   Server-side implementation for Hypre.GMRES
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
+ * babel-version = 0.7.4
+ * source-line   = 465
+ * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 
 #ifndef included_Hypre_GMRES_Impl_h
@@ -17,17 +20,17 @@
 #ifndef included_SIDL_header_h
 #include "SIDL_header.h"
 #endif
-#ifndef included_Hypre_Solver_h
-#include "Hypre_Solver.h"
-#endif
 #ifndef included_Hypre_Vector_h
 #include "Hypre_Vector.h"
+#endif
+#ifndef included_Hypre_Operator_h
+#include "Hypre_Operator.h"
 #endif
 #ifndef included_Hypre_GMRES_h
 #include "Hypre_GMRES.h"
 #endif
-#ifndef included_Hypre_Operator_h
-#include "Hypre_Operator.h"
+#ifndef included_Hypre_Solver_h
+#include "Hypre_Solver.h"
 #endif
 
 /* DO-NOT-DELETE splicer.begin(Hypre.GMRES._includes) */
@@ -99,10 +102,9 @@ impl_Hypre_GMRES__dtor(
  */
 
 extern int32_t
-impl_Hypre_GMRES_Apply(
+impl_Hypre_GMRES_SetCommunicator(
   Hypre_GMRES,
-  Hypre_Vector,
-  Hypre_Vector*);
+  void*);
 
 extern int32_t
 impl_Hypre_GMRES_GetDoubleValue(
@@ -117,62 +119,15 @@ impl_Hypre_GMRES_GetIntValue(
   int32_t*);
 
 extern int32_t
-impl_Hypre_GMRES_GetPreconditionedResidual(
-  Hypre_GMRES,
-  Hypre_Vector*);
-
-extern int32_t
-impl_Hypre_GMRES_GetResidual(
-  Hypre_GMRES,
-  Hypre_Vector*);
-
-extern int32_t
-impl_Hypre_GMRES_SetCommunicator(
-  Hypre_GMRES,
-  void*);
-
-extern int32_t
-impl_Hypre_GMRES_SetDoubleArrayParameter(
-  Hypre_GMRES,
-  const char*,
-  struct SIDL_double__array*);
-
-extern int32_t
 impl_Hypre_GMRES_SetDoubleParameter(
   Hypre_GMRES,
   const char*,
   double);
 
 extern int32_t
-impl_Hypre_GMRES_SetIntArrayParameter(
-  Hypre_GMRES,
-  const char*,
-  struct SIDL_int__array*);
-
-extern int32_t
 impl_Hypre_GMRES_SetIntParameter(
   Hypre_GMRES,
   const char*,
-  int32_t);
-
-extern int32_t
-impl_Hypre_GMRES_SetLogging(
-  Hypre_GMRES,
-  int32_t);
-
-extern int32_t
-impl_Hypre_GMRES_SetOperator(
-  Hypre_GMRES,
-  Hypre_Operator);
-
-extern int32_t
-impl_Hypre_GMRES_SetPreconditioner(
-  Hypre_GMRES,
-  Hypre_Solver);
-
-extern int32_t
-impl_Hypre_GMRES_SetPrintLevel(
-  Hypre_GMRES,
   int32_t);
 
 extern int32_t
@@ -182,10 +137,58 @@ impl_Hypre_GMRES_SetStringParameter(
   const char*);
 
 extern int32_t
+impl_Hypre_GMRES_SetIntArrayParameter(
+  Hypre_GMRES,
+  const char*,
+  struct SIDL_int__array*);
+
+extern int32_t
+impl_Hypre_GMRES_SetDoubleArrayParameter(
+  Hypre_GMRES,
+  const char*,
+  struct SIDL_double__array*);
+
+extern int32_t
 impl_Hypre_GMRES_Setup(
   Hypre_GMRES,
   Hypre_Vector,
   Hypre_Vector);
+
+extern int32_t
+impl_Hypre_GMRES_Apply(
+  Hypre_GMRES,
+  Hypre_Vector,
+  Hypre_Vector*);
+
+extern int32_t
+impl_Hypre_GMRES_SetOperator(
+  Hypre_GMRES,
+  Hypre_Operator);
+
+extern int32_t
+impl_Hypre_GMRES_GetResidual(
+  Hypre_GMRES,
+  Hypre_Vector*);
+
+extern int32_t
+impl_Hypre_GMRES_SetLogging(
+  Hypre_GMRES,
+  int32_t);
+
+extern int32_t
+impl_Hypre_GMRES_SetPrintLevel(
+  Hypre_GMRES,
+  int32_t);
+
+extern int32_t
+impl_Hypre_GMRES_SetPreconditioner(
+  Hypre_GMRES,
+  Hypre_Solver);
+
+extern int32_t
+impl_Hypre_GMRES_GetPreconditionedResidual(
+  Hypre_GMRES,
+  Hypre_Vector*);
 
 #ifdef __cplusplus
 }

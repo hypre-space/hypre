@@ -2,13 +2,16 @@
  * File:          Hypre_PCG_Impl.c
  * Symbol:        Hypre.PCG-v0.1.5
  * Symbol Type:   class
- * Babel Version: 0.6.3
- * SIDL Created:  20021001 09:48:43 PDT
- * Generated:     20021001 09:48:53 PDT
+ * Babel Version: 0.7.4
+ * SIDL Created:  20021101 15:14:28 PST
+ * Generated:     20021101 15:14:36 PST
  * Description:   Server-side implementation for Hypre.PCG
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
+ * babel-version = 0.7.4
+ * source-line   = 463
+ * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 
 /*
@@ -174,7 +177,281 @@ impl_Hypre_PCG__dtor(
 }
 
 /*
- * Method:  Apply
+ * Method:  SetCommunicator[]
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_Hypre_PCG_SetCommunicator"
+
+int32_t
+impl_Hypre_PCG_SetCommunicator(
+  Hypre_PCG self, void* comm)
+{
+  /* DO-NOT-DELETE splicer.begin(Hypre.PCG.SetCommunicator) */
+  /* Insert the implementation of the SetCommunicator method here... */
+   int ierr = 0;
+   struct Hypre_PCG__data * data;
+   data = Hypre_PCG__get_data( self );
+   data -> comm = (MPI_Comm) comm;
+
+   return ierr;
+  /* DO-NOT-DELETE splicer.end(Hypre.PCG.SetCommunicator) */
+}
+
+/*
+ * Method:  GetDoubleValue[]
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_Hypre_PCG_GetDoubleValue"
+
+int32_t
+impl_Hypre_PCG_GetDoubleValue(
+  Hypre_PCG self, const char* name, double* value)
+{
+  /* DO-NOT-DELETE splicer.begin(Hypre.PCG.GetDoubleValue) */
+  /* Insert the implementation of the GetDoubleValue method here... */
+   /* >>> We should add a Get for everything in SetParameter.
+      There are two values for each parameter: the Hypre cache, and the HYPRE value.
+      The cache gets copied to HYPRE when Apply is called.  What we want to return
+      is the cache value if the corresponding Set had been called, otherwise the
+      real (HYPRE) value.  Assuming the HYPRE interface is not used simultaneously
+      with the Babel interface, it is sufficient to initialize the cache with
+      whatever HYPRE is using. */
+   int ierr = 0;
+   HYPRE_Solver solver;
+   struct Hypre_PCG__data * data;
+
+   data = Hypre_PCG__get_data( self );
+   assert( data->solver != NULL );
+   solver = data->solver;
+
+   if ( strcmp(name,"FinalRelativeResidualNorm")==0 ||
+        strcmp(name,"Final Relative Residual Norm")==0 ) {
+      ierr += HYPRE_PCGGetFinalRelativeResidualNorm( solver, value );
+   }
+   /* Get other values here. */
+   else ierr=1;
+
+   return ierr;
+  /* DO-NOT-DELETE splicer.end(Hypre.PCG.GetDoubleValue) */
+}
+
+/*
+ * Method:  GetIntValue[]
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_Hypre_PCG_GetIntValue"
+
+int32_t
+impl_Hypre_PCG_GetIntValue(
+  Hypre_PCG self, const char* name, int32_t* value)
+{
+  /* DO-NOT-DELETE splicer.begin(Hypre.PCG.GetIntValue) */
+  /* Insert the implementation of the GetIntValue method here... */
+   /* >>> We should add a Get for everything in SetParameter.
+      There are two values for each parameter: the Hypre cache, and the HYPRE value.
+      The cache gets copied to HYPRE when Apply is called.  What we want to return
+      is the cache value if the corresponding Set had been called, otherwise the
+      real (HYPRE) value.  Assuming the HYPRE interface is not used simultaneously
+      with the Babel interface, it is sufficient to initialize the cache with
+      whatever HYPRE is using. */
+   int ierr = 0;
+   HYPRE_Solver solver;
+   struct Hypre_PCG__data * data;
+
+   data = Hypre_PCG__get_data( self );
+   assert( data->solver != NULL );
+   solver = data->solver;
+
+   if ( strcmp(name,"NumIterations")==0 || strcmp(name,"Num Iterations")==0
+      || strcmp(name,"Number of Iterations")==0 ) {
+      ierr += HYPRE_PCGGetNumIterations( solver, value );
+      printf("num iterations=%i",*value);
+   }
+   /* Get other values here. */
+   else ierr=1;
+
+   return ierr;
+  /* DO-NOT-DELETE splicer.end(Hypre.PCG.GetIntValue) */
+}
+
+/*
+ * Method:  SetDoubleParameter[]
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_Hypre_PCG_SetDoubleParameter"
+
+int32_t
+impl_Hypre_PCG_SetDoubleParameter(
+  Hypre_PCG self, const char* name, double value)
+{
+  /* DO-NOT-DELETE splicer.begin(Hypre.PCG.SetDoubleParameter) */
+  /* Insert the implementation of the SetDoubleParameter method here... */
+   /* The normal way to implement this function would be to call the corresponding
+      HYPRE function to set the parameter.  That can't always be done because the
+      HYPRE struct may not exist.  The HYPRE struct may not exist because it can't
+      be created until we know the vector type - and that is not known until Apply
+      is first called.  So what we do is save the parameter in a cache belonging to
+      this Babel interface, and copy it into the HYPRE struct once Apply is called.
+   */
+   int ierr = 0;
+   struct Hypre_PCG__data * data;
+   data = Hypre_PCG__get_data( self );
+
+   if ( strcmp(name,"Tol")==0 || strcmp(name,"Tolerance")==0 ) {
+      data -> tol = value;
+   }
+   else if ( strcmp(name,"AbsoluteTolFactor")==0 ||
+             strcmp(name,"Absolute Tol Factor")==0 ||
+             strcmp(name,"Absolute Tolerance Factor")==0 ) {
+      data -> atolf = value;
+   }
+   else if (strcmp(name,"ConvergenceFactorTol")==0 ||
+            strcmp(name,"Convergence Factor Tol")==0 ||
+            strcmp(name,"Convergence Factor Tolerance")==0 ) {
+      /* tolerance for special test for slow convergence */
+      data -> cf_tol = value;
+   }
+   /* Set other parameters here. */
+   else ierr=1;
+
+   return ierr;
+  /* DO-NOT-DELETE splicer.end(Hypre.PCG.SetDoubleParameter) */
+}
+
+/*
+ * Method:  SetIntParameter[]
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_Hypre_PCG_SetIntParameter"
+
+int32_t
+impl_Hypre_PCG_SetIntParameter(
+  Hypre_PCG self, const char* name, int32_t value)
+{
+  /* DO-NOT-DELETE splicer.begin(Hypre.PCG.SetIntParameter) */
+  /* Insert the implementation of the SetIntParameter method here... */
+   /* The normal way to implement this function would be to call the corresponding
+      HYPRE function to set the parameter.  That can't always be done because the
+      HYPRE struct may not exist.  The HYPRE struct may not exist because it can't
+      be created until we know the vector type - and that is not known until Apply
+      is first called.  So what we do is save the parameter in a cache belonging to
+      this Babel interface, and copy it into the HYPRE struct once Apply is called.
+   */
+   int ierr = 0;
+   struct Hypre_PCG__data * data;
+   data = Hypre_PCG__get_data( self );
+
+   if ( strcmp(name,"MaxIter")==0 || strcmp(name,"Max Iter")==0 ||
+      strcmp(name,"Maximum Number of Iterations")==0 ) {
+      data -> maxiter = value;
+   }
+   else if ( strcmp(name,"TwoNorm")==0 || strcmp(name,"Two Norm")==0 ||
+            strcmp(name,"2-Norm")==0 ) {
+      data -> twonorm = value;
+   }
+   else if ( strcmp(name,"RelChange")==0 || strcmp(name,"Rel Change")==0 ||
+            strcmp(name,"Relative Change Test")==0 ) {
+      data -> relchange = value;
+   }
+   else if ( strcmp(name,"StopCrit")==0 || strcmp(name,"Stop Crit")==0 ||
+             strcmp(name,"Pure Absolute Error Stopping Criterion")==0 ) {
+      /* this parameter is obsolete but still supported */
+      data -> stop_crit = value;
+   }
+   else if ( strcmp(name,"PrintLevel")==0 || strcmp(name,"Print Level")==0 ) {
+      /* also settable through SetPrintLevel */
+      data -> printlevel = value;
+   }
+   else if ( strcmp(name,"LogLevel")==0 || strcmp(name,"Log Level")==0 ) {
+      /* also settable through SetLogging */
+      data -> log_level = value;
+   }
+   /* Set other parameters here. */
+   else ierr=1;
+
+   return ierr;
+  /* DO-NOT-DELETE splicer.end(Hypre.PCG.SetIntParameter) */
+}
+
+/*
+ * Method:  SetStringParameter[]
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_Hypre_PCG_SetStringParameter"
+
+int32_t
+impl_Hypre_PCG_SetStringParameter(
+  Hypre_PCG self, const char* name, const char* value)
+{
+  /* DO-NOT-DELETE splicer.begin(Hypre.PCG.SetStringParameter) */
+  /* Insert the implementation of the SetStringParameter method here... */
+   /* There are no string parameters, so return an error. */
+   return 1;
+  /* DO-NOT-DELETE splicer.end(Hypre.PCG.SetStringParameter) */
+}
+
+/*
+ * Method:  SetIntArrayParameter[]
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_Hypre_PCG_SetIntArrayParameter"
+
+int32_t
+impl_Hypre_PCG_SetIntArrayParameter(
+  Hypre_PCG self, const char* name, struct SIDL_int__array* value)
+{
+  /* DO-NOT-DELETE splicer.begin(Hypre.PCG.SetIntArrayParameter) */
+  /* Insert the implementation of the SetIntArrayParameter method here... */
+   /* no such parameters, return error if called */
+   return 1;
+  /* DO-NOT-DELETE splicer.end(Hypre.PCG.SetIntArrayParameter) */
+}
+
+/*
+ * Method:  SetDoubleArrayParameter[]
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_Hypre_PCG_SetDoubleArrayParameter"
+
+int32_t
+impl_Hypre_PCG_SetDoubleArrayParameter(
+  Hypre_PCG self, const char* name, struct SIDL_double__array* value)
+{
+  /* DO-NOT-DELETE splicer.begin(Hypre.PCG.SetDoubleArrayParameter) */
+  /* Insert the implementation of the SetDoubleArrayParameter method here... */
+   /* no such parameters, return error if called */
+   return 1;
+  /* DO-NOT-DELETE splicer.end(Hypre.PCG.SetDoubleArrayParameter) */
+}
+
+/*
+ * Method:  Setup[]
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_Hypre_PCG_Setup"
+
+int32_t
+impl_Hypre_PCG_Setup(
+  Hypre_PCG self, Hypre_Vector x, Hypre_Vector y)
+{
+  /* DO-NOT-DELETE splicer.begin(Hypre.PCG.Setup) */
+  /* Insert the implementation of the Setup method here... */
+   /* Setup is not done here because it requires the entire problem.
+      It is done in Apply instead. */
+  /* DO-NOT-DELETE splicer.end(Hypre.PCG.Setup) */
+}
+
+/*
+ * Method:  Apply[]
  */
 
 #undef __FUNC__
@@ -182,9 +459,7 @@ impl_Hypre_PCG__dtor(
 
 int32_t
 impl_Hypre_PCG_Apply(
-  Hypre_PCG self,
-  Hypre_Vector x,
-  Hypre_Vector* y)
+  Hypre_PCG self, Hypre_Vector x, Hypre_Vector* y)
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.PCG.Apply) */
   /* Insert the implementation of the Apply method here... */
@@ -286,109 +561,30 @@ impl_Hypre_PCG_Apply(
 }
 
 /*
- * Method:  GetDoubleValue
+ * Method:  SetOperator[]
  */
 
 #undef __FUNC__
-#define __FUNC__ "impl_Hypre_PCG_GetDoubleValue"
+#define __FUNC__ "impl_Hypre_PCG_SetOperator"
 
 int32_t
-impl_Hypre_PCG_GetDoubleValue(
-  Hypre_PCG self,
-  const char* name,
-  double* value)
+impl_Hypre_PCG_SetOperator(
+  Hypre_PCG self, Hypre_Operator A)
 {
-  /* DO-NOT-DELETE splicer.begin(Hypre.PCG.GetDoubleValue) */
-  /* Insert the implementation of the GetDoubleValue method here... */
-   /* >>> We should add a Get for everything in SetParameter.
-      There are two values for each parameter: the Hypre cache, and the HYPRE value.
-      The cache gets copied to HYPRE when Apply is called.  What we want to return
-      is the cache value if the corresponding Set had been called, otherwise the
-      real (HYPRE) value.  Assuming the HYPRE interface is not used simultaneously
-      with the Babel interface, it is sufficient to initialize the cache with
-      whatever HYPRE is using. */
+  /* DO-NOT-DELETE splicer.begin(Hypre.PCG.SetOperator) */
+  /* Insert the implementation of the SetOperator method here... */
    int ierr = 0;
-   HYPRE_Solver solver;
    struct Hypre_PCG__data * data;
 
    data = Hypre_PCG__get_data( self );
-   assert( data->solver != NULL );
-   solver = data->solver;
-
-   if ( strcmp(name,"FinalRelativeResidualNorm")==0 ||
-        strcmp(name,"Final Relative Residual Norm")==0 ) {
-      ierr += HYPRE_PCGGetFinalRelativeResidualNorm( solver, value );
-   }
-   /* Get other values here. */
-   else ierr=1;
+   data->matrix = A;
 
    return ierr;
-  /* DO-NOT-DELETE splicer.end(Hypre.PCG.GetDoubleValue) */
+  /* DO-NOT-DELETE splicer.end(Hypre.PCG.SetOperator) */
 }
 
 /*
- * Method:  GetIntValue
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_Hypre_PCG_GetIntValue"
-
-int32_t
-impl_Hypre_PCG_GetIntValue(
-  Hypre_PCG self,
-  const char* name,
-  int32_t* value)
-{
-  /* DO-NOT-DELETE splicer.begin(Hypre.PCG.GetIntValue) */
-  /* Insert the implementation of the GetIntValue method here... */
-   /* >>> We should add a Get for everything in SetParameter.
-      There are two values for each parameter: the Hypre cache, and the HYPRE value.
-      The cache gets copied to HYPRE when Apply is called.  What we want to return
-      is the cache value if the corresponding Set had been called, otherwise the
-      real (HYPRE) value.  Assuming the HYPRE interface is not used simultaneously
-      with the Babel interface, it is sufficient to initialize the cache with
-      whatever HYPRE is using. */
-   int ierr = 0;
-   HYPRE_Solver solver;
-   struct Hypre_PCG__data * data;
-
-   data = Hypre_PCG__get_data( self );
-   assert( data->solver != NULL );
-   solver = data->solver;
-
-   if ( strcmp(name,"NumIterations")==0 || strcmp(name,"Num Iterations")==0
-      || strcmp(name,"Number of Iterations")==0 ) {
-      ierr += HYPRE_PCGGetNumIterations( solver, value );
-      printf("num iterations=%i",*value);
-   }
-   /* Get other values here. */
-   else ierr=1;
-
-   return ierr;
-  /* DO-NOT-DELETE splicer.end(Hypre.PCG.GetIntValue) */
-}
-
-/*
- * Method:  GetPreconditionedResidual
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_Hypre_PCG_GetPreconditionedResidual"
-
-int32_t
-impl_Hypre_PCG_GetPreconditionedResidual(
-  Hypre_PCG self,
-  Hypre_Vector* r)
-{
-  /* DO-NOT-DELETE splicer.begin(Hypre.PCG.GetPreconditionedResidual) */
-  /* Insert the implementation of the GetPreconditionedResidual method here... 
-    */
-   return 1;
-  /* DO-NOT-DELETE splicer.end(Hypre.PCG.GetPreconditionedResidual) */
-}
-
-/*
- * Method:  GetResidual
+ * Method:  GetResidual[]
  */
 
 #undef __FUNC__
@@ -396,8 +592,7 @@ impl_Hypre_PCG_GetPreconditionedResidual(
 
 int32_t
 impl_Hypre_PCG_GetResidual(
-  Hypre_PCG self,
-  Hypre_Vector* r)
+  Hypre_PCG self, Hypre_Vector* r)
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.PCG.GetResidual) */
   /* Insert the implementation of the GetResidual method here... */
@@ -443,175 +638,7 @@ impl_Hypre_PCG_GetResidual(
 }
 
 /*
- * Method:  SetCommunicator
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_Hypre_PCG_SetCommunicator"
-
-int32_t
-impl_Hypre_PCG_SetCommunicator(
-  Hypre_PCG self,
-  void* comm)
-{
-  /* DO-NOT-DELETE splicer.begin(Hypre.PCG.SetCommunicator) */
-  /* Insert the implementation of the SetCommunicator method here... */
-   int ierr = 0;
-   struct Hypre_PCG__data * data;
-   data = Hypre_PCG__get_data( self );
-   data -> comm = (MPI_Comm) comm;
-
-   return ierr;
-  /* DO-NOT-DELETE splicer.end(Hypre.PCG.SetCommunicator) */
-}
-
-/*
- * Method:  SetDoubleArrayParameter
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_Hypre_PCG_SetDoubleArrayParameter"
-
-int32_t
-impl_Hypre_PCG_SetDoubleArrayParameter(
-  Hypre_PCG self,
-  const char* name,
-  struct SIDL_double__array* value)
-{
-  /* DO-NOT-DELETE splicer.begin(Hypre.PCG.SetDoubleArrayParameter) */
-  /* Insert the implementation of the SetDoubleArrayParameter method here... */
-   /* no such parameters, return error if called */
-   return 1;
-  /* DO-NOT-DELETE splicer.end(Hypre.PCG.SetDoubleArrayParameter) */
-}
-
-/*
- * Method:  SetDoubleParameter
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_Hypre_PCG_SetDoubleParameter"
-
-int32_t
-impl_Hypre_PCG_SetDoubleParameter(
-  Hypre_PCG self,
-  const char* name,
-  double value)
-{
-  /* DO-NOT-DELETE splicer.begin(Hypre.PCG.SetDoubleParameter) */
-  /* Insert the implementation of the SetDoubleParameter method here... */
-   /* The normal way to implement this function would be to call the corresponding
-      HYPRE function to set the parameter.  That can't always be done because the
-      HYPRE struct may not exist.  The HYPRE struct may not exist because it can't
-      be created until we know the vector type - and that is not known until Apply
-      is first called.  So what we do is save the parameter in a cache belonging to
-      this Babel interface, and copy it into the HYPRE struct once Apply is called.
-   */
-   int ierr = 0;
-   struct Hypre_PCG__data * data;
-   data = Hypre_PCG__get_data( self );
-
-   if ( strcmp(name,"Tol")==0 || strcmp(name,"Tolerance")==0 ) {
-      data -> tol = value;
-   }
-   else if ( strcmp(name,"AbsoluteTolFactor")==0 ||
-             strcmp(name,"Absolute Tol Factor")==0 ||
-             strcmp(name,"Absolute Tolerance Factor")==0 ) {
-      data -> atolf = value;
-   }
-   else if (strcmp(name,"ConvergenceFactorTol")==0 ||
-            strcmp(name,"Convergence Factor Tol")==0 ||
-            strcmp(name,"Convergence Factor Tolerance")==0 ) {
-      /* tolerance for special test for slow convergence */
-      data -> cf_tol = value;
-   }
-   /* Set other parameters here. */
-   else ierr=1;
-
-   return ierr;
-  /* DO-NOT-DELETE splicer.end(Hypre.PCG.SetDoubleParameter) */
-}
-
-/*
- * Method:  SetIntArrayParameter
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_Hypre_PCG_SetIntArrayParameter"
-
-int32_t
-impl_Hypre_PCG_SetIntArrayParameter(
-  Hypre_PCG self,
-  const char* name,
-  struct SIDL_int__array* value)
-{
-  /* DO-NOT-DELETE splicer.begin(Hypre.PCG.SetIntArrayParameter) */
-  /* Insert the implementation of the SetIntArrayParameter method here... */
-   /* no such parameters, return error if called */
-   return 1;
-  /* DO-NOT-DELETE splicer.end(Hypre.PCG.SetIntArrayParameter) */
-}
-
-/*
- * Method:  SetIntParameter
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_Hypre_PCG_SetIntParameter"
-
-int32_t
-impl_Hypre_PCG_SetIntParameter(
-  Hypre_PCG self,
-  const char* name,
-  int32_t value)
-{
-  /* DO-NOT-DELETE splicer.begin(Hypre.PCG.SetIntParameter) */
-  /* Insert the implementation of the SetIntParameter method here... */
-   /* The normal way to implement this function would be to call the corresponding
-      HYPRE function to set the parameter.  That can't always be done because the
-      HYPRE struct may not exist.  The HYPRE struct may not exist because it can't
-      be created until we know the vector type - and that is not known until Apply
-      is first called.  So what we do is save the parameter in a cache belonging to
-      this Babel interface, and copy it into the HYPRE struct once Apply is called.
-   */
-   int ierr = 0;
-   struct Hypre_PCG__data * data;
-   data = Hypre_PCG__get_data( self );
-
-   if ( strcmp(name,"MaxIter")==0 || strcmp(name,"Max Iter")==0 ||
-      strcmp(name,"Maximum Number of Iterations")==0 ) {
-      data -> maxiter = value;
-   }
-   else if ( strcmp(name,"TwoNorm")==0 || strcmp(name,"Two Norm")==0 ||
-            strcmp(name,"2-Norm")==0 ) {
-      data -> twonorm = value;
-   }
-   else if ( strcmp(name,"RelChange")==0 || strcmp(name,"Rel Change")==0 ||
-            strcmp(name,"Relative Change Test")==0 ) {
-      data -> relchange = value;
-   }
-   else if ( strcmp(name,"StopCrit")==0 || strcmp(name,"Stop Crit")==0 ||
-             strcmp(name,"Pure Absolute Error Stopping Criterion")==0 ) {
-      /* this parameter is obsolete but still supported */
-      data -> stop_crit = value;
-   }
-   else if ( strcmp(name,"PrintLevel")==0 || strcmp(name,"Print Level")==0 ) {
-      /* also settable through SetPrintLevel */
-      data -> printlevel = value;
-   }
-   else if ( strcmp(name,"LogLevel")==0 || strcmp(name,"Log Level")==0 ) {
-      /* also settable through SetLogging */
-      data -> log_level = value;
-   }
-   /* Set other parameters here. */
-   else ierr=1;
-
-   return ierr;
-  /* DO-NOT-DELETE splicer.end(Hypre.PCG.SetIntParameter) */
-}
-
-/*
- * Method:  SetLogging
+ * Method:  SetLogging[]
  */
 
 #undef __FUNC__
@@ -619,8 +646,7 @@ impl_Hypre_PCG_SetIntParameter(
 
 int32_t
 impl_Hypre_PCG_SetLogging(
-  Hypre_PCG self,
-  int32_t level)
+  Hypre_PCG self, int32_t level)
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.PCG.SetLogging) */
   /* Insert the implementation of the SetLogging method here... */
@@ -642,31 +668,37 @@ impl_Hypre_PCG_SetLogging(
 }
 
 /*
- * Method:  SetOperator
+ * Method:  SetPrintLevel[]
  */
 
 #undef __FUNC__
-#define __FUNC__ "impl_Hypre_PCG_SetOperator"
+#define __FUNC__ "impl_Hypre_PCG_SetPrintLevel"
 
 int32_t
-impl_Hypre_PCG_SetOperator(
-  Hypre_PCG self,
-  Hypre_Operator A)
+impl_Hypre_PCG_SetPrintLevel(
+  Hypre_PCG self, int32_t level)
 {
-  /* DO-NOT-DELETE splicer.begin(Hypre.PCG.SetOperator) */
-  /* Insert the implementation of the SetOperator method here... */
+  /* DO-NOT-DELETE splicer.begin(Hypre.PCG.SetPrintLevel) */
+  /* Insert the implementation of the SetPrintLevel method here... */
+   /* The normal way to implement this function would be to call the corresponding
+      HYPRE function to set the print level.  That can't always be done because the
+      HYPRE struct may not exist.  The HYPRE struct may not exist because it can't
+      be created until we know the vector type - and that is not known until Apply
+      is first called.  So what we do is save the print level in a cache belonging to
+      this Babel interface, and copy it into the HYPRE struct once Apply is called.
+   */
    int ierr = 0;
    struct Hypre_PCG__data * data;
-
    data = Hypre_PCG__get_data( self );
-   data->matrix = A;
+
+   data -> printlevel = level;
 
    return ierr;
-  /* DO-NOT-DELETE splicer.end(Hypre.PCG.SetOperator) */
+  /* DO-NOT-DELETE splicer.end(Hypre.PCG.SetPrintLevel) */
 }
 
 /*
- * Method:  SetPreconditioner
+ * Method:  SetPreconditioner[]
  */
 
 #undef __FUNC__
@@ -674,8 +706,7 @@ impl_Hypre_PCG_SetOperator(
 
 int32_t
 impl_Hypre_PCG_SetPreconditioner(
-  Hypre_PCG self,
-  Hypre_Solver s)
+  Hypre_PCG self, Hypre_Solver s)
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.PCG.SetPreconditioner) */
   /* Insert the implementation of the SetPreconditioner method here... */
@@ -737,72 +768,19 @@ impl_Hypre_PCG_SetPreconditioner(
 }
 
 /*
- * Method:  SetPrintLevel
+ * Method:  GetPreconditionedResidual[]
  */
 
 #undef __FUNC__
-#define __FUNC__ "impl_Hypre_PCG_SetPrintLevel"
+#define __FUNC__ "impl_Hypre_PCG_GetPreconditionedResidual"
 
 int32_t
-impl_Hypre_PCG_SetPrintLevel(
-  Hypre_PCG self,
-  int32_t level)
+impl_Hypre_PCG_GetPreconditionedResidual(
+  Hypre_PCG self, Hypre_Vector* r)
 {
-  /* DO-NOT-DELETE splicer.begin(Hypre.PCG.SetPrintLevel) */
-  /* Insert the implementation of the SetPrintLevel method here... */
-   /* The normal way to implement this function would be to call the corresponding
-      HYPRE function to set the print level.  That can't always be done because the
-      HYPRE struct may not exist.  The HYPRE struct may not exist because it can't
-      be created until we know the vector type - and that is not known until Apply
-      is first called.  So what we do is save the print level in a cache belonging to
-      this Babel interface, and copy it into the HYPRE struct once Apply is called.
-   */
-   int ierr = 0;
-   struct Hypre_PCG__data * data;
-   data = Hypre_PCG__get_data( self );
-
-   data -> printlevel = level;
-
-   return ierr;
-  /* DO-NOT-DELETE splicer.end(Hypre.PCG.SetPrintLevel) */
-}
-
-/*
- * Method:  SetStringParameter
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_Hypre_PCG_SetStringParameter"
-
-int32_t
-impl_Hypre_PCG_SetStringParameter(
-  Hypre_PCG self,
-  const char* name,
-  const char* value)
-{
-  /* DO-NOT-DELETE splicer.begin(Hypre.PCG.SetStringParameter) */
-  /* Insert the implementation of the SetStringParameter method here... */
-   /* There are no string parameters, so return an error. */
+  /* DO-NOT-DELETE splicer.begin(Hypre.PCG.GetPreconditionedResidual) */
+  /* Insert the implementation of the GetPreconditionedResidual method here... 
+    */
    return 1;
-  /* DO-NOT-DELETE splicer.end(Hypre.PCG.SetStringParameter) */
-}
-
-/*
- * Method:  Setup
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_Hypre_PCG_Setup"
-
-int32_t
-impl_Hypre_PCG_Setup(
-  Hypre_PCG self,
-  Hypre_Vector x,
-  Hypre_Vector y)
-{
-  /* DO-NOT-DELETE splicer.begin(Hypre.PCG.Setup) */
-  /* Insert the implementation of the Setup method here... */
-   /* Setup is not done here because it requires the entire problem.
-      It is done in Apply instead. */
-  /* DO-NOT-DELETE splicer.end(Hypre.PCG.Setup) */
+  /* DO-NOT-DELETE splicer.end(Hypre.PCG.GetPreconditionedResidual) */
 }

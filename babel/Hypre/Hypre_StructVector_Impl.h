@@ -2,13 +2,16 @@
  * File:          Hypre_StructVector_Impl.h
  * Symbol:        Hypre.StructVector-v0.1.5
  * Symbol Type:   class
- * Babel Version: 0.6.3
- * SIDL Created:  20021001 09:48:43 PDT
- * Generated:     20021001 09:48:52 PDT
+ * Babel Version: 0.7.4
+ * SIDL Created:  20021101 15:14:28 PST
+ * Generated:     20021101 15:14:36 PST
  * Description:   Server-side implementation for Hypre.StructVector
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
+ * babel-version = 0.7.4
+ * source-line   = 428
+ * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 
 #ifndef included_Hypre_StructVector_Impl_h
@@ -16,6 +19,12 @@
 
 #ifndef included_SIDL_header_h
 #include "SIDL_header.h"
+#endif
+#ifndef included_Hypre_StructGrid_h
+#include "Hypre_StructGrid.h"
+#endif
+#ifndef included_Hypre_StructVector_h
+#include "Hypre_StructVector.h"
 #endif
 #ifndef included_Hypre_Vector_h
 #include "Hypre_Vector.h"
@@ -25,12 +34,6 @@
 #endif
 #ifndef included_SIDL_BaseInterface_h
 #include "SIDL_BaseInterface.h"
-#endif
-#ifndef included_Hypre_StructGrid_h
-#include "Hypre_StructGrid.h"
-#endif
-#ifndef included_Hypre_StructVector_h
-#include "Hypre_StructVector.h"
 #endif
 
 /* DO-NOT-DELETE splicer.begin(Hypre.StructVector._includes) */
@@ -78,60 +81,22 @@ impl_Hypre_StructVector__dtor(
  */
 
 extern int32_t
-impl_Hypre_StructVector_Assemble(
-  Hypre_StructVector);
-
-extern int32_t
-impl_Hypre_StructVector_Axpy(
+impl_Hypre_StructVector_SetCommunicator(
   Hypre_StructVector,
-  double,
-  Hypre_Vector);
-
-extern int32_t
-impl_Hypre_StructVector_Clear(
-  Hypre_StructVector);
-
-extern int32_t
-impl_Hypre_StructVector_Clone(
-  Hypre_StructVector,
-  Hypre_Vector*);
-
-extern int32_t
-impl_Hypre_StructVector_Copy(
-  Hypre_StructVector,
-  Hypre_Vector);
-
-extern int32_t
-impl_Hypre_StructVector_Dot(
-  Hypre_StructVector,
-  Hypre_Vector,
-  double*);
-
-extern int32_t
-impl_Hypre_StructVector_GetObject(
-  Hypre_StructVector,
-  SIDL_BaseInterface*);
+  void*);
 
 extern int32_t
 impl_Hypre_StructVector_Initialize(
   Hypre_StructVector);
 
 extern int32_t
-impl_Hypre_StructVector_Scale(
-  Hypre_StructVector,
-  double);
+impl_Hypre_StructVector_Assemble(
+  Hypre_StructVector);
 
 extern int32_t
-impl_Hypre_StructVector_SetBoxValues(
+impl_Hypre_StructVector_GetObject(
   Hypre_StructVector,
-  struct SIDL_int__array*,
-  struct SIDL_int__array*,
-  struct SIDL_double__array*);
-
-extern int32_t
-impl_Hypre_StructVector_SetCommunicator(
-  Hypre_StructVector,
-  void*);
+  SIDL_BaseInterface*);
 
 extern int32_t
 impl_Hypre_StructVector_SetGrid(
@@ -148,6 +113,44 @@ impl_Hypre_StructVector_SetValue(
   Hypre_StructVector,
   struct SIDL_int__array*,
   double);
+
+extern int32_t
+impl_Hypre_StructVector_SetBoxValues(
+  Hypre_StructVector,
+  struct SIDL_int__array*,
+  struct SIDL_int__array*,
+  struct SIDL_double__array*);
+
+extern int32_t
+impl_Hypre_StructVector_Clear(
+  Hypre_StructVector);
+
+extern int32_t
+impl_Hypre_StructVector_Copy(
+  Hypre_StructVector,
+  Hypre_Vector);
+
+extern int32_t
+impl_Hypre_StructVector_Clone(
+  Hypre_StructVector,
+  Hypre_Vector*);
+
+extern int32_t
+impl_Hypre_StructVector_Scale(
+  Hypre_StructVector,
+  double);
+
+extern int32_t
+impl_Hypre_StructVector_Dot(
+  Hypre_StructVector,
+  Hypre_Vector,
+  double*);
+
+extern int32_t
+impl_Hypre_StructVector_Axpy(
+  Hypre_StructVector,
+  double,
+  Hypre_Vector);
 
 #ifdef __cplusplus
 }

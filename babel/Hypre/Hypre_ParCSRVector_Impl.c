@@ -2,13 +2,16 @@
  * File:          Hypre_ParCSRVector_Impl.c
  * Symbol:        Hypre.ParCSRVector-v0.1.5
  * Symbol Type:   class
- * Babel Version: 0.6.3
- * SIDL Created:  20021001 09:48:43 PDT
- * Generated:     20021001 09:48:54 PDT
+ * Babel Version: 0.7.4
+ * SIDL Created:  20021101 15:14:28 PST
+ * Generated:     20021101 15:14:36 PST
  * Description:   Server-side implementation for Hypre.ParCSRVector
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
+ * babel-version = 0.7.4
+ * source-line   = 436
+ * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 
 /*
@@ -77,171 +80,32 @@ impl_Hypre_ParCSRVector__dtor(
 }
 
 /*
- * Method:  AddToLocalComponentsInBlock
+ * Method:  GetRow[]
  */
 
 #undef __FUNC__
-#define __FUNC__ "impl_Hypre_ParCSRVector_AddToLocalComponentsInBlock"
+#define __FUNC__ "impl_Hypre_ParCSRVector_GetRow"
 
 int32_t
-impl_Hypre_ParCSRVector_AddToLocalComponentsInBlock(
-  Hypre_ParCSRVector self,
-  int32_t glob_vec_index_start,
-  int32_t glob_vec_index_stop,
-  struct SIDL_int__array* value_indices,
-  struct SIDL_double__array* values)
+impl_Hypre_ParCSRVector_GetRow(
+  Hypre_ParCSRVector self, int32_t row, int32_t* size,
+    struct SIDL_int__array** col_ind, struct SIDL_double__array** values)
 {
-  /* DO-NOT-DELETE 
-    splicer.begin(Hypre.ParCSRVector.AddToLocalComponentsInBlock) */
-  /* Insert the implementation of the AddToLocalComponentsInBlock method 
-    here... */
-  /* DO-NOT-DELETE splicer.end(Hypre.ParCSRVector.AddToLocalComponentsInBlock) 
-    */
-}
-
-/*
- * Adds to values in vector.  Usage details are analogous to
- * \Ref{SetValues}.
- * 
- * Not collective.
- * 
- * 
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_Hypre_ParCSRVector_AddToValues"
-
-int32_t
-impl_Hypre_ParCSRVector_AddToValues(
-  Hypre_ParCSRVector self,
-  int32_t nvalues,
-  struct SIDL_int__array* indices,
-  struct SIDL_double__array* values)
-{
-  /* DO-NOT-DELETE splicer.begin(Hypre.ParCSRVector.AddToValues) */
-  /* Insert the implementation of the AddToValues method here... */
-   int ierr = 0;
-   struct Hypre_ParCSRVector__data * data;
-   HYPRE_IJVector ij_b;
-   data = Hypre_ParCSRVector__get_data( self );
-   ij_b = data->ij_b;
-
-   ierr = HYPRE_IJVectorAddToValues( ij_b, nvalues,
-                                     SIDLArrayAddr1( indices, 0 ),
-                                     SIDLArrayAddr1( values, 0 ) );
-   return( ierr );
-  /* DO-NOT-DELETE splicer.end(Hypre.ParCSRVector.AddToValues) */
-}
-
-/*
- * Method:  AddtoLocalComponents
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_Hypre_ParCSRVector_AddtoLocalComponents"
-
-int32_t
-impl_Hypre_ParCSRVector_AddtoLocalComponents(
-  Hypre_ParCSRVector self,
-  int32_t num_values,
-  struct SIDL_int__array* glob_vec_indices,
-  struct SIDL_int__array* value_indices,
-  struct SIDL_double__array* values)
-{
-  /* DO-NOT-DELETE splicer.begin(Hypre.ParCSRVector.AddtoLocalComponents) */
-  /* Insert the implementation of the AddtoLocalComponents method here... */
-/* >>> not implemented <<< */
-  /* DO-NOT-DELETE splicer.end(Hypre.ParCSRVector.AddtoLocalComponents) */
-}
-
-/*
- * Finalize the construction of an object before using, either for
- * the first time or on subsequent uses. "Initialize" and "Assemble"
- * always appear in a matched set, with Initialize preceding Assemble. Values
- * can only be set in between a call to Initialize and Assemble.
- * 
- * 
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_Hypre_ParCSRVector_Assemble"
-
-int32_t
-impl_Hypre_ParCSRVector_Assemble(
-  Hypre_ParCSRVector self)
-{
-  /* DO-NOT-DELETE splicer.begin(Hypre.ParCSRVector.Assemble) */
-  /* Insert the implementation of the Assemble method here... */
+  /* DO-NOT-DELETE splicer.begin(Hypre.ParCSRVector.GetRow) */
+  /* Insert the implementation of the GetRow method here... */
+   /* The standard vector is a column vector, so GetRow simply returns one value.
+      Thus we ignore the size and col_ind argumens, and simply set
+      values[0][0] = vector[row]
+   */
    int ierr = 0;
    struct Hypre_ParCSRVector__data * data;
    HYPRE_IJVector ij_b;
    data = Hypre_ParCSRVector__get_data( self );
    ij_b = data -> ij_b;
 
-   ierr = HYPRE_IJVectorAssemble( ij_b );
+   ierr += HYPRE_IJVectorGetValues( ij_b, 1, &row, SIDLArrayAddr1( values[0], 0 ) );
    return( ierr );
-  /* DO-NOT-DELETE splicer.end(Hypre.ParCSRVector.Assemble) */
-}
-
-/*
- * y <- a*x + y
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_Hypre_ParCSRVector_Axpy"
-
-int32_t
-impl_Hypre_ParCSRVector_Axpy(
-  Hypre_ParCSRVector self,
-  double a,
-  Hypre_Vector x)
-{
-  /* DO-NOT-DELETE splicer.begin(Hypre.ParCSRVector.Axpy) */
-  /* Insert the implementation of the Axpy method here... */
-   int ierr = 0;
-   int type[1];
-   void * object;
-   struct Hypre_ParCSRVector__data * data, * data_x;
-   Hypre_ParCSRVector HypreP_x;
-   HYPRE_IJVector ij_y, ij_x;
-   HYPRE_ParVector yy, xx;
-   data = Hypre_ParCSRVector__get_data( self );
-   ij_y = data -> ij_b;
-
-   ierr += HYPRE_IJVectorGetObjectType( ij_y, type );
-   assert( *type == HYPRE_PARCSR );  /* ... don't know how to deal with other types */
-   ierr += HYPRE_IJVectorGetObject( ij_y, &object );
-   yy = (HYPRE_ParVector) object;
-
-   /*  A Hypre_Vector is just an interface, we have no knowledge of its contents.
-       Check whether it's something we know how to handle.  If not, die. */
-   if ( Hypre_Vector_queryInterface(x, "Hypre.ParCSRVector" ) ) {
-      /* perhaps Hypre_Vector_isInstanceOf( x, "ParCSRVector" ) might do the same job */
-      HypreP_x = Hypre_Vector__cast2( x, "Hypre.ParCSRVector" );
-   }
-   else {
-      assert( "Unrecognized vector type."==(char *)x );
-   }
-   /* This is the old code for the above.  It seems that queryInterface has been
-      changed to return TRUE or FALSE rather than the object (jfp Oct2002)
-      HypreP_x = Hypre_Vector__cast2
-         ( Hypre_Vector_queryInterface( x, "Hypre.ParCSRVector"),
-           "Hypre.ParCSRVector" );
-      assert( HypreP_x!=NULL );
-   */
-
-   data_x = Hypre_ParCSRVector__get_data( HypreP_x );
-   ij_x = data_x->ij_b;
-   ierr += HYPRE_IJVectorGetObjectType( ij_x, type );
-   assert( *type == HYPRE_PARCSR );  /* ... don't know how to deal with other types */
-   /* ... don't know how to deal with other types */
-   ierr += HYPRE_IJVectorGetObject( ij_x, &object );
-   xx = (HYPRE_ParVector) object;
-
-   ierr += hypre_ParVectorAxpy( a, (hypre_ParVector *) xx, (hypre_ParVector *) yy );
-
-   return( ierr );
-  /* DO-NOT-DELETE splicer.end(Hypre.ParCSRVector.Axpy) */
+  /* DO-NOT-DELETE splicer.end(Hypre.ParCSRVector.GetRow) */
 }
 
 /*
@@ -275,6 +139,72 @@ impl_Hypre_ParCSRVector_Clear(
 }
 
 /*
+ * y <- x 
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_Hypre_ParCSRVector_Copy"
+
+int32_t
+impl_Hypre_ParCSRVector_Copy(
+  Hypre_ParCSRVector self, Hypre_Vector x)
+{
+  /* DO-NOT-DELETE splicer.begin(Hypre.ParCSRVector.Copy) */
+  /* Insert the implementation of the Copy method here... */
+   /* Copy the contents of x onto self.
+      This is a deep copy, ultimately done by hypre_SeqVectorCopy.
+   */
+   int ierr = 0;
+   int type[1]; /* type[0] produces silly error messages on Sun */
+   void * objectx, * objecty;
+   struct Hypre_ParCSRVector__data * data_y, * data_x;
+   HYPRE_IJVector ij_y, ij_x;
+   Hypre_ParCSRVector HypreP_x;
+   HYPRE_ParVector yy, xx;
+   
+   /*  A Hypre_Vector is just an interface, we have no knowledge of its contents.
+       Check whether it's something we know how to handle.  If not, die. */
+   if ( Hypre_Vector_queryInterface(x, "Hypre.ParCSRVector" ) ) {
+      /* perhaps Hypre_Vector_isInstanceOf( x, "ParCSRVector" ) might do the same job */
+      HypreP_x = Hypre_Vector__cast2( x, "Hypre.ParCSRVector" );
+   }
+   else {
+      assert( "Unrecognized vector type."==(char *)x );
+   }
+   /* This is the old code for the above.  It seems that queryInterface has been
+      changed to return TRUE or FALSE rather than the object (jfp Oct2002)
+      HypreP_x = Hypre_Vector__cast2
+         ( Hypre_Vector_queryInterface( x, "Hypre.ParCSRVector"),
+           "Hypre.ParCSRVector" );
+      assert( HypreP_x!=NULL );
+   */
+
+   data_y = Hypre_ParCSRVector__get_data( self );
+   data_x = Hypre_ParCSRVector__get_data( HypreP_x );
+
+   data_y->comm = data_x->comm;
+
+   ij_x = data_x -> ij_b;
+   ij_y = data_y -> ij_b;
+
+   ierr += HYPRE_IJVectorGetObjectType( ij_y, type );
+   assert( *type == HYPRE_PARCSR );  /* ... don't know how to deal with other types */
+   ierr += HYPRE_IJVectorGetObject( ij_y, &objecty );
+   yy = (HYPRE_ParVector) objecty;
+
+   ierr += HYPRE_IJVectorGetObjectType( ij_x, type );
+   assert( *type == HYPRE_PARCSR );  /* ... don't know how to deal with other types */
+   ierr += HYPRE_IJVectorGetObject( ij_x, &objectx );
+   xx = (HYPRE_ParVector) objectx;
+
+   ierr += HYPRE_ParVectorCopy( xx, yy );
+
+   return( ierr );
+
+  /* DO-NOT-DELETE splicer.end(Hypre.ParCSRVector.Copy) */
+}
+
+/*
  * create an x compatible with y
  */
 
@@ -283,8 +213,7 @@ impl_Hypre_ParCSRVector_Clear(
 
 int32_t
 impl_Hypre_ParCSRVector_Clone(
-  Hypre_ParCSRVector self,
-  Hypre_Vector* x)
+  Hypre_ParCSRVector self, Hypre_Vector* x)
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.ParCSRVector.Clone) */
   /* Insert the implementation of the Clone method here... */
@@ -350,112 +279,34 @@ impl_Hypre_ParCSRVector_Clone(
 }
 
 /*
- * y <- x 
+ * y <- a*y 
  */
 
 #undef __FUNC__
-#define __FUNC__ "impl_Hypre_ParCSRVector_Copy"
+#define __FUNC__ "impl_Hypre_ParCSRVector_Scale"
 
 int32_t
-impl_Hypre_ParCSRVector_Copy(
-  Hypre_ParCSRVector self,
-  Hypre_Vector x)
+impl_Hypre_ParCSRVector_Scale(
+  Hypre_ParCSRVector self, double a)
 {
-  /* DO-NOT-DELETE splicer.begin(Hypre.ParCSRVector.Copy) */
-  /* Insert the implementation of the Copy method here... */
-   /* Copy the contents of x onto self.
-      This is a deep copy, ultimately done by hypre_SeqVectorCopy.
-   */
+  /* DO-NOT-DELETE splicer.begin(Hypre.ParCSRVector.Scale) */
+  /* Insert the implementation of the Scale method here... */
    int ierr = 0;
-   int type[1]; /* type[0] produces silly error messages on Sun */
-   void * objectx, * objecty;
-   struct Hypre_ParCSRVector__data * data_y, * data_x;
-   HYPRE_IJVector ij_y, ij_x;
-   Hypre_ParCSRVector HypreP_x;
-   HYPRE_ParVector yy, xx;
-   
-   /*  A Hypre_Vector is just an interface, we have no knowledge of its contents.
-       Check whether it's something we know how to handle.  If not, die. */
-   if ( Hypre_Vector_queryInterface(x, "Hypre.ParCSRVector" ) ) {
-      /* perhaps Hypre_Vector_isInstanceOf( x, "ParCSRVector" ) might do the same job */
-      HypreP_x = Hypre_Vector__cast2( x, "Hypre.ParCSRVector" );
-   }
-   else {
-      assert( "Unrecognized vector type."==(char *)x );
-   }
-   /* This is the old code for the above.  It seems that queryInterface has been
-      changed to return TRUE or FALSE rather than the object (jfp Oct2002)
-      HypreP_x = Hypre_Vector__cast2
-         ( Hypre_Vector_queryInterface( x, "Hypre.ParCSRVector"),
-           "Hypre.ParCSRVector" );
-      assert( HypreP_x!=NULL );
-   */
-
-   data_y = Hypre_ParCSRVector__get_data( self );
-   data_x = Hypre_ParCSRVector__get_data( HypreP_x );
-
-   data_y->comm = data_x->comm;
-
-   ij_x = data_x -> ij_b;
-   ij_y = data_y -> ij_b;
-
-   ierr += HYPRE_IJVectorGetObjectType( ij_y, type );
-   assert( *type == HYPRE_PARCSR );  /* ... don't know how to deal with other types */
-   ierr += HYPRE_IJVectorGetObject( ij_y, &objecty );
-   yy = (HYPRE_ParVector) objecty;
-
-   ierr += HYPRE_IJVectorGetObjectType( ij_x, type );
-   assert( *type == HYPRE_PARCSR );  /* ... don't know how to deal with other types */
-   ierr += HYPRE_IJVectorGetObject( ij_x, &objectx );
-   xx = (HYPRE_ParVector) objectx;
-
-   ierr += HYPRE_ParVectorCopy( xx, yy );
-
-   return( ierr );
-
-  /* DO-NOT-DELETE splicer.end(Hypre.ParCSRVector.Copy) */
-}
-
-/*
- * Create a vector object.  Each process owns some unique consecutive
- * range of vector unknowns, indicated by the global indices {\tt
- * jlower} and {\tt jupper}.  The data is required to be such that the
- * value of {\tt jlower} on any process $p$ be exactly one more than
- * the value of {\tt jupper} on process $p-1$.  Note that the first
- * index of the global vector may start with any integer value.  In
- * particular, one may use zero- or one-based indexing.
- * 
- * Collective.
- * 
- * 
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_Hypre_ParCSRVector_Create"
-
-int32_t
-impl_Hypre_ParCSRVector_Create(
-  Hypre_ParCSRVector self,
-  void* comm,
-  int32_t jlower,
-  int32_t jupper)
-{
-  /* DO-NOT-DELETE splicer.begin(Hypre.ParCSRVector.Create) */
-  /* Insert the implementation of the Create method here... */
-   int ierr = 0;
+   void * object;
    struct Hypre_ParCSRVector__data * data;
    HYPRE_IJVector ij_b;
+   HYPRE_ParVector xx;
+   HYPRE_IJVector ij_x;
    data = Hypre_ParCSRVector__get_data( self );
-   ij_b = data -> ij_b;
-   assert( data->comm != (MPI_Comm)NULL ); /* SetCommunicator should be called before Create */
+   ij_x = data -> ij_b;
 
-   ierr = HYPRE_IJVectorCreate( data->comm, jlower, jupper, &ij_b );
-   ierr += HYPRE_IJVectorSetObjectType( ij_b, HYPRE_PARCSR );
-   data -> ij_b = ij_b;
+   ierr += HYPRE_IJVectorGetObject( ij_x, &object );
+   xx = (HYPRE_ParVector) object;
+   ierr += HYPRE_ParVectorScale( a, xx );
 
    return( ierr );
 
-  /* DO-NOT-DELETE splicer.end(Hypre.ParCSRVector.Create) */
+  /* DO-NOT-DELETE splicer.end(Hypre.ParCSRVector.Scale) */
 }
 
 /*
@@ -467,9 +318,7 @@ impl_Hypre_ParCSRVector_Create(
 
 int32_t
 impl_Hypre_ParCSRVector_Dot(
-  Hypre_ParCSRVector self,
-  Hypre_Vector x,
-  double* d)
+  Hypre_ParCSRVector self, Hypre_Vector x, double* d)
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.ParCSRVector.Dot) */
   /* Insert the implementation of the Dot method here... */
@@ -515,63 +364,82 @@ impl_Hypre_ParCSRVector_Dot(
 }
 
 /*
- * The problem definition interface is a "builder" that creates an object
- * that contains the problem definition information, e.g. a matrix. To
- * perform subsequent operations with that object, it must be returned from
- * the problem definition object. "GetObject" performs this function.
- * <note>At compile time, the type of the returned object is unknown.
- * Thus, the returned type is a SIDL.BaseInterface. QueryInterface or Cast must
- * be used on the returned object to convert it into a known type.</note>
- * 
- * 
+ * y <- a*x + y
  */
 
 #undef __FUNC__
-#define __FUNC__ "impl_Hypre_ParCSRVector_GetObject"
+#define __FUNC__ "impl_Hypre_ParCSRVector_Axpy"
 
 int32_t
-impl_Hypre_ParCSRVector_GetObject(
-  Hypre_ParCSRVector self,
-  SIDL_BaseInterface* A)
+impl_Hypre_ParCSRVector_Axpy(
+  Hypre_ParCSRVector self, double a, Hypre_Vector x)
 {
-  /* DO-NOT-DELETE splicer.begin(Hypre.ParCSRVector.GetObject) */
-  /* Insert the implementation of the GetObject method here... */
-   Hypre_ParCSRMatrix_addReference( self );
-   *A = (SIDL_BaseInterface) SIDL_BaseInterface__cast( self );
-   return( 0 );
-  /* DO-NOT-DELETE splicer.end(Hypre.ParCSRVector.GetObject) */
+  /* DO-NOT-DELETE splicer.begin(Hypre.ParCSRVector.Axpy) */
+  /* Insert the implementation of the Axpy method here... */
+   int ierr = 0;
+   int type[1];
+   void * object;
+   struct Hypre_ParCSRVector__data * data, * data_x;
+   Hypre_ParCSRVector HypreP_x;
+   HYPRE_IJVector ij_y, ij_x;
+   HYPRE_ParVector yy, xx;
+   data = Hypre_ParCSRVector__get_data( self );
+   ij_y = data -> ij_b;
+
+   ierr += HYPRE_IJVectorGetObjectType( ij_y, type );
+   assert( *type == HYPRE_PARCSR );  /* ... don't know how to deal with other types */
+   ierr += HYPRE_IJVectorGetObject( ij_y, &object );
+   yy = (HYPRE_ParVector) object;
+
+   /*  A Hypre_Vector is just an interface, we have no knowledge of its contents.
+       Check whether it's something we know how to handle.  If not, die. */
+   if ( Hypre_Vector_queryInterface(x, "Hypre.ParCSRVector" ) ) {
+      /* perhaps Hypre_Vector_isInstanceOf( x, "ParCSRVector" ) might do the same job */
+      HypreP_x = Hypre_Vector__cast2( x, "Hypre.ParCSRVector" );
+   }
+   else {
+      assert( "Unrecognized vector type."==(char *)x );
+   }
+   /* This is the old code for the above.  It seems that queryInterface has been
+      changed to return TRUE or FALSE rather than the object (jfp Oct2002)
+      HypreP_x = Hypre_Vector__cast2
+         ( Hypre_Vector_queryInterface( x, "Hypre.ParCSRVector"),
+           "Hypre.ParCSRVector" );
+      assert( HypreP_x!=NULL );
+   */
+
+   data_x = Hypre_ParCSRVector__get_data( HypreP_x );
+   ij_x = data_x->ij_b;
+   ierr += HYPRE_IJVectorGetObjectType( ij_x, type );
+   assert( *type == HYPRE_PARCSR );  /* ... don't know how to deal with other types */
+   /* ... don't know how to deal with other types */
+   ierr += HYPRE_IJVectorGetObject( ij_x, &object );
+   xx = (HYPRE_ParVector) object;
+
+   ierr += hypre_ParVectorAxpy( a, (hypre_ParVector *) xx, (hypre_ParVector *) yy );
+
+   return( ierr );
+  /* DO-NOT-DELETE splicer.end(Hypre.ParCSRVector.Axpy) */
 }
 
 /*
- * Method:  GetRow
+ * Method:  SetCommunicator[]
  */
 
 #undef __FUNC__
-#define __FUNC__ "impl_Hypre_ParCSRVector_GetRow"
+#define __FUNC__ "impl_Hypre_ParCSRVector_SetCommunicator"
 
 int32_t
-impl_Hypre_ParCSRVector_GetRow(
-  Hypre_ParCSRVector self,
-  int32_t row,
-  int32_t* size,
-  struct SIDL_int__array** col_ind,
-  struct SIDL_double__array** values)
+impl_Hypre_ParCSRVector_SetCommunicator(
+  Hypre_ParCSRVector self, void* mpi_comm)
 {
-  /* DO-NOT-DELETE splicer.begin(Hypre.ParCSRVector.GetRow) */
-  /* Insert the implementation of the GetRow method here... */
-   /* The standard vector is a column vector, so GetRow simply returns one value.
-      Thus we ignore the size and col_ind argumens, and simply set
-      values[0][0] = vector[row]
-   */
+  /* DO-NOT-DELETE splicer.begin(Hypre.ParCSRVector.SetCommunicator) */
+  /* Insert the implementation of the SetCommunicator method here... */
    int ierr = 0;
    struct Hypre_ParCSRVector__data * data;
-   HYPRE_IJVector ij_b;
    data = Hypre_ParCSRVector__get_data( self );
-   ij_b = data -> ij_b;
-
-   ierr += HYPRE_IJVectorGetValues( ij_b, 1, &row, SIDLArrayAddr1( values[0], 0 ) );
-   return( ierr );
-  /* DO-NOT-DELETE splicer.end(Hypre.ParCSRVector.GetRow) */
+   data -> comm = (MPI_Comm) mpi_comm;
+  /* DO-NOT-DELETE splicer.end(Hypre.ParCSRVector.SetCommunicator) */
 }
 
 /*
@@ -601,117 +469,63 @@ impl_Hypre_ParCSRVector_Initialize(
 }
 
 /*
- * Print the vector to file.  This is mainly for debugging purposes.
- * 
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_Hypre_ParCSRVector_Print"
-
-int32_t
-impl_Hypre_ParCSRVector_Print(
-  Hypre_ParCSRVector self,
-  const char* filename)
-{
-  /* DO-NOT-DELETE splicer.begin(Hypre.ParCSRVector.Print) */
-  /* Insert the implementation of the Print method here... */
-   int ierr = 0;
-   struct Hypre_ParCSRVector__data * data;
-   HYPRE_IJVector ij_b;
-   data = Hypre_ParCSRVector__get_data( self );
-   ij_b = data->ij_b;
-
-   ierr = HYPRE_IJVectorPrint( ij_b, filename );
-  /* DO-NOT-DELETE splicer.end(Hypre.ParCSRVector.Print) */
-}
-
-/*
- * Read the vector from file.  This is mainly for debugging purposes.
+ * Finalize the construction of an object before using, either for
+ * the first time or on subsequent uses. "Initialize" and "Assemble"
+ * always appear in a matched set, with Initialize preceding Assemble. Values
+ * can only be set in between a call to Initialize and Assemble.
  * 
  * 
  */
 
 #undef __FUNC__
-#define __FUNC__ "impl_Hypre_ParCSRVector_Read"
+#define __FUNC__ "impl_Hypre_ParCSRVector_Assemble"
 
 int32_t
-impl_Hypre_ParCSRVector_Read(
-  Hypre_ParCSRVector self,
-  const char* filename,
-  void* comm)
+impl_Hypre_ParCSRVector_Assemble(
+  Hypre_ParCSRVector self)
 {
-  /* DO-NOT-DELETE splicer.begin(Hypre.ParCSRVector.Read) */
-  /* Insert the implementation of the Read method here... */
+  /* DO-NOT-DELETE splicer.begin(Hypre.ParCSRVector.Assemble) */
+  /* Insert the implementation of the Assemble method here... */
    int ierr = 0;
    struct Hypre_ParCSRVector__data * data;
    HYPRE_IJVector ij_b;
    data = Hypre_ParCSRVector__get_data( self );
-   ij_b = data->ij_b;
+   ij_b = data -> ij_b;
 
-   ierr = HYPRE_IJVectorRead( filename, data->comm,
-                              HYPRE_PARCSR, &ij_b );
-   data->ij_b = ij_b;
-   Hypre_ParCSRVector__set_data( self, data );
-
+   ierr = HYPRE_IJVectorAssemble( ij_b );
    return( ierr );
-  /* DO-NOT-DELETE splicer.end(Hypre.ParCSRVector.Read) */
+  /* DO-NOT-DELETE splicer.end(Hypre.ParCSRVector.Assemble) */
 }
 
 /*
- * y <- a*y 
+ * The problem definition interface is a "builder" that creates an object
+ * that contains the problem definition information, e.g. a matrix. To
+ * perform subsequent operations with that object, it must be returned from
+ * the problem definition object. "GetObject" performs this function.
+ * <note>At compile time, the type of the returned object is unknown.
+ * Thus, the returned type is a SIDL.BaseInterface. QueryInterface or Cast must
+ * be used on the returned object to convert it into a known type.</note>
+ * 
+ * 
  */
 
 #undef __FUNC__
-#define __FUNC__ "impl_Hypre_ParCSRVector_Scale"
+#define __FUNC__ "impl_Hypre_ParCSRVector_GetObject"
 
 int32_t
-impl_Hypre_ParCSRVector_Scale(
-  Hypre_ParCSRVector self,
-  double a)
+impl_Hypre_ParCSRVector_GetObject(
+  Hypre_ParCSRVector self, SIDL_BaseInterface* A)
 {
-  /* DO-NOT-DELETE splicer.begin(Hypre.ParCSRVector.Scale) */
-  /* Insert the implementation of the Scale method here... */
-   int ierr = 0;
-   void * object;
-   struct Hypre_ParCSRVector__data * data;
-   HYPRE_IJVector ij_b;
-   HYPRE_ParVector xx;
-   HYPRE_IJVector ij_x;
-   data = Hypre_ParCSRVector__get_data( self );
-   ij_x = data -> ij_b;
-
-   ierr += HYPRE_IJVectorGetObject( ij_x, &object );
-   xx = (HYPRE_ParVector) object;
-   ierr += HYPRE_ParVectorScale( a, xx );
-
-   return( ierr );
-
-  /* DO-NOT-DELETE splicer.end(Hypre.ParCSRVector.Scale) */
+  /* DO-NOT-DELETE splicer.begin(Hypre.ParCSRVector.GetObject) */
+  /* Insert the implementation of the GetObject method here... */
+   Hypre_ParCSRMatrix_addReference( self );
+   *A = (SIDL_BaseInterface) SIDL_BaseInterface__cast( self );
+   return( 0 );
+  /* DO-NOT-DELETE splicer.end(Hypre.ParCSRVector.GetObject) */
 }
 
 /*
- * Method:  SetCommunicator
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_Hypre_ParCSRVector_SetCommunicator"
-
-int32_t
-impl_Hypre_ParCSRVector_SetCommunicator(
-  Hypre_ParCSRVector self,
-  void* mpi_comm)
-{
-  /* DO-NOT-DELETE splicer.begin(Hypre.ParCSRVector.SetCommunicator) */
-  /* Insert the implementation of the SetCommunicator method here... */
-   int ierr = 0;
-   struct Hypre_ParCSRVector__data * data;
-   data = Hypre_ParCSRVector__get_data( self );
-   data -> comm = (MPI_Comm) mpi_comm;
-  /* DO-NOT-DELETE splicer.end(Hypre.ParCSRVector.SetCommunicator) */
-}
-
-/*
- * Method:  SetGlobalSize
+ * Method:  SetGlobalSize[]
  */
 
 #undef __FUNC__
@@ -719,8 +533,7 @@ impl_Hypre_ParCSRVector_SetCommunicator(
 
 int32_t
 impl_Hypre_ParCSRVector_SetGlobalSize(
-  Hypre_ParCSRVector self,
-  int32_t n)
+  Hypre_ParCSRVector self, int32_t n)
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.ParCSRVector.SetGlobalSize) */
   /* Insert the implementation of the SetGlobalSize method here... */
@@ -730,7 +543,27 @@ impl_Hypre_ParCSRVector_SetGlobalSize(
 }
 
 /*
- * Method:  SetLocalComponents
+ * Method:  SetPartitioning[]
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_Hypre_ParCSRVector_SetPartitioning"
+
+int32_t
+impl_Hypre_ParCSRVector_SetPartitioning(
+  Hypre_ParCSRVector self, struct SIDL_int__array* partitioning)
+{
+  /* DO-NOT-DELETE splicer.begin(Hypre.ParCSRVector.SetPartitioning) */
+  /* Insert the implementation of the SetPartitioning method here... */
+   /* We have no need for partitioning in this form (it is provided by the row
+      bound arguments of  calls of Hypre_IJBuildVector_Create).
+      Hence nothing is done here. */
+   return 0;
+  /* DO-NOT-DELETE splicer.end(Hypre.ParCSRVector.SetPartitioning) */
+}
+
+/*
+ * Method:  SetLocalComponents[]
  */
 
 #undef __FUNC__
@@ -738,11 +571,9 @@ impl_Hypre_ParCSRVector_SetGlobalSize(
 
 int32_t
 impl_Hypre_ParCSRVector_SetLocalComponents(
-  Hypre_ParCSRVector self,
-  int32_t num_values,
-  struct SIDL_int__array* glob_vec_indices,
-  struct SIDL_int__array* value_indices,
-  struct SIDL_double__array* values)
+  Hypre_ParCSRVector self, int32_t num_values,
+    struct SIDL_int__array* glob_vec_indices,
+    struct SIDL_int__array* value_indices, struct SIDL_double__array* values)
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.ParCSRVector.SetLocalComponents) */
   /* Insert the implementation of the SetLocalComponents method here... */
@@ -751,7 +582,26 @@ impl_Hypre_ParCSRVector_SetLocalComponents(
 }
 
 /*
- * Method:  SetLocalComponentsInBlock
+ * Method:  AddtoLocalComponents[]
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_Hypre_ParCSRVector_AddtoLocalComponents"
+
+int32_t
+impl_Hypre_ParCSRVector_AddtoLocalComponents(
+  Hypre_ParCSRVector self, int32_t num_values,
+    struct SIDL_int__array* glob_vec_indices,
+    struct SIDL_int__array* value_indices, struct SIDL_double__array* values)
+{
+  /* DO-NOT-DELETE splicer.begin(Hypre.ParCSRVector.AddtoLocalComponents) */
+  /* Insert the implementation of the AddtoLocalComponents method here... */
+/* >>> not implemented <<< */
+  /* DO-NOT-DELETE splicer.end(Hypre.ParCSRVector.AddtoLocalComponents) */
+}
+
+/*
+ * Method:  SetLocalComponentsInBlock[]
  */
 
 #undef __FUNC__
@@ -759,11 +609,9 @@ impl_Hypre_ParCSRVector_SetLocalComponents(
 
 int32_t
 impl_Hypre_ParCSRVector_SetLocalComponentsInBlock(
-  Hypre_ParCSRVector self,
-  int32_t glob_vec_index_start,
-  int32_t glob_vec_index_stop,
-  struct SIDL_int__array* value_indices,
-  struct SIDL_double__array* values)
+  Hypre_ParCSRVector self, int32_t glob_vec_index_start,
+    int32_t glob_vec_index_stop, struct SIDL_int__array* value_indices,
+    struct SIDL_double__array* values)
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.ParCSRVector.SetLocalComponentsInBlock) 
     */
@@ -774,24 +622,63 @@ impl_Hypre_ParCSRVector_SetLocalComponentsInBlock(
 }
 
 /*
- * Method:  SetPartitioning
+ * Method:  AddToLocalComponentsInBlock[]
  */
 
 #undef __FUNC__
-#define __FUNC__ "impl_Hypre_ParCSRVector_SetPartitioning"
+#define __FUNC__ "impl_Hypre_ParCSRVector_AddToLocalComponentsInBlock"
 
 int32_t
-impl_Hypre_ParCSRVector_SetPartitioning(
-  Hypre_ParCSRVector self,
-  struct SIDL_int__array* partitioning)
+impl_Hypre_ParCSRVector_AddToLocalComponentsInBlock(
+  Hypre_ParCSRVector self, int32_t glob_vec_index_start,
+    int32_t glob_vec_index_stop, struct SIDL_int__array* value_indices,
+    struct SIDL_double__array* values)
 {
-  /* DO-NOT-DELETE splicer.begin(Hypre.ParCSRVector.SetPartitioning) */
-  /* Insert the implementation of the SetPartitioning method here... */
-   /* We have no need for partitioning in this form (it is provided by the row
-      bound arguments of  calls of Hypre_IJBuildVector_Create).
-      Hence nothing is done here. */
-   return 0;
-  /* DO-NOT-DELETE splicer.end(Hypre.ParCSRVector.SetPartitioning) */
+  /* DO-NOT-DELETE 
+    splicer.begin(Hypre.ParCSRVector.AddToLocalComponentsInBlock) */
+  /* Insert the implementation of the AddToLocalComponentsInBlock method 
+    here... */
+  /* DO-NOT-DELETE splicer.end(Hypre.ParCSRVector.AddToLocalComponentsInBlock) 
+    */
+}
+
+/*
+ * Create a vector object.  Each process owns some unique consecutive
+ * range of vector unknowns, indicated by the global indices {\tt
+ * jlower} and {\tt jupper}.  The data is required to be such that the
+ * value of {\tt jlower} on any process $p$ be exactly one more than
+ * the value of {\tt jupper} on process $p-1$.  Note that the first
+ * index of the global vector may start with any integer value.  In
+ * particular, one may use zero- or one-based indexing.
+ * 
+ * Collective.
+ * 
+ * 
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_Hypre_ParCSRVector_Create"
+
+int32_t
+impl_Hypre_ParCSRVector_Create(
+  Hypre_ParCSRVector self, void* comm, int32_t jlower, int32_t jupper)
+{
+  /* DO-NOT-DELETE splicer.begin(Hypre.ParCSRVector.Create) */
+  /* Insert the implementation of the Create method here... */
+   int ierr = 0;
+   struct Hypre_ParCSRVector__data * data;
+   HYPRE_IJVector ij_b;
+   data = Hypre_ParCSRVector__get_data( self );
+   ij_b = data -> ij_b;
+   assert( data->comm != (MPI_Comm)NULL ); /* SetCommunicator should be called before Create */
+
+   ierr = HYPRE_IJVectorCreate( data->comm, jlower, jupper, &ij_b );
+   ierr += HYPRE_IJVectorSetObjectType( ij_b, HYPRE_PARCSR );
+   data -> ij_b = ij_b;
+
+   return( ierr );
+
+  /* DO-NOT-DELETE splicer.end(Hypre.ParCSRVector.Create) */
 }
 
 /*
@@ -811,10 +698,8 @@ impl_Hypre_ParCSRVector_SetPartitioning(
 
 int32_t
 impl_Hypre_ParCSRVector_SetValues(
-  Hypre_ParCSRVector self,
-  int32_t nvalues,
-  struct SIDL_int__array* indices,
-  struct SIDL_double__array* values)
+  Hypre_ParCSRVector self, int32_t nvalues, struct SIDL_int__array* indices,
+    struct SIDL_double__array* values)
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.ParCSRVector.SetValues) */
   /* Insert the implementation of the SetValues method here... */
@@ -829,4 +714,90 @@ impl_Hypre_ParCSRVector_SetValues(
                                    SIDLArrayAddr1( values, 0 ) );
    return( ierr );
   /* DO-NOT-DELETE splicer.end(Hypre.ParCSRVector.SetValues) */
+}
+
+/*
+ * Adds to values in vector.  Usage details are analogous to
+ * \Ref{SetValues}.
+ * 
+ * Not collective.
+ * 
+ * 
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_Hypre_ParCSRVector_AddToValues"
+
+int32_t
+impl_Hypre_ParCSRVector_AddToValues(
+  Hypre_ParCSRVector self, int32_t nvalues, struct SIDL_int__array* indices,
+    struct SIDL_double__array* values)
+{
+  /* DO-NOT-DELETE splicer.begin(Hypre.ParCSRVector.AddToValues) */
+  /* Insert the implementation of the AddToValues method here... */
+   int ierr = 0;
+   struct Hypre_ParCSRVector__data * data;
+   HYPRE_IJVector ij_b;
+   data = Hypre_ParCSRVector__get_data( self );
+   ij_b = data->ij_b;
+
+   ierr = HYPRE_IJVectorAddToValues( ij_b, nvalues,
+                                     SIDLArrayAddr1( indices, 0 ),
+                                     SIDLArrayAddr1( values, 0 ) );
+   return( ierr );
+  /* DO-NOT-DELETE splicer.end(Hypre.ParCSRVector.AddToValues) */
+}
+
+/*
+ * Read the vector from file.  This is mainly for debugging purposes.
+ * 
+ * 
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_Hypre_ParCSRVector_Read"
+
+int32_t
+impl_Hypre_ParCSRVector_Read(
+  Hypre_ParCSRVector self, const char* filename, void* comm)
+{
+  /* DO-NOT-DELETE splicer.begin(Hypre.ParCSRVector.Read) */
+  /* Insert the implementation of the Read method here... */
+   int ierr = 0;
+   struct Hypre_ParCSRVector__data * data;
+   HYPRE_IJVector ij_b;
+   data = Hypre_ParCSRVector__get_data( self );
+   ij_b = data->ij_b;
+
+   ierr = HYPRE_IJVectorRead( filename, data->comm,
+                              HYPRE_PARCSR, &ij_b );
+   data->ij_b = ij_b;
+   Hypre_ParCSRVector__set_data( self, data );
+
+   return( ierr );
+  /* DO-NOT-DELETE splicer.end(Hypre.ParCSRVector.Read) */
+}
+
+/*
+ * Print the vector to file.  This is mainly for debugging purposes.
+ * 
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_Hypre_ParCSRVector_Print"
+
+int32_t
+impl_Hypre_ParCSRVector_Print(
+  Hypre_ParCSRVector self, const char* filename)
+{
+  /* DO-NOT-DELETE splicer.begin(Hypre.ParCSRVector.Print) */
+  /* Insert the implementation of the Print method here... */
+   int ierr = 0;
+   struct Hypre_ParCSRVector__data * data;
+   HYPRE_IJVector ij_b;
+   data = Hypre_ParCSRVector__get_data( self );
+   ij_b = data->ij_b;
+
+   ierr = HYPRE_IJVectorPrint( ij_b, filename );
+  /* DO-NOT-DELETE splicer.end(Hypre.ParCSRVector.Print) */
 }

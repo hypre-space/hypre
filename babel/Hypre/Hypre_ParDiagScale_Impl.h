@@ -2,13 +2,16 @@
  * File:          Hypre_ParDiagScale_Impl.h
  * Symbol:        Hypre.ParDiagScale-v0.1.5
  * Symbol Type:   class
- * Babel Version: 0.6.3
- * SIDL Created:  20021001 09:48:43 PDT
- * Generated:     20021001 09:48:52 PDT
+ * Babel Version: 0.7.4
+ * SIDL Created:  20021101 15:14:28 PST
+ * Generated:     20021101 15:14:35 PST
  * Description:   Server-side implementation for Hypre.ParDiagScale
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
+ * babel-version = 0.7.4
+ * source-line   = 455
+ * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 
 #ifndef included_Hypre_ParDiagScale_Impl_h
@@ -20,11 +23,11 @@
 #ifndef included_Hypre_Vector_h
 #include "Hypre_Vector.h"
 #endif
-#ifndef included_Hypre_ParDiagScale_h
-#include "Hypre_ParDiagScale.h"
-#endif
 #ifndef included_Hypre_Operator_h
 #include "Hypre_Operator.h"
+#endif
+#ifndef included_Hypre_ParDiagScale_h
+#include "Hypre_ParDiagScale.h"
 #endif
 
 /* DO-NOT-DELETE splicer.begin(Hypre.ParDiagScale._includes) */
@@ -77,10 +80,9 @@ impl_Hypre_ParDiagScale__dtor(
  */
 
 extern int32_t
-impl_Hypre_ParDiagScale_Apply(
+impl_Hypre_ParDiagScale_SetCommunicator(
   Hypre_ParDiagScale,
-  Hypre_Vector,
-  Hypre_Vector*);
+  void*);
 
 extern int32_t
 impl_Hypre_ParDiagScale_GetDoubleValue(
@@ -95,52 +97,15 @@ impl_Hypre_ParDiagScale_GetIntValue(
   int32_t*);
 
 extern int32_t
-impl_Hypre_ParDiagScale_GetResidual(
-  Hypre_ParDiagScale,
-  Hypre_Vector*);
-
-extern int32_t
-impl_Hypre_ParDiagScale_SetCommunicator(
-  Hypre_ParDiagScale,
-  void*);
-
-extern int32_t
-impl_Hypre_ParDiagScale_SetDoubleArrayParameter(
-  Hypre_ParDiagScale,
-  const char*,
-  struct SIDL_double__array*);
-
-extern int32_t
 impl_Hypre_ParDiagScale_SetDoubleParameter(
   Hypre_ParDiagScale,
   const char*,
   double);
 
 extern int32_t
-impl_Hypre_ParDiagScale_SetIntArrayParameter(
-  Hypre_ParDiagScale,
-  const char*,
-  struct SIDL_int__array*);
-
-extern int32_t
 impl_Hypre_ParDiagScale_SetIntParameter(
   Hypre_ParDiagScale,
   const char*,
-  int32_t);
-
-extern int32_t
-impl_Hypre_ParDiagScale_SetLogging(
-  Hypre_ParDiagScale,
-  int32_t);
-
-extern int32_t
-impl_Hypre_ParDiagScale_SetOperator(
-  Hypre_ParDiagScale,
-  Hypre_Operator);
-
-extern int32_t
-impl_Hypre_ParDiagScale_SetPrintLevel(
-  Hypre_ParDiagScale,
   int32_t);
 
 extern int32_t
@@ -150,10 +115,48 @@ impl_Hypre_ParDiagScale_SetStringParameter(
   const char*);
 
 extern int32_t
+impl_Hypre_ParDiagScale_SetIntArrayParameter(
+  Hypre_ParDiagScale,
+  const char*,
+  struct SIDL_int__array*);
+
+extern int32_t
+impl_Hypre_ParDiagScale_SetDoubleArrayParameter(
+  Hypre_ParDiagScale,
+  const char*,
+  struct SIDL_double__array*);
+
+extern int32_t
 impl_Hypre_ParDiagScale_Setup(
   Hypre_ParDiagScale,
   Hypre_Vector,
   Hypre_Vector);
+
+extern int32_t
+impl_Hypre_ParDiagScale_Apply(
+  Hypre_ParDiagScale,
+  Hypre_Vector,
+  Hypre_Vector*);
+
+extern int32_t
+impl_Hypre_ParDiagScale_SetOperator(
+  Hypre_ParDiagScale,
+  Hypre_Operator);
+
+extern int32_t
+impl_Hypre_ParDiagScale_GetResidual(
+  Hypre_ParDiagScale,
+  Hypre_Vector*);
+
+extern int32_t
+impl_Hypre_ParDiagScale_SetLogging(
+  Hypre_ParDiagScale,
+  int32_t);
+
+extern int32_t
+impl_Hypre_ParDiagScale_SetPrintLevel(
+  Hypre_ParDiagScale,
+  int32_t);
 
 #ifdef __cplusplus
 }
