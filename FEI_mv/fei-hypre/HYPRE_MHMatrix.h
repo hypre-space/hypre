@@ -59,6 +59,7 @@ typedef struct
     int          BGS_blocksize;
     double       jacobi_wt;
     double       ag_threshold;
+    int          coarse_solver;
 #ifdef MLPACK
     ML_Aggregate *ml_ag;
     ML_AMG       *ml_amg;
