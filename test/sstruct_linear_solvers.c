@@ -985,13 +985,16 @@ main( int   argc,
     * Read input file
     *-----------------------------------------------------------*/
 
+   arg_index = 1;
+
    /* parse command line for input file name */
    infile = infile_default;
    if (argc > 1)
    {
-      if ( strcmp(argv[1], "-in") == 0 )
+      if ( strcmp(argv[arg_index], "-in") == 0 )
       {
-         infile = argv[2];
+         arg_index++;
+         infile = argv[arg_index++];
       }
    }
 
@@ -1024,7 +1027,6 @@ main( int   argc,
     * Parse command line
     *-----------------------------------------------------------*/
 
-   arg_index = 1;
    while (arg_index < argc)
    {
       if ( strcmp(argv[arg_index], "-pt") == 0 )
