@@ -36,14 +36,9 @@ void hypre_F90_NAME_BLAS(dpotrs, DPOTRS)(char *, int *, int *, double *, int *, 
 
 int
 hypre_AMGNodalSchwarzSmoother( hypre_CSRMatrix    *A,
-
 			       int                 num_functions,
-
 			       int		   option,
-			       int               **i_domain_dof_pointer,
-			       int               **j_domain_dof_pointer,
-			       double            **domain_matrixinverse_pointer,
-			       int                *num_domains_pointer)
+			       hypre_CSRMatrix   **domain_structure_pointer)
 
 {
 
@@ -54,7 +49,7 @@ hypre_AMGNodalSchwarzSmoother( hypre_CSRMatrix    *A,
   int *i_domain_dof, *j_domain_dof;
   double *domain_matrixinverse;
   int num_domains;
-
+  hypre_CSRMatrix *domain_structure;
 
   int *i_dof_node, *j_dof_node;
   int *i_node_dof, *j_node_dof;
@@ -404,78 +399,22 @@ hypre_AMGNodalSchwarzSmoother( hypre_CSRMatrix    *A,
 
   hypre_TFree(i_local_to_global);
 
+  domain_structure = hypre_CSRMatrixCreate(num_domains, max_local_dof_counter, 
+		i_domain_dof[num_domains]);
+  hypre_CSRMatrixI(domain_structure) = i_domain_dof;
+  hypre_CSRMatrixJ(domain_structure) = j_domain_dof;
+  hypre_CSRMatrixData(domain_structure) = domain_matrixinverse;
 
-  *i_domain_dof_pointer = i_domain_dof;
-  *j_domain_dof_pointer = j_domain_dof;
+  *domain_structure_pointer = domain_structure;
 
-  *num_domains_pointer = num_domains;
-
-  *domain_matrixinverse_pointer = domain_matrixinverse;
-
-
-
-  /* printf("exit *Schwarz*: ===============================\n\n"); */
-
-  /* -----------------------------------------------------------------
-   x   = hypre_CTAlloc(double, num_dofs); 
-   rhs = hypre_CTAlloc(double, num_dofs);
-
-   v   = hypre_CTAlloc(double, num_dofs);
-   w   = hypre_CTAlloc(double, num_dofs);
-   d   = hypre_CTAlloc(double, num_dofs);
-   aux = hypre_CTAlloc(double, num_dofs);
-
-   for (i=0; i < num_dofs; i++)
-     x[i] = 0.e0;
-
-   for (i=0; i < num_dofs; i++)
-     rhs[i] = rand();
-
-
-   max_iter = 1000;
-
-   printf("\nenter SchwarzPCG: =======================================\n");
-
-   ierr = hypre_Schwarzpcg(x, rhs,
-			   a_dof_dof,
-			   i_dof_dof, j_dof_dof,
-
-			   i_domain_dof, j_domain_dof,
-			   domain_matrixinverse, 
-
-			   num_domains,
-
-			   v, w, d, aux,
-
-			   max_iter, 
-
-			   num_dofs);
-
-   printf("\n\n=======================================================\n");
-   printf("             END test PCG solve:                           \n");
-   printf("===========================================================\n");
- 
-   hypre_TFree(x);
-   hypre_TFree(rhs);
-
-   hypre_TFree(aux);
-   hypre_TFree(v);
-   hypre_TFree(w);
-   hypre_TFree(d);
-
-
-   ----------------------------------------------------------------------- */
 
    return ierr;
 
 }
 
-int hypre_SchwarzSolve(hypre_ParCSRMatrix *par_A,
+int hypre_MPSchwarzSolve(hypre_ParCSRMatrix *par_A,
 		       hypre_Vector *rhs_vector,
-		       int num_domains,
-		       int *i_domain_dof,
-		       int *j_domain_dof,
-		       double *domain_matrixinverse,
+		       hypre_CSRMatrix *domain_structure,
 		       hypre_ParVector *par_x,
 		       hypre_Vector *aux_vector)
 
@@ -491,6 +430,10 @@ int hypre_SchwarzSolve(hypre_ParCSRMatrix *par_A,
   hypre_CSRMatrix *A;
   hypre_Vector *x_vector;
   MPI_Comm comm = hypre_ParCSRMatrixComm(par_A);
+  int num_domains = hypre_CSRMatrixNumRows(domain_structure);
+  int *i_domain_dof = hypre_CSRMatrixI(domain_structure);
+  int *j_domain_dof = hypre_CSRMatrixJ(domain_structure);
+  double *domain_matrixinverse = hypre_CSRMatrixData(domain_structure);
 
 #ifdef ESSL
 #else
@@ -533,14 +476,6 @@ int hypre_SchwarzSolve(hypre_ParCSRMatrix *par_A,
 
       /* compute residual: ---------------------------------------- */
 
-   /*   for (j=i_domain_dof[i]; j < i_domain_dof[i+1]; j++)
-	{
-	  aux[j_domain_dof[j]] = rhs[j_domain_dof[j]];
-	  for (k=i_dof_dof[j_domain_dof[j]];
-	       k<i_dof_dof[j_domain_dof[j]+1]; k++)
-	    aux[j_domain_dof[j]] -= a_dof_dof[k] * x[j_dof_dof[k]];
-	}
-   */
       jj = 0;
       for (j=i_domain_dof[i]; j < i_domain_dof[i+1]; j++)
 	{
@@ -551,27 +486,9 @@ int hypre_SchwarzSolve(hypre_ParCSRMatrix *par_A,
 	  jj++;
 	}
       /* solve for correction: ------------------------------------- */
-  /*    
-      for (j=i_domain_dof[i]; j < i_domain_dof[i+1]; j++)
-	{
-	  j_loc = j-i_domain_dof[i];
-
-	  for (k=i_domain_dof[i]; k < i_domain_dof[i+1]; k++)
-	    {
-	      k_loc = k-i_domain_dof[i];
-	      x[j_domain_dof[j]]+= 
-		domain_matrixinverse[matrix_size_counter 
-				    + j_loc + k_loc * matrix_size]
-		* aux[j_domain_dof[k]];
-	    }
-	}
-   */
 #ifdef ESSL
 	dpps(&domain_matrixinverse[matrix_size_counter], matrix_size, aux, 1);
 #else
-        /* dpotrs_(&uplo, &matrix_size, &one,  
-	&domain_matrixinverse[matrix_size_counter], &matrix_size, aux,
-	&matrix_size, &ierr); */
         hypre_F90_NAME_BLAS(dpotrs, DPOTRS)(&uplo, &matrix_size, &one, 
 	&domain_matrixinverse[matrix_size_counter], &matrix_size, aux,
 	&matrix_size, &ierr); 
@@ -590,6 +507,11 @@ int hypre_SchwarzSolve(hypre_ParCSRMatrix *par_A,
 
     }
 
+  if (num_procs > 1)
+     hypre_parCorrRes(par_A,par_x,rhs_vector,&rhs);
+  else 
+     rhs = hypre_VectorData(rhs_vector);
+
   /* backward solve: ------------------------------------------------ */
     for (i=num_domains-1; i > -1; i--)
     {
@@ -601,15 +523,6 @@ int hypre_SchwarzSolve(hypre_ParCSRMatrix *par_A,
 #endif
  
       /* compute residual: ---------------------------------------- */
-/*
-      for (j=i_domain_dof[i]; j < i_domain_dof[i+1]; j++)
-	{
-	  aux[j_domain_dof[j]] = rhs[j_domain_dof[j]];
-	  for (k=i_dof_dof[j_domain_dof[j]];
-	       k<i_dof_dof[j_domain_dof[j]+1]; k++)
-	    aux[j_domain_dof[j]] -= a_dof_dof[k] * x[j_dof_dof[k]];
-	}
-*/
       jj = 0;
       for (j=i_domain_dof[i]; j < i_domain_dof[i+1]; j++)
 	{
@@ -621,27 +534,9 @@ int hypre_SchwarzSolve(hypre_ParCSRMatrix *par_A,
 	}
 
       /* solve for correction: ------------------------------------- */
- /*     
-      for (j=i_domain_dof[i]; j < i_domain_dof[i+1]; j++)
-	{
-	  j_loc = j-i_domain_dof[i];
-
-	  for (k=i_domain_dof[i]; k < i_domain_dof[i+1]; k++)
-	    {
-	      k_loc = k-i_domain_dof[i];
-	      x[j_domain_dof[j]]+= 
-		domain_matrixinverse[matrix_size_counter 
-				    + j_loc + k_loc * matrix_size]
-		* aux[j_domain_dof[k]];
-	    }
-	}
-  */    
 #ifdef ESSL
 	dpps(&domain_matrixinverse[matrix_size_counter], matrix_size, aux, 1);
 #else
-        /* dpotrs_(&uplo, &matrix_size, &one,  
-	&domain_matrixinverse[matrix_size_counter], &matrix_size, aux,
-	&matrix_size, &ierr); */
         hypre_F90_NAME_BLAS(dpotrs, DPOTRS)(&uplo, &matrix_size, &one, 
 	&domain_matrixinverse[matrix_size_counter], &matrix_size, aux,
 	&matrix_size, &ierr); 
@@ -875,21 +770,14 @@ matrix_matrix_product(    int **i_element_edge_pointer,
  *****************************************************************************/
 int
 hypre_AMGCreateDomainDof(hypre_CSRMatrix     *A,
-
-
-			 int                 **i_domain_dof_pointer,
-			 int                 **j_domain_dof_pointer,
-			 double              **domain_matrixinverse_pointer,
-
-
-			 int                 *num_domains_pointer) 
+			 hypre_CSRMatrix    **domain_structure_pointer)
 
 {
 
   int *i_domain_dof, *j_domain_dof;
   double *domain_matrixinverse;
   int num_domains;
-  
+  hypre_CSRMatrix *domain_structure;  
 
   int *i_dof_dof = hypre_CSRMatrixI(A);
   int *j_dof_dof = hypre_CSRMatrixJ(A);
@@ -1159,69 +1047,14 @@ hypre_AMGCreateDomainDof(hypre_CSRMatrix     *A,
 
   hypre_TFree(i_dof_index);
   
+  domain_structure = hypre_CSRMatrixCreate(num_domains, max_local_dof_counter,
+			i_domain_dof[num_domains]);
 
-  *i_domain_dof_pointer = i_domain_dof;
-  *j_domain_dof_pointer = j_domain_dof;
+  hypre_CSRMatrixI(domain_structure) = i_domain_dof;
+  hypre_CSRMatrixJ(domain_structure) = j_domain_dof;
+  hypre_CSRMatrixData(domain_structure) = domain_matrixinverse;
 
-  *num_domains_pointer = num_domains;
-
-  *domain_matrixinverse_pointer = domain_matrixinverse;
-
-
-  
-  /*
-   x   = hypre_CTAlloc(double, num_dofs); 
-   rhs = hypre_CTAlloc(double, num_dofs);
-
-   v   = hypre_CTAlloc(double, num_dofs);
-   w   = hypre_CTAlloc(double, num_dofs);
-   d   = hypre_CTAlloc(double, num_dofs);
-   aux = hypre_CTAlloc(double, num_dofs);
-
-   for (i=0; i < num_dofs; i++)
-     x[i] = 0.e0;
-
-   for (i=0; i < num_dofs; i++)
-     rhs[i] = rand();
-
-
-   max_iter = 1000;
-
-   printf("\nenter SchwarzPCG: =======================================\n");
-
-   ierr = hypre_Schwarzpcg(x, rhs,
-			   a_dof_dof,
-			   i_dof_dof, j_dof_dof,
-
-			   i_domain_dof, j_domain_dof,
-			   domain_matrixinverse, 
-
-			   num_domains,
-
-			   v, w, d, aux,
-
-			   max_iter, 
-
-			   num_dofs);
-
-
-   printf("\n\n=======================================================\n");
-   printf("             END test PCG solve:                           \n");
-   printf("===========================================================\n");
- 
-   hypre_TFree(x);
-   hypre_TFree(rhs);
-
-   hypre_TFree(aux);
-   hypre_TFree(v);
-   hypre_TFree(w);
-   hypre_TFree(d);
-
-   hypre_TFree(i_domain_dof);
-   hypre_TFree(j_domain_dof);
-   hypre_TFree(domain_matrixinverse); 
-
-   */
+  *domain_structure_pointer = domain_structure;
 
   return ierr;
 

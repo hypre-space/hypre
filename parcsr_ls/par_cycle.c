@@ -227,12 +227,9 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
 	 }
          else if (smooth_option[level] > 4)
          {
-            Solve_err_flag = hypre_SchwarzSolve( A_array[level],
+            Solve_err_flag = hypre_MPSchwarzSolve( A_array[level],
                         hypre_ParVectorLocalVector(F_array[level]),
-                        hypre_ParAMGDataNumDomains(amg_data)[level],
-                        hypre_ParAMGDataIDomainDof(amg_data)[level],
-                        hypre_ParAMGDataJDomainDof(amg_data)[level],
-                        hypre_ParAMGDataDomainMatrixInverse(amg_data)[level],
+                        hypre_ParAMGDataDomainStructure(amg_data)[level],
                         U_array[level],
                         hypre_ParVectorLocalVector(Vtemp));
 	 }
@@ -294,8 +291,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
 
       else if (level != 0)
       {
-                            
-         /*---------------------------------------------------------------
+                            /*---------------------------------------------------------------
           * Visit finer level next.
           * Interpolate and add correction using hypre_ParCSRMatrixMatvec.
           * Reset counters and cycling parameters for finer level.

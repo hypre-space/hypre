@@ -73,10 +73,8 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    int       num_functions = hypre_ParAMGDataNumFunctions(amg_data);
    int	    *coarse_dof_func;
    int	    *coarse_pnts_global;
-   int       num_domains;
-   int      *i_domain_dof;
-   int      *j_domain_dof;
-   double   *domain_matrixinverse;
+   /* double   *scale; */
+   hypre_CSRMatrix *domain_structure;
 
    HYPRE_Solver *smoother;
    int      *smooth_option = hypre_ParAMGDataSmoothOption(amg_data);
@@ -432,27 +430,19 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    }
    else if (smooth_option[0] > 4)
    {
-      hypre_ParAMGDataNumDomains(amg_data) = hypre_CTAlloc(int, max_levels);
-      hypre_ParAMGDataIDomainDof(amg_data) = hypre_CTAlloc(int*, max_levels);
-      hypre_ParAMGDataJDomainDof(amg_data) = hypre_CTAlloc(int*, max_levels);
-      hypre_ParAMGDataDomainMatrixInverse(amg_data) = 	
-			hypre_CTAlloc(double*, max_levels);
+      hypre_ParAMGDataDomainStructure(amg_data) = 	
+			hypre_CTAlloc(hypre_CSRMatrix *, max_levels);
+      /* hypre_ParAMGDataScaleArray(amg_data) = hypre_CTAlloc(double*, max_levels); */
       if (smooth_option[0] == 6)
          hypre_AMGNodalSchwarzSmoother (hypre_ParCSRMatrixDiag(A_array[0]),
                                         num_functions,
                                         1,
-                                        &i_domain_dof, &j_domain_dof,
-                                        &domain_matrixinverse,
-                                        &num_domains);
+                                        &domain_structure);
       if (smooth_option[0] == 5)
          hypre_AMGCreateDomainDof (hypre_ParCSRMatrixDiag(A_array[0]),
-                                        &i_domain_dof, &j_domain_dof,
-                                        &domain_matrixinverse,
-                                        &num_domains);
-      hypre_ParAMGDataNumDomains(amg_data)[0] = num_domains;
-      hypre_ParAMGDataIDomainDof(amg_data)[0] = i_domain_dof;
-      hypre_ParAMGDataJDomainDof(amg_data)[0] = j_domain_dof;
-      hypre_ParAMGDataDomainMatrixInverse(amg_data)[0] = domain_matrixinverse;
+                                        &domain_structure);
+      hypre_ParAMGDataDomainStructure(amg_data)[0] = domain_structure;
+      /* hypre_ParAMGDataDomainScaleArray(amg_data)[0] = scale); */
    }
       
    for (j = 1; j < num_levels; j++)
@@ -497,26 +487,16 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
          hypre_AMGNodalSchwarzSmoother (hypre_ParCSRMatrixDiag(A_array[j]),
                                         num_functions,
                                         1,
-                                        &i_domain_dof, &j_domain_dof,
-                                        &domain_matrixinverse,
-                                        &num_domains);
-         hypre_ParAMGDataIDomainDof(amg_data)[j] = i_domain_dof;
-         hypre_ParAMGDataJDomainDof(amg_data)[j] = j_domain_dof;
-         hypre_ParAMGDataNumDomains(amg_data)[j] = num_domains;
-         hypre_ParAMGDataDomainMatrixInverse(amg_data)[j] = 
-                        domain_matrixinverse;
+                                        &domain_structure);
+         hypre_ParAMGDataDomainStructure(amg_data)[j] = domain_structure;
+         /* hypre_ParAMGDataScaleArray(amg_data)[j] = scale; */
       }
       else if (smooth_option[j] == 5)
       {
          hypre_AMGCreateDomainDof (hypre_ParCSRMatrixDiag(A_array[j]),
-                                        &i_domain_dof, &j_domain_dof,
-                                        &domain_matrixinverse,
-                                        &num_domains);
-         hypre_ParAMGDataIDomainDof(amg_data)[j] = i_domain_dof;
-         hypre_ParAMGDataJDomainDof(amg_data)[j] = j_domain_dof;
-         hypre_ParAMGDataNumDomains(amg_data)[j] = num_domains;
-         hypre_ParAMGDataDomainMatrixInverse(amg_data)[j] = 
-                        domain_matrixinverse;
+                                        &domain_structure);
+         hypre_ParAMGDataDomainStructure(amg_data)[j] = domain_structure;
+         /* hypre_ParAMGDataScaleArray(amg_data)[j] = scale; */
       }
    }
 

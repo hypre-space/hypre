@@ -61,10 +61,8 @@ typedef struct
    int                  num_levels;
    int                 *smooth_option;
    HYPRE_Solver        *smoother;
-   int                 *num_domains;
-   int                **i_domain_dof;
-   int                **j_domain_dof;
-   double             **domain_matrixinverse;
+   hypre_CSRMatrix    **domain_structure;
+   double	      **scale_array;
 
    /* data generated in the solve phase */
    hypre_ParVector   *Vtemp;
@@ -135,11 +133,9 @@ typedef struct
 #define hypre_ParAMGDataSmoothOption(amg_data) ((amg_data)->smooth_option)
 #define hypre_ParAMGDataSmoother(amg_data) ((amg_data)->smoother)	
 
-#define hypre_ParAMGDataNumDomains(amg_data) ((amg_data)->num_domains)	
-#define hypre_ParAMGDataIDomainDof(amg_data) ((amg_data)->i_domain_dof)	
-#define hypre_ParAMGDataJDomainDof(amg_data) ((amg_data)->j_domain_dof)	
-#define hypre_ParAMGDataDomainMatrixInverse(amg_data) \
-((amg_data)->domain_matrixinverse) 
+#define hypre_ParAMGDataDomainStructure(amg_data) \
+((amg_data)->domain_structure) 
+#define hypre_ParAMGDataScaleArray(amg_data) ((amg_data)->scale_array)	
       
 /* data generated in the solve phase */
 #define hypre_ParAMGDataVtemp(amg_data) ((amg_data)->Vtemp)
