@@ -119,6 +119,10 @@ help:
 	@echo "     deletes all files from the current directory that are"
 	@echo "        created by configuring or building the program"
 	@echo "     "
+	@echo "tags:"
+	@echo "     runs etags to create tags table"
+	@echo "     file is named TAGS and is saved in current directory"
+	@echo "     "
 	@echo "test:"
 	@echo "     depends on the all target to be completed"
 	@echo "     removes existing temporary installation sub-directory"
@@ -133,7 +137,6 @@ test: all
 	@ \
 	echo "Making test drivers ..."; \
 	(cd test; $(MAKE) distclean; $(MAKE) all); \
-	echo ""
 
 install: all
 	@echo "Installing hypre ..."
@@ -174,3 +177,8 @@ distclean:
 	  fi; \
 	done
 	rm -rf ./config/Makefile.config
+	rm -rf ./TAGS
+
+tags:
+	etags `find . -name "*.c" -or -name "*.C" -or -name "*.h" -or\
+	-name "*.c??" -or -name "*.h??" -or -name "*.f"`
