@@ -20,7 +20,6 @@
 #include "DiagScale.h"
 #include "OrderStat.h"
 
-#define MAX_NPES          1024
 #define DIAG_VALS_TAG      225
 #define DIAG_INDS_TAG      226
 
@@ -41,7 +40,8 @@
  *--------------------------------------------------------------------------*/
 
 static void ExchangeDiagEntries(MPI_Comm comm, Matrix *mat, int reqlen, 
-  int *reqind, double *diags, int *num_requests, MPI_Request *requests)
+  int *reqind, double *diags, int *num_requests, MPI_Request *requests,
+  int *replies_list)
 {
     MPI_Request request;
     int i, j, this_pe;
@@ -72,8 +72,10 @@ static void ExchangeDiagEntries(MPI_Comm comm, Matrix *mat, int reqlen,
         MPI_Isend(&reqind[i], j-i, MPI_INT, this_pe, DIAG_INDS_TAG,
             comm, &request);
         MPI_Request_free(&request);
-
         (*num_requests)++;
+
+	if (replies_list != NULL)
+	    replies_list[this_pe] = 1;
     }
 }
 
@@ -147,9 +149,9 @@ static void ExchangeDiagEntriesServer(MPI_Comm comm, Matrix *mat,
 
 DiagScale *DiagScaleCreate(Matrix *mat)
 {
-    MPI_Request requests[MAX_NPES];
-    MPI_Status  statuses[MAX_NPES];
-    int row, i, j, num_requests;
+    MPI_Request *requests;
+    MPI_Status  *statuses;
+    int npes, row, i, j, num_requests, num_replies, *replies_list;
     int len, *ind;
     double *val;
 
@@ -170,7 +172,7 @@ DiagScale *DiagScaleCreate(Matrix *mat)
         {
             if (ind[j] == row)
             {
-                p->local_diags[row] = val[j];
+                p->local_diags[row] = 1.0 / sqrt(ABS(val[j]));
                 break;
             }
         }
@@ -184,15 +186,25 @@ DiagScale *DiagScaleCreate(Matrix *mat)
     /* buffer for receiving diagonal values from other processors */
     p->ext_diags = (double *) malloc(len * sizeof(double));
 
-    ExchangeDiagEntries(mat->comm, mat, len, ind, p->ext_diags, &num_requests, 
-        requests);
+    MPI_Comm_size(mat->comm, &npes);
+    requests = (MPI_Request *) malloc(npes * sizeof(MPI_Request));
+    statuses = (MPI_Status  *) malloc(npes * sizeof(MPI_Status));
+    replies_list = (int *) calloc(npes, sizeof(int));
 
-    ExchangeDiagEntriesServer(mat->comm, mat, p->local_diags, num_requests);
+    ExchangeDiagEntries(mat->comm, mat, len, ind, p->ext_diags, &num_requests, 
+        requests, replies_list);
+
+    num_replies = FindNumReplies(mat->comm, replies_list);
+    free(replies_list);
+
+    ExchangeDiagEntriesServer(mat->comm, mat, p->local_diags, num_replies);
 
     /* Wait for all replies */
     MPI_Waitall(num_requests, requests, statuses);
+    free(requests);
+    free(statuses);
 
-    p->mat  = mat;
+    p->offset = mat->end_row - mat->beg_row + 1;
 
     return p;
 }
@@ -216,14 +228,12 @@ void DiagScaleDestroy(DiagScale *p)
 
 double DiagScaleGet(DiagScale *p, int index)
 {
-    int offset = p->mat->end_row - p->mat->beg_row + 1;
-
-    if (index < offset)
+    if (index < p->offset)
     {
-        return 1.0 / sqrt(ABS(p->local_diags[index]));
+        return p->local_diags[index];
     }
     else
     {
-        return 1.0 / sqrt(ABS(p->ext_diags[index - offset]));
+        return p->ext_diags[index - p->offset];
     }
 }
