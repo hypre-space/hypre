@@ -4,18 +4,19 @@
 
 #include "utilities.h"
 #include "HYPRE_struct_ls.h"
+#include "struct_mv.h"
  
-#include "bHYPRE_Box_Stub.h"
-#include "bHYPRE_StructStencil_Stub.h"
-#include "bHYPRE_StructGrid_Stub.h"
-#include "bHYPRE_StructMatrix_Stub.h"
-#include "bHYPRE_StructMatrixBuilder_Stub.h"
-#include "bHYPRE_StructVector_Stub.h"
-#include "bHYPRE_StructVectorBuilder_Stub.h"
-#include "bHYPRE_MPI_Com_Stub.h"
-#include "bHYPRE_StructJacobi_Stub.h"
-#include "bHYPRE_StructSMG_Stub.h"
-#include "bHYPRE_PCG_Stub.h"
+#include "bHYPRE_StructBuildMatrix.h"
+#include "bHYPRE_StructMatrix.h"
+#include "bHYPRE_StructBuildVector.h"
+#include "bHYPRE_StructVector.h"
+#include "bHYPRE_Operator.h"
+#include "bHYPRE_Solver.h"
+#include "bHYPRE_StructSMG.h"
+#include "bHYPRE_PCG.h"
+#include "bHYPRE_StructGrid.h"
+#include "bHYPRE_StructStencil.h"
+#include "bHYPRE_StructGrid_Impl.h"
 
 #ifdef HYPRE_DEBUG
 #include <cegdb.h>
@@ -31,6 +32,9 @@
  * Standard 7-point laplacian in 3D with grid and anisotropy determined
  * as command line arguments.  Do `driver -help' for usage info.
  *----------------------------------------------------------------------*/
+
+int SetStencilBndry
+( bHYPRE_StructMatrix A_b, bHYPRE_StructGrid grid, int* periodic );
 
 int
 main( int   argc,
@@ -49,37 +53,40 @@ main( int   argc,
    /*double              dxyz[3];*/
 
    int                 A_num_ghost[6] = {0, 0, 0, 0, 0, 0};
-   double              doubtemp;
+   /* obsolete double              doubtemp;*/
                      
-   bHYPRE_StructMatrixBuilder MatBldr;
-   bHYPRE_StructVectorBuilder VecBldr;
-   bHYPRE_LinearOperator lo_test;
-   bHYPRE_StructMatrix  A_SM;
-   bHYPRE_LinearOperator A_LO;
+/* obsolete...
+   bHYPRE_StructBuildMatrix MatBldr;
+   bHYPRE_StructBuildVector VecBldr;
+*/
+/* not currently used   bHYPRE_Operator lo_test;*/
+   bHYPRE_StructMatrix  A_b;
+/* not currently used   bHYPRE_Operator A_LO;*/
+   bHYPRE_Operator A_O;
    bHYPRE_StructVector  b_SV;
    bHYPRE_Vector  b_V;
    bHYPRE_StructVector  x_SV;
    bHYPRE_Vector  x_V;
 
-   bHYPRE_Solver  solver;
+/* not currently used   bHYPRE_Solver  solver;*/
    bHYPRE_Solver  precond;
-   bHYPRE_StructJacobi  solver_SJ;
+/*   bHYPRE_StructJacobi  solver_SJ;*/
    bHYPRE_StructSMG solver_SMG;
    bHYPRE_PCG  solver_PCG;
 
-   bHYPRE_MPI_Com comm;
-   bHYPRE_Box * box;
-   bHYPRE_Box bbox;
+   int zero = 0;
+   int one = 1;
+   int size;
+   struct sidl_int__array* sidl_upper;
+   struct sidl_int__array* sidl_lower;
+   struct sidl_int__array* sidl_periodic;
+   struct sidl_int__array* sidl_offsets;
+   struct sidl_int__array* sidl_num_ghost;
+   struct sidl_int__array* sidl_stencil_indices;
+   struct sidl_double__array* sidl_values;
+
+   MPI_Comm comm = MPI_COMM_WORLD;
    int symmetric;
-   array1int arroffsets;
-   array1int intvals;
-   array1int intvals_lo;
-   array1int intvals_hi;
-   array1double doubvals;
-   array1int num_ghost;
-   array1int periodic_arr;
-   int int1, int2, int3, int4, int5, int6, int7, int8, int9, int10;
-   int int11, int12, int13, int14, int15;
 
 /*    HYPRE_StructMatrix  A; */
 /*    HYPRE_StructVector  b; */
@@ -116,7 +123,8 @@ main( int   argc,
    int                *stencil_indices;
    double             *values;
 
-   int                 i, isave, s, d;
+   int                 i, s;
+/* not currently used   int                 isave, d;*/
    int                 ix, iy, iz, ib;
 
    int                 periodic_error = 0;
@@ -132,30 +140,12 @@ main( int   argc,
 
    MPI_Comm_size(MPI_COMM_WORLD, &num_procs );
    MPI_Comm_rank(MPI_COMM_WORLD, &myid );
-   /* Make a MPI_Com object. */
-   comm = bHYPRE_MPI_Com_Constructor( MPI_COMM_WORLD );
-
 
 #ifdef HYPRE_DEBUG
    cegdb(&argc, &argv, myid);
 #endif
 
    hypre_InitMemoryDebug(myid);
-
-   arroffsets.lower = &int1;
-   arroffsets.upper = &int2;
-   intvals.lower = &int3;
-   intvals.upper = &int4;
-   intvals_lo.lower = &int5;
-   intvals_lo.upper = &int6;
-   intvals_hi.lower = &int7;
-   intvals_hi.upper = &int8;
-   num_ghost.lower = &int9;
-   num_ghost.upper = &int10;
-   periodic_arr.lower = &int11;
-   periodic_arr.upper = &int12;
-   doubvals.lower = &int13;
-   doubvals.upper = &int14;
 
    /*-----------------------------------------------------------
     * Set defaults
@@ -453,7 +443,6 @@ main( int   argc,
          break;
    }
 
-   box = hypre_CTAlloc( bHYPRE_Box, nblocks );
    ilower = hypre_CTAlloc(int*, nblocks);
    iupper = hypre_CTAlloc(int*, nblocks);
    for (i = 0; i < nblocks; i++)
@@ -470,10 +459,6 @@ main( int   argc,
 
    /* compute ilower and iupper from (p,q,r), (bx,by,bz), and (nx,ny,nz) */
    ib = 0;
-   intvals_lo.lower[0] = 0;
-   intvals_lo.upper[0] = dim;
-   intvals_hi.lower[0] = 0;
-   intvals_hi.upper[0] = dim;
    switch (dim)
    {
       case 1:
@@ -481,10 +466,6 @@ main( int   argc,
          {
             ilower[ib][0] = istart[0]+ nx*(bx*p+ix);
             iupper[ib][0] = istart[0]+ nx*(bx*p+ix+1) - 1;
-            intvals_lo.data = ilower[ib];
-            intvals_hi.data = iupper[ib];
-            box[ib] = bHYPRE_Box_Constructor( intvals_lo, intvals_hi, dim );
-            bHYPRE_Box_Setup( box[ib] );
             ib++;
          }
          break;
@@ -496,10 +477,6 @@ main( int   argc,
                iupper[ib][0] = istart[0]+ nx*(bx*p+ix+1) - 1;
                ilower[ib][1] = istart[1]+ ny*(by*q+iy);
                iupper[ib][1] = istart[1]+ ny*(by*q+iy+1) - 1;
-               intvals_lo.data = ilower[ib];
-               intvals_hi.data = iupper[ib];
-               box[ib] = bHYPRE_Box_Constructor( intvals_lo, intvals_hi, dim );
-               bHYPRE_Box_Setup( box[ib] );
                ib++;
             }
          break;
@@ -514,28 +491,37 @@ main( int   argc,
                   iupper[ib][1] = istart[1]+ ny*(by*q+iy+1) - 1;
                   ilower[ib][2] = istart[2]+ nz*(bz*r+iz);
                   iupper[ib][2] = istart[2]+ nz*(bz*r+iz+1) - 1;
-                  intvals_lo.data = ilower[ib];
-                  intvals_hi.data = iupper[ib];
-                  box[ib] = bHYPRE_Box_Constructor(
-                     intvals_lo, intvals_hi, dim );
-                  bHYPRE_Box_Setup( box[ib] );
                   ib++;
                }
          break;
    } 
 
-   grid = bHYPRE_StructGrid_Constructor( comm, dim );
+   sidl_upper= sidl_int__array_create1d( dim );
+   sidl_lower= sidl_int__array_create1d( dim );
+   grid = bHYPRE_StructGrid__create();
+   ierr += bHYPRE_StructGrid_SetCommunicator( grid, (void *) comm );
+   ierr += bHYPRE_StructGrid_SetDimension( grid, dim );
    for (ib = 0; ib < nblocks; ib++)
    {
-      bHYPRE_StructGrid_SetGridExtents( grid, box[ib] );
+      for ( i=0; i < dim; i++ )
+      {
+         sidl_int__array_set1( sidl_upper, i, iupper[ib][i] );
+         sidl_int__array_set1( sidl_lower, i, ilower[ib][i] );
+      }
+      bHYPRE_StructGrid_SetExtents( grid, sidl_lower, sidl_upper );
    }
+   sidl_int__array_deleteRef( sidl_upper );
+   sidl_int__array_deleteRef( sidl_lower );
 
-   periodic_arr.lower[0] = 0;
-   periodic_arr.upper[0] = dim;
-   periodic_arr.data = periodic;
-   bHYPRE_StructGrid_SetParameterIntArray( grid, "periodic", periodic_arr );
+   sidl_periodic= sidl_int__array_create1d( dim );
+   for ( i=0; i < dim; i++ )
+   {
+      sidl_int__array_set1( sidl_periodic, i, periodic[i] );
+   }
+   bHYPRE_StructGrid_SetPeriodic( grid, sidl_periodic );
+   sidl_int__array_deleteRef( sidl_periodic );
 
-   bHYPRE_StructGrid_Setup( grid );
+   bHYPRE_StructGrid_Assemble( grid );
 
 /*    HYPRE_StructGridCreate(MPI_COMM_WORLD, dim, &grid); */
 /*    for (ib = 0; ib < nblocks; ib++) */
@@ -549,13 +535,21 @@ main( int   argc,
     * Set up the stencil structure
     *-----------------------------------------------------------*/
  
-   stencil = bHYPRE_StructStencil_Constructor( dim, dim+1 );
+   stencil = bHYPRE_StructStencil__create();
+   ierr += bHYPRE_StructStencil_SetDimension( stencil, dim );
+   ierr += bHYPRE_StructStencil_SetSize( stencil, dim+1 );
+   /* ...SetSize recognizes that ...SetDimension has been called, so it calls
+      HYPRE_StructStencilCreate */
+   sidl_offsets= sidl_int__array_create1d( dim );
    for (s = 0; s < dim + 1; s++)
    {
-      arroffsets.data = offsets[s];
-      bHYPRE_StructStencil_SetElement( stencil, s, arroffsets );
+      for ( i=0; i < dim; i++ )
+      {
+         sidl_int__array_set1( sidl_offsets, i, offsets[s][i] );
+      }
+      bHYPRE_StructStencil_SetElement( stencil, s, sidl_offsets );
    };
-   bHYPRE_StructStencil_Setup( stencil );
+   sidl_int__array_deleteRef( sidl_offsets );
 
 /*    HYPRE_StructStencilCreate(dim, dim + 1, &stencil); */
 /*    for (s = 0; s < dim + 1; s++) */
@@ -575,12 +569,28 @@ main( int   argc,
     Note that HYPRE has an Assemble function too. */
 
    symmetric = 1;
+   /* ... this test code, and probably the present Babel interface, only works
+      with symmetric matrix storage */
+   A_b = bHYPRE_StructMatrix__create();
+   ierr += bHYPRE_StructMatrix_SetCommunicator( A_b, (void *) comm );
+   ierr += bHYPRE_StructMatrix_SetGrid( A_b, grid );
+   /* ... the above matrix Set functions _must_ be called before the following ones ... */
+   ierr += bHYPRE_StructMatrix_SetStencil( A_b, stencil );
+   ierr += bHYPRE_StructMatrix_SetSymmetric( A_b, symmetric );
+   size = 2*dim;
+   sidl_num_ghost= sidl_int__array_borrow( A_num_ghost, 1, &zero, &size, &one );
+   ierr += bHYPRE_StructMatrix_SetNumGhost( A_b, sidl_num_ghost );
+   sidl_int__array_deleteRef( sidl_num_ghost );
+   ierr += bHYPRE_StructMatrix_Initialize( A_b );
+
+/* obsolete...
    num_ghost.lower[0] = 0;
    num_ghost.upper[0] = 2*dim;
    num_ghost.data = A_num_ghost;
    MatBldr = bHYPRE_StructMatrixBuilder_Constructor
       ( grid, stencil, symmetric, num_ghost );
    bHYPRE_StructMatrixBuilder_Start( MatBldr, grid, stencil, symmetric, num_ghost );
+*/
 
    /*-----------------------------------------------------------
     * Fill in the matrix elements
@@ -614,6 +624,29 @@ main( int   argc,
          }
       }
    }
+   sidl_lower= sidl_int__array_create1d( dim );
+   sidl_upper= sidl_int__array_create1d( dim );
+   size = dim+1;
+   sidl_stencil_indices= sidl_int__array_borrow( stencil_indices, 1, &zero, &size, &one );
+   size = (dim+1)*volume;
+   sidl_values= sidl_double__array_borrow( values, 1, &zero, &size, &one );
+   for (ib = 0; ib < nblocks; ib++)
+   {
+      for ( i=0; i < dim; i++ )
+      {
+         sidl_int__array_set1( sidl_lower, i, ilower[ib][i] );
+         sidl_int__array_set1( sidl_upper, i, iupper[ib][i] );
+      }
+      ierr += bHYPRE_StructMatrix_SetBoxValues
+         ( A_b, sidl_lower, sidl_upper, dim+1,
+           sidl_stencil_indices,
+           sidl_values );
+   }
+   sidl_int__array_deleteRef( sidl_lower );
+   sidl_int__array_deleteRef( sidl_upper );
+   sidl_int__array_deleteRef( sidl_stencil_indices );
+   sidl_double__array_deleteRef( sidl_values );
+/* obsolete...
    intvals.lower[0] = 0;
    intvals.upper[0] = dim+1;
    doubvals.lower[0] = 0;
@@ -623,11 +656,15 @@ main( int   argc,
    for (ib = 0; ib < nblocks; ib++)
    {
       bHYPRE_StructMatrixBuilder_SetBoxValues( MatBldr, box[ib], intvals, doubvals );
+   }
+*/
 /*       HYPRE_StructMatrixSetBoxValues(A, ilower[ib], iupper[ib], (dim+1), */
 /*                                      stencil_indices, values); */
-   }
 
    /* Zero out stencils reaching to real boundary */
+   /* this section moved to a new function, SetStencilBndry */
+   ierr += SetStencilBndry( A_b, grid, periodic); 
+#if 0
    for (i = 0; i < volume; i++)
    {
       values[i] = 0.0;
@@ -642,6 +679,7 @@ main( int   argc,
             /* Make boundary box by flattening out box[ib] for direction d. */
             isave = iupper[ib][d];
             iupper[ib][d] = istart[d];
+/* obsolete
             intvals_lo.lower[0] = 0;
             intvals_lo.upper[0] = dim;
             intvals_hi.lower[0] = 0;
@@ -650,20 +688,22 @@ main( int   argc,
             intvals_hi.data = iupper[ib];
             bbox = bHYPRE_Box_Constructor( intvals_lo, intvals_hi, dim );
             bHYPRE_Box_Setup( bbox );
-   
+*/
             /* Put stencil point d (the one in direction d from the "middle"),
                into stencil_indices, so the corresponding matrix entry will
                get zeroed. */
             stencil_indices[0] = d;
+
+/* obsolete
             intvals.lower[0] = 0;
             intvals.upper[0] = 1;
             intvals.data = stencil_indices;
             doubvals.lower[0] = 0;
             doubvals.upper[0] = volume;
             doubvals.data = values;
-
             bHYPRE_StructMatrixBuilder_SetBoxValues
                ( MatBldr, bbox, intvals, doubvals );
+*/
 /*             HYPRE_StructMatrixSetBoxValues(A, ilower[ib], iupper[ib], */
 /*                                            1, stencil_indices, values); */
             iupper[ib][d] = isave;
@@ -671,14 +711,18 @@ main( int   argc,
          }
       }
    }
+#endif
 
+   ierr += bHYPRE_StructMatrix_Assemble( A_b );
+/* obsolete...
    ierr += bHYPRE_StructMatrixBuilder_Setup( MatBldr );
    ierr += bHYPRE_StructMatrixBuilder_GetConstructedObject( MatBldr, &A_LO );
-   A_SM = (bHYPRE_StructMatrix) bHYPRE_LinearOperator_castTo
+   A_b = (bHYPRE_StructMatrix) bHYPRE_LinearOperator_castTo
       ( A_LO, "bHYPRE.StructMatrix" );
+*/
 
 #if 0
-   bHYPRE_StructMatrix_print( A_SM );
+   bHYPRE_StructMatrix_print( A_b );
 /*   HYPRE_StructMatrixPrint("driver.out.A", A, 0); */
 #endif
 
@@ -690,8 +734,14 @@ main( int   argc,
 
    values = hypre_CTAlloc(double, volume);
 
+   b_SV = bHYPRE_StructVector__create();
+   ierr += bHYPRE_StructVector_SetCommunicator( b_SV, (void *) comm );
+   ierr += bHYPRE_StructVector_SetGrid( b_SV, grid );
+   ierr += bHYPRE_StructVector_Initialize( b_SV );
+/* obsolete...
    VecBldr = bHYPRE_StructVectorBuilder_Constructor( grid );
    bHYPRE_StructVectorBuilder_Start( VecBldr, grid );
+*/
 /*    HYPRE_StructVectorCreate(MPI_COMM_WORLD, grid, stencil, &b); */
 /*    HYPRE_StructVectorInitialize(b); */
 
@@ -719,41 +769,89 @@ main( int   argc,
       }
    }
 
+   sidl_lower= sidl_int__array_create1d( dim );
+   sidl_upper= sidl_int__array_create1d( dim );
+   sidl_values= sidl_double__array_borrow( values, 1, &zero, &volume, &one );
+   for (ib = 0; ib < nblocks; ib++)
+   {
+      for ( i=0; i < dim; i++ )
+      {
+         sidl_int__array_set1( sidl_lower, i, ilower[ib][i] );
+         sidl_int__array_set1( sidl_upper, i, iupper[ib][i] );
+      }
+      ierr += bHYPRE_StructVector_SetBoxValues( b_SV, sidl_lower, sidl_upper, sidl_values );
+   }
+   sidl_int__array_deleteRef( sidl_lower );
+   sidl_int__array_deleteRef( sidl_upper );
+   sidl_double__array_deleteRef( sidl_values );
+
+/* obsolete...
    doubvals.data = values;
    for (ib = 0; ib < nblocks; ib++)
    {
       bHYPRE_StructVectorBuilder_SetBoxValues( VecBldr, box[ib], doubvals );
-/*       HYPRE_StructVectorSetBoxValues(b, ilower[ib], iupper[ib], values); */
    }
+*/
+/*       HYPRE_StructVectorSetBoxValues(b, ilower[ib], iupper[ib], values); */
 /*   HYPRE_StructVectorAssemble(b); */
-   bHYPRE_StructVectorBuilder_Setup( VecBldr );
+   bHYPRE_StructVector_Assemble( b_SV );
+/* obsolete...
    bHYPRE_StructVectorBuilder_GetConstructedObject( VecBldr, &b_V );
    b_SV = (bHYPRE_StructVector) bHYPRE_Vector_castTo
       ( b_V, "bHYPRE.StructVector" );
+*/
 
 #if 0
    bHYPRE_StructVector_Print( b_SV );
 /*   HYPRE_StructVectorPrint("driver.out.b", b, 0); */
 #endif
 
+/* obsolete...
    bHYPRE_StructVectorBuilder_Start( VecBldr, grid );
+*/
 /*    HYPRE_StructVectorCreate(MPI_COMM_WORLD, grid, stencil, &x); */
 /*    HYPRE_StructVectorInitialize(x); */
+   x_SV = bHYPRE_StructVector__create();
+   ierr += bHYPRE_StructVector_SetCommunicator( x_SV, (void *) comm );
+   ierr += bHYPRE_StructVector_SetGrid( x_SV, grid );
+   ierr += bHYPRE_StructVector_Initialize( x_SV );
+
+   sidl_lower= sidl_int__array_create1d( dim );
+   sidl_upper= sidl_int__array_create1d( dim );
+   sidl_values= sidl_double__array_borrow( values, 1, &zero, &volume, &one );
    for (i = 0; i < volume; i++)
    {
       values[i] = 0.0;
    }
+   for (ib = 0; ib < nblocks; ib++)
+   {
+      for ( i=0; i < dim; i++ )
+      {
+         sidl_int__array_set1( sidl_lower, i, ilower[ib][i] );
+         sidl_int__array_set1( sidl_upper, i, iupper[ib][i] );
+      }
+      ierr += bHYPRE_StructVector_SetBoxValues( x_SV, sidl_lower, sidl_upper, sidl_values );
+   }
+   sidl_int__array_deleteRef( sidl_lower );
+   sidl_int__array_deleteRef( sidl_upper );
+   sidl_double__array_deleteRef( sidl_values );
+
+   bHYPRE_StructVector_Assemble( b_SV );
+/* obsolete...
    doubvals.data = values;
    for (ib = 0; ib < nblocks; ib++)
    {
       bHYPRE_StructVectorBuilder_SetBoxValues( VecBldr, box[ib], doubvals );
-/*       HYPRE_StructVectorSetBoxValues(x, ilower[ib], iupper[ib], values); */
    }
+*/
+/*       HYPRE_StructVectorSetBoxValues(x, ilower[ib], iupper[ib], values); */
 /*   HYPRE_StructVectorAssemble(x); */
+/* obsolete...
    bHYPRE_StructVectorBuilder_Setup( VecBldr );
    bHYPRE_StructVectorBuilder_GetConstructedObject( VecBldr, &x_V );
    x_SV = (bHYPRE_StructVector) bHYPRE_Vector_castTo
       ( x_V, "bHYPRE.StructVector" );
+*/
 
 #if 0
    bHYPRE_StructVector_Print( x_SV );
@@ -770,7 +868,7 @@ main( int   argc,
 
 /* JfP: temporarily, call Jacobi iteration, using as a model the
    code which calls multigrid ... */
-
+#if 0
    if ( solver_id==201 )
    {
       time_index = hypre_InitializeTiming("Jacobi Setup");
@@ -778,7 +876,7 @@ main( int   argc,
 
       solver_SJ = bHYPRE_StructJacobi_Constructor( comm );
 
-      bHYPRE_StructJacobi_SetParameterDouble( solver_SJ, "tol", 1.0e-4 );
+      bHYPRE_StructJacobi_SetDoubleParameter( solver_SJ, "tol", 1.0e-4 );
       bHYPRE_StructJacobi_SetParameterInt( solver_SJ, "max_iter", 500 );
 
       bHYPRE_StructJacobi_Setup( solver_SJ, A_LO, b_V, x_V );
@@ -811,7 +909,7 @@ main( int   argc,
 
       bHYPRE_StructJacobi_destructor( solver_SJ );
    }
-
+#endif
 
 /* Conjugate Gradient */
    if ((solver_id > 9) && (solver_id < 20))
@@ -819,51 +917,65 @@ main( int   argc,
       time_index = hypre_InitializeTiming("PCG Setup");
       hypre_BeginTiming(time_index);
 
-      solver_PCG = bHYPRE_PCG_Constructor( comm );
 
-      bHYPRE_PCG_SetParameterInt( solver_PCG, "max_iter", 50 );
-      bHYPRE_PCG_SetParameterDouble( solver_PCG, "tol", 1.0e-06);
-      bHYPRE_PCG_SetParameterInt( solver_PCG, "2-norm", 1);
-      bHYPRE_PCG_SetParameterInt( solver_PCG, "relative change test", 0);
-      bHYPRE_PCG_SetParameterInt( solver_PCG, "log", 1);
+      solver_PCG = bHYPRE_PCG__create();
+      ierr += bHYPRE_PCG_SetCommunicator( solver_PCG, (void *) comm );
+      A_O = bHYPRE_Operator__cast( A_b );
+      ierr += bHYPRE_PCG_SetOperator( solver_PCG, A_O );
+      b_V = bHYPRE_Vector__cast( b_SV );
+      x_V = bHYPRE_Vector__cast( x_SV );
+      /* obsolete solver_PCG = bHYPRE_PCG_Constructor( comm );*/
+
+      bHYPRE_PCG_SetIntParameter( solver_PCG, "max_iter", 50 );
+      bHYPRE_PCG_SetDoubleParameter( solver_PCG, "tol", 1.0e-06);
+      bHYPRE_PCG_SetIntParameter( solver_PCG, "2-norm", 1);
+      bHYPRE_PCG_SetIntParameter( solver_PCG, "relative change test", 0);
+      bHYPRE_PCG_SetIntParameter( solver_PCG, "log", 1);
 
       if (solver_id == 10)
       {
          /* use symmetric SMG as preconditioner */
-         solver_SMG = bHYPRE_StructSMG_Constructor( comm );
-         precond = (bHYPRE_Solver) bHYPRE_StructSMG_castTo
+         solver_SMG = bHYPRE_StructSMG__create();
+         ierr += bHYPRE_StructSMG_SetCommunicator( solver_SMG, (void *) comm );
+         ierr += bHYPRE_StructSMG_SetOperator( solver_SMG, A_O );
+
+         bHYPRE_StructSMG_SetIntParameter( solver_SMG, "memory use", 0 );
+         bHYPRE_StructSMG_SetIntParameter( solver_SMG, "max iter", 1 );
+         bHYPRE_StructSMG_SetDoubleParameter( solver_SMG, "tol", 0.0 );
+         bHYPRE_StructSMG_SetIntParameter( solver_SMG, "zero guess", 1 );
+         bHYPRE_StructSMG_SetIntParameter( solver_SMG, "rel change", 0 );
+         bHYPRE_StructSMG_SetIntParameter( solver_SMG, "num prerelax", n_pre );
+         bHYPRE_StructSMG_SetIntParameter( solver_SMG, "num postrelax", n_post );
+         bHYPRE_StructSMG_SetIntParameter( solver_SMG, "logging", 0 );
+
+         ierr += bHYPRE_StructSMG_Setup( solver_SMG, b_V, x_V );
+         /* obsolete solver_SMG = bHYPRE_StructSMG_Constructor( comm );*/
+
+         precond = (bHYPRE_Solver) bHYPRE_StructSMG__cast2
             ( solver_SMG, "bHYPRE.Solver" ); 
-
-         bHYPRE_StructSMG_SetParameterInt( solver_SMG, "memory use", 0 );
-         bHYPRE_StructSMG_SetParameterInt( solver_SMG, "max iter", 1 );
-         bHYPRE_StructSMG_SetParameterDouble( solver_SMG, "tol", 0.0 );
-         bHYPRE_StructSMG_SetParameterInt( solver_SMG, "zero guess", 1 );
-         bHYPRE_StructSMG_SetParameterInt( solver_SMG, "rel change", 0 );
-         bHYPRE_StructSMG_SetParameterInt( solver_SMG, "num prerelax", n_pre );
-         bHYPRE_StructSMG_SetParameterInt( solver_SMG, "num postrelax", n_post );
-         bHYPRE_StructSMG_SetParameterInt( solver_SMG, "logging", 0 );
-
-         bHYPRE_StructSMG_Setup( solver_SMG, A_LO, b_V, x_V );
       }
+#if 0
       else if (solver_id == 17)
       {
          /* use two-step Jacobi as preconditioner */
          solver_SJ = bHYPRE_StructJacobi_Constructor( comm );
          precond = (bHYPRE_Solver) bHYPRE_StructJacobi_castTo
             ( solver_SJ, "bHYPRE.Solver" ); 
-         bHYPRE_StructJacobi_SetParameterDouble( solver_SJ, "tol", 0.0 );
-         bHYPRE_StructJacobi_SetParameterInt( solver_SJ, "max_iter", 2 );
-         bHYPRE_StructJacobi_SetParameterInt( solver_SJ, "zero guess", 0 );
+         bHYPRE_StructJacobi_SetDoubleParameter( solver_SJ, "tol", 0.0 );
+         bHYPRE_StructJacobi_SetIntParameter( solver_SJ, "max_iter", 2 );
+         bHYPRE_StructJacobi_SetIntParameter( solver_SJ, "zero guess", 0 );
       
          bHYPRE_StructJacobi_Setup( solver_SJ, A_LO, b_V, x_V );
       }
+#endif
       else {
          printf( "Preconditioner not supported! Solver_id=%i\n", solver_id );
       }
       
       bHYPRE_PCG_SetPreconditioner( solver_PCG, precond );
 
-      bHYPRE_PCG_Setup( solver_PCG, A_LO, b_V, x_V );
+      ierr += bHYPRE_PCG_Setup( solver_PCG, b_V, x_V );
+      /* obsolete bHYPRE_PCG_Setup( solver_PCG, A_LO, b_V, x_V );*/
 
       hypre_EndTiming(time_index);
       hypre_PrintTiming("Setup phase times", MPI_COMM_WORLD);
@@ -880,19 +992,23 @@ main( int   argc,
       hypre_FinalizeTiming(time_index);
       hypre_ClearTiming();
 
-      bHYPRE_PCG_GetConvergenceInfo( solver_PCG, "number of iterations",
-                                    &doubtemp );
-      num_iterations = floor(doubtemp*1.001); /* round(doubtemp) */
+      ierr += bHYPRE_PCG_GetNumIterations( solver_PCG, &num_iterations );
+      ierr += bHYPRE_PCG_GetRelResidualNorm( solver_PCG, &final_res_norm );
+      /* obsolete bHYPRE_PCG_GetConvergenceInfo( solver_PCG, "number of iterations",
+         &doubtemp );
+         num_iterations = floor(doubtemp*1.001);  i.e. round(doubtemp)
       bHYPRE_PCG_GetConvergenceInfo( solver_PCG, "residual norm",
-                                    &final_res_norm);
+      &final_res_norm);*/
 
 /* not available yet      bHYPRE_PCG_PrintLogging( solver_PCG ); */
 
-      bHYPRE_PCG_destructor( solver_PCG );
+      bHYPRE_PCG_deleteRef( solver_PCG );
+   /* obsolete bHYPRE_PCG_destructor( solver_PCG );*/
 
       if (solver_id == 10)
       {
-         bHYPRE_StructSMG_destructor( solver_SMG );
+         /* obsolete bHYPRE_StructSMG_destructor( solver_SMG );*/
+         bHYPRE_StructSMG_deleteRef( solver_SMG );
       }
 /*
       else if (solver_id == 11)
@@ -903,11 +1019,12 @@ main( int   argc,
       {
          HYPRE_StructSparseMSGDestroy(precond);
       }
-*/
       else if (solver_id == 17)
       {
          bHYPRE_StructJacobi_destructor( solver_SJ );
       }
+*/
+
    }
 
    /*-----------------------------------------------------------
@@ -919,17 +1036,24 @@ main( int   argc,
       time_index = hypre_InitializeTiming("SMG Setup");
       hypre_BeginTiming(time_index);
 
-      solver_SMG = bHYPRE_StructSMG_Constructor( comm );
+      solver_SMG = bHYPRE_StructSMG__create();
+      ierr += bHYPRE_StructSMG_SetCommunicator( solver_SMG, (void *) comm );
+      bHYPRE_StructSMG_SetIntParameter( solver_SMG, "memory use", 0 );
+      bHYPRE_StructSMG_SetIntParameter( solver_SMG, "max iter", 50 );
+      bHYPRE_StructSMG_SetDoubleParameter( solver_SMG, "tol", 1.0e-6 );
+      bHYPRE_StructSMG_SetIntParameter( solver_SMG, "rel change", 0 );
+      bHYPRE_StructSMG_SetIntParameter( solver_SMG, "num prerelax", n_pre );
+      bHYPRE_StructSMG_SetIntParameter( solver_SMG, "num postrelax", n_post );
+      bHYPRE_StructSMG_SetIntParameter( solver_SMG, "logging", 1 );
 
-      bHYPRE_StructSMG_SetParameterInt( solver_SMG, "memory use", 0 );
-      bHYPRE_StructSMG_SetParameterInt( solver_SMG, "max iter", 50 );
-      bHYPRE_StructSMG_SetParameterDouble( solver_SMG, "tol", 1.0e-6 );
-      bHYPRE_StructSMG_SetParameterInt( solver_SMG, "rel change", 0 );
-      bHYPRE_StructSMG_SetParameterInt( solver_SMG, "num prerelax", n_pre );
-      bHYPRE_StructSMG_SetParameterInt( solver_SMG, "num postrelax", n_post );
-      bHYPRE_StructSMG_SetParameterInt( solver_SMG, "logging", 1 );
+      A_O = bHYPRE_Operator__cast( A_b );
+      ierr += bHYPRE_StructSMG_SetOperator( solver_SMG, A_O );
+      b_V = bHYPRE_Vector__cast( b_SV );
+      x_V = bHYPRE_Vector__cast( x_SV );
+      ierr += bHYPRE_StructSMG_Setup( solver_SMG, b_V, x_V );
+      /* obsolete solver_SMG = bHYPRE_StructSMG_Constructor( comm );*/
 
-      bHYPRE_StructSMG_Setup( solver_SMG, A_LO, b_V, x_V );
+      /* obsolete bHYPRE_StructSMG_Setup( solver_SMG, A_LO, b_V, x_V );*/
 /*
       HYPRE_StructSMGCreate(MPI_COMM_WORLD, &solver);
       HYPRE_StructSMGSetMemoryUse(solver, 0);
@@ -959,16 +1083,19 @@ main( int   argc,
       hypre_FinalizeTiming(time_index);
       hypre_ClearTiming();
    
-      bHYPRE_StructSMG_GetConvergenceInfo(
+      ierr += bHYPRE_StructSMG_GetNumIterations( solver_SMG, &num_iterations );
+      ierr += bHYPRE_StructSMG_GetRelResidualNorm( solver_SMG, &final_res_norm );
+      /* obsolete bHYPRE_StructSMG_GetConvergenceInfo(
          solver_SMG, "num iterations", &doubtemp );
-      num_iterations = floor( 1.001*doubtemp );
-      bHYPRE_StructSMG_GetConvergenceInfo(
-         solver_SMG, "final relative residual norm", &final_res_norm );
+         num_iterations = floor( 1.001*doubtemp );
+         bHYPRE_StructSMG_GetConvergenceInfo(
+         solver_SMG, "final relative residual norm", &final_res_norm );*/
 /*
       HYPRE_StructSMGGetNumIterations(solver, &num_iterations);
       HYPRE_StructSMGGetFinalRelativeResidualNorm(solver, &final_res_norm);
 */
-      bHYPRE_StructSMG_destructor( solver_SMG );
+      /* obsolete bHYPRE_StructSMG_destructor( solver_SMG );*/
+      bHYPRE_StructSMG_deleteRef( solver_SMG );
 /*    HYPRE_StructSMGDestroy(solver); */
    }
 
@@ -1130,7 +1257,7 @@ main( int   argc,
                                    HYPRE_StructSparseMSGSetup,
                                    precond);
       }
-
+#if 0
       else if (solver_id == 17)
       {
          /* use two-step Jacobi as preconditioner */
@@ -1143,7 +1270,7 @@ main( int   argc,
                                    HYPRE_StructJacobiSetup,
                                    precond);
       }
-
+#endif
       else if (solver_id == 18)
       {
          /* use diagonal scaling as preconditioner */
@@ -1194,10 +1321,12 @@ main( int   argc,
       {
          HYPRE_StructSparseMSGDestroy(precond);
       }
+#if 0
       else if (solver_id == 17)
       {
          HYPRE_StructJacobiDestroy(precond);
       }
+#endif
    }
 
    /*-----------------------------------------------------------
@@ -1332,14 +1461,20 @@ main( int   argc,
     * Finalize things
     *-----------------------------------------------------------*/
 
-   bHYPRE_MPI_Com_destructor(comm);
+   bHYPRE_StructStencil_deleteRef( stencil );
+   bHYPRE_StructGrid_deleteRef( grid );
+   bHYPRE_StructMatrix_deleteRef( A_b );
+   bHYPRE_StructVector_deleteRef( b_SV );
+   bHYPRE_StructVector_deleteRef( x_SV );
+   /* obsolete bHYPRE_MPI_Com_destructor(comm);
    bHYPRE_StructStencil_destructor(stencil);
    bHYPRE_StructGrid_destructor(grid);
    for (ib = 0; ib < nblocks; ib++)
       bHYPRE_Box_destructor(box[ib]);
-   bHYPRE_StructMatrix_destructor(A_SM);
+   bHYPRE_StructMatrix_destructor(A_b);
    bHYPRE_StructVector_destructor(b_SV);
    bHYPRE_StructVector_destructor(x_SV);
+   */
             
 /*    HYPRE_StructGridDestroy(grid); */
 /*    HYPRE_StructStencilDestroy(stencil); */
@@ -1355,7 +1490,7 @@ main( int   argc,
    hypre_TFree(ilower);
    hypre_TFree(iupper);
    hypre_TFree(stencil_indices);
-   hypre_TFree(box);
+   /* obsolete hypre_TFree(box);*/
 
    for ( i = 0; i < (dim + 1); i++)
       hypre_TFree(offsets[i]);
@@ -1372,3 +1507,158 @@ main( int   argc,
 
    return (0);
 }
+
+/*********************************************************************************
+ * this function sets to zero the stencil entries that are on the boundary
+ * Grid, matrix and the period are needed. 
+ *********************************************************************************/ 
+
+int SetStencilBndry
+( bHYPRE_StructMatrix A_b, bHYPRE_StructGrid grid, int* period )
+{
+  int ierr=0;
+  hypre_BoxArray    *gridboxes;
+  int                size,i,j,d,ib;
+  int              **ilower;
+  int              **iupper;
+  int               *vol;
+  int               *istart, *iend;
+  hypre_Box         *box;
+  hypre_Box         *dummybox;
+  hypre_Box         *boundingbox;
+  double            *values;
+  int                volume, dim;
+  int               *stencil_indices;
+  int                constant_coefficient;
+  int zero = 0;
+  int one = 1;
+  struct sidl_int__array* sidl_upper;
+  struct sidl_int__array* sidl_lower;
+  struct sidl_int__array* sidl_stencil_indices;
+  struct sidl_double__array* sidl_values;
+
+  struct bHYPRE_StructGrid__data * grid_data;
+  HYPRE_StructGrid Hgrid;
+  HYPRE_StructGrid gridmatrix;
+  grid_data = bHYPRE_StructGrid__get_data( grid );
+  Hgrid = grid_data -> grid;
+  gridmatrix = Hgrid;
+
+  gridboxes       = hypre_StructGridBoxes(gridmatrix);
+  boundingbox     = hypre_StructGridBoundingBox(gridmatrix);
+  istart          = hypre_BoxIMin(boundingbox);
+  iend            = hypre_BoxIMax(boundingbox);
+  size            = hypre_StructGridNumBoxes(gridmatrix);
+  dim             = hypre_StructGridDim(gridmatrix);
+  stencil_indices = hypre_CTAlloc(int, 1);
+
+  /*  constant_coefficient = hypre_StructMatrixConstantCoefficient(A);*/
+  constant_coefficient = 0; /* Babel interface doesn't support c.c. yet */
+  if ( constant_coefficient>0 ) return 1;
+  /*...no space dependence if constant_coefficient==1,
+    and space dependence only for diagonal if constant_coefficient==2 --
+    and this function only touches off-diagonal entries */
+
+  vol    = hypre_CTAlloc(int, size);
+  ilower = hypre_CTAlloc(int*, size);
+  iupper = hypre_CTAlloc(int*, size);
+  for (i = 0; i < size; i++)
+  {
+     ilower[i] = hypre_CTAlloc(int, dim);
+     iupper[i] = hypre_CTAlloc(int, dim);
+  }
+
+  i = 0;
+  ib = 0;
+  hypre_ForBoxI(i, gridboxes)
+     {
+        dummybox = hypre_BoxCreate( );
+        box      = hypre_BoxArrayBox(gridboxes, i);
+        volume   =  hypre_BoxVolume(box);
+        vol[i]   = volume;
+        hypre_CopyBox(box,dummybox);
+        for (d = 0; d < dim; d++)
+        {
+	   ilower[ib][d] = hypre_BoxIMinD(dummybox,d);
+	   iupper[ib][d] = hypre_BoxIMaxD(dummybox,d);
+        }
+	ib++ ;
+        hypre_BoxDestroy(dummybox);
+     }
+
+  if ( constant_coefficient==0 )
+  {
+     sidl_lower= sidl_int__array_create1d( dim );
+     sidl_upper= sidl_int__array_create1d( dim );
+     sidl_stencil_indices= sidl_int__array_create1d( 1 );
+     for (d = 0; d < dim; d++)
+     {
+        for (ib = 0; ib < size; ib++)
+        {
+           values = hypre_CTAlloc(double, vol[ib]);
+        
+           for (i = 0; i < vol[ib]; i++)
+           {
+              values[i] = 0.0;
+           }
+           sidl_values= sidl_double__array_borrow( values, 1, &zero, &(vol[ib]), &one );
+
+           if( ilower[ib][d] == istart[d] && period[d] == 0 )
+           {
+              j = iupper[ib][d];
+              iupper[ib][d] = istart[d];
+              stencil_indices[0] = d;
+
+              for ( i=0; i < dim; i++ )
+              {
+                 sidl_int__array_set1( sidl_lower, i, ilower[ib][i] );
+                 sidl_int__array_set1( sidl_upper, i, iupper[ib][i] );
+              }
+              sidl_int__array_set1( sidl_stencil_indices, 0, stencil_indices[0] );
+              bHYPRE_StructMatrix_SetBoxValues
+                 ( A_b, sidl_lower, sidl_upper, 1, sidl_stencil_indices, sidl_values );
+              /* HYPRE_StructMatrixSetBoxValues(A, ilower[ib], iupper[ib],
+                 1, stencil_indices, values);*/
+              iupper[ib][d] = j;
+           }
+
+           if( iupper[ib][d] == iend[d] && period[d] == 0 )
+           {
+              j = ilower[ib][d];
+              ilower[ib][d] = iend[d];
+              stencil_indices[0] = dim + 1 + d;
+              for ( i=0; i < dim; i++ )
+              {
+                 sidl_int__array_set1( sidl_lower, i, ilower[ib][i] );
+                 sidl_int__array_set1( sidl_upper, i, iupper[ib][i] );
+              }
+              bHYPRE_StructMatrix_SetBoxValues
+                 ( A_b, sidl_lower, sidl_upper, 1, sidl_stencil_indices, sidl_values );
+              /* HYPRE_StructMatrixSetBoxValues(A, ilower[ib], iupper[ib],
+                 1, stencil_indices, values);*/
+              ilower[ib][d] = j;
+           }
+           sidl_double__array_deleteRef( sidl_values );
+           hypre_TFree(values);
+        }
+     }
+     sidl_int__array_deleteRef( sidl_lower );
+     sidl_int__array_deleteRef( sidl_upper );
+     sidl_int__array_deleteRef( sidl_stencil_indices );
+  }
+  
+  hypre_TFree(vol);
+  hypre_TFree(stencil_indices);
+  for (ib =0 ; ib < size ; ib++)
+  {
+     hypre_TFree(ilower[ib]);
+     hypre_TFree(iupper[ib]);
+  }
+  hypre_TFree(ilower);
+  hypre_TFree(iupper);
+
+  
+
+  return ierr;
+}
+
