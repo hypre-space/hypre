@@ -205,9 +205,7 @@ hypre_FinalizeCommunication( hypre_CommHandle *comm_handle )
  * ---------------------------------------------------------------------*/
 
 int
-hypre_GenerateMatvecCommunicationInfo ( hypre_ParCSRMatrix *A,
-					int *row_part_starts ,
-					int *col_part_starts )
+hypre_GenerateMatvecCommunicationInfo ( hypre_ParCSRMatrix *A)
 {
    hypre_CommPkg	*comm_pkg;
    
@@ -225,14 +223,13 @@ hypre_GenerateMatvecCommunicationInfo ( hypre_ParCSRMatrix *A,
    
    int  *col_map_offd = hypre_ParCSRMatrixColMapOffd(A);
    int  first_col_diag = hypre_ParCSRMatrixFirstColDiag(A);
-   int  first_row_index = hypre_ParCSRMatrixFirstRowIndex(A);
+   int  *col_starts = hypre_ParCSRMatrixColStarts(A);
 
    int	i, j, j2, k;
    int	*proc_mark, *tmp, *recv_buf, *displs, *info;
    int	num_procs, my_id, proc_num, num_elmts;
    int	local_info, index, index2, offset, offd_col;
    int	ierr = 0;
-   int  row_len = hypre_ParCSRMatrixGlobalNumCols(A);	
    int	num_cols_diag = hypre_CSRMatrixNumCols(hypre_ParCSRMatrixDiag(A));
    int	num_cols_offd = hypre_CSRMatrixNumCols(hypre_ParCSRMatrixOffd(A));
 
@@ -241,43 +238,6 @@ hypre_GenerateMatvecCommunicationInfo ( hypre_ParCSRMatrix *A,
 
    proc_mark = hypre_CTAlloc(int, num_procs);
    info = hypre_CTAlloc(int, num_procs);
-
-/* ----------------------------------------------------------------------
- * generate row and column partitioning if necessary
- * ---------------------------------------------------------------------*/
-
-   if (!row_part_starts)
-   {
-   	row_part_starts = hypre_CTAlloc(int, num_procs+1);
-
-   	for (i=0; i < num_procs; i++)
-   	{
-        	MPE_Decomp1d(hypre_ParCSRMatrixGlobalNumCols(A), num_procs, i, 
-		&row_part_starts[i], &proc_mark[i]);
-     		row_part_starts[i]--;
-   	}
-   	row_part_starts[num_procs] = hypre_ParCSRMatrixGlobalNumCols(A);
-   }
-
-   if (row_part_starts[my_id]-first_row_index)
-	printf("Conflicting row partitioning!!!");
-
-   if (!col_part_starts)
-   {
-   	col_part_starts = hypre_CTAlloc(int, num_procs+1);
-
-   	for (i=0; i < num_procs; i++)
-   	{
-        	MPE_Decomp1d(row_len, num_procs, i, 
-		&col_part_starts[i], &proc_mark[i]);
-     		col_part_starts[i]--;
-   	}
-   	col_part_starts[num_procs] = row_len;
-   }
-
-   if (col_part_starts[my_id]-first_col_diag)
-	printf("Conflicting column partitioning!!!");
-
 
 /* ----------------------------------------------------------------------
  * determine which processors to receive from (set proc_mark) and num_recvs,
@@ -292,9 +252,9 @@ hypre_GenerateMatvecCommunicationInfo ( hypre_ParCSRMatrix *A,
    {
 	offd_col = col_map_offd[i];
 	proc_num = offd_col / num_cols_diag;
-	while (col_part_starts[proc_num] > offd_col )
+	while (col_starts[proc_num] > offd_col )
 		proc_num = proc_num-1;
-	while (col_part_starts[proc_num+1]-1 < offd_col )
+	while (col_starts[proc_num+1]-1 < offd_col )
 		proc_num = proc_num+1;
 	proc_mark[proc_num]++;
    }
@@ -338,8 +298,8 @@ hypre_GenerateMatvecCommunicationInfo ( hypre_ParCSRMatrix *A,
 		tmp[j++] = i;
 		tmp[j++] = proc_mark[i];
 		for (k=0; k < num_cols_offd; k++)
-			if (col_map_offd[k] >= col_part_starts[i] && 
-				col_map_offd[k] < col_part_starts[i+1])
+			if (col_map_offd[k] >= col_starts[i] && 
+				col_map_offd[k] < col_starts[i+1])
 				tmp[j++] = col_map_offd[k];
 	}
 
