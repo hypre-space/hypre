@@ -668,8 +668,8 @@ AC_DEFUN([HYPRE_FIND_BLAS],
 	[AS_HELP_STRING([  --with-blas], [Find a system-provided BLAS library])])
 
   case $with_blas in
-      yes | "") ;;
-	     *) BLASLIBS="internal" ;;
+      yes) ;;
+        *) BLASLIBS="internal" ;;
   esac
 
 #***************************************************************
@@ -794,8 +794,8 @@ AC_DEFUN([HYPRE_FIND_LAPACK],
         [AS_HELP_STRING([  --with-lapack], [Find a system-provided LAPACK library])])
 
   case $with_lapack in
-      yes | "") ;;
-             *) LAPACKLIBS="internal" ;;
+      yes) ;;
+        *) LAPACKLIBS="internal" ;;
   esac
 
 #***************************************************************

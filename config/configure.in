@@ -435,7 +435,6 @@ AC_ARG_WITH(blas-libs,
 [for blas_lib in $withval; do
    BLASLIBS="$BLASLIBS -l$blas_lib"
  done;
- BLASINTERNAL=no;
  casc_user_chose_blas=yes]
 )
 
@@ -449,7 +448,6 @@ AC_ARG_WITH(blas-lib-dirs,
 [for blas_lib_dir in $withval; do
    BLASLIBDIRS="-L$blas_lib_dir $BLASLIBDIRS"
  done;
- BLASINTERNAL=no;
  casc_user_chose_blas=yes]
 )
 
@@ -461,7 +459,6 @@ AC_ARG_WITH(lapack-libs,
 [for lapack_lib in $withval; do
    LAPACKLIBS="$LAPACKLIBS -l$lapack_lib"
  done;
- LAPACKINTERNAL=no;
  casc_user_chose_lapack=yes]
 )
 
@@ -475,7 +472,6 @@ AC_ARG_WITH(lapack-lib-dirs,
 [for lapack_lib_dir in $withval; do
    LAPACKLIBDIRS="-L$lapack_lib_dir $LAPACKLIBDIRS"
  done;
- LAPACKINTERNAL=no;
  casc_user_chose_lapack=yes]
 )
 
@@ -711,33 +707,17 @@ then
       BLAS_DIR="HYPRE_TOP_SRC_DIR/hypre/lib"
       BLASLIBDIRS="-L$BLAS_DIR"
       BLASLIBS="-lHYPRE_utilities"
-      BLASINTERNAL=yes
       AC_DEFINE(HYPRE_USING_HYPRE_BLAS, 1, [Using internal HYPRE routines.])
    elif test "$BLASLIBS" = "internal"
    then
       BLAS_DIR="HYPRE_TOP_SRC_DIR/hypre/lib"
       BLASLIBDIRS="-L$BLAS_DIR"
       BLASLIBS="-lHYPRE_utilities"
-      BLASINTERNAL=yes
       AC_DEFINE(HYPRE_USING_HYPRE_BLAS, 1, [Using internal HYPRE routines.])
    else
-      BLASINTERNAL=no
       AC_DEFINE(HAVE_BLAS, 1, [BLAS library is system provided.])
    fi
 fi
-
-dnl *********************************************************************
-dnl * Create blas/Makefile with appropriate substitutions based on
-dnl * whether or not internal routines are needed
-dnl *********************************************************************
-   chmod 775 HYPRE_TOP_SRC_DIR/blas/*
-   blas_make="HYPRE_TOP_SRC_DIR/blas/Makefile"
-   if test "$BLASINTERNAL" = "yes"
-   then
-      cat HYPRE_TOP_SRC_DIR/blas/Makefile.template | sed 's/\${BLASINTERNAL}/ /g' > "$blas_make"
-   else
-      cat HYPRE_TOP_SRC_DIR/blas/Makefile.template | sed 's/\${BLASINTERNAL}/\#/g' > "$blas_make"
-   fi
 
 dnl *********************************************************************
 dnl * Find LAPACK library if not already set by the user 
@@ -756,64 +736,17 @@ then
       LAPACK_DIR="HYPRE_TOP_SRC_DIR/hypre/lib"
       LAPACKLIBDIRS="-L$LAPACK_DIR"
       LAPACKLIBS="-lHYPRE_utilities"
-      LAPACKINTERNAL=yes
       AC_DEFINE(HYPRE_USING_HYPRE_LAPACK, 1, [Using internal HYPRE routines.])
    elif test "$LAPACKLIBS" = "internal"
    then
       LAPACK_DIR="HYPRE_TOP_SRC_DIR/hypre/lib"
       LAPACKLIBDIRS="-L$LAPACK_DIR"
       LAPACKLIBS="-lHYPRE_utilities"
-      LAPACKINTERNAL=yes
       AC_DEFINE(HYPRE_USING_HYPRE_LAPACK, 1, [Using internal HYPRE routines.])
    else
-      LAPACKINTERNAL=no
       AC_DEFINE(HAVE_LAPACK, 1, [LAPACK library is system provided.])
    fi
 fi
-
-dnl *********************************************************************
-dnl * Create lapack/Makefile with appropriate substitutions based on
-dnl * whether or not internal routines are needed
-dnl *********************************************************************
-   chmod 775 HYPRE_TOP_SRC_DIR/lapack/*
-   lapack_make="HYPRE_TOP_SRC_DIR/lapack/Makefile"
-   if test "$LAPACKINTERNAL" = "yes"
-   then
-      cat HYPRE_TOP_SRC_DIR/lapack/Makefile.template | sed 's/\${LAPACKINTERNAL}/ /g' > "$lapack_make"
-   else
-      cat HYPRE_TOP_SRC_DIR/lapack/Makefile.template | sed 's/\${LAPACKINTERNAL}/\#/g' > "$lapack_make"
-   fi
-
-dnl *********************************************************************
-dnl * Create Makefiles in the lib and utilities sub-directories with 
-dnl * appropriate substitutions for BLASINTERNAL and LAPACKINTERNAL based
-dnl * on whether or not internal routines are needed
-dnl *********************************************************************
-   chmod 775 HYPRE_TOP_SRC_DIR/lib/*
-   chmod 775 HYPRE_TOP_SRC_DIR/utilities/*
-   lib_make="HYPRE_TOP_SRC_DIR/lib/Makefile"
-   util_make="HYPRE_TOP_SRC_DIR/utilities/Makefile"
-   if test "$LAPACKINTERNAL" = "yes"
-   then
-     if test "$BLASINTERNAL" = "yes"
-     then
-       cat HYPRE_TOP_SRC_DIR/lib/Makefile.template | sed 's/\${LAPACKINTERNAL}/ /g; s/\${BLASINTERNAL}/ /g' > "$lib_make"
-       cat HYPRE_TOP_SRC_DIR/utilities/Makefile.template | sed 's/\${LAPACKINTERNAL}/ /g; s/\${BLASINTERNAL}/ /g' > "$util_make"
-     else
-       cat HYPRE_TOP_SRC_DIR/lib/Makefile.template | sed 's/\${LAPACKINTERNAL}/ /g; s/\${BLASINTERNAL}/\#/g' > "$lib_make"
-       cat HYPRE_TOP_SRC_DIR/utilities/Makefile.template | sed 's/\${LAPACKINTERNAL}/ /g; s/\${BLASINTERNAL}/\#/g' > "$util_make"
-     fi
-   elif test "$LAPACKINTERNAL" = "no"
-   then
-     if test "$BLASINTERNAL" = "yes"
-     then
-       cat HYPRE_TOP_SRC_DIR/lib/Makefile.template | sed 's/\${LAPACKINTERNAL}/\#/g; s/\${BLASINTERNAL}/ /g' > "$lib_make"
-       cat HYPRE_TOP_SRC_DIR/utilities/Makefile.template | sed 's/\${LAPACKINTERNAL}/\#/g; s/\${BLASINTERNAL}/ /g' > "$util_make"
-     else
-       cat HYPRE_TOP_SRC_DIR/lib/Makefile.template | sed 's/\${LAPACKINTERNAL}/\#/g; s/\${BLASINTERNAL}/\#/g' > "$lib_make"
-       cat HYPRE_TOP_SRC_DIR/utilities/Makefile.template | sed 's/\${LAPACKINTERNAL}/\#/g; s/\${BLASINTERNAL}/\#/g' > "$util_make"
-     fi
-   fi
 
 dnl *********************************************************************
 dnl * Create FEI_mv/fei-hypre/Makefile with appropriate substitutions

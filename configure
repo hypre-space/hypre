@@ -2037,7 +2037,6 @@ if test "${with_blas_libs+set}" = set; then
   for blas_lib in $withval; do
    BLASLIBS="$BLASLIBS -l$blas_lib"
  done;
- BLASINTERNAL=no;
  casc_user_chose_blas=yes
 
 fi;
@@ -2049,7 +2048,6 @@ if test "${with_blas_lib_dirs+set}" = set; then
   for blas_lib_dir in $withval; do
    BLASLIBDIRS="-L$blas_lib_dir $BLASLIBDIRS"
  done;
- BLASINTERNAL=no;
  casc_user_chose_blas=yes
 
 fi;
@@ -2061,7 +2059,6 @@ if test "${with_lapack_libs+set}" = set; then
   for lapack_lib in $withval; do
    LAPACKLIBS="$LAPACKLIBS -l$lapack_lib"
  done;
- LAPACKINTERNAL=no;
  casc_user_chose_lapack=yes
 
 fi;
@@ -2073,7 +2070,6 @@ if test "${with_lapack_lib_dirs+set}" = set; then
   for lapack_lib_dir in $withval; do
    LAPACKLIBDIRS="-L$lapack_lib_dir $LAPACKLIBDIRS"
  done;
- LAPACKINTERNAL=no;
  casc_user_chose_lapack=yes
 
 fi;
@@ -5154,7 +5150,7 @@ fi
 
 
 # Provide some information about the compiler.
-echo "$as_me:5157:" \
+echo "$as_me:5153:" \
      "checking for Fortran 77 compiler version" >&5
 ac_compiler=`set X $ac_compile; echo $2`
 { (eval echo "$as_me:$LINENO: \"$ac_compiler --version </dev/null >&5\"") >&5
@@ -5350,7 +5346,7 @@ _ACEOF
 # flags.
 ac_save_FFLAGS=$FFLAGS
 FFLAGS="$FFLAGS $ac_verb"
-(eval echo $as_me:5353: \"$ac_link\") >&5
+(eval echo $as_me:5349: \"$ac_link\") >&5
 ac_f77_v_output=`eval $ac_link 5>&1 2>&1 | grep -v 'Driving:'`
 echo "$ac_f77_v_output" >&5
 FFLAGS=$ac_save_FFLAGS
@@ -5428,7 +5424,7 @@ _ACEOF
 # flags.
 ac_save_FFLAGS=$FFLAGS
 FFLAGS="$FFLAGS $ac_cv_prog_f77_v"
-(eval echo $as_me:5431: \"$ac_link\") >&5
+(eval echo $as_me:5427: \"$ac_link\") >&5
 ac_f77_v_output=`eval $ac_link 5>&1 2>&1 | grep -v 'Driving:'`
 echo "$ac_f77_v_output" >&5
 FFLAGS=$ac_save_FFLAGS
@@ -8170,8 +8166,8 @@ if test "${with_blas+set}" = set; then
 fi;
 
   case $with_blas in
-      yes | "") ;;
-	     *) BLASLIBS="internal" ;;
+      yes) ;;
+        *) BLASLIBS="internal" ;;
   esac
 
 #***************************************************************
@@ -8367,7 +8363,6 @@ echo "$as_me: WARNING: ***************************************" >&2;}
       BLAS_DIR="`pwd`/hypre/lib"
       BLASLIBDIRS="-L$BLAS_DIR"
       BLASLIBS="-lHYPRE_utilities"
-      BLASINTERNAL=yes
 
 cat >>confdefs.h <<\_ACEOF
 #define HYPRE_USING_HYPRE_BLAS 1
@@ -8378,14 +8373,12 @@ _ACEOF
       BLAS_DIR="`pwd`/hypre/lib"
       BLASLIBDIRS="-L$BLAS_DIR"
       BLASLIBS="-lHYPRE_utilities"
-      BLASINTERNAL=yes
 
 cat >>confdefs.h <<\_ACEOF
 #define HYPRE_USING_HYPRE_BLAS 1
 _ACEOF
 
    else
-      BLASINTERNAL=no
 
 cat >>confdefs.h <<\_ACEOF
 #define HAVE_BLAS 1
@@ -8393,15 +8386,6 @@ _ACEOF
 
    fi
 fi
-
-   chmod 775 `pwd`/blas/*
-   blas_make="`pwd`/blas/Makefile"
-   if test "$BLASINTERNAL" = "yes"
-   then
-      cat `pwd`/blas/Makefile.template | sed 's/\${BLASINTERNAL}/ /g' > "$blas_make"
-   else
-      cat `pwd`/blas/Makefile.template | sed 's/\${BLASINTERNAL}/\#/g' > "$blas_make"
-   fi
 
 if test "$casc_user_chose_lapack" = "no"
 then
@@ -8422,8 +8406,8 @@ if test "${with_lapack+set}" = set; then
 fi;
 
   case $with_lapack in
-      yes | "") ;;
-             *) LAPACKLIBS="internal" ;;
+      yes) ;;
+        *) LAPACKLIBS="internal" ;;
   esac
 
 #***************************************************************
@@ -8600,7 +8584,6 @@ echo "$as_me: WARNING: ***************************************" >&2;}
       LAPACK_DIR="`pwd`/hypre/lib"
       LAPACKLIBDIRS="-L$LAPACK_DIR"
       LAPACKLIBS="-lHYPRE_utilities"
-      LAPACKINTERNAL=yes
 
 cat >>confdefs.h <<\_ACEOF
 #define HYPRE_USING_HYPRE_LAPACK 1
@@ -8611,14 +8594,12 @@ _ACEOF
       LAPACK_DIR="`pwd`/hypre/lib"
       LAPACKLIBDIRS="-L$LAPACK_DIR"
       LAPACKLIBS="-lHYPRE_utilities"
-      LAPACKINTERNAL=yes
 
 cat >>confdefs.h <<\_ACEOF
 #define HYPRE_USING_HYPRE_LAPACK 1
 _ACEOF
 
    else
-      LAPACKINTERNAL=no
 
 cat >>confdefs.h <<\_ACEOF
 #define HAVE_LAPACK 1
@@ -8626,41 +8607,6 @@ _ACEOF
 
    fi
 fi
-
-   chmod 775 `pwd`/lapack/*
-   lapack_make="`pwd`/lapack/Makefile"
-   if test "$LAPACKINTERNAL" = "yes"
-   then
-      cat `pwd`/lapack/Makefile.template | sed 's/\${LAPACKINTERNAL}/ /g' > "$lapack_make"
-   else
-      cat `pwd`/lapack/Makefile.template | sed 's/\${LAPACKINTERNAL}/\#/g' > "$lapack_make"
-   fi
-
-   chmod 775 `pwd`/lib/*
-   chmod 775 `pwd`/utilities/*
-   lib_make="`pwd`/lib/Makefile"
-   util_make="`pwd`/utilities/Makefile"
-   if test "$LAPACKINTERNAL" = "yes"
-   then
-     if test "$BLASINTERNAL" = "yes"
-     then
-       cat `pwd`/lib/Makefile.template | sed 's/\${LAPACKINTERNAL}/ /g; s/\${BLASINTERNAL}/ /g' > "$lib_make"
-       cat `pwd`/utilities/Makefile.template | sed 's/\${LAPACKINTERNAL}/ /g; s/\${BLASINTERNAL}/ /g' > "$util_make"
-     else
-       cat `pwd`/lib/Makefile.template | sed 's/\${LAPACKINTERNAL}/ /g; s/\${BLASINTERNAL}/\#/g' > "$lib_make"
-       cat `pwd`/utilities/Makefile.template | sed 's/\${LAPACKINTERNAL}/ /g; s/\${BLASINTERNAL}/\#/g' > "$util_make"
-     fi
-   elif test "$LAPACKINTERNAL" = "no"
-   then
-     if test "$BLASINTERNAL" = "yes"
-     then
-       cat `pwd`/lib/Makefile.template | sed 's/\${LAPACKINTERNAL}/\#/g; s/\${BLASINTERNAL}/ /g' > "$lib_make"
-       cat `pwd`/utilities/Makefile.template | sed 's/\${LAPACKINTERNAL}/\#/g; s/\${BLASINTERNAL}/ /g' > "$util_make"
-     else
-       cat `pwd`/lib/Makefile.template | sed 's/\${LAPACKINTERNAL}/\#/g; s/\${BLASINTERNAL}/\#/g' > "$lib_make"
-       cat `pwd`/utilities/Makefile.template | sed 's/\${LAPACKINTERNAL}/\#/g; s/\${BLASINTERNAL}/\#/g' > "$util_make"
-     fi
-   fi
 
    chmod 775 `pwd`/FEI_mv/fei-hypre/*
    feihypre_make="`pwd`/FEI_mv/fei-hypre/Makefile"

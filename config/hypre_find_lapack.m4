@@ -41,8 +41,8 @@ AC_DEFUN([HYPRE_FIND_LAPACK],
         [AS_HELP_STRING([  --with-lapack], [Find a system-provided LAPACK library])])
 
   case $with_lapack in
-      yes | "") ;;
-             *) LAPACKLIBS="internal" ;;
+      yes) ;;
+        *) LAPACKLIBS="internal" ;;
   esac
 
 #***************************************************************

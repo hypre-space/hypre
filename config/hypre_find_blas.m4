@@ -43,8 +43,8 @@ AC_DEFUN([HYPRE_FIND_BLAS],
 	[AS_HELP_STRING([  --with-blas], [Find a system-provided BLAS library])])
 
   case $with_blas in
-      yes | "") ;;
-	     *) BLASLIBS="internal" ;;
+      yes) ;;
+        *) BLASLIBS="internal" ;;
   esac
 
 #***************************************************************
