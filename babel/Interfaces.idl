@@ -11,9 +11,9 @@
  **/
 
 /**
- * The Hypre package defines interfaces for the HYPRE software package.
+ * The bHYPRE package defines interfaces for the HYPRE software package.
  **/
-package Hypre version 0.1.7
+package bHYPRE version 1.0.0
 {
 
    /*----------- Interface -------------------------------------------------*/
@@ -105,8 +105,6 @@ package Hypre version 0.1.7
        * of the matrix separately from the rest of the matrix.
        *
        * Collective.
-       *
-       * RDF: Changed name from 'Create' (x)
        **/
       int SetLocalRange(in int ilower,
                         in int iupper,
@@ -150,8 +148,6 @@ package Hypre version 0.1.7
       /**
        * Gets range of rows owned by this processor and range of
        * column partitioning for this processor.
-       *
-       * RDF: New (x)
        **/
       int GetLocalRange(out int ilower,
                         out int iupper,
@@ -162,8 +158,6 @@ package Hypre version 0.1.7
        * Gets number of nonzeros elements for {\tt nrows} rows
        * specified in {\tt rows} and returns them in {\tt ncols},
        * which needs to be allocated by the user.
-       *
-       * RDF: New (x)
        **/
       int GetRowCounts(in int nrows,
                        in array<int> rows,
@@ -172,8 +166,6 @@ package Hypre version 0.1.7
       /**
        * Gets values for {\tt nrows} rows or partial rows of the
        * matrix.  Usage details are analogous to {\tt SetValues}.
-       *
-       * RDF: New (x)
        **/
       int GetValues(in int nrows,
                     in array<int> ncols,
@@ -221,8 +213,6 @@ package Hypre version 0.1.7
        * particular, one may use zero- or one-based indexing.
        *
        * Collective.
-       *
-       * RDF: Changed name from 'Create' (x)
        **/
       int SetLocalRange(in int jlower,
                         in int jupper);
@@ -253,8 +243,6 @@ package Hypre version 0.1.7
       /**
        * Returns range of the part of the vector owned by this
        * processor.
-       *
-       * RDF: New (x)
        **/
       int GetLocalRange(out int jlower,
                         out int jupper);
@@ -264,8 +252,6 @@ package Hypre version 0.1.7
        * SetValues}.
        *
        * Not collective.
-       *
-       * RDF: New (x)
        **/
       int GetValues(in int nvalues,
                     in array<int> indices,
@@ -716,15 +702,11 @@ package Hypre version 0.1.7
 
       /**
        * (Optional) Set the convergence tolerance.
-       *
-       * RDF: New
        **/
       int SetTolerance(in double tolerance);
 
       /**
        * (Optional) Set maximum number of iterations.
-       *
-       * RDF: New
        **/
       int SetMaxIterations(in int max_iterations);
 
@@ -748,15 +730,11 @@ package Hypre version 0.1.7
 
       /**
        * (Optional) Return the number of iterations taken.
-       *
-       * RDF: New
        **/
       int GetNumIterations(out int num_iterations);
 
       /**
        * (Optional) Return the norm of the relative residual.
-       *
-       * RDF: New
        **/
       int GetRelResidualNorm(out double norm);
    }
@@ -1146,8 +1124,6 @@ package Hypre version 0.1.7
     *
     * Objects of this type can be cast to Solver objects using the
     * {\tt \_\_cast} methods.
-    *
-    * RDF: Changed name from 'ParDiagScale' (x)
     **/
    class ParCSRDiagScale implements-all Solver
    {
@@ -1162,72 +1138,69 @@ package Hypre version 0.1.7
     *
     * \begin{description}
     *
-    * \item[Max Levels] ({\tt Int}) - maximum number of multigrid
+    * \item[MaxLevels] ({\tt Int}) - maximum number of multigrid
     * levels.
     *
-    * \item[Strong Threshold] ({\tt Double}) - AMG strength threshold.
+    * \item[StrongThreshold] ({\tt Double}) - AMG strength threshold.
     *
-    * \item[Max Row Sum] ({\tt Double}) -
+    * \item[MaxRowSum] ({\tt Double}) -
     *
-    * \item[Coarsen Type] ({\tt Int}) - type of parallel coarsening
+    * \item[CoarsenType] ({\tt Int}) - type of parallel coarsening
     * algorithm used.
     *
-    * \item[Measure Type] ({\tt Int}) - type of measure used; local or
+    * \item[MeasureType] ({\tt Int}) - type of measure used; local or
     * global.
     *
-    * \item[Cycle Type] ({\tt Int}) - type of cycle used; a V-cycle
+    * \item[CycleType] ({\tt Int}) - type of cycle used; a V-cycle
     * (default) or a W-cycle.
     *
-    * \item[Num Grid Sweeps] ({\tt IntArray}) - number of sweeps for
+    * \item[NumGridSweeps] ({\tt IntArray}) - number of sweeps for
     * fine and coarse grid, up and down cycle.
     *
-    * \item[Grid Relax Type] ({\tt IntArray}) - type of smoother used
-    * on fine and coarse grid, up and down cycle.
+    * \item[GridRelaxType] ({\tt IntArray}) - type of smoother used on
+    * fine and coarse grid, up and down cycle.
     *
-    * \item[Grid Relax Points] ({\tt IntArray}) - point ordering used
-    * in relaxation.
+    * \item[GridRelaxPoints] ({\tt IntArray}) - point ordering used in
+    * relaxation.
     *
-    * \item[Relax Weight] ({\tt DoubleArray}) - relaxation weight for
+    * \item[RelaxWeight] ({\tt DoubleArray}) - relaxation weight for
     * smoothed Jacobi and hybrid SOR.
     *
-    * \item[Truncation Factor] ({\tt Double}) - truncation factor for
+    * \item[TruncFactor] ({\tt Double}) - truncation factor for
     * interpolation.
     *
-    * \item[Smooth Type] ({\tt Int}) - more complex smoothers.
+    * \item[SmoothType] ({\tt Int}) - more complex smoothers.
     *
-    * \item[Smooth Num Levels] ({\tt Int}) - number of levels for more
+    * \item[SmoothNumLevels] ({\tt Int}) - number of levels for more
     * complex smoothers.
     *
-    * \item[Smooth Num Sweeps] ({\tt Int}) - number of sweeps for more
+    * \item[SmoothNumSweeps] ({\tt Int}) - number of sweeps for more
     * complex smoothers.
     *
-    * \item[Print File Name] ({\tt String}) - name of file printed to
-    * in association with {\tt SetPrintLevel}.  (not yet implemented).
+    * \item[PrintFileName] ({\tt String}) - name of file printed to in
+    * association with {\tt SetPrintLevel}.  (not yet implemented).
     *
-    * \item[Num Functions] ({\tt Int}) - size of the system of PDEs
+    * \item[NumFunctions] ({\tt Int}) - size of the system of PDEs
     * (when using the systems version).
     * 
-    * \item[DOF Func] ({\tt IntArray}) - mapping that assigns the
+    * \item[DOFFunc] ({\tt IntArray}) - mapping that assigns the
     * function to each variable (when using the systems version).
     *
     * \item[Variant] ({\tt Int}) - variant of Schwarz used.
     *
     * \item[Overlap] ({\tt Int}) - overlap for Schwarz.
     *
-    * \item[Domain Type] ({\tt Int}) - type of domain used for
-    * Schwarz.
+    * \item[DomainType] ({\tt Int}) - type of domain used for Schwarz.
     *
-    * \item[Schwarz Relaxation Weight] ({\tt Double}) - the smoothing
-    * parameter for additive Schwarz.
+    * \item[SchwarzRlxWeight] ({\tt Double}) - the smoothing parameter
+    * for additive Schwarz.
     *
-    * \item[Debug Flag] ({\tt Int}) -
+    * \item[DebugFlag] ({\tt Int}) -
     *
     * \end{description}
     *
     * Objects of this type can be cast to Solver objects using the
     * {\tt \_\_cast} methods.
-    *
-    * RDF: Changed name from 'ParAMG' (x)
     **/
    class BoomerAMG implements-all Solver
    {
@@ -1247,7 +1220,7 @@ package Hypre version 0.1.7
     * Objects of this type can be cast to PreconditionedSolver objects
     * using the {\tt \_\_cast} methods.
     *
-    * RDF: Documentation goes here. (x)
+    * RDF: Documentation goes here.
     **/
    class PCG implements-all PreconditionedSolver
    {
@@ -1257,7 +1230,7 @@ package Hypre version 0.1.7
     * Objects of this type can be cast to PreconditionedSolver objects
     * using the {\tt \_\_cast} methods.
     *
-    * RDF: Documentation goes here. (x)
+    * RDF: Documentation goes here.
     **/
    class GMRES implements-all PreconditionedSolver
    {

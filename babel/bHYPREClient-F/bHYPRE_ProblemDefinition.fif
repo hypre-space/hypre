@@ -1,0 +1,226 @@
+C       
+C       File:          bHYPRE_ProblemDefinition_Impl.f
+C       Symbol:        bHYPRE.ProblemDefinition-v1.0.0
+C       Symbol Type:   interface
+C       Babel Version: 0.8.0
+C       SIDL Created:  20030314 14:22:46 PST
+C       Generated:     20030314 14:22:50 PST
+C       Description:   Client-side documentation text for bHYPRE.ProblemDefinition
+C       
+C       WARNING: Automatically generated; changes will be lost
+C       
+C       babel-version = 0.8.0
+C       source-line   = 42
+C       source-url    = file:/home/falgout/linear_solvers/babel/Interfaces.idl
+C       
+
+        THIS FILE IS DOCUMENTATION - DO NOT COMPILE IT!
+
+C       
+C       Symbol "bHYPRE.ProblemDefinition" (version 1.0.0)
+C       
+C       The purpose of a ProblemDefinition is to:
+C       
+C       \begin{itemize}
+C       \item provide a particular view of how to define a problem
+C       \item construct and return a {\it problem object}
+C       \end{itemize}
+C       
+C       A {\it problem object} is an intentionally vague term that
+C       corresponds to any useful object used to define a problem.
+C       Prime examples are:
+C       
+C       \begin{itemize}
+C       \item a LinearOperator object, i.e., something with a matvec
+C       \item a MatrixAccess object, i.e., something with a getrow
+C       \item a Vector, i.e., something with a dot, axpy, ...
+C       \end{itemize}
+C       
+C       Note that {\tt Initialize} and {\tt Assemble} are reserved here
+C       for defining problem objects through a particular interface.
+C       
+C       
+
+
+
+
+C       
+C       Cast method for interface and class type conversions.
+C       
+
+        subroutine bHYPRE_ProblemDefinition__cast_f(self, name, retval)
+        implicit none
+C       in bHYPRE.ProblemDefinition self
+        integer*8 self
+C       in string name
+        character*(*) name
+C       out opaque retval
+        integer*8 retval
+        end
+
+
+C       
+C       <p>
+C       Add one to the intrinsic reference count in the underlying object.
+C       Object in <code>SIDL</code> have an intrinsic reference count.
+C       Objects continue to exist as long as the reference count is
+C       positive. Clients should call this method whenever they
+C       create another ongoing reference to an object or interface.
+C       </p>
+C       <p>
+C       This does not have a return value because there is no language
+C       independent type that can refer to an interface or a
+C       class.
+C       </p>
+C       
+
+        subroutine bHYPRE_ProblemDefinition_addRef_f(self)
+        implicit none
+C       in bHYPRE.ProblemDefinition self
+        integer*8 self
+        end
+
+
+C       
+C       Decrease by one the intrinsic reference count in the underlying
+C       object, and delete the object if the reference is non-positive.
+C       Objects in <code>SIDL</code> have an intrinsic reference count.
+C       Clients should call this method whenever they remove a
+C       reference to an object or interface.
+C       
+
+        subroutine bHYPRE_ProblemDefinition_deleteRef_f(self)
+        implicit none
+C       in bHYPRE.ProblemDefinition self
+        integer*8 self
+        end
+
+
+C       
+C       Return true if and only if <code>obj</code> refers to the same
+C       object as this object.
+C       
+
+        subroutine bHYPRE_ProblemDefinition_isSame_f(self, iobj, retval)
+        implicit none
+C       in bHYPRE.ProblemDefinition self
+        integer*8 self
+C       in SIDL.BaseInterface iobj
+        integer*8 iobj
+C       out bool retval
+        logical retval
+        end
+
+
+C       
+C       Check whether the object can support the specified interface or
+C       class.  If the <code>SIDL</code> type name in <code>name</code>
+C       is supported, then a reference to that object is returned with the
+C       reference count incremented.  The callee will be responsible for
+C       calling <code>deleteRef</code> on the returned object.  If
+C       the specified type is not supported, then a null reference is
+C       returned.
+C       
+
+        subroutine bHYPRE_ProblemDefinition_queryInt_f(self, name,
+     &     retval)
+        implicit none
+C       in bHYPRE.ProblemDefinition self
+        integer*8 self
+C       in string name
+        character*(*) name
+C       out SIDL.BaseInterface retval
+        integer*8 retval
+        end
+
+
+C       
+C       Return whether this object is an instance of the specified type.
+C       The string name must be the <code>SIDL</code> type name.  This
+C       routine will return <code>true</code> if and only if a cast to
+C       the string type name would succeed.
+C       
+
+        subroutine bHYPRE_ProblemDefinition_isType_f(self, name, retval)
+        implicit none
+C       in bHYPRE.ProblemDefinition self
+        integer*8 self
+C       in string name
+        character*(*) name
+C       out bool retval
+        logical retval
+        end
+
+
+C       
+C       Set the MPI Communicator.
+C       
+C       
+
+        subroutine bHYPRE_ProblemDefinition_SetCommunicator_f(self,
+     &     mpi_comm, retval)
+        implicit none
+C       in bHYPRE.ProblemDefinition self
+        integer*8 self
+C       in opaque mpi_comm
+        integer*8 mpi_comm
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Prepare an object for setting coefficient values, whether for
+C       the first time or subsequently.
+C       
+C       
+
+        subroutine bHYPRE_ProblemDefinition_Initialize_f(self, retval)
+        implicit none
+C       in bHYPRE.ProblemDefinition self
+        integer*8 self
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Finalize the construction of an object before using, either
+C       for the first time or on subsequent uses. {\tt Initialize}
+C       and {\tt Assemble} always appear in a matched set, with
+C       Initialize preceding Assemble. Values can only be set in
+C       between a call to Initialize and Assemble.
+C       
+C       
+
+        subroutine bHYPRE_ProblemDefinition_Assemble_f(self, retval)
+        implicit none
+C       in bHYPRE.ProblemDefinition self
+        integer*8 self
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       The problem definition interface is a {\it builder} that
+C       creates an object that contains the problem definition
+C       information, e.g. a matrix. To perform subsequent operations
+C       with that object, it must be returned from the problem
+C       definition object. {\tt GetObject} performs this function.
+C       At compile time, the type of the returned object is unknown.
+C       Thus, the returned type is a SIDL.BaseInterface.
+C       QueryInterface or Cast must be used on the returned object to
+C       convert it into a known type.
+C       
+C       
+
+        subroutine bHYPRE_ProblemDefinition_GetObject_f(self, A, retval)
+        implicit none
+C       in bHYPRE.ProblemDefinition self
+        integer*8 self
+C       out SIDL.BaseInterface A
+        integer*8 A
+C       out int retval
+        integer*4 retval
+        end

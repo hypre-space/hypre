@@ -89,58 +89,58 @@ babel-driver: ${HYPRE_BABEL_DRIVER_EXECS} ${HYPRE_BABEL_DRIVER_F77_EXECS}
 
 babel-interfaces:
 	@ \
-	if [ -d Hypre ]; \
+	if [ -d bHYPRE ]; \
 	then \
-	  echo "Making Hypre Server..."; \
-	  (cd Hypre; $(MAKE)); \
+	  echo "Making bHYPRE Server..."; \
+	  (cd bHYPRE; $(MAKE)); \
 	  echo ""; \
 	fi; \
 
 	@ \
-	if [ -d HypreClient-C ]; \
+	if [ -d bHYPREClient-C ]; \
 	then \
-	  echo "Making Hypre C Client..."; \
-	  (cd HypreClient-C; $(MAKE)); \
+	  echo "Making bHYPRE C Client..."; \
+	  (cd bHYPREClient-C; $(MAKE)); \
 	  echo ""; \
 	fi; \
 
 	@ \
-	if [ -d HypreClient-F ]; \
+	if [ -d bHYPREClient-F ]; \
 	then \
-	  echo "Making Hypre Fortran Client ..."; \
-	  (cd HypreClient-F; $(MAKE)); \
+	  echo "Making bHYPRE Fortran Client ..."; \
+	  (cd bHYPREClient-F; $(MAKE)); \
 	  echo ""; \
 	fi; \
 
 install: all
-	@cp -f $(srcdir)/Hypre*/*.h $$HYPRE_INSTALL_DIR/include/.
-	@cp -f $(srcdir)/Hypre*/libHypre*.a $$HYPRE_INSTALL_DIR/lib/.
+	@cp -f $(srcdir)/bHYPRE*/*.h $$HYPRE_INSTALL_DIR/include/.
+	@cp -f $(srcdir)/bHYPRE*/libbHYPRE*.a $$HYPRE_INSTALL_DIR/lib/.
 
 clean:
 	@rm -f *.o
 	@ \
-	if [ -d Hypre ]; \
+	if [ -d bHYPRE ]; \
 	then \
-	  echo "Making Hypre Server clean ..."; \
-	  (cd Hypre; $(MAKE) clean); \
+	  echo "Making bHYPRE Server clean ..."; \
+	  (cd bHYPRE; $(MAKE) clean); \
 	  echo ""; \
 	fi; \
 
 	@rm -f *.o
 	@ \
-	if [ -d HypreClient-C ]; \
+	if [ -d bHYPREClient-C ]; \
 	then \
-	  echo "Making Hypre C Client clean ..."; \
-	  (cd HypreClient-C; $(MAKE) clean); \
+	  echo "Making bHYPRE C Client clean ..."; \
+	  (cd bHYPREClient-C; $(MAKE) clean); \
 	  echo ""; \
 	fi; \
 
 	@rm -f *.o
 	@ \
-	if [ -d HypreClient-F ]; \
+	if [ -d bHYPREClient-F ]; \
 	then \
-	  echo "Making Hypre Fortran Client clean ..."; \
-	  (cd HypreClient-F; $(MAKE) clean); \
+	  echo "Making bHYPRE Fortran Client clean ..."; \
+	  (cd bHYPREClient-F; $(MAKE) clean); \
 	  echo ""; \
 	fi; \
 
@@ -150,24 +150,24 @@ veryclean: clean
 	@rm -f ${HYPRE_BABEL_DRIVER_F77_EXECS}
 	@rm -f *.o
 	@ \
-	if [ -d Hypre ]; \
+	if [ -d bHYPRE ]; \
 	then \
-	  echo "Making Hypre Server very clean ..."; \
-	  (cd Hypre; $(MAKE) veryclean); \
+	  echo "Making bHYPRE Server very clean ..."; \
+	  (cd bHYPRE; $(MAKE) veryclean); \
 	  echo ""; \
 	fi; \
 
-	if [ -d HypreClient-C ]; \
+	if [ -d bHYPREClient-C ]; \
 	then \
-	  echo "Making Hypre C Client very clean ..."; \
-	  (cd HypreClient-C; $(MAKE) veryclean); \
+	  echo "Making bHYPRE C Client very clean ..."; \
+	  (cd bHYPREClient-C; $(MAKE) veryclean); \
 	  echo ""; \
 	fi; \
 
-	if [ -d HypreClient-F ]; \
+	if [ -d bHYPREClient-F ]; \
 	then \
-	  echo "Making Hypre Fortran Client very clean ..."; \
-	  (cd HypreClient-F; $(MAKE) veryclean); \
+	  echo "Making bHYPRE Fortran Client very clean ..."; \
+	  (cd bHYPREClient-F; $(MAKE) veryclean); \
 	  echo ""; \
 	fi; \
 

@@ -1,0 +1,701 @@
+C       
+C       File:          bHYPRE_IJParCSRMatrix_Impl.f
+C       Symbol:        bHYPRE.IJParCSRMatrix-v1.0.0
+C       Symbol Type:   class
+C       Babel Version: 0.8.0
+C       SIDL Created:  20030314 14:22:47 PST
+C       Generated:     20030314 14:22:51 PST
+C       Description:   Client-side documentation text for bHYPRE.IJParCSRMatrix
+C       
+C       WARNING: Automatically generated; changes will be lost
+C       
+C       babel-version = 0.8.0
+C       source-line   = 777
+C       source-url    = file:/home/falgout/linear_solvers/babel/Interfaces.idl
+C       
+
+        THIS FILE IS DOCUMENTATION - DO NOT COMPILE IT!
+
+C       
+C       Symbol "bHYPRE.IJParCSRMatrix" (version 1.0.0)
+C       
+C       The IJParCSR matrix class.
+C       
+C       Objects of this type can be cast to IJBuildMatrix, Operator, or
+C       CoefficientAccess objects using the {\tt \_\_cast} methods.
+C       
+C       
+
+
+
+
+C       
+C       Create an instance of class bHYPRE.IJParCSRMatrix
+C       
+
+        subroutine bHYPRE_IJParCSRMatrix__create_f(retval)
+        implicit none
+C       out bHYPRE.IJParCSRMatrix retval
+        integer*8 retval
+        end
+
+
+C       
+C       Cast method for interface and class type conversions.
+C       
+
+        subroutine bHYPRE_IJParCSRMatrix__cast_f(self, name, retval)
+        implicit none
+C       in bHYPRE.IJParCSRMatrix self
+        integer*8 self
+C       in string name
+        character*(*) name
+C       out opaque retval
+        integer*8 retval
+        end
+
+
+C       
+C       <p>
+C       Add one to the intrinsic reference count in the underlying object.
+C       Object in <code>SIDL</code> have an intrinsic reference count.
+C       Objects continue to exist as long as the reference count is
+C       positive. Clients should call this method whenever they
+C       create another ongoing reference to an object or interface.
+C       </p>
+C       <p>
+C       This does not have a return value because there is no language
+C       independent type that can refer to an interface or a
+C       class.
+C       </p>
+C       
+
+        subroutine bHYPRE_IJParCSRMatrix_addRef_f(self)
+        implicit none
+C       in bHYPRE.IJParCSRMatrix self
+        integer*8 self
+        end
+
+
+C       
+C       Decrease by one the intrinsic reference count in the underlying
+C       object, and delete the object if the reference is non-positive.
+C       Objects in <code>SIDL</code> have an intrinsic reference count.
+C       Clients should call this method whenever they remove a
+C       reference to an object or interface.
+C       
+
+        subroutine bHYPRE_IJParCSRMatrix_deleteRef_f(self)
+        implicit none
+C       in bHYPRE.IJParCSRMatrix self
+        integer*8 self
+        end
+
+
+C       
+C       Return true if and only if <code>obj</code> refers to the same
+C       object as this object.
+C       
+
+        subroutine bHYPRE_IJParCSRMatrix_isSame_f(self, iobj, retval)
+        implicit none
+C       in bHYPRE.IJParCSRMatrix self
+        integer*8 self
+C       in SIDL.BaseInterface iobj
+        integer*8 iobj
+C       out bool retval
+        logical retval
+        end
+
+
+C       
+C       Check whether the object can support the specified interface or
+C       class.  If the <code>SIDL</code> type name in <code>name</code>
+C       is supported, then a reference to that object is returned with the
+C       reference count incremented.  The callee will be responsible for
+C       calling <code>deleteRef</code> on the returned object.  If
+C       the specified type is not supported, then a null reference is
+C       returned.
+C       
+
+        subroutine bHYPRE_IJParCSRMatrix_queryInt_f(self, name, retval)
+        implicit none
+C       in bHYPRE.IJParCSRMatrix self
+        integer*8 self
+C       in string name
+        character*(*) name
+C       out SIDL.BaseInterface retval
+        integer*8 retval
+        end
+
+
+C       
+C       Return whether this object is an instance of the specified type.
+C       The string name must be the <code>SIDL</code> type name.  This
+C       routine will return <code>true</code> if and only if a cast to
+C       the string type name would succeed.
+C       
+
+        subroutine bHYPRE_IJParCSRMatrix_isType_f(self, name, retval)
+        implicit none
+C       in bHYPRE.IJParCSRMatrix self
+        integer*8 self
+C       in string name
+        character*(*) name
+C       out bool retval
+        logical retval
+        end
+
+
+C       
+C       Return the meta-data about the class implementing this interface.
+C       
+
+        subroutine bHYPRE_IJParCSRMatrix_getClassInfo_f(self, retval)
+        implicit none
+C       in bHYPRE.IJParCSRMatrix self
+        integer*8 self
+C       out SIDL.ClassInfo retval
+        integer*8 retval
+        end
+
+
+C       
+C       (Optional) Set the max number of nonzeros to expect in each
+C       row of the diagonal and off-diagonal blocks.  The diagonal
+C       block is the submatrix whose column numbers correspond to
+C       rows owned by this process, and the off-diagonal block is
+C       everything else.  The arrays {\tt diag\_sizes} and {\tt
+C       offdiag\_sizes} contain estimated sizes for each row of the
+C       diagonal and off-diagonal blocks, respectively.  This routine
+C       can significantly improve the efficiency of matrix
+C       construction, and should always be utilized if possible.
+C       
+C       Not collective.
+C       
+C       
+
+        subroutine bHYPRE_IJParCSRMatrix_SetDiagOffdSizes_f(self,
+     &     diag_sizes, offdiag_sizes, retval)
+        implicit none
+C       in bHYPRE.IJParCSRMatrix self
+        integer*8 self
+C       in array<int> diag_sizes
+        integer*8 diag_sizes
+C       in array<int> offdiag_sizes
+        integer*8 offdiag_sizes
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Set the MPI Communicator.
+C       
+C       
+
+        subroutine bHYPRE_IJParCSRMatrix_SetCommunicator_f(self,
+     &     mpi_comm, retval)
+        implicit none
+C       in bHYPRE.IJParCSRMatrix self
+        integer*8 self
+C       in opaque mpi_comm
+        integer*8 mpi_comm
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Set the int parameter associated with {\tt name}.
+C       
+C       
+
+        subroutine bHYPRE_IJParCSRMatrix_SetIntParameter_f(self, name,
+     &     value, retval)
+        implicit none
+C       in bHYPRE.IJParCSRMatrix self
+        integer*8 self
+C       in string name
+        character*(*) name
+C       in int value
+        integer*4 value
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Set the double parameter associated with {\tt name}.
+C       
+C       
+
+        subroutine bHYPRE_IJParCSRMatrix_SetDoubleParameter_f(self,
+     &     name, value, retval)
+        implicit none
+C       in bHYPRE.IJParCSRMatrix self
+        integer*8 self
+C       in string name
+        character*(*) name
+C       in double value
+        double precision value
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Set the string parameter associated with {\tt name}.
+C       
+C       
+
+        subroutine bHYPRE_IJParCSRMatrix_SetStringParameter_f(self,
+     &     name, value, retval)
+        implicit none
+C       in bHYPRE.IJParCSRMatrix self
+        integer*8 self
+C       in string name
+        character*(*) name
+C       in string value
+        character*(*) value
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Set the int array parameter associated with {\tt name}.
+C       
+C       
+
+        subroutine bHYPRE_IJParCSRMatrix_SetIntArrayParameter_f(self,
+     &     name, value, retval)
+        implicit none
+C       in bHYPRE.IJParCSRMatrix self
+        integer*8 self
+C       in string name
+        character*(*) name
+C       in array<int> value
+        integer*8 value
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Set the double array parameter associated with {\tt name}.
+C       
+C       
+
+        subroutine bHYPRE_IJParCSRMatrix_SetDoubleArrayParameter_f(self,
+     &     name, value, retval)
+        implicit none
+C       in bHYPRE.IJParCSRMatrix self
+        integer*8 self
+C       in string name
+        character*(*) name
+C       in array<double> value
+        integer*8 value
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Set the int parameter associated with {\tt name}.
+C       
+C       
+
+        subroutine bHYPRE_IJParCSRMatrix_GetIntValue_f(self, name,
+     &     value, retval)
+        implicit none
+C       in bHYPRE.IJParCSRMatrix self
+        integer*8 self
+C       in string name
+        character*(*) name
+C       out int value
+        integer*4 value
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Get the double parameter associated with {\tt name}.
+C       
+C       
+
+        subroutine bHYPRE_IJParCSRMatrix_GetDoubleValue_f(self, name,
+     &     value, retval)
+        implicit none
+C       in bHYPRE.IJParCSRMatrix self
+        integer*8 self
+C       in string name
+        character*(*) name
+C       out double value
+        double precision value
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       (Optional) Do any preprocessing that may be necessary in
+C       order to execute {\tt Apply}.
+C       
+C       
+
+        subroutine bHYPRE_IJParCSRMatrix_Setup_f(self, b, x, retval)
+        implicit none
+C       in bHYPRE.IJParCSRMatrix self
+        integer*8 self
+C       in bHYPRE.Vector b
+        integer*8 b
+C       in bHYPRE.Vector x
+        integer*8 x
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Apply the operator to {\tt b}, returning {\tt x}.
+C       
+C       
+
+        subroutine bHYPRE_IJParCSRMatrix_Apply_f(self, b, x, retval)
+        implicit none
+C       in bHYPRE.IJParCSRMatrix self
+        integer*8 self
+C       in bHYPRE.Vector b
+        integer*8 b
+C       inout bHYPRE.Vector x
+        integer*8 x
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Prepare an object for setting coefficient values, whether for
+C       the first time or subsequently.
+C       
+C       
+
+        subroutine bHYPRE_IJParCSRMatrix_Initialize_f(self, retval)
+        implicit none
+C       in bHYPRE.IJParCSRMatrix self
+        integer*8 self
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Finalize the construction of an object before using, either
+C       for the first time or on subsequent uses. {\tt Initialize}
+C       and {\tt Assemble} always appear in a matched set, with
+C       Initialize preceding Assemble. Values can only be set in
+C       between a call to Initialize and Assemble.
+C       
+C       
+
+        subroutine bHYPRE_IJParCSRMatrix_Assemble_f(self, retval)
+        implicit none
+C       in bHYPRE.IJParCSRMatrix self
+        integer*8 self
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       The problem definition interface is a {\it builder} that
+C       creates an object that contains the problem definition
+C       information, e.g. a matrix. To perform subsequent operations
+C       with that object, it must be returned from the problem
+C       definition object. {\tt GetObject} performs this function.
+C       At compile time, the type of the returned object is unknown.
+C       Thus, the returned type is a SIDL.BaseInterface.
+C       QueryInterface or Cast must be used on the returned object to
+C       convert it into a known type.
+C       
+C       
+
+        subroutine bHYPRE_IJParCSRMatrix_GetObject_f(self, A, retval)
+        implicit none
+C       in bHYPRE.IJParCSRMatrix self
+        integer*8 self
+C       out SIDL.BaseInterface A
+        integer*8 A
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Set the local range for a matrix object.  Each process owns
+C       some unique consecutive range of rows, indicated by the
+C       global row indices {\tt ilower} and {\tt iupper}.  The row
+C       data is required to be such that the value of {\tt ilower} on
+C       any process $p$ be exactly one more than the value of {\tt
+C       iupper} on process $p-1$.  Note that the first row of the
+C       global matrix may start with any integer value.  In
+C       particular, one may use zero- or one-based indexing.
+C       
+C       For square matrices, {\tt jlower} and {\tt jupper} typically
+C       should match {\tt ilower} and {\tt iupper}, respectively.
+C       For rectangular matrices, {\tt jlower} and {\tt jupper}
+C       should define a partitioning of the columns.  This
+C       partitioning must be used for any vector $v$ that will be
+C       used in matrix-vector products with the rectangular matrix.
+C       The matrix data structure may use {\tt jlower} and {\tt
+C       jupper} to store the diagonal blocks (rectangular in general)
+C       of the matrix separately from the rest of the matrix.
+C       
+C       Collective.
+C       
+C       
+
+        subroutine bHYPRE_IJParCSRMatrix_SetLocalRange_f(self, ilower,
+     &     iupper, jlower, jupper, retval)
+        implicit none
+C       in bHYPRE.IJParCSRMatrix self
+        integer*8 self
+C       in int ilower
+        integer*4 ilower
+C       in int iupper
+        integer*4 iupper
+C       in int jlower
+        integer*4 jlower
+C       in int jupper
+        integer*4 jupper
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Sets values for {\tt nrows} of the matrix.  The arrays {\tt
+C       ncols} and {\tt rows} are of dimension {\tt nrows} and
+C       contain the number of columns in each row and the row
+C       indices, respectively.  The array {\tt cols} contains the
+C       column indices for each of the {\tt rows}, and is ordered by
+C       rows.  The data in the {\tt values} array corresponds
+C       directly to the column entries in {\tt cols}.  Erases any
+C       previous values at the specified locations and replaces them
+C       with new ones, or, if there was no value there before,
+C       inserts a new one.
+C       
+C       Not collective.
+C       
+C       
+
+        subroutine bHYPRE_IJParCSRMatrix_SetValues_f(self, nrows, ncols,
+     &     rows, cols, values, retval)
+        implicit none
+C       in bHYPRE.IJParCSRMatrix self
+        integer*8 self
+C       in int nrows
+        integer*4 nrows
+C       in array<int> ncols
+        integer*8 ncols
+C       in array<int> rows
+        integer*8 rows
+C       in array<int> cols
+        integer*8 cols
+C       in array<double> values
+        integer*8 values
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Adds to values for {\tt nrows} of the matrix.  Usage details
+C       are analogous to {\tt SetValues}.  Adds to any previous
+C       values at the specified locations, or, if there was no value
+C       there before, inserts a new one.
+C       
+C       Not collective.
+C       
+C       
+
+        subroutine bHYPRE_IJParCSRMatrix_AddToValues_f(self, nrows,
+     &     ncols, rows, cols, values, retval)
+        implicit none
+C       in bHYPRE.IJParCSRMatrix self
+        integer*8 self
+C       in int nrows
+        integer*4 nrows
+C       in array<int> ncols
+        integer*8 ncols
+C       in array<int> rows
+        integer*8 rows
+C       in array<int> cols
+        integer*8 cols
+C       in array<double> values
+        integer*8 values
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Gets range of rows owned by this processor and range of
+C       column partitioning for this processor.
+C       
+C       
+
+        subroutine bHYPRE_IJParCSRMatrix_GetLocalRange_f(self, ilower,
+     &     iupper, jlower, jupper, retval)
+        implicit none
+C       in bHYPRE.IJParCSRMatrix self
+        integer*8 self
+C       out int ilower
+        integer*4 ilower
+C       out int iupper
+        integer*4 iupper
+C       out int jlower
+        integer*4 jlower
+C       out int jupper
+        integer*4 jupper
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Gets number of nonzeros elements for {\tt nrows} rows
+C       specified in {\tt rows} and returns them in {\tt ncols},
+C       which needs to be allocated by the user.
+C       
+C       
+
+        subroutine bHYPRE_IJParCSRMatrix_GetRowCounts_f(self, nrows,
+     &     rows, ncols, retval)
+        implicit none
+C       in bHYPRE.IJParCSRMatrix self
+        integer*8 self
+C       in int nrows
+        integer*4 nrows
+C       in array<int> rows
+        integer*8 rows
+C       inout array<int> ncols
+        integer*8 ncols
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Gets values for {\tt nrows} rows or partial rows of the
+C       matrix.  Usage details are analogous to {\tt SetValues}.
+C       
+C       
+
+        subroutine bHYPRE_IJParCSRMatrix_GetValues_f(self, nrows, ncols,
+     &     rows, cols, values, retval)
+        implicit none
+C       in bHYPRE.IJParCSRMatrix self
+        integer*8 self
+C       in int nrows
+        integer*4 nrows
+C       in array<int> ncols
+        integer*8 ncols
+C       in array<int> rows
+        integer*8 rows
+C       in array<int> cols
+        integer*8 cols
+C       inout array<double> values
+        integer*8 values
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       (Optional) Set the max number of nonzeros to expect in each
+C       row.  The array {\tt sizes} contains estimated sizes for each
+C       row on this process.  This call can significantly improve the
+C       efficiency of matrix construction, and should always be
+C       utilized if possible.
+C       
+C       Not collective.
+C       
+C       
+
+        subroutine bHYPRE_IJParCSRMatrix_SetRowSizes_f(self, sizes,
+     &     retval)
+        implicit none
+C       in bHYPRE.IJParCSRMatrix self
+        integer*8 self
+C       in array<int> sizes
+        integer*8 sizes
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Print the matrix to file.  This is mainly for debugging
+C       purposes.
+C       
+C       
+
+        subroutine bHYPRE_IJParCSRMatrix_Print_f(self, filename, retval)
+        implicit none
+C       in bHYPRE.IJParCSRMatrix self
+        integer*8 self
+C       in string filename
+        character*(*) filename
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Read the matrix from file.  This is mainly for debugging
+C       purposes.
+C       
+C       
+
+        subroutine bHYPRE_IJParCSRMatrix_Read_f(self, filename, comm,
+     &     retval)
+        implicit none
+C       in bHYPRE.IJParCSRMatrix self
+        integer*8 self
+C       in string filename
+        character*(*) filename
+C       in opaque comm
+        integer*8 comm
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       The GetRow method will allocate space for its two output
+C       arrays on the first call.  The space will be reused on
+C       subsequent calls.  Thus the user must not delete them, yet
+C       must not depend on the data from GetRow to persist beyond the
+C       next GetRow call.
+C       
+C       
+
+        subroutine bHYPRE_IJParCSRMatrix_GetRow_f(self, row, size,
+     &     col_ind, values, retval)
+        implicit none
+C       in bHYPRE.IJParCSRMatrix self
+        integer*8 self
+C       in int row
+        integer*4 row
+C       out int size
+        integer*4 size
+C       out array<int> col_ind
+        integer*8 col_ind
+C       out array<double> values
+        integer*8 values
+C       out int retval
+        integer*4 retval
+        end
