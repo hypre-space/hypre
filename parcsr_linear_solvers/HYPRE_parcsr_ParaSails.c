@@ -123,7 +123,7 @@ HYPRE_ParCSRParaSailsSolve( HYPRE_Solver solver,
    rhs  = hypre_VectorData(hypre_ParVectorLocalVector((hypre_ParVector *) b));
    soln = hypre_VectorData(hypre_ParVectorLocalVector((hypre_ParVector *) x));
 
-   ierr = HYPRE_ParaSailsApply(secret->obj, soln, rhs);
+   ierr = HYPRE_ParaSailsApply(secret->obj, rhs, soln);
 
    return ierr;
 }
