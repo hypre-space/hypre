@@ -1,0 +1,80 @@
+#BHEADER***********************************************************************
+# (c) 1999   The Regents of the University of California
+#
+# See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
+# notice, contact person, and disclaimer.
+#
+# $Revision$
+#EHEADER***********************************************************************
+
+
+.SUFFIXES: .cc .c .f .o
+
+all: lib
+
+install:all
+
+CC = @CC@
+CXX = @CXX@
+
+CFLAGS = \
+  -I../fei-isis
+
+CXXFLAGS = \
+  -I../fei-isis
+
+
+#Headers
+HEADERS =		\
+  CommInfo.h		\
+  GlobalIDArray.h	\
+  IntArray.h		\
+  Map.h			\
+  Matrix.h		\
+  RealArray.h		\
+  Vector.h		\
+  mpiuni.h 
+
+ 
+HYPREFILES =		\
+  CommInfo.cc		\
+  GlobalIDArray.cc	\
+  IntArray.cc		\
+  Map.cc		\
+  Matrix.cc		\
+  RealArray.cc		\
+  Vector.cc		\
+  mpiuni.c 
+
+LOCALFILES =
+
+
+FILES = $(HYPREFILES) $(LOCALFILES)
+
+
+OBJS = ${FILES:.c=.o} ${FILES:.cc=.o}
+
+${OBJS}: ${HEADERS}
+
+
+##################################################################
+# Main rules
+##################################################################
+
+lib: $(PROTOS) ${OBJS}
+	@echo  "Building $@ ... "
+	@echo  "Building ${OBJS} ... "
+	@ar -rcu lib_HYPRE_FEI_needed.a ${OBJS}
+	@ranlib lib_HYPRE_FEI_needed.a 
+
+##################################################################
+# Generic rules
+##################################################################
+
+.c.o:
+	${CC} -o $@ -c ${CFLAGS} $<
+
+.cc.o:
+	${CXX} -o $@ -c ${CXXFLAGS} $<
+
+
