@@ -44,6 +44,7 @@ int HYPRE_ParCSRParaSailsSetFilter( HYPRE_Solver solver , double filter );
 int HYPRE_ParCSRParaSailsSetSym( HYPRE_Solver solver , int sym );
 int HYPRE_ParCSRParaSailsSetLoadbal( HYPRE_Solver solver , double loadbal );
 int HYPRE_ParCSRParaSailsSetReuse( HYPRE_Solver solver , int reuse );
+int HYPRE_ParCSRParaSailsSetLogging( HYPRE_Solver solver , int logging );
 
 /* HYPRE_parcsr_amg.c */
 int HYPRE_BoomerAMGCreate( HYPRE_Solver *solver );

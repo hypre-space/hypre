@@ -42,6 +42,7 @@ typedef struct
     double          loadbal;
     int             reuse; /* reuse pattern */
     MPI_Comm        comm;
+    int		    logging;
 }
 Secret;
 
@@ -68,6 +69,7 @@ HYPRE_ParCSRParaSailsCreate( MPI_Comm comm, HYPRE_Solver *solver )
    secret->loadbal = 0.0;
    secret->reuse   = 0;
    secret->comm    = comm;
+   secret->logging = 0;
 
    HYPRE_ParaSailsCreate(comm, &secret->obj);
 
@@ -121,13 +123,14 @@ HYPRE_ParCSRParaSailsSetup( HYPRE_Solver solver,
    {
        virgin = 0;
        ierr = HYPRE_ParaSailsSetup(secret->obj, mat, secret->sym, 
-           secret->thresh, secret->nlevels, secret->filter, secret->loadbal);
+           secret->thresh, secret->nlevels, secret->filter, secret->loadbal,
+	   secret->logging);
        if (ierr) return ierr;
    }
    else /* reuse is true; this is a subsequent call */
    {
        ierr = HYPRE_ParaSailsSetupValues(secret->obj, mat,
-	 secret->filter, secret->loadbal);
+	 secret->filter, secret->loadbal, secret->logging);
        if (ierr) return ierr;
    }
 
@@ -233,6 +236,21 @@ HYPRE_ParCSRParaSailsSetReuse(HYPRE_Solver solver,
    Secret *secret = (Secret *) solver;
 
    secret->reuse = reuse;
+
+   return 0;
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_ParCSRParaSailsSetLogging -
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_ParCSRParaSailsSetLogging(HYPRE_Solver solver, 
+                    int logging)
+{
+   Secret *secret = (Secret *) solver;
+
+   secret->logging = logging;
 
    return 0;
 }
