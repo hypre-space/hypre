@@ -97,6 +97,10 @@ hypre_PFMGSetupInterpOp( hypre_StructMatrix *A,
    int                    i, si;
    int                    loopi, loopj, loopk;
 
+   int                    si0, si1;
+   int                    mrk0, mrk1;
+   int                    d;
+
    int                    ierr = 0;
 
    /*----------------------------------------------------------
@@ -110,6 +114,37 @@ hypre_PFMGSetupInterpOp( hypre_StructMatrix *A,
    P_stencil       = hypre_StructMatrixStencil(P);
    P_stencil_shape = hypre_StructStencilShape(P_stencil);
 
+   /*----------------------------------------------------------
+    * Find stencil enties in A cooresponding to P
+    *----------------------------------------------------------*/
+
+   for (si = 0; si < stencil_size; si++)
+   {
+      mrk0 = 0;
+      mrk1 = 0;
+      for (d = 0; d < hypre_StructStencilDim(stencil); d++)
+      {
+         if (hypre_IndexD(stencil_shape[si], d) ==
+             hypre_IndexD(P_stencil_shape[0], d))
+         {
+            mrk0++;
+         }
+         if (hypre_IndexD(stencil_shape[si], d) ==
+             hypre_IndexD(P_stencil_shape[1], d))
+         {
+            mrk1++;
+         }
+      }
+      if (mrk0 == hypre_StructStencilDim(stencil))
+      {
+         si0 = si;
+      }
+      if (mrk1 == hypre_StructStencilDim(stencil))
+      {
+         si1 = si;
+      }
+   }
+            
    hypre_SetIndex(stridec, 1, 1, 1);
 
    /*----------------------------------------------------------
@@ -129,7 +164,7 @@ hypre_PFMGSetupInterpOp( hypre_StructMatrix *A,
 
          Pstenc0 = hypre_IndexD(P_stencil_shape[0], cdir);
          Pstenc1 = hypre_IndexD(P_stencil_shape[1], cdir);
-
+ 
          startc  = hypre_BoxIMin(compute_box);
          hypre_PFMGMapCoarseToFine(startc, findex, stride, start);
 
@@ -138,13 +173,15 @@ hypre_PFMGSetupInterpOp( hypre_StructMatrix *A,
          hypre_BoxLoop2Begin(loop_size,
                              A_data_box, start, stride, Ai,
                              P_data_box, startc, stridec, Pi);
-#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,Ai,Pi,center,si,Ap,Astenc
+#define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,Ai,Pi,center,si,Ap,Astenc,mrk0,mrk1
 #include "hypre_box_smp_forloop.h"
          hypre_BoxLoop2For(loopi, loopj, loopk, Ai, Pi)
             {
                center  = 0.0;
                Pp0[Pi] = 0.0;
                Pp1[Pi] = 0.0;
+               mrk0 = 0;
+               mrk1 = 0;
 
                for (si = 0; si < stencil_size; si++)
                {
@@ -163,10 +200,26 @@ hypre_PFMGSetupInterpOp( hypre_StructMatrix *A,
                   {
                      Pp1[Pi] -= Ap[Ai];
                   }
+
+                  if (si == si0 && Ap[Ai] == 0.0)
+                    mrk0++;
+                  if (si == si1 && Ap[Ai] == 0.0)
+                    mrk1++;
                }
 
                Pp0[Pi] /= center;
                Pp1[Pi] /= center;  
+
+               /*----------------------------------------------
+                * Set interpolation weight to zero, if stencil
+                * entry in same direction is zero. Prevents
+                * interpolation and operator stencils reaching
+                * outside domain.
+                *----------------------------------------------*/
+               if (mrk0 != 0)
+                 Pp0[Pi] = 0.0;
+               if (mrk1 != 0)
+                 Pp1[Pi] = 0.0;
             }
          hypre_BoxLoop2End(Ai, Pi);
       }
