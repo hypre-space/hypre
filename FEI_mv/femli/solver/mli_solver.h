@@ -34,6 +34,7 @@
 #define MLI_SOLVER_KARCMARZ_ID      313
 #define MLI_SOLVER_GMRES_ID         314
 #define MLI_SOLVER_MLI_ID           315
+#define MLI_SOLVER_ILU_ID           316
 
 /*--------------------------------------------------------------------------
  * include files 

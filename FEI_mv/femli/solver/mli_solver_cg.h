@@ -38,6 +38,10 @@ class MLI_Solver_CG : public MLI_Solver
    int	       *sendProcs_;
    int	       *sendLengs_;
    MPI_Comm    AComm_;
+   int         *iluI_;
+   int         *iluJ_;
+   int         *iluD_;
+   double      *iluA_;
 
 public :
 
@@ -48,6 +52,8 @@ public :
    int solve(MLI_Vector *f, MLI_Vector *u);
 
    int setParams( char *paramString, int argc, char **argv );
+   int iluDecomposition();
+   int iluSolve(double *, double *);
 };
 
 #endif

@@ -125,49 +125,55 @@ MLI_Solver *MLI_Solver_CreateFromName( char *str )
    {
       solver_ptr = new MLI_Solver_CG(str);
       strcpy( paramString, "baseMethod Jacobi");
-      solver_ptr->setParams( paramString, 0, NULL);
+      solver_ptr->setParams(paramString, 0, NULL);
    }
    else if (!strcmp(str,"CGBJacobi")) 
    {
       solver_ptr = new MLI_Solver_CG(str);
       strcpy( paramString, "baseMethod BJacobi");
-      solver_ptr->setParams( paramString, 0, NULL);
+      solver_ptr->setParams(paramString, 0, NULL);
    }
    else if (!strcmp(str,"CGSGS")) 
    {
       solver_ptr = new MLI_Solver_CG(str);
       strcpy( paramString, "baseMethod SGS");
-      solver_ptr->setParams( paramString, 0, NULL);
+      solver_ptr->setParams(paramString, 0, NULL);
    }
    else if (!strcmp(str,"CGBSGS")) 
    {
       solver_ptr = new MLI_Solver_CG(str);
       strcpy( paramString, "baseMethod BSGS");
-      solver_ptr->setParams( paramString, 0, NULL);
+      solver_ptr->setParams(paramString, 0, NULL);
    }
    else if (!strcmp(str,"CGMLI")) 
    {
       solver_ptr = new MLI_Solver_CG(str);
       strcpy( paramString, "baseMethod MLI");
-      solver_ptr->setParams( paramString, 0, NULL);
+      solver_ptr->setParams(paramString, 0, NULL);
+   }
+   else if (!strcmp(str,"CGILU")) 
+   {
+      solver_ptr = new MLI_Solver_CG(str);
+      strcpy( paramString, "baseMethod ILU");
+      solver_ptr->setParams(paramString, 0, NULL);
    }
    else if (!strcmp(str,"GMRESJacobi")) 
    {
       solver_ptr = new MLI_Solver_GMRES(str);
       strcpy( paramString, "baseMethod Jacobi");
-      solver_ptr->setParams( paramString, 0, NULL);
+      solver_ptr->setParams(paramString, 0, NULL);
    }
    else if (!strcmp(str,"GMRESSGS")) 
    {
       solver_ptr = new MLI_Solver_GMRES(str);
       strcpy( paramString, "baseMethod SGS");
-      solver_ptr->setParams( paramString, 0, NULL);
+      solver_ptr->setParams(paramString, 0, NULL);
    }
    else if (!strcmp(str,"GMRESMLI")) 
    {
       solver_ptr = new MLI_Solver_GMRES(str);
       strcpy( paramString, "baseMethod MLI");
-      solver_ptr->setParams( paramString, 0, NULL);
+      solver_ptr->setParams(paramString, 0, NULL);
    }
    else if (!strcmp(str, "Kaczmarz"))   
    {
@@ -220,8 +226,11 @@ MLI_Solver *MLI_Solver_CreateFromName( char *str )
       printf("\t CGBJacobi \n");
       printf("\t CGSGS \n");
       printf("\t CGBSGS \n");
+      printf("\t CGMLI \n");
+      printf("\t CGILU \n");
       printf("\t GMRESJacobi \n");
       printf("\t GMRESSGS \n");
+      printf("\t GMRESMLI \n");
       printf("\t Kaczmarz\n"); 
       printf("\t SuperLU\n");
       printf("\t SeqSuperLU\n");

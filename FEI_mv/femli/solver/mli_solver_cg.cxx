@@ -43,6 +43,10 @@ MLI_Solver_CG::MLI_Solver_CG(char *name) : MLI_Solver(name)
    PSmat_     = NULL;
    AComm_     = 0;
    PSvec_     = NULL;
+   iluI_      = NULL;
+   iluJ_      = NULL;
+   iluA_      = NULL;
+   iluD_      = NULL;
 }
 
 /******************************************************************************
@@ -62,6 +66,10 @@ MLI_Solver_CG::~MLI_Solver_CG()
    if ( sendLengs_  != NULL ) delete [] sendLengs_;
    if ( recvLengs_  != NULL ) delete [] recvLengs_;
    if ( baseSolver_ != NULL ) delete baseSolver_;
+   if ( iluI_ != NULL ) delete iluI_;
+   if ( iluJ_ != NULL ) delete iluJ_;
+   if ( iluA_ != NULL ) delete iluA_;
+   if ( iluD_ != NULL ) delete iluD_;
 }
 
 /******************************************************************************
@@ -125,10 +133,12 @@ int MLI_Solver_CG::setup(MLI_Matrix *Amat_in)
                                   baseSolver_ = 
                                      new MLI_Solver_MLI(paramString);
                                   break;
+      case MLI_SOLVER_ILU_ID:     iluDecomposition();
+                                  break;
       default : printf("MLI_Solver_CG ERROR : no base method.\n");
                 exit(1);
    }
-   baseSolver_->setup(Amat_);
+   if (baseMethod_ != MLI_SOLVER_ILU_ID) baseSolver_->setup(Amat_);
  
    /*-----------------------------------------------------------------
     * build auxiliary vectors
@@ -183,6 +193,7 @@ int MLI_Solver_CG::solve(MLI_Vector *f_in, MLI_Vector *u_in)
 
    f = (hypre_ParVector *) f_in->getVector();
    u = (hypre_ParVector *) u_in->getVector();
+   rData = hypre_VectorData(hypre_ParVectorLocalVector(r));
    if ( PSmat_ != NULL )
    {
       P  = (hypre_ParCSRMatrix *) PSmat_->getMatrix();
@@ -191,7 +202,6 @@ int MLI_Solver_CG::solve(MLI_Vector *f_in, MLI_Vector *u_in)
       rlength = 0;
       for ( iP = 0; iP < nRecvs_; iP++ ) rlength += recvLengs_[iP];
       shortNRows = localNRows - rlength;
-      rData  = hypre_VectorData(hypre_ParVectorLocalVector(r));
       f2Data = hypre_VectorData(hypre_ParVectorLocalVector(f2));
       if ( nRecvs_ > 0 ) mpiRequests = new MPI_Request[nRecvs_];
       for ( iP = 0; iP < nRecvs_; iP++ )
@@ -245,11 +255,13 @@ int MLI_Solver_CG::solve(MLI_Vector *f_in, MLI_Vector *u_in)
       iter++;
       hypre_ParVectorSetConstantValues(z, 0.0);
       strcpy(paramString, "zeroInitialGuess");
-      baseSolver_->setParams( paramString, 0, NULL );
+      if (baseMethod_ != MLI_SOLVER_ILU_ID) 
+         baseSolver_->setParams( paramString, 0, NULL );
       strcpy( paramString, "HYPRE_ParVector" );
       zVecLocal = new MLI_Vector( (void *) z, paramString, NULL);
       rVecLocal = new MLI_Vector( (void *) r, paramString, NULL);
-      baseSolver_->solve( rVecLocal, zVecLocal );
+      if (baseMethod_ == MLI_SOLVER_ILU_ID) iluSolve(rData, zData);
+      else               baseSolver_->solve( rVecLocal, zVecLocal );
       rhom1 = rho;
       rho   = hypre_ParVectorInnerProd(r, z);
       if ( iter == 1 ) 
@@ -346,6 +358,8 @@ int MLI_Solver_CG::setParams( char *paramString, int argc, char **argv )
          baseMethod_ = MLI_SOLVER_BSGS_ID;
       else if ( !strcmp(param2, "MLI") )
          baseMethod_ = MLI_SOLVER_MLI_ID;
+      else if ( !strcmp(param2, "ILU") )
+         baseMethod_ = MLI_SOLVER_ILU_ID;
       else
          baseMethod_ = MLI_SOLVER_BJACOBI_ID;
       return 0;
@@ -411,6 +425,132 @@ int MLI_Solver_CG::setParams( char *paramString, int argc, char **argv )
       printf("MLI_Solver_CG::setParams - parameter not recognized.\n");
       printf("                Params = %s\n", paramString);
       return 1;
+   }
+   return 0;
+}
+
+/******************************************************************************
+ * ilu decomposition 
+ *---------------------------------------------------------------------------*/
+
+int MLI_Solver_CG::iluDecomposition()
+{
+   int                 nrows, i, j, jj, jjj, k, rownum, colnum;
+   int                 *ADiagI, *ADiagJ;
+   double              *ADiagA, *darray, dt;
+   hypre_ParCSRMatrix *A;
+   hypre_CSRMatrix    *ADiag;
+
+   A       = (hypre_ParCSRMatrix *) Amat_->getMatrix();
+   ADiag   = hypre_ParCSRMatrixDiag(A);
+   nrows   = hypre_CSRMatrixNumRows(ADiag);
+   ADiagI  = hypre_CSRMatrixI(ADiag);
+   ADiagJ  = hypre_CSRMatrixJ(ADiag);
+   ADiagA  = hypre_CSRMatrixData(ADiag);
+   iluI_   = new int[nrows+2];
+   iluJ_   = new int[ADiagI[nrows]];
+   iluA_   = new double[ADiagI[nrows]];
+   iluD_   = new int[nrows+1];
+
+   // -----------------------------------------------------------------
+   // then put the elements (submatrix) of A into lu array
+   // -----------------------------------------------------------------
+
+   for (i = 0; i <= nrows; i++) iluI_[i+1] = ADiagI[i];
+   for (i = 1; i <= nrows; i++)
+   {
+      rownum = i;
+      for (j = iluI_[i]; j < iluI_[i+1]; j++)
+      {
+         colnum = ADiagJ[j] + 1;
+         if (colnum == rownum) iluD_[i] = j;
+         iluJ_[j] = colnum;
+         iluA_[j] = ADiagA[j];
+      }
+   }
+   // -----------------------------------------------------------------
+   // loop on all the rows
+   // -----------------------------------------------------------------
+   darray = new double[nrows+1];
+   for ( i = 1; i <= nrows; i++)
+   {
+      if (iluI_[i] != iluI_[i+1])
+      {
+         for (j = 1; j <= nrows; j++) darray[j] = 0.0e0;
+         for (j = iluI_[i]; j < iluI_[i+1]; j++)
+         {
+            jj = iluJ_[j];
+            if (iluI_[jj] != iluI_[jj+1]) darray[jj] = iluA_[j];
+         }
+         // ----------------------------------------------------------
+         // eliminate L part of row i
+         // ----------------------------------------------------------
+         for (j = iluI_[i]; j < iluI_[i+1]; j++)
+         {
+            jj = iluJ_[j];
+            if (jj < i && iluI_[jj] != iluI_[jj+1])
+            {
+               dt = darray[jj];
+                if (dt != 0.0) {
+                  dt = dt * iluA_[iluD_[jj]];
+                  darray[jj] = dt;
+                  for (k = iluI_[jj]; k < iluI_[jj+1]; k++) {
+                     jjj = iluJ_[k];
+                     if (jjj > jj) darray[jjj] -= dt * iluA_[k];
+                  }
+               }
+            }
+         }
+         // ----------------------------------------------------------
+         // put modified row part to lu array
+         // ----------------------------------------------------------
+         for (j = iluI_[i]; j < iluI_[i+1]; j++) {
+            jj = iluJ_[j];
+            if (iluI_[jj] != iluI_[jj+1]) iluA_[j] = darray[jj];
+            else                          iluA_[j] = 0.0;
+         }
+         iluA_[iluD_[i]] = 1.0e0 / iluA_[iluD_[i]];
+      }
+   }
+   delete [] darray;
+   return 0;
+}
+
+/******************************************************************************
+ * ilu solve 
+ *---------------------------------------------------------------------------*/
+
+int MLI_Solver_CG::iluSolve(double *inData, double *outData)
+{
+   int                i, j, k, nrows;
+   double             dtmp;
+   hypre_ParCSRMatrix *A;
+   hypre_CSRMatrix    *ADiag;
+
+   A     = (hypre_ParCSRMatrix *) Amat_->getMatrix();
+   ADiag = hypre_ParCSRMatrixDiag(A);
+   nrows = hypre_CSRMatrixNumRows(ADiag);
+
+   for (i = 0; i < nrows; i++) outData[i] = inData[i];
+   for (i = 1; i <= nrows; i++) {
+      if (iluI_[i] != iluI_[i+1]) {
+         dtmp = 0.0e0;
+         for (k = iluI_[i]; k < iluD_[i]; k++) {
+            j = iluJ_[k];
+            dtmp += (iluA_[k] * outData[j-1]);
+         }
+         outData[i-1] = outData[i-1] - dtmp;
+      }
+   }
+   for (i = nrows; i >= 1; i--) {
+      if (iluI_[i] != iluI_[i+1]) {
+         dtmp = 0.0e0;
+         for (k = iluD_[i]+1; k < iluI_[i+1]; k++) {
+            j = iluJ_[k];
+            dtmp += (iluA_[k] * outData[j-1]);
+         }
+         outData[i-1] = (outData[i-1] - dtmp) * iluA_[iluD_[i]];
+      }
    }
    return 0;
 }
