@@ -62,14 +62,14 @@ double MLI_Method_AMGSA::genPLocal(MLI_Matrix *mli_Amat,
    MLI_Matrix             *mli_Pmat, *mli_Jmat, *mli_A2mat;
    MLI_Function           *func_ptr;
    MPI_Comm  comm;
-   int       i, j, mypid, num_procs, A_start_row, A_end_row, A_global_nrows;
+   int       i, j, mypid, num_procs, A_start_row, A_end_row;
    int       A_local_nrows, *partition, naggr, *node2aggr, *eqn2aggr, ierr;
    int       P_local_ncols, P_start_col, P_global_ncols;
    int       P_local_nrows, P_start_row, *row_lengths, row_num;
-   int       k, irow, *col_ind, send_leng, *send_ibuf, *P_cols, index;
+   int       k, irow, *col_ind, *P_cols, index;
    int       blk_size, max_agg_size, *agg_cnt_array, **agg_ind_array;
    int       agg_size, info, nzcnt, *local_labels;
-   double    *col_val, **P_vecs_ext, *send_buf, **P_vecs, max_eigen=0, alpha;
+   double    *col_val, **P_vecs, max_eigen=0, alpha;
    double    *q_array, *new_null, *r_array;
    char      param_string[200];
 
@@ -107,7 +107,6 @@ double          *hyprePData, *hyprePData2;
    HYPRE_ParCSRMatrixGetRowPartitioning((HYPRE_ParCSRMatrix) Amat,&partition);
    A_start_row    = partition[mypid];
    A_end_row      = partition[mypid+1] - 1;
-   A_global_nrows = partition[num_procs];
    free( partition );
    A_local_nrows = A_end_row - A_start_row + 1;
 
