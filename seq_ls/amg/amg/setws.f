@@ -47,6 +47,9 @@ c
      *           ndimu,ndimp,ndima,ndimb)
       return
 30    call setw3(k,ewt,nwt,imin,imax,a,ia,ja,iu,icg,ifg,b,ib,jb,
+     *           ndimu,ndimp,ndima,ndimb)
+      return
+40    call setw4(k,ewt,nwt,imin,imax,a,ia,ja,iu,icg,ifg,b,ib,jb,
      *           ipmn,ipmx,ip,iv,xp,yp,
      *           ndimu,ndimp,ndima,ndimb)
       return
@@ -132,11 +135,12 @@ c
 c     3. nwt - 2 digits (this is now the full nwt as defined)
 c
 c          1st - iwts  (calls this routine)
-c          2nd - iddst = 0 - no distribution to diagonal
-c                      = 1 - distribution to diagonal
-c          3rd - ispt  = 0 - Special points treated as F-points
+c          2nd - iddst = 0 - distribution to diagonal
+c                      = 1 - no distribution to diagonal
+c UNUSED*  3rd - ispt  = 0 - Special points ignored (eliminated)
+c                      = 1 - Special points treated as F-points
 c                            (for testing & distribution)
-c                      = 1 - F-S connection added to diagonal.
+c                      = 2 - F-S connection added to diagonal.
 c
 c     4. No previous form for b is assumed.
 c        C-rows get a diagonal entry.
@@ -220,10 +224,10 @@ c
 30    continue
 c
 c     Set last entry for i. If distribution to the diagonal
-c     is wanted (iddst=1), set ifg(i)=kb.
+c     is wanted (iddst=0), set ifg(i)=kb.
 c
       b(kb)=a(ia(i))
-      if(iddst.ne.0) ifg(i)=kb
+      if(iddst.eq.0) ifg(i)=kb
 c
 c     sweep over all direct neighbors.
 c
@@ -253,7 +257,9 @@ c
       jjhi=ia(ii+1)-1
       do 110 jj=jjlo,jjhi
       if(ifg(ja(jj)).le.0) go to 110
-      if(a(jj)/a(jjlo).le.0.e0) go to 110
+c>>>>> test - 8/19/96
+c     if(a(jj)/a(jjlo).le.0.e0) go to 110
+c<<<<<
       s=s+a(jj)
 110   continue
 c
@@ -268,7 +274,9 @@ c
         w=a(j)/s
         do 150 jj=jjlo,jjhi
         if(ifg(ja(jj)).le.0) go to 150
-        if(a(jj)/a(jjlo).le.0.e0) go to 150
+c>>>>> test - 8/19/96
+c       if(a(jj)/a(jjlo).le.0.e0) go to 150
+c<<<<<
         b(ifg(ja(jj)))=b(ifg(ja(jj)))+a(jj)*w
 150     continue
       endif
@@ -300,6 +308,199 @@ c
 c---------------------------------------------------------------------
 c
       subroutine setw3(k,ewt,nwt,imin,imax,a,ia,ja,iu,icg,ifg,b,ib,jb,
+     *                 ndimu,ndimp,ndima,ndimb)
+c
+c---------------------------------------------------------------------
+c
+c     define iterative mg interpolation (no tests are performed)
+c
+c     1. The REAL part of the operator is used.
+c
+c     2. Interpolation is only within unknowns.
+c
+c     3. nwt - 2 digits (this is now the full nwt as defined)
+c
+c          1st - iwts  (calls this routine)
+c          2nd - nswp  = Number of sweeps to perform
+c
+c     4. No form for b is assumed.
+c        C-rows get a diagonal entry.
+c        F-rows in standard form with the computed weights.
+c
+c     5. Special points get empty rows here.
+c
+c---------------------------------------------------------------------
+c
+      implicit real*8 (a-h,o-z)
+c
+c     include 'params.amg'
+c
+      dimension imin(25),imax(25)
+      dimension ia (*)
+      dimension a  (*)
+      dimension ja (*)
+      dimension iu (*)
+      dimension icg(*)
+      dimension ifg(*)
+
+      dimension ib (*)
+      dimension b  (*)
+      dimension jb (*)
+c
+      dimension  iarr(10)
+c
+c---------------------------------------------------------------------
+c
+c     write(6,1357) k
+1357  format(2x,'subroutine setw73 entered ... k=',i2)
+c
+c     decompose the parameters
+c
+c     print *,'  nnwt=',nwt
+      call idec(nwt,4,ndig,iarr)
+      nswp=iarr(2)
+      nout=iarr(3)
+      if(nswp.lt.1) nswp=1
+      ishift=imax(k)-imin(k)+2
+c
+c     set up proper form of b
+c
+      kb=ib(imin(k))
+      do 20 i=imin(k),imax(k)
+        ifg(i)=0
+        ib(i) = kb
+c
+c       Test for C/F points (empty row for S (special) points)
+c
+c       C-point - load diagonal entry
+c
+        if(icg(i).gt.0) then
+          b(kb) = 1.0
+          jb(kb) = i
+          kb = kb+1
+c
+c       F-point - load all strong C-connections (from A+)
+c       (Note: initial weights are from STRONGx (matrix entries))
+c
+        elseif(icg(i).lt.0) then
+          i1 = i+ishift
+          jlo=ia(i1)+1
+          jhi=ia(i1+1)-1
+          do 10 j=jlo,jhi
+            ii=ja(j)
+            if(icg(ii).gt.0) then
+              b(kb)=a(j)
+              jb(kb)=ii
+              kb=kb+1
+            endif
+10        continue
+        endif
+20    continue
+      ib(imax(k)+1)=kb
+c
+c     Set outer iteration
+c
+      it = 0
+100   it = it+1
+c
+c     iterate on the weights
+c
+      do 400 ns=1,nswp
+        do 300 i=imin(k),imax(k)
+          if(icg(i).ge.0) go to 300
+c
+c         mark the interpolation points in ifg with location in b
+c         (Note: diagonal term is stored in b(kb) for distribution)
+c
+cc        ifg(i) = kb
+cc        b(kb) = a(ia(i))
+          ifg(i) = 0
+          bdiag  = a(ia(i))
+          jblo=ib(i)
+          jbhi=ib(i+1)-1
+          do 110 j=jblo,jbhi
+            ifg(jb(j))=j
+            b(j)=0.d0
+110       continue
+c
+c         sweep over direct neighbors
+c
+          jlo=ia(i)+1
+          jhi=ia(i+1)-1
+          do 200 j=jlo,jhi
+            ii=ja(j)
+            if(iu(ii).ne.iu(i)) go to 200
+c
+c           Strong C-neighbor - add entry to weight
+c
+            if(ifg(ii).gt.0) then
+              b(ifg(ii))=b(ifg(ii))+a(j)
+c
+c           F or weak connection - perform distribution
+c
+            elseif(icg(i).ne.0) then
+              sum = 0.0
+              jjlo=ib(ii)
+              jjhi=ib(ii+1)-1
+              do 120 jj=jjlo,jjhi
+                if(ifg(jb(jj)).gt.0) sum=sum+b(jj)
+120           continue
+c
+              if(sum.eq.0.0) then
+                bdiag=bdiag+a(j)
+              else
+                w=a(j)/sum
+                do 130 jj=jjlo,jjhi
+                  if(ifg(jb(jj)).gt.0)
+     *              b(ifg(jb(jj)))=b(ifg(jb(jj)))+b(jj)*w
+130             continue
+              endif
+            endif
+200       continue
+c
+c         Compute weights for point i (and zero out ifg)
+c
+          bdiag=-1.d0/bdiag
+          do 210 j=jblo,jbhi
+            b(j)=b(j)*bdiag
+            ifg(jb(j))=0
+210       continue
+c
+300     continue
+400   continue
+c
+c     eliminate negative weights and recompute
+c
+      if(it.gt.nout) return
+c
+      kb = ib(imin(k))
+      do 420 i=imin(k),imax(k)
+        if(icg(i).gt.0) then
+          ib(i)=kb
+          b(kb)=1.0
+          jb(kb)=i
+          kb=kb+1
+        elseif(icg(i).eq.0) then
+          ib(i)=kb
+        else
+          jlo=ib(i)
+          ib(i)=kb
+          do 410 j=jlo,ib(i+1)-1
+            if(b(j).gt.0.01) then
+              b(kb)=b(j)
+              jb(kb)=jb(j)
+              kb=kb+1
+            endif
+410       continue
+        endif
+420   continue
+      ib(imax(k)+1)=kb
+      go to 100
+      end
+c
+c---------------------------------------------------------------------
+c
+      subroutine setw4(k,ewt,nwt,imin,imax,a,ia,ja,iu,icg,ifg,b,ib,jb,
      *                 ipmn,ipmx,ip,iv,xp,yp,
      *                 ndimu,ndimp,ndima,ndimb)
 c
@@ -320,8 +521,8 @@ c
 c     3. nwt - 2 digits (this is now the full nwt as defined)
 c
 c          1st - iwts  (calls this routine)
-c          2nd - iddst = 0 - no distribution to diagonal
-c                      = 1 - distribution to diagonal
+c          2nd - iddst = 0 - distribution to diagonal
+c                      = 1 - no distribution to diagonal
 c          3rd - ispt  = 0 - Special points treated as F-points
 c                            (for testing & distribution)
 c                      = 1 - F-S connection added to diagonal.
@@ -466,7 +667,7 @@ c
 c
 c     Set bound for distribution (to center or not)
 c
-      if(iddst.eq.0) then
+      if(iddst.ne.0) then
         idlo=ibf
       else
         idlo=0
