@@ -77,6 +77,12 @@ for i in $HYPRE_TEST_DRIVERS
 do
     echo "running ${i} test suite..."
     ./${i}.sh 1> ${i}.log 2> ${i}.err
+
+    if test -f purify.log
+    then
+      mv purify.log $i.purify.log
+      grep -i hypre_ $i.purify.log > $i.purify.err
+    fi
 done
 
 #===========================================================================
@@ -100,13 +106,14 @@ then
 
     for i in $HYPRE_TEST_DRIVERS
     do
-    if [ -s "${i}.err" ]
+    if test -s "${i}.err"
     then
-	RECIPIENTS=`cat ${i}.email`
-        SUBJECT="Error(s) in ${i} test suite ($HYPRE_ARCH)"
-	$HYPRE_MAIL -s "$SUBJECT" $RECIPIENTS < ${i}.err
+       if test -r "${i}.email"
+        then
+	    RECIPIENTS=`cat ${i}.email`
+            SUBJECT="Error(s) in ${i} test suite ($HYPRE_ARCH)"
+	    $HYPRE_MAIL -s "$SUBJECT" $RECIPIENTS < ${i}.err
+        fi
     fi
     done
 fi
-
-
