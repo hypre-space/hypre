@@ -45,7 +45,7 @@ int hypre_ILUpcg(double *x, double *rhs,
   float tau, alpha, beta;
   float delta_x;
 
-  if (max_iter) max_iter = 1000;
+  if (max_iter< 0) max_iter = 1000;
 
   delta0 = 0.e0;
   for (i=0; i<num_dofs; i++)
@@ -137,7 +137,7 @@ int hypre_ILUpcg(double *x, double *rhs,
     delta0+= w[i] * d[i];
 
   if (max_iter > 999)
-    printf("Hypre_ILUpcg_delta0: %e\n", delta0); 
+    printf("hypre_ILUpcg_delta0: %e\n", delta0); 
 
   delta_old = delta0;
 

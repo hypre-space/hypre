@@ -187,7 +187,7 @@ int hypre_VcycleILUpcg(double *x, double *rhs,
     delta0+= w[i] * d[i];
 
   if (max_iter > 999)
-    printf("hypre_ILUpcg_delta0: %e\n", delta0); 
+    printf("hypre_VcycleILUpcg: delta0: %e\n", delta0); 
 
   delta_old = delta0;
 
