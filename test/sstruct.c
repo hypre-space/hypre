@@ -259,7 +259,7 @@ ReadData( char         *filename,
    int                sdata_size;
    int                size;
    int                memchunk = 10000;
-   int                maxline  = 250;
+   int                maxline  = 500;
 
    char               key[250];
 
@@ -284,14 +284,16 @@ ReadData( char         *filename,
       sdata = hypre_TAlloc(char, memchunk);
       sdata_line = fgets(sdata, maxline, file);
 
+      s= 0;
       while (sdata_line != NULL)
       {
          sdata_size += strlen(sdata_line) + 1;
 
          /* allocate more space, if necessary */
-         if ((sdata_size % memchunk) > (memchunk - maxline))
+         if ((sdata_size + maxline) > s)
          {
             sdata = hypre_TReAlloc(sdata, char, (sdata_size + memchunk));
+            s= sdata_size + memchunk;
          }
          
          /* read the next input line */
@@ -1392,6 +1394,7 @@ main( int   argc,
    Index                 ilower, iupper;
    Index                 index, to_index;
    double               *values;
+   double                max_norm;
 
    int                   num_iterations;
    double                final_res_norm;
@@ -1913,6 +1916,10 @@ main( int   argc,
    {
       HYPRE_SStructVectorGetObject(x, (void **) &par_x);
    }
+
+   
+   max_norm= hypre_SStructMaxNorm(x);
+   printf("max_norm norm = %e \n", max_norm);
  
    hypre_EndTiming(time_index);
    hypre_PrintTiming("SStruct Interface", MPI_COMM_WORLD);
