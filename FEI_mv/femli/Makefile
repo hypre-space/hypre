@@ -25,6 +25,7 @@ HEADERS = \
  ./solver/mli_solver_parasails.h\
  ./solver/mli_solver_mls.h\
  ./solver/mli_solver_mli.h\
+ ./solver/mli_solver_amg.h\
  ./solver/mli_solver_chebyshev.h\
  ./solver/mli_solver_cg.h\
  ./solver/mli_solver_gmres.h\
@@ -67,6 +68,7 @@ FILES =\
  ./solver/mli_solver_parasails.cxx\
  ./solver/mli_solver_mls.cxx\
  ./solver/mli_solver_mli.cxx\
+ ./solver/mli_solver_amg.cxx\
  ./solver/mli_solver_chebyshev.cxx\
  ./solver/mli_solver_cg.cxx\
  ./solver/mli_solver_gmres.cxx\
