@@ -4270,23 +4270,23 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
            // if variable mli preconditioner (SA and GSA)
            if ( MLI_Hybrid_GSA_ && HYPreconID_ == HYMLI )
            {
-              nTrials = 1;
-              if (rnorm/rnorm0 >= tolerance_)
-              {
-                 HYPRE_ParCSRGMRESSolve(HYSolver_, A_csr, b_csr, x_csr);
-                 HYPRE_ParCSRGMRESGetNumIterations(HYSolver_, &tempIter);
-                 numIterations += tempIter;
-                 HYPRE_ParVectorCopy( b_csr, r_csr );
-                 HYPRE_ParCSRMatrixMatvec( -1.0, A_csr, x_csr, 1.0, r_csr );
-                 HYPRE_ParVectorInnerProd( r_csr, r_csr, &rnorm1);
-                 rnorm1 = sqrt( rnorm1 );
-                 convRate = rnorm1 / rnorm;
-                 rnorm = rnorm1;
-              }
+              nTrials = 0;
+              //if (rnorm/rnorm0 >= tolerance_)
+              //{
+              //   HYPRE_ParCSRGMRESSolve(HYSolver_, A_csr, b_csr, x_csr);
+              //   HYPRE_ParCSRGMRESGetNumIterations(HYSolver_, &tempIter);
+              //   numIterations += tempIter;
+              //   HYPRE_ParVectorCopy( b_csr, r_csr );
+              //   HYPRE_ParCSRMatrixMatvec( -1.0, A_csr, x_csr, 1.0, r_csr );
+              //   HYPRE_ParVectorInnerProd( r_csr, r_csr, &rnorm1);
+              //   rnorm1 = sqrt( rnorm1 );
+              //   convRate = rnorm1 / rnorm;
+              //   rnorm = rnorm1;
+              //}
+              convRate = rnorm / rnorm0;
               while ((rnorm/rnorm0)>=tolerance_ && nTrials<MLI_Hybrid_NTrials_)
               {
                  nTrials++;
-printf("LSC: convRate = %e(%e) : %d\n",convRate,rateThresh,MLI_Hybrid_NSIncr_);
                  if ( convRate > rateThresh )
                  {
                     if ( MLI_Hybrid_NSIncr_ > 1 )

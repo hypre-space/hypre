@@ -115,6 +115,7 @@ typedef struct HYPRE_LSI_MLI_Struct
    double   *nullScales_;         /* scaling vector for null space */
    int      calibrationSize_;     /* for calibration smoothed aggregation */
    double   Pweight_;
+   int      SPLevel_;
    char     paramFile_[50];
    int      adjustNullSpace_;
    int      numResetNull_;
@@ -200,6 +201,7 @@ int HYPRE_LSI_MLICreate( MPI_Comm comm, HYPRE_Solver *solver )
    mli_object->nullScales_          = NULL;
    mli_object->calibrationSize_     = 0;
    mli_object->Pweight_             = -1.0;      /* default in MLI */
+   mli_object->SPLevel_             = 0;         /* default in MLI */
    mli_object->adjustNullSpace_     = 0;
    mli_object->numResetNull_        = 0;
    mli_object->resetNullIndices_    = NULL;
@@ -415,6 +417,11 @@ int HYPRE_LSI_MLISetup( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
    {
       sprintf( paramString, "setPweight %e", mli_object->Pweight_ );
       method->setParams( paramString, 0, NULL );
+      if ( mli_object->SPLevel_ > 0 )
+      { 
+         sprintf( paramString, "setSPLevel %d", mli_object->SPLevel_ );
+         method->setParams( paramString, 0, NULL );
+      }
    }
    if ( strcmp(mli_object->coarsenScheme_, "default") )
    {
@@ -439,6 +446,8 @@ int HYPRE_LSI_MLISetup( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
    if ( mli_object->feData_ != NULL )
       mli->setFEData( 0, mli_object->feData_, mli_object->mapper_ );
    if ( mli_object->sfei_ != NULL ) mli->setSFEI(0, mli_object->sfei_);
+   //mli_object->mapper_ = NULL;
+   //mli_object->feData_ = NULL;
 
    /* -------------------------------------------------------- */ 
    /* load null space, if there is any                         */
@@ -699,6 +708,7 @@ int HYPRE_LSI_MLISetParams( HYPRE_Solver solver, char *paramString )
          printf("\t      smootherFindOmega \n");
          printf("\t      minCoarseSize <d> \n");
          printf("\t      Pweight <f> \n");
+         printf("\t      SPLevel <d> \n");
          printf("\t      scalar\n");
          printf("\t      nodeDOF <d> \n");
          printf("\t      nullSpaceDim <d> \n");
@@ -831,6 +841,11 @@ int HYPRE_LSI_MLISetParams( HYPRE_Solver solver, char *paramString )
       sscanf(paramString,"%s %s %lg",param1,param2, &(mli_object->Pweight_));
       if ( mli_object->Pweight_ < 0. ) mli_object->Pweight_ = 1.333;
    }
+   else if ( !strcmp(param2, "SPLevel") )
+   {
+      sscanf(paramString,"%s %s %d",param1,param2, &(mli_object->SPLevel_));
+      if ( mli_object->SPLevel_ < 0 ) mli_object->SPLevel_ = 0;
+   }
    else if ( !strcmp(param2, "scalar") )
    {
       mli_object->scalar_ = 1;
@@ -927,7 +942,8 @@ int HYPRE_LSI_MLISetParams( HYPRE_Solver solver, char *paramString )
          printf("\t      smootherPrintRNorm\n");
          printf("\t      smootherFindOmega\n");
          printf("\t      minCoarseSize <d> \n");
-         printf("\t      Pweight <d> \n");
+         printf("\t      Pweight <f> \n");
+         printf("\t      SPLevel <d> \n");
          printf("\t      nodeDOF <d> \n");
          printf("\t      nullSpaceDim <d> \n");
          printf("\t      useNodalCoord <on,off> \n");
