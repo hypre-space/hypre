@@ -576,6 +576,7 @@ hypre_ExtractBExt( hypre_ParCSRMatrix *B, hypre_ParCSRMatrix *A)
    int i, j, k, counter;
    int start_index;
    int j_cnt, jrow;
+   int data = 0;
 
    MPI_Comm_size(comm,&num_procs);
    MPI_Comm_rank(comm,&my_id);
@@ -586,6 +587,7 @@ hypre_ExtractBExt( hypre_ParCSRMatrix *B, hypre_ParCSRMatrix *A)
    send_matrix_types = hypre_CTAlloc(MPI_Datatype, num_sends);
    B_ext_i = hypre_CTAlloc(int, num_rows_B_ext+1);
    recv_matrix_types = hypre_CTAlloc(MPI_Datatype, num_recvs);
+   if (diag_data) data = 1;
   
 /*--------------------------------------------------------------------------
  * generate B_int_i through adding number of row-elements of offd and diag
@@ -613,7 +615,7 @@ hypre_ExtractBExt( hypre_ParCSRMatrix *B, hypre_ParCSRMatrix *A)
 		&B_int_i[1],&B_ext_i[1]);
 
    B_int_j = hypre_CTAlloc(int, num_nonzeros);
-   B_int_data = hypre_CTAlloc(double, num_nonzeros);
+   if (data) B_int_data = hypre_CTAlloc(double, num_nonzeros);
 
    start_index = B_int_i[0];
    counter = 0;
@@ -626,22 +628,35 @@ hypre_ExtractBExt( hypre_ParCSRMatrix *B, hypre_ParCSRMatrix *A)
 	    for (k=diag_i[jrow]; k < diag_i[jrow+1]; k++) 
 	    {
 		B_int_j[counter] = diag_j[k]+first_col_diag;
-		B_int_data[counter] = diag_data[k];
+		if (data) B_int_data[counter] = diag_data[k];
 		counter++;
   	    }
 	    for (k=offd_i[jrow]; k < offd_i[jrow+1]; k++) 
 	    {
 		B_int_j[counter] = col_map_offd[offd_j[k]];
-		B_int_data[counter] = offd_data[k];
+		if (data) B_int_data[counter] = offd_data[k];
 		counter++;
   	    }
 	   
 	}
 	num_nonzeros = counter - num_nonzeros;
-	hypre_BuildCSRJDataType(num_nonzeros, 
+	if (data) 
+	{
+		hypre_BuildCSRJDataType(num_nonzeros, 
 			  &B_int_data[start_index], 
 			  &B_int_j[start_index], 
 			  &send_matrix_types[i]);	
+	}
+	else
+	{
+		MPI_Aint displ[1];
+		MPI_Datatype type[1];
+		type[0] = MPI_INT;
+		MPI_Address(&B_int_j[start_index], &displ[0]);
+		MPI_Type_struct(1,&num_nonzeros,displ,type,
+			&send_matrix_types[i]);
+		MPI_Type_commit(&send_matrix_types[i]);
+	}
 	start_index += num_nonzeros;
    }
 
@@ -669,16 +684,29 @@ hypre_ExtractBExt( hypre_ParCSRMatrix *B, hypre_ParCSRMatrix *A)
 
    B_ext = hypre_CreateCSRMatrix(num_rows_B_ext,num_cols_B_int,num_nonzeros);
    B_ext_j = hypre_CTAlloc(int, num_nonzeros);
-   B_ext_data = hypre_CTAlloc(double, num_nonzeros);
+   if (data) B_ext_data = hypre_CTAlloc(double, num_nonzeros);
 
    for (i=0; i < num_recvs; i++)
    {
 	start_index = B_ext_i[recv_vec_starts[i]];
 	num_nonzeros = B_ext_i[recv_vec_starts[i+1]]-start_index;
-	hypre_BuildCSRJDataType(num_nonzeros, 
+	if (data)
+	{
+		hypre_BuildCSRJDataType(num_nonzeros, 
 			  &B_ext_data[start_index], 
 			  &B_ext_j[start_index], 
 			  &recv_matrix_types[i]);	
+	}
+	else
+	{
+		MPI_Aint displ[1];
+		MPI_Datatype type[1];
+		type[0] = MPI_INT;
+		MPI_Address(&B_ext_j[start_index], &displ[0]);
+		MPI_Type_struct(1,&num_nonzeros,displ,type,
+			&recv_matrix_types[i]);
+		MPI_Type_commit(&recv_matrix_types[i]);
+	}
    }
 
    hypre_CommPkgRecvMPITypes(tmp_comm_pkg) = recv_matrix_types;	
@@ -687,13 +715,13 @@ hypre_ExtractBExt( hypre_ParCSRMatrix *B, hypre_ParCSRMatrix *A)
 
    hypre_CSRMatrixI(B_ext) = B_ext_i;
    hypre_CSRMatrixJ(B_ext) = B_ext_j;
-   hypre_CSRMatrixData(B_ext) = B_ext_data;
+   if (data) hypre_CSRMatrixData(B_ext) = B_ext_data;
 
    hypre_FinalizeCommunication(comm_handle); 
 
    hypre_TFree(B_int_i);
    hypre_TFree(B_int_j);
-   hypre_TFree(B_int_data);
+   if (data) hypre_TFree(B_int_data);
 
    for (i=0; i < num_sends; i++)
 	MPI_Type_free(&send_matrix_types[i]);
