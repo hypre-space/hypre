@@ -25,7 +25,7 @@ int hypre_ParAMGBuildCoarseOperator(    hypre_ParCSRMatrix  *RT,
    hypre_CSRMatrix *RT_offd = hypre_ParCSRMatrixOffd(RT);
    int 		   num_cols_offd_RT = hypre_CSRMatrixNumCols(RT_offd);
    int 		   num_rows_offd_RT = hypre_CSRMatrixNumRows(RT_offd);
-   hypre_CommPkg   *comm_pkg_RT = hypre_ParCSRMatrixCommPkg(RT);
+   hypre_ParCSRCommPkg   *comm_pkg_RT = hypre_ParCSRMatrixCommPkg(RT);
    int		   num_recvs_RT = 0;
    int		   num_sends_RT = 0;
    int		   *send_map_starts_RT;
@@ -168,10 +168,10 @@ int hypre_ParAMGBuildCoarseOperator(    hypre_ParCSRMatrix  *RT,
 
    if (comm_pkg_RT)
    {
-	num_recvs_RT = hypre_CommPkgNumRecvs(comm_pkg_RT);
-      	num_sends_RT = hypre_CommPkgNumSends(comm_pkg_RT);
-      	send_map_starts_RT =hypre_CommPkgSendMapStarts(comm_pkg_RT);
-      	send_map_elmts_RT = hypre_CommPkgSendMapElmts(comm_pkg_RT);
+	num_recvs_RT = hypre_ParCSRCommPkgNumRecvs(comm_pkg_RT);
+      	num_sends_RT = hypre_ParCSRCommPkgNumSends(comm_pkg_RT);
+      	send_map_starts_RT =hypre_ParCSRCommPkgSendMapStarts(comm_pkg_RT);
+      	send_map_elmts_RT = hypre_ParCSRCommPkgSendMapElmts(comm_pkg_RT);
    }
 
    hypre_CSRMatrixTranspose(RT_diag,&R_diag); 
@@ -1467,20 +1467,20 @@ int hypre_ParAMGBuildCoarseOperator(    hypre_ParCSRMatrix  *RT,
          
 hypre_CSRMatrix *
 hypre_ExchangeRAPData( 	hypre_CSRMatrix *RAP_int,
-			hypre_CommPkg *comm_pkg_RT)
+			hypre_ParCSRCommPkg *comm_pkg_RT)
 {
    int     *RAP_int_i;
    int     *RAP_int_j;
    double  *RAP_int_data;
    int     num_cols = 0;
 
-   MPI_Comm comm = hypre_CommPkgComm(comm_pkg_RT);
-   int num_recvs = hypre_CommPkgNumRecvs(comm_pkg_RT);
-   int *recv_procs = hypre_CommPkgRecvProcs(comm_pkg_RT);
-   int *recv_vec_starts = hypre_CommPkgRecvVecStarts(comm_pkg_RT);
-   int num_sends = hypre_CommPkgNumSends(comm_pkg_RT);
-   int *send_procs = hypre_CommPkgSendProcs(comm_pkg_RT);
-   int *send_map_starts = hypre_CommPkgSendMapStarts(comm_pkg_RT);
+   MPI_Comm comm = hypre_ParCSRCommPkgComm(comm_pkg_RT);
+   int num_recvs = hypre_ParCSRCommPkgNumRecvs(comm_pkg_RT);
+   int *recv_procs = hypre_ParCSRCommPkgRecvProcs(comm_pkg_RT);
+   int *recv_vec_starts = hypre_ParCSRCommPkgRecvVecStarts(comm_pkg_RT);
+   int num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg_RT);
+   int *send_procs = hypre_ParCSRCommPkgSendProcs(comm_pkg_RT);
+   int *send_map_starts = hypre_ParCSRCommPkgSendMapStarts(comm_pkg_RT);
 
    hypre_CSRMatrix *RAP_ext;
 
@@ -1490,8 +1490,8 @@ hypre_ExchangeRAPData( 	hypre_CSRMatrix *RAP_int,
 
    MPI_Datatype *recv_matrix_types;
    MPI_Datatype *send_matrix_types;
-   hypre_CommHandle *comm_handle;
-   hypre_CommPkg *tmp_comm_pkg;
+   hypre_ParCSRCommHandle *comm_handle;
+   hypre_ParCSRCommPkg *tmp_comm_pkg;
 
    int num_rows;
    int num_nonzeros;
@@ -1541,13 +1541,13 @@ hypre_ExchangeRAPData( 	hypre_CSRMatrix *RAP_int,
    comm_handle = hypre_InitializeCommunication(12,comm_pkg_RT,
 		&RAP_int_i[1], &RAP_ext_i[1]);
 
-   tmp_comm_pkg = hypre_CTAlloc(hypre_CommPkg, 1);
-   hypre_CommPkgComm(tmp_comm_pkg) = comm;
-   hypre_CommPkgNumSends(tmp_comm_pkg) = num_recvs;
-   hypre_CommPkgNumRecvs(tmp_comm_pkg) = num_sends;
-   hypre_CommPkgSendProcs(tmp_comm_pkg) = recv_procs;
-   hypre_CommPkgRecvProcs(tmp_comm_pkg) = send_procs;
-   hypre_CommPkgSendMPITypes(tmp_comm_pkg) = recv_matrix_types;	
+   tmp_comm_pkg = hypre_CTAlloc(hypre_ParCSRCommPkg, 1);
+   hypre_ParCSRCommPkgComm(tmp_comm_pkg) = comm;
+   hypre_ParCSRCommPkgNumSends(tmp_comm_pkg) = num_recvs;
+   hypre_ParCSRCommPkgNumRecvs(tmp_comm_pkg) = num_sends;
+   hypre_ParCSRCommPkgSendProcs(tmp_comm_pkg) = recv_procs;
+   hypre_ParCSRCommPkgRecvProcs(tmp_comm_pkg) = send_procs;
+   hypre_ParCSRCommPkgSendMPITypes(tmp_comm_pkg) = recv_matrix_types;	
 
    hypre_FinalizeCommunication(comm_handle);
 
@@ -1577,7 +1577,7 @@ hypre_ExchangeRAPData( 	hypre_CSRMatrix *RAP_int,
 			  &send_matrix_types[i]);	
    }
 
-   hypre_CommPkgRecvMPITypes(tmp_comm_pkg) = send_matrix_types;	
+   hypre_ParCSRCommPkgRecvMPITypes(tmp_comm_pkg) = send_matrix_types;	
 
    comm_handle = hypre_InitializeCommunication(0,tmp_comm_pkg,NULL,NULL);
 

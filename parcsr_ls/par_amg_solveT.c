@@ -541,8 +541,8 @@ int  hypre_ParAMGRelaxT( hypre_ParCSRMatrix *A,
    int            *A_offd_i     = hypre_CSRMatrixI(A_offd);
    double         *A_offd_data  = hypre_CSRMatrixData(A_offd);
    int            *A_offd_j     = hypre_CSRMatrixJ(A_offd);
-   hypre_CommPkg  *comm_pkg = hypre_ParCSRMatrixCommPkg(A);
-   hypre_CommHandle *comm_handle;
+   hypre_ParCSRCommPkg  *comm_pkg = hypre_ParCSRMatrixCommPkg(A);
+   hypre_ParCSRCommHandle *comm_handle;
 
    int             n_global= hypre_ParCSRMatrixGlobalNumRows(A);
    int             n       = hypre_CSRMatrixNumRows(A_diag);

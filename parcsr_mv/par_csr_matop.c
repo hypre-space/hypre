@@ -531,17 +531,17 @@ hypre_ParCSRMatrixExtractBExt( hypre_ParCSRMatrix *B, hypre_ParCSRMatrix *A, int
    int first_col_diag = hypre_ParCSRMatrixFirstColDiag(B);
    int *col_map_offd = hypre_ParCSRMatrixColMapOffd(B);
 
-   hypre_CommPkg *comm_pkg = hypre_ParCSRMatrixCommPkg(A);
-   int num_recvs = hypre_CommPkgNumRecvs(comm_pkg);
-   int *recv_vec_starts = hypre_CommPkgRecvVecStarts(comm_pkg);
-   int num_sends = hypre_CommPkgNumSends(comm_pkg);
-   int *send_map_starts = hypre_CommPkgSendMapStarts(comm_pkg);
-   int *send_map_elmts = hypre_CommPkgSendMapElmts(comm_pkg);
+   hypre_ParCSRCommPkg *comm_pkg = hypre_ParCSRMatrixCommPkg(A);
+   int num_recvs = hypre_ParCSRCommPkgNumRecvs(comm_pkg);
+   int *recv_vec_starts = hypre_ParCSRCommPkgRecvVecStarts(comm_pkg);
+   int num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
+   int *send_map_starts = hypre_ParCSRCommPkgSendMapStarts(comm_pkg);
+   int *send_map_elmts = hypre_ParCSRCommPkgSendMapElmts(comm_pkg);
  
    MPI_Datatype *recv_matrix_types;
    MPI_Datatype *send_matrix_types;
-   hypre_CommHandle *comm_handle;
-   hypre_CommPkg *tmp_comm_pkg;
+   hypre_ParCSRCommHandle *comm_handle;
+   hypre_ParCSRCommPkg *tmp_comm_pkg;
 
    hypre_CSRMatrix *diag = hypre_ParCSRMatrixDiag(B);
 
@@ -658,13 +658,13 @@ hypre_ParCSRMatrixExtractBExt( hypre_ParCSRMatrix *B, hypre_ParCSRMatrix *A, int
 	start_index += num_nonzeros;
    }
 
-   tmp_comm_pkg = hypre_CTAlloc(hypre_CommPkg,1);
-   hypre_CommPkgComm(tmp_comm_pkg) = comm;
-   hypre_CommPkgNumSends(tmp_comm_pkg) = num_sends;
-   hypre_CommPkgNumRecvs(tmp_comm_pkg) = num_recvs;
-   hypre_CommPkgSendProcs(tmp_comm_pkg) = hypre_CommPkgSendProcs(comm_pkg);
-   hypre_CommPkgRecvProcs(tmp_comm_pkg) = hypre_CommPkgRecvProcs(comm_pkg);
-   hypre_CommPkgSendMPITypes(tmp_comm_pkg) = send_matrix_types;	
+   tmp_comm_pkg = hypre_CTAlloc(hypre_ParCSRCommPkg,1);
+   hypre_ParCSRCommPkgComm(tmp_comm_pkg) = comm;
+   hypre_ParCSRCommPkgNumSends(tmp_comm_pkg) = num_sends;
+   hypre_ParCSRCommPkgNumRecvs(tmp_comm_pkg) = num_recvs;
+   hypre_ParCSRCommPkgSendProcs(tmp_comm_pkg) = hypre_ParCSRCommPkgSendProcs(comm_pkg);
+   hypre_ParCSRCommPkgRecvProcs(tmp_comm_pkg) = hypre_ParCSRCommPkgRecvProcs(comm_pkg);
+   hypre_ParCSRCommPkgSendMPITypes(tmp_comm_pkg) = send_matrix_types;	
 
    hypre_FinalizeCommunication(comm_handle);
 
@@ -707,7 +707,7 @@ hypre_ParCSRMatrixExtractBExt( hypre_ParCSRMatrix *B, hypre_ParCSRMatrix *A, int
 	}
    }
 
-   hypre_CommPkgRecvMPITypes(tmp_comm_pkg) = recv_matrix_types;	
+   hypre_ParCSRCommPkgRecvMPITypes(tmp_comm_pkg) = recv_matrix_types;	
 
    comm_handle = hypre_InitializeCommunication(0,tmp_comm_pkg,NULL,NULL);
 

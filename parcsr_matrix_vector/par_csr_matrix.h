@@ -45,7 +45,7 @@ typedef struct
 	   first_col_diag = col_starts[my_id],
 	   col_starts[num_procs] = global_num_cols */
 
-   hypre_CommPkg	*comm_pkg;
+   hypre_ParCSRCommPkg	*comm_pkg;
    
    /* Does the ParCSRMatrix create/destroy `diag', `offd', `col_map_offd'? */
    int      owns_data;

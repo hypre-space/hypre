@@ -14,11 +14,11 @@ hypre_GetCommPkgRTFromCommPkgA( hypre_ParCSRMatrix *RT,
 			       	hypre_ParCSRMatrix *A)
 {
    MPI_Comm comm = hypre_ParCSRMatrixComm(RT);
-   hypre_CommPkg *comm_pkg_A = hypre_ParCSRMatrixCommPkg(A);
-   int num_recvs_A = hypre_CommPkgNumRecvs(comm_pkg_A);
-   int *recv_procs_A = hypre_CommPkgRecvProcs(comm_pkg_A);
-   int num_sends_A = hypre_CommPkgNumSends(comm_pkg_A);
-   int *send_procs_A = hypre_CommPkgSendProcs(comm_pkg_A);
+   hypre_ParCSRCommPkg *comm_pkg_A = hypre_ParCSRMatrixCommPkg(A);
+   int num_recvs_A = hypre_ParCSRCommPkgNumRecvs(comm_pkg_A);
+   int *recv_procs_A = hypre_ParCSRCommPkgRecvProcs(comm_pkg_A);
+   int num_sends_A = hypre_ParCSRCommPkgNumSends(comm_pkg_A);
+   int *send_procs_A = hypre_ParCSRCommPkgSendProcs(comm_pkg_A);
 
    int num_recvs_RT;
    int *recv_procs_RT;   
@@ -139,9 +139,9 @@ hypre_GetCommPkgRTFromCommPkgA( hypre_ParCSRMatrix *RT,
 /*   printf (" my_id %d num_sends %d num_recvs %d \n", my_id,
 	num_sends_RT, num_recvs_RT);
    send_map_starts_RT = 
-	hypre_CommPkgSendMapStarts(hypre_ParCSRMatrixCommPkg(RT));
+	hypre_ParCSRCommPkgSendMapStarts(hypre_ParCSRMatrixCommPkg(RT));
    send_map_elmts_RT = 
-	hypre_CommPkgSendMapElmts(hypre_ParCSRMatrixCommPkg(RT));
+	hypre_ParCSRCommPkgSendMapElmts(hypre_ParCSRMatrixCommPkg(RT));
    for (i=0; i < num_sends_RT; i++)
    {
 	printf (" send_procs %d send_map_starts %d\n", send_procs_RT[i],
@@ -161,7 +161,7 @@ hypre_GetCommPkgRTFromCommPkgA( hypre_ParCSRMatrix *RT,
    return ierr;
 }
 
-hypre_CommPkg *
+hypre_ParCSRCommPkg *
 hypre_GenerateSendMapAndCommPkg(MPI_Comm comm, int num_sends, int num_recvs,
 				int *recv_procs, int *send_procs,
 				int *recv_vec_starts, hypre_ParCSRMatrix *A)
@@ -173,7 +173,7 @@ hypre_GenerateSendMapAndCommPkg(MPI_Comm comm, int num_sends, int num_recvs,
    MPI_Request *requests;
    MPI_Status *status;
    int vec_len, vec_start;
-   hypre_CommPkg *comm_pkg;
+   hypre_ParCSRCommPkg *comm_pkg;
    int *col_map_offd = hypre_ParCSRMatrixColMapOffd(A);
    int first_col_diag = hypre_ParCSRMatrixFirstColDiag(A);
 
@@ -224,16 +224,16 @@ hypre_GenerateSendMapAndCommPkg(MPI_Comm comm, int num_sends, int num_recvs,
    for (i=0; i < send_map_starts[num_sends]; i++)
 	send_map_elmts[i] -= first_col_diag; 
 	
-   comm_pkg = hypre_CTAlloc(hypre_CommPkg,1);
+   comm_pkg = hypre_CTAlloc(hypre_ParCSRCommPkg,1);
 
-   hypre_CommPkgComm(comm_pkg) = comm;
-   hypre_CommPkgNumSends(comm_pkg) = num_sends;
-   hypre_CommPkgNumRecvs(comm_pkg) = num_recvs;
-   hypre_CommPkgSendProcs(comm_pkg) = send_procs;
-   hypre_CommPkgRecvProcs(comm_pkg) = recv_procs;
-   hypre_CommPkgRecvVecStarts(comm_pkg) = recv_vec_starts;
-   hypre_CommPkgSendMapStarts(comm_pkg) = send_map_starts;
-   hypre_CommPkgSendMapElmts(comm_pkg) = send_map_elmts;
+   hypre_ParCSRCommPkgComm(comm_pkg) = comm;
+   hypre_ParCSRCommPkgNumSends(comm_pkg) = num_sends;
+   hypre_ParCSRCommPkgNumRecvs(comm_pkg) = num_recvs;
+   hypre_ParCSRCommPkgSendProcs(comm_pkg) = send_procs;
+   hypre_ParCSRCommPkgRecvProcs(comm_pkg) = recv_procs;
+   hypre_ParCSRCommPkgRecvVecStarts(comm_pkg) = recv_vec_starts;
+   hypre_ParCSRCommPkgSendMapStarts(comm_pkg) = send_map_starts;
+   hypre_ParCSRCommPkgSendMapElmts(comm_pkg) = send_map_elmts;
 
    hypre_TFree(status);
    hypre_TFree(requests);
@@ -246,11 +246,11 @@ hypre_GenerateRAPCommPkg( hypre_ParCSRMatrix *RAP,
 			  hypre_ParCSRMatrix *A)
 {
    MPI_Comm comm = hypre_ParCSRMatrixComm(RAP);
-   hypre_CommPkg *comm_pkg_A = hypre_ParCSRMatrixCommPkg(A);
-   int num_recvs_A = hypre_CommPkgNumRecvs(comm_pkg_A);
-   int *recv_procs_A = hypre_CommPkgRecvProcs(comm_pkg_A);
-   int num_sends_A = hypre_CommPkgNumSends(comm_pkg_A);
-   int *send_procs_A = hypre_CommPkgSendProcs(comm_pkg_A);
+   hypre_ParCSRCommPkg *comm_pkg_A = hypre_ParCSRMatrixCommPkg(A);
+   int num_recvs_A = hypre_ParCSRCommPkgNumRecvs(comm_pkg_A);
+   int *recv_procs_A = hypre_ParCSRCommPkgRecvProcs(comm_pkg_A);
+   int num_sends_A = hypre_ParCSRCommPkgNumSends(comm_pkg_A);
+   int *send_procs_A = hypre_ParCSRCommPkgSendProcs(comm_pkg_A);
 
    int num_recvs_RAP;
    int *recv_procs_RAP;   
@@ -572,9 +572,9 @@ hypre_GenerateRAPCommPkg( hypre_ParCSRMatrix *RAP,
                         recv_vec_starts_RAP, RAP);
 
 /*   send_map_starts_RAP = 
-	hypre_CommPkgSendMapStarts(hypre_ParCSRMatrixCommPkg(RAP));
+	hypre_ParCSRCommPkgSendMapStarts(hypre_ParCSRMatrixCommPkg(RAP));
    send_map_elmts_RAP = 
-	hypre_CommPkgSendMapElmts(hypre_ParCSRMatrixCommPkg(RAP));
+	hypre_ParCSRCommPkgSendMapElmts(hypre_ParCSRMatrixCommPkg(RAP));
    printf (" my_id %d num_sends %d num_recvs %d \n", my_id,
 	num_sends_RAP, num_recvs_RAP);
    for (i=0; i < num_sends_RAP; i++)

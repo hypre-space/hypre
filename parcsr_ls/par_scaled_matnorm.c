@@ -21,8 +21,8 @@
 double
 hypre_ParScaledMatNorm( hypre_ParCSRMatrix *A)
 {
-   hypre_CommHandle	*comm_handle;
-   hypre_CommPkg	*comm_pkg = hypre_ParCSRMatrixCommPkg(A);
+   hypre_ParCSRCommHandle	*comm_handle;
+   hypre_ParCSRCommPkg	*comm_pkg = hypre_ParCSRMatrixCommPkg(A);
    MPI_Comm		 comm = hypre_ParCSRMatrixComm(A);
    hypre_CSRMatrix      *diag   = hypre_ParCSRMatrixDiag(A);
    int			*diag_i = hypre_CSRMatrixI(diag);
@@ -78,17 +78,17 @@ hypre_ParScaledMatNorm( hypre_ParCSRMatrix *A)
 	comm_pkg = hypre_ParCSRMatrixCommPkg(A); 
    }
 
-   num_sends = hypre_CommPkgNumSends(comm_pkg);
-   d_buf_data = hypre_CTAlloc(double, hypre_CommPkgSendMapStart(comm_pkg,
+   num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
+   d_buf_data = hypre_CTAlloc(double, hypre_ParCSRCommPkgSendMapStart(comm_pkg,
 						num_sends));
 
    index = 0;
    for (i = 0; i < num_sends; i++)
    {
-	start = hypre_CommPkgSendMapStart(comm_pkg, i);
-	for (j = start; j < hypre_CommPkgSendMapStart(comm_pkg, i+1); j++)
+	start = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
+	for (j = start; j < hypre_ParCSRCommPkgSendMapStart(comm_pkg, i+1); j++)
 		d_buf_data[index++] 
-		 = dis_data[hypre_CommPkgSendMapElmt(comm_pkg,j)];
+		 = dis_data[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j)];
    }
 	
    comm_handle = hypre_InitializeCommunication( 1, comm_pkg, d_buf_data, 

@@ -38,8 +38,8 @@ int  hypre_ParAMGRelax( hypre_ParCSRMatrix *A,
    int            *A_offd_i     = hypre_CSRMatrixI(A_offd);
    double         *A_offd_data  = hypre_CSRMatrixData(A_offd);
    int            *A_offd_j     = hypre_CSRMatrixJ(A_offd);
-   hypre_CommPkg  *comm_pkg = hypre_ParCSRMatrixCommPkg(A);
-   hypre_CommHandle *comm_handle;
+   hypre_ParCSRCommPkg  *comm_pkg = hypre_ParCSRMatrixCommPkg(A);
+   hypre_ParCSRCommHandle *comm_handle;
 
    int             n_global= hypre_ParCSRMatrixGlobalNumRows(A);
    int             n       = hypre_CSRMatrixNumRows(A_diag);
@@ -104,10 +104,10 @@ int  hypre_ParAMGRelax( hypre_ParCSRMatrix *A,
    {            
       case 0: /* Weighted Jacobi */
       {
-   	num_sends = hypre_CommPkgNumSends(comm_pkg);
+   	num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
 
    	v_buf_data = hypre_CTAlloc(double, 
-			hypre_CommPkgSendMapStart(comm_pkg, num_sends));
+			hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends));
 
 	Vext_data = hypre_CTAlloc(double,num_cols_offd);
         
@@ -120,10 +120,10 @@ int  hypre_ParAMGRelax( hypre_ParCSRMatrix *A,
    	index = 0;
    	for (i = 0; i < num_sends; i++)
    	{
-        	start = hypre_CommPkgSendMapStart(comm_pkg, i);
-        	for (j=start; j < hypre_CommPkgSendMapStart(comm_pkg, i+1); j++)
+        	start = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
+        	for (j=start; j < hypre_ParCSRCommPkgSendMapStart(comm_pkg, i+1); j++)
                 	v_buf_data[index++] 
-                 	= u_data[hypre_CommPkgSendMapElmt(comm_pkg,j)];
+                 	= u_data[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j)];
    	}
  
    	comm_handle = hypre_InitializeCommunication( 1, comm_pkg, v_buf_data, 
@@ -244,10 +244,10 @@ int  hypre_ParAMGRelax( hypre_ParCSRMatrix *A,
       case 3: /* Hybrid: Jacobi off-processor, 
                          Gauss-Seidel on-processor       */
       {
-   	num_sends = hypre_CommPkgNumSends(comm_pkg);
+   	num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
 
    	v_buf_data = hypre_CTAlloc(double, 
-			hypre_CommPkgSendMapStart(comm_pkg, num_sends));
+			hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends));
 
 	Vext_data = hypre_CTAlloc(double,num_cols_offd);
         
@@ -260,10 +260,10 @@ int  hypre_ParAMGRelax( hypre_ParCSRMatrix *A,
    	index = 0;
    	for (i = 0; i < num_sends; i++)
    	{
-        	start = hypre_CommPkgSendMapStart(comm_pkg, i);
-        	for (j=start; j < hypre_CommPkgSendMapStart(comm_pkg,i+1); j++)
+        	start = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
+        	for (j=start; j < hypre_ParCSRCommPkgSendMapStart(comm_pkg,i+1); j++)
                 	v_buf_data[index++] 
-                 	= u_data[hypre_CommPkgSendMapElmt(comm_pkg,j)];
+                 	= u_data[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j)];
    	}
  
    	comm_handle = hypre_InitializeCommunication( 1, comm_pkg, v_buf_data, 
@@ -344,11 +344,11 @@ int  hypre_ParAMGRelax( hypre_ParCSRMatrix *A,
 
       case 1: /* Gauss-Seidel VERY SLOW */
       {
-   	num_sends = hypre_CommPkgNumSends(comm_pkg);
-   	num_recvs = hypre_CommPkgNumRecvs(comm_pkg);
+   	num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
+   	num_recvs = hypre_ParCSRCommPkgNumRecvs(comm_pkg);
 
    	v_buf_data = hypre_CTAlloc(double, 
-			hypre_CommPkgSendMapStart(comm_pkg, num_sends));
+			hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends));
 
 	Vext_data = hypre_CTAlloc(double,num_cols_offd);
         
@@ -380,13 +380,13 @@ int  hypre_ParAMGRelax( hypre_ParCSRMatrix *A,
 	{
    	  for (i = 0; i < num_sends; i++)
    	  {
-            ip = hypre_CommPkgSendProc(comm_pkg, i);
+            ip = hypre_ParCSRCommPkgSendProc(comm_pkg, i);
 	    if (ip == p)
 	    {
-               vec_start = hypre_CommPkgSendMapStart(comm_pkg, i);
-	       vec_len = hypre_CommPkgSendMapStart(comm_pkg, i+1)-vec_start;
+               vec_start = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
+	       vec_len = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i+1)-vec_start;
                for (j=vec_start; j < vec_start+vec_len; j++)
-                  v_buf_data[j] = u_data[hypre_CommPkgSendMapElmt(comm_pkg,j)];
+                  v_buf_data[j] = u_data[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j)];
 	       MPI_Isend(&v_buf_data[vec_start], vec_len, MPI_DOUBLE,
                         ip, 0, comm, &requests[jr++]);
 	    }
@@ -398,9 +398,9 @@ int  hypre_ParAMGRelax( hypre_ParCSRMatrix *A,
         {
           for (i = 0; i < num_recvs; i++)
           {
-             ip = hypre_CommPkgRecvProc(comm_pkg, i);
-             vec_start = hypre_CommPkgRecvVecStart(comm_pkg,i);
-             vec_len = hypre_CommPkgRecvVecStart(comm_pkg,i+1)-vec_start;
+             ip = hypre_ParCSRCommPkgRecvProc(comm_pkg, i);
+             vec_start = hypre_ParCSRCommPkgRecvVecStart(comm_pkg,i);
+             vec_len = hypre_ParCSRCommPkgRecvVecStart(comm_pkg,i+1)-vec_start;
              MPI_Irecv(&Vext_data[vec_start], vec_len, MPI_DOUBLE,
                         ip, 0, comm, &requests[jr++]);
 	  }
@@ -477,11 +477,11 @@ int  hypre_ParAMGRelax( hypre_ParCSRMatrix *A,
       case 4: /* Gauss-Seidel: relax interior points in parallel, boundary
 				sequentially */
       {
-   	num_sends = hypre_CommPkgNumSends(comm_pkg);
-   	num_recvs = hypre_CommPkgNumRecvs(comm_pkg);
+   	num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
+   	num_recvs = hypre_ParCSRCommPkgNumRecvs(comm_pkg);
 
    	v_buf_data = hypre_CTAlloc(double, 
-			hypre_CommPkgSendMapStart(comm_pkg, num_sends));
+			hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends));
 
 	Vext_data = hypre_CTAlloc(double,num_cols_offd);
         
@@ -559,13 +559,13 @@ int  hypre_ParAMGRelax( hypre_ParCSRMatrix *A,
 	{
    	  for (i = 0; i < num_sends; i++)
    	  {
-            ip = hypre_CommPkgSendProc(comm_pkg, i);
+            ip = hypre_ParCSRCommPkgSendProc(comm_pkg, i);
 	    if (ip == p)
 	    {
-               vec_start = hypre_CommPkgSendMapStart(comm_pkg, i);
-	       vec_len = hypre_CommPkgSendMapStart(comm_pkg, i+1)-vec_start;
+               vec_start = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
+	       vec_len = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i+1)-vec_start;
                for (j=vec_start; j < vec_start+vec_len; j++)
-                  v_buf_data[j] = u_data[hypre_CommPkgSendMapElmt(comm_pkg,j)];
+                  v_buf_data[j] = u_data[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j)];
 	       MPI_Isend(&v_buf_data[vec_start], vec_len, MPI_DOUBLE,
                         ip, 0, comm, &requests[jr++]);
 	    }
@@ -577,9 +577,9 @@ int  hypre_ParAMGRelax( hypre_ParCSRMatrix *A,
         {
           for (i = 0; i < num_recvs; i++)
           {
-             ip = hypre_CommPkgRecvProc(comm_pkg, i);
-             vec_start = hypre_CommPkgRecvVecStart(comm_pkg,i);
-             vec_len = hypre_CommPkgRecvVecStart(comm_pkg,i+1)-vec_start;
+             ip = hypre_ParCSRCommPkgRecvProc(comm_pkg, i);
+             vec_start = hypre_ParCSRCommPkgRecvVecStart(comm_pkg,i);
+             vec_len = hypre_ParCSRCommPkgRecvVecStart(comm_pkg,i+1)-vec_start;
              MPI_Irecv(&Vext_data[vec_start], vec_len, MPI_DOUBLE,
                         ip, 0, comm, &requests[jr++]);
 	  }

@@ -25,8 +25,8 @@ hypre_ParCSRMatrixMatvec( double           alpha,
                  double           beta,
                  hypre_ParVector    *y     )
 {
-   hypre_CommHandle	*comm_handle;
-   hypre_CommPkg	*comm_pkg = hypre_ParCSRMatrixCommPkg(A);
+   hypre_ParCSRCommHandle	*comm_handle;
+   hypre_ParCSRCommPkg	*comm_pkg = hypre_ParCSRMatrixCommPkg(A);
    hypre_CSRMatrix      *diag   = hypre_ParCSRMatrixDiag(A);
    hypre_CSRMatrix      *offd   = hypre_ParCSRMatrixOffd(A);
    hypre_Vector         *x_local  = hypre_ParVectorLocalVector(x);   
@@ -77,17 +77,17 @@ hypre_ParCSRMatrixMatvec( double           alpha,
 	comm_pkg = hypre_ParCSRMatrixCommPkg(A); 
    }
 
-   num_sends = hypre_CommPkgNumSends(comm_pkg);
-   x_buf_data = hypre_CTAlloc(double, hypre_CommPkgSendMapStart(comm_pkg,
+   num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
+   x_buf_data = hypre_CTAlloc(double, hypre_ParCSRCommPkgSendMapStart(comm_pkg,
 						num_sends));
 
    index = 0;
    for (i = 0; i < num_sends; i++)
    {
-	start = hypre_CommPkgSendMapStart(comm_pkg, i);
-	for (j = start; j < hypre_CommPkgSendMapStart(comm_pkg, i+1); j++)
+	start = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
+	for (j = start; j < hypre_ParCSRCommPkgSendMapStart(comm_pkg, i+1); j++)
 		x_buf_data[index++] 
-		 = x_local_data[hypre_CommPkgSendMapElmt(comm_pkg,j)];
+		 = x_local_data[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j)];
    }
 	
    comm_handle = hypre_InitializeCommunication( 1, comm_pkg, x_buf_data, 
@@ -119,8 +119,8 @@ hypre_ParCSRMatrixMatvecT( double           alpha,
                   double           beta,
                   hypre_ParVector    *y     )
 {
-   hypre_CommHandle	*comm_handle;
-   hypre_CommPkg	*comm_pkg = hypre_ParCSRMatrixCommPkg(A);
+   hypre_ParCSRCommHandle	*comm_handle;
+   hypre_ParCSRCommPkg	*comm_pkg = hypre_ParCSRMatrixCommPkg(A);
    hypre_CSRMatrix *diag = hypre_ParCSRMatrixDiag(A);
    hypre_CSRMatrix *offd = hypre_ParCSRMatrixOffd(A);
    hypre_Vector *x_local = hypre_ParVectorLocalVector(x);
@@ -174,8 +174,8 @@ hypre_ParCSRMatrixMatvecT( double           alpha,
 	comm_pkg = hypre_ParCSRMatrixCommPkg(A); 
    }
 
-   num_sends = hypre_CommPkgNumSends(comm_pkg);
-   y_buf_data = hypre_CTAlloc(double, hypre_CommPkgSendMapStart(comm_pkg,
+   num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
+   y_buf_data = hypre_CTAlloc(double, hypre_ParCSRCommPkgSendMapStart(comm_pkg,
 						num_sends));
    y_tmp_data = hypre_VectorData(y_tmp);
    y_local_data = hypre_VectorData(y_local);
@@ -192,9 +192,9 @@ hypre_ParCSRMatrixMatvecT( double           alpha,
    index = 0;
    for (i = 0; i < num_sends; i++)
    {
-	start = hypre_CommPkgSendMapStart(comm_pkg, i);
-	for (j = start; j < hypre_CommPkgSendMapStart(comm_pkg, i+1); j++)
-		y_local_data[hypre_CommPkgSendMapElmt(comm_pkg,j)]
+	start = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
+	for (j = start; j < hypre_ParCSRCommPkgSendMapStart(comm_pkg, i+1); j++)
+		y_local_data[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j)]
 			+= y_buf_data[index++];
    }
 	
