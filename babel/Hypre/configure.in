@@ -1,0 +1,45 @@
+dnl Process this file with autoconf to produce a configure script.
+dnl based on Babel 0.3.0 configure.in
+
+AC_INIT(COPYRIGHT)
+AM_INIT_AUTOMAKE(babel, 0.3.0)
+
+AC_ARG_PROGRAM
+n
+dnl Checks for programs.
+
+AC_PROG_CC
+AC_PROG_INSTALL
+AC_PROG_LN_S
+AC_PROG_RANLIB
+AC_CHECK_PROGS(PERL, perl /bin/perl /usr/bin/perl /usr/local/bin/perl)
+
+dnl Checks for libraries.
+
+dnl Checks for header files.
+AC_HEADER_STDC
+
+dnl Checks for typedefs, structures, and compiler characteristics.
+AC_C_CONST
+AC_STRUCT_TM
+
+dnl Checks for library functions.
+
+AC_SUBST(PACKAGE)
+AC_SUBST(VERSION)
+
+babeldir="$HOME/babel-0.3.0"
+AC_SUBST(babeldir)
+
+dnl Export this variable names
+builddir=`pwd`
+AC_SUBST(builddir)
+
+dnl
+dnl Generate the output files.  Find all Makefile.in and associated
+dnl subdirectories.  Copy other files as needed.
+dnl
+
+AC_OUTPUT(Makefile)
+
+
