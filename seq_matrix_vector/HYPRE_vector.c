@@ -56,3 +56,12 @@ HYPRE_PrintVector( HYPRE_Vector  vector,
                       file_name ) );
 }
 
+/*--------------------------------------------------------------------------
+ * HYPRE_ReadVector
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Vector
+HYPRE_ReadVector( char         *file_name )
+{
+   return ( (HYPRE_Vector) hypre_ReadVector( file_name ) );
+}

@@ -194,6 +194,7 @@ typedef struct
 HYPRE_CSRMatrix HYPRE_CreateCSRMatrix P((int num_rows , int num_cols , int *row_sizes ));
 int HYPRE_DestroyCSRMatrix P((HYPRE_CSRMatrix matrix ));
 int HYPRE_InitializeCSRMatrix P((HYPRE_CSRMatrix matrix ));
+HYPRE_CSRMatrix HYPRE_ReadCSRMatrix P((char *file_name ));
 void HYPRE_PrintCSRMatrix P((HYPRE_CSRMatrix matrix , char *file_name ));
 
 /* HYPRE_mapped_matrix.c */
@@ -224,6 +225,7 @@ HYPRE_Vector HYPRE_CreateVector P((int size ));
 int HYPRE_DestroyVector P((HYPRE_Vector vector ));
 int HYPRE_InitializeVector P((HYPRE_Vector vector ));
 int HYPRE_PrintVector P((HYPRE_Vector vector , char *file_name ));
+HYPRE_Vector HYPRE_ReadVector P((char *file_name ));
 
 /* csr_matop.c */
 hypre_CSRMatrix *hypre_Matadd P((hypre_CSRMatrix *A , hypre_CSRMatrix *B ));

@@ -61,6 +61,16 @@ HYPRE_InitializeCSRMatrix( HYPRE_CSRMatrix matrix )
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_ReadCSRMatrix
+ *--------------------------------------------------------------------------*/
+
+HYPRE_CSRMatrix 
+HYPRE_ReadCSRMatrix( char            *file_name )
+{
+   return ( (HYPRE_CSRMatrix) hypre_ReadCSRMatrix( file_name ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_PrintCSRMatrix
  *--------------------------------------------------------------------------*/
 
