@@ -209,8 +209,8 @@ c-----------------------------------------------------------------------
       if (nz .gt. 1) values(1) = values(1) + 2d0*cz
 
 c Generate a Dirichlet Laplacian
-      call hypre_GenerateLaplacian(MPI_COMM_WORLD, nx, ny, nz,
-     &                             Px, Py, Pz, p, q, r, values, A, ierr)
+      call GenerateLaplacian(MPI_COMM_WORLD, nx, ny, nz,
+     &                       Px, Py, Pz, p, q, r, values, A, ierr)
 
       call HYPRE_PrintParCSRMatrix(A, "driver.out.A", ierr)
 
