@@ -271,6 +271,20 @@ hypre_PCGSolve( void *pcg_vdata,
    }
    eps = (tol*tol)*bi_prod;
 
+   /* Check to see if the rhs vector b is zero */
+   if (bi_prod == 0.0)
+   {
+      /* Set x equal to zero and return */
+      hypre_PCGCopyVector(b, x);
+      if (logging > 0)
+      {
+         norms[0]     = 0.0;
+         rel_norms[i] = 0.0;
+      }
+      ierr = 0;
+      return ierr;
+   }
+
    /* r = b - Ax */
    hypre_PCGCopyVector(b, r);
    hypre_PCGMatvec(matvec_data, -1.0, A, x, 1.0, r);
