@@ -859,11 +859,8 @@ main( int   argc,
       {
          /* use ParaSails preconditioner */
 
-         double thresh;
-
 	 HYPRE_ParCSRParaSailsCreate(MPI_COMM_WORLD, &pcg_precond);
-	 HYPRE_ParCSRParaSailsSelectThresh(pcg_precond, &thresh);
-	 HYPRE_ParCSRParaSailsSetParams(pcg_precond, thresh, 1);
+	 HYPRE_ParCSRParaSailsSetParams(pcg_precond, 0.1, 1);
 
          HYPRE_ParCSRPCGSetPrecond(pcg_solver,
                                    HYPRE_ParCSRParaSailsSolve,
