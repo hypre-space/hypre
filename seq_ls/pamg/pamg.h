@@ -220,6 +220,9 @@ int update_entry( int weight , int *weight_max , int *previous , int *next , int
 int remove_entry( int weight , int *weight_max , int *previous , int *next , int *first , int *last , int head , int tail , int i );
 int move_entry( int weight , int *weight_max , int *previous , int *next , int *first , int *last , int head , int tail , int i );
 
+/* stencil_matrix.c */
+hypre_CSRMatrix *hypre_GenerateStencilMatrix( int nx, int ny, int nz, char *infile );
+
 /* trunc.c */
 int hypre_AMGTruncation( hypre_CSRMatrix *A , double trunc_factor , int max_elmts );
 void swap3( int *v , double *w , int i , int j );

@@ -131,6 +131,12 @@ main( int   argc,
          build_matrix_type      = 1;
          build_matrix_arg_index = arg_index;
       }
+      else if ( strcmp(argv[arg_index], "-stencil") == 0 )
+      {
+         arg_index++;
+         build_matrix_type      = 2;
+         build_matrix_arg_index = arg_index;
+      }
       else if ( strcmp(argv[arg_index], "-9pt") == 0 )
       {
          arg_index++;
@@ -255,6 +261,7 @@ main( int   argc,
       printf("  -fromfile <filename>   : build matrix from file\n");
       printf("\n");
       printf("  -laplacian (default)   : build laplacian 7pt operator\n");
+      printf("  -stencil <infile>      : build general stencil operator\n");
       printf("  -9pt                   : build laplacian 9pt operator\n");
       printf("  -27pt                  : build laplacian 27pt operator\n");
       printf("  -difconv               : build 7pt diffusion-convection\n");
@@ -277,10 +284,10 @@ main( int   argc,
       printf("  -Pmx <max_elmts>       : defines max coeffs per row in interpolation\n");
       printf("  -Ptr <truncfactor>     : defines interpolation truncation factor\n");
       printf("  -maxlev <ml>           : defines max. no. of levels\n");
-      printf("    -n <nx> <ny> <nz>    : problem size per processor\n");
-      printf("    -P <Px> <Py> <Pz>    : processor topology\n");
-      printf("    -c <cx> <cy> <cz>    : diffusion coefficients\n");
-      printf("    -a <ax> <ay> <az>    : convection coefficients\n");
+      printf("  -n <nx> <ny> <nz>      : problem size per processor\n");
+      printf("  -P <Px> <Py> <Pz>      : processor topology\n");
+      printf("  -c <cx> <cy> <cz>      : diffusion coefficients\n");
+      printf("  -a <ax> <ay> <az>      : convection coefficients\n");
       printf("\n");
       printf("  -solver <ID>           : solver ID\n");
       printf("      0=AMG, 1=AMG-CG, 2=CG, 3=AMG-GMRES, 4=GMRES\n");
@@ -313,6 +320,10 @@ main( int   argc,
    else if ( build_matrix_type == 1 )
    {
       BuildLaplacian(argc, argv, build_matrix_arg_index, &A);
+   }
+   else if ( build_matrix_type == 2 )
+   {
+      BuildStencilMatrix(argc, argv, build_matrix_arg_index, &A);
    }
    else if ( build_matrix_type == 3 )
    {
@@ -529,6 +540,7 @@ main( int   argc,
       hypre_BeginTiming(time_index); */
 
       amg_solver = HYPRE_AMGInitialize();
+      HYPRE_AMGSetMaxIter(amg_solver, 20);
       HYPRE_AMGSetCoarsenType(amg_solver, coarsen_type);
       HYPRE_AMGSetStrongThreshold(amg_solver, strong_threshold);
       HYPRE_AMGSetATruncFactor(amg_solver, A_trunc_factor);
@@ -997,6 +1009,68 @@ BuildLaplacian( int               argc,
 #if 0
    *global_part_ptr = global_part;
 #endif
+
+   return (0);
+}
+
+/*----------------------------------------------------------------------
+ * Build matrix with general stencil.
+ *----------------------------------------------------------------------*/
+
+int
+BuildStencilMatrix( int               argc,
+                    char             *argv[],
+                    int               arg_index,
+                    hypre_CSRMatrix **A_ptr )
+{
+   int                 nx, ny, nz;
+   char               *filename;
+   hypre_CSRMatrix    *A;
+
+   /*-----------------------------------------------------------
+    * Set defaults
+    *-----------------------------------------------------------*/
+ 
+   nx = 10;
+   ny = 10;
+   nz = 10;
+
+   /*-----------------------------------------------------------
+    * Parse command line
+    *-----------------------------------------------------------*/
+
+   filename = argv[arg_index];
+
+   arg_index = 0; 
+   while (arg_index < argc)
+   {
+      if ( strcmp(argv[arg_index], "-n") == 0 )
+      {
+         arg_index++;
+         nx = atoi(argv[arg_index++]);
+         ny = atoi(argv[arg_index++]);
+         nz = atoi(argv[arg_index++]);
+      }
+      else
+      {
+         arg_index++;
+      }
+   }
+
+   /*-----------------------------------------------------------
+    * Print driver parameters
+    *-----------------------------------------------------------*/
+ 
+   printf("  Stencil Matrix:\n");
+   printf("    (nx, ny, nz) = (%d, %d, %d)\n", nx, ny, nz);
+
+   /*-----------------------------------------------------------
+    * Generate the matrix 
+    *-----------------------------------------------------------*/
+ 
+   A = hypre_GenerateStencilMatrix(nx, ny, nz, filename);
+
+   *A_ptr = A;
 
    return (0);
 }

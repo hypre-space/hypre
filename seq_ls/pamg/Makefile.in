@@ -79,6 +79,7 @@ FILES =\
  relax.c\
  schwarz.c\
  scaled_matnorm.c\
+ stencil_matrix.c\
  trunc.c\
  Atrunc.c\
  HYPRE_amg.c\
