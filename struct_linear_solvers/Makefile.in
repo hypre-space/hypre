@@ -41,8 +41,7 @@ LFLAGS =\
  -L../utilities\
  -lHYPRE_ls\
  -lHYPRE_mv\
- -lHYPRE_timing\
- -lHYPRE_memory\
+ -lHYPRE_utilities\
  ${MPILIBFLAGS} ${LIBFLAGS} ${LDLIBFLAGS}
 
 
