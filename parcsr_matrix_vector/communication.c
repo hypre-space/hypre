@@ -198,14 +198,14 @@ hypre_FinalizeCommunication( hypre_CommHandle *comm_handle )
 }
 
 /* ----------------------------------------------------------------------
- * hypre_GenerateMatvecCommunicationInfo
+ * hypre_MatvecCommPkgCreate
  * generates the comm_pkg for A 
  * if no row and/or column partitioning is given, the routine determines
  * them with MPE_Decomp1d 
  * ---------------------------------------------------------------------*/
 
 int
-hypre_GenerateMatvecCommunicationInfo ( hypre_ParCSRMatrix *A)
+hypre_MatvecCommPkgCreate ( hypre_ParCSRMatrix *A)
 {
    hypre_CommPkg	*comm_pkg;
    
@@ -395,7 +395,7 @@ hypre_GenerateMatvecCommunicationInfo ( hypre_ParCSRMatrix *A)
 }
 
 int
-hypre_DestroyMatvecCommPkg(hypre_CommPkg *comm_pkg)
+hypre_MatvecCommPkgDestroy(hypre_CommPkg *comm_pkg)
 {
    int ierr = 0;
 

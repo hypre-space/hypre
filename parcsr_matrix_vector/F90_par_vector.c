@@ -16,7 +16,7 @@
 #include "fortran.h"
 
 /*--------------------------------------------------------------------------
- * hypre_CreateParVector
+ * hypre_ParVectorCreate
  *--------------------------------------------------------------------------*/
 
 void 
@@ -26,14 +26,14 @@ hypre_F90_IFACE(hypre_createparvector)( int      *comm,
                                         long int *vector,
                                         int      *ierr          )
 {
-   *vector = (long int) ( hypre_CreateParVector ( (MPI_Comm) *comm,
+   *vector = (long int) ( hypre_ParVectorCreate ( (MPI_Comm) *comm,
                                                   (int)      *global_size,
                                                   (int *)    *partitioning ) );
    *ierr = 0;
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SetParVectorDataOwner
+ * hypre_ParVectorSetDataOwner
  *--------------------------------------------------------------------------*/
 
 void 
@@ -41,7 +41,7 @@ hypre_F90_IFACE(hypre_setparvectordataowner)( long int *vector,
                                               int      *owns_data,
                                               int      *ierr       )
 {
-   *ierr = (int) ( hypre_SetParVectorDataOwner ( (hypre_ParVector *) *vector,
+   *ierr = (int) ( hypre_ParVectorSetDataOwner ( (hypre_ParVector *) *vector,
                                                  (int)               *owns_data ) );
 }
 
@@ -54,7 +54,7 @@ hypre_F90_IFACE(hypre_setparvectorpartitioningo)( long int *vector,
                                                   int      *owns_partitioning,
                                                   int      *ierr    )
 {
-   *ierr = (int) ( hypre_SetParVectorPartitioningOwner
+   *ierr = (int) ( hypre_ParVectorSetPartitioningOwner
                          ( (hypre_ParVector *) *vector,
                            (int)               *owns_partitioning ) );
 }
@@ -68,13 +68,13 @@ hypre_F90_IFACE(hypre_setparvectorconstantvalue)( long int *vector,
                                                   double   *value,
                                                   int      *ierr    )
 {
-   *ierr = (int) ( hypre_SetParVectorConstantValues
+   *ierr = (int) ( hypre_ParVectorSetConstantValues
                       ( (hypre_ParVector *) *vector,
                         (double)            *value   ) );
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SetParVectorRandomValues 
+ * hypre_ParVectorSetRandomValues 
  *--------------------------------------------------------------------------*/
 
 void 
@@ -82,12 +82,12 @@ hypre_F90_IFACE(hypre_setparvectorrandomvalues)( long int *vector,
                                                  int      *seed,
                                                  int      *ierr    )
 {
-   *ierr = (int) ( hypre_SetParVectorRandomValues ( (hypre_ParVector *) *vector,
+   *ierr = (int) ( hypre_ParVectorSetRandomValues ( (hypre_ParVector *) *vector,
                                                     (int)               *seed    ) );
 }
 
 /*--------------------------------------------------------------------------
- * hypre_CopyParVector 
+ * hypre_ParVectorCopy 
  *--------------------------------------------------------------------------*/
 
 void 
@@ -95,12 +95,12 @@ hypre_F90_IFACE(hypre_copyparvector)( long int *x,
                                       long int *y,
                                       int      *ierr )
 {
-   *ierr = (int) ( hypre_CopyParVector ( (hypre_ParVector *) *x,
+   *ierr = (int) ( hypre_ParVectorCopy ( (hypre_ParVector *) *x,
                                          (hypre_ParVector *) *y  ) );
 }
 
 /*--------------------------------------------------------------------------
- * hypre_ScaleParVector 
+ * hypre_ParVectorScale 
  *--------------------------------------------------------------------------*/
 
 void 
@@ -108,12 +108,12 @@ hypre_F90_IFACE(hypre_scaleparvector)( long int *vector,
                                        double   *scale,
                                        int      *ierr    )
 {
-   *ierr = (int) ( hypre_ScaleParVector ( (double)            *scale,
+   *ierr = (int) ( hypre_ParVectorScale ( (double)            *scale,
                                           (hypre_ParVector *) *vector ) );
 }
 
 /*--------------------------------------------------------------------------
- * hypre_ParAxpy 
+ * hypre_ParVectorAxpy 
  *--------------------------------------------------------------------------*/
 
 void 
@@ -122,13 +122,13 @@ hypre_F90_IFACE(hypre_paraxpy)( double   *a,
                                 long int *y,
                                 int      *ierr )
 {
-   *ierr = (int) ( hypre_ParAxpy ( (double)            *a,
+   *ierr = (int) ( hypre_ParVectorAxpy ( (double)            *a,
                                    (hypre_ParVector *) *x,
                                    (hypre_ParVector *) *y  ) );
 }
 
 /*--------------------------------------------------------------------------
- * hypre_ParInnerProd
+ * hypre_ParVectorInnerProd
  *--------------------------------------------------------------------------*/
 
 void 
@@ -137,7 +137,7 @@ hypre_F90_IFACE(hypre_parinnerprod)( long int *x,
                                      double   *inner_prod, 
                                      int      *ierr           )
 {
-   *inner_prod = (double) ( hypre_ParInnerProd ( (hypre_ParVector *) *x,
+   *inner_prod = (double) ( hypre_ParVectorInnerProd ( (hypre_ParVector *) *x,
                                                  (hypre_ParVector *) *y  ) );
 
    *ierr = 0;

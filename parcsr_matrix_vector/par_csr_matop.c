@@ -122,10 +122,10 @@ hypre_ParCSRMatrix *hypre_ParMatmul( hypre_ParCSRMatrix  *A,
     	*--------------------------------------------------------------------*/
    	if (!hypre_ParCSRMatrixCommPkg(A))
    	{
-        	hypre_GenerateMatvecCommunicationInfo(A);
+        	hypre_MatvecCommPkgCreate(A);
    	}
 
-   	B_ext = hypre_ExtractBExt(B,A,1);
+   	B_ext = hypre_ParCSRMatrixExtractBExt(B,A,1);
    	B_ext_data = hypre_CSRMatrixData(B_ext);
    	B_ext_i    = hypre_CSRMatrixI(B_ext);
    	B_ext_j    = hypre_CSRMatrixJ(B_ext);
@@ -482,12 +482,12 @@ hypre_ParCSRMatrix *hypre_ParMatmul( hypre_ParCSRMatrix  *A,
    for (i=0; i < C_offd_size; i++)
 	C_offd_j[i] = B_marker[C_offd_j[i]];
 
-   C = hypre_CreateParCSRMatrix(comm, n_rows_A, n_cols_B, row_starts_A,
+   C = hypre_ParCSRMatrixCreate(comm, n_rows_A, n_cols_B, row_starts_A,
 	col_starts_B, num_cols_offd_C, C_diag_size, C_offd_size);
 
 /* Note that C does not own the partitionings */
-   hypre_SetParCSRMatrixRowStartsOwner(C,0);
-   hypre_SetParCSRMatrixColStartsOwner(C,0);
+   hypre_ParCSRMatrixSetRowStartsOwner(C,0);
+   hypre_ParCSRMatrixSetColStartsOwner(C,0);
 
    C_diag = hypre_ParCSRMatrixDiag(C);
    hypre_CSRMatrixData(C_diag) = C_diag_data; 
@@ -511,7 +511,7 @@ hypre_ParCSRMatrix *hypre_ParMatmul( hypre_ParCSRMatrix  *A,
     *  Free B_ext and marker array.
     *-----------------------------------------------------------------------*/
 
-   if (num_cols_offd_A) hypre_DestroyCSRMatrix(B_ext);
+   if (num_cols_offd_A) hypre_CSRMatrixDestroy(B_ext);
    hypre_TFree(B_marker);   
 
    return C;
@@ -519,13 +519,13 @@ hypre_ParCSRMatrix *hypre_ParMatmul( hypre_ParCSRMatrix  *A,
 }            
 
 /*--------------------------------------------------------------------------
- * hypre_ExtractBExt : extracts rows from B which are located on other
+ * hypre_ParCSRMatrixExtractBExt : extracts rows from B which are located on other
  * processors and needed for multiplication with A locally. The rows
  * are returned as CSRMatrix.
  *--------------------------------------------------------------------------*/
 
 hypre_CSRMatrix * 
-hypre_ExtractBExt( hypre_ParCSRMatrix *B, hypre_ParCSRMatrix *A, int data)
+hypre_ParCSRMatrixExtractBExt( hypre_ParCSRMatrix *B, hypre_ParCSRMatrix *A, int data)
 {
    MPI_Comm comm = hypre_ParCSRMatrixComm(B);
    int first_col_diag = hypre_ParCSRMatrixFirstColDiag(B);
@@ -680,7 +680,7 @@ hypre_ExtractBExt( hypre_ParCSRMatrix *B, hypre_ParCSRMatrix *A, int data)
 
    num_nonzeros = B_ext_i[num_rows_B_ext];
 
-   B_ext = hypre_CreateCSRMatrix(num_rows_B_ext,num_cols_B,num_nonzeros);
+   B_ext = hypre_CSRMatrixCreate(num_rows_B_ext,num_cols_B,num_nonzeros);
    B_ext_j = hypre_CTAlloc(int, num_nonzeros);
    if (data) B_ext_data = hypre_CTAlloc(double, num_nonzeros);
 

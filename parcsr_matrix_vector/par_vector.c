@@ -15,11 +15,11 @@
 #include "headers.h"
 
 /*--------------------------------------------------------------------------
- * hypre_CreateParVector
+ * hypre_ParVectorCreate
  *--------------------------------------------------------------------------*/
 
 hypre_ParVector *
-hypre_CreateParVector(  MPI_Comm comm,
+hypre_ParVectorCreate(  MPI_Comm comm,
 			int global_size, 
 			int *partitioning)
 {
@@ -40,7 +40,7 @@ hypre_CreateParVector(  MPI_Comm comm,
    hypre_ParVectorFirstIndex(vector) = partitioning[my_id];
    hypre_ParVectorPartitioning(vector) = partitioning;
    hypre_ParVectorLocalVector(vector) = 
-		hypre_CreateVector(partitioning[my_id+1]-partitioning[my_id]);
+		hypre_VectorCreate(partitioning[my_id+1]-partitioning[my_id]);
 
    /* set defaults */
    hypre_ParVectorOwnsData(vector) = 1;
@@ -50,11 +50,11 @@ hypre_CreateParVector(  MPI_Comm comm,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_DestroyParVector
+ * hypre_ParVectorDestroy
  *--------------------------------------------------------------------------*/
 
 int 
-hypre_DestroyParVector( hypre_ParVector *vector )
+hypre_ParVectorDestroy( hypre_ParVector *vector )
 {
    int  ierr=0;
 
@@ -62,7 +62,7 @@ hypre_DestroyParVector( hypre_ParVector *vector )
    {
       if ( hypre_ParVectorOwnsData(vector) )
       {
-         hypre_DestroyVector(hypre_ParVectorLocalVector(vector));
+         hypre_VectorDestroy(hypre_ParVectorLocalVector(vector));
       }
       if ( hypre_ParVectorOwnsPartitioning(vector) )
       {
@@ -75,25 +75,25 @@ hypre_DestroyParVector( hypre_ParVector *vector )
 }
 
 /*--------------------------------------------------------------------------
- * hypre_InitializeParVector
+ * hypre_ParVectorInitialize
  *--------------------------------------------------------------------------*/
 
 int 
-hypre_InitializeParVector( hypre_ParVector *vector )
+hypre_ParVectorInitialize( hypre_ParVector *vector )
 {
    int  ierr = 0;
 
-   ierr = hypre_InitializeVector(hypre_ParVectorLocalVector(vector));
+   ierr = hypre_VectorInitialize(hypre_ParVectorLocalVector(vector));
 
    return ierr;
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SetParVectorDataOwner
+ * hypre_ParVectorSetDataOwner
  *--------------------------------------------------------------------------*/
 
 int 
-hypre_SetParVectorDataOwner( hypre_ParVector *vector,
+hypre_ParVectorSetDataOwner( hypre_ParVector *vector,
                              int           owns_data   )
 {
    int    ierr=0;
@@ -104,11 +104,11 @@ hypre_SetParVectorDataOwner( hypre_ParVector *vector,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SetParVectorPartitioningOwner
+ * hypre_ParVectorSetPartitioningOwner
  *--------------------------------------------------------------------------*/
 
 int 
-hypre_SetParVectorPartitioningOwner( hypre_ParVector *vector,
+hypre_ParVectorSetPartitioningOwner( hypre_ParVector *vector,
                              	     int owns_partitioning)
 {
    int    ierr=0;
@@ -119,11 +119,11 @@ hypre_SetParVectorPartitioningOwner( hypre_ParVector *vector,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_ReadParVector
+ * hypre_ParVectorRead
  *--------------------------------------------------------------------------*/
 
 hypre_ParVector
-*hypre_ReadParVector( MPI_Comm comm, char *file_name )
+*hypre_ParVectorRead( MPI_Comm comm, char *file_name )
 {
    char 	new_file_name[80];
    hypre_ParVector *par_vector;
@@ -156,17 +156,17 @@ hypre_ParVector
    hypre_ParVectorOwnsPartitioning(par_vector) = 1;
 
    sprintf(new_file_name,"%s.%d",file_name,my_id); 
-   hypre_ParVectorLocalVector(par_vector) = hypre_ReadVector(new_file_name);
+   hypre_ParVectorLocalVector(par_vector) = hypre_VectorRead(new_file_name);
 
    return par_vector;
 }
 
 /*--------------------------------------------------------------------------
- * hypre_PrintParVector
+ * hypre_ParVectorPrint
  *--------------------------------------------------------------------------*/
 
 int
-hypre_PrintParVector( hypre_ParVector  *vector, 
+hypre_ParVectorPrint( hypre_ParVector  *vector, 
                       char             *file_name )
 {
    char 	new_file_name[80];
@@ -181,7 +181,7 @@ hypre_PrintParVector( hypre_ParVector  *vector,
    MPI_Comm_rank(comm,&my_id); 
    MPI_Comm_size(comm,&num_procs); 
    sprintf(new_file_name,"%s.%d",file_name,my_id); 
-   ierr = hypre_PrintVector(local_vector,new_file_name);
+   ierr = hypre_VectorPrint(local_vector,new_file_name);
    sprintf(new_file_name,"%s.INFO.%d",file_name,my_id); 
    fp = fopen(new_file_name, "w");
    fprintf(fp, "%d\n", global_size);
@@ -192,24 +192,24 @@ hypre_PrintParVector( hypre_ParVector  *vector,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SetParVectorConstantValues
+ * hypre_ParVectorSetConstantValues
  *--------------------------------------------------------------------------*/
 
 int
-hypre_SetParVectorConstantValues( hypre_ParVector *v,
+hypre_ParVectorSetConstantValues( hypre_ParVector *v,
                                   double        value )
 {
    hypre_Vector *v_local = hypre_ParVectorLocalVector(v);
            
-   return hypre_SetVectorConstantValues(v_local,value);
+   return hypre_VectorSetConstantValues(v_local,value);
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SetParVectorRandomValues
+ * hypre_ParVectorSetRandomValues
  *--------------------------------------------------------------------------*/
 
 int
-hypre_SetParVectorRandomValues( hypre_ParVector *v,
+hypre_ParVectorSetRandomValues( hypre_ParVector *v,
                                 int            seed )
 {
    int my_id;
@@ -220,56 +220,56 @@ hypre_SetParVectorRandomValues( hypre_ParVector *v,
 
    seed *= (my_id+1);
            
-   return hypre_SetVectorRandomValues(v_local,seed);
+   return hypre_VectorSetRandomValues(v_local,seed);
 }
 
 /*--------------------------------------------------------------------------
- * hypre_CopyParVector
+ * hypre_ParVectorCopy
  *--------------------------------------------------------------------------*/
 
 int
-hypre_CopyParVector( hypre_ParVector *x,
+hypre_ParVectorCopy( hypre_ParVector *x,
                      hypre_ParVector *y )
 {
    hypre_Vector *x_local = hypre_ParVectorLocalVector(x);
    hypre_Vector *y_local = hypre_ParVectorLocalVector(y);
-   return hypre_CopyVector(x_local, y_local);
+   return hypre_VectorCopy(x_local, y_local);
 }
 
 /*--------------------------------------------------------------------------
- * hypre_ScaleParVector
+ * hypre_ParVectorScale
  *--------------------------------------------------------------------------*/
 
 int
-hypre_ScaleParVector( double        alpha,
+hypre_ParVectorScale( double        alpha,
                       hypre_ParVector *y     )
 {
    hypre_Vector *y_local = hypre_ParVectorLocalVector(y);
 
-   return hypre_ScaleVector( alpha, y_local);
+   return hypre_VectorScale( alpha, y_local);
 }
 
 /*--------------------------------------------------------------------------
- * hypre_ParAxpy
+ * hypre_ParVectorAxpy
  *--------------------------------------------------------------------------*/
 
 int
-hypre_ParAxpy( double        alpha,
+hypre_ParVectorAxpy( double        alpha,
                hypre_ParVector *x,
                hypre_ParVector *y     )
 {
    hypre_Vector *x_local = hypre_ParVectorLocalVector(x);
    hypre_Vector *y_local = hypre_ParVectorLocalVector(y);
            
-   return hypre_Axpy( alpha, x_local, y_local);
+   return hypre_VectorAxpy( alpha, x_local, y_local);
 }
 
 /*--------------------------------------------------------------------------
- * hypre_ParInnerProd
+ * hypre_ParVectorInnerProd
  *--------------------------------------------------------------------------*/
 
 double
-hypre_ParInnerProd( hypre_ParVector *x,
+hypre_ParVectorInnerProd( hypre_ParVector *x,
                     hypre_ParVector *y )
 {
    MPI_Comm      comm    = hypre_ParVectorComm(x);
@@ -277,7 +277,7 @@ hypre_ParInnerProd( hypre_ParVector *x,
    hypre_Vector *y_local = hypre_ParVectorLocalVector(y);
            
    double result = 0.0;
-   double local_result = hypre_InnerProd(x_local, y_local);
+   double local_result = hypre_VectorInnerProd(x_local, y_local);
    
    MPI_Allreduce(&local_result, &result, 1, MPI_DOUBLE, MPI_SUM, comm);
    
@@ -315,12 +315,12 @@ hypre_VectorToParVector (MPI_Comm comm, hypre_Vector *v, int *vec_starts)
 
    MPI_Bcast(&global_size,1,MPI_INT,0,comm);
 
-   par_vector = hypre_CreateParVector(comm, global_size, vec_starts);
+   par_vector = hypre_ParVectorCreate(comm, global_size, vec_starts);
 
    vec_starts = hypre_ParVectorPartitioning(par_vector);
 
    local_size = vec_starts[my_id+1] - vec_starts[my_id];
-   hypre_InitializeParVector(par_vector);
+   hypre_ParVectorInitialize(par_vector);
    local_vector = hypre_ParVectorLocalVector(par_vector);
    local_data = hypre_VectorData(local_vector);
 
@@ -383,8 +383,8 @@ hypre_ParVectorToVectorAll (hypre_ParVector *par_v)
 	return NULL;
  
    local_data = hypre_VectorData(local_vector);
-   vector = hypre_CreateVector(global_size);
-   hypre_InitializeVector(vector);
+   vector = hypre_VectorCreate(global_size);
+   hypre_VectorInitialize(vector);
    vector_data = hypre_VectorData(vector);
 
 /* determine procs which hold data of par_v and store ids in used_procs */

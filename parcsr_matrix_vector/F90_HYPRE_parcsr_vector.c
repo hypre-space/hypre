@@ -16,18 +16,18 @@
 #include "fortran.h"
 
 /*--------------------------------------------------------------------------
- * HYPRE_NewParVector
+ * HYPRE_ParVectorCreate
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_newparvector)( int      *comm,
+hypre_F90_IFACE(hypre_parvectorcreate)( int      *comm,
                                      int      *global_size,
                                      long int *partitioning,
                                      long int *vector,
                                      int      *ierr          )
 {
    *vector = (long int)
-             ( HYPRE_CreateParVector( (MPI_Comm) *comm,
+             ( HYPRE_ParVectorCreate( (MPI_Comm) *comm,
                                       (int)      *global_size,
                                       (int *)    *partitioning ) );
 
@@ -35,53 +35,53 @@ hypre_F90_IFACE(hypre_newparvector)( int      *comm,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_DestroyParVector
+ * HYPRE_ParVectorDestroy
  *--------------------------------------------------------------------------*/
 
 void 
-hypre_F90_IFACE(hypre_destroyparvector)( long int *vector,
+hypre_F90_IFACE(hypre_parvectordestroy)( long int *vector,
                                          int      *ierr    )
 {
-   *ierr = (int) ( HYPRE_DestroyParVector( (HYPRE_ParVector) *vector ) );
+   *ierr = (int) ( HYPRE_ParVectorDestroy( (HYPRE_ParVector) *vector ) );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_InitializeParVector
+ * HYPRE_ParVectorInitialize
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_initializeparvector)( long int *vector,
+hypre_F90_IFACE(hypre_parvectorinitialize)( long int *vector,
                                             int      *ierr    )
 {
-   *ierr = (int) ( HYPRE_InitializeParVector( (HYPRE_ParVector) *vector ) );
+   *ierr = (int) ( HYPRE_ParVectorInitialize( (HYPRE_ParVector) *vector ) );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_ReadParVector
+ * HYPRE_ParVectorRead
  *--------------------------------------------------------------------------*/
 
 void 
-hypre_F90_IFACE(hypre_readparvector)( int      *comm,
+hypre_F90_IFACE(hypre_parvectorread)( int      *comm,
                                       long int *vector,
                                       char     *file_name,
                                       int      *ierr       )
 {
-   *vector = (long int) ( HYPRE_ReadParVector( (MPI_Comm) *comm,
+   *vector = (long int) ( HYPRE_ParVectorRead( (MPI_Comm) *comm,
                                                (char *)    file_name ) );
 
    *ierr = !(*vector);
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_PrintParVector
+ * HYPRE_ParVectorPrint
  *--------------------------------------------------------------------------*/
 
 void 
-hypre_F90_IFACE(hypre_printparvector)( long int *vector,
+hypre_F90_IFACE(hypre_parvectorprint)( long int *vector,
                                        char     *file_name,
                                        int      *ierr       )
 {
-   *ierr = (int) ( HYPRE_PrintParVector ( (HYPRE_ParVector) *vector,
+   *ierr = (int) ( HYPRE_ParVectorPrint ( (HYPRE_ParVector) *vector,
                                           (char *)           file_name ) );
 }
 

@@ -15,114 +15,114 @@
 #include "headers.h"
 
 /*--------------------------------------------------------------------------
- * HYPRE_CreateParVector
+ * HYPRE_ParVectorCreate
  *--------------------------------------------------------------------------*/
 
 HYPRE_ParVector
-HYPRE_CreateParVector( MPI_Comm comm,
+HYPRE_ParVectorCreate( MPI_Comm comm,
                        int      global_size, 
                        int     *partitioning )
 {
-   return ( (HYPRE_ParVector) hypre_CreateParVector(comm, global_size,
+   return ( (HYPRE_ParVector) hypre_ParVectorCreate(comm, global_size,
                                                     partitioning) );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_DestroyParVector
+ * HYPRE_ParVectorDestroy
  *--------------------------------------------------------------------------*/
 
 int 
-HYPRE_DestroyParVector( HYPRE_ParVector vector )
+HYPRE_ParVectorDestroy( HYPRE_ParVector vector )
 {
-   return ( hypre_DestroyParVector( (hypre_ParVector *) vector ) );
+   return ( hypre_ParVectorDestroy( (hypre_ParVector *) vector ) );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_InitializeParVector
+ * HYPRE_ParVectorInitialize
  *--------------------------------------------------------------------------*/
 
 int 
-HYPRE_InitializeParVector( HYPRE_ParVector vector )
+HYPRE_ParVectorInitialize( HYPRE_ParVector vector )
 {
-   return ( hypre_InitializeParVector( (hypre_ParVector *) vector ) );
+   return ( hypre_ParVectorInitialize( (hypre_ParVector *) vector ) );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_ReadParVector
+ * HYPRE_ParVectorRead
  *--------------------------------------------------------------------------*/
 
 HYPRE_ParVector
-HYPRE_ReadParVector( MPI_Comm  comm,
+HYPRE_ParVectorRead( MPI_Comm  comm,
                      char     *file_name )
 {
-   return ( (HYPRE_ParVector) hypre_ReadParVector( comm, file_name ) );
+   return ( (HYPRE_ParVector) hypre_ParVectorRead( comm, file_name ) );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_PrintParVector
+ * HYPRE_ParVectorPrint
  *--------------------------------------------------------------------------*/
 
 int
-HYPRE_PrintParVector( HYPRE_ParVector  vector,
+HYPRE_ParVectorPrint( HYPRE_ParVector  vector,
                       char         *file_name )
 {
-   return ( hypre_PrintParVector( (hypre_ParVector *) vector,
+   return ( hypre_ParVectorPrint( (hypre_ParVector *) vector,
                                   file_name ) );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SetParVectorConstantValues
+ * HYPRE_ParVectorSetConstantValues
  *--------------------------------------------------------------------------*/
 
 int
-HYPRE_SetParVectorConstantValues( HYPRE_ParVector  vector,
+HYPRE_ParVectorSetConstantValues( HYPRE_ParVector  vector,
                       		  double	   value )
 {
-   return ( hypre_SetParVectorConstantValues( (hypre_ParVector *) vector,
+   return ( hypre_ParVectorSetConstantValues( (hypre_ParVector *) vector,
                                   value ) );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SetParVectorRandomValues
+ * HYPRE_ParVectorSetRandomValues
  *--------------------------------------------------------------------------*/
 
 int
-HYPRE_SetParVectorRandomValues( HYPRE_ParVector  vector,
+HYPRE_ParVectorSetRandomValues( HYPRE_ParVector  vector,
                       		int	         seed  )
 {
-   return ( hypre_SetParVectorRandomValues( (hypre_ParVector *) vector,
+   return ( hypre_ParVectorSetRandomValues( (hypre_ParVector *) vector,
                                   seed ) );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_CopyParVector
+ * HYPRE_ParVectorCopy
  *--------------------------------------------------------------------------*/
 
 int
-HYPRE_CopyParVector( HYPRE_ParVector x, HYPRE_ParVector y)
+HYPRE_ParVectorCopy( HYPRE_ParVector x, HYPRE_ParVector y)
 {
-   return ( hypre_CopyParVector( (hypre_ParVector *) x,
+   return ( hypre_ParVectorCopy( (hypre_ParVector *) x,
                                  (hypre_ParVector *) y ) );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_ScaleParVector
+ * HYPRE_ParVectorScale
  *--------------------------------------------------------------------------*/
 
 int
-HYPRE_ScaleParVector( double value, HYPRE_ParVector x)
+HYPRE_ParVectorScale( double value, HYPRE_ParVector x)
 {
-   return ( hypre_ScaleParVector( value, (hypre_ParVector *) x) );
+   return ( hypre_ParVectorScale( value, (hypre_ParVector *) x) );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_ParInnerProd
+ * HYPRE_ParVectorInnerProd
  *--------------------------------------------------------------------------*/
 
 double
-HYPRE_ParInnerProd( HYPRE_ParVector x, HYPRE_ParVector y)
+HYPRE_ParVectorInnerProd( HYPRE_ParVector x, HYPRE_ParVector y)
 {
-   return ( hypre_ParInnerProd( (hypre_ParVector *) x, 
+   return ( hypre_ParVectorInnerProd( (hypre_ParVector *) x, 
 				(hypre_ParVector *) y) );
 }
 

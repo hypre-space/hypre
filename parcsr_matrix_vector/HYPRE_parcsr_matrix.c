@@ -15,11 +15,11 @@
 #include "headers.h"
 
 /*--------------------------------------------------------------------------
- * HYPRE_CreateParCSRMatrix
+ * HYPRE_ParCSRMatrixCreate
  *--------------------------------------------------------------------------*/
 
 HYPRE_ParCSRMatrix 
-HYPRE_CreateParCSRMatrix( MPI_Comm  comm,
+HYPRE_ParCSRMatrixCreate( MPI_Comm  comm,
                           int       global_num_rows,
                           int       global_num_cols,
                           int      *row_starts,
@@ -30,7 +30,7 @@ HYPRE_CreateParCSRMatrix( MPI_Comm  comm,
 {
    hypre_ParCSRMatrix *matrix;
 
-   matrix = hypre_CreateParCSRMatrix(comm, global_num_rows, global_num_cols,
+   matrix = hypre_ParCSRMatrixCreate(comm, global_num_rows, global_num_cols,
                                      row_starts, col_starts, num_cols_offd,
                                      num_nonzeros_diag, num_nonzeros_offd);
 
@@ -38,54 +38,54 @@ HYPRE_CreateParCSRMatrix( MPI_Comm  comm,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_DestroyParCSRMatrix
+ * HYPRE_ParCSRMatrixDestroy
  *--------------------------------------------------------------------------*/
 
 int 
-HYPRE_DestroyParCSRMatrix( HYPRE_ParCSRMatrix matrix )
+HYPRE_ParCSRMatrixDestroy( HYPRE_ParCSRMatrix matrix )
 {
-   return( hypre_DestroyParCSRMatrix( (hypre_ParCSRMatrix *) matrix ) );
+   return( hypre_ParCSRMatrixDestroy( (hypre_ParCSRMatrix *) matrix ) );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_InitializeParCSRMatrix
+ * HYPRE_ParCSRMatrixInitialize
  *--------------------------------------------------------------------------*/
 
 int
-HYPRE_InitializeParCSRMatrix( HYPRE_ParCSRMatrix matrix )
+HYPRE_ParCSRMatrixInitialize( HYPRE_ParCSRMatrix matrix )
 {
-   return ( hypre_InitializeParCSRMatrix( (hypre_ParCSRMatrix *) matrix ) );
+   return ( hypre_ParCSRMatrixInitialize( (hypre_ParCSRMatrix *) matrix ) );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_ReadParCSRMatrix
+ * HYPRE_ParCSRMatrixRead
  *--------------------------------------------------------------------------*/
 
 HYPRE_ParCSRMatrix 
-HYPRE_ReadParCSRMatrix( MPI_Comm comm,
+HYPRE_ParCSRMatrixRead( MPI_Comm comm,
                         char    *file_name )
 {
-   return ( (HYPRE_ParCSRMatrix) hypre_ReadParCSRMatrix( comm, file_name ));
+   return ( (HYPRE_ParCSRMatrix) hypre_ParCSRMatrixRead( comm, file_name ));
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_PrintParCSRMatrix
+ * HYPRE_ParCSRMatrixPrint
  *--------------------------------------------------------------------------*/
 
 void 
-HYPRE_PrintParCSRMatrix( HYPRE_ParCSRMatrix  matrix,
+HYPRE_ParCSRMatrixPrint( HYPRE_ParCSRMatrix  matrix,
                          char               *file_name )
 {
-   hypre_PrintParCSRMatrix( (hypre_ParCSRMatrix *) matrix,
+   hypre_ParCSRMatrixPrint( (hypre_ParCSRMatrix *) matrix,
                             file_name );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_GetCommParCSR
+ * HYPRE_ParCSRMatrixGetComm
  *--------------------------------------------------------------------------*/
 
 int
-HYPRE_GetCommParCSR( HYPRE_ParCSRMatrix  matrix,
+HYPRE_ParCSRMatrixGetComm( HYPRE_ParCSRMatrix  matrix,
                          MPI_Comm *comm )
 {  
    int ierr = 0;
@@ -95,11 +95,11 @@ HYPRE_GetCommParCSR( HYPRE_ParCSRMatrix  matrix,
    return( ierr );
 }
 /*--------------------------------------------------------------------------
- * HYPRE_GetDimsParCSR
+ * HYPRE_ParCSRMatrixGetDims
  *--------------------------------------------------------------------------*/
 
 int
-HYPRE_GetDimsParCSR( HYPRE_ParCSRMatrix  matrix,
+HYPRE_ParCSRMatrixGetDims( HYPRE_ParCSRMatrix  matrix,
                          int *M, int *N )
 {  
    int ierr = 0;
@@ -111,11 +111,11 @@ HYPRE_GetDimsParCSR( HYPRE_ParCSRMatrix  matrix,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_GetRowPartitioningParCSR
+ * HYPRE_ParCSRMatrixGetRowPartitioning
  *--------------------------------------------------------------------------*/
 
 int
-HYPRE_GetRowPartitioningParCSR( HYPRE_ParCSRMatrix  matrix,
+HYPRE_ParCSRMatrixGetRowPartitioning( HYPRE_ParCSRMatrix  matrix,
                                 int **row_partitioning_ptr)
 {  
    int ierr = 0;
@@ -135,11 +135,11 @@ HYPRE_GetRowPartitioningParCSR( HYPRE_ParCSRMatrix  matrix,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_GetColPartitioningParCSR
+ * HYPRE_ParCSRMatrixGetColPartitioning
  *--------------------------------------------------------------------------*/
 
 int
-HYPRE_GetColPartitioningParCSR( HYPRE_ParCSRMatrix  matrix,
+HYPRE_ParCSRMatrixGetColPartitioning( HYPRE_ParCSRMatrix  matrix,
                                 int **col_partitioning_ptr)
 {  
    int ierr = 0;
@@ -161,7 +161,7 @@ HYPRE_GetColPartitioningParCSR( HYPRE_ParCSRMatrix  matrix,
 
 
 /*--------------------------------------------------------------------------
- * HYPRE_GetLocalRangeParcsr
+ * HYPRE_ParCSRMatrixGetLocalRange
  *--------------------------------------------------------------------------*/
 /**
 Returns range of rows and columns owned by this processor.
@@ -181,7 +181,7 @@ Not collective.
 */
 
 int
-HYPRE_GetLocalRangeParcsr( HYPRE_ParCSRMatrix  matrix,
+HYPRE_ParCSRMatrixGetLocalRange( HYPRE_ParCSRMatrix  matrix,
                          int               *row_start,
                          int               *row_end,
                          int               *col_start,
@@ -189,17 +189,17 @@ HYPRE_GetLocalRangeParcsr( HYPRE_ParCSRMatrix  matrix,
 {  
    int ierr = 0;
 
-   ierr = hypre_GetLocalRangeParCSRMatrix( (hypre_ParCSRMatrix *) matrix,
+   ierr = hypre_ParCSRMatrixGetLocalRange( (hypre_ParCSRMatrix *) matrix,
                             row_start, row_end, col_start, col_end );
    return( ierr );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_GetRowParCSRMatrix
+ * HYPRE_ParCSRMatrixGetRow
  *--------------------------------------------------------------------------*/
 
 int 
-HYPRE_GetRowParCSRMatrix( HYPRE_ParCSRMatrix  matrix,
+HYPRE_ParCSRMatrixGetRow( HYPRE_ParCSRMatrix  matrix,
                          int                row,
                          int               *size,
                          int               **col_ind,
@@ -207,17 +207,17 @@ HYPRE_GetRowParCSRMatrix( HYPRE_ParCSRMatrix  matrix,
 {  
    int ierr=0;
    
-   ierr = hypre_GetRowParCSRMatrix( (hypre_ParCSRMatrix *) matrix,
+   ierr = hypre_ParCSRMatrixGetRow( (hypre_ParCSRMatrix *) matrix,
                             row, size, col_ind, values );
    return( ierr );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_RestoreRowParCSRMatrix
+ * HYPRE_ParCSRMatrixRestoreRow
  *--------------------------------------------------------------------------*/
 
 int 
-HYPRE_RestoreRowParCSRMatrix( HYPRE_ParCSRMatrix  matrix,
+HYPRE_ParCSRMatrixRestoreRow( HYPRE_ParCSRMatrix  matrix,
                          int                row,
                          int               *size,
                          int               **col_ind,
@@ -225,7 +225,7 @@ HYPRE_RestoreRowParCSRMatrix( HYPRE_ParCSRMatrix  matrix,
 {  
    int ierr = 0;
 
-   ierr = hypre_RestoreRowParCSRMatrix( (hypre_ParCSRMatrix *) matrix,
+   ierr = hypre_ParCSRMatrixRestoreRow( (hypre_ParCSRMatrix *) matrix,
                             row, size, col_ind, values );
    return( ierr );
 }
@@ -246,13 +246,13 @@ HYPRE_CSRMatrixToParCSRMatrix( MPI_Comm comm,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_ParMatvec
+ * HYPRE_ParCSRMatrixMatvec
  *--------------------------------------------------------------------------*/
 
 int
-HYPRE_ParMatvec( double alpha, HYPRE_ParCSRMatrix A, HYPRE_ParVector x,
+HYPRE_ParCSRMatrixMatvec( double alpha, HYPRE_ParCSRMatrix A, HYPRE_ParVector x,
 		 double beta, HYPRE_ParVector y)
 {
-   return ( hypre_ParMatvec( alpha, (hypre_ParCSRMatrix *) A,
+   return ( hypre_ParCSRMatrixMatvec( alpha, (hypre_ParCSRMatrix *) A,
 		(hypre_ParVector *) x, beta, (hypre_ParVector *) y) );
 }

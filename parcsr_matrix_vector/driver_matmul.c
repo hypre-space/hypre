@@ -27,9 +27,9 @@ main( int   argc,
 
    if (my_id == 0)
    {
-   	As = hypre_ReadCSRMatrix("inpr");
+   	As = hypre_CSRMatrixRead("inpr");
    	printf(" read input A\n");
-   	Bs = hypre_ReadCSRMatrix("input");
+   	Bs = hypre_CSRMatrixRead("input");
    	printf(" read input B\n");
    }
    A = hypre_CSRMatrixToParCSRMatrix(MPI_COMM_WORLD, As, row_starts,
@@ -38,19 +38,19 @@ main( int   argc,
    col_starts = hypre_ParCSRMatrixColStarts(A);
    B = hypre_CSRMatrixToParCSRMatrix(MPI_COMM_WORLD, Bs, col_starts,
 	row_starts);
-   hypre_SetParCSRMatrixRowStartsOwner(B,0);
-   hypre_SetParCSRMatrixColStartsOwner(B,0);
+   hypre_ParCSRMatrixSetRowStartsOwner(B,0);
+   hypre_ParCSRMatrixSetColStartsOwner(B,0);
    C = hypre_ParMatmul(B,A);
-   hypre_PrintParCSRMatrix(C, "result");
+   hypre_ParCSRMatrixPrint(C, "result");
 
    if (my_id == 0)
    {
-	hypre_DestroyCSRMatrix(As);
-   	hypre_DestroyCSRMatrix(Bs);
+	hypre_CSRMatrixDestroy(As);
+   	hypre_CSRMatrixDestroy(Bs);
    }
-   hypre_DestroyParCSRMatrix(A);
-   hypre_DestroyParCSRMatrix(B);
-   hypre_DestroyParCSRMatrix(C);
+   hypre_ParCSRMatrixDestroy(A);
+   hypre_ParCSRMatrixDestroy(B);
+   hypre_ParCSRMatrixDestroy(C);
 
    MPI_Finalize();
 
