@@ -64,7 +64,7 @@ cd $HYPRE_AUTOTEST_DIR/linear_solvers/test
 #=============================================================================
 
 cd $HYPRE_AUTOTEST_DIR/linear_solvers
-make veryclean
+make clean
 
 #==============================================================================
 # Set permissions so that all developers can access
