@@ -27,6 +27,7 @@ typedef struct
 
    void  *A;
    void  *r;
+   void  *w;
    void  **p;
 
    void  *matvec_data;
@@ -129,6 +130,7 @@ hypre_GMRESSetup( void *gmres_vdata,
  
    (gmres_data -> p) = hypre_PCGNewVectorArray(k_dim+1,x);
    (gmres_data -> r) = hypre_PCGNewVector(b);
+   (gmres_data -> w) = hypre_PCGNewVector(b);
  
    (gmres_data -> matvec_data) = hypre_PCGMatvecInitialize(A, x);
  
@@ -164,6 +166,7 @@ hypre_GMRESSolve(void  *gmres_vdata,
    void             *matvec_data  = (gmres_data -> matvec_data);
 
    void             *r            = (gmres_data -> r);
+   void             *w            = (gmres_data -> w);
    void            **p            = (gmres_data -> p);
 
    int 	           (*precond)()   = (gmres_data -> precond);
@@ -234,6 +237,7 @@ hypre_GMRESSolve(void  *gmres_vdata,
 	{
 		i++;
 		iter++;
+		hypre_PCGClearVector(r);
 		precond(precond_data, A, p[i-1], r);
 		hypre_PCGMatvec(matvec_data, 1.0, A, r, 0.0, p[i]);
 		/* modified Gram_Schmidt */
@@ -285,12 +289,13 @@ hypre_GMRESSolve(void  *gmres_vdata,
 	}
 	/* form linear combination of p's to get solution */
 	
-	hypre_PCGCopyVector(p[0],r);
-	hypre_PCGScaleVector(rs[0],r);
+	hypre_PCGCopyVector(p[0],w);
+	hypre_PCGScaleVector(rs[0],w);
 	for (j = 1; j < i; j++)
-		hypre_PCGAxpy(rs[j], p[j], r);
+		hypre_PCGAxpy(rs[j], p[j], w);
 
-	precond(precond_data, A, r, r);
+	hypre_PCGClearVector(r);
+	precond(precond_data, A, w, r);
 
 	hypre_PCGAxpy(1.0,r,x);
 
