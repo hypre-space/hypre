@@ -341,10 +341,10 @@ do
         HYPRE_RUN_MACHINE="ilx"
         HYPRE_REMOTE_DIR="/usr/casc/hypre/i686-pc-linux-gnu-ilx/AUTOTEST"
         if [ "$AUTOMAKEMODE" = "yes" ] ; then
-	  HYPRE_MACHINE_COMMANDS="-mnse 1 -a 1 -cfl 1"
+	  HYPRE_MACHINE_COMMANDS="-mne 1 -a 1 -cfl 1"
           HYPRE_MESSAGE='TEST[automake-pgi-4.1]'
         else
-	  HYPRE_MACHINE_COMMANDS="-mnse 1 -a 2 -cf"
+	  HYPRE_MACHINE_COMMANDS="-mne 1 -a 2 -cf"
           HYPRE_MESSAGE='OTHER[pgi-4.1]'
         fi
 	perform_test
@@ -602,7 +602,7 @@ do
         HYPRE_COMPILE_MACHINE="tux83"
         HYPRE_RUN_MACHINE="tux83"
         HYPRE_REMOTE_DIR="/usr/tmp"
-        HYPRE_DIST_DIR="/usr/casc/hypre/i686-pc-linux-gnu-pgi3.x/AUTOTEST"
+        HYPRE_DIST_DIR="/usr/casc/hypre/i686-pc-linux-gnu-pgi4.x/AUTOTEST"
         if [ "$AUTOMAKEMODE" = "yes" ] ; then
 	  HYPRE_MACHINE_COMMANDS="-mnse 1 -a 1 -cfl 1"
           HYPRE_MESSAGE='TEST[automake-pgi-4.1]'

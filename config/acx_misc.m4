@@ -234,14 +234,17 @@ Currently this macro knows about GCC, and KCC.]),
     CXXFLAGS="$CXXFLAGS -Wall -Wshadow -fno-implicit-templates"
     CXXFLAGS="$CXXFLAGS -Woverloaded-virtual -ansi -pedantic"
     casc_using_debug=yes
+    casc_using_mpi=no
   elif test "x$CC" = "xicc"; then
     CFLAGS="$CFLAGS -Xc -Wall -x c"
     CXXFLAGS="$CXXFLAGS -Xc -Wall -x c++"
     casc_using_debug=yes
+    casc_using_mpi=no
   elif test "x$CC" = "xpgcc"; then
     CFLAGS="$CFLAGS -Xa -Minform,inform"
     CXXFLAGS="$CXXFLAGS -A --display_error_number -Minform,inform"
     casc_using_debug=yes
+    casc_using_mpi=no
   elif test "x$CC" = "xxlc"; then
     CFLAGS="$CFLAGS -qinfo=dcl:eff:pro:rea:ret:use"
     CXXFLAGS="$CXXFLAGS  -qinfo=dcl:eff:obs:pro:rea:ret:use"
