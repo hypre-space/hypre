@@ -248,7 +248,7 @@ in
 \begin{display}
 \begin{verbatim}
 
-return_code = HYPRE_New( solver );
+return_code = HYPRE_Create( solver );
 
 \end{verbatim}
 \end{display}
@@ -301,7 +301,7 @@ object as in
 \begin{display}
 \begin{verbatim}
 
-HYPRE_Free( solver );
+HYPRE_Destroy( solver );
 
 \end{verbatim}
 \end{display}

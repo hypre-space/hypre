@@ -23,8 +23,11 @@ Most preconditioners, on the other hand, have additional requirements such as ac
 coefficients of the matrix, e.g. the GetRow function in the \code{HYPRE\_DistributedMatrix} interface.
 
 \item
-{\bf Choose parameters.} Parameters are chosen through the "Set" calls provided by the solver.
+{\bf Choose parameters that control construction of the preconditioner/solver.} 
+Parameters are chosen through the "Set" calls provided by the solver.
 As is true throughout \hypre, all parameters have reasonable defaults if not chosen.
+Note that in \hypre, we convergence criteria can be chosen after the preconditioner/solver
+has been setup.
 
 \item
 {\bf Pass the preconditioner to the solver.} For solvers that are not preconditioned, this step
@@ -45,7 +48,7 @@ At this point, the solver/preconditioner is fully constructed and ready for use.
 \begin{enumerate}
 
 \item
-{\bf Set convergence parameters.} Convergence can be controlled by the number of iterations,
+{\bf Set convergence criteria.} Convergence can be controlled by the number of iterations,
 as well as various tolerances such as relative residual, preconditioned residual, etc.
 Like all parameters, reasonable defaults are used. Generally speaking, Krylov solvers
 default to a tolerance-based convergence criteria, while solvers used traditionally as

@@ -5,8 +5,7 @@
 \hypre{} is a software library focused on the solution of large, sparse linear
 systems of equations on highly parallel distributed-memory computer
 systems. The library has been created with the goals of robustness,
-computational performance, ease of use, flexibility, rapid
-incorporation of new algorithms, and compatibility/interoperability
+computational performance, ease of use, flexibility, and interoperability
 with other similar libraries. The mathematical emphasis is to provide
 the latest scalable preconditioner algorithms to application codes
 with a minimum of delay between development and deployment.
@@ -33,7 +32,7 @@ structured multigrid, through the use of the Grid-centric interfaces discussed
 below. These interfaces 
 provide more information to solvers than traditional sparse matrix data
 structures can provide, enabling 
-"smarter" algorithms.
+more effective algorithms.
 
 \item
 {\bf Suite of Common Iterative Methods Provides Options for a Spectrum of Problems:}
@@ -58,20 +57,21 @@ finite-difference applications; an
 unstructured finite-element based interface; and a linear-algebra based
 interface. Other interfaces will be 
 added as time and demand dictate.
+Each interface provides access to several solvers without the need to
+write new interface code.
 
 \item
 {\bf Many User Options Accommodate Beginners through Experts:} \hypre{} allows a
 spectrum of expertise 
-to be applied by users. The beginning user can call prepackaged
-solver-preconditioner combinations that 
-will work for large classes of problems. More expert users can take further
+to be applied by users. The beginning user can get up and running with a
+minimal amount of effort. More expert users can take further
 control of the solution process 
-through various parameters, all of which have reasonable defaults if not
-specified. Further expertise can 
-allows users to put together their own solvers using components of \hypre{} as
-"building blocks", a 
-technique enabled through a new, flexible object model for linear solver
-libraries.
+through various parameters, all of which have reasonable defaults. 
+%Further expertise can 
+%allows users to put together their own solvers using components of \hypre{} as
+%"building blocks", a 
+%technique enabled through a new, flexible object model for linear solver
+%libraries.
 
 \item
 {\bf Many Configuration Options to Suit your Computing System:} \hypre{} utilizes the
@@ -106,32 +106,27 @@ that they can find the unique
 combination that works best for them.
 
 \item
-{\bf Common interfaces allows dynamic reconfiguration of your solvers for easy
-experimentation:} Users 
-may code to a single interface once and then switch the specific solvers,
-preconditioners, and other options 
-flexibly at runtime. This allows users to look quickly and easily for their
-optimal solver, without coding to 
-new interfaces or even recompiling. 
-
-\item
 {\bf Interfaces in Multiple Languages Provide Greater Flexibility for Applications:}
 \hypre{} contains 
-another major breakthrough in flexibility and usability: it is callable from a
-wide variety of languages. We 
-have used the Babel project to provide interfaces in C, C++, and Fortran, and
-as Babel adds support for 
-other languages, those languages will be added to \hypre{}. Babel allows \hypre{} to
-use an object-oriented 
-design in each of the supported languages, thus eliminating the need for \hypre{}
-to be written to the so-
-called "lowest common denominator".
+interfaces for both Fortran and C users.
+%another major breakthrough in flexibility and usability: it is callable from a
+%wide variety of languages. We 
+%have used the Babel project to provide interfaces in C, C++, and Fortran, and
+%as Babel adds support for 
+%other languages, those languages will be added to \hypre{}. Babel allows \hypre{} to
+%use an object-oriented 
+%design in each of the supported languages, thus eliminating the need for \hypre{}
+%to be written to the so-
+%called "lowest common denominator".
 
 \end{itemize}
 
 \subsection{Assumptions and Limitations}
 
-{\bf \hypre{} is not designed for all linear systems.}  Sequential, dense, small.
+{\bf \hypre{} is designed for large, sparse, linear systems on parallel
+computers.}  Small linear systems, 
+systems that are solvable on a sequential computer, and dense systems are all
+better addressed by libraries designed specifically for them. 
 
 {\bf \hypre{} requires an installation of the Message Passing Interface (MPI).}
 Exception: will run 
@@ -143,19 +138,6 @@ Only a small set of \hypre{} is compatible with threads at the current time.
 
 {\bf Configuration of \hypre{} with other libraries requires installation of and
 linking to those libraries.}
-
-{\bf \hypre{} has a learning curve.} The use of grid-based interfaces and \hypre{}'s
-compatibility with the ESI 
-standard are designed to greatly reduce the lead time to try \hypre{}'s
-algorithms, but there is still a learning 
-curve associated with \hypre{}'s object-oriented structure as many computational
-scientists are more 
-familiar with the traditional procedural programming model. Nonetheless, the
-changes have been designed 
-to be minimal for the beginning user and are intuitive after a little exposure.
-\hypre{} is not a project 
-designed to show off object oriented technology at the expense of the casual
-user.
 
 {\bf \hypre{} is a project under construction.} Systems problems, SAMR interface,
 semi-structured interface, 
@@ -190,10 +172,11 @@ preconditioners.
 this will mean a single 
 Krylov method and a single preconditioner. Some common combinations have been
 prewrapped as a 
-single solver to make them easier to use. More advanced users might choose to,
-say, use two 
-preconditioners, composed through residual correction, to create a more robust
-solution method.
+single solver to make them easier to use. 
+%More advanced users might choose to,
+%say, use two 
+%preconditioners, composed through residual correction, to create a more robust
+%solution method.
 
 \item 
 {\bf Look up matrix requirements for each solver and preconditioner.} Each
@@ -267,220 +250,4 @@ that those functions are fully
 supported or fully tested, nor that they will not change in future releases of
 \hypre{}. 
 
-{\bf Abstract versus concrete types:} 
-Likewise, we use the same capitalization scheme
-to differentiate types in 
-\hypre{}: capital \code{HYPRE} refers to abstract classes, that is, services. 
-If you
-declare something to be of 
-type \code{HYPRE_Solver}, for instance (see declaration of components below), it is
-equivalent to stating that you 
-will be using a component that supports the services listed in the 
-\code{HYPRE_Solver}
-class. On the other hand, 
-lowercase \code{hypre} indicates a specific component, that is, a "concrete class".
-The \code{hypre_StructSMGSolve}r, 
-for instance, is a particular component. Just as in object-oriented libraries,
-"upcasting" is always allowed. 
-This means that in the bulk of your program code, you can refer to components
-as if they were the abstract 
-types. Only in the declaration of the component is the concrete class
-mentioned. This technique is 
-invaluable for promoting plug and play. In this example, then, you could
-declare 
-
-\begin{display}
-\begin{verbatim}
-
-HYPRE_Solver A; 
-hypre_StructSMGSolver a; 
-A = (HYPRE_Solver) a; 
-
-\end{verbatim}
-\end{display}
-
-Everywhere else in the code, you
-can refer to \code{a} as if it 
-was an \code{HYPRE_Solver}. Then, should you decide you would like to, say, 
-use the PFMG solver
-instead of SMG (these 
-algorithms are described in more detail in the "Solvers Available" section),
-the only line of code that needs 
-to change is 
-
-\begin{display}
-\begin{verbatim}
-
-hypre_StructPFMGSolver a;
-
-\end{verbatim}
-\end{display}
-
-In this way, users can isolate any
-potential changes to a single 
-place in their code.
-
-
-\subsection{The life cycle of a component}
-
-Every encapsulated object or component in \hypre{} has the same basic "life
-cycle", and many user 
-problems can be prevented simply by understanding this cycle and making sure
-that each component has 
-had all of the proper steps taken in the user code.
-
-\begin{display}
-\begin{verbatim}
-
-Add an example here to use for illustration of the exact sequence and syntax of
-steps.
-
-\end{verbatim}
-\end{display}
-
-\begin{enumerate}
-
-\item
-{\bf Declaration of the "handle" to the component.}  Each \hypre{} component is
-represented by a 
-"handle", and users must declare these handles just like any other data. They
-can either be declared
-statically or through dynamic memory mechanism such as \code{MALLOC} in C language,
-and the same 
-scope rules apply to \hypre{} components as to other data types (though see the
-note below on 
-reference counting). Though this information is technically "opaque" to users,
-generally \hypre{} 
-handles are either pointers or integers, and thus, these handles are safe to be
-passed around by users in 
-parameter lists without worrying about excessive copying going on underneath. 
-The handles are all of the form
-\code{HYPRE_Service}, where 
-\code{Service} is replaced by the name of the family of services that you want your
-\hypre{} object to 
-provide. For example, a \code{HYPRE_Solve}r is a component that provides solver
-services.
-
-\item
-{\bf Binding the handle to a concrete type.} Declaration of the handle by
-
-\begin{display}
-\begin{verbatim}
-
-HYPRE_Solver solver; 
-
-\end{verbatim}
-\end{display}
-
-says the 
-following to \hypre{}: "I will be using a \hypre{} component that provides the Solver
-service, and I will 
-be calling that component "solver"". It does not, however, tell \hypre{} exactly
-which component that 
-provides the Solver service "solver" should refer to. The most common way for
-this information to be 
-declared is to set the handle equal to the handle of a specific component. For
-example, 
-
-\begin{display}
-\begin{verbatim}
-
-HYPRE_Solver solver = (HYPRE_Solver) hypre_StructSMGSolver;
-
-\end{verbatim}
-\end{display}
-
-In the OO world, this is the
-same thing as 
-"instantiating the concrete type", while the service is the "abstract
-type". The benefit of this 
-system is that the choice of concrete type appears exactly once in the user's
-code, and that everywhere 
-else, the component is accessed knowing only the services it provides. This is
-the mechanism that 
-enables "plug and play": a user can switch solvers (or other components) by
-changing a single line of 
-their code (in fact, mechanisms can be set up to allow runtime switching; this
-will be discussed later) 
-because everywhere else in the code the components are used through the "common
-interfaces" 
-defined by the appropriate \hypre{} service.
-
-\item
-{\bf Bring the component "to life" through a "new" call.} The first call that must
-be made on every 
-\hypre{} component is a \code{new} call (though see the section on "Construction
-Components" below), as 
-in 
-
-\begin{display}
-\begin{verbatim}
-
-return_code = HYPRE_New( solver );
-
-\end{verbatim}
-\end{display}
-
-Essentially, these routines allocate
-space for the object and 
-set up defaults.
-
-\item
-{\bf Set parameters.  Important note:} all parameters have reasonable defaults
-that will be used if not 
-explicitly set by the user.
-
-\item
-{\bf Pass in needed information for construction of the component.} The
-information required depends 
-on the component. Matrices need the coefficients that define the matrix; these
-are passed in through 
-repeated calls to the chosen conceptual interface. Preconditioners need a
-"matrix" that provides the 
-necessary access pattern service. Preconditioned solvers need a preconditioner.
-
-\item
-{\bf Construct the object.} After the necessary construction information has been
-passed in, \hypre{} must 
-be instructed to construct the object, currently through the Setup call as in
-
-\begin{display}
-\begin{verbatim}
-
-HYPRE_Setup (solver);
-
-\end{verbatim}
-\end{display}
-
-\item
-{\bf Use the object.} After construction, the object is ready to be used through
-its advertised services, or to 
-be handed to other components as parameters. Matrices can be used to do
-matrix-vector multiplication, 
-or be given to solvers/preconditioners (for their construction); solvers can be
-used to solve systems, or 
-handed to other solvers as preconditioners; etc.
-
-\item
-{\bf "Kill" the object.} This is the opposite of the "bringing to life" phase.
-Here, the call is to "Free" the 
-object as in 
-
-\begin{display}
-\begin{verbatim}
-
-HYPRE_Free( solver );
-
-\end{verbatim}
-\end{display}
-
-NOTE: \hypre{} uses reference counting to
-manage memory, and 
-thus \code{HYPRE_Free} does not actually deallocate the object unless this was the
-last remaining reference 
-to the object. This allows users to safely free an object in one part of the
-code without worrying about 
-whether it is still being used by some other objects that are still alive.
-
-\end{enumerate}
 
