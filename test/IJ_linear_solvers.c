@@ -131,6 +131,9 @@ main( int   argc,
    /* parameters for GMRES */
    int	    k_dim;
 
+   /* parameters for GSMG */
+   int      gsmg_samples = 5;
+
    int      print_matrix = 0;
 
    /*-----------------------------------------------------------
@@ -629,6 +632,11 @@ main( int   argc,
          arg_index++;
          cycle_type  = atoi(argv[arg_index++]);
       }
+      else if ( strcmp(argv[arg_index], "-numsamp") == 0 )
+      {
+         arg_index++;
+         gsmg_samples  = atoi(argv[arg_index++]);
+      }
       else
       {
          arg_index++;
@@ -719,6 +727,7 @@ main( int   argc,
       printf("  -tr   <val>            : set AMG interpolation truncation factor = val \n");
       printf("  -mxrs <val>            : set AMG maximum row sum threshold for dependency weakening \n");
       printf("  -nf <val>              : set number of functions for systems AMG\n");
+      printf("  -numsamp <val>         : set number of sample vectors for GSMG\n");
      
       printf("  -w   <val>             : set Jacobi relax weight = val\n");
       printf("  -k   <val>             : dimension Krylov space for GMRES\n");
@@ -1561,6 +1570,7 @@ main( int   argc,
  
       HYPRE_BoomerAMGCreate(&amg_solver);
       HYPRE_BoomerAMGSetGSMG(amg_solver, 4); /* specify GSMG */
+      HYPRE_BoomerAMGSetGSMGNumSamples(amg_solver, gsmg_samples);
       HYPRE_BoomerAMGSetCoarsenType(amg_solver, (hybrid*coarsen_type));
       HYPRE_BoomerAMGSetMeasureType(amg_solver, measure_type);
       HYPRE_BoomerAMGSetTol(amg_solver, tol);
@@ -1773,6 +1783,7 @@ main( int   argc,
          if (myid == 0) printf("Solver: GSMG-PCG\n");
          HYPRE_BoomerAMGCreate(&pcg_precond); 
          HYPRE_BoomerAMGSetGSMG(pcg_precond, 4); 
+         HYPRE_BoomerAMGSetGSMGNumSamples(pcg_precond, gsmg_samples);
          HYPRE_BoomerAMGSetTol(pcg_precond, pc_tol);
          HYPRE_BoomerAMGSetCoarsenType(pcg_precond, (hybrid*coarsen_type));
          HYPRE_BoomerAMGSetMeasureType(pcg_precond, measure_type);
