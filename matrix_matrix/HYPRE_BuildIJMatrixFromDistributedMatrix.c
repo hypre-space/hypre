@@ -41,7 +41,7 @@ low-memory requirement situations (such as unit-testing code).
 int 
 HYPRE_BuildIJMatrixFromDistributedMatrix(
                  HYPRE_DistributedMatrix DistributedMatrix,
-                 HYPRE_IJMatrix *ij_matrix.
+                 HYPRE_IJMatrix *ij_matrix,
                  int local_storage_type )
 {
    int ierr;
@@ -61,15 +61,15 @@ HYPRE_BuildIJMatrixFromDistributedMatrix(
 
    ierr = HYPRE_NewIJMatrix( ij_matrix, comm, M, N );
 
-   ierr = HYPRE_SetIJMatrixLocalStorageType( *ij_matrix,
-                                                     local_storage_type );
+   ierr = HYPRE_SetIJMatrixLocalStorageType( 
+                 *ij_matrix, local_storage_type );
    if(ierr) return(ierr);
 
    ierr = HYPRE_GetDistributedMatrixLocalRange( DistributedMatrix, 
-             &first_local_row, &last_local_row, &N );
+             &first_local_row, &last_local_row );
 
-   ierr = HYPRE_SetIJMatrixLocalSize( *ij_matrix, last_local_row-first_local_row+1,
-                                       N );
+   ierr = HYPRE_SetIJMatrixLocalSize( *ij_matrix, 
+                last_local_row-first_local_row+1, N );
 
    ierr = HYPRE_InitializeIJMatrix( *ij_matrix );
    if(ierr) return(ierr);
@@ -77,13 +77,13 @@ HYPRE_BuildIJMatrixFromDistributedMatrix(
    /* Loop through all locally stored rows and insert them into ij_matrix */
    for (i=first_local_row; i<= last_local_row; i++)
    {
-      ierr = HYPRE_GetDistributedMatrixRow( i, &size, &col_ind, &values );
+      ierr = HYPRE_GetDistributedMatrixRow( DistributedMatrix, i, &size, &col_ind, &values );
       if( ierr ) return(ierr);
 
-      ierr = HYPRE_InsertIJMatrixRow( *ij_matrix, size, col_ind, values );
+      ierr = HYPRE_InsertIJMatrixRow( *ij_matrix, size, i, col_ind, values );
       if( ierr ) return(ierr);
 
-      ierr = HYPRE_RestoreDistributedMatrixRow( i, &size, &col_ind, &values );
+      ierr = HYPRE_RestoreDistributedMatrixRow( DistributedMatrix, i, &size, &col_ind, &values );
       if( ierr ) return(ierr);
 
    }
