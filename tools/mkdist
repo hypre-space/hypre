@@ -20,13 +20,13 @@ help ()
   printf " -display will report the cvs rtag history.\n"
   printf " VersionId, is the desired version identification\n"
   printf "  (e.g., hypre-VersionId.tar.gz, hypre-1.2.0.tar.gz).\n"
-  printf "  By convention, VersionId use the following syntax \"M.mm.rr\".\n"
+  printf "  By convention, VersionId uses the following syntax \"M.mm.rr\".\n"
   printf "  The \"M\" is the major release number, \"mm\" is the minor\n"
   printf "  release number, and the \"rr\" an update number. VersionId\n"
   printf "  is used for the name of the release creation and is used\n"
   printf "  in the tar file name and root directory for the distribution.\n"
   printf "  If VersionId can be mapped into a valid rtag branch from the\n"
-  printf "  source repository. It is assumed that the rtag id will follow\n"
+  printf "  source repository; it is assumed that the rtag id will follow\n"
   printf "  naming convention, \"VM-nn-rr\", note: the leading (capital)\n"
   printf "  \"V\" and the version number separated with \"-\" replacing\n"
   printf "  the \".\"s. If the VersionId can not be mapped to a current\n"
@@ -120,17 +120,8 @@ HYPRE_DIST_INSTALL_DIR=`pwd`"/$HYPRE_DIR"
     
 (       # build documentation and install
   cd $HYPRE_DIST_INSTALL_DIR/src/linear_solvers
-  ./configure --prefix=$HYPRE_DIST_INSTALL_DIR --with-babel
-  (cd docs; make all)
-  mkdir $HYPRE_DIST_INSTALL_DIR/docs
-  cp -fr HYPRE_usr_manual    $HYPRE_DIST_INSTALL_DIR/docs/.
-  cp -f  HYPRE_usr_manual.ps $HYPRE_DIST_INSTALL_DIR/docs/.
-  cp -fr HYPRE_ref_manual    $HYPRE_DIST_INSTALL_DIR/docs/.
-  cp -f  HYPRE_ref_manual.ps $HYPRE_DIST_INSTALL_DIR/docs/.
-  cp -fr bHYPRE_ref_manual    $HYPRE_DIST_INSTALL_DIR/docs/.
-  cp -f  bHYPRE_ref_manual.ps $HYPRE_DIST_INSTALL_DIR/docs/.
-  cd $HYPRE_DIST_INSTALL_DIR/src/linear_solvers
-  (cd docs; make distclean)
+  ./configure --prefix=$HYPRE_DIST_INSTALL_DIR
+  (cd docs; make install)
 )
     
 (       # store version info
@@ -152,7 +143,7 @@ tar cf $HYPRE_DIR.tar \
     $HYPRE_DIR/COPYRIGHT_and_DISCLAIMER \
     $HYPRE_DIR/INSTALL \
     $HYPRE_DIR/README \
-    $HYPRE_DIR/src/docs \
+    $HYPRE_DIR/docs \
     $HYPRE_DIR/src/FEI_mv \
     $HYPRE_DIR/src/HYPRE.h \
     $HYPRE_DIR/src/IJ_mv \
