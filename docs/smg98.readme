@@ -1,1027 +1,409 @@
 %==========================================================================
-\chapter{Code Description}
-\label{Code Description}
+%==========================================================================
+
+Code Description
 
 A. General description:
 
-Hypre's SMG code is an object-oriented library code designed to solve sparse
-linear systems on parallel computers.......   
+SMG98 is a parallel semicoarsening multigrid solver for the linear
+systems arising from finite difference, finite volume, or finite
+element discretizations of the diffusion equation,
 
+  \grad \cdot ( D \grad u ) + \sigma u = f
+
+on logically rectangular grids.  The code solves both 2D and 3D
+problems with discretization stencils of up to 9-point in 2D and up to
+27-point in 3D.  See the following paper for details on the algorithm
+and its parallel implementation/performance:
+
+  P. N. Brown, R. D. Falgout, and J. E. Jones,
+    "Semicoarsening multigrid on distributed memory machines".
+    To appear in the SIAM Journal on Scientific Computing special
+    issue on the Fifth Copper Mountain Conference on Iterative Methods.
+    Also available as LLNL technical report UCRL-JC-130720.
+
+The driver provided with SMG98 builds linear systems for the special
+case of the above equation,
+
+  - cx u_xx - cy u_yy - cz u_zz = (1/h)^2 ,         (in 3D)
+  - cx u_xx - cy u_yy           = (1/h)^2 ,         (in 2D)
+  - cx u_xx                     = (1/h)^2 ,         (in 1D)
+
+with Dirichlet boundary conditions of u = 0, where h is the mesh
+spacing in each direction.  Standard finite differences are used to
+discretize the equations, yielding 3-pt., 5-pt., and 7-pt. stencils in
+1D, 2D, and 3D, respectively.
+
+To determine when the solver has converged, the driver currently uses
+the relative-residual stopping criteria,
+
+  ||r_k||_2 / ||b||_2 < tol
+
+with tol = 10^-6.  Note that in 1D, SMG98 reduces to a direct method
+(cyclic reduction), so that the exact solution is obtained in just one
+V-cycle (iteration).
+
+This solver can serve as a key component for achieving scalability in
+radiation diffusion simulations.
 
 B. Coding:
 
-SMG98 is written in C but can be routines may be called from C,C++, and 
-Fortran codes.  
-
+SMG98 is written in ISO-C.  It is an SPMD code which uses either MPI,
+or both MPI and POSIX threads.  Parallelism is achieved by data
+decomposition.  The driver provided with SMG98 achieves this
+decomposition by simply subdividing the grid into logical P x Q x R
+(in 3D) chunks of equal size.
 
 C. Parallelism:
 
+SMG98 is a highly synchronous code.  The communications and
+computations patterns exhibit the surface-to-volume relationship
+common to many parallel scientific codes.  Hence, parallel efficiency
+is largely determined by the size of the data "chunks" mentioned
+above, and the speed of communications and computations on the
+machine.  SMG98 is also memory-access bound, doing only about 1-2
+computations per memory access, so memory-access speeds will also have
+a large impact on performance.
 
-/**@name Files in this Distribution
+%==========================================================================
+%==========================================================================
 
-\begin{verbatim}
+Files in this Distribution
+
+NOTE: Not all of these files are actually needed by SMG98.  This code
+is part of a larger linear solver library that is being developed in
+the Center for Applied Scientific Computing (CASC) at LLNL.
+
 In the linear_solvers directory the following files are included:
-	HYPRE.h                                        
-	Makefile.in 
-	configure.in  
-	
-	The following subdirectories are also included:
-	docs
-	utilities
-	struct_matrix_vector
-	struct_linear_solvers
+Makefile.in
+configure
+
+The following subdirectories are also included:
+docs
+struct_linear_solvers
+struct_matrix_vector
+test
+utilities
 
 In the docs directory the following files are included:
-	TBD....
+smg98.readme
 
 In the utilities directory the following files are included:
-memory_dmalloc.c      thread_wrappers.awk
-HYPRE_utilities.h     memory_dmalloc.o      threading.c
-Makefile              mpistubs.c            threading.h
-Makefile.in           mpistubs.h            threading.o
-Makefile~             mpistubs.o            timer.c
-general.h             preproc.c             timer.o
-headers               pthreads_interface.c  timing.c
-hypre_utilities.h     random.c              timing.h
-libHYPRE_utilities.a  thread_mpistubs.c     timing.o
-memory.c              thread_mpistubs.h     utilities.h
-memory.h              thread_mpistubs.o
-memory.o              thread_protos.awk
 
 In the struct_matrix_vector directory the following files are included:
-grow.o
-DevManual.dxx              headers
-HYPRE_headers              headers.h
-HYPRE_mv.h                 lap_write_matrix.m
-HYPRE_struct_grid.c        libHYPRE_mv.a
-HYPRE_struct_grid.o        one_to_many.c
-HYPRE_struct_matrix.c      one_to_many_vector.c
-HYPRE_struct_matrix.o      project.c
-HYPRE_struct_stencil.c     project.o
-HYPRE_struct_stencil.o     pthreads_c_definitions.m4
-HYPRE_struct_vector.c      read_matrix.m
-HYPRE_struct_vector.o      read_vector.m
-Makefile                   sbox.o
-Makefile.in                struct_axpy.c
-ardra_write_matrix.m       struct_axpy.o
-batch.blue                 struct_copy.c
-box.c                      struct_copy.o
-box.h                      struct_grid.c
-box.o                      struct_grid.h
-box_algebra.c              struct_grid.o
-box_algebra.o              struct_innerprod.c
-box_alloc.c                struct_innerprod.o
-box_alloc.o                struct_io.c
-box_data.c                 struct_io.o
-box_neighbors.c            struct_matrix.c
-box_neighbors.h            struct_matrix.h
-box_neighbors.o            struct_matrix.o
-box_pthreads.h             struct_matrix_mask.c
-box_pthreads.m4            struct_matrix_mask.o
-communication.c            struct_matrix_vector.h
-communication.h            struct_matvec.c
-communication.o            struct_matvec.o
-communication_info.c       struct_scale.c
-communication_info.o       struct_scale.o
-computation.c              struct_stencil.c
-computation.h              struct_stencil.h
-computation.o              struct_stencil.o
-create_2d_laplacian.c      struct_vector.c
-create_3d_laplacian.c      struct_vector.h
-dco_8.dat                  struct_vector.o
-docxx.sty                  thread_wrappers.c
-driver_internal.c          write_matrix.m
-grow.c                     write_vector.m
 
 In the struct_linear_solvers directory the following files are included:
-pcg.c                    smg_residual.o
-HYPRE_headers            pcg.o                    smg_residual_unrolled.c
-HYPRE_ls.h               pcg_struct.c             smg_restrict.c
-HYPRE_struct_pcg.c       pcg_struct.o             smg_restrict.o
-HYPRE_struct_pcg.o       smg.c                    smg_setup.c
-HYPRE_struct_smg.c       smg.h                    smg_setup.o
-HYPRE_struct_smg.o       smg.o                    smg_setup_interp.c
-Makefile                 smg2_setup_rap.c         smg_setup_interp.o
-Makefile.in              smg2_setup_rap.o         smg_setup_rap.c
-cyclic_reduction.c       smg3_setup_rap.c         smg_setup_rap.o
-cyclic_reduction.o       smg3_setup_rap.o         smg_setup_restrict.c
-general.c                smg_intadd.c             smg_setup_restrict.o
-general.o                smg_intadd.o             smg_solve.c
-headers                  smg_relax.c              smg_solve.o
-headers.h                smg_relax.o              struct_linear_solvers.h
-libHYPRE_ls.a            smg_residual.c           thread_wrappers.c
 
 
-\end{verbatim}
+%==========================================================================
+%==========================================================================
 
+Building the Code
 
+SMG98 uses GNU Autoconf to generate machine-specific makefiles for
+building the code.  To generate the makefiles, type
 
-*/%==========================================================================
-\chapter{Building the Code}
-\label{Building the Code}
+  configure
 
-To automatically generate machine specific makefiles, type
-\kbd{configure} in the \file{linear_solvers} directory.  The configure
-script is a portable script generated by GNU Autoconf.  It runs a
-series of tests to determine characteristics of the machine on which
-it is running, and it uses the results of the these tests to produce
-the machine specific makefiles, called `Makefile', from template files
-called `Makefile.in' in each directory.  Once the makefiles are
-produced you can run make as you would with any other makefile.
+in the top-level directory.  The configure script is a portable script
+generated by GNU Autoconf.  It runs a series of tests to determine
+characteristics of the machine on which it is running, and it uses the
+results of the these tests to produce the machine specific makefiles,
+called `Makefile', from template files called `Makefile.in' in each
+directory.  The configure script produces a file called `config.cache'
+which stores some of its results.  If you wish to run configure again
+in a way that will get different results, you should remove this file.
 
-The configure script produces a file called `config.cache' which
-stores some of its results.  If you wish to run configure again in a
-way that will get different results, you should remove `config.cache'.
+Once the makefiles are produced, type
+
+  make
+
+Other available targets are
+
+  make clean        (deletes .o files)
+  make veryclean    (deletes .o files, libraries, and executables)
 
 This configure script primarily does the following things:
-\begin{itemize}
-\item selects a C compiler
-\item provides either optimization or debugging options for the C compiler
-\item finds the headers and libraries for MPI
-\end{itemize}
+
+   1. selects a C compiler
+   2. provides either optimization or debugging options for the C compiler
+   3. finds the headers and libraries for MPI
 
 The configure script has some command-line options that can give you
 some control over the choices it will make.  You can type
-\begin{verbatim}
+
    configure --help
-\end{verbatim}
+
 to see the list of all of the command-line options to configure, but
 the most significant options are at the bottom of the list, after the
 line that reads
-\begin{verbatim}
+
    --enable and --with options recognized:
-\end{verbatim}
 
-\begin{description}
+Here are the current options:
 
-\item[--with-CC=ARG] This option allows you to choose the C compiler
-you wish to use.  The default compiler that configure chooses is gcc,
-if it is available.
+--with-CC=ARG
 
-\item[--enable-opt-debug=ARG] Choose whether you want the C compiler
-to have optimization or debugging flags.  For debugging, replace
-\kbd{ARG} with \kbd{debug}.  For optimization, replace \kbd{ARG} with
-\kbd{opt}.  If you want both sets of flags, replace \kbd{ARG} with
-\kbd{both}.  The default is optimization
+This option allows you to choose the C compiler you wish to use.  The
+default compiler that configure uses is the MPI compiler.
 
-\item[--without-MPI] This flag suppresses the use of MPI.
+--enable-opt-debug=ARG
 
-\item[--with-mpi-include=DIR]
-\item[--with-mpi-libs=LIBS]
-\item[--with-mpi-lib-dirs=DIRS] These three flags are to be used if
-you want to override the automatic search for MPI.  If you use one of
-these flags, you must use all three.  Replace \kbd{DIR} with the path
-of the directory that contains \file{mpi.h}, replace \kbd{LIBS} with a
-list of the stub names of all the libraries needed for MPI, and
-replace \kbd{DIRS} with a list of the directory paths containing the
-libraries specified by \kbd{LIBS}.  NOTE: The lists \kbd{LIBS} and
-\kbd{DIRS} should be space-separated and contained in quotes, e.g.
-\begin{verbatim}
+Choose whether you want the C compiler to have optimization or
+debugging flags.  For debugging, replace `ARG' with `debug'.  For
+optimization, replace `ARG' with `opt'.  If you want both sets of
+flags, replace `ARG' with `both'.  The default is optimization.
+
+--without-MPI
+
+This flag suppresses the use of MPI.
+
+--with-mpi-include=DIR
+--with-mpi-libs=LIBS
+--with-mpi-lib-dirs=DIRS
+
+These three flags are to be used if you want to override the automatic
+search for MPI.  If you use one of these flags, you must use all
+three.  Replace `DIR' with the path of the directory that contains
+mpi.h, replace `LIBS' with a list of the stub names of all the
+libraries needed for MPI, and replace `DIRS' with a list of the
+directory paths containing the libraries specified by `LIBS'.  NOTE:
+The lists `LIBS' and `DIRS' should be space-separated and contained in
+quotes, e.g.
+
    --with-mpi-libs="nslsocket mpi"
    --with-mpi-lib-dirs="/usr/lib /usr/local/mpi/lib"
-\end{verbatim}
 
-\item[--with-mpi-flags=FLAGS] Sometimes other compiler flags are
-needed for certain MPI implementations to work.  Replace \kbd{FLAGS}
-with a space-separated list of whatever flags are necessary.  This
-option does not override the automatic search for MPI.  It can be used
-to add to the results of the automatic search, or it can be used along
-with the three previous flags.
+--with-mpi-flags=FLAGS
 
-\item[--with-MPICC=ARG] The automatic search for the MPI stuff is
-based on a tool such as \file{mpicc} that configure finds in your
-\code{$PATH}.  If there is an implementation of MPI that you wish to
-use, you can replace \kbd{ARG} with the name of that MPI version's C
-compiler wrapper, if it has one.  (MPICH has \file{mpicc}, IBM MPI has
-\file{mpcc}, other MPIs use other names.)  configure will then
-automatically find the necessary libraries and headers.
+Sometimes other compiler flags are needed for certain MPI
+implementations to work.  Replace `FLAGS' with a space-separated list
+of whatever flags are necessary.  This option does not override the
+automatic search for MPI.  It can be used to add to the results of the
+automatic search, or it can be used along with the three previous
+flags.
 
-\end{description}
+--with-MPICC=ARG
 
-/**@name Optimization and Improvement Challenges
+The automatic search for the MPI stuff is based on a tool such as
+mpicc that configure finds in your $PATH.  If there is an
+implementation of MPI that you wish to use, you can replace `ARG' with
+the name of that MPI version's C compiler wrapper, if it has one.
+(MPICH has mpicc, IBM MPI has mpcc, other MPIs use other names.)
+configure will then automatically find the necessary libraries and
+headers.
 
-*/
-/**@name Parallelism and Scalability Expectations
+%==========================================================================
+%==========================================================================
 
-*//**@name Running the Code
+Optimization and Improvement Challenges
 
-Once calls to smg98 routines have been placed in the application code and the 
-code has been built according to the instructions in "Building the Code", 
-simply typre the following to run the code:
+This code is memory-access bound.  We believe it would be very
+difficult to obtain "good" cache reuse with an optimized version of
+the code.
 
-> mpirun -np 3 executable_filename -n 1 2 1 -P 1 3 1 -b 1 2 1 -c 0 1.0 
+%==========================================================================
+%==========================================================================
 
--np 3 indicates the number of nodes which you want to run on.
+Parallelism and Scalability Expectations
 
--n 1 2 1 indicates a problem size of 1x2x1.
+SMG98 has been run on the following platforms:
 
--P 1 3 1 indicates the partitioning in each direction.
+ Blue-Pacific (ID)   - up to 64 procs
+ Blue-Pacific (TR)   - up to 256 procs
+ Red                 - up to 1000 procs
+ DEC cluster         - up to 8 procs
+ Sun sparc 5's, 10's - up to 4 machines
+ Pentium PC          - up to 1 proc
 
--b 1 2 1 ??????
-
--c 0 1.0 0 ?????
-
-
-Time to execute varies depending on the parameters used.
-
-During executing of smg98 routines, progress is shown through messages printed
-to the screen.    
- 
-*/
-/**@name Timing Issues
-
-\begin{verbatim} 
-
-All timings made by this code are via the timing.c and timer.c files in the 
-utilities directory.  Timing.c routines are used when MPI is not used and
-timer.c routines are used when MPI is used.  It is assumes that the MPI timers
-are more accurate than the system timer.  Both wall clock time and CPU time
-are calculated.  
-
-Timing calcualtions are made around each section in both the setup and solve
-phases.  The measurements are made in microseconds.
-
-
-
-\end{verbatim}
-
-*//**@name Memory Needed
-
-*/
-/**@name About the Data
-
-\begin{verbatim}
-
-
-
-\end{verbatim}
-*/
-/**@name Expected Results
-
-\begin{verbatim}
-
-Listed below is a sample application which uses smg98 routines.  This code, 
-when compiled and run with the parameters shown should produce the results
-as listed below.
-
-#include <stdlib.h>
-#include <stdio.h>
-#include <math.h>
-
-#include "utilities.h"
-#include "HYPRE_ls.h"
- 
-#ifdef HYPRE_DEBUG
-#include <cegdb.h>
-#endif
-
-#ifdef HYPRE_USE_PTHREADS
-#ifndef HYPRE_NO_PTHREAD_MANGLING
-#if 0
-#undef HYPRE_InitializeStructMatrix
-#undef HYPRE_StructSMGSetup
-#undef HYPRE_StructSMGSolve
-#undef HYPRE_SetStructMatrixBoxValues
-#undef HYPRE_SetStructVectorBoxValues
-#undef HYPRE_StructPCGInitialize
-#undef HYPRE_StructPCGSolve
-#undef HYPRE_StructDiagScale
-#endif
-#endif
-#endif
-
-
-/*--------------------------------------------------------------------------
- * Test driver for structured matrix interface (structured storage)
- *--------------------------------------------------------------------------*
- 
-
-/*----------------------------------------------------------------------
- * Standard 7-point laplacian in 3D with grid and anisotropy determined
- * as command line arguments.  Do `driver -help' for usage info.
- *----------------------------------------------------------------------*
-
-int
-main( int   argc,
-      char *argv[] )
-{
-   int                 arg_index;
-   int                 print_usage;
-   int                 nx, ny, nz;
-   int                 P, Q, R;
-   int                 bx, by, bz;
-   double              cx, cy, cz;
-   int                 solver_id;
-
-   int                 A_num_ghost[6] = { 0, 0, 0, 0, 0, 0};
-                     
-   HYPRE_StructMatrix  A;
-   HYPRE_StructVector  b;
-   HYPRE_StructVector  x;
-
-   HYPRE_StructSolver  smg_solver;
-   HYPRE_StructSolver  pcg_solver;
-   HYPRE_StructSolver  pcg_precond;
-   int                 num_iterations;
-   int                 time_index;
-   double              final_res_norm;
-
-   int                 num_procs, myid;
-
-   int                 p, q, r;
-   int                 dim;
-   int                 n_pre, n_post;
-   int                 nblocks, volume;
-
-   int               **iupper;
-   int               **ilower;
-
-   int                *istart;
-
-   int               **offsets;
-
-   HYPRE_StructGrid    grid;
-   HYPRE_StructStencil stencil;
-
-   int                *stencil_indices;
-   double             *values;
-
-   int                 i, s, d;
-   int                 ix, iy, iz, ib;
-
-   /*-----------------------------------------------------------
-    * Initialize some stuff
-    *-----------------------------------------------------------*
-
-#ifdef HYPRE_USE_PTHREADS
-   HYPRE_InitPthreads(4);
-#endif  
-
- 
-   /* Initialize MPI *
-   MPI_Init(&argc, &argv);
-
-   MPI_Comm_size(MPI_COMM_WORLD, &num_procs );
-   MPI_Comm_rank(MPI_COMM_WORLD, &myid );
-
-
-#ifdef HYPRE_DEBUG
-   cegdb(&argc, &argv, myid);
-#endif
-
-   hypre_InitMemoryDebug(myid);
-
-   /*-----------------------------------------------------------
-    * Set defaults
-    *-----------------------------------------------------------*
- 
-   dim = 3;
-
-   nx = 10;
-   ny = 10;
-   nz = 10;
-
-   P  = num_procs;
-   Q  = 1;
-   R  = 1;
-
-   bx = 1;
-   by = 1;
-   bz = 1;
-
-   cx = 1.0;
-   cy = 1.0;
-   cz = 1.0;
-
-   n_pre  = 1;
-   n_post = 1;
-
-   solver_id = 0;
-
-   /*-----------------------------------------------------------
-    * Parse command line
-    *-----------------------------------------------------------*
- 
-   print_usage = 0;
-   arg_index = 1;
-   while (arg_index < argc)
-   {
-      if ( strcmp(argv[arg_index], "-n") == 0 )
-      {
-         arg_index++;
-         nx = atoi(argv[arg_index++]);
-         ny = atoi(argv[arg_index++]);
-         nz = atoi(argv[arg_index++]);
-      }
-      else if ( strcmp(argv[arg_index], "-P") == 0 )
-      {
-         arg_index++;
-         P  = atoi(argv[arg_index++]);
-         Q  = atoi(argv[arg_index++]);
-         R  = atoi(argv[arg_index++]);
-      }
-      else if ( strcmp(argv[arg_index], "-b") == 0 )
-      {
-         arg_index++;
-         bx = atoi(argv[arg_index++]);
-         by = atoi(argv[arg_index++]);
-         bz = atoi(argv[arg_index++]);
-      }
-      else if ( strcmp(argv[arg_index], "-c") == 0 )
-      {
-         arg_index++;
-         cx = atof(argv[arg_index++]);
-         cy = atof(argv[arg_index++]);
-         cz = atof(argv[arg_index++]);
-      }
-      else if ( strcmp(argv[arg_index], "-v") == 0 )
-      {
-         arg_index++;
-         n_pre = atoi(argv[arg_index++]);
-         n_post = atoi(argv[arg_index++]);
-      }
-      else if ( strcmp(argv[arg_index], "-d") == 0 )
-      {
-         arg_index++;
-         dim = atoi(argv[arg_index++]);
-      }
-      else if ( strcmp(argv[arg_index], "-solver") == 0 )
-      {
-         arg_index++;
-         solver_id = atoi(argv[arg_index++]);
-      }
-      else if ( strcmp(argv[arg_index], "-help") == 0 )
-      {
-         print_usage = 1;
-         break;
-      }
-      else
-      {
-         break;
-      }
-   }
-
-   /*-----------------------------------------------------------
-    * Print usage info
-    *-----------------------------------------------------------*
- 
-   if ( (print_usage) && (myid == 0) )
-   {
-      printf("\n");
-      printf("Usage: %s [<options>]\n", argv[0]);
-      printf("\n");
-      printf("  -n <nx> <ny> <nz>    : problem size per block\n");
-      printf("  -P <Px> <Py> <Pz>    : processor topology\n");
-      printf("  -b <bx> <by> <bz>    : blocking per processor\n");
-      printf("  -c <cx> <cy> <cz>    : diffusion coefficients\n");
-      printf("  -v <n_pre> <n_post>  : number of pre and post relaxations\n");
-      printf("  -d <dim>             : problem dimension (2 or 3)\n");
-      printf("  -solver <ID>         : solver ID\n");
-      printf("\n");
-
-      exit(1);
-   }
-
-   /*-----------------------------------------------------------
-    * Check a few things
-    *-----------------------------------------------------------*
-
-   if ((P*Q*R) != num_procs)
-   {
-      printf("Error: Invalid number of processors or processor topology \n");
-      exit(1);
-   }
-
-   /*-----------------------------------------------------------
-    * Print driver parameters
-    *-----------------------------------------------------------*
- 
-   if (myid == 0)
-   {
-      printf("Running with these driver parameters:\n");
-      printf("  (nx, ny, nz)    = (%d, %d, %d)\n", nx, ny, nz);
-      printf("  (Px, Py, Pz)    = (%d, %d, %d)\n", P,  Q,  R);
-      printf("  (bx, by, bz)    = (%d, %d, %d)\n", bx, by, bz);
-      printf("  (cx, cy, cz)    = (%f, %f, %f)\n", cx, cy, cz);
-      printf("  (n_pre, n_post) = (%d, %d)\n", n_pre, n_post);
-      printf("  dim             = %d\n", dim);
-      printf("  solver ID       = %d\n", solver_id);
-   }
-
-   /*-----------------------------------------------------------
-    * Set up the grid structure
-    *-----------------------------------------------------------*
-
-   istart = hypre_CTAlloc(int, dim);
-
-   switch (dim)
-   {
-      case 1:
-         volume  = nx;
-         nblocks = bx;
-         istart[0] = -17;
-         stencil_indices = hypre_CTAlloc(int, 2);
-         offsets = hypre_CTAlloc(int*, 2);
-         offsets[0] = hypre_CTAlloc(int, 1);
-         offsets[0][0] = -1; 
-         offsets[1] = hypre_CTAlloc(int, 1);
-         offsets[1][0] = 0; 
-         /* compute p from P and myid *
-         p = myid % P;
-         break;
-      case 2:
-         volume  = nx*ny;
-         nblocks = bx*by;
-         istart[0] = -17;
-         istart[1] = 0;
-         stencil_indices = hypre_CTAlloc(int, 3);
-         offsets = hypre_CTAlloc(int*, 3);
-         offsets[0] = hypre_CTAlloc(int, 2);
-         offsets[0][0] = -1; 
-         offsets[0][1] = 0; 
-         offsets[1] = hypre_CTAlloc(int, 2);
-         offsets[1][0] = 0; 
-         offsets[1][1] = -1; 
-         offsets[2] = hypre_CTAlloc(int, 2);
-         offsets[2][0] = 0; 
-         offsets[2][1] = 0; 
-         /* compute p,q from P,Q and myid *
-         p = myid % P;
-         q = (( myid - p)/P) % Q;
-         break;
-      case 3:
-         volume  = nx*ny*nz;
-         nblocks = bx*by*bz;
-         istart[0] = -17;
-         istart[1] = 0;
-         istart[2] = 32;
-         stencil_indices = hypre_CTAlloc(int, 4);
-         offsets = hypre_CTAlloc(int*, 4);
-         offsets[0] = hypre_CTAlloc(int, 3);
-         offsets[0][0] = -1; 
-         offsets[0][1] = 0; 
-         offsets[0][2] = 0; 
-         offsets[1] = hypre_CTAlloc(int, 3);
-         offsets[1][0] = 0; 
-         offsets[1][1] = -1; 
-         offsets[1][2] = 0; 
-         offsets[2] = hypre_CTAlloc(int, 3);
-         offsets[2][0] = 0; 
-         offsets[2][1] = 0; 
-         offsets[2][2] = -1; 
-         offsets[3] = hypre_CTAlloc(int, 3);
-         offsets[3][0] = 0; 
-         offsets[3][1] = 0; 
-         offsets[3][2] = 0; 
-         /* compute p,q,r from P,Q,R and myid *
-         p = myid % P;
-         q = (( myid - p)/P) % Q;
-         r = ( myid - p - P*q)/( P*Q );
-         break;
-   }
-
-   ilower = hypre_CTAlloc(int*, nblocks);
-   iupper = hypre_CTAlloc(int*, nblocks);
-   for (i = 0; i < nblocks; i++)
-   {
-      ilower[i] = hypre_CTAlloc(int, dim);
-      iupper[i] = hypre_CTAlloc(int, dim);
-   }
-
-   for (i = 0; i < dim; i++)
-   {
-      A_num_ghost[2*i] = 1;
-      A_num_ghost[2*i + 1] = 1;
-   }
-
-   /* compute ilower and iupper from (p,q,r), (bx,by,bz), and (nx,ny,nz) *
-   ib = 0;
-   switch (dim)
-   {
-      case 1:
-         for (ix = 0; ix < bx; ix++)
-         {
-            ilower[ib][0] = istart[0]+ nx*(bx*p+ix);
-            iupper[ib][0] = istart[0]+ nx*(bx*p+ix+1) - 1;
-            ib++;
-         }
-         break;
-      case 2:
-         for (iy = 0; iy < by; iy++)
-            for (ix = 0; ix < bx; ix++)
-            {
-               ilower[ib][0] = istart[0]+ nx*(bx*p+ix);
-               iupper[ib][0] = istart[0]+ nx*(bx*p+ix+1) - 1;
-               ilower[ib][1] = istart[1]+ ny*(by*q+iy);
-               iupper[ib][1] = istart[1]+ ny*(by*q+iy+1) - 1;
-               ib++;
-            }
-         break;
-      case 3:
-         for (iz = 0; iz < bz; iz++)
-            for (iy = 0; iy < by; iy++)
-               for (ix = 0; ix < bx; ix++)
-               {
-                  ilower[ib][0] = istart[0]+ nx*(bx*p+ix);
-                  iupper[ib][0] = istart[0]+ nx*(bx*p+ix+1) - 1;
-                  ilower[ib][1] = istart[1]+ ny*(by*q+iy);
-                  iupper[ib][1] = istart[1]+ ny*(by*q+iy+1) - 1;
-                  ilower[ib][2] = istart[2]+ nz*(bz*r+iz);
-                  iupper[ib][2] = istart[2]+ nz*(bz*r+iz+1) - 1;
-                  ib++;
-               }
-         break;
-   } 
-
-   HYPRE_NewStructGrid(MPI_COMM_WORLD, dim, &grid);
-   for (ib = 0; ib < nblocks; ib++)
-   {
-      HYPRE_SetStructGridExtents(grid, ilower[ib], iupper[ib]);
-   }
-   HYPRE_AssembleStructGrid(grid);
-
-   /*-----------------------------------------------------------
-    * Set up the stencil structure
-    *-----------------------------------------------------------*
- 
-   HYPRE_NewStructStencil(dim, dim + 1, &stencil);
-   for (s = 0; s < dim + 1; s++)
-   {
-      HYPRE_SetStructStencilElement(stencil, s, offsets[s]);
-   }
-
-   /*-----------------------------------------------------------
-    * Set up the matrix structure
-    *-----------------------------------------------------------*
- 
-   HYPRE_NewStructMatrix(MPI_COMM_WORLD, grid, stencil, &A);
-   HYPRE_SetStructMatrixSymmetric(A, 1);
-   HYPRE_SetStructMatrixNumGhost(A, A_num_ghost);
-   HYPRE_InitializeStructMatrix(A);
-   /*-----------------------------------------------------------
-    * Fill in the matrix elements
-    *-----------------------------------------------------------*
-
-   values = hypre_CTAlloc(double, (dim +1)*volume);
-
-   /* Set the coefficients for the grid *
-   for (i = 0; i < (dim + 1)*volume; i += (dim + 1))
-   {
-      for (s = 0; s < (dim + 1); s++)
-      {
-         stencil_indices[s] = s;
-         switch (dim)
-         {
-            case 1:
-               values[i  ] = -cx;
-               values[i+1] = 2.0*(cx);
-               break;
-            case 2:
-               values[i  ] = -cx;
-               values[i+1] = -cy;
-               values[i+2] = 2.0*(cx+cy);
-               break;
-            case 3:
-               values[i  ] = -cx;
-               values[i+1] = -cy;
-               values[i+2] = -cz;
-               values[i+3] = 2.0*(cx+cy+cz);
-               break;
-         }
-      }
-   }
-   for (ib = 0; ib < nblocks; ib++)
-   {
-      HYPRE_SetStructMatrixBoxValues(A, ilower[ib], iupper[ib], (dim+1),
-                                     stencil_indices, values);
-   }
-
-   /* Zero out stencils reaching to real boundary *
-   for (i = 0; i < volume; i++)
-   {
-      values[i] = 0.0;
-   }
-   for (d = 0; d < dim; d++)
-   {
-      for (ib = 0; ib < nblocks; ib++)
-      {
-         if( ilower[ib][d] == istart[d] )
-         {
-            i = iupper[ib][d];
-            iupper[ib][d] = istart[d];
-            stencil_indices[0] = d;
-            HYPRE_SetStructMatrixBoxValues(A, ilower[ib], iupper[ib],
-                                           1, stencil_indices, values);
-            iupper[ib][d] = i;
-         }
-      }
-   }
-
-   HYPRE_AssembleStructMatrix(A);
-#if 0
-   HYPRE_PrintStructMatrix("driver.out.A", A, 0);
-#endif
-
-   hypre_TFree(values);
-
-   /*-----------------------------------------------------------
-    * Set up the linear system
-    *-----------------------------------------------------------*
-
-   values = hypre_CTAlloc(double, volume);
-
-   HYPRE_NewStructVector(MPI_COMM_WORLD, grid, stencil, &b);
-   HYPRE_InitializeStructVector(b);
-   for (i = 0; i < volume; i++)
-   {
-      values[i] = 1.0;
-   }
-   for (ib = 0; ib < nblocks; ib++)
-   {
-      HYPRE_SetStructVectorBoxValues(b, ilower[ib], iupper[ib], values);
-   }
-   HYPRE_AssembleStructVector(b);
-#if 0
-   HYPRE_PrintStructVector("driver.out.b", b, 0);
-#endif
-
-   HYPRE_NewStructVector(MPI_COMM_WORLD, grid, stencil, &x);
-   HYPRE_InitializeStructVector(x);
-   for (i = 0; i < volume; i++)
-   {
-      values[i] = 0.0;
-   }
-   for (ib = 0; ib < nblocks; ib++)
-   {
-      HYPRE_SetStructVectorBoxValues(x, ilower[ib], iupper[ib], values);
-   }
-   HYPRE_AssembleStructVector(x);
-#if 0
-   HYPRE_PrintStructVector("driver.out.x0", x, 0);
-#endif
- 
-   hypre_TFree(values);
-
-   /*-----------------------------------------------------------
-    * Solve the system using SMG
-    *-----------------------------------------------------------*
-
-   if (solver_id == 0)
-   {
-      time_index = hypre_InitializeTiming("SMG Setup");
-      hypre_BeginTiming(time_index);
-
-      HYPRE_StructSMGInitialize(MPI_COMM_WORLD, &smg_solver);
-      HYPRE_StructSMGSetMemoryUse(smg_solver, 0);
-      HYPRE_StructSMGSetMaxIter(smg_solver, 50);
-      HYPRE_StructSMGSetRelChange(smg_solver, 0);
-      HYPRE_StructSMGSetTol(smg_solver, 1.0e-06);
-      HYPRE_StructSMGSetNumPreRelax(smg_solver, n_pre);
-      HYPRE_StructSMGSetNumPostRelax(smg_solver, n_post);
-      HYPRE_StructSMGSetLogging(smg_solver, 1);
-      HYPRE_StructSMGSetup(smg_solver, A, b, x);
-
-      hypre_EndTiming(time_index);
-      hypre_PrintTiming("Setup phase times", MPI_COMM_WORLD);
-      hypre_FinalizeTiming(time_index);
-      hypre_ClearTiming();
-
-      time_index = hypre_InitializeTiming("SMG Solve");
-      hypre_BeginTiming(time_index);
-
-      HYPRE_StructSMGSolve(smg_solver, A, b, x);
-
-      hypre_EndTiming(time_index);
-      hypre_PrintTiming("Solve phase times", MPI_COMM_WORLD);
-      hypre_FinalizeTiming(time_index);
-      hypre_ClearTiming();
+Consider increasing both problem size and number of processors in tandem.
+On scalable architectures, time-to-solution for SMG98 will initially
+increase, then it will level off at a modest numbers of processors,
+remaining roughly constant for larger numbers of processors.  Iteration
+counts will also increase slightly for small to modest sized problems,
+then level off at a roughly constant number for larger problem sizes.
+
+For example, we get the following results for a 3D problem with
+cx = 0.1, cy = 1.0, and cz = 10.0, for a problem distributed on
+a logical P x Q x R processor topology, with fixed local problem
+size per processor given as 40x40x40:
+
+ "P x Q x R"      P  "iters"     "solve time"    "solve mflops"
+  1x1x1           1     6          23.255241          6.464325
+  2x2x2           8     6          32.262907         37.030568
+  3x3x3          27     7          41.341892        111.707595
+  4x4x4          64     7          46.672215        236.775982
+  5x5x5         125     7          50.051737        433.673948
+  8x8x8         512     7          54.094806       1631.579065
+  10x10x10     1000     8          62.725305       3136.280769
+
+These results were obtained on ASCI Red.
+
+%==========================================================================
+%==========================================================================
+
+Running the Code
+
+The driver for SMG98 is called `struct_linear_solvers', and is located
+in the linear_solvers/test subdirectory.  Type
+
+   mpirun -np 1 struct_linear_solvers -help
+
+to get usage information.  This prints out the following:
+
+Usage: .../linear_solvers/test/struct_linear_solvers [<options>]
+
+  -n <nx> <ny> <nz>    : problem size per block
+  -P <Px> <Py> <Pz>    : processor topology
+  -b <bx> <by> <bz>    : blocking per processor
+  -c <cx> <cy> <cz>    : diffusion coefficients
+  -v <n_pre> <n_post>  : number of pre and post relaxations
+  -d <dim>             : problem dimension (2 or 3)
+  -solver <ID>         : solver ID
+
+All of the arguments are optional.  The most important options for the
+SMG98 compact application are the `-n' and `-P' options.  The `-n'
+option allows one to specify the local problem size per processor, the
+the `-P' option specifies the processor topology to run on.  The
+global problem size will be <Px>*<nx> by <Py>*<ny> by <Pz>*<nz>.
+
+%==========================================================================
+%==========================================================================
+
+Timing Issues
+
+The whole code is timed using the MPI timers.  Timing results are
+printed to standard out, and are divided into "Setup Phase" times and
+"Solve Phase" times.  Timings for a few individual routines are also
+printed out.
+
+%==========================================================================
+%==========================================================================
+
+Memory Needed
+
+SMG98 is a memory intensive code, and its memory needs are somewhat
+complicated to describe.  For the 3D problems discussed in this
+document, memory requirements are roughly 54 times the local problem
+size times the size of a double plus some overhead for storing ghost
+points, etc. in the code.  Unfortunately, the overhead required by
+this version of the SMG code grows with problem size, and can be
+quite substantial for very large runs.
+
+%==========================================================================
+%==========================================================================
+
+About the Data
+
+%==========================================================================
+%==========================================================================
+
+Expected Results
+
+Consider the following run:
+
+  mpirun -np 1 struct_linear_solvers -np 12 12 12 -c 2.0 3.0 40
+
+This is what SMG98 prints out:
+
+   Running with these driver parameters:
+     (nx, ny, nz)    = (12, 12, 12)
+     (Px, Py, Pz)    = (1, 1, 1)
+     (bx, by, bz)    = (1, 1, 1)
+     (cx, cy, cz)    = (2.000000, 3.000000, 40.000000)
+     (n_pre, n_post) = (1, 1)
+     dim             = 3
+     solver ID       = 0
+   =============================================
+   Setup phase times:
+   =============================================
+   SMG Setup:
+     wall clock time = 0.383954 seconds
+     wall MFLOPS     = 0.825474
+     cpu clock time  = 0.380000 seconds
+     cpu MFLOPS      = 0.834063
+   SMG:
+     wall clock time = 0.050722 seconds
+     wall MFLOPS     = 4.637869
+     cpu clock time  = 0.050000 seconds
+     cpu MFLOPS      = 4.704840
+   SMGRelax:
+     wall clock time = 0.072742 seconds
+     wall MFLOPS     = 4.357098
+     cpu clock time  = 0.080000 seconds
+     cpu MFLOPS      = 3.961800
+   SMGResidual:
+     wall clock time = 0.024079 seconds
+     wall MFLOPS     = 5.973338
+     cpu clock time  = 0.040000 seconds
+     cpu MFLOPS      = 3.595800
+   CyclicReduction:
+     wall clock time = 0.039484 seconds
+     wall MFLOPS     = 3.662243
+     cpu clock time  = 0.040000 seconds
+     cpu MFLOPS      = 3.615000
+   SMGIntAdd:
+     wall clock time = 0.002812 seconds
+     wall MFLOPS     = 5.633001
+     cpu clock time  = 0.000000 seconds
+     cpu MFLOPS      = 0.000000
+   SMGRestrict:
+     wall clock time = 0.001255 seconds
+     wall MFLOPS     = 10.097211
+     cpu clock time  = 0.000000 seconds
+     cpu MFLOPS      = 0.000000
+   =============================================
+   Solve phase times:
+   =============================================
+   SMG Solve:
+     wall clock time = 0.526451 seconds
+     wall MFLOPS     = 4.864426
+     cpu clock time  = 0.530000 seconds
+     cpu MFLOPS      = 4.831853
+   SMG:
+     wall clock time = 0.526433 seconds
+     wall MFLOPS     = 4.864592
+     cpu clock time  = 0.530000 seconds
+     cpu MFLOPS      = 4.831853
+   SMGRelax:
+     wall clock time = 0.496075 seconds
+     wall MFLOPS     = 4.651397
+     cpu clock time  = 0.510000 seconds
+     cpu MFLOPS      = 4.524396
+   SMGResidual:
+     wall clock time = 0.216037 seconds
+     wall MFLOPS     = 6.290034
+     cpu clock time  = 0.230000 seconds
+     cpu MFLOPS      = 5.908174
+   CyclicReduction:
+     wall clock time = 0.235903 seconds
+     wall MFLOPS     = 3.644964
+     cpu clock time  = 0.260000 seconds
+     cpu MFLOPS      = 3.307146
+   SMGIntAdd:
+     wall clock time = 0.027868 seconds
+     wall MFLOPS     = 6.407349
+     cpu clock time  = 0.020000 seconds
+     cpu MFLOPS      = 8.928000
+   SMGRestrict:
+     wall clock time = 0.015325 seconds
+     wall MFLOPS     = 9.321240
+     cpu clock time  = 0.000000 seconds
+     cpu MFLOPS      = 0.000000
    
-      HYPRE_StructSMGGetNumIterations(smg_solver, &num_iterations);
-      HYPRE_StructSMGGetFinalRelativeResidualNorm(smg_solver, &final_res_norm);
-      HYPRE_StructSMGFinalize(smg_solver);
-   }
+   Iterations = 4
+   Final Relative Residual Norm = 8.972097e-07
 
-   /*-----------------------------------------------------------
-    * Solve the system using PCG
-    *-----------------------------------------------------------*
+The relative residual norm may differ slightly from machine to machine
+or compiler to compiler, but should only differ very slightly (say,
+the 6th or 7th decimal place).  Also, the code should generate nearly
+identical results for a given problem, independent of the data
+distribution.  The only part of the code that does not guarantee
+bitwise identical results is the inner product used to compute norms.
+In practice, the above residual norm has remained the same.
 
-   if (solver_id > 0)
-   {
-      time_index = hypre_InitializeTiming("PCG Setup");
-      hypre_BeginTiming(time_index);
+%==========================================================================
+%==========================================================================
 
-      HYPRE_StructPCGInitialize(MPI_COMM_WORLD, &pcg_solver);
-      HYPRE_StructPCGSetMaxIter(pcg_solver, 50);
-      HYPRE_StructPCGSetTol(pcg_solver, 1.0e-06);
-      HYPRE_StructPCGSetTwoNorm(pcg_solver, 1);
-      HYPRE_StructPCGSetRelChange(pcg_solver, 0);
-      HYPRE_StructPCGSetLogging(pcg_solver, 1);
+Release and Modification Record
 
-      if (solver_id == 1)
-      {
-         /* use symmetric SMG as preconditioner *
-         HYPRE_StructSMGInitialize(MPI_COMM_WORLD, &pcg_precond);
-         HYPRE_StructSMGSetMemoryUse(pcg_precond, 0);
-         HYPRE_StructSMGSetMaxIter(pcg_precond, 1);
-         HYPRE_StructSMGSetTol(pcg_precond, 0.0);
-         HYPRE_StructSMGSetNumPreRelax(pcg_precond, n_pre);
-         HYPRE_StructSMGSetNumPostRelax(pcg_precond, n_post);
-         HYPRE_StructSMGSetLogging(pcg_precond, 0);
-         HYPRE_StructPCGSetPrecond(pcg_solver,
-                                   HYPRE_StructSMGSolve,
-                                   HYPRE_StructSMGSetup,
-                                   pcg_precond);
-      }
-      else if (solver_id == 2)
-      {
-         /* use diagonal scaling as preconditioner *
-#ifdef HYPRE_USE_PTHREADS
-         for (i = 0; i<hypre_NumThreads; i++)
-            pcg_precond[i] = NULL;
-#else
-         pcg_precond = NULL;
-#endif
-         HYPRE_StructPCGSetPrecond(pcg_solver,
-                                   HYPRE_StructDiagScale,
-                                   HYPRE_StructDiagScaleSetup,
-                                   pcg_precond);
-      }
-
-      HYPRE_StructPCGSetup(pcg_solver, A, b, x);
-
-      hypre_EndTiming(time_index);
-      hypre_PrintTiming("Setup phase times", MPI_COMM_WORLD);
-      hypre_FinalizeTiming(time_index);
-      hypre_ClearTiming();
-   
-      time_index = hypre_InitializeTiming("PCG Solve");
-      hypre_BeginTiming(time_index);
-
-      HYPRE_StructPCGSolve(pcg_solver, A, b, x);
-
-      hypre_EndTiming(time_index);
-      hypre_PrintTiming("Solve phase times", MPI_COMM_WORLD);
-      hypre_FinalizeTiming(time_index);
-      hypre_ClearTiming();
-
-      HYPRE_StructPCGGetNumIterations(pcg_solver, &num_iterations);
-      HYPRE_StructPCGGetFinalRelativeResidualNorm(pcg_solver, &final_res_norm);
-      HYPRE_StructPCGFinalize(pcg_solver);
-
-      if (solver_id == 1)
-      {
-         HYPRE_StructSMGFinalize(pcg_precond);
-      }
-   }
-
-   /*-----------------------------------------------------------
-    * Print the solution and other info
-    *-----------------------------------------------------------*
-
-#if 0
-   HYPRE_PrintStructVector("driver.out.x", x, 0);
-#endif
-
-   if (myid == 0)
-   {
-      printf("\n");
-      printf("Iterations = %d\n", num_iterations);
-      printf("Final Relative Residual Norm = %e\n", final_res_norm);
-      printf("\n");
-   }
-
-   /*-----------------------------------------------------------
-    * Finalize things
-    *-----------------------------------------------------------*
-
-   HYPRE_FreeStructGrid(grid);
-   HYPRE_FreeStructMatrix(A);
-   HYPRE_FreeStructVector(b);
-   HYPRE_FreeStructVector(x);
-
-   for (i = 0; i < nblocks; i++)
-   {
-      hypre_TFree(iupper[i]);
-      hypre_TFree(ilower[i]);
-   }
-   hypre_TFree(ilower);
-   hypre_TFree(iupper);
-   hypre_TFree(stencil_indices);
-   hypre_TFree(istart);
-
-   for ( i = 0; i < (dim + 1); i++)
-      hypre_TFree(offsets[i]);
-   hypre_TFree(offsets);
-
-   hypre_FinalizeMemoryDebug();
-
-   /* Finalize MPI *
-   MPI_Finalize();
-
-#ifdef HYPRE_USE_PTHREADS
-   HYPRE_DestroyPthreads();
-#endif  
-
-   return (0);
-}
-
-
-
-Run with these parameters:
-mpirun -np 1 struct_linear_solvers -np 12 12 12 -c 2.0 3.0 40
-
-Produces these results:
-Running with these driver parameters:
-  (nx, ny, nz)    = (12, 12, 12)
-  (Px, Py, Pz)    = (1, 1, 1)
-  (bx, by, bz)    = (1, 1, 1)
-  (cx, cy, cz)    = (2.000000, 3.000000, 40.000000)
-  (n_pre, n_post) = (1, 1)
-  dim             = 3
-  solver ID       = 0
-=============================================
-Setup phase times:
-=============================================
-SMG Setup:
-  wall clock time = 0.383954 seconds
-  wall MFLOPS     = 0.825474
-  cpu clock time  = 0.380000 seconds
-  cpu MFLOPS      = 0.834063
-SMG:
-  wall clock time = 0.050722 seconds
-  wall MFLOPS     = 4.637869
-  cpu clock time  = 0.050000 seconds
-  cpu MFLOPS      = 4.704840
-SMGRelax:
-  wall clock time = 0.072742 seconds
-  wall MFLOPS     = 4.357098
-  cpu clock time  = 0.080000 seconds
-  cpu MFLOPS      = 3.961800
-SMGResidual:
-  wall clock time = 0.024079 seconds
-  wall MFLOPS     = 5.973338
-  cpu clock time  = 0.040000 seconds
-  cpu MFLOPS      = 3.595800
-CyclicReduction:
-  wall clock time = 0.039484 seconds
-  wall MFLOPS     = 3.662243
-  cpu clock time  = 0.040000 seconds
-  cpu MFLOPS      = 3.615000
-SMGIntAdd:
-  wall clock time = 0.002812 seconds
-  wall MFLOPS     = 5.633001
-  cpu clock time  = 0.000000 seconds
-  cpu MFLOPS      = 0.000000
-SMGRestrict:
-  wall clock time = 0.001255 seconds
-  wall MFLOPS     = 10.097211
-  cpu clock time  = 0.000000 seconds
-  cpu MFLOPS      = 0.000000
-=============================================
-Solve phase times:
-=============================================
-SMG Solve:
-  wall clock time = 0.526451 seconds
-  wall MFLOPS     = 4.864426
-  cpu clock time  = 0.530000 seconds
-  cpu MFLOPS      = 4.831853
-SMG:
-  wall clock time = 0.526433 seconds
-  wall MFLOPS     = 4.864592
-  cpu clock time  = 0.530000 seconds
-  cpu MFLOPS      = 4.831853
-SMGRelax:
-  wall clock time = 0.496075 seconds
-  wall MFLOPS     = 4.651397
-  cpu clock time  = 0.510000 seconds
-  cpu MFLOPS      = 4.524396
-SMGResidual:
-  wall clock time = 0.216037 seconds
-  wall MFLOPS     = 6.290034
-  cpu clock time  = 0.230000 seconds
-  cpu MFLOPS      = 5.908174
-CyclicReduction:
-  wall clock time = 0.235903 seconds
-  wall MFLOPS     = 3.644964
-  cpu clock time  = 0.260000 seconds
-  cpu MFLOPS      = 3.307146
-SMGIntAdd:
-  wall clock time = 0.027868 seconds
-  wall MFLOPS     = 6.407349
-  cpu clock time  = 0.020000 seconds
-  cpu MFLOPS      = 8.928000
-SMGRestrict:
-  wall clock time = 0.015325 seconds
-  wall MFLOPS     = 9.321240
-  cpu clock time  = 0.000000 seconds
-  cpu MFLOPS      = 0.000000
-
-Iterations = 4
-Final Relative Residual Norm = 8.972097e-07
-
-\end{verbatim}
-
-*/
-/**@name Release and Modification Record
-
-*/
