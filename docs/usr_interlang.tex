@@ -19,7 +19,7 @@ A pointer parameter in C can achieve the same effect as call-by-reference,
 and by this mechanism the languages can interoperate in a straightforward
 manner.
 
-Portability across typical platforms\footnote{DEC Compass, DEC Tera, and IBM ASCI-Blue at LLNL}
+Portability across typical platforms\footnote{Including DEC Compass, DEC Tera, and IBM ASCI-Blue at LLNL.}
 is currently achieved with the specific Fortran-calling-C mapping: 
 
 \vspace{0.2in}
@@ -55,7 +55,8 @@ in a Fortran call, and if they address inhomogeneously typed collections
 of data (e.g. C structures), Fortran might not have enough information to
 dereference them.  But Fortran can still pass around such addresses, and in
 particular hand them back and forth between various C functions.  The
-{\slshape hypre} Fortran interface makes extensive use of this technique.
+{\slshape hypre} Fortran interface makes extensive use of this technique,
+as with the \verb+addr+ variable in the following general example:
 
 \vspace{0.1in}
 
@@ -78,15 +79,12 @@ the label of the {\slshape hypre} C-function\footnote{For C
 function names under 32 characters in length, the Fortran name is the same
 as the C name.  For C function names over 31 characters, the Fortran
 name is condensed to less than 32 characters (see reference manual for
-Fortran name).}.
+Fortran name in such a case).}.
 {\slshape Hypre} interlanguage C-wrappers currently
-account for related compilation/linking issues involving appended
-underscores, and for Fortran name length limitations.
-Fortran variables like \verb+addr+
-are convenient for receiving, from C, pointers to arrays or other
-collections of data.  Such pointers need not point to data allocated by
-Fortran.  Fortran variable \verb+ierr+ exemplifies a convenient approach
-to error handling through the interface.
+account for interlanguage linking issues involving appended
+underscores.  The C-wrappers also accomodate Fortran subroutine name length
+limitations.  Fortran variable \verb+ierr+ allows error handling through
+the interface.
 
 \vspace{0.1in}
 
@@ -105,7 +103,7 @@ to error handling through the interface.
              .
 
       call HYPRE_IJMatrixInsertRow(IJmatrix, num_nonzero_coefs, row_index,
-                                   col_indexes, coefs, ierr)
+                                   col_indices, coefs, ierr)
 \end{verbatim}
 
 \vspace{0.1in}
@@ -124,8 +122,8 @@ to error handling through the interface.
         return(ierr); }
 \end{verbatim}
 
-\noindent Since the C function name has less than 32 characters, Fortran uses the
-same name in the subroutine call.
+\noindent Since the C function name has less than 32 characters, Fortran
+uses the same name in the subroutine call.
 
 The typical implementation above might not have the portability needed
 over a larger set of platforms.  The previous mapping might
@@ -133,43 +131,5 @@ not be universal.  Furthermore,
 the implementation is hand-programmed, slow, and prone to human error.
 It will probably be replaced by a more automated implementation in accordance
 with the {\slshape Babel} project. 
-
-%  C called:
-%\begin{verbatim}
-%      void hypre_F90_NAME(sub_name)( long int *struct_addr,
-%                                     int      *intg,
-%                                     char     *charact,
-%                                     double   *double_prec,
-%                                     int      *ierr          )
-%\end{verbatim}
-
-%\section{Fortran subroutine calls in {\slshape hypre} source code}
-
-%\vspace{0.1in}
-
-%\noindent Example:
-
-%\vspace{0.1in}
-
-%  C calling:
-%\begin{verbatim}
-%      long int long_intg;
-%      int      intg, ierr;
-%      char     charact;
-%      double   double_prec;
-
-%      hypre_F90_NAME(sub_name)( &long_intg, &intg, &charact,
-%                               &double_prec, &ierr )
-%\end{verbatim}
-
-%  Fortran called:
-%\begin{verbatim}
-%      subroutine sub_name(long_intg, intg, charact, double_prec, ierr)
-
-%      integer*8        long_intg
-%      integer          intg, ierr
-%      character        charact
-%      double precision double_prec
-%\end{verbatim}
 
 %==========================================================================
