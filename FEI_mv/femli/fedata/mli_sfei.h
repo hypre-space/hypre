@@ -27,6 +27,7 @@ class MLI_SFEI : public MLI_FEBase
    int      *blkNodeDofs_;
    int      ***blkElemEqnLists_;
    double   ***blkElemStiffness_;
+   int      blkIDBase_;
 
 public :
 
