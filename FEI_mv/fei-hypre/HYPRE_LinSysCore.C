@@ -42,42 +42,6 @@
 #include "HYPRE_LSI_block.h"
 #include "HYPRE_LSI_Uzawa.h"
 #include "HYPRE_SlideReduction.h"
-#ifdef HAVE_LOBPCG
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-#include "../../eigen/lobpcg/lobpcg.h"
-HYPRE_Solver       pcg_solver;
-HYPRE_ParCSRMatrix parcsr_A;
-
-int Funct_Solve(HYPRE_ParVector b,HYPRE_ParVector x)
-{
-   int ierr=0;
-   ierr=HYPRE_ParCSRPCGSolve(pcg_solver,parcsr_A,b,x);assert2(ierr);
-   return 0;
-}
-int Func_A1(HYPRE_ParVector x,HYPRE_ParVector y)
-{
-   int ierr=0;
-   ierr=HYPRE_ParCSRMatrixMatvec(1.0,parcsr_A,x,0.0,y);assert2(ierr);
-   return 0;
-}
-
-#ifdef __cplusplus
-}
-#endif
-
-#endif
-
-//***************************************************************************
-// SuperLU includes
-//---------------------------------------------------------------------------
-
-#ifdef HAVE_SUPERLU
-#include "dsp_defs.h"
-#include "util.h"
-#endif
 
 //***************************************************************************
 // timers 
@@ -149,6 +113,8 @@ HYPRE_LinSysCore::HYPRE_LinSysCore(MPI_Comm comm) :
                   HYbs_(NULL),
                   HYx_(NULL),
                   HYr_(NULL),
+                  HYnormalA_(NULL),
+                  HYnormalB_(NULL),
                   currA_(NULL),
                   currB_(NULL),
                   currX_(NULL),
@@ -180,6 +146,7 @@ HYPRE_LinSysCore::HYPRE_LinSysCore(MPI_Comm comm) :
                   slideReductionMinNorm_(-1.0),
                   schurReduction_(0),
                   schurReductionCreated_(0),
+                  normalEqnFlag_(0),
                   A21NRows_(0),
                   A21NCols_(0),
                   finalResNorm_(0.0),
@@ -348,6 +315,8 @@ HYPRE_LinSysCore::~HYPRE_LinSysCore()
       delete [] HYpxs_;
       HYpxs_ = NULL;
    }
+   if (HYnormalA_!= NULL) {HYPRE_IJMatrixDestroy(HYnormalA_);HYnormalA_ = NULL;}
+   if (HYnormalB_!= NULL) {HYPRE_IJVectorDestroy(HYnormalB_);HYnormalB_ = NULL;}
    if (reducedA_ != NULL) {HYPRE_IJMatrixDestroy(reducedA_); reducedA_ = NULL;}
    if (reducedB_ != NULL) {HYPRE_IJVectorDestroy(reducedB_); reducedB_ = NULL;}
    if (reducedX_ != NULL) {HYPRE_IJVectorDestroy(reducedX_); reducedX_ = NULL;}
@@ -694,6 +663,17 @@ int HYPRE_LinSysCore::createMatricesAndVectors(int numGlobalEqns,
    matrixVectorsCreated_ = 1;
    schurReductionCreated_ = 0;
    systemAssembled_ = 0;
+   normalEqnFlag_ &= 1;
+   if ( HYnormalA_ != NULL ) 
+   {
+      HYPRE_IJMatrixDestroy(HYnormalA_); 
+      HYnormalA_ = NULL;
+   }
+   if ( HYnormalB_ != NULL ) 
+   {
+      HYPRE_IJVectorDestroy(HYnormalB_); 
+      HYnormalB_ = NULL;
+   }
 
    //-------------------------------------------------------------------
    // diagnostic message
@@ -1027,6 +1007,12 @@ int HYPRE_LinSysCore::resetMatrixAndVector(double setValue)
    systemAssembled_ = 0;
    schurReductionCreated_ = 0;
    projectCurrSize_ = 0;
+   normalEqnFlag_ &= 1;
+   if ( HYnormalA_ != NULL ) 
+   {
+      HYPRE_IJMatrixDestroy(HYnormalA_); 
+      HYnormalA_ = NULL;
+   }
 
    //-------------------------------------------------------------------
    // for now, since HYPRE does not yet support
@@ -1153,6 +1139,12 @@ int HYPRE_LinSysCore::resetMatrix(double setValue)
    systemAssembled_ = 0;
    schurReductionCreated_ = 0;
    projectCurrSize_ = 0;
+   normalEqnFlag_ &= 1;
+   if ( HYnormalA_ != NULL ) 
+   {
+      HYPRE_IJMatrixDestroy(HYnormalA_); 
+      HYnormalA_ = NULL;
+   }
 
    //-------------------------------------------------------------------
    // diagnostic message
@@ -1204,6 +1196,12 @@ int HYPRE_LinSysCore::resetRHSVector(double setValue)
                                     (const double *) vals);
       delete [] cols;
       delete [] vals;
+   }
+   normalEqnFlag_ &= 3;
+   if ( HYnormalB_ != NULL ) 
+   {
+      HYPRE_IJVectorDestroy(HYnormalB_); 
+      HYnormalB_ = NULL;
    }
 
    //-------------------------------------------------------------------
@@ -1717,8 +1715,13 @@ int HYPRE_LinSysCore::getFromRHSVector(int num, double* values,
 int HYPRE_LinSysCore::matrixLoadComplete()
 {
    int    i, j, ierr, numLocalEqns, leng, eqnNum, nnz, *newColInd=NULL;
-   int    maxRowLeng, newLeng;
-   double *newColVal=NULL;
+   int    maxRowLeng, newLeng, rowSize, *rowInd, *colInd, nrows, *matSizes;
+   double *newColVal=NULL, *colVal, value;
+   char   fname[40];
+   FILE   *fp;
+   HYPRE_IJMatrix     IJI;
+   HYPRE_ParCSRMatrix A_csr, I_csr, normalA_csr;
+   HYPRE_ParVector    b_csr, r_csr;
 
    //-------------------------------------------------------------------
    // diagnostic message
@@ -1825,6 +1828,87 @@ int HYPRE_LinSysCore::matrixLoadComplete()
    }
 
    //-------------------------------------------------------------------
+   // if normal equation requested
+   //-------------------------------------------------------------------
+
+   if ( (normalEqnFlag_ & 1) != 0 )
+   {
+      if ( (normalEqnFlag_ & 2) == 0 )
+      {
+         if ( HYnormalA_ != NULL ) HYPRE_IJMatrixDestroy(HYnormalA_);
+         HYPRE_IJMatrixGetObject(HYA_, (void **) &A_csr);
+         ierr = HYPRE_IJMatrixCreate(comm_, localStartRow_-1,
+		 localEndRow_-1, localStartRow_-1, localEndRow_-1,&IJI);
+         ierr += HYPRE_IJMatrixSetObjectType(IJI, HYPRE_PARCSR);
+         assert(!ierr);
+         nrows = localEndRow_ - localStartRow_ + 1;
+         matSizes = new int[nrows];
+         rowInd   = new int[nrows];
+         colInd   = new int[nrows];
+         colVal   = new double[nrows];
+         for ( i = 0; i < nrows; i++ ) 
+         {
+            matSizes[i] = 1;
+            rowInd[i] = localStartRow_ - 1 + i;
+            colInd[i] = rowInd[i];
+            colVal[i] = 1.0;
+         }
+         ierr  = HYPRE_IJMatrixSetRowSizes(IJI, matSizes);
+         ierr += HYPRE_IJMatrixInitialize(IJI);
+         ierr += HYPRE_IJMatrixSetValues(IJI, nrows, matSizes,
+                   (const int *) rowInd, (const int *) colInd,
+                   (const double *) colVal);
+         assert(!ierr);
+         delete [] rowInd;
+         delete [] colInd;
+         delete [] colVal;
+         HYPRE_IJMatrixAssemble(IJI);
+         HYPRE_IJMatrixGetObject(IJI, (void **) &I_csr);
+         hypre_BoomerAMGBuildCoarseOperator((hypre_ParCSRMatrix*) A_csr,
+             (hypre_ParCSRMatrix*) I_csr, (hypre_ParCSRMatrix*) A_csr, 
+             (hypre_ParCSRMatrix**) &normalA_csr);
+         HYPRE_IJMatrixDestroy( IJI );
+         ierr = HYPRE_IJMatrixCreate(comm_, localStartRow_-1,
+		 localEndRow_-1, localStartRow_-1, localEndRow_-1,&HYnormalA_);
+         ierr += HYPRE_IJMatrixSetObjectType(HYnormalA_, HYPRE_PARCSR);
+         assert(!ierr);
+         for ( i = localStartRow_-1; i < localEndRow_; i++ )
+         {
+            HYPRE_ParCSRMatrixGetRow(normalA_csr,i,&rowSize,NULL,NULL);
+            matSizes[i-localStartRow_+1] = rowSize;
+            HYPRE_ParCSRMatrixRestoreRow(normalA_csr,i,&rowSize,NULL,NULL);
+         }
+         ierr  = HYPRE_IJMatrixSetRowSizes(HYnormalA_, matSizes);
+         ierr += HYPRE_IJMatrixInitialize(HYnormalA_);
+         for ( i = localStartRow_-1; i < localEndRow_; i++ )
+         {
+            HYPRE_ParCSRMatrixGetRow(normalA_csr,i,&rowSize,&colInd,&colVal);
+            ierr += HYPRE_IJMatrixSetValues(HYnormalA_, 1, &rowSize,
+                      (const int *) &i, (const int *) colInd,
+                      (const double *) colVal);
+            HYPRE_ParCSRMatrixRestoreRow(normalA_csr,i,&rowSize,&colInd,&colVal);
+         }
+         HYPRE_IJMatrixAssemble(HYnormalA_);
+         delete [] matSizes;
+         normalEqnFlag_ |= 2;
+      }
+      if ( (normalEqnFlag_ & 4) == 0 )
+      {
+         if ( HYnormalB_ != NULL ) HYPRE_IJVectorDestroy(HYnormalB_);
+         HYPRE_IJVectorCreate(comm_, localStartRow_-1, localEndRow_-1,
+                              &HYnormalB_);
+         HYPRE_IJVectorSetObjectType(HYnormalB_, HYPRE_PARCSR);
+         HYPRE_IJVectorInitialize(HYnormalB_);
+         HYPRE_IJVectorAssemble(HYnormalB_);
+         HYPRE_IJMatrixGetObject(HYA_, (void **) &A_csr);
+         HYPRE_IJVectorGetObject(HYb_, (void **) &b_csr);
+         HYPRE_IJVectorGetObject(HYnormalB_, (void **) &r_csr);
+         HYPRE_ParCSRMatrixMatvecT( 1.0, A_csr, b_csr, 0.0, r_csr );
+         normalEqnFlag_ |= 4;
+      }
+   }
+
+   //-------------------------------------------------------------------
    // diagnostics : print the matrix and rhs to files 
    //-------------------------------------------------------------------
 
@@ -1833,10 +1917,6 @@ int HYPRE_LinSysCore::matrixLoadComplete()
    {
       if ( HYOutputLevel_ & HYFEI_PRINTPARCSRMAT )
       {
-         char   fname[40];
-         HYPRE_ParCSRMatrix A_csr;
-         HYPRE_ParVector    b_csr;
-
          printf("%4d : HYPRE_LSC::print the matrix/rhs to files(1)\n",mypid_);
          HYPRE_IJMatrixGetObject(HYA_, (void **) &A_csr);
          sprintf(fname, "HYPRE_Mat");
@@ -1847,12 +1927,6 @@ int HYPRE_LinSysCore::matrixLoadComplete()
       }
       else
       {
-         int    rowSize, *colInd, nnz, nrows;
-         double *colVal, value;
-         char   fname[40];
-         FILE   *fp;
-         HYPRE_ParCSRMatrix A_csr;
-
          printf("%4d : HYPRE_LSC::print the matrix/rhs to files(2)\n",mypid_);
          HYPRE_IJMatrixGetObject(HYA_, (void **) &A_csr);
          sprintf(fname, "hypre_mat.out.%d",mypid_);
@@ -1910,6 +1984,17 @@ int HYPRE_LinSysCore::putNodalFieldData(int fieldID, int fieldSize,
    int    i, **nodeFieldIDs, nodeFieldID, numFields, *procNRows;
    int    blockID, *blockIDs, *eqnNumbers, *iTempArray, checkFieldSize;
    int    *aleNodeNumbers;
+
+   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
+   {
+      printf("%4d : HYPRE_LSC::entering putNodalFieldData.\n",mypid_);
+      if ( mypid_ == 0 )
+      {
+         printf("      putNodalFieldData : fieldSize = %d\n", fieldSize);
+         printf("      putNodalFieldData : fieldID   = %d\n", fieldID);
+         printf("      putNodalFieldData : numNodes  = %d\n", numNodes);
+      }
+   }
 
    //-------------------------------------------------------------------
    // This part is for loading the nodal coordinate information.
@@ -3397,6 +3482,11 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
    HYPRE_IJVectorGetObject(currX_, (void **) &x_csr);
    HYPRE_IJVectorGetObject(currB_, (void **) &b_csr);
    HYPRE_IJVectorGetObject(currR_, (void **) &r_csr);
+   if ( (normalEqnFlag_ & 7) == 7 ) 
+   {
+      HYPRE_IJMatrixGetObject(HYnormalA_, (void **) &A_csr);
+      HYPRE_IJVectorGetObject(HYnormalB_, (void **) &b_csr);
+   }
 
    //-------------------------------------------------------------------
    // diagnostics (print the reduced matrix to a file)
@@ -3518,41 +3608,6 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
            HYPRE_ParCSRPCGSetup(HYSolver_, A_csr, b_csr, x_csr);
            MPI_Barrier( comm_ );
            ptime  = LSC_Wtime();
-
-//****************************************************************
-// Keep this part temporarily
-//----------------------------------------------------------------
-#ifdef HAVE_LOBPCG
-int nVectors=7;
-printf("LOBPCG Solve\n");
-HYPRE_LobpcgData lobpcgdata;
-int (*FuncT)(HYPRE_ParVector x,HYPRE_ParVector y);
-double *eigval;
-
-HYPRE_LobpcgCreate(&lobpcgdata);
-HYPRE_LobpcgSetVerbose(lobpcgdata);
-HYPRE_LobpcgSetBlocksize(lobpcgdata, nVectors);
-FuncT = Funct_Solve;
-HYPRE_LobpcgSetSolverFunction(lobpcgdata,FuncT);
-HYPRE_LobpcgSetup(lobpcgdata);
-parcsr_A = A_csr;
-pcg_solver = HYSolver_;
-Matx *X = Mat_Alloc1();
-int  nrows = localEndRow_ - localStartRow_ + 1;
-int  *row_partitioning;
-HYPRE_ParCSRMatrixGetRowPartitioning( A_csr, &row_partitioning );
-Mat_Init_Rand(X, row_partitioning[numProcs_],nVectors, HYPRE_VECTORS, 
-              row_partitioning);
-HYPRE_LobpcgSolve(lobpcgdata,Func_A1,X->vsPar,&eigval);
-Mat_Free(X);
-free(X);
-for ( int iE = 0; iE < nVectors; iE++ )
-printf("LOBPCG Eigenvalue %d = %e\n", iE, eigval[iE]);
-exit(1);
-#endif
-//----------------------------------------------------------------
-// end of "Keep this part temporarily"
-//****************************************************************
 
            HYPRE_ParCSRPCGSolve(HYSolver_, A_csr, b_csr, x_csr);
            HYPRE_ParCSRPCGGetNumIterations(HYSolver_, &numIterations);
@@ -4115,6 +4170,17 @@ exit(1);
    {
       newnorm = rnorm;
       rnorm   = buildSchurReducedSoln();
+   }
+   if ( (normalEqnFlag_ & 7) == 7 )
+   {
+      HYPRE_IJMatrixGetObject(currA_, (void **) &A_csr);
+      HYPRE_IJVectorGetObject(currX_,  (void **) &x_csr);
+      HYPRE_IJVectorGetObject(currB_, (void **) &b_csr);
+      HYPRE_IJVectorGetObject(currR_,  (void **) &r_csr);
+      HYPRE_ParVectorCopy( b_csr, r_csr );
+      HYPRE_ParCSRMatrixMatvec( -1.0, A_csr, x_csr, 1.0, r_csr );
+      HYPRE_ParVectorInnerProd( r_csr, r_csr, &rnorm);
+      rnorm = sqrt( rnorm );
    }
 
    //-------------------------------------------------------------------

@@ -13,7 +13,7 @@
 #ifndef _HYPRE_LinSysCore_h_
 #define _HYPRE_LinSysCore_h_
 
-#define HYPRE_FEI_Version() "FEI/HYPRE 2.0.1R21"
+#define HYPRE_FEI_Version() "FEI/HYPRE 2.0.1R22"
 
 // *************************************************************************
 // system libraries used
@@ -487,7 +487,9 @@ class HYPRE_LinSysCore
    // ----------------------------------------------------------------------
 
    HYPRE_IJMatrix  HYA_;                // the system matrix
-   HYPRE_IJVector  HYb_;                // the current RHS 
+   HYPRE_IJMatrix  HYnormalA_;          // normalized system matrix
+   HYPRE_IJVector  HYb_;                // the current RHS
+   HYPRE_IJVector  HYnormalB_;          // normalized system rhs
    HYPRE_IJVector  *HYbs_;              // an array of RHSs
    HYPRE_IJVector  HYx_;                // the solution vector
    HYPRE_IJVector  HYr_;                // temporary vector for residual
@@ -544,6 +546,7 @@ class HYPRE_LinSysCore
    int             projectSize_;
    int             projectCurrSize_;
    double          **projectionMatrix_; 
+   int             normalEqnFlag_;
 
    // ----------------------------------------------------------------------
    // variables for slide and Schur reduction

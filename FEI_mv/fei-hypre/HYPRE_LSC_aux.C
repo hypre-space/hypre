@@ -361,6 +361,17 @@ int HYPRE_LinSysCore::parameters(int numParams, char **params)
       }
 
       //----------------------------------------------------------------
+      // turn on normal equation option
+      //----------------------------------------------------------------
+
+      else if ( !strcasecmp(param1, "normalEquation") )
+      {
+         normalEqnFlag_ = 1;
+         if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
+            printf("       HYPRE_LSC::parameters - normal equation on.\n");
+      }
+
+      //----------------------------------------------------------------
       // perform Schur complement reduction
       //----------------------------------------------------------------
 
