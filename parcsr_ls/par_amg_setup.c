@@ -439,7 +439,6 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 			hypre_CTAlloc(double*, max_levels);
       if (smooth_option[0] == 6)
          hypre_AMGNodalSchwarzSmoother (hypre_ParCSRMatrixDiag(A_array[0]),
-					dof_func_array[0],
                                         num_functions,
                                         1,
                                         &i_domain_dof, &j_domain_dof,
@@ -496,7 +495,6 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
       else if (smooth_option[j] == 6)
       {
          hypre_AMGNodalSchwarzSmoother (hypre_ParCSRMatrixDiag(A_array[j]),
-					dof_func_array[j],
                                         num_functions,
                                         1,
                                         &i_domain_dof, &j_domain_dof,
