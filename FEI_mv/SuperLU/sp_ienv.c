@@ -1,5 +1,7 @@
 #include "dsp_defs.h"
 
+extern int xerbla_(char *srname, int *info);
+
 /* local prototype */
 int sp_ienv ( int ispec );
 
