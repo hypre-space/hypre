@@ -539,7 +539,7 @@ hypre_IJMatrixAddToRowParCSR(hypre_IJMatrix *matrix,
 	 qsort1(tmp_j,tmp_data,0,tmp_indx-1);
 	 indx = 0;
 	 size = row_length[row_local]; 
-	 for (i=1; i < row_length[row_local]; i++)
+	 for (i=0; i < row_length[row_local]; i++)
 	 {
 	    while (indx < tmp_indx && local_j[i] > tmp_j[indx])
 	    {
@@ -571,7 +571,7 @@ hypre_IJMatrixAddToRowParCSR(hypre_IJMatrix *matrix,
          indx = 0; 
 	 cnt = old_size; 
 
-	 for (i=1; i < old_size; i++)
+	 for (i=0; i < old_size; i++)
 	 {
 	    while (indx < tmp_indx && local_j[i] > tmp_j[indx])
 	    {
