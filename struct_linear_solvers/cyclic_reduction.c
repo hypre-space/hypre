@@ -45,7 +45,7 @@
       hypre_SetIndex(cindex, 0, 0, 0);\
    else\
       hypre_CopyIndex(base_index,  cindex);\
-   hypre_IndexD(cindex, cdir) = 0;\
+   hypre_IndexD(cindex, cdir) += 0;\
 }
 
 #define hypre_CycRedSetFIndex(base_index, base_stride, level, cdir, findex) \
@@ -54,7 +54,7 @@
       hypre_SetIndex(findex, 0, 0, 0);\
    else\
       hypre_CopyIndex(base_index,  findex);\
-   hypre_IndexD(findex, cdir) = 1;\
+   hypre_IndexD(findex, cdir) += 1;\
 }
 
 #define hypre_CycRedSetStride(base_index, base_stride, level, cdir, stride) \
@@ -63,7 +63,7 @@
       hypre_SetIndex(stride, 1, 1, 1);\
    else\
       hypre_CopyIndex(base_stride, stride);\
-   hypre_IndexD(stride, cdir) = 2;\
+   hypre_IndexD(stride, cdir) *= 2;\
 }
 
 /*--------------------------------------------------------------------------
