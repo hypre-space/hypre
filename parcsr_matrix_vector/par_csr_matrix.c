@@ -228,7 +228,6 @@ hypre_ParCSRMatrixRead( MPI_Comm comm, char *file_name )
    int	my_id, i, num_procs;
    char new_file_d[80], new_file_o[80], new_file_info[80];
    int  global_num_rows, global_num_cols, num_cols_offd;
-   int  num_nonzeros_diag;
    int  local_num_rows;
    int  *row_starts;
    int  *col_starts;
@@ -272,7 +271,6 @@ hypre_ParCSRMatrixRead( MPI_Comm comm, char *file_name )
    
    diag = hypre_CSRMatrixRead(new_file_d);
    local_num_rows = hypre_CSRMatrixNumRows(diag);
-   num_nonzeros_diag = hypre_CSRMatrixNumNonzeros(diag);
 
    if (num_cols_offd)
    {
@@ -452,7 +450,7 @@ hypre_ParCSRMatrixGetRow( hypre_ParCSRMatrix  *mat,
    /* Copy from dual sequential matrices into buffer */
    {
    double     *vworkA, *vworkB, *v_p;
-   int        i, ierr=0, *cworkA, *cworkB, 
+   int        i, *cworkA, *cworkB, 
               cstart = hypre_ParCSRMatrixFirstColDiag(mat);
    int        nztot, nzA, nzB, lrow=row-row_start;
    int        *cmap, *idx_p;
@@ -815,7 +813,6 @@ hypre_MergeDiagAndOffd(hypre_ParCSRMatrix *par_matrix)
    int 		first_col_diag = hypre_ParCSRMatrixFirstColDiag(par_matrix);
    int		*col_map_offd = hypre_ParCSRMatrixColMapOffd(par_matrix);
    int 		num_rows = hypre_CSRMatrixNumRows(diag);
-   int 		num_cols_offd = hypre_CSRMatrixNumCols(offd);
 
    int		*diag_i = hypre_CSRMatrixI(diag);
    int		*diag_j = hypre_CSRMatrixJ(diag);
