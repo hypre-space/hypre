@@ -92,6 +92,7 @@ $MPIRUN -np 4 $DRIVER -rhsrand -n 15 15 10 -P 2 2 1 -falgout -27pt
 #    2: DS_PCG
 #    3: BoomerAMG_GMRES
 #    4: DS_GMRES
+#    8: ParaSails_PCG
 #=============================================================================
 
 $MPIRUN -np 2 $DRIVER -solver 1 -rhsrand
@@ -102,3 +103,4 @@ $MPIRUN -np 2 $DRIVER -solver 3 -rhsrand
 
 $MPIRUN -np 2 $DRIVER -solver 4 -rhsrand
 
+$MPIRUN -np 2 $DRIVER -solver 8 -rhsrand
