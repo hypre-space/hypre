@@ -284,7 +284,7 @@ HYPRE_SStructVectorGather( HYPRE_SStructVector vector )
       hypre_SStructPVectorGather(hypre_SStructVectorPVector(vector, part));
    }
 
-   /* gather data from other parts - TODO*/
+   /* gather data from other parts? - TODO*/
 
    return ierr;
 }
@@ -305,8 +305,6 @@ HYPRE_SStructVectorGetValues( HYPRE_SStructVector  vector,
    hypre_Index           cindex;
 
    hypre_CopyToCleanIndex(index, ndim, cindex);
-
-   /* TODO: migrate data? */
 
    if (var < hypre_SStructPVectorNVars(pvector))
    {
@@ -339,8 +337,6 @@ HYPRE_SStructVectorGetBoxValues(HYPRE_SStructVector  vector,
 
    hypre_CopyToCleanIndex(ilower, ndim, cilower);
    hypre_CopyToCleanIndex(iupper, ndim, ciupper);
-
-   /* TODO: migrate data? */
 
    ierr = hypre_SStructPVectorGetBoxValues(pvector, cilower, ciupper,
                                            var, values);
