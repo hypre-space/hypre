@@ -290,7 +290,6 @@ int MLI_Solver_HSGS::setParams( char *paramString, int argc, char **argv )
 int MLI_Solver_HSGS::calcOmega()
 {
    int                i, relaxType=6, relaxTypes[2], level=0, numCGSweeps=10;
-   int                nprocs;
    double             relaxWt;
    hypre_ParCSRMatrix *A;
    hypre_ParVector    *vTemp;
@@ -299,8 +298,6 @@ int MLI_Solver_HSGS::calcOmega()
 
    A = (hypre_ParCSRMatrix *) Amat_->getMatrix();
    comm       = hypre_ParCSRMatrixComm(A);
-   MPI_Comm_size(comm,&nprocs);  
-   if ( nprocs == 1 ) return 0;
    amgData = (hypre_ParAMGData *) hypre_BoomerAMGCreate();
    amgData->CF_marker_array = new int*[1];
    amgData->CF_marker_array[0] = NULL;
