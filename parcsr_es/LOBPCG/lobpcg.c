@@ -38,7 +38,6 @@ Matx *temp_global_data; /* this needs to be available to other program modules *
 static Matx *TMP_Global1;
 static Matx *TMP_Global2;
 static int rowcount_global;
-static int ierr=0;
 
 int HYPRE_LobpcgSolve(HYPRE_LobpcgData lobpcgdata,
     int (*FunctA)(HYPRE_ParVector x,HYPRE_ParVector y),
@@ -55,20 +54,20 @@ int HYPRE_LobpcgSolve(HYPRE_LobpcgData lobpcgdata,
   int *partitioning,*part2;
   int mypid,nprocs;
 
-  ierr=MPI_Comm_rank(MPI_COMM_WORLD, &mypid);
-  ierr=MPI_Comm_size(MPI_COMM_WORLD, &nprocs);
+  MPI_Comm_rank(MPI_COMM_WORLD, &mypid);
+  MPI_Comm_size(MPI_COMM_WORLD, &nprocs);
 
   /* store function pointers */
   FunctA_ptr=FunctA;
-  ierr=HYPRE_LobpcgGetSolverFunction(lobpcgdata,&FunctPrec_ptr);
+  HYPRE_LobpcgGetSolverFunction(lobpcgdata,&FunctPrec_ptr);
 
   /* get lobpcg parameters */  
-  ierr=HYPRE_LobpcgGetMaxIterations(lobpcgdata,&max_iter);
-  ierr=HYPRE_LobpcgGetTolerance(lobpcgdata,&tol);
-  ierr=HYPRE_LobpcgGetVerbose(lobpcgdata,&verbose);
-  ierr=HYPRE_LobpcgGetRandom(lobpcgdata,&rand_vec);
-  ierr=HYPRE_LobpcgGetEye(lobpcgdata,&eye_vec);
-  ierr=HYPRE_LobpcgGetBlocksize(lobpcgdata,&bsize);
+  HYPRE_LobpcgGetMaxIterations(lobpcgdata,&max_iter);
+  HYPRE_LobpcgGetTolerance(lobpcgdata,&tol);
+  HYPRE_LobpcgGetVerbose(lobpcgdata,&verbose);
+  HYPRE_LobpcgGetRandom(lobpcgdata,&rand_vec);
+  HYPRE_LobpcgGetEye(lobpcgdata,&eye_vec);
+  HYPRE_LobpcgGetBlocksize(lobpcgdata,&bsize);
 
   /* initialize detailed verbose status for data collection */
   if (verbose==2)
@@ -80,7 +79,7 @@ int HYPRE_LobpcgSolve(HYPRE_LobpcgData lobpcgdata,
 
   /* derive partitioning from v */
   partitioning=hypre_ParVectorPartitioning((hypre_ParVector *)  v[0]);
-  ierr=hypre_LobpcgSetGetPartition(0,&partitioning);
+  hypre_LobpcgSetGetPartition(0,&partitioning);
   rowcount_global=partitioning[nprocs];
 
   /* check time test */
@@ -89,33 +88,33 @@ int HYPRE_LobpcgSolve(HYPRE_LobpcgData lobpcgdata,
   /* create global temp vector to use in solve function */
   part2=CopyPartition(partitioning);
   if (verbose2(1)==TRUE) collect_data(0,HYPRE_ParVectorCreate_Data,0);
-  ierr=HYPRE_ParVectorCreate(MPI_COMM_WORLD,rowcount_global,
-    part2,&temp_global_vector);assert2(ierr);
-  ierr=HYPRE_ParVectorInitialize(temp_global_vector);assert2(ierr);
+  HYPRE_ParVectorCreate(MPI_COMM_WORLD,rowcount_global,
+    part2,&temp_global_vector);
+  HYPRE_ParVectorInitialize(temp_global_vector);
 
   /* create global temporary data containing bsize parallel hypre vectors */
   /* these may be used in other programs for lobpcg */
   temp_global_data=Mat_Alloc1();
-  ierr=Mat_Init(temp_global_data,rowcount_global,bsize,rowcount_global*bsize,HYPRE_VECTORS,GENERAL);
+  Mat_Init(temp_global_data,rowcount_global,bsize,rowcount_global*bsize,HYPRE_VECTORS,GENERAL);
 
   /* check to see if we need to randomize v or set to identity */
   if (rand_vec==TRUE)
   {
-    ierr=Init_Rand_Vectors(v,partitioning,rowcount_global,bsize);
+    Init_Rand_Vectors(v,partitioning,rowcount_global,bsize);
   }
   else if (eye_vec==TRUE)
   {
-    ierr=Init_Eye_Vectors(v,partitioning,rowcount_global,bsize);
+    Init_Eye_Vectors(v,partitioning,rowcount_global,bsize);
 
   }
 
   /* Setup X array for initial eigenvectors */
   X=Mat_Alloc1();
-  ierr=Mat_Init(X,rowcount_global,bsize,rowcount_global*bsize,HYPRE_VECTORS,GENERAL);
+  Mat_Init(X,rowcount_global,bsize,rowcount_global*bsize,HYPRE_VECTORS,GENERAL);
   for (i=0; i<bsize; i++){
      if (verbose2(1)==TRUE) collect_data(0,HYPRE_ParVectorCopy_Data,0);
-     ierr =HYPRE_ParVectorCopy(v[i],X->vsPar[i]);assert2(ierr);
-     assert2(ierr);
+     HYPRE_ParVectorCopy(v[i],X->vsPar[i]);
+     
   }
 
   TMP_Global1=Mat_Alloc1();
@@ -130,22 +129,22 @@ int HYPRE_LobpcgSolve(HYPRE_LobpcgData lobpcgdata,
   if (FunctPrec_ptr!=NULL) FuncT=Func_TPrec;
 
   /* call main lobpcg solver */
-  ierr=lobpcg(X,Func_AMult,FuncT,tol,&max_iter,verbose,eigval,eigvalhistory,resvec);
+  lobpcg(X,Func_AMult,FuncT,tol,&max_iter,verbose,eigval,eigvalhistory,resvec);
 
   /* check orthogonality of eigenvectors */
   if (hypre_LobpcgOrthCheck((hypre_LobpcgData *) lobpcgdata)==TRUE)
   {
-    ierr = Mat_Trans_Mult(X,X,TMP);
-    ierr = Mat_Eye(bsize,TMP1); 
-    ierr = Mat_Add(TMP,TMP1,minus_one,TMP2);
+    Mat_Trans_Mult(X,X,TMP);
+    Mat_Eye(bsize,TMP1); 
+    Mat_Add(TMP,TMP1,minus_one,TMP2);
     hypre_LobpcgOrthFrobNorm((hypre_LobpcgData *) lobpcgdata)=Mat_Norm_Frob(TMP2);
   }
 
   /* get v vectors back */
   for (i=0; i<bsize; i++){
      if (verbose2(1)==TRUE) collect_data(0,HYPRE_ParVectorCopy_Data,0);
-     ierr =HYPRE_ParVectorCopy(X->vsPar[i],v[i]);assert2(ierr);
-     assert2(ierr);
+     HYPRE_ParVectorCopy(X->vsPar[i],v[i]);
+     
   }
 
   /* store output */
@@ -164,22 +163,22 @@ int HYPRE_LobpcgSolve(HYPRE_LobpcgData lobpcgdata,
   }
 
   /* save eigenvalues to output */
-  ierr=HYPRE_LobpcgGetEigval(lobpcgdata,eigval1);
+  HYPRE_LobpcgGetEigval(lobpcgdata,eigval1);
 
   /* free all memory associated with these pointers */
   if (verbose2(1)==TRUE) collect_data(0,HYPRE_ParVectorDestroy_Data,0);
-  ierr=HYPRE_ParVectorDestroy(temp_global_vector);assert2(ierr);
+  HYPRE_ParVectorDestroy(temp_global_vector);
 
-  ierr=Mat_Free(temp_global_data);free(temp_global_data); 
-  ierr=Mat_Free(X);free(X); 
-  ierr=Mat_Free(resvec);free(resvec);
-  ierr=Mat_Free(eigvalhistory);free(eigvalhistory);
-  ierr=Mat_Free(eigval);free(eigval);
-  ierr=Mat_Free(TMP);free(TMP); 
-  ierr=Mat_Free(TMP1);free(TMP1); 
-  ierr=Mat_Free(TMP2);free(TMP2); 
-  ierr=Mat_Free(TMP_Global1);free(TMP_Global1);
-  ierr=Mat_Free(TMP_Global2);free(TMP_Global2);
+  Mat_Free(temp_global_data);free(temp_global_data); 
+  Mat_Free(X);free(X); 
+  Mat_Free(resvec);free(resvec);
+  Mat_Free(eigvalhistory);free(eigvalhistory);
+  Mat_Free(eigval);free(eigval);
+  Mat_Free(TMP);free(TMP); 
+  Mat_Free(TMP1);free(TMP1); 
+  Mat_Free(TMP2);free(TMP2); 
+  Mat_Free(TMP_Global1);free(TMP_Global1);
+  Mat_Free(TMP_Global2);free(TMP_Global2);
 
   /* print out execution statistics */
   if (verbose==2 && Get_Rank()==0)
@@ -195,7 +194,7 @@ int Func_AMult(Matx *B,Matx *C,int *idx)
   int i;
   for (i=0; i<B->n; i++) {
     if (idx[i]>0){
-      ierr=FunctA_ptr(B->vsPar[i],C->vsPar[i]);
+      FunctA_ptr(B->vsPar[i],C->vsPar[i]);
       if (verbose2(1)==TRUE) collect_data(0,NUMBER_A_MULTIPLIES,0);
     }
   }
@@ -214,10 +213,10 @@ int Func_TPrec(Matx *R,int *idx)
     {
       /* this next copy is not required, but improves performance substantially */
       if (verbose2(1)==TRUE) collect_data(0,HYPRE_ParVectorCopy_Data,0);
-      ierr=HYPRE_ParVectorCopy(R->vsPar[i],temp_global_vector);assert2(ierr);
-      ierr=FunctPrec_ptr(R->vsPar[i],temp_global_vector);
+      HYPRE_ParVectorCopy(R->vsPar[i],temp_global_vector);
+      FunctPrec_ptr(R->vsPar[i],temp_global_vector);
       if (verbose2(1)==TRUE) collect_data(0,HYPRE_ParVectorCopy_Data,0);
-      ierr=HYPRE_ParVectorCopy(temp_global_vector,R->vsPar[i]);assert2(ierr);
+      HYPRE_ParVectorCopy(temp_global_vector,R->vsPar[i]);
       if (verbose2(1)==TRUE) collect_data(0,NUMBER_SOLVES,0);
     }
   }
@@ -235,17 +234,17 @@ HYPRE_LobpcgCreate(HYPRE_LobpcgData *lobpcg)
 
    /* allocate memory */
    if (!(*lobpcg=(HYPRE_LobpcgData) malloc(sizeof(hypre_LobpcgData)))) {
-     printf("Out of memory\n");
-     assert(0);
+     fprintf(stderr, "Out of memory\n");
+     abort();
    }
 
    lobpcg2=*lobpcg;
 
    /* set defaults */
-   ierr=HYPRE_LobpcgSetMaxIterations(lobpcg2,LOBPCG_DEFAULT_MAXITR);
-   ierr=HYPRE_LobpcgSetTolerance(lobpcg2,LOBPCG_DEFAULT_TOL);
-   ierr=HYPRE_LobpcgSetBlocksize(lobpcg2,LOBPCG_DEFAULT_BSIZE);
-   ierr=HYPRE_LobpcgSetSolverFunction(lobpcg2,NULL);
+   HYPRE_LobpcgSetMaxIterations(lobpcg2,LOBPCG_DEFAULT_MAXITR);
+   HYPRE_LobpcgSetTolerance(lobpcg2,LOBPCG_DEFAULT_TOL);
+   HYPRE_LobpcgSetBlocksize(lobpcg2,LOBPCG_DEFAULT_BSIZE);
+   HYPRE_LobpcgSetSolverFunction(lobpcg2,NULL);
    hypre_LobpcgVerbose((hypre_LobpcgData *) lobpcg2)=LOBPCG_DEFAULT_VERBOSE;
    hypre_LobpcgRandom((hypre_LobpcgData *) lobpcg2)=LOBPCG_DEFAULT_RANDOM;
    hypre_LobpcgEye((hypre_LobpcgData *) lobpcg2)=LOBPCG_DEFAULT_EYE;
@@ -266,8 +265,9 @@ HYPRE_LobpcgCreate(HYPRE_LobpcgData *lobpcg)
 int
 HYPRE_LobpcgSetup(HYPRE_LobpcgData lobpcg)
 {
-   /* future use */
-   return 0;
+  if(!lobpcg) abort();
+  /* future use */
+  return 0;
 }
 
 /*--------------------------------------------------------------------------
@@ -518,13 +518,17 @@ static int *partitioning;
    else if (action==1)
    {
       *part=partitioning;
-      if (part==NULL) assert(0);
+      if (part==NULL) {
+		fprintf(stderr, "hypre_LobpcgSetGetPartition function failed");
+		abort();
+	  }
       return 0;
    }
    else
    {
-      assert(0);
-      return(1);
+	 fprintf(stderr, "hypre_LobpcgSetGetPartition function failed");
+	 abort();
+	 return(1);
    } 
 }
 
@@ -579,12 +583,10 @@ static int *partitioning;
 ******************************************************************************/
 
 int
-lobpcg(X, FuncA, FuncT, mytol, maxit_ptr, verbose, lambda_out, lambdahistory, 
-       resvec)
-Matx *X, *lambda_out, *lambdahistory, *resvec;
-int (*FuncA)(Matx *B, Matx *c, int *idx);
-int (*FuncT)(Matx *B,int *idx), *maxit_ptr, verbose;
-double mytol;
+lobpcg(X, FuncA, FuncT, mytol, maxit_ptr, verbose, lambda_out, lambdahistory, resvec)
+	 Matx *X, *lambda_out, *lambdahistory, *resvec;
+	 int (*FuncA)(Matx *B, Matx *c, int *idx), (*FuncT)(Matx *B,int *idx), *maxit_ptr, verbose;
+	 double mytol;
 {
   /* initialize variables */
   double minus_one=-1;
@@ -623,7 +625,7 @@ double mytol;
 
   /* check bsize */
   if (n<5*bsize && Get_Rank()==0){
-    printf("The problem size is too small compared to the block size for LOBPCG.\n");
+    fprintf(stderr, "The problem size is too small compared to the block size for LOBPCG.\n");
     exit(EXIT_FAILURE);
   }
 
@@ -632,61 +634,61 @@ double mytol;
   if (maxit_ptr != NULL) maxit=*maxit_ptr;
   if (maxit==0) maxit=n<20 ? n:20;
 
-  ierr = Mat_Init_Dense(lambda_out,bsize,1,GENERAL);
-  ierr = Mat_Init_Dense(lambdahistory,bsize,maxit+1,GENERAL);
-  ierr = Mat_Init_Dense(resvec,bsize,maxit+1,GENERAL);
+  Mat_Init_Dense(lambda_out,bsize,1,GENERAL);
+  Mat_Init_Dense(lambdahistory,bsize,maxit+1,GENERAL);
+  Mat_Init_Dense(resvec,bsize,maxit+1,GENERAL);
 
   if (bsize > 0) {
     /* allocate lambda */
-    lambda=(double *)calloc(3*bsize,sizeof(double));
-    y=(double *)calloc(3*bsize,sizeof(double));
+    lambda=(double *)calloc((long)3*bsize,sizeof(double));
+    y=(double *)calloc((long)3*bsize,sizeof(double));
     /* allocate norm of R vector */
-    normR=(double *)calloc(bsize,sizeof(double));
+    normR=(double *)calloc((long)bsize,sizeof(double));
     /* allocate index */
-    idx=(int *)calloc(bsize,sizeof(int));
+    idx=(int *)calloc((long)bsize,sizeof(int));
     for (i=0; i<bsize; i++) idx[i]=1; /* initialize index */
   }
   else {
-    printf("The block size is wrong.\n");
+    fprintf(stderr, "The block size is wrong.\n");
     exit(EXIT_FAILURE);
   }
 		     
   /* perform orthonormalization of X */
-  ierr=Qr2(X,RR1,idx);
+  Qr2(X,RR1,idx);
 
   /* generate AX */
-  ierr = Mat_Copy(X,AX);     /* initialize AX */
+  Mat_Copy(X,AX);     /* initialize AX */
   if (misc_flags(1,0)!=TRUE)
   {
-    ierr = FuncA(X,AX,idx);    /* AX=A*X */
+    FuncA(X,AX,idx);    /* AX=A*X */
     Amult_count=Amult_count+bsize;
   }
 
   /* initialize global data */
-  ierr = Mat_Copy(X,TMP_Global1); 
-  ierr = Mat_Copy(X,TMP_Global2); 
+  Mat_Copy(X,TMP_Global1); 
+  Mat_Copy(X,TMP_Global2); 
 
   /* compute initial eigenvalues */
-  ierr = Mat_Trans_Mult(X,AX,TMP1);     /* X'*AX */
-  ierr = Mat_Sym(TMP1);                 /* (TMP1+TMP1')/2 */
-  ierr = Mat_Eye(bsize,TMP2);           /* identity */
-  ierr = myeig1(TMP1,TMP2,TMP,lambda);  /* TMP has eignevectors */
+  Mat_Trans_Mult(X,AX,TMP1);     /* X'*AX */
+  Mat_Sym(TMP1);                 /* (TMP1+TMP1')/2 */
+  Mat_Eye(bsize,TMP2);           /* identity */
+  myeig1(TMP1,TMP2,TMP,lambda);  /* TMP has eignevectors */
   assert(lambda!=NULL);
 
   Mat_Mult2(X,TMP,idx);        /* X=X(idx)*TMP */
   Mat_Mult2(AX,TMP,idx);       /* AX=AX(idx)*TMP */
 
   /* compute initial residuals */
-  ierr = Mat_Diag(lambda,bsize,TMP1);   /* diagonal matrix of eigenvalues */
-  ierr = Mat_Mult(X,TMP1,TMP_Global1);
-  ierr = Mat_Add(AX,TMP_Global1,minus_one,R);  /* R=AX-A*eigs */
-  ierr = Mat_Norm2_Col(R,normR);
+  Mat_Diag(lambda,bsize,TMP1);   /* diagonal matrix of eigenvalues */
+  Mat_Mult(X,TMP1,TMP_Global1);
+  Mat_Add(AX,TMP_Global1,minus_one,R);  /* R=AX-A*eigs */
+  Mat_Norm2_Col(R,normR);
   assert(normR!=NULL); 
   
   /* initialize AR  and P and AP using the same size and format as X */
-  ierr = Mat_Init(AR,X->m,X->n,X->nz,X->mat_storage_type,X->mat_type);
-  ierr = Mat_Init(P,X->m,X->n,X->nz,X->mat_storage_type,X->mat_type);
-  ierr = Mat_Init(AP,X->m,X->n,X->nz,X->mat_storage_type,X->mat_type);
+  Mat_Init(AR,X->m,X->n,X->nz,X->mat_storage_type,X->mat_type);
+  Mat_Init(P,X->m,X->n,X->nz,X->mat_storage_type,X->mat_type);
+  Mat_Init(AP,X->m,X->n,X->nz,X->mat_storage_type,X->mat_type);
 
   k=1;         /* iteration count */
   
@@ -730,7 +732,7 @@ double mytol;
     if ((FuncT != NULL) && (misc_flags(1,1)!=TRUE))
     {
       FuncT(R,idx);
-      ierr = Tmult_solve_count=Tmult_solve_count+bsizeiaf;
+      Tmult_solve_count=Tmult_solve_count+bsizeiaf;
     }
 
     /* orthonormalize R to increase stability  */
@@ -739,30 +741,30 @@ double mytol;
     /* compute AR */
     if (misc_flags(1,0)!=TRUE)
     {
-      ierr=FuncA(R,AR,idx);
+      FuncA(R,AR,idx);
       Amult_count=Amult_count+bsizeiaf;
     }
-    else ierr=Mat_Copy(R,AR);
+    else Mat_Copy(R,AR);
 
     /* compute AP */
     if (k>1){
       Qr2(P,RR1,idx);
-      ierr = Mat_Inv_Triu(RR1,Temp_Dense); /* TMP=inv(RR1) */
-      ierr=Mat_Mult2(AP,Temp_Dense,idx);   /* AP(idx)=AP(idx)*TMP */
+      Mat_Inv_Triu(RR1,Temp_Dense); /* TMP=inv(RR1) */
+      Mat_Mult2(AP,Temp_Dense,idx);   /* AP(idx)=AP(idx)*TMP */
     }
 
     /* Raleigh-Ritz proceedure */
     if (bsize != bsizeiaf)
     {
-      ierr = Mat_Get_Col(R,TMP_Global2,idx);  
-      ierr = Mat_Get_Col(AR,temp_global_data,idx);
-      ierr = Mat_Get_Col(P,TMP_Global1,idx); 
-      ierr = Mat_Copy(TMP_Global1,P);
-      ierr = Mat_Get_Col(AP,TMP_Global1,idx); 
-      ierr = Mat_Copy(TMP_Global1,AP);
-      ierr = rr(X,AX,TMP_Global2,temp_global_data,P,AP,lambda,idx,bsize,k,0);
+      Mat_Get_Col(R,TMP_Global2,idx);  
+      Mat_Get_Col(AR,temp_global_data,idx);
+      Mat_Get_Col(P,TMP_Global1,idx); 
+      Mat_Copy(TMP_Global1,P);
+      Mat_Get_Col(AP,TMP_Global1,idx); 
+      Mat_Copy(TMP_Global1,AP);
+      rr(X,AX,TMP_Global2,temp_global_data,P,AP,lambda,idx,bsize,k,0);
     }
-    else ierr = rr(X,AX,R,AR,P,AP,lambda,idx,bsize,k,0);
+    else rr(X,AX,R,AR,P,AP,lambda,idx,bsize,k,0);
 
     /* get eigenvalues corresponding to index */
     j=0;
@@ -776,13 +778,13 @@ double mytol;
     assert(y!=NULL);
     
     /* compute residuals */
-    ierr = Mat_Diag(y,bsizeiaf,Temp_Dense);   
-    ierr = Mat_Get_Col(X,TMP_Global1,idx);   
-    ierr = Mat_Mult(TMP_Global1,Temp_Dense,TMP_Global2);
-    ierr = Mat_Get_Col(AX,TMP_Global1,idx);      
-    ierr = Mat_Add(TMP_Global1,TMP_Global2,minus_one,temp_global_data);
-    ierr = Mat_Put_Col(temp_global_data,R,idx);       
-    ierr = Mat_Norm2_Col(R,normR);
+    Mat_Diag(y,bsizeiaf,Temp_Dense);   
+    Mat_Get_Col(X,TMP_Global1,idx);   
+    Mat_Mult(TMP_Global1,Temp_Dense,TMP_Global2);
+    Mat_Get_Col(AX,TMP_Global1,idx);      
+    Mat_Add(TMP_Global1,TMP_Global2,minus_one,temp_global_data);
+    Mat_Put_Col(temp_global_data,R,idx);       
+    Mat_Norm2_Col(R,normR);
 
     /* store auxillary information */
     if (resvec != NULL){
@@ -810,12 +812,12 @@ double mytol;
   if (verbose2(1)==TRUE) collect_data(1,0,0);
   
   /* call rr once more to release memory */
-  ierr = rr(X,AX,R,AR,P,AP,lambda,idx,bsize,k,1);
+  rr(X,AX,R,AR,P,AP,lambda,idx,bsize,k,1);
 
   /* return actual number of iterations */
   if (maxit_ptr != NULL) *maxit_ptr=k;
   else {
-    printf("The number of iterations is empty.\n");
+    fprintf(stderr, "The number of iterations is empty.\n");
     exit(EXIT_FAILURE);
   }
 	
@@ -830,17 +832,17 @@ double mytol;
   free(y);
   free(normR);
   free(idx);
-  ierr = Mat_Free(AX);free(AX);
-  ierr = Mat_Free(R);free(R);
-  ierr = Mat_Free(AR);free(AR);
-  ierr = Mat_Free(P);free(P);
-  ierr = Mat_Free(AP);free(AP);
-  ierr = Mat_Free(TMP1);free(TMP1);
-  ierr = Mat_Free(TMP2);free(TMP2);
-  ierr = Mat_Free(TMP);free(TMP);
-  ierr = Mat_Free(RR1);free(RR1);
-  ierr = Mat_Free(D);free(D);
-  ierr = Mat_Free(Temp_Dense);free(Temp_Dense);
+  Mat_Free(AX);free(AX);
+  Mat_Free(R);free(R);
+  Mat_Free(AR);free(AR);
+  Mat_Free(P);free(P);
+  Mat_Free(AP);free(AP);
+  Mat_Free(TMP1);free(TMP1);
+  Mat_Free(TMP2);free(TMP2);
+  Mat_Free(TMP);free(TMP);
+  Mat_Free(RR1);free(RR1);
+  Mat_Free(D);free(D);
+  Mat_Free(Temp_Dense);free(Temp_Dense);
 
   return 0;
 }
@@ -891,18 +893,18 @@ int rr(Matx *U,Matx *LU,Matx *R,Matx *LR,Matx *P,Matx *LP,
   /* cleanup */
   if ((last_flag !=0) && (exec_first==1))
   {
-    ierr = Mat_Free(GL);free(GL);
-    ierr = Mat_Free(GM);free(GM);
-    ierr = Mat_Free(GL12);free(GL12);
-    ierr = Mat_Free(GL13);free(GL13);
-    ierr = Mat_Free(GL23);free(GL23);
-    ierr = Mat_Free(GL33);free(GL33);
-    ierr = Mat_Free(GM12);free(GM12);
-    ierr = Mat_Free(GM13);free(GM13);
-    ierr = Mat_Free(GM23);free(GM23);
-    ierr = Mat_Free(GU);free(GU);
-    ierr = Mat_Free(D);free(D);
-    ierr = Mat_Free(Temp_Dense);free(Temp_Dense);
+    Mat_Free(GL);free(GL);
+    Mat_Free(GM);free(GM);
+    Mat_Free(GL12);free(GL12);
+    Mat_Free(GL13);free(GL13);
+    Mat_Free(GL23);free(GL23);
+    Mat_Free(GL33);free(GL33);
+    Mat_Free(GM12);free(GM12);
+    Mat_Free(GM13);free(GM13);
+    Mat_Free(GM23);free(GM23);
+    Mat_Free(GU);free(GU);
+    Mat_Free(D);free(D);
+    Mat_Free(Temp_Dense);free(Temp_Dense);
     return 0;
   }
 
@@ -924,117 +926,117 @@ int rr(Matx *U,Matx *LU,Matx *R,Matx *LR,Matx *P,Matx *LP,
     restart=0;
   }
 
-  ierr = Mat_Trans_Mult(LU,R,GL12);
-  ierr = Mat_Trans_Mult(LR,R,GL22);
-  ierr = Mat_Trans_Mult(U,R,GM12);
-  ierr = Mat_Sym(GL22);
+  Mat_Trans_Mult(LU,R,GL12);
+  Mat_Trans_Mult(LR,R,GL22);
+  Mat_Trans_Mult(U,R,GM12);
+  Mat_Sym(GL22);
   
   if (restart==0){
     /* form GL */
-    ierr = Mat_Trans_Mult(LU,P,GL13);
-    ierr = Mat_Trans_Mult(LR,P,GL23);
-    ierr = Mat_Trans_Mult(LP,P,GL33);
-    ierr = Mat_Sym(GL33);
-    ierr = Mat_Diag(lambda,bsizeU,D);
+    Mat_Trans_Mult(LU,P,GL13);
+    Mat_Trans_Mult(LR,P,GL23);
+    Mat_Trans_Mult(LP,P,GL33);
+    Mat_Sym(GL33);
+    Mat_Diag(lambda,bsizeU,D);
     
     n=bsize+bsizeR+bsizeP;
-    ierr = Mat_Init_Dense(GL,n,n,SYMMETRIC);
+    Mat_Init_Dense(GL,n,n,SYMMETRIC);
      
-    ierr = Mat_Copy_MN(D,GL,0,0); 
-    ierr = Mat_Copy_MN(GL12,GL,0,bsizeU); 
-    ierr = Mat_Copy_MN(GL13,GL,0,bsizeU+bsizeR); 
-    ierr = Mat_Copy_MN(GL22,GL,bsizeU,bsizeU); 
-    ierr = Mat_Copy_MN(GL23,GL,bsizeU,bsizeU+bsizeR); 
-    ierr = Mat_Copy_MN(GL33,GL,bsizeU+bsizeR,bsizeU+bsizeR); 
-    ierr = Mat_Trans(GL12,D);
-    ierr = Mat_Copy_MN(D,GL,bsizeU,0); 
-    ierr = Mat_Trans(GL13,D);
-    ierr = Mat_Copy_MN(D,GL,bsizeU+bsizeR,0); 
-    ierr = Mat_Trans(GL23,D);
-    ierr = Mat_Copy_MN(D,GL,bsizeU+bsizeR,bsizeU); 
+    Mat_Copy_MN(D,GL,0,0); 
+    Mat_Copy_MN(GL12,GL,0,bsizeU); 
+    Mat_Copy_MN(GL13,GL,0,bsizeU+bsizeR); 
+    Mat_Copy_MN(GL22,GL,bsizeU,bsizeU); 
+    Mat_Copy_MN(GL23,GL,bsizeU,bsizeU+bsizeR); 
+    Mat_Copy_MN(GL33,GL,bsizeU+bsizeR,bsizeU+bsizeR); 
+    Mat_Trans(GL12,D);
+    Mat_Copy_MN(D,GL,bsizeU,0); 
+    Mat_Trans(GL13,D);
+    Mat_Copy_MN(D,GL,bsizeU+bsizeR,0); 
+    Mat_Trans(GL23,D);
+    Mat_Copy_MN(D,GL,bsizeU+bsizeR,bsizeU); 
 
     /* form GM */
-    ierr = Mat_Trans_Mult(U,P,GM13);
-    ierr = Mat_Trans_Mult(R,P,GM23);
-    ierr = Mat_Init_Dense(GM,n,n,SYMMETRIC);
+    Mat_Trans_Mult(U,P,GM13);
+    Mat_Trans_Mult(R,P,GM23);
+    Mat_Init_Dense(GM,n,n,SYMMETRIC);
     
-    ierr = Mat_Eye(bsizeU,D);
-    ierr = Mat_Copy_MN(D,GM,0,0);
-    ierr = Mat_Eye(bsizeR,D);
-    ierr = Mat_Copy_MN(D,GM,bsizeU,bsizeU);
-    ierr = Mat_Eye(bsizeP,D);
-    ierr = Mat_Copy_MN(D,GM,bsizeU+bsizeR,bsizeU+bsizeR);
-    ierr = Mat_Copy_MN(GM12,GM,0,bsizeU);
-    ierr = Mat_Copy_MN(GM13,GM,0,bsizeU+bsizeR);
-    ierr = Mat_Copy_MN(GM23,GM,bsizeU,bsizeU+bsizeR);
-    ierr = Mat_Trans(GM12,D);
-    ierr = Mat_Copy_MN(D,GM,bsizeU,0);
-    ierr = Mat_Trans(GM13,D);
-    ierr = Mat_Copy_MN(D,GM,bsizeU+bsizeR,0);
-    ierr = Mat_Trans(GM23,D);
-    ierr = Mat_Copy_MN(D,GM,bsizeU+bsizeR,bsizeU);
+    Mat_Eye(bsizeU,D);
+    Mat_Copy_MN(D,GM,0,0);
+    Mat_Eye(bsizeR,D);
+    Mat_Copy_MN(D,GM,bsizeU,bsizeU);
+    Mat_Eye(bsizeP,D);
+    Mat_Copy_MN(D,GM,bsizeU+bsizeR,bsizeU+bsizeR);
+    Mat_Copy_MN(GM12,GM,0,bsizeU);
+    Mat_Copy_MN(GM13,GM,0,bsizeU+bsizeR);
+    Mat_Copy_MN(GM23,GM,bsizeU,bsizeU+bsizeR);
+    Mat_Trans(GM12,D);
+    Mat_Copy_MN(D,GM,bsizeU,0);
+    Mat_Trans(GM13,D);
+    Mat_Copy_MN(D,GM,bsizeU+bsizeR,0);
+    Mat_Trans(GM23,D);
+    Mat_Copy_MN(D,GM,bsizeU+bsizeR,bsizeU);
   }
   else
   {
     /* form GL */
     n=bsizeU+bsizeR;
-    ierr = Mat_Init_Dense(GL,n,n,SYMMETRIC);
-    ierr = Mat_Diag(lambda,bsizeU,D);
-    ierr = Mat_Copy_MN(D,GL,0,0);
-    ierr = Mat_Copy_MN(GL12,GL,0,bsizeU);
-    ierr = Mat_Copy_MN(GL22,GL,bsizeU,bsizeU);
-    ierr = Mat_Trans(GL12,D);
-    ierr = Mat_Copy_MN(D,GL,bsizeU,0);
+    Mat_Init_Dense(GL,n,n,SYMMETRIC);
+    Mat_Diag(lambda,bsizeU,D);
+    Mat_Copy_MN(D,GL,0,0);
+    Mat_Copy_MN(GL12,GL,0,bsizeU);
+    Mat_Copy_MN(GL22,GL,bsizeU,bsizeU);
+    Mat_Trans(GL12,D);
+    Mat_Copy_MN(D,GL,bsizeU,0);
 
     /* form GM */
-    ierr = Mat_Init_Dense(GM,n,n,SYMMETRIC);
-    ierr = Mat_Eye(bsizeU,D);
-    ierr = Mat_Copy_MN(D,GM,0,0);
-    ierr = Mat_Eye(bsizeR,D);
-    ierr = Mat_Copy_MN(D,GM,bsizeU,bsizeU);
-    ierr = Mat_Copy_MN(GM12,GM,0,bsizeU);
-    ierr = Mat_Trans(GM12,D);
-    ierr = Mat_Copy_MN(D,GM,bsizeU,0);
+    Mat_Init_Dense(GM,n,n,SYMMETRIC);
+    Mat_Eye(bsizeU,D);
+    Mat_Copy_MN(D,GM,0,0);
+    Mat_Eye(bsizeR,D);
+    Mat_Copy_MN(D,GM,bsizeU,bsizeU);
+    Mat_Copy_MN(GM12,GM,0,bsizeU);
+    Mat_Trans(GM12,D);
+    Mat_Copy_MN(D,GM,bsizeU,0);
 
   }
 
   /* solve generalized eigenvalue problem */
-  ierr = myeig1(GL,GM,GU,lambda);
-  ierr = Mat_Copy_Cols(GU,Temp_Dense,0,bsizeU-1);
-  ierr = Mat_Copy(Temp_Dense,GU);
+  myeig1(GL,GM,GU,lambda);
+  Mat_Copy_Cols(GU,Temp_Dense,0,bsizeU-1);
+  Mat_Copy(Temp_Dense,GU);
 
-  ierr = Mat_Copy_Rows(GU,Temp_Dense,bsizeU,bsizeU+bsizeR-1);
-  ierr = Mat_Mult(R,Temp_Dense,TMP_Global1);
-  ierr = Mat_Copy(TMP_Global1,R);
-  ierr = Mat_Mult(LR,Temp_Dense,TMP_Global1);
-  ierr = Mat_Copy(TMP_Global1,LR);
+  Mat_Copy_Rows(GU,Temp_Dense,bsizeU,bsizeU+bsizeR-1);
+  Mat_Mult(R,Temp_Dense,TMP_Global1);
+  Mat_Copy(TMP_Global1,R);
+  Mat_Mult(LR,Temp_Dense,TMP_Global1);
+  Mat_Copy(TMP_Global1,LR);
 
   if (restart==0){
-    ierr = Mat_Copy_Rows(GU,Temp_Dense,bsizeU+bsizeR,bsizeU+bsizeR+bsizeP-1);
-    ierr = Mat_Mult(P,Temp_Dense,TMP_Global1);
-    ierr = Mat_Add(R,TMP_Global1,1,P);
+    Mat_Copy_Rows(GU,Temp_Dense,bsizeU+bsizeR,bsizeU+bsizeR+bsizeP-1);
+    Mat_Mult(P,Temp_Dense,TMP_Global1);
+    Mat_Add(R,TMP_Global1,1,P);
 
-    ierr = Mat_Mult(LP,Temp_Dense,TMP_Global1);
-    ierr = Mat_Add(LR,TMP_Global1,1,LP);
+    Mat_Mult(LP,Temp_Dense,TMP_Global1);
+    Mat_Add(LR,TMP_Global1,1,LP);
 
-    ierr = Mat_Copy_Rows(GU,Temp_Dense,0,bsizeU-1);
-    ierr = Mat_Mult(U,Temp_Dense,TMP_Global1);
-    ierr = Mat_Add(P,TMP_Global1,1,U);
+    Mat_Copy_Rows(GU,Temp_Dense,0,bsizeU-1);
+    Mat_Mult(U,Temp_Dense,TMP_Global1);
+    Mat_Add(P,TMP_Global1,1,U);
 
-    ierr = Mat_Mult(LU,Temp_Dense,TMP_Global1);
-    ierr = Mat_Add(LP,TMP_Global1,1,LU);
+    Mat_Mult(LU,Temp_Dense,TMP_Global1);
+    Mat_Add(LP,TMP_Global1,1,LU);
   }
   else
   {
-    ierr = Mat_Copy(R,P);   
-    ierr = Mat_Copy(LR,LP);   
+    Mat_Copy(R,P);   
+    Mat_Copy(LR,LP);   
 
-    ierr = Mat_Copy_Rows(GU,Temp_Dense,0,bsizeU-1);
-    ierr = Mat_Mult(U,Temp_Dense,TMP_Global1);
-    ierr = Mat_Add(R,TMP_Global1,1,U);
+    Mat_Copy_Rows(GU,Temp_Dense,0,bsizeU-1);
+    Mat_Mult(U,Temp_Dense,TMP_Global1);
+    Mat_Add(R,TMP_Global1,1,U);
 
-    ierr = Mat_Mult(LU,Temp_Dense,TMP_Global1);
-    ierr = Mat_Add(LR,TMP_Global1,1,LU);
+    Mat_Mult(LU,Temp_Dense,TMP_Global1);
+    Mat_Add(LR,TMP_Global1,1,LU);
   }
 
   return 0;
@@ -1079,15 +1081,15 @@ int myeig1(Matx *A, Matx *B, Matx *X,double *lambda)
   lwork=10*n;
   itype=1;
 
-  ierr = Mat_Init_Dense(X,n,n,GENERAL);
+  Mat_Init_Dense(X,n,n,GENERAL);
 
   /* allocate memory */
-    a=(double *)calloc(n*n,sizeof(double));
-    b=(double *)calloc(n*n,sizeof(double));
-    work=(double *)calloc(lwork,sizeof(double));
+    a=(double *)calloc((long)n*n,sizeof(double));
+    b=(double *)calloc((long)n*n,sizeof(double));
+    work=(double *)calloc((long)lwork,sizeof(double));
   if (a==NULL || b==NULL || work==NULL){
-    printf("Out of memory.\n");
-    assert(0);
+    fprintf(stderr, "Out of memory.\n");
+    abort();
   }
 
   /* convert C-style to Fortran-style storage */
@@ -1125,7 +1127,7 @@ int myeig1(Matx *A, Matx *B, Matx *X,double *lambda)
   }
 
   /* check error condition */
-  if (info!=0) printf("problem in dsygv eigensolver, info=%d\n",info);
+  if (info!=0) fprintf(stderr, "problem in dsygv eigensolver, info=%d\n",info);
   Trouble_Check(0,info);
 
   free(a);

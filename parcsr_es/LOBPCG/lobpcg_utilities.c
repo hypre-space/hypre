@@ -17,7 +17,6 @@
 #include "lobpcg.h"
 #include "mmio.h"
 
-static int ierr=0;
 
 /***************************************************************************/
 /* reading a matrix from a file in ija format (first row : nrows, nnz)     */
@@ -31,8 +30,8 @@ void HYPRE_Load_IJAMatrix(Matx *A, int matrix_input_type, char *matfile,int *par
    double *val;
    HYPRE_IJMatrix IJA;
 
-   ierr=MPI_Comm_rank(MPI_COMM_WORLD, &mypid);
-   ierr=MPI_Comm_size(MPI_COMM_WORLD, &nprocs);
+   MPI_Comm_rank(MPI_COMM_WORLD, &mypid);
+   MPI_Comm_size(MPI_COMM_WORLD, &nprocs);
 
    /*------------------------------------------------------------------
     * read the matrix and broadcast
@@ -47,86 +46,86 @@ void HYPRE_Load_IJAMatrix(Matx *A, int matrix_input_type, char *matfile,int *par
       else if (matrix_input_type==MATRIX_INPUT_MTX){
          Get_IJAMatrixFromFileMtx(&val, &ia, &ja, &nrows, &ncols, matfile);
          if (nrows != ncols){
-            printf("Error: non-square matrix (filename=%s).\n",matfile);         
+            fprintf(stderr, "Error: non-square matrix (filename=%s).\n",matfile);         
             exit(1);
          }
       }
       else {
-         printf("Bad matrix input type (filename=%s).\n",matfile);
+         fprintf(stderr, "Bad matrix input type (filename=%s).\n",matfile);
          exit(1);
       }
 
       nnz = ia[nrows];
-      ierr=MPI_Bcast(&nrows, 1, MPI_INT, 0, MPI_COMM_WORLD);
-      ierr=MPI_Bcast(&ncols, 1, MPI_INT, 0, MPI_COMM_WORLD);
-      ierr=MPI_Bcast(&nnz,   1, MPI_INT, 0, MPI_COMM_WORLD);
+      MPI_Bcast(&nrows, 1, MPI_INT, 0, MPI_COMM_WORLD);
+      MPI_Bcast(&ncols, 1, MPI_INT, 0, MPI_COMM_WORLD);
+      MPI_Bcast(&nnz,   1, MPI_INT, 0, MPI_COMM_WORLD);
 
-      ierr=MPI_Bcast(ia,  nrows+1, MPI_INT,    0, MPI_COMM_WORLD);
-      ierr=MPI_Bcast(ja,  nnz,     MPI_INT,    0, MPI_COMM_WORLD);
-      ierr=MPI_Bcast(val, nnz,     MPI_DOUBLE, 0, MPI_COMM_WORLD);
+      MPI_Bcast(ia,  nrows+1, MPI_INT,    0, MPI_COMM_WORLD);
+      MPI_Bcast(ja,  nnz,     MPI_INT,    0, MPI_COMM_WORLD);
+      MPI_Bcast(val, nnz,     MPI_DOUBLE, 0, MPI_COMM_WORLD);
    } 
    else 
    {
-      ierr=MPI_Bcast(&nrows, 1, MPI_INT, 0, MPI_COMM_WORLD);
-      ierr=MPI_Bcast(&ncols, 1, MPI_INT, 0, MPI_COMM_WORLD);
-      ierr=MPI_Bcast(&nnz,   1, MPI_INT, 0, MPI_COMM_WORLD);
+      MPI_Bcast(&nrows, 1, MPI_INT, 0, MPI_COMM_WORLD);
+      MPI_Bcast(&ncols, 1, MPI_INT, 0, MPI_COMM_WORLD);
+      MPI_Bcast(&nnz,   1, MPI_INT, 0, MPI_COMM_WORLD);
 
       if ((ia=(int *) malloc((nrows+1)*sizeof(int)))==NULL){
-        printf("Could not allocate memory.\n");
-        assert(0);
+        fprintf(stderr, "Could not allocate memory.\n");
+        abort();
       }
       if ((ja=(int *) malloc(nnz*sizeof(int)))==NULL){
-        printf("Could not allocate memory.\n");
-        assert(0);
+        fprintf(stderr, "Could not allocate memory.\n");
+        abort();
       }
       if ((val=(double *) malloc(nnz*sizeof(double)))==NULL){
-        printf("Could not allocate memory.\n");
-        assert(0);
+        fprintf(stderr, "Could not allocate memory.\n");
+        abort();
       }
 
-      ierr=MPI_Bcast(ia,  nrows+1, MPI_INT,    0, MPI_COMM_WORLD);
-      ierr=MPI_Bcast(ja,  nnz,     MPI_INT,    0, MPI_COMM_WORLD);
-      ierr=MPI_Bcast(val, nnz,     MPI_DOUBLE, 0, MPI_COMM_WORLD);
+      MPI_Bcast(ia,  nrows+1, MPI_INT,    0, MPI_COMM_WORLD);
+      MPI_Bcast(ja,  nnz,     MPI_INT,    0, MPI_COMM_WORLD);
+      MPI_Bcast(val, nnz,     MPI_DOUBLE, 0, MPI_COMM_WORLD);
    }
 
    mybegin=partitioning[mypid];
    myend=partitioning[mypid+1]-1;
 
    printf("Processor %d : begin/end = %d %d\n", mypid, mybegin, myend);
-   ierr=fflush(stdout);
+   fflush(stdout);
 
    /*------------------------------------------------------------------
     * create matrix in the HYPRE context
     *----------------------------------------------------------------*/
 
    local_nrows = myend - mybegin + 1;
-   ierr  = HYPRE_IJMatrixCreate(MPI_COMM_WORLD, mybegin, myend, 
+   HYPRE_IJMatrixCreate(MPI_COMM_WORLD, mybegin, myend, 
            mybegin, myend, &IJA);
 
-   ierr += HYPRE_IJMatrixSetObjectType(IJA, HYPRE_PARCSR);
-   assert2(ierr);
+    HYPRE_IJMatrixSetObjectType(IJA, HYPRE_PARCSR);
+   
 
    row_sizes = (int *) malloc( local_nrows * sizeof(int) );
    for ( i = mybegin; i <= myend; i++ )
       row_sizes[i-mybegin] = ia[i+1] - ia[i];
 
-   ierr  = HYPRE_IJMatrixSetRowSizes(IJA, row_sizes);
-   ierr += HYPRE_IJMatrixInitialize(IJA);
-   assert2(ierr);
+   HYPRE_IJMatrixSetRowSizes(IJA, row_sizes);
+    HYPRE_IJMatrixInitialize(IJA);
+   
    free( row_sizes );
 
    for ( i = mybegin; i <= myend; i++ ) 
    {
       ncnt = ia[i+1] - ia[i];
-      ierr = HYPRE_IJMatrixSetValues(IJA, 1, &ncnt, (const int *) &i, 
+      HYPRE_IJMatrixSetValues(IJA, 1, &ncnt, (const int *) &i, 
             (const int *) &(ja[ia[i]]), (const double *) &(val[ia[i]]));
-      assert2(ierr);
+      
    }
-   ierr = HYPRE_IJMatrixAssemble(IJA);
-   assert2(ierr);
+   HYPRE_IJMatrixAssemble(IJA);
+   
 
-   ierr +=HYPRE_IJMatrixGetObject(IJA, (void **) &A->MPar);
-   assert2(ierr);
+   HYPRE_IJMatrixGetObject(IJA, (void **) &A->MPar);
+   
 
    /* update A matrix parameters */
    A->m=nrows;
@@ -156,8 +155,8 @@ void HYPRE_Load_IJAMatrix2(HYPRE_ParCSRMatrix  *A_ptr,
    double *val;
    HYPRE_IJMatrix IJA;
 
-   ierr=MPI_Comm_rank(MPI_COMM_WORLD, &mypid);
-   ierr=MPI_Comm_size(MPI_COMM_WORLD, &nprocs);
+   MPI_Comm_rank(MPI_COMM_WORLD, &mypid);
+   MPI_Comm_size(MPI_COMM_WORLD, &nprocs);
 
    /*------------------------------------------------------------------
     * read the matrix and broadcast
@@ -172,92 +171,92 @@ void HYPRE_Load_IJAMatrix2(HYPRE_ParCSRMatrix  *A_ptr,
       else if (matrix_input_type==MATRIX_INPUT_MTX){
          Get_IJAMatrixFromFileMtx(&val, &ia, &ja, &nrows, &ncols, matfile);
          if (nrows != ncols){
-            printf("Error: non-square matrix (filename=%s).\n",matfile);
+            fprintf(stderr, "Error: non-square matrix (filename=%s).\n",matfile);
             exit(1);
          }
       }
       else if (matrix_input_type==MATRIX_INPUT_BIN){
-         ierr=Get_CRSMatrixFromFileBinary(&val, &ia, &ja, &nrows, &ncols, matfile);
+         Get_CRSMatrixFromFileBinary(&val, &ia, &ja, &nrows, &ncols, matfile);
          if (nrows != ncols){
-            printf("Error: non-square matrix (filename=%s).\n",matfile);
+            fprintf(stderr, "Error: non-square matrix (filename=%s).\n",matfile);
             exit(1);
          }
       }
       else {
-         printf("Bad matrix input type (filename=%s).\n",matfile);
+         fprintf(stderr, "Bad matrix input type (filename=%s).\n",matfile);
          exit(1);
       }
 
       nnz = ia[nrows];
-      ierr=MPI_Bcast(&nrows, 1, MPI_INT, 0, MPI_COMM_WORLD);
-      ierr=MPI_Bcast(&ncols, 1, MPI_INT, 0, MPI_COMM_WORLD);
-      ierr=MPI_Bcast(&nnz,   1, MPI_INT, 0, MPI_COMM_WORLD);
+      MPI_Bcast(&nrows, 1, MPI_INT, 0, MPI_COMM_WORLD);
+      MPI_Bcast(&ncols, 1, MPI_INT, 0, MPI_COMM_WORLD);
+      MPI_Bcast(&nnz,   1, MPI_INT, 0, MPI_COMM_WORLD);
 
-      ierr=MPI_Bcast(ia,  nrows+1, MPI_INT,    0, MPI_COMM_WORLD);
-      ierr=MPI_Bcast(ja,  nnz,     MPI_INT,    0, MPI_COMM_WORLD);
-      ierr=MPI_Bcast(val, nnz,     MPI_DOUBLE, 0, MPI_COMM_WORLD);
+      MPI_Bcast(ia,  nrows+1, MPI_INT,    0, MPI_COMM_WORLD);
+      MPI_Bcast(ja,  nnz,     MPI_INT,    0, MPI_COMM_WORLD);
+      MPI_Bcast(val, nnz,     MPI_DOUBLE, 0, MPI_COMM_WORLD);
    }
    else
    {
-      ierr=MPI_Bcast(&nrows, 1, MPI_INT, 0, MPI_COMM_WORLD);
-      ierr=MPI_Bcast(&ncols, 1, MPI_INT, 0, MPI_COMM_WORLD);
-      ierr=MPI_Bcast(&nnz,   1, MPI_INT, 0, MPI_COMM_WORLD);
+      MPI_Bcast(&nrows, 1, MPI_INT, 0, MPI_COMM_WORLD);
+      MPI_Bcast(&ncols, 1, MPI_INT, 0, MPI_COMM_WORLD);
+      MPI_Bcast(&nnz,   1, MPI_INT, 0, MPI_COMM_WORLD);
 
       if ((ia=(int *) malloc((nrows+1)*sizeof(int)))==NULL){
-        printf("Could not allocate memory.\n");
-        assert(0);
+        fprintf(stderr, "Could not allocate memory.\n");
+        abort();
       }
       if ((ja=(int *) malloc(nnz*sizeof(int)))==NULL){
-        printf("Could not allocate memory.\n");
-        assert(0);
+        fprintf(stderr, "Could not allocate memory.\n");
+        abort();
       }
       if ((val=(double *) malloc(nnz*sizeof(double)))==NULL){
-        printf("Could not allocate memory.\n");
-        assert(0);
+        fprintf(stderr, "Could not allocate memory.\n");
+        abort();
       }
 
-      ierr=MPI_Bcast(ia,  nrows+1, MPI_INT,    0, MPI_COMM_WORLD);
-      ierr=MPI_Bcast(ja,  nnz,     MPI_INT,    0, MPI_COMM_WORLD);
-      ierr=MPI_Bcast(val, nnz,     MPI_DOUBLE, 0, MPI_COMM_WORLD);
+      MPI_Bcast(ia,  nrows+1, MPI_INT,    0, MPI_COMM_WORLD);
+      MPI_Bcast(ja,  nnz,     MPI_INT,    0, MPI_COMM_WORLD);
+      MPI_Bcast(val, nnz,     MPI_DOUBLE, 0, MPI_COMM_WORLD);
    }
 
    mybegin=partitioning[mypid];
    myend=partitioning[mypid+1]-1;
 
-   printf("Processor %d : begin/end = %d %d\n", mypid, mybegin, myend);
-   ierr=fflush(stdout);
+   fprintf(stderr, "Processor %d : begin/end = %d %d\n", mypid, mybegin, myend);
+   fflush(stdout);
 
    /*------------------------------------------------------------------
     * create matrix in the HYPRE context
     *----------------------------------------------------------------*/
    local_nrows = myend - mybegin + 1;
-   ierr  = HYPRE_IJMatrixCreate(MPI_COMM_WORLD, mybegin, myend,
+   HYPRE_IJMatrixCreate(MPI_COMM_WORLD, mybegin, myend,
            mybegin, myend, &IJA);
 
-   ierr += HYPRE_IJMatrixSetObjectType(IJA, HYPRE_PARCSR);
-   assert2(ierr);
+    HYPRE_IJMatrixSetObjectType(IJA, HYPRE_PARCSR);
+   
 
    row_sizes = (int *) malloc( local_nrows * sizeof(int) );
    for ( i = mybegin; i <= myend; i++ )
       row_sizes[i-mybegin] = ia[i+1] - ia[i];
 
-   ierr  = HYPRE_IJMatrixSetRowSizes(IJA, row_sizes);
-   ierr += HYPRE_IJMatrixInitialize(IJA);
-   assert2(ierr);
+   HYPRE_IJMatrixSetRowSizes(IJA, row_sizes);
+    HYPRE_IJMatrixInitialize(IJA);
+   
    free( row_sizes );
 
    for ( i = mybegin; i <= myend; i++ )
    {
       ncnt = ia[i+1] - ia[i];
-      ierr = HYPRE_IJMatrixSetValues(IJA, 1, &ncnt, (const int *) &i,
+      HYPRE_IJMatrixSetValues(IJA, 1, &ncnt, (const int *) &i,
             (const int *) &(ja[ia[i]]), (const double *) &(val[ia[i]]));
-      assert2(ierr);
+      
    }
-   ierr = HYPRE_IJMatrixAssemble(IJA);
-   assert2(ierr);
+   HYPRE_IJMatrixAssemble(IJA);
+   
 
-   ierr +=HYPRE_IJMatrixGetObject(IJA, (void **) A_ptr);
-   assert2(ierr);
+   HYPRE_IJMatrixGetObject(IJA, (void **) A_ptr);
+   
 
    /*------------------------------------------------------------------
     * clean up
@@ -285,12 +284,12 @@ void Get_IJAMatrixFromFileStandard(double **val, int **ia,
     printf("Reading standard matrix file = %s \n", matfile );
     fp = fopen( matfile, "r" );
     if ( fp == NULL ) {
-       printf("Error : file open error (filename=%s).\n", matfile);
+       fprintf(stderr, "Error : file open error (filename=%s).\n", matfile);
        exit(1);
     }
-    ierr=fscanf(fp, "%d %d", &Nrows, &nnz);
+    fscanf(fp, "%d %d", &Nrows, &nnz);
     if ( Nrows <= 0 || nnz <= 0 ) {
-       printf("Error : nrows,nnz = %d %d\n", Nrows, nnz);
+       fprintf(stderr, "Error : nrows,nnz = %d %d\n", Nrows, nnz);
        exit(1);
     }
     mat_ia = (int *) malloc((Nrows+1) * sizeof(int));
@@ -300,20 +299,20 @@ void Get_IJAMatrixFromFileStandard(double **val, int **ia,
     curr_row = 0;
     icount   = 0;
     for ( i = 0; i < nnz; i++ ) {
-       ierr=fscanf(fp, "%d %d %lg", &rowindex, &colindex, &value);
+       fscanf(fp, "%d %d %lg", &rowindex, &colindex, &value);
        rowindex--;
        colindex--;
        if ( rowindex != curr_row ) mat_ia[++curr_row] = icount;
        if ( rowindex < 0 || rowindex >= Nrows )
-          printf("Error reading row %d (curr_row = %d)\n", rowindex, curr_row);
+          fprintf(stderr, "Error reading row %d (curr_row = %d)\n", rowindex, curr_row);
        if ( colindex < 0 || colindex >= Nrows )
-          printf("Error reading col %d (rowindex = %d)\n", colindex, rowindex);
+          fprintf(stderr, "Error reading col %d (rowindex = %d)\n", colindex, rowindex);
          /*if ( value != 0.0 ) {*/
           mat_ja[icount] = colindex;
           mat_a[icount++]  = value;
          /*}*/
     }
-    ierr=fclose(fp);
+    fclose(fp);
     for ( i = curr_row+1; i <= Nrows; i++ ) mat_ia[i] = icount;
     (*val) = mat_a;
     (*ia)  = mat_ia;
@@ -344,13 +343,13 @@ void Get_IJAMatrixFromFileMtx(double **val, int **ia,
     printf("Reading matrix file = %s \n", matfile );
     fp = fopen( matfile, "r" );
     if ( fp == NULL ) {
-       printf("Error : file open error (filename=%s).\n", matfile);
+       fprintf(stderr, "Error : file open error (filename=%s).\n", matfile);
        exit(1);
     }
 
     /* read Matrix Market Banner */
     if (mm_read_banner(fp,&matcode) != 0) {
-       printf("Could not process Matrix Market banner (filename=%s).\n",matfile);
+       fprintf(stderr, "Could not process Matrix Market banner (filename=%s).\n",matfile);
        exit(1);
     }
 
@@ -359,25 +358,25 @@ void Get_IJAMatrixFromFileMtx(double **val, int **ia,
 
        /* read array parameters for sparse matrix */
        if ((mm_read_mtx_crd_size(fp,&m1,&n1,&nnz)) !=0){
-          printf("Could not process Matrix Market parameters (filename=%s).\n",matfile);
+          fprintf(stderr, "Could not process Matrix Market parameters (filename=%s).\n",matfile);
           exit(1);
        }
 
        if ( m1 <= 0 || n1<=0  || nnz <= 0 ) {
-          printf("Error reading matrix market matrix: m1,n1,nnz = %d %d %d\n",
+          fprintf(stderr, "Error reading matrix market matrix: m1,n1,nnz = %d %d %d\n",
              m1,n1,nnz);
           exit(1);
        }
     
        /* allocate memory */
        if ((input1=(input_data *) malloc(nnz*sizeof(input_data)))==NULL){
-          printf("Could not allocate memory for input data.\n");
+          fprintf(stderr, "Could not allocate memory for input data.\n");
           exit(1);
        }
 
        /* read in values */
        for (i=0; i<nnz; i++) {
-          ierr=fscanf(fp,"%le %le %le\n",&input1[i].row,&input1[i].col,&input1[i].val);
+          fscanf(fp,"%le %le %le\n",&input1[i].row,&input1[i].col,&input1[i].val);
           input1[i].row--; input1[i].col--;  /* set index set starts at 0 */
           input1[i].index=input1[i].row*m1+input1[i].col;
        }
@@ -388,33 +387,33 @@ void Get_IJAMatrixFromFileMtx(double **val, int **ia,
 
        /* read array parameters for sparse matrix */
        if ((mm_read_mtx_crd_size(fp,&m1,&n1,&nnz)) !=0){
-          printf("Could not process Matrix Market parameters (filename=%s).\n",matfile);
+          fprintf(stderr, "Could not process Matrix Market parameters (filename=%s).\n",matfile);
           exit(1);
        }
 
        if ( m1 <= 0 || n1<=0  || nnz <= 0 ) {
-          printf("Error reading matrix market matrix: m1,n1,nnz = %d %d %d\n",
+          fprintf(stderr, "Error reading matrix market matrix: m1,n1,nnz = %d %d %d\n",
              m1,n1,nnz);
           exit(1);
        }
        
        /* allocate memory */
        if ((input1=(input_data *) malloc(nnz*sizeof(input_data)))==NULL){
-          printf("Could not allocate memory for input data.\n");
+          fprintf(stderr, "Could not allocate memory for input data.\n");
           exit(1);
        }
 
        /* read in values */
        for (i=0; i<nnz; i++) {
-          ierr=fscanf(fp,"%le %le %le\n",&input1[i].row,&input1[i].col,&input1[i].val);
+          fscanf(fp,"%le %le %le\n",&input1[i].row,&input1[i].col,&input1[i].val);
           input1[i].row--; input1[i].col--;  /* set index set starts at 0 */
           input1[i].index=input1[i].row*m1+input1[i].col;
           if (input1[i].row!=input1[i].col) ++off_diag_count;
        }
 
        /* reallocate memory */
-       if ((input1=realloc(input1,(nnz+off_diag_count)*sizeof(input_data)))==NULL){
-          printf("Could not allocate memory for input data.\n");
+       if ((input1=(input_data *) realloc(input1,(nnz+off_diag_count)*sizeof(input_data)))==NULL){
+          fprintf(stderr, "Could not allocate memory for input data.\n");
           exit(1);
        }
 
@@ -443,7 +442,7 @@ void Get_IJAMatrixFromFileMtx(double **val, int **ia,
 
        /* allocate memory */
        if ((input1=(input_data *) malloc(nnz*sizeof(input_data)))==NULL){
-          if (Get_Rank()==0) printf("Could not allocate memory for input data.\n");
+          if (Get_Rank()==0) fprintf(stderr, "Could not allocate memory for input data.\n");
        exit(1);
        }
 
@@ -451,7 +450,7 @@ void Get_IJAMatrixFromFileMtx(double **val, int **ia,
        k=0;
        for (j=0; j<n1; j++){
           for (i=0; i<m1; i++){
-          ierr=fscanf(fp,"%le\n",&input1[k].val);
+          fscanf(fp,"%le\n",&input1[k].val);
           input1[k].row=i; input1[k].col=j;  /* set index set starts at 0 */
           input1[k].index=input1[k].row*m1+input1[k].col;
           k++;
@@ -464,14 +463,14 @@ void Get_IJAMatrixFromFileMtx(double **val, int **ia,
 
        /* read array parameters for dense matrix */
        if ((mm_read_mtx_array_size(fp,&m1,&n1)) !=0){
-          if (Get_Rank()==0) printf("Could not process Matrix Market parameters.\n");
+          if (Get_Rank()==0) fprintf(stderr, "Could not process Matrix Market parameters.\n");
           exit(1);
        }
        nnz=m1*n1;
 
        /* allocate memory */
        if ((input1=(input_data *) malloc(2*nnz*sizeof(input_data)))==NULL){
-          if (Get_Rank()==0) printf("Could not allocate memory for input data.\n");
+          if (Get_Rank()==0) fprintf(stderr, "Could not allocate memory for input data.\n");
           exit(1);
        }
 
@@ -479,7 +478,7 @@ void Get_IJAMatrixFromFileMtx(double **val, int **ia,
        k=0;
        for (j=0; j<n1; j++){
           for (i=j; i<m1; i++){
-             ierr=fscanf(fp,"%le\n",&input1[k].val);
+             fscanf(fp,"%le\n",&input1[k].val);
              input1[k].row=i; input1[k].col=j;  /* set index set starts at 0 */
              input1[k].index=input1[k].row*m1+input1[k].col;
              k++;
@@ -503,12 +502,12 @@ void Get_IJAMatrixFromFileMtx(double **val, int **ia,
     }
 
     else {
-       printf("Can't processs Matrix Market format (filename=%s).\n",matfile);
-       ierr=fclose(fp);
+       fprintf(stderr, "Can't processs Matrix Market format (filename=%s).\n",matfile);
+       fclose(fp);
        exit(1);
     }
 
-    ierr=fclose(fp);
+    fclose(fp);
 
     /* sort input data by rows and then columns */
     qsort(input1,nnz,sizeof(input_data),comp);
@@ -527,9 +526,9 @@ void Get_IJAMatrixFromFileMtx(double **val, int **ia,
        value=input1[i].val;
        if ( rowindex != curr_row ) mat_ia[++curr_row] = icount;
        if ( rowindex < 0 || rowindex >= Nrows )
-          printf("Error reading row %d (curr_row = %d)\n", rowindex, curr_row);
+          fprintf(stderr, "Error reading row %d (curr_row = %d)\n", rowindex, curr_row);
        if ( colindex < 0 || colindex >= Nrows )
-          printf("Error reading col %d (rowindex = %d)\n", colindex, rowindex);
+          fprintf(stderr, "Error reading col %d (rowindex = %d)\n", colindex, rowindex);
        mat_ja[icount] = colindex;
        mat_a[icount++]  = value;
     }
@@ -561,8 +560,8 @@ void HYPRE_LoadMatrixVectorMtx(Matx *A,char *matfile,int *partitioning)
    double *val,*tempvector;
    HYPRE_IJVector *vv;
 
-   ierr=MPI_Comm_rank(MPI_COMM_WORLD, &mypid);
-   ierr=MPI_Comm_size(MPI_COMM_WORLD, &nprocs);
+   MPI_Comm_rank(MPI_COMM_WORLD, &mypid);
+   MPI_Comm_size(MPI_COMM_WORLD, &nprocs);
 
    /*------------------------------------------------------------------
     * read the matrix and broadcast
@@ -571,50 +570,50 @@ void HYPRE_LoadMatrixVectorMtx(Matx *A,char *matfile,int *partitioning)
    {
       Get_IJAMatrixFromFileMtx(&val, &ia, &ja, &nrows, &ncols, matfile);
       nnz = ia[nrows];
-      ierr=MPI_Bcast(&nrows, 1, MPI_INT, 0, MPI_COMM_WORLD);
-      ierr=MPI_Bcast(&ncols, 1, MPI_INT, 0, MPI_COMM_WORLD);
-      ierr=MPI_Bcast(&nnz,   1, MPI_INT, 0, MPI_COMM_WORLD);
+      MPI_Bcast(&nrows, 1, MPI_INT, 0, MPI_COMM_WORLD);
+      MPI_Bcast(&ncols, 1, MPI_INT, 0, MPI_COMM_WORLD);
+      MPI_Bcast(&nnz,   1, MPI_INT, 0, MPI_COMM_WORLD);
 
-      ierr=MPI_Bcast(ia,  nrows+1, MPI_INT,    0, MPI_COMM_WORLD);
-      ierr=MPI_Bcast(ja,  nnz,     MPI_INT,    0, MPI_COMM_WORLD);
-      ierr=MPI_Bcast(val, nnz,     MPI_DOUBLE, 0, MPI_COMM_WORLD);
+      MPI_Bcast(ia,  nrows+1, MPI_INT,    0, MPI_COMM_WORLD);
+      MPI_Bcast(ja,  nnz,     MPI_INT,    0, MPI_COMM_WORLD);
+      MPI_Bcast(val, nnz,     MPI_DOUBLE, 0, MPI_COMM_WORLD);
    }
    else
    {
-      ierr=MPI_Bcast(&nrows, 1, MPI_INT, 0, MPI_COMM_WORLD);
-      ierr=MPI_Bcast(&ncols, 1, MPI_INT, 0, MPI_COMM_WORLD);
-      ierr=MPI_Bcast(&nnz,   1, MPI_INT, 0, MPI_COMM_WORLD);
+      MPI_Bcast(&nrows, 1, MPI_INT, 0, MPI_COMM_WORLD);
+      MPI_Bcast(&ncols, 1, MPI_INT, 0, MPI_COMM_WORLD);
+      MPI_Bcast(&nnz,   1, MPI_INT, 0, MPI_COMM_WORLD);
 
       if ((ia=(int *) malloc((nrows+1)*sizeof(int)))==NULL){
-        printf("Could not allocate memory.\n");
-        assert(0);
+        fprintf(stderr, "Could not allocate memory.\n");
+        abort();
       }
       if ((ja=(int *) malloc(nnz*sizeof(int)))==NULL){
-        printf("Could not allocate memory.\n");
-        assert(0);
+        fprintf(stderr, "Could not allocate memory.\n");
+        abort();
       }
       if ((val=(double *) malloc(nnz*sizeof(double)))==NULL){
-        printf("Could not allocate memory.\n");
-        assert(0);
+        fprintf(stderr, "Could not allocate memory.\n");
+        abort();
       }
 
-      ierr=MPI_Bcast(ia,  nrows+1, MPI_INT,    0, MPI_COMM_WORLD);
-      ierr=MPI_Bcast(ja,  nnz,     MPI_INT,    0, MPI_COMM_WORLD);
-      ierr=MPI_Bcast(val, nnz,     MPI_DOUBLE, 0, MPI_COMM_WORLD);
+      MPI_Bcast(ia,  nrows+1, MPI_INT,    0, MPI_COMM_WORLD);
+      MPI_Bcast(ja,  nnz,     MPI_INT,    0, MPI_COMM_WORLD);
+      MPI_Bcast(val, nnz,     MPI_DOUBLE, 0, MPI_COMM_WORLD);
    }
 
    /* Mat_Init needs this call */
-   ierr=hypre_LobpcgSetGetPartition(0,&partitioning);
-   ierr=Mat_Init(A,nrows,ncols,nnz,HYPRE_VECTORS,GENERAL);
+   hypre_LobpcgSetGetPartition(0,&partitioning);
+   Mat_Init(A,nrows,ncols,nnz,HYPRE_VECTORS,GENERAL);
 
    /* allocate storage */
    if ((tempvector=(double *) malloc(nrows*sizeof(double)))==NULL){
-        printf("Could not allocate memory.\n");
-        assert(0);
+        fprintf(stderr, "Could not allocate memory.\n");
+        abort();
    }
    if ((vv=(HYPRE_IJVector  *) malloc(ncols*sizeof(HYPRE_IJVector)))==NULL){
-      printf("Could not allocate memory.\n");
-      assert(0);
+      fprintf(stderr, "Could not allocate memory.\n");
+      abort();
    }
 
    mybegin=partitioning[mypid];
@@ -631,15 +630,15 @@ void HYPRE_LoadMatrixVectorMtx(Matx *A,char *matfile,int *partitioning)
             if (ja[rowindex]==j) tempvector[i]=val[rowindex];     
          }
       }
-      ierr=HYPRE_IJVectorCreate(MPI_COMM_WORLD, mybegin, myend, &vv[j]);
-      ierr=HYPRE_IJVectorSetObjectType(vv[j], HYPRE_PARCSR);
-      ierr=HYPRE_IJVectorInitialize(vv[j]);
+      HYPRE_IJVectorCreate(MPI_COMM_WORLD, mybegin, myend, &vv[j]);
+      HYPRE_IJVectorSetObjectType(vv[j], HYPRE_PARCSR);
+      HYPRE_IJVectorInitialize(vv[j]);
       for ( i = mybegin; i <= myend; i++ )
-         ierr=HYPRE_IJVectorSetValues(vv[j], 1, (const int *) &i,
+         HYPRE_IJVectorSetValues(vv[j], 1, (const int *) &i,
                                  (const double *) &(tempvector[i]));
-      ierr += HYPRE_IJVectorAssemble(vv[j]);
-      assert2(ierr);
-      ierr=HYPRE_IJVectorGetObject(vv[j], (void ** ) &A->vsPar[j]);
+       HYPRE_IJVectorAssemble(vv[j]);
+      
+      HYPRE_IJVectorGetObject(vv[j], (void ** ) &A->vsPar[j]);
    }
 
    /*------------------------------------------------------------------
@@ -667,7 +666,7 @@ int Get_CRSMatrixFromFileBinary(double **val, int **ia,
   int i;
 
   if ((fid=fopen(file_name,"r"))==NULL){
-    printf("Cannot open file: %s\n",file_name);
+    fprintf(stderr, "Cannot open file: %s\n",file_name);
     exit(1);
   }
 
@@ -675,13 +674,13 @@ int Get_CRSMatrixFromFileBinary(double **val, int **ia,
   expect(fid,1);
   expect(fid,4);
   expect(fid,4);
-  ierr=fread(&nrows,sizeof(int),1,fid);
+  fread(&nrows,sizeof(int),1,fid);
   expect(fid,4);
   expect(fid,4);
-  ierr=fread(&ncols,sizeof(int),1,fid);
+  fread(&ncols,sizeof(int),1,fid);
   expect(fid,4);
   expect(fid,4);
-  ierr=fread(&nzs,sizeof(int),1,fid);
+  fread(&nzs,sizeof(int),1,fid);
   expect(fid,4);
   expect(fid,4*(ncols+1));
 
@@ -694,28 +693,28 @@ int Get_CRSMatrixFromFileBinary(double **val, int **ia,
 
   /* allocate storage */
   if (!(rows=(int *) malloc((nrows+1)*sizeof(int)))) {
-    printf("Out of memory\n");
-    assert(0);
+    fprintf(stderr, "Out of memory\n");
+    abort();
   }
   if (!(cols=(int *) malloc(nzs*sizeof(int)))) {
-    printf("Out of memory\n");
-    assert(0);
+    fprintf(stderr, "Out of memory\n");
+    abort();
   }
   if (!(val1=(double *) malloc(nzs*sizeof(double)))) {
-    printf("Out of memory\n");
-    assert(0);
+    fprintf(stderr, "Out of memory\n");
+    abort();
   }
 
-  ierr=fread(rows,sizeof(int),nrows+1,fid);
+  fread(rows,sizeof(int),(long)nrows+1,fid);
   expect(fid,4*(ncols+1));
   expect(fid,4*nzs);
-  ierr=fread(cols,sizeof(int),nzs,fid);
+  fread(cols,sizeof(int),(long)nzs,fid);
   expect(fid,4*nzs);
   expect(fid,8*nzs);
 
-  ierr=fread(val1,sizeof(double),nzs,fid);
+  fread(val1,sizeof(double),(long)nzs,fid);
   expect(fid,8*nzs);
-  ierr=fclose(fid);
+  fclose(fid);
 
   rows[nrows]=nzs;
   for (i=0;i<nrows;++i) --rows[i];
@@ -727,7 +726,7 @@ int Get_CRSMatrixFromFileBinary(double **val, int **ia,
   (*n) = ncols;
 
   /* make symmetric */
-  ierr=IJAMatrixiToSymmetric(val,ia,ja,m);
+  IJAMatrixiToSymmetric(val,ia,ja,m);
 
   printf("matrix has %d rows, %d columns and %d nonzeros\n",
     nrows,ncols, (*ia)[nrows]);
@@ -755,7 +754,7 @@ int IJAMatrixiToSymmetric(double **val, int **ia,
 
   /* allocate memory */
   if ((input1=(input_data *) malloc(nnz*sizeof(input_data)))==NULL){
-    printf("Could not allocate memory for input data.\n");
+    fprintf(stderr, "Could not allocate memory for input data.\n");
     exit(1);
   }
 
@@ -778,8 +777,8 @@ int IJAMatrixiToSymmetric(double **val, int **ia,
   }
 
   /* reallocate memory */
-  if ((input1=realloc(input1,(nnz+off_diag_count)*sizeof(input_data)))==NULL){
-    printf("Could not allocate memory for input data.\n");
+  if ((input1=(input_data *) realloc(input1,(nnz+off_diag_count)*sizeof(input_data)))==NULL){
+    fprintf(stderr, "Could not allocate memory for input data.\n");
     exit(1);
   }
 
@@ -817,9 +816,9 @@ int IJAMatrixiToSymmetric(double **val, int **ia,
      value=input1[i].val;
      if ( rowindex != curr_row ) mat_ia[++curr_row] = icount;
      if ( rowindex < 0 || rowindex >= nrows )
-        printf("Error reading row %d (curr_row = %d)\n", rowindex, curr_row);
+        fprintf(stderr, "Error reading row %d (curr_row = %d)\n", rowindex, curr_row);
      if ( colindex < 0 || colindex >= nrows )
-        printf("Error reading col %d (rowindex = %d)\n", colindex, rowindex);
+        fprintf(stderr, "Error reading col %d (rowindex = %d)\n", colindex, rowindex);
      mat_ja[icount] = colindex;
      mat_a[icount++]  = value;
   }
@@ -838,9 +837,9 @@ void expect(FILE *fid,int i)
 {
   int ii;
 
-  ierr=fread(&ii,sizeof(int),1,fid);
+  fread(&ii,sizeof(int),1,fid);
   if (ii != i){
-    printf("Error: Expected %d, got %d\n",i,ii);
+    fprintf(stderr, "Error: Expected %d, got %d\n",i,ii);
     exit(1);
   }
 }
@@ -856,15 +855,15 @@ int PrintArray(Matx *A,char fname[])
   double  *data=NULL;
   hypre_Vector *local_vector;
 
-  ierr=MPI_Comm_rank(MPI_COMM_WORLD, &mypid);
-  ierr=MPI_Comm_size(MPI_COMM_WORLD, &nprocs);
+  MPI_Comm_rank(MPI_COMM_WORLD, &mypid);
+  MPI_Comm_size(MPI_COMM_WORLD, &nprocs);
 
   /* check to see if there is any data */
   if (A->m==0 || A->n==0 || A->nz==0) return 0;
 
   if (A->mat_storage_type==DENSE){
     if ((fp=fopen(fname,"w"))==NULL){
-      printf("Cannot open file %s for writing\n",fname);
+      fprintf(stderr, "Cannot open file %s for writing\n",fname);
       exit(1);
     }
 
@@ -874,7 +873,7 @@ int PrintArray(Matx *A,char fname[])
     mm_set_dense(&matcode);
     mm_set_real(&matcode);
     mm_set_general(&matcode);
-    ierr=mm_write_banner(fp, matcode);
+    mm_write_banner(fp, matcode);
     fprintf(fp,"%d %d\n",A->m,A->n);
 
     /* print to file column by column */
@@ -883,13 +882,13 @@ int PrintArray(Matx *A,char fname[])
         fprintf(fp,"%22.16e\n",A->val[i][j]);
      }
     }
-    ierr=fclose(fp);
+    fclose(fp);
     return 0;
   }
   if (A->mat_storage_type==HYPRE_VECTORS){
     if ( mypid == 0 ){
       if ((fp=fopen(fname,"w"))==NULL){
-        printf("Cannot open file %s for writing\n",fname);
+        fprintf(stderr, "Cannot open file %s for writing\n",fname);
         exit(1);
       }
 
@@ -899,7 +898,7 @@ int PrintArray(Matx *A,char fname[])
       mm_set_dense(&matcode);
       mm_set_real(&matcode);
       mm_set_general(&matcode);
-      ierr=mm_write_banner(fp, matcode);
+      mm_write_banner(fp, matcode);
       fprintf(fp,"%d %d\n",A->m,A->n);
     }
     for (i=0;i<A->n;i++){
@@ -909,17 +908,17 @@ int PrintArray(Matx *A,char fname[])
         for (j=0; j<A->m;j++) {
           fprintf(fp,"%22.16e\n",data[j]);
         }
-        ierr=hypre_SeqVectorDestroy(local_vector);
+        hypre_SeqVectorDestroy(local_vector);
       }
     }
 
    /*------------------------------------------------------------------
     * clean up
     *----------------------------------------------------------------*/
-    if ( mypid == 0 ) ierr=fclose(fp);
+    if ( mypid == 0 ) fclose(fp);
     return 0;
   }
-  else printf("Can't save this file to matrix market format\n");
+  else fprintf(stderr, "Can't save this file to matrix market format\n");
   return 1;
 }
 
@@ -930,8 +929,8 @@ int PrintArray(Matx *A,char fname[])
 int PrintPartitioning(int *partitioning,char *name)
 {
   int i,mypid,nprocs;
-  ierr=MPI_Comm_rank(MPI_COMM_WORLD, &mypid);
-  ierr=MPI_Comm_size(MPI_COMM_WORLD, &nprocs);
+  MPI_Comm_rank(MPI_COMM_WORLD, &mypid);
+  MPI_Comm_size(MPI_COMM_WORLD, &nprocs);
   if (mypid==0)
   {
      printf("Partitioning: %s\n",name);
@@ -961,13 +960,13 @@ int Print_Par_Matrix_To_Mtx(HYPRE_ParCSRMatrix A,char *filename)
   X=Mat_Alloc1();
 
   /* get partitioning and size of matrix */
-  ierr=HYPRE_ParCSRMatrixGetRowPartitioning(A,&partitioning);
-  ierr=HYPRE_ParCSRMatrixGetDims(A,&M,&N);
+  HYPRE_ParCSRMatrixGetRowPartitioning(A,&partitioning);
+  HYPRE_ParCSRMatrixGetDims(A,&M,&N);
   
   part2=CopyPartition(partitioning);
   if (verbose2(1)==TRUE) collect_data(0,HYPRE_ParVectorCreate_Data,0);
-  ierr=HYPRE_ParVectorCreate(MPI_COMM_WORLD,M,part2,&b);
-  ierr=HYPRE_ParVectorInitialize(b);
+  HYPRE_ParVectorCreate(MPI_COMM_WORLD,M,part2,&b);
+  HYPRE_ParVectorInitialize(b);
 
   /* setup X */
   X->m=M;
@@ -978,14 +977,14 @@ int Print_Par_Matrix_To_Mtx(HYPRE_ParCSRMatrix A,char *filename)
 
   /* allocate memory */
   if ((X->vsPar=(HYPRE_ParVector *) malloc(X->n*sizeof(HYPRE_ParVector)))==NULL){
-     printf("Could not allocate memory.\n");
-     assert(0);
+     fprintf(stderr, "Could not allocate memory.\n");
+     abort();
   }
 
-    ierr=MPI_Comm_rank(MPI_COMM_WORLD, &mypid);
-    ierr=MPI_Comm_size(MPI_COMM_WORLD, &nprocs);
+    MPI_Comm_rank(MPI_COMM_WORLD, &mypid);
+    MPI_Comm_size(MPI_COMM_WORLD, &nprocs);
     v_temp=hypre_SeqVectorCreate(M);
-    ierr=hypre_SeqVectorInitialize(v_temp);
+    hypre_SeqVectorInitialize(v_temp);
     vector_data = hypre_VectorData(v_temp);
     for (i=0; i<N; i++) {
        for (j = 0; j < N; j++){
@@ -993,16 +992,16 @@ int Print_Par_Matrix_To_Mtx(HYPRE_ParCSRMatrix A,char *filename)
           else vector_data[j] = 0.0;
        }
        part2=CopyPartition(partitioning);
-       ierr=HYPRE_VectorToParVector(MPI_COMM_WORLD,(HYPRE_Vector) v_temp,part2,&X->vsPar[i]);
-       ierr=HYPRE_ParVectorCopy(X->vsPar[i],b);
-       ierr=HYPRE_ParCSRMatrixMatvec(1.0,A,b,0.0,X->vsPar[i]);assert2(ierr);
+       HYPRE_VectorToParVector(MPI_COMM_WORLD,(HYPRE_Vector) v_temp,part2,&X->vsPar[i]);
+       HYPRE_ParVectorCopy(X->vsPar[i],b);
+       HYPRE_ParCSRMatrixMatvec(1.0,A,b,0.0,X->vsPar[i]);
     }
-    ierr=hypre_SeqVectorDestroy(v_temp);
+    hypre_SeqVectorDestroy(v_temp);
     if (verbose2(1)==TRUE) collect_data(0,HYPRE_ParVectorDestroy_Data,0);
-    ierr=HYPRE_ParVectorDestroy(b);
-    ierr=PrintArray(X,filename);
+    HYPRE_ParVectorDestroy(b);
+    PrintArray(X,filename);
 
-    ierr=Mat_Free(X);free(X);
+    Mat_Free(X);free(X);
     return 0;
 }
 
@@ -1026,11 +1025,11 @@ void PrintVector(double *data,int n,char fname[])
   Matx  *A;
 
   A=Mat_Alloc1();
-  ierr=Mat_Init_Dense(A,n,1,GENERAL);
+  Mat_Init_Dense(A,n,1,GENERAL);
   for (i=0; i<n; i++) A->val[i][0]=data[i];
-  ierr=PrintArray(A,fname);
+  PrintArray(A,fname);
 
-  ierr=Mat_Free(A);free(A);
+  Mat_Free(A);free(A);
 }
 
 /*****************************************************************************/
@@ -1040,13 +1039,13 @@ void PrintMatrix(double **data,int m,int n,char fname[])
   int i,j;
   Matx  *A;
   A=Mat_Alloc1();
-  ierr=Mat_Init_Dense(A,m,n,GENERAL);
+  Mat_Init_Dense(A,m,n,GENERAL);
   for (i=0; i<m; i++){
     for (j=0; j<n; j++) A->val[i][j]=data[i][j];
   }
-  ierr=PrintArray(A,fname);
+  PrintArray(A,fname);
 
-  ierr=Mat_Free(A);free(A);
+  Mat_Free(A);free(A);
 }
 
 /*****************************************************************************/
@@ -1136,7 +1135,7 @@ int readmatrix(char Ain[],Matx *A,mst mat_storage_type,int *partitioning)
       /* standard simple IJA format (see Charles Tong) */
       HYPRE_Load_IJAMatrix(A,MATRIX_INPUT_PLANE_IJ,Ain,partitioning);
     else {
-      printf("%s is in invalid file name\n",Ain);
+      fprintf(stderr, "%s is in invalid file name\n",Ain);
       exit(1);
     }
     A->mat_storage_type=mat_storage_type;
@@ -1148,7 +1147,7 @@ int readmatrix(char Ain[],Matx *A,mst mat_storage_type,int *partitioning)
       HYPRE_LoadMatrixVectorMtx(A,Ain,partitioning);
       }
     else {
-      printf("%s is in invalid file name\n",Ain);
+      fprintf(stderr, "%s is in invalid file name\n",Ain);
       exit(1);
     }
     A->mat_storage_type=mat_storage_type;
@@ -1158,13 +1157,13 @@ int readmatrix(char Ain[],Matx *A,mst mat_storage_type,int *partitioning)
 
 
   if ((Afile=fopen(Ain,"r"))==NULL){
-    if (Get_Rank()==0) printf("Cannot open file: %s\n",Ain);
+    if (Get_Rank()==0) fprintf(stderr, "Cannot open file: %s\n",Ain);
     exit(1);
   }
 
   /* read Matrix Market Banner */
   if (mm_read_banner(Afile,&matcode) != 0) {
-    if (Get_Rank()==0) printf("Could not process Matrix Market banner.\n");
+    if (Get_Rank()==0) fprintf(stderr, "Could not process Matrix Market banner.\n");
     exit(1);
   }
 
@@ -1173,13 +1172,13 @@ int readmatrix(char Ain[],Matx *A,mst mat_storage_type,int *partitioning)
 
     /* read array parameters for sparse matrix */
     if ((mm_read_mtx_crd_size(Afile,&mA,&nA,&nzA)) !=0){
-      if (Get_Rank()==0) printf("Could not process Matrix Market parameters.\n");
+      if (Get_Rank()==0) fprintf(stderr, "Could not process Matrix Market parameters.\n");
       exit(1);
     }
 
     /* allocate memory */
     if ((input1=(input_data *) malloc(nzA*sizeof(input_data)))==NULL){
-      if (Get_Rank()==0) printf("Could not allocate memory for input data.\n");
+      if (Get_Rank()==0) fprintf(stderr, "Could not allocate memory for input data.\n");
       exit(1);
     }
 
@@ -1188,12 +1187,12 @@ int readmatrix(char Ain[],Matx *A,mst mat_storage_type,int *partitioning)
     if(nzA>10) ii=nzA/10;
     for (i=0; i<nzA; i++) {
       if (i % ii == 0 && Get_Rank()==0)  printf("nzA= %d %d\n",nzA,i); /* output every 10% */
-      ierr=fscanf(Afile,"%le %le %le\n",&input1[i].row,&input1[i].col,&input1[i].val);
+      fscanf(Afile,"%le %le %le\n",&input1[i].row,&input1[i].col,&input1[i].val);
       input1[i].row--; input1[i].col--;  /* set index set starts at 0 */
       input1[i].index=input1[i].row*nA+input1[i].col;
     }
 
-    ierr=fclose(Afile);
+    fclose(Afile);
     mat_type=GENERAL;
   }
 
@@ -1202,13 +1201,13 @@ int readmatrix(char Ain[],Matx *A,mst mat_storage_type,int *partitioning)
 
     /* read array parameters for sparse matrix */
     if ((mm_read_mtx_crd_size(Afile,&mA,&nA,&nzA)) !=0){
-      if (Get_Rank()==0) printf("Could not process Matrix Market parameters.\n");
+      if (Get_Rank()==0) fprintf(stderr, "Could not process Matrix Market parameters.\n");
       exit(1);
     }
 
     /* allocate memory */
     if ((input1=(input_data *) malloc(nzA*sizeof(input_data)))==NULL){
-      if (Get_Rank()==0) printf("Could not allocate memory for input data.\n");
+      if (Get_Rank()==0) fprintf(stderr, "Could not allocate memory for input data.\n");
       exit(1);
     }
 
@@ -1217,12 +1216,12 @@ int readmatrix(char Ain[],Matx *A,mst mat_storage_type,int *partitioning)
     if(nzA>10) ii=nzA/10;
     for (i=0; i<nzA; i++) {
       if (i % ii == 0 && Get_Rank()==0)  printf("nzA= %d %d\n",nzA,i); /* output every 10% */
-      ierr=fscanf(Afile,"%le %le %le\n",&input1[i].row,&input1[i].col,&input1[i].val);
+      fscanf(Afile,"%le %le %le\n",&input1[i].row,&input1[i].col,&input1[i].val);
       input1[i].row--; input1[i].col--;  /* set index set starts at 0 */
       input1[i].index=input1[i].row*nA+input1[i].col;
     }
 
-    ierr=fclose(Afile);
+    fclose(Afile);
     mat_type=SYMMETRIC;
   }
 
@@ -1231,14 +1230,14 @@ int readmatrix(char Ain[],Matx *A,mst mat_storage_type,int *partitioning)
 
     /* read array parameters for dense matrix */
     if ((mm_read_mtx_array_size(Afile,&mA,&nA)) !=0){
-      if (Get_Rank()==0) printf("Could not process Matrix Market parameters.\n");
+      if (Get_Rank()==0) fprintf(stderr, "Could not process Matrix Market parameters.\n");
       exit(1);
     }
     nzA=mA*nA;
 
     /* allocate memory */
     if ((input1=(input_data *) malloc(nzA*sizeof(input_data)))==NULL){
-      if (Get_Rank()==0) printf("Could not allocate memory for input data.\n");
+      if (Get_Rank()==0) fprintf(stderr, "Could not allocate memory for input data.\n");
       exit(1);
     }
 
@@ -1246,13 +1245,13 @@ int readmatrix(char Ain[],Matx *A,mst mat_storage_type,int *partitioning)
     k=0;
     for (j=0; j<nA; j++){
       for (i=0; i<mA; i++){
-        ierr=fscanf(Afile,"%le\n",&input1[k].val);
+        fscanf(Afile,"%le\n",&input1[k].val);
         input1[k].row=i; input1[k].col=j;  /* set index set starts at 0 */
         input1[k].index=input1[k].row*nA+input1[k].col;
         k++;
         }
     }
-    ierr=fclose(Afile);
+    fclose(Afile);
     mat_type=GENERAL;
   }
 
@@ -1261,14 +1260,14 @@ int readmatrix(char Ain[],Matx *A,mst mat_storage_type,int *partitioning)
 
     /* read array parameters for dense matrix */
     if ((mm_read_mtx_array_size(Afile,&mA,&nA)) !=0){
-      if (Get_Rank()==0) printf("Could not process Matrix Market parameters.\n");
+      if (Get_Rank()==0) fprintf(stderr, "Could not process Matrix Market parameters.\n");
       exit(1);
     }
     nzA=mA*nA;
 
     /* allocate memory */
     if ((input1=(input_data *) malloc(2*nzA*sizeof(input_data)))==NULL){
-      if (Get_Rank()==0) printf("Could not allocate memory for input data.\n");
+      if (Get_Rank()==0) fprintf(stderr, "Could not allocate memory for input data.\n");
       exit(1);
     }
 
@@ -1276,13 +1275,13 @@ int readmatrix(char Ain[],Matx *A,mst mat_storage_type,int *partitioning)
     k=0;
     for (j=0; j<nA; j++){
       for (i=j; i<mA; i++){
-        ierr=fscanf(Afile,"%le\n",&input1[k].val);
+        fscanf(Afile,"%le\n",&input1[k].val);
         input1[k].row=i; input1[k].col=j;  /* set index set starts at 0 */
         input1[k].index=input1[k].row*nA+input1[k].col;
         k++;
         }
     }
-    ierr=fclose(Afile);
+    fclose(Afile);
 
     /* fill in remaining values */
     kk=k;
@@ -1302,7 +1301,7 @@ int readmatrix(char Ain[],Matx *A,mst mat_storage_type,int *partitioning)
   }
 
   else {
-    if (Get_Rank()==0) printf("Unabel to read Matrix Market format\n");
+    if (Get_Rank()==0) fprintf(stderr, "Unabel to read Matrix Market format\n");
     exit(1);
   }
 
@@ -1314,10 +1313,10 @@ int readmatrix(char Ain[],Matx *A,mst mat_storage_type,int *partitioning)
   {
     case DENSE:
       if (Get_Rank()==0) printf("Assembling DENSE matrix\n");
-      ierr=Assemble_DENSE(A,input1,mA,nA,nzA,mat_type);
+      Assemble_DENSE(A,input1,mA,nA,nzA,mat_type);
       break;
     default:
-      if (Get_Rank()==0) printf("Invalid matrix type\n");
+      if (Get_Rank()==0) fprintf(stderr, "Invalid matrix type\n");
       exit(1);
   }
 
@@ -1331,8 +1330,8 @@ int comp(const void *p1,const void *p2)
 /* comparison function used by qsort */
 /* sort values by increasing */
 
-  const input_data *ps1=p1;
-  const input_data *ps2=p2;
+  const input_data *ps1=(input_data *) p1;
+  const input_data *ps2=(input_data *) p2;
   
   if (ps1->index < ps2->index) return -1;
   else if (ps1->index == ps2->index) return 0;
@@ -1351,31 +1350,34 @@ int Mat_Size_Mtx(char *file_name,int rc)
   MM_typecode matcode; /* Matrix Market type code */
 
   if ((Afile=fopen(file_name,"r"))==NULL){
-    if (Get_Rank()==0) printf("Cannot open file: %s\n",file_name);
+    if (Get_Rank()==0) fprintf(stderr, "Cannot open file: %s\n",file_name);
     exit(1);
   }
 
   /* read Matrix Market Banner */
   if (mm_read_banner(Afile,&matcode) != 0) {
-    if (Get_Rank()==0) printf("Could not process Matrix Market banner.\n");
+    if (Get_Rank()==0) fprintf(stderr, "Could not process Matrix Market banner.\n");
     exit(1);
   }
 
   if (mm_is_sparse(matcode)){
     /* read array parameters for sparse matrix */
     if ((mm_read_mtx_crd_size(Afile,&mA,&nA,&nzA)) !=0){
-      if (Get_Rank()==0) printf("Could not process Matrix Market parameters.\n");
+      if (Get_Rank()==0) fprintf(stderr, "Could not process Matrix Market parameters.\n");
       exit(1);
     }
   }
   else if (mm_is_dense(matcode)){
     /* read array parameters for dense matrix */
     if ((mm_read_mtx_array_size(Afile,&mA,&nA)) !=0){
-      if (Get_Rank()==0) printf("Could not process Matrix Market parameters.\n");
+      if (Get_Rank()==0) fprintf(stderr, "Could not process Matrix Market parameters.\n");
       exit(1);
     }
   }
-  else assert(0);
+  else {
+	fprintf(stderr, "Mat_Size_Mtx function failed.\n");
+	abort();
+  }
 
   if (rc==1) return mA;
   else return nA;
@@ -1389,7 +1391,7 @@ int Mat_Size_Bin(char *file_name,int rc)
   FILE *fid;
 
   if ((fid=fopen(file_name,"r"))==NULL){
-    printf("Cannot open file: %s\n",file_name);
+    fprintf(stderr, "Cannot open file: %s\n",file_name);
     exit(1);
   }
 
@@ -1397,11 +1399,11 @@ int Mat_Size_Bin(char *file_name,int rc)
   expect(fid,1);
   expect(fid,4);
   expect(fid,4);
-  ierr=fread(&nrows,sizeof(int),1,fid);
+  fread(&nrows,sizeof(int),1,fid);
   expect(fid,4);
   expect(fid,4);
-  ierr=fread(&ncols,sizeof(int),1,fid);
-  ierr=fclose(fid);
+  fread(&ncols,sizeof(int),1,fid);
+  fclose(fid);
 
   if (rc==1) return nrows;
   else return ncols;
@@ -1410,7 +1412,9 @@ int Mat_Size_Bin(char *file_name,int rc)
 /*****************************************************************************/
 int Get_Lobpcg_Options(int argc,char **argv,lobpcg_options *opts)
 {
-  /* read in all command line options */
+   int ftype,count;
+
+   /* read in all command line options */
    int arg_index=1;
 
    opts->verbose=1; /* default is standard amount of output */
@@ -1530,6 +1534,13 @@ int Get_Lobpcg_Options(int argc,char **argv,lobpcg_options *opts)
          /* uses identity for T solver  - used for debugging */
          arg_index++;
          misc_flags(0,1);
+      }
+      else if ( strcmp(argv[arg_index], "-time") == 0 )
+      {
+         arg_index++;
+         ftype=atoi(argv[arg_index++]);
+         count=atoi(argv[arg_index++]);
+         time_functions(0,ftype,0,count,0);
       }
       else
       {
@@ -1713,11 +1724,11 @@ int mm_read_unsymmetric_sparse(const char *fname, int *M_, int *N_, int *nz_,
  
     for (i=0; i<nz; i++)
     {
-        ierr=fscanf(f, "%d %d %lg\n", &I[i], &J[i], &val[i]);
+        fscanf(f, "%d %d %lg\n", &I[i], &J[i], &val[i]);
         I[i]--;  /* adjust from 1-based to 0-based */
         J[i]--;
     }
-    ierr=fclose(f);
+    fclose(f);
  
     return 0;
 }
@@ -1741,7 +1752,7 @@ int mm_read_banner(FILE *f, MM_typecode *matcode)
     char data_type[MM_MAX_TOKEN_LENGTH];
     char storage_scheme[MM_MAX_TOKEN_LENGTH];
     char *p;
-    char cnull;
+
 
     mm_clear_typecode(matcode);  
 
@@ -1752,11 +1763,10 @@ int mm_read_banner(FILE *f, MM_typecode *matcode)
         storage_scheme) != 5)
         return MM_PREMATURE_EOF;
 
-    cnull = '\0';
-    for (p=mtx; *p!=cnull; *p=tolower(*p),p++);  /* convert to lower case */
-    for (p=crd; *p!=cnull; *p=tolower(*p),p++);  
-    for (p=data_type; *p!=cnull; *p=tolower(*p),p++);
-    for (p=storage_scheme; *p!=cnull; *p=tolower(*p),p++);
+    for (p=mtx; *p; *p=tolower(*p),p++);  /* convert to lower case */
+    for (p=crd; *p; *p=tolower(*p),p++);  
+    for (p=data_type; *p; *p=tolower(*p),p++);
+    for (p=storage_scheme; *p; *p=tolower(*p),p++);
 
     /* check for banner */
     if (strncmp(banner, MatrixMarketBanner, strlen(MatrixMarketBanner)) != 0)
@@ -1975,7 +1985,7 @@ int mm_read_mtx_crd_entry(FILE *f, int *I, int *J,
 int mm_read_mtx_crd(char *fname, int *M, int *N, int *nz, int **I, int **J, 
         double **val, MM_typecode *matcode)
 {
-    int  ret_code;
+    int ret_code;
     FILE *f;
 
     if (strcmp(fname, "stdin") == 0) f=stdin;
@@ -2021,7 +2031,7 @@ int mm_read_mtx_crd(char *fname, int *M, int *N, int *nz, int **I, int **J,
         if (ret_code != 0) return ret_code;
     }
 
-    if (f != stdin) ierr=fclose(f);
+    if (f != stdin) fclose(f);
     return 0;
 }
 
@@ -2072,11 +2082,11 @@ int mm_write_mtx_crd(char fname[], int M, int N, int nz, int I[], int J[],
                         val[2*i+1]);
     else
     {
-        if (f != stdout) ierr=fclose(f);
+        if (f != stdout) fclose(f);
         return MM_UNSUPPORTED_TYPE;
     }
 
-    if (f !=stdout) ierr=fclose(f);
+    if (f !=stdout) fclose(f);
 
     return 0;
 }
@@ -2086,13 +2096,10 @@ char  *mm_typecode_to_str(MM_typecode matcode)
 {
     char buffer[MM_MAX_LINE_LENGTH];
     char *types[4];
-    /*int error =0;*/
 
     /* check for MTX type */
     if (mm_is_matrix(matcode)) 
         types[0] = MM_MTX_STR;
-    /*else
-        error=1;*/
 
     /* check for CRD or ARR matrix */
     if (mm_is_sparse(matcode))

@@ -30,10 +30,10 @@
 #define LOBPCG_DEFAULT_MAXITR     500
 #define LOBPCG_DEFAULT_TOL        1E-6
 #define LOBPCG_DEFAULT_BSIZE      1
-#define LOBPCG_DEFAULT_VERBOSE    1
-#define LOBPCG_DEFAULT_RANDOM     FALSE
-#define LOBPCG_DEFAULT_EYE        FALSE
-#define LOBPCG_DEFAULT_ORTH_CHECK FALSE
+#define LOBPCG_DEFAULT_VERBOSE    1 	
+#define LOBPCG_DEFAULT_RANDOM     FALSE	
+#define LOBPCG_DEFAULT_EYE        FALSE	
+#define LOBPCG_DEFAULT_ORTH_CHECK FALSE	
 
 #define MAX_NUMBER_COUNTS 25
 #define HYPRE_ParVectorInnerProd_Data 0
@@ -54,29 +54,29 @@ typedef struct {
 } input_data;
 
 typedef struct {
-  int      verbose;            /* =0,1 or 2 to control output */
-  int      rand_vec;         /* =1 randomize input vectors */
-  int      eye_vec;         /* =1 set input vectors to n x bsize identity */
+  int      verbose;   		/* =0,1 or 2 to control output */
+  int      rand_vec;		/* =1 randomize input vectors */
+  int      eye_vec;		/* =1 set input vectors to n x bsize identity */
   int      orth_check;          /* =1 check orthoganality of eigenvectors */
   double   orth_frob_norm;      /* Frobenius norm of V'V-I, if requested */
-  int      max_iter;         /* maximum number of iterations */
-  int      iterations;         /* actual number of iterations */
-  double   tol;          /* tolerance on max residual for convergence */
-  double   *eigval;         /* pointer to array to store eigenvalues */
-  double   **resvec;         /* pointer to array to store residual vectors */
-  double   **eigvalhistory; /* pointer to array to store eigenvalue history */
-  int      *partition;         /* partition for parallel vectors */
-  int      bsize;         /* block size of eigenvectors */
+  int      max_iter;		/* maximum number of iterations */
+  int      iterations;		/* actual number of iterations */
+  double   tol; 		/* tolerance on max residual for convergence */
+  double   *eigval;		/* pointer to array to store eigenvalues */
+  double   **resvec;		/* pointer to array to store residual vectors */
+  double   **eigvalhistory;	/* pointer to array to store eigenvalue history */
+  int      *partition;		/* partition for parallel vectors */
+  int      bsize;		/* block size of eigenvectors */
   int (*FunctSolver)(HYPRE_ParVector x,HYPRE_ParVector y);
 } hypre_LobpcgData;
 
 /*--------------------------------------------------------------------------
-* Macro for assert
-*--------------------------------------------------------------------------*/
+ * Macro for assert 
+ *--------------------------------------------------------------------------*/
 #define assert2(ierr)                           assert(ierr==0)
 
 /*--------------------------------------------------------------------------
- * Accessor functions for the lobpcg structure
+ * Accessor functions for the lobpcg structure 
  *--------------------------------------------------------------------------*/
 #define hypre_LobpcgVerbose(lobpcgdata)         ((lobpcgdata) -> verbose)
 #define hypre_LobpcgRandom(lobpcgdata)          ((lobpcgdata) -> rand_vec)
@@ -98,13 +98,11 @@ double Mat_Norm_Inf(Matx *A);
 double Mat_Norm_Frob(Matx *A);
 double Max_Vec(double *y,int n);
 double **Mymalloc(int m,int n);
-int Assemble_DENSE(Matx *A,input_data *input1,int mA,int nA,int nzA,mt
- mat_type);
+int Assemble_DENSE(Matx *A,input_data *input1,int mA,int nA,int nzA,mt mat_type);
 int comp(const void *p1,const void *p2);
 void expect(FILE *fid,int i);
 int Get_Rank();
-int lobpcg(Matx *, int (*)(), int (*)(), double, int*, int, Matx *, Matx *,
-Matx *);
+int lobpcg(Matx *, int (*)(Matx*, Matx*, int*), int (*)(Matx*, int*), double, int*, int, Matx *, Matx *, Matx *);
 int Mat_Add(Matx *A,Matx *B,double alpha,Matx *C);
 Matx *Mat_Alloc1();
 int Mat_Copy_Cols(Matx *A,Matx *B,int col1,int col2);
@@ -154,14 +152,12 @@ void Get_IJAMatrixFromFileMtx(double **val, int **ia,
 int  Get_CRSMatrixFromFileBinary(double **val, int **ia,
      int **ja, int *m, int *n, char *file_name);
 int IJAMatrixiToSymmetric(double **val, int **ia,
-    int **ja, int *m);
-void HYPRE_Load_IJAMatrix(Matx *A, int matrix_input_type, char *matfile,int
-*partitioning);
+     int **ja, int *m);
+void HYPRE_Load_IJAMatrix(Matx *A, int matrix_input_type, char *matfile,int *partitioning);
 void HYPRE_Load_IJAMatrix2(HYPRE_ParCSRMatrix  *A_ptr,
      int matrix_input_type, char *matfile,int *partitioning);
 void HYPRE_LoadMatrixVectorMtx(Matx *A,char *matfile,int *partitioning);
-int Mat_Init_Identity(Matx *A,int m,int n,mst mat_storage_type,int
-*partitioning);
+int Mat_Init_Identity(Matx *A,int m,int n,mst mat_storage_type,int *partitioning);
 void PrintVector(double *data,int n,char fname[]);
 void PrintMatrix(double **data,int m,int n,char fname[]);
 
@@ -177,3 +173,4 @@ int collect_data(int state,int counter_type,int phase);
 void Display_Execution_Statistics();
 int time_functions(int set_run,int ftype_in,int numb_rows,int count_in,
     int (*FunctA)(HYPRE_ParVector x,HYPRE_ParVector y));
+
