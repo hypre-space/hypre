@@ -18,6 +18,7 @@
 #include "HYPRE_utilities.h"
 #include "HYPRE_seq_mv.h"
 #include "HYPRE_parcsr_mv.h"
+#include <stdio.h>  /* D.Hysom Nov/2K needed for HYPRE_ParCSREuclidPrintParams */
 
 #ifdef __cplusplus
 extern "C" {
@@ -392,6 +393,135 @@ int HYPRE_ParCSRParaSailsSetReuse(HYPRE_Solver solver,
  **/
 int HYPRE_ParCSRParaSailsSetLogging(HYPRE_Solver solver,
                                     int          logging);
+
+/*@}*/
+
+/*--------------------------------------------------------------------------*
+ *--------------------------------------------------------------------------*/
+
+/**
+ * @name ParCSR Euclid Preconditioner 
+ *
+ * OpenMP and MPI Parallel ILU preconditioner 
+ * for the ParCSR matrix format.
+ **/
+/*@{*/
+
+/**
+ * Create a Euclid object.
+ **/
+int HYPRE_ParCSREuclidCreate(MPI_Comm      comm,
+                             HYPRE_Solver *solver);
+
+/**
+ * Destroy a Euclid object.
+ **/
+int HYPRE_ParCSREuclidDestroy(HYPRE_Solver solver);
+
+/**
+ * Set up the Euclid preconditioner.  This function should be passed
+ * to the iterative solver {\tt SetPrecond} function.
+ *
+ * @param solver [IN] Preconditioner object to set up.
+ * @param A [IN] ParCSR matrix used to construct the preconditioner.
+ * @param b Ignored by this function.
+ * @param x Ignored by this function.
+ **/
+int HYPRE_ParCSREuclidSetup(HYPRE_Solver       solver,
+                            HYPRE_ParCSRMatrix A,
+                            HYPRE_ParVector    b,
+                            HYPRE_ParVector    x);
+
+/**
+ * Apply the Euclid preconditioner. This function should be passed
+ * to the iterative solver {\tt SetPrecond} function.
+ *
+ * @param solver [IN] Preconditioner object to apply.
+ * @param A Ignored by this function.
+ * @param b [IN] Vector to precondition.
+ * @param x [OUT] Preconditioned vector.
+ **/
+int HYPRE_ParCSREuclidSolve(HYPRE_Solver       solver,
+                            HYPRE_ParCSRMatrix A,
+                            HYPRE_ParVector    b,
+                            HYPRE_ParVector    x);
+
+/**
+ * Insert command line (flag, value) pairs in Euclid's
+ * database. All Euclid options (e.g, level, ILU method,
+ * parallelization algorithm) are internally selected by
+ * this database.  To insert values from a file instead
+ * of the command line, use HYPRE_ParCSREuclidSetParamsFromFile().
+ * If a (flag, value) pair already exists, this call updates
+ * its value.
+ *
+ * See Euclid documentation for comprehensive listing
+ * of settable parameters.
+ *
+ * @param argc [IN] Length of argv array
+ * @param argv [IN] Array of strings
+ **/
+int HYPRE_ParCSREuclidSetParams(HYPRE_Solver solver,
+                                int argc,
+                                char *argv[]);
+
+/**
+ * Insert (flag, value) pairs in Euclid's  database.
+ * Each line of the file should either begin with a "#"
+ * indicating a comment line, or contain a (flag value)
+ * pair, e.g:
+ *
+ * #sample runtime parameter file
+ * -blockJacobi 3
+ * -matFile     /home/hysom/myfile.euclid
+ * -doSomething true
+ * -xx_coeff -1.0
+ *
+ * See Euclid documentation for comprehensive listing
+ * of settable parameters.
+ *
+ * @param filename[IN] Pathname/filename to read
+ **/
+int HYPRE_ParCSREuclidSetParamsFromFile(HYPRE_Solver solver,
+                                        char *filename);
+
+/**
+ * Returns returns rho, which is the number of nonzeros in
+ * the preconditioner (ILU factors) divided by the number of
+ * of nonzeros in the input matrix.  This can be used in
+ * solutions to optimize memory usage, via the setting
+ * "-rho <double>".  This setting determines the amount of
+ * storage initially allocated for the ILU factors; if too
+ * small, storage will be reallocated, thereby possibly 
+ * fragmenting memory; if too large, memory is wasted.
+ * Call after factorization (Setup) has completed.
+ *
+ * @param rho[OUT] rho, also called preconditioner density
+ **/
+int HYPRE_ParCSREuclidReadRho(HYPRE_Solver solver, double *rho);
+
+
+
+/**
+ * Prints settings used during factorization; also
+ * prints info on preconditioner size, etc.  Best if called
+ * after HYPRE_ParCSRPilutSetup -- else, data may be incorrect.
+ *
+ **/
+int HYPRE_ParCSREuclidPrintParams(HYPRE_Solver solver);
+
+/**
+ * Set the logging parameter for the
+ * Euclid object.
+ *
+ * @param solver [IN] Preconditioner object for which to set the logging
+ *                    parameter.
+ * @param logging [IN] Value of the logging parameter.  A nonzero value
+ *                     sends statistics of the setup procedure to stdout.
+ *                     The default value is 0.
+ **/
+int HYPRE_ParCSREuclidSetLogging(HYPRE_Solver solver,
+                                 int          logging);
 
 /*@}*/
 
