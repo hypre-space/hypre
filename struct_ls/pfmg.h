@@ -64,6 +64,7 @@ typedef struct
    int                   num_iterations;
    int                   time_index;
 
+   int                   print_level;
    /* additional log info (logged when `logging' > 0) */
    int                   logging;
    double               *norms;
