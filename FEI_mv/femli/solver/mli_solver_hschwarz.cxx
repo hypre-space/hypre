@@ -127,7 +127,7 @@ int MLI_Solver_HSchwarz::setParams( char *paramString, int argc, char **argv )
 
 int MLI_Solver_HSchwarz::calcOmega()
 {
-   int                i, relaxType=6, relaxTypes[2], level=0, numCGSweeps=10;
+   int                relaxType=6, relaxTypes[2], level=0, numCGSweeps=10;
    int                one=1, zero=0;
    double             dOne=1.0;
    hypre_ParCSRMatrix *A;
