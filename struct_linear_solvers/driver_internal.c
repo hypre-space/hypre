@@ -68,7 +68,10 @@ char *argv[];
    /*-----------------------------------------------------------
     * Initialize some stuff
     *-----------------------------------------------------------*/
- 
+
+   /* TEMPORARY */
+   hypre_InitializeBoxMemory(0);
+
    /* Initialize MPI */
    MPI_Init(&argc, &argv);
 
@@ -301,6 +304,9 @@ char *argv[];
 
    /* Finalize MPI */
    MPI_Finalize();
+
+   /* TEMPORARY */
+   hypre_FinalizeBoxMemory();
 
    return (0);
 }
