@@ -3,15 +3,15 @@
  * Symbol:        bHYPRE.SStructParCSRVector-v1.0.0
  * Symbol Type:   class
  * Babel Version: 0.8.0
- * SIDL Created:  20030314 14:22:36 PST
- * Generated:     20030314 14:22:38 PST
+ * SIDL Created:  20030320 16:52:19 PST
+ * Generated:     20030320 16:52:25 PST
  * Description:   Client-side glue code for bHYPRE.SStructParCSRVector
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
  * babel-version = 0.8.0
- * source-line   = 825
- * source-url    = file:/home/falgout/linear_solvers/babel/Interfaces.idl
+ * source-line   = 837
+ * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 
 #ifndef included_bHYPRE_SStructParCSRVector_h
@@ -129,6 +129,65 @@ bHYPRE_SStructParCSRVector_isType(
 SIDL_ClassInfo
 bHYPRE_SStructParCSRVector_getClassInfo(
   bHYPRE_SStructParCSRVector self);
+
+/**
+ * Set {\tt self} to 0.
+ * 
+ */
+int32_t
+bHYPRE_SStructParCSRVector_Clear(
+  bHYPRE_SStructParCSRVector self);
+
+/**
+ * Copy x into {\tt self}.
+ * 
+ */
+int32_t
+bHYPRE_SStructParCSRVector_Copy(
+  bHYPRE_SStructParCSRVector self,
+  bHYPRE_Vector x);
+
+/**
+ * Create an {\tt x} compatible with {\tt self}.
+ * 
+ * NOTE: When this method is used in an inherited class, the
+ * cloned {\tt Vector} object can be cast to an object with the
+ * inherited class type.
+ * 
+ */
+int32_t
+bHYPRE_SStructParCSRVector_Clone(
+  bHYPRE_SStructParCSRVector self,
+  bHYPRE_Vector* x);
+
+/**
+ * Scale {\self} by {\tt a}.
+ * 
+ */
+int32_t
+bHYPRE_SStructParCSRVector_Scale(
+  bHYPRE_SStructParCSRVector self,
+  double a);
+
+/**
+ * Compute {\tt d}, the inner-product of {\tt self} and {\tt x}.
+ * 
+ */
+int32_t
+bHYPRE_SStructParCSRVector_Dot(
+  bHYPRE_SStructParCSRVector self,
+  bHYPRE_Vector x,
+  double* d);
+
+/**
+ * Add {\tt a}*{\tt x} to {\tt self}.
+ * 
+ */
+int32_t
+bHYPRE_SStructParCSRVector_Axpy(
+  bHYPRE_SStructParCSRVector self,
+  double a,
+  bHYPRE_Vector x);
 
 /**
  * Set the MPI Communicator.
@@ -333,65 +392,6 @@ bHYPRE_SStructParCSRVector_Print(
   bHYPRE_SStructParCSRVector self,
   const char* filename,
   int32_t all);
-
-/**
- * Set {\tt self} to 0.
- * 
- */
-int32_t
-bHYPRE_SStructParCSRVector_Clear(
-  bHYPRE_SStructParCSRVector self);
-
-/**
- * Copy x into {\tt self}.
- * 
- */
-int32_t
-bHYPRE_SStructParCSRVector_Copy(
-  bHYPRE_SStructParCSRVector self,
-  bHYPRE_Vector x);
-
-/**
- * Create an {\tt x} compatible with {\tt self}.
- * 
- * NOTE: When this method is used in an inherited class, the
- * cloned {\tt Vector} object can be cast to an object with the
- * inherited class type.
- * 
- */
-int32_t
-bHYPRE_SStructParCSRVector_Clone(
-  bHYPRE_SStructParCSRVector self,
-  bHYPRE_Vector* x);
-
-/**
- * Scale {\self} by {\tt a}.
- * 
- */
-int32_t
-bHYPRE_SStructParCSRVector_Scale(
-  bHYPRE_SStructParCSRVector self,
-  double a);
-
-/**
- * Compute {\tt d}, the inner-product of {\tt self} and {\tt x}.
- * 
- */
-int32_t
-bHYPRE_SStructParCSRVector_Dot(
-  bHYPRE_SStructParCSRVector self,
-  bHYPRE_Vector x,
-  double* d);
-
-/**
- * Add {\tt a}*{\tt x} to {\tt self}.
- * 
- */
-int32_t
-bHYPRE_SStructParCSRVector_Axpy(
-  bHYPRE_SStructParCSRVector self,
-  double a,
-  bHYPRE_Vector x);
 
 /**
  * Cast method for interface and class type conversions.

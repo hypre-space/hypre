@@ -3,15 +3,15 @@
  * Symbol:        bHYPRE.StructGrid-v1.0.0
  * Symbol Type:   class
  * Babel Version: 0.8.0
- * SIDL Created:  20030314 14:22:36 PST
- * Generated:     20030314 14:22:39 PST
+ * SIDL Created:  20030320 16:52:19 PST
+ * Generated:     20030320 16:52:31 PST
  * Description:   Server-side glue code for bHYPRE.StructGrid
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
  * babel-version = 0.8.0
- * source-line   = 1089
- * source-url    = file:/home/falgout/linear_solvers/babel/Interfaces.idl
+ * source-line   = 1101
+ * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 
 #include "bHYPRE_StructGrid_IOR.h"
@@ -51,6 +51,43 @@ extern int32_t
 impl_bHYPRE_StructGrid_Assemble(
   bHYPRE_StructGrid);
 
+static int32_t
+skel_bHYPRE_StructGrid_SetExtents(
+  bHYPRE_StructGrid self,
+  struct SIDL_int__array* ilower,
+  struct SIDL_int__array* iupper)
+{
+  int32_t _return;
+  struct SIDL_int__array* ilower_proxy = SIDL_int__array_ensure(ilower, 1,
+    SIDL_column_major_order);
+  struct SIDL_int__array* iupper_proxy = SIDL_int__array_ensure(iupper, 1,
+    SIDL_column_major_order);
+  _return =
+    impl_bHYPRE_StructGrid_SetExtents(
+      self,
+      ilower_proxy,
+      iupper_proxy);
+  SIDL_int__array_deleteRef(ilower_proxy);
+  SIDL_int__array_deleteRef(iupper_proxy);
+  return _return;
+}
+
+static int32_t
+skel_bHYPRE_StructGrid_SetPeriodic(
+  bHYPRE_StructGrid self,
+  struct SIDL_int__array* periodic)
+{
+  int32_t _return;
+  struct SIDL_int__array* periodic_proxy = SIDL_int__array_ensure(periodic, 1,
+    SIDL_column_major_order);
+  _return =
+    impl_bHYPRE_StructGrid_SetPeriodic(
+      self,
+      periodic_proxy);
+  SIDL_int__array_deleteRef(periodic_proxy);
+  return _return;
+}
+
 void
 bHYPRE_StructGrid__set_epv(struct bHYPRE_StructGrid__epv *epv)
 {
@@ -58,8 +95,8 @@ bHYPRE_StructGrid__set_epv(struct bHYPRE_StructGrid__epv *epv)
   epv->f__dtor = impl_bHYPRE_StructGrid__dtor;
   epv->f_SetCommunicator = impl_bHYPRE_StructGrid_SetCommunicator;
   epv->f_SetDimension = impl_bHYPRE_StructGrid_SetDimension;
-  epv->f_SetExtents = impl_bHYPRE_StructGrid_SetExtents;
-  epv->f_SetPeriodic = impl_bHYPRE_StructGrid_SetPeriodic;
+  epv->f_SetExtents = skel_bHYPRE_StructGrid_SetExtents;
+  epv->f_SetPeriodic = skel_bHYPRE_StructGrid_SetPeriodic;
   epv->f_Assemble = impl_bHYPRE_StructGrid_Assemble;
 }
 

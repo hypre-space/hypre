@@ -3,15 +3,15 @@
  * Symbol:        bHYPRE.StructStencil-v1.0.0
  * Symbol Type:   class
  * Babel Version: 0.8.0
- * SIDL Created:  20030314 14:22:36 PST
- * Generated:     20030314 14:22:39 PST
+ * SIDL Created:  20030320 16:52:19 PST
+ * Generated:     20030320 16:52:32 PST
  * Description:   Server-side glue code for bHYPRE.StructStencil
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
  * babel-version = 0.8.0
- * source-line   = 1076
- * source-url    = file:/home/falgout/linear_solvers/babel/Interfaces.idl
+ * source-line   = 1088
+ * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 
 #include "bHYPRE_StructStencil_IOR.h"
@@ -42,6 +42,24 @@ impl_bHYPRE_StructStencil_SetElement(
   int32_t,
   struct SIDL_int__array*);
 
+static int32_t
+skel_bHYPRE_StructStencil_SetElement(
+  bHYPRE_StructStencil self,
+  int32_t index,
+  struct SIDL_int__array* offset)
+{
+  int32_t _return;
+  struct SIDL_int__array* offset_proxy = SIDL_int__array_ensure(offset, 1,
+    SIDL_column_major_order);
+  _return =
+    impl_bHYPRE_StructStencil_SetElement(
+      self,
+      index,
+      offset_proxy);
+  SIDL_int__array_deleteRef(offset_proxy);
+  return _return;
+}
+
 void
 bHYPRE_StructStencil__set_epv(struct bHYPRE_StructStencil__epv *epv)
 {
@@ -49,7 +67,7 @@ bHYPRE_StructStencil__set_epv(struct bHYPRE_StructStencil__epv *epv)
   epv->f__dtor = impl_bHYPRE_StructStencil__dtor;
   epv->f_SetDimension = impl_bHYPRE_StructStencil_SetDimension;
   epv->f_SetSize = impl_bHYPRE_StructStencil_SetSize;
-  epv->f_SetElement = impl_bHYPRE_StructStencil_SetElement;
+  epv->f_SetElement = skel_bHYPRE_StructStencil_SetElement;
 }
 
 struct bHYPRE_StructStencil__data*

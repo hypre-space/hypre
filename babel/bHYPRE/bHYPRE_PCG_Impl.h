@@ -3,15 +3,15 @@
  * Symbol:        bHYPRE.PCG-v1.0.0
  * Symbol Type:   class
  * Babel Version: 0.8.0
- * SIDL Created:  20030314 14:22:36 PST
- * Generated:     20030314 14:22:39 PST
+ * SIDL Created:  20030320 16:52:19 PST
+ * Generated:     20030320 16:52:29 PST
  * Description:   Server-side implementation for bHYPRE.PCG
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
  * babel-version = 0.8.0
- * source-line   = 1225
- * source-url    = file:/home/falgout/linear_solvers/babel/Interfaces.idl
+ * source-line   = 1237
+ * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 
 #ifndef included_bHYPRE_PCG_Impl_h
@@ -126,13 +126,25 @@ impl_bHYPRE_PCG_SetStringParameter(
   const char*);
 
 extern int32_t
-impl_bHYPRE_PCG_SetIntArrayParameter(
+impl_bHYPRE_PCG_SetIntArray1Parameter(
   bHYPRE_PCG,
   const char*,
   struct SIDL_int__array*);
 
 extern int32_t
-impl_bHYPRE_PCG_SetDoubleArrayParameter(
+impl_bHYPRE_PCG_SetIntArray2Parameter(
+  bHYPRE_PCG,
+  const char*,
+  struct SIDL_int__array*);
+
+extern int32_t
+impl_bHYPRE_PCG_SetDoubleArray1Parameter(
+  bHYPRE_PCG,
+  const char*,
+  struct SIDL_double__array*);
+
+extern int32_t
+impl_bHYPRE_PCG_SetDoubleArray2Parameter(
   bHYPRE_PCG,
   const char*,
   struct SIDL_double__array*);

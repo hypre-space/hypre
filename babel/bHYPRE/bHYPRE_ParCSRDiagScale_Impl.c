@@ -3,15 +3,15 @@
  * Symbol:        bHYPRE.ParCSRDiagScale-v1.0.0
  * Symbol Type:   class
  * Babel Version: 0.8.0
- * SIDL Created:  20030314 14:22:36 PST
- * Generated:     20030314 14:22:39 PST
+ * SIDL Created:  20030320 16:52:19 PST
+ * Generated:     20030320 16:52:30 PST
  * Description:   Server-side implementation for bHYPRE.ParCSRDiagScale
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
  * babel-version = 0.8.0
- * source-line   = 1128
- * source-url    = file:/home/falgout/linear_solvers/babel/Interfaces.idl
+ * source-line   = 1140
+ * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 
 /*
@@ -178,45 +178,83 @@ impl_bHYPRE_ParCSRDiagScale_SetStringParameter(
 }
 
 /*
- * Set the int array parameter associated with {\tt name}.
+ * Set the int 1-D array parameter associated with {\tt name}.
  * 
  */
 
 #undef __FUNC__
-#define __FUNC__ "impl_bHYPRE_ParCSRDiagScale_SetIntArrayParameter"
+#define __FUNC__ "impl_bHYPRE_ParCSRDiagScale_SetIntArray1Parameter"
 
 int32_t
-impl_bHYPRE_ParCSRDiagScale_SetIntArrayParameter(
+impl_bHYPRE_ParCSRDiagScale_SetIntArray1Parameter(
   bHYPRE_ParCSRDiagScale self, const char* name, struct SIDL_int__array* value)
 {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.ParCSRDiagScale.SetIntArrayParameter) */
-  /* Insert the implementation of the SetIntArrayParameter method here... */
-
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.ParCSRDiagScale.SetIntArray1Parameter) 
+    */
+  /* Insert the implementation of the SetIntArray1Parameter method here... */
    return 1;
-
-  /* DO-NOT-DELETE splicer.end(bHYPRE.ParCSRDiagScale.SetIntArrayParameter) */
+  /* DO-NOT-DELETE splicer.end(bHYPRE.ParCSRDiagScale.SetIntArray1Parameter) */
 }
 
 /*
- * Set the double array parameter associated with {\tt name}.
+ * Set the int 2-D array parameter associated with {\tt name}.
  * 
  */
 
 #undef __FUNC__
-#define __FUNC__ "impl_bHYPRE_ParCSRDiagScale_SetDoubleArrayParameter"
+#define __FUNC__ "impl_bHYPRE_ParCSRDiagScale_SetIntArray2Parameter"
 
 int32_t
-impl_bHYPRE_ParCSRDiagScale_SetDoubleArrayParameter(
+impl_bHYPRE_ParCSRDiagScale_SetIntArray2Parameter(
+  bHYPRE_ParCSRDiagScale self, const char* name, struct SIDL_int__array* value)
+{
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.ParCSRDiagScale.SetIntArray2Parameter) 
+    */
+  /* Insert the implementation of the SetIntArray2Parameter method here... */
+   return 1;
+  /* DO-NOT-DELETE splicer.end(bHYPRE.ParCSRDiagScale.SetIntArray2Parameter) */
+}
+
+/*
+ * Set the double 1-D array parameter associated with {\tt name}.
+ * 
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_ParCSRDiagScale_SetDoubleArray1Parameter"
+
+int32_t
+impl_bHYPRE_ParCSRDiagScale_SetDoubleArray1Parameter(
   bHYPRE_ParCSRDiagScale self, const char* name,
     struct SIDL_double__array* value)
 {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.ParCSRDiagScale.SetDoubleArrayParameter) 
-    */
-  /* Insert the implementation of the SetDoubleArrayParameter method here... */
-
+  /* DO-NOT-DELETE 
+    splicer.begin(bHYPRE.ParCSRDiagScale.SetDoubleArray1Parameter) */
+  /* Insert the implementation of the SetDoubleArray1Parameter method here... */
    return 1;
+  /* DO-NOT-DELETE splicer.end(bHYPRE.ParCSRDiagScale.SetDoubleArray1Parameter) 
+    */
+}
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.ParCSRDiagScale.SetDoubleArrayParameter) */
+/*
+ * Set the double 2-D array parameter associated with {\tt name}.
+ * 
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_ParCSRDiagScale_SetDoubleArray2Parameter"
+
+int32_t
+impl_bHYPRE_ParCSRDiagScale_SetDoubleArray2Parameter(
+  bHYPRE_ParCSRDiagScale self, const char* name,
+    struct SIDL_double__array* value)
+{
+  /* DO-NOT-DELETE 
+    splicer.begin(bHYPRE.ParCSRDiagScale.SetDoubleArray2Parameter) */
+  /* Insert the implementation of the SetDoubleArray2Parameter method here... */
+   return 1;
+  /* DO-NOT-DELETE splicer.end(bHYPRE.ParCSRDiagScale.SetDoubleArray2Parameter) 
+    */
 }
 
 /*
@@ -520,3 +558,11 @@ impl_bHYPRE_ParCSRDiagScale_GetRelResidualNorm(
 
   /* DO-NOT-DELETE splicer.end(bHYPRE.ParCSRDiagScale.GetRelResidualNorm) */
 }
+
+/**
+ * ================= BEGIN UNREFERENCED METHOD(S) ================
+ * The following code segment(s) belong to unreferenced method(s).
+ * This can result from a method rename/removal in the SIDL file.
+ * Move or remove the code in order to compile cleanly.
+ */
+/* ================== END UNREFERENCED METHOD(S) ================= */

@@ -3,15 +3,15 @@
  * Symbol:        bHYPRE.BoomerAMG-v1.0.0
  * Symbol Type:   class
  * Babel Version: 0.8.0
- * SIDL Created:  20030314 14:22:36 PST
- * Generated:     20030314 14:22:39 PST
+ * SIDL Created:  20030320 16:52:19 PST
+ * Generated:     20030320 16:52:30 PST
  * Description:   Server-side glue code for bHYPRE.BoomerAMG
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
  * babel-version = 0.8.0
- * source-line   = 1205
- * source-url    = file:/home/falgout/linear_solvers/babel/Interfaces.idl
+ * source-line   = 1217
+ * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 
 #include "bHYPRE_BoomerAMG_IOR.h"
@@ -50,13 +50,25 @@ impl_bHYPRE_BoomerAMG_SetStringParameter(
   const char*);
 
 extern int32_t
-impl_bHYPRE_BoomerAMG_SetIntArrayParameter(
+impl_bHYPRE_BoomerAMG_SetIntArray1Parameter(
   bHYPRE_BoomerAMG,
   const char*,
   struct SIDL_int__array*);
 
 extern int32_t
-impl_bHYPRE_BoomerAMG_SetDoubleArrayParameter(
+impl_bHYPRE_BoomerAMG_SetIntArray2Parameter(
+  bHYPRE_BoomerAMG,
+  const char*,
+  struct SIDL_int__array*);
+
+extern int32_t
+impl_bHYPRE_BoomerAMG_SetDoubleArray1Parameter(
+  bHYPRE_BoomerAMG,
+  const char*,
+  struct SIDL_double__array*);
+
+extern int32_t
+impl_bHYPRE_BoomerAMG_SetDoubleArray2Parameter(
   bHYPRE_BoomerAMG,
   const char*,
   struct SIDL_double__array*);
@@ -120,6 +132,78 @@ impl_bHYPRE_BoomerAMG_GetRelResidualNorm(
   bHYPRE_BoomerAMG,
   double*);
 
+static int32_t
+skel_bHYPRE_BoomerAMG_SetIntArray1Parameter(
+  bHYPRE_BoomerAMG self,
+  const char* name,
+  struct SIDL_int__array* value)
+{
+  int32_t _return;
+  struct SIDL_int__array* value_proxy = SIDL_int__array_ensure(value, 1,
+    SIDL_column_major_order);
+  _return =
+    impl_bHYPRE_BoomerAMG_SetIntArray1Parameter(
+      self,
+      name,
+      value_proxy);
+  SIDL_int__array_deleteRef(value_proxy);
+  return _return;
+}
+
+static int32_t
+skel_bHYPRE_BoomerAMG_SetIntArray2Parameter(
+  bHYPRE_BoomerAMG self,
+  const char* name,
+  struct SIDL_int__array* value)
+{
+  int32_t _return;
+  struct SIDL_int__array* value_proxy = SIDL_int__array_ensure(value, 2,
+    SIDL_column_major_order);
+  _return =
+    impl_bHYPRE_BoomerAMG_SetIntArray2Parameter(
+      self,
+      name,
+      value_proxy);
+  SIDL_int__array_deleteRef(value_proxy);
+  return _return;
+}
+
+static int32_t
+skel_bHYPRE_BoomerAMG_SetDoubleArray1Parameter(
+  bHYPRE_BoomerAMG self,
+  const char* name,
+  struct SIDL_double__array* value)
+{
+  int32_t _return;
+  struct SIDL_double__array* value_proxy = SIDL_double__array_ensure(value, 1,
+    SIDL_column_major_order);
+  _return =
+    impl_bHYPRE_BoomerAMG_SetDoubleArray1Parameter(
+      self,
+      name,
+      value_proxy);
+  SIDL_double__array_deleteRef(value_proxy);
+  return _return;
+}
+
+static int32_t
+skel_bHYPRE_BoomerAMG_SetDoubleArray2Parameter(
+  bHYPRE_BoomerAMG self,
+  const char* name,
+  struct SIDL_double__array* value)
+{
+  int32_t _return;
+  struct SIDL_double__array* value_proxy = SIDL_double__array_ensure(value, 2,
+    SIDL_column_major_order);
+  _return =
+    impl_bHYPRE_BoomerAMG_SetDoubleArray2Parameter(
+      self,
+      name,
+      value_proxy);
+  SIDL_double__array_deleteRef(value_proxy);
+  return _return;
+}
+
 void
 bHYPRE_BoomerAMG__set_epv(struct bHYPRE_BoomerAMG__epv *epv)
 {
@@ -129,9 +213,12 @@ bHYPRE_BoomerAMG__set_epv(struct bHYPRE_BoomerAMG__epv *epv)
   epv->f_SetIntParameter = impl_bHYPRE_BoomerAMG_SetIntParameter;
   epv->f_SetDoubleParameter = impl_bHYPRE_BoomerAMG_SetDoubleParameter;
   epv->f_SetStringParameter = impl_bHYPRE_BoomerAMG_SetStringParameter;
-  epv->f_SetIntArrayParameter = impl_bHYPRE_BoomerAMG_SetIntArrayParameter;
-  epv->f_SetDoubleArrayParameter = 
-    impl_bHYPRE_BoomerAMG_SetDoubleArrayParameter;
+  epv->f_SetIntArray1Parameter = skel_bHYPRE_BoomerAMG_SetIntArray1Parameter;
+  epv->f_SetIntArray2Parameter = skel_bHYPRE_BoomerAMG_SetIntArray2Parameter;
+  epv->f_SetDoubleArray1Parameter = 
+    skel_bHYPRE_BoomerAMG_SetDoubleArray1Parameter;
+  epv->f_SetDoubleArray2Parameter = 
+    skel_bHYPRE_BoomerAMG_SetDoubleArray2Parameter;
   epv->f_GetIntValue = impl_bHYPRE_BoomerAMG_GetIntValue;
   epv->f_GetDoubleValue = impl_bHYPRE_BoomerAMG_GetDoubleValue;
   epv->f_Setup = impl_bHYPRE_BoomerAMG_Setup;

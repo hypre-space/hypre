@@ -3,15 +3,15 @@
  * Symbol:        bHYPRE.SStructVector-v1.0.0
  * Symbol Type:   class
  * Babel Version: 0.8.0
- * SIDL Created:  20030314 14:22:36 PST
- * Generated:     20030314 14:22:39 PST
+ * SIDL Created:  20030320 16:52:19 PST
+ * Generated:     20030320 16:52:29 PST
  * Description:   Server-side implementation for bHYPRE.SStructVector
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
  * babel-version = 0.8.0
- * source-line   = 1062
- * source-url    = file:/home/falgout/linear_solvers/babel/Interfaces.idl
+ * source-line   = 1074
+ * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 
 #ifndef included_bHYPRE_SStructVector_Impl_h
@@ -76,6 +76,37 @@ impl_bHYPRE_SStructVector__dtor(
 /*
  * User-defined object methods
  */
+
+extern int32_t
+impl_bHYPRE_SStructVector_Clear(
+  bHYPRE_SStructVector);
+
+extern int32_t
+impl_bHYPRE_SStructVector_Copy(
+  bHYPRE_SStructVector,
+  bHYPRE_Vector);
+
+extern int32_t
+impl_bHYPRE_SStructVector_Clone(
+  bHYPRE_SStructVector,
+  bHYPRE_Vector*);
+
+extern int32_t
+impl_bHYPRE_SStructVector_Scale(
+  bHYPRE_SStructVector,
+  double);
+
+extern int32_t
+impl_bHYPRE_SStructVector_Dot(
+  bHYPRE_SStructVector,
+  bHYPRE_Vector,
+  double*);
+
+extern int32_t
+impl_bHYPRE_SStructVector_Axpy(
+  bHYPRE_SStructVector,
+  double,
+  bHYPRE_Vector);
 
 extern int32_t
 impl_bHYPRE_SStructVector_SetCommunicator(
@@ -164,37 +195,6 @@ impl_bHYPRE_SStructVector_Print(
   bHYPRE_SStructVector,
   const char*,
   int32_t);
-
-extern int32_t
-impl_bHYPRE_SStructVector_Clear(
-  bHYPRE_SStructVector);
-
-extern int32_t
-impl_bHYPRE_SStructVector_Copy(
-  bHYPRE_SStructVector,
-  bHYPRE_Vector);
-
-extern int32_t
-impl_bHYPRE_SStructVector_Clone(
-  bHYPRE_SStructVector,
-  bHYPRE_Vector*);
-
-extern int32_t
-impl_bHYPRE_SStructVector_Scale(
-  bHYPRE_SStructVector,
-  double);
-
-extern int32_t
-impl_bHYPRE_SStructVector_Dot(
-  bHYPRE_SStructVector,
-  bHYPRE_Vector,
-  double*);
-
-extern int32_t
-impl_bHYPRE_SStructVector_Axpy(
-  bHYPRE_SStructVector,
-  double,
-  bHYPRE_Vector);
 
 #ifdef __cplusplus
 }

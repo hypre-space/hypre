@@ -3,15 +3,15 @@
  * Symbol:        bHYPRE.PreconditionedSolver-v1.0.0
  * Symbol Type:   interface
  * Babel Version: 0.8.0
- * SIDL Created:  20030314 14:22:35 PST
- * Generated:     20030314 14:22:39 PST
+ * SIDL Created:  20030320 16:52:19 PST
+ * Generated:     20030320 16:52:28 PST
  * Description:   Client-side glue code for bHYPRE.PreconditionedSolver
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
  * babel-version = 0.8.0
- * source-line   = 744
- * source-url    = file:/home/falgout/linear_solvers/babel/Interfaces.idl
+ * source-line   = 756
+ * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 
 #ifndef included_bHYPRE_PreconditionedSolver_h
@@ -151,21 +151,41 @@ bHYPRE_PreconditionedSolver_SetStringParameter(
   const char* value);
 
 /**
- * Set the int array parameter associated with {\tt name}.
+ * Set the int 1-D array parameter associated with {\tt name}.
  * 
  */
 int32_t
-bHYPRE_PreconditionedSolver_SetIntArrayParameter(
+bHYPRE_PreconditionedSolver_SetIntArray1Parameter(
   bHYPRE_PreconditionedSolver self,
   const char* name,
   struct SIDL_int__array* value);
 
 /**
- * Set the double array parameter associated with {\tt name}.
+ * Set the int 2-D array parameter associated with {\tt name}.
  * 
  */
 int32_t
-bHYPRE_PreconditionedSolver_SetDoubleArrayParameter(
+bHYPRE_PreconditionedSolver_SetIntArray2Parameter(
+  bHYPRE_PreconditionedSolver self,
+  const char* name,
+  struct SIDL_int__array* value);
+
+/**
+ * Set the double 1-D array parameter associated with {\tt name}.
+ * 
+ */
+int32_t
+bHYPRE_PreconditionedSolver_SetDoubleArray1Parameter(
+  bHYPRE_PreconditionedSolver self,
+  const char* name,
+  struct SIDL_double__array* value);
+
+/**
+ * Set the double 2-D array parameter associated with {\tt name}.
+ * 
+ */
+int32_t
+bHYPRE_PreconditionedSolver_SetDoubleArray2Parameter(
   bHYPRE_PreconditionedSolver self,
   const char* name,
   struct SIDL_double__array* value);

@@ -3,15 +3,15 @@
  * Symbol:        bHYPRE.GMRES-v1.0.0
  * Symbol Type:   class
  * Babel Version: 0.8.0
- * SIDL Created:  20030314 14:22:36 PST
- * Generated:     20030314 14:22:38 PST
+ * SIDL Created:  20030320 16:52:19 PST
+ * Generated:     20030320 16:52:27 PST
  * Description:   Client-side glue code for bHYPRE.GMRES
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
  * babel-version = 0.8.0
- * source-line   = 1235
- * source-url    = file:/home/falgout/linear_solvers/babel/Interfaces.idl
+ * source-line   = 1247
+ * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 
 #include "bHYPRE_GMRES.h"
@@ -240,34 +240,68 @@ bHYPRE_GMRES_SetStringParameter(
 }
 
 /*
- * Set the int array parameter associated with {\tt name}.
+ * Set the int 1-D array parameter associated with {\tt name}.
  * 
  */
 
 int32_t
-bHYPRE_GMRES_SetIntArrayParameter(
+bHYPRE_GMRES_SetIntArray1Parameter(
   bHYPRE_GMRES self,
   const char* name,
   struct SIDL_int__array* value)
 {
-  return (*self->d_epv->f_SetIntArrayParameter)(
+  return (*self->d_epv->f_SetIntArray1Parameter)(
     self,
     name,
     value);
 }
 
 /*
- * Set the double array parameter associated with {\tt name}.
+ * Set the int 2-D array parameter associated with {\tt name}.
  * 
  */
 
 int32_t
-bHYPRE_GMRES_SetDoubleArrayParameter(
+bHYPRE_GMRES_SetIntArray2Parameter(
+  bHYPRE_GMRES self,
+  const char* name,
+  struct SIDL_int__array* value)
+{
+  return (*self->d_epv->f_SetIntArray2Parameter)(
+    self,
+    name,
+    value);
+}
+
+/*
+ * Set the double 1-D array parameter associated with {\tt name}.
+ * 
+ */
+
+int32_t
+bHYPRE_GMRES_SetDoubleArray1Parameter(
   bHYPRE_GMRES self,
   const char* name,
   struct SIDL_double__array* value)
 {
-  return (*self->d_epv->f_SetDoubleArrayParameter)(
+  return (*self->d_epv->f_SetDoubleArray1Parameter)(
+    self,
+    name,
+    value);
+}
+
+/*
+ * Set the double 2-D array parameter associated with {\tt name}.
+ * 
+ */
+
+int32_t
+bHYPRE_GMRES_SetDoubleArray2Parameter(
+  bHYPRE_GMRES self,
+  const char* name,
+  struct SIDL_double__array* value)
+{
+  return (*self->d_epv->f_SetDoubleArray2Parameter)(
     self,
     name,
     value);

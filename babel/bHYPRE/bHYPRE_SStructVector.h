@@ -3,15 +3,15 @@
  * Symbol:        bHYPRE.SStructVector-v1.0.0
  * Symbol Type:   class
  * Babel Version: 0.8.0
- * SIDL Created:  20030314 14:22:36 PST
- * Generated:     20030314 14:22:38 PST
+ * SIDL Created:  20030320 16:52:19 PST
+ * Generated:     20030320 16:52:25 PST
  * Description:   Client-side glue code for bHYPRE.SStructVector
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
  * babel-version = 0.8.0
- * source-line   = 1062
- * source-url    = file:/home/falgout/linear_solvers/babel/Interfaces.idl
+ * source-line   = 1074
+ * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 
 #ifndef included_bHYPRE_SStructVector_h
@@ -129,6 +129,65 @@ bHYPRE_SStructVector_isType(
 SIDL_ClassInfo
 bHYPRE_SStructVector_getClassInfo(
   bHYPRE_SStructVector self);
+
+/**
+ * Set {\tt self} to 0.
+ * 
+ */
+int32_t
+bHYPRE_SStructVector_Clear(
+  bHYPRE_SStructVector self);
+
+/**
+ * Copy x into {\tt self}.
+ * 
+ */
+int32_t
+bHYPRE_SStructVector_Copy(
+  bHYPRE_SStructVector self,
+  bHYPRE_Vector x);
+
+/**
+ * Create an {\tt x} compatible with {\tt self}.
+ * 
+ * NOTE: When this method is used in an inherited class, the
+ * cloned {\tt Vector} object can be cast to an object with the
+ * inherited class type.
+ * 
+ */
+int32_t
+bHYPRE_SStructVector_Clone(
+  bHYPRE_SStructVector self,
+  bHYPRE_Vector* x);
+
+/**
+ * Scale {\self} by {\tt a}.
+ * 
+ */
+int32_t
+bHYPRE_SStructVector_Scale(
+  bHYPRE_SStructVector self,
+  double a);
+
+/**
+ * Compute {\tt d}, the inner-product of {\tt self} and {\tt x}.
+ * 
+ */
+int32_t
+bHYPRE_SStructVector_Dot(
+  bHYPRE_SStructVector self,
+  bHYPRE_Vector x,
+  double* d);
+
+/**
+ * Add {\tt a}*{\tt x} to {\tt self}.
+ * 
+ */
+int32_t
+bHYPRE_SStructVector_Axpy(
+  bHYPRE_SStructVector self,
+  double a,
+  bHYPRE_Vector x);
 
 /**
  * Set the MPI Communicator.
@@ -333,65 +392,6 @@ bHYPRE_SStructVector_Print(
   bHYPRE_SStructVector self,
   const char* filename,
   int32_t all);
-
-/**
- * Set {\tt self} to 0.
- * 
- */
-int32_t
-bHYPRE_SStructVector_Clear(
-  bHYPRE_SStructVector self);
-
-/**
- * Copy x into {\tt self}.
- * 
- */
-int32_t
-bHYPRE_SStructVector_Copy(
-  bHYPRE_SStructVector self,
-  bHYPRE_Vector x);
-
-/**
- * Create an {\tt x} compatible with {\tt self}.
- * 
- * NOTE: When this method is used in an inherited class, the
- * cloned {\tt Vector} object can be cast to an object with the
- * inherited class type.
- * 
- */
-int32_t
-bHYPRE_SStructVector_Clone(
-  bHYPRE_SStructVector self,
-  bHYPRE_Vector* x);
-
-/**
- * Scale {\self} by {\tt a}.
- * 
- */
-int32_t
-bHYPRE_SStructVector_Scale(
-  bHYPRE_SStructVector self,
-  double a);
-
-/**
- * Compute {\tt d}, the inner-product of {\tt self} and {\tt x}.
- * 
- */
-int32_t
-bHYPRE_SStructVector_Dot(
-  bHYPRE_SStructVector self,
-  bHYPRE_Vector x,
-  double* d);
-
-/**
- * Add {\tt a}*{\tt x} to {\tt self}.
- * 
- */
-int32_t
-bHYPRE_SStructVector_Axpy(
-  bHYPRE_SStructVector self,
-  double a,
-  bHYPRE_Vector x);
 
 /**
  * Cast method for interface and class type conversions.

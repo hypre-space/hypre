@@ -3,15 +3,15 @@
  * Symbol:        bHYPRE.PCG-v1.0.0
  * Symbol Type:   class
  * Babel Version: 0.8.0
- * SIDL Created:  20030314 14:22:36 PST
- * Generated:     20030314 14:22:39 PST
+ * SIDL Created:  20030320 16:52:19 PST
+ * Generated:     20030320 16:52:29 PST
  * Description:   Server-side implementation for bHYPRE.PCG
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
  * babel-version = 0.8.0
- * source-line   = 1225
- * source-url    = file:/home/falgout/linear_solvers/babel/Interfaces.idl
+ * source-line   = 1237
+ * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 
 /*
@@ -330,43 +330,75 @@ impl_bHYPRE_PCG_SetStringParameter(
 }
 
 /*
- * Set the int array parameter associated with {\tt name}.
+ * Set the int 1-D array parameter associated with {\tt name}.
  * 
  */
 
 #undef __FUNC__
-#define __FUNC__ "impl_bHYPRE_PCG_SetIntArrayParameter"
+#define __FUNC__ "impl_bHYPRE_PCG_SetIntArray1Parameter"
 
 int32_t
-impl_bHYPRE_PCG_SetIntArrayParameter(
+impl_bHYPRE_PCG_SetIntArray1Parameter(
   bHYPRE_PCG self, const char* name, struct SIDL_int__array* value)
 {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.PCG.SetIntArrayParameter) */
-  /* Insert the implementation of the SetIntArrayParameter method here... */
-
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.PCG.SetIntArray1Parameter) */
+  /* Insert the implementation of the SetIntArray1Parameter method here... */
    return 1;
-
-  /* DO-NOT-DELETE splicer.end(bHYPRE.PCG.SetIntArrayParameter) */
+  /* DO-NOT-DELETE splicer.end(bHYPRE.PCG.SetIntArray1Parameter) */
 }
 
 /*
- * Set the double array parameter associated with {\tt name}.
+ * Set the int 2-D array parameter associated with {\tt name}.
  * 
  */
 
 #undef __FUNC__
-#define __FUNC__ "impl_bHYPRE_PCG_SetDoubleArrayParameter"
+#define __FUNC__ "impl_bHYPRE_PCG_SetIntArray2Parameter"
 
 int32_t
-impl_bHYPRE_PCG_SetDoubleArrayParameter(
+impl_bHYPRE_PCG_SetIntArray2Parameter(
+  bHYPRE_PCG self, const char* name, struct SIDL_int__array* value)
+{
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.PCG.SetIntArray2Parameter) */
+  /* Insert the implementation of the SetIntArray2Parameter method here... */
+   return 1;
+  /* DO-NOT-DELETE splicer.end(bHYPRE.PCG.SetIntArray2Parameter) */
+}
+
+/*
+ * Set the double 1-D array parameter associated with {\tt name}.
+ * 
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_PCG_SetDoubleArray1Parameter"
+
+int32_t
+impl_bHYPRE_PCG_SetDoubleArray1Parameter(
   bHYPRE_PCG self, const char* name, struct SIDL_double__array* value)
 {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.PCG.SetDoubleArrayParameter) */
-  /* Insert the implementation of the SetDoubleArrayParameter method here... */
-
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.PCG.SetDoubleArray1Parameter) */
+  /* Insert the implementation of the SetDoubleArray1Parameter method here... */
    return 1;
+  /* DO-NOT-DELETE splicer.end(bHYPRE.PCG.SetDoubleArray1Parameter) */
+}
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.PCG.SetDoubleArrayParameter) */
+/*
+ * Set the double 2-D array parameter associated with {\tt name}.
+ * 
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_PCG_SetDoubleArray2Parameter"
+
+int32_t
+impl_bHYPRE_PCG_SetDoubleArray2Parameter(
+  bHYPRE_PCG self, const char* name, struct SIDL_double__array* value)
+{
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.PCG.SetDoubleArray2Parameter) */
+  /* Insert the implementation of the SetDoubleArray2Parameter method here... */
+   return 1;
+  /* DO-NOT-DELETE splicer.end(bHYPRE.PCG.SetDoubleArray2Parameter) */
 }
 
 /*
@@ -644,7 +676,7 @@ impl_bHYPRE_PCG_Apply(
       bHYPREP_b = bHYPRE_IJParCSRVector__cast
          ( bHYPRE_Vector_queryInt( b, "bHYPRE.IJParCSRVector") );
       datab = bHYPRE_IJParCSRVector__get_data( bHYPREP_b );
-      bHYPRE_Vector_deleteRef( bHYPREP_b ); /* extra ref created by queryInt */
+      bHYPRE_IJParCSRVector_deleteRef( bHYPREP_b ); /* extra ref created by queryInt */
       ij_b = datab -> ij_b;
       ierr += HYPRE_IJVectorGetObject( ij_b, &objectb );
       bb = (HYPRE_ParVector) objectb;
@@ -653,7 +685,7 @@ impl_bHYPRE_PCG_Apply(
       bHYPREP_x = bHYPRE_IJParCSRVector__cast
          ( bHYPRE_Vector_queryInt( *x, "bHYPRE.IJParCSRVector") );
       datax = bHYPRE_IJParCSRVector__get_data( bHYPREP_x );
-      bHYPRE_Vector_deleteRef( bHYPREP_x ); /* extra ref created by queryInt */
+      bHYPRE_IJParCSRVector_deleteRef( bHYPREP_x ); /* extra ref created by queryInt */
       ij_x = datax -> ij_b;
       ierr += HYPRE_IJVectorGetObject( ij_x, &objectx );
       xx = (HYPRE_ParVector) objectx;
@@ -967,3 +999,11 @@ impl_bHYPRE_PCG_SetPreconditioner(
 
   /* DO-NOT-DELETE splicer.end(bHYPRE.PCG.SetPreconditioner) */
 }
+
+/**
+ * ================= BEGIN UNREFERENCED METHOD(S) ================
+ * The following code segment(s) belong to unreferenced method(s).
+ * This can result from a method rename/removal in the SIDL file.
+ * Move or remove the code in order to compile cleanly.
+ */
+/* ================== END UNREFERENCED METHOD(S) ================= */

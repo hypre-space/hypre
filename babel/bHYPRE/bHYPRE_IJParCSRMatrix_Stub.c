@@ -3,15 +3,15 @@
  * Symbol:        bHYPRE.IJParCSRMatrix-v1.0.0
  * Symbol Type:   class
  * Babel Version: 0.8.0
- * SIDL Created:  20030314 14:22:35 PST
- * Generated:     20030314 14:22:39 PST
+ * SIDL Created:  20030320 16:52:19 PST
+ * Generated:     20030320 16:52:29 PST
  * Description:   Client-side glue code for bHYPRE.IJParCSRMatrix
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
  * babel-version = 0.8.0
- * source-line   = 777
- * source-url    = file:/home/falgout/linear_solvers/babel/Interfaces.idl
+ * source-line   = 789
+ * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 
 #include "bHYPRE_IJParCSRMatrix.h"
@@ -202,6 +202,31 @@ bHYPRE_IJParCSRMatrix_SetDiagOffdSizes(
 }
 
 /*
+ * The GetRow method will allocate space for its two output
+ * arrays on the first call.  The space will be reused on
+ * subsequent calls.  Thus the user must not delete them, yet
+ * must not depend on the data from GetRow to persist beyond the
+ * next GetRow call.
+ * 
+ */
+
+int32_t
+bHYPRE_IJParCSRMatrix_GetRow(
+  bHYPRE_IJParCSRMatrix self,
+  int32_t row,
+  int32_t* size,
+  struct SIDL_int__array** col_ind,
+  struct SIDL_double__array** values)
+{
+  return (*self->d_epv->f_GetRow)(
+    self,
+    row,
+    size,
+    col_ind,
+    values);
+}
+
+/*
  * Set the MPI Communicator.
  * 
  */
@@ -214,160 +239,6 @@ bHYPRE_IJParCSRMatrix_SetCommunicator(
   return (*self->d_epv->f_SetCommunicator)(
     self,
     mpi_comm);
-}
-
-/*
- * Set the int parameter associated with {\tt name}.
- * 
- */
-
-int32_t
-bHYPRE_IJParCSRMatrix_SetIntParameter(
-  bHYPRE_IJParCSRMatrix self,
-  const char* name,
-  int32_t value)
-{
-  return (*self->d_epv->f_SetIntParameter)(
-    self,
-    name,
-    value);
-}
-
-/*
- * Set the double parameter associated with {\tt name}.
- * 
- */
-
-int32_t
-bHYPRE_IJParCSRMatrix_SetDoubleParameter(
-  bHYPRE_IJParCSRMatrix self,
-  const char* name,
-  double value)
-{
-  return (*self->d_epv->f_SetDoubleParameter)(
-    self,
-    name,
-    value);
-}
-
-/*
- * Set the string parameter associated with {\tt name}.
- * 
- */
-
-int32_t
-bHYPRE_IJParCSRMatrix_SetStringParameter(
-  bHYPRE_IJParCSRMatrix self,
-  const char* name,
-  const char* value)
-{
-  return (*self->d_epv->f_SetStringParameter)(
-    self,
-    name,
-    value);
-}
-
-/*
- * Set the int array parameter associated with {\tt name}.
- * 
- */
-
-int32_t
-bHYPRE_IJParCSRMatrix_SetIntArrayParameter(
-  bHYPRE_IJParCSRMatrix self,
-  const char* name,
-  struct SIDL_int__array* value)
-{
-  return (*self->d_epv->f_SetIntArrayParameter)(
-    self,
-    name,
-    value);
-}
-
-/*
- * Set the double array parameter associated with {\tt name}.
- * 
- */
-
-int32_t
-bHYPRE_IJParCSRMatrix_SetDoubleArrayParameter(
-  bHYPRE_IJParCSRMatrix self,
-  const char* name,
-  struct SIDL_double__array* value)
-{
-  return (*self->d_epv->f_SetDoubleArrayParameter)(
-    self,
-    name,
-    value);
-}
-
-/*
- * Set the int parameter associated with {\tt name}.
- * 
- */
-
-int32_t
-bHYPRE_IJParCSRMatrix_GetIntValue(
-  bHYPRE_IJParCSRMatrix self,
-  const char* name,
-  int32_t* value)
-{
-  return (*self->d_epv->f_GetIntValue)(
-    self,
-    name,
-    value);
-}
-
-/*
- * Get the double parameter associated with {\tt name}.
- * 
- */
-
-int32_t
-bHYPRE_IJParCSRMatrix_GetDoubleValue(
-  bHYPRE_IJParCSRMatrix self,
-  const char* name,
-  double* value)
-{
-  return (*self->d_epv->f_GetDoubleValue)(
-    self,
-    name,
-    value);
-}
-
-/*
- * (Optional) Do any preprocessing that may be necessary in
- * order to execute {\tt Apply}.
- * 
- */
-
-int32_t
-bHYPRE_IJParCSRMatrix_Setup(
-  bHYPRE_IJParCSRMatrix self,
-  bHYPRE_Vector b,
-  bHYPRE_Vector x)
-{
-  return (*self->d_epv->f_Setup)(
-    self,
-    b,
-    x);
-}
-
-/*
- * Apply the operator to {\tt b}, returning {\tt x}.
- * 
- */
-
-int32_t
-bHYPRE_IJParCSRMatrix_Apply(
-  bHYPRE_IJParCSRMatrix self,
-  bHYPRE_Vector b,
-  bHYPRE_Vector* x)
-{
-  return (*self->d_epv->f_Apply)(
-    self,
-    b,
-    x);
 }
 
 /*
@@ -649,28 +520,191 @@ bHYPRE_IJParCSRMatrix_Read(
 }
 
 /*
- * The GetRow method will allocate space for its two output
- * arrays on the first call.  The space will be reused on
- * subsequent calls.  Thus the user must not delete them, yet
- * must not depend on the data from GetRow to persist beyond the
- * next GetRow call.
+ * Set the int parameter associated with {\tt name}.
  * 
  */
 
 int32_t
-bHYPRE_IJParCSRMatrix_GetRow(
+bHYPRE_IJParCSRMatrix_SetIntParameter(
   bHYPRE_IJParCSRMatrix self,
-  int32_t row,
-  int32_t* size,
-  struct SIDL_int__array** col_ind,
-  struct SIDL_double__array** values)
+  const char* name,
+  int32_t value)
 {
-  return (*self->d_epv->f_GetRow)(
+  return (*self->d_epv->f_SetIntParameter)(
     self,
-    row,
-    size,
-    col_ind,
-    values);
+    name,
+    value);
+}
+
+/*
+ * Set the double parameter associated with {\tt name}.
+ * 
+ */
+
+int32_t
+bHYPRE_IJParCSRMatrix_SetDoubleParameter(
+  bHYPRE_IJParCSRMatrix self,
+  const char* name,
+  double value)
+{
+  return (*self->d_epv->f_SetDoubleParameter)(
+    self,
+    name,
+    value);
+}
+
+/*
+ * Set the string parameter associated with {\tt name}.
+ * 
+ */
+
+int32_t
+bHYPRE_IJParCSRMatrix_SetStringParameter(
+  bHYPRE_IJParCSRMatrix self,
+  const char* name,
+  const char* value)
+{
+  return (*self->d_epv->f_SetStringParameter)(
+    self,
+    name,
+    value);
+}
+
+/*
+ * Set the int 1-D array parameter associated with {\tt name}.
+ * 
+ */
+
+int32_t
+bHYPRE_IJParCSRMatrix_SetIntArray1Parameter(
+  bHYPRE_IJParCSRMatrix self,
+  const char* name,
+  struct SIDL_int__array* value)
+{
+  return (*self->d_epv->f_SetIntArray1Parameter)(
+    self,
+    name,
+    value);
+}
+
+/*
+ * Set the int 2-D array parameter associated with {\tt name}.
+ * 
+ */
+
+int32_t
+bHYPRE_IJParCSRMatrix_SetIntArray2Parameter(
+  bHYPRE_IJParCSRMatrix self,
+  const char* name,
+  struct SIDL_int__array* value)
+{
+  return (*self->d_epv->f_SetIntArray2Parameter)(
+    self,
+    name,
+    value);
+}
+
+/*
+ * Set the double 1-D array parameter associated with {\tt name}.
+ * 
+ */
+
+int32_t
+bHYPRE_IJParCSRMatrix_SetDoubleArray1Parameter(
+  bHYPRE_IJParCSRMatrix self,
+  const char* name,
+  struct SIDL_double__array* value)
+{
+  return (*self->d_epv->f_SetDoubleArray1Parameter)(
+    self,
+    name,
+    value);
+}
+
+/*
+ * Set the double 2-D array parameter associated with {\tt name}.
+ * 
+ */
+
+int32_t
+bHYPRE_IJParCSRMatrix_SetDoubleArray2Parameter(
+  bHYPRE_IJParCSRMatrix self,
+  const char* name,
+  struct SIDL_double__array* value)
+{
+  return (*self->d_epv->f_SetDoubleArray2Parameter)(
+    self,
+    name,
+    value);
+}
+
+/*
+ * Set the int parameter associated with {\tt name}.
+ * 
+ */
+
+int32_t
+bHYPRE_IJParCSRMatrix_GetIntValue(
+  bHYPRE_IJParCSRMatrix self,
+  const char* name,
+  int32_t* value)
+{
+  return (*self->d_epv->f_GetIntValue)(
+    self,
+    name,
+    value);
+}
+
+/*
+ * Get the double parameter associated with {\tt name}.
+ * 
+ */
+
+int32_t
+bHYPRE_IJParCSRMatrix_GetDoubleValue(
+  bHYPRE_IJParCSRMatrix self,
+  const char* name,
+  double* value)
+{
+  return (*self->d_epv->f_GetDoubleValue)(
+    self,
+    name,
+    value);
+}
+
+/*
+ * (Optional) Do any preprocessing that may be necessary in
+ * order to execute {\tt Apply}.
+ * 
+ */
+
+int32_t
+bHYPRE_IJParCSRMatrix_Setup(
+  bHYPRE_IJParCSRMatrix self,
+  bHYPRE_Vector b,
+  bHYPRE_Vector x)
+{
+  return (*self->d_epv->f_Setup)(
+    self,
+    b,
+    x);
+}
+
+/*
+ * Apply the operator to {\tt b}, returning {\tt x}.
+ * 
+ */
+
+int32_t
+bHYPRE_IJParCSRMatrix_Apply(
+  bHYPRE_IJParCSRMatrix self,
+  bHYPRE_Vector b,
+  bHYPRE_Vector* x)
+{
+  return (*self->d_epv->f_Apply)(
+    self,
+    b,
+    x);
 }
 
 /*

@@ -3,15 +3,15 @@
  * Symbol:        bHYPRE.SStructParCSRVector-v1.0.0
  * Symbol Type:   class
  * Babel Version: 0.8.0
- * SIDL Created:  20030314 14:22:36 PST
- * Generated:     20030314 14:22:39 PST
+ * SIDL Created:  20030320 16:52:19 PST
+ * Generated:     20030320 16:52:29 PST
  * Description:   Server-side implementation for bHYPRE.SStructParCSRVector
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
  * babel-version = 0.8.0
- * source-line   = 825
- * source-url    = file:/home/falgout/linear_solvers/babel/Interfaces.idl
+ * source-line   = 837
+ * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 
 /*
@@ -65,6 +65,112 @@ impl_bHYPRE_SStructParCSRVector__dtor(
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructParCSRVector._dtor) */
   /* Insert the implementation of the destructor method here... */
   /* DO-NOT-DELETE splicer.end(bHYPRE.SStructParCSRVector._dtor) */
+}
+
+/*
+ * Set {\tt self} to 0.
+ * 
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_SStructParCSRVector_Clear"
+
+int32_t
+impl_bHYPRE_SStructParCSRVector_Clear(
+  bHYPRE_SStructParCSRVector self)
+{
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructParCSRVector.Clear) */
+  /* Insert the implementation of the Clear method here... */
+  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructParCSRVector.Clear) */
+}
+
+/*
+ * Copy x into {\tt self}.
+ * 
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_SStructParCSRVector_Copy"
+
+int32_t
+impl_bHYPRE_SStructParCSRVector_Copy(
+  bHYPRE_SStructParCSRVector self, bHYPRE_Vector x)
+{
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructParCSRVector.Copy) */
+  /* Insert the implementation of the Copy method here... */
+  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructParCSRVector.Copy) */
+}
+
+/*
+ * Create an {\tt x} compatible with {\tt self}.
+ * 
+ * NOTE: When this method is used in an inherited class, the
+ * cloned {\tt Vector} object can be cast to an object with the
+ * inherited class type.
+ * 
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_SStructParCSRVector_Clone"
+
+int32_t
+impl_bHYPRE_SStructParCSRVector_Clone(
+  bHYPRE_SStructParCSRVector self, bHYPRE_Vector* x)
+{
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructParCSRVector.Clone) */
+  /* Insert the implementation of the Clone method here... */
+  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructParCSRVector.Clone) */
+}
+
+/*
+ * Scale {\self} by {\tt a}.
+ * 
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_SStructParCSRVector_Scale"
+
+int32_t
+impl_bHYPRE_SStructParCSRVector_Scale(
+  bHYPRE_SStructParCSRVector self, double a)
+{
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructParCSRVector.Scale) */
+  /* Insert the implementation of the Scale method here... */
+  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructParCSRVector.Scale) */
+}
+
+/*
+ * Compute {\tt d}, the inner-product of {\tt self} and {\tt x}.
+ * 
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_SStructParCSRVector_Dot"
+
+int32_t
+impl_bHYPRE_SStructParCSRVector_Dot(
+  bHYPRE_SStructParCSRVector self, bHYPRE_Vector x, double* d)
+{
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructParCSRVector.Dot) */
+  /* Insert the implementation of the Dot method here... */
+  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructParCSRVector.Dot) */
+}
+
+/*
+ * Add {\tt a}*{\tt x} to {\tt self}.
+ * 
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_SStructParCSRVector_Axpy"
+
+int32_t
+impl_bHYPRE_SStructParCSRVector_Axpy(
+  bHYPRE_SStructParCSRVector self, double a, bHYPRE_Vector x)
+{
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructParCSRVector.Axpy) */
+  /* Insert the implementation of the Axpy method here... */
+  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructParCSRVector.Axpy) */
 }
 
 /*
@@ -372,110 +478,4 @@ impl_bHYPRE_SStructParCSRVector_Print(
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructParCSRVector.Print) */
   /* Insert the implementation of the Print method here... */
   /* DO-NOT-DELETE splicer.end(bHYPRE.SStructParCSRVector.Print) */
-}
-
-/*
- * Set {\tt self} to 0.
- * 
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_bHYPRE_SStructParCSRVector_Clear"
-
-int32_t
-impl_bHYPRE_SStructParCSRVector_Clear(
-  bHYPRE_SStructParCSRVector self)
-{
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructParCSRVector.Clear) */
-  /* Insert the implementation of the Clear method here... */
-  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructParCSRVector.Clear) */
-}
-
-/*
- * Copy x into {\tt self}.
- * 
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_bHYPRE_SStructParCSRVector_Copy"
-
-int32_t
-impl_bHYPRE_SStructParCSRVector_Copy(
-  bHYPRE_SStructParCSRVector self, bHYPRE_Vector x)
-{
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructParCSRVector.Copy) */
-  /* Insert the implementation of the Copy method here... */
-  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructParCSRVector.Copy) */
-}
-
-/*
- * Create an {\tt x} compatible with {\tt self}.
- * 
- * NOTE: When this method is used in an inherited class, the
- * cloned {\tt Vector} object can be cast to an object with the
- * inherited class type.
- * 
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_bHYPRE_SStructParCSRVector_Clone"
-
-int32_t
-impl_bHYPRE_SStructParCSRVector_Clone(
-  bHYPRE_SStructParCSRVector self, bHYPRE_Vector* x)
-{
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructParCSRVector.Clone) */
-  /* Insert the implementation of the Clone method here... */
-  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructParCSRVector.Clone) */
-}
-
-/*
- * Scale {\self} by {\tt a}.
- * 
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_bHYPRE_SStructParCSRVector_Scale"
-
-int32_t
-impl_bHYPRE_SStructParCSRVector_Scale(
-  bHYPRE_SStructParCSRVector self, double a)
-{
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructParCSRVector.Scale) */
-  /* Insert the implementation of the Scale method here... */
-  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructParCSRVector.Scale) */
-}
-
-/*
- * Compute {\tt d}, the inner-product of {\tt self} and {\tt x}.
- * 
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_bHYPRE_SStructParCSRVector_Dot"
-
-int32_t
-impl_bHYPRE_SStructParCSRVector_Dot(
-  bHYPRE_SStructParCSRVector self, bHYPRE_Vector x, double* d)
-{
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructParCSRVector.Dot) */
-  /* Insert the implementation of the Dot method here... */
-  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructParCSRVector.Dot) */
-}
-
-/*
- * Add {\tt a}*{\tt x} to {\tt self}.
- * 
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_bHYPRE_SStructParCSRVector_Axpy"
-
-int32_t
-impl_bHYPRE_SStructParCSRVector_Axpy(
-  bHYPRE_SStructParCSRVector self, double a, bHYPRE_Vector x)
-{
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructParCSRVector.Axpy) */
-  /* Insert the implementation of the Axpy method here... */
-  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructParCSRVector.Axpy) */
 }

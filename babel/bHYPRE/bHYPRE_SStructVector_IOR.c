@@ -3,15 +3,15 @@
  * Symbol:        bHYPRE.SStructVector-v1.0.0
  * Symbol Type:   class
  * Babel Version: 0.8.0
- * SIDL Created:  20030314 14:22:36 PST
- * Generated:     20030314 14:22:37 PST
+ * SIDL Created:  20030320 16:52:19 PST
+ * Generated:     20030320 16:52:21 PST
  * Description:   Intermediate Object Representation for bHYPRE.SStructVector
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
  * babel-version = 0.8.0
- * source-line   = 1062
- * source-url    = file:/home/falgout/linear_solvers/babel/Interfaces.idl
+ * source-line   = 1074
+ * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 
 #include <stdlib.h>
@@ -161,6 +161,12 @@ static void bHYPRE_SStructVector__init_epv(
     const char*)) s1->d_epv->f_isType;
   epv->f_getClassInfo    = (struct SIDL_ClassInfo__object* (*)(struct 
     bHYPRE_SStructVector__object*)) s1->d_epv->f_getClassInfo;
+  epv->f_Clear           = NULL;
+  epv->f_Copy            = NULL;
+  epv->f_Clone           = NULL;
+  epv->f_Scale           = NULL;
+  epv->f_Dot             = NULL;
+  epv->f_Axpy            = NULL;
   epv->f_SetCommunicator = NULL;
   epv->f_Initialize      = NULL;
   epv->f_Assemble        = NULL;
@@ -175,12 +181,6 @@ static void bHYPRE_SStructVector__init_epv(
   epv->f_GetBoxValues    = NULL;
   epv->f_SetComplex      = NULL;
   epv->f_Print           = NULL;
-  epv->f_Clear           = NULL;
-  epv->f_Copy            = NULL;
-  epv->f_Clone           = NULL;
-  epv->f_Scale           = NULL;
-  epv->f_Dot             = NULL;
-  epv->f_Axpy            = NULL;
 
   bHYPRE_SStructVector__set_epv(epv);
 
@@ -514,6 +514,79 @@ remote_bHYPRE_SStructVector_getClassInfo(
 }
 
 /*
+ * REMOTE METHOD STUB:Clear
+ */
+
+static int32_t
+remote_bHYPRE_SStructVector_Clear(
+  struct bHYPRE_SStructVector__object* self)
+{
+  return 0;
+}
+
+/*
+ * REMOTE METHOD STUB:Copy
+ */
+
+static int32_t
+remote_bHYPRE_SStructVector_Copy(
+  struct bHYPRE_SStructVector__object* self,
+  struct bHYPRE_Vector__object* x)
+{
+  return 0;
+}
+
+/*
+ * REMOTE METHOD STUB:Clone
+ */
+
+static int32_t
+remote_bHYPRE_SStructVector_Clone(
+  struct bHYPRE_SStructVector__object* self,
+  struct bHYPRE_Vector__object** x)
+{
+  return 0;
+}
+
+/*
+ * REMOTE METHOD STUB:Scale
+ */
+
+static int32_t
+remote_bHYPRE_SStructVector_Scale(
+  struct bHYPRE_SStructVector__object* self,
+  double a)
+{
+  return 0;
+}
+
+/*
+ * REMOTE METHOD STUB:Dot
+ */
+
+static int32_t
+remote_bHYPRE_SStructVector_Dot(
+  struct bHYPRE_SStructVector__object* self,
+  struct bHYPRE_Vector__object* x,
+  double* d)
+{
+  return 0;
+}
+
+/*
+ * REMOTE METHOD STUB:Axpy
+ */
+
+static int32_t
+remote_bHYPRE_SStructVector_Axpy(
+  struct bHYPRE_SStructVector__object* self,
+  double a,
+  struct bHYPRE_Vector__object* x)
+{
+  return 0;
+}
+
+/*
  * REMOTE METHOD STUB:SetCommunicator
  */
 
@@ -700,79 +773,6 @@ remote_bHYPRE_SStructVector_Print(
 }
 
 /*
- * REMOTE METHOD STUB:Clear
- */
-
-static int32_t
-remote_bHYPRE_SStructVector_Clear(
-  struct bHYPRE_SStructVector__object* self)
-{
-  return 0;
-}
-
-/*
- * REMOTE METHOD STUB:Copy
- */
-
-static int32_t
-remote_bHYPRE_SStructVector_Copy(
-  struct bHYPRE_SStructVector__object* self,
-  struct bHYPRE_Vector__object* x)
-{
-  return 0;
-}
-
-/*
- * REMOTE METHOD STUB:Clone
- */
-
-static int32_t
-remote_bHYPRE_SStructVector_Clone(
-  struct bHYPRE_SStructVector__object* self,
-  struct bHYPRE_Vector__object** x)
-{
-  return 0;
-}
-
-/*
- * REMOTE METHOD STUB:Scale
- */
-
-static int32_t
-remote_bHYPRE_SStructVector_Scale(
-  struct bHYPRE_SStructVector__object* self,
-  double a)
-{
-  return 0;
-}
-
-/*
- * REMOTE METHOD STUB:Dot
- */
-
-static int32_t
-remote_bHYPRE_SStructVector_Dot(
-  struct bHYPRE_SStructVector__object* self,
-  struct bHYPRE_Vector__object* x,
-  double* d)
-{
-  return 0;
-}
-
-/*
- * REMOTE METHOD STUB:Axpy
- */
-
-static int32_t
-remote_bHYPRE_SStructVector_Axpy(
-  struct bHYPRE_SStructVector__object* self,
-  double a,
-  struct bHYPRE_Vector__object* x)
-{
-  return 0;
-}
-
-/*
  * REMOTE EPV: create remote entry point vectors (EPVs).
  */
 
@@ -796,6 +796,12 @@ static void bHYPRE_SStructVector__init_remote_epv(void)
   epv->f_queryInt        = remote_bHYPRE_SStructVector_queryInt;
   epv->f_isType          = remote_bHYPRE_SStructVector_isType;
   epv->f_getClassInfo    = remote_bHYPRE_SStructVector_getClassInfo;
+  epv->f_Clear           = remote_bHYPRE_SStructVector_Clear;
+  epv->f_Copy            = remote_bHYPRE_SStructVector_Copy;
+  epv->f_Clone           = remote_bHYPRE_SStructVector_Clone;
+  epv->f_Scale           = remote_bHYPRE_SStructVector_Scale;
+  epv->f_Dot             = remote_bHYPRE_SStructVector_Dot;
+  epv->f_Axpy            = remote_bHYPRE_SStructVector_Axpy;
   epv->f_SetCommunicator = remote_bHYPRE_SStructVector_SetCommunicator;
   epv->f_Initialize      = remote_bHYPRE_SStructVector_Initialize;
   epv->f_Assemble        = remote_bHYPRE_SStructVector_Assemble;
@@ -810,12 +816,6 @@ static void bHYPRE_SStructVector__init_remote_epv(void)
   epv->f_GetBoxValues    = remote_bHYPRE_SStructVector_GetBoxValues;
   epv->f_SetComplex      = remote_bHYPRE_SStructVector_SetComplex;
   epv->f_Print           = remote_bHYPRE_SStructVector_Print;
-  epv->f_Clear           = remote_bHYPRE_SStructVector_Clear;
-  epv->f_Copy            = remote_bHYPRE_SStructVector_Copy;
-  epv->f_Clone           = remote_bHYPRE_SStructVector_Clone;
-  epv->f_Scale           = remote_bHYPRE_SStructVector_Scale;
-  epv->f_Dot             = remote_bHYPRE_SStructVector_Dot;
-  epv->f_Axpy            = remote_bHYPRE_SStructVector_Axpy;
 
   e0->f__cast        = (void* (*)(struct SIDL_BaseClass__object*,
     const char*)) epv->f__cast;

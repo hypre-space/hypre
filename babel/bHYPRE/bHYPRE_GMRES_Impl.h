@@ -3,15 +3,15 @@
  * Symbol:        bHYPRE.GMRES-v1.0.0
  * Symbol Type:   class
  * Babel Version: 0.8.0
- * SIDL Created:  20030314 14:22:36 PST
- * Generated:     20030314 14:22:39 PST
+ * SIDL Created:  20030320 16:52:19 PST
+ * Generated:     20030320 16:52:30 PST
  * Description:   Server-side implementation for bHYPRE.GMRES
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
  * babel-version = 0.8.0
- * source-line   = 1235
- * source-url    = file:/home/falgout/linear_solvers/babel/Interfaces.idl
+ * source-line   = 1247
+ * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 
 #ifndef included_bHYPRE_GMRES_Impl_h
@@ -125,13 +125,25 @@ impl_bHYPRE_GMRES_SetStringParameter(
   const char*);
 
 extern int32_t
-impl_bHYPRE_GMRES_SetIntArrayParameter(
+impl_bHYPRE_GMRES_SetIntArray1Parameter(
   bHYPRE_GMRES,
   const char*,
   struct SIDL_int__array*);
 
 extern int32_t
-impl_bHYPRE_GMRES_SetDoubleArrayParameter(
+impl_bHYPRE_GMRES_SetIntArray2Parameter(
+  bHYPRE_GMRES,
+  const char*,
+  struct SIDL_int__array*);
+
+extern int32_t
+impl_bHYPRE_GMRES_SetDoubleArray1Parameter(
+  bHYPRE_GMRES,
+  const char*,
+  struct SIDL_double__array*);
+
+extern int32_t
+impl_bHYPRE_GMRES_SetDoubleArray2Parameter(
   bHYPRE_GMRES,
   const char*,
   struct SIDL_double__array*);

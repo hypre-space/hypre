@@ -3,15 +3,15 @@
  * Symbol:        bHYPRE.SStructParCSRMatrix-v1.0.0
  * Symbol Type:   class
  * Babel Version: 0.8.0
- * SIDL Created:  20030314 14:22:36 PST
- * Generated:     20030314 14:22:39 PST
+ * SIDL Created:  20030320 16:52:19 PST
+ * Generated:     20030320 16:52:29 PST
  * Description:   Server-side implementation for bHYPRE.SStructParCSRMatrix
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
  * babel-version = 0.8.0
- * source-line   = 815
- * source-url    = file:/home/falgout/linear_solvers/babel/Interfaces.idl
+ * source-line   = 827
+ * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 
 #ifndef included_bHYPRE_SStructParCSRMatrix_Impl_h
@@ -101,13 +101,25 @@ impl_bHYPRE_SStructParCSRMatrix_SetStringParameter(
   const char*);
 
 extern int32_t
-impl_bHYPRE_SStructParCSRMatrix_SetIntArrayParameter(
+impl_bHYPRE_SStructParCSRMatrix_SetIntArray1Parameter(
   bHYPRE_SStructParCSRMatrix,
   const char*,
   struct SIDL_int__array*);
 
 extern int32_t
-impl_bHYPRE_SStructParCSRMatrix_SetDoubleArrayParameter(
+impl_bHYPRE_SStructParCSRMatrix_SetIntArray2Parameter(
+  bHYPRE_SStructParCSRMatrix,
+  const char*,
+  struct SIDL_int__array*);
+
+extern int32_t
+impl_bHYPRE_SStructParCSRMatrix_SetDoubleArray1Parameter(
+  bHYPRE_SStructParCSRMatrix,
+  const char*,
+  struct SIDL_double__array*);
+
+extern int32_t
+impl_bHYPRE_SStructParCSRMatrix_SetDoubleArray2Parameter(
   bHYPRE_SStructParCSRMatrix,
   const char*,
   struct SIDL_double__array*);

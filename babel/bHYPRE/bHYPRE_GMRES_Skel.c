@@ -3,15 +3,15 @@
  * Symbol:        bHYPRE.GMRES-v1.0.0
  * Symbol Type:   class
  * Babel Version: 0.8.0
- * SIDL Created:  20030314 14:22:36 PST
- * Generated:     20030314 14:22:39 PST
+ * SIDL Created:  20030320 16:52:19 PST
+ * Generated:     20030320 16:52:30 PST
  * Description:   Server-side glue code for bHYPRE.GMRES
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
  * babel-version = 0.8.0
- * source-line   = 1235
- * source-url    = file:/home/falgout/linear_solvers/babel/Interfaces.idl
+ * source-line   = 1247
+ * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 
 #include "bHYPRE_GMRES_IOR.h"
@@ -50,13 +50,25 @@ impl_bHYPRE_GMRES_SetStringParameter(
   const char*);
 
 extern int32_t
-impl_bHYPRE_GMRES_SetIntArrayParameter(
+impl_bHYPRE_GMRES_SetIntArray1Parameter(
   bHYPRE_GMRES,
   const char*,
   struct SIDL_int__array*);
 
 extern int32_t
-impl_bHYPRE_GMRES_SetDoubleArrayParameter(
+impl_bHYPRE_GMRES_SetIntArray2Parameter(
+  bHYPRE_GMRES,
+  const char*,
+  struct SIDL_int__array*);
+
+extern int32_t
+impl_bHYPRE_GMRES_SetDoubleArray1Parameter(
+  bHYPRE_GMRES,
+  const char*,
+  struct SIDL_double__array*);
+
+extern int32_t
+impl_bHYPRE_GMRES_SetDoubleArray2Parameter(
   bHYPRE_GMRES,
   const char*,
   struct SIDL_double__array*);
@@ -125,6 +137,78 @@ impl_bHYPRE_GMRES_SetPreconditioner(
   bHYPRE_GMRES,
   bHYPRE_Solver);
 
+static int32_t
+skel_bHYPRE_GMRES_SetIntArray1Parameter(
+  bHYPRE_GMRES self,
+  const char* name,
+  struct SIDL_int__array* value)
+{
+  int32_t _return;
+  struct SIDL_int__array* value_proxy = SIDL_int__array_ensure(value, 1,
+    SIDL_column_major_order);
+  _return =
+    impl_bHYPRE_GMRES_SetIntArray1Parameter(
+      self,
+      name,
+      value_proxy);
+  SIDL_int__array_deleteRef(value_proxy);
+  return _return;
+}
+
+static int32_t
+skel_bHYPRE_GMRES_SetIntArray2Parameter(
+  bHYPRE_GMRES self,
+  const char* name,
+  struct SIDL_int__array* value)
+{
+  int32_t _return;
+  struct SIDL_int__array* value_proxy = SIDL_int__array_ensure(value, 2,
+    SIDL_column_major_order);
+  _return =
+    impl_bHYPRE_GMRES_SetIntArray2Parameter(
+      self,
+      name,
+      value_proxy);
+  SIDL_int__array_deleteRef(value_proxy);
+  return _return;
+}
+
+static int32_t
+skel_bHYPRE_GMRES_SetDoubleArray1Parameter(
+  bHYPRE_GMRES self,
+  const char* name,
+  struct SIDL_double__array* value)
+{
+  int32_t _return;
+  struct SIDL_double__array* value_proxy = SIDL_double__array_ensure(value, 1,
+    SIDL_column_major_order);
+  _return =
+    impl_bHYPRE_GMRES_SetDoubleArray1Parameter(
+      self,
+      name,
+      value_proxy);
+  SIDL_double__array_deleteRef(value_proxy);
+  return _return;
+}
+
+static int32_t
+skel_bHYPRE_GMRES_SetDoubleArray2Parameter(
+  bHYPRE_GMRES self,
+  const char* name,
+  struct SIDL_double__array* value)
+{
+  int32_t _return;
+  struct SIDL_double__array* value_proxy = SIDL_double__array_ensure(value, 2,
+    SIDL_column_major_order);
+  _return =
+    impl_bHYPRE_GMRES_SetDoubleArray2Parameter(
+      self,
+      name,
+      value_proxy);
+  SIDL_double__array_deleteRef(value_proxy);
+  return _return;
+}
+
 void
 bHYPRE_GMRES__set_epv(struct bHYPRE_GMRES__epv *epv)
 {
@@ -134,8 +218,10 @@ bHYPRE_GMRES__set_epv(struct bHYPRE_GMRES__epv *epv)
   epv->f_SetIntParameter = impl_bHYPRE_GMRES_SetIntParameter;
   epv->f_SetDoubleParameter = impl_bHYPRE_GMRES_SetDoubleParameter;
   epv->f_SetStringParameter = impl_bHYPRE_GMRES_SetStringParameter;
-  epv->f_SetIntArrayParameter = impl_bHYPRE_GMRES_SetIntArrayParameter;
-  epv->f_SetDoubleArrayParameter = impl_bHYPRE_GMRES_SetDoubleArrayParameter;
+  epv->f_SetIntArray1Parameter = skel_bHYPRE_GMRES_SetIntArray1Parameter;
+  epv->f_SetIntArray2Parameter = skel_bHYPRE_GMRES_SetIntArray2Parameter;
+  epv->f_SetDoubleArray1Parameter = skel_bHYPRE_GMRES_SetDoubleArray1Parameter;
+  epv->f_SetDoubleArray2Parameter = skel_bHYPRE_GMRES_SetDoubleArray2Parameter;
   epv->f_GetIntValue = impl_bHYPRE_GMRES_GetIntValue;
   epv->f_GetDoubleValue = impl_bHYPRE_GMRES_GetDoubleValue;
   epv->f_Setup = impl_bHYPRE_GMRES_Setup;

@@ -3,15 +3,15 @@
  * Symbol:        bHYPRE.SStructParCSRMatrix-v1.0.0
  * Symbol Type:   class
  * Babel Version: 0.8.0
- * SIDL Created:  20030314 14:22:36 PST
- * Generated:     20030314 14:22:39 PST
+ * SIDL Created:  20030320 16:52:19 PST
+ * Generated:     20030320 16:52:30 PST
  * Description:   Server-side implementation for bHYPRE.SStructParCSRMatrix
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
  * babel-version = 0.8.0
- * source-line   = 815
- * source-url    = file:/home/falgout/linear_solvers/babel/Interfaces.idl
+ * source-line   = 827
+ * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 
 /*
@@ -138,43 +138,87 @@ impl_bHYPRE_SStructParCSRMatrix_SetStringParameter(
 }
 
 /*
- * Set the int array parameter associated with {\tt name}.
+ * Set the int 1-D array parameter associated with {\tt name}.
  * 
  */
 
 #undef __FUNC__
-#define __FUNC__ "impl_bHYPRE_SStructParCSRMatrix_SetIntArrayParameter"
+#define __FUNC__ "impl_bHYPRE_SStructParCSRMatrix_SetIntArray1Parameter"
 
 int32_t
-impl_bHYPRE_SStructParCSRMatrix_SetIntArrayParameter(
+impl_bHYPRE_SStructParCSRMatrix_SetIntArray1Parameter(
   bHYPRE_SStructParCSRMatrix self, const char* name,
     struct SIDL_int__array* value)
 {
   /* DO-NOT-DELETE 
-    splicer.begin(bHYPRE.SStructParCSRMatrix.SetIntArrayParameter) */
-  /* Insert the implementation of the SetIntArrayParameter method here... */
-  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructParCSRMatrix.SetIntArrayParameter) 
-    */
+    splicer.begin(bHYPRE.SStructParCSRMatrix.SetIntArray1Parameter) */
+  /* Insert the implementation of the SetIntArray1Parameter method here... */
+   return 1;
+  /* DO-NOT-DELETE 
+    splicer.end(bHYPRE.SStructParCSRMatrix.SetIntArray1Parameter) */
 }
 
 /*
- * Set the double array parameter associated with {\tt name}.
+ * Set the int 2-D array parameter associated with {\tt name}.
  * 
  */
 
 #undef __FUNC__
-#define __FUNC__ "impl_bHYPRE_SStructParCSRMatrix_SetDoubleArrayParameter"
+#define __FUNC__ "impl_bHYPRE_SStructParCSRMatrix_SetIntArray2Parameter"
 
 int32_t
-impl_bHYPRE_SStructParCSRMatrix_SetDoubleArrayParameter(
+impl_bHYPRE_SStructParCSRMatrix_SetIntArray2Parameter(
+  bHYPRE_SStructParCSRMatrix self, const char* name,
+    struct SIDL_int__array* value)
+{
+  /* DO-NOT-DELETE 
+    splicer.begin(bHYPRE.SStructParCSRMatrix.SetIntArray2Parameter) */
+  /* Insert the implementation of the SetIntArray2Parameter method here... */
+   return 1;
+  /* DO-NOT-DELETE 
+    splicer.end(bHYPRE.SStructParCSRMatrix.SetIntArray2Parameter) */
+}
+
+/*
+ * Set the double 1-D array parameter associated with {\tt name}.
+ * 
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_SStructParCSRMatrix_SetDoubleArray1Parameter"
+
+int32_t
+impl_bHYPRE_SStructParCSRMatrix_SetDoubleArray1Parameter(
   bHYPRE_SStructParCSRMatrix self, const char* name,
     struct SIDL_double__array* value)
 {
   /* DO-NOT-DELETE 
-    splicer.begin(bHYPRE.SStructParCSRMatrix.SetDoubleArrayParameter) */
-  /* Insert the implementation of the SetDoubleArrayParameter method here... */
+    splicer.begin(bHYPRE.SStructParCSRMatrix.SetDoubleArray1Parameter) */
+  /* Insert the implementation of the SetDoubleArray1Parameter method here... */
+   return 1;
   /* DO-NOT-DELETE 
-    splicer.end(bHYPRE.SStructParCSRMatrix.SetDoubleArrayParameter) */
+    splicer.end(bHYPRE.SStructParCSRMatrix.SetDoubleArray1Parameter) */
+}
+
+/*
+ * Set the double 2-D array parameter associated with {\tt name}.
+ * 
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_SStructParCSRMatrix_SetDoubleArray2Parameter"
+
+int32_t
+impl_bHYPRE_SStructParCSRMatrix_SetDoubleArray2Parameter(
+  bHYPRE_SStructParCSRMatrix self, const char* name,
+    struct SIDL_double__array* value)
+{
+  /* DO-NOT-DELETE 
+    splicer.begin(bHYPRE.SStructParCSRMatrix.SetDoubleArray2Parameter) */
+  /* Insert the implementation of the SetDoubleArray2Parameter method here... */
+   return 1;
+  /* DO-NOT-DELETE 
+    splicer.end(bHYPRE.SStructParCSRMatrix.SetDoubleArray2Parameter) */
 }
 
 /*

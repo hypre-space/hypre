@@ -3,15 +3,15 @@
  * Symbol:        bHYPRE.BoomerAMG-v1.0.0
  * Symbol Type:   class
  * Babel Version: 0.8.0
- * SIDL Created:  20030314 14:22:36 PST
- * Generated:     20030314 14:22:39 PST
+ * SIDL Created:  20030320 16:52:19 PST
+ * Generated:     20030320 16:52:30 PST
  * Description:   Server-side implementation for bHYPRE.BoomerAMG
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
  * babel-version = 0.8.0
- * source-line   = 1205
- * source-url    = file:/home/falgout/linear_solvers/babel/Interfaces.idl
+ * source-line   = 1217
+ * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 
 /*
@@ -46,16 +46,16 @@
  * \item[CycleType] ({\tt Int}) - type of cycle used; a V-cycle
  * (default) or a W-cycle.
  * 
- * \item[NumGridSweeps] ({\tt IntArray}) - number of sweeps for
+ * \item[NumGridSweeps] ({\tt IntArray 1D}) - number of sweeps for
  * fine and coarse grid, up and down cycle.
  * 
- * \item[GridRelaxType] ({\tt IntArray}) - type of smoother used on
+ * \item[GridRelaxType] ({\tt IntArray 1D}) - type of smoother used on
  * fine and coarse grid, up and down cycle.
  * 
- * \item[GridRelaxPoints] ({\tt IntArray}) - point ordering used in
+ * \item[GridRelaxPoints] ({\tt IntArray 2D}) - point ordering used in
  * relaxation.
  * 
- * \item[RelaxWeight] ({\tt DoubleArray}) - relaxation weight for
+ * \item[RelaxWeight] ({\tt DoubleArray 1D}) - relaxation weight for
  * smoothed Jacobi and hybrid SOR.
  * 
  * \item[TruncFactor] ({\tt Double}) - truncation factor for
@@ -75,7 +75,7 @@
  * \item[NumFunctions] ({\tt Int}) - size of the system of PDEs
  * (when using the systems version).
  * 
- * \item[DOFFunc] ({\tt IntArray}) - mapping that assigns the
+ * \item[DOFFunc] ({\tt IntArray 1D}) - mapping that assigns the
  * function to each variable (when using the systems version).
  * 
  * \item[Variant] ({\tt Int}) - variant of Schwarz used.
@@ -347,24 +347,22 @@ impl_bHYPRE_BoomerAMG_SetStringParameter(
 }
 
 /*
- * Set the int array parameter associated with {\tt name}.
+ * Set the int 1-D array parameter associated with {\tt name}.
  * 
  */
 
 #undef __FUNC__
-#define __FUNC__ "impl_bHYPRE_BoomerAMG_SetIntArrayParameter"
+#define __FUNC__ "impl_bHYPRE_BoomerAMG_SetIntArray1Parameter"
 
 int32_t
-impl_bHYPRE_BoomerAMG_SetIntArrayParameter(
+impl_bHYPRE_BoomerAMG_SetIntArray1Parameter(
   bHYPRE_BoomerAMG self, const char* name, struct SIDL_int__array* value)
 {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.BoomerAMG.SetIntArrayParameter) */
-  /* Insert the implementation of the SetIntArrayParameter method here... */
-
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.BoomerAMG.SetIntArray1Parameter) */
+  /* Insert the implementation of the SetIntArray1Parameter method here... */
    int ierr = 0;
-   int dim, lb0, ub0, lb1, ub1, i, j;
-   int * data1_c;  /* the data in a C 1d array */
-   int ** data2_c; /* the data in a C 2d array */
+   int dim;
+   int * data1_c;
    HYPRE_Solver solver;
    struct bHYPRE_BoomerAMG__data * data;
 
@@ -384,7 +382,46 @@ impl_bHYPRE_BoomerAMG_SetIntArrayParameter(
       assert( dim==1 );
       ierr += HYPRE_BoomerAMGSetGridRelaxType( solver, data1_c );
    }
-   else if ( strcmp(name,"GridRelaxPoints")==0 )
+   else if ( strcmp(name,"DOFFunc")==0 )
+   {
+      assert( dim==1 );
+      ierr += HYPRE_BoomerAMGSetDofFunc( solver, data1_c );
+   }
+   else
+   {
+      ierr=1;
+   }
+
+   return ierr;
+  /* DO-NOT-DELETE splicer.end(bHYPRE.BoomerAMG.SetIntArray1Parameter) */
+}
+
+/*
+ * Set the int 2-D array parameter associated with {\tt name}.
+ * 
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_BoomerAMG_SetIntArray2Parameter"
+
+int32_t
+impl_bHYPRE_BoomerAMG_SetIntArray2Parameter(
+  bHYPRE_BoomerAMG self, const char* name, struct SIDL_int__array* value)
+{
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.BoomerAMG.SetIntArray2Parameter) */
+  /* Insert the implementation of the SetIntArray2Parameter method here... */
+   int ierr = 0;
+   int dim, lb0, ub0, lb1, ub1, i, j;
+    int ** data2_c;
+   HYPRE_Solver solver;
+   struct bHYPRE_BoomerAMG__data * data;
+
+   data = bHYPRE_BoomerAMG__get_data( self );
+   solver = data->solver;
+
+   dim = SIDL_int__array_dimen( value );
+
+   if ( strcmp(name,"GridRelaxPoints")==0 )
    {
       assert( dim==2 );
       lb0 = SIDL_int__array_lower( value, 0 );
@@ -404,36 +441,29 @@ impl_bHYPRE_BoomerAMG_SetIntArrayParameter(
       }
       ierr += HYPRE_BoomerAMGSetGridRelaxPoints( solver, data2_c );
    }
-   else if ( strcmp(name,"DOFFunc")==0 )
-   {
-      assert( dim==1 );
-      ierr += HYPRE_BoomerAMGSetDofFunc( solver, data1_c );
-   }
    else
    {
       ierr=1;
    }
 
    return ierr;
-
-  /* DO-NOT-DELETE splicer.end(bHYPRE.BoomerAMG.SetIntArrayParameter) */
+  /* DO-NOT-DELETE splicer.end(bHYPRE.BoomerAMG.SetIntArray2Parameter) */
 }
 
 /*
- * Set the double array parameter associated with {\tt name}.
+ * Set the double 1-D array parameter associated with {\tt name}.
  * 
  */
 
 #undef __FUNC__
-#define __FUNC__ "impl_bHYPRE_BoomerAMG_SetDoubleArrayParameter"
+#define __FUNC__ "impl_bHYPRE_BoomerAMG_SetDoubleArray1Parameter"
 
 int32_t
-impl_bHYPRE_BoomerAMG_SetDoubleArrayParameter(
+impl_bHYPRE_BoomerAMG_SetDoubleArray1Parameter(
   bHYPRE_BoomerAMG self, const char* name, struct SIDL_double__array* value)
 {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.BoomerAMG.SetDoubleArrayParameter) */
-  /* Insert the implementation of the SetDoubleArrayParameter method here... */
-
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.BoomerAMG.SetDoubleArray1Parameter) */
+  /* Insert the implementation of the SetDoubleArray1Parameter method here... */
    int ierr = 0, dim;
    HYPRE_Solver solver;
    struct bHYPRE_BoomerAMG__data * data;
@@ -455,7 +485,25 @@ impl_bHYPRE_BoomerAMG_SetDoubleArrayParameter(
 
    return ierr;
 
-  /* DO-NOT-DELETE splicer.end(bHYPRE.BoomerAMG.SetDoubleArrayParameter) */
+  /* DO-NOT-DELETE splicer.end(bHYPRE.BoomerAMG.SetDoubleArray1Parameter) */
+}
+
+/*
+ * Set the double 2-D array parameter associated with {\tt name}.
+ * 
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_BoomerAMG_SetDoubleArray2Parameter"
+
+int32_t
+impl_bHYPRE_BoomerAMG_SetDoubleArray2Parameter(
+  bHYPRE_BoomerAMG self, const char* name, struct SIDL_double__array* value)
+{
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.BoomerAMG.SetDoubleArray2Parameter) */
+  /* Insert the implementation of the SetDoubleArray2Parameter method here... */
+   return 1;
+  /* DO-NOT-DELETE splicer.end(bHYPRE.BoomerAMG.SetDoubleArray2Parameter) */
 }
 
 /*
@@ -894,3 +942,11 @@ impl_bHYPRE_BoomerAMG_GetRelResidualNorm(
 
   /* DO-NOT-DELETE splicer.end(bHYPRE.BoomerAMG.GetRelResidualNorm) */
 }
+
+/**
+ * ================= BEGIN UNREFERENCED METHOD(S) ================
+ * The following code segment(s) belong to unreferenced method(s).
+ * This can result from a method rename/removal in the SIDL file.
+ * Move or remove the code in order to compile cleanly.
+ */
+/* ================== END UNREFERENCED METHOD(S) ================= */

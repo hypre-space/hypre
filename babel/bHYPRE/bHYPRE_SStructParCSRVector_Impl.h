@@ -3,15 +3,15 @@
  * Symbol:        bHYPRE.SStructParCSRVector-v1.0.0
  * Symbol Type:   class
  * Babel Version: 0.8.0
- * SIDL Created:  20030314 14:22:36 PST
- * Generated:     20030314 14:22:39 PST
+ * SIDL Created:  20030320 16:52:19 PST
+ * Generated:     20030320 16:52:29 PST
  * Description:   Server-side implementation for bHYPRE.SStructParCSRVector
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
  * babel-version = 0.8.0
- * source-line   = 825
- * source-url    = file:/home/falgout/linear_solvers/babel/Interfaces.idl
+ * source-line   = 837
+ * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 
 #ifndef included_bHYPRE_SStructParCSRVector_Impl_h
@@ -76,6 +76,37 @@ impl_bHYPRE_SStructParCSRVector__dtor(
 /*
  * User-defined object methods
  */
+
+extern int32_t
+impl_bHYPRE_SStructParCSRVector_Clear(
+  bHYPRE_SStructParCSRVector);
+
+extern int32_t
+impl_bHYPRE_SStructParCSRVector_Copy(
+  bHYPRE_SStructParCSRVector,
+  bHYPRE_Vector);
+
+extern int32_t
+impl_bHYPRE_SStructParCSRVector_Clone(
+  bHYPRE_SStructParCSRVector,
+  bHYPRE_Vector*);
+
+extern int32_t
+impl_bHYPRE_SStructParCSRVector_Scale(
+  bHYPRE_SStructParCSRVector,
+  double);
+
+extern int32_t
+impl_bHYPRE_SStructParCSRVector_Dot(
+  bHYPRE_SStructParCSRVector,
+  bHYPRE_Vector,
+  double*);
+
+extern int32_t
+impl_bHYPRE_SStructParCSRVector_Axpy(
+  bHYPRE_SStructParCSRVector,
+  double,
+  bHYPRE_Vector);
 
 extern int32_t
 impl_bHYPRE_SStructParCSRVector_SetCommunicator(
@@ -164,37 +195,6 @@ impl_bHYPRE_SStructParCSRVector_Print(
   bHYPRE_SStructParCSRVector,
   const char*,
   int32_t);
-
-extern int32_t
-impl_bHYPRE_SStructParCSRVector_Clear(
-  bHYPRE_SStructParCSRVector);
-
-extern int32_t
-impl_bHYPRE_SStructParCSRVector_Copy(
-  bHYPRE_SStructParCSRVector,
-  bHYPRE_Vector);
-
-extern int32_t
-impl_bHYPRE_SStructParCSRVector_Clone(
-  bHYPRE_SStructParCSRVector,
-  bHYPRE_Vector*);
-
-extern int32_t
-impl_bHYPRE_SStructParCSRVector_Scale(
-  bHYPRE_SStructParCSRVector,
-  double);
-
-extern int32_t
-impl_bHYPRE_SStructParCSRVector_Dot(
-  bHYPRE_SStructParCSRVector,
-  bHYPRE_Vector,
-  double*);
-
-extern int32_t
-impl_bHYPRE_SStructParCSRVector_Axpy(
-  bHYPRE_SStructParCSRVector,
-  double,
-  bHYPRE_Vector);
 
 #ifdef __cplusplus
 }

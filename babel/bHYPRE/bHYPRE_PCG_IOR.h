@@ -3,15 +3,15 @@
  * Symbol:        bHYPRE.PCG-v1.0.0
  * Symbol Type:   class
  * Babel Version: 0.8.0
- * SIDL Created:  20030314 14:22:36 PST
- * Generated:     20030314 14:22:36 PST
+ * SIDL Created:  20030320 16:52:19 PST
+ * Generated:     20030320 16:52:20 PST
  * Description:   Intermediate Object Representation for bHYPRE.PCG
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
  * babel-version = 0.8.0
- * source-line   = 1225
- * source-url    = file:/home/falgout/linear_solvers/babel/Interfaces.idl
+ * source-line   = 1237
+ * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 
 #ifndef included_bHYPRE_PCG_IOR_h
@@ -122,11 +122,19 @@ struct bHYPRE_PCG__epv {
     struct bHYPRE_PCG__object* self,
     const char* name,
     const char* value);
-  int32_t (*f_SetIntArrayParameter)(
+  int32_t (*f_SetIntArray1Parameter)(
     struct bHYPRE_PCG__object* self,
     const char* name,
     struct SIDL_int__array* value);
-  int32_t (*f_SetDoubleArrayParameter)(
+  int32_t (*f_SetIntArray2Parameter)(
+    struct bHYPRE_PCG__object* self,
+    const char* name,
+    struct SIDL_int__array* value);
+  int32_t (*f_SetDoubleArray1Parameter)(
+    struct bHYPRE_PCG__object* self,
+    const char* name,
+    struct SIDL_double__array* value);
+  int32_t (*f_SetDoubleArray2Parameter)(
     struct bHYPRE_PCG__object* self,
     const char* name,
     struct SIDL_double__array* value);
