@@ -15,7 +15,9 @@ MAINTAINERCLEANFILES = Makefile.in\
 
 # this is really ulgy, but there are different directory structures
 # seq_ls tools are not in the distribution, but could be added
-# by uncommenting herre and in configure.ac
+# by uncommenting here and in configure.ac. The SUBDIRS controls
+# the build directories, while DIST_SUBDIRS determine the directories
+# in the distribution (make dist).
 #if PARCHORDLSDIR
 #PARCHORDLS = "parchord_ls"
 #else !PARCHORDLSDIR
@@ -131,7 +133,18 @@ nofei:
 	(cd lib && touch libHYPRE.* .libs/libHYPRE.*); \
 	(cd lib && $(MAKE) $(AM_MAKEFLAGS) libHYPRE_LSI.la)
 
+clean-local:
+	@ \
+	for i in autotest.*.err autotest.*.log \
+		autotest.*.email ; \
+	do \
+	  if [ -e $$i ] ; \
+	  then \
+	    rm -f $$i; \
+	  fi; \
+	done
 
+# may decide to use "make dist" for distribution
 #dist-hook:
 #	@ \
 #	for i in $(HYPRE_SUBDIR_LIST); \

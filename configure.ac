@@ -5,7 +5,7 @@ m4_define(HYPRE_NAME, hypre)
 m4_define(HYPRE_VERSION, 1.8.3b)
 m4_define(HYPRE_DATE, 2003/10/22)
 m4_define(HYPRE_TIME, 23:46:36)
-m4_define(HYPRE_DATETIME, HYPRE_DATE HYPRE_TIME)
+m4_define(HYPRE_DATETIME, [HYPRE_DATE HYPRE_TIME])
 m4_define(HYPRE_BUGS,http://www-casc.llnl.gov/bugs/enter_bug.cgi?product=HYPRE)
 m4_define(HYPRE_TOP_SRC_DIR, `pwd`)
 
@@ -53,7 +53,7 @@ m4_pattern_allow([HYPRE_[A-Z_]+])
 AC_DEFINE([PACKAGE_DATE], ["HYPRE_DATE"], [Date of release])
 AC_DEFINE([PACKAGE_TIME], ["HYPRE_TIME"], [Time of release])
 AC_DEFINE([PACKAGE_DATETIME], ["HYPRE_DATETIME"], [Date and time of release])
-PACKAGE_DATETIME=HYPRE_DATETIME
+PACKAGE_DATETIME="HYPRE_DATE HYPRE_TIME"
 AC_SUBST([PACKAGE_DATETIME])
 
 if test "x$CFLAGS" != "x" ; then

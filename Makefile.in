@@ -224,7 +224,9 @@ MAINTAINERCLEANFILES = Makefile.in\
 
 # this is really ulgy, but there are different directory structures
 # seq_ls tools are not in the distribution, but could be added
-# by uncommenting herre and in configure.ac
+# by uncommenting here and in configure.ac. The SUBDIRS controls
+# the build directories, while DIST_SUBDIRS determine the directories
+# in the distribution (make dist).
 #if PARCHORDLSDIR
 #PARCHORDLS = "parchord_ls"
 #else !PARCHORDLSDIR
@@ -649,7 +651,7 @@ maintainer-clean-generic:
 	-test -z "$(MAINTAINERCLEANFILES)" || rm -f $(MAINTAINERCLEANFILES)
 clean: clean-recursive
 
-clean-am: clean-generic clean-libtool mostlyclean-am
+clean-am: clean-generic clean-libtool clean-local mostlyclean-am
 
 distclean: distclean-recursive
 	-rm -f $(am__CONFIG_DISTCLEAN_FILES)
@@ -702,9 +704,9 @@ uninstall-am: uninstall-includeHEADERS
 uninstall-info: uninstall-info-recursive
 
 .PHONY: $(RECURSIVE_TARGETS) CTAGS GTAGS all all-am am--refresh check \
-	check-am clean clean-generic clean-libtool clean-recursive \
-	ctags ctags-recursive dist dist-all dist-bzip2 dist-gzip \
-	dist-shar dist-tarZ dist-zip distcheck distclean \
+	check-am clean clean-generic clean-libtool clean-local \
+	clean-recursive ctags ctags-recursive dist dist-all dist-bzip2 \
+	dist-gzip dist-shar dist-tarZ dist-zip distcheck distclean \
 	distclean-generic distclean-hdr distclean-libtool \
 	distclean-recursive distclean-tags distcleancheck distdir \
 	distuninstallcheck dvi dvi-am dvi-local html html-am \
@@ -768,6 +770,18 @@ nofei:
 	(cd lib && touch libHYPRE.* .libs/libHYPRE.*); \
 	(cd lib && $(MAKE) $(AM_MAKEFLAGS) libHYPRE_LSI.la)
 
+clean-local:
+	@ \
+	for i in autotest.*.err autotest.*.log \
+		autotest.*.email ; \
+	do \
+	  if [ -e $$i ] ; \
+	  then \
+	    rm -f $$i; \
+	  fi; \
+	done
+
+# may decide to use "make dist" for distribution
 #dist-hook:
 #	@ \
 #	for i in $(HYPRE_SUBDIR_LIST); \
