@@ -458,8 +458,12 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
       {
          if ((proc % 2) == 0)
          {
-            t0hiprocs[t0nhi] = myproc + i;
-            t0nhi++;
+            /* added if test to avoid t0hi ranks exceeding nprocs */
+            if ((myproc + i) < nprocs) 
+            {
+               t0hiprocs[t0nhi] = myproc + i;
+               t0nhi++;
+            }
             proc /= 2;
          }
          else
