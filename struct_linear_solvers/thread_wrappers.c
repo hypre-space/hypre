@@ -78,7 +78,7 @@ HYPRE_StructPCGFinalizePush(
    int i;
    int  returnvalue;
 
-   pushargs.solver = (HYPRE_StructSolverArray *)&solver;
+   pushargs.solver = (HYPRE_StructSolverArray *)solver;
    for (i = 0; i < hypre_NumThreads; i++)
       hypre_work_put( HYPRE_StructPCGFinalizeVoidPtr, (void *)&pushargs );
 
@@ -128,10 +128,10 @@ HYPRE_StructPCGSetupPush(
    int i;
    int  returnvalue;
 
-   pushargs.solver = (HYPRE_StructSolverArray *)&solver;
-   pushargs.A = (HYPRE_StructMatrixArray *)&A;
-   pushargs.b = (HYPRE_StructVectorArray *)&b;
-   pushargs.x = (HYPRE_StructVectorArray *)&x;
+   pushargs.solver = (HYPRE_StructSolverArray *)solver;
+   pushargs.A = (HYPRE_StructMatrixArray *)A;
+   pushargs.b = (HYPRE_StructVectorArray *)b;
+   pushargs.x = (HYPRE_StructVectorArray *)x;
    for (i = 0; i < hypre_NumThreads; i++)
       hypre_work_put( HYPRE_StructPCGSetupVoidPtr, (void *)&pushargs );
 
@@ -181,10 +181,10 @@ HYPRE_StructPCGSolvePush(
    int i;
    int  returnvalue;
 
-   pushargs.solver = (HYPRE_StructSolverArray *)&solver;
-   pushargs.A = (HYPRE_StructMatrixArray *)&A;
-   pushargs.b = (HYPRE_StructVectorArray *)&b;
-   pushargs.x = (HYPRE_StructVectorArray *)&x;
+   pushargs.solver = (HYPRE_StructSolverArray *)solver;
+   pushargs.A = (HYPRE_StructMatrixArray *)A;
+   pushargs.b = (HYPRE_StructVectorArray *)b;
+   pushargs.x = (HYPRE_StructVectorArray *)x;
    for (i = 0; i < hypre_NumThreads; i++)
       hypre_work_put( HYPRE_StructPCGSolveVoidPtr, (void *)&pushargs );
 
@@ -228,7 +228,7 @@ HYPRE_StructPCGSetTolPush(
    int i;
    int  returnvalue;
 
-   pushargs.solver = (HYPRE_StructSolverArray *)&solver;
+   pushargs.solver = (HYPRE_StructSolverArray *)solver;
    pushargs.tol = tol;
    for (i = 0; i < hypre_NumThreads; i++)
       hypre_work_put( HYPRE_StructPCGSetTolVoidPtr, (void *)&pushargs );
@@ -273,7 +273,7 @@ HYPRE_StructPCGSetMaxIterPush(
    int i;
    int  returnvalue;
 
-   pushargs.solver = (HYPRE_StructSolverArray *)&solver;
+   pushargs.solver = (HYPRE_StructSolverArray *)solver;
    pushargs.max_iter = max_iter;
    for (i = 0; i < hypre_NumThreads; i++)
       hypre_work_put( HYPRE_StructPCGSetMaxIterVoidPtr, (void *)&pushargs );
@@ -318,7 +318,7 @@ HYPRE_StructPCGSetTwoNormPush(
    int i;
    int  returnvalue;
 
-   pushargs.solver = (HYPRE_StructSolverArray *)&solver;
+   pushargs.solver = (HYPRE_StructSolverArray *)solver;
    pushargs.two_norm = two_norm;
    for (i = 0; i < hypre_NumThreads; i++)
       hypre_work_put( HYPRE_StructPCGSetTwoNormVoidPtr, (void *)&pushargs );
@@ -363,7 +363,7 @@ HYPRE_StructPCGSetRelChangePush(
    int i;
    int  returnvalue;
 
-   pushargs.solver = (HYPRE_StructSolverArray *)&solver;
+   pushargs.solver = (HYPRE_StructSolverArray *)solver;
    pushargs.rel_change = rel_change;
    for (i = 0; i < hypre_NumThreads; i++)
       hypre_work_put( HYPRE_StructPCGSetRelChangeVoidPtr, (void *)&pushargs );
@@ -414,7 +414,7 @@ HYPRE_StructPCGSetPrecondPush(
    int i;
    int  returnvalue;
 
-   pushargs.solver = (HYPRE_StructSolverArray *)&solver;
+   pushargs.solver = (HYPRE_StructSolverArray *)solver;
    pushargs.precond = precond;
    pushargs.precond_setup = precond_setup;
    pushargs.precond_data = precond_data;
@@ -461,7 +461,7 @@ HYPRE_StructPCGSetLoggingPush(
    int i;
    int  returnvalue;
 
-   pushargs.solver = (HYPRE_StructSolverArray *)&solver;
+   pushargs.solver = (HYPRE_StructSolverArray *)solver;
    pushargs.logging = logging;
    for (i = 0; i < hypre_NumThreads; i++)
       hypre_work_put( HYPRE_StructPCGSetLoggingVoidPtr, (void *)&pushargs );
@@ -506,7 +506,7 @@ HYPRE_StructPCGGetNumIterationsPush(
    int i;
    int  returnvalue;
 
-   pushargs.solver = (HYPRE_StructSolverArray *)&solver;
+   pushargs.solver = (HYPRE_StructSolverArray *)solver;
    pushargs.num_iterations = num_iterations;
    for (i = 0; i < hypre_NumThreads; i++)
       hypre_work_put( HYPRE_StructPCGGetNumIterationsVoidPtr, (void *)&pushargs );
@@ -551,7 +551,7 @@ HYPRE_StructPCGGetFinalRelativeResidualNormPush(
    int i;
    int  returnvalue;
 
-   pushargs.solver = (HYPRE_StructSolverArray *)&solver;
+   pushargs.solver = (HYPRE_StructSolverArray *)solver;
    pushargs.norm = norm;
    for (i = 0; i < hypre_NumThreads; i++)
       hypre_work_put( HYPRE_StructPCGGetFinalRelativeResidualNormVoidPtr, (void *)&pushargs );
@@ -602,10 +602,10 @@ HYPRE_StructDiagScaleSetupPush(
    int i;
    int  returnvalue;
 
-   pushargs.solver = (HYPRE_StructSolverArray *)&solver;
-   pushargs.A = (HYPRE_StructMatrixArray *)&A;
-   pushargs.y = (HYPRE_StructVectorArray *)&y;
-   pushargs.x = (HYPRE_StructVectorArray *)&x;
+   pushargs.solver = (HYPRE_StructSolverArray *)solver;
+   pushargs.A = (HYPRE_StructMatrixArray *)A;
+   pushargs.y = (HYPRE_StructVectorArray *)y;
+   pushargs.x = (HYPRE_StructVectorArray *)x;
    for (i = 0; i < hypre_NumThreads; i++)
       hypre_work_put( HYPRE_StructDiagScaleSetupVoidPtr, (void *)&pushargs );
 
@@ -655,10 +655,10 @@ HYPRE_StructDiagScalePush(
    int i;
    int  returnvalue;
 
-   pushargs.solver = (HYPRE_StructSolverArray *)&solver;
-   pushargs.HA = (HYPRE_StructMatrixArray *)&HA;
-   pushargs.Hy = (HYPRE_StructVectorArray *)&Hy;
-   pushargs.Hx = (HYPRE_StructVectorArray *)&Hx;
+   pushargs.solver = (HYPRE_StructSolverArray *)solver;
+   pushargs.HA = (HYPRE_StructMatrixArray *)HA;
+   pushargs.Hy = (HYPRE_StructVectorArray *)Hy;
+   pushargs.Hx = (HYPRE_StructVectorArray *)Hx;
    for (i = 0; i < hypre_NumThreads; i++)
       hypre_work_put( HYPRE_StructDiagScaleVoidPtr, (void *)&pushargs );
 
@@ -744,7 +744,7 @@ HYPRE_StructSMGFinalizePush(
    int i;
    int  returnvalue;
 
-   pushargs.solver = (HYPRE_StructSolverArray *)&solver;
+   pushargs.solver = (HYPRE_StructSolverArray *)solver;
    for (i = 0; i < hypre_NumThreads; i++)
       hypre_work_put( HYPRE_StructSMGFinalizeVoidPtr, (void *)&pushargs );
 
@@ -794,10 +794,10 @@ HYPRE_StructSMGSetupPush(
    int i;
    int  returnvalue;
 
-   pushargs.solver = (HYPRE_StructSolverArray *)&solver;
-   pushargs.A = (HYPRE_StructMatrixArray *)&A;
-   pushargs.b = (HYPRE_StructVectorArray *)&b;
-   pushargs.x = (HYPRE_StructVectorArray *)&x;
+   pushargs.solver = (HYPRE_StructSolverArray *)solver;
+   pushargs.A = (HYPRE_StructMatrixArray *)A;
+   pushargs.b = (HYPRE_StructVectorArray *)b;
+   pushargs.x = (HYPRE_StructVectorArray *)x;
    for (i = 0; i < hypre_NumThreads; i++)
       hypre_work_put( HYPRE_StructSMGSetupVoidPtr, (void *)&pushargs );
 
@@ -847,10 +847,10 @@ HYPRE_StructSMGSolvePush(
    int i;
    int  returnvalue;
 
-   pushargs.solver = (HYPRE_StructSolverArray *)&solver;
-   pushargs.A = (HYPRE_StructMatrixArray *)&A;
-   pushargs.b = (HYPRE_StructVectorArray *)&b;
-   pushargs.x = (HYPRE_StructVectorArray *)&x;
+   pushargs.solver = (HYPRE_StructSolverArray *)solver;
+   pushargs.A = (HYPRE_StructMatrixArray *)A;
+   pushargs.b = (HYPRE_StructVectorArray *)b;
+   pushargs.x = (HYPRE_StructVectorArray *)x;
    for (i = 0; i < hypre_NumThreads; i++)
       hypre_work_put( HYPRE_StructSMGSolveVoidPtr, (void *)&pushargs );
 
@@ -894,7 +894,7 @@ HYPRE_StructSMGSetMemoryUsePush(
    int i;
    int  returnvalue;
 
-   pushargs.solver = (HYPRE_StructSolverArray *)&solver;
+   pushargs.solver = (HYPRE_StructSolverArray *)solver;
    pushargs.memory_use = memory_use;
    for (i = 0; i < hypre_NumThreads; i++)
       hypre_work_put( HYPRE_StructSMGSetMemoryUseVoidPtr, (void *)&pushargs );
@@ -939,7 +939,7 @@ HYPRE_StructSMGSetTolPush(
    int i;
    int  returnvalue;
 
-   pushargs.solver = (HYPRE_StructSolverArray *)&solver;
+   pushargs.solver = (HYPRE_StructSolverArray *)solver;
    pushargs.tol = tol;
    for (i = 0; i < hypre_NumThreads; i++)
       hypre_work_put( HYPRE_StructSMGSetTolVoidPtr, (void *)&pushargs );
@@ -984,7 +984,7 @@ HYPRE_StructSMGSetMaxIterPush(
    int i;
    int  returnvalue;
 
-   pushargs.solver = (HYPRE_StructSolverArray *)&solver;
+   pushargs.solver = (HYPRE_StructSolverArray *)solver;
    pushargs.max_iter = max_iter;
    for (i = 0; i < hypre_NumThreads; i++)
       hypre_work_put( HYPRE_StructSMGSetMaxIterVoidPtr, (void *)&pushargs );
@@ -1029,7 +1029,7 @@ HYPRE_StructSMGSetRelChangePush(
    int i;
    int  returnvalue;
 
-   pushargs.solver = (HYPRE_StructSolverArray *)&solver;
+   pushargs.solver = (HYPRE_StructSolverArray *)solver;
    pushargs.rel_change = rel_change;
    for (i = 0; i < hypre_NumThreads; i++)
       hypre_work_put( HYPRE_StructSMGSetRelChangeVoidPtr, (void *)&pushargs );
@@ -1071,7 +1071,7 @@ HYPRE_StructSMGSetZeroGuessPush(
    int i;
    int  returnvalue;
 
-   pushargs.solver = (HYPRE_StructSolverArray *)&solver;
+   pushargs.solver = (HYPRE_StructSolverArray *)solver;
    for (i = 0; i < hypre_NumThreads; i++)
       hypre_work_put( HYPRE_StructSMGSetZeroGuessVoidPtr, (void *)&pushargs );
 
@@ -1115,7 +1115,7 @@ HYPRE_StructSMGSetNumPreRelaxPush(
    int i;
    int  returnvalue;
 
-   pushargs.solver = (HYPRE_StructSolverArray *)&solver;
+   pushargs.solver = (HYPRE_StructSolverArray *)solver;
    pushargs.num_pre_relax = num_pre_relax;
    for (i = 0; i < hypre_NumThreads; i++)
       hypre_work_put( HYPRE_StructSMGSetNumPreRelaxVoidPtr, (void *)&pushargs );
@@ -1160,7 +1160,7 @@ HYPRE_StructSMGSetNumPostRelaxPush(
    int i;
    int  returnvalue;
 
-   pushargs.solver = (HYPRE_StructSolverArray *)&solver;
+   pushargs.solver = (HYPRE_StructSolverArray *)solver;
    pushargs.num_post_relax = num_post_relax;
    for (i = 0; i < hypre_NumThreads; i++)
       hypre_work_put( HYPRE_StructSMGSetNumPostRelaxVoidPtr, (void *)&pushargs );
@@ -1205,7 +1205,7 @@ HYPRE_StructSMGSetLoggingPush(
    int i;
    int  returnvalue;
 
-   pushargs.solver = (HYPRE_StructSolverArray *)&solver;
+   pushargs.solver = (HYPRE_StructSolverArray *)solver;
    pushargs.logging = logging;
    for (i = 0; i < hypre_NumThreads; i++)
       hypre_work_put( HYPRE_StructSMGSetLoggingVoidPtr, (void *)&pushargs );
@@ -1250,7 +1250,7 @@ HYPRE_StructSMGGetNumIterationsPush(
    int i;
    int  returnvalue;
 
-   pushargs.solver = (HYPRE_StructSolverArray *)&solver;
+   pushargs.solver = (HYPRE_StructSolverArray *)solver;
    pushargs.num_iterations = num_iterations;
    for (i = 0; i < hypre_NumThreads; i++)
       hypre_work_put( HYPRE_StructSMGGetNumIterationsVoidPtr, (void *)&pushargs );
@@ -1295,7 +1295,7 @@ HYPRE_StructSMGGetFinalRelativeResidualNormPush(
    int i;
    int  returnvalue;
 
-   pushargs.solver = (HYPRE_StructSolverArray *)&solver;
+   pushargs.solver = (HYPRE_StructSolverArray *)solver;
    pushargs.norm = norm;
    for (i = 0; i < hypre_NumThreads; i++)
       hypre_work_put( HYPRE_StructSMGGetFinalRelativeResidualNormVoidPtr, (void *)&pushargs );
