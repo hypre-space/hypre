@@ -111,7 +111,7 @@ parse_arguments () {
       b) confbuildtest $OPTARG  " "             "beta"      0 0 0 0 0 1 1;;
       c) build $Build "all++"   "all++"         "test";;
       D) DEBUG_MODE="yes";;
-      d) build $Build " "       "docs"          "docs";;
+      d) build $Build "install" "docs"          "docs";;
       f) build $Build "all77"   "all77"         "test";;
       h) usage; exit 2;;
       i) confbuildtest 1        "--enable-debug" "debug"    0 0 0 0 1 0 1
