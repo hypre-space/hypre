@@ -5,6 +5,7 @@
 % output file.
 % 
 % Author: Peter Brown, 12-17-97
+% 12-18-97  PNB  Added capability to write out vectors
 
 % Set problem
 iprob = 1;
@@ -77,8 +78,8 @@ end
 % Modify matrix to make it nonsingular
 A = A + 0.001*speye(size(A));
 
-% Open output file
-fid = fopen('test.out', 'wt');
+% Open output file for matrix
+fid = fopen('test_matrix.out', 'wt');
 if (fid == -1),
   printf('Error: cannot open input file %s\n', filename);
   return;
@@ -86,3 +87,30 @@ end
 
 % Write the matrix to the file.
 ierr = write_matrix(fid,A,symmetric,dim,grid,stencil);
+
+% Open output file for vector
+fid = fopen('test_vector_in.out', 'wt');
+if (fid == -1),
+  printf('Error: cannot open input file %s\n', filename);
+  return;
+end
+
+% Load input vector.
+v = ones(nx*ny*nz,1);
+
+% Write the vector to the file.
+ierr = write_vector(fid,v,dim,grid);
+
+% Calculate output vector
+w = A*v; % Matrix vector product
+% w = A\v; % Matrix solve
+
+% Open output file for vector
+fid = fopen('test_vector_out.out', 'wt');
+if (fid == -1),
+  printf('Error: cannot open input file %s\n', filename);
+  return;
+end
+
+% Write the vector to the file.
+ierr = write_vector(fid,w,dim,grid);
