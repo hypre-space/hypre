@@ -1995,7 +1995,7 @@ int MLI_Utils_HyprePCGSolve( CMLI *cmli, HYPRE_Matrix A,
                              HYPRE_Vector b, HYPRE_Vector x )
 {
    int          numIterations, maxIter=500, mypid;
-   double       tol=1.0e-6, norm, setupTime, solveTime;
+   double       tol=1.0e-8, norm, setupTime, solveTime;
    MPI_Comm     mpiComm;
    HYPRE_Solver pcgSolver, pcgPrecond;
    HYPRE_ParCSRMatrix hypreA;
