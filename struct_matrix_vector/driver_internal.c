@@ -21,7 +21,7 @@ main( int   argc,
       char *argv[] )
 {
    MPI_Comm           *comm;
-   int                 matrix_num_ghost[6] = { 1, 1, 0, 0, 0, 0};
+   int                 matrix_num_ghost[6] = { 0, 0, 0, 0, 0, 0};
    int                 vector_num_ghost[6] = { 1, 1, 1, 1, 1, 1};
                      
    zzz_StructMatrix   *matrix;
