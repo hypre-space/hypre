@@ -37,11 +37,11 @@ host_triplet = @host@
 subdir = test/TEST_ij_es 
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in 
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4 
-am__aclocal_m4_deps = $(top_srcdir)/config/acinclude.m4 \ 
-	$(top_srcdir)/config/acx_blas.m4 \ 
-	$(top_srcdir)/config/acx_lapack.m4 \ 
+am__aclocal_m4_deps = $(top_srcdir)/config/acinclude.m4 \
+	$(top_srcdir)/config/acx_blas.m4 \
+	$(top_srcdir)/config/acx_lapack.m4 \
 	$(top_srcdir)/config/acx_misc.m4 $(top_srcdir)/configure.ac 
-am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \ 
+am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4) 
 mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs 
 CONFIG_HEADER = $(top_builddir)/HYPRE_config.h 
@@ -184,14 +184,14 @@ sysconfdir = @sysconfdir@
 target_alias = @target_alias@ 
  
 # 
-FILES = \ 
- default.jobs\ 
- default.sh\ 
- lobpcg.jobs\ 
- lobpcg.sh\ 
- lobpcg2.jobs\ 
- lobpcg2.sh\ 
- solvers.jobs\ 
+FILES = \
+ default.jobs\
+ default.sh\
+ lobpcg.jobs\
+ lobpcg.sh\
+ lobpcg2.jobs\
+ lobpcg2.sh\
+ solvers.jobs\
  solvers.sh 
  
 EXTRA_DIST = $(FILES) 
@@ -199,25 +199,25 @@ all: all-am
  
 .SUFFIXES: 
 $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am  $(am__configure_deps) 
-	@for dep in $?; do \ 
-	  case '$(am__configure_deps)' in \ 
-	    *$$dep*) \ 
-	      cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh \ 
-		&& exit 0; \ 
-	      exit 1;; \ 
-	  esac; \ 
-	done; \ 
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign  --ignore-deps test/TEST_ij_es/Makefile'; \ 
-	cd $(top_srcdir) && \ 
+	@for dep in $?; do \
+	  case '$(am__configure_deps)' in \
+	    *$$dep*) \
+	      cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh \
+		&& exit 0; \
+	      exit 1;; \
+	  esac; \
+	done; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign  --ignore-deps test/TEST_ij_es/Makefile'; \
+	cd $(top_srcdir) && \
 	  $(AUTOMAKE) --foreign  --ignore-deps test/TEST_ij_es/Makefile 
 .PRECIOUS: Makefile 
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status 
-	@case '$?' in \ 
-	  *config.status*) \ 
-	    cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh;; \ 
-	  *) \ 
-	    echo ' cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@ $(am__depfiles_maybe)'; \ 
-	    cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@ $(am__depfiles_maybe);; \ 
+	@case '$?' in \
+	  *config.status*) \
+	    cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh;; \
+	  *) \
+	    echo ' cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@ $(am__depfiles_maybe)'; \
+	    cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@ $(am__depfiles_maybe);; \
 	esac; 
  
 $(top_builddir)/config.status: $(top_srcdir)/configure $(CONFIG_STATUS_DEPENDENCIES) 
@@ -245,31 +245,31 @@ CTAGS:
  
  
 distdir: $(DISTFILES) 
-	@srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`; \ 
-	topsrcdirstrip=`echo "$(top_srcdir)" | sed 's|.|.|g'`; \ 
-	list='$(DISTFILES)'; for file in $$list; do \ 
-	  case $$file in \ 
-	    $(srcdir)/*) file=`echo "$$file" | sed "s|^$$srcdirstrip/||"`;; \ 
-	    $(top_srcdir)/*) file=`echo "$$file" | sed "s|^$$topsrcdirstrip/|$(top_builddir)/|"`;; \ 
-	  esac; \ 
-	  if test -f $$file || test -d $$file; then d=.; else d=$(srcdir); fi; \ 
-	  dir=`echo "$$file" | sed -e 's,/[^/]*$$,,'`; \ 
-	  if test "$$dir" != "$$file" && test "$$dir" != "."; then \ 
-	    dir="/$$dir"; \ 
-	    $(mkdir_p) "$(distdir)$$dir"; \ 
-	  else \ 
-	    dir=''; \ 
-	  fi; \ 
-	  if test -d $$d/$$file; then \ 
-	    if test -d $(srcdir)/$$file && test $$d != $(srcdir); then \ 
-	      cp -pR $(srcdir)/$$file $(distdir)$$dir || exit 1; \ 
-	    fi; \ 
-	    cp -pR $$d/$$file $(distdir)$$dir || exit 1; \ 
-	  else \ 
-	    test -f $(distdir)/$$file \ 
-	    || cp -p $$d/$$file $(distdir)/$$file \ 
-	    || exit 1; \ 
-	  fi; \ 
+	@srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`; \
+	topsrcdirstrip=`echo "$(top_srcdir)" | sed 's|.|.|g'`; \
+	list='$(DISTFILES)'; for file in $$list; do \
+	  case $$file in \
+	    $(srcdir)/*) file=`echo "$$file" | sed "s|^$$srcdirstrip/||"`;; \
+	    $(top_srcdir)/*) file=`echo "$$file" | sed "s|^$$topsrcdirstrip/|$(top_builddir)/|"`;; \
+	  esac; \
+	  if test -f $$file || test -d $$file; then d=.; else d=$(srcdir); fi; \
+	  dir=`echo "$$file" | sed -e 's,/[^/]*$$,,'`; \
+	  if test "$$dir" != "$$file" && test "$$dir" != "."; then \
+	    dir="/$$dir"; \
+	    $(mkdir_p) "$(distdir)$$dir"; \
+	  else \
+	    dir=''; \
+	  fi; \
+	  if test -d $$d/$$file; then \
+	    if test -d $(srcdir)/$$file && test $$d != $(srcdir); then \
+	      cp -pR $(srcdir)/$$file $(distdir)$$dir || exit 1; \
+	    fi; \
+	    cp -pR $$d/$$file $(distdir)$$dir || exit 1; \
+	  else \
+	    test -f $(distdir)/$$file \
+	    || cp -p $$d/$$file $(distdir)/$$file \
+	    || exit 1; \
+	  fi; \
 	done 
 check-am: all-am 
 check: check-am 
@@ -285,9 +285,9 @@ install-am: all-am
  
 installcheck: installcheck-am 
 install-strip: 
-	$(MAKE) $(AM_MAKEFLAGS) INSTALL_PROGRAM="$(INSTALL_STRIP_PROGRAM)" \ 
-	  install_sh_PROGRAM="$(INSTALL_STRIP_PROGRAM)" INSTALL_STRIP_FLAG=-s \ 
-	  `test -z '$(STRIP)' || \ 
+	$(MAKE) $(AM_MAKEFLAGS) INSTALL_PROGRAM="$(INSTALL_STRIP_PROGRAM)" \
+	  install_sh_PROGRAM="$(INSTALL_STRIP_PROGRAM)" INSTALL_STRIP_FLAG=-s \
+	  `test -z '$(STRIP)' || \
 	    echo "INSTALL_PROGRAM_ENV=STRIPPROG='$(STRIP)'"` install 
 mostlyclean-generic: 
  
@@ -345,14 +345,14 @@ ps-am:
  
 uninstall-am: 
  
-.PHONY: all all-am check check-am clean clean-generic clean-libtool \ 
-	distclean distclean-generic distclean-libtool distdir dvi \ 
-	dvi-am html html-am info info-am install install-am \ 
-	install-data install-data-am install-exec install-exec-am \ 
-	install-info install-info-am install-man install-strip \ 
-	installcheck installcheck-am installdirs maintainer-clean \ 
-	maintainer-clean-generic mostlyclean mostlyclean-generic \ 
-	mostlyclean-libtool pdf pdf-am ps ps-am uninstall uninstall-am \ 
+.PHONY: all all-am check check-am clean clean-generic clean-libtool \
+	distclean distclean-generic distclean-libtool distdir dvi \
+	dvi-am html html-am info info-am install install-am \
+	install-data install-data-am install-exec install-exec-am \
+	install-info install-info-am install-man install-strip \
+	installcheck installcheck-am installdirs maintainer-clean \
+	maintainer-clean-generic mostlyclean mostlyclean-generic \
+	mostlyclean-libtool pdf pdf-am ps ps-am uninstall uninstall-am \
 	uninstall-info-am 
  
 # Tell versions [3.59,3.63) of GNU make to not export all variables. 

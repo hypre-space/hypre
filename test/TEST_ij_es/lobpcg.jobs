@@ -15,8 +15,8 @@
 #    
 #============================================================================= 
  
-mpirun -np 4 ./ij_es -lobpcg -veye 1 > lobpcg.out.0 
-mpirun -np 4 ./ij_es -lobpcg -veye 2 > lobpcg.out.1 
-mpirun -np 4 ./ij_es -lobpcg -veye 3 > lobpcg.out.2 
-mpirun -np 4 ./ij_es -lobpcg -veye 4 > lobpcg.out.3 
+mpirun -np 4 ./ij_es -lobpcg -veye 1 > lobpcg.out.0
+mpirun -np 4 ./ij_es -lobpcg -veye 2 > lobpcg.out.1
+mpirun -np 4 ./ij_es -lobpcg -veye 3 > lobpcg.out.2
+mpirun -np 4 ./ij_es -lobpcg -veye 4 > lobpcg.out.3
  

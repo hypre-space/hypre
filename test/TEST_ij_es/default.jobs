@@ -14,9 +14,9 @@
 # ij: Run default case, weigthed Jacobi, BoomerAMG 
 #============================================================================= 
  
-mpirun -np 1 ./ij_es -solver 1 -cljp -rlx 0 -lobpcg  -veye 1 > default.out.0 
+mpirun -np 1 ./ij_es -solver 1 -cljp -rlx 0 -lobpcg  -veye 1 > default.out.0
  
-mpirun -np 2 ./ij_es -solver 1 -P 1 1 2 -cljp1 -rlx 0 -lobpcg  -veye 1 > default.out.1 
+mpirun -np 2 ./ij_es -solver 1 -P 1 1 2 -cljp1 -rlx 0 -lobpcg  -veye 1 > default.out.1
  
-mpirun -np 3 ./ij_es -solver 1 -P 1 1 3 -cljp1 -rlx 0 -lobpcg  -veye 1 > default.out.2 
+mpirun -np 3 ./ij_es -solver 1 -P 1 1 3 -cljp1 -rlx 0 -lobpcg  -veye 1 > default.out.2
  
