@@ -260,6 +260,15 @@ hypre_GMRESSolve(void  *gmres_vdata,
 
    (*(gmres_functions->Matvec))(matvec_data,-1.0, A, x, 1.0, p[0]);
    r_norm = sqrt((*(gmres_functions->InnerProd))(p[0],p[0]));
+   if ( r_norm!=r_norm ) {
+      /* ...NaN's in input will generally make r_norm a NaN.  This test
+         for  rnorm==NaN  works on all IEEE-compliant compilers/machines,
+         c.f. page 8 of "Lecture Notes on the Status of IEEE 754" by W. Kahan,
+         May 31, 1996.  Currently (July 2002) this paper may be found at
+         http://HTTP.CS.Berkeley.EDU/~wkahan/ieee754status/IEEE754.PDF */
+      ierr += 101;
+      return ierr;
+   }
    b_norm = sqrt((*(gmres_functions->InnerProd))(b,b));
    if (logging > 0)
    {
