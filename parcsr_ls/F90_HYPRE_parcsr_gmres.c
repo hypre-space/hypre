@@ -155,6 +155,7 @@ hypre_F90_IFACE(hypre_parcsrgmressetprecond)( long int *solver,
               ( HYPRE_ParCSRGMRESSetPrecond( (HYPRE_Solver) *solver,
                                              HYPRE_ParCSRDiagScale,
                                              HYPRE_ParCSRDiagScaleSetup,
+                                             NULL,
                                              NULL                         ) );
    }
    else if (*precond_id == 2)
@@ -163,6 +164,7 @@ hypre_F90_IFACE(hypre_parcsrgmressetprecond)( long int *solver,
    *ierr = (int) ( HYPRE_ParCSRGMRESSetPrecond( (HYPRE_Solver) *solver,
                                                 HYPRE_ParAMGSolve,
                                                 HYPRE_ParAMGSetup,
+                                                HYPRE_ParAMGReinit,
                                                 (void *)       *precond_solver ) );
    }
    else if (*precond_id == 3)
@@ -171,6 +173,7 @@ hypre_F90_IFACE(hypre_parcsrgmressetprecond)( long int *solver,
               ( HYPRE_ParCSRGMRESSetPrecond( (HYPRE_Solver) *solver,
                                              HYPRE_ParCSRPilutSolve,
                                              HYPRE_ParCSRPilutSetup,
+                                             NULL,
                                              (void *)       *precond_solver ) );
    }
    else if (*precond_id == 4)
@@ -179,12 +182,26 @@ hypre_F90_IFACE(hypre_parcsrgmressetprecond)( long int *solver,
               ( HYPRE_ParCSRGMRESSetPrecond( (HYPRE_Solver) *solver,
                                              HYPRE_ParCSRParaSailsSolve,
                                              HYPRE_ParCSRParaSailsSetup,
+                                             NULL,
                                              (void *)       *precond_solver ) );
    }
    else
    {
       *ierr = -1;
    }
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_ParCSRGMRESReinitPrecond
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_parcsrgmresreinitprecond)( long int *solver,
+                                                 int      *ierr          )
+{
+      *ierr = (int)
+              ( HYPRE_ParCSRGMRESReinitPrecond( (HYPRE_Solver) *solver ) );
+   
 }
 
 /*--------------------------------------------------------------------------
