@@ -88,7 +88,6 @@ int MLI_Solver_SeqSuperLU::setup( MLI_Matrix *Amat )
    hypre_ParCSRMatrix   *hypreA;
    hypre_CSRMatrix      *ADiag;
    SuperMatrix          AC, superLU_Amat;
-   extern SuperLUStat_t SuperLUStat;
 
    /* ---------------------------------------------------------------
     * fetch matrix

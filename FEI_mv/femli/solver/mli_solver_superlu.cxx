@@ -61,7 +61,6 @@ int MLI_Solver_SuperLU::setup( MLI_Matrix *Amat )
    MPI_Comm mpiComm;
    hypre_ParCSRMatrix   *hypreA;
    SuperMatrix          AC;
-   extern SuperLUStat_t SuperLUStat;
 
    /* ---------------------------------------------------------------
     * fetch matrix
