@@ -46,7 +46,7 @@ int Funct_Solve_T(HYPRE_ParVector x,HYPRE_ParVector y);
 
 /* misc lobpcg function prototypes */
 int Get_Lobpcg_Options(int argc,char **args,lobpcg_options *opts);
-Matx *Mat_Alloc1();
+Matx *Mat_Alloc1(void);
 int Mat_Size(Matx *A,int rc);
 int Mat_Size_Mtx(char *file_name,int rc);
 void HYPRE_Load_IJAMatrix2(HYPRE_ParCSRMatrix  *A_ptr,
