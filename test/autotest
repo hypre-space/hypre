@@ -106,6 +106,10 @@ cd $HYPRE_AUTOTEST_DIR/linear_solvers/test
 $MAKE beta++ 1> $0.beta++.log 2> $0.beta++.err
 echo "$HYPRE_BETA_EMAIL" > $0.beta++.err.email 
 
+cd $HYPRE_AUTOTEST_DIR/linear_solvers/test
+$MAKE betaCXX 1> $0.betaCXX.log 2> $0.betaCXX.err
+echo "$HYPRE_BETA_EMAIL" > $0.betaCXX.err.email 
+
 #==============================
 # Run test suites
 #==============================

@@ -15,6 +15,7 @@
 TEST_DRIVERS="\
  struct_linear_solvers\
  IJ_linear_solvers\
+ fei_linear_solvers\
 "
 
 #===========================================================================
