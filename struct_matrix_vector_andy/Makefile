@@ -38,21 +38,6 @@ HYPREFILES =\
 
 FILES = $(HYPREFILES) $(LOCALFILES)
 
-#Automatically generate prototypes when necessary
-HYPRE_protos.h: $(HYPREFILES)
-	mkproto HYPRE*.c > HYPRE_protos.h
-
-hypre_protos.h: $(FILES)
-	mkproto hypre*.c > hypre_protos.h
-
-internal_protos.h: $(FILES)
-	mkproto *.c > internal_protos.h
-
-PROTOS =\
- HYPRE_protos.h\
- hypre_protos.h\
- internal_protos.h
- 
 OBJS = ${FILES:.c=.o}
 
 # Declarations for this installation site
@@ -64,7 +49,7 @@ include ../bmakes/base
 
 driver: driver.o lib
 	@echo  "Linking" $@ "... "
-	${CC} -o driver driver.o ${LFLAGS} 
+	${LD} -o driver driver.o ${LFLAGS} 
 
 link:
 	rm driver
