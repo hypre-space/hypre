@@ -176,12 +176,7 @@ zzz_SMGSolve( void             *smg_vdata,
          zzz_SMGRelax(post_relax_data_l[l], b_l[l], x_l[l]);
       }
 
-      (smg_data -> num_iterations) = i;
-   }
-
-   if (i == max_iter)
-   {
-      (smg_data -> num_iterations) = max_iter;
+      (smg_data -> num_iterations) = (i + 1);
    }
 
    return ierr;
