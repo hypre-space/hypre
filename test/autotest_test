@@ -222,7 +222,9 @@ confbuildtest ()
 {
 BuildOpt=$1	 ConfigOption=$2	 MessageStr=$3
 StructOpt=$4	 SstructOpt=$5	 IJOpt=$6	 FeiOpt=$7
-MakeOpt=$8	 BetaOpt=$9	 NoFeiOpt=${10}
+MakeOpt=$8	 BetaOpt=$9
+shift
+NoFeiOpt=$9
 if [ ${BuildOpt} -ne $Skip ]
 then
   seconds; TIME=$SECS
