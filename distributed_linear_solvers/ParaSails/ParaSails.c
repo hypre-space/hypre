@@ -1349,8 +1349,8 @@ void ParaSailsApply(ParaSails *ps, double *u, double *v)
 {
     if (ps->symmetric)
     {
-        MatrixMatvecTrans(ps->M, v, v); /* do the second mult in place */
         MatrixMatvec(ps->M, u, v);      /* need to preserve u */
+        MatrixMatvecTrans(ps->M, v, v); /* do the second mult in place */
     }
     else
     {
