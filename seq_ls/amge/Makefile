@@ -13,13 +13,12 @@
 
 srcdir = .
  
-#CC = purify cc
-CC = mpicc
+CC =  mpicc
 
-C_COMPILE_FLAGS= -g  
-CXX_COMPILE_FLAGS= -g  
-F77_COMPILE_FLAGS=   
-CINCLUDES=  -I/usr/local/mpi/mpich-1.2.0//include
+C_COMPILE_FLAGS=  -g
+CXX_COMPILE_FLAGS=  -g
+F77_COMPILE_FLAGS=  -g -silent 
+CINCLUDES= 
 CDEFS =
 
 CFLAGS =\
@@ -33,7 +32,7 @@ CFLAGS =\
  
 RANLIB= ranlib
  
-MPILIBFLAGS =  -L/usr/local/mpi/mpich-1.2.0//lib  -lmpich -lsocket -lnsl  
+MPILIBFLAGS =   
 LIBFLAGS =   -lm
 LDLIBFLAGS =  
  
@@ -47,7 +46,6 @@ LFLAGS =\
  -lHYPRE_utilities\
  ${MPILIBFLAGS} ${LIBFLAGS} ${LDLIBFLAGS}
  
-EISPACK = /home/panayot/eispack/eispack/rs.o /home/panayot/eispack/eispack/tql1.o /home/panayot/eispack/eispack/tql2.o /home/panayot/eispack/eispack/tred1.o /home/panayot/eispack/eispack/tred2.o /home/panayot/eispack/eispack/pythag.o
 
 HEADERS =\
  headers.h\
@@ -55,10 +53,12 @@ HEADERS =\
  HYPRE_amge.h
 
 FILES =\
- driver_spectral_amge_triangles.c\
+ driver_amge.c\
  amge_initial_graphs.c\
  amge_topology_setup.c\
- amge_spectral_interpolation_setup.c\
+ amge_coarsenode_setup.c\
+ amge_interpolation_setup.c\
+ amge_smoother_setup.c\
  matrix_topology.c\
  AMGe_matrix_topology.c\
  amge_coarsen_topology.c\
@@ -68,7 +68,7 @@ FILES =\
  matrix_matrix_t_product.c\
  agglomerate.c\
  coarse_node_selection.c\
- build_spectral_amge_interpolation.c\
+ build_interpolation.c\
  Schur_complement.c\
  create_element_matrices_dofs.c\
  domain_assemble.c\
@@ -78,12 +78,12 @@ FILES =\
  boundarysurfaces.c\
  assemble.c\
  rap.c\
+ ILU_factor.c\
  compute_dof_on_boundary.c\
- sym_GS_solve.c\
- sym_GS_pcg.c\
- V_cycle_GS_smoothing.c\
- V_cycle_GS_pcg.c\
- matrix_inverse.c\
+ ILU_pcg.c\
+ ILU_solve.c\
+ V_cycle_ILU_smoothing.c\
+ V_cycle_ILU_pcg.c\
  graphics_2d.c\
  xgraph0.c
 
@@ -113,9 +113,9 @@ veryclean: clean
 # Rules
 ##################################################################
 
-driver: driver_spectral_amge_triangles.o libHYPRE_amge_ls.a
+driver: driver_amge.o libHYPRE_amge_ls.a
 	@echo  "Linking" $@ "... "
-	${CC} -o driver driver_spectral_amge_triangles.o ${EISPACK} ${LFLAGS}
+	${CC} -o driver driver_amge.o ${LFLAGS}
 
 
 

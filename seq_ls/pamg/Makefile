@@ -16,18 +16,20 @@ srcdir = .
 CC =  mpicc
 
 C_COMPILE_FLAGS=  -g
-CXX_COMPILE_FLAGS=-DNOFEI  -g
+CXX_COMPILE_FLAGS=  -g
 F77_COMPILE_FLAGS=  -g -silent 
+LD_LINK_FLAGS=
 CINCLUDES= 
 CDEFS =
 
 CFLAGS =\
  ${C_COMPILE_FLAGS}\
+ -I../..\
  -I$(srcdir)\
  -I$(srcdir)/../..\
  -I$(srcdir)/../../utilities\
  -I$(srcdir)/../../krylov\
- -I$(srcdir)/../../seq_matrix_vector\
+ -I$(srcdir)/../../seq_mv\
  ${CINCLUDES}\
  ${CDEFS}
  
@@ -38,8 +40,9 @@ LIBFLAGS =   -lm
 LDLIBFLAGS =  
  
 LFLAGS =\
+ ${LD_LINK_FLAGS}\
  -L.\
- -L../../seq_matrix_vector\
+ -L../../seq_mv\
  -L../../utilities\
  -lHYPRE_amg_ls\
  -lHYPRE_seq_mv\
