@@ -75,7 +75,7 @@ class HYPRE_LSI_BlockP
    int     setSchemeBlockInverse()    {scheme_ = HYPRE_INCFLOW_BAI;   return 0;}
    int     setLumpedMasses( int length, double *Mdiag );
    int     setup(HYPRE_ParCSRMatrix Amat);
-   int     solve( HYPRE_ParVector xvec, HYPRE_ParVector fvec );
+   int     solve( HYPRE_ParVector fvec, HYPRE_ParVector xvec );
 
  private:
    int     computeBlockInfo();
@@ -84,6 +84,8 @@ class HYPRE_LSI_BlockP
                         HYPRE_IJVector f1, HYPRE_IJVector f2 );
    int     solveBISolve(HYPRE_IJVector x1, HYPRE_IJVector x2,
                         HYPRE_IJVector f1, HYPRE_IJVector f2 );
+   int     solveUsingSuperLU(HYPRE_IJMatrix Amat, HYPRE_IJVector f,
+                             HYPRE_IJVector x );
 };
 
 #endif
