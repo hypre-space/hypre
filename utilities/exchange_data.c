@@ -159,7 +159,7 @@ int hypre_DataExchangeList(int num_contacts,
 
    int  overhead;
  
-   int  max_response_size_bytes = max_response_size*response_obj_size;
+   int  max_response_size_bytes;
    
    int  max_response_total_bytes;
    
@@ -187,7 +187,7 @@ int hypre_DataExchangeList(int num_contacts,
 
    const int contact_tag = 1000*rnum;
    const int response_tag = 1002*rnum;
-   const int term_tag = 1004*rnum;  
+   const int term_tag =  1004*rnum;  
    const int post_tag = 1006*rnum;
    
 
@@ -195,16 +195,23 @@ int hypre_DataExchangeList(int num_contacts,
    MPI_Comm_rank(comm, &myid );
 
 
+   /* ---------initializations ----------------*/ 
+
+
+
    /*if the response_obj_size or contact_obj_size is 0, set to sizeof(int) */
    if (!response_obj_size) response_obj_size = sizeof(int);
    if (!contact_obj_size) contact_obj_size = sizeof(int);
 
-
-                    
+   max_response_size_bytes = max_response_size*response_obj_size;
+ 
+                   
    /* pre-allocate the max space for responding to contacts */
    overhead = ceil((double) sizeof(int)/response_obj_size); /*for appending an integer*/
- 
+   
    max_response_total_bytes = (max_response_size+overhead)*response_obj_size;
+
+  
 
    response_obj->send_response_overhead = overhead;
    response_obj->send_response_storage = max_response_size;
