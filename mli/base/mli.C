@@ -66,6 +66,10 @@ MLI::~MLI()
    delete [] one_levels;
    if ( coarse_solver != NULL ) delete coarse_solver;
    if ( method_ptr    != NULL ) delete method_ptr;
+cout << "method_ptr in MLI destructor\n";
+cout.flush();
+if ( method_ptr    != NULL ) 
+printf("method_ptr in MLI destructor not nULL\n");
 }
 
 /*****************************************************************************
@@ -157,7 +161,8 @@ int MLI::setCoarseSolve( MLI_Solver *solver )
    cout << "MLI::setCoarseSolve" << endl;
    cout.flush();
 #endif
-   coarse_solver = solver; 
+   if ( ! assembled ) coarse_solver = solver; 
+   else               one_levels[coarsest_level]->setCoarseSolve(solver);
    return 0;
 }
 
@@ -216,6 +221,7 @@ int MLI::setMethod( MLI_Method *object )
    cout << "MLI::setMethod = " << object->getName() << endl;
    cout.flush();
 #endif
+printf("set method_ptr in MLI \n");
    method_ptr = object;
    return 0;
 }
@@ -228,11 +234,18 @@ int MLI::setup()
 {
    int nlevels, status=0;
 
-   curr_iter  = 0;
-   build_time = MLI_Utils_WTime();
-   nlevels    = method_ptr->setup(this);
+   curr_iter      = 0;
+   build_time     = MLI_Utils_WTime();
+   nlevels        = method_ptr->setup(this);
+   coarsest_level = nlevels - 1;
    build_time = MLI_Utils_WTime() - build_time;
    for (int i = 0; i < nlevels; i++) status += one_levels[i]->setup();
+   if ( coarse_solver != NULL ) 
+   {
+      one_levels[coarsest_level]->setCoarseSolve(coarse_solver); 
+      coarse_solver = NULL;
+   }
+   assembled = 1;
    return status;
 }
 
@@ -259,6 +272,30 @@ int MLI::solve( MLI_Vector *sol, MLI_Vector *rhs )
    MLI_Matrix *Amat;
    MLI_Vector *res;
 
+   /*-------------------------------------------------------------------*/
+   /* check for error                                                   */
+   /*-------------------------------------------------------------------*/
+
+   if ( ! assembled )
+   {
+      cout << "MLI::solve ERROR - setup not called yet.\n";
+      exit(1);
+   }
+
+   /*-------------------------------------------------------------------*/
+   /* if coarse solver was set before setup, put it in the coarse level */
+   /*-------------------------------------------------------------------*/
+
+   if ( coarse_solver != NULL ) 
+   {
+      one_levels[coarsest_level]->setCoarseSolve(coarse_solver); 
+      coarse_solver = NULL;
+   }
+
+   /*-------------------------------------------------------------------*/
+   /* compute initial residual norm and convergence tolerance           */
+   /*-------------------------------------------------------------------*/
+
    res   = one_levels[0]->getResidualVector();
    Amat  = one_levels[0]->getAmat();
    Amat->apply( -1.0, sol, 1.0, rhs, res );
@@ -269,6 +306,7 @@ int MLI::solve( MLI_Vector *sol, MLI_Vector *rhs )
    {
       printf("\tMLI Initial norm = %16.8e (%16.8e)\n", norm2, rel_tol);
    }
+
    while ( norm2 > rel_tol && iter < max_iterations ) 
    {
       iter++;
@@ -296,12 +334,12 @@ int MLI::print()
    MPI_Comm_rank(mpi_comm, &mypid);
    if ( mypid == 0 )
    {
-      cout << "\t***************** MLI Information *********************" << endl;
+      cout << "\t***************** MLI Information *********************\n";
       cout << "\t*** max_levels        = " << max_levels << endl;
       cout << "\t*** output level      = " << output_level << endl;
       cout << "\t*** max_iterations    = " << max_iterations << endl;
       cout << "\t*** tolerance         = " << tolerance << endl;
-      cout << "\t*******************************************************" << endl;
+      cout << "\t*******************************************************\n";
       cout.flush();
    }
    return 0;
@@ -318,10 +356,10 @@ int MLI::printTiming()
    MPI_Comm_rank( mpi_comm, &mypid );
    if ( mypid == 0 )
    {
-      cout << "\t***************** MLI Timing Information **************" << endl;
+      cout << "\t***************** MLI Timing Information **************\n";
       cout << "\t*** MLI Build time = " << build_time << " seconds" << endl;
       cout << "\t*** MLI Solve time = " << solve_time << " seconds" << endl;
-      cout << "\t*******************************************************" << endl;
+      cout << "\t*******************************************************\n";
    }
    return 0;
 }
