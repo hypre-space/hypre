@@ -1,0 +1,32 @@
+#!/bin/sh
+#BHEADER***********************************************************************
+# (c) 1999   The Regents of the University of California
+#
+# See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
+# notice, contact person, and disclaimer.
+#
+# $Revision$
+#EHEADER***********************************************************************
+
+#==============================================================================
+# Environment variables
+# NOTE: this should be stripped down to something more minimal
+#==============================================================================
+
+CVSROOT=/home/casc/repository
+export CVSROOT
+
+PATH=/home/casc/bin:\
+/opt/SUNWspro/bin:/usr/ccs/bin:/usr/local/bin:\
+/usr/sbin:/usr/bin:/usr/ucb:\
+/sbin/bin:\
+/usr/local/scripts:\
+/usr/local/mpi/mpich/bin
+export PATH
+
+#==============================================================================
+# Set autotest directory to current directory
+#==============================================================================
+
+HYPRE_AUTOTEST_DIR=`pwd`
+

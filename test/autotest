@@ -8,29 +8,13 @@
 # $Revision$
 #EHEADER***********************************************************************
 
+#==============================================================================
+# This script is the top-level script used to regression test hypre.
+#==============================================================================
+
+. ./autotest_env
+
 MAKE="make -k"
-
-#==============================================================================
-# Environment variables
-# NOTE: this should be stripped down to something more minimal
-#==============================================================================
-
-CVSROOT=/home/casc/repository
-export CVSROOT
-
-PATH=/home/casc/bin:\
-/opt/SUNWspro/bin:/usr/ccs/bin:/usr/local/bin:\
-/usr/sbin:/usr/bin:/usr/ucb:\
-/sbin/bin:\
-/usr/local/scripts:\
-/usr/local/mpi/mpich/bin
-export PATH
-
-#==============================================================================
-# Set autotest directory (assumes CASC cluster)
-#==============================================================================
-
-HYPRE_AUTOTEST_DIR="/home/casc/software/hypre/autotest"
 
 #==============================================================================
 # Email lists
