@@ -1133,13 +1133,15 @@ PrintUsage( char *progname,
       printf("  -P <Px> <Py> <Pz>   : refine and distribute part(s)\n");
       printf("  -b <bx> <by> <bz>   : refine and block part(s)\n");
       printf("  -solver <ID>        : solver ID (default = 39)\n");
-      printf("                         1 - SysPFMG\n");
+      printf("                         3 - SysPFMG\n");
       printf("                        10 - PCG with SMG split precond\n");
       printf("                        11 - PCG with PFMG split precond\n");
+      printf("                        13 - PCG with SysPFMG precond\n");
       printf("                        18 - PCG with diagonal scaling\n");
       printf("                        19 - PCG\n");
       printf("                        20 - PCG with BoomerAMG precond\n");
       printf("                        22 - PCG with ParaSails precond\n");
+      printf("                        28 - PCG with diagonal scaling\n");
       printf("                        30 - GMRES with SMG split precond\n");
       printf("                        31 - GMRES with PFMG split precond\n");
       printf("                        38 - GMRES with diagonal scaling\n");
@@ -1147,6 +1149,7 @@ PrintUsage( char *progname,
       printf("                        40 - GMRES with BoomerAMG precond\n");
       printf("                        41 - GMRES with PILUT precond\n");
       printf("                        42 - GMRES with ParaSails precond\n");
+      printf("                        120 - PCG with hybrid precond\n");
       printf("  -print             : print out the system\n");
       printf("  -v <n_pre> <n_post>: SysPFMG # of pre and post relax\n");
       printf("  -skip <s>          : SysPFMG skip relaxation (0 or 1)\n");
@@ -1493,7 +1496,8 @@ main( int   argc,
    HYPRE_SStructMatrixCreate(MPI_COMM_WORLD, graph, &A);
    /* TODO HYPRE_SStructMatrixSetSymmetric(A, 1); */
    if ( ((solver_id >= 20) && (solver_id < 30)) ||
-        ((solver_id >= 40) && (solver_id < 50)) )
+        ((solver_id >= 40) && (solver_id < 50)) ||
+        (solver_id == 120))
    {
       HYPRE_SStructMatrixSetObjectType(A, HYPRE_PARCSR);
    }
@@ -1600,7 +1604,8 @@ main( int   argc,
 
    HYPRE_SStructMatrixAssemble(A);
    if ( ((solver_id >= 20) && (solver_id < 30)) ||
-        ((solver_id >= 40) && (solver_id < 50)) )
+        ((solver_id >= 40) && (solver_id < 50)) ||
+        (solver_id == 120))
    {
       HYPRE_SStructMatrixGetObject(A, (void **) &par_A);
    }
@@ -1611,7 +1616,8 @@ main( int   argc,
 
    HYPRE_SStructVectorCreate(MPI_COMM_WORLD, grid, &b);
    if ( ((solver_id >= 20) && (solver_id < 30)) ||
-        ((solver_id >= 40) && (solver_id < 50)) )
+        ((solver_id >= 40) && (solver_id < 50)) ||
+        (solver_id == 120))
    {
       HYPRE_SStructVectorSetObjectType(b, HYPRE_PARCSR);
    }
@@ -1637,14 +1643,16 @@ main( int   argc,
    }
    HYPRE_SStructVectorAssemble(b);
    if ( ((solver_id >= 20) && (solver_id < 30)) ||
-        ((solver_id >= 40) && (solver_id < 50)) )
+        ((solver_id >= 40) && (solver_id < 50)) ||
+        (solver_id == 120))
    {
       HYPRE_SStructVectorGetObject(b, (void **) &par_b);
    }
 
    HYPRE_SStructVectorCreate(MPI_COMM_WORLD, grid, &x);
    if ( ((solver_id >= 20) && (solver_id < 30)) ||
-        ((solver_id >= 40) && (solver_id < 50)) )
+        ((solver_id >= 40) && (solver_id < 50)) ||
+        (solver_id == 120))
    {
       HYPRE_SStructVectorSetObjectType(x, HYPRE_PARCSR);
    }
@@ -1669,7 +1677,8 @@ main( int   argc,
    }
    HYPRE_SStructVectorAssemble(x);
    if ( ((solver_id >= 20) && (solver_id < 30)) ||
-        ((solver_id >= 40) && (solver_id < 50)) )
+        ((solver_id >= 40) && (solver_id < 50)) ||
+        (solver_id == 120))
    {
       HYPRE_SStructVectorGetObject(x, (void **) &par_x);
    }
@@ -1775,7 +1784,7 @@ main( int   argc,
     * Solve the system using SysPFMG
     *-----------------------------------------------------------*/
 
-   if (solver_id == 1)
+   if (solver_id == 3)
    {
       time_index = hypre_InitializeTiming("SysPFMG Setup");
       hypre_BeginTiming(time_index);
@@ -1851,6 +1860,25 @@ main( int   argc,
                               (HYPRE_Solver) precond);
       }
 
+      else if (solver_id == 13)
+      {
+         /* use SysPFMG solver as preconditioner */
+         HYPRE_SStructSysPFMGCreate(MPI_COMM_WORLD, &precond);
+         HYPRE_SStructSysPFMGSetMaxIter(precond, 1);
+         HYPRE_SStructSysPFMGSetTol(precond, 0.0);
+         HYPRE_SStructSysPFMGSetZeroGuess(precond);
+         /* weighted Jacobi = 1; red-black GS = 2 */
+         HYPRE_SStructSysPFMGSetRelaxType(precond, 1);
+         HYPRE_SStructSysPFMGSetNumPreRelax(precond, n_pre);
+         HYPRE_SStructSysPFMGSetNumPostRelax(precond, n_post);
+         HYPRE_SStructSysPFMGSetSkipRelax(precond, skip);
+         /*HYPRE_StructPFMGSetDxyz(precond, dxyz);*/
+         HYPRE_PCGSetPrecond( (HYPRE_Solver) solver,
+                              (HYPRE_PtrToSolverFcn) HYPRE_SStructSysPFMGSolve,
+                              (HYPRE_PtrToSolverFcn) HYPRE_SStructSysPFMGSetup,
+                              (HYPRE_Solver) precond);
+
+      }
       else if (solver_id == 18)
       {
          /* use diagonal scaling as preconditioner */
@@ -1887,6 +1915,10 @@ main( int   argc,
       if ((solver_id == 10) || (solver_id == 11))
       {
          HYPRE_SStructSplitDestroy(precond);
+      }
+      else if (solver_id == 13)
+      {
+         HYPRE_SStructSysPFMGDestroy(precond);
       }
    }
 
@@ -2138,6 +2170,44 @@ main( int   argc,
    }
 
    /*-----------------------------------------------------------
+    * Solve the system using ParCSR hybrid DSCG/BoomerAMG
+    *-----------------------------------------------------------*/
+
+   if (solver_id == 120) 
+   {
+      time_index = hypre_InitializeTiming("Hybrid Setup");
+      hypre_BeginTiming(time_index);
+
+      HYPRE_ParCSRHybridCreate(&par_solver);
+      HYPRE_ParCSRHybridSetTol(par_solver, 1.0e-06);
+      HYPRE_ParCSRHybridSetTwoNorm(par_solver, 1);
+      HYPRE_ParCSRHybridSetRelChange(par_solver, 0);
+      HYPRE_ParCSRHybridSetLogging(par_solver,1);
+      HYPRE_ParCSRHybridSetup(par_solver,par_A,par_b,par_x);
+
+      hypre_EndTiming(time_index);
+      hypre_PrintTiming("Setup phase times", MPI_COMM_WORLD);
+      hypre_FinalizeTiming(time_index);
+      hypre_ClearTiming();
+   
+      time_index = hypre_InitializeTiming("Hybrid Solve");
+      hypre_BeginTiming(time_index);
+
+      HYPRE_ParCSRHybridSolve(par_solver,par_A,par_b,par_x);
+
+      hypre_EndTiming(time_index);
+      hypre_PrintTiming("Solve phase times", MPI_COMM_WORLD);
+      hypre_FinalizeTiming(time_index); 
+      hypre_ClearTiming();
+
+      HYPRE_ParCSRHybridGetNumIterations(par_solver, &num_iterations);
+      HYPRE_ParCSRHybridGetFinalRelativeResidualNorm(
+                                           par_solver, &final_res_norm);
+
+      HYPRE_ParCSRHybridDestroy(par_solver);
+   }
+
+   /*-----------------------------------------------------------
     * Gather the solution vector
     *-----------------------------------------------------------*/
 
@@ -2174,6 +2244,7 @@ main( int   argc,
    HYPRE_SStructMatrixDestroy(A);
    HYPRE_SStructVectorDestroy(b);
    HYPRE_SStructVectorDestroy(x);
+
 
    DestroyData(data);
 
