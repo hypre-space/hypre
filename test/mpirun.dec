@@ -10,5 +10,7 @@
 
 echo "(dmpirun $*)"
 ipcs
+mpiclean
+ipcs
 dmpirun $*
 
