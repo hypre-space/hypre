@@ -180,8 +180,8 @@ hypre_CSRMatrixMultiply( hypre_CSRMatrix *A,
 				num_nonzeros++;
 			}
 		}
-		C_i[ic+1] = num_nonzeros;
    	}
+	C_i[ic+1] = num_nonzeros;
    }
 
    C = hypre_CSRMatrixCreate(nrows_A, ncols_B, num_nonzeros);
