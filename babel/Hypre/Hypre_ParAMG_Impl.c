@@ -46,7 +46,8 @@ impl_Hypre_ParAMG__ctor(
   /* DO-NOT-DELETE splicer.begin(Hypre.ParAMG._ctor) */
   /* Insert the implementation of the constructor method here... */
    int ierr=0;
-   HYPRE_Solver * solver = NULL; /* will really be initialized by Create call */
+   HYPRE_Solver dummy;
+   HYPRE_Solver * solver = &dummy; /* will really be initialized by Create call */
    struct Hypre_ParAMG__data * data;
    data = hypre_CTAlloc( struct Hypre_ParAMG__data, 1 );
    data -> comm = NULL;
