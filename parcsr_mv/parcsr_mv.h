@@ -334,8 +334,6 @@ typedef struct
 #ifndef hypre_NUMBERS_HEADER
 #define hypre_NUMBERS_HEADER
 
-struct hypre_NumbersNode;
-
 typedef struct {
    void * digit[11];
 /* ... should be   hypre_NumbersNode * digit[11]; */

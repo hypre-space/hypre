@@ -8,7 +8,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
-#include <mpi.h>
 #include <assert.h>
 
 #include "headers.h"
@@ -236,6 +235,7 @@ hypre_ParChordMatrixToParCSRMatrix(
    hypre_CSRMatrixDestroy(local_A);
    hypre_TFree(local_num_rows);
 /*   hypre_TFree(csr_matrix_datatypes);*/
+   return 0;
 }
 
 int
@@ -260,7 +260,7 @@ hypre_ParCSRMatrixToParChordMatrix(
    int * len_offd_col_array, * offd_col_array_me;
    int len_offd_col_array_me;
    int num_idofs, num_rdofs, j_local, j_global, row_global;
-   int i, j, jj, p, pto, q, qto, my_id, my_q, row, ireq, jjd;
+   int i, j, jj, p, pto, q, qto, my_id, my_q, row, ireq;
    int num_inprocessors, num_toprocessors, num_procs, len_num_rdofs_toprocessor;
    int *inprocessor, *toprocessor, *pcr, *qcr, *num_inchords, *chord, *chordto;
    int *inproc, *toproc, *num_rdofs_toprocessor;
@@ -307,7 +307,7 @@ hypre_ParCSRMatrixToParChordMatrix(
          }
       }
    }
-   jjd = jj;
+   /*   jjd = jj; ...not used yet */
 
    /* pcr[my_id] = 1; ...for square matrices (with nonzero diag block)
       this one line  would do the job of the following nested loop.
@@ -488,7 +488,7 @@ hypre_ParCSRMatrixToParChordMatrix(
          j_global =  col_map_offd[j_local];
          hypre_NumbersEnter( rdofs, j_local );
          
-         /* TO DO: find faster ways to do the two processor lookups below.
+         /* TO DO: find faster ways to do the two processor lookups below.*/
          /* Find a processor p (local index q) from the inprocessor list,
             which owns the column(rdof) whichis the same as this processor's
             row(idof) row. Update num_inchords for p.
@@ -633,6 +633,7 @@ hypre_ParCSRMatrixToParChordMatrix(
    hypre_ParChordMatrixIdofInprocessor(Ac)  (low priority - not used);
 */
 
+   return 0;
    }
 
 
