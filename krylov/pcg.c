@@ -140,21 +140,6 @@ hypre_PCGDestroy( void *pcg_vdata )
 }
 
 /*--------------------------------------------------------------------------
- * hypre_PCGGetPreconditionedResidual
- *--------------------------------------------------------------------------*/
-
-int hypre_PCGGetPreconditionedResidual( void *pcg_vdata, void **residual )
-{
-   /* returns a pointer to the preconditioned residual vector , s = C*r .
-      (r is the residual b-A*x, C the preconditioner, an approx. inverse of A) */
-
-   int ierr = 0;
-   hypre_PCGData  *pcg_data     = pcg_vdata;
-   *residual = pcg_data->s;
-   return ierr;
-}
-
-/*--------------------------------------------------------------------------
  * hypre_PCGGetResidual
  *--------------------------------------------------------------------------*/
 

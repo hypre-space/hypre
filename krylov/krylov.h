@@ -846,6 +846,7 @@ int HYPRE_PCGSetTwoNorm( HYPRE_Solver solver , int two_norm );
 int HYPRE_PCGSetRelChange( HYPRE_Solver solver , int rel_change );
 int HYPRE_PCGSetPrecond( HYPRE_Solver solver , HYPRE_PtrToSolverFcn precond , HYPRE_PtrToSolverFcn precond_setup , HYPRE_Solver precond_solver );
 int HYPRE_PCGGetPrecond( HYPRE_Solver solver , HYPRE_Solver *precond_data_ptr );
+int HYPRE_PCGSetLogging( HYPRE_Solver solver , int level );
 int HYPRE_PCGSetPrintLevel( HYPRE_Solver solver , int level );
 int HYPRE_PCGSetLogLevel( HYPRE_Solver solver , int level );
 int HYPRE_PCGGetNumIterations( HYPRE_Solver solver , int *num_iterations );
