@@ -156,9 +156,8 @@ code_ref.dxx: ${DXX_FILES}
 
 version.tex:
 	@ \
-	VINFO=`grep HYPRE_Version ../utilities/HYPRE_utilities.h`; \
-	VNUM=`echo $$VINFO | awk '{print $$4}'`; \
-	VDATE=`echo $$VINFO | awk '{print $$6}'`; \
+	VNUM=`../utilities/version -number`; \
+	VDATE=`../utilities/version -date`; \
 	echo "\def\HYPREVersion{$$VNUM}" > version.tex; \
 	echo "\def\HYPREVersionDate{$$VDATE}" >> version.tex
 
