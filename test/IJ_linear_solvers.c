@@ -973,11 +973,11 @@ main( int   argc,
       hypre_BeginTiming(time_index);
  
       HYPRE_ParCSRPCGCreate(MPI_COMM_WORLD, &pcg_solver);
-      HYPRE_ParCSRPCGSetMaxIter(pcg_solver, 500);
-      HYPRE_ParCSRPCGSetTol(pcg_solver, tol);
-      HYPRE_ParCSRPCGSetTwoNorm(pcg_solver, 1);
-      HYPRE_ParCSRPCGSetRelChange(pcg_solver, 0);
-      HYPRE_ParCSRPCGSetLogging(pcg_solver, 1);
+      HYPRE_PCGSetMaxIter(pcg_solver, 500);
+      HYPRE_PCGSetTol(pcg_solver, tol);
+      HYPRE_PCGSetTwoNorm(pcg_solver, 1);
+      HYPRE_PCGSetRelChange(pcg_solver, 0);
+      HYPRE_PCGSetLogging(pcg_solver, 1);
  
       if (solver_id == 1)
       {
@@ -1002,7 +1002,7 @@ main( int   argc,
          HYPRE_BoomerAMGSetNumFunctions(pcg_precond, num_functions);
          if (num_functions > 1)
             HYPRE_BoomerAMGSetDofFunc(pcg_precond, dof_func);
-         HYPRE_ParCSRPCGSetPrecond(pcg_solver,
+         HYPRE_PCGSetPrecond(pcg_solver,
                                    HYPRE_BoomerAMGSolve,
                                    HYPRE_BoomerAMGSetup,
                                    pcg_precond);
@@ -1014,7 +1014,7 @@ main( int   argc,
          if (myid == 0) printf("Solver: DS-PCG\n");
          pcg_precond = NULL;
 
-         HYPRE_ParCSRPCGSetPrecond(pcg_solver,
+         HYPRE_PCGSetPrecond(pcg_solver,
                                    HYPRE_ParCSRDiagScale,
                                    HYPRE_ParCSRDiagScaleSetup,
                                    pcg_precond);
@@ -1027,7 +1027,7 @@ main( int   argc,
 	 HYPRE_ParCSRParaSailsCreate(MPI_COMM_WORLD, &pcg_precond);
 	 HYPRE_ParCSRParaSailsSetParams(pcg_precond, 0.1, 1);
 
-         HYPRE_ParCSRPCGSetPrecond(pcg_solver,
+         HYPRE_PCGSetPrecond(pcg_solver,
                                    HYPRE_ParCSRParaSailsSolve,
                                    HYPRE_ParCSRParaSailsSetup,
                                    pcg_precond);
@@ -1046,13 +1046,13 @@ main( int   argc,
          */   
          HYPRE_ParCSREuclidSetParams(pcg_precond, argc, argv);
 
-         HYPRE_ParCSRPCGSetPrecond(pcg_solver,
+         HYPRE_PCGSetPrecond(pcg_solver,
                                    HYPRE_ParCSREuclidSolve,
                                    HYPRE_ParCSREuclidSetup,
                                    pcg_precond);
       }
  
-      HYPRE_ParCSRPCGGetPrecond(pcg_solver, &pcg_precond_gotten);
+      HYPRE_PCGGetPrecond(pcg_solver, &pcg_precond_gotten);
       if (pcg_precond_gotten !=  pcg_precond)
       {
         printf("HYPRE_ParCSRPCGGetPrecond got bad precond\n");
@@ -1061,7 +1061,7 @@ main( int   argc,
       else 
         if (myid == 0)
           printf("HYPRE_ParCSRPCGGetPrecond got good precond\n");
-      HYPRE_ParCSRPCGSetup(pcg_solver, A, b, x);
+      HYPRE_PCGSetup(pcg_solver, (HYPRE_Matrix)A, (HYPRE_Matrix)b, (HYPRE_Matrix)x);
  
       hypre_EndTiming(time_index);
       hypre_PrintTiming("Setup phase times", MPI_COMM_WORLD);
@@ -1071,21 +1071,21 @@ main( int   argc,
       time_index = hypre_InitializeTiming("PCG Solve");
       hypre_BeginTiming(time_index);
  
-      HYPRE_ParCSRPCGSolve(pcg_solver, A, b, x);
+      HYPRE_PCGSolve(pcg_solver, (HYPRE_Matrix)A, (HYPRE_Vector)b, (HYPRE_Vector)x);
  
       hypre_EndTiming(time_index);
       hypre_PrintTiming("Solve phase times", MPI_COMM_WORLD);
       hypre_FinalizeTiming(time_index);
       hypre_ClearTiming();
  
-      HYPRE_ParCSRPCGGetNumIterations(pcg_solver, &num_iterations);
-      HYPRE_ParCSRPCGGetFinalRelativeResidualNorm(pcg_solver, &final_res_norm);
+      HYPRE_PCGGetNumIterations(pcg_solver, &num_iterations);
+      HYPRE_PCGGetFinalRelativeResidualNorm(pcg_solver, &final_res_norm);
 
 #if SECOND_TIME
       /* run a second time to check for memory leaks */
       HYPRE_ParVectorSetRandomValues(x, 775);
-      HYPRE_ParCSRPCGSetup(pcg_solver, A, b, x);
-      HYPRE_ParCSRPCGSolve(pcg_solver, A, b, x);
+      HYPRE_PCGSetup(pcg_solver, (HYPRE_Matrix)A, (HYPRE_Vector)b, (HYPRE_Vector)x);
+      HYPRE_PCGSolve(pcg_solver, (HYPRE_Matrix)A, (HYPRE_Vector)b, (HYPRE_Vector)x);
 #endif
 
       HYPRE_ParCSRPCGDestroy(pcg_solver);
@@ -1125,10 +1125,10 @@ main( int   argc,
       hypre_BeginTiming(time_index);
  
       HYPRE_ParCSRGMRESCreate(MPI_COMM_WORLD, &pcg_solver);
-      HYPRE_ParCSRGMRESSetKDim(pcg_solver, k_dim);
-      HYPRE_ParCSRGMRESSetMaxIter(pcg_solver, 1000);
-      HYPRE_ParCSRGMRESSetTol(pcg_solver, tol);
-      HYPRE_ParCSRGMRESSetLogging(pcg_solver, 1);
+      HYPRE_GMRESSetKDim(pcg_solver, k_dim);
+      HYPRE_GMRESSetMaxIter(pcg_solver, 1000);
+      HYPRE_GMRESSetTol(pcg_solver, tol);
+      HYPRE_GMRESSetLogging(pcg_solver, 1);
  
       if (solver_id == 3)
       {
@@ -1154,10 +1154,10 @@ main( int   argc,
          HYPRE_BoomerAMGSetNumFunctions(pcg_precond, num_functions);
          if (num_functions > 1)
             HYPRE_BoomerAMGSetDofFunc(pcg_precond, dof_func);
-         HYPRE_ParCSRGMRESSetPrecond(pcg_solver,
-                                     HYPRE_BoomerAMGSolve,
-                                     HYPRE_BoomerAMGSetup,
-                                     pcg_precond);
+         HYPRE_GMRESSetPrecond(pcg_solver,
+                               HYPRE_BoomerAMGSolve,
+                               HYPRE_BoomerAMGSetup,
+                               pcg_precond);
       }
       else if (solver_id == 4)
       {
@@ -1165,10 +1165,10 @@ main( int   argc,
          if (myid == 0) printf("Solver: DS-GMRES\n");
          pcg_precond = NULL;
 
-         HYPRE_ParCSRGMRESSetPrecond(pcg_solver,
-                                     HYPRE_ParCSRDiagScale,
-                                     HYPRE_ParCSRDiagScaleSetup,
-                                     pcg_precond);
+         HYPRE_GMRESSetPrecond(pcg_solver,
+                               HYPRE_ParCSRDiagScale,
+                               HYPRE_ParCSRDiagScaleSetup,
+                               pcg_precond);
       }
       else if (solver_id == 7)
       {
@@ -1180,10 +1180,10 @@ main( int   argc,
 	   printf("Error in ParPilutCreate\n");
          }
 
-         HYPRE_ParCSRGMRESSetPrecond(pcg_solver,
-                                     HYPRE_ParCSRPilutSolve,
-                                     HYPRE_ParCSRPilutSetup,
-                                     pcg_precond);
+         HYPRE_GMRESSetPrecond(pcg_solver,
+                               HYPRE_ParCSRPilutSolve,
+                               HYPRE_ParCSRPilutSetup,
+                               pcg_precond);
 
          if (drop_tol >= 0 )
             HYPRE_ParCSRPilutSetDropTolerance( pcg_precond,
@@ -1202,10 +1202,10 @@ main( int   argc,
 	 HYPRE_ParCSRParaSailsSetParams(pcg_precond, 0.1, 1);
 	 HYPRE_ParCSRParaSailsSetSym(pcg_precond, 0);
 
-         HYPRE_ParCSRGMRESSetPrecond(pcg_solver,
-                                   HYPRE_ParCSRParaSailsSolve,
-                                   HYPRE_ParCSRParaSailsSetup,
-                                   pcg_precond);
+         HYPRE_GMRESSetPrecond(pcg_solver,
+                               HYPRE_ParCSRParaSailsSolve,
+                               HYPRE_ParCSRParaSailsSetup,
+                               pcg_precond);
       }
       else if (solver_id == 44)
       {
@@ -1221,22 +1221,23 @@ main( int   argc,
          */   
          HYPRE_ParCSREuclidSetParams(pcg_precond, argc, argv);
 
-         HYPRE_ParCSRGMRESSetPrecond (pcg_solver,
-                                   HYPRE_ParCSREuclidSolve,
-                                   HYPRE_ParCSREuclidSetup,
-                                   pcg_precond);
+         HYPRE_GMRESSetPrecond (pcg_solver,
+                                HYPRE_ParCSREuclidSolve,
+                                HYPRE_ParCSREuclidSetup,
+                                pcg_precond);
       }
  
-      HYPRE_ParCSRGMRESGetPrecond(pcg_solver, &pcg_precond_gotten);
+      HYPRE_GMRESGetPrecond(pcg_solver, &pcg_precond_gotten);
       if (pcg_precond_gotten != pcg_precond)
       {
-        printf("HYPRE_ParCSRGMRESGetPrecond got bad precond\n");
+        printf("HYPRE_GMRESGetPrecond got bad precond\n");
         return(-1);
       }
       else
         if (myid == 0)
-          printf("HYPRE_ParCSRGMRESGetPrecond got good precond\n");
-      HYPRE_ParCSRGMRESSetup(pcg_solver, A, b, x);
+          printf("HYPRE_GMRESGetPrecond got good precond\n");
+      HYPRE_GMRESSetup
+         (pcg_solver, (HYPRE_Matrix)A, (HYPRE_Vector)b, (HYPRE_Vector)x);
  
       hypre_EndTiming(time_index);
       hypre_PrintTiming("Setup phase times", MPI_COMM_WORLD);
@@ -1246,20 +1247,21 @@ main( int   argc,
       time_index = hypre_InitializeTiming("GMRES Solve");
       hypre_BeginTiming(time_index);
  
-      HYPRE_ParCSRGMRESSolve(pcg_solver, A, b, x);
+      HYPRE_GMRESSolve
+         (pcg_solver, (HYPRE_Matrix)A, (HYPRE_Vector)b, (HYPRE_Vector)x);
  
       hypre_EndTiming(time_index);
       hypre_PrintTiming("Solve phase times", MPI_COMM_WORLD);
       hypre_FinalizeTiming(time_index);
       hypre_ClearTiming();
  
-      HYPRE_ParCSRGMRESGetNumIterations(pcg_solver, &num_iterations);
-      HYPRE_ParCSRGMRESGetFinalRelativeResidualNorm(pcg_solver,&final_res_norm);
+      HYPRE_GMRESGetNumIterations(pcg_solver, &num_iterations);
+      HYPRE_GMRESGetFinalRelativeResidualNorm(pcg_solver,&final_res_norm);
 #if SECOND_TIME
       /* run a second time to check for memory leaks */
       HYPRE_ParVectorSetRandomValues(x, 775);
-      HYPRE_ParCSRGMRESSetup(pcg_solver, A, b, x);
-      HYPRE_ParCSRGMRESSolve(pcg_solver, A, b, x);
+      HYPRE_GMRESSetup(pcg_solver, (HYPRE_Matrix)A, (HYPRE_Vector)b, (HYPRE_Vector)x);
+      HYPRE_GMRESSolve(pcg_solver, (HYPRE_Matrix)A, (HYPRE_Vector)b, (HYPRE_Vector)x);
 #endif
 
       HYPRE_ParCSRGMRESDestroy(pcg_solver);
@@ -1301,9 +1303,9 @@ main( int   argc,
       hypre_BeginTiming(time_index);
  
       HYPRE_ParCSRBiCGSTABCreate(MPI_COMM_WORLD, &pcg_solver);
-      HYPRE_ParCSRBiCGSTABSetMaxIter(pcg_solver, 1000);
-      HYPRE_ParCSRBiCGSTABSetTol(pcg_solver, tol);
-      HYPRE_ParCSRBiCGSTABSetLogging(pcg_solver, 1);
+      HYPRE_BiCGSTABSetMaxIter(pcg_solver, 1000);
+      HYPRE_BiCGSTABSetTol(pcg_solver, tol);
+      HYPRE_BiCGSTABSetLogging(pcg_solver, 1);
  
       if (solver_id == 9)
       {
@@ -1329,10 +1331,10 @@ main( int   argc,
          HYPRE_BoomerAMGSetNumFunctions(pcg_precond, num_functions);
          if (num_functions > 1)
             HYPRE_BoomerAMGSetDofFunc(pcg_precond, dof_func);
-         HYPRE_ParCSRBiCGSTABSetPrecond(pcg_solver,
-                                        HYPRE_BoomerAMGSolve,
-                                        HYPRE_BoomerAMGSetup,
-                                        pcg_precond);
+         HYPRE_BiCGSTABSetPrecond(pcg_solver,
+                                  HYPRE_BoomerAMGSolve,
+                                  HYPRE_BoomerAMGSetup,
+                                  pcg_precond);
       }
       else if (solver_id == 10)
       {
@@ -1340,10 +1342,10 @@ main( int   argc,
          if (myid == 0) printf("Solver: DS-BiCGSTAB\n");
          pcg_precond = NULL;
 
-         HYPRE_ParCSRBiCGSTABSetPrecond(pcg_solver,
-                                        HYPRE_ParCSRDiagScale,
-                                        HYPRE_ParCSRDiagScaleSetup,
-                                        pcg_precond);
+         HYPRE_BiCGSTABSetPrecond(pcg_solver,
+                                  HYPRE_ParCSRDiagScale,
+                                  HYPRE_ParCSRDiagScaleSetup,
+                                  pcg_precond);
       }
       else if (solver_id == 11)
       {
@@ -1355,10 +1357,10 @@ main( int   argc,
 	   printf("Error in ParPilutCreate\n");
          }
 
-         HYPRE_ParCSRBiCGSTABSetPrecond(pcg_solver,
-                                        HYPRE_ParCSRPilutSolve,
-                                        HYPRE_ParCSRPilutSetup,
-                                        pcg_precond);
+         HYPRE_BiCGSTABSetPrecond(pcg_solver,
+                                  HYPRE_ParCSRPilutSolve,
+                                  HYPRE_ParCSRPilutSetup,
+                                  pcg_precond);
 
          if (drop_tol >= 0 )
             HYPRE_ParCSRPilutSetDropTolerance( pcg_precond,
@@ -1388,7 +1390,7 @@ main( int   argc,
                                    pcg_precond);
       }
  
-      HYPRE_ParCSRBiCGSTABSetup(pcg_solver, A, b, x);
+      HYPRE_BiCGSTABSetup(pcg_solver, (HYPRE_Matrix)A, (HYPRE_Vector)b, (HYPRE_Vector)x);
  
       hypre_EndTiming(time_index);
       hypre_PrintTiming("Setup phase times", MPI_COMM_WORLD);
@@ -1398,7 +1400,7 @@ main( int   argc,
       time_index = hypre_InitializeTiming("BiCGSTAB Solve");
       hypre_BeginTiming(time_index);
  
-      HYPRE_ParCSRBiCGSTABSolve(pcg_solver, A, b, x);
+      HYPRE_BiCGSTABSolve(pcg_solver, (HYPRE_Matrix)A, (HYPRE_Vector)b, (HYPRE_Vector)x);
  
       hypre_EndTiming(time_index);
       hypre_PrintTiming("Solve phase times", MPI_COMM_WORLD);
@@ -1410,8 +1412,8 @@ main( int   argc,
 #if SECOND_TIME
       /* run a second time to check for memory leaks */
       HYPRE_ParVectorSetRandomValues(x, 775);
-      HYPRE_ParCSRBiCGSTABSetup(pcg_solver, A, b, x);
-      HYPRE_ParCSRBiCGSTABSolve(pcg_solver, A, b, x);
+      HYPRE_BiCGSTABSetup(pcg_solver, (HYPRE_Matrix)A, (HYPRE_Vector)b, (HYPRE_Vector)x);
+      HYPRE_BiCGSTABSolve(pcg_solver, (HYPRE_Matrix)A, (HYPRE_Vector)b, (HYPRE_Vector)x);
 #endif
 
       HYPRE_ParCSRBiCGSTABDestroy(pcg_solver);
@@ -1449,9 +1451,9 @@ main( int   argc,
       hypre_BeginTiming(time_index);
  
       HYPRE_ParCSRCGNRCreate(MPI_COMM_WORLD, &pcg_solver);
-      HYPRE_ParCSRCGNRSetMaxIter(pcg_solver, 1000);
-      HYPRE_ParCSRCGNRSetTol(pcg_solver, tol);
-      HYPRE_ParCSRCGNRSetLogging(pcg_solver, 1);
+      HYPRE_CGNRSetMaxIter(pcg_solver, 1000);
+      HYPRE_CGNRSetTol(pcg_solver, tol);
+      HYPRE_CGNRSetLogging(pcg_solver, 1);
  
       if (solver_id == 5)
       {
@@ -1477,11 +1479,11 @@ main( int   argc,
          HYPRE_BoomerAMGSetNumFunctions(pcg_precond, num_functions);
          if (num_functions > 1)
             HYPRE_BoomerAMGSetDofFunc(pcg_precond, dof_func);
-         HYPRE_ParCSRCGNRSetPrecond(pcg_solver,
-                                   HYPRE_BoomerAMGSolve,
-                                   HYPRE_BoomerAMGSolveT,
-                                   HYPRE_BoomerAMGSetup,
-                                   pcg_precond);
+         HYPRE_CGNRSetPrecond(pcg_solver,
+                              HYPRE_BoomerAMGSolve,
+                              HYPRE_BoomerAMGSolveT,
+                              HYPRE_BoomerAMGSetup,
+                              pcg_precond);
       }
       else if (solver_id == 6)
       {
@@ -1489,14 +1491,14 @@ main( int   argc,
          if (myid == 0) printf("Solver: DS-CGNR\n");
          pcg_precond = NULL;
 
-         HYPRE_ParCSRCGNRSetPrecond(pcg_solver,
-                                   HYPRE_ParCSRDiagScale,
-                                   HYPRE_ParCSRDiagScale,
-                                   HYPRE_ParCSRDiagScaleSetup,
-                                   pcg_precond);
+         HYPRE_CGNRSetPrecond(pcg_solver,
+                              HYPRE_ParCSRDiagScale,
+                              HYPRE_ParCSRDiagScale,
+                              HYPRE_ParCSRDiagScaleSetup,
+                              pcg_precond);
       }
  
-      HYPRE_ParCSRCGNRGetPrecond(pcg_solver, &pcg_precond_gotten);
+      HYPRE_CGNRGetPrecond(pcg_solver, &pcg_precond_gotten);
       if (pcg_precond_gotten != pcg_precond)
       {
         printf("HYPRE_ParCSRCGNRGetPrecond got bad precond\n");
@@ -1505,7 +1507,7 @@ main( int   argc,
       else
         if (myid == 0)
           printf("HYPRE_ParCSRCGNRGetPrecond got good precond\n");
-      HYPRE_ParCSRCGNRSetup(pcg_solver, A, b, x);
+      HYPRE_CGNRSetup(pcg_solver, (HYPRE_Matrix)A, (HYPRE_Vector)b, (HYPRE_Vector)x);
  
       hypre_EndTiming(time_index);
       hypre_PrintTiming("Setup phase times", MPI_COMM_WORLD);
@@ -1515,21 +1517,21 @@ main( int   argc,
       time_index = hypre_InitializeTiming("CGNR Solve");
       hypre_BeginTiming(time_index);
  
-      HYPRE_ParCSRCGNRSolve(pcg_solver, A, b, x);
+      HYPRE_CGNRSolve(pcg_solver, (HYPRE_Matrix)A, (HYPRE_Vector)b, (HYPRE_Vector)x);
  
       hypre_EndTiming(time_index);
       hypre_PrintTiming("Solve phase times", MPI_COMM_WORLD);
       hypre_FinalizeTiming(time_index);
       hypre_ClearTiming();
  
-      HYPRE_ParCSRCGNRGetNumIterations(pcg_solver, &num_iterations);
-      HYPRE_ParCSRCGNRGetFinalRelativeResidualNorm(pcg_solver,&final_res_norm);
+      HYPRE_CGNRGetNumIterations(pcg_solver, &num_iterations);
+      HYPRE_CGNRGetFinalRelativeResidualNorm(pcg_solver,&final_res_norm);
 
 #if SECOND_TIME
       /* run a second time to check for memory leaks */
       HYPRE_ParVectorSetRandomValues(x, 775);
-      HYPRE_ParCSRCGNRSetup(pcg_solver, A, b, x);
-      HYPRE_ParCSRCGNRSolve(pcg_solver, A, b, x);
+      HYPRE_CGNRSetup(pcg_solver, (HYPRE_Matrix)A, (HYPRE_Vector)b, (HYPRE_Vector)x);
+      HYPRE_CGNRSolve(pcg_solver, (HYPRE_Matrix)A, (HYPRE_Vector)b, (HYPRE_Vector)x);
 #endif
 
       HYPRE_ParCSRCGNRDestroy(pcg_solver);
