@@ -42,6 +42,8 @@ then
 	    HYPRE_ARCH="red";;
 	Linux)
 	    HYPRE_ARCH="linux";;
+	IRIX64)
+	    HYPRE_ARCH="sgi";;
     esac
 fi
 
