@@ -244,7 +244,7 @@ HYPRE_MAIL=mailx
 cd $HYPRE_AUTOTEST_DIR
 for i in *.err linear_solvers/*.err linear_solvers/test/*.err
 do 
-    if [ -s "$i" ] -o [ -r ${i}.email ] 
+    if [ -s "$i" ] -a [ -r ${i}.email ] 
     then 
 	RECIPIENTS=`cat ${i}.email` 
 	${HYPRE_MAIL} -s "Autotest error: $i" $RECIPIENTS < $i 
