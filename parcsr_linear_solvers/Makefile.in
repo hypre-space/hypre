@@ -114,7 +114,7 @@ driver_rap: driver_rap.o libHYPRE_parcsr_ls.a
 
 libHYPRE_parcsr_ls.a: ${OBJS}
 	@echo  "Building $@ ... "
-	ar -ru $@ ${OBJS}
+	ar -rcu $@ ${OBJS}
 	ranlib $@
  
 ${OBJS}: ${HEADERS}
