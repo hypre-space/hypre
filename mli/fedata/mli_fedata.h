@@ -351,11 +351,9 @@ public :
 
    int createElemBlock(int blockID);
    int deleteElemBlock(int blockID);
-   int search(int, int *, int);
    int searchElement(int);
    int searchNode(int key);
    int searchFace(int key);
-   int intQSort2(int *list, int *list2, int left, int right);
 };
 
 #endif

@@ -19,6 +19,7 @@
 #include <mpi.h>
 
 #include "mli_fedata.h"
+#include "../util/mli_utils.h"
 
 /**************************************************************************
  * constructor 
@@ -478,7 +479,7 @@ int MLI_FEData::initSharedNodes(int nNodes, const int *nGlobalIDs,
    intArray = new int[nNodes];
    for (i = 0; i < nNodes; i++) currBlock->sharedNodeIDs_[i] = nGlobalIDs[i];
    for (i = 0; i < nNodes; i++) intArray[i] = i;
-   intQSort2(currBlock->sharedNodeIDs_, intArray, 0, nNodes-1);
+   MLI_Utils_IntQSort2(currBlock->sharedNodeIDs_, intArray, 0, nNodes-1);
    for ( i = 0; i < nNodes; i++ )
    {
       index = intArray[i];
@@ -491,7 +492,8 @@ int MLI_FEData::initSharedNodes(int nNodes, const int *nGlobalIDs,
       currBlock->sharedNodeProc_[i] = new int[numProcs[index]];
       for ( j = 0; j < numProcs[index]; j++ )
          currBlock->sharedNodeProc_[i][j] = procLists[index][j];
-      intQSort2(currBlock->sharedNodeProc_[i], NULL, 0, numProcs[index]-1);
+      MLI_Utils_IntQSort2(currBlock->sharedNodeProc_[i], NULL, 0, 
+                          numProcs[index]-1);
    } 
    delete [] intArray;
    return 1;
@@ -604,7 +606,7 @@ int MLI_FEData::initFaceBlockNodeLists(int nFaces, const int *fGlobalIDs,
       currBlock->faceNodeIDList_[i] = NULL;
       faceArray[i]                  = i;
    } 
-   intQSort2(currBlock->faceGlobalIDs_, faceArray, 0, nFaces-1);
+   MLI_Utils_IntQSort2(currBlock->faceGlobalIDs_, faceArray, 0, nFaces-1);
 
    // -------------------------------------------------------------
    // --- load the face Node list 
@@ -676,7 +678,7 @@ int MLI_FEData::initSharedFaces(int nFaces, const int *fGlobalIDs,
    intArray = new int[nFaces];
    for (i = 0; i < nFaces; i++) currBlock->sharedFaceIDs_[i] = fGlobalIDs[i];
    for (i = 0; i < nFaces; i++) intArray[i] = i;
-   intQSort2(currBlock->sharedFaceIDs_, intArray, 0, nFaces-1);
+   MLI_Utils_IntQSort2(currBlock->sharedFaceIDs_, intArray, 0, nFaces-1);
 
    for ( i = 0; i < nFaces; i++ )
    {
@@ -690,7 +692,8 @@ int MLI_FEData::initSharedFaces(int nFaces, const int *fGlobalIDs,
       currBlock->sharedFaceProc_[i]   = new int[numProcs[index]];
       for ( j = 0; j < numProcs[index]; j++ )
          currBlock->sharedFaceProc_[i][j] = procLists[index][j];
-      intQSort2(currBlock->sharedFaceProc_[i], NULL, 0, numProcs[index]-1);
+      MLI_Utils_IntQSort2(currBlock->sharedFaceProc_[i], NULL, 0, 
+                          numProcs[index]-1);
    } 
    delete [] intArray;
    return 1;
@@ -761,7 +764,8 @@ int MLI_FEData::initComplete()
 
    currBlock->elemGlobalIDAux_ = new int[nElems];
    for ( i = 0; i < nElems; i++ ) currBlock->elemGlobalIDAux_[i] = i;
-   intQSort2(currBlock->elemGlobalIDs_,currBlock->elemGlobalIDAux_,0,nElems-1);
+   MLI_Utils_IntQSort2(currBlock->elemGlobalIDs_,
+                       currBlock->elemGlobalIDAux_, 0, nElems-1);
 
    // -------------------------------------------------------------
    // --- error checking (for duplicate element IDs)
@@ -840,7 +844,7 @@ int MLI_FEData::initComplete()
       for ( j = 0; j < elemNumNodes; j++ )
          nodeArray[totalNodes++] = elemNodeList[i][j];
    }
-   intQSort2(nodeArray, NULL, 0, temp_cnt-1);
+   MLI_Utils_IntQSort2(nodeArray, NULL, 0, temp_cnt-1);
    totalNodes = 1;
    for ( i = 1; i < temp_cnt; i++ )
       if ( nodeArray[i] != nodeArray[i-1] )
@@ -864,7 +868,8 @@ int MLI_FEData::initComplete()
          if ( sharedNodeProc[i][j] < mypid ) 
          {
             nExtNodes++;
-            index = search( sharedNodeIDs[i], nodeArray, totalNodes);
+            index = MLI_Utils_BinarySearch( sharedNodeIDs[i], nodeArray, 
+                                            totalNodes);
             if ( index < 0 ) 
             {
                cout << "initComplete ERROR : shared node not in elements.\n";
@@ -932,7 +937,7 @@ int MLI_FEData::initComplete()
    recvProcs = NULL;
    recvLengs = NULL;
    recvBuf   = NULL;
-   intQSort2( iauxArray, NULL, 0, nExtNodes-1);
+   MLI_Utils_IntQSort2( iauxArray, NULL, 0, nExtNodes-1);
    if ( nExtNodes > 0 ) nRecv = 1;
    for ( i = 1; i < nExtNodes; i++ )
       if (iauxArray[i] != iauxArray[i-1]) iauxArray[nRecv++] = iauxArray[i];
@@ -944,7 +949,7 @@ int MLI_FEData::initComplete()
       for ( i = 0; i < nRecv; i++ ) recvLengs[i] = 0;
       for ( i = 0; i < nExtNodes; i++ ) 
       {
-         index = search( ownerP[i], recvProcs, nRecv );
+         index = MLI_Utils_BinarySearch( ownerP[i], recvProcs, nRecv );
          recvLengs[index]++;
       }
       recvBuf = new int*[nRecv];
@@ -972,7 +977,7 @@ int MLI_FEData::initComplete()
    sendBuf   = NULL;
    if ( counter > 0 )
    {
-      intQSort2( iauxArray, NULL, 0, counter-1);
+      MLI_Utils_IntQSort2( iauxArray, NULL, 0, counter-1);
       nSend = 1;
       for ( i = 1; i < counter; i++ )
          if (iauxArray[i] != iauxArray[i-1]) iauxArray[nSend++] = iauxArray[i];
@@ -989,7 +994,7 @@ int MLI_FEData::initComplete()
                if ( sharedNodeProc[i][j] != mypid ) 
                {
                   index = sharedNodeProc[i][j];
-                  index = search( index, sendProcs, nSend );
+                  index = MLI_Utils_BinarySearch( index, sendProcs, nSend );
                   sendLengs[index]++;
                }        
             }        
@@ -1007,7 +1012,7 @@ int MLI_FEData::initComplete()
                if ( sharedNodeProc[i][j] != mypid ) 
                {
                   index = sharedNodeProc[i][j];
-                  index = search( index, sendProcs, nSend );
+                  index = MLI_Utils_BinarySearch( index, sendProcs, nSend );
                   index2 = searchNode( sharedNodeIDs[i] );
                   sendBuf[index][sendLengs[index]++] = 
                      currBlock->nodeOffset_ + index2;
@@ -1030,7 +1035,7 @@ int MLI_FEData::initComplete()
    for ( i = 0; i < nRecv; i++ ) recvLengs[i] = 0;
    for ( i = 0; i < nExtNodes; i++ ) 
    {
-      index = search( ownerP[i], recvProcs, nRecv );
+      index = MLI_Utils_BinarySearch( ownerP[i], recvProcs, nRecv );
       j = recvBuf[index][recvLengs[index]++];
       currBlock->nodeExtNewGlobalIDs_[i] =  j;
    }
@@ -1061,10 +1066,12 @@ int MLI_FEData::initComplete()
          for ( j = 0; j < currBlock->elemNumNodes_; j++ )
          {
             index     = currBlock->elemNodeIDList_[i][j];
-            searchInd = search(index, nodeArray, totalNodes-nExtNodes);
+            searchInd = MLI_Utils_BinarySearch(index, nodeArray, 
+                                               totalNodes-nExtNodes);
             if ( searchInd < 0 )
-               searchInd = search(index, &(nodeArray[totalNodes-nExtNodes]), 
-                                  nExtNodes) + totalNodes - nExtNodes;
+               searchInd = MLI_Utils_BinarySearch(index, 
+                               &(nodeArray[totalNodes-nExtNodes]), 
+                               nExtNodes) + totalNodes - nExtNodes;
             for ( k = 0; k < spaceDimension_; k++ )
                nodeCoords[searchInd*spaceDimension_+k] = 
                   dtemp_array[(i*elemNumNodes+j)*spaceDimension_+k];
@@ -1090,7 +1097,7 @@ int MLI_FEData::initComplete()
          for ( j = 0; j < elemNumFaces; j++ )
             faceArray[totalFaces++] = elemFaceList[i][j];
       }
-      intQSort2(faceArray, NULL, 0, temp_cnt-1);
+      MLI_Utils_IntQSort2(faceArray, NULL, 0, temp_cnt-1);
       totalFaces = 1;
       for ( i = 1; i < temp_cnt; i++ )
          if ( faceArray[i] != faceArray[i-1] )
@@ -1133,7 +1140,8 @@ int MLI_FEData::initComplete()
             if ( sharedFaceProc[i][j] < mypid ) 
             {
                nExtFaces++;
-               index = search( sharedFaceIDs[i], faceArray, totalFaces);
+               index = MLI_Utils_BinarySearch( sharedFaceIDs[i], faceArray, 
+                                               totalFaces);
                if ( index < 0 ) 
                {
                   cout << "initComplete ERROR : shared node not in elements.\n";
@@ -3586,7 +3594,8 @@ int MLI_FEData::impSpecificRequests(char *data_key, int argc, char **argv)
 
       for( i = 0; i < numSharedNodes; i++ )
       {
-         ind[i] = search(sharedNodeList[i], nodeList, nNodes);
+         ind[i] = MLI_Utils_BinarySearch(sharedNodeList[i], nodeList, 
+                                         nNodes);
 	  
          // the shared node is owned by this subdomain
  
@@ -3598,7 +3607,8 @@ int MLI_FEData::impSpecificRequests(char *data_key, int argc, char **argv)
                    MPI_Recv( Buf, 100, MPI_INT, MPI_ANY_SOURCE,
                              MPI_ANY_TAG, MPI_COMM_WORLD, &Status);
                    MPI_Get_count( &Status, MPI_INT, &n);
-                   k = search( Status.MPI_TAG, nodeList, nNodes);
+                   k = MLI_Utils_BinarySearch( Status.MPI_TAG, nodeList, 
+                                               nNodes);
                    columns = new int[ncols[k]+n];
                    for ( l = 0; l < ncols[k]; l++ ) columns[l] = cols[k][l];
                    for ( l = 0; l < n; l++ ) columns[ncols[k]++] = Buf[l];
@@ -3658,7 +3668,7 @@ int MLI_FEData::impSpecificRequests(char *data_key, int argc, char **argv)
 
       for ( i = 0; i < numSharedFaces; i++ )
       {
-         ind[i] = search(sharedFaceList[i], faceList, nFaces);
+         ind[i] = MLI_Utils_BinarySearch(sharedFaceList[i], faceList, nFaces);
 	  
          // the shared face is owned by this subdomain
 
@@ -3670,7 +3680,7 @@ int MLI_FEData::impSpecificRequests(char *data_key, int argc, char **argv)
                   MPI_Recv( Buf, 100, MPI_INT, MPI_ANY_SOURCE,
                             MPI_ANY_TAG, MPI_COMM_WORLD, &Status);
                   MPI_Get_count( &Status, MPI_INT, &n);
-                  k = search( Status.MPI_TAG, faceList, nFaces);
+                  k = MLI_Utils_BinarySearch(Status.MPI_TAG,faceList,nFaces);
                   columns = new int[ncols[k]+n];
 		  
                   for( l = 0; l < ncols[k]; l++ ) columns[l] = cols[k][l];
@@ -3791,12 +3801,12 @@ int MLI_FEData::readFromFile(char *infile)
       for (i = 0; i < nElems; i++) 
          newCoords[i] = new double[nNodesPerElem*spaceDim]; 
 
-      intQSort2(nodeIDs, nodeIDAux, 0, nNodes-1);
+      MLI_Utils_IntQSort2(nodeIDs, nodeIDAux, 0, nNodes-1);
       for (i = 0; i < nElems; i++) 
       {
          for (j = 0; j < nNodesPerElem; j++) 
          {
-            index = search( IDLists[i][j], nodeIDs, nNodes );
+            index = MLI_Utils_BinarySearch(IDLists[i][j], nodeIDs, nNodes);
             if ( index < 0 )
             {
                cout << "readFromFile ERROR : element node ID not found.\n";
@@ -4428,33 +4438,6 @@ int MLI_FEData::deleteElemBlock(int blockID)
 }
 
 /**************************************************************************
- * main binary search routine  
- *-----------------------------------------------------------------------*/
-
-int MLI_FEData::search(int key, int *globalIDs, int size)
-{
-   int  nfirst, nlast, nmid, found, index;
-
-   if (size <= 0) return -1;
-   nfirst = 0;
-   nlast  = size - 1;
-   if (key > globalIDs[nlast])  return -(nlast+1);
-   if (key < globalIDs[nfirst]) return -(nfirst+1);
-   found = 0;
-   while ((found == 0) && ((nlast-nfirst)>1)) 
-   {
-      nmid = (nfirst + nlast) / 2;
-      if      (key == globalIDs[nmid]) {index  = nmid; found = 1;}
-      else if (key > globalIDs[nmid])  nfirst = nmid;
-      else                             nlast  = nmid;
-   }
-   if (found == 1)                    return index;
-   else if (key == globalIDs[nfirst]) return nfirst;
-   else if (key == globalIDs[nlast])  return nlast;
-   else                               return -(nfirst+1);
-}
-
-/**************************************************************************
  * search element ID in an ordered array
  *-----------------------------------------------------------------------*/
 
@@ -4463,7 +4446,8 @@ int MLI_FEData::searchElement(int key)
    int           index;
    MLI_ElemBlock *currBlock = elemBlockList_[currentElemBlock_];
 
-   index = search(key, currBlock->elemGlobalIDs_, currBlock->numLocalElems_);
+   index = MLI_Utils_BinarySearch(key, currBlock->elemGlobalIDs_, 
+                                  currBlock->numLocalElems_);
    return index;
 }
 
@@ -4476,11 +4460,13 @@ int MLI_FEData::searchNode(int key)
    int           index;
    MLI_ElemBlock *currBlock = elemBlockList_[currentElemBlock_];
 
-   index = search(key, currBlock->nodeGlobalIDs_, currBlock->numLocalNodes_);
+   index = MLI_Utils_BinarySearch(key, currBlock->nodeGlobalIDs_, 
+                                  currBlock->numLocalNodes_);
    if ( index < 0 )
    {
-      index = search(key,&(currBlock->nodeGlobalIDs_[currBlock->numLocalNodes_]),
-                     currBlock->numExternalNodes_);
+      index = MLI_Utils_BinarySearch(key,
+                  &(currBlock->nodeGlobalIDs_[currBlock->numLocalNodes_]),
+                  currBlock->numExternalNodes_);
       if ( index >= 0 ) index += currBlock->numLocalNodes_;
    }
    return index;
@@ -4495,63 +4481,15 @@ int MLI_FEData::searchFace(int key)
    int           index;
    MLI_ElemBlock *currBlock = elemBlockList_[currentElemBlock_];
 
-   index = search(key, currBlock->faceGlobalIDs_, currBlock->numLocalFaces_);
+   index = MLI_Utils_BinarySearch(key, currBlock->faceGlobalIDs_, 
+                                  currBlock->numLocalFaces_);
    if ( index < 0 )
    {
-      index = search(key,&(currBlock->faceGlobalIDs_[currBlock->numLocalFaces_]),
-                     currBlock->numExternalFaces_);
+      index = MLI_Utils_BinarySearch(key,
+                  &(currBlock->faceGlobalIDs_[currBlock->numLocalFaces_]),
+                  currBlock->numExternalFaces_);
       if ( index >= 0 ) index += currBlock->numLocalFaces_;
    }
    return index;
-}
-
-/**************************************************************************
- * sort an integer array
- *-----------------------------------------------------------------------*/
-
-int MLI_FEData::intQSort2(int *ilist, int *ilist2, int left, int right)
-{
-   int i, last, mid, itemp;
-
-   if (left >= right) return 0;
-   mid          = (left + right) / 2;
-   itemp        = ilist[left];
-   ilist[left]  = ilist[mid];
-   ilist[mid]   = itemp;
-   if ( ilist2 != NULL )
-   {
-      itemp        = ilist2[left];
-      ilist2[left] = ilist2[mid];
-      ilist2[mid]  = itemp;
-   }
-   last         = left;
-   for (i = left+1; i <= right; i++)
-   {
-      if (ilist[i] < ilist[left])
-      {
-         last++;
-         itemp        = ilist[last];
-         ilist[last]  = ilist[i];
-         ilist[i]     = itemp;
-         if ( ilist2 != NULL )
-         {
-            itemp        = ilist2[last];
-            ilist2[last] = ilist2[i];
-            ilist2[i]    = itemp;
-         } 
-      } 
-   } 
-   itemp        = ilist[left];
-   ilist[left]  = ilist[last];
-   ilist[last]  = itemp;
-   if ( ilist2 != NULL )
-   {
-      itemp        = ilist2[left];
-      ilist2[left] = ilist2[last];
-      ilist2[last] = itemp;
-   }
-   intQSort2(ilist, ilist2, left, last-1);
-   intQSort2(ilist, ilist2, last+1, right);
-   return 0;
 }
 
