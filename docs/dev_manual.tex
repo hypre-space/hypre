@@ -1,0 +1,112 @@
+\documentstyle[11pt,makeidx,html,hypre]{book}
+
+%=============================================================================
+% Preamble:
+%=============================================================================
+
+% set margins
+\setlength{\oddsidemargin}{0in}
+\setlength{\evensidemargin}{0in}
+\setlength{\textwidth}{6.5in}
+\setlength{\topmargin}{0in}
+\setlength{\textheight}{8.0in}
+
+% define various commands and macros
+\input{epsf}
+
+% define the version number
+% NOTE: this should be automatically generated from some other file in hypre
+\input{version}
+
+% write out the index entries in the `.idx' file
+\makeindex
+
+%=============================================================================
+% Body:
+%=============================================================================
+
+\begin{document}
+
+%=============== Title Page
+
+\begin{TitlePage}
+
+\Title{\hypre{} Developer's Manual: Draft}
+\SubTitle{Software \HYPREVersion}
+\SubTitle{\today}
+\Author{%
+Scalable Linear Solvers Project\\
+Center for Applied Scientific Computing\\
+Lawrence Livermore National Laboratory
+}
+
+\end{TitlePage}
+
+%=============== Copyright Page
+
+\begin{CopyrightPage}
+
+\noindent
+Copyright \copyright{} 1998 The Regents of the University of California.
+
+\vspace{1em}\noindent
+Permission is granted to make and distribute verbatim copies of this
+manual provided the copyright notice and this permission notice are
+preserved on all copies.
+
+\vspace{1em}
+
+This computer software and documentation was prepared as an account of
+work sponsored by an agency of the United  States Government.  Neither
+the United States Government nor the  University of California nor any
+of their employees, makes any warranty, express or implied, or assumes
+any legal liability  or responsibility for the accuracy, completeness,
+or   usefulness of any   information,  apparatus, product, or  process
+disclosed,   or represents that  its  use would not infringe privately
+owned rights.  Reference  herein to any specific  commercial products,
+process,   or service by   trade  name,  trademark,  manufacturer,  or
+otherwise, does not  necessarily constitute or imply its  endorsement,
+recommendation, or  favoring  by the  United  States Government or the
+University of California.  The views and opinions of authors expressed
+herein do not necessarily state or reflect those  of the United States
+Government or the University of California, and shall  not be used for
+advertising or product endorsement purposes.
+
+\end{CopyrightPage}
+
+%=============== Table of Contents
+
+\pagenumbering{roman}
+\tableofcontents
+\cleardoublepage
+\pagenumbering{arabic}
+
+%=============== Include Chapters
+
+\input{dev_requirements}
+\input{dev_design}
+\input{dev_error_handling}
+\input{dev_makefile}
+\input{dev_documentation}
+\input{dev_coding}
+\input{dev_language_interop}
+\input{dev_autotest}
+\input{dev_QA}
+\input{dev_install}
+
+%=============== Include Other
+
+% \input{glossary}
+
+%=============== Print the References here
+
+\bibliographystyle{plain}
+%\bibliography{hypre}
+
+%=============== Print the Index here
+
+\printindex
+
+\end{document}
+
+

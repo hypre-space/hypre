@@ -1,26 +1,22 @@
-/** @name Language Interoperability
+%==========================================================================
+\chapter{Language Interoperability}
+\label{Language Interoperability}
 
-*/
-
-//@{
-
-/*==========================================================================*/
-/** @name Zero-based vs. One-based Indexing in HYPRE Matrices
+%==========================================================================
+\section{Zero-based vs. One-based Indexing in \hypre{} Matrices}
+\label{Zero-based vs. One-based Indexing in hypre Matrices}
 
 Some definitions:
 \begin{description}
-\item[0-based indexing]  Row and column indices are numbered starting at 0.
-\item[1-based indexing]  Row and column indices are numbered starting at 1.
-\item[0-based storage]   Natural for C, possible in Fortran.
-\item[1-based storage]   Natural for Fortran, sometimes used in C.
+\item[0-based indexing] Row and column indices are numbered starting at 0.
+\item[1-based indexing] Row and column indices are numbered starting at 1.
+\item[0-based storage]  Natural for C, possible in Fortran.
+\item[1-based storage]  Natural for Fortran, sometimes used in C.
 \end{description}
 
-*/
-
-//@{
-
-/*==========================================================================*/
-/** @name The issues and a suggested decision
+%==========================================================================
+\subsection{The issues and a suggested decision}
+\label{The issues and a suggested decision}
 
 The issues are as follows:
 \begin{enumerate}
@@ -38,55 +34,53 @@ subroutine, but the intention here is to explicitely demonstrate the
 parameter translation required to interface with the routine), then
 de-allocates the coarse grid array.
 
-The #A# and #B# examples use 0-based and 1-based indexing with no
-pointer tricks.  Example #C# uses 1-based indexing with a pointer
-trick that is left fully exposed for illustrative purposes.  Example
-#D# supports both 0 and 1-based indexing and uses a #hypre_BaseArray#
-class (see the following section for details on this class) to hide
-the tricks illustrated in example C.  In these examples, it is assumed
-that the Fortran subroutine provides the same indexing support as the
-calling C-routines.
+The \code{A} and \code{B} examples use 0-based and 1-based indexing
+with no pointer tricks.  Example \code{C} uses 1-based indexing with a
+pointer trick that is left fully exposed for illustrative purposes.
+Example \code{D} supports both 0 and 1-based indexing and uses a
+\code{hypre_BaseArray} class (see the following section for details on
+this class) to hide the tricks illustrated in example C.  In these
+examples, it is assumed that the Fortran subroutine provides the same
+indexing support as the calling C-routines.
 
-Issue 1: Example #A# is the most straightforward and least confusing
-of all the examples.  That is, 0-based indexing is the most natural
-for C programming.  However, examples #C# and #D# are not all that bad
-either.  Example #B# is horribly confusing.  The most natural style
-for Fortran is 1-based, but a Fortran variant of examples #C# and #D#
-for 0-based indexing would also be fairly natural.  Arrays would be
-declared like this:
+{\bf Issue 1:} Example \code{A} is the most straightforward and least
+confusing of all the examples.  That is, 0-based indexing is the most
+natural for C programming.  However, examples \code{C} and \code{D}
+are not all that bad either.  Example \code{B} is horribly confusing.
+The most natural style for Fortran is 1-based, but a Fortran variant
+of examples \code{C} and \code{D} for 0-based indexing would also be
+fairly natural.  Arrays would be declared like this:
 \begin{verbatim}
      integer  Ai(base:An+base)
 \end{verbatim}
-and the #iiA# loop would look like this:
+and the \code{iiA} loop would look like this:
 \begin{verbatim}
      do iiA = base, An-1+base
 \end{verbatim}
 
-Issue 2: We cannot dictate what other code groups support regarding
+{\bf Issue 2:} We cannot dictate what other code groups support regarding
 indexing.  So, if we want to interoperate with other codes, we need to
-support both 0-based and 1-based indexing as in example #D# below.
+support both 0-based and 1-based indexing as in example \code{D} below.
 
-Issue 3: To keep efficiency high, we do NOT want to have to modify the
-data in the #A_i# and #A_j# arrays.  That is, we want to use the
+{\bf Issue 3:} To keep efficiency high, we do NOT want to have to modify the
+data in the \code{A_i} and \code{A_j} arrays.  That is, we want to use the
 pointer tricks below to interoperate with other codes.  However, this
 means that the whole code does EITHER 0-based OR 1-based indexing
 during any single run, and NOT both.
 
 Suggested decision: Support both 0-based and 1-based indexing.
 
-*/
-
-/*==========================================================================*/
-/** @name Hiding the details
+%==========================================================================
+\subsection{Hiding the details}
+\label{Hiding the details}
 
 Although code for supporting both 0-based and 1-based indexing is not
 too ugly even when the tricks are exposed, it is easier to make
 mistakes and/or get confused during code development and debugging.
-In an attempt to minimize this, we introduce below a #hypre_BaseArray#
-class and a set of coding rules and guidelines.
+In an attempt to minimize this, we introduce below a
+\code{hypre_BaseArray} class and a set of coding rules and guidelines.
 
-{\large {\bf The BaseArray class}}
-
+{\noindent\bf The BaseArray class:}
 \begin{verbatim}
 Types:
   hypre_IntBaseArray, hypre_DoubleBaseArray, ...
@@ -113,15 +107,14 @@ modifies the data in the array, so it should be used only when necessary):
   hypre_ConvertBaseArray(&base_array, base, new_base)
 \end{verbatim}
 
-{\large {\bf Coding Rules and Guidelines}}
-
+{\noindent\bf Coding Rules and Guidelines:}
 \begin{itemize}
 
 \item All arrays with array indices that refer to either rows/columns
-of matrices or elements of vectors must be #hypre_BaseArray# types.
+of matrices or elements of vectors must be \code{hypre_BaseArray} types.
 This reduces the possibility of making coding errors.
 
-\item All #hypre_BaseArray# types in the same routine should use the
+\item All \code{hypre_BaseArray} types in the same routine should use the
 same base.  It is recommended that only one `base' variable be defined
 for each routine in an attempt to enforce this.
 
@@ -131,20 +124,19 @@ called code supports.
 
 \end{itemize}
 
-*/
-
-/*==========================================================================*/
-/** @name Sample code
+%==========================================================================
+\subsection{Sample code}
+\label{Sample code}
 
 \begin{verbatim}
 
 /*--------------------------------------------------------------------------
  * Indexing example code:
- *--------------------------------------------------------------------------*
+ *--------------------------------------------------------------------------*/
 
 /*-----------------------------------------------
  * A) 0-based indexing
- *-----------------------------------------------*
+ *-----------------------------------------------*/
 
 int
 hypre_SampleA( hypre_Matrix *A,
@@ -188,7 +180,7 @@ hypre_SampleA( hypre_Matrix *A,
 
 /*-----------------------------------------------
  * B) 1-based indexing (no tricks)
- *-----------------------------------------------*
+ *-----------------------------------------------*/
 
 int
 hypre_SampleB( hypre_Matrix *A,
@@ -232,7 +224,7 @@ hypre_SampleB( hypre_Matrix *A,
 
 /*-----------------------------------------------
  * C) 1-based indexing (with tricks):
- *-----------------------------------------------*
+ *-----------------------------------------------*/
 
 int
 hypre_SampleC( hypre_Matrix *A,
@@ -293,7 +285,7 @@ hypre_SampleC( hypre_Matrix *A,
  * We also use the following types so that the
  * code is more explicit about which variables
  * we are applying "tricks" to.
- *-----------------------------------------------*
+ *-----------------------------------------------*/
 
 int
 hypre_SampleD( hypre_Matrix *A,
@@ -312,9 +304,9 @@ hypre_SampleD( hypre_Matrix *A,
 
    int                     iiA, jjA;
 
-   /* ... *
+   /* ... */
 
-   /* matvec *
+   /* matvec */
    for (iiA = base; iiA < A_n+base; iiA++ )
    {
       for (jjA = A_i[iiA]; jjA < A_i[iiA+1]; jjA++)
@@ -323,23 +315,17 @@ hypre_SampleD( hypre_Matrix *A,
       }
    }
 
-   /* coarse-grid allocation ( = hypre_TAlloc(int, A_n) - base ) *
+   /* coarse-grid allocation ( = hypre_TAlloc(int, A_n) - base ) */
    coarse_grid = hypre_AllocBaseArray(int, A_n, base);
 
-   /* coarse-grid selection function call *
+   /* coarse-grid selection function call */
    hypre_coarsen_( ..., &base,
                    hypre_BaseArrayData(coarse_grid, base);
 
-   /* coarse-grid de-allocation ( = hypre_TFree(coarse_grid + base) ) *
+   /* coarse-grid de-allocation ( = hypre_TFree(coarse_grid + base) ) */
    hypre_FreeBaseArray(coarse_grid, base);
    return 0;
 }
 
 \end{verbatim}
-
-*/
-
-//@}
-
-//@}
 

@@ -1,0 +1,95 @@
+%==========================================================================
+\chapter{\hypre{} Requirements}
+\label{hypre Requirements}
+
+%==========================================================================
+\section{Functional Requirements}
+\label{Functional Requirements}
+
+\begin{description}
+
+\item[R1] \hypre{} will consist of a set of linear solvers,
+preconditioners, libraries of linear solvers, and an interface that
+allows various applications to use these libraries and linear solvers
+in various ways.
+\begin{description}
+
+\item[R1.1] Current linear solver include ILUT, AMG, EBE, PILUT, SMG,
+and
+
+\item[R1.2] Current libraries of linear solvers include PetsC, ISIS, and
+
+\end{description}
+
+\item[R2] \hypre{} must allow access to other libraries of linear
+solvers directly through the \hypre{} interface and allow \hypre{}'s other
+linear solvers and preconditioners to be accesses via the standard
+interface for the other libraries of linear solvers.
+
+
+\item[R3] New linear solvers, preconditioners, and libraries of
+linear solvers should be able to be added to \hypre{} and accessed
+through the \hypre{} interface any time without much modification.
+\begin{description}
+
+\item[R3.1] A degree of modularity and loose coupling should exist to
+ensure modification and enhancements are simple.
+
+\item[R3.2] (related to R2 also): every linear solver and
+preconditioner should exist independently of the \hypre{} interface.
+
+\end{description}
+
+\item[R4] The applications that will use \hypre{} may provide data in a
+variety of forms.  \hypre{} should allow new forms of data to be input
+without much modification.
+\begin{description}
+
+\item[R4.1] Currently application data may consist of linear algebra,
+finite elements, stencils, and
+
+\item[R4.2] The \hypre{} interface should be modular to the extent that
+adding new valid application data forms will be simple.
+
+\end{description}
+
+\item[R5] \hypre{} should provide mechanisms to maximize the number of
+linear solvers and preconditioners avialable to an application
+regardless of the format of that data provided by those applications.
+\begin{description}
+
+\item[R5.1] The user will choose which linear solver or preconditioner
+to apply to the data. (A set of valid choices will be provided).
+
+\item[R5.1] This should be accomplished primarily by "translating"
+the application data into the storage schema required by the solver or
+preconditioner or by applting the coefficient access method required
+by the solver or preconditioner.
+
+\end{description}
+
+\end{description}
+
+%==========================================================================
+\section{Non-Functional Requirements}
+\label{Non-Functional Requirements}
+
+\begin{description}
+
+\item[R6] \hypre{} should be portable across these platforms: Sun, DEC,
+BLue, and
+	
+\item[R7] \hypre{} should work with applications written in C, C++,
+FORTRAN77, and
+	
+\item[R8] \hypre{} should should be easy to compile, configure, and
+install.
+
+\item[R9] \hypre{} should be scalable.
+
+\item[R10] \hypre{} should work with applications that utilize the MPI
+standard as well as those incorporating both MPI and OpenMP or MPI and
+Pthreads.
+
+\end{description}
+

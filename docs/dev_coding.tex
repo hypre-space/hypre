@@ -1,16 +1,15 @@
-/** @name	Coding Standards
+%==========================================================================
+\chapter{Coding Standards}
+\label{Coding Standards}
 
 These guidelines are based on those provided by the ISE project in CASC.
-See #file:/home/casc/software_development/html/index.html# for more info.
+See \file{file:/home/casc/software_development/html/index.html} for more info.
 
-*/
+%==========================================================================
+\section{General Guidelines}
+\label{General Guidelines}
 
-//@{
-
-/*==========================================================================*/
-/** @name General Guidelines
-
-The guidelines given in the ISE project document #coding_style.ps#
+The guidelines given in the ISE project document \file{coding_style.ps}
 should be followed.  There are a few additions/changes that should
 be made here:
 \begin{enumerate}
@@ -22,7 +21,7 @@ should look like
 \begin{verbatim}
    HYPRE_SetMatrixCoeffs(matrix_object, ...)
 \end{verbatim}
-even though the #matrix_object# is an I/O parameter.  This is just to
+even though the \code{matrix_object} is an I/O parameter.  This is just to
 provide some consistency.
 
 \item Guidelines for indentation are given below.
@@ -34,10 +33,9 @@ to indicate error status.  This will primarily affect "New" functions.
 
 \end{enumerate}
 
-*/
-
-/*==========================================================================*/
-/** @name Naming Conventions for hypre
+%==========================================================================
+\section{Naming Conventions for \hypre{}}
+\label{Naming Conventions for hypre}
 
 \begin{enumerate}
 
@@ -74,10 +72,9 @@ macros.
 
 \end{enumerate}
  
-*/
-
-/*==========================================================================*/
-/** @name User interface vs. internal code
+%==========================================================================
+\section{User interface vs. internal code}
+\label{User interface vs. internal code}
 
 The term "user" here refers to someone who wants to solve linear systems,
 but is not developing linear solvers.  The term "internal code" refers to
@@ -87,15 +84,16 @@ NOTE: It is important to clearly distinguish between supported
 routines and everything else in the library.  The mechanism described
 below is one way of making this explicit.
 
-The following convention has been used to some degree already in hypre
-for separating the two above notions.  Files containing internal
-routines are given names WITHOUT the #hypre_# prefix and include only
-ONE internal header file with some name that is unique in the hypre
-library (Note: The SMG code currently uses the convention of giving
-this header file the same name as the subdirectory it lives in.  See
-the below example).  All user interface routines are defined in files
-beginning with the prefix #HYPRE_#.  One user interface header file is
-defined that contains prototypes, etc., for the interface routines.
+The following convention has been used to some degree already in
+\hypre{} for separating the two above notions.  Files containing
+internal routines are given names WITHOUT the \code{hypre_} prefix and
+include only ONE internal header file with some name that is unique in
+the \hypre{} library (Note: The SMG code currently uses the convention
+of giving this header file the same name as the subdirectory it lives
+in.  See the below example).  All user interface routines are defined
+in files beginning with the prefix \code{HYPRE_}.  One user interface
+header file is defined that contains prototypes, etc., for the
+interface routines.
 
 By doing this, it is easy to create prototypes for internal routines and
 user interface routines.  For example,
@@ -108,24 +106,20 @@ We should continue this convention for now.  It is possible that this
 may be changed to some other convention in the future, but if we have
 a common way of doing it now, it will be easier to change later.
 
-*/
+%==========================================================================
+\section{Indentation}
+\label{Indentation}
 
-/*==========================================================================*/
-/** @name Indentation
-
-The ISE project file #sample.emacs# should be used to provide a common
+The ISE project file \file{sample.emacs} should be used to provide a common
 indentation style for the library.  If you don't use emacs as your
 editor, you can use the scripts written by Rob Falgout to indent files
-from the shell command line.  See the README file in #~falgout/tools#.
+from the shell command line.  See the README file in \file{~falgout/tools}.
 
-The files #sample_c_code.c# and #sample_f77_code.c# have been
-provided as examples of indentation style for hypre.  They are
+The files \file{sample_c_code.c} and \file{sample_f77_code.c} have
+been provided as examples of indentation style for \hypre{}.  They are
 modifications of those provided by the ISE project.
 
 NOTE: the Fortran source file and the Fortran mode defined in
-the #sample.emacs# file do not agree.  The Fortran part of this
+the \file{sample.emacs} file do not agree.  The Fortran part of this
 document needs work.  Volunteers?
 
-*/
-
-//@}

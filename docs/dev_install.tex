@@ -1,6 +1,8 @@
-/** @name Installing hypre
+%==========================================================================
+\chapter{Installing \hypre{}}
+\label{Installing hypre}
 
-There are two types of hypre installations that are updated and
+There are two types of \hypre{} installations that are updated and
 maintained by members of the Scalable Linear Solvers project:
 \begin{enumerate}
 
@@ -39,28 +41,26 @@ notification of installation updates: one for "internal" updates and
 one for "external" updates.  Users should send email to Rob at
 rfalgout@llnl.gov to get on either list.
 
-*/
+%==========================================================================
+\section{Installation Procedures}
+\label{Installation Procedures}
 
-//@{
-
-/*==========================================================================*/
-/** @name Installation Procedures
-
-All installations are done with the #update# Bourne-shell script
-located in the top-level directory of the hypre repository.  To
-get general usage info, do #update -help#.
+All installations are done with the \file{update} Bourne-shell script
+located in the top-level directory of the \hypre{} repository.  To
+get general usage info, do \kbd{update -help}.
 \begin{itemize}
 
 \item Internal installation: (on CASC cluster only)
 \begin{enumerate}
 
-   \item Do #update internal# - this checks out the current version of the
-   repository, tags it with a date (file #VERSION_DATE#), compiles it,
-   temporarily installs it, and sets the permissions of the temporary
-   installation to appropriate values.  This also creates the tar file
-   #UPDATE.tar#, currently only used in the external installation.
+   \item Do \kbd{update internal} - this checks out the current
+   version of the repository, tags it with a date (file
+   \file{VERSION_DATE}), compiles it, temporarily installs it, and
+   sets the permissions of the temporary installation to appropriate
+   values.  This also creates the tar file \file{UPDATE.tar},
+   currently only used in the external installation.
   
-   \item Do #update internal install# - this saves the previously
+   \item Do \kbd{update internal install} - this saves the previously
    installed version, moves the temporary installation into its
    correct location, and possibly deletes some older installations.
   
@@ -68,7 +68,7 @@ get general usage info, do #update -help#.
    something doesn't work as planned (e.g., failed checkout, failed
    compile, ...).  Also, step 1 provides the opportunity to test the
    library in non-CASC codes such as ARES or ALE3D via the temporary
-   installation in the #UPDATE# subdirectory.
+   installation in the \file{UPDATE} subdirectory.
   
    \item Send email to appropriate users indicating the update.
 
@@ -77,8 +77,8 @@ get general usage info, do #update -help#.
 \item External installation: (on CASC cluster)
 \begin{enumerate}
 
-   \item Do #update external#
-   \item Do #update external install#
+   \item Do \kbd{update external}
+   \item Do \kbd{update external install}
 
 \end{enumerate}
 
@@ -86,17 +86,13 @@ get general usage info, do #update -help#.
 e.g. the Compass cluster)
 \begin{enumerate}
 
-   \item FTP the file #UPDATE.tar# to west (for example), and put it
-   in the install directory (do #update -dirs# for a list).
-   \item Do #tar xf UPDATE.tar#
-   \item Do #update external -dec #
-   \item Do #update external -dec install#
+   \item FTP the file \file{UPDATE.tar} to west (for example), and put it
+   in the install directory (do \kbd{update -dirs} for a list).
+   \item Do \kbd{tar xf UPDATE.tar}
+   \item Do \kbd{update external -dec}
+   \item Do \kbd{update external -dec install}
 
 \end{enumerate}
 
 \end{itemize}
-
-*/
-
-//@}
 

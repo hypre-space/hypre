@@ -13,6 +13,10 @@
 srcdir = @srcdir@
 VPATH = @srcdir@
 
+ONLINE_OPTS =\
+ -show_section_numbers\
+ -bottom_navigation
+
 ##################################################################
 # Targets
 ##################################################################
@@ -22,54 +26,97 @@ all: html ps
 install: all
 
 clean:
-	@rm -f users_manual.dvi
-	@rm -f developers_manual.dvi
+	@/bin/rm -f *.aux *.bbl *.blg *.dvi *.log *.dlog *.toc
+	@/bin/rm -f *.idx *.ilg *.ind
 
 veryclean: clean
-	@rm -fr users_manual
-	@rm -f users_manual.tex
-	@rm -f users_manual.ps
-	@rm -fr developers_manual
-	@rm -f developers_manual.tex
-	@rm -f developers_manual.ps
+	@/bin/rm -fr usr_manual
+	@/bin/rm -f  usr_manual.ps
+	@/bin/rm -fr dev_manual
+	@/bin/rm -f  dev_manual.ps
 
 ##################################################################
 # Rules
 ##################################################################
 
-html: users_html developers_html
+html: usr_html dev_html
 
-ps: users_ps developers_ps
+ps: usr_ps dev_ps
 
-##########
+usr: usr_html usr_ps
+usr_html: usr_manual/usr_manual.html
+usr_ps: usr_manual.ps
 
-users: users_html users_ps
-
-users_html:
-	doc++ -d users_manual users_manual.dxx
-
-users_ps: users_tex
-	latex users_manual
-	latex users_manual
-	dvips -o users_manual.ps users_manual
-
-users_tex:
-	doc++ -t -o users_manual.tex users_manual.dxx
+dev: dev_html dev_ps
+dev_html: dev_manual/dev_manual.html
+dev_ps: dev_manual.ps
 
 ##########
 
-developers: developers_html developers_ps
+USR_FILES =\
+ usr_building_code.tex\
+ usr_code_description.tex\
+ usr_data.tex\
+ usr_expected_results.tex\
+ usr_files_included.tex\
+ usr_manual.tex\
+ usr_memory.tex\
+ usr_optimization.tex\
+ usr_release_record.tex\
+ usr_running_code.tex\
+ usr_scalability.tex\
+ usr_timing.tex
 
-developers_html:
-	doc++ -d developers_manual developers_manual.dxx
+usr_manual/usr_manual.html: usr_manual.dvi
+	latex2html ${ONLINE_OPTS} usr_manual.tex
 
-developers_ps: developers_tex
-	latex developers_manual
-	latex developers_manual
-	dvips -o developers_manual.ps developers_manual
+usr_manual.ps: usr_manual.dvi
+	dvips -o usr_manual.ps usr_manual
 
-developers_tex:
-	doc++ -t -o developers_manual.tex developers_manual.dxx
+usr_manual.dvi: version.tex usr_manual.idx
+	latex usr_manual
+	latex usr_manual
+
+usr_manual.idx: ${USR_FILES}
+	latex usr_manual
+	#bibtex usr_manual
+	makeindex usr_manual.idx
+
+##########
+
+DEV_FILES =\
+ dev_QA.tex\
+ dev_autotest.tex\
+ dev_coding.tex\
+ dev_design.tex\
+ dev_documentation.tex\
+ dev_error_handling.tex\
+ dev_install.tex\
+ dev_language_interop.tex\
+ dev_makefile.tex\
+ dev_manual.tex\
+ dev_reference.tex\
+ dev_requirements.tex
+
+dev_manual/dev_manual.html: dev_manual.dvi
+	latex2html ${ONLINE_OPTS} dev_manual.tex
+
+dev_manual.ps: dev_manual.dvi
+	dvips -o dev_manual.ps dev_manual
+
+dev_manual.dvi: version.tex dev_manual.idx
+	latex dev_manual
+	latex dev_manual
+
+dev_manual.idx: ${DEV_FILES}
+	latex dev_manual
+	#bibtex dev_manual
+	makeindex dev_manual.idx
+
+##########
+
+version.tex:
+	echo "\def\HYPREVersion{Revision: 0.00}" > version.tex
 
 ##################################################################
 # Generic rules
