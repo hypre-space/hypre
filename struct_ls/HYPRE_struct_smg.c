@@ -12,10 +12,14 @@
  *
  *****************************************************************************/
 
+#ifdef HYPRE_USE_PTHREADS
 #define NO_PTHREAD_MANGLING
+#endif
 
 #include "headers.h"
+#ifdef HYPRE_USE_PTHREADS
 #include "threading.h"
+#endif
 
 /*--------------------------------------------------------------------------
  * HYPRE_StructSMGInitialize
@@ -41,14 +45,6 @@ HYPRE_StructSMGFinalize( HYPRE_StructSolver solver )
  * HYPRE_StructSMGSetup
  *--------------------------------------------------------------------------*/
 
-typedef struct {
-   HYPRE_StructSolver solver;
-   HYPRE_StructMatrix A;
-   HYPRE_StructVector b;
-   HYPRE_StructVector x;
-   int               *returnvalue;
-} HYPRE_StructSMGSetupArgs;
-
 int 
 HYPRE_StructSMGSetup( HYPRE_StructSolver solver,
                       HYPRE_StructMatrix A,
@@ -60,6 +56,15 @@ HYPRE_StructSMGSetup( HYPRE_StructSolver solver,
                            (hypre_StructVector *) b,
                            (hypre_StructVector *) x ) );
 }
+
+#ifdef HYPRE_USE_PTHREADS
+typedef struct {
+   HYPRE_StructSolver solver;
+   HYPRE_StructMatrix A;
+   HYPRE_StructVector b;
+   HYPRE_StructVector x;
+   int               *returnvalue;
+} HYPRE_StructSMGSetupArgs;
 
 void
 HYPRE_StructSMGSetupVoidPtr( void *argptr )
@@ -99,18 +104,11 @@ HYPRE_StructSMGSetupPush( HYPRE_StructSolver solver,
 
    return returnvalue;
 }
+#endif
 
 /*--------------------------------------------------------------------------
  * HYPRE_StructSMGSolve
  *--------------------------------------------------------------------------*/
-
-typedef struct {
-   HYPRE_StructSolver solver;
-   HYPRE_StructMatrix A;
-   HYPRE_StructVector b;
-   HYPRE_StructVector x;
-   int               *returnvalue;
-} HYPRE_StructSMGSolveArgs;
 
 int 
 HYPRE_StructSMGSolve( HYPRE_StructSolver solver,
@@ -123,6 +121,15 @@ HYPRE_StructSMGSolve( HYPRE_StructSolver solver,
                            (hypre_StructVector *) b,
                            (hypre_StructVector *) x ) );
 }
+
+#ifdef HYPRE_USE_PTHREADS
+typedef struct {
+   HYPRE_StructSolver solver;
+   HYPRE_StructMatrix A;
+   HYPRE_StructVector b;
+   HYPRE_StructVector x;
+   int               *returnvalue;
+} HYPRE_StructSMGSolveArgs;
 
 void
 HYPRE_StructSMGSolveVoidPtr( void *argptr )
@@ -162,7 +169,7 @@ HYPRE_StructSMGSolvePush( HYPRE_StructSolver solver,
 
    return returnvalue;
 }
-
+#endif
 
 /*--------------------------------------------------------------------------
  * HYPRE_StructSMGSetMemoryUse

@@ -12,25 +12,30 @@
  * HYPRE_StructPCG interface
  *
  *****************************************************************************/
+#ifdef HYPRE_USE_PTHREADS
 #define NO_PTHREAD_MANGLING
+#endif
 
 #include "headers.h"
-#include "threading.h"
 
+#ifdef HYPRE_USE_PTHREADS
+#include "threading.h"
+#endif
 /*--------------------------------------------------------------------------
  * HYPRE_StructPCGInitialize
  *--------------------------------------------------------------------------*/
-
-typedef struct {
-   MPI_Comm             comm;
-   HYPRE_StructSolver  *returnvalue;
-} HYPRE_StructPCGInitializeArgs;
 
 HYPRE_StructSolver
 HYPRE_StructPCGInitialize( MPI_Comm comm )
 {
    return ( (HYPRE_StructSolver) hypre_PCGInitialize( ) );
 }
+
+#ifdef HYPRE_USE_PTHREADS
+typedef struct {
+   MPI_Comm             comm;
+   HYPRE_StructSolver  *returnvalue;
+} HYPRE_StructPCGInitializeArgs;
 
 void
 HYPRE_StructPCGInitializeVoidPtr( void *argptr )
@@ -63,6 +68,7 @@ HYPRE_StructPCGInitializePush( MPI_Comm comm )
 
    return returnvalue;
 }
+#endif
 
 /*--------------------------------------------------------------------------
  * HYPRE_StructPCGFinalize
@@ -94,14 +100,6 @@ HYPRE_StructPCGSetup( HYPRE_StructSolver solver,
  * HYPRE_StructPCGSolve
  *--------------------------------------------------------------------------*/
 
-typedef struct {
-   HYPRE_StructSolver  solver;
-   HYPRE_StructMatrix  A;
-   HYPRE_StructVector  b;
-   HYPRE_StructVector  x;
-   int                *returnvalue;
-} HYPRE_StructPCGSolveArgs;
-
 int 
 HYPRE_StructPCGSolve( HYPRE_StructSolver solver,
                       HYPRE_StructMatrix A,
@@ -113,6 +111,15 @@ HYPRE_StructPCGSolve( HYPRE_StructSolver solver,
                            (void *) b,
                            (void *) x ) );
 }
+
+#ifdef HYPRE_USE_PTHREADS
+typedef struct {
+   HYPRE_StructSolver  solver;
+   HYPRE_StructMatrix  A;
+   HYPRE_StructVector  b;
+   HYPRE_StructVector  x;
+   int                *returnvalue;
+} HYPRE_StructPCGSolveArgs;
 
 void
 HYPRE_StructPCGSolveVoidPtr( void *argptr )
@@ -152,6 +159,7 @@ HYPRE_StructPCGSolvePush( HYPRE_StructSolver solver,
    
    return returnvalue;
 }
+#endif
 
 /*--------------------------------------------------------------------------
  * HYPRE_StructPCGSetTol
@@ -261,14 +269,6 @@ HYPRE_StructDiagScaleSetup( HYPRE_StructSolver solver,
  * HYPRE_StructDiagScale
  *--------------------------------------------------------------------------*/
 
-typedef struct {
-   HYPRE_StructSolver  solver;
-   HYPRE_StructMatrix  HA;
-   HYPRE_StructVector  Hy;
-   HYPRE_StructVector  Hx;
-   int                *returnvalue;
-} HYPRE_StructDiagScaleArgs;
-
 int 
 HYPRE_StructDiagScale( HYPRE_StructSolver solver,
                        HYPRE_StructMatrix HA,
@@ -335,6 +335,15 @@ HYPRE_StructDiagScale( HYPRE_StructSolver solver,
    return ierr;
 }
 
+#ifdef HYPRE_USE_PTHREADS
+typedef struct {
+   HYPRE_StructSolver  solver;
+   HYPRE_StructMatrix  HA;
+   HYPRE_StructVector  Hy;
+   HYPRE_StructVector  Hx;
+   int                *returnvalue;
+} HYPRE_StructDiagScaleArgs;
+
 void
 HYPRE_StructDiagScaleVoidPtr ( void *argptr )
 {
@@ -374,3 +383,4 @@ HYPRE_StructDiagScalePush( HYPRE_StructSolver solver,
 
    return returnvalue;
 }
+#endif
