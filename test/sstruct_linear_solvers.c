@@ -1269,8 +1269,8 @@ main( int   argc,
             }
             for (box = 0; box < pdata.nboxes; box++)
             {
-               GetVariableBox(pdata.ilowers[box], pdata.iuppers[box], var,
-                              ilower, iupper);
+               GetVariableBox(pdata.ilowers[box], pdata.iuppers[box],
+                              pdata.vartypes[var], ilower, iupper);
                HYPRE_SStructMatrixSetBoxValues(A, part, ilower, iupper,
                                                var, 1, &i, values);
             }
