@@ -25,7 +25,6 @@ CFLAGS =\
  ${C_COMPILE_FLAGS}\
  -I..\
  -I../utilities\
- -I../krylov\
  ${CINCLUDES}
 
 RANLIB = @RANLIB@
@@ -34,7 +33,7 @@ HEADERS =\
  gmres.h\
  pcg.h\
  bicgstab.h\
- cgnr.c
+ cgnr.h
 
 FILES =\
  gmres.c\
@@ -59,7 +58,7 @@ clean:
 	@rm -f *.kdd
 
 veryclean: clean
-	@rm -f libHYPRE_*.a
+	@rm -f lib*.a
 
 
 ##################################################################
