@@ -14,6 +14,7 @@
 
 #include "./distributed_matrix.h"
 
+#include "../seq_matrix_vector/HYPRE_seq_mv.h"
 #include "../parcsr_matrix_vector/HYPRE_parcsr_mv.h"
 
 typedef struct
