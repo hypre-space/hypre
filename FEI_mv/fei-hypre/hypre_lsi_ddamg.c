@@ -40,9 +40,9 @@ void HYPRE_LSI_Get_IJAMatrixFromFile(double**,int**,int**,int*,double**,
 /***************************************************************************/
 /***************************************************************************/
 
-//**************************************************************************/
-// local variables for preconditioning (bad idea, but...)                  */
-//**************************************************************************/
+/***************************************************************************/
+/* local variables for preconditioning (bad idea, but...)                  */
+/***************************************************************************/
 
 HYPRE_IJMatrix localA;
 HYPRE_IJVector localb;
@@ -800,8 +800,9 @@ int HYPRE_IntfaceSolve( HYPRE_Solver solver, HYPRE_ParCSRMatrix A_csr,
       hypre_ParVectorAxpy(one, f_par, r_par);
       HYPRE_ParVectorInnerProd(r_csr, r_csr, &rnorm);
       rnorm = sqrt( rnorm );
-      //if ( myRank == 0 )
-      //   printf("   Interface GMRES : true res. norm = %e \n", rnorm);
+      /*if ( myRank == 0 )
+         printf("   Interface GMRES : true res. norm = %e \n", rnorm);
+      */
    }
     
    /* --------------------------------------------------------*/
@@ -1078,8 +1079,8 @@ int HYPRE_LSI_DDAMGSolve(HYPRE_ParCSRMatrix A_csr, HYPRE_ParVector x_csr,
    LA_csr  = (HYPRE_ParCSRMatrix) HYPRE_IJMatrixGetLocalStorage(localA);
    Lb_csr  = (HYPRE_ParVector)    HYPRE_IJVectorGetLocalStorage(localb);
    Lx_csr  = (HYPRE_ParVector)    HYPRE_IJVectorGetLocalStorage(localx);
-   //HYPRE_ParAMGSetIOutDat(SeqPrecon, 2);
-   //HYPRE_ParAMGSetDebugFlag(SeqPrecon, 1);
+   /*HYPRE_ParAMGSetIOutDat(SeqPrecon, 2);*/
+   /*HYPRE_ParAMGSetDebugFlag(SeqPrecon, 1);*/
    HYPRE_ParAMGSetup( SeqPrecon, LA_csr, Lb_csr, Lx_csr);
    MPI_Barrier(MPI_COMM_WORLD);
 
@@ -1171,14 +1172,15 @@ printf("CHECK 2 = %e\n", ddata);
    HYPRE_ParCSRGMRESSetup(PSolver, A_csr, b_csr, x_csr);
    HYPRE_ParCSRGMRESSolve(PSolver, A_csr, b_csr, x_csr);
    HYPRE_ParCSRGMRESGetNumIterations(PSolver, &num_iterations);
-   //HYPRE_ParCSRPCGCreate(parComm, &PSolver);
-   //HYPRE_ParCSRPCGSetPrecond(PSolver,HYPRE_DDAMGSolve,HYPRE_DummySetup, 
-   //                         SeqPrecon);
-   //HYPRE_ParCSRPCGSetMaxIter(PSolver, 100);
-   //HYPRE_ParCSRPCGSetTol(PSolver, 1.0E-8);
-   //HYPRE_ParCSRPCGSetup(PSolver, A_csr, b_csr, x_csr);
-   //HYPRE_ParCSRPCGSolve(PSolver, A_csr, b_csr, x_csr);
-   //HYPRE_ParCSRPCGGetNumIterations(PSolver, &num_iterations);
+   /*HYPRE_ParCSRPCGCreate(parComm, &PSolver);
+     HYPRE_ParCSRPCGSetPrecond(PSolver,HYPRE_DDAMGSolve,HYPRE_DummySetup, 
+                              SeqPrecon);
+     HYPRE_ParCSRPCGSetMaxIter(PSolver, 100);
+     HYPRE_ParCSRPCGSetTol(PSolver, 1.0E-8);
+     HYPRE_ParCSRPCGSetup(PSolver, A_csr, b_csr, x_csr);
+     HYPRE_ParCSRPCGSolve(PSolver, A_csr, b_csr, x_csr);
+     HYPRE_ParCSRPCGGetNumIterations(PSolver, &num_iterations);
+   */
    if ( myRank == 0 )
       printf("GMRES iteration count = %d \n", num_iterations);
 
