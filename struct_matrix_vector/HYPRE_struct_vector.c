@@ -226,3 +226,43 @@ HYPRE_SetStructVectorConstantValues( HYPRE_StructMatrix  vector,
    return( hypre_SetStructVectorConstantValues( (hypre_StructVector *) vector,
                                                 values) );
 }
+
+/*--------------------------------------------------------------------------
+ * HYPRE_GetMigrateStructVectorCommPkg
+ *--------------------------------------------------------------------------*/
+
+HYPRE_CommPkg
+HYPRE_GetMigrateStructVectorCommPkg( HYPRE_StructVector from_vector,
+				     HYPRE_StructVector to_vector   )
+{
+   return( (HYPRE_CommPkg) 
+	   hypre_GetMigrateStructVectorCommPkg( 
+                		(hypre_StructVector *)from_vector, 
+				(hypre_StructVector *)to_vector ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_MigrateStructVector
+ *--------------------------------------------------------------------------*/
+
+int 
+HYPRE_MigrateStructVector( HYPRE_CommPkg      comm_pkg,
+			   HYPRE_StructVector from_vector,
+                           HYPRE_StructVector to_vector   )
+{
+  return( hypre_MigrateStructVector( (hypre_CommPkg *)comm_pkg,
+				     (hypre_StructVector *)from_vector,
+				     (hypre_StructVector *)to_vector ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_FreeCommPkg
+ *--------------------------------------------------------------------------*/
+
+void 
+HYPRE_FreeCommPkg( HYPRE_CommPkg comm_pkg )
+{
+  hypre_FreeCommPkg( (hypre_CommPkg *)comm_pkg );
+}
+
+
