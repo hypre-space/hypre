@@ -38,7 +38,7 @@ public :
 
    MLI_Solver(char *name);
    MLI_Solver(int  id);
-   ~MLI_Solver()             { }
+   virtual ~MLI_Solver()     { }
 
    char* getName()           { return solver_name; }
    int   getID()             { return solver_id; }
