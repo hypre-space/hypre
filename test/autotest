@@ -81,7 +81,11 @@ $MAKE beta 1> $0.beta.log 2> $0.beta.err
 echo "$HYPRE_BETA_EMAIL" > $0.beta.err.email 
 
 # make documentation
-(cd docs; $MAKE)
+(
+    cd docs
+    $MAKE 1> ../$0.docs.log 2> ../$0.docs.err
+    echo "$HYPRE_ALL_EMAIL" > ../$0.docs.err.email 
+)
 
 #==============================
 # Run test suites
