@@ -389,12 +389,6 @@ MPI_Type_commit( MPI_Datatype *datatype )
    return(0);
 }
 
-int
-MPI_LOR( MPI_Datatype *datatype )
-{
-   return(0);
-}
-
 #else
 
 /* this is used only to eliminate compiler warnings */
