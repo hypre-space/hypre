@@ -135,7 +135,18 @@ fei: base
 	@ \
 	HYPRE_INSTALL_DIR=`pwd`/hypre; \
 	export HYPRE_INSTALL_DIR; \
-	for i in ${HYPRE_IJ_DIRS} ${HYPRE_FEI_DIRS}; \
+	for i in ${HYPRE_IJ_DIRS}; \
+	do \
+	  if [ -d $$i ]; \
+	  then \
+	    echo "Making $$i ..."; \
+	    (cd $$i; make install); \
+	    echo ""; \
+	  fi; \
+	done; \
+	HYPRE_INSTALL_DIR=`pwd`/hypre; \
+	export HYPRE_INSTALL_DIR; \
+	for i in ${HYPRE_FEI_DIRS}; \
 	do \
 	  if [ -d $$i ]; \
 	  then \
@@ -166,7 +177,7 @@ base:
 	cp -f HYPRE_config.h $$HYPRE_INSTALL_DIR/include/.;\
 	cp -f HYPRE.h $$HYPRE_INSTALL_DIR/include/.
 
-install: all
+install: all fei
 	@ \
 	if [ ! "$$HYPRE_INSTALL_DIR" ]; \
 	then \
