@@ -292,8 +292,10 @@ int hypre_BuildAMGeMatrixTopology(hypre_AMGeMatrixTopology **A_pointer,
   hypre_TFree(i_node_face);
   hypre_TFree(j_node_face);
 
+  /*
   printf("num_boundary_faces: %d, num_bfaces: %d\n",
 	 i_boundarysurface_face[num_boundarysurfaces], num_bfaces);
+	 */
 
   i_boundarysurface_face[num_boundarysurfaces] = num_bfaces;
 
