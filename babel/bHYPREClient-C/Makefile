@@ -53,7 +53,7 @@ IORHDRS = bHYPRE_BoomerAMG_IOR.h bHYPRE_CoefficientAccess_IOR.h               \
   bHYPRE_SStructStencil_IOR.h bHYPRE_SStructVariable_IOR.h                    \
   bHYPRE_SStructVector_IOR.h bHYPRE_Solver_IOR.h                              \
   bHYPRE_StructBuildMatrix_IOR.h bHYPRE_StructBuildVector_IOR.h               \
-  bHYPRE_StructGrid_IOR.h bHYPRE_StructMatrix_IOR.h                           \
+  bHYPRE_StructGrid_IOR.h bHYPRE_StructMatrix_IOR.h bHYPRE_StructPFMG_IOR.h   \
   bHYPRE_StructStencil_IOR.h bHYPRE_StructVector_IOR.h bHYPRE_Vector_IOR.h
 
 IORSRCS = bHYPRE_BoomerAMG_IOR.c bHYPRE_CoefficientAccess_IOR.c               \
@@ -68,7 +68,7 @@ IORSRCS = bHYPRE_BoomerAMG_IOR.c bHYPRE_CoefficientAccess_IOR.c               \
   bHYPRE_SStructStencil_IOR.c                    \
   bHYPRE_SStructVector_IOR.c bHYPRE_Solver_IOR.c                              \
   bHYPRE_StructBuildMatrix_IOR.c bHYPRE_StructBuildVector_IOR.c               \
-  bHYPRE_StructGrid_IOR.c bHYPRE_StructMatrix_IOR.c                           \
+  bHYPRE_StructGrid_IOR.c bHYPRE_StructMatrix_IOR.c bHYPRE_StructPFMG_IOR.c   \
   bHYPRE_StructStencil_IOR.c bHYPRE_StructVector_IOR.c bHYPRE_Vector_IOR.c
 
 STUBHDRS = bHYPRE.h bHYPRE_BoomerAMG.h bHYPRE_CoefficientAccess.h             \
@@ -82,7 +82,7 @@ STUBHDRS = bHYPRE.h bHYPRE_BoomerAMG.h bHYPRE_CoefficientAccess.h             \
   bHYPRE_SStructStencil.h bHYPRE_SStructVariable.h bHYPRE_SStructVector.h     \
   bHYPRE_Solver.h bHYPRE_StructBuildMatrix.h bHYPRE_StructBuildVector.h       \
   bHYPRE_StructGrid.h bHYPRE_StructMatrix.h bHYPRE_StructStencil.h            \
-  bHYPRE_StructVector.h bHYPRE_Vector.h
+  bHYPRE_StructVector.h bHYPRE_Vector.h bHYPRE_StructPFMG.h
 
 STUBSRCS = bHYPRE_BoomerAMG_Stub.c bHYPRE_CoefficientAccess_Stub.c            \
   bHYPRE_GMRES_Stub.c bHYPRE_IJBuildMatrix_Stub.c bHYPRE_IJBuildVector_Stub.c \
@@ -97,7 +97,8 @@ STUBSRCS = bHYPRE_BoomerAMG_Stub.c bHYPRE_CoefficientAccess_Stub.c            \
   bHYPRE_SStructVector_Stub.c bHYPRE_Solver_Stub.c                            \
   bHYPRE_StructBuildMatrix_Stub.c bHYPRE_StructBuildVector_Stub.c             \
   bHYPRE_StructGrid_Stub.c bHYPRE_StructMatrix_Stub.c                         \
-  bHYPRE_StructStencil_Stub.c bHYPRE_StructVector_Stub.c bHYPRE_Vector_Stub.c
+  bHYPRE_StructStencil_Stub.c bHYPRE_StructVector_Stub.c bHYPRE_Vector_Stub.c \
+  bHYPRE_StructPFMG_Stub.c
 
 HEADERS = ${STUBHDRS} ${IORHDRS} ${IMPLHDRS}
 
