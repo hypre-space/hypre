@@ -11,11 +11,6 @@ work once hypre is updated to use GNU standard targets.
 On frost.llnl.gov, configure cannot find an include necessary for Java
 without being told the path, with the configure argument
  JNI_INCLUDES="-I /usr/java130/include"
-If it doesn't have that information, it should (but doesn't) disable
-Java from the languages supported by the Babel runtime.
-Consequently ... I have changed the configure.ac file to disable
-Java in all cases.  Fortran90 is also disabled, as it also won't build
-properly on Frost.
 
 On frost.llnl.gov and probably other machines, the Hypre default C and
 Fortran compilers are different from the Babel defaults.  The hypre
