@@ -68,7 +68,8 @@ int MLI_Solver_AMG::setup(MLI_Matrix *mat)
    relaxOmega = (double *) malloc(25 * sizeof(double));
    for (i = 0; i < 25; i++) relaxOmega[i] = 1.0;
    HYPRE_BoomerAMGSetOmega(precond_, relaxOmega);
-   HYPRE_BoomerAMGSetup(precond_, hypreA, NULL, NULL);
+   HYPRE_BoomerAMGSetup(precond_, (HYPRE_ParCSRMatrix) hypreA, 
+         (HYPRE_ParVector) NULL, (HYPRE_ParVector) NULL);
    return 0;
 }
 
