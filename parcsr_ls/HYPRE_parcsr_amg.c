@@ -318,7 +318,7 @@ HYPRE_ParAMGInitGridRelaxation( int     **num_grid_sweeps_ptr,
    grid_relax_points[3][0] = 0;
 
    for (i = 0; i < max_levels; i++)
-      relax_weights[i] = 0.;
+      relax_weights[i] = 1.;
 
    return 0;
 }
