@@ -1194,7 +1194,112 @@ int HYPRE_ParCSRParaSailsSetReuse(HYPRE_Solver solver,
  **/
 int HYPRE_ParCSRParaSailsSetLogging(HYPRE_Solver solver,
                                     int          logging);
+/*
+ * @name ParCSRHybrid Solver
+ **/
+ 
+int HYPRE_ParCSRHybridCreate( HYPRE_Solver *solver);
+ 
+int HYPRE_ParCSRHybridDestroy(HYPRE_Solver solver);
+ 
+int HYPRE_ParCSRHybridSetup(HYPRE_Solver solver,
+                            HYPRE_ParCSRMatrix A,
+                            HYPRE_ParVector b,
+                            HYPRE_ParVector x); 
+ 
+int HYPRE_ParCSRHybridSolve(HYPRE_Solver solver,
+                            HYPRE_ParCSRMatrix A,
+                            HYPRE_ParVector b,
+                            HYPRE_ParVector x);
+ 
+int HYPRE_ParCSRHybridSetTol(HYPRE_Solver solver,
+                             double             tol);
+ 
+int HYPRE_ParCSRHybridSetConvergenceTol(HYPRE_Solver solver,
+                                        double             cf_tol);
+ 
+int HYPRE_ParCSRHybridSetDSCGMaxIter(HYPRE_Solver solver,
+                                     int                dscg_max_its);
+ 
+int HYPRE_ParCSRHybridSetPCGMaxIter(HYPRE_Solver solver,
+                                    int                pcg_max_its);
+ 
+int HYPRE_ParCSRHybridSetTwoNorm(HYPRE_Solver solver,
+                                 int                two_norm);
+ 
+int HYPRE_ParCSRHybridSetRelChange(HYPRE_Solver solver,
+                                   int                rel_change); 
+ 
+int HYPRE_ParCSRHybridSetPrecond(HYPRE_Solver         solver,
+                                 HYPRE_PtrToParSolverFcn precond,
+                                 HYPRE_PtrToParSolverFcn precond_setup,
+                                 HYPRE_Solver         precond_solver);
+ 
+int HYPRE_ParCSRHybridSetLogging(HYPRE_Solver solver,
+                                 int                logging);
 
+int
+HYPRE_ParCSRHybridSetPLogging( HYPRE_Solver solver,
+                              int               plogging    );
+ 
+int
+HYPRE_ParCSRHybridSetStrongThreshold( HYPRE_Solver solver,
+                              double            strong_threshold    );
+ 
+int
+HYPRE_ParCSRHybridSetMaxRowSum( HYPRE_Solver solver,
+                              double             max_row_sum    );
+ 
+int
+HYPRE_ParCSRHybridSetTruncFactor( HYPRE_Solver solver,
+                              double              trunc_factor    );
+ 
+int
+HYPRE_ParCSRHybridSetMaxLevels( HYPRE_Solver solver,
+                              int                max_levels    );
+ 
+int
+HYPRE_ParCSRHybridSetMeasureType( HYPRE_Solver solver,
+                              int                measure_type    );
+ 
+int
+HYPRE_ParCSRHybridSetCoarsenType( HYPRE_Solver solver,
+                              int                coarsen_type    );
+ 
+int
+HYPRE_ParCSRHybridSetCycleType( HYPRE_Solver solver,
+                              int                cycle_type    );
+ 
+int
+HYPRE_ParCSRHybridSetNumGridSweeps( HYPRE_Solver solver,
+                              int               *num_grid_sweeps    );
+ 
+int
+HYPRE_ParCSRHybridSetGridRelaxType( HYPRE_Solver solver,
+                              int               *grid_relax_type    );
+ 
+int
+HYPRE_ParCSRHybridSetGridRelaxPoints( HYPRE_Solver solver,
+                              int              **grid_relax_points    );
+ 
+int
+HYPRE_ParCSRHybridSetRelaxWeight( HYPRE_Solver solver,
+                              double             *relax_weight    );
+ 
+int HYPRE_ParCSRHybridGetNumIterations(HYPRE_Solver  solver,
+                                       int                *num_its);
+ 
+int HYPRE_ParCSRHybridGetDSCGNumIterations(HYPRE_Solver  solver,
+                                           int                *dscg_num_its);
+ 
+int HYPRE_ParCSRHybridGetPCGNumIterations(HYPRE_Solver  solver,
+                                          int                *pcg_num_its);
+ 
+int HYPRE_ParCSRHybridGetFinalRelativeResidualNorm(HYPRE_Solver  solver,                                                   double             *norm); 
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/ 
+/*@}*/
 
 #ifdef __cplusplus
 }
