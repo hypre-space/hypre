@@ -399,6 +399,16 @@ hypre_BoomerAMGBuildCoarseOperator( hypre_ParCSRMatrix  *RT,
     *  and needed locally for triple matrix product 
     *-----------------------------------------------------------------------*/
 
+   HYPRE_Int2IntSet *send_map_elmts_RT_reverse_map = hypre_Int2IntSetCreate();
+   for (i = 0; i < num_sends_RT; i++)
+   {
+      for (j = send_map_starts_RT[i]; j < send_map_starts_RT[i + 1]; j++)
+      {
+         HYPRE_Int key = send_map_elmts_RT[j];
+         hypre_Int2IntSetInsert(send_map_elmts_RT_reverse_map, key, j);
+      }
+   }
+
    if (num_procs > 1) 
    {
         Ps_ext = hypre_ParCSRMatrixExtractBExt(P,A,1);
@@ -1155,33 +1165,36 @@ hypre_BoomerAMGBuildCoarseOperator( hypre_ParCSRMatrix  *RT,
       if (square)
          P_marker[ic] = jj_count_diag++;
 
-      for (i=0; i < num_sends_RT; i++)
-        for (j = send_map_starts_RT[i]; j < send_map_starts_RT[i+1]; j++)
-            if (send_map_elmts_RT[j] == ic)
+      HYPRE_IntSet *set = hypre_Int2IntSetFind(send_map_elmts_RT_reverse_map, ic);
+      if (set)
+      {
+         hypre_IntSetBegin(set);
+         while (hypre_IntSetHasNext(set))
+         {
+            j = hypre_IntSetNext(set);
+            for (k=RAP_ext_i[j]; k < RAP_ext_i[j+1]; k++)
             {
-                for (k=RAP_ext_i[j]; k < RAP_ext_i[j+1]; k++)
-                {
-                   jcol = RAP_ext_j[k];
-                   if (jcol < num_cols_diag_P)
-                   {
-                        if (P_marker[jcol] < jj_row_begin_diag)
-                        {
-                                P_marker[jcol] = jj_count_diag;
-                                jj_count_diag++;
-                        }
-                   }
-                   else
-                   {
-                        if (P_marker[jcol] < jj_row_begin_offd)
-                        {
-                                P_marker[jcol] = jj_count_offd;
-                                jj_count_offd++;
-                        }
-                   }
-                }
-                break;
+               jcol = RAP_ext_j[k];
+               if (jcol < num_cols_diag_P)
+               {
+                    if (P_marker[jcol] < jj_row_begin_diag)
+                    {
+                            P_marker[jcol] = jj_count_diag;
+                            jj_count_diag++;
+                    }
+               }
+               else
+               {
+                    if (P_marker[jcol] < jj_row_begin_offd)
+                    {
+                            P_marker[jcol] = jj_count_offd;
+                            jj_count_offd++;
+                    }
+               }
             }
- 
+         }
+      } // if (set)
+
       /*--------------------------------------------------------------------
        *  Loop over entries in row ic of R_diag.
        *--------------------------------------------------------------------*/
@@ -1474,45 +1487,48 @@ hypre_BoomerAMGBuildCoarseOperator( hypre_ParCSRMatrix  *RT,
          jj_count_diag++;
       }
 
-      for (i=0; i < num_sends_RT; i++)
-        for (j = send_map_starts_RT[i]; j < send_map_starts_RT[i+1]; j++)
-            if (send_map_elmts_RT[j] == ic)
+      HYPRE_IntSet *set = hypre_Int2IntSetFind(send_map_elmts_RT_reverse_map, ic);
+      if (set)
+      {
+         hypre_IntSetBegin(set);
+         while (hypre_IntSetHasNext(set))
+         {
+            j = hypre_IntSetNext(set);
+            for (k=RAP_ext_i[j]; k < RAP_ext_i[j+1]; k++)
             {
-                for (k=RAP_ext_i[j]; k < RAP_ext_i[j+1]; k++)
-                {
-                   jcol = RAP_ext_j[k];
-                   if (jcol < num_cols_diag_P)
-                   {
-                        if (P_marker[jcol] < jj_row_begin_diag)
-                        {
-                                P_marker[jcol] = jj_count_diag;
-                                RAP_diag_data[jj_count_diag] 
-                                        = RAP_ext_data[k];
-                                RAP_diag_j[jj_count_diag] = jcol;
-                                jj_count_diag++;
-                        }
-                        else
-                                RAP_diag_data[P_marker[jcol]]
-                                        += RAP_ext_data[k];
-                   }
-                   else
-                   {
-                        if (P_marker[jcol] < jj_row_begin_offd)
-                        {
-                                P_marker[jcol] = jj_count_offd;
-                                RAP_offd_data[jj_count_offd] 
-                                        = RAP_ext_data[k];
-                                RAP_offd_j[jj_count_offd] 
-                                        = jcol-num_cols_diag_P;
-                                jj_count_offd++;
-                        }
-                        else
-                                RAP_offd_data[P_marker[jcol]]
-                                        += RAP_ext_data[k];
-                   }
-                }
-                break;
+               jcol = RAP_ext_j[k];
+               if (jcol < num_cols_diag_P)
+               {
+                    if (P_marker[jcol] < jj_row_begin_diag)
+                    {
+                            P_marker[jcol] = jj_count_diag;
+                            RAP_diag_data[jj_count_diag] 
+                                    = RAP_ext_data[k];
+                            RAP_diag_j[jj_count_diag] = jcol;
+                            jj_count_diag++;
+                    }
+                    else
+                            RAP_diag_data[P_marker[jcol]]
+                                    += RAP_ext_data[k];
+               }
+               else
+               {
+                    if (P_marker[jcol] < jj_row_begin_offd)
+                    {
+                            P_marker[jcol] = jj_count_offd;
+                            RAP_offd_data[jj_count_offd] 
+                                    = RAP_ext_data[k];
+                            RAP_offd_j[jj_count_offd] 
+                                    = jcol-num_cols_diag_P;
+                            jj_count_offd++;
+                    }
+                    else
+                            RAP_offd_data[P_marker[jcol]]
+                                    += RAP_ext_data[k];
+               }
             }
+         }
+      } // if (set)
 
       /*--------------------------------------------------------------------
        *  Loop over entries in row ic of R_diag and compute row ic of RA.
@@ -1868,6 +1884,7 @@ hypre_BoomerAMGBuildCoarseOperator( hypre_ParCSRMatrix  *RT,
       hypre_TFree(RA_offd_data_array);
       hypre_TFree(RA_offd_j_array);
    }
+   hypre_Int2IntSetDestroy(send_map_elmts_RT_reverse_map);
 
    return(0);
    
