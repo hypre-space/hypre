@@ -116,3 +116,26 @@ int impl_Hypre_ParCSRMatrix_GetLocalRange
    return 1;
 } /* end impl_Hypre_ParCSRMatrixGetLocalRange */
 
+/* ********************************************************
+ * impl_Hypre_ParCSRMatrixGetRow
+/* >>>>>>> TO DO: implement this
+ **********************************************************/
+int  impl_Hypre_ParCSRMatrix_GetRow
+( Hypre_ParCSRMatrix this, int row, int* size, array1int* col_ind,
+  array1double* values ) {
+   printf("Hypre_ParCSRMatrix_GetRow has not been implemented!\n");
+   return 1;
+} /* end impl_Hypre_ParCSRMatrixGetRow */
+
+/* ********************************************************
+ * impl_Hypre_ParCSRMatrixRestoreRow
+/* >>>>>>> TO DO: implement this
+ **********************************************************/
+int  impl_Hypre_ParCSRMatrix_RestoreRow
+( Hypre_ParCSRMatrix this, int row, int size, array1int col_ind,
+  array1double values) {
+   printf("Hypre_ParCSRMatrix_RestoreRow has not been implemented!\n");
+   return 1;
+} /* end impl_Hypre_ParCSRMatrixRestoreRow */
+
+

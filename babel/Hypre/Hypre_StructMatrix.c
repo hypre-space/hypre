@@ -139,3 +139,25 @@ int  impl_Hypre_StructMatrix_GetLocalRange
    return 1;
 } /* end impl_Hypre_StructMatrixGetLocalRange */
 
+/* ********************************************************
+ * impl_Hypre_StructMatrixGetRow
+/* >>>>>>> TO DO: implement this
+ **********************************************************/
+int  impl_Hypre_StructMatrix_GetRow
+( Hypre_StructMatrix this, int row, int* size, array1int* col_ind,
+  array1double* values ) {
+   printf("Hypre_StructMatrix_GetRow has not been implemented!\n");
+   return 1;
+} /* end impl_Hypre_StructMatrixGetRow */
+
+/* ********************************************************
+ * impl_Hypre_StructMatrixRestoreRow
+/* >>>>>>> TO DO: implement this
+ **********************************************************/
+int  impl_Hypre_StructMatrix_RestoreRow
+( Hypre_StructMatrix this, int row, int size, array1int col_ind,
+  array1double values) {
+   printf("Hypre_StructMatrix_RestoreRow has not been implemented!\n");
+   return 1;
+} /* end impl_Hypre_StructMatrixRestoreRow */
+
