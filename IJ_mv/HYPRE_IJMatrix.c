@@ -81,7 +81,8 @@ HYPRE_FreeIJMatrix( HYPRE_IJMatrix IJmatrix )
             ierr = hypre_FreeIJMatrixPETSc( matrix );
          else if ( hypre_IJMatrixLocalStorageType(matrix) == HYPRE_ISIS_MATRIX )
             ierr = hypre_FreeIJMatrixISIS( matrix );
-         else */ if ( hypre_IJMatrixLocalStorageType(matrix) == HYPRE_PARCSR_MATRIX )
+         else */ 
+	 if ( hypre_IJMatrixLocalStorageType(matrix) == HYPRE_PARCSR_MATRIX )
             ierr = hypre_FreeIJMatrixParCSR( matrix );
          else
             ierr = -1;
@@ -150,7 +151,9 @@ HYPRE_AssembleIJMatrix( HYPRE_IJMatrix IJmatrix )
  *--------------------------------------------------------------------------*/
 
 int 
-HYPRE_DistributeIJMatrix( HYPRE_IJMatrix IJmatrix, int *row_starts , int *col_starts )
+HYPRE_DistributeIJMatrix( HYPRE_IJMatrix IJmatrix, 
+			  const int     *row_starts,
+			  const int     *col_starts )
 {
    int ierr = 0;
    hypre_IJMatrix *matrix = (hypre_IJMatrix *) IJmatrix;
@@ -242,7 +245,7 @@ HYPRE_SetIJMatrixLocalSize( HYPRE_IJMatrix IJmatrix, int local_m, int local_n )
  *--------------------------------------------------------------------------*/
 
 /**
-* HYPRE_SetIJMatrixRowSizes( HYPRE_IJMatrix IJmatrix, int *sizes); 
+* HYPRE_SetIJMatrixRowSizes( HYPRE_IJMatrix IJmatrix, const int *sizes); 
 
 Not collective.
 Tells "matrix" how many nonzeros to expect in each row.
@@ -258,7 +261,7 @@ all local_m rows, in order from lowest globally numbered local row to highest.
 */
 
 int 
-HYPRE_SetIJMatrixRowSizes( HYPRE_IJMatrix IJmatrix, int *sizes )
+HYPRE_SetIJMatrixRowSizes( HYPRE_IJMatrix IJmatrix, const int *sizes )
 {
    int ierr = 0;
    hypre_IJMatrix *matrix = (hypre_IJMatrix *) IJmatrix;
@@ -281,7 +284,7 @@ HYPRE_SetIJMatrixRowSizes( HYPRE_IJMatrix IJmatrix, int *sizes )
  *--------------------------------------------------------------------------*/
 
 /**
-* HYPRE_SetIJMatrixDiagRowSizes( HYPRE_IJMatrix IJmatrix, int *sizes); 
+* HYPRE_SetIJMatrixDiagRowSizes( HYPRE_IJMatrix IJmatrix, const int *sizes); 
 
 Not collective.
 Tells "matrix" how many nonzeros to expect in each row corresponding to other rows also
@@ -298,7 +301,7 @@ all local_m rows, in order from lowest globally numbered local row to highest.
 */
 
 int 
-HYPRE_SetIJMatrixDiagRowSizes( HYPRE_IJMatrix IJmatrix, int *sizes )
+HYPRE_SetIJMatrixDiagRowSizes( HYPRE_IJMatrix IJmatrix, const int *sizes )
 {
    int ierr = 0;
    hypre_IJMatrix *matrix = (hypre_IJMatrix *) IJmatrix;
@@ -321,7 +324,7 @@ HYPRE_SetIJMatrixDiagRowSizes( HYPRE_IJMatrix IJmatrix, int *sizes )
  *--------------------------------------------------------------------------*/
 
 /**
-* HYPRE_SetIJMatrixOffDiagRowSizes( HYPRE_IJMatrix matrix, int *sizes);
+* HYPRE_SetIJMatrixOffDiagRowSizes( HYPRE_IJMatrix matrix, const int *sizes);
 
 Tells "matrix" how many nonzeros to expect in each corresponding to rows NOT
 on this processor, i.e. the off-diagonal block corresponding to this processor. As above, this option
@@ -339,7 +342,7 @@ all local_m rows, in order from lowest globally numbered local row to highest
 */
 
 int 
-HYPRE_SetIJMatrixOffDiagRowSizes( HYPRE_IJMatrix IJmatrix, int *sizes )
+HYPRE_SetIJMatrixOffDiagRowSizes( HYPRE_IJMatrix IJmatrix, const int *sizes )
 {
    int ierr = 0;
    hypre_IJMatrix *matrix = (hypre_IJMatrix *) IJmatrix;
@@ -350,44 +353,6 @@ HYPRE_SetIJMatrixOffDiagRowSizes( HYPRE_IJMatrix IJmatrix, int *sizes )
       ierr = hypre_SetIJMatrixOffDiagRowSizesISIS( matrix , sizes );
    else */ if ( hypre_IJMatrixLocalStorageType(matrix) == HYPRE_PARCSR_MATRIX )
       ierr = hypre_SetIJMatrixOffDiagRowSizesParCSR( matrix , sizes );
-   else
-      ierr = -1;
-
-   return(ierr);
-}
-
-/*--------------------------------------------------------------------------
- * HYPRE_SetIJMatrixTotalSize
- *--------------------------------------------------------------------------*/
-
-/** 
-Tells "matrix" how many nonzeros to expect in each row. This option is preferable to using NO
-"SetSizes" commands but it may lead to less efficient Assemble calls than using the two functions
-above.
-
-Not collective.
-@return integer error code
-@param HYPRE_IJMatrix &matrix [IN]
-the matrix to be initialized.
-@param int size [IN]
-total number of coefficients expected on this processor.
-
-{\bf note} All sizes given in the SetIJMatrixSize routines do not have to be exact, that is, it is not
-an error for them to be incorrect. Incorrect values may degrade performance, however.
-*/
-
-int 
-HYPRE_SetIJMatrixTotalSize( HYPRE_IJMatrix IJmatrix, int size )
-{
-   int ierr = 0;
-   hypre_IJMatrix *matrix = (hypre_IJMatrix *) IJmatrix;
-
-   /* if ( hypre_IJMatrixLocalStorageType(matrix) == HYPRE_PETSC_MATRIX )
-      ierr = hypre_SetIJMatrixTotalSizePETSc( matrix , size );
-   else if ( hypre_IJMatrixLocalStorageType(matrix) == HYPRE_ISIS_MATRIX )
-      ierr = hypre_SetIJMatrixTotalSizeISIS( matrix , size );
-   else */ if ( hypre_IJMatrixLocalStorageType(matrix) == HYPRE_PARCSR_MATRIX )
-      ierr = hypre_SetIJMatrixTotalSizeParCSR( matrix , size );
    else
       ierr = -1;
 
@@ -468,7 +433,8 @@ block of size m X n.
 
 int 
 HYPRE_InsertIJMatrixBlock( HYPRE_IJMatrix IJmatrix, int m, int n,
-                           int *rows, int *cols, double *values)
+                           const int *rows, const int *cols, 
+			   const double *values)
 {
    int ierr = 0;
    hypre_IJMatrix *matrix = (hypre_IJMatrix *) IJmatrix;
@@ -515,7 +481,8 @@ block of size m X n.
 
 int 
 HYPRE_AddBlockToIJMatrix( HYPRE_IJMatrix IJmatrix, int m, int n,
-                           int *rows, int *cols, double *values)
+                          const int *rows, const int *cols, 
+			  const double *values)
 {
    int ierr = 0;
    hypre_IJMatrix *matrix = (hypre_IJMatrix *) IJmatrix;
@@ -559,7 +526,7 @@ The values to be inserted into the matrix.
 
 int 
 HYPRE_InsertIJMatrixRow( HYPRE_IJMatrix IJmatrix, int n,
-                           int row, int *cols, double *values)
+                           int row, const int *cols, const double *values)
 {
    int ierr = 0;
    hypre_IJMatrix *matrix = (hypre_IJMatrix *) IJmatrix;
@@ -571,6 +538,49 @@ HYPRE_InsertIJMatrixRow( HYPRE_IJMatrix IJmatrix, int n,
    else */ if ( hypre_IJMatrixLocalStorageType(matrix) == HYPRE_PARCSR_MATRIX )
      /* Currently a slight mismatch between "Insert" and "Set" */
       ierr = hypre_InsertIJMatrixRowParCSR( matrix, n, row, cols, values );
+   else
+      ierr = -1;
+
+   return(ierr);
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_AddIJMatrixRow
+ *--------------------------------------------------------------------------*/
+
+/** 
+Adds a row to the row of a matrix. 
+
+Not collective.
+
+@return integer error code
+@param HYPRE_IJMatrix &matrix [IN]
+the matrix to be operated on.
+@param int n [IN]
+the number of values in the row to be added.
+@param int row [IN]
+index of row to be added.
+@param int *cols [IN]
+an integer vector of length n giving the indices in the global matrix
+corresponding to the columns in "values".
+@param double *values {IN]
+The values to be added to the matrix.
+*/
+
+int 
+HYPRE_AddIJMatrixRow( HYPRE_IJMatrix IJmatrix, int n,
+                           int row, const int *cols, const double *values)
+{
+   int ierr = 0;
+   hypre_IJMatrix *matrix = (hypre_IJMatrix *) IJmatrix;
+
+   /* if ( hypre_IJMatrixLocalStorageType(matrix) == HYPRE_PETSC_MATRIX )
+      ierr = hypre_AddIJMatrixRowPETSc( matrix, n, row, cols, values );
+   else if ( hypre_IJMatrixLocalStorageType(matrix) == HYPRE_ISIS_MATRIX )
+      ierr = hypre_AddIJMatrixRowISIS( matrix, n, row, cols, values );
+   else */ if ( hypre_IJMatrixLocalStorageType(matrix) == HYPRE_PARCSR_MATRIX )
+     /* Currently a slight mismatch between "Insert" and "Set" */
+      ierr = hypre_AddIJMatrixRowParCSR( matrix, n, row, cols, values );
    else
       ierr = -1;
 
@@ -630,4 +640,62 @@ HYPRE_GetIJMatrixLocalStorage( HYPRE_IJMatrix IJmatrix )
 
    return( hypre_IJMatrixLocalStorage( matrix ) );
 
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_GetIJMatrixRowPartitioning
+ *--------------------------------------------------------------------------*/
+
+/**
+Returns a pointer to the row partitioning if IJmatrix has an underlying
+parcsr matrix
+
+@return integer error code
+@param IJMatrix [IN]
+The matrix to be pointed to.
+*/
+
+int
+HYPRE_GetIJMatrixRowPartitioning( HYPRE_IJMatrix IJmatrix ,
+				  const int    **row_partitioning )
+{
+   int ierr = 0;
+   hypre_IJMatrix *matrix = (hypre_IJMatrix *) IJmatrix;
+
+   if ( hypre_IJMatrixLocalStorageType(matrix) == HYPRE_PARCSR_MATRIX )
+      ierr = hypre_GetIJMatrixRowPartitioningParCSR( matrix ,
+							row_partitioning );
+   else
+      ierr = -1;
+
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_GetIJMatrixColPartitioning
+ *--------------------------------------------------------------------------*/
+
+/**
+Returns a pointer to the column partitioning if IJmatrix has an underlying
+parcsr matrix
+
+@return integer error code
+@param IJMatrix [IN]
+The matrix to be pointed to.
+*/
+
+int
+HYPRE_GetIJMatrixColPartitioning( HYPRE_IJMatrix IJmatrix ,
+				  const int    **col_partitioning )
+{
+   int ierr = 0;
+   hypre_IJMatrix *matrix = (hypre_IJMatrix *) IJmatrix;
+
+   if ( hypre_IJMatrixLocalStorageType(matrix) == HYPRE_PARCSR_MATRIX )
+      ierr = hypre_GetIJMatrixColPartitioningParCSR( matrix ,
+							col_partitioning );
+   else
+      ierr = -1;
+
+   return ierr;
 }

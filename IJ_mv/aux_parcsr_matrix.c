@@ -72,7 +72,6 @@ hypre_DestroyAuxParCSRMatrix( hypre_AuxParCSRMatrix *matrix )
 
    if (matrix)
    {
-      if (hypre_AuxParCSRMatrixNeedAux(matrix))
       {
          if (hypre_AuxParCSRMatrixRowLength(matrix))
             hypre_TFree(hypre_AuxParCSRMatrixRowLength(matrix));
@@ -87,7 +86,6 @@ hypre_DestroyAuxParCSRMatrix( hypre_AuxParCSRMatrix *matrix )
             }
          }
       }
-      else
       {
          if (hypre_AuxParCSRMatrixIndxDiag(matrix))
             hypre_TFree(hypre_AuxParCSRMatrixIndxDiag(matrix));
