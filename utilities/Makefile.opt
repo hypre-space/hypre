@@ -7,14 +7,19 @@
 # $Revision$
 #EHEADER***********************************************************************
 
-CC = cicc
-F77 = ci77
+CC = gcc
+F77 = /home/casc/g77/bin/g77
 
-CFLAGS = -O -DHYPRE_TIMING -DTIMER_USE_MPI -DTIMER_NO_SYS
+CFLAGS =\
+ -I/usr/local/include\
+ -I/home/casc/include\
+ -I/usr/local/mpi/mpich/include\
+ -O -Wall\
+ -DHYPRE_TIMING -DTIMER_USE_MPI
 
 FFLAGS = -O
 
-MEMORY_EXTRA_FILES =
+MEMORY_EXTRA_FILES = 
 
 include Makefile.generic
 

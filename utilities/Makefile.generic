@@ -1,0 +1,80 @@
+#BHEADER***********************************************************************
+# (c) 1997   The Regents of the University of California
+#
+# See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
+# notice, contact person, and disclaimer.
+#
+# $Revision$
+#EHEADER***********************************************************************
+
+.SUFFIXES:
+.SUFFIXES: .c .f .o
+
+##################################################################
+# Make all utilities
+##################################################################
+
+all: libHYPRE_memory.a libHYPRE_timing.a 
+
+##################################################################
+# Memory rules
+##################################################################
+
+MEMORY_HEADERS =\
+ memory.h
+
+MEMORY_FILES =\
+ memory.c\
+ ${MEMORY_EXTRA_FILES}
+
+MEMORY_OBJS = ${MEMORY_FILES:.c=.o}
+
+libHYPRE_memory.a: ${MEMORY_OBJS}
+	@echo  "Building $@ ... "
+	ar -ru $@ ${MEMORY_OBJS}
+	ranlib $@
+${MEMORY_OBJS}: ${MEMORY_HEADERS}
+
+##################################################################
+# Timing rules
+##################################################################
+
+TIMING_HEADERS =\
+ timer.h\
+ timing.h
+
+TIMING_FILES =\
+ timer.c\
+ timing.c
+
+TIMING_OBJS = ${TIMING_FILES:.c=.o}
+
+libHYPRE_timing.a: ${TIMING_OBJS}
+	@echo  "Building $@ ... "
+	ar -ru $@ ${TIMING_OBJS}
+	ranlib $@
+${TIMING_OBJS}: ${TIMING_HEADERS}
+
+##################################################################
+# Generic rules
+##################################################################
+
+.c.o:
+	@echo "Making (c) " $@
+	@${CC} -o $@ -c ${CFLAGS} $<
+
+.f.${AMG_ARCH}.o:
+	@echo "Making (f) " $@
+	@${F77} -o $@ -c ${FFLAGS} $<
+
+##################################################################
+# Miscellaneous rules
+##################################################################
+
+veryclean: clean
+	@rm -f libHYPRE_timing.a
+	@rm -f libHYPRE_memory.a
+
+clean:
+	@rm -f *.o
+
