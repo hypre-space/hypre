@@ -13,20 +13,21 @@
 
 HYPRE_ParCSRMatrix GenerateConvectionDiffusion(MPI_Comm,
                       int nx, int ny, int nz, int P, int Q, int R,
-                      int p, int q, int r, double alpha, double  *value );
+                      int p, int q, int r, double alpha, double beta,
+                      double  *value );
 
 int main(int argc, char **argv)
 {
 
-   int                j, nx=7, ny=7, nz=7, P, Q, R, p, q, r, nprocs;
+   int                j, nx=7, ny=7, nz=3, P, Q, R, p, q, r, nprocs;
    int                mypid, startRow;
    int                *partition, globalSize, localSize, nsweeps, rowSize;
    int                *colInd, k, *procCnts, *offsets, *rowCnts, ftype;
-   int                ndofs=3, nullDim=6, testProb=0, solver=1, scaleFlag=0;
+   int                ndofs=3, nullDim=6, testProb=0, solver=2, scaleFlag=0;
    int                fleng, rleng, status;
-   char               *targv[10], fname[100], rhsFname[100];
+   char               *targv[10], fname[100], rhsFname[100], methodName[10];
    double             *values, *nullVecs, *scaleVec, *colVal, *gscaleVec;
-   double             *rhsVector=NULL, alpha, *weights;
+   double             *rhsVector=NULL, alpha, beta, *weights;
    HYPRE_IJMatrix     newIJA;
    HYPRE_IJVector     IJrhs;
    HYPRE_ParCSRMatrix HYPREA;
@@ -59,13 +60,14 @@ int main(int argc, char **argv)
       q = (( mypid - p)/P) % Q;
       r = ( mypid - p - P*q)/( P*Q );
       values = (double *) calloc(4, sizeof(double));
-      values[3] = -1.0;
+      values[3] = -0.0;
       values[2] = -1.0;
-      values[1] = -1.0;
+      values[1] = -2.0;
       values[0] = 6.0;
-      alpha     = 0.0;
+      alpha     = 240.0;
+      beta      = 120.0;
       HYPREA = (HYPRE_ParCSRMatrix) GenerateConvectionDiffusion(MPI_COMM_WORLD, 
-                                  nx, ny, nz, P, Q, R, p, q, r, alpha, values); 
+                           nx, ny, nz, P, Q, R, p, q, r, alpha, beta, values); 
       free( values );
       HYPRE_ParCSRMatrixGetRowPartitioning(HYPREA, &partition);
       globalSize = partition[nprocs];
@@ -274,32 +276,57 @@ int main(int argc, char **argv)
    cmliMat = MLI_MatrixCreate((void*) hypreA,"HYPRE_ParCSR",funcPtr);
    free( funcPtr );
    cmli = MLI_Create( MPI_COMM_WORLD );
-   cmliMethod = MLI_MethodCreate( "AMGSA", MPI_COMM_WORLD );
-   nsweeps = 5;
-   weights = (double *) malloc( sizeof(double)*nsweeps );
-   for ( j = 0; j < nsweeps; j++ ) weights[j] = 0.3;
-   targv[0] = (char *) &nsweeps;
-   targv[1] = (char *) weights;
-   MLI_MethodSetParams( cmliMethod, "setNumLevels 2", 0, NULL );
-   MLI_MethodSetParams( cmliMethod, "setPreSmoother SGS", 2, targv );
-   MLI_MethodSetParams( cmliMethod, "setPostSmoother SGS", 2, targv );
+   strcpy( methodName, "AMGRS" );
+   cmliMethod = MLI_MethodCreate( methodName, MPI_COMM_WORLD );
    MLI_MethodSetParams( cmliMethod, "setOutputLevel 2", 0, NULL );
-   MLI_MethodSetParams( cmliMethod, "setMinCoarseSize 10", 0, NULL );
-   MLI_MethodSetParams( cmliMethod, "setPweight 0.0", 0, NULL );
-   MLI_MethodSetParams( cmliMethod, "setCoarsenScheme ruge", 0, NULL );
-   MLI_MethodSetParams( cmliMethod, "setStrengthThreshold 0.0", 0, NULL );
+   MLI_MethodSetParams( cmliMethod, "setNumLevels 2", 0, NULL );
+   MLI_MethodSetParams( cmliMethod, "setMinCoarseSize 5", 0, NULL );
+   MLI_MethodSetParams( cmliMethod, "setCoarseSolver SuperLU", 2, targv );
+   if ( ! strcmp(methodName, "AMGRS") )
+   {
+      nsweeps = 2;
+      weights = (double *) malloc( sizeof(double)*nsweeps );
+      for ( j = 0; j < nsweeps; j++ ) weights[j] = 0.05;
+      targv[0] = (char *) &nsweeps;
+      targv[1] = (char *) weights;
+      MLI_MethodSetParams( cmliMethod, "setPreSmoother SGS", 2, targv );
+      MLI_MethodSetParams( cmliMethod, "setPostSmoother SGS", 2, targv );
+      free(weights);
+      MLI_MethodSetParams( cmliMethod, "setCoarsenScheme ruge", 0, NULL );
+      MLI_MethodSetParams( cmliMethod, "setStrengthThreshold 0.0", 0, NULL );
 /*
-   MLI_MethodSetParams( cmliMethod, "setSmootherPrintRNorm", 0, NULL );
+      MLI_MethodSetParams( cmliMethod, "setSmootherPrintRNorm", 0, NULL );
 */
-   free(weights);
+      MLI_MethodSetParams( cmliMethod, "setSmootherFindOmega", 0, NULL );
 /*
-   MLI_MethodSetParams( cmliMethod, "nonsymmetric", 0, NULL );
 */
+/*
+*/
+/*
+      MLI_MethodSetParams( cmliMethod, "useInjectionForR", 0, NULL );
+MLI_MethodSetParams( cmliMethod, "nonsymmetric", 0, NULL );
+*/
+   }
+   else
+   {
+      nsweeps = 2;
+      weights = (double *) malloc( sizeof(double)*nsweeps );
+      for ( j = 0; j < nsweeps; j++ ) weights[j] = 0.1;
+      targv[0] = (char *) &nsweeps;
+      targv[1] = (char *) weights;
+      MLI_MethodSetParams( cmliMethod, "setPreSmoother SGS", 2, targv );
+      MLI_MethodSetParams( cmliMethod, "setPostSmoother SGS", 2, targv );
+      free(weights);
+      MLI_MethodSetParams( cmliMethod, "setPweight 0.0", 0, NULL );
+      MLI_MethodSetParams( cmliMethod, "setStrengthThreshold 0.08", 0, NULL );
+      MLI_MethodSetParams( cmliMethod, "setCalibrationSize 0", 0, NULL );
+   }
    nsweeps = 1;
    targv[0] = (char *) &nsweeps;
    targv[1] = (char *) NULL;
-   MLI_MethodSetParams( cmliMethod, "setCoarseSolver SuperLU", 2, targv );
-   MLI_MethodSetParams( cmliMethod, "setCalibrationSize 0", 0, NULL );
+/*
+   MLI_MethodSetParams( cmliMethod, "setSmootherPrintRNorm", 0, NULL );
+*/
    if ( testProb == 0 )
    {
       ndofs    = 1;
@@ -308,7 +335,8 @@ int main(int argc, char **argv)
       targv[1] = (char *) &nullDim;
       targv[2] = (char *) nullVecs;
       targv[3] = (char *) &localSize;
-      MLI_MethodSetParams( cmliMethod, "setNullSpace", 4, targv );
+      if ( ! strcmp(methodName, "AMGSA") )
+         MLI_MethodSetParams( cmliMethod, "setNullSpace", 4, targv );
       free( nullVecs );
    }
    if ( testProb == 1 )
@@ -317,7 +345,8 @@ int main(int argc, char **argv)
       targv[1] = (char *) &nullDim;
       targv[2] = (char *) nullVecs;
       targv[3] = (char *) &localSize;
-      MLI_MethodSetParams( cmliMethod, "setNullSpace", 4, targv );
+      if ( ! strcmp(methodName, "AMGSA") )
+         MLI_MethodSetParams( cmliMethod, "setNullSpace", 4, targv );
       free( nullVecs );
    }
    MLI_MethodSetParams( cmliMethod, "print", 0, NULL );
@@ -376,7 +405,8 @@ int hypre_mapCD( int  ix, int  iy, int  iz, int  p, int  q, int  r,
 
 HYPRE_ParCSRMatrix GenerateConvectionDiffusion( MPI_Comm comm,
                       int nx, int ny, int nz, int P, int Q, int R,
-                      int p, int q, int r, double alpha, double  *value )
+                      int p, int q, int r, double alpha, double beta,
+                      double  *value )
 {
    hypre_ParCSRMatrix *A;
    hypre_CSRMatrix *diag, *offd;
@@ -559,7 +589,7 @@ HYPRE_ParCSRMatrix GenerateConvectionDiffusion( MPI_Comm comm,
             if (iy > ny_part[q]) 
             {
                diag_j[cnt] = row_index-nx_local;
-               diag_data[cnt++] = value[2];
+               diag_data[cnt++] = value[2] - 0.5 * beta / (double)(ny - 1);
             }
             else
             {
@@ -567,13 +597,14 @@ HYPRE_ParCSRMatrix GenerateConvectionDiffusion( MPI_Comm comm,
                {
                   offd_j[o_cnt] = hypre_mapCD(ix,iy-1,iz,p,q-1,r,P,Q,R,
                                       nx_part,ny_part,nz_part,global_part);
-                  offd_data[o_cnt++] = value[2];
+                  offd_data[o_cnt++] = value[2] - 0.5 * beta / (double)(ny - 1);
                }
             }
             if (ix > nx_part[p]) 
             {
                diag_j[cnt] = row_index-1;
-               diag_data[cnt++] = value[1] - alpha / (double) (nx-1);
+               diag_data[cnt++] = value[1] - 0.5 * alpha / (double) (nx-1);
+if ( row_index == 0 ) printf("convection = %e\n", diag_data[cnt-1]);
             }
             else
             {
@@ -581,13 +612,14 @@ HYPRE_ParCSRMatrix GenerateConvectionDiffusion( MPI_Comm comm,
                {
                   offd_j[o_cnt] = hypre_mapCD(ix-1,iy,iz,p-1,q,r,P,Q,R,
                                       nx_part,ny_part,nz_part,global_part);
-                  offd_data[o_cnt++] = value[1] - alpha / (double) (nx-1);
+                  offd_data[o_cnt++] = value[1] - 0.5 * alpha / (double) (nx-1);
                }
             }
             if (ix+1 < nx_part[p+1]) 
             {
                diag_j[cnt] = row_index+1;
-               diag_data[cnt++] = value[1] + alpha / (double) (nx-1);
+               diag_data[cnt++] = value[1] + 0.5 * alpha / (double) (nx-1);
+if ( row_index == 0 ) printf("convection = %e\n", diag_data[cnt-1]);
             }
             else
             {
@@ -595,13 +627,13 @@ HYPRE_ParCSRMatrix GenerateConvectionDiffusion( MPI_Comm comm,
                {
                   offd_j[o_cnt] = hypre_mapCD(ix+1,iy,iz,p+1,q,r,P,Q,R,
                                       nx_part,ny_part,nz_part,global_part);
-                  offd_data[o_cnt++] = value[1] + alpha / (double) (nx-1);
+                  offd_data[o_cnt++] = value[1] + 0.5 * alpha / (double) (nx-1);
                }
             }
             if (iy+1 < ny_part[q+1]) 
             {
                diag_j[cnt] = row_index+nx_local;
-               diag_data[cnt++] = value[2];
+               diag_data[cnt++] = value[2] + 0.5 * beta / (double) (ny-1);
             }
             else
             {
@@ -609,7 +641,7 @@ HYPRE_ParCSRMatrix GenerateConvectionDiffusion( MPI_Comm comm,
                {
                   offd_j[o_cnt] = hypre_mapCD(ix,iy+1,iz,p,q+1,r,P,Q,R,
                                       nx_part,ny_part,nz_part,global_part);
-                  offd_data[o_cnt++] = value[2];
+                  offd_data[o_cnt++] = value[2] + 0.5 * beta / (double) (ny-1);
                }
             }
             if (iz+1 < nz_part[r+1]) 
