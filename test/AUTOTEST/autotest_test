@@ -227,6 +227,30 @@ EOF
     cat $ErrorFile >> $ErrorFile.orig
     mv $ErrorFile.tmp $ErrorFile 
   fi
+multi_line_delete () {
+  if [ "$DEBUG_MODE" = "yes" ] ; then
+    set -xv
+  fi
+  ErrorFile=$1
+  shift
+  Join=$1
+  shift
+  if (egrep "$@" $ErrorFile >/dev/null)
+  then
+    cp $ErrorFile $ErrorFile.tmp
+    while (egrep "$@" $ErrorFile.tmp >/dev/null)
+    do
+      ed $ErrorFile.tmp <<EOF >/dev/null
+/$@/
+.,+${Join}d
+w
+q
+EOF
+    done
+    echo "-- applied multi-line filter:$@" >> $ErrorFile.orig
+    cat $ErrorFile >> $ErrorFile.orig
+    mv $ErrorFile.tmp $ErrorFile 
+  fi
 }
 apply_error_filters () {
   if [ "$DEBUG_MODE" = "yes" ] ; then
@@ -244,6 +268,7 @@ apply_error_filters () {
           '^\ Guide\ \ \ '\
           ':\ 0\ errors\ in\ file'\
           '1500-030:\ \(I\)\ INFORMATION:'\
+          '^No\ begin\ line'\
           'configure:\ WARNING:\ Configuration\ for'\
           'configure:\ WARNING:\ I\ have\ to\ compile'
         do process_filter $ErrorFile "${ii}"
@@ -295,8 +320,22 @@ apply_error_filters () {
         do process_filter $ErrorFile "${ii}"
         done
         for ii in \
-          ': warning: assignment type mismatch:$'
-        do multi_line_filter $ErrorFile 3 "${ii}"
+          ': warning: assignment type mismatch:'
+        do multi_line_delete $ErrorFile 1 "${ii}"
+        done
+      ;;
+      perr*|poin*)
+        for ii in \
+          '(autoconf|automake|autoheader) has been disabled'\
+          'xauth:  error in locking authority file '\
+          'Xauthority not writable, changes will be ignored'\
+          '^No begin line'\
+          '^configure: WARNING: '
+        do process_filter $ErrorFile "${ii}"
+        done
+        for ii in \
+          ': warning: assignment type mismatch:'
+        do multi_line_delete $ErrorFile 1 "${ii}"
         done
       ;;
     esac
