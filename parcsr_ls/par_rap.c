@@ -1493,10 +1493,11 @@ hypre_ExchangeRAPData( 	hypre_CSRMatrix *RAP_int,
    int	   *RAP_ext_j;
    double  *RAP_ext_data;
 
-   MPI_Datatype *recv_matrix_types;
-   MPI_Datatype *send_matrix_types;
    hypre_ParCSRCommHandle *comm_handle;
    hypre_ParCSRCommPkg *tmp_comm_pkg;
+
+   int *jdata_recv_vec_starts;
+   int *jdata_send_map_starts;
 
    int num_rows;
    int num_nonzeros;
@@ -1507,10 +1508,9 @@ hypre_ExchangeRAPData( 	hypre_CSRMatrix *RAP_int,
    MPI_Comm_size(comm,&num_procs);
    MPI_Comm_rank(comm,&my_id);
 
-   send_matrix_types = hypre_CTAlloc(MPI_Datatype, num_sends);
-   recv_matrix_types = hypre_CTAlloc(MPI_Datatype, num_recvs);
- 
    RAP_ext_i = hypre_CTAlloc(int, send_map_starts[num_sends]+1);
+   jdata_recv_vec_starts = hypre_CTAlloc(int, num_recvs+1);
+   jdata_send_map_starts = hypre_CTAlloc(int, num_sends+1);
  
 /*--------------------------------------------------------------------------
  * recompute RAP_int_i so that RAP_int_i[j+1] contains the number of
@@ -1526,14 +1526,9 @@ hypre_ExchangeRAPData( 	hypre_CSRMatrix *RAP_int,
    	num_cols = hypre_CSRMatrixNumCols(RAP_int);
    }
 
-   for (i=0; i < num_recvs; i++)
+   for (i=0; i < num_recvs+1; i++)
    {
-	start_index = RAP_int_i[recv_vec_starts[i]];
-	num_nonzeros = RAP_int_i[recv_vec_starts[i+1]]-start_index;
-	hypre_BuildCSRJDataType(num_nonzeros, 
-			  &RAP_int_data[start_index], 
-			  &RAP_int_j[start_index], 
-			  &recv_matrix_types[i]);	
+	jdata_recv_vec_starts[i] = RAP_int_i[recv_vec_starts[i]];
    }
  
    for (i=num_recvs; i > 0; i--)
@@ -1552,7 +1547,6 @@ hypre_ExchangeRAPData( 	hypre_CSRMatrix *RAP_int,
    hypre_ParCSRCommPkgNumRecvs(tmp_comm_pkg) = num_sends;
    hypre_ParCSRCommPkgSendProcs(tmp_comm_pkg) = recv_procs;
    hypre_ParCSRCommPkgRecvProcs(tmp_comm_pkg) = send_procs;
-   hypre_ParCSRCommPkgSendMPITypes(tmp_comm_pkg) = recv_matrix_types;	
 
    hypre_ParCSRCommHandleDestroy(comm_handle);
 
@@ -1572,20 +1566,20 @@ hypre_ExchangeRAPData( 	hypre_CSRMatrix *RAP_int,
       RAP_ext_data = hypre_CTAlloc(double, num_nonzeros);
    }
 
-   for (i=0; i < num_sends; i++)
+   for (i=0; i < num_sends+1; i++)
    {
-	start_index = RAP_ext_i[send_map_starts[i]];
-	num_nonzeros = RAP_ext_i[send_map_starts[i+1]]-start_index;
-	hypre_BuildCSRJDataType(num_nonzeros, 
-			  &RAP_ext_data[start_index], 
-			  &RAP_ext_j[start_index], 
-			  &send_matrix_types[i]);	
+	jdata_send_map_starts[i] = RAP_ext_i[send_map_starts[i]];
    }
 
-   hypre_ParCSRCommPkgRecvMPITypes(tmp_comm_pkg) = send_matrix_types;	
+   hypre_ParCSRCommPkgRecvVecStarts(tmp_comm_pkg) = jdata_send_map_starts;	
+   hypre_ParCSRCommPkgSendMapStarts(tmp_comm_pkg) = jdata_recv_vec_starts;	
 
-   comm_handle = hypre_ParCSRCommHandleCreate(0,tmp_comm_pkg,NULL,NULL);
+   comm_handle = hypre_ParCSRCommHandleCreate(1,tmp_comm_pkg,RAP_int_data,
+					RAP_ext_data);
+   hypre_ParCSRCommHandleDestroy(comm_handle);
 
+   comm_handle = hypre_ParCSRCommHandleCreate(11,tmp_comm_pkg,RAP_int_j,
+					RAP_ext_j);
    RAP_ext = hypre_CSRMatrixCreate(num_rows,num_cols,num_nonzeros);
 
    hypre_CSRMatrixI(RAP_ext) = RAP_ext_i;
@@ -1597,19 +1591,9 @@ hypre_ExchangeRAPData( 	hypre_CSRMatrix *RAP_int,
 
    hypre_ParCSRCommHandleDestroy(comm_handle); 
 
-   for (i=0; i < num_sends; i++)
-   {
-	MPI_Type_free(&send_matrix_types[i]);
-   }
-
-   for (i=0; i < num_recvs; i++)
-   {
-	MPI_Type_free(&recv_matrix_types[i]);
-   }
-
+   hypre_TFree(jdata_recv_vec_starts);
+   hypre_TFree(jdata_send_map_starts);
    hypre_TFree(tmp_comm_pkg);
-   hypre_TFree(recv_matrix_types);
-   hypre_TFree(send_matrix_types);
 
    return RAP_ext;
 }

@@ -142,6 +142,7 @@ hypre_ParAMGCoarsen( hypre_ParCSRMatrix    *A,
    int		       num_recvs = 0;
    int  	      *int_buf_data;
    double	      *buf_data;
+   double	      *S_buf_data;
 
    int                *CF_marker;
    int                *CF_marker_offd;
@@ -156,17 +157,15 @@ hypre_ParAMGCoarsen( hypre_ParCSRMatrix    *A,
                       
    double              diag, row_scale;
    int                 i, j, k, ic, jc, kc, jj, kk, jA, jS, kS, ig;
-   int		       index, start, my_id, num_procs, jrow;
+   int		       index, index_S, start, my_id, num_procs, jrow;
                       
    int                 ierr = 0;
    int                 break_var = 1;
 
-   MPI_Datatype	       *recv_datatype, *send_datatype;
-   MPI_Datatype	       types[2];
-   MPI_Aint	       displs[2];
-   int		       block_lens[2];
    int		       num_data, start_index;
    int		       *recv_vec_starts;
+   int		       *S_recv_vec_starts;
+   int		       *S_send_map_starts;
    double	    wall_time;
    double	    wall_time_ip = 0;
    double	    wall_time_bp = 0;
@@ -215,14 +214,12 @@ hypre_ParAMGCoarsen( hypre_ParCSRMatrix    *A,
    hypre_ParCSRCommPkgComm(comm_pkg_mS) = comm;
    hypre_ParCSRCommPkgNumRecvs(comm_pkg_mS) = num_recvs;
    hypre_ParCSRCommPkgRecvProcs(comm_pkg_mS) = hypre_ParCSRCommPkgRecvProcs(comm_pkg);
-   hypre_ParCSRCommPkgRecvVecStarts(comm_pkg_mS) = recv_vec_starts; 
    hypre_ParCSRCommPkgNumSends(comm_pkg_mS) = num_sends;
    hypre_ParCSRCommPkgSendProcs(comm_pkg_mS) = hypre_ParCSRCommPkgSendProcs(comm_pkg);
-   hypre_ParCSRCommPkgSendMapStarts(comm_pkg_mS) 
-		= hypre_ParCSRCommPkgSendMapStarts(comm_pkg);
-   hypre_ParCSRCommPkgSendMapElmts(comm_pkg_mS) = hypre_ParCSRCommPkgSendMapElmts(comm_pkg);
 
    int_buf_data = hypre_CTAlloc(int, hypre_ParCSRCommPkgSendMapStart(comm_pkg,
+                                                num_sends));
+   buf_data = hypre_CTAlloc(double, hypre_ParCSRCommPkgSendMapStart(comm_pkg,
                                                 num_sends));
  
    num_nonzeros_diag = A_diag_i[num_variables];
@@ -412,22 +409,6 @@ hypre_ParAMGCoarsen( hypre_ParCSRMatrix    *A,
 
    for (ig = 0; ig < num_variables+num_cols_offd; ig++)
       graph_array[ig] = ig;
-/*   i = 0;
-   if (num_procs > 1)
-   {
-      while (i < num_cols_offd && col_map_offd[i] < col_1)
-      {
-         graph_array[i] = i+num_variables;
-         i++;
-      }	
-   }	
-
-   for (ig = 0; ig < num_variables; ig++)
-      graph_array[ig+i] = ig;
-   
-   for (ig = i; ig < num_cols_offd; ig++)
-      graph_array[ig+num_variables] = ig+num_variables;
-*/ 
 
    /*---------------------------------------------------
     * Initialize the C/F marker array
@@ -459,57 +440,33 @@ hypre_ParAMGCoarsen( hypre_ParCSRMatrix    *A,
       S_ext_data = hypre_CSRMatrixData(S_ext);
    }
 
-   send_datatype = hypre_CTAlloc(MPI_Datatype,num_sends);
-   recv_datatype = hypre_CTAlloc(MPI_Datatype,num_recvs);
-
-   types[0] = MPI_DOUBLE;
-   types[1] = MPI_DOUBLE;
+   S_send_map_starts = hypre_CTAlloc(int, num_sends+1);
 
    num_data = 0;
+   S_send_map_starts[0] = 0;
    for (i = 0; i < num_sends; i++)
    {
-      start = hypre_ParCSRCommPkgSendMapStart(comm_pkg_mS, i);
-      num_data += hypre_ParCSRCommPkgSendMapStart(comm_pkg_mS, i+1)-start;
-      for (j = start; j < hypre_ParCSRCommPkgSendMapStart(comm_pkg_mS, i+1); j++)
+      start = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
+      for (j = start; j < hypre_ParCSRCommPkgSendMapStart(comm_pkg, i+1); j++)
       {
-         jrow = hypre_ParCSRCommPkgSendMapElmt(comm_pkg_mS,j);
+         jrow = hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j);
          num_data += S_diag_i[jrow+1] - S_diag_i[jrow]
          		+ S_offd_i[jrow+1] - S_offd_i[jrow];
       }
+      S_send_map_starts[i+1] = num_data;
    }
 
-   buf_data = hypre_CTAlloc(double, num_data);
+   S_buf_data = hypre_CTAlloc(double, num_data);
 
-   index = 0;
-   for (i = 0; i < num_sends; i++)
+   hypre_ParCSRCommPkgSendMapStarts(comm_pkg_mS) = S_send_map_starts;   
+
+   S_recv_vec_starts = hypre_CTAlloc(int, num_recvs+1);
+   S_recv_vec_starts[0] = 0;
+   for (i=0; i < num_recvs; i++)
    {
-      num_data = index;
-      MPI_Address(&buf_data[index],&displs[0]);
-      start = hypre_ParCSRCommPkgSendMapStart(comm_pkg_mS, i);
-      index += hypre_ParCSRCommPkgSendMapStart(comm_pkg_mS, i+1) - start;
-      for (j = start; j < hypre_ParCSRCommPkgSendMapStart(comm_pkg_mS, i+1); j++)
-      {
-         jrow = hypre_ParCSRCommPkgSendMapElmt(comm_pkg_mS,j);
-         index += S_diag_i[jrow+1] - S_diag_i[jrow]
-	 		+ S_offd_i[jrow+1] - S_offd_i[jrow];
-      }
-      num_data = index-num_data;
-      MPI_Type_struct(1,&num_data,displs,types,&send_datatype[i]);
-      MPI_Type_commit(&send_datatype[i]); 
+      S_recv_vec_starts[i+1] = S_ext_i[recv_vec_starts[i+1]];
    }
-   hypre_ParCSRCommPkgSendMPITypes(comm_pkg_mS) = send_datatype;   
-
-   for (i=0; i < hypre_ParCSRCommPkgNumRecvs(comm_pkg); i++)
-   {
-      start_index = S_ext_i[recv_vec_starts[i]];
-      block_lens[0] = recv_vec_starts[i+1] - recv_vec_starts[i];
-      block_lens[1] = S_ext_i[recv_vec_starts[i+1]]-start_index; 
-      MPI_Address(&measure_array[num_variables+recv_vec_starts[i]],&displs[0]);
-      MPI_Address(&S_ext_data[start_index], &displs[1]);
-      MPI_Type_struct(2,block_lens,displs,types,&recv_datatype[i]);
-      MPI_Type_commit(&recv_datatype[i]); 
-   }
-   hypre_ParCSRCommPkgRecvMPITypes(comm_pkg_mS) = recv_datatype;   
+   hypre_ParCSRCommPkgRecvVecStarts(comm_pkg_mS) = S_recv_vec_starts;   
  
    
    if (debug_flag == 3)
@@ -525,28 +482,35 @@ hypre_ParAMGCoarsen( hypre_ParCSRMatrix    *A,
        *------------------------------------------------*/
 
       if (debug_flag == 3) wall_time = time_getWallclockSeconds();
+
       index = 0;
+      index_S = 0;
       for (i = 0; i < num_sends; i++)
       {
-	 start = hypre_ParCSRCommPkgSendMapStart(comm_pkg_mS, i);
-         for (j = start; j < hypre_ParCSRCommPkgSendMapStart(comm_pkg_mS, i+1); j++)
-            buf_data[index++] 
-                 = measure_array[hypre_ParCSRCommPkgSendMapElmt(comm_pkg_mS,j)];
-         for (j = start; j < hypre_ParCSRCommPkgSendMapStart(comm_pkg_mS, i+1); j++)
-         {
-            jrow = hypre_ParCSRCommPkgSendMapElmt(comm_pkg_mS,j);
+        start = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
+        for (j = start; j < hypre_ParCSRCommPkgSendMapStart(comm_pkg, i+1); j++)
+        {
+            jrow = hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j);
+            buf_data[index++] = measure_array[jrow];
 	    for (k = S_diag_i[jrow]; k < S_diag_i[jrow+1]; k++)
 	    {
-	       buf_data[index++] = S_diag_data[k];
+	       S_buf_data[index_S++] = S_diag_data[k];
             }
 	    for (k = S_offd_i[jrow]; k < S_offd_i[jrow+1]; k++)
 	    {
-	       buf_data[index++] = S_offd_data[k];
+	       S_buf_data[index_S++] = S_offd_data[k];
             }
          }
       }
  
-      comm_handle = hypre_ParCSRCommHandleCreate( 0, comm_pkg_mS, NULL, NULL); 
+      comm_handle = hypre_ParCSRCommHandleCreate(1, comm_pkg, buf_data, 
+        &measure_array[num_variables]);
+ 
+      hypre_ParCSRCommHandleDestroy(comm_handle);   
+ 
+ 
+      comm_handle = hypre_ParCSRCommHandleCreate( 1, comm_pkg_mS, S_buf_data,
+			S_ext_data);
  
       hypre_ParCSRCommHandleDestroy(comm_handle);   
  
@@ -1164,15 +1128,19 @@ hypre_ParAMGCoarsen( hypre_ParCSRMatrix    *A,
    hypre_ParVectorDestroy(measure_vector);
    hypre_TFree(graph_array);
    hypre_TFree(buf_data);
+   hypre_TFree(S_buf_data);
    hypre_TFree(int_buf_data);
    hypre_TFree(CF_marker_offd);
+   hypre_TFree(S_recv_vec_starts);
+   hypre_TFree(S_send_map_starts);
 
-   for (i=0; i < num_sends; i++)
+/*   for (i=0; i < num_sends; i++)
 	MPI_Type_free(&send_datatype[i]);
    hypre_TFree(send_datatype);
    for (i=0; i < num_recvs; i++)
    	MPI_Type_free(&recv_datatype[i]);
    hypre_TFree(recv_datatype);
+*/
    hypre_TFree(comm_pkg_mS);
    if (num_procs > 1) hypre_CSRMatrixDestroy(S_ext);
 
@@ -2377,7 +2345,10 @@ hypre_ParAMGCoarsenFalgout( hypre_ParCSRMatrix    *A,
    int		       num_sends = 0;
    int		       num_recvs = 0;
    int  	      *int_buf_data;
+   int  	      *S_recv_vec_starts;
+   int  	      *S_send_map_starts;
    double	      *buf_data;
+   double	      *S_buf_data;
 
    int                *CF_marker;
    int                *CF_marker_offd;
@@ -2395,7 +2366,7 @@ hypre_ParAMGCoarsenFalgout( hypre_ParCSRMatrix    *A,
                       
    double              diag, row_scale;
    int                 i, j, k, ic, jc, kc, jj, kk, jA, jS, kS, ig;
-   int		       index, jrow;
+   int		       index, index_S, jrow;
    int		    ci_size, ci_tilde_size;
    int              measure, max_measure;
    int              jS_offd;
@@ -2408,10 +2379,6 @@ hypre_ParAMGCoarsenFalgout( hypre_ParCSRMatrix    *A,
    int		    first_col, start;
    int		    col_0, iter;
                       
-   MPI_Datatype	       *recv_datatype, *send_datatype;
-   MPI_Datatype	       types[2];
-   MPI_Aint	       displs[2];
-   int		       block_lens[2];
    int		       num_data, start_index;
    int		       *recv_vec_starts;
 
@@ -2897,14 +2864,12 @@ hypre_ParAMGCoarsenFalgout( hypre_ParCSRMatrix    *A,
    hypre_ParCSRCommPkgComm(comm_pkg_mS) = comm;
    hypre_ParCSRCommPkgNumRecvs(comm_pkg_mS) = num_recvs;
    hypre_ParCSRCommPkgRecvProcs(comm_pkg_mS) = hypre_ParCSRCommPkgRecvProcs(comm_pkg);
-   hypre_ParCSRCommPkgRecvVecStarts(comm_pkg_mS) = recv_vec_starts; 
    hypre_ParCSRCommPkgNumSends(comm_pkg_mS) = num_sends;
    hypre_ParCSRCommPkgSendProcs(comm_pkg_mS) = hypre_ParCSRCommPkgSendProcs(comm_pkg);
-   hypre_ParCSRCommPkgSendMapStarts(comm_pkg_mS) 
-		= hypre_ParCSRCommPkgSendMapStarts(comm_pkg);
-   hypre_ParCSRCommPkgSendMapElmts(comm_pkg_mS) = hypre_ParCSRCommPkgSendMapElmts(comm_pkg);
 
    int_buf_data = hypre_CTAlloc(int, hypre_ParCSRCommPkgSendMapStart(comm_pkg,
+                                                num_sends));
+   buf_data = hypre_CTAlloc(double, hypre_ParCSRCommPkgSendMapStart(comm_pkg,
                                                 num_sends));
  
    num_nonzeros_diag = A_diag_i[num_variables];
@@ -2954,23 +2919,6 @@ hypre_ParAMGCoarsenFalgout( hypre_ParCSRMatrix    *A,
    for (ig = 0; ig < num_variables+num_cols_offd; ig++)
       graph_array[ig] = ig;
 
-/*   i = 0;
-   if (num_procs > 1)
-   {
-      while (i < num_cols_offd && col_map_offd[i] < col_1)
-      {
-         graph_array[i] = i+num_variables;
-         i++;
-      }	
-   }	
-
-   for (ig = 0; ig < num_variables; ig++)
-      graph_array[ig+i] = ig;
-   
-   for (ig = i; ig < num_cols_offd; ig++)
-      graph_array[ig+num_variables] = ig+num_variables;
-*/ 
-
    /*---------------------------------------------------
     * Initialize the C/F marker array
     * C/F marker array contains interior points in elements 0 ... 
@@ -3001,57 +2949,44 @@ hypre_ParAMGCoarsenFalgout( hypre_ParCSRMatrix    *A,
       S_ext_data = hypre_CSRMatrixData(S_ext);
    }
 
-   send_datatype = hypre_CTAlloc(MPI_Datatype,num_sends);
-   recv_datatype = hypre_CTAlloc(MPI_Datatype,num_recvs);
-
-   types[0] = MPI_DOUBLE;
-   types[1] = MPI_DOUBLE;
-
    num_data = 0;
    for (i = 0; i < num_sends; i++)
    {
-      start = hypre_ParCSRCommPkgSendMapStart(comm_pkg_mS, i);
-      num_data += hypre_ParCSRCommPkgSendMapStart(comm_pkg_mS, i+1)-start;
-      for (j = start; j < hypre_ParCSRCommPkgSendMapStart(comm_pkg_mS, i+1); j++)
+      num_data += hypre_ParCSRCommPkgSendMapStart(comm_pkg, i+1)-start;
+      for (j = start; j < hypre_ParCSRCommPkgSendMapStart(comm_pkg, i+1); j++)
       {
-         jrow = hypre_ParCSRCommPkgSendMapElmt(comm_pkg_mS,j);
+         jrow = hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j);
          num_data += S_diag_i[jrow+1] - S_diag_i[jrow]
          		+ S_offd_i[jrow+1] - S_offd_i[jrow];
       }
    }
 
-   buf_data = hypre_CTAlloc(double, num_data);
+   S_buf_data = hypre_CTAlloc(double, num_data);
+   S_send_map_starts = hypre_CTAlloc(int, num_sends+1);
 
    index = 0;
+   S_send_map_starts[0] = 0;
    for (i = 0; i < num_sends; i++)
    {
-      num_data = index;
-      MPI_Address(&buf_data[index],&displs[0]);
-      start = hypre_ParCSRCommPkgSendMapStart(comm_pkg_mS, i);
-      index += hypre_ParCSRCommPkgSendMapStart(comm_pkg_mS, i+1) - start;
-      for (j = start; j < hypre_ParCSRCommPkgSendMapStart(comm_pkg_mS, i+1); j++)
+      start = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
+      for (j = start; j < hypre_ParCSRCommPkgSendMapStart(comm_pkg, i+1); j++)
       {
-         jrow = hypre_ParCSRCommPkgSendMapElmt(comm_pkg_mS,j);
+         jrow = hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j);
          index += S_diag_i[jrow+1] - S_diag_i[jrow]
 	 		+ S_offd_i[jrow+1] - S_offd_i[jrow];
       }
-      num_data = index-num_data;
-      MPI_Type_struct(1,&num_data,displs,types,&send_datatype[i]);
-      MPI_Type_commit(&send_datatype[i]); 
+      S_send_map_starts[i+1] = index;
    }
-   hypre_ParCSRCommPkgSendMPITypes(comm_pkg_mS) = send_datatype;   
+   hypre_ParCSRCommPkgSendMapStarts(comm_pkg_mS) = S_send_map_starts;   
 
-   for (i=0; i < hypre_ParCSRCommPkgNumRecvs(comm_pkg); i++)
+   S_recv_vec_starts = hypre_CTAlloc(int, num_recvs+1);
+   S_recv_vec_starts[0] = 0;
+
+   for (i=0; i < num_recvs; i++)
    {
-      start_index = S_ext_i[recv_vec_starts[i]];
-      block_lens[0] = recv_vec_starts[i+1] - recv_vec_starts[i];
-      block_lens[1] = S_ext_i[recv_vec_starts[i+1]]-start_index; 
-      MPI_Address(&measure_array[num_variables+recv_vec_starts[i]],&displs[0]);
-      MPI_Address(&S_ext_data[start_index], &displs[1]);
-      MPI_Type_struct(2,block_lens,displs,types,&recv_datatype[i]);
-      MPI_Type_commit(&recv_datatype[i]); 
+      S_recv_vec_starts[i+1] = S_ext_i[recv_vec_starts[i+1]];
    }
-   hypre_ParCSRCommPkgRecvMPITypes(comm_pkg_mS) = recv_datatype;   
+   hypre_ParCSRCommPkgRecvVecStarts(comm_pkg_mS) = S_recv_vec_starts;   
  
    if (debug_flag == 3)
    {
@@ -3068,27 +3003,32 @@ hypre_ParAMGCoarsenFalgout( hypre_ParCSRMatrix    *A,
 
    if (debug_flag == 3) wall_time = time_getWallclockSeconds();
       index = 0;
+      index_S = 0;
       for (i = 0; i < num_sends; i++)
       {
-	 start = hypre_ParCSRCommPkgSendMapStart(comm_pkg_mS, i);
-         for (j = start; j < hypre_ParCSRCommPkgSendMapStart(comm_pkg_mS, i+1); j++)
-            buf_data[index++] 
-                 = measure_array[hypre_ParCSRCommPkgSendMapElmt(comm_pkg_mS,j)];
-         for (j = start; j < hypre_ParCSRCommPkgSendMapStart(comm_pkg_mS, i+1); j++)
+	 start = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
+         for (j = start; j < hypre_ParCSRCommPkgSendMapStart(comm_pkg,i+1); j++)
          {
-            jrow = hypre_ParCSRCommPkgSendMapElmt(comm_pkg_mS,j);
+            jrow = hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j);
+            buf_data[index++] = measure_array[jrow];
 	    for (k = S_diag_i[jrow]; k < S_diag_i[jrow+1]; k++)
 	    {
-	       buf_data[index++] = S_diag_data[k];
+	       S_buf_data[index_S++] = S_diag_data[k];
             }
 	    for (k = S_offd_i[jrow]; k < S_offd_i[jrow+1]; k++)
 	    {
-	       buf_data[index++] = S_offd_data[k];
+	       S_buf_data[index_S++] = S_offd_data[k];
             }
          }
       }
  
-      comm_handle = hypre_ParCSRCommHandleCreate( 0, comm_pkg_mS, NULL, NULL); 
+      comm_handle = hypre_ParCSRCommHandleCreate( 1, comm_pkg, buf_data, 
+			&measure_array[num_variables]); 
+ 
+      hypre_ParCSRCommHandleDestroy(comm_handle);   
+ 
+      comm_handle = hypre_ParCSRCommHandleCreate( 1, comm_pkg_mS, S_buf_data, 
+			S_ext_data);
  
       hypre_ParCSRCommHandleDestroy(comm_handle);   
  
@@ -3719,15 +3659,12 @@ hypre_ParAMGCoarsenFalgout( hypre_ParCSRMatrix    *A,
    hypre_ParVectorDestroy(measure_vector);
    hypre_TFree(graph_array);
    hypre_TFree(buf_data);
+   hypre_TFree(S_buf_data);
    hypre_TFree(int_buf_data);
    hypre_TFree(CF_marker_offd);
 
-   for (i=0; i < num_sends; i++)
-	MPI_Type_free(&send_datatype[i]);
-   hypre_TFree(send_datatype);
-   for (i=0; i < num_recvs; i++)
-   	MPI_Type_free(&recv_datatype[i]);
-   hypre_TFree(recv_datatype);
+   hypre_TFree(S_send_map_starts);
+   hypre_TFree(S_recv_vec_starts);
    hypre_TFree(comm_pkg_mS);
    if (num_procs > 1) hypre_CSRMatrixDestroy(S_ext);
 
