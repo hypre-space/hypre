@@ -18,7 +18,6 @@
  * resolution than the system timers.
  */
 
-#include "timer.h"
 #include <time.h>
 #include <sys/times.h>
 #ifdef TIMER_USE_MPI

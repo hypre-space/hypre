@@ -14,7 +14,7 @@
 # Default targets
 ##################################################################
 
-default: libHYPRE_memory.a libHYPRE_timing.a 
+default: libHYPRE_utilities.a libHYPRE_memory.a libHYPRE_timing.a
 
 ##################################################################
 # Memory rules
@@ -40,7 +40,6 @@ ${MEMORY_OBJS}: ${MEMORY_HEADERS}
 ##################################################################
 
 TIMING_HEADERS =\
- timer.h\
  timing.h
 
 TIMING_FILES =\
@@ -54,6 +53,17 @@ libHYPRE_timing.a: ${TIMING_OBJS}
 	ar -ru $@ ${TIMING_OBJS}
 	ranlib $@
 ${TIMING_OBJS}: ${TIMING_HEADERS}
+
+##################################################################
+# Utilities rules
+##################################################################
+
+UTILITIES_OBJS = ${MEMORY_OBJS} ${TIMING_OBJS}
+
+libHYPRE_utilities.a: ${UTILITIES_OBJS}
+	@echo  "Building $@ ... "
+	ar -ru $@ ${UTILITIES_OBJS}
+	ranlib $@
 
 ##################################################################
 # Generic rules
@@ -72,6 +82,7 @@ ${TIMING_OBJS}: ${TIMING_HEADERS}
 ##################################################################
 
 veryclean: clean
+	@rm -f libHYPRE_utilities.a
 	@rm -f libHYPRE_timing.a
 	@rm -f libHYPRE_memory.a
 

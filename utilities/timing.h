@@ -22,11 +22,29 @@
 #ifndef HYPRE_SEQUENTIAL
 #include "mpi.h"
 #endif
-#include "timer.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+/*--------------------------------------------------------------------------
+ * Prototypes for low-level timing routines
+ *--------------------------------------------------------------------------*/
+
+#ifdef __STDC__
+# define        P(s) s
+#else
+# define P(s) ()
+#endif
+
+
+/* timer.c */
+double time_getWallclockSeconds P((void ));
+double time_getCPUSeconds P((void ));
+double time_get_wallclock_seconds_ P((void ));
+double time_get_cpu_seconds_ P((void ));
+
+#undef P
 
 /*--------------------------------------------------------------------------
  * With timing off

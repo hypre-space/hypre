@@ -1,0 +1,57 @@
+#!/bin/sh
+#BHEADER***********************************************************************
+# (c) 1998   The Regents of the University of California
+#
+# See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
+# notice, contact person, and disclaimer.
+#
+# $Revision$
+#EHEADER***********************************************************************
+
+INTERNAL_HEADER=hypre_utilities.h
+
+#===========================================================================
+# Include guards and other includes
+#===========================================================================
+
+cat > $INTERNAL_HEADER <<@
+
+#ifndef hypre_UTILITIES_HEADER
+#define hypre_UTILITIES_HEADER
+
+#ifndef HYPRE_SEQUENTIAL
+#include "mpi.h"
+#endif
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+@
+
+#===========================================================================
+# Structures and prototypes
+#===========================================================================
+
+echo "#ifdef HYPRE_SEQUENTIAL" >> $INTERNAL_HEADER
+cat mpistubs.h                 >> $INTERNAL_HEADER
+echo "#endif"                  >> $INTERNAL_HEADER
+
+cat memory.h                   >> $INTERNAL_HEADER
+		          
+cat timing.h                   >> $INTERNAL_HEADER
+		          
+#===========================================================================
+# Include guards
+#===========================================================================
+
+cat >> $INTERNAL_HEADER <<@
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif
+
+@
+
