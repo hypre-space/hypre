@@ -278,7 +278,7 @@ config\
  sstruct_mv sstruct_ls\
  seq_mv parcsr_mv distributed_matrix matrix_matrix\
  IJ_mv distributed_ls parcsr_ls parcsr_es\
- FEI_mv babel babel-runtime test lib docs .
+ FEI_mv $(BABELDIR) test lib docs .
 
 all: HYPRE_config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-recursive
@@ -722,9 +722,14 @@ uninstall-info: uninstall-info-recursive
 	uninstall-includeHEADERS uninstall-info-am
 
 
-test-local:
-	echo "no automated test suite available yet."
-	echo "To compile test drivers enter: make tests"
+.PHONY: test
+# causes problems with "make distclean"
+# FEI_mv babel babel-runtime test lib docs .
+
+test:
+	@ \
+	$(MAKE) $(AM_MAKEFLAGS) install; \
+	(cd test && $(MAKE) $(AM_MAKEFLAGS) install)
 
 tests:
 	@ \

@@ -17,7 +17,6 @@
 #
 # Makefile.am --- automake input file for Hypre test drivers
 #
-
 SOURCES = $(f77_ij_SOURCES) $(f77_ij_b_SOURCES) $(f77_ij_mv_SOURCES) $(f77_struct_SOURCES) $(fei_SOURCES) $(ij_SOURCES) $(nodist_ij_C___SOURCES) $(ij_b_SOURCES) $(ij_mv_SOURCES) $(nodist_ij_mv_C___SOURCES) $(new_ij_SOURCES) $(nodist_new_ij_C___SOURCES) $(sstruct_SOURCES) $(nodist_sstruct_C___SOURCES) $(struct_SOURCES) $(nodist_struct_C___SOURCES)
 
 srcdir = @srcdir@
@@ -41,14 +40,12 @@ NORMAL_UNINSTALL = :
 PRE_UNINSTALL = :
 POST_UNINSTALL = :
 host_triplet = @host@
-bin_PROGRAMS = ij$(EXEEXT) ij_mv$(EXEEXT) new_ij$(EXEEXT) \
-	sstruct$(EXEEXT) struct$(EXEEXT)
-EXTRA_PROGRAMS = f77_ij$(EXEEXT) f77_ij_b$(EXEEXT) f77_ij_mv$(EXEEXT) \
-	f77_struct$(EXEEXT) fei$(EXEEXT) ij_b$(EXEEXT) ij.C++$(EXEEXT) \
-	new_ij.C++$(EXEEXT) ij_mv.C++$(EXEEXT) struct.C++$(EXEEXT) \
-	sstruct.C++$(EXEEXT)
+EXTRA_PROGRAMS = ij$(EXEEXT) ij_mv$(EXEEXT) new_ij$(EXEEXT) \
+	sstruct$(EXEEXT) struct$(EXEEXT) f77_ij$(EXEEXT) \
+	f77_ij_b$(EXEEXT) f77_ij_mv$(EXEEXT) f77_struct$(EXEEXT) \
+	fei$(EXEEXT) ij_b$(EXEEXT) ij.C++$(EXEEXT) new_ij.C++$(EXEEXT) \
+	ij_mv.C++$(EXEEXT) struct.C++$(EXEEXT) sstruct.C++$(EXEEXT)
 subdir = test
-SUBDIRS =
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/config/acinclude.m4 \
@@ -60,9 +57,6 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/HYPRE_config.h
 CONFIG_CLEAN_FILES =
-am__installdirs = $(DESTDIR)$(bindir)
-binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
-PROGRAMS = $(bin_PROGRAMS)
 am_f77_ij_OBJECTS = f77_ij.$(OBJEXT)
 f77_ij_OBJECTS = $(am_f77_ij_OBJECTS)
 am__DEPENDENCIES_1 =
@@ -139,6 +133,7 @@ RECURSIVE_TARGETS = all-recursive check-recursive dvi-recursive \
 	uninstall-recursive
 ETAGS = etags
 CTAGS = ctags
+DIST_SUBDIRS = $(SUBDIRS)
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 ACLOCAL = @ACLOCAL@
 AMTAR = @AMTAR@
@@ -277,15 +272,17 @@ target_alias = @target_alias@
 # hopefully these will be auto-generated with >automake-1.8.0
 abs_top_srcdir = @abs_top_srcdir@
 abs_srcdir = @abs_srcdir@
-DIST_SUBDIRS = \
+SUBDIRS = \
+ .\
  AUTOTEST\
  TEST_fei\
  TEST_ij\
  TEST_sstruct\
  TEST_struct\
- TEST_timing\
- .
+ TEST_timing
 
+# f77_struct_b\
+# struct_b
 AM_CPPFLAGS = \
  -DHYPRE_TIMING\
  -I$(includedir)
@@ -423,8 +420,6 @@ struct_LDADD = \
 #sstruct_LDFLAGS = -no-undefined -rpath $(libdir)
 #struct_LDFLAGS = -no-undefined -rpath $(libdir)
 EXTRA_bindir = $(bindir)
-# f77_struct_b\
-# struct_b
 f77_ij_SOURCES = f77_ij.f
 f77_ij_b_SOURCES = f77_ij_b.f
 f77_ij_mv_SOURCES = f77_ij_mv.f
@@ -770,34 +765,6 @@ $(top_srcdir)/configure: @MAINTAINER_MODE_TRUE@ $(am__configure_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 $(ACLOCAL_M4): @MAINTAINER_MODE_TRUE@ $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
-install-binPROGRAMS: $(bin_PROGRAMS)
-	@$(NORMAL_INSTALL)
-	$(mkdir_p) $(DESTDIR)$(bindir)
-	@list='$(bin_PROGRAMS)'; for p in $$list; do \
-	  p1=`echo $$p|sed 's/$(EXEEXT)$$//'`; \
-	  if test -f $$p \
-	     || test -f $$p1 \
-	  ; then \
-	    f=`echo "$$p1" | sed 's,^.*/,,;$(transform);s/$$/$(EXEEXT)/'`; \
-	   echo " $(INSTALL_PROGRAM_ENV) $(LIBTOOL) --mode=install $(binPROGRAMS_INSTALL) $$p $(DESTDIR)$(bindir)/$$f"; \
-	   $(INSTALL_PROGRAM_ENV) $(LIBTOOL) --mode=install $(binPROGRAMS_INSTALL) $$p $(DESTDIR)$(bindir)/$$f || exit 1; \
-	  else :; fi; \
-	done
-
-uninstall-binPROGRAMS:
-	@$(NORMAL_UNINSTALL)
-	@list='$(bin_PROGRAMS)'; for p in $$list; do \
-	  f=`echo "$$p" | sed 's,^.*/,,;s/$(EXEEXT)$$//;$(transform);s/$$/$(EXEEXT)/'`; \
-	  echo " rm -f $(DESTDIR)$(bindir)/$$f"; \
-	  rm -f $(DESTDIR)$(bindir)/$$f; \
-	done
-
-clean-binPROGRAMS:
-	@list='$(bin_PROGRAMS)'; for p in $$list; do \
-	  f=`echo $$p|sed 's/$(EXEEXT)$$//'`; \
-	  echo " rm -f $$p $$f"; \
-	  rm -f $$p $$f ; \
-	done
 f77_ij$(EXEEXT): $(f77_ij_OBJECTS) $(f77_ij_DEPENDENCIES) 
 	@rm -f f77_ij$(EXEEXT)
 	$(F77LINK) $(f77_ij_LDFLAGS) $(f77_ij_OBJECTS) $(f77_ij_LDADD) $(LIBS)
@@ -1042,7 +1009,7 @@ distdir: $(DISTFILES)
 	    || exit 1; \
 	  fi; \
 	done
-	list='$(DIST_SUBDIRS)'; for subdir in $$list; do \
+	list='$(SUBDIRS)'; for subdir in $$list; do \
 	  if test "$$subdir" = .; then :; else \
 	    test -d "$(distdir)/$$subdir" \
 	    || mkdir "$(distdir)/$$subdir" \
@@ -1057,10 +1024,9 @@ distdir: $(DISTFILES)
 	done
 check-am: all-am
 check: check-recursive
-all-am: Makefile $(PROGRAMS)
+all-am: Makefile
 installdirs: installdirs-recursive
 installdirs-am:
-	$(mkdir_p) $(DESTDIR)$(bindir)
 install: install-recursive
 install-exec: install-exec-recursive
 install-data: install-data-recursive
@@ -1087,8 +1053,7 @@ maintainer-clean-generic:
 	@echo "it deletes files that may require special tools to rebuild."
 clean: clean-recursive
 
-clean-am: clean-binPROGRAMS clean-generic clean-libtool clean-local \
-	mostlyclean-am
+clean-am: clean-generic clean-libtool clean-local mostlyclean-am
 
 distclean: distclean-recursive
 	-rm -f Makefile
@@ -1107,7 +1072,7 @@ info-am:
 
 install-data-am:
 
-install-exec-am: install-binPROGRAMS
+install-exec-am:
 	@$(NORMAL_INSTALL)
 	$(MAKE) $(AM_MAKEFLAGS) install-exec-hook
 
@@ -1134,25 +1099,28 @@ ps: ps-recursive
 
 ps-am:
 
-uninstall-am: uninstall-binPROGRAMS
+uninstall-am:
+	@$(NORMAL_INSTALL)
+	$(MAKE) $(AM_MAKEFLAGS) uninstall-hook
 
 uninstall-info: uninstall-info-recursive
 
 .PHONY: $(RECURSIVE_TARGETS) CTAGS GTAGS all all-am check check-am \
-	clean clean-binPROGRAMS clean-generic clean-libtool \
-	clean-local clean-recursive ctags ctags-recursive distclean \
-	distclean-compile distclean-generic distclean-libtool \
-	distclean-recursive distclean-tags distdir dvi dvi-am html \
-	html-am info info-am install install-am install-binPROGRAMS \
-	install-data install-data-am install-exec install-exec-am \
-	install-info install-info-am install-man install-strip \
-	installcheck installcheck-am installdirs installdirs-am \
-	maintainer-clean maintainer-clean-generic \
+	clean clean-generic clean-libtool clean-local clean-recursive \
+	ctags ctags-recursive distclean distclean-compile \
+	distclean-generic distclean-libtool distclean-recursive \
+	distclean-tags distdir dvi dvi-am html html-am info info-am \
+	install install-am install-data install-data-am install-exec \
+	install-exec-am install-info install-info-am install-man \
+	install-strip installcheck installcheck-am installdirs \
+	installdirs-am maintainer-clean maintainer-clean-generic \
 	maintainer-clean-recursive mostlyclean mostlyclean-compile \
 	mostlyclean-generic mostlyclean-libtool mostlyclean-recursive \
 	pdf pdf-am ps ps-am tags tags-recursive uninstall uninstall-am \
-	uninstall-binPROGRAMS uninstall-info-am
+	uninstall-info-am
 
+
+all: ij ij_mv new_ij struct sstruct
 
 fei++: fei
 
@@ -1177,7 +1145,8 @@ struct.C++.cxx:
 
 clean-local:
 	@ \
-	for i in fei f77_ij f77_ij_mv f77_struct \
+	for i in ij ij_mv new_ij sstruct struct \
+		fei f77_ij f77_ij_mv f77_struct \
 		f77_ij_b ij_b *.C++* driver.out.* ; \
 	do \
 	  if [ -e $$i ] ; \
@@ -1186,18 +1155,31 @@ clean-local:
 	  fi; \
 	done
 
-install-exec-hook:
+install-exec-hook: all
 	@ \
 	for i in fei ij sstruct struct ; \
 	do \
-	if [ -x $$i$(EXEEXT) ] ; \
+	if test -x $$i$(EXEEXT) ; \
 	  then \
-	    if [ -d $(abs_srcdir)/TEST_$$i ] ; \
+	    if test -d $(abs_builddir)/TEST_$$i ; \
 	    then \
-	      echo $(INSTALL_PROGRAM_ENV) $(LIBTOOL) --mode=install $(binPROGRAMS_INSTALL) $$i$(EXEEXT) $(abs_srcdir)/TEST_$$i/$$i$(EXEEXT); \
-	      $(INSTALL_PROGRAM_ENV) $(LIBTOOL) --mode=install $(binPROGRAMS_INSTALL) $$i$(EXEEXT) $(abs_srcdir)/TEST_$$i/$$i$(EXEEXT); \
+	      echo $(INSTALL_PROGRAM_ENV) $(LIBTOOL) --mode=install $(binPROGRAMS_INSTALL) $$i$(EXEEXT) $(abs_builddir)/TEST_$$i/$$i$(EXEEXT); \
+	      $(INSTALL_PROGRAM_ENV) $(LIBTOOL) --mode=install $(binPROGRAMS_INSTALL) $$i$(EXEEXT) $(abs_builddir)/TEST_$$i/$$i$(EXEEXT); \
 	    fi; \
 	  fi; \
+	done
+
+uninstall-hook:
+	@ \
+	for i in fei ij sstruct struct ; \
+	do \
+	    if test -d $(abs_builddir)/TEST_$$i ; \
+	    then \
+	      if test -x $(abs_builddir)/TEST_$$i/$$i$(EXEEXT) ; \
+	      then \
+		rm -f $(abs_builddir)/TEST_$$i/$$i$(EXEEXT); \
+	      fi; \
+	    fi; \
 	done
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
