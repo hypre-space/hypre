@@ -28,15 +28,6 @@ AC_CONFIG_HEADER(HYPRE_config.h)
 AC_CONFIG_AUX_DIR(config)
 AC_PREFIX_DEFAULT(`pwd`/hypre)
 
-# JNI_INCLUDES has a path needed for Java support on Frost by Babel runtime:
-JNI_INCLUDES="-I /usr/java130/include"; export JNI_INCLUDES
-# Default Fortran compilers differ for this configure file and the Babel runtime
-# configure file on Frost:
-F77= $ac_cv_prog_F77; export F77
-# Other language environment variables should also be set here, e.g. CC.
-dnl Babel runtime library, per Gary Kumfert Sept02:
-AC_CONFIG_SUBDIRS(babel-runtime)
-
 dnl *********************************************************************
 dnl * Set the variable ARCH, (CASC_GUESS_ARCH uses tarch).  ARCH will
 dnl * be used throught this file to determine optimal compilers, options
@@ -1362,6 +1353,29 @@ AC_SUBST(HYPRE_TOP_SRC_DIR)
 
 AC_SUBST(CSUPERLUFLAGS)
 AC_SUBST(BLASLIBFLAGS)
+
+dnl Configure Babel runtime if needed...
+if test "$casc_using_babel" = "yes"
+then
+ # JNI_INCLUDES has a path needed for Java support on Frost by Babel runtime:
+ JNI_INCLUDES="-I /usr/java130/include"; export JNI_INCLUDES
+ # Default Fortran compilers differ for this configure file and the Babel runtime
+ # configure file on Frost:
+ F77= $ac_cv_prog_F77; export F77
+ # Other language environment variables should also be set here, e.g. CC.
+
+dnl We want to configure babel-runtime iff we get here.  It doesn't work to simply
+dnl put AC_CONFIG_SUBDIRS(babel-runtime) inside this if block, because the macro
+dnl expands to something tacked onto the end of the configure script.  So instead
+dnl use a trick suggested by Alexandre Oliva in a GNU mailing list, April 1999:
+ config_babel_runtime=babel-runtime
+else
+ config_babel_runtime=
+fi
+dnl Babel runtime library, per Gary Kumfert Sept02:
+AC_CONFIG_SUBDIRS($config_babel_runtime)
+
+
 
 dnl *********************************************************************
 dnl * Use CASC_CONFIG_OUTPUT_LIST with AC_OUTPUT if you want to handle the
