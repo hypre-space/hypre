@@ -166,7 +166,7 @@ void hypre_free_multi(void *ptr1,...)
 
   va_start(plist, ptr1);
 
-  while ((int)(ptr = va_arg(plist, void *)) != -1) {
+  while ( (ptr = va_arg(plist, void *)) != ((void *) -1) ) {
     if (ptr != NULL)
       free(ptr);
     ptr = NULL;

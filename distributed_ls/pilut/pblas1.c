@@ -83,7 +83,8 @@ void hypre_p_daxbyz(DataDistType *ddist, double alpha, double *x, double beta,
 /*************************************************************************
 * This function prints a vector
 **************************************************************************/
-hypre_p_vprintf(DataDistType *ddist, double *x, hypre_PilutSolverGlobals *globals )
+int hypre_p_vprintf(DataDistType *ddist, double *x,
+                    hypre_PilutSolverGlobals *globals )
 {
   int pe, i;
 
@@ -98,4 +99,6 @@ hypre_p_vprintf(DataDistType *ddist, double *x, hypre_PilutSolverGlobals *global
   }
   fflush(stdout);
   MPI_Barrier( pilut_comm );
+
+  return 0;
 }
