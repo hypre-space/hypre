@@ -418,9 +418,6 @@ impl_Hypre_ParAMG_Setup(
   /* DO-NOT-DELETE splicer.begin(Hypre.ParAMG.Setup) */
   /* Insert the implementation of the Setup method here... */
    int ierr = 0;
-
-/* >>> TO DO... everything needed to compute the arguments, but no more.
-   >>> The following is copied from Apply.... >>> */
    void * objectA, * objectb, * objectx;
    HYPRE_Solver solver;
    struct Hypre_ParAMG__data * data;

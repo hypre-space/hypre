@@ -133,8 +133,13 @@ impl_Hypre_GMRES__dtor(
    struct Hypre_GMRES__data * data;
    data = Hypre_GMRES__get_data( self );
 
-/* >>> TO DO switch according to vector_type; it's not always ParCSR */
-   ierr += HYPRE_ParCSRGMRESDestroy( data->solver );
+   if ( data->vector_type == "ParVector" ) {
+      ierr += HYPRE_ParGMRESDestroy( data->solver );
+   }
+   /* To Do: support more vector types */
+   else {  /* Unsupported vector type.  We're unlikely to reach this point. */
+      ++ierr;
+   }
    Hypre_Operator_deleteRef( data->matrix );
    /* delete any nontrivial data components here */
    hypre_TFree( data );

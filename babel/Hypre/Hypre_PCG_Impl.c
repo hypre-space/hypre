@@ -168,8 +168,13 @@ impl_Hypre_PCG__dtor(
    struct Hypre_PCG__data * data;
    data = Hypre_PCG__get_data( self );
 
-/* >>> TO DO switch according to vector type; it's not always ParCSR */
-   ierr += HYPRE_ParCSRPCGDestroy( data->solver );
+   if ( data->vector_type == "ParVector" ) {
+      ierr += HYPRE_ParCSRPCGDestroy( data->solver );
+   }
+   /* To Do: support more vector types */
+   else {  /* Unsupported vector type.  We're unlikely to reach this point. */
+      ++ierr;
+   }
    Hypre_Operator_deleteRef( data->matrix );
    /* delete any nontrivial data components here */
    hypre_TFree( data );
