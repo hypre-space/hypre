@@ -105,7 +105,8 @@ extern "C" {
 
 int HYPRE_LinSysCore::parameters(int numParams, char **params)
 {
-    int    i, k, nsweeps, rtype, olevel, reuse=0;
+    int    i, k, nsweeps, rtype, olevel, reuse=0, precon_override=0;
+    int    solver_override=0;
     double weight, dtemp;
     char   param[256], param1[256], param2[80];
 
@@ -296,8 +297,16 @@ int HYPRE_LinSysCore::parameters(int numParams, char **params)
 
        else if ( !strcmp(param1, "solver") )
        {
-          sscanf(params[i],"%s %s", param, HYSolverName_);
-          selectSolver(HYSolverName_);
+          sscanf(params[i],"%s %s", param, param2);
+          if (!strcmp(param2, "override")) solver_override = 1;
+          else
+          {
+             if ( solver_override == 0 )
+             {
+                sscanf(params[i],"%s %s", param, HYSolverName_);
+                selectSolver(HYSolverName_);
+             }
+          }
           if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
           {
              printf("       HYPRE_LSC::parameters solver = %s\n",
@@ -377,10 +386,14 @@ int HYPRE_LinSysCore::parameters(int numParams, char **params)
           sscanf(params[i],"%s %s", param, param2);
           if      (!strcmp(param2, "reuse" )) HYPreconReuse_ = reuse = 1;
           else if (!strcmp(param2, "parasails_reuse")) parasailsReuse_ = 1;
+          else if (!strcmp(param2, "override")) precon_override = 1;
           else
           {
-             sscanf(params[i],"%s %s", param, HYPreconName_);
-             selectPreconditioner(HYPreconName_);
+             if ( precon_override == 0 )
+             {
+                sscanf(params[i],"%s %s", param, HYPreconName_);
+                selectPreconditioner(HYPreconName_);
+             }
           }
           if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
           {
