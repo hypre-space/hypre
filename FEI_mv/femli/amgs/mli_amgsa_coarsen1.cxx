@@ -1178,7 +1178,6 @@ int MLI_Method_AMGSA::coarsenGlobal(hypre_ParCSRMatrix *Gmat,
    int                 *commGraphJ, *recvCounts, i, j, *aggrInds, nAggr;
    int                 pIndex, *aggrCnts, *rowCounts, nRows;
    MPI_Comm            comm;
-   hypre_ParCSRMatrix  *A;
    hypre_ParCSRCommPkg *commPkg;
 
    comm    = hypre_ParCSRMatrixComm(Gmat);
@@ -1462,7 +1461,7 @@ int MLI_Method_AMGSA::formGlobalGraph( hypre_ParCSRMatrix *Amat,
    hypre_CSRMatrix    *ADiag, *AOffd;
    hypre_ParCSRMatrix *graph;
    MPI_Comm           comm;
-   int                i, j, jj, index, mypid, nprocs, *partition;
+   int                cInd, jcol, index, mypid, nprocs, *partition;
    int                startRow, endRow, *rowLengths, length;
    int                *ADiagI, *ADiagJ, *AOffdI, *AOffdJ, localNRows;
    int                irow, maxRowNnz, ierr, *colInd, *colMapOffd;
@@ -1510,15 +1509,15 @@ int MLI_Method_AMGSA::formGlobalGraph( hypre_ParCSRMatrix *Amat,
    for ( irow = 0; irow < localNRows; irow++ )
    {
       rowLengths[irow] = 0;
-      for (j = ADiagI[irow]; j < ADiagI[irow+1]; j++)
+      for (jcol = ADiagI[irow]; jcol < ADiagI[irow+1]; jcol++)
       {
-         jj = ADiagJ[j];
-         if ( jj != irow && ADiagA[j] != 0.0 ) rowLengths[irow]++;
+         jInd = ADiagJ[j];
+         if ( jInd != irow && ADiagA[jcol] != 0.0 ) rowLengths[irow]++;
       }
       if (nprocs > 1)
       {
-         for (j = AOffdI[irow]; j < AOffdI[irow+1]; j++)
-            if ( AOffdA[j] != 0.0 ) rowLengths[irow]++;
+         for (jcol = AOffdI[irow]; jcol < AOffdI[irow+1]; jcol++)
+            if ( AOffdA[jcol] != 0.0 ) rowLengths[irow]++;
       }
    }
    maxRowNnz = 0;
@@ -1542,24 +1541,24 @@ int MLI_Method_AMGSA::formGlobalGraph( hypre_ParCSRMatrix *Amat,
    {
       length = 0;
       index  = startRow + irow;
-      for (j = ADiagI[irow]; j < ADiagI[irow+1]; j++)
+      for (jcol = ADiagI[irow]; jcol < ADiagI[irow+1]; jcol++)
       {
-         jj = ADiagJ[j];
-         if ( jj != irow && ADiagA[j] != 0.0) 
+         jInd = ADiagJ[jcol];
+         if ( jInd != irow && ADiagA[jcol] != 0.0) 
          {
-            colVal[length] = ADiagA[j];
-            colInd[length++] = jj + startRow;
+            colVal[length] = ADiagA[jcol];
+            colInd[length++] = jInd + startRow;
          }
       }
       if (nprocs > 1)
       {
-         for (j = AOffdI[irow]; j < AOffdI[irow+1]; j++)
+         for (jcol = AOffdI[irow]; jcol < AOffdI[irow+1]; jcol++)
          {
-            jj = AOffdJ[j];
-            if ( AOffdA[j] != 0.0) 
+            jInd = AOffdJ[jcol];
+            if ( AOffdA[jcol] != 0.0) 
             {
-               colVal[length] = AOffdA[j];
-               colInd[length++] = colMapOffd[jj];
+               colVal[length] = AOffdA[jcol];
+               colInd[length++] = colMapOffd[jInd];
             }
          }
       }
