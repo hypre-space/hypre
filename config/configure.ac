@@ -264,11 +264,13 @@ fi
 dnl set generic default for blas/lapack usage
 ACX_BLAS([casc_user_chose_blas=yes;BLASLIBFLAGS=$BLAS_LIBS], 
   [casc_user_chose_blas=no;BLASLIBFLAGS="-lHYPRE_blas"]) 
-AM_CONDITIONAL([BLASNEEDED],[test "$casc_user_chose_blas" = no])
+AM_CONDITIONAL([BLASNEEDED],
+  [test "$acx_blas_ok" != disable && test "$casc_user_chose_blas" = no])
 AC_SUBST(BLASLIBFLAGS)
 ACX_LAPACK([casc_user_chose_lapack=yes;LAPACKLIBFLAGS=$LAPACK_LIBS], 
   [casc_user_chose_lapack=no;LAPACKLIBFLAGS="-lHYPRE_lapack"]) 
-AM_CONDITIONAL([LAPACKNEEDED],[test "$casc_user_chose_lapack" = no])
+AM_CONDITIONAL([LAPACKNEEDED],
+  [test "$acx_lapack_ok" != disable && test "$casc_user_chose_lapack" = no])
 if test "$casc_user_chose_blas" = "yes" && test "$casc_user_chose_lapack" = "no"
 then
   LAPACKLIBFLAGS="$LAPACKLIBFLAGS $FLIBS"
