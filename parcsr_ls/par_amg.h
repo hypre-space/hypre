@@ -82,7 +82,11 @@ typedef struct
    hypre_ParVector   *Vtemp;
    hypre_Vector      *Vtemp_local;
    double            *Vtemp_local_data;
-   int                cycle_op_count;                                                   
+   int                cycle_op_count;
+   hypre_ParVector   *Rtemp;
+   hypre_ParVector   *Ptemp;
+   hypre_ParVector   *Ztemp;
+
    /* fields used by GSMG and LS interpolation */
    int                 gsmg;        /* nonzero indicates use of GSMG */
    int                 num_samples; /* number of sample vectors */
@@ -175,6 +179,9 @@ typedef struct
 #define hypre_ParAMGDataVtempLocal(amg_data) ((amg_data)->Vtemp_local)
 #define hypre_ParAMGDataVtemplocalData(amg_data) ((amg_data)->Vtemp_local_data)
 #define hypre_ParAMGDataCycleOpCount(amg_data) ((amg_data)->cycle_op_count)
+#define hypre_ParAMGDataRtemp(amg_data) ((amg_data)->Rtemp)
+#define hypre_ParAMGDataPtemp(amg_data) ((amg_data)->Ptemp)
+#define hypre_ParAMGDataZtemp(amg_data) ((amg_data)->Ztemp)
 
 /* fields used by GSMG */
 #define hypre_ParAMGDataGSMG(amg_data) ((amg_data)->gsmg)

@@ -155,7 +155,7 @@ hypre_BoomerAMGCGRelaxWt( void              *amg_vdata,
 	hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A));
    Ptemp_data = hypre_VectorData(hypre_ParVectorLocalVector(Ptemp));
    Ztemp_data = hypre_VectorData(hypre_ParVectorLocalVector(Ztemp));
-   if (level == 0)
+   /* if (level == 0)
       hypre_ParVectorCopy(hypre_ParAMGDataFArray(amg_data)[0],Rtemp);
    else
    {
@@ -170,9 +170,9 @@ hypre_BoomerAMGCGRelaxWt( void              *amg_vdata,
       hypre_ParCSRMatrixMatvecT(alpha,R_array[level-1],Vtemp,
                           beta,F_array[level]);   
       hypre_ParVectorCopy(F_array[level],Rtemp);
-   } 
+   } */
 
-/*   hypre_ParVectorSetRandomValues(Rtemp,5128);    */
+   hypre_ParVectorSetRandomValues(Rtemp,5128);    
 
       /*------------------------------------------------------------------
        * Do the relaxation num_sweeps times
@@ -264,13 +264,13 @@ hypre_BoomerAMGCGRelaxWt( void              *amg_vdata,
          if (row_sum > max_row_sum) max_row_sum = row_sum;
 	 lambda_min_old = lambda_min;
 	 lambda_max_old = lambda_max;
-         hypre_Bisection(jj+1, tridiag, trioffd, 0.0, lambda_min_old, 
-		1.e-3, 1, &lambda_min);
+         rlx_wt_old = rlx_wt;
          hypre_Bisection(jj+1, tridiag, trioffd, lambda_max_old, 
 		max_row_sum, 1.e-3, jj+1, &lambda_max);
-         rlx_wt_old = rlx_wt;
-         /*rlx_wt = 2.0/(lambda_min+lambda_max);*/
          rlx_wt = 1.0/lambda_max;
+         /* hypre_Bisection(jj+1, tridiag, trioffd, 0.0, lambda_min_old, 
+		1.e-3, 1, &lambda_min);
+         rlx_wt = 2.0/(lambda_min+lambda_max); */
 	 if (fabs(rlx_wt-rlx_wt_old) < 1.e-3 )
 	 {
 	    if (my_id == 0) printf (" cg sweeps : %d\n", (jj+1));

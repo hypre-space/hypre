@@ -613,7 +613,7 @@ int hypre_ParMPSchwarzSolve(hypre_ParCSRMatrix *par_A,
 #endif
 
    }
-
+/*
    for (i=0; i < num_cols_offd; i++)
       x_ext[i] -= x_ext_old[i];  
 
@@ -662,9 +662,9 @@ int hypre_ParMPSchwarzSolve(hypre_ParCSRMatrix *par_A,
       hypre_ParCSRCommHandleDestroy(comm_handle);
       comm_handle = NULL;
    }
-
+*/
    /* correction of residual for exterior points to be updated locally */
-   for (i=0; i < num_cols_offd; i++)
+/*   for (i=0; i < num_cols_offd; i++)
    {
       x_ext_old[i] = x_ext[i];
       for (j = A_boundary_i[i]; j < A_boundary_i[i+1]; j++)
@@ -676,7 +676,7 @@ int hypre_ParMPSchwarzSolve(hypre_ParCSRMatrix *par_A,
            rhs_ext[i] += A_boundary_i[k]*x_ext[k_loc-num_variables]; 
       }
    }
-
+*/
    /* backward solve: ------------------------------------------------ */
    for (i=num_domains-1; i > -1; i--)
    {
@@ -861,14 +861,14 @@ int hypre_MPSchwarzSolve(hypre_ParCSRMatrix *par_A,
 
     }
 
-  if (num_procs > 1)
+/*  if (num_procs > 1)
   {
      hypre_TFree(rhs);
      hypre_parCorrRes(par_A,par_x,rhs_vector,&rhs);
   }
   else 
      rhs = hypre_VectorData(rhs_vector);
-
+*/
   /* backward solve: ------------------------------------------------ */
     for (i=num_domains-1; i > -1; i--)
     {
@@ -2397,43 +2397,6 @@ int hypre_AdSchwarzSolve(hypre_ParCSRMatrix *par_A,
 
     }
 
-  hypre_ParVectorCopy(par_rhs,par_aux);
-  hypre_ParCSRMatrixMatvec(-1.0,par_A,par_x,1.0,par_aux);
-
-  /* backward solve: ------------------------------------------------ */
-    for (i=num_domains-1; i > -1; i--)
-    {
-      matrix_size = i_domain_dof[i+1] - i_domain_dof[i];
-#ifdef ESSL
-      matrix_size_counter -= matrix_size * (matrix_size+1)/2;  
-#else
-      matrix_size_counter -= matrix_size * matrix_size;
-#endif
- 
-      /* compute residual: ---------------------------------------- */
-      jj = 0;
-      for (j=i_domain_dof[i]; j < i_domain_dof[i+1]; j++)
-	{
-	  tmp[jj] = aux[j_domain_dof[j]]; 
-	  jj++;
-	}
-
-      /* solve for correction: ------------------------------------- */
-#ifdef ESSL
-	dpps(&domain_matrixinverse[matrix_size_counter], matrix_size, tmp, 1);
-#else
-        hypre_F90_NAME_BLAS(dpotrs, DPOTRS)(&uplo, &matrix_size, &one, 
-	&domain_matrixinverse[matrix_size_counter], &matrix_size, tmp,
-	&matrix_size, &ierr); 
-#endif
-      if (ierr) printf (" error in dpotrs !!!\n");
-      jj = 0;
-      for (j=i_domain_dof[i]; j < i_domain_dof[i+1]; j++)
-	{
-	   x[j_domain_dof[j]]+=  scale[j_domain_dof[j]]*tmp[jj++];
-	}
-    }			      
-
 			      
   hypre_TFree(tmp);
 
@@ -2616,90 +2579,6 @@ int hypre_ParAdSchwarzSolve(hypre_ParCSRMatrix *A,
 #endif
 
     }
-
-  if (comm_pkg)
-  {
-  comm_handle = hypre_ParCSRCommHandleCreate (2,comm_pkg,x_ext_data,buf_data); 
-
-  hypre_ParCSRCommHandleDestroy(comm_handle);
-  comm_handle = NULL;
-
-  index = 0;
-  for (i=0; i < num_sends; i++)
-  {
-     for (j = send_map_starts[i]; j < send_map_starts[i+1]; j++)
-	x_data[send_map_elmts[j]] += buf_data[index++];
-  }
-  }
-
-  hypre_ParVectorCopy(F,Vtemp);
-  hypre_ParCSRMatrixMatvec(-1.0,A,X,1.0,Vtemp);
-
-  for (i=0; i < num_cols_offd; i++)
-     x_ext_data[i] = 0.0;
-
-  if (comm_pkg)
-  {
-  index = 0;
-  for (i=0; i < num_sends; i++)
-  {
-     for (j = send_map_starts[i]; j < send_map_starts[i+1]; j++)
-        buf_data[index++] = vtemp_data[send_map_elmts[j]];
-  }
-
-  comm_handle = hypre_ParCSRCommHandleCreate(1,comm_pkg,buf_data,
-		vtemp_ext_data);
-  hypre_ParCSRCommHandleDestroy(comm_handle);
-  comm_handle = NULL;
-  }
-
-  /* backward solve: ------------------------------------------------ */
-    for (i=num_domains-1; i > -1; i--)
-    {
-      matrix_size = i_domain_dof[i+1] - i_domain_dof[i];
-#ifdef ESSL
-      matrix_size_counter -= matrix_size * (matrix_size+1)/2;  
-#else
-      matrix_size_counter -= matrix_size * matrix_size;
-#endif
- 
-      /* compute residual: ---------------------------------------- */
-      jj = 0;
-      for (j=i_domain_dof[i]; j < i_domain_dof[i+1]; j++)
-	{
-	  j_loc = j_domain_dof[j]; 
-	  if (j_loc < num_variables)
-	     aux[jj] = vtemp_data[j_loc];
-	  else
-	     aux[jj] = vtemp_ext_data[j_loc-num_variables];
-	  jj++;
-	}
-
-      /* solve for correction: ------------------------------------- */
-#ifdef ESSL
-	dpps(&domain_matrixinverse[matrix_size_counter], matrix_size, aux, 1);
-#else
-        /* dpotrs_(&uplo, &matrix_size, &one,  
-	&domain_matrixinverse[matrix_size_counter], &matrix_size, aux,
-	&matrix_size, &ierr); */
-        hypre_F90_NAME_BLAS(dpotrs, DPOTRS)(&uplo, &matrix_size, &one, 
-	&domain_matrixinverse[matrix_size_counter], &matrix_size, aux,
-	&matrix_size, &ierr); 
-#endif
-      if (ierr) printf (" error in dpotrs !!!\n");
-      jj = 0;
-      for (j=i_domain_dof[i]; j < i_domain_dof[i+1]; j++)
-	{
-	   j_loc = j_domain_dof[j];
-	   if (j_loc < num_variables)
-	      x_data[j_loc]+= scale[j_loc] * aux[jj++];
-	   else
-	   {
-	      j_loc -= num_variables;
-	      x_ext_data[j_loc] += scale_ext[j_loc] * aux[jj++];
-	   }
-	}
-    }			      
 
   if (comm_pkg)
   {

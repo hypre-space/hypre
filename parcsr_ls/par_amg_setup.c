@@ -38,6 +38,9 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    hypre_ParVector    **F_array;
    hypre_ParVector    **U_array;
    hypre_ParVector     *Vtemp;
+   hypre_ParVector     *Rtemp;
+   hypre_ParVector     *Ptemp;
+   hypre_ParVector     *Ztemp;
    hypre_ParCSRMatrix **P_array;
    hypre_ParVector    *Residual_array;
    int                **CF_marker_array;   
@@ -230,6 +233,34 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    hypre_ParVectorSetPartitioningOwner(Vtemp,0);
    hypre_ParAMGDataVtemp(amg_data) = Vtemp;
 
+   if ((smooth_num_levels > 0 && smooth_type > 9) 
+		|| relax_weight[0] < 0 || omega[0] < 0 ||
+                hypre_ParAMGDataSchwarzRlxWeight(amg_data) < 0)
+   {
+      Ptemp = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A_array[0]),
+                                 hypre_ParCSRMatrixGlobalNumRows(A_array[0]),
+                                 hypre_ParCSRMatrixRowStarts(A_array[0]));
+      hypre_ParVectorInitialize(Ptemp);
+      hypre_ParVectorSetPartitioningOwner(Ptemp,0);
+      hypre_ParAMGDataPtemp(amg_data) = Ptemp;
+      Rtemp = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A_array[0]),
+                                 hypre_ParCSRMatrixGlobalNumRows(A_array[0]),
+                                 hypre_ParCSRMatrixRowStarts(A_array[0]));
+      hypre_ParVectorInitialize(Rtemp);
+      hypre_ParVectorSetPartitioningOwner(Rtemp,0);
+      hypre_ParAMGDataRtemp(amg_data) = Rtemp;
+   }
+   if ((smooth_num_levels > 0 && smooth_type > 6)
+		 || relax_weight[0] < 0 || omega[0] < 0 ||
+                hypre_ParAMGDataSchwarzRlxWeight(amg_data) < 0)
+   {
+      Ztemp = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A_array[0]),
+                                 hypre_ParCSRMatrixGlobalNumRows(A_array[0]),
+                                 hypre_ParCSRMatrixRowStarts(A_array[0]));
+      hypre_ParVectorInitialize(Ztemp);
+      hypre_ParVectorSetPartitioningOwner(Ztemp,0);
+      hypre_ParAMGDataZtemp(amg_data) = Ztemp;
+   }
    F_array = hypre_ParAMGDataFArray(amg_data);
    U_array = hypre_ParAMGDataUArray(amg_data);
 
@@ -314,7 +345,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
           fflush(NULL);
       }
 
-      if (smooth_type == 6 && smooth_num_levels > level)
+      if ((smooth_type == 6 || smooth_type == 16) && smooth_num_levels > level)
       {
 	 schwarz_relax_wt = hypre_ParAMGDataSchwarzRlxWeight(amg_data);
          HYPRE_SchwarzCreate(&smoother[level]);
@@ -400,6 +431,9 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 			&schwarz_relax_wt);
 	    printf (" schwarz weight %f \n", schwarz_relax_wt);
 	    HYPRE_SchwarzSetRelaxWeight(smoother[level], schwarz_relax_wt);
+ 	    if (hypre_ParAMGDataVariant(amg_data) > 0)
+            local_size = hypre_CSRMatrixNumRows
+		(hypre_ParCSRMatrixDiag(A_array[level]));
  	    hypre_SchwarzReScale(smoother[level], local_size, schwarz_relax_wt);
 	    schwarz_relax_wt = 1;
          }
@@ -561,6 +595,8 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
    num_levels = level+1;
    hypre_ParAMGDataNumLevels(amg_data) = num_levels;
+   if (hypre_ParAMGDataSmoothNumLevels(amg_data) > num_levels-1)
+      hypre_ParAMGDataSmoothNumLevels(amg_data) = num_levels-1;
 
    /*-----------------------------------------------------------------------
     * Setup F and U arrays
@@ -568,7 +604,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
    for (j = 0; j < num_levels; j++)
    {
-      if (smooth_type == 9 && smooth_num_levels > j)
+      if ((smooth_type == 9 || smooth_type == 19) && smooth_num_levels > j)
       {
          HYPRE_EuclidCreate(comm, &smoother[j]);
          if (euclidfile)
@@ -578,7 +614,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                         (HYPRE_ParVector) F_array[j],
                         (HYPRE_ParVector) U_array[j]); 
       }
-      else if (smooth_type == 8 && smooth_num_levels > j)
+      else if ((smooth_type == 8 || smooth_type == 18) && smooth_num_levels > j)
       {
          HYPRE_ParCSRParaSailsCreate(comm, &smoother[j]);
          HYPRE_ParCSRParaSailsSetParams(smoother[j],thresh,nlevel);
@@ -589,7 +625,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                         (HYPRE_ParVector) F_array[j],
                         (HYPRE_ParVector) U_array[j]);
       }
-      else if (smooth_type == 7 && smooth_num_levels > j)
+      else if ((smooth_type == 7 || smooth_type == 17) && smooth_num_levels > j)
       {
          HYPRE_ParCSRPilutCreate(comm, &smoother[j]);
          HYPRE_ParCSRPilutSetup(smoother[j],

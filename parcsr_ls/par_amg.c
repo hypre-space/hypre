@@ -202,6 +202,9 @@ hypre_BoomerAMGCreate()
    hypre_ParAMGDataRArray(amg_data) = NULL;
    hypre_ParAMGDataCFMarkerArray(amg_data) = NULL;
    hypre_ParAMGDataVtemp(amg_data)  = NULL;
+   hypre_ParAMGDataRtemp(amg_data)  = NULL;
+   hypre_ParAMGDataPtemp(amg_data)  = NULL;
+   hypre_ParAMGDataZtemp(amg_data)  = NULL;
    hypre_ParAMGDataFArray(amg_data) = NULL;
    hypre_ParAMGDataUArray(amg_data) = NULL;
    hypre_ParAMGDataDofFunc(amg_data) = NULL;
@@ -224,6 +227,7 @@ hypre_BoomerAMGDestroy( void *data )
    int ierr = 0;
    hypre_ParAMGData  *amg_data = data;
    int num_levels = hypre_ParAMGDataNumLevels(amg_data);
+   int smooth_num_levels = hypre_ParAMGDataSmoothNumLevels(amg_data);
    HYPRE_Solver *smoother = hypre_ParAMGDataSmoother(amg_data);
    int i;
 
@@ -278,6 +282,12 @@ hypre_BoomerAMGDestroy( void *data )
    hypre_TFree(hypre_ParAMGDataAArray(amg_data));
    hypre_TFree(hypre_ParAMGDataPArray(amg_data));
    hypre_TFree(hypre_ParAMGDataCFMarkerArray(amg_data));
+   if (hypre_ParAMGDataRtemp(amg_data))
+      hypre_ParVectorDestroy(hypre_ParAMGDataRtemp(amg_data));
+   if (hypre_ParAMGDataPtemp(amg_data))
+      hypre_ParVectorDestroy(hypre_ParAMGDataPtemp(amg_data));
+   if (hypre_ParAMGDataZtemp(amg_data))
+      hypre_ParVectorDestroy(hypre_ParAMGDataZtemp(amg_data));
 
    if (hypre_ParAMGDataDofFuncArray(amg_data))
    {
@@ -305,32 +315,34 @@ hypre_BoomerAMGDestroy( void *data )
       hypre_TFree(hypre_ParAMGDataPointDofMapArray(amg_data));
       hypre_ParAMGDataPointDofMapArray(amg_data) = NULL;
    }
-   if (hypre_ParAMGDataSmoothNumLevels(amg_data))
+   if (smooth_num_levels)
    {
+      if (smooth_num_levels > num_levels-1)
+	smooth_num_levels = num_levels -1;
       if (hypre_ParAMGDataSmoothType(amg_data) == 7)
       {
-         for (i=0; i < hypre_ParAMGDataSmoothNumLevels(amg_data); i++)
+         for (i=0; i < smooth_num_levels; i++)
          {
 	    HYPRE_ParCSRPilutDestroy(smoother[i]);
          }
       }
       else if (hypre_ParAMGDataSmoothType(amg_data) == 8)
       {
-         for (i=0; i < hypre_ParAMGDataSmoothNumLevels(amg_data); i++)
+         for (i=0; i < smooth_num_levels; i++)
          {
 	    HYPRE_ParCSRParaSailsDestroy(smoother[i]);
          }
       }
       else if (hypre_ParAMGDataSmoothType(amg_data) == 9)
       {
-         for (i=0; i < hypre_ParAMGDataSmoothNumLevels(amg_data); i++)
+         for (i=0; i < smooth_num_levels; i++)
 	 {
 	    HYPRE_EuclidDestroy(smoother[i]);
          }
       }
       else if (hypre_ParAMGDataSmoothType(amg_data) == 6)
       {
-         for (i=0; i < hypre_ParAMGDataSmoothNumLevels(amg_data); i++)
+         for (i=0; i < smooth_num_levels; i++)
 	 {
 	    HYPRE_SchwarzDestroy(smoother[i]);
          } 
