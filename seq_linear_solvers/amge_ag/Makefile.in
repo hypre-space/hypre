@@ -1,0 +1,127 @@
+#BHEADER***********************************************************************
+# (c) 1998   The Regents of the University of California
+#
+# See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
+# notice, contact person, and disclaimer.
+#
+# $Revision$
+#EHEADER***********************************************************************
+
+.SUFFIXES:
+.SUFFIXES: .c .f .o
+
+srcdir = @srcdir@
+VPATH = @srcdir@
+ 
+CC = @CC@
+
+C_COMPILE_FLAGS=@CFLAGS@
+CXX_COMPILE_FLAGS=@CXXFLAGS@
+F77_COMPILE_FLAGS=@F77FLAGS@ 
+CINCLUDES=@INCLUDES@ @MPIINCLUDE@
+CDEFS =
+
+CFLAGS =\
+ ${C_COMPILE_FLAGS}\
+ -I../..\
+ -I../../utilities\
+ -I../../seq_matrix_vector\
+ ${CINCLUDES}\
+ ${CDEFS}
+ 
+RANLIB= @RANLIB@
+ 
+MPILIBFLAGS = @MPILIBDIRS@ @MPILIBS@ @MPIFLAGS@
+LIBFLAGS = @LIBDIRS@ @LIBS@
+LDLIBFLAGS = @LDLIBDIRS@ @LDLIBS@
+ 
+LFLAGS =\
+ -L.\
+ -lX11\
+ -L../../seq_matrix_vector\
+ -L../../utilities\
+ -lHYPRE_amge_ls\
+ -lHYPRE_seq_mv\
+ -lHYPRE_utilities\
+ ${MPILIBFLAGS} ${LIBFLAGS} ${LDLIBFLAGS}
+ 
+EISPACK = /home/panayot/eispack/eispack/rs.o /home/panayot/eispack/eispack/tql1.o /home/panayot/eispack/eispack/tql2.o /home/panayot/eispack/eispack/tred1.o /home/panayot/eispack/eispack/tred2.o /home/panayot/eispack/eispack/pythag.o
+ 
+HEADERS =\
+ headers.h\
+ AMGe_matrix_topology.h\
+ HYPRE_amge.h
+
+FILES =\
+ driver_amge_ag_Schwarz.c\
+ amge_ag_setup.c\
+ matrix_topology.c\
+ AMGe_matrix_topology.c\
+ amge_initial_graphs.c\
+ boundarysurfaces.c\
+ amge_coarsen_topology.c\
+ transpose_matrix_create.c\
+ matrix_matrix_product.c\
+ create_maximal_intersection_sets.c\
+ matrix_matrix_t_product.c\
+ agglomerate.c\
+ build_interpolation.c\
+ Schur_complement.c\
+ create_element_matrices_dofs.c\
+ domain_assemble.c\
+ amge_elmmat_read.c\
+ assemble.c\
+ rap.c\
+ Schwarz_pcg.c\
+ Schwarz_smoother.c\
+ V_cycle_Schwarz_pcg.c\
+ V_cycle_Schwarz_smoothing.c\
+ amge_ag_Schwarz_smoother_setup.c\
+ graphics_2d.c\
+ xgraph0.c
+
+
+
+OBJS = ${FILES:.c=.o}
+
+
+
+
+##################################################################
+# Targets
+##################################################################
+
+all: libHYPRE_amge_ls.a driver
+
+install: all
+
+clean:
+	@rm -f *.o
+
+veryclean: clean
+	@rm -f driver
+	@rm -f libHYPRE_amge_ls.a
+
+##################################################################
+# Rules
+##################################################################
+
+driver: driver_amge_ag_Schwarz..o libHYPRE_amge_ls.a
+	@echo  "Linking" $@ "... "
+	${CC} -o driver driver_amge_ag_Schwarz..o ${LFLAGS}
+
+
+
+libHYPRE_amge_ls.a: ${OBJS}
+	@echo  "Building $@ ... "
+	ar -rcu $@ ${OBJS}
+	${RANLIB} $@
+
+${OBJS}: ${HEADERS}
+
+##################################################################
+# Generic rules
+##################################################################
+
+.c.o:
+	${CC} -o $@ -c ${CFLAGS} $<
