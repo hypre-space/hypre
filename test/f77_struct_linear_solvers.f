@@ -10,8 +10,6 @@ c-----------------------------------------------------------------------
       program test
 
       include 'mpif.h'
-c     include '/usr/local/mpi/mpich/include/mpif.h'
-c     include '/usr/local/mpi/include/mpif.h'
 
       parameter (MAXZONS=4194304)
       parameter (MAXBLKS=32)
