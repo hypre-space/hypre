@@ -57,7 +57,7 @@ extern "C"
 
 int MLI_Method_AMGSA::setupSFEIBasedNullSpaces( MLI *mli ) 
 {
-   int          k, k2, iN, iD, iR, level, mypid, nElems, elemNNodes;
+   int          k, iN, iD, iR, level, mypid, nElems, elemNNodes;
    int          iE, iN2, **elemNodeLists, *elemNodeList1D, totalNNodes;
    int          *partition, localStartRow, localNRows, *newElemNodeList;
    int          eMatDim, newNNodes, *elemNodeList, count, *orderArray;
@@ -339,7 +339,7 @@ int MLI_Method_AMGSA::setupSFEIBasedNullSpaces( MLI *mli )
 #if 0
       FILE *fptr2 = fopen("arpackEigenV", "w");
       for ( k = 0; k < nullspaceDim_; k++ ) 
-         for ( k2 = 0; k2 < nullspaceLen_; k2++ )
+         for ( int k2 = 0; k2 < nullspaceLen_; k2++ )
             fprintf(fptr2,"%10d %18.10\n", saLabels_[0][k2], 
                     nullspaceVec_[nullspaceLen_*k+k2]);
       fclose(fptr2);
