@@ -13,13 +13,16 @@
  *****************************************************************************/
 
 #include <stdlib.h>
-#include <assert.h>
 #include "math.h"
 #include "Common.h"
 #include "Matrix.h"
 #include "RowPatt.h"
 #include "DiagScale.h"
 #include "OrderStat.h"
+
+#define MAX_NPES          1024
+#define DIAG_VALS_TAG      225
+#define DIAG_INDS_TAG      226
 
 /*--------------------------------------------------------------------------
  * ExchangeDiagEntries - Given a list of indices of diagonal entries required

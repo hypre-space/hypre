@@ -26,6 +26,8 @@
 #include "Matrix.h"
 #include "Numbering.h"
 
+#define MAX_NZ_PER_ROW 1000
+
 /*--------------------------------------------------------------------------
  * MatrixCreate - Return (a pointer to) a matrix object.
  *--------------------------------------------------------------------------*/
@@ -291,8 +293,8 @@ static void MatrixReadMaster(Matrix *mat, char *filename)
 
     int curr_row;
     int len;
-    int ind[10000];
-    double val[10000];
+    int ind[MAX_NZ_PER_ROW];
+    double val[MAX_NZ_PER_ROW];
 
     char line[100];
     int oldrow;
@@ -332,7 +334,11 @@ static void MatrixReadMaster(Matrix *mat, char *filename)
         offset = ftell(file);
 	oldrow = row;
         fscanf(file, "%d %d %lf", &row, &col, &value);
-        assert(oldrow <= row);
+	if (oldrow > row)
+	{
+	    fprintf(stderr, "Matrix file is not sorted by rows.\n");
+	    PARASAILS_EXIT;
+	}
     }
 
     /* Now read our own part */
@@ -362,6 +368,14 @@ static void MatrixReadMaster(Matrix *mat, char *filename)
 
 	    /* reset row pointer */
 	    len = 0;
+	}
+
+	if (len >= MAX_NZ_PER_ROW)
+	{
+	    fprintf(stderr, "The matrix has exceeded %d\n", MAX_NZ_PER_ROW);
+	    fprintf(stderr, "nonzeros per row.  Internal buffers must be\n");
+	    fprintf(stderr, "increased to continue.\n");
+	    PARASAILS_EXIT;
 	}
 
 	ind[len] = col;
@@ -397,8 +411,8 @@ static void MatrixReadSlave(Matrix *mat, char *filename)
 
     int curr_row;
     int len;
-    int ind[10000];
-    double val[10000];
+    int ind[MAX_NZ_PER_ROW];
+    double val[MAX_NZ_PER_ROW];
 
     double time0, time1;
 
@@ -428,6 +442,14 @@ static void MatrixReadSlave(Matrix *mat, char *filename)
 
 	    /* reset row pointer */
 	    len = 0;
+	}
+
+	if (len >= MAX_NZ_PER_ROW)
+	{
+	    fprintf(stderr, "The matrix has exceeded %d\n", MAX_NZ_PER_ROW);
+	    fprintf(stderr, "nonzeros per row.  Internal buffers must be\n");
+	    fprintf(stderr, "increased to continue.\n");
+	    PARASAILS_EXIT;
 	}
 
 	ind[len] = col;
@@ -672,7 +694,7 @@ void MatrixComplete(Matrix *mat)
     inlist  = (int *) calloc(npes, sizeof(int));
 
     /* Create Numbering object */
-    mat->numb = NumberingCreate(mat, 50000);
+    mat->numb = NumberingCreate(mat, PARASAILS_NROWS);
 
     SetupReceives(mat, mat->numb->num_ind - mat->numb->num_loc,
         &mat->numb->local_to_global[mat->numb->num_loc], outlist);

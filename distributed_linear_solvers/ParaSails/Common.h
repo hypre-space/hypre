@@ -30,13 +30,6 @@
 #ifndef _COMMON_H
 #define _COMMON_H
 
-#define MAX_NPES          1024
-#define ROW_REQ_TAG        222
-#define ROW_REPI_TAG       223
-#define ROW_REPV_TAG       224
-#define DIAG_VALS_TAG      225
-#define DIAG_INDS_TAG      226
-
 #define PARASAILS_MAXLEN   1000 /* maximum nz in a pattern - can grow */
 #define PARASAILS_NROWS   50000 /* maximum rows stored per proc - can grow */
 

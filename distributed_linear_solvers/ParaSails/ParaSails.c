@@ -25,6 +25,10 @@
 #include "LoadBal.h"
 #include "ParaSails.h"
 
+#define ROW_REQ_TAG        222
+#define ROW_REPI_TAG       223
+#define ROW_REPV_TAG       224
+
 #ifdef ESSL
 #include <essl.h>
 #else
@@ -638,7 +642,7 @@ static void ConstructPatternForEachRow(int symmetric, PrunedRows *pruned_rows,
         (*costp) += (double) len*len*len;
     }
 
-#ifdef PARASAILS_TIME
+#ifdef PARASAILS_DEBUG
     {
     int mype;
     MPI_Comm_rank(MPI_COMM_WORLD, &mype);
@@ -651,7 +655,7 @@ static void ConstructPatternForEachRow(int symmetric, PrunedRows *pruned_rows,
 }
 
 /*--------------------------------------------------------------------------
- * ComputeValues
+ * ComputeValuesSym
  *--------------------------------------------------------------------------*/
 
 static void ComputeValuesSym(StoredRows *stored_rows, Matrix *mat,
@@ -769,11 +773,11 @@ static void ComputeValuesSym(StoredRows *stored_rows, Matrix *mat,
         hypre_F90_NAME(dpotrf)(&uplo, &len, ahat, &len, &info);
         if (info != 0)
         {
+            printf("Matrix may not be symmetric positive definite.\n");
             printf("ParaSails: row %d, dpotrf returned %d.\n", row, info);
             printf("ParaSails: len %d, ahat: %f %f %f %f\n", row,
                 ahat[0], ahat[1], ahat[2], ahat[3]);
-            fflush(NULL);
-            MPI_Abort(MPI_COMM_WORLD, -1);
+            PARASAILS_EXIT;
         }
 
         /* Solve local linear system - solve phase */
@@ -783,8 +787,7 @@ static void ComputeValuesSym(StoredRows *stored_rows, Matrix *mat,
             printf("ParaSails: row %d, dpotrs returned %d.\n", row, info);
             printf("ParaSails: len %d, ahat: %f %f %f %f\n", row,
                 ahat[0], ahat[1], ahat[2], ahat[3]);
-            fflush(NULL);
-            MPI_Abort(MPI_COMM_WORLD, -1);
+            PARASAILS_EXIT;
         }
 #endif
         time1 = MPI_Wtime();
@@ -799,7 +802,7 @@ static void ComputeValuesSym(StoredRows *stored_rows, Matrix *mat,
     free(marker);
     free(ahat);
 
-#ifdef PARASAILS_TIME
+#ifdef PARASAILS_DEBUG
     {
     int mype;
     MPI_Comm_rank(MPI_COMM_WORLD, &mype);
@@ -811,9 +814,13 @@ static void ComputeValuesSym(StoredRows *stored_rows, Matrix *mat,
 #endif
 }
 
+/*--------------------------------------------------------------------------
+ * ComputeValuesNonsym
+ *--------------------------------------------------------------------------*/
 /* Numbering may need additional indices .... */
 /* all stored rows have been converted to local indexing by the time get here */
 /* num_loc is the highest local index number */
+/*--------------------------------------------------------------------------*/
 
 static void ComputeValuesNonsym(StoredRows *stored_rows, Matrix *mat,
   int local_beg_row, Numbering *numb)
@@ -821,7 +828,7 @@ static void ComputeValuesNonsym(StoredRows *stored_rows, Matrix *mat,
     int *marker;
     double *ahat, *ahatp, *bhat;
     double *work;
-    int ahat_size = 10000, bhat_size = 1000, work_size = 400*64;
+    int ahat_size = 10000, bhat_size = 1000, work_size = 2000*64;
 
     int row, maxlen, len, *ind;
     double *val;
@@ -946,8 +953,7 @@ static void ComputeValuesNonsym(StoredRows *stored_rows, Matrix *mat,
             printf("ParaSails: row %d, dgels returned %d.\n", row, info);
             printf("ParaSails: len %d, ahat: %f %f %f %f\n", row,
                 ahat[0], ahat[1], ahat[2], ahat[3]);
-            fflush(NULL);
-            MPI_Abort(MPI_COMM_WORLD, -1);
+            PARASAILS_EXIT;
         }
 
 	/* Copy result into row */
@@ -964,7 +970,7 @@ static void ComputeValuesNonsym(StoredRows *stored_rows, Matrix *mat,
     free(ahat);
     free(work);
 
-#ifdef PARASAILS_TIME
+#ifdef PARASAILS_DEBUG
     {
     int mype;
     MPI_Comm_rank(MPI_COMM_WORLD, &mype);
@@ -1111,7 +1117,7 @@ void ParaSailsSetupPattern(ParaSails *ps, double thresh, int num_levels)
     ps->thresh     = thresh;
     ps->num_levels = num_levels;
 
-#ifdef PARASAILS_TIME
+#ifdef PARASAILS_DEBUG
     if (mype == 0)
        printf("ParaSails: thresh %e, level %d\n", thresh, num_levels);
 #endif
@@ -1190,7 +1196,7 @@ void ParaSailsSetupValues(ParaSails *ps, Matrix *A)
 
     time1 = MPI_Wtime();
 
-#ifdef PARASAILS_TIME
+#ifdef PARASAILS_DEBUG
     printf("%d: Total Time for computing values: %f\n", mype, time1-time0);
 #endif
 
