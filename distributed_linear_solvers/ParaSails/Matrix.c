@@ -368,9 +368,65 @@ void MatrixRead(Matrix *mat, char *filename)
     printf("%d: Time for reading matrix: %f\n", mype, time1-time0);
 }
 
-/*
-need to check communications complete in setup
+/*--------------------------------------------------------------------------
+ * RhsRead - Read a right-hand side file "filename" from disk and store in the 
+ * location pointed to by "rhs".  "mat" is needed to provide the partitioning
+ * information.  The expected format is: a header line (n, nrhs) followed
+ * by n values.
+ *--------------------------------------------------------------------------*/
 
+void RhsRead(double *rhs, Matrix *mat, char *filename)
+{
+    FILE *file;
+    MPI_Status status;
+    int mype, npes;
+    int num_rows, dummy, num_local, pe, i;
+    double *buffer = NULL;
+    int buflen = 0;
+
+    MPI_Comm_size(mat->comm, &npes);
+    MPI_Comm_rank(mat->comm, &mype);
+
+    num_local = mat->end_row - mat->beg_row + 1;
+
+    if (mype != 0)
+    {
+	MPI_Recv(rhs, num_local, MPI_DOUBLE, 0, 0, mat->comm, &status);
+	return;
+    }
+
+    file = fopen(filename, "r");
+    assert(file != NULL);
+
+    i = fscanf(file, "%d %d\n", &num_rows, &dummy);
+    assert(i == 2);
+    assert(num_rows == mat->end_rows[npes-1]);
+
+    /* Read own rows first */
+    for (i=0; i<num_local; i++)
+        fscanf(file, "%lf\n", &rhs[i]);
+
+    for (pe=1; pe<npes; pe++)
+    {
+	num_local = mat->end_rows[pe] - mat->beg_rows[pe]+ 1;
+
+	if (buflen < num_local)
+	{
+	    free(buffer);
+	    buflen = num_local;
+            buffer = (double *) malloc(buflen * sizeof(double));
+	}
+
+        for (i=0; i<num_local; i++)
+            fscanf(file, "%lf\n", &buffer[i]);
+
+	MPI_Send(buffer, num_local, MPI_DOUBLE, pe, 0, mat->comm);
+    }
+
+    free(buffer);
+}
+
+/*
 local_to_global = one simple array = ind (using base 0 for external)
 global_to_local = indexed by hash table
 */
@@ -746,4 +802,3 @@ void MatrixMatvecTrans(Matrix *mat, double *x, double *y)
 
     MPI_Waitall(mat->num_recv, mat->send_req2, mat->statuses);
 }
-

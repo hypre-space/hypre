@@ -87,6 +87,7 @@ void MatrixGetRow(Matrix *mat, int row, int *lenp, int **indp, double **valp);
 int  MatrixRowPe(Matrix *mat, int row);
 void MatrixPrint(Matrix *mat, char *filename);
 void MatrixRead(Matrix *mat, char *filename);
+void RhsRead(double *rhs, Matrix *mat, char *filename);
 
 void MatrixMatvec(Matrix *mat, double *x, double *y);
 void MatrixMatvecTrans(Matrix *mat, double *x, double *y);
