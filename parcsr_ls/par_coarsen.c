@@ -292,7 +292,6 @@ hypre_BoomerAMGCoarsen( hypre_ParCSRMatrix    *S,
             }
             else
             {
-               graph_size--;
                CF_marker[i] = F_PT;
             }
          }
@@ -2148,7 +2147,6 @@ hypre_BoomerAMGCoarsenPMIS( hypre_ParCSRMatrix    *S,
             }
             else
             {
-               graph_size--;
                CF_marker[i] = F_PT;
             }
          }
