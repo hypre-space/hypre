@@ -65,16 +65,26 @@ int main(int argc, char *argv[])
     /* Read number of rows in matrix */
     file = fopen(argv[1], "r");
     assert(file != NULL);
+#ifdef EMSOLVE
+    fscanf(file, "%*d %d\n", &n);
+#else
     fscanf(file, "%d\n", &n);
+#endif
     fclose(file);
     assert(n >= npes);
 
     beg_row = (int) ((double)(mype*n) / npes) + 1; /* assumes 1-based */
     end_row = (int) ((double)((mype+1)* n) / npes);
+
+#ifdef EMSOLVE
+    beg_row--;
+    end_row--;
+#else
     if (mype == 0)
         assert(beg_row == 1);
     if (mype == npes-1)
         assert(end_row == n);
+#endif
 
     x = (double *) malloc((end_row-beg_row+1) * sizeof(double));
     b = (double *) malloc((end_row-beg_row+1) * sizeof(double));
@@ -108,8 +118,6 @@ int main(int argc, char *argv[])
         {
             printf("Enter parameters selparam (0.75), nlevels (1), filter (0.1): ");
             scanf("%lf %d %lf", &selparam, &nlevels, &filter);
-            printf("selparam %f, nlevels %d, filter %f\n", selparam, nlevels, filter);
-            fflush(stdout);
 	}
 
 	MPI_Bcast(&selparam, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
@@ -119,6 +127,13 @@ int main(int argc, char *argv[])
         if (nlevels < 0)
             break;
 #endif
+        beta=0.9;
+        if (mype == 0) 
+	{
+            printf("selparam %f, nlevels %d, filter %f, beta %f\n", 
+		selparam, nlevels, filter, beta);
+            fflush(stdout);
+	}
 
         MPI_Barrier(MPI_COMM_WORLD);
         time0 = MPI_Wtime();
@@ -126,7 +141,7 @@ int main(int argc, char *argv[])
         thresh = ParaSailsSelectThresh(ps, selparam);
 /*thresh=10.0;*/
         if (mype == 0) 
-            printf("thresh: %f\n", thresh);
+            printf("thresh: %e\n", thresh);
         ParaSailsSetupPattern(ps, thresh, nlevels);
         ParaSailsSetupValues(ps, A);
         time1 = MPI_Wtime();
