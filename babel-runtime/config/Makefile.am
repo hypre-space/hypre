@@ -40,8 +40,7 @@ noinst_SCRIPTS  = config.guess config.sub install-sh	\
 EXTRA_DIST      = disabled
 
 AUTOHEADER = @AUTOHEADER@ \
-	     && cd config \
-	     && @PERL@ -p -i.bak \
-	          -e "s/^\#undef (.*)$$/\#ifndef \1\n\#undef \1\n\#endif/" \
+	     && cd sidl \
+	     && @PERL@ -p -i.bak changeundef.pl \
 	          babel_config.h.in \
              && rm -f babel_config.h.in.bak
