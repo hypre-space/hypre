@@ -8,5 +8,20 @@
 # $Revision$
 #EHEADER***********************************************************************
 
-mpirun $*
+POE_ARGS=""
+POE_NUM_PROCS="1"
+while [ "$*" != "" ]
+do
+case $1 in
+    -np)
+	POE_NUM_PROCS=$2
+	shift
+        shift;;
+    *)
+        POE_ARGS="$POE_ARGS $1"
+        shift;;
+esac
+done
+
+poe $*
 
