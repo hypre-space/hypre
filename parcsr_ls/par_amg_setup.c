@@ -467,6 +467,10 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
       if (hypre_ParAMGDataInterpType(amg_data) == 1)
       {
+          hypre_BoomerAMGNormalizeVecs(
+		hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A_array[level])),
+                 hypre_ParAMGDataNumSamples(amg_data), SmoothVecs);
+
           hypre_BoomerAMGBuildInterpLS(NULL, CF_marker_array[level], S,
                  coarse_pnts_global, num_functions, dof_func_array[level], 
 		 debug_flag, trunc_factor, 

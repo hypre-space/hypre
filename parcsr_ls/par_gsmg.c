@@ -598,6 +598,39 @@ hypre_BoomerAMGCreateSmoothDirs(void         *data,
 }
 
 /*---------------------------------------------------------------------------
+ * hypre_BoomerAMGNormalizeVecs
+ *
+ * Normalize the smooth vectors and also make the first vector the constant
+ * vector
+ *
+ * inputs:
+ * n   = length of smooth vectors
+ * num = number of smooth vectors
+ * V   = smooth vectors (array of length n*num), also an output
+ * 
+ * output:
+ * V   = adjusted smooth vectors
+ *--------------------------------------------------------------------------*/
+int
+hypre_BoomerAMGNormalizeVecs(int n, int num, double *V)
+{
+   int i, j;
+   double nrm;
+
+   /* change first vector to the constant vector */
+   for (i=0; i<n; i++)
+      V[i] = 1.0;
+
+   for (j=0; j<num; j++)
+   {
+       nrm = dnrm2(n, &V[j*n]);
+       dscal(n, 1./nrm, &V[j*n]);
+   }
+
+   return 0;
+}
+
+/*---------------------------------------------------------------------------
  * hypre_BoomerAMGFitVectors
  *
  * Construct interpolation weights based on fitting smooth vectors
@@ -616,7 +649,7 @@ hypre_BoomerAMGCreateSmoothDirs(void         *data,
  *       vectors have also been normalized; this is also an input
  *--------------------------------------------------------------------------*/
 int
-hypre_BoomerAMGFitVectors(int ip, int n, int num, double *V, 
+hypre_BoomerAMGFitVectors(int ip, int n, int num, const double *V, 
   int nc, const int *ind, double *val)
 {
    double *a, *b;
@@ -635,10 +668,6 @@ hypre_BoomerAMGFitVectors(int ip, int n, int num, double *V,
       printf("%d ", ind[i]);
    printf("\n");
 */
-
-   /* change first vector to the constant vector */
-   for (i=0; i<n; i++)
-      V[i] = 1.0;
 
    work_size = 2000*64;
    work = hypre_CTAlloc(double, work_size);
@@ -1092,7 +1121,7 @@ hypre_BoomerAMGBuildInterpLS( hypre_ParCSRMatrix   *A,
       else
       {         
          int kk;
-         int indices[1000];
+         int indices[1000]; /* kludge */
 
          /* Diagonal part of P */
          P_diag_i[i] = jj_counter;
@@ -1116,13 +1145,8 @@ hypre_BoomerAMGBuildInterpLS( hypre_ParCSRMatrix   *A,
             }
          }
 
-         /* edmond */
          hypre_BoomerAMGFitVectors(i, n_fine, num_smooth, SmoothVecs, 
-            kk,
-            /*jj_end_row-jj_begin_row,*/
-            indices,
-            /*&P_diag_j[jj_begin_row],*/
-            &P_diag_data[P_diag_i[i]]);
+            kk, indices, &P_diag_data[P_diag_i[i]]);
 
          /* Off-Diagonal part of P */
          /* undone */
