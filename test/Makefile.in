@@ -196,8 +196,8 @@ HYPRE_STANDARD_DRIVERS =\
  struct.c\
  sstruct.c
 
+# taken out, doesn't work presently: struct_b.c
 HYPRE_BABEL_DRIVERS =\
- struct_b.c\
  ij_b.c
 
 HYPRE_DRIVERS_CXX =\
@@ -213,8 +213,8 @@ HYPRE_STANDARD_DRIVERS_F77 =\
 
 HYPRE_BABEL_DRIVERS_CXX =
 
+# taken out, doesn't work presently: f77_struct_b.f
 HYPRE_BABEL_DRIVERS_F77 =\
- f77_struct_b.f\
  f77_ij_b.f
 
 HYPRE_BETA_DRIVERS =
