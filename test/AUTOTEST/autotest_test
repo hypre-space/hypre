@@ -421,8 +421,8 @@ apply_error_filters () {
         do process_filter $ErrorFile "${ii}"
         done
         for ii in \
-          ': In function `f_open'
-        do multi_line_delete $ErrorFile 2 "${ii}"
+          ':\ In\ function\ `f_open'
+        do multi_line_delete $ErrorFile 1 "${ii}"
         done
       ;;
       vivid*)
