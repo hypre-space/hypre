@@ -37,6 +37,9 @@
 struct hypre_Solver_struct;
 typedef struct hypre_Solver_struct *HYPRE_Solver;
 /* similar pseudo-void* for Matrix and Vector: */
+#endif
+#ifndef HYPRE_MATRIX_STRUCT
+#define HYPRE_MATRIX_STRUCT
 struct hypre_Matrix_struct;
 typedef struct hypre_Matrix_struct *HYPRE_Matrix;
 #endif

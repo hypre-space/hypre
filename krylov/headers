@@ -14,16 +14,16 @@ INTERNAL_HEADER=krylov.h
 # Include guards and other includes
 #===========================================================================
 
-cat > $INTERNAL_HEADER <<@
+cat > $INTERNAL_HEADER < all_krylov.h
+cat >> $INTERNAL_HEADER < bicgstab.h
+cat >> $INTERNAL_HEADER < cgnr.h
+cat >> $INTERNAL_HEADER < gmres.h
+cat >> $INTERNAL_HEADER < pcg.h
+
+cat >> $INTERNAL_HEADER <<@
 
 #ifndef hypre_KRYLOV_HEADER
 #define hypre_KRYLOV_HEADER
-
-#include "all_krylov.h"
-#include "bicgstab.h"
-#include "cgnr.h"
-#include "gmres.h"
-#include "pcg.h"
 
 #ifdef __cplusplus
 extern "C" {

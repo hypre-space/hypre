@@ -1,12 +1,717 @@
+/*BHEADER**********************************************************************
+ * (c) 2000   The Regents of the University of California
+ *
+ * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
+ * notice, contact person, and disclaimer.
+ *
+ * $Revision$
+ *********************************************************************EHEADER*/
+
+/******************************************************************************
+ *
+ * krylov solver headers
+ *
+ *****************************************************************************/
+
+#ifndef HYPRE_ALL_KRYLOV_HEADER
+#define HYPRE_ALL_KRYLOV_HEADER
+
+#include <stdlib.h>
+#include <stdio.h>
+#include <math.h>
+
+#ifndef max
+#define max(a,b)  (((a)<(b)) ? (b) : (a))
+#endif
+
+#define hypre_CTAllocF(type, count, funcs) \
+( (type *)(*(funcs->CAlloc))\
+((unsigned int)(count), (unsigned int)sizeof(type)) )
+
+#define hypre_TFreeF( ptr, funcs ) \
+( (*(funcs->Free))((char *)ptr), ptr = NULL )
+
+/* A pointer to a type which is never defined, sort of works like void* ... */
+#ifndef HYPRE_SOLVER_STRUCT
+#define HYPRE_SOLVER_STRUCT
+struct hypre_Solver_struct;
+typedef struct hypre_Solver_struct *HYPRE_Solver;
+/* similar pseudo-void* for Matrix and Vector: */
+#endif
+#ifndef HYPRE_MATRIX_STRUCT
+#define HYPRE_MATRIX_STRUCT
+struct hypre_Matrix_struct;
+typedef struct hypre_Matrix_struct *HYPRE_Matrix;
+#endif
+#ifndef HYPRE_VECTOR_STRUCT
+#define HYPRE_VECTOR_STRUCT
+struct hypre_Vector_struct;
+typedef struct hypre_Vector_struct *HYPRE_Vector;
+#endif
+
+typedef int (*HYPRE_PtrToSolverFcn)(HYPRE_Solver,
+                                    HYPRE_Matrix,
+                                    HYPRE_Vector,
+                                    HYPRE_Vector);
+
+#endif
+/*BHEADER**********************************************************************
+ * (c) 2000   The Regents of the University of California
+ *
+ * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
+ * notice, contact person, and disclaimer.
+ *
+ * $Revision$
+ *********************************************************************EHEADER*/
+/******************************************************************************
+ *
+ * BiCGSTAB bicgstab
+ *
+ *****************************************************************************/
+
+#ifndef HYPRE_KRYLOV_BiCGSTAB_HEADER
+#define HYPRE_KRYLOV_BiCGSTAB_HEADER
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+/**
+ * @name Generic BiCGSTAB Interface
+ *
+ * A general description of the interface goes here...
+ *
+ * @memo A generic BiCGSTAB linear solver interface
+ * @version 0.1
+ * @author Jeffrey F. Painter
+ **/
+/*@{*/
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+/*--------------------------------------------------------------------------
+ * hypre_BiCGSTABData and hypre_BiCGSTABFunctions
+ *--------------------------------------------------------------------------*/
+
+
+/**
+ * @name BiCGSTAB structs
+ *
+ * Description...
+ **/
+/*@{*/
+
+/**
+ * The {\tt hypre\_BiCGSTABSFunctions} object ...
+ **/
+
+/* functions in pcg_struct.c which aren't used here:
+char *hypre_ParKrylovCAlloc( int count , int elt_size );
+int hypre_ParKrylovFree( char *ptr );
+void *hypre_ParKrylovCreateVectorArray( int n , void *vvector );
+int hypre_ParKrylovMatvecT( void *matvec_data , double alpha , void *A , void *x , double beta , void *y );
+int hypre_ParKrylovClearVector( void *x );
+*/
+/* functions in pcg_struct.c which are used here:
+  void *hypre_ParKrylovCreateVector( void *vvector );
+  int hypre_ParKrylovDestroyVector( void *vvector );
+  void *hypre_ParKrylovMatvecCreate( void *A , void *x );
+  int hypre_ParKrylovMatvec( void *matvec_data , double alpha , void *A , void *x , double beta , void *y );
+  int hypre_ParKrylovMatvecDestroy( void *matvec_data );
+  double hypre_ParKrylovInnerProd( void *x , void *y );
+  int hypre_ParKrylovCopyVector( void *x , void *y );
+  int hypre_ParKrylovScaleVector( double alpha , void *x );
+  int hypre_ParKrylovAxpy( double alpha , void *x , void *y );
+  int hypre_ParKrylovCommInfo( void *A , int *my_id , int *num_procs );
+  int hypre_ParKrylovIdentitySetup( void *vdata , void *A , void *b , void *x );
+  int hypre_ParKrylovIdentity( void *vdata , void *A , void *b , void *x );
+*/
+
+typedef struct
+{
+  void *(*CreateVector)( void *vvector );
+  int (*DestroyVector)( void *vvector );
+  void *(*MatvecCreate)( void *A , void *x );
+  int (*Matvec)( void *matvec_data , double alpha , void *A , void *x , double beta , void *y );
+  int (*MatvecDestroy)( void *matvec_data );
+  double (*InnerProd)( void *x , void *y );
+  int (*CopyVector)( void *x , void *y );
+  int (*ScaleVector)( double alpha , void *x );
+  int (*Axpy)( double alpha , void *x , void *y );
+  int (*CommInfo)( void *A , int *my_id , int *num_procs );
+  int (*IdentitySetup)( void *vdata , void *A , void *b , void *x );
+  int (*Identity)( void *vdata , void *A , void *b , void *x );
+
+   int    (*precond)();
+   int    (*precond_setup)();
+
+} hypre_BiCGSTABFunctions;
+
+/**
+ * The {\tt hypre\_BiCGSTABData} object ...
+ **/
+
+typedef struct
+{
+   int      min_iter;
+   int      max_iter;
+   int      stop_crit;
+   double   tol;
+   double   rel_residual_norm;
+
+   void  *A;
+   void  *r;
+   void  *r0;
+   void  *s;
+   void  *v;
+   void  *p;
+   void  *q;
+
+   void  *matvec_data;
+   void    *precond_data;
+
+   hypre_BiCGSTABFunctions * functions;
+
+   /* log info (always logged) */
+   int      num_iterations;
+ 
+   /* additional log info (logged when `logging' > 0) */
+   int      logging;
+   double  *norms;
+   char    *log_file_name;
+
+} hypre_BiCGSTABData;
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/**
+ * @name generic BiCGSTAB Solver
+ *
+ * Description...
+ **/
+/*@{*/
+
+/**
+ * Description...
+ *
+ * @param param [IN] ...
+ **/
+
+   hypre_BiCGSTABFunctions *
+   hypre_BiCGSTABFunctionsCreate(
+      void *(*CreateVector)( void *vvector ),
+      int (*DestroyVector)( void *vvector ),
+      void *(*MatvecCreate)( void *A , void *x ),
+      int (*Matvec)( void *matvec_data , double alpha , void *A , void *x , double beta , void *y ),
+      int (*MatvecDestroy)( void *matvec_data ),
+      double (*InnerProd)( void *x , void *y ),
+      int (*CopyVector)( void *x , void *y ),
+      int (*ScaleVector)( double alpha , void *x ),
+      int (*Axpy)( double alpha , void *x , void *y ),
+      int (*CommInfo)( void *A , int *my_id , int *num_procs ),
+      int    (*precond)(),
+      int    (*precond_setup)()
+      );
+
+
+/**
+ * Description...
+ *
+ * @param param [IN] ...
+ **/
+
+void *
+hypre_BiCGSTABCreate( hypre_BiCGSTABFunctions * bicgstab_functions );
+
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif
+/*BHEADER**********************************************************************
+ * (c) 2000   The Regents of the University of California
+ *
+ * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
+ * notice, contact person, and disclaimer.
+ *
+ * $Revision$
+ *********************************************************************EHEADER*/
+
+/******************************************************************************
+ *
+ * cgnr (conjugate gradient on the normal equations A^TAx = A^Tb) functions
+ *
+ *****************************************************************************/
+
+#ifndef HYPRE_KRYLOV_CGNR_HEADER
+#define HYPRE_KRYLOV_CGNR_HEADER
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+/**
+ * @name Generic CGNR Interface
+ *
+ * A general description of the interface goes here...
+ *
+ * @memo A generic CGNR linear solver interface
+ * @version 0.1
+ * @author Jeffrey F. Painter
+ **/
+/*@{*/
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+/*--------------------------------------------------------------------------
+ * hypre_CGNRData and hypre_CGNRFunctions
+ *--------------------------------------------------------------------------*/
+
+
+/**
+ * @name CGNR structs
+ *
+ * Description...
+ **/
+/*@{*/
+
+/**
+ * The {\tt hypre\_CGNRSFunctions} object ...
+ **/
+
+typedef struct
+{
+   int    (*CommInfo)      ( void  *A, int   *my_id, int   *num_procs );
+   void * (*CreateVector)  ( void *vector );
+   int    (*DestroyVector) ( void *vector );
+   void * (*MatvecCreate)  ( void *A, void *x );
+   int    (*Matvec)        ( void *matvec_data, double alpha, void *A,
+                             void *x, double beta, void *y );
+   int    (*MatvecT)       ( void *matvec_data, double alpha, void *A,
+                             void *x, double beta, void *y );
+   int    (*MatvecDestroy) ( void *matvec_data );
+   double (*InnerProd)     ( void *x, void *y );
+   int    (*CopyVector)    ( void *x, void *y );
+   int    (*ClearVector)   ( void *x );
+   int    (*ScaleVector)   ( double alpha, void *x );
+   int    (*Axpy)          ( double alpha, void *x, void *y );
+   int    (*precond_setup) ( void *vdata, void *A, void *b, void *x );
+   int    (*precond)       ( void *vdata, void *A, void *b, void *x );
+   int    (*precondT)       ( void *vdata, void *A, void *b, void *x );
+} hypre_CGNRFunctions;
+
+/**
+ * The {\tt hypre\_CGNRData} object ...
+ **/
+
+typedef struct
+{
+   double   tol;
+   double   rel_residual_norm;
+   int      min_iter;
+   int      max_iter;
+   int      stop_crit;
+
+   void    *A;
+   void    *p;
+   void    *q;
+   void    *r;
+   void    *t;
+
+   void    *matvec_data;
+   void    *precond_data;
+
+   hypre_CGNRFunctions * functions;
+
+   /* log info (always logged) */
+   int      num_iterations;
+
+   /* additional log info (logged when `logging' > 0) */
+   int      logging;
+   double  *norms;
+   char    *log_file_name;
+
+} hypre_CGNRData;
+
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+
+/**
+ * @name generic CGNR Solver
+ *
+ * Description...
+ **/
+/*@{*/
+
+
+/**
+ * Description...
+ *
+ * @param param [IN] ...
+ **/
+hypre_CGNRFunctions *
+hypre_CGNRFunctionsCreate(
+   int    (*CommInfo)      ( void  *A, int   *my_id, int   *num_procs ),
+   void * (*CreateVector)  ( void *vector ),
+   int    (*DestroyVector) ( void *vector ),
+   void * (*MatvecCreate)  ( void *A, void *x ),
+   int    (*Matvec)        ( void *matvec_data, double alpha, void *A,
+                             void *x, double beta, void *y ),
+   int    (*MatvecT)        ( void *matvec_data, double alpha, void *A,
+                             void *x, double beta, void *y ),
+   int    (*MatvecDestroy) ( void *matvec_data ),
+   double (*InnerProd)     ( void *x, void *y ),
+   int    (*CopyVector)    ( void *x, void *y ),
+   int    (*ClearVector)   ( void *x ),
+   int    (*ScaleVector)   ( double alpha, void *x ),
+   int    (*Axpy)          ( double alpha, void *x, void *y ),
+   int    (*PrecondSetup)  ( void *vdata, void *A, void *b, void *x ),
+   int    (*Precond)       ( void *vdata, void *A, void *b, void *x ),
+   int    (*PrecondT)       ( void *vdata, void *A, void *b, void *x )
+   );
+
+/**
+ * Description...
+ *
+ * @param param [IN] ...
+ **/
+
+void *
+hypre_CGNRCreate( hypre_CGNRFunctions *cgnr_functions );
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif
+/*BHEADER**********************************************************************
+ * (c) 2000   The Regents of the University of California
+ *
+ * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
+ * notice, contact person, and disclaimer.
+ *
+ * $Revision$
+ *********************************************************************EHEADER*/
+/******************************************************************************
+ *
+ * GMRES gmres
+ *
+ *****************************************************************************/
+
+#ifndef HYPRE_KRYLOV_GMRES_HEADER
+#define HYPRE_KRYLOV_GMRES_HEADER
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+/**
+ * @name Generic GMRES Interface
+ *
+ * A general description of the interface goes here...
+ *
+ * @memo A generic GMRES linear solver interface
+ * @version 0.1
+ * @author Jeffrey F. Painter
+ **/
+/*@{*/
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+/*--------------------------------------------------------------------------
+ * hypre_GMRESData and hypre_GMRESFunctions
+ *--------------------------------------------------------------------------*/
+
+
+/**
+ * @name GMRES structs
+ *
+ * Description...
+ **/
+/*@{*/
+
+/**
+ * The {\tt hypre\_GMRESFunctions} object ...
+ **/
+
+typedef struct
+{
+   char * (*CAlloc)        ( int count, int elt_size );
+   int    (*Free)          ( char *ptr );
+   int    (*CommInfo)      ( void  *A, int   *my_id, int   *num_procs );
+   void * (*CreateVector)  ( void *vector );
+   void * (*CreateVectorArray)  ( int size, void *vectors );
+   int    (*DestroyVector) ( void *vector );
+   void * (*MatvecCreate)  ( void *A, void *x );
+   int    (*Matvec)        ( void *matvec_data, double alpha, void *A,
+                             void *x, double beta, void *y );
+   int    (*MatvecDestroy) ( void *matvec_data );
+   double (*InnerProd)     ( void *x, void *y );
+   int    (*CopyVector)    ( void *x, void *y );
+   int    (*ClearVector)   ( void *x );
+   int    (*ScaleVector)   ( double alpha, void *x );
+   int    (*Axpy)          ( double alpha, void *x, void *y );
+
+   int    (*precond)();
+   int    (*precond_setup)();
+
+} hypre_GMRESFunctions;
+
+/**
+ * The {\tt hypre\_GMRESData} object ...
+ **/
+
+typedef struct
+{
+   int      k_dim;
+   int      min_iter;
+   int      max_iter;
+   int      stop_crit;
+   double   tol;
+   double   rel_residual_norm;
+
+   void  *A;
+   void  *r;
+   void  *w;
+   void  **p;
+
+   void  *matvec_data;
+   void    *precond_data;
+
+   hypre_GMRESFunctions * functions;
+
+   /* log info (always logged) */
+   int      num_iterations;
+ 
+   /* additional log info (logged when `logging' > 0) */
+   int      logging;
+   double  *norms;
+   char    *log_file_name;
+
+} hypre_GMRESData;
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/**
+ * @name generic GMRES Solver
+ *
+ * Description...
+ **/
+/*@{*/
+
+/**
+ * Description...
+ *
+ * @param param [IN] ...
+ **/
+
+hypre_GMRESFunctions *
+hypre_GMRESFunctionsCreate(
+   char * (*CAlloc)        ( int count, int elt_size ),
+   int    (*Free)          ( char *ptr ),
+   int    (*CommInfo)      ( void  *A, int   *my_id, int   *num_procs ),
+   void * (*CreateVector)  ( void *vector ),
+   void * (*CreateVectorArray)  ( int size, void *vectors ),
+   int    (*DestroyVector) ( void *vector ),
+   void * (*MatvecCreate)  ( void *A, void *x ),
+   int    (*Matvec)        ( void *matvec_data, double alpha, void *A,
+                             void *x, double beta, void *y ),
+   int    (*MatvecDestroy) ( void *matvec_data ),
+   double (*InnerProd)     ( void *x, void *y ),
+   int    (*CopyVector)    ( void *x, void *y ),
+   int    (*ClearVector)   ( void *x ),
+   int    (*ScaleVector)   ( double alpha, void *x ),
+   int    (*Axpy)          ( double alpha, void *x, void *y ),
+   int    (*PrecondSetup)  ( void *vdata, void *A, void *b, void *x ),
+   int    (*Precond)       ( void *vdata, void *A, void *b, void *x )
+   );
+
+/**
+ * Description...
+ *
+ * @param param [IN] ...
+ **/
+
+void *
+hypre_GMRESCreate( hypre_GMRESFunctions *gmres_functions );
+
+#ifdef __cplusplus
+}
+#endif
+#endif
+/*BHEADER**********************************************************************
+ * (c) 2000   The Regents of the University of California
+ *
+ * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
+ * notice, contact person, and disclaimer.
+ *
+ * $Revision$
+ *********************************************************************EHEADER*/
+
+/******************************************************************************
+ *
+ * Preconditioned conjugate gradient (Omin) headers
+ *
+ *****************************************************************************/
+
+#ifndef HYPRE_KRYLOV_PCG_HEADER
+#define HYPRE_KRYLOV_PCG_HEADER
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+/**
+ * @name Generic PCG Interface
+ *
+ * A general description of the interface goes here...
+ *
+ * @memo A generic PCG linear solver interface
+ * @version 0.1
+ * @author Jeffrey F. Painter
+ **/
+/*@{*/
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+/*--------------------------------------------------------------------------
+ * hypre_PCGData and hypre_PCGFunctions
+ *--------------------------------------------------------------------------*/
+
+
+/**
+ * @name PCG structs
+ *
+ * Description...
+ **/
+/*@{*/
+
+/**
+ * The {\tt hypre\_PCGSFunctions} object ...
+ **/
+
+typedef struct
+{
+   char * (*CAlloc)        ( int count, int elt_size );
+   int    (*Free)          ( char *ptr );
+   void * (*CreateVector)  ( void *vector );
+   int    (*DestroyVector) ( void *vector );
+   void * (*MatvecCreate)  ( void *A, void *x );
+   int    (*Matvec)        ( void *matvec_data, double alpha, void *A,
+                             void *x, double beta, void *y );
+   int    (*MatvecDestroy) ( void *matvec_data );
+   double (*InnerProd)     ( void *x, void *y );
+   int    (*CopyVector)    ( void *x, void *y );
+   int    (*ClearVector)   ( void *x );
+   int    (*ScaleVector)   ( double alpha, void *x );
+   int    (*Axpy)          ( double alpha, void *x, void *y );
+
+   int    (*precond)();
+   int    (*precond_setup)();
+} hypre_PCGFunctions;
+
+/**
+ * The {\tt hypre\_PCGData} object ...
+ **/
+
+/* rel_change!=0 means: if pass the other stopping criteria,
+ also check the relative change in the solution x.
+   stop_crit!=0 means: absolute error tolerance rather than
+ the usual relative error tolerance on the residual.  Never
+ applies if rel_change!=0.
+*/
+
+typedef struct
+{
+   double   tol;
+   double   cf_tol;
+   int      max_iter;
+   int      two_norm;
+   int      rel_change;
+   int      stop_crit;
+
+   void    *A;
+   void    *p;
+   void    *s;
+   void    *r;
+
+   void    *matvec_data;
+   void    *precond_data;
+
+   hypre_PCGFunctions * functions;
+
+   /* log info (always logged) */
+   int      num_iterations;
+
+   /* additional log info (logged when `logging' > 0) */
+   int      logging;
+   double  *norms;
+   double  *rel_norms;
+
+} hypre_PCGData;
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+
+/**
+ * @name generic PCG Solver
+ *
+ * Description...
+ **/
+/*@{*/
+
+/**
+ * Description...
+ *
+ * @param param [IN] ...
+ **/
+
+hypre_PCGFunctions *
+hypre_PCGFunctionsCreate(
+   char * (*CAlloc)        ( int count, int elt_size ),
+   int    (*Free)          ( char *ptr ),
+   void * (*CreateVector)  ( void *vector ),
+   int    (*DestroyVector) ( void *vector ),
+   void * (*MatvecCreate)  ( void *A, void *x ),
+   int    (*Matvec)        ( void *matvec_data, double alpha, void *A,
+                             void *x, double beta, void *y ),
+   int    (*MatvecDestroy) ( void *matvec_data ),
+   double (*InnerProd)     ( void *x, void *y ),
+   int    (*CopyVector)    ( void *x, void *y ),
+   int    (*ClearVector)   ( void *x ),
+   int    (*ScaleVector)   ( double alpha, void *x ),
+   int    (*Axpy)          ( double alpha, void *x, void *y ),
+   int    (*PrecondSetup)  ( void *vdata, void *A, void *b, void *x ),
+   int    (*Precond)       ( void *vdata, void *A, void *b, void *x )
+   );
+
+/**
+ * Description...
+ *
+ * @param param [IN] ...
+ **/
+
+void *
+hypre_PCGCreate( hypre_PCGFunctions *pcg_functions );
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif
 
 #ifndef hypre_KRYLOV_HEADER
 #define hypre_KRYLOV_HEADER
-
-#include "all_krylov.h"
-#include "bicgstab.h"
-#include "cgnr.h"
-#include "gmres.h"
-#include "pcg.h"
 
 #ifdef __cplusplus
 extern "C" {
