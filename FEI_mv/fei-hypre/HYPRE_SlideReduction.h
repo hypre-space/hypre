@@ -56,7 +56,7 @@ class HYPRE_SlideReduction
    virtual ~HYPRE_SlideReduction();
    int    setOutputLevel(int level);
    int    setTruncationThreshold(double trunc) {truncTol_=trunc; return 0;}
-   int    setScaleMatrix()             {scaleMatrixFlag_ = 1;}
+   int    setScaleMatrix()             {scaleMatrixFlag_ = 1; return 0;}
    int    setBlockMinNorm(double norm) {blockMinNorm_ = norm; return 0;}
    int    setup(HYPRE_IJMatrix , HYPRE_IJVector , HYPRE_IJVector );
    int    buildReducedMatrix();
