@@ -1,0 +1,65 @@
+#BHEADER***********************************************************************
+# (c) 2000   The Regents of the University of California
+#
+# See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
+# notice, contact person, and disclaimer.
+#
+# $Revision$
+#EHEADER***********************************************************************
+
+#### This is a template file for a Makefile to create a libHYPRE_*.a
+#### Lines not relevant to your sub-directory can be deleted.
+#### The name of your resulting file MUST be Makefile
+#### ALL of the configured information is in the included file
+#### named Makefile.config
+
+
+include ../config/Makefile.config
+
+CINCLUDES =          ## any include files needed for C code  ##
+CXXINCLUDES =        ## any include files needed for CXX code  ##
+F77INCLUDES =        ## any include files needed for F77 code  ##
+ 
+C_COMPILE_FLAGS =     ## any needed CFLAGS ##
+CXX_COMPILE_FLAGS =   ## any needed CXXFLAGS ##
+F77_COMPILE_FLAGS =   ## any needed FFLAGS ##
+
+HEADERS =  ## all *.h files ##
+
+FILESC =    ## all C source code files ##
+FILESCXX =  ## all CXX source code files ##
+FILESF =    ## all F source code files ##
+FILES = ${FILESC} ${FILESCXX} ${FILESF}
+
+OBJSC = ${FILES:.c=.o}       ## object files for C ##
+OBJSCXX = ${FILES:.cxx=.o}   ## object files for C++ ##
+OBJSF = ${FILES:.f=.o}       ## object files for F77 ##
+OBJS = ${OBJSC} ${OBJSCXX} ${OBJSF}
+
+##################################################################
+# Targets
+##################################################################
+
+all: libHYPRE_***.a 
+	@cp -fp $(srcdir)/***.h $(HYPRE_BUILD_DIR)/include/.
+	@cp -fp lib*.a $(HYPRE_BUILD_DIR)/lib/.
+
+install: all
+	@cp -fp $(srcdir)/***.h $(HYPRE_INC_INSTALL)/.
+	@cp -fp lib*.a $(HYPRE_LIB_INSTALL)/.
+clean:
+	@rm -f *.o lib*.a
+
+distclean: clean
+
+
+##################################################################
+# Rules
+##################################################################
+
+libHYPRE_***.a: ${OBJS}
+	@echo  "Building $@ ... "
+	${AR} $@ ${OBJS}
+	${RANLIB} $@
+
+${OBJS}: ${HEADERS}

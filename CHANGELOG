@@ -16,11 +16,18 @@
 
 Version 1.8.4a released, ???????.
 
-- Removed all automake & libtool use from build system.  Autoconf reads 
-  configure.in to create the configure script.  The Makefiles are created by
-  configure from Makefile.in in each subdirectory.
-
 - NOTE: link lines may need changing depending on configure options used
+
+- Removed all automake & libtool use from build system.  Autoconf reads 
+  configure.in to create the configure script.  
+
+- The config sub-directory has a file named Makefile.config.in that contains all
+  of the configurable variables.  When the configure script is run, it will replace
+  the appropriate variables.  This file is included in all Makefiles in all
+  sub-directories.
+
+- Removed all Makefile.am and Makefile.in in each sub-directory as they are no longer 
+  needed due to above noted changes.
 
 - to view the allowed configure options run './configure --help'
 

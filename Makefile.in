@@ -7,8 +7,11 @@
 # $Revision$
 #EHEADER***********************************************************************
 
+# Include all variables defined by configure
 include ./config/Makefile.config
 
+
+# These are the directories for internal blas, lapack and general utilities
 HYPRE_BASIC_DIRS = \
   blas\
   lapack\
@@ -41,24 +44,16 @@ HYPRE_IJ_DIRS =\
 HYPRE_EIGEN_DIRS = eigensolvers
 
 #These are the directories for the FEI
-HYPRE_FEI_DIRS =\
- FEI_mv
+HYPRE_FEI_DIRS = FEI_mv
 
 #This is the lib directory
-HYPRE_LIBS_DIRS =\
- lib
+HYPRE_LIBS_DIRS = lib
 
 #This is the documentation directory
-HYPRE_DOCS_DIRS =\
- docs
+HYPRE_DOCS_DIRS = docs
 
-HYPRE_FEI_LIBFILES =\
- libHYPRE_parcsr_ls.a  libHYPRE_DistributedMatrix.a \
- libHYPRE_parcsr_mv.a  libHYPRE_FEI.a \
- libHYPRE_seq_mv.a     libHYPRE_IJ_mv.a libHYPRE_krylov.a \
- libHYPRE_DistributedMatrixPilutSolver.a \
- libHYPRE_utilities.a  libHYPRE_MatrixMatrix.a libHYPRE_ParaSails.a\
- libHYPRE_Euclid.a
+#This is the test-driver directory
+HYPRE_TEST_DIRS = test
 
 # These are directories that are officially in HYPRE
 HYPRE_DIRS =\
@@ -69,225 +64,129 @@ HYPRE_DIRS =\
  ${HYPRE_IJ_DIRS}\
  ${HYPRE_EIGEN_DIRS}\
  ${HYPRE_FEI_DIRS}\
- ${HYPRE_LIBS_DIRS}\
- ${HYPRE_DOCS_DIRS}
+ ${HYPRE_LIBS_DIRS}
 
 # These are directories that are not yet officially in HYPRE
 HYPRE_EXTRA_DIRS =\
+ ${HYPRE_DOCS_DIRS}\
+ ${HYPRE_TEST_DIRS}\
  seq_ls 
 
-all: krylov struct sstruct IJ eigen fei hyprelibs docs
+#################################################################
+# Targets
+#################################################################
+
+all:
 	@ \
-	HYPRE_INSTALL_DIR=`pwd`/hypre;\
-	export HYPRE_INSTALL_DIR;\
+	mkdir -p ${HYPRE_BUILD_DIR}/include; \
+	mkdir -p ${HYPRE_BUILD_DIR}/lib; \
+	cp -fp HYPRE_config.h ${HYPRE_BUILD_DIR}/include/.; \
+	cp -fp $(srcdir)/HYPRE.h ${HYPRE_BUILD_DIR}/include/.; \
+	for i in ${HYPRE_DIRS}; \
+	do \
+	  echo "Making $$i ..."; \
+	  (cd $$i && $(MAKE) $@); \
+	  echo ""; \
+	done
+
+help:
+	@echo "     "
+	@echo "************************************************************"
+	@echo " HYPRE Make System Targets"
+	@echo "   (using GNU-standards)"
+	@echo "     "
+	@echo "all:"
+	@echo "     default target in all directories"
+	@echo "     compile the entire program"
+	@echo "     does not rebuild documentation"
+	@echo "     "
+	@echo "help:"
+	@echo "     prints details of each target"
+	@echo "     "
+	@echo "install:"
+	@echo "     compile the program and copy executables, libraries, etc"
+	@echo "        to the file names where they reside for actual use"
+	@echo "     executes installdirs target to create directories needed"
+	@echo "     "
+	@echo "installdirs:"
+	@echo "     creates all directories in which files are to be installed,"
+	@echo "        if they don't already exist, including those specified"
+	@echo "        by prefix and exec_prefix"
+	@echo "     "
+	@echo "uninstall:"
+	@echo "     deletes all files that the install target creates"
+	@echo "     "
+	@echo "clean:"
+	@echo "     deletes all files from the current directory that are normally"
+	@echo "        created by building the program"
+	@echo "     "
+	@echo "distclean:"
+	@echo "     deletes all files from the current directory that are"
+	@echo "        created by configuring or building the program"
+	@echo "     "
+	@echo "test:"
+	@echo "     depends on the all target to be completed"
+	@echo "     removes existing temporary installation sub-directory"
+	@echo "     creates a temporary installation sub-directory"
+	@echo "     copies all libHYPRE* and *.h files to the temporary locations"
+	@echo "     builds the test drivers; linking to the temporary installation"
+	@echo "        directories to simulate how application codes will link to HYPRE"
+	@echo "     "
+	@echo "docs:"
+	@echo "     creates documentation in the docs sub-directory"
+	@echo "     "
+	@echo "************************************************************"
+
+test: all
+	@ \
 	echo "Making test drivers ..."; \
-	(cd test; $(MAKE) veryclean; $(MAKE)); \
+	(cd test; $(MAKE) distclean; $(MAKE) all); \
 	echo ""
-
-beta: all
-	@ \
-	for i in ${HYPRE_EXTRA_DIRS}; \
-	do \
-	  if [ -d $$i ]; \
-	  then \
-	    echo "Making $$i ..."; \
-	    (cd $$i; $(MAKE) install); \
-	    echo ""; \
-	  fi; \
-	done; \
-	echo "Making beta test drivers ..."; \
-	(cd test; $(MAKE) beta); \
-	echo ""
-
-krylov: base
-	@ \
-	HYPRE_INSTALL_DIR=`pwd`/hypre;\
-	export HYPRE_INSTALL_DIR;\
-	for i in ${HYPRE_KRYLOV_DIRS}; \
-	do \
-	  if [ -d $$i ]; \
-	  then \
-	    echo "Making $$i ..."; \
-	    (cd $$i; $(MAKE) install); \
-	    echo ""; \
-	  fi; \
-	done
-
-struct: base
-	@ \
-	HYPRE_INSTALL_DIR=`pwd`/hypre;\
-	export HYPRE_INSTALL_DIR;\
-	for i in ${HYPRE_STRUCT_DIRS}; \
-	do \
-	  if [ -d $$i ]; \
-	  then \
-	    echo "Making $$i ..."; \
-	    (cd $$i; $(MAKE) install); \
-	    echo ""; \
-	  fi; \
-	done
-
-sstruct: struct IJ
-	@ \
-	HYPRE_INSTALL_DIR=`pwd`/hypre;\
-	export HYPRE_INSTALL_DIR;\
-	for i in ${HYPRE_SSTRUCT_DIRS}; \
-	do \
-	  if [ -d $$i ]; \
-	  then \
-	    echo "Making $$i ..."; \
-	    (cd $$i; $(MAKE) install); \
-	    echo ""; \
-	  fi; \
-	done
-
-IJ: base
-	@ \
-	HYPRE_INSTALL_DIR=`pwd`/hypre;\
-	export HYPRE_INSTALL_DIR;\
-	for i in ${HYPRE_IJ_DIRS}; \
-	do \
-	  if [ -d $$i ]; \
-	  then \
-	    echo "Making $$i ..."; \
-	    (cd $$i; $(MAKE) install); \
-	    echo ""; \
-	  fi; \
-	done
-
-eigen: base
-	@ \
-	HYPRE_INSTALL_DIR=`pwd`/hypre;\
-	export HYPRE_INSTALL_DIR;\
-	for i in ${HYPRE_EIGEN_DIRS}; \
-	do \
-	  if [ -d $$i ]; \
-	  then \
-	    echo "Making $$i ..."; \
-	    (cd $$i; $(MAKE) install); \
-	    echo ""; \
-	  fi; \
-	done
-
-hyprelibs:
-	@ \
-	HYPRE_INSTALL_DIR=`pwd`/hypre;\
-	export HYPRE_INSTALL_DIR;\
-	for i in ${HYPRE_LIBS_DIRS}; \
-	do \
-	  if [ -d $$i ]; \
-	  then \
-	    echo "Making $$i ..."; \
-	    (cd $$i; $(MAKE) install); \
-	    echo ""; \
-	  fi; \
-	done
 
 docs:
 	@ \
-	HYPRE_INSTALL_DIR=`pwd`/hypre;\
-	export HYPRE_INSTALL_DIR;\
 	for i in ${HYPRE_DOCS_DIRS}; \
 	do \
 	  if [ -d $$i ]; \
 	  then \
 	    echo "Making $$i ..."; \
-	    (cd $$i; $(MAKE) install); \
-	    echo ""; \
-	  fi; \
-	done
-
-fei: IJ krylov
-	@ \
-	HYPRE_INSTALL_DIR=`pwd`/hypre;\
-	export HYPRE_INSTALL_DIR;\
-	for i in ${HYPRE_FEI_DIRS}; \
-	do \
-	  if [ -d $$i ]; \
-	  then \
-	    echo "Making $$i ..."; \
-	    (cd $$i; $(MAKE) install); \
-	    echo ""; \
-	  fi; \
-	done; \
-	mkdir -p hypre/tmp; \
-	for i in ${HYPRE_FEI_LIBFILES}; \
-	do \
-	   (cp hypre/lib/$$i hypre/tmp; cd hypre/tmp; ar x $$i; rm -f ___*;);\
-	   if [ $$i = "libHYPRE_DistributedMatrixPilutSolver.a" ]; then \
-	      (cd hypre/tmp; mv -f distributed_qsort.o psort.o;); \
-	      (cd hypre/tmp; mv -f distributed_qsort_si.o psort_si.o;); \
-	   fi; \
-	done; \
-	(cd hypre/tmp; ar rcu ../lib/libHYPRE_LSI.a *.o;); \
-	rm -rf hypre/tmp
-
-base:
-	@ \
-	HYPRE_INSTALL_DIR=`pwd`/hypre;\
-	export HYPRE_INSTALL_DIR;\
-	mkdir -p hypre/include; \
-	mkdir -p hypre/lib; \
-	cp -f HYPRE_config.h $$HYPRE_INSTALL_DIR/include/.; \
-	cp -f $(srcdir)/HYPRE.h $$HYPRE_INSTALL_DIR/include/.; \
-	for i in ${HYPRE_BASIC_DIRS}; \
-	do \
-	  if [ -d $$i ]; \
-	  then \
-	    echo "Making $$i ..."; \
-	    (cd $$i; $(MAKE) install); \
+	    (cd $$i; $(MAKE) distclean; $(MAKE) all); \
 	    echo ""; \
 	  fi; \
 	done
 
 install: all
 	@ \
-	HYPRE_INSTALL_DIR=`pwd`/hypre;\
-	export HYPRE_INSTALL_DIR;\
-	echo "******install-dir: $$HYPRE_INSTALL_DIR"; \
-	if [ ! "$$HYPRE_INSTALL_DIR" ]; \
-	then \
-	  echo "Error: set the HYPRE_INSTALL_DIR environment variable"; \
-	  exit 1; \
-	fi; \
-	if [ ! -d $$HYPRE_INSTALL_DIR ]; \
-	then \
-	  echo "Error: no directory HYPRE_INSTALL_DIR=$$HYPRE_INSTALL_DIR"; \
-	  exit 1; \
-	fi; \
 	echo "Installing hypre ..."; \
-	cp -fr hypre/* $$HYPRE_INSTALL_DIR/.; \
-	rm -Rf hypre
+	cp -fr ${HYPRE_BUILD_DIR}/lib/* $(HYPRE_LIB_INSTALL)/.; \
+	cp -fr ${HYPRE_BUILD_DIR}/include/* $(HYPRE_INC_INSTALL)/.
+
+uninstall: install
+	@ \
+	echo "Un-installing hypre ..."; \
+	(cd $(HYPRE_LIB_INSTALL); rm -rf *); \
+	(cd $(HYPRE_INC_INSTALL); rm -rf *)
 
 clean:
 	@ \
-	HYPRE_INSTALL_DIR=`pwd`/hypre;\
-	export HYPRE_INSTALL_DIR;\
 	for i in ${HYPRE_DIRS} ${HYPRE_EXTRA_DIRS}; \
 	do \
 	  if [ -d $$i ]; \
 	  then \
 	    echo "Cleaning $$i ..."; \
-	    (cd $$i; $(MAKE) $@); \
+	    (cd $$i && $(MAKE) $@); \
 	  fi; \
-	done; \
-	echo "Cleaning test ..."; \
-	(cd test; $(MAKE) $@)
+	done
 
-veryclean:
+distclean:
 	@ \
-	HYPRE_INSTALL_DIR=`pwd`/hypre;\
-	export HYPRE_INSTALL_DIR;\
 	rm -Rf hypre; \
-	rm Makefile; \
 	for i in ${HYPRE_DIRS} ${HYPRE_EXTRA_DIRS}; \
 	do \
 	  if [ -d $$i ]; \
 	  then \
-	    echo "Very-cleaning $$i ..."; \
-	    (cd $$i; $(MAKE) $@); \
+	    echo "Dist-cleaning $$i ..."; \
+	    (cd $$i &&  $(MAKE) $@); \
 	  fi; \
-	done; \
-	echo "Very-cleaning test ..."; \
-	(cd test; $(MAKE) $@)
-
+	done
+	@rm -rf ./config/Makefile.config

@@ -322,7 +322,7 @@ ac_includes_default="\
 #endif"
 
 ac_subdirs_all="$ac_subdirs_all babel-runtime"
-ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS build build_cpu build_vendor build_os host host_cpu host_vendor host_os PACKAGE_DATETIME CC CXX F77 RANLIB ac_ct_RANLIB INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA AWK CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT CPP LN_S SET_MAKE CXXFLAGS ac_ct_CXX FFLAGS ac_ct_F77 FLIBS CXXCPP FPP EGREP POW_LIB LIBOBJS MPILIBS subdirs BABELDIR LIBM INCLUDES LIBDIRS MPIINCLUDE MPILIBDIRS MPIFLAGS TIMERDEFS LDLIBS LDLIBDIRS F77FLAGS PREPEND FEILIBS FEILIBDIRS FEIINCLUDE FEINEEDED MLI_DIR MLILIBS MLILIBDIRS MLIINCLUDE BLASLIBDIRS BLASLIBS BLASNEEDED LAPACKLIBDIRS LAPACKLIBS LAPACKNEEDED `pwd` LTLIBOBJS'
+ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS build build_cpu build_vendor build_os host host_cpu host_vendor host_os PACKAGE_DATETIME HYPRE_TOP_SRCDIR CC CXX F77 RANLIB ac_ct_RANLIB INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA AWK CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT CPP LN_S SET_MAKE CXXFLAGS ac_ct_CXX FFLAGS ac_ct_F77 FLIBS CXXCPP FPP EGREP POW_LIB LIBOBJS MPILIBS subdirs BABELDIR HYPRE_ARCH HOSTNAME HYPRE_LIBINSTALL HYPRE_INCINSTALL HYPRE_DOCSINSTALL INCLUDES LIBDIRS MPIINCLUDE MPILIBDIRS MPIFLAGS TIMERDEFS LDLIBS LDLIBDIRS F77FLAGS PREPEND FEILIBS FEILIBDIRS FEIINCLUDE FEINEEDED MLI_DIR MLILIBS MLILIBDIRS MLIINCLUDE BLASLIBDIRS BLASLIBS BLASNEEDED LAPACKLIBDIRS LAPACKLIBS LAPACKNEEDED LTLIBOBJS'
 ac_subst_files=''
 
 # Initialize some variables set by options.
@@ -1584,6 +1584,9 @@ _ACEOF
 PACKAGE_DATETIME="2004/11/05 10:34:00"
 
 
+HYPRE_TOP_SRCDIR="`pwd`"
+
+
 # Check whether --enable-debug or --disable-debug was given.
 if test "${enable_debug+set}" = set; then
   enableval="$enable_debug"
@@ -2063,7 +2066,7 @@ if test "${with_blas_libs+set}" = set; then
   for blas_lib in $withval; do
    BLASLIBS="$BLASLIBS -l$blas_lib"
  done;
- BLASNEEDED="#";
+ BLASNEEDED="\##";
  casc_user_chose_blas=yes
 
 fi;
@@ -2075,7 +2078,7 @@ if test "${with_blas_lib_dirs+set}" = set; then
   for blas_lib_dir in $withval; do
    BLASLIBDIRS="-L$blas_lib_dir $BLASLIBDIRS"
  done;
- BLASNEEDED="#";
+ BLASNEEDED="\##";
  casc_user_chose_blas=yes
 
 fi;
@@ -2087,7 +2090,7 @@ if test "${with_lapack_libs+set}" = set; then
   for lapack_lib in $withval; do
    LAPACKLIBS="$LAPACKLIBS -l$lapack_lib"
  done;
- LAPACKNEEDED="#";
+ LAPACKNEEDED="\##";
  casc_user_chose_lapack=yes
 
 fi;
@@ -2099,7 +2102,7 @@ if test "${with_lapack_lib_dirs+set}" = set; then
   for lapack_lib_dir in $withval; do
    LAPACKLIBDIRS="-L$lapack_lib_dir $LAPACKLIBDIRS"
  done;
- LAPACKNEEDED="#";
+ LAPACKNEEDED="\##";
  casc_user_chose_lapack=yes
 
 fi;
@@ -2111,7 +2114,7 @@ if test "${with_fei_libs+set}" = set; then
   for fei_lib in $withval; do
    FEILIBS="$FEILIBS -l$fei_lib"
  done;
- FEINEEDED="#";
+ FEINEEDED="\##";
  casc_user_chose_fei=yes
 else
   FEINEEDED=""; FEILIBS=""
@@ -2125,7 +2128,7 @@ if test "${with_fei_lib_dir+set}" = set; then
   for fei_lib_dir in $withval; do
    FEILIBDIRS="-L$fei_lib_dir $FEILIBDIRS"
  done;
- FEINEEDED="#";
+ FEINEEDED="\##";
  casc_user_chose_fei=yes
 else
   FEINEEDED=""; FEILIBDIRS=""
@@ -2139,7 +2142,7 @@ if test "${with_fei_inc_dir+set}" = set; then
   for fei_inc in $withval; do
    FEIINCLUDE="$FEIINCLUDE $fei_inc"
  done;
- FEINEEDED="#";
+ FEINEEDED="\##";
  casc_user_chose_fei=yes
 else
   FEINEEDED=""; FEIINCLUDE=""
@@ -5168,7 +5171,7 @@ fi
 
 
 # Provide some information about the compiler.
-echo "$as_me:5171:" \
+echo "$as_me:5174:" \
      "checking for Fortran 77 compiler version" >&5
 ac_compiler=`set X $ac_compile; echo $2`
 { (eval echo "$as_me:$LINENO: \"$ac_compiler --version </dev/null >&5\"") >&5
@@ -5364,7 +5367,7 @@ _ACEOF
 # flags.
 ac_save_FFLAGS=$FFLAGS
 FFLAGS="$FFLAGS $ac_verb"
-(eval echo $as_me:5367: \"$ac_link\") >&5
+(eval echo $as_me:5370: \"$ac_link\") >&5
 ac_f77_v_output=`eval $ac_link 5>&1 2>&1 | grep -v 'Driving:'`
 echo "$ac_f77_v_output" >&5
 FFLAGS=$ac_save_FFLAGS
@@ -5442,7 +5445,7 @@ _ACEOF
 # flags.
 ac_save_FFLAGS=$FFLAGS
 FFLAGS="$FFLAGS $ac_cv_prog_f77_v"
-(eval echo $as_me:5445: \"$ac_link\") >&5
+(eval echo $as_me:5448: \"$ac_link\") >&5
 ac_f77_v_output=`eval $ac_link 5>&1 2>&1 | grep -v 'Driving:'`
 echo "$ac_f77_v_output" >&5
 FFLAGS=$ac_save_FFLAGS
@@ -6362,7 +6365,8 @@ ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
-   for ac_prog in fpp cpp "$CC -E" "cc -E" "gcc -E"
+
+for ac_prog in fpp cpp "$CC -E" "cc -E" "gcc -E"
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
@@ -6402,11 +6406,9 @@ fi
   test -n "$FPP" && break
 done
 
-   test -z "$FPP" && { { echo "$as_me:$LINENO: error: no acceptable fpp found in \$PATH" >&5
+test -z "$FPP" && { { echo "$as_me:$LINENO: error: no acceptable fpp found in \$PATH" >&5
 echo "$as_me: error: no acceptable fpp found in \$PATH" >&2;}
    { (exit 1); exit 1; }; }
-
-
 
 
 echo "$as_me:$LINENO: checking for egrep" >&5
@@ -8081,8 +8083,8 @@ if test "$casc_using_mli" = "yes"
 then
    MLI_DIR="`pwd`/mli/matrix"
    MLILIBS="-lHYPRE_mli_mat"
-   MLILIBDIRS="-L $MLI_DIR"
-   MLIINCLUDE="-I $MLI_DIR"
+   MLILIBDIRS="-L$MLI_DIR"
+   MLIINCLUDE="-I$MLI_DIR"
    MLILIBDIRS="$MLILIBDIRS -L/usr/openwin/lib"
    MLILIBS="$MLILIBS -lX11"
 fi
@@ -8108,6 +8110,9 @@ fi;
                 hypre_blas_ok=internal ;;
   esac
 
+  hypre_blas_save_LIBS="$LIBS"
+  LIBS="$LIBS $FLIBS"
+
 # Get fortran linker names of BLAS functions to check for.
   ac_ext=f
 ac_compile='$F77 -c $FFLAGS conftest.$ac_ext >&5'
@@ -8129,13 +8134,10 @@ ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
-  hypre_blas_save_LIBS="$LIBS"
-  LIBS="$LIBS $FLIBS"
-
 # Is BLASLIBS environment variable set?
   if test $hypre_blas_ok = no; then
     if test "x$BLASLIBS" != x; then
-	save_LIBS="$LIBS"; LIBS="$BLASLIBS $LIBS"
+        save_LIBS="$LIBS"; LIBS="$BLASLIBS $LIBS"
 	echo "$as_me:$LINENO: checking for $dgemm in $BLASLIBS" >&5
 echo $ECHO_N "checking for $dgemm in $BLASLIBS... $ECHO_C" >&6
 	cat >conftest.$ac_ext <<_ACEOF
@@ -8201,13 +8203,13 @@ rm -f conftest.err conftest.$ac_objext \
       conftest$ac_exeext conftest.$ac_ext
 	echo "$as_me:$LINENO: result: $hypre_blas_ok" >&5
 echo "${ECHO_T}$hypre_blas_ok" >&6
-	LIBS="$save_LIBS"
+        LIBS="$save_LIBS"
     fi
   fi
 
 # BLAS linked to by default?  (happens on some supercomputers)
   if test $hypre_blas_ok = no; then
-	save_LIBS="$LIBS"; LIBS="$LIBS"
+        save_LIBS="$LIBS"; LIBS="$LIBS"
 	as_ac_var=`echo "ac_cv_func_$dgemm" | $as_tr_sh`
 echo "$as_me:$LINENO: checking for $dgemm" >&5
 echo $ECHO_N "checking for $dgemm... $ECHO_C" >&6
@@ -8311,7 +8313,7 @@ if test `eval echo '${'$as_ac_var'}'` = yes; then
   hypre_blas_ok=yes; BLASLIBS="$LIBS"
 fi
 
-	LIBS="$save_LIBS"
+        LIBS="$save_LIBS"
   fi
 
 # Generic BLAS library?
@@ -9201,7 +9203,7 @@ fi
 
   fi
 
-  LIBS="$hypre_blas_save_LIBS"
+LIBS="$hypre_blas_save_LIBS"
 
   if test $hypre_blas_ok = no; then
          BLASLIBS="no"
@@ -9219,7 +9221,7 @@ echo "$as_me: WARNING:   configuring --without-blas" >&2;}
       { echo "$as_me:$LINENO: WARNING: ***************************************" >&5
 echo "$as_me: WARNING: ***************************************" >&2;}
       BLAS_DIR="`pwd`/hypre/lib"
-      BLASLIBDIRS="-L $BLAS_DIR"
+      BLASLIBDIRS="-L$BLAS_DIR"
       BLASLIBS="-lHYPRE_utilities"
       BLASNEEDED=
 
@@ -9230,7 +9232,7 @@ _ACEOF
    elif test "$BLASLIBS" = "internal"
    then
       BLAS_DIR="`pwd`/hypre/lib"
-      BLASLIBDIRS="-L $BLAS_DIR"
+      BLASLIBDIRS="-L$BLAS_DIR"
       BLASLIBS="-lHYPRE_utilities"
       BLASNEEDED=
 
@@ -9239,12 +9241,13 @@ cat >>confdefs.h <<\_ACEOF
 _ACEOF
 
    else
-      BLASNEEDED="#"
+      BLASNEEDED="\##"
 
 cat >>confdefs.h <<\_ACEOF
 #define HAVE_BLAS 1
 _ACEOF
 
+      BLASLIBDIRS="-L/usr/lib -L/usr/local/lib"
    fi
 fi
 
@@ -9289,12 +9292,12 @@ ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
-  hypre_lapack_save_libs="$LIBS"
+  hypre_lapack_save_LIBS="$LIBS"
 
 # Is LAPACKLIBS environment variable set?
   if test $hypre_lapack_ok = no; then
     if test "x$LAPACKLIBS" != x; then
-        save_LIBS="$LIBS"; LIBS="$LAPACKLIBS $LIBS"
+        save_LIBS="$LIBS"; LIBS="$LAPACKLIBS $BLASLIBS $LIBS $FLIBS"
         echo "$as_me:$LINENO: checking for $dsygv in $LAPACKLIBS" >&5
 echo $ECHO_N "checking for $dsygv in $LAPACKLIBS... $ECHO_C" >&6
         cat >conftest.$ac_ext <<_ACEOF
@@ -9584,11 +9587,6 @@ fi
 
 # Generic LAPACK library
   if test $hypre_lapack_ok = no; then
-     if test "$BLASLIBS" = "-lHYPRE_utilities"; then
-       TEMPBLAS=
-     else
-       TEMPBLAS="$BLASLIBS"
-     fi
      save_LIBS="$LIBS"; LIBS="$LIBS $FLIBS"
      save_LDFLAGS="$LDFLAGS"
      LDFLAGS="-L/usr/lib -L/usr/local/lib $LDFLAGS"
@@ -9599,7 +9597,7 @@ if eval "test \"\${$as_ac_Lib+set}\" = set"; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
   ac_check_lib_save_LIBS=$LIBS
-LIBS="-llapack $TEMPBLAS $LIBS"
+LIBS="-llapack -lblas $LIBS"
 cat >conftest.$ac_ext <<_ACEOF
 /* confdefs.h.  */
 _ACEOF
@@ -9685,7 +9683,7 @@ if eval "test \"\${$as_ac_Lib+set}\" = set"; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
   ac_check_lib_save_LIBS=$LIBS
-LIBS="-llapack_rs6k $BLASLIBS $LIBS"
+LIBS="-llapack_rs6k -lblas $LIBS"
 cat >conftest.$ac_ext <<_ACEOF
 /* confdefs.h.  */
 _ACEOF
@@ -9777,7 +9775,7 @@ echo "$as_me: WARNING:   configuring --without-lapack" >&2;}
       { echo "$as_me:$LINENO: WARNING: ***************************************" >&5
 echo "$as_me: WARNING: ***************************************" >&2;}
       LAPACK_DIR="`pwd`/hypre/lib"
-      LAPACKLIBDIRS="-L $LAPACK_DIR"
+      LAPACKLIBDIRS="-L$LAPACK_DIR"
       LAPACKLIBS="-lHYPRE_utilities"
       LAPACKNEEDED=
 
@@ -9788,7 +9786,7 @@ _ACEOF
    elif test "$LAPACKLIBS" = "internal"
    then
       LAPACK_DIR="`pwd`/hypre/lib"
-      LAPACKLIBDIRS="-L $LAPACK_DIR"
+      LAPACKLIBDIRS="-L$LAPACK_DIR"
       LAPACKLIBS="-lHYPRE_utilities"
       LAPACKNEEDED=
 
@@ -9797,28 +9795,23 @@ cat >>confdefs.h <<\_ACEOF
 _ACEOF
 
    else
-      LAPACKNEEDED="#"
+      LAPACKNEEDED="\##"
 
 cat >>confdefs.h <<\_ACEOF
 #define HAVE_LAPACK 1
 _ACEOF
 
+      LAPACKLIBDIRS="-L/usr/lib -L/usr/local/lib"
    fi
 fi
 
-LIBM=
-case $host in
-*-*-beos* | *-*-cygwin* | *-*-pw32*)
-  # These system don't have libm
-  ;;
-*-ncr-sysv4.3*)
-  echo "$as_me:$LINENO: checking for _mwvalidcheckl in -lmw" >&5
-echo $ECHO_N "checking for _mwvalidcheckl in -lmw... $ECHO_C" >&6
-if test "${ac_cv_lib_mw__mwvalidcheckl+set}" = set; then
+echo "$as_me:$LINENO: checking for cabs in -lm" >&5
+echo $ECHO_N "checking for cabs in -lm... $ECHO_C" >&6
+if test "${ac_cv_lib_m_cabs+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
   ac_check_lib_save_LIBS=$LIBS
-LIBS="-lmw  $LIBS"
+LIBS="-lm  $LIBS"
 cat >conftest.$ac_ext <<_ACEOF
 /* confdefs.h.  */
 _ACEOF
@@ -9832,7 +9825,7 @@ extern "C"
 #endif
 /* We use char because int might match the return type of a gcc2
    builtin and then its argument prototype would still apply.  */
-char _mwvalidcheckl ();
+char cabs ();
 #ifdef F77_DUMMY_MAIN
 
 #  ifdef __cplusplus
@@ -9844,7 +9837,7 @@ char _mwvalidcheckl ();
 int
 main ()
 {
-_mwvalidcheckl ();
+cabs ();
   ;
   return 0;
 }
@@ -9871,168 +9864,22 @@ if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
   ac_status=$?
   echo "$as_me:$LINENO: \$? = $ac_status" >&5
   (exit $ac_status); }; }; then
-  ac_cv_lib_mw__mwvalidcheckl=yes
+  ac_cv_lib_m_cabs=yes
 else
   echo "$as_me: failed program was:" >&5
 sed 's/^/| /' conftest.$ac_ext >&5
 
-ac_cv_lib_mw__mwvalidcheckl=no
+ac_cv_lib_m_cabs=no
 fi
 rm -f conftest.err conftest.$ac_objext \
       conftest$ac_exeext conftest.$ac_ext
 LIBS=$ac_check_lib_save_LIBS
 fi
-echo "$as_me:$LINENO: result: $ac_cv_lib_mw__mwvalidcheckl" >&5
-echo "${ECHO_T}$ac_cv_lib_mw__mwvalidcheckl" >&6
-if test $ac_cv_lib_mw__mwvalidcheckl = yes; then
-  LIBM="-lmw"
+echo "$as_me:$LINENO: result: $ac_cv_lib_m_cabs" >&5
+echo "${ECHO_T}$ac_cv_lib_m_cabs" >&6
+if test $ac_cv_lib_m_cabs = yes; then
+  LIBS="$LIBS -lm"
 fi
-
-  echo "$as_me:$LINENO: checking for main in -lm" >&5
-echo $ECHO_N "checking for main in -lm... $ECHO_C" >&6
-if test "${ac_cv_lib_m_main+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
-  ac_check_lib_save_LIBS=$LIBS
-LIBS="-lm  $LIBS"
-cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-
-
-#ifdef F77_DUMMY_MAIN
-
-#  ifdef __cplusplus
-     extern "C"
-#  endif
-   int F77_DUMMY_MAIN() { return 1; }
-
-#endif
-int
-main ()
-{
-main ();
-  ;
-  return 0;
-}
-_ACEOF
-rm -f conftest.$ac_objext conftest$ac_exeext
-if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
-  (eval $ac_link) 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } &&
-	 { ac_try='test -z "$ac_c_werror_flag"
-			 || test ! -s conftest.err'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; } &&
-	 { ac_try='test -s conftest$ac_exeext'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; }; then
-  ac_cv_lib_m_main=yes
-else
-  echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-ac_cv_lib_m_main=no
-fi
-rm -f conftest.err conftest.$ac_objext \
-      conftest$ac_exeext conftest.$ac_ext
-LIBS=$ac_check_lib_save_LIBS
-fi
-echo "$as_me:$LINENO: result: $ac_cv_lib_m_main" >&5
-echo "${ECHO_T}$ac_cv_lib_m_main" >&6
-if test $ac_cv_lib_m_main = yes; then
-  LIBM="$LIBM -lm"
-fi
-
-  ;;
-*)
-  echo "$as_me:$LINENO: checking for main in -lm" >&5
-echo $ECHO_N "checking for main in -lm... $ECHO_C" >&6
-if test "${ac_cv_lib_m_main+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
-  ac_check_lib_save_LIBS=$LIBS
-LIBS="-lm  $LIBS"
-cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-
-
-#ifdef F77_DUMMY_MAIN
-
-#  ifdef __cplusplus
-     extern "C"
-#  endif
-   int F77_DUMMY_MAIN() { return 1; }
-
-#endif
-int
-main ()
-{
-main ();
-  ;
-  return 0;
-}
-_ACEOF
-rm -f conftest.$ac_objext conftest$ac_exeext
-if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
-  (eval $ac_link) 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } &&
-	 { ac_try='test -z "$ac_c_werror_flag"
-			 || test ! -s conftest.err'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; } &&
-	 { ac_try='test -s conftest$ac_exeext'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; }; then
-  ac_cv_lib_m_main=yes
-else
-  echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-ac_cv_lib_m_main=no
-fi
-rm -f conftest.err conftest.$ac_objext \
-      conftest$ac_exeext conftest.$ac_ext
-LIBS=$ac_check_lib_save_LIBS
-fi
-echo "$as_me:$LINENO: result: $ac_cv_lib_m_main" >&5
-echo "${ECHO_T}$ac_cv_lib_m_main" >&6
-if test $ac_cv_lib_m_main = yes; then
-  LIBM="-lm"
-fi
-
-  ;;
-esac
-
 
 
 echo "$as_me:$LINENO: checking for e_wsfe in -lg2c" >&5
@@ -10514,9 +10361,144 @@ then
 fi
 fi
 
+if test "$prefix" = "NONE"
+then
+   prefix="`pwd`/hypre"
+   exec_prefix="`pwd`/hypre"
+fi
+
+if test "$libdir" = "${exec_prefix}/lib"
+then
+   HYPRE_LIBINSTALL="${exec_prefix}/lib"
+else
+   HYPRE_LIBINSTALL="${libdir}"
+fi
+
+if test "$includedir" = "${prefix}/lib"
+then
+   HYPRE_INCINSTALL="${prefix}/include"
+else
+   HYPRE_INCINSTALL="${includedir}"
+fi
+
+if test "$libdir" = "${exec_prefix}/lib"
+then
+   HYPRE_DOCSINSTALL="${prefix}/docs"
+else
+   HYPRE_DOCSINSTALL="${libdir}/../docs"
+fi
+
+
+   echo "$as_me:$LINENO: checking the hostname" >&5
+echo $ECHO_N "checking the hostname... $ECHO_C" >&6
+   casc_hostname=hostname
+   HOSTNAME="`$casc_hostname`"
+
+   if test -z "$HOSTNAME"
+   then
+         HOSTNAME=unknown
+      { echo "$as_me:$LINENO: WARNING: hostname is unknown" >&5
+echo "$as_me: WARNING: hostname is unknown" >&2;}
+   else
+      echo "$as_me:$LINENO: result: $HOSTNAME" >&5
+echo "${ECHO_T}$HOSTNAME" >&6
+   fi
+
+
+   echo "$as_me:$LINENO: checking the architecture" >&5
+echo $ECHO_N "checking the architecture... $ECHO_C" >&6
+
+         if test -z "$ARCH"; then
+
+                        casc_tarch_dir=
+      for casc_dir in $srcdir $srcdir/.. $srcdir/../.. $srcdir/config; do
+         if test -f $casc_dir/tarch; then
+            casc_tarch_dir=$casc_dir
+            casc_tarch=$casc_tarch_dir/tarch
+            break
+         fi
+      done
+
+                  if test -z "$casc_tarch_dir"; then
+         { echo "$as_me:$LINENO: WARNING: cannot find tarch" >&5
+echo "$as_me: WARNING: cannot find tarch" >&2;}
+         HYPRE_ARCH=$HOSTTYPE
+      else
+         HYPRE_ARCH="`$casc_tarch`"
+
+         if test -z "$HYPRE_ARCH" || test "$HYPRE_ARCH" = "unknown"; then
+            HYPRE_ARCH=$HOSTTYPE
+         fi
+      fi
+
+            if test -z "$HYPRE_ARCH"; then
+         HYPRE_ARCH=unknown
+         { echo "$as_me:$LINENO: WARNING: architecture is unknown" >&5
+echo "$as_me: WARNING: architecture is unknown" >&2;}
+      else
+         echo "$as_me:$LINENO: result: $HYPRE_ARCH" >&5
+echo "${ECHO_T}$HYPRE_ARCH" >&6
+      fi
+   else
+      HYPRE_ARCH = $ARCH
+      echo "$as_me:$LINENO: result: $HYPRE_ARCH" >&5
+echo "${ECHO_T}$HYPRE_ARCH" >&6
+   fi
+
+
+
+
+
+case $HYPRE_ARCH in
+  sun* | solaris*)
+       cat >>confdefs.h <<\_ACEOF
+#define HYPRE_SOLARIS 1
+_ACEOF
+
+       ;;
+  LINUX | Linux)
+       case $HOSTNAME in
+          mcr* | thunder*)
+            cat >>confdefs.h <<\_ACEOF
+#define HYPRE_LINUX_CHAOS2 1
+_ACEOF
+
+            ;;
+          *)
+            cat >>confdefs.h <<\_ACEOF
+#define HYPRE_LINUX 1
+_ACEOF
+
+            ;;
+       esac
+       ;;
+  alpha)
+       cat >>confdefs.h <<\_ACEOF
+#define HYPRE_ALPHA 1
+_ACEOF
+
+       ;;
+  rs6000)
+       cat >>confdefs.h <<\_ACEOF
+#define HYPRE_RS6000 1
+_ACEOF
+
+       ;;
+  IRIX64)
+       cat >>confdefs.h <<\_ACEOF
+#define HYPRE_IRIX64 1
+_ACEOF
+
+       ;;
+esac
+
 
 CC="$PREPEND $CC"
 CXX="$PREPEND $CXX"
+
+
+
+
 
 
 
@@ -10570,8 +10552,6 @@ if test -d docs; then
 #define DOCSDIR 1
 _ACEOF
 
-             ac_config_files="$ac_config_files docs/Makefile"
-
                        ac_config_files="$ac_config_files docs/bref_manual.dxx docs/ref_manual.dxx"
 
 fi
@@ -10586,11 +10566,9 @@ if test -d tools; then
 #define TOOLSDIR 1
 _ACEOF
 
-             ac_config_files="$ac_config_files tools/Makefile"
-
 fi
 
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          ac_config_files="$ac_config_files Makefile FEI_mv/Makefile FEI_mv/SuperLU/Makefile FEI_mv/fei-base/Makefile FEI_mv/fei-hypre/Makefile FEI_mv/femli/Makefile FEI_mv/femli/amgs/Makefile FEI_mv/femli/base/Makefile FEI_mv/femli/blas/Makefile FEI_mv/femli/cintface/Makefile FEI_mv/femli/fedata/Makefile FEI_mv/femli/lib/Makefile FEI_mv/femli/mapper/Makefile FEI_mv/femli/matrix/Makefile FEI_mv/femli/solver/Makefile FEI_mv/femli/test/Makefile FEI_mv/femli/util/Makefile FEI_mv/femli/vector/Makefile blas/Makefile config/Makefile.config distributed_ls/Makefile distributed_ls/Euclid/Makefile distributed_ls/pilut/Makefile distributed_ls/ParaSails/Makefile distributed_matrix/Makefile eigensolvers/Makefile eigensolvers/krylov/Makefile eigensolvers/lib/Makefile eigensolvers/multivector/Makefile eigensolvers/parcsr_ls/Makefile eigensolvers/sstruct_ls/Makefile eigensolvers/struct_ls/Makefile eigensolvers/utilities/Makefile IJ_mv/Makefile krylov/Makefile lapack/Makefile lib/Makefile matrix_matrix/Makefile parcsr_ls/Makefile parcsr_mv/Makefile seq_ls/Makefile seq_ls/pamg/Makefile seq_mv/Makefile sstruct_ls/Makefile sstruct_mv/Makefile struct_ls/Makefile struct_mv/Makefile test/Makefile utilities/Makefile"
+          ac_config_files="$ac_config_files config/Makefile.config"
 
 
 cat >confcache <<\_ACEOF
@@ -11118,63 +11096,13 @@ for ac_config_target in $ac_config_targets
 do
   case "$ac_config_target" in
   # Handling of arguments.
-  "docs/Makefile" ) CONFIG_FILES="$CONFIG_FILES docs/Makefile" ;;
   "docs/bref_manual.dxx" ) CONFIG_FILES="$CONFIG_FILES docs/bref_manual.dxx" ;;
   "docs/ref_manual.dxx" ) CONFIG_FILES="$CONFIG_FILES docs/ref_manual.dxx" ;;
   "babel/Makefile" ) CONFIG_FILES="$CONFIG_FILES babel/Makefile" ;;
   "babel/bHYPRE/Makefile" ) CONFIG_FILES="$CONFIG_FILES babel/bHYPRE/Makefile" ;;
   "babel/bHYPREClient-C/Makefile" ) CONFIG_FILES="$CONFIG_FILES babel/bHYPREClient-C/Makefile" ;;
   "babel/bHYPREClient-F/Makefile" ) CONFIG_FILES="$CONFIG_FILES babel/bHYPREClient-F/Makefile" ;;
-  "tools/Makefile" ) CONFIG_FILES="$CONFIG_FILES tools/Makefile" ;;
-  "Makefile" ) CONFIG_FILES="$CONFIG_FILES Makefile" ;;
-  "FEI_mv/Makefile" ) CONFIG_FILES="$CONFIG_FILES FEI_mv/Makefile" ;;
-  "FEI_mv/SuperLU/Makefile" ) CONFIG_FILES="$CONFIG_FILES FEI_mv/SuperLU/Makefile" ;;
-  "FEI_mv/fei-base/Makefile" ) CONFIG_FILES="$CONFIG_FILES FEI_mv/fei-base/Makefile" ;;
-  "FEI_mv/fei-hypre/Makefile" ) CONFIG_FILES="$CONFIG_FILES FEI_mv/fei-hypre/Makefile" ;;
-  "FEI_mv/femli/Makefile" ) CONFIG_FILES="$CONFIG_FILES FEI_mv/femli/Makefile" ;;
-  "FEI_mv/femli/amgs/Makefile" ) CONFIG_FILES="$CONFIG_FILES FEI_mv/femli/amgs/Makefile" ;;
-  "FEI_mv/femli/base/Makefile" ) CONFIG_FILES="$CONFIG_FILES FEI_mv/femli/base/Makefile" ;;
-  "FEI_mv/femli/blas/Makefile" ) CONFIG_FILES="$CONFIG_FILES FEI_mv/femli/blas/Makefile" ;;
-  "FEI_mv/femli/cintface/Makefile" ) CONFIG_FILES="$CONFIG_FILES FEI_mv/femli/cintface/Makefile" ;;
-  "FEI_mv/femli/fedata/Makefile" ) CONFIG_FILES="$CONFIG_FILES FEI_mv/femli/fedata/Makefile" ;;
-  "FEI_mv/femli/lib/Makefile" ) CONFIG_FILES="$CONFIG_FILES FEI_mv/femli/lib/Makefile" ;;
-  "FEI_mv/femli/mapper/Makefile" ) CONFIG_FILES="$CONFIG_FILES FEI_mv/femli/mapper/Makefile" ;;
-  "FEI_mv/femli/matrix/Makefile" ) CONFIG_FILES="$CONFIG_FILES FEI_mv/femli/matrix/Makefile" ;;
-  "FEI_mv/femli/solver/Makefile" ) CONFIG_FILES="$CONFIG_FILES FEI_mv/femli/solver/Makefile" ;;
-  "FEI_mv/femli/test/Makefile" ) CONFIG_FILES="$CONFIG_FILES FEI_mv/femli/test/Makefile" ;;
-  "FEI_mv/femli/util/Makefile" ) CONFIG_FILES="$CONFIG_FILES FEI_mv/femli/util/Makefile" ;;
-  "FEI_mv/femli/vector/Makefile" ) CONFIG_FILES="$CONFIG_FILES FEI_mv/femli/vector/Makefile" ;;
-  "blas/Makefile" ) CONFIG_FILES="$CONFIG_FILES blas/Makefile" ;;
   "config/Makefile.config" ) CONFIG_FILES="$CONFIG_FILES config/Makefile.config" ;;
-  "distributed_ls/Makefile" ) CONFIG_FILES="$CONFIG_FILES distributed_ls/Makefile" ;;
-  "distributed_ls/Euclid/Makefile" ) CONFIG_FILES="$CONFIG_FILES distributed_ls/Euclid/Makefile" ;;
-  "distributed_ls/pilut/Makefile" ) CONFIG_FILES="$CONFIG_FILES distributed_ls/pilut/Makefile" ;;
-  "distributed_ls/ParaSails/Makefile" ) CONFIG_FILES="$CONFIG_FILES distributed_ls/ParaSails/Makefile" ;;
-  "distributed_matrix/Makefile" ) CONFIG_FILES="$CONFIG_FILES distributed_matrix/Makefile" ;;
-  "eigensolvers/Makefile" ) CONFIG_FILES="$CONFIG_FILES eigensolvers/Makefile" ;;
-  "eigensolvers/krylov/Makefile" ) CONFIG_FILES="$CONFIG_FILES eigensolvers/krylov/Makefile" ;;
-  "eigensolvers/lib/Makefile" ) CONFIG_FILES="$CONFIG_FILES eigensolvers/lib/Makefile" ;;
-  "eigensolvers/multivector/Makefile" ) CONFIG_FILES="$CONFIG_FILES eigensolvers/multivector/Makefile" ;;
-  "eigensolvers/parcsr_ls/Makefile" ) CONFIG_FILES="$CONFIG_FILES eigensolvers/parcsr_ls/Makefile" ;;
-  "eigensolvers/sstruct_ls/Makefile" ) CONFIG_FILES="$CONFIG_FILES eigensolvers/sstruct_ls/Makefile" ;;
-  "eigensolvers/struct_ls/Makefile" ) CONFIG_FILES="$CONFIG_FILES eigensolvers/struct_ls/Makefile" ;;
-  "eigensolvers/utilities/Makefile" ) CONFIG_FILES="$CONFIG_FILES eigensolvers/utilities/Makefile" ;;
-  "IJ_mv/Makefile" ) CONFIG_FILES="$CONFIG_FILES IJ_mv/Makefile" ;;
-  "krylov/Makefile" ) CONFIG_FILES="$CONFIG_FILES krylov/Makefile" ;;
-  "lapack/Makefile" ) CONFIG_FILES="$CONFIG_FILES lapack/Makefile" ;;
-  "lib/Makefile" ) CONFIG_FILES="$CONFIG_FILES lib/Makefile" ;;
-  "matrix_matrix/Makefile" ) CONFIG_FILES="$CONFIG_FILES matrix_matrix/Makefile" ;;
-  "parcsr_ls/Makefile" ) CONFIG_FILES="$CONFIG_FILES parcsr_ls/Makefile" ;;
-  "parcsr_mv/Makefile" ) CONFIG_FILES="$CONFIG_FILES parcsr_mv/Makefile" ;;
-  "seq_ls/Makefile" ) CONFIG_FILES="$CONFIG_FILES seq_ls/Makefile" ;;
-  "seq_ls/pamg/Makefile" ) CONFIG_FILES="$CONFIG_FILES seq_ls/pamg/Makefile" ;;
-  "seq_mv/Makefile" ) CONFIG_FILES="$CONFIG_FILES seq_mv/Makefile" ;;
-  "sstruct_ls/Makefile" ) CONFIG_FILES="$CONFIG_FILES sstruct_ls/Makefile" ;;
-  "sstruct_mv/Makefile" ) CONFIG_FILES="$CONFIG_FILES sstruct_mv/Makefile" ;;
-  "struct_ls/Makefile" ) CONFIG_FILES="$CONFIG_FILES struct_ls/Makefile" ;;
-  "struct_mv/Makefile" ) CONFIG_FILES="$CONFIG_FILES struct_mv/Makefile" ;;
-  "test/Makefile" ) CONFIG_FILES="$CONFIG_FILES test/Makefile" ;;
-  "utilities/Makefile" ) CONFIG_FILES="$CONFIG_FILES utilities/Makefile" ;;
   "HYPRE_config.h" ) CONFIG_HEADERS="$CONFIG_HEADERS HYPRE_config.h:config/HYPRE_config.h.in" ;;
   *) { { echo "$as_me:$LINENO: error: invalid argument: $ac_config_target" >&5
 echo "$as_me: error: invalid argument: $ac_config_target" >&2;}
@@ -11269,6 +11197,7 @@ s,@host_cpu@,$host_cpu,;t t
 s,@host_vendor@,$host_vendor,;t t
 s,@host_os@,$host_os,;t t
 s,@PACKAGE_DATETIME@,$PACKAGE_DATETIME,;t t
+s,@HYPRE_TOP_SRCDIR@,$HYPRE_TOP_SRCDIR,;t t
 s,@CC@,$CC,;t t
 s,@CXX@,$CXX,;t t
 s,@F77@,$F77,;t t
@@ -11300,7 +11229,11 @@ s,@LIBOBJS@,$LIBOBJS,;t t
 s,@MPILIBS@,$MPILIBS,;t t
 s,@subdirs@,$subdirs,;t t
 s,@BABELDIR@,$BABELDIR,;t t
-s,@LIBM@,$LIBM,;t t
+s,@HYPRE_ARCH@,$HYPRE_ARCH,;t t
+s,@HOSTNAME@,$HOSTNAME,;t t
+s,@HYPRE_LIBINSTALL@,$HYPRE_LIBINSTALL,;t t
+s,@HYPRE_INCINSTALL@,$HYPRE_INCINSTALL,;t t
+s,@HYPRE_DOCSINSTALL@,$HYPRE_DOCSINSTALL,;t t
 s,@INCLUDES@,$INCLUDES,;t t
 s,@LIBDIRS@,$LIBDIRS,;t t
 s,@MPIINCLUDE@,$MPIINCLUDE,;t t
@@ -11325,7 +11258,6 @@ s,@BLASNEEDED@,$BLASNEEDED,;t t
 s,@LAPACKLIBDIRS@,$LAPACKLIBDIRS,;t t
 s,@LAPACKLIBS@,$LAPACKLIBS,;t t
 s,@LAPACKNEEDED@,$LAPACKNEEDED,;t t
-s,@`pwd`@,$`pwd`,;t t
 s,@LTLIBOBJS@,$LTLIBOBJS,;t t
 CEOF
 
