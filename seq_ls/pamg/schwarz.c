@@ -213,8 +213,12 @@ hypre_AMGNodalSchwarzSmoother( hypre_CSRMatrix    *A,
 
   int *i_int;
   int *i_int_to_local;
+  int *i_ext_to_local;
+  int *i_local_to_ext;
+  int *dof_domain;
 
   int local_dof_counter, max_local_dof_counter=0; 
+  int int_dof_counter;
 
   int domain_dof_counter = 0, domain_matrixinverse_counter = 0;
 
