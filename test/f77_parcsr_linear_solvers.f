@@ -135,7 +135,7 @@ c
       read(5,*) generate_matrix
 
       if (generate_matrix .eq. 0) then
-        write(6,*) 'What file to use for matrix (32 chars or less)?'
+        write(6,*) 'What file to use for matrix (<= 32 chars)?'
         read(5,*) matfile
       endif
 
@@ -143,8 +143,8 @@ c
       read(5,*) generate_rhs
 
       if (generate_rhs .eq. 0) then
-        write(6,*) 'What file to use for right-hand side
-     &              (32 chars or less)?'
+        write(6,*)
+     &    'What file to use for right-hand side (<= 32 chars)?'
         read(5,*) rhsfile
       endif
 
