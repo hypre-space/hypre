@@ -23,6 +23,8 @@ LOCALFILES =
 
 FILES = $(HYPREFILES) $(LOCALFILES)
 
+OBJS = ${FILES:.c=.o}
+
 
 ${OBJS}: ${HEADERS}
 
