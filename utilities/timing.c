@@ -370,7 +370,6 @@ hypre_ClearTiming( )
       hypre_TimingWallTime(i) = 0.0;
       hypre_TimingCPUTime(i)  = 0.0;
       hypre_TimingFLOPS(i)    = 0.0;
-printf("Hello\n");
    }
 
    return ierr;
