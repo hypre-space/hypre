@@ -43,13 +43,8 @@ hypre_SMGIntAddInitialize( )
    hypre_SMGIntAddData *intadd_data;
 
    intadd_data = hypre_CTAlloc(hypre_SMGIntAddData, 1);
-#ifdef HYPRE_USE_PTHREADS
-   hypre_TimingThreadWrapper({
-      (intadd_data -> time_index)  = hypre_InitializeTiming("SMGIntAdd");
-   });
-#else
    (intadd_data -> time_index)  = hypre_InitializeTiming("SMGIntAdd");
-#endif
+
    return (void *) intadd_data;
 }
 
@@ -256,13 +251,7 @@ hypre_SMGIntAdd( void               *intadd_vdata,
    int                     compute_i, i, j;
    int                     loopi, loopj, loopk;
 
-#ifdef HYPRE_USE_PTHREADS
-   hypre_TimingThreadWrapper({
-      hypre_BeginTiming(intadd_data -> time_index);
-   });
-#else
    hypre_BeginTiming(intadd_data -> time_index);
-#endif
 
    /*-----------------------------------------------------------------------
     * Initialize some things
@@ -408,16 +397,8 @@ hypre_SMGIntAdd( void               *intadd_vdata,
     * Return
     *-----------------------------------------------------------------------*/
 
-#ifdef HYPRE_USE_PTHREADS
-   hypre_TimingThreadWrapper({
-      hypre_IncFLOPCount(5*hypre_StructVectorGlobalSize(xc));
-      hypre_EndTiming(intadd_data -> time_index);
-   });
-#else
    hypre_IncFLOPCount(5*hypre_StructVectorGlobalSize(xc));
    hypre_EndTiming(intadd_data -> time_index);
-#endif
-
 
    return ierr;
 }
@@ -437,13 +418,7 @@ hypre_SMGIntAddFinalize( void *intadd_vdata )
    {
       hypre_FreeBoxArray(intadd_data -> coarse_points);
       hypre_FreeComputePkg(intadd_data -> compute_pkg);
-#ifdef HYPRE_USE_PTHREADS
-      hypre_TimingThreadWrapper({
-         hypre_FinalizeTiming(intadd_data -> time_index);
-      });
-#else
       hypre_FinalizeTiming(intadd_data -> time_index);
-#endif
       hypre_TFree(intadd_data);
    }
 

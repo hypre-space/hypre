@@ -126,6 +126,20 @@ void hypre_PrintTiming P((char *heading , MPI_Comm comm ));
 
 #undef P
 
+#ifdef HYPRE_USE_PTHREADS
+
+#define hypre_TimingThreadWrapper(body)\
+   if (pthread_equal(pthread_self(), initial_thread) ||\
+       pthread_equal(pthread_self(), hypre_thread[0])) {\
+      body;\
+   }
+
+#else
+
+#define hypre_TimingThreadWrapper(body) body
+
+#endif
+
 #endif
 
 #ifdef __cplusplus

@@ -499,15 +499,8 @@ main( int   argc,
 
    if (solver_id == 0)
    {
-#ifdef HYPRE_USE_PTHREADS
-      hypre_TimingThreadWrapper({
-         time_index = hypre_InitializeTiming("SMG Setup");
-         hypre_BeginTiming(time_index);
-      });
-#else
       time_index = hypre_InitializeTiming("SMG Setup");
       hypre_BeginTiming(time_index);
-#endif
 
       smg_solver = HYPRE_StructSMGInitialize(MPI_COMM_WORLD);
       HYPRE_StructSMGSetMemoryUse(smg_solver, 0);
@@ -519,16 +512,6 @@ main( int   argc,
       HYPRE_StructSMGSetLogging(smg_solver, 1);
       HYPRE_StructSMGSetup(smg_solver, A, b, x);
 
-#ifdef HYPRE_USE_PTHREADS
-      hypre_TimingThreadWrapper({
-         hypre_EndTiming(time_index);
-         hypre_PrintTiming("Setup phase times", MPI_COMM_WORLD);
-         hypre_FinalizeTiming(time_index);
-         hypre_ClearTiming();
-         time_index = hypre_InitializeTiming("SMG Solve");
-         hypre_BeginTiming(time_index);
-      });
-#else
       hypre_EndTiming(time_index);
       hypre_PrintTiming("Setup phase times", MPI_COMM_WORLD);
       hypre_FinalizeTiming(time_index);
@@ -537,24 +520,12 @@ main( int   argc,
       time_index = hypre_InitializeTiming("SMG Solve");
       hypre_BeginTiming(time_index);
 
-#endif
-   
-
       HYPRE_StructSMGSolve(smg_solver, A, b, x);
 
-#ifdef HYPRE_USE_PTHREADS
-      hypre_TimingThreadWrapper({
-         hypre_EndTiming(time_index);
-         hypre_PrintTiming("Solve phase times", MPI_COMM_WORLD);
-         hypre_FinalizeTiming(time_index);
-         hypre_ClearTiming();
-      });
-#else
       hypre_EndTiming(time_index);
       hypre_PrintTiming("Solve phase times", MPI_COMM_WORLD);
       hypre_FinalizeTiming(time_index);
       hypre_ClearTiming();
-#endif
    
       HYPRE_StructSMGGetNumIterations(smg_solver, &num_iterations);
       HYPRE_StructSMGGetFinalRelativeResidualNorm(smg_solver, &final_res_norm);

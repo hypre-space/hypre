@@ -49,13 +49,8 @@ hypre_SMGResidualInitialize( )
 
    residual_data = hypre_CTAlloc(hypre_SMGResidualData, 1);
 
-#ifdef HYPRE_USE_PTHREADS
-   hypre_TimingThreadWrapper({
-      (residual_data -> time_index)  = hypre_InitializeTiming("SMGResidual");
-   });
-#else
    (residual_data -> time_index)  = hypre_InitializeTiming("SMGResidual");
-#endif
+
    /* set defaults */
    hypre_SetIndex((residual_data -> base_index), 0, 0, 0);
    hypre_SetIndex((residual_data -> base_stride), 1, 1, 1);
@@ -196,13 +191,7 @@ hypre_SMGResidual( void               *residual_vdata,
    int                     compute_i, i, j, si;
    int                     loopi, loopj, loopk;
 
-#ifdef HYPRE_USE_PTHREADS
-   hypre_TimingThreadWrapper({
-      hypre_BeginTiming(residual_data -> time_index);
-   });
-#else
    hypre_BeginTiming(residual_data -> time_index);
-#endif
 
    /*-----------------------------------------------------------------------
     * Compute residual r = b - Ax
@@ -303,15 +292,8 @@ hypre_SMGResidual( void               *residual_vdata,
     * Return
     *-----------------------------------------------------------------------*/
 
-#ifdef HYPRE_USE_PTHREADS
-   hypre_TimingThreadWrapper({
-      hypre_IncFLOPCount(residual_data -> flops);
-      hypre_EndTiming(residual_data -> time_index);
-   });
-#else
    hypre_IncFLOPCount(residual_data -> flops);
    hypre_EndTiming(residual_data -> time_index);
-#endif
 
    return ierr;
 }
@@ -355,13 +337,7 @@ hypre_SMGResidualFinalize( void *residual_vdata )
    {
       hypre_FreeBoxArray(residual_data -> base_points);
       hypre_FreeComputePkg(residual_data -> compute_pkg );
-#ifdef HYPRE_USE_PTHREADS
-      hypre_TimingThreadWrapper({
-         hypre_FinalizeTiming(residual_data -> time_index);
-      });
-#else
       hypre_FinalizeTiming(residual_data -> time_index);
-#endif
       hypre_TFree(residual_data);
    }
 

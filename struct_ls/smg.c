@@ -29,13 +29,7 @@ hypre_SMGInitialize( MPI_Comm  comm )
    smg_data = hypre_CTAlloc(hypre_SMGData, 1);
 
    (smg_data -> comm)        = comm;
-#ifdef HYPRE_USE_PTHREADS
-   hypre_TimingThreadWrapper({
-      (smg_data -> time_index)  = hypre_InitializeTiming("SMG");
-   });
-#else
    (smg_data -> time_index)  = hypre_InitializeTiming("SMG");
-#endif
 
    /* set defaults */
    (smg_data -> memory_use) = 0;
@@ -121,13 +115,7 @@ hypre_SMGFinalize( void *smg_vdata )
       hypre_TFree(smg_data -> tb_l);
       hypre_TFree(smg_data -> tx_l);
  
-#ifdef HYPRE_USE_PTHREADS
-      hypre_TimingThreadWrapper({
-         hypre_FinalizeTiming(smg_data -> time_index);
-      });
-#else
       hypre_FinalizeTiming(smg_data -> time_index);
-#endif
       hypre_TFree(smg_data);
    }
 

@@ -82,13 +82,7 @@ hypre_SMGRelaxInitialize( MPI_Comm  comm )
    (relax_data -> setup_a_sol)    = 1;
    (relax_data -> comm)           = comm;
    (relax_data -> base_box_array) = NULL;
-#ifdef HYPRE_USE_PTHREADS
-   hypre_TimingThreadWrapper({
-      (relax_data -> time_index)     = hypre_InitializeTiming("SMGRelax");
-   });
-#else
    (relax_data -> time_index)     = hypre_InitializeTiming("SMGRelax");
-#endif
    /* set defaults */
    (relax_data -> memory_use)         = 0;
    (relax_data -> tol)                = 1.0e-06;
@@ -213,13 +207,7 @@ hypre_SMGRelaxFinalize( void *relax_vdata )
       hypre_SMGRelaxFreeARem(relax_vdata);
       hypre_SMGRelaxFreeASol(relax_vdata);
 
-#ifdef HYPRE_USE_PTHREADS
-      hypre_TimingThreadWrapper({
-         hypre_FinalizeTiming(relax_data -> time_index);
-      });
-#else
       hypre_FinalizeTiming(relax_data -> time_index);
-#endif
       hypre_TFree(relax_data);
    }
 
@@ -265,13 +253,7 @@ hypre_SMGRelax( void               *relax_vdata,
     * relaxation.
     *----------------------------------------------------------*/
 
-#ifdef HYPRE_USE_PTHREADS
-   hypre_TimingThreadWrapper({
-      hypre_BeginTiming(relax_data -> time_index);
-   });
-#else
    hypre_BeginTiming(relax_data -> time_index);
-#endif
 
    /*----------------------------------------------------------
     * Set up the solver
@@ -356,14 +338,7 @@ hypre_SMGRelax( void               *relax_vdata,
       hypre_SMGRelaxFreeASol(relax_vdata);
    }
 
-#ifdef HYPRE_USE_PTHREADS
-   hypre_TimingThreadWrapper({
-      hypre_EndTiming(relax_data -> time_index);
-   });
-#else
    hypre_EndTiming(relax_data -> time_index);
-#endif
-
 
    return ierr;
 }
