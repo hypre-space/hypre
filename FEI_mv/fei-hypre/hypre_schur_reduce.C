@@ -1160,7 +1160,7 @@ void HYPRE_LinSysCore::buildSchurInitialGuess()
     putIndices = new int[nSchur];
     for ( i = 0; i < nSchur; i++ ) putIndices[i] = CStartRow + i;
     HYPRE_IJVectorGetValues(HYx_, nSchur, getIndices, dArray);
-    ierr = HYPRE_IJVectorSetValues(reducedX_, 1, 
+    ierr = HYPRE_IJVectorSetValues(reducedX_, nSchur, 
                     (const int *) putIndices, (const double *) dArray);
     assert( !ierr );
     delete [] dArray;
