@@ -114,9 +114,7 @@ hypre_BoomerAMGCoarsen( hypre_ParCSRMatrix    *S,
    int                *S_offd_j;
 
    int 		      *col_map_offd    = hypre_ParCSRMatrixColMapOffd(S);
-   int 		      *row_starts      = hypre_ParCSRMatrixRowStarts(S);
    int                 num_variables   = hypre_CSRMatrixNumRows(S_diag);
-   int                 global_num_vars = hypre_ParCSRMatrixGlobalNumRows(S);
    int		       col_1 = hypre_ParCSRMatrixFirstColDiag(S);
    int		       col_n = col_1 + hypre_CSRMatrixNumCols(S_diag);
    int 		       num_cols_offd = 0;
@@ -126,10 +124,7 @@ hypre_BoomerAMGCoarsen( hypre_ParCSRMatrix    *S,
    int                *S_ext_j;
 
    int		       num_sends = 0;
-   int		       num_recvs = 0;
    int  	      *int_buf_data;
-   int  	      *S_recv_vec_starts;
-   int  	      *S_send_map_starts;
    double	      *buf_data;
 
    int                *CF_marker;
@@ -143,19 +138,13 @@ hypre_BoomerAMGCoarsen( hypre_ParCSRMatrix    *S,
    int                 graph_offd_size;
    int                 global_graph_size;
                       
-   int                 i, j, k, ic, jc, kc, jj, kk, jA, jS, kS, ig;
-   int		       index, index_S, start, my_id, num_procs, jrow, cnt;
+   int                 i, j, k, kc, jS, kS, ig;
+   int		       index, start, my_id, num_procs, jrow, cnt;
                       
    int                 ierr = 0;
    int                 break_var = 1;
 
-   int		       num_data, start_index;
    double	    wall_time;
-   double	    wall_time_ip = 0;
-   double	    wall_time_rs = 0;
-   double	    sum_time_ip = 0;
-   double	    sum_time_bp = 0;
-   double	    sum_time_rs = 0;
    int   iter = 0;
 
 #if 0 /* debugging */
@@ -190,7 +179,6 @@ hypre_BoomerAMGCoarsen( hypre_ParCSRMatrix    *S,
    }
 
    num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
-   num_recvs = hypre_ParCSRCommPkgNumRecvs(comm_pkg);
 
    int_buf_data = hypre_CTAlloc(int, hypre_ParCSRCommPkgSendMapStart(comm_pkg,
                                                 num_sends));
@@ -814,7 +802,6 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
    MPI_Comm         comm          = hypre_ParCSRMatrixComm(S);
    hypre_ParCSRCommPkg   *comm_pkg      = hypre_ParCSRMatrixCommPkg(A);
    hypre_ParCSRCommHandle *comm_handle;
-   int		   *row_starts    = hypre_ParCSRMatrixRowStarts(S);
    hypre_CSRMatrix *S_diag        = hypre_ParCSRMatrixDiag(S);
    hypre_CSRMatrix *S_offd        = hypre_ParCSRMatrixOffd(S);
    int             *S_i           = hypre_CSRMatrixI(S_diag);
@@ -823,7 +810,6 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
    int             *S_offd_j;
    int              num_variables = hypre_CSRMatrixNumRows(S_diag);
    int              num_cols_offd = hypre_CSRMatrixNumCols(S_offd);
-   int		    global_num_vars = hypre_ParCSRMatrixGlobalNumCols(S);
    int 	           *col_map_offd    = hypre_ParCSRMatrixColMapOffd(S);
                   
    hypre_CSRMatrix *S_ext;
@@ -845,15 +831,13 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
 
    int             *measure_array;
    int             *graph_array;
-   int              graph_size;
    int 	           *int_buf_data;
    int 	           *ci_array;
 
-   int              i, j, k, jA, jS, jS_offd, kS, ig;
-   int		    ic, ji, jj, jk, jl, jm, index;
+   int              i, j, k, jS;
+   int		    ji, jj, jk, jm, index;
    int		    set_empty = 1;
    int		    C_i_nonempty = 0;
-   int		    num_strong;
    int		    num_nonzeros;
    int		    num_procs, my_id;
    int		    num_sends = 0;
@@ -922,7 +906,6 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
    }
 
    num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
-   num_strong = S_i[num_variables] - num_variables;
 
    if (num_cols_offd) S_offd_j = hypre_CSRMatrixJ(S_offd);
 
@@ -1013,8 +996,6 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
     *---------------------------------------------------*/
 
    if (debug_flag == 3) wall_time = time_getWallclockSeconds();
-
-   graph_size = num_variables;
 
    /* first coarsening phase */
 

@@ -38,7 +38,7 @@ hypre_BoomerAMGSolveT( void               *amg_vdata,
    int     *num_variables;
    int      cycle_op_count;
    int      num_levels;
-   int      num_unknowns;
+   /* int      num_unknowns; */
    double   tol;
    char    *file_name;
    hypre_ParCSRMatrix **A_array;
@@ -77,7 +77,7 @@ hypre_BoomerAMGSolveT( void               *amg_vdata,
 
    amg_ioutdat   = hypre_ParAMGDataIOutDat(amg_data);
    file_name     = hypre_ParAMGDataLogFileName(amg_data);
-   num_unknowns  = hypre_ParAMGDataNumUnknowns(amg_data);
+   /* num_unknowns  = hypre_ParAMGDataNumUnknowns(amg_data); */
    num_levels    = hypre_ParAMGDataNumLevels(amg_data);
    A_array       = hypre_ParAMGDataAArray(amg_data);
    F_array       = hypre_ParAMGDataFArray(amg_data);
@@ -288,14 +288,14 @@ hypre_BoomerAMGCycleT( void              *amg_vdata,
    hypre_ParVector    *Vtemp;
 
    int     **CF_marker_array;
-   int     **unknown_map_array;
-   int     **point_map_array;
-   int     **v_at_point_array;
+   /* int     **unknown_map_array; */
+   /* int     **point_map_array; */
+   /* int     **v_at_point_array; */
 
    int       cycle_op_count;   
    int       cycle_type;
    int       num_levels;
-   int       num_unknowns;
+   /* int       num_unknowns; */
 
    int      *num_coeffs;
    int      *num_grid_sweeps;   
@@ -331,13 +331,13 @@ hypre_BoomerAMGCycleT( void              *amg_vdata,
    P_array           = hypre_ParAMGDataPArray(amg_data);
    R_array           = hypre_ParAMGDataRArray(amg_data);
    CF_marker_array   = hypre_ParAMGDataCFMarkerArray(amg_data);
-   unknown_map_array = hypre_ParAMGDataUnknownMapArray(amg_data);
-   point_map_array   = hypre_ParAMGDataPointMapArray(amg_data);
-   v_at_point_array  = hypre_ParAMGDataVatPointArray(amg_data);
+   /* unknown_map_array = hypre_ParAMGDataUnknownMapArray(amg_data); */
+   /* point_map_array   = hypre_ParAMGDataPointMapArray(amg_data); */
+   /* v_at_point_array  = hypre_ParAMGDataVatPointArray(amg_data); */
    Vtemp             = hypre_ParAMGDataVtemp(amg_data);
    num_levels        = hypre_ParAMGDataNumLevels(amg_data);
    cycle_type        = hypre_ParAMGDataCycleType(amg_data);
-   num_unknowns      =  hypre_ParCSRMatrixNumRows(A_array[0]);
+   /* num_unknowns      =  hypre_ParCSRMatrixNumRows(A_array[0]); */
 
    num_grid_sweeps     = hypre_ParAMGDataNumGridSweeps(amg_data);
    grid_relax_type     = hypre_ParAMGDataGridRelaxType(amg_data);
@@ -539,29 +539,16 @@ int  hypre_BoomerAMGRelaxT( hypre_ParCSRMatrix *A,
    hypre_CSRMatrix *A_diag = hypre_ParCSRMatrixDiag(A);
    double         *A_diag_data  = hypre_CSRMatrixData(A_diag);
    int            *A_diag_i     = hypre_CSRMatrixI(A_diag);
-   int            *A_diag_j     = hypre_CSRMatrixJ(A_diag);
-   hypre_CSRMatrix *A_offd = hypre_ParCSRMatrixOffd(A);
-   int            *A_offd_i     = hypre_CSRMatrixI(A_offd);
-   double         *A_offd_data  = hypre_CSRMatrixData(A_offd);
-   int            *A_offd_j     = hypre_CSRMatrixJ(A_offd);
-   hypre_ParCSRCommPkg  *comm_pkg = hypre_ParCSRMatrixCommPkg(A);
-   hypre_ParCSRCommHandle *comm_handle;
 
    int             n_global= hypre_ParCSRMatrixGlobalNumRows(A);
    int             n       = hypre_CSRMatrixNumRows(A_diag);
-   int             num_cols_offd = hypre_CSRMatrixNumCols(A_offd);
    int	      	   first_index = hypre_ParVectorFirstIndex(u);
    
    hypre_Vector   *u_local = hypre_ParVectorLocalVector(u);
    double         *u_data  = hypre_VectorData(u_local);
 
-   hypre_Vector   *f_local = hypre_ParVectorLocalVector(f);
-   double         *f_data  = hypre_VectorData(f_local);
-
    hypre_Vector   *Vtemp_local = hypre_ParVectorLocalVector(Vtemp);
    double         *Vtemp_data = hypre_VectorData(Vtemp_local);
-   double 	  *Vext_data;
-   double 	  *v_buf_data;
 
    hypre_CSRMatrix *A_CSR;
    int		   *A_CSR_i;   
@@ -571,21 +558,15 @@ int  hypre_BoomerAMGRelaxT( hypre_ParCSRMatrix *A,
    hypre_Vector    *f_vector;
    double	   *f_vector_data;
 
-   int             i, j;
-   int             ii, jj;
+   int             i;
+   int             jj;
    int             column;
    int             relax_error = 0;
-   int		   num_sends;
-   int		   index, start;
 
    double         *A_mat;
    double         *b_vec;
 
    double          zero = 0.0;
-   double	   res;
-   double          one_minus_weight;
-
-   one_minus_weight = 1.0 - relax_weight;
   
    /*-----------------------------------------------------------------------
     * Switch statement to direct control based on relax_type:

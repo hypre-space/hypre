@@ -358,7 +358,6 @@ map( int  ix,
 {
    int nx_local;
    int ny_local;
-   int nz_local;
    int ix_local;
    int iy_local;
    int iz_local;
@@ -368,7 +367,6 @@ map( int  ix,
    proc_num = r*P*Q + q*P + p;
    nx_local = nx_part[p+1] - nx_part[p];
    ny_local = ny_part[q+1] - ny_part[q];
-   nz_local = nz_part[r+1] - nz_part[r];
    ix_local = ix - nx_part[p];
    iy_local = iy - ny_part[q];
    iz_local = iz - nz_part[r];

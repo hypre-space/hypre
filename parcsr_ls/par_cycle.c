@@ -35,14 +35,14 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
    hypre_ParVector    *Vtemp;
 
    int     **CF_marker_array;
-   int     **unknown_map_array;
+   /* int     **unknown_map_array;
    int     **point_map_array;
-   int     **v_at_point_array;
+   int     **v_at_point_array; */
 
    int       cycle_op_count;   
    int       cycle_type;
    int       num_levels;
-   int       num_unknowns;
+   /* int       num_unknowns; */
 
    int      *num_coeffs;
    int      *num_grid_sweeps;   
@@ -79,13 +79,13 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
    P_array           = hypre_ParAMGDataPArray(amg_data);
    R_array           = hypre_ParAMGDataRArray(amg_data);
    CF_marker_array   = hypre_ParAMGDataCFMarkerArray(amg_data);
-   unknown_map_array = hypre_ParAMGDataUnknownMapArray(amg_data);
+   /* unknown_map_array = hypre_ParAMGDataUnknownMapArray(amg_data);
    point_map_array   = hypre_ParAMGDataPointMapArray(amg_data);
-   v_at_point_array  = hypre_ParAMGDataVatPointArray(amg_data);
+   v_at_point_array  = hypre_ParAMGDataVatPointArray(amg_data); */
    Vtemp             = hypre_ParAMGDataVtemp(amg_data);
    num_levels        = hypre_ParAMGDataNumLevels(amg_data);
    cycle_type        = hypre_ParAMGDataCycleType(amg_data);
-   num_unknowns      =  hypre_ParCSRMatrixNumRows(A_array[0]);
+   /* num_unknowns      =  hypre_ParCSRMatrixNumRows(A_array[0]); */
 
    num_grid_sweeps     = hypre_ParAMGDataNumGridSweeps(amg_data);
    grid_relax_type     = hypre_ParAMGDataGridRelaxType(amg_data);

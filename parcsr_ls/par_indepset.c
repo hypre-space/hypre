@@ -100,7 +100,6 @@ hypre_BoomerAMGIndepSet( hypre_ParCSRMatrix *S,
                       int                *IS_marker,
                       int                *IS_marker_offd     )
 {
-   int		   *col_map_offd = hypre_ParCSRMatrixColMapOffd(S);
    hypre_CSRMatrix *S_diag      = hypre_ParCSRMatrixDiag(S);
    int             *S_diag_i    = hypre_CSRMatrixI(S_diag);
    int             *S_diag_j    = hypre_CSRMatrixJ(S_diag);
@@ -114,11 +113,8 @@ hypre_BoomerAMGIndepSet( hypre_ParCSRMatrix *S,
    /* double          *S_ext_data; */
 
    int		    local_num_vars = hypre_CSRMatrixNumRows(S_diag);
-   int		    num_cols_offd = hypre_CSRMatrixNumCols(S_offd);
-   int		    col_1 = hypre_ParCSRMatrixFirstColDiag(S);
-   int		    col_n = col_1 + hypre_CSRMatrixNumCols(S_diag);
-   int		    ic, jc;
-   int              i, j, ig, jS, jj, jjc;
+   int		    jc;
+   int              i, j, ig, jS, jj;
                    
    int              ierr = 0;
 

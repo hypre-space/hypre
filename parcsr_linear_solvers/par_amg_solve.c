@@ -38,7 +38,7 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
    int     *num_variables;
    int      cycle_op_count;
    int      num_levels;
-   int      num_unknowns;
+   /* int      num_unknowns; */
    double   tol;
 
    hypre_ParCSRMatrix **A_array;
@@ -74,7 +74,7 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
    MPI_Comm_rank(comm,&my_id);
 
    amg_ioutdat   = hypre_ParAMGDataIOutDat(amg_data);
-   num_unknowns  = hypre_ParAMGDataNumUnknowns(amg_data);
+   /* num_unknowns  = hypre_ParAMGDataNumUnknowns(amg_data); */
    num_levels    = hypre_ParAMGDataNumLevels(amg_data);
    A_array       = hypre_ParAMGDataAArray(amg_data);
    F_array       = hypre_ParAMGDataFArray(amg_data);

@@ -79,7 +79,6 @@ hypre_BoomerAMGBuildInterp( hypre_ParCSRMatrix   *A,
    int              start_indexing = 0; /* start indexing for P_data at 0 */
 
    int              n_fine = hypre_CSRMatrixNumRows(A_diag);
-   int              n_coarse;
 
    int              strong_f_marker;
 
@@ -91,8 +90,6 @@ hypre_BoomerAMGBuildInterp( hypre_ParCSRMatrix   *A,
    int              num_cols_P_offd,my_first_cpt;
    int             *num_cpts_global;
 
-   int              count;
-   
    int              i,i1,i2;
    int              j,jl,jj,jj1;
    int              start;
@@ -333,7 +330,6 @@ hypre_BoomerAMGBuildInterp( hypre_ParCSRMatrix   *A,
       jj_count_offd[i+1] += jj_count_offd[i];
    }
    i = hypre_NumThreads-1;
-   n_coarse = coarse_counter[i];
    jj_counter = jj_count[i];
    jj_counter_offd = jj_count_offd[i];
 

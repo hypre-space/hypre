@@ -192,8 +192,8 @@ hypre_GMRESSolve(void  *gmres_vdata,
    /* logging variables */
    int             logging        = (gmres_data -> logging);
    double         *norms          = (gmres_data -> norms);
-   char           *log_file_name  = (gmres_data -> log_file_name);
-/*   FILE           *fp; */
+/*   char           *log_file_name  = (gmres_data -> log_file_name);
+     FILE           *fp; */
    
    int        ierr = 0;
    int	      i, j, k;
@@ -207,8 +207,8 @@ hypre_GMRESSolve(void  *gmres_vdata,
    if (logging > 0)
    {
       norms          = (gmres_data -> norms);
-      log_file_name  = (gmres_data -> log_file_name);
-      /* fp = fopen(log_file_name,"w"); */
+      /* log_file_name  = (gmres_data -> log_file_name);
+         fp = fopen(log_file_name,"w"); */
    }
 
    /* initialize work arrays */

@@ -265,7 +265,7 @@ hypre_KrylovSolve( void *pcg_vdata,
    int             i = 0, j;
    int             ierr = 0;
    int             my_id, num_procs;
-   char		  *log_file_name;
+/*   char		  *log_file_name; */
 /*   FILE		  *fp; */
 
    /*-----------------------------------------------------------------------
@@ -275,7 +275,7 @@ hypre_KrylovSolve( void *pcg_vdata,
    hypre_KrylovCommInfo(A,&my_id,&num_procs);
    if (logging > 0)
    {
-      log_file_name = (pcg_data -> log_file_name);
+/*      log_file_name = (pcg_data -> log_file_name); */
 /*      fp
  = fopen(log_file_name,"w"); */
    }

@@ -91,7 +91,7 @@ int
 hypre_BiCGSTABDestroy( void *bicgstab_vdata )
 {
    hypre_BiCGSTABData *bicgstab_data = bicgstab_vdata;
-   int i, ierr = 0;
+   int ierr = 0;
  
    if (bicgstab_data)
    {
@@ -202,8 +202,8 @@ hypre_BiCGSTABSolve(void  *bicgstab_vdata,
    /* logging variables */
    int             logging        = (bicgstab_data -> logging);
    double         *norms          = (bicgstab_data -> norms);
-   char           *log_file_name  = (bicgstab_data -> log_file_name);
-/*   FILE           *fp; */
+/*   char           *log_file_name  = (bicgstab_data -> log_file_name);
+     FILE           *fp; */
    
    int        ierr = 0;
    int        iter; 
@@ -216,8 +216,8 @@ hypre_BiCGSTABSolve(void  *bicgstab_vdata,
    if (logging > 0)
    {
       norms          = (bicgstab_data -> norms);
-      log_file_name  = (bicgstab_data -> log_file_name);
-      /* fp = fopen(log_file_name,"w"); */
+      /* log_file_name  = (bicgstab_data -> log_file_name);
+         fp = fopen(log_file_name,"w"); */
    }
 
    /* initialize work arrays */

@@ -52,7 +52,7 @@ hypre_BoomerAMGCreate()
 
    /* output params */
    int      ioutdat;
-   int      cycle_op_count;
+   /* int      cycle_op_count; */
    char     log_file_name[256];
    int      debug_flag;
 
@@ -107,7 +107,7 @@ hypre_BoomerAMGCreate()
    /* output params */
    ioutdat = 0;
    sprintf(log_file_name, "%s", "amg.out.log");
-   cycle_op_count = 0;
+   /* cycle_op_count = 0; */
    debug_flag = 0;
 
    /*-----------------------------------------------------------------------
@@ -468,7 +468,7 @@ hypre_BoomerAMGSetLogging( void     *data,
    int ierr = 0;
    hypre_ParAMGData  *amg_data = data;
  
-   FILE *fp;
+   /* FILE *fp; */
 
    hypre_ParAMGDataIOutDat(amg_data) = ioutdat;
 /*   if (ioutdat > 0)

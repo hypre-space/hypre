@@ -45,7 +45,7 @@ GenerateLaplacian27pt(MPI_Comm comm,
    int *col_map_offd;
    int *work;
    int row_index;
-   int i, j, k;
+   int i, j;
 
    int nx_local, ny_local, nz_local;
    int nx_size, ny_size, nz_size;

@@ -33,31 +33,24 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
    hypre_CSRMatrix *A_diag;
    double          *A_diag_data;
    int             *A_diag_i;
-   int             *A_diag_j;
 
    hypre_CSRMatrix *A_offd;   
    double          *A_offd_data;
    int             *A_offd_i;
-   int             *A_offd_j;
-   int              num_cols_A_offd;
 
    hypre_CSRMatrix *P_diag;
    double          *P_diag_data;
    int             *P_diag_i;
-   int             *P_diag_j;
 
    hypre_CSRMatrix *P_offd;   
    double          *P_offd_data;
    int             *P_offd_i;
-   int             *P_offd_j;
-   int              num_cols_P_offd;
 
    int		   *row_starts;
 
    int	    numrows;
    int      num_levels; 
    int      global_nonzeros;
-   int      amg_ioutdat;
    int      coarsen_type;
    int      measure_type;
 
@@ -71,7 +64,6 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
    int       fine_size;
    int       coarse_size;
    int       entries;
-   int       total_entries;
    int       min_entries;
    int       max_entries;
 
@@ -94,7 +86,6 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
 
    int     *num_coeffs;
    int     *num_variables;
-   int      total_coeffs;
    int      total_variables;
    double   operat_cmplxty;
    double   grid_cmplxty;
@@ -105,7 +96,6 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
    A_array = hypre_ParAMGDataAArray(amg_data);
    P_array = hypre_ParAMGDataPArray(amg_data);
    num_levels = hypre_ParAMGDataNumLevels(amg_data);
-   amg_ioutdat = hypre_ParAMGDataIOutDat(amg_data);
    coarsen_type = hypre_ParAMGDataCoarsenType(amg_data);
    measure_type = hypre_ParAMGDataMeasureType(amg_data);
 
@@ -185,13 +175,10 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
        A_diag = hypre_ParCSRMatrixDiag(A_array[level]);
        A_diag_data = hypre_CSRMatrixData(A_diag);
        A_diag_i = hypre_CSRMatrixI(A_diag);
-       A_diag_j = hypre_CSRMatrixJ(A_diag);
 
        A_offd = hypre_ParCSRMatrixOffd(A_array[level]);   
        A_offd_data = hypre_CSRMatrixData(A_offd);
        A_offd_i = hypre_CSRMatrixI(A_offd);
-       A_offd_j = hypre_CSRMatrixJ(A_offd);
-       num_cols_A_offd = hypre_CSRMatrixNumCols(A_offd);
 
        row_starts = hypre_ParCSRMatrixRowStarts(A_array[level]);
 
@@ -205,7 +192,6 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
 
        min_entries = 0;
        max_entries = 0;
-       total_entries = 0;
        min_rowsum = 0.0;
        max_rowsum = 0.0;
 
@@ -298,13 +284,10 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
        P_diag = hypre_ParCSRMatrixDiag(P_array[level]);
        P_diag_data = hypre_CSRMatrixData(P_diag);
        P_diag_i = hypre_CSRMatrixI(P_diag);
-       P_diag_j = hypre_CSRMatrixJ(P_diag);
 
        P_offd = hypre_ParCSRMatrixOffd(P_array[level]);   
        P_offd_data = hypre_CSRMatrixData(P_offd);
        P_offd_i = hypre_CSRMatrixI(P_offd);
-       P_offd_j = hypre_CSRMatrixJ(P_offd);
-       num_cols_P_offd = hypre_CSRMatrixNumCols(P_offd);
 
        row_starts = hypre_ParCSRMatrixRowStarts(P_array[level]);
 
