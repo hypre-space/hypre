@@ -32,7 +32,9 @@ FILES =\
  smg_setup_rap.c\
  smg_setup_restrict.c\
  smg_solve.c\
- ZZZ_struct_smg.c
+ ZZZ_struct_smg.c \
+ ZZZ_pcg.c \
+ ZZZ_struct_pcg.c 
 
 #smg1_setup_rap.c\
 
@@ -75,6 +77,10 @@ LFLAGS =\
 driver_internal: driver_internal.o libZZZ_ls.a
 	@echo  "Linking" $@ "... "
 	${CC} -o driver_internal driver_internal.o ${LFLAGS}
+
+driver_internal_cgsmg: driver_internal_cgsmg.o libZZZ_ls.a
+	@echo  "Linking" $@ "... "
+	${CC} -o driver_internal_cgsmg driver_internal_cgsmg.o ${LFLAGS}
 
 libZZZ_ls.a: ${OBJS}
 	@echo  "Building $@ ... "
