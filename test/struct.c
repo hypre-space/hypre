@@ -176,9 +176,15 @@ main( int   argc,
    solver_id = 0;
    solver_type = 1;
 
+/*
    istart[0] = -3; 
    istart[1] = -3; 
    istart[2] = -3;
+ */
+/* istart changed for testing, <<< DON'T CHECK THIS IN */
+   istart[0] = 1; 
+   istart[1] = 1; 
+   istart[2] = 1;
 
    px = 0;
    py = 0;
@@ -220,7 +226,7 @@ main( int   argc,
          ny = atoi(argv[arg_index++]);
          nz = atoi(argv[arg_index++]);
       }
-      if ( strcmp(argv[arg_index], "-istart") == 0 )
+      else if ( strcmp(argv[arg_index], "-istart") == 0 )
       {
          arg_index++;
          istart[0] = atoi(argv[arg_index++]);
@@ -1183,7 +1189,8 @@ main( int   argc,
       hypre_BeginTiming(time_index);
 
       HYPRE_StructPFMGCreate(MPI_COMM_WORLD, &solver);
-      HYPRE_StructPFMGSetMaxIter(solver, 50);
+      /*HYPRE_StructPFMGSetMaxLevels( solver, 3 );*/  /*jfp normally not set, default 10 */
+      HYPRE_StructPFMGSetMaxIter(solver, 50); /* <<< jfp normally 50 */
       HYPRE_StructPFMGSetTol(solver, 1.0e-06);
       HYPRE_StructPFMGSetRelChange(solver, 0);
       HYPRE_StructPFMGSetRAPType(solver, rap);
