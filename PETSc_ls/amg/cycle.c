@@ -20,105 +20,101 @@
  * hypre_AMGCycle
  *--------------------------------------------------------------------------*/
 
-int         hypre_AMGCycle(U_array,F_array, tol, data)
+int         hypre_AMGCycle(hypre_AMGData *amg_data, 
+                           hypre_Vector  **U_array,
+                           hypre_Vector  **F_array)
 
-hypre_Vector      **U_array;
-hypre_Vector      **F_array;
-double       tol;
-void        *data; 
 {
 
 /* Data Structure variables */
 
-   hypre_Matrix    **A_array;
-   hypre_Matrix    **P_array;
-   hypre_VectorInt **IU_array;
-   hypre_VectorInt **IP_array;
-   hypre_VectorInt **IV_array;
-   hypre_VectorInt **ICG_array;
+   hypre_CSRMatrix    **A_array;
+   hypre_CSRMatrix    **P_array;
    hypre_Vector    *Vtemp;
 
-   int       Fcycle_flag;
-   int       Vstar_flag;
+   int     **CF_marker_array;
+   int     **unknown_map_array;
+   int     **point_map_array;
+   int     **v_at_point_array;
+
    int       cycle_op_count;   
-   int      *imin;
-   int      *imax;
-   int      *ipmn;
-   int      *ipmx;
-   int      *mu;
-   int      *ntrlx;
-   int      *iprlx;
-   int      *num_coeffs;
-   int      *numv;
+   int       cycle_type;
    int       num_levels;
    int       num_unknowns;
+
+   int      *num_coeffs;
+   int      *num_grid_sweeps;   
+   int      *grid_relax_type;   
+/*   int     **grid_relax_points;  */
+   int      *grid_relax_points[4];
 
 
 /* Local variables  */
 
-   int      *iarr;
-   int      *ity, *ipt;
    int      *lev_counter;
    int       Solve_err_flag;
    int       k;
    int       j;
-   int       ii;
    int       level;
    int       cycle_param;
    int       coarse_grid;
    int       fine_grid;
    int       Not_Finished;
-   int       num_integers;
-   int       num_digits;
    int       num_sweep;
-   int       base_lev;
+   int       relax_type;
+   int       relax_points;
 
    double    alpha;
    double    beta;
-   double   *D_mat;
-   double   *S_vec;
+/*   double   *D_mat;
+   double   *S_vec;  */
    
 /* Acquire data and allocate storage */
 
-   hypre_AMGData  *amg_data = data; 
+   A_array           = hypre_AMGDataAArray(amg_data);
+   P_array           = hypre_AMGDataPArray(amg_data);
+   CF_marker_array   = hypre_AMGDataCFMarkerArray(amg_data);
+   unknown_map_array = hypre_AMGDataUnknownMapArray(amg_data);
+   point_map_array   = hypre_AMGDataPointMapArray(amg_data);
+   v_at_point_array  = hypre_AMGDataVatPointArray(amg_data);
+   Vtemp             = hypre_AMGDataVtemp(amg_data);
+   num_levels        = hypre_AMGDataNumLevels(amg_data);
+   cycle_type        = hypre_AMGDataCycleType(amg_data);
+   num_unknowns      =  hypre_CSRMatrixNumRows(A_array[0]);
 
-   A_array = hypre_AMGDataAArray(amg_data);
-   P_array = hypre_AMGDataPArray(amg_data);
-   IU_array = hypre_AMGDataIUArray(amg_data);
-   IP_array = hypre_AMGDataIPArray(amg_data);
-   IV_array = hypre_AMGDataIVArray(amg_data);
-   ICG_array = hypre_AMGDataICGArray(amg_data);
-   Vtemp = hypre_AMGDataVtemp(amg_data);
+   num_grid_sweeps     = hypre_AMGDataNumGridSweeps(amg_data);
+   grid_relax_type     = hypre_AMGDataGridRelaxType(amg_data);
+/*   grid_relax_points   =  hypre_AMGDataGridRelaxPoints(amg_data); */
 
-   imin = hypre_AMGDataIMin(amg_data);
-   imax = hypre_AMGDataIMax(amg_data);
-   ipmn = hypre_AMGDataIPMN(amg_data);
-   ipmx =  hypre_AMGDataIPMX(amg_data);
-   num_levels  = hypre_AMGDataNumLevels(amg_data);
-   mu = hypre_AMGDataMU(amg_data);
-   ntrlx = hypre_AMGDataNTRLX(amg_data);
-   iprlx = hypre_AMGDataIPRLX(amg_data);
-   num_coeffs = hypre_AMGDataNumA(amg_data);
-   num_unknowns = hypre_AMGDataNumUnknowns(amg_data);
-   numv = hypre_AMGDataNumV(amg_data);
+/* temporary fix */
+   for (j = 0; j < 3; j++)
+   {
+      grid_relax_points[j] = hypre_CTAlloc(int,2);
+      grid_relax_points[j][0] = 1;
+      grid_relax_points[j][1] = -1;
+   }
+   grid_relax_points[3] = hypre_CTAlloc(int,1);
+   grid_relax_points[3][0] = 9;    
+/*end temporary fix */
+
    cycle_op_count = hypre_AMGDataCycleOpCount(amg_data);
 
-   Fcycle_flag = hypre_AMGDataFcycleFlag(amg_data);
-   Vstar_flag = hypre_AMGDataVstarFlag(amg_data);
 
-   lev_counter = hypre_CTAlloc(int, num_levels);
-   iarr = hypre_CTAlloc(int, 10);
-   ity  = hypre_CTAlloc(int, 10);
-   ipt  = hypre_CTAlloc(int, 10);
+    lev_counter = hypre_CTAlloc(int, num_levels);
 
-   D_mat = hypre_CTAlloc(double, num_unknowns * num_unknowns);
-   S_vec = hypre_CTAlloc(double, num_unknowns);
+/*   D_mat = hypre_CTAlloc(double, num_unknowns * num_unknowns);
+   S_vec = hypre_CTAlloc(double, num_unknowns); */
 
 /* Initialize */
 
    Solve_err_flag = 0;
-   base_lev = 0;             /* Will be removed eventually */
-   num_integers = 9;         /* Used in all idec calls */
+
+   num_coeffs = hypre_CTAlloc(int, num_levels);
+   num_coeffs[0]    = hypre_CSRMatrixNumNonzeros(A_array[0]);
+
+   for (j = 1; j < num_levels; j++)
+       num_coeffs[j] = hypre_CSRMatrixNumNonzeros(A_array[j]);
+
 
 /*------------------------------------------------------------------------
  *    Initialize cycling control counter
@@ -132,10 +128,10 @@ void        *data;
  *     following actions control cycling:
  *     
  *     a. lev_counter[0] is initialized to 1.
- *     b. lev_counter[k] is initialized to mu[k-1]+Fcycle_flag for k>0.
+ *     b. lev_counter[k] is initialized to cycle_type for k>0.
  *     
  *     c. During cycling, when going down to level k,
- *        lev_counter[k] is set to the max of (lev_counter[k],mu[k-1])
+ *        lev_counter[k] is set to the max of (lev_counter[k],cycle_type)
 *------------------------------------------------------------------------*/
 
    Not_Finished = 1;
@@ -143,7 +139,7 @@ void        *data;
    lev_counter[0] = 1;
    for (k = 1; k < num_levels; ++k) 
    {
-       lev_counter[k] = mu[k-1] + Fcycle_flag;
+       lev_counter[k] = cycle_type;
    }
 
 /*------------------------------------------------------------------------
@@ -161,66 +157,61 @@ void        *data;
    level = 0;
    cycle_param = 0;
 
-   if (ntrlx[cycle_param] == 1 || ntrlx[cycle_param] == 2) cycle_param = 1;
-
 /*------------------------------------------------------------------------
  * Main loop of cycling
  *-----------------------------------------------------------------------*/
   
    while (Not_Finished)
    {
-      if (ntrlx[cycle_param] > 9)
+   
+      num_sweep = num_grid_sweeps[cycle_param];
+      relax_type = grid_relax_type[cycle_param];
+
+/*------------------------------------------------------------------------
+ * Do the relaxation num_sweep times
+ *-----------------------------------------------------------------------*/
+
+      for (j = 0; j < num_sweep; j++)
       {
+         relax_points =   grid_relax_points[cycle_param][j];
 
-/*------------------------------------------------------------------------
- * Decode relaxation parameters. error flag set to 7 if error occurs
- *-----------------------------------------------------------------------*/
- 
- 
-         idec_(&ntrlx[cycle_param],&num_integers,&num_digits,iarr);
-         num_sweep = iarr[0];
-         ii = 0;
-         for (k = 1; k < num_digits; k++)
+         /*-----------------------------------------------
+          * VERY sloppy approximation to cycle complexity
+          *-----------------------------------------------*/
+
+         if (level < num_levels -1)
          {
-             if (iarr[k] == 0) num_sweep = num_sweep * 10;
-             else ity[ii++] = iarr[k];
+            switch (relax_points)
+            {
+                 case 1:
+                    cycle_op_count += num_coeffs[level+1]; 
+  
+                 case -1: 
+                    cycle_op_count += (num_coeffs[level]-num_coeffs[level+1]); 
+            }
+         }
+	 else
+         {
+            cycle_op_count += num_coeffs[level]; 
          }
 
-         idec_(&iprlx[cycle_param],&num_integers,&num_digits,ipt);
-         if (num_digits < ii)
-         {
-            Solve_err_flag = 7;
-            return(Solve_err_flag);
-         }
+         Solve_err_flag = hypre_AMGRelax(A_array[level], 
+                                         F_array[level],
+                                         CF_marker_array[level],
+                                         relax_type,
+                                         relax_points,
+                                         U_array[level],
+                                         Vtemp);
 
- 
-/*------------------------------------------------------------------------
- * Do the relaxation num_sweep times, looping over partial sweeps.
- *-----------------------------------------------------------------------*/
+         if (Solve_err_flag != 0) return(Solve_err_flag);
 
-         for (j = 0; j < num_sweep; j++)
-         {
-             cycle_op_count += num_coeffs[level];
-
-             for (k = 0; k < ii; k++) 
-             {
-               Solve_err_flag = hypre_AMGRelax(U_array[level],F_array[level],
-                                          A_array[level], ICG_array[level],
-                                          IV_array[level],ipmn[level],
-                                          ipmx[level],ipt[k],ity[k],
-                                          D_mat,S_vec);
-
-               if (Solve_err_flag != 0) return(Solve_err_flag);
-
-             }
-         }
+            
+      }
 
 
 /*------------------------------------------------------------------------
  * Decrement the control counter and determine which grid to visit next
  *-----------------------------------------------------------------------*/
-
-      }
 
       --lev_counter[level];
        
@@ -236,7 +227,7 @@ void        *data;
           fine_grid = level;
           coarse_grid = level + 1;
 
-          hypre_InitVector(U_array[coarse_grid],0.0);
+          hypre_SetVectorConstantValues(U_array[coarse_grid], 0.0);
           
           hypre_CopyVector(F_array[fine_grid],Vtemp);
           alpha = -1.0;
@@ -250,7 +241,7 @@ void        *data;
                   beta,F_array[coarse_grid]);
 
           ++level;
-          lev_counter[level] = max(lev_counter[level],mu[level-1]);
+          lev_counter[level] = max(lev_counter[level],cycle_type);
           cycle_param = 1;
           if (level == num_levels-1) cycle_param = 3;
       }
@@ -273,7 +264,7 @@ void        *data;
 
           --level;
           cycle_param = 2;
-          if (level == 0 && ntrlx[0] > 9) cycle_param = 0;
+          if (level == 0) cycle_param = 0;
       }
       else
       {
@@ -284,12 +275,9 @@ void        *data;
    hypre_AMGDataCycleOpCount(amg_data) = cycle_op_count;
 
    hypre_TFree(lev_counter);
-   hypre_TFree(iarr); 
-   hypre_TFree(ity);  
-   hypre_TFree(ipt); 
 
-   hypre_TFree(D_mat);
-   hypre_TFree(S_vec); 
+/*   hypre_TFree(D_mat);
+   hypre_TFree(S_vec);  */
 
    return(Solve_err_flag);
 }
