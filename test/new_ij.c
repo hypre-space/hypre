@@ -110,7 +110,7 @@ main( int   argc,
    /* parameters for BoomerAMG */
    double   strong_threshold;
    double   trunc_factor;
-   double   S_commpkg_switch;
+   double   S_commpkg_switch = 1.0;
    int      cycle_type;
    int      coarsen_type = 6;
    int      measure_type = 0;
@@ -492,7 +492,6 @@ main( int   argc,
    {
    strong_threshold = 0.25;
    trunc_factor = 0.;
-   S_commpkg_switch = 0.05;
    cycle_type = 1;
    relax_wt = 1.;
    outer_wt = 1.;
