@@ -111,7 +111,8 @@ hypre_BoxNeighborsCreate( hypre_BoxArray      *boxes,
 
 int
 hypre_BoxNeighborsAssemble( hypre_BoxNeighbors *neighbors,
-                            int                 max_distance )
+                            int                 max_distance,
+                            int                 prune )
 {
    hypre_BoxArray      *boxes;
    int                 *procs;
@@ -213,37 +214,48 @@ hypre_BoxNeighborsAssemble( hypre_BoxNeighbors *neighbors,
             }
          }
 
-         /* use procs array to store which boxes to keep */
-         if (keep_box)
+         if (prune)
          {
-            procs[i] = -procs[i];
-            if (inew < i)
+            /* use procs array to store which boxes to keep */
+            if (keep_box)
             {
-               procs[inew] = i;
+               procs[i] = -procs[i];
+               if (inew < i)
+               {
+                  procs[inew] = i;
+               }
+               inew = i + 1;
+               
+               num_boxes++;
             }
-            inew = i + 1;
-
+         }
+         else
+         {
+            /* keep all of the boxes */
             num_boxes++;
          }
       }
 
-   i = 0;
-   for (inew = 0; inew < num_boxes; inew++)
+   if (prune)
    {
-      if (procs[i] > 0)
+      i = 0;
+      for (inew = 0; inew < num_boxes; inew++)
       {
-         i = procs[i];
-      }
-      hypre_CopyBox(hypre_BoxArrayBox(boxes, i),
-                    hypre_BoxArrayBox(boxes, inew));
-      procs[inew] = -procs[i];
-      ids[inew]   = ids[i];
-      if (i == first_local)
-      {
-         first_local = inew;
-      }
+         if (procs[i] > 0)
+         {
+            i = procs[i];
+         }
+         hypre_CopyBox(hypre_BoxArrayBox(boxes, i),
+                       hypre_BoxArrayBox(boxes, inew));
+         procs[inew] = -procs[i];
+         ids[inew]   = ids[i];
+         if (i == first_local)
+         {
+            first_local = inew;
+         }
 
-      i++;
+         i++;
+      }
    }
 
    hypre_BoxArraySetSize(boxes, num_boxes);

@@ -1548,7 +1548,7 @@ int hypre_BoxFree( hypre_Box *box );
 int hypre_RankLinkCreate( int rank , hypre_RankLink **rank_link_ptr );
 int hypre_RankLinkDestroy( hypre_RankLink *rank_link );
 int hypre_BoxNeighborsCreate( hypre_BoxArray *boxes , int *procs , int *ids , int first_local , int num_local , int num_periodic , hypre_BoxNeighbors **neighbors_ptr );
-int hypre_BoxNeighborsAssemble( hypre_BoxNeighbors *neighbors , int max_distance );
+int hypre_BoxNeighborsAssemble( hypre_BoxNeighbors *neighbors , int max_distance , int prune );
 int hypre_BoxNeighborsDestroy( hypre_BoxNeighbors *neighbors );
 
 /* communication.c */

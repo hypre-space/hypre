@@ -219,9 +219,11 @@ hypre_StructGridAssemble( hypre_StructGrid *grid )
    hypre_BoxArray      *boxes;
    hypre_Box           *box;
    int                  size;
+   int                  prune;
    int                  i;
 
    boxes = hypre_StructGridBoxes(grid);
+   prune = 0;
 
    if (hypre_StructGridNeighbors(grid) == NULL)
    {
@@ -299,10 +301,12 @@ hypre_StructGridAssemble( hypre_StructGrid *grid )
             ids[i] = all_ids[first_local + i];
          }
       hypre_StructGridIDs(grid) = ids;
+
+      prune = 1;
    }
 
    hypre_BoxNeighborsAssemble(hypre_StructGridNeighbors(grid),
-                              hypre_StructGridMaxDistance(grid));
+                              hypre_StructGridMaxDistance(grid), prune);
 
    /* compute local size */
    size = 0;
