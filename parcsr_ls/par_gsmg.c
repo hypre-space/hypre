@@ -178,16 +178,32 @@ hypre_ParCSRMatrixFillSmooth(int nsamples, double *samples,
   hypre_ParCSRMatrix *S, hypre_ParCSRMatrix *A,
   int num_functions, int *dof_func)
 {
+   MPI_Comm           comm = hypre_ParCSRMatrixComm(S);
+   hypre_ParCSRCommPkg     *comm_pkg = hypre_ParCSRMatrixCommPkg(S);
+   hypre_ParCSRCommHandle  *comm_handle;
+
    hypre_CSRMatrix    *S_diag          = hypre_ParCSRMatrixDiag(S);
    int                *S_diag_i        = hypre_CSRMatrixI(S_diag);
    int                *S_diag_j        = hypre_CSRMatrixJ(S_diag);
    double             *S_diag_data     = hypre_CSRMatrixData(S_diag);
+   hypre_CSRMatrix    *S_offd          = hypre_ParCSRMatrixOffd(S);
+   int                *S_offd_i        = hypre_CSRMatrixI(S_offd);
+   int                *S_offd_j        = hypre_CSRMatrixJ(S_offd);
+   double             *S_offd_data     = hypre_CSRMatrixData(S_offd);
    hypre_CSRMatrix    *A_diag          = hypre_ParCSRMatrixDiag(A);
    double             *A_diag_data     = hypre_CSRMatrixData(A_diag);
+   hypre_CSRMatrix    *A_offd          = hypre_ParCSRMatrixOffd(A);
+   double             *A_offd_data     = hypre_CSRMatrixData(A_offd);
    int                 n               = hypre_CSRMatrixNumRows(S_diag);
-   int i, j, k, ii;
+   int i, j, k, ii, index, start;
+   int num_cols_offd;
+   int num_sends;
+   int *dof_func_offd;
+   int *int_buf_data;
    double temp;
    double *p;
+   double *p_offd;
+   double *buf_data;
    double nm;
    double mx = 0., my = 1.e+10;
 
@@ -197,6 +213,60 @@ hypre_ParCSRMatrixFillSmooth(int nsamples, double *samples,
        nm = dnrm2(n, samples+k*n);
        nm = 1./nm/nsamples;
        dscal(n, nm, samples+k*n);
+   }
+
+   if (!comm_pkg)
+   {
+        hypre_MatvecCommPkgCreate(S);
+        comm_pkg = hypre_ParCSRMatrixCommPkg(S);
+   }
+
+   num_cols_offd = S_offd_i[n];
+   num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
+   buf_data = hypre_CTAlloc(double,hypre_ParCSRCommPkgSendMapStart(comm_pkg,
+                                                num_sends));
+   p_offd = hypre_CTAlloc(double, nsamples*num_cols_offd);
+
+   p = samples;
+   for (k = 0; k < nsamples; k++)
+   {
+      index = 0;
+      for (i = 0; i < num_sends; i++)
+      {
+         start = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
+         for (j=start; j < hypre_ParCSRCommPkgSendMapStart(comm_pkg, i+1); j++)
+                buf_data[index++]
+                 = p[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j)];
+      }
+
+      comm_handle = hypre_ParCSRCommHandleCreate( 1, comm_pkg, buf_data,
+        p_offd);
+
+      hypre_ParCSRCommHandleDestroy(comm_handle);
+      p = p+n;
+      p_offd = p_offd+num_cols_offd;
+   }
+
+   hypre_TFree(buf_data);
+
+   if (num_functions > 1)
+   {
+      int_buf_data = hypre_CTAlloc(int,hypre_ParCSRCommPkgSendMapStart(comm_pkg,
+                                                num_sends));
+      index = 0;
+      for (i = 0; i < num_sends; i++)
+      {
+         start = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
+         for (j=start; j < hypre_ParCSRCommPkgSendMapStart(comm_pkg, i+1); j++)
+                int_buf_data[index++]
+                 = dof_func[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j)];
+      }
+
+      comm_handle = hypre_ParCSRCommHandleCreate( 11, comm_pkg, int_buf_data,
+        dof_func_offd);
+
+      hypre_ParCSRCommHandleDestroy(comm_handle);
+      hypre_TFree(int_buf_data);
    }
 
    for (i = 0; i < n; i++)
@@ -252,8 +322,49 @@ my = hypre_min(my,temp);
 mx = hypre_max(mx,temp);
            S_diag_data[j] = temp;
        }
+       for (j = S_offd_i[i]; j < S_offd_i[i+1]; j++)
+       {
+           ii = S_offd_j[j];
+
+           /* only interpolate between like functions */
+           if (num_functions > 1 && dof_func_offd[i] != dof_func_offd[ii])
+           {
+               S_offd_data[j] = 0.;
+               continue;
+           }
+
+           /* explicit zeros */
+           if (A_offd_data[j] == 0.)
+           {
+               S_offd_data[j] = 0.;
+               continue;
+           }
+
+           temp = 0.;
+           p = samples;
+           for (k=0; k<nsamples; k++)
+           {
+               temp = temp + ABS(p[i] - p_offd[ii]);
+               p = p + n;
+               p_offd = p_offd + num_cols_offd;
+           }
+
+           /* explicit zeros in matrix may cause this */
+           if (temp == 0.)
+           {
+               S_offd_data[j] = 0.;
+               continue;
+           }
+
+           temp = 1./temp; /* reciprocal */
+my = hypre_min(my,temp);
+mx = hypre_max(mx,temp);
+           S_offd_data[j] = temp;
+       }
    }
 printf("MIN, MAX: %f %f\n", my, mx);
+
+   hypre_TFree(p_offd);
 
    return 0;
 }
