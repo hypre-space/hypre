@@ -285,6 +285,7 @@ hypre_ParCSRMatrix *hypre_CSRMatrixToParCSRMatrix P((MPI_Comm comm , hypre_CSRMa
 int GenerateDiagAndOffd P((hypre_CSRMatrix *A , hypre_ParCSRMatrix *matrix , int first_col_diag , int last_col_diag ));
 hypre_CSRMatrix *hypre_MergeDiagAndOffd P((hypre_ParCSRMatrix *par_matrix ));
 hypre_CSRMatrix *hypre_ParCSRMatrixToCSRMatrixAll P((hypre_ParCSRMatrix *par_matrix ));
+int hypre_CopyParCSRMatrix P((hypre_ParCSRMatrix *A , hypre_ParCSRMatrix *B , int copy_data ));
 
 /* par_csr_matvec.c */
 int hypre_ParMatvec P((double alpha , hypre_ParCSRMatrix *A , hypre_ParVector *x , double beta , hypre_ParVector *y ));
