@@ -150,7 +150,7 @@ dgssvx(char *fact, char *trans, char *refact,
  * A       (input/output) SuperMatrix*
  *         Matrix A in A*X=B, of dimension (A->nrow, A->ncol). The number
  *         of the linear equations is A->nrow. Currently, the type of A can be:
- *         Stype = NC or NR, Dtype = _D, Mtype = GE. In the future,
+ *         Stype = NC or NR, Dtype = D_D, Mtype = GE. In the future,
  *         more general A can be handled.
  *
  *         On entry, If fact = 'F' and equed is not 'N', then A must have
@@ -263,14 +263,14 @@ dgssvx(char *fact, char *trans, char *refact,
  *             Pr*A*Pc=L*U              (if A->Stype = NC) or
  *             Pr*transpose(A)*Pc=L*U   (if A->Stype = NR).
  *         Uses compressed row subscripts storage for supernodes, i.e.,
- *         L has types: Stype = SC, Dtype = _D, Mtype = TRLU.
+ *         L has types: Stype = SC, Dtype = D_D, Mtype = TRLU.
  *
  * U       (output) SuperMatrix*
  *	   The factor U from the factorization
  *             Pr*A*Pc=L*U              (if A->Stype = NC) or
  *             Pr*transpose(A)*Pc=L*U   (if A->Stype = NR).
  *         Uses column-wise storage scheme, i.e., U has types:
- *         Stype = NC, Dtype = _D, Mtype = TRU.
+ *         Stype = NC, Dtype = D_D, Mtype = TRU.
  *
  * work    (workspace/output) void*, size (lwork) (in bytes)
  *         User supplied workspace, should be large enough
@@ -289,7 +289,7 @@ dgssvx(char *fact, char *trans, char *refact,
  *         See argument 'mem_usage' for memory usage statistics.
  *
  * B       (input/output) SuperMatrix*
- *         B has types: Stype = DN, Dtype = _D, Mtype = GE.
+ *         B has types: Stype = DN, Dtype = D_D, Mtype = GE.
  *         On entry, the right hand side matrix.
  *         On exit,
  *            if equed = 'N', B is not modified; otherwise
@@ -305,7 +305,7 @@ dgssvx(char *fact, char *trans, char *refact,
  *                  overwritten by diag(R)*B.
  *
  * X       (output) SuperMatrix*
- *         X has types: Stype = DN, Dtype = _D, Mtype = GE. 
+ *         X has types: Stype = DN, Dtype = D_D, Mtype = GE. 
  *         If info = 0 or info = A->ncol+1, X contains the solution matrix
  *         to the original system of equations. Note that A and B are modified
  *         on exit if equed is not 'N', and the solution to the equilibrated
@@ -420,7 +420,7 @@ printf("dgssvx: fact=%c, trans=%c, refact=%c, equed=%c\n",
     else if ( !(lsame_(refact,"Y") || lsame_(refact, "N")) ) *info = -3;
     else if ( A->nrow != A->ncol || A->nrow < 0 ||
 	      (A->Stype != NC && A->Stype != NR) ||
-	      A->Dtype != _D || A->Mtype != GE )
+	      A->Dtype != D_D || A->Mtype != GE )
 	*info = -4;
     else if (lsame_(fact, "F") && !(rowequ || colequ || lsame_(equed, "N")))
 	*info = -9;
@@ -452,12 +452,12 @@ printf("dgssvx: fact=%c, trans=%c, refact=%c, equed=%c\n",
 	if (*info == 0) {
 	    if ( lwork < -1 ) *info = -15;
 	    else if ( B->ncol < 0 || Bstore->lda < MAX(0, A->nrow) ||
-		      B->Stype != DN || B->Dtype != _D || 
+		      B->Stype != DN || B->Dtype != D_D || 
 		      B->Mtype != GE )
 		*info = -16;
 	    else if ( X->ncol < 0 || Xstore->lda < MAX(0, A->nrow) ||
 		      B->ncol != X->ncol || X->Stype != DN ||
-		      X->Dtype != _D || X->Mtype != GE )
+		      X->Dtype != D_D || X->Mtype != GE )
 		*info = -17;
 	}
     }
