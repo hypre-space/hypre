@@ -20,7 +20,7 @@ CC     = gcc
 CFLAGS = -I${AMG_DIR}/include -I/usr/local/include
 
 F77    = f77
-FFLAGS = -silent
+FFLAGS = ""
 
 LINK   = gcc
 LFLAGS = -L${AMG_DIR}/lib -lamg \
