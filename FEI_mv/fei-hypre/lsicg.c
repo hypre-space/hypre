@@ -223,6 +223,7 @@ int hypre_LSICGSolve(void  *lsicg_vdata, void  *A, void  *b, void  *x)
       if ( r_norm < epsilon || iter >= max_iter ) converged = 1;
    }
    lsicg_data->rel_residual_norm = r_norm;
+   lsicg_data->num_iterations    = iter;
    if ( logging >= 1 && mypid == 0 )
       printf("LSICG : total number of iterations = %d \n",iter);
 
