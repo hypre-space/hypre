@@ -519,6 +519,7 @@ int HYPRE_LinSysCore::parameters(int numParams, char **params)
              HYOutputLevel_ |= HYFEI_SCHURREDUCE2;
           if (!strcmp(param2, "schurReduction3")) 
              HYOutputLevel_ |= HYFEI_SCHURREDUCE3;
+          if (!strcmp(param2, "amgDebug")) HYOutputLevel_ |= HYFEI_AMGDEBUG;
           if (!strcmp(param2, "printMat")) HYOutputLevel_ |= HYFEI_PRINTMAT;
           if (!strcmp(param2, "printSol")) HYOutputLevel_ |= HYFEI_PRINTSOL;
           if (!strcmp(param2, "printReducedMat")) 
@@ -4010,7 +4011,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                      printf("AMG relax type   = %d\n", amgRelaxType_[0]);
                      printf("AMG relax weight = %e\n", amgRelaxWeight_[0]);
                   }
-                  if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2)
+                  if ( HYOutputLevel_ & HYFEI_AMGDEBUG )
                   {
                      HYPRE_BoomerAMGSetDebugFlag(HYPrecon_, 0);
                      HYPRE_BoomerAMGSetIOutDat(HYPrecon_, 3);
@@ -4293,7 +4294,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                      printf("AMG relax type   = %d\n", amgRelaxType_[0]);
                      printf("AMG relax weight = %e\n", amgRelaxWeight_[0]);
                   }
-                  if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2)
+                  if ( HYOutputLevel_ & HYFEI_AMGDEBUG )
                   {
                      HYPRE_BoomerAMGSetDebugFlag(HYPrecon_, 0);
                      HYPRE_BoomerAMGSetIOutDat(HYPrecon_, 3);
@@ -4582,9 +4583,11 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                      printf("AMG relax type   = %d\n", amgRelaxType_[0]);
                      printf("AMG relax weight = %e\n", amgRelaxWeight_[0]);
                   }
-                  if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2)
+                  if ( HYOutputLevel_ & HYFEI_AMGDEBUG )
+                  {
+                     HYPRE_BoomerAMGSetDebugFlag(HYPrecon_, 0);
                      HYPRE_BoomerAMGSetIOutDat(HYPrecon_, 3);
-
+                  }
                   if ( HYPreconReuse_ == 1 )
                   {
                      HYPRE_ParCSRBiCGSTABSetPrecond(HYSolver_,
@@ -4872,9 +4875,11 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                      printf("AMG relax type   = %d\n", amgRelaxType_[0]);
                      printf("AMG relax weight = %e\n", amgRelaxWeight_[0]);
                   }
-                  if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2)
-                     HYPRE_BoomerAMGSetIOutDat(HYPrecon_, 2);
-
+                  if ( HYOutputLevel_ & HYFEI_AMGDEBUG )
+                  {
+                     HYPRE_BoomerAMGSetDebugFlag(HYPrecon_, 0);
+                     HYPRE_BoomerAMGSetIOutDat(HYPrecon_, 3);
+                  }
                   if ( HYPreconReuse_ == 1 )
                   {
                      HYPRE_ParCSRBiCGSTABLSetPrecond(HYSolver_,
@@ -5157,9 +5162,11 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                      printf("AMG relax type   = %d\n", amgRelaxType_[0]);
                      printf("AMG relax weight = %e\n", amgRelaxWeight_[0]);
                   }
-                  if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2)
-                     HYPRE_BoomerAMGSetIOutDat(HYPrecon_, 2);
-
+                  if ( HYOutputLevel_ & HYFEI_AMGDEBUG )
+                  {
+                     HYPRE_BoomerAMGSetDebugFlag(HYPrecon_, 0);
+                     HYPRE_BoomerAMGSetIOutDat(HYPrecon_, 3);
+                  }
                   if ( HYPreconReuse_ == 1 )
                   {
                      HYPRE_ParCSRTFQmrSetPrecond(HYSolver_,
@@ -5442,9 +5449,11 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                      printf("AMG relax type   = %d\n", amgRelaxType_[0]);
                      printf("AMG relax weight = %e\n", amgRelaxWeight_[0]);
                   }
-                  if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2)
-                     HYPRE_BoomerAMGSetIOutDat(HYPrecon_, 2);
-
+                  if ( HYOutputLevel_ & HYFEI_AMGDEBUG )
+                  {
+                     HYPRE_BoomerAMGSetDebugFlag(HYPrecon_, 0);
+                     HYPRE_BoomerAMGSetIOutDat(HYPrecon_, 3);
+                  }
                   if ( HYPreconReuse_ == 1 )
                   {
                      HYPRE_ParCSRBiCGSSetPrecond(HYSolver_,

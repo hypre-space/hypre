@@ -37,4 +37,7 @@
             - optimize by taking out zeros in loading matrix to parcsr
             - revert Schur complement reduction to old ways 
 04/12/01    - convert totally to 2.0 
+04/24/01    2.0.0R8
+            - add Euclid preconditioner
+            - create an amgDebug flag for boomeramg diagnostics
 
