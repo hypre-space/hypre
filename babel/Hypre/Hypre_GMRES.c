@@ -321,7 +321,8 @@ impl_Hypre_GMRES_Apply(Hypre_GMRES this, Hypre_Vector b, Hypre_Vector* xp)
 		needs to be inherited from higher up, like from Hypre_Object
    MPI_Comm_rank (MPI_COMM_WORLD, &my_id);
    */
-
+   /* >>>>> TO DO: put a corresponding function in the MPI_Com interface;
+      call that, so we don't have to "know" what's in a MPI_Com's d_table ... */
    MPI_Comm_rank( *(gmr_data->comm->d_table->hcom), &my_id );
 
    if (logging > 0)

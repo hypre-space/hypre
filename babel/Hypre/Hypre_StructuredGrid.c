@@ -164,6 +164,7 @@ int  impl_Hypre_StructuredGrid_New
 
    struct Hypre_MPI_Com_private_type *Cp = com->d_table;
    MPI_Comm *C = Cp->hcom; /*gkk: ??? was CP->hcom */
+   Gp->comm = com;
 
    return HYPRE_StructGridCreate( *C, dimension, G );
 

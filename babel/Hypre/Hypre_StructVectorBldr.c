@@ -115,7 +115,11 @@ int  impl_Hypre_StructVectorBldr_New
    HYPRE_StructGrid *G = Gp->hsgrid;
    hypre_StructGrid *g = (hypre_StructGrid *) *G;
 
-   MPI_Comm comm = hypre_StructGridComm( g );
+   Hypre_MPI_Com com = Gp->comm;
+   /*   MPI_Comm comm = hypre_StructGridComm( g ); ... this is ok, but the
+        following requires less knowledge of what's in a hypre_StructGrid ...
+    */
+   MPI_Comm comm = *(com->d_table->hcom);
 
    struct Hypre_StructVector_private_type * SVp;
    HYPRE_StructVector * V;
