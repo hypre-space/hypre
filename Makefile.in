@@ -16,7 +16,14 @@ VPATH = @srcdir@
 HYPRE_DIRS =\
  utilities\
  struct_matrix_vector\
- struct_linear_solvers\
+ struct_linear_solvers
+
+# These are directories that are not yet officially in HYPRE
+HYPRE_EXTRA_DIRS =\
+ seq_matrix_vector\
+ parcsr_matrix_vector\
+ parcsr_linear_solvers\
+ seq_linear_solvers/pamg\
  CI_struct_matrix_vector\
  CI_struct_linear_solvers\
  PETScMat_linear_solvers/pilut\
@@ -24,13 +31,6 @@ HYPRE_DIRS =\
  distributed_linear_solvers/pilut\
  distributed_matrix\
  matrix_matrix
-
-# These are directories that are not yet officially in HYPRE
-HYPRE_EXTRA_DIRS =\
- seq_matrix_vector\
- parcsr_matrix_vector\
- parcsr_linear_solvers\
- seq_linear_solvers/pamg
 # bmakes
 
 #These are the directories for structured matrices
@@ -158,18 +158,6 @@ struct:
 parcsr:
 	@ \
 	for i in ${HYPRE_PARCSR_DIRS}; \
-	do \
-	  if [ -d $$i ]; \
-	  then \
-	    echo "Making $$i ..."; \
-	    (cd $$i; make); \
-	    echo ""; \
-	  fi; \
-	done
-
-ci_struct:
-	@ \
-	for i in ${HYPRE_CI_STRUCT_DIRS}; \
 	do \
 	  if [ -d $$i ]; \
 	  then \
