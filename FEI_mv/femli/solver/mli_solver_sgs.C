@@ -122,16 +122,10 @@ int MLI_Solver_SGS::solve(MLI_Vector *fIn, MLI_Vector *uIn)
       nSends = hypre_ParCSRCommPkgNumSends(commPkg);
       vBufData = new double[hypre_ParCSRCommPkgSendMapStart(commPkg,nSends)];
       vExtData = new double[extNRows];
-
-      if (extNRows)
-      {
-         AOffdJ = hypre_CSRMatrixJ(AOffd);
-         AOffdA = hypre_CSRMatrixData(AOffd);
-      }
    }
 
    /*-----------------------------------------------------------------
-    * perform GS sweeps
+    * perform SGS sweeps
     *-----------------------------------------------------------------*/
  
 #if 1
@@ -154,7 +148,7 @@ int MLI_Solver_SGS::solve(MLI_Vector *fIn, MLI_Vector *uIn)
       {
          if (nprocs > 1)
          {
-            if ( ! zeroInitialGuess_ )
+            if ( zeroInitialGuess_ == 0 )
             {
                index = 0;
                for (i = 0; i < nSends; i++)
@@ -179,13 +173,13 @@ int MLI_Solver_SGS::solve(MLI_Vector *fIn, MLI_Vector *uIn)
                if ( ADiagA[ADiagI[i]] != zero)
                {
                   res      = fData[i];
-                  iStart   = ADiagI[i];
+                  iStart   = ADiagI[i] + 1;
                   iEnd     = ADiagI[i+1];
                   tmpJ    = &(ADiagJ[iStart]);
                   tmpData = &(ADiagA[iStart]);
                   for (jj = iStart; jj < iEnd; jj++)
                      res -= (*tmpData++) * uData[*tmpJ++];
-                  if ( ! zeroInitialGuess_ && nprocs > 1 )
+                  if ( (zeroInitialGuess_ == 0) && (nprocs > 1) )
                   {
                      iStart  = AOffdI[i];
                      iEnd    = AOffdI[i+1];
@@ -194,8 +188,9 @@ int MLI_Solver_SGS::solve(MLI_Vector *fIn, MLI_Vector *uIn)
                      for (jj = iStart; jj < iEnd; jj++)
                         res -= (*tmpData++) * vExtData[*tmpJ++];
                   }
-                  uData[i] += relaxWeight * res / ADiagA[ADiagI[i]];
+                  uData[i] = relaxWeight * res / ADiagA[ADiagI[i]];
                }
+               else printf("MLI_Solver_SGS error : diag = 0.\n");
             }
          }
          zeroInitialGuess_ = 0;
@@ -207,9 +202,9 @@ int MLI_Solver_SGS::solve(MLI_Vector *fIn, MLI_Vector *uIn)
 
       for ( iC = numColors_-1; iC >= 0; iC-- )
       {
-         if ( numColors_ > 1 && nprocs > 1 )
+         if ( (numColors_ > 1) && (nprocs > 1) )
          {
-            if ( ! zeroInitialGuess_ )
+            if ( zeroInitialGuess_ == 0 )
             {
                index = 0;
                for (i = 0; i < nSends; i++)
@@ -234,13 +229,13 @@ int MLI_Solver_SGS::solve(MLI_Vector *fIn, MLI_Vector *uIn)
                if ( ADiagA[ADiagI[i]] != zero)
                {
                   res     = fData[i];
-                  iStart  = ADiagI[i];
+                  iStart  = ADiagI[i] + 1;
                   iEnd    = ADiagI[i+1];
                   tmpJ    = &(ADiagJ[iStart]);
                   tmpData = &(ADiagA[iStart]);
                   for (jj = iStart; jj < iEnd; jj++)
                      res -= (*tmpData++) * uData[*tmpJ++];
-                  if ( ! zeroInitialGuess_ && nprocs > 1 )
+                  if ( (zeroInitialGuess_ == 0 ) && (nprocs > 1) )
                   {
                      iStart  = AOffdI[i];
                      iEnd    = AOffdI[i+1];
@@ -249,7 +244,7 @@ int MLI_Solver_SGS::solve(MLI_Vector *fIn, MLI_Vector *uIn)
                      for (jj = iStart; jj < iEnd; jj++)
                         res -= (*tmpData++) * vExtData[*tmpJ++];
                   }
-                  uData[i] += relaxWeight * res / ADiagA[ADiagI[i]];
+                  uData[i] = relaxWeight * res / ADiagA[ADiagI[i]];
                }
             }
          }
@@ -444,6 +439,7 @@ int MLI_Solver_SGS::doProcColoring()
    for ( j = 0; j < nprocs; j++ ) 
       if ( colors[j]+1 > numColors_ ) numColors_ = colors[j]+1;
    delete [] colors;
+printf("MLI_Solver_SGS : number of colors = %d\n", numColors_);
    return 0;
 }
 
