@@ -100,7 +100,7 @@ driver_matmul: driver_matmul.o libHYPRE_parcsr_mv.a
 libHYPRE_parcsr_mv.a: ${OBJS}
 	@echo  "Building $@ ... "
 	ar -rcu $@ ${OBJS}
-	ranlib $@
+	@RANLIB@ $@
 
 ${OBJS}: ${HEADERS}
 
