@@ -93,6 +93,7 @@ int MLI_Solver_ARPACKSuperLU::setup( MLI_Matrix *mat )
 
 int MLI_Solver_ARPACKSuperLU::solve( MLI_Vector *f_in, MLI_Vector *u_in )
 {
+#ifdef MLI_ARPACK 
    int                iP, iE, iB, mypid, length, info, *partition;
    int                offset, totalRecvs, totalSends, SLeng, SIndex, AIndex;
    double             *u_data, *f_data, *dRecvBufs, *dSendBufs;
@@ -105,7 +106,6 @@ int MLI_Solver_ARPACKSuperLU::solve( MLI_Vector *f_in, MLI_Vector *u_in )
    MPI_Request        *requests;
    MPI_Status         *statuses;
 
-#ifdef MLI_ARPACK 
    /* -------------------------------------------------------------
     * fetch matrix and vector parameters
     * -----------------------------------------------------------*/

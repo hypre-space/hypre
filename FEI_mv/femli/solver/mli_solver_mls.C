@@ -167,7 +167,6 @@ int MLI_Solver_MLS::solve(MLI_Vector *f_in, MLI_Vector *u_in)
    int                 i, nrows, deg;
    double              omega, coef, *u_data, *Vtemp_data;
    double              *Wtemp_data, *Ytemp_data;
-   void                *void_vector;
 
    /*-----------------------------------------------------------------
     * check that proper spectral radius is passed in

@@ -66,7 +66,7 @@ int MLI_Solver_SGS::solve(MLI_Vector *f_in, MLI_Vector *u_in)
    register int        iStart, iEnd, jj;
    int                 *tmp_j;
    int                 i, j, n, is, relax_error = 0;
-   int                 ii, index, num_procs, num_sends, num_cols_offd;
+   int                 index, num_procs, num_sends, num_cols_offd;
    int                 start;
    double              zero = 0.0, relax_weight;
    register double     res;
