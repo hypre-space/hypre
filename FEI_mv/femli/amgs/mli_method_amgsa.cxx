@@ -30,7 +30,8 @@ extern "C"
    /* ARPACK function to compute eigenvalues/eigenvectors */
    void dnstev_(int *n, int *nev, char *which, double *sigmar, 
                 double *sigmai, int *colptr, int *rowind, double *nzvals, 
-                double *dr, double *di, double *z, int *ldz, int *info);
+                double *dr, double *di, double *z, int *ldz, int *info,
+                double *tol);
 }
 #endif
 
@@ -98,6 +99,7 @@ MLI_Method_AMGSA::MLI_Method_AMGSA( MPI_Comm comm ) : MLI_Method( comm )
    printToFile_         = 0;
    strcpy( paramFile_, "empty" );
    symmetric_           = 1;
+   arpackTol_           = 1.0e-10;
 }
 
 /* ********************************************************************* *
@@ -157,7 +159,7 @@ MLI_Method_AMGSA::~MLI_Method_AMGSA()
 #ifdef MLI_ARPACK
       int  info;
       dnstev_(NULL, NULL, paramString, NULL, NULL, NULL, NULL, NULL, NULL, 
-              NULL, NULL, NULL, &info);
+              NULL, NULL, NULL, &info, &arpackTol_);
 #endif
    }
 }
@@ -199,6 +201,11 @@ int MLI_Method_AMGSA::setParams(char *in_name, int argc, char *argv[])
    else if ( !strcmp(param1, "useSAMGDD" ))
    {
       useSAMGDDFlag_ = 1;
+      return 0;
+   }
+   else if ( !strcmp(param1, "useSAMGDDExt" ))
+   {
+      useSAMGDDFlag_ = 2;
       return 0;
    }
    else if ( !strcmp(param1, "setCoarsenScheme" ))
@@ -469,6 +476,12 @@ int MLI_Method_AMGSA::setParams(char *in_name, int argc, char *argv[])
    {
       return ( print() );
    }
+   else if ( !strcmp(param1, "arpackTol" ))
+   {
+      sscanf(in_name, "%s %lg", param1, &arpackTol_);
+      if ( arpackTol_ <= 1.0e-10 ) arpackTol_ = 1.0e-10;
+      if ( arpackTol_ >  1.0e-1  ) arpackTol_ = 1.0e-1;
+   }
    return 1;
 }
 
@@ -526,6 +539,17 @@ int MLI_Method_AMGSA::setup( MLI *mli )
 #endif
 
    /* --------------------------------------------------------------- */
+   /* if using the extended DD method, needs special processing       */
+   /* --------------------------------------------------------------- */
+
+#if 1
+   if (useSAMGDDFlag_ == 2) 
+   {
+      return(setupExtendedDomainDecomp(mli));
+   }
+#endif
+
+   /* --------------------------------------------------------------- */
    /* clean up some mess made previously for levels other than the    */
    /* finest level                                                    */
    /* --------------------------------------------------------------- */
@@ -562,7 +586,7 @@ int MLI_Method_AMGSA::setup( MLI *mli )
    /* subdomains                                                      */
    /* --------------------------------------------------------------- */
 
-   if (useSAMGDDFlag_) 
+   if (useSAMGDDFlag_ == 1) 
    {
       level = 0;
       fedata = mli->getFEData( level );
@@ -733,7 +757,7 @@ int MLI_Method_AMGSA::setup( MLI *mli )
       /* perform special treatment.)                        */
       /* -------------------------------------------------- */
 
-      if ( useSAMGDDFlag_ && numLevels_ == 2 && 
+      if ( useSAMGDDFlag_ == 1 && numLevels_ == 2 && 
            !strcmp(preSmoother_, "ARPACKSuperLU") )
       {
          setupFEDataBasedSuperLUSmoother(mli, level);
@@ -751,7 +775,7 @@ int MLI_Method_AMGSA::setup( MLI *mli )
 #endif
          continue;
       }
-      else if ( useSAMGDDFlag_ && numLevels_ == 2 && 
+      else if ( useSAMGDDFlag_ == 1 && numLevels_ == 2 && 
                 !strcmp(preSmoother_, "SeqSuperLU") && saDataAux_ != NULL)
       {
          smootherPtr = MLI_Solver_CreateFromName(preSmoother_);

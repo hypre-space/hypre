@@ -48,7 +48,8 @@ extern "C"
 
    void dnstev_(int *n, int *nev, char *which, double *sigmar, 
                 double *sigmai, int *colptr, int *rowind, double *nzvals, 
-                double *dr, double *di, double *z, int *ldz, int *info);
+                double *dr, double *di, double *z, int *ldz, int *info,
+                double *tol);
 }
 
 /***********************************************************************
@@ -304,7 +305,8 @@ int MLI_Method_AMGSA::setupFEDataBasedNullSpaces( MLI *mli )
    sigmaR = 1.0e-5;
    sigmaI = 0.0e-1;
    dnstev_(&csrNrows, &nullspaceDim_, which, &sigmaR, &sigmaI, 
-           csrIA, csrJA, csrAA, eigenR, eigenI, eigenV, &csrNrows, &info);
+           csrIA, csrJA, csrAA, eigenR, eigenI, eigenV, &csrNrows, &info,
+           &arpackTol_);
 #else
    printf("MLI_Method_AMGSA::FATAL ERROR : ARPACK not installed.\n");
    exit(1);
@@ -316,7 +318,8 @@ int MLI_Method_AMGSA::setupFEDataBasedNullSpaces( MLI *mli )
       strcpy( which, "destroy" );
 #ifdef MLI_ARPACK
       dnstev_(&csrNrows, &nullspaceDim_, which, &sigmaR, &sigmaI, 
-              csrIA, csrJA, csrAA, eigenR, eigenI, eigenV, &csrNrows, &info);
+              csrIA, csrJA, csrAA, eigenR, eigenI, eigenV, &csrNrows, &info,
+              &arpackTol_);
 #else
    printf("MLI_Method_AMGSA::FATAL ERROR : ARPACK not installed.\n");
    exit(1);

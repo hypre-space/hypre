@@ -17,6 +17,8 @@
 #include <string.h>
 #include <assert.h>
 
+#define MABS(x) ((x) > 0 ? (x) : (-(x)))
+
 // *********************************************************************
 // HYPRE includes external to MLI
 // ---------------------------------------------------------------------
@@ -30,6 +32,15 @@
 #define mabs(x) ((x) > 0 ? x : -(x))
 
 // *********************************************************************
+// local defines
+// ---------------------------------------------------------------------
+
+#define MLI_METHOD_AMGSA_READY       -1
+#define MLI_METHOD_AMGSA_SELECTED    -2
+#define MLI_METHOD_AMGSA_PENDING     -3
+#define MLI_METHOD_AMGSA_NOTSELECTED -4
+
+// *********************************************************************
 // local MLI includes
 // ---------------------------------------------------------------------
 
@@ -38,6 +49,8 @@
 #include "fedata/mli_sfei.h"
 #include "fedata/mli_fedata_utils.h"
 #include "matrix/mli_matrix.h"
+#include "matrix/mli_matrix_misc.h"
+#include "solver/mli_solver.h"
  
 // *********************************************************************
 // functions external to MLI 
@@ -49,7 +62,8 @@ extern "C"
 
    void dnstev_(int *n, int *nev, char *which, double *sigmar, 
                 double *sigmai, int *colptr, int *rowind, double *nzvals, 
-                double *dr, double *di, double *z, int *ldz, int *info);
+                double *dr, double *di, double *z, int *ldz, int *info,
+                double *tol);
 }
 
 /***********************************************************************
@@ -310,7 +324,8 @@ int MLI_Method_AMGSA::setupSFEIBasedNullSpaces( MLI *mli )
       sigmaR = 1.0e-6;
       sigmaI = 0.0e0;
       dnstev_(&csrNrows, &nullspaceDim_, which, &sigmaR, &sigmaI, 
-           csrIA, csrJA, csrAA, eigenR, eigenI, eigenV, &csrNrows, &info);
+           csrIA, csrJA, csrAA, eigenR, eigenI, eigenV, &csrNrows, &info,
+           &arpackTol_);
       if ( outputLevel_ > 2 )
       {
          printf("%5d : Subdomain %3d (%3d) (size=%d) : \n",mypid,iD,
@@ -327,7 +342,8 @@ int MLI_Method_AMGSA::setupSFEIBasedNullSpaces( MLI *mli )
 //    strcpy( which, "destroy" );
 #ifdef MLI_ARPACK
 //    dnstev_(&csrNrows, &nullspaceDim_, which, &sigmaR, &sigmaI, 
-//            csrIA, csrJA, csrAA, eigenR, eigenI, eigenV, &csrNrows, &info);
+//            csrIA, csrJA, csrAA, eigenR, eigenI, eigenV, &csrNrows, &info,
+//            &arpackTol_);
 #else
       printf("MLI_Method_AMGSA::FATAL ERROR : ARPACK not installed.\n");
       exit(1);
@@ -518,6 +534,1266 @@ int MLI_Method_AMGSA::setupSFEIBasedAggregates( MLI *mli )
    printf("MLI_Method_AMGSA::setupSFEIBasedAggregates ends.\n");
 #endif
 
+   return 0;
+}
+
+/***********************************************************************
+ * set up domain decomposition method by extending the local problem
+ * --------------------------------------------------------------------- */
+
+int MLI_Method_AMGSA::setupExtendedDomainDecomp( MLI *mli ) 
+{
+   /* --------------------------------------------------------------- */
+   /* error checking                                                  */
+   /* --------------------------------------------------------------- */
+
+   if (mli == NULL)
+   {
+      printf("MLI_Method_AMGSA::setupExtendedDomainDecomp ERROR");
+      printf(" - no mli.\n");
+      exit(1);
+   }
+
+   /* *************************************************************** */
+   /* creating the local expanded matrix                              */
+   /* --------------------------------------------------------------- */
+
+   /* --------------------------------------------------------------- */
+   /* fetch communicator and fine matrix information                  */
+   /* --------------------------------------------------------------- */
+
+   MPI_Comm           comm;
+   int                mypid, nprocs, level, *partition, ANRows;
+   MLI_Matrix         *mli_Amat;
+   hypre_ParCSRMatrix *hypreA;
+
+   comm = getComm();
+   MPI_Comm_rank( comm, &mypid );
+   MPI_Comm_size( comm, &nprocs );
+
+#ifdef MLI_DEBUG_DETAILED
+   printf("%d : MLI_Method_AMGSA::setupExtendedDomainDecomp begins...\n",mypid);
+#endif
+
+   level = 0;
+   mli_Amat = mli->getSystemMatrix( level );
+   hypreA  = (hypre_ParCSRMatrix *) mli_Amat->getMatrix();
+   HYPRE_ParCSRMatrixGetRowPartitioning((HYPRE_ParCSRMatrix) hypreA, 
+                                        &partition);
+   ANRows = partition[mypid+1] - partition[mypid];
+   free( partition );
+
+   /* --------------------------------------------------------------- */
+   /* first save the nodeDofs and null space information              */
+   /* (since genP replaces the null vectors with new ones)            */
+   /* --------------------------------------------------------------- */
+
+   int    nodeDofs, iD, iD2;
+   double *nullVecs=NULL;
+
+   nodeDofs = currNodeDofs_;
+   nullVecs = new double[nullspaceDim_*ANRows];
+   if ( nullspaceVec_ != NULL )
+   {
+      for ( iD = 0; iD < nullspaceDim_*ANRows; iD++ )
+         nullVecs[iD] = nullspaceVec_[iD];
+   }
+   else
+   {
+      for ( iD = 0; iD < nullspaceDim_; iD++ )
+         for ( iD2 = 0; iD2 < ANRows; iD2++ )
+            if ( MABS((iD - iD2)) % nullspaceDim_ == 0 )
+                 nullVecs[iD*ANRows+iD2] = 1.0;
+            else nullVecs[iD*ANRows+iD2] = 0.0;
+   }
+
+   /* --------------------------------------------------------------- */
+   /* create the first coarse grid matrix (the off processor block    */
+   /* will be the 2,2 block of my expanded matrix)                    */
+   /* --------------------------------------------------------------- */
+
+   int                *ACPartition, ACNRows, ACStart, *PdiagI;
+   double             *PdiagA;
+   MLI_Matrix         *mli_Pmat, *mli_cAmat;
+   hypre_ParCSRMatrix *hypreAc, *hypreP;
+   hypre_ParCSRCommPkg *commPkg;
+   hypre_CSRMatrix     *Pdiag;
+
+   genP_DD(mli_Amat, &mli_Pmat);
+   hypreP = (hypre_ParCSRMatrix *) mli_Pmat->getMatrix();
+   Pdiag   = hypre_ParCSRMatrixDiag(hypreP);
+   PdiagI  = hypre_CSRMatrixI(Pdiag);
+   PdiagA  = hypre_CSRMatrixData(Pdiag);
+   commPkg = hypre_ParCSRMatrixCommPkg(hypreP);
+   if ( commPkg == NULL ) hypre_MatvecCommPkgCreate(hypreP);
+
+   MLI_Matrix_ComputePtAP(mli_Pmat, mli_Amat, &mli_cAmat);
+   hypreAc = (hypre_ParCSRMatrix *) mli_cAmat->getMatrix();
+
+   HYPRE_ParCSRMatrixGetRowPartitioning((HYPRE_ParCSRMatrix) hypreAc, 
+                                        &ACPartition);
+   ACStart = ACPartition[mypid];
+   ACNRows = ACPartition[mypid+1] - ACStart;
+
+   /* --------------------------------------------------------------- */
+   /* fetch communication information for the coarse matrix           */
+   /* --------------------------------------------------------------- */
+
+   int   nRecvs, *recvProcs, nSends, *sendProcs;
+
+   commPkg = hypre_ParCSRMatrixCommPkg(hypreAc);
+   if ( commPkg == NULL )
+   {
+      hypre_MatvecCommPkgCreate((hypre_ParCSRMatrix *) hypreAc);
+      commPkg = hypre_ParCSRMatrixCommPkg(hypreAc);
+   }
+   nRecvs    = hypre_ParCSRCommPkgNumRecvs(commPkg);
+   recvProcs = hypre_ParCSRCommPkgRecvProcs(commPkg);
+   nSends    = hypre_ParCSRCommPkgNumSends(commPkg);
+   sendProcs = hypre_ParCSRCommPkgSendProcs(commPkg);
+
+   /* --------------------------------------------------------------- */
+   /* need to calcuate the size of my local expanded off matrix (this */
+   /* is needed to create the permutation matrix) - the local size of */
+   /* the expanded off matrix should be the total number of rows of   */
+   /* my recv neighbors                                               */
+   /* --------------------------------------------------------------- */
+
+   int  iP, PENCols, proc, *PEPartition, PECStart, *recvLengs;
+
+   PENCols = 0;
+   if ( nRecvs > 0 ) recvLengs = new int[nRecvs];
+   for ( iP = 0; iP < nRecvs; iP++ )
+   {
+      proc = recvProcs[iP];
+      PENCols += (ACPartition[proc+1] - ACPartition[proc]);
+      recvLengs[iP] = ACPartition[proc+1] - ACPartition[proc];
+   }
+   PEPartition = new int[nprocs+1];
+   MPI_Allgather(&PENCols,1,MPI_INT,&(PEPartition[1]),1,MPI_INT,comm); 
+   PEPartition[0] = 0;
+   for ( iP = 2; iP <= nprocs; iP++ )
+      PEPartition[iP] += PEPartition[iP-1];
+   PECStart = PEPartition[mypid];
+
+   /* --------------------------------------------------------------- */
+   /* since PE(i,j) = 1 means putting external row i into local row   */
+   /* j, and since I may not own row i of PE, I need to tell my       */
+   /* neighbor processor who owns row i the value of j.               */
+   /* ==> procOffsets                                                 */
+   /* --------------------------------------------------------------- */
+
+   int         *procOffsets, offset;
+   MPI_Request *mpiRequests;
+   MPI_Status  mpiStatus;
+
+   if ( nSends > 0 )
+   {
+      mpiRequests = new MPI_Request[nSends];
+      procOffsets = new int[nSends];
+   }
+   for ( iP = 0; iP < nSends; iP++ )
+      MPI_Irecv(&procOffsets[iP],1,MPI_INT,sendProcs[iP],13582,comm,
+                &(mpiRequests[iP]));
+   offset = 0;
+   for ( iP = 0; iP < nRecvs; iP++ )
+   {
+      MPI_Send(&offset, 1, MPI_INT, recvProcs[iP], 13582, comm);
+      offset += (ACPartition[recvProcs[iP]+1] - ACPartition[recvProcs[iP]]);
+   }
+   for ( iP = 0; iP < nSends; iP++ )
+      MPI_Wait( &(mpiRequests[iP]), &mpiStatus );
+   if ( nSends > 0 ) delete [] mpiRequests;
+
+   /* --------------------------------------------------------------- */
+   /* create the permutation matrix to gather expanded coarse matrix  */
+   /* PE has same number of rows as Ac but it has many more columns   */
+   /* --------------------------------------------------------------- */
+
+   int            ierr, *rowSizes, *colInds, rowIndex;
+   double         *colVals;
+   char           paramString[50];
+   MLI_Matrix     *mli_PE;
+   HYPRE_IJMatrix IJ_PE;
+   hypre_ParCSRMatrix *hyprePE;
+
+   ierr  = HYPRE_IJMatrixCreate(comm,ACStart,ACStart+ACNRows-1,
+                                PECStart,PECStart+PENCols-1,&IJ_PE);
+   ierr += HYPRE_IJMatrixSetObjectType(IJ_PE, HYPRE_PARCSR);
+   assert(!ierr);
+   if ( ACNRows > 0 ) rowSizes = new int[ACNRows];
+   for ( iD = 0; iD < ACNRows; iD++ ) rowSizes[iD] = nSends;
+   ierr  = HYPRE_IJMatrixSetRowSizes(IJ_PE, rowSizes);
+   ierr += HYPRE_IJMatrixInitialize(IJ_PE);
+   assert(!ierr);
+   if ( ACNRows > 0 ) delete [] rowSizes;
+   if ( nSends > 0 )
+   {
+      colInds = new int[nSends];
+      colVals = new double[nSends];
+      for ( iP = 0; iP < nSends; iP++ ) colVals[iP] = 1.0; 
+   }
+   for ( iD = 0; iD < ACNRows; iD++ )
+   {
+      rowIndex = iD + ACStart;
+      for ( iP = 0; iP < nSends; iP++ )
+         colInds[iP] = procOffsets[iP] + PEPartition[sendProcs[iP]] + iD;
+      HYPRE_IJMatrixSetValues(IJ_PE, 1, &nSends, (const int *) &rowIndex,
+                (const int *) colInds, (const double *) colVals);
+   }
+   if ( nSends > 0 )
+   {
+      delete [] colInds;
+      delete [] colVals;
+      delete [] procOffsets;
+   }
+   HYPRE_IJMatrixAssemble(IJ_PE);
+   HYPRE_IJMatrixGetObject(IJ_PE, (void **) &hyprePE);
+   sprintf(paramString, "HYPRE_ParCSR" );
+   mli_PE = new MLI_Matrix( (void *) hyprePE, paramString, NULL);
+   commPkg = hypre_ParCSRMatrixCommPkg(hyprePE);
+   if ( commPkg == NULL )
+      hypre_MatvecCommPkgCreate((hypre_ParCSRMatrix *) hyprePE);
+
+   /* --------------------------------------------------------------- */
+   /* form the expanded coarse matrix (that is, the (2,2) block of my */
+   /* final matrix)                                                   */
+   /* --------------------------------------------------------------- */
+
+   MLI_Matrix         *mli_AExt;
+   hypre_ParCSRMatrix *hypreAExt;
+
+   MLI_Matrix_ComputePtAP(mli_PE, mli_cAmat, &mli_AExt);
+   hypreAExt = (hypre_ParCSRMatrix *) mli_AExt->getMatrix();
+
+   /* --------------------------------------------------------------- */
+   /* form A * P (in order to form the (1,2) and (2,1) block          */
+   /* --------------------------------------------------------------- */
+
+   hypre_ParCSRMatrix *hypreAP;
+
+   hypreP  = (hypre_ParCSRMatrix *) mli_Pmat->getMatrix();
+   hypreAP = hypre_ParMatmul(hypreA, hypreP);
+
+   /* --------------------------------------------------------------- */
+   /* concatenate the local and the (1,2) and (2,2) block             */
+   /* --------------------------------------------------------------- */
+
+   int    *AdiagI, *AdiagJ, *APoffdI, *APoffdJ, *AEdiagI, *AEdiagJ, index;
+   int    *APcmap, newNrows, *newIA, *newJA, newNnz, *auxIA, iR, iC;
+   double *AdiagA, *APoffdA, *AEdiagA, *newAA;
+   hypre_CSRMatrix *Adiag, *APoffd, *AEdiag;
+
+   Adiag   = hypre_ParCSRMatrixDiag(hypreA);
+   AdiagI  = hypre_CSRMatrixI(Adiag);
+   AdiagJ  = hypre_CSRMatrixJ(Adiag);
+   AdiagA  = hypre_CSRMatrixData(Adiag);
+   APoffd  = hypre_ParCSRMatrixOffd(hypreAP);
+   APoffdI = hypre_CSRMatrixI(APoffd);
+   APoffdJ = hypre_CSRMatrixJ(APoffd);
+   APoffdA = hypre_CSRMatrixData(APoffd);
+   APcmap  = hypre_ParCSRMatrixColMapOffd(hypreAP);
+   AEdiag  = hypre_ParCSRMatrixDiag(hypreAExt);
+   AEdiagI = hypre_CSRMatrixI(AEdiag);
+   AEdiagJ = hypre_CSRMatrixJ(AEdiag);
+   AEdiagA = hypre_CSRMatrixData(AEdiag);
+   newNrows = ANRows + PENCols;
+   newIA    = new int[newNrows+1];
+   newNnz   = AdiagI[ANRows] + AEdiagI[PENCols] + 2 * APoffdI[ANRows];
+   newJA    = new int[newNnz];
+   newAA    = new double[newNnz];
+   auxIA    = new int[PENCols];
+   newNnz   = 0;
+   newIA[0] = newNnz;
+   for ( iR = 0; iR < PENCols; iR++ ) auxIA[iR] = 0;
+
+   // (1,1) and (1,2) blocks
+   for ( iR = 0; iR < ANRows; iR++ )
+   {
+      for ( iC = AdiagI[iR]; iC < AdiagI[iR+1]; iC++ )
+      {
+         newJA[newNnz] = AdiagJ[iC];
+         newAA[newNnz++] = AdiagA[iC];
+      }
+      for ( iC = APoffdI[iR]; iC < APoffdI[iR+1]; iC++ )
+      {
+         index = APcmap[APoffdJ[iC]];
+         offset = ANRows;
+         for ( iP = 0; iP < nRecvs; iP++ )
+         {
+            if ( index < ACPartition[recvProcs[iP]+1] )
+            {
+               index = index - ACPartition[recvProcs[iP]] + offset;
+               break;
+            }
+            offset += (ACPartition[recvProcs[iP]+1] - 
+                       ACPartition[recvProcs[iP]]);
+         }
+         newJA[newNnz] = index;
+         newAA[newNnz++] = APoffdA[iC];
+         APoffdJ[iC] = index;
+         auxIA[index-ANRows]++;
+      }
+      newIA[iR+1] = newNnz;
+   } 
+
+   // (2,2) block
+   for ( iR = ANRows; iR < ANRows+PENCols; iR++ )
+   {
+      newNnz += auxIA[iR-ANRows];
+      for ( iC = AEdiagI[iR-ANRows]; iC < AEdiagI[iR-ANRows+1]; iC++ )
+      {
+         newJA[newNnz] = AEdiagJ[iC] + ANRows;
+         newAA[newNnz++] = AEdiagA[iC];
+      }
+      newIA[iR+1] = newNnz;
+   }
+
+   // (2,1) block
+   for ( iR = 0; iR < PENCols; iR++ ) auxIA[iR] = 0;
+   for ( iR = 0; iR < ANRows; iR++ )
+   {
+      for ( iC = APoffdI[iR]; iC < APoffdI[iR+1]; iC++ )
+      {
+         index = APoffdJ[iC];
+         offset = newIA[index] + auxIA[index-ANRows];
+         newJA[offset] = iR;
+         newAA[offset] = APoffdA[iC];
+         auxIA[index-ANRows]++;
+      } 
+   } 
+
+   /* --------------------------------------------------------------- */
+   
+   int                iZero=0, *newRowSizes;
+   MPI_Comm           newMPIComm;
+   HYPRE_IJMatrix     IJnewA;
+   hypre_ParCSRMatrix *hypreNewA;
+   MLI_Matrix         *mli_newA;
+   MLI_Function       *funcPtr;
+
+   MPI_Comm_split(comm, mypid, iZero, &newMPIComm);
+   ierr  = HYPRE_IJMatrixCreate(newMPIComm,iZero,newNrows-1,iZero,
+                                newNrows-1,&IJnewA);
+   ierr += HYPRE_IJMatrixSetObjectType(IJnewA, HYPRE_PARCSR);
+   assert(!ierr);
+   if ( newNrows > 0 ) newRowSizes = new int[newNrows];
+   for ( iD = 0; iD < newNrows; iD++ )
+      newRowSizes[iD] = newIA[iD+1] - newIA[iD];
+   ierr  = HYPRE_IJMatrixSetRowSizes(IJnewA, newRowSizes);
+   ierr += HYPRE_IJMatrixInitialize(IJnewA);
+   assert(!ierr);
+   for ( iD = 0; iD < newNrows; iD++ )
+   {
+      offset = newIA[iD];
+      HYPRE_IJMatrixSetValues(IJnewA, 1, &newRowSizes[iD], (const int *) &iD,
+               (const int *) &newJA[offset], (const double *) &newAA[offset]);
+   }
+   if ( newNrows > 0 ) delete [] newRowSizes;
+   delete [] newIA;
+   delete [] newJA;
+   delete [] newAA;
+   HYPRE_IJMatrixAssemble(IJnewA);
+   HYPRE_IJMatrixGetObject(IJnewA, (void **) &hypreNewA);
+   sprintf(paramString, "HYPRE_ParCSR" );
+   funcPtr = new MLI_Function();
+   MLI_Utils_HypreParCSRMatrixGetDestroyFunc(funcPtr);
+   mli_newA = new MLI_Matrix( (void *) hypreNewA, paramString, funcPtr);
+
+   /* --------------------------------------------------------------- */
+   /* communicate null space vectors                                  */
+   /* --------------------------------------------------------------- */
+
+   int    rLength, sLength;
+   double *tmpNullVecs, *newNullVecs;
+
+   if ( PENCols > 0 ) tmpNullVecs = new double[PENCols*nullspaceDim_];
+   if ( nRecvs > 0 ) mpiRequests = new MPI_Request[nRecvs];
+
+   offset = 0;
+   for ( iP = 0; iP < nRecvs; iP++ )
+   {
+      rLength = ACPartition[recvProcs[iP]+1] - ACPartition[recvProcs[iP]];
+      rLength *= nullspaceDim_;
+      MPI_Irecv(&tmpNullVecs[offset],rLength,MPI_DOUBLE,recvProcs[iP],14581,
+                comm,&(mpiRequests[iP]));
+      offset += rLength;
+   }
+   for ( iP = 0; iP < nSends; iP++ )
+   {
+      sLength = ACNRows * nullspaceDim_;
+      MPI_Send(nullVecs, sLength, MPI_DOUBLE, sendProcs[iP], 14581, comm);
+   }
+   for ( iP = 0; iP < nRecvs; iP++ )
+      MPI_Wait( &(mpiRequests[iP]), &mpiStatus );
+   if ( nRecvs > 0 ) delete [] mpiRequests;
+
+   newNullVecs = new double[newNrows*nullspaceDim_];
+   for ( iD = 0; iD < nullspaceDim_; iD++ )
+      for ( iD2 = 0; iD2 < ANRows; iD2++ )
+         newNullVecs[iD*newNrows+iD2] = nullVecs[iD*ANRows+iD2];
+   offset = 0;
+   for ( iP = 0; iP < nRecvs; iP++ )
+   {
+      rLength = ACPartition[recvProcs[iP]+1] - ACPartition[recvProcs[iP]];
+      for ( iD = 0; iD < nullspaceDim_; iD++ )
+         for ( iD2 = 0; iD2 < rLength; iD2++ )
+            newNullVecs[iD*newNrows+iD2+offset] = 
+               tmpNullVecs[offset+iD*rLength+iD2];
+      rLength *= nullspaceDim_;
+      offset += rLength;
+   }
+   if ( PENCols > 0 ) delete [] tmpNullVecs;
+
+   /* --------------------------------------------------------------- */
+   /* create new overlapped DD smoother using sequential SuperLU      */
+   /* --------------------------------------------------------------- */
+
+   int        *sendLengs;
+   char       *targv[7];
+   MLI_Solver *smootherPtr;
+   MLI_Matrix *mli_PSmat;
+
+   //sprintf( paramString, "SeqSuperLU" );
+   sprintf( paramString, "CGMLI" );
+   smootherPtr = MLI_Solver_CreateFromName(paramString);
+   sprintf( paramString, "numSweeps 10000" );
+   smootherPtr->setParams(paramString, 0, NULL);
+   sprintf( paramString, "tolerance 1.0e-6" );
+   smootherPtr->setParams(paramString, 0, NULL);
+
+   // restate these lines if aggregation is used for subdomain solve
+   // delete [] newNullVecs;
+   //sprintf( paramString, "setNullSpace" );
+   //targv[0] = (char *) &nullspaceDim_;
+   //targv[1] = (char *) newNullVecs;
+   //smootherPtr->setParams(paramString, 2, targv);
+
+   // send PSmat and communication information to smoother
+   if ( nSends > 0 ) sendLengs = new int[nSends];
+   for ( iP = 0; iP < nSends; iP++ ) sendLengs[iP] = ACNRows;
+   sprintf( paramString, "setPmat" );
+   mli_PSmat = mli_Pmat;
+   targv[0] = (char *) mli_PSmat;
+   smootherPtr->setParams(paramString, 1, targv);
+   sprintf( paramString, "setCommData" );
+   targv[0] = (char *) &nRecvs;
+   targv[1] = (char *) recvProcs;
+   targv[2] = (char *) recvLengs;
+   targv[3] = (char *) &nSends;
+   targv[4] = (char *) sendProcs;
+   targv[5] = (char *) sendLengs;
+   targv[6] = (char *) &comm;
+   smootherPtr->setParams(paramString, 7, targv);
+   if ( nSends > 0 ) delete [] sendLengs;
+
+   smootherPtr->setup(mli_newA);
+   mli->setSmoother( level, MLI_SMOOTHER_PRE, smootherPtr );
+
+   /* --------------------------------------------------------------- */
+   /* create prolongation and coarse grid operators                   */
+   /* --------------------------------------------------------------- */
+
+   MLI_Solver *csolvePtr;
+   MLI_Matrix *mli_Rmat;
+
+   delete mli_cAmat;
+
+   // set up one aggregate per processor
+   saCounts_[0] = 1;
+   if (saData_[0] != NULL) delete [] saData_[0];
+   saData_[0] = new int[ANRows];
+   for ( iD = 0; iD < ANRows; iD++ ) saData_[0][iD] = 0;
+
+   // restore nullspace changed by the last genP
+   currNodeDofs_ = nodeDofs;
+   if ( nullspaceVec_ != NULL ) delete [] nullspaceVec_;
+   nullspaceVec_ = new double[nullspaceDim_*ANRows];
+   for ( iD = 0; iD < nullspaceDim_*ANRows; iD++) 
+      nullspaceVec_[iD] = nullVecs[iD];
+
+   // create prolongation and coarse grid operators
+   genP(mli_Amat, &mli_Pmat, saCounts_[0], saData_[0]);
+   MLI_Matrix_ComputePtAP(mli_Pmat, mli_Amat, &mli_cAmat);
+   mli->setSystemMatrix(level+1, mli_cAmat);
+   mli->setProlongation(level+1, mli_Pmat);
+   sprintf(paramString, "HYPRE_ParCSRT");
+   mli_Rmat = new MLI_Matrix(mli_Pmat->getMatrix(), paramString, NULL);
+   mli->setRestriction(level, mli_Rmat);
+
+   /* --------------------------------------------------------------- */
+   /* setup coarse solver                                             */
+   /* --------------------------------------------------------------- */
+
+   strcpy( paramString, "SuperLU" );
+   csolvePtr = MLI_Solver_CreateFromName( paramString );
+   csolvePtr->setup(mli_cAmat);
+   mli->setCoarseSolve(csolvePtr);
+
+   /* --------------------------------------------------------------- */
+   /* clean up                                                        */
+   /* --------------------------------------------------------------- */
+
+   free( ACPartition );
+   delete [] PEPartition;
+   delete [] auxIA;
+   HYPRE_IJMatrixDestroy(IJ_PE); 
+   delete mli_AExt;
+   delete [] nullVecs;
+   delete mli_PE;
+
+#ifdef MLI_DEBUG_DETAILED
+   printf("%d : MLI_Method_AMGSA::setupExtendedDomainDecomp ends.\n",mypid);
+#endif
+
+   level = 2;
+   return (level);
+}
+
+// ************************************************************************ 
+// Purpose : Given Amat, perform preferential coarsening (small aggregates
+//           near processor boundaries and create the corresponding Pmat 
+// ------------------------------------------------------------------------
+
+double MLI_Method_AMGSA::genP_DD(MLI_Matrix *mli_Amat,MLI_Matrix **PmatOut)
+{
+   int    mypid, nprocs, *partition, AStartRow, AEndRow, ALocalNRows;
+   int    blkSize, naggr, *node2aggr, ierr, PLocalNCols, PStartCol;
+   int    PGlobalNCols, PLocalNRows, PStartRow, *eqn2aggr, irow, jcol, ig;
+   int    *PCols, maxAggSize, *aggCntArray, index, **aggIndArray;
+   int    aggSize, info, nzcnt, *rowLengths, rowNum, *colInd;
+   double **PVecs, *newNull, *qArray, *rArray, *colVal, dtemp;
+   char   paramString[200];
+   HYPRE_IJMatrix      IJPmat;
+   hypre_ParCSRMatrix  *Amat, *A2mat, *Pmat;
+   MLI_Matrix          *mli_A2mat=NULL, *mli_Pmat;
+   MPI_Comm            comm;
+   hypre_ParCSRCommPkg *commPkg;
+   MLI_Function        *funcPtr;
+
+   /*-----------------------------------------------------------------
+    * fetch matrix and machine information
+    *-----------------------------------------------------------------*/
+
+   Amat = (hypre_ParCSRMatrix *) mli_Amat->getMatrix();
+   comm = hypre_ParCSRMatrixComm(Amat);
+   MPI_Comm_rank(comm,&mypid);
+   MPI_Comm_size(comm,&nprocs);
+
+   /*-----------------------------------------------------------------
+    * fetch other matrix information
+    *-----------------------------------------------------------------*/
+
+   HYPRE_ParCSRMatrixGetRowPartitioning((HYPRE_ParCSRMatrix) Amat,&partition);
+   AStartRow = partition[mypid];
+   AEndRow   = partition[mypid+1] - 1;
+   ALocalNRows = AEndRow - AStartRow + 1;
+   free( partition );
+
+   /*-----------------------------------------------------------------
+    * reduce Amat based on the block size information (if nodeDofs_ > 1)
+    *-----------------------------------------------------------------*/
+
+   blkSize = currNodeDofs_;
+   if (blkSize > 1) MLI_Matrix_Compress(mli_Amat, blkSize, &mli_A2mat);
+   else             mli_A2mat = mli_Amat;
+   A2mat = (hypre_ParCSRMatrix *) mli_A2mat->getMatrix();
+
+   /*-----------------------------------------------------------------
+    * modify minimum aggregate size, if needed
+    *-----------------------------------------------------------------*/
+
+   minAggrSize_ = nullspaceDim_ / currNodeDofs_;
+   if ( minAggrSize_ <= 1 ) minAggrSize_ = 2;
+
+   /*-----------------------------------------------------------------
+    * perform coarsening (small aggregates on processor boundaries
+    *-----------------------------------------------------------------*/
+  
+   coarsenGraded(A2mat, &naggr, &node2aggr);
+   if ( blkSize > 1 && mli_A2mat != NULL) delete mli_A2mat;
+
+   /*-----------------------------------------------------------------
+    * fetch the coarse grid information and instantiate P
+    *-----------------------------------------------------------------*/
+
+   PLocalNCols  = naggr * nullspaceDim_;
+   MLI_Utils_GenPartition(comm, PLocalNCols, &partition);
+   PStartCol    = partition[mypid];
+   PGlobalNCols = partition[nprocs];
+   free( partition );
+   PLocalNRows = ALocalNRows;
+   PStartRow   = AStartRow;
+   ierr = HYPRE_IJMatrixCreate(comm,PStartRow,PStartRow+PLocalNRows-1,
+                          PStartCol,PStartCol+PLocalNCols-1,&IJPmat);
+   ierr = HYPRE_IJMatrixSetObjectType(IJPmat, HYPRE_PARCSR);
+   assert(!ierr);
+
+   /*-----------------------------------------------------------------
+    * expand the aggregation information if block size > 1 ==> eqn2aggr
+    *-----------------------------------------------------------------*/
+
+   if ( blkSize > 1 )
+   {
+      eqn2aggr = new int[ALocalNRows];
+      for ( irow = 0; irow < ALocalNRows; irow++ )
+         eqn2aggr[irow] = node2aggr[irow/blkSize];
+      delete [] node2aggr;
+   }
+   else eqn2aggr = node2aggr;
+ 
+   /*-----------------------------------------------------------------
+    * create a compact form for the null space vectors 
+    * (get ready to perform QR on them)
+    *-----------------------------------------------------------------*/
+
+   PVecs = new double*[nullspaceDim_];
+   PCols = new int[PLocalNRows];
+   for (irow = 0; irow < nullspaceDim_; irow++)
+      PVecs[irow] = new double[PLocalNRows];
+   for ( irow = 0; irow < PLocalNRows; irow++ )
+   {
+      if ( eqn2aggr[irow] >= 0 )
+      {
+         PCols[irow] = PStartCol + eqn2aggr[irow] * nullspaceDim_;
+         if ( nullspaceVec_ != NULL )
+         {
+            for ( jcol = 0; jcol < nullspaceDim_; jcol++ )
+               PVecs[jcol][irow] = nullspaceVec_[jcol*PLocalNRows+irow];
+         }
+         else
+         {
+            for ( jcol = 0; jcol < nullspaceDim_; jcol++ )
+            {
+               if (irow % nullspaceDim_ == jcol) PVecs[jcol][irow] = 1.0;
+               else                              PVecs[jcol][irow] = 0.0;
+            }
+         }
+      }
+      else
+      {
+         PCols[irow] = -1;
+         for ( jcol = 0; jcol < nullspaceDim_; jcol++ ) 
+            PVecs[jcol][irow] = 0.0;
+      }
+   }
+
+   /*-----------------------------------------------------------------
+    * perform QR for null space
+    *-----------------------------------------------------------------*/
+
+   newNull = NULL;
+   if ( PLocalNRows > 0 )
+   {
+      /* ------ count the size of each aggregate ------ */
+
+      aggCntArray = new int[naggr];
+      for ( ig = 0; ig < naggr; ig++ ) aggCntArray[ig] = 0;
+      for ( irow = 0; irow < PLocalNRows; irow++ )
+         if ( eqn2aggr[irow] >= 0 ) aggCntArray[eqn2aggr[irow]]++;
+      maxAggSize = 0;
+      for ( ig = 0; ig < naggr; ig++ ) 
+         if (aggCntArray[ig] > maxAggSize) maxAggSize = aggCntArray[ig];
+
+      /* ------ register which equation is in which aggregate ------ */
+
+      aggIndArray = new int*[naggr];
+      for ( ig = 0; ig < naggr; ig++ ) 
+      {
+         aggIndArray[ig] = new int[aggCntArray[ig]];
+         aggCntArray[ig] = 0;
+      }
+      for ( irow = 0; irow < PLocalNRows; irow++ )
+      {
+         index = eqn2aggr[irow];
+         if ( index >= 0 )
+            aggIndArray[index][aggCntArray[index]++] = irow;
+      }
+
+      /* ------ allocate storage for QR factorization ------ */
+
+      qArray  = new double[maxAggSize * nullspaceDim_];
+      rArray  = new double[nullspaceDim_ * nullspaceDim_];
+      newNull = new double[naggr*nullspaceDim_*nullspaceDim_]; 
+
+      /* ------ perform QR on each aggregate ------ */
+
+      for ( ig = 0; ig < naggr; ig++ ) 
+      {
+         aggSize = aggCntArray[ig];
+
+         if ( aggSize < nullspaceDim_ )
+         {
+            printf("Aggregation ERROR : underdetermined system in QR.\n");
+            printf("            error on Proc %d\n", mypid);
+            printf("            error on aggr %d (%d)\n", ig, naggr);
+            printf("            aggr size is %d\n", aggSize);
+            exit(1);
+         }
+          
+         /* ------ put data into the temporary array ------ */
+
+         for ( jcol = 0; jcol < aggSize; jcol++ ) 
+         {
+            for ( irow = 0; irow < nullspaceDim_; irow++ ) 
+               qArray[aggSize*irow+jcol] = PVecs[irow][aggIndArray[ig][jcol]]; 
+         }
+
+         /* ------ call QR function ------ */
+
+/*
+         if ( currLevel_ < (numLevels_-1) )
+         {
+            info = MLI_Utils_QR(qArray, rArray, aggSize, nullspaceDim_); 
+            if (info != 0)
+            {
+               printf("%4d : Aggregation WARNING : QR returns non-zero for\n",
+                      mypid);
+               printf("  aggregate %d, size = %d, info = %d\n",ig,aggSize,info);
+            }
+         }
+         else
+         {
+            for ( irow = 0; irow < nullspaceDim_; irow++ ) 
+            {
+               dtemp = 0.0;
+               for ( jcol = 0; jcol < aggSize; jcol++ ) 
+                  dtemp += qArray[aggSize*irow+jcol]*qArray[aggSize*irow+jcol];
+               dtemp = 1.0 / sqrt(dtemp);
+               for ( jcol = 0; jcol < aggSize; jcol++ ) 
+                  qArray[aggSize*irow+jcol] *= dtemp;
+            }
+         }
+*/
+
+         /* ------ after QR, put the R into the next null space ------ */
+
+/*
+         for ( jcol = 0; jcol < nullspaceDim_; jcol++ )
+            for ( irow = 0; irow < nullspaceDim_; irow++ )
+               newNull[ig*nullspaceDim_+jcol+irow*naggr*nullspaceDim_] = 
+                         rArray[jcol+nullspaceDim_*irow];
+*/
+         for ( jcol = 0; jcol < nullspaceDim_; jcol++ )
+            for ( irow = 0; irow < nullspaceDim_; irow++ )
+               if ( irow == jcol )
+                  newNull[ig*nullspaceDim_+jcol+irow*naggr*nullspaceDim_] = 1.0;
+               else
+                  newNull[ig*nullspaceDim_+jcol+irow*naggr*nullspaceDim_] = 0.0;
+
+         /* ------ put the P to PVecs ------ */
+
+         for ( jcol = 0; jcol < aggSize; jcol++ )
+         {
+            for ( irow = 0; irow < nullspaceDim_; irow++ )
+            {
+               index = aggIndArray[ig][jcol];
+               PVecs[irow][index] = qArray[ irow*aggSize + jcol ];
+            }
+         } 
+      }
+      for ( ig = 0; ig < naggr; ig++ ) delete [] aggIndArray[ig];
+      delete [] aggIndArray;
+      delete [] aggCntArray;
+      delete [] qArray;
+      delete [] rArray;
+   }
+   if ( nullspaceVec_ != NULL ) delete [] nullspaceVec_;
+   nullspaceVec_ = newNull;
+
+   /*-----------------------------------------------------------------
+    * initialize Pmat 
+    *-----------------------------------------------------------------*/
+
+   rowLengths = new int[PLocalNRows];
+   for ( irow = 0; irow < PLocalNRows; irow++ )
+      rowLengths[irow] = nullspaceDim_;
+   ierr = HYPRE_IJMatrixSetRowSizes(IJPmat, rowLengths);
+   ierr = HYPRE_IJMatrixInitialize(IJPmat);
+   assert(!ierr);
+   delete [] rowLengths;
+
+   /*--------------------------------------------------------------------
+    * load and assemble Pmat 
+    *--------------------------------------------------------------------*/
+
+   colInd = new int[nullspaceDim_];
+   colVal = new double[nullspaceDim_];
+   for ( irow = 0; irow < PLocalNRows; irow++ )
+   {
+      if ( PCols[irow] >= 0 )
+      {
+         nzcnt = 0;
+         for ( jcol = 0; jcol < nullspaceDim_; jcol++ )
+         {
+            if ( PVecs[jcol][irow] != 0.0 )
+            {
+               colInd[nzcnt] = PCols[irow] + jcol;
+               colVal[nzcnt++] = PVecs[jcol][irow];
+            }
+         }
+         rowNum = PStartRow + irow;
+         HYPRE_IJMatrixSetValues(IJPmat, 1, &nzcnt, 
+                             (const int *) &rowNum, (const int *) colInd, 
+                             (const double *) colVal);
+      }
+   }
+   ierr = HYPRE_IJMatrixAssemble(IJPmat);
+   assert( !ierr );
+   HYPRE_IJMatrixGetObject(IJPmat, (void **) &Pmat);
+   hypre_MatvecCommPkgCreate((hypre_ParCSRMatrix *) Pmat);
+   commPkg = hypre_ParCSRMatrixCommPkg(Amat);
+   if (!commPkg) hypre_MatvecCommPkgCreate(Amat);
+   HYPRE_IJMatrixSetObjectType(IJPmat, -1);
+   HYPRE_IJMatrixDestroy( IJPmat );
+   delete [] colInd;
+   delete [] colVal;
+
+   /*-----------------------------------------------------------------
+    * clean up
+    *-----------------------------------------------------------------*/
+
+   if ( PCols != NULL ) delete [] PCols;
+   if ( PVecs != NULL ) 
+   {
+      for (irow = 0; irow < nullspaceDim_; irow++) 
+         if ( PVecs[irow] != NULL ) delete [] PVecs[irow];
+      delete [] PVecs;
+   }
+   delete [] eqn2aggr;
+
+   /*-----------------------------------------------------------------
+    * set up and return Pmat 
+    *-----------------------------------------------------------------*/
+
+   funcPtr = new MLI_Function();
+   MLI_Utils_HypreParCSRMatrixGetDestroyFunc(funcPtr);
+   sprintf(paramString, "HYPRE_ParCSR" ); 
+   mli_Pmat = new MLI_Matrix( Pmat, paramString, funcPtr );
+   (*PmatOut) = mli_Pmat;
+   delete funcPtr;
+   return 0.0;
+}
+
+/* ********************************************************************* *
+ * graded coarsening scheme (Given a graph, aggregate on the local subgraph
+ * but give smaller aggregate near processor boundaries)
+ * --------------------------------------------------------------------- */
+
+int MLI_Method_AMGSA::coarsenGraded(hypre_ParCSRMatrix *hypreG,
+                                   int *mliAggrLeng, int **mliAggrArray)
+{
+   MPI_Comm  comm;
+   int       mypid, nprocs, *partition, startRow, endRow, maxInd;
+   int       localNRows, naggr=0, *node2aggr, *aggrSizes, nUndone;
+   int       irow, jcol, colNum, rowNum, rowLeng, *cols, globalNRows;
+   int       *nodeStat, selectFlag, nSelected=0, nNotSelected=0, count;
+   int       ibuf[2], itmp[2], *bdrySet, localMinSize, index, maxCount;
+   int       *GDiagI, *GDiagJ, *GOffdI;
+   double    maxVal, *vals, *GDiagA, *GOffdA;
+   hypre_CSRMatrix *GDiag, *GOffd;
+
+   /*-----------------------------------------------------------------
+    * fetch machine and matrix parameters
+    *-----------------------------------------------------------------*/
+
+   comm = hypre_ParCSRMatrixComm(hypreG);
+   MPI_Comm_rank(comm,&mypid);
+   MPI_Comm_size(comm,&nprocs);
+   HYPRE_ParCSRMatrixGetRowPartitioning((HYPRE_ParCSRMatrix) hypreG, 
+                                        &partition);
+   startRow = partition[mypid];
+   endRow   = partition[mypid+1] - 1;
+   free( partition );
+   localNRows = endRow - startRow + 1;
+   MPI_Allreduce(&localNRows, &globalNRows, 1, MPI_INT, MPI_SUM, comm);
+   if ( mypid == 0 && outputLevel_ > 1 )
+   {
+      printf("\t*** Aggregation(G) : total nodes to aggregate = %d\n",
+             globalNRows);
+   }
+   GDiag  = hypre_ParCSRMatrixDiag(hypreG);
+   GDiagI = hypre_CSRMatrixI(GDiag);
+   GDiagJ = hypre_CSRMatrixJ(GDiag);
+   GDiagA = hypre_CSRMatrixData(GDiag);
+   GOffd  = hypre_ParCSRMatrixOffd(hypreG);
+   GOffdI = hypre_CSRMatrixI(GOffd);
+
+   /*-----------------------------------------------------------------
+    * allocate status arrays 
+    *-----------------------------------------------------------------*/
+
+   if ( localNRows > 0 )
+   {
+      node2aggr = new int[localNRows];
+      aggrSizes = new int[localNRows];
+      nodeStat  = new int[localNRows];
+      bdrySet   = new int[localNRows];
+      for ( irow = 0; irow < localNRows; irow++ ) 
+      {
+         aggrSizes[irow] = 0;
+         node2aggr[irow] = -1;
+         nodeStat[irow]  = MLI_METHOD_AMGSA_READY;
+         bdrySet[irow]   = 0;
+      }
+   }
+   else node2aggr = aggrSizes = nodeStat = bdrySet = NULL;
+
+   /*-----------------------------------------------------------------
+    * search for zero rows and rows near the processor boundaries 
+    *-----------------------------------------------------------------*/
+
+   for ( irow = 0; irow < localNRows; irow++ ) 
+   {
+      rowLeng = GDiagI[irow+1] - GDiagI[irow];
+      if (rowLeng <= 0) 
+      {
+         nodeStat[irow] = MLI_METHOD_AMGSA_NOTSELECTED;
+         nNotSelected++;
+      }
+      if ( GOffdI != NULL && (GOffdI[irow+1] - GOffdI[irow]) > 0 )
+         bdrySet[irow] = 1;
+   }
+
+   /*-----------------------------------------------------------------
+    * Phase 0 : form aggregates near the boundary (aggregates should be
+    *           as small as possible, but has to satisfy min size.
+    *           The algorithm gives preference to nodes on boundaries.)
+    *-----------------------------------------------------------------*/
+
+   localMinSize = nullspaceDim_ / currNodeDofs_ * 2;
+   for ( irow = 0; irow < localNRows; irow++ ) 
+   {
+      if ( nodeStat[irow] == MLI_METHOD_AMGSA_READY && bdrySet[irow] == 1 )  
+      {
+         nSelected++;
+         node2aggr[irow]  = naggr;
+         aggrSizes[naggr] = 1;
+         nodeStat[irow]  = MLI_METHOD_AMGSA_SELECTED;
+         if ( localMinSize > 1 ) 
+         {
+            rowLeng = GDiagI[irow+1] - GDiagI[irow];
+            cols = &(GDiagJ[GDiagI[irow]]);
+            jcol = 0;
+            while ( aggrSizes[naggr] < localMinSize && jcol < rowLeng )
+            {
+               index = cols[jcol];
+               if ( index != irow && (bdrySet[index] != 1) &&
+                    nodeStat[irow] == MLI_METHOD_AMGSA_READY )
+               {
+                  node2aggr[index] = naggr;
+                  aggrSizes[naggr]++;
+                  nodeStat[index]  = MLI_METHOD_AMGSA_SELECTED;
+               }
+               jcol++;
+            }
+/*
+            jcol = 0;
+            while ( aggrSizes[naggr] < localMinSize && jcol < rowLeng )
+            {
+               index = cols[jcol];
+               if (index != irow && nodeStat[index] == MLI_METHOD_AMGSA_READY)
+               {
+                  node2aggr[index] = naggr;
+                  aggrSizes[naggr]++;
+                  nodeStat[index]  = MLI_METHOD_AMGSA_SELECTED;
+               }
+               jcol++;
+            }
+*/
+         }
+         naggr++;
+      }
+   }
+   itmp[0] = naggr;
+   itmp[1] = nSelected;
+   if (outputLevel_ > 1) MPI_Allreduce(itmp, ibuf, 2, MPI_INT, MPI_SUM, comm);
+   if ( mypid == 0 && outputLevel_ > 1 )
+   {
+      printf("\t*** Aggregation(G) P0 : no. of aggregates     = %d\n",ibuf[0]);
+      printf("\t*** Aggregation(G) P0 : no. nodes aggregated  = %d\n",ibuf[1]);
+   }
+
+   // search for seed node with largest number of neighbors
+
+   maxInd   = -1;
+   maxCount = -1;
+   for ( irow = 0; irow < localNRows; irow++ ) 
+   {
+      if ( nodeStat[irow] == MLI_METHOD_AMGSA_READY )  
+      {
+         count = 0;
+         rowLeng = GDiagI[irow+1] - GDiagI[irow];
+         cols = &(GDiagJ[GDiagI[irow]]);
+         for ( jcol = 0; jcol < rowLeng; jcol++ )
+         {
+            index = cols[jcol];
+            if ( nodeStat[index] == MLI_METHOD_AMGSA_READY ) count++;
+         }
+         if ( count > maxCount )
+         {
+            maxCount = count;
+            maxInd = irow;
+         }
+      }
+   }
+
+   /*-----------------------------------------------------------------
+    * Phase 1 : form aggregates
+    *-----------------------------------------------------------------*/
+
+   for ( irow = 0; irow < localNRows; irow++ )
+   {
+      if ( nodeStat[irow] == MLI_METHOD_AMGSA_READY )
+      {
+         rowLeng = GDiagI[irow+1] - GDiagI[irow];
+         cols = &(GDiagJ[GDiagI[irow]]);
+         selectFlag = 1;
+         count      = 1;
+         for ( jcol = 0; jcol < rowLeng; jcol++ )
+         {
+            colNum = cols[jcol];
+            if ( nodeStat[colNum] != MLI_METHOD_AMGSA_READY )
+            {
+               selectFlag = 0;
+               break;
+            }
+            else count++;
+         }
+         if ( selectFlag == 1 && count >= minAggrSize_ )
+         {
+            aggrSizes[naggr] = 0;
+            for ( jcol = 0; jcol < rowLeng; jcol++ )
+            {
+               colNum = cols[jcol];
+               node2aggr[colNum] = naggr;
+               nodeStat[colNum] = MLI_METHOD_AMGSA_SELECTED;
+               aggrSizes[naggr]++;
+               nSelected++;
+            }
+            naggr++;
+         }
+      }
+   }
+   itmp[0] = naggr;
+   itmp[1] = nSelected;
+   if (outputLevel_ > 1) MPI_Allreduce(itmp, ibuf, 2, MPI_INT, MPI_SUM, comm);
+   if ( mypid == 0 && outputLevel_ > 1 )
+   {
+      printf("\t*** Aggregation(G) P1 : no. of aggregates     = %d\n",ibuf[0]);
+      printf("\t*** Aggregation(G) P1 : no. nodes aggregated  = %d\n",ibuf[1]);
+   }
+
+   /*-----------------------------------------------------------------
+    * Phase 2 : put the rest into one of the existing aggregates
+    *-----------------------------------------------------------------*/
+
+   if ( (nSelected+nNotSelected) < localNRows )
+   {
+      for ( irow = 0; irow < localNRows; irow++ )
+      {
+         if ( nodeStat[irow] == MLI_METHOD_AMGSA_READY )
+         {
+            rowLeng = GDiagI[irow+1] - GDiagI[irow];
+            cols    = &(GDiagJ[GDiagI[irow]]);
+            vals    = &(GDiagA[GDiagI[irow]]);
+            maxInd  = -1;
+            maxVal  = 0.0;
+            for ( jcol = 0; jcol < rowLeng; jcol++ )
+            {
+               colNum = cols[jcol];
+               if ( nodeStat[colNum] == MLI_METHOD_AMGSA_SELECTED )
+               {
+                  if (vals[jcol] > maxVal)
+                  {
+                     maxInd = colNum;
+                     maxVal = vals[jcol];
+                  }
+               }
+            }
+            if ( maxInd != -1 )
+            {
+               node2aggr[irow] = node2aggr[maxInd];
+               nodeStat[irow] = MLI_METHOD_AMGSA_PENDING;
+               aggrSizes[node2aggr[maxInd]]++;
+            }
+         }
+      }
+      for ( irow = 0; irow < localNRows; irow++ )
+      {
+         if ( nodeStat[irow] == MLI_METHOD_AMGSA_PENDING )
+         {
+            nodeStat[irow] = MLI_METHOD_AMGSA_SELECTED;
+            nSelected++;
+         }
+      } 
+   }
+   itmp[0] = naggr;
+   itmp[1] = nSelected;
+   if (outputLevel_ > 1) MPI_Allreduce(itmp,ibuf,2,MPI_INT,MPI_SUM,comm);
+   if ( mypid == 0 && outputLevel_ > 1 )
+   {
+      printf("\t*** Aggregation(G) P2 : no. of aggregates     = %d\n",ibuf[0]);
+      printf("\t*** Aggregation(G) P2 : no. nodes aggregated  = %d\n",ibuf[1]);
+   }
+
+   /*-----------------------------------------------------------------
+    * Phase 3 : form aggregates for all other rows
+    *-----------------------------------------------------------------*/
+
+   if ( (nSelected+nNotSelected) < localNRows )
+   {
+      for ( irow = 0; irow < localNRows; irow++ )
+      {
+         if ( nodeStat[irow] == MLI_METHOD_AMGSA_READY )
+         {
+            rowLeng = GDiagI[irow+1] - GDiagI[irow];
+            cols    = &(GDiagJ[GDiagI[irow]]);
+            count = 1;
+            for ( jcol = 0; jcol < rowLeng; jcol++ )
+            {
+               colNum = cols[jcol];
+               if ( nodeStat[colNum] == MLI_METHOD_AMGSA_READY ) count++;
+            }
+            if ( count > 1 && count >= minAggrSize_ ) 
+            {
+               aggrSizes[naggr] = 0;
+               for ( jcol = 0; jcol < rowLeng; jcol++ )
+               {
+                  colNum = cols[jcol];
+                  if ( nodeStat[colNum] == MLI_METHOD_AMGSA_READY )
+                  {
+                     nodeStat[colNum] = MLI_METHOD_AMGSA_SELECTED;
+                     node2aggr[colNum] = naggr;
+                     aggrSizes[naggr]++;
+                     nSelected++;
+                  }
+               }
+               naggr++;
+            }
+         }
+      }
+   }
+   itmp[0] = naggr;
+   itmp[1] = nSelected;
+   if (outputLevel_ > 1) MPI_Allreduce(itmp,ibuf,2,MPI_INT,MPI_SUM,comm);
+   if ( mypid == 0 && outputLevel_ > 1 )
+   {
+      printf("\t*** Aggregation(G) P3 : no. of aggregates     = %d\n",ibuf[0]);
+      printf("\t*** Aggregation(G) P3 : no. nodes aggregated  = %d\n",ibuf[1]);
+   }
+
+   /*-----------------------------------------------------------------
+    * Phase 4 : finally put all lone rows into some neighbor aggregate
+    *-----------------------------------------------------------------*/
+
+   if ( (nSelected+nNotSelected) < localNRows )
+   {
+      for ( irow = 0; irow < localNRows; irow++ )
+      {
+         if ( nodeStat[irow] == MLI_METHOD_AMGSA_READY )
+         {
+            rowLeng = GDiagI[irow+1] - GDiagI[irow];
+            cols    = &(GDiagJ[GDiagI[irow]]);
+            for ( jcol = 0; jcol < rowLeng; jcol++ )
+            {
+               colNum = cols[jcol];
+               if ( nodeStat[colNum] == MLI_METHOD_AMGSA_SELECTED )
+               {
+                  node2aggr[irow] = node2aggr[colNum];
+                  nodeStat[irow] = MLI_METHOD_AMGSA_SELECTED;
+                  aggrSizes[node2aggr[colNum]]++;
+                  nSelected++;
+                  break;
+               }
+            }
+         }
+      }
+   }
+   itmp[0] = naggr;
+   itmp[1] = nSelected;
+   if ( outputLevel_ > 1 ) MPI_Allreduce(itmp,ibuf,2,MPI_INT,MPI_SUM,comm);
+   if ( mypid == 0 && outputLevel_ > 1 )
+   {
+      printf("\t*** Aggregation(G) P4 : no. of aggregates     = %d\n",ibuf[0]);
+      printf("\t*** Aggregation(G) P4 : no. nodes aggregated  = %d\n",ibuf[1]);
+   }
+   nUndone = localNRows - nSelected - nNotSelected;
+//if ( nUndone > 0 )
+   if ( nUndone > localNRows )
+   {
+      count = nUndone / minAggrSize_;
+      if ( count == 0 ) count = 1;
+      count += naggr;
+      irow = jcol = 0;
+      while ( nUndone > 0 )
+      {
+         if ( nodeStat[irow] == MLI_METHOD_AMGSA_READY )
+         {
+            node2aggr[irow] = naggr;
+            nodeStat[irow] = MLI_METHOD_AMGSA_SELECTED;
+            nUndone--;
+            nSelected++;
+            jcol++;
+            if ( jcol >= minAggrSize_ && naggr < count-1 ) 
+            {
+               jcol = 0;
+               naggr++;
+            }
+         }
+         irow++;
+      }
+      naggr = count;
+   }
+   itmp[0] = naggr;
+   itmp[1] = nSelected;
+   if ( outputLevel_ > 1 ) MPI_Allreduce(itmp,ibuf,2,MPI_INT,MPI_SUM,comm);
+   if ( mypid == 0 && outputLevel_ > 1 )
+   {
+      printf("\t*** Aggregation(G) P5 : no. of aggregates     = %d\n",ibuf[0]);
+      printf("\t*** Aggregation(G) P5 : no. nodes aggregated  = %d\n",ibuf[1]);
+   }
+
+   /*-----------------------------------------------------------------
+    * diagnostics
+    *-----------------------------------------------------------------*/
+
+   if ( (nSelected+nNotSelected) < localNRows )
+   {
+#ifdef MLI_DEBUG_DETAILED
+      for ( irow = 0; irow < localNRows; irow++ )
+      {
+         if ( nodeStat[irow] == MLI_METHOD_AMGSA_READY )
+         {
+            rowNum = startRow + irow;
+            printf("%5d : unaggregated node = %8d\n", mypid, rowNum);
+            hypre_ParCSRMatrixGetRow(hypreG,rowNum,&rowLeng,&cols,NULL);
+            for ( jcol = 0; jcol < rowLeng; jcol++ )
+            {
+               colNum = cols[jcol];
+               printf("ERROR : neighbor of unselected node %9d = %9d\n", 
+                     rowNum, colNum);
+            }
+            hypre_ParCSRMatrixRestoreRow(hypreG,rowNum,&rowLeng,&cols,NULL);
+         }
+      }
+#endif
+   }
+
+   /*-----------------------------------------------------------------
+    * clean up and initialize the output arrays 
+    *-----------------------------------------------------------------*/
+
+   if ( localNRows > 0 ) delete [] aggrSizes; 
+   if ( localNRows > 0 ) delete [] nodeStat; 
+   if ( localNRows > 0 ) delete [] bdrySet; 
+   if ( localNRows == 1 && naggr == 0 )
+   {
+      node2aggr[0] = 0;
+      naggr = 1;
+   }
+   (*mliAggrArray) = node2aggr;
+   (*mliAggrLeng)  = naggr;
    return 0;
 }
 
