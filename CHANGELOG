@@ -15,13 +15,16 @@
 #=============================================================================
 
 
+Version 1.7.8b, work in progress.
+
 - SStruct: Changed the MatrixSetSymmetric interface (this was actually
   not implemented before anyway).  The new interface allows much more
   flexibility in controlling which parts of the matrix are symmetric.
 
-Version 1.7.7b released, 2002/07/01.
+Version 1.7.7b released, 2002/08/08.
 
 - limited release SStruct optimizations testing
+- the krylov library has been renamed to HYPRE_krylov
 
 Version 1.7.6b released, 2002/01/27.
 
