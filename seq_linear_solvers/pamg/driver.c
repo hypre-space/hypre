@@ -366,7 +366,7 @@ main( int   argc,
       printf("\n Number of unknown functions = %d\n\n",num_functions);
       dof_func = hypre_CTAlloc(int,hypre_CSRMatrixNumRows(A));
  
-      for (j = 0; j < hypre_CSRMatrixNumRows(A)/num_functions; j += num_functions)
+      for (j = 0; j < hypre_CSRMatrixNumRows(A)/num_functions; j++)
       {
          for (k = 0; k < num_functions; k++) dof_func[j*num_functions+k] = k;
       }
