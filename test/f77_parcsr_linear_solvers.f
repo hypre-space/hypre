@@ -59,7 +59,7 @@ c     HYPRE_Solver        precond
       integer*8           grid_relax_points
       integer*8           row_starts
 
-      double precision    values(3)
+      double precision    values(4)
 
       integer             p, q, r
       integer             ierr
@@ -202,8 +202,19 @@ c----------------------------------------------------------------------
 c     Set up the matrix
 c-----------------------------------------------------------------------
 
+      values(2) = -cx
+      values(3) = -cy
+      values(4) = -cz
+
+      values(1) = 0.0
+      if (nx .gt. 1) values(1) = values(1) + 2d0*cx
+      if (ny .gt. 1) values(1) = values(1) + 2d0*cy
+      if (nz .gt. 1) values(1) = values(1) + 2d0*cz
+
       call hypre_GenerateLaplacian(MPI_COMM_WORLD, nx, ny, nz,
      &                             Px, Py, Pz, p, q, r, values, A, ierr)
+
+      call HYPRE_PrintParCSRMatrix(A, "driver.out.A", ierr)
 
 c     call HYPRE_NewParCSRMatrix(MPI_COMM_WORLD, gnrows, gncols,
 c    &   rstarts, cstarts, ncoloffdg, nonzsdg, nonzsoffdg, A, ierr)
@@ -214,10 +225,6 @@ c-----------------------------------------------------------------------
 c     Set up the rhs and initial guess
 c-----------------------------------------------------------------------
 
-      values(1) = -cx
-      values(2) = -cy
-      values(3) = -cz
-
       call hypre_ParCSRMatrixGlobalNumRows(A, num_rows, ierr)
       call hypre_ParCSRMatrixRowStarts(A, row_starts, ierr)
 
@@ -225,15 +232,15 @@ c-----------------------------------------------------------------------
      &                        b, ierr)
       call hypre_SetParVectorPartitioningO(b, 0, ierr)
       call HYPRE_InitializeParVector(b, ierr)
-      call hypre_SetParVectorConstantValue(b, 0d0, ierr)
-c     call HYPRE_PrintParVector("driver.out.b", b, zero, ierr)
+      call hypre_SetParVectorConstantValue(b, 1d0, ierr)
+      call HYPRE_PrintParVector(b, "driver.out.b", ierr)
 
       call HYPRE_NewParVector(MPI_COMM_WORLD, num_rows, row_starts,
      &                        x, ierr)
       call hypre_SetParVectorPartitioningO(x, 0, ierr)
       call HYPRE_InitializeParVector(x, ierr)
-      call hypre_SetParVectorConstantValue(x, 1d0, ierr)
-c     call HYPRE_PrintParVector("driver.out.x0", x, zero, ierr)
+      call hypre_SetParVectorConstantValue(x, 0d0, ierr)
+      call HYPRE_PrintParVector(x, "driver.out.x0", ierr)
 
 c-----------------------------------------------------------------------
 c     Solve the linear system
@@ -337,7 +344,7 @@ c-----------------------------------------------------------------------
 c     Print the solution and other info
 c-----------------------------------------------------------------------
 
-c  call HYPRE_PrintParCSRVector("driver.out.x", x, zero, ierr)
+      call HYPRE_PrintParVector(x, "driver.out.x", ierr)
 
       if (myid .eq. 0) then
          print *, 'Iterations = ', num_iterations
