@@ -1,3 +1,19 @@
 /** @name	Quaility Assurance Issues
 
+
+\begin{verbatim}
+To assure quality of external releases of hypre the following Quality
+Assurance Standard have been adopted.  
+
+  - developer has done fairly rigorous testing of code
+  - an autotest suite has been set up and the code passes
+  - code conforms to coding guidelines
+  - uses autoconfig infrastructure and configures on all supported platforms
+  - more than one developer has looked at the code
+  - documentation (this is not yet being enforced, but will include inline
+	Doc++ comments that will be included in the Developer's Manual)
+  - runs through purify cleanly
+
+\end{verbatim}
+
 */
