@@ -343,11 +343,11 @@ int MLI_Utils_ComputeExtremeRitzValues(hypre_ParCSRMatrix *A, double *ritz,
                                        int scaleFlag)
 {
    int      i, j, k, its, maxIter, nprocs, mypid, localNRows, globalNRows;
-   int      startRow, endRow, *partition, *ADiagI;
+   int      startRow, endRow, *partition, *ADiagI, *ADiagJ;
    double   alpha, beta, rho, rhom1, sigma, offdiagNorm, *zData;
    double   rnorm, *alphaArray, *rnormArray, **Tmat, initOffdiagNorm;
    double   app, aqq, arr, ass, apq, sign, tau, t, c, s;
-   double   *ADiagA, one=1.0, *rData;
+   double   *ADiagA, one=1.0, *rData, *srdiag;
    MPI_Comm comm;
    hypre_CSRMatrix *ADiag;
    hypre_ParVector *rVec, *zVec, *pVec, *apVec;
@@ -365,6 +365,7 @@ int MLI_Utils_ComputeExtremeRitzValues(hypre_ParCSRMatrix *A, double *ritz,
    ADiag      = hypre_ParCSRMatrixDiag(A);
    ADiagA     = hypre_CSRMatrixData(ADiag);
    ADiagI     = hypre_CSRMatrixI(ADiag);
+   ADiagJ     = hypre_CSRMatrixJ(ADiag);
    HYPRE_ParCSRMatrixGetRowPartitioning((HYPRE_ParCSRMatrix) A, &partition);
    startRow    = partition[mypid];
    endRow      = partition[mypid+1] - 1;
@@ -374,6 +375,15 @@ int MLI_Utils_ComputeExtremeRitzValues(hypre_ParCSRMatrix *A, double *ritz,
    maxIter     = 5;
    if ( globalNRows < maxIter ) maxIter = globalNRows;
    ritz[0] = ritz[1] = 0.0;
+   srdiag = (double *) malloc(localNRows * sizeof(double));
+   for ( i = 0; i < localNRows; i++ )
+   {
+      srdiag[i] = 1.0;
+      for ( j = ADiagI[i]; j < ADiagI[i+1]; j++ )
+         if (ADiagJ[j] == i) {srdiag[i] = ADiagA[j]; break;}
+      if ( srdiag[i] > 0.0 ) srdiag[i] = 1.0 / sqrt(srdiag[i]);
+      else                   srdiag[i] = 1.0 / sqrt(-srdiag[i]);
+   }
 
    /*-----------------------------------------------------------------
     * allocate space
@@ -436,19 +446,8 @@ int MLI_Utils_ComputeExtremeRitzValues(hypre_ParCSRMatrix *A, double *ritz,
 
    for ( its = 0; its < maxIter; its++ )
    {
-      if ( 0 ) /* if scaleFlag */
-      {
-         for ( i = 0; i < localNRows; i++ )
-         {
-            if (ADiagA[ADiagI[i]] != 0.0) 
-               zData[i] = rData[i]/sqrt(ADiagA[ADiagI[i]]);
-         }
-      }
-      else 
-         for ( i = 0; i < localNRows; i++ ) zData[i] = rData[i];
-
       rhom1 = rho;
-      rho = hypre_ParVectorInnerProd(rVec, zVec); 
+      rho   = hypre_ParVectorInnerProd(rVec, rVec); 
       if (its == 0) beta = 0.0;
       else 
       {
@@ -456,23 +455,19 @@ int MLI_Utils_ComputeExtremeRitzValues(hypre_ParCSRMatrix *A, double *ritz,
          Tmat[its-1][its] = -beta;
       }
       HYPRE_ParVectorScale( beta, (HYPRE_ParVector) pVec );
-      hypre_ParVectorAxpy( one, zVec, pVec );
+      hypre_ParVectorAxpy( one, rVec, pVec );
 
       if (scaleFlag)
-        for ( i = 0; i < localNRows; i++ )
-          pData[i] = pData[i]/sqrt(ADiagA[ADiagI[i]]);
+         for ( i = 0; i < localNRows; i++ ) apData[i] = pData[i]*srdiag[i];
+      else
+         for ( i = 0; i < localNRows; i++ ) apData[i] = pData[i];
 
-      hypre_ParCSRMatrixMatvec(one, A, pVec, 0.0, apVec);
+      hypre_ParCSRMatrixMatvec(one, A, apVec, 0.0, zVec);
 
       if (scaleFlag)
-      {
-        /* restore p */
-        for ( i = 0; i < localNRows; i++ )
-          pData[i] = pData[i]*sqrt(ADiagA[ADiagI[i]]);
-
-        for ( i = 0; i < localNRows; i++ )
-          apData[i] = apData[i]/sqrt(ADiagA[ADiagI[i]]);
-      }
+         for ( i = 0; i < localNRows; i++ ) apData[i] = zData[i]*srdiag[i];
+      else
+         for ( i = 0; i < localNRows; i++ ) apData[i] = zData[i];
 
       sigma = hypre_ParVectorInnerProd(pVec, apVec); 
       alpha  = rho / sigma;
@@ -580,6 +575,7 @@ int MLI_Utils_ComputeExtremeRitzValues(hypre_ParCSRMatrix *A, double *ritz,
    free(rnormArray);
    for (i = 0; i <= maxIter; i++) if ( Tmat[i] != NULL ) free( Tmat[i] );
    free(Tmat);
+   free(srdiag);
    return 0;
 }
 
