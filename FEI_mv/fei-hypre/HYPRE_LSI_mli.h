@@ -47,15 +47,18 @@ extern int  HYPRE_LSI_MLISetup( HYPRE_Solver, HYPRE_ParCSRMatrix,
 extern int  HYPRE_LSI_MLISolve( HYPRE_Solver, HYPRE_ParCSRMatrix,
                                 HYPRE_ParVector,   HYPRE_ParVector);
 extern int  HYPRE_LSI_MLISetParams( HYPRE_Solver, char * );
-extern int  HYPRE_LSI_MLICreateNodeEqnMap( HYPRE_Solver, int, int *, int * );
+extern int  HYPRE_LSI_MLICreateNodeEqnMap( HYPRE_Solver, int, int *, int *,
+                                           int *procNRows );
+extern int  HYPRE_LSI_MLIAdjustNodeEqnMap( HYPRE_Solver, int *, int * );
 extern int  HYPRE_LSI_MLISetFEData( HYPRE_Solver, void * );
 extern int  HYPRE_LSI_MLISetStrengthThreshold( HYPRE_Solver, double );
 extern int  HYPRE_LSI_MLISetMethod( HYPRE_Solver, char * );
 extern int  HYPRE_LSI_MLISetSmoother( HYPRE_Solver, int, int, int, char ** );
 extern int  HYPRE_LSI_MLISetCoarseSolver( HYPRE_Solver, int, int, char ** );
-extern int  HYPRE_LSI_MLISetNodalCoordinates(HYPRE_Solver, int, int, double *,
-                                             double * );
-extern int  HYPRE_LSI_MLISetNullSpace( HYPRE_Solver, int, int, double *, int );
+
+extern int  HYPRE_LSI_MLILoadNodalCoordinates(HYPRE_Solver, int, int, int *, 
+                                   int, double * );
+extern int  HYPRE_LSI_MLILoadMatrixScalings(HYPRE_Solver, int, double * );
 
 extern void *HYPRE_LSI_MLIFEDataCreate( MPI_Comm );
 extern int  HYPRE_LSI_MLIFEDataDestroy( void * );

@@ -17,6 +17,7 @@
  *        HYPRE_LSI_MLISetParams
  *--------------------------------------------------------------------------
  *        HYPRE_LSI_MLICreateNodeEqnMap
+ *        HYPRE_LSI_MLIAdjustNodeEqnMap
  *        HYPRE_LSI_MLISetFEData
  *        HYPRE_LSI_MLISetStrengthThreshold
  *        HYPRE_LSI_MLISetMethod
@@ -647,30 +648,217 @@ int HYPRE_LSI_MLISetParams( HYPRE_Solver solver, char *paramString )
 }
 
 /****************************************************************************/
-/* HYPRE_LSI_MLICreateMapper                                                */
+/* HYPRE_LSI_MLICreateNodeEqnMap                                            */
 /*--------------------------------------------------------------------------*/
 
 extern "C"
 int HYPRE_LSI_MLICreateNodeEqnMap(HYPRE_Solver solver, int nNodes, 
-                                  int *nodeNumbers, int *eqnNumbers)
+                                  int *nodeNumbers, int *eqnNumbers,
+                                  int *procNRows)
 {
 #ifdef HAVE_MLI
-   int           mypid;
+   int           iN, iP, mypid, nprocs, *procMapArray, *iTempArray;
+   int           iS, nSends, *sendLengs, *sendProcs, **iSendBufs;
+   int           iR, nRecvs, *recvLengs, *recvProcs, **iRecvBufs, *procList;
+   int           newNumNodes, *newNodeNumbers, *newEqnNumbers, procIndex;
+   MPI_Comm      mpiComm;
+   MPI_Request   *mpiRequests;
+   MPI_Status    mpiStatus;
    MLI_Mapper    *mapper;
    HYPRE_LSI_MLI *mli_object = (HYPRE_LSI_MLI *) solver;
 
+   /* -------------------------------------------------------- */ 
+   /* fetch processor information                              */
+   /* -------------------------------------------------------- */ 
+
    if ( mli_object == NULL ) return 1;
    if ( mli_object->mapper_ != NULL ) delete mli_object->mapper_;
+   mpiComm = mli_object->mpiComm_;
+   MPI_Comm_rank( mpiComm, &mypid );
+   MPI_Comm_size( mpiComm, &nprocs );
+
+   /* -------------------------------------------------------- */ 
+   /* construct node to processor map array                    */
+   /* -------------------------------------------------------- */ 
+
+   procMapArray = new int[nNodes]; 
+   for ( iN = 0; iN < nNodes; iN++ )
+   {
+      procMapArray[iN] = -1;
+      if ( eqnNumbers[iN] < procNRows[mypid] || 
+           eqnNumbers[iN] >= procNRows[mypid+1] )
+      {
+         for ( iP = 0; iP < nprocs; iP++ )
+            if ( eqnNumbers[iN] < procNRows[iP] ) break;
+         procMapArray[iN] = iP - 1;
+      }
+   } 
+
+   /* -------------------------------------------------------- */ 
+   /* construct send information                               */
+   /* -------------------------------------------------------- */ 
+
+   procList = new int[nprocs];
+   for ( iP = 0; iP < nprocs; iP++ ) procList[iP] = 0;
+   for ( iN = 0; iN < nNodes; iN++ )
+      if ( procMapArray[iN] >= 0 ) procList[procMapArray[iN]]++;
+   nSends = 0;
+   for ( iP = 0; iP < nprocs; iP++ ) if ( procList[iP] > 0 ) nSends++;
+   if ( nSends > 0 )
+   {
+      sendProcs = new int[nSends]; 
+      sendLengs = new int[nSends]; 
+      iSendBufs = new int*[nSends]; 
+   }
+   nSends = 0;
+   for ( iP = 0; iP < nprocs; iP++ ) 
+   {
+      if ( procList[iP] > 0 ) 
+      {
+         sendLengs[nSends] = procList[iP];
+         sendProcs[nSends++] = iP;
+      }
+   }
+
+   /* -------------------------------------------------------- */ 
+   /* construct recv information                               */
+   /* -------------------------------------------------------- */ 
+
+   for ( iP = 0; iP < nprocs; iP++ ) procList[iP] = 0;
+   for ( iP = 0; iP < nSends; iP++ ) procList[sendProcs[iP]]++; 
+   iTempArray = new int[nprocs]; 
+   MPI_Allreduce(procList,iTempArray,nprocs,MPI_INT,MPI_SUM,mpiComm);
+   nRecvs = iTempArray[mypid];
+   delete [] procList;
+   delete [] iTempArray;
+   if ( nRecvs > 0 )
+   {
+      recvLengs = new int[nRecvs];
+      recvProcs = new int[nRecvs];
+      iRecvBufs = new int*[nRecvs];
+      mpiRequests = new MPI_Request[nRecvs];
+   }
+   for ( iP = 0; iP < nRecvs; iP++ ) 
+      MPI_Irecv(&(recvLengs[iP]), 1, MPI_INT, MPI_ANY_SOURCE, 29421, 
+                mpiComm, &(mpiRequests[iP]));
+   for ( iP = 0; iP < nSends; iP++ ) 
+      MPI_Send(&(sendLengs[iP]), 1, MPI_INT, sendProcs[iP], 29421, mpiComm);
+   for ( iP = 0; iP < nRecvs; iP++ ) 
+   {
+      MPI_Wait(&(mpiRequests[iP]), &mpiStatus);
+      recvProcs[iP] = mpiStatus.MPI_SOURCE;
+   }
+
+   /* -------------------------------------------------------- */ 
+   /* communicate node and equation information                */
+   /* -------------------------------------------------------- */ 
+
+   for ( iP = 0; iP < nRecvs; iP++ ) 
+   {
+      iRecvBufs[iP] = new int[recvLengs[iP]*2];
+      MPI_Irecv(iRecvBufs[iP], recvLengs[iP]*2, MPI_INT, recvProcs[iP], 
+                29422, mpiComm, &(mpiRequests[iP]));
+   }
+   for ( iP = 0; iP < nSends; iP++ ) 
+   {
+      iSendBufs[iP] = new int[sendLengs[iP]*2];
+      sendLengs[iP] = 0;
+   }
+   for ( iN = 0; iN < nNodes; iN++ )
+   {
+      if ( procMapArray[iN] >= 0 ) 
+      {
+         procIndex = procMapArray[iN];
+         iSendBufs[procIndex][sendLengs[procIndex]++] = nodeNumbers[iN];
+         iSendBufs[procIndex][sendLengs[procIndex]++] = eqnNumbers[iN];
+      }
+   }
+   for ( iP = 0; iP < nSends; iP++ ) 
+   {
+      sendLengs[iP] /= 2;
+      MPI_Send(iSendBufs[iP], sendLengs[iP]*2, MPI_INT, sendProcs[iP], 
+               29422, mpiComm);
+   }
+   for ( iP = 0; iP < nRecvs; iP++ ) MPI_Wait(&(mpiRequests[iP]), &mpiStatus);
+
+   /* -------------------------------------------------------- */ 
+   /* form node and equation map                               */
+   /* -------------------------------------------------------- */ 
+
+   newNumNodes = nNodes;
+   for ( iP = 0; iP < nRecvs; iP++ ) newNumNodes += recvLengs[iP];
+   newNodeNumbers = new int[newNumNodes];
+   newEqnNumbers  = new int[newNumNodes];
+   newNumNodes = 0;
+   for (iN = 0; iN < nNodes; iN++) 
+   {
+      newNodeNumbers[newNumNodes]  = nodeNumbers[iN];
+      newEqnNumbers[newNumNodes++] = eqnNumbers[iN];
+   }
+   for ( iP = 0; iP < nRecvs; iP++ ) 
+   {
+      for ( iR = 0; iR < recvLengs[iP]; iR++ ) 
+      {
+         newNodeNumbers[newNumNodes]  = iRecvBufs[iP][iR*2];
+         newEqnNumbers[newNumNodes++] = iRecvBufs[iP][iR*2+1];
+      }
+   }
    mapper = new MLI_Mapper();
-   mapper->setMap( nNodes, nodeNumbers, eqnNumbers );
-   MPI_Comm_rank( mli_object->mpiComm_, &mypid );
+   mapper->setMap( newNumNodes, newNodeNumbers, newEqnNumbers );
    mli_object->mapper_ = mapper;
+
+   /* -------------------------------------------------------- */ 
+   /* clean up and return                                      */
+   /* -------------------------------------------------------- */ 
+
+   delete [] procMapArray; 
+   if ( nSends > 0 )
+   {
+      delete [] sendProcs;
+      delete [] sendLengs;
+      for ( iS = 0; iS < nSends; iS++ ) delete [] iSendBufs[iS];
+      delete [] iSendBufs;
+   } 
+   if ( nRecvs > 0 )
+   {
+      delete [] recvProcs;
+      delete [] recvLengs;
+      for ( iR = 0; iR < nRecvs; iR++ ) delete [] iRecvBufs[iR];
+      delete [] iRecvBufs;
+      delete [] mpiRequests;
+   } 
+   delete [] newNodeNumbers;
+   delete [] newEqnNumbers;
    return 0;
 #else
    (void) solver;
    (void) nNodes;
    (void) nodeNumbers;
    (void) eqnNumbers;
+   (void) procNRows;
+   return 1;
+#endif
+}
+
+/****************************************************************************/
+/* HYPRE_LSI_MLIAdjustNodeEqnMap                                            */
+/*--------------------------------------------------------------------------*/
+
+extern "C"
+int HYPRE_LSI_MLIAdjustNodeEqnMap(HYPRE_Solver solver, int *procNRows,
+                                  int *procOffsets)
+{
+#ifdef HAVE_MLI
+   HYPRE_LSI_MLI *mli_object = (HYPRE_LSI_MLI *) solver;
+   if ( mli_object == NULL ) return 1;
+   if ( mli_object->mapper_ == NULL ) return 1;
+   mli_object->mapper_->adjustMapOffset( mli_object->mpiComm_, procNRows, 
+                                         procOffsets );
+   return 0;
+#else
+   (void) solver;
+   (void) procNRows;
+   (void) procOffsets;
    return 1;
 #endif
 }
@@ -885,13 +1073,25 @@ int HYPRE_LSI_MLISetCoarseSolver( HYPRE_Solver solver, int solver_id,
 }
 
 /****************************************************************************/
-/* HYPRE_LSI_MLISetNodalCoordinates                                         */
+/* HYPRE_LSI_MLILoadNodalCoordinates                                        */
+/* (The nodal coordinates loaded in here conforms to the nodal labeling in  */
+/* FEI, so the lookup object can be used to find the equation number.       */
+/* In addition, node numbers and coordinates need to be shuffled between    */
+/* processors)
 /*--------------------------------------------------------------------------*/
 
 extern "C"
-int HYPRE_LSI_MLISetNodalCoordinates(HYPRE_Solver solver, int nNodes,
-                                  int nodeDOF, double *coords, double *scaling)
+int HYPRE_LSI_MLILoadNodalCoordinates(HYPRE_Solver solver, int nNodes,
+              int nodeDOF, int *eqnNumbers, int endRow, double *coords)
 {
+   int           iN, iP, mypid, nprocs, *nodeProcMap, *iTempArray, eqnInd;
+   int           iS, nSends, *sendLengs, *sendProcs, **iSendBufs, procIndex;
+   int           iR, nRecvs, *recvLengs, *recvProcs, **iRecvBufs, *procList;
+   int           iD, *procNRows, numNodes;
+   double        **dSendBufs, **dRecvBufs, *nCoords;
+   MPI_Request   *mpiRequests;
+   MPI_Status    mpiStatus;
+   MPI_Comm      mpiComm;
    HYPRE_LSI_MLI *mli_object = (HYPRE_LSI_MLI *) solver;
 
    /* -------------------------------------------------------- */ 
@@ -915,22 +1115,237 @@ int HYPRE_LSI_MLISetNodalCoordinates(HYPRE_Solver solver, int nNodes,
    mli_object->nSpaceVects_  = NULL; 
 
    /* -------------------------------------------------------- */ 
-   /* allocate space and load information                      */
+   /* fetch machine information                                */
    /* -------------------------------------------------------- */ 
 
-   mli_object->nodeDOF_      = nodeDOF;
-   mli_object->localNEqns_   = nNodes * nodeDOF;
-   mli_object->nCoordinates_ = new double[nNodes*nodeDOF];
-   for ( int i = 0; i < nNodes*nodeDOF; i++ )  
-      mli_object->nCoordinates_[i] = coords[i];
-   if ( scaling != NULL )
+   mpiComm = mli_object->mpiComm_;
+   MPI_Comm_rank( mpiComm, &mypid );
+   MPI_Comm_size( mpiComm, &nprocs );
+
+   /* -------------------------------------------------------- */
+   /* construct procNRows array                                */
+   /* -------------------------------------------------------- */
+
+   procNRows = new int[nprocs+1];
+   iTempArray = new int[nprocs];
+   for ( iP = 0; iP < nprocs; iP++ ) iTempArray[iP] = 0;
+   iTempArray[mypid] = endRow + 1;
+   MPI_Allreduce(iTempArray,&(procNRows[1]),nprocs,MPI_INT,MPI_SUM,mpiComm);
+   procNRows[0] = 0;
+
+   /* -------------------------------------------------------- */
+   /* construct node to processor map                          */
+   /* -------------------------------------------------------- */
+
+   nodeProcMap = new int[nNodes];
+   for ( iN = 0; iN < nNodes; iN++ )
    {
-      mli_object->nullScales_ = new double[nNodes*nodeDOF];
-      for ( int i = 0; i < nNodes*nodeDOF; i++ )  
-         mli_object->nullScales_[i] = scaling[i];
+      nodeProcMap[iN] = -1;
+      if ( eqnNumbers[iN] < procNRows[mypid] ||
+           eqnNumbers[iN] >= procNRows[mypid+1] )
+      {
+         for ( iP = 0; iP < nprocs; iP++ )
+            if ( eqnNumbers[iN] < procNRows[iP] ) break;
+         nodeProcMap[iN] = iP - 1;
+      }
+   }
+
+   /* -------------------------------------------------------- */
+   /* construct send information                               */
+   /* -------------------------------------------------------- */
+
+   procList = new int[nprocs];
+   for ( iP = 0; iP < nprocs; iP++ ) procList[iP] = 0;
+   for ( iN = 0; iN < nNodes; iN++ )
+      if ( nodeProcMap[iN] >= 0 ) procList[nodeProcMap[iN]]++;
+   nSends = 0;
+   for ( iP = 0; iP < nprocs; iP++ ) if ( procList[iP] > 0 ) nSends++;
+   if ( nSends > 0 )
+   {
+      sendProcs = new int[nSends];
+      sendLengs = new int[nSends];
+      iSendBufs = new int*[nSends];
+      dSendBufs = new double*[nSends];
+   }
+   nSends = 0;
+   for ( iP = 0; iP < nprocs; iP++ )
+   {
+      if ( procList[iP] > 0 )
+      {
+         sendLengs[nSends] = procList[iP];
+         sendProcs[nSends++] = iP;
+      }
+   }
+
+   /* -------------------------------------------------------- */
+   /* construct recv information                               */
+   /* -------------------------------------------------------- */
+
+   for ( iP = 0; iP < nprocs; iP++ ) procList[iP] = 0;
+   for ( iP = 0; iP < nSends; iP++ ) procList[sendProcs[iP]]++;
+   iTempArray = new int[nprocs];
+   MPI_Allreduce(procList,iTempArray,nprocs,MPI_INT,MPI_SUM,mpiComm);
+   nRecvs = iTempArray[mypid];
+   delete [] procList;
+   delete [] iTempArray;
+   if ( nRecvs > 0 )
+   {
+      recvLengs = new int[nRecvs];
+      recvProcs = new int[nRecvs];
+      iRecvBufs = new int*[nRecvs];
+      dRecvBufs = new double*[nRecvs];
+      mpiRequests = new MPI_Request[nRecvs];
+   }
+   for ( iP = 0; iP < nRecvs; iP++ )
+      MPI_Irecv(&(recvLengs[iP]), 1, MPI_INT, MPI_ANY_SOURCE, 29421,
+                mpiComm, &(mpiRequests[iP]));
+   for ( iP = 0; iP < nSends; iP++ )
+      MPI_Send(&(sendLengs[iP]), 1, MPI_INT, sendProcs[iP], 29421, mpiComm);
+   for ( iP = 0; iP < nRecvs; iP++ )
+   {
+      MPI_Wait(&(mpiRequests[iP]), &mpiStatus);
+      recvProcs[iP] = mpiStatus.MPI_SOURCE;
+   }
+
+   /* -------------------------------------------------------- */
+   /* communicate equation numbers information                */
+   /* -------------------------------------------------------- */
+
+   for ( iP = 0; iP < nRecvs; iP++ )
+   {
+      iRecvBufs[iP] = new int[recvLengs[iP]];
+      MPI_Irecv(iRecvBufs[iP], recvLengs[iP], MPI_INT, recvProcs[iP],
+                29422, mpiComm, &(mpiRequests[iP]));
+   }
+   for ( iP = 0; iP < nSends; iP++ )
+   {
+      iSendBufs[iP] = new int[sendLengs[iP]];
+      sendLengs[iP] = 0;
+   }
+   for ( iN = 0; iN < nNodes; iN++ )
+   {
+      if ( nodeProcMap[iN] >= 0 )
+      {
+         procIndex = nodeProcMap[iN];
+         iSendBufs[procIndex][sendLengs[procIndex]++] = eqnNumbers[iN];
+      }
+   }
+   for ( iP = 0; iP < nSends; iP++ )
+   {
+      MPI_Send(iSendBufs[iP], sendLengs[iP], MPI_INT, sendProcs[iP],
+               29422, mpiComm);
+   }
+   for ( iP = 0; iP < nRecvs; iP++ ) MPI_Wait(&(mpiRequests[iP]), &mpiStatus);
+
+   /* -------------------------------------------------------- */
+   /* communicate coordinate information                       */
+   /* -------------------------------------------------------- */
+
+   for ( iP = 0; iP < nRecvs; iP++ )
+   {
+      dRecvBufs[iP] = new double[recvLengs[iP]*nodeDOF];
+      MPI_Irecv(dRecvBufs[iP], recvLengs[iP]*nodeDOF, MPI_DOUBLE, 
+                recvProcs[iP], 29425, mpiComm, &(mpiRequests[iP]));
+   }
+   for ( iP = 0; iP < nSends; iP++ )
+   {
+      dSendBufs[iP] = new double[sendLengs[iP]*nodeDOF];
+      sendLengs[iP] = 0;
+   }
+   for ( iN = 0; iN < nNodes; iN++ )
+   {
+      if ( nodeProcMap[iN] >= 0 )
+      {
+         procIndex = nodeProcMap[iN];
+         for ( iD = 0; iD < nodeDOF; iD++ )
+            dSendBufs[procIndex][sendLengs[procIndex]++]=coords[iN*nodeDOF+iD];
+      }
+   }
+   for ( iP = 0; iP < nSends; iP++ )
+   {
+      sendLengs[iP] /= nodeDOF;
+      MPI_Send(dSendBufs[iP], sendLengs[iP]*nodeDOF, MPI_DOUBLE, 
+               sendProcs[iP], 29425, mpiComm);
+   }
+   for ( iP = 0; iP < nRecvs; iP++ ) MPI_Wait(&(mpiRequests[iP]), &mpiStatus);
+
+   /* -------------------------------------------------------- */
+   /* set up nodal coordinate information in correct order     */
+   /* -------------------------------------------------------- */
+
+   mli_object->nodeDOF_      = nodeDOF;
+   mli_object->localNEqns_   = procNRows[mypid+1] - procNRows[mypid];
+   mli_object->nCoordinates_ = new double[mli_object->localNEqns_];
+   nCoords                   = mli_object->nCoordinates_;
+   for (iN = 0; iN < mli_object->localNEqns_; iN++) nCoords[iN] = -999999.0;  
+
+   numNodes = 0;
+   for ( iN = 0; iN < nNodes; iN++ )  
+   {
+      if ( nodeProcMap[iN] < 0 ) 
+      {
+         eqnInd = eqnNumbers[iN] - procNRows[mypid];
+         if ( nCoords[eqnInd] == -999999.0 ) numNodes++;
+         for ( iD = 0; iD < nodeDOF; iD++ )  
+            nCoords[eqnInd+iD] = coords[iN*nodeDOF+iD]; 
+      }
+   }
+   for ( iP = 0; iP < nRecvs; iP++ )
+   {
+      for ( iR = 0; iR < recvLengs[iP]; iR++ )
+      {
+         eqnInd = iRecvBufs[iP][iR] - procNRows[mypid];
+         if ( nCoords[eqnInd] == -999999.0 ) numNodes++;
+         for ( iD = 0; iD < nodeDOF; iD++ )  
+            nCoords[eqnInd+iD] = dRecvBufs[iP][iR*nodeDOF+iD];
+      }
+   }
+   mli_object->localNEqns_ = numNodes * nodeDOF;
+
+   /* -------------------------------------------------------- */
+   /* clean up                                                 */
+   /* -------------------------------------------------------- */
+
+   delete [] nodeProcMap;
+   if ( nSends > 0 )
+   {
+      delete [] sendProcs;
+      delete [] sendLengs;
+      for ( iS = 0; iS < nSends; iS++ ) delete [] iSendBufs[iS];
+      for ( iS = 0; iS < nSends; iS++ ) delete [] dSendBufs[iS];
+      delete [] dSendBufs;
+      delete [] iSendBufs;
+   }
+   if ( nRecvs > 0 )
+   {
+      delete [] recvProcs;
+      delete [] recvLengs;
+      for ( iR = 0; iR < nRecvs; iR++ ) delete [] iRecvBufs[iR];
+      for ( iR = 0; iR < nRecvs; iR++ ) delete [] dRecvBufs[iR];
+      delete [] iRecvBufs;
+      delete [] dRecvBufs;
+      delete [] mpiRequests;
    }
    return 0;
 } 
+
+/****************************************************************************/
+/* HYPRE_LSI_MLILoadMatrixScalings                                          */
+/*--------------------------------------------------------------------------*/
+
+extern "C"
+int HYPRE_LSI_MLILoadMatrixScalings(HYPRE_Solver solver, int nEqns,
+                                    double *scalings)
+{
+   HYPRE_LSI_MLI *mli_object = (HYPRE_LSI_MLI *) solver;
+   if ( scalings != NULL )
+   {
+      mli_object->nullScales_ = new double[nEqns];
+      for ( int i = 0; i < nEqns; i++ )  
+         mli_object->nullScales_[i] = scalings[i];
+   }
+   return 0;
+}
 
 /****************************************************************************/
 /* HYPRE_LSI_MLIFEDataCreate                                                */

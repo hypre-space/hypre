@@ -1884,9 +1884,15 @@ int HYPRE_LinSysCore::matrixLoadComplete()
 int HYPRE_LinSysCore::putNodalFieldData(int fieldID, int fieldSize,
                        int* nodeNumbers, int numNodes, const double* data)
 {
-   int    i, j, nEqns, **nodeFieldIDs, eqnNumber, nodeFieldID;
-   int    blockID, *blockIDs, localNNodes, *trueNodeNumbers, *trueEqnNumbers;
-   double *nullData;
+   int    i, **nodeFieldIDs, nodeFieldID, numFields, *procNRows;
+   int    blockID, *blockIDs, *eqnNumbers, *iTempArray, checkFieldSize;
+   int    *aleNodeNumbers;
+
+   //-------------------------------------------------------------------
+   // This part is for loading the nodal coordinate information.
+   // The node IDs in nodeNumbers are the one used in FEI (and thus
+   // corresponds to the ones in the system matrix using lookup)
+   //-------------------------------------------------------------------
 
    if ( fieldID == -25333 )
    {
@@ -1901,50 +1907,61 @@ int HYPRE_LinSysCore::putNodalFieldData(int fieldID, int fieldSize,
       }    
       if ( HYPreconID_ == HYMLI && lookup_ != NULL )
       {
-         nEqns        = localEndRow_ - localStartRow_ + 1,
-         nullData     = new double[nEqns];
-         blockIDs     = (int *) lookup_->getElemBlockIDs();
-         blockID      = blockIDs[0];
-         nodeFieldIDs = (int **) lookup_->getFieldIDsTable(blockID);
-         nodeFieldID  = nodeFieldIDs[0][0];
-         localNNodes  = 0;
+         blockIDs       = (int *) lookup_->getElemBlockIDs();
+         blockID        = blockIDs[0];
+         nodeFieldIDs   = (int **) lookup_->getFieldIDsTable(blockID);
+         nodeFieldID    = nodeFieldIDs[0][0];
+         checkFieldSize = lookup_->getFieldSize(nodeFieldID);
+         assert( checkFieldSize == fieldSize );
+         eqnNumbers     = new int[numNodes];
          for ( i = 0; i < numNodes; i++ )
-         {
-            eqnNumber = lookup_->getEqnNumber(nodeNumbers[i], nodeFieldID);
-            if ( (eqnNumber+1) >= localStartRow_ && eqnNumber < localEndRow_ )
-            {
-               for ( j = 0; j < fieldSize; j++ )
-                  nullData[eqnNumber+1-localStartRow_+j] = data[i*fieldSize+j];
-               localNNodes++;
-            }
-         }
-         HYPRE_LSI_MLISetNodalCoordinates(HYPrecon_, localNNodes, fieldSize,  
-                                          nullData, NULL);
-         delete [] nullData;
+            eqnNumbers[i] = lookup_->getEqnNumber(nodeNumbers[i],nodeFieldID);
+         HYPRE_LSI_MLILoadNodalCoordinates(HYPrecon_, numNodes, fieldSize,
+                       eqnNumbers, localEndRow_-1, (double *) data);
+         delete [] eqnNumbers;
       }    
    }    
+
+   //-------------------------------------------------------------------
+   // this is needed to set up the correct node equation map
+   // (the FEI remaps the node IDs in the incoming nodeNumbers array.
+   //  to revert to the original ALE3D node numbers, it is passed in
+   //  here as data)
+   //-------------------------------------------------------------------
+
    else if ( fieldID == -49773 )
    {
       if ( HYPreconID_ == HYMLI && lookup_ != NULL )
       {
-         blockIDs      = (int *) lookup_->getElemBlockIDs();
-         blockID      = blockIDs[0];
-         nodeFieldIDs = (int **) lookup_->getFieldIDsTable(blockID);
-         nodeFieldID  = nodeFieldIDs[0][0];
-
-         trueNodeNumbers = new int[numNodes];
-         for ( i = 0; i < numNodes; i++ ) trueNodeNumbers[i] = (int) data[i];
-         trueEqnNumbers = new int[numNodes];
+         blockIDs       = (int *) lookup_->getElemBlockIDs();
+         blockID        = blockIDs[0];
+         nodeFieldIDs   = (int **) lookup_->getFieldIDsTable(blockID);
+         nodeFieldID    = nodeFieldIDs[0][0];
+         checkFieldSize = lookup_->getFieldSize(nodeFieldID);
+         assert( fieldSize == 1 );
+         aleNodeNumbers = new int[numNodes];
+         eqnNumbers     = new int[numNodes];
          for ( i = 0; i < numNodes; i++ )
-            trueEqnNumbers[i] = 
-               lookup_->getEqnNumber(nodeNumbers[i],nodeFieldID);
-
-         HYPRE_LSI_MLICreateNodeEqnMap(HYPrecon_, numNodes, trueNodeNumbers,
-                                       trueEqnNumbers);
-         delete [] trueNodeNumbers;
-         delete [] trueEqnNumbers;
-      }    
-   }    
+         {
+            aleNodeNumbers[i] = (int) data[i];
+            eqnNumbers[i] = lookup_->getEqnNumber(nodeNumbers[i],nodeFieldID);
+         }
+         procNRows = new int[numProcs_];
+         for ( i = 0; i < numProcs_; i++ ) procNRows[i] = 0;
+         procNRows[mypid_] = localEndRow_;
+         iTempArray = procNRows;
+         procNRows  = new int[numProcs_+1];
+         for ( i = 0; i <= numProcs_; i++ ) procNRows[i] = 0;
+         MPI_Allreduce(iTempArray, &(procNRows[1]), numProcs_, MPI_INT, MPI_SUM,
+                       comm_);
+         delete [] iTempArray;
+         HYPRE_LSI_MLICreateNodeEqnMap(HYPrecon_, numNodes, aleNodeNumbers,
+                                       eqnNumbers, procNRows);
+         delete [] procNRows;
+         delete [] eqnNumbers;
+         delete [] aleNodeNumbers;
+      } 
+   } 
    return (0);
 }
 
@@ -3440,6 +3457,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
          HYPRE_ParCSRMatrixRestoreRow(A_csr,i,&rowSize,&colInd,&colVal);
       }
       fclose(fp);
+
       sprintf(fname, "hypre_rhs.out.%d", mypid_);
       fp = fopen( fname, "w");
       fprintf(fp, "%6d \n", nrows);
