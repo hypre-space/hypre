@@ -103,7 +103,13 @@ hypre_ParAMGSetup( void               *amg_vdata,
        * for the level.  Returns strength matrix, S  
        *--------------------------------------------------------------*/
      
-      if (debug_flag) wall_time = time_getWallclockSeconds();
+      if (debug_flag==1) wall_time = time_getWallclockSeconds();
+      if (debug_flag==3)
+      {
+          printf("\n ===== Proc = %d     Level = %d  =====\n",
+                        my_id, level);
+          fflush(NULL);
+      }
       if (coarsen_type == 6)
       {
 	 hypre_ParAMGCoarsenFalgout(A_array[level], strong_threshold,
@@ -120,7 +126,7 @@ hypre_ParAMGSetup( void               *amg_vdata,
 	 hypre_ParAMGCoarsen(A_array[level], strong_threshold,
                           &S, &CF_marker, &coarse_size); 
       }
-      if (debug_flag)
+      if (debug_flag==1)
       {
          wall_time = time_getWallclockSeconds() - wall_time;
          printf("Proc = %d    Level = %d    Coarsen Time = %f\n",
@@ -133,12 +139,12 @@ hypre_ParAMGSetup( void               *amg_vdata,
       /*-------------------------------------------------------------
        * Build prolongation matrix, P, and place in P_array[level] 
        *--------------------------------------------------------------*/
-      if (debug_flag) wall_time = time_getWallclockSeconds();
+      if (debug_flag==1) wall_time = time_getWallclockSeconds();
 
       hypre_ParAMGBuildInterp(A_array[level], CF_marker_array[level], S,
                               debug_flag, trunc_factor, &P);
 
-      if (debug_flag)
+      if (debug_flag==1)
       {
          wall_time = time_getWallclockSeconds() - wall_time;
          printf("Proc = %d    Level = %d    Build Interp Time = %f\n",
@@ -158,12 +164,12 @@ hypre_ParAMGSetup( void               *amg_vdata,
        * Build coarse-grid operator, A_array[level+1] by R*A*P
        *--------------------------------------------------------------*/
 
-      if (debug_flag) wall_time = time_getWallclockSeconds();
+      if (debug_flag==1) wall_time = time_getWallclockSeconds();
 
       hypre_ParAMGBuildCoarseOperator(P_array[level], A_array[level] , 
                                       P_array[level], &A_H);
 
-      if (debug_flag)
+      if (debug_flag==1)
       {
          wall_time = time_getWallclockSeconds() - wall_time;
          printf("Proc = %d    Level = %d    Build Coarse Operator Time = %f\n",
