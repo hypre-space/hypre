@@ -342,8 +342,8 @@ then
         CASC_SET_CDEBUG(-g)
         CASC_SET_CXXOPT(-O)
         CASC_SET_CXXDEBUG(-g)
-        CASC_SET_FOPT(-O)
-        CASC_SET_FDEBUG(-g)
+        CASC_SET_FOPT(-O -silent)
+        CASC_SET_FDEBUG(-g -silent)
 
    ;;
 
@@ -399,6 +399,7 @@ then
       
      CASC_SET_CXXOPT(-O)
      CASC_SET_CXXDEBUG(-g)
+
    ;;
 
    rs6000)
@@ -489,6 +490,7 @@ then
      CASC_SET_CXXDEBUG(-g)
      CASC_SET_FOPT(-O)
      CASC_SET_FDEBUG(-g)
+
    ;;
    
   esac
@@ -596,7 +598,7 @@ fi
 
 CFLAGS="$CFLAGS $COPT $CDEBUG"
 CXXFLAGS="$CXXFLAGS $CXXOPT $CXXDEBUG"
-F77FLAGS="$FFLAGS $FOPT $FDEBUG"
+F77FLAGS="$F77FLAGS $FOPT $FDEBUG"
 
 dnl *********************************************************************
 dnl * Add flags to LIBS and LIBDIRS
