@@ -23,6 +23,7 @@
 #endif
 
 #include "HYPRE.h"
+#include "HYPRE_config.h"
 #include "../../IJ_mv/HYPRE_IJ_mv.h"
 #include "../../parcsr_mv/HYPRE_parcsr_mv.h"
 #include "../../parcsr_ls/HYPRE_parcsr_ls.h"
@@ -46,6 +47,26 @@
 #ifdef SUPERLU
 #include "dsp_defs.h"
 #include "util.h"
+#endif
+
+#ifdef HYPRE_SEQUENTIAL
+#include <time.h>
+extern "C"
+{
+   double LSC_Wtime()
+   {
+      clock_t  ticks;
+      double   seconds; 
+      ticks   = clock() ;
+      seconds = (double) t / (double) CLOCKS_PER_SEC;
+      return seconds;
+   }
+}
+#else
+   double LSC_Wtime()
+   {
+      return (MPI_Wtime());
+   }
 #endif
 
 //---------------------------------------------------------------------------
@@ -2854,9 +2875,7 @@ void HYPRE_LinSysCore::selectPreconditioner(char *name)
             break;
 
        case HYEUCLID :
-printf("EuclidCreate\n");
             ierr = HYPRE_ParCSREuclidCreate( comm_, &HYPrecon_ );
-printf("EuclidCreate done\n");
             assert( !ierr );
             break;
 
@@ -2981,7 +3000,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
     //-------------------------------------------------------------------
 
     MPI_Barrier(comm_);
-    rtime1  = MPI_Wtime();
+    rtime1  = LSC_Wtime();
     if ( schurReduction_ == 1 && schurReductionCreated_ == 0 )
     {
        buildSchurReducedSystem();
@@ -2998,7 +3017,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
     }
 
     MPI_Barrier(comm_);
-    rtime2  = MPI_Wtime();
+    rtime2  = LSC_Wtime();
     
     //*******************************************************************
     // fetch matrix and vector pointers
@@ -3120,7 +3139,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
 
     MPI_Barrier(comm_);
     status = 1;
-    stime  = MPI_Wtime();
+    stime  = LSC_Wtime();
     ptime  = stime;
 
     if ( projectionScheme_ == 1 )
@@ -3163,7 +3182,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
             }
             HYPRE_ParCSRPCGSetup(HYSolver_, A_csr, b_csr, x_csr);
             MPI_Barrier( comm_ );
-            ptime  = MPI_Wtime();
+            ptime  = LSC_Wtime();
             HYPRE_ParCSRPCGSolve(HYSolver_, A_csr, b_csr, x_csr);
             HYPRE_ParCSRPCGGetNumIterations(HYSolver_, &num_iterations);
             HYPRE_ParVectorCopy( b_csr, r_csr );
@@ -3203,7 +3222,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
             }
             HYPRE_ParCSRGMRESSetup(HYSolver_, A_csr, b_csr, x_csr);
             MPI_Barrier( comm_ );
-            ptime  = MPI_Wtime();
+            ptime  = LSC_Wtime();
             HYPRE_ParCSRGMRESSolve(HYSolver_, A_csr, b_csr, x_csr);
             HYPRE_ParCSRGMRESGetNumIterations(HYSolver_, &num_iterations);
             HYPRE_ParVectorCopy( b_csr, r_csr );
@@ -3241,7 +3260,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
             }
             HYPRE_ParCSRBiCGSTABSetup(HYSolver_, A_csr, b_csr, x_csr);
             MPI_Barrier( comm_ );
-            ptime  = MPI_Wtime();
+            ptime  = LSC_Wtime();
             HYPRE_ParCSRBiCGSTABSolve(HYSolver_, A_csr, b_csr, x_csr);
             HYPRE_ParCSRBiCGSTABGetNumIterations(HYSolver_, &num_iterations);
             HYPRE_ParVectorCopy( b_csr, r_csr );
@@ -3279,7 +3298,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
             }
             HYPRE_ParCSRBiCGSTABLSetup(HYSolver_, A_csr, b_csr, x_csr);
             MPI_Barrier( comm_ );
-            ptime  = MPI_Wtime();
+            ptime  = LSC_Wtime();
             HYPRE_ParCSRBiCGSTABLSolve(HYSolver_, A_csr, b_csr, x_csr);
             HYPRE_ParCSRBiCGSTABLGetNumIterations(HYSolver_, &num_iterations);
             HYPRE_ParVectorCopy( b_csr, r_csr );
@@ -3317,7 +3336,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
             }
             HYPRE_ParCSRTFQmrSetup(HYSolver_, A_csr, b_csr, x_csr);
             MPI_Barrier( comm_ );
-            ptime  = MPI_Wtime();
+            ptime  = LSC_Wtime();
             HYPRE_ParCSRTFQmrSolve(HYSolver_, A_csr, b_csr, x_csr);
             HYPRE_ParCSRTFQmrGetNumIterations(HYSolver_, &num_iterations);
             HYPRE_ParVectorCopy( b_csr, r_csr );
@@ -3355,7 +3374,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
             }
             HYPRE_ParCSRBiCGSSetup(HYSolver_, A_csr, b_csr, x_csr);
             MPI_Barrier( comm_ );
-            ptime  = MPI_Wtime();
+            ptime  = LSC_Wtime();
             HYPRE_ParCSRBiCGSSolve(HYSolver_, A_csr, b_csr, x_csr);
             HYPRE_ParCSRBiCGSGetNumIterations(HYSolver_, &num_iterations);
             HYPRE_ParVectorCopy( b_csr, r_csr );
@@ -3495,7 +3514,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
     iterations = num_iterations;
 
     MPI_Barrier(comm_);
-    etime = MPI_Wtime();
+    etime = LSC_Wtime();
     if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0 )
     {
        printf("***************************************************\n");

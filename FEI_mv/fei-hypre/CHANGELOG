@@ -54,4 +54,7 @@
 06/14/01    2.0.0R11
             - re-work hypre_slide_reduce.C to give smaller subroutines
             - output matrices to file in longer precision
+06/25/01    2.0.1R1
+            - change to the new IJ interface
+            - add timings for non-MPI version
  

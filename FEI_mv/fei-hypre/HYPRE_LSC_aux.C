@@ -2779,7 +2779,12 @@ void HYPRE_LinSysCore::solveUsingSuperLU(int& status)
     // get information about the current matrix
     //------------------------------------------------------------------
 
-    A_csr  = (HYPRE_ParCSRMatrix) HYPRE_IJMatrixGetLocalStorage(currA_);
+    //---old_IJ----------------------------------------------------------
+    //A_csr  = (HYPRE_ParCSRMatrix) HYPRE_IJMatrixGetLocalStorage(currA_);
+    //---new_IJ----------------------------------------------------------
+    HYPRE_IJMatrixGetObject(currA_, (void **) &A_csr);
+    //------------------------------------------------------------------
+
     HYPRE_ParCSRMatrixGetRowPartitioning( A_csr, &partition );
     start_row = partition[0];
     end_row   = partition[1] - 1;
@@ -2807,7 +2812,13 @@ void HYPRE_LinSysCore::solveUsingSuperLU(int& status)
     ind_array = new int[nrows];
     for ( i = 0; i < nrows; i++ ) ind_array[i] = i;
     rhs = new double[nrows];
-    ierr = HYPRE_IJVectorGetLocalComponents(currB_, nrows, ind_array, NULL, rhs);
+
+    //---old_IJ---------------------------------------------------------
+    //HYPRE_IJVectorGetLocalComponents(currB_, nrows, ind_array, NULL, rhs);
+    //---new_IJ---------------------------------------------------------
+    ierr = HYPRE_IJVectorGetValues(currB_, nrows, ind_array, NULL, rhs);
+    //------------------------------------------------------------------
+
     assert(!ierr);
     dCreate_Dense_Matrix(&B, nrows, 1, rhs, nrows, DN, _D, GE);
 
@@ -2863,9 +2874,16 @@ void HYPRE_LinSysCore::solveUsingSuperLU(int& status)
        soln = (double *) ((DNformat *) B.Store)->nzval;
        ierr = HYPRE_IJVectorSetLocalComponents(currX_,nrows,ind_array,NULL,soln);
        assert(!ierr);
-       x_csr  = (HYPRE_ParVector) HYPRE_IJVectorGetLocalStorage(currX_);
-       b_csr  = (HYPRE_ParVector) HYPRE_IJVectorGetLocalStorage(currB_);
-       r_csr  = (HYPRE_ParVector) HYPRE_IJVectorGetLocalStorage(currR_);
+       //---old_IJ------------------------------------------------------
+       //x_csr  = (HYPRE_ParVector) HYPRE_IJVectorGetLocalStorage(currX_);
+       //b_csr  = (HYPRE_ParVector) HYPRE_IJVectorGetLocalStorage(currB_);
+       //r_csr  = (HYPRE_ParVector) HYPRE_IJVectorGetLocalStorage(currR_);
+       //---new_IJ------------------------------------------------------
+       HYPRE_IJVectorGetObject(currX_, (void **) &x_csr);
+       HYPRE_IJVectorGetObject(currB_, (void **) &b_csr);
+       HYPRE_IJVectorGetObject(currR_, (void **) &r_csr);
+       //---------------------------------------------------------------
+
        ierr = HYPRE_ParVectorCopy( b_csr, r_csr );
        assert(!ierr);
        ierr = HYPRE_ParCSRMatrixMatvec( -1.0, A_csr, x_csr, 1.0, r_csr );
@@ -2960,7 +2978,12 @@ void HYPRE_LinSysCore::solveUsingSuperLUX(int& status)
     // get information about the current matrix
     //------------------------------------------------------------------
 
-    A_csr  = (HYPRE_ParCSRMatrix) HYPRE_IJMatrixGetLocalStorage(currA_);
+    //---old_IJ---------------------------------------------------------
+    //A_csr  = (HYPRE_ParCSRMatrix) HYPRE_IJMatrixGetLocalStorage(currA_);
+    //---new_IJ---------------------------------------------------------
+    HYPRE_IJMatrixGetObject(currA_, (void**) &A_csr);
+    //------------------------------------------------------------------
+
     HYPRE_ParCSRMatrixGetRowPartitioning( A_csr, &partition );
     start_row = partition[0];
     end_row   = partition[1] - 1;
@@ -2995,7 +3018,13 @@ void HYPRE_LinSysCore::solveUsingSuperLUX(int& status)
     ind_array = new int[nrows];
     for ( i = 0; i < nrows; i++ ) ind_array[i] = i;
     rhs = new double[nrows];
-    ierr = HYPRE_IJVectorGetLocalComponents(currB_,nrows,ind_array,NULL,rhs);
+
+    //---new_IJ---------------------------------------------------------
+    //ierr=HYPRE_IJVectorGetLocalComponents(currB_,nrows,ind_array,NULL,rhs);
+    //---new_IJ---------------------------------------------------------
+    ierr = HYPRE_IJVectorGetValues(currB_, nrows, ind_array, NULL, rhs);
+    //------------------------------------------------------------------
+
     assert(!ierr);
     dCreate_Dense_Matrix(&B, nrows, 1, rhs, nrows, DN, _D, GE);
     soln = new double[nrows];
@@ -3073,9 +3102,15 @@ void HYPRE_LinSysCore::solveUsingSuperLUX(int& status)
     {
        ierr = HYPRE_IJVectorSetLocalComponents(currX_,nrows,ind_array,NULL,soln);
        assert(!ierr);
-       x_csr  = (HYPRE_ParVector) HYPRE_IJVectorGetLocalStorage(currX_);
-       r_csr  = (HYPRE_ParVector) HYPRE_IJVectorGetLocalStorage(currR_);
-       b_csr    = (HYPRE_ParVector) HYPRE_IJVectorGetLocalStorage(currB_);
+       //---old_IJ------------------------------------------------------
+       //x_csr  = (HYPRE_ParVector) HYPRE_IJVectorGetLocalStorage(currX_);
+       //r_csr  = (HYPRE_ParVector) HYPRE_IJVectorGetLocalStorage(currR_);
+       //b_csr    = (HYPRE_ParVector) HYPRE_IJVectorGetLocalStorage(currB_);
+       //---new_IJ------------------------------------------------------
+       HYPRE_IJVectorGetObject(currX_, (void **) &x_csr);
+       HYPRE_IJVectorGetObject(currR_, (void **) &r_csr);
+       HYPRE_IJVectorGetObject(currB_, (void **) &b_csr);
+       //---------------------------------------------------------------
        ierr = HYPRE_ParVectorCopy( b_csr, r_csr );
        assert(!ierr);
        ierr = HYPRE_ParCSRMatrixMatvec( -1.0, A_csr, x_csr, 1.0, r_csr );
@@ -3172,7 +3207,12 @@ void HYPRE_LinSysCore::solveUsingY12M(int& status)
     for ( i = 0; i < nrows; i++ ) colLengths[i] = 0;
     
     maxRowSize = 0;
-    A_csr  = (HYPRE_ParCSRMatrix) HYPRE_IJMatrixGetLocalStorage(currA_);
+    //---old_IJ---------------------------------------------------------
+    //A_csr  = (HYPRE_ParCSRMatrix) HYPRE_IJMatrixGetLocalStorage(currA_);
+    //---new_IJ---------------------------------------------------------
+    HYPRE_IJMatrixGetObject(currA_, (void**) &A_csr);
+    //------------------------------------------------------------------
+
     for ( i = 0; i < nrows; i++ )
     {
        HYPRE_ParCSRMatrixGetRow(A_csr,i,&rowSize,&colInd,&colVal);
@@ -3228,7 +3268,12 @@ void HYPRE_LinSysCore::solveUsingY12M(int& status)
     ind_array = new int[nrows];
     for ( i = 0; i < nrows; i++ ) ind_array[i] = i;
     rhs = new double[nrows];
-    ierr = HYPRE_IJVectorGetLocalComponents(currB_,nrows,ind_array,NULL,rhs);
+
+    //---old_IJ---------------------------------------------------------
+    //HYPRE_IJVectorGetLocalComponents(currB_,nrows,ind_array,NULL,rhs);
+    //---new_IJ---------------------------------------------------------
+    ierr = HYPRE_IJVectorGetValues(currB_, nrows, ind_array, NULL, rhs);
+    //------------------------------------------------------------------
     assert(!ierr);
 
     //------------------------------------------------------------------
@@ -3250,9 +3295,16 @@ void HYPRE_LinSysCore::solveUsingY12M(int& status)
     {
        ierr = HYPRE_IJVectorSetLocalComponents(currX_,nrows,ind_array,NULL,rhs);
        assert(!ierr);
-       x_csr  = (HYPRE_ParVector) HYPRE_IJVectorGetLocalStorage(currX_);
-       r_csr  = (HYPRE_ParVector) HYPRE_IJVectorGetLocalStorage(currR_);
-       b_csr  = (HYPRE_ParVector) HYPRE_IJVectorGetLocalStorage(currB_);
+       //---old_IJ------------------------------------------------------
+       //x_csr  = (HYPRE_ParVector) HYPRE_IJVectorGetLocalStorage(currX_);
+       //r_csr  = (HYPRE_ParVector) HYPRE_IJVectorGetLocalStorage(currR_);
+       //b_csr  = (HYPRE_ParVector) HYPRE_IJVectorGetLocalStorage(currB_);
+       //---new_IJ------------------------------------------------------
+       HYPRE_IJVectorGetObject(currX_, (void**) &x_csr);
+       HYPRE_IJVectorGetObject(currR_, (void**) &r_csr);
+       HYPRE_IJVectorGetObject(currB_, (void**) &b_csr);
+       //---------------------------------------------------------------
+
        ierr = HYPRE_ParVectorCopy( b_csr, r_csr );
        assert(!ierr);
        ierr = HYPRE_ParCSRMatrixMatvec( -1.0, A_csr, x_csr, 1.0, r_csr );
@@ -3332,7 +3384,13 @@ void HYPRE_LinSysCore::solveUsingAMGe(int &iterations)
     ind_array = new int[nrows];
     for ( i = 0; i < nrows; i++ ) ind_array[i] = i;
     rhs = new double[nrows];
-    ierr = HYPRE_IJVectorGetLocalComponents(currB_,nrows,ind_array,NULL,rhs);
+
+    //---old_IJ---------------------------------------------------------
+    // HYPRE_IJVectorGetLocalComponents(currB_,nrows,ind_array,NULL,rhs);
+    //---new_IJ---------------------------------------------------------
+    ierr = HYPRE_IJVectorGetValues(currB_, nrows, ind_array, NULL, rhs);
+    //------------------------------------------------------------------
+
     assert(!ierr);
 
     //------------------------------------------------------------------
@@ -3348,9 +3406,17 @@ void HYPRE_LinSysCore::solveUsingAMGe(int &iterations)
 
     ierr = HYPRE_IJVectorSetLocalComponents(currX_,nrows,ind_array,NULL,sol);
     assert(!ierr);
-    x_csr  = (HYPRE_ParVector) HYPRE_IJVectorGetLocalStorage(currX_);
-    r_csr  = (HYPRE_ParVector) HYPRE_IJVectorGetLocalStorage(currR_);
-    b_csr  = (HYPRE_ParVector) HYPRE_IJVectorGetLocalStorage(currB_);
+
+    //---old_IJ---------------------------------------------------------
+    //x_csr  = (HYPRE_ParVector) HYPRE_IJVectorGetLocalStorage(currX_);
+    //r_csr  = (HYPRE_ParVector) HYPRE_IJVectorGetLocalStorage(currR_);
+    //b_csr  = (HYPRE_ParVector) HYPRE_IJVectorGetLocalStorage(currB_);
+    //---new_IJ---------------------------------------------------------
+    HYPRE_IJVectorGetObject(currX_, (void**) &x_csr);
+    HYPRE_IJVectorGetObject(currR_, (void**) &r_csr);
+    HYPRE_IJVectorGetObject(currB_, (void**) &b_csr);
+    //------------------------------------------------------------------
+
     ierr = HYPRE_ParVectorCopy( b_csr, r_csr );
     assert(!ierr);
     ierr = HYPRE_ParCSRMatrixMatvec( -1.0, A_csr, x_csr, 1.0, r_csr );
