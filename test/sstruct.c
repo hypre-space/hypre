@@ -1268,7 +1268,6 @@ GetVariableBox( Index  cell_ilower,
 
    return ierr;
 }
- 
 /*--------------------------------------------------------------------------
  * Routine to load cosine function
  *--------------------------------------------------------------------------*/
@@ -1341,12 +1340,54 @@ PrintUsage( char *progname,
       printf("                        60 - BiCGSTAB with BoomerAMG precond\n");
       printf("                        61 - BiCGSTAB with PILUT precond\n");
       printf("                        62 - BiCGSTAB with ParaSails precond\n");
-      printf("                        120 - PCG with hybrid precond\n");
+      printf("                        120- PCG with hybrid precond\n");
+      printf("                        200- Struct SMG (default)\n");
+      printf("                        201- Struct PFMG\n");
+      printf("                        202- Struct SparseMSG\n");
+      printf("                        203- Struct PFMG constant coefficients\n");
+      printf("                        204- Struct PFMG constant coefficients variable diagonal\n");
+      printf("                        210- Struct CG with SMG precond\n");
+      printf("                        211- Struct CG with PFMG precond\n");
+      printf("                        212- Struct CG with SparseMSG precond\n");
+      printf("                        217- Struct CG with 2-step Jacobi\n");
+      printf("                        218- Struct CG with diagonal scaling\n");
+      printf("                        219- Struct CG\n");
+      printf("                        220- Struct Hybrid with SMG precond\n");
+      printf("                        221- Struct Hybrid with PFMG precond\n");
+      printf("                        222- Struct Hybrid with SparseMSG precond\n");
+      printf("                        230- Struct GMRES with SMG precond\n");
+      printf("                        231- Struct GMRES with PFMG precond\n");
+      printf("                        232- Struct GMRES with SparseMSG precond\n");
+      printf("                        237- Struct GMRES with 2-step Jacobi\n");
+      printf("                        238- Struct GMRES with diagonal scaling\n");
+      printf("                        239- Struct GMRES\n");
+      printf("                        240- Struct BiCGSTAB with SMG precond\n");
+      printf("                        241- Struct BiCGSTAB with PFMG precond\n");
+      printf("                        242- Struct BiCGSTAB with SparseMSG precond\n");
+      printf("                        247- Struct BiCGSTAB with 2-step Jacobi\n");
+      printf("                        248- Struct BiCGSTAB with diagonal scaling\n");
+      printf("                        249- Struct BiCGSTAB\n");
       printf("  -print             : print out the system\n");
       printf("  -rhsfromcosine     : solution is cosine function (default)\n");
       printf("  -rhsone            : rhs is vector with unit components\n");
-      printf("  -v <n_pre> <n_post>: SysPFMG # of pre and post relax\n");
-      printf("  -skip <s>          : SysPFMG skip relaxation (0 or 1)\n");
+      printf("  -v <n_pre> <n_post>: SysPFMG and Struct- # of pre and post relax\n");
+      printf("  -skip <s>          : SysPFMG and Struct- skip relaxation (0 or 1)\n");
+      printf("  -rap <r>           : Struct- coarse grid operator type\n");
+      printf("                        0 - Galerkin (default)\n");
+      printf("                        1 - non-Galerkin ParFlow operators\n");
+      printf("                        2 - Galerkin, general operators\n");
+      printf("  -relax <r>         : Struct- relaxation type\n");
+      printf("                        0 - Jacobi\n");
+      printf("                        1 - Weighted Jacobi (default)\n");
+      printf("                        2 - R/B Gauss-Seidel\n");
+      printf("                        3 - R/B Gauss-Seidel (nonsymmetric)\n");
+      printf("  -skip <s>          : Struct- skip levels in PFMG (0 or 1)\n");
+      printf("  -sym <s>           : Struct- symmetric storage (1) or not (0)\n");
+      printf("  -jump <num>        : Struct- num levels to jump in SparseMSG\n");
+      printf("  -solver_type <ID>  : Struct- solver type for Hybrid\n");
+      printf("                        1 - PCG (default)\n");
+      printf("                        2 - GMRES\n");
+      printf("  -cf <cf>           : Struct- convergence factor for Hybrid\n");
 
       printf("\n");
    }
@@ -1391,6 +1432,12 @@ main( int   argc,
    HYPRE_Solver          par_solver;
    HYPRE_Solver          par_precond;
 
+   HYPRE_StructMatrix    sA;
+   HYPRE_StructVector    sb;
+   HYPRE_StructVector    sx;
+   HYPRE_StructSolver    struct_solver;
+   HYPRE_StructSolver    struct_precond;
+
    Index                 ilower, iupper;
    Index                 index, to_index;
    double               *values;
@@ -1403,6 +1450,13 @@ main( int   argc,
                          
    int                   n_pre, n_post;
    int                   skip;
+   int                   sym;
+   int                   rap;
+   int                   relax;
+   int                   jump;
+   int                   solver_type;
+
+   double                cf_tol;
 
    int                   arg_index, part, box, var, entry, s, i, j, k;
                         
@@ -1441,6 +1495,14 @@ main( int   argc,
     * Set defaults
     *-----------------------------------------------------------*/
 
+   skip  = 0;
+   sym   = 1;
+   rap   = 0;
+   relax = 1;
+   jump  = 0;
+   solver_type = 1;
+   cf_tol = 0.90;
+
    nparts = global_data.nparts;
 
    parts      = hypre_TAlloc(int, nparts);
@@ -1462,7 +1524,6 @@ main( int   argc,
    print_system = 0;
    cosine = 1;
 
-   skip = 0;
    n_pre  = 1;
    n_post = 1;
 
@@ -1554,6 +1615,36 @@ main( int   argc,
          n_pre = atoi(argv[arg_index++]);
          n_post = atoi(argv[arg_index++]);
       }
+      else if ( strcmp(argv[arg_index], "-rap") == 0 )
+      {
+         arg_index++;
+         rap = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-relax") == 0 )
+      {
+         arg_index++;
+         relax = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-sym") == 0 )
+      {
+         arg_index++;
+         sym = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-jump") == 0 )
+      {
+         arg_index++;
+         jump = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-solver_type") == 0 )
+      {
+         arg_index++;
+         solver_type = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-cf") == 0 )
+      {
+         arg_index++;
+         cf_tol = atof(argv[arg_index++]);
+      }
       else if ( strcmp(argv[arg_index], "-help") == 0 )
       {
          PrintUsage(argv[0], myid);
@@ -1580,6 +1671,19 @@ main( int   argc,
 
    DistributeData(global_data, refine, distribute, block,
                   num_procs, myid, &data);
+
+   /*-----------------------------------------------------------
+    * Check a few things
+    *-----------------------------------------------------------*/
+   if (solver_id >= 200)
+   {
+      pdata = data.pdata[0];
+      if (nparts > 1 || pdata.nvars > 1)
+      {
+         printf("Error: Invalid number of parts or nvars for Struct Solver \n");
+         exit(1);
+      }
+   }
 
    /*-----------------------------------------------------------
     * Synchronize so that timings make sense
@@ -1653,6 +1757,11 @@ main( int   argc,
         (solver_id == 120))
    {
        HYPRE_SStructGraphSetObjectType(graph, HYPRE_PARCSR);  
+   }
+
+   if (solver_id >= 200) 
+   {
+       HYPRE_SStructGraphSetObjectType(graph, HYPRE_STRUCT);  
    }
 
    for (part = 0; part < data.nparts; part++)
@@ -1729,6 +1838,12 @@ main( int   argc,
    {
       HYPRE_SStructMatrixSetObjectType(A, HYPRE_PARCSR);
    }
+
+   else if (solver_id >= 200)
+   {
+      HYPRE_SStructMatrixSetObjectType(A, HYPRE_STRUCT);
+   }
+
    HYPRE_SStructMatrixInitialize(A);
 
    for (part = 0; part < data.nparts; part++)
@@ -1802,7 +1917,11 @@ main( int   argc,
       }
    }
 
-   /* reset matrix values */
+   /* reset matrix values:
+    *   NOTE THAT THE matrix_ilowers & matrix_iuppers MUST BE IN TERMS OF THE
+    *   CHOOSEN VAR_TYPE INDICES, UNLIKE THE EXTENTS OF THE GRID< WHICH ARE
+    *   IN TEMS OF THE CELL VARTYPE INDICES.
+    */
    for (part = 0; part < data.nparts; part++)
    {
       pdata = data.pdata[part];
@@ -1839,6 +1958,11 @@ main( int   argc,
       HYPRE_SStructMatrixGetObject(A, (void **) &par_A);
    }
 
+   else if ( solver_id >= 200 )
+   {
+      HYPRE_SStructMatrixGetObject(A, (void **) &sA);
+   }
+
    /*-----------------------------------------------------------
     * Set up the linear system
     *-----------------------------------------------------------*/
@@ -1851,6 +1975,12 @@ main( int   argc,
    {
       HYPRE_SStructVectorSetObjectType(b, HYPRE_PARCSR);
    }
+   else if (solver_id >= 200)
+   {
+      HYPRE_SStructVectorSetObjectType(b, HYPRE_STRUCT);
+   }
+
+
    HYPRE_SStructVectorInitialize(b);
    for (j = 0; j < data.max_boxsize; j++)
    {
@@ -1863,9 +1993,8 @@ main( int   argc,
       {
          for (box = 0; box < pdata.nboxes; box++)
          {
- 
-            GetVariableBox(pdata.ilowers[box], pdata.iuppers[box], var,
-                           ilower, iupper);
+            GetVariableBox(pdata.ilowers[box], pdata.iuppers[box], 
+                           pdata.vartypes[var], ilower, iupper);
             HYPRE_SStructVectorSetBoxValues(b, part, ilower, iupper,
                                             var, values);
          }
@@ -1879,6 +2008,10 @@ main( int   argc,
    {
       HYPRE_SStructVectorGetObject(b, (void **) &par_b);
    }
+   else if (solver_id >= 200)
+   {
+      HYPRE_SStructVectorGetObject(b, (void **) &sb);
+   }
 
    HYPRE_SStructVectorCreate(MPI_COMM_WORLD, grid, &x);
    if ( ((solver_id >= 20) && (solver_id < 30)) ||
@@ -1888,6 +2021,11 @@ main( int   argc,
    {
       HYPRE_SStructVectorSetObjectType(x, HYPRE_PARCSR);
    }
+   else if (solver_id >= 200)
+   {
+      HYPRE_SStructVectorSetObjectType(x, HYPRE_STRUCT);
+   }
+
    HYPRE_SStructVectorInitialize(x);
    for (j = 0; j < data.max_boxsize; j++)
    {
@@ -1900,8 +2038,8 @@ main( int   argc,
       {
          for (box = 0; box < pdata.nboxes; box++)
          {
-            GetVariableBox(pdata.ilowers[box], pdata.iuppers[box], var,
-                           ilower, iupper);
+            GetVariableBox(pdata.ilowers[box], pdata.iuppers[box], 
+                           pdata.vartypes[var], ilower, iupper);
             HYPRE_SStructVectorSetBoxValues(x, part, ilower, iupper,
                                             var, values);
          }
@@ -1916,8 +2054,11 @@ main( int   argc,
       HYPRE_SStructVectorGetObject(x, (void **) &par_x);
    }
 
-   
- 
+   else if (solver_id >= 200)
+   {
+      HYPRE_SStructVectorGetObject(x, (void **) &sx);
+   }
+
    hypre_EndTiming(time_index);
    hypre_PrintTiming("SStruct Interface", MPI_COMM_WORLD);
    hypre_FinalizeTiming(time_index);
@@ -1930,6 +2071,10 @@ main( int   argc,
     *   u(part,var,i,j,k) = (part+1)*(var+1)*cosine[(i+j+k)/10]
     * 
     *-----------------------------------------------------------*/
+   if (solver_id >= 200)
+   {
+      cosine= 0;
+   }
 
    if (cosine)
    {
@@ -2060,11 +2205,11 @@ main( int   argc,
       hypre_BeginTiming(time_index);
 
       HYPRE_SStructSysPFMGCreate(MPI_COMM_WORLD, &solver);
-      HYPRE_SStructSysPFMGSetMaxIter(solver, 50);
-      HYPRE_SStructSysPFMGSetTol(solver, 1.0e-06);
+      HYPRE_SStructSysPFMGSetMaxIter(solver, 100);
+      HYPRE_SStructSysPFMGSetTol(solver, 1.0e-6);
       HYPRE_SStructSysPFMGSetRelChange(solver, 0);
       /* weighted Jacobi = 1; red-black GS = 2 */
-      HYPRE_SStructSysPFMGSetRelaxType(solver, 1);
+      HYPRE_SStructSysPFMGSetRelaxType(solver, relax);
       HYPRE_SStructSysPFMGSetNumPreRelax(solver, n_pre);
       HYPRE_SStructSysPFMGSetNumPostRelax(solver, n_post);
       HYPRE_SStructSysPFMGSetSkipRelax(solver, skip);
@@ -2139,7 +2284,7 @@ main( int   argc,
          HYPRE_SStructSysPFMGSetTol(precond, 0.0);
          HYPRE_SStructSysPFMGSetZeroGuess(precond);
          /* weighted Jacobi = 1; red-black GS = 2 */
-         HYPRE_SStructSysPFMGSetRelaxType(precond, 1);
+         HYPRE_SStructSysPFMGSetRelaxType(precond, relax);
          HYPRE_SStructSysPFMGSetNumPreRelax(precond, n_pre);
          HYPRE_SStructSysPFMGSetNumPostRelax(precond, n_post);
          HYPRE_SStructSysPFMGSetSkipRelax(precond, skip);
@@ -2651,6 +2796,683 @@ main( int   argc,
 
       HYPRE_ParCSRHybridDestroy(par_solver);
    }
+
+   /*-----------------------------------------------------------
+    * Solve the system using Struct solvers
+    *-----------------------------------------------------------*/
+   if (solver_id == 200)
+   {
+      time_index = hypre_InitializeTiming("SMG Setup");
+      hypre_BeginTiming(time_index);
+
+      HYPRE_StructSMGCreate(MPI_COMM_WORLD, &struct_solver);
+      HYPRE_StructSMGSetMemoryUse(struct_solver, 0);
+      HYPRE_StructSMGSetMaxIter(struct_solver, 50);
+      HYPRE_StructSMGSetTol(struct_solver, 1.0e-6);
+      HYPRE_StructSMGSetRelChange(struct_solver, 0);
+      HYPRE_StructSMGSetNumPreRelax(struct_solver, n_pre);
+      HYPRE_StructSMGSetNumPostRelax(struct_solver, n_post);
+      HYPRE_StructSMGSetPrintLevel(struct_solver, 1);
+      HYPRE_StructSMGSetLogging(struct_solver, 1);
+      HYPRE_StructSMGSetup(struct_solver, sA, sb, sx);
+
+      hypre_EndTiming(time_index);
+      hypre_PrintTiming("Setup phase times", MPI_COMM_WORLD);
+      hypre_FinalizeTiming(time_index);
+      hypre_ClearTiming();
+
+      time_index = hypre_InitializeTiming("SMG Solve");
+      hypre_BeginTiming(time_index);
+
+      HYPRE_StructSMGSolve(struct_solver, sA, sb, sx);
+
+      hypre_EndTiming(time_index);
+      hypre_PrintTiming("Solve phase times", MPI_COMM_WORLD);
+      hypre_FinalizeTiming(time_index);
+      hypre_ClearTiming();
+
+      HYPRE_StructSMGGetNumIterations(struct_solver, &num_iterations);
+      HYPRE_StructSMGGetFinalRelativeResidualNorm(struct_solver, &final_res_norm);
+      HYPRE_StructSMGDestroy(struct_solver);
+   }
+
+   else if ( solver_id == 201 || solver_id == 203 || solver_id == 204 )
+   {
+      time_index = hypre_InitializeTiming("PFMG Setup");
+      hypre_BeginTiming(time_index);
+
+      HYPRE_StructPFMGCreate(MPI_COMM_WORLD, &struct_solver);
+      HYPRE_StructPFMGSetMaxIter(struct_solver, 50);
+      HYPRE_StructPFMGSetTol(struct_solver, 1.0e-06);
+      HYPRE_StructPFMGSetRelChange(struct_solver, 0);
+      HYPRE_StructPFMGSetRAPType(struct_solver, rap);
+      HYPRE_StructPFMGSetRelaxType(struct_solver, relax);
+      HYPRE_StructPFMGSetNumPreRelax(struct_solver, n_pre);
+      HYPRE_StructPFMGSetNumPostRelax(struct_solver, n_post);
+      HYPRE_StructPFMGSetSkipRelax(struct_solver, skip);
+      /*HYPRE_StructPFMGSetDxyz(struct_solver, dxyz);*/
+      HYPRE_StructPFMGSetPrintLevel(struct_solver, 1);
+      HYPRE_StructPFMGSetLogging(struct_solver, 1);
+      HYPRE_StructPFMGSetup(struct_solver, sA, sb, sx);
+
+      hypre_EndTiming(time_index);
+      hypre_PrintTiming("Setup phase times", MPI_COMM_WORLD);
+      hypre_FinalizeTiming(time_index);
+      hypre_ClearTiming();
+
+      time_index = hypre_InitializeTiming("PFMG Solve");
+      hypre_BeginTiming(time_index);
+
+      HYPRE_StructPFMGSolve(struct_solver, sA, sb, sx);
+
+      hypre_EndTiming(time_index);
+      hypre_PrintTiming("Solve phase times", MPI_COMM_WORLD);
+      hypre_FinalizeTiming(time_index);
+      hypre_ClearTiming();
+
+      HYPRE_StructPFMGGetNumIterations(struct_solver, &num_iterations);
+      HYPRE_StructPFMGGetFinalRelativeResidualNorm(struct_solver, &final_res_norm);
+      HYPRE_StructPFMGDestroy(struct_solver);
+   }
+
+   /*-----------------------------------------------------------
+    * Solve the system using SparseMSG
+    *-----------------------------------------------------------*/
+
+   else if (solver_id == 202)
+   {
+      time_index = hypre_InitializeTiming("SparseMSG Setup");
+      hypre_BeginTiming(time_index);
+
+      HYPRE_StructSparseMSGCreate(MPI_COMM_WORLD, &struct_solver);
+      HYPRE_StructSparseMSGSetMaxIter(struct_solver, 50);
+      HYPRE_StructSparseMSGSetJump(struct_solver, jump);
+      HYPRE_StructSparseMSGSetTol(struct_solver, 1.0e-06);
+      HYPRE_StructSparseMSGSetRelChange(struct_solver, 0);
+      HYPRE_StructSparseMSGSetRelaxType(struct_solver, relax);
+      HYPRE_StructSparseMSGSetNumPreRelax(struct_solver, n_pre);
+      HYPRE_StructSparseMSGSetNumPostRelax(struct_solver, n_post);
+      HYPRE_StructSparseMSGSetPrintLevel(struct_solver, 1);
+      HYPRE_StructSparseMSGSetLogging(struct_solver, 1);
+      HYPRE_StructSparseMSGSetup(struct_solver, sA, sb, sx);
+
+      hypre_EndTiming(time_index);
+      hypre_PrintTiming("Setup phase times", MPI_COMM_WORLD);
+      hypre_FinalizeTiming(time_index);
+      hypre_ClearTiming();
+
+      time_index = hypre_InitializeTiming("SparseMSG Solve");
+      hypre_BeginTiming(time_index);
+
+      HYPRE_StructSparseMSGSolve(struct_solver, sA, sb, sx);
+
+      hypre_EndTiming(time_index);
+      hypre_PrintTiming("Solve phase times", MPI_COMM_WORLD);
+      hypre_FinalizeTiming(time_index);
+      hypre_ClearTiming();
+
+      HYPRE_StructSparseMSGGetNumIterations(struct_solver, &num_iterations);
+      HYPRE_StructSparseMSGGetFinalRelativeResidualNorm(struct_solver,
+                                                        &final_res_norm);
+      HYPRE_StructSparseMSGDestroy(struct_solver);
+   }
+   /*-----------------------------------------------------------
+    * Solve the system using CG
+    *-----------------------------------------------------------*/
+
+   if ((solver_id > 209) && (solver_id < 220))
+   {
+      time_index = hypre_InitializeTiming("PCG Setup");
+      hypre_BeginTiming(time_index);
+
+      HYPRE_StructPCGCreate(MPI_COMM_WORLD, &struct_solver);
+      HYPRE_PCGSetMaxIter( (HYPRE_Solver)struct_solver, 50 );
+      HYPRE_PCGSetTol( (HYPRE_Solver)struct_solver, 1.0e-06 );
+      HYPRE_PCGSetTwoNorm( (HYPRE_Solver)struct_solver, 1 );
+      HYPRE_PCGSetRelChange( (HYPRE_Solver)struct_solver, 0 );
+      HYPRE_PCGSetPrintLevel( (HYPRE_Solver)struct_solver, 1 );
+
+      if (solver_id == 210)
+      {
+         /* use symmetric SMG as preconditioner */
+         HYPRE_StructSMGCreate(MPI_COMM_WORLD, &struct_precond);
+         HYPRE_StructSMGSetMemoryUse(struct_precond, 0);
+         HYPRE_StructSMGSetMaxIter(struct_precond, 1);
+         HYPRE_StructSMGSetTol(struct_precond, 0.0);
+         HYPRE_StructSMGSetZeroGuess(struct_precond);
+         HYPRE_StructSMGSetNumPreRelax(struct_precond, n_pre);
+         HYPRE_StructSMGSetNumPostRelax(struct_precond, n_post);
+         HYPRE_StructSMGSetPrintLevel(struct_precond, 0);
+         HYPRE_StructSMGSetLogging(struct_precond, 0);
+         HYPRE_PCGSetPrecond( (HYPRE_Solver) struct_solver,
+                              (HYPRE_PtrToSolverFcn) HYPRE_StructSMGSolve,
+                              (HYPRE_PtrToSolverFcn) HYPRE_StructSMGSetup,
+                              (HYPRE_Solver) struct_precond);
+      }
+
+      else if (solver_id == 211)
+      {
+         /* use symmetric PFMG as preconditioner */
+         HYPRE_StructPFMGCreate(MPI_COMM_WORLD, &struct_precond);
+         HYPRE_StructPFMGSetMaxIter(struct_precond, 1);
+         HYPRE_StructPFMGSetTol(struct_precond, 0.0);
+         HYPRE_StructPFMGSetZeroGuess(struct_precond);
+         HYPRE_StructPFMGSetRAPType(struct_precond, rap);
+         HYPRE_StructPFMGSetRelaxType(struct_precond, relax);
+         HYPRE_StructPFMGSetNumPreRelax(struct_precond, n_pre);
+         HYPRE_StructPFMGSetNumPostRelax(struct_precond, n_post);
+         HYPRE_StructPFMGSetSkipRelax(struct_precond, skip);
+         /*HYPRE_StructPFMGSetDxyz(struct_precond, dxyz);*/
+         HYPRE_StructPFMGSetPrintLevel(struct_precond, 0);
+         HYPRE_StructPFMGSetLogging(struct_precond, 0);
+         HYPRE_PCGSetPrecond( (HYPRE_Solver) struct_solver,
+                              (HYPRE_PtrToSolverFcn) HYPRE_StructPFMGSolve,
+                              (HYPRE_PtrToSolverFcn) HYPRE_StructPFMGSetup,
+                              (HYPRE_Solver) struct_precond);
+      }
+
+      else if (solver_id == 212)
+      {
+         /* use symmetric SparseMSG as preconditioner */
+         HYPRE_StructSparseMSGCreate(MPI_COMM_WORLD, &struct_precond);
+         HYPRE_StructSparseMSGSetMaxIter(struct_precond, 1);
+         HYPRE_StructSparseMSGSetJump(struct_precond, jump);
+         HYPRE_StructSparseMSGSetTol(struct_precond, 0.0);
+         HYPRE_StructSparseMSGSetZeroGuess(struct_precond);
+         HYPRE_StructSparseMSGSetRelaxType(struct_precond, relax);
+         HYPRE_StructSparseMSGSetNumPreRelax(struct_precond, n_pre);
+         HYPRE_StructSparseMSGSetNumPostRelax(struct_precond, n_post);
+         HYPRE_StructSparseMSGSetPrintLevel(struct_precond, 0);
+         HYPRE_StructSparseMSGSetLogging(struct_precond, 0);
+         HYPRE_PCGSetPrecond( (HYPRE_Solver) struct_solver,
+                              (HYPRE_PtrToSolverFcn) HYPRE_StructSparseMSGSolve,
+                              (HYPRE_PtrToSolverFcn) HYPRE_StructSparseMSGSetup,
+                              (HYPRE_Solver) struct_precond);
+      }
+
+      else if (solver_id == 217)
+      {
+         /* use two-step Jacobi as preconditioner */
+         HYPRE_StructJacobiCreate(MPI_COMM_WORLD, &struct_precond);
+         HYPRE_StructJacobiSetMaxIter(struct_precond, 2);
+         HYPRE_StructJacobiSetTol(struct_precond, 0.0);
+         HYPRE_StructJacobiSetZeroGuess(struct_precond);
+         HYPRE_PCGSetPrecond( (HYPRE_Solver) struct_solver,
+                               (HYPRE_PtrToSolverFcn) HYPRE_StructJacobiSolve,
+                               (HYPRE_PtrToSolverFcn) HYPRE_StructJacobiSetup,
+                               (HYPRE_Solver) struct_precond);
+      }
+
+      else if (solver_id == 218)
+      {
+         /* use diagonal scaling as preconditioner */
+#ifdef HYPRE_USE_PTHREADS
+         for (i = 0; i < hypre_NumThreads; i++)
+         {
+            struct_precond[i] = NULL;
+         }
+#else
+         struct_precond = NULL;
+#endif
+         HYPRE_PCGSetPrecond( (HYPRE_Solver) struct_solver,
+                              (HYPRE_PtrToSolverFcn) HYPRE_StructDiagScale,
+                              (HYPRE_PtrToSolverFcn) HYPRE_StructDiagScaleSetup,
+                              (HYPRE_Solver) struct_precond);
+      }
+
+      HYPRE_PCGSetup
+         ( (HYPRE_Solver)struct_solver, (HYPRE_Matrix)sA, (HYPRE_Vector)sb, 
+                                                          (HYPRE_Vector)sx );
+
+      hypre_EndTiming(time_index);
+      hypre_PrintTiming("Setup phase times", MPI_COMM_WORLD);
+      hypre_FinalizeTiming(time_index);
+      hypre_ClearTiming();
+
+      time_index = hypre_InitializeTiming("PCG Solve");
+      hypre_BeginTiming(time_index);
+
+      HYPRE_PCGSolve
+         ( (HYPRE_Solver) struct_solver, (HYPRE_Matrix)sA, (HYPRE_Vector)sb, 
+                                                           (HYPRE_Vector)sx);
+
+      hypre_EndTiming(time_index);
+      hypre_PrintTiming("Solve phase times", MPI_COMM_WORLD);
+      hypre_FinalizeTiming(time_index);
+      hypre_ClearTiming();
+
+      HYPRE_PCGGetNumIterations( (HYPRE_Solver)struct_solver, &num_iterations );
+      HYPRE_PCGGetFinalRelativeResidualNorm( (HYPRE_Solver)struct_solver, &final_res_norm );
+      HYPRE_StructPCGDestroy(struct_solver);
+
+      if (solver_id == 210)
+      {
+         HYPRE_StructSMGDestroy(struct_precond);
+      }
+      else if (solver_id == 211)
+      {
+         HYPRE_StructPFMGDestroy(struct_precond);
+      }
+      else if (solver_id == 212)
+      {
+         HYPRE_StructSparseMSGDestroy(struct_precond);
+      }
+      else if (solver_id == 217)
+      {
+         HYPRE_StructJacobiDestroy(struct_precond);
+      }
+   }
+
+   /*-----------------------------------------------------------
+    * Solve the system using Hybrid
+    *-----------------------------------------------------------*/
+
+   if ((solver_id > 219) && (solver_id < 230))
+   {
+      time_index = hypre_InitializeTiming("Hybrid Setup");
+      hypre_BeginTiming(time_index);
+
+      HYPRE_StructHybridCreate(MPI_COMM_WORLD, &struct_solver);
+      HYPRE_StructHybridSetDSCGMaxIter(struct_solver, 100);
+      HYPRE_StructHybridSetPCGMaxIter(struct_solver, 50);
+      HYPRE_StructHybridSetTol(struct_solver, 1.0e-06);
+      /*HYPRE_StructHybridSetPCGAbsoluteTolFactor(struct_solver, 1.0e-200);*/
+      HYPRE_StructHybridSetConvergenceTol(struct_solver, cf_tol);
+      HYPRE_StructHybridSetTwoNorm(struct_solver, 1);
+      HYPRE_StructHybridSetRelChange(struct_solver, 0);
+      if (solver_type == 2) /* for use with GMRES */
+      {
+         HYPRE_StructHybridSetStopCrit(struct_solver, 0);
+         HYPRE_StructHybridSetKDim(struct_solver, 10);
+      }
+      HYPRE_StructHybridSetPrintLevel(struct_solver, 1);
+      HYPRE_StructHybridSetLogging(struct_solver, 1);
+      HYPRE_StructHybridSetSolverType(struct_solver, solver_type);
+
+      if (solver_id == 220)
+      {
+         /* use symmetric SMG as preconditioner */
+         HYPRE_StructSMGCreate(MPI_COMM_WORLD, &struct_precond);
+         HYPRE_StructSMGSetMemoryUse(struct_precond, 0);
+         HYPRE_StructSMGSetMaxIter(struct_precond, 1);
+         HYPRE_StructSMGSetTol(struct_precond, 0.0);
+         HYPRE_StructSMGSetZeroGuess(struct_precond);
+         HYPRE_StructSMGSetNumPreRelax(struct_precond, n_pre);
+         HYPRE_StructSMGSetNumPostRelax(struct_precond, n_post);
+         HYPRE_StructSMGSetPrintLevel(struct_precond, 0);
+         HYPRE_StructSMGSetLogging(struct_precond, 0);
+         HYPRE_StructHybridSetPrecond(struct_solver,
+                                      HYPRE_StructSMGSolve,
+                                      HYPRE_StructSMGSetup,
+                                      struct_precond);
+      }
+
+      else if (solver_id == 221)
+      {
+         /* use symmetric PFMG as preconditioner */
+         HYPRE_StructPFMGCreate(MPI_COMM_WORLD, &struct_precond);
+         HYPRE_StructPFMGSetMaxIter(struct_precond, 1);
+         HYPRE_StructPFMGSetTol(struct_precond, 0.0);
+         HYPRE_StructPFMGSetZeroGuess(struct_precond);
+         HYPRE_StructPFMGSetRAPType(struct_precond, rap);
+         HYPRE_StructPFMGSetRelaxType(struct_precond, relax);
+         HYPRE_StructPFMGSetNumPreRelax(struct_precond, n_pre);
+         HYPRE_StructPFMGSetNumPostRelax(struct_precond, n_post);
+         HYPRE_StructPFMGSetSkipRelax(struct_precond, skip);
+         /*HYPRE_StructPFMGSetDxyz(struct_precond, dxyz);*/
+         HYPRE_StructPFMGSetPrintLevel(struct_precond, 0);
+         HYPRE_StructPFMGSetLogging(struct_precond, 0);
+         HYPRE_StructHybridSetPrecond(struct_solver,
+                                      HYPRE_StructPFMGSolve,
+                                      HYPRE_StructPFMGSetup,
+                                      struct_precond);
+      }
+
+      else if (solver_id == 222)
+      {
+         /* use symmetric SparseMSG as preconditioner */
+         HYPRE_StructSparseMSGCreate(MPI_COMM_WORLD, &struct_precond);
+         HYPRE_StructSparseMSGSetJump(struct_precond, jump);
+         HYPRE_StructSparseMSGSetMaxIter(struct_precond, 1);
+         HYPRE_StructSparseMSGSetTol(struct_precond, 0.0);
+         HYPRE_StructSparseMSGSetZeroGuess(struct_precond);
+         HYPRE_StructSparseMSGSetRelaxType(struct_precond, relax);
+         HYPRE_StructSparseMSGSetNumPreRelax(struct_precond, n_pre);
+         HYPRE_StructSparseMSGSetNumPostRelax(struct_precond, n_post);
+         HYPRE_StructSparseMSGSetPrintLevel(struct_precond, 0);
+         HYPRE_StructSparseMSGSetLogging(struct_precond, 0);
+         HYPRE_StructHybridSetPrecond(struct_solver,
+                                      HYPRE_StructSparseMSGSolve,
+                                      HYPRE_StructSparseMSGSetup,
+                                      struct_precond);
+      }
+
+      HYPRE_StructHybridSetup(struct_solver, sA, sb, sx);
+
+      hypre_EndTiming(time_index);
+      hypre_PrintTiming("Setup phase times", MPI_COMM_WORLD);
+      hypre_FinalizeTiming(time_index);
+      hypre_ClearTiming();
+
+      time_index = hypre_InitializeTiming("Hybrid Solve");
+      hypre_BeginTiming(time_index);
+
+      HYPRE_StructHybridSolve(struct_solver, sA, sb, sx);
+
+      hypre_EndTiming(time_index);
+      hypre_PrintTiming("Solve phase times", MPI_COMM_WORLD);
+      hypre_FinalizeTiming(time_index);
+      hypre_ClearTiming();
+
+      HYPRE_StructHybridGetNumIterations(struct_solver, &num_iterations);
+      HYPRE_StructHybridGetFinalRelativeResidualNorm(struct_solver, &final_res_norm);
+      HYPRE_StructHybridDestroy(struct_solver);
+
+      if (solver_id == 220)
+      {
+         HYPRE_StructSMGDestroy(struct_precond);
+      }
+      else if (solver_id == 221)
+      {
+         HYPRE_StructPFMGDestroy(struct_precond);
+      }
+      else if (solver_id == 222)
+      {
+         HYPRE_StructSparseMSGDestroy(struct_precond);
+      }
+   }
+
+   /*-----------------------------------------------------------
+    * Solve the system using GMRES
+    *-----------------------------------------------------------*/
+
+   if ((solver_id > 229) && (solver_id < 240))
+   {
+      time_index = hypre_InitializeTiming("GMRES Setup");
+      hypre_BeginTiming(time_index);
+
+      HYPRE_StructGMRESCreate(MPI_COMM_WORLD, &struct_solver);
+      HYPRE_GMRESSetMaxIter( (HYPRE_Solver)struct_solver, 50 );
+      HYPRE_GMRESSetTol( (HYPRE_Solver)struct_solver, 1.0e-06 );
+      HYPRE_GMRESSetRelChange( (HYPRE_Solver)struct_solver, 0 );
+      HYPRE_GMRESSetPrintLevel( (HYPRE_Solver)struct_solver, 1 );
+      HYPRE_GMRESSetLogging( (HYPRE_Solver)struct_solver, 1 );
+
+      if (solver_id == 230)
+      {
+         /* use symmetric SMG as preconditioner */
+         HYPRE_StructSMGCreate(MPI_COMM_WORLD, &struct_precond);
+         HYPRE_StructSMGSetMemoryUse(struct_precond, 0);
+         HYPRE_StructSMGSetMaxIter(struct_precond, 1);
+         HYPRE_StructSMGSetTol(struct_precond, 0.0);
+         HYPRE_StructSMGSetZeroGuess(struct_precond);
+         HYPRE_StructSMGSetNumPreRelax(struct_precond, n_pre);
+         HYPRE_StructSMGSetNumPostRelax(struct_precond, n_post);
+         HYPRE_StructSMGSetPrintLevel(struct_precond, 0);
+         HYPRE_StructSMGSetLogging(struct_precond, 0);
+         HYPRE_GMRESSetPrecond( (HYPRE_Solver)struct_solver,
+                                (HYPRE_PtrToSolverFcn) HYPRE_StructSMGSolve,
+                                (HYPRE_PtrToSolverFcn) HYPRE_StructSMGSetup,
+                                (HYPRE_Solver)struct_precond);
+      }
+
+      else if (solver_id == 231)
+      {
+         /* use symmetric PFMG as preconditioner */
+         HYPRE_StructPFMGCreate(MPI_COMM_WORLD, &struct_precond);
+         HYPRE_StructPFMGSetMaxIter(struct_precond, 1);
+         HYPRE_StructPFMGSetTol(struct_precond, 0.0);
+         HYPRE_StructPFMGSetZeroGuess(struct_precond);
+         HYPRE_StructPFMGSetRAPType(struct_precond, rap);
+         HYPRE_StructPFMGSetRelaxType(struct_precond, relax);
+         HYPRE_StructPFMGSetNumPreRelax(struct_precond, n_pre);
+         HYPRE_StructPFMGSetNumPostRelax(struct_precond, n_post);
+         HYPRE_StructPFMGSetSkipRelax(struct_precond, skip);
+         /*HYPRE_StructPFMGSetDxyz(struct_precond, dxyz);*/
+         HYPRE_StructPFMGSetPrintLevel(struct_precond, 0);
+         HYPRE_StructPFMGSetLogging(struct_precond, 0);
+         HYPRE_GMRESSetPrecond( (HYPRE_Solver)struct_solver,
+                                (HYPRE_PtrToSolverFcn) HYPRE_StructPFMGSolve,
+                                (HYPRE_PtrToSolverFcn) HYPRE_StructPFMGSetup,
+                                (HYPRE_Solver)struct_precond);
+      }
+      else if (solver_id == 232)
+      {
+         /* use symmetric SparseMSG as preconditioner */
+         HYPRE_StructSparseMSGCreate(MPI_COMM_WORLD, &struct_precond);
+         HYPRE_StructSparseMSGSetMaxIter(struct_precond, 1);
+         HYPRE_StructSparseMSGSetJump(struct_precond, jump);
+         HYPRE_StructSparseMSGSetTol(struct_precond, 0.0);
+         HYPRE_StructSparseMSGSetZeroGuess(struct_precond);
+         HYPRE_StructSparseMSGSetRelaxType(struct_precond, relax);
+         HYPRE_StructSparseMSGSetNumPreRelax(struct_precond, n_pre);
+         HYPRE_StructSparseMSGSetNumPostRelax(struct_precond, n_post);
+         HYPRE_StructSparseMSGSetPrintLevel(struct_precond, 0);
+         HYPRE_StructSparseMSGSetLogging(struct_precond, 0);
+         HYPRE_GMRESSetPrecond( (HYPRE_Solver)struct_solver,
+                                (HYPRE_PtrToSolverFcn) HYPRE_StructSparseMSGSolve,
+                                (HYPRE_PtrToSolverFcn) HYPRE_StructSparseMSGSetup,
+                                (HYPRE_Solver)struct_precond);
+      }
+
+      else if (solver_id == 237)
+      {
+         /* use two-step Jacobi as preconditioner */
+         HYPRE_StructJacobiCreate(MPI_COMM_WORLD, &struct_precond);
+         HYPRE_StructJacobiSetMaxIter(struct_precond, 2);
+         HYPRE_StructJacobiSetTol(struct_precond, 0.0);
+         HYPRE_StructJacobiSetZeroGuess(struct_precond);
+         HYPRE_GMRESSetPrecond( (HYPRE_Solver)struct_solver,
+                                (HYPRE_PtrToSolverFcn) HYPRE_StructJacobiSolve,
+                                (HYPRE_PtrToSolverFcn) HYPRE_StructJacobiSetup,
+                                (HYPRE_Solver)struct_precond);
+      }
+
+      else if (solver_id == 238)
+      {
+         /* use diagonal scaling as preconditioner */
+#ifdef HYPRE_USE_PTHREADS
+         for (i = 0; i < hypre_NumThreads; i++)
+         {
+            struct_precond[i] = NULL;
+         }
+#else
+         struct_precond = NULL;
+#endif
+         HYPRE_GMRESSetPrecond( (HYPRE_Solver)struct_solver,
+                                (HYPRE_PtrToSolverFcn) HYPRE_StructDiagScale,
+                                (HYPRE_PtrToSolverFcn) HYPRE_StructDiagScaleSetup,
+                                (HYPRE_Solver)struct_precond);
+      }
+
+      HYPRE_GMRESSetup
+         ( (HYPRE_Solver)struct_solver, (HYPRE_Matrix)sA, (HYPRE_Vector)sb, 
+                                                          (HYPRE_Vector)sx );
+
+      hypre_EndTiming(time_index);
+      hypre_PrintTiming("Setup phase times", MPI_COMM_WORLD);
+      hypre_FinalizeTiming(time_index);
+      hypre_ClearTiming();
+
+      time_index = hypre_InitializeTiming("GMRES Solve");
+      hypre_BeginTiming(time_index);
+
+      HYPRE_GMRESSolve
+         ( (HYPRE_Solver)struct_solver, (HYPRE_Matrix)sA, (HYPRE_Vector)sb, 
+                                                          (HYPRE_Vector)sx);
+
+      hypre_EndTiming(time_index);
+      hypre_PrintTiming("Solve phase times", MPI_COMM_WORLD);
+      hypre_FinalizeTiming(time_index);
+      hypre_ClearTiming();
+
+      HYPRE_GMRESGetNumIterations( (HYPRE_Solver)struct_solver, &num_iterations);
+      HYPRE_GMRESGetFinalRelativeResidualNorm( (HYPRE_Solver)struct_solver, &final_res_norm);
+      HYPRE_StructGMRESDestroy(struct_solver);
+
+      if (solver_id == 230)
+      {
+         HYPRE_StructSMGDestroy(struct_precond);
+      }
+      else if (solver_id == 231)
+      {
+         HYPRE_StructPFMGDestroy(struct_precond);
+      }
+      else if (solver_id == 232)
+      {
+         HYPRE_StructSparseMSGDestroy(struct_precond);
+      }
+      else if (solver_id == 237)
+      {
+         HYPRE_StructJacobiDestroy(struct_precond);
+      }
+   }
+   /*-----------------------------------------------------------
+    * Solve the system using BiCGTAB
+    *-----------------------------------------------------------*/
+
+   if ((solver_id > 239) && (solver_id < 250))
+   {
+      time_index = hypre_InitializeTiming("BiCGSTAB Setup");
+      hypre_BeginTiming(time_index);
+
+      HYPRE_StructBiCGSTABCreate(MPI_COMM_WORLD, &struct_solver);
+      HYPRE_BiCGSTABSetMaxIter( (HYPRE_Solver)struct_solver, 50 );
+      HYPRE_BiCGSTABSetTol( (HYPRE_Solver)struct_solver, 1.0e-06 );
+      HYPRE_BiCGSTABSetPrintLevel( (HYPRE_Solver)struct_solver, 1 );
+      HYPRE_BiCGSTABSetLogging( (HYPRE_Solver)struct_solver, 1 );
+
+      if (solver_id == 240)
+      {
+         /* use symmetric SMG as preconditioner */
+         HYPRE_StructSMGCreate(MPI_COMM_WORLD, &struct_precond);
+         HYPRE_StructSMGSetMemoryUse(struct_precond, 0);
+         HYPRE_StructSMGSetMaxIter(struct_precond, 1);
+         HYPRE_StructSMGSetTol(struct_precond, 0.0);
+         HYPRE_StructSMGSetZeroGuess(struct_precond);
+         HYPRE_StructSMGSetNumPreRelax(struct_precond, n_pre);
+         HYPRE_StructSMGSetNumPostRelax(struct_precond, n_post);
+         HYPRE_StructSMGSetPrintLevel(struct_precond, 0);
+         HYPRE_StructSMGSetLogging(struct_precond, 0);
+         HYPRE_BiCGSTABSetPrecond( (HYPRE_Solver)struct_solver,
+                                (HYPRE_PtrToSolverFcn) HYPRE_StructSMGSolve,
+                                (HYPRE_PtrToSolverFcn) HYPRE_StructSMGSetup,
+                                (HYPRE_Solver)struct_precond);
+      }
+
+      else if (solver_id == 241)
+      {
+         /* use symmetric PFMG as preconditioner */
+         HYPRE_StructPFMGCreate(MPI_COMM_WORLD, &struct_precond);
+         HYPRE_StructPFMGSetMaxIter(struct_precond, 1);
+         HYPRE_StructPFMGSetTol(struct_precond, 0.0);
+         HYPRE_StructPFMGSetZeroGuess(struct_precond);
+         HYPRE_StructPFMGSetRAPType(struct_precond, rap);
+         HYPRE_StructPFMGSetRelaxType(struct_precond, relax);
+         HYPRE_StructPFMGSetNumPreRelax(struct_precond, n_pre);
+         HYPRE_StructPFMGSetNumPostRelax(struct_precond, n_post);
+         HYPRE_StructPFMGSetSkipRelax(struct_precond, skip);
+         /*HYPRE_StructPFMGSetDxyz(struct_precond, dxyz);*/
+         HYPRE_StructPFMGSetPrintLevel(struct_precond, 0);
+         HYPRE_StructPFMGSetLogging(struct_precond, 0);
+         HYPRE_BiCGSTABSetPrecond( (HYPRE_Solver)struct_solver,
+                                (HYPRE_PtrToSolverFcn) HYPRE_StructPFMGSolve,
+                                (HYPRE_PtrToSolverFcn) HYPRE_StructPFMGSetup,
+                                (HYPRE_Solver)struct_precond);
+      }
+
+      else if (solver_id == 242)
+      {
+         /* use symmetric SparseMSG as preconditioner */
+         HYPRE_StructSparseMSGCreate(MPI_COMM_WORLD, &struct_precond);
+         HYPRE_StructSparseMSGSetMaxIter(struct_precond, 1);
+         HYPRE_StructSparseMSGSetJump(struct_precond, jump);
+         HYPRE_StructSparseMSGSetTol(struct_precond, 0.0);
+         HYPRE_StructSparseMSGSetZeroGuess(struct_precond);
+         HYPRE_StructSparseMSGSetRelaxType(struct_precond, relax);
+         HYPRE_StructSparseMSGSetNumPreRelax(struct_precond, n_pre);
+         HYPRE_StructSparseMSGSetNumPostRelax(struct_precond, n_post);
+         HYPRE_StructSparseMSGSetPrintLevel(struct_precond, 0);
+         HYPRE_StructSparseMSGSetLogging(struct_precond, 0);
+         HYPRE_BiCGSTABSetPrecond( (HYPRE_Solver)struct_solver,
+                                (HYPRE_PtrToSolverFcn) HYPRE_StructSparseMSGSolve,
+                                (HYPRE_PtrToSolverFcn) HYPRE_StructSparseMSGSetup,
+                                (HYPRE_Solver)struct_precond);
+      }
+
+      else if (solver_id == 247)
+      {
+         /* use two-step Jacobi as preconditioner */
+         HYPRE_StructJacobiCreate(MPI_COMM_WORLD, &struct_precond);
+         HYPRE_StructJacobiSetMaxIter(struct_precond, 2);
+         HYPRE_StructJacobiSetTol(struct_precond, 0.0);
+         HYPRE_StructJacobiSetZeroGuess(struct_precond);
+         HYPRE_BiCGSTABSetPrecond( (HYPRE_Solver)struct_solver,
+                                (HYPRE_PtrToSolverFcn) HYPRE_StructJacobiSolve,
+                                (HYPRE_PtrToSolverFcn) HYPRE_StructJacobiSetup,
+                                (HYPRE_Solver)struct_precond);
+      }
+
+      else if (solver_id == 248)
+      {
+         /* use diagonal scaling as preconditioner */
+#ifdef HYPRE_USE_PTHREADS
+         for (i = 0; i < hypre_NumThreads; i++)
+         {
+            struct_precond[i] = NULL;
+         }
+#else
+         struct_precond = NULL;
+#endif
+         HYPRE_BiCGSTABSetPrecond( (HYPRE_Solver)struct_solver,
+                                (HYPRE_PtrToSolverFcn) HYPRE_StructDiagScale,
+                                (HYPRE_PtrToSolverFcn) HYPRE_StructDiagScaleSetup,
+                                (HYPRE_Solver)struct_precond);
+      }
+
+      HYPRE_BiCGSTABSetup
+         ( (HYPRE_Solver)struct_solver, (HYPRE_Matrix)sA, (HYPRE_Vector)sb, 
+                                                          (HYPRE_Vector)sx );
+
+      hypre_EndTiming(time_index);
+      hypre_PrintTiming("Setup phase times", MPI_COMM_WORLD);
+      hypre_FinalizeTiming(time_index);
+      hypre_ClearTiming();
+
+      time_index = hypre_InitializeTiming("BiCGSTAB Solve");
+      hypre_BeginTiming(time_index);
+
+      HYPRE_BiCGSTABSolve
+         ( (HYPRE_Solver)struct_solver, (HYPRE_Matrix)sA, (HYPRE_Vector)sb,
+                                                          (HYPRE_Vector)sx);
+
+      hypre_EndTiming(time_index);
+      hypre_PrintTiming("Solve phase times", MPI_COMM_WORLD);
+      hypre_FinalizeTiming(time_index);
+      hypre_ClearTiming();
+
+      HYPRE_BiCGSTABGetNumIterations( (HYPRE_Solver)struct_solver, &num_iterations);
+      HYPRE_BiCGSTABGetFinalRelativeResidualNorm( (HYPRE_Solver)struct_solver, &final_res_norm);
+      HYPRE_StructBiCGSTABDestroy(struct_solver);
+
+      if (solver_id == 240)
+      {
+         HYPRE_StructSMGDestroy(struct_precond);
+      }
+      else if (solver_id == 241)
+      {
+         HYPRE_StructPFMGDestroy(struct_precond);
+      }
+      else if (solver_id == 242)
+      {
+         HYPRE_StructSparseMSGDestroy(struct_precond);
+      }
+      else if (solver_id == 247)
+      {
+         HYPRE_StructJacobiDestroy(struct_precond);
+      }
+   }
+
 
    /*-----------------------------------------------------------
     * Gather the solution vector
