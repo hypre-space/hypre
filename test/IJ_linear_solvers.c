@@ -561,19 +561,25 @@ main( int   argc,
       HYPRE_SetIJVectorLocalStorageType(ij_b,ij_vector_storage_type );
       HYPRE_SetIJVectorPartitioning(ij_b, partitioning);
       HYPRE_InitializeIJVector(ij_b);
-      HYPRE_SetIJVectorLocalComponentsInBlock(ij_b, 
-					      partitioning[myid], 
-					      partitioning[myid+1]-1, 
-					      0.0);
+      HYPRE_ZeroIJVectorLocalComponents(ij_b); 
 
       HYPRE_NewIJVector(MPI_COMM_WORLD, &ij_x, global_n);
       HYPRE_SetIJVectorLocalStorageType(ij_x,ij_vector_storage_type );
       HYPRE_SetIJVectorPartitioning(ij_x, partitioning);
       HYPRE_InitializeIJVector(ij_x);
+      HYPRE_ZeroIJVectorLocalComponents(ij_b);
+      values = hypre_CTAlloc(double, partitioning[myid+1] - partitioning[myid]);
+
+      for (i = 0; i < partitioning[myid+1] - partitioning[myid]; i++)
+         values[i] = 1.0;
+
       HYPRE_SetIJVectorLocalComponentsInBlock(ij_x, 
-						 partitioning[myid], 
-						 partitioning[myid+1]-1, 
-						 1.0);
+					      partitioning[myid], 
+					      partitioning[myid+1]-1,
+                                              NULL,
+					      values);
+      hypre_TFree(values);
+
    /*-----------------------------------------------------------
     * Fetch the resulting underlying vectors out
     *-----------------------------------------------------------*/
@@ -590,10 +596,7 @@ main( int   argc,
       HYPRE_SetIJVectorLocalStorageType(ij_x,ij_vector_storage_type );
       HYPRE_SetIJVectorPartitioning(ij_x, partitioning);
       HYPRE_InitializeIJVector(ij_x);
-      HYPRE_SetIJVectorLocalComponentsInBlock(ij_x, 
-						 partitioning[myid], 
-						 partitioning[myid+1]-1, 
-						 0.0);
+      HYPRE_ZeroIJVectorLocalComponents(ij_x); 
       x = (HYPRE_ParVector) HYPRE_GetIJVectorLocalStorage( ij_x );
 
    }
@@ -610,10 +613,7 @@ main( int   argc,
       HYPRE_SetIJVectorLocalStorageType(ij_x,ij_vector_storage_type );
       HYPRE_SetIJVectorPartitioning(ij_x, partitioning);
       HYPRE_InitializeIJVector(ij_x);
-      HYPRE_SetIJVectorLocalComponentsInBlock(ij_x, 
-						 partitioning[myid], 
-						 partitioning[myid+1]-1, 
-						 0.0);
+      HYPRE_ZeroIJVectorLocalComponents(ij_x); 
       x = (HYPRE_ParVector) HYPRE_GetIJVectorLocalStorage( ij_x );
    }
    else if ( build_rhs_type == 4 )
@@ -635,20 +635,14 @@ main( int   argc,
       HYPRE_SetIJVectorLocalStorageType(ij_b,ij_vector_storage_type );
       HYPRE_SetIJVectorPartitioning(ij_b, partitioning);
       HYPRE_InitializeIJVector(ij_b);
-      HYPRE_SetIJVectorLocalComponentsInBlock(ij_b, 
-						 partitioning[myid], 
-						 partitioning[myid+1]-1, 
-						 0.0);
+      HYPRE_ZeroIJVectorLocalComponents(ij_b); 
       b = (HYPRE_ParVector) HYPRE_GetIJVectorLocalStorage( ij_b );
 
       HYPRE_NewIJVector(MPI_COMM_WORLD, &ij_x, global_n);
       HYPRE_SetIJVectorLocalStorageType(ij_x,ij_vector_storage_type );
       HYPRE_SetIJVectorPartitioning(ij_x, partitioning);
       HYPRE_InitializeIJVector(ij_x);
-      HYPRE_SetIJVectorLocalComponentsInBlock(ij_x, 
-						 partitioning[myid], 
-						 partitioning[myid+1]-1, 
-						 1.0);
+      HYPRE_ZeroIJVectorLocalComponents(ij_x); 
       x = (HYPRE_ParVector) HYPRE_GetIJVectorLocalStorage( ij_x );
    }
    /*-----------------------------------------------------------
