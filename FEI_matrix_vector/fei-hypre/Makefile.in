@@ -15,16 +15,38 @@ srcdir = @srcdir@
 
 all: lib
 
+CC = @CC@
 CXX = @CXX@
 
 SUPERLU_INCLUDE = -I/g/g2/chtong/SUPERLU/WEST/SuperLU/SRC
 SUPERLU_LIB     = -L/g/g2/chtong/SUPERLU/WEST/SuperLU
+MLPACK_INCLUDE  = -I/g/g2/chtong/ML/WEST/ml/src
 MLPACK_LIB      = -L/g/g2/chtong/ML/WEST/ml/src
 
+C_COMPILE_FLAGS=@CFLAGS@
 CXX_COMPILE_FLAGS=@CXXFLAGS@
+CINCLUDES=@INCLUDES@ @MPIINCLUDE@
 CXXINCLUDES=@INCLUDES@ @MPIINCLUDE@
+CDEFS = -DHYPRE_NO_PTHREAD_MANGLING -DSUPERLU -DMLPACK
 CXXDEFS = -DHYPRE_NO_PTHREAD_MANGLING -DSUPERLU -DMLPACK
 
+CFLAGS = -w ${C_COMPILE_FLAGS} \
+ ${CDEFS}\
+ -I../..\
+ -I../isis-mv\
+ -I../../IJ_matrix_vector\
+ -I../../utilities\
+ -I../../parcsr_matrix_vector\
+ -I../../parcsr_linear_solvers\
+ -I../../seq_matrix_vector\
+ -I../../distributed_matrix\
+ -I../../distributed_linear_solvers\
+ -I../fei-base\
+ ${SUPERLU_INCLUDE}\
+ ${MLPACK_INCLUDE}\
+ ${CINCLUDES}
+
+MPILIBFLAGS = @MPILIBDIRS@ @MPILIBS@ @MPIFLAGS@
 CXXFLAGS = -w ${CXX_COMPILE_FLAGS} \
  ${CXXDEFS}\
  -I../..\
@@ -68,9 +90,9 @@ LFLAGS =\
  -ldxml -lm
 
 FILES = HYPRE_LinSysCore.cc cfei.cc hypre_fei_reduce.cc hypre_fei_schur.cc \
-        hypre_fei_misc.cc hypre_fei_ddamg.cc
+        hypre_fei_misc.cc hypre_fei_ddamg.cc HYPRE_parcsr_ml.c
 
-OBJS = ${FILES:.cc=.o}
+OBJS = ${FILES:.c=.o} ${FILES:.cc=.o}
 
 ##################################################################
 # Main rules
@@ -112,4 +134,7 @@ veryclean: clean
 
 .cc.o:
 	${CXX} -o $@ -c ${CXXFLAGS} $<
+
+.c.o:
+	${CC} -o $@ -c ${CFLAGS} $<
 
