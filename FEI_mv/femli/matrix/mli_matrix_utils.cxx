@@ -426,7 +426,7 @@ int MLI_Matrix_GetOverlappedMatrix(MLI_Matrix *mli_mat, int *offNRows,
  * diagonal entries at the beginning of the row)
  *--------------------------------------------------------------------------*/
 
-int MLI_Matrix_Transpose(MLI_Matrix *Amat, MLI_Matrix **AmatT)
+void MLI_Matrix_Transpose(MLI_Matrix *Amat, MLI_Matrix **AmatT)
 {
    int                one=1, ia, ia2, ib, iTemp, *ATDiagI, *ATDiagJ;
    int                localNRows;
@@ -484,6 +484,4 @@ int MLI_Matrix_Transpose(MLI_Matrix *Amat, MLI_Matrix **AmatT)
    delete funcPtr;
 
    *AmatT = mli_AmatT;
-  
-   return 0;
 }
