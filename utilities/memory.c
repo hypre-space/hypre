@@ -153,7 +153,14 @@ hypre_ReAlloc( char *ptr,
       ptr = _urealloc_(ptr, size);
    }
 #else
-   ptr = realloc(ptr, size);
+   if (ptr == NULL)
+   {
+      ptr = malloc(size);
+   }
+   else
+   {
+      ptr = realloc(ptr, size);
+   }
 #endif
 
 #if 1
