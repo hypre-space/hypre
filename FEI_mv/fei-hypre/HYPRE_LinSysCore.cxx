@@ -2156,7 +2156,7 @@ This should ultimately be taken out even for newer ale3d implementation
          blockID        = blockIDs[0];
          nodeFieldIDs   = (int **) lookup_->getFieldIDsTable(blockID);
          nodeFieldID    = nodeFieldIDs[0][0];
-         checkFieldSize = lookup_->getFieldSize(nodeFieldID);
+         //checkFieldSize = lookup_->getFieldSize(nodeFieldID);
          assert( fieldSize == 1 );
          aleNodeNumbers = new int[numNodes];
          eqnNumbers     = new int[numNodes];
