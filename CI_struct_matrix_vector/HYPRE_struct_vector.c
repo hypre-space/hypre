@@ -8,33 +8,34 @@
  *********************************************************************EHEADER*/
 /******************************************************************************
  *
- * HYPRE_StructMatrix interface
+ * HYPRE_StructInterfaceVector interface
  *
  *****************************************************************************/
 
 #include "headers.h"
 
 /*--------------------------------------------------------------------------
- * HYPRE_NewStructInterfaceVector
+ * HYPRE_StructInterfaceVectorCreate
  *--------------------------------------------------------------------------*/
 
-HYPRE_StructInterfaceVector
-HYPRE_NewStructInterfaceVector( MPI_Comm     context,
-		      HYPRE_StructGrid     grid,
-		      HYPRE_StructStencil  stencil )
+int
+HYPRE_StructInterfaceVectorCreate( MPI_Comm             context,
+		                   HYPRE_StructGrid     grid,
+		                   HYPRE_StructStencil  stencil,
+                                   HYPRE_StructInterfaceVector  *vector)
 {
-   return ( (HYPRE_StructInterfaceVector)
-	    hypre_NewStructInterfaceVector( context,
+   *vector = (HYPRE_StructInterfaceVector)
+	      hypre_NewStructInterfaceVector( context,
 				  (hypre_StructGrid *) grid,
-				  (hypre_StructStencil *) stencil ) );
+				  (hypre_StructStencil *) stencil );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_FreeStructInterfaceVector
+ * HYPRE_StructInterfaceVectorDestroy
  *--------------------------------------------------------------------------*/
 
 int 
-HYPRE_FreeStructInterfaceVector( HYPRE_StructInterfaceVector struct_vector )
+HYPRE_StructInterfaceVectorDestroy( HYPRE_StructInterfaceVector struct_vector )
 {
    return( hypre_FreeStructInterfaceVector( (hypre_StructInterfaceVector *) struct_vector ) );
 }
@@ -49,13 +50,12 @@ HYPRE_SetStructInterfaceVectorCoeffs( HYPRE_StructInterfaceVector  vector,
 			    double            *coeffs      )
 {
    hypre_StructInterfaceVector *new_vector;
-   hypre_Index         *new_grid_index;
+   hypre_Index         new_grid_index;
 
    int                d;
    int                ierr;
 
    new_vector = (hypre_StructInterfaceVector *) vector;
-   new_grid_index = hypre_NewIndex();
    for (d = 0;
 	d < hypre_StructGridDim(hypre_StructInterfaceVectorStructGrid(new_vector));
 	d++)
@@ -65,31 +65,51 @@ HYPRE_SetStructInterfaceVectorCoeffs( HYPRE_StructInterfaceVector  vector,
 
    ierr = hypre_SetStructInterfaceVectorCoeffs( new_vector, new_grid_index, coeffs );
 
-   hypre_FreeIndex(new_grid_index);
-
    return (ierr);
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SetStructInterfaceVectorBoxValues
+ * HYPRE_StructInterfaceVectorSetValues
  *--------------------------------------------------------------------------*/
 
 int 
-HYPRE_SetStructInterfaceVectorBoxValues( HYPRE_StructInterfaceVector  vector,
+HYPRE_StructInterfaceVectorSetValues( HYPRE_StructInterfaceVector  vector,
+			    int               *grid_index,
+			    double            *coeffs      )
+{
+   return ( 0 );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_StructInterfaceVectorGetValues
+ *--------------------------------------------------------------------------*/
+
+int 
+HYPRE_StructInterfaceVectorGetValues( HYPRE_StructInterfaceVector  vector,
+			    int               *grid_index,
+			    double            *values_ptr     )
+{
+   return ( 0 );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_StructInterfaceVectorSetBoxValues
+ *--------------------------------------------------------------------------*/
+
+int 
+HYPRE_StructInterfaceVectorSetBoxValues( HYPRE_StructInterfaceVector  vector,
 			    int               *lower_grid_index,
 			    int               *upper_grid_index,
 			    double            *coeffs      )
 {
    hypre_StructInterfaceVector *new_vector;
-   hypre_Index         *new_lower_grid_index;
-   hypre_Index         *new_upper_grid_index;
+   hypre_Index         new_lower_grid_index;
+   hypre_Index         new_upper_grid_index;
 
    int                d;
    int                ierr;
 
    new_vector = (hypre_StructInterfaceVector *) vector;
-   new_lower_grid_index = hypre_NewIndex();
-   new_upper_grid_index = hypre_NewIndex();
    for (d = 0;
 	d < hypre_StructGridDim(hypre_StructInterfaceVectorStructGrid(new_vector));
 	d++)
@@ -100,15 +120,26 @@ HYPRE_SetStructInterfaceVectorBoxValues( HYPRE_StructInterfaceVector  vector,
 
    ierr = hypre_SetStructInterfaceVectorBoxValues( new_vector, new_lower_grid_index, new_upper_grid_index, coeffs );
 
-   hypre_FreeIndex(new_lower_grid_index);
-   hypre_FreeIndex(new_upper_grid_index);
-
    return (ierr);
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_StructInterfaceVectorGetBoxValues
+ *--------------------------------------------------------------------------*/
+
+int 
+HYPRE_StructInterfaceVectorGetBoxValues( HYPRE_StructInterfaceVector  vector,
+			    int               *lower_grid_index,
+			    int               *upper_grid_index,
+			    double            *values_ptr     )
+{
+   return ( 0 );
 }
 
 /*--------------------------------------------------------------------------
  * HYPRE_SetStructInterfaceVector
  *--------------------------------------------------------------------------*/
+
 
 int 
 HYPRE_SetStructInterfaceVector( HYPRE_StructInterfaceVector  vector,
@@ -125,23 +156,24 @@ HYPRE_SetStructInterfaceVector( HYPRE_StructInterfaceVector  vector,
    return (ierr);
 }
 
+
 /*--------------------------------------------------------------------------
- * HYPRE_InitializeStructInterfaceVector
+ * HYPRE_StructInterfaceVectorInitialize
  *--------------------------------------------------------------------------*/
 
 int 
-HYPRE_InitializeStructInterfaceVector( HYPRE_StructInterfaceVector vector )
+HYPRE_StructInterfaceVectorInitialize( HYPRE_StructInterfaceVector vector )
 {
   /* Currently a no-op */
    return( 0 );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_AssembleStructInterfaceVector
+ * HYPRE_StructInterfaceVectorAssemble
  *--------------------------------------------------------------------------*/
 
 int 
-HYPRE_AssembleStructInterfaceVector( HYPRE_StructInterfaceVector vector )
+HYPRE_StructInterfaceVectorAssemble( HYPRE_StructInterfaceVector vector )
 {
    return( hypre_AssembleStructInterfaceVector( (hypre_StructInterfaceVector *) vector ) );
 }
@@ -168,13 +200,12 @@ HYPRE_StructInterfaceVectorGetData( HYPRE_StructInterfaceVector vector )
    return( hypre_StructInterfaceVectorData( (hypre_StructInterfaceVector *) vector ) );
 }
 
-/* OUTPUT */
 /*--------------------------------------------------------------------------
- * HYPRE_PrintStructInterfaceVector
+ * HYPRE_StructInterfaceVectorPrint
  *--------------------------------------------------------------------------*/
 
 int 
-HYPRE_PrintStructInterfaceVector( HYPRE_StructInterfaceVector vector )
+HYPRE_StructInterfaceVectorPrint( HYPRE_StructInterfaceVector vector )
 {
    return( hypre_PrintStructInterfaceVector( (hypre_StructInterfaceVector *) vector ) );
 }
@@ -182,6 +213,7 @@ HYPRE_PrintStructInterfaceVector( HYPRE_StructInterfaceVector vector )
 /*--------------------------------------------------------------------------
  * HYPRE_RetrievalOnStructInterfaceVector
  *--------------------------------------------------------------------------*/
+
 
 int 
 HYPRE_RetrievalOnStructInterfaceVector( HYPRE_StructInterfaceVector vector )
@@ -209,9 +241,8 @@ HYPRE_GetStructInterfaceVectorValue( HYPRE_StructInterfaceVector vector,
 {
    int ierr=0;
    int d;
-   hypre_Index         *new_grid_index;
+   hypre_Index         new_grid_index;
 
-   new_grid_index = hypre_NewIndex();
    for (d = 0;
 	d < hypre_StructGridDim(hypre_StructInterfaceVectorStructGrid
            ((hypre_StructInterfaceVector *) vector));
@@ -223,7 +254,16 @@ HYPRE_GetStructInterfaceVectorValue( HYPRE_StructInterfaceVector vector,
    ierr = hypre_GetStructInterfaceVectorValue
           ( (hypre_StructInterfaceVector *) vector, new_grid_index, value );
 
-   hypre_FreeIndex(new_grid_index);
-
    return(ierr);
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_StructInterfaceVectorSetNumGhost
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_StructInterfaceVectorSetNumGhost( HYPRE_StructInterfaceVector vector,
+				        int *num_ghost )
+{
+   return( 0 );
 }

@@ -7,110 +7,66 @@
 # $Revision$
 #EHEADER***********************************************************************
 
-
 .SUFFIXES:
-.SUFFIXES: .c .f .o
-
-default: lib
-
-all: default
-
-install:all
-
-HEADERS =\
- box.h\
- struct_grid.h\
- grid_to_coord.h\
- headers.h\
- struct_stencil.h\
- struct_matrix.h\
- struct_vector.h
- 
-LOCALFILES =\
- box.c\
- struct_grid.c\
- grid_to_coord.c\
- struct_stencil.c\
- struct_matrix.c\
- struct_matrix_PETSc.c\
- struct_matrix_ParCSR.c\
- struct_vector.c\
- struct_vector_PETSc.c
-
-HYPREFILES =\
- HYPRE_struct_grid.c\
- HYPRE_struct_stencil.c\
- HYPRE_struct_matrix.c\
- HYPRE_struct_vector.c
-
-FILES = $(HYPREFILES) $(LOCALFILES)
-
-OBJS = ${FILES:.c=.o}
+.SUFFIXES: .c .o
 
 CC = @CC@
-CXX = @CXX@
-F77 = @F77@
 
 C_COMPILE_FLAGS=@CFLAGS@
-CXX_COMPILE_FLAGS=@CXXFLAGS@
-F77_COMPILE_FLAGS=@F77FLAGS@
 CINCLUDES=@INCLUDES@ @MPIINCLUDE@
 CDEFS = @HYPRE_PETSCDEFS@ -DHYPRE_NO_PTHREAD_MANGLING
 
 CFLAGS = \
- -I..\
- -I../utilities\
- -I.\
- -I../seq_matrix_vector\
- -I../parcsr_matrix_vector\
- @PETSCINCLUDE@ \
  ${C_COMPILE_FLAGS}\
- ${CINCLUDES}\
- ${CDEFS}
-
-CXXFLAGS = \
- @PETSCINCLUDE@ \
- ${CXX_COMPILE_FLAGS}\
- -I../utilities\
  -I..\
+ -I../utilities\
+ -I../struct_matrix_vector\
+ @PETSCINCLUDE@ \
  ${CINCLUDES}\
- ${COPT}\
- ${CDEBUG}\
  ${CDEFS}
 
 RANLIB = @RANLIB@
 
+HEADERS =\
+ headers.h\
+ CI_struct_matrix_vector.h\
+ HYPRE_CI_mv.h
+ 
+FILES =\
+ HYPRE_struct_matrix.c\
+ HYPRE_struct_vector.c\
+ struct_matrix.c\
+ struct_vector.c\
+ grid_to_coord.c\
+ struct_matrix_PETSc.c\
+ struct_vector_PETSc.c
 
-##################################################################
-# Main rules
-##################################################################
-
-lib: libHYPRE_CI_mv.a
-
-driver: driver.o lib
-	@echo  "Linking" $@ "... "
-	${LD} -o driver driver.o ${LFLAGS} 
-
-link:
-	rm driver
-	make driver
-
-libHYPRE_CI_mv.a: $(PROTOS) ${OBJS}
-	@echo  "Building $@ ... "
-	ar -rcu lib_HYPRE_CI_mv.a ${OBJS}
-	@RANLIB@ lib_HYPRE_CI_mv.a
-
-${OBJS}: ${HEADERS}
+OBJS = ${FILES:.c=.o}
 
 ##################################################################
 # Targets
 ##################################################################
+
+all: libHYPRE_CI_mv.a
+
+install: all
+
 clean:
 	@rm -f *.o *.dxx 
 
 veryclean: clean
 	@rm -f lib*.a
 
+##################################################################
+# Rules
+##################################################################
+
+libHYPRE_CI_mv.a: ${OBJS}
+	@echo  "Building $@ ... "
+	ar -rcu $@ ${OBJS}
+	${RANLIB} $@
+
+${OBJS}: ${HEADERS}
 
 ##################################################################
 # Generic rules
@@ -118,11 +74,3 @@ veryclean: clean
 
 .c.o:
 	${CC} -o $@ -c ${CFLAGS} $<
-
-.cc.o:
-	${CXX} -o $@ -c ${CFLAGS} $<
-
-.f.o:
-	${F77} -o $@ -c ${FFLAGS} $<
-
-

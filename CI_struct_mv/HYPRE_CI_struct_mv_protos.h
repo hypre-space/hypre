@@ -1,10 +1,12 @@
 # define	P(s) s
 
 /* HYPRE_struct_grid.c */
+/*
 HYPRE_StructGrid HYPRE_NewStructGrid P((MPI_Comm context, int dim ));
 void HYPRE_FreeStructGrid P((HYPRE_StructGrid grid ));
 void HYPRE_SetStructGridExtents P((HYPRE_StructGrid grid , int *ilower , int *iupper ));
 void HYPRE_AssembleStructGrid P((HYPRE_StructGrid grid ));
+*/
 
 /* HYPRE_struct_matrix.c */
 HYPRE_StructInterfaceMatrix HYPRE_NewStructInterfaceMatrix P((MPI_Comm context , HYPRE_StructGrid grid , HYPRE_StructStencil stencil ));
@@ -20,9 +22,11 @@ int HYPRE_SetStructInterfaceMatrixStorageType P((HYPRE_StructInterfaceMatrix str
 int HYPRE_SetStructInterfaceMatrixSymmetric P((HYPRE_StructInterfaceMatrix struct_matrix , int type ));
 
 /* HYPRE_struct_stencil.c */
+/*
 HYPRE_StructStencil HYPRE_NewStructStencil P((int dim , int size ));
 void HYPRE_SetStructStencilElement P((HYPRE_StructStencil stencil , int element_index , int *offset ));
 void HYPRE_FreeStructStencil P((HYPRE_StructStencil stencil ));
+*/
 
 /* HYPRE_struct_vector.c */
 HYPRE_StructInterfaceVector HYPRE_NewStructInterfaceVector P((MPI_Comm context , HYPRE_StructGrid grid , HYPRE_StructStencil stencil ));

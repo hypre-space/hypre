@@ -52,9 +52,11 @@ hypre_FreeStructInterfaceMatrix( hypre_StructInterfaceMatrix *matrix )
 
    if ( hypre_StructInterfaceMatrixStorageType(matrix) == HYPRE_PETSC )
       hypre_FreeStructInterfaceMatrixPETSc( matrix );
+/*
    else
    if ( hypre_StructInterfaceMatrixStorageType(matrix) == HYPRE_PARCSR )
       hypre_FreeStructInterfaceMatrixParCSR( matrix );
+*/
    else
       return(-1);
 
@@ -74,16 +76,18 @@ hypre_FreeStructInterfaceMatrix( hypre_StructInterfaceMatrix *matrix )
 
 int 
 hypre_SetStructInterfaceMatrixCoeffs( hypre_StructInterfaceMatrix *matrix,
-			    hypre_Index         *grid_index,
+			    hypre_Index         grid_index,
 			    double            *coeffs     )
 {
    int    ierr;
 
    if ( hypre_StructInterfaceMatrixStorageType(matrix) == HYPRE_PETSC )
       return( hypre_SetStructInterfaceMatrixPETScCoeffs( matrix, grid_index, coeffs ) );
+/*
    else
    if ( hypre_StructInterfaceMatrixStorageType(matrix) == HYPRE_PARCSR )
       return( hypre_SetStructInterfaceMatrixParCSRCoeffs( matrix, grid_index, coeffs ) );
+*/
    else
       return(-1);
 }
@@ -94,8 +98,8 @@ hypre_SetStructInterfaceMatrixCoeffs( hypre_StructInterfaceMatrix *matrix,
 
 int 
 hypre_SetStructInterfaceMatrixBoxValues( hypre_StructInterfaceMatrix *matrix,
-			    hypre_Index         *lower_grid_index,
-			    hypre_Index         *upper_grid_index,
+			    hypre_Index         lower_grid_index,
+			    hypre_Index         upper_grid_index,
                             int                 num_stencil_indices,
                             int                 *stencil_indices,
 			    double            *coeffs      )
@@ -106,15 +110,12 @@ hypre_SetStructInterfaceMatrixBoxValues( hypre_StructInterfaceMatrix *matrix,
                  to any (if any) previously entered values for the same coefficient  
      */
 {
-   hypre_Index *loop_index;
+   hypre_Index loop_index;
    hypre_StructStencil *stencil;
    int         ierr=0;
    int         stencil_size;
    int         i, j, k, l, coeffs_index;
    double      *coeffs_buffer;
-
-   /* Allocate loop_index */
-   loop_index = hypre_CTAlloc( hypre_Index, 3); 
 
    /* Get stencil object out of matrix object */
    stencil = hypre_StructInterfaceMatrixStructStencil( matrix );
@@ -154,8 +155,6 @@ hypre_SetStructInterfaceMatrixBoxValues( hypre_StructInterfaceMatrix *matrix,
          }
    /* End Loop from lower_grid_index to upper_grid index */
 
-
-   hypre_TFree( loop_index );
    hypre_TFree( coeffs_buffer );
 
    return( ierr );
@@ -171,9 +170,11 @@ hypre_AssembleStructInterfaceMatrix( hypre_StructInterfaceMatrix *matrix )
 {
    if ( hypre_StructInterfaceMatrixStorageType(matrix) == HYPRE_PETSC )
       return( hypre_AssembleStructInterfaceMatrixPETSc( matrix ) );
+/*
    else
    if ( hypre_StructInterfaceMatrixStorageType(matrix) == HYPRE_PARCSR )
       return( hypre_AssembleStructInterfaceMatrixParCSR( matrix ) );
+*/
    else
       return(-1);
 }
@@ -188,9 +189,11 @@ hypre_PrintStructInterfaceMatrix( hypre_StructInterfaceMatrix *matrix )
 {
    if ( hypre_StructInterfaceMatrixStorageType(matrix) == HYPRE_PETSC )
       return( hypre_PrintStructInterfaceMatrixPETSc( matrix ) );
+/*
    else
    if ( hypre_StructInterfaceMatrixStorageType(matrix) == HYPRE_PARCSR)
       return( hypre_PrintStructInterfaceMatrixParCSR( matrix ) );
+*/
    else
       return(-1);
 }
@@ -252,18 +255,22 @@ hypre_FindBoxNeighborhood( hypre_BoxArray *boxes,
 
    int          i, j, d, s;
 
+/*  CJR
    hypre_StructStencilElt  *stencil_shape = hypre_StructStencilShape(stencil);
+*/
+   hypre_Index  *stencil_shape = hypre_StructStencilShape(stencil);
 
    /*-----------------------------------------------------------------------
     * Determine `neighborhood_flags'
     *-----------------------------------------------------------------------*/
 
    neighborhood_flags = hypre_CTAlloc(int, hypre_BoxArraySize(all_boxes));
+   tmp_box = hypre_BoxCreate();
 
    hypre_ForBoxI(i, boxes)
    {
       box = hypre_BoxArrayBox(boxes, i);
-      shift_box = hypre_DuplicateBox(box);
+      shift_box = hypre_BoxDuplicate(box);
 
       for (s = 0; s < hypre_StructStencilSize(stencil); s++)
       {
@@ -279,17 +286,18 @@ hypre_FindBoxNeighborhood( hypre_BoxArray *boxes,
 	 {
 	    all_box = hypre_BoxArrayBox(all_boxes, j);
 
-	    tmp_box = hypre_IntersectBoxes(shift_box, all_box);
-	    if (tmp_box)
+	    hypre_IntersectBoxes(shift_box, all_box, tmp_box);
+	    if (hypre_BoxVolume(tmp_box))
 	    {
 	       neighborhood_flags[j] = 1;
-	       hypre_FreeBox(tmp_box);
 	    }
 	 }
       }
 
-      hypre_FreeBox(shift_box);
+      hypre_BoxDestroy(shift_box);
    }
+
+   hypre_BoxDestroy(tmp_box);
 
    return neighborhood_flags;
 }
@@ -327,7 +335,7 @@ hypre_FindBoxApproxNeighborhood( hypre_BoxArray   *boxes,
 
    int          i, j, d, s;
 
-   hypre_StructStencilElt  *stencil_shape = hypre_StructStencilShape(stencil);
+   hypre_Index  *stencil_shape = hypre_StructStencilShape(stencil);
 
    /*-----------------------------------------------------------------------
     * Compute min and max stencil offsets
@@ -353,13 +361,14 @@ hypre_FindBoxApproxNeighborhood( hypre_BoxArray   *boxes,
     *-----------------------------------------------------------------------*/
 
    neighborhood_flags = hypre_CTAlloc(int, hypre_BoxArraySize(all_boxes));
+   tmp_box = hypre_BoxCreate();
 
    hypre_ForBoxI(i, boxes)
    {
       box = hypre_BoxArrayBox(boxes, i);
 
       /* grow the box */
-      grow_box = hypre_DuplicateBox(box);
+      grow_box = hypre_BoxDuplicate(box);
       for (d = 0; d < 3; d++)
       {
 	 hypre_BoxIMinD(grow_box, d) += min_offset[d];
@@ -370,16 +379,17 @@ hypre_FindBoxApproxNeighborhood( hypre_BoxArray   *boxes,
       {
 	 all_box = hypre_BoxArrayBox(all_boxes, j);
 
-	 tmp_box = hypre_IntersectBoxes(grow_box, all_box);
-	 if (tmp_box)
+	 hypre_IntersectBoxes(grow_box, all_box, tmp_box);
+	 if (hypre_BoxVolume(tmp_box))
 	 {
 	    neighborhood_flags[j] = 1;
-	    hypre_FreeBox(tmp_box);
 	 }
       }
 
-      hypre_FreeBox(grow_box);
+      hypre_BoxDestroy(grow_box);
    }
+
+   hypre_BoxDestroy(tmp_box);
 
    return neighborhood_flags;
 }

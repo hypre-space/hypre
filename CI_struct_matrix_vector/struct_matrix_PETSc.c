@@ -54,7 +54,7 @@ hypre_FreeStructInterfaceMatrixPETSc( hypre_StructInterfaceMatrix *struct_matrix
 
 int 
 hypre_SetStructInterfaceMatrixPETScCoeffs( hypre_StructInterfaceMatrix *struct_matrix, 
-				 hypre_Index         *index,
+				 hypre_Index         index,
 				 double            *coeffs )
 {
 #ifdef PETSC_AVAILABLE
@@ -64,7 +64,7 @@ hypre_SetStructInterfaceMatrixPETScCoeffs( hypre_StructInterfaceMatrix *struct_m
    /* variables meaningful to the interface */
    hypre_StructGrid                   *grid;
    hypre_StructStencil                *stencil;
-   hypre_Index                  *new_index;
+   hypre_Index                  new_index;
 
    /* variables meaningful to the storage format and translator */
    int                         row_coord, col_coord;
@@ -72,8 +72,6 @@ hypre_SetStructInterfaceMatrixPETScCoeffs( hypre_StructInterfaceMatrix *struct_m
    hypre_StructGridToCoordTableEntry  *grid_to_coord_table_entry;
 
    Mat                        PETSc_matrix;
-
-   new_index = hypre_NewIndex();
 
    grid    = hypre_StructInterfaceMatrixStructGrid(struct_matrix);
    stencil = hypre_StructInterfaceMatrixStructStencil(struct_matrix);
@@ -146,8 +144,6 @@ hypre_SetStructInterfaceMatrixPETScCoeffs( hypre_StructInterfaceMatrix *struct_m
       } /*End of "if coeff not equal to zero" */
 
    } /* End of "for" loop over the elements of the stencil */
-
-   hypre_FreeIndex(new_index);
 
 #endif
    return(0);

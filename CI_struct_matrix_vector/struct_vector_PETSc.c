@@ -51,7 +51,7 @@ hypre_FreeStructInterfaceVectorPETSc( hypre_StructInterfaceVector *struct_vector
 
 int 
 hypre_SetStructInterfaceVectorPETScCoeffs( hypre_StructInterfaceVector *struct_vector, 
-				 hypre_Index         *index,
+				 hypre_Index         index,
 				 double            *coeffs )
 {
    int                         ierr=0;
@@ -60,7 +60,7 @@ hypre_SetStructInterfaceVectorPETScCoeffs( hypre_StructInterfaceVector *struct_v
    /* variables meaningful to the interface */
    hypre_StructGrid                   *grid;
    hypre_StructStencil                *stencil;
-   hypre_Index                  *new_index;
+   hypre_Index                  new_index;
 
    /* variables meaningful to the storage format and translator */
    int                         row_coord, col_coord;
@@ -69,8 +69,6 @@ hypre_SetStructInterfaceVectorPETScCoeffs( hypre_StructInterfaceVector *struct_v
 
    Vec                        PETSc_vector;
 
-
-   new_index = hypre_NewIndex();
 
    grid    = hypre_StructInterfaceVectorStructGrid(struct_vector);
    stencil = hypre_StructInterfaceVectorStructStencil(struct_vector);
@@ -247,7 +245,7 @@ hypre_RetrievalOffStructInterfaceVectorPETSc( hypre_StructInterfaceVector *vecto
 
 int 
 hypre_GetStructInterfaceVectorPETScValue( 
-       hypre_StructInterfaceVector *vector, hypre_Index *index, double *value )
+       hypre_StructInterfaceVector *vector, hypre_Index index, double *value )
 {
    int  ierr=0;
 #ifdef PETSC_AVAILABLE

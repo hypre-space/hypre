@@ -37,8 +37,8 @@ hypre_NewStructGridToCoordTable( hypre_StructGrid    *grid,
    hypre_BoxArray               *boxes;
 			  
    hypre_Box                    *box;
-   hypre_Index                  *imin;
-   hypre_Index                  *imax;
+   hypre_Index                  imin;
+   hypre_Index                  imax;
 	                  
    int                        *box_neighborhood;
    int                        *box_offsets, box_offset;
@@ -57,7 +57,7 @@ hypre_NewStructGridToCoordTable( hypre_StructGrid    *grid,
    all_boxes = hypre_StructGridAllBoxes(grid);
    box_neighborhood = hypre_FindBoxApproxNeighborhood(boxes, all_boxes, stencil);
 
-   boxes = hypre_NewBoxArray();
+   boxes = hypre_BoxArrayCreate(0);
    for (i = 0; i < hypre_BoxArraySize(all_boxes); i++)
    {
       if (box_neighborhood[i])
@@ -76,7 +76,7 @@ hypre_NewStructGridToCoordTable( hypre_StructGrid    *grid,
       if (box_neighborhood[i])
 	 box_offsets[j++] = box_offset;
 
-      box_offset += hypre_BoxTotalSize(hypre_BoxArrayBox(all_boxes, i));
+      box_offset += hypre_BoxVolume(hypre_BoxArrayBox(all_boxes, i));
    }
       
    /*------------------------------------------------------
@@ -134,9 +134,6 @@ hypre_NewStructGridToCoordTable( hypre_StructGrid    *grid,
    entries = hypre_CTAlloc( hypre_StructGridToCoordTableEntry *,
 		      (size[0] * size[1] * size[2]) );
       
-   imin = hypre_NewIndex();
-   imax = hypre_NewIndex();
-
    hypre_ForBoxI(b, boxes)
    {
       box = hypre_BoxArrayBox(boxes, b);
@@ -179,8 +176,6 @@ hypre_NewStructGridToCoordTable( hypre_StructGrid    *grid,
       }
    }
       
-   hypre_FreeIndex(imin);
-   hypre_FreeIndex(imax);
 
    /*------------------------------------------------------
     * Set up the table
@@ -196,7 +191,7 @@ hypre_NewStructGridToCoordTable( hypre_StructGrid    *grid,
 
    /* this box array points to grid boxes in all_boxes */
    hypre_BoxArraySize(boxes) = 0;
-   hypre_FreeBoxArray(boxes);
+   hypre_BoxArrayDestroy(boxes);
 
    hypre_TFree(box_neighborhood);
    hypre_TFree(box_offsets);
@@ -233,7 +228,7 @@ hypre_FreeStructGridToCoordTable( hypre_StructGridToCoordTable *table )
  *--------------------------------------------------------------------------*/
 
 hypre_StructGridToCoordTableEntry *
-hypre_FindStructGridToCoordTableEntry( hypre_Index            *index, 
+hypre_FindStructGridToCoordTableEntry( hypre_Index            index, 
 			       hypre_StructGridToCoordTable *table )
 {
    hypre_StructGridToCoordTableEntry *entry;

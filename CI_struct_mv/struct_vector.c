@@ -72,7 +72,7 @@ hypre_FreeStructInterfaceVector( hypre_StructInterfaceVector *vector )
 
 int 
 hypre_SetStructInterfaceVectorCoeffs( hypre_StructInterfaceVector *vector,
-			    hypre_Index         *grid_index,
+			    hypre_Index         grid_index,
 			    double            *coeffs     )
 {
    int    ierr;
@@ -88,16 +88,13 @@ hypre_SetStructInterfaceVectorCoeffs( hypre_StructInterfaceVector *vector,
  *--------------------------------------------------------------------------*/
 int 
 hypre_SetStructInterfaceVectorBoxValues( hypre_StructInterfaceVector *vector,
-			    hypre_Index         *lower_grid_index,
-			    hypre_Index         *upper_grid_index,
+			    hypre_Index         lower_grid_index,
+			    hypre_Index         upper_grid_index,
 			    double            *coeffs     )
 {
-   hypre_Index *loop_index;
+   hypre_Index loop_index;
    int         ierr=0;
    int         i, j, k, coeffs_index;
-
-   /* Allocate loop_index */
-   loop_index = hypre_CTAlloc( hypre_Index, 3); 
 
    /* Insert coefficients one grid point at a time */
    for (k = hypre_IndexZ(lower_grid_index), coeffs_index = 0; k <= hypre_IndexZ(upper_grid_index); k++)
@@ -115,8 +112,6 @@ hypre_SetStructInterfaceVectorBoxValues( hypre_StructInterfaceVector *vector,
 
          }
    /* End Loop from lower_grid_index to upper_grid index */
-
-   hypre_TFree( loop_index );
 
    return( ierr );
 }
@@ -219,7 +214,7 @@ hypre_RetrievalOffStructInterfaceVector( hypre_StructInterfaceVector *vector )
 
 int 
 hypre_GetStructInterfaceVectorValue( hypre_StructInterfaceVector *vector, 
-      hypre_Index *index, double *value )
+      hypre_Index index, double *value )
 {
    int ierr = 0;
 
@@ -236,5 +231,4 @@ hypre_GetStructInterfaceVectorValue( hypre_StructInterfaceVector *vector,
       return(-1);
 
 }
-
 

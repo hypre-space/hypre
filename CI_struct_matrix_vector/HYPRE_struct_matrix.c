@@ -8,35 +8,37 @@
  *********************************************************************EHEADER*/
 /******************************************************************************
  *
- * HYPRE_StructMatrix interface
+ * HYPRE_StructInterfaceMatrix interface
  *
  *****************************************************************************/
 
 #include "headers.h"
 
 /*--------------------------------------------------------------------------
- * HYPRE_NewStructInterfaceMatrix
- *--------------------------------------------------------------------------*/
-
-HYPRE_StructInterfaceMatrix 
-HYPRE_NewStructInterfaceMatrix( MPI_Comm    context,
-		      HYPRE_StructGrid    grid,
-		      HYPRE_StructStencil stencil )
-{
-   return ( (HYPRE_StructInterfaceMatrix)
-	    hypre_NewStructInterfaceMatrix( context,
-				  (hypre_StructGrid *) grid,
-				  (hypre_StructStencil *) stencil ) );
-}
-
-/*--------------------------------------------------------------------------
- * HYPRE_FreeStructInterfaceMatrix
+ * HYPRE_StructInterfaceMatrixCreate
  *--------------------------------------------------------------------------*/
 
 int 
-HYPRE_FreeStructInterfaceMatrix( HYPRE_StructInterfaceMatrix struct_matrix )
+HYPRE_StructInterfaceMatrixCreate( MPI_Comm            context,
+		                   HYPRE_StructGrid    grid,
+		                   HYPRE_StructStencil stencil,
+                                   HYPRE_StructInterfaceMatrix *matrix )
 {
-   return( hypre_FreeStructInterfaceMatrix( (hypre_StructInterfaceMatrix *) struct_matrix ) );
+   *matrix = (HYPRE_StructInterfaceMatrix)
+	      hypre_NewStructInterfaceMatrix( context,
+	           			  (hypre_StructGrid *) grid,
+				          (hypre_StructStencil *) stencil );
+   return 0;
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_StructInterfaceMatrixDestroy
+ *--------------------------------------------------------------------------*/
+
+int 
+HYPRE_StructInterfaceMatrixDestroy( HYPRE_StructInterfaceMatrix matrix )
+{
+   return( hypre_FreeStructInterfaceMatrix( (hypre_StructInterfaceMatrix *) matrix ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -49,13 +51,12 @@ HYPRE_SetStructInterfaceMatrixCoeffs( HYPRE_StructInterfaceMatrix  matrix,
 			    double            *coeffs      )
 {
    hypre_StructInterfaceMatrix *new_matrix;
-   hypre_Index         *new_grid_index;
+   hypre_Index         new_grid_index;
 
    int                d;
    int                ierr;
 
    new_matrix = (hypre_StructInterfaceMatrix *) matrix;
-   new_grid_index = hypre_NewIndex();
    for (d = 0;
 	d < hypre_StructGridDim(hypre_StructInterfaceMatrixStructGrid(new_matrix));
 	d++)
@@ -65,17 +66,37 @@ HYPRE_SetStructInterfaceMatrixCoeffs( HYPRE_StructInterfaceMatrix  matrix,
 
    ierr = hypre_SetStructInterfaceMatrixCoeffs( new_matrix, new_grid_index, coeffs );
 
-   hypre_FreeIndex(new_grid_index);
-
    return (ierr);
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SetStructInterfaceMatrixBoxValues
+ * HYPRE_StructInterfaceMatrixSetValues
  *--------------------------------------------------------------------------*/
 
+/*
+ Not currently supported.
+*/
+
 int 
-HYPRE_SetStructInterfaceMatrixBoxValues( HYPRE_StructInterfaceMatrix  matrix,
+HYPRE_StructInterfaceMatrixSetValues( HYPRE_StructInterfaceMatrix  matrix,
+			    int               *grid_index,
+                            int                num_stencil_indices,
+                            int               *stencil_indices,
+			    double            *coeffs      )
+{
+   return( 0 );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_StructInterfaceMatrixSetBoxValues
+ *--------------------------------------------------------------------------*/
+
+/* 
+ Don't completely understand this function.  Why is new_matrix needed?
+*/
+
+int 
+HYPRE_StructInterfaceMatrixSetBoxValues( HYPRE_StructInterfaceMatrix  matrix,
 			    int               *lower_grid_index,
 			    int               *upper_grid_index,
                             int                num_stencil_indices,
@@ -84,15 +105,13 @@ HYPRE_SetStructInterfaceMatrixBoxValues( HYPRE_StructInterfaceMatrix  matrix,
 
 {
    hypre_StructInterfaceMatrix *new_matrix;
-   hypre_Index         *new_lower_grid_index;
-   hypre_Index         *new_upper_grid_index;
+   hypre_Index         new_lower_grid_index;
+   hypre_Index         new_upper_grid_index;
 
    int                d;
    int                ierr;
 
    new_matrix = (hypre_StructInterfaceMatrix *) matrix;
-   new_lower_grid_index = hypre_NewIndex();
-   new_upper_grid_index = hypre_NewIndex();
    for (d = 0;
 	d < hypre_StructGridDim(hypre_StructInterfaceMatrixStructGrid(new_matrix));
 	d++)
@@ -109,30 +128,26 @@ HYPRE_SetStructInterfaceMatrixBoxValues( HYPRE_StructInterfaceMatrix  matrix,
                               coeffs );
 
 
-   hypre_FreeIndex(new_lower_grid_index);
-   hypre_FreeIndex(new_upper_grid_index);
-
    return (ierr);
-
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_InitializeStructInterfaceMatrix
+ * HYPRE_StructInterfaceMatrixInitialize
  *--------------------------------------------------------------------------*/
 
 int 
-HYPRE_InitializeStructInterfaceMatrix( HYPRE_StructInterfaceMatrix matrix )
+HYPRE_StructInterfaceMatrixInitialize( HYPRE_StructInterfaceMatrix matrix )
      /* No-op */
 {
    return( 0 );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_AssembleStructInterfaceMatrix
+ * HYPRE_StructInterfaceMatrixAssemble
  *--------------------------------------------------------------------------*/
 
 int 
-HYPRE_AssembleStructInterfaceMatrix( HYPRE_StructInterfaceMatrix matrix )
+HYPRE_StructInterfaceMatrixAssemble( HYPRE_StructInterfaceMatrix matrix )
 {
    return( hypre_AssembleStructInterfaceMatrix( (hypre_StructInterfaceMatrix *) matrix ) );
 }
@@ -148,11 +163,11 @@ HYPRE_StructInterfaceMatrixGetData( HYPRE_StructInterfaceMatrix matrix )
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_PrintStructInterfaceMatrix
+ * HYPRE_StructInterfaceMatrixPrint
  *--------------------------------------------------------------------------*/
 
 int 
-HYPRE_PrintStructInterfaceMatrix( HYPRE_StructInterfaceMatrix matrix )
+HYPRE_StructInterfaceMatrixPrint( HYPRE_StructInterfaceMatrix matrix )
 {
    return( hypre_PrintStructInterfaceMatrix( (hypre_StructInterfaceMatrix *) matrix ) );
 }
@@ -170,11 +185,11 @@ HYPRE_SetStructInterfaceMatrixStorageType( HYPRE_StructInterfaceMatrix struct_ma
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SetStructInterfaceMatrixSymmetric
+ * HYPRE_StructInterfaceMatrixSetSymmetric
  *--------------------------------------------------------------------------*/
 
 int
-HYPRE_SetStructInterfaceMatrixSymmetric( HYPRE_StructInterfaceMatrix struct_matrix,
+HYPRE_StructInterfaceMatrixSetSymmetric( HYPRE_StructInterfaceMatrix struct_matrix,
 				 int               type           )
 {
    return( hypre_SetStructInterfaceMatrixSymmetric(
@@ -182,15 +197,29 @@ HYPRE_SetStructInterfaceMatrixSymmetric( HYPRE_StructInterfaceMatrix struct_matr
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SetStructInterfaceMatrixNumGhost
+ * HYPRE_StructInterfaceMatrixSetNumGhost
  *--------------------------------------------------------------------------*/
 
 int
-HYPRE_SetStructInterfaceMatrixNumGhost( HYPRE_StructInterfaceMatrix struct_matrix,
-				 int               num_ghost         )
+HYPRE_StructInterfaceMatrixSetNumGhost( HYPRE_StructInterfaceMatrix struct_matrix,
+				 int              *num_ghost         )
      /* This does not mean anything for a PETSc matrix under the hood,
         so this is a no-op for now */
 {
    return( 0 );
 }
 
+/*--------------------------------------------------------------------------
+ * HYPRE_StructInterfaceMatrixGetGrid
+ *--------------------------------------------------------------------------*/
+
+/*
+ Not currently supported.
+*/
+
+int
+HYPRE_StructInterfaceMatrixGetGrid( HYPRE_StructInterfaceMatrix matrix,
+                                    HYPRE_StructGrid *grid)
+{
+   return( 0 );
+}
