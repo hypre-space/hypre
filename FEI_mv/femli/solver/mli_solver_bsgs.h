@@ -39,6 +39,9 @@ class MLI_Solver_BSGS : public MLI_Solver
    int        scheme_;
    int        numColors_;
    int        myColor_;
+#ifdef HAVE_ESSL
+   double     **esslMatrices_;
+#endif
 
 public :
 

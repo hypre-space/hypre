@@ -8,8 +8,13 @@
 
 #include <stdio.h>
 #include <string.h>
-#include "base/mli_defs.h"
+#include <strings.h>
 #include "solver/mli_solver_bjacobi.h"
+#ifdef HAVE_ESSL
+#include <essl.h>
+#endif
+
+#define switchSize 200
 
 /******************************************************************************
  * BJacobi relaxation scheme 
@@ -36,6 +41,9 @@ MLI_Solver_BJacobi::MLI_Solver_BJacobi(char *name) : MLI_Solver(name)
    offRowLengths_    = NULL;
    offCols_          = NULL;
    offVals_          = NULL;
+#ifdef HAVE_ESSL
+   esslMatrices_     = NULL;
+#endif
 }
 
 /******************************************************************************
@@ -54,9 +62,6 @@ MLI_Solver_BJacobi::~MLI_Solver_BJacobi()
 
 int MLI_Solver_BJacobi::setup(MLI_Matrix *Amat_in)
 {
-   hypre_ParCSRMatrix *A;
-   MPI_Comm           comm;
-
    Amat_ = Amat_in;
 
    /*-----------------------------------------------------------------
@@ -86,13 +91,13 @@ int MLI_Solver_BJacobi::setup(MLI_Matrix *Amat_in)
 
 int MLI_Solver_BJacobi::solve(MLI_Vector *f_in, MLI_Vector *u_in)
 {
-   int     iP, jP, iC, nRecvs, *recvProcs, *recvStarts, nRecvBefore;
+   int     iP, jP, nRecvs, *recvProcs, *recvStarts, nRecvBefore;
    int     blockStartRow, iB, iS, blockEndRow, blkLeng;
    int     localNRows, iStart, iEnd, irow, jcol, colIndex, index, mypid;
-   int     nSends, numColsOffd, start, relaxError=0, maxBlkLeng;
+   int     nSends, numColsOffd, start, relaxError=0;
    int     nprocs, *partition, startRow, endRow, offOffset, *tmpJ;
    int     *ADiagI, *ADiagJ, *AOffdI, *AOffdJ, offIRow;
-   double  *ADiagA, *AOffdA, *uData, *fData, *tmpA, ddiag, *fExtData;
+   double  *ADiagA, *AOffdA, *uData, *fData, *tmpA, *fExtData;
    double  relaxWeight, *vBufData, *vExtData, res, *dbleX, *dbleB;
    MPI_Comm               comm;
    hypre_ParCSRMatrix     *A;
@@ -181,8 +186,17 @@ int MLI_Solver_BJacobi::solve(MLI_Vector *f_in, MLI_Vector *u_in)
 
    dbleB = new double[maxBlkLeng_];
    dbleX = new double[maxBlkLeng_];
+#ifdef HAVE_ESSL
+   if ( blockSize_ > switchSize )
+   {
+#endif
    sluB  = hypre_SeqVectorCreate( maxBlkLeng_ );
    sluX  = hypre_SeqVectorCreate( maxBlkLeng_ );
+   hypre_VectorData(sluB) = dbleB;
+   hypre_VectorData(sluX) = dbleX;
+#ifdef HAVE_ESSL
+   }
+#endif
 
    /*-----------------------------------------------------------------
     * perform block Jacobi sweeps
@@ -280,10 +294,12 @@ int MLI_Solver_BJacobi::solve(MLI_Vector *f_in, MLI_Vector *u_in)
                dbleB[irow-blockStartRow] = res;
             }
          }
+#ifdef HAVE_ESSL
+      if ( blockSize_ > switchSize )
+      {
+#endif
          hypre_VectorSize(sluB) = blkLeng;
          hypre_VectorSize(sluX) = blkLeng;
-         hypre_VectorData(sluB) = dbleB;
-         hypre_VectorData(sluX) = dbleX;
          mliB = new MLI_Vector((void*) sluB, "HYPRE_Vector", NULL);
          mliX = new MLI_Vector((void*) sluX, "HYPRE_Vector", NULL);
 
@@ -291,6 +307,14 @@ int MLI_Solver_BJacobi::solve(MLI_Vector *f_in, MLI_Vector *u_in)
 
          delete mliB;
          delete mliX;
+#ifdef HAVE_ESSL
+      }
+      else
+      {
+         for ( irow = 0; irow < blkLeng; irow++ ) dbleX[irow] = dbleB[irow];
+         dpps(esslMatrices_[iB], blkLeng, dbleX, 1);
+      }
+#endif
 
          for ( irow = blockStartRow; irow <= blockEndRow; irow++ )
          {
@@ -341,8 +365,16 @@ int MLI_Solver_BJacobi::solve(MLI_Vector *f_in, MLI_Vector *u_in)
       delete [] vBufData;
       delete [] fExtData;
    }
+#ifdef HAVE_ESSL
+   if ( blockSize_ > switchSize )
+   {
+#endif
    hypre_SeqVectorDestroy( sluX );
    hypre_SeqVectorDestroy( sluB );
+#ifdef HAVE_ESSL
+   }
+#endif
+
    return(relaxError); 
 }
 
@@ -360,7 +392,7 @@ int MLI_Solver_BJacobi::setParams(char *paramString, int argc, char **argv)
    if ( !strcmp(param1, "blockSize") )
    {
       sscanf(paramString, "%s %d", param1, &blockSize_);
-      if ( blockSize_ < 500 ) blockSize_ = 500;
+      if ( blockSize_ < 10 ) blockSize_ = 10;
       return 0;
    }
    else if ( !strcmp(param1, "numSweeps") )
@@ -635,6 +667,10 @@ int MLI_Solver_BJacobi::buildBlocks()
    hypre_CSRMatrix     *seqA;
    MLI_Matrix          *mliMat;
    MLI_Function        *funcPtr;
+#ifdef HAVE_ESSL
+   int      rowIndex, index, offset;
+   double   *esslMatrix;
+#endif
 
    /*-----------------------------------------------------------------
     * fetch matrix information 
@@ -676,14 +712,26 @@ int MLI_Solver_BJacobi::buildBlocks()
                       blockLengths_[iB] : maxBlkLeng_;
 
    /*-----------------------------------------------------------------
-    * construct block matrices inverses
+    * construct block matrix inverses
     *-----------------------------------------------------------------*/
 
+#ifdef HAVE_ESSL
+   if ( blockSize_ > switchSize )
+   {
+#endif
    strcpy( sName, "SeqSuperLU" );
    blockSolvers_ = new MLI_Solver_SeqSuperLU*[nBlocks_];
    for ( iB = 0; iB < nBlocks_; iB++ ) 
       blockSolvers_[iB] = new MLI_Solver_SeqSuperLU(sName);
    funcPtr = (MLI_Function *) malloc( sizeof(MLI_Function) );
+#ifdef HAVE_ESSL
+   }
+   else
+   {
+      esslMatrices_ = new double*[nBlocks_];
+      for ( iB = 0; iB < nBlocks_; iB++ ) esslMatrices_[iB] = NULL;
+   }
+#endif
 
    offRowOffset = offRowNnz = 0;
 
@@ -693,6 +741,10 @@ int MLI_Solver_BJacobi::buildBlocks()
       blockStartRow = iB * blockSize_ + startRow - nRecvBefore;
       blockEndRow   = blockStartRow + blkLeng - 1;
       localNnz      = 0;
+#ifdef HAVE_ESSL
+      if ( blockSize_ > switchSize )
+      {
+#endif
       for ( irow = blockStartRow; irow <= blockEndRow; irow++ )
       {
          if ( irow >= startRow && irow <= endRow )
@@ -754,8 +806,63 @@ int MLI_Solver_BJacobi::buildBlocks()
       mliMat = new MLI_Matrix((void*) seqA,"HYPRE_CSR",funcPtr);
       blockSolvers_[iB]->setup( mliMat );
       delete mliMat;
+#ifdef HAVE_ESSL
+      }
+      else 
+      {
+         esslMatrices_[iB] = new double[blkLeng * (blkLeng+1)/2];
+         esslMatrix = esslMatrices_[iB];
+	 bzero((char *) esslMatrices_[iB],blkLeng*(blkLeng+1)/2*sizeof(double));
+         offset = 0;
+         for ( irow = blockStartRow; irow <= blockEndRow; irow++ )
+         {
+            rowIndex = irow - blockStartRow;
+            if ( irow >= startRow && irow <= endRow )
+            {
+               hypre_ParCSRMatrixGetRow(A, irow, &rowSize, &colInd, &colVal);
+               for ( jcol = 0; jcol < rowSize; jcol++ )
+               {
+                  colIndex = colInd[jcol] - blockStartRow;
+                  if ((colIndex >= rowIndex) && (colIndex <= blkLeng))
+                  {
+                     index = colIndex - rowIndex;
+                     esslMatrix[offset+index] = colVal[jcol];
+                  }
+               }
+               hypre_ParCSRMatrixRestoreRow(A,irow,&rowSize,&colInd,&colVal);
+            }
+            else
+            {
+               rowSize = offRowLengths_[offRowOffset];
+               colInd = &(offCols_[offRowNnz]);
+               colVal = &(offVals_[offRowNnz]);
+               for ( jcol = 0; jcol < rowSize; jcol++ )
+               {
+                  colIndex = colInd[jcol] - blockStartRow;
+                  if ((colIndex >= rowIndex) && (colIndex <= blkLeng))
+                  {
+                     index = colIndex - rowIndex;
+                     esslMatrix[offset+index] = colVal[jcol];
+                  }
+               }
+               offRowOffset++;
+               offRowNnz += rowSize;
+            }
+            offset += blkLeng - irow + blockStartRow;
+         }
+         dppf(esslMatrix, blkLeng, 1);
+      }
+#endif
    }
+
+#ifdef HAVE_ESSL
+   if ( blockSize_ > switchSize )
+   {
+#endif
    free( funcPtr );
+#ifdef HAVE_ESSL
+   }
+#endif
    return 0;
 }
 
@@ -833,6 +940,15 @@ int MLI_Solver_BJacobi::cleanBlocks()
    offRowLengths_ = NULL;
    offCols_       = NULL;
    offVals_       = NULL;
+#ifdef HAVE_ESSL
+   if ( esslMatrices_ != NULL )
+   {
+      for ( int iB = 0; iB < nBlocks_; iB++ )
+      if ( esslMatrices_[iB] != NULL ) delete [] esslMatrices_[iB];
+      delete [] esslMatrices_;
+      esslMatrices_ = NULL;      
+   }
+#endif
    return 0;
 }
 

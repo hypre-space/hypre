@@ -6,15 +6,15 @@
  *
  *********************************************************************EHEADER*/
 
+#include <stdio.h>
 #include <string.h>
 #include <strings.h>
-#include "seq_mv/seq_mv.h"
-#include "parcsr_mv/parcsr_mv.h"
-#include "base/mli_defs.h"
-#include "util/mli_utils.h"
-#include "cintface/cmli.h"
 #include "solver/mli_solver_bsgs.h"
-#include "solver/mli_solver_seqsuperlu.h"
+#ifdef HAVE_ESSL
+#include <essl.h>
+#endif
+
+#define switchSize 200
 
 /******************************************************************************
  * BSGS relaxation scheme 
@@ -31,7 +31,7 @@ MLI_Solver_BSGS::MLI_Solver_BSGS(char *name) : MLI_Solver(name)
    relaxWeights_     = NULL;
    zeroInitialGuess_ = 0;
    useOverlap_       = 0;
-   blockSize_        = 252;
+   blockSize_        = 512;
    nBlocks_          = 0;
    blockLengths_     = NULL;
    blockSolvers_     = NULL;
@@ -44,6 +44,9 @@ MLI_Solver_BSGS::MLI_Solver_BSGS(char *name) : MLI_Solver(name)
    myColor_          = 0;
    numColors_        = 1;
    scheme_           = 1;
+#ifdef HAVE_ESSL
+   esslMatrices_     = NULL;
+#endif
 }
 
 /******************************************************************************
@@ -116,10 +119,10 @@ int MLI_Solver_BSGS::solve(MLI_Vector *f_in, MLI_Vector *u_in)
    int     iP, jP, iC, nRecvs, *recvProcs, *recvStarts, nRecvBefore;
    int     blockStartRow, iB, iS, blockEndRow, blkLeng;
    int     localNRows, iStart, iEnd, irow, jcol, colIndex, index, mypid;
-   int     nSends, numColsOffd, start, relaxError=0, maxBlkLeng;
+   int     nSends, numColsOffd, start, relaxError=0;
    int     nprocs, *partition, startRow, endRow, offOffset, *tmpJ;
    int     *ADiagI, *ADiagJ, *AOffdI, *AOffdJ, offIRow, totalOffNNZ;
-   double  *ADiagA, *AOffdA, *uData, *fData, *tmpA, ddiag, *fExtData;
+   double  *ADiagA, *AOffdA, *uData, *fData, *tmpA, *fExtData;
    double  relaxWeight, *vBufData, *vExtData, res, *dbleX, *dbleB;
    MPI_Comm               comm;
    hypre_ParCSRMatrix     *A;
@@ -212,8 +215,17 @@ int MLI_Solver_BSGS::solve(MLI_Vector *f_in, MLI_Vector *u_in)
 
    dbleB = new double[maxBlkLeng_];
    dbleX = new double[maxBlkLeng_];
+#ifdef HAVE_ESSL
+   if ( blockSize_ > switchSize )
+   {
+#endif
    sluB  = hypre_SeqVectorCreate( maxBlkLeng_ );
    sluX  = hypre_SeqVectorCreate( maxBlkLeng_ );
+   hypre_VectorData(sluB) = dbleB;
+   hypre_VectorData(sluX) = dbleX;
+#ifdef HAVE_ESSL
+   }
+#endif
 
    /*-----------------------------------------------------------------
     * perform block SGS sweeps
@@ -309,10 +321,12 @@ int MLI_Solver_BSGS::solve(MLI_Vector *f_in, MLI_Vector *u_in)
                      dbleB[irow-blockStartRow] = res;
                   }
                }
+#ifdef HAVE_ESSL
+	   if ( blockSize_ > switchSize )
+	   {
+#endif
                hypre_VectorSize(sluB) = blkLeng;
                hypre_VectorSize(sluX) = blkLeng;
-               hypre_VectorData(sluB) = dbleB;
-               hypre_VectorData(sluX) = dbleX;
                mliB = new MLI_Vector((void*) sluB, "HYPRE_Vector", NULL);
                mliX = new MLI_Vector((void*) sluX, "HYPRE_Vector", NULL);
 
@@ -320,6 +334,14 @@ int MLI_Solver_BSGS::solve(MLI_Vector *f_in, MLI_Vector *u_in)
 
                delete mliB;
                delete mliX;
+#ifdef HAVE_ESSL
+            }
+            else
+            {
+               for (irow = 0; irow < blkLeng; irow++) dbleX[irow] = dbleB[irow];
+	       dpps(esslMatrices_[iB], blkLeng, dbleX, 1);
+            }
+#endif
 
                for ( irow = blockStartRow; irow <= blockEndRow; irow++ )
                {
@@ -418,10 +440,12 @@ int MLI_Solver_BSGS::solve(MLI_Vector *f_in, MLI_Vector *u_in)
                   }
                }
 
+#ifdef HAVE_ESSL
+            if ( blockSize_ > switchSize )
+            {
+#endif
                hypre_VectorSize(sluB) = blkLeng;
                hypre_VectorSize(sluX) = blkLeng;
-               hypre_VectorData(sluB) = dbleB;
-               hypre_VectorData(sluX) = dbleX;
                mliB = new MLI_Vector((void*) sluB, "HYPRE_Vector", NULL);
                mliX = new MLI_Vector((void*) sluX, "HYPRE_Vector", NULL);
 
@@ -429,6 +453,14 @@ int MLI_Solver_BSGS::solve(MLI_Vector *f_in, MLI_Vector *u_in)
 
                delete mliB;
                delete mliX;
+#ifdef HAVE_ESSL
+            }
+            else
+            {
+               for (irow = 0; irow < blkLeng; irow++) dbleX[irow] = dbleB[irow];
+	       dpps(esslMatrices_[iB], blkLeng, dbleX, 1);
+            }
+#endif
 
                for ( irow = blockStartRow; irow <= blockEndRow; irow++ )
                {
@@ -480,8 +512,16 @@ int MLI_Solver_BSGS::solve(MLI_Vector *f_in, MLI_Vector *u_in)
       delete [] vBufData;
       delete [] fExtData;
    }
+#ifdef HAVE_ESSL
+   if ( blockSize_ > switchSize )
+   {
+#endif
    hypre_SeqVectorDestroy( sluX );
    hypre_SeqVectorDestroy( sluB );
+#ifdef HAVE_ESSL
+   }
+#endif
+
    return(relaxError); 
 }
 
@@ -499,7 +539,7 @@ int MLI_Solver_BSGS::setParams(char *paramString, int argc, char **argv)
    if ( !strcmp(param1, "blockSize") )
    {
       sscanf(paramString, "%s %d", param1, &blockSize_);
-      if ( blockSize_ < 500 ) blockSize_ = 500;
+      if ( blockSize_ < 10 ) blockSize_ = 10;
       return 0;
    }
    else if ( !strcmp(param1, "numSweeps") )
@@ -761,6 +801,10 @@ int MLI_Solver_BSGS::buildBlocks()
    hypre_CSRMatrix     *seqA;
    MLI_Matrix          *mliMat;
    MLI_Function        *funcPtr;
+#ifdef HAVE_ESSL
+   int	    index, offset, rowIndex;
+   double   *esslMatrix;
+#endif
 
    /*-----------------------------------------------------------------
     * fetch matrix information 
@@ -774,6 +818,14 @@ int MLI_Solver_BSGS::buildBlocks()
    endRow     = partition[mypid+1] - 1;
    localNRows = endRow - startRow + 1;
    free( partition );
+   if ( blockSize_ == 1 ) 
+   {
+      nBlocks_ = localNRows;
+      blockLengths_ = new int[nBlocks_];
+      for ( iB = 0; iB < nBlocks_; iB++ ) blockLengths_[iB] = 1;
+      maxBlkLeng_ = 1;
+      return 0;
+   }
    if ( nprocs > 1 && useOverlap_ )
    {
       commPkg     = hypre_ParCSRMatrixCommPkg(A);
@@ -805,11 +857,23 @@ int MLI_Solver_BSGS::buildBlocks()
     * construct block matrices inverses
     *-----------------------------------------------------------------*/
 
+#ifdef HAVE_ESSL
+   if ( blockSize_ > switchSize )
+   {
+#endif
    strcpy( sName, "SeqSuperLU" );
    blockSolvers_ = new MLI_Solver_SeqSuperLU*[nBlocks_];
    for ( iB = 0; iB < nBlocks_; iB++ ) 
       blockSolvers_[iB] = new MLI_Solver_SeqSuperLU(sName);
    funcPtr = (MLI_Function *) malloc( sizeof(MLI_Function) );
+#ifdef HAVE_ESSL
+   }
+   else
+   {
+	   esslMatrices_ = new double*[nBlocks_];
+	for ( iB = 0; iB < nBlocks_; iB++ ) esslMatrices_[iB] = NULL;
+   }
+#endif
 
    offRowOffset = offRowNnz = 0;
 
@@ -819,6 +883,10 @@ int MLI_Solver_BSGS::buildBlocks()
       blockStartRow = iB * blockSize_ + startRow - nRecvBefore;
       blockEndRow   = blockStartRow + blkLeng - 1;
       localNnz      = 0;
+#ifdef HAVE_ESSL
+	if ( blockSize_ > switchSize )
+      {
+#endif
       for ( irow = blockStartRow; irow <= blockEndRow; irow++ )
       {
          if ( irow >= startRow && irow <= endRow )
@@ -880,8 +948,62 @@ int MLI_Solver_BSGS::buildBlocks()
       mliMat = new MLI_Matrix((void*) seqA,"HYPRE_CSR",funcPtr);
       blockSolvers_[iB]->setup( mliMat );
       delete mliMat;
+#ifdef HAVE_ESSL
+      }
+      else
+      {
+         esslMatrices_[iB] = new double[blkLeng * (blkLeng+1)/2];
+         esslMatrix = esslMatrices_[iB];
+         bzero((char *) esslMatrices_[iB],blkLeng*(blkLeng+1)/2*sizeof(double));
+         offset = 0;
+         for ( irow = blockStartRow; irow <= blockEndRow; irow++ )
+         {
+            rowIndex = irow - blockStartRow;
+            if ( irow >= startRow && irow <= endRow )
+            {
+               hypre_ParCSRMatrixGetRow(A, irow, &rowSize, &colInd, &colVal);
+               for ( jcol = 0; jcol < rowSize; jcol++ )
+               {
+                  colIndex = colInd[jcol] - blockStartRow;
+                  if ((colIndex >= rowIndex) && (colIndex <= blkLeng))
+                  {
+                     index = colIndex - rowIndex;
+                     esslMatrix[offset+index] = colVal[jcol];
+                  }
+               }
+               hypre_ParCSRMatrixRestoreRow(A,irow,&rowSize,&colInd,&colVal);
+            }
+            else
+            {
+               rowSize = offRowLengths_[offRowOffset];
+               colInd = &(offCols_[offRowNnz]);
+               colVal = &(offVals_[offRowNnz]);
+               for ( jcol = 0; jcol < rowSize; jcol++ )
+               {
+                  colIndex = colInd[jcol] - blockStartRow;
+                  if ((colIndex >= rowIndex) && (colIndex <= blkLeng))
+                  {
+                     index = colIndex - rowIndex;
+                     esslMatrix[offset+index] = colVal[jcol];
+                  }
+               }
+               offRowOffset++;
+               offRowNnz += rowSize;
+            }
+            offset += blkLeng - irow + blockStartRow;
+         }
+         dppf(esslMatrix, blkLeng, 1);
+      }
+#endif
    }
+#ifdef HAVE_ESSL
+   if ( blockSize_ > switchSize )
+   {
+#endif
    free( funcPtr );
+#ifdef HAVE_ESSL
+   }
+#endif
    return 0;
 }
 
