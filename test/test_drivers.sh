@@ -97,7 +97,8 @@ if [ "$HYPRE_SEND_MAIL" = "yes" ]
 then
     echo "checking for errors..."
 
-    HYPRE_MAIL=/usr/bin/mailx
+    [ -x /usr/bin/Mail ] && HYPRE_MAIL=/usr/bin/Mail
+    [ -x /usr/bin/mailx ] && HYPRE_MAIL=/usr/bin/mailx
 
     for i in $HYPRE_TEST_DRIVERS
     do

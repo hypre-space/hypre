@@ -55,14 +55,15 @@ initialize_variables ()
 # Define HYPRE_ARCH
 #
   . $StdTestDir/hypre_arch.sh
-  if test ! "$HYPRE_MAIL"
-  then
-    HYPRE_MAIL=mailx
-  fi
 #
 # If NOT started by autotest (hence no HYPRE_*_EMAIL variable
 # defined) default mail to UID only.
 #
+  if test ! "$HYPRE_MAIL"
+  then
+    [ -x /usr/bin/Mail ] && HYPRE_MAIL=/usr/bin/Mail
+    [ -x /usr/bin/mailx ] && HYPRE_MAIL=/usr/bin/mailx
+  fi
   if test ! "${HYPRE_DEFAULT_EMAIL}"
   then
     if test ! "${USER}"
