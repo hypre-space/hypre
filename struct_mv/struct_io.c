@@ -105,12 +105,10 @@ hypre_PrintCCBoxArrayData( FILE            *file,
                    
    int              datai;
                    
-   hypre_Index      loop_size;
    hypre_IndexRef   start;
    hypre_Index      stride;
                    
    int              i, j;
-   int              loopi, loopj, loopk;
 
    /*----------------------------------------
     * Print data
