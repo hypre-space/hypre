@@ -66,8 +66,8 @@ link:
 
 libHYPRE_CI_mv.a: $(PROTOS) ${OBJS}
 	@echo  "Building $@ ... "
-	@ar -ru lib_HYPRE_CI_mv.a ${OBJS}
-	@ranlib lib_HYPRE_CI_mv.a
+	ar -rcu lib_HYPRE_CI_mv.a ${OBJS}
+	@RANLIB@ lib_HYPRE_CI_mv.a
 
 ${OBJS}: ${HEADERS}
 

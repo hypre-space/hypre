@@ -42,8 +42,8 @@ include ../bmakes/Makefile
 
 lib: $(PROTOS) ${OBJS}
 	@echo  "Building $@ ... "
-	@ar -ru lib_HYPRE_CI_ls.a ${OBJS}
-	@ranlib lib_HYPRE_CI_ls.a
+	ar -rcu lib_HYPRE_CI_ls.a ${OBJS}
+	@RANLIB@ lib_HYPRE_CI_ls.a
 
 driver: driver.o lib_HYPRE.a
 	@echo  "Linking" $@ "... "

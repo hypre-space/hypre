@@ -158,6 +158,7 @@ void ComputeCommInfo(ReduceMatType *rmat, CommInfoType *cinfo, int *rowdist,
   int *rnz, *rcolind;
   int *rrowind,  *rnbrptr,  *rnbrind, *srowind, *snbrind, *snbrptr;
   MPI_Status Status ;
+  MPI_Request *index_requests;
 
   PrintLine("ComputeCommInfo", globals);
 
@@ -247,6 +248,9 @@ void ComputeCommInfo(ReduceMatType *rmat, CommInfoType *cinfo, int *rowdist,
   }
   cinfo->snnbr = snnbr;
 
+  /* Allocate requests */
+  index_requests = hypre_CTAlloc( MPI_Request, rnnbr );
+
   maxnsend = GlobalSEMax(nsend, pilut_comm);
 
   /* If memory requirements change, allocate new memory.
@@ -259,17 +263,24 @@ void ComputeCommInfo(ReduceMatType *rmat, CommInfoType *cinfo, int *rowdist,
   assert( cinfo->srowind  != NULL );
   srowind = cinfo->srowind;
 
+  /* issue asynchronous recieves */
+  for (i=0; i<snnbr; i++) {
+    MPI_Irecv( srowind+snbrptr[i], snbrptr[i+1]-snbrptr[i], MPI_INT,
+	      snbrind[i], TAG_Comm_rrowind, pilut_comm, &index_requests[i] ) ;
+  }
   /* OK, now I go and send the rrowind to the processor */
   for (i=0; i<rnnbr; i++) {
     MPI_Send( rrowind+rnbrptr[i], rnbrptr[i+1]-rnbrptr[i], MPI_INT,
 	      rnbrind[i], TAG_Comm_rrowind, pilut_comm );
   }
 
-  /* issue corresponding recieves (assumes buffering) */
+  /* finalize  recieves */
   for (i=0; i<snnbr; i++) {
-    MPI_Recv( srowind+snbrptr[i], snbrptr[i+1]-snbrptr[i], MPI_INT,
-	      snbrind[i], TAG_Comm_rrowind, pilut_comm, &Status ) ;
+    MPI_Wait( &index_requests[i], &Status ) ;
   }
+
+  /* clean up memory */
+  hypre_TFree(index_requests);
 }
 
 
@@ -415,8 +426,8 @@ void SendFactoredRows(FactorMatType *ldu, CommInfoType *cinfo,
   dvalues  = ldu->dvalues;
 
   /* Allocate requests */
-  index_requests = hypre_TAlloc( MPI_Request, rnnbr );
-  value_requests = hypre_TAlloc( MPI_Request, rnnbr );
+  index_requests = hypre_CTAlloc( MPI_Request, rnnbr );
+  value_requests = hypre_CTAlloc( MPI_Request, rnnbr );
 
   /* Issue asynchronous receives for rows from other processors.
      Asynchronous receives needed to avoid overflowing comm buffers. */

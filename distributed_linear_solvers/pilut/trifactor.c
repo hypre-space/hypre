@@ -41,6 +41,7 @@ void LDUSolve(DataDistType *ddist, FactorMatType *ldu, double *x, double *b,
     *spes, *sptr, *sind, *auxsptr, *rpes, *rdone, *rnum;
   double *lx, *ux, *values, *dvalues, *gatherbuf, **raddr, xx;
   MPI_Status Status;
+  MPI_Request *receive_requests;
 
   /* PrintLine("LDUSolve start", globals); */
 
@@ -90,6 +91,22 @@ void LDUSolve(DataDistType *ddist, FactorMatType *ldu, double *x, double *b,
     /* make MPI LX tags unique for this level (so we don't have to sync) */
     TAG = (TAG_LDU_lx | ii);
 
+    /* get number of recieves for this level */
+    rnum = &(ldu->lcomm.rnum[(ii-1)*rnbrpes]) ;
+
+    /* Allocate requests */
+    receive_requests = hypre_CTAlloc( MPI_Request, npes );
+
+    /* Recv the required lx elements from the appropriate processors */
+    for (i=0; i<rnbrpes; i++) {
+      if ( rnum[i] > 0 ) { /* Something to recv */
+	MPI_Irecv( raddr[i]+rdone[i], rnum[i], MPI_DOUBLE,
+		  rpes[i], TAG, pilut_comm, &receive_requests[i] );
+
+	rdone[i] += rnum[i] ;
+      }
+    }
+
     /* Send the required lx elements to the appropriate processors */
     for (i=0; i<snbrpes; i++) {
       if (sptr[i+1] > auxsptr[i]  &&  sind[auxsptr[i]]<nnodes[ii]) { /* Something to send */
@@ -103,16 +120,10 @@ void LDUSolve(DataDistType *ddist, FactorMatType *ldu, double *x, double *b,
       }
     }
 
-    /* get number of recieves for this level */
-    rnum = &(ldu->lcomm.rnum[(ii-1)*rnbrpes]) ;
-
-    /* Recv the required lx elements from the appropriate processors */
+    /* Wait for receives */
     for (i=0; i<rnbrpes; i++) {
       if ( rnum[i] > 0 ) { /* Something to recv */
-	MPI_Recv( raddr[i]+rdone[i], rnum[i], MPI_DOUBLE,
-		  rpes[i], TAG, pilut_comm, &Status );
-
-	rdone[i] += rnum[i] ;
+        MPI_Wait( &receive_requests[i], &Status);
       }
     }
 
@@ -163,6 +174,19 @@ void LDUSolve(DataDistType *ddist, FactorMatType *ldu, double *x, double *b,
     /* make MPI UX tags unique for this level (so we don't have to sync) */
     TAG = (TAG_LDU_ux | ii);
 
+    /* get number of recieves for this level */
+    rnum = &(ldu->ucomm.rnum[(ii-1)*rnbrpes]);
+
+    /* Recv the required ux elements from the appropriate processors */
+    for (i=0; i<rnbrpes; i++) {
+      if ( rnum[i] > 0 ) { /* Something to recv */
+	MPI_Irecv( raddr[i]+rdone[i], rnum[i], MPI_DOUBLE_PRECISION,
+		  rpes[i], TAG, pilut_comm, &receive_requests[ i ] );
+
+	rdone[i] += rnum[i] ;
+      }
+    }
+
     /* Send the required ux elements to the appropriate processors */
     for (i=0; i<snbrpes; i++) {
       if (sptr[i+1] > auxsptr[i]  &&  sind[auxsptr[i]]>=nnodes[ii-1]) { /* Something to send */
@@ -176,18 +200,20 @@ void LDUSolve(DataDistType *ddist, FactorMatType *ldu, double *x, double *b,
       }
     }
 
-    /* get number of recieves for this level */
-    rnum = &(ldu->ucomm.rnum[(ii-1)*rnbrpes]);
-
-    /* Recv the required ux elements from the appropriate processors */
+    /* Finish receives */
     for (i=0; i<rnbrpes; i++) {
       if ( rnum[i] > 0 ) { /* Something to recv */
+<<<<<<< trifactor.c
+	MPI_Wait( &receive_requests[ i ], &Status );
+=======
 	MPI_Recv( raddr[i]+rdone[i], rnum[i], MPI_DOUBLE,
 		  rpes[i], TAG, pilut_comm, &Status );
 
 	rdone[i] += rnum[i] ;
+>>>>>>> 1.10
       }
     }
+
   }
 
   /* Do the local next */
@@ -202,6 +228,8 @@ void LDUSolve(DataDistType *ddist, FactorMatType *ldu, double *x, double *b,
   /* Permute the solution to back to x */
   for (i=0; i<lnrows; i++)
     x[i] = ux[iperm[i]];
+
+  hypre_TFree( receive_requests );
 }
 
 
@@ -258,6 +286,7 @@ void SetUpFactor(DataDistType *ddist, FactorMatType *ldu, int maxnz,
   double *newvalues, *values, *x, **raddr;
   TriSolveCommType *TriSolveComm;
   MPI_Status Status;
+  MPI_Request *receive_requests;
   MPI_Datatype MyColType_rnbr;
 
   /* data common to L and U */
@@ -367,6 +396,15 @@ void SetUpFactor(DataDistType *ddist, FactorMatType *ldu, int maxnz,
     sptr[i] = sptr[i-1];
   sptr[0] = 0;
 
+  /* Allocate requests */
+  receive_requests = hypre_CTAlloc( MPI_Request, npes );
+
+  /* Start asynchronous receives */
+  for (i=0; i<snbrpes; i++) {
+    MPI_Irecv( sind+sptr[i], sptr[i+1]-sptr[i], MPI_INTEGER,
+	      spes[i], TAG_SetUp_rind, pilut_comm, &receive_requests[i] );
+  }
+
   /* Send the rind sets to the processors */
   rnbrpes = 0;
   k = 0;
@@ -388,9 +426,14 @@ void SetUpFactor(DataDistType *ddist, FactorMatType *ldu, int maxnz,
   raddr[rnbrpes] = x + k + lnrows;
   assert( TriSolveComm->rnbrpes == rnbrpes );
 
+  /* complete asynchronous receives */
   for (i=0; i<snbrpes; i++) {
+<<<<<<< trifactor.c
+    MPI_Wait( &receive_requests[i], &Status );
+=======
     MPI_Recv( sind+sptr[i], sptr[i+1]-sptr[i], MPI_INT,
 	      spes[i], TAG_SetUp_rind, pilut_comm, &Status );
+>>>>>>> 1.10
   }
 
   /* At this point, the set of indexes that you need to send to processors are
@@ -418,19 +461,32 @@ void SetUpFactor(DataDistType *ddist, FactorMatType *ldu, int maxnz,
     sind[i] = perm[sind[i]]+firstrow;
   }
 
+  /* Start Recvs from the processors that send them to me */
+  k = 0;
+  for (i=0; i<npes; i++) {
+    if (petotal[i] > 0) {
+      MPI_Irecv( rind+k, petotal[i], MPI_INTEGER,
+	        i, TAG_SetUp_reord, pilut_comm, &receive_requests[i] );
+      k += petotal[i];
+    }
+  }
+
   /* Write them back to the processors that send them to me */
   for (i=0; i<snbrpes; i++) {
     MPI_Send( sind+sptr[i], sptr[i+1]-sptr[i], MPI_INT,
 	      spes[i], TAG_SetUp_reord, pilut_comm );
   }
 
-  /* Recv them from the processors that send them to me */
-  k = 0;
+  /* Finish Recv  */
   for (i=0; i<npes; i++) {
     if (petotal[i] > 0) {
+<<<<<<< trifactor.c
+      MPI_Wait( &receive_requests[i], &Status );
+=======
       MPI_Recv( rind+k, petotal[i], MPI_INT,
 	        i, TAG_SetUp_reord, pilut_comm, &Status );
       k += petotal[i];
+>>>>>>> 1.10
     }
   }
 
@@ -483,11 +539,16 @@ void SetUpFactor(DataDistType *ddist, FactorMatType *ldu, int maxnz,
 
   if (rnum) free(rnum);
 
+<<<<<<< trifactor.c
+  /* receive data as columns rather than rows */
+  MPI_Type_vector( nlevels, 1, rnbrpes, MPI_INTEGER, &MyColType_rnbr );
+=======
   /* recieve data as columns rather than rows */
   MPI_Type_vector( nlevels, 1, rnbrpes, MPI_INT, &MyColType_rnbr );
+>>>>>>> 1.10
   MPI_Type_commit( &MyColType_rnbr );
 
-  /* recieve each column */
+  /* receive each column */
   for (i=0; i<rnbrpes; i++) {
     MPI_Recv( TriSolveComm->rnum+i, 1, MyColType_rnbr,
 	      rpes[i], TAG_SetUp_rnum, pilut_comm, &Status );
@@ -533,6 +594,9 @@ void SetUpFactor(DataDistType *ddist, FactorMatType *ldu, int maxnz,
     ldu->ucolind = newcolind;
     ldu->uvalues = newvalues;
   }
+
+  /* clean up memory */
+  hypre_TFree(receive_requests);
 
   /* Reset the imap by only touching the appropriate elements */
   for (i=0; i<nrecv; i++)
