@@ -490,10 +490,11 @@ main( int   argc,
       printf("       2=DS-PCG      3=AMG-GMRES     \n");
       printf("       4=DS-GMRES    5=AMG-CGNR      \n");     
       printf("       6=DS-CGNR     7=PILUT-GMRES   \n");     
-      printf("       8=ParaSails-PCG \n");     
-      printf("       9=AMG-BiCGSTAB   \n");
-      printf("       10=DS-BiCGSTAB     \n");
-      printf("       11=PILUT-BiCGSTAB     \n");
+      printf("       8=ParaSails-PCG   \n");     
+      printf("       9=AMG-BiCGSTAB    \n");
+      printf("       10=DS-BiCGSTAB    \n");
+      printf("       11=PILUT-BiCGSTAB \n");
+      printf("       18=ParaSails-GMRES\n");     
       printf("\n");
       printf("   -cljp                 : CLJP coarsening \n");
       printf("   -ruge                 : Ruge coarsening (local)\n");
@@ -999,7 +1000,7 @@ main( int   argc,
     * Solve the system using GMRES 
     *-----------------------------------------------------------*/
 
-   if (solver_id == 3 || solver_id == 4 || solver_id == 7)
+   if (solver_id == 3 || solver_id == 4 || solver_id == 7 || solver_id == 18)
    {
       time_index = hypre_InitializeTiming("GMRES Setup");
       hypre_BeginTiming(time_index);
@@ -1068,6 +1069,20 @@ main( int   argc,
             HYPRE_ParCSRPilutSetFactorRowSize( pcg_precond,
                nonzeros_to_keep );
       }
+      else if (solver_id == 18)
+      {
+         /* use ParaSails preconditioner */
+         if (myid == 0) printf("Solver: ParaSails-GMRES\n");
+
+	 HYPRE_ParCSRParaSailsCreate(MPI_COMM_WORLD, &pcg_precond);
+	 HYPRE_ParCSRParaSailsSetParams(pcg_precond, 0.1, 1);
+	 HYPRE_ParCSRParaSailsSetSym(pcg_precond, 0);
+
+         HYPRE_ParCSRPCGSetPrecond(pcg_solver,
+                                   HYPRE_ParCSRParaSailsSolve,
+                                   HYPRE_ParCSRParaSailsSetup,
+                                   pcg_precond);
+      }
  
       HYPRE_ParCSRGMRESGetPrecond(pcg_solver, &pcg_precond_gotten);
       if (pcg_precond_gotten != pcg_precond)
@@ -1113,6 +1128,10 @@ main( int   argc,
       if (solver_id == 7)
       {
          HYPRE_ParCSRPilutDestroy(pcg_precond);
+      }
+      else if (solver_id == 8)
+      {
+	 HYPRE_ParCSRParaSailsDestroy(pcg_precond);
       }
 
       if (myid == 0)
