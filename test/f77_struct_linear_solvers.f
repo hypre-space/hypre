@@ -261,7 +261,7 @@ c----------------------------------------------------------------------
          enddo
       endif 
 
-      call HYPRE_NewStructGrid(MPI_COMM_WORLD, dim, grid, ierr)
+      call HYPRE_CreateStructGrid(MPI_COMM_WORLD, dim, grid, ierr)
       do ib=1,nblocks
          call HYPRE_SetStructGridExtents(grid, ilower(1,ib),
      & iupper(1,ib), ierr)
@@ -297,7 +297,7 @@ c----------------------------------------------------------------------
          offsets(3,4) =  0
       endif
  
-      call HYPRE_NewStructStencil(dim, (dim+1), stencil, ierr) 
+      call HYPRE_CreateStructStencil(dim, (dim+1), stencil, ierr) 
       do s=1,dim+1
          call HYPRE_SetStructStencilElement(stencil, (s - 1),
      & offsets(1,s), ierr)
@@ -312,7 +312,8 @@ c-----------------------------------------------------------------------
          A_num_ghost(2*i) = 1
       enddo
  
-      call HYPRE_NewStructMatrix(MPI_COMM_WORLD, grid, stencil, A, ierr)
+      call HYPRE_CreateStructMatrix(MPI_COMM_WORLD, grid, stencil,
+     & A, ierr)
       call HYPRE_SetStructMatrixSymmetric(A, 1, ierr)
       call HYPRE_SetStructMatrixNumGhost(A, A_num_ghost, ierr)
       call HYPRE_InitializeStructMatrix(A, ierr)
@@ -373,7 +374,8 @@ c-----------------------------------------------------------------------
 c     Set up the rhs and initial guess
 c-----------------------------------------------------------------------
 
-      call HYPRE_NewStructVector(MPI_COMM_WORLD, grid, stencil, b, ierr)
+      call HYPRE_CreateStructVector(MPI_COMM_WORLD, grid, stencil,
+     & b, ierr)
       call HYPRE_InitializeStructVector(b, ierr)
       do i=1,volume
          values(i) = 1.0
@@ -385,7 +387,8 @@ c-----------------------------------------------------------------------
       call HYPRE_AssembleStructVector(b, ierr)
 c     call HYPRE_PrintStructVector("driver.out.b", b, zero, ierr)
 
-      call HYPRE_NewStructVector(MPI_COMM_WORLD, grid, stencil, x, ierr)
+      call HYPRE_CreateStructVector(MPI_COMM_WORLD, grid, stencil,
+     & x, ierr)
       call HYPRE_InitializeStructVector(x, ierr)
       do i=1,volume
          values(i) = 0.0
@@ -412,7 +415,7 @@ c     will break the interface.
       if (solver_id .eq. 0) then
 c        Solve the system using SMG
 
-         call HYPRE_StructSMGInitialize(MPI_COMM_WORLD, solver, ierr)
+         call HYPRE_StructSMGCreate(MPI_COMM_WORLD, solver, ierr)
          call HYPRE_StructSMGSetMemoryUse(solver, zero, ierr)
          call HYPRE_StructSMGSetMaxIter(solver, maxiter, ierr)
          call HYPRE_StructSMGSetTol(solver, tol, ierr)
@@ -429,11 +432,11 @@ c        Solve the system using SMG
      & ierr)
          call HYPRE_StructSMGGetFinalRelative(solver, final_res_norm,
      & ierr)
-         call HYPRE_StructSMGFinalize(solver, ierr)
+         call HYPRE_StructSMGDestroy(solver, ierr)
       elseif (solver_id .eq. 1) then
 c        Solve the system using PFMG
 
-         call HYPRE_StructPFMGInitialize(MPI_COMM_WORLD, solver, ierr)
+         call HYPRE_StructPFMGCreate(MPI_COMM_WORLD, solver, ierr)
          call HYPRE_StructPFMGSetMaxIter(solver, maxiter, ierr)
          call HYPRE_StructPFMGSetTol(solver, tol, ierr)
          call HYPRE_StructPFMGSetRelChange(solver, zero, ierr)
@@ -451,12 +454,12 @@ c        call HYPRE_StructPFMGSetDxyz(solver, dxyz, ierr)
      & ierr)
          call HYPRE_StructPFMGGetFinalRelativ(solver, final_res_norm,
      & ierr)
-         call HYPRE_StructPFMGFinalize(solver, ierr)
+         call HYPRE_StructPFMGDestroy(solver, ierr)
       elseif ((solver_id .gt. 9) .and. (solver_id .le. 20)) then
 c        Solve the system using CG
 
          precond_id = -1
-         call HYPRE_StructPCGInitialize(MPI_COMM_WORLD, solver, ierr)
+         call HYPRE_StructPCGCreate(MPI_COMM_WORLD, solver, ierr)
          call HYPRE_StructPCGSetMaxIter(solver, maxiter, ierr)
          call HYPRE_StructPCGSetTol(solver, tol, ierr)
          call HYPRE_StructPCGSetTwoNorm(solver, one, ierr)
@@ -469,7 +472,7 @@ c           use symmetric SMG as preconditioner
             maxiter = 1
             tol = 0.0
 
-            call HYPRE_StructSMGInitialize(MPI_COMM_WORLD, precond,
+            call HYPRE_StructSMGCreate(MPI_COMM_WORLD, precond,
      & ierr)
             call HYPRE_StructSMGSetMemoryUse(precond, zero, ierr)
             call HYPRE_StructSMGSetMaxIter(precond, maxiter, ierr)
@@ -486,7 +489,7 @@ c           use symmetric PFMG as preconditioner
             maxiter = 1
             tol = 0.0
 
-            call HYPRE_StructPFMGInitialize(MPI_COMM_WORLD, precond,
+            call HYPRE_StructPFMGCreate(MPI_COMM_WORLD, precond,
      & ierr)
             call HYPRE_StructPFMGSetMaxIter(precond, maxiter, ierr)
             call HYPRE_StructPFMGSetTol(precond, tol, ierr)
@@ -522,18 +525,18 @@ c           use diagonal scaling as preconditioner
      & ierr)
          call HYPRE_StructPCGGetFinalRelative(solver, final_res_norm,
      & ierr)
-         call HYPRE_StructPCGFinalize(solver, ierr)
+         call HYPRE_StructPCGDestroy(solver, ierr)
 
          if (solver_id .eq. 10) then
-            call HYPRE_StructSMGFinalize(precond, ierr)
+            call HYPRE_StructSMGDestroy(precond, ierr)
          elseif (solver_id .eq. 11) then
-            call HYPRE_StructPFMGFinalize(precond, ierr)
+            call HYPRE_StructPFMGDestroy(precond, ierr)
          endif
       elseif ((solver_id .gt. 19) .and. (solver_id .le. 30)) then
 c        Solve the system using Hybrid
 
          precond_id = -1
-         call HYPRE_StructHybridInitialize(MPI_COMM_WORLD, solver, ierr)
+         call HYPRE_StructHybridCreate(MPI_COMM_WORLD, solver, ierr)
          call HYPRE_StructHybridSetDSCGMaxIte(solver, dscgmaxiter, ierr)
          call HYPRE_StructHybridSetPCGMaxIter(solver, pcgmaxiter, ierr)
          call HYPRE_StructHybridSetTol(solver, tol, ierr)
@@ -548,7 +551,7 @@ c           use symmetric SMG as preconditioner
             maxiter = 1
             tol = 0.0
 
-            call HYPRE_StructSMGInitialize(MPI_COMM_WORLD, precond,
+            call HYPRE_StructSMGCreate(MPI_COMM_WORLD, precond,
      & ierr)
             call HYPRE_StructSMGSetMemoryUse(precond, zero, ierr)
             call HYPRE_StructSMGSetMaxIter(precond, maxiter, ierr)
@@ -562,7 +565,7 @@ c           use symmetric PFMG as preconditioner
             maxiter = 1
             tol = 0.0
 
-            call HYPRE_StructPFMGInitialize(MPI_COMM_WORLD, precond,
+            call HYPRE_StructPFMGCreate(MPI_COMM_WORLD, precond,
      & ierr)
             call HYPRE_StructPFMGSetMaxIter(precond, maxiter, ierr)
             call HYPRE_StructPFMGSetTol(precond, tol, ierr)
@@ -585,12 +588,12 @@ c           call HYPRE_StructPFMGSetDxyz(precond, dxyz, ierr)
      & ierr)
          call HYPRE_StructHybridGetFinalRelat(solver, final_res_norm,
      & ierr)
-         call HYPRE_StructHybridFinalize(solver, ierr)
+         call HYPRE_StructHybridDestroy(solver, ierr)
 
          if (solver_id .eq. 20) then
-            call HYPRE_StructSMGFinalize(precond, ierr)
+            call HYPRE_StructSMGDestroy(precond, ierr)
          elseif (solver_id .eq. 21) then
-            call HYPRE_StructPFMGFinalize(precond, ierr)
+            call HYPRE_StructPFMGDestroy(precond, ierr)
          endif
       endif
 
@@ -609,11 +612,11 @@ c-----------------------------------------------------------------------
 c     Finalize things
 c-----------------------------------------------------------------------
 
-      call HYPRE_FreeStructGrid(grid, ierr)
-      call HYPRE_FreeStructStencil(stencil, ierr)
-      call HYPRE_FreeStructMatrix(A, ierr)
-      call HYPRE_FreeStructVector(b, ierr)
-      call HYPRE_FreeStructVector(x, ierr)
+      call HYPRE_DestroyStructGrid(grid, ierr)
+      call HYPRE_DestroyStructStencil(stencil, ierr)
+      call HYPRE_DestroyStructMatrix(A, ierr)
+      call HYPRE_DestroyStructVector(b, ierr)
+      call HYPRE_DestroyStructVector(x, ierr)
 
 c     Finalize MPI
 
