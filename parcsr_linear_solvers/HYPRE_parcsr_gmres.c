@@ -113,6 +113,17 @@ HYPRE_ParCSRGMRESSetMaxIter( HYPRE_Solver solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_ParCSRGMRESSetStopCrit
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_ParCSRGMRESSetStopCrit( HYPRE_Solver solver,
+                              int          stop_crit )
+{
+   return( hypre_GMRESSetStopCrit( (void *) solver, stop_crit ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_ParCSRGMRESSetPrecond
  *--------------------------------------------------------------------------*/
 

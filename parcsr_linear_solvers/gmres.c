@@ -23,6 +23,7 @@ typedef struct
    int      k_dim;
    int      min_iter;
    int      max_iter;
+   int      stop_crit;
    double   tol;
    double   rel_residual_norm;
 
@@ -63,6 +64,7 @@ hypre_GMRESCreate( )
    (gmres_data -> tol)           = 1.0e-06;
    (gmres_data -> min_iter)      = 0;
    (gmres_data -> max_iter)      = 1000;
+   (gmres_data -> stop_crit)     = 0; /* rel. residual norm */
    (gmres_data -> precond)       = hypre_KrylovIdentity;
    (gmres_data -> precond_setup) = hypre_KrylovIdentitySetup;
    (gmres_data -> precond_data)  = NULL;
@@ -176,6 +178,7 @@ hypre_GMRESSolve(void  *gmres_vdata,
    int 		     k_dim        = (gmres_data -> k_dim);
    int               min_iter     = (gmres_data -> min_iter);
    int 		     max_iter     = (gmres_data -> max_iter);
+   int 		     stop_crit    = (gmres_data -> stop_crit);
    double 	     accuracy     = (gmres_data -> tol);
    void             *matvec_data  = (gmres_data -> matvec_data);
 
@@ -250,6 +253,10 @@ hypre_GMRESSolve(void  *gmres_vdata,
 /* convergence criterion |r_i| <= accuracy*|r0| if |b| = 0 */
      epsilon = accuracy * r_norm;
    };
+
+/* convergence criterion |r_i| <= accuracy , absolute residual norm*/
+   if (stop_crit)
+      epsilon = accuracy;
 
    while (iter < max_iter)
    {
@@ -484,6 +491,22 @@ hypre_GMRESSetMaxIter( void *gmres_vdata,
    int              ierr = 0;
  
    (gmres_data -> max_iter) = max_iter;
+ 
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_GMRESSetStopCrit
+ *--------------------------------------------------------------------------*/
+ 
+int
+hypre_GMRESSetStopCrit( void   *gmres_vdata,
+                        double  stop_crit       )
+{
+   hypre_GMRESData *gmres_data = gmres_vdata;
+   int            ierr = 0;
+ 
+   (gmres_data -> stop_crit) = stop_crit;
  
    return ierr;
 }

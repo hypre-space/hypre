@@ -80,6 +80,17 @@ HYPRE_ParCSRCGNRSetTol( HYPRE_Solver solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_ParCSRCGNRSetMinIter
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_ParCSRCGNRSetMinIter( HYPRE_Solver solver,
+                             int                min_iter )
+{
+   return( hypre_CGNRSetMinIter( (void *) solver, min_iter ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_ParCSRCGNRSetMaxIter
  *--------------------------------------------------------------------------*/
 
@@ -88,6 +99,17 @@ HYPRE_ParCSRCGNRSetMaxIter( HYPRE_Solver solver,
                              int                max_iter )
 {
    return( hypre_CGNRSetMaxIter( (void *) solver, max_iter ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_ParCSRCGNRSetStopCrit
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_ParCSRCGNRSetStopCrit( HYPRE_Solver solver,
+                             int                stop_crit )
+{
+   return( hypre_CGNRSetStopCrit( (void *) solver, stop_crit ) );
 }
 
 /*--------------------------------------------------------------------------

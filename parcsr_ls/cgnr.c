@@ -23,7 +23,9 @@ typedef struct
 {
    double   tol;
    double   rel_residual_norm;
+   int      min_iter;
    int      max_iter;
+   int      stop_crit;
 
    void    *A;
    void    *p;
@@ -61,7 +63,9 @@ hypre_CGNRCreate( )
 
    /* set defaults */
    (cgnr_data -> tol)          = 1.0e-06;
+   (cgnr_data -> min_iter)     = 0;
    (cgnr_data -> max_iter)     = 1000;
+   (cgnr_data -> stop_crit)    = 0;
    (cgnr_data -> matvec_data)  = NULL;
    (cgnr_data -> precond)       = hypre_KrylovIdentity;
    (cgnr_data -> precondT)      = hypre_KrylovIdentity;
@@ -163,6 +167,7 @@ hypre_CGNRSolve(void *cgnr_vdata,
 
    double          tol          = (cgnr_data -> tol);
    int             max_iter     = (cgnr_data -> max_iter);
+   int             stop_crit    = (cgnr_data -> stop_crit);
    void           *p            = (cgnr_data -> p);
    void           *q            = (cgnr_data -> q);
    void           *r            = (cgnr_data -> r);
@@ -197,7 +202,10 @@ hypre_CGNRSolve(void *cgnr_vdata,
 
    /* compute eps */
    bi_prod = hypre_KrylovInnerProd(b, b);
-   eps = (tol*tol)*bi_prod;
+   if (stop_crit) 
+      eps = tol*tol; /* absolute residual norm */
+   else
+      eps = (tol*tol)*bi_prod; /* relative residual norm */
 
    /* Check to see if the rhs vector b is zero */
    if (bi_prod == 0.0)
@@ -349,6 +357,22 @@ hypre_CGNRSetTol(void   *cgnr_vdata,
 }
 
 /*--------------------------------------------------------------------------
+ * hypre_CGNRSetMinIter
+ *--------------------------------------------------------------------------*/
+
+int
+hypre_CGNRSetMinIter( void *cgnr_vdata,
+                     int   min_iter  )
+{
+   hypre_CGNRData *cgnr_data = cgnr_vdata;
+   int            ierr = 0;
+ 
+   (cgnr_data -> min_iter) = min_iter;
+ 
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
  * hypre_CGNRSetMaxIter
  *--------------------------------------------------------------------------*/
 
@@ -360,6 +384,22 @@ hypre_CGNRSetMaxIter( void *cgnr_vdata,
    int            ierr = 0;
  
    (cgnr_data -> max_iter) = max_iter;
+ 
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_CGNRSetStopCrit
+ *--------------------------------------------------------------------------*/
+
+int
+hypre_CGNRSetStopCrit( void *cgnr_vdata,
+                     int   stop_crit  )
+{
+   hypre_CGNRData *cgnr_data = cgnr_vdata;
+   int            ierr = 0;
+ 
+   (cgnr_data -> stop_crit) = stop_crit;
  
    return ierr;
 }
