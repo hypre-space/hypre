@@ -5,6 +5,8 @@
 #ifndef _HYPRE_LinSysCore_h_
 #define _HYPRE_LinSysCore_h_
 
+#define HYPRE_FEI_Version() "FEI/HYPRE 2.0.0"
+
 // *************************************************************************
 // system libraries used
 // -------------------------------------------------------------------------
@@ -15,15 +17,6 @@
 #include <assert.h>
 #include <math.h>
 
-#ifndef NOFEI
-#if defined(FEI_V14) || defined(FEI_V13)
-class Lookup
-{
-   int bogus;
-};
-#endif
-#endif
-
 #ifdef NOFEI
 #define GlobalID int
 class Lookup
@@ -31,8 +24,6 @@ class Lookup
    int bogus;
 };
 #endif
-
-#define HYPRE_FEI_Version() "FEI/HYPRE 1.5.0"
 
 // *************************************************************************
 // local enumerations and defines
@@ -63,11 +54,7 @@ enum HYpreconID {HYDIAGONAL,HYPILUT,HYPARASAILS,HYBOOMERAMG,HYML,HYDDILUT,
 
 class HYPRE_LinSysCore
 #ifndef NOFEI
-#if defined(FEI_V14) || defined(FEI_V13) 
            : public LinearSystemCore 
-#else
-           : public LSC 
-#endif
 #endif
 {
  public:
@@ -83,138 +70,158 @@ class HYPRE_LinSysCore
 #endif
 
    // ----------------------------------------------------------------------
-   //void parameters: for setting generic argc/argv style parameters.
+   // parameters : for setting generic argc/argv style parameters.
    // ----------------------------------------------------------------------
 
-   void parameters(int numParams, char** params);
+   int parameters(int numParams, char** params);
 
-   // ======================================================================
-   // new functions in FEI 1.5 (not implemented here)
-   // ======================================================================
+   // ----------------------------------------------------------------------
+   // new functions in FEI 1.5 and above (not implemented here)
+   // ----------------------------------------------------------------------
 
-   void setLookup(Lookup& lookup);
+   int setLookup(Lookup& lookup);
 
-   void setConnectivities(GlobalID elemBlock, int numElements,
+   int setConnectivities(GlobalID elemBlock, int numElements,
            int numNodesPerElem, const GlobalID* elemIDs,
            const int* const* connNodes) ;
 
-   void setStiffnessMatrices(GlobalID elemBlock, int numElems,
+   int setStiffnessMatrices(GlobalID elemBlock, int numElems,
            const GlobalID* elemIDs, const double *const *const *stiff,
            int numEqnsPerElem, const int *const * eqnIndices);
 
-   void setLoadVectors(GlobalID elemBlock, int numElems,
+   int setLoadVectors(GlobalID elemBlock, int numElems,
            const GlobalID* elemIDs, const double *const * load,
            int numEqnsPerElem, const int *const * eqnIndices);
 
-   void setMultCREqns(int multCRSetID, int numCRs, int numNodesPerCR,
+   int setMultCREqns(int multCRSetID, int numCRs, int numNodesPerCR,
            int** nodeNumbers, int** eqnNumbers, int* fieldIDs,
            int* multiplierEqnNumbers);
 
-   void setPenCREqns(int penCRSetID, int numCRs, int numNodesPerCR,
+   int setPenCREqns(int penCRSetID, int numCRs, int numNodesPerCR,
            int** nodeNumbers, int** eqnNumbers, int* fieldIDs);
 
-   // ======================================================================
-   // createMatricesAndVectors replaced by setGlobalOffsets in 1.5
-   // ======================================================================
-   // void createMatricesVectors: provide info for initial creation of 
-   //      matrix/vector data, Equation numbers are 1-based, and local sets 
+   // ----------------------------------------------------------------------
+   // setGlobalOffsets : provide info for initial creation of
+   //      matrix/vector data, Equation numbers are 1-based, and local sets
    //      of equation numbers are contiguous.
    // ----------------------------------------------------------------------
 
-   void createMatricesAndVectors(int numGlobalEqns, int firstLocalEqn,
-                                 int numLocalEqns);
+   int setGlobalOffsets(int len, int* nodeOffsets, int* eqnOffsets,
+                        int* blkEqnOffsets);
 
-   void setGlobalOffsets(int len, int* nodeOffsets, int* eqnOffsets,
-           int* blkEqnOffsets);
-
-   // ======================================================================
-   // allocateMatrix replaced by setMatrixStructure in 1.5
-   // ======================================================================
-   // void allocateMatrix: provide enough info to allocate the matrix -- 
+   // ----------------------------------------------------------------------
+   // setMatrixStructure : provide enough info to allocate the matrix --
    //                      i.e., define the structure.
    // ----------------------------------------------------------------------
 
-   void allocateMatrix(int** colIndices, int* rowLengths);
-
-   void setMatrixStructure(int** ptColIndices, int* ptRowLengths,
+   int setMatrixStructure(int** ptColIndices, int* ptRowLengths,
            int** blkColIndices, int* blkRowLengths, int* ptRowsPerBlkRow);
 
    // ----------------------------------------------------------------------
-   // void resetMatrixAndVector: don't destroy the structure of the matrix, 
+   // resetMatrixAndVector : don't destroy the structure of the matrix,
    //      but set the value 's' throughout the matrix and vectors.
    // ----------------------------------------------------------------------
 
-   void resetMatrixAndVector(double s);
+   int resetMatrixAndVector(double s);
 
-   // ======================================================================
-   // 2 new functions in 1.5
-   // ======================================================================
+   // ----------------------------------------------------------------------
+   // reset matrix and vector individually
+   // ----------------------------------------------------------------------
 
-   void resetMatrix(double s);
-   void resetRHSVector(double s);
+   int resetMatrix(double s);
+   int resetRHSVector(double s);
 
-   // ======================================================================
-   // new function in 1.5 to deal with block matrix
-   // ======================================================================
-   // void sumIntoSystemMatrix:
+   // ----------------------------------------------------------------------
+   // sumIntoSystemMatrix:
    // this is the primary assembly function. The coefficients 'values'
    // are to be accumumlated into (added to any values already in place)
    // global (0-based) equation 'row' of the matrix.
    // ----------------------------------------------------------------------
 
-   void sumIntoSystemMatrix(int numPtRows, const int* ptRows,
-           int numPtCols, const int* ptCols, int numBlkRows, 
+   int sumIntoSystemMatrix(int numPtRows, const int* ptRows,
+           int numPtCols, const int* ptCols, int numBlkRows,
            const int* blkRows, int numBlkCols, const int* blkCols,
            const double* const* values);
 
-   // ======================================================================
-   // syntax of this functioin has been changed in 1.5
-   // ======================================================================
-   // void sumIntoSystemMatrix:
+   // ----------------------------------------------------------------------
+   // sumIntoSystemMatrix:
    // this is the primary assembly function. The coefficients 'values'
    // are to be accumumlated into (added to any values already in place)
    // global (1-based) [old - 0-based] equation 'row' of the matrix.
    // ----------------------------------------------------------------------
 
-   void sumIntoSystemMatrix(int row, int numValues, const double* values,
-                            const int* scatterIndices);
-
-   void sumIntoSystemMatrix(int numPtRows, const int* ptRows,
-                            int numPtCols, const int* ptCols,
-                            const double* const* values);
+   int sumIntoSystemMatrix(int numPtRows, const int* ptRows,
+                           int numPtCols, const int* ptCols,
+                           const double* const* values);
 
    // ----------------------------------------------------------------------
-   // void sumIntoRHSVector:
+   // Point-entry matrix data as for 'sumIntoSystemMatrix', but in this case
+   // the data should be "put" into the matrix (i.e., overwrite any coefficients
+   // already present) rather than being "summed" into the matrix.
+   // ----------------------------------------------------------------------
+
+   int putIntoSystemMatrix(int numPtRows, const int* ptRows, int numPtCols,
+                           const int* ptCols, const double* const* values);
+
+   // ----------------------------------------------------------------------
+   // Get the length of a row of the matrix.
+   // ----------------------------------------------------------------------
+
+   int getMatrixRowLength(int row, int& length);
+
+   // ----------------------------------------------------------------------
+   // Obtain the coefficients and indices for a row of the matrix.
+   // ----------------------------------------------------------------------
+
+   int getMatrixRow(int row, double* coefs, int* indices, int len, 
+                    int& rowLength);
+
+   // ----------------------------------------------------------------------
+   // sumIntoRHSVector:
    // this is the rhs vector equivalent to sumIntoSystemMatrix above.
    // ----------------------------------------------------------------------
 
-   void sumIntoRHSVector(int num, const double* values, const int* indices);
+   int sumIntoRHSVector(int num, const double* values, const int* indices);
 
    // ----------------------------------------------------------------------
-   // void matrixLoadComplete:
+   // For putting coefficients into the rhs vector
+   // ----------------------------------------------------------------------
+
+   int putIntoRHSVector(int num, const double* values, const int* indices);
+
+   // ----------------------------------------------------------------------
+   // For getting coefficients out of the rhs vector
+   // ----------------------------------------------------------------------
+
+   int getFromRHSVector(int num, double* values, const int* indices);
+
+   // ----------------------------------------------------------------------
+   // matrixLoadComplete:
    // do any internal synchronization/communication.
    // ----------------------------------------------------------------------
 
-   void matrixLoadComplete();
+   int matrixLoadComplete();
    
-   // ======================================================================
-   // new function in 1.5 
-   // ======================================================================
+   // ----------------------------------------------------------------------
+   // Pass nodal data that probably doesn't mean anything to the FEI
+   // implementation, but may mean something to the linear solver. Examples:
+   // geometric coordinates, nullspace data, etc.
+   // ----------------------------------------------------------------------
 
-   void putNodalFieldData(int fieldID, int fieldSize, int* nodeNumbers,
-                          int numNodes, const double* data);
+   int putNodalFieldData(int fieldID, int fieldSize, int* nodeNumbers,
+                         int numNodes, const double* data);
 
    // ----------------------------------------------------------------------
    // functions for enforcing boundary conditions.
    // ----------------------------------------------------------------------
 
-   void enforceEssentialBC(int* globalEqn,double* alpha,double* gamma,int len);
+   int enforceEssentialBC(int* globalEqn,double* alpha,double* gamma,int len);
 
-   void enforceRemoteEssBCs(int numEqns, int* globalEqns, int** colIndices, 
-                            int* colIndLen, double** coefs);
+   int enforceRemoteEssBCs(int numEqns, int* globalEqns, int** colIndices, 
+                           int* colIndLen, double** coefs);
 
-   void enforceOtherBC(int* globalEqn, double* alpha, double* beta, 
-                       double* gamma, int len);
+   int enforceOtherBC(int* globalEqn, double* alpha, double* beta, 
+                      double* gamma, int len);
 
    // ----------------------------------------------------------------------
    //functions for getting/setting matrix or vector pointers.
@@ -224,11 +231,11 @@ class HYPRE_LinSysCore
    // getMatrixPtr:
    // obtain a pointer to the 'A' matrix. This should be considered a
    // constant pointer -- i.e., this class remains responsible for the
-   // matrix (e.g., de-allocation upon destruction). 
+   // matrix (e.g., de-allocation upon destruction).
    // ----------------------------------------------------------------------
 
 #ifndef NOFEI
-   void getMatrixPtr(Data& data);
+   int getMatrixPtr(Data& data);
 #endif
 
    // ----------------------------------------------------------------------
@@ -238,7 +245,7 @@ class HYPRE_LinSysCore
    // ----------------------------------------------------------------------
 
 #ifndef NOFEI
-   void copyInMatrix(double scalar, const Data& data);
+   int copyInMatrix(double scalar, const Data& data);
 #endif
 
    // ----------------------------------------------------------------------
@@ -248,7 +255,7 @@ class HYPRE_LinSysCore
    // ----------------------------------------------------------------------
 
 #ifndef NOFEI
-   void copyOutMatrix(double scalar, Data& data);
+   int copyOutMatrix(double scalar, Data& data);
 #endif
 
    // ----------------------------------------------------------------------
@@ -258,7 +265,7 @@ class HYPRE_LinSysCore
    // ----------------------------------------------------------------------
 
 #ifndef NOFEI
-   void sumInMatrix(double scalar, const Data& data);
+   int sumInMatrix(double scalar, const Data& data);
 #endif 
 
    // ----------------------------------------------------------------------
@@ -267,7 +274,7 @@ class HYPRE_LinSysCore
    // ----------------------------------------------------------------------
 
 #ifndef NOFEI
-   void getRHSVectorPtr(Data& data);
+   int getRHSVectorPtr(Data& data);
 #endif 
 
    // ----------------------------------------------------------------------
@@ -276,9 +283,9 @@ class HYPRE_LinSysCore
    // ----------------------------------------------------------------------
 
 #ifndef NOFEI
-   void copyInRHSVector(double scalar, const Data& data);
-   void copyOutRHSVector(double scalar, Data& data);
-   void sumInRHSVector(double scalar, const Data& data);
+   int copyInRHSVector(double scalar, const Data& data);
+   int copyOutRHSVector(double scalar, Data& data);
+   int sumInRHSVector(double scalar, const Data& data);
 #endif 
 
    // ----------------------------------------------------------------------
@@ -287,72 +294,74 @@ class HYPRE_LinSysCore
    // ----------------------------------------------------------------------
 
 #ifndef NOFEI
-   void destroyMatrixData(Data& data);
-   void destroyVectorData(Data& data);
+   int destroyMatrixData(Data& data);
+   int destroyVectorData(Data& data);
 #endif 
 
    // ----------------------------------------------------------------------
    // functions for managing multiple rhs vectors
    // ----------------------------------------------------------------------
 
-   void setNumRHSVectors(int numRHSs, const int* rhsIDs);
+   int setNumRHSVectors(int numRHSs, const int* rhsIDs);
 
    // ----------------------------------------------------------------------
-   // void setRHSID:
+   // setRHSID:
    // set the 'current' rhs context, assuming multiple rhs vectors.
    // ----------------------------------------------------------------------
 
-   void setRHSID(int rhsID);
+   int setRHSID(int rhsID);
 
    // ----------------------------------------------------------------------
-   // void putInitialGuess:
+   // putInitialGuess:
    // function for setting (a subset of) the initial-guess
    // solution values (i.e., in the 'x' vector).
    // ----------------------------------------------------------------------
 
-   void putInitialGuess(const int* eqnNumbers, const double* values,int len);
+   int putInitialGuess(const int* eqnNumbers, const double* values,int len);
 
-   // ======================================================================
-   // syntax of this functioin has been changed in 1.5
-   // ======================================================================
+   // ----------------------------------------------------------------------
    // function for getting all of the answers ('x' vector).
    // ----------------------------------------------------------------------
 
-   void getSolution(int* eqnNumbers, double* answers, int len);
-
-   void getSolution(double* answers, int len);
+   int getSolution(double* answers, int len);
 
    // ----------------------------------------------------------------------
-   //function for getting the (single) entry at equation number 'eqnNumber'.
+   // function for getting the (single) entry at equation number 'eqnNumber'.
    // ----------------------------------------------------------------------
 
-   void getSolnEntry(int eqnNumber, double& answer);
-
-   // ======================================================================
-   // syntax of this functioin has been changed in 1.5
-   // ======================================================================
-   // fetch the residual vector (FEI 1.4.x compatible)
-   // ----------------------------------------------------------------------
-
-   void formResidual(int* eqnNumbers, double* values, int len);
-
-   void formResidual(double* values, int len);
+   int getSolnEntry(int eqnNumber, double& answer);
 
    // ----------------------------------------------------------------------
-   //function for launching the linear solver
+   // This will be called to request that LinearSystemCore form the residual
+   // vector r = b - A*x, and pass the coefficients for r back out in the
+   // 'values' list.
    // ----------------------------------------------------------------------
 
-   void launchSolver(int& solveStatus, int& iterations);
+   int formResidual(double* values, int len);
+
+   // ----------------------------------------------------------------------
+   // function for launching the linear solver
+   // ----------------------------------------------------------------------
+
+   int launchSolver(int& solveStatus, int& iterations);
 
    // ----------------------------------------------------------------------
    // other functions
    // ----------------------------------------------------------------------
 
-#ifdef FEI_V13
-   void  writeSystem(char *);
-#else
-   void  writeSystem(const char *);
-#endif
+   int  writeSystem(const char *);
+
+   // ----------------------------------------------------------------------
+   // old functions before FEI 1.5 (but still needed here)
+   // ----------------------------------------------------------------------
+
+   int createMatricesAndVectors(int numGlobalEqns, int firstLocalEqn,
+                                int numLocalEqns);
+
+   int allocateMatrix(int** colIndices, int* rowLengths);
+
+   int sumIntoSystemMatrix(int row, int numValues, const double* values,
+                            const int* scatterIndices);
 
    // ----------------------------------------------------------------------
    // HYPRE-specific public functions
@@ -364,10 +373,12 @@ class HYPRE_LinSysCore
    double buildSlideReducedSoln();
    double buildSlideReducedSoln2();
    void   buildSchurReducedSystem();
+   void   buildSchurReducedSystem2();
+   int    HYPRE_Schur_Search(int,int,int*,int*,int);
    void   buildSchurReducedRHS();
    double buildSchurReducedSoln();
    void   computeMinResProjection(HYPRE_ParCSRMatrix A_csr, HYPRE_ParVector x, 
-                                  HYPRE_ParVector b, double& nrm1, double& nrm2);
+                                  HYPRE_ParVector b,double& nrm1,double& nrm2);
    void   addToProjectionSpace(HYPRE_IJVector x, HYPRE_IJVector b);
    char  *getVersion();
    void   beginCreateMapFromSoln();
@@ -379,18 +390,11 @@ class HYPRE_LinSysCore
  private:        //functions
 
    // ----------------------------------------------------------------------
-   //functions for selecting solver/preconditioner
+   // functions for selecting solver/preconditioner
    // ----------------------------------------------------------------------
 
    void selectSolver(char* name);
    void selectPreconditioner(char* name);
-
-   // ----------------------------------------------------------------------
-   // not implemented in HYPRE
-   //void setDebugOutput(char* path, char* name);
-   //void debugOutput(char* mesg) const;
-   //void messageAbort(char* msg) const;
-   // ----------------------------------------------------------------------
 
    // ----------------------------------------------------------------------
    // HYPRE specific private functions
@@ -509,7 +513,7 @@ class HYPRE_LinSysCore
    int             HYPreconReuse_;
 
    // ----------------------------------------------------------------------
-   // preconditioner specific variables 
+   // preconditioner specific variables
    // ----------------------------------------------------------------------
 
    int             amgCoarsenType_;
@@ -534,8 +538,6 @@ class HYPRE_LinSysCore
    int             mlPostsmootherType_;
    double          mlRelaxWeight_;
    double          mlStrongThreshold_;
-   int             mlCoarseSolver_;
-   int             mlCoarsenScheme_;
    int             superluOrdering_;
    char            superluScale_[1];
    double          ddilutFillin_;
@@ -548,7 +550,7 @@ class HYPRE_LinSysCore
    int             polyOrder_;
 
    // ----------------------------------------------------------------------
-   // map and others 
+   // map and others
    // ----------------------------------------------------------------------
 
    void            *fegrid;
