@@ -23,12 +23,15 @@ int
 hypre_AMGBuildRBMInterp( hypre_CSRMatrix     *A,
                          int                 *CF_marker,
                          hypre_CSRMatrix     *S,
+                         int                 *dof_func,
+                         int                 num_functions,
+                         int                 **coarse_dof_func_ptr,
                          hypre_CSRMatrix     **P_ptr )
 {
 
 
   hypre_CSRMatrix    *P; 
-
+  int                *coarse_dof_func;
 
 
   double *Prolong_coeff;
