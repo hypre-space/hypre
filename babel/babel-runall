@@ -17,6 +17,6 @@
 # As of January 2002, I have switched to babel-0.8.0, which is not yet
 # in /usr/casc/babel.
 
-babel --output-directory=bHYPRE -sC Interfaces.idl
-babel --output-directory=bHYPREClient-C -cC Interfaces.idl
-babel --output-directory=bHYPREClient-F -cF77 Interfaces.idl
+babel --output-directory=bHYPRE --comment-local-only -sC Interfaces.idl
+babel --output-directory=bHYPREClient-C --comment-local-only -cC Interfaces.idl
+babel --output-directory=bHYPREClient-F --comment-local-only -cF77 Interfaces.idl
