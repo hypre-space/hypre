@@ -46,7 +46,7 @@ typedef struct {
 } hypre_NumbersNode;
 
 
-hypre_NumbersNode * hypre_NumbersNewNode();
+hypre_NumbersNode * hypre_NumbersNewNode(void);
 void hypre_NumbersDeleteNode( hypre_NumbersNode * node );
 int hypre_NumbersEnter( hypre_NumbersNode * node, const int n );
 int hypre_NumbersNEntered( hypre_NumbersNode * node );
