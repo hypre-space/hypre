@@ -2,9 +2,9 @@ C@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 C
 C     Example DRIVER for AMG library
 C
-C     reads matrix in from file:        AMG.in.ysmp         
-C     reads right-hand side from:       AMG.in.rhs        
-C     reads initial approximation from: AMG.in.initu.
+C     reads matrix in from file:        AMG2.in.ysmp         
+C     reads right-hand side from:       AMG2.in.rhs        
+C     reads initial approximation from: AMG2.in.initu.
 C
 C@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 C
@@ -22,14 +22,14 @@ C     READ INPUT FILES WITH MATRIX, RIGHT-HAND SIDE, PROBLEM SPECS,
 C     INITIAL GUESS.
 C
 
-      FYSMP = 'AMG.in.ysmp'
-      FRHS = 'AMG.in.rhs'
-      FINITU='AMG.in.initu'
-      FCONT = 'AMG.in.control'
+      FYSMP = 'AMG2.in.ysmp'
+      FRHS = 'AMG2.in.rhs'
+      FINITU='AMG2.in.initu'
+      FCONT = 'AMG2.in.control'
 
 
 CVEH
-C     READ IN CONTROL PARAMETERS FROM AMG.in.control
+C     READ IN CONTROL PARAMETERS FROM AMG2.in.control
 CVEH
       open (8,FILE=FCONT,STATUS='OLD')
       read (8,*) numu, nump
@@ -49,7 +49,7 @@ CVEH
 
 
 CVEH
-C     READ IN MATRIX FROM AMG.in.ysmp
+C     READ IN MATRIX FROM AMG2.in.ysmp
 CVEH
       open (8,FILE=FYSMP,STATUS='OLD')
       read (8,*) junk
@@ -62,7 +62,7 @@ CVEH
 
 
 CVEH
-C     READ IN RHS FROM AMG.in.rhs
+C     READ IN RHS FROM AMG2.in.rhs
 CVEH
       open (8,FILE=FRHS,STATUS='OLD')
       read (8,*) junk
@@ -77,7 +77,7 @@ CVEH
 
 
 CVEH
-C     READ IN INITIAL GUESS FROM AMG.in.initu
+C     READ IN INITIAL GUESS FROM AMG2.in.initu
 CVEH
       open (8,FILE=FINITU,STATUS='OLD')
       read (8,*) junk
@@ -95,7 +95,7 @@ CVEH
       call amg_SetNumUnknowns(numu,data)
       call amg_SetNumPoints(nump,data)
 
-      call amg_SetLogging(ioutdat, "AMG.runlog", data)
+      call amg_SetLogging(ioutdat, "AMG2.runlog", data)
       call amg_SetLevMax(levmax, data)
       call amg_SetEWT(ewt,data)
       call amg_SetNWT(nwt,data)
