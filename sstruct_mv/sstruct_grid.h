@@ -29,6 +29,7 @@ typedef struct
 {
    HYPRE_SStructVariable  type;
    int                    rank;     /* local rank */
+   int                     ghrank;  /* GEC0902 ghostrank */
    int                    proc;
 
 } hypre_SStructUVar;
@@ -56,7 +57,12 @@ typedef struct
    int                     local_size;    /* Number of variables locally */
    int                     global_size;   /* Total number of variables */
 
+
    hypre_Index             periodic;      /* Indicates if pgrid is periodic */
+
+  /* GEC0902 additions for ghost expansion of boxes */
+
+   int                     ghlocal_size;   /* Number of vars including ghosts */
                            
 } hypre_SStructPGrid;
 
@@ -81,6 +87,8 @@ typedef struct
    int  type;
    int  proc;
    int  offset;
+  /* GEC0902 ghost offset   */
+   int  ghoffset;
 
 } hypre_SStructMapInfo;
 
@@ -89,11 +97,13 @@ typedef struct
    int          type;
    int          proc;
    int          offset;  /* minimum offset for this box */
+   int          ghoffset;  /* GEC0902 minimum offset ghost for this box */
    int          part;    /* part the box lives on */
    hypre_Index  ilower;  /* local ilower on neighbor index-space */
    hypre_Index  coord;   /* lives on local index-space */
    hypre_Index  dir;     /* lives on neighbor index-space */
    hypre_Index  stride;  /* lives on local index-space */
+   hypre_Index  ghstride; /* GEC1002 the ghost equivalent of strides */ 
 
 } hypre_SStructNMapInfo;
 
@@ -128,6 +138,11 @@ typedef struct hypre_SStructGrid_struct
                               
    int                        ref_count;
 
+ /* GEC0902 additions for ghost expansion of boxes */
+
+   int                     ghlocal_size;  /* GEC0902 Number of vars including ghosts */
+   int                     ghstart_rank;  /* GEC0902 start rank including ghosts  */
+
 } hypre_SStructGrid;
 
 /*--------------------------------------------------------------------------
@@ -154,6 +169,8 @@ typedef struct hypre_SStructGrid_struct
 #define hypre_SStructGridLocalSize(grid)      ((grid) -> local_size)
 #define hypre_SStructGridGlobalSize(grid)     ((grid) -> global_size)
 #define hypre_SStructGridRefCount(grid)       ((grid) -> ref_count)
+#define hypre_SStructGridGhlocalSize(grid)    ((grid) -> ghlocal_size)
+#define hypre_SStructGridGhstartRank(grid)    ((grid) -> ghstart_rank)
 
 /*--------------------------------------------------------------------------
  * Accessor macros: hypre_SStructPGrid
@@ -184,27 +201,31 @@ typedef struct hypre_SStructGrid_struct
 #define hypre_SStructPGridLocalSize(pgrid)        ((pgrid) -> local_size)
 #define hypre_SStructPGridGlobalSize(pgrid)       ((pgrid) -> global_size)
 #define hypre_SStructPGridPeriodic(pgrid)         ((pgrid) -> periodic)
+#define hypre_SStructPGridGhlocalSize(pgrid)      ((pgrid) -> ghlocal_size)
 
 /*--------------------------------------------------------------------------
  * Accessor macros: hypre_SStructMapInfo
  *--------------------------------------------------------------------------*/
 
-#define hypre_SStructMapInfoType(info)   ((info) -> type)
-#define hypre_SStructMapInfoProc(info)   ((info) -> proc)
-#define hypre_SStructMapInfoOffset(info) ((info) -> offset)
+#define hypre_SStructMapInfoType(info)    ((info) -> type)
+#define hypre_SStructMapInfoProc(info)    ((info) -> proc)
+#define hypre_SStructMapInfoOffset(info)  ((info) -> offset)
+#define hypre_SStructMapInfoGhoffset(info) ((info) -> ghoffset)
 
 /*--------------------------------------------------------------------------
  * Accessor macros: hypre_SStructMapInfo
  *--------------------------------------------------------------------------*/
 
-#define hypre_SStructNMapInfoType(info)   ((info) -> type)
-#define hypre_SStructNMapInfoProc(info)   ((info) -> proc)
-#define hypre_SStructNMapInfoOffset(info) ((info) -> offset)
-#define hypre_SStructNMapInfoPart(info)   ((info) -> part)
-#define hypre_SStructNMapInfoILower(info) ((info) -> ilower)
-#define hypre_SStructNMapInfoCoord(info)  ((info) -> coord)
-#define hypre_SStructNMapInfoDir(info)    ((info) -> dir)
-#define hypre_SStructNMapInfoStride(info) ((info) -> stride)
+#define hypre_SStructNMapInfoType(info)    ((info) -> type)
+#define hypre_SStructNMapInfoProc(info)    ((info) -> proc)
+#define hypre_SStructNMapInfoOffset(info)  ((info) -> offset)
+#define hypre_SStructNMapInfoGhoffset(info) ((info) -> ghoffset)
+#define hypre_SStructNMapInfoPart(info)    ((info) -> part)
+#define hypre_SStructNMapInfoILower(info)  ((info) -> ilower)
+#define hypre_SStructNMapInfoCoord(info)   ((info) -> coord)
+#define hypre_SStructNMapInfoDir(info)     ((info) -> dir)
+#define hypre_SStructNMapInfoStride(info)  ((info) -> stride)
+#define hypre_SStructNMapInfoGhstride(info)  ((info) -> ghstride)
 
 /*--------------------------------------------------------------------------
  * Accessor macros: hypre_SStructNeighbor
@@ -226,6 +247,7 @@ typedef struct hypre_SStructGrid_struct
 #define hypre_SStructUCVarUVars(uc)    ((uc) -> uvars)
 #define hypre_SStructUCVarType(uc, i)  ((uc) -> uvars[i].type)
 #define hypre_SStructUCVarRank(uc, i)  ((uc) -> uvars[i].rank)
+#define hypre_SStructUCVarGhrank(uc, i) ((uc) -> uvars[i].ghrank)
 #define hypre_SStructUCVarProc(uc, i)  ((uc) -> uvars[i].proc)
 
 #endif

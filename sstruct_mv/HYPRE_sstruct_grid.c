@@ -61,6 +61,9 @@ HYPRE_SStructGridCreate( MPI_Comm           comm,
    hypre_SStructGridGlobalSize(grid)    = 0;
    hypre_SStructGridRefCount(grid)      = 1;
 
+   /* GEC0902 ghost addition to the grid    */
+   hypre_SStructGridGhlocalSize(grid)   = 0; 
+
    *grid_ptr = grid;
 
    return ierr;
@@ -380,13 +383,15 @@ HYPRE_SStructGridAssemble( HYPRE_SStructGrid grid )
 
    /*-------------------------------------------------------------
     * set up the size info
+    * GEC0902 calculation of the local ghost size for grid
     *-------------------------------------------------------------*/
 
    for (part = 0; part < nparts; part++)
    {
       pgrid = hypre_SStructGridPGrid(grid, part);
-      hypre_SStructGridLocalSize(grid)  += hypre_SStructPGridLocalSize(pgrid);
-      hypre_SStructGridGlobalSize(grid) += hypre_SStructPGridGlobalSize(pgrid);
+      hypre_SStructGridLocalSize(grid)   += hypre_SStructPGridLocalSize(pgrid);
+      hypre_SStructGridGlobalSize(grid)  += hypre_SStructPGridGlobalSize(pgrid);
+      hypre_SStructGridGhlocalSize(grid) += hypre_SStructPGridGhlocalSize(pgrid);
    }
 
    /*-------------------------------------------------
@@ -569,4 +574,17 @@ HYPRE_SStructGridSetPeriodic( HYPRE_SStructGrid  grid,
    }
 
    return ierr;
+}
+
+
+/*--------------------------------------------------------------------------
+ * GEC0902 a placeholder for a internal function that will set ghosts in each
+ * of the sgrids of the grid
+ *
+ *--------------------------------------------------------------------------*/
+int
+HYPRE_SStructGridSetNumGhost( HYPRE_SStructGrid grid,
+                              int            *num_ghost)       
+{
+   return ( hypre_SStructGridSetNumGhost(grid, num_ghost) );
 }

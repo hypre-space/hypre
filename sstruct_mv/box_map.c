@@ -76,7 +76,7 @@ hypre_BoxMapCreate( int            max_nentries,
    hypre_BoxMap   *map;
    hypre_IndexRef  global_imin_ref;
    hypre_IndexRef  global_imax_ref;
-   int             d;
+   int             d,i;
                           
    map = hypre_CTAlloc(hypre_BoxMap, 1);
    hypre_BoxMapMaxNEntries(map) = max_nentries;
@@ -91,6 +91,13 @@ hypre_BoxMapCreate( int            max_nentries,
    hypre_BoxMapNEntries(map) = 0;
    hypre_BoxMapEntries(map)  = hypre_CTAlloc(hypre_BoxMapEntry, max_nentries);
    hypre_BoxMapTable(map)    = NULL;
+
+   /* GEC1002 we choose a default that will give zero everywhere..*/
+
+  for (i = 0; i < 6; i++)
+  {
+    hypre_BoxMapNumGhost(map)[i] = 0;
+  }
       
    *map_ptr = map;
       
@@ -135,6 +142,8 @@ hypre_BoxMapAddEntry( hypre_BoxMap *map,
    hypre_IndexRef      entry_imin;
    hypre_IndexRef      entry_imax;
    int                 d;
+   /* GEC0902  added num_ghost variable. extract location */
+   int                 *num_ghost = hypre_BoxMapNumGhost(map);  
 
    entry = &entries[nentries];
    entry_imin = hypre_BoxMapEntryIMin(entry);
@@ -146,6 +155,13 @@ hypre_BoxMapAddEntry( hypre_BoxMap *map,
    }
    hypre_BoxMapEntryInfo(entry) = info;
    hypre_BoxMapNEntries(map) = nentries + 1;
+
+   /* GEC0902 for ghost sizes: inherit and inject the numghost from map into mapentry*/
+    
+   for (d = 0; d < 6; d++)
+   {
+     hypre_BoxMapEntryNumGhost(entry)[d] = num_ghost[d];
+   }
 
    return ierr;
 }
@@ -537,3 +553,23 @@ hypre_BoxMapIntersect( hypre_BoxMap        *map,
 }
 
 
+/*------------------------------------------------------------------------------
+ *GEC0902  hypre_BoxMapSetNumGhost
+ *
+ * the purpose is to set num ghost in the boxmap. It is identical
+ * to the function that is used in the structure vector entity. Take
+ * the entity map and use the macro to inject the num_ghost
+ *-----------------------------------------------------------------------------*/
+
+int
+hypre_BoxMapSetNumGhost( hypre_BoxMap *map, int  *num_ghost )
+{
+  int  ierr = 0;
+  int  i;
+  
+  for (i = 0; i < 6; i++)
+  {
+    hypre_BoxMapNumGhost(map)[i] = num_ghost[i];
+  }
+  return ierr;
+}
