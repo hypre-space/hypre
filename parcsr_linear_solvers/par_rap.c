@@ -131,6 +131,7 @@ int hypre_ParAMGBuildCoarseOperator(    hypre_ParCSRMatrix  *RT,
    int              start_indexing = 0; /* start indexing for RAP_data at 0 */
    int		    num_nz_cols_A;
    int		    count;
+   int		    num_procs;
 
    double           r_entry;
    double           r_a_product;
@@ -142,6 +143,8 @@ int hypre_ParAMGBuildCoarseOperator(    hypre_ParCSRMatrix  *RT,
     *  Copy ParCSRMatrix RT into CSRMatrix R so that we have row-wise access 
     *  to restriction .
     *-----------------------------------------------------------------------*/
+
+   MPI_Comm_size(comm,&num_procs);
 
    if (comm_pkg_RT)
    {
@@ -1132,7 +1135,11 @@ int hypre_ParAMGBuildCoarseOperator(    hypre_ParCSRMatrix  *RT,
 	hypre_CSRMatrixData(RAP_offd) = RAP_offd_data; 
    	hypre_CSRMatrixJ(RAP_offd) = RAP_offd_j; 
    	hypre_ParCSRMatrixColMapOffd(RAP) = col_map_offd_RAP;
-   	hypre_GenerateRAPCommPkg(RAP, A);
+   }
+   if (num_procs > 1)
+   {
+   	/* hypre_GenerateRAPCommPkg(RAP, A); */
+   	hypre_GenerateMatvecCommunicationInfo(RAP);
    }
 
    *RAP_ptr = RAP;
