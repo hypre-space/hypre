@@ -155,7 +155,6 @@ double MLI_Method_AMGSA::genP(MLI_Matrix *mli_Amat,
       }
       else 
       {
-if (mypid == 0) printf("amgsa_coarsen check (2c), %d\n", GGlobalNRows);
          if (blkSize > 1 && scalar_ == 0 ) 
             if ( saLabels_ != NULL && saLabels_[currLevel_] != NULL )
                if (localLabels != NULL) delete [] localLabels;
