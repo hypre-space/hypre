@@ -1414,7 +1414,7 @@ main( int   argc,
    Index                *block;
    int                   solver_id;
    int                   print_system;
-   int                   cosine;
+   int                   cosine, struct_cosine;
    double                scale;
                         
    HYPRE_SStructGrid     grid;
@@ -1523,6 +1523,7 @@ main( int   argc,
    solver_id = 39;
    print_system = 0;
    cosine = 1;
+   struct_cosine = 0;
 
    n_pre  = 1;
    n_post = 1;
@@ -1598,6 +1599,7 @@ main( int   argc,
       {
          arg_index++;
          cosine = 1;
+         struct_cosine = 1;
       }
       else if ( strcmp(argv[arg_index], "-print") == 0 )
       {
@@ -2073,7 +2075,7 @@ main( int   argc,
     *-----------------------------------------------------------*/
    if (solver_id >= 200)
    {
-      cosine= 0;
+      cosine= struct_cosine;
    }
 
    if (cosine)
