@@ -128,6 +128,25 @@ hypre_PCGMatvec( void   *matvec_data,
 }
 
 /*--------------------------------------------------------------------------
+ * hypre_PCGMatvecT
+ *--------------------------------------------------------------------------*/
+
+int
+hypre_PCGMatvecT(void   *matvec_data,
+                 double  alpha,
+                 void   *A,
+                 void   *x,
+                 double  beta,
+                 void   *y           )
+{
+   return ( hypre_ParMatvecT( alpha,
+                              (hypre_ParCSRMatrix *) A,
+                              (hypre_ParVector *) x,
+                               beta,
+                              (hypre_ParVector *) y ) );
+}
+
+/*--------------------------------------------------------------------------
  * hypre_PCGMatvecFinalize
  *--------------------------------------------------------------------------*/
 
