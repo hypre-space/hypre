@@ -500,7 +500,7 @@ DestroyData( ProblemData   data )
 }
 
 /*--------------------------------------------------------------------------
- * 
+ * Compute new box based on variable type
  *--------------------------------------------------------------------------*/
 
 int
@@ -878,6 +878,10 @@ main( int   argc,
 
    HYPRE_SStructMatrixCreate(MPI_COMM_WORLD, graph, &A);
    /* TODO HYPRE_SStructMatrixSetSymmetric(A, 1); */
+   if (solver_id >= 40)
+   {
+      HYPRE_SStructMatrixSetObjectType(A, HYPRE_PARCSR);
+   }
    HYPRE_SStructMatrixInitialize(A);
 
    for (part = 0; part < data.nparts; part++)
@@ -921,12 +925,20 @@ main( int   argc,
    }
 
    HYPRE_SStructMatrixAssemble(A);
+   if (solver_id >= 40)
+   {
+      HYPRE_SStructMatrixGetObject(A, (void **) &par_A);
+   }
 
    /*-----------------------------------------------------------
     * Set up the linear system
     *-----------------------------------------------------------*/
 
    HYPRE_SStructVectorCreate(MPI_COMM_WORLD, grid, &b);
+   if (solver_id >= 40)
+   {
+      HYPRE_SStructVectorSetObjectType(b, HYPRE_PARCSR);
+   }
    HYPRE_SStructVectorInitialize(b);
    for (j = 0; j < data.max_boxsize; j++)
    {
@@ -947,8 +959,16 @@ main( int   argc,
       }
    }
    HYPRE_SStructVectorAssemble(b);
+   if (solver_id >= 40)
+   {
+      HYPRE_SStructVectorGetObject(b, (void **) &par_b);
+   }
 
    HYPRE_SStructVectorCreate(MPI_COMM_WORLD, grid, &x);
+   if (solver_id >= 40)
+   {
+      HYPRE_SStructVectorSetObjectType(x, HYPRE_PARCSR);
+   }
    HYPRE_SStructVectorInitialize(x);
    for (j = 0; j < data.max_boxsize; j++)
    {
@@ -969,6 +989,10 @@ main( int   argc,
       }
    }
    HYPRE_SStructVectorAssemble(x);
+   if (solver_id >= 40)
+   {
+      HYPRE_SStructVectorGetObject(x, (void **) &par_x);
+   }
  
    hypre_EndTiming(time_index);
    hypre_PrintTiming("SStruct Interface", MPI_COMM_WORLD);
