@@ -116,7 +116,7 @@ typedef struct
    int      num_iterations;
    double   rel_residual_norm;
 
-   int     printlevel; /* printing when printlevel>0 */
+   int     print_level; /* printing when print_level>0 */
    int     logging;  /* extra computations for logging when logging>0 */
    double  *norms;
    double  *rel_norms;

@@ -89,7 +89,9 @@ typedef struct
    int      max_iter;
    int      rel_change;
    int      stop_crit;
+   int      converged;
    double   tol;
+   int      cf_tol;
    double   rel_residual_norm;
 
    void  *A;

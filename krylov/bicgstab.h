@@ -96,7 +96,9 @@ typedef struct
    int      min_iter;
    int      max_iter;
    int      stop_crit;
+   int      converged;
    double   tol;
+   double   cf_tol;
    double   rel_residual_norm;
 
    void  *A;
