@@ -33,10 +33,11 @@ BLAS_LIB       =  @BLASLIBFLAGS@
 
 CFLAGS =\
  ${C_COMPILE_FLAGS}\
- -I..\
+ -I../..\
+ -I$(srcdir)\
  -I$(srcdir)/../..\
- -I$(srcdir)/../../seq_mv\
  -I$(srcdir)/../../utilities\
+ -I$(srcdir)/../../seq_mv\
  -I$(srcdir)/../../parcsr_mv\
  ${CINCLUDES}\
  ${CDEFS}
@@ -47,6 +48,17 @@ MPILIBFLAGS = @MPILIBDIRS@ @MPILIBS@ @MPIFLAGS@
 LIBFLAGS = @LIBDIRS@ @LIBS@
 LDLIBFLAGS = @LDLIBDIRS@ @LDLIBS@
  
+LFLAGS =\
+ -L.\
+ -L../../seq_mv\
+ -L../../parcsr_mv\
+ -L../../utilities\
+ -lHYPRE_mli\
+ -lHYPRE_parcsr_mv\
+ -lHYPRE_seq_mv\
+ -lHYPRE_utilities\
+ ${MPILIBFLAGS} ${LIBFLAGS} ${LDLIBFLAGS}
+
 HEADERS =\
  headers.h\
  mli_pcsr_bool_mat.h
@@ -55,7 +67,13 @@ FILES =\
  mli_pcsr_bool_mat.c\
  mli_pcsr_bool_matop.c
 
+DRIVER_FILES =\
+ driver.c\
+ driver_matmul.c\
+ driver_matvec.c
+
 OBJS = ${FILES:.c=.o}
+DRIVER_OBJS = ${DRIVER_FILES:.c=.o}
 
 ##################################################################
 # Targets
@@ -63,6 +81,10 @@ OBJS = ${FILES:.c=.o}
 
 all: libHYPRE_mli.a 
  
+driver_matmul: driver_matmul.o libHYPRE_mli.a
+	@echo  "Linking" $@ "... "
+	${CC} -o driver_matmul driver_matmul.o ${LFLAGS} 
+
 install: all
 	@cp -f $(srcdir)/*.h $$HYPRE_INSTALL_DIR/include/.
 	@cp -f libHYPRE_*.a $$HYPRE_INSTALL_DIR/lib/.
