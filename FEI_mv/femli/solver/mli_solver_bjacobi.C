@@ -785,7 +785,8 @@ int MLI_Solver_BJacobi::buildBlocks()
       {
          esslMatrices_[iB] = new double[blkLeng * (blkLeng+1)/2];
          esslMatrix = esslMatrices_[iB];
-	 bzero((char *) esslMatrix,blkLeng*(blkLeng+1)/2*sizeof(double));
+         for ( irow = 0; irow < blkLeng*(blkLeng+1)/2; irow++ )
+            esslMatrix[irow] = 0.0;
          offset = 0;
          for ( irow = blockStartRow; irow <= blockEndRow; irow++ )
          {
