@@ -81,7 +81,6 @@ hypre_ParCSRBooleanMatrix *hypre_ParBooleanMatmul
    int              jj_count_diag, jj_count_offd;
    int              jj_row_begin_diag, jj_row_begin_offd;
    int              start_indexing = 0; /* start indexing for C_data at 0 */
-   int		    count;
    int		    n_rows_A, n_cols_A;
    int		    n_rows_B, n_cols_B;
    int              allsquare = 0;
