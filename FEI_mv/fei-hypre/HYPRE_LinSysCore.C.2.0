@@ -1178,8 +1178,8 @@ int HYPRE_LinSysCore::parameters(int numParams, char **params)
           sscanf(params[i],"%s %s", param, param2);
           rtype = 1;
           if      ( !strcmp(param2, "jacobi" ) ) rtype = 0;
-          else if ( !strcmp(param2, "gs") )      rtype = 1;
-          else if ( !strcmp(param2, "sgs") )     rtype = 2;
+          else if ( !strcmp(param2, "sgs") )     rtype = 1;
+          else if ( !strcmp(param2, "sgsseq") )  rtype = 2;
           else if ( !strcmp(param2, "vbjacobi")) rtype = 3;
           else if ( !strcmp(param2, "vbsgs") )   rtype = 4;
           else if ( !strcmp(param2, "vbsgsseq")) rtype = 5;
@@ -1246,7 +1246,7 @@ int HYPRE_LinSysCore::parameters(int numParams, char **params)
 
        else
        {
-          if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0 )
+          if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 && mypid_ == 0 )
           {
              printf("HYPRE_LSC::parameters WARNING : %s not recognized\n",
                     params[i]);
@@ -1734,8 +1734,8 @@ int HYPRE_LinSysCore::resetMatrixAndVector(double s)
     ierr = HYPRE_IJMatrixSetLocalStorageType(HYA_, HYPRE_PARCSR);
     size = localEndRow_ - localStartRow_ + 1;
     ierr = HYPRE_IJMatrixSetLocalSize(HYA_, size, size);
-    ierr = HYPRE_IJMatrixSetRowSizes(HYA_, rowLengths_);
-    ierr = HYPRE_IJMatrixInitialize(HYA_);
+    //ierr = HYPRE_IJMatrixSetRowSizes(HYA_, rowLengths_);
+    //ierr = HYPRE_IJMatrixInitialize(HYA_);
     assert(!ierr);
 
     //-------------------------------------------------------------------
@@ -1815,8 +1815,8 @@ int HYPRE_LinSysCore::resetMatrix(double s)
     ierr = HYPRE_IJMatrixSetLocalStorageType(HYA_, HYPRE_PARCSR);
     size = localEndRow_ - localStartRow_ + 1;
     ierr = HYPRE_IJMatrixSetLocalSize(HYA_, size, size);
-    ierr = HYPRE_IJMatrixSetRowSizes(HYA_, rowLengths_);
-    ierr = HYPRE_IJMatrixInitialize(HYA_);
+    //ierr = HYPRE_IJMatrixSetRowSizes(HYA_, rowLengths_);
+    //ierr = HYPRE_IJMatrixInitialize(HYA_);
     assert(!ierr);
 
     //-------------------------------------------------------------------
