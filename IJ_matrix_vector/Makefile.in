@@ -1,0 +1,91 @@
+#BHEADER***********************************************************************
+# (c) 1999   The Regents of the University of California
+#
+# See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
+# notice, contact person, and disclaimer.
+#
+# $Revision$
+#EHEADER***********************************************************************
+
+.SUFFIXES:
+.SUFFIXES: .c .f .o
+
+srcdir = @srcdir@
+VPATH = @srcdir@
+
+
+CC = @CC@
+
+C_COMPILE_FLAGS=@CFLAGS@
+CXX_COMPILE_FLAGS=@CXXFLAGS@
+F77_COMPILE_FLAGS=@F77FLAGS@
+CINCLUDES=@INCLUDES@ @MPIINCLUDE@
+CDEFS = @HYPREDEFS@ -DHYPRE_NO_PTHREAD_MANGLING
+
+CFLAGS =\
+ ${C_COMPILE_FLAGS}\
+ -I../utilities\
+ ${CINCLUDES}\
+ ${CDEFS}
+
+RANLIB= @RANLIB@
+
+MPILIBFLAGS = @MPILIBDIRS@ @MPILIBS@ @MPIFLAGS@
+LIBFLAGS = @LIBDIRS@ @LIBS@
+LDLIBFLAGS = @LDLIBDIRS@ @LDLIBS@
+
+LFLAGS =\
+ -L.\
+ -L../utilities\
+ -lHYPRE_IJ_mv\
+ -lHYPRE_utilities\
+ ${MPILIBFLAGS} ${LIBFLAGS} ${LDLIBFLAGS}
+
+HEADERS =\
+ HYPRE_IJ_mv.h \
+ IJMatrix.h
+
+FILES =\
+ HYPRE_IJMatrix.c\
+ IJMatrix_parcsr.c
+
+OBJS = ${FILES:.c=.o}
+
+##################################################################
+# Targets
+##################################################################
+
+all: libHYPRE_IJ_mv.a
+
+install: all
+	@cp -f HYPRE_*.h struct_matrix_vector.h $$HYPRE_INSTALL_DIR/include
+	@cp -f libHYPRE_*.a $$HYPRE_INSTALL_DIR/lib
+
+clean:
+	@rm -f *.o
+	@rm -f *.prj
+	@rm -f *.kdd
+
+veryclean: clean
+	@rm -f libHYPRE_*.a
+
+##################################################################
+# Rules
+##################################################################
+
+libHYPRE_IJ_mv.a: ${OBJS}
+	@echo  "Building $@ ... "
+	ar -rcu $@ ${OBJS}
+	${RANLIB} $@
+
+${OBJS}: ${HEADERS}
+
+##################################################################
+# Generic rules
+##################################################################
+
+.c.o:
+	${CC} -o $@ -c ${CFLAGS} $<
+
+.f.o:
+	${F77} -o $@ -c ${FFLAGS} $<
