@@ -33,6 +33,23 @@
 #include <assert.h>
 #include "Hypre_ParCSRVector_Impl.h"
 #include "parcsr_mv.h"
+
+/* following is to help debugging... */
+#include "../babel-runtime/sidl/SIDL_BaseClass_Impl.h"
+
+int
+Hypre_ParCSRMatrix_ReferenceCount(
+  Hypre_ParCSRMatrix self)
+{
+   SIDL_BaseClass base = (SIDL_BaseClass) SIDL_BaseClass__cast( self );
+   struct SIDL_BaseClass__data* data = SIDL_BaseClass__get_data(base);
+   if (data) {
+     return (data->d_refcount);
+   }
+   else
+      return 0;
+}
+/* ... end of section for debugging aids */
 /* DO-NOT-DELETE splicer.end(Hypre.ParCSRMatrix._includes) */
 
 /*

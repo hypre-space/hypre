@@ -456,6 +456,7 @@ impl_Hypre_ParAMG_Setup(
    */
 
    datab = Hypre_ParCSRVector__get_data( HypreP_b );
+   Hypre_ParCSRVector_deleteReference( HypreP_b );
    ij_b = datab -> ij_b;
    ierr += HYPRE_IJVectorGetObject( ij_b, &objectb );
    bb = (HYPRE_ParVector) objectb;
@@ -473,6 +474,7 @@ impl_Hypre_ParAMG_Setup(
    */
 
    datax = Hypre_ParCSRVector__get_data( HypreP_x );
+   Hypre_ParCSRVector_deleteReference( HypreP_x );
    ij_x = datax -> ij_b;
    ierr += HYPRE_IJVectorGetObject( ij_x, &objectx );
    xx = (HYPRE_ParVector) objectx;
@@ -531,6 +533,7 @@ impl_Hypre_ParAMG_Apply(
    */
 
    datab = Hypre_ParCSRVector__get_data( HypreP_b );
+   Hypre_ParCSRVector_deleteReference( HypreP_b );
    ij_b = datab -> ij_b;
    ierr += HYPRE_IJVectorGetObject( ij_b, &objectb );
    bb = (HYPRE_ParVector) objectb;
@@ -554,6 +557,7 @@ impl_Hypre_ParAMG_Apply(
    */
 
    datax = Hypre_ParCSRVector__get_data( HypreP_x );
+   Hypre_ParCSRVector_deleteReference( HypreP_x );
    ij_x = datax -> ij_b;
    ierr += HYPRE_IJVectorGetObject( ij_x, &objectx );
    xx = (HYPRE_ParVector) objectx;

@@ -39,21 +39,18 @@ int
 SIDL_BaseClass_ReferenceCount(
   SIDL_BaseClass self)
 {
-  /* DO-NOT-DELETE splicer.begin(SIDL.BaseClass.addReference) */
    struct SIDL_BaseClass__data* data = SIDL_BaseClass__get_data(self);
    if (data) {
      return (data->d_refcount);
    }
    else
       return 0;
-   /* DO-NOT-DELETE splicer.end(SIDL.BaseClass.addReference) */
 }
 
 int
 Hypre_ParCSRVector_ReferenceCount(
   Hypre_ParCSRVector self)
 {
-  /* DO-NOT-DELETE splicer.begin(SIDL.BaseClass.addReference) */
    SIDL_BaseClass base = (SIDL_BaseClass) SIDL_BaseClass__cast( self );
    struct SIDL_BaseClass__data* data = SIDL_BaseClass__get_data(base);
    if (data) {
@@ -61,7 +58,6 @@ Hypre_ParCSRVector_ReferenceCount(
    }
    else
       return 0;
-   /* DO-NOT-DELETE splicer.end(SIDL.BaseClass.addReference) */
 }
 /* ... end of section for debugging aids */
 
@@ -349,6 +345,7 @@ impl_Hypre_ParCSRVector_Dot(
    data = Hypre_ParCSRVector__get_data( self );
    ij_y = data -> ij_b;
    data = Hypre_ParCSRVector__get_data( HypreP_x );
+   Hypre_ParCSRVector_deleteReference( HypreP_x );
    ij_x = data -> ij_b;
 
    ierr += HYPRE_IJVectorGetObject( ij_x, &object );
@@ -408,6 +405,7 @@ impl_Hypre_ParCSRVector_Axpy(
    */
 
    data_x = Hypre_ParCSRVector__get_data( HypreP_x );
+   Hypre_ParCSRVector_deleteReference( HypreP_x );
    ij_x = data_x->ij_b;
    ierr += HYPRE_IJVectorGetObjectType( ij_x, type );
    assert( *type == HYPRE_PARCSR );  /* ... don't know how to deal with other types */
