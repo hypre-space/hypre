@@ -23,6 +23,9 @@ AM_CPPFLAGS = \
  -DHYPRE_TIMING\
  -I$(includedir)
 
+AM_FFLAGS = \
+ -I$(includedir)
+
 ij_SOURCES = ij.c
 ij_mv_SOURCES = ij_mv.c
 new_ij_SOURCES = new_ij.c
