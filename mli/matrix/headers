@@ -1,0 +1,53 @@
+#!/bin/sh
+#BHEADER***********************************************************************
+# (c) 1998-2001   The Regents of the University of California
+#
+# See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
+# notice, contact person, and disclaimer.
+#
+# $Revision$
+#EHEADER***********************************************************************
+
+INTERNAL_HEADER=mli_matrix.h
+
+#===========================================================================
+# Include guards and other includes
+#===========================================================================
+
+cat > $INTERNAL_HEADER <<@
+
+#include <HYPRE_config.h>
+
+#ifndef MLI_MATRIX_HEADER
+#define MLI_MATRIX_HEADER
+
+#include "utilities.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+@
+
+#===========================================================================
+# Structures and prototypes
+#===========================================================================
+
+cat mli_pcsr_bool_mat.h       >> $INTERNAL_HEADER	
+
+../../utilities/protos [!F]*.c                   >> $INTERNAL_HEADER
+
+#===========================================================================
+# Include guards
+#===========================================================================
+
+cat >> $INTERNAL_HEADER <<@
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif
+
+@
+
