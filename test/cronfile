@@ -1,8 +1,8 @@
-0 1 * * 4 cd /home/casc/software/hypre/autotest/; ./autotest -dec
+0 1 * * 0 cd /home/casc/software/hypre/autotest/; ./autotest -casc
+0 1 * * 1 cd /home/casc/software/hypre/autotest/; ./autotest -casc
+0 1 * * 2 cd /home/casc/software/hypre/autotest/; ./autotest -casc
 0 1 * * 3 cd /home/casc/software/hypre/autotest/; ./autotest -blue
-0 1 * * 0 cd /home/casc/software/hypre/autotest/; ./autotest
-0 1 * * 1 cd /home/casc/software/hypre/autotest/; ./autotest
-0 1 * * 2 cd /home/casc/software/hypre/autotest/; ./autotest
-0 1 * * 5 cd /home/casc/software/hypre/autotest/; ./autotest
-0 1 * * 6 cd /home/casc/software/hypre/autotest/; ./autotest
+0 1 * * 4 cd /home/casc/software/hypre/autotest/; ./autotest -dec
+0 1 * * 5 cd /home/casc/software/hypre/autotest/; ./autotest -casc
+0 1 * * 6 cd /home/casc/software/hypre/autotest/; ./autotest -casc
 0 12 * * * cd /home/casc/software/hypre/autotest/; ./autotest_check
