@@ -172,9 +172,16 @@ main( int   argc,
    solver_id = 0;
    solver_type = 1;
 
-   istart[0] = -3;
-   istart[1] = -3;
-   istart[2] = -3;
+/*     istart[0] = -3; */
+/*     istart[1] = -3; */
+/*     istart[2] = -3; */
+/* ... original was -3 */
+/*    istart[0] = 1; */
+/*    istart[1] = 1; */
+/*    istart[2] = 1; */
+   istart[0] = 1;
+   istart[1] = 1;
+   istart[2] = 1;
 
    px = 0;
    py = 0;
@@ -368,6 +375,7 @@ main( int   argc,
       printf("                        1  - PFMG\n");
       printf("                        2  - SparseMSG\n");
       printf("                        3  - PFMG constant coefficients\n");
+      printf("                        4  - PFMG constant coefficients variable diagonal\n");
       printf("                        10 - CG with SMG precond\n");
       printf("                        11 - CG with PFMG precond\n");
       printf("                        12 - CG with SparseMSG precond\n");
@@ -769,6 +777,11 @@ main( int   argc,
          HYPRE_StructMatrixSetConstantCoefficient( A, 1 );
          constant_coefficient = 1;
       }
+      if ( solver_id == 4 )
+      {
+         HYPRE_StructMatrixSetConstantCoefficient( A, 2 );
+         constant_coefficient = 2;
+      }
       HYPRE_StructMatrixSetSymmetric(A, sym);
       HYPRE_StructMatrixSetNumGhost(A, A_num_ghost);
       HYPRE_StructMatrixInitialize(A);
@@ -1143,7 +1156,7 @@ main( int   argc,
     * Solve the system using PFMG
     *-----------------------------------------------------------*/
 
-   else if (solver_id == 1 || solver_id == 3)
+   else if ( solver_id == 1 || solver_id == 3 || solver_id == 4 )
    {
       time_index = hypre_InitializeTiming("PFMG Setup");
       hypre_BeginTiming(time_index);
@@ -1395,6 +1408,7 @@ main( int   argc,
       HYPRE_StructHybridSetDSCGMaxIter(solver, 100);
       HYPRE_StructHybridSetPCGMaxIter(solver, 50);
       HYPRE_StructHybridSetTol(solver, 1.0e-06);
+      /*HYPRE_StructHybridSetPCGAbsoluteTolFactor(solver, 1.0e-200);*/
       HYPRE_StructHybridSetConvergenceTol(solver, cf_tol);
       HYPRE_StructHybridSetTwoNorm(solver, 1);
       HYPRE_StructHybridSetRelChange(solver, 0);
