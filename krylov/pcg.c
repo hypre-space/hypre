@@ -241,6 +241,7 @@ hypre_PCGSolve( void *pcg_vdata,
    double          guard_zero_residual; 
 
    int             i = 0;
+   int             j = 0;
    int             ierr = 0;
 
    /*-----------------------------------------------------------------------
@@ -414,7 +415,6 @@ hypre_PCGSolve( void *pcg_vdata,
     * Print log
     *-----------------------------------------------------------------------*/
 
-#if 0
    if (logging > 0)
    {
       if (two_norm)
@@ -432,7 +432,6 @@ hypre_PCGSolve( void *pcg_vdata,
          printf("% 5d    %e    %e\n", j, norms[j], rel_norms[j]);
       }
    }
-#endif
 
    (pcg_data -> num_iterations) = i;
 
