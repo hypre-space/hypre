@@ -958,8 +958,12 @@ PrintUsage( char *progname,
       printf("  -P <Px> <Py> <Pz>   : refine and distribute part(s)\n");
       printf("  -b <bx> <by> <bz>   : refine and block part(s)\n");
       printf("  -solver <ID>        : solver ID (default = 39)\n");
-      printf("                        28 - PCG with diagonal scaling\n");
-      printf("                        29 - PCG\n");
+      printf("                        10 - PCG with SMG split precond\n");
+      printf("                        11 - PCG with PFMG split precond\n");
+      printf("                        18 - PCG with diagonal scaling\n");
+      printf("                        19 - PCG\n");
+      printf("                        20 - PCG with BoomerAMG precond\n");
+      printf("                        22 - PCG with ParaSails precond\n");
       printf("                        30 - GMRES with SMG split precond\n");
       printf("                        31 - GMRES with PFMG split precond\n");
       printf("                        38 - GMRES with diagonal scaling\n");
@@ -1280,7 +1284,8 @@ main( int   argc,
 
    HYPRE_SStructMatrixCreate(MPI_COMM_WORLD, graph, &A);
    /* TODO HYPRE_SStructMatrixSetSymmetric(A, 1); */
-   if (solver_id >= 40)
+   if ( ((solver_id >= 20) && (solver_id < 30)) ||
+        ((solver_id >= 40) && (solver_id < 50)) )
    {
       HYPRE_SStructMatrixSetObjectType(A, HYPRE_PARCSR);
    }
@@ -1358,7 +1363,8 @@ main( int   argc,
    }
 
    HYPRE_SStructMatrixAssemble(A);
-   if (solver_id >= 40)
+   if ( ((solver_id >= 20) && (solver_id < 30)) ||
+        ((solver_id >= 40) && (solver_id < 50)) )
    {
       HYPRE_SStructMatrixGetObject(A, (void **) &par_A);
    }
@@ -1368,7 +1374,8 @@ main( int   argc,
     *-----------------------------------------------------------*/
 
    HYPRE_SStructVectorCreate(MPI_COMM_WORLD, grid, &b);
-   if (solver_id >= 40)
+   if ( ((solver_id >= 20) && (solver_id < 30)) ||
+        ((solver_id >= 40) && (solver_id < 50)) )
    {
       HYPRE_SStructVectorSetObjectType(b, HYPRE_PARCSR);
    }
@@ -1392,13 +1399,15 @@ main( int   argc,
       }
    }
    HYPRE_SStructVectorAssemble(b);
-   if (solver_id >= 40)
+   if ( ((solver_id >= 20) && (solver_id < 30)) ||
+        ((solver_id >= 40) && (solver_id < 50)) )
    {
       HYPRE_SStructVectorGetObject(b, (void **) &par_b);
    }
 
    HYPRE_SStructVectorCreate(MPI_COMM_WORLD, grid, &x);
-   if (solver_id >= 40)
+   if ( ((solver_id >= 20) && (solver_id < 30)) ||
+        ((solver_id >= 40) && (solver_id < 50)) )
    {
       HYPRE_SStructVectorSetObjectType(x, HYPRE_PARCSR);
    }
@@ -1422,7 +1431,8 @@ main( int   argc,
       }
    }
    HYPRE_SStructVectorAssemble(x);
-   if (solver_id >= 40)
+   if ( ((solver_id >= 20) && (solver_id < 30)) ||
+        ((solver_id >= 40) && (solver_id < 50)) )
    {
       HYPRE_SStructVectorGetObject(x, (void **) &par_x);
    }
@@ -1525,10 +1535,10 @@ main( int   argc,
    hypre_TFree(values);
 
    /*-----------------------------------------------------------
-    * Solve the system using GMRES
+    * Solve the system using PCG
     *-----------------------------------------------------------*/
 
-   if ((solver_id >= 20) && (solver_id < 30))
+   if ((solver_id >= 10) && (solver_id < 20))
    {
       time_index = hypre_InitializeTiming("PCG Setup");
       hypre_BeginTiming(time_index);
@@ -1536,17 +1546,40 @@ main( int   argc,
       HYPRE_SStructPCGCreate(MPI_COMM_WORLD, &solver);
       HYPRE_SStructPCGSetMaxIter(solver, 100);
       HYPRE_SStructPCGSetTol(solver, 1.0e-06);
+      HYPRE_SStructPCGSetTwoNorm(solver, 1);
+      HYPRE_SStructPCGSetRelChange(solver, 0);
       HYPRE_SStructPCGSetLogging(solver, 1);
 
-      if (solver_id == 28)
+      if ((solver_id == 10) || (solver_id == 11))
+      {
+         /* use Split solver as preconditioner */
+         HYPRE_SStructSplitCreate(MPI_COMM_WORLD, &precond);
+         HYPRE_SStructSplitSetMaxIter(precond, 1);
+         HYPRE_SStructSplitSetTol(precond, 0.0);
+         HYPRE_SStructSplitSetZeroGuess(precond);
+         if (solver_id == 10)
+         {
+            HYPRE_SStructSplitSetStructSolver(precond, HYPRE_SMG);
+         }
+         else if (solver_id == 11)
+         {
+            HYPRE_SStructSplitSetStructSolver(precond, HYPRE_PFMG);
+         }
+         HYPRE_SStructPCGSetPrecond(solver,
+                                    HYPRE_SStructSplitSolve,
+                                    HYPRE_SStructSplitSetup,
+                                    precond);
+      }
+
+      else if (solver_id == 18)
       {
 #if 0 /* TODO */
          /* use diagonal scaling as preconditioner */
          precond = NULL;
-         HYPRE_SStructGMRESSetPrecond(solver,
-                                      HYPRE_SStructDiagScale,
-                                      HYPRE_SStructDiagScaleSetup,
-                                      precond);
+         HYPRE_SStructPCGSetPrecond(solver,
+                                    HYPRE_SStructDiagScale,
+                                    HYPRE_SStructDiagScaleSetup,
+                                    precond);
 #endif
       }
 
@@ -1571,6 +1604,81 @@ main( int   argc,
       HYPRE_SStructPCGGetFinalRelativeResidualNorm(solver, &final_res_norm);
       HYPRE_SStructPCGDestroy(solver);
 
+      if ((solver_id == 10) || (solver_id == 11))
+      {
+         HYPRE_SStructSplitDestroy(precond);
+      }
+   }
+
+   /*-----------------------------------------------------------
+    * Solve the system using ParCSR version of PCG
+    *-----------------------------------------------------------*/
+
+   if ((solver_id >= 20) && (solver_id < 30))
+   {
+      time_index = hypre_InitializeTiming("PCG Setup");
+      hypre_BeginTiming(time_index);
+
+      HYPRE_ParCSRPCGCreate(MPI_COMM_WORLD, &par_solver);
+      HYPRE_ParCSRPCGSetMaxIter(par_solver, 100);
+      HYPRE_ParCSRPCGSetTol(par_solver, 1.0e-06);
+      HYPRE_ParCSRPCGSetTwoNorm(par_solver, 1);
+      HYPRE_ParCSRPCGSetRelChange(par_solver, 0);
+      HYPRE_ParCSRPCGSetLogging(par_solver, 1);
+
+      if (solver_id == 20)
+      {
+         /* use BoomerAMG as preconditioner */
+         HYPRE_BoomerAMGCreate(&par_precond); 
+         HYPRE_BoomerAMGSetCoarsenType(par_precond, 6);
+         HYPRE_BoomerAMGSetStrongThreshold(par_precond, 0.25);
+         HYPRE_BoomerAMGSetLogging(par_precond, 3, "sstruct.out.log");
+         HYPRE_BoomerAMGSetMaxIter(par_precond, 1);
+         HYPRE_ParCSRPCGSetPrecond(par_solver,
+                                   HYPRE_BoomerAMGSolve,
+                                   HYPRE_BoomerAMGSetup,
+                                   par_precond);
+      }
+      else if (solver_id == 22)
+      {
+         /* use ParaSails as preconditioner */
+         HYPRE_ParCSRParaSailsCreate(MPI_COMM_WORLD, &par_precond ); 
+	 HYPRE_ParCSRParaSailsSetParams(par_precond, 0.1, 1);
+         HYPRE_ParCSRPCGSetPrecond(par_solver,
+                                   HYPRE_ParCSRParaSailsSolve,
+                                   HYPRE_ParCSRParaSailsSetup,
+                                   par_precond);
+      }
+
+      HYPRE_ParCSRPCGSetup(par_solver, par_A, par_b, par_x);
+
+      hypre_EndTiming(time_index);
+      hypre_PrintTiming("Setup phase times", MPI_COMM_WORLD);
+      hypre_FinalizeTiming(time_index);
+      hypre_ClearTiming();
+   
+      time_index = hypre_InitializeTiming("PCG Solve");
+      hypre_BeginTiming(time_index);
+
+      HYPRE_ParCSRPCGSolve(par_solver, par_A, par_b, par_x);
+
+      hypre_EndTiming(time_index);
+      hypre_PrintTiming("Solve phase times", MPI_COMM_WORLD);
+      hypre_FinalizeTiming(time_index);
+      hypre_ClearTiming();
+
+      HYPRE_ParCSRPCGGetNumIterations(par_solver, &num_iterations);
+      HYPRE_ParCSRPCGGetFinalRelativeResidualNorm(par_solver, &final_res_norm);
+      HYPRE_ParCSRPCGDestroy(par_solver);
+
+      if (solver_id == 20)
+      {
+         HYPRE_BoomerAMGDestroy(par_precond);
+      }
+      else if (solver_id == 22)
+      {
+         HYPRE_ParCSRParaSailsDestroy(par_precond);
+      }
    }
 
    /*-----------------------------------------------------------

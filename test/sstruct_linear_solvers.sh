@@ -27,18 +27,18 @@ DRIVER="./sstruct_linear_solvers"
 #=============================================================================
 
 # base case
-$MPIRUN -np 1 $DRIVER -r 2 2 2 -solver 29
+$MPIRUN -np 1 $DRIVER -r 2 2 2 -solver 19
 tail -3 $DRIVER.log > $DRIVER.testdata
 
-$MPIRUN -np 1 $DRIVER -b 2 2 2 -solver 29
+$MPIRUN -np 1 $DRIVER -b 2 2 2 -solver 19
 tail -3 $DRIVER.log > $DRIVER.testdata.temp
 diff $DRIVER.testdata $DRIVER.testdata.temp >&2
 
-$MPIRUN -np 2 $DRIVER -P 2 1 1 -b 1 2 1 -r 1 1 2 -solver 29
+$MPIRUN -np 2 $DRIVER -P 2 1 1 -b 1 2 1 -r 1 1 2 -solver 19
 tail -3 $DRIVER.log > $DRIVER.testdata.temp
 diff $DRIVER.testdata $DRIVER.testdata.temp >&2
 
-$MPIRUN -np 4 $DRIVER -P 2 1 2 -r 1 2 1 -solver 29
+$MPIRUN -np 4 $DRIVER -P 2 1 2 -r 1 2 1 -solver 19
 tail -3 $DRIVER.log > $DRIVER.testdata.temp
 diff $DRIVER.testdata $DRIVER.testdata.temp >&2
 
@@ -49,14 +49,14 @@ rm -f $DRIVER.testdata $DRIVER.testdata.temp
 #=============================================================================
 
 # base case
-$MPIRUN -np 1 $DRIVER -in sstruct_default_2d.in -r 2 2 1 -solver 29
+$MPIRUN -np 1 $DRIVER -in sstruct_default_2d.in -r 2 2 1 -solver 19
 tail -3 $DRIVER.log > $DRIVER.testdata
 
-$MPIRUN -np 1 $DRIVER -in sstruct_default_2d.in -b 2 2 1 -solver 29
+$MPIRUN -np 1 $DRIVER -in sstruct_default_2d.in -b 2 2 1 -solver 19
 tail -3 $DRIVER.log > $DRIVER.testdata.temp
 diff $DRIVER.testdata $DRIVER.testdata.temp >&2
 
-$MPIRUN -np 2 $DRIVER -in sstruct_default_2d.in -P 1 2 1 -r 2 1 1 -solver 29
+$MPIRUN -np 2 $DRIVER -in sstruct_default_2d.in -P 1 2 1 -r 2 1 1 -solver 19
 tail -3 $DRIVER.log > $DRIVER.testdata.temp
 diff $DRIVER.testdata $DRIVER.testdata.temp >&2
 
@@ -66,8 +66,13 @@ rm -f $DRIVER.testdata $DRIVER.testdata.temp
 # Run all of the solvers
 #=============================================================================
 
-$MPIRUN -np 2 $DRIVER -P 1 1 2 -solver 28
-$MPIRUN -np 2 $DRIVER -P 1 1 2 -solver 29
+$MPIRUN -np 2 $DRIVER -P 1 1 2 -solver 10
+$MPIRUN -np 2 $DRIVER -P 1 1 2 -solver 11
+$MPIRUN -np 2 $DRIVER -P 1 1 2 -solver 18
+$MPIRUN -np 2 $DRIVER -P 1 1 2 -solver 19
+$MPIRUN -np 2 $DRIVER -P 1 1 2 -solver 20
+$MPIRUN -np 2 $DRIVER -P 1 1 2 -solver 21
+$MPIRUN -np 2 $DRIVER -P 1 1 2 -solver 22
 $MPIRUN -np 2 $DRIVER -P 1 1 2 -solver 30
 $MPIRUN -np 2 $DRIVER -P 1 1 2 -solver 31
 $MPIRUN -np 2 $DRIVER -P 1 1 2 -solver 38
