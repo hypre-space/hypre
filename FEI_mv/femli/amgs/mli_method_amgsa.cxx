@@ -20,6 +20,7 @@
 #include "solver/mli_solver.h"
 #include "amgs/mli_method_amgsa.h"
 
+#define MABS(x) (((x) > 0) ? (x) : -(x))
 /* ********************************************************************* *
  * functions external to MLI 
  * --------------------------------------------------------------------- */
@@ -523,7 +524,7 @@ int MLI_Method_AMGSA::getParams(char *in_name, int *argc, char *argv[])
 
 int MLI_Method_AMGSA::setup( MLI *mli ) 
 {
-   int             level, mypid, nRows, nullspaceDimKeep;
+   int             level, mypid, nRows, nullspaceDimKeep, ii, jj;
    double          startTime, elapsedTime, maxEigen, maxEigenT, dtemp=0.0;
    char            paramString[100], *targv[10];
    MLI_Matrix      *mli_Pmat, *mli_Rmat, *mli_Amat, *mli_ATmat, *mli_cAmat;
@@ -578,6 +579,7 @@ int MLI_Method_AMGSA::setup( MLI *mli )
       {
          sfei = mli->getSFEI( level );
          if (sfei != NULL) setupSFEIBasedNullSpaces(mli);
+         else              useSAMGeFlag_ = 0;
       }
    }
 
@@ -595,7 +597,24 @@ int MLI_Method_AMGSA::setup( MLI *mli )
       {
          sfei = mli->getSFEI( level );
          if (sfei != NULL) setupSFEIBasedAggregates(mli);
+         else              useSAMGDDFlag_ = 0;
       }
+   }
+
+   /* --------------------------------------------------------------- */
+   /* update nullspace dimension                                      */
+   /* --------------------------------------------------------------- */
+
+   if ( nullspaceVec_ != NULL )
+   {
+      for ( ii = nullspaceDim_-1; ii >= 0; ii-- )
+      {
+         dtemp = 0.0;
+         for ( jj = 0; jj < nullspaceLen_; jj++ )
+            dtemp += MABS(nullspaceVec_[ii*nullspaceLen_+jj]);
+         if (dtemp != 0.0) break;
+      }
+      nullspaceDim_ = nullspaceDim_ + ii - nullspaceDim_ + 1;
    }
 
    /* --------------------------------------------------------------- */
@@ -1205,15 +1224,7 @@ int MLI_Method_AMGSA::setNodalCoordinates(int num_nodes, int nDOF, int nsDim,
       currNodeDofs_ = 3;
       nullspaceLen_ = num_nodes * 3;
       nullspaceDim_ = numNS;
-      if ( nullspaceDim_ <= 3 ) nullspaceDim_  = 6;
-      if ( useSAMGeFlag_ == 0 )
-      {
-         if ( numNS != 3 && numNS != 6 && numNS != 9 && numNS != 12 ) 
-         {
-            printf("setNodalCoordinates: numNS reset to 3 (%d)\n",numNS);
-            nullspaceDim_ = numNS = 3;
-         }
-      }
+      if ( useSAMGeFlag_ == 0 ) nullspaceDim_ = 6;
    }
    else
    {
@@ -1254,7 +1265,6 @@ int MLI_Method_AMGSA::setNodalCoordinates(int num_nodes, int nDOF, int nsDim,
       }
       else if ( nodeDofs_ == 3 )
       {
-         if ( useSAMGeFlag_ == 0 ) nullspaceDim_ = 6;
          voffset = i * nodeDofs_;
          for ( j = 0; j < 3; j++ )
          {

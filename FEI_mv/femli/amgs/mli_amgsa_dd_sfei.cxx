@@ -146,6 +146,7 @@ int MLI_Method_AMGSA::setupSFEIBasedNullSpaces( MLI *mli )
          if (dAccum == 0.0) {startCol = k; break;}
       }
       if (k == nullspaceDim_) startCol = nullspaceDim_;
+      if ( startCol == nullspaceDim_ ) return 0;
    }
 
    /* --------------------------------------------------------------- */
