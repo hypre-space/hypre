@@ -12,6 +12,7 @@ color.f
 crsgd.f
 crushb.f
 ctest.f
+default.in.problem
 fftests.f
 form.f
 fortran.c
