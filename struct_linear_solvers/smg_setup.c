@@ -15,77 +15,6 @@
 #include "smg.h"
 
 /*--------------------------------------------------------------------------
- * zzz_SMGSetPreRelaxParams
- *--------------------------------------------------------------------------*/
-
-int
-zzz_SMGSetPreRelaxParams( void *smg_vdata,
-                          int   zero_guess, 
-                          void *pre_relax_data )
-{
-   zzz_SMGData *smg_data = smg_vdata;
-   int ierr = 0;
-
-   zzz_SMGRelaxSetTol(pre_relax_data, 0.0);
-   zzz_SMGRelaxSetMaxIter(pre_relax_data, 1);
-   if (zero_guess)
-      zzz_SMGRelaxSetZeroGuess(pre_relax_data);
-
-   zzz_SMGRelaxSetNumSpaces(pre_relax_data, 2);
-   /* relax coarse points */
-   zzz_SMGRelaxSetSpace(pre_relax_data, 0,
-                        (smg_data -> ci), (smg_data -> cs));
-   /* relax fine points */
-   zzz_SMGRelaxSetSpace(pre_relax_data, 1,
-                        (smg_data -> fi), (smg_data -> fs));
-
-   return ierr;
-}
-
-/*--------------------------------------------------------------------------
- * zzz_SMGSetCoarseRelaxParams
- *--------------------------------------------------------------------------*/
-
-int
-zzz_SMGSetCoarseRelaxParams( void *smg_vdata,
-                             void *coarse_relax_data )
-{
-   int ierr = 0;
-
-   zzz_SMGRelaxSetTol(coarse_relax_data, 0.0);
-   zzz_SMGRelaxSetMaxIter(coarse_relax_data, 1);
-   zzz_SMGRelaxSetZeroGuess(coarse_relax_data);
-
-   return ierr;
-}
-
-/*--------------------------------------------------------------------------
- * zzz_SMGSetPostRelaxParams
- *--------------------------------------------------------------------------*/
-
-int
-zzz_SMGSetPostRelaxParams( void *smg_vdata,
-                           int   zero_guess, 
-                           void *post_relax_data )
-{
-   zzz_SMGData *smg_data = smg_vdata;
-   int ierr = 0;
-
-   zzz_SMGRelaxSetTol(post_relax_data, 0.0);
-   zzz_SMGRelaxSetMaxIter(post_relax_data, 1);
-
-   zzz_SMGRelaxSetNumSpaces(post_relax_data, 2);
-   /* relax fine points */
-   zzz_SMGRelaxSetSpace(post_relax_data, 0,
-                        (smg_data -> fi), (smg_data -> fs));
-   /* relax coarse points */
-   zzz_SMGRelaxSetSpace(post_relax_data, 1,
-                        (smg_data -> ci), (smg_data -> cs));
-
-   return ierr;
-}
-
-/*--------------------------------------------------------------------------
  * zzz_SMGSetup
  *--------------------------------------------------------------------------*/
 
@@ -98,6 +27,10 @@ zzz_SMGSetup( void             *smg_vdata,
    zzz_SMGData        *smg_data = smg_vdata;
 
    MPI_Comm           *comm = (smg_data -> comm);
+   int                 ci   = (smg_data -> ci);
+   int                 fi   = (smg_data -> fi);
+   int                 cs   = (smg_data -> cs);
+   int                 fs   = (smg_data -> fs);
 
    int                 max_iter;
    int                 max_levels;
@@ -121,13 +54,16 @@ zzz_SMGSetup( void             *smg_vdata,
                     
    zzz_StructVector  **b_l;
    zzz_StructVector  **x_l;
+
+   /* temp vectors */
+   zzz_StructVector  **tb_l;
+   zzz_StructVector  **tx_l;
    zzz_StructVector  **r_l;
    zzz_StructVector  **e_l;
+   double             *b_data;
+   double             *x_data;
 
-   void               *pre_relax_data_initial;
-   void              **pre_relax_data_l;
-   void               *coarse_relax_data;
-   void              **post_relax_data_l;
+   void              **relax_data_l;
    void              **residual_data_l;
    void              **restrict_data_l;
    void              **intadd_data_l;
@@ -142,9 +78,8 @@ zzz_SMGSetup( void             *smg_vdata,
    int                 idmin, idmax;
    int                 i, l;
 
-   int                 b_num_ghost[] = {1, 1, 1, 1, 1, 1};
-   int                 x_num_ghost[] = {1, 1, 1, 1, 1, 1};
-   int                 r_num_ghost[] = {1, 1, 1, 1, 1, 1};
+   int                 b_num_ghost[]  = {0, 0, 0, 0, 0, 0};
+   int                 x_num_ghost[]  = {0, 0, 0, 0, 0, 0};
 
    int                 ierr;
 
@@ -215,10 +150,10 @@ zzz_SMGSetup( void             *smg_vdata,
    /* adjust coarsening info for the 1st two grid levels */
    for (l = 0; l < 2; l++)
    {
-      zzz_IndexD(cindex_l[l], cdir)  = (smg_data -> ci);
-      zzz_IndexD(findex_l[l], cdir)  = (smg_data -> fi);
-      zzz_IndexD(cstride_l[l], cdir) = (smg_data -> cs);
-      zzz_IndexD(fstride_l[l], cdir) = (smg_data -> fs);
+      zzz_IndexD(cindex_l[l], cdir)  = ci;
+      zzz_IndexD(findex_l[l], cdir)  = fi;
+      zzz_IndexD(cstride_l[l], cdir) = cs;
+      zzz_IndexD(fstride_l[l], cdir) = fs;
    }
 
    /* set coarsening info for the remaining grid levels */
@@ -296,20 +231,33 @@ zzz_SMGSetup( void             *smg_vdata,
    A_l  = zzz_TAlloc(zzz_StructMatrix *, num_levels);
    PT_l = zzz_TAlloc(zzz_StructMatrix *, num_levels - 1);
    R_l  = zzz_TAlloc(zzz_StructMatrix *, num_levels - 1);
-   x_l  = zzz_TAlloc(zzz_StructVector *, num_levels);
    b_l  = zzz_TAlloc(zzz_StructVector *, num_levels);
-   r_l  = zzz_TAlloc(zzz_StructVector *, num_levels);
-   e_l  = zzz_TAlloc(zzz_StructVector *, num_levels);
+   x_l  = zzz_TAlloc(zzz_StructVector *, num_levels);
+   tb_l = zzz_TAlloc(zzz_StructVector *, num_levels);
+   tx_l = zzz_TAlloc(zzz_StructVector *, num_levels);
+   r_l  = tx_l;
+   e_l  = tx_l;
 
    A_l[0] = A;
-   x_l[0] = x;
    b_l[0] = b;
+   x_l[0] = x;
 
-   r_l[0] = zzz_NewStructVector(comm, grid_l[0]);
-   zzz_SetStructVectorNumGhost(r_l[0], r_num_ghost);
-   zzz_InitializeStructVector(r_l[0]);
-   zzz_AssembleStructVector(r_l[0]);
-   e_l[0] = r_l[0];
+   for (i = 0; i <= cdir; i++)
+   {
+      x_num_ghost[2*i]     = 1;
+      x_num_ghost[2*i + 1] = 1;
+   }
+
+   tb_l[0] = zzz_NewStructVector(comm, grid_l[0]);
+   zzz_SetStructVectorNumGhost(tb_l[0], zzz_StructVectorNumGhost(b));
+   zzz_InitializeStructVector(tb_l[0]);
+   zzz_AssembleStructVector(tb_l[0]);
+
+   tx_l[0] = zzz_NewStructVector(comm, grid_l[0]);
+   zzz_SetStructVectorNumGhost(tx_l[0], zzz_StructVectorNumGhost(x));
+   zzz_InitializeStructVector(tx_l[0]);
+   zzz_AssembleStructVector(tx_l[0]);
+
    for (l = 0; l < (num_levels - 1); l++)
    {
       PT_l[l]  = zzz_SMGNewInterpOp(A_l[l], grid_l[l+1], cdir);
@@ -321,120 +269,130 @@ zzz_SMGSetup( void             *smg_vdata,
 
       A_l[l+1] = zzz_SMGNewRAPOp(R_l[l], A_l[l], PT_l[l]);
 
-      x_l[l+1] = zzz_NewStructVector(comm, grid_l[l+1]);
-      zzz_SetStructVectorNumGhost(x_l[l+1], x_num_ghost);
-      zzz_InitializeStructVector(x_l[l+1]);
-      zzz_AssembleStructVector(x_l[l+1]);
-
       b_l[l+1] = zzz_NewStructVector(comm, grid_l[l+1]);
       zzz_SetStructVectorNumGhost(b_l[l+1], b_num_ghost);
       zzz_InitializeStructVector(b_l[l+1]);
       zzz_AssembleStructVector(b_l[l+1]);
 
-      r_l[l+1] = zzz_NewStructVector(comm, grid_l[l+1]);
-      zzz_SetStructVectorNumGhost(r_l[l+1], r_num_ghost);
-      zzz_InitializeStructVectorShell(r_l[l+1]);
-      zzz_InitializeStructVectorData(r_l[l+1], zzz_StructVectorData(r_l[0]));
-      zzz_AssembleStructVector(r_l[l+1]);
-      e_l[l+1] = r_l[l+1];
+      x_l[l+1] = zzz_NewStructVector(comm, grid_l[l+1]);
+      zzz_SetStructVectorNumGhost(x_l[l+1], x_num_ghost);
+      zzz_InitializeStructVector(x_l[l+1]);
+      zzz_AssembleStructVector(x_l[l+1]);
+
+      tb_l[l+1] = zzz_NewStructVector(comm, grid_l[l+1]);
+      zzz_SetStructVectorNumGhost(tb_l[l+1], zzz_StructVectorNumGhost(b));
+      zzz_InitializeStructVectorShell(tb_l[l+1]);
+      zzz_InitializeStructVectorData(tb_l[l+1], zzz_StructVectorData(tb_l[0]));
+      zzz_AssembleStructVector(tb_l[l+1]);
+
+      tx_l[l+1] = zzz_NewStructVector(comm, grid_l[l+1]);
+      zzz_SetStructVectorNumGhost(tx_l[l+1], zzz_StructVectorNumGhost(x));
+      zzz_InitializeStructVectorShell(tx_l[l+1]);
+      zzz_InitializeStructVectorData(tx_l[l+1], zzz_StructVectorData(tx_l[0]));
+      zzz_AssembleStructVector(tx_l[l+1]);
    }
 
    (smg_data -> A_l)  = A_l;
    (smg_data -> PT_l) = PT_l;
    (smg_data -> R_l)  = R_l;
-   (smg_data -> x_l)  = x_l;
    (smg_data -> b_l)  = b_l;
+   (smg_data -> x_l)  = x_l;
+   (smg_data -> tb_l) = tb_l;
+   (smg_data -> tx_l) = tx_l;
    (smg_data -> r_l)  = r_l;
    (smg_data -> e_l)  = e_l;
 
    /*-----------------------------------------------------
-    * Set up coarse grid operators and transfer operators
+    * Set up multigrid operators and call setup routines
+    *
+    * Note: The routine that sets up interpolation uses
+    * the same relaxation routines used in the solve
+    * phase of the algorithm.  To do this, the data for
+    * the fine-grid unknown and right-hand-side vectors
+    * is temporarily changed to temporary data.
     *-----------------------------------------------------*/
+
+   relax_data_l    = zzz_TAlloc(void *, num_levels);
+   residual_data_l = zzz_TAlloc(void *, num_levels);
+   restrict_data_l = zzz_TAlloc(void *, num_levels);
+   intadd_data_l   = zzz_TAlloc(void *, num_levels);
+
+   /* temporarily set the data for x_l[0] and b_l[0] to temp data */
+   b_data = zzz_StructVectorData(b_l[0]);
+   x_data = zzz_StructVectorData(x_l[0]);
+   zzz_InitializeStructVectorData(b_l[0], zzz_StructVectorData(tb_l[0]));
+   zzz_InitializeStructVectorData(x_l[0], zzz_StructVectorData(tx_l[0]));
+   zzz_AssembleStructVector(b_l[0]);
+   zzz_AssembleStructVector(x_l[0]);
 
    for (l = 0; l < (num_levels - 1); l++)
    {
-      zzz_SMGSetupInterpOp(A_l[l], PT_l[l], r_l[l], cdir,
+      /* set up relaxation */
+      relax_data_l[l] = zzz_SMGRelaxInitialize(comm);
+      zzz_SMGRelaxSetBase(relax_data_l[l], base_index_l[l], base_stride_l[l]);
+      zzz_SMGRelaxSetMemoryUse(relax_data_l[l], (smg_data -> memory_use));
+      zzz_SMGRelaxSetTol(relax_data_l[l], 0.0);
+      zzz_SMGRelaxSetNumSpaces(relax_data_l[l], 2);
+      zzz_SMGRelaxSetSpace(relax_data_l[l], 0, ci, cs);
+      zzz_SMGRelaxSetSpace(relax_data_l[l], 1, fi, fs);
+      zzz_SMGRelaxSetTempVec(relax_data_l[l], tb_l[l]);
+      zzz_SMGRelaxSetup(relax_data_l[l], A_l[l], b_l[l], x_l[l]);
+
+      zzz_SMGSetupInterpOp(relax_data_l[l], A_l[l], b_l[l], x_l[l],
+                           PT_l[l], cdir,
                            cindex_l[l], cstride_l[l],
                            findex_l[l], fstride_l[l]);
 
-      if (!zzz_StructMatrixSymmetric(A))
-         zzz_SMGSetupRestrictOp(A_l[l], R_l[l], r_l[l], cdir,
-                                cindex_l[l], cstride_l[l]);
+      /* (re)set relaxation parameters */
+      zzz_SMGRelaxSetNumPreSpaces(relax_data_l[l], 0);
+      zzz_SMGRelaxSetNumRegSpaces(relax_data_l[l], 2);
+      zzz_SMGRelaxSetup(relax_data_l[l], A_l[l], b_l[l], x_l[l]);
 
-      zzz_SMGSetupRAPOp(R_l[l], A_l[l], PT_l[l], A_l[l+1],
-                        cindex_l[l], cstride_l[l]);
-   }
-
-   /*-----------------------------------------------------
-    * Call various setup routines
-    *-----------------------------------------------------*/
-
-   pre_relax_data_l  = zzz_TAlloc(void *, num_levels);
-   post_relax_data_l = zzz_TAlloc(void *, num_levels);
-   residual_data_l   = zzz_TAlloc(void *, num_levels);
-   restrict_data_l   = zzz_TAlloc(void *, num_levels);
-   intadd_data_l     = zzz_TAlloc(void *, num_levels);
-
-   pre_relax_data_initial = zzz_SMGRelaxInitialize(comm);
-   zzz_SMGRelaxSetBase(pre_relax_data_initial,
-                       base_index_l[0], base_stride_l[0]);
-   zzz_SMGSetPreRelaxParams(smg_data, (smg_data -> zero_guess),
-                            pre_relax_data_initial);
-   zzz_SMGRelaxSetup(pre_relax_data_initial, A_l[0], b_l[0], x_l[0], r_l[0]);
-
-   for (l = 0; l < (num_levels - 1); l++)
-   {
-      pre_relax_data_l[l] = zzz_SMGRelaxInitialize(comm);
-      if (l > 0)
-      {
-         zzz_SMGSetPreRelaxParams(smg_data, 1, pre_relax_data_l[l]);
-      }
-      else
-      {
-         zzz_SMGRelaxSetBase(pre_relax_data_l[l],
-                             base_index_l[l], base_stride_l[l]);
-         zzz_SMGSetPreRelaxParams(smg_data, 0, pre_relax_data_l[l]);
-      }
-      zzz_SMGRelaxSetup(pre_relax_data_l[l], A_l[l], b_l[l], x_l[l], r_l[l]);
-
+      /* set up the residual routine */
       residual_data_l[l] = zzz_SMGResidualInitialize();
       zzz_SMGResidualSetBase(residual_data_l[l],
                              base_index_l[l], base_stride_l[l]);
       zzz_SMGResidualSetup(residual_data_l[l], A_l[l], x_l[l], b_l[l], r_l[l]);
 
-      restrict_data_l[l] = zzz_SMGRestrictInitialize();
-      zzz_SMGRestrictSetup(restrict_data_l[l], R_l[l], r_l[l], b_l[l+1],
-                           cindex_l[l], cstride_l[l],
-                           findex_l[l], fstride_l[l]);
-   }
-
-   coarse_relax_data = zzz_SMGRelaxInitialize(comm);
-   zzz_SMGRelaxSetBase(coarse_relax_data,
-                       base_index_l[l], base_stride_l[l]);
-   zzz_SMGSetCoarseRelaxParams(smg_data, coarse_relax_data);
-   zzz_SMGRelaxSetup(coarse_relax_data, A_l[l], b_l[l], x_l[l], r_l[l]);
-
-   for (l = (num_levels - 2); l >= 0; l--)
-   {
+      /* set up the interpolation routine */
       intadd_data_l[l] = zzz_SMGIntAddInitialize();
       zzz_SMGIntAddSetup(intadd_data_l[l], PT_l[l], x_l[l+1], e_l[l], x_l[l],
                          cindex_l[l], cstride_l[l],
                          findex_l[l], fstride_l[l]);
 
-      post_relax_data_l[l] = zzz_SMGRelaxInitialize(comm);
-      zzz_SMGRelaxSetBase(post_relax_data_l[l],
-                          base_index_l[l], base_stride_l[l]);
-      zzz_SMGSetPostRelaxParams(smg_data, 0, post_relax_data_l[l]);
-      zzz_SMGRelaxSetup(post_relax_data_l[l], A_l[l], b_l[l], x_l[l], r_l[l]);
+      /* set up the restriction operator */
+      if (!zzz_StructMatrixSymmetric(A))
+         zzz_SMGSetupRestrictOp(A_l[l], R_l[l], tx_l[l], cdir,
+                                cindex_l[l], cstride_l[l]);
+
+      /* set up the restriction routine */
+      restrict_data_l[l] = zzz_SMGRestrictInitialize();
+      zzz_SMGRestrictSetup(restrict_data_l[l], R_l[l], r_l[l], b_l[l+1],
+                           cindex_l[l], cstride_l[l],
+                           findex_l[l], fstride_l[l]);
+
+      /* set up the coarse grid operator */
+      zzz_SMGSetupRAPOp(R_l[l], A_l[l], PT_l[l], A_l[l+1],
+                        cindex_l[l], cstride_l[l]);
    }
 
-   (smg_data -> pre_relax_data_initial) = pre_relax_data_initial;
-   (smg_data -> pre_relax_data_l)       = pre_relax_data_l;
-   (smg_data -> coarse_relax_data)      = coarse_relax_data;
-   (smg_data -> post_relax_data_l)      = post_relax_data_l;
-   (smg_data -> residual_data_l)        = residual_data_l;
-   (smg_data -> restrict_data_l)        = restrict_data_l;
-   (smg_data -> intadd_data_l)          = intadd_data_l;
+   relax_data_l[l] = zzz_SMGRelaxInitialize(comm);
+   zzz_SMGRelaxSetBase(relax_data_l[l], base_index_l[l], base_stride_l[l]);
+   zzz_SMGRelaxSetTol(relax_data_l[l], 0.0);
+   zzz_SMGRelaxSetMaxIter(relax_data_l[l], 1);
+   zzz_SMGRelaxSetTempVec(relax_data_l[l], tb_l[l]);
+   zzz_SMGRelaxSetup(relax_data_l[l], A_l[l], b_l[l], x_l[l]);
+
+   /* set the data for x_l[0] and b_l[0] the way they were */
+   zzz_InitializeStructVectorData(b_l[0], b_data);
+   zzz_InitializeStructVectorData(x_l[0], x_data);
+   zzz_AssembleStructVector(b_l[0]);
+   zzz_AssembleStructVector(x_l[0]);
+
+   (smg_data -> relax_data_l)      = relax_data_l;
+   (smg_data -> residual_data_l)   = residual_data_l;
+   (smg_data -> restrict_data_l)   = restrict_data_l;
+   (smg_data -> intadd_data_l)     = intadd_data_l;
 
    /*-----------------------------------------------------
     * Allocate space for log info

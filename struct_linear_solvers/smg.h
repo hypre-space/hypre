@@ -24,6 +24,7 @@ typedef struct
 {
    MPI_Comm           *comm;
 
+   int                 memory_use;
    double              tol;
    int                 max_iter;
    int                 zero_guess;
@@ -60,19 +61,21 @@ typedef struct
                     
    zzz_StructVector  **b_l;
    zzz_StructVector  **x_l;
+
+   /* temp vectors */
+   zzz_StructVector  **tb_l;
+   zzz_StructVector  **tx_l;
    zzz_StructVector  **r_l;
    zzz_StructVector  **e_l;
 
-   void               *pre_relax_data_initial;
-   void              **pre_relax_data_l;
-   void               *coarse_relax_data;
-   void              **post_relax_data_l;
+   void              **relax_data_l;
    void              **residual_data_l;
    void              **restrict_data_l;
    void              **intadd_data_l;
 
    /* log info (always logged) */
    int                 num_iterations;
+   int                 time_index;
 
    /* additional log info (logged when `logging' > 0) */
    int                 logging;

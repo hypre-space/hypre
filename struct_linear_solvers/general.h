@@ -15,25 +15,6 @@
 #ifndef zzz_GENERAL_HEADER
 #define zzz_GENERAL_HEADER
 
-
-/*--------------------------------------------------------------------------
- * Define memory allocation routines
- *--------------------------------------------------------------------------*/
-
-#define zzz_TAlloc(type, count) \
-((count) ? (type *) malloc((unsigned int)(sizeof(type) * (count))) : NULL)
-
-#define zzz_CTAlloc(type, count) \
-((count) ? (type *) calloc((unsigned int)(count),\
-                           (unsigned int)sizeof(type)) : NULL)
-
-#define zzz_TRealloc(ptr, type, count) \
-((count) ? (type *) realloc((char *)ptr,\
-                            (unsigned int)(sizeof(type) * (count))) : NULL)
-
-/* note: the `else' is required to guarantee termination of the `if' */
-#define zzz_TFree(ptr) if (ptr) {free(ptr); ptr = NULL;} else
-
 /*--------------------------------------------------------------------------
  * Define various functions
  *--------------------------------------------------------------------------*/
@@ -48,6 +29,5 @@
 #ifndef round
 #define round(x)  ( ((x) < 0.0) ? ((int)(x - 0.5)) : ((int)(x + 0.5)) )
 #endif
-
 
 #endif

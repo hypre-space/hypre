@@ -49,41 +49,37 @@
 
 int
 zzz_SMGSolve( void             *smg_vdata,
+              zzz_StructMatrix *A,
               zzz_StructVector *b,
               zzz_StructVector *x         )
 {
    zzz_SMGData        *smg_data = smg_vdata;
 
-   double              tol        = (smg_data -> tol);
-   int                 max_iter   = (smg_data -> max_iter);
-   int                 num_levels = (smg_data -> num_levels);
-   zzz_StructVector  **b_l        = (smg_data -> b_l);
-   zzz_StructVector  **x_l        = (smg_data -> x_l);
-   zzz_StructVector  **r_l        = (smg_data -> r_l);
-   zzz_StructVector  **e_l        = (smg_data -> e_l);
-   void               *pre_relax_data_initial =
-      (smg_data -> pre_relax_data_initial);
-   void              **pre_relax_data_l =
-      (smg_data -> pre_relax_data_l);
-   void               *coarse_relax_data =
-      (smg_data -> coarse_relax_data);
-   void              **post_relax_data_l =
-      (smg_data -> post_relax_data_l);
-   void              **residual_data_l =
-      (smg_data -> residual_data_l);
-   void              **restrict_data_l =
-      (smg_data -> restrict_data_l);
-   void              **intadd_data_l =
-      (smg_data -> intadd_data_l);
-   int                 logging   = (smg_data -> logging);
-   double             *norms     = (smg_data -> norms);
-   double             *rel_norms = (smg_data -> rel_norms);
+   double              tol             = (smg_data -> tol);
+   int                 max_iter        = (smg_data -> max_iter);
+   int                 num_levels      = (smg_data -> num_levels);
+   zzz_StructMatrix  **A_l             = (smg_data -> A_l);
+   zzz_StructMatrix  **PT_l            = (smg_data -> PT_l);
+   zzz_StructMatrix  **R_l             = (smg_data -> R_l);
+   zzz_StructVector  **b_l             = (smg_data -> b_l);
+   zzz_StructVector  **x_l             = (smg_data -> x_l);
+   zzz_StructVector  **r_l             = (smg_data -> r_l);
+   zzz_StructVector  **e_l             = (smg_data -> e_l);
+   void              **relax_data_l    = (smg_data -> relax_data_l);
+   void              **residual_data_l = (smg_data -> residual_data_l);
+   void              **restrict_data_l = (smg_data -> restrict_data_l);
+   void              **intadd_data_l   = (smg_data -> intadd_data_l);
+   int                 logging         = (smg_data -> logging);
+   double             *norms           = (smg_data -> norms);
+   double             *rel_norms       = (smg_data -> rel_norms);
 
    double              b_dot_b, r_dot_r, eps;
 
    int                 i, l;
 
    int                 ierr;
+
+   zzz_BeginTiming(smg_data -> time_index);
 
    /*-----------------------------------------------------
     * Do V-cycles:
@@ -103,11 +99,22 @@ zzz_SMGSolve( void             *smg_vdata,
        * Down cycle
        *--------------------------------------------------*/
 
+      zzz_SMGRelaxSetMaxIter(relax_data_l[0], 1);
+      zzz_SMGRelaxSetRegSpaceRank(relax_data_l[0], 0, 0);
+      zzz_SMGRelaxSetRegSpaceRank(relax_data_l[0], 1, 1);
       if (i == 0)
-         zzz_SMGRelax(pre_relax_data_initial, b_l[0], x_l[0]);
+      {
+         if (smg_data -> zero_guess)
+            zzz_SMGRelaxSetZeroGuess(relax_data_l[0]);
+         else
+            zzz_SMGRelaxSetNonZeroGuess(relax_data_l[0]);
+      }
       else
-         zzz_SMGRelax(pre_relax_data_l[0], b_l[0], x_l[0]);
-      zzz_SMGResidual(residual_data_l[0], x_l[0], b_l[0], r_l[0]);
+      {
+         zzz_SMGRelaxSetNonZeroGuess(relax_data_l[0]);
+      }
+      zzz_SMGRelax(relax_data_l[0], A_l[0], b_l[0], x_l[0]);
+      zzz_SMGResidual(residual_data_l[0], A_l[0], x_l[0], b_l[0], r_l[0]);
 
       /* convergence check */
       if (tol > 0.0)
@@ -131,20 +138,25 @@ zzz_SMGSolve( void             *smg_vdata,
       {
          if (l > 0)
          {
-            zzz_SMGRelax(pre_relax_data_l[l], b_l[l], x_l[l]);
-            zzz_SMGResidual(residual_data_l[l], x_l[l], b_l[l], r_l[l]);
+            zzz_SMGRelaxSetMaxIter(relax_data_l[l], 1);
+            zzz_SMGRelaxSetRegSpaceRank(relax_data_l[l], 0, 0);
+            zzz_SMGRelaxSetRegSpaceRank(relax_data_l[l], 1, 1);
+            zzz_SMGRelaxSetZeroGuess(relax_data_l[l]);
+            zzz_SMGRelax(relax_data_l[l], A_l[l], b_l[l], x_l[l]);
+            zzz_SMGResidual(residual_data_l[l],
+                            A_l[l], x_l[l], b_l[l], r_l[l]);
          }
-         zzz_SMGRestrict(restrict_data_l[l], r_l[l], b_l[l+1]);
+         zzz_SMGRestrict(restrict_data_l[l], R_l[l], r_l[l], b_l[l+1]);
 #if 0
-      /* for debugging purposes */
-   {
-      char  filename[255];
+         /* for debugging purposes */
+         {
+            char  filename[255];
 
-      sprintf(filename, "zout_xbefore.%02d", l);
-      zzz_PrintStructVector(filename, x_l[l], 0);
-      sprintf(filename, "zout_b.%02d", l+1);
-      zzz_PrintStructVector(filename, b_l[l+1], 0);
-   }
+            sprintf(filename, "zout_xbefore.%02d", l);
+            zzz_PrintStructVector(filename, x_l[l], 0);
+            sprintf(filename, "zout_b.%02d", l+1);
+            zzz_PrintStructVector(filename, b_l[l+1], 0);
+         }
 #endif
       }
 
@@ -154,7 +166,8 @@ zzz_SMGSolve( void             *smg_vdata,
 
       if (num_levels > 1)
       {
-         zzz_SMGRelax(coarse_relax_data, b_l[l], x_l[l]);
+         zzz_SMGRelaxSetZeroGuess(relax_data_l[l]);
+         zzz_SMGRelax(relax_data_l[l], A_l[l], b_l[l], x_l[l]);
       }
 
       /*--------------------------------------------------
@@ -163,21 +176,27 @@ zzz_SMGSolve( void             *smg_vdata,
 
       for (l = (num_levels - 2); l >= 0; l--)
       {
-         zzz_SMGIntAdd(intadd_data_l[l], x_l[l+1], e_l[l], x_l[l]);
+         zzz_SMGIntAdd(intadd_data_l[l], PT_l[l], x_l[l+1], e_l[l], x_l[l]);
 #if 0
-      /* for debugging purposes */
-   {
-      char  filename[255];
+         /* for debugging purposes */
+         {
+            char  filename[255];
 
-      sprintf(filename, "zout_xafter.%02d", l);
-      zzz_PrintStructVector(filename, x_l[l], 0);
-   }
+            sprintf(filename, "zout_xafter.%02d", l);
+            zzz_PrintStructVector(filename, x_l[l], 0);
+         }
 #endif
-         zzz_SMGRelax(post_relax_data_l[l], b_l[l], x_l[l]);
+         zzz_SMGRelaxSetMaxIter(relax_data_l[l], 1);
+         zzz_SMGRelaxSetRegSpaceRank(relax_data_l[l], 0, 1);
+         zzz_SMGRelaxSetRegSpaceRank(relax_data_l[l], 1, 0);
+         zzz_SMGRelaxSetNonZeroGuess(relax_data_l[l]);
+         zzz_SMGRelax(relax_data_l[l], A_l[l], b_l[l], x_l[l]);
       }
 
       (smg_data -> num_iterations) = (i + 1);
    }
+
+   zzz_EndTiming(smg_data -> time_index);
 
    return ierr;
 }

@@ -7,9 +7,12 @@
  * $Revision$
  *********************************************************************EHEADER*/
 
+#include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
 
+#include "../utilities/memory.h"
+#include "../utilities/timing.h"
 #include "../struct_matrix_vector/headers.h"
 
 /*#include "ZZZ_ls.h"*/

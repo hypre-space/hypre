@@ -68,29 +68,25 @@ zzz_SMGNewInterpOp( zzz_StructMatrix *A,
  *    contains all coefficients of A except for those in the same direction
  *    as {0, 0, -1}.
  *
- *    Two vectors are needed to do the above.  One of these vectors is
- *    passed in as argument `temp_vec', and a local vector `x' is set
- *    to point to it.  The second vector needed is the right-hand-side
- *    vector, `b'.  This vector is being allocated here until a more clever
- *    use of memory can be figured out.
+ *    The relaxation data for the multigrid algorithm is passed in and used.
+ *    When this routine returns, the only modified relaxation parameters
+ *    are MaxIter, RegSpace and PreSpace info, the right-hand-side and
+ *    solution info.
  *--------------------------------------------------------------------------*/
 
 int
-zzz_SMGSetupInterpOp( zzz_StructMatrix *A,
+zzz_SMGSetupInterpOp( void             *relax_data,
+                      zzz_StructMatrix *A,
+                      zzz_StructVector *b,
+                      zzz_StructVector *x,
                       zzz_StructMatrix *PT,
-                      zzz_StructVector *temp_vec,
                       int               cdir,
                       zzz_Index        *cindex,
                       zzz_Index        *cstride,
                       zzz_Index        *findex,
-                      zzz_Index        *fstride  )
+                      zzz_Index        *fstride    )
 {
-   void               *relax_data;
-
    zzz_StructMatrix   *A_mask;
-   zzz_StructVector   *x = temp_vec;
-   zzz_StructVector   *b;
-   int                 b_num_ghost[] = {0, 0, 0, 0, 0, 0};
 
    zzz_StructStencil  *A_stencil;
    zzz_Index         **A_stencil_shape;
@@ -160,26 +156,18 @@ zzz_SMGSetupInterpOp( zzz_StructMatrix *A,
 
    fgrid = zzz_StructMatrixGrid(A);
    
-   /* Set up right-hand-side vector */
-   b = zzz_NewStructVector(zzz_StructMatrixComm(A), fgrid);
-   zzz_SetStructVectorNumGhost(b, b_num_ghost);
-   zzz_InitializeStructVector(b);
-   zzz_AssembleStructVector(b);
-
-   /* Set up relaxation parameters */
-   relax_data = zzz_SMGRelaxInitialize(zzz_StructMatrixComm(A));
-   zzz_SMGRelaxSetTol(relax_data, 0.0);
-   zzz_SMGRelaxSetMaxIter(relax_data, 1);
-   zzz_SMGRelaxSetNumSpaces(relax_data, 1);
-   zzz_SMGRelaxSetSpace(relax_data, 0,
-                        zzz_IndexD(findex, cdir), zzz_IndexD(fstride, cdir));
-
    A_stencil = zzz_StructMatrixStencil(A);
    A_stencil_shape = zzz_StructStencilShape(A_stencil);
    A_stencil_size  = zzz_StructStencilSize(A_stencil);
    PT_stencil = zzz_StructMatrixStencil(PT);
    PT_stencil_shape = zzz_StructStencilShape(PT_stencil);
    PT_stencil_size  = zzz_StructStencilSize(PT_stencil);
+
+   /* Set up relaxation parameters */
+   zzz_SMGRelaxSetMaxIter(relax_data, 1);
+   zzz_SMGRelaxSetNumPreSpaces(relax_data, 0);
+   zzz_SMGRelaxSetNumRegSpaces(relax_data, 1);
+   zzz_SMGRelaxSetRegSpaceRank(relax_data, 0, 1);
 
    compute_pkg_stencil_shape =
       zzz_CTAlloc(zzz_Index *, compute_pkg_stencil_size);
@@ -216,11 +204,12 @@ zzz_SMGSetupInterpOp( zzz_StructMatrix *A,
        * Do relaxation sweep to compute coefficients
        *-----------------------------------------------------*/
 
-      zzz_SMGRelaxSetup(relax_data, A_mask, b, x, b);
       zzz_ClearStructVectorGhostValues(x);
       zzz_SetStructVectorConstantValues(x, 1.0);
       zzz_SetStructVectorConstantValues(b, 0.0);
-      zzz_SMGRelax(relax_data, b, x);
+      zzz_SMGRelaxSetNewMatrixStencil(relax_data, PT_stencil);
+      zzz_SMGRelaxSetup(relax_data, A_mask, b, x);
+      zzz_SMGRelax(relax_data, A_mask, b, x);
 
       /*-----------------------------------------------------
        * Free up A_mask matrix
@@ -323,9 +312,10 @@ zzz_SMGSetupInterpOp( zzz_StructMatrix *A,
       zzz_FreeComputePkg(compute_pkg);
    }
 
-   zzz_SMGRelaxFinalize(relax_data);
+   /* Tell SMGRelax that the stencil has changed */
+   zzz_SMGRelaxSetNewMatrixStencil(relax_data, PT_stencil);
+
    zzz_FreeStructStencil(compute_pkg_stencil);
-   zzz_FreeStructVector(b);
    zzz_FreeIndex(start);
    zzz_FreeIndex(startc);
    zzz_FreeIndex(stridec);

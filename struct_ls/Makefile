@@ -40,8 +40,8 @@ F77 = /home/casc/g77/bin/g77
 CFLAGS =\
  -I/usr/local/include\
  -I/home/casc/include\
- -I//usr/local/mpi/mpich/include\
- -g -Wall -DZZZ_DEBUG
+ -I/usr/local/mpi/mpich/include\
+ -g -Wall -DZZZ_DEBUG -DZZZ_TIMING
 
 FFLAGS = -g
 
@@ -52,8 +52,11 @@ LFLAGS =\
  -L/usr/local/mpi/mpich/lib/solaris/ch_p4\
  -L.\
  -L../struct_matrix_vector\
+ -L../utilities\
  -lZZZ_ls\
  -lZZZ_mv\
+ -lZZZ_timing\
+ -lZZZ_memory\
  -lnsl -lsocket -lmpi\
  -lf2c\
  -lcegdb\

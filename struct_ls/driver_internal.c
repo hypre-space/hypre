@@ -1,4 +1,4 @@
- 
+
 #include "headers.h"
 #include "smg.h"
  
@@ -37,6 +37,7 @@ char *argv[];
 
    void               *smg_data;
    int                 num_iterations;
+   int                 time_index;
 
    int                 num_procs, myid;
 
@@ -97,11 +98,16 @@ char *argv[];
     *-----------------------------------------------------------*/
 
    smg_data = zzz_SMGInitialize(comm);
+   zzz_SMGSetMemoryUse(smg_data, 0);
    zzz_SMGSetMaxIter(smg_data, 30);
-   zzz_SMGSetTol(smg_data, 1.e-12);
-   zzz_SMGSetLogging(smg_data, 1);
+   zzz_SMGSetTol(smg_data, 1.0e-06);
+   zzz_SMGSetLogging(smg_data, 0);
    zzz_SMGSetup(smg_data, A, b, x);
-   zzz_SMGSolve(smg_data, b, x);
+
+   time_index = zzz_InitializeTiming("Driver");
+   zzz_BeginTiming(time_index);
+   zzz_SMGSolve(smg_data, A, b, x);
+   zzz_EndTiming(time_index);
 
    /*-----------------------------------------------------------
     * Print the solution and other info
@@ -114,6 +120,8 @@ char *argv[];
    {
       printf("Iterations = %d\n", num_iterations);
    }
+
+   zzz_PrintTiming(comm);
    
    zzz_SMGPrintLogging(smg_data, myid);
 
@@ -121,6 +129,7 @@ char *argv[];
     * Finalize things
     *-----------------------------------------------------------*/
 
+   zzz_FinalizeTiming(time_index);
    zzz_SMGFinalize(smg_data);
    zzz_FreeStructGrid(zzz_StructMatrixGrid(A));
    zzz_FreeStructMatrix(A);

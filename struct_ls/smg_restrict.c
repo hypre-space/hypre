@@ -25,6 +25,8 @@ typedef struct
    zzz_Index        *cindex;
    zzz_Index        *cstride;
 
+   int               time_index;
+
 } zzz_SMGRestrictData;
 
 /*--------------------------------------------------------------------------
@@ -37,6 +39,7 @@ zzz_SMGRestrictInitialize( )
    zzz_SMGRestrictData *restrict_data;
 
    restrict_data = zzz_CTAlloc(zzz_SMGRestrictData, 1);
+   (restrict_data -> time_index)  = zzz_InitializeTiming("SMGRestrict");
 
    return (void *) restrict_data;
 }
@@ -125,14 +128,13 @@ zzz_SMGRestrictSetup( void             *restrict_vdata,
 
 int
 zzz_SMGRestrict( void             *restrict_vdata,
+                 zzz_StructMatrix *R,
                  zzz_StructVector *r,
-                 zzz_StructVector *rc                 )
+                 zzz_StructVector *rc             )
 {
    int ierr;
 
    zzz_SMGRestrictData  *restrict_data = restrict_vdata;
-
-   zzz_StructMatrix     *R = (restrict_data -> R);
 
    zzz_ComputePkg       *compute_pkg;
    zzz_Index            *cindex;
@@ -167,6 +169,8 @@ zzz_SMGRestrict( void             *restrict_vdata,
    zzz_Index           **stencil_shape;
 
    int                   compute_i, i, j;
+
+   zzz_BeginTiming(restrict_data -> time_index);
 
    /*-----------------------------------------------------------------------
     * Initialize some things.
@@ -256,6 +260,9 @@ zzz_SMGRestrict( void             *restrict_vdata,
    zzz_FreeIndex(startc);
    zzz_FreeIndex(stridec);
 
+   zzz_IncFLOPCount(4*zzz_StructVectorGlobalSize(rc));
+   zzz_EndTiming(restrict_data -> time_index);
+
    return ierr;
 }
 
@@ -273,6 +280,7 @@ zzz_SMGRestrictFinalize( void *restrict_vdata )
    if (restrict_data)
    {
       zzz_FreeComputePkg(restrict_data -> compute_pkg);
+      zzz_FinalizeTiming(restrict_data -> time_index);
       zzz_TFree(restrict_data);
    }
 

@@ -90,6 +90,9 @@ typedef struct
    zzz_ComputePkg    **down_compute_pkg_l;
    zzz_ComputePkg    **up_compute_pkg_l;
 
+   int                 time_index;
+   int                 solve_flops;
+
 } zzz_CyclicReductionData;
 
 /*--------------------------------------------------------------------------
@@ -106,6 +109,7 @@ zzz_CyclicReductionInitialize( MPI_Comm *comm )
    (cyc_red_data -> comm) = comm;
    (cyc_red_data -> base_index)  = zzz_NewIndex();
    (cyc_red_data -> base_stride) = zzz_NewIndex();
+   (cyc_red_data -> time_index)  = zzz_InitializeTiming("CyclicReduction");
 
    /* set defaults */
    zzz_SetIndex((cyc_red_data -> base_index), 0, 0, 0);
@@ -120,7 +124,8 @@ zzz_CyclicReductionInitialize( MPI_Comm *comm )
 
 zzz_StructMatrix *
 zzz_CycRedNewCoarseOp( zzz_StructMatrix *A,
-                       zzz_StructGrid   *coarse_grid )
+                       zzz_StructGrid   *coarse_grid,
+                       int               cdir        )
 {
    zzz_StructMatrix    *Ac;
 
@@ -128,7 +133,7 @@ zzz_CycRedNewCoarseOp( zzz_StructMatrix *A,
    zzz_StructStencil   *Ac_stencil;
    int                  Ac_stencil_size;
    int                  Ac_stencil_dim;
-   int                  Ac_num_ghost[] = {1, 1, 1, 1, 1, 1};
+   int                  Ac_num_ghost[] = {0, 0, 0, 0, 0, 0};
 
    int                  i;
    int                  stencil_rank;
@@ -197,9 +202,11 @@ zzz_CycRedNewCoarseOp( zzz_StructMatrix *A,
    zzz_StructMatrixSymmetric(Ac) = zzz_StructMatrixSymmetric(A);
 
    /*-----------------------------------------------
-    * Set number of ghost points - one on each boundary
+    * Set number of ghost points
     *-----------------------------------------------*/
 
+   Ac_num_ghost[2*cdir]     = 1;
+   Ac_num_ghost[2*cdir + 1] = 1;
    zzz_SetStructMatrixNumGhost(Ac, Ac_num_ghost);
 
    zzz_InitializeStructMatrix(Ac);
@@ -432,8 +439,9 @@ zzz_CyclicReductionSetup( void             *cyc_red_vdata,
                     
    int                   idmin, idmax;
    int                   i, l;
+   int                   flop_divisor;
 
-   int                   x_num_ghost[] = {1, 1, 1, 1, 1, 1};
+   int                   x_num_ghost[] = {0, 0, 0, 0, 0, 0};
 
    int                   ierr;
 
@@ -559,9 +567,12 @@ zzz_CyclicReductionSetup( void             *cyc_red_vdata,
    A_l[0] = A;
    x_l[0] = x;
 
+   x_num_ghost[2*cdir]     = 1;
+   x_num_ghost[2*cdir + 1] = 1;
+
    for (l = 0; l < (num_levels - 1); l++)
    {
-      A_l[l+1] = zzz_CycRedNewCoarseOp(A_l[l], grid_l[l+1]);
+      A_l[l+1] = zzz_CycRedNewCoarseOp(A_l[l], grid_l[l+1], cdir);
 
       x_l[l+1] = zzz_NewStructVector(comm, grid_l[l+1]);
       zzz_SetStructVectorNumGhost(x_l[l+1], x_num_ghost);
@@ -644,6 +655,24 @@ zzz_CyclicReductionSetup( void             *cyc_red_vdata,
    (cyc_red_data -> up_compute_pkg_l)   = up_compute_pkg_l;
 
    /*-----------------------------------------------------
+    * Compute solve flops
+    *-----------------------------------------------------*/
+
+   flop_divisor = (zzz_IndexX(base_stride) *
+                   zzz_IndexY(base_stride) *
+                   zzz_IndexZ(base_stride)  );
+   (cyc_red_data -> solve_flops) =
+      zzz_StructVectorGlobalSize(x_l[0])/2/flop_divisor;
+   (cyc_red_data -> solve_flops) +=
+      5*zzz_StructVectorGlobalSize(x_l[0])/2/flop_divisor;
+   for (l = 1; l < (num_levels - 1); l++)
+   {
+      (cyc_red_data -> solve_flops) +=
+         10*zzz_StructVectorGlobalSize(x_l[l])/2;
+   }
+   (cyc_red_data -> solve_flops) += zzz_StructVectorGlobalSize(x_l[l])/2;
+
+   /*-----------------------------------------------------
     * Finalize some things
     *-----------------------------------------------------*/
 
@@ -652,16 +681,16 @@ zzz_CyclicReductionSetup( void             *cyc_red_vdata,
    zzz_FreeIndex(stride);
 
 #if 0
-{
-   char  filename[255];
-
-   /* debugging stuff */
-   for (l = 0; l < num_levels; l++)
    {
-      sprintf(filename, "yout_A.%02d", l);
-      zzz_PrintStructMatrix(filename, A_l[l], 0);
+      char  filename[255];
+
+      /* debugging stuff */
+      for (l = 0; l < num_levels; l++)
+      {
+         sprintf(filename, "yout_A.%02d", l);
+         zzz_PrintStructMatrix(filename, A_l[l], 0);
+      }
    }
-}
 #endif
 
    return ierr;
@@ -678,6 +707,7 @@ zzz_CyclicReductionSetup( void             *cyc_red_vdata,
 
 int
 zzz_CyclicReduction( void             *cyc_red_vdata,
+                     zzz_StructMatrix *A,
                      zzz_StructVector *b,
                      zzz_StructVector *x             )
 {
@@ -731,6 +761,8 @@ zzz_CyclicReduction( void             *cyc_red_vdata,
    int                 compute_i, i, j, l;
 
    int                 ierr;
+
+   zzz_BeginTiming(cyc_red_data -> time_index);
 
    /*--------------------------------------------------
     * Initialize some things
@@ -1022,6 +1054,9 @@ zzz_CyclicReduction( void             *cyc_red_vdata,
    zzz_FreeIndex(startc);
    zzz_FreeIndex(stridec);
 
+   zzz_IncFLOPCount(cyc_red_data -> solve_flops);
+   zzz_EndTiming(cyc_red_data -> time_index);
+
    return ierr;
 }
 
@@ -1086,6 +1121,7 @@ zzz_CyclicReductionFinalize( void *cyc_red_vdata )
       zzz_TFree(cyc_red_data -> down_compute_pkg_l);
       zzz_TFree(cyc_red_data -> up_compute_pkg_l);
 
+      zzz_FinalizeTiming(cyc_red_data -> time_index);
       zzz_TFree(cyc_red_data);
    }
 

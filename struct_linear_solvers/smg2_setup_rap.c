@@ -32,7 +32,7 @@ zzz_SMG2NewRAPOp( zzz_StructMatrix *R,
    zzz_StructStencil   *RAP_stencil;
    int                  RAP_stencil_size;
    int                  RAP_stencil_dim;
-   int                  RAP_num_ghost[] = {1, 1, 1, 1, 1, 1};
+   int                  RAP_num_ghost[] = {1, 1, 1, 1, 0, 0};
 
    zzz_StructStencil   *A_stencil;
    int                  A_stencil_size;

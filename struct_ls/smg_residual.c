@@ -30,6 +30,9 @@ typedef struct
    zzz_SBoxArray     *base_points;
    zzz_ComputePkg    *compute_pkg;
 
+   int                time_index;
+   int                flops;
+
 } zzz_SMGResidualData;
 
 /*--------------------------------------------------------------------------
@@ -45,6 +48,7 @@ zzz_SMGResidualInitialize( )
 
    (residual_data -> base_index)  = zzz_NewIndex();
    (residual_data -> base_stride) = zzz_NewIndex();
+   (residual_data -> time_index)  = zzz_InitializeTiming("SMGResidual");
 
    /* set defaults */
    zzz_SetIndex((residual_data -> base_index), 0, 0, 0);
@@ -128,6 +132,16 @@ zzz_SMGResidualSetup( void             *residual_vdata,
    (residual_data -> base_points) = base_points;
    (residual_data -> compute_pkg) = compute_pkg;
 
+   /*-----------------------------------------------------
+    * Compute flops
+    *-----------------------------------------------------*/
+
+   (residual_data -> flops) =
+      (zzz_StructMatrixGlobalSize(A) + zzz_StructVectorGlobalSize(x)) /
+      (zzz_IndexX(base_stride) *
+       zzz_IndexY(base_stride) *
+       zzz_IndexZ(base_stride)  );
+
    return ierr;
 }
 
@@ -137,6 +151,7 @@ zzz_SMGResidualSetup( void             *residual_vdata,
 
 int
 zzz_SMGResidual( void             *residual_vdata,
+                 zzz_StructMatrix *A,
                  zzz_StructVector *x,
                  zzz_StructVector *b,
                  zzz_StructVector *r              )
@@ -146,7 +161,6 @@ zzz_SMGResidual( void             *residual_vdata,
    zzz_SMGResidualData  *residual_data = residual_vdata;
 
    zzz_Index            *base_stride = (residual_data -> base_stride);
-   zzz_StructMatrix     *A           = (residual_data -> A);
    zzz_SBoxArray        *base_points = (residual_data -> base_points);
    zzz_ComputePkg       *compute_pkg = (residual_data -> compute_pkg);
 
@@ -180,6 +194,8 @@ zzz_SMGResidual( void             *residual_vdata,
    int                   stencil_size;
 
    int                   compute_i, i, j, si;
+
+   zzz_BeginTiming(residual_data -> time_index);
 
    /*-----------------------------------------------------------------------
     * Initialize some things
@@ -287,6 +303,9 @@ zzz_SMGResidual( void             *residual_vdata,
    zzz_FreeIndex(loop_index);
    zzz_FreeIndex(loop_size);
 
+   zzz_IncFLOPCount(residual_data -> flops);
+   zzz_EndTiming(residual_data -> time_index);
+
    return ierr;
 }
 
@@ -331,6 +350,7 @@ zzz_SMGResidualFinalize( void *residual_vdata )
       zzz_FreeIndex(residual_data -> base_stride);
       zzz_FreeSBoxArray(residual_data -> base_points);
       zzz_FreeComputePkg(residual_data -> compute_pkg );
+      zzz_FinalizeTiming(residual_data -> time_index);
       zzz_TFree(residual_data);
    }
 

@@ -26,6 +26,8 @@ typedef struct
    zzz_Index        *cindex;
    zzz_Index        *cstride;
 
+   int               time_index;
+
 } zzz_SMGIntAddData;
 
 /*--------------------------------------------------------------------------
@@ -38,6 +40,7 @@ zzz_SMGIntAddInitialize( )
    zzz_SMGIntAddData *intadd_data;
 
    intadd_data = zzz_CTAlloc(zzz_SMGIntAddData, 1);
+   (intadd_data -> time_index)  = zzz_InitializeTiming("SMGIntAdd");
 
    return (void *) intadd_data;
 }
@@ -150,6 +153,7 @@ zzz_SMGIntAddSetup( void             *intadd_vdata,
 
 int
 zzz_SMGIntAdd( void             *intadd_vdata,
+               zzz_StructMatrix *PT,
                zzz_StructVector *xc,
                zzz_StructVector *e,
                zzz_StructVector *x           )
@@ -157,8 +161,6 @@ zzz_SMGIntAdd( void             *intadd_vdata,
    int ierr;
 
    zzz_SMGIntAddData    *intadd_data = intadd_vdata;
-
-   zzz_StructMatrix     *PT = (intadd_data -> PT);
 
    zzz_ComputePkg       *compute_pkg;
    zzz_SBoxArray        *coarse_points;
@@ -197,6 +199,8 @@ zzz_SMGIntAdd( void             *intadd_vdata,
    zzz_Index           **stencil_shape;
 
    int                   compute_i, i, j;
+
+   zzz_BeginTiming(intadd_data -> time_index);
 
    /*-----------------------------------------------------------------------
     * Initialize some things
@@ -350,6 +354,9 @@ zzz_SMGIntAdd( void             *intadd_vdata,
    zzz_FreeIndex(startc);
    zzz_FreeIndex(stridec);
 
+   zzz_IncFLOPCount(5*zzz_StructVectorGlobalSize(xc));
+   zzz_EndTiming(intadd_data -> time_index);
+
    return ierr;
 }
 
@@ -368,6 +375,7 @@ zzz_SMGIntAddFinalize( void *intadd_vdata )
    {
       zzz_FreeSBoxArray(intadd_data -> coarse_points);
       zzz_FreeComputePkg(intadd_data -> compute_pkg);
+      zzz_FinalizeTiming(intadd_data -> time_index);
       zzz_TFree(intadd_data);
    }
 

@@ -37,16 +37,19 @@ OBJS = ${FILES:.c=.o}
 CC = mpcc
 F77 = f77
 
-CFLAGS = -g
+CFLAGS = -O
 
-FFLAGS =
+FFLAGS = -O
 
 LFLAGS =\
  -L/usr/local/lib\
  -L.\
  -L../struct_matrix_vector\
+ -L../utilities\
  -lZZZ_ls\
  -lZZZ_mv\
+ -lZZZ_timing\
+ -lZZZ_memory\
  -lm
 
 
