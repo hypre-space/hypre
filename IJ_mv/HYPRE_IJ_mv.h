@@ -64,10 +64,6 @@ typedef struct hypre_IJMatrix_struct *HYPRE_IJMatrix;
  * general) of the matrix separately from the rest of the matrix.
  *
  * Collective.
- *
- * DEVELOPER NOTES: The arg {\tt matrix} was moved to the end; The
- * args {\tt ilower} and {\tt iupper} replace the args {\tt global\_m}
- * and {\tt global\_n}.
  **/
 int HYPRE_IJMatrixCreate(MPI_Comm        comm,
                          int             ilower,
@@ -84,17 +80,11 @@ int HYPRE_IJMatrixCreate(MPI_Comm        comm,
  * completion of this call, since there may be internal package
  * references to the object.  The object will then be destroyed when
  * all internal reference counts go to zero.
- *
- * DEVELOPER NOTES: None.
  **/
 int HYPRE_IJMatrixDestroy(HYPRE_IJMatrix matrix);
 
 /**
  * Prepare a matrix object for setting coefficient values.
- *
- * DEVELOPER NOTES: This should also re-initialize; Use in conjunction
- * with {\tt AddToValues} and {\tt Assemble} to take the place of the
- * previous routine {\tt HYPRE\_IJMatrixAddToRowAfter}.
  **/
 int HYPRE_IJMatrixInitialize(HYPRE_IJMatrix matrix);
 
@@ -110,9 +100,6 @@ int HYPRE_IJMatrixInitialize(HYPRE_IJMatrix matrix);
  * new one.
  *
  * Not collective.
- *
- * DEVELOPER NOTES: This routine is essentially new; it does not do
- * the same thing as it previous did.
  **/
 int HYPRE_IJMatrixSetValues(HYPRE_IJMatrix  matrix,
                             int             nrows,
@@ -128,9 +115,6 @@ int HYPRE_IJMatrixSetValues(HYPRE_IJMatrix  matrix,
  * before, inserts a new one.
  *
  * Not collective.
- *
- * DEVELOPER NOTES: This routine is essentially new; it does not do
- * the same thing as it previous did.
  **/
 int HYPRE_IJMatrixAddToValues(HYPRE_IJMatrix  matrix,
                               int             nrows,
@@ -141,18 +125,12 @@ int HYPRE_IJMatrixAddToValues(HYPRE_IJMatrix  matrix,
 
 /**
  * Finalize the construction of the matrix before using.
- *
- * DEVELOPER NOTES: This should also re-assemble; Use in conjunction
- * with {\tt Initialize} and {\tt AddToValues} to take the place of
- * the previous routine {\tt HYPRE\_IJMatrixAddToRowAfter}.
  **/
 int HYPRE_IJMatrixAssemble(HYPRE_IJMatrix matrix);
 
 /**
  * Gets values for {\tt nrows} of the matrix.  Usage details are
  * analogous to \Ref{HYPRE_IJMatrixSetValues}.
- *
- * DEVELOPER NOTES: New routine.
  **/
 int HYPRE_IJMatrixGetValues(HYPRE_IJMatrix  matrix,
                             int             nrows,
@@ -167,9 +145,6 @@ int HYPRE_IJMatrixGetValues(HYPRE_IJMatrix  matrix,
  *
  * Not collective, but must be the same on all processes.
  *
- * DEVELOPER NOTES: Changed function name from {\tt LocalStorage} to
- * {\tt Object}; New return type; Returned object is now the last arg.
- *
  * @see HYPRE_IJMatrixGetObject
  **/
 int HYPRE_IJMatrixSetObjectType(HYPRE_IJMatrix matrix,
@@ -177,17 +152,12 @@ int HYPRE_IJMatrixSetObjectType(HYPRE_IJMatrix matrix,
 
 /**
  * Get the storage type of the constructed matrix object.
- *
- * DEVELOPER NOTES: New routine.
  **/
 int HYPRE_IJMatrixGetObjectType(HYPRE_IJMatrix  matrix,
                                 int            *type);
 
 /**
  * Get a reference to the constructed matrix object.
- *
- * DEVELOPER NOTES: Changed function name from {\tt LocalStorage} to
- * {\tt Object}; New return type; Returned object is now the last arg.
  *
  * @see HYPRE_IJMatrixSetObjectType
  **/
@@ -201,8 +171,6 @@ int HYPRE_IJMatrixGetObject(HYPRE_IJMatrix   matrix,
  * matrix construction, and should always be utilized if possible.
  *
  * Not collective.
- *
- * DEVELOPER NOTES: None.
  **/
 int HYPRE_IJMatrixSetRowSizes(HYPRE_IJMatrix  matrix,
                               const int      *sizes);
@@ -218,9 +186,6 @@ int HYPRE_IJMatrixSetRowSizes(HYPRE_IJMatrix  matrix,
  * construction, and should always be utilized if possible.
  *
  * Not collective.
- *
- * DEVELOPER NOTES: This routine now combines the functionality of the
- * previous {\tt SetDiag} and {\tt SetOffDiag} routines.
  **/
 int HYPRE_IJMatrixSetDiagOffdSizes(HYPRE_IJMatrix  matrix,
                                    const int      *diag_sizes,
@@ -228,8 +193,6 @@ int HYPRE_IJMatrixSetDiagOffdSizes(HYPRE_IJMatrix  matrix,
 
 /**
  * Read the matrix from file.  This is mainly for debugging purposes.
- *
- * DEVELOPER NOTES: New routine.
  **/
 int HYPRE_IJMatrixRead(const char     *filename,
 		       MPI_Comm        comm,
@@ -240,8 +203,6 @@ int HYPRE_IJMatrixRead(const char     *filename,
 
 /**
  * Print the matrix to file.  This is mainly for debugging purposes.
- *
- * DEVELOPER NOTES: New routine.
  **/
 int HYPRE_IJMatrixPrint(HYPRE_IJMatrix  matrix,
                         const char     *filename);
@@ -272,9 +233,6 @@ typedef struct hypre_IJVector_struct *HYPRE_IJVector;
  * particular, one may use zero- or one-based indexing.
  *
  * Collective.
- *
- * DEVELOPER NOTES: The arg {\tt vector} was moved to the end; The
- * args {\tt jlower} and {\tt jupper} replace the arg {\tt global\_n}.
  **/
 int HYPRE_IJVectorCreate(MPI_Comm        comm,
                          int             jlower,
@@ -289,15 +247,11 @@ int HYPRE_IJVectorCreate(MPI_Comm        comm,
  * completion of this call, since there may be internal package
  * references to the object.  The object will then be destroyed when
  * all internal reference counts go to zero.
- *
- * DEVELOPER NOTES: None.
  **/
 int HYPRE_IJVectorDestroy(HYPRE_IJVector vector);
 
 /**
  * Prepare a vector object for setting coefficient values.
- *
- * DEVELOPER NOTES: This should also re-initialize.
  **/
 int HYPRE_IJVectorInitialize(HYPRE_IJVector vector);
 
@@ -309,9 +263,6 @@ int HYPRE_IJVectorInitialize(HYPRE_IJVector vector);
  * them with new ones.
  *
  * Not collective.
- *
- * DEVELOPER NOTES: Changed name from {\tt SetLocalComponents};
- * Removed arg {\tt value\_indices}.
  **/
 int HYPRE_IJVectorSetValues(HYPRE_IJVector  vector,
                             int             nvalues,
@@ -323,9 +274,6 @@ int HYPRE_IJVectorSetValues(HYPRE_IJVector  vector,
  * \Ref{HYPRE_IJVectorSetValues}.
  *
  * Not collective.
- *
- * DEVELOPER NOTES: Changed name from {\tt AddToLocalComponents};
- * Removed arg {\tt value\_indices}.
  **/
 int HYPRE_IJVectorAddToValues(HYPRE_IJVector  vector,
                               int             nvalues,
@@ -334,8 +282,6 @@ int HYPRE_IJVectorAddToValues(HYPRE_IJVector  vector,
 
 /**
  * Finalize the construction of the vector before using.
- *
- * DEVELOPER NOTES: This should also re-assemble.
  **/
 int HYPRE_IJVectorAssemble(HYPRE_IJVector vector);
 
@@ -344,9 +290,6 @@ int HYPRE_IJVectorAssemble(HYPRE_IJVector vector);
  * \Ref{HYPRE_IJVectorSetValues}.
  *
  * Not collective.
- *
- * DEVELOPER NOTES: Changed name from {\tt GetLocalComponents};
- * Removed arg {\tt value\_indices}.
  **/
 int HYPRE_IJVectorGetValues(HYPRE_IJVector  vector,
                             int             nvalues,
@@ -359,9 +302,6 @@ int HYPRE_IJVectorGetValues(HYPRE_IJVector  vector,
  *
  * Not collective, but must be the same on all processes.
  *
- * DEVELOPER NOTES: Changed function name from {\tt LocalStorage} to
- * {\tt Object}; New return type; Returned object is now the last arg.
- *
  * @see HYPRE_IJVectorGetObject
  **/
 int HYPRE_IJVectorSetObjectType(HYPRE_IJVector vector,
@@ -369,17 +309,12 @@ int HYPRE_IJVectorSetObjectType(HYPRE_IJVector vector,
 
 /**
  * Get the storage type of the constructed vector object.
- *
- * DEVELOPER NOTES: This routine was not advertised previously.
  **/
 int HYPRE_IJVectorGetObjectType(HYPRE_IJVector  vector,
                                 int            *type);
 
 /**
  * Get a reference to the constructed vector object.
- *
- * DEVELOPER NOTES: Changed function name from {\tt LocalStorage} to
- * {\tt Object}; New return type; Returned object is now the last arg.
  *
  * @see HYPRE_IJVectorSetObjectType
  **/
@@ -388,8 +323,6 @@ int HYPRE_IJVectorGetObject(HYPRE_IJVector   vector,
 
 /**
  * Read the vector from file.  This is mainly for debugging purposes.
- *
- * DEVELOPER NOTES: New routine.
  **/
 int HYPRE_IJVectorRead(const char     *filename,
 		       MPI_Comm        comm,
@@ -398,8 +331,6 @@ int HYPRE_IJVectorRead(const char     *filename,
 
 /**
  * Print the vector to file.  This is mainly for debugging purposes.
- *
- * DEVELOPER NOTES: New routine.
  **/
 int HYPRE_IJVectorPrint(HYPRE_IJVector  vector,
                         const char     *filename);
