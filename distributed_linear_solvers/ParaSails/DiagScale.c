@@ -178,7 +178,7 @@ DiagScale *DiagScaleCreate(Matrix *mat)
 
     /* Get the list of diagonal indices that we need.
        This is simply the external indices */
-    len = mat->numb->num_ext;
+    len = mat->numb->num_ind - mat->numb->num_loc;
     ind = &mat->numb->local_to_global[mat->numb->num_loc];
 
     /* buffer for receiving diagonal values from other processors */

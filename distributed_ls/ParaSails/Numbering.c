@@ -52,7 +52,6 @@ Numbering *NumberingCreate(Matrix *mat, int size)
     numb->end_row = mat->end_row;
     numb->num_loc = mat->end_row - mat->beg_row + 1;
     numb->num_ind = mat->end_row - mat->beg_row + 1;
-    numb->num_ext = -1; /* not set yet */
 
     numb->local_to_global = (int *) malloc((numb->num_loc+size) * sizeof(int));
     numb->hash            = HashCreate(2*size+1);
@@ -94,7 +93,31 @@ Numbering *NumberingCreate(Matrix *mat, int size)
         HashInsert(numb->hash, local_to_global[i], i + numb->num_loc);
 
     numb->num_ind += num_external;
-    numb->num_ext = num_external;
+
+    return numb;
+}
+
+/*--------------------------------------------------------------------------
+ * NumberingCreateCopy 
+ *--------------------------------------------------------------------------*/
+
+Numbering *NumberingCreateCopy(Numbering *orig)
+{
+    Numbering *numb = (Numbering *) malloc(sizeof(Numbering));
+
+    numb->size    = orig->size;
+    numb->beg_row = orig->beg_row;
+    numb->end_row = orig->end_row;
+    numb->num_loc = orig->num_loc;
+    numb->num_ind = orig->num_ind;
+
+    numb->local_to_global = 
+        (int *) malloc((numb->num_loc+numb->size) * sizeof(int));
+    memcpy(numb->local_to_global, orig->local_to_global, 
+         numb->num_ind*sizeof(int));
+
+    numb->hash = HashCreate(2*numb->size+1);
+    HashRehash(orig->hash, numb->hash);
 
     return numb;
 }

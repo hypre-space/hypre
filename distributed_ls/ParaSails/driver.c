@@ -5,8 +5,6 @@
 #include "ParaSails.h"
 #include "ConjGrad.h"
 
-extern double parasails_loadbal_beta;
-
 void report_times(MPI_Comm comm, double setup_time, double solve_time)
 {
     int mype, npes;
@@ -41,16 +39,16 @@ int main(int argc, char *argv[])
     ParaSails *ps;
     FILE *file;
     int n, beg_row, end_row;
-    int nnza, nnz0, nnz1;
+    int nnza, nnz0;
     double time0, time1;
     double setup_time, solve_time;
 
     double *x, *y, *b;
     int i, j;
     double thresh;
-    double selparam;
-    double filter;
     int nlevels;
+    double filter;
+    double loadbal_beta;
 
     MPI_Init(&argc, &argv);
     MPI_Comm_rank(MPI_COMM_WORLD, &mype);
@@ -111,24 +109,24 @@ int main(int argc, char *argv[])
             x[i] = 0.0;
 
 #if ONE_TIME
-        selparam = 0.00;
+        thresh = 0.0;
 	nlevels = 1;
 	filter = 0.0;
-        parasails_loadbal_beta = 0.0;
+        loadbal_beta = 0.0;
 #else
         if (mype == 0)
         {
-            printf("Enter parameters selparam (0.75), nlevels (1), "
-	        "filter (0.1), beta (0.0): ");
+            printf("Enter parameters thresh (0.75), nlevels (1), "
+	        "filter (0.1), beta (0.0):\n");
 	    fflush(NULL);
-            scanf("%lf %d %lf %lf", &selparam, &nlevels, 
-		&filter, &parasails_loadbal_beta);
+            scanf("%lf %d %lf %lf", &thresh, &nlevels, 
+		&filter, &loadbal_beta);
 	}
 
-	MPI_Bcast(&selparam, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+	MPI_Bcast(&thresh,   1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
 	MPI_Bcast(&nlevels,  1, MPI_INT,    0, MPI_COMM_WORLD);
 	MPI_Bcast(&filter,   1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
-	MPI_Bcast(&parasails_loadbal_beta, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+	MPI_Bcast(&loadbal_beta, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
 
         if (nlevels < 0)
             break;
@@ -136,49 +134,37 @@ int main(int argc, char *argv[])
 
         if (mype == 0) 
 	{
-            printf("selparam %f, nlevels %d, filter %f, beta %f\n", 
-		selparam, nlevels, filter, parasails_loadbal_beta);
+            printf("thresh %f, nlevels %d, filter %f, beta %f\n", 
+		thresh, nlevels, filter, loadbal_beta);
             fflush(NULL);
 	}
 
         MPI_Barrier(MPI_COMM_WORLD);
         time0 = MPI_Wtime();
-        ps = ParaSailsCreate(A);
 
 #ifdef NONSYM
-        ParaSailsSetSym(ps, 0);
+        ps = ParaSailsCreate(MPI_COMM_WORLD, beg_row, end_row, 0);
 #else
-        ParaSailsSetSym(ps, 1);
+        ps = ParaSailsCreate(MPI_COMM_WORLD, beg_row, end_row, 1);
 #endif
+        ps->loadbal_beta = loadbal_beta;
 
-        /* thresh = ParaSailsSelectThresh(ps, selparam); */
-        thresh=selparam;
 #ifdef DIAG_PRECON
         thresh=10.0;
 #endif
-        if (mype == 0) 
-            printf("thresh: %e\n", thresh);
-        ParaSailsSetupPattern(ps, thresh, nlevels);
-        ParaSailsSetupValues(ps, A);
+        ParaSailsSetupPattern(ps, A, thresh, nlevels);
+        ParaSailsSetupValues(ps, A, filter);
+
         nnz0 = MatrixNnz(ps->M);
-
-#if 0
-        /* filtration step */
-        filter = ParaSailsSelectFilter(ps, filter);
         if (mype == 0) 
-            printf("filter: %f\n", filter);
-#endif
-
-	ParaSailsFilterValues(ps, filter);
-        nnz1 = MatrixNnz(ps->M);
+            printf("thresh: %f, filter: %f\n", ps->thresh, ps->filter);
 
 #if 0
         if (mype == 0) 
             printf("SETTING UP VALUES AGAIN WITH FILTERED PATTERN\n");
-        ParaSailsSetupValues(ps, A);
+        ParaSailsSetupValues(ps, A, 0.0);
 #endif
 
-	ParaSailsComplete(ps);
         time1 = MPI_Wtime();
 	setup_time = time1-time0;
         printf("SETUP %3d %8.1f\n", mype, setup_time);
@@ -194,7 +180,6 @@ int main(int argc, char *argv[])
         {
             printf("%s\n", argv[1]);
             printf("Inumber of nonzeros: %d (%.2f)\n", nnz0, nnz0/(double)nnza);
-            printf("Innz after filter  : %d (%.2f)\n", nnz1, nnz1/(double)nnza);
         }
 
         time0 = MPI_Wtime();

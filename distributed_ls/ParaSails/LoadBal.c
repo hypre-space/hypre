@@ -407,5 +407,7 @@ void LoadBalReturn(LoadBal *p, MPI_Comm comm, Matrix *mat)
 
     free(p->donor_data);
     free(p->recip_data);
+
+    free(p);
 }
 

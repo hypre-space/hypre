@@ -37,13 +37,15 @@ void hypre_F90_NAME(dpotrs)(char *, int *, int *, double *, int *, double *,
   int *, int *);
 #endif
 
-double parasails_loadbal_beta = 0.0; /* load balance factor */
-
 /******************************************************************************
  *
  * ParaSails private functions
  *
  *****************************************************************************/
+
+/*--------------------------------------------------------------------------
+ * FindNumReplies -
+ *--------------------------------------------------------------------------*/
 
 int FindNumReplies(MPI_Comm comm, int *replies_list)
 {
@@ -63,7 +65,6 @@ int FindNumReplies(MPI_Comm comm, int *replies_list)
 
     return num_replies;
 }
-
 
 /*--------------------------------------------------------------------------
  * SendRequests - Given a list of indices "reqind" of length "reqlen",
@@ -980,7 +981,162 @@ static void ComputeValuesNonsym(StoredRows *stored_rows, Matrix *mat,
 #endif
 }
 
-static void Rescale(Numbering *numb, StoredRows *stored_rows, Matrix *M)
+/*--------------------------------------------------------------------------
+ * SelectThresh - select a threshold for the preconditioner pattern.  
+ * The threshold attempts to be chosen such that approximately (1-param) of 
+ * all the matrix elements is larger than this threshold.  This is accomplished
+ * by finding the element in each row that is smaller than (1-param) of the 
+ * elements in that row, and averaging these elements over all rows.  The 
+ * threshold is selected on the diagonally scaled matrix.
+ *--------------------------------------------------------------------------*/
+
+static double SelectThresh(MPI_Comm comm, Matrix *A, DiagScale *diag_scale, 
+  double param)
+{
+    int row, len, *ind, i, npes;
+    double *val;
+    double localsum = 0.0, sum;
+    double temp;
+
+    /* Buffer for storing the values in each row when computing the 
+       i-th smallest element - buffer will grow if necessary */
+    double *buffer;
+    int buflen = 10;
+    buffer = (double *) malloc(buflen * sizeof(double));
+
+    for (row=0; row<=A->end_row - A->beg_row; row++)
+    {
+        MatrixGetRow(A, row, &len, &ind, &val);
+
+	if (len > buflen)
+	{
+	    free(buffer);
+	    buflen = len;
+            buffer = (double *) malloc(buflen * sizeof(double));
+	}
+
+	/* Copy the scaled absolute values into a work buffer */
+        temp = DiagScaleGet(diag_scale, row);
+	for (i=0; i<len; i++)
+	{
+	    buffer[i] = temp*ABS(val[i])*DiagScaleGet(diag_scale, ind[i]);
+	    if (ind[i] == row)
+		buffer[i] = 0.0; /* diagonal is not same scale as off-diag */
+	}
+
+        /* Compute which element to select */
+	i = (int) (len * param) + 1;
+
+	/* Select the i-th smallest element */
+        localsum += randomized_select(buffer, 0, len-1, i);
+    }
+
+    /* Find the average across all processors */
+    MPI_Allreduce(&localsum, &sum, 1, MPI_DOUBLE, MPI_SUM, comm);
+    MPI_Comm_size(comm, &npes);
+
+    free(buffer);
+    return sum / (A->end_rows[npes-1] - A->beg_rows[0] + 1);
+}
+
+/*--------------------------------------------------------------------------
+ * SelectFilter - select a threshold for the preconditioner pattern.  
+ * The threshold attempts to be chosen such that approximately (1-param) of 
+ * all the matrix elements is larger than this threshold.  This is accomplished
+ * by finding the element in each row that is smaller than (1-param) of the 
+ * elements in that row, and averaging these elements over all rows.  The 
+ * threshold is selected on the diagonally scaled matrix.
+ *
+ * Assumes matrix is in local indexing.
+ *--------------------------------------------------------------------------*/
+
+static double SelectFilter(MPI_Comm comm, Matrix *M, DiagScale *diag_scale,
+  double param)
+{
+    int row, len, *ind, i, npes;
+    double *val;
+    double localsum = 0.0, sum;
+
+    /* Buffer for storing the values in each row when computing the 
+       i-th smallest element - buffer will grow if necessary */
+    double *buffer;
+    int buflen = 10;
+    buffer = (double *) malloc(buflen * sizeof(double));
+
+    for (row=0; row<=M->end_row - M->beg_row; row++)
+    {
+        MatrixGetRow(M, row, &len, &ind, &val);
+
+	if (len > buflen)
+	{
+	    free(buffer);
+	    buflen = len;
+            buffer = (double *) malloc(buflen * sizeof(double));
+	}
+
+	/* Copy the scaled absolute values into a work buffer */
+	for (i=0; i<len; i++)
+	{
+	    buffer[i] = ABS(val[i] * DiagScaleGet(diag_scale, ind[i]));
+	    if (ind[i] == row)
+	        buffer[i] = 0.0;
+	}
+
+        /* Compute which element to select */
+	i = (int) (len * param) + 1;
+
+	/* Select the i-th smallest element */
+        localsum += randomized_select(buffer, 0, len-1, i);
+    }
+
+    /* Find the average across all processors */
+    MPI_Allreduce(&localsum, &sum, 1, MPI_DOUBLE, MPI_SUM, comm);
+    MPI_Comm_size(comm, &npes);
+
+    free(buffer);
+    return sum / (M->end_rows[npes-1] - M->beg_rows[0] + 1);
+}
+
+/*--------------------------------------------------------------------------
+ * FilterValues - constructs another matrix, free existing matrix
+ * Assumes M is in local indexing.
+ * Does not rescale.
+ * Pass it a matrix, and does not 
+ *--------------------------------------------------------------------------*/
+
+static void FilterValues(Matrix *M, Matrix *F, DiagScale *diag_scale, 
+  double filter)
+{
+    int i, j;
+    int row, len, *ind;
+    double *val;
+
+    for (row=0; row<=M->end_row - M->beg_row; row++)
+    {
+        MatrixGetRow(M, row, &len, &ind, &val);
+
+        j = 0;
+        for (i=0; i<len; i++)
+        {
+            if (ABS(val[i] * DiagScaleGet(diag_scale, ind[i])) >= filter 
+	      || row == ind[i])
+	    {
+                val[j] = val[i];
+                ind[j] = ind[i];
+		j++;
+	    }
+        }
+
+        MatrixSetRow(F, row, j, ind, val);
+    }
+}
+
+/*--------------------------------------------------------------------------
+ * Rescale - 
+ *--------------------------------------------------------------------------*/
+
+static void Rescale(Matrix *M, StoredRows *stored_rows, DiagScale *diag_scale,
+  int num_ind)
 {
     int len, *ind, len2, *ind2;
     double *val, *val2, *w;
@@ -988,7 +1144,7 @@ static void Rescale(Numbering *numb, StoredRows *stored_rows, Matrix *M)
     double accum, prod;
 
     /* Allocate full-length workspace */
-    w = (double *) calloc(numb->num_ind, sizeof(double));
+    w = (double *) calloc(num_ind, sizeof(double));
 
     /* Loop over rows */
     for (row=0; row<=M->end_row - M->beg_row; row++)
@@ -1006,7 +1162,7 @@ static void Rescale(Numbering *numb, StoredRows *stored_rows, Matrix *M)
 	    /* Scatter nonzeros of A */
 	    for (i=0; i<len2; i++)
 	    {
-		assert(ind2[i] < numb->num_ind);
+		assert(ind2[i] < num_ind);
 		w[ind2[i]] = val2[i];
 	    }
 
@@ -1014,7 +1170,7 @@ static void Rescale(Numbering *numb, StoredRows *stored_rows, Matrix *M)
 	    prod = 0.0;
 	    for (i=0; i<len; i++)
 	    {
-		assert(ind[i] < numb->num_ind);
+		assert(ind[i] < num_ind);
 		prod += val[i] * w[ind[i]];
 	    }
 
@@ -1045,60 +1201,50 @@ static void Rescale(Numbering *numb, StoredRows *stored_rows, Matrix *M)
  *****************************************************************************/
 
 /*--------------------------------------------------------------------------
- * ParaSailsCreate - Return (a pointer to) a ParaSails preconditioner object.
- * The input matrix "A" is the matrix that will be used for setting up the 
- * sparsity pattern of the preconditioner.
+ * ParaSailsCreate - Allocate, initialize, and return a pointer to a
+ * ParaSails preconditioner data structure.
  *--------------------------------------------------------------------------*/
 
-ParaSails *ParaSailsCreate(Matrix *A)
+ParaSails *ParaSailsCreate(MPI_Comm comm, int beg_row, int end_row, int sym)
 {
     ParaSails *ps = (ParaSails *) malloc(sizeof(ParaSails));
+    int npes;
 
-    ps->symmetric = 0;
+    ps->symmetric = sym;
+    ps->numb      = NULL;
+    ps->M         = NULL;
 
-    ps->A = A;
+    ps->comm      = comm;
+    ps->beg_row   = beg_row;
+    ps->end_row   = end_row;
 
-    ps->M = NULL;
+    MPI_Comm_size(comm, &npes);
 
-    ps->numb = A->numb; /* UNDONE - should make a copy of A's numbering?? */
+    ps->beg_rows = (int *) malloc(npes * sizeof(int));
+    ps->end_rows = (int *) malloc(npes * sizeof(int));
 
-    ps->pruned_rows = NULL;
-
-    ps->stored_rows = NULL;
-
-    ps->diag_scale = DiagScaleCreate(A);
+    MPI_Allgather(&beg_row, 1, MPI_INT, ps->beg_rows, 1, MPI_INT, comm);
+    MPI_Allgather(&end_row, 1, MPI_INT, ps->end_rows, 1, MPI_INT, comm);
 
     return ps;
 }
 
 /*--------------------------------------------------------------------------
- * ParaSailsDestroy - Destroy a ParaSails object "ps".
+ * ParaSailsDestroy - Deallocate a ParaSails data structure.
  *--------------------------------------------------------------------------*/
 
 void ParaSailsDestroy(ParaSails *ps)
 {
-    if (ps->pruned_rows)
-        PrunedRowsDestroy(ps->pruned_rows);
+    if (ps->numb)
+        NumberingDestroy(ps->numb);
 
-    if (ps->stored_rows)
-        StoredRowsDestroy(ps->stored_rows);
+    if (ps->M)
+        MatrixDestroy(ps->M);
 
-    DiagScaleDestroy(ps->diag_scale);
-
-    MatrixDestroy(ps->M);
+    free(ps->beg_rows);
+    free(ps->end_rows);
 
     free(ps);
-}
-
-/*--------------------------------------------------------------------------
- * ParaSailsSetSym -
- * Must be the first call after ParaSailsCreate
- * Nonzero indicates symmetric.
- *--------------------------------------------------------------------------*/
-
-void ParaSailsSetSym(ParaSails *ps, int sym)
-{
-    ps->symmetric = sym;
 }
 
 /*--------------------------------------------------------------------------
@@ -1107,41 +1253,35 @@ void ParaSailsSetSym(ParaSails *ps, int sym)
  * input parameters "thresh" and "num_levels".
  *--------------------------------------------------------------------------*/
 
-void ParaSailsSetupPattern(ParaSails *ps, double thresh, int num_levels)
+void ParaSailsSetupPattern(ParaSails *ps, Matrix *A, 
+  double thresh, int num_levels)
 {
-    int mype;
-    double cost;
-
-    MPI_Comm_rank(ps->A->comm, &mype);
+    DiagScale  *diag_scale;
+    PrunedRows *pruned_rows;
 
     ps->thresh     = thresh;
     ps->num_levels = num_levels;
 
-#ifdef PARASAILS_DEBUG
-    if (mype == 0)
-       printf("ParaSails: thresh %e, level %d\n", thresh, num_levels);
-#endif
+    if (ps->numb) NumberingDestroy(ps->numb);
+    ps->numb = NumberingCreateCopy(A->numb);
 
-    if (ps->M)
-        MatrixDestroy(ps->M);
+    if (ps->M) MatrixDestroy(ps->M);
+    ps->M = MatrixCreate(ps->comm, ps->beg_row, ps->end_row);
 
-    ps->M = MatrixCreate(ps->A->comm, ps->A->beg_row, ps->A->end_row);
+    diag_scale = DiagScaleCreate(A);
 
-    if (ps->pruned_rows)
-        PrunedRowsDestroy(ps->pruned_rows);
+    if (ps->thresh < 0.0)
+	ps->thresh = SelectThresh(ps->comm, A, diag_scale, -ps->thresh);
 
-    ps->pruned_rows = PrunedRowsCreate(ps->A, PARASAILS_NROWS,
-        ps->diag_scale, ps->thresh);
+    pruned_rows = PrunedRowsCreate(A, PARASAILS_NROWS, diag_scale, ps->thresh);
 
-    ExchangePrunedRows(ps->A->comm, ps->A, ps->numb, ps->pruned_rows, 
-        ps->num_levels);
+    ExchangePrunedRows(ps->comm, A, ps->numb, pruned_rows, ps->num_levels);
 
-    /* set structure in approx inverse */
-    ConstructPatternForEachRow(ps->symmetric, ps->pruned_rows, ps->num_levels, 
-        ps->numb, ps->M, &cost);
+    ConstructPatternForEachRow(ps->symmetric, pruned_rows, ps->num_levels, 
+        ps->numb, ps->M, &ps->cost);
 
-    ps->load_bal = LoadBalDonate(ps->A->comm, ps->M, ps->numb, cost, 
-        parasails_loadbal_beta);
+    DiagScaleDestroy(diag_scale);
+    PrunedRowsDestroy(pruned_rows);
 }
 
 /*--------------------------------------------------------------------------
@@ -1152,232 +1292,116 @@ void ParaSailsSetupPattern(ParaSails *ps, double thresh, int num_levels)
  * matrix as a previous call is not treated any differently.)
  *--------------------------------------------------------------------------*/
 
-void ParaSailsSetupValues(ParaSails *ps, Matrix *A)
+void ParaSailsSetupValues(ParaSails *ps, Matrix *A, double filter)
 {
-    int mype;
+    LoadBal    *load_bal;
+    StoredRows *stored_rows;
+    int row, len, *ind;
+    double *val;
     int i;
-    double time0, time1;
 
-    MPI_Comm_rank(A->comm, &mype);
+    /* 
+     * If the preconditioner matrix has its own numbering object, then we
+     * assume it is in its own local numbering, and we change the numbering
+     * in the matrix to the ParaSails numbering.
+     */
 
-    if (ps->stored_rows)
-        StoredRowsDestroy(ps->stored_rows);
+    if (ps->M->numb != NULL)
+    {
+        for (row=0; row<=ps->M->end_row - ps->M->beg_row; row++)
+        {
+	   MatrixGetRow(ps->M, row, &len, &ind, &val);
+	   NumberingLocalToGlobal(ps->M->numb, len, ind, ind);
+	   NumberingGlobalToLocal(ps->numb,    len, ind, ind);
+        }
+    }
 
-    ps->stored_rows = StoredRowsCreate(A, PARASAILS_NROWS);
+    load_bal = LoadBalDonate(ps->comm, ps->M, ps->numb, ps->cost, 
+	ps->loadbal_beta);
 
-    ExchangeStoredRows(ps->A->comm, A, ps->M, ps->numb,
-        ps->stored_rows, ps->load_bal);
+    stored_rows = StoredRowsCreate(A, PARASAILS_NROWS);
 
-    time0 = MPI_Wtime();
+    ExchangeStoredRows(ps->comm, A, ps->M, ps->numb, stored_rows, load_bal);
 
     if (ps->symmetric)
     {
-        ComputeValuesSym(ps->stored_rows, ps->M, ps->load_bal->beg_row,
-            ps->numb);
+        ComputeValuesSym(stored_rows, ps->M, load_bal->beg_row, ps->numb);
 
-        for (i=0; i<ps->load_bal->num_taken; i++)
+        for (i=0; i<load_bal->num_taken; i++)
         {
-            ComputeValuesSym(ps->stored_rows, ps->load_bal->recip_data[i].mat,
-	        ps->load_bal->recip_data[i].mat->beg_row, ps->numb);
+            ComputeValuesSym(stored_rows, 
+                load_bal->recip_data[i].mat,
+	        load_bal->recip_data[i].mat->beg_row, ps->numb);
         }
     }
     else
     {
-        ComputeValuesNonsym(ps->stored_rows, ps->M, ps->load_bal->beg_row,
-            ps->numb);
+        ComputeValuesNonsym(stored_rows, ps->M, load_bal->beg_row, ps->numb);
 
-        for (i=0; i<ps->load_bal->num_taken; i++)
+        for (i=0; i<load_bal->num_taken; i++)
         {
-            ComputeValuesNonsym(ps->stored_rows, 
-		ps->load_bal->recip_data[i].mat,
-	        ps->load_bal->recip_data[i].mat->beg_row, ps->numb);
+            ComputeValuesNonsym(stored_rows, 
+		load_bal->recip_data[i].mat,
+	        load_bal->recip_data[i].mat->beg_row, ps->numb);
         }
     }
 
-    time1 = MPI_Wtime();
+    LoadBalReturn(load_bal, ps->comm, ps->M);
 
-#ifdef PARASAILS_DEBUG
-    printf("%d: Total Time for computing values: %f\n", mype, time1-time0);
-#endif
+    /* Filtering */
 
-    /* load bal affects code in ExchangeStoredRows and ComputeValues */
-    /* note that this will effectively synchronize the processors */
+    ps->filter = filter;
 
-    LoadBalReturn(ps->load_bal, ps->A->comm, ps->M);
-}
-
-/*--------------------------------------------------------------------------
- * ParaSailsSelectThresh - select a threshold for the preconditioner pattern.  
- * The threshold attempts to be chosen such that approximately (1-param) of 
- * all the matrix elements is larger than this threshold.  This is accomplished
- * by finding the element in each row that is smaller than (1-param) of the 
- * elements in that row, and averaging these elements over all rows.  The 
- * threshold is selected on the diagonally scaled matrix.
- *--------------------------------------------------------------------------*/
-
-double ParaSailsSelectThresh(ParaSails *ps, double param)
-{
-    int row, len, *ind, i, npes;
-    double *val;
-    double localsum = 0.0, sum;
-    double temp;
-
-    MPI_Comm comm = ps->A->comm;
-
-    /* Buffer for storing the values in each row when computing the 
-       i-th smallest element - buffer will grow if necessary */
-    double *buffer;
-    int buflen = 10;
-    buffer = (double *) malloc(buflen * sizeof(double));
-
-    for (row=0; row<=ps->A->end_row - ps->A->beg_row; row++)
+    if (ps->filter != 0.0)
     {
-        MatrixGetRow(ps->A, row, &len, &ind, &val);
+        DiagScale *diag_scale = DiagScaleCreate(A);
+        Matrix    *filtered_matrix = MatrixCreate(ps->comm, 
+	                                 ps->beg_row, ps->end_row);
 
-	if (len > buflen)
-	{
-	    free(buffer);
-	    buflen = len;
-            buffer = (double *) malloc(buflen * sizeof(double));
-	}
+	if (ps->filter < 0.0)
+	    ps->filter = SelectFilter(ps->comm, ps->M, diag_scale, -ps->filter);
 
-	/* Copy the scaled absolute values into a work buffer */
-        temp = DiagScaleGet(ps->diag_scale, row);
-	for (i=0; i<len; i++)
-	{
-	    buffer[i] = temp*ABS(val[i])*DiagScaleGet(ps->diag_scale, ind[i]);
-	    if (ind[i] == row)
-		buffer[i] = 0.0; /* diagonal is not same scale as off-diag */
-	}
+	FilterValues(ps->M, filtered_matrix, diag_scale, ps->filter);
 
-        /* Compute which element to select */
-	i = (int) (len * param) + 1;
+        MatrixDestroy(ps->M);
+        ps->M = filtered_matrix;
 
-	/* Select the i-th smallest element */
-        localsum += randomized_select(buffer, 0, len-1, i);
+        Rescale(ps->M, stored_rows, diag_scale, ps->numb->num_ind);
+
+        DiagScaleDestroy(diag_scale);
     }
 
-    /* Find the average across all processors */
-    MPI_Allreduce(&localsum, &sum, 1, MPI_DOUBLE, MPI_SUM, comm);
-    MPI_Comm_size(comm, &npes);
+    /* 
+     * If the preconditioner matrix has its own numbering object, then we
+     * change the numbering in the matrix to this numbering.  If not, then
+     * we put the preconditioner matrix in global numbering, and call
+     * MatrixComplete (to create numbering object, convert the indices,
+     * and create the matvec info).
+     */
 
-    free(buffer);
-    return sum / (ps->A->end_rows[npes-1] - ps->A->beg_rows[0] + 1);
-}
-
-/*--------------------------------------------------------------------------
- * ParaSailsSelectFilter - select a threshold for the preconditioner pattern.  
- * The threshold attempts to be chosen such that approximately (1-param) of 
- * all the matrix elements is larger than this threshold.  This is accomplished
- * by finding the element in each row that is smaller than (1-param) of the 
- * elements in that row, and averaging these elements over all rows.  The 
- * threshold is selected on the diagonally scaled matrix.
- *
- * Assumes matrix is in local indexing.
- *--------------------------------------------------------------------------*/
-
-double ParaSailsSelectFilter(ParaSails *ps, double param)
-{
-    int row, len, *ind, i, npes;
-    double *val;
-    double localsum = 0.0, sum;
-
-    MPI_Comm comm = ps->A->comm;
-
-    /* Buffer for storing the values in each row when computing the 
-       i-th smallest element - buffer will grow if necessary */
-    double *buffer;
-    int buflen = 10;
-    buffer = (double *) malloc(buflen * sizeof(double));
-
-    for (row=0; row<=ps->M->end_row - ps->M->beg_row; row++)
+    if (ps->M->numb != NULL)
     {
-        MatrixGetRow(ps->M, row, &len, &ind, &val);
-
-	if (len > buflen)
-	{
-	    free(buffer);
-	    buflen = len;
-            buffer = (double *) malloc(buflen * sizeof(double));
-	}
-
-	/* Copy the absolute values into a work buffer */
-	for (i=0; i<len; i++)
-	    if (ind[i] == row)
-	        buffer[i] = 0.0;
-	    else
-	        buffer[i] = ABS(val[i]);
-
-        /* Compute which element to select */
-	i = (int) (len * param) + 1;
-
-	/* Select the i-th smallest element */
-        localsum += randomized_select(buffer, 0, len-1, i);
-    }
-
-    /* Find the average across all processors */
-    MPI_Allreduce(&localsum, &sum, 1, MPI_DOUBLE, MPI_SUM, comm);
-    MPI_Comm_size(comm, &npes);
-
-    free(buffer);
-    return sum / (ps->A->end_rows[npes-1] - ps->A->beg_rows[0] + 1);
-}
-
-/*--------------------------------------------------------------------------
- * ParaSailsFilterValues - constructs another matrix, free existing matrix
- * Assumes M is in local indexing.
- *--------------------------------------------------------------------------*/
-
-void ParaSailsFilterValues(ParaSails *ps, double filter)
-{
-    int i, j;
-    int row, len, *ind;
-    double *val;
-    Matrix *F;
-
-    F = MatrixCreate(ps->M->comm, ps->M->beg_row, ps->M->end_row);
-
-    for (row=0; row<=ps->M->end_row - ps->M->beg_row; row++)
-    {
-        MatrixGetRow(ps->M, row, &len, &ind, &val);
-
-        j = 0;
-        for (i=0; i<len; i++)
+	/* Convert to own numbering system */
+        for (row=0; row<=ps->M->end_row - ps->M->beg_row; row++)
         {
-            if (ABS(val[i]) >= filter || row == ind[i])
-	    {
-                val[j] = val[i];
-                ind[j] = ind[i];
-		j++;
-	    }
+	    MatrixGetRow(ps->M, row, &len, &ind, &val);
+	    NumberingLocalToGlobal(ps->numb,    len, ind, ind);
+	    NumberingGlobalToLocal(ps->M->numb, len, ind, ind);
+        }
+    }
+    else
+    {
+	/* Convert to global numbering system and call MatrixComplete */
+        for (row=0; row<=ps->M->end_row - ps->M->beg_row; row++)
+        {
+	    MatrixGetRow(ps->M, row, &len, &ind, &val);
+	    NumberingLocalToGlobal(ps->numb, len, ind, ind);
         }
 
-        MatrixSetRow(F, row, j, ind, val);
+        MatrixComplete(ps->M);
     }
 
-    Rescale(ps->numb, ps->stored_rows, F);
-
-    MatrixDestroy(ps->M);
-    ps->M = F;
-}
-
-/*--------------------------------------------------------------------------
- * ParaSailsComplete -
- *--------------------------------------------------------------------------*/
-
-void ParaSailsComplete(ParaSails *ps)
-{
-    int row, len, *ind;
-    double *val;
-
-    /* convert to global indexing before calling MatrixComplete */
-    for (row=0; row<=ps->M->end_row - ps->M->beg_row; row++)
-    {
-	MatrixGetRow(ps->M, row, &len, &ind, &val);
-	NumberingLocalToGlobal(ps->numb, len, ind, ind);
-    }
-
-    MatrixComplete(ps->M);
+    StoredRowsDestroy(stored_rows);
 }
 
 /*--------------------------------------------------------------------------
@@ -1404,4 +1428,3 @@ void ParaSailsApply(ParaSails *ps, double *u, double *v)
         MatrixMatvec(ps->M, u, v);
     }
 }
-

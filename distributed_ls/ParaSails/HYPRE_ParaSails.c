@@ -32,7 +32,7 @@ hypre_ParaSails;
  *--------------------------------------------------------------------------*/
 
 int HYPRE_ParaSailsCreate(MPI_Comm comm, HYPRE_DistributedMatrix *distmat, 
-  HYPRE_ParaSails *obj)
+  HYPRE_ParaSails *obj, int symmetric)
 {
     int beg_row, end_row, row, dummy;
     int len, *ind;
@@ -58,7 +58,7 @@ int HYPRE_ParaSailsCreate(MPI_Comm comm, HYPRE_DistributedMatrix *distmat,
 
     /* Call the native code */
 
-    internal->ps = ParaSailsCreate(internal->A);
+    internal->ps = ParaSailsCreate(comm, beg_row, end_row, symmetric);
 
     *obj = (HYPRE_ParaSails) internal;
 
@@ -82,21 +82,6 @@ int HYPRE_ParaSailsDestroy(HYPRE_ParaSails ps)
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_ParaSailsSelectThresh - Return a recommended threshold to use in
- * HYPRE_ParaSailsSetup.
- *--------------------------------------------------------------------------*/
-
-int HYPRE_ParaSailsSelectThresh(HYPRE_ParaSails ps, double param,
-  double *threshp)
-{
-    hypre_ParaSails *internal = (hypre_ParaSails *) ps;
-
-    *threshp = ParaSailsSelectThresh(internal->ps, param);
-
-    return 0;
-}
-
-/*--------------------------------------------------------------------------
  * HYPRE_ParaSailsSetup - Set up a ParaSails preconditioner, using the
  * input parameters "thresh" and "nlevels".
  *--------------------------------------------------------------------------*/
@@ -106,19 +91,12 @@ int HYPRE_ParaSailsSetup(HYPRE_ParaSails ps, int sym, double thresh,
 {
     hypre_ParaSails *internal = (hypre_ParaSails *) ps;
 
-    ParaSailsSetSym(internal->ps, sym);
+    ParaSailsSetupPattern(internal->ps, internal->A, thresh, nlevels);
 
-    ParaSailsSetupPattern(internal->ps, thresh, nlevels);
-
-    ParaSailsSetupValues(internal->ps, internal->A);
-
-    ParaSailsFilterValues(internal->ps, filter);
-
-    ParaSailsComplete(internal->ps);
+    ParaSailsSetupValues(internal->ps, internal->A, filter);
 
     return 0;
 }
-
 
 /*--------------------------------------------------------------------------
  * HYPRE_ParaSailsApply - Apply the ParaSails preconditioner to an array 
@@ -133,4 +111,3 @@ int HYPRE_ParaSailsApply(HYPRE_ParaSails ps, double *u, double *v)
 
     return 0;
 }
-

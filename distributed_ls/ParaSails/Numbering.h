@@ -27,7 +27,6 @@ struct numbering
     int   end_row;
     int   num_loc; /* number of local indices */
     int   num_ind; /* number of indices */
-    int   num_ext; /* number of neighbor nodes */
 
     int  *local_to_global;
     Hash *hash;
@@ -36,6 +35,7 @@ struct numbering
 typedef struct numbering Numbering;
 
 Numbering *NumberingCreate(Matrix *m, int size);
+Numbering *NumberingCreateCopy(Numbering *orig);
 void NumberingDestroy(Numbering *numb);
 void NumberingLocalToGlobal(Numbering *numb, int len, int *local, int *global);
 void NumberingGlobalToLocal(Numbering *numb, int len, int *global, int *local);

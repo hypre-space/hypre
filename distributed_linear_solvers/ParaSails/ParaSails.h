@@ -24,30 +24,29 @@
 
 typedef struct
 {
-    Matrix     *A;  /* original matrix     */
-    Matrix     *M;  /* approximate inverse */
-    Numbering  *numb;
+    int        symmetric;
+    int        num_levels;
+    double     thresh;
+    double     filter;
+    double     cost;          /* cost for this processor */
+    double     loadbal_beta;
 
-    int         symmetric;
-    int         num_levels;
-    double      thresh;
+    Numbering *numb;
+    Matrix    *M;             /* preconditioner */
 
-    DiagScale  *diag_scale;
-    PrunedRows *pruned_rows;
-    StoredRows *stored_rows;
-    LoadBal    *load_bal;
+    MPI_Comm   comm;
+    int        beg_row;
+    int        end_row;
+    int       *beg_rows;
+    int       *end_rows;
 }
 ParaSails;
 
-ParaSails *ParaSailsCreate(Matrix *A);
+ParaSails *ParaSailsCreate(MPI_Comm comm, int beg_row, int end_row, int sym);
 void ParaSailsDestroy(ParaSails *ps);
-void ParaSailsSetSym(ParaSails *ps, int sym);
-double ParaSailsSelectThresh(ParaSails *ps, double param);
-void ParaSailsSetupPattern(ParaSails *ps, double thresh, int num_levels);
-void ParaSailsSetupValues(ParaSails *ps, Matrix *A);
-double ParaSailsSelectFilter(ParaSails *ps, double param);
-void ParaSailsFilterValues(ParaSails *ps, double filter);
-void ParaSailsComplete(ParaSails *ps);
+void ParaSailsSetupPattern(ParaSails *ps, Matrix *A, 
+  double thresh, int num_levels);
+void ParaSailsSetupValues(ParaSails *ps, Matrix *A, double filter);
 void ParaSailsApply(ParaSails *ps, double *u, double *v);
 
 #endif /* _PARASAILS_H */
