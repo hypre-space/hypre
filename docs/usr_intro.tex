@@ -161,8 +161,8 @@ demonstrate basic structure of usage:  This be temporarily yucky -MAL
 
    HYPRE_StructGridCreate(MPI_COMM_WORLD, dim, &grid);
 
-   /* Use HYPRE_StructGridSetExtents to define size in index space of
-      each grid block making up the grid */
+   /* Use HYPRE_StructGridSetExtents to define index space of
+      each block of the grid */
 
    HYPRE_StructGridSetPeriodic(grid, periodic);
    HYPRE_StructGridAssemble(grid);
@@ -171,9 +171,8 @@ demonstrate basic structure of usage:  This be temporarily yucky -MAL
 
    /* Use HYPRE_StructStencilSetElement to impart structure to stencil */
 
+/* Use grid and stencil to set matrix structure on matrix creation */
    HYPRE_StructMatrixCreate(MPI_COMM_WORLD, grid, stencil, &A);
-
-   /* Use grid and stencil to set matrix structure on matrix creation */
 
    HYPRE_StructMatrixSetSymmetric(A, 1);
    HYPRE_StructMatrixSetNumGhost(A, A_num_ghost);
