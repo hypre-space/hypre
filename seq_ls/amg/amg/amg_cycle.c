@@ -232,11 +232,11 @@ void        *data;
 
              for (k = 0; k < ii; k++) 
              {
-               Solve_err_flag = RelaxC(U_array[level],F_array[level],
-                                      A_array[level], ICG_array[level],
-                                      IV_array[level],ipmn[level],
-                                      ipmx[level],ipt[k],ity[k],
-                                      D_mat,S_vec);
+               Solve_err_flag = amg_Relax(U_array[level],F_array[level],
+                                          A_array[level], ICG_array[level],
+                                          IV_array[level],ipmn[level],
+                                          ipmx[level],ipt[k],ity[k],
+                                          D_mat,S_vec);
 
                if (Solve_err_flag != 0) return(Solve_err_flag);
 
