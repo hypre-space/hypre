@@ -23,6 +23,7 @@ FILES =\
  HYPRE_csr_matrix.c\
  HYPRE_mapped_matrix.c\
  HYPRE_multiblock_matrix.c\
+ csr_matop.c\
  csr_matrix.c\
  csr_matvec.c\
  mapped_matrix.c\
