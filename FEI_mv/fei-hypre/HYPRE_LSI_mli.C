@@ -23,7 +23,6 @@
  *        HYPRE_LSI_MLISetSmoother
  *        HYPRE_LSI_MLISetCoarseSolver
  *        HYPRE_LSI_MLISetNodalCoordinates
- *        HYPRE_LSI_MLISetNullSpace
  *--------------------------------------------------------------------------
  *        HYPRE_LSI_MLIFEDataCreate
  *        HYPRE_LSI_MLIFEDataDestroy
@@ -33,9 +32,6 @@
  *        HYPRE_LSI_MLIFEDataInitSharedNodes
  *        HYPRE_LSI_MLIFEDataInitComplete
  *        HYPRE_LSI_MLIFEDataLoadElemMatrix
- *        HYPRE_LSI_MLIFEDataLoadNullSpaceInfo
- *        HYPRE_LSI_MLIFEDataConstructNullSpace
- *        HYPRE_LSI_MLIFEDataGetNullSpacePtr
  *        HYPRE_LSI_MLIFEDataWriteToFile
  ****************************************************************************/
 
@@ -67,15 +63,10 @@
 #define MLI_SOLVER_MLS_ID       5 
 #define MLI_SOLVER_SUPERLU_ID   6 
 #define MLI_METHOD_AMGSA_ID     7
+#define MLI_METHOD_AMGSAE_ID    8
 #endif
 #define GlobalID int
 #include "HYPRE_LSI_mli.h"
-
-extern "C" 
-{
-void mli_computespectrum_(int *,int *,double *, double *, int *, double *, 
-                          double *, double *, int *);
-}
 
 /****************************************************************************/ 
 /* HYPRE_LSI_MLI data structure                                             */
@@ -126,13 +117,8 @@ typedef struct HYPRE_MLI_FEData_Struct
    MPI_Comm   comm_;              /* MPI communicator */
    MLI_FEData *fedata_;           /* holds FE information */
    int        fedataOwn_;         /* flag to indicate ownership */
-   int        fedataRowCnt_;      /* store number of rows loaded */
-   int        fedataMatDim_;      /* dimension of element matrices */
    int        computeNull_;       /* flag - compute null space or not */
-   int        nullLeng_;          /* number of equations locally */
    int        nullDim_;           /* number of null space vectors */
-   int        *nullCnts_;         /* counters for overlapping values */
-   double     *nullSpaces_;       /* data holder for null spaces */
 #endif
 }
 HYPRE_MLI_FEData;
@@ -258,7 +244,10 @@ int HYPRE_LSI_MLISetup( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
    switch ( mli_object->method_ )
    {
       case MLI_METHOD_AMGSA_ID : 
-           method = MLI_Method_CreateFromID(mli_object->method_, mpiComm );
+           method = MLI_Method_CreateFromID(mli_object->method_,mpiComm);
+           break;
+      case MLI_METHOD_AMGSAE_ID : 
+           method = MLI_Method_CreateFromID(mli_object->method_,mpiComm);
            break;
       default :
            printf("HYPRE_LSI_MLISetup : method not valid.\n");
@@ -266,7 +255,8 @@ int HYPRE_LSI_MLISetup( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
    }
    sprintf(paramString, "setNumLevels %d", mli_object->nLevels_);
    method->setParams( paramString, 0, NULL );
-   sprintf(paramString,"setStrengthThreshold %f",mli_object->strengthThreshold_);
+   sprintf(paramString, "setStrengthThreshold %f",
+           mli_object->strengthThreshold_);
    method->setParams( paramString, 0, NULL );
 
    /* -------------------------------------------------------- */ 
@@ -471,11 +461,10 @@ int HYPRE_LSI_MLISetParams( HYPRE_Solver solver, char *paramString )
       {
          printf("%4d : Available options for MLI are : \n", mypid);
          printf("\t      outputLevel <d> \n");
-         printf("\t      numLevels <d> \n");
          printf("\t      maxIterations <d> \n");
          printf("\t      cycleType <'V','W'> \n");
          printf("\t      strengthThreshold <f> \n");
-         printf("\t      method <AMGSA> \n");
+         printf("\t      method <AMGSA, AMGSAe> \n");
          printf("\t      smoother <Jacobi,GS,...> \n");
          printf("\t      coarseSolver <Jacobi,GS,...> \n");
          printf("\t      numSweeps <d> \n");
@@ -519,6 +508,8 @@ int HYPRE_LSI_MLISetParams( HYPRE_Solver solver, char *paramString )
       sscanf(paramString,"%s %s %s", param1, param2, param3);
       if ( ! strcmp( param3, "AMGSA" ) )
          mli_object->method_ = MLI_METHOD_AMGSA_ID;
+      else if ( ! strcmp( param3, "AMGSAe" ) )
+         mli_object->method_ = MLI_METHOD_AMGSAE_ID;
    }
    else if ( !strcmp(param2, "smoother") )
    {
@@ -629,7 +620,7 @@ int HYPRE_LSI_MLISetParams( HYPRE_Solver solver, char *paramString )
          printf("\t      maxIterations <d> \n");
          printf("\t      cycleType <'V','W'> \n");
          printf("\t      strengthThreshold <f> \n");
-         printf("\t      method <AMGSA> \n");
+         printf("\t      method <AMGSA, AMGSAe> \n");
          printf("\t      smoother <Jacobi,GS,...> \n");
          printf("\t      coarseSolver <Jacobi,GS,...> \n");
          printf("\t      numSweeps <d> \n");
@@ -724,6 +715,8 @@ int HYPRE_LSI_MLI_SetMethod( HYPRE_Solver solver, char *paramString )
 
    if ( ! strcmp( paramString, "AMGSA" ) )
       mli_object->method_ = MLI_METHOD_AMGSA_ID;
+   else if ( ! strcmp( paramString, "AMGSAe" ) )
+      mli_object->method_ = MLI_METHOD_AMGSAE_ID;
    else
    {
       printf("HYPRE_LSI_MLISetMethod ERROR : method unrecognized.\n");
@@ -929,49 +922,6 @@ int HYPRE_LSI_MLISetNodalCoordinates(HYPRE_Solver solver, int nNodes,
 } 
 
 /****************************************************************************/
-/* HYPRE_LSI_MLISetNullSpace                                                */
-/*--------------------------------------------------------------------------*/
-
-extern "C"
-int HYPRE_LSI_MLISetNullSpace( HYPRE_Solver solver, int nodeDOF,
-                               int numNS, double *NSpaces, int numEqns)
-{
-   HYPRE_LSI_MLI *mli_object = (HYPRE_LSI_MLI *) solver;
-
-   /* -------------------------------------------------------- */ 
-   /* if nodal coordinates flag on, do not take null space     */
-   /* -------------------------------------------------------- */ 
-
-   if ( mli_object->nCoordAccept_ ) return 1;
-
-   /* -------------------------------------------------------- */ 
-   /* clean up previously allocated space                      */
-   /* -------------------------------------------------------- */ 
-
-   if ( mli_object->nCoordinates_ != NULL )
-      delete [] mli_object->nCoordinates_;
-   if ( mli_object->nullScales_ != NULL )
-      delete [] mli_object->nullScales_;
-   if ( mli_object->nSpaceVects_ != NULL )
-      delete [] mli_object->nSpaceVects_; 
-   mli_object->nCoordinates_ = NULL;
-   mli_object->nullScales_   = NULL;
-   mli_object->nSpaceVects_  = NULL; 
-
-   /* -------------------------------------------------------- */ 
-   /* allocate space and load information                      */
-   /* -------------------------------------------------------- */ 
-
-   mli_object->nodeDOF_     = nodeDOF;
-   mli_object->nSpaceDim_   = numNS;
-   mli_object->localNEqns_  = numEqns;
-   mli_object->nSpaceVects_ = new double[numEqns*numNS];
-   for ( int i = 0; i < numEqns*numNS; i++ )  
-      mli_object->nSpaceVects_[i] = NSpaces[i];
-   return 0;
-} 
-
-/****************************************************************************/
 /* HYPRE_LSI_MLIFEDataCreate                                                */
 /*--------------------------------------------------------------------------*/
 
@@ -981,16 +931,11 @@ void *HYPRE_LSI_MLIFEDataCreate( MPI_Comm mpi_comm )
 #ifdef HAVE_MLI
    HYPRE_MLI_FEData *hypre_fedata;
    hypre_fedata = (HYPRE_MLI_FEData *) malloc( sizeof(HYPRE_MLI_FEData) );  
-   hypre_fedata->fedataRowCnt_  = 0;
-   hypre_fedata->fedataMatDim_  = 0;
    hypre_fedata->comm_          = mpi_comm;
    hypre_fedata->fedata_        = NULL;
    hypre_fedata->fedataOwn_     = 0;
    hypre_fedata->computeNull_   = 0;
-   hypre_fedata->nullLeng_      = 0;
-   hypre_fedata->nullCnts_      = NULL;
-   hypre_fedata->nullDim_       = 0;
-   hypre_fedata->nullSpaces_    = NULL;
+   hypre_fedata->nullDim_       = 1;
    return ((void *) hypre_fedata);
 #else
    return NULL;
@@ -1009,13 +954,7 @@ int HYPRE_LSI_MLIFEDataDestroy( void *object )
    if ( hypre_fedata == NULL ) return 1;
    if ( hypre_fedata->fedataOwn_ && hypre_fedata->fedata_ != NULL ) 
       delete hypre_fedata->fedata_;
-   if ( hypre_fedata->nullSpaces_ != NULL )
-      delete [] hypre_fedata->nullSpaces_;
-   if ( hypre_fedata->nullCnts_ != NULL ) 
-      delete [] hypre_fedata->nullCnts_;
    hypre_fedata->fedata_        = NULL;
-   hypre_fedata->nullSpaces_    = NULL;
-   hypre_fedata->nullCnts_      = NULL;
    free( hypre_fedata );
    return 0;
 #else
@@ -1166,10 +1105,8 @@ int HYPRE_LSI_MLIFEDataLoadElemMatrix(void *object, int elemID, int nNodes,
    (void) nNodes;
    (void) nodeList;
 #ifdef HAVE_MLI
-   int              i, j, rowCnt, matz=1, ierr, itmp;
-   int              index, nDim, length, *nCnts, mypid;
-   double           *elemMat, *evalues, *evectors, *dAux1, *dAux2, *nSpace;
-   char             paramString[100], *targv[1];
+   int              i, j;
+   double           *elemMat;
    HYPRE_MLI_FEData *hypre_fedata = (HYPRE_MLI_FEData *) object;
    MLI_FEData       *fedata;
 
@@ -1193,179 +1130,11 @@ int HYPRE_LSI_MLIFEDataLoadElemMatrix(void *object, int elemID, int nNodes,
    delete [] elemMat;
    return 0;
 
-   /* -------------------------------------------------------- */ 
-   /* if computing of the null space is requested, compute it  */
-   /* -------------------------------------------------------- */ 
-
-   if ( hypre_fedata->computeNull_ <= 0 ) return 0;
-
-/* This section to be moved to MLI
-   evalues  = new double[matDim];
-   evectors = new double[matDim*matDim];
-   dAux1    = new double[matDim];
-   dAux2    = new double[matDim];
-   mli_computespectrum_(&matDim, &matDim, elemMat, evalues, &matz, evectors,
-                        dAux1, dAux2, &ierr);
-   if ( hypre_fedata->nullSpaces_ == NULL ) 
-   {
-      fedata->getNumNodes(nNodes);
-      strcpy( paramString, "getNumExtNodes" );
-      targv[0] = (char *) &itmp;
-      fedata->impSpecificRequests( paramString, 1, targv );
-      nNodes -= itmp;
-      nDim = hypre_fedata->nullDim_;
-      hypre_fedata->nullSpaces_ = new double[nNodes*3*nDim];
-      hypre_fedata->nullLeng_   = nNodes * 3;
-      for ( i = 0; i < nNodes*3*nDim; i++ ) hypre_fedata->nullSpaces_[i] = 0.0;
-   }
-   if ( hypre_fedata->nullCnts_ == NULL ) 
-   {
-      fedata->getNumNodes(nNodes);
-      strcpy( paramString, "getNumExtNodes" );
-      targv[0] = (char *) &itmp;
-      fedata->impSpecificRequests( paramString, 1, targv );
-      nNodes -= itmp;
-      nDim = hypre_fedata->nullDim_;
-      hypre_fedata->nullCnts_   = new int[nNodes*3];
-      for ( i = 0; i < nNodes*3; i++ ) hypre_fedata->nullCnts_[i] = 0;
-   }
-   nSpace = hypre_fedata->nullSpaces_;
-   length = hypre_fedata->nullLeng_;
-   nDim   = hypre_fedata->nullDim_;
-   nCnts  = hypre_fedata->nullCnts_;
-   
-   for ( i = 0; i < matDim; i++ ) 
-   {
-      index = cols[i];
-      for ( j = 0; j < nDim; j++ ) 
-         nSpace[index+length*j] += evectors[j*matDim+i];
-      nCnts[index]++;
-   }
-   if ( elemID == -1 )
-   {
-      for ( i = 0; i < matDim; i++ )
-         printf("Element %5d : eigenvalue = %e\n", elemID, evalues[i]);
-      for ( i = 0; i < matDim; i++ )
-      {
-         for ( j = 0; j < matDim; j++ )
-            printf("%e ", evectors[j*matDim+i]);
-         printf("\n");
-      }
-   }   
-   delete [] evalues;
-   delete [] evectors;
-   delete [] dAux1;
-   delete [] dAux2;
-*/
-   return 0;
 #else
    (void) object;
    (void) elemID;
    (void) matDim;
    (void) inMat;
-   return 1;
-#endif
-}
-
-/****************************************************************************/
-/* HYPRE_LSI_MLIFEDataLoadNullSpaceInfo                                     */
-/*--------------------------------------------------------------------------*/
-
-extern "C"
-int HYPRE_LSI_MLIFEDataLoadNullSpaceInfo( void *object, int number )
-{
-#ifdef HAVE_MLI
-   HYPRE_MLI_FEData *hypre_fedata = (HYPRE_MLI_FEData *) object;
-   if ( hypre_fedata == NULL ) return 1;
-   hypre_fedata->computeNull_ = 1;
-   if ( number > 0 ) hypre_fedata->nullDim_ = number;
-   else              hypre_fedata->nullDim_ = 1;
-   return 0;
-#else
-   (void) object;
-   (void) number;
-   return 1;
-#endif
-}
-
-/****************************************************************************/
-/* HYPRE_LSI_MLIFEDataConstructNullSpace                                    */
-/*--------------------------------------------------------------------------*/
-
-extern "C"
-int HYPRE_LSI_MLIFEDataConstructNullSpace( void *object )
-{
-#ifdef HAVE_MLI
-   int    i, j, length, nDim, *nCnts, mypid;
-   double *nSpace;
-   HYPRE_MLI_FEData *hypre_fedata = (HYPRE_MLI_FEData *) object;
-
-   /* -------------------------------------------------------- */ 
-   /* error checking                                           */
-   /* -------------------------------------------------------- */ 
-
-   if ( hypre_fedata == NULL ) return 1;
-   if ( hypre_fedata->fedata_ == NULL ) return 1;
-   nSpace = hypre_fedata->nullSpaces_;
-   length = hypre_fedata->nullLeng_;
-   nDim   = hypre_fedata->nullDim_;
-   nCnts  = hypre_fedata->nullCnts_;
-   if ( nSpace == NULL || nCnts == NULL )
-   {
-      /*printf("HYPRE_LSI_MLIFEDataConstructNullSpace ERROR : no kernel.\n");*/
-      return 1;
-   }
-   MPI_Comm_rank(hypre_fedata->comm_, &mypid);
-   if ( mypid == 0 )
-      printf("%4d : HYPRE_LSI_MLIFEDataConstructNullSpace called.\n",mypid);
-
-   /* -------------------------------------------------------- */ 
-   /* adjust the kernel (since overlapped data have been       */
-   /* summed, they have to be averaged now)                    */
-   /* -------------------------------------------------------- */ 
-
-   for ( i = 0; i < nDim; i++ ) 
-   {
-      for ( j = 0; j < length; j++ ) 
-      {
-         if ( nCnts[j+length*i] != 0.0 ) 
-            nSpace[j+length*i] /= nCnts[j+length*i];
-         else
-         {
-            printf("HYPRE_LSI_MLIFEDataConstructNullSpace ERROR : nCnts = 0.\n");
-            exit(1);
-         }
-      }
-   }
-   delete [] hypre_fedata->nullCnts_;
-   hypre_fedata->nullCnts_ = NULL;
-   return 0;
-#else
-   (void) object;
-   return 1;
-#endif
-}
-
-/****************************************************************************/
-/* HYPRE_LSI_MLIFEDataGetNullSpacePtr                                       */
-/*--------------------------------------------------------------------------*/
-
-extern "C"
-int HYPRE_LSI_MLIFEDataGetNullSpacePtr( void *object, double **nSpace,
-                                        int *length, int *nDim )
-{
-#ifdef HAVE_MLI
-   HYPRE_MLI_FEData *hypre_fedata = (HYPRE_MLI_FEData *) object;
-   if ( hypre_fedata == NULL ) return 1;
-   (*nSpace) = hypre_fedata->nullSpaces_;
-   (*length) = hypre_fedata->nullLeng_;
-   (*nDim)   = hypre_fedata->nullDim_;
-   return 0;
-#else
-   (void) object;
-   (*nSpace) = NULL;
-   (*length) = 0;
-   (*nDim)   = 0;
    return 1;
 #endif
 }
