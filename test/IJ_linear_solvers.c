@@ -1528,6 +1528,32 @@ main( int   argc,
       HYPRE_BoomerAMGDestroy(amg_solver);
    }
 
+   if (solver_id == 999)
+   {
+      HYPRE_IJMatrix ij_M;
+      HYPRE_ParCSRMatrix  parcsr_mat;
+
+      /* use ParaSails preconditioner */
+      if (myid == 0) printf("Test ParaSails Build IJMatrix\n");
+
+      HYPRE_IJMatrixPrint(ij_A, "parasails.in");
+
+      HYPRE_ParaSailsCreate(MPI_COMM_WORLD, &pcg_precond);
+      HYPRE_ParaSailsSetParams(pcg_precond, 0., 0);
+      HYPRE_ParaSailsSetFilter(pcg_precond, 0.);
+      HYPRE_ParaSailsSetLogging(pcg_precond, ioutdat);
+
+      HYPRE_IJMatrixGetObject( ij_A, &object);
+      parcsr_mat = (HYPRE_ParCSRMatrix) object;
+
+      HYPRE_ParaSailsSetup(pcg_precond, parcsr_mat, NULL, NULL);
+      HYPRE_ParaSailsBuildIJMatrix(pcg_precond, &ij_M);
+      HYPRE_IJMatrixPrint(ij_M, "parasails.out");
+
+      if (myid == 0) printf("Printed to parasails.out.\n");
+      exit(0);
+   }
+
    /*-----------------------------------------------------------
     * Solve the system using PCG 
     *-----------------------------------------------------------*/
