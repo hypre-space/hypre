@@ -185,6 +185,26 @@ AC_ARG_WITH(gdb, [\
   )
 )
 
+AC_ARG_WITH(strict-checking, [\
+  --with-strict-checking  compiles with out MPI ('--without-MPI') and
+			  assigns kcc and KCC as the c and c++ compilers 
+			  and --c --strict as the compiler flag this 
+                          enforces syntax described by ISO 9899-1990, 
+			  the C language standard. Additional compiler
+			  flags, --display_error_number --lint are enabled
+			  for lint-type checking. Individual types of 
+			  warnings can be suppressed using --diag_suppress
+			  and the error numbers provided by 
+			  --display_error_number],
+  CC=kcc
+  CXX=KCC
+  casc_users_chose_compilers=yes
+  CFLAGS="$CFLAGS --c --strict --lint --display_error_number"
+  CXXFLAGS="$CXXFLAGS --strict --lint --display_error_number"
+  casc_using_mpi=no
+  AC_DEFINE(HYPRE_SEQUENTIAL)
+)
+
 dnl *********************************************************************
 dnl * If the user has specified any other command line options (without-MPI, 
 dnl * with-pthreads, with-dmalloc etc.) then this section identifies the 
