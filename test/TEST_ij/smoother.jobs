@@ -16,7 +16,7 @@
 #    4: hybrid GS, no CF-relaxation, on 4 procs
 #=============================================================================
 
-mpirun -np 3 ./new_ij -rhsrand -n 15 30 10 -w 1.1 -wl 1.0 0 \
+mpirun -np 3 ./new_ij -rhsrand -n 15 30 10 -w 1.1 -owl 1.0 0 \
  > smoother.out.0
 
 mpirun -np 4 ./new_ij -rhsrand -n 15 15 10 -P 2 2 1 -rlx 6 -owl -10 0 \
@@ -25,6 +25,6 @@ mpirun -np 4 ./new_ij -rhsrand -n 15 15 10 -P 2 2 1 -rlx 6 -owl -10 0 \
 mpirun -np 4 ./new_ij -rhsrand -n 20 20 10 -P 2 2 1 -rlx_up 4 \
  > coarsening.out.2
 
-mpirun -np 4 ./new_ij -rhsrand -n 20 20 10 -P 2 2 1 -CF_off \
+mpirun -np 4 ./new_ij -rhsrand -n 20 20 10 -P 2 2 1 -CF 0 \
  > coarsening.out.3
 
