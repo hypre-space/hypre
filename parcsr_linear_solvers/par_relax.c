@@ -25,6 +25,7 @@ int  hypre_ParAMGRelax( hypre_ParCSRMatrix *A,
                         int                *cf_marker,
                         int                 relax_type,
                         int                 relax_points,
+                        double              relax_weight,
                         hypre_ParVector    *u,
                         hypre_ParVector    *Vtemp )
 {
@@ -75,6 +76,9 @@ int  hypre_ParAMGRelax( hypre_ParCSRMatrix *A,
 
    double          zero = 0.0;
    double	   res;
+   double          one_minus_weight;
+
+   one_minus_weight = 1.0 - relax_weight;
   
    /*-----------------------------------------------------------------------
     * Switch statement to direct control based on relax_type:
@@ -85,41 +89,8 @@ int  hypre_ParAMGRelax( hypre_ParCSRMatrix *A,
     *-----------------------------------------------------------------------*/
    
    switch (relax_type)
-   {
-      case 2: /* Jacobi (uses ParMatvec) */
-      {
-
-         /*-----------------------------------------------------------------
-          * Copy current approximation into temporary vector.
-          *-----------------------------------------------------------------*/
-        
-  	 hypre_CopyParVector(f,Vtemp); 
-
-         /*-----------------------------------------------------------------
-          * Relax all points.
-          *-----------------------------------------------------------------*/
-
-	    hypre_ParMatvec(-1.0,A, u, 1.0, Vtemp);
-            for (i = 0; i < n; i++)
-            {
-
-               /*-----------------------------------------------------------
-                * If diagonal is nonzero, relax point i; otherwise, skip it.
-                *-----------------------------------------------------------*/
-             
-               if (A_diag_data[A_diag_i[i]] != zero)
-               {
-                  u_data[i] -= Vtemp_data[i] / A_diag_data[A_diag_i[i]];
-/*  or Jacobi relaxation
-                  u_data[i] -= omega * Vtemp_data[i] / A_diag_data[A_diag_i[i]];
-*/
-               }
-            }
-      }
-      break;
-      
-      
-      case 0: /* Jacobi */
+   {            
+      case 0: /* Weighted Jacobi */
       {
    	num_sends = hypre_CommPkgNumSends(comm_pkg);
 
@@ -183,7 +154,8 @@ int  hypre_ParAMGRelax( hypre_ParCSRMatrix *A,
                      ii = A_offd_j[jj];
                      res -= A_offd_data[jj] * Vext_data[ii];
                   }
-                  u_data[i] = res / A_diag_data[A_diag_i[i]];
+                  u_data[i] *= one_minus_weight; 
+                  u_data[i] += relax_weight * res / A_diag_data[A_diag_i[i]];
                }
             }
          }
@@ -216,7 +188,8 @@ int  hypre_ParAMGRelax( hypre_ParCSRMatrix *A,
                      ii = A_offd_j[jj];
                      res -= A_offd_data[jj] * Vext_data[ii];
                   }
-                  u_data[i] = res / A_diag_data[A_diag_i[i]];
+                  u_data[i] *= one_minus_weight; 
+                  u_data[i] += relax_weight * res / A_diag_data[A_diag_i[i]];
                }
             }     
          }

@@ -39,6 +39,7 @@ hypre_ParAMGInitialize()
    int     *num_grid_sweeps;  
    int     *grid_relax_type;   
    int    **grid_relax_points; 
+   double   relax_weight;
 
 
    /* output params */
@@ -65,6 +66,7 @@ hypre_ParAMGInitialize()
    num_grid_sweeps = hypre_CTAlloc(int,4);
    grid_relax_type = hypre_CTAlloc(int,4);
    grid_relax_points = hypre_CTAlloc(int *,4);
+   relax_weight = 2.0/3.0;
 
    for (j = 0; j < 3; j++)
    {
@@ -100,6 +102,7 @@ hypre_ParAMGInitialize()
    hypre_ParAMGSetNumGridSweeps(amg_data, num_grid_sweeps);
    hypre_ParAMGSetGridRelaxType(amg_data, grid_relax_type);
    hypre_ParAMGSetGridRelaxPoints(amg_data, grid_relax_points);
+   hypre_ParAMGSetRelaxWeight(amg_data, relax_weight);
 
    hypre_ParAMGSetIOutDat(amg_data, ioutdat);
    hypre_ParAMGSetLogFileName(amg_data, log_file_name); 
@@ -252,6 +255,18 @@ hypre_ParAMGSetGridRelaxPoints( void     *data,
 
    hypre_ParAMGDataGridRelaxPoints(amg_data) = grid_relax_points; 
 
+   return (ierr);
+}
+
+int
+hypre_ParAMGSetRelaxWeight( void     *data,
+                            double    relax_weight )
+{
+   int ierr = 0;
+   hypre_ParAMGData  *amg_data = data;
+               
+   hypre_ParAMGDataRelaxWeight(amg_data) = relax_weight;
+   
    return (ierr);
 }
 

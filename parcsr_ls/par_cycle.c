@@ -62,6 +62,7 @@ hypre_ParAMGCycle( void              *amg_vdata,
    int       num_sweep;
    int       relax_type;
    int       relax_points;
+   double    relax_weight;
 
    double    alpha;
    double    beta;
@@ -85,7 +86,8 @@ hypre_ParAMGCycle( void              *amg_vdata,
 
    num_grid_sweeps     = hypre_ParAMGDataNumGridSweeps(amg_data);
    grid_relax_type     = hypre_ParAMGDataGridRelaxType(amg_data);
-   grid_relax_points   =  hypre_ParAMGDataGridRelaxPoints(amg_data); 
+   grid_relax_points   = hypre_ParAMGDataGridRelaxPoints(amg_data);
+   relax_weight        = hypre_ParAMGDataRelaxWeight(amg_data); 
 
    cycle_op_count = hypre_ParAMGDataCycleOpCount(amg_data);
 
@@ -175,6 +177,7 @@ hypre_ParAMGCycle( void              *amg_vdata,
                                             CF_marker_array[level],
                                             relax_type,
                                             relax_points,
+                                            relax_weight,
                                             U_array[level],
                                             Vtemp);
 

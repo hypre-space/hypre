@@ -177,10 +177,12 @@ main( int   argc,
       int      cycle_type;
       int     *num_grid_sweeps;  
       int     *grid_relax_type;   
-      int    **grid_relax_points; 
+      int    **grid_relax_points;
+      double   relax_weight; 
 
       strong_threshold = 0.25;
       cycle_type       = 1;
+      relax_weight = 1.0;
 
       num_grid_sweeps = hypre_CTAlloc(int,4);
       grid_relax_type = hypre_CTAlloc(int,4);
@@ -214,11 +216,31 @@ main( int   argc,
       grid_relax_points[3][0] = 0;
 
       amg_solver = HYPRE_ParAMGInitialize();
+
+   arg_index = 0;
+   while (arg_index < argc)
+   {
+      if ( strcmp(argv[arg_index], "-w") == 0 )
+      {
+         arg_index++;
+         relax_weight = atof(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-th") == 0 )
+      {
+         arg_index++;
+         strong_threshold  = atof(argv[arg_index++]);
+      }
+      else
+      {
+         arg_index++;
+      }
+   }
       HYPRE_ParAMGSetStrongThreshold(amg_solver, strong_threshold);
       HYPRE_ParAMGSetLogging(amg_solver, 3, "driver.out.log");
       HYPRE_ParAMGSetCycleType(amg_solver, cycle_type);
       HYPRE_ParAMGSetNumGridSweeps(amg_solver, num_grid_sweeps);
       HYPRE_ParAMGSetGridRelaxType(amg_solver, grid_relax_type);
+      HYPRE_ParAMGSetRelaxWeight(amg_solver, relax_weight);
       HYPRE_ParAMGSetGridRelaxPoints(amg_solver, grid_relax_points);
       HYPRE_ParAMGSetMaxLevels(amg_solver, 25);
       HYPRE_ParAMGSetup(amg_solver, A, b, x);

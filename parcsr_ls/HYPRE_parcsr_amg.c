@@ -170,6 +170,17 @@ HYPRE_ParAMGSetGridRelaxPoints( HYPRE_Solver   solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_ParAMGSetRelaxWeight
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_ParAMGSetRelaxWeight( HYPRE_Solver solver,
+                            double       relax_weight  )
+{
+   return( hypre_ParAMGSetRelaxWeight( (void *) solver, relax_weight ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_ParAMGSetIOutDat
  *--------------------------------------------------------------------------*/
 
