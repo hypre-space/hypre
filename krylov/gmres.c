@@ -264,7 +264,7 @@ hypre_GMRESSolve(void  *gmres_vdata,
    if (logging > 0)
    {
       norms[0] = r_norm;
-      if (my_id == 0)
+      if (logging > 1 && my_id == 0)
       {
   	 printf("L2 norm of b: %e\n", b_norm);
          if (b_norm == 0.0)
@@ -290,6 +290,23 @@ hypre_GMRESSolve(void  *gmres_vdata,
    if ( stop_crit && !rel_change )
       epsilon = accuracy;
 
+   if (logging > 1 && my_id == 0)
+   {
+      if (b_norm > 0.0)
+         {printf("=============================================\n\n");
+          printf("Iters     resid.norm     conv.rate  rel.res.norm\n");
+          printf("-----    ------------    ---------- ------------\n");
+      
+          }
+
+      else
+         {printf("=============================================\n\n");
+          printf("Iters     resid.norm     conv.rate\n");
+          printf("-----    ------------    ----------\n");
+      
+          };
+   }
+
    while (iter < max_iter)
    {
    /* initialize first term of hessenberg system */
@@ -308,8 +325,11 @@ hypre_GMRESSolve(void  *gmres_vdata,
 		r_norm = sqrt((*(gmres_functions->InnerProd))(r,r));
 		if (r_norm <= epsilon)
                 {
-                  if (logging > 0 && my_id == 0)
+                  if (logging > 1 && my_id == 0)
+                  {
+                     printf("\n\n");
                      printf("Final L2 norm of residual: %e\n\n", r_norm);
+                  }
                   break;
                 }
 	}
@@ -358,7 +378,18 @@ hypre_GMRESSolve(void  *gmres_vdata,
 		if (logging > 0)
 		{
 		   norms[iter] = r_norm;
+                   if (logging > 1 && my_id == 0)
+   		   {
+      		      if (b_norm > 0.0)
+             	         printf("% 5d    %e    %f   %e\n", iter, 
+				norms[iter],norms[iter]/norms[iter-1],
+ 	             		norms[iter]/b_norm);
+      		      else
+             	         printf("% 5d    %e    %f\n", iter, norms[iter],
+				norms[iter]/norms[iter-1]);
+   		   }
 		}
+
 	}
 	/* now compute solution, first solve upper triangular system */
 	
@@ -392,8 +423,11 @@ hypre_GMRESSolve(void  *gmres_vdata,
 		r_norm = sqrt( (*(gmres_functions->InnerProd))(r,r) );
 		if (r_norm <= epsilon)
                 {
-                   if (logging > 0 && my_id == 0)
+                   if (logging > 1 && my_id == 0)
+                   {
+                      printf("\n\n");
                       printf("Final L2 norm of residual: %e\n\n", r_norm);
+                   }
                    if (rel_change && r_norm > guard_zero_residual)
                       /* Also test on relative change of iterates, x_i - x_(i-1) */
                    {  /* At this point r = x_i - x_(i-1) */
@@ -427,31 +461,8 @@ hypre_GMRESSolve(void  *gmres_vdata,
 		(*(gmres_functions->Axpy))(rs[j],p[j],p[0]);	
    }
 
-   if (logging > 0 && my_id == 0)
-   {
-      if (b_norm > 0.0)
-         {printf("=============================================\n\n");
-          printf("Iters     resid.norm     conv.rate  rel.res.norm\n");
-          printf("-----    ------------    ---------- ------------\n");
-      
-          for (j = 1; j <= iter; j++)
-          {
-             printf("% 5d    %e    %f   %e\n", j, norms[j],norms[j]/norms[j-1],
- 	             norms[j]/b_norm);
-          }
-          printf("\n\n"); }
-
-      else
-         {printf("=============================================\n\n");
-          printf("Iters     resid.norm     conv.rate\n");
-          printf("-----    ------------    ----------\n");
-      
-          for (j = 1; j <= iter; j++)
-          {
-             printf("% 5d    %e    %f\n", j, norms[j],norms[j]/norms[j-1]);
-          }
-          printf("\n\n"); };
-   }
+   if (logging > 1 && my_id == 0)
+          printf("\n\n"); 
 
    (gmres_data -> num_iterations) = iter;
    if (b_norm > 0.0)

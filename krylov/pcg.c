@@ -267,7 +267,7 @@ hypre_PCGSolve( void *pcg_vdata,
    {
       /* bi_prod = <b,b> */
       bi_prod = (*(pcg_functions->InnerProd))(b, b);
-      if (logging > 0 && my_id == 0) /* formerly for par_csr only */
+      if (logging > 1 && my_id == 0) 
           printf("<b,b>: %e\n",bi_prod);
    }
    else
@@ -276,7 +276,7 @@ hypre_PCGSolve( void *pcg_vdata,
       (*(pcg_functions->ClearVector))(p);
       precond(precond_data, A, b, p);
       bi_prod = (*(pcg_functions->InnerProd))(p, b);
-      if (logging > 0 && my_id == 0) /* formerly for par_csr only */
+      if (logging > 1 && my_id == 0)
           printf("<C*b,b>: %e\n",bi_prod);
    };
 
@@ -311,6 +311,27 @@ hypre_PCGSolve( void *pcg_vdata,
       i_prod_0   = (*(pcg_functions->InnerProd))(r,r);
       if (logging > 0) norms[0] = sqrt(i_prod_0);
    }
+   if ( logging > 1 && my_id==0 )  /* formerly for par_csr only */
+   {
+      printf("\n\n");
+      if (two_norm)
+      {
+         if ( stop_crit && !rel_change ) {  /* absolute tolerance */
+            printf("Iters       ||r||_2     conv.rate\n");
+            printf("-----    ------------   ---------\n");
+         }
+         else {
+            printf("Iters       ||r||_2     conv.rate  ||r||_2/||b||_2\n");
+            printf("-----    ------------   ---------  ------------ \n");
+         }
+      }
+      else  /* !two_norm */
+      {
+         printf("Iters       ||r||_C      ||r||_C/||b||_C\n");
+         printf("-----    ------------    ------------ \n");
+      }
+   }
+
 
    /* p = C*r */
    (*(pcg_functions->ClearVector))(p);
@@ -365,6 +386,27 @@ hypre_PCGSolve( void *pcg_vdata,
          norms[i]     = sqrt(i_prod);
          rel_norms[i] = bi_prod ? sqrt(i_prod/bi_prod) : 0;
       }
+      if ( logging > 1 && my_id==0 )
+      {
+         if (two_norm)
+         {
+            if ( stop_crit && !rel_change ) {  /* absolute tolerance */
+               printf("% 5d    %e    %f\n", i, norms[i],
+                      norms[i]/norms[i-1] );
+            }
+            else 
+            {
+               printf("% 5d    %e    %f    %e\n", i, norms[i],
+                      norms[i]/norms[i-1], rel_norms[i] );
+            }
+         }
+         else 
+         {
+               printf("% 5d    %e    %f    %e\n", i, norms[i],
+                      norms[i]/norms[i-1], rel_norms[i] );
+         }
+      }
+
 
       /* check for convergence */
       if (i_prod / bi_prod < eps)
@@ -424,44 +466,8 @@ hypre_PCGSolve( void *pcg_vdata,
              i, sqrt(i_prod), (bi_prod ? sqrt(i_prod/bi_prod) : 0));
 #endif
 
-   /*-----------------------------------------------------------------------
-    * Print log
-    *-----------------------------------------------------------------------*/
-
-   if ( logging > 0 && my_id==0 )  /* formerly for par_csr only */
-   {
+   if ( logging > 1 && my_id==0 )  /* formerly for par_csr only */
       printf("\n\n");
-      if (two_norm)
-      {
-         if ( stop_crit && !rel_change ) {  /* absolute tolerance */
-            printf("Iters       ||r||_2     conv.rate\n");
-            printf("-----    ------------   ---------\n");
-            for (j = 1; j <= i; j++) {
-               printf("% 5d    %e    %f\n", j, norms[j],
-                      norms[j]/norms[j-1] );
-            }
-         }
-         else {
-            
-            printf("Iters       ||r||_2     conv.rate  ||r||_2/||b||_2\n");
-            printf("-----    ------------   ---------  ------------ \n");
-            for (j = 1; j <= i; j++) {
-               printf("% 5d    %e    %f    %e\n", j, norms[j],
-                      norms[j]/norms[j-1], rel_norms[j] );
-            }
-         }
-      }
-      else  /* !two_norm */
-      {
-         printf("Iters       ||r||_C      ||r||_C/||b||_C\n");
-         printf("-----    ------------    ------------ \n");
-         for (j = 1; j <= i; j++) {
-            printf("% 5d    %e    %f    %e\n", j, norms[j],
-                   norms[j]/norms[j-1], rel_norms[j] );
-         }
-      }
-      printf("\n\n");
-   }
 
    (pcg_data -> num_iterations) = i;
 

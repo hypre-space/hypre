@@ -208,17 +208,18 @@ hypre_CGNRSolve(void *cgnr_vdata,
    int             my_id, num_procs;
    int             x_not_set = 1;
    char		  *log_file_name;
-   FILE		  *fp;
 
    /*-----------------------------------------------------------------------
     * Start cgnr solve
     *-----------------------------------------------------------------------*/
    (*(cgnr_functions->CommInfo))(A,&my_id,&num_procs);
-   if (logging > 0)
+   if (logging > 1 && my_id == 0)
    {
       log_file_name = (cgnr_data -> log_file_name);
-      fp = fopen(log_file_name,"w");
+      printf("Iters       ||r||_2      conv.rate  ||r||_2/||b||_2\n");
+      printf("-----    ------------    ---------  ------------ \n");
    }
+
 
    /* compute eps */
    bi_prod = (*(cgnr_functions->InnerProd))(b, b);
@@ -296,6 +297,11 @@ hypre_CGNRSolve(void *cgnr_vdata,
       if (logging > 0)
       {
          norms[i]     = sqrt(i_prod);
+         if (logging > 1 && my_id == 0)
+         {
+            printf("% 5d    %e    %f   %e\n", i, norms[i], norms[i]/ 
+		norms[i-1], norms[i]/bi_prod);
+         }
       }
 
       /* check for convergence */
@@ -342,16 +348,9 @@ hypre_CGNRSolve(void *cgnr_vdata,
 
    bi_prod = sqrt(bi_prod);
 
-   if (logging > 0 && my_id == 0)
+   if (logging > 1 && my_id == 0)
    {
-      fprintf(fp,"Iters       ||r||_2      conv.rate  ||r||_2/||b||_2\n");
-      fprintf(fp,"-----    ------------    ---------  ------------ \n");
-      for (j = 1; j <= i; j++)
-      {
-         fprintf(fp,"% 5d    %e    %f   %e\n", j, norms[j], norms[j]/ 
-		norms[j-1], norms[j]/bi_prod);
-      }
-      fclose(fp);
+      printf("\n\n");
    }
 
    (cgnr_data -> num_iterations) = i;
