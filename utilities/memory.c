@@ -81,7 +81,9 @@ hypre_MAlloc( int size )
 
 #if 1
       if (ptr == NULL)
+      {
         hypre_OutOfMemory(size);
+      }
 #endif
    }
    else
@@ -115,7 +117,9 @@ hypre_CAlloc( int count,
 
 #if 1
       if (ptr == NULL)
-        hypre_OutOfMemory(count * elt_size);
+      {
+        hypre_OutOfMemory(size);
+      }
 #endif
    }
    else
@@ -134,7 +138,6 @@ char *
 hypre_ReAlloc( char *ptr,
                int   size )
 {
-
 #ifdef HYPRE_USE_UMALLOC
    if (ptr == NULL)
    {
@@ -154,8 +157,10 @@ hypre_ReAlloc( char *ptr,
 #endif
 
 #if 1
-   if (ptr == NULL)
-     hypre_OutOfMemory(size);
+   if ((ptr == NULL) && (size > 0))
+   {
+      hypre_OutOfMemory(size);
+   }
 #endif
 
    return ptr;
