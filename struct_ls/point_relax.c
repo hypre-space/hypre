@@ -561,7 +561,7 @@ hypre_PointRelax( void               *relax_vdata,
 
             case 1:
             {
-               hypre_FinalizeIndtComputations(comm_handle);
+               hypre_FinalizeIndtComputations(comm_handle,constant_coefficient);
                compute_box_aa = hypre_ComputePkgDeptBoxes(compute_pkg);
             }
             break;
