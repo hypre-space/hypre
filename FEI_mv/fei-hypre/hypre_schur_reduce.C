@@ -997,8 +997,8 @@ double HYPRE_LinSysCore::buildSchurReducedSoln()
 
     if ( HYA21_ == NULL || HYinvA22_ == NULL )
     {
-       printf("buildSchurReducedSoln ERROR : A21 or A22 absent.\n");
-       exit(1);
+       printf("buildSchurReducedSoln WARNING : A21 or A22 absent.\n");
+       return (0.0);
     }
     else
     {
@@ -1169,6 +1169,11 @@ void HYPRE_LinSysCore::buildSchurReducedRHS()
     if ( mypid_ == 0 && (HYOutputLevel_ & HYFEI_SCHURREDUCE1) )
     {
        printf("buildSchurRHS begins....\n");
+    }
+    if ( HYA21_ == NULL || HYinvA22_ == NULL )
+    {
+       printf("buildSchurReducedRHS WARNING : A21 or A22 absent.\n");
+       return;
     }
     StartRow = localStartRow_ - 1;
     EndRow   = localEndRow_ - 1;
