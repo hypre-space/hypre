@@ -633,8 +633,12 @@ then
      then
        CASC_SET_COPT(-O)
        CASC_SET_CDEBUG()
-     else 
+     elif test "$CC" = "cc" 
+     then
        CASC_SET_COPT(-fast)
+       CASC_SET_CDEBUG(-g)
+     else 
+       CASC_SET_COPT(-O)
        CASC_SET_CDEBUG(-g)
      fi
 
@@ -1067,6 +1071,4 @@ CASC_CONFIG_OUTPUT_LIST(\
  utilities)
 
 AC_OUTPUT($Makefile_list)
-
-
 
