@@ -1,12 +1,7 @@
 c-----------------------------------------------------------------------
-c Test driver for unstructured matrix interface (structured storage)
+c Test driver for unstructured matrix-vector interface
 c-----------------------------------------------------------------------
  
-c-----------------------------------------------------------------------
-c Standard 7-point laplacian in 3D with grid and anisotropy determined
-c as user settings.
-c-----------------------------------------------------------------------
-
       program test
 
       implicit none
@@ -27,38 +22,14 @@ c-----------------------------------------------------------------------
       integer             dim
       integer             nx, ny, nz
       integer             Px, Py, Pz
-      integer             bx, by, bz
       double precision    cx, cy, cz
-      integer             n_pre, n_post
-      integer             solver_id
-      integer             precond_id
 
-      integer             hybrid, coarsen_type, measure_type
-      integer             setup_type
-      integer             debug_flag, ioutdat, cycle_type, k_dim
-      integer             nlevels
-
-      integer             zero, one, maxiter, num_iterations
-      integer             generate_matrix, generate_rhs
+      integer             generate_matrix, generate_vec
       character           matfile(32), vecfile(32)
+      character*32        matfile_str, vecfile_str
 
-      double precision    tol, convtol
-      double precision    final_res_norm
-      double precision    strong_threshold, trunc_factor, drop_tol
-      double precision    threshold
-                     
       integer*8           A, A_storage
-      integer*8           b, b_storage
-      integer*8           x, x_storage
-
-      integer*8           solver
-      integer*8           precond
-      integer*8           precond_gotten
-      integer*8           num_grid_sweeps
-      integer*8           grid_relax_type
-      integer*8           grid_relax_points
-      integer*8           relax_weights
-      integer*8           row_starts
+      integer*8           x, b
 
       double precision    values(4)
 
@@ -70,10 +41,11 @@ c-----------------------------------------------------------------------
       integer             first_local_row, last_local_row
       integer             first_local_col, last_local_col
       integer             indices(MAXZONS)
-      double precision    vals(MAXZONS)
 
-      data zero          / 0 /
-      data one           / 1 /
+      double precision    vals(MAXZONS)
+      double precision    bvals(MAXZONS)
+      double precision    xvals(MAXZONS)
+      double precision    sum
 
 c-----------------------------------------------------------------------
 c     Initialize MPI
@@ -98,24 +70,15 @@ c-----------------------------------------------------------------------
       Py  = 1
       Pz  = 1
 
-      bx = 1
-      by = 1
-      bz = 1
-
       cx = 1.0
       cy = 1.0
       cz = 1.0
-
-      n_pre  = 1
-      n_post = 1
-
-      solver_id = 3
 
 c-----------------------------------------------------------------------
 c     Read options
 c-----------------------------------------------------------------------
  
-c     open( 5, file='parcsr_linear_solver.in', status='old')
+c     open( 5, file='parcsr_matrix_vector.in', status='old')
 c
 c     read( 5, *) dim
 c
@@ -127,46 +90,44 @@ c     read( 5, *) Px
 c     read( 5, *) Py
 c     read( 5, *) Pz
 c
-c     read( 5, *) bx
-c     read( 5, *) by
-c     read( 5, *) bz
-c
 c     read( 5, *) cx
 c     read( 5, *) cy
 c     read( 5, *) cz
-c
-c     read( 5, *) n_pre
-c     read( 5, *) n_post
 c
 c     write(6,*) 'Generate matrix? !0 yes, 0 no (from file)'
       read(5,*) generate_matrix
 
       if (generate_matrix .eq. 0) then
 c       write(6,*) 'What file to use for matrix (<= 32 chars)?'
-        read(5,*) matfile
+        read(5,*) matfile_str
+        i = 1
+  100   if (matfile_str(i:i) .ne. ' ') then
+          matfile(i) = matfile_str(i:i)
+        else
+          goto 200
+        endif
+        i = i + 1
+        goto 100
+  200   matfile(i) = char(0)
       endif
 
-c     write(6,*) 'Generate right-hand side? !0 yes, 0 no (from file)'
-      read(5,*) generate_rhs
+c     write(6,*) 'Generate vector? !0 yes, 0 no (from file)'
+      read(5,*) generate_vec
 
-      if (generate_rhs .eq. 0) then
+      if (generate_vec .eq. 0) then
 c       write(6,*)
-c    &    'What file to use for right-hand side (<= 32 chars)?'
-        read(5,*) vecfile
+c    &    'What file to use for vector (<= 32 chars)?'
+        read(5,*) vecfile_str
+        i = 1
+  300   if (vecfile_str(i:i) .ne. ' ') then
+          vecfile(i) = vecfile_str(i:i)
+        else
+          goto 400
+        endif
+        i = i + 1
+        goto 300
+  400   vecfile(i) = char(0)
       endif
-
-c     write(6,*) 'What solver_id?'
-c     write(6,*) '0 AMG, 2 GMRES, 3 AMG-GMRES, 4 DSGMRES'
-c     write(6,*) '7 PILUT-GMRES, 8 PARASAILS-GMRES'
-      read(5,*) solver_id
-
-      if (solver_id .eq. 7) then
-c       write(6,*) 'What drop tolerance?  <0 do not drop'
-        read(5,*) drop_tol
-      endif
- 
-c     write(6,*) 'What relative residual norm tolerance?'
-      read(5,*) tol
 
 c     close( 5 )
 
@@ -189,23 +150,16 @@ c-----------------------------------------------------------------------
          stop
       endif
 
-      if ((bx*by*bz) .gt. MAXBLKS) then
-         print *, 'Error: Invalid number of blocks'
-         stop
-      endif
-
 c-----------------------------------------------------------------------
 c     Print driver parameters
 c-----------------------------------------------------------------------
 
       if (myid .eq. 0) then
-         print *, 'Running with these driver parameters:'
-         print *, '  (nx, ny, nz)    = (', nx, ',', ny, ',', nz, ')'
-         print *, '  (Px, Py, Pz)    = (',  Px, ',',  Py, ',',  Pz, ')'
-         print *, '  (bx, by, bz)    = (', bx, ',', by, ',', bz, ')'
-         print *, '  (cx, cy, cz)    = (', cx, ',', cy, ',', cz, ')'
-         print *, '  (n_pre, n_post) = (', n_pre, ',', n_post, ')'
-         print *, '  dim             = ', dim
+         print *, 'Matrix built with these parameters:'
+         print *, '  (nx, ny, nz) = (', nx, ',', ny, ',', nz, ')'
+         print *, '  (Px, Py, Pz) = (',  Px, ',',  Py, ',',  Pz, ')'
+         print *, '  (cx, cy, cz) = (', cx, ',', cy, ',', cz, ')'
+         print *, '  dim          = ', dim
       endif
 
 c-----------------------------------------------------------------------
@@ -247,11 +201,9 @@ c-----------------------------------------------------------------------
 
 c Generate a Dirichlet Laplacian
       if (generate_matrix .gt. 0) then
-c        call HYPRE_ParCSRMatrixCreate(MPI_COMM_WORLD, gnrows, gncols,
-c    &      rstarts, cstarts, ncoloffdg, nonzsdg, nonzsoffdg,
-c    &      A_storage, ierr)
 
-c        call HYPRE_ParCSRMatrixInitialize(A_storage, ierr)
+c        Standard 7-point laplacian in 3D with grid and anisotropy
+c        determined as user settings.
 
          call HYPRE_GenerateLaplacian(MPI_COMM_WORLD, nx, ny, nz,
      &                                Px, Py, Pz, p, q, r, values,
@@ -267,339 +219,199 @@ c        call HYPRE_ParCSRMatrixInitialize(A_storage, ierr)
 
          call HYPRE_IJMatrixSetObject(A, A_storage, ierr)
 
+         if (ierr .ne. 0) write(6,*) 'Matrix object set failed'
+
          call HYPRE_IJMatrixSetObjectType(A, HYPRE_PARCSR, ierr)
 
       else
 
-         call HYPRE_IJMatrixRead(MPI_COMM_WORLD, matfile, A, ierr)
+         call HYPRE_IJMatrixRead(matfile, MPI_COMM_WORLD,
+     &                           HYPRE_PARCSR, A, ierr)
+
+         if (ierr .ne. 0) write(6,*) 'Matrix read failed'
+
+         call HYPRE_IJMatrixGetObject(A, A_storage, ierr)
+
+         if (ierr .ne. 0)
+     &      write(6,*) 'Matrix object retrieval failed'
+
+         call HYPRE_ParCSRMatrixGetLocalRange(A_storage,
+     &             first_local_row, last_local_row,
+     &             first_local_col, last_local_col, ierr)
+
+         if (ierr .ne. 0)
+     &      write(6,*) 'Matrix local range retrieval failed'
 
       endif
 
-      matfile(1)  = 'd'
-      matfile(2)  = 'r'
-      matfile(3)  = 'i'
-      matfile(4)  = 'v'
-      matfile(5)  = 'e'
-      matfile(6)  = 'r'
-      matfile(7)  = '.'
-      matfile(8)  = 'o'
-      matfile(9)  = 'u'
-      matfile(10) = 't'
-      matfile(11) = '.'
-      matfile(12) = 'A'
-      matfile(13) = char(0)
+      matfile(1) = 'm'
+      matfile(2) = 'v'
+      matfile(3) = '.'
+      matfile(4) = 'o'
+      matfile(5) = 'u'
+      matfile(6) = 't'
+      matfile(7) = '.'
+      matfile(8) = 'A'
+      matfile(9) = char(0)
    
       call HYPRE_IJMatrixPrint(A, matfile, ierr)
 
-      call hypre_ParCSRMatrixRowStarts(A_storage, row_starts, ierr)
-
+      if (ierr .ne. 0) write(6,*) 'Matrix print failed'
+  
 c-----------------------------------------------------------------------
-c     Set up the rhs and initial guess
+c     "RHS vector" test
 c-----------------------------------------------------------------------
+      if (generate_vec .gt. 0) then
+        call HYPRE_IJVectorCreate(MPI_COMM_WORLD, first_local_row,
+     &                            last_local_row, b, ierr)
 
-      if (generate_rhs .gt. 0) then
-        call HYPRE_IJVectorCreate(MPI_COMM_WORLD, first_local_col,
-     &                            last_local_col, b, ierr)
+        if (ierr .ne. 0) write(6,*) 'RHS vector creation failed'
+  
         call HYPRE_IJVectorSetObjectType(b, HYPRE_PARCSR, ierr)
+
+        if (ierr .ne. 0) write(6,*) 'RHS vector object set failed'
+  
         call HYPRE_IJVectorInitialize(b, ierr)
+
+        if (ierr .ne. 0) write(6,*) 'RHS vector initialization failed'
+  
 c Set up a Dirichlet 0 problem
-        do i = 1, last_local_col - first_local_col + 1
-          indices(i) = first_local_col - 1 + i
+        do i = 1, last_local_row - first_local_row + 1
+          indices(i) = first_local_row - 1 + i
           vals(i) = 0.
         enddo
         call HYPRE_IJVectorSetValues(b,
-     &    first_local_col - last_local_col + 1, indices, vals, ierr)
-        call HYPRE_IJVectorGetObject(b, b_storage, ierr)
+     &    last_local_row - first_local_row + 1, indices, vals, ierr)
 
-        vecfile(1)  = 'd'
-        vecfile(2)  = 'r'
-        vecfile(3)  = 'i'
-        vecfile(4)  = 'v'
-        vecfile(5)  = 'e'
-        vecfile(6)  = 'r'
-        vecfile(7)  = '.'
-        vecfile(8)  = 'o'
-        vecfile(9)  = 'u'
-        vecfile(10) = 't'
-        vecfile(11) = '.'
-        vecfile(12) = 'b'
-        vecfile(13) = char(0)
+        vecfile(1) = 'm'
+        vecfile(2) = 'v'
+        vecfile(3) = '.'
+        vecfile(4) = 'o'
+        vecfile(5) = 'u'
+        vecfile(6) = 't'
+        vecfile(7) = '.'
+        vecfile(8) = 'b'
+        vecfile(9) = char(0)
    
         call HYPRE_IJVectorPrint(b, vecfile, ierr)
 
+        if (ierr .ne. 0) write(6,*) 'RHS vector print failed'
+
       else
-        call HYPRE_ParVectorRead(MPI_COMM_WORLD, b, vecfile, ierr)
+
+        call HYPRE_IJVectorRead(vecfile, MPI_COMM_WORLD,
+     &                          HYPRE_PARCSR, b, ierr)
+
+        if (ierr .ne. 0) write(6,*) 'RHS vector read failed'
+
       endif
 
+      do i = 1, last_local_row - first_local_row + 1
+        indices(i) = first_local_row - 1 + i
+      enddo
+
+      call HYPRE_IJVectorGetValues(b,
+     &  last_local_row - first_local_row + 1, indices, bvals, ierr)
+  
+      if (ierr .ne. 0) write(6,*) 'RHS vector value retrieval failed'
+  
+c     Set about to modify every other component of b, by adding the
+c     negative of the component
+
+      do i = 1, last_local_row - first_local_row + 1, 2
+        indices(i) = first_local_row - 1 + i
+        vals(i)    = -bvals(i)
+      enddo
+
+      call HYPRE_IJVectorAddToValues(b,
+     &   1 + (last_local_row - first_local_row)/2, indices, vals, ierr)
+
+      if (ierr .ne. 0) write(6,*) 'RHS vector value addition failed'
+  
+      do i = 1, last_local_row - first_local_row + 1
+        indices(i) = first_local_row - 1 + i
+      enddo
+
+      call HYPRE_IJVectorGetValues(b,
+     &  last_local_row - first_local_row + 1, indices, bvals, ierr)
+
+      if (ierr .ne. 0) write(6,*) 'RHS vector value retrieval failed'
+  
+      sum = 0.
+      do i = 1, last_local_row - first_local_row + 1, 2
+        sum = sum + bvals(i)
+      enddo
+  
+      if (sum .ne. 0.) write(6,*) 'RHS vector value addition error'
+
+c-----------------------------------------------------------------------
+c     "Solution vector" test
+c-----------------------------------------------------------------------
       call HYPRE_IJVectorCreate(MPI_COMM_WORLD, first_local_col,
      &                          last_local_col, x, ierr)
+
+      if (ierr .ne. 0) write(6,*) 'Solution vector creation failed'
+  
       call HYPRE_IJVectorSetObjectType(x, HYPRE_PARCSR, ierr)
+
+      if (ierr .ne. 0) write(6,*) 'Solution vector object set failed'
+  
       call HYPRE_IJVectorInitialize(x, ierr)
+
+      if (ierr .ne. 0) write(6,*) 'Solution vector initialization',
+     &                            ' failed'
+  
       do i = 1, last_local_col - first_local_col + 1
           indices(i) = first_local_col - 1 + i
           vals(i) = 0.
       enddo
+
       call HYPRE_IJVectorSetValues(x,
-     &  first_local_col - last_local_col + 1, indices, vals, ierr)
+     &  last_local_col - first_local_col + 1, indices, vals, ierr)
 
-c Choose a nonzero initial guess
-      call HYPRE_IJVectorGetObject(x, x_storage, ierr)
-      call hypre_SetParVectorConstantValue(x_storage, 1d0, ierr)
-
-      vecfile(1)  = 'd'
-      vecfile(2)  = 'r'
-      vecfile(3)  = 'i'
-      vecfile(4)  = 'v'
-      vecfile(5)  = 'e'
-      vecfile(6)  = 'r'
+      if (ierr .ne. 0) write(6,*) 'Solution vector value set failed'
+  
+      vecfile(1)  = 'm'
+      vecfile(2)  = 'v'
+      vecfile(3)  = '.'
+      vecfile(4)  = 'o'
+      vecfile(5)  = 'u'
+      vecfile(6)  = 't'
       vecfile(7)  = '.'
-      vecfile(8)  = 'o'
-      vecfile(9)  = 'u'
-      vecfile(10) = 't'
-      vecfile(11) = '.'
-      vecfile(12) = 'x'
-      vecfile(13) = '0'
-      vecfile(14) = char(0)
+      vecfile(8)  = 'x'
+      vecfile(9) = char(0)
    
       call HYPRE_IJVectorPrint(x, vecfile, ierr)
 
-c-----------------------------------------------------------------------
-c     Solve the linear system
-c-----------------------------------------------------------------------
+      if (ierr .ne. 0) write(6,*) 'Solution vector print failed'
+  
+      indices(1) = last_local_col
+      indices(2) = first_local_col
+      vals(1) = -99.
+      vals(2) = -45.
 
-c     General solver parameters, passing hard coded constants
-c     will break the interface.
+      call HYPRE_IJVectorAddToValues(x, 2, indices, vals, ierr)
 
-      maxiter = 100
-      convtol = 0.9
-      debug_flag = 0
-      ioutdat = 1
+      if (ierr .ne. 0) write(6,*) 'Solution vector value addition',
+     &                            ' failed'
+  
+      do i = 1, last_local_col - first_local_col + 1
+        indices(i) = first_local_col - 1 + i
+      enddo
 
-      if (solver_id .eq. 0) then
+      call HYPRE_IJVectorGetValues(x,
+     &  last_local_col - first_local_col + 1, indices, xvals, ierr)
 
-c Set defaults for BoomerAMG
-        maxiter = 400
-        coarsen_type = 0
-        hybrid = 1
-        measure_type = 0
-        strong_threshold = 0.1
-        trunc_factor = 0.9
-        cycle_type = 1
+      if (ierr .ne. 0) write(6,*) 'Solution vector value retrieval',
+     &                            ' failed'
+  
+      if (xvals(1) .ne. -45.)
+     &   write(6,*) 'Solution vector value addition error,',
+     &              ' first_local_col'
 
-        print *, 'AMG'
-
-        call HYPRE_BoomerAMGCreate(solver, ierr)
-        call HYPRE_BoomerAMGSetCoarsenType(solver,
-     &                                  (hybrid*coarsen_type), ierr)
-        call HYPRE_BoomerAMGSetMeasureType(solver, measure_type, ierr)
-        call HYPRE_BoomerAMGSetTol(solver, tol, ierr)
-        call HYPRE_BoomerAMGSetStrongThrshld(solver,
-     &                                      strong_threshold, ierr)
-        call HYPRE_BoomerAMGSetTruncFactor(solver, trunc_factor, ierr)
-        call HYPRE_BoomerAMGSetLogging(solver, ioutdat,
-     &                              "test.out.log", ierr)
-        call HYPRE_BoomerAMGSetMaxIter(solver, maxiter, ierr)
-        call HYPRE_BoomerAMGSetCycleType(solver, cycle_type, ierr)
-        call HYPRE_BoomerAMGInitGridRelaxatn(num_grid_sweeps,
-     &                                      grid_relax_type,
-     &                                      grid_relax_points,
-     &                                      coarsen_type,
-     &                                      relax_weights,
-     &                                      MAXLEVELS,ierr)
-        call HYPRE_BoomerAMGSetNumGridSweeps(solver,
-     &                                       num_grid_sweeps, ierr)
-        call HYPRE_BoomerAMGSetGridRelaxType(solver,
-     &                                       grid_relax_type, ierr)
-        call HYPRE_BoomerAMGSetRelaxWeight(solver,
-     &                                     relax_weights, ierr)
-        call HYPRE_BoomerAMGSetGridRelaxPnts(solver,
-     &                                       grid_relax_points,
-     &                                       ierr)
-        call HYPRE_BoomerAMGSetMaxLevels(solver, MAXLEVELS, ierr)
-        call HYPRE_BoomerAMGSetDebugFlag(solver, debug_flag, ierr)
-        call HYPRE_BoomerAMGSetup(solver, A_storage, b_storage,
-     &                         x_storage, ierr)
-        call HYPRE_BoomerAMGSolve(solver, A_storage, b_storage,
-     &                         x_storage, ierr)
-        call HYPRE_BoomerAMGGetNumIterations(solver, num_iterations, 
-     &						ierr)
-        call HYPRE_BoomerAMGGetFinalReltvRes(solver,
-     &                                       final_res_norm, ierr)
-        call HYPRE_BoomerAMGDestroy(solver, ierr)
-
-      endif
-
-      if (solver_id .eq. 2 .or. solver_id .eq. 3 .or.
-     &    solver_id .eq. 4 .or. solver_id .eq. 7 .or.
-     &    solver_id .eq. 8) then
-
-        maxiter = 100
-        k_dim = 5
-
-c       Solve the system using preconditioned GMRES
-
-        call HYPRE_ParCSRGMRESCreate(MPI_COMM_WORLD, solver, ierr)
-        call HYPRE_ParCSRGMRESSetKDim(solver, k_dim, ierr)
-        call HYPRE_ParCSRGMRESSetMaxIter(solver, maxiter, ierr)
-        call HYPRE_ParCSRGMRESSetTol(solver, tol, ierr)
-        call HYPRE_ParCSRGMRESSetLogging(solver, one, ierr)
-
-        if (solver_id .eq. 2) then
-
-          print *, 'GMRES'
-
-        else if (solver_id .eq. 3) then
-
-          print *, 'AMG preconditioned GMRES'
-
-          precond_id = 2
-
-c Set defaults for BoomerAMG
-          maxiter = 1
-          coarsen_type = 0
-          hybrid = 1
-          measure_type = 0
-          setup_type = 1
-          strong_threshold = 0.1
-          trunc_factor = 0.9
-          cycle_type = 1
-
-          call HYPRE_BoomerAMGCreate(precond, ierr)
-          call HYPRE_BoomerAMGSetCoarsenType(precond,
-     &                                    (hybrid*coarsen_type), ierr)
-          call HYPRE_BoomerAMGSetMeasureType(precond, measure_type, 
-     &						ierr)
-          call HYPRE_BoomerAMGSetStrongThrshld(precond,
-     &                                        strong_threshold, ierr)
-          call HYPRE_BoomerAMGSetTruncFactor(precond, trunc_factor,
-     &                                       ierr)
-          call HYPRE_BoomerAMGSetLogging(precond, ioutdat,
-     &                                "test.out.log", ierr)
-          call HYPRE_BoomerAMGSetMaxIter(precond, maxiter, ierr)
-          call HYPRE_BoomerAMGSetCycleType(precond, cycle_type, ierr)
-          call HYPRE_BoomerAMGInitGridRelaxatn(num_grid_sweeps,
-     &                                        grid_relax_type,
-     &                                        grid_relax_points,
-     &                                        coarsen_type,
-     &                                        relax_weights,
-     &                                        MAXLEVELS,ierr)
-          call HYPRE_BoomerAMGSetNumGridSweeps(precond,
-     &                                      num_grid_sweeps, ierr)
-          call HYPRE_BoomerAMGSetGridRelaxType(precond,
-     &                                      grid_relax_type, ierr)
-          call HYPRE_BoomerAMGSetRelaxWeight(precond,
-     &                                    relax_weights, ierr)
-          call HYPRE_BoomerAMGSetGridRelaxPnts(precond,
-     &                                        grid_relax_points, ierr)
-          call HYPRE_BoomerAMGSetMaxLevels(precond,
-     &                                  MAXLEVELS, ierr)
-          call HYPRE_ParCSRGMRESSetPrecond(solver, precond_id,
-     &                                     precond, ierr)
-
-          call HYPRE_BoomerAMGSetSetupType(precond,setup_type,ierr)
-          
-        else if (solver_id .eq. 4) then
-
-          print *, 'diagonally scaled GMRES'
-
-          precond_id = 1
-
-          call HYPRE_ParCSRGMRESSetPrecond(solver, precond_id,
-     &                                     precond, ierr)
-
-        else if (solver_id .eq. 7) then
-
-          print *, 'PILUT preconditioned GMRES'
-
-          precond_id = 3
-
-          call HYPRE_ParCSRPilutCreate(MPI_COMM_WORLD,
-     &                                     precond, ierr) 
-
-          if (ierr .ne. 0) write(6,*) 'ParCSRPilutCreate error'
-
-          call HYPRE_ParCSRGMRESSetPrecond(solver, precond_id,
-     &                                     precond, ierr)
-
-          if (drop_tol .ge. 0.)
-     &        call HYPRE_ParCSRPilutSetDropToleran(precond,
-     &                                              drop_tol, ierr)
-
-        else if (solver_id .eq. 8) then
-
-           print *, 'ParaSails preconditioned GMRES'
-
-           precond_id = 4
-
-           call HYPRE_ParaSailsCreate(MPI_COMM_WORLD, precond,
-     &                                      ierr)
-           call HYPRE_ParCSRGMRESSetPrecond(solver, precond_id,
-     &                                      precond, ierr)
-
-           threshold = 0.1
-           nlevels = 1
-
-           call HYPRE_ParaSailsSetParams(precond, threshold,
-     &                                   nlevels, ierr)
-
-        endif
-
-        call HYPRE_ParCSRGMRESGetPrecond(solver,precond_gotten,ierr)
-
-        if (precond_gotten .ne. precond) then
-          print *, 'HYPRE_ParCSRGMRESGetPrecond got bad precond'
-          stop
-        else
-          print *, 'HYPRE_ParCSRGMRESGetPrecond got good precond'
-        endif
-
-        call HYPRE_ParCSRGMRESSetup(solver, A_storage, b_storage,
-     &                              x_storage, ierr)
-        call HYPRE_ParCSRGMRESSolve(solver, A_storage, b_storage,
-     &                              x_storage, ierr)
-        call HYPRE_ParCSRGMRESGetNumIteratio(solver,
-     &                                       num_iterations, ierr)
-        call HYPRE_ParCSRGMRESGetFinalRelati(solver,
-     &                                       final_res_norm, ierr)
-
-        if (solver_id .eq. 3) then
-           call HYPRE_BoomerAMGDestroy(precond, ierr)
-        else if (solver_id .eq. 7) then
-           call HYPRE_ParCSRPilutDestroy(precond, ierr)
-        else if (solver_id .eq. 8) then
-           call HYPRE_ParaSailsDestroy(precond, ierr)
-           print *, 'parasails destruction: ',ierr
-        endif
-
-        call HYPRE_ParCSRGMRESDestroy(solver, ierr)
-        print *, 'gmres destruction: ',ierr
-
-      endif
-
-c-----------------------------------------------------------------------
-c     Print the solution and other info
-c-----------------------------------------------------------------------
-
-      vecfile(1)  = 'd'
-      vecfile(2)  = 'r'
-      vecfile(3)  = 'i'
-      vecfile(4)  = 'v'
-      vecfile(5)  = 'e'
-      vecfile(6)  = 'r'
-      vecfile(7)  = '.'
-      vecfile(8)  = 'o'
-      vecfile(9)  = 'u'
-      vecfile(10) = 't'
-      vecfile(11) = '.'
-      vecfile(12) = 'x'
-      vecfile(13) = char(0)
-   
-      call HYPRE_IJVectorPrint(x, vecfile, ierr)
-
-      if (myid .eq. 0) then
-         print *, 'Iterations = ', num_iterations
-         print *, 'Final Residual Norm = ', final_res_norm
-      endif
+      if (xvals(last_local_col - first_local_col + 1) .ne. -99.)
+     &   write(6,*) 'Solution vector value addition error,',
+     &              ' last_local_col'
 
 c-----------------------------------------------------------------------
 c     Finalize things
