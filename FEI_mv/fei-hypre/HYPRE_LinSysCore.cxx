@@ -1265,7 +1265,7 @@ int HYPRE_LinSysCore::resetMatrix(double setValue)
 
 int HYPRE_LinSysCore::resetRHSVector(double setValue) 
 {
-   int    i, j, ierr, localNRows, *cols;
+   int    i, localNRows, *cols;
    double *vals;
 
    //-------------------------------------------------------------------
@@ -1406,7 +1406,7 @@ int HYPRE_LinSysCore::sumIntoSystemMatrix(int numPtRows, const int* ptRows,
                             const double* const* values)
 {
    int    i, j, k, index, colIndex, localRow, orderFlag=0; 
-   int    *indptr, *auxPtCols, *newPtCols, rowLeng, useOld;
+   int    *indptr, rowLeng, useOld;
    double *valptr, *auxValues;
 
    //-------------------------------------------------------------------
@@ -2058,8 +2058,9 @@ int HYPRE_LinSysCore::matrixLoadComplete()
 int HYPRE_LinSysCore::putNodalFieldData(int fieldID, int fieldSize,
                        int* nodeNumbers, int numNodes, const double* data)
 {
-   int    i, **nodeFieldIDs, nodeFieldID, numFields, *procNRows, nRows;
-   int    blockID, *blockIDs, *eqnNumbers, *iTempArray, checkFieldSize;
+   int    i, **nodeFieldIDs, nodeFieldID, *procNRows, nRows;
+   int    blockID, *blockIDs, *eqnNumbers, *iTempArray;
+   //int   checkFieldSize;
    int    *aleNodeNumbers, j, index, newNumNodes;
    double *newData;
 
@@ -2095,7 +2096,7 @@ int HYPRE_LinSysCore::putNodalFieldData(int fieldID, int fieldSize,
          blockID        = blockIDs[0];
          nodeFieldIDs   = (int **) lookup_->getFieldIDsTable(blockID);
          nodeFieldID    = nodeFieldIDs[0][0];
-         checkFieldSize = lookup_->getFieldSize(nodeFieldID);
+         //checkFieldSize = lookup_->getFieldSize(nodeFieldID);
          //assert( checkFieldSize == fieldSize );
          eqnNumbers  = new int[numNodes];
          newData     = new double[numNodes*fieldSize];
@@ -3618,7 +3619,10 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
 {
    int                i, j, numIterations=0, status, ierr, localNRows;
    int                startRow, *procNRows, rowSize, *colInd, nnz, nrows;
-   int                *constrMap, *numSweeps, *relaxType, *constrEqns;
+#ifdef HAVE_MLI
+   int                *constrMap, *constrEqns;
+#endif
+   int                *numSweeps, *relaxType;
    int                *matSizes, *rowInd;
    double             rnorm=0.0, ddata, *colVal, *relaxWt, *diagVals;
    double             stime, etime, ptime, rtime1, rtime2, newnorm;
@@ -3626,7 +3630,10 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
    FILE               *fp;
    HYPRE_IJMatrix     TempA, IJI;
    HYPRE_IJVector     TempX, TempB, TempR;
-   HYPRE_ParCSRMatrix A_csr, perturb_csr, I_csr, normalA_csr;
+#ifdef HAVE_MLI
+   HYPRE_ParCSRMatrix perturb_csr;
+#endif
+   HYPRE_ParCSRMatrix A_csr, I_csr, normalA_csr;
    HYPRE_ParVector    x_csr, b_csr, r_csr;
    HYPRE_SlideReduction *slideObj;
 
