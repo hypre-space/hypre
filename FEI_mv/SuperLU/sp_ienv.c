@@ -1,3 +1,5 @@
+#include "dsp_defs.h"
+
 /*
  * File name:		sp_ienv.c
  * History:             Modified from lapack routine ILAENV

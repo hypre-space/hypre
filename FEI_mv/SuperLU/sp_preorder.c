@@ -1,3 +1,4 @@
+#include "dsp_defs.h"
 #include "supermatrix.h"
 #include "util.h"
 

@@ -163,6 +163,13 @@
 #define dgemm_    dgemm
 #define dtrsm_    dtrsm
 
+#define xerbla_   xerbla
+#define dpotrf_   dpotrf
+#define dgels_    dgels
+#define dpotrs_   dpotrs
+#define lsame_    lsame
+#define dlamch_   dlamch
+
 #define scasum_   scasum
 #define icamax_   icamax
 #define ccopy_    ccopy
