@@ -42,14 +42,11 @@
 /*--------------------------------------------------------------------------*/
 
 #include <string.h>
+#include <strings.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <assert.h>
 #include <math.h>
-
-#ifdef WIN32
-#define strcasecmp _stricmp
-#endif
 
 /****************************************************************************/ 
 /* MLI include files                                                        */
@@ -1008,18 +1005,28 @@ int HYPRE_LSI_MLI_SetMethod( HYPRE_Solver solver, char *paramString )
 /* processors)
 /*--------------------------------------------------------------------------*/
 
+/*
+#define FEI_2.5
+*/
+
 extern "C"
 int HYPRE_LSI_MLILoadNodalCoordinates(HYPRE_Solver solver, int nNodes,
               int nodeDOF, int *eqnNumbers, int nDim, double *coords)
 {
-   int           iN, iP, mypid, nprocs, *nodeProcMap, *iTempArray, eqnInd;
+   int           iN, iD, eqnInd, mypid;
+   double        *nCoords;
+   MPI_Comm      mpiComm;
+#ifdef FEI_2.5
+   int           iMax, iMin, offFlag;
+#else
+   int           iP, nprocs, *nodeProcMap, *iTempArray;
    int           iS, nSends, *sendLengs, *sendProcs, **iSendBufs, procIndex;
    int           iR, nRecvs, *recvLengs, *recvProcs, **iRecvBufs, *procList;
-   int           iD, *procNRows, numNodes, coordLength;
-   double        **dSendBufs, **dRecvBufs, *nCoords;
+   int           *procNRows, numNodes, coordLength;
+   double        **dSendBufs, **dRecvBufs;
    MPI_Request   *mpiRequests;
    MPI_Status    mpiStatus;
-   MPI_Comm      mpiComm;
+#endif
    HYPRE_LSI_MLI *mli_object = (HYPRE_LSI_MLI *) solver;
 
    /* -------------------------------------------------------- */ 
@@ -1040,10 +1047,48 @@ int HYPRE_LSI_MLILoadNodalCoordinates(HYPRE_Solver solver, int nNodes,
    mli_object->nullScales_   = NULL;
 
    /* -------------------------------------------------------- */ 
+   /* This code is used in place of the 'else' block in view   */
+   /* of the changes made to FEI 2.5.0                         */
+   /* -------------------------------------------------------- */ 
+
+#ifdef FEI_2.5
+   mpiComm = mli_object->mpiComm_;
+   MPI_Comm_rank( mpiComm, &mypid );
+   mli_object->spaceDim_ = nDim;
+   mli_object->nodeDOF_  = nodeDOF;
+   iMin = 1000000000; iMax = 0;
+   for ( iN = 0; iN < nNodes; iN++ )  
+   {
+      iMin = ( eqnNumbers[iN] < iMin ) ? eqnNumbers[iN] : iMin;
+      iMax = ( eqnNumbers[iN] > iMax ) ? eqnNumbers[iN] : iMax;
+   }
+   mli_object->localNEqns_ = ( iMax/nDim - iMin/nDim + 1 ) * nDim;
+   offFlag = 0;
+   if ( mli_object->localNEqns_ != nNodes*nDim ) offFlag = 1;
+   iN = offFlag;
+   MPI_Allreduce(&iN,&offFlag,1,MPI_INT,MPI_SUM,mpiComm);
+   if ( offFlag != 0 )
+   {
+      if ( mypid == 0 )
+         printf("HYPRE_LSI_MLILoadNodalCoordinates - turned off.\n");
+      mli_object->nCoordAccept_ = 0;
+      mli_object->localNEqns_ = 0;
+      return 1;
+   }
+   mli_object->nCoordinates_ = new double[nNodes*nDim];
+   nCoords                   = mli_object->nCoordinates_;
+   for ( iN = 0; iN < nNodes; iN++ )  
+   {
+      eqnInd = (eqnNumbers[iN] - iMin) / nodeDOF;
+      for ( iD = 0; iD < nDim; iD++ )  
+         nCoords[eqnInd*nDim+iD] = coords[iN*nDim+iD]; 
+   }
+
+#else
+   /* -------------------------------------------------------- */ 
    /* fetch machine information                                */
    /* -------------------------------------------------------- */ 
 
-   mpiComm = mli_object->mpiComm_;
    MPI_Comm_rank( mpiComm, &mypid );
    MPI_Comm_size( mpiComm, &nprocs );
 
@@ -1258,6 +1303,7 @@ int HYPRE_LSI_MLILoadNodalCoordinates(HYPRE_Solver solver, int nNodes,
       delete [] dRecvBufs;
       delete [] mpiRequests;
    }
+#endif
    return 0;
 } 
 
