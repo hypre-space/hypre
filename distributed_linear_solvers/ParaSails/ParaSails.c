@@ -727,9 +727,9 @@ static void ComputeValues(StoredRows *stored_rows, Matrix *mat,
 
 	/* Initialize ahat to zero */
 #ifdef HYPRE_USING_ESSL
-        bzero(ahat, len*(len+1)/2 * sizeof(double));
+        bzero((char *) ahat, len*(len+1)/2 * sizeof(double));
 #else
-        bzero(ahat, len*len * sizeof(double));
+        bzero((char *) ahat, len*len * sizeof(double));
 #endif
 
         time0 = MPI_Wtime();
@@ -776,7 +776,7 @@ static void ComputeValues(StoredRows *stored_rows, Matrix *mat,
         timea += (time1-time0);
 
         /* Set the right-hand side */
-        bzero(val, len*sizeof(double));
+        bzero((char *) val, len*sizeof(double));
         loc = HashLookup(hash, row);
 
 #ifdef DEBUG
