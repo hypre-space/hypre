@@ -153,5 +153,5 @@
               compile problems on Microsoft windows.
             - fix SGS problem with relaxation parameter
             - add diagnostics (print rnorm) tool to SGS
-
+            - add window option for strcasecmp in fei-hypre and femli
 
