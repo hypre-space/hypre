@@ -217,8 +217,8 @@ hypre_ParCSRMatrixFillSmooth(int nsamples, double *samples,
 
    if (!comm_pkg)
    {
-        hypre_MatvecCommPkgCreate(S);
-        comm_pkg = hypre_ParCSRMatrixCommPkg(S);
+        hypre_MatvecCommPkgCreate(A);
+        comm_pkg = hypre_ParCSRMatrixCommPkg(A);
    }
 
    num_cols_offd = S_offd_i[n];
@@ -271,7 +271,7 @@ hypre_ParCSRMatrixFillSmooth(int nsamples, double *samples,
 
    for (i = 0; i < n; i++)
    {
-       for (j = S_diag_i[i]; j < S_diag_i[i+1]; j++)
+       for (j = S_diag_i[i]+1; j < S_diag_i[i+1]; j++)
        {
            ii = S_diag_j[j];
 
@@ -289,12 +289,6 @@ hypre_ParCSRMatrixFillSmooth(int nsamples, double *samples,
                continue;
            }
 #endif
-           if (i == ii) /* diagonal element */
-           {
-               S_diag_data[j] = 0.; /* no diagonal element */
-               continue;
-           }
-
            /* explicit zeros */
            if (A_diag_data[j] == 0.)
            {
