@@ -95,7 +95,7 @@ int HYPRE_LSI_MLICreate( MPI_Comm comm, HYPRE_Solver *solver )
    *solver = (HYPRE_Solver) mli_object;
    mli_object->mpiComm_             = comm;
    mli_object->nLevels_             = 30;
-   mli_object->method_              = 1;
+   mli_object->method_              = MLI_METHOD_AMGSA_ID;
    mli_object->numPDEs_             = 1;
    mli_object->preSmoother_         = MLI_SOLVER_SGS_ID;
    mli_object->postSmoother_        = MLI_SOLVER_SGS_ID;
@@ -194,6 +194,10 @@ int HYPRE_LSI_MLISetup( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
    {
       case MLI_METHOD_AMGSA_ID : 
            method = MLI_Method_CreateFromID(mli_object->method_, mpiComm );
+           break;
+      default :
+           printf("HYPRE_LSI_MLISetup : method not valid.\n");
+           exit(1);
    }
    sprintf(paramString, "setNumLevels %d", mli_object->nLevels_);
    method->setParams( paramString, 0, NULL );
