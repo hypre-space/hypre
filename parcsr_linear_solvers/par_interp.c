@@ -17,8 +17,7 @@ int
 hypre_ParAMGBuildInterp( hypre_ParCSRMatrix   *A,
                          int                  *CF_marker,
                          hypre_ParCSRMatrix   *S,
-                         hypre_ParCSRMatrix  **P_ptr,
-                         int                 **coarse_partitioning_ptr )
+                         hypre_ParCSRMatrix  **P_ptr)
 {
 
    MPI_Comm 	      comm = hypre_ParCSRMatrixComm(A);   
@@ -37,15 +36,13 @@ hypre_ParAMGBuildInterp( hypre_ParCSRMatrix   *A,
    int              num_cols_A_offd = hypre_CSRMatrixNumCols(A_offd);
 
    hypre_CSRMatrix *S_diag = hypre_ParCSRMatrixDiag(S);
-   double          *S_diag_data = hypre_CSRMatrixData(S_diag);
    int             *S_diag_i = hypre_CSRMatrixI(S_diag);
    int             *S_diag_j = hypre_CSRMatrixJ(S_diag);
 
    hypre_CSRMatrix *S_offd = hypre_ParCSRMatrixOffd(S);   
-   double          *S_offd_data = hypre_CSRMatrixData(S_offd);
    int             *S_offd_i = hypre_CSRMatrixI(S_offd);
    int             *S_offd_j = hypre_CSRMatrixJ(S_offd);
-   int	            num_cols_S_offd = hypre_CSRMatrixNumCols(S_offd);
+/*   int	            num_cols_S_offd = hypre_CSRMatrixNumCols(S_offd); */
 
    hypre_ParCSRMatrix *P;
    int		      *col_map_offd_P;
@@ -155,7 +152,7 @@ hypre_ParAMGBuildInterp( hypre_ParCSRMatrix   *A,
 
 if (num_procs > 1)
    {
-    A_ext = hypre_GeneratePExt(A,A);
+    A_ext      = hypre_ExtractBExt(A,A);
     A_ext_i    = hypre_CSRMatrixI(A_ext);
     A_ext_j    = hypre_CSRMatrixJ(A_ext);
     A_ext_data = hypre_CSRMatrixData(A_ext);
@@ -698,7 +695,7 @@ if (num_procs > 1)
    P = hypre_CreateParCSRMatrix(comm, 
                                 hypre_ParCSRMatrixGlobalNumRows(A), 
                                 total_global_cpts,
-                                hypre_ParCSRMatrixRowStarts(A),
+                                hypre_ParCSRMatrixColStarts(A),
                                 num_cpts_global,
                                 num_cols_P_offd, 
                                 P_diag_i[n_fine],
@@ -721,7 +718,6 @@ if (num_procs > 1)
    }   
 
    *P_ptr = P;
-   *coarse_partitioning_ptr = num_cpts_global;
 
    hypre_TFree(CF_marker_cols);
    hypre_TFree(CF_marker_offd);
