@@ -31,20 +31,26 @@ void MLI_FEData_GetParCSRelement_node(MPI_Comm comm, MLI_FEData &fedata,
    int            i, j, ncols, rows, nnodes, nlocal, nexternal, nelems;
    int            elem_off, node_off, *gid, *rowlengths, cols[8];
    double         values[8];
-   char           param_string[100];
+   char           param_string[100], *targv[2];
    HYPRE_IJMatrix Matrix;
 
    fedata.getNumElements  ( nelems );
 
-   fedata.getNumLocalNodes( nlocal );
+   fedata.getNumNodes( nlocal );
+   targv[0] = (char *) &nexternal;
+   strcpy(param_string, "getNumExtNodes");
+   fedata.impSpecificRequests( param_string, 1, targv );
+   nlocal = nlocal - nexternal;
 
    gid = new int [ nelems ];
-   fedata.getElemIDs ( gid );
+   fedata.getElemBlockGlobalIDs ( nelems, gid );
  
-   strcpy(param_string, "elem_offset");
-   fedata.getSpecificData(param_string, &elem_off);
-   strcpy(param_string, "node_offset");
-   fedata.getSpecificData(param_string, &node_off);
+   strcpy(param_string, "getElemOffset");
+   targv[0] = (char *) &elem_off;
+   fedata.impSpecificRequests(param_string, 1, targv);
+   strcpy(param_string, "getNodeOffset");
+   targv[0] = (char *) &node_off;
+   fedata.impSpecificRequests(param_string, 1, targv);
 
    HYPRE_IJMatrixCreate(comm, elem_off, elem_off + nelems - 1, 
 			node_off, node_off + nlocal - 1 , &Matrix);
@@ -52,8 +58,8 @@ void MLI_FEData_GetParCSRelement_node(MPI_Comm comm, MLI_FEData &fedata,
    HYPRE_IJMatrixSetObjectType(Matrix, HYPRE_PARCSR);
 
    rowlengths = new int[nelems]; 
-   for ( i = 0; i < nelems; i++ )
-      fedata.getElemNumNodes(gid[i], rowlengths[i]);
+   fedata.getElemNumNodes( ncols );
+   for ( i = 0; i < nelems; i++ ) rowlengths[i] = ncols;
 
    HYPRE_IJMatrixSetRowSizes(Matrix, rowlengths);
    HYPRE_IJMatrixInitialize(Matrix);
@@ -62,16 +68,9 @@ void MLI_FEData_GetParCSRelement_node(MPI_Comm comm, MLI_FEData &fedata,
 
    for ( i = 0; i < nelems; i++ )
    {
-      fedata.getElemNumNodes(gid[i], ncols);
       rows = i + elem_off;
-       
-      fedata.getElemNodeList(gid[i], cols);
-      for( j = 0; j < ncols; j++ )
-      {
-	 fedata.getNodeGlobalID(cols[j], cols[j]);
-	 values[j] = 1.;
-      }
-       
+      fedata.getElemNodeList(gid[i], ncols, cols);
+      for( j = 0; j < ncols; j++ ) values[j] = 1.;
       HYPRE_IJMatrixSetValues(Matrix, 1, &ncols, &rows, cols, values);
    }
    delete [] gid;
@@ -87,22 +86,28 @@ void MLI_FEData_GetParCSRelement_node(MPI_Comm comm, MLI_FEData &fedata,
 void MLI_FEData_GetParCSRelement_face(MPI_Comm comm, MLI_FEData &fedata, 
 			              HYPRE_ParCSRMatrix *element_face )
 {
-   int            nlocal, nelems, i, j, rows;
+   int            nlocal, nelems, i, j, rows, nexternal;
    int            elem_off, face_off, *gid, *rowlengths, ncols, cols[8];
    double         values[8];
-   char           param_string[100];
+   char           param_string[100], *targv[2];
    HYPRE_IJMatrix Matrix;
 
    fedata.getNumElements ( nelems );
-   fedata.getNumLocalFaces ( nlocal );
+   fedata.getNumFaces ( nlocal );
+   targv[0] = (char *) &nexternal;
+   strcpy(param_string, "getNumExtFaces");
+   fedata.impSpecificRequests( param_string, 1, targv );
+   nlocal = nlocal - nexternal;
 
    gid = new int [ nelems ];
-   fedata.getElemIDs ( gid );
+   fedata.getElemBlockGlobalIDs ( nelems, gid );
 
-   strcpy(param_string, "elem_offset");
-   fedata.getSpecificData(param_string, &elem_off);
-   strcpy(param_string, "face_offset");
-   fedata.getSpecificData(param_string, &face_off);
+   strcpy(param_string, "getElemOffset");
+   targv[0] = (char *) &elem_off;
+   fedata.impSpecificRequests(param_string, 1, targv);
+   strcpy(param_string, "getFaceOffset");
+   targv[0] = (char *) &face_off;
+   fedata.impSpecificRequests(param_string, 1, targv);
 
    HYPRE_IJMatrixCreate(comm, elem_off, elem_off + nelems - 1, 
 			face_off, face_off + nlocal - 1 , &Matrix);
@@ -110,8 +115,8 @@ void MLI_FEData_GetParCSRelement_face(MPI_Comm comm, MLI_FEData &fedata,
    HYPRE_IJMatrixSetObjectType(Matrix, HYPRE_PARCSR);
 
    rowlengths = new int[nelems]; 
-   for ( i = 0; i < nelems; i++ )
-      fedata.getElemNumFaces(gid[i], rowlengths[i]);
+   fedata.getElemNumFaces( ncols );
+   for ( i = 0; i < nelems; i++ ) rowlengths[i] = ncols;
 
    HYPRE_IJMatrixSetRowSizes(Matrix, rowlengths);
    HYPRE_IJMatrixInitialize(Matrix);
@@ -120,15 +125,9 @@ void MLI_FEData_GetParCSRelement_face(MPI_Comm comm, MLI_FEData &fedata,
 
    for ( i = 0; i < nelems; i++ )
    {
-      fedata.getElemNumFaces(gid[i], ncols);
       rows = i + elem_off;
-
-      fedata.getElemFaceList(gid[i], cols);
-      for( j = 0; j < ncols; j++ )
-      {
-	 fedata.getFaceGlobalID(cols[j], cols[j]);
-	 values[j] = 1.;
-      }
+      fedata.getElemFaceList(gid[i], ncols, cols);
+      for( j = 0; j < ncols; j++ ) values[j] = 1.;
       HYPRE_IJMatrixSetValues(Matrix, 1, &ncols, &rows, cols, values);
    }
    delete [] gid;
@@ -146,22 +145,31 @@ void MLI_FEData_GetParCSRface_node(MPI_Comm comm, MLI_FEData &fedata,
 {
    int            nfaces, lfaces, efaces, nlocal, i, j, rows, length;
    int            face_off, node_off, *gid, *rowlengths, ncols, cols[8];
+   int            nexternal;
    double         values[8];
-   char           param_string[100];
+   char           param_string[100], *targv[2];
    HYPRE_IJMatrix Matrix;
 
-   fedata.getNumLocalFaces   ( lfaces );
-   fedata.getNumExternalFaces( efaces );
-   fedata.getNumLocalNodes ( nlocal );
-   nfaces = lfaces + efaces;
+   fedata.getNumFaces   ( nfaces );
+   targv[0] = (char *) &efaces;
+   strcpy(param_string, "getNumExtFaces");
+   fedata.impSpecificRequests( param_string, 1, targv );
+   lfaces = nfaces - efaces;
+   fedata.getNumNodes ( nlocal );
+   targv[0] = (char *) &nexternal;
+   strcpy(param_string, "getNumExtNodes");
+   fedata.impSpecificRequests( param_string, 1, targv );
+   nlocal = nlocal - nexternal;
 
    gid = new int [ nfaces ];
-   fedata.getFaceIDs ( gid );
+   fedata.getFaceBlockGlobalIDs ( nfaces, gid );
 
-   strcpy(param_string, "face_offset");
-   fedata.getSpecificData(param_string, &face_off);
-   strcpy(param_string, "node_offset");
-   fedata.getSpecificData(param_string, &node_off);
+   strcpy(param_string, "getFaceOffset");
+   targv[0] = (char *) &face_off;
+   fedata.impSpecificRequests(param_string, 1, targv);
+   strcpy(param_string, "getNodeOffset");
+   targv[0] = (char *) &node_off;
+   fedata.impSpecificRequests(param_string, 1, targv);
 
    HYPRE_IJMatrixCreate(comm, face_off, face_off + lfaces - 1, 
 			node_off, node_off + nlocal - 1 , &Matrix);
@@ -169,8 +177,8 @@ void MLI_FEData_GetParCSRface_node(MPI_Comm comm, MLI_FEData &fedata,
    HYPRE_IJMatrixSetObjectType(Matrix, HYPRE_PARCSR);
 
    rowlengths = new int[lfaces]; 
-   for ( i = 0; i < lfaces; i++ )
-      fedata.getFaceNumNodes(gid[i], rowlengths[i]);
+   fedata.getFaceNumNodes( ncols );
+   for ( i = 0; i < lfaces; i++ ) rowlengths[i] = ncols;
 
    HYPRE_IJMatrixSetRowSizes(Matrix, rowlengths);
    HYPRE_IJMatrixInitialize(Matrix);
@@ -179,15 +187,9 @@ void MLI_FEData_GetParCSRface_node(MPI_Comm comm, MLI_FEData &fedata,
 
    for ( i = 0; i < lfaces; i++ )
    {
-      fedata.getFaceNumNodes(gid[i], ncols);
       rows = i + face_off;
-       
-      fedata.getFaceNodeList(gid[i], cols);
-      for ( j = 0; j < ncols; j++ )
-      {
-	 fedata.getNodeGlobalID(cols[j], cols[j]);
-	 values[j] = 1.;
-      }
+      fedata.getFaceNodeList(gid[i], ncols, cols);
+      for ( j = 0; j < ncols; j++ ) values[j] = 1.;
       HYPRE_IJMatrixSetValues(Matrix, 1, &ncols, &rows, cols, values);
    }
    delete [] gid;
@@ -203,34 +205,39 @@ void MLI_FEData_GetParCSRface_node(MPI_Comm comm, MLI_FEData &fedata,
 void MLI_FEData_GetParCSRnode_element(MPI_Comm comm, MLI_FEData &fedata, 
 			              HYPRE_ParCSRMatrix *node_element )
 {
-   int            i, j, k, n, nelems, nnodes, local, external, rows, **cols;
+   int            i, j, k, n, nelems, nnodes, nlocal, nexternal, rows, **cols;
    int            elem_off, node_off, *gid, *nncols, *ncols, node[8];
    double         values[100];
-   char           param_string[100];
+   char           param_string[100], *targv[2];
    HYPRE_IJMatrix Matrix;
    
-   fedata.getNumLocalNodes ( local );
-   fedata.getNumExternalNodes( external );
+   fedata.getNumNodes ( nlocal );
+   targv[0] = (char *) &nexternal;
+   strcpy(param_string, "getNumExtNodes");
+   fedata.impSpecificRequests( param_string, 1, targv );
+   nlocal = nlocal - nexternal;
    fedata.getNumElements  ( nelems );
 
    gid = new int [ nelems ];
-   fedata.getElemIDs ( gid );
+   fedata.getElemBlockGlobalIDs ( nelems, gid );
 
-   strcpy(param_string, "elem_offset");
-   fedata.getSpecificData(param_string, &elem_off);
-   strcpy(param_string, "node_offset");
-   fedata.getSpecificData(param_string, &node_off);
+   strcpy(param_string, "getElemOffset");
+   targv[0] = (char *) &elem_off;
+   fedata.impSpecificRequests(param_string, 1, targv);
+   strcpy(param_string, "getNodeOffset");
+   targv[0] = (char *) &node_off;
+   fedata.impSpecificRequests(param_string, 1, targv);
 
-   nnodes = local + external; 
+   nnodes = nlocal + nexternal; 
    ncols  = new int [nnodes];
    nncols = new int [nnodes];
    cols   = new int*[nnodes];
    for ( i = 0; i < nnodes; i++ ) ncols[i] = 0;
 
+   fedata.getElemNumNodes(n);
    for( i = 0; i < nelems; i++ )
    {
-      fedata.getElemNumNodes(gid[i], n);
-      fedata.getElemNodeList(gid[i], node);
+      fedata.getElemNodeList(gid[i], n, node);
       for( j = 0; j < n; j++ ) ncols[fedata.searchNode(node[j])]++;
    }
    for ( i = 0; i < nnodes; i++ )
@@ -238,11 +245,9 @@ void MLI_FEData_GetParCSRnode_element(MPI_Comm comm, MLI_FEData &fedata,
       cols[i] = new int[ncols[i]];
       nncols[i] = 0;
    }
-   
    for ( i = 0; i < nelems; i++ )
    {
-      fedata.getElemNumNodes(gid[i], n);
-      fedata.getElemNodeList(gid[i], node);
+      fedata.getElemNodeList(gid[i], n, node);
       for ( j = 0; j < n; j++ )
       {
          k = fedata.searchNode(node[j]);
@@ -252,16 +257,18 @@ void MLI_FEData_GetParCSRnode_element(MPI_Comm comm, MLI_FEData &fedata,
 
    // Update ncols and cols for shared nodes
 
-   strcpy(param_string, "update_node_elements");
-   fedata.getSpecificData(param_string, ncols, cols);
+   strcpy(param_string, "updateNodeElemMatrix");
+   targv[0] = (char *) ncols;
+   targv[1] = (char *) cols;
+   fedata.impSpecificRequests(param_string, 2, targv);
  
-   HYPRE_IJMatrixCreate(comm, node_off, node_off + local - 1, 
+   HYPRE_IJMatrixCreate(comm, node_off, node_off + nlocal - 1, 
 			elem_off, elem_off + nelems - 1 , &Matrix);
    HYPRE_IJMatrixSetObjectType(Matrix, HYPRE_PARCSR);
    HYPRE_IJMatrixSetRowSizes(Matrix, ncols);
    HYPRE_IJMatrixInitialize(Matrix);
 
-   for ( i = 0; i < local; i++ )
+   for ( i = 0; i < nlocal; i++ )
    {
       rows   = i + node_off;
       for ( j = 0; j < ncols[i]; j++ ) values[j] = 1.;
@@ -285,37 +292,41 @@ void MLI_FEData_GetParCSRnode_element(MPI_Comm comm, MLI_FEData &fedata,
 void MLI_FEData_GetParCSRface_element(MPI_Comm comm, MLI_FEData &fedata, 
 			              HYPRE_ParCSRMatrix *face_element)
 {
-   int            i, j, k, n, nelems, nfaces, local, external, rows, **cols;
+   int            i, j, k, n, nelems, nfaces, nlocal, nexternal, rows, **cols;
    int            elem_off, face_off, *gid, *nncols, *ncols, face[8];
    double         values[100];
-   char           param_string[100];
+   char           param_string[100], *targv[2];
    HYPRE_IJMatrix Matrix;
    
-   fedata.getNumLocalFaces ( local );
-   fedata.getNumExternalFaces( external );
+   fedata.getNumFaces ( nlocal );
+   targv[0] = (char *) &nexternal;
+   strcpy(param_string, "getNumExtFaces");
+   fedata.impSpecificRequests( param_string, 1, targv );
+   nlocal = nlocal - nexternal;
    fedata.getNumElements  ( nelems );
 
    gid = new int [ nelems ];
-   fedata.getElemIDs ( gid );
+   fedata.getElemBlockGlobalIDs ( nelems, gid );
 
-   strcpy(param_string, "elem_offset");
-   fedata.getSpecificData(param_string, &elem_off);
-   strcpy(param_string, "face_offset");
-   fedata.getSpecificData(param_string, &face_off);
+   strcpy(param_string, "getElemOffset");
+   targv[0] = (char *) &elem_off;
+   fedata.impSpecificRequests(param_string, 1, targv);
+   strcpy(param_string, "getFaceOffset");
+   targv[0] = (char *) &face_off;
+   fedata.impSpecificRequests(param_string, 1, targv);
 
-   nfaces = local + external; 
+   nfaces = nlocal + nexternal; 
    ncols  = new int [nfaces];
    nncols = new int [nfaces];
    cols   = new int*[nfaces];
    for ( i = 0; i < nfaces; i++ ) ncols[i] = 0;
 
+   fedata.getElemNumFaces(n);
    for ( i = 0; i < nelems; i++ )
    {
-      fedata.getElemNumFaces(gid[i], n);
-      fedata.getElemFaceList(gid[i], face);
+      fedata.getElemFaceList(gid[i], n, face);
       for ( j = 0; j < n; j++ ) ncols[fedata.searchFace(face[j])]++;
    }
-
    for ( i = 0; i < nfaces; i++ )
    {
       cols[i] = new int[ncols[i]];
@@ -323,8 +334,7 @@ void MLI_FEData_GetParCSRface_element(MPI_Comm comm, MLI_FEData &fedata,
    }
    for ( i = 0; i < nelems; i++ )
    {
-      fedata.getElemNumFaces(gid[i], n);
-      fedata.getElemFaceList(gid[i], face);
+      fedata.getElemFaceList(gid[i], n, face);
       for ( j = 0; j < n; j++ )
       {
          k = fedata.searchFace(face[j]);
@@ -334,16 +344,18 @@ void MLI_FEData_GetParCSRface_element(MPI_Comm comm, MLI_FEData &fedata,
 
    // Update ncols and cols for shared faces
 
-   strcpy(param_string, "update_face_elements");
-   fedata.getSpecificData(param_string, ncols, cols);
+   strcpy(param_string, "updateFaceElemMatrix");
+   targv[0] = (char *) ncols;
+   targv[1] = (char *) cols;
+   fedata.impSpecificRequests(param_string, 2, targv);
  
-   HYPRE_IJMatrixCreate(comm, face_off, face_off + local - 1, 
+   HYPRE_IJMatrixCreate(comm, face_off, face_off + nlocal - 1, 
 			elem_off, elem_off + nelems - 1 , &Matrix);
    HYPRE_IJMatrixSetObjectType(Matrix, HYPRE_PARCSR);
    HYPRE_IJMatrixSetRowSizes(Matrix, ncols);
    HYPRE_IJMatrixInitialize(Matrix);
 
-   for ( i = 0; i < local; i++ )
+   for ( i = 0; i < nlocal; i++ )
    {
       rows   = i + face_off;
       for ( j = 0; j < ncols[i]; j++ ) values[j] = 1.;
@@ -367,47 +379,54 @@ void MLI_FEData_GetParCSRface_element(MPI_Comm comm, MLI_FEData &fedata,
 void MLI_FEData_GetParCSRnode_face(MPI_Comm comm, MLI_FEData &fedata, 
 			           HYPRE_ParCSRMatrix *node_face)
 {
-   int            i, j, k, n, nfaces, nnodes, local, external, **cols, rows;
-   int            face_off, node_off, *nncols, *ncols, node[8];
+   int            i, j, k, n, nfaces, nnodes, nlocal, nexternal, **cols, rows;
+   int            face_off, node_off, efaces, *nncols, *ncols, node[8];
    double         values[100];
-   char           param_string[100];
+   char           param_string[100], *targv[2];
    HYPRE_IJMatrix Matrix;
    
-   fedata.getNumLocalNodes ( local );
-   fedata.getNumExternalNodes( external );
-   fedata.getNumLocalFaces  ( nfaces );
+   fedata.getNumNodes( nlocal );
+   targv[0] = (char *) &nexternal;
+   strcpy(param_string, "getNumExtNodes");
+   fedata.impSpecificRequests( param_string, 1, targv );
+   nlocal = nlocal - nexternal;
+
+   fedata.getNumFaces( nfaces );
+   targv[0] = (char *) &efaces;
+   strcpy(param_string, "getNumExtFaces");
+   fedata.impSpecificRequests( param_string, 1, targv );
+   nfaces = nfaces - efaces;
 
    int *gid = new int [ nfaces ];
-   fedata.getFaceIDs ( gid );
+   fedata.getFaceBlockGlobalIDs ( nfaces, gid );
 
-   strcpy(param_string, "face_offset");
-   fedata.getSpecificData(param_string, &face_off);
-   strcpy(param_string, "node_offset");
-   fedata.getSpecificData(param_string, &node_off);
+   strcpy(param_string, "getFaceOffset");
+   targv[0] = (char *) &face_off;
+   fedata.impSpecificRequests(param_string, 1, targv);
+   strcpy(param_string, "getNodeOffset");
+   targv[0] = (char *) &node_off;
+   fedata.impSpecificRequests(param_string, 1, targv);
 
-   nnodes = local + external; 
+   nnodes = nlocal + nexternal; 
    ncols  = new int [nnodes];
    nncols = new int [nnodes];
    cols   = new int*[nnodes];
    for ( i = 0; i < nnodes; i++ ) ncols[i] = 0;
 
+   fedata.getFaceNumNodes(n);
    for(i=0; i<nfaces; i++)
    {
-      fedata.getFaceNumNodes(gid[i], n);
-      fedata.getFaceNodeList(gid[i], node);
+      fedata.getFaceNodeList(gid[i], n, node);
       for ( j = 0; j < n; j++ ) ncols[fedata.searchNode(node[j])]++;
    }
-
    for ( i = 0; i < nnodes; i++ )
    {
       cols[i] = new int[ncols[i]];
       nncols[i] = 0;
    }
-   
    for ( i = 0; i < nfaces; i++ )
    {
-      fedata.getFaceNumNodes(gid[i], n);
-      fedata.getFaceNodeList(gid[i], node);
+      fedata.getFaceNodeList(gid[i], n, node);
       for ( j = 0; j < n; j++ )
       {
          k = fedata.searchNode(node[j]);
@@ -418,16 +437,18 @@ void MLI_FEData_GetParCSRnode_face(MPI_Comm comm, MLI_FEData &fedata,
    // Update ncols and cols for shared nodes; we can use 
    // update_node_elements again since the information is in the arguments
 
-   strcpy(param_string, "update_node_elements");
-   fedata.getSpecificData(param_string, ncols, cols);
+   strcpy(param_string, "updateNodeElemMatrix");
+   targv[0] = (char *) ncols;
+   targv[1] = (char *) cols;
+   fedata.impSpecificRequests(param_string, 2, targv);
  
-   HYPRE_IJMatrixCreate(comm, node_off, node_off + local - 1, 
+   HYPRE_IJMatrixCreate(comm, node_off, node_off + nlocal - 1, 
 			face_off, face_off + nfaces - 1 , &Matrix);
    HYPRE_IJMatrixSetObjectType(Matrix, HYPRE_PARCSR);
    HYPRE_IJMatrixSetRowSizes(Matrix, ncols);
    HYPRE_IJMatrixInitialize(Matrix);
 
-   for ( i = 0; i < local; i++ )
+   for ( i = 0; i < nlocal; i++ )
    {
       rows   = i + node_off;
       for ( j = 0; j < ncols[i]; j++ ) values[j] = 1.;

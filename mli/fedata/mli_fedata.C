@@ -13,6 +13,7 @@
  **************************************************************************/
 
 #include <iostream.h>
+#include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <mpi.h>
@@ -551,6 +552,7 @@ int MLI_FEData::initFaceBlockNodeLists(int nFaces, const int *fGlobalIDs,
    currBlock->numExternalFaces_ = 0;
    currBlock->faceGlobalIDs_    = new int[nFaces];
    currBlock->faceNodeIDList_   = new int*[nFaces]; 
+   faceArray = new int[nFaces];
    for ( i = 0; i < nFaces; i++ )
    {
       currBlock->faceGlobalIDs_[i]  = fGlobalIDs[i]; 
@@ -571,6 +573,7 @@ int MLI_FEData::initFaceBlockNodeLists(int nFaces, const int *fGlobalIDs,
       for ( j = 0; j < nNodes; j++ ) 
          faceNodeList[i][j] = nGlobalIDLists[index][j];
    }
+   delete [] faceArray;
    return 1;
 } 
 
@@ -593,6 +596,7 @@ int MLI_FEData::initSharedFaces(int nFaces, const int *fGlobalIDs,
       cout << "initSharedFaces ERROR : nFaces <= 0.\n";
       exit(1);
    }
+   currBlock = elemBlockList_[currentElemBlock_];
    if ( currBlock->sharedFaceIDs_ != NULL )
       cout << "initSharedFaces WARNING : already initialized (1) ?\n";
    if ( currBlock->sharedFaceNProcs_ != NULL )
@@ -615,7 +619,6 @@ int MLI_FEData::initSharedFaces(int nFaces, const int *fGlobalIDs,
    // --- allocate space for the incoming data 
    // -------------------------------------------------------------
 
-   currBlock = elemBlockList_[currentElemBlock_];
    currBlock->numSharedFaces_   = nFaces;
    currBlock->sharedFaceIDs_    = new int[nFaces];
    currBlock->sharedFaceNProcs_ = new int[nFaces];
@@ -1080,6 +1083,7 @@ int MLI_FEData::initComplete()
    // -------------------------------------------------------------
 
    currBlock->initComplete_ = 1;
+   return 1;
 }
 
 //*************************************************************************
@@ -3584,7 +3588,7 @@ int MLI_FEData::impSpecificRequests(char *data_key, int argc, char **argv)
 
 int MLI_FEData::readFromFile(char *infile)
 {
-   int    i, j, k, nNodes, nodeDOF, index, length, nNodesPerElem;
+   int    i, j, k, nNodes, nodeDOF, index, nNodesPerElem;
    int    numFields, *fieldIDs=NULL, *fieldSizes=NULL, nElems_check;
    int    index2, nElems, *elemIDs=NULL, eMatDim;
    int    nodeNumFields, *nodeFieldIDs=NULL;
@@ -3790,7 +3794,7 @@ int MLI_FEData::readFromFile(char *infile)
    {
       for ( j = 0; j < eMatDim; j++ )
          for ( k = 0; k < eMatDim; k++ )
-            fscanf(fp, "%lg", &(elemMat[i][k*length+j]));
+            fscanf(fp, "%lg", &(elemMat[i][k*eMatDim+j]));
    }
    fclose(fp);
 
@@ -4366,8 +4370,10 @@ int MLI_FEData::searchNode(int key)
    int           index;
    MLI_ElemBlock *currBlock = elemBlockList_[currentElemBlock_];
 
-   index = search(key, currBlock->nodeGlobalIDs_, 
-                  currBlock->numLocalNodes_ + currBlock->numExternalNodes_);
+   index = search(key, currBlock->nodeGlobalIDs_, currBlock->numLocalNodes_);
+   if ( index < 0 )
+      index = search(key,&(currBlock->nodeGlobalIDs_[currBlock->numLocalNodes_]),
+                     currBlock->numExternalNodes_);
    return index;
 }
 
@@ -4380,8 +4386,10 @@ int MLI_FEData::searchFace(int key)
    int           index;
    MLI_ElemBlock *currBlock = elemBlockList_[currentElemBlock_];
 
-   index = search(key, currBlock->faceGlobalIDs_, 
-                  currBlock->numLocalFaces_+currBlock->numExternalFaces_);
+   index = search(key, currBlock->faceGlobalIDs_, currBlock->numLocalFaces_);
+   if ( index < 0 )
+      index = search(key,&(currBlock->faceGlobalIDs_[currBlock->numLocalFaces_]),
+                     currBlock->numExternalFaces_);
    return index;
 }
 

@@ -344,7 +344,9 @@ public :
 
    int writeToFile(char *filename);
 
-private :
+   // -------------------------------------------------------------------------
+   // internal functions
+   // -------------------------------------------------------------------------
 
    int createElemBlock(int blockID);
    int deleteElemBlock(int blockID);
