@@ -242,16 +242,19 @@ do
 
 case $1 in
     -dec)
+        HYPRE_ARCH="dec"
         HYPRE_COMPILE_MACHINE="west"
         HYPRE_RUN_MACHINE="southeast"
         HYPRE_REMOTE_DIR="/usr/apps/hypre/AUTOTEST"
         shift;;
     -blue)
+        HYPRE_ARCH="blue"
         HYPRE_COMPILE_MACHINE="blue"
         HYPRE_RUN_MACHINE="blue"
         HYPRE_REMOTE_DIR="/usr/apps/hypre/AUTOTEST"
         shift;;
     -red)
+        HYPRE_ARCH="red"
         HYPRE_COMPILE_MACHINE="sasn100"
         HYPRE_RUN_MACHINE="janus"
         HYPRE_REMOTE_DIR="/usr/apps/hypre/AUTOTEST"
@@ -278,7 +281,7 @@ scp -r linear_solvers ${HYPRE_COMPILE_MACHINE}:${HYPRE_REMOTE_DIR}
 ssh ${HYPRE_COMPILE_MACHINE} "\
     (\
         cd ${HYPRE_REMOTE_DIR}/linear_solvers;\
-	source test/env.${HYPRE_COMPILE_MACHINE};\
+	source test/env.${HYPRE_ARCH};\
         ./configure ;\
         make -k beta;\
     )"
@@ -294,7 +297,7 @@ ssh ${HYPRE_COMPILE_MACHINE} "\
     (\
 	
         cd ${HYPRE_REMOTE_DIR}/linear_solvers;\
-	source test/env.${HYPRE_COMPILE_MACHINE};\
+	source test/env.${HYPRE_ARCH};\
         ./configure --with-openmp;\
 	make veryclean;\
         make -k beta;\
