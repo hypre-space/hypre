@@ -122,7 +122,7 @@ HYPRE_SStructVectorSetValues( HYPRE_SStructVector  vector,
                               int                  part,
                               int                 *index,
                               int                  var,
-                              double               value )
+                              double              *value )
 {
    int ierr = 0;
    int                   ndim    = hypre_SStructVectorNDim(vector);
@@ -177,7 +177,7 @@ HYPRE_SStructVectorAddToValues( HYPRE_SStructVector  vector,
                                 int                  part,
                                 int                 *index,
                                 int                  var,
-                                double               value )
+                                double              *value )
 {
    int ierr = 0;
    int                   ndim    = hypre_SStructVectorNDim(vector);

@@ -590,8 +590,7 @@ int HYPRE_SStructVectorInitialize(HYPRE_SStructVector vector);
  *
  * If the vector is complex, then {\tt value} consists of a pair of
  * doubles representing the real and imaginary parts of the complex
- * value.  NOTE: To implement this, the type of {\tt value} will have
- * to be changed.
+ * value.
  *
  * @param param [IN] ...
  *
@@ -601,7 +600,7 @@ int HYPRE_SStructVectorSetValues(HYPRE_SStructVector  vector,
                                  int                  part,
                                  int                 *index,
                                  int                  var,
-                                 double               value);
+                                 double              *value);
 
 /**
  * Set vector coefficients a box at a time.
@@ -633,8 +632,7 @@ int HYPRE_SStructVectorSetBoxValues(HYPRE_SStructVector  vector,
  *
  * If the vector is complex, then {\tt value} consists of a pair of
  * doubles representing the real and imaginary parts of the complex
- * value.  NOTE: To implement this, the type of {\tt value} will have
- * to be changed.
+ * value.
  *
  * @param param [IN] ...
  *
@@ -644,7 +642,7 @@ int HYPRE_SStructVectorAddToValues(HYPRE_SStructVector  vector,
                                    int                  part,
                                    int                 *index,
                                    int                  var,
-                                   double               value);
+                                   double              *value);
 
 /**
  * Set vector coefficients a box at a time.

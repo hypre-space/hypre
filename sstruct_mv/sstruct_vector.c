@@ -120,13 +120,13 @@ int
 hypre_SStructPVectorSetValues( hypre_SStructPVector *pvector,
                                hypre_Index           index,
                                int                   var,
-                               double                value,
+                               double               *value,
                                int                   add_to )
 {
    int ierr = 0;
    hypre_StructVector *svector = hypre_SStructPVectorSVector(pvector, var);
 
-   ierr = hypre_StructVectorSetValues(svector, index, value, add_to);
+   ierr = hypre_StructVectorSetValues(svector, index, *value, add_to);
 
    return ierr;
 }

@@ -630,6 +630,8 @@ int HYPRE_SStructMatrixAddToValues( HYPRE_SStructMatrix matrix , int part , int 
 int HYPRE_SStructMatrixAddToBoxValues( HYPRE_SStructMatrix matrix , int part , int *ilower , int *iupper , int var , int nentries , int *entries , double *values );
 int HYPRE_SStructMatrixAssemble( HYPRE_SStructMatrix matrix );
 int HYPRE_SStructMatrixSetSymmetric( HYPRE_SStructMatrix matrix , int symmetric );
+int HYPRE_SStructMatrixSetObjectType( HYPRE_SStructMatrix matrix , int type );
+int HYPRE_SStructMatrixGetObject( HYPRE_SStructMatrix matrix , void **object );
 int HYPRE_SStructMatrixPrint( char *filename , HYPRE_SStructMatrix matrix , int all );
 
 /* HYPRE_sstruct_stencil.c */
@@ -641,14 +643,16 @@ int HYPRE_SStructStencilSetEntry( HYPRE_SStructStencil stencil , int entry , int
 int HYPRE_SStructVectorCreate( MPI_Comm comm , HYPRE_SStructGrid grid , HYPRE_SStructVector *vector_ptr );
 int HYPRE_SStructVectorDestroy( HYPRE_SStructVector vector );
 int HYPRE_SStructVectorInitialize( HYPRE_SStructVector vector );
-int HYPRE_SStructVectorSetValues( HYPRE_SStructVector vector , int part , int *index , int var , double value );
+int HYPRE_SStructVectorSetValues( HYPRE_SStructVector vector , int part , int *index , int var , double *value );
 int HYPRE_SStructVectorSetBoxValues( HYPRE_SStructVector vector , int part , int *ilower , int *iupper , int var , double *values );
-int HYPRE_SStructVectorAddToValues( HYPRE_SStructVector vector , int part , int *index , int var , double value );
+int HYPRE_SStructVectorAddToValues( HYPRE_SStructVector vector , int part , int *index , int var , double *value );
 int HYPRE_SStructVectorAddToBoxValues( HYPRE_SStructVector vector , int part , int *ilower , int *iupper , int var , double *values );
 int HYPRE_SStructVectorAssemble( HYPRE_SStructVector vector );
 int HYPRE_SStructVectorGather( HYPRE_SStructVector vector );
 int HYPRE_SStructVectorGetValues( HYPRE_SStructVector vector , int part , int *index , int var , double *value );
 int HYPRE_SStructVectorGetBoxValues( HYPRE_SStructVector vector , int part , int *ilower , int *iupper , int var , double *values );
+int HYPRE_SStructVectorSetObjectType( HYPRE_SStructVector vector , int type );
+int HYPRE_SStructVectorGetObject( HYPRE_SStructVector vector , void **object );
 int HYPRE_SStructVectorPrint( char *filename , HYPRE_SStructVector vector , int all );
 
 /* sstruct_axpy.c */
@@ -716,7 +720,7 @@ int hypre_SStructStencilRef( hypre_SStructStencil *stencil , hypre_SStructStenci
 int hypre_SStructPVectorCreate( MPI_Comm comm , hypre_SStructPGrid *pgrid , hypre_SStructPVector **pvector_ptr );
 int hypre_SStructPVectorDestroy( hypre_SStructPVector *pvector );
 int hypre_SStructPVectorInitialize( hypre_SStructPVector *pvector );
-int hypre_SStructPVectorSetValues( hypre_SStructPVector *pvector , hypre_Index index , int var , double value , int add_to );
+int hypre_SStructPVectorSetValues( hypre_SStructPVector *pvector , hypre_Index index , int var , double *value , int add_to );
 int hypre_SStructPVectorSetBoxValues( hypre_SStructPVector *pvector , hypre_Index ilower , hypre_Index iupper , int var , double *values , int add_to );
 int hypre_SStructPVectorAssemble( hypre_SStructPVector *pvector );
 int hypre_SStructPVectorGather( hypre_SStructPVector *pvector );
