@@ -25,6 +25,7 @@ int HYPRE_AMGSetup P((HYPRE_Solver solver , HYPRE_CSRMatrix A , HYPRE_Vector b ,
 int HYPRE_AMGSolve P((HYPRE_Solver solver , HYPRE_CSRMatrix A , HYPRE_Vector b , HYPRE_Vector x ));
 int HYPRE_AMGSetMaxLevels P((HYPRE_Solver solver , int max_levels ));
 int HYPRE_AMGSetStrongThreshold P((HYPRE_Solver solver , double strong_threshold ));
+int HYPRE_AMGSetCoarsenType P((HYPRE_Solver solver , int coarsen_type ));
 int HYPRE_AMGSetInterpType P((HYPRE_Solver solver , int interp_type ));
 int HYPRE_AMGSetMaxIter P((HYPRE_Solver solver , int max_iter ));
 int HYPRE_AMGSetCycleType P((HYPRE_Solver solver , int cycle_type ));
@@ -32,6 +33,7 @@ int HYPRE_AMGSetTol P((HYPRE_Solver solver , double tol ));
 int HYPRE_AMGSetNumGridSweeps P((HYPRE_Solver solver , int *num_grid_sweeps ));
 int HYPRE_AMGSetGridRelaxType P((HYPRE_Solver solver , int *grid_relax_type ));
 int HYPRE_AMGSetGridRelaxPoints P((HYPRE_Solver solver , int **grid_relax_points ));
+int HYPRE_AMGSetRelaxWeight P((HYPRE_Solver solver , double relax_weight ));
 int HYPRE_AMGSetIOutDat P((HYPRE_Solver solver , int ioutdat ));
 int HYPRE_AMGSetLogFileName P((HYPRE_Solver solver , char *log_file_name ));
 int HYPRE_AMGSetLogging P((HYPRE_Solver solver , int ioutdat , char *log_file_name ));
@@ -44,6 +46,7 @@ void *hypre_AMGInitialize P((void ));
 int hypre_AMGFinalize P((void *data ));
 int hypre_AMGSetMaxLevels P((void *data , int max_levels ));
 int hypre_AMGSetStrongThreshold P((void *data , double strong_threshold ));
+int hypre_AMGSetCoarsenType P((void *data , int coarsen_type ));
 int hypre_AMGSetInterpType P((void *data , int interp_type ));
 int hypre_AMGSetMaxIter P((void *data , int max_iter ));
 int hypre_AMGSetCycleType P((void *data , int cycle_type ));
@@ -51,6 +54,7 @@ int hypre_AMGSetTol P((void *data , double tol ));
 int hypre_AMGSetNumGridSweeps P((void *data , int *num_grid_sweeps ));
 int hypre_AMGSetGridRelaxType P((void *data , int *grid_relax_type ));
 int hypre_AMGSetGridRelaxPoints P((void *data , int **grid_relax_points ));
+int hypre_AMGSetRelaxWeight P((void *data , double relax_weight ));
 int hypre_AMGSetIOutDat P((void *data , int ioutdat ));
 int hypre_AMGSetLogFileName P((void *data , char *log_file_name ));
 int hypre_AMGSetLogging P((void *data , int ioutdat , char *log_file_name ));
@@ -72,6 +76,7 @@ void hypre_WriteSolverParams P((void *data ));
 
 /* coarsen.c */
 int hypre_AMGCoarsen P((hypre_CSRMatrix *A , double strength_threshold , hypre_CSRMatrix **S_ptr , int **CF_marker_ptr , int *coarse_size_ptr ));
+int hypre_AMGCoarsenRuge P((hypre_CSRMatrix *A , double strength_threshold , hypre_CSRMatrix **S_ptr , int **CF_marker_ptr , int *coarse_size_ptr ));
 
 /* cycle.c */
 int hypre_AMGCycle P((void *amg_vdata , hypre_Vector **F_array , hypre_Vector **U_array ));
@@ -81,6 +86,7 @@ int main P((int argc , char *argv []));
 int BuildFromFile P((int argc , char *argv [], int arg_index , hypre_CSRMatrix **A_ptr ));
 int BuildLaplacian P((int argc , char *argv [], int arg_index , hypre_CSRMatrix **A_ptr ));
 int BuildLaplacian9pt P((int argc , char *argv [], int arg_index , hypre_CSRMatrix **A_ptr ));
+int BuildRhsFromFile P((int argc , char *argv [], int arg_index , hypre_CSRMatrix *A, hypre_Vector **b_ptr ));
 
 /* indepset.c */
 int hypre_InitAMGIndepSet P((hypre_CSRMatrix *S , double *measure_array ));
@@ -109,7 +115,7 @@ double hypre_Rand P((void ));
 int hypre_AMGBuildCoarseOperator P((hypre_CSRMatrix *RT , hypre_CSRMatrix *A , hypre_CSRMatrix *P , hypre_CSRMatrix **RAP_ptr ));
 
 /* relax.c */
-int hypre_AMGRelax P((hypre_CSRMatrix *A , hypre_Vector *f , int *cf_marker , int relax_type , int relax_points , hypre_Vector *u , hypre_Vector *Vtemp ));
+int hypre_AMGRelax P((hypre_CSRMatrix *A , hypre_Vector *f , int *cf_marker , int relax_type , int relax_points , double relax_weight, hypre_Vector *u , hypre_Vector *Vtemp ));
 int gselim P((double *A , double *x , int n ));
 
 /* transpose.c */
