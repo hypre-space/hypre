@@ -34,6 +34,7 @@ CFLAGS =\
  -I$(srcdir)/..\
  -I$(srcdir)/../..\
  -I$(srcdir)/../../..\
+ -I$(srcdir)/../../../IJ_mv\
  -I$(srcdir)/../../../seq_mv\
  -I$(srcdir)/../../../parcsr_mv\
  -I$(srcdir)/../../../utilities\
@@ -46,6 +47,7 @@ CXXFLAGS =\
  -I$(srcdir)/..\
  -I$(srcdir)/../..\
  -I$(srcdir)/../../..\
+ -I$(srcdir)/../../../IJ_mv\
  -I$(srcdir)/../../../seq_mv\
  -I$(srcdir)/../../../parcsr_mv\
  -I$(srcdir)/../../../utilities\
@@ -61,7 +63,7 @@ BLASLIBFLAGS =  @BLASLIBFLAGS@
 
 LFLAGS =\
  -L.\
- -L../../hypre/lib\
+ -L../../../hypre/lib\
  -L../lib\
  -lHYPRE_mli\
  -lkrylov\
