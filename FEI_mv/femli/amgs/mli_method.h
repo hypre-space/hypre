@@ -16,12 +16,15 @@
 #define __MLIMETHODH__
 
 /****************************************************************************
- * include files 
+ * defines and include files 
  *--------------------------------------------------------------------------*/
 
-/*
-#include <mpi.h>
-*/
+#define MLI_METHOD_AMGSA_ID     701
+#define MLI_METHOD_AMGSAE_ID    702
+#define MLI_METHOD_AMGSADD_ID   703
+#define MLI_METHOD_AMGSADDE_ID  704
+#define MLI_METHOD_AMGRS_ID     705
+
 #include "utilities/utilities.h"
 #include "base/mli.h"
 
