@@ -37,6 +37,7 @@ extern "C" {
 #define MPI_Aint            hypre_MPI_Aint             
 
 #define MPI_COMM_WORLD      hypre_MPI_COMM_WORLD       
+#define MPI_COMM_NULL       hypre_MPI_COMM_NULL
 
 #define MPI_BOTTOM  	    hypre_MPI_BOTTOM
 
@@ -116,6 +117,7 @@ typedef int  hypre_MPI_Op;
 typedef int  hypre_MPI_Aint;
 
 #define  hypre_MPI_COMM_WORLD 0
+#define  hypre_MPI_COMM_NULL  0
 
 #define  hypre_MPI_BOTTOM  0x0
 
