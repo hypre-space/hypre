@@ -22,8 +22,6 @@
 #include <iostream.h>
 #include <fstream.h>
 
-#include <mpi.h>
-
 #include "fei-isis.h"
 
 #include "Poisson_Elem.h"
@@ -100,7 +98,7 @@ int main(int argc, char** argv){
         delete [] param;
     }
 
-    int numMatrices = 2;
+    int numMatrices = 1;
     int* matrixIDs = NULL;
     int* numRHSs = NULL;
     int** rhsIDs = NULL;
@@ -117,7 +115,7 @@ int main(int argc, char** argv){
                   numMatScalars, matScalars,
                   numRHSScalars, rhsScaleIDs, rhsScalars);
 
-    int solveType = 2;
+    int solveType = 0;
     int numElemBlocks = 1; // 1 per processor
 
     if (outputLevel>0) cout << "initSolveStep" << endl;
@@ -302,8 +300,8 @@ void setup_IDs(int& numMatrices, int*& matrixIDs,
     for(int i=0; i<numMatrices; i++) {
 
         matrixIDs[i] = i;
-        if (i==0)numRHSs[i] = 2;
-        if (i==1)numRHSs[i] = 0;
+        if (i==0)numRHSs[i] = 1;
+        if (i==1)numRHSs[i] = 1;
         if (i>=2)numRHSs[i] = 0;
 
         if (outputLevel>0)cout << "matrixIDs["<<i<<"]: " << matrixIDs[i];

@@ -40,12 +40,6 @@
 #include <time.h>
 #include <assert.h>
 
-#ifdef SER
-#include <isis-ser.h>
-#else
-#include <isis-mpi.h>
-#endif
-
 #include <fei-isis.h>
 
 #include "FE_Node.h"

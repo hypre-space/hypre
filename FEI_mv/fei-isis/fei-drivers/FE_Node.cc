@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <iostream.h>
 #include <assert.h>
 
 #include "other/basicTypes.h"
@@ -58,8 +59,6 @@ void FE_Node::allocateSolnList() {
 }
 
 
-
-#include <iostream.h>
 
 //-----------------------------------------------------------------------
 

@@ -35,12 +35,6 @@
 #include <time.h>
 #include <assert.h>
 
-#ifdef SER
-#include "mpiuni/mpi.h"
-#else
-#include <mpi.h>
-#endif
-
 #include "cfei-isis.h"
 
 #include "CFE_Node.h"

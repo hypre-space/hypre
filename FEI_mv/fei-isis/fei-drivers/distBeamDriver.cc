@@ -41,7 +41,7 @@
 #include <assert.h>
 #include <string.h>
 
-#ifdef SER
+#ifdef FEI_SER
 #include <isis-ser.h>
 #else
 #include <isis-mpi.h>
