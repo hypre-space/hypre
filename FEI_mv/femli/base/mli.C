@@ -297,9 +297,11 @@ int MLI::solve( MLI_Vector *sol, MLI_Vector *rhs )
       norm2   = 1.0;
       rel_tol = 0.1;
       sol->setConstantValue(zero);
+#if 0
       strcpy( paramString, "zeroInitialGuess" );
       preSmoother = one_levels[0]->getPreSmoother();
       if (preSmoother != NULL) preSmoother->setParams(paramString, 0, NULL);
+#endif
    }
    else
    {
