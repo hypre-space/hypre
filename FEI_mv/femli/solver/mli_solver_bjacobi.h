@@ -36,9 +36,8 @@ class MLI_Solver_BJacobi : public MLI_Solver
    int        *offCols_;
    double     *offVals_;
    MLI_Solver_SeqSuperLU **blockSolvers_;
-#ifdef HAVE_ESSL
+   int        blkScheme_;
    double     **esslMatrices_;
-#endif
 
 public :
 

@@ -31,7 +31,7 @@ MLI_Solver_BJacobi::MLI_Solver_BJacobi(char *name) : MLI_Solver(name)
    relaxWeights_     = NULL;
    zeroInitialGuess_ = 0;
    useOverlap_       = 0;
-   blockSize_        = 500;
+   blockSize_        = 200;
    nBlocks_          = 0;
    blockLengths_     = NULL;
    blockSolvers_     = NULL;
@@ -41,9 +41,8 @@ MLI_Solver_BJacobi::MLI_Solver_BJacobi(char *name) : MLI_Solver(name)
    offRowLengths_    = NULL;
    offCols_          = NULL;
    offVals_          = NULL;
-#ifdef HAVE_ESSL
+   blkScheme_        = 0;      /* default = SuperLU */
    esslMatrices_     = NULL;
-#endif
 }
 
 /******************************************************************************
@@ -80,6 +79,9 @@ int MLI_Solver_BJacobi::setup(MLI_Matrix *Amat_in)
     * construct the extended matrix
     *-----------------------------------------------------------------*/
 
+#if HAVE_ESSL
+   if ( blockSize_ <= switchSize && useOverlap_ == 0 ) blkScheme_ = 1;
+#endif
    buildBlocks();
 
    return 0;
@@ -97,16 +99,19 @@ int MLI_Solver_BJacobi::solve(MLI_Vector *f_in, MLI_Vector *u_in)
    int     nSends, numColsOffd, start, relaxError=0;
    int     nprocs, *partition, startRow, endRow, offOffset, *tmpJ;
    int     *ADiagI, *ADiagJ, *AOffdI, *AOffdJ, offIRow;
-   double  *ADiagA, *AOffdA, *uData, *fData, *tmpA, *fExtData;
-   double  relaxWeight, *vBufData, *vExtData, res, *dbleX, *dbleB;
+   double  *ADiagA, *AOffdA, *uData, *fData, *tmpA, *fExtData=NULL;
+   double  relaxWeight, *vBufData=NULL, *vExtData=NULL, res, *dbleX, *dbleB;
    MPI_Comm               comm;
    hypre_ParCSRMatrix     *A;
    hypre_CSRMatrix        *ADiag, *AOffd;
    hypre_ParCSRCommPkg    *commPkg;
    hypre_ParCSRCommHandle *commHandle;
    hypre_ParVector        *f, *u;
-   hypre_Vector           *sluB, *sluX;
+   hypre_Vector           *sluB=NULL, *sluX=NULL;
    MLI_Vector             *mliX, *mliB;
+#if HAVE_ESSL
+   int                    info;
+#endif
 
    /*-----------------------------------------------------------------
     * fetch machine and matrix parameters
@@ -186,17 +191,13 @@ int MLI_Solver_BJacobi::solve(MLI_Vector *f_in, MLI_Vector *u_in)
 
    dbleB = new double[maxBlkLeng_];
    dbleX = new double[maxBlkLeng_];
-#ifdef HAVE_ESSL
-   if ( blockSize_ > switchSize )
+   if ( blkScheme_ == 0 )
    {
-#endif
-   sluB  = hypre_SeqVectorCreate( maxBlkLeng_ );
-   sluX  = hypre_SeqVectorCreate( maxBlkLeng_ );
-   hypre_VectorData(sluB) = dbleB;
-   hypre_VectorData(sluX) = dbleX;
-#ifdef HAVE_ESSL
+      sluB  = hypre_SeqVectorCreate( maxBlkLeng_ );
+      sluX  = hypre_SeqVectorCreate( maxBlkLeng_ );
+      hypre_VectorData(sluB) = dbleB;
+      hypre_VectorData(sluX) = dbleX;
    }
-#endif
 
    /*-----------------------------------------------------------------
     * perform block Jacobi sweeps
@@ -210,7 +211,7 @@ int MLI_Solver_BJacobi::solve(MLI_Vector *f_in, MLI_Vector *u_in)
 
       if (nprocs > 1)
       {
-         if ( ! zeroInitialGuess_)
+         if ( zeroInitialGuess_ == 0 )
          {
             index = 0;
             for (iP = 0; iP < nSends; iP++)
@@ -249,7 +250,7 @@ int MLI_Solver_BJacobi::solve(MLI_Vector *f_in, MLI_Vector *u_in)
             index  = irow - startRow;
             if ( irow >= startRow && irow <= endRow )
             {
-               res    = fData[index];
+               res = fData[index];
                if ( zeroInitialGuess_ == 0 )
                {
                   iStart = ADiagI[index];
@@ -290,41 +291,35 @@ int MLI_Solver_BJacobi::solve(MLI_Vector *f_in, MLI_Vector *u_in)
                   }
                   offOffset += iEnd;
                }
-               offIRow++;
                dbleB[irow-blockStartRow] = res;
+               offIRow++;
             }
          }
-#ifdef HAVE_ESSL
-      if ( blockSize_ > switchSize )
-      {
+         if ( blkScheme_ == 0 )
+         {
+            hypre_VectorSize(sluB) = blkLeng;
+            hypre_VectorSize(sluX) = blkLeng;
+            mliB = new MLI_Vector((void*) sluB, "HYPRE_Vector", NULL);
+            mliX = new MLI_Vector((void*) sluX, "HYPRE_Vector", NULL);
+
+            blockSolvers_[iB]->solve( mliB, mliX );
+
+            delete mliB;
+            delete mliX;
+         }
+         else
+         {
+            for ( irow = 0; irow < blkLeng; irow++ ) dbleX[irow] = dbleB[irow];
+#if HAVE_ESSL
+            dpps(esslMatrices_[iB], blkLeng, dbleX, 1);
 #endif
-         hypre_VectorSize(sluB) = blkLeng;
-         hypre_VectorSize(sluX) = blkLeng;
-         mliB = new MLI_Vector((void*) sluB, "HYPRE_Vector", NULL);
-         mliX = new MLI_Vector((void*) sluX, "HYPRE_Vector", NULL);
-
-         blockSolvers_[iB]->solve( mliB, mliX );
-
-         delete mliB;
-         delete mliX;
-#ifdef HAVE_ESSL
-      }
-      else
-      {
-         for ( irow = 0; irow < blkLeng; irow++ ) dbleX[irow] = dbleB[irow];
-         dpps(esslMatrices_[iB], blkLeng, dbleX, 1);
-      }
-#endif
-
+         }
          for ( irow = blockStartRow; irow <= blockEndRow; irow++ )
          {
-            if ( irow < startRow )
-               vExtData[offIRow-blockSize_+irow-blockStartRow+1] += 
-                         relaxWeight * dbleX[irow-blockStartRow];
-            else if ( irow <= endRow )
+            if ( irow >= startRow && irow <= endRow )
                uData[irow-startRow] += relaxWeight * 
                                        dbleX[irow-blockStartRow];
-            else 
+            else
                vExtData[offIRow-blockSize_+irow-blockStartRow+1] += 
                          relaxWeight * dbleX[irow-blockStartRow];
          }
@@ -359,21 +354,11 @@ int MLI_Solver_BJacobi::solve(MLI_Vector *f_in, MLI_Vector *u_in)
     * clean up and return
     *-----------------------------------------------------------------*/
 
-   if (nprocs > 1)
-   {
-      delete [] vExtData;
-      delete [] vBufData;
-      delete [] fExtData;
-   }
-#ifdef HAVE_ESSL
-   if ( blockSize_ > switchSize )
-   {
-#endif
-   hypre_SeqVectorDestroy( sluX );
-   hypre_SeqVectorDestroy( sluB );
-#ifdef HAVE_ESSL
-   }
-#endif
+   if ( vExtData != NULL ) delete [] vExtData;
+   if ( vBufData != NULL ) delete [] vBufData;
+   if ( fExtData != NULL ) delete [] fExtData;
+   if ( sluX != NULL ) hypre_SeqVectorDestroy( sluX );
+   if ( sluB != NULL ) hypre_SeqVectorDestroy( sluB );
 
    return(relaxError); 
 }
@@ -656,21 +641,17 @@ int MLI_Solver_BJacobi::buildBlocks()
 {
    int      iB, iP, mypid, nprocs, *partition, startRow, endRow;
    int      localNRows, nRecvs, *recvProcs, *recvStarts, nRecvBefore=0; 
-   int      offRowOffset, offRowNnz, blockStartRow, blockEndRow;
+   int      offRowOffset, offRowNnz, blockStartRow, blockEndRow, index;
    int      irow, jcol, colIndex, rowSize, *colInd, localRow, localNnz;
-   int      blkLeng, *csrIA, *csrJA;
-   double   *colVal, *csrAA;
+   int      blkLeng, *csrIA, *csrJA, offset, rowIndex;
+   double   *colVal, *csrAA, *esslMatrix;
    char     sName[20];
    MPI_Comm comm;
    hypre_ParCSRCommPkg *commPkg;
    hypre_ParCSRMatrix  *A = (hypre_ParCSRMatrix *) Amat_->getMatrix();
    hypre_CSRMatrix     *seqA;
    MLI_Matrix          *mliMat;
-   MLI_Function        *funcPtr;
-#ifdef HAVE_ESSL
-   int      rowIndex, index, offset;
-   double   *esslMatrix;
-#endif
+   MLI_Function        *funcPtr=NULL;
 
    /*-----------------------------------------------------------------
     * fetch matrix information 
@@ -715,23 +696,19 @@ int MLI_Solver_BJacobi::buildBlocks()
     * construct block matrix inverses
     *-----------------------------------------------------------------*/
 
-#ifdef HAVE_ESSL
-   if ( blockSize_ > switchSize )
+   if ( blkScheme_ == 0 )
    {
-#endif
-   strcpy( sName, "SeqSuperLU" );
-   blockSolvers_ = new MLI_Solver_SeqSuperLU*[nBlocks_];
-   for ( iB = 0; iB < nBlocks_; iB++ ) 
-      blockSolvers_[iB] = new MLI_Solver_SeqSuperLU(sName);
-   funcPtr = (MLI_Function *) malloc( sizeof(MLI_Function) );
-#ifdef HAVE_ESSL
+      strcpy( sName, "SeqSuperLU" );
+      blockSolvers_ = new MLI_Solver_SeqSuperLU*[nBlocks_];
+      for ( iB = 0; iB < nBlocks_; iB++ ) 
+         blockSolvers_[iB] = new MLI_Solver_SeqSuperLU(sName);
+      funcPtr = (MLI_Function *) malloc( sizeof(MLI_Function) );
    }
    else
    {
       esslMatrices_ = new double*[nBlocks_];
       for ( iB = 0; iB < nBlocks_; iB++ ) esslMatrices_[iB] = NULL;
    }
-#endif
 
    offRowOffset = offRowNnz = 0;
 
@@ -741,78 +718,75 @@ int MLI_Solver_BJacobi::buildBlocks()
       blockStartRow = iB * blockSize_ + startRow - nRecvBefore;
       blockEndRow   = blockStartRow + blkLeng - 1;
       localNnz      = 0;
-#ifdef HAVE_ESSL
-      if ( blockSize_ > switchSize )
+      if ( blkScheme_ == 0 )
       {
-#endif
-      for ( irow = blockStartRow; irow <= blockEndRow; irow++ )
-      {
-         if ( irow >= startRow && irow <= endRow )
+         for ( irow = blockStartRow; irow <= blockEndRow; irow++ )
          {
-            hypre_ParCSRMatrixGetRow(A, irow, &rowSize, &colInd, &colVal);
-            localNnz += rowSize;
-            hypre_ParCSRMatrixRestoreRow(A, irow, &rowSize, &colInd, &colVal);
+            if ( irow >= startRow && irow <= endRow )
+            {
+               hypre_ParCSRMatrixGetRow(A, irow, &rowSize, &colInd, &colVal);
+               localNnz += rowSize;
+               hypre_ParCSRMatrixRestoreRow(A,irow,&rowSize,&colInd,&colVal);
+            }
+            else localNnz += offRowLengths_[offRowOffset+irow-blockStartRow];
          }
-         else localNnz += offRowLengths_[offRowOffset+irow-blockStartRow];
-      }
-      seqA = hypre_CSRMatrixCreate( blkLeng, blkLeng, localNnz );
-      csrIA = new int[blkLeng+1];
-      csrJA = new int[localNnz];
-      csrAA = new double[localNnz];
-      localRow = 0;
-      localNnz = 0;
-      csrIA[0] = localNnz;
+         seqA = hypre_CSRMatrixCreate( blkLeng, blkLeng, localNnz );
+         csrIA = new int[blkLeng+1];
+         csrJA = new int[localNnz];
+         csrAA = new double[localNnz];
+         localRow = 0;
+         localNnz = 0;
+         csrIA[0] = localNnz;
 
-      for ( irow = blockStartRow; irow <= blockEndRow; irow++ )
-      {
-         if ( irow >= startRow && irow <= endRow )
+         for ( irow = blockStartRow; irow <= blockEndRow; irow++ )
          {
-            hypre_ParCSRMatrixGetRow(A, irow, &rowSize, &colInd, &colVal);
-            for ( jcol = 0; jcol < rowSize; jcol++ )
+            if ( irow >= startRow && irow <= endRow )
             {
-               colIndex = colInd[jcol];
-               if ((colIndex >= blockStartRow) && (colIndex <= blockEndRow))
+               hypre_ParCSRMatrixGetRow(A, irow, &rowSize, &colInd, &colVal);
+               for ( jcol = 0; jcol < rowSize; jcol++ )
                {
-                  csrJA[localNnz] = colIndex - blockStartRow; 
-                  csrAA[localNnz++] = colVal[jcol];
+                  colIndex = colInd[jcol];
+                  if ((colIndex >= blockStartRow) && (colIndex <= blockEndRow))
+                  {
+                     csrJA[localNnz] = colIndex - blockStartRow; 
+                     csrAA[localNnz++] = colVal[jcol];
+                  }
                }
+               hypre_ParCSRMatrixRestoreRow(A,irow,&rowSize,&colInd,&colVal);
             }
-            hypre_ParCSRMatrixRestoreRow(A, irow, &rowSize, &colInd, &colVal);
-         }
-         else
-         {
-            rowSize = offRowLengths_[offRowOffset];
-            colInd = &(offCols_[offRowNnz]);
-            colVal = &(offVals_[offRowNnz]);
-            for ( jcol = 0; jcol < rowSize; jcol++ )
+            else
             {
-               colIndex = colInd[jcol];
-               if ((colIndex >= blockStartRow) && (colIndex <= blockEndRow))
+               rowSize = offRowLengths_[offRowOffset];
+               colInd = &(offCols_[offRowNnz]);
+               colVal = &(offVals_[offRowNnz]);
+               for ( jcol = 0; jcol < rowSize; jcol++ )
                {
-                  csrJA[localNnz] = colIndex - blockStartRow; 
-                  csrAA[localNnz++] = colVal[jcol];
+                  colIndex = colInd[jcol];
+                  if ((colIndex >= blockStartRow) && (colIndex <= blockEndRow))
+                  {
+                     csrJA[localNnz] = colIndex - blockStartRow; 
+                     csrAA[localNnz++] = colVal[jcol];
+                  }
                }
+               offRowOffset++;
+               offRowNnz += rowSize;
             }
-            offRowOffset++;
-            offRowNnz += rowSize;
+            localRow++;
+            csrIA[localRow] = localNnz;
          }
-         localRow++;
-         csrIA[localRow] = localNnz;
-      }
-      hypre_CSRMatrixI(seqA)    = csrIA;
-      hypre_CSRMatrixJ(seqA)    = csrJA;
-      hypre_CSRMatrixData(seqA) = csrAA;
-      MLI_Utils_HypreCSRMatrixGetDestroyFunc(funcPtr);
-      mliMat = new MLI_Matrix((void*) seqA,"HYPRE_CSR",funcPtr);
-      blockSolvers_[iB]->setup( mliMat );
-      delete mliMat;
-#ifdef HAVE_ESSL
+         hypre_CSRMatrixI(seqA)    = csrIA;
+         hypre_CSRMatrixJ(seqA)    = csrJA;
+         hypre_CSRMatrixData(seqA) = csrAA;
+         MLI_Utils_HypreCSRMatrixGetDestroyFunc(funcPtr);
+         mliMat = new MLI_Matrix((void*) seqA,"HYPRE_CSR",funcPtr);
+         blockSolvers_[iB]->setup( mliMat );
+         delete mliMat;
       }
       else 
       {
          esslMatrices_[iB] = new double[blkLeng * (blkLeng+1)/2];
          esslMatrix = esslMatrices_[iB];
-	 bzero((char *) esslMatrices_[iB],blkLeng*(blkLeng+1)/2*sizeof(double));
+	 bzero((char *) esslMatrix,blkLeng*(blkLeng+1)/2*sizeof(double));
          offset = 0;
          for ( irow = blockStartRow; irow <= blockEndRow; irow++ )
          {
@@ -823,7 +797,7 @@ int MLI_Solver_BJacobi::buildBlocks()
                for ( jcol = 0; jcol < rowSize; jcol++ )
                {
                   colIndex = colInd[jcol] - blockStartRow;
-                  if ((colIndex >= rowIndex) && (colIndex <= blkLeng))
+                  if ((colIndex >= rowIndex) && (colIndex < blkLeng))
                   {
                      index = colIndex - rowIndex;
                      esslMatrix[offset+index] = colVal[jcol];
@@ -839,7 +813,7 @@ int MLI_Solver_BJacobi::buildBlocks()
                for ( jcol = 0; jcol < rowSize; jcol++ )
                {
                   colIndex = colInd[jcol] - blockStartRow;
-                  if ((colIndex >= rowIndex) && (colIndex <= blkLeng))
+                  if ((colIndex >= rowIndex) && (colIndex < blkLeng))
                   {
                      index = colIndex - rowIndex;
                      esslMatrix[offset+index] = colVal[jcol];
@@ -850,19 +824,13 @@ int MLI_Solver_BJacobi::buildBlocks()
             }
             offset += blkLeng - irow + blockStartRow;
          }
+#ifdef HAVE_ESSL
          dppf(esslMatrix, blkLeng, 1);
-      }
 #endif
+      }
    }
 
-#ifdef HAVE_ESSL
-   if ( blockSize_ > switchSize )
-   {
-#endif
-   free( funcPtr );
-#ifdef HAVE_ESSL
-   }
-#endif
+   if ( funcPtr != NULL ) free( funcPtr );
    return 0;
 }
 
@@ -940,7 +908,6 @@ int MLI_Solver_BJacobi::cleanBlocks()
    offRowLengths_ = NULL;
    offCols_       = NULL;
    offVals_       = NULL;
-#ifdef HAVE_ESSL
    if ( esslMatrices_ != NULL )
    {
       for ( int iB = 0; iB < nBlocks_; iB++ )
@@ -948,7 +915,6 @@ int MLI_Solver_BJacobi::cleanBlocks()
       delete [] esslMatrices_;
       esslMatrices_ = NULL;      
    }
-#endif
    return 0;
 }
 
