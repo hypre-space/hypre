@@ -18,11 +18,11 @@
 #include <time.h>
 #include "utilities/utilities.h"
 typedef struct MLI_Function_Struct MLI_Function;
-#include "cintface/cmli.h"
 #include "parcsr_mv/parcsr_mv.h"
 #include "parcsr_ls/HYPRE_parcsr_ls.h"
 #include "parcsr_mv/HYPRE_parcsr_mv.h"
 #include "krylov/krylov.h"
+#include "cintface/cmli.h"
 
 /************************************************************************
  * place holder for function pointers
@@ -47,6 +47,8 @@ int    MLI_Utils_HypreVectorGetDestroyFunc(MLI_Function *func_ptr);
 int    MLI_Utils_HypreMatrixFormJacobi(void *A, double, void **J);
 int    MLI_Utils_GenPartition(MPI_Comm comm, int n, int **part);
 int    MLI_Utils_ComputeSpectralRadius(hypre_ParCSRMatrix *, double *);
+int    MLI_Utils_ComputeExtremeRitzValues(hypre_ParCSRMatrix *, double *, int);
+int    MLI_Utils_ComputeMatrixMaxNorm(hypre_ParCSRMatrix *, double *, int);
 double MLI_Utils_WTime();
 int    MLI_Utils_HypreMatrixPrint(void *, char *);
 int    MLI_Utils_HypreMatrixGetInfo(void *, int *, double *);

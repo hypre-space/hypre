@@ -264,6 +264,282 @@ int MLI_Utils_ComputeSpectralRadius(hypre_ParCSRMatrix *Amat, double *max_eigen)
    return 0;
 } 
 
+/******************************************************************************
+ * compute Ritz Values that approximates extreme eigenvalues
+ *--------------------------------------------------------------------------*/
+
+int MLI_Utils_ComputeExtremeRitzValues(hypre_ParCSRMatrix *A, double *ritz, 
+                                       int scaleFlag)
+{
+   int      i, j, k, its, maxIter, nprocs, mypid, localNRows, globalNRows;
+   int      startRow, endRow, *partition, *ADiagI;
+   double   alpha, beta, rho, rhom1, sigma, offdiagNorm, *zData, *pData;
+   double   rnorm, *alphaArray, *rnormArray, **Tmat, initOffdiagNorm;
+   double   app, aqq, arr, ass, apq, sign, tau, t, c, s, maxRowSum;
+   double   *ADiagA, one=1.0, *apData, *rData;
+   MPI_Comm comm;
+   hypre_CSRMatrix *ADiag;
+   hypre_ParVector *rVec, *zVec, *pVec, *apVec;
+
+   /*-----------------------------------------------------------------
+    * fetch matrix information 
+    *-----------------------------------------------------------------*/
+
+   comm = hypre_ParCSRMatrixComm(A);
+   MPI_Comm_rank(comm,&mypid);  
+   MPI_Comm_size(comm,&nprocs);  
+
+   ADiag      = hypre_ParCSRMatrixDiag(A);
+   ADiagA     = hypre_CSRMatrixData(ADiag);
+   ADiagI     = hypre_CSRMatrixI(ADiag);
+   HYPRE_ParCSRMatrixGetRowPartitioning((HYPRE_ParCSRMatrix) A, &partition);
+   startRow    = partition[mypid];
+   endRow      = partition[mypid+1] - 1;
+   globalNRows = partition[nprocs];
+   localNRows  = endRow - startRow + 1;
+   hypre_TFree( partition );
+   maxIter     = 20;
+   if ( globalNRows < maxIter ) maxIter = globalNRows;
+   ritz[0] = ritz[1] = 0.0;
+
+   /*-----------------------------------------------------------------
+    * allocate space
+    *-----------------------------------------------------------------*/
+
+   if ( localNRows > 0 )
+   {
+      HYPRE_ParCSRMatrixGetRowPartitioning((HYPRE_ParCSRMatrix)A,&partition);
+      rVec = hypre_ParVectorCreate(comm, globalNRows, partition);
+      hypre_ParVectorInitialize(rVec);
+      HYPRE_ParCSRMatrixGetRowPartitioning((HYPRE_ParCSRMatrix)A,&partition);
+      zVec = hypre_ParVectorCreate(comm, globalNRows, partition);
+      hypre_ParVectorInitialize(zVec);
+      HYPRE_ParCSRMatrixGetRowPartitioning((HYPRE_ParCSRMatrix)A,&partition);
+      pVec = hypre_ParVectorCreate(comm, globalNRows, partition);
+      hypre_ParVectorInitialize(pVec);
+      HYPRE_ParCSRMatrixGetRowPartitioning((HYPRE_ParCSRMatrix)A,&partition);
+      apVec = hypre_ParVectorCreate(comm, globalNRows, partition);
+      hypre_ParVectorInitialize(apVec);
+      zData  = hypre_VectorData( hypre_ParVectorLocalVector(zVec) );
+      pData  = hypre_VectorData( hypre_ParVectorLocalVector(pVec) );
+      apData = hypre_VectorData( hypre_ParVectorLocalVector(apVec) );
+      rData  = hypre_VectorData( hypre_ParVectorLocalVector(rVec) );
+   }
+   HYPRE_ParVectorSetRandomValues((HYPRE_ParVector) rVec, 1209873 );
+   alphaArray = (double  *) malloc( (maxIter+1) * sizeof(double) );
+   rnormArray = (double  *) malloc( (maxIter+1) * sizeof(double) );
+   Tmat       = (double **) malloc( (maxIter+1) * sizeof(double*) );
+   for ( i = 0; i <= maxIter; i++ )
+   {
+      Tmat[i] = (double *) malloc( (maxIter+1) * sizeof(double) );
+      for ( j = 0; j <= maxIter; j++ ) Tmat[i][j] = 0.0;
+      Tmat[i][i] = 1.0;
+   }
+
+   /*-----------------------------------------------------------------
+    * compute initial residual vector norm 
+    *-----------------------------------------------------------------*/
+
+   hypre_ParVectorSetRandomValues(rVec, 1209837);
+   hypre_ParVectorSetConstantValues(pVec, 0.0);
+   rho = hypre_ParVectorInnerProd(rVec, rVec); 
+   rnorm = sqrt(rho);
+   rnormArray[0] = rnorm;
+   if ( rnorm == 0.0 )
+   {
+      printf("MLI_Utils_ComputeExtremeRitzValues : fail for res=0.\n");
+      hypre_ParVectorDestroy( rVec );
+      hypre_ParVectorDestroy( pVec );
+      hypre_ParVectorDestroy( zVec );
+      hypre_ParVectorDestroy( apVec );
+      return 1;
+   }
+
+   /*-----------------------------------------------------------------
+    * main loop 
+    *-----------------------------------------------------------------*/
+
+   for ( its = 0; its < maxIter; its++ )
+   {
+      if ( scaleFlag )
+      {
+         for ( i = 0; i < localNRows; i++ )
+            if (ADiagA[ADiagI[i]] != 0.0) 
+               zData[i] = rData[i]/sqrt(ADiagA[ADiagI[i]]);
+      }
+      else 
+         for ( i = 0; i < localNRows; i++ ) zData[i] = rData[i];
+
+      rhom1 = rho;
+      rho = hypre_ParVectorInnerProd(rVec, zVec); 
+      if (its == 0) beta = 0.0;
+      else 
+      {
+         beta = rho / rhom1;
+         Tmat[its-1][its] = -beta;
+      }
+      HYPRE_ParVectorScale( beta, (HYPRE_ParVector) pVec );
+      hypre_ParVectorAxpy( one, zVec, pVec );
+      hypre_ParCSRMatrixMatvec(1.0, A, pVec, 0.0, apVec);
+      sigma = hypre_ParVectorInnerProd(pVec, apVec); 
+      alpha  = rho / sigma;
+      alphaArray[its] = sigma;
+      hypre_ParVectorAxpy( -alpha, apVec, rVec );
+      rnorm = sqrt(hypre_ParVectorInnerProd(rVec, rVec)); 
+      rnormArray[its+1] = rnorm;
+      if ( rnorm < 1.0E-8 * rnormArray[0] )
+      {
+         maxIter = its + 1;
+         break;
+      }
+   }
+
+   /*-----------------------------------------------------------------
+    * construct T 
+    *-----------------------------------------------------------------*/
+
+   Tmat[0][0] = alphaArray[0];
+   for ( i = 1; i < maxIter; i++ )
+      Tmat[i][i]=alphaArray[i]+alphaArray[i-1]*Tmat[i-1][i]*Tmat[i-1][i];
+
+   for ( i = 0; i < maxIter; i++ )
+   {
+      Tmat[i][i+1] *= alphaArray[i];
+      Tmat[i+1][i] = Tmat[i][i+1];
+      rnormArray[i] = 1.0 / rnormArray[i];
+   }
+   for ( i = 0; i < maxIter; i++ )
+      for ( j = 0; j < maxIter; j++ )
+         Tmat[i][j] = Tmat[i][j] * rnormArray[i] * rnormArray[j];
+
+   /* ----------------------------------------------------------------*/
+   /* diagonalize T using Jacobi iteration                            */
+   /* ----------------------------------------------------------------*/
+
+   offdiagNorm = 0.0;
+   for ( i = 0; i < maxIter; i++ )
+      for ( j = 0; j < i; j++ ) offdiagNorm += (Tmat[i][j] * Tmat[i][j]);
+   offdiagNorm *= 2.0;
+   initOffdiagNorm = offdiagNorm;
+
+   while ( offdiagNorm > initOffdiagNorm * 1.0E-8 )
+   {
+      for ( i = 1; i < maxIter; i++ )
+      {
+         for ( j = 0; j < i; j++ )
+         {
+            apq = Tmat[i][j];
+            if ( apq != 0.0 )
+            {
+               app = Tmat[j][j];
+               aqq = Tmat[i][i];
+               tau = ( aqq - app ) / (2.0 * apq);
+               sign = (tau >= 0.0) ? 1.0 : -1.0;
+               t  = sign / (tau * sign + sqrt(1.0 + tau * tau));
+               c  = 1.0 / sqrt( 1.0 + t * t );
+               s  = t * c;
+               for ( k = 0; k < maxIter; k++ )
+               {
+                  arr = Tmat[j][k];
+                  ass = Tmat[i][k];
+                  Tmat[j][k] = c * arr - s * ass;
+                  Tmat[i][k] = s * arr + c * ass;
+               }
+               for ( k = 0; k < maxIter; k++ )
+               {
+                  arr = Tmat[k][j];
+                  ass = Tmat[k][i];
+                  Tmat[k][j] = c * arr - s * ass;
+                  Tmat[k][i] = s * arr + c * ass;
+               }
+            }
+         }
+      }
+      offdiagNorm = 0.0;
+      for ( i = 0; i < maxIter; i++ )
+         for ( j = 0; j < i; j++ ) offdiagNorm += (Tmat[i][j] * Tmat[i][j]);
+      offdiagNorm *= 2.0;
+   }
+
+   /* ----------------------------------------------------------------
+    * search for max and min eigenvalues
+    * ----------------------------------------------------------------*/
+
+   t = Tmat[0][0];
+   for (i = 1; i < maxIter; i++) t = (Tmat[i][i] > t) ? Tmat[i][i] : t;
+   ritz[0] = t * 1.1;
+   t = Tmat[0][0];
+   for (i = 1; i < maxIter; i++) t = (Tmat[i][i] < t) ? Tmat[i][i] : t;
+   ritz[1] = t / 1.01;
+
+   /* ----------------------------------------------------------------*
+    * de-allocate storage for temporary vectors
+    * ----------------------------------------------------------------*/
+
+   if ( localNRows > 0 )
+   {
+      hypre_ParVectorDestroy( rVec );
+      hypre_ParVectorDestroy( zVec );
+      hypre_ParVectorDestroy( pVec );
+      hypre_ParVectorDestroy( apVec );
+   }
+   free(alphaArray);
+   free(rnormArray);
+   for (i = 0; i <= maxIter; i++) if ( Tmat[i] != NULL ) free( Tmat[i] );
+   free(Tmat);
+   return 0;
+}
+
+/******************************************************************************
+ * compute matrix max norm
+ *--------------------------------------------------------------------------*/
+
+int MLI_Utils_ComputeMatrixMaxNorm(hypre_ParCSRMatrix *A, double *norm,
+                                   int scaleFlag)
+{
+   int             i, j, iStart, iEnd, localNRows, *ADiagI, *AOffdI;
+   int             mypid;
+   double          *ADiagA, *AOffdA, maxVal, rowSum, dtemp;
+   hypre_CSRMatrix *ADiag, *AOffd;
+   MPI_Comm        comm;
+
+   /*-----------------------------------------------------------------
+    * fetch machine and smoother parameters
+    *-----------------------------------------------------------------*/
+
+   ADiag      = hypre_ParCSRMatrixDiag(A);
+   ADiagA     = hypre_CSRMatrixData(ADiag);
+   ADiagI     = hypre_CSRMatrixI(ADiag);
+   AOffd      = hypre_ParCSRMatrixDiag(A);
+   AOffdA     = hypre_CSRMatrixData(AOffd);
+   AOffdI     = hypre_CSRMatrixI(AOffd);
+   localNRows = hypre_CSRMatrixNumRows(ADiag);
+   comm       = hypre_ParCSRMatrixComm(A);
+   MPI_Comm_rank(comm,&mypid);  
+   
+   maxVal = 0.0;
+   for (i = 0; i < localNRows; i++)
+   {
+      rowSum = 0.0;
+      iStart = ADiagI[i];
+      iEnd   = ADiagI[i+1];
+      for (j = iStart; j < iEnd; j++) rowSum += habs(ADiagA[j]);
+      iStart = AOffdI[i];
+      iEnd   = AOffdI[i+1];
+      for (j = iStart; j < iEnd; j++) rowSum += habs(AOffdA[j]);
+      if ( scaleFlag == 1 )
+      {
+         if ( ADiagA[ADiagI[i]] == 0.0)
+            printf("MLI_Utils_ComputeMatrixMaxNorm - zero diagonal.\n");
+         else rowSum /= ADiagA[ADiagI[i]];
+      }
+      if ( rowSum > maxVal ) maxVal = rowSum;
+   }
+   MPI_Allreduce(&maxVal, &dtemp, 1, MPI_DOUBLE, MPI_MAX, comm);
+   (*norm) = dtemp;
+   return 0;
+}
+
 /***************************************************************************
  * Given a local degree of freedom, construct an array for that for all
  *--------------------------------------------------------------------------*/
