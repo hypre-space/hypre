@@ -204,7 +204,6 @@ zzz_SMGRelaxSetup( void             *relax_vdata,
          zzz_SMGSetBase(solve_data[i], base_index, base_stride);
          zzz_SMGSetTol(solve_data[i], 0.0);
          zzz_SMGSetMaxIter(solve_data[i], 1);
-         zzz_SMGSetZeroGuess(solve_data[i]);
          zzz_SMGSetup(solve_data[i], A_sol, temp_vec, x);
       }
       else
