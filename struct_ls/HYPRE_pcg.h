@@ -16,7 +16,6 @@
 #ifndef HYPRE_PCG_HEADER
 #define HYPRE_PCG_HEADER
 
-
 /*--------------------------------------------------------------------------
  * HYPRE_PCGData
  *--------------------------------------------------------------------------*/
@@ -59,10 +58,21 @@ typedef struct
 #define HYPRE_PCGDataNorm(pcg_data)          ((pcg_data) -> norm)
 #define HYPRE_PCGDataRelNorm(pcg_data)       ((pcg_data) -> rel_norm)
 
-#endif
-
 /*--------------------------------------------------------------------------
  * Prototypes
  *--------------------------------------------------------------------------*/
 
-void HYPRE_PCG( Vector *x, Vector *b, double  tol, void *data );
+#ifdef __STDC__
+# define        P(s) s
+#else
+# define P(s) ()
+#endif
+ 
+ 
+/* HYPRE_pcg.c */
+void HYPRE_PCG P((Vector *x , Vector *b , double tol , void *data ));
+ 
+#undef P
+
+#endif
+
