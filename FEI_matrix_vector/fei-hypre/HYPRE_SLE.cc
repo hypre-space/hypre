@@ -170,6 +170,8 @@ void HYPRE_SLE::deleteLinearAlgebraCore()
 //with the linear algebra library. i.e., do initial allocations, etc.
 // Rows and columns are 1-based.
 
+const int partit[] = {0, 3, 6};//UNDONE kludge
+
 void HYPRE_SLE::createLinearAlgebraCore(int globalNumEqns,
   int localStartRow, int localEndRow, int localStartCol, int localEndCol)
 {
@@ -183,25 +185,31 @@ void HYPRE_SLE::createLinearAlgebraCore(int globalNumEqns,
     ierr = HYPRE_IJMatrixSetLocalStorageType(A, HYPRE_PARCSR);
     assert(!ierr);
     ierr = HYPRE_IJMatrixSetLocalSize(A, localEndRow-localStartRow+1, 
-      globalNumEqns);
+      localEndRow-localStartRow+1);
     assert(!ierr);
 
     ierr = HYPRE_IJVectorCreate(comm, &b, globalNumEqns);
     assert(!ierr);
     ierr = HYPRE_IJVectorSetLocalStorageType(b, HYPRE_PARCSR);
     assert(!ierr);
-    ierr = HYPRE_IJVectorSetLocalPartitioning(b, localStartRow-1, localEndRow);
+//  ierr = HYPRE_IJVectorSetLocalPartitioning(b, localStartRow-1, localEndRow);
+    ierr = HYPRE_IJVectorSetPartitioning(b, partit);
     assert(!ierr);
     ierr = HYPRE_IJVectorInitialize(b);
+    assert(!ierr);
+    ierr = HYPRE_IJVectorZeroLocalComponents(b);
     assert(!ierr);
 
     ierr = HYPRE_IJVectorCreate(comm, &x, globalNumEqns);
     assert(!ierr);
     ierr = HYPRE_IJVectorSetLocalStorageType(x, HYPRE_PARCSR);
     assert(!ierr);
-    ierr = HYPRE_IJVectorSetLocalPartitioning(x, localStartRow-1, localEndRow);
+//  ierr = HYPRE_IJVectorSetLocalPartitioning(x, localStartRow-1, localEndRow);
+    ierr = HYPRE_IJVectorSetPartitioning(x, partit);
     assert(!ierr);
     ierr = HYPRE_IJVectorInitialize(x);
+    assert(!ierr);
+    ierr = HYPRE_IJVectorZeroLocalComponents(x);
     assert(!ierr);
 }
 
@@ -273,32 +281,36 @@ void HYPRE_SLE::sumIntoRHSVector(int num, const int* indices,
   const double* values)
 {
     int i;
+    int ierr;
 
     int *ind = (int *) indices; // cast away const-ness
 
     for (i=0; i<num; i++)
 	ind[i]--;               // change indices to 0-based
 
-    HYPRE_IJVectorAddToLocalComponents(b, num, ind, NULL, values);
+    ierr = HYPRE_IJVectorAddToLocalComponents(b, num, ind, NULL, values);
+    assert(ierr == 0);
 
     for (i=0; i<num; i++)
 	ind[i]++;               // change indices back to 1-based
 }
 
 //------------------------------------------------------------------------------
-// used for initializing the right-hand side
+// used for initializing the initial guess
 //
 void HYPRE_SLE::putIntoSolnVector(int num, const int* indices,
   const double* values)
 {
     int i;
+    int ierr;
 
     int *ind = (int *) indices; // cast away const-ness
 
     for (i=0; i<num; i++)
 	ind[i]--;               // change indices to 0-based
 
-    HYPRE_IJVectorSetLocalComponents(b, num, ind, NULL, values);
+    ierr = HYPRE_IJVectorSetLocalComponents(x, num, ind, NULL, values);
+    assert(ierr == 0);
 
     for (i=0; i<num; i++)
 	ind[i]++;               // change indices back to 1-based
@@ -311,10 +323,12 @@ double HYPRE_SLE::accessSolnVector(int equation)
 {
     double val;
     int temp;
+    int ierr;
 
     temp = equation-1; // construct 0-based index
 
-    HYPRE_IJVectorGetLocalComponents(x, 1, &temp, NULL, &val);
+    ierr = HYPRE_IJVectorGetLocalComponents(x, 1, &temp, NULL, &val);
+    assert(ierr == 0);
 
     return val;
 }
@@ -462,13 +476,12 @@ void fei_hypre_test(int argc, char *argv[])
 
     const int indg1[] = {1, 2, 3};
     const int indg2[] = {4, 5, 6};
-    const double valg[] = {0.0, 0.0, 0.0};
+    const double valg[] = {0.1, 0.2, 0.3};
 
     MPI_Init(&argc, &argv);
 
     MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
     MPI_Comm_size(MPI_COMM_WORLD, &num_procs);
-
 
     assert(num_procs == 2);
 
@@ -510,7 +523,8 @@ void fei_hypre_test(int argc, char *argv[])
             H.sumIntoSystemMatrix(5, 2, val1, ind5);
             H.sumIntoSystemMatrix(6, 2, val2, ind5);
 
-            H.putIntoSolnVector(3, indg2, valg); // initial guess
+            //H.sumIntoRHSVector(2, ind5, val1);   // rhs vector
+            //H.putIntoSolnVector(3, indg2, valg); // initial guess//BUG
 
 	    break;
 
@@ -528,10 +542,17 @@ void fei_hypre_test(int argc, char *argv[])
 
     // get the result
     for (i=1; i<=3; i++)
-	printf("local solution component %d: %f\n", i, H.accessSolnVector(i));
+      if (my_rank == 0)
+	printf("sol(%d): %f\n", i, H.accessSolnVector(i));
+      else
+	printf("sol(%d): %f\n", i+3, H.accessSolnVector(i+3));
 
     H.resetMatrixAndVector(0.0);
     
+/*
+fflush(stdout);
+MPI_Barrier(MPI_COMM_WORLD);
+*/
     MPI_Finalize();
 
     // note implicit call to destructor at end of scope
