@@ -112,7 +112,8 @@ public :
    int    setNullSpace(int nodeDOF, int numNS, double *nullVec, int length);
    int    resetNullSpaceComponents(int length, int start, int *indices);
    int    adjustNullSpace(double *vecAdjust);
-   int    setNodalCoordinates(int nNodes,int nDOF,double *coor,double *scale);
+   int    setNodalCoordinates(int nNodes,int nDOF, int nsDim, double *coor, 
+                              int numNS, double *scale);
    int    setCalibrationSize(int size);
    int    setupCalibration( MLI *mli );
    int    setupSubdomainNullSpaceUsingFEData( MLI *mli );

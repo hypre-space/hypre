@@ -155,7 +155,7 @@ MLI_Method_AMGSA::~MLI_Method_AMGSA()
 
 int MLI_Method_AMGSA::setParams(char *in_name, int argc, char *argv[])
 {
-   int        level, size, nDOF, numNS, length, nSweeps=1, offset;
+   int        level, size, nDOF, numNS, length, nSweeps=1, offset, nsDim;
    int        prePost, nnodes, nAggr, *aggrInfo, *labels, is, *indices;
    double     thresh, pweight, *nullspace, *weights=NULL, *coords, *scales;
    double     *nsAdjust;
@@ -339,23 +339,25 @@ int MLI_Method_AMGSA::setParams(char *in_name, int argc, char *argv[])
    }
    else if ( !strcasecmp(param1, "setNodalCoord" ))
    {
-      if ( argc != 5 )
+      if ( argc != 5 && argc != 6 )
       {
          printf("MLI_Method_AMGSA::setParams ERROR - setNodalCoord needs");
          printf(" 4 arguments.\n");
          printf("     argument[0] : number of nodes \n");
          printf("     argument[1] : node degree of freedom \n");
-         printf("     argument[2] : coordinate information \n");
-         printf("     argument[3] : scalings (can be null) \n");
-         printf("     argument[5] : null space dimension \n");
+         printf("     argument[2] : number of space dimension\n");
+         printf("     argument[3] : coordinate information \n");
+         printf("     argument[4] : null space dimension \n");
+         printf("     argument[5] : scalings (can be null) \n");
          return 1;
       } 
       nnodes = *(int *)   argv[0];
       nDOF   = *(int *)   argv[1];
-      coords = (double *) argv[2];
-      if ( argc == 4 ) scales = (double *) argv[3]; else scales = NULL;
-      nullspace_dim  = *(int *) argv[4];
-      return ( setNodalCoordinates(nnodes,nDOF,coords,scales) );
+      nsDim  = *(int *)   argv[2];
+      coords = (double *) argv[3];
+      numNS  = *(int *)   argv[4];
+      if ( argc == 6 ) scales = (double *) argv[5]; else scales = NULL;
+      return ( setNodalCoordinates(nnodes,nDOF,nsDim,coords,numNS,scales) );
    }
    else if ( !strcasecmp(param1, "setLabels" ))
    {
@@ -875,10 +877,10 @@ int MLI_Method_AMGSA::resetNullSpaceComponents(int length, int start,
  * (abridged from similar function in ML)
  * --------------------------------------------------------------------- */
 
-int MLI_Method_AMGSA::setNodalCoordinates(int num_nodes, int nDOF, 
-                                          double *coords, double *scalings)
+int MLI_Method_AMGSA::setNodalCoordinates(int num_nodes, int nDOF, int nsDim, 
+                         double *coords, int numNS, double *scalings)
 {
-   int i, j, k, offset, voffset, mypid;
+   int i, j, k, k2, offset, voffset, mypid;
    MPI_Comm comm = getComm();
    MPI_Comm_rank( comm, &mypid );
 
@@ -889,16 +891,26 @@ int MLI_Method_AMGSA::setNodalCoordinates(int num_nodes, int nDOF,
       node_dofs      = 1;
       curr_node_dofs = 1;
       nullspace_len  = num_nodes;
-/*
-      nullspace_dim  = 1;
-*/
+      nullspace_dim  = numNS;
+      if ( numNS != 1 && !(numNS == 4 && nsDim == 3) ) 
+      {
+         printf("setNodalCoordinates: nDOF,numNS,nsDim = %d %d %d\n",nDOF,
+                numNS,nsDim);
+         exit(1);
+      }
    }
    else if ( nDOF == 3 )
    {
       node_dofs      = 3;
       curr_node_dofs = 3;
       nullspace_len  = num_nodes * 3;
+      nullspace_dim  = numNS;
       if ( nullspace_dim <= 3 ) nullspace_dim  = 6;
+      if ( numNS != 3 && numNS != 6 && numNS != 9 && numNS != 12 ) 
+      {
+         printf("setNodalCoordinates: numNS %d not supported\n",numNS);
+         exit(1);
+      }
    }
    else
    {
@@ -910,18 +922,18 @@ int MLI_Method_AMGSA::setNodalCoordinates(int num_nodes, int nDOF,
 
    for( i = 0 ; i < num_nodes; i++ ) 
    {
-      voffset = i * node_dofs;
       if ( node_dofs == 1 )
       {
          nullspace_vec[i] = 1.0;
          if ( nullspace_dim == 4 ) 
          {
-            for( k = 0; k < 3; k++ )
-               nullspace_vec[(k+1)*nullspace_len+i] = coords[i*3+k];
+            for( k = 0; k < nsDim; k++ )
+               nullspace_vec[(k+1)*nullspace_len+i] = coords[i*nsDim+k];
          }
       }
       else if ( node_dofs == 3 )
       {
+         voffset = i * node_dofs;
          for ( j = 0; j < 3; j++ )
          {
             for( k = 0; k < 3; k++ )
@@ -979,6 +991,36 @@ int MLI_Method_AMGSA::setNodalCoordinates(int num_nodes, int nDOF,
             j = 2; k = 7; offset = k * nullspace_len + voffset + j; 
             nullspace_vec[offset] *= -1.0;
          }
+         if ( nullspace_dim == 12 ) 
+         {
+            for ( j = 0; j < 3; j++ )
+            { 
+               for ( k = 9; k < 12; k++ )
+               {
+                  offset = k * nullspace_len + voffset + j;
+                  if ( j == k-9 ) nullspace_vec[offset] = 0.0;
+                  else 
+                  {
+                     if (j+k == 10) 
+                        nullspace_vec[offset] = 
+                           coords[i*3+2] * coords[i*3+2] * coords[i*3+2];
+                     else if (j+k == 11) 
+                        nullspace_vec[offset] = 
+                           coords[i*3+1] * coords[i*3+1] * coords[i*3+1];
+                     else if (j+k == 12) 
+                        nullspace_vec[offset] = 
+                           coords[i*3] * coords[i*3] * coords[i*3];
+                     else nullspace_vec[offset] = 0.0;
+                  }
+               }
+            }
+            j = 0; k = 11; offset = k * nullspace_len + voffset + j; 
+            nullspace_vec[offset] *= -1.0;
+            j = 1; k = 9; offset = k * nullspace_len + voffset + j; 
+            nullspace_vec[offset] *= -1.0;
+            j = 2; k = 10; offset = k * nullspace_len + voffset + j; 
+            nullspace_vec[offset] *= -1.0;
+         }
       }
    }
    if ( scalings != NULL )
@@ -990,6 +1032,7 @@ int MLI_Method_AMGSA::setNodalCoordinates(int num_nodes, int nDOF,
 #if 0
    char fname[100];
    FILE *fp;
+
    for ( i = 0 ; i < nullspace_dim; i++ ) 
    {
       sprintf(fname, "rigid_body_mode%d.%d", i, mypid); 
@@ -999,7 +1042,6 @@ int MLI_Method_AMGSA::setNodalCoordinates(int num_nodes, int nDOF,
       fclose(fp);
    }
    MPI_Barrier(MPI_COMM_WORLD);
-   exit(1);
 #endif
    return 0;
 }
