@@ -540,6 +540,9 @@ int HYPRE_LinSysCore::createMatricesAndVectors(int numGlobalEqns,
           if ( colValues_[i] != NULL ) delete [] colValues_[i];
        delete [] colValues_;
     }
+    rowLengths_ = NULL;
+    colIndices_ = NULL;
+    colValues_  = NULL;
 
     //-------------------------------------------------------------------
     // error checking
@@ -810,6 +813,26 @@ int HYPRE_LinSysCore::allocateMatrix(int **colIndices, int *rowLengths)
        exit(1);
     }
 
+    //-------------------------------------------------------------------
+    // clean up previously allocated matrix
+    //-------------------------------------------------------------------
+
+    if ( rowLengths_ != NULL ) delete [] rowLengths_;
+    rowLengths_ = NULL;
+    if ( colIndices_ != NULL )
+    {
+       for ( i = 0; i < localEndRow_-localStartRow_+1; i++ )
+          if ( colIndices_[i] != NULL ) delete [] colIndices_[i];
+       delete [] colIndices_;
+       colIndices_ = NULL;
+    }
+    if ( colValues_ != NULL )
+    {
+       for ( i = 0; i < localEndRow_-localStartRow_+1; i++ )
+          if ( colValues_[i] != NULL ) delete [] colValues_[i];
+       delete [] colValues_;
+       colValues_ = NULL;
+    }
     nsize       = localEndRow_ - localStartRow_ + 1;
     rowLengths_ = new int[nsize];
     colIndices_ = new int*[nsize];
