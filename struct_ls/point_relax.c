@@ -408,6 +408,10 @@ hypre_PointRelax( void               *relax_vdata,
 
    if (zero_guess)
    {
+      if (num_pointsets > 1)
+      {
+         hypre_StructVectorSetConstantValues(x, 0.0);
+      }
       pointset = pointset_ranks[p];
       compute_pkg = compute_pkgs[pointset];
       stride = pointset_strides[pointset];

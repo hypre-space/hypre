@@ -659,6 +659,10 @@ hypre_NodeRelax(  void               *relax_vdata,
 
    if (zero_guess)
    {
+      if (num_nodesets > 1)
+      {
+         hypre_SStructPVectorSetConstantValues(x, 0.0);
+      }
       nodeset = nodeset_ranks[p];
       compute_pkg = compute_pkgs[nodeset];
       stride = nodeset_strides[nodeset];
