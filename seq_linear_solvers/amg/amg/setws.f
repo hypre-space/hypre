@@ -135,8 +135,8 @@ c
 c     3. nwt - 2 digits (this is now the full nwt as defined)
 c
 c          1st - iwts  (calls this routine)
-c          2nd - iddst = 0 - distribution to diagonal
-c                      = 1 - no distribution to diagonal
+c          2nd - iddst = 0 - no distribution to diagonal
+c                      = 1 - distribution to diagonal
 c UNUSED*  3rd - ispt  = 0 - Special points ignored (eliminated)
 c                      = 1 - Special points treated as F-points
 c                            (for testing & distribution)
@@ -227,7 +227,7 @@ c     Set last entry for i. If distribution to the diagonal
 c     is wanted (iddst=0), set ifg(i)=kb.
 c
       b(kb)=a(ia(i))
-      if(iddst.eq.0) ifg(i)=kb
+      if(iddst.ne.0) ifg(i)=kb
 c
 c     sweep over all direct neighbors.
 c
@@ -521,8 +521,8 @@ c
 c     3. nwt - 2 digits (this is now the full nwt as defined)
 c
 c          1st - iwts  (calls this routine)
-c          2nd - iddst = 0 - distribution to diagonal
-c                      = 1 - no distribution to diagonal
+c          2nd - iddst = 0 - no distribution to diagonal
+c                      = 1 - distribution to diagonal
 c          3rd - ispt  = 0 - Special points treated as F-points
 c                            (for testing & distribution)
 c                      = 1 - F-S connection added to diagonal.
@@ -667,7 +667,7 @@ c
 c
 c     Set bound for distribution (to center or not)
 c
-      if(iddst.ne.0) then
+      if(iddst.eq.0) then
         idlo=ibf
       else
         idlo=0
