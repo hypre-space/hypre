@@ -15,7 +15,6 @@
 #include "headers.h"
 
 /*--------------------------------------------------------------------------
- * HYPRE_SStructGridCreate
  *--------------------------------------------------------------------------*/
 
 int
@@ -64,7 +63,6 @@ HYPRE_SStructGridCreate( MPI_Comm           comm,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SStructGridDestroy
  *--------------------------------------------------------------------------*/
 
 int
@@ -125,7 +123,6 @@ HYPRE_SStructGridDestroy( HYPRE_SStructGrid grid )
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SStructGridSetExtents
  *--------------------------------------------------------------------------*/
 
 int
@@ -146,7 +143,6 @@ HYPRE_SStructGridSetExtents( HYPRE_SStructGrid  grid,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SStructGridSetVariables
  *--------------------------------------------------------------------------*/
 
 int HYPRE_SStructGridSetVariables( HYPRE_SStructGrid      grid,
@@ -160,7 +156,6 @@ int HYPRE_SStructGridSetVariables( HYPRE_SStructGrid      grid,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SStructGridAddVariables
  *--------------------------------------------------------------------------*/
 
 int
@@ -208,7 +203,6 @@ HYPRE_SStructGridAddVariables( HYPRE_SStructGrid      grid,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SStructGridSetNeighborBox
  *--------------------------------------------------------------------------*/
 
 int
@@ -287,7 +281,7 @@ HYPRE_SStructGridSetNeighborBox( HYPRE_SStructGrid  grid,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SStructGridAddUnstructuredPart *** placeholder ***
+ * *** placeholder ***
  *--------------------------------------------------------------------------*/
 
 #if 0
@@ -301,7 +295,6 @@ HYPRE_SStructGridAddUnstructuredPart( HYPRE_SStructGrid grid,
 #endif
 
 /*--------------------------------------------------------------------------
- * HYPRE_SStructGridAssemble
  *--------------------------------------------------------------------------*/
 
 int
@@ -375,3 +368,23 @@ HYPRE_SStructGridAssemble( HYPRE_SStructGrid grid )
    return ierr;
 }
 
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+int HYPRE_SStructGridSetPeriodic(HYPRE_SStructGrid  grid,
+                                 int                part,
+                                 int               *periodic)
+{
+   int ierr = 0;
+
+   hypre_SStructPGrid *pgrid          = hypre_SStructGridPGrid(grid, part);
+   hypre_IndexRef      pgrid_periodic = hypre_SStructPGridPeriodic(pgrid);
+   int                 d;
+
+   for (d = 0; d < hypre_SStructGridNDim(grid); d++)
+   {
+      hypre_IndexD(pgrid_periodic, d) = periodic[d];
+   }
+
+   return ierr;
+}

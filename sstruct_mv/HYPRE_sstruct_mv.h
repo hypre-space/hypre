@@ -197,6 +197,13 @@ int HYPRE_SStructGridAddUnstructuredPart(HYPRE_SStructGrid grid,
  **/
 int HYPRE_SStructGridAssemble(HYPRE_SStructGrid grid);
 
+/**
+ * (Optional) Set periodic for a particular part.
+ **/
+int HYPRE_SStructGridSetPeriodic(HYPRE_SStructGrid  grid,
+                                 int                part,
+                                 int               *periodic);
+
 /*@}*/
 
 /*--------------------------------------------------------------------------

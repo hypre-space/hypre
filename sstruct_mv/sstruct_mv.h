@@ -144,6 +144,8 @@ typedef struct
                                        
    int                     local_size;    /* Number of variables locally */
    int                     global_size;   /* Total number of variables */
+
+   hypre_Index             periodic;      /* Indicates if pgrid is periodic */
                            
 } hypre_SStructPGrid;
 
@@ -240,6 +242,7 @@ typedef struct hypre_SStructGrid_struct
 
 #define hypre_SStructPGridLocalSize(pgrid)        ((pgrid) -> local_size)
 #define hypre_SStructPGridGlobalSize(pgrid)       ((pgrid) -> global_size)
+#define hypre_SStructPGridPeriodic(pgrid)         ((pgrid) -> periodic)
 
 /*--------------------------------------------------------------------------
  * Accessor macros: hypre_SStructBoxMapInfo
@@ -646,6 +649,7 @@ int HYPRE_SStructGridAddVariables( HYPRE_SStructGrid grid , int part , int *inde
 int HYPRE_SStructGridSetNeighborBox( HYPRE_SStructGrid grid , int part , int *ilower , int *iupper , int nbor_part , int *nbor_ilower , int *nbor_iupper , int *index_map );
 int HYPRE_SStructGridAddUnstructuredPart( HYPRE_SStructGrid grid , int ilower , int iupper );
 int HYPRE_SStructGridAssemble( HYPRE_SStructGrid grid );
+int HYPRE_SStructGridSetPeriodic( HYPRE_SStructGrid grid , int part , int *periodic );
 
 /* HYPRE_sstruct_matrix.c */
 int HYPRE_SStructMatrixCreate( MPI_Comm comm , HYPRE_SStructGraph graph , HYPRE_SStructMatrix *matrix_ptr );

@@ -53,6 +53,8 @@ typedef struct
                                        
    int                     local_size;    /* Number of variables locally */
    int                     global_size;   /* Total number of variables */
+
+   hypre_Index             periodic;      /* Indicates if pgrid is periodic */
                            
 } hypre_SStructPGrid;
 
@@ -149,6 +151,7 @@ typedef struct hypre_SStructGrid_struct
 
 #define hypre_SStructPGridLocalSize(pgrid)        ((pgrid) -> local_size)
 #define hypre_SStructPGridGlobalSize(pgrid)       ((pgrid) -> global_size)
+#define hypre_SStructPGridPeriodic(pgrid)         ((pgrid) -> periodic)
 
 /*--------------------------------------------------------------------------
  * Accessor macros: hypre_SStructBoxMapInfo

@@ -102,6 +102,8 @@ hypre_SStructPGridCreate( MPI_Comm             comm,
    hypre_SStructPGridLocalSize(pgrid)  = 0;
    hypre_SStructPGridGlobalSize(pgrid) = 0;
    
+   hypre_ClearIndex(hypre_SStructPGridPeriodic(pgrid));
+
    *pgrid_ptr = pgrid;
 
    return ierr;
@@ -192,8 +194,10 @@ hypre_SStructPGridAssemble( hypre_SStructPGrid  *pgrid )
    HYPRE_SStructVariable *vartypes   = hypre_SStructPGridVarTypes(pgrid);
    hypre_StructGrid     **sgrids     = hypre_SStructPGridSGrids(pgrid);
    hypre_BoxArray       **iboxarrays = hypre_SStructPGridIBoxArrays(pgrid);
+   hypre_IndexRef         periodic   = hypre_SStructPGridPeriodic(pgrid);
 
    hypre_StructGrid      *cell_sgrid;
+   hypre_IndexRef         cell_imax;
    hypre_StructGrid      *sgrid;
    hypre_BoxArray        *iboxarray;
    hypre_BoxNeighbors    *hood;
@@ -210,7 +214,7 @@ hypre_SStructPGridAssemble( hypre_SStructPGrid  *pgrid )
    hypre_BoxArray        *tmp_boxes_ref;
    hypre_Index            varoffset;
 
-   int                    t, var, i, j, k;
+   int                    t, var, i, j, k, d;
 
    /*-------------------------------------------------------------
     * set up the uniquely distributed sgrids for each vartype
@@ -218,6 +222,9 @@ hypre_SStructPGridAssemble( hypre_SStructPGrid  *pgrid )
 
    cell_sgrid = hypre_SStructPGridCellSGrid(pgrid);
    HYPRE_StructGridAssemble(cell_sgrid);
+
+   /* this is used to truncate boxes when periodicity is on */
+   cell_imax = hypre_BoxIMax(hypre_StructGridBoundingBox(cell_sgrid));
 
    hood = hypre_StructGridNeighbors(cell_sgrid);
    hood_boxes       = hypre_BoxNeighborsBoxes(hood);
@@ -276,6 +283,23 @@ hypre_SStructPGridAssemble( hypre_SStructPGrid  *pgrid )
 
             hypre_AppendBoxArray(diff_boxes, boxes);
          }
+
+         /* truncate if necessary when periodic */
+         for (d = 0; d < 3; d++)
+         {
+            if (hypre_IndexD(periodic, d) && hypre_IndexD(varoffset, d))
+            {
+               hypre_ForBoxI(i, boxes)
+                  {
+                     box = hypre_BoxArrayBox(boxes, i);
+                     if (hypre_BoxIMaxD(box, d) == hypre_IndexD(cell_imax, d))
+                     {
+                        hypre_BoxIMaxD(box, d) --;
+                     }
+                  }
+            }
+         }
+         HYPRE_StructGridSetPeriodic(sgrid, periodic);
 
          hypre_StructGridSetBoxes(sgrid, boxes);
          HYPRE_StructGridAssemble(sgrid);
