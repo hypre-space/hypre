@@ -96,29 +96,9 @@ void hypre_FreeComputePkg P((hypre_ComputePkg *compute_pkg ));
 hypre_CommHandle *hypre_InitializeIndtComputations P((hypre_ComputePkg *compute_pkg , double *data ));
 void hypre_FinalizeIndtComputations P((hypre_CommHandle *comm_handle ));
 
-/* create_2d_laplacian.c */
-int main P((int argc , char *argv []));
-
-/* create_3d_laplacian.c */
-int main P((int argc , char *argv []));
-
-/* driver.c */
-int main P((int argc , char *argv []));
-
-/* driver_internal.c */
-int main P((int argc , char *argv []));
-
 /* grow.c */
 hypre_BoxArray *hypre_GrowBoxByStencil P((hypre_Box *box , hypre_StructStencil *stencil , int transpose ));
 hypre_BoxArrayArray *hypre_GrowBoxArrayByStencil P((hypre_BoxArray *box_array , hypre_StructStencil *stencil , int transpose ));
-
-/* matrix_interface_struct.c */
-
-/* one_to_many.c */
-int main P((int argc , char *argv []));
-
-/* one_to_many_vector.c */
-int main P((int argc , char *argv []));
 
 /* project.c */
 hypre_SBox *hypre_ProjectBox P((hypre_Box *box , hypre_Index index , hypre_Index stride ));
@@ -222,7 +202,8 @@ int hypre_AssembleStructVector P((hypre_StructVector *vector ));
 int hypre_SetStructVectorConstantValues P((hypre_StructVector *vector , double values ));
 int hypre_ClearStructVectorGhostValues P((hypre_StructVector *vector ));
 int hypre_ClearStructVectorAllValues P((hypre_StructVector *vector ));
-int hypre_MigrateStructVector P((hypre_StructVector *from_vector , hypre_StructVector *to_vector ));
+hypre_CommPkg *hypre_GetMigrateStructVectorCommPkg P((hypre_StructVector *from_vector , hypre_StructVector *to_vector ));
+int hypre_MigrateStructVector P((hypre_CommPkg *comm_pkg , hypre_StructVector *from_vector , hypre_StructVector *to_vector ));
 void hypre_PrintStructVector P((char *filename , hypre_StructVector *vector , int all ));
 hypre_StructVector *hypre_ReadStructVector P((MPI_Comm comm , char *filename , int *num_ghost ));
 
