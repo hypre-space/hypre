@@ -307,6 +307,24 @@ rm -f $SLS.testdata $SLS.testdata.temp
 $MPIRUN -np 3 $SLS -P 1 1 3 -v 1 0 -solver 1
 $MPIRUN -np 3 $SLS -P 1 1 3 -v 0 1 -solver 1
 
+
+#=============================================================================
+# CG+PFMG with skip: Run base 3d case
+#=============================================================================
+
+$MPIRUN -np 1 $SLS -n 12 12 12 -solver 11 -skip 1
+tail -3 $SLS.log > $SLS.testdata
+
+#=============================================================================
+# CG+PFMG with skip: Test parallel and blocking by diffing against base 3d case
+#=============================================================================
+
+$MPIRUN -np 8 $SLS -n 3 3 3 -b 2 2 2 -P 2 2 2  -solver 11 -skip 1
+tail -3 $SLS.log > $SLS.testdata.temp
+diff $SLS.testdata $SLS.testdata.temp >&2
+
+rm -f $SLS.testdata $SLS.testdata.temp
+
 if [ "0" = "1" ]
 then
   echo "Error: something's wrong" >&2

@@ -51,6 +51,7 @@ main( int   argc,
    int                 dim;
    int                 n_pre, n_post;
    int                 nblocks, volume;
+   int                 skip;
 
    int               **iupper;
    int               **ilower;
@@ -98,6 +99,8 @@ main( int   argc,
     *-----------------------------------------------------------*/
  
    dim = 3;
+
+   skip = 0;
 
    nx = 10;
    ny = 10;
@@ -187,6 +190,11 @@ main( int   argc,
          arg_index++;
          solver_id = atoi(argv[arg_index++]);
       }
+      else if ( strcmp(argv[arg_index], "-skip") == 0 )
+      {
+         arg_index++;
+         skip = atoi(argv[arg_index++]);
+      }
       else if ( strcmp(argv[arg_index], "-help") == 0 )
       {
          print_usage = 1;
@@ -214,6 +222,7 @@ main( int   argc,
       printf("  -c <cx> <cy> <cz>    : diffusion coefficients\n");
       printf("  -v <n_pre> <n_post>  : number of pre and post relaxations\n");
       printf("  -d <dim>             : problem dimension (2 or 3)\n");
+      printf("  -skip <s>            : skip some relaxation in PFMG (0 or 1)\n");
       printf("  -solver <ID>         : solver ID (default = 0)\n");
       printf("                         0  - SMG\n");
       printf("                         1  - PFMG\n");
@@ -264,6 +273,7 @@ main( int   argc,
       printf("  (cx, cy, cz)    = (%f, %f, %f)\n", cx, cy, cz);
       printf("  (n_pre, n_post) = (%d, %d)\n", n_pre, n_post);
       printf("  dim             = %d\n", dim);
+      printf("  skip            = %d\n", skip);
       printf("  solver ID       = %d\n", solver_id);
    }
 
@@ -624,6 +634,7 @@ main( int   argc,
       HYPRE_StructPFMGSetRelaxType(solver, 1);
       HYPRE_StructPFMGSetNumPreRelax(solver, n_pre);
       HYPRE_StructPFMGSetNumPostRelax(solver, n_post);
+      HYPRE_StructPFMGSetSkipRelax(solver, skip);
       /*HYPRE_StructPFMGSetDxyz(solver, dxyz);*/
       HYPRE_StructPFMGSetLogging(solver, 1);
       HYPRE_StructPFMGSetup(solver, A, b, x);
@@ -692,6 +703,7 @@ main( int   argc,
          HYPRE_StructPFMGSetRelaxType(precond, 1);
          HYPRE_StructPFMGSetNumPreRelax(precond, n_pre);
          HYPRE_StructPFMGSetNumPostRelax(precond, n_post);
+         HYPRE_StructPFMGSetSkipRelax(precond, skip);
          /*HYPRE_StructPFMGSetDxyz(precond, dxyz);*/
          HYPRE_StructPFMGSetLogging(precond, 0);
          HYPRE_StructPCGSetPrecond(solver,
