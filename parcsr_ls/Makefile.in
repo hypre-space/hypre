@@ -102,6 +102,7 @@ FILES =\
  HYPRE_parcsr_gmres.c\
  HYPRE_parcsr_pcg.c\
  HYPRE_parcsr_pilut.c\
+ F90_par_laplace.c\
  F90_HYPRE_parcsr_amg.c\
  F90_HYPRE_parcsr_cgnr.c\
  F90_HYPRE_parcsr_gmres.c\
