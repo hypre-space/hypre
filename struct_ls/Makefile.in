@@ -57,6 +57,7 @@ FILES =\
  pfmg_setup_rap.c\
  pfmg_solve.c\
  point_relax.c\
+ semi_setup_rap.c\
  semi_interp.c\
  semi_restrict.c\
  sparse_msg.c\

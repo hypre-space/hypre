@@ -14,6 +14,9 @@
 #include "headers.h"
 #include "pfmg.h"
 
+#define OLDRAP 1
+#define NEWRAP 0
+
 /*--------------------------------------------------------------------------
  * hypre_PFMGCreateRAPOp
  *
@@ -31,6 +34,9 @@ hypre_PFMGCreateRAPOp( hypre_StructMatrix *R,
    hypre_StructMatrix    *RAP;
    hypre_StructStencil   *stencil;
 
+   int                    P_stored_as_transpose = 0;
+
+#if OLDRAP
    stencil = hypre_StructMatrixStencil(A);
 
    switch (hypre_StructStencilDim(stencil)) 
@@ -43,6 +49,14 @@ hypre_PFMGCreateRAPOp( hypre_StructMatrix *R,
       RAP = hypre_PFMG3CreateRAPOp(R ,A, P, coarse_grid, cdir);
       break;
    } 
+#endif
+
+#if NEWRAP
+   RAP = hypre_SemiCreateRAPOp(R ,A, P, coarse_grid, cdir,
+                                     P_stored_as_transpose);
+
+#endif
+
 
    return RAP;
 }
@@ -67,6 +81,10 @@ hypre_PFMGSetupRAPOp( hypre_StructMatrix *R,
  
    hypre_StructStencil   *stencil;
 
+   int                    P_stored_as_transpose = 0;
+
+
+#if OLDRAP
    stencil = hypre_StructMatrixStencil(A);
 
    switch (hypre_StructStencilDim(stencil)) 
@@ -103,6 +121,13 @@ hypre_PFMGSetupRAPOp( hypre_StructMatrix *R,
       break;
 
    }
+#endif
+
+#if NEWRAP
+   ierr = hypre_SemiBuildRAP(A, P, R, cdir, cindex, cstride,
+                                    P_stored_as_transpose, Ac);
+#endif
+
 
    hypre_StructMatrixAssemble(Ac);
 

@@ -273,6 +273,10 @@ int hypre_SemiRestrictSetup( void *restrict_vdata , hypre_StructMatrix *R , int 
 int hypre_SemiRestrict( void *restrict_vdata , hypre_StructMatrix *R , hypre_StructVector *r , hypre_StructVector *rc );
 int hypre_SemiRestrictDestroy( void *restrict_vdata );
 
+/* semi_setup_rap.c */
+hypre_StructMatrix *hypre_SemiCreateRAPOp( hypre_StructMatrix *R , hypre_StructMatrix *A , hypre_StructMatrix *P , hypre_StructGrid *coarse_grid , int cdir , int P_stored_as_transpose );
+int hypre_SemiBuildRAP( hypre_StructMatrix *A , hypre_StructMatrix *P , hypre_StructMatrix *R , int cdir , hypre_Index cindex , hypre_Index cstride , int P_stored_as_transpose , hypre_StructMatrix *RAP );
+
 /* smg.c */
 void *hypre_SMGCreate( MPI_Comm comm );
 int hypre_SMGDestroy( void *smg_vdata );

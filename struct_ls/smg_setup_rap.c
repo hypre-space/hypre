@@ -14,6 +14,9 @@
 #include "headers.h"
 #include "smg.h"
 
+#define OLDRAP 1
+#define NEWRAP 0
+
 /*--------------------------------------------------------------------------
  * hypre_SMGCreateRAPOp
  *
@@ -30,8 +33,12 @@ hypre_SMGCreateRAPOp( hypre_StructMatrix *R,
    hypre_StructMatrix    *RAP;
    hypre_StructStencil   *stencil;
 
+   int                    cdir;
+   int                    P_stored_as_transpose = 1;
+
    stencil = hypre_StructMatrixStencil(A);
 
+#if OLDRAP
    switch (hypre_StructStencilDim(stencil)) 
    {
       case 2:
@@ -42,6 +49,24 @@ hypre_SMGCreateRAPOp( hypre_StructMatrix *R,
       RAP = hypre_SMG3CreateRAPOp(R ,A, PT, coarse_grid);
       break;
    } 
+#endif
+
+#if NEWRAP
+   switch (hypre_StructStencilDim(stencil)) 
+   {
+      case 2:
+      cdir = 1;
+      RAP = hypre_SemiCreateRAPOp(R ,A, PT, coarse_grid, cdir,
+                                     P_stored_as_transpose);
+      break;
+    
+      case 3:
+      cdir = 2;
+      RAP = hypre_SemiCreateRAPOp(R ,A, PT, coarse_grid, cdir,
+                                     P_stored_as_transpose);
+      break;
+   } 
+#endif
 
    return RAP;
 }
@@ -63,10 +88,14 @@ hypre_SMGSetupRAPOp( hypre_StructMatrix *R,
 {
    int ierr = 0;
  
+   int                    cdir;
+   int                    P_stored_as_transpose = 1;
+
    hypre_StructStencil   *stencil;
 
    stencil = hypre_StructMatrixStencil(A);
 
+#if OLDRAP
    switch (hypre_StructStencilDim(stencil)) 
    {
 
@@ -127,7 +156,26 @@ hypre_SMGSetupRAPOp( hypre_StructMatrix *R,
       break;
 
    }
+#endif
 
+#if NEWRAP
+   switch (hypre_StructStencilDim(stencil)) 
+   {
+
+      case 2:
+      cdir = 1;
+      ierr = hypre_SemiBuildRAP(A, PT, R, cdir, cindex, cstride,
+                                       P_stored_as_transpose, Ac);
+      break;
+
+      case 3:
+      cdir = 2;
+      ierr = hypre_SemiBuildRAP(A, PT, R, cdir, cindex, cstride,
+                                       P_stored_as_transpose, Ac);
+      break;
+
+   }
+#endif
    hypre_StructMatrixAssemble(Ac);
 
    return ierr;
