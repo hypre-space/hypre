@@ -50,4 +50,5 @@ clean:
 	@(cd ./lib && $(MAKE) $@)
 
 veryclean: clean
+	@(cd ./lib && $(MAKE) $@)
 	@rm -f Makefile
