@@ -243,7 +243,7 @@ hypre_CSRMatrixDeleteZeros( hypre_CSRMatrix *A, double tol)
 
    zeros = 0;
    for (i=0; i < num_nonzeros; i++)
-	if ( abs(A_data[i]) <= tol)
+	if (fabs(A_data[i]) <= tol)
 		zeros++;
 
    if (zeros)
