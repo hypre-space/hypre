@@ -49,48 +49,47 @@ class HYPRE_SlideReduction
    double         truncTol_;
    double         *ADiagISqrts_;
    int            scaleMatrixFlag_;
+   int            useSimpleScheme_;
 
  public:
 
    HYPRE_SlideReduction(MPI_Comm);
    virtual ~HYPRE_SlideReduction();
    int    setOutputLevel(int level);
-   int    setTruncationThreshold(double trunc) {truncTol_=trunc; return 0;}
-   int    setScaleMatrix()             {scaleMatrixFlag_ = 1; return 0;}
-   int    setBlockMinNorm(double norm) {blockMinNorm_ = norm; return 0;}
-   int    setup(HYPRE_IJMatrix , HYPRE_IJVector , HYPRE_IJVector );
-   int    buildReducedMatrix();
-   int    buildReducedRHSVector(HYPRE_IJVector);
-   int    buildReducedSolnVector(HYPRE_IJVector x, HYPRE_IJVector b);
+   int    setUseSimpleScheme();
+   int    setTruncationThreshold(double trunc);
+   int    setScaleMatrix();
+   int    setBlockMinNorm(double norm);
+
    int    getMatrixNumRows(); 
-   double *getMatrixDiagonal() { return ADiagISqrts_; } 
-   int    getReducedMatrix(HYPRE_IJMatrix *mat) 
-                       { (*mat) = reducedAmat_; return 0; }
-   int    getReducedRHSVector(HYPRE_IJVector *rhs) 
-                       { (*rhs) = reducedBvec_; return 0; }
-   int    getReducedSolnVector(HYPRE_IJVector *sol) 
-                       { (*sol) = reducedXvec_; return 0; }
-   int    getReducedAuxVector(HYPRE_IJVector *auxV ) 
-                       { (*auxV) = reducedRvec_; return 0; }
-   int    getProcConstraintMap(int **map) 
-                       { (*map) = procNConstr_; return 0; }
-   int    getSlaveEqnList(int **slist) 
-                       { (*slist) = slaveEqnList_; return 0; }
-   int    getPerturbationMatrix(HYPRE_ParCSRMatrix *matrix) 
-                       { (*matrix) = hypreRAP_; hypreRAP_ = NULL; return 0; }
+   double *getMatrixDiagonal();
+   int    getReducedMatrix(HYPRE_IJMatrix *mat); 
+   int    getReducedRHSVector(HYPRE_IJVector *rhs);
+   int    getReducedSolnVector(HYPRE_IJVector *sol);
+   int    getReducedAuxVector(HYPRE_IJVector *auxV);
+   int    getProcConstraintMap(int **map);
+   int    getSlaveEqnList(int **slist);
+   int    getPerturbationMatrix(HYPRE_ParCSRMatrix *matrix);
+   int    setup(HYPRE_IJMatrix , HYPRE_IJVector , HYPRE_IJVector );
+   int    buildReducedSolnVector(HYPRE_IJVector x, HYPRE_IJVector b);
 
  private:
+
    int    findConstraints();
    int    findSlaveEqns1();
    int    findSlaveEqnsBlock(int blkSize);
    int    composeGlobalList();
+   int    buildSubMatrices();
+   int    buildModifiedRHSVector(HYPRE_IJVector, HYPRE_IJVector);
+   int    buildReducedMatrix();
+   int    buildReducedRHSVector(HYPRE_IJVector);
    int    buildA21Mat();
    int    buildInvA22Mat();
+   int    scaleMatrixVector();
+   double matrixCondEst(int, int, int *, int);
 
    int    findSlaveEqns2(int **couplings);
    int    buildReducedMatrix2();
-   int    scaleMatrixVector();
-   double matrixCondEst(int, int, int *, int);
 };
 
 #endif

@@ -3657,7 +3657,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
       constrList_ = NULL;
       if      ( slideReduction_ == 1 ) buildSlideReducedSystem();
       else if ( slideReduction_ == 2 ) buildSlideReducedSystem2();
-      else if ( slideReduction_ == 3 ) 
+      else if ( slideReduction_ == 3 || slideReduction_ == 4 ) 
       {
          slideObj = new HYPRE_SlideReduction(comm_);
          TempA = currA_;
@@ -3675,6 +3675,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
          if ( slideReductionScaleMatrix_ == 1 )
             slideObj->setScaleMatrix();
          slideObj->setTruncationThreshold( truncThresh_ );
+         if ( slideReduction_ == 4 ) slideObj->setUseSimpleScheme();
          slideObj->setup(currA_, currX_, currB_);
          if ( slideReductionScaleMatrix_ == 1 && HYPreconID_ == HYMLI )
          {

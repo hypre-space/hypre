@@ -457,6 +457,12 @@ int HYPRE_LinSysCore::parameters(int numParams, char **params)
          if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
             printf("       HYPRE_LSC::parameters - slideReduction3.\n");
       }
+      else if ( !strcasecmp(param1, "slideReduction4") )
+      {
+         slideReduction_ = 4;
+         if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
+            printf("       HYPRE_LSC::parameters - slideReduction4.\n");
+      }
       else if ( !strcasecmp(param1, "slideReductionMinNorm") )
       {
          sscanf(params[i],"%s %lg", param, &slideReductionMinNorm_);

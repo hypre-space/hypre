@@ -176,4 +176,8 @@
             - add scalar variable to aggregation
             - change error threshold for QR
             - add amgMaxLevels 
+09/19/03    2.5.2R1
+            - add slide reduction option 4 to handle ALE3D's constraint
+              problems
+            - clean up a little bit for HYPRE_SlideReduction
 

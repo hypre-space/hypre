@@ -77,6 +77,7 @@ HYPRE_SlideReduction::HYPRE_SlideReduction(MPI_Comm comm)
    truncTol_         = 1.0e-20;
    scaleMatrixFlag_  = 0;
    ADiagISqrts_      = NULL;
+   useSimpleScheme_  = 0;
 }
 
 //***************************************************************************
@@ -114,6 +115,146 @@ int HYPRE_SlideReduction::setOutputLevel( int level )
    if ( level == 1 ) outputLevel_ |= 1;
    if ( level == 2 ) outputLevel_ |= 2;
    if ( level == 3 ) outputLevel_ |= 4;
+   return 0;
+}
+
+//***************************************************************************
+// set use simple scheme
+//---------------------------------------------------------------------------
+
+int HYPRE_SlideReduction::setUseSimpleScheme()
+{
+   useSimpleScheme_ = 1;
+   return 0;
+}
+
+//***************************************************************************
+// set truncation threshold for matrix
+//---------------------------------------------------------------------------
+
+int HYPRE_SlideReduction::setTruncationThreshold(double trunc)
+{
+   truncTol_ = trunc;
+   return 0;
+}
+
+//***************************************************************************
+// enable scaling the matrix
+//---------------------------------------------------------------------------
+
+int HYPRE_SlideReduction::setScaleMatrix()
+{
+   scaleMatrixFlag_ = 1;
+   return 0;
+}
+
+//***************************************************************************
+// set the minimum norm for stable blocks
+//---------------------------------------------------------------------------
+
+int HYPRE_SlideReduction::setBlockMinNorm(double norm)
+{
+   blockMinNorm_ = norm;
+   return 0;
+}
+
+//***************************************************************************
+// get matrix number of rows 
+//---------------------------------------------------------------------------
+
+int HYPRE_SlideReduction::getMatrixNumRows()
+{
+   int mypid, nprocs, *procNRows, localNRows, nConstraints;
+   HYPRE_ParCSRMatrix A_csr;
+
+   MPI_Comm_rank( mpiComm_, &mypid );
+   MPI_Comm_size( mpiComm_, &nprocs );
+   HYPRE_IJMatrixGetObject(Amat_, (void **) &A_csr);
+   HYPRE_ParCSRMatrixGetRowPartitioning( A_csr, &procNRows );
+   localNRows   = procNRows[mypid+1] - procNRows[mypid];
+   nConstraints = procNConstr_[mypid+1] - procNConstr_[mypid];
+   hypre_TFree( procNRows );
+   return (localNRows-nConstraints);
+}
+
+//***************************************************************************
+// get matrix diagonal 
+//---------------------------------------------------------------------------
+
+double *HYPRE_SlideReduction::getMatrixDiagonal()
+{
+   return ADiagISqrts_;
+}
+
+//***************************************************************************
+// get reduced matrix
+//---------------------------------------------------------------------------
+
+int HYPRE_SlideReduction::getReducedMatrix(HYPRE_IJMatrix *mat) 
+{
+   (*mat) = reducedAmat_;
+   return 0;
+}
+
+//***************************************************************************
+// get reduced rhs
+//---------------------------------------------------------------------------
+
+int HYPRE_SlideReduction::getReducedRHSVector(HYPRE_IJVector *rhs) 
+{
+   (*rhs) = reducedBvec_;
+   return 0;
+}
+
+//***************************************************************************
+// get reduced solution vector
+//---------------------------------------------------------------------------
+
+int HYPRE_SlideReduction::getReducedSolnVector(HYPRE_IJVector *sol) 
+{
+   (*sol) = reducedXvec_;
+   return 0;
+}
+
+//***************************************************************************
+// get auxiliary (temporary) vector
+//---------------------------------------------------------------------------
+
+int HYPRE_SlideReduction::getReducedAuxVector(HYPRE_IJVector *auxV ) 
+{
+   (*auxV) = reducedRvec_;
+   return 0;
+}
+
+//***************************************************************************
+// get processor to constraint map
+//---------------------------------------------------------------------------
+
+int HYPRE_SlideReduction::getProcConstraintMap(int **map) 
+{
+   (*map) = procNConstr_;
+   return 0;
+}
+
+//***************************************************************************
+// get slave equation list
+//---------------------------------------------------------------------------
+
+int HYPRE_SlideReduction::getSlaveEqnList(int **slist) 
+{
+   (*slist) = slaveEqnList_;
+   return 0;
+}
+
+//***************************************************************************
+// get perturbation matrix (reduced = sub(A) - perturb(A))
+// (for oorrecting the null space)
+//---------------------------------------------------------------------------
+
+int HYPRE_SlideReduction::getPerturbationMatrix(HYPRE_ParCSRMatrix *matrix) 
+{
+   (*matrix) = hypreRAP_;
+   hypreRAP_ = NULL;
    return 0;
 }
 
@@ -190,26 +331,31 @@ int HYPRE_SlideReduction::setup(HYPRE_IJMatrix A, HYPRE_IJVector x,
    // If not, search for block size of 2 or higher.
    //------------------------------------------------------------------
 
-   ierr = findSlaveEqns1();
-   while (ierr < 0 && bSize <= maxBSize) ierr = findSlaveEqnsBlock(bSize++);
-   if ( ierr < 0 )
+   if ( useSimpleScheme_ == 0 )
    {
-      printf("%4d : HYPRE_SlideReduction ERROR - fail !\n", mypid);
-      exit(1);
+      ierr = findSlaveEqns1();
+      while (ierr < 0 && bSize <= maxBSize) ierr = findSlaveEqnsBlock(bSize++);
+      if ( ierr < 0 )
+      {
+         printf("%4d : HYPRE_SlideReduction ERROR - fail !\n", mypid);
+         exit(1);
+      }
+      composeGlobalList();
    }
-   composeGlobalList();
        
    //------------------------------------------------------------------
    // build the reduced matrix
    //------------------------------------------------------------------
 
-   buildReducedMatrix();
+   if (useSimpleScheme_ == 0) buildReducedMatrix();
+   else                       buildSubMatrices();
 
    //------------------------------------------------------------------
    // build the reduced right hand side vector
    //------------------------------------------------------------------
 
-   buildReducedRHSVector(b);
+   if (useSimpleScheme_ == 0) buildReducedRHSVector(b);
+   else                       buildModifiedRHSVector(x,b);
 
    //------------------------------------------------------------------
    // if scale matrix is request, scale matrix and vector
@@ -1142,6 +1288,376 @@ int HYPRE_SlideReduction::composeGlobalList()
 }
  
 //****************************************************************************
+// build the submatrix matrix
+//----------------------------------------------------------------------------
+
+int HYPRE_SlideReduction::buildSubMatrices()
+{
+   int    mypid, nprocs, *procNRows, startRow, endRow, localNRows;
+   int    globalNConstr, globalNRows, nConstraints, ncnt;
+   int    A21NRows, A21NCols, A21GlobalNRows, A21GlobalNCols;
+   int    A21StartRow, A21StartCol, ierr, maxRowSize, *A21MatSize;
+   int    newEndRow, irow, is, rowIndex, newRowSize, nnzA21, rowCount;
+   int    *colInd, *newColInd, rowSize, *reducedAMatSize, uBound;
+   int    reducedANRows, reducedANCols, reducedAStartRow, reducedAStartCol;
+   int    reducedAGlobalNRows, reducedAGlobalNCols, jcol;
+   int    procIndex, colIndex, totalNNZ, newColIndex;
+   double *colVal, *newColVal;
+   HYPRE_ParCSRMatrix A_csr, A21_csr, reducedA_csr;
+
+   //------------------------------------------------------------------
+   // get matrix information
+   //------------------------------------------------------------------
+
+   MPI_Comm_rank(mpiComm_, &mypid);
+   MPI_Comm_size(mpiComm_, &nprocs);
+   HYPRE_IJMatrixGetObject(Amat_, (void **) &A_csr);
+   HYPRE_ParCSRMatrixGetRowPartitioning( A_csr, &procNRows );
+   startRow      = procNRows[mypid];
+   endRow        = procNRows[mypid+1] - 1;
+   localNRows    = endRow - startRow + 1;
+   globalNConstr = procNConstr_[nprocs];
+   globalNRows   = procNRows[nprocs];
+   nConstraints  = procNConstr_[mypid+1] - procNConstr_[mypid];
+
+   //******************************************************************
+   // extract A21 from A
+   //------------------------------------------------------------------
+   // calculate the dimension of A21
+   //------------------------------------------------------------------
+
+   A21NRows       = nConstraints;
+   A21NCols       = localNRows - nConstraints;
+   A21GlobalNRows = globalNConstr;
+   A21GlobalNCols = globalNRows - globalNConstr;
+   A21StartRow    = procNConstr_[mypid];
+   A21StartCol    = procNRows[mypid] - procNConstr_[mypid];
+
+   if ( ( outputLevel_ & HYPRE_BITMASK2 ) >= 1 )
+   {
+      printf("%4d : buildA21Mat(2) - A21StartRow  = %d\n", mypid, A21StartRow);
+      printf("%4d : buildA21Mat(2) - A21GlobalDim = %d %d\n", mypid,
+                                  A21GlobalNRows, A21GlobalNCols);
+      printf("%4d : buildA21Mat(2) - A21LocalDim  = %d %d\n",mypid,
+                                  A21NRows, A21NCols);
+   }
+
+   //------------------------------------------------------------------
+   // create a matrix context for A21
+   //------------------------------------------------------------------
+
+   ierr  = HYPRE_IJMatrixCreate(mpiComm_,A21StartRow,A21StartRow+A21NRows-1,
+                                A21StartCol,A21StartCol+A21NCols-1,&A21mat_);
+   ierr += HYPRE_IJMatrixSetObjectType(A21mat_, HYPRE_PARCSR);
+   assert(!ierr);
+
+   //------------------------------------------------------------------
+   // compute the number of nonzeros in the nConstraint row of A21
+   //------------------------------------------------------------------
+
+   rowCount  = maxRowSize = 0;
+   newEndRow = endRow - nConstraints;
+   if ( A21NRows > 0 ) A21MatSize = new int[A21NRows];
+   else                A21MatSize = NULL;
+   for ( irow = endRow-nConstraints+1; irow <= endRow; irow++ )
+   {
+      HYPRE_ParCSRMatrixGetRow(A_csr,irow,&rowSize,&colInd,&colVal);
+      newRowSize = 0;
+      for ( jcol = 0;  jcol < rowSize;  jcol++ )
+      {
+         colIndex = colInd[jcol];
+         if (colVal[jcol] != 0.0 && 
+             (colIndex <= newEndRow || colIndex > endRow)) newRowSize++;
+      }
+      A21MatSize[irow] = newRowSize;
+      maxRowSize = ( newRowSize > maxRowSize ) ? newRowSize : maxRowSize;
+      HYPRE_ParCSRMatrixRestoreRow(A_csr,irow,&rowSize,&colInd,&colVal);
+   }
+   nnzA21 = 0;
+   for ( irow = 0; irow < nConstraints; irow++ ) nnzA21 += A21MatSize[irow];
+   MPI_Allreduce(&nnzA21,&ncnt,1,MPI_INT,MPI_SUM,mpiComm_);
+   if ( mypid == 0 && ( outputLevel_ & HYPRE_BITMASK2 ) >= 1 )
+      printf("   0 : buildSubMatrices : NNZ of A21 = %d\n", ncnt);
+
+   //------------------------------------------------------------------
+   // after fetching the row sizes, set up A21 with such sizes
+   //------------------------------------------------------------------
+
+   ierr  = HYPRE_IJMatrixSetRowSizes(A21mat_, A21MatSize);
+   ierr += HYPRE_IJMatrixInitialize(A21mat_);
+   assert(!ierr);
+   if ( A21NRows > 0 ) delete [] A21MatSize;
+
+   //------------------------------------------------------------------
+   // next load the first nConstraint row to A21 extracted from A
+   // (at the same time, the D block is saved for future use)
+   //------------------------------------------------------------------
+
+   rowCount  = A21StartRow;
+   newColInd = new int[maxRowSize+1];
+   newColVal = new double[maxRowSize+1];
+
+   for ( irow = endRow-nConstraints+1; irow <= endRow; irow++ )
+   {
+      HYPRE_ParCSRMatrixGetRow(A_csr,irow,&rowSize,&colInd,&colVal);
+      newRowSize = 0;
+      for ( jcol = 0;  jcol < rowSize;  jcol++ )
+      {
+         colIndex = colInd[jcol];
+         if (colVal[jcol] != 0.0 &&
+             (colIndex <= newEndRow || colIndex > endRow))
+         {
+            for ( procIndex = 0; procIndex < nprocs; procIndex++ )
+               if ( procNRows[procIndex] > colIndex ) break;
+            procIndex--;
+            newColIndex = colInd[jcol] - procNConstr_[procIndex];
+            newColInd[newRowSize]   = newColIndex;
+            newColVal[newRowSize++] = colVal[jcol];
+         }
+      }
+      HYPRE_IJMatrixSetValues(A21mat_, 1, &newRowSize, (const int *) &rowCount,
+                (const int *) newColInd, (const double *) newColVal);
+      HYPRE_ParCSRMatrixRestoreRow(A_csr,irow,&rowSize,&colInd,&colVal);
+      rowCount++;
+   }
+   delete [] newColInd;
+   delete [] newColVal;
+
+   HYPRE_IJMatrixAssemble(A21mat_);
+   HYPRE_IJMatrixGetObject(A21mat_, (void **) &A21_csr);
+   hypre_MatvecCommPkgCreate((hypre_ParCSRMatrix *) A21_csr);
+
+   //******************************************************************
+   // extract submatrix of A not corresponding to constraints
+   //------------------------------------------------------------------
+
+   reducedANRows       = localNRows - nConstraints;
+   reducedANCols       = reducedANRows;
+   reducedAStartRow    = procNRows[mypid] - procNConstr_[mypid];
+   reducedAStartCol    = reducedAStartRow;
+   reducedAGlobalNRows = globalNRows - globalNConstr;
+   reducedAGlobalNCols = reducedAGlobalNRows;
+
+   if ( ( outputLevel_ & HYPRE_BITMASK2 ) >= 1 )
+   {
+      printf("%4d : buildReducedMatrix - reduceAGlobalDim = %d %d\n", mypid,
+                       reducedAGlobalNRows, reducedAGlobalNCols);
+      printf("%4d : buildReducedMatrix - reducedALocalDim  = %d %d\n", mypid,
+                       reducedANRows, reducedANCols);
+   }
+
+   //------------------------------------------------------------------
+   // create a matrix context for reducedA
+   //------------------------------------------------------------------
+
+   ierr  = HYPRE_IJMatrixCreate(mpiComm_,reducedAStartRow,
+                 reducedAStartRow+reducedANRows-1, reducedAStartCol,
+                 reducedAStartCol+reducedANCols-1,&reducedAmat_);
+   ierr += HYPRE_IJMatrixSetObjectType(reducedAmat_, HYPRE_PARCSR);
+   assert(!ierr);
+
+   //------------------------------------------------------------------
+   // compute row sizes for reducedA
+   //------------------------------------------------------------------
+
+   reducedAMatSize = new int[reducedANRows];
+   rowCount = maxRowSize = totalNNZ = 0;
+   for ( irow = startRow; irow <= newEndRow; irow++ )
+   {
+      HYPRE_ParCSRMatrixGetRow(A_csr,irow,&rowSize,&colInd,&colVal);
+      newRowSize = 0;
+      for ( jcol = 0; jcol < rowSize; jcol++ )
+      {
+         colIndex = colInd[jcol];
+         for ( procIndex = 0; procIndex < nprocs; procIndex++ )
+            if ( procNRows[procIndex] > colIndex ) break;
+         uBound = procNRows[procIndex] -
+                  (procNConstr_[procIndex]-procNConstr_[procIndex-1]);
+         procIndex--;
+         if (colIndex < uBound) newRowSize++;
+      }
+      rowIndex = reducedAStartRow + rowCount;
+      maxRowSize = ( newRowSize > maxRowSize ) ? newRowSize : maxRowSize;
+      reducedAMatSize[rowCount++] = newRowSize;
+      totalNNZ += newRowSize;
+      HYPRE_ParCSRMatrixRestoreRow(A_csr,irow,&rowSize,&colInd,&colVal);
+   }
+   ierr  = HYPRE_IJMatrixSetRowSizes(reducedAmat_, reducedAMatSize);
+   ierr += HYPRE_IJMatrixInitialize(reducedAmat_);
+   assert(!ierr);
+   delete [] reducedAMatSize;
+
+   //------------------------------------------------------------------
+   // load the reducedA matrix
+   //------------------------------------------------------------------
+
+   rowCount  = 0;
+   newColInd = new int[maxRowSize+1];
+   newColVal = new double[maxRowSize+1];
+   for ( irow = startRow; irow <= newEndRow; irow++ )
+   {
+      HYPRE_ParCSRMatrixGetRow(A_csr, irow, &rowSize, &colInd, &colVal);
+      newRowSize = 0;
+      for (jcol = 0; jcol < rowSize; jcol++)
+      {
+         colIndex = colInd[jcol];
+         for ( procIndex = 0; procIndex < nprocs; procIndex++ )
+            if ( procNRows[procIndex] > colIndex ) break;
+         uBound = procNRows[procIndex] -
+                  (procNConstr_[procIndex]-procNConstr_[procIndex-1]);
+         procIndex--;
+         if ( colIndex < uBound )
+         {
+            newColInd[newRowSize] = colIndex - procNConstr_[procIndex];
+            newColVal[newRowSize++] = colVal[jcol];
+         }
+         HYPRE_ParCSRMatrixRestoreRow(A_csr,irow,&rowSize,&colInd,&colVal);
+      }
+      rowIndex = reducedAStartRow + rowCount;
+      ierr = HYPRE_IJMatrixSetValues(reducedAmat_, 1, &newRowSize,
+                   (const int *) &rowIndex, (const int *) newColInd,
+                   (const double *) newColVal);
+      assert(!ierr);
+      rowCount++;
+   }
+   delete [] newColInd;
+   delete [] newColVal;
+
+   free( procNRows );
+
+   //------------------------------------------------------------------
+   // assemble the reduced matrix
+   //------------------------------------------------------------------
+
+   HYPRE_IJMatrixAssemble(reducedAmat_);
+   HYPRE_IJMatrixGetObject(reducedAmat_, (void **) &reducedA_csr);
+  
+   return 0;
+}
+
+//****************************************************************************
+// build reduced rhs vector (form red_f1 = f1 - A12*x2)
+//----------------------------------------------------------------------------
+
+int HYPRE_SlideReduction::buildModifiedRHSVector(HYPRE_IJVector x,
+                                                 HYPRE_IJVector b)
+{
+   int    nprocs, mypid, *procNRows, startRow, endRow, localNRows;
+   int    nConstraints, redBNRows, redBStart, ierr, x2NRows, x2Start;
+   int    newEndRow, vecIndex, irow;
+   double *b_data, *rb_data, *x_data, *x2_data;
+   HYPRE_ParCSRMatrix A_csr, A21_csr;
+   HYPRE_IJVector     x2;
+   HYPRE_ParVector    b_csr, rb_csr, x_csr, x2_csr;
+   hypre_Vector       *b_local, *rb_local, *x_local, *x2_local;
+
+   //------------------------------------------------------------------
+   // sanitize
+   //------------------------------------------------------------------
+
+   if (reducedBvec_ != NULL ) HYPRE_IJVectorDestroy(reducedBvec_);
+   if (reducedXvec_ != NULL ) HYPRE_IJVectorDestroy(reducedXvec_);
+   if (reducedRvec_ != NULL ) HYPRE_IJVectorDestroy(reducedRvec_);
+   reducedBvec_ = NULL;
+   reducedXvec_ = NULL;
+   reducedRvec_ = NULL;
+
+   //------------------------------------------------------------------
+   // get machine and matrix information
+   //------------------------------------------------------------------
+
+   if (reducedAmat_ == NULL) return 0;
+   MPI_Comm_rank( mpiComm_, &mypid );
+   MPI_Comm_size( mpiComm_, &nprocs );
+   HYPRE_IJMatrixGetObject(Amat_, (void **) &A_csr);
+   HYPRE_ParCSRMatrixGetRowPartitioning( A_csr, &procNRows );
+   startRow     = procNRows[mypid];
+   endRow       = procNRows[mypid+1] - 1;
+   localNRows   = endRow - startRow + 1;
+   if (procNConstr_ == NULL || procNConstr_[nprocs] == 0)
+   {
+      printf("%4d : buildModifiedRHSVector WARNING - no local data.\n",mypid);
+      free(procNRows);
+      return 1;
+   }
+
+   //------------------------------------------------------------------
+   // create reducedB
+   //------------------------------------------------------------------
+
+   nConstraints  = procNConstr_[mypid+1] - procNConstr_[mypid];
+   redBNRows = localNRows - nConstraints;
+   redBStart = procNRows[mypid] - procNConstr_[mypid];
+   ierr  = HYPRE_IJVectorCreate(mpiComm_, redBStart,
+                        redBStart+redBNRows-1, &reducedBvec_);
+   ierr += HYPRE_IJVectorSetObjectType(reducedBvec_, HYPRE_PARCSR);
+   ierr += HYPRE_IJVectorInitialize(reducedBvec_);
+   ierr += HYPRE_IJVectorAssemble(reducedBvec_);
+   assert( !ierr );
+   HYPRE_IJVectorGetObject(reducedBvec_, (void **) &rb_csr);
+   HYPRE_IJVectorGetObject(b, (void **) &b_csr);
+   b_local  = hypre_ParVectorLocalVector((hypre_ParVector *) b_csr);
+   b_data   = (double *) hypre_VectorData(b_local);
+   rb_local = hypre_ParVectorLocalVector((hypre_ParVector *) rb_csr);
+   rb_data  = (double *) hypre_VectorData(rb_local);
+   for ( irow = 0; irow < localNRows-nConstraints; irow++ )
+      rb_data[irow] = b_data[irow];
+
+   //------------------------------------------------------------------
+   // create x_2
+   //------------------------------------------------------------------
+
+   newEndRow = endRow - nConstraints;
+   x2NRows   = nConstraints;
+   x2Start   = procNConstr_[mypid];
+   HYPRE_IJVectorCreate(mpiComm_, x2Start, x2Start+x2NRows-1, &x2);
+   HYPRE_IJVectorSetObjectType(x2, HYPRE_PARCSR);
+   ierr  = HYPRE_IJVectorInitialize(x2);
+   ierr += HYPRE_IJVectorAssemble(x2);
+   assert(!ierr);
+   HYPRE_IJVectorGetObject(x2, (void **) &x2_csr);
+   HYPRE_IJVectorGetObject(x, (void **) &x_csr);
+   x_local  = hypre_ParVectorLocalVector((hypre_ParVector *) x_csr);
+   x_data   = (double *) hypre_VectorData(x_local);
+   x2_local = hypre_ParVectorLocalVector((hypre_ParVector *) x2_csr);
+   x2_data  = (double *) hypre_VectorData(x2_local);
+   for ( irow = 0; irow < nConstraints; irow++ )
+   {
+      vecIndex = localNRows - nConstraints + irow;
+      x2_data[irow] = x_data[vecIndex];
+   }
+
+   //------------------------------------------------------------------
+   // form reducedB = A21^T * u_2
+   //------------------------------------------------------------------
+
+   HYPRE_IJMatrixGetObject(A21mat_, (void **) &A21_csr);
+   HYPRE_ParCSRMatrixMatvecT(-1.0, A21_csr, x2_csr, 1.0, rb_csr);
+   HYPRE_IJVectorDestroy(x2);
+
+   //------------------------------------------------------------------
+   // create a few more vectors
+   //------------------------------------------------------------------
+
+   ierr  = HYPRE_IJVectorCreate(mpiComm_, redBStart,
+                        redBStart+redBNRows-1, &reducedXvec_);
+   ierr += HYPRE_IJVectorSetObjectType(reducedXvec_, HYPRE_PARCSR);
+   ierr += HYPRE_IJVectorInitialize(reducedXvec_);
+   ierr += HYPRE_IJVectorAssemble(reducedXvec_);
+   assert( !ierr );
+
+   ierr  = HYPRE_IJVectorCreate(mpiComm_, redBStart,
+                        redBStart+redBNRows-1, &reducedRvec_);
+   ierr += HYPRE_IJVectorSetObjectType(reducedRvec_, HYPRE_PARCSR);
+   ierr += HYPRE_IJVectorInitialize(reducedRvec_);
+   ierr += HYPRE_IJVectorAssemble(reducedRvec_);
+   assert( !ierr );
+   free( procNRows );
+
+   return 0;
+}
+
+//****************************************************************************
 // build the reduced matrix
 //----------------------------------------------------------------------------
 
@@ -1455,7 +1971,7 @@ int HYPRE_SlideReduction::buildReducedRHSVector(HYPRE_IJVector b)
    int    irow, jcol, vecIndex, redBLocalLength, redBStart, rowIndex;
    double *b_data, *f2_data, *f2hat_data, ddata;
    HYPRE_ParCSRMatrix A_csr, A21_csr, invA22_csr;
-   HYPRE_IJVector     f2, f2hat, redB, redX, redR;
+   HYPRE_IJVector     f2, f2hat;
    HYPRE_ParVector    b_csr, f2_csr, f2hat_csr, rb_csr;
    hypre_Vector       *b_local, *f2_local, *f2hat_local;
 
@@ -1474,6 +1990,7 @@ int HYPRE_SlideReduction::buildReducedRHSVector(HYPRE_IJVector b)
    if ( procNConstr_ == NULL || procNConstr_[nprocs] == 0 ) 
    {
       printf("%4d : buildReducedRHSVector WARNING - no local entries.\n",mypid);
+      free(procNRows);
       return 1;
    }
 
@@ -2846,6 +3363,171 @@ fclose(fp2);
       if ( mypid == 0 ) 
          printf("====================================================\n");
    }
+   return 0;
+}
+
+//***************************************************************************
+// scale matrix
+//---------------------------------------------------------------------------
+
+int HYPRE_SlideReduction::scaleMatrixVector()
+{
+   int                *partition, startRow, localNRows, index, offset;
+   int                 irow, jcol, iP, rowSize, *colInd, *rowLengs;
+   int                 mypid, nprocs;
+   int                 nSends, *sendStarts, *sendMap, *offdMap, ierr;
+   int                 nRecvs, *recvStarts, pstart, pend, maxRowLeng;
+   int                 *ADiagI, *ADiagJ, *AOffdI, *AOffdJ, rowInd;
+   double              *ADiagA, *AOffdA, *bData, *b2Data;
+   double              *scaleVec, *extScaleVec, *colVal, *sBuffer;
+   HYPRE_IJMatrix      newA;
+   HYPRE_IJVector      newB;
+   hypre_ParCSRMatrix  *A_csr;
+   hypre_CSRMatrix     *ADiag, *AOffd;
+   hypre_ParVector     *b_csr, *b2_csr;
+   hypre_ParCSRCommPkg *commPkg;
+   hypre_ParCSRCommHandle *commHandle;
+ 
+   //-----------------------------------------------------------------------
+   // fetch matrix and parameters 
+   //-----------------------------------------------------------------------
+
+   MPI_Comm_rank( mpiComm_, &mypid );
+   MPI_Comm_size( mpiComm_, &nprocs );
+   HYPRE_IJMatrixGetObject(reducedAmat_, (void **) &A_csr);
+   hypre_MatvecCommPkgCreate((hypre_ParCSRMatrix *) A_csr);
+   HYPRE_ParCSRMatrixGetRowPartitioning((HYPRE_ParCSRMatrix) A_csr,&partition);
+   startRow    = partition[mypid];
+   localNRows  = partition[mypid+1] - startRow;
+   free( partition );
+   ADiag  = hypre_ParCSRMatrixDiag(A_csr);
+   ADiagI = hypre_CSRMatrixI(ADiag);
+   ADiagJ = hypre_CSRMatrixJ(ADiag);
+   ADiagA = hypre_CSRMatrixData(ADiag);
+   AOffd  = hypre_ParCSRMatrixOffd(A_csr);
+   AOffdI = hypre_CSRMatrixI(AOffd);
+   AOffdJ = hypre_CSRMatrixJ(AOffd);
+   AOffdA = hypre_CSRMatrixData(AOffd);
+   HYPRE_IJVectorGetObject(reducedBvec_, (void **) &b_csr);
+   bData  = hypre_VectorData(hypre_ParVectorLocalVector(b_csr));
+
+   offdMap = hypre_ParCSRMatrixColMapOffd(A_csr);
+   commPkg = hypre_ParCSRMatrixCommPkg((hypre_ParCSRMatrix *) A_csr);
+   nSends  = hypre_ParCSRCommPkgNumSends(commPkg);
+   nRecvs  = hypre_ParCSRCommPkgNumRecvs(commPkg);
+   recvStarts = hypre_ParCSRCommPkgRecvVecStarts(commPkg);
+   sendStarts = hypre_ParCSRCommPkgSendMapStarts(commPkg);
+   sendMap    = hypre_ParCSRCommPkgSendMapElmts(commPkg);
+
+   //-----------------------------------------------------------------------
+   // fetch diagonal of A
+   //-----------------------------------------------------------------------
+
+   scaleVec  = new double[localNRows];
+   rowLengs  = new int[localNRows];
+   extScaleVec = NULL;
+   if ( nRecvs > 0 ) extScaleVec = new double[recvStarts[nRecvs]];
+
+   maxRowLeng = 0;
+   for ( irow = 0; irow < localNRows; irow++ )
+   {
+      scaleVec[irow] = 0.0;
+      rowLengs[irow] = ADiagI[irow+1] - ADiagI[irow] + 
+                       AOffdI[irow+1] - AOffdI[irow];
+      if ( rowLengs[irow] > maxRowLeng ) maxRowLeng = rowLengs[irow];
+      for ( jcol = ADiagI[irow]; jcol < ADiagI[irow+1];  jcol++ )
+         if ( ADiagJ[jcol] == irow ) scaleVec[irow] = ADiagA[jcol];
+   }
+   for ( irow = 0; irow < localNRows; irow++ )
+   {
+      if ( habs( scaleVec[irow] ) == 0.0 )
+      {
+         printf("%d : scaleMatrixVector - diag %d = %e <= 0 \n",mypid,irow,
+                scaleVec[irow]);
+         exit(1);
+      }
+      scaleVec[irow] = 1.0/sqrt(scaleVec[irow]);
+   }
+
+   //-----------------------------------------------------------------------
+   // exchange diagonal of A
+   //-----------------------------------------------------------------------
+
+   if ( nSends > 0 )
+   {
+      sBuffer = new double[sendStarts[nSends]];
+      offset = 0;
+      for ( iP = 0; iP < nSends; iP++ )
+      {
+         pstart = sendStarts[iP];
+         pend   = sendStarts[iP+1];
+         for ( jcol = pstart; jcol < pend; jcol++ )
+         {
+            index = sendMap[jcol];
+            sBuffer[offset++] = scaleVec[index];
+         }
+      }
+   }
+   else sBuffer = NULL;
+
+   commHandle = hypre_ParCSRCommHandleCreate(1,commPkg,sBuffer,extScaleVec);
+   hypre_ParCSRCommHandleDestroy(commHandle);
+
+   if ( nSends > 0 ) delete [] sBuffer;
+
+   //-----------------------------------------------------------------------
+   // construct new matrix
+   //-----------------------------------------------------------------------
+
+   HYPRE_IJMatrixCreate(mpiComm_, startRow, startRow+localNRows-1,
+                        startRow, startRow+localNRows-1, &newA);
+   HYPRE_IJMatrixSetObjectType(newA, HYPRE_PARCSR);
+   HYPRE_IJMatrixSetRowSizes(newA, rowLengs);
+   HYPRE_IJMatrixInitialize(newA);
+   delete [] rowLengs;
+   colInd = new int[maxRowLeng];
+   colVal = new double[maxRowLeng];
+   for ( irow = 0; irow < localNRows; irow++ )
+   {
+      rowSize = 0;
+      for ( jcol = ADiagI[irow]; jcol < ADiagI[irow+1]; jcol++ )
+      {
+         index = ADiagJ[jcol];
+         colInd[rowSize] = index + startRow; 
+         colVal[rowSize++] = scaleVec[irow]*scaleVec[index]*ADiagA[jcol];
+      }
+      for ( jcol = AOffdI[irow]; jcol < AOffdI[irow+1]; jcol++ )
+      {
+         index = AOffdJ[jcol];
+         colInd[rowSize] = offdMap[index]; 
+         colVal[rowSize++] = scaleVec[irow]*extScaleVec[index]*AOffdA[jcol];
+      }
+      rowInd = irow + startRow;
+      HYPRE_IJMatrixSetValues(newA, 1, &rowSize, (const int *) &rowInd,
+                  (const int *) colInd, (const double *) colVal);
+   }
+   HYPRE_IJMatrixAssemble(newA);
+   delete [] colInd;
+   delete [] colVal;
+   delete [] extScaleVec;
+
+   //-----------------------------------------------------------------------
+   // construct new vector
+   //-----------------------------------------------------------------------
+
+   ierr  = HYPRE_IJVectorCreate(mpiComm_,startRow,startRow+localNRows-1,&newB);
+   ierr += HYPRE_IJVectorSetObjectType(newB, HYPRE_PARCSR);
+   ierr += HYPRE_IJVectorInitialize(newB);
+   ierr += HYPRE_IJVectorAssemble(newB);
+   ierr += HYPRE_IJVectorGetObject(newB, (void **) &b2_csr);
+   b2Data = hypre_VectorData(hypre_ParVectorLocalVector(b2_csr));
+   assert( !ierr );
+   for ( irow = 0; irow < localNRows; irow++ )
+      b2Data[irow] = bData[irow] * scaleVec[irow];
+
+   ADiagISqrts_ = scaleVec;
+   reducedAmat_ = newA;
+   reducedBvec_ = newB;
    return 0;
 }
 
@@ -4346,190 +5028,6 @@ int HYPRE_SlideReduction::buildReducedMatrix2()
 
    free( procNRows );
    HYPRE_ParCSRMatrixDestroy(RAP_csr);
-   return 0;
-}
-
-//***************************************************************************
-// get matrix number of rows 
-//---------------------------------------------------------------------------
-
-int HYPRE_SlideReduction::getMatrixNumRows()
-{
-   int mypid, nprocs, *procNRows, localNRows, nConstraints;
-   HYPRE_ParCSRMatrix A_csr;
-
-   MPI_Comm_rank( mpiComm_, &mypid );
-   MPI_Comm_size( mpiComm_, &nprocs );
-   HYPRE_IJMatrixGetObject(Amat_, (void **) &A_csr);
-   HYPRE_ParCSRMatrixGetRowPartitioning( A_csr, &procNRows );
-   localNRows   = procNRows[mypid+1] - procNRows[mypid];
-   nConstraints = procNConstr_[mypid+1] - procNConstr_[mypid];
-   hypre_TFree( procNRows );
-   return (localNRows-nConstraints);
-}
-
-//***************************************************************************
-// scale matrix
-//---------------------------------------------------------------------------
-
-int HYPRE_SlideReduction::scaleMatrixVector()
-{
-   int                *partition, startRow, localNRows, index, offset;
-   int                 irow, jcol, iP, rowSize, *colInd, *rowLengs;
-   int                 mypid, nprocs;
-   int                 nSends, *sendStarts, *sendMap, *offdMap, ierr;
-   int                 nRecvs, *recvStarts, pstart, pend, maxRowLeng;
-   int                 *ADiagI, *ADiagJ, *AOffdI, *AOffdJ, rowInd;
-   double              *ADiagA, *AOffdA, *bData, *b2Data;
-   double              *scaleVec, *extScaleVec, *colVal, *sBuffer;
-   HYPRE_IJMatrix      newA;
-   HYPRE_IJVector      newB;
-   hypre_ParCSRMatrix  *A_csr;
-   hypre_CSRMatrix     *ADiag, *AOffd;
-   hypre_ParVector     *b_csr, *b2_csr;
-   hypre_ParCSRCommPkg *commPkg;
-   hypre_ParCSRCommHandle *commHandle;
- 
-   //-----------------------------------------------------------------------
-   // fetch matrix and parameters 
-   //-----------------------------------------------------------------------
-
-   MPI_Comm_rank( mpiComm_, &mypid );
-   MPI_Comm_size( mpiComm_, &nprocs );
-   HYPRE_IJMatrixGetObject(reducedAmat_, (void **) &A_csr);
-   hypre_MatvecCommPkgCreate((hypre_ParCSRMatrix *) A_csr);
-   HYPRE_ParCSRMatrixGetRowPartitioning((HYPRE_ParCSRMatrix) A_csr,&partition);
-   startRow    = partition[mypid];
-   localNRows  = partition[mypid+1] - startRow;
-   free( partition );
-   ADiag  = hypre_ParCSRMatrixDiag(A_csr);
-   ADiagI = hypre_CSRMatrixI(ADiag);
-   ADiagJ = hypre_CSRMatrixJ(ADiag);
-   ADiagA = hypre_CSRMatrixData(ADiag);
-   AOffd  = hypre_ParCSRMatrixOffd(A_csr);
-   AOffdI = hypre_CSRMatrixI(AOffd);
-   AOffdJ = hypre_CSRMatrixJ(AOffd);
-   AOffdA = hypre_CSRMatrixData(AOffd);
-   HYPRE_IJVectorGetObject(reducedBvec_, (void **) &b_csr);
-   bData  = hypre_VectorData(hypre_ParVectorLocalVector(b_csr));
-
-   offdMap = hypre_ParCSRMatrixColMapOffd(A_csr);
-   commPkg = hypre_ParCSRMatrixCommPkg((hypre_ParCSRMatrix *) A_csr);
-   nSends  = hypre_ParCSRCommPkgNumSends(commPkg);
-   nRecvs  = hypre_ParCSRCommPkgNumRecvs(commPkg);
-   recvStarts = hypre_ParCSRCommPkgRecvVecStarts(commPkg);
-   sendStarts = hypre_ParCSRCommPkgSendMapStarts(commPkg);
-   sendMap    = hypre_ParCSRCommPkgSendMapElmts(commPkg);
-
-   //-----------------------------------------------------------------------
-   // fetch diagonal of A
-   //-----------------------------------------------------------------------
-
-   scaleVec  = new double[localNRows];
-   rowLengs  = new int[localNRows];
-   extScaleVec = NULL;
-   if ( nRecvs > 0 ) extScaleVec = new double[recvStarts[nRecvs]];
-
-   maxRowLeng = 0;
-   for ( irow = 0; irow < localNRows; irow++ )
-   {
-      scaleVec[irow] = 0.0;
-      rowLengs[irow] = ADiagI[irow+1] - ADiagI[irow] + 
-                       AOffdI[irow+1] - AOffdI[irow];
-      if ( rowLengs[irow] > maxRowLeng ) maxRowLeng = rowLengs[irow];
-      for ( jcol = ADiagI[irow]; jcol < ADiagI[irow+1];  jcol++ )
-         if ( ADiagJ[jcol] == irow ) scaleVec[irow] = ADiagA[jcol];
-   }
-   for ( irow = 0; irow < localNRows; irow++ )
-   {
-      if ( habs( scaleVec[irow] ) == 0.0 )
-      {
-         printf("%d : scaleMatrixVector - diag %d = %e <= 0 \n",mypid,irow,
-                scaleVec[irow]);
-         exit(1);
-      }
-      scaleVec[irow] = 1.0/sqrt(scaleVec[irow]);
-   }
-
-   //-----------------------------------------------------------------------
-   // exchange diagonal of A
-   //-----------------------------------------------------------------------
-
-   if ( nSends > 0 )
-   {
-      sBuffer = new double[sendStarts[nSends]];
-      offset = 0;
-      for ( iP = 0; iP < nSends; iP++ )
-      {
-         pstart = sendStarts[iP];
-         pend   = sendStarts[iP+1];
-         for ( jcol = pstart; jcol < pend; jcol++ )
-         {
-            index = sendMap[jcol];
-            sBuffer[offset++] = scaleVec[index];
-         }
-      }
-   }
-   else sBuffer = NULL;
-
-   commHandle = hypre_ParCSRCommHandleCreate(1,commPkg,sBuffer,extScaleVec);
-   hypre_ParCSRCommHandleDestroy(commHandle);
-
-   if ( nSends > 0 ) delete [] sBuffer;
-
-   //-----------------------------------------------------------------------
-   // construct new matrix
-   //-----------------------------------------------------------------------
-
-   HYPRE_IJMatrixCreate(mpiComm_, startRow, startRow+localNRows-1,
-                        startRow, startRow+localNRows-1, &newA);
-   HYPRE_IJMatrixSetObjectType(newA, HYPRE_PARCSR);
-   HYPRE_IJMatrixSetRowSizes(newA, rowLengs);
-   HYPRE_IJMatrixInitialize(newA);
-   delete [] rowLengs;
-   colInd = new int[maxRowLeng];
-   colVal = new double[maxRowLeng];
-   for ( irow = 0; irow < localNRows; irow++ )
-   {
-      rowSize = 0;
-      for ( jcol = ADiagI[irow]; jcol < ADiagI[irow+1]; jcol++ )
-      {
-         index = ADiagJ[jcol];
-         colInd[rowSize] = index + startRow; 
-         colVal[rowSize++] = scaleVec[irow]*scaleVec[index]*ADiagA[jcol];
-      }
-      for ( jcol = AOffdI[irow]; jcol < AOffdI[irow+1]; jcol++ )
-      {
-         index = AOffdJ[jcol];
-         colInd[rowSize] = offdMap[index]; 
-         colVal[rowSize++] = scaleVec[irow]*extScaleVec[index]*AOffdA[jcol];
-      }
-      rowInd = irow + startRow;
-      HYPRE_IJMatrixSetValues(newA, 1, &rowSize, (const int *) &rowInd,
-                  (const int *) colInd, (const double *) colVal);
-   }
-   HYPRE_IJMatrixAssemble(newA);
-   delete [] colInd;
-   delete [] colVal;
-   delete [] extScaleVec;
-
-   //-----------------------------------------------------------------------
-   // construct new vector
-   //-----------------------------------------------------------------------
-
-   ierr  = HYPRE_IJVectorCreate(mpiComm_,startRow,startRow+localNRows-1,&newB);
-   ierr += HYPRE_IJVectorSetObjectType(newB, HYPRE_PARCSR);
-   ierr += HYPRE_IJVectorInitialize(newB);
-   ierr += HYPRE_IJVectorAssemble(newB);
-   ierr += HYPRE_IJVectorGetObject(newB, (void **) &b2_csr);
-   b2Data = hypre_VectorData(hypre_ParVectorLocalVector(b2_csr));
-   assert( !ierr );
-   for ( irow = 0; irow < localNRows; irow++ )
-      b2Data[irow] = bData[irow] * scaleVec[irow];
-
-   ADiagISqrts_ = scaleVec;
-   reducedAmat_ = newA;
-   reducedBvec_ = newB;
    return 0;
 }
 
