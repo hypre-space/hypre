@@ -276,7 +276,7 @@ eliminate_face:
 
 	weight = i_face_weight[j_face_face[j]];
 
-	/* printf("update entry: %d\n", j_face_face[j]);  */
+	/* printf("update entry: %d\n", j_face_face[j]);   */
 
 	last = previous[tail];
 	if (last == head) 
@@ -284,6 +284,7 @@ eliminate_face:
 	else
 	  weight_max = i_face_weight[last];
 
+	
 	ierr = update_entry(weight, &weight_max, 
 			    previous, next, first, &last,
 			    head, tail, 
@@ -552,6 +553,11 @@ int update_entry(int weight, int *weight_max,
 {
   int ierr = 0, weight0;
 
+  /*
+  printf("update_entry i: %d\n", i);
+  printf("next[%d]: %d\n", i, next[i]);
+  */
+
   if (previous[i] != head) next[previous[i]] = next[i];
   previous[next[i]] = previous[i];
 
@@ -571,10 +577,14 @@ int update_entry(int weight, int *weight_max,
 	  /* printf("create first[%d] = %d\n", weight0, i); */
 	}
 
-	  previous[i] = previous[tail];
-	  next[i] = tail;
-	  next[previous[tail]] = i;
-	  previous[tail] = i;
+      /*
+      printf("tail: %d, previous[tail]: %d\n", tail, previous[tail]);
+      */
+      previous[i] = previous[tail];
+      next[i] = tail;
+      if (previous[tail] > head) 
+	next[previous[tail]] = i;
+      previous[tail] = i;
 
     }
   else
