@@ -237,8 +237,8 @@ hypre_PrintParCSRMatrix( hypre_ParCSRMatrix *matrix,
 
 hypre_ParCSRMatrix *
 hypre_CSRMatrixToParCSRMatrix( MPI_Comm comm, hypre_CSRMatrix *A,
-			       int *row_starts,
-                               int *col_starts )
+			       int **row_starts_ptr,
+                               int **col_starts_ptr )
 {
    int		global_data[2];
    int		global_num_rows;
@@ -248,7 +248,7 @@ hypre_CSRMatrixToParCSRMatrix( MPI_Comm comm, hypre_CSRMatrix *A,
    int		num_procs, my_id;
    int		*local_num_nonzeros;
    int		num_nonzeros;
-
+  
    double	*a_data;
    int		*a_i;
    int		*a_j;
@@ -266,11 +266,17 @@ hypre_CSRMatrixToParCSRMatrix( MPI_Comm comm, hypre_CSRMatrix *A,
 
    int 		first_col_diag;
    int 		last_col_diag;
+   int *row_starts;
+   int *col_starts;
  
    int i, j, ind;
    int no_row_starts = 0;
    int no_col_starts = 0;
- 
+
+
+   row_starts = *row_starts_ptr;
+   col_starts = *col_starts_ptr;
+
    MPI_Comm_rank(comm, &my_id);
    MPI_Comm_size(comm, &num_procs);
 
@@ -298,10 +304,11 @@ hypre_CSRMatrixToParCSRMatrix( MPI_Comm comm, hypre_CSRMatrix *A,
 	 MPE_Decomp1d(global_num_rows, num_procs, i, &row_starts[i], 
 		&local_num_rows[i]);
 	 row_starts[i]--;
-	 local_num_rows[i] -= row_starts[i];
    	}
 	row_starts[num_procs] = global_num_rows;
    }
+   for (i=0; i < num_procs; i++)
+	 local_num_rows[i] = row_starts[i+1] - row_starts[i];
 
    if (my_id == 0)
    {
@@ -388,8 +395,11 @@ hypre_CSRMatrixToParCSRMatrix( MPI_Comm comm, hypre_CSRMatrix *A,
    hypre_DestroyCSRMatrix(local_A);
    hypre_TFree(local_num_rows);
    hypre_TFree(csr_matrix_datatypes);
-   if (no_row_starts) hypre_TFree(row_starts);
+/*   if (no_row_starts) hypre_TFree(row_starts);
    if (no_col_starts) hypre_TFree(col_starts);
+*/
+   *row_starts_ptr = row_starts;
+   *col_starts_ptr = col_starts;
 
    return par_matrix;
 }
