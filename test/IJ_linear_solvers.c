@@ -124,6 +124,8 @@ main( int   argc,
    /* parameters for GMRES */
    int	    k_dim;
 
+   int      print_matrix = 0;
+
    /*-----------------------------------------------------------
     * Initialize some stuff
     *-----------------------------------------------------------*/
@@ -713,6 +715,7 @@ main( int   argc,
       printf("\n");  
       printf("  -dbg <val>             : set debug flag\n");
       printf("       0=no debugging\n       1=internal timing\n       2=interpolation truncation\n       3=more detailed timing in coarsening routine\n");
+      printf("   -print_matrix         : print the matrix to a file");
       exit(1);
    }
 
@@ -771,6 +774,9 @@ main( int   argc,
       printf("build_matrix_type = %d.\n", build_matrix_type);
       return(-1);
    }
+
+   if ( print_matrix )
+      hypre_ParCSRMatrixPrint( parcsr_A, "matout" );
 
    time_index = hypre_InitializeTiming("Spatial operator");
    hypre_BeginTiming(time_index);
