@@ -699,11 +699,13 @@ hypre_ParAMGBuildInterp( hypre_ParCSRMatrix   *A,
       {
        /*  if (CF_marker[i] < 0) */
          {
-            max_coef = P_diag_data[P_diag_i[i]];
+            max_coef = 0;
             for (j = P_diag_i[i]; j < P_diag_i[i+1]; j++)
-              max_coef = (max_coef<P_diag_data[j]) ? P_diag_data[j] : max_coef;
+               max_coef = (max_coef < fabs(P_diag_data[j])) ? 
+				P_diag_data[j] : max_coef;
             for (j = P_offd_i[i]; j < P_offd_i[i+1]; j++)
-              max_coef = (max_coef<P_offd_data[j]) ? P_offd_data[j] : max_coef;
+               max_coef = (max_coef < fabs(P_offd_data[j])) ? 
+				P_offd_data[j] : max_coef;
             max_coef *= 0.25;
 
             start_j = P_diag_i[i];
