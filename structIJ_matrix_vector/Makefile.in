@@ -1,0 +1,68 @@
+
+.SUFFIXES:
+.SUFFIXES: .c .f .o
+
+CC = @CC@
+
+C_COMPILE_FLAGS=@CFLAGS@
+CINCLUDES=@INCLUDES@ @MPIINCLUDE@
+CDEFS = -DHYPRE_NO_PTHREAD_MANGLING
+
+CFLAGS =\
+ ${C_COMPILE_FLAGS}\
+ -I..\
+ -I../utilities\
+ -I../IJ_matrix_vector\
+ -I../seq_matrix_vector\
+ -I../parcsr_matrix_vector\
+ -I../CI_struct_matrix_vector\
+ ${CINCLUDES}\
+ ${CDEFS}
+
+RANLIB= @RANLIB@
+
+HEADERS =\
+ headers.h\
+ structIJ_matrix_vector.h\
+ HYPRE_structIJ_mv.h
+
+FILES =\
+ structIJ_matrix.c\
+ structIJ_vector.c\
+ HYPRE_structIJ_matrix.c\
+ HYPRE_structIJ_vector.c
+
+OBJS = ${FILES:.c=.o}
+
+##################################################################
+# Targets
+##################################################################
+
+all: libHYPRE_structIJ_mv.a
+
+install: all
+
+clean:
+	@rm -f *.o
+
+veryclean: clean
+	@rm -f libHYPRE_*.a
+
+##################################################################
+# Rules
+##################################################################
+
+libHYPRE_structIJ_mv.a: ${OBJS}
+	@echo  "Building $@ ... "
+	ar -rcu $@ ${OBJS}
+	${RANLIB} $@
+
+${OBJS}: ${HEADERS}
+
+##################################################################
+# Generic rules
+##################################################################
+
+.c.o:
+	${CC} -o $@ -c ${CFLAGS} $<
+
