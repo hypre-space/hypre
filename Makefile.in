@@ -49,6 +49,9 @@ HYPRE_PARCSR_DIRS =\
  utilities\
  seq_matrix_vector\
  parcsr_matrix_vector\
+ distributed_matrix\
+ matrix_matrix\
+ distributed_linear_solvers/pilut\
  parcsr_linear_solvers
 
 #These are the directories for PILUT accessed through CI using PETSc
