@@ -128,15 +128,11 @@ hypre_InitializeParCSRMatrix( hypre_ParCSRMatrix *matrix )
 {
    int  ierr=0;
 
-   if ( !hypre_ParCSRMatrixDiag(matrix) )
-   	hypre_InitializeCSRMatrix(hypre_ParCSRMatrixDiag(matrix));
-   if ( !hypre_ParCSRMatrixOffd(matrix) )
-   {
-   	hypre_InitializeCSRMatrix(hypre_ParCSRMatrixOffd(matrix));
-	hypre_ParCSRMatrixColMapOffd(matrix) = 
+   hypre_InitializeCSRMatrix(hypre_ParCSRMatrixDiag(matrix));
+   hypre_InitializeCSRMatrix(hypre_ParCSRMatrixOffd(matrix));
+   hypre_ParCSRMatrixColMapOffd(matrix) = 
 		hypre_CTAlloc(int,hypre_CSRMatrixNumCols(
 		hypre_ParCSRMatrixOffd(matrix)));
-   }
    return ierr;
 }
 
