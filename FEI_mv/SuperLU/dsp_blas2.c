@@ -15,6 +15,7 @@
 #include "dsp_defs.h"
 #include "superlu_util.h"
 
+extern int dtrsv_(char *,char *,char *,int *,double *,int *,double *,int *);
 
 /* 
  * Function prototypes 
