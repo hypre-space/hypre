@@ -162,7 +162,7 @@ int HYPRE_LSI_DDIlutSetOutputLevel(HYPRE_Solver solver, int level)
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_ParCSRParaSailsSolve - Solve function for ParaSails.
+ * HYPRE_LSI_DDIlutSolve - Solve function for DDILUT.
  *--------------------------------------------------------------------------*/
 
 int HYPRE_LSI_DDIlutSolve( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
@@ -191,7 +191,7 @@ int HYPRE_LSI_DDIlutSolve( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
    context->Amat = ilut_ptr->mh_mat;
    context->comm = MPI_COMM_WORLD;
 
-   MH_ExchBdry(dbuffer, context);
+   if ( extNrows > Nrows ) MH_ExchBdry(dbuffer, context);
 
    for ( i = 0; i < extNrows; i++ )
    {
