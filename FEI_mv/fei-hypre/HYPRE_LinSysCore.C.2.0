@@ -1856,7 +1856,11 @@ int HYPRE_LinSysCore::resetRHSVector(double s)
        exit(1);
     }
 
-    for (i = 0; i < numRHSs_; i++) HYPRE_IJVectorZeroLocalComponents(HYbs_[i]);
+    if ( HYbs_ != NULL )
+    {
+       for (i = 0; i < numRHSs_; i++) 
+          if ( HYbs_[i] != NULL ) HYPRE_IJVectorZeroLocalComponents(HYbs_[i]);
+    }
 
     if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
     {
