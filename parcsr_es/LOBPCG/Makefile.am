@@ -7,6 +7,7 @@ libHYPRE_lobpcg_la_LDFLAGS = -avoid-version
 include_HEADERS = HYPRE_lobpcg.h lobpcg.h
 
 AM_CPPFLAGS = \
+ -I$(top_srcdir)\
  -I$(top_srcdir)/IJ_mv\
  -I$(top_srcdir)/parcsr_mv\
  -I$(top_srcdir)/parcsr_ls\

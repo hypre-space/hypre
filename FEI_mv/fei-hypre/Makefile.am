@@ -15,6 +15,7 @@ include_HEADERS = cfei-hypre.h cfei_hypre.h \
  $(BASE_DIR)/Lookup.h
 
 AM_CPPFLAGS = -DHAVE_SUPERLU -DBOOL_NOT_SUPPORTED\
+ -I$(top_srcdir)\
  -I$(top_srcdir)/IJ_mv\
  -I$(top_srcdir)/utilities\
  -I$(top_srcdir)/krylov\
@@ -23,9 +24,9 @@ AM_CPPFLAGS = -DHAVE_SUPERLU -DBOOL_NOT_SUPPORTED\
  -I$(top_srcdir)/seq_mv\
  -I$(top_srcdir)/distributed_matrix\
  -I$(top_srcdir)/distributed_ls\
- -I$(top_srcdir)/../femli\
+ -I$(top_srcdir)/FEI_mv/femli\
  -I$(BASE_DIR)\
- -I$(srcdir)/../SuperLU
+ -I$(top_srcdir)/FEI_mv/SuperLU
 
 AM_CXXFLAGS = -DMPICH_SKIP_MPICXX
 

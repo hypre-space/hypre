@@ -8,6 +8,7 @@ include_HEADERS = HYPRE_DistributedMatrixPilutSolver_protos.h\
  HYPRE_DistributedMatrixPilutSolver_types.h
 
 AM_CPPFLAGS = \
+ -I$(top_srcdir)\
  -I$(top_srcdir)/utilities\
  -I$(top_srcdir)/distributed_matrix
 
