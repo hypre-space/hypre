@@ -120,7 +120,7 @@ main( int   argc,
    int      num_sweep = 1;
    double  *relax_weight; 
    double  *omega;
-   double   tol = 1.e-6, pc_tol = 0.;
+   double   tol = 1.e-8, pc_tol = 0.;
    double   max_row_sum = 1.;
 
    /* parameters for ParaSAILS */
@@ -1040,7 +1040,7 @@ main( int   argc,
       assembly is unnecessary if the sparsity pattern of the matrix is
       not changed somehow.  If one has not used IJMatrixRead, one has
       the opportunity to IJMatrixAddTo before a IJMatrixAssemble. */
-
+/*
    ncols    = hypre_CTAlloc(int, last_local_row - first_local_row + 1);
    rows     = hypre_CTAlloc(int, last_local_row - first_local_row + 1);
    col_inds = hypre_CTAlloc(int, last_local_row - first_local_row + 1);
@@ -1049,8 +1049,8 @@ main( int   argc,
    if (dt < dt_inf)
      val = 1./dt;
    else 
-     val = 0.;  /* Use zero to avoid unintentional loss of significance */
-
+     val = 0.; */  /* Use zero to avoid unintentional loss of significance */
+/*
    for (i = first_local_row; i <= last_local_row; i++)
    {
      j = i - first_local_row;
@@ -1070,12 +1070,12 @@ main( int   argc,
    hypre_TFree(col_inds);
    hypre_TFree(rows);
    hypre_TFree(ncols);
-
+*/
    /* If sparsity pattern is not changed since last IJMatrixAssemble call,
       this should be a no-op */
-
+/*
    ierr += HYPRE_IJMatrixAssemble( ij_A );
-
+*/
    /*-----------------------------------------------------------
     * Fetch the resulting underlying matrix out
     *-----------------------------------------------------------*/
@@ -1514,7 +1514,7 @@ main( int   argc,
       HYPRE_ParCSRHybridSetConvergenceTol(amg_solver, cf_tol);
       HYPRE_ParCSRHybridSetSolverType(amg_solver, solver_type);
       HYPRE_ParCSRHybridSetLogging(amg_solver, ioutdat);
-      HYPRE_ParCSRHybridSetPLogging(amg_solver, poutdat);
+      HYPRE_ParCSRHybridSetPrintLevel(amg_solver, poutdat);
       HYPRE_ParCSRHybridSetDSCGMaxIter(amg_solver, dscg_max_its );
       HYPRE_ParCSRHybridSetPCGMaxIter(amg_solver, pcg_max_its ); 
       HYPRE_ParCSRHybridSetCoarsenType(amg_solver, (hybrid*coarsen_type));
@@ -1581,7 +1581,7 @@ main( int   argc,
       HYPRE_BoomerAMGSetStrongThreshold(amg_solver, strong_threshold);
       HYPRE_BoomerAMGSetTruncFactor(amg_solver, trunc_factor);
 /* note: log is written to standard output, not to file */
-      HYPRE_BoomerAMGSetPrintLevel(amg_solver, ioutdat);
+      HYPRE_BoomerAMGSetPrintLevel(amg_solver, 3);
       HYPRE_BoomerAMGSetPrintFileName(amg_solver, "driver.out.log"); 
       HYPRE_BoomerAMGSetCycleType(amg_solver, cycle_type);
       HYPRE_BoomerAMGSetNumGridSweeps(amg_solver, num_grid_sweeps);
@@ -1683,7 +1683,7 @@ main( int   argc,
       HYPRE_BoomerAMGSetStrongThreshold(amg_solver, strong_threshold);
       HYPRE_BoomerAMGSetTruncFactor(amg_solver, trunc_factor);
 /* note: log is written to standard output, not to file */
-      HYPRE_BoomerAMGSetPrintLevel(amg_solver, ioutdat);
+      HYPRE_BoomerAMGSetPrintLevel(amg_solver, 3);
       HYPRE_BoomerAMGSetPrintFileName(amg_solver, "driver.out.log");
       HYPRE_BoomerAMGSetCycleType(amg_solver, cycle_type);
       HYPRE_BoomerAMGSetNumGridSweeps(amg_solver, num_grid_sweeps);
@@ -1770,7 +1770,7 @@ main( int   argc,
       ioutdat = 2;
  
       HYPRE_ParCSRPCGCreate(MPI_COMM_WORLD, &pcg_solver);
-      HYPRE_PCGSetMaxIter(pcg_solver, 500);
+      HYPRE_PCGSetMaxIter(pcg_solver, 1000);
       HYPRE_PCGSetTol(pcg_solver, tol);
       HYPRE_PCGSetTwoNorm(pcg_solver, 1);
       HYPRE_PCGSetRelChange(pcg_solver, 0);
@@ -2039,7 +2039,8 @@ main( int   argc,
       HYPRE_GMRESSetKDim(pcg_solver, k_dim);
       HYPRE_GMRESSetMaxIter(pcg_solver, 1000);
       HYPRE_GMRESSetTol(pcg_solver, tol);
-      HYPRE_GMRESSetLogging(pcg_solver, ioutdat);
+      HYPRE_GMRESSetLogging(pcg_solver, 1);
+      HYPRE_GMRESSetPrintLevel(pcg_solver, ioutdat);
  
       if (solver_id == 3)
       {
@@ -2303,6 +2304,7 @@ main( int   argc,
       HYPRE_BiCGSTABSetMaxIter(pcg_solver, 1000);
       HYPRE_BiCGSTABSetTol(pcg_solver, tol);
       HYPRE_BiCGSTABSetLogging(pcg_solver, ioutdat);
+      HYPRE_BiCGSTABSetPrintLevel(pcg_solver, ioutdat);
  
       if (solver_id == 9)
       {
