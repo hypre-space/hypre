@@ -34,7 +34,7 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
    /* Data Structure variables */
 
    int      amg_print_level;
-   int      amg_log_level;
+   int      amg_logging;
    int     *num_coeffs;
    int     *num_variables;
    int      cycle_op_count;
@@ -77,8 +77,8 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
    MPI_Comm_rank(comm,&my_id);
 
    amg_print_level    = hypre_ParAMGDataPrintLevel(amg_data);
-   amg_log_level      = hypre_ParAMGDataLogLevel(amg_data);
-   if ( amg_log_level > 2 )
+   amg_logging      = hypre_ParAMGDataLogging(amg_data);
+   if ( amg_logging > 1 )
       Residual = hypre_ParAMGDataResidual(amg_data);
    /* num_unknowns  = hypre_ParAMGDataNumUnknowns(amg_data); */
    num_levels       = hypre_ParAMGDataNumLevels(amg_data);
@@ -147,7 +147,7 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
 
    if (tol > 0.)
    {
-     if ( amg_log_level > 2 ) {
+     if ( amg_logging > 1 ) {
         hypre_ParVectorCopy(F_array[0], Residual );
         hypre_ParCSRMatrixMatvec(alpha, A_array[0], U_array[0], beta, Residual );
         resid_nrm = sqrt(hypre_ParVectorInnerProd( Residual, Residual ));
@@ -226,7 +226,7 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
       {
         old_resid = resid_nrm;
 
-        if ( amg_log_level > 2 ) {
+        if ( amg_logging > 1 ) {
            hypre_ParVectorCopy(F_array[0], Residual);
            hypre_ParCSRMatrixMatvec(alpha, A_array[0], U_array[0], beta, Residual );
            resid_nrm = sqrt(hypre_ParVectorInnerProd( Residual, Residual ));

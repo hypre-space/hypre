@@ -54,7 +54,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    double               trunc_factor;
 
    int      max_levels; 
-   int      amg_log_level;
+   int      amg_logging;
    int      amg_print_level;
    int      debug_flag;
 
@@ -107,7 +107,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
    old_num_levels = hypre_ParAMGDataNumLevels(amg_data);
    max_levels = hypre_ParAMGDataMaxLevels(amg_data);
-   amg_log_level = hypre_ParAMGDataLogLevel(amg_data);
+   amg_logging = hypre_ParAMGDataLogging(amg_data);
    amg_print_level = hypre_ParAMGDataPrintLevel(amg_data);
    coarsen_type = hypre_ParAMGDataCoarsenType(amg_data);
    measure_type = hypre_ParAMGDataMeasureType(amg_data);
@@ -640,7 +640,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
       }
    }
 
-   if ( amg_log_level > 2 ) {
+   if ( amg_logging > 1 ) {
       Residual_array= 
 	hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A_array[0]),
                               hypre_ParCSRMatrixGlobalNumRows(A_array[0]),

@@ -193,14 +193,14 @@ HYPRE_ParCSRHybridSetLogging( HYPRE_Solver solver,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_ParCSRHybridSetPLogging
+ * HYPRE_ParCSRHybridSetPrintLevel
  *--------------------------------------------------------------------------*/
 
 int
-HYPRE_ParCSRHybridSetPLogging( HYPRE_Solver solver,
-                              int               plogging    )
+HYPRE_ParCSRHybridSetPrintLevel( HYPRE_Solver solver,
+                              int               print_level    )
 {
-   return( hypre_AMGHybridSetPLogging( (void *) solver, plogging ) );
+   return( hypre_AMGHybridSetPrintLevel( (void *) solver, print_level ) );
 }
 
 /*--------------------------------------------------------------------------

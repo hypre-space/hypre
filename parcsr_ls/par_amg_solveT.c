@@ -34,7 +34,7 @@ hypre_BoomerAMGSolveT( void               *amg_vdata,
    /* Data Structure variables */
 
    int      amg_print_level;
-   int      amg_log_level;
+   int      amg_logging;
    int     *num_coeffs;
    int     *num_variables;
    int      cycle_op_count;
@@ -78,8 +78,8 @@ hypre_BoomerAMGSolveT( void               *amg_vdata,
    MPI_Comm_rank(comm,&my_id);
 
    amg_print_level = hypre_ParAMGDataPrintLevel(amg_data);
-   amg_log_level   = hypre_ParAMGDataLogLevel(amg_data);
-   if ( amg_log_level>2 )
+   amg_logging   = hypre_ParAMGDataLogging(amg_data);
+   if ( amg_logging>1 )
       Residual = hypre_ParAMGDataResidual(amg_data);
    file_name     = hypre_ParAMGDataLogFileName(amg_data);
    /* num_unknowns  = hypre_ParAMGDataNumUnknowns(amg_data); */
@@ -153,7 +153,7 @@ hypre_BoomerAMGSolveT( void               *amg_vdata,
     *    Compute initial fine-grid residual and print to logfile
     *-----------------------------------------------------------------------*/
 
-   if ( amg_log_level > 2 ) {
+   if ( amg_logging > 1 ) {
       hypre_ParVectorCopy(F_array[0], Residual );
       hypre_ParCSRMatrixMatvecT(alpha, A_array[0], U_array[0], beta, Residual );
       resid_nrm = sqrt(hypre_ParVectorInnerProd( Residual, Residual ));
@@ -201,7 +201,7 @@ hypre_BoomerAMGSolveT( void               *amg_vdata,
        *    Compute  fine-grid residual and residual norm
        *----------------------------------------------------------------*/
 
-      if ( amg_log_level > 2 ) {
+      if ( amg_logging > 1 ) {
          hypre_ParVectorCopy(F_array[0], Residual );
          hypre_ParCSRMatrixMatvecT(alpha, A_array[0], U_array[0], beta, Residual );
          resid_nrm = sqrt(hypre_ParVectorInnerProd( Residual, Residual ));

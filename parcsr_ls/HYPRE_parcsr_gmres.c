@@ -174,6 +174,17 @@ HYPRE_ParCSRGMRESSetLogging( HYPRE_Solver solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_ParCSRGMRESSetPrintLevel
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_ParCSRGMRESSetPrintLevel( HYPRE_Solver solver,
+                             int print_level)
+{
+   return( HYPRE_GMRESSetPrintLevel( solver, print_level ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_ParCSRGMRESGetNumIterations
  *--------------------------------------------------------------------------*/
 

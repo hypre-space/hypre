@@ -66,7 +66,7 @@ hypre_BoomerAMGCreate()
 
    /* output params */
    int      print_level;
-   int      log_level;
+   int      logging;
    /* int      cycle_op_count; */
    char     log_file_name[256];
    int      debug_flag;
@@ -140,7 +140,7 @@ hypre_BoomerAMGCreate()
 
    /* output params */
    print_level = 0;
-   log_level = 0;
+   logging = 0;
    sprintf(log_file_name, "%s", "amg.out.log");
    /* cycle_op_count = 0; */
    debug_flag = 0;
@@ -188,7 +188,7 @@ hypre_BoomerAMGCreate()
 
    hypre_BoomerAMGSetNumIterations(amg_data, num_iterations);
    hypre_BoomerAMGSetPrintLevel(amg_data, print_level);
-   hypre_BoomerAMGSetLogLevel(amg_data, log_level);
+   hypre_BoomerAMGSetLogging(amg_data, logging);
    hypre_BoomerAMGSetPrintFileName(amg_data, log_file_name); 
    hypre_BoomerAMGSetDebugFlag(amg_data, debug_flag);
 
@@ -627,19 +627,19 @@ hypre_BoomerAMGSetSmoothNumSweeps( void     *data,
 }
 
 int
-hypre_BoomerAMGSetLogLevel( void     *data,
-                            int       log_level )
+hypre_BoomerAMGSetLogging( void     *data,
+                            int       logging )
 {
-   /* This function should be called before Setup.  Log level changes
+   /* This function should be called before Setup.  Logging changes
       may require allocation or freeing of arrays, which is presently
       only done there.
-      It may be possible to support log_level changes at other times,
+      It may be possible to support logging changes at other times,
       but there is little need.
    */
    int ierr = 0;
    hypre_ParAMGData  *amg_data = data;
 
-   hypre_ParAMGDataLogLevel(amg_data) = log_level;
+   hypre_ParAMGDataLogging(amg_data) = logging;
 
    return (ierr);
 }

@@ -43,7 +43,7 @@ typedef struct
 
    /* additional information (place-holder currently used to print norms) */
    int                   logging;
-   int                   plogging; /* for preconditioner */
+   int                   print_level; 
 
    /* info for BoomerAMG */
    double		strong_threshold;
@@ -92,7 +92,7 @@ hypre_AMGHybridCreate( )
    (AMGhybrid_data -> dscg_num_its)      = 0; 
    (AMGhybrid_data -> pcg_num_its)       = 0; 
    (AMGhybrid_data -> logging)           = 0; 
-   (AMGhybrid_data -> plogging)          = 0; 
+   (AMGhybrid_data -> print_level)       = 0; 
    (AMGhybrid_data -> k_dim)             = 5; 
 
    /* BoomerAMG info */
@@ -339,17 +339,17 @@ hypre_AMGHybridSetLogging( void *AMGhybrid_vdata,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_AMGHybridSetPLogging
+ * hypre_AMGHybridSetPrintLevel
  *--------------------------------------------------------------------------*/
 
 int
-hypre_AMGHybridSetPLogging( void *AMGhybrid_vdata,
-                        int   plogging  )
+hypre_AMGHybridSetPrintLevel( void *AMGhybrid_vdata,
+                        int   print_level  )
 {
    hypre_AMGHybridData *AMGhybrid_data = AMGhybrid_vdata;
    int               ierr = 0;
 
-   (AMGhybrid_data -> plogging) = plogging;
+   (AMGhybrid_data -> print_level) = print_level;
 
    return ierr;
 }
@@ -662,7 +662,7 @@ hypre_AMGHybridSolve( void               *AMGhybrid_vdata,
    int                stop_crit      = (AMGhybrid_data -> stop_crit);
    int                rel_change     = (AMGhybrid_data -> rel_change);
    int                logging        = (AMGhybrid_data -> logging);
-   int                plogging       = (AMGhybrid_data -> plogging);
+   int                print_level    = (AMGhybrid_data -> print_level);
    int                solver_type    = (AMGhybrid_data -> solver_type);
    int                k_dim          = (AMGhybrid_data -> k_dim);
   
@@ -704,12 +704,17 @@ hypre_AMGHybridSolve( void               *AMGhybrid_vdata,
 
    int                ierr = 0;
    int                i, j;
-
+   int		      sol_print_level; /* print_level for solver */
+   int		      pre_print_level; /* print_level for preconditioner */
 
    /*-----------------------------------------------------------------------
     * Setup diagonal scaled solver
     *-----------------------------------------------------------------------*/
 
+/*  print_level definitions: xy,  sol_print_level = y, pre_print_level = x */
+   pre_print_level = print_level/10;
+   sol_print_level = print_level - pre_print_level*10;
+   
    if (solver_type == 1)
    {
       pcg_functions =
@@ -732,7 +737,8 @@ hypre_AMGHybridSolve( void               *AMGhybrid_vdata,
       hypre_PCGSetTwoNorm(pcg_solver, two_norm);
       hypre_PCGSetStopCrit(pcg_solver, stop_crit);
       hypre_PCGSetRelChange(pcg_solver, rel_change);
-      hypre_PCGSetPrintLevel(pcg_solver, logging);
+      hypre_PCGSetLogging(pcg_solver, logging);
+      hypre_PCGSetPrintLevel(pcg_solver, sol_print_level);
 
       pcg_precond = NULL;
 
@@ -781,7 +787,8 @@ hypre_AMGHybridSolve( void               *AMGhybrid_vdata,
       hypre_GMRESSetConvergenceFactorTol(pcg_solver, cf_tol);
       hypre_GMRESSetStopCrit(pcg_solver, stop_crit);
       hypre_GMRESSetRelChange(pcg_solver, rel_change);
-      hypre_GMRESSetPrintLevel(pcg_solver, logging);
+      hypre_GMRESSetLogging(pcg_solver, logging);
+      hypre_GMRESSetPrintLevel(pcg_solver, sol_print_level);
 
       pcg_precond = NULL;
 
@@ -826,6 +833,7 @@ hypre_AMGHybridSolve( void               *AMGhybrid_vdata,
       hypre_BiCGSTABSetConvergenceFactorTol(pcg_solver, cf_tol);
       hypre_BiCGSTABSetStopCrit(pcg_solver, stop_crit);
       hypre_BiCGSTABSetLogging(pcg_solver, logging);
+      hypre_BiCGSTABSetPrintLevel(pcg_solver, sol_print_level);
 
       pcg_precond = NULL;
 
@@ -857,7 +865,8 @@ hypre_AMGHybridSolve( void               *AMGhybrid_vdata,
     *---------------------------------------------------------------------*/
    if (converged)
    {
-      (AMGhybrid_data -> final_rel_res_norm) = res_norm;
+      if (logging)
+         (AMGhybrid_data -> final_rel_res_norm) = res_norm;
       if (solver_type == 1) hypre_PCGDestroy(pcg_solver);
       if (solver_type == 2) hypre_GMRESDestroy(pcg_solver);
       if (solver_type == 3) hypre_BiCGSTABDestroy(pcg_solver);
@@ -891,7 +900,8 @@ hypre_AMGHybridSolve( void               *AMGhybrid_vdata,
          hypre_PCGSetTwoNorm(pcg_solver, two_norm);
          hypre_PCGSetStopCrit(pcg_solver, stop_crit);
          hypre_PCGSetRelChange(pcg_solver, rel_change);
-         hypre_PCGSetPrintLevel(pcg_solver, logging);
+         hypre_PCGSetPrintLevel(pcg_solver, sol_print_level);
+         hypre_PCGSetLogging(pcg_solver, logging);
          hypre_PCGSetConvergenceFactorTol(pcg_solver, 0.0);
       }
       else if (solver_type == 2)
@@ -918,7 +928,8 @@ hypre_AMGHybridSolve( void               *AMGhybrid_vdata,
          hypre_GMRESSetKDim(pcg_solver, k_dim);
          hypre_GMRESSetStopCrit(pcg_solver, stop_crit);
          hypre_GMRESSetRelChange(pcg_solver, rel_change);
-         hypre_GMRESSetPrintLevel(pcg_solver, logging);
+         hypre_GMRESSetLogging(pcg_solver, logging);
+         hypre_GMRESSetPrintLevel(pcg_solver, sol_print_level);
          hypre_GMRESSetConvergenceFactorTol(pcg_solver, 0.0);
       }
       else if (solver_type == 3)
@@ -941,6 +952,7 @@ hypre_AMGHybridSolve( void               *AMGhybrid_vdata,
          hypre_BiCGSTABSetTol(pcg_solver, tol);
          hypre_BiCGSTABSetStopCrit(pcg_solver, stop_crit);
          hypre_BiCGSTABSetLogging(pcg_solver, logging);
+         hypre_BiCGSTABSetPrintLevel(pcg_solver, sol_print_level);
          hypre_BiCGSTABSetConvergenceFactorTol(pcg_solver, 0.0);
       }
 
@@ -955,7 +967,7 @@ hypre_AMGHybridSolve( void               *AMGhybrid_vdata,
          hypre_BoomerAMGSetStrongThreshold(pcg_precond, strong_threshold);
          hypre_BoomerAMGSetTruncFactor(pcg_precond, trunc_factor);
          hypre_BoomerAMGSetCycleType(pcg_precond, cycle_type);
-         hypre_BoomerAMGSetPrintLevel(pcg_precond, plogging);
+         hypre_BoomerAMGSetPrintLevel(pcg_precond, pre_print_level);
          hypre_BoomerAMGSetMaxLevels(pcg_precond,  max_levels);
          hypre_BoomerAMGSetMaxRowSum(pcg_precond, max_row_sum);
    	 if (num_grid_sweeps)
@@ -1020,8 +1032,11 @@ hypre_AMGHybridSolve( void               *AMGhybrid_vdata,
          /* Get information from PCG that is always logged in AMGhybrid solver*/
          hypre_PCGGetNumIterations(pcg_solver, &pcg_num_its);
          (AMGhybrid_data -> pcg_num_its)  = pcg_num_its;
-         hypre_PCGGetFinalRelativeResidualNorm(pcg_solver, &res_norm);
-         (AMGhybrid_data -> final_rel_res_norm) = res_norm;
+         if (logging)
+         {
+            hypre_PCGGetFinalRelativeResidualNorm(pcg_solver, &res_norm);
+            (AMGhybrid_data -> final_rel_res_norm) = res_norm;
+         }
 
          /* Free PCG and preconditioner */
          hypre_PCGDestroy(pcg_solver);
@@ -1038,8 +1053,11 @@ hypre_AMGHybridSolve( void               *AMGhybrid_vdata,
          /* Get information from GMRES that is always logged in AMGhybrid solver*/
          hypre_GMRESGetNumIterations(pcg_solver, &pcg_num_its);
          (AMGhybrid_data -> pcg_num_its)  = pcg_num_its;
-         hypre_GMRESGetFinalRelativeResidualNorm(pcg_solver, &res_norm);
-         (AMGhybrid_data -> final_rel_res_norm) = res_norm;
+         if (logging)
+         {
+            hypre_GMRESGetFinalRelativeResidualNorm(pcg_solver, &res_norm);
+            (AMGhybrid_data -> final_rel_res_norm) = res_norm;
+         }
 
          /* Free GMRES and preconditioner */
          hypre_GMRESDestroy(pcg_solver);
@@ -1056,8 +1074,11 @@ hypre_AMGHybridSolve( void               *AMGhybrid_vdata,
          /* Get information from BiCGSTAB that is always logged in AMGhybrid solver*/
          hypre_BiCGSTABGetNumIterations(pcg_solver, &pcg_num_its);
          (AMGhybrid_data -> pcg_num_its)  = pcg_num_its;
-         hypre_BiCGSTABGetFinalRelativeResidualNorm(pcg_solver, &res_norm);
-         (AMGhybrid_data -> final_rel_res_norm) = res_norm;
+         if (logging)
+         {
+	    hypre_BiCGSTABGetFinalRelativeResidualNorm(pcg_solver, &res_norm);
+            (AMGhybrid_data -> final_rel_res_norm) = res_norm;
+         }
 
          /* Free BiCGSTAB and preconditioner */
          hypre_BiCGSTABDestroy(pcg_solver);

@@ -161,6 +161,17 @@ HYPRE_ParCSRBiCGSTABSetLogging( HYPRE_Solver solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_ParCSRBiCGSTABSetPrintLevel
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_ParCSRBiCGSTABSetPrintLevel( HYPRE_Solver solver,
+                             int print_level)
+{
+   return( HYPRE_BiCGSTABSetPrintLevel( solver, print_level ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_ParCSRBiCGSTABGetNumIterations
  *--------------------------------------------------------------------------*/
 

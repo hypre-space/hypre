@@ -412,20 +412,20 @@ HYPRE_BoomerAMGSetSmoothNumSweeps( HYPRE_Solver  solver,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_BoomerAMGSetLogLevel
+ * HYPRE_BoomerAMGSetLogging
  *--------------------------------------------------------------------------*/
 
 int
-HYPRE_BoomerAMGSetLogLevel( HYPRE_Solver solver,
-                            int          log_level  )
+HYPRE_BoomerAMGSetLogging( HYPRE_Solver solver,
+                            int          logging  )
 {
-   /* This function should be called before Setup.  Log level changes
+   /* This function should be called before Setup.  Logging changes
       may require allocation or freeing of arrays, which is presently
       only done there.
-      It may be possible to support log_level changes at other times,
+      It may be possible to support logging changes at other times,
       but there is little need.
    */
-   return( hypre_BoomerAMGSetLogLevel( (void *) solver, log_level ) );
+   return( hypre_BoomerAMGSetLogging( (void *) solver, logging ) );
 }
 
 /*--------------------------------------------------------------------------

@@ -270,10 +270,10 @@ int HYPRE_BoomerAMGSetPrintLevel(HYPRE_Solver  solver,
 /*
  * (Optional) Requests additional computations for diagnostic and similar
  * data to be logged by the user. Default to 0 for do nothing.  The latest
- * residual will be available if log_level>2.
+ * residual will be available if logging > 1.
  **/
-int HYPRE_BoomerAMGSetLogLevel(HYPRE_Solver  solver,
-                              int           log_level);
+int HYPRE_BoomerAMGSetLogging(HYPRE_Solver  solver,
+                              int           logging);
 
 /*
  * (Optional) Sets the size of the system of PDEs, if using the systems version.
@@ -756,10 +756,16 @@ int HYPRE_ParCSRPCGGetPrecond(HYPRE_Solver  solver,
                               HYPRE_Solver *precond_data);
 
 /**
- * (Optional) Set the amount of print logging to do.
+ * (Optional) Set the amount of logging to do.
+ **/
+int HYPRE_ParCSRPCGSetLogging(HYPRE_Solver solver,
+                              int          logging);
+
+/**
+ * (Optional) Set the print level
  **/
 int HYPRE_ParCSRPCGSetPrintLevel(HYPRE_Solver solver,
-                              int          logging);
+                              int          print_level);
 
 /**
  * Return the number of iterations taken.
@@ -875,6 +881,12 @@ int HYPRE_ParCSRGMRESSetLogging(HYPRE_Solver solver,
                                 int          logging);
 
 /**
+ * (Optional) Set print level.
+ **/
+int HYPRE_ParCSRGMRESSetPrintLevel(HYPRE_Solver solver,
+                                int          print_level);
+
+/**
  * Return the number of iterations taken.
  **/
 int HYPRE_ParCSRGMRESGetNumIterations(HYPRE_Solver  solver,
@@ -968,6 +980,9 @@ int HYPRE_ParCSRBiCGSTABGetPrecond(HYPRE_Solver  solver,
 
 int HYPRE_ParCSRBiCGSTABSetLogging(HYPRE_Solver solver,
                                    int          logging);
+
+int HYPRE_ParCSRBiCGSTABSetPrintLevel(HYPRE_Solver solver,
+                                   int          print_level);
 
 int HYPRE_ParCSRBiCGSTABGetNumIterations(HYPRE_Solver  solver,
                                          int          *num_iterations);
@@ -1275,9 +1290,12 @@ int HYPRE_ParCSRHybridSetPrecond(HYPRE_Solver         solver,
 int HYPRE_ParCSRHybridSetLogging(HYPRE_Solver solver,
                                  int                logging);
 
+int HYPRE_ParCSRHybridSetPrintLevel(HYPRE_Solver solver,
+                                 int                print_level);
+
 int
-HYPRE_ParCSRHybridSetPLogging( HYPRE_Solver solver,
-                              int               plogging    );
+HYPRE_ParCSRHybridSetPrintLevel( HYPRE_Solver solver,
+                              int               print_level    );
  
 int
 HYPRE_ParCSRHybridSetStrongThreshold( HYPRE_Solver solver,

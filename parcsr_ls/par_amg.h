@@ -92,10 +92,10 @@ typedef struct
    int                 num_samples; /* number of sample vectors */
 
    /* log info */
-   int      log_level;
+   int      logging;
    int      num_iterations;
    double   rel_resid_norm;
-   hypre_ParVector *residual; /* available if log_level>2 */
+   hypre_ParVector *residual; /* available if logging>1 */
 
    /* output params */
    int      print_level;
@@ -188,7 +188,7 @@ typedef struct
 #define hypre_ParAMGDataNumSamples(amg_data) ((amg_data)->num_samples)
 
 /* log info data */
-#define hypre_ParAMGDataLogLevel(amg_data) ((amg_data)->log_level)
+#define hypre_ParAMGDataLogging(amg_data) ((amg_data)->logging)
 #define hypre_ParAMGDataNumIterations(amg_data) ((amg_data)->num_iterations)
 #define hypre_ParAMGDataRelativeResidualNorm(amg_data) ((amg_data)->rel_resid_norm)
 #define hypre_ParAMGDataResidual(amg_data) ((amg_data)->residual)
