@@ -1529,18 +1529,18 @@ main( int   argc,
          /* use Euclid preconditioning */
          if (myid == 0) printf("Solver: Euclid-PCG\n");
 
-         HYPRE_ParCSREuclidCreate(MPI_COMM_WORLD, &pcg_precond);
+         HYPRE_EuclidCreate(MPI_COMM_WORLD, &pcg_precond);
 
          /* note: There are three three methods of setting run-time 
             parameters for Euclid: (see HYPRE_parcsr_ls.h); here
             we'll use what I think is simplest: let Euclid internally 
             parse the command line.
          */   
-         HYPRE_ParCSREuclidSetParams(pcg_precond, argc, argv);
+         HYPRE_EuclidSetParams(pcg_precond, argc, argv);
 
          HYPRE_PCGSetPrecond(pcg_solver,
-                             (HYPRE_PtrToSolverFcn) HYPRE_ParCSREuclidSolve,
-                             (HYPRE_PtrToSolverFcn) HYPRE_ParCSREuclidSetup,
+                             (HYPRE_PtrToSolverFcn) HYPRE_EuclidSolve,
+                             (HYPRE_PtrToSolverFcn) HYPRE_EuclidSetup,
                              pcg_precond);
          hypre_TFree(smooth_option);
       }
@@ -1597,8 +1597,8 @@ main( int   argc,
       }
       else if (solver_id == 43)
       {
-        HYPRE_ParCSREuclidPrintParams(pcg_precond);
-        HYPRE_ParCSREuclidDestroy(pcg_precond);
+        HYPRE_EuclidPrintParams(pcg_precond);
+        HYPRE_EuclidDestroy(pcg_precond);
       }
 
       if (myid == 0)
@@ -1718,18 +1718,18 @@ main( int   argc,
          /* use Euclid preconditioning */
          if (myid == 0) printf("Solver: Euclid-GMRES\n");
 
-         HYPRE_ParCSREuclidCreate(MPI_COMM_WORLD, &pcg_precond);
+         HYPRE_EuclidCreate(MPI_COMM_WORLD, &pcg_precond);
 
          /* note: There are three three methods of setting run-time 
             parameters for Euclid: (see HYPRE_parcsr_ls.h); here
             we'll use what I think is simplest: let Euclid internally 
             parse the command line.
          */   
-         HYPRE_ParCSREuclidSetParams(pcg_precond, argc, argv);
+         HYPRE_EuclidSetParams(pcg_precond, argc, argv);
 
          HYPRE_GMRESSetPrecond (pcg_solver,
-                                (HYPRE_PtrToSolverFcn) HYPRE_ParCSREuclidSolve,
-                                (HYPRE_PtrToSolverFcn) HYPRE_ParCSREuclidSetup,
+                                (HYPRE_PtrToSolverFcn) HYPRE_EuclidSolve,
+                                (HYPRE_PtrToSolverFcn) HYPRE_EuclidSetup,
                                 pcg_precond);
          hypre_TFree(smooth_option);
       }
@@ -1788,8 +1788,8 @@ main( int   argc,
       }
       else if (solver_id == 44)
       {
-        HYPRE_ParCSREuclidPrintParams(pcg_precond);
-        HYPRE_ParCSREuclidDestroy(pcg_precond);
+        HYPRE_EuclidPrintParams(pcg_precond);
+        HYPRE_EuclidDestroy(pcg_precond);
       }
 
       if (myid == 0)
@@ -1888,18 +1888,18 @@ main( int   argc,
          /* use Euclid preconditioning */
          if (myid == 0) printf("Solver: Euclid-BICGSTAB\n");
 
-         HYPRE_ParCSREuclidCreate(MPI_COMM_WORLD, &pcg_precond);
+         HYPRE_EuclidCreate(MPI_COMM_WORLD, &pcg_precond);
 
          /* note: There are three three methods of setting run-time 
             parameters for Euclid: (see HYPRE_parcsr_ls.h); here
             we'll use what I think is simplest: let Euclid internally 
             parse the command line.
          */   
-         HYPRE_ParCSREuclidSetParams(pcg_precond, argc, argv);
+         HYPRE_EuclidSetParams(pcg_precond, argc, argv);
 
          HYPRE_BiCGSTABSetPrecond(pcg_solver,
-                                  (HYPRE_PtrToSolverFcn) HYPRE_ParCSREuclidSolve,
-                                  (HYPRE_PtrToSolverFcn) HYPRE_ParCSREuclidSetup,
+                                  (HYPRE_PtrToSolverFcn) HYPRE_EuclidSolve,
+                                  (HYPRE_PtrToSolverFcn) HYPRE_EuclidSetup,
                                   pcg_precond);
          hypre_TFree(smooth_option);
       }
@@ -1943,8 +1943,8 @@ main( int   argc,
       }
       else if (solver_id == 45)
       {
-        HYPRE_ParCSREuclidPrintParams(pcg_precond);
-        HYPRE_ParCSREuclidDestroy(pcg_precond);
+        HYPRE_EuclidPrintParams(pcg_precond);
+        HYPRE_EuclidDestroy(pcg_precond);
       }
 
       if (myid == 0)
