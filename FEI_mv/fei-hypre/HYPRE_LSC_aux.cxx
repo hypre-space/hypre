@@ -4838,7 +4838,8 @@ void HYPRE_LinSysCore::FE_initElemBlock(int nElems, int nNodesPerElem,
                            nNodesPerElem, numNodeFields, nodeFieldIDs);
       if ( status )
       {
-         delete feData_;
+         if      (haveFEData_ == 1) HYPRE_LSI_MLIFEDataDestroy(feData_);
+         else if (haveFEData_ == 2) HYPRE_LSI_MLISFEIDestroy(feData_);
          feData_ = NULL;
          haveFEData_ = 0;
       }
