@@ -2,9 +2,9 @@
 # Process this file with autoconf to produce a configure script.
 # Set VERSION so we only need to edit in one place (i.e., here)
 m4_define(HYPRE_NAME, hypre)
-m4_define(HYPRE_VERSION, 1.8.3b)
-m4_define(HYPRE_DATE, 2003/10/22)
-m4_define(HYPRE_TIME, 23:46:36)
+m4_define(HYPRE_VERSION, 1.8.3a)
+m4_define(HYPRE_DATE, 2004/01/21)
+m4_define(HYPRE_TIME, 05:08:16)
 m4_define(HYPRE_DATETIME, [HYPRE_DATE HYPRE_TIME])
 m4_define(HYPRE_BUGS,http://www-casc.llnl.gov/bugs/enter_bug.cgi?product=HYPRE)
 m4_define(HYPRE_TOP_SRC_DIR, `pwd`)
