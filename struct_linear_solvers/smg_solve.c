@@ -111,8 +111,11 @@ hypre_SMGSolve( void               *smg_vdata,
        *--------------------------------------------------*/
 
       hypre_SMGRelaxSetMaxIter(relax_data_l[0], num_pre_relax);
-      hypre_SMGRelaxSetRegSpaceRank(relax_data_l[0], 0, 0);
-      hypre_SMGRelaxSetRegSpaceRank(relax_data_l[0], 1, 1);
+      if ( num_levels > 1 )
+      {
+         hypre_SMGRelaxSetRegSpaceRank(relax_data_l[0], 0, 0);
+         hypre_SMGRelaxSetRegSpaceRank(relax_data_l[0], 1, 1);
+      }
       if (i == 0)
       {
          if (smg_data -> zero_guess)
@@ -249,8 +252,11 @@ hypre_SMGSolve( void               *smg_vdata,
          }
 #endif
          hypre_SMGRelaxSetMaxIter(relax_data_l[l], num_post_relax);
-         hypre_SMGRelaxSetRegSpaceRank(relax_data_l[l], 0, 1);
-         hypre_SMGRelaxSetRegSpaceRank(relax_data_l[l], 1, 0);
+         if ( num_levels > 1 )
+         {
+            hypre_SMGRelaxSetRegSpaceRank(relax_data_l[l], 0, 1);
+            hypre_SMGRelaxSetRegSpaceRank(relax_data_l[l], 1, 0);
+         }
          hypre_SMGRelaxSetNonZeroGuess(relax_data_l[l]);
          hypre_SMGRelax(relax_data_l[l], A_l[l], b_l[l], x_l[l]);
       }
