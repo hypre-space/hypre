@@ -1,6 +1,7 @@
 #ifndef TEMPORARY_MULTIVECTOR_FUNCTION_PROTOTYPES
 #define TEMPORARY_MULTIVECTOR_FUNCTION_PROTOTYPES
 
+#include "HYPRE_utilities.h"
 #include "utilities.h"
 
 #include "HYPRE_interpreter.h"
