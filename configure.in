@@ -25,7 +25,7 @@ define([AC_CACHE_SAVE], )dnl
 
 AC_INIT(utilities/memory.c)
 AC_CONFIG_HEADER(HYPRE_config.h)
-dnl AC_CONFIG_AUX_DIR(config)
+AC_CONFIG_AUX_DIR(config)
 AC_PREFIX_DEFAULT(`pwd`/hypre)
 
 # JNI_INCLUDES has a path needed for Java support on Frost by Babel runtime:

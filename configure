@@ -673,16 +673,8 @@ fi
 
 
 
-
-
-# JNI_INCLUDES has a path needed for Java support on Frost by Babel runtime:
-JNI_INCLUDES="-I /usr/java130/include"; export JNI_INCLUDES
-# Default Fortran compilers differ for this configure file and the Babel runtime
-# configure file on Frost:
-F77= $ac_cv_prog_F77; export F77
-# Other language environment variables should also be set here, e.g. CC.
 ac_aux_dir=
-for ac_dir in $srcdir $srcdir/.. $srcdir/../..; do
+for ac_dir in config $srcdir/config; do
   if test -f $ac_dir/install-sh; then
     ac_aux_dir=$ac_dir
     ac_install_sh="$ac_aux_dir/install-sh -c"
@@ -694,12 +686,20 @@ for ac_dir in $srcdir $srcdir/.. $srcdir/../..; do
   fi
 done
 if test -z "$ac_aux_dir"; then
-  { echo "configure: error: can not find install-sh or install.sh in $srcdir $srcdir/.. $srcdir/../.." 1>&2; exit 1; }
+  { echo "configure: error: can not find install-sh or install.sh in config $srcdir/config" 1>&2; exit 1; }
 fi
 ac_config_guess=$ac_aux_dir/config.guess
 ac_config_sub=$ac_aux_dir/config.sub
 ac_configure=$ac_aux_dir/configure # This should be Cygnus configure.
 
+
+
+# JNI_INCLUDES has a path needed for Java support on Frost by Babel runtime:
+JNI_INCLUDES="-I /usr/java130/include"; export JNI_INCLUDES
+# Default Fortran compilers differ for this configure file and the Babel runtime
+# configure file on Frost:
+F77= $ac_cv_prog_F77; export F77
+# Other language environment variables should also be set here, e.g. CC.
 subdirs="babel-runtime"
 
 
