@@ -321,6 +321,8 @@ package Hypre {
   /**
    * An Operator is anything that maps one Vector to another.
    * The terms "Setup" and "Apply" are reserved for Operators.
+   * The implementation is allowed to assume that supplied parameter
+   * arrays will not be destroyed.
    */
   interface Operator 
   {
