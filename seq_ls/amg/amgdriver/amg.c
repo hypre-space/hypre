@@ -41,8 +41,6 @@ char     *log_file_name;
    amg_SetMU(SolverAMGMU(solver), amg_data);
    amg_SetNTRLX(SolverAMGNTRLX(solver), amg_data);
    amg_SetIPRLX(SolverAMGIPRLX(solver), amg_data);
-   amg_SetIERLX(SolverAMGIERLX(solver), amg_data);
-   amg_SetIURLX(SolverAMGIURLX(solver), amg_data);
    				    
    amg_SetLogging(SolverAMGIOutDat(solver), log_file_name, amg_data);
 
