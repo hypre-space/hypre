@@ -1,0 +1,117 @@
+#!/bin/sh
+
+#===========================================================================
+# This script creates the AMG directory structure and repository links.
+#
+# To checkout from a specific date use the following -d"2/10/1995"
+#===========================================================================
+
+
+umask 027
+
+EXIT="no"
+
+#=============================================================================
+#
+# Set up directory locations
+#
+#=============================================================================
+
+if [ ! "$AMG_SRC" ]; then
+  echo "Error: set the AMG_SRC environment variable"
+  EXIT=yes
+fi
+
+if [ ! "$AMG_REP" ]; then
+  echo "Error: set the AMG_REP environment variable"
+  EXIT=yes
+elif [ ! -d "$AMG_REP" ]; then
+  echo "Error: directory AMG_REP = $AMG_REP does not exist"
+  EXIT=yes
+fi
+
+if [ "$EXIT" = "yes" ]; then
+  exit 1
+fi
+
+
+#=======================================================
+# Define the AMG_SRC directory structure:
+#=======================================================
+
+DIRS=""
+
+DIRS="$DIRS \
+  amg \
+  config \
+  lib \
+  port \
+  tools"
+
+DIRS="$DIRS \
+  port/seq"
+
+#=======================================================
+# Create the directory structure:
+#=======================================================
+
+echo "Creating the directory structure"
+
+# top level directory
+if [ ! -d "$AMG_SRC" ]; then
+  mkdir $AMG_SRC
+fi
+
+# subdirectories
+for i in $DIRS
+do
+  if [ ! -d "$AMG_SRC/$i" ]; then
+    mkdir $AMG_SRC/$i	
+  fi
+done
+
+#=======================================================
+# Create the repository links
+#=======================================================
+
+echo "Creating the repository links"
+
+# top level directory link
+if [ -d "$AMG_REP/src/RCS" ]; then
+  if [ ! -d "$AMG_SRC/RCS" ]; then
+    ln -s $AMG_REP/src/RCS $AMG_SRC/RCS
+  fi
+fi
+
+# subdirectory links
+for i in $DIRS
+do
+  if [ -d "$AMG_REP/src/$i/RCS" ]; then
+    if [ ! -d "$AMG_SRC/$i/RCS" ]; then
+      ln -s $AMG_REP/src/$i/RCS $AMG_SRC/$i/RCS
+    fi
+  fi
+done
+
+#=======================================================
+# Check out the repository source
+#=======================================================
+
+for i in $DIRS
+do
+  echo "Checking out $i"
+  if [ -f "$AMG_SRC/$i/RCS/rcs_files,v" ]; then
+    (cd $AMG_SRC/$i; co $* -q rcs_files; co $* -q `cat rcs_files`)
+  else
+    (cd $AMG_SRC/$i; co $* -q RCS/*)
+  fi
+done
+
+#=======================================================
+# Set group to amg
+#=======================================================
+
+find $AMG_SRC \( \! -name RCS \) -print | xargs chgrp amg
+find $AMG_SRC \( \! -name RCS \) -print | xargs chmod ug+rX
+find $AMG_SRC \( \! -name RCS \) -print | xargs chmod o-rwx
+ 
