@@ -46,12 +46,38 @@ NAMING CONVENTIONS FOR HYPRE
 
  4. It is preferred that variables be named as follows:
 
-      lower_casc_with_underscores
+      lower_case_with_underscores
 
     This is not a strict rule, but in general one should try
     to adhere to this so that it is easy to distinguish variables
     from functions and macros.
  
+--------------------------------------------------------------------------
+
+User interface vs. internal code
+
+The term "user" here refers to someone who wants to solve linear systems,
+but is not developing linear solvers.  The term "internal code" refers to
+code that is not part of the user interface.
+
+The following convention has been used to some degree already in Hypre
+for separating the two above notions.  Files containing internal routines
+are given names *without* the `hypre_' prefix and include only *one* internal
+header file, usually called `headers.h'.  All user interface routines are
+defined in files beginning with the prefix `HYPRE_'.  One user interface
+header file is defined that contains prototypes, etc., for the interface
+routines.
+
+By doing this, it is easy to create prototypes for internal routines and
+user interface routines.  For example,
+
+  mkproto *.c >> headers.h
+  mkproto HYPRE_*.c >> HYPRE_lib.h
+
+I would like to continue this convention for now.  It is possible that
+this may be changed to some other convention in the future, but if we
+have a common way of doing it now, it will be easier to change later.
+
 --------------------------------------------------------------------------
 
 INDENTATION
