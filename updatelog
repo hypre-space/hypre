@@ -58,7 +58,8 @@ New internal installation: V2000-05-31
   The optimized library is in the usual place; the debugging library
   is in the subdirectory 'debug'.
 
-- Added support for the FEI
+- Added support for the FEI v1.4, with additional capabilities for handling
+  parallel slide surface reduction and general Schur complement reduction. 
 
 - Using a new version numbering scheme.  The C macro HYPRE_Version()
   may be used to retrieve version information.
