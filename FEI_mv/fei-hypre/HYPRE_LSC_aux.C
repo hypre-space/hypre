@@ -1870,6 +1870,28 @@ void HYPRE_LinSysCore::setupBiCGSTABPrecon()
             }
             break;
 
+       case HYBLOCK :
+            if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
+            {
+               HYPRE_ParCSRBiCGSTABSetPrecond(HYSolver_, 
+                     HYPRE_LSI_BlockPrecondSolve, HYPRE_DummyFunction, 
+                     HYPrecon_);
+            }
+            else
+            {
+               if ( blockScheme_ == 1 )
+                  HYPRE_LSI_BlockPrecondSetSchemeBTri(HYPrecon_);
+               else if ( blockScheme_ == 2 )
+                  HYPRE_LSI_BlockPrecondSetSchemeBInv(HYPrecon_);
+               else
+                  HYPRE_LSI_BlockPrecondSetSchemeBDiag(HYPrecon_);
+               HYPRE_ParCSRBiCGSTABSetPrecond(HYSolver_, 
+                                       HYPRE_LSI_BlockPrecondSolve, 
+                                       HYPRE_LSI_BlockPrecondSetup, HYPrecon_);
+               HYPreconSetup_ = 1;
+            }
+            break;
+
 #ifdef MLPACK
        case HYML :
             if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
@@ -2155,6 +2177,28 @@ void HYPRE_LinSysCore::setupBiCGSTABLPrecon()
             }
             break;
 
+       case HYBLOCK :
+            if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
+            {
+               HYPRE_ParCSRBiCGSTABLSetPrecond(HYSolver_, 
+                     HYPRE_LSI_BlockPrecondSolve, HYPRE_DummyFunction, 
+                     HYPrecon_);
+            }
+            else
+            {
+               if ( blockScheme_ == 1 )
+                  HYPRE_LSI_BlockPrecondSetSchemeBTri(HYPrecon_);
+               else if ( blockScheme_ == 2 )
+                  HYPRE_LSI_BlockPrecondSetSchemeBInv(HYPrecon_);
+               else
+                  HYPRE_LSI_BlockPrecondSetSchemeBDiag(HYPrecon_);
+               HYPRE_ParCSRBiCGSTABLSetPrecond(HYSolver_, 
+                                       HYPRE_LSI_BlockPrecondSolve, 
+                                       HYPRE_LSI_BlockPrecondSetup, HYPrecon_);
+               HYPreconSetup_ = 1;
+            }
+            break;
+
 #ifdef MLPACK
        case HYML :
             if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
@@ -2436,6 +2480,28 @@ void HYPRE_LinSysCore::setupTFQmrPrecon()
             }
             break;
 
+       case HYBLOCK :
+            if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
+            {
+               HYPRE_ParCSRTFQmrSetPrecond(HYSolver_, 
+                     HYPRE_LSI_BlockPrecondSolve, HYPRE_DummyFunction, 
+                     HYPrecon_);
+            }
+            else
+            {
+               if ( blockScheme_ == 1 )
+                  HYPRE_LSI_BlockPrecondSetSchemeBTri(HYPrecon_);
+               else if ( blockScheme_ == 2 )
+                  HYPRE_LSI_BlockPrecondSetSchemeBInv(HYPrecon_);
+               else
+                  HYPRE_LSI_BlockPrecondSetSchemeBDiag(HYPrecon_);
+               HYPRE_ParCSRTFQmrSetPrecond(HYSolver_, 
+                                       HYPRE_LSI_BlockPrecondSolve, 
+                                       HYPRE_LSI_BlockPrecondSetup, HYPrecon_);
+               HYPreconSetup_ = 1;
+            }
+            break;
+
 #ifdef MLPACK
        case HYML :
             if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
@@ -2713,6 +2779,28 @@ void HYPRE_LinSysCore::setupBiCGSPrecon()
                HYPRE_EuclidSetParams(HYPrecon_,euclidargc_*2,euclidargv_);
                HYPRE_ParCSRBiCGSSetPrecond(HYSolver_, HYPRE_EuclidSolve,
                                            HYPRE_EuclidSetup, HYPrecon_);
+               HYPreconSetup_ = 1;
+            }
+            break;
+
+       case HYBLOCK :
+            if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
+            {
+               HYPRE_ParCSRBiCGSSetPrecond(HYSolver_, 
+                     HYPRE_LSI_BlockPrecondSolve, HYPRE_DummyFunction, 
+                     HYPrecon_);
+            }
+            else
+            {
+               if ( blockScheme_ == 1 )
+                  HYPRE_LSI_BlockPrecondSetSchemeBTri(HYPrecon_);
+               else if ( blockScheme_ == 2 )
+                  HYPRE_LSI_BlockPrecondSetSchemeBInv(HYPrecon_);
+               else
+                  HYPRE_LSI_BlockPrecondSetSchemeBDiag(HYPrecon_);
+               HYPRE_ParCSRBiCGSSetPrecond(HYSolver_, 
+                                       HYPRE_LSI_BlockPrecondSolve, 
+                                       HYPRE_LSI_BlockPrecondSetup, HYPrecon_);
                HYPreconSetup_ = 1;
             }
             break;
