@@ -451,6 +451,8 @@ class HYPRE_LinSysCore
                                   HYPRE_ParVector b);
    void   addToAConjProjectionSpace(HYPRE_IJVector x, HYPRE_IJVector b);
    void   addToMinResProjectionSpace(HYPRE_IJVector x, HYPRE_IJVector b);
+   void   scaleMatrixVector(HYPRE_IJMatrix, HYPRE_IJVector,
+                            HYPRE_IJMatrix *, HYPRE_IJVector *, double **);
    int    HYPRE_Schur_Search(int,int,int*,int*,int,int);
 
    // ----------------------------------------------------------------------

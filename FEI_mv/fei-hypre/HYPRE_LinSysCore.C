@@ -1961,7 +1961,11 @@ int HYPRE_LinSysCore::putNodalFieldData(int fieldID, int fieldSize,
          for ( i = 0; i < numNodes; i++ )
          { 
             index = lookup_->getEqnNumber(nodeNumbers[i],nodeFieldID);
+
+/* ======
+This should ultimately be taken out even for newer ale3d implementation
             if ( index >= localStartRow_-1 && index < localEndRow_)
+   =====*/
             {
                if ( newData[newNumNodes*fieldSize] == -99999.9 )
                { 
@@ -1972,7 +1976,8 @@ int HYPRE_LinSysCore::putNodalFieldData(int fieldID, int fieldSize,
             }
          }
          HYPRE_LSI_MLILoadNodalCoordinates(HYPrecon_, newNumNodes, 
-                  checkFieldSize, eqnNumbers, fieldSize, (double *) newData);
+                  checkFieldSize, eqnNumbers, fieldSize, (double *) newData,
+                  localEndRow_-localStartRow_+1);
          delete [] eqnNumbers;
          delete [] newData;
       }    
