@@ -28,3 +28,7 @@ mpirun -np 2 ./sstruct -in sstruct.in.miller_3blk  -r 5 10 1 -P 2 1 1 \
  -solver 11 > miller.out.6
 mpirun -np 2 ./sstruct -in sstruct.in.miller_3blk  -r 5 10 1 -P 2 1 1 \
  -solver 20 > miller.out.7
+mpirun -np 2 ./sstruct -in sstruct.in.miller_diag  -r 10 20 1 -P 2 1 1 \
+ -solver 11 > miller.out.8
+mpirun -np 2 ./sstruct -in sstruct.in.miller_diag  -r 10 20 1 -P 2 1 1 \
+ -solver 20 > miller.out.9
