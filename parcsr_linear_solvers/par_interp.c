@@ -102,7 +102,6 @@ hypre_BoomerAMGBuildInterp( hypre_ParCSRMatrix   *A,
    double           diagonal;
    double           sum;
    double           distribute;          
-   double           size, rest;
    
    double           zero = 0.0;
    double           one  = 1.0;
@@ -111,7 +110,7 @@ hypre_BoomerAMGBuildInterp( hypre_ParCSRMatrix   *A,
    int              num_procs;
    int              num_sends;
    int              index;
-   int              ns, ne;
+   int              ns, ne, size, rest;
    int             *int_buf_data;
 
    double           max_coef;

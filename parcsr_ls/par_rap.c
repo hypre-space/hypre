@@ -144,7 +144,7 @@ int hypre_BoomerAMGBuildCoarseOperator(    hypre_ParCSRMatrix  *RT,
    int              num_cols_offd_Pext = 0;
    
    int              ic, i, j, k;
-   int              i1, i2, i3, ii, ns, ne;
+   int              i1, i2, i3, ii, ns, ne, size, rest;
    int              index, index2, cnt, cnt_offd, cnt_diag, value;
    int              jj1, jj2, jj3, jcol;
    
@@ -156,7 +156,6 @@ int hypre_BoomerAMGBuildCoarseOperator(    hypre_ParCSRMatrix  *RT,
    int		    count;
    int		    num_procs;
 
-   double           rest, size;
    double           r_entry;
    double           r_a_product;
    double           r_a_p_product;
