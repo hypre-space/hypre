@@ -370,7 +370,7 @@ hypre_F90_IFACE(hypre_boomeramgsetrelaxweight, HYPRE_BOOMERAMGSETRELAXWEIGHT)( l
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_boomeramgsetprint_level, HYPRE_BOOMERAMGSETPRINTLEVEL)( long int *solver,
+hypre_F90_IFACE(hypre_boomeramgsetprintlevel, HYPRE_BOOMERAMGSETPRINTLEVEL)( long int *solver,
                                          int      *print_level,
                                          int      *ierr     )
 {
