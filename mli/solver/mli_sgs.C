@@ -221,7 +221,7 @@ int MLI_SolverSGS::setParams( char *param_string, int argc, char **argv )
    double *weights;
    char   param1[200];
 
-   if ( !strcmp(param_string, "NumSweeps") )
+   if ( !strcmp(param_string, "numSweeps") )
    {
       sscanf(param_string, "%s %d", param1, &nsweeps);
       if ( nsweeps < 1 ) nsweeps = 1;
