@@ -3929,6 +3929,7 @@ void HYPRE_LinSysCore::solveUsingDSuperLU(int& status)
    HYPRE_IJVectorGetObject(currB_, (void **) &b_csr);
    HYPRE_IJVectorGetObject(currR_, (void **) &r_csr);
 
+#ifdef HAVE_DSUPERLU
    HYPRE_LSI_DSuperLUCreate(comm_, &HYSolver_);  
    HYPRE_LSI_DSuperLUSetOutputLevel(HYSolver_, HYOutputLevel_);
    HYPRE_LSI_DSuperLUSetup(HYSolver_, A_csr, b_csr, x_csr);
@@ -3943,6 +3944,7 @@ void HYPRE_LinSysCore::solveUsingDSuperLU(int& status)
    rnorm = sqrt( rnorm );
    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 )
       printf("HYPRE_LSC::solveUsingDSuperLU - FINAL NORM = %e.\n",rnorm);
+#endif
 }
 
 //***************************************************************************
