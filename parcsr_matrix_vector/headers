@@ -22,8 +22,7 @@ cat > $INTERNAL_HEADER <<@
 #define hypre_PARCSR_MV_HEADER
 
 #include "utilities.h"
-#include "mpe.h"                   /* need to get rid of this */
-#include "hypre_mv.h"
+#include "seq_matrix_vector.h"
 
 #ifdef __cplusplus
 extern "C" {
