@@ -42,7 +42,7 @@ C_COMPILE_FLAGS=@CFLAGS@
 CXX_COMPILE_FLAGS=@CXXFLAGS@
 F77_COMPILE_FLAGS=@F77FLAGS@
 CINCLUDES=@INCLUDES@ @MPIINCLUDE@
-CDEFS = @HYPRE_PETSCDEFS@
+CDEFS = 
 
 CFLAGS = \
  -I..\
@@ -54,12 +54,10 @@ CFLAGS = \
  -I$(srcdir)/../IJ_mv\
  -I$(srcdir)/../seq_mv\
  -I$(srcdir)/../parcsr_mv\
- @PETSCINCLUDE@\
  ${C_COMPILE_FLAGS}\
  ${CINCLUDES} ${CDEFS}
 
 CXXFLAGS = \
- @PETSCINCLUDE@ \
  ${CXX_COMPILE_FLAGS}\
  -I..\
  -I$(srcdir)\

@@ -24,8 +24,6 @@ MPI_LIBDIR   = -L/usr/local/mpi/mpich/lib/solaris/ch_p4/
 MPI_LIBS     = -lmpi -lnsl -lsocket -lgen
 MPIRUN       = mpirun -np 4
 
-#PETSc; not used here, but used by objects called from here 
-PETSC_INCLUDES = -I${PETSC_DIR}/include
 # General
 HYPRE_INCLUDES = \
  -I../..\
@@ -65,7 +63,7 @@ C_COMPILE_FLAGS=@CFLAGS@
 CXX_COMPILE_FLAGS=@CXXFLAGS@
 F77_COMPILE_FLAGS=@F77FLAGS@
 CINCLUDES=@INCLUDES@ @MPIINCLUDE@
-CDEFS = @HYPRE_PETSCDEFS@
+CDEFS = 
 
 CFLAGS = \
  $(OPTIMIZATION)\
@@ -75,7 +73,6 @@ CFLAGS = \
  ${CINCLUDES} ${CDEFS}
 
 CXXFLAGS = \
- @PETSCINCLUDE@ \
  ${CXX_COMPILE_FLAGS}\
  -I../..\
  -I$(srcdir)\
