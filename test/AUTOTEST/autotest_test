@@ -383,10 +383,11 @@ apply_error_filters () {
         do process_filter $ErrorFile "${ii}"
         done
       ;;
-      achi*|sunup*)
+      achi*|sunup*)		# sparc-sun-solaris2.8
         for ii in \
           'Option -fexceptions passed to ld'\
           '(autoconf|automake|autoheader) has been disabled'\
+          'xauth:  error in locking authority file '\
           '^No begin line'\
           '^configure: WARNING: '
         do process_filter $ErrorFile "${ii}"
@@ -396,9 +397,10 @@ apply_error_filters () {
         do multi_line_delete $ErrorFile 1 "${ii}"
         done
       ;;
-      perr*|poin*)
+      perr*|poin*)		# sparc-sun-solaris2.7
         for ii in \
           '(autoconf|automake|autoheader) has been disabled'\
+          'python: fatal: '\
           'xauth:  error in locking authority file '\
           'Xauthority not writable, changes will be ignored'\
           '^No begin line'\
