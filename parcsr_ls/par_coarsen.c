@@ -97,6 +97,7 @@ hypre_ParAMGCoarsen( hypre_ParCSRMatrix    *A,
    MPI_Comm 	       comm            = hypre_ParCSRMatrixComm(A);
    hypre_CommPkg      *comm_pkg        = hypre_ParCSRMatrixCommPkg(A);
    hypre_CommHandle   *comm_handle;
+   hypre_CommHandle   *comm_handle2;
 
    hypre_CSRMatrix    *A_diag          = hypre_ParCSRMatrixDiag(A);
    int                *A_diag_i        = hypre_CSRMatrixI(A_diag);
@@ -149,6 +150,7 @@ hypre_ParAMGCoarsen( hypre_ParCSRMatrix    *A,
    int		       index, start, num_procs;
                       
    int                 ierr = 0;
+   int                 break_var = 1;
 
 #if 0 /* debugging */
    char  filename[256];
@@ -478,10 +480,10 @@ hypre_ParAMGCoarsen( hypre_ParCSRMatrix    *A,
                  = CF_marker[hypre_CommPkgSendMapElmt(comm_pkg,j)];
       }
  
-      comm_handle = hypre_InitializeCommunication(11, comm_pkg, int_buf_data, 
+      comm_handle2 = hypre_InitializeCommunication(11, comm_pkg, int_buf_data, 
         &CF_marker[num_variables]);
  
-      hypre_FinalizeCommunication(comm_handle);   
+      hypre_FinalizeCommunication(comm_handle2);   
  
       /*------------------------------------------------
        * Apply heuristics.
@@ -568,7 +570,7 @@ hypre_ParAMGCoarsen( hypre_ParCSRMatrix    *A,
                if (S_diag_data[jS] < 0)
                {
                   j = S_diag_j[jS];
-
+		  break_var = 1;
                   /* check for common C-pt */
                   for (kS = S_diag_i[j]; kS < S_diag_i[j+1]; kS++)
                   {
@@ -580,21 +582,25 @@ hypre_ParAMGCoarsen( hypre_ParCSRMatrix    *A,
                         /* "remove" edge from S and update measure*/
                         S_diag_data[jS] = -S_diag_data[jS];
                         measure_array[j]--;
+                        break_var = 0;
                         break;
                      }
                   }
-                  for (kS = S_offd_i[j]; kS < S_offd_i[j+1]; kS++)
+		  if (break_var)
                   {
-                     k = S_offd_j[kS];
-
-                     /* IMPORTANT: consider all dependencies */
-                     if (S_offd_data[kS] &&
-				CF_marker[k+num_variables] == COMMON_C_PT)
+                     for (kS = S_offd_i[j]; kS < S_offd_i[j+1]; kS++)
                      {
-                        /* "remove" edge from S and update measure*/
-                        S_diag_data[jS] = -S_diag_data[jS];
-                        measure_array[j]--;
-                        break;
+                        k = S_offd_j[kS];
+
+                        /* IMPORTANT: consider all dependencies */
+                        if (S_offd_data[kS] &&
+				CF_marker[k+num_variables] == COMMON_C_PT)
+                        {
+                           /* "remove" edge from S and update measure*/
+                           S_diag_data[jS] = -S_diag_data[jS];
+                           measure_array[j]--;
+                           break;
+                        }
                      }
                   }
                }
@@ -634,7 +640,7 @@ hypre_ParAMGCoarsen( hypre_ParCSRMatrix    *A,
 			   }
 		        }
 		        if (kc > -1 && S_ext_data[kS] && 
-				CF_marker[kc+col_1] == COMMON_C_PT)
+				CF_marker[kc+num_variables] == COMMON_C_PT)
 		        {
                            /* "remove" edge from S and update measure*/
                            S_offd_data[jS] = -S_offd_data[jS];
@@ -711,6 +717,7 @@ hypre_ParAMGCoarsen( hypre_ParCSRMatrix    *A,
 		  if (j >= col_1 && j < col_n)
 		  {
 		    jc = j - col_1;
+		    break_var = 1;
                     for (kS = S_diag_i[jc]; kS < S_diag_i[jc+1]; kS++)
                     {
                       k = S_diag_j[kS];
@@ -723,25 +730,29 @@ hypre_ParAMGCoarsen( hypre_ParCSRMatrix    *A,
                            /* "remove" edge from S and update measure*/
                            S_ext_data[jS] = -S_ext_data[jS];
                            measure_array[jc]--;
+                           break_var = 0;
                            break;
                         }
                       }
                     }
-                    for (kS = S_offd_i[jc]; kS < S_offd_i[jc+1]; kS++)
+		    if (break_var)
                     {
-                      k = S_offd_j[kS];
+                       for (kS = S_offd_i[jc]; kS < S_offd_i[jc+1]; kS++)
+                       {
+                          k = S_offd_j[kS];
 
-                      /* IMPORTANT: consider all dependencies */
-                      if (S_offd_data[kS])
-                      {
-                        if (CF_marker[k+num_variables] == COMMON_C_PT)
-                        {
-                           /* "remove" edge from S and update measure*/
-                           S_ext_data[jS] = -S_ext_data[jS];
-                           measure_array[jc]--;
-                           break;
-                        }
-                      }
+                          /* IMPORTANT: consider all dependencies */
+                          if (S_offd_data[kS])
+                          {
+                             if (CF_marker[k+num_variables] == COMMON_C_PT)
+                             {
+                                /* "remove" edge from S and update measure*/
+                                S_ext_data[jS] = -S_ext_data[jS];
+                                measure_array[jc]--;
+                                break;
+                             }
+                          }
+                       }
                     }
                   }
 		  else
