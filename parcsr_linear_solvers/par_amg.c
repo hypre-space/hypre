@@ -17,11 +17,11 @@
 #include "par_amg.h"
 
 /*--------------------------------------------------------------------------
- * hypre_ParAMGInitialize
+ * hypre_ParAMGCreate
  *--------------------------------------------------------------------------*/
 
 void *
-hypre_ParAMGInitialize()
+hypre_ParAMGCreate()
 {
    hypre_ParAMGData  *amg_data;
 
@@ -136,11 +136,11 @@ hypre_ParAMGInitialize()
 }
 
 /*--------------------------------------------------------------------------
- * hypre_ParAMGFinalize
+ * hypre_ParAMGDestroy
  *--------------------------------------------------------------------------*/
 
 int
-hypre_ParAMGFinalize( void *data )
+hypre_ParAMGDestroy( void *data )
 {
    int ierr = 0;
    hypre_ParAMGData  *amg_data = data;

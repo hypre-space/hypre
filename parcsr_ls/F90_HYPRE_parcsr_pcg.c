@@ -16,28 +16,28 @@
 #include "fortran.h"
 
 /*--------------------------------------------------------------------------
- * HYPRE_ParCSRPCGInitialize
+ * HYPRE_ParCSRPCGCreate
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_parcsrpcginitialize)( int      *comm,
+hypre_F90_IFACE(hypre_parcsrpcgcreate)( int      *comm,
                                             long int *solver,
                                             int      *ierr    )
 
 {
-   *ierr = (int) ( HYPRE_ParCSRPCGInitialize( (MPI_Comm)       *comm,
+   *ierr = (int) ( HYPRE_ParCSRPCGCreate( (MPI_Comm)       *comm,
                                               (HYPRE_Solver *)  solver ) );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_ParCSRPCGFinalize
+ * HYPRE_ParCSRPCGDestroy
  *--------------------------------------------------------------------------*/
 
 void 
-hypre_F90_IFACE(hypre_parcsrpcgfinalize)( long int *solver,
+hypre_F90_IFACE(hypre_parcsrpcgdestroy)( long int *solver,
                                           int      *ierr    )
 {
-   *ierr = (int) ( HYPRE_ParCSRPCGFinalize( (HYPRE_Solver) *solver ) );
+   *ierr = (int) ( HYPRE_ParCSRPCGDestroy( (HYPRE_Solver) *solver ) );
 }
 
 /*--------------------------------------------------------------------------

@@ -46,7 +46,7 @@ hypre_SetIJMatrixLocalSizeISIS(hypre_IJMatrix *matrix,
 
 /******************************************************************************
  *
- * hypre_NewIJMatrixISIS
+ * hypre_CreateIJMatrixISIS
  *
  * creates AuxParCSRMatrix and ParCSRMatrix if necessary,
  * generates arrays row_starts and col_starts using either previously
@@ -55,7 +55,7 @@ hypre_SetIJMatrixLocalSizeISIS(hypre_IJMatrix *matrix,
  *
  *****************************************************************************/
 int
-hypre_NewIJMatrixISIS(hypre_IJMatrix *matrix)
+hypre_CreateIJMatrixISIS(hypre_IJMatrix *matrix)
 {
    MPI_Comm comm = hypre_IJMatrixContext(matrix);
    int global_m = hypre_IJMatrixM(matrix); 
@@ -920,13 +920,13 @@ hypre_ApplyIJMatrixISIS(hypre_IJMatrix  *matrix,
 
 /******************************************************************************
  *
- * hypre_FreeIJMatrixISIS
+ * hypre_DestroyIJMatrixISIS
  *
  * frees an IJMatrix
  *
  *****************************************************************************/
 int
-hypre_FreeIJMatrixISIS(hypre_IJMatrix *matrix)
+hypre_DestroyIJMatrixISIS(hypre_IJMatrix *matrix)
 {
    return hypre_DestroyParCSRMatrix(hypre_IJMatrixLocalStorage(matrix));
 }
@@ -948,7 +948,7 @@ hypre_SetIJMatrixTotalSizeISIS(hypre_IJMatrix *matrix,
    par_matrix = hypre_IJMatrixLocalStorage(matrix);
    if (!par_matrix)
    {
-      ierr = hypre_NewIJMatrixISIS(matrix);
+      ierr = hypre_CreateIJMatrixISIS(matrix);
       par_matrix = hypre_IJMatrixLocalStorage(matrix);
    }
    hypre_ParCSRMatrixNumNonzeros(par_matrix) = size;

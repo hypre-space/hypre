@@ -17,14 +17,14 @@
 
 /******************************************************************************
  *
- * hypre_NewIJVectorPar
+ * hypre_CreateIJVectorPar
  *
  * creates ParVector if necessary, and leaves a pointer to it in the
  * hypre_IJVector local_storage
  *
  *****************************************************************************/
 int
-hypre_NewIJVectorPar(hypre_IJVector *vector, const int *partitioning)
+hypre_CreateIJVectorPar(hypre_IJVector *vector, const int *partitioning)
 {
    MPI_Comm comm = hypre_IJVectorContext(vector);
    int global_n = hypre_IJVectorN(vector); 
@@ -45,13 +45,13 @@ hypre_NewIJVectorPar(hypre_IJVector *vector, const int *partitioning)
 
 /******************************************************************************
  *
- * hypre_FreeIJVectorPar
+ * hypre_DestroyIJVectorPar
  *
  * frees ParVector local storage of an IJVectorPar 
  *
  *****************************************************************************/
 int
-hypre_FreeIJVectorPar(hypre_IJVector *vector)
+hypre_DestroyIJVectorPar(hypre_IJVector *vector)
 {
    return hypre_DestroyParVector(hypre_IJVectorLocalStorage(vector));
 }

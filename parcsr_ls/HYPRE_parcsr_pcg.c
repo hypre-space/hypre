@@ -15,25 +15,25 @@
 #include "headers.h"
 
 /*--------------------------------------------------------------------------
- * HYPRE_ParCSRPCGInitialize
+ * HYPRE_ParCSRPCGCreate
  *--------------------------------------------------------------------------*/
 
 int
-HYPRE_ParCSRPCGInitialize( MPI_Comm comm, HYPRE_Solver *solver )
+HYPRE_ParCSRPCGCreate( MPI_Comm comm, HYPRE_Solver *solver )
 {
-   *solver = ( (HYPRE_Solver) hypre_PCGInitialize( ) );
+   *solver = ( (HYPRE_Solver) hypre_PCGCreate( ) );
 
    return 0;
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_ParCSRPCGFinalize
+ * HYPRE_ParCSRPCGDestroy
  *--------------------------------------------------------------------------*/
 
 int 
-HYPRE_ParCSRPCGFinalize( HYPRE_Solver solver )
+HYPRE_ParCSRPCGDestroy( HYPRE_Solver solver )
 {
-   return( hypre_PCGFinalize( (void *) solver ) );
+   return( hypre_PCGDestroy( (void *) solver ) );
 }
 
 /*--------------------------------------------------------------------------

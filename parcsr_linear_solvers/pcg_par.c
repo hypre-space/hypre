@@ -41,11 +41,11 @@ hypre_PCGFree( char *ptr )
 }
 
 /*--------------------------------------------------------------------------
- * hypre_PCGNewVector
+ * hypre_PCGCreateVector
  *--------------------------------------------------------------------------*/
 
 void *
-hypre_PCGNewVector( void *vvector )
+hypre_PCGCreateVector( void *vvector )
 {
    hypre_ParVector *vector = vvector;
    hypre_ParVector *new_vector;
@@ -59,11 +59,11 @@ hypre_PCGNewVector( void *vvector )
 }
 
 /*--------------------------------------------------------------------------
- * hypre_PCGNewVectorArray
+ * hypre_PCGCreateVectorArray
  *--------------------------------------------------------------------------*/
 
 void *
-hypre_PCGNewVectorArray(int n, void *vvector )
+hypre_PCGCreateVectorArray(int n, void *vvector )
 {
    hypre_ParVector *vector = vvector;
    hypre_ParVector **new_vector;
@@ -82,11 +82,11 @@ hypre_PCGNewVectorArray(int n, void *vvector )
 }
 
 /*--------------------------------------------------------------------------
- * hypre_PCGFreeVector
+ * hypre_PCGDestroyVector
  *--------------------------------------------------------------------------*/
 
 int
-hypre_PCGFreeVector( void *vvector )
+hypre_PCGDestroyVector( void *vvector )
 {
    hypre_ParVector *vector = vvector;
 
@@ -94,12 +94,12 @@ hypre_PCGFreeVector( void *vvector )
 }
 
 /*--------------------------------------------------------------------------
- * hypre_PCGMatvecInitialize
+ * hypre_PCGMatvecCreate
  *--------------------------------------------------------------------------*/
 
 void *
-hypre_PCGMatvecInitialize( void   *A,
-                           void   *x )
+hypre_PCGMatvecCreate( void   *A,
+                       void   *x )
 {
    void *matvec_data;
 
@@ -147,11 +147,11 @@ hypre_PCGMatvecT(void   *matvec_data,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_PCGMatvecFinalize
+ * hypre_PCGMatvecDestroy
  *--------------------------------------------------------------------------*/
 
 int
-hypre_PCGMatvecFinalize( void *matvec_data )
+hypre_PCGMatvecDestroy( void *matvec_data )
 {
    return 0;
 }

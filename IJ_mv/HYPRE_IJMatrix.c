@@ -17,7 +17,7 @@
 #include "../HYPRE.h"
 
 /*--------------------------------------------------------------------------
- * HYPRE_NewIJMatrix
+ * HYPRE_CreateIJMatrix
  *--------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------- */
@@ -38,7 +38,7 @@ participate in any collective operations.
 */
 /*---------------------------------------------------------------------- */
 
-int HYPRE_NewIJMatrix( MPI_Comm comm, HYPRE_IJMatrix *in_matrix_ptr, 
+int HYPRE_CreateIJMatrix( MPI_Comm comm, HYPRE_IJMatrix *in_matrix_ptr, 
           int global_m, int global_n)
 
 {
@@ -63,11 +63,11 @@ int HYPRE_NewIJMatrix( MPI_Comm comm, HYPRE_IJMatrix *in_matrix_ptr,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_FreeIJMatrix
+ * HYPRE_DestroyIJMatrix
  *--------------------------------------------------------------------------*/
 
 int 
-HYPRE_FreeIJMatrix( HYPRE_IJMatrix IJmatrix )
+HYPRE_DestroyIJMatrix( HYPRE_IJMatrix IJmatrix )
 {
    int ierr = 0;
    hypre_IJMatrix *matrix = (hypre_IJMatrix *) IJmatrix;
@@ -80,12 +80,12 @@ HYPRE_FreeIJMatrix( HYPRE_IJMatrix IJmatrix )
       {
 	/*
          if ( hypre_IJMatrixLocalStorageType(matrix) == HYPRE_PETSC )
-            ierr = hypre_FreeIJMatrixPETSc( matrix );
+            ierr = hypre_DestroyIJMatrixPETSc( matrix );
          else if ( hypre_IJMatrixLocalStorageType(matrix) == HYPRE_ISIS )
-            ierr = hypre_FreeIJMatrixISIS( matrix );
+            ierr = hypre_DestroyIJMatrixISIS( matrix );
          else */ 
 	 if ( hypre_IJMatrixLocalStorageType(matrix) == HYPRE_PARCSR )
-            ierr = hypre_FreeIJMatrixParCSR( matrix );
+            ierr = hypre_DestroyIJMatrixParCSR( matrix );
          else
             ierr = -1;
 

@@ -34,28 +34,28 @@
 
 
 /*--------------------------------------------------------------------------
- * HYPRE_ParCSRPilutInitialize
+ * HYPRE_ParCSRPilutCreate
  *--------------------------------------------------------------------------*/
 
 int 
-HYPRE_ParCSRPilutInitialize( MPI_Comm comm, HYPRE_Solver *solver )
+HYPRE_ParCSRPilutCreate( MPI_Comm comm, HYPRE_Solver *solver )
 {
    int ierr = 0;
    
    *solver = (HYPRE_Solver) HYPRE_NewDistributedMatrixPilutSolver( comm, NULL);
 
-   ierr = HYPRE_DistributedMatrixPilutSolverInitialize( 
+   ierr = HYPRE_DistributedMatrixPilutSolverCreate( 
       (HYPRE_DistributedMatrixPilutSolver) solver );
 
    return( ierr );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_ParCSRPilutFinalize
+ * HYPRE_ParCSRPilutDestroy
  *--------------------------------------------------------------------------*/
 
 int 
-HYPRE_ParCSRPilutFinalize( HYPRE_Solver solver )
+HYPRE_ParCSRPilutDestroy( HYPRE_Solver solver )
 {
    int ierr = 0;
 

@@ -46,7 +46,7 @@ hypre_SetIJMatrixLocalSizeParCSR(hypre_IJMatrix *matrix,
 
 /******************************************************************************
  *
- * hypre_NewIJMatrixParCSR
+ * hypre_CreateIJMatrixParCSR
  *
  * creates AuxParCSRMatrix and ParCSRMatrix if necessary,
  * generates arrays row_starts and col_starts using either previously
@@ -55,7 +55,7 @@ hypre_SetIJMatrixLocalSizeParCSR(hypre_IJMatrix *matrix,
  *
  *****************************************************************************/
 int
-hypre_NewIJMatrixParCSR(hypre_IJMatrix *matrix)
+hypre_CreateIJMatrixParCSR(hypre_IJMatrix *matrix)
 {
    MPI_Comm comm = hypre_IJMatrixContext(matrix);
    int global_m = hypre_IJMatrixM(matrix); 
@@ -186,7 +186,7 @@ hypre_SetIJMatrixDiagRowSizesParCSR(hypre_IJMatrix *matrix,
    hypre_CSRMatrix *diag;
    int *diag_i;
    if (!hypre_IJMatrixLocalStorage(matrix))
-      ierr = hypre_NewIJMatrixParCSR(matrix);
+      ierr = hypre_CreateIJMatrixParCSR(matrix);
    if (ierr) return ierr;
    par_matrix = hypre_IJMatrixLocalStorage(matrix);
    
@@ -222,7 +222,7 @@ hypre_SetIJMatrixOffDiagRowSizesParCSR(hypre_IJMatrix *matrix,
    int *offd_i;
    par_matrix = hypre_IJMatrixLocalStorage(matrix);
    if (!par_matrix)
-      ierr = hypre_NewIJMatrixParCSR(matrix);
+      ierr = hypre_CreateIJMatrixParCSR(matrix);
    if (ierr) return ierr;
    
    hypre_AuxParCSRMatrixNeedAux(aux_matrix) = 0;
@@ -266,7 +266,7 @@ hypre_InitializeIJMatrixParCSR(hypre_IJMatrix *matrix)
    }
    else
    {
-      ierr = hypre_NewIJMatrixParCSR(matrix);
+      ierr = hypre_CreateIJMatrixParCSR(matrix);
       par_matrix = hypre_IJMatrixLocalStorage(matrix);
    }
    ierr += hypre_InitializeParCSRMatrix(par_matrix);
@@ -929,13 +929,13 @@ hypre_ApplyIJMatrixParCSR(hypre_IJMatrix  *matrix,
 
 /******************************************************************************
  *
- * hypre_FreeIJMatrixParCSR
+ * hypre_DestroyIJMatrixParCSR
  *
  * frees an IJMatrix
  *
  *****************************************************************************/
 int
-hypre_FreeIJMatrixParCSR(hypre_IJMatrix *matrix)
+hypre_DestroyIJMatrixParCSR(hypre_IJMatrix *matrix)
 {
    return hypre_DestroyParCSRMatrix(hypre_IJMatrixLocalStorage(matrix));
 }

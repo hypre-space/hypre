@@ -49,11 +49,11 @@ typedef struct
 } hypre_CGNRData;
 
 /*--------------------------------------------------------------------------
- * hypre_CGNRInitialize
+ * hypre_CGNRCreate
  *--------------------------------------------------------------------------*/
 
 void *
-hypre_CGNRInitialize( )
+hypre_CGNRCreate( )
 {
    hypre_CGNRData *cgnr_data;
 
@@ -74,11 +74,11 @@ hypre_CGNRInitialize( )
 }
 
 /*--------------------------------------------------------------------------
- * hypre_CGNRFinalize
+ * hypre_CGNRDestroy
  *--------------------------------------------------------------------------*/
 
 int
-hypre_CGNRFinalize( void *cgnr_vdata )
+hypre_CGNRDestroy( void *cgnr_vdata )
 {
    hypre_CGNRData *cgnr_data = cgnr_vdata;
    int ierr = 0;
@@ -90,12 +90,12 @@ hypre_CGNRFinalize( void *cgnr_vdata )
          hypre_TFree(cgnr_data -> norms);
       }
 
-      hypre_PCGMatvecFinalize(cgnr_data -> matvec_data);
+      hypre_PCGMatvecDestroy(cgnr_data -> matvec_data);
 
-      hypre_PCGFreeVector(cgnr_data -> p);
-      hypre_PCGFreeVector(cgnr_data -> q);
-      hypre_PCGFreeVector(cgnr_data -> r);
-      hypre_PCGFreeVector(cgnr_data -> t);
+      hypre_PCGDestroyVector(cgnr_data -> p);
+      hypre_PCGDestroyVector(cgnr_data -> q);
+      hypre_PCGDestroyVector(cgnr_data -> r);
+      hypre_PCGDestroyVector(cgnr_data -> t);
 
       hypre_TFree(cgnr_data);
    }
@@ -122,17 +122,17 @@ hypre_CGNRSetup(void *cgnr_vdata,
    (cgnr_data -> A) = A;
 
    /*--------------------------------------------------
-    * The arguments for NewVector are important to
+    * The arguments for CreateVector are important to
     * maintain consistency between the setup and
     * compute phases of matvec and the preconditioner.
     *--------------------------------------------------*/
 
-   (cgnr_data -> p) = hypre_PCGNewVector(x);
-   (cgnr_data -> q) = hypre_PCGNewVector(x);
-   (cgnr_data -> r) = hypre_PCGNewVector(b);
-   (cgnr_data -> t) = hypre_PCGNewVector(b);
+   (cgnr_data -> p) = hypre_PCGCreateVector(x);
+   (cgnr_data -> q) = hypre_PCGCreateVector(x);
+   (cgnr_data -> r) = hypre_PCGCreateVector(b);
+   (cgnr_data -> t) = hypre_PCGCreateVector(b);
 
-   (cgnr_data -> matvec_data) = hypre_PCGMatvecInitialize(A, x);
+   (cgnr_data -> matvec_data) = hypre_PCGMatvecCreate(A, x);
 
    precond_setup(precond_data, A, b, x);
 

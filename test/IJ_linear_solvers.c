@@ -518,7 +518,7 @@ main( int   argc,
    ierr = HYPRE_GetCommParCSR( parcsr_A, &comm );
    ierr += HYPRE_GetDimsParCSR( parcsr_A, &M, &N );
 
-   ierr += HYPRE_NewIJMatrix( comm, &ij_matrix, M, N );
+   ierr += HYPRE_CreateIJMatrix( comm, &ij_matrix, M, N );
 
    ierr += HYPRE_SetIJMatrixLocalStorageType(
                  ij_matrix, HYPRE_PARCSR );
@@ -653,13 +653,13 @@ main( int   argc,
    {
       /* BuildRHSParFromFile(argc, argv, build_rhs_arg_index, &b); */
       printf("Rhs from file not yet implemented.  Defaults to b=0\n");
-      HYPRE_NewIJVector(MPI_COMM_WORLD, &ij_b, global_n);
+      HYPRE_CreateIJVector(MPI_COMM_WORLD, &ij_b, global_n);
       HYPRE_SetIJVectorLocalStorageType(ij_b,ij_vector_storage_type );
       HYPRE_SetIJVectorPartitioning(ij_b, (const int *) part_b);
       HYPRE_InitializeIJVector(ij_b);
       HYPRE_ZeroIJVectorLocalComponents(ij_b); 
 
-      HYPRE_NewIJVector(MPI_COMM_WORLD, &ij_x, global_n);
+      HYPRE_CreateIJVector(MPI_COMM_WORLD, &ij_x, global_n);
       HYPRE_SetIJVectorLocalStorageType(ij_x,ij_vector_storage_type );
       HYPRE_SetIJVectorPartitioning(ij_x, (const int *) part_x);
       HYPRE_InitializeIJVector(ij_x);
@@ -688,7 +688,7 @@ main( int   argc,
    {
       BuildRhsParFromOneFile(argc, argv, build_rhs_arg_index, A, &b);
 
-      HYPRE_NewIJVector(MPI_COMM_WORLD, &ij_x, global_n);
+      HYPRE_CreateIJVector(MPI_COMM_WORLD, &ij_x, global_n);
       HYPRE_SetIJVectorLocalStorageType(ij_x,ij_vector_storage_type );
       HYPRE_SetIJVectorPartitioning(ij_x, (const int *) part_x);
       HYPRE_InitializeIJVector(ij_x);
@@ -706,7 +706,7 @@ main( int   argc,
       norm = 1.0/norm;
       ierr = HYPRE_ScaleParVector(norm, b);      
 
-      HYPRE_NewIJVector(MPI_COMM_WORLD, &ij_x, global_n);
+      HYPRE_CreateIJVector(MPI_COMM_WORLD, &ij_x, global_n);
       HYPRE_SetIJVectorLocalStorageType(ij_x,ij_vector_storage_type );
       HYPRE_SetIJVectorPartitioning(ij_x, (const int *) part_x);
       HYPRE_InitializeIJVector(ij_x);
@@ -728,14 +728,14 @@ main( int   argc,
    }
    else /* if ( build_rhs_type == 0 ) */
    {
-      HYPRE_NewIJVector(MPI_COMM_WORLD, &ij_b, global_n);
+      HYPRE_CreateIJVector(MPI_COMM_WORLD, &ij_b, global_n);
       HYPRE_SetIJVectorLocalStorageType(ij_b,ij_vector_storage_type );
       HYPRE_SetIJVectorPartitioning(ij_b, (const int *) part_b);
       HYPRE_InitializeIJVector(ij_b);
       HYPRE_ZeroIJVectorLocalComponents(ij_b); 
       b = (HYPRE_ParVector) HYPRE_GetIJVectorLocalStorage( ij_b );
 
-      HYPRE_NewIJVector(MPI_COMM_WORLD, &ij_x, global_n);
+      HYPRE_CreateIJVector(MPI_COMM_WORLD, &ij_x, global_n);
       HYPRE_SetIJVectorLocalStorageType(ij_x,ij_vector_storage_type );
       HYPRE_SetIJVectorPartitioning(ij_x, (const int *) part_x);
       HYPRE_InitializeIJVector(ij_x);
@@ -751,7 +751,7 @@ main( int   argc,
       time_index = hypre_InitializeTiming("BoomerAMG Setup");
       hypre_BeginTiming(time_index);
 
-      amg_solver = HYPRE_ParAMGInitialize(); 
+      amg_solver = HYPRE_ParAMGCreate(); 
       HYPRE_ParAMGSetCoarsenType(amg_solver, (hybrid*coarsen_type));
       HYPRE_ParAMGSetMeasureType(amg_solver, measure_type);
       HYPRE_ParAMGSetTol(amg_solver, tol);
@@ -784,7 +784,7 @@ main( int   argc,
       hypre_FinalizeTiming(time_index);
       hypre_ClearTiming();
 
-      HYPRE_ParAMGFinalize(amg_solver);
+      HYPRE_ParAMGDestroy(amg_solver);
    }
 
    /*-----------------------------------------------------------
@@ -796,7 +796,7 @@ main( int   argc,
       time_index = hypre_InitializeTiming("PCG Setup");
       hypre_BeginTiming(time_index);
  
-      HYPRE_ParCSRPCGInitialize(MPI_COMM_WORLD, &pcg_solver);
+      HYPRE_ParCSRPCGCreate(MPI_COMM_WORLD, &pcg_solver);
       HYPRE_ParCSRPCGSetMaxIter(pcg_solver, 500);
       HYPRE_ParCSRPCGSetTol(pcg_solver, tol);
       HYPRE_ParCSRPCGSetTwoNorm(pcg_solver, 1);
@@ -806,7 +806,7 @@ main( int   argc,
       if (solver_id == 1)
       {
          /* use BoomerAMG as preconditioner */
-         pcg_precond = HYPRE_ParAMGInitialize(); 
+         pcg_precond = HYPRE_ParAMGCreate(); 
          HYPRE_ParAMGSetCoarsenType(pcg_precond, (hybrid*coarsen_type));
          HYPRE_ParAMGSetMeasureType(pcg_precond, measure_type);
          HYPRE_ParAMGSetStrongThreshold(pcg_precond, strong_threshold);
@@ -854,11 +854,11 @@ main( int   argc,
  
       HYPRE_ParCSRPCGGetNumIterations(pcg_solver, &num_iterations);
       HYPRE_ParCSRPCGGetFinalRelativeResidualNorm(pcg_solver, &final_res_norm);
-      HYPRE_ParCSRPCGFinalize(pcg_solver);
+      HYPRE_ParCSRPCGDestroy(pcg_solver);
  
       if (solver_id == 1)
       {
-         HYPRE_ParAMGFinalize(pcg_precond);
+         HYPRE_ParAMGDestroy(pcg_precond);
       }
       if (myid == 0)
       {
@@ -879,7 +879,7 @@ main( int   argc,
       time_index = hypre_InitializeTiming("GMRES Setup");
       hypre_BeginTiming(time_index);
  
-      HYPRE_ParCSRGMRESInitialize(MPI_COMM_WORLD, &pcg_solver);
+      HYPRE_ParCSRGMRESCreate(MPI_COMM_WORLD, &pcg_solver);
       HYPRE_ParCSRGMRESSetKDim(pcg_solver, k_dim);
       HYPRE_ParCSRGMRESSetMaxIter(pcg_solver, 100);
       HYPRE_ParCSRGMRESSetTol(pcg_solver, tol);
@@ -889,7 +889,7 @@ main( int   argc,
       {
          /* use BoomerAMG as preconditioner */
 
-         pcg_precond = HYPRE_ParAMGInitialize(); 
+         pcg_precond = HYPRE_ParAMGCreate(); 
          HYPRE_ParAMGSetCoarsenType(pcg_precond, (hybrid*coarsen_type));
          HYPRE_ParAMGSetMeasureType(pcg_precond, measure_type);
          HYPRE_ParAMGSetStrongThreshold(pcg_precond, strong_threshold);
@@ -920,9 +920,9 @@ main( int   argc,
          /* use PILUT as preconditioner */
 /*      else if (solver_id == 7)
       {
-         ierr = HYPRE_ParCSRPilutInitialize( MPI_COMM_WORLD, &pcg_precond ); 
+         ierr = HYPRE_ParCSRPilutCreate( MPI_COMM_WORLD, &pcg_precond ); 
          if (ierr) {
-	   printf("Error in ParPilutInitialize\n");
+	   printf("Error in ParPilutCreate\n");
          }
 
          HYPRE_ParCSRGMRESSetPrecond(pcg_solver,
@@ -958,16 +958,16 @@ main( int   argc,
  
       HYPRE_ParCSRGMRESGetNumIterations(pcg_solver, &num_iterations);
       HYPRE_ParCSRGMRESGetFinalRelativeResidualNorm(pcg_solver,&final_res_norm);
-      HYPRE_ParCSRGMRESFinalize(pcg_solver);
+      HYPRE_ParCSRGMRESDestroy(pcg_solver);
  
       if (solver_id == 3)
       {
-         HYPRE_ParAMGFinalize(pcg_precond);
+         HYPRE_ParAMGDestroy(pcg_precond);
       }
 
 /*      if (solver_id == 7)
       {
-         HYPRE_ParCSRPilutFinalize(pcg_precond);
+         HYPRE_ParCSRPilutDestroy(pcg_precond);
       }
 */
       if (myid == 0)
@@ -987,7 +987,7 @@ main( int   argc,
       time_index = hypre_InitializeTiming("CGNR Setup");
       hypre_BeginTiming(time_index);
  
-      HYPRE_ParCSRCGNRInitialize(MPI_COMM_WORLD, &pcg_solver);
+      HYPRE_ParCSRCGNRCreate(MPI_COMM_WORLD, &pcg_solver);
       HYPRE_ParCSRCGNRSetMaxIter(pcg_solver, 1000);
       HYPRE_ParCSRCGNRSetTol(pcg_solver, tol);
       HYPRE_ParCSRCGNRSetLogging(pcg_solver, 1);
@@ -995,7 +995,7 @@ main( int   argc,
       if (solver_id == 5)
       {
          /* use BoomerAMG as preconditioner */
-         pcg_precond = HYPRE_ParAMGInitialize(); 
+         pcg_precond = HYPRE_ParAMGCreate(); 
          HYPRE_ParAMGSetCoarsenType(pcg_precond, (hybrid*coarsen_type));
          HYPRE_ParAMGSetMeasureType(pcg_precond, measure_type);
          HYPRE_ParAMGSetStrongThreshold(pcg_precond, strong_threshold);
@@ -1045,11 +1045,11 @@ main( int   argc,
  
       HYPRE_ParCSRCGNRGetNumIterations(pcg_solver, &num_iterations);
       HYPRE_ParCSRCGNRGetFinalRelativeResidualNorm(pcg_solver,&final_res_norm);
-      HYPRE_ParCSRCGNRFinalize(pcg_solver);
+      HYPRE_ParCSRCGNRDestroy(pcg_solver);
  
       if (solver_id == 5)
       {
-         HYPRE_ParAMGFinalize(pcg_precond);
+         HYPRE_ParAMGDestroy(pcg_precond);
       }
       if (myid == 0)
       {
@@ -1072,13 +1072,13 @@ main( int   argc,
     * Finalize things
     *-----------------------------------------------------------*/
 
-   HYPRE_FreeIJMatrix(ij_matrix);
+   HYPRE_DestroyIJMatrix(ij_matrix);
    if (build_rhs_type == 0 || build_rhs_type == 1)
-      HYPRE_FreeIJVector(ij_b);
+      HYPRE_DestroyIJVector(ij_b);
    else
       HYPRE_DestroyParVector(b);
    if (build_rhs_type > -1 && build_rhs_type < 4)
-      HYPRE_FreeIJVector(ij_x);
+      HYPRE_DestroyIJVector(ij_x);
    else
       HYPRE_DestroyParVector(x);
 /*

@@ -35,8 +35,8 @@ typedef struct {int opaque;} *HYPRE_IJVector;
 # define        P(s) s
 
 /* HYPRE_IJMatrix.c */
-int HYPRE_NewIJMatrix P((MPI_Comm comm , HYPRE_IJMatrix *in_matrix_ptr , int global_m , int global_n ));
-int HYPRE_FreeIJMatrix P((HYPRE_IJMatrix IJmatrix ));
+int HYPRE_CreateIJMatrix P((MPI_Comm comm , HYPRE_IJMatrix *in_matrix_ptr , int global_m , int global_n ));
+int HYPRE_DestroyIJMatrix P((HYPRE_IJMatrix IJmatrix ));
 int HYPRE_InitializeIJMatrix P((HYPRE_IJMatrix IJmatrix ));
 int HYPRE_AssembleIJMatrix P((HYPRE_IJMatrix IJmatrix ));
 int HYPRE_DistributeIJMatrix P((HYPRE_IJMatrix IJmatrix , const int *row_starts , const int *col_starts ));
@@ -56,8 +56,8 @@ int HYPRE_GetIJMatrixRowPartitioning P((HYPRE_IJMatrix IJmatrix , const int **ro
 int HYPRE_GetIJMatrixColPartitioning P((HYPRE_IJMatrix IJmatrix , const int **col_partitioning ));
 
 /* HYPRE_IJVector.c */
-int HYPRE_NewIJVector P((MPI_Comm comm, HYPRE_IJVector *in_vector_ptr , int global_n ));
-int HYPRE_FreeIJVector P((HYPRE_IJVector IJvector ));
+int HYPRE_CreateIJVector P((MPI_Comm comm, HYPRE_IJVector *in_vector_ptr , int global_n ));
+int HYPRE_DestroyIJVector P((HYPRE_IJVector IJvector ));
 int HYPRE_SetIJVectorPartitioning P((HYPRE_IJVector IJvector , const int *partitioning ));
 int HYPRE_SetIJVectorLocalPartitioning P((HYPRE_IJVector IJvector , int vec_start_this_proc, int vec_start_next_proc ));
 int HYPRE_InitializeIJVector P((HYPRE_IJVector IJvector ));

@@ -16,31 +16,31 @@
 #include "fortran.h"
 
 /*--------------------------------------------------------------------------
- * HYPRE_NewIJMatrix
+ * HYPRE_CreateIJMatrix
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_newijmatrix)( int      *comm,
+hypre_F90_IFACE(hypre_createijmatrix)( int      *comm,
                                     long int *matrix,
                                     int      *global_m,
                                     int      *global_n,
                                     int      *ierr      )
 {
-   *ierr = (int) ( HYPRE_NewIJMatrix( (MPI_Comm)         *comm,
+   *ierr = (int) ( HYPRE_CreateIJMatrix( (MPI_Comm)         *comm,
                                       (HYPRE_IJMatrix *)  matrix,
                                       (int)              *global_m,
                                       (int)              *global_n  ) );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_FreeIJMatrix
+ * HYPRE_DestroyIJMatrix
  *--------------------------------------------------------------------------*/
 
 void 
-hypre_F90_IFACE(hypre_freeijmatrix)( long int *matrix,
+hypre_F90_IFACE(hypre_destroyijmatrix)( long int *matrix,
                                      int      *ierr    )
 {
-   *ierr = (int) ( HYPRE_FreeIJMatrix( (HYPRE_IJMatrix) *matrix ) );
+   *ierr = (int) ( HYPRE_DestroyIJMatrix( (HYPRE_IJMatrix) *matrix ) );
 }
 
 /*--------------------------------------------------------------------------

@@ -15,25 +15,25 @@
 #include "headers.h"
 
 /*--------------------------------------------------------------------------
- * HYPRE_ParCSRCGNRInitialize
+ * HYPRE_ParCSRCGNRCreate
  *--------------------------------------------------------------------------*/
 
 int
-HYPRE_ParCSRCGNRInitialize( MPI_Comm comm, HYPRE_Solver *solver )
+HYPRE_ParCSRCGNRCreate( MPI_Comm comm, HYPRE_Solver *solver )
 {
-   *solver = ( (HYPRE_Solver) hypre_CGNRInitialize( ) );
+   *solver = ( (HYPRE_Solver) hypre_CGNRCreate( ) );
 
    return 0;
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_ParCSRCGNRFinalize
+ * HYPRE_ParCSRCGNRDestroy
  *--------------------------------------------------------------------------*/
 
 int 
-HYPRE_ParCSRCGNRFinalize( HYPRE_Solver solver )
+HYPRE_ParCSRCGNRDestroy( HYPRE_Solver solver )
 {
-   return( hypre_CGNRFinalize( (void *) solver ) );
+   return( hypre_CGNRDestroy( (void *) solver ) );
 }
 
 /*--------------------------------------------------------------------------

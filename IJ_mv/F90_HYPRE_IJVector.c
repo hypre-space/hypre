@@ -16,29 +16,29 @@
 #include "fortran.h"
 
 /*--------------------------------------------------------------------------
- * HYPRE_NewIJVector
+ * HYPRE_CreateIJVector
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_newijvector)( int      *comm,
+hypre_F90_IFACE(hypre_createijvector)( int      *comm,
                                     long int *vector,
                                     int      *global_n,
                                     int      *ierr      )
 {
-   *ierr = (int) ( HYPRE_NewIJVector( (MPI_Comm)         *comm,
+   *ierr = (int) ( HYPRE_CreateIJVector( (MPI_Comm)         *comm,
                                       (HYPRE_IJVector *)  vector,
                                       (int)              *global_n  ) );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_FreeIJVector
+ * HYPRE_DestroyIJVector
  *--------------------------------------------------------------------------*/
 
 void 
-hypre_F90_IFACE(hypre_freeijvector)( long int *vector,
+hypre_F90_IFACE(hypre_destroyijvector)( long int *vector,
                                      int      *ierr    )
 {
-   *ierr = (int) ( HYPRE_FreeIJVector( (HYPRE_IJVector) *vector ) );
+   *ierr = (int) ( HYPRE_DestroyIJVector( (HYPRE_IJVector) *vector ) );
 }
 
 /*--------------------------------------------------------------------------

@@ -15,23 +15,23 @@
 #include "headers.h"
 
 /*--------------------------------------------------------------------------
- * HYPRE_ParAMGInitialize
+ * HYPRE_ParAMGCreate
  *--------------------------------------------------------------------------*/
 
 HYPRE_Solver
-HYPRE_ParAMGInitialize( )
+HYPRE_ParAMGCreate( )
 {
-   return ( (HYPRE_Solver) hypre_ParAMGInitialize( ) );
+   return ( (HYPRE_Solver) hypre_ParAMGCreate( ) );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_ParAMGFinalize
+ * HYPRE_ParAMGDestroy
  *--------------------------------------------------------------------------*/
 
 int 
-HYPRE_ParAMGFinalize( HYPRE_Solver solver )
+HYPRE_ParAMGDestroy( HYPRE_Solver solver )
 {
-   return( hypre_ParAMGFinalize( (void *) solver ) );
+   return( hypre_ParAMGDestroy( (void *) solver ) );
 }
 
 /*--------------------------------------------------------------------------

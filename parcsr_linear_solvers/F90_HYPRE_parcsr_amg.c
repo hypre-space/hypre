@@ -16,28 +16,28 @@
 #include "fortran.h"
 
 /*--------------------------------------------------------------------------
- * HYPRE_ParAMGInitialize
+ * HYPRE_ParAMGCreate
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_paramginitialize)( long int *solver,
+hypre_F90_IFACE(hypre_paramgcreate)( long int *solver,
                                          int      *ierr    )
 
 {
-   *solver = (long int) ( HYPRE_ParAMGInitialize( ) );
+   *solver = (long int) ( HYPRE_ParAMGCreate( ) );
 
    *ierr = 0;
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_ParAMGFinalize
+ * HYPRE_ParAMGDestroy
  *--------------------------------------------------------------------------*/
 
 void 
-hypre_F90_IFACE(hypre_paramgfinalize)( long int *solver,
+hypre_F90_IFACE(hypre_paramgdestroy)( long int *solver,
                                        int      *ierr    )
 {
-   *ierr = (int) ( HYPRE_ParAMGFinalize( (HYPRE_Solver) *solver ) );
+   *ierr = (int) ( HYPRE_ParAMGDestroy( (HYPRE_Solver) *solver ) );
 }
 
 /*--------------------------------------------------------------------------

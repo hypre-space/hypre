@@ -47,11 +47,11 @@ typedef struct
 } hypre_GMRESData;
 
 /*--------------------------------------------------------------------------
- * hypre_GMRESInitialize
+ * hypre_GMRESCreate
  *--------------------------------------------------------------------------*/
  
 void *
-hypre_GMRESInitialize( )
+hypre_GMRESCreate( )
 {
    hypre_GMRESData *gmres_data;
  
@@ -72,11 +72,11 @@ hypre_GMRESInitialize( )
 }
 
 /*--------------------------------------------------------------------------
- * hypre_GMRESFinalize
+ * hypre_GMRESDestroy
  *--------------------------------------------------------------------------*/
  
 int
-hypre_GMRESFinalize( void *gmres_vdata )
+hypre_GMRESDestroy( void *gmres_vdata )
 {
    hypre_GMRESData *gmres_data = gmres_vdata;
    int i, ierr = 0;
@@ -88,12 +88,12 @@ hypre_GMRESFinalize( void *gmres_vdata )
          hypre_TFree(gmres_data -> norms);
       }
  
-      hypre_PCGMatvecFinalize(gmres_data -> matvec_data);
+      hypre_PCGMatvecDestroy(gmres_data -> matvec_data);
  
-      hypre_PCGFreeVector(gmres_data -> r);
+      hypre_PCGDestroyVector(gmres_data -> r);
       for (i = 0; i < (gmres_data -> k_dim); i++)
       {
-	 hypre_PCGFreeVector( (gmres_data -> p) [i]);
+	 hypre_PCGDestroyVector( (gmres_data -> p) [i]);
       }
       hypre_TFree(gmres_data -> p);
  
@@ -128,11 +128,11 @@ hypre_GMRESSetup( void *gmres_vdata,
     * compute phases of matvec and the preconditioner.
     *--------------------------------------------------*/
  
-   (gmres_data -> p) = hypre_PCGNewVectorArray(k_dim+1,x);
-   (gmres_data -> r) = hypre_PCGNewVector(b);
-   (gmres_data -> w) = hypre_PCGNewVector(b);
+   (gmres_data -> p) = hypre_PCGCreateVectorArray(k_dim+1,x);
+   (gmres_data -> r) = hypre_PCGCreateVector(b);
+   (gmres_data -> w) = hypre_PCGCreateVector(b);
  
-   (gmres_data -> matvec_data) = hypre_PCGMatvecInitialize(A, x);
+   (gmres_data -> matvec_data) = hypre_PCGMatvecCreate(A, x);
  
    precond_setup(precond_data, A, b, x);
  
