@@ -5,7 +5,12 @@
 #include "utilities.h"
 #include "HYPRE_struct_ls.h"
 #include "krylov.h"
- 
+
+#define HYPRE_MFLOPS 0
+#if HYPRE_MFLOPS
+#include "struct_mv.h"
+#endif
+
 #ifdef HYPRE_DEBUG
 #include <cegdb.h>
 #endif
@@ -1135,6 +1140,41 @@ main( int   argc,
       printf("Final Relative Residual Norm = %e\n", final_res_norm);
       printf("\n");
    }
+
+   /*-----------------------------------------------------------
+    * Compute MFLOPs for Matvec
+    *-----------------------------------------------------------*/
+
+#if HYPRE_MFLOPS
+   {
+      void *matvec_data;
+      int   i, imax, N;
+
+      /* compute imax */
+      N = (P*nx)*(Q*ny)*(R*nz);
+      imax = (5*1000000) / N;
+
+      matvec_data = hypre_StructMatvecCreate();
+      hypre_StructMatvecSetup(matvec_data, A, x);
+
+      time_index = hypre_InitializeTiming("Matvec");
+      hypre_BeginTiming(time_index);
+
+      for (i = 0; i < imax; i++)
+      {
+         hypre_StructMatvecCompute(matvec_data, 1.0, A, x, 1.0, b);
+      }
+      /* this counts mult-adds */
+      hypre_IncFLOPCount(7*N*imax);
+
+      hypre_EndTiming(time_index);
+      hypre_PrintTiming("Matvec time", MPI_COMM_WORLD);
+      hypre_FinalizeTiming(time_index);
+      hypre_ClearTiming();
+
+      hypre_StructMatvecDestroy(matvec_data);
+   }
+#endif
 
    /*-----------------------------------------------------------
     * Finalize things
