@@ -556,6 +556,14 @@ hypre_PCGSolve( void *pcg_vdata,
       if (cf_tol > 0.0)
       {
          cf_ave_0 = cf_ave_1;
+         if ( i_prod_0<1.0e-292 ) {
+            /* i_prod_0 is zero, or (almost) subnormal, yet i_prod wasn't small
+               enough to pass the convergence test.  Therefore initial guess was good,
+               and we're just calculating garbage - time to bail out before the
+               next step, which will be a divide by zero (or close to it). */
+            ierr = 1;
+            break;
+         }
 	 cf_ave_1 = pow( i_prod / i_prod_0, 1.0/(2.0*i)); 
 
          weight   = fabs(cf_ave_1 - cf_ave_0);
