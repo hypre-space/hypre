@@ -220,7 +220,7 @@ apply_error_filters () {
         do process_filter $ErrorFile "${ii}"
         done
       ;;
-      tckk*|tc2k*)
+      tckk*|tc2k*|gps*)
         for ii in \
           '^cc:\ Info:\ '\
           'WARNING:\ \ guidef77\ has\ implied\ '
@@ -553,14 +553,17 @@ if [ ${BuildOpt} -ne $Skip ] ; then
   echo "Autotest starting configure and make of $MessageStr"
   if [ ${BuildOpt} -eq $Build -o ${BuildOpt} -eq $Run ] ; then
     cd $StdBuildDir
+    if [ "$MessageStr" != "insure" ]
+    then			# don't want to delete previous build
+      if [ -f Makefile ]
+      then
+        $MAKE -i distclean	# assumed working with --enable-debug build
+      fi
+    fi
+    [ -f config.cache ] && rm config.cache
     ./configure "$ConfigOption" 1> ${Hdr}.${MessageStr}.configure.log \
 	2> ${Hdr}.${MessageStr}.configure.err
     echo "$HYPRE_CONFIGURE_EMAIL" > ${Hdr}.${MessageStr}.configure.err.email
-
-    if [ "$MessageStr" != "insure" ]
-    then			# don't want to delete previous build
-      $MAKE veryclean		# assumed working with --enable-debug build
-    fi
 
     if [ $IJOpt -ne $Skip ] ; then
       makeit "IJ" $MessageStr "$HYPRE_IJ_EMAIL"
