@@ -82,7 +82,7 @@ HYPRE_FreeStructGridPush(
    int i;
    int  returnvalue;
 
-   pushargs.grid = (HYPRE_StructGridArray *)&grid;
+   pushargs.grid = (HYPRE_StructGridArray *)grid;
    for (i = 0; i < hypre_NumThreads; i++)
       hypre_work_put( HYPRE_FreeStructGridVoidPtr, (void *)&pushargs );
 
@@ -129,7 +129,7 @@ HYPRE_SetStructGridExtentsPush(
    int i;
    int  returnvalue;
 
-   pushargs.grid = (HYPRE_StructGridArray *)&grid;
+   pushargs.grid = (HYPRE_StructGridArray *)grid;
    pushargs.ilower = ilower;
    pushargs.iupper = iupper;
    for (i = 0; i < hypre_NumThreads; i++)
@@ -172,7 +172,7 @@ HYPRE_AssembleStructGridPush(
    int i;
    int  returnvalue;
 
-   pushargs.grid = (HYPRE_StructGridArray *)&grid;
+   pushargs.grid = (HYPRE_StructGridArray *)grid;
    for (i = 0; i < hypre_NumThreads; i++)
       hypre_work_put( HYPRE_AssembleStructGridVoidPtr, (void *)&pushargs );
 
@@ -223,8 +223,8 @@ HYPRE_NewStructMatrixPush(
    int  returnvalue;
 
    pushargs.comm = comm;
-   pushargs.grid = (HYPRE_StructGridArray *)&grid;
-   pushargs.stencil = (HYPRE_StructStencilArray *)&stencil;
+   pushargs.grid = (HYPRE_StructGridArray *)grid;
+   pushargs.stencil = (HYPRE_StructStencilArray *)stencil;
    pushargs.matrix = (HYPRE_StructMatrixArray *)matrix;
    for (i = 0; i < hypre_NumThreads; i++)
       hypre_work_put( HYPRE_NewStructMatrixVoidPtr, (void *)&pushargs );
@@ -266,7 +266,7 @@ HYPRE_FreeStructMatrixPush(
    int i;
    int  returnvalue;
 
-   pushargs.matrix = (HYPRE_StructMatrixArray *)&matrix;
+   pushargs.matrix = (HYPRE_StructMatrixArray *)matrix;
    for (i = 0; i < hypre_NumThreads; i++)
       hypre_work_put( HYPRE_FreeStructMatrixVoidPtr, (void *)&pushargs );
 
@@ -307,7 +307,7 @@ HYPRE_InitializeStructMatrixPush(
    int i;
    int  returnvalue;
 
-   pushargs.matrix = (HYPRE_StructMatrixArray *)&matrix;
+   pushargs.matrix = (HYPRE_StructMatrixArray *)matrix;
    for (i = 0; i < hypre_NumThreads; i++)
       hypre_work_put( HYPRE_InitializeStructMatrixVoidPtr, (void *)&pushargs );
 
@@ -360,7 +360,7 @@ HYPRE_SetStructMatrixValuesPush(
    int i;
    int  returnvalue;
 
-   pushargs.matrix = (HYPRE_StructMatrixArray *)&matrix;
+   pushargs.matrix = (HYPRE_StructMatrixArray *)matrix;
    pushargs.grid_index = grid_index;
    pushargs.num_stencil_indices = num_stencil_indices;
    pushargs.stencil_indices = stencil_indices;
@@ -420,7 +420,7 @@ HYPRE_SetStructMatrixBoxValuesPush(
    int i;
    int  returnvalue;
 
-   pushargs.matrix = (HYPRE_StructMatrixArray *)&matrix;
+   pushargs.matrix = (HYPRE_StructMatrixArray *)matrix;
    pushargs.ilower = ilower;
    pushargs.iupper = iupper;
    pushargs.num_stencil_indices = num_stencil_indices;
@@ -466,7 +466,7 @@ HYPRE_AssembleStructMatrixPush(
    int i;
    int  returnvalue;
 
-   pushargs.matrix = (HYPRE_StructMatrixArray *)&matrix;
+   pushargs.matrix = (HYPRE_StructMatrixArray *)matrix;
    for (i = 0; i < hypre_NumThreads; i++)
       hypre_work_put( HYPRE_AssembleStructMatrixVoidPtr, (void *)&pushargs );
 
@@ -510,7 +510,7 @@ HYPRE_SetStructMatrixNumGhostPush(
    int i;
    int  returnvalue;
 
-   pushargs.matrix = (HYPRE_StructMatrixArray *)&matrix;
+   pushargs.matrix = (HYPRE_StructMatrixArray *)matrix;
    pushargs.num_ghost = num_ghost;
    for (i = 0; i < hypre_NumThreads; i++)
       hypre_work_put( HYPRE_SetStructMatrixNumGhostVoidPtr, (void *)&pushargs );
@@ -555,7 +555,7 @@ HYPRE_StructMatrixGridPush(
    int i;
    int  returnvalue;
 
-   pushargs.matrix = (HYPRE_StructMatrixArray *)&matrix;
+   pushargs.matrix = (HYPRE_StructMatrixArray *)matrix;
    pushargs.grid = (HYPRE_StructGridArray *)grid;
    for (i = 0; i < hypre_NumThreads; i++)
       hypre_work_put( HYPRE_StructMatrixGridVoidPtr, (void *)&pushargs );
@@ -600,7 +600,7 @@ HYPRE_SetStructMatrixSymmetricPush(
    int i;
    int  returnvalue;
 
-   pushargs.matrix = (HYPRE_StructMatrixArray *)&matrix;
+   pushargs.matrix = (HYPRE_StructMatrixArray *)matrix;
    pushargs.symmetric = symmetric;
    for (i = 0; i < hypre_NumThreads; i++)
       hypre_work_put( HYPRE_SetStructMatrixSymmetricVoidPtr, (void *)&pushargs );
@@ -649,7 +649,7 @@ HYPRE_PrintStructMatrixPush(
    int  returnvalue;
 
    pushargs.filename = filename;
-   pushargs.matrix = (HYPRE_StructMatrixArray *)&matrix;
+   pushargs.matrix = (HYPRE_StructMatrixArray *)matrix;
    pushargs.all = all;
    for (i = 0; i < hypre_NumThreads; i++)
       hypre_work_put( HYPRE_PrintStructMatrixVoidPtr, (void *)&pushargs );
@@ -746,7 +746,7 @@ HYPRE_SetStructStencilElementPush(
    int i;
    int  returnvalue;
 
-   pushargs.stencil = (HYPRE_StructStencilArray *)&stencil;
+   pushargs.stencil = (HYPRE_StructStencilArray *)stencil;
    pushargs.element_index = element_index;
    pushargs.offset = offset;
    for (i = 0; i < hypre_NumThreads; i++)
@@ -789,7 +789,7 @@ HYPRE_FreeStructStencilPush(
    int i;
    int  returnvalue;
 
-   pushargs.stencil = (HYPRE_StructStencilArray *)&stencil;
+   pushargs.stencil = (HYPRE_StructStencilArray *)stencil;
    for (i = 0; i < hypre_NumThreads; i++)
       hypre_work_put( HYPRE_FreeStructStencilVoidPtr, (void *)&pushargs );
 
@@ -840,8 +840,8 @@ HYPRE_NewStructVectorPush(
    int  returnvalue;
 
    pushargs.comm = comm;
-   pushargs.grid = (HYPRE_StructGridArray *)&grid;
-   pushargs.stencil = (HYPRE_StructStencilArray *)&stencil;
+   pushargs.grid = (HYPRE_StructGridArray *)grid;
+   pushargs.stencil = (HYPRE_StructStencilArray *)stencil;
    pushargs.vector = (HYPRE_StructVectorArray *)vector;
    for (i = 0; i < hypre_NumThreads; i++)
       hypre_work_put( HYPRE_NewStructVectorVoidPtr, (void *)&pushargs );
@@ -883,7 +883,7 @@ HYPRE_FreeStructVectorPush(
    int i;
    int  returnvalue;
 
-   pushargs.struct_vector = (HYPRE_StructVectorArray *)&struct_vector;
+   pushargs.struct_vector = (HYPRE_StructVectorArray *)struct_vector;
    for (i = 0; i < hypre_NumThreads; i++)
       hypre_work_put( HYPRE_FreeStructVectorVoidPtr, (void *)&pushargs );
 
@@ -924,7 +924,7 @@ HYPRE_InitializeStructVectorPush(
    int i;
    int  returnvalue;
 
-   pushargs.vector = (HYPRE_StructVectorArray *)&vector;
+   pushargs.vector = (HYPRE_StructVectorArray *)vector;
    for (i = 0; i < hypre_NumThreads; i++)
       hypre_work_put( HYPRE_InitializeStructVectorVoidPtr, (void *)&pushargs );
 
@@ -971,7 +971,7 @@ HYPRE_SetStructVectorValuesPush(
    int i;
    int  returnvalue;
 
-   pushargs.vector = (HYPRE_StructVectorArray *)&vector;
+   pushargs.vector = (HYPRE_StructVectorArray *)vector;
    pushargs.grid_index = grid_index;
    pushargs.values = values;
    for (i = 0; i < hypre_NumThreads; i++)
@@ -1020,7 +1020,7 @@ HYPRE_GetStructVectorValuesPush(
    int i;
    int  returnvalue;
 
-   pushargs.vector = (HYPRE_StructVectorArray *)&vector;
+   pushargs.vector = (HYPRE_StructVectorArray *)vector;
    pushargs.grid_index = grid_index;
    pushargs.values_ptr = values_ptr;
    for (i = 0; i < hypre_NumThreads; i++)
@@ -1072,7 +1072,7 @@ HYPRE_SetStructVectorBoxValuesPush(
    int i;
    int  returnvalue;
 
-   pushargs.vector = (HYPRE_StructVectorArray *)&vector;
+   pushargs.vector = (HYPRE_StructVectorArray *)vector;
    pushargs.ilower = ilower;
    pushargs.iupper = iupper;
    pushargs.values = values;
@@ -1125,7 +1125,7 @@ HYPRE_GetStructVectorBoxValuesPush(
    int i;
    int  returnvalue;
 
-   pushargs.vector = (HYPRE_StructVectorArray *)&vector;
+   pushargs.vector = (HYPRE_StructVectorArray *)vector;
    pushargs.ilower = ilower;
    pushargs.iupper = iupper;
    pushargs.values_ptr = values_ptr;
@@ -1169,7 +1169,7 @@ HYPRE_AssembleStructVectorPush(
    int i;
    int  returnvalue;
 
-   pushargs.vector = (HYPRE_StructVectorArray *)&vector;
+   pushargs.vector = (HYPRE_StructVectorArray *)vector;
    for (i = 0; i < hypre_NumThreads; i++)
       hypre_work_put( HYPRE_AssembleStructVectorVoidPtr, (void *)&pushargs );
 
@@ -1217,7 +1217,7 @@ HYPRE_PrintStructVectorPush(
    int  returnvalue;
 
    pushargs.filename = filename;
-   pushargs.vector = (HYPRE_StructVectorArray *)&vector;
+   pushargs.vector = (HYPRE_StructVectorArray *)vector;
    pushargs.all = all;
    for (i = 0; i < hypre_NumThreads; i++)
       hypre_work_put( HYPRE_PrintStructVectorVoidPtr, (void *)&pushargs );
@@ -1262,7 +1262,7 @@ HYPRE_SetStructVectorNumGhostPush(
    int i;
    int  returnvalue;
 
-   pushargs.vector = (HYPRE_StructVectorArray *)&vector;
+   pushargs.vector = (HYPRE_StructVectorArray *)vector;
    pushargs.num_ghost = num_ghost;
    for (i = 0; i < hypre_NumThreads; i++)
       hypre_work_put( HYPRE_SetStructVectorNumGhostVoidPtr, (void *)&pushargs );
@@ -1307,7 +1307,7 @@ HYPRE_SetStructVectorConstantValuesPush(
    int i;
    int  returnvalue;
 
-   pushargs.vector = (HYPRE_StructVectorArray *)&vector;
+   pushargs.vector = (HYPRE_StructVectorArray *)vector;
    pushargs.values = values;
    for (i = 0; i < hypre_NumThreads; i++)
       hypre_work_put( HYPRE_SetStructVectorConstantValuesVoidPtr, (void *)&pushargs );
@@ -1355,8 +1355,8 @@ HYPRE_GetMigrateStructVectorCommPkgPush(
    int i;
    int  returnvalue;
 
-   pushargs.from_vector = (HYPRE_StructVectorArray *)&from_vector;
-   pushargs.to_vector = (HYPRE_StructVectorArray *)&to_vector;
+   pushargs.from_vector = (HYPRE_StructVectorArray *)from_vector;
+   pushargs.to_vector = (HYPRE_StructVectorArray *)to_vector;
    pushargs.comm_pkg = (HYPRE_CommPkgArray *)comm_pkg;
    for (i = 0; i < hypre_NumThreads; i++)
       hypre_work_put( HYPRE_GetMigrateStructVectorCommPkgVoidPtr, (void *)&pushargs );
@@ -1404,9 +1404,9 @@ HYPRE_MigrateStructVectorPush(
    int i;
    int  returnvalue;
 
-   pushargs.comm_pkg = (HYPRE_CommPkgArray *)&comm_pkg;
-   pushargs.from_vector = (HYPRE_StructVectorArray *)&from_vector;
-   pushargs.to_vector = (HYPRE_StructVectorArray *)&to_vector;
+   pushargs.comm_pkg = (HYPRE_CommPkgArray *)comm_pkg;
+   pushargs.from_vector = (HYPRE_StructVectorArray *)from_vector;
+   pushargs.to_vector = (HYPRE_StructVectorArray *)to_vector;
    for (i = 0; i < hypre_NumThreads; i++)
       hypre_work_put( HYPRE_MigrateStructVectorVoidPtr, (void *)&pushargs );
 
@@ -1447,7 +1447,7 @@ HYPRE_FreeCommPkgPush(
    int i;
    int  returnvalue;
 
-   pushargs.comm_pkg = (HYPRE_CommPkgArray *)&comm_pkg;
+   pushargs.comm_pkg = (HYPRE_CommPkgArray *)comm_pkg;
    for (i = 0; i < hypre_NumThreads; i++)
       hypre_work_put( HYPRE_FreeCommPkgVoidPtr, (void *)&pushargs );
 
