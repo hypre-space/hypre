@@ -68,6 +68,7 @@ FILES =\
  par_indepset.c\
  par_laplace.c\
  par_laplace_9pt.c\
+ par_laplace_27pt.c\
  par_rap.c\
  par_rap_communication.c\
  pcg.c\
