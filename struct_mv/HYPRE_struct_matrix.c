@@ -117,6 +117,23 @@ HYPRE_StructMatrixSetBoxValues( HYPRE_StructMatrix  matrix,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_StructMatrixSetConstantValues
+ *--------------------------------------------------------------------------*/
+
+int 
+HYPRE_StructMatrixSetConstantValues( HYPRE_StructMatrix matrix,
+                                     int             num_stencil_indices,
+                                     int            *stencil_indices,
+                                     double         *values )
+{
+   return hypre_StructMatrixSetConstantValues( matrix,
+                                               num_stencil_indices,
+                                               stencil_indices,
+                                               values,
+                                               0 );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_StructMatrixAddToValues
  *--------------------------------------------------------------------------*/
 
@@ -184,6 +201,24 @@ HYPRE_StructMatrixAddToBoxValues( HYPRE_StructMatrix  matrix,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_StructMatrixAddToConstantValues
+ *--------------------------------------------------------------------------*/
+
+int 
+HYPRE_StructMatrixAddToConstantValues( HYPRE_StructMatrix matrix,
+                                       int             num_stencil_indices,
+                                       int            *stencil_indices,
+                                       double         *values,
+                                       int             action )
+{
+   return hypre_StructMatrixSetConstantValues( matrix,
+                                               num_stencil_indices,
+                                               stencil_indices,
+                                               values,
+                                               1 );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_StructMatrixAssemble
  *--------------------------------------------------------------------------*/
 
@@ -234,14 +269,24 @@ HYPRE_StructMatrixSetSymmetric( HYPRE_StructMatrix  matrix,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_StructMatrixSetConstantCoefficient
+ * HYPRE_StructMatrixSetConstantEntries
+ * - nentries is the number of array entries
+ * - Each int entries[i] is an index into the shape array of the stencil of the
+ * matrix
+ * In the present version, only three possibilites are recognized:
+ * - no entries constant                 (constant_coefficient==0)
+ * - all entries constant                (constant_coefficient==1)
+ * - all but the diagonal entry constant (constant_coefficient==2)
+ * If something else is attempted, this function will return a nonzero error.
+ * In the present version, if this function is called more than once, only
+ * the last call will take effect.
  *--------------------------------------------------------------------------*/
 
-int
-HYPRE_StructMatrixSetConstantCoefficient( HYPRE_StructMatrix matrix,
-                                          int                constant_coefficient )
+int  HYPRE_StructMatrixSetConstantEntries( HYPRE_StructMatrix  matrix,
+                                           int                 nentries,
+                                           int                *entries )
 {
-   return( hypre_StructMatrixSetConstantCoefficient( matrix, constant_coefficient ));
+   return hypre_StructMatrixSetConstantEntries( matrix, nentries, entries );
 }
 
 /*--------------------------------------------------------------------------
