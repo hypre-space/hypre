@@ -103,7 +103,7 @@ int impl_Hypre_PCG_Copy_Parameters_to_HYPRE_struct( Hypre_PCG self )
    ierr += HYPRE_PCGSetStopCrit( solver, data->stop_crit );
 
    ierr += HYPRE_PCGSetPrintLevel( solver, data->printlevel );
-   ierr += HYPRE_PCGSetLogLevel( solver, data->log_level );
+   ierr += HYPRE_PCGSetLogging( solver, data->log_level );
 
    return ierr;
 }

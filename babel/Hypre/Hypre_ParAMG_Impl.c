@@ -683,7 +683,7 @@ impl_Hypre_ParAMG_SetLogging(
    data = Hypre_ParAMG__get_data( self );
    solver = data->solver;
 
-   ierr += HYPRE_BoomerAMGSetLogLevel( solver, level );
+   ierr += HYPRE_BoomerAMGSetLogging( solver, level );
 
    return ierr;
   /* DO-NOT-DELETE splicer.end(Hypre.ParAMG.SetLogging) */
