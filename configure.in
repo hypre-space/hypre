@@ -1,4 +1,4 @@
-nl *********************************************************************
+dnl *********************************************************************
 dnl * configure.in, when autoconf is run, this file is read and 
 dnl * the script configure is generated.  Configure.in is structured
 dnl * as follows:  initialization, the current architecture is determined,
