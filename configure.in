@@ -249,19 +249,6 @@ AC_ARG_WITH(gdb,
  casc_users_chose_compilers=yes]
 )
 
-AC_ARG_WITH(strict-checking,
-[  --with-strict-checking  compiles with out MPI ('--without-MPI') and
-			  assigns gcc and g++ as the c and c++ compilers.],
-[CC=gcc
- CXX=g++
- CFLAGS="$CFLAGS -Wall -pedantic"
- CXXFLAGS="$CXXFLAGS -Wall -Wshadow -fno-implicit-templates"
- CXXFLAGS="$CXXFLAGS -Woverloaded-virtual -ansi -pedantic"
- casc_users_chose_compilers=yes
- casc_using_mpi=no
- AC_DEFINE(HYPRE_SEQUENTIAL)]
-)
-
 AC_ARG_WITH(mpi-include,
 [  --with-mpi-include=DIR  User specifies that mpi.h is in DIR.  The options
 			  --with-mpi-include --with-mpi-libs and 
@@ -330,6 +317,18 @@ AC_ARG_WITH(MPI,
    *)   casc_using_mpi=$withval ;;
  esac],
 [casc_using_mpi=yes]
+)
+
+AC_ARG_WITH(strict-checking,
+[  --with-strict-checking  compiles with out MPI ('--without-MPI') and
+			  assigns gcc and g++ as the c and c++ compilers.],
+[CC=gcc
+ CXX=g++
+ CFLAGS="$CFLAGS -Wall -pedantic"
+ CXXFLAGS="$CXXFLAGS -Wall -Wshadow -fno-implicit-templates"
+ CXXFLAGS="$CXXFLAGS -Woverloaded-virtual -ansi -pedantic"
+ casc_users_chose_compilers=yes
+ casc_using_mpi=no]
 )
 if test $casc_using_mpi = "no"
 then
