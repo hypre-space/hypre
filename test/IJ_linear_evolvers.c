@@ -134,6 +134,7 @@ main( int   argc,
    solver_id = 0;
 
    ioutdat = 3;
+   if (solver_id == 18) max_levels = 1;
 
    /*-----------------------------------------------------------
     * Parse command line
@@ -527,12 +528,10 @@ main( int   argc,
       printf("       3=Hybrid Jacobi/Gauss-Seidel  \n");
       printf("  -ns <val>              : Use <val> sweeps on each level\n");
       printf("                           (default C/F down, F/C up, F/C fine\n");
-      printf("  -mxl  <val>            : maximum number of AMG levels\n");
       printf("\n"); 
       printf("  -mu   <val>            : set AMG cycles (1=V, 2=W, etc.)\n"); 
       printf("  -th   <val>            : set AMG threshold Theta = val \n");
       printf("  -tr   <val>            : set AMG interpolation truncation factor = val \n");
-      printf("  -tol  <val>            : set AMG convergence tolerance to val\n");
       printf("  -mxrs <val>            : set AMG maximum row sum threshold for dependency weakening \n");
      
       printf("  -w   <val>             : set Jacobi relax weight = val\n");
@@ -543,6 +542,8 @@ main( int   argc,
       printf("  -drop_tol  <val>       : set threshold for dropping in PILUT\n");
       printf("  -nonzeros_to_keep <val>: number of nonzeros in each row to keep\n");
       printf("\n");  
+      printf("  -tol  <val>            : set solver convergence tolerance = val\n");
+      printf("  -mxl  <val>            : maximum number of levels\n");
       printf("  -iout <val>            : set output flag\n");
       printf("       0=no output    1=matrix stats\n"); 
       printf("       2=cycle stats  3=matrix & cycle stats\n"); 
@@ -1036,7 +1037,7 @@ main( int   argc,
          if (myid == 0) printf("Solver: ParaSails-PCG\n");
 
 	 HYPRE_ParCSRParaSailsCreate(MPI_COMM_WORLD, &pcg_precond);
-	 HYPRE_ParCSRParaSailsSetParams(pcg_precond, sai_threshold, 1);
+	 HYPRE_ParCSRParaSailsSetParams(pcg_precond, sai_threshold, max_levels);
 	 HYPRE_ParCSRParaSailsSetLogging(pcg_precond, ioutdat);
 
          HYPRE_ParCSRPCGSetPrecond(pcg_solver,
@@ -1184,7 +1185,7 @@ main( int   argc,
          if (myid == 0) printf("Solver: ParaSails-GMRES\n");
 
 	 HYPRE_ParCSRParaSailsCreate(MPI_COMM_WORLD, &pcg_precond);
-	 HYPRE_ParCSRParaSailsSetParams(pcg_precond, sai_threshold, 1);
+	 HYPRE_ParCSRParaSailsSetParams(pcg_precond, sai_threshold, max_levels);
 	 HYPRE_ParCSRParaSailsSetLogging(pcg_precond, ioutdat);
 	 HYPRE_ParCSRParaSailsSetSym(pcg_precond, 0);
 
