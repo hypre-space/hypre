@@ -293,20 +293,12 @@ void        *data;
 
           fine_grid = level - 1;
           coarse_grid = level;
+          alpha = 1.0;
+          beta = 1.0;
 
-          if (Vstar_flag != 0)
-          {
-              CALL_INTAD(coarse_grid,fine_grid,numv,Vstar_flag,
-                         F_array,U_array,amg_data);
-          }
-          else
-          {
-              alpha = 1.0;
-              beta = 1.0;
-              Matvec(alpha, P_array[fine_grid], U_array[coarse_grid],
-                     beta, U_array[fine_grid]);
-         }
-              
+          Matvec(alpha, P_array[fine_grid], U_array[coarse_grid],
+                 beta, U_array[fine_grid]);            
+
           --level;
           cycle_param = 2;
           if (level == 0 && ntrlx[0] > 9) cycle_param = 0;
