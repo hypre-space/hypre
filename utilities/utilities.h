@@ -4,9 +4,6 @@
 #ifndef hypre_UTILITIES_HEADER
 #define hypre_UTILITIES_HEADER
 
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 /*BHEADER**********************************************************************
  * (c) 1997   The Regents of the University of California
