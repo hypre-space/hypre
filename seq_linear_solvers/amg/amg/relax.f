@@ -5,7 +5,7 @@ c
 c=====================================================================
 c     
       subroutine relax(ierr,itrel,iprel,ierel,iurel,
-     *     imin,imax,u,f,a,ia,ja,iu,icg,ipmn,ipmx,iv)
+     *     imin,imax,vtmp,u,f,a,ia,ja,iu,icg,ipmn,ipmx,iv)
 c     
 c---------------------------------------------------------------------
 c     
@@ -35,19 +35,22 @@ c
       dimension iu (*)
       dimension icg(*)
       dimension iv (*)
+      dimension vtmp(*)
 c     
 c---------------------------------------------------------------------
 c     
-      go to (100,999,300,999,999,999,999,800,900),itrel
+      go to (100,200,300,999,999,999,999,800,900),itrel
       return
 c     
 c     Gauss-Seidel relaxation
 c     
  100  call relax1(ierr,iprel,ierel,imin,imax,u,f,a,ia,ja,iu,icg)
       return
-c     
-c     Kaczmarz relaxation (removed)
-c     
+c
+c     Kaczmarz relaxation (replaced by veh, 7/30/97)
+c
+200   call kacz(iprel,ierel,imin,imax,u,f,a,ia,ja,iu,icg,vtmp)
+      return
 c     
 c     Point Gauss-Seidel relaxation
 c     
@@ -108,7 +111,7 @@ c
 c     ierr = 5 indicates user has requested illegal value for iprel 
 c     
 c     F-variable relaxation
-c     
+c
  100  do 120 i=ilo,ihi
          if(icg(i).gt.0) go to 120
          if(ierel.ne.iu(i).and.ierel.ne.9) go to 120
@@ -118,6 +121,10 @@ c
          do 110 j=jlo,jhi
             r=r-a(j)*u(ja(j))
  110     continue
+      if (a(ia(i)).eq.0.0) then
+         print *, 'zero row number',i, ' skipped'
+         go to 120
+      endif
          u(i)=r/a(ia(i))
  120  continue
       return
@@ -149,6 +156,78 @@ c
  310     continue
          u(i)=r/a(ia(i))
  320  continue
+      return
+      end
+c
+      subroutine kacz(iprel,ierel,imin,imax,u,f,a,ia,ja,iu,icg,vtmp)
+c
+c---------------------------------------------------------------------
+c
+c     Kaczmarz relaxation
+c
+c     Not a very efficient implementation should have ata prestored
+c     veh 7/29/97
+c     c
+c       iprel = 1 - relax f-variables only
+c       iprel = 2 - relax all variables
+c       iprel = 3 - relax c-variables only
+c
+c       ierel = n - relax equations of type n
+c       ierel = 9 - relax equations of all types
+c
+c       iurel = n - relax unknowns of type n
+c       iurel = 9 - relax unknowns of all types
+c
+c---------------------------------------------------------------------
+c
+      implicit real*8 (a-h,o-z)
+c
+      dimension u  (*)
+      dimension f  (*)
+      dimension ia (*)
+      dimension a  (*)
+      dimension ja (*)
+      dimension iu (*)
+      dimension icg(*)
+      dimension vtmp(*)
+c
+c---------------------------------------------------------------------
+c
+      ilo=imin
+      ihi=imax
+      go to (100,200,300) iprel
+      stop 'bad iprel in kacz'
+
+100   continue
+300   continue
+200   continue
+c
+c     compute the residual
+c
+      nv=ihi-ilo+1
+      call vcopy(vtmp,f,nv)
+      alpha = -1.0
+      beta=1.0
+      call matvec(nv,alpha,a,ia,ja,u,beta,vtmp,0) 
+c   
+c    sweep over the rows
+c
+   
+      do 220 i=ilo,ihi
+         if(ierel.ne.iu(i).and.ierel.ne.9) go to 220
+         if(iprel.eq.1 .and. icg(i).gt.0) go to 220
+         if(iprel.eq.3 .and. icg(i).le.0) go to 220
+         jlo=ia(i)+1
+         jhi=ia(i+1)-1
+         ata=0.0
+         do 222, j=jlo-1,jhi
+            ata = ata + a(j)*a(j)
+222      continue
+         s = vtmp(i)/ata
+         do 223 j=jlo-1,jhi
+            u(ja(j)) = u(ja(j)) + s*a(j)
+223      continue
+220   continue
       return
       end
 c     
@@ -244,6 +323,7 @@ c
          ilo=iv(ipt)
          ihi=iv(ipt+1)-1
          if(ihi.gt.ilo) go to 220
+cveh                        %%%%%% if ihi=ilo, only one variable at point ipt 
          r=f(ilo)
          jlo=ia(ilo)+1
          jhi=ia(ilo+1)-1
@@ -252,6 +332,7 @@ c
  210     continue
          u(ilo)=r/a(ia(ilo))
          go to 280
+cveh                        %%%%%% multiple variables at point ipt
  220     n=0
          ilo1=ilo-1
          nhi=ihi-ilo1
