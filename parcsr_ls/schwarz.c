@@ -103,8 +103,8 @@ hypre_AMGNodalSchwarzSmoother( hypre_CSRMatrix    *A,
 
   num_nodes = num_dofs / num_functions;
 
-  printf("\nnum_nodes: %d, num_dofs: %d = %d x %d\n", num_nodes, num_dofs,
-	 num_nodes, num_functions);
+  /*printf("\nnum_nodes: %d, num_dofs: %d = %d x %d\n", num_nodes, num_dofs,
+	 num_nodes, num_functions);*/
 
   i_dof_node = hypre_CTAlloc(int, num_dofs+1);
   j_dof_node = hypre_CTAlloc(int, num_dofs);
@@ -1177,8 +1177,8 @@ hypre_AMGCreateDomainDof(hypre_CSRMatrix     *A,
   /*    create artificial domains by agglomeration;                        */
   /*=======================================================================*/
 
-  printf("----------- create artificials domain by agglomeration;  ======\n");
-
+  /*printf("----------- create artificials domain by agglomeration;  ======\n");
+*/
 
 
   i_aggregate_dof = hypre_CTAlloc(int,num_dofs+1);
@@ -1200,8 +1200,8 @@ hypre_AMGCreateDomainDof(hypre_CSRMatrix     *A,
         }
 
 
-     printf("end computing weights for agglomeration procedure: --------\n");
-
+     /*printf("end computing weights for agglomeration procedure: --------\n");
+*/
      ierr = hypre_AMGeAgglomerate(i_aggregate_dof, j_aggregate_dof,
 
 			       i_dof_dof, j_dof_dof, w_dof_dof,
@@ -1235,7 +1235,7 @@ hypre_AMGCreateDomainDof(hypre_CSRMatrix     *A,
         j_aggregate_dof[i] = i;
      }
   }
-  printf("num_dofs: %d, num_domains: %d\n", num_dofs, num_domains);
+  /*printf("num_dofs: %d, num_domains: %d\n", num_dofs, num_domains);*/
 
 
   /*
@@ -1387,8 +1387,8 @@ hypre_AMGCreateDomainDof(hypre_CSRMatrix     *A,
      j_domain_dof = j_aggregate_dof;
   }
 
-  printf("END domain_dof computations: =================================\n");
-
+  /*printf("END domain_dof computations: =================================\n");
+*/
   domain_matrixinverse_counter = 0;
   local_dof_counter = 0;
   
@@ -2691,8 +2691,8 @@ hypre_ParAMGCreateDomainDof(hypre_ParCSRMatrix   *A,
   /*    create artificial domains by agglomeration;                        */
   /*=======================================================================*/
 
-  printf("----------- create artificials domain by agglomeration;  ======\n");
-
+  /*printf("----------- create artificials domain by agglomeration;  ======\n");
+*/
   i_aggregate_dof = hypre_CTAlloc(int,num_variables+1);
   j_aggregate_dof = hypre_CTAlloc (int,num_variables);
 
@@ -2711,8 +2711,8 @@ hypre_ParAMGCreateDomainDof(hypre_ParCSRMatrix   *A,
         }
 
 
-     printf("end computing weights for agglomeration procedure: --------\n");
-
+     /*printf("end computing weights for agglomeration procedure: --------\n");
+*/
 
      i_dof_weight = hypre_CTAlloc (int, num_variables);
      ierr = hypre_AMGeAgglomerate(i_aggregate_dof, j_aggregate_dof,
@@ -2744,8 +2744,8 @@ hypre_ParAMGCreateDomainDof(hypre_ParCSRMatrix   *A,
         j_aggregate_dof[i] = i;
      }
   }
-  printf("num_variables: %d, num_domains: %d\n", num_variables, num_domains);
-
+  /*printf("num_variables: %d, num_domains: %d\n", num_variables, num_domains);
+*/
   if (overlap == 1)
   {
      i_domain_dof = hypre_CTAlloc(int, num_domains+1);
@@ -2969,8 +2969,8 @@ hypre_ParAMGCreateDomainDof(hypre_ParCSRMatrix   *A,
      j_domain_dof = j_aggregate_dof;
   }
 
-  printf("END domain_dof computations: =================================\n");
-
+  /*printf("END domain_dof computations: =================================\n");
+*/
   domain_matrixinverse_counter = 0;
   local_dof_counter = 0;
   
