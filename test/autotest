@@ -25,33 +25,23 @@ PATH=/home/casc/bin:\
 export PATH
 
 #==============================================================================
-# Set autotest directories
+# Set autotest directory
 #==============================================================================
 
 HYPRE_AUTOTEST_DIR="/home/casc/software/hypre/autotest"
 
 #=============================================================================
-# Remove old autotest and create new directory
-#=============================================================================
-
-if [ -d $HYPRE_AUTOTEST_DIR ]
-then
-	rm -fR $HYPRE_AUTOTEST_DIR
-fi
-
-mkdir $HYPRE_AUTOTEST_DIR
-cd $HYPRE_AUTOTEST_DIR
-	
-#=============================================================================
-# Checks out repository, builds and installs in the AUTOTEST directory
+# Check out repository, build and install in the AUTOTEST directory
 #=============================================================================
 
 if [ ! -d "$CVSROOT" ]
 then
-	echo "Error: no CVS repository, CVSROOT = $CVSROOT"
-	exit
+    echo "Error: no CVS repository, CVSROOT = $CVSROOT"
+    exit
 fi
 
+cd $HYPRE_AUTOTEST_DIR
+rm -fR linear_solvers
 cvs checkout -P linear_solvers
 
 cd linear_solvers
