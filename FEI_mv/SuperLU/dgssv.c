@@ -190,7 +190,7 @@ dgssv(SuperMatrix *A, int *perm_c, int *perm_r, SuperMatrix *L,
 	SUPERLU_FREE(AA);
     }
 
-    PrintStat( &SuperLUStat );
+    /* PrintStat( &SuperLUStat );*/
     StatFree();
 
 }
