@@ -1123,7 +1123,7 @@ hypre_SStructMapEntryGetGlobalRank(hypre_BoxMapEntry   *entry,
   {
     hypre_SStructMapEntryGetGlobalCSRank(entry,index,rank_ptr);
   }
-  if (type == HYPRE_SSTRUCT)
+  if (type == HYPRE_SSTRUCT || type == HYPRE_STRUCT)
   {
     hypre_SStructMapEntryGetGlobalGhrank(entry,index,rank_ptr);
   }
@@ -1148,7 +1148,7 @@ hypre_SStructMapEntryGetStrides(hypre_BoxMapEntry   *entry,
   {
     hypre_SStructMapEntryGetCSRstrides(entry,strides);
   }
-  if (type == HYPRE_SSTRUCT)
+  if (type == HYPRE_SSTRUCT || type == HYPRE_STRUCT)
   {
     hypre_SStructMapEntryGetGhstrides(entry,strides);
   }
