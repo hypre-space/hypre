@@ -171,7 +171,7 @@ hypre_SubtractBoxArraysExceptBoxes( hypre_BoxArray *box_array1,
       {
          box2 = hypre_BoxArrayBox(box_array2, i);
 
-         if ( ! hypre_BoxEqualP(boxa,box2) && ! hypre_BoxEqualP(boxb,box2) )
+         if ( (! hypre_BoxEqualP(boxa,box2)) && (! hypre_BoxEqualP(boxb,box2)) )
          {
             /* compute new_diff_boxes = (diff_boxes - box2) */
             hypre_BoxArraySetSize(new_diff_boxes, 0);

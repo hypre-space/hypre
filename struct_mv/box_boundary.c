@@ -53,6 +53,43 @@ hypre_BoxArraySubtractAdjacentBoxArray( hypre_BoxArray *boxes1,
 }
 
 /*--------------------------------------------------------------------------
+ * Take away from the boxes in boxes1 whatever is adjacent to boxes in boxes2,
+ * in the signed direction ds only (ds=0,1,2,3,4,5);
+ * as well as the boxes themselves.  But ignore "box" if it appears in boxes2.
+ * The result is returned in boxes1.  The last argument, thick, is the number
+ * of layers around a box considered to be "adjacent", typically 1.
+ *--------------------------------------------------------------------------*/
+
+int
+hypre_BoxArraySubtractAdjacentBoxArrayD( hypre_BoxArray *boxes1,
+                                        hypre_BoxArray *boxes2,
+                                        hypre_Box *box, int ds, int thick )
+{
+   int ierr = 0;
+   int i;
+   int numexp[6];
+   hypre_Box *box2e;
+   hypre_Box *boxe = hypre_BoxDuplicate( box );
+   hypre_BoxArray *boxes2e = hypre_BoxArrayDuplicate( boxes2 );
+   hypre_BoxArray *tmp_box_array = hypre_BoxArrayCreate( 0 );
+   for ( i=0; i<6; ++i ) numexp[i] = 0;
+   numexp[ds] = thick;
+   hypre_ForBoxI(i, boxes2e)
+      {
+         box2e = hypre_BoxArrayBox(boxes2e, i);
+         ierr += hypre_BoxExpand( box2e, numexp );
+      }
+   ierr += hypre_BoxExpand( boxe, numexp );
+   ierr += hypre_SubtractBoxArraysExceptBoxes( boxes1, boxes2e, tmp_box_array, box, boxe );
+
+   ierr += hypre_BoxArrayDestroy( boxes2e );
+   ierr += hypre_BoxArrayDestroy( tmp_box_array );
+   ierr += hypre_BoxDestroy( boxe );
+
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
  * Find the parts of the given box which lie on a (physical) boundary.
  * Stick them into the user-provided box array boundary (any input contents
  * of this box array may get changed).
@@ -112,10 +149,32 @@ hypre_BoxBoundaryDNT( hypre_Box *box, hypre_BoxArray *neighbor_boxes,
    ierr += hypre_SubtractBoxes( box, boxe, boundary );
 
    /* Now boundary contains the surface of the original box, in direction ds.
-      Subtract out the neighbor boxes, and anything adjacent to a neighbor box.
+      Subtract out the neighbor boxes, and anything adjacent to a neighbor box
+      in the opposite direction.
       Anything left will belong to the physical boundary. */
 
-   ierr += hypre_BoxArraySubtractAdjacentBoxArray( boundary, neighbor_boxes, box, thick );
+   switch(ds)
+   {
+   case 0:
+      ds = 1;
+      break;
+   case 1:
+      ds = 0;
+      break;
+   case 2:
+      ds = 3;
+      break;
+   case 3:
+      ds = 2;
+      break;
+   case 4:
+      ds = 5;
+      break;
+   case 5:
+      ds = 4;
+   }
+   ierr += hypre_BoxArraySubtractAdjacentBoxArrayD(
+      boundary, neighbor_boxes, box, ds, thick );
 
    ierr += hypre_BoxDestroy( boxe );
 

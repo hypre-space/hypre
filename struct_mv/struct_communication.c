@@ -628,8 +628,15 @@ hypre_CommTypeSetEntry( hypre_Box           *box,
     * Set offset
     *------------------------------------------------------*/
 
-   hypre_CommEntryTypeOffset(comm_entry) =
-      data_box_offset + hypre_BoxIndexRank(data_box, hypre_BoxIMin(box));
+   if ( constant_coefficient==0 || constant_coefficient==2 )
+   {
+      hypre_CommEntryTypeOffset(comm_entry) =
+         data_box_offset + hypre_BoxIndexRank(data_box, hypre_BoxIMin(box));
+   }
+   else
+   {
+      hypre_CommEntryTypeOffset(comm_entry) = data_box_offset;
+   }
 
    /*------------------------------------------------------
     * Set length_array, stride_array, and dim

@@ -145,12 +145,12 @@ hypre_max(0, (hypre_BoxIMaxD(box, d) - hypre_BoxIMinD(box, d) + 1))
 #define hypre_BoxSizeZ(box)    hypre_BoxSizeD(box, 2)
 
 #define hypre_BoxEqualP( box1, box2 ) (\
- hypre_BoxIMinX(box1)==hypre_BoxIMinX(box1) &&\
- hypre_BoxIMaxX(box1)==hypre_BoxIMaxX(box1) &&\
- hypre_BoxIMinY(box1)==hypre_BoxIMinY(box1) &&\
- hypre_BoxIMaxY(box1)==hypre_BoxIMaxY(box1) &&\
- hypre_BoxIMinZ(box1)==hypre_BoxIMinZ(box1) &&\
- hypre_BoxIMaxZ(box1)==hypre_BoxIMaxZ(box1) )
+ hypre_BoxIMinX(box1)==hypre_BoxIMinX(box2) &&\
+ hypre_BoxIMaxX(box1)==hypre_BoxIMaxX(box2) &&\
+ hypre_BoxIMinY(box1)==hypre_BoxIMinY(box2) &&\
+ hypre_BoxIMaxY(box1)==hypre_BoxIMaxY(box2) &&\
+ hypre_BoxIMinZ(box1)==hypre_BoxIMinZ(box2) &&\
+ hypre_BoxIMaxZ(box1)==hypre_BoxIMaxZ(box2) )
 
 #define hypre_IndexInBoxP( index, box ) (\
  hypre_IndexX(index)>=hypre_BoxIMinX(box) &&\
@@ -1668,6 +1668,7 @@ int hypre_BoxFree( hypre_Box *box );
 
 /* box_boundary.c */
 int hypre_BoxArraySubtractAdjacentBoxArray( hypre_BoxArray *boxes1 , hypre_BoxArray *boxes2 , hypre_Box *box , int thick );
+int hypre_BoxArraySubtractAdjacentBoxArrayD( hypre_BoxArray *boxes1 , hypre_BoxArray *boxes2 , hypre_Box *box , int ds , int thick );
 int hypre_BoxBoundaryNT( hypre_Box *box , hypre_BoxArray *neighbor_boxes , hypre_BoxArray *boundary , int *thickness );
 int hypre_BoxBoundaryDNT( hypre_Box *box , hypre_BoxArray *neighbor_boxes , hypre_BoxArray *boundary , int ds , int thick );
 int hypre_BoxBoundaryG( hypre_Box *box , hypre_StructGrid *g , hypre_BoxArray *boundary );
