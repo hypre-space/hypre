@@ -11,7 +11,6 @@
  * PrunedRows - Collection of pruned rows that are cached on the local 
  * processor.  Direct access to these rows is available, via the local
  * index number.
- * (The local pruned rows are stored in the first num_local locations.)
  *
  *****************************************************************************/
 
@@ -33,6 +32,9 @@
  *              pruned rows (input) - includes the number of local nodes
  * diag_scale - diagonal scale object used to scale the thresholding (input)
  * thresh     - threshold for pruning the matrix (input)
+ *
+ * The local pruned rows are stored in the first part of the len and ind 
+ * arrays.
  *--------------------------------------------------------------------------*/
 
 PrunedRows *PrunedRowsCreate(Matrix *mat, int size, DiagScale *diag_scale, 

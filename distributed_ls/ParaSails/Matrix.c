@@ -613,7 +613,7 @@ static void SetupReceives(Matrix *mat, int reqlen, int *reqind, int *outlist)
 
 /*--------------------------------------------------------------------------
  * SetupSends
- * this func waits for all receives to complete 
+ * This function will wait for all receives to complete.
  *--------------------------------------------------------------------------*/
 
 static void SetupSends(Matrix *mat, int *inlist)
@@ -717,7 +717,7 @@ void MatrixComplete(Matrix *mat)
 
 /*--------------------------------------------------------------------------
  * MatrixMatvec
- * can be done in place
+ * Can be done in place.
  *--------------------------------------------------------------------------*/
 
 void MatrixMatvec(Matrix *mat, double *x, double *y)
@@ -761,7 +761,7 @@ void MatrixMatvec(Matrix *mat, double *x, double *y)
 
 /*--------------------------------------------------------------------------
  * MatrixMatvecTrans
- * can be done in place
+ * Can be done in place.
  *--------------------------------------------------------------------------*/
 
 void MatrixMatvecTrans(Matrix *mat, double *x, double *y)
@@ -808,4 +808,3 @@ void MatrixMatvecTrans(Matrix *mat, double *x, double *y)
 
     MPI_Waitall(mat->num_recv, mat->send_req2, mat->statuses);
 }
-

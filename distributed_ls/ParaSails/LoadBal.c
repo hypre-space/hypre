@@ -29,8 +29,6 @@
  *
  * local_cost - amount of work that this processor has
  * beta - target load balance factor
- *
- * Algorithm:
  *--------------------------------------------------------------------------*/
 
 void LoadBalInit(MPI_Comm comm, double local_cost, double beta, 
@@ -334,6 +332,7 @@ void LoadBalDonorRecv(MPI_Comm comm, Matrix *mat,
 }
 
 /*--------------------------------------------------------------------------
+ * LoadBalDonate
  *--------------------------------------------------------------------------*/
 
 LoadBal *LoadBalDonate(MPI_Comm comm, Matrix *mat, Numbering *numb,
@@ -381,6 +380,10 @@ LoadBal *LoadBalDonate(MPI_Comm comm, Matrix *mat, Numbering *numb,
 
     return p;
 }
+
+/*--------------------------------------------------------------------------
+ * LoadBalReturn
+ *--------------------------------------------------------------------------*/
 
 void LoadBalReturn(LoadBal *p, MPI_Comm comm, Matrix *mat)
 {

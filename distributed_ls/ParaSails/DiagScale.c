@@ -37,6 +37,7 @@
  * num_requests - number of requests (output)
  * requests - request handles, used to check that all responses are back 
  *            (output)
+ * replies_list - array that indicates who we sent message to (output)
  *--------------------------------------------------------------------------*/
 
 static void ExchangeDiagEntries(MPI_Comm comm, Matrix *mat, int reqlen, 

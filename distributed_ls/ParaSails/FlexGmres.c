@@ -82,8 +82,6 @@ static void ApplyPlaneRotation(double *dx, double *dy, double cs, double sn)
   *dx = temp;
 }
 
-/* want to add a non-convergence test? */
-
 void FGMRES_ParaSails(Matrix *mat, ParaSails *ps, double *b, double *x,
   int dim, double tol, int max_iter)
 {

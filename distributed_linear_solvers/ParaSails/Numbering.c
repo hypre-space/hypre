@@ -110,7 +110,8 @@ Numbering *NumberingCreate(Matrix *mat, int size)
 }
 
 /*--------------------------------------------------------------------------
- * NumberingCreateCopy 
+ * NumberingCreateCopy - Create a new numbering object, and take as initial
+ * contents the "orig" numbering object.
  *--------------------------------------------------------------------------*/
 
 Numbering *NumberingCreateCopy(Numbering *orig)
@@ -147,7 +148,8 @@ void NumberingDestroy(Numbering *numb)
 }
 
 /*--------------------------------------------------------------------------
- * NumberingLocalToGlobal -
+ * NumberingLocalToGlobal - Convert an array of indices to global coordinate
+ * numbering.  May be done in place.
  *--------------------------------------------------------------------------*/
 
 void NumberingLocalToGlobal(Numbering *numb, int len, int *local, int *global)
@@ -159,10 +161,9 @@ void NumberingLocalToGlobal(Numbering *numb, int len, int *local, int *global)
 }
 
 /*--------------------------------------------------------------------------
- * NumberingGlobalToLocal -
- * global indices are added this way...
- *** new : no longer need a global to local, since this is done by hash tab **
- *** ALLOW in place conversion
+ * NumberingGlobalToLocal - Convert an array of indices to local coordinate
+ * numbering.  If the global coordinate number does not exist, it is added
+ * to the numbering object.  May be done in place.
  *--------------------------------------------------------------------------*/
 
 void NumberingGlobalToLocal(Numbering *numb, int len, int *global, int *local)

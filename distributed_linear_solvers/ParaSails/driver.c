@@ -160,10 +160,10 @@ int main(int argc, char *argv[])
         MPI_Barrier(MPI_COMM_WORLD);
         time0 = MPI_Wtime();
 
-        if (!symmetric)
-            FGMRES_ParaSails(A, ps, b, x, 50, 1.e-8, 1500);
-	else
+        if (symmetric == 1)
             PCG_ParaSails(A, ps, b, x, 1.e-8, 1700);
+	else
+            FGMRES_ParaSails(A, ps, b, x, 50, 1.e-8, 1500);
 
         time1 = MPI_Wtime();
 	solve_time = time1-time0;

@@ -44,7 +44,11 @@ void hypre_F90_NAME(dpotrs)(char *, int *, int *, double *, int *, double *,
  *****************************************************************************/
 
 /*--------------------------------------------------------------------------
- * FindNumReplies -
+ * FindNumReplies - Find the number of replies that this processor should
+ * expect.  The input "replies_list" is an array that indicates what 
+ * processors were sent a message from the local processor.  An Allreduce
+ * operation determines the total number of messages sent to the local
+ * processor.
  *--------------------------------------------------------------------------*/
 
 int FindNumReplies(MPI_Comm comm, int *replies_list)
@@ -83,7 +87,6 @@ int FindNumReplies(MPI_Comm comm, int *replies_list)
  *          processor i.  This array can be used to count (using 
  *          MPI_AllReduce) the number of requests made to the current
  *          processor when the communication pattern is nonsymmetric.
- *
  *--------------------------------------------------------------------------*/
 
 static void SendRequests(MPI_Comm comm, Matrix *mat, int reqlen, int *reqind, 
@@ -353,6 +356,7 @@ static void SendReplyStoredRows(MPI_Comm comm, Numbering *numb,
  * ReceiveReplyStoredRows - Receive a reply sent by SendReplyStoredRows
  *
  * comm    - MPI communicator (input)
+ * numb    - Numbering object (input)
  * stored_rows - the stored_rows object where the rows should be stored
  *--------------------------------------------------------------------------*/
 
@@ -1064,13 +1068,7 @@ static double SelectThresh(MPI_Comm comm, Matrix *A, DiagScale *diag_scale,
 }
 
 /*--------------------------------------------------------------------------
- * SelectFilter - select a threshold for the preconditioner pattern.  
- * The threshold attempts to be chosen such that approximately (1-param) of 
- * all the matrix elements is larger than this threshold.  This is accomplished
- * by finding the element in each row that is smaller than (1-param) of the 
- * elements in that row, and averaging these elements over all rows.  The 
- * threshold is selected on the diagonally scaled matrix.
- *
+ * SelectFilter - Similar to SelectThresh, but on the preconditioner.
  * Assumes matrix is in local indexing.
  *--------------------------------------------------------------------------*/
 
@@ -1126,10 +1124,9 @@ static double SelectFilter(MPI_Comm comm, Matrix *M, DiagScale *diag_scale,
 }
 
 /*--------------------------------------------------------------------------
- * FilterValues - constructs another matrix, free existing matrix
- * Assumes M is in local indexing.
- * Does not rescale.
- * Pass it a matrix, and does not 
+ * FilterValues - Filter the values in a preconditioner matrix.
+ * M - original matrix, in local ordering
+ * F - new matrix, that has been created already
  *--------------------------------------------------------------------------*/
 
 static void FilterValues(Matrix *M, Matrix *F, DiagScale *diag_scale, 
@@ -1163,7 +1160,7 @@ static void FilterValues(Matrix *M, Matrix *F, DiagScale *diag_scale,
 }
 
 /*--------------------------------------------------------------------------
- * Rescale - 
+ * Rescale - Rescaling to be used after filtering, in symmetric case.
  *--------------------------------------------------------------------------*/
 
 static void Rescale(Matrix *M, StoredRows *stored_rows, DiagScale *diag_scale,
@@ -1286,8 +1283,6 @@ void ParaSailsDestroy(ParaSails *ps)
 
 /*--------------------------------------------------------------------------
  * ParaSailsSetupPattern - Set up a pattern for the ParaSails preconditioner.
- * The pattern is defined by the matrix used in the Create call, and by the
- * input parameters "thresh" and "num_levels".
  *--------------------------------------------------------------------------*/
 
 void ParaSailsSetupPattern(ParaSails *ps, Matrix *A, 
@@ -1331,8 +1326,7 @@ void ParaSailsSetupPattern(ParaSails *ps, Matrix *A,
  * ParaSailsSetupValues - Compute the numerical values of the ParaSails
  * preconditioner, for the pattern set up using ParaSailsSetupPattern.
  * This function may be called repeatedly with different input matrices
- * "A", for which a preconditioner is constructed.  (A call with the same
- * matrix as a previous call is not treated any differently.)
+ * "A", for which a preconditioner is constructed.
  *--------------------------------------------------------------------------*/
 
 void ParaSailsSetupValues(ParaSails *ps, Matrix *A, double filter)
@@ -1487,7 +1481,7 @@ void ParaSailsApply(ParaSails *ps, double *u, double *v)
 }
 
 /*--------------------------------------------------------------------------
- * ParaSailsStats - 
+ * ParaSailsStats - Print some statistics about the setup procedure to stdout.
  *--------------------------------------------------------------------------*/
 
 void ParaSailsStats(ParaSails *ps, Matrix *A)

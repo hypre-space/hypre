@@ -53,8 +53,13 @@ static void Axpy(int n, double alpha, double *x, double *y)
     daxpy_(&n, &alpha, x, &one, y, &one);
 }
 
-/* use NULL for ps if unpreconditioned */
-/* will stop at step 500 if rel. resid. norm reduction is not less than 0.1 */
+
+/*--------------------------------------------------------------------------
+ * PCG_ParaSails - PCG solver using ParaSails.
+ * Use NULL for ps if to get unpreconditioned solve.
+ * Solver will stop at step 500 if rel. resid. norm reduction is not less 
+ * than 0.1 at that point.
+ *--------------------------------------------------------------------------*/
 
 void PCG_ParaSails(Matrix *mat, ParaSails *ps, double *b, double *x,
    double tol, int max_iter)

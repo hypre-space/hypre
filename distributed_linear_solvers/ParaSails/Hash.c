@@ -134,7 +134,7 @@ void HashRehash(Hash *old, Hash *new)
 }
 
 /*--------------------------------------------------------------------------
- * HashReset -
+ * HashReset - Reset the hash table to all empty.
  *--------------------------------------------------------------------------*/
 
 void HashReset(Hash *h)
