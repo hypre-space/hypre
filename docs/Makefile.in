@@ -24,8 +24,6 @@ ONLINE_OPTS =\
 all: html ps
 
 install: all
-	@rm -fr $$HYPRE_INSTALL_DIR/docs
-	@mkdir  $$HYPRE_INSTALL_DIR/docs
 	@cp -fr usr_manual    $$HYPRE_INSTALL_DIR/docs
 	@cp -f  usr_manual.ps $$HYPRE_INSTALL_DIR/docs
 	@cp -fr code_ref_html $$HYPRE_INSTALL_DIR/docs
