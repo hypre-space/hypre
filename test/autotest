@@ -89,7 +89,7 @@ do
         HYPRE_ARCH="blue"
         HYPRE_COMPILE_MACHINE="blue"
         HYPRE_RUN_MACHINE="blue"
-        HYPRE_REMOTE_DIR="/usr/apps/hypre/AUTOTEST"
+        HYPRE_REMOTE_DIR="/usr/gapps/hypre/powerpc-ibm-aix4.3.3.0/AUTOTEST"
 	HYPRE_MACHINE_COMMANDS="-m -a 2 -cf -o 1"
 	perform_test
 	HYPRE_MACHINE_COMMANDS="-m -a 2 -dcxfy -t 1 -ns"
@@ -110,7 +110,7 @@ do
         HYPRE_ARCH="linux"
         HYPRE_COMPILE_MACHINE="lx10"
         HYPRE_RUN_MACHINE="lx10"
-        HYPRE_REMOTE_DIR="/usr/gapps/hypre/AUTOTEST"
+        HYPRE_REMOTE_DIR="/usr/gapps/hypre/alphaev67-unknown-linux-gnu/AUTOTEST"
 	HYPRE_MACHINE_COMMANDS="-m -a 2 -cf -o 1"
 	perform_test
 	HYPRE_MACHINE_COMMANDS="-m -a 2 -dcxfy -t 1 -ns"
@@ -124,6 +124,15 @@ do
         HYPRE_RUN_MACHINE="janus"
         HYPRE_REMOTE_DIR="/usr/apps/hypre/AUTOTEST"
 	HYPRE_MACHINE_COMMANDS="-m -r $HYPRE_RUN_MACHINE -a 2 -cf -o 1"
+	perform_test
+	HYPRE_MACHINE_COMMANDS="-m -a 2 -dcxfy -t 1 -ns"
+        shift;;
+    -sgi)
+        HYPRE_ARCH="sgi"
+        HYPRE_COMPILE_MACHINE="wicked"
+        HYPRE_RUN_MACHINE="wicked"
+        HYPRE_REMOTE_DIR="/home/treadway/AUTOTEST"
+	HYPRE_MACHINE_COMMANDS="-m -a 2 -cf -o 1"
 	perform_test
 	HYPRE_MACHINE_COMMANDS="-m -a 2 -dcxfy -t 1 -ns"
         shift;;
