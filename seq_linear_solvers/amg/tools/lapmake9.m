@@ -1,5 +1,5 @@
-function L = lapmake9(Nx,Ny,stncl)
-%function L = lapmake9(Nx,Ny,stncl)
+function [L,xy] = lapmake9(Nx,Ny,stncl)
+%function [L,xy] = lapmake9(Nx,Ny,stncl)
 %
 % Makes Laplacian matrix based on 9-pt input stencil (3x3 matrix)
 % using Nx nodes in x-direction and Ny nodes in y-direction 
@@ -12,7 +12,8 @@ function L = lapmake9(Nx,Ny,stncl)
 %            |           A B|
 %
 % where A, B, and C are tridiagonal matrices.
-
+%
+% Also makes the xy location matrix.
 
 B = diag(stncl(2,2)*ones(Nx,1));
 B = B + diag(stncl(2,3)*ones(Nx-1,1),1);
@@ -35,3 +36,14 @@ for j=2:Ny-1,
 end
 
 L = [L; zeros(Nx,(Ny-2)*Nx) A B];
+
+x=[1:Nx]'/(Nx+1);
+y=1/(Ny+1)*ones(Nx,1);
+
+for j=2:Ny,
+    x=[x;[1:Nx]'/(Nx+1)];
+    y=[y;j/(Ny+1)*ones(Nx,1)];
+end
+xy=[x y];
+
+
