@@ -53,6 +53,9 @@ main( int   argc,
    int                 indx, rest, tms;
    int                 max_levels = 25;
    int                 num_iterations; 
+   int                 pcg_num_its; 
+   int                 dscg_num_its; 
+   double              cf_tol = 0.9;
    double              norm;
    double              final_res_norm;
    void               *object;
@@ -550,6 +553,11 @@ main( int   argc,
          arg_index++;
          strong_threshold  = atof(argv[arg_index++]);
       }
+      else if ( strcmp(argv[arg_index], "-cf") == 0 )
+      {
+         arg_index++;
+         cf_tol  = atof(argv[arg_index++]);
+      }
       else if ( strcmp(argv[arg_index], "-tol") == 0 )
       {
          arg_index++;
@@ -674,6 +682,7 @@ main( int   argc,
       printf("       10=DS-BiCGSTAB     11=PILUT-BiCGSTAB \n");
       printf("       12=Schwarz-PCG     13=GSMG           \n");     
       printf("       14=GSMG-PCG        18=ParaSails-GMRES\n");     
+      printf("       20=Hybrid PCG/ DiagScale, AMG \n");
       printf("       43=Euclid-PCG      44=Euclid-GMRES   \n");
       printf("       45=Euclid-BICGSTAB\n");
       printf("\n");
@@ -1032,7 +1041,7 @@ main( int   argc,
 
       values = hypre_CTAlloc(double, local_num_rows);
       for (i = 0; i < local_num_rows; i++)
-         values[i] = 1.;
+         values[i] = 1.0;
       HYPRE_IJVectorSetValues(ij_b, local_num_rows, NULL, values);
       hypre_TFree(values);
 
@@ -1372,6 +1381,67 @@ main( int   argc,
       }
    }
  
+   /*-----------------------------------------------------------
+    * Solve the system using the hybrid solver
+    *-----------------------------------------------------------*/
+
+   if (solver_id == 20)
+   {
+      ioutdat = 2;
+      if (myid == 0) printf("Solver:  AMG\n");
+      time_index = hypre_InitializeTiming("AMG_hybrid Setup");
+      hypre_BeginTiming(time_index);
+
+      HYPRE_ParCSRHybridCreate(&amg_solver); 
+      HYPRE_ParCSRHybridSetTol(amg_solver, tol);
+      HYPRE_ParCSRHybridSetConvergenceTol(amg_solver, cf_tol);
+      HYPRE_ParCSRHybridSetLogging(amg_solver, ioutdat);
+      /* HYPRE_ParCSRHybridSetDSCGMaxIter(amg_solver, dscg_max_its );
+      HYPRE_ParCSRHybridSetPCGMaxIter(amg_solver, pcg_max_its ); */
+      /* HYPRE_ParCSRHybridSetCoarsenType(amg_solver, (hybrid*coarsen_type));
+      HYPRE_ParCSRHybridSetStrongThreshold(amg_solver, strong_threshold);
+      HYPRE_ParCSRHybridSetTruncFactor(amg_solver, trunc_factor);
+      HYPRE_ParCSRHybridSetNumGridSweeps(amg_solver, num_grid_sweeps);
+      HYPRE_ParCSRHybridSetGridRelaxType(amg_solver, grid_relax_type);
+      HYPRE_ParCSRHybridSetRelaxWeight(amg_solver, relax_weight);
+      HYPRE_ParCSRHybridSetGridRelaxPoints(amg_solver, grid_relax_points);
+      HYPRE_ParCSRHybridSetMaxLevels(amg_solver, max_levels);
+      HYPRE_ParCSRHybridSetMaxRowSum(amg_solver, max_row_sum); */
+  
+      HYPRE_ParCSRHybridSetup(amg_solver, parcsr_A, b, x);
+
+      hypre_EndTiming(time_index);
+      hypre_PrintTiming("Setup phase times", MPI_COMM_WORLD);
+      hypre_FinalizeTiming(time_index);
+      hypre_ClearTiming();
+ 
+      time_index = hypre_InitializeTiming("ParCSR Hybrid Solve");
+      hypre_BeginTiming(time_index);
+
+      HYPRE_ParCSRHybridSolve(amg_solver, parcsr_A, b, x);
+
+      hypre_EndTiming(time_index);
+      hypre_PrintTiming("Solve phase times", MPI_COMM_WORLD);
+      hypre_FinalizeTiming(time_index);
+      hypre_ClearTiming();
+
+      HYPRE_ParCSRHybridGetNumIterations(amg_solver, &num_iterations);
+      HYPRE_ParCSRHybridGetPCGNumIterations(amg_solver, &pcg_num_its);
+      HYPRE_ParCSRHybridGetDSCGNumIterations(amg_solver, &dscg_num_its);
+      HYPRE_ParCSRHybridGetFinalRelativeResidualNorm(amg_solver, 
+	&final_res_norm);
+
+      if (myid == 0)
+      {
+         printf("\n");
+         printf("Iterations = %d\n", num_iterations);
+         printf("PCG_Iterations = %d\n", pcg_num_its);
+         printf("DSCG_Iterations = %d\n", dscg_num_its);
+         printf("Final Relative Residual Norm = %e\n", final_res_norm);
+         printf("\n");
+      }
+      HYPRE_ParCSRHybridDestroy(amg_solver);
+   }
    /*-----------------------------------------------------------
     * Solve the system using AMG
     *-----------------------------------------------------------*/
