@@ -28,6 +28,7 @@ int HYPRE_ParAMGSolveT P((HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE_Par
 int HYPRE_ParAMGSetRestriction P((HYPRE_Solver solver , int restr_par ));
 int HYPRE_ParAMGSetMaxLevels P((HYPRE_Solver solver , int max_levels ));
 int HYPRE_ParAMGSetStrongThreshold P((HYPRE_Solver solver , double strong_threshold ));
+int HYPRE_ParAMGSetTruncFactor P((HYPRE_Solver solver , double trunc_factor ));
 int HYPRE_ParAMGSetInterpType P((HYPRE_Solver solver , int interp_type ));
 int HYPRE_ParAMGSetMaxIter P((HYPRE_Solver solver , int max_iter ));
 int HYPRE_ParAMGSetCoarsenType P((HYPRE_Solver solver , int coarsen_type ));
@@ -130,6 +131,7 @@ int hypre_ParAMGFinalize P((void *data ));
 int hypre_ParAMGSetRestriction P((void *data , int restr_par ));
 int hypre_ParAMGSetMaxLevels P((void *data , int max_levels ));
 int hypre_ParAMGSetStrongThreshold P((void *data , double strong_threshold ));
+int hypre_ParAMGSetTruncFactor P((void *data , double trunc_factor ));
 int hypre_ParAMGSetInterpType P((void *data , int interp_type ));
 int hypre_ParAMGSetMaxIter P((void *data , int max_iter ));
 int hypre_ParAMGSetCoarsenType P((void *data , int coarsen_type ));
@@ -173,7 +175,7 @@ int hypre_InitParAMGIndepSet P((hypre_ParCSRMatrix *S , double *measure_array ))
 int hypre_ParAMGIndepSet P((hypre_ParCSRMatrix *S , hypre_CSRMatrix *S_ext , double *measure_array , int *graph_array , int graph_array_size , int *IS_marker , int *IS_marker_offd ));
 
 /* par_interp.c */
-int hypre_ParAMGBuildInterp P((hypre_ParCSRMatrix *A , int *CF_marker , hypre_ParCSRMatrix *S , int debug_flag , hypre_ParCSRMatrix **P_ptr ));
+int hypre_ParAMGBuildInterp P((hypre_ParCSRMatrix *A , int *CF_marker , hypre_ParCSRMatrix *S , int debug_flag , double trunc_factor , hypre_ParCSRMatrix **P_ptr ));
 
 /* par_laplace.c */
 hypre_ParCSRMatrix *hypre_GenerateLaplacian P((MPI_Comm comm , int nx , int ny , int nz , int P , int Q , int R , int p , int q , int r , double *value ));
