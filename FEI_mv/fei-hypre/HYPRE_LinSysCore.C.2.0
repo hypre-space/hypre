@@ -1991,7 +1991,7 @@ int HYPRE_LinSysCore::sumIntoSystemMatrix(int numPtRows, const int* ptRows,
           {
              printf("%4d : sumIntoSystemMatrix ERROR - loading column");
              printf("      that has not been declared before - %d.\n",colIndex);
-             for ( k = 0; j < rowLengths_[localRow]; j++ ) 
+             for ( k = 0; k < rowLengths_[localRow]; k++ ) 
                 printf("       available column index = %d\n",
                         colIndices_[localRow][k]);
              exit(1);
@@ -2035,12 +2035,78 @@ int HYPRE_LinSysCore::putIntoSystemMatrix(int numPtRows, const int* ptRows,
                             int numPtCols, const int* ptCols,
                             const double* const* values)
 {
-    (void) numPtRows;
-    (void) ptRows;
-    (void) numPtCols;
-    (void) ptCols;
-    (void) values;
-    printf("putIntoSystemMatrix ERROR : not implemented.\n");
+    int    i, j, localRow, newLeng, *tempInd, colIndex, index;
+    double *tempVal;
+
+    //-------------------------------------------------------------------
+    // diagnostic message for high output level only
+    //-------------------------------------------------------------------
+
+    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )
+    {
+       printf("%4d : HYPRE_LSC::entering putIntoSystemMatrix(2).\n",mypid_);
+    }
+
+    //-------------------------------------------------------------------
+    // error checking
+    //-------------------------------------------------------------------
+
+    if ( systemAssembled_ == 1 )
+    {
+       printf("putIntoSystemMatrix ERROR : matrix already assembled\n");
+       exit(1);
+    }
+    if ( numPtRows <= 0 || numPtCols <= 0 )
+    {
+       printf("%4d : putIntoSystemMatrix ERROR : invalid numPt.\n",mypid_);
+       return (-1);
+    }
+
+    //-------------------------------------------------------------------
+    // first adjust memory allocation (conservative)
+    //-------------------------------------------------------------------
+
+    for ( i = 0; i < numPtRows; i++ ) 
+    {
+       localRow = ptRows[i] - localStartRow_ + 1;
+       newLeng  = rowLengths_[localRow] + numPtCols;
+       tempInd  = new int[newLeng];
+       tempVal  = new double[newLeng];
+       for ( j = 0; j < rowLengths_[localRow]; j++ ) 
+       {
+          tempVal[j] = colValues_[localRow][j];
+          tempInd[j] = colIndices_[localRow][j];
+       }
+       delete [] colValues_[localRow];
+       delete [] colIndices_[localRow];
+       colValues_[localRow] = tempVal;
+       colIndices_[localRow] = tempInd;
+    }
+
+    //-------------------------------------------------------------------
+    // load the local matrix
+    //-------------------------------------------------------------------
+
+    for ( i = 0; i < numPtRows; i++ ) 
+    {
+       localRow = ptRows[i] - localStartRow_ + 1;
+       newLeng  = rowLengths_[localRow];
+       tempInd  = colIndices_[localRow];
+       tempVal  = colValues_[localRow];
+       for ( j = 0; j < numPtCols; j++ ) 
+       { 
+          colIndex = ptCols[j] + 1;
+          index    = hypre_BinarySearch(tempInd, colIndex, newLeng);
+          if ( index < 0 )
+          {
+             tempInd[rowLengths_[localRow]]   = colIndex;
+             tempVal[rowLengths_[localRow]++] = values[i][j];
+          }
+          else tempVal[index] = values[i][j];
+       }
+       newLeng  = rowLengths_[localRow];
+       HYPRE_LSI_Sort(tempInd, newLeng, NULL, tempVal);
+    }
     return(0);
 }
 
