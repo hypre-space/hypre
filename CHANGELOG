@@ -17,14 +17,35 @@
 
 Version 1.8.3a released, 2004/01/21.
 
-- Now using GNU automake-1.8.2 to support Makefile.in generation, 
-  autoconf-2.59 to generate configure, and libtool-1.5 for shared
-  library support. with the addition of other GNU tools; autoheader, 
-  libtoolize, and aclocal, the flexibility, and platform support
-  should be better than ever, and more closely follow GNU standards. 
-- Divided up lapack, and Blas support library routines into respective
-  directories. Hypre Blas/lapack support determined by configure, and
-  can be over-ridden --with-blas=<lib> and --with-lapack=<lib>.
+- The build system has been revamped to enable the building of shared
+  libraries (in addition to static libraries, as before).  The new
+  system more closely follows GNU standards, and will hopefully show
+  improved flexibility and platform support.  Users can build hypre
+  as before by typing 'configure' followed by 'make'.  A few makefile
+  target changes to note are:
+
+    * 'make clean' replaces 'make veryclean'
+    * 'make all' no longer builds the drivers in the 'test' directory.
+       If needed, build them from within the 'test' directory or
+       use the 'make test' target.
+
+  Technical notes: We are now using GNU automake-1.8.2 to support
+  Makefile.in generation; autoconf-2.59 to generate configure; and
+  libtool-1.5 to provide shared library support.  The GNU tools,
+  autoheader, libtoolize, and aclocal are also used.  These tools are
+  only used by hypre developers and are *not* needed to build hypre.
+
+- Separated the lapack and blas routines into two libraries.  Blas and
+  lapack support (whether to use the routines distributed with hypre or
+  use already installed libraries) is determined by configure, and can
+  be overridden with '--with-blas=<lib>' and '--with-lapack=<lib>'.
+  NOTE: This change affects your link line!
+
+- Fixed the PFMG and SMG solvers to work in the case of pure Neumann
+  boundary conditions.
+
+- Added new coarsening options in BoomerAMG.  These options can lead
+  to reduced complexity, and hence reduced storage and solution time.
 
 Version 1.8.2b released, 2003/10/22.
 
