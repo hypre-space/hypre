@@ -303,6 +303,9 @@ hypre_PFMGSetupInterpOp( hypre_StructMatrix *A,
 
                   if (Astenc == 0)
                   {
+                     /* expected to be the only case, this loop needs some
+                        more thought & cleanup.  Also, I think center_offd=0
+                        and mrk?==0 always.  */
                      center += Ap[Ai];
                   }
                   else if (Astenc == Pstenc0)

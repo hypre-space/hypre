@@ -166,7 +166,6 @@ hypre_PFMGBuildCoarseOp5( hypre_StructMatrix *A,
    hypre_Index           loop_size;
 
    int                   constant_coefficient;
-   int                   constant_coefficient_A;
 
    int                   fi, ci;
    int                   loopi, loopj, loopk;
@@ -204,18 +203,10 @@ hypre_PFMGBuildCoarseOp5( hypre_StructMatrix *A,
    cgrid_ids = hypre_StructGridIDs(cgrid);
 
    constant_coefficient = hypre_StructMatrixConstantCoefficient(RAP);
-   constant_coefficient_A = hypre_StructMatrixConstantCoefficient(A);
-   assert( constant_coefficient==0 || constant_coefficient==1 );
+   assert( constant_coefficient==0 || constant_coefficient==1 || constant_coefficient==2 );
+   assert( hypre_StructMatrixConstantCoefficient(A) == constant_coefficient );
    assert( hypre_StructMatrixConstantCoefficient(R) == constant_coefficient );
    assert( hypre_StructMatrixConstantCoefficient(P) == constant_coefficient );
-   if (constant_coefficient==1 )
-   {
-      assert( constant_coefficient_A==1 );
-   }
-   else
-   {
-      assert( constant_coefficient_A==0 || constant_coefficient_A==2 );
-   }
       
    fi = 0;
    hypre_ForBoxI(ci, cgrid_boxes)
@@ -330,7 +321,7 @@ hypre_PFMGBuildCoarseOp5( hypre_StructMatrix *A,
          else
          {
             yOffsetP = hypre_BoxOffsetDistance(P_dbox,index);
-            if ( constant_coefficient_A == 0 )
+            if ( constant_coefficient == 0 )
             {
                yOffsetA = hypre_BoxOffsetDistance(A_dbox,index);
             }
@@ -380,7 +371,7 @@ hypre_PFMGBuildCoarseOp5( hypre_StructMatrix *A,
          {
             hypre_BoxGetSize(cgrid_box, loop_size);
 
-            if ( constant_coefficient_A == 0 )
+            if ( constant_coefficient == 0 )
             {
                hypre_BoxLoop3Begin(loop_size,
                                    P_dbox, cstart, stridec, iP,
@@ -418,7 +409,7 @@ hypre_PFMGBuildCoarseOp5( hypre_StructMatrix *A,
                   }
                hypre_BoxLoop3End(iP, iA, iAc);
             }
-            else /* constant_coefficient_A==2 */
+            else /* constant_coefficient==2 */
             {
                /* First, deal with the purely off-diagonal parts of A,
                   which are constant coefficient */
@@ -448,8 +439,8 @@ hypre_PFMGBuildCoarseOp5( hypre_StructMatrix *A,
                      iPm1 = iP - yOffsetP;
                      iPp1 = iP + yOffsetP;
 
-                     rap_cs[iAc] = a_cs[iA] * pa[iPm1];
-                     rap_cn[iAc] = a_cn[iA] * pb[iPp1];
+                     rap_cs[iAc] = a_cs_cc * pa[iPm1];
+                     rap_cn[iAc] = a_cn_cc * pb[iPp1];
 
                      rap_cw[iAc] = west;
                      rap_ce[iAc] = east;

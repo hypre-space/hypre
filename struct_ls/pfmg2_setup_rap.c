@@ -851,6 +851,7 @@ hypre_PFMG2BuildRAPNoSym( hypre_StructMatrix *A,
    cgrid_ids = hypre_StructGridIDs(cgrid);
 
    constant_coefficient = hypre_StructMatrixConstantCoefficient(RAP);
+   constant_coefficient_A = hypre_StructMatrixConstantCoefficient(A);
    if (constant_coefficient)
    {
       assert( hypre_StructMatrixConstantCoefficient(R) );

@@ -49,11 +49,11 @@ hypre_PFMGCreateRAPOp( hypre_StructMatrix *R,
    {
       switch (hypre_StructStencilDim(stencil)) 
       {
-         case 2:
+      case 2:
          RAP = hypre_PFMG2CreateRAPOp(R ,A, P, coarse_grid, cdir);
          break;
     
-         case 3:
+      case 3:
          RAP = hypre_PFMG3CreateRAPOp(R ,A, P, coarse_grid, cdir);
          break;
       } 
@@ -78,14 +78,15 @@ hypre_PFMGCreateRAPOp( hypre_StructMatrix *R,
                                         P_stored_as_transpose);
    }
 
+
    constant_coefficient = hypre_StructMatrixConstantCoefficient(A);
-   if ( constant_coefficient==2 )
+   if ( constant_coefficient==2 && rap_type==0 )
    {
-      /* A has variable diagonal, so P (and R) is entirely variable coefficient,
-       so RAP will be variable coefficient */
+      /* A has variable diagonal, so, in the Galerkin case, P (and R) is
+         entirely variable coefficient.  Thus RAP will be variable coefficient */
       hypre_StructMatrixSetConstantCoefficient( RAP, 0 );
    }
-   else /* constant_coefficient== 0 or 1 */
+   else
    {
       hypre_StructMatrixSetConstantCoefficient( RAP, constant_coefficient );
    }

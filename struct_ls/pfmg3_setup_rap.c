@@ -1391,6 +1391,10 @@ hypre_PFMG3BuildRAPSym( hypre_StructMatrix *A,
                      a_cne_offdm1 = a_cne[iA_offdm1];
                      a_cnw_offdm1 = a_cnw[iA_offdm1];
                      a_ce_offdm1 = a_ce[iA_offdm1];
+                     a_asw_offd = a_asw[iA_offd];
+                     a_asw_offdm1 = a_asw[iA_offdm1];
+                     a_ase_offd = a_ase[iA_offd];
+                     a_ase_offdm1 = a_ase[iA_offdm1];
                      a_bc_offd = a_bc[iA_offd];
                      a_bc_offdm1 = a_bc[iA_offdm1];
                      a_bc_offdp1 = a_bc[iA_offdp1];
