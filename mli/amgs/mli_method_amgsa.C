@@ -1040,7 +1040,7 @@ int MLI_Method_AMGSA::copy( MLI_Method *new_obj )
    }
    else
    {
-      cout << "MLI_Method_AMGSA::copy ERROR - incoming object not AMGSA.\n");
+      cout << "MLI_Method_AMGSA::copy ERROR - incoming object not AMGSA.\n";
       exit(1);
    }
    return 0;
