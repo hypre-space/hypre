@@ -176,7 +176,7 @@ hypre_ParAMGSetup( void               *amg_vdata,
     * Print some stuff
     *-----------------------------------------------------------------------*/
 
-   if (amg_ioutdat == 1 || amg_ioutdat == 3)
+   if (amg_ioutdat >= 2)
       hypre_ParAMGSetupStats(amg_data,A);
 
 #if 0 /* add later */
