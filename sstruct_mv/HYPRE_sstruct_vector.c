@@ -199,7 +199,7 @@ HYPRE_SStructVectorInitialize( HYPRE_SStructVector vector )
      iupper = ilower + hypre_SStructGridLocalSize(grid) - 1;
    }
    
-   if(vector_type == HYPRE_SSTRUCT)
+   if(vector_type == HYPRE_SSTRUCT || vector_type == HYPRE_STRUCT)
    {
      ilower = hypre_SStructGridGhstartRank(grid);
      iupper = ilower + hypre_SStructGridGhlocalSize(grid) - 1;
@@ -230,7 +230,7 @@ HYPRE_SStructVectorInitialize( HYPRE_SStructVector vector )
     * We do not need the IJVectorInitializePar, we have to undoit for the SStruct case
     * in a sense it is a desinitializepar */
 
-   if (vector_type == HYPRE_SSTRUCT)
+   if (vector_type == HYPRE_SSTRUCT || vector_type == HYPRE_STRUCT)
    {
      par_vector = hypre_IJVectorObject(ijvector);
      parlocal_vector = hypre_ParVectorLocalVector(par_vector);
@@ -515,17 +515,30 @@ HYPRE_SStructVectorGetObject( HYPRE_SStructVector   vector,
 {
    int ierr = 0;
    int vector_type = hypre_SStructVectorObjectType(vector);
+   hypre_SStructPVector *pvector;
+   hypre_StructVector   *svector;
+
+   int part, var;
 
    /* GEC1102 in case the vector is HYPRE_SSTRUCT  */
 
-     if (vector_type == HYPRE_SSTRUCT)
-     {
-        hypre_SStructVectorConvert(vector, (hypre_ParVector **) object);
-     }
-   if (vector_type == HYPRE_PARCSR)
-     {
-        hypre_SStructVectorParConvert(vector, (hypre_ParVector **) object);
-     }
+   if (vector_type == HYPRE_SSTRUCT)
+   {
+      hypre_SStructVectorConvert(vector, (hypre_ParVector **) object);
+   }
+   else if (vector_type == HYPRE_PARCSR)
+   {
+      hypre_SStructVectorParConvert(vector, (hypre_ParVector **) object);
+   }
+   else if (vector_type == HYPRE_STRUCT)
+   {
+      /* only one part & one variable */
+      part= 0;
+      var = 0;
+      pvector= hypre_SStructVectorPVector(vector, part);
+      svector= hypre_SStructPVectorSVector(pvector, var);
+     *object = svector;
+   }
 
    return ierr;
 }
