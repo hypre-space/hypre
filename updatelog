@@ -25,3 +25,16 @@ New internal installation: V2000-01-14
   slower setup phase times for small-scale problems, but much
   improved setup phase times for very large-scale (greater than
   1000 processors) problems.
+
+- AMG and GMRES solvers have minor fixes for reproducibility under
+  restart.
+
+- A subtle coarse grid operator bug in AMG was removed.  AMG no longer
+  frees from an uninitialized pointer to an empty domain coarse grid
+  operator.
+
+- Minimum iteration count controls have been installed for AMG, GMRES,
+  and CGNR.
+
+- Fortran interface wrappers have been made for ParCSRMatrixMatvec and
+  ParCSRMatrixMatvecT calls
