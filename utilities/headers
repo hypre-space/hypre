@@ -38,7 +38,13 @@ cat mpistubs.h                 >> $INTERNAL_HEADER
 cat memory.h                   >> $INTERNAL_HEADER
 		          
 cat timing.h                   >> $INTERNAL_HEADER
-		          
+
+cat thread_mpistubs.h          >> $INTERNAL_HEADER
+
+cat threading.h                >> $INTERNAL_HEADER
+
+cat mpi.h                      >> $INTERNAL_HEADER
+
 #===========================================================================
 # Include guards
 #===========================================================================

@@ -14,16 +14,13 @@
 
 #ifdef HYPRE_USE_PTHREADS
 
-#define MPI_DEFINED 
+#define HYPRE_USING_THREAD_MPISTUBS 
 
-#include "thread_mpistubs.h"
 #include "hypre_utilities.h"
-#include "mpi.h"
-#include "threading.h"
 
 
 int
-thread_MPI_Init( int    *argc,
+hypre_thread_MPI_Init( int    *argc,
           char ***argv)
 {
   int returnval;
@@ -40,7 +37,7 @@ thread_MPI_Init( int    *argc,
 }
 
 double
-thread_MPI_Wtime( )
+hypre_thread_MPI_Wtime( )
 {
   double returnval;
   if (pthread_equal(pthread_self(),hypre_thread[0]))
@@ -56,7 +53,7 @@ thread_MPI_Wtime( )
 }
 
 double
-thread_MPI_Wtick( )
+hypre_thread_MPI_Wtick( )
 {
   double returnval;
   if (pthread_equal(pthread_self(),hypre_thread[0]))
@@ -71,7 +68,7 @@ thread_MPI_Wtick( )
 }
 
 int
-thread_MPI_Barrier( MPI_Comm comm )
+hypre_thread_MPI_Barrier( MPI_Comm comm )
 {
   int returnval;
   hypre_barrier(&mpi_mtx);
@@ -88,7 +85,7 @@ thread_MPI_Barrier( MPI_Comm comm )
 }
 
 int
-thread_MPI_Finalize( )
+hypre_thread_MPI_Finalize( )
 {
   int returnval;
   hypre_barrier(&mpi_mtx);
@@ -104,7 +101,7 @@ thread_MPI_Finalize( )
 }
 
 int
-thread_MPI_Comm_group( MPI_Comm   comm,
+hypre_thread_MPI_Comm_group( MPI_Comm   comm,
                 MPI_Group *group )
 {
   int returnval;
@@ -120,7 +117,7 @@ thread_MPI_Comm_group( MPI_Comm   comm,
 }
 
 int
-thread_MPI_Comm_dup( MPI_Comm  comm,
+hypre_thread_MPI_Comm_dup( MPI_Comm  comm,
               MPI_Comm *newcomm )
 {
   int returnval;
@@ -136,7 +133,7 @@ thread_MPI_Comm_dup( MPI_Comm  comm,
 }
 
 int
-thread_MPI_Group_incl( MPI_Group  group,
+hypre_thread_MPI_Group_incl( MPI_Group  group,
                 int        n,
                 int       *ranks,
                 MPI_Group *newgroup )
@@ -154,7 +151,7 @@ thread_MPI_Group_incl( MPI_Group  group,
 }
 
 int
-thread_MPI_Comm_create( MPI_Comm  comm,
+hypre_thread_MPI_Comm_create( MPI_Comm  comm,
                  MPI_Group group,
                  MPI_Comm *newcomm )
 {
@@ -171,7 +168,7 @@ thread_MPI_Comm_create( MPI_Comm  comm,
 }
 
 int
-thread_MPI_Allgather( void        *sendbuf,
+hypre_thread_MPI_Allgather( void        *sendbuf,
                int          sendcount,
                MPI_Datatype sendtype,
                void        *recvbuf,
@@ -232,7 +229,7 @@ thread_MPI_Allgather( void        *sendbuf,
 }
 
 int
-thread_MPI_Allgatherv( void        *sendbuf,
+hypre_thread_MPI_Allgatherv( void        *sendbuf,
                 int          sendcount,
                 MPI_Datatype sendtype,
                 void        *recvbuf,
@@ -295,7 +292,7 @@ thread_MPI_Allgatherv( void        *sendbuf,
 }
 
 int
-thread_MPI_Bcast( void        *buffer,
+hypre_thread_MPI_Bcast( void        *buffer,
            int          count,
            MPI_Datatype datatype,
            int          root,
@@ -317,7 +314,7 @@ thread_MPI_Bcast( void        *buffer,
 }
 
 int
-thread_MPI_Send( void        *buf,
+hypre_thread_MPI_Send( void        *buf,
           int          count,
           MPI_Datatype datatype,
           int          dest,
@@ -339,7 +336,7 @@ thread_MPI_Send( void        *buf,
 }
 
 int
-thread_MPI_Recv( void        *buf,
+hypre_thread_MPI_Recv( void        *buf,
           int          count,
           MPI_Datatype datatype,
           int          source,
@@ -362,7 +359,7 @@ thread_MPI_Recv( void        *buf,
 }
 
 int
-thread_MPI_Isend( void        *buf,
+hypre_thread_MPI_Isend( void        *buf,
            int          count,
            MPI_Datatype datatype,
            int          dest,
@@ -385,7 +382,7 @@ thread_MPI_Isend( void        *buf,
 }
 
 int
-thread_MPI_Irecv( void        *buf,
+hypre_thread_MPI_Irecv( void        *buf,
            int          count,
            MPI_Datatype datatype,
            int          source,
@@ -407,7 +404,7 @@ thread_MPI_Irecv( void        *buf,
 }
 
 int
-thread_MPI_Wait( MPI_Request *request,
+hypre_thread_MPI_Wait( MPI_Request *request,
           MPI_Status  *status  )
 {
   int returnval;
@@ -425,7 +422,7 @@ thread_MPI_Wait( MPI_Request *request,
 }
 
 int
-thread_MPI_Waitall( int          count,
+hypre_thread_MPI_Waitall( int          count,
              MPI_Request *array_of_requests,
              MPI_Status  *array_of_statuses )
 {
@@ -443,7 +440,7 @@ thread_MPI_Waitall( int          count,
 }
 
 int
-thread_MPI_Waitany( int          count,
+hypre_thread_MPI_Waitany( int          count,
              MPI_Request *array_of_requests,
              int         *index,
              MPI_Status  *status            )
@@ -463,7 +460,7 @@ thread_MPI_Waitany( int          count,
 }
 
 int
-thread_MPI_Comm_size( MPI_Comm comm,
+hypre_thread_MPI_Comm_size( MPI_Comm comm,
                int     *size )
 { 
   int returnval;
@@ -480,7 +477,7 @@ thread_MPI_Comm_size( MPI_Comm comm,
 }
 
 int
-thread_MPI_Comm_rank( MPI_Comm comm,
+hypre_thread_MPI_Comm_rank( MPI_Comm comm,
                int     *rank )
 { 
   int returnval;
@@ -497,7 +494,7 @@ thread_MPI_Comm_rank( MPI_Comm comm,
 }
 
 int
-thread_MPI_Allreduce( void        *sendbuf,
+hypre_thread_MPI_Allreduce( void        *sendbuf,
                void        *recvbuf,
                int          count,
                MPI_Datatype datatype,
@@ -546,7 +543,7 @@ thread_MPI_Allreduce( void        *sendbuf,
 }
 
 int
-thread_MPI_Type_hvector( int           count,
+hypre_thread_MPI_Type_hvector( int           count,
                   int           blocklength,
                   MPI_Aint      stride,
                   MPI_Datatype  oldtype,
@@ -566,7 +563,7 @@ thread_MPI_Type_hvector( int           count,
 }
 
 int
-thread_MPI_Type_struct( int           count,
+hypre_thread_MPI_Type_struct( int           count,
                  int          *array_of_blocklengths,
                  MPI_Aint     *array_of_displacements,
                  MPI_Datatype *array_of_types,
@@ -587,7 +584,7 @@ thread_MPI_Type_struct( int           count,
 }
 
 int
-thread_MPI_Type_free( MPI_Datatype *datatype )
+hypre_thread_MPI_Type_free( MPI_Datatype *datatype )
 {
   int returnval;
   hypre_barrier(&mpi_mtx);
@@ -603,7 +600,7 @@ thread_MPI_Type_free( MPI_Datatype *datatype )
 }
 
 int
-thread_MPI_Type_commit( MPI_Datatype *datatype )
+hypre_thread_MPI_Type_commit( MPI_Datatype *datatype )
 {
   int returnval;
   if (pthread_equal(pthread_self(),hypre_thread[0]))
