@@ -62,15 +62,24 @@ hypre_DestroyAuxParCSRMatrix( hypre_AuxParCSRMatrix *matrix )
 
    if (matrix)
    {
-      hypre_TFree(hypre_AuxParCSRMatrixRowStartDiag(matrix));
-      hypre_TFree(hypre_AuxParCSRMatrixRowEndDiag(matrix));
-      hypre_TFree(hypre_AuxParCSRMatrixAuxDiagJ(matrix));
-      hypre_TFree(hypre_AuxParCSRMatrixAuxDiagData(matrix));
-      hypre_TFree(hypre_AuxParCSRMatrixRowStartOffd(matrix));
-      hypre_TFree(hypre_AuxParCSRMatrixRowEndOffd(matrix));
-      hypre_TFree(hypre_AuxParCSRMatrixAuxOffdJ(matrix));
-      hypre_TFree(hypre_AuxParCSRMatrixAuxOffdData(matrix));
-
+      if (hypre_AuxParCSRMatrixRowStartDiag(matrix))
+         hypre_TFree(hypre_AuxParCSRMatrixRowStartDiag(matrix));
+      if (hypre_AuxParCSRMatrixRowEndDiag(matrix))
+         hypre_TFree(hypre_AuxParCSRMatrixRowEndDiag(matrix));
+      if (hypre_AuxParCSRMatrixDiagSize(matrix) > 0)
+      {
+         hypre_TFree(hypre_AuxParCSRMatrixAuxDiagJ(matrix));
+         hypre_TFree(hypre_AuxParCSRMatrixAuxDiagData(matrix));
+      }
+      if (hypre_AuxParCSRMatrixRowStartOffd(matrix))
+         hypre_TFree(hypre_AuxParCSRMatrixRowStartOffd(matrix));
+      if (hypre_AuxParCSRMatrixRowStartOffd(matrix))
+         hypre_TFree(hypre_AuxParCSRMatrixRowEndOffd(matrix));
+      if (hypre_AuxParCSRMatrixOffdSize(matrix) > 0)
+      {
+         hypre_TFree(hypre_AuxParCSRMatrixAuxOffdJ(matrix));
+         hypre_TFree(hypre_AuxParCSRMatrixAuxOffdData(matrix));
+      }
       hypre_TFree(matrix);
    }
 
@@ -89,18 +98,29 @@ hypre_InitializeAuxParCSRMatrix( hypre_AuxParCSRMatrix *matrix )
    int local_num_cols = hypre_AuxParCSRMatrixLocalNumCols(matrix);
    int diag_size = hypre_AuxParCSRMatrixDiagSize(matrix);
    int offd_size = hypre_AuxParCSRMatrixOffdSize(matrix);
-   hypre_AuxParCSRMatrixRowStartDiag(matrix) = 
+   if (diag_size != -2)
+   {
+      hypre_AuxParCSRMatrixRowStartDiag(matrix) = 
+  		hypre_CTAlloc(int, local_num_rows+1);
+      hypre_AuxParCSRMatrixRowEndDiag(matrix) = 
  		hypre_CTAlloc(int, local_num_rows+1);
-   hypre_AuxParCSRMatrixRowEndDiag(matrix) = 
+   }
+   if (diag_size > 0)
+   {
+      hypre_AuxParCSRMatrixAuxDiagJ(matrix) = hypre_CTAlloc(int, diag_size);
+      hypre_AuxParCSRMatrixAuxDiagData(matrix) = hypre_CTAlloc(double, diag_size);
+   }
+   if (offd_size != -2)
+   {
+      hypre_AuxParCSRMatrixRowStartOffd(matrix) = 
  		hypre_CTAlloc(int, local_num_rows+1);
-   hypre_AuxParCSRMatrixAuxDiagJ(matrix) = hypre_CTAlloc(int, diag_size);
-   hypre_AuxParCSRMatrixAuxDiagData(matrix) = hypre_CTAlloc(double, diag_size);
-   hypre_AuxParCSRMatrixRowStartOffd(matrix) = 
+      hypre_AuxParCSRMatrixRowEndOffd(matrix) = 
  		hypre_CTAlloc(int, local_num_rows+1);
-   hypre_AuxParCSRMatrixRowEndOffd(matrix) = 
- 		hypre_CTAlloc(int, local_num_rows+1);
-   hypre_AuxParCSRMatrixAuxOffdJ(matrix) = hypre_CTAlloc(int, offd_size);
-   hypre_AuxParCSRMatrixAuxOffdData(matrix) = hypre_CTAlloc(double, offd_size);
-
+   }
+   if (offd_size > 0)
+   {
+      hypre_AuxParCSRMatrixAuxOffdJ(matrix) = hypre_CTAlloc(int, offd_size);
+      hypre_AuxParCSRMatrixAuxOffdData(matrix) = hypre_CTAlloc(double, offd_size);
+   }
    return ierr;
 }
