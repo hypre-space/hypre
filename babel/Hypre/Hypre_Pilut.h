@@ -3,8 +3,8 @@
  * Symbol:        Hypre.Pilut-v0.1.5
  * Symbol Type:   class
  * Babel Version: 0.6.3
- * SIDL Created:  20020711 16:38:24 PDT
- * Generated:     20020711 16:38:30 PDT
+ * SIDL Created:  20020904 10:05:22 PDT
+ * Generated:     20020904 10:05:27 PDT
  * Description:   Client-side glue code for Hypre.Pilut
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -61,7 +61,9 @@ Hypre_Pilut_SetLogging(
  */
 int32_t
 Hypre_Pilut_Setup(
-  Hypre_Pilut self);
+  Hypre_Pilut self,
+  Hypre_Vector x,
+  Hypre_Vector y);
 
 /**
  * Method:  SetIntArrayParameter

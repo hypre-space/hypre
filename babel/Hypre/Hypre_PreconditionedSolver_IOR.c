@@ -3,8 +3,8 @@
  * Symbol:        Hypre.PreconditionedSolver-v0.1.5
  * Symbol Type:   interface
  * Babel Version: 0.6.3
- * SIDL Created:  20020711 16:38:24 PDT
- * Generated:     20020711 16:38:28 PDT
+ * SIDL Created:  20020904 10:05:21 PDT
+ * Generated:     20020904 10:05:25 PDT
  * Description:   Intermediate Object Representation for Hypre.PreconditionedSolver
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -663,7 +663,9 @@ remote_Hypre_PreconditionedSolver_SetStringParameter(
 
 static int32_t
 remote_Hypre_PreconditionedSolver_Setup(
-  void* self)
+  void* self,
+  struct Hypre_Vector__object* x,
+  struct Hypre_Vector__object* y)
 {
   return 0;
 }

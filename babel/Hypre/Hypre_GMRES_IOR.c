@@ -3,8 +3,8 @@
  * Symbol:        Hypre.GMRES-v0.1.5
  * Symbol Type:   class
  * Babel Version: 0.6.3
- * SIDL Created:  20020711 16:38:24 PDT
- * Generated:     20020711 16:38:25 PDT
+ * SIDL Created:  20020904 10:05:22 PDT
+ * Generated:     20020904 10:05:23 PDT
  * Description:   Intermediate Object Representation for Hypre.GMRES
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -170,7 +170,8 @@ static void Hypre_GMRES__init_epv(
     int32_t)) epv->f_SetIntParameter;
   e0->f_SetStringParameter      = (int32_t (*)(void*,const char*,
     const char*)) epv->f_SetStringParameter;
-  e0->f_Setup                   = (int32_t (*)(void*)) epv->f_Setup;
+  e0->f_Setup                   = (int32_t (*)(void*,
+    struct Hypre_Vector__object*,struct Hypre_Vector__object*)) epv->f_Setup;
   e0->f_addReference            = (void (*)(void*)) epv->f_addReference;
   e0->f_deleteReference         = (void (*)(void*)) epv->f_deleteReference;
   e0->f_isInstanceOf            = (SIDL_bool (*)(void*,
@@ -212,7 +213,8 @@ static void Hypre_GMRES__init_epv(
     int32_t)) epv->f_SetPrintLevel;
   e1->f_SetStringParameter        = (int32_t (*)(void*,const char*,
     const char*)) epv->f_SetStringParameter;
-  e1->f_Setup                     = (int32_t (*)(void*)) epv->f_Setup;
+  e1->f_Setup                     = (int32_t (*)(void*,
+    struct Hypre_Vector__object*,struct Hypre_Vector__object*)) epv->f_Setup;
   e1->f_addReference              = (void (*)(void*)) epv->f_addReference;
   e1->f_deleteReference           = (void (*)(void*)) epv->f_deleteReference;
   e1->f_isInstanceOf              = (SIDL_bool (*)(void*,
@@ -250,7 +252,8 @@ static void Hypre_GMRES__init_epv(
     int32_t)) epv->f_SetPrintLevel;
   e2->f_SetStringParameter      = (int32_t (*)(void*,const char*,
     const char*)) epv->f_SetStringParameter;
-  e2->f_Setup                   = (int32_t (*)(void*)) epv->f_Setup;
+  e2->f_Setup                   = (int32_t (*)(void*,
+    struct Hypre_Vector__object*,struct Hypre_Vector__object*)) epv->f_Setup;
   e2->f_addReference            = (void (*)(void*)) epv->f_addReference;
   e2->f_deleteReference         = (void (*)(void*)) epv->f_deleteReference;
   e2->f_isInstanceOf            = (SIDL_bool (*)(void*,
@@ -986,7 +989,9 @@ remote_Hypre_GMRES_SetStringParameter(
 
 static int32_t
 remote_Hypre_GMRES_Setup(
-  struct Hypre_GMRES__object* self)
+  struct Hypre_GMRES__object* self,
+  struct Hypre_Vector__object* x,
+  struct Hypre_Vector__object* y)
 {
   return 0;
 }
@@ -1108,7 +1113,8 @@ static void Hypre_GMRES__init_remote_epv(void)
     int32_t)) epv->f_SetIntParameter;
   e0->f_SetStringParameter      = (int32_t (*)(void*,const char*,
     const char*)) epv->f_SetStringParameter;
-  e0->f_Setup                   = (int32_t (*)(void*)) epv->f_Setup;
+  e0->f_Setup                   = (int32_t (*)(void*,
+    struct Hypre_Vector__object*,struct Hypre_Vector__object*)) epv->f_Setup;
   e0->f_addReference            = (void (*)(void*)) epv->f_addReference;
   e0->f_deleteReference         = (void (*)(void*)) epv->f_deleteReference;
   e0->f_isInstanceOf            = (SIDL_bool (*)(void*,
@@ -1150,7 +1156,8 @@ static void Hypre_GMRES__init_remote_epv(void)
     int32_t)) epv->f_SetPrintLevel;
   e1->f_SetStringParameter        = (int32_t (*)(void*,const char*,
     const char*)) epv->f_SetStringParameter;
-  e1->f_Setup                     = (int32_t (*)(void*)) epv->f_Setup;
+  e1->f_Setup                     = (int32_t (*)(void*,
+    struct Hypre_Vector__object*,struct Hypre_Vector__object*)) epv->f_Setup;
   e1->f_addReference              = (void (*)(void*)) epv->f_addReference;
   e1->f_deleteReference           = (void (*)(void*)) epv->f_deleteReference;
   e1->f_isInstanceOf              = (SIDL_bool (*)(void*,
@@ -1188,7 +1195,8 @@ static void Hypre_GMRES__init_remote_epv(void)
     int32_t)) epv->f_SetPrintLevel;
   e2->f_SetStringParameter      = (int32_t (*)(void*,const char*,
     const char*)) epv->f_SetStringParameter;
-  e2->f_Setup                   = (int32_t (*)(void*)) epv->f_Setup;
+  e2->f_Setup                   = (int32_t (*)(void*,
+    struct Hypre_Vector__object*,struct Hypre_Vector__object*)) epv->f_Setup;
   e2->f_addReference            = (void (*)(void*)) epv->f_addReference;
   e2->f_deleteReference         = (void (*)(void*)) epv->f_deleteReference;
   e2->f_isInstanceOf            = (SIDL_bool (*)(void*,

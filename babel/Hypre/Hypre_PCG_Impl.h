@@ -3,8 +3,8 @@
  * Symbol:        Hypre.PCG-v0.1.5
  * Symbol Type:   class
  * Babel Version: 0.6.3
- * SIDL Created:  20020711 16:38:24 PDT
- * Generated:     20020711 16:38:34 PDT
+ * SIDL Created:  20020904 10:05:22 PDT
+ * Generated:     20020904 10:05:32 PDT
  * Description:   Server-side implementation for Hypre.PCG
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
@@ -184,7 +184,9 @@ impl_Hypre_PCG_SetStringParameter(
 
 extern int32_t
 impl_Hypre_PCG_Setup(
-  Hypre_PCG);
+  Hypre_PCG,
+  Hypre_Vector,
+  Hypre_Vector);
 
 #ifdef __cplusplus
 }

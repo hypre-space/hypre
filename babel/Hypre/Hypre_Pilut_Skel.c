@@ -3,8 +3,8 @@
  * Symbol:        Hypre.Pilut-v0.1.5
  * Symbol Type:   class
  * Babel Version: 0.6.3
- * SIDL Created:  20020711 16:38:24 PDT
- * Generated:     20020711 16:38:33 PDT
+ * SIDL Created:  20020904 10:05:22 PDT
+ * Generated:     20020904 10:05:31 PDT
  * Description:   Server-side glue code for Hypre.Pilut
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -98,7 +98,9 @@ impl_Hypre_Pilut_SetStringParameter(
 
 extern int32_t
 impl_Hypre_Pilut_Setup(
-  Hypre_Pilut);
+  Hypre_Pilut,
+  Hypre_Vector,
+  Hypre_Vector);
 
 void
 Hypre_Pilut__set_epv(struct Hypre_Pilut__epv *epv)

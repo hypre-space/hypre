@@ -3,8 +3,8 @@
  * Symbol:        Hypre.PCG-v0.1.5
  * Symbol Type:   class
  * Babel Version: 0.6.3
- * SIDL Created:  20020711 16:38:24 PDT
- * Generated:     20020711 16:38:34 PDT
+ * SIDL Created:  20020904 10:05:22 PDT
+ * Generated:     20020904 10:05:32 PDT
  * Description:   Server-side implementation for Hypre.PCG
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
@@ -121,7 +121,7 @@ impl_Hypre_PCG__ctor(
   /* Insert the implementation of the constructor method here... */
    struct Hypre_PCG__data * data;
    data = hypre_CTAlloc( struct Hypre_PCG__data, 1 );
-   data -> comm = NULL;
+   data -> comm = (MPI_Comm)NULL;
    data -> solver = NULL;
    data -> matrix = NULL;
    data -> vector_type = NULL;
@@ -214,7 +214,7 @@ impl_Hypre_PCG_Apply(
 
    data = Hypre_PCG__get_data( self );
    comm = data->comm;
-   assert( comm != NULL ); /* SetCommunicator should have been called earlier */
+   assert( comm != (MPI_Comm)NULL ); /* SetCommunicator should have been called earlier */
    mat = data->matrix;
    assert( mat != NULL ); /* SetOperator should have been called earlier */
 
@@ -796,7 +796,9 @@ impl_Hypre_PCG_SetStringParameter(
 
 int32_t
 impl_Hypre_PCG_Setup(
-  Hypre_PCG self)
+  Hypre_PCG self,
+  Hypre_Vector x,
+  Hypre_Vector y)
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.PCG.Setup) */
   /* Insert the implementation of the Setup method here... */

@@ -3,8 +3,8 @@
  * Symbol:        Hypre.GMRES-v0.1.5
  * Symbol Type:   class
  * Babel Version: 0.6.3
- * SIDL Created:  20020711 16:38:24 PDT
- * Generated:     20020711 16:38:32 PDT
+ * SIDL Created:  20020904 10:05:22 PDT
+ * Generated:     20020904 10:05:30 PDT
  * Description:   Server-side implementation for Hypre.GMRES
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
@@ -86,7 +86,7 @@ impl_Hypre_GMRES__ctor(
   /* Insert the implementation of the constructor method here... */
    struct Hypre_GMRES__data * data;
    data = hypre_CTAlloc( struct Hypre_GMRES__data, 1 );
-   data -> comm = NULL;
+   data -> comm = (MPI_Comm)NULL;
    data -> solver = NULL;
    data -> matrix = NULL;
    data -> vector_type = NULL;
@@ -180,7 +180,7 @@ impl_Hypre_GMRES_Apply(
 
    data = Hypre_GMRES__get_data( self );
    comm = data->comm;
-   assert( comm != NULL ); /* SetCommunicator should have been called earlier */
+   assert( comm != (MPI_Comm)NULL ); /* SetCommunicator should have been called earlier */
    mat = data->matrix;
    assert( mat != NULL ); /* SetOperator should have been called earlier */
 
@@ -751,7 +751,9 @@ impl_Hypre_GMRES_SetStringParameter(
 
 int32_t
 impl_Hypre_GMRES_Setup(
-  Hypre_GMRES self)
+  Hypre_GMRES self,
+  Hypre_Vector x,
+  Hypre_Vector y)
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.GMRES.Setup) */
   /* Insert the implementation of the Setup method here... */
@@ -759,4 +761,3 @@ impl_Hypre_GMRES_Setup(
       It is done in Apply instead. */
   /* DO-NOT-DELETE splicer.end(Hypre.GMRES.Setup) */
 }
-

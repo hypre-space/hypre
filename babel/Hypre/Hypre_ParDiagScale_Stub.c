@@ -3,8 +3,8 @@
  * Symbol:        Hypre.ParDiagScale-v0.1.5
  * Symbol Type:   class
  * Babel Version: 0.6.3
- * SIDL Created:  20020711 16:38:24 PDT
- * Generated:     20020711 16:38:30 PDT
+ * SIDL Created:  20020904 10:05:22 PDT
+ * Generated:     20020904 10:05:27 PDT
  * Description:   Client-side glue code for Hypre.ParDiagScale
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -77,10 +77,14 @@ Hypre_ParDiagScale_SetLogging(
 
 int32_t
 Hypre_ParDiagScale_Setup(
-  Hypre_ParDiagScale self)
+  Hypre_ParDiagScale self,
+  Hypre_Vector x,
+  Hypre_Vector y)
 {
   return (*self->d_epv->f_Setup)(
-    self);
+    self,
+    x,
+    y);
 }
 
 /*

@@ -3,8 +3,8 @@
  * Symbol:        Hypre.PCG-v0.1.5
  * Symbol Type:   class
  * Babel Version: 0.6.3
- * SIDL Created:  20020711 16:38:24 PDT
- * Generated:     20020711 16:38:31 PDT
+ * SIDL Created:  20020904 10:05:22 PDT
+ * Generated:     20020904 10:05:29 PDT
  * Description:   Client-side glue code for Hypre.PCG
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -64,7 +64,9 @@ Hypre_PCG_SetLogging(
  */
 int32_t
 Hypre_PCG_Setup(
-  Hypre_PCG self);
+  Hypre_PCG self,
+  Hypre_Vector x,
+  Hypre_Vector y);
 
 /**
  * Method:  SetIntArrayParameter

@@ -3,8 +3,8 @@
  * Symbol:        Hypre.Vector-v0.1.5
  * Symbol Type:   interface
  * Babel Version: 0.6.3
- * SIDL Created:  20020711 16:38:23 PDT
- * Generated:     20020711 16:38:29 PDT
+ * SIDL Created:  20020904 10:05:20 PDT
+ * Generated:     20020904 10:05:27 PDT
  * Description:   Client-side glue code for Hypre.Vector
  * 
  * WARNING: Automatically generated; changes will be lost

@@ -3,8 +3,8 @@
  * Symbol:        Hypre.ParCSRMatrix-v0.1.5
  * Symbol Type:   class
  * Babel Version: 0.6.3
- * SIDL Created:  20020711 16:38:24 PDT
- * Generated:     20020711 16:38:32 PDT
+ * SIDL Created:  20020904 10:05:22 PDT
+ * Generated:     20020904 10:05:30 PDT
  * Description:   Server-side glue code for Hypre.ParCSRMatrix
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -147,7 +147,9 @@ impl_Hypre_ParCSRMatrix_SetValues(
 
 extern int32_t
 impl_Hypre_ParCSRMatrix_Setup(
-  Hypre_ParCSRMatrix);
+  Hypre_ParCSRMatrix,
+  Hypre_Vector,
+  Hypre_Vector);
 
 void
 Hypre_ParCSRMatrix__set_epv(struct Hypre_ParCSRMatrix__epv *epv)

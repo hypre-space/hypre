@@ -3,8 +3,8 @@
  * Symbol:        Hypre.ParAMG-v0.1.5
  * Symbol Type:   class
  * Babel Version: 0.6.3
- * SIDL Created:  20020711 16:38:24 PDT
- * Generated:     20020711 16:38:28 PDT
+ * SIDL Created:  20020904 10:05:22 PDT
+ * Generated:     20020904 10:05:26 PDT
  * Description:   Intermediate Object Representation for Hypre.ParAMG
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -126,7 +126,9 @@ struct Hypre_ParAMG__epv {
     const char* name,
     const char* value);
   int32_t (*f_Setup)(
-    struct Hypre_ParAMG__object* self);
+    struct Hypre_ParAMG__object* self,
+    struct Hypre_Vector__object* x,
+    struct Hypre_Vector__object* y);
   /* Methods introduced in Hypre.Solver-v0.1.5 */
   int32_t (*f_GetResidual)(
     struct Hypre_ParAMG__object* self,

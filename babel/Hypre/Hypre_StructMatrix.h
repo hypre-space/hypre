@@ -3,8 +3,8 @@
  * Symbol:        Hypre.StructMatrix-v0.1.5
  * Symbol Type:   class
  * Babel Version: 0.6.3
- * SIDL Created:  20020711 16:38:24 PDT
- * Generated:     20020711 16:38:30 PDT
+ * SIDL Created:  20020904 10:05:22 PDT
+ * Generated:     20020904 10:05:28 PDT
  * Description:   Client-side glue code for Hypre.StructMatrix
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -68,7 +68,9 @@ Hypre_StructMatrix_SetIntArrayParameter(
  */
 int32_t
 Hypre_StructMatrix_Setup(
-  Hypre_StructMatrix self);
+  Hypre_StructMatrix self,
+  Hypre_Vector x,
+  Hypre_Vector y);
 
 /**
  * Method:  SetIntParameter

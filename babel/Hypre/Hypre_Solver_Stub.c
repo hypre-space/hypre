@@ -3,8 +3,8 @@
  * Symbol:        Hypre.Solver-v0.1.5
  * Symbol Type:   interface
  * Babel Version: 0.6.3
- * SIDL Created:  20020711 16:38:24 PDT
- * Generated:     20020711 16:38:32 PDT
+ * SIDL Created:  20020904 10:05:21 PDT
+ * Generated:     20020904 10:05:29 PDT
  * Description:   Client-side glue code for Hypre.Solver
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -66,10 +66,14 @@ Hypre_Solver_SetLogging(
 
 int32_t
 Hypre_Solver_Setup(
-  Hypre_Solver self)
+  Hypre_Solver self,
+  Hypre_Vector x,
+  Hypre_Vector y)
 {
   return (*self->d_epv->f_Setup)(
-    self->d_object);
+    self->d_object,
+    x,
+    y);
 }
 
 /*

@@ -3,8 +3,8 @@
  * Symbol:        Hypre.Solver-v0.1.5
  * Symbol Type:   interface
  * Babel Version: 0.6.3
- * SIDL Created:  20020711 16:38:24 PDT
- * Generated:     20020711 16:38:29 PDT
+ * SIDL Created:  20020904 10:05:21 PDT
+ * Generated:     20020904 10:05:26 PDT
  * Description:   Intermediate Object Representation for Hypre.Solver
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -104,7 +104,9 @@ struct Hypre_Solver__epv {
     const char* name,
     const char* value);
   int32_t (*f_Setup)(
-    void* self);
+    void* self,
+    struct Hypre_Vector__object* x,
+    struct Hypre_Vector__object* y);
   /* Methods introduced in Hypre.Solver-v0.1.5 */
   int32_t (*f_GetResidual)(
     void* self,

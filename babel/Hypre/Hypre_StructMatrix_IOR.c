@@ -3,8 +3,8 @@
  * Symbol:        Hypre.StructMatrix-v0.1.5
  * Symbol Type:   class
  * Babel Version: 0.6.3
- * SIDL Created:  20020711 16:38:24 PDT
- * Generated:     20020711 16:38:27 PDT
+ * SIDL Created:  20020904 10:05:22 PDT
+ * Generated:     20020904 10:05:24 PDT
  * Description:   Intermediate Object Representation for Hypre.StructMatrix
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -178,7 +178,8 @@ static void Hypre_StructMatrix__init_epv(
     int32_t)) epv->f_SetIntParameter;
   e0->f_SetStringParameter      = (int32_t (*)(void*,const char*,
     const char*)) epv->f_SetStringParameter;
-  e0->f_Setup                   = (int32_t (*)(void*)) epv->f_Setup;
+  e0->f_Setup                   = (int32_t (*)(void*,
+    struct Hypre_Vector__object*,struct Hypre_Vector__object*)) epv->f_Setup;
   e0->f_addReference            = (void (*)(void*)) epv->f_addReference;
   e0->f_deleteReference         = (void (*)(void*)) epv->f_deleteReference;
   e0->f_isInstanceOf            = (SIDL_bool (*)(void*,
@@ -1003,7 +1004,9 @@ remote_Hypre_StructMatrix_SetValues(
 
 static int32_t
 remote_Hypre_StructMatrix_Setup(
-  struct Hypre_StructMatrix__object* self)
+  struct Hypre_StructMatrix__object* self,
+  struct Hypre_Vector__object* x,
+  struct Hypre_Vector__object* y)
 {
   return 0;
 }
@@ -1130,7 +1133,8 @@ static void Hypre_StructMatrix__init_remote_epv(void)
     int32_t)) epv->f_SetIntParameter;
   e0->f_SetStringParameter      = (int32_t (*)(void*,const char*,
     const char*)) epv->f_SetStringParameter;
-  e0->f_Setup                   = (int32_t (*)(void*)) epv->f_Setup;
+  e0->f_Setup                   = (int32_t (*)(void*,
+    struct Hypre_Vector__object*,struct Hypre_Vector__object*)) epv->f_Setup;
   e0->f_addReference            = (void (*)(void*)) epv->f_addReference;
   e0->f_deleteReference         = (void (*)(void*)) epv->f_deleteReference;
   e0->f_isInstanceOf            = (SIDL_bool (*)(void*,
