@@ -66,10 +66,6 @@ MLI::~MLI()
    delete [] one_levels;
    if ( coarse_solver != NULL ) delete coarse_solver;
    if ( method_ptr    != NULL ) delete method_ptr;
-cout << "method_ptr in MLI destructor\n";
-cout.flush();
-if ( method_ptr    != NULL ) 
-printf("method_ptr in MLI destructor not nULL\n");
 }
 
 /*****************************************************************************
@@ -221,7 +217,6 @@ int MLI::setMethod( MLI_Method *object )
    cout << "MLI::setMethod = " << object->getName() << endl;
    cout.flush();
 #endif
-printf("set method_ptr in MLI \n");
    method_ptr = object;
    return 0;
 }
