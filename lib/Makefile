@@ -34,7 +34,6 @@ dtrsv.o\
 idamax.o\
 blas_utils.o
 
-
 LAPACKFILES = \
 dbdsqr.o\
 dgebd2.o\
@@ -307,6 +306,8 @@ KRYLOVFILES = \
  HYPRE_cgnr.o\
  HYPRE_gmres.o\
  HYPRE_pcg.o\
+ HYPRE_lobpcg.o\
+ lobpcg.o\
  bicgstab.o\
  cgnr.o\
  gmres.o\
@@ -317,15 +318,9 @@ MATMATFILES = \
  HYPRE_ConvertPETScMatrixToDistributedMatrix.o\
  HYPRE_ConvertParCSRMatrixToDistributedMatrix.o
 
-EIGENSOLVEFILES = \
- HYPRE_lobpcg.o\
- lobpcg.o\
+MULTIVECFILES = \
  multivector.o\
- temp_multivector.o\
- HYPRE_parcsr_int.o\
- HYPRE_struct_int.o\
- HYPRE_sstruct_int.o\
- fortran_matrix.o
+ temp_multivector.o
 
 PARCSRLSFILES = \
  F90_HYPRE_parcsr_ParaSails.o\
@@ -343,6 +338,7 @@ PARCSRLSFILES = \
  HYPRE_parcsr_cgnr.o\
  HYPRE_parcsr_gmres.o\
  HYPRE_parcsr_hybrid.o\
+ HYPRE_parcsr_int.o\
  HYPRE_parcsr_pcg.o\
  HYPRE_parcsr_pilut.o\
  HYPRE_parcsr_schwarz.o\
@@ -367,10 +363,12 @@ PARCSRLSFILES = \
  par_rap_communication.o\
  par_relax.o\
  par_relax_interface.o\
+ par_rotate_7pt.o\
  par_scaled_matnorm.o\
  par_schwarz.o\
  par_stats.o\
  par_strength.o\
+ par_vardifconv.o\
  pcg_par.o\
  schwarz.o
 
@@ -415,6 +413,7 @@ SSTRUCTLSFILES = \
  HYPRE_sstruct_bicgstab.o\
  HYPRE_sstruct_gmres.o\
  HYPRE_sstruct_InterFAC.o\
+ HYPRE_sstruct_int.o\
  HYPRE_sstruct_pcg.o\
  HYPRE_sstruct_split.o\
  HYPRE_sstruct_sys_pfmg.o\
@@ -481,6 +480,7 @@ STRUCTLSFILES = \
  HYPRE_struct_bicgstab.o\
  HYPRE_struct_gmres.o\
  HYPRE_struct_hybrid.o\
+ HYPRE_struct_int.o\
  HYPRE_struct_jacobi.o\
  HYPRE_struct_pcg.o\
  HYPRE_struct_pfmg.o\
@@ -566,6 +566,7 @@ UTILFILES = \
  amg_linklist.o\
  binsearch.o\
  exchange_data.o\
+ fortran_matrix.o\
  hypre_memory.o\
  hypre_qsort.o\
  memory_dmalloc.o\
