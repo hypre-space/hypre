@@ -284,7 +284,7 @@ int hypre_PrintParCSRMatrix P((hypre_ParCSRMatrix *matrix , char *file_name ));
 hypre_ParCSRMatrix *hypre_CSRMatrixToParCSRMatrix P((MPI_Comm comm , hypre_CSRMatrix *A , int *row_starts , int *col_starts ));
 int GenerateDiagAndOffd P((hypre_CSRMatrix *A , hypre_ParCSRMatrix *matrix , int first_col_diag , int last_col_diag ));
 hypre_CSRMatrix *hypre_MergeDiagAndOffd P((hypre_ParCSRMatrix *par_matrix ));
-hypre_CSRMatrix *hypre_ParCSRMatrixToCSRMatrixAll P((MPI_Comm comm , hypre_ParCSRMatrix *par_matrix ));
+hypre_CSRMatrix *hypre_ParCSRMatrixToCSRMatrixAll P((hypre_ParCSRMatrix *par_matrix ));
 
 /* par_csr_matvec.c */
 int hypre_ParMatvec P((double alpha , hypre_ParCSRMatrix *A , hypre_ParVector *x , double beta , hypre_ParVector *y ));
@@ -304,7 +304,7 @@ int hypre_ScaleParVector P((double alpha , hypre_ParVector *y ));
 int hypre_ParAxpy P((double alpha , hypre_ParVector *x , hypre_ParVector *y ));
 double hypre_ParInnerProd P((hypre_ParVector *x , hypre_ParVector *y ));
 hypre_ParVector *hypre_VectorToParVector P((MPI_Comm comm , hypre_Vector *v , int *vec_starts ));
-hypre_Vector *hypre_ParVectorToVectorAll P((MPI_Comm comm , hypre_ParVector *par_v ));
+hypre_Vector *hypre_ParVectorToVectorAll P((hypre_ParVector *par_v ));
 
 #undef P
 
