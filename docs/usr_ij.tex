@@ -80,7 +80,8 @@ type to \code{HYPRE_PARCSR} (this is the only object type currently
 supported).  The \code{Initialize()} routine indicates that the matrix
 coefficients (or values) are ready to be set.  This routine may or may
 not involve the allocation of memory for the coefficient data,
-depending on the implementation.  The optional \code{Set()} routines
+depending on the implementation.  The optional \code{SetRowSizes()}
+and \code{SetDiagOffdSizes()} routines
 mentioned later in this chapter and in the Reference Manual, should be
 called before this step.
 

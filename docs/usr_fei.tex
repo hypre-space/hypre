@@ -52,10 +52,10 @@ void FEI_iterateToSolve(int sysHandle);
 \subsection{Iterative methods}
 
 \begin{enumerate}
-\item conjugate gradient (CG)
-\item generalized minimal residual (GMRES) methods
-%\item SuperLU direct solver
-%\item SuperLU direct solver with iterative refinement
+\item Krylov solvers (conjugate gradient, GMRES, TFQMR, BiCGSTAB)
+\item BoomerAMG (a parallel algebraic multigrid solver)
+\item SuperLU direct solver (sequential)
+\item SuperLU direct solver with iterative refinement (sequential)
 %\item Y12M direct solver
 \end{enumerate}
 
@@ -64,6 +64,7 @@ void FEI_iterateToSolve(int sysHandle);
 \begin{enumerate}
 \item diagonal
 \item parallel incomplete LU with threshold (PILUT)
+\item another parallel incomplete LU (Euclid)
 \item parallel algebraic multigrid (BoomerAMG)
 \item parallel sparse approximate inverse (ParaSails)
 \end{enumerate}
@@ -81,12 +82,12 @@ void FEI_iterateToSolve(int sysHandle);
 Parameter Name & Parameter Values \\
 \hline\hline
 solver &
-\code{cg}, \code{gmres} (default), \code{superlu}, \code{superlux}
+\code{cg}, \code{gmres} (default), \code{bicgstab}, \code{tfqmr}, \code{boomeramg}, \code{superlu}, \code{superlux}
 \\
 preconditioner &
-\code{diagonal} (default), \code{pilut}, \code{parasails}, \code{boomeramg}
+\code{diagonal} (default), \code{pilut}, \code{parasails}, \code{boomeramg}, \code{euclid}
 \\
-gmres-dim &
+gmresDim &
 an integer specifying the value of \code{m} in restarted GMRES(m).
 The default value is 50.
 \\
@@ -98,55 +99,78 @@ tolerance &
 a floating point number specifying the termination criterion for CG or
 GMRES.  The default value is 1.0E-10.
 \\
-pilut-row-size &
-\mbox[4.0i]{%
+pilutFillin &
 an integer specifying the maximum number of nonzeros kept in the
 formation of incomplete L and U.  If this is not called, a value will
 be selected based on the sparsity of the matrix.
-}
 \\
-pilut-drop-tol &
+pilutDropTol &
 a floating point number specifying the threshold to drop small entries
 in L and U.  The default value is 0.0.
 \\
-superlu-ordering &
+euclidNlevels &
+a non-negative integer specifying the desired sparsity of the incomplete
+factors. The default value is 0.
+\\
+euclidThreshold &
+a floating point number specifying the threshold used to sparsify the 
+incomplete factors. The default value is 0.0.
+\\
+superluOrdering &
 \code{natural} (default) or \code{mmd} (minimum degree ordering).  This
 ordering is used to minimize the number of nonzeros generated in the
 LU decomposition.  The default is natural ordering.
 \\
-superlu-scale &
+superluScale &
 \code{y} (yes; perform row and column scalings before decomposition) or
 \code{n} (no; default).
 \\
-amg-coarsen-type &
-\code{falgout}, \code{ruge}, or \code{default} coarsening for BOOMERAMG.
+amgCoarsenType &
+\code{falgout}, \code{ruge}, or \code{default} (CLJP) coarsening for BoomerAMG.
 \\
-amg-num-sweeps &
+amgNumSweeps &
 an integer specifying the number of pre- and post-smoothing at each
 level of BoomerAMG.  The default is one pre- and one post-smoothings.
 \\
-amg-relax-type &
+amgRelaxType &
 \code{jacobi} (Damped Jacobi), \code{gs-slow} (sequential Gauss-Seidel),
 \code{gs-fast} (Gauss-Seidel on interior nodes), \code{hybrid}, or
 \code{direct}. The default is \code{hybrid}.
 \\
-amg-relax-weight &
+amgRelaxWeight &
 a floating point number between 0 and 1 specifying the damping factor
 for BoomerAMG's damped Jacobi smoother.  The default value is 0.5.
 \\
-amg-strong-threshold &
+amgStrongThreshold &
 a floating point number between 0 and 1 specifying the threshold used
 to determine strong coupling in BoomerAMG's coasening.  The default
 value is 0.25.
 \\
-parasails-threshold &
+parasailsThreshold &
 a floating point number between 0 and 1 specifying the threshold used
 to prune small entries in setting up the sparse approximate inverse.
 The default value is 0.0.
 \\
-parasails-nlevels &
+parasailsNlevels &
 an integer larger than 0 specifying the desired sparsity of the
 approximate inverse.  The default value is 1.
+\\
+parasailsFilter &
+a floating point number between 0 and 1 defining the threshold used to
+prune small entries in A. The default is 0.0.
+\\
+parasailsLoadbal &
+a floating point number between 0 and 1 specifying how load balancing has 
+to be done. The default is 0.0.
+\\
+parasailsSymmetric &
+set ParaSails to take A as symmetric.
+\\
+parasailsUnSymmetric &
+set ParaSails to take A as nonsymmetric (default).
+\\
+parasailsReuse &
+set ParaSails to reuse the sparsity pattern of A.
 \\
 \hline
 \end{tabular}

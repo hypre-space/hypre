@@ -25,16 +25,16 @@ For more details about the ParaSails algorithm, see \cite{Chow:1999:APS}.
 \begin{verbatim}
 #include "HYPRE_parcsr_ls.h"
 
-int HYPRE_ParCSRParaSailsCreate(MPI_Comm comm, HYPRE_Solver *solver, 
+int HYPRE_ParaSailsCreate(MPI_Comm comm, HYPRE_Solver *solver, 
   int symmetry);
-int HYPRE_ParCSRParaSailsSetParams(HYPRE_Solver solver, 
+int HYPRE_ParaSailsSetParams(HYPRE_Solver solver, 
   double thresh, int nlevel, double filter);
-int HYPRE_ParCSRParaSailsSetup(HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
+int HYPRE_ParaSailsSetup(HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
   HYPRE_ParVector b, HYPRE_ParVector x);
-int HYPRE_ParCSRParaSailsSolve(HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
+int HYPRE_ParaSailsSolve(HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
   HYPRE_ParVector b, HYPRE_ParVector x);
-int HYPRE_ParCSRParaSailsStats(HYPRE_Solver solver);
-int HYPRE_ParCSRParaSailsDestroy(HYPRE_Solver solver);
+int HYPRE_ParaSailsStats(HYPRE_Solver solver);
+int HYPRE_ParaSailsDestroy(HYPRE_Solver solver);
 \end{verbatim}
 \end{display}
 
@@ -46,7 +46,7 @@ and higher values of {\em nlevels} lead to more accurate, but more expensive
 preconditioners.  More accurate preconditioners are also more expensive
 per iteration.  The default values are ${\it thresh} = 0.1$
 and ${\it nlevels} = 1$.  The parameters are set using
-{\tt HYPRE\_ParCSRParaSailsSetParams}.
+{\tt HYPRE\_ParaSailsSetParams}.
 
 Mathematically, given a symmetric matrix $A$, the pattern of the
 approximate inverse is the pattern of $\tilde{A}^m$ where $\tilde{A}$
@@ -69,7 +69,7 @@ order to construct the preconditioner.
 A ParaSails solver {\tt solver} is returned with 
 \begin{display}
 \begin{verbatim}
-int HYPRE_ParCSRParaSailsCreate(MPI_Comm comm, HYPRE_Solver *solver,
+int HYPRE_ParaSailsCreate(MPI_Comm comm, HYPRE_Solver *solver,
   int symmetry);
 \end{verbatim}
 \end{display}
@@ -92,7 +92,7 @@ For more information about the final case, see section \ref{nearly}.
 Parameters for setting up the preconditioner are specified using
 \begin{display}
 \begin{verbatim}
-int HYPRE_ParCSRParaSailsSetParams(HYPRE_Solver solver, 
+int HYPRE_ParaSailsSetParams(HYPRE_Solver solver, 
   double thresh, int nlevel, double filter);
 \end{verbatim}
 \end{display}
