@@ -42,7 +42,7 @@ main( int   argc,
    double   trunc_factor;
    int      cycle_type;
    int      coarsen_type = 0;
-   int      hybrid = 1;
+   int      hinybrid = 1;
    int      measure_type = 0;
    int     *num_grid_sweeps;  
    int     *grid_relax_type;   
@@ -179,10 +179,10 @@ main( int   argc,
          arg_index++;
          coarsen_type      = 6;
       }    
-      else if ( strcmp(argv[arg_index], "-nohybrid") == 0 )
+      else if ( strcmp(argv[arg_index], "-nohinybrid") == 0 )
       {
          arg_index++;
-         hybrid      = -1;
+         hinybrid      = -1;
       }    
       else if ( strcmp(argv[arg_index], "-gm") == 0 )
       {
@@ -366,7 +366,7 @@ main( int   argc,
       printf("   -ruge2b               : 2nd pass is global\n");
       printf("   -rugerlx              : relaxes special points\n");
       printf("   -falgout              : local ruge followed by LJP\n");
-      printf("   -nohybrid             : no switch in coarsening\n");
+      printf("   -nohinybrid             : no switch in coarsening\n");
       printf("   -gm                   : use global measures\n");
       printf("\n");
       printf("  -rlx <val>             : relaxation type\n");
@@ -531,7 +531,7 @@ main( int   argc,
       hypre_BeginTiming(time_index);
 
       amg_solver = HYPRE_ParAMGInitialize(); 
-      HYPRE_ParAMGSetCoarsenType(amg_solver, (hybrid*coarsen_type));
+      HYPRE_ParAMGSetCoarsenType(amg_solver, (hinybrid*coarsen_type));
       HYPRE_ParAMGSetMeasureType(amg_solver, measure_type);
       HYPRE_ParAMGSetTol(amg_solver, tol);
       HYPRE_ParAMGSetStrongThreshold(amg_solver, strong_threshold);
@@ -1050,7 +1050,7 @@ BuildParDifConv( int                  argc,
    int                 P, Q, R;
    double              cx, cy, cz;
    double              ax, ay, az;
-   double              hx,hy,hz;
+   double              hinx,hiny,hinz;
 
    hypre_ParCSRMatrix *A;
 
@@ -1073,9 +1073,9 @@ BuildParDifConv( int                  argc,
    ny = 10;
    nz = 10;
 
-   hx = 1.0/(nx+1);
-   hy = 1.0/(ny+1);
-   hz = 1.0/(nz+1);
+   hinx = 1.0/(nx+1);
+   hiny = 1.0/(ny+1);
+   hinz = 1.0/(nz+1);
 
    P  = 1;
    Q  = num_procs;
@@ -1168,25 +1168,25 @@ BuildParDifConv( int                  argc,
  
    values = hypre_CTAlloc(double, 7);
 
-   values[1] = -cx/(hx*hx);
-   values[2] = -cy/(hy*hy);
-   values[3] = -cz/(hz*hz);
-   values[4] = -cx/(hx*hx) + ax/hx;
-   values[5] = -cy/(hy*hy) + ay/hy;
-   values[6] = -cz/(hz*hz) + az/hz;
+   values[1] = -cx/(hinx*hinx);
+   values[2] = -cy/(hiny*hiny);
+   values[3] = -cz/(hinz*hinz);
+   values[4] = -cx/(hinx*hinx) + ax/hinx;
+   values[5] = -cy/(hiny*hiny) + ay/hiny;
+   values[6] = -cz/(hinz*hinz) + az/hinz;
 
    values[0] = 0.0;
    if (nx > 1)
    {
-      values[0] += 2.0*cx/(hx*hx) - 1.0*ax/hx;
+      values[0] += 2.0*cx/(hinx*hinx) - 1.0*ax/hinx;
    }
    if (ny > 1)
    {
-      values[0] += 2.0*cy/(hy*hy) - 1.0*ay/hy;
+      values[0] += 2.0*cy/(hiny*hiny) - 1.0*ay/hiny;
    }
    if (nz > 1)
    {
-      values[0] += 2.0*cz/(hz*hz) - 1.0*az/hz;
+      values[0] += 2.0*cz/(hinz*hinz) - 1.0*az/hinz;
    }
 
    A = hypre_GenerateDifConv(MPI_COMM_WORLD,
