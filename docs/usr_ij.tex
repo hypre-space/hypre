@@ -231,34 +231,32 @@ and \verb+glob_vec_index_stop+ \verb+=+\verb+next_domain_pt_start-1+.
 \label{loc_comps_blk}
 \centerline{\epsfig{figure=loc_cmps_blk.eps,height=2.5in}}
 \parbox{6.5in}{\hspace{1in}
-  {\tt int HYPRE\_IJVectorSetLocalComponentsInBlock(HYPRE\_IJVector *ij\_vec,}}
+  {\tt int HYPRE\_IJVectorXXXLocalComponentsInBlock(HYPRE\_IJVector *ij\_vec,}}
 \parbox{6.5in}{\hspace{2in}
   {\tt int glob\_vec\_index\_start, int glob\_vec\_index\_stop,}}
 \parbox{6.5in}{\hspace{2in}
   {\tt int *value\_indices, double *values);}}
 \caption{Mapping between external array values and
-  internal vector data for
-  {\tt HYPRE\_IJVectorSet\linebreak[0]LocalComponentsInBlock}
-  (rightward arrows) and
-  {\tt HYPRE\_IJVectorGet\linebreak[0]LocalComponentsInBlock}
-  (leftward arrows)}
+  internal vector data for functions
+  {\tt HYPRE\_IJVectorXXX}{\tt LocalComponentsInBlock}.
+   Use rightward arrows for {\tt XXX = Set} or {\tt AddTo}.
+   Use leftward arrows for {\tt XXX = Get}.}
 \end{figure}
 
 \begin{figure}
 \label{loc_comps}
 \centerline{\epsfig{figure=loc_cmps.eps,height=2.4in}}
 \parbox{6.5in}{\hspace{1in}
-   {\tt int HYPRE\_IJVectorSetLocalComponents(HYPRE\_IJVector *ij\_vec,}}
+   {\tt int HYPRE\_IJVectorXXXLocalComponents(HYPRE\_IJVector *ij\_vec,}}
 \parbox{6.5in}{\hspace{2in}
    {\tt int num\_values, int *glob\_vec\_indices,}}
 \parbox{6.5in}{\hspace{2in}
    {\tt int *value\_indices, double *values);}}
 \caption{Mapping between external array values and
-   internal vector data for
-   {\tt HYPRE\_IJVectorSet\linebreak[0]LocalComponents}
-   (rightward arrows) and
-   {\tt HYPRE\_IJVectorGet\linebreak[0]LocalComponents}
-   (leftward arrows)}
+   internal vector data for functions
+   {\tt HYPRE\_IJVectorXXX}{\tt LocalComponents}.
+   Use rightward arrows for {\tt XXX = Set} or {\tt AddTo}.
+   Use leftward arrows for {\tt XXX = Get}.}
 \end{figure}
 
 One can also add to vector components that are already set, in
