@@ -160,26 +160,28 @@ ifetchadd( int *w, pthread_mutex_t *mutex_fetchadd )
 static int thb_count = 0;
 static int thb_release = 0;
 
-void hypre_barrier(pthread_mutex_t *mtx)
+void hypre_barrier(pthread_mutex_t *mtx, int unthreaded)
 {
-  pthread_mutex_lock(mtx);
-  thb_count++;
+   if (!unthreaded) {
+      pthread_mutex_lock(mtx);
+      thb_count++;
 
-  if (thb_count < NUM_THREADS) {
-    pthread_mutex_unlock(mtx);
-    while (!thb_release);
-    pthread_mutex_lock(mtx);
-    (thb_count)--;
-    pthread_mutex_unlock(mtx);
-    while (thb_release);
-  }
-  else if (thb_count == NUM_THREADS) {
-    (thb_count)--;
-    pthread_mutex_unlock(mtx);
-    (thb_release)++;
-    while (thb_count);
-    thb_release = 0;
-  }
+      if (thb_count < NUM_THREADS) {
+         pthread_mutex_unlock(mtx);
+         while (!thb_release);
+         pthread_mutex_lock(mtx);
+         thb_count--;
+         pthread_mutex_unlock(mtx);
+         while (thb_release);
+      }
+      else if (thb_count == NUM_THREADS) {
+         thb_count--;
+         pthread_mutex_unlock(mtx);
+         thb_release++;
+         while (thb_count);
+         thb_release = 0;
+      }
+   }
 }
 
 
