@@ -74,7 +74,7 @@ am_f77_struct_OBJECTS = f77_struct-f77_struct.$(OBJEXT)
 f77_struct_OBJECTS = $(am_f77_struct_OBJECTS)
 am__DEPENDENCIES_4 = $(am__DEPENDENCIES_1)
 f77_struct_DEPENDENCIES = $(am__DEPENDENCIES_4)
-am_fei_OBJECTS = fei.$(OBJEXT)
+am_fei_OBJECTS = fei-fei.$(OBJEXT)
 fei_OBJECTS = $(am_fei_OBJECTS)
 fei_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1)
@@ -427,11 +427,12 @@ struct_dependencies = \
 # optiontional target, fei++
 # fei
 fei_SOURCES = fei.cxx
-#fei_CXXFLAGS = \
-# -DNOFEI\
-# -DHYPRE_TIMING\
-# -DMPICH_SKIP_MPICXX\
-# -I$(includedir)
+fei_CXXFLAGS = \
+ -DNOFEI\
+ -DHYPRE_TIMING\
+ -DMPICH_SKIP_MPICXX\
+ -I$(includedir)
+
 fei_LDADD = \
  -L$(libdir)\
  -lHYPRE_LSI\
@@ -708,6 +709,15 @@ struct-struct.lo: struct.c
 
 .cxx.lo:
 	$(LTCXXCOMPILE) -c -o $@ $<
+
+fei-fei.o: fei.cxx
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(fei_CXXFLAGS) $(CXXFLAGS) -c -o fei-fei.o `test -f 'fei.cxx' || echo '$(srcdir)/'`fei.cxx
+
+fei-fei.obj: fei.cxx
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(fei_CXXFLAGS) $(CXXFLAGS) -c -o fei-fei.obj `if test -f 'fei.cxx'; then $(CYGPATH_W) 'fei.cxx'; else $(CYGPATH_W) '$(srcdir)/fei.cxx'; fi`
+
+fei-fei.lo: fei.cxx
+	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(fei_CXXFLAGS) $(CXXFLAGS) -c -o fei-fei.lo `test -f 'fei.cxx' || echo '$(srcdir)/'`fei.cxx
 
 ij_C__-ij.C++.o: ij.C++.cxx
 	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ij_C___CXXFLAGS) $(CXXFLAGS) -c -o ij_C__-ij.C++.o `test -f 'ij.C++.cxx' || echo '$(srcdir)/'`ij.C++.cxx
