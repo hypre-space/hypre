@@ -137,7 +137,7 @@ hypre_F90_IFACE(hypre_paramgsetstrongthreshold)( long int *solver,
 
 void
 hypre_F90_IFACE(hypre_paramgsettruncfactor)( long int *solver,
-                                             long int *trunc_factor,
+                                             double   *trunc_factor,
                                              int      *ierr          )
 {
    *ierr = (int) ( HYPRE_ParAMGSetTruncFactor( (HYPRE_Solver) *solver,
