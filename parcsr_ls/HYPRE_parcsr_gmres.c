@@ -107,8 +107,14 @@ HYPRE_ParCSRGMRESSetMaxIter( HYPRE_Solver solver,
 
 int
 HYPRE_ParCSRGMRESSetPrecond( HYPRE_Solver  solver,
-                             int               (*precond)(),
-                             int               (*precond_setup)(),
+                             int (*precond)      (HYPRE_Solver sol, 
+					 	  HYPRE_ParCSRMatrix matrix,
+						  HYPRE_ParVector b,
+						  HYPRE_ParVector x),
+                             int (*precond_setup)(HYPRE_Solver sol, 
+					 	  HYPRE_ParCSRMatrix matrix,
+						  HYPRE_ParVector b,
+						  HYPRE_ParVector x),
                              void               *precond_data )
 {
    return( hypre_GMRESSetPrecond( (void *) solver,

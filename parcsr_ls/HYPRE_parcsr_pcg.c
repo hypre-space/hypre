@@ -118,9 +118,15 @@ HYPRE_ParCSRPCGSetRelChange( HYPRE_Solver solver,
 
 int
 HYPRE_ParCSRPCGSetPrecond( HYPRE_Solver  solver,
-                           int               (*precond)(),
-                           int               (*precond_setup)(),
-                           void               *precond_data )
+                           int (*precond)      (HYPRE_Solver sol,
+						HYPRE_ParCSRMatrix matrix,
+						HYPRE_ParVector b,
+						HYPRE_ParVector x),
+                           int (*precond_setup)(HYPRE_Solver sol,
+						HYPRE_ParCSRMatrix matrix,
+						HYPRE_ParVector b,
+						HYPRE_ParVector x),
+                           void                *precond_data )
 {
    return( hypre_PCGSetPrecond( (void *) solver,
                                 precond, precond_setup, precond_data ) );
