@@ -78,6 +78,8 @@ main( int   argc,
    array1double doubvals;
    array1int num_ghost;
    array1int periodic_arr;
+   int int1, int2, int3, int4, int5, int6, int7, int8, int9, int10;
+   int int11, int12, int13, int14, int15;
 
 /*    HYPRE_StructMatrix  A; */
 /*    HYPRE_StructVector  b; */
@@ -137,6 +139,21 @@ main( int   argc,
 #endif
 
    hypre_InitMemoryDebug(myid);
+
+   arroffsets.lower = &int1;
+   arroffsets.upper = &int2;
+   intvals.lower = &int3;
+   intvals.upper = &int4;
+   intvals_lo.lower = &int5;
+   intvals_lo.upper = &int6;
+   intvals_hi.lower = &int7;
+   intvals_hi.upper = &int8;
+   num_ghost.lower = &int9;
+   num_ghost.upper = &int10;
+   periodic_arr.lower = &int11;
+   periodic_arr.upper = &int12;
+   doubvals.lower = &int13;
+   doubvals.upper = &int14;
 
    /*-----------------------------------------------------------
     * Set defaults
