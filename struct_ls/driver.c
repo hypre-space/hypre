@@ -20,9 +20,9 @@
  * as command line arguments.  Do `driver -help' for usage info.
  *----------------------------------------------------------------------*/
 
-int   main(argc, argv)
-int   argc;
-char *argv[];
+int
+main( int   argc,
+      char *argv[] )
 {
    int                 arg_index;
    int                 print_usage;
@@ -126,7 +126,7 @@ char *argv[];
          Q  = atoi(argv[arg_index++]);
          R  = atoi(argv[arg_index++]);
       }
-      if ( strcmp(argv[arg_index], "-b") == 0 )
+      else if ( strcmp(argv[arg_index], "-b") == 0 )
       {
          arg_index++;
          bx = atoi(argv[arg_index++]);
