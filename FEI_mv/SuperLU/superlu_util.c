@@ -24,7 +24,6 @@
 #include "dsp_defs.h"
 #include "superlu_util.h"
 
-void StatFree ( void );
 flops_t LUFactFlops ( void );
 flops_t LUSolveFlops ( void );
 float SpaSize ( int n , int np , float sum_npw );
