@@ -24,7 +24,7 @@ perform_test()
     )"
 
   echo "copying new source...."
-  scp -r linear_solvers ${HYPRE_COMPILE_MACHINE}:${HYPRE_REMOTE_DIR}
+  scp -pr linear_solvers ${HYPRE_COMPILE_MACHINE}:${HYPRE_REMOTE_DIR}
 
   echo "running autotest...."
   ssh ${HYPRE_COMPILE_MACHINE} "\
@@ -44,13 +44,8 @@ perform_test()
     )"
 
   echo "copying test results to CASC machine..."
-  scp -r  ${HYPRE_COMPILE_MACHINE}:${HYPRE_REMOTE_DIR}/linear_solvers/autotest.${HYPRE_RUN_MACHINE}.tar $HYPRE_AUTOTEST_DIR/.
+  scp -pr  ${HYPRE_COMPILE_MACHINE}:${HYPRE_REMOTE_DIR}/linear_solvers/autotest.${HYPRE_RUN_MACHINE}.tar $HYPRE_AUTOTEST_DIR/.
 
-# echo "cleaning up...."
-# ssh ${HYPRE_COMPILE_MACHINE} "\
-#   (\
-#        rm -fR ${HYPRE_REMOTE_DIR}\
-#   )"
 }
 
 #==============================================================================
@@ -75,8 +70,8 @@ cd $HYPRE_AUTOTEST_DIR
 rm -fR linear_solvers
 cvs -q checkout -P linear_solvers 1> $0.checkout.log 2> $0.checkout.err
 echo "$HYPRE_CHECKOUT_EMAIL" > $0.checkout.err.email 
-#chgrp -fR hypre linear_solvers # should not be needed if cron started
-# from hypre group, i.e., make sure to do a newgrp -l hypre; crontab ...
+chmod -fR g+rw linear_solvers
+chgrp -fR hypre linear_solvers
 
 #==============================================================================
 # Run test suites on remote machines
