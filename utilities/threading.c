@@ -20,7 +20,7 @@
 int iteration_counter = 0;
 int hypre_thread_counter;
 
-int HYPRE_InitPthreads( MPI_Comm comm )
+int HYPRE_InitPthreads( int num_threads )
 {
    int err;
    int i;
@@ -28,7 +28,7 @@ int HYPRE_InitPthreads( MPI_Comm comm )
           (hypre_workqueue_t) malloc(sizeof(struct hypre_workqueue_struct) +
                                       (MAX_QUEUE * sizeof(void *)));
 
-
+   hypre_NumThreads = num_threads;
    initial_thread = pthread_self();
 
    if (hypre_qptr != NULL) {

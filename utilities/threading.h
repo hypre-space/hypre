@@ -48,7 +48,7 @@ typedef struct hypre_workqueue_struct {
 
 void hypre_work_put( hypre_work_proc_t funcptr, void *argptr );
 void hypre_work_wait( void );
-int HYPRE_InitPthreads( MPI_Comm comm );
+int HYPRE_InitPthreads( int num_threads );
 void HYPRE_DestroyPthreads( void );
 void hypre_pthread_worker( int threadid );
 int ifetchadd( int *w, pthread_mutex_t *mutex_fetchadd );
