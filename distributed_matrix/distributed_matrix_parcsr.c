@@ -16,12 +16,6 @@
 
 #include "HYPRE_parcsr_mv.h"
 
-typedef struct
-{
-   int dummy;
-
-} hypre_DistributedMatrixParcsrAuxiliaryData;
-
 /*--------------------------------------------------------------------------
  * hypre_DistributedMatrixDestroyParCSR
  *   Internal routine for freeing a matrix stored in Parcsr form.
@@ -30,11 +24,6 @@ typedef struct
 int 
 hypre_DistributedMatrixDestroyParCSR( hypre_DistributedMatrix *distributed_matrix )
 {
-   HYPRE_ParCSRMatrix Parcsr_matrix = (HYPRE_ParCSRMatrix) hypre_DistributedMatrixLocalStorage(distributed_matrix);
-
-   HYPRE_ParCSRMatrixDestroy( Parcsr_matrix );
-
-   hypre_TFree(hypre_DistributedMatrixAuxiliaryData( distributed_matrix ) );
 
    return(0);
 }
@@ -49,9 +38,6 @@ int
 hypre_DistributedMatrixInitializeParCSR(hypre_DistributedMatrix *matrix)
 {
    
-   hypre_DistributedMatrixAuxiliaryData( matrix ) = 
-      hypre_CTAlloc( hypre_DistributedMatrixParcsrAuxiliaryData, 1 );
-
    return 0;
 }
 
