@@ -68,7 +68,7 @@ int hypre_BoomerAMGBuildCoarseOperator(    hypre_ParCSRMatrix  *RT,
    hypre_ParCSRMatrix *RAP;
    int		      *col_map_offd_RAP;
 
-   hypre_CSRMatrix *RAP_int;
+   hypre_CSRMatrix *RAP_int = NULL;
 
    double          *RAP_int_data;
    int             *RAP_int_i;
@@ -1608,8 +1608,8 @@ hypre_ExchangeRAPData( 	hypre_CSRMatrix *RAP_int,
 			hypre_ParCSRCommPkg *comm_pkg_RT)
 {
    int     *RAP_int_i;
-   int     *RAP_int_j;
-   double  *RAP_int_data;
+   int     *RAP_int_j = NULL;
+   double  *RAP_int_data = NULL;
    int     num_cols = 0;
 
    MPI_Comm comm = hypre_ParCSRCommPkgComm(comm_pkg_RT);
@@ -1623,8 +1623,8 @@ hypre_ExchangeRAPData( 	hypre_CSRMatrix *RAP_int,
    hypre_CSRMatrix *RAP_ext;
 
    int	   *RAP_ext_i;
-   int	   *RAP_ext_j;
-   double  *RAP_ext_data;
+   int	   *RAP_ext_j = NULL;
+   double  *RAP_ext_data = NULL;
 
    hypre_ParCSRCommHandle *comm_handle;
    hypre_ParCSRCommPkg *tmp_comm_pkg;
