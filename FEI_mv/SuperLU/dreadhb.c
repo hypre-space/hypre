@@ -15,8 +15,7 @@
 /* Eat up the rest of the current line */
 int dDumpLine(FILE *fp)
 {
-    register int c;
-    while ((c = fgetc(fp)) != '\n') ;
+    while (fgetc(fp) != '\n') ;
     return 0;
 }
 
