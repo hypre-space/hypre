@@ -3,6 +3,8 @@
 lib_LTLIBRARIES = libHYPRE_superlu.la
 libHYPRE_superlu_la_SOURCES = $(FILES)
 libHYPRE_superlu_la_LDFLAGS = -avoid-version
+AM_CPPFLAGS = \
+ -I$(top_srcdir)/utilities
 
 #
 FILES = \
