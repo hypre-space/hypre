@@ -83,14 +83,16 @@ or
 \label{Installation Procedures}
 
 The installation is broken down into 2 parts: 
+  \begin{itemize}
   \item building the distribution (tar file)
   \item installation
+  \end{itemize}
 
 Build the \hypre{} distribution:
 
 \begin{enumerate}
 
-   \item Set the version number in \file{utilities/HYPRE_utilities.h}.
+   \item Set the version number in \file{utilities/HYPRE\_utilities.h}.
    The version number, by convension, use the following syntax "M.mm.rr".
    Where the "M" is the major release number, "mm" is the minor
    relases number, and the "rr" an update number. Alpha, and Beta 
@@ -101,7 +103,7 @@ Build the \hypre{} distribution:
 
    \item Create a symbolic tag for the current version
    of the cvs repository. To create a generat release enter:
-   kbd{cvs rtag -b VM-nn-rr linear_solvers}. Note that a
+   \kbd{cvs rtag -b VM-nn-rr linear\_solvers}. Note that a
    general release requires that the cvs rtag branch option.
    Version numbers are mapped into a valid rtag branch name by the
    following conversion, "VM-nn-rr", note: the leading (capital)
@@ -110,15 +112,15 @@ Build the \hypre{} distribution:
    tag name restrictions (e.g., begin with a letter, and no "."'s).
    The version information during the install will be derived
    from the main trunk archive using the information in the
-   file utilites/HYPRE_utilites.h. Alpha, and Beta releases
+   file utilites/HYPRE\_utilites.h. Alpha, and Beta releases
    are denoted by the following sytanx "VM-nn-rr-a" for alpha
    releases, and "VM-nn-rr-b" for beta releases. An alpha or
    beta release do not make branches in the repository. For a beta
    release the command would be similar to: 
-   kbd{cvs rtag VM-nn-rrb linear_solvers}. Optionally, an rtag
+   \kbd{cvs rtag VM-nn-rrb linear\_solvers}. Optionally, an rtag
    can be made relative to a date or time. For example set the
    rtag relative to last midnight enter:
-   kbd{cvs rtag -D 0:0 VM-nn-rrb linear_solvers}.
+   \kbd{cvs rtag -D 0:0 VM-nn-rrb linear\_solvers}.
 
    \item The distribution is created with the \file{mkdist} 
    Bourne-shell script located in the tools directory of the 
@@ -130,23 +132,23 @@ Build the \hypre{} distribution:
 
 \end{enumerate}
 
-\end{itemize}
-
 %==========================================================================
 \section{Installation Example}
 \label{Installation Example}
 
 The following is an example session creating a beta distribution:
 \begin{ttfamily}
-\$ \bfseries{pwd}\linebreak
+\begin{mdseries}
+\linebreak
+\$ \textbf{pwd}\linebreak
 /home/hypre\linebreak
-\$ \bfseries{cvs checkout linear\_solvers}\linebreak
+\$ \textbf{cvs checkout linear\_solvers}\linebreak
 U linear\_solvers/CHANGELOG\linebreak
 U linear\_solvers/COPYRIGHT\_and\_DISCLAIMER\linebreak
  . . .\linebreak
 U linear\_solvers/utilities/utilities.h\linebreak
 U linear\_solvers/utilities/version\linebreak
-\$ \bfseries{cvs history -T}\linebreak
+\$ \textbf{cvs history -T}\linebreak
 T 2000-09-18 23:56 +0000 treadway linear\_solvers [V1-0-0b1:A]\linebreak
 T 2000-09-20 17:00 +0000 treadway linear\_solvers [V1-0-0b1:D]\linebreak
 T 2000-09-20 20:08 +0000 treadway linear\_solvers [V1-0-0b1:D]\linebreak
@@ -156,15 +158,15 @@ T 2001-01-11 20:58 +0000 treadway linear\_solvers [V1-4-0b:A]\linebreak
 T 2001-01-11 22:07 +0000 treadway linear\_solvers [V1-4-0b:A]\linebreak
 T 2001-01-11 22:12 +0000 treadway linear\_solvers [V1-4-0b:D]\linebreak
 T 2001-01-11 22:15 +0000 treadway linear\_solvers [V1-4-0b:A]\linebreak
-\$ \bfseries{vi linear\_solvers/utilities/HYPRE\_utilities.h}\linebreak
+\$ \textbf{vi linear\_solvers/utilities/HYPRE\_utilities.h}\linebreak
  . . .\linebreak
 \#define HYPRE\_Version() "HYPRE 1.4.0b \$Date$ Compiled: " \_\linebreak
 \_DATE\_\_ " " \_\_TIME\_\_\linebreak
  . . .\linebreak
-#define HYPRE\_Version() "HYPRE 1.4.0b \$Date$ Compiled: " \_\linebreak
+\#define HYPRE\_Version() "HYPRE 1.4.0b \$Date$ Compiled: " \_\linebreak
 \_DATE\_\_ " " \_\_TIME\_\_\linebreak
 "linear\_solvers/utilities/HYPRE\_utilities.h" 60 lines, 1570 characters\linebreak
-\$ \bfseries{cvs commit linear\_solvers/utilities/HYPRE\_utilities.h\linebreak
+\$ \textbf{cvs commit linear\_solvers/utilities/HYPRE\_utilities.h\linebreak
 beta release 1.5.0b}\linebreak
 CVS: ----------------------------------------------------------------------\linebreak
 CVS: Enter Log.	 Lines beginning with `CVS:' are removed automatically\linebreak
@@ -180,10 +182,10 @@ Checking in linear\_solvers/utilities/HYPRE\_utilities.h;\linebreak
 /home/casc/repository/linear\_solvers/utilities/HYPRE\_utilities.h,v  <--  HYPRE\_utilities.h\linebreak
 new revision: 2.2; previous revision: 2.1\linebreak
 done\linebreak
-\$ \bfseries{linear\_solvers/utilities/version -number\linebreak
-1.5.0b}\linebreak
-\$ \bfseries{cvs rtag V1-5-0b linear\_solvers}\linebreak
-\$ \bfseries{./mkdist V1-5-0b}\linebreak
+\$ \textbf{linear\_solvers/utilities/version -number}\linebreak
+1.5.0b\linebreak
+\$ \textbf{cvs rtag V1-5-0b linear\_solvers}\linebreak
+\$ \textbf{./mkdist V1-5-0b}\linebreak
 U linear\_solvers/CHANGELOG\linebreak
 U linear\_solvers/COPYRIGHT\_and\_DISCLAIMER\linebreak
  . . .\linebreak
@@ -193,7 +195,7 @@ checking the hostname... perrin\linebreak
 checking the architecture... solaris\linebreak
  . . .\linebreak
 creating hypre-1.5.0b.tar file ...\linebreak
-\$ \bfseries{ls -l hypre-1.5*}\linebreak
+\$ \textbf{ls -l hypre-1.5*}\linebreak
 -rw-rw-r--   1 treadway treadway 1532225 Jul 11 15:17 hypre-1.5.0b.tar.gz\linebreak
 \linebreak
 hypre-1.5.0b:\linebreak
@@ -203,30 +205,30 @@ total 20\linebreak
 drwxrwxr-x   2 treadway treadway     512 Jul 11 15:17 bin\linebreak
 drwxrwxr-x   4 treadway treadway     512 Jul 11 15:17 docs\linebreak
 drwxrwxr-x  27 treadway treadway    1024 Jul 11 15:17 src\linebreak
-\$ \bfseries{cp hypre-1.5.0b.tar.gz hypre/sparc-sun-solaris2.7/}\linebreak
-\$ \bfseries{cd hypre-1.5.0b/src/tools/mklibs hypre/sparc-sun-solaris2.7/}\linebreak
-\$ \bfseries{cd hypre/sparc-sun-solaris2.7/}\linebreak
-\$ \bfseries{ls}\linebreak
+\$ \textbf{cp hypre-1.5.0b.tar.gz hypre/sparc-sun-solaris2.7/}\linebreak
+\$ \textbf{cd hypre-1.5.0b/src/tools/mklibs hypre/sparc-sun-solaris2.7/}\linebreak
+\$ \textbf{cd hypre/sparc-sun-solaris2.7/}\linebreak
+\$ \textbf{ls}\linebreak
 AUTOTEST             hypre-1.5.0b.tar.gz  mklibs\linebreak
-\$ \bfseries{./mklibs -b hypre-1.5.0b.tar.gz}\linebreak
+\$ \textbf{./mklibs -b hypre-1.5.0b.tar.gz}\linebreak
 checking the hostname... perrin\linebreak
 checking the architecture... solaris\linebreak
  . . .\linebreak
 Very-cleaning FEI\_mv ...\linebreak
 Very-cleaning test ...\linebreak
-\$ \bfseries{ls}\linebreak
+\$ \textbf{ls}\linebreak
 AUTOTEST             hypre-1.5.0b.tar.gz\linebreak
 hypre-1.5.0b         mklibs\linebreak
-\$ \bfseries{ls hypre-1.5.0b}\linebreak
+\$ \textbf{ls hypre-1.5.0b}\linebreak
 CHANGELOG                 debug                     lib\linebreak
 COPYRIGHT\_and\_DISCLAIMER  docs                      src\linebreak
 bin                       include\linebreak
-\$ \bfseries{ls hypre-1.5.0b/lib}\linebreak
+\$ \textbf{ls hypre-1.5.0b/lib}\linebreak
 libHYPRE\_DistributedMatrix.a\linebreak
 libHYPRE\_DistributedMatrixPilutSolver.a\linebreak
 libHYPRE\_Euclid.a\linebreak
 libHYPRE\_FEI.a\linebreak
-libHYPRE\_IJ_mv.a\linebreak
+libHYPRE\_IJ\_mv.a\linebreak
 libHYPRE\_LSI.a\linebreak
 libHYPRE\_MatrixMatrix.a\linebreak
 libHYPRE\_ParaSails.a\linebreak
@@ -242,4 +244,5 @@ libHYPRE\_superlu.a\linebreak
 libHYPRE\_utilities.a\linebreak
 libkrylov.a\linebreak
 \$ \linebreak
+\end{mdseries}
 \end{ttfamily}
