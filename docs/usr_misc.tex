@@ -73,41 +73,38 @@ configured and may also be included by the user in his/her own code.
 \subsection{Linking into another program}
 
 A program linking with \hypre{} must be compiled with
-\kbd{-I$HYPRE_DIR/include} and linked with
-\kbd{-L$HYPRE_DIR/lib -l}{\it hypre library name}... 
-\kbd{-l}{\it hypre library name}.
-When using a formal \hypre{} installation, \kbd{$HYPRE_DIR} is
-\file{/usr/apps/hypre}.
-When using a private installation, the installer sets
-\kbd{$HYPRE_DIR}.  Additionally, any other libraries to which \hypre{}
-is linked must also be linked to by the users application e.g. the
-BLAS library or PETSc library are often (but not always) linked in by
-\hypre{} and must therefore be linked in by the users
-application as well.  It may be useful to reference the Makefile in
-the test subdirectory.  This Makefile is designed to build a test
-application that links with and calls \hypre{}.  All include and
-linking flags that are used by \hypre{} and needed by the application
-get exported to this file by the configure script.
+\kbd{-I\$HYPRE_DIR/include} and linked with
+\kbd{-L\$HYPRE_DIR/lib -l}{\it hypre library name}... 
+\kbd{-l}{\it hypre library name}..., where \kbd{\$HYPRE_DIR} is the
+directory where \hypre{} is installed.  Additionally, any other
+libraries to which \hypre{} is linked must also be linked to by the
+users application.  For example, the BLAS library or PETSc library are
+often (but not always) linked in by \hypre{} and would also need to be
+linked in by the users application.
+
+It may be useful to reference the \code{Makefile} in the \file{test}
+subdirectory.  This makefile is designed to build test applications
+that link with and call \hypre{}.  All include and linking flags that
+are used by \hypre{} and needed by these test applications get
+exported to this file by the \file{configure} script.
 
 %==========================================================================
 
 \section{Calling \hypre{} from Fortran}
 \label{Calling hypre from Fortran}
 
-Fortran 77 subroutine arguments always pass copies of the argument addresses
-upon execution of the subroutine call.
-This is referred to as call-by-address or call-by-reference.
-In the called subroutine, the memory space at the
-argument address can be altered, but the calling address cannot be
-altered.
+Fortran 77 subroutine arguments always pass copies of the argument
+addresses upon execution of the subroutine call.  This is referred to
+as call-by-address or call-by-reference.  In the called subroutine,
+the memory space at the argument address can be altered, but the
+calling address cannot be altered.
 
 C function parameters, whether pointers (addresses) or not, are
-directly copied upon
-entry to the function. This is referred to as call-by-value.
-Altering the copied C parameter in the
-called function has no effect on the parameter in the calling function. 
-A pointer parameter in C can achieve the same effect as call-by-reference,
-and by this mechanism the languages can interoperate in a straightforward
+directly copied upon entry to the function. This is referred to as
+call-by-value.  Altering the copied C parameter in the called function
+has no effect on the parameter in the calling function.  A pointer
+parameter in C can achieve the same effect as call-by-reference, and
+by this mechanism the languages can interoperate in a straightforward
 manner.
 
 Portability across typical platforms is currently achieved with the
