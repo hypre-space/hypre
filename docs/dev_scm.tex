@@ -62,8 +62,8 @@ procedures outlined in Section \ref{Autotest Procedures}.  So,
 developers must take extra care that checked-in code does not break
 autotest.  One thing that should almost always be done is to do a
 clean checkout into a temporary subdirectory (e.g., \code{~/tmp}),
-then do a '\code{configure}' and a '\code{make beta}'.  This will at
-least verify that the compile is not broken.  Extra measures should be
+then do '\code{configure}' and '\code{make}'.  This will at least
+verify that the compile is not broken.  Extra measures should be
 taken when necessary to insure that the autotest runs also do not
 fail.
 
@@ -104,7 +104,7 @@ cd foo
 cvs checkout -r foo linear_solvers
 \end{verbatim}
 
-\item Make modifications to files in '\code{~/foo/linear_solvers}'.
+\item Make modifications to files in '\code{~/foo/linear\_solvers}'.
 Code can be checked in/out without doing damage to the main
 development trunk.
 
@@ -133,6 +133,66 @@ cvs rtag -d foo linear_solvers
 \end{verbatim}
 
 \end{itemize}
+
+%==========================================================================
+\subsection{Making Changes to the Repository}
+\label{Making Changes to the Repository}
+
+This section gives guidelines for making changes to the repository.
+Because \hypre{} is a fairly large software library with a number of
+important customers, formal change control guidelines are necessary in
+order to maintain software quality and preserve the sanity of library
+developers (those who are not already lost, anyway :).
+
+There are different classes of code changes that can be commited to
+the repository, some with little or no prerequisites attached, and
+others with heavier prerequisites.
+\begin{itemize}
+
+\item {\bf All code} should at least compile before commiting
+to the repository.
+
+\item {\bf Code that is not being distributed with a release}
+may be changed without consulting with the \hypre{} technical lead.
+
+\item {\bf Code being distributed with a release that is not officially
+part of the release} may be changed without consulting with the
+\hypre{} technical lead.  This code should compile on all platforms
+and pass all autotesting.
+
+\item {\bf Code that is part of a release} may be changed without
+consulting the \hypre{} technical lead if the changes will have no
+noticeable effect on users.  All user interface changes or
+modifications that change the behavior of the library require
+coordination with the \hypre{} technical lead.  This code should
+compile on all platforms, have sufficient user documentation, and pass
+all autotesting.
+
+\end{itemize}
+
+
+%==============================
+\subsection{Tracking Repository Changes}
+\label{Tracking Repository Changes}
+
+Changes to the repository are tracked primarily by CVS, which keeps a
+chronological log of all changes in the following file.
+\begin{verbatim}
+/home/casc/repository/updatelog.linear_solvers
+\end{verbatim}
+
+CVS tags are used to ``tag'' releases with their corresponding release
+number (see Section \ref{Releases}).  For general releases, a new CVS
+branch is also created, and bug fixes are made to that branch.  CVS
+provides commands for viewing the tags and branches in the repository.
+
+Major changes that need to be reported to users are manually entered
+in the \file{CHANGELOG} file in the top-level directory.  This file is
+distributed with each \hypre{} release.
+
+Finally, the \hypre{} bug-tracking facility, Bugzilla, also provides
+the ability to track the status of bugs and new features/changes.
+
 
 %==========================================================================
 \section{Releases}
@@ -187,34 +247,6 @@ Alpha releases are not expected to be as stable as beta releases.
 The release is tagged, but a CVS branch is not created.
 \end{itemize}
 
-%==========================================================================
-\subsection{Installations}
-\label{Installations}
-
-Installations of the various releases is done as follows:
-\begin{itemize}
-\item General releases and beta releases are installed on all
-supported LLNL platforms.
-\item Alpha releases are installed only on the CASC cluster.
-\end{itemize}
-
-\noindent
-Users can point to one of two installations (three on the CASC
-cluster) by default:
-\begin{itemize}
-\item \file{/usr/apps/hypre} - the latest general release.
-\item \file{/usr/apps/hypre/beta} - the latest general or beta release
-\end{itemize}
-
-\noindent
-On the CASC cluster, the main installation directory is
-\file{/home/casc/software/hypre}, and users can also point to a
-\file{/home/casc/software/hypre/alpha} installation.
-Debugging and threaded versions are also being installed on the
-various platforms.  To get to these, append \file{debug},
-\file{threads}, or \file{threads/debug} to the default install
-directory name (e.g., \file{/usr/apps/hypre/threads}).
-
 %==============================
 \subsection{Release Schedule}
 \label{Release Schedule}
@@ -241,60 +273,36 @@ use these two weeks to allow the code to ``settle'' a little as we do
 testing, etc.  Minor changes are encouraged, of course.
 
 %==========================================================================
-\section{Making Changes to the Repository}
-\label{Making Changes to the Repository}
+\subsection{Release Installations}
+\label{Release Installations}
 
-This section gives guidelines for making changes to the repository.
-Because \hypre{} is a fairly large software library with a number of
-important customers, formal change control guidelines are necessary in
-order to maintain software quality and preserve the sanity of library
-developers (those who are not already lost, anyway :).
+General and beta releases are installed on all supported LLNL platforms. While
+alpha releases are installed {\bf only} on the CASC cluster.  Each release is 
+configured and built with MPI (default) with and without debug enabled, no MPI
+with and without debug enabled and (where supported) threads with and without 
+debug enabled. Each library is archived in a subdirectory of the main installation
+directory based on the options used; see below for a list of the subdirectories.
 
-There are different classes of code changes that can be commited to
-the repository, some with little or no prerequisites attached, and
-others with heavier prerequisites.
+\noindent
+On LLNL supported platforms, the installation directory for a general
+release is \file{/usr/apps/hypre} and a beta release is \file{/usr/apps/hypre/beta}. 
+
+On the CASC cluster, the installation directory for a general release is
+\file{/usr/casc/hypre}, a beta release is \file{/usr/casc/hypre/beta} and
+an alpha release is \file{/usr/casc/hypre/alpha}.
+
+List of subdirectories:
 \begin{itemize}
-
-\item {\bf All code} should at least compile before commiting
-to the repository.
-
-\item {\bf Code that is not being distributed with the release}
-may be changed without consulting with the \hypre{} technical lead.
-
-\item {\bf Code being distributed with the release that is not officially
-part of the release} may be changed without consulting with the
-\hypre{} technical lead.  This code should compile on all platforms
-and pass all autotesting.
-
-\item {\bf Code that is part of the release} may be changed without
-consulting the \hypre{} technical lead if the changes will have no
-noticeable effect on users.  All user interface changes or
-modifications that change the behavior of the library require
-coordination with the \hypre{} technical lead.  This code should
-compile on all platforms, have sufficient user documentation, and pass
-all autotesting.
-
+\item lib
+\item include
+\item debug/lib
+\item debug/include
+\item serial/lib
+\item serial/include
+\item serial/debug/lib
+\item serial/debug/include
+\item threaded/lib
+\item threaded/include
+\item threaded/debug/lib
+\item threaded/debug/include
 \end{itemize}
-
-
-%==============================
-\subsection{Tracking Changes}
-\label{Tracking Changes}
-
-Changes to the repository are tracked primarily by CVS, which keeps a
-cronological log of all changes in the following file.
-\begin{verbatim}
-/home/casc/repository/updatelog.linear_solvers
-\end{verbatim}
-
-CVS tags are used to ``tag'' releases with their corresponding release
-number (see Section \ref{Releases}).  For general releases, a new CVS
-branch is also created, and bug fixes are made to that branch.  CVS
-provides commands for viewing the tags and branches in the repository.
-
-Major changes that need to be reported to users are manually entered
-in the \file{CHANGELOG} file in the top-level directory.  This file is
-distributed with each \hypre{} release.
-
-Finally, the \hypre{} bug-tracking facility, Bugzilla, also provides
-the ability to track the status of bugs and new features/changes.

@@ -5,14 +5,32 @@
 
 
 The \hypre{} build system uses GNU Autoconf and a few related scripts to 
-create a \file{configure} script. 
+configure and build the library on UNIX-based platforms.  All of the necessary files
+are in the \file{config} subdirectory. Although it is unlikely that a developer 
+will need to modify any of the scripts, those that may need changing are further
+described below.
 
+%==========================================================================
+\section{Bootstrap Script}
+\label{Bootstrap Script}
 
-configure, make and install the library.  These tools are very inter-
-dependent and need to be executed in a specific order. A shell script named 
-\file{bootstrap}, is provided in the \file{config} subdirectory to relieve 
-developers of needing to know the required versions or constraints.  It is run 
-whenever changes are made to the M4 files or the \file{configure.in} script.
+A Bourne shell script named \file{bootstrap}, is provided in the \file{config} subdirectory
+to relieve developers of needing to know the required versions or constraints of the GNU 
+tools being used.  \file{bootstrap} is run from the \file{linear\_solvers} directory 
+(\file{./config/bootstrap}) whenever changes are made to the \file{*.m4} files or the 
+\file{configure.in} script.
+
+%==========================================================================
+\section{Configure Script}
+\label{Configure Script}
+
+The GNU tool Autoconf is used to generate the \file{configure} script for automatically
+configuring \hypre{} on UNIX-based systems.  It requires GNU M4 to generate the
+scripts.  There are several M4 scripts in the \file{linear\_solvers/config} directory
+that are customized for \hypre{}.
+
+\file{configure.in} is the template file, located in the \file{config} subdirectory, used 
+by Autoconf to create the \file{configure} script. 
 
 %==========================================================================
 \section{Makefile Requirements}
@@ -28,13 +46,13 @@ or not there are source code files.  \file{Makefile.am} is used by automake as a
 template which contains the names of the source and include files that need to 
 be built as well as include file paths and macro flags.  The source file names 
 are added to the \file{FILES} list; include files to be installed are in the 
-\file{include_HEADERS} list; and include paths and macro flags (i.e. -Dxxx) are 
+\file{include\_HEADERS} list; and include paths and macro flags (i.e. -Dxxx) are 
 in the AM\_CPPFLAGS list for C and C++ compilers or the AM\_FFLAGS list for Fortran
 compilers.  These preprocessor flags are global to the build system.  The 
 EXTRA\_DIST list is for those files not needed for building \hypre{} but desired 
 for its distribution, such as a README file. 
 
-The top level \file{Makefile.am}, i.e. \file{linear_solvers/Makefile.am}, is 
+The top level \file{Makefile.am}, i.e. \file{linear\_solvers/Makefile.am}, is 
 edited to add the name of the new (highest\_level) subdirectory, excluding all of
 its child-subdirectories, to the SUBDIRS, HYPRE\_SUBDIR\_LIST and possibly 
 DIST\_SUBDIRS lists.  The rest of this file is not likely to need changing.
@@ -81,49 +99,6 @@ $(OBJECTS): $(dependent_includes)
 SUBDIRS = . LOBPCG
 
 \end{verbatim}
-
-%==========================================================================
-\section{Configure Script Requirements}
-\label{Configure Script Requirements}
-
-
-The GNU tool Autoconf is used to generate the \file{configure} script for automatically
-configuring \hypre{} on UNIX-based systems.  It requires GNU M4 to generate the
-scripts.  There are several M4 scripts in the \file{linear_solvers/config} directory
-that are customized for \hypre{}.
-
-\file{configure.ac} is the template file, located in the \file{config} subdirectory, used 
-by Autoconf to create the \file{configure} script.  It is the file that gets changed
-when new subdirectories are added.  The names of new subdirectories are added to
-the AC\_CONFIG\_FILES list (near the end of the file).
-
-For example, a developer creates subdirectory \file{new_solve} with its own 
-subdirectories of \file{solve_setup} and \file{solve_exec}.  The additions to 
-AC\_CONFIG\_FILES would be (back slashes indicate continuation lines):
-
-\begin{verbatim}
-    new_solve/Makefile \
-    new_solve/solve_setup/Makefile \
-    new_solve/solve_exec/Makefile \
-
-\end{verbatim}
-
-%==========================================================================
-\section{Bootstrap Script}
-\label{Bootstrap Script}
-
-
-The GNU Autotools are very inter-dependent, needing to be run in a specified 
-order.  The \file{bootstrap} script is a wrapper for executing them properly, 
-thus relieving developers of needing to know the details.
-
-\file{bootstrap} must be run anytime there are changes to any of the M4 routines
-or \file{configure.ac} to generate a new \file{configure} script.  The new configure
-script must be checked into the \hypre{} repository along with any other new or
-modified files.
-
-To run \file{bootstrap} you must be in the top-level directory, which is usually the
-\file{linear_solvers} directory.  The execute line is: \file{./config/bootstrap} 
 
 %==========================================================================
 \section{Build and Install}
