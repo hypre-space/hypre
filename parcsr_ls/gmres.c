@@ -153,7 +153,7 @@ hypre_GMRESSetup( void *gmres_vdata,
    {
       if ((gmres_data -> norms) == NULL)
          (gmres_data -> norms) = hypre_CTAlloc(double, max_iter + 1);
-      if ((gmres_data -> log_file_name == NULL)
+      if ((gmres_data -> log_file_name) == NULL)
          (gmres_data -> log_file_name) = "gmres.out.log";
    }
  
