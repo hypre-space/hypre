@@ -33,7 +33,7 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
 
    /* Data Structure variables */
 
-   int      amg_ioutdat;
+   int      amg_print_level;
    int     *num_coeffs;
    int     *num_variables;
    int      cycle_op_count;
@@ -73,7 +73,7 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
    MPI_Comm_size(comm, &num_procs);   
    MPI_Comm_rank(comm,&my_id);
 
-   amg_ioutdat      = hypre_ParAMGDataIOutDat(amg_data);
+   amg_print_level      = hypre_ParAMGDataPrintLevel(amg_data);
    /* num_unknowns  = hypre_ParAMGDataNumUnknowns(amg_data); */
    num_levels       = hypre_ParAMGDataNumLevels(amg_data);
    A_array          = hypre_ParAMGDataAArray(amg_data);
@@ -112,7 +112,7 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
     *-----------------------------------------------------------------------*/
 
 
-   if (my_id == 0 && amg_ioutdat > 1)
+   if (my_id == 0 && amg_print_level > 1)
       hypre_BoomerAMGWriteSolverParams(amg_data); 
 
    /*-----------------------------------------------------------------------
@@ -131,7 +131,7 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
     *     write some initial info
     *-----------------------------------------------------------------------*/
 
-   if (my_id == 0 && amg_ioutdat > 1 && tol > 0.)
+   if (my_id == 0 && amg_print_level > 1 && tol > 0.)
      printf("\n\nAMG SOLUTION INFO:\n");
 
    /*-----------------------------------------------------------------------
@@ -160,7 +160,7 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
      relative_resid = 1.;
    }
 
-   if (my_id == 0 && amg_ioutdat > 1 && tol > 0.)
+   if (my_id == 0 && amg_print_level > 1 && tol > 0.)
    {     
       printf("                                            relative\n");
       printf("               residual        factor       residual\n");
@@ -211,7 +211,7 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
 
       hypre_ParAMGDataNumIterations(amg_data) = cycle_count;
 
-      if (my_id == 0 && amg_ioutdat > 1 && tol > 0.)
+      if (my_id == 0 && amg_print_level > 1 && tol > 0.)
       { 
          printf("    Cycle %2d   %e    %f     %e \n", cycle_count,
                  resid_nrm, conv_factor, relative_resid);
@@ -246,7 +246,7 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
       cycle_cmplxty = ((double) cycle_op_count) / ((double) num_coeffs[0]);
    }
 
-   if (my_id == 0 && amg_ioutdat > 1)
+   if (my_id == 0 && amg_print_level > 1)
    {
       if (Solve_err_flag == 1)
       {

@@ -44,7 +44,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    double               trunc_factor;
 
    int      max_levels; 
-   int      amg_ioutdat;
+   int      amg_print_level;
    int      debug_flag;
 
  
@@ -85,7 +85,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
    old_num_levels = hypre_ParAMGDataNumLevels(amg_data);
    max_levels = hypre_ParAMGDataMaxLevels(amg_data);
-   amg_ioutdat = hypre_ParAMGDataIOutDat(amg_data);
+   amg_print_level = hypre_ParAMGDataPrintLevel(amg_data);
    coarsen_type = hypre_ParAMGDataCoarsenType(amg_data);
    measure_type = hypre_ParAMGDataMeasureType(amg_data);
    setup_type = hypre_ParAMGDataSetupType(amg_data);
@@ -294,7 +294,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 	 coarse_size = coarse_pnts_global[num_procs];
       
 #if DEBUG
-   if (amg_ioutdat == -3)
+   if (amg_print_level == -3)
    {  
       char  filename[255];
       FILE *fp;
@@ -567,11 +567,11 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
     * Print some stuff
     *-----------------------------------------------------------------------*/
 
-   if (amg_ioutdat == 1 || amg_ioutdat == 3)
+   if (amg_print_level == 1 || amg_print_level == 3)
       hypre_BoomerAMGSetupStats(amg_data,A);
 
 #if DEBUG
-   if (amg_ioutdat == -3)
+   if (amg_print_level == -3)
    {  
       char  filename[255];
 

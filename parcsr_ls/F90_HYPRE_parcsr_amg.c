@@ -366,16 +366,16 @@ hypre_F90_IFACE(hypre_boomeramgsetrelaxweight, HYPRE_BOOMERAMGSETRELAXWEIGHT)( l
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_BoomerAMGSetIOutDat
+ * HYPRE_BoomerAMGSetPrintLevel
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_boomeramgsetioutdat, HYPRE_BOOMERAMGSETIOUTDAT)( long int *solver,
-                                         int      *ioutdat,
+hypre_F90_IFACE(hypre_boomeramgsetprint_level, HYPRE_BOOMERAMGSETIOUTDAT)( long int *solver,
+                                         int      *print_level,
                                          int      *ierr     )
 {
-   *ierr = (int) ( HYPRE_BoomerAMGSetIOutDat( (HYPRE_Solver) *solver,
-                                           (int)          *ioutdat ) );
+   *ierr = (int) ( HYPRE_BoomerAMGSetPrintLevel( (HYPRE_Solver) *solver,
+                                           (int)          *print_level ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -397,12 +397,12 @@ hypre_F90_IFACE(hypre_boomeramgsetlogfilename, HYPRE_BOOMERAMGSETLOGFILENAME)( l
 
 void
 hypre_F90_IFACE(hypre_boomeramgsetlogging, HYPRE_BOOMERAMGSETLOGGING)( long int *solver,
-                                         int      *ioutdat,
+                                         int      *print_level,
                                          char     *log_file_name,
                                          int      *ierr     )
 {
    *ierr = (int) ( HYPRE_BoomerAMGSetLogging( (HYPRE_Solver) *solver,
-                                           (int)          *ioutdat,
+                                           (int)          *print_level,
                                            (char *)       log_file_name ) );
 }
 

@@ -446,7 +446,7 @@ void    *data;
    double   tol;
  
    /* amg output params */
-   int      amg_ioutdat;
+   int      amg_print_level;
  
    int      j;
  
@@ -464,13 +464,13 @@ void    *data;
    relax_weight = hypre_ParAMGDataRelaxWeight(amg_data); 
    tol = hypre_ParAMGDataTol(amg_data);
  
-   amg_ioutdat = hypre_ParAMGDataIOutDat(amg_data);
+   amg_print_level = hypre_ParAMGDataPrintLevel(amg_data);
  
    /*----------------------------------------------------------
     * AMG info
     *----------------------------------------------------------*/
  
-   if (amg_ioutdat == 1 || amg_ioutdat == 3)
+   if (amg_print_level == 1 || amg_print_level == 3)
    { 
       printf("\n\nBoomerAMG SOLVER PARAMETERS:\n\n");
       printf( "  Maximum number of cycles:         %d \n",max_iter);
@@ -508,7 +508,7 @@ void    *data;
          printf( "  Relaxation Weight (Jacobi) %f level %d\n",relax_weight[j],j);
       }
 
-      printf( " Output flag (ioutdat): %d \n", amg_ioutdat);
+      printf( " Output flag (print_level): %d \n", amg_print_level);
    }
  
    return 0;

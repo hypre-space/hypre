@@ -390,14 +390,14 @@ HYPRE_BoomerAMGSetSmoothNumSweep( HYPRE_Solver  solver,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_BoomerAMGSetIOutDat
+ * HYPRE_BoomerAMGSetPrintLevel
  *--------------------------------------------------------------------------*/
 
 int
-HYPRE_BoomerAMGSetIOutDat( HYPRE_Solver solver,
-                        int          ioutdat  )
+HYPRE_BoomerAMGSetPrintlevel( HYPRE_Solver solver,
+                        int          print_level  )
 {
-   return( hypre_BoomerAMGSetIOutDat( (void *) solver, ioutdat ) );
+   return( hypre_BoomerAMGSetPrintLevel( (void *) solver, print_level ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -417,10 +417,10 @@ HYPRE_BoomerAMGSetLogFileName( HYPRE_Solver  solver,
 
 int
 HYPRE_BoomerAMGSetLogging( HYPRE_Solver  solver,
-                           int           ioutdat,
+                           int           print_level,
                            const char   *log_file_name  )
 {
-   return( hypre_BoomerAMGSetLogging( (void *) solver, ioutdat, log_file_name ) );
+   return( hypre_BoomerAMGSetLogging( (void *) solver, print_level, log_file_name ) );
 }
 
 /*--------------------------------------------------------------------------

@@ -171,8 +171,8 @@ int HYPRE_BoomerAMGSetRelaxWeight(HYPRE_Solver  solver,
 /**
  * (Optional)
  **/
-int HYPRE_BoomerAMGSetIOutDat(HYPRE_Solver solver,
-                              int          ioutdat);
+int HYPRE_BoomerAMGSetPrintLevel(HYPRE_Solver solver,
+                              int          print_level);
 
 /**
  * (Optional)
@@ -256,7 +256,7 @@ int HYPRE_BoomerAMGSetLogFileName(HYPRE_Solver  solver,
  * (Optional)
  **/
 int HYPRE_BoomerAMGSetLogging(HYPRE_Solver  solver,
-                              int           ioutdat,
+                              int           print_level,
                               const char   *log_file_name);
 
 /*

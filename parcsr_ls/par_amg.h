@@ -89,7 +89,7 @@ typedef struct
    double   rel_resid_norm;
 
    /* output params */
-   int      ioutdat;
+   int      print_level;
    char     log_file_name[256];
    int      debug_flag;
 
@@ -169,7 +169,7 @@ typedef struct
 #define hypre_ParAMGDataRelativeResidualNorm(amg_data) ((amg_data)->rel_resid_norm)
 
 /* output parameters */
-#define hypre_ParAMGDataIOutDat(amg_data) ((amg_data)->ioutdat)
+#define hypre_ParAMGDataPrintLevel(amg_data) ((amg_data)->print_level)
 #define hypre_ParAMGDataLogFileName(amg_data) ((amg_data)->log_file_name)
 #define hypre_ParAMGDataDebugFlag(amg_data)   ((amg_data)->debug_flag)
 
