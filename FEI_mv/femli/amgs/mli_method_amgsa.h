@@ -92,7 +92,7 @@ class MLI_Method_AMGSA : public MLI_Method
    int      ARPACKSuperLUExists_;
    MLI_AMGSA_DD *ddObj_;
    char     paramFile_[100];
-   int      printNullSpace_;
+   int      printToFile_;
 
 public :
 

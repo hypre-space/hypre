@@ -344,7 +344,7 @@ double MLI_Method_AMGSA::genPLocal(MLI_Matrix *mli_Amat,
          /* ------ call QR function ------ */
 
 #if 0
-         if ( mypid == 0 )
+         if ( mypid == 0 && i == 0)
          {
             for ( j = 0; j < aggSize; j++ ) 
             {
@@ -363,7 +363,7 @@ double MLI_Method_AMGSA::genPLocal(MLI_Matrix *mli_Amat,
                printf("%4d : Aggregation WARNING : QR returns non-zero for\n",
                       mypid);
                printf("  aggregate %d, size = %d, info = %d\n",i,aggSize,info);
-#if 1
+#if 0
 /*
                for ( j = 0; j < aggSize; j++ ) 
                {
@@ -1053,7 +1053,7 @@ int MLI_Method_AMGSA::formLocalGraph( hypre_ParCSRMatrix *Amat,
                   dcomp2 = habs(diagData[irow] * diagData[jj]);
                   if ( (dcomp1 >= epsilon * dcomp2) && (labeli == labelj) ) 
                   {
-                     colVal[length] = dcomp2 / dcomp1;
+                     colVal[length] = dcomp1 / dcomp2;
                      colInd[length++] = jj + startRow;
                   }
                }

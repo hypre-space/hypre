@@ -94,7 +94,7 @@ MLI_Method_AMGSA::MLI_Method_AMGSA( MPI_Comm comm ) : MLI_Method( comm )
    ARPACKSuperLUExists_ = 0;
    saLabels_            = NULL;
    useSAMGDDFlag_       = 0;
-   printNullSpace_      = 0;
+   printToFile_         = 0;
    strcpy( paramFile_, "empty" );
    symmetric_           = 1;
 }
@@ -437,9 +437,19 @@ int MLI_Method_AMGSA::setParams(char *in_name, int argc, char *argv[])
       strcpy( paramFile_, param3 ); 
       return 0;
    }
+   else if ( !strcmp(param1, "printNodalCoord" ))
+   {
+      printToFile_ |= 2;
+      return 0;
+   }
    else if ( !strcmp(param1, "printNullSpace" ))
    {
-      printNullSpace_ = 1;
+      printToFile_ |= 4;
+      return 0;
+   }
+   else if ( !strcmp(param1, "printElemNodeList" ))
+   {
+      printToFile_ |= 8;
       return 0;
    }
    else if ( !strcmp(param1, "print" ))
@@ -1000,7 +1010,6 @@ int MLI_Method_AMGSA::setNullSpace( int nDOF, int ndim, double *nullvec,
    nodeDofs_     = nDOF;
    currNodeDofs_ = nDOF;
    nullspaceDim_ = ndim;
-printf("method_amgsa: set ndim = %d\n", ndim);
    nullspaceLen_ = length;
    if ( nullspaceVec_ != NULL ) delete [] nullspaceVec_;
    if ( nullvec != NULL )
@@ -1100,9 +1109,24 @@ int MLI_Method_AMGSA::setNodalCoordinates(int num_nodes, int nDOF, int nsDim,
       printf("setNodalCoordinates: nDOF = %d not supported\n",nDOF);
       exit(1);
    }
-   if ( nullspaceVec_ != NULL ) delete [] nullspaceVec_;
+   if (nullspaceVec_ != NULL) delete [] nullspaceVec_;
+
+   if ((printToFile_ & 2) != 0 && nodeDofs_ == 3 )
+   {
+      sprintf(fname, "nodalCoord.%d", mypid); 
+      fp = fopen(fname, "w");
+      fprintf(fp, "%d\n", num_nodes);
+      for ( i = 0 ; i < num_nodes; i++ ) 
+      {
+         for ( j = 0 ; j < nodeDofs_; j++ ) 
+            fprintf(fp," %25.16e", coords[i*nodeDofs_+j]);
+         fprintf(fp,"\n");
+      }
+      fclose(fp);
+   }
 
    nullspaceVec_ = new double[nullspaceLen_ * nullspaceDim_];
+   for( i = 0 ; i < nullspaceLen_*nullspaceDim_; i++ ) nullspaceVec_[i] = 0.0;
 
    for( i = 0 ; i < num_nodes; i++ ) 
    {
@@ -1151,6 +1175,7 @@ int MLI_Method_AMGSA::setNodalCoordinates(int num_nodes, int nDOF, int nsDim,
          nullspaceVec_[offset] *= -1.0;
          j = 2; k = 4; offset = k * nullspaceLen_ + voffset + j; 
          nullspaceVec_[offset] *= -1.0;
+#if 0
          if ( nullspaceDim_ == 9 ) 
          {
             for ( j = 0; j < 3; j++ )
@@ -1208,6 +1233,7 @@ int MLI_Method_AMGSA::setNodalCoordinates(int num_nodes, int nDOF, int nsDim,
             j = 2; k = 10; offset = k * nullspaceLen_ + voffset + j; 
             nullspaceVec_[offset] *= -1.0;
          }
+#endif
       }
    }
    if ( scalings != NULL )
@@ -1215,17 +1241,6 @@ int MLI_Method_AMGSA::setNodalCoordinates(int num_nodes, int nDOF, int nsDim,
       for ( i = 0 ; i < nullspaceDim_; i++ ) 
          for ( j = 0 ; j < nullspaceLen_; j++ ) 
             nullspaceVec_[i*nullspaceLen_+j] /= scalings[j];
-   }
-   if ( printNullSpace_ == 1 )
-   {
-      for ( i = 0 ; i < nullspaceDim_; i++ ) 
-      {
-         sprintf(fname, "nullspace%d.%d", i, mypid); 
-         fp = fopen( fname, "w" );
-         for ( j = 0 ; j < nullspaceLen_; j++ ) 
-            fprintf(fp," %25.16e\n", nullspaceVec_[i*nullspaceLen_+j]);
-         fclose(fp);
-      }
    }
    return 0;
 }

@@ -27,6 +27,8 @@
 #include "seq_mv/seq_mv.h"
 #include "parcsr_mv/parcsr_mv.h"
 
+#define mabs(x) ((x) > 0 ? x : -(x))
+
 // *********************************************************************
 // local MLI includes
 // ---------------------------------------------------------------------
@@ -61,11 +63,12 @@ int MLI_Method_AMGSA::setupSFEIBasedNullSpaces( MLI *mli )
    int          iE, iN2, **elemNodeLists, *elemNodeList1D, totalNNodes;
    int          *partition, localStartRow, localNRows, *newElemNodeList;
    int          eMatDim, newNNodes, *elemNodeList, count, *orderArray;
-   int          csrNrows, *csrIA, *csrJA, offset, rowSize;
+   int          csrNrows, *csrIA, *csrJA, offset, rowSize, startCol;
    int          rowInd, colInd, colOffset, rowLeng, start, nSubdomains;
-   double       **elemMatrices, *elemMat, *csrAA;
+   double       **elemMatrices, *elemMat, *csrAA, dAccum;
    double       *eigenR, *eigenI, *eigenV;
-   char         which[20];
+   char         which[20], filename[100];;
+   FILE         *fp;
    MPI_Comm     comm;
    MLI_SFEI     *sfei;
    MLI_Matrix   *mliAmat;
@@ -115,12 +118,33 @@ int MLI_Method_AMGSA::setupSFEIBasedNullSpaces( MLI *mli )
    free( partition );
 
    /* --------------------------------------------------------------- */
+   /* fetch communicator matrix information                           */
+   /* --------------------------------------------------------------- */
+
+   startCol = 0;
+   if ( nullspaceVec_ != NULL )
+   {
+      for ( k = 0; k < nullspaceDim_; k++ )
+      {
+         dAccum = 0.0;
+         for ( iR = 0; iR < nullspaceLen_; iR++ )
+            dAccum += mabs(nullspaceVec_[iR+k*nullspaceLen_]);
+         if (dAccum == 0.0) {startCol = k; break;}
+      }
+      if (k == nullspaceDim_) startCol = nullspaceDim_;
+   }
+
+   /* --------------------------------------------------------------- */
    /* initialize null space vector and aggregation label              */
    /* --------------------------------------------------------------- */
   
-   if ( nullspaceVec_ != NULL ) delete [] nullspaceVec_;
-   nullspaceVec_ = new double[localNRows*nullspaceDim_];
-   assert( nullspaceLen_ == localNRows );
+   //if ( nullspaceVec_ != NULL ) delete [] nullspaceVec_;
+   if (nullspaceVec_ != NULL) assert( nullspaceLen_ == localNRows );
+   if (nullspaceVec_ == NULL) 
+   {
+      nullspaceLen_ = localNRows;
+      nullspaceVec_ = new double[localNRows*nullspaceDim_];
+   }
    if ( saLabels_ == NULL ) 
    {
       saLabels_ = new int*[maxLevels_];
@@ -134,9 +158,16 @@ int MLI_Method_AMGSA::setupSFEIBasedNullSpaces( MLI *mli )
    /* fetch SFEI information (nElems,elemIDs,elemNNodes,elemNodeLists)*/
    /* --------------------------------------------------------------- */
 
+   if ((printToFile_ & 8) != 0 && nSubdomains == 1)
+   {
+      sprintf(filename,"elemNodeList.%d", mypid);
+      fp = fopen(filename,"w");
+   }
+   else fp = NULL;
    for ( iD = 0; iD < nSubdomains; iD++ )
    {
       nElems = sfei->getBlockNumElems(iD);
+      if (fp != NULL) fprintf(fp, "%d\n", nElems);
       elemNNodes  = sfei->getBlockElemNEqns(iD);
       elemNodeLists = sfei->getBlockElemEqnLists(iD);
       elemMatrices  = sfei->getBlockElemStiffness(iD); 
@@ -264,13 +295,6 @@ int MLI_Method_AMGSA::setupSFEIBasedNullSpaces( MLI *mli )
 
       for ( iR = 0; iR < csrIA[csrNrows]; iR++ ) csrJA[iR]++;
       for ( iR = 0; iR <= csrNrows; iR++ ) csrIA[iR]++;
-#if 0
-      FILE *fptr = fopen("arpackMat", "w");
-      for ( iR = 0; iR < csrNrows; iR++ ) 
-         for ( k = csrIA[iR]; k < csrIA[iR+1]; k++ )
-            fprintf(fptr,"A(%10d,%10d) = %18.10e\n",iR,csrJA[k],csrAA[k]);
-      fclose(fptr);
-#endif
 
       /* -------------------------------------------------------- */
       /* compute near null spaces                                 */
@@ -283,8 +307,8 @@ int MLI_Method_AMGSA::setupSFEIBasedNullSpaces( MLI *mli )
       assert((long) eigenV);
 
 #ifdef MLI_ARPACK
-      sigmaR = 1.0e-5;
-      sigmaI = 0.0e-1;
+      sigmaR = 1.0e-7;
+      sigmaI = 0.0e0;
       dnstev_(&csrNrows, &nullspaceDim_, which, &sigmaR, &sigmaI, 
            csrIA, csrJA, csrAA, eigenR, eigenI, eigenV, &csrNrows, &info);
       if ( mypid == 0 && outputLevel_ > 0 )
@@ -327,35 +351,40 @@ int MLI_Method_AMGSA::setupSFEIBasedNullSpaces( MLI *mli )
          for ( iN = 0; iN < elemNNodes; iN++ )
          {
             rowInd = elemNodeList[iN] - localStartRow;
+            if (fp != NULL) fprintf(fp,"%7d ", rowInd+1);
             if ( rowInd >= 0 && rowInd < localNRows )
             {
                saLabels_[0][rowInd] = iD;
                colInd = elemNodeList1D[iE*elemNNodes+iN];
-               for ( k = 0; k < nullspaceDim_; k++ )
+               for ( k = startCol; k < nullspaceDim_; k++ )
                   nullspaceVec_[rowInd+k*nullspaceLen_] = 
                         eigenV[colInd+k*csrNrows];
             }
          }
+         if (fp != NULL) fprintf(fp,"\n");
       }
       delete [] elemNodeList1D;
-#if 0
-      FILE *fptr2 = fopen("arpackEigenV", "w");
-      for ( k = 0; k < nullspaceDim_; k++ ) 
-      {
-         fprintf(fptr2,"ev%d = [\n", k);
-         for ( int k2 = 0; k2 < nullspaceLen_; k2++ )
-            fprintf(fptr2,"%10d %18.10e\n", saLabels_[0][k2], 
-                    nullspaceVec_[nullspaceLen_*k+k2]);
-         fprintf(fptr2,"];\n");
-      }
-      fclose(fptr2);
-#endif
 
       /* -------------------------------------------------------- */
       /* clean up                                                 */
       /* -------------------------------------------------------- */
 
       delete [] eigenV;
+   }
+   if (fp != NULL) fclose(fp);
+
+   if ((printToFile_ & 4) != 0)
+   {
+      sprintf(filename, "eVec.%d", mypid);
+      fp = fopen(filename, "w");
+      fprintf(fp," %d %d\n", nullspaceLen_, nullspaceDim_);
+      for ( iN = 0; iN < nullspaceLen_; iN++ )
+      {
+         for ( k = 0; k < nullspaceDim_; k++ ) 
+            fprintf(fp,"%17.9e ",nullspaceVec_[nullspaceLen_*k+iN]);
+         fprintf(fp,"\n");
+      }
+      fclose(fp);
    }
 
 #ifdef MLI_DEBUG_DETAILED
