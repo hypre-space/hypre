@@ -230,9 +230,12 @@ hypre_GMRESSolve(void  *gmres_vdata,
            printf("Norm of b is zero. Exiting on residual norm.\n");
            b_norm = 1;
 
+/* I repeat! DO NOT hard-wire the zero-vector answer for the
+   zero-vector right-hand side!  I need to test this algorithm, so let
+   the thing converge to it, please!   - MAL */
            hypre_PCGCopyVector(b,x);
 	   ierr = 0;
-	   return ierr; 
+	   return ierr; */
 
 	}
       	t = 1.0 / r_norm;
