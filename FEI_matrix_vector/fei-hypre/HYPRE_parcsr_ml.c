@@ -508,7 +508,7 @@ int HYPRE_ParCSRMLSetup( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
     }
 
     ML_Gen_CoarseSolverSuperLU(ml, coarsest_level);
-    //ML_Gen_SmootherGaussSeidel(ml, coarsest_level, ML_PRESMOOTHER, 100);
+    /*ML_Gen_SmootherGaussSeidel(ml, coarsest_level, ML_PRESMOOTHER, 100);*/
 
     ML_Gen_Solver(ml, ML_MGV, nlevels-1, coarsest_level);
    
@@ -544,7 +544,7 @@ int HYPRE_ParCSRMLSolve( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
     */
   
     ML_Solve_AMGV(ml, rhs, sol);
-    //ML_Iterate(ml, sol, rhs);
+    /*ML_Iterate(ml, sol, rhs);*/
 
     return 0;
 }
@@ -733,12 +733,12 @@ int HYPRE_ParCSRMLConstructMHMatrix(HYPRE_ParCSRMatrix A, MH_Matrix *mh_mat,
        for (j = 0; j < rowLeng; j++)
           if ( colInd[j] < startRow || colInd[j] > endRow )
           {
-             //if ( colVal[j] != 0.0 ) offdiagSize[i-startRow]++;
+             /*/if ( colVal[j] != 0.0 ) offdiagSize[i-startRow]++;*/
              offdiagSize[i-startRow]++;
           }
           else
           {
-             //if ( colVal[j] != 0.0 ) diagSize[i-startRow]++;
+             /*if ( colVal[j] != 0.0 ) diagSize[i-startRow]++;*/
              diagSize[i-startRow]++;
           }
        HYPRE_ParCSRMatrixRestoreRow(A, i, &rowLeng, &colInd, &colVal);
@@ -761,7 +761,7 @@ int HYPRE_ParCSRMLConstructMHMatrix(HYPRE_ParCSRMatrix A, MH_Matrix *mh_mat,
        for (j = 0; j < rowLeng; j++)
        {
           if ( colInd[j] < startRow || colInd[j] > endRow )
-             //if ( colVal[j] != 0.0 ) externList[externLeng++] = colInd[j];
+             /*if ( colVal[j] != 0.0 ) externList[externLeng++] = colInd[j];*/
              externList[externLeng++] = colInd[j];
        }
        HYPRE_ParCSRMatrixRestoreRow(A, i, &rowLeng, &colInd, &colVal);
@@ -802,7 +802,7 @@ int HYPRE_ParCSRMLConstructMHMatrix(HYPRE_ParCSRMatrix A, MH_Matrix *mh_mat,
        for (j = 0; j < rowLeng; j++)
        {
           index = colInd[j];
-          //if ( colVal[j] != 0.0 ) 
+          /*if ( colVal[j] != 0.0 ) */
           {
              if ( index < startRow || index > endRow )
              {
