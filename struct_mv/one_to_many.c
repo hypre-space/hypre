@@ -48,8 +48,7 @@ main( int   argc,
    int                 sub_i, sub_j, sub_k; 
                             /* Number of subdivisions to use for i,j,k */
    int                 num_files; /* Total number of files to write out */
-   int                 i, j, k, ii, 
-i_file, idummy;
+   int                 i, j, k, ii, i_file, idummy;
    int                 num_values, num_values_2;
    int                 imin, jmin, kmin, imax, jmax, kmax;
    int                 del_i, del_j, del_k;
@@ -67,9 +66,10 @@ i_file, idummy;
    /* Initialize MPI */
    MPI_Init(&argc, &argv);
 
-   MPI_Comm_size(MPI_COMM_WORLD, &num_procs );
-   MPI_Comm_rank(MPI_COMM_WORLD, &myid );
+   comm = zzz_TAlloc(MPI_Comm, 1);
    MPI_Comm_dup(MPI_COMM_WORLD, comm);
+   MPI_Comm_size(*comm, &num_procs );
+   MPI_Comm_rank(*comm, &myid );
 
 #ifdef ZZZ_DEBUG
    cegdb(&argc, &argv, myid);
@@ -350,6 +350,7 @@ i_file, idummy;
    zzz_TFree(sub_matrices);
    zzz_TFree(stencils);
    zzz_TFree(stencil_shapes);
+   zzz_TFree(comm);
 
 #ifdef ZZZ_DEBUG
    malloc_verify(0);

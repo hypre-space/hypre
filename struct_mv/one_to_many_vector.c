@@ -62,9 +62,10 @@ main( int   argc,
    /* Initialize MPI */
    MPI_Init(&argc, &argv);
 
-   MPI_Comm_size(MPI_COMM_WORLD, &num_procs );
-   MPI_Comm_rank(MPI_COMM_WORLD, &myid );
+   comm = zzz_TAlloc(MPI_Comm, 1);
    MPI_Comm_dup(MPI_COMM_WORLD, comm);
+   MPI_Comm_size(*comm, &num_procs );
+   MPI_Comm_rank(*comm, &myid );
 
 #ifdef ZZZ_DEBUG
    cegdb(&argc, &argv, myid);
@@ -291,6 +292,7 @@ main( int   argc,
      }
    zzz_TFree(sub_grids);
    zzz_TFree(sub_vectors);
+   zzz_TFree(comm);
 
 #ifdef ZZZ_DEBUG
    malloc_verify(0);
