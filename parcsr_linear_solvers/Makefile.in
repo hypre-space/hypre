@@ -54,6 +54,7 @@ HEADERS =\
 
 FILES =\
  driver.c\
+ cgnr.c\
  gmres.c\
  par_amg.c\
  par_amg_setup.c\
@@ -72,6 +73,7 @@ FILES =\
  pcg_par.c\
  transpose.c\
  HYPRE_parcsr_amg.c\
+ HYPRE_parcsr_cgnr.c\
  HYPRE_parcsr_gmres.c\
  HYPRE_parcsr_pcg.c
 
