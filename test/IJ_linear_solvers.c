@@ -17,7 +17,6 @@
 #include "HYPRE_parcsr_ls.h"
 #include "krylov.h"
 
-
 int BuildParFromFile (int argc , char *argv [], int arg_index , HYPRE_ParCSRMatrix *A_ptr );
 int BuildParLaplacian (int argc , char *argv [], int arg_index , HYPRE_ParCSRMatrix *A_ptr );
 int BuildParDifConv (int argc , char *argv [], int arg_index , HYPRE_ParCSRMatrix *A_ptr );
@@ -59,6 +58,8 @@ main( int   argc,
    HYPRE_IJMatrix      ij_matrix; 
    HYPRE_IJVector      ij_b;
    HYPRE_IJVector      ij_x;
+   HYPRE_IJVector      ij_v;
+
    /* concrete underlying type for ij_matrix defaults to parcsr. AJC. */
    /* int                 ij_matrix_storage_type=HYPRE_PARCSR; */
    int                 ij_vector_storage_type=HYPRE_PARCSR;
@@ -78,6 +79,8 @@ main( int   argc,
    const int          *partitioning;
    int                *part_b;
    int                *part_x;
+   int                *glob_vec_indices;
+   int                *value_indices;
    int                *row_sizes;
    int                *diag_sizes;
    int                *offdiag_sizes;
@@ -813,6 +816,409 @@ main( int   argc,
    /* HYPRE_ParCSRMatrixGetRowPartitioning(A, &partitioning); */
    HYPRE_ParCSRMatrixGetDims(A, &global_n, &global_n);
 
+   hypre_EndTiming(time_index);
+
+  /*-------------------------------------------------------------------
+   * Separately test IJVector functions
+   *-------------------------------------------------------------------*/
+
+   HYPRE_IJVectorCreate(MPI_COMM_WORLD, &ij_v, global_n);
+   HYPRE_IJVectorSetLocalStorageType(ij_v, ij_vector_storage_type );
+   HYPRE_IJVectorSetPartitioning(ij_v, (const int *) part_x);
+   HYPRE_IJVectorInitialize(ij_v);
+   HYPRE_IJVectorZeroLocalComponents(ij_v); 
+
+   values = hypre_CTAlloc(double, part_x[myid+1] - part_x[myid]);
+
+   HYPRE_IJVectorGetLocalComponentsInBlock(ij_v, 
+                                           part_x[myid], 
+                                           part_x[myid+1]-1,
+                                           NULL,
+                                           values);
+
+   ierr = 0;
+   for (i = 0; i < part_x[myid+1] - part_x[myid]; i++)
+     if (values[i] != 0.) ++ierr;
+   if (ierr)
+   {
+     printf("One of HYPRE_IJVectorZeroLocalComponents or\n");
+     printf("HYPRE_IJVectorGetLocalComponentsInBlock calls bad\n");
+     printf("IJVector Error 1 with ierr = %d\n", ierr);
+     exit(1);
+   }
+
+  /*-------------------------------------------------------------------
+   * Check HYPRE_IJVectorSet(Get)LocalComponentsInBlock calls
+   *
+   * All local components changed -- NULL value_indices
+   *-------------------------------------------------------------------*/
+
+   HYPRE_IJVectorZeroLocalComponents(ij_v); 
+
+   for (i = 0; i < part_x[myid+1] - part_x[myid]; i++)
+     values[i] = 1.;
+
+   HYPRE_IJVectorSetLocalComponentsInBlock(ij_v, 
+                                           part_x[myid], 
+                                           part_x[myid+1]-1,
+                                           NULL,
+                                           values);
+
+   HYPRE_IJVectorGetLocalComponentsInBlock(ij_v, 
+                                           part_x[myid], 
+                                           part_x[myid+1]-1,
+                                           NULL,
+                                           values);
+
+   ierr = 0;
+   for (i = 0; i < part_x[myid+1] - part_x[myid]; i++)
+     if (values[i] != 1.) ++ierr;
+   if (ierr)
+   {
+     printf("One of HYPRE_IJVectorSet(Get)LocalComponentsInBlock\n");
+     printf("calls with NULL value_indices bad\n");
+     printf("IJVector Error 2 with ierr = %d\n", ierr);
+     exit(1);
+   }
+
+  /*-------------------------------------------------------------------
+   * Only first component changed -- NULL value_indices
+   *-------------------------------------------------------------------*/
+
+   HYPRE_IJVectorZeroLocalComponents(ij_v); 
+
+   for (i = 0; i < part_x[myid+1] - part_x[myid]; i++)
+     values[i] = 1.;
+
+   HYPRE_IJVectorSetLocalComponentsInBlock(ij_v, 
+                                           part_x[myid], 
+                                           part_x[myid],
+                                           NULL,
+                                           values);
+
+   for (i = 0; i < part_x[myid+1] - part_x[myid]; i++)
+     values[i] = 99.;
+
+   HYPRE_IJVectorGetLocalComponentsInBlock(ij_v, 
+                                           part_x[myid], 
+                                           part_x[myid+1]-1,
+                                           NULL,
+                                           values);
+
+   ierr = 0;
+   if (values[0] != 1.) ++ierr;
+   for (i = 1; i < part_x[myid+1] - part_x[myid]; i++)
+     if (values[i] != 0.) ++ierr;
+   if (ierr)
+   {
+     printf("One of HYPRE_IJVectorSet(Get)LocalComponentsInBlock\n");
+     printf("calls with NULL value_indices bad\n");
+     printf("IJVector Error 3 with ierr = %d\n", ierr);
+     exit(1);
+   }
+
+  /*-------------------------------------------------------------------
+   * Only last component changed -- NULL value_indices 
+   *-------------------------------------------------------------------*/
+
+   HYPRE_IJVectorZeroLocalComponents(ij_v); 
+
+   for (i = 0; i < part_x[myid+1] - part_x[myid]; i++)
+     values[i] = 1.;
+
+   HYPRE_IJVectorSetLocalComponentsInBlock(ij_v, 
+                                           part_x[myid+1]-1, 
+                                           part_x[myid+1]-1,
+                                           NULL,
+                                           values);
+
+   for (i = 0; i < part_x[myid+1] - part_x[myid]; i++)
+     values[i] = 99.;
+
+   HYPRE_IJVectorGetLocalComponentsInBlock(ij_v, 
+                                           part_x[myid], 
+                                           part_x[myid+1]-1,
+                                           NULL,
+                                           values);
+
+   ierr = 0;
+
+   for (i = 0; i < part_x[myid+1] - part_x[myid] - 1; i++)
+     if (values[i] != 0.) ++ierr;
+   if (values[part_x[myid+1] - part_x[myid] - 1] != 1.) ++ierr;
+   if (ierr)
+   {
+     printf("One of HYPRE_IJVectorSet(Get)LocalComponentsInBlock\n");
+     printf("calls with NULL value_indices bad\n");
+     printf("IJVector Error 4 with ierr = %d\n",ierr);
+     exit(1);
+   }
+
+  /*-------------------------------------------------------------------
+   * Last component set from first value of values of values array
+   *-------------------------------------------------------------------*/
+
+   HYPRE_IJVectorZeroLocalComponents(ij_v); 
+
+   value_indices = hypre_CTAlloc(int,1);
+
+   value_indices[0] = 0;
+
+   for (i = 0; i < part_x[myid+1] - part_x[myid]; i++)
+     values[i] = 0.;
+
+   values[0] = 1.;
+
+   HYPRE_IJVectorSetLocalComponentsInBlock(ij_v, 
+                                           part_x[myid+1]-1, 
+                                           part_x[myid+1]-1,
+                                           value_indices,
+                                           values);
+
+   hypre_TFree(value_indices);
+
+   for (i = 0; i < part_x[myid+1] - part_x[myid]; i++)
+     values[i] = 99.;
+
+   HYPRE_IJVectorGetLocalComponentsInBlock(ij_v, 
+                                           part_x[myid], 
+                                           part_x[myid+1]-1,
+                                           NULL,
+                                           values);
+
+   ierr = 0;
+   for (i = 0; i < part_x[myid+1] - part_x[myid] - 1; i++)
+     if (values[i] != 0.) ++ierr;
+   if (values[part_x[myid+1] - part_x[myid] - 1] != 1.) ++ierr;
+   if (ierr)
+   {
+     printf("One of HYPRE_IJVectorSet(Get)LocalComponentsInBlock\n");
+     printf("calls bad\n");
+     printf("IJVector Error 5 with ierr = %d\n",ierr);
+     exit(1);
+   }
+
+  /*-------------------------------------------------------------------
+   * Check HYPRE_IJVectorSet(Get)LocalComponents calls
+   *
+   * All local components changed -- NULL glob_vec_indices,
+   *                                 NULL value_indices
+   *-------------------------------------------------------------------*/
+
+   HYPRE_IJVectorZeroLocalComponents(ij_v); 
+
+   for (i = 0; i < part_x[myid+1] - part_x[myid]; i++)
+     values[i] = 1.;
+
+   HYPRE_IJVectorSetLocalComponents(ij_v,
+                                    part_x[myid+1] - part_x[myid],
+                                    NULL, NULL, values);
+
+   for (i = 0; i < part_x[myid+1] - part_x[myid]; i++)
+     values[i] = 99.;
+
+   HYPRE_IJVectorGetLocalComponents(ij_v,
+                                    part_x[myid+1] - part_x[myid],
+                                    NULL, NULL, values);
+
+   ierr = 0;
+   for (i = 0; i < part_x[myid+1] - part_x[myid]; i++)
+     if (values[i] != 1.) ++ierr;
+   if (ierr)
+   {
+     printf("One of HYPRE_IJVectorSet(Get)LocalComponents\n");
+     printf("calls with NULL glob_vec_indices, NULL value_indices bad\n");
+     printf("IJVector Error 6 with ierr = %d\n", ierr);
+     exit(1);
+   }
+
+  /*-------------------------------------------------------------------
+   * All local components changed, assigned reverse-ordered values
+   *   as specified by glob_vec_indices -- NULL value_indices
+   *-------------------------------------------------------------------*/
+
+   HYPRE_IJVectorZeroLocalComponents(ij_v); 
+
+   glob_vec_indices = hypre_CTAlloc(int, part_x[myid+1] - part_x[myid]);
+
+   for (i = 0; i < part_x[myid+1] - part_x[myid]; i++)
+   {
+     values[i] = (double)i;
+     glob_vec_indices[i] = part_x[myid+1] - 1 - i;
+   }
+
+   HYPRE_IJVectorSetLocalComponents(ij_v,
+                                    part_x[myid+1] - part_x[myid],
+                                    glob_vec_indices, NULL, values);
+
+   for (i = 0; i < part_x[myid+1] - part_x[myid]; i++)
+     values[i] = 99.;
+
+   HYPRE_IJVectorGetLocalComponents(ij_v,
+                                    part_x[myid+1] - part_x[myid],
+                                    glob_vec_indices, NULL, values);
+
+   hypre_TFree(glob_vec_indices);
+
+   ierr = 0;
+   for (i = 0; i < part_x[myid+1] - part_x[myid]; i++)
+     if (values[i] != (double)i) ++ierr;
+   if (ierr)
+   {
+     printf("One of HYPRE_IJVectorSet(Get)LocalComponents\n");
+     printf("calls with NULL value_indices bad\n");
+     printf("IJVector Error 7 with ierr = %d\n", ierr);
+     exit(1);
+   }
+
+  /*-------------------------------------------------------------------
+   * All local components changed, assigned reverse-ordered values
+   *   as specified by glob_vec_indices -- NULL glob_vec_indices
+   *-------------------------------------------------------------------*/
+
+   HYPRE_IJVectorZeroLocalComponents(ij_v); 
+
+   for (i = 0; i < part_x[myid+1] - part_x[myid]; i++)
+     values[i] = 0.;
+
+   value_indices = hypre_CTAlloc(int, 2);
+
+   value_indices[0] = part_x[myid+1] - part_x[myid] - 1;
+   value_indices[1] = 0;
+
+   values[0] = 1.;
+   values[part_x[myid+1] - part_x[myid] - 1] = -1.;
+
+   HYPRE_IJVectorSetLocalComponents(ij_v, 2,
+                                    NULL, value_indices, values);
+
+   for (i = 0; i < part_x[myid+1] - part_x[myid]; i++)
+     values[i] = 99.;
+
+   /* Inspect all of the vector data */
+   HYPRE_IJVectorGetLocalComponents(ij_v,
+                                    part_x[myid+1] - part_x[myid],
+                                    NULL, NULL, values);
+
+   ierr = 0;
+   if (values[0] != -1.) ++ierr;
+   if (values[1] != 1.) ++ierr;
+   for (i = 2; i < part_x[myid+1] - part_x[myid]; i++)
+     if (values[i] != 0.) ++ierr;
+   if (ierr)
+   {
+     printf("One of HYPRE_IJVectorSet(Get)LocalComponents\n");
+     printf("calls with NULL value_indices bad\n");
+     printf("IJVector Error 8 with ierr = %d\n", ierr);
+     exit(1);
+   }
+
+   /* This should switch the extreme values wrt the initial values array */
+   value_indices[0] = 0;
+   value_indices[1] = part_x[myid+1] - part_x[myid] - 1;
+
+   HYPRE_IJVectorGetLocalComponents(ij_v, 2,
+                                    NULL, value_indices, values);
+
+   hypre_TFree(value_indices);
+
+   ierr = 0;
+   if (values[0] != -1.) ++ierr;
+   if (values[1] != 1.) ++ierr;
+   for (i = 2; i < part_x[myid+1] - part_x[myid] - 1; i++)
+     if (values[i] != 0.) ++ierr;
+   if (values[part_x[myid+1]-part_x[myid]-1] != 1.) ++ierr;
+   if (ierr)
+   {
+     printf("One of HYPRE_IJVectorSet(Get)LocalComponents\n");
+     printf("calls with NULL value_indices bad\n");
+     printf("IJVector Error 9 with ierr = %d\n", ierr);
+     exit(1);
+   }
+
+  /*-------------------------------------------------------------------
+   * Extreme local components assigned from opposite ends of
+   *   values array
+   *-------------------------------------------------------------------*/
+
+   HYPRE_IJVectorZeroLocalComponents(ij_v); 
+
+   glob_vec_indices = hypre_CTAlloc(int, 2);
+   value_indices    = hypre_CTAlloc(int, 2);
+
+   for (i = 0; i < part_x[myid+1] - part_x[myid]; i++)
+     values[i] = 0.;
+
+   value_indices[0] = part_x[myid+1] - part_x[myid] - 1;
+   value_indices[1] = 0;
+
+   values[0] = 1.;
+   values[part_x[myid+1] - part_x[myid] - 1] = -1.;
+
+   glob_vec_indices[0] = part_x[myid]; 
+   glob_vec_indices[1] = part_x[myid+1] - 1; 
+
+   HYPRE_IJVectorSetLocalComponents(ij_v, 2,
+                                    glob_vec_indices,
+                                    value_indices,
+                                    values);
+
+   for (i = 0; i < part_x[myid+1] - part_x[myid]; i++)
+     values[i] = 99.;
+
+   /* Inspect all of the vector data */
+   HYPRE_IJVectorGetLocalComponents(ij_v,
+                                    part_x[myid+1] - part_x[myid],
+                                    NULL, NULL,
+                                    values);
+
+   ierr = 0;
+   if (values[0] != -1.) ++ierr;
+   for (i = 1; i < part_x[myid+1] - part_x[myid] - 1; i++)
+     if (values[i] != 0.) ++ierr;
+   if (values[part_x[myid+1]-1] != 1.) ++ierr;
+   if (ierr)
+   {
+     printf("One of HYPRE_IJVectorSet(Get)LocalComponents\n");
+     printf("calls bad\n");
+     printf("IJVector Error 10 with ierr = %d\n", ierr);
+     exit(1);
+   }
+
+   /* This should switch the extreme values wrt the initial values array */
+   value_indices[0] = 0;
+   value_indices[1] = part_x[myid+1] - part_x[myid] - 1;
+
+   values[value_indices[1]] = -1.;
+   HYPRE_IJVectorGetLocalComponents(ij_v, 2,
+                                    glob_vec_indices,
+                                    value_indices,
+                                    values);
+
+   hypre_TFree(value_indices);
+   hypre_TFree(glob_vec_indices);
+
+   ierr = 0;
+   if (values[0] != -1.) ++ierr;
+   for (i = 1; i < part_x[myid+1] - part_x[myid] - 1; i++)
+     if (values[i] != 0.) ++ierr;
+   if (values[part_x[myid+1]-1] != 1.) ++ierr;
+   if (ierr)
+   {
+     printf("One of HYPRE_IJVectorSet(Get)LocalComponents\n");
+     printf("calls bad\n");
+     printf("IJVector Error 11 with ierr = %d\n", ierr);
+     exit(1);
+   }
+
+   hypre_TFree(values);
+
+  /*-------------------------------------------------------------------
+   * End testing of IJVector functions
+   *-------------------------------------------------------------------*/
+
+   hypre_BeginTiming(time_index);
+
    if (build_rhs_type == 1)
    {
       /* BuildRHSParFromFile(argc, argv, build_rhs_arg_index, &b); */
@@ -827,17 +1233,18 @@ main( int   argc,
       HYPRE_IJVectorSetLocalStorageType(ij_x,ij_vector_storage_type );
       HYPRE_IJVectorSetPartitioning(ij_x, (const int *) part_x);
       HYPRE_IJVectorInitialize(ij_x);
-      HYPRE_IJVectorZeroLocalComponents(ij_b);
+      HYPRE_IJVectorZeroLocalComponents(ij_x); 
+
       values = hypre_CTAlloc(double, part_x[myid+1] - part_x[myid]);
 
       for (i = 0; i < part_x[myid+1] - part_x[myid]; i++)
          values[i] = 1.0;
 
       HYPRE_IJVectorSetLocalComponentsInBlock(ij_x, 
-					      part_x[myid], 
-					      part_x[myid+1]-1,
+                                              part_x[myid], 
+                                              part_x[myid+1]-1,
                                               NULL,
-					      values);
+                                              values);
       hypre_TFree(values);
 
    /*-----------------------------------------------------------
@@ -1667,6 +2074,10 @@ main( int   argc,
    /*-----------------------------------------------------------
     * Finalize things
     *-----------------------------------------------------------*/
+
+   HYPRE_IJVectorDestroy(ij_v);
+   hypre_TFree(part_x);
+   hypre_TFree(part_b);
 
    HYPRE_IJMatrixDestroy(ij_matrix);
    if (build_rhs_type == 1)
