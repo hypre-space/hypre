@@ -108,7 +108,8 @@ hypre_ParAMGBuildInterp( hypre_ParCSRMatrix   *A,
    int             *int_buf_data;
 
    int col_1 = hypre_ParCSRMatrixFirstRowIndex(A);
-   int col_n = col_1 + hypre_CSRMatrixNumRows(A_diag);
+   int local_numrows = hypre_CSRMatrixNumRows(A_diag);
+   int col_n = col_1 + local_numrows;
 
    MPI_Comm_size(comm, &num_procs);   
    MPI_Comm_rank(comm,&my_id);
@@ -123,7 +124,7 @@ hypre_ParAMGBuildInterp( hypre_ParCSRMatrix   *A,
       CF_marker_cols[i] = CF_marker[i]*(i+col_1);
    }
    /* Case where point 0 is fine */
-   if (col_1 == 0 && CF_marker[0] < 0) CF_marker_cols[0] = -1;
+   if (local_numrows && col_1==0 && CF_marker[0]<0) CF_marker_cols[0] = -1;
  
    CF_marker_offd = hypre_CTAlloc(int, num_cols_A_offd);
 
