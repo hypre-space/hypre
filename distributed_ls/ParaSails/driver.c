@@ -24,13 +24,12 @@ int main(int argc, char *argv[])
     ParaSails *ps;
     FILE *file;
     int n, beg_row, end_row;
-    int nnza, nnz0;
     double time0, time1;
     double setup_time, solve_time;
     double max_setup_time, max_solve_time;
 
-    double *x, *y, *b;
-    int i, j;
+    double *x, *b;
+    int i;
     double thresh;
     int nlevels;
     double filter;
@@ -149,6 +148,7 @@ int main(int argc, char *argv[])
 #if 0
         if (mype == 0) 
             printf("SETTING UP VALUES AGAIN WITH FILTERED PATTERN\n");
+        ps->loadbal_beta = 0;
         ParaSailsSetupValues(ps, A, 0.0);
 #endif
 
