@@ -65,13 +65,6 @@ c     perform interpolation
 
  70   continue
 
-c      call vcopy(u,vtmp,n)
-      
-c      do 101 i=1,n
-c         vtmp(i) = u(i)
-c101   continue
-
-
       alpha = 1.0
       beta = 1.0
       call matvec(n,alpha,b,ib,jb,uc,beta,u,0)
@@ -130,65 +123,5 @@ cveh      perform restriction using matvec
 
       return
       end
-
-c=====================================================================
-c     compute (and print) residual
-c=====================================================================
-
-      subroutine rsdl(enrg,res,numu,resv,vtmp,
-     *     imin,imax,u,f,a,ia,ja,iu)
-
-      implicit real*8 (a-h,o-z)
-  
-      dimension vtmp (*)
-
-      dimension u  (*)
-      dimension f  (*)
-      dimension ia (*)
-      dimension a  (*)
-      dimension ja (*)
-      dimension iu (*)
-
-c      dimension imin(*),imax(*)
-
-      dimension resv(*)
-
-c---------------------------------------------------------------------
-
-      do 10 i=1,numu
-         resv(i)=0.e0
- 10   continue
-      enrg=0.e0
-
-cveh   new residual routine, using matvec
-cveh   here vtmp = Au-f
-
-      r2=0.e0
-      ilo=imin
-      ihi=imax
-      nv = ihi-ilo+1
-
-      call vcopy(f,vtmp,nv)
-
-      alpha = 1.0
-      beta = -1.0
-      call matvec(nv,alpha,a,ia,ja,u,beta,vtmp,0)
-     
-      do 31 j = 1,nv
-         rtmp = vtmp(j)*vtmp(j)
-         r2 = r2 + rtmp
-         resv(iu(j)) = resv(iu(j)) + rtmp
-         enrg=enrg+vtmp(j)*u(j)-u(j)*f(j)
-31    continue
-      res = sqrt(r2)
-
-      return
-      end
-
-
-
-
-
-
 
 
