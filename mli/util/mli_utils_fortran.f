@@ -1,8 +1,16 @@
-      subroutine mli_computeSpectrum(nm,n,a,w,matz,z,fv1,fv2,ierr)
-c
-      integer n,nm,ierr,matz,i,j
-      double precision a(nm,n),w(n),z(nm,n),fv1(n),fv2(n)
-c
+C *BHEADER**************************************************************
+C * (c) 2001   The Regents of the University of California
+C *
+C * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
+C * notice, contact person, and disclaimer.
+C *
+C **************************************************************EHEADER*
+
+C **********************************************************************
+C * Eispack functions for computing eigenvalues and eigenvectors
+C **********************************************************************
+
+C **********************************************************************
 c     this subroutine calls the recommended sequence of
 c     subroutines from the eigensystem subroutine package (eispack)
 c     to find the eigenvalues and eigenvectors (if desired)
@@ -39,18 +47,20 @@ c     mathematics and computer science div, argonne national laboratory
 c
 c     this version dated august 1983.
 c
-c     ------------------------------------------------------------------
+C ----------------------------------------------------------------------
 c
+      subroutine mli_computeSpectrum(nm,n,a,w,matz,z,fv1,fv2,ierr)
+      integer n,nm,ierr,matz
+      double precision a(nm,n),w(n),z(nm,n),fv1(n),fv2(n)
       if (n .le. nm) go to 10
       ierr = 10 * n
       go to 50
 c
    10 if (matz .ne. 0) go to 20
 c     .......... find eigenvalues only ..........
-
       call  mli_tred1(nm,n,a,w,fv1,fv2)
 *  tqlrat encounters catastrophic underflow on the Vax
-*     call  mli_tqlrat(n,w,fv2,ierr)
+*     call  tqlrat(n,w,fv2,ierr)
       call  mli_tql1(n,w,fv1,ierr)
       go to 50
 c     .......... find both eigenvalues and eigenvectors ..........
@@ -59,15 +69,7 @@ c     .......... find both eigenvalues and eigenvectors ..........
    50 return
       end
 
-C***********************************************************************
-
-      subroutine mli_tql1(n,d,e,ierr)
-c
-      integer i,j,l,m,n,ii,l1,l2,mml,ierr
-      double precision d(n),e(n)
-      double precision c,c2,c3,dl1,el1,f,g,h,p,r,s,s2,tst1,tst2
-      double precision mli_pythag
-      double precision dsign
+C **********************************************************************
 c
 c     this subroutine is a translation of the algol procedure tql1,
 c     num. math. 11, 293-306(1968) by bowdler, martin, reinsch, and
@@ -107,8 +109,15 @@ c     mathematics and computer science div, argonne national laboratory
 c
 c     this version dated august 1983.
 c
-c     ------------------------------------------------------------------
+C ----------------------------------------------------------------------
 c
+      subroutine mli_tql1(n,d,e,ierr)
+      integer i,j,l,m,n,ii,l1,l2,mml,ierr
+      double precision d(n),e(n)
+      double precision c,c2,c3,dl1,el1,f,g,h,p,r,s,s2,tst1,tst2
+      double precision mli_pythag
+      double precision mli_dsign
+
       ierr = 0
       if (n .eq. 1) go to 1001
 c
@@ -142,15 +151,15 @@ c     .......... form shift ..........
          r = mli_pythag(p,1.0d0)
 
          if (p . ge. 0.e0) then
-            dsign = dabs(r)
+            mli_dsign = dabs(r)
          end if
 
          if (p .lt. 0.e0) then
-            dsign = -dabs(r)
+            mli_dsign = -dabs(r)
          end if
 
-         d(l) = e(l) / (p + dsign)
-         d(l1) = e(l) * (p + dsign)
+         d(l) = e(l) / (p + mli_dsign)
+         d(l1) = e(l) * (p + mli_dsign)
          dl1 = d(l1)
          h = g - d(l)
          if (l2 .gt. n) go to 145
@@ -208,14 +217,7 @@ c                eigenvalue after 30 iterations ..........
  1001 return
       end
 
-C***********************************************************************
-
-      subroutine mli_tql2(nm,n,d,e,z,ierr)
-c
-      integer i,j,k,l,m,n,ii,l1,l2,nm,mml,ierr
-      double precision dsign
-      double precision d(n),e(n),z(nm,n)
-      double precision c,c2,c3,dl1,el1,f,g,h,p,r,s,s2,tst1,tst2,pythag
+C **********************************************************************
 c
 c     this subroutine is a translation of the algol procedure tql2,
 c     num. math. 11, 293-306(1968) by bowdler, martin, reinsch, and
@@ -271,7 +273,14 @@ c     mathematics and computer science div, argonne national laboratory
 c
 c     this version dated august 1983.
 c
-c     ------------------------------------------------------------------
+C ----------------------------------------------------------------------
+c
+      subroutine mli_tql2(nm,n,d,e,z,ierr)
+      integer i,j,k,l,m,n,ii,l1,l2,nm,mml,ierr
+      double precision mli_dsign
+      double precision d(n),e(n),z(nm,n)
+      double precision c,c2,c3,dl1,el1,f,g,h,p,r,s,s2,tst1,tst2
+      double precision mli_pythag
 c
       ierr = 0
       if (n .eq. 1) go to 1001
@@ -305,15 +314,15 @@ c     .......... form shift ..........
          p = (d(l1) - g) / (2.0d0 * e(l))
          r = mli_pythag(p,1.0d0)
          if (p . ge. 0.e0) then
-            dsign = dabs(r)
+            mli_dsign = dabs(r)
          end if
 
          if (p .lt. 0.e0) then
-            dsign = -dabs(r)
+            mli_dsign = -dabs(r)
          end if
 
-         d(l) = e(l) / (p + dsign)
-         d(l1) = e(l) * (p + dsign)
+         d(l) = e(l) / (p + mli_dsign)
+         d(l1) = e(l) * (p + mli_dsign)
          dl1 = d(l1)
          h = g - d(l)
          if (l2 .gt. n) go to 145
@@ -390,14 +399,7 @@ c                eigenvalue after 30 iterations ..........
  1001 return
       end
 
-C***********************************************************************
-
-      subroutine mli_tred1(nm,n,a,d,e,e2)
-c
-      integer i,j,k,l,n,ii,nm,jp1
-      double precision dsign
-      double precision a(nm,n),d(n),e(n),e2(n)
-      double precision f,g,h,scale
+C **********************************************************************
 c
 c     this subroutine is a translation of the algol procedure tred1,
 c     num. math. 11, 181-195(1968) by martin, reinsch, and wilkinson.
@@ -437,8 +439,14 @@ c     mathematics and computer science div, argonne national laboratory
 c
 c     this version dated august 1983.
 c
-c     ------------------------------------------------------------------
-c
+C ----------------------------------------------------------------------
+C
+      subroutine mli_tred1(nm,n,a,d,e,e2)
+      integer i,j,k,l,n,ii,nm,jp1
+      double precision mli_dsign
+      double precision a(nm,n),d(n),e(n),e2(n)
+      double precision f,g,h,scale
+C
       do 100 i = 1, n
          d(i) = a(n,i)
          a(n,i) = a(i,i)
@@ -474,13 +482,13 @@ c
          e2(i) = scale * scale * h
          f = d(l)
          if (f . ge. 0.e0) then
-            dsign = dsqrt(h)
+            mli_dsign = dsqrt(h)
          end if
 
          if (f .lt. 0.e0) then
-            dsign = -dsqrt(h)
+            mli_dsign = -dsqrt(h)
          end if
-         g = -dsign
+         g = -mli_dsign
          e(i) = scale * g
          h = h - f * g
          d(l) = f - g
@@ -536,14 +544,7 @@ c
       return
       end
 
-C***********************************************************************
-
-      subroutine mli_tred2(nm,n,a,d,e,z)
-c
-      integer i,j,k,l,n,ii,nm,jp1
-      double precision dsign
-      double precision a(nm,n),d(n),e(n),z(nm,n)
-      double precision f,g,h,hh,scale
+C **********************************************************************
 c
 c     this subroutine is a translation of the algol procedure tred2,
 c     num. math. 11, 181-195(1968) by martin, reinsch, and wilkinson.
@@ -581,8 +582,14 @@ c     mathematics and computer science div, argonne national laboratory
 c
 c     this version dated august 1983.
 c
-c     ------------------------------------------------------------------
-c
+C ----------------------------------------------------------------------
+C
+      subroutine mli_tred2(nm,n,a,d,e,z)
+      integer i,j,k,l,n,ii,nm,jp1
+      double precision mli_dsign
+      double precision a(nm,n),d(n),e(n),z(nm,n)
+      double precision f,g,h,hh,scale
+
       do 100 i = 1, n
 c
          do 80 j = i, n
@@ -621,13 +628,13 @@ c
 c
          f = d(l)
          if (f . ge. 0.e0) then
-            dsign = dsqrt(h)
+            mli_dsign = dsqrt(h)
          end if
 
          if (f .lt. 0.e0) then
-            dsign = -dsqrt(h)
+            mli_dsign = -dsqrt(h)
          end if
-         g = -dsign
+         g = -mli_dsign
          e(i) = scale * g
          h = h - f * g
          d(l) = f - g
@@ -710,20 +717,15 @@ c
       e(1) = 0.0d0
       return
       end
-
-C***********************************************************************
-
+         
+C **********************************************************************
+C     finds dsqrt(a**2+b**2) without overflow or destructive underflow
+C ----------------------------------------------------------------------
+C
       double precision function mli_pythag(a,b)
       double precision a,b
-c
-c     finds dsqrt(a**2+b**2) without overflow or destructive underflow
-c
+C
       double precision p,r,s,t,u
-
-c     Charles Tong (the detailed code does not work for some problems)
-c     mli_pythag = dsqrt(a**2+b**2)
-c     return
-
       p = dmax1(dabs(a),dabs(b))
       if (p .eq. 0.0d0) go to 20
       r = (dmin1(dabs(a),dabs(b))/p)**2
@@ -738,4 +740,20 @@ c     return
    20 mli_pythag = p
       return
       end
+
+C **********************************************************************
+
+      double precision function mli_dsign(a,b)
+      real*8 a,b
+
+      if (b .ge. 0.e0) then
+         mli_dsign = dabs(a)
+         return
+      endif
+
+      if (b .lt. 0.e0) then
+         mli_dsign =-dabs(a)
+         return
+      endif
+      end 
 
