@@ -18,7 +18,7 @@
 
 
 /*--------------------------------------------------------------------------
- *Spamg
+ *Spamg-pcg
  *--------------------------------------------------------------------------*/
 
 int
@@ -27,6 +27,8 @@ main( int   argc,
 {
    void             *amg_data;
 
+   PCGData          *pcg_data;
+
    hypre_CSRMatrix  *A;
 
    hypre_Vector     *f;
@@ -34,42 +36,51 @@ main( int   argc,
 
    double            strong_threshold;
    char              *filename;
-   int               solve_err_flag;
    int               num_fine;
 
    int               cycle_type;
-   int               j;
    double           *tmp;
 
-/*----------------------------------------------------
+   double   stop_tol;
+   char     pcg_logfilename[256];
+
    int     *num_grid_sweeps;  
    int     *grid_relax_type;   
    int    **grid_relax_points; 
 
-   int      j;
+   int      j; 
 
    num_grid_sweeps = hypre_CTAlloc(int,4);
-   grid_relax_type = hypre_CTAlloc(int,4);
-   grid_relax_points = hypre_CTAlloc(int *,4);
+   grid_relax_type = hypre_CTAlloc(int,4); 
+   grid_relax_points = hypre_CTAlloc(int *,4); 
 
-   for (j = 0; j < 3; j++)
+   for (j = 0; j < 2; j++)
    {
-      num_grid_sweeps[j] = 2;
-      grid_relax_type[j] = 1; 
-      grid_relax_points[j] = hypre_CTAlloc(int,2); 
+      num_grid_sweeps[j] = 3;
+      grid_relax_type[j] = 1;  
+      grid_relax_points[j] = hypre_CTAlloc(int,3); 
       grid_relax_points[j][0] = 1;
       grid_relax_points[j][1] = -1;
+      grid_relax_points[j][2] = 1;
    }
-   num_grid_sweeps[3] = 100;
-   grid_relax_type[3] = 1;
-   grid_relax_points[3] = hypre_CTAlloc(int,100);
-   for (j=0;j<100;j++)
-       grid_relax_points[3][j] = 0;
-----------------------------------------------------*/
+
+   num_grid_sweeps[2] = 3;
+   grid_relax_type[2] = 1; 
+   grid_relax_points[2] = hypre_CTAlloc(int,2); 
+   grid_relax_points[2][0] = -1;
+   grid_relax_points[2][1] = 1;
+   grid_relax_points[2][2] = -1;
+
+   num_grid_sweeps[3] = 1;
+   grid_relax_type[3] = 9;
+   grid_relax_points[3] = hypre_CTAlloc(int,1);
+   grid_relax_points[3][0] = 0;
+
+
 
    if (argc < 4)
    {
-      fprintf(stderr, "Usage:  SPamg <file> <strong_threshold>  <mu>\n");
+      fprintf(stderr, "Usage:  SPamg-pcg <file> <strong_threshold>  <mu>\n");
       exit(1);
    }
 
@@ -80,7 +91,7 @@ main( int   argc,
    hypre_InitMemoryDebug(0); 
 
   /*-------------------------------------------------------
-    * Begin AMG driver
+    * Begin AMG-PCG driver
     *-------------------------------------------------------*/
            
    strong_threshold = atof(argv[2]);
@@ -92,12 +103,6 @@ main( int   argc,
    hypre_AMGSetLogging(3,"amg.out.log",amg_data);
    hypre_AMGSetCycleType(cycle_type, amg_data);
 
-/*--------------  
-   hypre_AMGSetNumGridSweeps(num_grid_sweeps, amg_data);
-   hypre_AMGSetGridRelaxType(grid_relax_type, amg_data);
-   hypre_AMGSetGridRelaxPoints(grid_relax_points, amg_data);
---------------*/
-
    filename = argv[1];
    A = hypre_ReadCSRMatrix(filename);
 
@@ -105,23 +110,54 @@ main( int   argc,
 
    f = hypre_CreateVector(num_fine);
    hypre_InitializeVector(f);
-   hypre_SetVectorConstantValues(f, 0.0);
+   hypre_SetVectorConstantValues(f, 1.0);
                               
    u = hypre_CreateVector(num_fine);
    hypre_InitializeVector(u);
 
    tmp = hypre_CTAlloc(double, num_fine);
+
    for (j = 0; j < num_fine; j++)
    {
        tmp[j] = hypre_Rand();
    }
-   hypre_VectorData(u) = tmp;
+   hypre_VectorData(u) = tmp;  
 
-/*   hypre_SetVectorConstantValues(u, 1.0); */
 
-   hypre_AMGSetup(amg_data,A);
+/*   hypre_SetVectorConstantValues(u, 0.0); */
 
-   solve_err_flag = hypre_AMGSolve(amg_data, f, u);
+   /* Set the relaxation parameters for symmetric cycle */
+
+   hypre_AMGSetNumGridSweeps(num_grid_sweeps, amg_data);
+   hypre_AMGSetGridRelaxType(grid_relax_type, amg_data);
+   hypre_AMGSetGridRelaxPoints(grid_relax_points, amg_data);
+
+   /* Initialize the PCG data structure */
+
+   pcg_data = hypre_CTAlloc(PCGData, 1);
+   PCGDataMaxIter(pcg_data) = 50;
+   PCGDataTwoNorm(pcg_data) = 1;
+   PCGDataA(pcg_data)  = A;
+
+   sprintf(pcg_logfilename,"pcg.out.log");
+
+   PCGDataLogFileName(pcg_data) = pcg_logfilename;
+
+/*   stop_tol = hypre_AMGDataTol(amg_data); */
+   stop_tol = 1.0e-7;
+   hypre_AMGSetTol(0.0, amg_data);
+   hypre_AMGSetMaxIter(1, amg_data);
+   
+
+   /* Perform the PCG and AMG setups */
+
+   hypre_AMGSetup(amg_data, A);
+   
+   PCGSetup(A, hypre_AMGSolve, amg_data, pcg_data);
+
+   /* Perform the PCG Solve */
+
+   PCG(u, f, stop_tol, pcg_data);
 
    hypre_FinalizeMemoryDebug(); 
                 

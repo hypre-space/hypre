@@ -51,8 +51,6 @@ LFLAGS =\
  -lHYPRE_ls\
  -lHYPRE_mv\
  -lHYPRE_memory\
- -lf2c\
- -lcegdb\
  -lm
 
 ##################################################################

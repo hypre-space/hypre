@@ -38,6 +38,8 @@ main( int   argc,
    int               num_fine;
 
    int               cycle_type;
+   int               j;
+   double           *tmp;
 
 /*----------------------------------------------------
    int     *num_grid_sweeps;  
@@ -107,7 +109,15 @@ main( int   argc,
                               
    u = hypre_CreateVector(num_fine);
    hypre_InitializeVector(u);
-   hypre_SetVectorConstantValues(u, 1.0);
+
+   tmp = hypre_CTAlloc(double, num_fine);
+   for (j = 0; j < num_fine; j++)
+   {
+       tmp[j] = hypre_Rand();
+   }
+   hypre_VectorData(u) = tmp;
+
+/*   hypre_SetVectorConstantValues(u, 1.0); */
 
    hypre_AMGSetup(amg_data,A);
 

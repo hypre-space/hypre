@@ -236,7 +236,7 @@ int  hypre_AMGSolve(hypre_AMGData  *amg_data,
 
     if (amg_ioutdat >= 0)
     { 
- /*      fclose(fp); */
+       fclose(fp); 
     }
 
    hypre_TFree(F_array);

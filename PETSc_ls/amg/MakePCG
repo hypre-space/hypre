@@ -15,7 +15,8 @@ HEADERS =\
  headers.h
 
 FILES =\
- SPamg.c\
+ SPamg-pcg.c\
+ pcg.c\
  amg.c\
  amg_setup.c\
  coarsen.c\
@@ -31,14 +32,18 @@ FILES =\
 
 OBJS = ${FILES:.c=.o}
 
-CC = cc
+CC = gcc
+F77 = /home/casc/g77/bin/g77
 
 CFLAGS =\
  -I/usr/local/include\
  -I/home/casc/include\
  -I/usr/local/mpi/mpich/include\
- -I../..
+ -I../..\
+ -g -Wall -DHYPRE_MEMORY_DMALLOC
+#-g -Wall  
 
+FFLAGS = -g
 
 LFLAGS =\
  -L/usr/local/lib\
@@ -51,15 +56,18 @@ LFLAGS =\
  -lHYPRE_ls\
  -lHYPRE_mv\
  -lHYPRE_memory\
+ -lf2c\
+ -lcegdb\
+ -ldmalloc\
  -lm
 
 ##################################################################
 # Main rules
 ##################################################################
 
-SPamg: SPamg.o libHYPRE_ls.a
+SPamg-pcg: SPamg-pcg.o libHYPRE_ls.a
 	@echo  "Linking" $@ "... "
-	${CC} -o SPamg SPamg.o ${LFLAGS}
+	${CC} -o SPamg-pcg SPamg-pcg.o ${LFLAGS}
 
 libHYPRE_ls.a: ${OBJS}
 	@echo  "Building $@ ... "
