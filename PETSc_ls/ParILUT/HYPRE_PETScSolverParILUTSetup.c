@@ -190,9 +190,9 @@ int HYPRE_PETScSolverParILUTSetup( HYPRE_PETScSolverParILUT in_ptr,
    /* From this point on, we override user choices */
 
    /* Get the linear solver structures for the preconditioner solves... */
-   ierr = PCGetType( pc, &pc_type, PETSC_NULL ); CHKERRA(ierr);
+   ierr = PCGetType( pc, &pc_type ); CHKERRA(ierr);
 
-   if ( pc_type == PCSHELL )
+   if ( !strcmp( pc_type, PCSHELL ) )
    {
 
      PETScMatPilutSolver = 
