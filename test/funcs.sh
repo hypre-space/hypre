@@ -33,9 +33,10 @@ function MpirunString
       RunString="poe $* -procs $POE_NUM_PROCS -nodes $POE_NUM_NODES"
       ;;
     tckk*) shift
-      RunString="prun -n $*"
+      RunString="prun -n$*"
       ;;
-    peng*) RunString="mpirun $*"
+    peng*) shift
+      RunString="prun -n$*"
       ;;
     perr*|achi*|poin*|esak*|ares*|hypn*|weyl*|juve*) MACHINES_FILE="hostname"
       if [ ! -f $MACHINES_FILE ]
@@ -185,9 +186,10 @@ function PsubCmdStub
     blue*) PsubCmd="psub -c blue,pbatch -b a_casc -r $RunName"
       PsubCmd="$PsubCmd -ln $NumNodes -g $NumProcs"
       ;;
-    tckk*) PsubCmd="psub -c tc2k,pbatch -b casc -r $RunName -ln $NumNodes"
+    tckk*) PsubCmd="psub -c tc2k,pbatch -b casc -r $RunName -ln $NumProcs"
       ;;
-    peng*) PsubCmd="psub -c pengra,pbatch -b casc -r $RunName -ln $NumNodes"
+    peng*) PsubCmd="psub -c pengra,pbatch -b casc -r $RunName -ln $NumProcs"
+      PsubCmd="$PsubCmd -standby"
       ;;
     gps*) PsubCmd="psub -c gps320 -b casc -r $RunName -cpn $NumProcs"
       ;;
@@ -209,7 +211,7 @@ function ExecuteJobs
   integer BatchFlag=0                   # #Batch option detected flag 
   integer BatchCount=0                  # different numbering for #Batch option
   integer PrevPid=0
-  typeset -L15 RunName
+  typeset RunName
   SavePWD=$(pwd)
   cd $WorkingDir
   exec 3< $InputFile.jobs               # open *.jobs file for reading
@@ -224,7 +226,7 @@ function ExecuteJobs
       \#End*|\#end*|\#END*) BatchFlag=0
         if (( DebugMode > 0 )) ; then print "Submit job" ; fi
         chmod +x $BatchFile
-        PsubCmd="$PsubCmd -o $OutFile -e $ErrFile $BatchFile"
+        PsubCmd="$PsubCmd -o $OutFile -e $ErrFile $(pwd)/$BatchFile"
         if (( NoRun == 0 )) ; then CmdReply=$($PsubCmd) ; fi
         PrevPid=$(print $CmdReply | cut -d \  -f 2)
         if (( DebugMode > 0 )) ; then print "PsubCmd=$PsubCmd $PrevPid" ; fi
@@ -269,7 +271,7 @@ function ExecuteJobs
 		EOF
             chmod +x $BatchFile
             PsubCmdStub ${RunCmd}
-            PsubCmd="$PsubCmd -o $OutFile -e $ErrFile $BatchFile"
+            PsubCmd="$PsubCmd -o $OutFile -e $ErrFile $(pwd)/$BatchFile"
             if (( NoRun == 0 )) ; then CmdReply=$($PsubCmd) ; fi
             PrevPid=$(print $CmdReply | cut -d \  -f 2)
             if (( DebugMode > 0 )) ; then print "$PsubCmd $PrevPid" ; fi
