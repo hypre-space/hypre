@@ -113,13 +113,13 @@ extern hypre_TimingType *hypre_global_timing;
  *-------------------------------------------------------*/
 
 /* timing.c */
-int hypre_InitializeTiming( char *name );
+int hypre_InitializeTiming( const char *name );
 int hypre_FinalizeTiming( int time_index );
 int hypre_IncFLOPCount( int inc );
 int hypre_BeginTiming( int time_index );
 int hypre_EndTiming( int time_index );
 int hypre_ClearTiming( void );
-int hypre_PrintTiming( char *heading , MPI_Comm comm );
+int hypre_PrintTiming( const char *heading , MPI_Comm comm );
 
 #endif
 

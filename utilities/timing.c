@@ -42,7 +42,7 @@ hypre_TimingCPUCount += time_getCPUSeconds()
  *--------------------------------------------------------------------------*/
 
 int
-hypre_InitializeTiming( char *name )
+hypre_InitializeTiming( const char *name )
 {
    int      time_index;
 
@@ -382,8 +382,8 @@ hypre_ClearTiming( )
 #ifndef HYPRE_USE_PTHREADS  /* non-threaded version of hypre_PrintTiming */
 
 int
-hypre_PrintTiming( char     *heading,
-                   MPI_Comm  comm  )
+hypre_PrintTiming( const char     *heading,
+                   MPI_Comm        comm  )
 {
    int  ierr = 0;
 
@@ -457,8 +457,8 @@ hypre_PrintTiming( char     *heading,
 #endif
 
 int
-hypre_PrintTiming( char     *heading,
-                   MPI_Comm  comm  )
+hypre_PrintTiming( const char     *heading,
+                   MPI_Comm        comm  )
 {
    int  ierr = 0;
 
