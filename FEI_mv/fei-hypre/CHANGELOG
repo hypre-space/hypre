@@ -132,4 +132,9 @@
 11/21/02    2.0.0R23
             - add material coarsening
             - add polynomial null vectors
+11/27/02    2.0.0R24
+            - add nonsymmetric AMG
+            - correct bug in matrix_mult : put diag in front
+            - add better matrix transpose function
+
 

@@ -100,10 +100,11 @@ typedef struct HYPRE_LSI_MLI_Struct
    int      adjustNullSpace_;
    int      numResetNull_;
    int      *resetNullIndices_;
-   HYPRE_ParCSRMatrix correctionMatrix_;
    int      numMatLabels_;        /* for controlling aggregation */
    int      *matLabels_;
    int      printNullSpace_;
+   int      symmetric_;
+   HYPRE_ParCSRMatrix correctionMatrix_; /* for nullspace correction */
 } 
 HYPRE_LSI_MLI;
 
@@ -157,7 +158,7 @@ int HYPRE_LSI_MLICreate( MPI_Comm comm, HYPRE_Solver *solver )
    mli_object->nCoordAccept_        = 0;
    mli_object->nullScales_          = NULL;
    mli_object->calibrationSize_     = 0;
-   mli_object->Pweight_             = 1.33;
+   mli_object->Pweight_             = 0.0;
    mli_object->adjustNullSpace_     = 0;
    mli_object->numResetNull_        = 0;
    mli_object->resetNullIndices_    = NULL;
@@ -166,6 +167,7 @@ int HYPRE_LSI_MLICreate( MPI_Comm comm, HYPRE_Solver *solver )
    mli_object->numMatLabels_        = 0;
    mli_object->matLabels_           = NULL;
    mli_object->printNullSpace_      = 0;
+   mli_object->symmetric_           = 0;
 #ifdef HAVE_MLI
    mli_object->mli_                 = NULL;
    mli_object->feData_              = NULL;
@@ -259,6 +261,11 @@ int HYPRE_LSI_MLISetup( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
    sprintf(paramString, "setStrengthThreshold %f",
            mli_object->strengthThreshold_);
    method->setParams( paramString, 0, NULL );
+   if ( mli_object->symmetric_ == 0 )
+   {
+      strcpy(paramString, "nonsymmetric");
+      method->setParams( paramString, 0, NULL );
+   }
 
    /* -------------------------------------------------------- */ 
    /* set up presmoother                                       */
@@ -546,6 +553,7 @@ int HYPRE_LSI_MLISetParams( HYPRE_Solver solver, char *paramString )
       {
          printf("%4d : Available options for MLI are : \n", mypid);
          printf("\t      outputLevel <d> \n");
+         printf("\t      numLevels <d> \n");
          printf("\t      maxIterations <d> \n");
          printf("\t      cycleType <'V','W'> \n");
          printf("\t      strengthThreshold <f> \n");
@@ -558,6 +566,9 @@ int HYPRE_LSI_MLISetParams( HYPRE_Solver solver, char *paramString )
          printf("\t      nodeDOF <d> \n");
          printf("\t      nullSpaceDim <d> \n");
          printf("\t      useNodalCoord <on,off> \n");
+         printf("\t      saAMGCalibrationSize <d> \n");
+         printf("\t      rsAMGSymmetric <d> \n");
+         printf("\t      printNullSpace <d> \n");
          printf("\t      paramFile <s> \n");
       }
    }
@@ -567,8 +578,7 @@ int HYPRE_LSI_MLISetParams( HYPRE_Solver solver, char *paramString )
    }
    else if ( !strcasecmp(param2, "numLevels") )
    {
-      sscanf(paramString,"%s %s %d", param1, param2,
-             &(mli_object->nLevels_));
+      sscanf(paramString,"%s %s %d", param1, param2, &(mli_object->nLevels_));
       if ( mli_object->nLevels_ <= 0 ) mli_object->nLevels_ = 1;
    }
    else if ( !strcasecmp(param2, "maxIterations") )
@@ -620,20 +630,17 @@ int HYPRE_LSI_MLISetParams( HYPRE_Solver solver, char *paramString )
    }
    else if ( !strcasecmp(param2, "Pweight") )
    {
-      sscanf(paramString,"%s %s %lg",param1,param2,
-             &(mli_object->Pweight_));
+      sscanf(paramString,"%s %s %lg",param1,param2, &(mli_object->Pweight_));
       if ( mli_object->Pweight_ < 0. ) mli_object->Pweight_ = 1.333;
    }
    else if ( !strcasecmp(param2, "nodeDOF") )
    {
-      sscanf(paramString,"%s %s %d",param1,param2,
-             &(mli_object->nodeDOF_));
+      sscanf(paramString,"%s %s %d",param1,param2, &(mli_object->nodeDOF_));
       if ( mli_object->nodeDOF_ <= 0 ) mli_object->nodeDOF_ = 1;
    }
    else if ( !strcasecmp(param2, "nullSpaceDim") )
    {
-      sscanf(paramString,"%s %s %d",param1,param2,
-             &(mli_object->nSpaceDim_));
+      sscanf(paramString,"%s %s %d",param1,param2, &(mli_object->nSpaceDim_));
       if ( mli_object->nSpaceDim_ <= 0 ) mli_object->nSpaceDim_ = 1;
    }
    else if ( !strcasecmp(param2, "useNodalCoord") )
@@ -646,8 +653,13 @@ int HYPRE_LSI_MLISetParams( HYPRE_Solver solver, char *paramString )
    {
       sscanf(paramString,"%s %s %d",param1,param2,
              &(mli_object->calibrationSize_));
-      if ( mli_object->calibrationSize_ < 0 ) 
-         mli_object->calibrationSize_ = 0; 
+      if (mli_object->calibrationSize_ < 0) mli_object->calibrationSize_ = 0; 
+   }
+   else if ( !strcasecmp(param2, "rsAMGSymmetric") )
+   {
+      sscanf(paramString,"%s %s %d",param1,param2, &(mli_object->symmetric_));
+      if ( mli_object->symmetric_ < 0 ) mli_object->symmetric_ = 0; 
+      if ( mli_object->symmetric_ > 1 ) mli_object->symmetric_ = 1; 
    }
    else if ( !strcasecmp(param2, "printNullSpace") )
    {
