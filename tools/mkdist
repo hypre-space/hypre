@@ -119,13 +119,10 @@ HYPRE_DIR="hypre-${Version}"
 HYPRE_INSTALL_DIR=`pwd`"/$HYPRE_DIR"
     
 (       # build documentation and tools and install
-  mkdir $HYPRE_INSTALL_DIR/bin
-  mkdir $HYPRE_INSTALL_DIR/docs
   cd $HYPRE_INSTALL_DIR/src/linear_solvers
-  ./configure
-  (cd docs;  make -i install; make veryclean)
-  (cd tools; make install; make veryclean)
-  find . -name Makefile -exec rm {} \;
+  ./configure --prefix=$HYPRE_INSTALL_DIR --with-babel
+  (make docs; cd docs;  make -i install; make clean)
+  make distclean
 )
     
 (       # store version info
@@ -149,9 +146,10 @@ tar cf $HYPRE_DIR.tar \
     $HYPRE_DIR/bin \
     $HYPRE_DIR/src/FEI_mv \
     $HYPRE_DIR/src/HYPRE.h \
-    $HYPRE_DIR/src/HYPRE_config.h.in \
     $HYPRE_DIR/src/IJ_mv \
     $HYPRE_DIR/src/Makefile.in \
+    $HYPRE_DIR/src/Makefile.am \
+    $HYPRE_DIR/src/aclocal.m4 \
     $HYPRE_DIR/src/babel \
     $HYPRE_DIR/src/babel-runtime \
     $HYPRE_DIR/src/blas \
@@ -160,6 +158,8 @@ tar cf $HYPRE_DIR.tar \
     $HYPRE_DIR/src/distributed_ls \
     $HYPRE_DIR/src/distributed_matrix \
     $HYPRE_DIR/src/krylov \
+    $HYPRE_DIR/src/lapack \
+    $HYPRE_DIR/src/lib \
     $HYPRE_DIR/src/matrix_matrix \
     $HYPRE_DIR/src/nopoe \
     $HYPRE_DIR/src/parcsr_es \
