@@ -22,13 +22,13 @@
 void 
 hypre_F90_IFACE(hypre_createparvector)( int      *comm,
                                         int      *global_size,
-                                        int      *partitioning,
+                                        long int *partitioning,
                                         long int *vector,
                                         int      *ierr          )
 {
    *vector = (long int) ( hypre_CreateParVector ( (MPI_Comm) *comm,
                                                   (int)      *global_size,
-                                                  (int *)     partitioning ) );
+                                                  (int *)    *partitioning ) );
    *ierr = 0;
 }
 
@@ -55,8 +55,8 @@ hypre_F90_IFACE(hypre_setparvectorpartitioningo)( long int *vector,
                                                   int      *ierr    )
 {
    *ierr = (int) ( hypre_SetParVectorPartitioningOwner
-                         ( (HYPRE_ParCSRMatrix) *vector,
-                           (int)                *owns_partitioning ) );
+                         ( (HYPRE_ParVector) *vector,
+                           (int)             *owns_partitioning ) );
 }
 
 /*--------------------------------------------------------------------------

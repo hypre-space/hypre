@@ -25,7 +25,7 @@ hypre_F90_IFACE(hypre_parcsrmatrixglobalnumrows)( long int *matrix,
                                                   int      *ierr      )
 {
    *num_rows = (int) ( hypre_ParCSRMatrixGlobalNumRows
-                          ( ((hypre_ParCSRMatrix *) matrix) ) );
+                          ( (hypre_ParCSRMatrix *) *matrix ) );
 
    *ierr = 0;
 }
@@ -40,7 +40,7 @@ hypre_F90_IFACE(hypre_parcsrmatrixrowstarts)( long int *matrix,
                                               int      *ierr      )
 {
    *row_starts = (long int) ( hypre_ParCSRMatrixRowStarts
-                                ( ((hypre_ParCSRMatrix *) matrix) ) );
+                                ( (hypre_ParCSRMatrix *) *matrix ) );
 
    *ierr = 0;
 }
