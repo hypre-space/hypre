@@ -686,7 +686,6 @@ int MLI_Method_AMGSA::coarsenLocal(hypre_ParCSRMatrix *hypre_graph,
                {
                   if ( node_stat[col_num] == MLI_METHOD_AMGSA_SELECTED )
                   {
-                  if ( node_stat[col_num] == MLI_METHOD_AMGSA_SELECTED )
                      node2aggr[irow] = node2aggr[col_num];
                      node_stat[irow] = MLI_METHOD_AMGSA_PENDING;
                      aggr_size[node2aggr[col_num]]++;
