@@ -1632,6 +1632,7 @@ int SetStencilBndry
                  sidl_int__array_set1( sidl_lower, i, ilower[ib][i] );
                  sidl_int__array_set1( sidl_upper, i, iupper[ib][i] );
               }
+              sidl_int__array_set1( sidl_stencil_indices, 0, stencil_indices[0] );
               bHYPRE_StructMatrix_SetBoxValues
                  ( A_b, sidl_lower, sidl_upper, 1, sidl_stencil_indices, sidl_values );
               /* HYPRE_StructMatrixSetBoxValues(A, ilower[ib], iupper[ib],
