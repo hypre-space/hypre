@@ -287,13 +287,10 @@ hypre_InitializeStructMatrixShell( hypre_StructMatrix *matrix )
             data_box = hypre_BoxArrayBox(data_space, i);
 
             hypre_CopyBox(box, data_box);
-            if (hypre_BoxVolume(data_box))
+            for (d = 0; d < 3; d++)
             {
-               for (d = 0; d < 3; d++)
-               {
-                  hypre_BoxIMinD(data_box, d) -= num_ghost[2*d];
-                  hypre_BoxIMaxD(data_box, d) += num_ghost[2*d + 1];
-               }
+               hypre_BoxIMinD(data_box, d) -= num_ghost[2*d];
+               hypre_BoxIMaxD(data_box, d) += num_ghost[2*d + 1];
             }
          }
 
@@ -586,10 +583,6 @@ hypre_AssembleStructMatrix( hypre_StructMatrix *matrix )
 
    int                   *num_ghost = hypre_StructMatrixNumGhost(matrix);
 
-   hypre_StructStencil   *comm_stencil;
-   hypre_Index           *comm_stencil_shape;
-   int                    comm_stencil_size;
-
    hypre_BoxArrayArray   *send_boxes;
    hypre_BoxArrayArray   *recv_boxes;
    int                  **send_processes;
@@ -598,8 +591,6 @@ hypre_AssembleStructMatrix( hypre_StructMatrix *matrix )
    hypre_Index            unit_stride;
 
    hypre_CommPkg         *comm_pkg;
-
-   int                    i, j, k, m;
 
    hypre_CommHandle      *comm_handle;
 
@@ -613,29 +604,10 @@ hypre_AssembleStructMatrix( hypre_StructMatrix *matrix )
    {
       hypre_SetIndex(unit_stride, 1, 1, 1);
 
-      /* Set up the stencil describing communications, `comm_stencil' */
-      comm_stencil_size =
-         (num_ghost[0] + num_ghost[1] + 1) *
-         (num_ghost[2] + num_ghost[3] + 1) *
-         (num_ghost[4] + num_ghost[5] + 1);
-      comm_stencil_shape = hypre_CTAlloc(hypre_Index, comm_stencil_size);
-      m = 0;
-      for (k = -num_ghost[4]; k <= num_ghost[5]; k++)
-         for (j = -num_ghost[2]; j <= num_ghost[3]; j++)
-            for (i = -num_ghost[0]; i <= num_ghost[1]; i++)
-            {
-               hypre_SetIndex(comm_stencil_shape[m], i, j, k);
-               m++;
-            }
-      comm_stencil =
-         hypre_NewStructStencil(3, comm_stencil_size, comm_stencil_shape);
-
-      /* Set up the CommPkg */
-
-      hypre_NewCommInfoFromStencil(hypre_StructMatrixGrid(matrix),
-                                   comm_stencil,
-                                   &send_boxes, &recv_boxes,
-                                   &send_processes, &recv_processes);
+      hypre_NewCommInfoFromNumGhost(hypre_StructMatrixGrid(matrix),
+                                    num_ghost,
+                                    &send_boxes, &recv_boxes,
+                                    &send_processes, &recv_processes);
 
       comm_pkg = hypre_NewCommPkg(send_boxes, recv_boxes,
                                   unit_stride, unit_stride,
@@ -646,8 +618,6 @@ hypre_AssembleStructMatrix( hypre_StructMatrix *matrix )
                                   hypre_StructMatrixComm(matrix));
 
       hypre_StructMatrixCommPkg(matrix) = comm_pkg;
-
-      hypre_FreeStructStencil(comm_stencil);
    }
 
    /*-----------------------------------------------------------------------

@@ -119,13 +119,10 @@ hypre_InitializeStructVectorShell( hypre_StructVector *vector )
             data_box = hypre_BoxArrayBox(data_space, i);
 
             hypre_CopyBox(box, data_box);
-            if (hypre_BoxVolume(data_box))
+            for (d = 0; d < 3; d++)
             {
-               for (d = 0; d < 3; d++)
-               {
-                  hypre_BoxIMinD(data_box, d) -= num_ghost[2*d];
-                  hypre_BoxIMaxD(data_box, d) += num_ghost[2*d + 1];
-               }
+               hypre_BoxIMinD(data_box, d) -= num_ghost[2*d];
+               hypre_BoxIMaxD(data_box, d) += num_ghost[2*d + 1];
             }
          }
 
