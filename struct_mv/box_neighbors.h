@@ -72,7 +72,7 @@ typedef struct
  * Looping macros:
  *--------------------------------------------------------------------------*/
  
-#define hypre_BeginBoxNeighborsLoop(n, b, neighbors, distance_index)\
+#define hypre_BeginBoxNeighborsLoop(n, neighbors, b, distance_index)\
 {\
    int             hypre__istart = 0;\
    int             hypre__jstart = 0;\

@@ -173,10 +173,10 @@ hypre_UnionBoxArray( hypre_BoxArray *boxes )
    int              index_not_there;
             
    /*------------------------------------------------------
-    * If the size of boxes is 0, return
+    * If the size of boxes is less than 2, return
     *------------------------------------------------------*/
 
-   if (hypre_BoxArraySize(boxes) == 0)
+   if (hypre_BoxArraySize(boxes) < 2)
    {
       return ierr;
    }

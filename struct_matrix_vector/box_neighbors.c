@@ -53,6 +53,9 @@ hypre_FreeRankLink( hypre_RankLink  *rank_link )
  *
  * Finds boxes that are "near" the boxes given by `local_ranks',
  * where near is defined by max_distance.
+ *
+ * Note: This routine does not consider a box to be a neighbor of itself,
+ * and will not include it in the list of neighboring boxes.
  *--------------------------------------------------------------------------*/
 
 hypre_BoxNeighbors *
@@ -152,16 +155,15 @@ hypre_NewBoxNeighbors( int             *local_ranks,
     * Create new_boxes and new_processes
     *---------------------------------------------*/
 
+   new_boxes_ranks = hypre_TReAlloc(new_boxes_ranks, int, num_new_boxes);
    new_boxes = hypre_NewBoxArray(num_new_boxes);
-   new_processes = hypre_TAlloc(int, num_new_boxes);
    for (i = 0; i < num_new_boxes; i++)
    {
       neighbor_box = hypre_BoxArrayBox(boxes, new_boxes_ranks[i]);
       hypre_CopyBox(neighbor_box, hypre_BoxArrayBox(new_boxes, i));
-      new_processes[i] = processes[new_boxes_ranks[i]];
+      new_boxes_ranks[i] = processes[new_boxes_ranks[i]];
    }
-
-   hypre_TFree(new_boxes_ranks);
+   new_processes = new_boxes_ranks;
 
    /*---------------------------------------------
     * Create neighbors

@@ -33,6 +33,15 @@ typedef struct
    hypre_BoxNeighbors  *neighbors;    /* neighbors of boxes */
    int                  max_distance;
 
+   /* keep this for now to (hopefully) improve SMG setup performance */
+   hypre_BoxArray      *all_boxes;      /* valid only before Assemble */
+   int                 *processes;
+   int                 *box_ranks;
+   hypre_BoxArray      *base_all_boxes;
+   hypre_Index          pindex;         /* description of index-space to */
+   hypre_Index          pstride;        /* project base_all_boxes onto   */
+   int                  alloced;        /* boolean used to free up */
+
 } hypre_StructGrid;
 
 /*--------------------------------------------------------------------------
@@ -46,6 +55,13 @@ typedef struct
 #define hypre_StructGridLocalSize(grid)     ((grid) -> local_size)
 #define hypre_StructGridNeighbors(grid)     ((grid) -> neighbors)
 #define hypre_StructGridMaxDistance(grid)   ((grid) -> max_distance)
+#define hypre_StructGridAllBoxes(grid)      ((grid) -> all_boxes)
+#define hypre_StructGridProcesses(grid)     ((grid) -> processes)
+#define hypre_StructGridBoxRanks(grid)      ((grid) -> box_ranks)
+#define hypre_StructGridBaseAllBoxes(grid)  ((grid) -> base_all_boxes)
+#define hypre_StructGridPIndex(grid)        ((grid) -> pindex)
+#define hypre_StructGridPStride(grid)       ((grid) -> pstride)
+#define hypre_StructGridAlloced(grid)       ((grid) -> alloced)
 
 #define hypre_StructGridBox(grid, i) \
 (hypre_BoxArrayBox(hypre_StructGridBoxes(grid), i))

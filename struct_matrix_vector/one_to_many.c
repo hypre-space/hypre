@@ -150,7 +150,7 @@ main( int   argc,
    fscanf(file_root, "\nData:\n");
    hypre_ReadBoxArrayData(file_root, boxes, data_space, num_values,
                         hypre_StructMatrixData(matrix_root));
-   hypre_AssembleStructMatrix(matrix_root, NULL, NULL, NULL);
+   hypre_AssembleStructMatrix(matrix_root);
 
    /*----------------------------------------
     * Close input file

@@ -15,7 +15,14 @@
 /*==========================================================================*/
 /*==========================================================================*/
 /** Return descriptions of communications patterns for a given
-grid-stencil computation.
+grid-stencil computation.  These patterns are defined by intersecting
+the data dependencies of each box (including data dependencies within
+the box) with its neighbor boxes.
+
+{\bf Note:} No concept of data ownership is assumed.  As a result,
+problematic communications patterns can be produced when the grid
+boxes overlap.  For example, it is likely that some boxes will have
+send and receive patterns that overlap.
 
 {\bf Input files:}
 headers.h
@@ -82,7 +89,6 @@ hypre_NewCommInfoFromStencil( hypre_StructGrid      *grid,
    int                      s, d;
 
    /* temporary work variables */
-   hypre_BoxArray          *subtract_box_array;
    hypre_Box               *box0;
 
    /*------------------------------------------------------
@@ -95,16 +101,13 @@ hypre_NewCommInfoFromStencil( hypre_StructGrid      *grid,
    if (stencil_max_offset > hypre_BoxNeighborsMaxDistance(neighbors))
    {
       hypre_StructGridMaxDistance(grid) = stencil_max_offset;
-      hypre_AssembleStructGrid(grid, NULL, NULL, NULL);
+      hypre_AssembleStructGrid(grid);
       neighbors = hypre_StructGridNeighbors(grid);
    }
 
    /*------------------------------------------------------
     * Compute send/recv boxes and processes
     *------------------------------------------------------*/
-
-   box0 = hypre_NewBox();
-   subtract_box_array = hypre_NewBoxArray(0);
 
    send_boxes = hypre_NewBoxArrayArray(hypre_BoxArraySize(boxes));
    recv_boxes = hypre_NewBoxArrayArray(hypre_BoxArraySize(boxes));
@@ -115,6 +118,10 @@ hypre_NewCommInfoFromStencil( hypre_StructGrid      *grid,
 
    neighbor_boxes = hypre_BoxNeighborsBoxes(neighbors);
    neighbor_processes = hypre_BoxNeighborsProcesses(neighbors);
+
+   box0 = hypre_NewBox();
+   shift_box = hypre_NewBox();
+
    cbox_arrays =
       hypre_CTAlloc(hypre_BoxArray *, hypre_BoxArraySize(neighbor_boxes));
    cbox_arrays_i =
@@ -123,7 +130,7 @@ hypre_NewCommInfoFromStencil( hypre_StructGrid      *grid,
    hypre_ForBoxI(i, boxes)
       {
          box = hypre_BoxArrayBox(boxes, i);
-         shift_box = hypre_DuplicateBox(box);
+         hypre_CopyBox(box, shift_box);
 
          /*------------------------------------------------
           * Compute recv_box_array for box i
@@ -143,7 +150,7 @@ hypre_NewCommInfoFromStencil( hypre_StructGrid      *grid,
                   hypre_BoxIMaxD(box, d) + hypre_IndexD(stencil_offset, d);
             }
  
-            hypre_BeginBoxNeighborsLoop(j, i, neighbors, stencil_offset)
+            hypre_BeginBoxNeighborsLoop(j, neighbors, i, stencil_offset)
                {
                   neighbor_box = hypre_BoxArrayBox(neighbor_boxes, j);
 
@@ -156,8 +163,7 @@ hypre_NewCommInfoFromStencil( hypre_StructGrid      *grid,
                         cbox_arrays_i[num_cbox_arrays] = j;
                         num_cbox_arrays++;
                      }
-                     hypre_SubtractBoxes(box0, box, subtract_box_array);
-                     hypre_AppendBoxArray(subtract_box_array, cbox_arrays[j]);
+                     hypre_AppendBox(box0, cbox_arrays[j]);
                   }
                }
             hypre_EndBoxNeighborsLoop;
@@ -216,7 +222,7 @@ hypre_NewCommInfoFromStencil( hypre_StructGrid      *grid,
                   hypre_BoxIMaxD(box, d) + hypre_IndexD(stencil_offset, d);
             }
  
-            hypre_BeginBoxNeighborsLoop(j, i, neighbors, stencil_offset)
+            hypre_BeginBoxNeighborsLoop(j, neighbors, i, stencil_offset)
                {
                   neighbor_box = hypre_BoxArrayBox(neighbor_boxes, j);
 
@@ -238,9 +244,7 @@ hypre_NewCommInfoFromStencil( hypre_StructGrid      *grid,
                         cbox_arrays_i[num_cbox_arrays] = j;
                         num_cbox_arrays++;
                      }
-                     hypre_SubtractBoxes(box0, neighbor_box,
-                                         subtract_box_array);
-                     hypre_AppendBoxArray(subtract_box_array, cbox_arrays[j]);
+                     hypre_AppendBox(box0, cbox_arrays[j]);
                   }
                }
             hypre_EndBoxNeighborsLoop;
@@ -280,14 +284,12 @@ hypre_NewCommInfoFromStencil( hypre_StructGrid      *grid,
             hypre_FreeBoxArray(cbox_arrays[j]);
             cbox_arrays[j] = NULL;
          }
-
-         hypre_FreeBox(shift_box);
       }
 
    hypre_TFree(cbox_arrays);
    hypre_TFree(cbox_arrays_i);
 
-   hypre_FreeBoxArray(subtract_box_array);
+   hypre_FreeBox(shift_box);
    hypre_FreeBox(box0);
 
    /*------------------------------------------------------

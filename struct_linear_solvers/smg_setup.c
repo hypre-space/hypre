@@ -69,17 +69,22 @@ hypre_SMGSetup( void               *smg_vdata,
    void                **restrict_data_l;
    void                **intadd_data_l;
 
+   hypre_StructGrid     *grid;
    hypre_BoxArray       *boxes;
    hypre_BoxArray       *all_boxes;
    int                  *processes;
    int                  *box_ranks;
+   hypre_BoxArray       *base_all_boxes;
+   hypre_Index           pindex;
+   hypre_Index           pstride;
+
    int                   num_boxes;
    int                   num_all_boxes;
 
    hypre_Box            *box;
 
    int                   idmin, idmax;
-   int                   i, l;
+   int                   i, d, l;
                        
    int                   b_num_ghost[]  = {0, 0, 0, 0, 0, 0};
    int                   x_num_ghost[]  = {0, 0, 0, 0, 0, 0};
@@ -97,10 +102,28 @@ hypre_SMGSetup( void               *smg_vdata,
     * Set up coarse grids
     *-----------------------------------------------------*/
 
-   boxes = hypre_StructGridBoxes(hypre_StructMatrixGrid(A));
-   hypre_GatherAllBoxes(comm, boxes, &all_boxes, &processes, &box_ranks);
-   num_boxes = hypre_BoxArraySize(boxes);
-   num_all_boxes = hypre_BoxArraySize(all_boxes);
+   grid           = hypre_StructMatrixGrid(A);
+   boxes          = hypre_StructGridBoxes(grid);
+   all_boxes      = hypre_StructGridAllBoxes(grid);
+   processes      = hypre_StructGridProcesses(grid);
+   box_ranks      = hypre_StructGridBoxRanks(grid);
+   base_all_boxes = hypre_StructGridBaseAllBoxes(grid);
+   hypre_CopyIndex(hypre_StructGridPIndex(grid),  pindex);
+   hypre_CopyIndex(hypre_StructGridPStride(grid), pstride);
+   num_boxes      = hypre_BoxArraySize(boxes);
+   num_all_boxes  = hypre_BoxArraySize(all_boxes);
+
+   /* compute all_boxes from base_all_boxes */
+   hypre_ForBoxI(i, all_boxes)
+      {
+         box = hypre_BoxArrayBox(all_boxes, i);
+         hypre_CopyBox(hypre_BoxArrayBox(base_all_boxes, i), box);
+         hypre_ProjectBox(box, pindex, pstride);
+         hypre_SMGMapFineToCoarse(hypre_BoxIMin(box), hypre_BoxIMin(box),
+                                  pindex, pstride);
+         hypre_SMGMapFineToCoarse(hypre_BoxIMax(box), hypre_BoxIMax(box),
+                                  pindex, pstride);
+      }
 
    /* Compute a new max_levels value based on the grid */
    idmin = hypre_BoxIMinD(hypre_BoxArrayBox(all_boxes, 0), cdir);
@@ -118,7 +141,7 @@ hypre_SMGSetup( void               *smg_vdata,
    (smg_data -> max_levels) = max_levels;
 
    grid_l = hypre_TAlloc(hypre_StructGrid *, max_levels);
-   grid_l[0] = hypre_StructMatrixGrid(A);
+   grid_l[0] = grid;
    for (l = 0; ; l++)
    {
       /* set cindex and stride */
@@ -161,14 +184,19 @@ hypre_SMGSetup( void               *smg_vdata,
       }
 
       grid_l[l+1] = hypre_NewStructGrid(comm, hypre_StructGridDim(grid_l[l]));
+      for (d = 0; d < 3; d++)
+      {
+         hypre_IndexD(pindex, d) +=
+            hypre_IndexD(cindex, d) * hypre_IndexD(pstride, d);
+         hypre_IndexD(pstride, d) *= hypre_IndexD(stride, d);
+      }
       hypre_SetStructGridBoxes(grid_l[l+1], boxes);
-      hypre_AssembleStructGrid(grid_l[l+1], all_boxes, processes, box_ranks);
+      hypre_SetStructGridGlobalInfo(grid_l[l+1],
+                                    all_boxes, processes, box_ranks,
+                                    base_all_boxes, pindex, pstride);
+      hypre_AssembleStructGrid(grid_l[l+1]);
    }
    num_levels = l + 1;
-
-   hypre_FreeBoxArray(all_boxes);
-   hypre_TFree(processes);
-   hypre_TFree(box_ranks);
 
    (smg_data -> num_levels) = num_levels;
    (smg_data -> grid_l)     = grid_l;

@@ -211,7 +211,7 @@ main( int   argc,
 		 }
 
 	       hypre_SetStructGridExtents(sub_grids[i_file], ilower, iupper);
-	       hypre_AssembleStructGrid(sub_grids[i_file], NULL, NULL, NULL);
+	       hypre_AssembleStructGrid(sub_grids[i_file]);
 
 	       sub_vectors[i_file] = 
 		 hypre_NewStructVector(MPI_COMM_WORLD, sub_grids[i_file]); 

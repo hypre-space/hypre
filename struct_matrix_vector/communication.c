@@ -14,7 +14,7 @@
 /** Create a communication package.  A grid-based description of a
 communication exchange is passed in.  This description is then
 compiled into an intermediate processor-based description of the
-communication.  It may further compiled into a form based on the
+communication.  It may further be compiled into a form based on the
 message-passing layer in the routine hypre\_CommitCommPkg.  This
 proceeds as follows based on several compiler flags:
 
@@ -253,8 +253,8 @@ hypre_InitializeCommunication( hypre_CommPkg     *comm_pkg,
    MPI_Status          *status;
    double             **send_buffers;
    double             **recv_buffers;
-   int                **send_sizes;
-   int                **recv_sizes;
+   int                 *send_sizes;
+   int                 *recv_sizes;
 
    hypre_CommType      *send_type;
    hypre_CommTypeEntry *send_entry;
@@ -305,14 +305,17 @@ hypre_InitializeCommunication( hypre_CommPkg     *comm_pkg,
 
       total_size += send_sizes[i];
    }
-   send_buffers[0] = hypre_SharedTAlloc(double, total_size);
-   for (i = 1; i < num_sends; i++)
+   if (num_sends > 0)
    {
-      send_buffers[i] = send_buffers[i-1] + send_sizes[i-1];
+      send_buffers[0] = hypre_SharedTAlloc(double, total_size);
+      for (i = 1; i < num_sends; i++)
+      {
+         send_buffers[i] = send_buffers[i-1] + send_sizes[i-1];
+      }
    }
 
    /* allocate recv buffers */
-   send_buffers = hypre_TAlloc(double *, num_recvs);
+   recv_buffers = hypre_TAlloc(double *, num_recvs);
    recv_sizes = hypre_TAlloc(int, num_recvs);
    total_size = 0;
    for (i = 0; i < num_recvs; i++)
@@ -335,10 +338,13 @@ hypre_InitializeCommunication( hypre_CommPkg     *comm_pkg,
 
       total_size += recv_sizes[i];
    }
-   recv_buffers[0] = hypre_SharedTAlloc(double, total_size);
-   for (i = 1; i < num_recvs; i++)
+   if (num_recvs > 0)
    {
-      recv_buffers[i] = recv_buffers[i-1] + recv_sizes[i-1];
+      recv_buffers[0] = hypre_SharedTAlloc(double, total_size);
+      for (i = 1; i < num_recvs; i++)
+      {
+         recv_buffers[i] = recv_buffers[i-1] + recv_sizes[i-1];
+      }
    }
 
    /*--------------------------------------------------------------------
@@ -551,8 +557,8 @@ hypre_FinalizeCommunication( hypre_CommHandle *comm_handle )
    hypre_CommPkg   *comm_pkg     = hypre_CommHandleCommPkg(comm_handle);
    double         **send_buffers = hypre_CommHandleSendBuffers(comm_handle);
    double         **recv_buffers = hypre_CommHandleRecvBuffers(comm_handle);
-   int            **send_sizes   = hypre_CommHandleSendSizes(comm_handle);
-   int            **recv_sizes   = hypre_CommHandleRecvSizes(comm_handle);
+   int             *send_sizes   = hypre_CommHandleSendSizes(comm_handle);
+   int             *recv_sizes   = hypre_CommHandleRecvSizes(comm_handle);
    int              num_sends    = hypre_CommPkgNumSends(comm_pkg);
    int              num_recvs    = hypre_CommPkgNumRecvs(comm_pkg);
 
@@ -631,8 +637,14 @@ hypre_FinalizeCommunication( hypre_CommHandle *comm_handle )
 
    hypre_SharedTFree(hypre_CommHandleRequests(comm_handle));
    hypre_SharedTFree(hypre_CommHandleStatus(comm_handle));
-   hypre_SharedTFree(send_buffers[0]);
-   hypre_SharedTFree(recv_buffers[0]);
+   if (num_sends > 0)
+   {
+      hypre_SharedTFree(send_buffers[0]);
+   }
+   if (num_recvs > 0)
+   {
+      hypre_SharedTFree(recv_buffers[0]);
+   }
    hypre_TFree(send_buffers);
    hypre_TFree(recv_buffers);
    hypre_TFree(send_sizes);
@@ -1050,6 +1062,7 @@ hypre_NewCommPkgInfo( hypre_BoxArrayArray   *boxes,
    /*---------------------------------------------------------
     * Misc stuff
     *---------------------------------------------------------*/
+
    nprocs_ptr = hypre_SharedTAlloc(int, 1);
    myproc_ptr = hypre_SharedTAlloc(int, 1);
 
@@ -1061,6 +1074,7 @@ hypre_NewCommPkgInfo( hypre_BoxArrayArray   *boxes,
 
    hypre_SharedTFree(nprocs_ptr);
    hypre_SharedTFree(myproc_ptr);
+
    /*------------------------------------------------------
     * Loop over boxes and compute num_entries.
     *------------------------------------------------------*/

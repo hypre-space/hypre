@@ -70,6 +70,5 @@ HYPRE_SetStructGridExtents( HYPRE_StructGrid  grid,
 int
 HYPRE_AssembleStructGrid( HYPRE_StructGrid grid )
 {
-   return ( hypre_AssembleStructGrid( (hypre_StructGrid *) grid,
-                                      NULL, NULL, NULL ) );
+   return ( hypre_AssembleStructGrid( (hypre_StructGrid *) grid ) );
 }
