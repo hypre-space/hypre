@@ -161,7 +161,7 @@ hypre_FACSetPLevels( void *fac_vdata,
 int
 hypre_FACSetPRefinements( void         *fac_vdata,
                           int           nparts,
-                          hypre_Index  *prefinements )
+                          int         (*prefinements)[3] )
 {
    hypre_FACData *fac_data   = fac_vdata;
    hypre_Index   *fac_prefinements;
