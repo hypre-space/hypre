@@ -62,7 +62,9 @@ FILES =\
  par_csr_matvec.c\
  par_vector.c\
  HYPRE_parcsr_matrix.c\
- HYPRE_parcsr_vector.c
+ HYPRE_parcsr_vector.c\
+ F90_HYPRE_parcsr_matrix.c\
+ F90_HYPRE_parcsr_vector.c
 
 OBJS = ${FILES:.c=.o}
 
