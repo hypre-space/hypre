@@ -128,18 +128,18 @@ int main(int argc, char **argv)
    cmli_mat = MLI_MatrixCreate((void*) hypre_A,"HYPRE_ParCSR",func_ptr);
    free( func_ptr );
    cmli = MLI_Create( MPI_COMM_WORLD );
-   cmli_method = MLI_MethodCreate( "MLI_METHOD_AMGSA", MPI_COMM_WORLD );
-   nsweeps = 10;
+   cmli_method = MLI_MethodCreate( "AMGSA", MPI_COMM_WORLD );
+   nsweeps = 2;
    targv[0] = (char *) &nsweeps;
    targv[1] = (char *) NULL;
-   MLI_MethodSetParams( cmli_method, "setNumLevels 3", 0, NULL );
-   MLI_MethodSetParams( cmli_method, "setPreSmoother MLS", 2, targv );
-   MLI_MethodSetParams( cmli_method, "setPostSmoother MLS", 2, targv );
+   MLI_MethodSetParams( cmli_method, "setNumLevels 4", 0, NULL );
+   MLI_MethodSetParams( cmli_method, "setPreSmoother SGS", 2, targv );
+   MLI_MethodSetParams( cmli_method, "setPostSmoother SGS", 2, targv );
    nsweeps = 20;
    targv[0] = (char *) &nsweeps;
    targv[1] = (char *) NULL;
-   MLI_MethodSetParams( cmli_method, "setCoarseSolver SGS", 2, targv );
-   MLI_MethodSetParams( cmli_method, "setCalibrationSize 0", 0, NULL );
+   MLI_MethodSetParams( cmli_method, "setCoarseSolver SuperLU", 2, targv );
+   MLI_MethodSetParams( cmli_method, "setCalibrationSize 1", 0, NULL );
    if ( test_prob == 1 )
    {
       targv[0] = (char *) &ndofs;
