@@ -2363,8 +2363,8 @@ int MLI_Utils_HypreGMRESSolve(void *precon, HYPRE_Matrix A,
       HYPRE_BoomerAMGSetCycleType(gmresPrecond, 1);
       HYPRE_BoomerAMGSetMaxLevels(gmresPrecond, 25);
       HYPRE_BoomerAMGSetMeasureType(gmresPrecond, 0);
-      HYPRE_BoomerAMGSetDebugFlag(gmresPrecond, 1);
-      HYPRE_BoomerAMGSetPrintLevel(gmresPrecond, 1);
+      HYPRE_BoomerAMGSetDebugFlag(gmresPrecond, 0);
+      HYPRE_BoomerAMGSetPrintLevel(gmresPrecond, 0);
       HYPRE_BoomerAMGSetCoarsenType(gmresPrecond, 0);
       HYPRE_BoomerAMGSetStrongThreshold(gmresPrecond, 0.9);
       nSweeps = (int *) malloc(4 * sizeof(int));
@@ -2465,8 +2465,8 @@ int MLI_Utils_HypreFGMRESSolve(void *precon, HYPRE_Matrix A,
       HYPRE_BoomerAMGSetCycleType(gmresPrecond, 1);
       HYPRE_BoomerAMGSetMaxLevels(gmresPrecond, 25);
       HYPRE_BoomerAMGSetMeasureType(gmresPrecond, 0);
-      HYPRE_BoomerAMGSetDebugFlag(gmresPrecond, 1);
-      HYPRE_BoomerAMGSetPrintLevel(gmresPrecond, 1);
+      HYPRE_BoomerAMGSetDebugFlag(gmresPrecond, 0);
+      HYPRE_BoomerAMGSetPrintLevel(gmresPrecond, 0);
       HYPRE_BoomerAMGSetCoarsenType(gmresPrecond, 0);
       HYPRE_BoomerAMGSetStrongThreshold(gmresPrecond, 0.9);
       nSweeps = (int *) malloc(4 * sizeof(int));
