@@ -240,7 +240,7 @@ c-----------------------------------------------------------------------
       if (nz .gt. 1) values(1) = values(1) + 2d0*cz
 
 c Generate a Dirichlet Laplacian
-      if (generate_matrix) then
+      if (generate_matrix .gt. 0) then
 c        call HYPRE_ParCSRMatrixCreate(MPI_COMM_WORLD, gnrows, gncols,
 c    &      rstarts, cstarts, ncoloffdg, nonzsdg, nonzsoffdg,
 c    &      A_storage, ierr)
@@ -264,7 +264,7 @@ c-----------------------------------------------------------------------
 c     Set up the rhs and initial guess
 c-----------------------------------------------------------------------
 
-      if (generate_rhs) then
+      if (generate_rhs .gt. 0) then
         call HYPRE_IJVectorCreate(MPI_COMM_WORLD, b, num_rows, ierr)
         call HYPRE_IJVectorSetLocalStorageTy(b, HYPRE_PARCSR, ierr)
         call HYPRE_IJVectorSetPartitioning(b, row_starts, ierr)
