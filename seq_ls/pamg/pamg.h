@@ -220,9 +220,6 @@ int update_entry( int weight , int *weight_max , int *previous , int *next , int
 int remove_entry( int weight , int *weight_max , int *previous , int *next , int *first , int *last , int head , int tail , int i );
 int move_entry( int weight , int *weight_max , int *previous , int *next , int *first , int *last , int head , int tail , int i );
 
-/* transpose.c */
-int hypre_CSRMatrixTranspose( hypre_CSRMatrix *A , hypre_CSRMatrix **AT );
-
 /* trunc.c */
 int hypre_AMGTruncation( hypre_CSRMatrix *A , double trunc_factor , int max_elmts );
 void swap3( int *v , double *w , int i , int j );

@@ -79,7 +79,6 @@ FILES =\
  relax.c\
  schwarz.c\
  scaled_matnorm.c\
- transpose.c\
  trunc.c\
  Atrunc.c\
  HYPRE_amg.c\

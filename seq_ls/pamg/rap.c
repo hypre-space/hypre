@@ -67,7 +67,7 @@ hypre_CSRMatrix **RAP_ptr;
     *  Copy RT into R so that we have row-wise access to restriction.
     *-----------------------------------------------------------------------*/
 
-   hypre_CSRMatrixTranspose(RT, &R);   /* could call PETSc MatTranspose */
+   hypre_CSRMatrixTranspose(RT, &R, 1);   /* could call PETSc MatTranspose */
 
    /*-----------------------------------------------------------------------
     *  Access the CSR vectors for R, A, P. Also get sizes of fine and
