@@ -10,13 +10,13 @@
 .SUFFIXES:
 .SUFFIXES: .c .f .o
 
-CC = cc
+CC = cicc
+F77 = ci77
 
-CFLAGS =\
- -I/usr/local/include\
- -I/home/casc/include\
- -I/usr/local/mpi/mpich/include\
- -DHYPRE_TIMING -DUSE_MPI_TIMER
+CFLAGS = -O -DHYPRE_TIMING -DTIMER_USE_MPI -DTIMER_NO_SYS
+
+FFLAGS = -O
+
 
 ##################################################################
 # Make all utilities
@@ -32,8 +32,7 @@ MEMORY_HEADERS =\
  memory.h
 
 MEMORY_FILES =\
- memory.c\
- memory_dmalloc.c
+ memory.c
 
 MEMORY_OBJS = ${MEMORY_FILES:.c=.o}
 

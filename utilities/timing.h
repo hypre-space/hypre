@@ -32,7 +32,7 @@
 #define hypre_IncFLOPCount(inc)
 #define hypre_BeginTiming(i)
 #define hypre_EndTiming(i)
-#define hypre_PrintTiming(comm)
+#define hypre_PrintTiming(heading, comm)
 #define hypre_FinalizeTiming(index)
 
 /*--------------------------------------------------------------------------

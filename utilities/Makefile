@@ -19,7 +19,7 @@ CFLAGS =\
  -I/usr/local/mpi/mpich/include\
  -g -Wall\
  -DHYPRE_MEMORY_DMALLOC\
- -DHYPRE_TIMING -DUSE_MPI_TIMER
+ -DHYPRE_TIMING -DTIMER_USE_MPI
 
 FFLAGS = -g
 
