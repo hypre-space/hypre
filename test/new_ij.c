@@ -28,7 +28,8 @@ int BuildFuncsFromOneFile (int argc , char *argv [], int arg_index , HYPRE_ParCS
 int BuildRhsParFromOneFile (int argc , char *argv [], int arg_index , int *partitioning , HYPRE_ParVector *b_ptr );
 int BuildParLaplacian9pt (int argc , char *argv [], int arg_index , HYPRE_ParCSRMatrix *A_ptr );
 int BuildParLaplacian27pt (int argc , char *argv [], int arg_index , HYPRE_ParCSRMatrix *A_ptr );
-
+int BuildParRotate7pt (int argc , char *argv [], int arg_index , HYPRE_ParCSRMatrix *A_ptr );
+int BuildParVarDifConv (int argc , char *argv [], int arg_index , HYPRE_ParCSRMatrix *A_ptr , HYPRE_ParVector *rhs_ptr );
 HYPRE_ParCSRMatrix GenerateSysLaplacian (MPI_Comm comm, int nx, int ny, int nz, 
                                          int P, int Q, int R, int p, int q, int r,
                                          int num_fun, double *mtrx, double *value);
@@ -235,6 +236,18 @@ main( int   argc,
          build_matrix_type      = 5;
          build_matrix_arg_index = arg_index;
       }
+      else if ( strcmp(argv[arg_index], "-vardifconv") == 0 )
+      {
+         arg_index++;
+         build_matrix_type      = 6;
+         build_matrix_arg_index = arg_index;
+      }
+      else if ( strcmp(argv[arg_index], "-rotate") == 0 )
+      {
+         arg_index++;
+         build_matrix_type      = 7;
+         build_matrix_arg_index = arg_index;
+      } 
       else if ( strcmp(argv[arg_index], "-funcsfromonefile") == 0 )
       {
          arg_index++;
@@ -840,6 +853,16 @@ main( int   argc,
    {
       BuildParDifConv(argc, argv, build_matrix_arg_index, &parcsr_A);
    }
+   else if ( build_matrix_type == 6 )
+   {
+      BuildParVarDifConv(argc, argv, build_matrix_arg_index, &parcsr_A, &b);
+      /*HYPRE_ParCSRMatrixPrint(parcsr_A,"mat100");*/
+   }
+   else if ( build_matrix_type == 7 )
+   {
+      BuildParRotate7pt(argc, argv, build_matrix_arg_index, &parcsr_A);
+   }
+
    else
    {
       printf("You have asked for an unsupported problem with\n");
@@ -1034,6 +1057,7 @@ main( int   argc,
 
    ierr += HYPRE_IJMatrixGetObject( ij_A, &object);
    parcsr_A = (HYPRE_ParCSRMatrix) object;
+     /*HYPRE_ParCSRMatrixPrint(parcsr_A,"rot60");*/
 
    /*-----------------------------------------------------------
     * Set up the RHS and initial guess
@@ -3507,3 +3531,237 @@ BuildParLaplacian27pt( int                  argc,
 
    return (0);
 }
+
+
+/*----------------------------------------------------------------------
+ * Build 7-point in 2D 
+ * Parameters given in command line.
+ *----------------------------------------------------------------------*/
+
+int
+BuildParRotate7pt( int                  argc,
+                      char                *argv[],
+                      int                  arg_index,
+                      HYPRE_ParCSRMatrix  *A_ptr     )
+{
+   int                 nx, ny;
+   int                 P, Q;
+
+   HYPRE_ParCSRMatrix  A;
+
+   int                 num_procs, myid;
+   int                 p, q;
+   double             *values, eps, alpha;
+
+   /*-----------------------------------------------------------
+    * Initialize some stuff
+    *-----------------------------------------------------------*/
+
+   MPI_Comm_size(MPI_COMM_WORLD, &num_procs );
+   MPI_Comm_rank(MPI_COMM_WORLD, &myid );
+
+   /*-----------------------------------------------------------
+    * Set defaults
+    *-----------------------------------------------------------*/
+
+   nx = 10;
+   ny = 10;
+
+   P  = 1;
+   Q  = num_procs;
+
+   /*-----------------------------------------------------------
+    * Parse command line
+    *-----------------------------------------------------------*/
+   arg_index = 0;
+   while (arg_index < argc)
+   {
+      if ( strcmp(argv[arg_index], "-n") == 0 )
+      {
+         arg_index++;
+         nx = atoi(argv[arg_index++]);
+         ny = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-P") == 0 )
+      {
+         arg_index++;
+         P  = atoi(argv[arg_index++]);
+         Q  = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-alpha") == 0 )
+      {
+         arg_index++;
+         alpha  = atof(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-eps") == 0 )
+      {
+         arg_index++;
+         eps  = atof(argv[arg_index++]);
+      }
+      else
+      {
+         arg_index++;
+      }
+   }
+
+   /*-----------------------------------------------------------
+    * Check a few things
+    *-----------------------------------------------------------*/
+
+   if ((P*Q) != num_procs)
+   {
+      printf("Error: Invalid number of processors or processor topology \n");
+      exit(1);
+   }
+
+   /*-----------------------------------------------------------
+    * Print driver parameters
+    *-----------------------------------------------------------*/
+
+   if (myid == 0)
+   {
+      printf("  Rotate 7pt:\n");
+      printf("    alpha = %f, eps = %f\n", alpha,eps);
+      printf("    (nx, ny) = (%d, %d)\n", nx, ny);
+      printf("    (Px, Py) = (%d, %d)\n", P,  Q);
+   }
+
+   /*-----------------------------------------------------------
+    * Set up the grid structure
+    *-----------------------------------------------------------*/
+
+   /* compute p,q from P,Q and myid */
+   p = myid % P;
+   q = ( myid - p)/P;
+
+   /*-----------------------------------------------------------
+    * Generate the matrix 
+    *-----------------------------------------------------------*/
+
+   A = (HYPRE_ParCSRMatrix) GenerateRotate7pt(MPI_COMM_WORLD,
+                                  nx, ny, P, Q, p, q, alpha, eps);
+
+   *A_ptr = A;
+
+   return (0);
+}
+
+/*----------------------------------------------------------------------
+ * Build standard 7-point difference operator using centered differences
+ *
+ *  eps*(a(x,y,z) ux)x + (b(x,y,z) uy)y + (c(x,y,z) uz)z 
+ *  d(x,y,z) ux + e(x,y,z) uy + f(x,y,z) uz + g(x,y,z) u
+ *
+ *  functions a,b,c,d,e,f,g need to be defined inside par_vardifconv.c
+ *
+ *----------------------------------------------------------------------*/
+
+int
+BuildParVarDifConv( int                  argc,
+                    char                *argv[],
+                    int                  arg_index,
+                    HYPRE_ParCSRMatrix  *A_ptr    ,
+                    HYPRE_ParVector  *rhs_ptr     )
+{
+   int                 nx, ny, nz;
+   int                 P, Q, R;
+
+   HYPRE_ParCSRMatrix  A;
+   HYPRE_ParVector  rhs;
+
+   int                 num_procs, myid;
+   int                 p, q, r;
+   double             *values, eps;
+
+   /*-----------------------------------------------------------
+    * Initialize some stuff
+    *-----------------------------------------------------------*/
+
+   MPI_Comm_size(MPI_COMM_WORLD, &num_procs );
+   MPI_Comm_rank(MPI_COMM_WORLD, &myid );
+
+   /*-----------------------------------------------------------
+    * Set defaults
+    *-----------------------------------------------------------*/
+
+   nx = 10;
+   ny = 10;
+   nz = 10;
+   P  = 1;
+   Q  = num_procs;
+   R  = 1;
+
+   /*-----------------------------------------------------------
+    * Parse command line
+    *-----------------------------------------------------------*/
+  arg_index = 0;
+   while (arg_index < argc)
+   {
+      if ( strcmp(argv[arg_index], "-n") == 0 )
+      {
+         arg_index++;
+         nx = atoi(argv[arg_index++]);
+         ny = atoi(argv[arg_index++]);
+         nz = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-P") == 0 )
+      {
+         arg_index++;
+         P  = atoi(argv[arg_index++]);
+         Q  = atoi(argv[arg_index++]);
+         R  = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-eps") == 0 )
+      {
+         arg_index++;
+         eps  = atof(argv[arg_index++]);
+      }
+      else
+      {
+         arg_index++;
+      }
+   }
+
+   /*-----------------------------------------------------------
+    * Check a few things
+    *-----------------------------------------------------------*/
+
+   if ((P*Q*R) != num_procs)
+   {
+      printf("Error: Invalid number of processors or processor topology \n");
+      exit(1);
+   }
+
+   /*-----------------------------------------------------------
+    * Print driver parameters
+    *-----------------------------------------------------------*/
+
+   if (myid == 0)
+   {
+      printf("  ell PDE: eps = %f\n", eps);
+      printf("    Dx(aDxu) + Dy(bDyu) + Dz(cDzu) + d Dxu + e Dyu + f Dzu  + g u= f\n");
+      printf("    (nx, ny, nz) = (%d, %d, %d)\n", nx, ny, nz);
+      printf("    (Px, Py, Pz) = (%d, %d, %d)\n", P,  Q,  R);
+   }
+   /*-----------------------------------------------------------
+    * Set up the grid structure
+    *-----------------------------------------------------------*/
+
+   /* compute p,q,r from P,Q,R and myid */
+   p = myid % P;
+   q = (( myid - p)/P) % Q;
+   r = ( myid - p - P*q)/( P*Q );
+
+   /*-----------------------------------------------------------
+    * Generate the matrix
+    *-----------------------------------------------------------*/
+
+   A = (HYPRE_ParCSRMatrix) GenerateVarDifConv(MPI_COMM_WORLD,
+                               nx, ny, nz, P, Q, R, p, q, r, eps, &rhs);
+
+   *A_ptr = A;
+   *rhs_ptr = rhs;
+
+   return (0);
+}
+
