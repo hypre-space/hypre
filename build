@@ -157,7 +157,7 @@ then
     # SMG
     (
 	cd utilities
-	cp -f memory.h timer.h timing.h $HYPRE_INSTALL_DIR/include
+	cp -f memory.h mpistubs.h timer.h timing.h $HYPRE_INSTALL_DIR/include
 	cp -f *.a $HYPRE_INSTALL_DIR/lib
     )
     (
