@@ -12,22 +12,26 @@ SHELL = /bin/sh
 srcdir = @srcdir@
 VPATH = @srcdir@
 
+# These are directories that are officially in HYPRE
 HYPRE_DIRS =\
  utilities\
- parcsr_matrix_vector\
- parcsr_linear_solvers\
- seq_matrix_vector\
  struct_matrix_vector\
  struct_linear_solvers\
  test
 
+# These are directories that are not yet officially in HYPRE
+HYPRE_EXTRA_DIRS =\
+
 all:
 	@ \
-	for i in ${HYPRE_DIRS}; \
+	for i in ${HYPRE_DIRS} ${HYPRE_EXTRA_DIRS}; \
 	do \
-	  echo "Making $$i ..."; \
-	  (cd $$i; make); \
-	  echo ""; \
+	  if [ -d $$i ]; \
+	  then \
+	    echo "Making $$i ..."; \
+	    (cd $$i; make); \
+	    echo ""; \
+	  fi; \
 	done
 
 install:
@@ -55,26 +59,35 @@ install:
 	   done \
 	); \
 	# install the libraries; \
-	for i in ${HYPRE_DIRS}; \
+	for i in ${HYPRE_DIRS} ${HYPRE_EXTRA_DIRS}; \
 	do \
-	  echo "Installing $$i ..."; \
-	  (cd $$i; make install); \
-	  echo ""; \
+	  if [ -d $$i ]; \
+	  then \
+	    echo "Installing $$i ..."; \
+	    (cd $$i; make install); \
+	    echo ""; \
+	  fi; \
 	done
 
 clean:
 	@ \
-	for i in ${HYPRE_DIRS}; \
+	for i in ${HYPRE_DIRS} ${HYPRE_EXTRA_DIRS}; \
 	do \
-	  echo "Cleaning $$i ..."; \
-	  (cd $$i; make clean); \
+	  if [ -d $$i ]; \
+	  then \
+	    echo "Cleaning $$i ..."; \
+	    (cd $$i; make clean); \
+	  fi; \
 	done
 
 veryclean:
 	@ \
-	for i in ${HYPRE_DIRS}; \
+	for i in ${HYPRE_DIRS} ${HYPRE_EXTRA_DIRS}; \
 	do \
-	  echo "Very-cleaning $$i ..."; \
-	  (cd $$i; make veryclean); \
+	  if [ -d $$i ]; \
+	  then \
+	    echo "Very-cleaning $$i ..."; \
+	    (cd $$i; make veryclean); \
+	  fi; \
 	done
 
