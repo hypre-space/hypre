@@ -9,11 +9,12 @@
 
 /* JFP ... */
 #include "struct_linear_solvers.h"
+#include "Hypre_StructMatrix.h"
 
 struct Hypre_StructJacobi_private
 {
    HYPRE_StructSolver * hssolver;
-   HYPRE_StructMatrix * hsmatrix;
+   Hypre_StructMatrix hsmatrix;
 };
 
 #endif

@@ -118,13 +118,7 @@ int  impl__Hypre_StructuredGrid_Assemble(Hypre_StructuredGrid this) {
 }
 
 Hypre_StructuredGrid  impl__Hypre_StructuredGrid_GetConstructedObject(Hypre_StructuredGrid this) {
-
-	/*#*******************************************************
-	#
-	#	Put Library code here!!!!!!
-	#
-	#*********************************************************/
-
+   return this;
 }
 
 

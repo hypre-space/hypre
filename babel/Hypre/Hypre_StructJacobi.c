@@ -17,57 +17,6 @@
    correct interpretation is as a Jacobi solver.
    */
 
-/* JFP >>>>>>> If I keep the following structs, they need to be moved
- to a .h file <<<<<< */
-
-/*--------------------------------------------------------------------------
- * hypre_JacobiData data structure copied from jacobi.c
- *--------------------------------------------------------------------------*/
-/*
-typedef struct
-{
-   void  *relax_data;
-
-} hypre_JacobiData;
-*/
-/*--------------------------------------------------------------------------
- * hypre_PointRelaxData data structure copied from point_relax.c
- *--------------------------------------------------------------------------*/
-/*
-typedef struct
-{
-   MPI_Comm                comm;
-                       
-   double                  tol;                /* not yet used */
-   int                     max_iter;
-   int                     rel_change;         /* not yet used */
-   int                     zero_guess;
-   double                  weight;
-                         
-   int                     num_pointsets;
-   int                    *pointset_sizes;
-   int                    *pointset_ranks;
-   hypre_Index            *pointset_strides;
-   hypre_Index           **pointset_indices;
-                       
-   hypre_StructMatrix     *A;
-   hypre_StructVector     *b;
-   hypre_StructVector     *x;
-
-   hypre_StructVector     *t;
-
-   int                     diag_rank;
-
-   hypre_ComputePkg      **compute_pkgs;
-/*
-   /* log info (always logged) */
-/*
-   int                     num_iterations;
-   int                     time_index;
-   int                     flops;
-
-} hypre_PointRelaxData;
-*/
 
 /*#************************************************
 #	Constructor
@@ -113,21 +62,10 @@ void  impl__Hypre_StructJacobi_Apply(
    struct Hypre_StructJacobi_private *HSJp = HSJP;
    HYPRE_StructSolver *S = HSJp->hssolver;
 
-/* It's a bit tricky to get the matrix back out of where it's hidden:
-   when the HYPRE_StructSolver representing a StructJacobi is created, the matrix
-   is passed via some void* function arguments and saved in a struct defined only
-   in a .c file.  Maybe instead I should save my own pointer to the Hypre_StructMatrix
-   object in Hypre_StructJacobi_Data.h ... */
-/* jfp 19jan2000: changed to save a pointer to the matrix, c.f.
-   Hypre_StructJacobi_Data.h.  Reason: email from Falgout makes me think I can't
-   count on Hypre's data structures having the matrix, if he changes it later. */
-/*
-   hypre_JacobiData *jacobi_data =  (void *) *S; / * as in jacobi.c * /
-   hypre_PointRelaxData *relax_data = jacobi_data -> relax_data; / * as in point_relax.c * /
-   hypre_StructMatrix * hA = hypre_StructMatrixRef( relax_data -> A );
-   HYPRE_StructMatrix HA = (HYPRE_StructMatrix) hA;
-*/
-   HYPRE_StructMatrix HA = *(this->d_table->hsmatrix) ;
+   Hypre_StructMatrix A = this->d_table->hsmatrix;
+   Hypre_StructMatrix_Private SMP = A->d_table;
+   struct Hypre_StructMatrix_private *SMp = SMP;
+   HYPRE_StructMatrix *MA = SMp->hsmat;
 
    Hypre_StructVector_Private SVbP = b->d_table;
    struct Hypre_StructVector_private *SVbp = SVbP;
@@ -137,30 +75,35 @@ void  impl__Hypre_StructJacobi_Apply(
    struct Hypre_StructVector_private *SVxp = SVxP;
    HYPRE_StructVector *Vx = SVxp->hsvec;
 
-   HYPRE_StructJacobiSolve( *S, HA, *Vb, *Vx );
+   HYPRE_StructJacobiSolve( *S, *MA, *Vb, *Vx );
 
-   /* The above hypre_StructMatrixRef call upped the reference count to *hA;
-      so we have to decrement it when hA goes out of scope... */
-/*   hypre_StructMatrixDestroy( hA );*/
 }
 
 Hypre_StructMatrix  impl__Hypre_StructJacobi_GetSystemOperator(Hypre_StructJacobi this) {
 
-	/*#*******************************************************
-	#
-	#	Put Library code here!!!!!!
-	#
-	#*********************************************************/
+   return this->d_table->hsmatrix;
 
 }
 
 Hypre_StructVector  impl__Hypre_StructJacobi_GetResidual(Hypre_StructJacobi this) {
 
-	/*#*******************************************************
-	#
-	#	Put Library code here!!!!!!
-	#
-	#*********************************************************/
+/*
+ The present StructJacobi code in Hypre doesn't provide a residual.
+c.f. files, point_relax.c (the end of the iteration is around line 605)
+jacobi.c, and HYPRE_struct_jacobi.c.  In the last file is an
+unimplemented function HYPRE_StructJacobiGetFinalRelativeResidualNorm.
+
+ For now, all we do is make a dummy object and return it.  It can't even be
+of the right size because the grid information is quite buried and it's not
+worthwhile to store a StructuredGrid object just to support a function that
+doesn't work.
+*/
+
+   Hypre_StructVector vec = Hypre_StructVector_new();
+
+   printf( "called Hypre_StructJacobi_GetResidual, which doesn't work!\n");
+
+   return vec;
 
 }
 
@@ -173,14 +116,44 @@ void  impl__Hypre_StructJacobi_GetConvergenceInfo(Hypre_StructJacobi this) {
 	#*********************************************************/
 
 }
+/* After the next Babel run, replace the above with something like the
+  following (replace _JFP_ with __ ) */
+void  impl_JFP_Hypre_StructJacobi_GetConvergenceInfo
+( Hypre_StructJacobi this, char* name, double *value )
+{
+   /* As the only HYPRE function called here is an unimplemented no-op,
+      this function does nothing useful except to demonstrate how I would
+      write such a function. */
+   int ivalue;
 
-void  impl__Hypre_StructJacobi_SetSystemOperator(Hypre_StructJacobi this, Hypre_StructMatrix op) {
+   Hypre_StructJacobi_Private HSJP = this->d_table;
+   struct Hypre_StructJacobi_private *HSJp = HSJP;
+   HYPRE_StructSolver *S = HSJp->hssolver;
 
-	/*#*******************************************************
-	#
-	#	Put Library code here!!!!!!
-	#
-	#*********************************************************/
+   if ( !strcmp(name,"number of iterations") ) {
+      ivalue = -1;
+      HYPRE_StructJacobiGetNumIterations( *S, &ivalue );
+      *value = ivalue;
+      return;
+   }
+   else {
+      printf(
+         "Don't understand keyword %s to Hypre_StructJacobi_GetConvergenceInfo\n",
+         name );
+      *value = 0;
+      return;
+   }
+
+}
+
+
+void  impl__Hypre_StructJacobi_SetSystemOperator( Hypre_StructJacobi this,
+                                                  Hypre_StructMatrix op) {
+
+/* Sets the matrix.  Setup should (probably) be called before anything is
+   done with it. */
+
+   this->d_table->hsmatrix = op ;
 
 }
 
@@ -236,7 +209,7 @@ void  impl__Hypre_StructJacobi_Setup(
    struct Hypre_StructVector_private *SVxp = SVxP;
    HYPRE_StructVector *Vx = SVxp->hsvec;
 
-   this->d_table->hsmatrix = MA;
+   this->d_table->hsmatrix = A;
 
    HYPRE_StructJacobiSetup( *S, *MA, *Vb, *Vx );
 
@@ -262,11 +235,7 @@ void Hypre_StructJacobi_NewSolver
 
 Hypre_SolverBuilder  impl__Hypre_StructJacobi_GetConstructedObject(Hypre_StructJacobi this) {
 
-	/*#*******************************************************
-	#
-	#	Put Library code here!!!!!!
-	#
-	#*********************************************************/
+   return (Hypre_SolverBuilder) this;
 
 }
 

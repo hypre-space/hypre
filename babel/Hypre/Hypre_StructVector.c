@@ -100,21 +100,18 @@ void  impl__Hypre_StructVector_print(Hypre_StructVector this) {
 
 int  impl__Hypre_StructVector_SetGrid(Hypre_StructVector this, Hypre_StructuredGrid grid) {
 
-	/*#*******************************************************
-	#
-	#	Put Library code here!!!!!!
-	#
-	#*********************************************************/
-
+/* not implemented; this functionality isn't in Hypre (though doesn't
+   look too hard to put in)
+   */
+   printf( "unimplemented function, Hypre_StructVector_SetGrid, was called" );
 }
 
 int  impl__Hypre_StructVector_SetStencil(Hypre_StructVector this, Hypre_StructStencil stencil) {
 
-	/*#*******************************************************
-	#
-	#	Put Library code here!!!!!!
-	#
-	#*********************************************************/
+/* This doesn't make sense for a Vector (it makes sense for a Matrix,
+   which has the same interface)
+   */
+   printf( "silly function, Hypre_StructVector_SetStencil, was called" );
 
 }
 
@@ -155,24 +152,22 @@ int  impl__Hypre_StructVector_Setup(
    return 0;
 }
 
-void  impl__Hypre_StructVector_Apply(Hypre_StructVector this, Hypre_StructVector x, Hypre_StructVector* b) {
+void  impl__Hypre_StructVector_Apply
+(Hypre_StructVector this, Hypre_StructVector x, Hypre_StructVector* b) {
 
-	/*#*******************************************************
-	#
-	#	Put Library code here!!!!!!
-	#
-	#*********************************************************/
+/*
+  There is nothing reasonable for this function to do.
+  See my comment in Interfaces.idl.
+  */
+   printf( "I don't know what you think Hypre_StructVector_Apply should do!\n");
 
 }
 
 Hypre_StructMatrix  impl__Hypre_StructVector_GetConstructedObject(Hypre_StructVector this) {
 
-/* next Babel run will have this return a Hypre_StructVector */
-	/*#*******************************************************
-	#
-	#	Put Library code here!!!!!!
-	#
-	#*********************************************************/
+/* Next Babel run will have this return a Hypre_StructVector 
+   At that time, uncomment the following line: */
+/* return this; */
 
 }
 

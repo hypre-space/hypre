@@ -108,21 +108,19 @@ void  impl__Hypre_StructMatrix_print(Hypre_StructMatrix this) {
 
 int  impl__Hypre_StructMatrix_SetGrid(Hypre_StructMatrix this, Hypre_StructuredGrid grid) {
 
-	/*#*******************************************************
-	#
-	#	Put Library code here!!!!!!
-	#
-	#*********************************************************/
+/* not implemented; this functionality isn't in Hypre (though doesn't
+   look too hard to put in)
+   */
+   printf( "unimplemented function, Hypre_StructMatrix_SetGrid, was called" );
 
 }
 
 int  impl__Hypre_StructMatrix_SetStencil(Hypre_StructMatrix this, Hypre_StructStencil stencil) {
 
-	/*#*******************************************************
-	#
-	#	Put Library code here!!!!!!
-	#
-	#*********************************************************/
+/* not implemented; this functionality isn't in Hypre (though doesn't
+   look too hard to put in)
+   */
+   printf( "unimplemented function, Hypre_StructMatrix_SetStencil, was called" );
 
 }
 
@@ -176,22 +174,30 @@ int  impl__Hypre_StructMatrix_Setup(
 
 void  impl__Hypre_StructMatrix_Apply(Hypre_StructMatrix this, Hypre_StructVector x, Hypre_StructVector* b) {
 
-	/*#*******************************************************
-	#
-	#	Put Library code here!!!!!!
-	#
-	#*********************************************************/
+   /* b = A * x   where this = A  */
+
+   Hypre_StructMatrix_Private SMP = this->d_table;
+   struct Hypre_StructMatrix_private *SMp = SMP;
+   HYPRE_StructMatrix *M = SMp->hsmat;
+   hypre_StructMatrix *hA = (hypre_StructMatrix *) *M;
+
+   Hypre_StructVector_Private SVxP = x->d_table;
+   struct Hypre_StructVector_private *SVxp = SVxP;
+   HYPRE_StructVector *Vx = SVxp->hsvec;
+   hypre_StructVector *hx = (hypre_StructVector *) *Vx;
+
+   Hypre_StructVector_Private SVyP = (*b)->d_table;
+   struct Hypre_StructVector_private *SVyp = SVyP;
+   HYPRE_StructVector *Vy = SVyp->hsvec;
+   hypre_StructVector *hy = (hypre_StructVector *) *Vy;
+
+   hypre_StructMatvec( 1.0, hA, hx, 1.0, hy );  /* y = A*x */
 
 }
 
 Hypre_StructMatrix  impl__Hypre_StructMatrix_GetConstructedObject(Hypre_StructMatrix this) {
 
-	/*#*******************************************************
-	#
-	#	Put Library code here!!!!!!
-	#
-	#*********************************************************/
-
+   return this;
 }
 
 
