@@ -62,7 +62,7 @@ CFLAGS = \
  -I../utilities\
  -I.\
  -I../CI_struct_matrix_vector\
- -I../PETSc_linear_sovlers/ParILUT\
+ -I../PETSc_linear_solvers/ParILUT\
  @PETSCINCLUDE@ \
  ${C_COMPILE_FLAGS}\
  ${CINCLUDES}\
@@ -84,7 +84,7 @@ RANLIB = @RANLIB@
 # Main rules
 ##################################################################
 
-lib_HYPRE_DistributedMatrixPilutSolver.a: ${PROTOS} ${OBJS}
+libHYPRE_DistributedMatrixPilutSolver.a: ${PROTOS} ${OBJS}
 	@echo "Building $@ ... "
 	ar -rcu $@ ${OBJS}
 	@RANLIB@ $@

@@ -22,7 +22,9 @@ int ILUT(DataDistType *ddist, HYPRE_DistributedMatrix matrix, FactorMatType *ldu
   int dummy_row_ptr[2], *col_ind, size;
   double *values;
 
+#ifdef HYPRE_DEBUG
   printf("ILUT, maxnz = %d\n ", maxnz);
+#endif
 
   /* Allocate memory for ldu */
   ldu->lsrowptr = idx_malloc(ddist->ddist_lnrows, "ILUT: ldu->lsrowptr");

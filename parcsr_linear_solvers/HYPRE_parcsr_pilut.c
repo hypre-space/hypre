@@ -42,7 +42,8 @@ HYPRE_ParCSRPilutCreate( MPI_Comm comm, HYPRE_Solver *solver )
 {
    int ierr = 0;
    
-   *solver = (HYPRE_Solver) HYPRE_NewDistributedMatrixPilutSolver( comm, NULL);
+   ierr = HYPRE_NewDistributedMatrixPilutSolver( comm, NULL, 
+            (HYPRE_DistributedMatrixPilutSolver *) solver);
 
    ierr = HYPRE_DistributedMatrixPilutSolverInitialize( 
       (HYPRE_DistributedMatrixPilutSolver) solver );

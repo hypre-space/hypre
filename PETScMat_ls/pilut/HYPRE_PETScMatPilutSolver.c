@@ -25,8 +25,9 @@ HYPRE_PETScMatPilutSolver  HYPRE_NewPETScMatPilutSolver(
    hypre_PETScMatPilutSolverMatrix(solver) = matrix;
 
    /* DistributedMatrixPilutSolver */
-   hypre_PETScMatPilutSolverDistributedSolver( solver ) =
-      HYPRE_NewDistributedMatrixPilutSolver( comm, NULL );
+   ierr =
+      HYPRE_NewDistributedMatrixPilutSolver( comm, NULL,
+        &( hypre_PETScMatPilutSolverDistributedSolver( solver )  ) );
 
    /* Return created structure to calling routine */
    return( (HYPRE_PETScMatPilutSolver) solver );

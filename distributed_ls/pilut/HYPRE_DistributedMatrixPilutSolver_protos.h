@@ -1,7 +1,7 @@
 # define        P(s) s
  
 /* HYPRE_DistributedMatrixPilutSolver.c */
-HYPRE_DistributedMatrixPilutSolver HYPRE_NewDistributedMatrixPilutSolver P((MPI_Comm comm , HYPRE_DistributedMatrix matrix ));
+int HYPRE_NewDistributedMatrixPilutSolver P((MPI_Comm comm , HYPRE_DistributedMatrix matrix, HYPRE_DistributedMatrixPilutSolver *solver ));
 int HYPRE_FreeDistributedMatrixPilutSolver P((HYPRE_DistributedMatrixPilutSolver in_ptr ));
 int HYPRE_DistributedMatrixPilutSolverInitialize P((HYPRE_DistributedMatrixPilutSolver solver ));
 int HYPRE_DistributedMatrixPilutSolverSetMatrix P((HYPRE_DistributedMatrixPilutSolver in_ptr , HYPRE_DistributedMatrix matrix ));

@@ -6,15 +6,16 @@
  * HYPRE_NewDistributedMatrixPilutSolver
  *--------------------------------------------------------------------------*/
 
-HYPRE_DistributedMatrixPilutSolver  HYPRE_NewDistributedMatrixPilutSolver( 
+int  HYPRE_NewDistributedMatrixPilutSolver( 
                                   MPI_Comm comm,
-                                  HYPRE_DistributedMatrix matrix )
+                                  HYPRE_DistributedMatrix matrix,
+                                  HYPRE_DistributedMatrixPilutSolver *new_solver )
      /* Allocates and Initializes solver structure */
 {
 
    hypre_DistributedMatrixPilutSolver     *solver;
    hypre_PilutSolverGlobals *globals;
-   int            ierr, nprocs, myid;
+   int            ierr=0, nprocs, myid;
 
    /* Allocate structure for holding solver data */
    solver = (hypre_DistributedMatrixPilutSolver *) 
@@ -55,8 +56,9 @@ HYPRE_DistributedMatrixPilutSolver  HYPRE_NewDistributedMatrixPilutSolver(
    hypre_DistributedMatrixPilutSolverTol(solver)   = 0.000001;  /* Drop tolerance for factor */
 
    /* Return created structure to calling routine */
-   return( (HYPRE_DistributedMatrixPilutSolver) solver );
+   *new_solver = ( (HYPRE_DistributedMatrixPilutSolver) solver );
 
+   return( ierr );
 }
 
 /*--------------------------------------------------------------------------

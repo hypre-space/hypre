@@ -57,7 +57,9 @@ void ParILUT(DataDistType *ddist, FactorMatType *ldu,
   int *perm, *iperm, *newiperm, *newperm; 
   ReduceMatType *rmats[2], nrmat;
 
+#ifdef HYPRE_DEBUG
   PrintLine("ILUT start", globals);
+#endif
 
   /* Initialize globals */
   global_maxnz = gmaxnz;
@@ -135,7 +137,9 @@ void ParILUT(DataDistType *ddist, FactorMatType *ldu,
              cinfo.incolind,  cinfo.invalues, 
              newperm, newiperm, vrowdist, -1);
 
+#ifdef HYPRE_DEBUG
   PrintLine("ParILUT done", globals);
+#endif
 }
 
 
@@ -160,7 +164,9 @@ void ComputeCommInfo(ReduceMatType *rmat, CommInfoType *cinfo, int *rowdist,
   MPI_Status Status ;
   MPI_Request *index_requests;
 
+#ifdef HYPRE_DEBUG
   PrintLine("ComputeCommInfo", globals);
+#endif
 
   rnz = rmat->rmat_rnz;
 
@@ -316,7 +322,9 @@ int SelectSet(ReduceMatType *rmat, CommInfoType *cinfo,
   int nnz, snnbr;
   int *rcolind, *snbrind, *snbrptr, *srowind;
 
+#ifdef HYPRE_DEBUG
   PrintLine("SelectSet", globals);
+#endif
 
   snnbr    = cinfo->snnbr;
   snbrind  = cinfo->snbrind;
@@ -403,7 +411,9 @@ void SendFactoredRows(FactorMatType *ldu, CommInfoType *cinfo,
   MPI_Status Status; 
   MPI_Request *index_requests, *value_requests ;
 
+#ifdef HYPRE_DEBUG
   PrintLine("SendFactoredRows", globals);
+#endif
 
   snnbr   = cinfo->snnbr;
   snbrind = cinfo->snbrind;
@@ -537,7 +547,9 @@ void ComputeRmat(FactorMatType *ldu, ReduceMatType *rmat,
   double *uvalues, *nrm2s, *invalues, *rvalues, *dvalues;
   double mult, nval, rtol;
 
+#ifdef HYPRE_DEBUG
   PrintLine("ComputeRmat", globals);
+#endif
 
   usrowptr = ldu->usrowptr;
   uerowptr = ldu->uerowptr;
@@ -710,7 +722,9 @@ void FactorLocal(FactorMatType *ldu, ReduceMatType *rmat,
   double *uvalues, *nrm2s, *rvalues, *dvalues;
   double mult, nval, rtol;
 
+#ifdef HYPRE_DEBUG
   PrintLine("FactorLocal", globals);
+#endif
 
   assert( rmat  != nrmat    );
   assert( perm  != newperm  );
@@ -1171,7 +1185,9 @@ void EraseMap(CommInfoType *cinfo, int *newperm, int nmis,
   rnbrptr  = cinfo->rnbrptr;
   incolind = cinfo->incolind;
 
+#ifdef HYPRE_DEBUG
   PrintLine("EraseMap", globals);
+#endif
 
   /* clear map of all MIS rows */
   for (i=ndone; i<ndone+nmis; i++) 
@@ -1209,7 +1225,9 @@ void ParINIT( ReduceMatType *nrmat, CommInfoType *cinfo, int *rowdist,
 {
   int i;
 
+#ifdef HYPRE_DEBUG
   PrintLine("ParINIT", globals);
+#endif
 
   /* save a global copy of the row distribution */
   vrowdist = idx_malloc(npes+1, "ParINIT: vrowdist");
