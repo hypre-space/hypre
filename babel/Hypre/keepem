@@ -6,13 +6,13 @@
 #  2. rm *.c *.h *.orig *.o *.a
 #  3. Run Babel on Interfaces.idl to make new .c and .h files
 #  4. Run this script.  The .c and .h files which Babel generated for the user
-#     to edit now have the suffic .orig.  Your previous files have been restored
+#     to edit now have the suffix .orig.  Your previous files have been restored
 #     from the repository.
 #  5. Edit the restored files to be consistent with the Babel-generated files.
 
 # Add file name roots as new classes are added to the SIDL file ...
 
-foreach i ( Box MPI_Com PCG StructMatrix StructStencil StructVector StructuredGrid StructJacobi StructSMG StructSolver)
+foreach i ( Box MPI_Com PCG StructMatrix StructMatrixBldr StructStencil StructVector StructVectorBldr StructuredGrid StructJacobi StructSMG StructSolver)
 mv 'Hypre_'$i'.c' 'Hypre_'$i'.c.orig'
 mv 'Hypre_'$i'_Data.h' 'Hypre_'$i'_Data.h.orig'
 end
