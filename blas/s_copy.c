@@ -3,9 +3,9 @@
 /* assign strings:  a = b */
 
 #ifdef KR_headers
-VOID s_copy(a, b, la, lb) register char *a, *b; ftnlen la, lb;
+VOID s_copy(a, b, la, lb) char *a, *b; ftnlen la, lb;
 #else
-void s_copy(register char *a, register char *b, ftnlen la, ftnlen lb)
+void s_copy(char *a, char *b, ftnlen la, ftnlen lb)
 #endif
 {
 register char *aend, *bend;
