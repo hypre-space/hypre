@@ -9,10 +9,12 @@ matrix.h
 convert_icf3d.c
 matrix.c
 read.c
-vector.c
 write.c
+vector.c
+lapmake.m
+lapmake9.m
+manalyze.m
 readysmp.m
 readvec.m
 writevec.m
 writeysmp.m
-manalyze.m
