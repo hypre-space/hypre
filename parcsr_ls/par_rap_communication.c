@@ -51,7 +51,7 @@ hypre_GetCommPkgRTFromCommPkgA( hypre_ParCSRMatrix *RT,
 
    for (i=0; i < num_procs; i++)
                 proc_mark[i] = 0;
- 
+
 /*--------------------------------------------------------------------------
  * determine num_recvs, recv_procs and recv_vec_starts for RT
  *--------------------------------------------------------------------------*/
@@ -154,7 +154,7 @@ hypre_GetCommPkgRTFromCommPkgA( hypre_ParCSRMatrix *RT,
 	recv_vec_starts_RT[i+1]);
    }
 */
-   
+
    hypre_TFree(change_array);
 
    return ierr;
@@ -241,7 +241,7 @@ hypre_GenerateSendMapAndCommPkg(MPI_Comm comm, int num_sends, int num_recvs,
    return 0;
 }
 
-int
+/*int
 hypre_GenerateRAPCommPkg( hypre_ParCSRMatrix *RAP,
 			  hypre_ParCSRMatrix *A)
 {
@@ -257,9 +257,9 @@ hypre_GenerateRAPCommPkg( hypre_ParCSRMatrix *RAP,
    int *recv_vec_starts_RAP;   
    int num_sends_RAP;
    int *send_procs_RAP;   
-/*   int *send_map_starts_RAP;   
+*//*   int *send_map_starts_RAP;   
    int *send_map_elmts_RAP;   */
-
+/*
    int *col_map_offd_RAP = hypre_ParCSRMatrixColMapOffd(RAP);
    int *partitioning = hypre_ParCSRMatrixRowStarts(RAP);
    int num_cols_offd_RAP = hypre_CSRMatrixNumCols( hypre_ParCSRMatrixOffd(RAP));
@@ -287,11 +287,11 @@ hypre_GenerateRAPCommPkg( hypre_ParCSRMatrix *RAP,
 
    for (i=0; i < num_procs; i++)
                 proc_mark[i] = 0;
- 
+*/ 
 /*--------------------------------------------------------------------------
  * determine num_recvs, recv_procs and recv_vec_starts for RAP
  *--------------------------------------------------------------------------*/
-
+/*
    proc_num = 0;
    for (i=0; i < num_cols_offd_RAP; i++)
    {
@@ -319,11 +319,11 @@ hypre_GenerateRAPCommPkg( hypre_ParCSRMatrix *RAP,
         }
 
    hypre_TFree(proc_mark);
-
+*/
 /*--------------------------------------------------------------------------
  * determine if recv_procs_A differs from recv_procs_RAP
  *--------------------------------------------------------------------------*/
-
+/*
    work = hypre_CTAlloc(int,num_recvs_RAP+num_recvs_A);
 
    change = 0;
@@ -369,10 +369,10 @@ hypre_GenerateRAPCommPkg( hypre_ParCSRMatrix *RAP,
       for (i=j; i < num_recvs_A; i++)
 	 work[change++] = -recv_procs_A[i]-1;
    }
-/*--------------------------------------------------------------------------
+*//*--------------------------------------------------------------------------
  * send num_changes to recv_procs_A and receive change_array from send_procs_A
  *--------------------------------------------------------------------------*/
-
+/*
    num_requests = num_recvs_A+num_sends_A;
    requests = hypre_CTAlloc(MPI_Request, num_requests);
    status = hypre_CTAlloc(MPI_Status, num_requests);
@@ -389,11 +389,11 @@ hypre_GenerateRAPCommPkg( hypre_ParCSRMatrix *RAP,
 		&requests[j++]);
    
    MPI_Waitall(num_requests,requests,status);
-
+*/
 /*--------------------------------------------------------------------------
  * if there was a change send and receive recv_procs_RAP
  *--------------------------------------------------------------------------*/
-
+/*
    num_changes = 0;
    total_num_procs = 0;
    for (i=0; i < num_sends_A; i++)
@@ -430,7 +430,7 @@ hypre_GenerateRAPCommPkg( hypre_ParCSRMatrix *RAP,
 			&requests[j++]);
    
    MPI_Waitall(j,requests,status);
-
+*/
 /*--------------------------------------------------------------------------
  * Now examine recv_buf for changes in send_procs,
  * if for changed_procs[i] recv_buf contains -(my_id+1) changed_procs[i]
@@ -438,7 +438,7 @@ hypre_GenerateRAPCommPkg( hypre_ParCSRMatrix *RAP,
  * if recv_buf contains k+1 and k is in recv_procs_A , proc k needs to
  * add changed_procs[i] to its send_procs_RAP, i.e. 
  *--------------------------------------------------------------------------*/
-
+/*
    num_sends_RAP = num_sends_A;
    for (i=0; i < num_sends_A; i++)
 	work[i] = 1;
@@ -462,11 +462,11 @@ hypre_GenerateRAPCommPkg( hypre_ParCSRMatrix *RAP,
 		if (recv_buf[j]-1 == recv_procs_A[k])
 			flag[k]++;
 	}
-
+*/
 /*--------------------------------------------------------------------------
  * flag to recv_procs_A number of processors to be added to send_procs_RAP
  *--------------------------------------------------------------------------*/
-
+/*
    j = 0;
    for (i=0; i < num_sends_A; i++)
 	MPI_Irecv(&change_array[i],1,MPI_INT,send_procs_A[i],0,comm,
@@ -477,13 +477,13 @@ hypre_GenerateRAPCommPkg( hypre_ParCSRMatrix *RAP,
 		&requests[j++]);
    
    MPI_Waitall(num_requests,requests,status);
-
+*/
 /*--------------------------------------------------------------------------
  * Now examine recv_buf for changes in send_procs,
  * if recv_buf contains k+1 and k is in recv_procs_A , proc k needs to
  * add changed_procs[i] to its send_procs_RAP, i.e. 
  *--------------------------------------------------------------------------*/
-
+/*
    send_starts = hypre_CTAlloc(int,num_recvs_A+1);
    recv_starts = hypre_CTAlloc(int,num_sends_A+1);
 
@@ -515,11 +515,11 @@ hypre_GenerateRAPCommPkg( hypre_ParCSRMatrix *RAP,
    recv_starts[0] = 0;
    for (k=0; k < num_sends_A; k++)
   	recv_starts[k+1] = recv_starts[k]+change_array[k];
-   
+*/   
 /*--------------------------------------------------------------------------
  * flag to recv_procs_A processors to be added to send_procs_RAP
  *--------------------------------------------------------------------------*/
-   
+/*   
    num_new_send_procs = recv_starts[num_sends_A];
    new_send_procs = hypre_CTAlloc(int, num_new_send_procs);
 
@@ -535,11 +535,11 @@ hypre_GenerateRAPCommPkg( hypre_ParCSRMatrix *RAP,
 		recv_procs_A[i],0,comm,&requests[j++]);
    
    MPI_Waitall(j,requests,status);
-
+*/
 /*--------------------------------------------------------------------------
  * generate send_procs_RAP and num_sends_RAP
  *--------------------------------------------------------------------------*/
-
+/*
    for (i = 0; i < num_new_send_procs ; i++)
    {
 	while (new_send_procs[i] == -1) i++;
@@ -561,15 +561,15 @@ hypre_GenerateRAPCommPkg( hypre_ParCSRMatrix *RAP,
 
    for (i=0; i < num_new_send_procs; i++)
 	if (new_send_procs[i] != -1) send_procs_RAP[cnt++] = new_send_procs[i];
-
+*/
 /*--------------------------------------------------------------------------
  * generate send_map_starts and send_map_elmts
  *--------------------------------------------------------------------------*/
-
+/*
    hypre_GenerateSendMapAndCommPkg(comm, num_sends_RAP, num_recvs_RAP,
                         	   recv_procs_RAP, send_procs_RAP,
                         	   recv_vec_starts_RAP, RAP);
-
+*/
 /*   send_map_starts_RAP = 
 	hypre_ParCSRCommPkgSendMapStarts(hypre_ParCSRMatrixCommPkg(RAP));
    send_map_elmts_RAP = 
@@ -590,7 +590,7 @@ hypre_GenerateRAPCommPkg( hypre_ParCSRMatrix *RAP,
    }
 */
    
-   hypre_TFree(work);
+/*   hypre_TFree(work);
    hypre_TFree(flag);
    hypre_TFree(send_list);
    hypre_TFree(send_starts);
@@ -604,4 +604,4 @@ hypre_GenerateRAPCommPkg( hypre_ParCSRMatrix *RAP,
    hypre_TFree(requests);
 
    return ierr;
-}
+}*/

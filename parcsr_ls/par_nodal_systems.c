@@ -70,11 +70,13 @@ hypre_BoomerAMGCreateNodalA(hypre_ParCSRMatrix    *A,
    int                *AN_offd_i;
    int                *AN_offd_j;
    double             *AN_offd_data; 
-   int		      *col_map_offd_AN = 0;
+   int		      *col_map_offd_AN;
+   int		      *new_col_map_offd;
    int		      *row_starts_AN;
    int		       AN_num_nonzeros_diag = 0;
    int		       AN_num_nonzeros_offd = 0;
    int		       num_cols_offd_AN;
+   int		       new_num_cols_offd;
                  
    hypre_ParCSRCommPkg *comm_pkg = hypre_ParCSRMatrixCommPkg(A);
    int		       num_sends;
@@ -82,6 +84,7 @@ hypre_BoomerAMGCreateNodalA(hypre_ParCSRMatrix    *A,
    int		      *send_procs;
    int		      *send_map_starts;
    int		      *send_map_elmts;
+   int		      *new_send_map_elmts;
    int		      *recv_procs;
    int		      *recv_vec_starts;
 
@@ -100,6 +103,8 @@ hypre_BoomerAMGCreateNodalA(hypre_ParCSRMatrix    *A,
    int		       start_index;
    int		       num_procs;
    int		       node, cnt;
+   int		       mode;
+   int		       new_send_elmts_size;
 
    int		       global_num_nodes;
    int		       num_nodes;
@@ -115,6 +120,8 @@ hypre_BoomerAMGCreateNodalA(hypre_ParCSRMatrix    *A,
       hypre_MatvecCommPkgCreate(A);
       comm_pkg = hypre_ParCSRMatrixCommPkg(A);
    }
+
+   mode = fabs(option);
 
    comm_pkg_AN = NULL;
    col_map_offd_AN = NULL;
@@ -179,7 +186,7 @@ hypre_BoomerAMGCreateNodalA(hypre_ParCSRMatrix    *A,
    start_index = 0;
    row = 0;
 
-   switch (option)
+   switch (mode)
    {
       case 1:
       {
@@ -354,6 +361,8 @@ hypre_BoomerAMGCreateNodalA(hypre_ParCSRMatrix    *A,
          counter = hypre_CTAlloc(int,num_cols_offd_AN);
       }
 
+      map_to_map = NULL;
+      col_map_offd_AN = NULL;
       map_to_map = hypre_CTAlloc(int, num_cols_offd);
       col_map_offd_AN = hypre_CTAlloc(int,num_cols_offd_AN);
       col_map_offd_AN[0] = map_to_node[0];
@@ -397,6 +406,7 @@ hypre_BoomerAMGCreateNodalA(hypre_ParCSRMatrix    *A,
       }
       AN_offd_i[num_nodes] = AN_num_nonzeros_offd;
    }
+
        
    AN_offd = hypre_CSRMatrixCreate(num_nodes,num_cols_offd_AN,	
 		AN_num_nonzeros_offd);
@@ -414,31 +424,99 @@ hypre_BoomerAMGCreateNodalA(hypre_ParCSRMatrix    *A,
       row = 0;
       AN_offd_i[0] = 0;
       start_index = 0;
-      for (i=0; i < num_nodes; i++)
+      switch (mode)
       {
-         for (j=0; j < num_functions; j++)
+         case 1:
          {
-	    for (k=A_offd_i[row]; k < A_offd_i[row+1]; k++)
-	    {
-	       k_map = map_to_map[A_offd_j[k]];
-	       if (counter[k_map] < start_index)
-	       {
-	          counter[k_map] = index;
-	          AN_offd_j[index] = k_map;
-	          AN_offd_data[index] = A_offd_data[k]*A_offd_data[k];
-	          index++;
-	       }
-	       else
-	       {
-	          AN_offd_data[counter[k_map]] += A_offd_data[k]*A_offd_data[k];
-	       }
-	    }
-	    row++;
+            for (i=0; i < num_nodes; i++)
+            {
+               for (j=0; j < num_functions; j++)
+               {
+	          for (k=A_offd_i[row]; k < A_offd_i[row+1]; k++)
+	          {
+	             k_map = map_to_map[A_offd_j[k]];
+	             if (counter[k_map] < start_index)
+	             {
+	                counter[k_map] = index;
+	                AN_offd_j[index] = k_map;
+	                AN_offd_data[index] = A_offd_data[k]*A_offd_data[k];
+	                index++;
+	             }
+	             else
+	             {
+	                AN_offd_data[counter[k_map]] += 
+				A_offd_data[k]*A_offd_data[k];
+	             }
+	          }
+	          row++;
+               }
+               start_index = index;
+            }
+            for (i=0; i < AN_num_nonzeros_offd; i++)
+	       AN_offd_data[i] = sqrt(AN_offd_data[i]);
          }
-         start_index = index;
+         break;
+      
+         case 2:
+         {
+            for (i=0; i < num_nodes; i++)
+            {
+               for (j=0; j < num_functions; j++)
+               {
+	          for (k=A_offd_i[row]; k < A_offd_i[row+1]; k++)
+	          {
+	             k_map = map_to_map[A_offd_j[k]];
+	             if (counter[k_map] < start_index)
+	             {
+	                counter[k_map] = index;
+	                AN_offd_j[index] = k_map;
+	                AN_offd_data[index] = fabs(A_offd_data[k]);
+	                index++;
+	             }
+	             else
+	             {
+	                AN_offd_data[counter[k_map]] += fabs(A_offd_data[k]);
+	             }
+	          }
+	          row++;
+               }
+               start_index = index;
+            }
+            for (i=0; i < AN_num_nonzeros_offd; i++)
+               AN_offd_data[i] /= num_fun2;
+         }
+         break;
+
+         case 3:
+         {
+            for (i=0; i < num_nodes; i++)
+            {
+               for (j=0; j < num_functions; j++)
+               {
+      	          for (k=A_offd_i[row]; k < A_offd_i[row+1]; k++)
+      	          {
+      	             k_map = map_to_map[A_offd_j[k]];
+      	             if (counter[k_map] < start_index)
+      	             {
+      	                counter[k_map] = index;
+      	                AN_offd_j[index] = k_map;
+      	                AN_offd_data[index] = A_offd_data[k];
+      	                index++;
+      	             }
+      	             else
+      	             {
+      	                if (fabs(A_offd_data[k]) > 
+				fabs(AN_offd_data[counter[k_map]]))
+      	                   AN_offd_data[counter[k_map]] = A_offd_data[k];
+      	             }
+      	          }
+      	          row++;
+               }
+               start_index = index;
+            }
+         }
+         break;
       }
-      for (i=0; i < AN_num_nonzeros_offd; i++)
-	 AN_offd_data[i] = sqrt(AN_offd_data[i]);
       hypre_TFree(map_to_map);
    }
 
@@ -450,9 +528,65 @@ hypre_BoomerAMGCreateNodalA(hypre_ParCSRMatrix    *A,
    hypre_ParCSRMatrixColMapOffd(AN) = col_map_offd_AN;
    hypre_ParCSRMatrixCommPkg(AN) = comm_pkg_AN;
 
+   new_num_cols_offd = num_functions*num_cols_offd_AN;
+
+   if (new_num_cols_offd > num_cols_offd)
+   {
+      new_col_map_offd = hypre_CTAlloc(int, new_num_cols_offd);
+      cnt = 0;
+      for (i=0; i < num_cols_offd_AN; i++)
+      {
+	 for (j=0; j < num_functions; j++)
+         {
+ 	    new_col_map_offd[cnt++] = num_functions*col_map_offd_AN[i]+j;
+         }
+      }
+      cnt = 0;
+      for (i=0; i < num_cols_offd; i++)
+      {
+         while (col_map_offd[i] >  new_col_map_offd[cnt])
+            cnt++;
+         col_map_offd[i] = cnt++;
+      }
+      for (i=0; i < num_recvs; i++)
+      {
+         j = recv_vec_starts[i];
+         recv_vec_starts[i] = col_map_offd[j];
+      }
+      recv_vec_starts[num_recvs] = new_num_cols_offd;
+
+      for (i=0; i < num_nonzeros_offd; i++)
+      {
+         j = A_offd_j[i];
+	 A_offd_j[i] = col_map_offd[j];
+      }
+      hypre_ParCSRMatrixColMapOffd(A) = new_col_map_offd;
+      hypre_CSRMatrixNumCols(A_offd) = new_num_cols_offd;
+      hypre_TFree(col_map_offd);
+   }
+ 
+   hypre_TFree(map_to_node);
+   new_send_elmts_size = send_map_starts_AN[num_sends]*num_functions;
+
+   if (new_send_elmts_size > send_map_starts[num_sends])
+   {
+      new_send_map_elmts = hypre_CTAlloc(int,new_send_elmts_size);
+      cnt = 0;
+      for (i=0; i < num_sends; i++)
+      {
+         send_map_starts[i+1] = send_map_starts_AN[i+1]*num_functions;
+         for (j=send_map_starts_AN[i]; j < send_map_starts_AN[i+1]; j++)
+	 {
+            for (k=0; k < num_functions; k++)
+	       new_send_map_elmts[cnt++] = send_map_elmts_AN[j]*num_functions+k;
+	 }
+      }
+      hypre_TFree(send_map_elmts);
+      hypre_ParCSRCommPkgSendMapElmts(comm_pkg) = new_send_map_elmts;
+   }
+ 
    *AN_ptr        = AN;
 
-   hypre_TFree(map_to_node);
    hypre_TFree(counter);
 
    return (ierr);
@@ -461,11 +595,13 @@ hypre_BoomerAMGCreateNodalA(hypre_ParCSRMatrix    *A,
 int
 hypre_BoomerAMGCreateScalarCFS(hypre_ParCSRMatrix    *SN,
                        int                   *CFN_marker,
+                       int                   *col_offd_SN_to_AN,
                        int                    num_functions,
                        int                    nodal,
                        int                    data,
                        int                  **dof_func_ptr,
                        int                  **CF_marker_ptr,
+                       int                  **col_offd_S_to_A_ptr,
                        hypre_ParCSRMatrix   **S_ptr)
 {
    MPI_Comm	       comm = hypre_ParCSRMatrixComm(SN);
@@ -510,6 +646,7 @@ hypre_BoomerAMGCreateScalarCFS(hypre_ParCSRMatrix    *SN,
    int		      *send_map_elmts_S;
    int		      *recv_procs_S;
    int		      *recv_vec_starts_S;
+   int		      *col_offd_S_to_A = NULL;
    
    int		       num_coarse_nodes;
    int		       i,j,k,k1,jj,cnt;
@@ -687,6 +824,21 @@ hypre_BoomerAMGCreateScalarCFS(hypre_ParCSRMatrix    *SN,
       hypre_ParCSRMatrixColMapOffd(S) = col_map_offd_S;
    }
    
+   if (col_offd_SN_to_AN)
+   {
+      col_offd_S_to_A = hypre_CTAlloc(int, num_cols_offd_S);
+
+      cnt = 0;
+      for (i=0; i < num_cols_offd_SN; i++)
+      {
+         k1 = col_offd_SN_to_AN[i]*num_functions;
+         for (j=0; j < num_functions; j++)
+            col_offd_S_to_A[cnt++] = k1+j;
+      }
+      *col_offd_S_to_A_ptr = col_offd_S_to_A;
+   }
+   
+
 
    cnt = 0;
    row = 0;
@@ -740,7 +892,7 @@ hypre_BoomerAMGCreateScalarCFS(hypre_ParCSRMatrix    *SN,
       }
    } 
 
-   *S_ptr = S;
+   *S_ptr = S; 
 
    return (ierr);
 }

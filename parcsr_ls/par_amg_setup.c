@@ -48,6 +48,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    int                 *dof_func;
    int                 *dof_func1;
    int                 *col_offd_S_to_A;
+   int                 *col_offd_SN_to_AN;
    double              *relax_weight;
    double              *omega;
    double               schwarz_relax_wt = 1;
@@ -396,9 +397,9 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                else
                   hypre_BoomerAMGCreateS(AN, strong_threshold, max_row_sum,
                                    1, NULL,&SN);
-	       col_offd_S_to_A = NULL;
+	       col_offd_SN_to_AN = NULL;
 	       if (strong_threshold > S_commpkg_switch)
-                  hypre_BoomerAMGCreateSCommPkg(AN,SN,&col_offd_S_to_A);
+                  hypre_BoomerAMGCreateSCommPkg(AN,SN,&col_offd_SN_to_AN);
 	    }
 	    else
 	    {
@@ -429,9 +430,14 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
            {
              hypre_BoomerAMGCoarsenFalgout(SN, SN, measure_type,
                                     debug_flag, &CFN_marker);
-             hypre_BoomerAMGCreateScalarCFS(SN, CFN_marker,
-                             num_functions, nodal, 0, NULL, &CF_marker, &S);
-             hypre_TFree(CFN_marker);
+	     col_offd_S_to_A = NULL;
+             hypre_BoomerAMGCreateScalarCFS(SN, CFN_marker, col_offd_SN_to_AN,
+                             num_functions, nodal, 0, NULL, &CF_marker, 
+			     &col_offd_S_to_A, &S);
+             if (col_offd_SN_to_AN == NULL)
+	        col_offd_S_to_A = NULL;
+	     hypre_TFree(CFN_marker);
+             hypre_TFree(col_offd_SN_to_AN);
              hypre_ParCSRMatrixDestroy(AN);
              hypre_ParCSRMatrixDestroy(SN);
            }
@@ -457,9 +463,16 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
            {
              hypre_BoomerAMGCoarsenPMIS(SN, SN, 0,
                                     debug_flag, &CFN_marker);
-             hypre_BoomerAMGCreateScalarCFS(SN, CFN_marker,
-                             num_functions, nodal, 0, NULL, &CF_marker, &S);
+             /*hypre_BoomerAMGCreateScalarCFS(SN, CFN_marker,
+                             num_functions, nodal, 0, NULL, &CF_marker, &S);*/
+	     col_offd_S_to_A = NULL;
+             hypre_BoomerAMGCreateScalarCFS(SN, CFN_marker, col_offd_SN_to_AN,
+                             num_functions, nodal, 0, NULL, &CF_marker, 
+			     &col_offd_S_to_A, &S);
+             if (col_offd_SN_to_AN == NULL)
+	        col_offd_S_to_A = NULL;
              hypre_TFree(CFN_marker);
+             hypre_TFree(col_offd_SN_to_AN);
              hypre_ParCSRMatrixDestroy(AN);
              hypre_ParCSRMatrixDestroy(SN);
            }
@@ -485,9 +498,16 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
            {
              hypre_BoomerAMGCoarsenHMIS(SN, SN, measure_type,
                                     debug_flag, &CFN_marker);
-             hypre_BoomerAMGCreateScalarCFS(SN, CFN_marker,
-                             num_functions, nodal, 0, NULL, &CF_marker, &S);
+             /*hypre_BoomerAMGCreateScalarCFS(SN, CFN_marker,
+                             num_functions, nodal, 0, NULL, &CF_marker, &S);*/
+	     col_offd_S_to_A = NULL;
+             hypre_BoomerAMGCreateScalarCFS(SN, CFN_marker, col_offd_SN_to_AN,
+                             num_functions, nodal, 0, NULL, &CF_marker, 
+			     &col_offd_S_to_A, &S);
+             if (col_offd_SN_to_AN == NULL)
+	        col_offd_S_to_A = NULL;
              hypre_TFree(CFN_marker);
+             hypre_TFree(col_offd_SN_to_AN);
              hypre_ParCSRMatrixDestroy(AN);
              hypre_ParCSRMatrixDestroy(SN);
            }
@@ -512,9 +532,16 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                                  &CFN_marker);
              /*hypre_BoomerAMGCreateScalarCFS(SN, CFN_marker,
                              num_functions, 0, &CF_marker, &S);*/
-             hypre_BoomerAMGCreateScalarCFS(SN, CFN_marker,
-                             num_functions, nodal, 0, NULL, &CF_marker, &S);
+             /*hypre_BoomerAMGCreateScalarCFS(SN, CFN_marker,
+                             num_functions, nodal, 0, NULL, &CF_marker, &S);*/
+	     col_offd_S_to_A = NULL;
+             hypre_BoomerAMGCreateScalarCFS(SN, CFN_marker, col_offd_SN_to_AN,
+                             num_functions, nodal, 0, NULL, &CF_marker, 
+			     &col_offd_S_to_A, &S);
+             if (col_offd_SN_to_AN == NULL)
+	        col_offd_S_to_A = NULL;
              hypre_TFree(CFN_marker);
+             hypre_TFree(col_offd_SN_to_AN);
              hypre_ParCSRMatrixDestroy(AN);
              hypre_ParCSRMatrixDestroy(SN);
            }
@@ -534,9 +561,16 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
            else if (nodal > 0)
            {
              hypre_BoomerAMGCoarsen(SN, SN, 0, debug_flag, &CFN_marker);
-             hypre_BoomerAMGCreateScalarCFS(SN, CFN_marker,
-                             num_functions, nodal, 0, NULL, &CF_marker, &S);
+             /*hypre_BoomerAMGCreateScalarCFS(SN, CFN_marker,
+                             num_functions, nodal, 0, NULL, &CF_marker, &S);*/
+	     col_offd_S_to_A = NULL;
+             hypre_BoomerAMGCreateScalarCFS(SN, CFN_marker, col_offd_SN_to_AN,
+                             num_functions, nodal, 0, NULL, &CF_marker, 
+			     &col_offd_S_to_A, &S);
+             if (col_offd_SN_to_AN == NULL)
+	        col_offd_S_to_A = NULL;
              hypre_TFree(CFN_marker);
+             hypre_TFree(col_offd_SN_to_AN);
              hypre_ParCSRMatrixDestroy(AN);
              hypre_ParCSRMatrixDestroy(SN);
              /*hypre_ParCSRMatrixDestroy(S);
@@ -577,7 +611,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 	    num_cg_sweeps = (int) (-schwarz_relax_wt);
  	    hypre_BoomerAMGCGRelaxWt(amg_data, level, num_cg_sweeps,
 			&schwarz_relax_wt);
-	    /* printf (" schwarz weight %f \n", schwarz_relax_wt); */
+	    /*printf (" schwarz weight %f \n", schwarz_relax_wt);*/
 	    HYPRE_SchwarzSetRelaxWeight(smoother[level], schwarz_relax_wt);
  	    if (hypre_ParAMGDataVariant(amg_data) > 0)
             {
@@ -685,6 +719,16 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
       {
 	 if (nodal > -1)
 	 {
+	    /*if (nodal)
+	    {
+	       hypre_BoomerAMGCreateS(A_array[level], 
+				   strong_threshold, max_row_sum, 
+				   num_functions, dof_func_array[level],&S);
+	       col_offd_S_to_A = NULL;
+	       if (strong_threshold > S_commpkg_switch)
+                  hypre_BoomerAMGCreateSCommPkg(A_array[level],S,
+				&col_offd_S_to_A);
+	    }*/
             hypre_BoomerAMGBuildInterp(A_array[level], CF_marker_array[level], 
                  S, coarse_pnts_global, num_functions, dof_func_array[level], 
 		 debug_flag, trunc_factor, col_offd_S_to_A, &P);
@@ -695,11 +739,11 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
             CFN_marker = CF_marker_array[level],
             hypre_BoomerAMGBuildInterp(AN, CFN_marker,
                  SN, coarse_pnts_global, 1, NULL,
-                 debug_flag, trunc_factor, col_offd_S_to_A, &PN);
-	    hypre_TFree(col_offd_S_to_A);
-            hypre_BoomerAMGCreateScalarCFS(PN, CFN_marker,
+                 debug_flag, trunc_factor, col_offd_SN_to_AN, &PN);
+	    hypre_TFree(col_offd_SN_to_AN);
+            hypre_BoomerAMGCreateScalarCFS(PN, CFN_marker, NULL,
                 num_functions, nodal, 1, &dof_func1,
-                &CF_marker, &P);
+                &CF_marker, NULL, &P);
             dof_func_array[level+1] = dof_func1;
             CF_marker_array[level] = CF_marker;
             hypre_TFree (CFN_marker);
