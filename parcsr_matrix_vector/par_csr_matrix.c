@@ -840,6 +840,7 @@ hypre_MergeDiagAndOffd(hypre_ParCSRMatrix *par_matrix)
    int		num_nonzeros, i, j;
    int		count;
 
+/*
    if (!num_cols_offd)
    {
    	matrix = hypre_CSRMatrixCreate(num_rows,num_cols,diag_i[num_rows]);
@@ -849,6 +850,7 @@ hypre_MergeDiagAndOffd(hypre_ParCSRMatrix *par_matrix)
 	hypre_CSRMatrixData(matrix) = diag_data;
  	return matrix;
    }
+*/
 
    num_nonzeros = diag_i[num_rows] + offd_i[num_rows];
 
