@@ -1,0 +1,45 @@
+#BHEADER***********************************************************************
+# (c) 1998   The Regents of the University of California
+#
+# See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
+# notice, contact person, and disclaimer.
+#
+# $Revision$
+#EHEADER***********************************************************************
+
+SHELL = /bin/sh
+
+srcdir = @srcdir@
+VPATH = @srcdir@
+
+HYPRE_SUBDIRS =\
+ utilities\
+ struct_matrix_vector\
+ struct_linear_solvers\
+ test
+
+all:
+	@ \
+	for i in ${HYPRE_SUBDIRS}; \
+	do \
+	echo "Making $$i ..."; \
+	(cd $$i; make); \
+	echo ""; \
+	done
+
+clean:
+	@ \
+	for i in ${HYPRE_SUBDIRS}; \
+	do \
+	echo "Cleaning $$i ..."; \
+	(cd $$i; make clean); \
+	done
+
+veryclean:
+	@ \
+	for i in ${HYPRE_SUBDIRS}; \
+	do \
+	echo "Really cleaning $$i ..."; \
+	(cd $$i; make veryclean); \
+	done
+

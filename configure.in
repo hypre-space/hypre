@@ -62,14 +62,12 @@ case $ARCH in
    ;;
 esac
 
-
 dnl *********************************************************************
 dnl * checks flag '--enable-opt-debug' to decide which compiler flags
 dnl * to leave on.  Default is opt, if flag not invoked.
 dnl *********************************************************************
 
 CASC_CHOOSE_OPT_OR_DEBUG
-
 
 dnl *********************************************************************
 dnl * sets MPIINCLUDES, MPILIBDIRS, MPILIBS, MPIFLAGS
@@ -96,9 +94,6 @@ if test "$casc_using_mpi" = "yes"; then
       TIMERDEFS="$TIMERDEFS -DTIMER_USE_MPI"
    fi
 fi
-
-
-
 
 dnl *********************************************************************
 dnl * when debugging was chosen, look for debugging libraries and headers,
@@ -128,12 +123,10 @@ dnl *********************************************************************
 
 CASC_ADD_LIB(m, main, /usr/lib /usr/ccs/lib)
 
-
 dnl *********************************************************************
 dnl * Note:  CASC_ADD_LIB calls should be placed in the order you want the
 dnl *        libraries to appear on the linking line.
 dnl *********************************************************************
-
 
 dnl *********************************************************************
 dnl * AC_SUBST performs the variable substitutions
@@ -157,7 +150,6 @@ AC_SUBST(LDLIBDIRS)
 AC_SUBST(ARCH)
 AC_SUBST(MEMORYEXTRAFILES)
 
-
 dnl *********************************************************************
 dnl * DIRECTING THE OUTPUT
 dnl *********************************************************************
@@ -168,17 +160,23 @@ dnl * full structure of the package to be present, and when you don't want
 dnl * non-standard names for your output files.
 dnl *********************************************************************
 
-dnl * AC_OUTPUT(utilities/Makefile struct_matrix_vector/Makefile \
-dnl *          struct_linear_solvers/Makefile test/Makefile)
-
+dnl * AC_OUTPUT(Makefile \
+dnl *           utilities/Makefile \
+dnl *           struct_matrix_vector/Makefile \
+dnl *           struct_linear_solvers/Makefile \
+dnl *           test/Makefile)
 
 dnl *********************************************************************
 dnl * Use CASC_CONFIG_OUTPUT_LIST with AC_OUTPUT if you want to handle the
 dnl * possibility that certain parts of the package are not present.
 dnl *********************************************************************
 
-CASC_CONFIG_OUTPUT_LIST(utilities struct_matrix_vector \
-                        struct_linear_solvers test)
+CASC_CONFIG_OUTPUT_LIST(\
+ .\
+ utilities\
+ struct_matrix_vector\
+ struct_linear_solvers\
+ test)
 
 AC_OUTPUT($Makefile_list)
 
