@@ -32,13 +32,17 @@ FILES = \
  dlartg.c\
  dlascl.c\
  dlaset.c\
+ dlas2.c\
+ dlasq1.c\
  dlasr.c\
  dlasrt.c\
  dlassq.c\
+ dlasv2.c\
  dlatrd.c\
  dorg2l.c\
  dorg2r.c\
  dorgbr.c\
+ dorgl2.c\
  dorglq.c\
  dorgql.c\
  dorgqr.c\

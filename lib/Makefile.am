@@ -61,15 +61,19 @@ LAPACKFILES = \
  $(top_srcdir)/lapack/dlarfg.c\
  $(top_srcdir)/lapack/dlarft.c\
  $(top_srcdir)/lapack/dlartg.c\
+ $(top_srcdir)/lapack/dlas2.c\
  $(top_srcdir)/lapack/dlascl.c\
  $(top_srcdir)/lapack/dlaset.c\
+ $(top_srcdir)/lapack/dlasq1.c\
  $(top_srcdir)/lapack/dlasr.c\
  $(top_srcdir)/lapack/dlasrt.c\
  $(top_srcdir)/lapack/dlassq.c\
+ $(top_srcdir)/lapack/dlasv2.c\
  $(top_srcdir)/lapack/dlatrd.c\
  $(top_srcdir)/lapack/dorg2l.c\
  $(top_srcdir)/lapack/dorg2r.c\
  $(top_srcdir)/lapack/dorgbr.c\
+ $(top_srcdir)/lapack/dorgl2.c\
  $(top_srcdir)/lapack/dorglq.c\
  $(top_srcdir)/lapack/dorgql.c\
  $(top_srcdir)/lapack/dorgqr.c\

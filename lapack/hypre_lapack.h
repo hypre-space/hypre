@@ -160,6 +160,7 @@ integer ilaenv_ ( integer *ispec , char *name__ , char *opts , integer *n1 , int
 double d_lg10 ( doublereal *x );
 double d_sign ( doublereal *a , doublereal *b );
 double pow_di ( doublereal *ap , integer *bp );
+double pow_dd ( doublereal *ap , doublereal *bp );
 int s_cat ( char *lp , char *rpp [], ftnlen rnp [], ftnlen *np , ftnlen ll );
 
 /* lsame.c */
@@ -185,5 +186,17 @@ int dlacpy_ ( char *uplo , integer *m , integer *n , doublereal *a , integer *ld
 
 /* dormbr.c */
 int dormbr_ ( char *vect , char *side , char *trans , integer *m , integer *n , integer *k , doublereal *a , integer *lda , doublereal *tau , doublereal *c__ , integer *ldc , doublereal *work , integer *lwork , integer *info );
+
+/* dlasq1.c */
+int dlasq1_ ( integer *n , doublereal *d__ , doublereal *e , doublereal *work , integer *info );
+
+/* dlas2.c */
+int dlas2_ ( doublereal *f , doublereal *g , doublereal *h__ , doublereal *ssmin , doublereal *ssmax );
+
+/* dlasv2.c */
+int dlasv2_ ( doublereal *f , doublereal *g , doublereal *h__ , doublereal *ssmin , doublereal *ssmax , doublereal *snr , doublereal *csr , doublereal *snl , doublereal *csl );
+
+/* dorgl2.c */
+int dorgl2_ ( integer *m , integer *n , integer *k , doublereal *a , integer *lda , doublereal *tau , doublereal *work , integer *info );
 
 #endif

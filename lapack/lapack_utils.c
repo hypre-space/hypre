@@ -67,6 +67,20 @@ return(pow);
 #include "f2c.h"
 
 #ifdef KR_headers
+double pow();
+double pow_dd(ap, bp) doublereal *ap, *bp;
+#else
+#undef abs
+#include "math.h"
+double pow_dd(doublereal *ap, doublereal *bp)
+#endif
+{
+return(pow(*ap, *bp) );
+}
+
+#include "f2c.h"
+
+#ifdef KR_headers
 int s_cat(lp, rpp, rnp, np, ll) char *lp, *rpp[]; ftnlen rnp[], *np, ll;
 #else
 int s_cat(char *lp, char *rpp[], ftnlen rnp[], ftnlen *np, ftnlen ll)
