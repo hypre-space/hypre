@@ -1563,6 +1563,7 @@ hypre_ParAMGCoarsenRuge( hypre_ParCSRMatrix    *A,
 		     for (jj=max_ci_size ; jj < ci_tilde_size; jj++)
 		     {
 			CF_marker[graph_array[jj]] = -1;
+		        coarse_size--;
 		     }
 		     ci_tilde_size = max_ci_size;
 		     break;
@@ -1570,7 +1571,8 @@ hypre_ParAMGCoarsenRuge( hypre_ParCSRMatrix    *A,
 		  else
 		  {
 		     graph_array[ci_tilde_size++] = j;
-		     CF_marker[j] = 2;
+		     CF_marker[j] = 1;
+		     coarse_size++;
 		     C_i_nonempty = 1;
 		     i--;
 		     break;
