@@ -40,11 +40,6 @@ LAPACKLIBFLAGS =  @LAPACKLIBDIRS@ @LAPACKLIBS@
 BLASLIBFLAGS =  @BLASLIBDIRS@ @BLASLIBS@
 
 LFLAGS =\
- ${LAPACKLIBFLAGS} \
- ${BLASLIBFLAGS} \
- ${MPILIBFLAGS} \
- ${LIBFLAGS} \
- ${LDLIBFLAGS} \
  ${LD_LINK_FLAGS}\
  -L../hypre/lib\
  -lHYPRE_sstruct_ls\
@@ -61,48 +56,42 @@ LFLAGS =\
  -lHYPRE_parcsr_mv\
  -lHYPRE_seq_mv\
  -lHYPRE_krylov\
- -lHYPRE_utilities
+ -lHYPRE_utilities\
+ ${LAPACKLIBFLAGS} \
+ ${BLASLIBFLAGS} \
+ ${MPILIBFLAGS} ${LIBFLAGS} ${LDLIBFLAGS}
 
 ###########################################
 # Commpkg definitions
 ###########################################
 
 COMMPKG_LFLAGS =\
- ${MPILIBFLAGS} \
- ${LIBFLAGS} \
- ${LDLIBFLAGS} \
  ${LD_LINK_FLAGS}\
  -L../hypre/lib\
  -lHYPRE_parcsr_ls\
  -lHYPRE_parcsr_mv\
  -lHYPRE_seq_mv\
- -lHYPRE_utilities
+ -lHYPRE_utilities\
+ ${MPILIBFLAGS} ${LIBFLAGS} ${LDLIBFLAGS}
 
 ###########################################
 # Struct definitions
 ###########################################
 
 STRUCT_LFLAGS =\
- ${MPILIBFLAGS} \
- ${LIBFLAGS} \
- ${LDLIBFLAGS} \
  ${LD_LINK_FLAGS}\
  -L../hypre/lib\
  -lHYPRE_struct_ls\
  -lHYPRE_struct_mv\
  -lHYPRE_krylov\
- -lHYPRE_utilities
+ -lHYPRE_utilities\
+ ${MPILIBFLAGS} ${LIBFLAGS} ${LDLIBFLAGS}
 
 ###########################################
 # Struct_es definitions
 ###########################################
 
 STRUCT_ES_LFLAGS =\
- ${LAPACKLIBFLAGS} \
- ${BLASLIBFLAGS} \
- ${MPILIBFLAGS} \
- ${LIBFLAGS} \
- ${LDLIBFLAGS} \
  ${LD_LINK_FLAGS}\
  -L../hypre/lib\
  -lHYPRE_struct_ls\
@@ -118,18 +107,16 @@ STRUCT_ES_LFLAGS =\
  -lHYPRE_seq_mv\
  -lHYPRE_krylov\
  -lHYPRE_utilities\
- -lHYPRE_lobpcg
+ -lHYPRE_lobpcg \
+ ${LAPACKLIBFLAGS} \
+ ${BLASLIBFLAGS} \
+ ${MPILIBFLAGS} ${LIBFLAGS} ${LDLIBFLAGS}
 
 ###########################################
 # Sstruct definitions
 ###########################################
 
 SSTRUCT_LFLAGS =\
- ${LAPACKLIBFLAGS} \
- ${BLASLIBFLAGS} \
- ${MPILIBFLAGS} \
- ${LIBFLAGS} \
- ${LDLIBFLAGS} \
  ${LD_LINK_FLAGS}\
  -L../hypre/lib\
  -lHYPRE_sstruct_ls\
@@ -146,18 +133,16 @@ SSTRUCT_LFLAGS =\
  -lHYPRE_parcsr_mv\
  -lHYPRE_seq_mv\
  -lHYPRE_krylov\
- -lHYPRE_utilities
+ -lHYPRE_utilities\
+ ${LAPACKLIBFLAGS} \
+ ${BLASLIBFLAGS} \
+ ${MPILIBFLAGS} ${LIBFLAGS} ${LDLIBFLAGS}
 
 ###########################################
 # Sstruct_es definitions
 ###########################################
 
 SSTRUCT_ES_LFLAGS =\
- ${LAPACKLIBFLAGS} \
- ${BLASLIBFLAGS} \
- ${MPILIBFLAGS} \
- ${LIBFLAGS} \
- ${LDLIBFLAGS} \
  ${LD_LINK_FLAGS}\
  -L../hypre/lib\
  -lHYPRE_sstruct_ls\
@@ -175,42 +160,16 @@ SSTRUCT_ES_LFLAGS =\
  -lHYPRE_seq_mv\
  -lHYPRE_krylov\
  -lHYPRE_utilities\
- -lHYPRE_lobpcg
+ -lHYPRE_lobpcg\
+ ${LAPACKLIBFLAGS} \
+ ${BLASLIBFLAGS} \
+ ${MPILIBFLAGS} ${LIBFLAGS} ${LDLIBFLAGS}
 
 ###########################################
 # IJ definitions
 ###########################################
 
 IJ_LFLAGS =\
- ${LAPACKLIBFLAGS} \
- ${BLASLIBFLAGS} \
- ${MPILIBFLAGS} \
- ${LIBFLAGS} \
- ${LDLIBFLAGS} \
- ${LD_LINK_FLAGS}\
- -L../hypre/lib\
- -lHYPRE_parcsr_ls\
- -lHYPRE_DistributedMatrixPilutSolver \
- -lHYPRE_ParaSails \
- -lHYPRE_Euclid \
- -lHYPRE_MatrixMatrix \
- -lHYPRE_DistributedMatrix \
- -lHYPRE_IJ_mv\
- -lHYPRE_parcsr_mv\
- -lHYPRE_seq_mv\
- -lHYPRE_krylov\
- -lHYPRE_utilities
-
-###########################################
-# IJ_ES definitions
-###########################################
-
-IJ_ES_LFLAGS =\
- ${LAPACKLIBFLAGS} \
- ${BLASLIBFLAGS} \
- ${MPILIBFLAGS} \
- ${LIBFLAGS} \
- ${LDLIBFLAGS} \
  ${LD_LINK_FLAGS}\
  -L../hypre/lib\
  -lHYPRE_parcsr_ls\
@@ -224,38 +183,61 @@ IJ_ES_LFLAGS =\
  -lHYPRE_seq_mv\
  -lHYPRE_krylov\
  -lHYPRE_utilities\
- -lHYPRE_lobpcg
+ ${LAPACKLIBFLAGS} \
+ ${BLASLIBFLAGS} \
+ ${MPILIBFLAGS} ${LIBFLAGS} ${LDLIBFLAGS}
+
+
+###########################################
+# IJ_ES definitions
+###########################################
+
+IJ_ES_LFLAGS =\
+ ${LD_LINK_FLAGS}\
+ -L../hypre/lib\
+ -lHYPRE_parcsr_ls\
+ -lHYPRE_DistributedMatrixPilutSolver \
+ -lHYPRE_ParaSails \
+ -lHYPRE_Euclid \
+ -lHYPRE_MatrixMatrix \
+ -lHYPRE_DistributedMatrix \
+ -lHYPRE_IJ_mv\
+ -lHYPRE_parcsr_mv\
+ -lHYPRE_seq_mv\
+ -lHYPRE_krylov\
+ -lHYPRE_utilities\
+ -lHYPRE_lobpcg\
+ ${LAPACKLIBFLAGS} \
+ ${BLASLIBFLAGS} \
+ ${MPILIBFLAGS} ${LIBFLAGS} ${LDLIBFLAGS}
+
 
 ###########################################
 # IJ_MV definitions
 ###########################################
 
 IJ_MV_LFLAGS =\
- ${MPILIBFLAGS} \
- ${LIBFLAGS} \
- ${LDLIBFLAGS} \
  ${LD_LINK_FLAGS}\
  -L../hypre/lib\
  -lHYPRE_parcsr_ls\
  -lHYPRE_IJ_mv\
  -lHYPRE_parcsr_mv\
  -lHYPRE_seq_mv\
- -lHYPRE_utilities
+ -lHYPRE_utilities\
+ ${MPILIBFLAGS} ${LIBFLAGS} ${LDLIBFLAGS}
 
 ###########################################
 # FEI definitions
 ###########################################
 
 FEICXX_LFLAGS =\
- ${LAPACKLIBFLAGS} \
- ${BLASLIBFLAGS} \
- ${MPILIBFLAGS} \
- ${LIBFLAGS} \
- ${LDLIBFLAGS} \
  ${LD_LINK_FLAGS}\
  -L../hypre/lib\
  -lHYPRE_LSI\
- -lHYPRE_superlu
+ -lHYPRE_superlu\
+ ${LAPACKLIBFLAGS} \
+ ${BLASLIBFLAGS} \
+ ${MPILIBFLAGS} ${LIBFLAGS} ${LDLIBFLAGS}
 
 ##################################################################
 # Targets
