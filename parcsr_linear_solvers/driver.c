@@ -49,6 +49,7 @@ main( int   argc,
    int    **grid_relax_points;
    int      relax_default;
    double   relax_weight; 
+   double   tol = 1.0e-7;
 
    /* parameters for GMRES */
    int	    k_dim;
@@ -291,6 +292,11 @@ main( int   argc,
          arg_index++;
          strong_threshold  = atof(argv[arg_index++]);
       }
+      else if ( strcmp(argv[arg_index], "-tol") == 0 )
+      {
+         arg_index++;
+         tol  = atof(argv[arg_index++]);
+      }
       else if ( strcmp(argv[arg_index], "-tr") == 0 )
       {
          arg_index++;
@@ -349,6 +355,7 @@ main( int   argc,
       printf("\n");  
       printf("  -th <val>              : set AMG threshold Theta = val \n");
       printf("  -tr <val>              : set AMG interpolation truncation factor = val \n");
+      printf("  -tol <val>             : set AMG convergence tolerance to val\n");
       printf("  -w  <val>              : set Jacobi relax weight = val\n");
       printf("  -k  <val>              : dimension Krylov space for GMRES\n");
       printf("\n");  
@@ -503,6 +510,7 @@ main( int   argc,
       amg_solver = HYPRE_ParAMGInitialize(); 
       HYPRE_ParAMGSetCoarsenType(amg_solver, (hybrid*coarsen_type));
       HYPRE_ParAMGSetMeasureType(amg_solver, measure_type);
+      HYPRE_ParAMGSetTol(amg_solver, tol);
       HYPRE_ParAMGSetStrongThreshold(amg_solver, strong_threshold);
       HYPRE_ParAMGSetTruncFactor(amg_solver, trunc_factor);
       HYPRE_ParAMGSetLogging(amg_solver, ioutdat, "driver.out.log");
