@@ -151,8 +151,8 @@ int HYPRE_FreeDistributedMatrixPilutSolver (
     hypre_TFree( ldu->lcomm.sptr );
     hypre_TFree( ldu->ucomm.sptr );
 
-    hypre_TFree( ldu->lcomm.sind );
-    hypre_TFree( ldu->ucomm.sind );
+    hypre_TFree( ldu->lcomm.sindex );
+    hypre_TFree( ldu->ucomm.sindex );
 
     hypre_TFree( ldu->lcomm.auxsptr );
     hypre_TFree( ldu->ucomm.auxsptr );

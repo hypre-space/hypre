@@ -59,8 +59,8 @@ struct cphasedef {
   double **raddr;	/* A rnbrpes+1 list of addresses to recv data into */
 
   int *spes;	/* A snbrpes    list of PEs to send data */
-  int *sptr;	/* An snbrpes+1 list indexing sind for each spes[i] */
-  int *sind;	/* The packets to send per PE */
+  int *sptr;	/* An snbrpes+1 list indexing sindex for each spes[i] */
+  int *sindex;	/* The packets to send per PE */
   int *auxsptr;	/* Auxiliary send ptr, used at intermediate points */
 
   int *rpes;	/* A rnbrpes   list of PEs to recv data */
@@ -167,7 +167,7 @@ typedef struct comminfodef CommInfoType;
 struct mvcommdef {
   int *spes;	/* Array of PE numbers */
   int *sptr;	/* Array of send indices */
-  int *sind;	/* Array that stores the actual indices */
+  int *sindex;	/* Array that stores the actual indices */
 
   int *rpes;
   double **raddr;
