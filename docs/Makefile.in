@@ -546,7 +546,7 @@ vref_manual.tex: vref_manual.dxx
 
 vref_manual.dxx: ref_manual.dxx
 	@ \
-	sed "s/HYPREVersion/$$PACKAGE_VERSION/g" $(srcdir)/ref_manual.dxx > \
+	sed "s/HYPREVersion/@PACKAGE_VERSION@/g" $(srcdir)/ref_manual.dxx > \
 		vref_manual.dxx
 
 ##########
@@ -572,15 +572,15 @@ vbref_manual.tex: vbref_manual.dxx
 
 vbref_manual.dxx: bref_manual.dxx
 	@ \
-	sed "s/HYPREVersion/$$PACKAGE_VERSION/g" bref_manual.dxx > \
+	sed "s/HYPREVersion/@PACKAGE_VERSION@/g" bref_manual.dxx > \
 		vbref_manual.dxx
 
 ##########
 
 version.tex:
 	@ \
-	echo "\def\HYPREVersion{$$PACKAGE_VERSION}" > version.tex; \
-	echo "\def\HYPREVersionDate{$$PACKAGE_DATETIME}" >> version.tex
+	echo "\def\HYPREVersion{@PACKAGE_VERSION@}" > version.tex; \
+	echo "\def\HYPREVersionDate{@PACKAGE_DATETIME@}" >> version.tex
 
 ##################################################################
 # Extended Targets
