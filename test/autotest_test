@@ -14,6 +14,9 @@
 #=============================================================================
 initialize_variables ()
 {
+  newgrp hypre
+  OldMask=`umask`
+  umask 007
   MAKE="make -k"
   Hdr="autotest"
   Skip=0
@@ -170,6 +173,8 @@ mail_errors () {
 }
 
 cleanup () { 
+  umask $OldMask
+  chgrp
   echo "Autotest finished leaving $0"
 }
 #=============================================================================
