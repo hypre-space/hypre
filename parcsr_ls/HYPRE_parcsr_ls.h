@@ -590,7 +590,7 @@ int HYPRE_ParaSailsSetLogging(HYPRE_Solver solver,
 /*--------------------------------------------------------------------------*
  *--------------------------------------------------------------------------*/
 
-/**
+/*
  * @name ParCSR Euclid Preconditioner 
  *
  * OpenMP and MPI Parallel ILU preconditioner 
@@ -598,18 +598,18 @@ int HYPRE_ParaSailsSetLogging(HYPRE_Solver solver,
  **/
 /*@{*/
 
-/**
+/*
  * Create a Euclid object.
  **/
 int HYPRE_ParCSREuclidCreate(MPI_Comm      comm,
                              HYPRE_Solver *solver);
 
-/**
+/*
  * Destroy a Euclid object.
  **/
 int HYPRE_ParCSREuclidDestroy(HYPRE_Solver solver);
 
-/**
+/*
  * Set up the Euclid preconditioner.  This function should be passed
  * to the iterative solver {\tt SetPrecond} function.
  *
@@ -623,7 +623,7 @@ int HYPRE_ParCSREuclidSetup(HYPRE_Solver       solver,
                             HYPRE_ParVector    b,
                             HYPRE_ParVector    x);
 
-/**
+/*
  * Apply the Euclid preconditioner. This function should be passed
  * to the iterative solver {\tt SetPrecond} function.
  *
@@ -637,7 +637,7 @@ int HYPRE_ParCSREuclidSolve(HYPRE_Solver       solver,
                             HYPRE_ParVector    b,
                             HYPRE_ParVector    x);
 
-/**
+/*
  * Insert command line (flag, value) pairs in Euclid's
  * database. All Euclid options (e.g, level, ILU method,
  * parallelization algorithm) are internally selected by
@@ -656,7 +656,7 @@ int HYPRE_ParCSREuclidSetParams(HYPRE_Solver solver,
                                 int argc,
                                 char *argv[]);
 
-/**
+/*
  * Insert (flag, value) pairs in Euclid's  database.
  * Each line of the file should either begin with a "#"
  * indicating a comment line, or contain a (flag value)
@@ -676,7 +676,7 @@ int HYPRE_ParCSREuclidSetParams(HYPRE_Solver solver,
 int HYPRE_ParCSREuclidSetParamsFromFile(HYPRE_Solver solver,
                                         char *filename);
 
-/**
+/*
  * Returns returns rho, which is the number of nonzeros in
  * the preconditioner (ILU factors) divided by the number of
  * of nonzeros in the input matrix.  This can be used in
@@ -693,7 +693,7 @@ int HYPRE_ParCSREuclidReadRho(HYPRE_Solver solver, double *rho);
 
 
 
-/**
+/*
  * Prints settings used during factorization; also
  * prints info on preconditioner size, etc.  Best if called
  * after HYPRE\_ParCSRPilutSetup -- else, data may be incorrect.
@@ -701,7 +701,7 @@ int HYPRE_ParCSREuclidReadRho(HYPRE_Solver solver, double *rho);
  **/
 int HYPRE_ParCSREuclidPrintParams(HYPRE_Solver solver);
 
-/**
+/*
  * Set the logging parameter for the
  * Euclid object.
  *
