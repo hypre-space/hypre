@@ -24,9 +24,7 @@ mkproto HYPRE*.c > $TEMP_FILE
 cat > $TWRAPPER_FILE <<@
 
 #ifdef HYPRE_USE_PTHREADS
-#define NO_PTHREAD_MANGLING
-#include "headers.h"
-#include "threading.h"
+#include "HYPRE_mv.h"
 
 @
 
@@ -45,7 +43,7 @@ cat >> $TWRAPPER_FILE <<@
 
 cat <<@
 
-#ifndef NO_PTHREAD_MANGLING
+#ifndef HYPRE_NO_PTHREAD_MANGLING
 
 @
 

@@ -12,14 +12,7 @@
  *
  *****************************************************************************/
 
-#ifdef HYPRE_USE_PTHREADS
-#define NO_PTHREAD_MANGLING
-#endif
-
 #include "headers.h"
-#ifdef HYPRE_USE_PTHREADS
-#include "threading.h"
-#endif
 
 /*--------------------------------------------------------------------------
  * HYPRE_NewStructVector

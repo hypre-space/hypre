@@ -1,8 +1,6 @@
 
 #ifdef HYPRE_USE_PTHREADS
-#define NO_PTHREAD_MANGLING
-#include "headers.h"
-#include "threading.h"
+#include "HYPRE_mv.h"
 
 
 /*----------------------------------------------------------------
@@ -12,7 +10,7 @@
 typedef struct {
    MPI_Comm comm;
    int dim;
-   HYPRE_StructGrid *grid;
+   HYPRE_StructGridArray *grid;
    int  returnvalue[hypre_MAX_THREADS];
 } HYPRE_NewStructGridArgs;
 
@@ -35,7 +33,7 @@ int
 HYPRE_NewStructGridPush(
    MPI_Comm comm,
    int dim,
-   HYPRE_StructGrid *grid )
+   HYPRE_StructGridArray *grid )
 {
    HYPRE_NewStructGridArgs pushargs;
    int i;
@@ -43,7 +41,7 @@ HYPRE_NewStructGridPush(
 
    pushargs.comm = comm;
    pushargs.dim = dim;
-   pushargs.grid = grid;
+   pushargs.grid = (HYPRE_StructGridArray *)grid;
    for (i = 0; i < hypre_NumThreads; i++)
       hypre_work_put( HYPRE_NewStructGridVoidPtr, (void *)&pushargs );
 
@@ -59,7 +57,7 @@ HYPRE_NewStructGridPush(
  *----------------------------------------------------------------*/
 
 typedef struct {
-   HYPRE_StructGrid *grid;
+   HYPRE_StructGridArray *grid;
    int  returnvalue[hypre_MAX_THREADS];
 } HYPRE_FreeStructGridArgs;
 
@@ -73,18 +71,18 @@ HYPRE_FreeStructGridVoidPtr( void *argptr )
 
    (localargs -> returnvalue[threadid]) =
       HYPRE_FreeStructGrid(
-         &(*(localargs -> grid))[threadid] );
+         (*(localargs -> grid))[threadid] );
 }
 
 int 
 HYPRE_FreeStructGridPush(
-   HYPRE_StructGrid grid )
+   HYPRE_StructGridArray grid )
 {
    HYPRE_FreeStructGridArgs pushargs;
    int i;
    int  returnvalue;
 
-   pushargs.grid = &grid;
+   pushargs.grid = (HYPRE_StructGridArray *)&grid;
    for (i = 0; i < hypre_NumThreads; i++)
       hypre_work_put( HYPRE_FreeStructGridVoidPtr, (void *)&pushargs );
 
@@ -100,7 +98,7 @@ HYPRE_FreeStructGridPush(
  *----------------------------------------------------------------*/
 
 typedef struct {
-   HYPRE_StructGrid *grid;
+   HYPRE_StructGridArray *grid;
    int *ilower;
    int *iupper;
    int  returnvalue[hypre_MAX_THREADS];
@@ -116,14 +114,14 @@ HYPRE_SetStructGridExtentsVoidPtr( void *argptr )
 
    (localargs -> returnvalue[threadid]) =
       HYPRE_SetStructGridExtents(
-         &(*(localargs -> grid))[threadid],
+         (*(localargs -> grid))[threadid],
          localargs -> ilower,
          localargs -> iupper );
 }
 
 int 
 HYPRE_SetStructGridExtentsPush(
-   HYPRE_StructGrid grid,
+   HYPRE_StructGridArray grid,
    int *ilower,
    int *iupper )
 {
@@ -131,7 +129,7 @@ HYPRE_SetStructGridExtentsPush(
    int i;
    int  returnvalue;
 
-   pushargs.grid = &grid;
+   pushargs.grid = (HYPRE_StructGridArray *)&grid;
    pushargs.ilower = ilower;
    pushargs.iupper = iupper;
    for (i = 0; i < hypre_NumThreads; i++)
@@ -149,7 +147,7 @@ HYPRE_SetStructGridExtentsPush(
  *----------------------------------------------------------------*/
 
 typedef struct {
-   HYPRE_StructGrid *grid;
+   HYPRE_StructGridArray *grid;
    int  returnvalue[hypre_MAX_THREADS];
 } HYPRE_AssembleStructGridArgs;
 
@@ -163,18 +161,18 @@ HYPRE_AssembleStructGridVoidPtr( void *argptr )
 
    (localargs -> returnvalue[threadid]) =
       HYPRE_AssembleStructGrid(
-         &(*(localargs -> grid))[threadid] );
+         (*(localargs -> grid))[threadid] );
 }
 
 int 
 HYPRE_AssembleStructGridPush(
-   HYPRE_StructGrid grid )
+   HYPRE_StructGridArray grid )
 {
    HYPRE_AssembleStructGridArgs pushargs;
    int i;
    int  returnvalue;
 
-   pushargs.grid = &grid;
+   pushargs.grid = (HYPRE_StructGridArray *)&grid;
    for (i = 0; i < hypre_NumThreads; i++)
       hypre_work_put( HYPRE_AssembleStructGridVoidPtr, (void *)&pushargs );
 
@@ -191,9 +189,9 @@ HYPRE_AssembleStructGridPush(
 
 typedef struct {
    MPI_Comm comm;
-   HYPRE_StructGrid *grid;
-   HYPRE_StructStencil *stencil;
-   HYPRE_StructMatrix *matrix;
+   HYPRE_StructGridArray *grid;
+   HYPRE_StructStencilArray *stencil;
+   HYPRE_StructMatrixArray *matrix;
    int  returnvalue[hypre_MAX_THREADS];
 } HYPRE_NewStructMatrixArgs;
 
@@ -208,26 +206,26 @@ HYPRE_NewStructMatrixVoidPtr( void *argptr )
    (localargs -> returnvalue[threadid]) =
       HYPRE_NewStructMatrix(
          localargs -> comm,
-         &(*(localargs -> grid))[threadid],
-         &(*(localargs -> stencil))[threadid],
+         (*(localargs -> grid))[threadid],
+         (*(localargs -> stencil))[threadid],
          &(*(localargs -> matrix))[threadid] );
 }
 
 int 
 HYPRE_NewStructMatrixPush(
    MPI_Comm comm,
-   HYPRE_StructGrid grid,
-   HYPRE_StructStencil stencil,
-   HYPRE_StructMatrix *matrix )
+   HYPRE_StructGridArray grid,
+   HYPRE_StructStencilArray stencil,
+   HYPRE_StructMatrixArray *matrix )
 {
    HYPRE_NewStructMatrixArgs pushargs;
    int i;
    int  returnvalue;
 
    pushargs.comm = comm;
-   pushargs.grid = &grid;
-   pushargs.stencil = &stencil;
-   pushargs.matrix = matrix;
+   pushargs.grid = (HYPRE_StructGridArray *)&grid;
+   pushargs.stencil = (HYPRE_StructStencilArray *)&stencil;
+   pushargs.matrix = (HYPRE_StructMatrixArray *)matrix;
    for (i = 0; i < hypre_NumThreads; i++)
       hypre_work_put( HYPRE_NewStructMatrixVoidPtr, (void *)&pushargs );
 
@@ -243,7 +241,7 @@ HYPRE_NewStructMatrixPush(
  *----------------------------------------------------------------*/
 
 typedef struct {
-   HYPRE_StructMatrix *matrix;
+   HYPRE_StructMatrixArray *matrix;
    int  returnvalue[hypre_MAX_THREADS];
 } HYPRE_FreeStructMatrixArgs;
 
@@ -257,18 +255,18 @@ HYPRE_FreeStructMatrixVoidPtr( void *argptr )
 
    (localargs -> returnvalue[threadid]) =
       HYPRE_FreeStructMatrix(
-         &(*(localargs -> matrix))[threadid] );
+         (*(localargs -> matrix))[threadid] );
 }
 
 int 
 HYPRE_FreeStructMatrixPush(
-   HYPRE_StructMatrix matrix )
+   HYPRE_StructMatrixArray matrix )
 {
    HYPRE_FreeStructMatrixArgs pushargs;
    int i;
    int  returnvalue;
 
-   pushargs.matrix = &matrix;
+   pushargs.matrix = (HYPRE_StructMatrixArray *)&matrix;
    for (i = 0; i < hypre_NumThreads; i++)
       hypre_work_put( HYPRE_FreeStructMatrixVoidPtr, (void *)&pushargs );
 
@@ -284,7 +282,7 @@ HYPRE_FreeStructMatrixPush(
  *----------------------------------------------------------------*/
 
 typedef struct {
-   HYPRE_StructMatrix *matrix;
+   HYPRE_StructMatrixArray *matrix;
    int  returnvalue[hypre_MAX_THREADS];
 } HYPRE_InitializeStructMatrixArgs;
 
@@ -298,18 +296,18 @@ HYPRE_InitializeStructMatrixVoidPtr( void *argptr )
 
    (localargs -> returnvalue[threadid]) =
       HYPRE_InitializeStructMatrix(
-         &(*(localargs -> matrix))[threadid] );
+         (*(localargs -> matrix))[threadid] );
 }
 
 int 
 HYPRE_InitializeStructMatrixPush(
-   HYPRE_StructMatrix matrix )
+   HYPRE_StructMatrixArray matrix )
 {
    HYPRE_InitializeStructMatrixArgs pushargs;
    int i;
    int  returnvalue;
 
-   pushargs.matrix = &matrix;
+   pushargs.matrix = (HYPRE_StructMatrixArray *)&matrix;
    for (i = 0; i < hypre_NumThreads; i++)
       hypre_work_put( HYPRE_InitializeStructMatrixVoidPtr, (void *)&pushargs );
 
@@ -325,7 +323,7 @@ HYPRE_InitializeStructMatrixPush(
  *----------------------------------------------------------------*/
 
 typedef struct {
-   HYPRE_StructMatrix *matrix;
+   HYPRE_StructMatrixArray *matrix;
    int *grid_index;
    int num_stencil_indices;
    int *stencil_indices;
@@ -343,7 +341,7 @@ HYPRE_SetStructMatrixValuesVoidPtr( void *argptr )
 
    (localargs -> returnvalue[threadid]) =
       HYPRE_SetStructMatrixValues(
-         &(*(localargs -> matrix))[threadid],
+         (*(localargs -> matrix))[threadid],
          localargs -> grid_index,
          localargs -> num_stencil_indices,
          localargs -> stencil_indices,
@@ -352,7 +350,7 @@ HYPRE_SetStructMatrixValuesVoidPtr( void *argptr )
 
 int 
 HYPRE_SetStructMatrixValuesPush(
-   HYPRE_StructMatrix matrix,
+   HYPRE_StructMatrixArray matrix,
    int *grid_index,
    int num_stencil_indices,
    int *stencil_indices,
@@ -362,7 +360,7 @@ HYPRE_SetStructMatrixValuesPush(
    int i;
    int  returnvalue;
 
-   pushargs.matrix = &matrix;
+   pushargs.matrix = (HYPRE_StructMatrixArray *)&matrix;
    pushargs.grid_index = grid_index;
    pushargs.num_stencil_indices = num_stencil_indices;
    pushargs.stencil_indices = stencil_indices;
@@ -382,7 +380,7 @@ HYPRE_SetStructMatrixValuesPush(
  *----------------------------------------------------------------*/
 
 typedef struct {
-   HYPRE_StructMatrix *matrix;
+   HYPRE_StructMatrixArray *matrix;
    int *ilower;
    int *iupper;
    int num_stencil_indices;
@@ -401,7 +399,7 @@ HYPRE_SetStructMatrixBoxValuesVoidPtr( void *argptr )
 
    (localargs -> returnvalue[threadid]) =
       HYPRE_SetStructMatrixBoxValues(
-         &(*(localargs -> matrix))[threadid],
+         (*(localargs -> matrix))[threadid],
          localargs -> ilower,
          localargs -> iupper,
          localargs -> num_stencil_indices,
@@ -411,7 +409,7 @@ HYPRE_SetStructMatrixBoxValuesVoidPtr( void *argptr )
 
 int 
 HYPRE_SetStructMatrixBoxValuesPush(
-   HYPRE_StructMatrix matrix,
+   HYPRE_StructMatrixArray matrix,
    int *ilower,
    int *iupper,
    int num_stencil_indices,
@@ -422,7 +420,7 @@ HYPRE_SetStructMatrixBoxValuesPush(
    int i;
    int  returnvalue;
 
-   pushargs.matrix = &matrix;
+   pushargs.matrix = (HYPRE_StructMatrixArray *)&matrix;
    pushargs.ilower = ilower;
    pushargs.iupper = iupper;
    pushargs.num_stencil_indices = num_stencil_indices;
@@ -443,7 +441,7 @@ HYPRE_SetStructMatrixBoxValuesPush(
  *----------------------------------------------------------------*/
 
 typedef struct {
-   HYPRE_StructMatrix *matrix;
+   HYPRE_StructMatrixArray *matrix;
    int  returnvalue[hypre_MAX_THREADS];
 } HYPRE_AssembleStructMatrixArgs;
 
@@ -457,18 +455,18 @@ HYPRE_AssembleStructMatrixVoidPtr( void *argptr )
 
    (localargs -> returnvalue[threadid]) =
       HYPRE_AssembleStructMatrix(
-         &(*(localargs -> matrix))[threadid] );
+         (*(localargs -> matrix))[threadid] );
 }
 
 int 
 HYPRE_AssembleStructMatrixPush(
-   HYPRE_StructMatrix matrix )
+   HYPRE_StructMatrixArray matrix )
 {
    HYPRE_AssembleStructMatrixArgs pushargs;
    int i;
    int  returnvalue;
 
-   pushargs.matrix = &matrix;
+   pushargs.matrix = (HYPRE_StructMatrixArray *)&matrix;
    for (i = 0; i < hypre_NumThreads; i++)
       hypre_work_put( HYPRE_AssembleStructMatrixVoidPtr, (void *)&pushargs );
 
@@ -484,7 +482,7 @@ HYPRE_AssembleStructMatrixPush(
  *----------------------------------------------------------------*/
 
 typedef struct {
-   HYPRE_StructMatrix *matrix;
+   HYPRE_StructMatrixArray *matrix;
    int *num_ghost;
    int  returnvalue[hypre_MAX_THREADS];
 } HYPRE_SetStructMatrixNumGhostArgs;
@@ -499,20 +497,20 @@ HYPRE_SetStructMatrixNumGhostVoidPtr( void *argptr )
 
    (localargs -> returnvalue[threadid]) =
       HYPRE_SetStructMatrixNumGhost(
-         &(*(localargs -> matrix))[threadid],
+         (*(localargs -> matrix))[threadid],
          localargs -> num_ghost );
 }
 
 int 
 HYPRE_SetStructMatrixNumGhostPush(
-   HYPRE_StructMatrix matrix,
+   HYPRE_StructMatrixArray matrix,
    int *num_ghost )
 {
    HYPRE_SetStructMatrixNumGhostArgs pushargs;
    int i;
    int  returnvalue;
 
-   pushargs.matrix = &matrix;
+   pushargs.matrix = (HYPRE_StructMatrixArray *)&matrix;
    pushargs.num_ghost = num_ghost;
    for (i = 0; i < hypre_NumThreads; i++)
       hypre_work_put( HYPRE_SetStructMatrixNumGhostVoidPtr, (void *)&pushargs );
@@ -529,8 +527,9 @@ HYPRE_SetStructMatrixNumGhostPush(
  *----------------------------------------------------------------*/
 
 typedef struct {
-   HYPRE_StructMatrix *matrix;
-   HYPRE_StructGrid  returnvalue[hypre_MAX_THREADS];
+   HYPRE_StructMatrixArray *matrix;
+   HYPRE_StructGridArray *grid;
+   int  returnvalue[hypre_MAX_THREADS];
 } HYPRE_StructMatrixGridArgs;
 
 void
@@ -543,18 +542,21 @@ HYPRE_StructMatrixGridVoidPtr( void *argptr )
 
    (localargs -> returnvalue[threadid]) =
       HYPRE_StructMatrixGrid(
-         &(*(localargs -> matrix))[threadid] );
+         (*(localargs -> matrix))[threadid],
+         &(*(localargs -> grid))[threadid] );
 }
 
-HYPRE_StructGrid 
+int 
 HYPRE_StructMatrixGridPush(
-   HYPRE_StructMatrix matrix )
+   HYPRE_StructMatrixArray matrix,
+   HYPRE_StructGridArray *grid )
 {
    HYPRE_StructMatrixGridArgs pushargs;
    int i;
-   HYPRE_StructGrid  returnvalue;
+   int  returnvalue;
 
-   pushargs.matrix = &matrix;
+   pushargs.matrix = (HYPRE_StructMatrixArray *)&matrix;
+   pushargs.grid = (HYPRE_StructGridArray *)grid;
    for (i = 0; i < hypre_NumThreads; i++)
       hypre_work_put( HYPRE_StructMatrixGridVoidPtr, (void *)&pushargs );
 
@@ -570,7 +572,7 @@ HYPRE_StructMatrixGridPush(
  *----------------------------------------------------------------*/
 
 typedef struct {
-   HYPRE_StructMatrix *matrix;
+   HYPRE_StructMatrixArray *matrix;
    int symmetric;
    int  returnvalue[hypre_MAX_THREADS];
 } HYPRE_SetStructMatrixSymmetricArgs;
@@ -585,20 +587,20 @@ HYPRE_SetStructMatrixSymmetricVoidPtr( void *argptr )
 
    (localargs -> returnvalue[threadid]) =
       HYPRE_SetStructMatrixSymmetric(
-         &(*(localargs -> matrix))[threadid],
+         (*(localargs -> matrix))[threadid],
          localargs -> symmetric );
 }
 
 int 
 HYPRE_SetStructMatrixSymmetricPush(
-   HYPRE_StructMatrix matrix,
+   HYPRE_StructMatrixArray matrix,
    int symmetric )
 {
    HYPRE_SetStructMatrixSymmetricArgs pushargs;
    int i;
    int  returnvalue;
 
-   pushargs.matrix = &matrix;
+   pushargs.matrix = (HYPRE_StructMatrixArray *)&matrix;
    pushargs.symmetric = symmetric;
    for (i = 0; i < hypre_NumThreads; i++)
       hypre_work_put( HYPRE_SetStructMatrixSymmetricVoidPtr, (void *)&pushargs );
@@ -616,7 +618,7 @@ HYPRE_SetStructMatrixSymmetricPush(
 
 typedef struct {
    char *filename;
-   HYPRE_StructMatrix *matrix;
+   HYPRE_StructMatrixArray *matrix;
    int all;
    int  returnvalue[hypre_MAX_THREADS];
 } HYPRE_PrintStructMatrixArgs;
@@ -632,14 +634,14 @@ HYPRE_PrintStructMatrixVoidPtr( void *argptr )
    (localargs -> returnvalue[threadid]) =
       HYPRE_PrintStructMatrix(
          localargs -> filename,
-         &(*(localargs -> matrix))[threadid],
+         (*(localargs -> matrix))[threadid],
          localargs -> all );
 }
 
 int 
 HYPRE_PrintStructMatrixPush(
    char *filename,
-   HYPRE_StructMatrix matrix,
+   HYPRE_StructMatrixArray matrix,
    int all )
 {
    HYPRE_PrintStructMatrixArgs pushargs;
@@ -647,7 +649,7 @@ HYPRE_PrintStructMatrixPush(
    int  returnvalue;
 
    pushargs.filename = filename;
-   pushargs.matrix = &matrix;
+   pushargs.matrix = (HYPRE_StructMatrixArray *)&matrix;
    pushargs.all = all;
    for (i = 0; i < hypre_NumThreads; i++)
       hypre_work_put( HYPRE_PrintStructMatrixVoidPtr, (void *)&pushargs );
@@ -666,7 +668,7 @@ HYPRE_PrintStructMatrixPush(
 typedef struct {
    int dim;
    int size;
-   HYPRE_StructStencil *stencil;
+   HYPRE_StructStencilArray *stencil;
    int  returnvalue[hypre_MAX_THREADS];
 } HYPRE_NewStructStencilArgs;
 
@@ -689,7 +691,7 @@ int
 HYPRE_NewStructStencilPush(
    int dim,
    int size,
-   HYPRE_StructStencil *stencil )
+   HYPRE_StructStencilArray *stencil )
 {
    HYPRE_NewStructStencilArgs pushargs;
    int i;
@@ -697,7 +699,7 @@ HYPRE_NewStructStencilPush(
 
    pushargs.dim = dim;
    pushargs.size = size;
-   pushargs.stencil = stencil;
+   pushargs.stencil = (HYPRE_StructStencilArray *)stencil;
    for (i = 0; i < hypre_NumThreads; i++)
       hypre_work_put( HYPRE_NewStructStencilVoidPtr, (void *)&pushargs );
 
@@ -713,7 +715,7 @@ HYPRE_NewStructStencilPush(
  *----------------------------------------------------------------*/
 
 typedef struct {
-   HYPRE_StructStencil *stencil;
+   HYPRE_StructStencilArray *stencil;
    int element_index;
    int *offset;
    int  returnvalue[hypre_MAX_THREADS];
@@ -729,14 +731,14 @@ HYPRE_SetStructStencilElementVoidPtr( void *argptr )
 
    (localargs -> returnvalue[threadid]) =
       HYPRE_SetStructStencilElement(
-         &(*(localargs -> stencil))[threadid],
+         (*(localargs -> stencil))[threadid],
          localargs -> element_index,
          localargs -> offset );
 }
 
 int 
 HYPRE_SetStructStencilElementPush(
-   HYPRE_StructStencil stencil,
+   HYPRE_StructStencilArray stencil,
    int element_index,
    int *offset )
 {
@@ -744,7 +746,7 @@ HYPRE_SetStructStencilElementPush(
    int i;
    int  returnvalue;
 
-   pushargs.stencil = &stencil;
+   pushargs.stencil = (HYPRE_StructStencilArray *)&stencil;
    pushargs.element_index = element_index;
    pushargs.offset = offset;
    for (i = 0; i < hypre_NumThreads; i++)
@@ -762,7 +764,7 @@ HYPRE_SetStructStencilElementPush(
  *----------------------------------------------------------------*/
 
 typedef struct {
-   HYPRE_StructStencil *stencil;
+   HYPRE_StructStencilArray *stencil;
    int  returnvalue[hypre_MAX_THREADS];
 } HYPRE_FreeStructStencilArgs;
 
@@ -776,18 +778,18 @@ HYPRE_FreeStructStencilVoidPtr( void *argptr )
 
    (localargs -> returnvalue[threadid]) =
       HYPRE_FreeStructStencil(
-         &(*(localargs -> stencil))[threadid] );
+         (*(localargs -> stencil))[threadid] );
 }
 
 int 
 HYPRE_FreeStructStencilPush(
-   HYPRE_StructStencil stencil )
+   HYPRE_StructStencilArray stencil )
 {
    HYPRE_FreeStructStencilArgs pushargs;
    int i;
    int  returnvalue;
 
-   pushargs.stencil = &stencil;
+   pushargs.stencil = (HYPRE_StructStencilArray *)&stencil;
    for (i = 0; i < hypre_NumThreads; i++)
       hypre_work_put( HYPRE_FreeStructStencilVoidPtr, (void *)&pushargs );
 
@@ -804,9 +806,9 @@ HYPRE_FreeStructStencilPush(
 
 typedef struct {
    MPI_Comm comm;
-   HYPRE_StructGrid *grid;
-   HYPRE_StructStencil *stencil;
-   HYPRE_StructVector *vector;
+   HYPRE_StructGridArray *grid;
+   HYPRE_StructStencilArray *stencil;
+   HYPRE_StructVectorArray *vector;
    int  returnvalue[hypre_MAX_THREADS];
 } HYPRE_NewStructVectorArgs;
 
@@ -821,26 +823,26 @@ HYPRE_NewStructVectorVoidPtr( void *argptr )
    (localargs -> returnvalue[threadid]) =
       HYPRE_NewStructVector(
          localargs -> comm,
-         &(*(localargs -> grid))[threadid],
-         &(*(localargs -> stencil))[threadid],
+         (*(localargs -> grid))[threadid],
+         (*(localargs -> stencil))[threadid],
          &(*(localargs -> vector))[threadid] );
 }
 
 int 
 HYPRE_NewStructVectorPush(
    MPI_Comm comm,
-   HYPRE_StructGrid grid,
-   HYPRE_StructStencil stencil,
-   HYPRE_StructVector *vector )
+   HYPRE_StructGridArray grid,
+   HYPRE_StructStencilArray stencil,
+   HYPRE_StructVectorArray *vector )
 {
    HYPRE_NewStructVectorArgs pushargs;
    int i;
    int  returnvalue;
 
    pushargs.comm = comm;
-   pushargs.grid = &grid;
-   pushargs.stencil = &stencil;
-   pushargs.vector = vector;
+   pushargs.grid = (HYPRE_StructGridArray *)&grid;
+   pushargs.stencil = (HYPRE_StructStencilArray *)&stencil;
+   pushargs.vector = (HYPRE_StructVectorArray *)vector;
    for (i = 0; i < hypre_NumThreads; i++)
       hypre_work_put( HYPRE_NewStructVectorVoidPtr, (void *)&pushargs );
 
@@ -856,7 +858,7 @@ HYPRE_NewStructVectorPush(
  *----------------------------------------------------------------*/
 
 typedef struct {
-   HYPRE_StructVector *struct_vector;
+   HYPRE_StructVectorArray *struct_vector;
    int  returnvalue[hypre_MAX_THREADS];
 } HYPRE_FreeStructVectorArgs;
 
@@ -870,18 +872,18 @@ HYPRE_FreeStructVectorVoidPtr( void *argptr )
 
    (localargs -> returnvalue[threadid]) =
       HYPRE_FreeStructVector(
-         &(*(localargs -> struct_vector))[threadid] );
+         (*(localargs -> struct_vector))[threadid] );
 }
 
 int 
 HYPRE_FreeStructVectorPush(
-   HYPRE_StructVector struct_vector )
+   HYPRE_StructVectorArray struct_vector )
 {
    HYPRE_FreeStructVectorArgs pushargs;
    int i;
    int  returnvalue;
 
-   pushargs.struct_vector = &struct_vector;
+   pushargs.struct_vector = (HYPRE_StructVectorArray *)&struct_vector;
    for (i = 0; i < hypre_NumThreads; i++)
       hypre_work_put( HYPRE_FreeStructVectorVoidPtr, (void *)&pushargs );
 
@@ -897,7 +899,7 @@ HYPRE_FreeStructVectorPush(
  *----------------------------------------------------------------*/
 
 typedef struct {
-   HYPRE_StructVector *vector;
+   HYPRE_StructVectorArray *vector;
    int  returnvalue[hypre_MAX_THREADS];
 } HYPRE_InitializeStructVectorArgs;
 
@@ -911,18 +913,18 @@ HYPRE_InitializeStructVectorVoidPtr( void *argptr )
 
    (localargs -> returnvalue[threadid]) =
       HYPRE_InitializeStructVector(
-         &(*(localargs -> vector))[threadid] );
+         (*(localargs -> vector))[threadid] );
 }
 
 int 
 HYPRE_InitializeStructVectorPush(
-   HYPRE_StructVector vector )
+   HYPRE_StructVectorArray vector )
 {
    HYPRE_InitializeStructVectorArgs pushargs;
    int i;
    int  returnvalue;
 
-   pushargs.vector = &vector;
+   pushargs.vector = (HYPRE_StructVectorArray *)&vector;
    for (i = 0; i < hypre_NumThreads; i++)
       hypre_work_put( HYPRE_InitializeStructVectorVoidPtr, (void *)&pushargs );
 
@@ -938,7 +940,7 @@ HYPRE_InitializeStructVectorPush(
  *----------------------------------------------------------------*/
 
 typedef struct {
-   HYPRE_StructVector *vector;
+   HYPRE_StructVectorArray *vector;
    int *grid_index;
    double values;
    int  returnvalue[hypre_MAX_THREADS];
@@ -954,14 +956,14 @@ HYPRE_SetStructVectorValuesVoidPtr( void *argptr )
 
    (localargs -> returnvalue[threadid]) =
       HYPRE_SetStructVectorValues(
-         &(*(localargs -> vector))[threadid],
+         (*(localargs -> vector))[threadid],
          localargs -> grid_index,
          localargs -> values );
 }
 
 int 
 HYPRE_SetStructVectorValuesPush(
-   HYPRE_StructVector vector,
+   HYPRE_StructVectorArray vector,
    int *grid_index,
    double values )
 {
@@ -969,7 +971,7 @@ HYPRE_SetStructVectorValuesPush(
    int i;
    int  returnvalue;
 
-   pushargs.vector = &vector;
+   pushargs.vector = (HYPRE_StructVectorArray *)&vector;
    pushargs.grid_index = grid_index;
    pushargs.values = values;
    for (i = 0; i < hypre_NumThreads; i++)
@@ -987,7 +989,7 @@ HYPRE_SetStructVectorValuesPush(
  *----------------------------------------------------------------*/
 
 typedef struct {
-   HYPRE_StructVector *vector;
+   HYPRE_StructVectorArray *vector;
    int *grid_index;
    double *values_ptr;
    int  returnvalue[hypre_MAX_THREADS];
@@ -1003,14 +1005,14 @@ HYPRE_GetStructVectorValuesVoidPtr( void *argptr )
 
    (localargs -> returnvalue[threadid]) =
       HYPRE_GetStructVectorValues(
-         &(*(localargs -> vector))[threadid],
+         (*(localargs -> vector))[threadid],
          localargs -> grid_index,
          localargs -> values_ptr );
 }
 
 int 
 HYPRE_GetStructVectorValuesPush(
-   HYPRE_StructVector vector,
+   HYPRE_StructVectorArray vector,
    int *grid_index,
    double *values_ptr )
 {
@@ -1018,7 +1020,7 @@ HYPRE_GetStructVectorValuesPush(
    int i;
    int  returnvalue;
 
-   pushargs.vector = &vector;
+   pushargs.vector = (HYPRE_StructVectorArray *)&vector;
    pushargs.grid_index = grid_index;
    pushargs.values_ptr = values_ptr;
    for (i = 0; i < hypre_NumThreads; i++)
@@ -1036,7 +1038,7 @@ HYPRE_GetStructVectorValuesPush(
  *----------------------------------------------------------------*/
 
 typedef struct {
-   HYPRE_StructVector *vector;
+   HYPRE_StructVectorArray *vector;
    int *ilower;
    int *iupper;
    double *values;
@@ -1053,7 +1055,7 @@ HYPRE_SetStructVectorBoxValuesVoidPtr( void *argptr )
 
    (localargs -> returnvalue[threadid]) =
       HYPRE_SetStructVectorBoxValues(
-         &(*(localargs -> vector))[threadid],
+         (*(localargs -> vector))[threadid],
          localargs -> ilower,
          localargs -> iupper,
          localargs -> values );
@@ -1061,7 +1063,7 @@ HYPRE_SetStructVectorBoxValuesVoidPtr( void *argptr )
 
 int 
 HYPRE_SetStructVectorBoxValuesPush(
-   HYPRE_StructVector vector,
+   HYPRE_StructVectorArray vector,
    int *ilower,
    int *iupper,
    double *values )
@@ -1070,7 +1072,7 @@ HYPRE_SetStructVectorBoxValuesPush(
    int i;
    int  returnvalue;
 
-   pushargs.vector = &vector;
+   pushargs.vector = (HYPRE_StructVectorArray *)&vector;
    pushargs.ilower = ilower;
    pushargs.iupper = iupper;
    pushargs.values = values;
@@ -1089,7 +1091,7 @@ HYPRE_SetStructVectorBoxValuesPush(
  *----------------------------------------------------------------*/
 
 typedef struct {
-   HYPRE_StructVector *vector;
+   HYPRE_StructVectorArray *vector;
    int *ilower;
    int *iupper;
    double **values_ptr;
@@ -1106,7 +1108,7 @@ HYPRE_GetStructVectorBoxValuesVoidPtr( void *argptr )
 
    (localargs -> returnvalue[threadid]) =
       HYPRE_GetStructVectorBoxValues(
-         &(*(localargs -> vector))[threadid],
+         (*(localargs -> vector))[threadid],
          localargs -> ilower,
          localargs -> iupper,
          localargs -> values_ptr );
@@ -1114,7 +1116,7 @@ HYPRE_GetStructVectorBoxValuesVoidPtr( void *argptr )
 
 int 
 HYPRE_GetStructVectorBoxValuesPush(
-   HYPRE_StructVector vector,
+   HYPRE_StructVectorArray vector,
    int *ilower,
    int *iupper,
    double **values_ptr )
@@ -1123,7 +1125,7 @@ HYPRE_GetStructVectorBoxValuesPush(
    int i;
    int  returnvalue;
 
-   pushargs.vector = &vector;
+   pushargs.vector = (HYPRE_StructVectorArray *)&vector;
    pushargs.ilower = ilower;
    pushargs.iupper = iupper;
    pushargs.values_ptr = values_ptr;
@@ -1142,7 +1144,7 @@ HYPRE_GetStructVectorBoxValuesPush(
  *----------------------------------------------------------------*/
 
 typedef struct {
-   HYPRE_StructVector *vector;
+   HYPRE_StructVectorArray *vector;
    int  returnvalue[hypre_MAX_THREADS];
 } HYPRE_AssembleStructVectorArgs;
 
@@ -1156,18 +1158,18 @@ HYPRE_AssembleStructVectorVoidPtr( void *argptr )
 
    (localargs -> returnvalue[threadid]) =
       HYPRE_AssembleStructVector(
-         &(*(localargs -> vector))[threadid] );
+         (*(localargs -> vector))[threadid] );
 }
 
 int 
 HYPRE_AssembleStructVectorPush(
-   HYPRE_StructVector vector )
+   HYPRE_StructVectorArray vector )
 {
    HYPRE_AssembleStructVectorArgs pushargs;
    int i;
    int  returnvalue;
 
-   pushargs.vector = &vector;
+   pushargs.vector = (HYPRE_StructVectorArray *)&vector;
    for (i = 0; i < hypre_NumThreads; i++)
       hypre_work_put( HYPRE_AssembleStructVectorVoidPtr, (void *)&pushargs );
 
@@ -1184,7 +1186,7 @@ HYPRE_AssembleStructVectorPush(
 
 typedef struct {
    char *filename;
-   HYPRE_StructVector *vector;
+   HYPRE_StructVectorArray *vector;
    int all;
    int  returnvalue[hypre_MAX_THREADS];
 } HYPRE_PrintStructVectorArgs;
@@ -1200,14 +1202,14 @@ HYPRE_PrintStructVectorVoidPtr( void *argptr )
    (localargs -> returnvalue[threadid]) =
       HYPRE_PrintStructVector(
          localargs -> filename,
-         &(*(localargs -> vector))[threadid],
+         (*(localargs -> vector))[threadid],
          localargs -> all );
 }
 
 int 
 HYPRE_PrintStructVectorPush(
    char *filename,
-   HYPRE_StructVector vector,
+   HYPRE_StructVectorArray vector,
    int all )
 {
    HYPRE_PrintStructVectorArgs pushargs;
@@ -1215,7 +1217,7 @@ HYPRE_PrintStructVectorPush(
    int  returnvalue;
 
    pushargs.filename = filename;
-   pushargs.vector = &vector;
+   pushargs.vector = (HYPRE_StructVectorArray *)&vector;
    pushargs.all = all;
    for (i = 0; i < hypre_NumThreads; i++)
       hypre_work_put( HYPRE_PrintStructVectorVoidPtr, (void *)&pushargs );
@@ -1232,7 +1234,7 @@ HYPRE_PrintStructVectorPush(
  *----------------------------------------------------------------*/
 
 typedef struct {
-   HYPRE_StructVector *vector;
+   HYPRE_StructVectorArray *vector;
    int *num_ghost;
    int  returnvalue[hypre_MAX_THREADS];
 } HYPRE_SetStructVectorNumGhostArgs;
@@ -1247,20 +1249,20 @@ HYPRE_SetStructVectorNumGhostVoidPtr( void *argptr )
 
    (localargs -> returnvalue[threadid]) =
       HYPRE_SetStructVectorNumGhost(
-         &(*(localargs -> vector))[threadid],
+         (*(localargs -> vector))[threadid],
          localargs -> num_ghost );
 }
 
 int 
 HYPRE_SetStructVectorNumGhostPush(
-   HYPRE_StructVector vector,
+   HYPRE_StructVectorArray vector,
    int *num_ghost )
 {
    HYPRE_SetStructVectorNumGhostArgs pushargs;
    int i;
    int  returnvalue;
 
-   pushargs.vector = &vector;
+   pushargs.vector = (HYPRE_StructVectorArray *)&vector;
    pushargs.num_ghost = num_ghost;
    for (i = 0; i < hypre_NumThreads; i++)
       hypre_work_put( HYPRE_SetStructVectorNumGhostVoidPtr, (void *)&pushargs );
@@ -1277,7 +1279,7 @@ HYPRE_SetStructVectorNumGhostPush(
  *----------------------------------------------------------------*/
 
 typedef struct {
-   HYPRE_StructVector *vector;
+   HYPRE_StructVectorArray *vector;
    double values;
    int  returnvalue[hypre_MAX_THREADS];
 } HYPRE_SetStructVectorConstantValuesArgs;
@@ -1292,20 +1294,20 @@ HYPRE_SetStructVectorConstantValuesVoidPtr( void *argptr )
 
    (localargs -> returnvalue[threadid]) =
       HYPRE_SetStructVectorConstantValues(
-         &(*(localargs -> vector))[threadid],
+         (*(localargs -> vector))[threadid],
          localargs -> values );
 }
 
 int 
 HYPRE_SetStructVectorConstantValuesPush(
-   HYPRE_StructVector vector,
+   HYPRE_StructVectorArray vector,
    double values )
 {
    HYPRE_SetStructVectorConstantValuesArgs pushargs;
    int i;
    int  returnvalue;
 
-   pushargs.vector = &vector;
+   pushargs.vector = (HYPRE_StructVectorArray *)&vector;
    pushargs.values = values;
    for (i = 0; i < hypre_NumThreads; i++)
       hypre_work_put( HYPRE_SetStructVectorConstantValuesVoidPtr, (void *)&pushargs );
@@ -1322,9 +1324,9 @@ HYPRE_SetStructVectorConstantValuesPush(
  *----------------------------------------------------------------*/
 
 typedef struct {
-   HYPRE_StructVector *from_vector;
-   HYPRE_StructVector *to_vector;
-   HYPRE_CommPkg *comm_pkg;
+   HYPRE_StructVectorArray *from_vector;
+   HYPRE_StructVectorArray *to_vector;
+   HYPRE_CommPkgArray *comm_pkg;
    int  returnvalue[hypre_MAX_THREADS];
 } HYPRE_GetMigrateStructVectorCommPkgArgs;
 
@@ -1338,24 +1340,24 @@ HYPRE_GetMigrateStructVectorCommPkgVoidPtr( void *argptr )
 
    (localargs -> returnvalue[threadid]) =
       HYPRE_GetMigrateStructVectorCommPkg(
-         &(*(localargs -> from_vector))[threadid],
-         &(*(localargs -> to_vector))[threadid],
+         (*(localargs -> from_vector))[threadid],
+         (*(localargs -> to_vector))[threadid],
          &(*(localargs -> comm_pkg))[threadid] );
 }
 
 int 
 HYPRE_GetMigrateStructVectorCommPkgPush(
-   HYPRE_StructVector from_vector,
-   HYPRE_StructVector to_vector,
-   HYPRE_CommPkg *comm_pkg )
+   HYPRE_StructVectorArray from_vector,
+   HYPRE_StructVectorArray to_vector,
+   HYPRE_CommPkgArray *comm_pkg )
 {
    HYPRE_GetMigrateStructVectorCommPkgArgs pushargs;
    int i;
    int  returnvalue;
 
-   pushargs.from_vector = &from_vector;
-   pushargs.to_vector = &to_vector;
-   pushargs.comm_pkg = comm_pkg;
+   pushargs.from_vector = (HYPRE_StructVectorArray *)&from_vector;
+   pushargs.to_vector = (HYPRE_StructVectorArray *)&to_vector;
+   pushargs.comm_pkg = (HYPRE_CommPkgArray *)comm_pkg;
    for (i = 0; i < hypre_NumThreads; i++)
       hypre_work_put( HYPRE_GetMigrateStructVectorCommPkgVoidPtr, (void *)&pushargs );
 
@@ -1371,9 +1373,9 @@ HYPRE_GetMigrateStructVectorCommPkgPush(
  *----------------------------------------------------------------*/
 
 typedef struct {
-   HYPRE_CommPkg *comm_pkg;
-   HYPRE_StructVector *from_vector;
-   HYPRE_StructVector *to_vector;
+   HYPRE_CommPkgArray *comm_pkg;
+   HYPRE_StructVectorArray *from_vector;
+   HYPRE_StructVectorArray *to_vector;
    int  returnvalue[hypre_MAX_THREADS];
 } HYPRE_MigrateStructVectorArgs;
 
@@ -1387,24 +1389,24 @@ HYPRE_MigrateStructVectorVoidPtr( void *argptr )
 
    (localargs -> returnvalue[threadid]) =
       HYPRE_MigrateStructVector(
-         &(*(localargs -> comm_pkg))[threadid],
-         &(*(localargs -> from_vector))[threadid],
-         &(*(localargs -> to_vector))[threadid] );
+         (*(localargs -> comm_pkg))[threadid],
+         (*(localargs -> from_vector))[threadid],
+         (*(localargs -> to_vector))[threadid] );
 }
 
 int 
 HYPRE_MigrateStructVectorPush(
-   HYPRE_CommPkg comm_pkg,
-   HYPRE_StructVector from_vector,
-   HYPRE_StructVector to_vector )
+   HYPRE_CommPkgArray comm_pkg,
+   HYPRE_StructVectorArray from_vector,
+   HYPRE_StructVectorArray to_vector )
 {
    HYPRE_MigrateStructVectorArgs pushargs;
    int i;
    int  returnvalue;
 
-   pushargs.comm_pkg = &comm_pkg;
-   pushargs.from_vector = &from_vector;
-   pushargs.to_vector = &to_vector;
+   pushargs.comm_pkg = (HYPRE_CommPkgArray *)&comm_pkg;
+   pushargs.from_vector = (HYPRE_StructVectorArray *)&from_vector;
+   pushargs.to_vector = (HYPRE_StructVectorArray *)&to_vector;
    for (i = 0; i < hypre_NumThreads; i++)
       hypre_work_put( HYPRE_MigrateStructVectorVoidPtr, (void *)&pushargs );
 
@@ -1420,7 +1422,7 @@ HYPRE_MigrateStructVectorPush(
  *----------------------------------------------------------------*/
 
 typedef struct {
-   HYPRE_CommPkg *comm_pkg;
+   HYPRE_CommPkgArray *comm_pkg;
    int  returnvalue[hypre_MAX_THREADS];
 } HYPRE_FreeCommPkgArgs;
 
@@ -1434,18 +1436,18 @@ HYPRE_FreeCommPkgVoidPtr( void *argptr )
 
    (localargs -> returnvalue[threadid]) =
       HYPRE_FreeCommPkg(
-         &(*(localargs -> comm_pkg))[threadid] );
+         (*(localargs -> comm_pkg))[threadid] );
 }
 
 int 
 HYPRE_FreeCommPkgPush(
-   HYPRE_CommPkg comm_pkg )
+   HYPRE_CommPkgArray comm_pkg )
 {
    HYPRE_FreeCommPkgArgs pushargs;
    int i;
    int  returnvalue;
 
-   pushargs.comm_pkg = &comm_pkg;
+   pushargs.comm_pkg = (HYPRE_CommPkgArray *)&comm_pkg;
    for (i = 0; i < hypre_NumThreads; i++)
       hypre_work_put( HYPRE_FreeCommPkgVoidPtr, (void *)&pushargs );
 

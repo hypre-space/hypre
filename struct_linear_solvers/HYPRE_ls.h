@@ -15,16 +15,13 @@
 #ifndef HYPRE_LS_HEADER
 #define HYPRE_LS_HEADER
 
-#include "HYPRE_utilities.h"
-#include "HYPRE_mv.h"
+#include "utilities.h"
+#include "struct_matrix_vector.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#ifndef HYPRE_USE_PTHREADS
-#define NO_PTHREAD_MANGLING
-#endif
 
 /*--------------------------------------------------------------------------
  * Structures
@@ -32,17 +29,26 @@ extern "C" {
 
 typedef struct {int opaque;} *HYPRE_StructSolverBase;
 
-#ifdef NO_PTHREAD_MANGLING
+#ifndef HYPRE_USE_PTHREADS
+#define hypre_MAX_THREADS 1
+#ifndef HYPRE_NO_PTHREAD_MANGLING
+#define HYPRE_NO_PTHREAD_MANGLING
+#endif
+#endif
+
+typedef HYPRE_StructSolverBase HYPRE_StructSolverArray[hypre_MAX_THREADS];
+
+#ifdef HYPRE_NO_PTHREAD_MANGLING
 typedef HYPRE_StructSolverBase HYPRE_StructSolver;
 #else
-typedef HYPRE_StructSolverBase HYPRE_StructSolver[hypre_MAX_THREADS];
+typedef HYPRE_StructSolverArray HYPRE_StructSolver;
 #endif
 
 /*--------------------------------------------------------------------------
  * Prototypes
  *--------------------------------------------------------------------------*/
 
-#ifndef NO_PTHREAD_MANGLING
+#ifndef HYPRE_NO_PTHREAD_MANGLING
 
 #define HYPRE_StructPCGInitialize HYPRE_StructPCGInitializePush
 #define HYPRE_StructPCGFinalize HYPRE_StructPCGFinalizePush

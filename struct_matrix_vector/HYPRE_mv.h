@@ -15,14 +15,10 @@
 #ifndef HYPRE_MV_HEADER
 #define HYPRE_MV_HEADER
 
-#include "HYPRE_utilities.h"
+#include "utilities.h"
 
 #ifdef __cplusplus
 extern "C" {
-#endif
-
-#ifndef HYPRE_USE_PTHREADS
-#define NO_PTHREAD_MANGLING
 #endif
 
 /*--------------------------------------------------------------------------
@@ -35,25 +31,39 @@ typedef struct {int opaque;} *HYPRE_StructMatrixBase;
 typedef struct {int opaque;} *HYPRE_StructVectorBase;
 typedef struct {int opaque;} *HYPRE_CommPkgBase;
 
-#ifdef NO_PTHREAD_MANGLING
-typedef HYPRE_StructStencilBase HYPRE_StructStencil;
-typedef HYPRE_StructGridBase    HYPRE_StructGrid;
-typedef HYPRE_StructMatrixBase  HYPRE_StructMatrix;
-typedef HYPRE_StructVectorBase  HYPRE_StructVector;
-typedef HYPRE_CommPkgBase       HYPRE_CommPkg;
+#ifndef HYPRE_USE_PTHREADS
+#define hypre_MAX_THREADS 1
+#ifndef HYPRE_NO_PTHREAD_MANGLING
+#define HYPRE_NO_PTHREAD_MANGLING
+#endif
+#endif
+
+typedef HYPRE_StructStencilBase   HYPRE_StructStencilArray[hypre_MAX_THREADS];
+typedef HYPRE_StructGridBase      HYPRE_StructGridArray[hypre_MAX_THREADS];
+typedef HYPRE_StructMatrixBase    HYPRE_StructMatrixArray[hypre_MAX_THREADS];
+typedef HYPRE_StructVectorBase    HYPRE_StructVectorArray[hypre_MAX_THREADS];
+typedef HYPRE_CommPkgBase         HYPRE_CommPkgArray[hypre_MAX_THREADS];
+
+
+#ifdef HYPRE_NO_PTHREAD_MANGLING
+typedef HYPRE_StructStencilBase  HYPRE_StructStencil;
+typedef HYPRE_StructGridBase     HYPRE_StructGrid;
+typedef HYPRE_StructMatrixBase   HYPRE_StructMatrix;
+typedef HYPRE_StructVectorBase   HYPRE_StructVector;
+typedef HYPRE_CommPkgBase        HYPRE_CommPkg;
 #else
-typedef HYPRE_StructStencilBase HYPRE_StructStencil[hypre_MAX_THREADS];
-typedef HYPRE_StructGridBase    HYPRE_StructGrid[hypre_MAX_THREADS];
-typedef HYPRE_StructMatrixBase  HYPRE_StructMatrix[hypre_MAX_THREADS];
-typedef HYPRE_StructVectorBase  HYPRE_StructVector[hypre_MAX_THREADS];
-typedef HYPRE_CommPkgBase       HYPRE_CommPkg[hypre_MAX_THREADS];
+typedef HYPRE_StructStencilArray HYPRE_StructStencil;
+typedef HYPRE_StructGridArray    HYPRE_StructGrid;
+typedef HYPRE_StructMatrixArray  HYPRE_StructMatrix;
+typedef HYPRE_StructVectorArray  HYPRE_StructVector;
+typedef HYPRE_CommPkgArray       HYPRE_CommPkg;
 #endif
 
 /*--------------------------------------------------------------------------
  * Prototypes
  *--------------------------------------------------------------------------*/
 
-#ifndef NO_PTHREAD_MANGLING
+#ifndef HYPRE_NO_PTHREAD_MANGLING
 
 #define HYPRE_NewStructGrid HYPRE_NewStructGridPush
 #define HYPRE_FreeStructGrid HYPRE_FreeStructGridPush
@@ -110,7 +120,7 @@ int HYPRE_SetStructMatrixValues P((HYPRE_StructMatrix matrix , int *grid_index ,
 int HYPRE_SetStructMatrixBoxValues P((HYPRE_StructMatrix matrix , int *ilower , int *iupper , int num_stencil_indices , int *stencil_indices , double *values ));
 int HYPRE_AssembleStructMatrix P((HYPRE_StructMatrix matrix ));
 int HYPRE_SetStructMatrixNumGhost P((HYPRE_StructMatrix matrix , int *num_ghost ));
-HYPRE_StructGrid HYPRE_StructMatrixGrid P((HYPRE_StructMatrix matrix ));
+int HYPRE_StructMatrixGrid P((HYPRE_StructMatrix matrix , HYPRE_StructGrid *grid ));
 int HYPRE_SetStructMatrixSymmetric P((HYPRE_StructMatrix matrix , int symmetric ));
 int HYPRE_PrintStructMatrix P((char *filename , HYPRE_StructMatrix matrix , int all ));
 
@@ -137,9 +147,7 @@ int HYPRE_FreeCommPkg P((HYPRE_CommPkg comm_pkg ));
 
 #undef P
 
-#ifdef __cplusplus
-}
 #endif
 
-#endif
+
 

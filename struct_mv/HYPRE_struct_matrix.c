@@ -12,14 +12,7 @@
  *
  *****************************************************************************/
 
-#ifdef HYPRE_USE_PTHREADS
-#define NO_PTHREAD_MANGLING
-#endif
-
 #include "headers.h"
-#ifdef HYPRE_USE_PTHREADS
-#include "threading.h"
-#endif
 /*--------------------------------------------------------------------------
  * HYPRE_NewStructMatrix
  *--------------------------------------------------------------------------*/
@@ -158,11 +151,15 @@ HYPRE_SetStructMatrixNumGhost( HYPRE_StructMatrix  matrix,
  * HYPRE_StructMatrixGrid
  *--------------------------------------------------------------------------*/
 
-HYPRE_StructGrid
-HYPRE_StructMatrixGrid( HYPRE_StructMatrix matrix )
+int
+HYPRE_StructMatrixGrid( HYPRE_StructMatrix matrix, HYPRE_StructGrid *grid )
 {
-   return ( (HYPRE_StructGrid)
+   int ierr = 0;
+
+   *grid = ( (HYPRE_StructGrid)
             (hypre_StructMatrixGrid( (hypre_StructMatrix *) matrix) ) );
+
+   return ierr;
 }
 
 /*--------------------------------------------------------------------------
