@@ -971,6 +971,7 @@ main( int   argc,
       HYPRE_StructSMGSetRelChange(solver, 0);
       HYPRE_StructSMGSetNumPreRelax(solver, n_pre);
       HYPRE_StructSMGSetNumPostRelax(solver, n_post);
+      HYPRE_StructSMGSetPrintLevel(solver, 1);
       HYPRE_StructSMGSetLogging(solver, 1);
       HYPRE_StructSMGSetup(solver, A, b, x);
 
@@ -1013,6 +1014,7 @@ main( int   argc,
       HYPRE_StructPFMGSetNumPostRelax(solver, n_post);
       HYPRE_StructPFMGSetSkipRelax(solver, skip);
       /*HYPRE_StructPFMGSetDxyz(solver, dxyz);*/
+      HYPRE_StructPFMGSetPrintLevel(solver, 1);
       HYPRE_StructPFMGSetLogging(solver, 1);
       HYPRE_StructPFMGSetup(solver, A, b, x);
 
@@ -1054,6 +1056,7 @@ main( int   argc,
       HYPRE_StructSparseMSGSetRelaxType(solver, 1);
       HYPRE_StructSparseMSGSetNumPreRelax(solver, n_pre);
       HYPRE_StructSparseMSGSetNumPostRelax(solver, n_post);
+      HYPRE_StructSparseMSGSetPrintLevel(solver, 1);
       HYPRE_StructSparseMSGSetLogging(solver, 1);
       HYPRE_StructSparseMSGSetup(solver, A, b, x);
 
@@ -1104,6 +1107,7 @@ main( int   argc,
          HYPRE_StructSMGSetZeroGuess(precond);
          HYPRE_StructSMGSetNumPreRelax(precond, n_pre);
          HYPRE_StructSMGSetNumPostRelax(precond, n_post);
+         HYPRE_StructSMGSetPrintLevel(precond, 0);
          HYPRE_StructSMGSetLogging(precond, 0);
          HYPRE_PCGSetPrecond( (HYPRE_Solver) solver,
                               (HYPRE_PtrToSolverFcn) HYPRE_StructSMGSolve,
@@ -1124,6 +1128,7 @@ main( int   argc,
          HYPRE_StructPFMGSetNumPostRelax(precond, n_post);
          HYPRE_StructPFMGSetSkipRelax(precond, skip);
          /*HYPRE_StructPFMGSetDxyz(precond, dxyz);*/
+         HYPRE_StructPFMGSetPrintLevel(precond, 0);
          HYPRE_StructPFMGSetLogging(precond, 0);
          HYPRE_PCGSetPrecond( (HYPRE_Solver) solver,
                               (HYPRE_PtrToSolverFcn) HYPRE_StructPFMGSolve,
@@ -1143,6 +1148,7 @@ main( int   argc,
          HYPRE_StructSparseMSGSetRelaxType(precond, 1);
          HYPRE_StructSparseMSGSetNumPreRelax(precond, n_pre);
          HYPRE_StructSparseMSGSetNumPostRelax(precond, n_post);
+         HYPRE_StructSparseMSGSetPrintLevel(precond, 0);
          HYPRE_StructSparseMSGSetLogging(precond, 0);
          HYPRE_PCGSetPrecond( (HYPRE_Solver) solver,
                               (HYPRE_PtrToSolverFcn) HYPRE_StructSparseMSGSolve,
@@ -1242,6 +1248,7 @@ main( int   argc,
          HYPRE_StructHybridSetStopCrit(solver, 0);
          HYPRE_StructHybridSetKDim(solver, 10);
       }
+      HYPRE_StructHybridSetPrintLevel(solver, 1);
       HYPRE_StructHybridSetLogging(solver, 1);
       HYPRE_StructHybridSetSolverType(solver, solver_type);
 
@@ -1255,6 +1262,7 @@ main( int   argc,
          HYPRE_StructSMGSetZeroGuess(precond);
          HYPRE_StructSMGSetNumPreRelax(precond, n_pre);
          HYPRE_StructSMGSetNumPostRelax(precond, n_post);
+         HYPRE_StructSMGSetPrintLevel(precond, 0);
          HYPRE_StructSMGSetLogging(precond, 0);
          HYPRE_StructHybridSetPrecond(solver,
                                       HYPRE_StructSMGSolve,
@@ -1275,6 +1283,7 @@ main( int   argc,
          HYPRE_StructPFMGSetNumPostRelax(precond, n_post);
          HYPRE_StructPFMGSetSkipRelax(precond, skip);
          /*HYPRE_StructPFMGSetDxyz(precond, dxyz);*/
+         HYPRE_StructPFMGSetPrintLevel(precond, 0);
          HYPRE_StructPFMGSetLogging(precond, 0);
          HYPRE_StructHybridSetPrecond(solver,
                                       HYPRE_StructPFMGSolve,
@@ -1294,6 +1303,7 @@ main( int   argc,
          HYPRE_StructSparseMSGSetRelaxType(precond, 1);
          HYPRE_StructSparseMSGSetNumPreRelax(precond, n_pre);
          HYPRE_StructSparseMSGSetNumPostRelax(precond, n_post);
+         HYPRE_StructSparseMSGSetPrintLevel(precond, 0);
          HYPRE_StructSparseMSGSetLogging(precond, 0);
          HYPRE_StructHybridSetPrecond(solver,
                                       HYPRE_StructSparseMSGSolve,
@@ -1349,6 +1359,7 @@ main( int   argc,
       HYPRE_GMRESSetMaxIter( (HYPRE_Solver)solver, 50 );
       HYPRE_GMRESSetTol( (HYPRE_Solver)solver, 1.0e-06 );
       HYPRE_GMRESSetRelChange( (HYPRE_Solver)solver, 0 );
+      HYPRE_GMRESSetPrintLevel( (HYPRE_Solver)solver, 1 );
       HYPRE_GMRESSetLogging( (HYPRE_Solver)solver, 1 );
 
       if (solver_id == 30)
@@ -1361,6 +1372,7 @@ main( int   argc,
          HYPRE_StructSMGSetZeroGuess(precond);
          HYPRE_StructSMGSetNumPreRelax(precond, n_pre);
          HYPRE_StructSMGSetNumPostRelax(precond, n_post);
+         HYPRE_StructSMGSetPrintLevel(precond, 0);
          HYPRE_StructSMGSetLogging(precond, 0);
          HYPRE_GMRESSetPrecond( (HYPRE_Solver)solver,
                                 (HYPRE_PtrToSolverFcn) HYPRE_StructSMGSolve,
@@ -1381,6 +1393,7 @@ main( int   argc,
          HYPRE_StructPFMGSetNumPostRelax(precond, n_post);
          HYPRE_StructPFMGSetSkipRelax(precond, skip);
          /*HYPRE_StructPFMGSetDxyz(precond, dxyz);*/
+         HYPRE_StructPFMGSetPrintLevel(precond, 0);
          HYPRE_StructPFMGSetLogging(precond, 0);
          HYPRE_GMRESSetPrecond( (HYPRE_Solver)solver,
                                 (HYPRE_PtrToSolverFcn) HYPRE_StructPFMGSolve,
@@ -1400,6 +1413,7 @@ main( int   argc,
          HYPRE_StructSparseMSGSetRelaxType(precond, 1);
          HYPRE_StructSparseMSGSetNumPreRelax(precond, n_pre);
          HYPRE_StructSparseMSGSetNumPostRelax(precond, n_post);
+         HYPRE_StructSparseMSGSetPrintLevel(precond, 0);
          HYPRE_StructSparseMSGSetLogging(precond, 0);
          HYPRE_GMRESSetPrecond( (HYPRE_Solver)solver,
                                 (HYPRE_PtrToSolverFcn) HYPRE_StructSparseMSGSolve,

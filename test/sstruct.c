@@ -1883,6 +1883,7 @@ main( int   argc,
       HYPRE_SStructSysPFMGSetNumPostRelax(solver, n_post);
       HYPRE_SStructSysPFMGSetSkipRelax(solver, skip);
       /*HYPRE_StructPFMGSetDxyz(solver, dxyz);*/
+      HYPRE_SStructSysPFMGSetPrintLevel(solver, 1);
       HYPRE_SStructSysPFMGSetLogging(solver, 1);
       HYPRE_SStructSysPFMGSetup(solver, A, b, x);
 
@@ -2103,6 +2104,7 @@ main( int   argc,
       HYPRE_GMRESSetKDim( (HYPRE_Solver) solver, 5 );
       HYPRE_GMRESSetMaxIter( (HYPRE_Solver) solver, 100 );
       HYPRE_GMRESSetTol( (HYPRE_Solver) solver, 1.0e-06 );
+      HYPRE_GMRESSetPrintLevel( (HYPRE_Solver) solver, 1 );
       HYPRE_GMRESSetLogging( (HYPRE_Solver) solver, 1 );
 
       if ((solver_id == 30) || (solver_id == 31))
@@ -2178,6 +2180,7 @@ main( int   argc,
       HYPRE_GMRESSetKDim(par_solver, 5);
       HYPRE_GMRESSetMaxIter(par_solver, 100);
       HYPRE_GMRESSetTol(par_solver, 1.0e-06);
+      HYPRE_GMRESSetPrintLevel(par_solver, 1);
       HYPRE_GMRESSetLogging(par_solver, 1);
 
       if (solver_id == 40)
