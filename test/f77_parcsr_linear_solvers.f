@@ -17,7 +17,6 @@ c-----------------------------------------------------------------------
 
       integer             num_procs, myid
 
-      integer             comm
       integer             dim
       integer             nx, ny, nz
       integer             Px, Py, Pz
@@ -48,14 +47,10 @@ c     HYPRE_Solver        precond
       integer*8           solver
       integer*8           precond
 
-      integer             offsets(3,MAXDIM+1)
-
       double precision    values(3)
 
       integer             p, q, r
 
-      integer             i, s, d
-      integer             ix, iy, iz, ib
       integer             ierr
 
       data zero          / 0 /
@@ -173,7 +168,7 @@ c     Set up the matrix
 c-----------------------------------------------------------------------
 
       call hypre_GenerateLaplacian(comm, nx, ny, nz, Px, Py, Pz,
-                                   p, q, r, values, A, ierr)
+     &                             p, q, r, values, A, ierr)
 
 c     call HYPRE_NewParCSRMatrix(MPI_COMM_WORLD, gnrows, gncols,
 c    &   rstarts, cstarts, ncoloffdg, nonzsdg, nonzsoffdg, A, ierr)
@@ -189,15 +184,17 @@ c-----------------------------------------------------------------------
       values(3) = -cz
 
       call HYPRE_NewParVector(MPI_COMM_WORLD, 
-                              hypre_ParCSRMatrixGlobalNumRows(A),
-                              hypre_ParCSRMatrixRowStarts(A), b, ierr)
+     &                        hypre_ParCSRMatrixGlobalNumRows(A),
+     &                        hypre_ParCSRMatrixRowStarts(A), b, ierr)
       call hypre_SetParVectorPartioningOwner(b, 0, ierr)
       call HYPRE_InitializeParVector(b, ierr)
       call hypre_SetParVectorConstantValues(b, 0.0, ierr)
 c     call HYPRE_PrintParVector("driver.out.b", b, zero, ierr)
 
-      call HYPRE_NewParVector(MPI_COMM_WORLD, gnrows, partitioning, x, ierr)
-      call hypre_SetParVectorPartioningOwner(b, 0, ierr)
+      call HYPRE_NewParVector(MPI_COMM_WORLD, 
+     &                        hypre_ParCSRMatrixGlobalNumRows(A),
+     &                        hypre_ParCSRMatrixRowStarts(A), x, ierr)
+      call hypre_SetParVectorPartioningOwner(x, 0, ierr)
       call HYPRE_InitializeParVector(x, ierr)
       call hypre_SetParVectorConstantValues(x, 1.0, ierr)
 c     call HYPRE_PrintParVector("driver.out.x0", x, zero, ierr)
@@ -267,43 +264,43 @@ c         Use BoomerAMG as preconditioner
      &                                   HYPRE_ParAMGSetup,
      &                                   gmres_precond, ierr)
 
-        else if (solver_id .eq. 4)
+        else if (solver_id .eq. 4) then
           pcg_precond = 0
 
           call HYPRE_ParCSRGMRESSetPrecond(solver,
-                                           HYPRE_ParCSRDiagScale,
-                                           HYPRE_ParCSRDiagScaleSetup,
-                                           gmres_precond, ierr);
+     &                                     HYPRE_ParCSRDiagScale,
+     &                                     HYPRE_ParCSRDiagScaleSetup,
+     &                                     gmres_precond, ierr)
 
-        else if (solver_id .eq. 7)
+        else if (solver_id .eq. 7) then
 
           call HYPRE_ParCSRPilutInitialize(MPI_COMM_WORLD,
      &                                     gmres_precond, ierr) 
 
-            if (ierr .neq. 0)
-               write(6,*) 'Error in ParCSRPilutInitialize'
+          if (ierr .ne. 0) write(6,*) 'ParCSRPilutInitialize error'
 
-            call  HYPRE_ParCSRGMRESSetPrecond(solver,
-                                              HYPRE_ParCSRPilutSolve,
-                                              HYPRE_ParCSRPilutSetup,
-                                              gmres_precond, ierr);
+          call HYPRE_ParCSRGMRESSetPrecond(solver,
+     &                                     HYPRE_ParCSRPilutSolve,
+     &                                     HYPRE_ParCSRPilutSetup,
+     &                                     gmres_precond, ierr)
 
-            if (drop_tol .ge. 0.)
-               call HYPRE_ParCSRPilutSetDropTolerance(gmres_precond,
+           if (drop_tol .ge. 0.)
+     &         call HYPRE_ParCSRPilutSetDropTolerance(gmres_precond,
      &                                                drop_tol, ierr)
-         endif
 
-         call HYPRE_ParCSRGMRESSetup(solver, A, b, x, ierr)
+        endif
 
-         call HYPRE_ParCSRGMRESSolve(solver, A, b, x, ierr)
+        call HYPRE_ParCSRGMRESSetup(solver, A, b, x, ierr)
 
-         call HYPRE_ParCSRGMRESGetNumIterations(solver,
+        call HYPRE_ParCSRGMRESSolve(solver, A, b, x, ierr)
+
+        call HYPRE_ParCSRGMRESGetNumIterations(solver,
      &                                          num_iterations, ierr)
 
-         call HYPRE_ParCSRGMRESGetFinalRelative(solver,
+        call HYPRE_ParCSRGMRESGetFinalRelative(solver,
      &                                          final_res_norm, ierr)
 
-         call HYPRE_ParCSRGMRESFinalize(solver, ierr)
+        call HYPRE_ParCSRGMRESFinalize(solver, ierr)
 
       endif
 
