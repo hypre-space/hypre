@@ -63,6 +63,7 @@ FILES =\
  interp.c\
  laplace.c\
  laplace_9pt.c\
+ laplace_27pt.c\
  random.c\
  rap.c \
  relax.c\

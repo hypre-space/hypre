@@ -86,6 +86,7 @@ int main P((int argc , char *argv []));
 int BuildFromFile P((int argc , char *argv [], int arg_index , hypre_CSRMatrix **A_ptr ));
 int BuildLaplacian P((int argc , char *argv [], int arg_index , hypre_CSRMatrix **A_ptr ));
 int BuildLaplacian9pt P((int argc , char *argv [], int arg_index , hypre_CSRMatrix **A_ptr ));
+int BuildLaplacian27pt P((int argc , char *argv [], int arg_index , hypre_CSRMatrix **A_ptr ));
 int BuildRhsFromFile P((int argc , char *argv [], int arg_index , hypre_CSRMatrix *A, hypre_Vector **b_ptr ));
 
 /* indepset.c */
@@ -102,6 +103,10 @@ int map P((int ix , int iy , int iz , int p , int q , int r , int P , int Q , in
 /* laplace_9pt.c */
 hypre_CSRMatrix *hypre_GenerateLaplacian9pt P((int nx , int ny , int P , int Q , double *value ));
 int map2 P((int ix , int iy , int p , int q , int P , int Q , int *nx_part , int *ny_part , int *global_part ));
+
+/* laplace_27pt.c */
+hypre_CSRMatrix *hypre_GenerateLaplacian27pt P((int nx , int ny , int nz , int P , int Q , int R , double *value ));
+int map3 P((int ix , int iy , int iz , int p , int q , int r , int P , int Q , int R , int *nx_part , int *ny_part , int *nz_part , int *global_part ));
 
 /* pcg.c */
 void PCG P((hypre_Vector *x , hypre_Vector *b , double tol , void *data ));
