@@ -227,7 +227,7 @@ void LoadBalRecipRecv(MPI_Comm comm, Numbering *numb,
 
 	/* Set the indices of the local matrix containing donated rows */
 
-        for (row=0; row<=end_row - beg_row; row++)
+        for (row=beg_row; row<=end_row; row++)
         {
             len = *bufferp++;
 	    NumberingGlobalToLocal(numb, len, bufferp, bufferp);

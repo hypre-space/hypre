@@ -165,11 +165,13 @@ void MatrixDestroy(Matrix *mat)
  * MatrixSetRow - Set a row in a matrix.  Only local rows can be set.
  * Once a row has been set, it should not be set again, or else the 
  * memory used by the existing row will not be recovered until 
- * the matrix is destroyed.
+ * the matrix is destroyed.  "row" is in global coordinate numbering.
  *--------------------------------------------------------------------------*/
 
 void MatrixSetRow(Matrix *mat, int row, int len, int *ind, double *val)
 {
+    row -= mat->beg_row;
+
     mat->lens[row] = len;
     mat->inds[row] = (int *) MemAlloc(mat->mem, len*sizeof(int));
     mat->vals[row] = (double *) MemAlloc(mat->mem, len*sizeof(double));
@@ -361,7 +363,7 @@ static void MatrixReadMaster(Matrix *mat, char *filename)
 	if (row != curr_row)
 	{
 	    /* store this row */
-	    MatrixSetRow(mat, curr_row - mat->beg_row, len, ind, val);
+	    MatrixSetRow(mat, curr_row, len, ind, val);
 
 	    curr_row = row;
 
@@ -386,7 +388,7 @@ static void MatrixReadMaster(Matrix *mat, char *filename)
 
     /* Store the final row */
     if (ret == EOF || row > mat->end_row)
-	MatrixSetRow(mat, mat->end_row - mat->beg_row, len, ind, val);
+	MatrixSetRow(mat, mat->end_row, len, ind, val);
 
     fclose(file);
 
@@ -435,7 +437,7 @@ static void MatrixReadSlave(Matrix *mat, char *filename)
 	if (row != curr_row)
 	{
 	    /* store this row */
-	    MatrixSetRow(mat, curr_row - mat->beg_row, len, ind, val);
+	    MatrixSetRow(mat, curr_row, len, ind, val);
 
 	    curr_row = row;
 
@@ -460,7 +462,7 @@ static void MatrixReadSlave(Matrix *mat, char *filename)
 
     /* Store the final row */
     if (ret == EOF || row > mat->end_row)
-	MatrixSetRow(mat, mat->end_row - mat->beg_row, len, ind, val);
+	MatrixSetRow(mat, mat->end_row, len, ind, val);
 
     fclose(file);
     time1 = MPI_Wtime();

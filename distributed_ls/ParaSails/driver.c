@@ -91,16 +91,16 @@ int main(int argc, char *argv[])
             b[i] = (double) (2*rand()) / (double) RAND_MAX - 1.0;
     }
 
-    while (num_runs--)
+    while (num_runs && num_runs >= -1)
     {
         /* Initial guess */
         for (i=0; i<end_row-beg_row+1; i++)
             x[i] = 0.0;
 
-	if (num_runs == 0)
+	if (num_runs == -1)
 	{
             thresh = 0.0;
-	    nlevels = 1;
+	    nlevels = 0;
 	    filter = 0.0;
             loadbal = 0.0;
 	}
@@ -183,6 +183,8 @@ int main(int argc, char *argv[])
 	}
 
         ParaSailsDestroy(ps);
+
+        num_runs--;
     }
 
     free(x);

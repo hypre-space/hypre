@@ -50,7 +50,7 @@ int HYPRE_ParaSailsCreate(MPI_Comm comm, HYPRE_DistributedMatrix *distmat,
     for (row=beg_row; row<=end_row; row++)
     {
 	HYPRE_DistributedMatrixGetRow(distmat, row, &len, &ind, &val);
-	MatrixSetRow(internal->A, row-beg_row, len, ind, val);
+	MatrixSetRow(internal->A, row, len, ind, val);
 	HYPRE_DistributedMatrixRestoreRow(distmat, row, &len, &ind, &val);
     }
 

@@ -637,7 +637,7 @@ static void ConstructPatternForEachRow(int symmetric, PrunedRows *pruned_rows,
 
         /* Store structure of row in matrix M */
         /* Following statement allocates space but does not store values */
-        MatrixSetRow(M, row, len, ind, NULL);
+        MatrixSetRow(M, row+M->beg_row, len, ind, NULL);
 
         nnz += len;
         (*costp) += (double) len*len*len;
@@ -1130,7 +1130,7 @@ static void FilterValues(Matrix *M, Matrix *F, DiagScale *diag_scale,
 	    }
         }
 
-        MatrixSetRow(F, row, j, ind, val);
+        MatrixSetRow(F, row+F->beg_row, j, ind, val);
     }
 }
 
