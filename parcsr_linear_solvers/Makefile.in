@@ -106,6 +106,7 @@ FILES =\
  HYPRE_parcsr_pcg.c\
  HYPRE_parcsr_pilut.c\
  HYPRE_parcsr_ParaSails.c\
+ HYPRE_parcsr_Euclid.c\
  F90_par_laplace.c\
  F90_HYPRE_parcsr_amg.c\
  F90_HYPRE_parcsr_bicgstab.c\
