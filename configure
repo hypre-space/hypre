@@ -2868,19 +2868,19 @@ unset ac_cv_lib_$ac_lib_var
 
      
    if test -z "$CDEBUG"; then
-      CDEBUG="-g"
+      CDEBUG="-g -64"
    fi
    
 
      
    if test -z "$CXXOPT"; then
-      CXXOPT="-64"
+      CXXOPT="-64 -64"
    fi
    
 
      
    if test -z "$CXXDEBUG"; then
-      CXXDEBUG="-g"
+      CXXDEBUG="-g -64"
    fi
    
 
@@ -2892,7 +2892,7 @@ unset ac_cv_lib_$ac_lib_var
 
      
    if test -z "$FDEBUG"; then
-      FDEBUG="-g"
+      FDEBUG="-g -64"
    fi
    
 
