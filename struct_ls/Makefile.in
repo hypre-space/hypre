@@ -34,7 +34,7 @@ CFLAGS = \
  ${CDEFS}
 
 RANLIB = @RANLIB@
- 
+
 MPILIBFLAGS = @MPILIBDIRS@ @MPILIBS@ @MPIFLAGS@ 
 LIBFLAGS = @LIBDIRS@ @LIBS@
 LDLIBFLAGS = @LDLIBDIRS@ @LDLIBS@
@@ -51,6 +51,7 @@ LFLAGS =\
 
 HEADERS =\
  headers.h\
+ pfmg.h\
  smg.h\
  struct_linear_solvers.h\
  HYPRE_ls.h
@@ -61,6 +62,17 @@ FILES =\
  hybrid.c\
  pcg.c\
  pcg_struct.c\
+ pfmg.c\
+ pfmg2_setup_rap.c\
+ pfmg3_setup_rap.c\
+ pfmg_interp.c\
+ pfmg_relax.c\
+ pfmg_restrict.c\
+ pfmg_setup.c\
+ pfmg_setup_interp.c\
+ pfmg_setup_rap.c\
+ pfmg_solve.c\
+ point_relax.c\
  smg2_setup_rap.c\
  smg3_setup_rap.c\
  smg.c\
@@ -75,6 +87,7 @@ FILES =\
  smg_solve.c\
  thread_wrappers.c\
  HYPRE_struct_hybrid.c\
+ HYPRE_struct_pfmg.c\
  HYPRE_struct_smg.c\
  HYPRE_struct_pcg.c
 

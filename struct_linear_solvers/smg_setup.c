@@ -14,6 +14,8 @@
 #include "headers.h"
 #include "smg.h"
 
+#define DEBUG 0
+
 /*--------------------------------------------------------------------------
  * hypre_SMGSetup
  *--------------------------------------------------------------------------*/
@@ -90,6 +92,9 @@ hypre_SMGSetup( void               *smg_vdata,
    int                   x_num_ghost[]  = {0, 0, 0, 0, 0, 0};
                        
    int                   ierr = 0;
+#if DEBUG
+   char                  filename[255];
+#endif
 
    /*-----------------------------------------------------
     * Set up coarsening direction
@@ -458,23 +463,18 @@ hypre_SMGSetup( void               *smg_vdata,
       (smg_data -> rel_norms) = hypre_TAlloc(double, max_iter);
    }
 
-#if 0
+#if DEBUG
+   if(hypre_StructGridDim(grid_l[0]) == 3)
    {
-      if(hypre_StructGridDim(grid_l[0]) == 3)
+      for (l = 0; l < (num_levels - 1); l++)
       {
-         char  filename[255];
-
-         /* debugging stuff */
-         for (l = 0; l < (num_levels - 1); l++)
-         {
-            sprintf(filename, "zout_A.%02d", l);
-            hypre_PrintStructMatrix(filename, A_l[l], 0);
-            sprintf(filename, "zout_PT.%02d", l);
-            hypre_PrintStructMatrix(filename, PT_l[l], 0);
-         }
          sprintf(filename, "zout_A.%02d", l);
          hypre_PrintStructMatrix(filename, A_l[l], 0);
+         sprintf(filename, "zout_PT.%02d", l);
+         hypre_PrintStructMatrix(filename, PT_l[l], 0);
       }
+      sprintf(filename, "zout_A.%02d", l);
+      hypre_PrintStructMatrix(filename, A_l[l], 0);
    }
 #endif
 

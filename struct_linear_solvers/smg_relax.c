@@ -695,31 +695,17 @@ hypre_SMGRelaxSetMaxIter( void *relax_vdata,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SMGRelaxSetNonZeroGuess
- *--------------------------------------------------------------------------*/
-
-int
-hypre_SMGRelaxSetNonZeroGuess( void *relax_vdata )
-{
-   hypre_SMGRelaxData *relax_data = relax_vdata;
-   int                 ierr = 0;
-
-   (relax_data -> zero_guess) = 0;
-
-   return ierr;
-}
-
-/*--------------------------------------------------------------------------
  * hypre_SMGRelaxSetZeroGuess
  *--------------------------------------------------------------------------*/
 
 int
-hypre_SMGRelaxSetZeroGuess( void *relax_vdata )
+hypre_SMGRelaxSetZeroGuess( void *relax_vdata,
+                            int   zero_guess  )
 {
    hypre_SMGRelaxData *relax_data = relax_vdata;
    int                 ierr = 0;
 
-   (relax_data -> zero_guess) = 1;
+   (relax_data -> zero_guess) = zero_guess;
 
    return ierr;
 }

@@ -14,6 +14,8 @@
 #include "headers.h"
 #include "smg.h"
 
+#define DEBUG 0
+
 /*--------------------------------------------------------------------------
  * hypre_SMGSolve
  *    This is the main solve routine for the Schaffer multigrid method.
@@ -59,6 +61,7 @@ hypre_SMGSolve( void               *smg_vdata,
    double                tol             = (smg_data -> tol);
    int                   max_iter        = (smg_data -> max_iter);
    int                   rel_change      = (smg_data -> rel_change);
+   int                   zero_guess      = (smg_data -> zero_guess);
    int                   num_levels      = (smg_data -> num_levels);
    int                   num_pre_relax   = (smg_data -> num_pre_relax);
    int                   num_post_relax  = (smg_data -> num_post_relax);
@@ -84,13 +87,15 @@ hypre_SMGSolve( void               *smg_vdata,
    int                   i, l;
                     
    int                   ierr = 0;
-
-   hypre_BeginTiming(smg_data -> time_index);
+#if DEBUG
+   char                  filename[255];
+#endif
 
    /*-----------------------------------------------------
-    * Do V-cycles:
-    *   For each index l, "fine" = l, "coarse" = (l+1)
+    * Initialize some things and deal with special cases
     *-----------------------------------------------------*/
+
+   hypre_BeginTiming(smg_data -> time_index);
 
    A_l[0] = A;
    b_l[0] = b;
@@ -98,6 +103,20 @@ hypre_SMGSolve( void               *smg_vdata,
 
    (smg_data -> num_iterations) = 0;
 
+   /* if max_iter is zero, return */
+   if (max_iter == 0)
+   {
+      /* if using a zero initial guess, return zero */
+      if (zero_guess)
+      {
+         hypre_SetStructVectorConstantValues(x, 0.0);
+      }
+
+      hypre_EndTiming(smg_data -> time_index);
+      return ierr;
+   }
+
+   /* part of convergence check */
    if (tol > 0.0)
    {
       /* eps = (tol^2)*<b,b> */
@@ -113,9 +132,16 @@ hypre_SMGSolve( void               *smg_vdata,
             norms[0]     = 0.0;
             rel_norms[0] = 0.0;
          }
+
+         hypre_EndTiming(smg_data -> time_index);
          return ierr;
       }
    }
+
+   /*-----------------------------------------------------
+    * Do V-cycles:
+    *   For each index l, "fine" = l, "coarse" = (l+1)
+    *-----------------------------------------------------*/
 
    for (i = 0; i < max_iter; i++)
    {
@@ -131,20 +157,17 @@ hypre_SMGSolve( void               *smg_vdata,
       }
       if (i == 0)
       {
-         if (smg_data -> zero_guess)
-            hypre_SMGRelaxSetZeroGuess(relax_data_l[0]);
-         else
-            hypre_SMGRelaxSetNonZeroGuess(relax_data_l[0]);
+         hypre_SMGRelaxSetZeroGuess(relax_data_l[0], zero_guess);
       }
       else
       {
-         hypre_SMGRelaxSetNonZeroGuess(relax_data_l[0]);
+         hypre_SMGRelaxSetZeroGuess(relax_data_l[0], 0);
       }
       /* part of convergence check */
       if ((i == 0) && (tol > 0.0) && (rel_change))
       {
          /* store x in tb) */
-         if (!(smg_data -> zero_guess))
+         if (!zero_guess)
          {
             hypre_StructCopy(x_l[0], r_l[0]);
          }
@@ -153,7 +176,7 @@ hypre_SMGSolve( void               *smg_vdata,
       /* part of convergence check */
       if ((i == 0) && (tol > 0.0) && (rel_change))
       {
-         if (!(smg_data -> zero_guess))
+         if (!zero_guess)
          {
             /* compute x_i+1 - x_i, (note: x_i stored in r) */
             hypre_StructAxpy(-1.0, x_l[0], r_l[0]);
@@ -203,18 +226,15 @@ hypre_SMGSolve( void               *smg_vdata,
             hypre_SMGRelaxSetMaxIter(relax_data_l[l], num_pre_relax);
             hypre_SMGRelaxSetRegSpaceRank(relax_data_l[l], 0, 0);
             hypre_SMGRelaxSetRegSpaceRank(relax_data_l[l], 1, 1);
-            hypre_SMGRelaxSetZeroGuess(relax_data_l[l]);
+            hypre_SMGRelaxSetZeroGuess(relax_data_l[l], 1);
             hypre_SMGRelax(relax_data_l[l], A_l[l], b_l[l], x_l[l]);
             hypre_SMGResidual(residual_data_l[l],
                               A_l[l], x_l[l], b_l[l], r_l[l]);
          }
          hypre_SMGRestrict(restrict_data_l[l], R_l[l], r_l[l], b_l[l+1]);
-#if 0
-         /* for debugging purposes */
+#if DEBUG
          if(hypre_StructStencilDim(hypre_StructMatrixStencil(A)) == 3)
          {
-            char  filename[255];
-
             sprintf(filename, "zout_xbefore.%02d", l);
             hypre_PrintStructVector(filename, x_l[l], 0);
             sprintf(filename, "zout_b.%02d", l+1);
@@ -229,7 +249,7 @@ hypre_SMGSolve( void               *smg_vdata,
 
       if (num_levels > 1)
       {
-         hypre_SMGRelaxSetZeroGuess(relax_data_l[l]);
+         hypre_SMGRelaxSetZeroGuess(relax_data_l[l], 1);
          hypre_SMGRelax(relax_data_l[l], A_l[l], b_l[l], x_l[l]);
       }
 
@@ -254,12 +274,9 @@ hypre_SMGSolve( void               *smg_vdata,
             xx_dot_xx = hypre_StructInnerProd(tb_l[0], tb_l[0]);
             x_dot_x = hypre_StructInnerProd(x_l[0], x_l[0]);
          }
-#if 0
-         /* for debugging purposes */
+#if DEBUG
          if(hypre_StructStencilDim(hypre_StructMatrixStencil(A)) == 3)
          {
-            char  filename[255];
-
             sprintf(filename, "zout_xafter.%02d", l);
             hypre_PrintStructVector(filename, x_l[l], 0);
          }
@@ -270,7 +287,7 @@ hypre_SMGSolve( void               *smg_vdata,
             hypre_SMGRelaxSetRegSpaceRank(relax_data_l[l], 0, 1);
             hypre_SMGRelaxSetRegSpaceRank(relax_data_l[l], 1, 0);
          }
-         hypre_SMGRelaxSetNonZeroGuess(relax_data_l[l]);
+         hypre_SMGRelaxSetZeroGuess(relax_data_l[l], 0);
          hypre_SMGRelax(relax_data_l[l], A_l[l], b_l[l], x_l[l]);
       }
 

@@ -1,7 +1,694 @@
 
 #ifdef HYPRE_USE_PTHREADS
 #include "HYPRE_ls.h"
-#include "utilities.h"
+
+
+/*----------------------------------------------------------------
+ * HYPRE_StructHybridInitialize thread wrappers
+ *----------------------------------------------------------------*/
+
+typedef struct {
+   MPI_Comm comm;
+   HYPRE_StructSolverArray *solver;
+   int  returnvalue[hypre_MAX_THREADS];
+} HYPRE_StructHybridInitializeArgs;
+
+void
+HYPRE_StructHybridInitializeVoidPtr( void *argptr )
+{
+   int threadid = hypre_GetThreadID();
+
+   HYPRE_StructHybridInitializeArgs *localargs =
+      (HYPRE_StructHybridInitializeArgs *) argptr;
+
+   (localargs -> returnvalue[threadid]) =
+      HYPRE_StructHybridInitialize(
+         localargs -> comm,
+         &(*(localargs -> solver))[threadid] );
+}
+
+int 
+HYPRE_StructHybridInitializePush(
+   MPI_Comm comm,
+   HYPRE_StructSolverArray *solver )
+{
+   HYPRE_StructHybridInitializeArgs pushargs;
+   int i;
+   int  returnvalue;
+
+   pushargs.comm = comm;
+   pushargs.solver = (HYPRE_StructSolverArray *)solver;
+   for (i = 0; i < hypre_NumThreads; i++)
+      hypre_work_put( HYPRE_StructHybridInitializeVoidPtr, (void *)&pushargs );
+
+   hypre_work_wait();
+
+   returnvalue = pushargs.returnvalue[0];
+
+   return returnvalue;
+}
+
+/*----------------------------------------------------------------
+ * HYPRE_StructHybridFinalize thread wrappers
+ *----------------------------------------------------------------*/
+
+typedef struct {
+   HYPRE_StructSolverArray *solver;
+   int  returnvalue[hypre_MAX_THREADS];
+} HYPRE_StructHybridFinalizeArgs;
+
+void
+HYPRE_StructHybridFinalizeVoidPtr( void *argptr )
+{
+   int threadid = hypre_GetThreadID();
+
+   HYPRE_StructHybridFinalizeArgs *localargs =
+      (HYPRE_StructHybridFinalizeArgs *) argptr;
+
+   (localargs -> returnvalue[threadid]) =
+      HYPRE_StructHybridFinalize(
+         (*(localargs -> solver))[threadid] );
+}
+
+int 
+HYPRE_StructHybridFinalizePush(
+   HYPRE_StructSolverArray solver )
+{
+   HYPRE_StructHybridFinalizeArgs pushargs;
+   int i;
+   int  returnvalue;
+
+   pushargs.solver = (HYPRE_StructSolverArray *)solver;
+   for (i = 0; i < hypre_NumThreads; i++)
+      hypre_work_put( HYPRE_StructHybridFinalizeVoidPtr, (void *)&pushargs );
+
+   hypre_work_wait();
+
+   returnvalue = pushargs.returnvalue[0];
+
+   return returnvalue;
+}
+
+/*----------------------------------------------------------------
+ * HYPRE_StructHybridSetup thread wrappers
+ *----------------------------------------------------------------*/
+
+typedef struct {
+   HYPRE_StructSolverArray *solver;
+   HYPRE_StructMatrixArray *A;
+   HYPRE_StructVectorArray *b;
+   HYPRE_StructVectorArray *x;
+   int  returnvalue[hypre_MAX_THREADS];
+} HYPRE_StructHybridSetupArgs;
+
+void
+HYPRE_StructHybridSetupVoidPtr( void *argptr )
+{
+   int threadid = hypre_GetThreadID();
+
+   HYPRE_StructHybridSetupArgs *localargs =
+      (HYPRE_StructHybridSetupArgs *) argptr;
+
+   (localargs -> returnvalue[threadid]) =
+      HYPRE_StructHybridSetup(
+         (*(localargs -> solver))[threadid],
+         (*(localargs -> A))[threadid],
+         (*(localargs -> b))[threadid],
+         (*(localargs -> x))[threadid] );
+}
+
+int 
+HYPRE_StructHybridSetupPush(
+   HYPRE_StructSolverArray solver,
+   HYPRE_StructMatrixArray A,
+   HYPRE_StructVectorArray b,
+   HYPRE_StructVectorArray x )
+{
+   HYPRE_StructHybridSetupArgs pushargs;
+   int i;
+   int  returnvalue;
+
+   pushargs.solver = (HYPRE_StructSolverArray *)solver;
+   pushargs.A = (HYPRE_StructMatrixArray *)A;
+   pushargs.b = (HYPRE_StructVectorArray *)b;
+   pushargs.x = (HYPRE_StructVectorArray *)x;
+   for (i = 0; i < hypre_NumThreads; i++)
+      hypre_work_put( HYPRE_StructHybridSetupVoidPtr, (void *)&pushargs );
+
+   hypre_work_wait();
+
+   returnvalue = pushargs.returnvalue[0];
+
+   return returnvalue;
+}
+
+/*----------------------------------------------------------------
+ * HYPRE_StructHybridSolve thread wrappers
+ *----------------------------------------------------------------*/
+
+typedef struct {
+   HYPRE_StructSolverArray *solver;
+   HYPRE_StructMatrixArray *A;
+   HYPRE_StructVectorArray *b;
+   HYPRE_StructVectorArray *x;
+   int  returnvalue[hypre_MAX_THREADS];
+} HYPRE_StructHybridSolveArgs;
+
+void
+HYPRE_StructHybridSolveVoidPtr( void *argptr )
+{
+   int threadid = hypre_GetThreadID();
+
+   HYPRE_StructHybridSolveArgs *localargs =
+      (HYPRE_StructHybridSolveArgs *) argptr;
+
+   (localargs -> returnvalue[threadid]) =
+      HYPRE_StructHybridSolve(
+         (*(localargs -> solver))[threadid],
+         (*(localargs -> A))[threadid],
+         (*(localargs -> b))[threadid],
+         (*(localargs -> x))[threadid] );
+}
+
+int 
+HYPRE_StructHybridSolvePush(
+   HYPRE_StructSolverArray solver,
+   HYPRE_StructMatrixArray A,
+   HYPRE_StructVectorArray b,
+   HYPRE_StructVectorArray x )
+{
+   HYPRE_StructHybridSolveArgs pushargs;
+   int i;
+   int  returnvalue;
+
+   pushargs.solver = (HYPRE_StructSolverArray *)solver;
+   pushargs.A = (HYPRE_StructMatrixArray *)A;
+   pushargs.b = (HYPRE_StructVectorArray *)b;
+   pushargs.x = (HYPRE_StructVectorArray *)x;
+   for (i = 0; i < hypre_NumThreads; i++)
+      hypre_work_put( HYPRE_StructHybridSolveVoidPtr, (void *)&pushargs );
+
+   hypre_work_wait();
+
+   returnvalue = pushargs.returnvalue[0];
+
+   return returnvalue;
+}
+
+/*----------------------------------------------------------------
+ * HYPRE_StructHybridSetTol thread wrappers
+ *----------------------------------------------------------------*/
+
+typedef struct {
+   HYPRE_StructSolverArray *solver;
+   double tol;
+   int  returnvalue[hypre_MAX_THREADS];
+} HYPRE_StructHybridSetTolArgs;
+
+void
+HYPRE_StructHybridSetTolVoidPtr( void *argptr )
+{
+   int threadid = hypre_GetThreadID();
+
+   HYPRE_StructHybridSetTolArgs *localargs =
+      (HYPRE_StructHybridSetTolArgs *) argptr;
+
+   (localargs -> returnvalue[threadid]) =
+      HYPRE_StructHybridSetTol(
+         (*(localargs -> solver))[threadid],
+         localargs -> tol );
+}
+
+int 
+HYPRE_StructHybridSetTolPush(
+   HYPRE_StructSolverArray solver,
+   double tol )
+{
+   HYPRE_StructHybridSetTolArgs pushargs;
+   int i;
+   int  returnvalue;
+
+   pushargs.solver = (HYPRE_StructSolverArray *)solver;
+   pushargs.tol = tol;
+   for (i = 0; i < hypre_NumThreads; i++)
+      hypre_work_put( HYPRE_StructHybridSetTolVoidPtr, (void *)&pushargs );
+
+   hypre_work_wait();
+
+   returnvalue = pushargs.returnvalue[0];
+
+   return returnvalue;
+}
+
+/*----------------------------------------------------------------
+ * HYPRE_StructHybridSetConvergenceTol thread wrappers
+ *----------------------------------------------------------------*/
+
+typedef struct {
+   HYPRE_StructSolverArray *solver;
+   double cf_tol;
+   int  returnvalue[hypre_MAX_THREADS];
+} HYPRE_StructHybridSetConvergenceTolArgs;
+
+void
+HYPRE_StructHybridSetConvergenceTolVoidPtr( void *argptr )
+{
+   int threadid = hypre_GetThreadID();
+
+   HYPRE_StructHybridSetConvergenceTolArgs *localargs =
+      (HYPRE_StructHybridSetConvergenceTolArgs *) argptr;
+
+   (localargs -> returnvalue[threadid]) =
+      HYPRE_StructHybridSetConvergenceTol(
+         (*(localargs -> solver))[threadid],
+         localargs -> cf_tol );
+}
+
+int 
+HYPRE_StructHybridSetConvergenceTolPush(
+   HYPRE_StructSolverArray solver,
+   double cf_tol )
+{
+   HYPRE_StructHybridSetConvergenceTolArgs pushargs;
+   int i;
+   int  returnvalue;
+
+   pushargs.solver = (HYPRE_StructSolverArray *)solver;
+   pushargs.cf_tol = cf_tol;
+   for (i = 0; i < hypre_NumThreads; i++)
+      hypre_work_put( HYPRE_StructHybridSetConvergenceTolVoidPtr, (void *)&pushargs );
+
+   hypre_work_wait();
+
+   returnvalue = pushargs.returnvalue[0];
+
+   return returnvalue;
+}
+
+/*----------------------------------------------------------------
+ * HYPRE_StructHybridSetMaxDSIterations thread wrappers
+ *----------------------------------------------------------------*/
+
+typedef struct {
+   HYPRE_StructSolverArray *solver;
+   int max_ds_its;
+   int  returnvalue[hypre_MAX_THREADS];
+} HYPRE_StructHybridSetMaxDSIterationsArgs;
+
+void
+HYPRE_StructHybridSetMaxDSIterationsVoidPtr( void *argptr )
+{
+   int threadid = hypre_GetThreadID();
+
+   HYPRE_StructHybridSetMaxDSIterationsArgs *localargs =
+      (HYPRE_StructHybridSetMaxDSIterationsArgs *) argptr;
+
+   (localargs -> returnvalue[threadid]) =
+      HYPRE_StructHybridSetMaxDSIterations(
+         (*(localargs -> solver))[threadid],
+         localargs -> max_ds_its );
+}
+
+int 
+HYPRE_StructHybridSetMaxDSIterationsPush(
+   HYPRE_StructSolverArray solver,
+   int max_ds_its )
+{
+   HYPRE_StructHybridSetMaxDSIterationsArgs pushargs;
+   int i;
+   int  returnvalue;
+
+   pushargs.solver = (HYPRE_StructSolverArray *)solver;
+   pushargs.max_ds_its = max_ds_its;
+   for (i = 0; i < hypre_NumThreads; i++)
+      hypre_work_put( HYPRE_StructHybridSetMaxDSIterationsVoidPtr, (void *)&pushargs );
+
+   hypre_work_wait();
+
+   returnvalue = pushargs.returnvalue[0];
+
+   return returnvalue;
+}
+
+/*----------------------------------------------------------------
+ * HYPRE_StructHybridSetMaxMGIterations thread wrappers
+ *----------------------------------------------------------------*/
+
+typedef struct {
+   HYPRE_StructSolverArray *solver;
+   int max_mg_its;
+   int  returnvalue[hypre_MAX_THREADS];
+} HYPRE_StructHybridSetMaxMGIterationsArgs;
+
+void
+HYPRE_StructHybridSetMaxMGIterationsVoidPtr( void *argptr )
+{
+   int threadid = hypre_GetThreadID();
+
+   HYPRE_StructHybridSetMaxMGIterationsArgs *localargs =
+      (HYPRE_StructHybridSetMaxMGIterationsArgs *) argptr;
+
+   (localargs -> returnvalue[threadid]) =
+      HYPRE_StructHybridSetMaxMGIterations(
+         (*(localargs -> solver))[threadid],
+         localargs -> max_mg_its );
+}
+
+int 
+HYPRE_StructHybridSetMaxMGIterationsPush(
+   HYPRE_StructSolverArray solver,
+   int max_mg_its )
+{
+   HYPRE_StructHybridSetMaxMGIterationsArgs pushargs;
+   int i;
+   int  returnvalue;
+
+   pushargs.solver = (HYPRE_StructSolverArray *)solver;
+   pushargs.max_mg_its = max_mg_its;
+   for (i = 0; i < hypre_NumThreads; i++)
+      hypre_work_put( HYPRE_StructHybridSetMaxMGIterationsVoidPtr, (void *)&pushargs );
+
+   hypre_work_wait();
+
+   returnvalue = pushargs.returnvalue[0];
+
+   return returnvalue;
+}
+
+/*----------------------------------------------------------------
+ * HYPRE_StructHybridSetTwoNorm thread wrappers
+ *----------------------------------------------------------------*/
+
+typedef struct {
+   HYPRE_StructSolverArray *solver;
+   int two_norm;
+   int  returnvalue[hypre_MAX_THREADS];
+} HYPRE_StructHybridSetTwoNormArgs;
+
+void
+HYPRE_StructHybridSetTwoNormVoidPtr( void *argptr )
+{
+   int threadid = hypre_GetThreadID();
+
+   HYPRE_StructHybridSetTwoNormArgs *localargs =
+      (HYPRE_StructHybridSetTwoNormArgs *) argptr;
+
+   (localargs -> returnvalue[threadid]) =
+      HYPRE_StructHybridSetTwoNorm(
+         (*(localargs -> solver))[threadid],
+         localargs -> two_norm );
+}
+
+int 
+HYPRE_StructHybridSetTwoNormPush(
+   HYPRE_StructSolverArray solver,
+   int two_norm )
+{
+   HYPRE_StructHybridSetTwoNormArgs pushargs;
+   int i;
+   int  returnvalue;
+
+   pushargs.solver = (HYPRE_StructSolverArray *)solver;
+   pushargs.two_norm = two_norm;
+   for (i = 0; i < hypre_NumThreads; i++)
+      hypre_work_put( HYPRE_StructHybridSetTwoNormVoidPtr, (void *)&pushargs );
+
+   hypre_work_wait();
+
+   returnvalue = pushargs.returnvalue[0];
+
+   return returnvalue;
+}
+
+/*----------------------------------------------------------------
+ * HYPRE_StructHybridSetRelChange thread wrappers
+ *----------------------------------------------------------------*/
+
+typedef struct {
+   HYPRE_StructSolverArray *solver;
+   int rel_change;
+   int  returnvalue[hypre_MAX_THREADS];
+} HYPRE_StructHybridSetRelChangeArgs;
+
+void
+HYPRE_StructHybridSetRelChangeVoidPtr( void *argptr )
+{
+   int threadid = hypre_GetThreadID();
+
+   HYPRE_StructHybridSetRelChangeArgs *localargs =
+      (HYPRE_StructHybridSetRelChangeArgs *) argptr;
+
+   (localargs -> returnvalue[threadid]) =
+      HYPRE_StructHybridSetRelChange(
+         (*(localargs -> solver))[threadid],
+         localargs -> rel_change );
+}
+
+int 
+HYPRE_StructHybridSetRelChangePush(
+   HYPRE_StructSolverArray solver,
+   int rel_change )
+{
+   HYPRE_StructHybridSetRelChangeArgs pushargs;
+   int i;
+   int  returnvalue;
+
+   pushargs.solver = (HYPRE_StructSolverArray *)solver;
+   pushargs.rel_change = rel_change;
+   for (i = 0; i < hypre_NumThreads; i++)
+      hypre_work_put( HYPRE_StructHybridSetRelChangeVoidPtr, (void *)&pushargs );
+
+   hypre_work_wait();
+
+   returnvalue = pushargs.returnvalue[0];
+
+   return returnvalue;
+}
+
+/*----------------------------------------------------------------
+ * HYPRE_StructHybridSetLogging thread wrappers
+ *----------------------------------------------------------------*/
+
+typedef struct {
+   HYPRE_StructSolverArray *solver;
+   int logging;
+   int  returnvalue[hypre_MAX_THREADS];
+} HYPRE_StructHybridSetLoggingArgs;
+
+void
+HYPRE_StructHybridSetLoggingVoidPtr( void *argptr )
+{
+   int threadid = hypre_GetThreadID();
+
+   HYPRE_StructHybridSetLoggingArgs *localargs =
+      (HYPRE_StructHybridSetLoggingArgs *) argptr;
+
+   (localargs -> returnvalue[threadid]) =
+      HYPRE_StructHybridSetLogging(
+         (*(localargs -> solver))[threadid],
+         localargs -> logging );
+}
+
+int 
+HYPRE_StructHybridSetLoggingPush(
+   HYPRE_StructSolverArray solver,
+   int logging )
+{
+   HYPRE_StructHybridSetLoggingArgs pushargs;
+   int i;
+   int  returnvalue;
+
+   pushargs.solver = (HYPRE_StructSolverArray *)solver;
+   pushargs.logging = logging;
+   for (i = 0; i < hypre_NumThreads; i++)
+      hypre_work_put( HYPRE_StructHybridSetLoggingVoidPtr, (void *)&pushargs );
+
+   hypre_work_wait();
+
+   returnvalue = pushargs.returnvalue[0];
+
+   return returnvalue;
+}
+
+/*----------------------------------------------------------------
+ * HYPRE_StructHybridGetNumIterations thread wrappers
+ *----------------------------------------------------------------*/
+
+typedef struct {
+   HYPRE_StructSolverArray *solver;
+   int *num_its;
+   int  returnvalue[hypre_MAX_THREADS];
+} HYPRE_StructHybridGetNumIterationsArgs;
+
+void
+HYPRE_StructHybridGetNumIterationsVoidPtr( void *argptr )
+{
+   int threadid = hypre_GetThreadID();
+
+   HYPRE_StructHybridGetNumIterationsArgs *localargs =
+      (HYPRE_StructHybridGetNumIterationsArgs *) argptr;
+
+   (localargs -> returnvalue[threadid]) =
+      HYPRE_StructHybridGetNumIterations(
+         (*(localargs -> solver))[threadid],
+         localargs -> num_its );
+}
+
+int 
+HYPRE_StructHybridGetNumIterationsPush(
+   HYPRE_StructSolverArray solver,
+   int *num_its )
+{
+   HYPRE_StructHybridGetNumIterationsArgs pushargs;
+   int i;
+   int  returnvalue;
+
+   pushargs.solver = (HYPRE_StructSolverArray *)solver;
+   pushargs.num_its = num_its;
+   for (i = 0; i < hypre_NumThreads; i++)
+      hypre_work_put( HYPRE_StructHybridGetNumIterationsVoidPtr, (void *)&pushargs );
+
+   hypre_work_wait();
+
+   returnvalue = pushargs.returnvalue[0];
+
+   return returnvalue;
+}
+
+/*----------------------------------------------------------------
+ * HYPRE_StructHybridGetNumDSIterations thread wrappers
+ *----------------------------------------------------------------*/
+
+typedef struct {
+   HYPRE_StructSolverArray *solver;
+   int *num_ds_its;
+   int  returnvalue[hypre_MAX_THREADS];
+} HYPRE_StructHybridGetNumDSIterationsArgs;
+
+void
+HYPRE_StructHybridGetNumDSIterationsVoidPtr( void *argptr )
+{
+   int threadid = hypre_GetThreadID();
+
+   HYPRE_StructHybridGetNumDSIterationsArgs *localargs =
+      (HYPRE_StructHybridGetNumDSIterationsArgs *) argptr;
+
+   (localargs -> returnvalue[threadid]) =
+      HYPRE_StructHybridGetNumDSIterations(
+         (*(localargs -> solver))[threadid],
+         localargs -> num_ds_its );
+}
+
+int 
+HYPRE_StructHybridGetNumDSIterationsPush(
+   HYPRE_StructSolverArray solver,
+   int *num_ds_its )
+{
+   HYPRE_StructHybridGetNumDSIterationsArgs pushargs;
+   int i;
+   int  returnvalue;
+
+   pushargs.solver = (HYPRE_StructSolverArray *)solver;
+   pushargs.num_ds_its = num_ds_its;
+   for (i = 0; i < hypre_NumThreads; i++)
+      hypre_work_put( HYPRE_StructHybridGetNumDSIterationsVoidPtr, (void *)&pushargs );
+
+   hypre_work_wait();
+
+   returnvalue = pushargs.returnvalue[0];
+
+   return returnvalue;
+}
+
+/*----------------------------------------------------------------
+ * HYPRE_StructHybridGetNumMGIterations thread wrappers
+ *----------------------------------------------------------------*/
+
+typedef struct {
+   HYPRE_StructSolverArray *solver;
+   int *num_mg_its;
+   int  returnvalue[hypre_MAX_THREADS];
+} HYPRE_StructHybridGetNumMGIterationsArgs;
+
+void
+HYPRE_StructHybridGetNumMGIterationsVoidPtr( void *argptr )
+{
+   int threadid = hypre_GetThreadID();
+
+   HYPRE_StructHybridGetNumMGIterationsArgs *localargs =
+      (HYPRE_StructHybridGetNumMGIterationsArgs *) argptr;
+
+   (localargs -> returnvalue[threadid]) =
+      HYPRE_StructHybridGetNumMGIterations(
+         (*(localargs -> solver))[threadid],
+         localargs -> num_mg_its );
+}
+
+int 
+HYPRE_StructHybridGetNumMGIterationsPush(
+   HYPRE_StructSolverArray solver,
+   int *num_mg_its )
+{
+   HYPRE_StructHybridGetNumMGIterationsArgs pushargs;
+   int i;
+   int  returnvalue;
+
+   pushargs.solver = (HYPRE_StructSolverArray *)solver;
+   pushargs.num_mg_its = num_mg_its;
+   for (i = 0; i < hypre_NumThreads; i++)
+      hypre_work_put( HYPRE_StructHybridGetNumMGIterationsVoidPtr, (void *)&pushargs );
+
+   hypre_work_wait();
+
+   returnvalue = pushargs.returnvalue[0];
+
+   return returnvalue;
+}
+
+/*----------------------------------------------------------------
+ * HYPRE_StructHybridGetFinalRelativeResidualNorm thread wrappers
+ *----------------------------------------------------------------*/
+
+typedef struct {
+   HYPRE_StructSolverArray *solver;
+   double *norm;
+   int  returnvalue[hypre_MAX_THREADS];
+} HYPRE_StructHybridGetFinalRelativeResidualNormArgs;
+
+void
+HYPRE_StructHybridGetFinalRelativeResidualNormVoidPtr( void *argptr )
+{
+   int threadid = hypre_GetThreadID();
+
+   HYPRE_StructHybridGetFinalRelativeResidualNormArgs *localargs =
+      (HYPRE_StructHybridGetFinalRelativeResidualNormArgs *) argptr;
+
+   (localargs -> returnvalue[threadid]) =
+      HYPRE_StructHybridGetFinalRelativeResidualNorm(
+         (*(localargs -> solver))[threadid],
+         localargs -> norm );
+}
+
+int 
+HYPRE_StructHybridGetFinalRelativeResidualNormPush(
+   HYPRE_StructSolverArray solver,
+   double *norm )
+{
+   HYPRE_StructHybridGetFinalRelativeResidualNormArgs pushargs;
+   int i;
+   int  returnvalue;
+
+   pushargs.solver = (HYPRE_StructSolverArray *)solver;
+   pushargs.norm = norm;
+   for (i = 0; i < hypre_NumThreads; i++)
+      hypre_work_put( HYPRE_StructHybridGetFinalRelativeResidualNormVoidPtr, (void *)&pushargs );
+
+   hypre_work_wait();
+
+   returnvalue = pushargs.returnvalue[0];
+
+   return returnvalue;
+}
 
 /*----------------------------------------------------------------
  * HYPRE_StructPCGInitialize thread wrappers
@@ -381,8 +1068,8 @@ HYPRE_StructPCGSetRelChangePush(
 
 typedef struct {
    HYPRE_StructSolverArray *solver;
-   int (*precond )();
-   int (*precond_setup )();
+   ;
+   ;
    void *precond_data;
    int  returnvalue[hypre_MAX_THREADS];
 } HYPRE_StructPCGSetPrecondArgs;
@@ -398,16 +1085,16 @@ HYPRE_StructPCGSetPrecondVoidPtr( void *argptr )
    (localargs -> returnvalue[threadid]) =
       HYPRE_StructPCGSetPrecond(
          (*(localargs -> solver))[threadid],
-         localargs -> precond,
-         localargs -> precond_setup,
+         localargs -> ,
+         localargs -> ,
          localargs -> precond_data );
 }
 
 int 
 HYPRE_StructPCGSetPrecondPush(
    HYPRE_StructSolverArray solver,
-   int (*precond )(),
-   int (*precond_setup )(),
+   ,
+   ,
    void *precond_data )
 {
    HYPRE_StructPCGSetPrecondArgs pushargs;
@@ -415,8 +1102,8 @@ HYPRE_StructPCGSetPrecondPush(
    int  returnvalue;
 
    pushargs.solver = (HYPRE_StructSolverArray *)solver;
-   pushargs.precond = precond;
-   pushargs.precond_setup = precond_setup;
+   pushargs. = ;
+   pushargs. = ;
    pushargs.precond_data = precond_data;
    for (i = 0; i < hypre_NumThreads; i++)
       hypre_work_put( HYPRE_StructPCGSetPrecondVoidPtr, (void *)&pushargs );
@@ -661,6 +1348,730 @@ HYPRE_StructDiagScalePush(
    pushargs.Hx = (HYPRE_StructVectorArray *)Hx;
    for (i = 0; i < hypre_NumThreads; i++)
       hypre_work_put( HYPRE_StructDiagScaleVoidPtr, (void *)&pushargs );
+
+   hypre_work_wait();
+
+   returnvalue = pushargs.returnvalue[0];
+
+   return returnvalue;
+}
+
+/*----------------------------------------------------------------
+ * HYPRE_StructPFMGInitialize thread wrappers
+ *----------------------------------------------------------------*/
+
+typedef struct {
+   MPI_Comm comm;
+   HYPRE_StructSolverArray *solver;
+   int  returnvalue[hypre_MAX_THREADS];
+} HYPRE_StructPFMGInitializeArgs;
+
+void
+HYPRE_StructPFMGInitializeVoidPtr( void *argptr )
+{
+   int threadid = hypre_GetThreadID();
+
+   HYPRE_StructPFMGInitializeArgs *localargs =
+      (HYPRE_StructPFMGInitializeArgs *) argptr;
+
+   (localargs -> returnvalue[threadid]) =
+      HYPRE_StructPFMGInitialize(
+         localargs -> comm,
+         &(*(localargs -> solver))[threadid] );
+}
+
+int 
+HYPRE_StructPFMGInitializePush(
+   MPI_Comm comm,
+   HYPRE_StructSolverArray *solver )
+{
+   HYPRE_StructPFMGInitializeArgs pushargs;
+   int i;
+   int  returnvalue;
+
+   pushargs.comm = comm;
+   pushargs.solver = (HYPRE_StructSolverArray *)solver;
+   for (i = 0; i < hypre_NumThreads; i++)
+      hypre_work_put( HYPRE_StructPFMGInitializeVoidPtr, (void *)&pushargs );
+
+   hypre_work_wait();
+
+   returnvalue = pushargs.returnvalue[0];
+
+   return returnvalue;
+}
+
+/*----------------------------------------------------------------
+ * HYPRE_StructPFMGFinalize thread wrappers
+ *----------------------------------------------------------------*/
+
+typedef struct {
+   HYPRE_StructSolverArray *solver;
+   int  returnvalue[hypre_MAX_THREADS];
+} HYPRE_StructPFMGFinalizeArgs;
+
+void
+HYPRE_StructPFMGFinalizeVoidPtr( void *argptr )
+{
+   int threadid = hypre_GetThreadID();
+
+   HYPRE_StructPFMGFinalizeArgs *localargs =
+      (HYPRE_StructPFMGFinalizeArgs *) argptr;
+
+   (localargs -> returnvalue[threadid]) =
+      HYPRE_StructPFMGFinalize(
+         (*(localargs -> solver))[threadid] );
+}
+
+int 
+HYPRE_StructPFMGFinalizePush(
+   HYPRE_StructSolverArray solver )
+{
+   HYPRE_StructPFMGFinalizeArgs pushargs;
+   int i;
+   int  returnvalue;
+
+   pushargs.solver = (HYPRE_StructSolverArray *)solver;
+   for (i = 0; i < hypre_NumThreads; i++)
+      hypre_work_put( HYPRE_StructPFMGFinalizeVoidPtr, (void *)&pushargs );
+
+   hypre_work_wait();
+
+   returnvalue = pushargs.returnvalue[0];
+
+   return returnvalue;
+}
+
+/*----------------------------------------------------------------
+ * HYPRE_StructPFMGSetup thread wrappers
+ *----------------------------------------------------------------*/
+
+typedef struct {
+   HYPRE_StructSolverArray *solver;
+   HYPRE_StructMatrixArray *A;
+   HYPRE_StructVectorArray *b;
+   HYPRE_StructVectorArray *x;
+   int  returnvalue[hypre_MAX_THREADS];
+} HYPRE_StructPFMGSetupArgs;
+
+void
+HYPRE_StructPFMGSetupVoidPtr( void *argptr )
+{
+   int threadid = hypre_GetThreadID();
+
+   HYPRE_StructPFMGSetupArgs *localargs =
+      (HYPRE_StructPFMGSetupArgs *) argptr;
+
+   (localargs -> returnvalue[threadid]) =
+      HYPRE_StructPFMGSetup(
+         (*(localargs -> solver))[threadid],
+         (*(localargs -> A))[threadid],
+         (*(localargs -> b))[threadid],
+         (*(localargs -> x))[threadid] );
+}
+
+int 
+HYPRE_StructPFMGSetupPush(
+   HYPRE_StructSolverArray solver,
+   HYPRE_StructMatrixArray A,
+   HYPRE_StructVectorArray b,
+   HYPRE_StructVectorArray x )
+{
+   HYPRE_StructPFMGSetupArgs pushargs;
+   int i;
+   int  returnvalue;
+
+   pushargs.solver = (HYPRE_StructSolverArray *)solver;
+   pushargs.A = (HYPRE_StructMatrixArray *)A;
+   pushargs.b = (HYPRE_StructVectorArray *)b;
+   pushargs.x = (HYPRE_StructVectorArray *)x;
+   for (i = 0; i < hypre_NumThreads; i++)
+      hypre_work_put( HYPRE_StructPFMGSetupVoidPtr, (void *)&pushargs );
+
+   hypre_work_wait();
+
+   returnvalue = pushargs.returnvalue[0];
+
+   return returnvalue;
+}
+
+/*----------------------------------------------------------------
+ * HYPRE_StructPFMGSolve thread wrappers
+ *----------------------------------------------------------------*/
+
+typedef struct {
+   HYPRE_StructSolverArray *solver;
+   HYPRE_StructMatrixArray *A;
+   HYPRE_StructVectorArray *b;
+   HYPRE_StructVectorArray *x;
+   int  returnvalue[hypre_MAX_THREADS];
+} HYPRE_StructPFMGSolveArgs;
+
+void
+HYPRE_StructPFMGSolveVoidPtr( void *argptr )
+{
+   int threadid = hypre_GetThreadID();
+
+   HYPRE_StructPFMGSolveArgs *localargs =
+      (HYPRE_StructPFMGSolveArgs *) argptr;
+
+   (localargs -> returnvalue[threadid]) =
+      HYPRE_StructPFMGSolve(
+         (*(localargs -> solver))[threadid],
+         (*(localargs -> A))[threadid],
+         (*(localargs -> b))[threadid],
+         (*(localargs -> x))[threadid] );
+}
+
+int 
+HYPRE_StructPFMGSolvePush(
+   HYPRE_StructSolverArray solver,
+   HYPRE_StructMatrixArray A,
+   HYPRE_StructVectorArray b,
+   HYPRE_StructVectorArray x )
+{
+   HYPRE_StructPFMGSolveArgs pushargs;
+   int i;
+   int  returnvalue;
+
+   pushargs.solver = (HYPRE_StructSolverArray *)solver;
+   pushargs.A = (HYPRE_StructMatrixArray *)A;
+   pushargs.b = (HYPRE_StructVectorArray *)b;
+   pushargs.x = (HYPRE_StructVectorArray *)x;
+   for (i = 0; i < hypre_NumThreads; i++)
+      hypre_work_put( HYPRE_StructPFMGSolveVoidPtr, (void *)&pushargs );
+
+   hypre_work_wait();
+
+   returnvalue = pushargs.returnvalue[0];
+
+   return returnvalue;
+}
+
+/*----------------------------------------------------------------
+ * HYPRE_StructPFMGSetTol thread wrappers
+ *----------------------------------------------------------------*/
+
+typedef struct {
+   HYPRE_StructSolverArray *solver;
+   double tol;
+   int  returnvalue[hypre_MAX_THREADS];
+} HYPRE_StructPFMGSetTolArgs;
+
+void
+HYPRE_StructPFMGSetTolVoidPtr( void *argptr )
+{
+   int threadid = hypre_GetThreadID();
+
+   HYPRE_StructPFMGSetTolArgs *localargs =
+      (HYPRE_StructPFMGSetTolArgs *) argptr;
+
+   (localargs -> returnvalue[threadid]) =
+      HYPRE_StructPFMGSetTol(
+         (*(localargs -> solver))[threadid],
+         localargs -> tol );
+}
+
+int 
+HYPRE_StructPFMGSetTolPush(
+   HYPRE_StructSolverArray solver,
+   double tol )
+{
+   HYPRE_StructPFMGSetTolArgs pushargs;
+   int i;
+   int  returnvalue;
+
+   pushargs.solver = (HYPRE_StructSolverArray *)solver;
+   pushargs.tol = tol;
+   for (i = 0; i < hypre_NumThreads; i++)
+      hypre_work_put( HYPRE_StructPFMGSetTolVoidPtr, (void *)&pushargs );
+
+   hypre_work_wait();
+
+   returnvalue = pushargs.returnvalue[0];
+
+   return returnvalue;
+}
+
+/*----------------------------------------------------------------
+ * HYPRE_StructPFMGSetMaxIter thread wrappers
+ *----------------------------------------------------------------*/
+
+typedef struct {
+   HYPRE_StructSolverArray *solver;
+   int max_iter;
+   int  returnvalue[hypre_MAX_THREADS];
+} HYPRE_StructPFMGSetMaxIterArgs;
+
+void
+HYPRE_StructPFMGSetMaxIterVoidPtr( void *argptr )
+{
+   int threadid = hypre_GetThreadID();
+
+   HYPRE_StructPFMGSetMaxIterArgs *localargs =
+      (HYPRE_StructPFMGSetMaxIterArgs *) argptr;
+
+   (localargs -> returnvalue[threadid]) =
+      HYPRE_StructPFMGSetMaxIter(
+         (*(localargs -> solver))[threadid],
+         localargs -> max_iter );
+}
+
+int 
+HYPRE_StructPFMGSetMaxIterPush(
+   HYPRE_StructSolverArray solver,
+   int max_iter )
+{
+   HYPRE_StructPFMGSetMaxIterArgs pushargs;
+   int i;
+   int  returnvalue;
+
+   pushargs.solver = (HYPRE_StructSolverArray *)solver;
+   pushargs.max_iter = max_iter;
+   for (i = 0; i < hypre_NumThreads; i++)
+      hypre_work_put( HYPRE_StructPFMGSetMaxIterVoidPtr, (void *)&pushargs );
+
+   hypre_work_wait();
+
+   returnvalue = pushargs.returnvalue[0];
+
+   return returnvalue;
+}
+
+/*----------------------------------------------------------------
+ * HYPRE_StructPFMGSetRelChange thread wrappers
+ *----------------------------------------------------------------*/
+
+typedef struct {
+   HYPRE_StructSolverArray *solver;
+   int rel_change;
+   int  returnvalue[hypre_MAX_THREADS];
+} HYPRE_StructPFMGSetRelChangeArgs;
+
+void
+HYPRE_StructPFMGSetRelChangeVoidPtr( void *argptr )
+{
+   int threadid = hypre_GetThreadID();
+
+   HYPRE_StructPFMGSetRelChangeArgs *localargs =
+      (HYPRE_StructPFMGSetRelChangeArgs *) argptr;
+
+   (localargs -> returnvalue[threadid]) =
+      HYPRE_StructPFMGSetRelChange(
+         (*(localargs -> solver))[threadid],
+         localargs -> rel_change );
+}
+
+int 
+HYPRE_StructPFMGSetRelChangePush(
+   HYPRE_StructSolverArray solver,
+   int rel_change )
+{
+   HYPRE_StructPFMGSetRelChangeArgs pushargs;
+   int i;
+   int  returnvalue;
+
+   pushargs.solver = (HYPRE_StructSolverArray *)solver;
+   pushargs.rel_change = rel_change;
+   for (i = 0; i < hypre_NumThreads; i++)
+      hypre_work_put( HYPRE_StructPFMGSetRelChangeVoidPtr, (void *)&pushargs );
+
+   hypre_work_wait();
+
+   returnvalue = pushargs.returnvalue[0];
+
+   return returnvalue;
+}
+
+/*----------------------------------------------------------------
+ * HYPRE_StructPFMGSetZeroGuess thread wrappers
+ *----------------------------------------------------------------*/
+
+typedef struct {
+   HYPRE_StructSolverArray *solver;
+   int  returnvalue[hypre_MAX_THREADS];
+} HYPRE_StructPFMGSetZeroGuessArgs;
+
+void
+HYPRE_StructPFMGSetZeroGuessVoidPtr( void *argptr )
+{
+   int threadid = hypre_GetThreadID();
+
+   HYPRE_StructPFMGSetZeroGuessArgs *localargs =
+      (HYPRE_StructPFMGSetZeroGuessArgs *) argptr;
+
+   (localargs -> returnvalue[threadid]) =
+      HYPRE_StructPFMGSetZeroGuess(
+         (*(localargs -> solver))[threadid] );
+}
+
+int 
+HYPRE_StructPFMGSetZeroGuessPush(
+   HYPRE_StructSolverArray solver )
+{
+   HYPRE_StructPFMGSetZeroGuessArgs pushargs;
+   int i;
+   int  returnvalue;
+
+   pushargs.solver = (HYPRE_StructSolverArray *)solver;
+   for (i = 0; i < hypre_NumThreads; i++)
+      hypre_work_put( HYPRE_StructPFMGSetZeroGuessVoidPtr, (void *)&pushargs );
+
+   hypre_work_wait();
+
+   returnvalue = pushargs.returnvalue[0];
+
+   return returnvalue;
+}
+
+/*----------------------------------------------------------------
+ * HYPRE_StructPFMGSetNonZeroGuess thread wrappers
+ *----------------------------------------------------------------*/
+
+typedef struct {
+   HYPRE_StructSolverArray *solver;
+   int  returnvalue[hypre_MAX_THREADS];
+} HYPRE_StructPFMGSetNonZeroGuessArgs;
+
+void
+HYPRE_StructPFMGSetNonZeroGuessVoidPtr( void *argptr )
+{
+   int threadid = hypre_GetThreadID();
+
+   HYPRE_StructPFMGSetNonZeroGuessArgs *localargs =
+      (HYPRE_StructPFMGSetNonZeroGuessArgs *) argptr;
+
+   (localargs -> returnvalue[threadid]) =
+      HYPRE_StructPFMGSetNonZeroGuess(
+         (*(localargs -> solver))[threadid] );
+}
+
+int 
+HYPRE_StructPFMGSetNonZeroGuessPush(
+   HYPRE_StructSolverArray solver )
+{
+   HYPRE_StructPFMGSetNonZeroGuessArgs pushargs;
+   int i;
+   int  returnvalue;
+
+   pushargs.solver = (HYPRE_StructSolverArray *)solver;
+   for (i = 0; i < hypre_NumThreads; i++)
+      hypre_work_put( HYPRE_StructPFMGSetNonZeroGuessVoidPtr, (void *)&pushargs );
+
+   hypre_work_wait();
+
+   returnvalue = pushargs.returnvalue[0];
+
+   return returnvalue;
+}
+
+/*----------------------------------------------------------------
+ * HYPRE_StructPFMGSetRelaxType thread wrappers
+ *----------------------------------------------------------------*/
+
+typedef struct {
+   HYPRE_StructSolverArray *solver;
+   int relax_type;
+   int  returnvalue[hypre_MAX_THREADS];
+} HYPRE_StructPFMGSetRelaxTypeArgs;
+
+void
+HYPRE_StructPFMGSetRelaxTypeVoidPtr( void *argptr )
+{
+   int threadid = hypre_GetThreadID();
+
+   HYPRE_StructPFMGSetRelaxTypeArgs *localargs =
+      (HYPRE_StructPFMGSetRelaxTypeArgs *) argptr;
+
+   (localargs -> returnvalue[threadid]) =
+      HYPRE_StructPFMGSetRelaxType(
+         (*(localargs -> solver))[threadid],
+         localargs -> relax_type );
+}
+
+int 
+HYPRE_StructPFMGSetRelaxTypePush(
+   HYPRE_StructSolverArray solver,
+   int relax_type )
+{
+   HYPRE_StructPFMGSetRelaxTypeArgs pushargs;
+   int i;
+   int  returnvalue;
+
+   pushargs.solver = (HYPRE_StructSolverArray *)solver;
+   pushargs.relax_type = relax_type;
+   for (i = 0; i < hypre_NumThreads; i++)
+      hypre_work_put( HYPRE_StructPFMGSetRelaxTypeVoidPtr, (void *)&pushargs );
+
+   hypre_work_wait();
+
+   returnvalue = pushargs.returnvalue[0];
+
+   return returnvalue;
+}
+
+/*----------------------------------------------------------------
+ * HYPRE_StructPFMGSetNumPreRelax thread wrappers
+ *----------------------------------------------------------------*/
+
+typedef struct {
+   HYPRE_StructSolverArray *solver;
+   int num_pre_relax;
+   int  returnvalue[hypre_MAX_THREADS];
+} HYPRE_StructPFMGSetNumPreRelaxArgs;
+
+void
+HYPRE_StructPFMGSetNumPreRelaxVoidPtr( void *argptr )
+{
+   int threadid = hypre_GetThreadID();
+
+   HYPRE_StructPFMGSetNumPreRelaxArgs *localargs =
+      (HYPRE_StructPFMGSetNumPreRelaxArgs *) argptr;
+
+   (localargs -> returnvalue[threadid]) =
+      HYPRE_StructPFMGSetNumPreRelax(
+         (*(localargs -> solver))[threadid],
+         localargs -> num_pre_relax );
+}
+
+int 
+HYPRE_StructPFMGSetNumPreRelaxPush(
+   HYPRE_StructSolverArray solver,
+   int num_pre_relax )
+{
+   HYPRE_StructPFMGSetNumPreRelaxArgs pushargs;
+   int i;
+   int  returnvalue;
+
+   pushargs.solver = (HYPRE_StructSolverArray *)solver;
+   pushargs.num_pre_relax = num_pre_relax;
+   for (i = 0; i < hypre_NumThreads; i++)
+      hypre_work_put( HYPRE_StructPFMGSetNumPreRelaxVoidPtr, (void *)&pushargs );
+
+   hypre_work_wait();
+
+   returnvalue = pushargs.returnvalue[0];
+
+   return returnvalue;
+}
+
+/*----------------------------------------------------------------
+ * HYPRE_StructPFMGSetNumPostRelax thread wrappers
+ *----------------------------------------------------------------*/
+
+typedef struct {
+   HYPRE_StructSolverArray *solver;
+   int num_post_relax;
+   int  returnvalue[hypre_MAX_THREADS];
+} HYPRE_StructPFMGSetNumPostRelaxArgs;
+
+void
+HYPRE_StructPFMGSetNumPostRelaxVoidPtr( void *argptr )
+{
+   int threadid = hypre_GetThreadID();
+
+   HYPRE_StructPFMGSetNumPostRelaxArgs *localargs =
+      (HYPRE_StructPFMGSetNumPostRelaxArgs *) argptr;
+
+   (localargs -> returnvalue[threadid]) =
+      HYPRE_StructPFMGSetNumPostRelax(
+         (*(localargs -> solver))[threadid],
+         localargs -> num_post_relax );
+}
+
+int 
+HYPRE_StructPFMGSetNumPostRelaxPush(
+   HYPRE_StructSolverArray solver,
+   int num_post_relax )
+{
+   HYPRE_StructPFMGSetNumPostRelaxArgs pushargs;
+   int i;
+   int  returnvalue;
+
+   pushargs.solver = (HYPRE_StructSolverArray *)solver;
+   pushargs.num_post_relax = num_post_relax;
+   for (i = 0; i < hypre_NumThreads; i++)
+      hypre_work_put( HYPRE_StructPFMGSetNumPostRelaxVoidPtr, (void *)&pushargs );
+
+   hypre_work_wait();
+
+   returnvalue = pushargs.returnvalue[0];
+
+   return returnvalue;
+}
+
+/*----------------------------------------------------------------
+ * HYPRE_StructPFMGSetDxyz thread wrappers
+ *----------------------------------------------------------------*/
+
+typedef struct {
+   HYPRE_StructSolverArray *solver;
+   double *dxyz;
+   int  returnvalue[hypre_MAX_THREADS];
+} HYPRE_StructPFMGSetDxyzArgs;
+
+void
+HYPRE_StructPFMGSetDxyzVoidPtr( void *argptr )
+{
+   int threadid = hypre_GetThreadID();
+
+   HYPRE_StructPFMGSetDxyzArgs *localargs =
+      (HYPRE_StructPFMGSetDxyzArgs *) argptr;
+
+   (localargs -> returnvalue[threadid]) =
+      HYPRE_StructPFMGSetDxyz(
+         (*(localargs -> solver))[threadid],
+         localargs -> dxyz );
+}
+
+int 
+HYPRE_StructPFMGSetDxyzPush(
+   HYPRE_StructSolverArray solver,
+   double *dxyz )
+{
+   HYPRE_StructPFMGSetDxyzArgs pushargs;
+   int i;
+   int  returnvalue;
+
+   pushargs.solver = (HYPRE_StructSolverArray *)solver;
+   pushargs.dxyz = dxyz;
+   for (i = 0; i < hypre_NumThreads; i++)
+      hypre_work_put( HYPRE_StructPFMGSetDxyzVoidPtr, (void *)&pushargs );
+
+   hypre_work_wait();
+
+   returnvalue = pushargs.returnvalue[0];
+
+   return returnvalue;
+}
+
+/*----------------------------------------------------------------
+ * HYPRE_StructPFMGSetLogging thread wrappers
+ *----------------------------------------------------------------*/
+
+typedef struct {
+   HYPRE_StructSolverArray *solver;
+   int logging;
+   int  returnvalue[hypre_MAX_THREADS];
+} HYPRE_StructPFMGSetLoggingArgs;
+
+void
+HYPRE_StructPFMGSetLoggingVoidPtr( void *argptr )
+{
+   int threadid = hypre_GetThreadID();
+
+   HYPRE_StructPFMGSetLoggingArgs *localargs =
+      (HYPRE_StructPFMGSetLoggingArgs *) argptr;
+
+   (localargs -> returnvalue[threadid]) =
+      HYPRE_StructPFMGSetLogging(
+         (*(localargs -> solver))[threadid],
+         localargs -> logging );
+}
+
+int 
+HYPRE_StructPFMGSetLoggingPush(
+   HYPRE_StructSolverArray solver,
+   int logging )
+{
+   HYPRE_StructPFMGSetLoggingArgs pushargs;
+   int i;
+   int  returnvalue;
+
+   pushargs.solver = (HYPRE_StructSolverArray *)solver;
+   pushargs.logging = logging;
+   for (i = 0; i < hypre_NumThreads; i++)
+      hypre_work_put( HYPRE_StructPFMGSetLoggingVoidPtr, (void *)&pushargs );
+
+   hypre_work_wait();
+
+   returnvalue = pushargs.returnvalue[0];
+
+   return returnvalue;
+}
+
+/*----------------------------------------------------------------
+ * HYPRE_StructPFMGGetNumIterations thread wrappers
+ *----------------------------------------------------------------*/
+
+typedef struct {
+   HYPRE_StructSolverArray *solver;
+   int *num_iterations;
+   int  returnvalue[hypre_MAX_THREADS];
+} HYPRE_StructPFMGGetNumIterationsArgs;
+
+void
+HYPRE_StructPFMGGetNumIterationsVoidPtr( void *argptr )
+{
+   int threadid = hypre_GetThreadID();
+
+   HYPRE_StructPFMGGetNumIterationsArgs *localargs =
+      (HYPRE_StructPFMGGetNumIterationsArgs *) argptr;
+
+   (localargs -> returnvalue[threadid]) =
+      HYPRE_StructPFMGGetNumIterations(
+         (*(localargs -> solver))[threadid],
+         localargs -> num_iterations );
+}
+
+int 
+HYPRE_StructPFMGGetNumIterationsPush(
+   HYPRE_StructSolverArray solver,
+   int *num_iterations )
+{
+   HYPRE_StructPFMGGetNumIterationsArgs pushargs;
+   int i;
+   int  returnvalue;
+
+   pushargs.solver = (HYPRE_StructSolverArray *)solver;
+   pushargs.num_iterations = num_iterations;
+   for (i = 0; i < hypre_NumThreads; i++)
+      hypre_work_put( HYPRE_StructPFMGGetNumIterationsVoidPtr, (void *)&pushargs );
+
+   hypre_work_wait();
+
+   returnvalue = pushargs.returnvalue[0];
+
+   return returnvalue;
+}
+
+/*----------------------------------------------------------------
+ * HYPRE_StructPFMGGetFinalRelativeResidualNorm thread wrappers
+ *----------------------------------------------------------------*/
+
+typedef struct {
+   HYPRE_StructSolverArray *solver;
+   double *norm;
+   int  returnvalue[hypre_MAX_THREADS];
+} HYPRE_StructPFMGGetFinalRelativeResidualNormArgs;
+
+void
+HYPRE_StructPFMGGetFinalRelativeResidualNormVoidPtr( void *argptr )
+{
+   int threadid = hypre_GetThreadID();
+
+   HYPRE_StructPFMGGetFinalRelativeResidualNormArgs *localargs =
+      (HYPRE_StructPFMGGetFinalRelativeResidualNormArgs *) argptr;
+
+   (localargs -> returnvalue[threadid]) =
+      HYPRE_StructPFMGGetFinalRelativeResidualNorm(
+         (*(localargs -> solver))[threadid],
+         localargs -> norm );
+}
+
+int 
+HYPRE_StructPFMGGetFinalRelativeResidualNormPush(
+   HYPRE_StructSolverArray solver,
+   double *norm )
+{
+   HYPRE_StructPFMGGetFinalRelativeResidualNormArgs pushargs;
+   int i;
+   int  returnvalue;
+
+   pushargs.solver = (HYPRE_StructSolverArray *)solver;
+   pushargs.norm = norm;
+   for (i = 0; i < hypre_NumThreads; i++)
+      hypre_work_put( HYPRE_StructPFMGGetFinalRelativeResidualNormVoidPtr, (void *)&pushargs );
 
    hypre_work_wait();
 
@@ -1074,6 +2485,47 @@ HYPRE_StructSMGSetZeroGuessPush(
    pushargs.solver = (HYPRE_StructSolverArray *)solver;
    for (i = 0; i < hypre_NumThreads; i++)
       hypre_work_put( HYPRE_StructSMGSetZeroGuessVoidPtr, (void *)&pushargs );
+
+   hypre_work_wait();
+
+   returnvalue = pushargs.returnvalue[0];
+
+   return returnvalue;
+}
+
+/*----------------------------------------------------------------
+ * HYPRE_StructSMGSetNonZeroGuess thread wrappers
+ *----------------------------------------------------------------*/
+
+typedef struct {
+   HYPRE_StructSolverArray *solver;
+   int  returnvalue[hypre_MAX_THREADS];
+} HYPRE_StructSMGSetNonZeroGuessArgs;
+
+void
+HYPRE_StructSMGSetNonZeroGuessVoidPtr( void *argptr )
+{
+   int threadid = hypre_GetThreadID();
+
+   HYPRE_StructSMGSetNonZeroGuessArgs *localargs =
+      (HYPRE_StructSMGSetNonZeroGuessArgs *) argptr;
+
+   (localargs -> returnvalue[threadid]) =
+      HYPRE_StructSMGSetNonZeroGuess(
+         (*(localargs -> solver))[threadid] );
+}
+
+int 
+HYPRE_StructSMGSetNonZeroGuessPush(
+   HYPRE_StructSolverArray solver )
+{
+   HYPRE_StructSMGSetNonZeroGuessArgs pushargs;
+   int i;
+   int  returnvalue;
+
+   pushargs.solver = (HYPRE_StructSolverArray *)solver;
+   for (i = 0; i < hypre_NumThreads; i++)
+      hypre_work_put( HYPRE_StructSMGSetNonZeroGuessVoidPtr, (void *)&pushargs );
 
    hypre_work_wait();
 

@@ -191,12 +191,13 @@ hypre_SMGSetRelChange( void *smg_vdata,
  *--------------------------------------------------------------------------*/
  
 int
-hypre_SMGSetZeroGuess( void *smg_vdata )
+hypre_SMGSetZeroGuess( void *smg_vdata,
+                       int   zero_guess )
 {
    hypre_SMGData *smg_data = smg_vdata;
    int            ierr = 0;
  
-   (smg_data -> zero_guess) = 1;
+   (smg_data -> zero_guess) = zero_guess;
  
    return ierr;
 }

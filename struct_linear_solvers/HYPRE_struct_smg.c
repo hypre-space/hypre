@@ -119,7 +119,17 @@ HYPRE_StructSMGSetRelChange( HYPRE_StructSolver solver,
 int
 HYPRE_StructSMGSetZeroGuess( HYPRE_StructSolver solver )
 {
-   return( hypre_SMGSetZeroGuess( (void *) solver ) );
+   return( hypre_SMGSetZeroGuess( (void *) solver, 1 ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_StructSMGSetNonZeroGuess
+ *--------------------------------------------------------------------------*/
+ 
+int
+HYPRE_StructSMGSetNonZeroGuess( HYPRE_StructSolver solver )
+{
+   return( hypre_SMGSetZeroGuess( (void *) solver, 0 ) );
 }
 
 /*--------------------------------------------------------------------------
