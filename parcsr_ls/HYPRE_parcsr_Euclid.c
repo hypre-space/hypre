@@ -127,12 +127,12 @@ HYPRE_ParCSREuclidDestroy( HYPRE_Solver solver )
 {
   START_FUNC_DH
   Euclid_dh eu = (Euclid_dh)solver;
-  bool printMemReport;
+  bool printMemReport = false;
 
   Euclid_dhDestroy(eu); HYPRE_EUCLID_ERRCHKA;
 
   if (parser_dh != NULL) {
-    printMemReport = Parser_dhHasSwitch(parser_dh, "-printMemReport"); HYPRE_EUCLID_ERRCHKA;
+    printMemReport = Parser_dhHasSwitch(parser_dh, "-printMemReport"); HYPRE_EUCLID_ERRCHKA;  
     Parser_dhDestroy(parser_dh); HYPRE_EUCLID_ERRCHKA;
     parser_dh = NULL;
   }
@@ -143,7 +143,9 @@ HYPRE_ParCSREuclidDestroy( HYPRE_Solver solver )
   }
 
   if (mem_dh != NULL) {
-    if (printMemReport) { Mem_dhPrint(mem_dh, stdout, false); }
+    if (printMemReport) { 
+      Mem_dhPrint(mem_dh, stdout, false); HYPRE_EUCLID_ERRCHKA; 
+    }
     Mem_dhDestroy(mem_dh);  HYPRE_EUCLID_ERRCHKA;
     mem_dh = NULL;
   }
