@@ -293,8 +293,8 @@ c     Generate a Dirichlet Laplacian
 
 c     The following will cancel each other out, but it is good practice
 c     to perform them.
-      call Hypre_IJBuildMatrix_addReference_f( Hypre_ij_A )
-      call Hypre_ParCSRMatrix_deleteReference_f( Hypre_parcsr_A )
+      call Hypre_IJBuildMatrix_addref_f( Hypre_ij_A )
+      call Hypre_ParCSRMatrix_deleteref_f( Hypre_parcsr_A )
 
       call Hypre_IJBuildMatrix_SetCommunicator_f( Hypre_ij_A,
      1     MPI_COMM_WORLD, ierrtmp )
@@ -314,7 +314,7 @@ c     to perform them.
       call Hypre_IJBuildMatrix_SetRowSizes_f(
      1     Hypre_ij_A, Hypre_row_sizes, ierrtmp )
       ierr = ierr + ierrtmp
-      call SIDL_int__array_deleteReference_f( Hypre_row_sizes)
+      call SIDL_int__array_deleteref_f( Hypre_row_sizes)
 
       call Hypre_IJBuildMatrix_Initialize_f( Hypre_ij_A, ierrtmp )
       ierr = ierr + ierrtmp
@@ -346,14 +346,14 @@ c     Loop through all locally stored rows and insert them into ij_matrix
      1        A_parcsr, i, size, col_inds, values, ierrtmp )
          ierr = ierr + ierrtmp
       enddo
-      call SIDL_int__array_deleteReference_f( Hypre_row_sizes )
-      call SIDL_int__array_deleteReference_f( Hypre_ncols )
+      call SIDL_int__array_deleteref_f( Hypre_row_sizes )
+      call SIDL_int__array_deleteref_f( Hypre_ncols )
 
       call Hypre_IJBuildMatrix_Assemble_f( Hypre_ij_A, ierrtmp )
       ierr = ierr + ierrtmp
 
-      call SIDL_int__array_deleteReference_f( Hypre_col_inds )
-      call SIDL_int__array_deleteReference_f( Hypre_values )
+      call SIDL_int__array_deleteref_f( Hypre_col_inds )
+      call SIDL_int__array_deleteref_f( Hypre_values )
 
 c     
 c     Fetch the resulting underlying matrix out
@@ -361,14 +361,14 @@ c
       call Hypre_IJBuildMatrix_GetObject_f(
      1     Hypre_ij_A, Hypre_object, ierrtmp )
       ierr = ierr + ierrtmp
-      call Hypre_IJBuildMatrix_deleteReference_f( Hypre_ij_A )
+      call Hypre_IJBuildMatrix_deleteref_f( Hypre_ij_A )
 c     
-c     The QueryInterface below checks to see if the returned object can
+c     The Queryint below checks to see if the returned object can
 c     return a Hypre.ParCSRMatrix. The "cast" is necessary because of the
 c     restrictions of the C language, and is merely to please the compiler.
-c     It is the QueryInterface that actually has semantic meaning.
+c     It is the Queryint that actually has semantic meaning.
 c     >>> keep the cast for now, take it out once this works.  This isn't C>>>
-      call SIDL_BaseInterface_queryInterface_f(
+      call SIDL_BaseInterface_queryint_f(
      1     Hypre_object, "Hypre.ParCSRMatrix", Hypre_object_tmp )
       call SIDL_BaseInterface__cast_f(
      1     Hypre_object_tmp, "Hypre.ParCSRMatrix", Hypre_parcsr_A )
@@ -400,8 +400,8 @@ c-----------------------------------------------------------------------
          write(6,*) 'Cast failed'
          stop
       endif
-      call Hypre_IJBuildVector_addReference_f( Hypre_ij_b )
-      call Hypre_ParCSRVector_deleteReference_f( Hypre_parcsr_b )
+      call Hypre_IJBuildVector_addref_f( Hypre_ij_b )
+      call Hypre_ParCSRVector_deleteref_f( Hypre_parcsr_b )
       call Hypre_IJBuildVector_SetCommunicator_f( Hypre_ij_b,
      1     MPI_COMM_WORLD, ierrtmp )
       ierr = ierr + ierrtmp
@@ -424,8 +424,8 @@ c-----------------------------------------------------------------------
      1     local_num_cols, Hypre_indices, Hypre_values, ierrtmp )
       ierr = ierr + ierrtmp
 
-      call SIDL_int__array_deleteReference_f( Hypre_indices)
-      call SIDL_double__array_deleteReference_f( Hypre_values )
+      call SIDL_int__array_deleteref_f( Hypre_indices)
+      call SIDL_double__array_deleteref_f( Hypre_values )
 
       call Hypre_IJBuildVector_Assemble_f( Hypre_ij_b, ierrtmp )
       ierr = ierr + ierrtmp
@@ -433,8 +433,8 @@ c-----------------------------------------------------------------------
      1     Hypre_ij_b, Hypre_object, ierrtmp )
       ierr = ierr + ierrtmp
 
-      call Hypre_IJBuildVector_deleteReference_f( Hypre_ij_b )
-      call SIDL_BaseInterface_queryInterface_f(
+      call Hypre_IJBuildVector_deleteref_f( Hypre_ij_b )
+      call SIDL_BaseInterface_queryint_f(
      1     Hypre_object, "Hypre.ParCSRVector", Hypre_object_tmp )
       call SIDL_BaseInterface__cast_f(
      1     Hypre_object_tmp, "Hypre.ParCSRVector", Hypre_parcsr_b )
@@ -455,7 +455,7 @@ c-----------------------------------------------------------------------
          write(6,*) 'Cast failed'
          stop
       endif
-      call Hypre_IJBuildVector_addReference_f( Hypre_ij_x )
+      call Hypre_IJBuildVector_addref_f( Hypre_ij_x )
       call Hypre_IJBuildVector_SetCommunicator_f( Hypre_ij_x,
      1     MPI_COMM_WORLD, ierrtmp )
       ierr = ierr + ierrtmp
@@ -478,8 +478,8 @@ c-----------------------------------------------------------------------
      1     local_num_cols, Hypre_indices, Hypre_values, ierrtmp )
       ierr = ierr + ierrtmp
 
-      call SIDL_int__array_deleteReference_f( Hypre_indices)
-      call SIDL_double__array_deleteReference_f( Hypre_values )
+      call SIDL_int__array_deleteref_f( Hypre_indices)
+      call SIDL_double__array_deleteref_f( Hypre_values )
 
       call Hypre_IJBuildVector_Assemble_f( Hypre_ij_x, ierrtmp )
       ierr = ierr + ierrtmp
@@ -487,8 +487,8 @@ c-----------------------------------------------------------------------
      1     Hypre_ij_x, Hypre_object, ierrtmp )
       ierr = ierr + ierrtmp
 
-      call Hypre_IJBuildVector_deleteReference_f( Hypre_ij_x )
-      call SIDL_BaseInterface_queryInterface_f(
+      call Hypre_IJBuildVector_deleteref_f( Hypre_ij_x )
+      call SIDL_BaseInterface_queryint_f(
      1     Hypre_object, "Hypre.ParCSRVector", Hypre_object_tmp )
       call SIDL_BaseInterface__cast_f(
      1     Hypre_object_tmp, "Hypre.ParCSRVector", Hypre_parcsr_x )
@@ -653,7 +653,7 @@ c-----------------------------------------------------------------------
 c     Finalize things
 c-----------------------------------------------------------------------
 
-      call Hypre_ParCSRVector_deleteReference_f( Hypre_parcsr_x )
+      call Hypre_ParCSRVector_deleteref_f( Hypre_parcsr_x )
       call HYPRE_ParCSRMatrixDestroy(A_storage, ierr)
 c      call HYPRE_IJVectorDestroy(b, ierr)
       call HYPRE_IJVectorDestroy(x, ierr)

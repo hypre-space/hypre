@@ -863,8 +863,8 @@ main( int   argc,
 
      /* The following will cancel each other out, but it is good practice
         to perform them */
-     Hypre_IJBuildMatrix_addReference( Hypre_ij_A );
-     Hypre_ParCSRMatrix_deleteReference( Hypre_parcsr_A );
+     Hypre_IJBuildMatrix_addRef( Hypre_ij_A );
+     Hypre_ParCSRMatrix_deleteRef( Hypre_parcsr_A );
 
      ierr += Hypre_IJBuildMatrix_SetCommunicator( Hypre_ij_A, (void *)comm );
      ierr += Hypre_IJBuildMatrix_Create( Hypre_ij_A, 
@@ -933,8 +933,8 @@ main( int   argc,
        hypre_TFree(diag_sizes);
        hypre_TFree(offdiag_sizes);
 
-       SIDL_int__array_deleteReference( Hypre_diag_sizes );
-       SIDL_int__array_deleteReference( Hypre_offdiag_sizes );
+       SIDL_int__array_deleteRef( Hypre_diag_sizes );
+       SIDL_int__array_deleteRef( Hypre_offdiag_sizes );
 
      
        ierr = HYPRE_IJMatrixInitialize( ij_A );
@@ -987,7 +987,7 @@ main( int   argc,
        ierr = Hypre_IJBuildMatrix_SetRowSizes( Hypre_ij_A, Hypre_row_sizes );
           printf("finishedij row sizes\n");
 
-       SIDL_int__array_deleteReference( Hypre_row_sizes );
+       SIDL_int__array_deleteRef( Hypre_row_sizes );
 
        ierr = Hypre_IJBuildMatrix_Initialize( Hypre_ij_A );
 
@@ -1023,12 +1023,12 @@ main( int   argc,
 
          ierr += HYPRE_ParCSRMatrixRestoreRow( parcsr_A, i, &size,
                                                &col_inds, &values );
-         SIDL_int__array_deleteReference( Hypre_col_inds );
-         SIDL_double__array_deleteReference( Hypre_values );
+         SIDL_int__array_deleteRef( Hypre_col_inds );
+         SIDL_double__array_deleteRef( Hypre_values );
 
        }
-       SIDL_int__array_deleteReference( Hypre_row_sizes );
-       SIDL_int__array_deleteReference( Hypre_ncols );
+       SIDL_int__array_deleteRef( Hypre_row_sizes );
+       SIDL_int__array_deleteRef( Hypre_ncols );
      }
 
      ierr += Hypre_IJBuildMatrix_Assemble( Hypre_ij_A );
@@ -1093,10 +1093,10 @@ main( int   argc,
    hypre_TFree(rows);
    hypre_TFree(ncols);
 
-   SIDL_int__array_deleteReference( Hypre_ncols );
-   SIDL_int__array_deleteReference( Hypre_rows );
-   SIDL_int__array_deleteReference( Hypre_col_inds );
-   SIDL_double__array_deleteReference( Hypre_values );
+   SIDL_int__array_deleteRef( Hypre_ncols );
+   SIDL_int__array_deleteRef( Hypre_rows );
+   SIDL_int__array_deleteRef( Hypre_col_inds );
+   SIDL_double__array_deleteRef( Hypre_values );
 
    /* If sparsity pattern is not changed since last IJMatrixAssemble call,
       this should be a no-op */
@@ -1113,14 +1113,14 @@ main( int   argc,
    ierr += Hypre_IJBuildMatrix_GetObject( Hypre_ij_A, &Hypre_object );
 
    /* Done with the IJBuildMatrix, delete the reference */
-   Hypre_IJBuildMatrix_deleteReference( Hypre_ij_A );
+   Hypre_IJBuildMatrix_deleteRef( Hypre_ij_A );
 
    /* The QueryInterface below checks to see if the returned object can
       return a Hypre.ParCSRMatrix. The "cast" is necessary because of the
       restrictions of the C language, and is merely to please the compiler.
       It is the QueryInterface that actually has semantic meaning. */
    Hypre_parcsr_A = Hypre_cast_BaseInterface_to_ParCSRMatrix(
-      SIDL_BaseInterface_queryInterface( Hypre_object, "Hypre.ParCSRMatrix") );
+      SIDL_BaseInterface_queryInt( Hypre_object, "Hypre.ParCSRMatrix") );
    if ( Hypre_parcsr_A == NULL )
    {
       printf("Cast/QI failed\n");
@@ -1199,8 +1199,8 @@ main( int   argc,
       Hypre_b = Hypre_ParCSRVector__create();
       Hypre_ij_b = Hypre_cast_ParCSRVector_to_IJBuildVector( Hypre_b );
       /* adjust reference counting system for new data type: */
-      Hypre_IJBuildVector_addReference( Hypre_ij_b );
-      Hypre_ParCSRVector_deleteReference( Hypre_b );
+      Hypre_IJBuildVector_addRef( Hypre_ij_b );
+      Hypre_ParCSRVector_deleteRef( Hypre_b );
       ierr += Hypre_IJBuildVector_SetCommunicator( Hypre_ij_b, (void *)comm );
       ierr += Hypre_IJBuildVector_Create( Hypre_ij_b, (void *)comm,
                                           first_local_row,last_local_row );
@@ -1214,21 +1214,21 @@ main( int   argc,
          SIDL_double__array_set1( Hypre_values, i, 1 );
       }
       Hypre_IJBuildVector_SetValues( Hypre_ij_b, local_num_rows, Hypre_indices, Hypre_values );
-      SIDL_int__array_deleteReference( Hypre_indices );
-      SIDL_double__array_deleteReference( Hypre_values );
+      SIDL_int__array_deleteRef( Hypre_indices );
+      SIDL_double__array_deleteRef( Hypre_values );
 
      ierr += Hypre_IJBuildVector_Assemble( Hypre_ij_b );
 
      ierr += Hypre_IJBuildVector_GetObject( Hypre_ij_b, &Hypre_object );
      /* Done with the IJBuildVector, delete the reference */
-     Hypre_IJBuildVector_deleteReference( Hypre_ij_b );
+     Hypre_IJBuildVector_deleteRef( Hypre_ij_b );
      Hypre_b = Hypre_cast_BaseInterface_to_ParCSRVector(
-        SIDL_BaseInterface_queryInterface( Hypre_object, "Hypre.ParCSRVector") );
+        SIDL_BaseInterface_queryInt( Hypre_object, "Hypre.ParCSRVector") );
      if ( Hypre_b == NULL ) {
         printf("Cast/QI failed\n");
         return 1;
      }
-     SIDL_BaseInterface_deleteReference( Hypre_object );
+     SIDL_BaseInterface_deleteRef( Hypre_object );
 
       /* Break encapsulation so that the rest of the driver stays the same */
 
@@ -1242,8 +1242,8 @@ main( int   argc,
       Hypre_x = Hypre_ParCSRVector__create();
       Hypre_ij_x = Hypre_cast_ParCSRVector_to_IJBuildVector( Hypre_x );
       /* adjust reference counting system for new data type: */
-      Hypre_IJBuildVector_addReference( Hypre_ij_x );
-      Hypre_ParCSRVector_deleteReference( Hypre_x );
+      Hypre_IJBuildVector_addRef( Hypre_ij_x );
+      Hypre_ParCSRVector_deleteRef( Hypre_x );
       ierr += Hypre_IJBuildVector_SetCommunicator( Hypre_ij_x, (void *)comm );
       ierr += Hypre_IJBuildVector_Create( Hypre_ij_x, (void *)comm,
                                           first_local_col,last_local_col );
@@ -1257,21 +1257,21 @@ main( int   argc,
          SIDL_double__array_set1( Hypre_values, i, 0 );
       }
       Hypre_IJBuildVector_SetValues( Hypre_ij_x, local_num_cols, Hypre_indices, Hypre_values );
-      SIDL_int__array_deleteReference( Hypre_indices );
-      SIDL_double__array_deleteReference( Hypre_values );
+      SIDL_int__array_deleteRef( Hypre_indices );
+      SIDL_double__array_deleteRef( Hypre_values );
 
      ierr += Hypre_IJBuildVector_Assemble( Hypre_ij_x );
 
      ierr += Hypre_IJBuildVector_GetObject( Hypre_ij_x, &Hypre_object );
      /* Done with the IJBuildVector, delete the reference */
-     Hypre_IJBuildVector_deleteReference( Hypre_ij_x );
+     Hypre_IJBuildVector_deleteRef( Hypre_ij_x );
      Hypre_x = Hypre_cast_BaseInterface_to_ParCSRVector(
-        SIDL_BaseInterface_queryInterface( Hypre_object, "Hypre.ParCSRVector") );
+        SIDL_BaseInterface_queryInt( Hypre_object, "Hypre.ParCSRVector") );
      if ( Hypre_x == NULL ) {
         printf("Cast/QI failed\n");
         return 1;
      }
-     SIDL_BaseInterface_deleteReference( Hypre_object );
+     SIDL_BaseInterface_deleteRef( Hypre_object );
 
       /* Break encapsulation so that the rest of the driver stays the same */
 
@@ -1619,23 +1619,23 @@ main( int   argc,
       Hypre_y = Hypre_ParCSRVector__create();
       Hypre_ij_y = Hypre_cast_ParCSRVector_to_IJBuildVector( Hypre_y );
       /* adjust reference counting system for new data type: */
-      Hypre_IJBuildVector_addReference( Hypre_ij_y );
+      Hypre_IJBuildVector_addRef( Hypre_ij_y );
       ierr += Hypre_IJBuildVector_SetCommunicator( Hypre_ij_y, (void *)comm );
       ierr += Hypre_IJBuildVector_Create( Hypre_ij_y, (void *)comm,
                                           first_local_col,last_local_col );
       ierr += Hypre_IJBuildVector_Initialize( Hypre_ij_y );
       y = Hypre_cast_ParCSRVector_to_Vector( Hypre_y );
-      Hypre_ParCSRVector_deleteReference( Hypre_y );
+      Hypre_ParCSRVector_deleteRef( Hypre_y );
 
       Hypre_ParCSRMatrix_Apply( Hypre_parcsr_A, Hypre_cast_ParCSRVector_to_Vector( Hypre_b ),
                                 &y );
 
-      Hypre_ParCSRVector_deleteReference( Hypre_b ); /* This gets rid of the extra reference
+      Hypre_ParCSRVector_deleteRef( Hypre_b ); /* This gets rid of the extra reference
                                                         produced by the above cast */
       Hypre_ParCSRMatrix_Print( Hypre_parcsr_A, "test.A" );
       Hypre_ParCSRVector_Print( Hypre_y, "test.apply" );
-      Hypre_IJBuildVector_deleteReference( Hypre_ij_y );
-      Hypre_IJBuildVector_deleteReference( Hypre_ij_y );
+      Hypre_IJBuildVector_deleteRef( Hypre_ij_y );
+      Hypre_IJBuildVector_deleteRef( Hypre_ij_y );
       /* ...It would make sense to delete the reference as y.  I don't know why y's function
          pointers are messed up at this point so that won't work. */
 
@@ -1649,34 +1649,34 @@ main( int   argc,
          SIDL_double__array_set1( Hypre_values, i, 1.0 );
       }
       Hypre_IJBuildVector_SetValues( Hypre_ij_x, local_num_cols, Hypre_indices, Hypre_values );
-      SIDL_int__array_deleteReference( Hypre_indices );
-      SIDL_double__array_deleteReference( Hypre_values );
+      SIDL_int__array_deleteRef( Hypre_indices );
+      SIDL_double__array_deleteRef( Hypre_values );
       Hypre_ParCSRVector_Print( Hypre_x, "test.setvalues" );
 
       /* Copy, b=x; result is all 1's */
       Hypre_Vector_x = Hypre_cast_ParCSRVector_to_Vector( Hypre_x );
       Hypre_ParCSRVector_Copy( Hypre_b, Hypre_Vector_x );
       Hypre_ParCSRVector_Print( Hypre_b, "test.copy" );
-      Hypre_Vector_deleteReference( Hypre_Vector_x );
+      Hypre_Vector_deleteRef( Hypre_Vector_x );
 
       /* Clone y=b; result is all 1's */
       Hypre_ParCSRVector_Clone( Hypre_b, &y );
       Hypre_y = Hypre_cast_Vector_to_ParCSRVector( y );
       Hypre_ParCSRVector_Print( Hypre_y, "test.clone" );
-      Hypre_Vector_deleteReference( y );
+      Hypre_Vector_deleteRef( y );
 
       /* Read y2=y; result is all 1's */
       Hypre_y2 = Hypre_ParCSRVector__create();
       Hypre_ij_y2 = Hypre_cast_ParCSRVector_to_IJBuildVector( Hypre_y2 );
-      Hypre_IJBuildVector_addReference( Hypre_ij_y2 );
+      Hypre_IJBuildVector_addRef( Hypre_ij_y2 );
       ierr += Hypre_IJBuildVector_SetCommunicator( Hypre_ij_y2, (void *)comm );
       ierr += Hypre_IJBuildVector_Create( Hypre_ij_y2, (void *)comm,
                                           first_local_col,last_local_col );
       ierr += Hypre_IJBuildVector_Initialize( Hypre_ij_y2 );
       Hypre_ParCSRVector_Read( Hypre_y2, "test.clone", (void *)comm );
       Hypre_ParCSRVector_Print( Hypre_y2, "test.read" );
-      Hypre_IJBuildVector_deleteReference( Hypre_ij_y2 );
-      Hypre_ParCSRVector_deleteReference( Hypre_y2 );
+      Hypre_IJBuildVector_deleteRef( Hypre_ij_y2 );
+      Hypre_ParCSRVector_deleteRef( Hypre_y2 );
 
       /* GetRow, b[i], tested but not printed */
       dimsl[0] = 0;   dimsu[0] = local_num_cols;
@@ -1685,8 +1685,8 @@ main( int   argc,
       Hypre_ParCSRVector_GetRow( Hypre_b, 6, &local_num_cols, &Hypre_indices, &Hypre_values );
       tmp = SIDL_double__array_get1( Hypre_values, 0 );
       assert( tmp == 1.0 );
-      SIDL_int__array_deleteReference( Hypre_indices );
-      SIDL_double__array_deleteReference( Hypre_values );
+      SIDL_int__array_deleteRef( Hypre_indices );
+      SIDL_double__array_deleteRef( Hypre_values );
 
       /* Scale, x=2*x; result is all 2's */
       Hypre_ParCSRVector_Scale( Hypre_x, 2.0 );
@@ -1712,8 +1712,8 @@ main( int   argc,
       }
       Hypre_ParCSRVector_Clear( Hypre_b );
       Hypre_IJBuildVector_AddToValues( Hypre_ij_b, local_num_cols, Hypre_indices, Hypre_values );
-      SIDL_int__array_deleteReference( Hypre_indices );
-      SIDL_double__array_deleteReference( Hypre_values );
+      SIDL_int__array_deleteRef( Hypre_indices );
+      SIDL_double__array_deleteRef( Hypre_values );
       Hypre_ParCSRVector_Print( Hypre_b, "test.addtovalues" );
 
       /* Clear,x=0, which restores its initial value of 0 */
@@ -1820,8 +1820,8 @@ main( int   argc,
            Hypre_y = Hypre_ParCSRVector__create();
            Hypre_ij_y = Hypre_cast_ParCSRVector_to_IJBuildVector( Hypre_y );
            /* adjust reference counting system for new data type: */
-           Hypre_IJBuildVector_addReference( Hypre_ij_y );
-           Hypre_ParCSRVector_deleteReference( Hypre_y );
+           Hypre_IJBuildVector_addRef( Hypre_ij_y );
+           Hypre_ParCSRVector_deleteRef( Hypre_y );
            ierr += Hypre_IJBuildVector_SetCommunicator( Hypre_ij_y, (void *)comm );
            ierr += Hypre_IJBuildVector_Create( Hypre_ij_y, (void *)comm,
                                                first_local_col,last_local_col );
@@ -1829,11 +1829,11 @@ main( int   argc,
            y = Hypre_cast_ParCSRVector_to_Vector( Hypre_y );
            ierr += Hypre_ParAMG_GetResidual( Hypre_AMG, &y );
            Hypre_ParCSRVector_Print( Hypre_y, "test.residual" );
-           Hypre_IJBuildVector_deleteReference( Hypre_ij_y ); /* delete y */
-           Hypre_IJBuildVector_deleteReference( Hypre_ij_y );
+           Hypre_IJBuildVector_deleteRef( Hypre_ij_y ); /* delete y */
+           Hypre_IJBuildVector_deleteRef( Hypre_ij_y );
       }
 
-      Hypre_ParCSRMatrix_deleteReference( Hypre_parcsr_A );
+      Hypre_ParCSRMatrix_deleteRef( Hypre_parcsr_A );
 
       /* Break encapsulation so that the rest of the driver stays the same */
       temp_vecdata = Hypre_ParCSRVector__get_data( Hypre_x );
@@ -2072,8 +2072,8 @@ main( int   argc,
            Hypre_y = Hypre_ParCSRVector__create();
            Hypre_ij_y = Hypre_cast_ParCSRVector_to_IJBuildVector( Hypre_y );
            /* adjust reference counting system for new data type: */
-           Hypre_IJBuildVector_addReference( Hypre_ij_y );
-           Hypre_ParCSRVector_deleteReference( Hypre_y );
+           Hypre_IJBuildVector_addRef( Hypre_ij_y );
+           Hypre_ParCSRVector_deleteRef( Hypre_y );
            ierr += Hypre_IJBuildVector_SetCommunicator( Hypre_ij_y, (void *)comm );
            ierr += Hypre_IJBuildVector_Create( Hypre_ij_y, (void *)comm,
                                                first_local_col,last_local_col );
@@ -2081,7 +2081,7 @@ main( int   argc,
            y = Hypre_cast_ParCSRVector_to_Vector( Hypre_y );
            ierr += Hypre_PCG_GetResidual( Hypre_PCG, &y );
            Hypre_ParCSRVector_Print( Hypre_y, "test.residual" );
-           Hypre_IJBuildVector_deleteReference( Hypre_ij_y ); /* delete y */
+           Hypre_IJBuildVector_deleteRef( Hypre_ij_y ); /* delete y */
       }
 
       /* Break encapsulation so that the rest of the driver stays the same */
@@ -2631,24 +2631,24 @@ main( int   argc,
       afterwards,  there will be a crash because the data inside them is already
       gone.  */
    if( Hypre_grid_relax_type )
-      SIDL_int__array_deleteReference( Hypre_grid_relax_type );
+      SIDL_int__array_deleteRef( Hypre_grid_relax_type );
    if( Hypre_relax_weight )
-      SIDL_double__array_deleteReference( Hypre_relax_weight );
+      SIDL_double__array_deleteRef( Hypre_relax_weight );
    if( Hypre_grid_relax_points )
-      SIDL_int__array_deleteReference( Hypre_grid_relax_points );
+      SIDL_int__array_deleteRef( Hypre_grid_relax_points );
    if( Hypre_num_grid_sweeps )
-      SIDL_int__array_deleteReference( Hypre_num_grid_sweeps );
+      SIDL_int__array_deleteRef( Hypre_num_grid_sweeps );
    if( Hypre_dof_func )
-      SIDL_int__array_deleteReference( Hypre_dof_func );
+      SIDL_int__array_deleteRef( Hypre_dof_func );
 
    if( Hypre_AMG )
-      Hypre_ParAMG_deleteReference( Hypre_AMG );
+      Hypre_ParAMG_deleteRef( Hypre_AMG );
    if ( Hypre_op_A )
-      Hypre_Operator_deleteReference( Hypre_op_A );
+      Hypre_Operator_deleteRef( Hypre_op_A );
    if ( Hypre_x)
-      Hypre_ParCSRVector_deleteReference( Hypre_x );
+      Hypre_ParCSRVector_deleteRef( Hypre_x );
    if ( Hypre_b)
-      Hypre_ParCSRVector_deleteReference( Hypre_b );
+      Hypre_ParCSRVector_deleteRef( Hypre_b );
 
    if (num_grid_sweeps)
       hypre_TFree(num_grid_sweeps);
