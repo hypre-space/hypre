@@ -47,7 +47,7 @@ LFLAGS =\
  ${MPILIBFLAGS} ${LIBFLAGS} ${LDLIBFLAGS}
 
 HEADERS =\
- communication.h\
+ par_csr_communication.h\
  headers.h\
  numbers.h\
  par_csr_matrix.h\
@@ -56,7 +56,7 @@ HEADERS =\
  HYPRE_parcsr_mv.h
 
 FILES =\
- communication.c\
+ par_csr_communication.c\
  numbers.c\
  par_csr_matop.c\
  par_csr_matrix.c\

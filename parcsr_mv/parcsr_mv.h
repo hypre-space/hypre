@@ -350,7 +350,7 @@ int * hypre_NumbersArray( hypre_NumbersNode * node );
 
 #endif
 
-/* communication.c */
+/* par_csr_communication.c */
 hypre_ParCSRCommHandle *hypre_ParCSRCommHandleCreate( int job , hypre_ParCSRCommPkg *comm_pkg , void *send_data , void *recv_data );
 int hypre_ParCSRCommHandleDestroy( hypre_ParCSRCommHandle *comm_handle );
 void hypre_MatvecCommPkgCreate_core( MPI_Comm comm , int *col_map_offd , int first_col_diag , int *col_starts , int num_cols_diag , int num_cols_offd , int firstColDiag , int *colMapOffd , int data , int *p_num_recvs , int **p_recv_procs , int **p_recv_vec_starts , int *p_num_sends , int **p_send_procs , int **p_send_map_starts , int **p_send_map_elmts );
