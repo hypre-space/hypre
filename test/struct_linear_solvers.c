@@ -654,6 +654,7 @@ main( int   argc,
          HYPRE_StructSMGSetMemoryUse(precond, 0);
          HYPRE_StructSMGSetMaxIter(precond, 1);
          HYPRE_StructSMGSetTol(precond, 0.0);
+         HYPRE_StructSMGSetZeroGuess(precond);
          HYPRE_StructSMGSetNumPreRelax(precond, n_pre);
          HYPRE_StructSMGSetNumPostRelax(precond, n_post);
          HYPRE_StructSMGSetLogging(precond, 0);
@@ -669,6 +670,7 @@ main( int   argc,
          HYPRE_StructPFMGInitialize(MPI_COMM_WORLD, &precond);
          HYPRE_StructPFMGSetMaxIter(precond, 1);
          HYPRE_StructPFMGSetTol(precond, 0.0);
+         HYPRE_StructPFMGSetZeroGuess(precond);
          /* weighted Jacobi = 1; red-black GS = 2 */
          HYPRE_StructPFMGSetRelaxType(precond, 1);
          HYPRE_StructPFMGSetNumPreRelax(precond, n_pre);
@@ -678,6 +680,19 @@ main( int   argc,
          HYPRE_StructPCGSetPrecond(solver,
                                    HYPRE_StructPFMGSolve,
                                    HYPRE_StructPFMGSetup,
+                                   precond);
+      }
+
+      else if (solver_id == 17)
+      {
+         /* use two-step Jacobi as preconditioner */
+         HYPRE_StructJacobiInitialize(MPI_COMM_WORLD, &precond);
+         HYPRE_StructJacobiSetMaxIter(precond, 2);
+         HYPRE_StructJacobiSetTol(precond, 0.0);
+         HYPRE_StructJacobiSetZeroGuess(precond);
+         HYPRE_StructPCGSetPrecond(solver,
+                                   HYPRE_StructJacobiSolve,
+                                   HYPRE_StructJacobiSetup,
                                    precond);
       }
 
@@ -727,6 +742,10 @@ main( int   argc,
       {
          HYPRE_StructPFMGFinalize(precond);
       }
+      else if (solver_id == 17)
+      {
+         HYPRE_StructJacobiFinalize(precond);
+      }
    }
 
    /*-----------------------------------------------------------
@@ -754,6 +773,7 @@ main( int   argc,
          HYPRE_StructSMGSetMemoryUse(precond, 0);
          HYPRE_StructSMGSetMaxIter(precond, 1);
          HYPRE_StructSMGSetTol(precond, 0.0);
+         HYPRE_StructSMGSetZeroGuess(precond);
          HYPRE_StructSMGSetNumPreRelax(precond, n_pre);
          HYPRE_StructSMGSetNumPostRelax(precond, n_post);
          HYPRE_StructSMGSetLogging(precond, 0);
@@ -769,6 +789,7 @@ main( int   argc,
          HYPRE_StructPFMGInitialize(MPI_COMM_WORLD, &precond);
          HYPRE_StructPFMGSetMaxIter(precond, 1);
          HYPRE_StructPFMGSetTol(precond, 0.0);
+         HYPRE_StructPFMGSetZeroGuess(precond);
          /* weighted Jacobi = 1; red-black GS = 2 */
          HYPRE_StructPFMGSetRelaxType(precond, 1);
          HYPRE_StructPFMGSetNumPreRelax(precond, n_pre);
