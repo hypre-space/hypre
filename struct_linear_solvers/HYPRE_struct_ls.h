@@ -29,7 +29,7 @@ extern "C" {
 /**
  * @name Struct Solvers
  *
- * These solvers use matrix/vector storage schemes that are taylored
+ * These solvers use matrix/vector storage schemes that are tailored
  * to structured grid problems.
  *
  * @memo Linear solvers for structured grids
@@ -447,6 +447,95 @@ int HYPRE_StructDiagScale(HYPRE_StructSolver solver,
                           HYPRE_StructMatrix HA,
                           HYPRE_StructVector Hy,
                           HYPRE_StructVector Hx);
+
+/*@}*/
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+/*
+ * @name Struct GMRES Solver
+ **/
+/*@{*/
+
+/**
+ * Create a solver object.
+ **/
+int
+HYPRE_StructGMRESCreate( MPI_Comm comm, HYPRE_StructSolver *solver );
+
+
+/**
+ * Destroy a solver object.
+ **/
+int 
+HYPRE_StructGMRESDestroy( HYPRE_StructSolver solver );
+
+
+/**
+ * set up
+ **/
+int 
+HYPRE_StructGMRESSetup( HYPRE_StructSolver solver,
+                      HYPRE_StructMatrix A,
+                      HYPRE_StructVector b,
+                        HYPRE_StructVector x      );
+
+
+/**
+ * Solve the system.
+ **/
+int 
+HYPRE_StructGMRESSolve( HYPRE_StructSolver solver,
+                      HYPRE_StructMatrix A,
+                      HYPRE_StructVector b,
+                        HYPRE_StructVector x      );
+
+
+/**
+ * (Optional) Set the convergence tolerance.
+ **/
+int
+HYPRE_StructGMRESSetTol( HYPRE_StructSolver solver,
+                         double             tol    );
+
+/**
+ * (Optional) Set maximum number of iterations.
+ **/
+int
+HYPRE_StructGMRESSetMaxIter( HYPRE_StructSolver solver,
+                             int                max_iter );
+
+
+/**
+ * (Optional) Set the preconditioner to use.
+ **/
+int
+HYPRE_StructGMRESSetPrecond( HYPRE_StructSolver         solver,
+                           HYPRE_PtrToStructSolverFcn precond,
+                           HYPRE_PtrToStructSolverFcn precond_setup,
+                             HYPRE_StructSolver         precond_solver );
+
+/**
+ * (Optional) Set the amount of logging to do.
+ **/
+int
+HYPRE_StructGMRESSetLogging( HYPRE_StructSolver solver,
+                             int                logging );
+
+/**
+ * Return the number of iterations taken.
+ **/
+int
+HYPRE_StructGMRESGetNumIterations( HYPRE_StructSolver  solver,
+                                   int                *num_iterations );
+
+/**
+ * Return the norm of the final relative residual.
+ **/
+int
+HYPRE_StructGMRESGetFinalRelativeResidualNorm( HYPRE_StructSolver  solver,
+                                               double             *norm   );
 
 /*@}*/
 
