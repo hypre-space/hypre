@@ -103,8 +103,8 @@ parse_arguments () {
       d) build $Build " "       "docs"          "docs";;
       f) build $Build "all77"   "all77"         "test";;
       h) usage; exit 2;;
-      m) HYPRE_SEND_MAIL="yes"; MailOpt="-mail";;
-     +m) HYPRE_SEND_MAIL="no"; MailOpt="";;
+      m) HYPRE_SEND_MAIL="no"; MailOpt="";;
+     +m) HYPRE_SEND_MAIL="yes"; MailOpt="-mail";;
       n) confbuildtest $Build   "--without-MPI" "no_mpi"    1 0 1 1 1 1 0;;
       o) confbuildtest $OPTARG  "--with-openmp" "openmp"    0 0 0 0 0 1 0;;
       p) confbuildtest $OPTARG  "--with-petac"  "petac"     0 0 0 0 1 0 0;;
@@ -170,6 +170,105 @@ usage () {
 # Function for mailing error messages
 #=============================================================================
 
+mail_summary () {
+  CTOTCNT=0; ETOTCNT=0
+  CLOGCNT=0; ELOGCNT=0
+  CERRCNT=0; EERRCNT=0; TOTCNT=0
+  CLIST=""; ELIST=""
+  SUMFILE="autotest.${HYPRE_RUN_MACHINE}.sum"
+  cd $HYPRE_AUTOTEST_DIR
+  echo "Autotest mailing error summary"
+  printf "\n" > $SUMFILE
+  printf "Autotest error summary for `date`\n" >> $SUMFILE
+  printf "Target architecure=$HYPRE_ARCH\n" >> $SUMFILE
+  printf "Compile machine=$HYPRE_COMPILE_MACHINE\n" >> $SUMFILE
+  printf "Execute machine=$HYPRE_RUN_MACHINE\n" >> $SUMFILE
+  printf "Directory=${HYPRE_AUTOTEST_DIR}\n" >> $SUMFILE
+  printf "\n" >> $SUMFILE
+  printf "Compile summary:\n" >> $SUMFILE
+  for ConfOpt in default beta no_mpi openmp petac \
+           pthreads purify strict_checking \
+           docs all++ all77 beta++ beta77
+  do
+    printf "$ConfOpt\t" >> $SUMFILE
+    for MakeOpt in ""  all beta configure IJ fei++ fei nofei sstruct struct
+    do
+      FILE=autotest.$ConfOpt.$MakeOpt
+      LFILE=${FILE%%.}.log
+      for i in $LFILE ${SRC}/${LFILE} \
+               ${SRC}/test/${LFILE} ${SRC}/docs/${LFILE} 
+      do
+        if test -r "${i}"
+        then
+          CTOTCNT=`expr $CTOTCNT + 1`
+          EFILE=${i%%log}err
+          if test -s "${EFILE}"
+          then
+            printf "  O  " >> $SUMFILE
+            TOTCNT=`expr $TOTCNT + 1`
+            CERRCNT=`expr $CERRCNT + 1`
+            CLIST="${CLIST}${EFILE}\n"
+          else
+            printf "  +  " >> $SUMFILE
+            CLOGCNT=`expr $CLOGCNT + 1`
+          fi
+        fi
+      done
+    done
+    printf "\n" >> $SUMFILE
+  done
+  printf "\n" >> $SUMFILE
+  printf "$CTOTCNT total test performed\n" >> $SUMFILE
+  printf "$CERRCNT test failed\n" >> $SUMFILE
+  printf "$CLOGCNT test succeeded\n" >> $SUMFILE
+  if [ "$CLIST" != "" ]
+  then
+    printf "non zero error log file(s):\n" >> $SUMFILE
+    printf "${CLIST}\n" >> $SUMFILE
+  fi
+  printf "\n" >> $SUMFILE
+  printf "Execute summary:\n" >> $SUMFILE
+  for i in IJ fei sstruct struct
+  do
+    LFILE=${SRC}/test/${i}_linear_solvers.log
+    if test -r "${LFILE}"
+    then
+      printf "$i\t" >> $SUMFILE
+      ETOTCNT=`expr $ETOTCNT + 1`
+      EFILE=${SRC}/test/${i}_linear_solvers.err
+      if test -s "${EFILE}"
+      then
+        printf "  O  " >> $SUMFILE
+        TOTCNT=`expr $TOTCNT + 1`
+        EERRCNT=`expr $EERRCNT + 1`
+        ELIST="${ELIST}${EFILE}\n"
+      else
+        printf "  +  " >> $SUMFILE
+        ELOGCNT=`expr $ELOGCNT + 1`
+      fi
+      printf "\n" >> $SUMFILE
+    fi
+  done
+  printf "\n" >> $SUMFILE
+  printf "$ETOTCNT total test performed\n" >> $SUMFILE
+  printf "$EERRCNT test failed\n" >> $SUMFILE
+  printf "$ELOGCNT test succeeded\n" >> $SUMFILE
+  if [ "$ELIST" != "" ]
+  then
+    printf "non zero error log file(s):\n" >> $SUMFILE
+    printf "${ELIST}\n" >> $SUMFILE
+  fi
+  printf "\n" >> $SUMFILE
+  if [ "$TOTCNT" = "0" ]
+  then
+    SUBJECT="Autotest NO Errors ($HYPRE_ARCH)"
+  else
+    SUBJECT="Autotest $TOTCNT Errors ($HYPRE_ARCH)"
+  fi
+  ${HYPRE_MAIL} -s "$SUBJECT" $HYPRE_ALL_EMAIL < $SUMFILE 
+  echo "Autotest mail sent"
+}
+
 mail_errors () { 
   if [ "$HYPRE_SEND_MAIL" = "yes" ]
   then
@@ -191,6 +290,8 @@ mail_errors () {
       fi 
     done 
     echo "Autotest mail sent"
+  else
+    mail_summary 
   fi
 }
 
