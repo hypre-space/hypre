@@ -240,7 +240,8 @@ int hypre_DataExchangeList(int num_contacts,
       
       for (i=0; i< num_contacts; i++) 
       {
-         response_ptrs[i] =  initial_recv_buf + i*max_response_total_bytes ; 
+         /* response_ptrs[i] =  initial_recv_buf + i*max_response_total_bytes ; */
+         response_ptrs[i] =  (void *)((char *) initial_recv_buf + i*max_response_total_bytes) ; 
 
          MPI_Irecv(response_ptrs[i], max_response_total_bytes, MPI_BYTE, contact_proc_list[i], 
                    response_tag, comm, &response_requests[i]);
@@ -256,7 +257,9 @@ int hypre_DataExchangeList(int num_contacts,
          size =  contact_send_buf_starts[i+1] - contact_send_buf_starts[i]  ; 
          MPI_Isend(contact_ptrs[i], size*contact_obj_size, MPI_BYTE, contact_proc_list[i], 
                    contact_tag, comm, &contact_requests[i]); 
-         start_ptr += (size*contact_obj_size);        
+         /*  start_ptr += (size*contact_obj_size); */        
+         start_ptr = (void *) ((char *) start_ptr  + (size*contact_obj_size)); 
+
 
       }
    }
@@ -358,8 +361,9 @@ int hypre_DataExchangeList(int num_contacts,
              - so we will allocate space for the data as needed */
            size = post_size*response_obj_size;
            post_array[post_array_size] =  hypre_MAlloc(size); 
-           index_ptr =  send_response_buf + max_response_size_bytes;
-                          
+           /* index_ptr =  send_response_buf + max_response_size_bytes */;
+           index_ptr =  (void *) ((char *) send_response_buf + max_response_size_bytes);
+               
            memcpy(post_array[post_array_size], index_ptr, size);
     
         /*now post any part of the message that is too long with a non-blocking send and
@@ -372,7 +376,9 @@ int hypre_DataExchangeList(int num_contacts,
         }
 
        /*now append the size information into the overhead storage */
-        index_ptr =  send_response_buf + max_response_size_bytes;
+       /* index_ptr =  send_response_buf + max_response_size_bytes; */
+        index_ptr =  (void *) ((char *) send_response_buf + max_response_size_bytes);
+
         memcpy(index_ptr, &response_message_size, response_obj_size);
 
          
@@ -463,12 +469,16 @@ int hypre_DataExchangeList(int num_contacts,
      the array that will be used in posting the irecvs */ 
    for (i=0; i< num_contacts; i++)
    {
-      int_ptr = (int *) (start_ptr + max_response_size_bytes); /*the overhead int*/
+      /* int_ptr = (int *) (start_ptr + max_response_size_bytes);  */ /*the overhead int*/
+      int_ptr = (int *) ( (char *) start_ptr + max_response_size_bytes); /*the overhead int*/
+
+
       response_message_size =  *int_ptr;
       response_recv_buf_starts[i+1] = response_recv_buf_starts[i] + response_message_size;
       total_size +=  response_message_size;
       if (max_response_size < response_message_size) num_post_recvs++;
-      start_ptr += max_response_total_bytes;
+      /* start_ptr += max_response_total_bytes; */
+      start_ptr =  (void *) ((char *) start_ptr + max_response_total_bytes);
    }
       
    post_recv_requests = hypre_TAlloc(MPI_Request, num_post_recvs);
@@ -488,7 +498,9 @@ int hypre_DataExchangeList(int num_contacts,
       copy_size = hypre_min(response_message_size, max_response_size);
       
       memcpy(index_ptr, start_ptr, copy_size*response_obj_size);   
-      index_ptr += copy_size*response_obj_size;  
+      /* index_ptr += copy_size*response_obj_size; */  
+      index_ptr = (void *) ((char *) index_ptr + copy_size*response_obj_size);  
+
       if (max_response_size < response_message_size)
       {
          size = (response_message_size - max_response_size)*response_obj_size;
@@ -496,10 +508,13 @@ int hypre_DataExchangeList(int num_contacts,
          MPI_Irecv(post_ptrs[count], size, MPI_BYTE, contact_proc_list[i]     ,
                    post_tag,  comm, &post_recv_requests[count]);
          count++;
-         index_ptr+=size;        
+         /* index_ptr+=size;*/        
+          index_ptr=  (void *) ((char *) index_ptr + size);  
       }
         
-      start_ptr += max_response_total_bytes;
+      /* start_ptr += max_response_total_bytes; */
+      start_ptr = (void *) ((char *) start_ptr + max_response_total_bytes);
+
    }
 
    post_send_statuses = hypre_TAlloc(MPI_Status, post_array_size);
