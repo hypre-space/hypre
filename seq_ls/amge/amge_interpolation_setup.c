@@ -148,7 +148,7 @@ int hypre_AMGeInterpolationSetup(hypre_CSRMatrix ***P_pointer,
   j_dof_node[0] = j_dof_node_0;
 
   i_node_dof[0] = i_node_dof_0;
-  j_node_dof[0] = i_node_dof_0;
+  j_node_dof[0] = j_node_dof_0;
  
   i_dof_neighbor_coarsedof = hypre_CTAlloc(int*, level);
   j_dof_neighbor_coarsedof = hypre_CTAlloc(int*, level);
