@@ -1333,8 +1333,8 @@ main( int   argc,
    hypre_FinalizeTiming(time_index);
    hypre_ClearTiming();
    
-   HYPRE_IJMatrixPrint(ij_A, "driver.out.A");
-   HYPRE_IJVectorPrint(ij_x, "driver.out.x0");
+   /* HYPRE_IJMatrixPrint(ij_A, "driver.out.A");
+   HYPRE_IJVectorPrint(ij_x, "driver.out.x0"); */
 
    if (num_functions > 1)
    {
@@ -1675,6 +1675,10 @@ main( int   argc,
          HYPRE_BoomerAMGSetRelaxWeight(pcg_precond, relax_weight);
          HYPRE_BoomerAMGSetSmoothOption(pcg_precond, smooth_option);
          HYPRE_BoomerAMGSetSmoothNumSweep(pcg_precond, smooth_num_sweep);
+         HYPRE_BoomerAMGSetVariant(pcg_precond, variant);
+         HYPRE_BoomerAMGSetOverlap(pcg_precond, overlap);
+         HYPRE_BoomerAMGSetDomainType(pcg_precond, domain_type);
+         HYPRE_BoomerAMGSetSchwarzRlxWeight(pcg_precond, schwarz_rlx_weight);
          HYPRE_BoomerAMGSetGridRelaxPoints(pcg_precond, grid_relax_points);
          HYPRE_BoomerAMGSetMaxLevels(pcg_precond, max_levels);
          HYPRE_BoomerAMGSetMaxRowSum(pcg_precond, max_row_sum);
@@ -2236,8 +2240,8 @@ main( int   argc,
     *-----------------------------------------------------------*/
 
    HYPRE_IJVectorGetObjectType(ij_b, &j);
-   HYPRE_IJVectorPrint(ij_b, "driver.out.b");
-   HYPRE_IJVectorPrint(ij_x, "driver.out.x");
+   /* HYPRE_IJVectorPrint(ij_b, "driver.out.b");
+   HYPRE_IJVectorPrint(ij_x, "driver.out.x"); */
 
    /*-----------------------------------------------------------
     * Finalize things
