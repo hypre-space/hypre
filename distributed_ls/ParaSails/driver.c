@@ -164,7 +164,12 @@ int main(int argc, char *argv[])
         MPI_Barrier(MPI_COMM_WORLD);
         time0 = MPI_Wtime();
 
-        ParaSailsSetupValues(ps, A, filter);
+        err = ParaSailsSetupValues(ps, A, filter);
+        if (err != 0)
+	{
+            printf("ParaSailsSetupValues returned error.\n");
+	    goto cleanup;
+	}
 
         time1 = MPI_Wtime();
 	setup_time += (time1-time0);

@@ -210,6 +210,7 @@ int hypre_ParaSailsSetup(hypre_ParaSails obj,
     /* double cost; */
     Matrix *mat;
     hypre_ParaSails_struct *internal = (hypre_ParaSails_struct *) obj;
+    int err;
 
     mat = convert_matrix(internal->comm, distmat);
 
@@ -225,14 +226,14 @@ int hypre_ParaSailsSetup(hypre_ParaSails obj,
 
     internal->ps->loadbal_beta = loadbal;
 
-    ParaSailsSetupValues(internal->ps, mat, filter);
+    err = ParaSailsSetupValues(internal->ps, mat, filter);
 
     if (logging)
         ParaSailsStatsValues(internal->ps, mat);
 
     MatrixDestroy(mat);
 
-    return 0;
+    return err;
 }
 
 /*--------------------------------------------------------------------------
@@ -274,20 +275,21 @@ int hypre_ParaSailsSetupValues(hypre_ParaSails obj,
 {
     Matrix *mat;
     hypre_ParaSails_struct *internal = (hypre_ParaSails_struct *) obj;
+    int err;
 
     mat = convert_matrix(internal->comm, distmat);
 
     internal->ps->loadbal_beta = loadbal;
     internal->ps->setup_pattern_time = 0.0;
 
-    ParaSailsSetupValues(internal->ps, mat, filter);
+    err = ParaSailsSetupValues(internal->ps, mat, filter);
 
     if (logging)
         ParaSailsStatsValues(internal->ps, mat);
 
     MatrixDestroy(mat);
 
-    return 0;
+    return err;
 }
 
 /*--------------------------------------------------------------------------

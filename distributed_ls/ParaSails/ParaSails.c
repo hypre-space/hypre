@@ -993,7 +993,7 @@ static void ConstructPatternForEachRowExt(int symmetric,
  * ComputeValuesSym
  *--------------------------------------------------------------------------*/
 
-static void ComputeValuesSym(StoredRows *stored_rows, Matrix *mat,
+static int ComputeValuesSym(StoredRows *stored_rows, Matrix *mat,
   int local_beg_row, Numbering *numb, int symmetric)
 {
     int *marker;
@@ -1006,6 +1006,8 @@ static void ComputeValuesSym(StoredRows *stored_rows, Matrix *mat,
     double time0, time1, timet = 0.0, timea = 0.0;
 
     double ahatcost = 0.0;
+
+    double error = 0;
 
 #ifndef ESSL
     char uplo = 'L';
@@ -1129,11 +1131,14 @@ static void ComputeValuesSym(StoredRows *stored_rows, Matrix *mat,
         hypre_F90_NAME_BLAS(dpotrf, DPOTRF)(&uplo, &len, ahat, &len, &info);
         if (info != 0)
         {
+#if 0
             printf("Matrix may not be symmetric positive definite.\n");
             printf("ParaSails: row %d, dpotrf returned %d.\n", row, info);
             printf("ParaSails: len %d, ahat: %f %f %f %f\n", len,
                 ahat[0], ahat[1], ahat[2], ahat[3]);
             PARASAILS_EXIT;
+#endif
+            error = 1;
         }
 
         /* Solve local linear system - solve phase */
@@ -1141,10 +1146,13 @@ static void ComputeValuesSym(StoredRows *stored_rows, Matrix *mat,
           &info);
         if (info != 0)
         {
+#if 0
             printf("ParaSails: row %d, dpotrs returned %d.\n", row, info);
             printf("ParaSails: len %d, ahat: %f %f %f %f\n", len,
                 ahat[0], ahat[1], ahat[2], ahat[3]);
             PARASAILS_EXIT;
+#endif
+            error = 1;
         }
 #endif
         time1 = MPI_Wtime();
@@ -1169,13 +1177,15 @@ static void ComputeValuesSym(StoredRows *stored_rows, Matrix *mat,
     fflush(stdout);
     }
 #endif
+
+    return error;
 }
 
 /*--------------------------------------------------------------------------
  * ComputeValuesNonsym
  *--------------------------------------------------------------------------*/
 
-static void ComputeValuesNonsym(StoredRows *stored_rows, Matrix *mat,
+static int ComputeValuesNonsym(StoredRows *stored_rows, Matrix *mat,
   int local_beg_row, Numbering *numb)
 {
     int *marker;
@@ -1195,6 +1205,8 @@ static void ComputeValuesNonsym(StoredRows *stored_rows, Matrix *mat,
     int *patt = (int *) malloc(pattsize*sizeof(int));
 
     int info;
+
+    int error = 0;
 
 #ifndef ESSL
     char trans = 'N';
@@ -1309,10 +1321,13 @@ static void ComputeValuesNonsym(StoredRows *stored_rows, Matrix *mat,
 
         if (info != 0)
         {
+#if 0
             printf("ParaSails: row %d, dgels returned %d.\n", row, info);
             printf("ParaSails: len %d, ahat: %f %f %f %f\n", len,
                 ahat[0], ahat[1], ahat[2], ahat[3]);
             PARASAILS_EXIT;
+#endif
+            error = 1;
         }
 
         /* Copy result into row */
@@ -1337,6 +1352,8 @@ static void ComputeValuesNonsym(StoredRows *stored_rows, Matrix *mat,
     fflush(stdout);
     }
 #endif
+
+    return error;
 }
 
 /*--------------------------------------------------------------------------
@@ -1721,7 +1738,7 @@ void ParaSailsSetupPatternExt(ParaSails *ps, Matrix *A,
  * "A", for which a preconditioner is constructed.
  *--------------------------------------------------------------------------*/
 
-void ParaSailsSetupValues(ParaSails *ps, Matrix *A, double filter)
+int ParaSailsSetupValues(ParaSails *ps, Matrix *A, double filter)
 {
     LoadBal    *load_bal;
     StoredRows *stored_rows;
@@ -1729,6 +1746,8 @@ void ParaSailsSetupValues(ParaSails *ps, Matrix *A, double filter)
     double *val;
     int i;
     double time0, time1;
+    MPI_Comm comm = ps->comm;
+    int error = 0, error_sum;
 
     time0 = MPI_Wtime();
 
@@ -1761,12 +1780,13 @@ void ParaSailsSetupValues(ParaSails *ps, Matrix *A, double filter)
 
     if (ps->symmetric)
     {
-        ComputeValuesSym(stored_rows, ps->M, load_bal->beg_row, ps->numb,
+        error += 
+          ComputeValuesSym(stored_rows, ps->M, load_bal->beg_row, ps->numb,
             ps->symmetric);
 
         for (i=0; i<load_bal->num_taken; i++)
         {
-            ComputeValuesSym(stored_rows,
+            error += ComputeValuesSym(stored_rows,
                 load_bal->recip_data[i].mat,
                 load_bal->recip_data[i].mat->beg_row, ps->numb,
                 ps->symmetric);
@@ -1774,11 +1794,12 @@ void ParaSailsSetupValues(ParaSails *ps, Matrix *A, double filter)
     }
     else
     {
-        ComputeValuesNonsym(stored_rows, ps->M, load_bal->beg_row, ps->numb);
+        error += 
+          ComputeValuesNonsym(stored_rows, ps->M, load_bal->beg_row, ps->numb);
 
         for (i=0; i<load_bal->num_taken; i++)
         {
-            ComputeValuesNonsym(stored_rows,
+            error += ComputeValuesNonsym(stored_rows,
                 load_bal->recip_data[i].mat,
                 load_bal->recip_data[i].mat->beg_row, ps->numb);
         }
@@ -1788,6 +1809,17 @@ void ParaSailsSetupValues(ParaSails *ps, Matrix *A, double filter)
     ps->setup_values_time = time1 - time0;
 
     LoadBalReturn(load_bal, ps->comm, ps->M);
+
+    /* check if there was an error in computing the approximate inverse */
+    MPI_Allreduce(&error, &error_sum, 1, MPI_INT, MPI_SUM, comm);
+    if (error_sum != 0)
+    {
+        printf("Hypre-ParaSails detected a problem.  The input matrix\n");
+        printf("may not be full-rank, or if you are using the SPD version,\n");
+        printf("the input matrix may not be positive definite.\n");
+        printf("This error is being returned to the calling function.\n");
+        return error_sum;
+    }
 
     /* Filtering */
 
@@ -1846,6 +1878,8 @@ void ParaSailsSetupValues(ParaSails *ps, Matrix *A, double filter)
     }
 
     StoredRowsDestroy(stored_rows);
+
+    return 0;
 }
 
 /*--------------------------------------------------------------------------
