@@ -172,6 +172,7 @@ HYPRE_LinSysCore::HYPRE_LinSysCore(MPI_Comm comm) :
                   mapFromSolnLengMax_(0),
                   mapFromSolnList_(NULL),
                   mapFromSolnList2_(NULL),
+                  memOptimizerFlag_(0),
                   HYpbs_(NULL)
 {
    //-------------------------------------------------------------------
