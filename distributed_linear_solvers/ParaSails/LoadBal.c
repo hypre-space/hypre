@@ -94,7 +94,10 @@ void LoadBalInit(MPI_Comm comm, double local_cost, double beta,
                     {
                         cost[i] = cost[i] - move;
                         cost[j] = cost[j] + move;
-                        printf("moved from %d to %d (%f)\n", i,j,move);
+#ifdef PARASAILS_TIME
+			if (mype == 0)
+                            printf("moved from %d to %d (%f)\n", i,j,move);
+#endif
                         /*nummoves = nummoves + 1;*/
                         break;
                     }
@@ -102,7 +105,10 @@ void LoadBalInit(MPI_Comm comm, double local_cost, double beta,
                     {
                         cost[i] = cost[i] - accept;
                         cost[j] = cost[j] + accept;
-                        printf("moved from %d to %d (%f)\n", i,j,accept);
+#ifdef PARASAILS_TIME
+			if (mype == 0)
+                            printf("moved from %d to %d (%f)\n", i,j,accept);
+#endif
                         /*nummoves = nummoves + 1;*/
                         move = cost[i] - upper;
                     }
