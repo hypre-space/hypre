@@ -89,6 +89,7 @@ class MLI_Method_AMGSA : public MLI_Method
    double   total_time;
    int      ARPACKSuperLUExists_;
    MLI_AMGSA_DD *ddObj;
+   char     paramFile_[100];
 
 public :
 

@@ -7,7 +7,6 @@
  *********************************************************************EHEADER*/
 
 #include <string.h>
-#include <strings.h>
 #include <assert.h>
 #include "HYPRE.h"
 #include "util/mli_utils.h"
@@ -82,6 +81,7 @@ MLI_Method_AMGSA::MLI_Method_AMGSA( MPI_Comm comm ) : MLI_Method( comm )
    ARPACKSuperLUExists_ = 0;
    sa_labels            = NULL;
    useSAMGDDFlag_       = 0;
+   strcpy( paramFile_, "empty" );
 }
 
 /* ********************************************************************* *
@@ -154,7 +154,7 @@ int MLI_Method_AMGSA::setParams(char *in_name, int argc, char *argv[])
    int        level, size, nDOF, numNS, length, nSweeps=1, set_id;
    int        prePost, nnodes, nAggr, *aggrInfo, *labels, is;
    double     thresh, pweight, *nullspace, *weights=NULL, *coords, *scales;
-   char       param1[256], param2[256];
+   char       param1[256], param2[256], *param3;
 
    sscanf(in_name, "%s", param1);
    if ( !strcasecmp(param1, "setOutputLevel" ))
@@ -411,6 +411,13 @@ int MLI_Method_AMGSA::setParams(char *in_name, int argc, char *argv[])
       if ( sa_labels[level] != NULL ) delete [] sa_labels[level];
       sa_labels[level] = new int[length];
       for ( is = 0; is < length; is++ ) sa_labels[level][is] = labels[is];
+      return 0;
+   }
+   else if ( !strcasecmp(param1, "setParamFile" ))
+   {
+      param3 = (char *) argv[0];
+      strcpy( paramFile_, param3 ); 
+      return 0;
    }
    else if ( !strcasecmp(param1, "print" ))
    {
