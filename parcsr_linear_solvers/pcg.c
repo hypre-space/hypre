@@ -273,6 +273,8 @@ hypre_KrylovSolve( void *pcg_vdata,
    {
       /* bi_prod = <b,b> */
       bi_prod = hypre_KrylovInnerProd(b, b);
+      if (logging > 0)
+          printf("<b,b>: %e\n",bi_prod);
    }
    else
    {
@@ -280,9 +282,11 @@ hypre_KrylovSolve( void *pcg_vdata,
       hypre_KrylovClearVector(p);
       precond(precond_data, A, b, p);
       bi_prod = hypre_KrylovInnerProd(p, b);
+      if (logging > 0)
+          printf("<C*b,b>: %e\n",bi_prod);
    }
-   eps = (tol*tol)*bi_prod;
 
+#if 0
    /* Check to see if the rhs vector b is zero */
    if (bi_prod == 0.0)
    {
@@ -296,6 +300,7 @@ hypre_KrylovSolve( void *pcg_vdata,
       ierr = 0;
       return ierr;
    }
+#endif
 
    /* r = b - Ax */
    hypre_KrylovCopyVector(b, r);
@@ -313,6 +318,20 @@ hypre_KrylovSolve( void *pcg_vdata,
 
    /* gamma = <r,p> */
    gamma = hypre_KrylovInnerProd(r,p);
+
+   if (bi_prod > 0.0)
+       eps = (tol*tol)*bi_prod;
+   else
+      {if (two_norm)
+          {eps = (tol*tol)*hypre_KrylovInnerProd(r,r);
+           if (logging > 0)
+              {printf("Exiting when ||r||_2 < tol * ||r0||_2\n");
+               printf("Initial ||r0||_2: %e\n",norms[0]);};}
+       else
+          {eps = (tol*tol)*gamma;
+           if (logging > 0)
+              {printf("Exiting when ||r||_C < tol * ||r0||_C\n");
+               printf("Initial ||r0||_C: %e\n",sqrt(gamma));};};};
 
    while ((i+1) <= max_iter)
    {
@@ -358,7 +377,7 @@ hypre_KrylovSolve( void *pcg_vdata,
       if (logging > 0)
       {
          norms[i]     = sqrt(i_prod);
-         rel_norms[i] = bi_prod ? sqrt(i_prod/bi_prod) : 0;
+         rel_norms[i] = sqrt(tol*tol*(i_prod/eps));
       }
 
       /* check for convergence */
@@ -368,7 +387,7 @@ hypre_KrylovSolve( void *pcg_vdata,
          {
             pi_prod = hypre_KrylovInnerProd(p,p);
             xi_prod = hypre_KrylovInnerProd(x,x);
-            if ((alpha*alpha*pi_prod/xi_prod) < (eps/bi_prod))
+            if ((alpha*alpha*pi_prod/xi_prod) < tol*tol)
                break;
          }
          else
@@ -400,25 +419,46 @@ hypre_KrylovSolve( void *pcg_vdata,
 
    if (logging > 0)
    {
-      if (two_norm)
-      {
-         printf("\n\n");
-         printf("Iters       ||r||_2      conv.rate  ||r||_2/||b||_2\n");
-         printf("-----    ------------    ---------  ------------ \n");
-      }
-      else
-      {
-         printf("\n\n");
-         printf("Iters       ||r||_C      conv.rate  ||r||_C/||b||_C\n");
-         printf("-----    ------------    ---------  ------------ \n");
-      }
-      for (j = 1; j <= i; j++)
-      {
-         printf("% 5d    %e    %f   %e\n", j, norms[j], norms[j]/ 
+      if (bi_prod > 0.0)
+         {if (two_norm)
+             {
+              printf("\n\n");
+              printf("Iters       ||r||_2      conv.rate  ||r||_2/||b||_2\n");
+              printf("-----    ------------    ---------  ------------ \n");
+             }
+          else
+             {
+              printf("\n\n");
+              printf("Iters       ||r||_C      conv.rate  ||r||_C/||b||_C\n");
+              printf("-----    ------------    ---------  ------------ \n");
+         }
+         for (j = 1; j <= i; j++)
+         {
+            printf("% 5d    %e    %f   %e\n", j, norms[j], norms[j]/ 
 		norms[j-1], rel_norms[j]);
-      }
-      printf("\n\n");
-      /* fclose(fp); */
+         }
+         printf("\n\n");}
+      /* fclose(fp);}; */
+      else
+         {if (two_norm)
+             {
+              printf("\n\n");
+              printf("Iters       ||r||_2      conv.rate\n");
+              printf("-----    ------------    ---------\n");
+             }
+          else
+             {
+              printf("\n\n");
+              printf("Iters       ||r||_C      conv.rate\n");
+              printf("-----    ------------    ---------\n");
+         }
+         for (j = 1; j <= i; j++)
+         {
+            printf("% 5d    %e    %f   %e\n", j, norms[j], norms[j]/ 
+		norms[j-1]);
+         }
+         printf("\n\n");};
+      /* fclose(fp);}; */
    }
 
    (pcg_data -> num_iterations) = i;
