@@ -261,11 +261,6 @@ zzz_SMGRelax( void             *relax_vdata,
     * relaxation.
     *----------------------------------------------------------*/
 
-   if (zero_guess && (stencil_dim > 2))
-   {
-      zzz_SetStructVectorConstantValues(x, 0.0);
-   }
-
    /*----------------------------------------------------------
     * Do pre-relaxation
     *----------------------------------------------------------*/
