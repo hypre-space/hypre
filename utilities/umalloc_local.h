@@ -11,7 +11,6 @@
 #define UMALLOC_LOCAL_HEADER
 
 #ifdef HYPRE_USE_UMALLOC
-#include <pthread.h>
 #include <umalloc.h>
 
 #define MAX_THREAD_COUNT 10 
@@ -28,8 +27,6 @@ struct upc_struct _uparam[MAX_THREAD_COUNT];
 
 int _uheapReleasesCount=0;
 int _uheapGetsCount=0;
-
-pthread_mutex_t _ucountmutex=PTHREAD_MUTEX_INITIALIZER;
 
 void *_uget_fn(Heap_t usrheap, size_t *length, int *clean);
 void _urelease_fn(Heap_t usrheap, void *p, size_t size);
