@@ -163,6 +163,22 @@ HYPRE_GetColPartitioningParCSR( HYPRE_ParCSRMatrix  matrix,
 /*--------------------------------------------------------------------------
  * HYPRE_GetLocalRangeParcsr
  *--------------------------------------------------------------------------*/
+/**
+Returns range of rows and columns owned by this processor.
+Not collective.
+
+@return integer error code
+@param HYPRE_ParCSRMatrix matrix [IN]
+ the matrix to be operated on. 
+@param int *row_start [OUT]
+ the global number of the first row stored on this processor
+@param int *row_end [OUT]
+ the global number of the first row stored on this processor
+@param int *col_start [OUT]
+ the global number of the first column stored on this processor
+@param int *col_end [OUT]
+ the global number of the first column stored on this processor
+*/
 
 int
 HYPRE_GetLocalRangeParcsr( HYPRE_ParCSRMatrix  matrix,

@@ -361,8 +361,7 @@ hypre_PrintParCSRMatrix( hypre_ParCSRMatrix *matrix,
 /*--------------------------------------------------------------------------
  * hypre_GetLocalRangeParCSRMatrix
  * returns the row numbers of the rows stored on this processor.
- * "End" is actually the row number of the first row on the next processor,
- *  not the row number of the last row on this processor.
+ * "End" is actually the row number of the last row on this processor.
  *--------------------------------------------------------------------------*/
 
 int 

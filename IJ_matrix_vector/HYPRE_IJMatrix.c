@@ -205,15 +205,17 @@ HYPRE_SetIJMatrixLocalStorageType( HYPRE_IJMatrix IJmatrix, int type )
  *--------------------------------------------------------------------------*/
 
 /**
-Tells "matrix" local size
+Tells "matrix" how many rows and columns are locally owned.
+Not collective.
+REQUIREMENTS: HYPRE_SetIJMatrixLocalStorageType needs to be called before this routine
+
 @return integer error code
-@param HYPRE_IJMatrix &matrix [IN]
+@param HYPRE_IJMatrix matrix [IN]
  the matrix to be operated on. 
 @param int local_m [IN]
  local number of rows
 @param int local_n [IN]
  local number of columns
-HYPRE_SetIJMatrixLocalStorageType needs to be called before this routine
 */
 
 int 
