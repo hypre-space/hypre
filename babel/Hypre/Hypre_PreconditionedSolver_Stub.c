@@ -3,8 +3,8 @@
  * Symbol:        Hypre.PreconditionedSolver-v0.1.5
  * Symbol Type:   interface
  * Babel Version: 0.6.3
- * SIDL Created:  20020522 13:59:35 PDT
- * Generated:     20020522 13:59:43 PDT
+ * SIDL Created:  20020711 16:38:24 PDT
+ * Generated:     20020711 16:38:31 PDT
  * Description:   Client-side glue code for Hypre.PreconditionedSolver
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -48,6 +48,20 @@ static const struct Hypre_PreconditionedSolver__external* _getIOR(void)
 }
 
 /*
+ * Method:  SetLogging
+ */
+
+int32_t
+Hypre_PreconditionedSolver_SetLogging(
+  Hypre_PreconditionedSolver self,
+  int32_t level)
+{
+  return (*self->d_epv->f_SetLogging)(
+    self->d_object,
+    level);
+}
+
+/*
  * Method:  Setup
  */
 
@@ -73,20 +87,6 @@ Hypre_PreconditionedSolver_SetIntArrayParameter(
     self->d_object,
     name,
     value);
-}
-
-/*
- * Method:  SetLogging
- */
-
-int32_t
-Hypre_PreconditionedSolver_SetLogging(
-  Hypre_PreconditionedSolver self,
-  int32_t level)
-{
-  return (*self->d_epv->f_SetLogging)(
-    self->d_object,
-    level);
 }
 
 /*
@@ -131,6 +131,22 @@ Hypre_PreconditionedSolver_SetPrintLevel(
   return (*self->d_epv->f_SetPrintLevel)(
     self->d_object,
     level);
+}
+
+/*
+ * Method:  GetIntValue
+ */
+
+int32_t
+Hypre_PreconditionedSolver_GetIntValue(
+  Hypre_PreconditionedSolver self,
+  const char* name,
+  int32_t* value)
+{
+  return (*self->d_epv->f_GetIntValue)(
+    self->d_object,
+    name,
+    value);
 }
 
 /*
@@ -259,6 +275,22 @@ Hypre_PreconditionedSolver_Apply(
     self->d_object,
     x,
     y);
+}
+
+/*
+ * Method:  GetDoubleValue
+ */
+
+int32_t
+Hypre_PreconditionedSolver_GetDoubleValue(
+  Hypre_PreconditionedSolver self,
+  const char* name,
+  double* value)
+{
+  return (*self->d_epv->f_GetDoubleValue)(
+    self->d_object,
+    name,
+    value);
 }
 
 /*

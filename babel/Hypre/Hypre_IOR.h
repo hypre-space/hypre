@@ -3,8 +3,8 @@
  * Symbol:        Hypre-v0.1.5
  * Symbol Type:   package
  * Babel Version: 0.6.3
- * SIDL Created:  20020522 13:59:33 PDT
- * Generated:     20020522 13:59:38 PDT
+ * SIDL Created:  20020711 16:38:23 PDT
+ * Generated:     20020711 16:38:29 PDT
  * Description:   Intermediate Object Representation for Hypre
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -48,6 +48,9 @@
 #endif
 #ifndef included_Hypre_ParCSRVector_IOR_h
 #include "Hypre_ParCSRVector_IOR.h"
+#endif
+#ifndef included_Hypre_ParDiagScale_IOR_h
+#include "Hypre_ParDiagScale_IOR.h"
 #endif
 #ifndef included_Hypre_Pilut_IOR_h
 #include "Hypre_Pilut_IOR.h"

@@ -3,8 +3,8 @@
  * Symbol:        Hypre.GMRES-v0.1.5
  * Symbol Type:   class
  * Babel Version: 0.6.3
- * SIDL Created:  20020522 13:59:35 PDT
- * Generated:     20020522 13:59:37 PDT
+ * SIDL Created:  20020711 16:38:24 PDT
+ * Generated:     20020711 16:38:25 PDT
  * Description:   Intermediate Object Representation for Hypre.GMRES
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -122,6 +122,8 @@ static void Hypre_GMRES__init_epv(
   epv->f__ctor                     = NULL;
   epv->f__dtor                     = NULL;
   epv->f_Apply                     = NULL;
+  epv->f_GetDoubleValue            = NULL;
+  epv->f_GetIntValue               = NULL;
   epv->f_GetPreconditionedResidual = NULL;
   epv->f_GetResidual               = NULL;
   epv->f_SetCommunicator           = NULL;
@@ -152,6 +154,10 @@ static void Hypre_GMRES__init_epv(
   e0->f__delete                 = (void (*)(void*)) epv->f__delete;
   e0->f_Apply                   = (int32_t (*)(void*,
     struct Hypre_Vector__object*,struct Hypre_Vector__object**)) epv->f_Apply;
+  e0->f_GetDoubleValue          = (int32_t (*)(void*,const char*,
+    double*)) epv->f_GetDoubleValue;
+  e0->f_GetIntValue             = (int32_t (*)(void*,const char*,
+    int32_t*)) epv->f_GetIntValue;
   e0->f_SetCommunicator         = (int32_t (*)(void*,
     void*)) epv->f_SetCommunicator;
   e0->f_SetDoubleArrayParameter = (int32_t (*)(void*,const char*,
@@ -178,6 +184,10 @@ static void Hypre_GMRES__init_epv(
   e1->f__delete                   = (void (*)(void*)) epv->f__delete;
   e1->f_Apply                     = (int32_t (*)(void*,
     struct Hypre_Vector__object*,struct Hypre_Vector__object**)) epv->f_Apply;
+  e1->f_GetDoubleValue            = (int32_t (*)(void*,const char*,
+    double*)) epv->f_GetDoubleValue;
+  e1->f_GetIntValue               = (int32_t (*)(void*,const char*,
+    int32_t*)) epv->f_GetIntValue;
   e1->f_GetPreconditionedResidual = (int32_t (*)(void*,
     struct Hypre_Vector__object**)) epv->f_GetPreconditionedResidual;
   e1->f_GetResidual               = (int32_t (*)(void*,
@@ -216,6 +226,10 @@ static void Hypre_GMRES__init_epv(
   e2->f__delete                 = (void (*)(void*)) epv->f__delete;
   e2->f_Apply                   = (int32_t (*)(void*,
     struct Hypre_Vector__object*,struct Hypre_Vector__object**)) epv->f_Apply;
+  e2->f_GetDoubleValue          = (int32_t (*)(void*,const char*,
+    double*)) epv->f_GetDoubleValue;
+  e2->f_GetIntValue             = (int32_t (*)(void*,const char*,
+    int32_t*)) epv->f_GetIntValue;
   e2->f_GetResidual             = (int32_t (*)(void*,
     struct Hypre_Vector__object**)) epv->f_GetResidual;
   e2->f_SetCommunicator         = (int32_t (*)(void*,
@@ -792,6 +806,32 @@ remote_Hypre_GMRES_Apply(
 }
 
 /*
+ * REMOTE METHOD STUB:GetDoubleValue
+ */
+
+static int32_t
+remote_Hypre_GMRES_GetDoubleValue(
+  struct Hypre_GMRES__object* self,
+  const char* name,
+  double* value)
+{
+  return 0;
+}
+
+/*
+ * REMOTE METHOD STUB:GetIntValue
+ */
+
+static int32_t
+remote_Hypre_GMRES_GetIntValue(
+  struct Hypre_GMRES__object* self,
+  const char* name,
+  int32_t* value)
+{
+  return 0;
+}
+
+/*
  * REMOTE METHOD STUB:GetPreconditionedResidual
  */
 
@@ -1026,6 +1066,8 @@ static void Hypre_GMRES__init_remote_epv(void)
   epv->f__ctor                     = NULL;
   epv->f__dtor                     = NULL;
   epv->f_Apply                     = remote_Hypre_GMRES_Apply;
+  epv->f_GetDoubleValue            = remote_Hypre_GMRES_GetDoubleValue;
+  epv->f_GetIntValue               = remote_Hypre_GMRES_GetIntValue;
   epv->f_GetPreconditionedResidual = 
     remote_Hypre_GMRES_GetPreconditionedResidual;
   epv->f_GetResidual               = remote_Hypre_GMRES_GetResidual;
@@ -1050,6 +1092,10 @@ static void Hypre_GMRES__init_remote_epv(void)
   e0->f__delete                 = (void (*)(void*)) epv->f__delete;
   e0->f_Apply                   = (int32_t (*)(void*,
     struct Hypre_Vector__object*,struct Hypre_Vector__object**)) epv->f_Apply;
+  e0->f_GetDoubleValue          = (int32_t (*)(void*,const char*,
+    double*)) epv->f_GetDoubleValue;
+  e0->f_GetIntValue             = (int32_t (*)(void*,const char*,
+    int32_t*)) epv->f_GetIntValue;
   e0->f_SetCommunicator         = (int32_t (*)(void*,
     void*)) epv->f_SetCommunicator;
   e0->f_SetDoubleArrayParameter = (int32_t (*)(void*,const char*,
@@ -1076,6 +1122,10 @@ static void Hypre_GMRES__init_remote_epv(void)
   e1->f__delete                   = (void (*)(void*)) epv->f__delete;
   e1->f_Apply                     = (int32_t (*)(void*,
     struct Hypre_Vector__object*,struct Hypre_Vector__object**)) epv->f_Apply;
+  e1->f_GetDoubleValue            = (int32_t (*)(void*,const char*,
+    double*)) epv->f_GetDoubleValue;
+  e1->f_GetIntValue               = (int32_t (*)(void*,const char*,
+    int32_t*)) epv->f_GetIntValue;
   e1->f_GetPreconditionedResidual = (int32_t (*)(void*,
     struct Hypre_Vector__object**)) epv->f_GetPreconditionedResidual;
   e1->f_GetResidual               = (int32_t (*)(void*,
@@ -1114,6 +1164,10 @@ static void Hypre_GMRES__init_remote_epv(void)
   e2->f__delete                 = (void (*)(void*)) epv->f__delete;
   e2->f_Apply                   = (int32_t (*)(void*,
     struct Hypre_Vector__object*,struct Hypre_Vector__object**)) epv->f_Apply;
+  e2->f_GetDoubleValue          = (int32_t (*)(void*,const char*,
+    double*)) epv->f_GetDoubleValue;
+  e2->f_GetIntValue             = (int32_t (*)(void*,const char*,
+    int32_t*)) epv->f_GetIntValue;
   e2->f_GetResidual             = (int32_t (*)(void*,
     struct Hypre_Vector__object**)) epv->f_GetResidual;
   e2->f_SetCommunicator         = (int32_t (*)(void*,

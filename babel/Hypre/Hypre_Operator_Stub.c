@@ -3,8 +3,8 @@
  * Symbol:        Hypre.Operator-v0.1.5
  * Symbol Type:   interface
  * Babel Version: 0.6.3
- * SIDL Created:  20020522 13:59:35 PDT
- * Generated:     20020522 13:59:43 PDT
+ * SIDL Created:  20020711 16:38:24 PDT
+ * Generated:     20020711 16:38:31 PDT
  * Description:   Client-side glue code for Hypre.Operator
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -108,6 +108,22 @@ Hypre_Operator_SetIntParameter(
 }
 
 /*
+ * Method:  GetDoubleValue
+ */
+
+int32_t
+Hypre_Operator_GetDoubleValue(
+  Hypre_Operator self,
+  const char* name,
+  double* value)
+{
+  return (*self->d_epv->f_GetDoubleValue)(
+    self->d_object,
+    name,
+    value);
+}
+
+/*
  * <p>
  * Add one to the intrinsic reference count in the underlying object.
  * Object in <code>SIDL</code> have an intrinsic reference count.
@@ -128,6 +144,22 @@ Hypre_Operator_addReference(
 {
   (*self->d_epv->f_addReference)(
     self->d_object);
+}
+
+/*
+ * Method:  GetIntValue
+ */
+
+int32_t
+Hypre_Operator_GetIntValue(
+  Hypre_Operator self,
+  const char* name,
+  int32_t* value)
+{
+  return (*self->d_epv->f_GetIntValue)(
+    self->d_object,
+    name,
+    value);
 }
 
 /*

@@ -3,8 +3,8 @@
  * Symbol:        Hypre.GMRES-v0.1.5
  * Symbol Type:   class
  * Babel Version: 0.6.3
- * SIDL Created:  20020522 13:59:35 PDT
- * Generated:     20020522 13:59:43 PDT
+ * SIDL Created:  20020711 16:38:24 PDT
+ * Generated:     20020711 16:38:32 PDT
  * Description:   Server-side implementation for Hypre.GMRES
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
@@ -79,6 +79,18 @@ impl_Hypre_GMRES_Apply(
   Hypre_GMRES,
   Hypre_Vector,
   Hypre_Vector*);
+
+extern int32_t
+impl_Hypre_GMRES_GetDoubleValue(
+  Hypre_GMRES,
+  const char*,
+  double*);
+
+extern int32_t
+impl_Hypre_GMRES_GetIntValue(
+  Hypre_GMRES,
+  const char*,
+  int32_t*);
 
 extern int32_t
 impl_Hypre_GMRES_GetPreconditionedResidual(

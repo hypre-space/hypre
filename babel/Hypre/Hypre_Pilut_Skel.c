@@ -3,8 +3,8 @@
  * Symbol:        Hypre.Pilut-v0.1.5
  * Symbol Type:   class
  * Babel Version: 0.6.3
- * SIDL Created:  20020522 13:59:35 PDT
- * Generated:     20020522 13:59:44 PDT
+ * SIDL Created:  20020711 16:38:24 PDT
+ * Generated:     20020711 16:38:33 PDT
  * Description:   Server-side glue code for Hypre.Pilut
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -28,6 +28,18 @@ impl_Hypre_Pilut_Apply(
   Hypre_Pilut,
   Hypre_Vector,
   Hypre_Vector*);
+
+extern int32_t
+impl_Hypre_Pilut_GetDoubleValue(
+  Hypre_Pilut,
+  const char*,
+  double*);
+
+extern int32_t
+impl_Hypre_Pilut_GetIntValue(
+  Hypre_Pilut,
+  const char*,
+  int32_t*);
 
 extern int32_t
 impl_Hypre_Pilut_GetResidual(
@@ -94,12 +106,14 @@ Hypre_Pilut__set_epv(struct Hypre_Pilut__epv *epv)
   epv->f__ctor = impl_Hypre_Pilut__ctor;
   epv->f__dtor = impl_Hypre_Pilut__dtor;
   epv->f_Apply = impl_Hypre_Pilut_Apply;
-  epv->f_SetLogging = impl_Hypre_Pilut_SetLogging;
   epv->f_SetIntArrayParameter = impl_Hypre_Pilut_SetIntArrayParameter;
   epv->f_Setup = impl_Hypre_Pilut_Setup;
+  epv->f_SetLogging = impl_Hypre_Pilut_SetLogging;
   epv->f_SetIntParameter = impl_Hypre_Pilut_SetIntParameter;
   epv->f_GetResidual = impl_Hypre_Pilut_GetResidual;
+  epv->f_GetDoubleValue = impl_Hypre_Pilut_GetDoubleValue;
   epv->f_SetPrintLevel = impl_Hypre_Pilut_SetPrintLevel;
+  epv->f_GetIntValue = impl_Hypre_Pilut_GetIntValue;
   epv->f_SetCommunicator = impl_Hypre_Pilut_SetCommunicator;
   epv->f_SetOperator = impl_Hypre_Pilut_SetOperator;
   epv->f_SetDoubleParameter = impl_Hypre_Pilut_SetDoubleParameter;

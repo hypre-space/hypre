@@ -3,8 +3,8 @@
  * Symbol:        Hypre.StructSMG-v0.1.5
  * Symbol Type:   class
  * Babel Version: 0.6.3
- * SIDL Created:  20020522 13:59:35 PDT
- * Generated:     20020522 13:59:41 PDT
+ * SIDL Created:  20020711 16:38:24 PDT
+ * Generated:     20020711 16:38:30 PDT
  * Description:   Client-side glue code for Hypre.StructSMG
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -49,6 +49,14 @@ Hypre_StructSMG
 Hypre_StructSMG__create(void);
 
 /**
+ * Method:  SetLogging
+ */
+int32_t
+Hypre_StructSMG_SetLogging(
+  Hypre_StructSMG self,
+  int32_t level);
+
+/**
  * Method:  Setup
  */
 int32_t
@@ -63,14 +71,6 @@ Hypre_StructSMG_SetIntArrayParameter(
   Hypre_StructSMG self,
   const char* name,
   struct SIDL_int__array* value);
-
-/**
- * Method:  SetLogging
- */
-int32_t
-Hypre_StructSMG_SetLogging(
-  Hypre_StructSMG self,
-  int32_t level);
 
 /**
  * Method:  SetIntParameter
@@ -96,6 +96,15 @@ int32_t
 Hypre_StructSMG_SetPrintLevel(
   Hypre_StructSMG self,
   int32_t level);
+
+/**
+ * Method:  GetIntValue
+ */
+int32_t
+Hypre_StructSMG_GetIntValue(
+  Hypre_StructSMG self,
+  const char* name,
+  int32_t* value);
 
 /**
  * Method:  SetCommunicator
@@ -183,6 +192,15 @@ Hypre_StructSMG_Apply(
 void
 Hypre_StructSMG_addReference(
   Hypre_StructSMG self);
+
+/**
+ * Method:  GetDoubleValue
+ */
+int32_t
+Hypre_StructSMG_GetDoubleValue(
+  Hypre_StructSMG self,
+  const char* name,
+  double* value);
 
 /**
  * Method:  SetOperator

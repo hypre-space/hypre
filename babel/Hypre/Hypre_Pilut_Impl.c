@@ -3,8 +3,8 @@
  * Symbol:        Hypre.Pilut-v0.1.5
  * Symbol Type:   class
  * Babel Version: 0.6.3
- * SIDL Created:  20020522 13:59:35 PDT
- * Generated:     20020522 13:59:44 PDT
+ * SIDL Created:  20020711 16:38:24 PDT
+ * Generated:     20020711 16:38:33 PDT
  * Description:   Server-side implementation for Hypre.Pilut
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
@@ -74,6 +74,42 @@ impl_Hypre_Pilut_Apply(
   /* DO-NOT-DELETE splicer.begin(Hypre.Pilut.Apply) */
   /* Insert the implementation of the Apply method here... */
   /* DO-NOT-DELETE splicer.end(Hypre.Pilut.Apply) */
+}
+
+/*
+ * Method:  GetDoubleValue
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_Hypre_Pilut_GetDoubleValue"
+
+int32_t
+impl_Hypre_Pilut_GetDoubleValue(
+  Hypre_Pilut self,
+  const char* name,
+  double* value)
+{
+  /* DO-NOT-DELETE splicer.begin(Hypre.Pilut.GetDoubleValue) */
+  /* Insert the implementation of the GetDoubleValue method here... */
+  /* DO-NOT-DELETE splicer.end(Hypre.Pilut.GetDoubleValue) */
+}
+
+/*
+ * Method:  GetIntValue
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_Hypre_Pilut_GetIntValue"
+
+int32_t
+impl_Hypre_Pilut_GetIntValue(
+  Hypre_Pilut self,
+  const char* name,
+  int32_t* value)
+{
+  /* DO-NOT-DELETE splicer.begin(Hypre.Pilut.GetIntValue) */
+  /* Insert the implementation of the GetIntValue method here... */
+  /* DO-NOT-DELETE splicer.end(Hypre.Pilut.GetIntValue) */
 }
 
 /*

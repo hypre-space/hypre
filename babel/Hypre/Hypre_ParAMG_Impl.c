@@ -3,8 +3,8 @@
  * Symbol:        Hypre.ParAMG-v0.1.5
  * Symbol Type:   class
  * Babel Version: 0.6.3
- * SIDL Created:  20020522 13:59:35 PDT
- * Generated:     20020522 13:59:44 PDT
+ * SIDL Created:  20020711 16:38:24 PDT
+ * Generated:     20020711 16:38:34 PDT
  * Description:   Server-side implementation for Hypre.ParAMG
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
@@ -136,6 +136,42 @@ impl_Hypre_ParAMG_Apply(
    return ierr;
 
   /* DO-NOT-DELETE splicer.end(Hypre.ParAMG.Apply) */
+}
+
+/*
+ * Method:  GetDoubleValue
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_Hypre_ParAMG_GetDoubleValue"
+
+int32_t
+impl_Hypre_ParAMG_GetDoubleValue(
+  Hypre_ParAMG self,
+  const char* name,
+  double* value)
+{
+  /* DO-NOT-DELETE splicer.begin(Hypre.ParAMG.GetDoubleValue) */
+  /* Insert the implementation of the GetDoubleValue method here... */
+  /* DO-NOT-DELETE splicer.end(Hypre.ParAMG.GetDoubleValue) */
+}
+
+/*
+ * Method:  GetIntValue
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_Hypre_ParAMG_GetIntValue"
+
+int32_t
+impl_Hypre_ParAMG_GetIntValue(
+  Hypre_ParAMG self,
+  const char* name,
+  int32_t* value)
+{
+  /* DO-NOT-DELETE splicer.begin(Hypre.ParAMG.GetIntValue) */
+  /* Insert the implementation of the GetIntValue method here... */
+  /* DO-NOT-DELETE splicer.end(Hypre.ParAMG.GetIntValue) */
 }
 
 /*
@@ -384,8 +420,7 @@ impl_Hypre_ParAMG_SetIntParameter(
       HYPRE_BoomerAMGSetMeasureType( solver, value );
    }
    else if ( strcmp(name,"Print Level")==0 || strcmp(name,"PrintLevel")==0 ) {
-      /* BoomerAMG ignores the filename arg, uses SetPrintFileName instead ...*/
-      HYPRE_BoomerAMGSetPrintLevel( solver, value, "driver.out.log");
+      HYPRE_BoomerAMGSetPrintLevel( solver, value );
    }
    else if ( strcmp(name,"CycleType")==0 || strcmp(name,"Cycle Type")==0 ) {
       HYPRE_BoomerAMGSetCycleType( solver, value );
@@ -504,7 +539,7 @@ impl_Hypre_ParAMG_SetPrintLevel(
    data = Hypre_ParAMG__get_data( self );
    solver = data->solver;
 
-   HYPRE_BoomerAMGSetPrintLevel( solver, level, "driver.out.log");
+   HYPRE_BoomerAMGSetPrintLevel( solver, level );
 
    return ierr;
   /* DO-NOT-DELETE splicer.end(Hypre.ParAMG.SetPrintLevel) */

@@ -3,8 +3,8 @@
  * Symbol:        Hypre.PCG-v0.1.5
  * Symbol Type:   class
  * Babel Version: 0.6.3
- * SIDL Created:  20020522 13:59:35 PDT
- * Generated:     20020522 13:59:44 PDT
+ * SIDL Created:  20020711 16:38:24 PDT
+ * Generated:     20020711 16:38:34 PDT
  * Description:   Server-side implementation for Hypre.PCG
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
@@ -30,6 +30,31 @@
 #include "Hypre_ParCSRVector_Impl.h"
 #include "Hypre_ParAMG.h"
 #include "Hypre_ParAMG_Impl.h"
+#include "Hypre_ParDiagScale.h"
+#include "Hypre_ParDiagScale_Impl.h"
+#include <assert.h>
+
+int impl_Hypre_PCG_Copy_Parameters_to_HYPRE_struct( Hypre_PCG self )
+{
+   int ierr = 0;
+   HYPRE_Solver solver;
+   struct Hypre_PCG__data * data;
+
+   data = Hypre_PCG__get_data( self );
+   assert( data->solver != NULL );
+   solver = data->solver;
+
+   /* double parameters: */
+   ierr += HYPRE_PCGSetTol( solver, data->tol );
+   /* int parameters: */
+   ierr += HYPRE_PCGSetMaxIter( solver, data->maxiter );
+   ierr += HYPRE_PCGSetRelChange( solver, data->relchange );
+   ierr += HYPRE_PCGSetTwoNorm( solver, data->twonorm );
+   ierr += HYPRE_PCGSetLogging( solver, data->printlevel );
+   /* >>> ...this will have to be changed when PCG logging is brought up to the new standard */
+
+   return ierr;
+}
 /* DO-NOT-DELETE splicer.end(Hypre.PCG._includes) */
 
 /*
@@ -79,7 +104,7 @@ impl_Hypre_PCG__dtor(
    struct Hypre_PCG__data * data;
    data = Hypre_PCG__get_data( self );
 
-   ierr += HYPRE_ParCSRPCGDestroy( *(data->solver) );
+   ierr += HYPRE_ParCSRPCGDestroy( data->solver );
    Hypre_Operator_deleteReference( data->matrix );
    /* delete any nontrivial data components here */
    hypre_TFree( data );
@@ -102,8 +127,9 @@ impl_Hypre_PCG_Apply(
   /* DO-NOT-DELETE splicer.begin(Hypre.PCG.Apply) */
   /* Insert the implementation of the Apply method here... */
    int ierr=0;
-   MPI_Comm * comm;
-   HYPRE_Solver * solver;
+   MPI_Comm comm;
+   HYPRE_Solver solver;
+   HYPRE_Solver * psolver = &solver; /* will get a real value later */
    struct Hypre_PCG__data * data;
    Hypre_Operator mat;
    HYPRE_Matrix HYPRE_A;
@@ -129,8 +155,9 @@ impl_Hypre_PCG_Apply(
          So we are ready to create the Hypre PCG object. */
       if ( Hypre_Vector_queryInterface( x, "Hypre.ParCSRVector") ) {
          data -> vector_type = "ParVector";
-         HYPRE_ParCSRPCGCreate( *comm, solver );
-         data -> solver = solver;
+         HYPRE_ParCSRPCGCreate( comm, psolver );
+         assert( solver != NULL );
+         data -> solver = *psolver;
       }
       /* Add more vector types here */
       else {
@@ -142,6 +169,11 @@ impl_Hypre_PCG_Apply(
       solver = data->solver;
       assert( solver != NULL );
    };
+   /* The SetParameter functions set parameters in the local Babel-interface struct,
+      "data".  That is because the HYPRE struct (where they are actually used) may
+      not exist yet when the functions are called.  At this point we finally know
+      the HYPRE struct exists, so we copy the parameters to it. */
+   ierr += impl_Hypre_PCG_Copy_Parameters_to_HYPRE_struct( self );
    if ( data->vector_type == "ParVector" ) {
          HypreP_x = Hypre_Vector__cast2
             ( Hypre_Vector_queryInterface( x, "Hypre.ParCSRVector"),
@@ -159,11 +191,12 @@ impl_Hypre_PCG_Apply(
          ij_y = datay -> ij_b;
          ierr += HYPRE_IJVectorGetObject( ij_y, &objecty );
          yy = (HYPRE_ParVector) objecty;
-         HYPRE_x = (HYPRE_Vector) yy;
+         HYPRE_y = (HYPRE_Vector) yy;
 
          HypreP_A = Hypre_Operator__cast2
-            ( Hypre_Operator_queryInterface( mat, "Hypre.ParCSRVector"),
-              "Hypre.ParCSRVector" );
+            ( Hypre_Operator_queryInterface( mat, "Hypre.ParCSRMatrix"),
+              "Hypre.ParCSRMatrix" );
+         assert( HypreP_A != NULL );
          dataA = Hypre_ParCSRMatrix__get_data( HypreP_A );
          ij_A = dataA -> ij_A;
          ierr += HYPRE_IJMatrixGetObject( ij_A, &objectA );
@@ -175,12 +208,83 @@ impl_Hypre_PCG_Apply(
          assert( "only ParCSRVector supported by PCG"==0 );
    }
       
-
-   HYPRE_PCGSetup( *solver, HYPRE_A, HYPRE_x, HYPRE_y );
-   HYPRE_PCGSolve( *solver, HYPRE_A, HYPRE_x, HYPRE_y );
+   ierr += HYPRE_PCGSetPrecond( solver, data->precond, data->precond_setup,
+                                *(data->solverprecond) );
+   HYPRE_PCGSetup( solver, HYPRE_A, HYPRE_x, HYPRE_y );
+   HYPRE_PCGSolve( solver, HYPRE_A, HYPRE_x, HYPRE_y );
 
    return ierr;
   /* DO-NOT-DELETE splicer.end(Hypre.PCG.Apply) */
+}
+
+/*
+ * Method:  GetDoubleValue
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_Hypre_PCG_GetDoubleValue"
+
+int32_t
+impl_Hypre_PCG_GetDoubleValue(
+  Hypre_PCG self,
+  const char* name,
+  double* value)
+{
+  /* DO-NOT-DELETE splicer.begin(Hypre.PCG.GetDoubleValue) */
+  /* Insert the implementation of the GetDoubleValue method here... */
+   int ierr = 0;
+   HYPRE_Solver solver;
+   struct Hypre_PCG__data * data;
+
+   data = Hypre_PCG__get_data( self );
+   assert( data->solver != NULL );
+   solver = data->solver;
+
+   if ( strcmp(name,"FinalRelativeResidualNorm")==0 ||
+        strcmp(name,"Final Relative Residual Norm")==0 ) {
+      ierr += HYPRE_PCGGetFinalRelativeResidualNorm( solver, value );
+   }
+   /* Get other values here. */
+   else ierr=1;
+
+   return ierr;
+  /* DO-NOT-DELETE splicer.end(Hypre.PCG.GetDoubleValue) */
+}
+
+/*
+ * Method:  GetIntValue
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_Hypre_PCG_GetIntValue"
+
+int32_t
+impl_Hypre_PCG_GetIntValue(
+  Hypre_PCG self,
+  const char* name,
+  int32_t* value)
+{
+  /* DO-NOT-DELETE splicer.begin(Hypre.PCG.GetIntValue) */
+  /* Insert the implementation of the GetIntValue method here... */
+   int ierr = 0;
+   HYPRE_Solver solver;
+   struct Hypre_PCG__data * data;
+
+   data = Hypre_PCG__get_data( self );
+   assert( data->solver != NULL );
+   solver = data->solver;
+
+   printf("data->maxiter=%i\n",data->maxiter);
+   if ( strcmp(name,"NumIterations")==0 || strcmp(name,"Num Iterations")==0
+      || strcmp(name,"Number of Iterations")==0 ) {
+      ierr += HYPRE_PCGGetNumIterations( solver, value );
+      printf("num iterations=%i",*value);
+   }
+   /* Get other values here. */
+   else ierr=1;
+
+   return ierr;
+  /* DO-NOT-DELETE splicer.end(Hypre.PCG.GetIntValue) */
 }
 
 /*
@@ -237,8 +341,7 @@ impl_Hypre_PCG_SetCommunicator(
    int ierr = 0;
    struct Hypre_PCG__data * data;
    data = Hypre_PCG__get_data( self );
-   data -> comm = (MPI_Comm *) comm;
-   Hypre_PCG__set_data( self, data );
+   data -> comm = (MPI_Comm) comm;
 
    return ierr;
   /* DO-NOT-DELETE splicer.end(Hypre.PCG.SetCommunicator) */
@@ -278,7 +381,25 @@ impl_Hypre_PCG_SetDoubleParameter(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.PCG.SetDoubleParameter) */
   /* Insert the implementation of the SetDoubleParameter method here... */
-   /* >>>>>>>>>>>> TO DO <<<<<<<<<<<<<<<<< */
+   /* The normal way to implement this function would be to call the corresponding
+      HYPRE function to set the parameter.  That can't always be done because the
+      HYPRE struct may not exist.  The HYPRE struct may not exist because it can't
+      be created until we know the vector type - and that is not known until Apply
+      is first called.  So what we do is save the parameter in a cache belonging to
+      this Babel interface, and copy it into the HYPRE struct once Apply is called.
+   */
+   int ierr = 0;
+   struct Hypre_PCG__data * data;
+   data = Hypre_PCG__get_data( self );
+
+   if ( strcmp(name,"Tol")==0 || strcmp(name,"Tolerance")==0 ) {
+      data -> tol = value;
+   }
+   /* Set other parameters here. */
+   /* >>>>>>>>>>>> check whether more belong here <<<<<<<<<<<<<<<<< */
+   else ierr=1;
+
+   return ierr;
   /* DO-NOT-DELETE splicer.end(Hypre.PCG.SetDoubleParameter) */
 }
 
@@ -316,7 +437,34 @@ impl_Hypre_PCG_SetIntParameter(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.PCG.SetIntParameter) */
   /* Insert the implementation of the SetIntParameter method here... */
-   /* >>>>>>>>>>>> TO DO <<<<<<<<<<<<<<<<< */
+   /* The normal way to implement this function would be to call the corresponding
+      HYPRE function to set the parameter.  That can't always be done because the
+      HYPRE struct may not exist.  The HYPRE struct may not exist because it can't
+      be created until we know the vector type - and that is not known until Apply
+      is first called.  So what we do is save the parameter in a cache belonging to
+      this Babel interface, and copy it into the HYPRE struct once Apply is called.
+   */
+   int ierr = 0;
+   struct Hypre_PCG__data * data;
+   data = Hypre_PCG__get_data( self );
+
+   if ( strcmp(name,"MaxIter")==0 || strcmp(name,"Max Iter")==0 ||
+      strcmp(name,"Maximum Number of Iterations")==0 ) {
+      data -> maxiter = value;
+   }
+   else if ( strcmp(name,"TwoNorm")==0 || strcmp(name,"Two Norm")==0 ||
+            strcmp(name,"2-Norm")==0 ) {
+      data -> twonorm = value;
+   }
+   else if ( strcmp(name,"RelChange")==0 || strcmp(name,"Rel Change")==0 ||
+            strcmp(name,"Relative Change Test")==0 ) {
+      data -> relchange = value;
+   }
+   /* Set other parameters here. */
+   /* >>>>>>>>>>>> check whether more belong here <<<<<<<<<<<<<<<<< */
+   else ierr=1;
+
+   return ierr;
   /* DO-NOT-DELETE splicer.end(Hypre.PCG.SetIntParameter) */
 }
 
@@ -377,18 +525,20 @@ impl_Hypre_PCG_SetPreconditioner(
   /* DO-NOT-DELETE splicer.begin(Hypre.PCG.SetPreconditioner) */
   /* Insert the implementation of the SetPreconditioner method here... */
    int ierr = 0;
-   HYPRE_Solver * solverself, * solverprecond;
+   HYPRE_Solver * solverprecond;
    struct Hypre_PCG__data * dataself;
    struct Hypre_ParAMG__data * AMG_dataprecond;
    Hypre_ParAMG AMG_s;
+   struct Hypre_ParDiagScale__data * DiagScale_dataprecond;
+   Hypre_ParDiagScale DiagScale_s;
    HYPRE_PtrToSolverFcn precond, precond_setup; /* functions */
 
    dataself = Hypre_PCG__get_data( self );
-   solverself = dataself->solver;
-   assert( solverself != NULL );
+/*   solver = dataself->solver;
+     assert( solver != NULL );*/
 
    if ( Hypre_Solver_queryInterface( s, "Hypre.ParAMG" ) ) {
-      /* s is a Hypre_PCG */
+      /* s is a Hypre_ParAMG */
       AMG_s = Hypre_Operator__cast2
          ( Hypre_Solver_queryInterface( s, "Hypre.ParAMG"),
            "Hypre.ParAMG" );
@@ -398,15 +548,34 @@ impl_Hypre_PCG_SetPreconditioner(
       precond = (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSolve;
       precond_setup = (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSetup;
    }
+   else if ( Hypre_Solver_queryInterface( s, "Hypre.ParDiagScale" ) ) {
+      /* s is a Hypre_ParDiagScale */
+      DiagScale_s = Hypre_Operator__cast2
+         ( Hypre_Solver_queryInterface( s, "Hypre.ParDiagScale"),
+           "Hypre.ParDiagScale" );
+      DiagScale_dataprecond = Hypre_ParDiagScale__get_data( DiagScale_s );
+      solverprecond = (HYPRE_Solver *) hypre_CTAlloc( double, 1 );
+      /* ... HYPRE diagonal scaling needs no solver object, but we must provide a
+         HYPRE_Solver object.  It will be totally ignored. */
+      precond = (HYPRE_PtrToSolverFcn) HYPRE_ParCSRDiagScale;
+      precond_setup = (HYPRE_PtrToSolverFcn) HYPRE_ParCSRDiagScaleSetup;
+   }
    /* put other preconditioner types here */
    else {
-      assert( "PCG_SetPreconditioner cannot recognice preconditioner"==0 );
+      assert( "PCG_SetPreconditioner cannot recognize preconditioner"==0 );
    }
 
+   /* We can't actually set the HYPRE preconditioner, because that requires
+      knowing what the solver object is - but that requires knowing its data type
+      but _that_ requires knowing the kind of matrix and vectors we'll need;
+      not known until Apply is called.  So save the information in the Hypre
+      data structure, and stick it in HYPRE later... */
+   dataself->precond = precond;
+   dataself->precond_setup = precond_setup;
+   dataself->solverprecond = solverprecond;
    /*   for example call, see test/IJ_linear_solvers.c, line 1686.
         The four arguments  are:  self's (solver) data; and, for the preconditioner:
-        solver function, setup function, data
-   ierr += HYPRE_PCGSetPrecond( *solverself, precond, precond_setup, *solverprecond );
+        solver function, setup function, data */
 
    return ierr;
   /* DO-NOT-DELETE splicer.end(Hypre.PCG.SetPreconditioner) */
@@ -426,7 +595,20 @@ impl_Hypre_PCG_SetPrintLevel(
 {
   /* DO-NOT-DELETE splicer.begin(Hypre.PCG.SetPrintLevel) */
   /* Insert the implementation of the SetPrintLevel method here... */
-   /* >>>>>>>>>>>> TO DO <<<<<<<<<<<<<<<<< */
+   /* The normal way to implement this function would be to call the corresponding
+      HYPRE function to set the print level.  That can't always be done because the
+      HYPRE struct may not exist.  The HYPRE struct may not exist because it can't
+      be created until we know the vector type - and that is not known until Apply
+      is first called.  So what we do is save the print level in a cache belonging to
+      this Babel interface, and copy it into the HYPRE struct once Apply is called.
+   */
+   int ierr = 0;
+   struct Hypre_PCG__data * data;
+   data = Hypre_PCG__get_data( self );
+
+   data -> printlevel = level;
+
+   return ierr;
   /* DO-NOT-DELETE splicer.end(Hypre.PCG.SetPrintLevel) */
 }
 
@@ -466,6 +648,3 @@ impl_Hypre_PCG_Setup(
       It is done in Apply instead. */
   /* DO-NOT-DELETE splicer.end(Hypre.PCG.Setup) */
 }
-  /* DO-NOT-DELETE splicer.begin(Hypre.PCG.SetParameter) */
-  /* Insert the implementation of the SetParameter method here... */
-  /* DO-NOT-DELETE splicer.end(Hypre.PCG.SetParameter) */

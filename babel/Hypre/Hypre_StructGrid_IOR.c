@@ -3,8 +3,8 @@
  * Symbol:        Hypre.StructGrid-v0.1.5
  * Symbol Type:   class
  * Babel Version: 0.6.3
- * SIDL Created:  20020522 13:59:35 PDT
- * Generated:     20020522 13:59:38 PDT
+ * SIDL Created:  20020711 16:38:24 PDT
+ * Generated:     20020711 16:38:26 PDT
  * Description:   Intermediate Object Representation for Hypre.StructGrid
  * 
  * WARNING: Automatically generated; changes will be lost

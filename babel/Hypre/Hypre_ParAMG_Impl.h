@@ -3,8 +3,8 @@
  * Symbol:        Hypre.ParAMG-v0.1.5
  * Symbol Type:   class
  * Babel Version: 0.6.3
- * SIDL Created:  20020522 13:59:35 PDT
- * Generated:     20020522 13:59:44 PDT
+ * SIDL Created:  20020711 16:38:24 PDT
+ * Generated:     20020711 16:38:34 PDT
  * Description:   Server-side implementation for Hypre.ParAMG
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
@@ -82,6 +82,18 @@ impl_Hypre_ParAMG_Apply(
   Hypre_ParAMG,
   Hypre_Vector,
   Hypre_Vector*);
+
+extern int32_t
+impl_Hypre_ParAMG_GetDoubleValue(
+  Hypre_ParAMG,
+  const char*,
+  double*);
+
+extern int32_t
+impl_Hypre_ParAMG_GetIntValue(
+  Hypre_ParAMG,
+  const char*,
+  int32_t*);
 
 extern int32_t
 impl_Hypre_ParAMG_GetResidual(

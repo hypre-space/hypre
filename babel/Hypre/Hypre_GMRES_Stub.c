@@ -3,8 +3,8 @@
  * Symbol:        Hypre.GMRES-v0.1.5
  * Symbol Type:   class
  * Babel Version: 0.6.3
- * SIDL Created:  20020522 13:59:35 PDT
- * Generated:     20020522 13:59:40 PDT
+ * SIDL Created:  20020711 16:38:24 PDT
+ * Generated:     20020711 16:38:29 PDT
  * Description:   Client-side glue code for Hypre.GMRES
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -57,6 +57,20 @@ Hypre_GMRES__create()
 }
 
 /*
+ * Method:  SetLogging
+ */
+
+int32_t
+Hypre_GMRES_SetLogging(
+  Hypre_GMRES self,
+  int32_t level)
+{
+  return (*self->d_epv->f_SetLogging)(
+    self,
+    level);
+}
+
+/*
  * Method:  Setup
  */
 
@@ -82,20 +96,6 @@ Hypre_GMRES_SetIntArrayParameter(
     self,
     name,
     value);
-}
-
-/*
- * Method:  SetLogging
- */
-
-int32_t
-Hypre_GMRES_SetLogging(
-  Hypre_GMRES self,
-  int32_t level)
-{
-  return (*self->d_epv->f_SetLogging)(
-    self,
-    level);
 }
 
 /*
@@ -140,6 +140,22 @@ Hypre_GMRES_SetPrintLevel(
   return (*self->d_epv->f_SetPrintLevel)(
     self,
     level);
+}
+
+/*
+ * Method:  GetIntValue
+ */
+
+int32_t
+Hypre_GMRES_GetIntValue(
+  Hypre_GMRES self,
+  const char* name,
+  int32_t* value)
+{
+  return (*self->d_epv->f_GetIntValue)(
+    self,
+    name,
+    value);
 }
 
 /*
@@ -268,6 +284,22 @@ Hypre_GMRES_Apply(
     self,
     x,
     y);
+}
+
+/*
+ * Method:  GetDoubleValue
+ */
+
+int32_t
+Hypre_GMRES_GetDoubleValue(
+  Hypre_GMRES self,
+  const char* name,
+  double* value)
+{
+  return (*self->d_epv->f_GetDoubleValue)(
+    self,
+    name,
+    value);
 }
 
 /*

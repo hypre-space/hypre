@@ -3,8 +3,8 @@
  * Symbol:        Hypre.Pilut-v0.1.5
  * Symbol Type:   class
  * Babel Version: 0.6.3
- * SIDL Created:  20020522 13:59:35 PDT
- * Generated:     20020522 13:59:44 PDT
+ * SIDL Created:  20020711 16:38:24 PDT
+ * Generated:     20020711 16:38:33 PDT
  * Description:   Server-side implementation for Hypre.Pilut
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
@@ -76,6 +76,18 @@ impl_Hypre_Pilut_Apply(
   Hypre_Pilut,
   Hypre_Vector,
   Hypre_Vector*);
+
+extern int32_t
+impl_Hypre_Pilut_GetDoubleValue(
+  Hypre_Pilut,
+  const char*,
+  double*);
+
+extern int32_t
+impl_Hypre_Pilut_GetIntValue(
+  Hypre_Pilut,
+  const char*,
+  int32_t*);
 
 extern int32_t
 impl_Hypre_Pilut_GetResidual(

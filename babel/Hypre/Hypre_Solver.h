@@ -3,8 +3,8 @@
  * Symbol:        Hypre.Solver-v0.1.5
  * Symbol Type:   interface
  * Babel Version: 0.6.3
- * SIDL Created:  20020522 13:59:35 PDT
- * Generated:     20020522 13:59:42 PDT
+ * SIDL Created:  20020711 16:38:24 PDT
+ * Generated:     20020711 16:38:32 PDT
  * Description:   Client-side glue code for Hypre.Solver
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -43,6 +43,14 @@ extern "C" {
 #endif
 
 /**
+ * Method:  SetLogging
+ */
+int32_t
+Hypre_Solver_SetLogging(
+  Hypre_Solver self,
+  int32_t level);
+
+/**
  * Method:  Setup
  */
 int32_t
@@ -57,14 +65,6 @@ Hypre_Solver_SetIntArrayParameter(
   Hypre_Solver self,
   const char* name,
   struct SIDL_int__array* value);
-
-/**
- * Method:  SetLogging
- */
-int32_t
-Hypre_Solver_SetLogging(
-  Hypre_Solver self,
-  int32_t level);
 
 /**
  * Method:  SetIntParameter
@@ -90,6 +90,15 @@ int32_t
 Hypre_Solver_SetPrintLevel(
   Hypre_Solver self,
   int32_t level);
+
+/**
+ * Method:  GetIntValue
+ */
+int32_t
+Hypre_Solver_GetIntValue(
+  Hypre_Solver self,
+  const char* name,
+  int32_t* value);
 
 /**
  * Method:  SetCommunicator
@@ -159,6 +168,15 @@ Hypre_Solver_Apply(
   Hypre_Solver self,
   Hypre_Vector x,
   Hypre_Vector* y);
+
+/**
+ * Method:  GetDoubleValue
+ */
+int32_t
+Hypre_Solver_GetDoubleValue(
+  Hypre_Solver self,
+  const char* name,
+  double* value);
 
 /**
  * <p>

@@ -3,8 +3,8 @@
  * Symbol:        Hypre.StructMatrix-v0.1.5
  * Symbol Type:   class
  * Babel Version: 0.6.3
- * SIDL Created:  20020522 13:59:35 PDT
- * Generated:     20020522 13:59:44 PDT
+ * SIDL Created:  20020711 16:38:24 PDT
+ * Generated:     20020711 16:38:33 PDT
  * Description:   Server-side glue code for Hypre.StructMatrix
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -32,6 +32,18 @@ impl_Hypre_StructMatrix_Apply(
 extern int32_t
 impl_Hypre_StructMatrix_Assemble(
   Hypre_StructMatrix);
+
+extern int32_t
+impl_Hypre_StructMatrix_GetDoubleValue(
+  Hypre_StructMatrix,
+  const char*,
+  double*);
+
+extern int32_t
+impl_Hypre_StructMatrix_GetIntValue(
+  Hypre_StructMatrix,
+  const char*,
+  int32_t*);
 
 extern int32_t
 impl_Hypre_StructMatrix_GetObject(
@@ -127,9 +139,10 @@ Hypre_StructMatrix__set_epv(struct Hypre_StructMatrix__epv *epv)
   epv->f_SetIntArrayParameter = impl_Hypre_StructMatrix_SetIntArrayParameter;
   epv->f_SetIntParameter = impl_Hypre_StructMatrix_SetIntParameter;
   epv->f_SetStencil = impl_Hypre_StructMatrix_SetStencil;
+  epv->f_GetIntValue = impl_Hypre_StructMatrix_GetIntValue;
   epv->f_SetCommunicator = impl_Hypre_StructMatrix_SetCommunicator;
-  epv->f_SetStringParameter = impl_Hypre_StructMatrix_SetStringParameter;
   epv->f_SetDoubleParameter = impl_Hypre_StructMatrix_SetDoubleParameter;
+  epv->f_SetStringParameter = impl_Hypre_StructMatrix_SetStringParameter;
   epv->f_SetSymmetric = impl_Hypre_StructMatrix_SetSymmetric;
   epv->f_GetObject = impl_Hypre_StructMatrix_GetObject;
   epv->f_Assemble = impl_Hypre_StructMatrix_Assemble;
@@ -137,6 +150,7 @@ Hypre_StructMatrix__set_epv(struct Hypre_StructMatrix__epv *epv)
   epv->f_Apply = impl_Hypre_StructMatrix_Apply;
   epv->f_SetNumGhost = impl_Hypre_StructMatrix_SetNumGhost;
   epv->f_SetBoxValues = impl_Hypre_StructMatrix_SetBoxValues;
+  epv->f_GetDoubleValue = impl_Hypre_StructMatrix_GetDoubleValue;
   epv->f_SetGrid = impl_Hypre_StructMatrix_SetGrid;
   epv->f_SetValues = impl_Hypre_StructMatrix_SetValues;
   epv->f_SetDoubleArrayParameter = 

@@ -3,8 +3,8 @@
  * Symbol:        Hypre.ParAMG-v0.1.5
  * Symbol Type:   class
  * Babel Version: 0.6.3
- * SIDL Created:  20020522 13:59:35 PDT
- * Generated:     20020522 13:59:44 PDT
+ * SIDL Created:  20020711 16:38:24 PDT
+ * Generated:     20020711 16:38:34 PDT
  * Description:   Server-side glue code for Hypre.ParAMG
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -28,6 +28,18 @@ impl_Hypre_ParAMG_Apply(
   Hypre_ParAMG,
   Hypre_Vector,
   Hypre_Vector*);
+
+extern int32_t
+impl_Hypre_ParAMG_GetDoubleValue(
+  Hypre_ParAMG,
+  const char*,
+  double*);
+
+extern int32_t
+impl_Hypre_ParAMG_GetIntValue(
+  Hypre_ParAMG,
+  const char*,
+  int32_t*);
 
 extern int32_t
 impl_Hypre_ParAMG_GetResidual(
@@ -94,12 +106,14 @@ Hypre_ParAMG__set_epv(struct Hypre_ParAMG__epv *epv)
   epv->f__ctor = impl_Hypre_ParAMG__ctor;
   epv->f__dtor = impl_Hypre_ParAMG__dtor;
   epv->f_Apply = impl_Hypre_ParAMG_Apply;
-  epv->f_SetLogging = impl_Hypre_ParAMG_SetLogging;
   epv->f_SetIntArrayParameter = impl_Hypre_ParAMG_SetIntArrayParameter;
   epv->f_Setup = impl_Hypre_ParAMG_Setup;
+  epv->f_SetLogging = impl_Hypre_ParAMG_SetLogging;
   epv->f_SetIntParameter = impl_Hypre_ParAMG_SetIntParameter;
   epv->f_GetResidual = impl_Hypre_ParAMG_GetResidual;
+  epv->f_GetDoubleValue = impl_Hypre_ParAMG_GetDoubleValue;
   epv->f_SetPrintLevel = impl_Hypre_ParAMG_SetPrintLevel;
+  epv->f_GetIntValue = impl_Hypre_ParAMG_GetIntValue;
   epv->f_SetCommunicator = impl_Hypre_ParAMG_SetCommunicator;
   epv->f_SetOperator = impl_Hypre_ParAMG_SetOperator;
   epv->f_SetDoubleParameter = impl_Hypre_ParAMG_SetDoubleParameter;

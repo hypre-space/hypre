@@ -3,8 +3,8 @@
  * Symbol:        Hypre.GMRES-v0.1.5
  * Symbol Type:   class
  * Babel Version: 0.6.3
- * SIDL Created:  20020522 13:59:35 PDT
- * Generated:     20020522 13:59:43 PDT
+ * SIDL Created:  20020711 16:38:24 PDT
+ * Generated:     20020711 16:38:32 PDT
  * Description:   Server-side glue code for Hypre.GMRES
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -28,6 +28,18 @@ impl_Hypre_GMRES_Apply(
   Hypre_GMRES,
   Hypre_Vector,
   Hypre_Vector*);
+
+extern int32_t
+impl_Hypre_GMRES_GetDoubleValue(
+  Hypre_GMRES,
+  const char*,
+  double*);
+
+extern int32_t
+impl_Hypre_GMRES_GetIntValue(
+  Hypre_GMRES,
+  const char*,
+  int32_t*);
 
 extern int32_t
 impl_Hypre_GMRES_GetPreconditionedResidual(
@@ -104,12 +116,14 @@ Hypre_GMRES__set_epv(struct Hypre_GMRES__epv *epv)
   epv->f__ctor = impl_Hypre_GMRES__ctor;
   epv->f__dtor = impl_Hypre_GMRES__dtor;
   epv->f_Apply = impl_Hypre_GMRES_Apply;
-  epv->f_SetLogging = impl_Hypre_GMRES_SetLogging;
   epv->f_SetIntArrayParameter = impl_Hypre_GMRES_SetIntArrayParameter;
   epv->f_Setup = impl_Hypre_GMRES_Setup;
+  epv->f_SetLogging = impl_Hypre_GMRES_SetLogging;
   epv->f_SetIntParameter = impl_Hypre_GMRES_SetIntParameter;
   epv->f_GetResidual = impl_Hypre_GMRES_GetResidual;
+  epv->f_GetDoubleValue = impl_Hypre_GMRES_GetDoubleValue;
   epv->f_SetPrintLevel = impl_Hypre_GMRES_SetPrintLevel;
+  epv->f_GetIntValue = impl_Hypre_GMRES_GetIntValue;
   epv->f_SetPreconditioner = impl_Hypre_GMRES_SetPreconditioner;
   epv->f_SetCommunicator = impl_Hypre_GMRES_SetCommunicator;
   epv->f_SetOperator = impl_Hypre_GMRES_SetOperator;

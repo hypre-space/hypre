@@ -3,8 +3,8 @@
  * Symbol:        Hypre.Operator-v0.1.5
  * Symbol Type:   interface
  * Babel Version: 0.6.3
- * SIDL Created:  20020522 13:59:35 PDT
- * Generated:     20020522 13:59:40 PDT
+ * SIDL Created:  20020711 16:38:24 PDT
+ * Generated:     20020711 16:38:28 PDT
  * Description:   Intermediate Object Representation for Hypre.Operator
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -478,6 +478,32 @@ remote_Hypre_Operator_Apply(
 }
 
 /*
+ * REMOTE METHOD STUB:GetDoubleValue
+ */
+
+static int32_t
+remote_Hypre_Operator_GetDoubleValue(
+  void* self,
+  const char* name,
+  double* value)
+{
+  return 0;
+}
+
+/*
+ * REMOTE METHOD STUB:GetIntValue
+ */
+
+static int32_t
+remote_Hypre_Operator_GetIntValue(
+  void* self,
+  const char* name,
+  int32_t* value)
+{
+  return 0;
+}
+
+/*
  * REMOTE METHOD STUB:SetCommunicator
  */
 
@@ -632,6 +658,8 @@ static void Hypre_Operator__init_remote_epv(void)
   epv->f__cast                   = remote_Hypre_Operator__cast;
   epv->f__delete                 = remote_Hypre_Operator__delete;
   epv->f_Apply                   = remote_Hypre_Operator_Apply;
+  epv->f_GetDoubleValue          = remote_Hypre_Operator_GetDoubleValue;
+  epv->f_GetIntValue             = remote_Hypre_Operator_GetIntValue;
   epv->f_SetCommunicator         = remote_Hypre_Operator_SetCommunicator;
   epv->f_SetDoubleArrayParameter = 
     remote_Hypre_Operator_SetDoubleArrayParameter;

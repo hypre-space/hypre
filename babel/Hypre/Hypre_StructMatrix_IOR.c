@@ -3,8 +3,8 @@
  * Symbol:        Hypre.StructMatrix-v0.1.5
  * Symbol Type:   class
  * Babel Version: 0.6.3
- * SIDL Created:  20020522 13:59:35 PDT
- * Generated:     20020522 13:59:39 PDT
+ * SIDL Created:  20020711 16:38:24 PDT
+ * Generated:     20020711 16:38:27 PDT
  * Description:   Intermediate Object Representation for Hypre.StructMatrix
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -126,6 +126,8 @@ static void Hypre_StructMatrix__init_epv(
   epv->f__dtor                   = NULL;
   epv->f_Apply                   = NULL;
   epv->f_Assemble                = NULL;
+  epv->f_GetDoubleValue          = NULL;
+  epv->f_GetIntValue             = NULL;
   epv->f_GetObject               = NULL;
   epv->f_Initialize              = NULL;
   epv->f_SetBoxValues            = NULL;
@@ -160,6 +162,10 @@ static void Hypre_StructMatrix__init_epv(
   e0->f__delete                 = (void (*)(void*)) epv->f__delete;
   e0->f_Apply                   = (int32_t (*)(void*,
     struct Hypre_Vector__object*,struct Hypre_Vector__object**)) epv->f_Apply;
+  e0->f_GetDoubleValue          = (int32_t (*)(void*,const char*,
+    double*)) epv->f_GetDoubleValue;
+  e0->f_GetIntValue             = (int32_t (*)(void*,const char*,
+    int32_t*)) epv->f_GetIntValue;
   e0->f_SetCommunicator         = (int32_t (*)(void*,
     void*)) epv->f_SetCommunicator;
   e0->f_SetDoubleArrayParameter = (int32_t (*)(void*,const char*,
@@ -787,6 +793,32 @@ remote_Hypre_StructMatrix_Assemble(
 }
 
 /*
+ * REMOTE METHOD STUB:GetDoubleValue
+ */
+
+static int32_t
+remote_Hypre_StructMatrix_GetDoubleValue(
+  struct Hypre_StructMatrix__object* self,
+  const char* name,
+  double* value)
+{
+  return 0;
+}
+
+/*
+ * REMOTE METHOD STUB:GetIntValue
+ */
+
+static int32_t
+remote_Hypre_StructMatrix_GetIntValue(
+  struct Hypre_StructMatrix__object* self,
+  const char* name,
+  int32_t* value)
+{
+  return 0;
+}
+
+/*
  * REMOTE METHOD STUB:GetObject
  */
 
@@ -1053,6 +1085,8 @@ static void Hypre_StructMatrix__init_remote_epv(void)
   epv->f__dtor                   = NULL;
   epv->f_Apply                   = remote_Hypre_StructMatrix_Apply;
   epv->f_Assemble                = remote_Hypre_StructMatrix_Assemble;
+  epv->f_GetDoubleValue          = remote_Hypre_StructMatrix_GetDoubleValue;
+  epv->f_GetIntValue             = remote_Hypre_StructMatrix_GetIntValue;
   epv->f_GetObject               = remote_Hypre_StructMatrix_GetObject;
   epv->f_Initialize              = remote_Hypre_StructMatrix_Initialize;
   epv->f_SetBoxValues            = remote_Hypre_StructMatrix_SetBoxValues;
@@ -1080,6 +1114,10 @@ static void Hypre_StructMatrix__init_remote_epv(void)
   e0->f__delete                 = (void (*)(void*)) epv->f__delete;
   e0->f_Apply                   = (int32_t (*)(void*,
     struct Hypre_Vector__object*,struct Hypre_Vector__object**)) epv->f_Apply;
+  e0->f_GetDoubleValue          = (int32_t (*)(void*,const char*,
+    double*)) epv->f_GetDoubleValue;
+  e0->f_GetIntValue             = (int32_t (*)(void*,const char*,
+    int32_t*)) epv->f_GetIntValue;
   e0->f_SetCommunicator         = (int32_t (*)(void*,
     void*)) epv->f_SetCommunicator;
   e0->f_SetDoubleArrayParameter = (int32_t (*)(void*,const char*,

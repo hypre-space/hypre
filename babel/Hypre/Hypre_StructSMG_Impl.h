@@ -3,8 +3,8 @@
  * Symbol:        Hypre.StructSMG-v0.1.5
  * Symbol Type:   class
  * Babel Version: 0.6.3
- * SIDL Created:  20020522 13:59:35 PDT
- * Generated:     20020522 13:59:44 PDT
+ * SIDL Created:  20020711 16:38:24 PDT
+ * Generated:     20020711 16:38:33 PDT
  * Description:   Server-side implementation for Hypre.StructSMG
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
@@ -76,6 +76,18 @@ impl_Hypre_StructSMG_Apply(
   Hypre_StructSMG,
   Hypre_Vector,
   Hypre_Vector*);
+
+extern int32_t
+impl_Hypre_StructSMG_GetDoubleValue(
+  Hypre_StructSMG,
+  const char*,
+  double*);
+
+extern int32_t
+impl_Hypre_StructSMG_GetIntValue(
+  Hypre_StructSMG,
+  const char*,
+  int32_t*);
 
 extern int32_t
 impl_Hypre_StructSMG_GetResidual(

@@ -3,8 +3,8 @@
  * Symbol:        Hypre.StructGrid-v0.1.5
  * Symbol Type:   class
  * Babel Version: 0.6.3
- * SIDL Created:  20020522 13:59:35 PDT
- * Generated:     20020522 13:59:41 PDT
+ * SIDL Created:  20020711 16:38:24 PDT
+ * Generated:     20020711 16:38:30 PDT
  * Description:   Client-side glue code for Hypre.StructGrid
  * 
  * WARNING: Automatically generated; changes will be lost

@@ -3,8 +3,8 @@
  * Symbol:        Hypre.PCG-v0.1.5
  * Symbol Type:   class
  * Babel Version: 0.6.3
- * SIDL Created:  20020522 13:59:35 PDT
- * Generated:     20020522 13:59:44 PDT
+ * SIDL Created:  20020711 16:38:24 PDT
+ * Generated:     20020711 16:38:34 PDT
  * Description:   Server-side implementation for Hypre.PCG
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
@@ -45,10 +45,24 @@
 struct Hypre_PCG__data {
   /* DO-NOT-DELETE splicer.begin(Hypre.PCG._data) */
   /* Put private data members here... */
-   MPI_Comm * comm;
-   HYPRE_Solver * solver;
+
+   MPI_Comm comm;
+   HYPRE_Solver solver;
    Hypre_Operator matrix;
    char * vector_type;
+
+   /* parameter cache, to save in Set*Parameter functions and copy in Apply: */
+   double tol;
+   int maxiter;
+   int relchange;
+   int twonorm;
+   int printlevel;
+
+   /* preconditioner cache, to save in SetPreconditioner and apply in Apply:*/
+   HYPRE_Solver * solverprecond;
+   HYPRE_PtrToSolverFcn precond; /* function */
+   HYPRE_PtrToSolverFcn precond_setup; /* function */
+
   /* DO-NOT-DELETE splicer.end(Hypre.PCG._data) */
 };
 
@@ -86,6 +100,18 @@ impl_Hypre_PCG_Apply(
   Hypre_PCG,
   Hypre_Vector,
   Hypre_Vector*);
+
+extern int32_t
+impl_Hypre_PCG_GetDoubleValue(
+  Hypre_PCG,
+  const char*,
+  double*);
+
+extern int32_t
+impl_Hypre_PCG_GetIntValue(
+  Hypre_PCG,
+  const char*,
+  int32_t*);
 
 extern int32_t
 impl_Hypre_PCG_GetPreconditionedResidual(

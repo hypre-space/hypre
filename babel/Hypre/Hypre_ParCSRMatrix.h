@@ -3,8 +3,8 @@
  * Symbol:        Hypre.ParCSRMatrix-v0.1.5
  * Symbol Type:   class
  * Babel Version: 0.6.3
- * SIDL Created:  20020522 13:59:35 PDT
- * Generated:     20020522 13:59:40 PDT
+ * SIDL Created:  20020711 16:38:24 PDT
+ * Generated:     20020711 16:38:29 PDT
  * Description:   Client-side glue code for Hypre.ParCSRMatrix
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -49,6 +49,156 @@ Hypre_ParCSRMatrix
 Hypre_ParCSRMatrix__create(void);
 
 /**
+ * Method:  SetIntArrayParameter
+ */
+int32_t
+Hypre_ParCSRMatrix_SetIntArrayParameter(
+  Hypre_ParCSRMatrix self,
+  const char* name,
+  struct SIDL_int__array* value);
+
+/**
+ * (Optional) Set the max number of nonzeros to expect in each row.
+ * The array {\tt sizes} contains estimated sizes for each row on this
+ * process.  This call can significantly improve the efficiency of
+ * matrix construction, and should always be utilized if possible.
+ * 
+ * Not collective.
+ * 
+ * DEVELOPER NOTES: None.
+ * 
+ */
+int32_t
+Hypre_ParCSRMatrix_SetRowSizes(
+  Hypre_ParCSRMatrix self,
+  struct SIDL_int__array* sizes);
+
+/**
+ * Method:  SetCommunicator
+ */
+int32_t
+Hypre_ParCSRMatrix_SetCommunicator(
+  Hypre_ParCSRMatrix self,
+  void* mpi_comm);
+
+/**
+ * Read the matrix from file.  This is mainly for debugging purposes.
+ * 
+ */
+int32_t
+Hypre_ParCSRMatrix_Read(
+  Hypre_ParCSRMatrix self,
+  const char* filename,
+  void* comm);
+
+/**
+ * Method:  SetStringParameter
+ */
+int32_t
+Hypre_ParCSRMatrix_SetStringParameter(
+  Hypre_ParCSRMatrix self,
+  const char* name,
+  const char* value);
+
+/**
+ * Method:  SetDoubleParameter
+ */
+int32_t
+Hypre_ParCSRMatrix_SetDoubleParameter(
+  Hypre_ParCSRMatrix self,
+  const char* name,
+  double value);
+
+/**
+ * Finalize the construction of an object before using, either for
+ * the first time or on subsequent uses. "Initialize" and "Assemble"
+ * always appear in a matched set, with Initialize preceding Assemble. Values
+ * can only be set in between a call to Initialize and Assemble.
+ * 
+ * 
+ */
+int32_t
+Hypre_ParCSRMatrix_Assemble(
+  Hypre_ParCSRMatrix self);
+
+/**
+ * Prepare an object for setting coefficient values, whether for
+ * the first time or subsequently.
+ * 
+ * 
+ */
+int32_t
+Hypre_ParCSRMatrix_Initialize(
+  Hypre_ParCSRMatrix self);
+
+/**
+ * (Optional) Set the max number of nonzeros to expect in each row of
+ * the diagonal and off-diagonal blocks.  The diagonal block is the
+ * submatrix whose column numbers correspond to rows owned by this
+ * process, and the off-diagonal block is everything else.  The arrays
+ * {\tt diag\_sizes} and {\tt offdiag\_sizes} contain estimated sizes
+ * for each row of the diagonal and off-diagonal blocks, respectively.
+ * This routine can significantly improve the efficiency of matrix
+ * construction, and should always be utilized if possible.
+ * 
+ * Not collective.
+ * 
+ * 
+ */
+int32_t
+Hypre_ParCSRMatrix_SetDiagOffdSizes(
+  Hypre_ParCSRMatrix self,
+  struct SIDL_int__array* diag_sizes,
+  struct SIDL_int__array* offdiag_sizes);
+
+/**
+ * Return true if and only if <code>obj</code> refers to the same
+ * object as this object.
+ */
+SIDL_bool
+Hypre_ParCSRMatrix_isSame(
+  Hypre_ParCSRMatrix self,
+  SIDL_BaseInterface iobj);
+
+/**
+ * <p>
+ * Add one to the intrinsic reference count in the underlying object.
+ * Object in <code>SIDL</code> have an intrinsic reference count.
+ * Objects continue to exist as long as the reference count is
+ * positive. Clients should call this method whenever they
+ * create another ongoing reference to an object or interface.
+ * </p>
+ * <p>
+ * This does not have a return value because there is no language
+ * independent type that can refer to an interface or a
+ * class.
+ * </p>
+ */
+void
+Hypre_ParCSRMatrix_addReference(
+  Hypre_ParCSRMatrix self);
+
+/**
+ * Method:  SetDoubleArrayParameter
+ */
+int32_t
+Hypre_ParCSRMatrix_SetDoubleArrayParameter(
+  Hypre_ParCSRMatrix self,
+  const char* name,
+  struct SIDL_double__array* value);
+
+/**
+ * Decrease by one the intrinsic reference count in the underlying
+ * object, and delete the object if the reference is non-positive.
+ * Objects in <code>SIDL</code> have an intrinsic reference count.
+ * Clients should call this method whenever they remove a
+ * reference to an object or interface.
+ */
+void
+Hypre_ParCSRMatrix_deleteReference(
+  Hypre_ParCSRMatrix self);
+
+/**
  * Adds to values for {\tt nrows} of the matrix.  Usage details are
  * analogous to \Ref{HYPRE_IJMatrixSetValues}.  Adds to any previous
  * values at the specified locations, or, if there was no value there
@@ -68,29 +218,11 @@ Hypre_ParCSRMatrix_AddToValues(
   struct SIDL_double__array* values);
 
 /**
- * Method:  SetIntArrayParameter
- */
-int32_t
-Hypre_ParCSRMatrix_SetIntArrayParameter(
-  Hypre_ParCSRMatrix self,
-  const char* name,
-  struct SIDL_int__array* value);
-
-/**
  * Method:  Setup
  */
 int32_t
 Hypre_ParCSRMatrix_Setup(
   Hypre_ParCSRMatrix self);
-
-/**
- * Method:  SetIntParameter
- */
-int32_t
-Hypre_ParCSRMatrix_SetIntParameter(
-  Hypre_ParCSRMatrix self,
-  const char* name,
-  int32_t value);
 
 /**
  * Create a matrix object.  Each process owns some unique consecutive
@@ -123,46 +255,22 @@ Hypre_ParCSRMatrix_Create(
   int32_t jupper);
 
 /**
- * (Optional) Set the max number of nonzeros to expect in each row.
- * The array {\tt sizes} contains estimated sizes for each row on this
- * process.  This call can significantly improve the efficiency of
- * matrix construction, and should always be utilized if possible.
- * 
- * Not collective.
- * 
- * DEVELOPER NOTES: None.
- * 
+ * Method:  SetIntParameter
  */
 int32_t
-Hypre_ParCSRMatrix_SetRowSizes(
-  Hypre_ParCSRMatrix self,
-  struct SIDL_int__array* sizes);
-
-/**
- * Method:  SetCommunicator
- */
-int32_t
-Hypre_ParCSRMatrix_SetCommunicator(
-  Hypre_ParCSRMatrix self,
-  void* mpi_comm);
-
-/**
- * Method:  SetDoubleParameter
- */
-int32_t
-Hypre_ParCSRMatrix_SetDoubleParameter(
+Hypre_ParCSRMatrix_SetIntParameter(
   Hypre_ParCSRMatrix self,
   const char* name,
-  double value);
+  int32_t value);
 
 /**
- * Method:  SetStringParameter
+ * Method:  GetIntValue
  */
 int32_t
-Hypre_ParCSRMatrix_SetStringParameter(
+Hypre_ParCSRMatrix_GetIntValue(
   Hypre_ParCSRMatrix self,
   const char* name,
-  const char* value);
+  int32_t* value);
 
 /**
  * Return whether this object is an instance of the specified type.
@@ -174,16 +282,6 @@ SIDL_bool
 Hypre_ParCSRMatrix_isInstanceOf(
   Hypre_ParCSRMatrix self,
   const char* name);
-
-/**
- * Read the matrix from file.  This is mainly for debugging purposes.
- * 
- */
-int32_t
-Hypre_ParCSRMatrix_Read(
-  Hypre_ParCSRMatrix self,
-  const char* filename,
-  void* comm);
 
 /**
  * The problem definition interface is a "builder" that creates an object
@@ -202,18 +300,6 @@ Hypre_ParCSRMatrix_GetObject(
   SIDL_BaseInterface* A);
 
 /**
- * Finalize the construction of an object before using, either for
- * the first time or on subsequent uses. "Initialize" and "Assemble"
- * always appear in a matched set, with Initialize preceding Assemble. Values
- * can only be set in between a call to Initialize and Assemble.
- * 
- * 
- */
-int32_t
-Hypre_ParCSRMatrix_Assemble(
-  Hypre_ParCSRMatrix self);
-
-/**
  * Check whether the object can support the specified interface or
  * class.  If the <code>SIDL</code> type name in <code>name</code>
  * is supported, then a reference to that object is returned with the
@@ -226,45 +312,6 @@ SIDL_BaseInterface
 Hypre_ParCSRMatrix_queryInterface(
   Hypre_ParCSRMatrix self,
   const char* name);
-
-/**
- * Return true if and only if <code>obj</code> refers to the same
- * object as this object.
- */
-SIDL_bool
-Hypre_ParCSRMatrix_isSame(
-  Hypre_ParCSRMatrix self,
-  SIDL_BaseInterface iobj);
-
-/**
- * (Optional) Set the max number of nonzeros to expect in each row of
- * the diagonal and off-diagonal blocks.  The diagonal block is the
- * submatrix whose column numbers correspond to rows owned by this
- * process, and the off-diagonal block is everything else.  The arrays
- * {\tt diag\_sizes} and {\tt offdiag\_sizes} contain estimated sizes
- * for each row of the diagonal and off-diagonal blocks, respectively.
- * This routine can significantly improve the efficiency of matrix
- * construction, and should always be utilized if possible.
- * 
- * Not collective.
- * 
- * 
- */
-int32_t
-Hypre_ParCSRMatrix_SetDiagOffdSizes(
-  Hypre_ParCSRMatrix self,
-  struct SIDL_int__array* diag_sizes,
-  struct SIDL_int__array* offdiag_sizes);
-
-/**
- * Prepare an object for setting coefficient values, whether for
- * the first time or subsequently.
- * 
- * 
- */
-int32_t
-Hypre_ParCSRMatrix_Initialize(
-  Hypre_ParCSRMatrix self);
 
 /**
  * Method:  Apply
@@ -285,22 +332,13 @@ Hypre_ParCSRMatrix_Print(
   const char* filename);
 
 /**
- * <p>
- * Add one to the intrinsic reference count in the underlying object.
- * Object in <code>SIDL</code> have an intrinsic reference count.
- * Objects continue to exist as long as the reference count is
- * positive. Clients should call this method whenever they
- * create another ongoing reference to an object or interface.
- * </p>
- * <p>
- * This does not have a return value because there is no language
- * independent type that can refer to an interface or a
- * class.
- * </p>
+ * Method:  GetDoubleValue
  */
-void
-Hypre_ParCSRMatrix_addReference(
-  Hypre_ParCSRMatrix self);
+int32_t
+Hypre_ParCSRMatrix_GetDoubleValue(
+  Hypre_ParCSRMatrix self,
+  const char* name,
+  double* value);
 
 /**
  * Method:  GetRow
@@ -336,26 +374,6 @@ Hypre_ParCSRMatrix_SetValues(
   struct SIDL_int__array* rows,
   struct SIDL_int__array* cols,
   struct SIDL_double__array* values);
-
-/**
- * Method:  SetDoubleArrayParameter
- */
-int32_t
-Hypre_ParCSRMatrix_SetDoubleArrayParameter(
-  Hypre_ParCSRMatrix self,
-  const char* name,
-  struct SIDL_double__array* value);
-
-/**
- * Decrease by one the intrinsic reference count in the underlying
- * object, and delete the object if the reference is non-positive.
- * Objects in <code>SIDL</code> have an intrinsic reference count.
- * Clients should call this method whenever they remove a
- * reference to an object or interface.
- */
-void
-Hypre_ParCSRMatrix_deleteReference(
-  Hypre_ParCSRMatrix self);
 
 /**
  * Cast method for interface and class type conversions.

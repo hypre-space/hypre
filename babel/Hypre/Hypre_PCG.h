@@ -3,8 +3,8 @@
  * Symbol:        Hypre.PCG-v0.1.5
  * Symbol Type:   class
  * Babel Version: 0.6.3
- * SIDL Created:  20020522 13:59:35 PDT
- * Generated:     20020522 13:59:41 PDT
+ * SIDL Created:  20020711 16:38:24 PDT
+ * Generated:     20020711 16:38:31 PDT
  * Description:   Client-side glue code for Hypre.PCG
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -52,6 +52,14 @@ Hypre_PCG
 Hypre_PCG__create(void);
 
 /**
+ * Method:  SetLogging
+ */
+int32_t
+Hypre_PCG_SetLogging(
+  Hypre_PCG self,
+  int32_t level);
+
+/**
  * Method:  Setup
  */
 int32_t
@@ -66,14 +74,6 @@ Hypre_PCG_SetIntArrayParameter(
   Hypre_PCG self,
   const char* name,
   struct SIDL_int__array* value);
-
-/**
- * Method:  SetLogging
- */
-int32_t
-Hypre_PCG_SetLogging(
-  Hypre_PCG self,
-  int32_t level);
 
 /**
  * Method:  SetIntParameter
@@ -99,6 +99,15 @@ int32_t
 Hypre_PCG_SetPrintLevel(
   Hypre_PCG self,
   int32_t level);
+
+/**
+ * Method:  GetIntValue
+ */
+int32_t
+Hypre_PCG_GetIntValue(
+  Hypre_PCG self,
+  const char* name,
+  int32_t* value);
 
 /**
  * Method:  SetCommunicator
@@ -176,6 +185,15 @@ Hypre_PCG_Apply(
   Hypre_PCG self,
   Hypre_Vector x,
   Hypre_Vector* y);
+
+/**
+ * Method:  GetDoubleValue
+ */
+int32_t
+Hypre_PCG_GetDoubleValue(
+  Hypre_PCG self,
+  const char* name,
+  double* value);
 
 /**
  * <p>

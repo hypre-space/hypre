@@ -3,8 +3,8 @@
  * Symbol:        Hypre.StructSMG-v0.1.5
  * Symbol Type:   class
  * Babel Version: 0.6.3
- * SIDL Created:  20020522 13:59:35 PDT
- * Generated:     20020522 13:59:41 PDT
+ * SIDL Created:  20020711 16:38:24 PDT
+ * Generated:     20020711 16:38:30 PDT
  * Description:   Client-side glue code for Hypre.StructSMG
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -58,6 +58,20 @@ Hypre_StructSMG__create()
 }
 
 /*
+ * Method:  SetLogging
+ */
+
+int32_t
+Hypre_StructSMG_SetLogging(
+  Hypre_StructSMG self,
+  int32_t level)
+{
+  return (*self->d_epv->f_SetLogging)(
+    self,
+    level);
+}
+
+/*
  * Method:  Setup
  */
 
@@ -83,20 +97,6 @@ Hypre_StructSMG_SetIntArrayParameter(
     self,
     name,
     value);
-}
-
-/*
- * Method:  SetLogging
- */
-
-int32_t
-Hypre_StructSMG_SetLogging(
-  Hypre_StructSMG self,
-  int32_t level)
-{
-  return (*self->d_epv->f_SetLogging)(
-    self,
-    level);
 }
 
 /*
@@ -141,6 +141,22 @@ Hypre_StructSMG_SetPrintLevel(
   return (*self->d_epv->f_SetPrintLevel)(
     self,
     level);
+}
+
+/*
+ * Method:  GetIntValue
+ */
+
+int32_t
+Hypre_StructSMG_GetIntValue(
+  Hypre_StructSMG self,
+  const char* name,
+  int32_t* value)
+{
+  return (*self->d_epv->f_GetIntValue)(
+    self,
+    name,
+    value);
 }
 
 /*
@@ -278,6 +294,22 @@ Hypre_StructSMG_addReference(
 {
   (*self->d_epv->f_addReference)(
     self);
+}
+
+/*
+ * Method:  GetDoubleValue
+ */
+
+int32_t
+Hypre_StructSMG_GetDoubleValue(
+  Hypre_StructSMG self,
+  const char* name,
+  double* value)
+{
+  return (*self->d_epv->f_GetDoubleValue)(
+    self,
+    name,
+    value);
 }
 
 /*

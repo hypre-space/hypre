@@ -3,8 +3,8 @@
  * Symbol:        Hypre.StructuredGridBuildVector-v0.1.5
  * Symbol Type:   interface
  * Babel Version: 0.6.3
- * SIDL Created:  20020522 13:59:35 PDT
- * Generated:     20020522 13:59:40 PDT
+ * SIDL Created:  20020711 16:38:24 PDT
+ * Generated:     20020711 16:38:31 PDT
  * Description:   Client-side glue code for Hypre.StructuredGridBuildVector
  * 
  * WARNING: Automatically generated; changes will be lost

@@ -3,8 +3,8 @@
  * Symbol:        Hypre.StructMatrix-v0.1.5
  * Symbol Type:   class
  * Babel Version: 0.6.3
- * SIDL Created:  20020522 13:59:35 PDT
- * Generated:     20020522 13:59:42 PDT
+ * SIDL Created:  20020711 16:38:24 PDT
+ * Generated:     20020711 16:38:30 PDT
  * Description:   Client-side glue code for Hypre.StructMatrix
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -86,6 +86,15 @@ int32_t
 Hypre_StructMatrix_SetStencil(
   Hypre_StructMatrix self,
   Hypre_StructStencil stencil);
+
+/**
+ * Method:  GetIntValue
+ */
+int32_t
+Hypre_StructMatrix_GetIntValue(
+  Hypre_StructMatrix self,
+  const char* name,
+  int32_t* value);
 
 /**
  * Method:  SetCommunicator
@@ -221,6 +230,15 @@ Hypre_StructMatrix_SetBoxValues(
   int32_t num_stencil_indices,
   struct SIDL_int__array* stencil_indices,
   struct SIDL_double__array* values);
+
+/**
+ * Method:  GetDoubleValue
+ */
+int32_t
+Hypre_StructMatrix_GetDoubleValue(
+  Hypre_StructMatrix self,
+  const char* name,
+  double* value);
 
 /**
  * <p>

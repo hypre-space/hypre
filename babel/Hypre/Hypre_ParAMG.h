@@ -3,8 +3,8 @@
  * Symbol:        Hypre.ParAMG-v0.1.5
  * Symbol Type:   class
  * Babel Version: 0.6.3
- * SIDL Created:  20020522 13:59:35 PDT
- * Generated:     20020522 13:59:41 PDT
+ * SIDL Created:  20020711 16:38:24 PDT
+ * Generated:     20020711 16:38:32 PDT
  * Description:   Client-side glue code for Hypre.ParAMG
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -49,6 +49,14 @@ Hypre_ParAMG
 Hypre_ParAMG__create(void);
 
 /**
+ * Method:  SetLogging
+ */
+int32_t
+Hypre_ParAMG_SetLogging(
+  Hypre_ParAMG self,
+  int32_t level);
+
+/**
  * Method:  Setup
  */
 int32_t
@@ -63,14 +71,6 @@ Hypre_ParAMG_SetIntArrayParameter(
   Hypre_ParAMG self,
   const char* name,
   struct SIDL_int__array* value);
-
-/**
- * Method:  SetLogging
- */
-int32_t
-Hypre_ParAMG_SetLogging(
-  Hypre_ParAMG self,
-  int32_t level);
 
 /**
  * Method:  SetIntParameter
@@ -96,6 +96,15 @@ int32_t
 Hypre_ParAMG_SetPrintLevel(
   Hypre_ParAMG self,
   int32_t level);
+
+/**
+ * Method:  GetIntValue
+ */
+int32_t
+Hypre_ParAMG_GetIntValue(
+  Hypre_ParAMG self,
+  const char* name,
+  int32_t* value);
 
 /**
  * Method:  SetCommunicator
@@ -183,6 +192,15 @@ Hypre_ParAMG_Apply(
 void
 Hypre_ParAMG_addReference(
   Hypre_ParAMG self);
+
+/**
+ * Method:  GetDoubleValue
+ */
+int32_t
+Hypre_ParAMG_GetDoubleValue(
+  Hypre_ParAMG self,
+  const char* name,
+  double* value);
 
 /**
  * Method:  SetOperator

@@ -3,8 +3,8 @@
  * Symbol:        Hypre.StructMatrix-v0.1.5
  * Symbol Type:   class
  * Babel Version: 0.6.3
- * SIDL Created:  20020522 13:59:35 PDT
- * Generated:     20020522 13:59:45 PDT
+ * SIDL Created:  20020711 16:38:24 PDT
+ * Generated:     20020711 16:38:33 PDT
  * Description:   Server-side implementation for Hypre.StructMatrix
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
@@ -98,6 +98,42 @@ impl_Hypre_StructMatrix_Assemble(
   /* DO-NOT-DELETE splicer.begin(Hypre.StructMatrix.Assemble) */
   /* Insert the implementation of the Assemble method here... */
   /* DO-NOT-DELETE splicer.end(Hypre.StructMatrix.Assemble) */
+}
+
+/*
+ * Method:  GetDoubleValue
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_Hypre_StructMatrix_GetDoubleValue"
+
+int32_t
+impl_Hypre_StructMatrix_GetDoubleValue(
+  Hypre_StructMatrix self,
+  const char* name,
+  double* value)
+{
+  /* DO-NOT-DELETE splicer.begin(Hypre.StructMatrix.GetDoubleValue) */
+  /* Insert the implementation of the GetDoubleValue method here... */
+  /* DO-NOT-DELETE splicer.end(Hypre.StructMatrix.GetDoubleValue) */
+}
+
+/*
+ * Method:  GetIntValue
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_Hypre_StructMatrix_GetIntValue"
+
+int32_t
+impl_Hypre_StructMatrix_GetIntValue(
+  Hypre_StructMatrix self,
+  const char* name,
+  int32_t* value)
+{
+  /* DO-NOT-DELETE splicer.begin(Hypre.StructMatrix.GetIntValue) */
+  /* Insert the implementation of the GetIntValue method here... */
+  /* DO-NOT-DELETE splicer.end(Hypre.StructMatrix.GetIntValue) */
 }
 
 /*

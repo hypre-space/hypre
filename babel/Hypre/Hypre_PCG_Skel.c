@@ -3,8 +3,8 @@
  * Symbol:        Hypre.PCG-v0.1.5
  * Symbol Type:   class
  * Babel Version: 0.6.3
- * SIDL Created:  20020522 13:59:35 PDT
- * Generated:     20020522 13:59:44 PDT
+ * SIDL Created:  20020711 16:38:24 PDT
+ * Generated:     20020711 16:38:34 PDT
  * Description:   Server-side glue code for Hypre.PCG
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -28,6 +28,18 @@ impl_Hypre_PCG_Apply(
   Hypre_PCG,
   Hypre_Vector,
   Hypre_Vector*);
+
+extern int32_t
+impl_Hypre_PCG_GetDoubleValue(
+  Hypre_PCG,
+  const char*,
+  double*);
+
+extern int32_t
+impl_Hypre_PCG_GetIntValue(
+  Hypre_PCG,
+  const char*,
+  int32_t*);
 
 extern int32_t
 impl_Hypre_PCG_GetPreconditionedResidual(
@@ -104,12 +116,14 @@ Hypre_PCG__set_epv(struct Hypre_PCG__epv *epv)
   epv->f__ctor = impl_Hypre_PCG__ctor;
   epv->f__dtor = impl_Hypre_PCG__dtor;
   epv->f_Apply = impl_Hypre_PCG_Apply;
-  epv->f_SetLogging = impl_Hypre_PCG_SetLogging;
   epv->f_SetIntArrayParameter = impl_Hypre_PCG_SetIntArrayParameter;
   epv->f_Setup = impl_Hypre_PCG_Setup;
+  epv->f_SetLogging = impl_Hypre_PCG_SetLogging;
   epv->f_SetIntParameter = impl_Hypre_PCG_SetIntParameter;
   epv->f_GetResidual = impl_Hypre_PCG_GetResidual;
+  epv->f_GetDoubleValue = impl_Hypre_PCG_GetDoubleValue;
   epv->f_SetPrintLevel = impl_Hypre_PCG_SetPrintLevel;
+  epv->f_GetIntValue = impl_Hypre_PCG_GetIntValue;
   epv->f_SetPreconditioner = impl_Hypre_PCG_SetPreconditioner;
   epv->f_SetCommunicator = impl_Hypre_PCG_SetCommunicator;
   epv->f_SetOperator = impl_Hypre_PCG_SetOperator;

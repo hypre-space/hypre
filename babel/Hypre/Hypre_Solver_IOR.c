@@ -3,8 +3,8 @@
  * Symbol:        Hypre.Solver-v0.1.5
  * Symbol Type:   interface
  * Babel Version: 0.6.3
- * SIDL Created:  20020522 13:59:35 PDT
- * Generated:     20020522 13:59:39 PDT
+ * SIDL Created:  20020711 16:38:24 PDT
+ * Generated:     20020711 16:38:29 PDT
  * Description:   Intermediate Object Representation for Hypre.Solver
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -478,6 +478,32 @@ remote_Hypre_Solver_Apply(
 }
 
 /*
+ * REMOTE METHOD STUB:GetDoubleValue
+ */
+
+static int32_t
+remote_Hypre_Solver_GetDoubleValue(
+  void* self,
+  const char* name,
+  double* value)
+{
+  return 0;
+}
+
+/*
+ * REMOTE METHOD STUB:GetIntValue
+ */
+
+static int32_t
+remote_Hypre_Solver_GetIntValue(
+  void* self,
+  const char* name,
+  int32_t* value)
+{
+  return 0;
+}
+
+/*
  * REMOTE METHOD STUB:GetResidual
  */
 
@@ -680,6 +706,8 @@ static void Hypre_Solver__init_remote_epv(void)
   epv->f__cast                   = remote_Hypre_Solver__cast;
   epv->f__delete                 = remote_Hypre_Solver__delete;
   epv->f_Apply                   = remote_Hypre_Solver_Apply;
+  epv->f_GetDoubleValue          = remote_Hypre_Solver_GetDoubleValue;
+  epv->f_GetIntValue             = remote_Hypre_Solver_GetIntValue;
   epv->f_GetResidual             = remote_Hypre_Solver_GetResidual;
   epv->f_SetCommunicator         = remote_Hypre_Solver_SetCommunicator;
   epv->f_SetDoubleArrayParameter = remote_Hypre_Solver_SetDoubleArrayParameter;

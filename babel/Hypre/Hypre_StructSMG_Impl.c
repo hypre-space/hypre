@@ -3,8 +3,8 @@
  * Symbol:        Hypre.StructSMG-v0.1.5
  * Symbol Type:   class
  * Babel Version: 0.6.3
- * SIDL Created:  20020522 13:59:35 PDT
- * Generated:     20020522 13:59:44 PDT
+ * SIDL Created:  20020711 16:38:24 PDT
+ * Generated:     20020711 16:38:33 PDT
  * Description:   Server-side implementation for Hypre.StructSMG
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
@@ -74,6 +74,42 @@ impl_Hypre_StructSMG_Apply(
   /* DO-NOT-DELETE splicer.begin(Hypre.StructSMG.Apply) */
   /* Insert the implementation of the Apply method here... */
   /* DO-NOT-DELETE splicer.end(Hypre.StructSMG.Apply) */
+}
+
+/*
+ * Method:  GetDoubleValue
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_Hypre_StructSMG_GetDoubleValue"
+
+int32_t
+impl_Hypre_StructSMG_GetDoubleValue(
+  Hypre_StructSMG self,
+  const char* name,
+  double* value)
+{
+  /* DO-NOT-DELETE splicer.begin(Hypre.StructSMG.GetDoubleValue) */
+  /* Insert the implementation of the GetDoubleValue method here... */
+  /* DO-NOT-DELETE splicer.end(Hypre.StructSMG.GetDoubleValue) */
+}
+
+/*
+ * Method:  GetIntValue
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_Hypre_StructSMG_GetIntValue"
+
+int32_t
+impl_Hypre_StructSMG_GetIntValue(
+  Hypre_StructSMG self,
+  const char* name,
+  int32_t* value)
+{
+  /* DO-NOT-DELETE splicer.begin(Hypre.StructSMG.GetIntValue) */
+  /* Insert the implementation of the GetIntValue method here... */
+  /* DO-NOT-DELETE splicer.end(Hypre.StructSMG.GetIntValue) */
 }
 
 /*

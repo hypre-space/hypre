@@ -3,8 +3,8 @@
  * Symbol:        Hypre.Operator-v0.1.5
  * Symbol Type:   interface
  * Babel Version: 0.6.3
- * SIDL Created:  20020522 13:59:35 PDT
- * Generated:     20020522 13:59:43 PDT
+ * SIDL Created:  20020711 16:38:24 PDT
+ * Generated:     20020711 16:38:31 PDT
  * Description:   Client-side glue code for Hypre.Operator
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -19,6 +19,8 @@
  * 
  * An Operator is anything that maps one Vector to another.
  * The terms "Setup" and "Apply" are reserved for Operators.
+ * The implementation is allowed to assume that supplied parameter
+ * arrays will not be destroyed.
  */
 struct Hypre_Operator__object;
 struct Hypre_Operator__array;
@@ -77,6 +79,15 @@ Hypre_Operator_SetIntParameter(
   int32_t value);
 
 /**
+ * Method:  GetDoubleValue
+ */
+int32_t
+Hypre_Operator_GetDoubleValue(
+  Hypre_Operator self,
+  const char* name,
+  double* value);
+
+/**
  * <p>
  * Add one to the intrinsic reference count in the underlying object.
  * Object in <code>SIDL</code> have an intrinsic reference count.
@@ -93,6 +104,15 @@ Hypre_Operator_SetIntParameter(
 void
 Hypre_Operator_addReference(
   Hypre_Operator self);
+
+/**
+ * Method:  GetIntValue
+ */
+int32_t
+Hypre_Operator_GetIntValue(
+  Hypre_Operator self,
+  const char* name,
+  int32_t* value);
 
 /**
  * Method:  SetCommunicator

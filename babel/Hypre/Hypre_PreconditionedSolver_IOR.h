@@ -3,8 +3,8 @@
  * Symbol:        Hypre.PreconditionedSolver-v0.1.5
  * Symbol Type:   interface
  * Babel Version: 0.6.3
- * SIDL Created:  20020522 13:59:35 PDT
- * Generated:     20020522 13:59:40 PDT
+ * SIDL Created:  20020711 16:38:24 PDT
+ * Generated:     20020711 16:38:27 PDT
  * Description:   Intermediate Object Representation for Hypre.PreconditionedSolver
  * 
  * WARNING: Automatically generated; changes will be lost
@@ -74,6 +74,14 @@ struct Hypre_PreconditionedSolver__epv {
     void* self,
     struct Hypre_Vector__object* x,
     struct Hypre_Vector__object** y);
+  int32_t (*f_GetDoubleValue)(
+    void* self,
+    const char* name,
+    double* value);
+  int32_t (*f_GetIntValue)(
+    void* self,
+    const char* name,
+    int32_t* value);
   int32_t (*f_SetCommunicator)(
     void* self,
     void* comm);
