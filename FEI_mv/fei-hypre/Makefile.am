@@ -51,6 +51,7 @@ noinst_HEADERS = \
  HYPRE_parcsr_bicgstabl.h\
  HYPRE_parcsr_fgmres.h\
  HYPRE_parcsr_lsicg.h\
+ HYPRE_parcsr_superlu.h\
  HYPRE_parcsr_symqmr.h
 dependent_includes = $(include_HEADERS) $(noinst_HEADERS)
 
@@ -123,6 +124,7 @@ FILES = \
  HYPRE_parcsr_fgmres.c\
  HYPRE_parcsr_lsicg.c\
  HYPRE_parcsr_symqmr.c\
+ HYPRE_parcsr_superlu.c\
  SymQMR.c\
  TFQmr.c\
  bicgs.c\
