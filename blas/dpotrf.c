@@ -72,7 +72,7 @@
     static doublereal c_b14 = 1.;
     
     /* System generated locals */
-    integer a_dim1, a_offset, i__1, i__2, i__3, i__4;
+    integer i__1, i__3, i__4;
     /* Local variables */
     static integer j;
     extern /* Subroutine */ int dgemm_(char *, char *, integer *, integer *, 
@@ -135,7 +135,6 @@
 /*           Compute the Cholesky factorization A = U'*U. */
 
 	    i__1 = *n;
-	    i__2 = nb;
 	    for (j = 1; nb < 0 ? j >= *n : j <= *n; j += nb) {
 
 /*              Update and factorize the current diagonal bloc
@@ -170,7 +169,6 @@ k and test
 
 /*           Compute the Cholesky factorization A = L*L'. */
 
-	    i__2 = *n;
 	    i__1 = nb;
 	    for (j = 1; nb < 0 ? j >= *n : j <= *n; j += nb) {
 
@@ -292,7 +290,7 @@ L40:
     static doublereal c_b12 = 1.;
     
     /* System generated locals */
-    integer a_dim1, a_offset, i__1, i__2, i__3;
+    integer i__1, i__2, i__3;
     doublereal d__1;
     /* Builtin functions */
     double sqrt(doublereal);

@@ -13,7 +13,6 @@
 
 
     /* System generated locals */
-    integer a_dim1, a_offset, c_dim1, c_offset, i__1, i__2, i__3;
 
     /* Local variables */
     static integer info;
@@ -211,9 +210,7 @@
     if (*alpha == 0.) {
 	if (upper) {
 	    if (*beta == 0.) {
-		i__1 = *n;
 		for (j = 1; j <= *n; ++j) {
-		    i__2 = j;
 		    for (i = 1; i <= j; ++i) {
 			C(i,j) = 0.;
 /* L10: */
@@ -221,9 +218,7 @@
 /* L20: */
 		}
 	    } else {
-		i__1 = *n;
 		for (j = 1; j <= *n; ++j) {
-		    i__2 = j;
 		    for (i = 1; i <= j; ++i) {
 			C(i,j) = *beta * C(i,j);
 /* L30: */
@@ -233,9 +228,7 @@
 	    }
 	} else {
 	    if (*beta == 0.) {
-		i__1 = *n;
 		for (j = 1; j <= *n; ++j) {
-		    i__2 = *n;
 		    for (i = j; i <= *n; ++i) {
 			C(i,j) = 0.;
 /* L50: */
@@ -243,9 +236,7 @@
 /* L60: */
 		}
 	    } else {
-		i__1 = *n;
 		for (j = 1; j <= *n; ++j) {
-		    i__2 = *n;
 		    for (i = j; i <= *n; ++i) {
 			C(i,j) = *beta * C(i,j);
 /* L70: */
@@ -264,26 +255,21 @@
 /*        Form  C := alpha*A*A' + beta*C. */
 
 	if (upper) {
-	    i__1 = *n;
 	    for (j = 1; j <= *n; ++j) {
 		if (*beta == 0.) {
-		    i__2 = j;
 		    for (i = 1; i <= j; ++i) {
 			C(i,j) = 0.;
 /* L90: */
 		    }
 		} else if (*beta != 1.) {
-		    i__2 = j;
 		    for (i = 1; i <= j; ++i) {
 			C(i,j) = *beta * C(i,j);
 /* L100: */
 		    }
 		}
-		i__2 = *k;
 		for (l = 1; l <= *k; ++l) {
 		    if (A(j,l) != 0.) {
 			temp = *alpha * A(j,l);
-			i__3 = j;
 			for (i = 1; i <= j; ++i) {
 			    C(i,j) += temp * A(i,l);
 /* L110: */
@@ -294,26 +280,21 @@
 /* L130: */
 	    }
 	} else {
-	    i__1 = *n;
 	    for (j = 1; j <= *n; ++j) {
 		if (*beta == 0.) {
-		    i__2 = *n;
 		    for (i = j; i <= *n; ++i) {
 			C(i,j) = 0.;
 /* L140: */
 		    }
 		} else if (*beta != 1.) {
-		    i__2 = *n;
 		    for (i = j; i <= *n; ++i) {
 			C(i,j) = *beta * C(i,j);
 /* L150: */
 		    }
 		}
-		i__2 = *k;
 		for (l = 1; l <= *k; ++l) {
 		    if (A(j,l) != 0.) {
 			temp = *alpha * A(j,l);
-			i__3 = *n;
 			for (i = j; i <= *n; ++i) {
 			    C(i,j) += temp * A(i,l);
 /* L160: */
@@ -329,12 +310,9 @@
 /*        Form  C := alpha*A'*A + beta*C. */
 
 	if (upper) {
-	    i__1 = *n;
 	    for (j = 1; j <= *n; ++j) {
-		i__2 = j;
 		for (i = 1; i <= j; ++i) {
 		    temp = 0.;
-		    i__3 = *k;
 		    for (l = 1; l <= *k; ++l) {
 			temp += A(l,i) * A(l,j);
 /* L190: */
@@ -349,12 +327,9 @@
 /* L210: */
 	    }
 	} else {
-	    i__1 = *n;
 	    for (j = 1; j <= *n; ++j) {
-		i__2 = *n;
 		for (i = j; i <= *n; ++i) {
 		    temp = 0.;
-		    i__3 = *k;
 		    for (l = 1; l <= *k; ++l) {
 			temp += A(l,i) * A(l,j);
 /* L220: */

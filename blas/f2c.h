@@ -31,7 +31,7 @@ typedef unsigned @F2C_LONGINT@ ulongint;	/* system-dependent */
 #define qbit_clear(a,b)	((a) & ~((ulongint)1 << (b)))
 #define qbit_set(a,b)	((a) |  ((ulongint)1 << (b)))
 #endif
-typedef long long int longint;
+/* typedef long long int longint; */ /* RDF: removed */
 
 #define TRUE_ (1)
 #define FALSE_ (0)

@@ -12,7 +12,7 @@
 
 
     /* System generated locals */
-    integer i__1, i__2;
+    integer i__2;
 
     /* Local variables */
     static integer i, m, nincx, mp1;
@@ -41,7 +41,6 @@
 /*        code for increment not equal to 1 */
 
     nincx = *n * *incx;
-    i__1 = nincx;
     i__2 = *incx;
     for (i = 1; *incx < 0 ? i >= nincx : i <= nincx; i += *incx) {
 	DX(i) = *da * DX(i);
