@@ -146,14 +146,15 @@ hypre_SetParCSRMatrixNumNonzeros( hypre_ParCSRMatrix *matrix)
    MPI_Comm comm = hypre_ParCSRMatrixComm(matrix);
    hypre_CSRMatrix *diag = hypre_ParCSRMatrixDiag(matrix);
    int *diag_i = hypre_CSRMatrixI(diag);
+   hypre_CSRMatrix *offd = hypre_ParCSRMatrixOffd(matrix);
+   int *offd_i = hypre_CSRMatrixI(offd);
    int local_num_rows = hypre_CSRMatrixNumRows(diag);
-   int num_procs, my_id;
-   total_num_nonzeros;
+   int total_num_nonzeros;
+   int local_num_nonzeros;
+   int ierr = 0;
 
-   MPI_Comm_size(comm, &num_procs);
-   MPI_Comm_rank(comm, &my_id);
-
-   MPI_Allreduce(&diag_i[local_num_rows], &total_num_nonzeros, 1, MPI_INT,
+   local_num_nonzeros = diag_i[local_num_rows] + offd_i[local_num_rows];
+   MPI_Allreduce(&local_num_nonzeros, &total_num_nonzeros, 1, MPI_INT,
 	MPI_SUM, comm);
    hypre_ParCSRMatrixNumNonzeros(matrix) = total_num_nonzeros;
    return ierr;
