@@ -304,7 +304,7 @@ main( int   argc,
        fprintf(file, "%d\n", stencil_size);
        for (i = 0; i < stencil_size; i++)
 	 {
-	   fprintf(file, "%d: %d %d %d\n", idummy,
+	   fprintf(file, "%d: %d %d %d\n", i,
 		  zzz_IndexX(stencil_shape[i]),
 		  zzz_IndexY(stencil_shape[i]),
 		  zzz_IndexZ(stencil_shape[i]));
