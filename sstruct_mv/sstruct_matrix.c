@@ -663,8 +663,8 @@ hypre_SStructUMatrixSetBoxValues( hypre_SStructMatrix *matrix,
       cols     = hypre_CTAlloc(int, nrows);
       ijvalues = hypre_CTAlloc(double, nrows);
 
-      sy = (hypre_IndexY(iupper) - hypre_IndexY(ilower));
-      sz = (hypre_IndexZ(iupper) - hypre_IndexZ(ilower)) * sy;
+      sy = (hypre_IndexX(iupper) - hypre_IndexX(ilower) + 1);
+      sz = (hypre_IndexY(iupper) - hypre_IndexY(ilower) + 1) * sy;
 
       map = hypre_SStructGridMap(grid, part, var);
       hypre_BoxMapIntersect(map, ilower, iupper, &map_entries, &nmap_entries);
@@ -726,9 +726,12 @@ hypre_SStructUMatrixSetBoxValues( hypre_SStructMatrix *matrix,
                hypre_IndexZ(index) -= hypre_IndexZ(offset);
                hypre_SStructMapEntryGetGlobalRank(map_entries[ii],
                                                   index, &row_base);
-               val_base = (hypre_IndexX(index) +
-                           hypre_IndexY(index)*sy +
-                           hypre_IndexZ(index)*sz) * e;
+               hypre_IndexX(index) -= hypre_IndexX(ilower);
+               hypre_IndexY(index) -= hypre_IndexY(ilower);
+               hypre_IndexZ(index) -= hypre_IndexZ(ilower);
+               val_base = e + (hypre_IndexX(index) +
+                               hypre_IndexY(index)*sy +
+                               hypre_IndexZ(index)*sz) * nentries;
 
                for (k = 0; k < hypre_BoxSizeZ(int_box); k++)
                {
@@ -739,7 +742,7 @@ hypre_SStructUMatrixSetBoxValues( hypre_SStructMatrix *matrix,
                         rows[nrows] = row_base + i*rs[0] + j*rs[1] + k*rs[2];
                         cols[nrows] = col_base + i*cs[0] + j*cs[1] + k*cs[2];
                         ijvalues[nrows] =
-                           values[val_base + (i + j*sy + k*sz)*e];
+                           values[val_base + (i + j*sy + k*sz)*nentries];
                         nrows++;
                      }
                   }
