@@ -124,9 +124,7 @@ systems that are solvable on a sequential computer, and dense systems are all
 better addressed by libraries designed specifically for them. 
 
 \item
-{\bf \hypre{} requires an installation of the Message Passing Interface (MPI).}
-Exception: will run 
-sequentially (for debugging) with an included "stub" version of MPI.
+To run in parallel, {\bf \hypre{} requires an installation of the Message Passing Interface (MPI).}
 
 \item
 {\bf Configuration of \hypre{} with threads
@@ -138,12 +136,15 @@ Only a small set of \hypre{} is compatible with threads at the current time.
 linking to those libraries.}
 
 \item
-{\bf \hypre{} is a project under construction.} Systems problems, SAMR interface,
-semi-structured interface, 
-AMGe, full object orientation, full multilanguage support, ESI not integrated
-yet, etc.
+{\bf \hypre{} is a project under construction.} Many things are planned
+for the future and will be incorporated as they are developed.
+This includes systems problems, interfaces for semi-structured grids
+such as those from structured refined meshes that occur in adaptive meshing,
+a preconditioner based on finite elements and algebraic multigrid,
+full object orientation, full multilanguage support, compliance
+with the emerging Equation Solver Interface, etc.
 
-\end{itemize''
+\end{itemize}
 
 
 
@@ -267,8 +268,8 @@ the system.
 \begin{enumerate}
 
 \item
-{\bf Choose a conceptual interface.} Generally, the choice is fairly obvious, as,
-say, a structured grid 
+{\bf Choose a conceptual interface.} Generally, the choice is fairly obvious.
+A structured grid 
 interface is clearly inappropriate from an unstructured grid application. It is
 desirable to use a more 
 specific interface if appropriate, e.g., the linear-algebraic interface is
@@ -290,7 +291,7 @@ single solver to make them easier to use.
 \item 
 {\bf Look up matrix requirements for each solver and preconditioner.} Each
 specific solver and 
-preconditioner ("Operator") has requirements from the input matrix. This 
+preconditioner has requirements from the input matrix. This 
 information is provided in several places (Developer's Guide, source comments,
 headers) in the form 
 of type information.
@@ -300,7 +301,8 @@ of type information.
 conceptual 
 interface.} This can be done by inspecting the documentation, or alternatively,
 by running a small 
-problem size, as compatibility is checked within \hypre{} at runtime and produces
+problem size.
+Compatibility is checked within \hypre{} at runtime and produces
 an error condition 
 (errors are discussed more fully later) if the types are found to be
 incompatible.
@@ -344,15 +346,15 @@ iterations is typically available, though it may differ from solver to solver.
 \end{enumerate}
 
 
-{\bf Note on capitalization:} We use \code{HYPRE} and \code{hypre }
-to divide \hypre{}'s function
-calls into two kinds: 
-those supported for users, and internal function calls. Expert users are
-welcome to dig into \hypre{} source 
-code and use internal function calls if they want to, but we make no promise
-that those functions are fully 
-supported or fully tested, nor that they will not change in future releases of
-\hypre{}. 
+%{\bf Note on capitalization:} We use \code{HYPRE} and \code{hypre }
+%to divide \hypre{}'s function
+%calls into two kinds: 
+%those supported for users, and internal function calls. Expert users are
+%welcome to dig into \hypre{} source 
+%code and use internal function calls if they want to, but we make no promise
+%that those functions are fully 
+%supported or fully tested, nor that they will not change in future releases of
+%\hypre{}. 
 
 \section{Bug Reporting}
 
