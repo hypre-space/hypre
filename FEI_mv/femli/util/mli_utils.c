@@ -51,7 +51,7 @@ int  MLI_Utils_IntTreeUpdate(int treeLeng, int *tree,int *treeInd);
  * destructor for hypre_ParCSRMatrix conforming to MLI requirements 
  *--------------------------------------------------------------------------*/
 
-int MLI_Utils_HypreParCSRMatrixGetDestroyFunc( MLI_Function *funcPtr )
+int MLI_Utils_HypreParCSRMatrixGetDestroyFunc(MLI_Function *funcPtr)
 {
    funcPtr->func_ = (int (*)(void *)) hypre_ParCSRMatrixDestroy;
    return 0;
@@ -1241,6 +1241,7 @@ int MLI_Utils_HypreMatrixReadIJAFormat(char *filename, MPI_Comm mpiComm,
          {
             printf("MLI_Utils_HypreMatrixReadIJAFormat ERROR : ");
             printf("file %s not found.\n", filename);
+            system("ls");
             exit(1);
          }
          fscanf( fp, "%d %d", &globalNRows, &globalNnz );
@@ -1523,6 +1524,85 @@ int MLI_Utils_HypreParMatrixReadIJAFormat(char *filename, MPI_Comm mpiComm,
 }
 
 /***************************************************************************
+ * read a matrix file in HB format (sequential)
+ *--------------------------------------------------------------------------*/
+ 
+int MLI_Utils_HypreMatrixReadHBFormat(char *filename, MPI_Comm mpiComm, 
+                                      void **Amat)
+{
+   int    *matIA, *matJA, *rowLengths, length, rowNum, startRow,*inds; 
+   int    irow, lineLeng=200, localNRows, localNCols, localNnz, ierr;
+   double *matAA, *vals;
+   char   line[200], junk[100];
+   FILE   *fp;
+   hypre_ParCSRMatrix *hypreA;
+   HYPRE_IJMatrix     IJmat;
+
+   fp = fopen(filename, "r");
+   if (fp == NULL)
+   {
+      printf("file not found.\n");
+      exit(1);
+   }
+   fgets(line, lineLeng, fp);
+   fgets(line, lineLeng, fp);
+   fgets(line, lineLeng, fp);
+   sscanf(line, "%s %d %d %d", junk, &localNRows, &localNCols, &localNnz );
+   printf("matrix info = %d %d %d", localNRows, localNCols, localNnz);
+   fgets(line, lineLeng, fp);
+/*
+   fgets(line, lineLeng, fp);
+*/
+   matIA = (int *) malloc((localNRows+1) * sizeof(int));
+   matJA = (int *) malloc(localNnz * sizeof(int));
+   matAA = (double *) malloc(localNnz * sizeof(double));
+   for (irow = 0; irow <= localNRows; irow++) fscanf(fp, "%d", &matIA[irow]);
+   for (irow = 0; irow < localNnz; irow++) fscanf(fp, "%d", &matJA[irow]);
+   for (irow = 0; irow < localNnz; irow++) fscanf(fp, "%lg", &matAA[irow]);
+   for (irow = 0; irow <= localNRows; irow++) matIA[irow]--;
+   for (irow = 0; irow < localNnz; irow++) matJA[irow]--;
+   if (matAA[0] < 0.0)
+      for (irow = 0; irow < localNnz; irow++) matAA[irow] = -matAA[irow];
+
+   fclose(fp);
+
+   startRow = 0;
+   rowLengths = (int *) malloc(localNRows * sizeof(int));
+   for ( irow = 0; irow < localNRows; irow++ )
+      rowLengths[irow] = matIA[irow+1] - matIA[irow];
+
+   ierr = HYPRE_IJMatrixCreate(mpiComm, startRow, startRow+localNRows-1,
+                               startRow, startRow+localNRows-1, &IJmat);
+   ierr = HYPRE_IJMatrixSetObjectType(IJmat, HYPRE_PARCSR);
+   assert(!ierr);
+   ierr = HYPRE_IJMatrixSetRowSizes(IJmat, rowLengths);
+   ierr = HYPRE_IJMatrixInitialize(IJmat);
+   assert(!ierr);
+   for (irow = 0; irow < localNRows; irow++)
+   {
+      length = rowLengths[irow];
+      rowNum = irow + startRow;
+      inds = &(matJA[matIA[irow]]);
+      vals = &(matAA[matIA[irow]]);
+      ierr = HYPRE_IJMatrixSetValues(IJmat, 1, &length,(const int *) &rowNum,
+                (const int *) inds, (const double *) vals);
+      assert( !ierr );
+   }
+   free(rowLengths);
+   free(matIA);
+   free(matJA);
+   free(matAA);
+
+   ierr = HYPRE_IJMatrixAssemble(IJmat);
+   assert( !ierr );
+   HYPRE_IJMatrixGetObject(IJmat, (void**) &hypreA);
+   HYPRE_IJMatrixSetObjectType(IJmat, -1);
+   HYPRE_IJMatrixDestroy(IJmat);
+   (*Amat) = (void *) hypreA;
+   return ierr;
+}
+
+/***************************************************************************
  * read a vector from a file 
  *--------------------------------------------------------------------------*/
  
@@ -1670,6 +1750,150 @@ int MLI_Utils_ParCSRMLISolve( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
 }
 
 /***************************************************************************
+ * constructor for m-Jacobi preconditioner
+ *--------------------------------------------------------------------------*/
+ 
+int MLI_Utils_mJacobiCreate(MPI_Comm comm, HYPRE_Solver *solver)
+{
+   HYPRE_MLI_mJacobi *jacobiPtr;
+
+   jacobiPtr = (HYPRE_MLI_mJacobi *) malloc(sizeof(HYPRE_MLI_mJacobi));
+
+   if (jacobiPtr == NULL) return 1;
+
+   jacobiPtr->comm_     = comm;
+   jacobiPtr->diagonal_ = NULL;
+   jacobiPtr->degree_   = 1;
+   jacobiPtr->hypreRes_ = NULL;
+
+   *solver = (HYPRE_Solver) jacobiPtr;
+   return 0;
+}
+
+/***************************************************************************
+ * destructor for m-Jacobi preconditioner
+ *--------------------------------------------------------------------------*/
+ 
+int MLI_Utils_mJacobiDestroy(HYPRE_Solver solver)
+{
+   HYPRE_MLI_mJacobi *jacobiPtr = (HYPRE_MLI_mJacobi *) solver;
+   if (jacobiPtr == NULL) return 1;
+   if (jacobiPtr->diagonal_ != NULL) free(jacobiPtr->diagonal_);
+   if (jacobiPtr->hypreRes_ != NULL) 
+      HYPRE_ParVectorDestroy(jacobiPtr->hypreRes_);
+   jacobiPtr->diagonal_ = NULL;
+   jacobiPtr->hypreRes_ = NULL;
+   return 0;
+}
+
+/***************************************************************************
+ * set polynomial degree
+ *--------------------------------------------------------------------------*/
+ 
+int MLI_Utils_mJacobiSetParams(HYPRE_Solver solver, int degree)
+{
+   HYPRE_MLI_mJacobi *jacobiPtr = (HYPRE_MLI_mJacobi *) solver;
+   if (jacobiPtr == NULL) return 1;
+   if (degree > 0) jacobiPtr->degree_ = degree;
+   return 0;
+}
+
+/***************************************************************************
+ * conform to the preconditioner set up from HYPRE
+ *--------------------------------------------------------------------------*/
+ 
+int MLI_Utils_mJacobiSetup(HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
+                           HYPRE_ParVector b, HYPRE_ParVector x)
+{
+   int    i, j, nrows, *AI, *AJ, gnrows, *partition, *newPartition, nprocs;
+   double *AData;
+   hypre_ParCSRMatrix *hypreA;
+   hypre_ParVector    *hypreX;
+   HYPRE_MLI_mJacobi  *jacobiPtr;
+
+   jacobiPtr = (HYPRE_MLI_mJacobi *) solver;
+   if (jacobiPtr == NULL) return 1;
+   if (jacobiPtr->diagonal_ != NULL) free(jacobiPtr->diagonal_);
+   hypreX = (hypre_ParVector *) x;
+   nrows = hypre_VectorSize(hypre_ParVectorLocalVector(hypreX));
+   jacobiPtr->diagonal_ = (double *) malloc(nrows * sizeof(double));
+   hypreA = (hypre_ParCSRMatrix *) A;
+   AI = hypre_CSRMatrixI(hypre_ParCSRMatrixDiag(hypreA));
+   AJ = hypre_CSRMatrixJ(hypre_ParCSRMatrixDiag(hypreA));
+   AData = hypre_CSRMatrixData(hypre_ParCSRMatrixDiag(hypreA));
+   for (i = 0; i < nrows; i++)
+   {
+      jacobiPtr->diagonal_[i] = 1.0;
+      for (j = AI[i]; j < AI[i+1]; j++)
+      {
+         if (AJ[j] == i && AData[j] != 0.0)
+         {
+            jacobiPtr->diagonal_[i] = AData[j];
+            break;
+         }
+      }
+      if (jacobiPtr->diagonal_[i] >= 0.0)
+      {
+         for (j = AI[i]; j < AI[i+1]; j++)
+            if (AJ[j] != i && AData[j] > 0.0)
+               jacobiPtr->diagonal_[i] += AData[j];
+      }
+      else
+      {
+         for (j = AI[i]; j < AI[i+1]; j++)
+            if (AJ[j] != i && AData[j] < 0.0)
+               jacobiPtr->diagonal_[i] += AData[j];
+      }
+      jacobiPtr->diagonal_[i] = 1.0 / jacobiPtr->diagonal_[i];
+   }
+   if (jacobiPtr->hypreRes_ != NULL) 
+      HYPRE_ParVectorDestroy(jacobiPtr->hypreRes_);
+   gnrows = hypre_ParVectorGlobalSize(hypreX);
+   partition = hypre_ParVectorPartitioning(hypreX);
+   MPI_Comm_size(jacobiPtr->comm_, &nprocs);
+   newPartition = (int *) malloc((nprocs+1) * sizeof(int));
+   for (i = 0; i <= nprocs; i++) newPartition[i] = partition[i];
+   HYPRE_ParVectorCreate(jacobiPtr->comm_, gnrows, newPartition, 
+                         &(jacobiPtr->hypreRes_));
+   HYPRE_ParVectorInitialize(jacobiPtr->hypreRes_);
+   return 0;
+}
+
+/***************************************************************************
+ * conform to the preconditioner apply from HYPRE
+ *--------------------------------------------------------------------------*/
+ 
+int MLI_Utils_mJacobiSolve(HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
+                           HYPRE_ParVector b, HYPRE_ParVector x)
+{
+   int                i, j, nrows;
+   double             *xData, *rData, omega=1;
+   HYPRE_ParVector    res;
+   hypre_ParVector    *hypreX, *hypreR;
+   HYPRE_MLI_mJacobi  *jacobiPtr;
+
+   jacobiPtr = (HYPRE_MLI_mJacobi *) solver;
+   if (jacobiPtr == NULL) return 1;
+   res = (HYPRE_ParVector) jacobiPtr->hypreRes_;
+   hypreX = (hypre_ParVector *) x;
+   hypreR = (hypre_ParVector *) res;
+   xData = hypre_VectorData(hypre_ParVectorLocalVector(hypreX));
+   rData = hypre_VectorData(hypre_ParVectorLocalVector(hypreR));
+   nrows = hypre_VectorSize(hypre_ParVectorLocalVector(hypreX));
+   HYPRE_ParVectorCopy(b, res);
+   for (j = 0; j < nrows; j++)
+      xData[j] = (rData[j] * jacobiPtr->diagonal_[j]);
+   for (i = 1; i < jacobiPtr->degree_; i++)
+   {
+      HYPRE_ParVectorCopy(b, res);
+      HYPRE_ParCSRMatrixMatvec(-1.0e0, A, x, 1.0, res);
+      for (j = 0; j < nrows; j++)
+         xData[j] += omega * (rData[j] * jacobiPtr->diagonal_[j]);
+   }
+   return 0;
+}
+
+/***************************************************************************
  * solve the system using HYPRE pcg
  *--------------------------------------------------------------------------*/
  
@@ -1722,29 +1946,55 @@ int MLI_Utils_HyprePCGSolve( CMLI *cmli, HYPRE_Matrix A,
  * solve the system using HYPRE gmres
  *--------------------------------------------------------------------------*/
  
-int MLI_Utils_HypreGMRESSolve( CMLI *cmli, HYPRE_Matrix A,
-                             HYPRE_Vector b, HYPRE_Vector x )
+int MLI_Utils_HypreGMRESSolve(void *precon, HYPRE_Matrix A,
+                              HYPRE_Vector b, HYPRE_Vector x, char *pname)
 {
-   int          numIterations, maxIter=500, mypid;
-   double       tol=1.0e-6, norm, setupTime, solveTime;
+   int          numIterations, maxIter=1000, mypid;
+   double       tol=1.0e-8, norm, setupTime, solveTime;
    MPI_Comm     mpiComm;
    HYPRE_Solver gmresSolver, gmresPrecond;
    HYPRE_ParCSRMatrix hypreA;
+   CMLI         *cmli;
 
    hypreA = (HYPRE_ParCSRMatrix) A;
-   MLI_SetMaxIterations( cmli, 1 );
-   HYPRE_ParCSRMatrixGetComm( hypreA , &mpiComm );
+   HYPRE_ParCSRMatrixGetComm(hypreA , &mpiComm);
    HYPRE_ParCSRGMRESCreate(mpiComm, &gmresSolver);
    HYPRE_GMRESSetMaxIter(gmresSolver, maxIter );
    HYPRE_GMRESSetTol(gmresSolver, tol);
    HYPRE_GMRESSetRelChange(gmresSolver, 0);
-   HYPRE_GMRESSetLogging(gmresSolver, 2);
-   HYPRE_ParCSRGMRESSetKDim(gmresSolver, 200);
-   gmresPrecond = (HYPRE_Solver) cmli;
-   HYPRE_GMRESSetPrecond(gmresSolver,
+   HYPRE_ParCSRGMRESSetPrintLevel(gmresSolver, 2);
+   HYPRE_ParCSRGMRESSetKDim(gmresSolver, 100);
+   if (!strcmp(pname, "mli"))
+   {
+      cmli = (CMLI *) precon;
+      MLI_SetMaxIterations(cmli, 1);
+      gmresPrecond = (HYPRE_Solver) cmli;
+      HYPRE_GMRESSetMaxIter(gmresSolver, maxIter);
+      HYPRE_GMRESSetPrecond(gmresSolver,
                        (HYPRE_PtrToSolverFcn) MLI_Utils_ParCSRMLISolve,
                        (HYPRE_PtrToSolverFcn) MLI_Utils_ParCSRMLISetup,
                        gmresPrecond);
+   }
+   else if (!strcmp(pname, "pJacobi"))
+   {
+      gmresPrecond = (HYPRE_Solver) precon;
+      HYPRE_GMRESSetMaxIter(gmresSolver, 10);
+      HYPRE_ParCSRGMRESSetPrintLevel(gmresSolver, 0);
+      HYPRE_GMRESSetPrecond(gmresSolver,
+                       (HYPRE_PtrToSolverFcn) MLI_Utils_mJacobiSolve,
+                       (HYPRE_PtrToSolverFcn) MLI_Utils_mJacobiSetup,
+                       gmresPrecond);
+   }
+   else if (!strcmp(pname, "mJacobi"))
+   {
+      gmresPrecond = (HYPRE_Solver) precon;
+      HYPRE_GMRESSetMaxIter(gmresSolver, 5); /* change this in amgcr too */
+      HYPRE_ParCSRGMRESSetPrintLevel(gmresSolver, 0);
+      HYPRE_GMRESSetPrecond(gmresSolver,
+                       (HYPRE_PtrToSolverFcn) MLI_Utils_mJacobiSolve,
+                       (HYPRE_PtrToSolverFcn) MLI_Utils_mJacobiSetup,
+                       gmresPrecond);
+   }
    setupTime = MLI_Utils_WTime();
    HYPRE_GMRESSetup(gmresSolver, A, b, x);
    solveTime = MLI_Utils_WTime();
@@ -1755,7 +2005,7 @@ int MLI_Utils_HypreGMRESSolve( CMLI *cmli, HYPRE_Matrix A,
    HYPRE_GMRESGetFinalRelativeResidualNorm(gmresSolver, &norm);
    HYPRE_ParCSRGMRESDestroy(gmresSolver);
    MPI_Comm_rank(mpiComm, &mypid);
-   if ( mypid == 0 )
+   if ( mypid == 0 && (!strcmp(pname, "mli")))
    {
       printf("\tGMRES Krylov dimension             = 200\n");
       printf("\tGMRES maximum iterations           = %d\n", maxIter);
@@ -1937,6 +2187,57 @@ int MLI_Utils_IntQSort2a(int *ilist, double *dlist, int left, int right)
    }
    MLI_Utils_IntQSort2a(ilist, dlist, left, last-1);
    MLI_Utils_IntQSort2a(ilist, dlist, last+1, right);
+   return 0;
+}
+
+/***************************************************************************
+ * quicksort on double and permute integers
+ *--------------------------------------------------------------------------*/
+
+int MLI_Utils_DbleQSort2a(double *dlist, int *ilist, int left, int right)
+{
+   int    i, last, mid, itemp;
+   double dtemp;
+
+   if (left >= right) return 0;
+   mid          = (left + right) / 2;
+   dtemp        = dlist[left];
+   dlist[left]  = dlist[mid];
+   dlist[mid]   = dtemp;
+   if ( ilist != NULL )
+   {
+      itemp       = ilist[left];
+      ilist[left] = ilist[mid];
+      ilist[mid]  = itemp;
+   }
+   last = left;
+   for (i = left+1; i <= right; i++)
+   {
+      if (dlist[i] < dlist[left])
+      {
+         last++;
+         dtemp        = dlist[last];
+         dlist[last]  = dlist[i];
+         dlist[i]     = dtemp;
+         if ( ilist != NULL )
+         {
+            itemp       = ilist[last];
+            ilist[last] = ilist[i];
+            ilist[i]    = itemp;
+         }
+      }
+   }
+   dtemp        = dlist[left];
+   dlist[left]  = dlist[last];
+   dlist[last]  = dtemp;
+   if ( ilist != NULL )
+   {
+      itemp       = ilist[left];
+      ilist[left] = ilist[last];
+      ilist[last] = itemp;
+   }
+   MLI_Utils_DbleQSort2a(dlist, ilist, left, last-1);
+   MLI_Utils_DbleQSort2a(dlist, ilist, last+1, right);
    return 0;
 }
 
