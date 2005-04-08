@@ -19,7 +19,7 @@ previous revisions of software, and track changes and releases.
 
 Some CVS commands you will use most often are:
 \begin{itemize}
-\item '\code{cvs checkout linear_solvers}' - checks out the most
+\item '\code{cvs checkout linear\_solvers}' - checks out the most
 recent version of the repository source into the current directory.
 \item '\code{cvs update}' - updates your working version, merging
 (or attempting to merge) your file changes with changes made (and
@@ -202,11 +202,12 @@ The term \hypre{} {\em release} refers to the collection of software
 and documentation distributed and supported for our users.  Only a
 subset of the repository is in the \hypre{} release at any point in
 time.  The files distributed in a release are defined via the Korn
-shell script \file{tools/mkdist} used to create releases.  Note that
-there will be times when pieces of software are distributed with the
-release, but are technically not yet {\em in} the release (i.e., they
-are not yet fully supported).  This is done to ease the process of
-migrating a code from a development stage to a production stage.
+shell script \file{tools/mkdist} used to create the tar file for that
+version.  Note that there will be times when pieces of software are 
+distributed with the release, but are technically not yet {\em in} 
+the release (i.e., they are not yet fully supported).  This is done 
+to ease the process of migrating a code from a development stage to 
+a production stage.
 
 The \hypre{} technical lead determines when new software is added to
 the release.  The following criteria must be met before a code is
@@ -224,23 +225,54 @@ supported platforms
 
 \end{enumerate}
 
+Two mailing list are available to inform users of new HYPRE general and beta
+releases being available.  Announcements about general releases made to the
+`hypre-announce' mailing list, and announcements about beta releases are made
+to the `hypre-beta-announce' list. Since the alpha releases are only done on
+the CASC platforms there is no mailing list for those releases.
+
+These mailing lists are handled through the LLNL Majordomo list server,
+Majordomo@lists.llnl.gov. To add yourself to a mailing list, send mail to
+<Majordomo@list.llnl.gov> with the following command in the body of the message:
+
+subscribe hypre-announce
+        or
+subscribe hypre-beta-announce
+
+
+%==============================
+\subsection{Release Numbers}
+\label{Release Numbers}
+
+By convention, a release (or version) number is of the form M.mm.rr.
+M is the major release number, mm the minor relase number and rr is an
+update number.  This number is used when creating a symbolic tag in the 
+repository to identify the release. 
+
+The release number will have an 'a' appended for an alpha release or a 'b'
+for a beta release.
+
+%==============================
+\subsection{Types of Releases}
+\label{Types of Releases}
+
 \noindent
 We currently have 3 flavors of releases:
 \begin{itemize}
-\item {\bf Version \#.\#.\#} - This is our {\em general release}.  These
+\item {\bf Version M.mm.rr} - This is our {\em general release}.  These
 releases occur infrequently and are available for download from the
 web.  Only bug fixes will be done to these releases (i.e., no new
 technology), indicated by an incremented 3rd digit in the version
 number.  A new CVS branch is created and tagged to allow bug fixes
 without introducing new technology.
 
-\item {\bf Version \#.\#.\#b} - These {\em beta releases} will occur somewhat
+\item {\bf Version M.mm.rrb} - These {\em beta releases} will occur somewhat
 frequently.  Bug fixes will only be available here from new releases,
 which may also include new technology.  Beta releases are not expected
 to be as stable as general releases.  The release is tagged, but a CVS
 branch is not created.
 
-\item {\bf Version \#.\#.\#a} - These {\em alpha releases} are essentially
+\item {\bf Version M.mm.rra} - These {\em alpha releases} are essentially
 the same as beta releases, and may occur very frequently.  They will
 primarily be used to quickly get new code to close collaborators.
 Alpha releases are not expected to be as stable as beta releases.
@@ -271,38 +303,3 @@ of the general release schedule (i.e., weeks 2 and 3) without first
 consulting with the \hypre{} software technical lead.  The idea is to
 use these two weeks to allow the code to ``settle'' a little as we do
 testing, etc.  Minor changes are encouraged, of course.
-
-%==========================================================================
-\subsection{Release Installations}
-\label{Release Installations}
-
-General and beta releases are installed on all supported LLNL platforms. While
-alpha releases are installed {\bf only} on the CASC cluster.  Each release is 
-configured and built with MPI (default) with and without debug enabled, no MPI
-with and without debug enabled and (where supported) threads with and without 
-debug enabled. Each library is archived in a subdirectory of the main installation
-directory based on the options used; see below for a list of the subdirectories.
-
-\noindent
-On LLNL supported platforms, the installation directory for a general
-release is \file{/usr/apps/hypre} and a beta release is \file{/usr/apps/hypre/beta}. 
-
-On the CASC cluster, the installation directory for a general release is
-\file{/usr/casc/hypre}, a beta release is \file{/usr/casc/hypre/beta} and
-an alpha release is \file{/usr/casc/hypre/alpha}.
-
-List of subdirectories:
-\begin{itemize}
-\item lib
-\item include
-\item debug/lib
-\item debug/include
-\item serial/lib
-\item serial/include
-\item serial/debug/lib
-\item serial/debug/include
-\item threaded/lib
-\item threaded/include
-\item threaded/debug/lib
-\item threaded/debug/include
-\end{itemize}

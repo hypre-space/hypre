@@ -1,140 +1,169 @@
 %==========================================================================
-\chapter{Installation}
-\label{Installation}
+\chapter{Creating and Installing a HYPRE Distribution}
+\label{Creating and Installing a HYPRE Distribution}
 
-The supported installation platforms (read pre-built \hypre{} releases)
-is a dynamic, evolving list of LC/ASCI machines, reflecting a cross
-section of the \hypre{} user community.
-There are three types of \hypre{} installations that are updated and
-maintained by members of the Scalable Linear Solvers project:
-\begin{enumerate}
+Making a HYPRE release available to the user community involves creating a
+distribution tar file, copying it to all the supported Livermore Computing
+(LC) platforms and installing the libraries on those platforms.  As LC adds 
+new machines, the latest HYPRE releases will be installed on those machines.
 
-\item The "alpha" installation (designated by an "a" in the version number):
-   \begin{itemize}
-   \item intended to give users access to relatively recent changes.
-   \item updated somewhat frequently.
-   \item may be relatively unstable.
-   \item three old installations are retained.
-   \item installed on:
-      \begin{itemize}
-      \item CASC Sun workstation cluster
-      \item CASC Linux workstation cluster
-      \end{itemize}
-   \end{itemize}
+General and beta releases are installed on all supported LC platforms. While
+alpha releases are installed {\bf only} on the CASC cluster.  Each release is 
+configured and built with several options and stored in a subdirectory of the 
+root directory as noted in this chart:
 
-\item The "beta" installation (designated by an "b" in the version number):
-   \begin{itemize}
-   \item intended to give users access to relatively recent changes.
-   \item intended to give users consistent access across several platforms.
-   \item may be relatively unstable.
-   \item three old installations are retained.
-   \item installed on:
-      \begin{itemize}
-       \item CASC Sun workstation cluster
-       \item CASC Linux workstation cluster
-       \item MCR Linux cluster
-       \item GPS Compaq cluster
-       \item Linux TeraCluster Compaq cluster
-       \item Blue-Pacific
-       \item Frost
-       \item SC cluster          (classified)
-       \item Blue(Sky)-Pacific   (classified)
-       \item White               (classified)
-       \item Adelie              (classified)
-       \item Q                   (classified)
-      \end{itemize}
-   \end{itemize}
+\begin{verbatim}
+     Option                   Subdirectory Lib and Include Paths
+MPI, no debug (default)         lib,                 include
+MPI, debug                      debug/lib,           debug/include
+No MPI, no debug                serial/lib,          serial/include
+No MPI, debug                   serial/debug/lib,    serial/debug/include
+OpenMP, no debug                threaded/lib,        threaded/include
+OpenMP, debug	                threaded/debug/lib,  threaded/debug/include
+\end{verbatim}
 
-\item The general release installation:
-   \begin{itemize}
-   \item intended to give users consistent access across several platforms.
-   \item updated less frequently than internal installation.
-   \item should be relatively stable.
-   \item three old installations are retained.
-   \item installed on:
-      \begin{itemize}
-       \item CASC Sun workstation cluster
-       \item CASC Linux workstation cluster
-       \item MCR Linux cluster
-       \item GPS Compaq cluster
-       \item Linux TeraCluster Compaq cluster
-       \item Blue-Pacific
-       \item Frost
-       \item SC cluster          (classified)
-       \item Blue(Sky)-Pacific   (classified)
-       \item White               (classified)
-       \item Adelie              (classified)
-       \item Q                   (classified)
-      \end{itemize}
-   \end{itemize}
 
-\end{enumerate}
-
-Two mailing list are available to inform users of the hypre
-linear solver library when new releases become available.
-Announcements about general releases made on the `hypre-announce'
-mailing list, and announcements about beta releases are made on the
-`hypre-beta-announce' list. 
-
-Subscriptions to either mailing list is handled throught the LLNL
-Majordomo list server, Majordomo@lists.llnl.gov.i To add yourself
-to a mailing list, send mail to <Majordomo@list.llnl.gov> with
-the following command in the body of the email message:
-
- subscribe hypre-announce
-
-or
-
- subscribe hypre-beta-announce
+(comment on mk* scripts and define in later section)
 
 %==========================================================================
-\section{Installation Procedures}
-\label{Installation Procedures}
+\section{Creating a Distribution Tar File}
+\label{Creating a Distribution Tar File}
 
-The installation is broken down into 2 parts: 
-  \begin{itemize}
-  \item building the distribution (tar file)
-  \item installation
-  \end{itemize}
-
-Build the \hypre{} distribution:
+The distribution tar file is created on a local CASC platform.  The following 
+steps detail the actions to be taken as well as provide a sample command as 
+appropriate.  Prior to executing these steps the release number will be assigned 
+by the project team. In the examples below, M-mm-rr is a place-holder for the 
+actual release number, which may or may not have an 'a' or 'b' appended; depending 
+on the type of release being created.
 
 \begin{enumerate}
+\item Go to a local directory
+\item Retrieve the latest version of \hypre{} from the CVS repository
+      results in a new directory named linear\_solvers which contains the source code
+\begin{verbatim}
+      Example: cvs checkout linear_solvers
+\end{verbatim}
+\item Move to the linear\_solvers directory
+\begin{verbatim}
+      Example: cd linear_solvers
+\end{verbatim}
+\item Move to the config directory
+\begin{verbatim}
+      Example: cd config
+\end{verbatim}
+\item Change the HYPRE\_version number, date and time in the \file{configure.in} file
+\begin{verbatim}
+      Example: vi configure.in
+               change numeric values following HYPRE_* in:
+                  m4_define(HYPRE_VERSION, 1.9.0b)
+                  m4_define(HYPRE_DATE, 2005/02/24)
+                  m4_define(HYPRE_TIME, 14:26:53)
+\end{verbatim}
+\item Move to the linear\_solvers directory
+\begin{verbatim}
+      Example: cd linear_solvers
+\end{verbatim}
+\item Run the \file{bootstrap} script to create a new \file{configure} script
+\begin{verbatim}
+      Example:./config/bootstrap
+\end{verbatim}
+\item Commit new \file{configure} and \file{configure.in} files to repository
+\begin{verbatim}
+      Example: cvs commit 
+\end{verbatim}
+\item Tag the repository with this release number
+\begin{verbatim}
+      Example: cvs rtag VM-mm-rr linear_solvers
+\end{verbatim}
+\item Create the distribution tar file by running the \file{mkdist} script,
+      located in the tools directory. Output is a new directory named \file{hypre-M.mm.rr}
+      and a compressed tar file named \file{hypre-M.mm.rr.tar.gz}
+\begin{verbatim}
+      Example: ./tools/mkdist VM-mm-rr
+\end{verbatim}
+\item Copy the tar file to /usr/casc/hypre on the local system
+\begin{verbatim}
+      Example: cp hypre-M.mm.rr.tar.gz /usr/casc/hypre
+\end{verbatim}
+\end{enumerate}
 
-   \item Set the version number in \file{configure.ac} by editing
-   the \kbd{m4\_define(HYPRE\_VERSION, 1.8.3b)} line, additionally the
-   \kbd{m4\_define(HYPRE\_DATE, 2004/02/14)} and,
-   \kbd{m4\_define(HYPRE\_TIME, 10:35:00)} lines can be updated as well.
-   The version number, by convention, use the following syntax `M.mm.rr'.
-   Where the `M' is the major release number, `mm' is the minor
-   relases number, and the `rr' an update number. Alpha, and Beta 
-   releases are denoted by the following sytanx `M.nn.rra' for 
-   alpha releases, and `M.nn.rrb' for appending beta releases. The version 
-   number is used for the name of the release creation and is used
-   in the tar file name and root directory for the distribution. The
-   \file{configure} file mst then be created by running the 
-   \kbd{config/boostrap} script, followed by a \kbd{cvs commit}.
+%==========================================================================
+\section{Installing a Distribution on the CASC Cluster}
+\label{Installing a Distribution on the CASC Cluster}
 
-   \item Create a symbolic tag for the current version
-   of the cvs repository. To create a general release enter:
-   \kbd{cvs rtag -b VM-nn-rr linear\_solvers}. Note that a
-   general release requires that a cvs rtag with branch option,
-   the alpha, and beta releases just use an rtag.
-   Version numbers are mapped into a valid rtag branch name by the
-   following conversion, `VM-nn-rr', note: the leading (capital)
-   `V' and the version number separated with `-' replacing
-   the `.'s. This convention will over come the strict cvs
-   tag name restrictions (e.g., begin with a letter, and no `.'s).
-   Alpha, and Beta releases are denoted by the following sytanx 
-   `VM-nn-rra' for alpha releases, and `VM-nn-rrb' for beta 
-   releases. An alpha or beta release do not make branches in 
-   the repository. For a beta release the command would be similar to: 
-   \kbd{cvs rtag VM-nn-rrb linear\_solvers}. Optionally, an rtag
-   can be made relative to a date or time. For example set the
-   rtag relative to last midnight enter:
-   \kbd{cvs rtag -D 0:0 VM-nn-rrb linear\_solvers}.
+On the CASC cluster the root directory for \hypre{} is \file{/usr/casc/hypre}.  The 
+subdirectory (which corresponds to SYS\_TYPE) is \file{i686-pc-linux-gnu}. The following
+procedure will build the library with its options and stored in the appropriate 
+directories.
 
-   \item The distribution is created with the \kbd{mkdist} 
+\begin{enumerate}
+\item Move to the /usr/casc/hypre directory
+\begin{verbatim}
+      Example: cd /usr/casc/hypre
+\end{verbatim}
+\item Create symbolic links to the tar file by running the \file{mkdistlinks} script
+\begin{verbatim}
+      Example: ./mkdistlinks hypre-M.mm.rr.tar.gz
+\end{verbatim}
+\item Move to the CASC cluster subdirectory; i686-pc-linux-gnu
+\begin{verbatim}
+      Example: cd i686-pc-linux-gnu
+\end{verbatim}
+\item Build and install the library by runnning the \file{mklibs} script; which is
+         located in the \file{/usr/casc/hypre} directory.
+      The arguments -g (general), -b (beta) or -a (alpha) indicate the type of 
+          release being generated.  If the install argument is included the 
+          symbolic links will be created automatically.
+\begin{verbatim}
+      Example: ../mklibs <-g | -b | -a> hypre-M.mm.rr.tar.gz <install>
+\end{verbatim}
+\end{enumerate}
+
+%==========================================================================
+\section{Installing a Distribution on LC Platforms}
+\label{Installing a Distribution on LC Platforms}
+
+On all of the supported LC platforms, the root directory for \hypre{} is 
+\file{/usr/gapps/hypre}.  Under the root are subdirectories for each class 
+of machines identified by the LC defined environment variable, SYS\_TYPE.
+The following table shows the SYS\_TYPE values for supported LC open (OCF) 
+and secure (SCF) platforms as of April 2005.
+
+\begin{verbatim}
+  SYS_TYPE                       OCF                          SCF
+aix_5_64                         ---                        tempest
+aix_5_ll                        frost                     white, ice
+aix_5_64_fed                   newberg                      uv, um
+tru64_5                          gps                          sc
+sles_9_ppc64                     bgl                          ---
+chaos_2_ia32                     ilx                          ace
+chaos_2_ia32_elan3        pengra, alc, mcr,             adelie, emperor,
+                             pvc, bigdev                  lilac, gviz
+chaos_2_ia32_elan4             thunder                        cub
+\end{verbatim}
+
+To relieve the user of needing to know the SYS\_TYPE on each platform, the path
+\file{/usr/apps/hypre} will be symbolically linked to the appropriate subdirectory
+on each platform by the development team.  
+
+%==========================================================================
+\subsection{Open Computing Facility (OCF) Platforms}
+\label{Open Computing Facility (OCF) Platforms}
+
+%==========================================================================
+\subsection{Secure Computing Facility (SCF) Platforms}
+\label{Secure Computing Facility (SCF) Platforms}
+
+
+%==========================================================================
+\section{Installation Scripts}
+\label{Installation Scripts}
+
+%==========================================================================
+\subsection{mkdist}
+\label{mkdist}
+
+   The distribution is created with the \kbd{mkdist} 
    Bourne-shell script located in the tools directory of the 
    \hypre{} repository.  Typing \kbd{mkdist -help} will give 
    general usage info. Enter: \kbd{mkdist VM-nn-rr}. This checks 
@@ -142,63 +171,16 @@ Build the \hypre{} distribution:
    reorganizes the file structure, build the documentation,
    and creates the distribution tar file \file{hypre-M.nn.rr.tar.gz}.
 
-\end{enumerate}
 
-Installing the \hypre{} distribution:
+%==========================================================================
+\subsection{mkdistlinks}
+\label{mkdistlinks}
 
-\begin{enumerate}
+%==========================================================================
+\subsection{mklibs}
+\label{mklibs}
 
-   \item Copy the tar file \file{hypre-M.nn.rr.tar.gz} to 
-   \file{/usr/gapps/hypre/} and, \file{/usr/casc/hypre/}.
-   Run the script \kbd{mkdistlinks} to create symbolic-links
-   between the tar file and the 
-   appropriate systems, and locations for the build. For non-CASC 
-   machines there are two install locations:
-      \begin{itemize}
-       \item \file{/usr/gapps/hypre/}\textit{canonical system name}
-       \item \file{/usr/casc/hypre/}\textit{canonical system name}
-      \end{itemize}
-   The \textit{canonical system name} is determined by 
-   \kbd{config.guess}. The appropriate directory is found using
-   the command:
-      \begin{itemize}
-       \item \file{/usr/gapps/hypre/`/usr/gapps/hypre/config.guess`}
-       \item \file{/usr/casc/hypre/`/usr/gapps/hypre/config.guess`}
-      \end{itemize}
-   However if the above name is insufficient to distinguish between
-   similar systems (e.g., AIX 5.1 runs on both Blue, and Frost. Both
-   are IBM SP, but Blue is 604e processor and Frost is Power3, capable
-   of running in 64-bit mode) then all bets are off. 
-   
-   The user's of \hypre{} needn't deal with these details for the 
-   Non-CASC systems, because the \file{/usr/apps/hypre} directory
-   will automatically be linked to the appropate hypre system 
-   installation. Through a \kbd{SYS\_TYPE} environment variable
-   Some mappings between the \file{/usr/gapps/hypre/} 
-   \textit{canonical system name} directory names, the
-   \kbd{SYS\_TYPE}, and the system  follow:
-\begin{enumerate}
-   \item \textit{canonical system name}  \kbd{SYS\_TYPE}   \kbd{System}
-   \begin{itemize}
-   \item  \file{alphaev67-dec-osf5.1}        tru64\_5sc           tc2k
-   \item  \file{alphaev68-dec-osf5.1}        tru64\_5             gps
-   \item  \file{i686-pc-linux-gnu}           redhat\_7a\_ia32      vivid,ilx
-   \item  \file{i686-pc-linux-gnu-pengra}    redhat\_7a\_ia32\_qsw  pengra
-   \item  \file{mips-sgi-irix6.5}            irix64              riptide
-   \item  \file{powerpc-ibm-aix5.1.0.0}      aix\_5               blue
-   \item  \file{powerpcll-ibm-aix5.1.0.0}    aix\_5\_ll            frost
-   \end{itemize}
-\end{enumerate}
-   see: 
-\htmladdnormallink{https://lc.llnl.gov/computing/techbulletins/bulletin258l.html}
-{https://lc.llnl.gov/computing/techbulletins/bulletin258l.html}
-
-   Copying the tar file on to an SCF machine requires going through
-   File Interchange System (FIS) see: 
-\htmladdnormallink{http://www-lc.llnl.gov:6336/dynaweb/LCdocs/fis/}
-{http://www-lc.llnl.gov:6336/dynaweb/LCdocs/fis/}
-
-   \item Run the Bourne-shell install script \kbd{mklibs} located in 
+   Run the Bourne-shell install script \kbd{mklibs} located in 
    the tools directory of the \hypre{} repository, a copy also
    exist at the root level of the hypre install directory. There are
    a couple specialized versions of \kbd{mklibs}, including:
@@ -254,7 +236,14 @@ Installing the \hypre{} distribution:
    \file{/usr/apps/hypre/alpha -> /usr/gapps/hypre/.../hypre-M.nn.rra}\linebreak
    Note: in general, alpha releases are only released on CASC systems.
 
-\end{enumerate}
+
+   
+
+   Copying the tar file on to an SCF machine requires going through
+   File Interchange System (FIS) see: 
+\htmladdnormallink{http://www-lc.llnl.gov:6336/dynaweb/LCdocs/fis/}
+{http://www-lc.llnl.gov:6336/dynaweb/LCdocs/fis/}
+
 
 %==========================================================================
 \section{Installation Example}
@@ -285,10 +274,6 @@ T 2001-08-24 20:26 +0000 treadway linear_solvers [V1-7-0a:A]
 \$ \textbf{cd linear\_solvers}\linebreak
 \$ \textbf{vi configure.ac}\linebreak
 \begin{verbatim}
- . . .
-m4_define(HYPRE_VERSION, 1.7.0a)
-m4_define(HYPRE_DATE, 2001/08/24)
-m4_define(HYPRE_TIME, 20:26:53)
  . . .
 \end{verbatim}
 \begin{bfseries}
