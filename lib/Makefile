@@ -514,7 +514,6 @@ STRUCTLSFILES = \
  smg_axpy.o\
  smg_relax.o\
  smg_residual.o\
- smg_residual_unrolled.o\
  smg_setup.o\
  smg_setup_interp.o\
  smg_setup_rap.o\
