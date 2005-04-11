@@ -73,7 +73,6 @@ FILES =\
  smg.c\
  smg_relax.c\
  smg_residual.c\
- smg_residual_unrolled.c\
  smg_setup.c\
  smg_setup_interp.c\
  smg_setup_rap.c\
