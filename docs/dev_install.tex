@@ -3,34 +3,106 @@
 \label{Creating and Installing a HYPRE Distribution}
 
 Making a HYPRE release available to the user community involves creating a
-distribution tar file, copying it to all the supported Livermore Computing
+distribution tar file, copying it to supported CASC and Livermore Computing
 (LC) platforms and installing the libraries on those platforms.  As LC adds 
 new machines, the latest HYPRE releases will be installed on those machines.
 
 General and beta releases are installed on all supported LC platforms. While
 alpha releases are installed {\bf only} on the CASC cluster.  Each release is 
-configured and built with several options and stored in a subdirectory of the 
-root directory as noted in this chart:
+configured and built with different options which results in the creation of 
+subdirectories as defined below:
+\begin{itemize}
+\item optimized -- stored in lib and include
+\item optimized and debug -- stored in debug/lib and debug/include
+
+\item serial -- stored in serial/lib and serial/include
+\item serial and debug -- stored in serial/debug/lib and serial/debug/include
+
+\item threads -- stored in threads/lib and threads/include
+\item threads and debug -- stored in threads/debug/lib and threads/debug/include
+\end{itemize}
+
+%==========================================================================
+\section{Scripts}
+\label{Scripts}
+
+There are three, currently Korn shell, scripts \file{mkdist}, \file{mkdistlinks}
+and \file{mklibs} that ease the task of building and installing \hypre{} on most 
+platforms.  These scripts reside in the \file{tools} subdirectory of the \hypre{} 
+repository or in the root directory on specific platforms.
+
+%==========================================================================
+\subsection{mkdist}
+\label{mkdist}
+
+The distribution tar file is created with the \file{mkdist} script.
 
 \begin{verbatim}
-     Option                   Subdirectory Lib and Include Paths
-MPI, no debug (default)         lib,                 include
-MPI, debug                      debug/lib,           debug/include
-No MPI, no debug                serial/lib,          serial/include
-No MPI, debug                   serial/debug/lib,    serial/debug/include
-OpenMP, no debug                threaded/lib,        threaded/include
-OpenMP, debug	                threaded/debug/lib,  threaded/debug/include
+Usage: ./mkdist [-help] | [-display] | VersionID
+       where:
+             -help       displays help message only
+             -display    reports the CVS rtag history
+             VersionID   release number
+                         syntax: M.mm.rr  -- general release
+                                 M.mm.rrb -- beta release
+                                 M.mm.rra -- alpha release
 \end{verbatim}
 
+\file{mkdist} extracts the requested version from the repository, reorganizes 
+the file structure, builds the documentation and creates the distribution tar 
+file named \file{hypre-M.nn.rr.tar.gz}.
 
-(comment on mk* scripts and define in later section)
+%==========================================================================
+\subsection{mkdistlinks}
+\label{mkdistlinks}
 
+\file{mkdistlinks} creates symbolic links from the \hypre{} distribution tar file
+to subdirectories that are defined within this script.  The directory list only
+needs to be updated when new classes of platforms are added.
+
+\begin{verbatim}
+Usage: ./mkdistlinks hypre-M.mm.rr.tar.gz
+       where:
+             hypre-M.mm.rr.tar.gz  distribution tar file created by mkdist
+\end{verbatim}
+
+%==========================================================================
+\subsection{mklibs}
+\label{mklibs}
+
+\file{mklibs} generates the various versions of the library (optimized, debug, serial,
+threaded) and stores them in the appropriate subdirectories. Optionally, it will 
+symbolically link to the \file{/usr/apps/hypre} directory.
+
+\begin{verbatim}
+Usage: ./mklibs [-help] | [-n] <-g | -b | -a> hypre-M.mm.rr.tar.gz [install]
+       where:
+             -help       displays help message only
+             -n          do not extract files from hypre-M.mm.rr.tar.gz
+             <-g|-b|-a>  release type -- MUST choose one
+                         -g for general release
+                         -b for beta release
+                         -a for alpha release
+             hypre-M.mm.rr.tar.gz  distribution tar file created by mkdist
+             install     create symbolic links
+\end{verbatim}
+
+\file{mklibs} untars the distribution, resulting in a new directory named 
+\file{hypre-M.mm.rr} which contains the \file{docs} and \file{src} subdirectories 
+as well as the CHANGELOG and other relevant files.
+
+There are two specialized versions of \file{mklibs}:
+\begin{itemize}
+\item \file{mklibs.aix}   creates 32 and 64 bit libraries on AIX pltforms
+\item \file{mklibs.babel} adds --with-babel to each of the installations
+\end{itemize}
+   
 %==========================================================================
 \section{Creating a Distribution Tar File}
 \label{Creating a Distribution Tar File}
 
 The distribution tar file is created on a local CASC platform.  The following 
-steps detail the actions to be taken as well as provide a sample command as 
+steps detail the actions to be taken as well as provide an example command as 
 appropriate.  Prior to executing these steps the release number will be assigned 
 by the project team. In the examples below, M-mm-rr is a place-holder for the 
 actual release number, which may or may not have an 'a' or 'b' appended; depending 
@@ -38,6 +110,9 @@ on the type of release being created.
 
 \begin{enumerate}
 \item Go to a local directory
+\begin{verbatim}
+      Example: cd /home/hill66
+\end{verbatim}
 \item Retrieve the latest version of \hypre{} from the CVS repository
       results in a new directory named linear\_solvers which contains the source code
 \begin{verbatim}
@@ -92,9 +167,8 @@ on the type of release being created.
 \label{Installing a Distribution on the CASC Cluster}
 
 On the CASC cluster the root directory for \hypre{} is \file{/usr/casc/hypre}.  The 
-subdirectory (which corresponds to SYS\_TYPE) is \file{i686-pc-linux-gnu}. The following
-procedure will build the library with its options and stored in the appropriate 
-directories.
+subdirectory is \file{i686-pc-linux-gnu}. The following procedure will build the 
+library with its options and stored in the appropriate directories.
 
 \begin{enumerate}
 \item Move to the /usr/casc/hypre directory
@@ -130,351 +204,269 @@ The following table shows the SYS\_TYPE values for supported LC open (OCF)
 and secure (SCF) platforms as of April 2005.
 
 \begin{verbatim}
-  SYS_TYPE                       OCF                          SCF
-aix_5_64                         ---                        tempest
-aix_5_ll                        frost                     white, ice
-aix_5_64_fed                   newberg                      uv, um
-tru64_5                          gps                          sc
-sles_9_ppc64                     bgl                          ---
-chaos_2_ia32                     ilx                          ace
-chaos_2_ia32_elan3        pengra, alc, mcr,             adelie, emperor,
-                             pvc, bigdev                  lilac, gviz
-chaos_2_ia32_elan4             thunder                        cub
+  SYS_TYPE                       OCF                    SCF
+aix_5_64                         ---                  tempest
+aix_5_ll                        frost               white, ice
+aix_5_64_fed                   newberg                 uv, um
+tru64_5                          gps                    sc
+sles_9_ppc64                     bgl                    ---
+chaos_2_ia32                     ilx                    ace
+chaos_2_ia32_elan3        pengra, alc, mcr,       adelie, emperor,
+                             pvc, bigdev            lilac, gviz
+chaos_2_ia32_elan4             thunder                  cub
 \end{verbatim}
 
 To relieve the user of needing to know the SYS\_TYPE on each platform, the path
 \file{/usr/apps/hypre} will be symbolically linked to the appropriate subdirectory
-on each platform by the development team.  
+on each platform by the development team.  The command to create the link is:
+\begin{verbatim}
+ln -s /usr/gapps/hypre/<SYS_TYPE> /usr/apps/hypre
+  where the actual value of SYS_TYPE is substituted for <SYS_TYPE>.
+\end{verbatim}
 
 %==========================================================================
 \subsection{Open Computing Facility (OCF) Platforms}
 \label{Open Computing Facility (OCF) Platforms}
 
+Before the \hypre{} library can be built on an OCF platform it needs to be 
+copied from the CASC cluster.  This can be done from any CASC cluster directory
+in which \file{hypre-M.mm.rr.tar.gz} exists by using the command (host is any OCF
+platform):
+\begin{verbatim}
+  scp hypre-M.mm.rr.tar.gz host:/usr/gapps/hypre
+\end{verbatim}
+
+When the distribution tar file has been successfully copied, create the symbolic
+links to the tar file. This only needs to be done once for all platforms.
+
+\begin{enumerate}
+\item Move to the \file{/usr/gapps/hypre} directory
+\begin{verbatim}
+      Example: cd /usr/gapps/hypre
+\end{verbatim}
+\item Create symbolic links to the tar file by running the \file{mkdistlinks} script
+\begin{verbatim}
+      Example: ./mkdistlinks hypre-M.mm.rr.tar.gz
+\end{verbatim}
+\end{enumerate}
+
+The procedure below MUST be repeated for each class of platforms on which \hypre{} is 
+to be installed. 
+
+\begin{enumerate}
+\item If not already in the \file{/usr/gapps/hypre} directory; move to it
+\begin{verbatim}
+      Example: cd /usr/gapps/hypre
+\end{verbatim}
+\item Move to the subdirectory for this platform, identified by SYS\_TYPE
+\begin{verbatim}
+      Example: cd chaos_2_ia32_elan3
+\end{verbatim}
+\item Build and install the library by runnning the \file{mklibs} script; which is
+         located in the \file{/usr/gapps/hypre} directory.
+      The arguments -g (general) or -b (beta) indicate the type of release being 
+          generated.  If the install argument is included, the symbolic links will 
+          be created automatically.
+\begin{verbatim}
+      Example: ../mklibs <-g | -b> hypre-M.mm.rr.tar.gz <install>
+\end{verbatim}
+\end{enumerate}
+
 %==========================================================================
 \subsection{Secure Computing Facility (SCF) Platforms}
 \label{Secure Computing Facility (SCF) Platforms}
 
+Before the \hypre{} library can be built on an SCF platform it needs to be 
+copied from an OCF platform.  This is done through the FIS utility by logging
+onto an OCF platform, running FTP to connect to FIS, sending the file to the SCF, 
+logging out of OCF and logging into an SCF platform after a few hours have elapsed.
+From an SCF platform again run FTP to extract the file from FIS and continue as
+described below.
+\begin{verbatim}
+      Example: On OCF: ftp fis
+                       cd TO
+                       put hypre-M.mm.rr.tar.gz
+                       quit
+\end{verbatim}
+
+\begin{verbatim}
+      Example: On SCF: ftp fis
+                       cd FROM
+                       get hypre-M.mm.rr.tar.gz
+                       quit
+\end{verbatim}
+
+When the distribution tar file has been successfully copied, create the symbolic
+links to the tar file. This only needs to be done once for all platforms.
+
+\begin{enumerate}
+\item Move to the \file{/usr/gapps/hypre} directory
+\begin{verbatim}
+      Example: cd /usr/gapps/hypre
+\end{verbatim}
+\item Create symbolic links to the tar file by running the \file{mkdistlinks} script
+\begin{verbatim}
+      Example: ./mkdistlinks hypre-M.mm.rr.tar.gz
+\end{verbatim}
+\end{enumerate}
+
+The procedure below MUST be repeated for each class of platforms on which \hypre{} is 
+to be installed. 
+
+\begin{enumerate}
+\item If not already in the \file{/usr/gapps/hypre} directory; move to it
+\begin{verbatim}
+      Example: cd /usr/gapps/hypre
+\end{verbatim}
+\item Move to the subdirectory for this platform, identified by SYS\_TYPE
+\begin{verbatim}
+      Example: cd chaos_2_ia32_elan3
+\end{verbatim}
+\item Build and install the library by runnning the \file{mklibs} script; which is
+         located in the \file{/usr/gapps/hypre} directory.
+      The arguments -g (general) or -b (beta) indicate the type of release being 
+          generated.  If the install argument is included, the symbolic links will 
+          be created automatically.
+\begin{verbatim}
+      Example: ../mklibs <-g | -b> hypre-M.mm.rr.tar.gz <install>
+\end{verbatim}
+\end{enumerate}
 
 %==========================================================================
-\section{Installation Scripts}
-\label{Installation Scripts}
+\section{Example of Creating and Installing a Beta Release}
+\label{Example of Creating and Installing a Beta Release}
 
-%==========================================================================
-\subsection{mkdist}
-\label{mkdist}
+In the example, the version number, machine names and user names are for illustration 
+purposes only; the specific values may differ. Each step is separated by a blank line.
+Output from some steps is shown in abbreviated form immediately below the command.
 
-   The distribution is created with the \kbd{mkdist} 
-   Bourne-shell script located in the tools directory of the 
-   \hypre{} repository.  Typing \kbd{mkdist -help} will give 
-   general usage info. Enter: \kbd{mkdist VM-nn-rr}. This checks 
-   out the rtag version (step 2 above) from the repository,
-   reorganizes the file structure, build the documentation,
-   and creates the distribution tar file \file{hypre-M.nn.rr.tar.gz}.
+On a local CASC platform:
+\begin{verbatim}
+ 1.  cd /home/hill66
 
+ 2.  cvs checkout linear_solvers
+     U linear_solvers/CHANGELOG
+     U linear_solvers/COPYRIGHT_and_DISCLAIMER
+             . . .
+     U linear_solvers/utilities/utilities.h
+     U linear_solvers/utilities/version
 
-%==========================================================================
-\subsection{mkdistlinks}
-\label{mkdistlinks}
+ 3.  cd linear_solvers/config
 
-%==========================================================================
-\subsection{mklibs}
-\label{mklibs}
+ 4.  vi configure.in
+         <change values in m4_define(HYPRE_*) statements>
+     quit
 
-   Run the Bourne-shell install script \kbd{mklibs} located in 
-   the tools directory of the \hypre{} repository, a copy also
-   exist at the root level of the hypre install directory. There are
-   a couple specialized versions of \kbd{mklibs}, including:
-   \kbd{mklibs.aix}, which creates combined 32, and 64 bit
-   libraries, and \kbd{mklibs.babel} which adds --with-babel to
-   each of the installations. Typing
-   \kbd{mklibs -help} will provide usage information. Executing
-   \kbd{mklibs} will untar the distribution, and build the hypre 
-   libraries. The untaring of the distribution, creates a directory
-   \file{hypre-M.nn.rr} which contains the following subdirectories:
-      \begin{itemize}
-       \item \file{bin}     contains hypre utilities
-       \item \file{docs}    PostScript, PDF, and HTML documentation
-       \item \file{src}     source code
-      \end{itemize}
-   The build process will create these directories:
-      \begin{itemize}
-       \item \file{debug}   debug compiled lib, and include subdirectories
-       \item \file{include} include files
-       \item \file{lib}     optimized compiled libraries
-       \item \file{serial}  no parallel/serial compiled libraries
-       \item \file{share}   the Babel SIDL file
-       \item \file{threads} OpenMP compiled libraries
-      \end{itemize}
-   At a minimum an optimized and a debugged version of the library will
-   be generated. Optionally, OpenMP versions of the libraries will
-   be built and installed in a \file{threads}, and \file{threads/debug}
-   directory, assuming the target system supports OpenMP. The
-   user's will see this located at: \file{/usr/apps/hypre/hypre-M.nn.rr}.
-   \kbd{mklibs} script has an optional third argument \kbd{install} which 
-   will symbolically link the distribution to the `common' user
-   accessable directories, depending on the installion type
-   specified. Typical command to build a general distribution:\linebreak
-   \kbd{mklibs -g hypre-M.nn.rr.tar.gz install}\linebreak
-   The results of this build would create the following links:\linebreak
-   \file{/usr/apps/hypre/bin -> /usr/gapps/hypre/.../hypre-M.nn.rr/bin}\linebreak
-   \file{/usr/apps/hypre/debug -> /usr/gapps/hypre/.../hypre-M.nn.rr/debug}\linebreak
-   \file{/usr/apps/hypre/docs -> /usr/gapps/hypre/.../hypre-M.nn.rr/docs}\linebreak
-   \file{/usr/apps/hypre/include -> /usr/gapps/hypre/.../hypre-M.nn.rr/include}\linebreak
-   \file{/usr/apps/hypre/lib -> /usr/gapps/hypre/.../hypre-M.nn.rr/lib}\linebreak
-   \file{/usr/apps/hypre/src -> /usr/gapps/hypre/.../hypre-M.nn.rr/src}\linebreak
-   \file{/usr/apps/hypre/threads -> /usr/gapps/hypre/.../hypre-M.nn.rr/threads}\linebreak
-   \file{/usr/apps/hypre/alpha -> /usr/gapps/hypre/.../hypre-M.nn.rr}\linebreak
-   \file{/usr/apps/hypre/beta -> /usr/gapps/hypre/.../hypre-M.nn.rr}\linebreak
-   A beta install command of:\linebreak
-   \kbd{mklibs -b hypre-M.nn.rrb.tar.gz install}\linebreak
-   Would create the following links:\linebreak
-   \file{/usr/apps/hypre/alpha -> /usr/gapps/hypre/.../hypre-M.nn.rrb}\linebreak
-   \file{/usr/apps/hypre/beta -> /usr/gapps/hypre/.../hypre-M.nn.rrb}\linebreak
-   An alpha type install command of:\linebreak
-   \kbd{mklibs -a hypre-M.nn.rra.tar.gz install}\linebreak
-   Would create the following links:\linebreak
-   \file{/usr/apps/hypre/alpha -> /usr/gapps/hypre/.../hypre-M.nn.rra}\linebreak
-   Note: in general, alpha releases are only released on CASC systems.
+ 5.  ./config/bootstrap
 
+ 6.  cvs commit
+     Update configure files for release 1.90b
 
-   
+ 7.  cvs rtag V1-9-0b linear_solvers
 
-   Copying the tar file on to an SCF machine requires going through
-   File Interchange System (FIS) see: 
-\htmladdnormallink{http://www-lc.llnl.gov:6336/dynaweb/LCdocs/fis/}
-{http://www-lc.llnl.gov:6336/dynaweb/LCdocs/fis/}
+ 8.  ./tools/mkdist V1-9-0b
+     U linear_solvers/CHANGELOG
+     U linear_solvers/COPYRIGHT_and_DISCLAIMER
+              . . .
+     U linear_solvers/utilities/utilities.h
+     U linear_solvers/utilities/version
+     checking the hostname... tux149
+     checking the architecture... linux
+              . . .
+     creating hypre-1.9.0b.tar file ...
 
+ 9.  cp hypre-1.9.0b.tar.gz /usr/casc/hypre
 
-%==========================================================================
-\section{Installation Example}
-\label{Installation Example}
+10.  cd /usr/casc/hypre
 
-The following is an example session creating a beta distribution:
-\begin{ttfamily}
-\begin{mdseries}
-\linebreak
-\$ \textbf{pwd}\linebreak
-/home/hypre\linebreak
-\$ \textbf{cvs checkout linear\_solvers}\linebreak
-\begin{verbatim}
-U linear_solvers/CHANGELOG
-U linear_solvers/COPYRIGHT_and_DISCLAIMER
- . . .
-U linear_solvers/utilities/utilities.h
-U linear_solvers/utilities/version
-\end{verbatim}
-\$ \textbf{cvs history -T}\linebreak
-\begin{verbatim}
-T 2000-10-12 20:27 +0000 treadway linear_solvers [V1-3-1b:A]
-T 2001-01-11 20:58 +0000 treadway linear_solvers [V1-4-0b:A]
- . . .
-T 2001-07-27 16:57 +0000 treadway linear_solvers [V1-6-0:A]
-T 2001-08-24 20:26 +0000 treadway linear_solvers [V1-7-0a:A]
-\end{verbatim}
-\$ \textbf{cd linear\_solvers}\linebreak
-\$ \textbf{vi configure.ac}\linebreak
-\begin{verbatim}
- . . .
-\end{verbatim}
-\begin{bfseries}
-\begin{verbatim}
-m4_define(HYPRE_VERSION, 1.7.0b)
-m4_define(HYPRE_DATE, 2001/11/13)
-m4_define(HYPRE_TIME, 07:25:23)
-\end{verbatim}
-\end{bfseries}
-"configure.ac" 423 lines, 13216 characters\linebreak
-\$ \textbf{config/bootstrap}
-\begin{verbatim}
-Putting files in AC_CONFIG_AUX_DIR, `config'.
-\end{verbatim}
-\$ \textbf{cvs commit configure.ac configure}\linebreak
-\textbf{beta release 1.7.0b}\linebreak
-\begin{verbatim}
-Release 1.7.0b
-CVS: ----------------------------------------------------------------------
-CVS: Enter Log.  Lines beginning with `CVS:' are removed automatically
-CVS:
-CVS: Modified Files:
-CVS:   configure.ac configure
-CVS: ----------------------------------------------------------------------
-~
-""/tmp/cvsAAABga42v" 9 lines, 345 characters
-Checking in linear_solvers/configure.ac;
-/home/casc/repository/linear_solvers/configure.ac,v  <--  configure.ac
-new revision: 2.34; previous revision: 2.33
-done
-Checking in configure;
-/home/casc/repository/linear_solvers/configure,v  <--  configure
-new revision: 2.107; previous revision: 2.106
-done
-\end{verbatim}
-:q
-\$ \textbf{cvs rtag V1-7-0b linear\_solvers}\linebreak
-\$ \textbf{./mkdist V1-7-0b}\linebreak
-\begin{verbatim}
-U linear_solvers/CHANGELOG
-U linear_solvers/COPYRIGHT_and_DISCLAIMER
- . . .
-U linear_solvers/utilities/utilities.h
-U linear_solvers/utilities/version
-checking the hostname... perrin
-checking the architecture... solaris
- . . .
-creating hypre-1.7.0b.tar file ...
-\end{verbatim}
-\$ \textbf{ls -l hypre-1.7*}\linebreak
-\begin{verbatim}
--rw-rw-r--   1 treadway treadway 1532225 Nov 13 07:32 hypre-1.7.0b.tar.gz
+11.  ./mkdistlinks hypre-1.9.0b.tar.gz
+     lrwxrwxrwx   1 hil66 hypre  22 Apr 13 07:32 alphaev68-dec-osf5.1/hypre-1.9.0b.tar.gz -> ../hypre-1.9.0b.tar.gz
+     lrwxrwxrwx   1 hil66 hypre  22 Apr 13 07:32 i686-pc-linux-gnu/hypre-1.9.0b.tar.gz -> ../hypre-1.9.0b.tar.gz
+     lrwxrwxrwx   1 hil66 hypre  22 Apr 13 07:32 powerpc-ibm-aix5.2.0.0/hypre-1.9.0b.tar.gz -> ../hypre-1.9.0b.tar.gz
+     lrwxrwxrwx   1 hil66 hypre  22 Apr 13 07:32 chaos_2_ia32_elan3/hypre-1.9.0b.tar.gz -> ../hypre-1.9.0b.tar.gz
 
-hypre-1.7.0b:
-total 20
--rw-rw----   1 treadway treadway    4384 Nov 13 07:32 CHANGELOG
--rw-rw----   1 treadway treadway    1645 Nov 13 07:32 COPYRIGHT_and_DISCLAIMER
-drwxrwxr-x   2 treadway treadway     512 Nov 13 07:32 bin
-drwxrwxr-x   4 treadway treadway     512 Nov 13 07:32 docs
-drwxrwxr-x  27 treadway treadway    1024 Nov 13 07:32 src
-\end{verbatim}
-\$ \textbf{hypre-1.7.0b/src/utilities/version -number}\linebreak
-1.7.0b\linebreak
-\$ \textbf{scp hypre-1.7.0b.tar.gz blue:/usr/gapps/hypre}\linebreak
-\$ \textbf{scp hypre-1.7.0b.tar.gz blue:/usr/casc/hypre}\linebreak
-\$ \textbf{ftp fis}\linebreak
-\begin{verbatim}
-Connected to fis.llnl.gov.
-220-                       NOTICE TO USERS
-220-This is a Federal computer system and is the property of the
- . . .
-220 reebok.llnl.gov FTP server (Version LLNL-22 built 08/13/01 07:32:54) ready.
-Name (fis:treadway):
-331 Password required for treadway.
-Password:
-230 User treadway logged in.
-\end{verbatim}
-ftp> \textbf{cd TO}\linebreak
-250 CWD command successful.\linebreak
-ftp> \textbf{binary}\linebreak
-200 Type set to I.\linebreak
-ftp> \textbf{put hypre-1.7.0b.tar.gz}\linebreak
-200 PORT command successful.\linebreak
-150 Opening BINARY mode data connection for hypre-1.7.0b.tar.gz.\linebreak
-226 Transfer complete.\linebreak
-local: hypre-1.7.0b.tar.gz remote: hypre-1.7.0b.tar.gz\linebreak
-1663281 bytes sent in 0.49 seconds (3342.89 Kbytes/s)\linebreak
-ftp> \textbf{quit}\linebreak
-221 Goodbye.\linebreak
-\$ \textbf{ssh blue}\linebreak
- . . .\linebreak
-\$ \textbf{cd /usr/gapps/hypre}\linebreak
-\$ \textbf{ls}\linebreak
-\begin{verbatim}
-aix_4                        hypre-1.7.0a.tar.gz
-aix_4ll                      i686-pc-linux-gnu
-aix_5                        i686-pc-linux-gnu-chaos
-aix_5_ll                     i686-pc-linux-gnu-pengra
-alphaev56-dec-osf4.0f        i686-pc-linux-gnu-vivid
-alphaev56-dec-osf5.1         irix64
-alphaev67-dec-osf5.0         irix_6.5_64
-alphaev67-dec-osf5.1         mips-sgi-irix6.5
-alphaev67-unknown-linux-gnu  mkdirlinks
-alphaev68-dec-osf5.1         mkdistlinks
-chaos_2_ia32                 mklibs
-config.guess                 mklibs.aix
-config.sub                   mklibs.babel
-env.blue                     mklibs.tc2k
-env.linux                    powerpc-ibm-aix4.3.3.0
-hypre-1.2.0.tar.gz           powerpc-ibm-aix5.1.0.0
-hypre-1.3.1b.tar.gz          powerpcll-ibm-aix4.3.3.0
-hypre-1.4.0b.tar.gz          powerpcll-ibm-aix5.1.0.0
-hypre-1.5.0b.tar.gz          redhat_7_ia32
-hypre-1.6.0.tar.gz           tru64_5sc
-\end{verbatim}
-\$ \textbf{./mkdistlinks hypre-1.7.0b.tar.gz}\linebreak
-\begin{verbatim}
-lrwxrwxrwx   1 treadway hypre  22 Nov 13 07:32 alphaev67-dec-osf5.1/hypre-1.7.0b.tar.gz -> ../hypre-1.7.0b.tar.gz
-lrwxrwxrwx   1 treadway hypre  22 Nov 13 07:32 alphaev67-unknown-linux-gnu/hypre-1.7.0b.tar.gz -> ../hypre-1.7.0b.tar.gz
-lrwxrwxrwx   1 treadway hypre  22 Nov 13 07:32 alphaev68-dec-osf5.1/hypre-1.7.0b.tar.gz -> ../hypre-1.7.0b.tar.gz
-lrwxrwxrwx   1 treadway hypre  22 Nov 13 07:32 i686-pc-linux-gnu/hypre-1.7.0b.tar.gz -> ../hypre-1.7.0b.tar.gz
-lrwxrwxrwx   1 treadway hypre  22 Nov 13 07:32 i686-pc-linux-gnu-pengra/hypre-1.7.0b.tar.gz -> ../hypre-1.7.0b.tar.gz
-lrwxrwxrwx   1 treadway hypre  22 Nov 13 07:32 mips-sgi-irix6.5/hypre-1.7.0b.tar.gz -> ../hypre-1.7.0b.tar.gz
-lrwxrwxrwx   1 treadway hypre  22 Nov 13 07:32 powerpc-ibm-aix5.1.0.0/hypre-1.7.0b.tar.gz -> ../hypre-1.7.0b.tar.gz
-lrwxrwxrwx   1 treadway hypre  22 Nov 13 07:32 powerpcll-ibm-aix5.1.0.0/hypre-1.7.0b.tar.gz -> ../hypre-1.7.0b.tar.gz
-\end{verbatim}
-\$ \textbf{cd `/usr/gapps/hypre/config.guess`}\linebreak
-\$ \textbf{ls}\linebreak
-\begin{verbatim}
-AUTOTEST             hypre-1.2.0.tar.gz   hypre-1.7.0a
-STLport-4.0          hypre-1.3.1b         hypre-1.7.0a.tar.gz
-alpha                hypre-1.4.0b         hypre-1.7.0b.tar.gz
-beta                 hypre-1.4.0b.tar.gz  include
-bin                  hypre-1.5.0b         lib
-debug                hypre-1.5.0b.tar.gz  src
-docs                 hypre-1.6.0          threads
-hypre-1.2.0          hypre-1.6.0.tar.gz
-\end{verbatim}
-\$ \textbf{../mklibs -b hypre-1.7.0b.tar.gz}\linebreak
-\begin{verbatim}
-checking the hostname... blue
-checking the architecture... aix
- . . .
-Very-cleaning FEI_mv ...
-Very-cleaning test ...
-\end{verbatim}
-\$ \textbf{ls}\linebreak
-\begin{verbatim}
-AUTOTEST             hypre-1.2.0.tar.gz   hypre-1.7.0a
-STLport-4.0          hypre-1.3.1b         hypre-1.7.0a.tar.gz
-alpha                hypre-1.4.0b         hypre-1.7.0b
-beta                 hypre-1.4.0b.tar.gz  hypre-1.7.0b.tar.gz
-bin                  hypre-1.5.0b         include
-debug                hypre-1.5.0b.tar.gz  lib
-docs                 hypre-1.6.0          src
-hypre-1.2.0          hypre-1.6.0.tar.gz   threads
-\end{verbatim}
-\$ \textbf{ls hypre-1.7.0b}\linebreak
-\begin{verbatim}
-CHANGELOG                 debug                     src
-COPYRIGHT_and_DISCLAIMER  docs                      threads
-README                    include
-bin                       lib
-\end{verbatim}
-\$ \textbf{ls beta/lib}\linebreak
-libHYPRE\_DistributedMatrix.a\linebreak
-libHYPRE\_DistributedMatrixPilutSolver.a\linebreak
-libHYPRE\_Euclid.a\linebreak
-libHYPRE\_FEI.a\linebreak
-libHYPRE\_IJ\_mv.a\linebreak
-libHYPRE\_LSI.a\linebreak
-libHYPRE\_MatrixMatrix.a\linebreak
-libHYPRE\_ParaSails.a\linebreak
-libHYPRE\_blas.a\linebreak
-libHYPRE\_parcsr\_ls.a\linebreak
-libHYPRE\_parcsr\_mv.a\linebreak
-libHYPRE\_seq\_mv.a\linebreak
-libHYPRE\_sstruct\_ls.a\linebreak
-libHYPRE\_sstruct\_mv.a\linebreak
-libHYPRE\_struct\_ls.a\linebreak
-libHYPRE\_struct\_mv.a\linebreak
-libHYPRE\_superlu.a\linebreak
-libHYPRE\_utilities.a\linebreak
-libkrylov.a\linebreak
-\$ \linebreak
-\end{mdseries}
-\end{ttfamily}
+12.  cd i686-pc-linux-gnu
 
-Variations of mklib and use include:
-\begin{bfseries}
-\begin{verbatim}
-Name          Purpose
-mklibs        does default, debug, serial, and opt. threaded
-mklibs.aix    build 32 and 64 bit libraries on white & frost
-mklibs.babel  does the default plus builds babel libraries
-mklibs.tc2k   build for tc2k
-
-Name          Supported host
-mklibs        riptide, gps, sc, Q
-mklibs.aix    frost and white
-mklibs.babel  Solaris, Linux, blue, SKY (AIX<Power 3)
-mklibs.tc2k   tc2k
+13.  ../mklibs -b hypre-1.9.0b.tar.gz install
+     checking the hostname... blue
+     checking the architecture... aix
+             . . .
+     Cleaning FEI_mv ...
+     Cleaning test ...
 \end{verbatim}
-\end{bfseries}
+The build and installation is now complete on the CASC cluster.
+
+Next copy the tar file to an OCF platform (mcr in this example).
+\begin{verbatim}
+
+14.  scp hypre-1.9.0b.tar.gz mcr:/usr/gapps/hypre
+
+\end{verbatim}
+
+Now log off the CASC cluster and into an OCF platform (mcr in this example) to build and 
+install \hypre{}.
+\begin{verbatim}
+15.  ssh mcr
+16.  cd /usr/gapps/hypre
+
+17.  ./mkdistlinks hypre-1.9.0b.tar.gz
+     lrwxrwxrwx   1 hil66 hypre  22 Apr 13 07:32 alphaev68-dec-osf5.1/hypre-1.9.0b.tar.gz -> ../hypre-1.9.0b.tar.gz
+     lrwxrwxrwx   1 hil66 hypre  22 Apr 13 07:32 powerpc-ibm-aix5.2.0.0/hypre-1.9.0b.tar.gz -> ../hypre-1.9.0b.tar.gz
+     lrwxrwxrwx   1 hil66 hypre  22 Apr 13 07:32 chaos_2_ia32_elan3/hypre-1.9.0b.tar.gz -> ../hypre-1.9.0b.tar.gz
+
+18.  cd chaos_2_ia32_elan3
+
+19.  ../mklibs -b hypre-1.9.0b.tar.gz install
+     checking the hostname... blue
+     checking the architecture... aix
+             . . .
+     Cleaning FEI_mv ...
+     Cleaning test ...
+\end{verbatim}
+The build and installation is now complete on one OCF class of machines. For each of the
+remaining classes of OCF platforms, log-in, cd to /usr/apps/hypre/<SYS\_TYPE> and repeat
+step 19.
+
+Next copy the tar file to an SCF platform (adelie in this example).
+\begin{verbatim}
+20.  ftp fis
+       . . . 
+     cd TO
+     put hypre-1.9.0b.tar.gz
+     quit
+\end{verbatim}
+
+Now log off the OCF platform and into an SCF platform (adelie in this example) to retrieve
+the tar file.
+\begin{verbatim}
+21.  ssh adelie
+
+22.  ftp fis
+       . . . 
+     cd FROM
+     get hypre-1.9.0b.tar.gz
+     quit
+\end{verbatim}
+
+Now build and install \hypre{} on the SCF platform (adelie in this example).
+\begin{verbatim}
+
+23.  cd /usr/gapps/hypre
+
+24.  ./mkdistlinks hypre-1.9.0b.tar.gz
+     lrwxrwxrwx   1 hil66 hypre  22 Apr 13 07:32 alphaev68-dec-osf5.1/hypre-1.9.0b.tar.gz -> ../hypre-1.9.0b.tar.gz
+     lrwxrwxrwx   1 hil66 hypre  22 Apr 13 07:32 powerpc-ibm-aix5.2.0.0/hypre-1.9.0b.tar.gz -> ../hypre-1.9.0b.tar.gz
+     lrwxrwxrwx   1 hil66 hypre  22 Apr 13 07:32 chaos_2_ia32_elan3/hypre-1.9.0b.tar.gz -> ../hypre-1.9.0b.tar.gz
+
+25.  cd chaos_2_ia32_elan3
+
+26.  ../mklibs -b hypre-1.9.0b.tar.gz install
+     checking the hostname... blue
+     checking the architecture... aix
+             . . .
+     Cleaning FEI_mv ...
+     Cleaning test ...
+\end{verbatim}
+The build and installation is now complete on one SCF class of machines. For each of the 
+remaining classes of SCF platforms, log-in, cd to /usr/gapps/hypre/<SYS\_TYPE> and repeat
+step 26.
