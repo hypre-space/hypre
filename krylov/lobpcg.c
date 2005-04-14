@@ -203,12 +203,11 @@ lobpcg_solve( hypre_MultiVectorPtr blockVectorX, /* eigenvectors */
     utilities_FortranMatrixAllocateData( sizeY, sizeY, gramYBY );
     utilities_FortranMatrixAllocateData( sizeY, sizeX, gramYBX );
     utilities_FortranMatrixAllocateData( sizeY, sizeX, tempYBX );
+    blockVectorBY = blockVectorY;
     if ( !noBFlag ) {
       operatorB( operatorBData, blockVectorY, blockVectorBY );
       blockVectorBY = hypre_MultiVectorCreateCopy( blockVectorY, 0 );
-    }
-    else
-      blockVectorBY = blockVectorY;
+    };
 
     lobpcg_MultiVectorByMultiVector( blockVectorBY, blockVectorY, gramYBY );
     exitFlag = lobpcg_chol( gramYBY );

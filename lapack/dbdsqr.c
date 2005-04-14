@@ -68,7 +68,6 @@ static doublereal c_b72 = -1.;
 	    integer *);
     static doublereal sminoa, thresh;
     static logical rotate;
-    static doublereal sminlo;
     static integer nm1;
     static doublereal tolmul;
     static integer nm12, nm13, lll;
@@ -504,7 +503,6 @@ L90:
 		    e[lll] = 0.;
 		    goto L60;
 		}
-		sminlo = sminl;
 		mu = (d__2 = d__[lll + 1], abs(d__2)) * (mu / (mu + (d__1 = e[
 			lll], abs(d__1))));
 		sminl = min(sminl,mu);
@@ -536,7 +534,6 @@ L90:
 		    e[lll] = 0.;
 		    goto L60;
 		}
-		sminlo = sminl;
 		mu = (d__2 = d__[lll], abs(d__2)) * (mu / (mu + (d__1 = e[lll]
 			, abs(d__1))));
 		sminl = min(sminl,mu);
