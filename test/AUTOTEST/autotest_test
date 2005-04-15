@@ -710,10 +710,12 @@ if [ ${BuildOpt} -ne $Skip ] ; then
     if [ "$ConfigOption" != " " ]
     then
       if [ "$ConfigOption" = "--with-babel" ]            ## need to disable Fortran90
-      then                                               ## when building Babel
-         ConfigOption="$ConfigOption --disable-fortran90"
+      then                                               ## when ONLY building Babel
+         ExtraConfigOption="--disable-fortran90"
+      else
+         ExtraConfigOption=""
       fi
-      $CONFIGURE "$ConfigOption" 1> ${Hdr}.${MessageStr}.configure.log \
+      $CONFIGURE "$ConfigOption" "$ExtraConfigOption" 1> ${Hdr}.${MessageStr}.configure.log \
 	2> ${Hdr}.${MessageStr}.configure.err
     else
       $CONFIGURE 1> ${Hdr}.${MessageStr}.configure.log \
@@ -772,6 +774,10 @@ then
   cd $StdBuildDir/$MakeDir
   $MAKE $MakeOption 1> ${Hdr}.${MessageStr}.log \
 	2> ${Hdr}.${MessageStr}.err
+  if [ "$MakeDir" = "docs" ]   ## clean up temporary files used in building docs
+  then                                             
+     $MAKE clean
+  fi
   echo "$HYPRE_ALL_EMAIL" > ${Hdr}.${MessageStr}.err.email
   seconds; TIME=`expr $SECS - $TIME`
   echo "Autotest finished $MessageStr taking $TIME seconds"
