@@ -712,12 +712,15 @@ if [ ${BuildOpt} -ne $Skip ] ; then
       if [ "$ConfigOption" = "--with-babel" ]            ## need to disable Fortran90
       then                                               ## when ONLY building Babel
          ExtraConfigOption="--disable-fortran90"
+         $CONFIGURE "$ConfigOption" "$ExtraConfigOption" 1> ${Hdr}.${MessageStr}.configure.log \
+	   2> ${Hdr}.${MessageStr}.configure.err
       else
-         ExtraConfigOption=""
+         $CONFIGURE "$ConfigOption" 1> ${Hdr}.${MessageStr}.configure.log \
+	   2> ${Hdr}.${MessageStr}.configure.err
       fi
-      $CONFIGURE "$ConfigOption" "$ExtraConfigOption" 1> ${Hdr}.${MessageStr}.configure.log \
-	2> ${Hdr}.${MessageStr}.configure.err
-    else
+    fi
+    if [ "$ConfigOption" = " " ]
+    then
       $CONFIGURE 1> ${Hdr}.${MessageStr}.configure.log \
 	2> ${Hdr}.${MessageStr}.configure.err
     fi
