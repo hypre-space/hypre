@@ -34,10 +34,14 @@ HEADERS =\
 FILES =\
  coarsen.c\
  cyclic_reduction.c\
+ F90_HYPRE_struct_bicgstab.c\
+ F90_HYPRE_struct_gmres.c\
  F90_HYPRE_struct_hybrid.c\
+ F90_HYPRE_struct_jacobi.c\
  F90_HYPRE_struct_pcg.c\
  F90_HYPRE_struct_pfmg.c\
  F90_HYPRE_struct_smg.c\
+ F90_HYPRE_struct_sparse_msg.c\
  general.c\
  hybrid.c\
  HYPRE_struct_bicgstab.c\
