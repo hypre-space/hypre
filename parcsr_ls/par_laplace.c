@@ -412,7 +412,8 @@ GenerateSysLaplacian( MPI_Comm comm,
    int cnt, o_cnt;
    int local_num_rows; 
    int *col_map_offd;
-   int row_index;
+   int row_index, row, col;
+   int index, diag_index;
    int i,j;
 
    int nx_local, ny_local, nz_local;
@@ -428,6 +429,7 @@ GenerateSysLaplacian( MPI_Comm comm,
 
    int num_procs, my_id;
    int P_busy, Q_busy, R_busy;
+   double val;
 
    MPI_Comm_size(comm,&num_procs);
    MPI_Comm_rank(comm,&my_id);
@@ -816,6 +818,22 @@ GenerateSysLaplacian( MPI_Comm comm,
 
    for (i=0; i < num_procs+1; i++)
       global_part[i] *= num_fun;
+
+   for (j=1; j< num_fun; j++)
+   {
+      for (i=0; i<grid_size; i++)
+      {
+	  row = i*num_fun+j;
+	  diag_index = diag_i[row];
+	  index = diag_index+j;
+	  val = diag_data[diag_index];
+	  col = diag_j[diag_index];
+	  diag_data[diag_index] = diag_data[index];
+	  diag_j[diag_index] = diag_j[index];
+	  diag_data[index] = val;
+	  diag_j[index] = col;
+      }
+   }
 
    A = hypre_ParCSRMatrixCreate(comm, num_fun*grid_size, num_fun*grid_size,
                                 global_part, global_part, num_cols_offd,
