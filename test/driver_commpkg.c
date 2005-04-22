@@ -87,7 +87,7 @@ main( int   argc,
    int                 p, q, r;
    double              values[4];
 
-   hypre_ParVector     *x_new, *x;
+   hypre_ParVector     *x_new;
    hypre_ParVector     *y_new, *y;
    int                 *row_starts;
    double              ans;
@@ -454,7 +454,7 @@ main( int   argc,
           x_new = hypre_ParVectorCreate(MPI_COMM_WORLD, global_num_rows, row_starts);
           hypre_ParVectorSetPartitioningOwner(x_new, 0);
           hypre_ParVectorInitialize(x_new);
-          hypre_ParVectorSetConstantValues(x_new, 1.0);    
+          hypre_ParVectorSetRandomValues(x_new, 1);    
           
           y_new = hypre_ParVectorCreate(MPI_COMM_WORLD, global_num_rows, row_starts);
           hypre_ParVectorSetPartitioningOwner(y_new, 0);
@@ -634,17 +634,12 @@ main( int   argc,
           row_starts = hypre_ParCSRMatrixRowStarts(parcsr_A);
  
        
-          x = hypre_ParVectorCreate(MPI_COMM_WORLD, global_num_rows, row_starts);
-          hypre_ParVectorSetPartitioningOwner(x, 0);
-          hypre_ParVectorInitialize(x);
-          hypre_ParVectorSetConstantValues(x ,1.0);    
-
           y = hypre_ParVectorCreate(MPI_COMM_WORLD, global_num_rows,row_starts);
           hypre_ParVectorSetPartitioningOwner(y, 0);
           hypre_ParVectorInitialize(y);
           hypre_ParVectorSetConstantValues(y, 0.0);
 
-          hypre_ParCSRMatrixMatvec (1.0, parcsr_A, x, 1.0, y);
+          hypre_ParCSRMatrixMatvec (1.0, parcsr_A, x_new, 1.0, y);
       
        }
 
@@ -699,7 +694,7 @@ main( int   argc,
 
   if (commpkg_flag == 3 ) 
   { 
-      hypre_ParVectorDestroy(x);
+
       hypre_ParVectorDestroy(x_new);
       hypre_ParVectorDestroy(y);
       hypre_ParVectorDestroy(y_new);
