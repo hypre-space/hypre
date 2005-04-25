@@ -183,14 +183,14 @@ hypre_F90_IFACE(hypre_structbicgstabsetprintlev, HYPRE_STRUCTBICGSTABSETPRINTLEV
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_structbicgstabgetnumitera, HYPRE_STRUCTBICGSTABGETNUMITERA)( long int *solver,
+hypre_F90_IFACE(hypre_structbicgstabgetnumitera, HYPRE_STRUCTBICGSTABGETNUMITERA)
+                                                ( long int *solver,
                                                   int      *num_iterations,
                                                   int      *ierr   )
 {
    *ierr = (int)
-      ( HYPRE_BiCGSTABGetNumIterations(
-         (HYPRE_StructSolver) *solver,
-         (int *)              num_iterations ) );
+      ( HYPRE_StructBiCGSTABGetNumIterations( (HYPRE_StructSolver) *solver,
+                                        (int *)              num_iterations ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -198,12 +198,13 @@ hypre_F90_IFACE(hypre_structbicgstabgetnumitera, HYPRE_STRUCTBICGSTABGETNUMITERA
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_structbicgstabgetresidual, HYPRE_STRUCTBICGSTABGETRESIDUAL)( long int *solver,
-                                                  long int *residual,
+hypre_F90_IFACE(hypre_structbicgstabgetresidual, HYPRE_STRUCTBICGSTABGETRESIDUAL)
+                                                ( long int *solver,
+                                                  void *residual,
                                                   int      *ierr   )
 {
-   *ierr = (int) ( HYPRE_BiCGSTABGetResidual( (HYPRE_StructSolver) *solver,
-           (long int *)             residual ) );
+   *ierr = (int) ( HYPRE_StructBiCGSTABGetResidual( (HYPRE_StructSolver) *solver,
+                                              (void *)          residual ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -211,12 +212,12 @@ hypre_F90_IFACE(hypre_structbicgstabgetresidual, HYPRE_STRUCTBICGSTABGETRESIDUAL
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_structbicgstabgetfinalrel, HYPRE_STRUCTBICGSTABGETFINALREL)( long int *solver,
+hypre_F90_IFACE(hypre_structbicgstabgetfinalrel, HYPRE_STRUCTBICGSTABGETFINALREL)
+                                                ( long int *solver,
                                                   double   *norm,
                                                   int      *ierr   )
 {
    *ierr = (int)
-      ( HYPRE_BiCGSTABGetFinalRelativeResidualNorm(
-         (HYPRE_StructSolver) *solver,
-         (double *)           norm ) );
+      ( HYPRE_StructBiCGSTABGetFinalRelativeResidualNorm( (HYPRE_StructSolver) *solver,
+                                                    (double *)           norm ) );
 }
