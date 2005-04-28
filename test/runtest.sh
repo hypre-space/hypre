@@ -325,7 +325,7 @@ function ExecuteJobs
         if [ "$BatchMode" -eq 0 ]
         then
           if [ "$DebugMode" -gt 0 ] ; then echo "${RunString} > $OutFile 2> $ErrFile" ; fi
-          sh `${RunString} > $OutFile 2> $ErrFile </dev/null`
+          sh ${RunString} > $OutFile 2> $ErrFile </dev/null
         else
           if [ "$BatchFlag" -eq 0 ]
           then BatchFile=`echo $OutFile | sed -e 's/\.out\./.batch./'`
