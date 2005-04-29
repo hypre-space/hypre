@@ -322,7 +322,7 @@ ac_includes_default="\
 #endif"
 
 ac_subdirs_all="$ac_subdirs_all babel-runtime"
-ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS build build_cpu build_vendor build_os host host_cpu host_vendor host_os PACKAGE_DATETIME HYPRE_TOP_SRCDIR HYPRE_RELEASEVERSION HYPRE_RELEASEDATE HYPRE_RELEASETIME HYPRE_RELEASEDATETIME CC CXX F77 RANLIB ac_ct_RANLIB INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA AWK CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT CPP LN_S SET_MAKE CXXFLAGS ac_ct_CXX FFLAGS ac_ct_F77 FLIBS CXXCPP FPP EGREP POW_LIB LIBOBJS MPILIBS subdirs BABELDIR HYPRE_ARCH HOSTNAME F77FLAGS HYPRE_INSTALLDIR HYPRE_LIBINSTALL HYPRE_INCINSTALL INCLUDES LIBDIRS LDLIBS LDLIBDIRS HYPRE_LIBSUFFIX MPIINCLUDE MPILIBDIRS MPIFLAGS TIMERDEFS FEILIBS FEILIBDIRS FEIINCLUDE MLI_DIR MLILIBS MLILIBDIRS MLIINCLUDE BLASLIBDIRS BLASLIBS LAPACKLIBDIRS LAPACKLIBS AR LTLIBOBJS'
+ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS build build_cpu build_vendor build_os host host_cpu host_vendor host_os PACKAGE_DATETIME HYPRE_TOP_SRCDIR HYPRE_RELEASEVERSION HYPRE_RELEASEDATE HYPRE_RELEASETIME HYPRE_RELEASEDATETIME CC CXX F77 RANLIB ac_ct_RANLIB INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA AWK CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT CPP LN_S SET_MAKE CXXFLAGS ac_ct_CXX FFLAGS ac_ct_F77 FLIBS CXXCPP FPP EGREP POW_LIB LIBOBJS MPILIBS subdirs BABELDIR HYPRE_ARCH HOSTNAME F77FLAGS HYPRE_INSTALLDIR HYPRE_LIBINSTALL HYPRE_INCINSTALL INCLUDES LIBDIRS LDLIBS LDLIBDIRS HYPRE_LIBSUFFIX MPIINCLUDE MPILIBDIRS MPIFLAGS TIMERDEFS FEILIBS FEILIBDIRS FEIINCLUDE MLI_DIR MLILIBS MLILIBDIRS MLIINCLUDE BLASLIBDIRS BLASLIBS HYPREBLASFILES HYPREBLASHEADERS LAPACKLIBDIRS LAPACKLIBS HYPRELAPACKFILES HYPRELAPACKHEADERS AR LTLIBOBJS'
 ac_subst_files=''
 
 # Initialize some variables set by options.
@@ -8387,6 +8387,26 @@ echo "$as_me: WARNING: ***************************************" >&2;}
       BLASLIBDIRS="-L$BLAS_DIR"
       BLASLIBS="-lHYPRE_utilities"
 
+
+#*******************************************************
+#   Source files
+#*******************************************************
+ FL1="`pwd`/blas/blas_utils.c `pwd`/blas/dasum.c"
+ FL2="`pwd`/blas/daxpy.c `pwd`/blas/dcopy.c"
+ FL3="`pwd`/blas/ddot.c `pwd`/blas/dgemm.c"
+ FL4="`pwd`/blas/dgemv.c `pwd`/blas/dger.c"
+ FL5="`pwd`/blas/dnrm2.c `pwd`/blas/drot.c"
+ FL6="`pwd`/blas/dscal.c `pwd`/blas/dswap.c"
+ FL7="`pwd`/blas/dsymm.c `pwd`/blas/dsymv.c"
+ FL8="`pwd`/blas/dsyr2.c `pwd`/blas/dsyr2k.c"
+ FL9="`pwd`/blas/dsyrk.c `pwd`/blas/dtrmm.c"
+ F10="`pwd`/blas/dtrmv.c `pwd`/blas/dtrsm.c"
+ F11="`pwd`/blas/dtrsv.c `pwd`/blas/idamax.c"
+
+ HYPREBLASFILES="$FL1 $FL2 $FL3 $FL4 $FL5 $FL6 $FL7 $FL8 $FL9 $F10 $F11"
+
+
+
 cat >>confdefs.h <<\_ACEOF
 #define HYPRE_USING_HYPRE_BLAS 1
 _ACEOF
@@ -8396,6 +8416,26 @@ _ACEOF
       BLAS_DIR="`pwd`/hypre/lib"
       BLASLIBDIRS="-L$BLAS_DIR"
       BLASLIBS="-lHYPRE_utilities"
+
+
+#*******************************************************
+#   Source files
+#*******************************************************
+ FL1="`pwd`/blas/blas_utils.c `pwd`/blas/dasum.c"
+ FL2="`pwd`/blas/daxpy.c `pwd`/blas/dcopy.c"
+ FL3="`pwd`/blas/ddot.c `pwd`/blas/dgemm.c"
+ FL4="`pwd`/blas/dgemv.c `pwd`/blas/dger.c"
+ FL5="`pwd`/blas/dnrm2.c `pwd`/blas/drot.c"
+ FL6="`pwd`/blas/dscal.c `pwd`/blas/dswap.c"
+ FL7="`pwd`/blas/dsymm.c `pwd`/blas/dsymv.c"
+ FL8="`pwd`/blas/dsyr2.c `pwd`/blas/dsyr2k.c"
+ FL9="`pwd`/blas/dsyrk.c `pwd`/blas/dtrmm.c"
+ F10="`pwd`/blas/dtrmv.c `pwd`/blas/dtrsm.c"
+ F11="`pwd`/blas/dtrsv.c `pwd`/blas/idamax.c"
+
+ HYPREBLASFILES="$FL1 $FL2 $FL3 $FL4 $FL5 $FL6 $FL7 $FL8 $FL9 $F10 $F11"
+
+
 
 cat >>confdefs.h <<\_ACEOF
 #define HYPRE_USING_HYPRE_BLAS 1
@@ -8622,6 +8662,54 @@ echo "$as_me: WARNING: ***************************************" >&2;}
       LAPACKLIBDIRS="-L$LAPACK_DIR"
       LAPACKLIBS="-lHYPRE_utilities"
 
+
+#***************************************************************
+#  Source files
+#***************************************************************
+  FL1="`pwd`/lapack/dbdsqr.c `pwd`/lapack/dgebd2.c"
+  FL2="`pwd`/lapack/dgebrd.c `pwd`/lapack/dgelq2.c"
+  FL3="`pwd`/lapack/dgelqf.c `pwd`/lapack/dgels.c"
+  FL4="`pwd`/lapack/dgeqr2.c `pwd`/lapack/dgeqrf.c"
+  FL5="`pwd`/lapack/dgesvd.c `pwd`/lapack/dlabad.c"
+  FL6="`pwd`/lapack/dlabrd.c `pwd`/lapack/dlacpy.c"
+  FL7="`pwd`/lapack/dlae2.c `pwd`/lapack/dlaev2.c"
+  FL8="`pwd`/lapack/dlamch.c `pwd`/lapack/dlange.c"
+  FL9="`pwd`/lapack/dlanst.c `pwd`/lapack/dlansy.c"
+  F10="`pwd`/lapack/dlapy2.c `pwd`/lapack/dlarfb.c"
+  F11="`pwd`/lapack/dlarf.c `pwd`/lapack/dlarfg.c"
+  F12="`pwd`/lapack/dlarft.c `pwd`/lapack/dlartg.c"
+  F13="`pwd`/lapack/dlas2.c `pwd`/lapack/dlascl.c"
+  F14="`pwd`/lapack/dlaset.c `pwd`/lapack/dlasq1.c"
+  F15="`pwd`/lapack/dlasq2.c `pwd`/lapack/dlasq3.c"
+  F16="`pwd`/lapack/dlasq4.c `pwd`/lapack/dlasq5.c"
+  F17="`pwd`/lapack/dlasq6.c `pwd`/lapack/dlasr.c"
+  F18="`pwd`/lapack/dlasrt.c `pwd`/lapack/dlassq.c"
+  F19="`pwd`/lapack/dlasv2.c `pwd`/lapack/dlatrd.c"
+  F20="`pwd`/lapack/dorg2l.c `pwd`/lapack/dorg2r.c"
+  F21="`pwd`/lapack/dorgbr.c `pwd`/lapack/dorgl2.c"
+  F22="`pwd`/lapack/dorglq.c `pwd`/lapack/dorgql.c"
+  F23="`pwd`/lapack/dorgqr.c `pwd`/lapack/dorgtr.c"
+  F24="`pwd`/lapack/dorm2r.c `pwd`/lapack/dormbr.c"
+  F25="`pwd`/lapack/dorml2.c `pwd`/lapack/dormlq.c"
+  F26="`pwd`/lapack/dormqr.c `pwd`/lapack/dpotf2.c"
+  F27="`pwd`/lapack/dpotrf.c `pwd`/lapack/dpotrs.c"
+  F28="`pwd`/lapack/dsteqr.c `pwd`/lapack/dsterf.c"
+  F29="`pwd`/lapack/dsyev.c `pwd`/lapack/dsygs2.c"
+  F30="`pwd`/lapack/dsygst.c `pwd`/lapack/dsygv.c"
+  F31="`pwd`/lapack/dsytd2.c `pwd`/lapack/dsytrd.c"
+  F32="`pwd`/lapack/ieeeck.c `pwd`/lapack/ilaenv.c"
+  F33="`pwd`/lapack/lapack_utils.c"
+  F34="`pwd`/lapack/lsame.c `pwd`/lapack/xerbla.c"
+
+  Fil0="$FL1 $FL2 $FL3 $FL4 $FL5 $FL6 $FL7 $FL8 $FL9 $F10"
+  Fil1="$F11 $F12 $F13 $F14 $F15 $F16 $F17 $F18 $F19 $F20"
+  Fil2="$F21 $F22 $F23 $F24 $F25 $F26 $F27 $F28 $F29 $F30"
+  Fil3="$F31 $F32 $F33 $F34"
+
+  HYPRELAPACKFILES="$Fil0 $Fil1 $Fil2 $Fil3"
+
+
+
 cat >>confdefs.h <<\_ACEOF
 #define HYPRE_USING_HYPRE_LAPACK 1
 _ACEOF
@@ -8631,6 +8719,54 @@ _ACEOF
       LAPACK_DIR="`pwd`/hypre/lib"
       LAPACKLIBDIRS="-L$LAPACK_DIR"
       LAPACKLIBS="-lHYPRE_utilities"
+
+
+#***************************************************************
+#  Source files
+#***************************************************************
+  FL1="`pwd`/lapack/dbdsqr.c `pwd`/lapack/dgebd2.c"
+  FL2="`pwd`/lapack/dgebrd.c `pwd`/lapack/dgelq2.c"
+  FL3="`pwd`/lapack/dgelqf.c `pwd`/lapack/dgels.c"
+  FL4="`pwd`/lapack/dgeqr2.c `pwd`/lapack/dgeqrf.c"
+  FL5="`pwd`/lapack/dgesvd.c `pwd`/lapack/dlabad.c"
+  FL6="`pwd`/lapack/dlabrd.c `pwd`/lapack/dlacpy.c"
+  FL7="`pwd`/lapack/dlae2.c `pwd`/lapack/dlaev2.c"
+  FL8="`pwd`/lapack/dlamch.c `pwd`/lapack/dlange.c"
+  FL9="`pwd`/lapack/dlanst.c `pwd`/lapack/dlansy.c"
+  F10="`pwd`/lapack/dlapy2.c `pwd`/lapack/dlarfb.c"
+  F11="`pwd`/lapack/dlarf.c `pwd`/lapack/dlarfg.c"
+  F12="`pwd`/lapack/dlarft.c `pwd`/lapack/dlartg.c"
+  F13="`pwd`/lapack/dlas2.c `pwd`/lapack/dlascl.c"
+  F14="`pwd`/lapack/dlaset.c `pwd`/lapack/dlasq1.c"
+  F15="`pwd`/lapack/dlasq2.c `pwd`/lapack/dlasq3.c"
+  F16="`pwd`/lapack/dlasq4.c `pwd`/lapack/dlasq5.c"
+  F17="`pwd`/lapack/dlasq6.c `pwd`/lapack/dlasr.c"
+  F18="`pwd`/lapack/dlasrt.c `pwd`/lapack/dlassq.c"
+  F19="`pwd`/lapack/dlasv2.c `pwd`/lapack/dlatrd.c"
+  F20="`pwd`/lapack/dorg2l.c `pwd`/lapack/dorg2r.c"
+  F21="`pwd`/lapack/dorgbr.c `pwd`/lapack/dorgl2.c"
+  F22="`pwd`/lapack/dorglq.c `pwd`/lapack/dorgql.c"
+  F23="`pwd`/lapack/dorgqr.c `pwd`/lapack/dorgtr.c"
+  F24="`pwd`/lapack/dorm2r.c `pwd`/lapack/dormbr.c"
+  F25="`pwd`/lapack/dorml2.c `pwd`/lapack/dormlq.c"
+  F26="`pwd`/lapack/dormqr.c `pwd`/lapack/dpotf2.c"
+  F27="`pwd`/lapack/dpotrf.c `pwd`/lapack/dpotrs.c"
+  F28="`pwd`/lapack/dsteqr.c `pwd`/lapack/dsterf.c"
+  F29="`pwd`/lapack/dsyev.c `pwd`/lapack/dsygs2.c"
+  F30="`pwd`/lapack/dsygst.c `pwd`/lapack/dsygv.c"
+  F31="`pwd`/lapack/dsytd2.c `pwd`/lapack/dsytrd.c"
+  F32="`pwd`/lapack/ieeeck.c `pwd`/lapack/ilaenv.c"
+  F33="`pwd`/lapack/lapack_utils.c"
+  F34="`pwd`/lapack/lsame.c `pwd`/lapack/xerbla.c"
+
+  Fil0="$FL1 $FL2 $FL3 $FL4 $FL5 $FL6 $FL7 $FL8 $FL9 $F10"
+  Fil1="$F11 $F12 $F13 $F14 $F15 $F16 $F17 $F18 $F19 $F20"
+  Fil2="$F21 $F22 $F23 $F24 $F25 $F26 $F27 $F28 $F29 $F30"
+  Fil3="$F31 $F32 $F33 $F34"
+
+  HYPRELAPACKFILES="$Fil0 $Fil1 $Fil2 $Fil3"
+
+
 
 cat >>confdefs.h <<\_ACEOF
 #define HYPRE_USING_HYPRE_LAPACK 1
@@ -9254,6 +9390,10 @@ _ACEOF
 
        ;;
 esac
+
+
+
+
 
 
 
@@ -9993,8 +10133,12 @@ s,@MLILIBDIRS@,$MLILIBDIRS,;t t
 s,@MLIINCLUDE@,$MLIINCLUDE,;t t
 s,@BLASLIBDIRS@,$BLASLIBDIRS,;t t
 s,@BLASLIBS@,$BLASLIBS,;t t
+s,@HYPREBLASFILES@,$HYPREBLASFILES,;t t
+s,@HYPREBLASHEADERS@,$HYPREBLASHEADERS,;t t
 s,@LAPACKLIBDIRS@,$LAPACKLIBDIRS,;t t
 s,@LAPACKLIBS@,$LAPACKLIBS,;t t
+s,@HYPRELAPACKFILES@,$HYPRELAPACKFILES,;t t
+s,@HYPRELAPACKHEADERS@,$HYPRELAPACKHEADERS,;t t
 s,@AR@,$AR,;t t
 s,@LTLIBOBJS@,$LTLIBOBJS,;t t
 CEOF

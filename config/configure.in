@@ -725,12 +725,14 @@ then
       BLAS_DIR="HYPRE_TOP_SRC_DIR/hypre/lib"
       BLASLIBDIRS="-L$BLAS_DIR"
       BLASLIBS="-lHYPRE_utilities"
+      HYPRE_SET_BLAS_FILES
       AC_DEFINE(HYPRE_USING_HYPRE_BLAS, 1, [Using internal HYPRE routines.])
    elif test "$BLASLIBS" = "internal"
    then
       BLAS_DIR="HYPRE_TOP_SRC_DIR/hypre/lib"
       BLASLIBDIRS="-L$BLAS_DIR"
       BLASLIBS="-lHYPRE_utilities"
+      HYPRE_SET_BLAS_FILES
       AC_DEFINE(HYPRE_USING_HYPRE_BLAS, 1, [Using internal HYPRE routines.])
    else
       AC_DEFINE(HAVE_BLAS, 1, [BLAS library is system provided.])
@@ -767,12 +769,14 @@ then
       LAPACK_DIR="HYPRE_TOP_SRC_DIR/hypre/lib"
       LAPACKLIBDIRS="-L$LAPACK_DIR"
       LAPACKLIBS="-lHYPRE_utilities"
+      HYPRE_SET_LAPACK_FILES
       AC_DEFINE(HYPRE_USING_HYPRE_LAPACK, 1, [Using internal HYPRE routines.])
    elif test "$LAPACKLIBS" = "internal"
    then
       LAPACK_DIR="HYPRE_TOP_SRC_DIR/hypre/lib"
       LAPACKLIBDIRS="-L$LAPACK_DIR"
       LAPACKLIBS="-lHYPRE_utilities"
+      HYPRE_SET_LAPACK_FILES
       AC_DEFINE(HYPRE_USING_HYPRE_LAPACK, 1, [Using internal HYPRE routines.])
    else
       AC_DEFINE(HAVE_LAPACK, 1, [LAPACK library is system provided.])
@@ -941,8 +945,12 @@ dnl * BLAS & LAPACK related information
 dnl *********************************************************************
 AC_SUBST(BLASLIBDIRS)
 AC_SUBST(BLASLIBS)
+AC_SUBST(HYPREBLASFILES)
+AC_SUBST(HYPREBLASHEADERS)
 AC_SUBST(LAPACKLIBDIRS)
 AC_SUBST(LAPACKLIBS)
+AC_SUBST(HYPRELAPACKFILES)
+AC_SUBST(HYPRELAPACKHEADERS)
 
 dnl *********************************************************************
 dnl * ar & ranlib substitution

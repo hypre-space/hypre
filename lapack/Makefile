@@ -7,9 +7,9 @@
 # $Revision$
 #EHEADER***********************************************************************
 
-###  Internal LAPACK routines are compiled in this sub-directory then copied
-###  to the utilities and lib directories to be included in the appropriate
-###  libHYPRE* libraries.
+###  Internal LAPACK routines may be compiled in this sub-directory.
+###  Generally, the Makefile in the utilities sub-directory controls
+###  the inclusion of these routines based on the configure options.
 ###
 
 include ../config/Makefile.config
@@ -91,13 +91,6 @@ OBJS = ${LAPACK_FILES:.c=.o}
 #################################################################
 
 all: ${OBJS}
-	@\
-	for file in ${OBJS}; \
-	do \
-	  (cp -fp $$file ../utilities); \
-	  (cp -fp $$file ../lib); \
-	done
-	cp -fp ${LAPACK_HEADERS} ../utilities
 
 install: all
 
