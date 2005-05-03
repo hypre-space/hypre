@@ -3,15 +3,11 @@
  * Symbol:        bHYPRE.SStructVector-v1.0.0
  * Symbol Type:   class
  * Babel Version: 0.9.8
- * sidl Created:  20050317 11:17:39 PST
- * Generated:     20050317 11:17:44 PST
  * Description:   Server-side implementation for bHYPRE.SStructVector
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
  * babel-version = 0.9.8
- * source-line   = 1079
- * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 
 #ifndef included_bHYPRE_SStructVector_Impl_h
@@ -35,6 +31,10 @@
 
 /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructVector._includes) */
 /* Put additional include files here... */
+#include "HYPRE_sstruct_mv.h"
+#include "HYPRE.h"
+#include "utilities.h"
+#include "bHYPRE_SStructBuildVector.h"
 /* DO-NOT-DELETE splicer.end(bHYPRE.SStructVector._includes) */
 
 /*
@@ -44,7 +44,8 @@
 struct bHYPRE_SStructVector__data {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructVector._data) */
   /* Put private data members here... */
-  int ignore; /* dummy to force non-empty struct; remove if you add data */
+   HYPRE_SStructVector vec;
+   MPI_Comm comm;
   /* DO-NOT-DELETE splicer.end(bHYPRE.SStructVector._data) */
 };
 
@@ -76,6 +77,11 @@ impl_bHYPRE_SStructVector__dtor(
 /*
  * User-defined object methods
  */
+
+extern int32_t
+impl_bHYPRE_SStructVector_SetObjectType(
+  bHYPRE_SStructVector,
+  int32_t);
 
 extern int32_t
 impl_bHYPRE_SStructVector_Clear(

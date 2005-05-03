@@ -3,15 +3,11 @@
  * Symbol:        bHYPRE.SStructGraph-v1.0.0
  * Symbol Type:   class
  * Babel Version: 0.9.8
- * sidl Created:  20050317 11:17:39 PST
- * Generated:     20050317 11:17:43 PST
  * Description:   Server-side glue code for bHYPRE.SStructGraph
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
  * babel-version = 0.9.8
- * source-line   = 1027
- * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 
 #include "bHYPRE_SStructGraph_IOR.h"
@@ -27,8 +23,9 @@ impl_bHYPRE_SStructGraph__dtor(
   bHYPRE_SStructGraph);
 
 extern int32_t
-impl_bHYPRE_SStructGraph_SetGrid(
+impl_bHYPRE_SStructGraph_SetCommGrid(
   bHYPRE_SStructGraph,
+  void*,
   bHYPRE_SStructGrid);
 
 extern int32_t
@@ -47,6 +44,29 @@ impl_bHYPRE_SStructGraph_AddEntries(
   int32_t,
   struct sidl_int__array*,
   int32_t);
+
+extern int32_t
+impl_bHYPRE_SStructGraph_SetObjectType(
+  bHYPRE_SStructGraph,
+  int32_t);
+
+extern int32_t
+impl_bHYPRE_SStructGraph_SetCommunicator(
+  bHYPRE_SStructGraph,
+  void*);
+
+extern int32_t
+impl_bHYPRE_SStructGraph_Initialize(
+  bHYPRE_SStructGraph);
+
+extern int32_t
+impl_bHYPRE_SStructGraph_Assemble(
+  bHYPRE_SStructGraph);
+
+extern int32_t
+impl_bHYPRE_SStructGraph_GetObject(
+  bHYPRE_SStructGraph,
+  sidl_BaseInterface*);
 
 static int32_t
 skel_bHYPRE_SStructGraph_AddEntries(
@@ -86,9 +106,14 @@ bHYPRE_SStructGraph__set_epv(struct bHYPRE_SStructGraph__epv *epv)
 {
   epv->f__ctor = impl_bHYPRE_SStructGraph__ctor;
   epv->f__dtor = impl_bHYPRE_SStructGraph__dtor;
-  epv->f_SetGrid = impl_bHYPRE_SStructGraph_SetGrid;
+  epv->f_SetCommGrid = impl_bHYPRE_SStructGraph_SetCommGrid;
   epv->f_SetStencil = impl_bHYPRE_SStructGraph_SetStencil;
   epv->f_AddEntries = skel_bHYPRE_SStructGraph_AddEntries;
+  epv->f_SetObjectType = impl_bHYPRE_SStructGraph_SetObjectType;
+  epv->f_SetCommunicator = impl_bHYPRE_SStructGraph_SetCommunicator;
+  epv->f_Initialize = impl_bHYPRE_SStructGraph_Initialize;
+  epv->f_Assemble = impl_bHYPRE_SStructGraph_Assemble;
+  epv->f_GetObject = impl_bHYPRE_SStructGraph_GetObject;
 }
 #ifdef __cplusplus
 }

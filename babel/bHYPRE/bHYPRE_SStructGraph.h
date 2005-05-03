@@ -3,15 +3,11 @@
  * Symbol:        bHYPRE.SStructGraph-v1.0.0
  * Symbol Type:   class
  * Babel Version: 0.9.8
- * sidl Created:  20050317 11:17:39 PST
- * Generated:     20050317 11:17:42 PST
  * Description:   Client-side glue code for bHYPRE.SStructGraph
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
  * babel-version = 0.9.8
- * source-line   = 1027
- * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 
 #ifndef included_bHYPRE_SStructGraph_h
@@ -85,12 +81,13 @@ bHYPRE_SStructGraph_getClassInfo(
   /*in*/ bHYPRE_SStructGraph self);
 
 /**
- * Set the grid.
+ * Set the grid and communicator.
  * 
  */
 int32_t
-bHYPRE_SStructGraph_SetGrid(
+bHYPRE_SStructGraph_SetCommGrid(
   /*in*/ bHYPRE_SStructGraph self,
+  /*in*/ void* mpi_comm,
   /*in*/ bHYPRE_SStructGrid grid);
 
 /**
@@ -124,6 +121,61 @@ bHYPRE_SStructGraph_AddEntries(
   /*in*/ int32_t to_part,
   /*in*/ struct sidl_int__array* to_index,
   /*in*/ int32_t to_var);
+
+/**
+ * Method:  SetObjectType[]
+ */
+int32_t
+bHYPRE_SStructGraph_SetObjectType(
+  /*in*/ bHYPRE_SStructGraph self,
+  /*in*/ int32_t type);
+
+/**
+ * Set the MPI Communicator.
+ * 
+ */
+int32_t
+bHYPRE_SStructGraph_SetCommunicator(
+  /*in*/ bHYPRE_SStructGraph self,
+  /*in*/ void* mpi_comm);
+
+/**
+ * Prepare an object for setting coefficient values, whether for
+ * the first time or subsequently.
+ * 
+ */
+int32_t
+bHYPRE_SStructGraph_Initialize(
+  /*in*/ bHYPRE_SStructGraph self);
+
+/**
+ * Finalize the construction of an object before using, either
+ * for the first time or on subsequent uses. {\tt Initialize}
+ * and {\tt Assemble} always appear in a matched set, with
+ * Initialize preceding Assemble. Values can only be set in
+ * between a call to Initialize and Assemble.
+ * 
+ */
+int32_t
+bHYPRE_SStructGraph_Assemble(
+  /*in*/ bHYPRE_SStructGraph self);
+
+/**
+ * The problem definition interface is a {\it builder} that
+ * creates an object that contains the problem definition
+ * information, e.g. a matrix. To perform subsequent operations
+ * with that object, it must be returned from the problem
+ * definition object. {\tt GetObject} performs this function.
+ * At compile time, the type of the returned object is unknown.
+ * Thus, the returned type is a sidl.BaseInterface.
+ * QueryInterface or Cast must be used on the returned object to
+ * convert it into a known type.
+ * 
+ */
+int32_t
+bHYPRE_SStructGraph_GetObject(
+  /*in*/ bHYPRE_SStructGraph self,
+  /*out*/ sidl_BaseInterface* A);
 
 /**
  * Cast method for interface and class type conversions.

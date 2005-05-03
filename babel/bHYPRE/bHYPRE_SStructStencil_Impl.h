@@ -3,15 +3,11 @@
  * Symbol:        bHYPRE.SStructStencil-v1.0.0
  * Symbol Type:   class
  * Babel Version: 0.9.8
- * sidl Created:  20050317 11:17:39 PST
- * Generated:     20050317 11:17:43 PST
  * Description:   Server-side implementation for bHYPRE.SStructStencil
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
  * babel-version = 0.9.8
- * source-line   = 1006
- * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 
 #ifndef included_bHYPRE_SStructStencil_Impl_h
@@ -26,6 +22,7 @@
 
 /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructStencil._includes) */
 /* Put additional include files here... */
+#include "sstruct_mv.h"
 /* DO-NOT-DELETE splicer.end(bHYPRE.SStructStencil._includes) */
 
 /*
@@ -35,7 +32,7 @@
 struct bHYPRE_SStructStencil__data {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructStencil._data) */
   /* Put private data members here... */
-  int ignore; /* dummy to force non-empty struct; remove if you add data */
+   HYPRE_SStructStencil  stencil;
   /* DO-NOT-DELETE splicer.end(bHYPRE.SStructStencil._data) */
 };
 

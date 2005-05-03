@@ -3,15 +3,11 @@
  * Symbol:        bHYPRE.SStructParCSRVector-v1.0.0
  * Symbol Type:   class
  * Babel Version: 0.9.8
- * sidl Created:  20050317 11:17:39 PST
- * Generated:     20050317 11:17:43 PST
  * Description:   Client-side glue code for bHYPRE.SStructParCSRVector
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
  * babel-version = 0.9.8
- * source-line   = 842
- * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 
 #include "bHYPRE_SStructParCSRVector.h"
@@ -392,14 +388,14 @@ bHYPRE_SStructParCSRVector_SetValues(
   /*in*/ int32_t part,
   /*in*/ struct sidl_int__array* index,
   /*in*/ int32_t var,
-  /*in*/ struct sidl_double__array* value)
+  /*in*/ struct sidl_double__array* values)
 {
   return (*self->d_epv->f_SetValues)(
     self,
     part,
     index,
     var,
-    value);
+    values);
 }
 
 /*
@@ -452,14 +448,14 @@ bHYPRE_SStructParCSRVector_AddToValues(
   /*in*/ int32_t part,
   /*in*/ struct sidl_int__array* index,
   /*in*/ int32_t var,
-  /*in*/ struct sidl_double__array* value)
+  /*in*/ struct sidl_double__array* values)
 {
   return (*self->d_epv->f_AddToValues)(
     self,
     part,
     index,
     var,
-    value);
+    values);
 }
 
 /*

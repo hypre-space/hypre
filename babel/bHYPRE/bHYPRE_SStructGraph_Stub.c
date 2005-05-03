@@ -3,15 +3,11 @@
  * Symbol:        bHYPRE.SStructGraph-v1.0.0
  * Symbol Type:   class
  * Babel Version: 0.9.8
- * sidl Created:  20050317 11:17:39 PST
- * Generated:     20050317 11:17:42 PST
  * Description:   Client-side glue code for bHYPRE.SStructGraph
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
  * babel-version = 0.9.8
- * source-line   = 1027
- * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 
 #include "bHYPRE_SStructGraph.h"
@@ -194,17 +190,19 @@ bHYPRE_SStructGraph_getClassInfo(
 }
 
 /*
- * Set the grid.
+ * Set the grid and communicator.
  * 
  */
 
 int32_t
-bHYPRE_SStructGraph_SetGrid(
+bHYPRE_SStructGraph_SetCommGrid(
   bHYPRE_SStructGraph self,
+  /*in*/ void* mpi_comm,
   /*in*/ bHYPRE_SStructGrid grid)
 {
-  return (*self->d_epv->f_SetGrid)(
+  return (*self->d_epv->f_SetCommGrid)(
     self,
+    mpi_comm,
     grid);
 }
 
@@ -257,6 +255,89 @@ bHYPRE_SStructGraph_AddEntries(
     to_part,
     to_index,
     to_var);
+}
+
+/*
+ * Method:  SetObjectType[]
+ */
+
+int32_t
+bHYPRE_SStructGraph_SetObjectType(
+  bHYPRE_SStructGraph self,
+  /*in*/ int32_t type)
+{
+  return (*self->d_epv->f_SetObjectType)(
+    self,
+    type);
+}
+
+/*
+ * Set the MPI Communicator.
+ * 
+ */
+
+int32_t
+bHYPRE_SStructGraph_SetCommunicator(
+  bHYPRE_SStructGraph self,
+  /*in*/ void* mpi_comm)
+{
+  return (*self->d_epv->f_SetCommunicator)(
+    self,
+    mpi_comm);
+}
+
+/*
+ * Prepare an object for setting coefficient values, whether for
+ * the first time or subsequently.
+ * 
+ */
+
+int32_t
+bHYPRE_SStructGraph_Initialize(
+  bHYPRE_SStructGraph self)
+{
+  return (*self->d_epv->f_Initialize)(
+    self);
+}
+
+/*
+ * Finalize the construction of an object before using, either
+ * for the first time or on subsequent uses. {\tt Initialize}
+ * and {\tt Assemble} always appear in a matched set, with
+ * Initialize preceding Assemble. Values can only be set in
+ * between a call to Initialize and Assemble.
+ * 
+ */
+
+int32_t
+bHYPRE_SStructGraph_Assemble(
+  bHYPRE_SStructGraph self)
+{
+  return (*self->d_epv->f_Assemble)(
+    self);
+}
+
+/*
+ * The problem definition interface is a {\it builder} that
+ * creates an object that contains the problem definition
+ * information, e.g. a matrix. To perform subsequent operations
+ * with that object, it must be returned from the problem
+ * definition object. {\tt GetObject} performs this function.
+ * At compile time, the type of the returned object is unknown.
+ * Thus, the returned type is a sidl.BaseInterface.
+ * QueryInterface or Cast must be used on the returned object to
+ * convert it into a known type.
+ * 
+ */
+
+int32_t
+bHYPRE_SStructGraph_GetObject(
+  bHYPRE_SStructGraph self,
+  /*out*/ sidl_BaseInterface* A)
+{
+  return (*self->d_epv->f_GetObject)(
+    self,
+    A);
 }
 
 /*

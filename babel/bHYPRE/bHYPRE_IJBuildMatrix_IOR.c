@@ -3,15 +3,11 @@
  * Symbol:        bHYPRE.IJBuildMatrix-v1.0.0
  * Symbol Type:   interface
  * Babel Version: 0.9.8
- * sidl Created:  20050317 11:17:39 PST
- * Generated:     20050317 11:17:40 PST
  * Description:   Intermediate Object Representation for bHYPRE.IJBuildMatrix
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
  * babel-version = 0.9.8
- * source-line   = 85
- * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 
 #include <stdlib.h>

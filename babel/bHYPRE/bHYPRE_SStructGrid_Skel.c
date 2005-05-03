@@ -3,15 +3,11 @@
  * Symbol:        bHYPRE.SStructGrid-v1.0.0
  * Symbol Type:   class
  * Babel Version: 0.9.8
- * sidl Created:  20050317 11:17:39 PST
- * Generated:     20050317 11:17:43 PST
  * Description:   Server-side glue code for bHYPRE.SStructGrid
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
  * babel-version = 0.9.8
- * source-line   = 909
- * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 
 #include "bHYPRE_SStructGrid_IOR.h"
@@ -33,6 +29,11 @@ impl_bHYPRE_SStructGrid_SetNumDimParts(
   int32_t);
 
 extern int32_t
+impl_bHYPRE_SStructGrid_SetCommunicator(
+  bHYPRE_SStructGrid,
+  void*);
+
+extern int32_t
 impl_bHYPRE_SStructGrid_SetExtents(
   bHYPRE_SStructGrid,
   int32_t,
@@ -42,6 +43,7 @@ impl_bHYPRE_SStructGrid_SetExtents(
 extern int32_t
 impl_bHYPRE_SStructGrid_SetVariable(
   bHYPRE_SStructGrid,
+  int32_t,
   int32_t,
   int32_t,
   enum bHYPRE_SStructVariable__enum);
@@ -81,6 +83,10 @@ extern int32_t
 impl_bHYPRE_SStructGrid_SetNumGhost(
   bHYPRE_SStructGrid,
   struct sidl_int__array*);
+
+extern int32_t
+impl_bHYPRE_SStructGrid_Assemble(
+  bHYPRE_SStructGrid);
 
 static int32_t
 skel_bHYPRE_SStructGrid_SetExtents(
@@ -211,6 +217,7 @@ bHYPRE_SStructGrid__set_epv(struct bHYPRE_SStructGrid__epv *epv)
   epv->f__ctor = impl_bHYPRE_SStructGrid__ctor;
   epv->f__dtor = impl_bHYPRE_SStructGrid__dtor;
   epv->f_SetNumDimParts = impl_bHYPRE_SStructGrid_SetNumDimParts;
+  epv->f_SetCommunicator = impl_bHYPRE_SStructGrid_SetCommunicator;
   epv->f_SetExtents = skel_bHYPRE_SStructGrid_SetExtents;
   epv->f_SetVariable = impl_bHYPRE_SStructGrid_SetVariable;
   epv->f_AddVariable = skel_bHYPRE_SStructGrid_AddVariable;
@@ -218,6 +225,7 @@ bHYPRE_SStructGrid__set_epv(struct bHYPRE_SStructGrid__epv *epv)
   epv->f_AddUnstructuredPart = impl_bHYPRE_SStructGrid_AddUnstructuredPart;
   epv->f_SetPeriodic = skel_bHYPRE_SStructGrid_SetPeriodic;
   epv->f_SetNumGhost = skel_bHYPRE_SStructGrid_SetNumGhost;
+  epv->f_Assemble = impl_bHYPRE_SStructGrid_Assemble;
 }
 #ifdef __cplusplus
 }

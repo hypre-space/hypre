@@ -3,15 +3,11 @@
  * Symbol:        bHYPRE.SStructParCSRVector-v1.0.0
  * Symbol Type:   class
  * Babel Version: 0.9.8
- * sidl Created:  20050317 11:17:39 PST
- * Generated:     20050317 11:17:43 PST
  * Description:   Server-side implementation for bHYPRE.SStructParCSRVector
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
  * babel-version = 0.9.8
- * source-line   = 842
- * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 
 #ifndef included_bHYPRE_SStructParCSRVector_Impl_h
@@ -35,6 +31,10 @@
 
 /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructParCSRVector._includes) */
 /* Put additional include files here... */
+#include "HYPRE_sstruct_mv.h"
+#include "HYPRE.h"
+#include "utilities.h"
+#include "bHYPRE_SStructBuildVector.h"
 /* DO-NOT-DELETE splicer.end(bHYPRE.SStructParCSRVector._includes) */
 
 /*
@@ -44,7 +44,8 @@
 struct bHYPRE_SStructParCSRVector__data {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructParCSRVector._data) */
   /* Put private data members here... */
-  int ignore; /* dummy to force non-empty struct; remove if you add data */
+   HYPRE_SStructVector vec;
+   MPI_Comm comm;
   /* DO-NOT-DELETE splicer.end(bHYPRE.SStructParCSRVector._data) */
 };
 

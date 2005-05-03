@@ -3,15 +3,11 @@
  * Symbol:        bHYPRE.SStructGrid-v1.0.0
  * Symbol Type:   class
  * Babel Version: 0.9.8
- * sidl Created:  20050317 11:17:39 PST
- * Generated:     20050317 11:17:43 PST
  * Description:   Server-side implementation for bHYPRE.SStructGrid
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
  * babel-version = 0.9.8
- * source-line   = 909
- * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 
 /*
@@ -30,6 +26,11 @@
 
 /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructGrid._includes) */
 /* Put additional includes or other arbitrary code here... */
+#include <assert.h>
+#include "mpi.h"
+#include "HYPRE_sstruct_mv.h"
+#include "sstruct_mv.h"
+#include "utilities.h"
 /* DO-NOT-DELETE splicer.end(bHYPRE.SStructGrid._includes) */
 
 /*
@@ -45,6 +46,13 @@ impl_bHYPRE_SStructGrid__ctor(
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructGrid._ctor) */
   /* Insert the implementation of the constructor method here... */
+
+   struct bHYPRE_SStructGrid__data * data;
+   data = hypre_CTAlloc( struct bHYPRE_SStructGrid__data, 1 );
+   data -> grid = NULL;
+   data -> comm = MPI_COMM_NULL;
+   bHYPRE_SStructGrid__set_data( self, data );
+
   /* DO-NOT-DELETE splicer.end(bHYPRE.SStructGrid._ctor) */
 }
 
@@ -61,6 +69,16 @@ impl_bHYPRE_SStructGrid__dtor(
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructGrid._dtor) */
   /* Insert the implementation of the destructor method here... */
+
+   int ierr = 0;
+   struct bHYPRE_SStructGrid__data * data;
+   HYPRE_SStructGrid Hgrid;
+   data = bHYPRE_SStructGrid__get_data( self );
+   Hgrid = data -> grid;
+   ierr = HYPRE_SStructGridDestroy( Hgrid );
+   assert( ierr==0 );
+   hypre_TFree( data );
+
   /* DO-NOT-DELETE splicer.end(bHYPRE.SStructGrid._dtor) */
 }
 
@@ -79,8 +97,43 @@ impl_bHYPRE_SStructGrid_SetNumDimParts(
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructGrid.SetNumDimParts) */
   /* Insert the implementation of the SetNumDimParts method here... */
-   return 1;
+
+   int ierr = 0;
+   struct bHYPRE_SStructGrid__data * data;
+   HYPRE_SStructGrid * Hgrid;
+   data = bHYPRE_SStructGrid__get_data( self );
+   Hgrid = &(data -> grid);
+   assert( *Hgrid==NULL );  /* grid shouldn't have already been created */
+
+   ierr += HYPRE_SStructGridCreate( data->comm, ndim, nparts, Hgrid );
+
+   return ierr;
+
   /* DO-NOT-DELETE splicer.end(bHYPRE.SStructGrid.SetNumDimParts) */
+}
+
+/*
+ * Method:  SetCommunicator[]
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_SStructGrid_SetCommunicator"
+
+int32_t
+impl_bHYPRE_SStructGrid_SetCommunicator(
+  /*in*/ bHYPRE_SStructGrid self, /*in*/ void* mpi_comm)
+{
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructGrid.SetCommunicator) */
+  /* Insert the implementation of the SetCommunicator method here... */
+
+   int ierr = 0;
+   struct bHYPRE_SStructGrid__data * data;
+   data = bHYPRE_SStructGrid__get_data( self );
+   data -> comm = (MPI_Comm) mpi_comm;
+
+   return ierr;
+
+  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructGrid.SetCommunicator) */
 }
 
 /*
@@ -99,13 +152,26 @@ impl_bHYPRE_SStructGrid_SetExtents(
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructGrid.SetExtents) */
   /* Insert the implementation of the SetExtents method here... */
-   return 1;
+
+   int ierr = 0;
+   struct bHYPRE_SStructGrid__data * data;
+   HYPRE_SStructGrid Hgrid;
+   data = bHYPRE_SStructGrid__get_data( self );
+   Hgrid = data -> grid;
+
+   ierr += HYPRE_SStructGridSetExtents( Hgrid, part,
+                                        sidlArrayAddr1( ilower, 0 ),
+                                        sidlArrayAddr1( iupper, 0 ) );
+   return ierr;
+
   /* DO-NOT-DELETE splicer.end(bHYPRE.SStructGrid.SetExtents) */
 }
 
 /*
  * Describe the variables that live on a structured part of the
- * grid.
+ * grid.  Input: part number, variable number, total number of
+ * variables on that part (needed for memory allocation),
+ * variable type.
  * 
  */
 
@@ -115,11 +181,28 @@ impl_bHYPRE_SStructGrid_SetExtents(
 int32_t
 impl_bHYPRE_SStructGrid_SetVariable(
   /*in*/ bHYPRE_SStructGrid self, /*in*/ int32_t part, /*in*/ int32_t var,
-    /*in*/ enum bHYPRE_SStructVariable__enum vartype)
+    /*in*/ int32_t nvars, /*in*/ enum bHYPRE_SStructVariable__enum vartype)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructGrid.SetVariable) */
   /* Insert the implementation of the SetVariable method here... */
-   return 1;
+
+   /* note: the relevent enums are defined in bHYPRE_SStructVariable_IOR.h
+      (derived from Interfaces.idl) and HYPRE_sstruct_mv.h .  They should
+      be equivalent, and were when I last checked. */
+   /* also note: there would be a SetVariables in the sidl file, except
+      that babeldoesn't suport an array of enums */
+
+   int ierr = 0;
+   struct bHYPRE_SStructGrid__data * data;
+   HYPRE_SStructGrid Hgrid;
+   data = bHYPRE_SStructGrid__get_data( self );
+   Hgrid = data -> grid;
+
+   ierr += HYPRE_SStructGridSetVariable( Hgrid, part, var, nvars,
+                                         (HYPRE_SStructVariable) vartype );
+
+   return ierr;
+
   /* DO-NOT-DELETE splicer.end(bHYPRE.SStructGrid.SetVariable) */
 }
 
@@ -142,7 +225,20 @@ impl_bHYPRE_SStructGrid_AddVariable(
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructGrid.AddVariable) */
   /* Insert the implementation of the AddVariable method here... */
-   return 1;
+
+   int ierr = 0;
+   struct bHYPRE_SStructGrid__data * data;
+   HYPRE_SStructGrid Hgrid;
+   data = bHYPRE_SStructGrid__get_data( self );
+   Hgrid = data -> grid;
+
+   ierr += HYPRE_SStructGridAddVariable( Hgrid, part, 
+                                         sidlArrayAddr1( index, 0 ),
+                                         var,
+                                         (HYPRE_SStructVariable) vartype );
+
+   return ierr;
+
   /* DO-NOT-DELETE splicer.end(bHYPRE.SStructGrid.AddVariable) */
 }
 
@@ -186,7 +282,24 @@ impl_bHYPRE_SStructGrid_SetNeighborBox(
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructGrid.SetNeighborBox) */
   /* Insert the implementation of the SetNeighborBox method here... */
-   return 1;
+
+   int ierr = 0;
+   struct bHYPRE_SStructGrid__data * data;
+   HYPRE_SStructGrid Hgrid;
+   data = bHYPRE_SStructGrid__get_data( self );
+   Hgrid = data -> grid;
+
+   ierr += HYPRE_SStructGridSetNeighborBox
+      ( Hgrid, part,
+        sidlArrayAddr1( ilower, 0 ),
+        sidlArrayAddr1( iupper, 0 ),
+        nbor_part,
+        sidlArrayAddr1( nbor_ilower, 0 ),
+        sidlArrayAddr1( nbor_iupper, 0 ),
+        sidlArrayAddr1( index_map, 0 ) );
+
+      return ierr;
+
   /* DO-NOT-DELETE splicer.end(bHYPRE.SStructGrid.SetNeighborBox) */
 }
 
@@ -211,7 +324,22 @@ impl_bHYPRE_SStructGrid_AddUnstructuredPart(
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructGrid.AddUnstructuredPart) */
   /* Insert the implementation of the AddUnstructuredPart method here... */
+
+#if 0
+   /* the function HYPRE_SStructGridAddUnstructuredPart hasn't been implemented yet */
+   int ierr = 0;
+   struct bHYPRE_SStructGrid__data * data;
+   HYPRE_SStructGrid Hgrid;
+   data = bHYPRE_SStructGrid__get_data( self );
+   Hgrid = data -> grid;
+
+   ierr += HYPRE_SStructGridAddUnstructuredPart( Hgrid, ilower, iupper );
+
+   return ierr;
+#endif
+
    return 1;
+
   /* DO-NOT-DELETE splicer.end(bHYPRE.SStructGrid.AddUnstructuredPart) */
 }
 
@@ -230,7 +358,18 @@ impl_bHYPRE_SStructGrid_SetPeriodic(
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructGrid.SetPeriodic) */
   /* Insert the implementation of the SetPeriodic method here... */
-   return 1;
+
+   int ierr = 0;
+   struct bHYPRE_SStructGrid__data * data;
+   HYPRE_SStructGrid Hgrid;
+   data = bHYPRE_SStructGrid__get_data( self );
+   Hgrid = data -> grid;
+
+   ierr += HYPRE_SStructGridSetPeriodic( Hgrid, part,
+                                         sidlArrayAddr1( periodic, 0 ) );
+
+   return ierr;
+
   /* DO-NOT-DELETE splicer.end(bHYPRE.SStructGrid.SetPeriodic) */
 }
 
@@ -248,6 +387,43 @@ impl_bHYPRE_SStructGrid_SetNumGhost(
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructGrid.SetNumGhost) */
   /* Insert the implementation of the SetNumGhost method here... */
-   return 1;
+
+   int ierr = 0;
+   struct bHYPRE_SStructGrid__data * data;
+   HYPRE_SStructGrid Hgrid;
+   data = bHYPRE_SStructGrid__get_data( self );
+   Hgrid = data -> grid;
+
+   ierr += HYPRE_SStructGridSetNumGhost( Hgrid, sidlArrayAddr1( num_ghost, 0 ) );
+
+   return ierr;
+
   /* DO-NOT-DELETE splicer.end(bHYPRE.SStructGrid.SetNumGhost) */
+}
+
+/*
+ * Method:  Assemble[]
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_SStructGrid_Assemble"
+
+int32_t
+impl_bHYPRE_SStructGrid_Assemble(
+  /*in*/ bHYPRE_SStructGrid self)
+{
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructGrid.Assemble) */
+  /* Insert the implementation of the Assemble method here... */
+
+   int ierr = 0;
+   struct bHYPRE_SStructGrid__data * data;
+   HYPRE_SStructGrid Hgrid;
+   data = bHYPRE_SStructGrid__get_data( self );
+   Hgrid = data -> grid;
+
+   ierr += HYPRE_SStructGridAssemble( Hgrid );
+
+   return ierr;
+
+  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructGrid.Assemble) */
 }

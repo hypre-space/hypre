@@ -3,15 +3,11 @@
  * Symbol:        bHYPRE.SStructMatrix-v1.0.0
  * Symbol Type:   class
  * Babel Version: 0.9.8
- * sidl Created:  20050317 11:17:39 PST
- * Generated:     20050317 11:17:43 PST
  * Description:   Server-side implementation for bHYPRE.SStructMatrix
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
  * babel-version = 0.9.8
- * source-line   = 1067
- * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 
 /*
@@ -33,6 +29,12 @@
 
 /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructMatrix._includes) */
 /* Put additional includes or other arbitrary code here... */
+#include <assert.h>
+#include "mpi.h"
+#include "sstruct_mv.h"
+#include "bHYPRE_SStructVector_Impl.h"
+#include "bHYPRE_SStructGraph_Impl.h"
+#include "bHYPRE_StructMatrix_Impl.h"
 /* DO-NOT-DELETE splicer.end(bHYPRE.SStructMatrix._includes) */
 
 /*
@@ -48,6 +50,20 @@ impl_bHYPRE_SStructMatrix__ctor(
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructMatrix._ctor) */
   /* Insert the implementation of the constructor method here... */
+
+   /* To build a SStructMatrix via Babel: first call the constructor,
+      then SetCommunicator, then SetGraph (which internally calls
+      HYPRE_SStructMatrixCreate), then any optional parameter set functions
+      (e.g. SetSymmetric) then Initialize, then value set functions (such as
+      SetValues or SetBoxValues), and finally Assemble (Setup is equivalent to Assemble).
+    */
+
+   struct bHYPRE_SStructMatrix__data * data;
+   data = hypre_CTAlloc( struct bHYPRE_SStructMatrix__data, 1 );
+   data -> comm = MPI_COMM_NULL;
+   data -> matrix = NULL;
+   bHYPRE_SStructMatrix__set_data( self, data );
+
   /* DO-NOT-DELETE splicer.end(bHYPRE.SStructMatrix._ctor) */
 }
 
@@ -64,6 +80,16 @@ impl_bHYPRE_SStructMatrix__dtor(
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructMatrix._dtor) */
   /* Insert the implementation of the destructor method here... */
+
+   int ierr = 0;
+   struct bHYPRE_SStructMatrix__data * data;
+   HYPRE_SStructMatrix matrix;
+   data = bHYPRE_SStructMatrix__get_data( self );
+   matrix = data -> matrix;
+   ierr += HYPRE_SStructMatrixDestroy( matrix );
+   assert( ierr==0 );
+   hypre_TFree( data );
+
   /* DO-NOT-DELETE splicer.end(bHYPRE.SStructMatrix._dtor) */
 }
 
@@ -81,7 +107,14 @@ impl_bHYPRE_SStructMatrix_SetCommunicator(
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructMatrix.SetCommunicator) */
   /* Insert the implementation of the SetCommunicator method here... */
-   return 1;
+
+   int ierr = 0;
+   struct bHYPRE_SStructMatrix__data * data;
+   data = bHYPRE_SStructMatrix__get_data( self );
+   data -> comm = (MPI_Comm) mpi_comm;
+
+   return ierr;
+
   /* DO-NOT-DELETE splicer.end(bHYPRE.SStructMatrix.SetCommunicator) */
 }
 
@@ -274,7 +307,18 @@ impl_bHYPRE_SStructMatrix_Setup(
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructMatrix.Setup) */
   /* Insert the implementation of the Setup method here... */
-   return 1;
+
+   int ierr=0;
+   struct bHYPRE_SStructMatrix__data * data;
+   HYPRE_SStructMatrix HA;
+
+   data = bHYPRE_SStructMatrix__get_data( self );
+   HA = data -> matrix;
+
+   ierr = HYPRE_SStructMatrixAssemble( HA );
+
+   return( ierr );
+
   /* DO-NOT-DELETE splicer.end(bHYPRE.SStructMatrix.Setup) */
 }
 
@@ -293,7 +337,54 @@ impl_bHYPRE_SStructMatrix_Apply(
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructMatrix.Apply) */
   /* Insert the implementation of the Apply method here... */
-   return 1;
+
+   /* Apply means to multiply by a vector, x = A*b .  Here, we call
+    * the HYPRE Matvec function which performs x = alpha*A*b + beta*x (we set
+    * alpha=1 and beta=0).  */
+
+   int ierr = 0;
+   struct bHYPRE_SStructMatrix__data * data;
+   struct bHYPRE_SStructVector__data * data_x, * data_b;
+   bHYPRE_SStructVector bHYPREP_b, bHYPREP_x;
+   HYPRE_SStructMatrix HA;
+   HYPRE_SStructVector Hx, Hb;
+
+   data = bHYPRE_SStructMatrix__get_data( self );
+   HA = data -> matrix;
+
+   /* A bHYPRE_Vector is just an interface, we have no knowledge of its
+    * contents.  Check whether it's something we know how to handle.
+    * If not, die. */
+   if ( bHYPRE_Vector_queryInt(b, "bHYPRE.SStructVector" ) )
+   {
+      bHYPREP_b = bHYPRE_SStructVector__cast( b );
+   }
+   else
+   {
+      assert( "Unrecognized vector type."==(char *)b );
+   }
+
+   if ( bHYPRE_Vector_queryInt( *x, "bHYPRE.SStructVector" ) )
+   {
+      bHYPREP_x = bHYPRE_SStructVector__cast( *x );
+   }
+   else
+   {
+      assert( "Unrecognized vector type."==(char *)x );
+   }
+
+   data_x = bHYPRE_SStructVector__get_data( bHYPREP_x );
+   Hx = data_x -> vec;
+   data_b = bHYPRE_SStructVector__get_data( bHYPREP_b );
+   Hb = data_b -> vec;
+
+   ierr += HYPRE_SStructMatrixMatvec( 1.0, HA, Hb, 0.0, Hx );
+
+   bHYPRE_SStructVector_deleteRef( bHYPREP_b ); /* ref was created by queryInt */
+   bHYPRE_SStructVector_deleteRef( bHYPREP_x ); /* ref was created by queryInt */
+
+   return( ierr );
+
   /* DO-NOT-DELETE splicer.end(bHYPRE.SStructMatrix.Apply) */
 }
 
@@ -312,7 +403,19 @@ impl_bHYPRE_SStructMatrix_Initialize(
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructMatrix.Initialize) */
   /* Insert the implementation of the Initialize method here... */
-   return 1;
+
+   int ierr=0;
+   struct bHYPRE_SStructMatrix__data * data;
+   HYPRE_SStructMatrix HA;
+
+   data = bHYPRE_SStructMatrix__get_data( self );
+   HA = data -> matrix;
+
+   ierr = HYPRE_SStructMatrixInitialize( HA );
+   HYPRE_SStructMatrixSetObjectType( HA, HYPRE_STRUCT );
+
+   return( ierr );
+
   /* DO-NOT-DELETE splicer.end(bHYPRE.SStructMatrix.Initialize) */
 }
 
@@ -334,7 +437,18 @@ impl_bHYPRE_SStructMatrix_Assemble(
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructMatrix.Assemble) */
   /* Insert the implementation of the Assemble method here... */
-   return 1;
+
+   int ierr=0;
+   struct bHYPRE_SStructMatrix__data * data;
+   HYPRE_SStructMatrix HA;
+
+   data = bHYPRE_SStructMatrix__get_data( self );
+   HA = data -> matrix;
+
+   ierr = HYPRE_SStructMatrixAssemble( HA );
+
+   return( ierr );
+
   /* DO-NOT-DELETE splicer.end(bHYPRE.SStructMatrix.Assemble) */
 }
 
@@ -360,7 +474,34 @@ impl_bHYPRE_SStructMatrix_GetObject(
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructMatrix.GetObject) */
   /* Insert the implementation of the GetObject method here... */
-   return 1;
+ 
+   /* bHYPRE_SStructMatrix_addRef( self );*/
+   /* *A = sidl_BaseInterface__cast( self );*/
+   /* the matrix needs to be made into a struct or parcsr matrix for solver use,
+    struct here (parcsr in the case of SStructParCSRMatrix) */
+
+   int ierr=0;
+   struct bHYPRE_SStructMatrix__data * data;
+   HYPRE_SStructMatrix HA;
+   bHYPRE_StructMatrix sA;
+   struct bHYPRE_StructMatrix__data * s_data;
+   HYPRE_StructMatrix HsA;
+
+   data = bHYPRE_SStructMatrix__get_data( self );
+   HA = data -> matrix;
+
+   sA = bHYPRE_StructMatrix__create();
+   s_data = bHYPRE_StructMatrix__get_data( sA );
+   ierr += HYPRE_SStructMatrixGetObject( HA, (void **) (&HsA) );
+   s_data -> matrix = HsA;
+   s_data -> comm = data -> comm;
+   /* The grid and stencil slots of s_data haven't been set, but they shouldn't
+      be needed- they are just used for creation of the HYPRE_StructMatrix object.
+    */
+   *A = sidl_BaseInterface__cast( sA );
+
+   return( ierr );
+
   /* DO-NOT-DELETE splicer.end(bHYPRE.SStructMatrix.GetObject) */
 }
 
@@ -378,7 +519,34 @@ impl_bHYPRE_SStructMatrix_SetGraph(
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructMatrix.SetGraph) */
   /* Insert the implementation of the SetGraph method here... */
-   return 1;
+
+   /* To create a matrix one needs a graph and communicator.
+      We assume SetCommunicator will be called first.
+      So SetGraph can simply call HYPRE_StructMatrixCreate.
+      It is an error to call this function
+      if HYPRE_StructMatrixCreate has already been called for this matrix.
+   */
+
+   int ierr = 0;
+   struct bHYPRE_SStructMatrix__data * data;
+   HYPRE_SStructMatrix HA;
+   HYPRE_SStructGraph Hgraph;
+   MPI_Comm comm;
+   struct bHYPRE_SStructGraph__data * gdata;
+
+   data = bHYPRE_SStructMatrix__get_data( self );
+   HA = data->matrix;
+   assert( HA==NULL ); /* shouldn't have already been created */
+   comm = data->comm;
+
+   gdata = bHYPRE_SStructGraph__get_data( graph );
+   Hgraph = gdata->graph;
+
+   ierr += HYPRE_SStructMatrixCreate( comm, Hgraph, &HA );
+   data->matrix = HA;
+
+   return( ierr );
+
   /* DO-NOT-DELETE splicer.end(bHYPRE.SStructMatrix.SetGraph) */
 }
 
@@ -413,7 +581,19 @@ impl_bHYPRE_SStructMatrix_SetValues(
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructMatrix.SetValues) */
   /* Insert the implementation of the SetValues method here... */
-   return 1;
+
+   int ierr = 0;
+   struct bHYPRE_SStructMatrix__data * data;
+   HYPRE_SStructMatrix HA;
+   data = bHYPRE_SStructMatrix__get_data( self );
+   HA = data -> matrix;
+
+   ierr += HYPRE_SStructMatrixSetValues
+      ( HA, part, sidlArrayAddr1( index, 0 ), var, nentries,
+        sidlArrayAddr1( entries, 0 ), sidlArrayAddr1( values, 0 ) );
+
+   return ierr;
+
   /* DO-NOT-DELETE splicer.end(bHYPRE.SStructMatrix.SetValues) */
 }
 
@@ -449,7 +629,19 @@ impl_bHYPRE_SStructMatrix_SetBoxValues(
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructMatrix.SetBoxValues) */
   /* Insert the implementation of the SetBoxValues method here... */
-   return 1;
+
+   int ierr = 0;
+   struct bHYPRE_SStructMatrix__data * data;
+   HYPRE_SStructMatrix HA;
+   data = bHYPRE_SStructMatrix__get_data( self );
+   HA = data -> matrix;
+
+   ierr += HYPRE_SStructMatrixSetBoxValues
+      ( HA, part, sidlArrayAddr1( ilower, 0 ), sidlArrayAddr1( iupper, 0 ),
+        var, nentries, sidlArrayAddr1( entries, 0 ), sidlArrayAddr1( values, 0 ) );
+
+   return ierr;
+
   /* DO-NOT-DELETE splicer.end(bHYPRE.SStructMatrix.SetBoxValues) */
 }
 
@@ -483,7 +675,19 @@ impl_bHYPRE_SStructMatrix_AddToValues(
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructMatrix.AddToValues) */
   /* Insert the implementation of the AddToValues method here... */
-   return 1;
+
+   int ierr = 0;
+   struct bHYPRE_SStructMatrix__data * data;
+   HYPRE_SStructMatrix HA;
+   data = bHYPRE_SStructMatrix__get_data( self );
+   HA = data -> matrix;
+
+   ierr += HYPRE_SStructMatrixAddToValues
+      ( HA, part, sidlArrayAddr1( index, 0 ), var, nentries,
+        sidlArrayAddr1( entries, 0 ), sidlArrayAddr1( values, 0 ) );
+
+   return ierr;
+
   /* DO-NOT-DELETE splicer.end(bHYPRE.SStructMatrix.AddToValues) */
 }
 
@@ -517,7 +721,19 @@ impl_bHYPRE_SStructMatrix_AddToBoxValues(
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructMatrix.AddToBoxValues) */
   /* Insert the implementation of the AddToBoxValues method here... */
-   return 1;
+
+   int ierr = 0;
+   struct bHYPRE_SStructMatrix__data * data;
+   HYPRE_SStructMatrix HA;
+   data = bHYPRE_SStructMatrix__get_data( self );
+   HA = data -> matrix;
+
+   ierr += HYPRE_SStructMatrixAddToBoxValues
+      ( HA, part, sidlArrayAddr1( ilower, 0 ), sidlArrayAddr1( iupper, 0 ),
+        var, nentries, sidlArrayAddr1( entries, 0 ), sidlArrayAddr1( values, 0 ) );
+
+   return ierr;
+
   /* DO-NOT-DELETE splicer.end(bHYPRE.SStructMatrix.AddToBoxValues) */
 }
 
@@ -548,7 +764,18 @@ impl_bHYPRE_SStructMatrix_SetSymmetric(
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructMatrix.SetSymmetric) */
   /* Insert the implementation of the SetSymmetric method here... */
-   return 1;
+
+   int ierr=0;
+   struct bHYPRE_SStructMatrix__data * data;
+   HYPRE_SStructMatrix HA;
+
+   data = bHYPRE_SStructMatrix__get_data( self );
+   HA = data -> matrix;
+
+   ierr += HYPRE_SStructMatrixSetSymmetric( HA, part, var, to_var, symmetric );
+
+   return ierr;
+
   /* DO-NOT-DELETE splicer.end(bHYPRE.SStructMatrix.SetSymmetric) */
 }
 
@@ -567,7 +794,18 @@ impl_bHYPRE_SStructMatrix_SetNSSymmetric(
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructMatrix.SetNSSymmetric) */
   /* Insert the implementation of the SetNSSymmetric method here... */
-   return 1;
+
+   int ierr=0;
+   struct bHYPRE_SStructMatrix__data * data;
+   HYPRE_SStructMatrix HA;
+
+   data = bHYPRE_SStructMatrix__get_data( self );
+   HA = data -> matrix;
+
+   ierr += HYPRE_SStructMatrixSetNSSymmetric( HA, symmetric );
+
+   return ierr;
+
   /* DO-NOT-DELETE splicer.end(bHYPRE.SStructMatrix.SetNSSymmetric) */
 }
 
@@ -585,6 +823,7 @@ impl_bHYPRE_SStructMatrix_SetComplex(
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructMatrix.SetComplex) */
   /* Insert the implementation of the SetComplex method here... */
+   /* I don't think complex numbers have been implemented in sstruct yet */
    return 1;
   /* DO-NOT-DELETE splicer.end(bHYPRE.SStructMatrix.SetComplex) */
 }
@@ -605,6 +844,17 @@ impl_bHYPRE_SStructMatrix_Print(
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructMatrix.Print) */
   /* Insert the implementation of the Print method here... */
-   return 1;
+
+   int ierr=0;
+   struct bHYPRE_SStructMatrix__data * data;
+   HYPRE_SStructMatrix HA;
+
+   data = bHYPRE_SStructMatrix__get_data( self );
+   HA = data -> matrix;
+
+   ierr += HYPRE_SStructMatrixPrint( filename, HA, all );
+
+   return ierr;
+
   /* DO-NOT-DELETE splicer.end(bHYPRE.SStructMatrix.Print) */
 }

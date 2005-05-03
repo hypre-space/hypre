@@ -3,15 +3,11 @@
  * Symbol:        bHYPRE.SStructVector-v1.0.0
  * Symbol Type:   class
  * Babel Version: 0.9.8
- * sidl Created:  20050317 11:17:39 PST
- * Generated:     20050317 11:17:43 PST
  * Description:   Client-side glue code for bHYPRE.SStructVector
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
  * babel-version = 0.9.8
- * source-line   = 1079
- * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 
 #ifndef included_bHYPRE_SStructVector_h
@@ -86,6 +82,14 @@ bHYPRE_SStructVector_isType(
 sidl_ClassInfo
 bHYPRE_SStructVector_getClassInfo(
   /*in*/ bHYPRE_SStructVector self);
+
+/**
+ * Method:  SetObjectType[]
+ */
+int32_t
+bHYPRE_SStructVector_SetObjectType(
+  /*in*/ bHYPRE_SStructVector self,
+  /*in*/ int32_t type);
 
 /**
  * Set {\tt self} to 0.
@@ -220,7 +224,7 @@ bHYPRE_SStructVector_SetValues(
   /*in*/ int32_t part,
   /*in*/ struct sidl_int__array* index,
   /*in*/ int32_t var,
-  /*in*/ struct sidl_double__array* value);
+  /*in*/ struct sidl_double__array* values);
 
 /**
  * Set vector coefficients a box at a time.
@@ -261,7 +265,7 @@ bHYPRE_SStructVector_AddToValues(
   /*in*/ int32_t part,
   /*in*/ struct sidl_int__array* index,
   /*in*/ int32_t var,
-  /*in*/ struct sidl_double__array* value);
+  /*in*/ struct sidl_double__array* values);
 
 /**
  * Set vector coefficients a box at a time.

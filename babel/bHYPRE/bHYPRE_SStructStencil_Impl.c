@@ -3,15 +3,11 @@
  * Symbol:        bHYPRE.SStructStencil-v1.0.0
  * Symbol Type:   class
  * Babel Version: 0.9.8
- * sidl Created:  20050317 11:17:39 PST
- * Generated:     20050317 11:17:43 PST
  * Description:   Server-side implementation for bHYPRE.SStructStencil
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
  * babel-version = 0.9.8
- * source-line   = 1006
- * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 
 /*
@@ -30,6 +26,9 @@
 
 /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructStencil._includes) */
 /* Put additional includes or other arbitrary code here... */
+#include <assert.h>
+#include "mpi.h"
+#include "sstruct_mv.h"
 /* DO-NOT-DELETE splicer.end(bHYPRE.SStructStencil._includes) */
 
 /*
@@ -45,6 +44,12 @@ impl_bHYPRE_SStructStencil__ctor(
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructStencil._ctor) */
   /* Insert the implementation of the constructor method here... */
+
+   struct bHYPRE_SStructStencil__data * data;
+   data = hypre_CTAlloc( struct bHYPRE_SStructStencil__data, 1 );
+   data -> stencil = NULL;
+   bHYPRE_SStructStencil__set_data( self, data );
+
   /* DO-NOT-DELETE splicer.end(bHYPRE.SStructStencil._ctor) */
 }
 
@@ -61,6 +66,16 @@ impl_bHYPRE_SStructStencil__dtor(
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructStencil._dtor) */
   /* Insert the implementation of the destructor method here... */
+
+   int ierr = 0;
+   struct bHYPRE_SStructStencil__data * data;
+   HYPRE_SStructStencil stencil;
+   data = bHYPRE_SStructStencil__get_data( self );
+   stencil = data -> stencil;
+   ierr += HYPRE_SStructStencilDestroy( stencil );
+   assert( ierr==0 );
+   hypre_TFree( data );
+
   /* DO-NOT-DELETE splicer.end(bHYPRE.SStructStencil._dtor) */
 }
 
@@ -78,7 +93,23 @@ impl_bHYPRE_SStructStencil_SetNumDimSize(
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructStencil.SetNumDimSize) */
   /* Insert the implementation of the SetNumDimSize method here... */
-   return 1;
+   /* note: StructStencil does this with two functions, SStruct with one.
+      But StructStencil_SetElement and SStructStencil_SetEntry are inherently
+      different, and no other stencil classes are expected to exist, so there
+      is little point in reconciling this */
+ 
+   int ierr = 0;
+   struct bHYPRE_SStructStencil__data * data;
+   HYPRE_SStructStencil stencil;
+
+   data = bHYPRE_SStructStencil__get_data( self );
+   stencil = data -> stencil;
+
+   ierr += HYPRE_SStructStencilCreate( ndim, size, &stencil );
+   data -> stencil = stencil;
+
+   return ierr;
+
   /* DO-NOT-DELETE splicer.end(bHYPRE.SStructStencil.SetNumDimSize) */
 }
 
@@ -97,6 +128,18 @@ impl_bHYPRE_SStructStencil_SetEntry(
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructStencil.SetEntry) */
   /* Insert the implementation of the SetEntry method here... */
-   return 1;
+ 
+   int ierr = 0;
+   struct bHYPRE_SStructStencil__data * data;
+   HYPRE_SStructStencil Hstencil;
+
+   data = bHYPRE_SStructStencil__get_data( self );
+   Hstencil = data -> stencil;
+
+   ierr += HYPRE_SStructStencilSetEntry( Hstencil, entry,
+                                         sidlArrayAddr1( offset, 0 ), var );
+
+   return ierr;
+
   /* DO-NOT-DELETE splicer.end(bHYPRE.SStructStencil.SetEntry) */
 }

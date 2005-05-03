@@ -3,15 +3,11 @@
  * Symbol:        bHYPRE.SStructGraph-v1.0.0
  * Symbol Type:   class
  * Babel Version: 0.9.8
- * sidl Created:  20050317 11:17:39 PST
- * Generated:     20050317 11:17:43 PST
  * Description:   Server-side implementation for bHYPRE.SStructGraph
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
  * babel-version = 0.9.8
- * source-line   = 1027
- * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 
 #ifndef included_bHYPRE_SStructGraph_Impl_h
@@ -26,12 +22,16 @@
 #ifndef included_bHYPRE_SStructGrid_h
 #include "bHYPRE_SStructGrid.h"
 #endif
+#ifndef included_sidl_BaseInterface_h
+#include "sidl_BaseInterface.h"
+#endif
 #ifndef included_bHYPRE_SStructGraph_h
 #include "bHYPRE_SStructGraph.h"
 #endif
 
 /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructGraph._includes) */
 /* Put additional include files here... */
+#include "HYPRE_sstruct_mv.h"
 /* DO-NOT-DELETE splicer.end(bHYPRE.SStructGraph._includes) */
 
 /*
@@ -41,7 +41,7 @@
 struct bHYPRE_SStructGraph__data {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructGraph._data) */
   /* Put private data members here... */
-  int ignore; /* dummy to force non-empty struct; remove if you add data */
+   HYPRE_SStructGraph graph;
   /* DO-NOT-DELETE splicer.end(bHYPRE.SStructGraph._data) */
 };
 
@@ -75,8 +75,9 @@ impl_bHYPRE_SStructGraph__dtor(
  */
 
 extern int32_t
-impl_bHYPRE_SStructGraph_SetGrid(
+impl_bHYPRE_SStructGraph_SetCommGrid(
   bHYPRE_SStructGraph,
+  void*,
   bHYPRE_SStructGrid);
 
 extern int32_t
@@ -95,6 +96,29 @@ impl_bHYPRE_SStructGraph_AddEntries(
   int32_t,
   struct sidl_int__array*,
   int32_t);
+
+extern int32_t
+impl_bHYPRE_SStructGraph_SetObjectType(
+  bHYPRE_SStructGraph,
+  int32_t);
+
+extern int32_t
+impl_bHYPRE_SStructGraph_SetCommunicator(
+  bHYPRE_SStructGraph,
+  void*);
+
+extern int32_t
+impl_bHYPRE_SStructGraph_Initialize(
+  bHYPRE_SStructGraph);
+
+extern int32_t
+impl_bHYPRE_SStructGraph_Assemble(
+  bHYPRE_SStructGraph);
+
+extern int32_t
+impl_bHYPRE_SStructGraph_GetObject(
+  bHYPRE_SStructGraph,
+  sidl_BaseInterface*);
 
 #ifdef __cplusplus
 }

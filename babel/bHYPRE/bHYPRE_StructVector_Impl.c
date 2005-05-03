@@ -3,15 +3,11 @@
  * Symbol:        bHYPRE.StructVector-v1.0.0
  * Symbol Type:   class
  * Babel Version: 0.9.8
- * sidl Created:  20050317 11:17:39 PST
- * Generated:     20050317 11:17:43 PST
  * Description:   Server-side implementation for bHYPRE.StructVector
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
  * babel-version = 0.9.8
- * source-line   = 1141
- * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 
 /*
@@ -55,8 +51,8 @@ impl_bHYPRE_StructVector__ctor(
 
    struct bHYPRE_StructVector__data * data;
    data = hypre_CTAlloc( struct bHYPRE_StructVector__data, 1 );
-   data -> comm = MPI_COMM_NULL;
    data -> vec = NULL;
+   data -> comm = MPI_COMM_NULL;
    bHYPRE_StructVector__set_data( self, data );
 
   /* DO-NOT-DELETE splicer.end(bHYPRE.StructVector._ctor) */
@@ -362,6 +358,9 @@ impl_bHYPRE_StructVector_SetCommunicator(
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.StructVector.SetCommunicator) */
   /* Insert the implementation of the SetCommunicator method here... */
+   /* N.B. This function will have no effect unless called _before_
+      SetGrid.
+    */
 
    int ierr = 0;
    struct bHYPRE_StructVector__data * data;

@@ -3,15 +3,11 @@
  * Symbol:        bHYPRE.SStructGrid-v1.0.0
  * Symbol Type:   class
  * Babel Version: 0.9.8
- * sidl Created:  20050317 11:17:39 PST
- * Generated:     20050317 11:17:43 PST
  * Description:   Server-side implementation for bHYPRE.SStructGrid
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
  * babel-version = 0.9.8
- * source-line   = 909
- * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 
 #ifndef included_bHYPRE_SStructGrid_Impl_h
@@ -29,6 +25,7 @@
 
 /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructGrid._includes) */
 /* Put additional include files here... */
+#include "HYPRE_sstruct_mv.h"
 /* DO-NOT-DELETE splicer.end(bHYPRE.SStructGrid._includes) */
 
 /*
@@ -38,7 +35,8 @@
 struct bHYPRE_SStructGrid__data {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructGrid._data) */
   /* Put private data members here... */
-  int ignore; /* dummy to force non-empty struct; remove if you add data */
+   HYPRE_SStructGrid grid;
+   MPI_Comm comm;
   /* DO-NOT-DELETE splicer.end(bHYPRE.SStructGrid._data) */
 };
 
@@ -78,6 +76,11 @@ impl_bHYPRE_SStructGrid_SetNumDimParts(
   int32_t);
 
 extern int32_t
+impl_bHYPRE_SStructGrid_SetCommunicator(
+  bHYPRE_SStructGrid,
+  void*);
+
+extern int32_t
 impl_bHYPRE_SStructGrid_SetExtents(
   bHYPRE_SStructGrid,
   int32_t,
@@ -87,6 +90,7 @@ impl_bHYPRE_SStructGrid_SetExtents(
 extern int32_t
 impl_bHYPRE_SStructGrid_SetVariable(
   bHYPRE_SStructGrid,
+  int32_t,
   int32_t,
   int32_t,
   enum bHYPRE_SStructVariable__enum);
@@ -126,6 +130,10 @@ extern int32_t
 impl_bHYPRE_SStructGrid_SetNumGhost(
   bHYPRE_SStructGrid,
   struct sidl_int__array*);
+
+extern int32_t
+impl_bHYPRE_SStructGrid_Assemble(
+  bHYPRE_SStructGrid);
 
 #ifdef __cplusplus
 }

@@ -3,15 +3,11 @@
  * Symbol:        bHYPRE.SStructParCSRVector-v1.0.0
  * Symbol Type:   class
  * Babel Version: 0.9.8
- * sidl Created:  20050317 11:17:39 PST
- * Generated:     20050317 11:17:43 PST
  * Description:   Server-side implementation for bHYPRE.SStructParCSRVector
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
  * babel-version = 0.9.8
- * source-line   = 842
- * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 
 /*
@@ -33,6 +29,11 @@
 
 /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructParCSRVector._includes) */
 /* Put additional includes or other arbitrary code here... */
+#include <assert.h>
+#include "mpi.h"
+#include "sstruct_mv.h"
+#include "bHYPRE_SStructGrid_Impl.h"
+#include "bHYPRE_IJParCSRVector_Impl.h"
 /* DO-NOT-DELETE splicer.end(bHYPRE.SStructParCSRVector._includes) */
 
 /*
@@ -48,6 +49,18 @@ impl_bHYPRE_SStructParCSRVector__ctor(
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructParCSRVector._ctor) */
   /* Insert the implementation of the constructor method here... */
+
+  /* How to make a vector: first call the constructor.
+     Then SetCommunicator, then SetGrid (which calls HYPRE_SStructParCSRVectorCreate),
+     then Initialize, then SetValues (or SetBoxValues, etc.), then Assemble.
+  */
+
+   struct bHYPRE_SStructParCSRVector__data * data;
+   data = hypre_CTAlloc( struct bHYPRE_SStructParCSRVector__data, 1 );
+   data -> vec = NULL;
+   data -> comm = MPI_COMM_NULL;
+   bHYPRE_SStructParCSRVector__set_data( self, data );
+
   /* DO-NOT-DELETE splicer.end(bHYPRE.SStructParCSRVector._ctor) */
 }
 
@@ -64,6 +77,16 @@ impl_bHYPRE_SStructParCSRVector__dtor(
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructParCSRVector._dtor) */
   /* Insert the implementation of the destructor method here... */
+
+   int ierr = 0;
+   struct bHYPRE_SStructParCSRVector__data * data;
+   HYPRE_SStructVector vec;
+   data = bHYPRE_SStructParCSRVector__get_data( self );
+   vec = data -> vec;
+   ierr += HYPRE_SStructVectorDestroy( vec );
+   assert( ierr==0 );
+   hypre_TFree( data );
+
   /* DO-NOT-DELETE splicer.end(bHYPRE.SStructParCSRVector._dtor) */
 }
 
@@ -195,7 +218,14 @@ impl_bHYPRE_SStructParCSRVector_SetCommunicator(
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructParCSRVector.SetCommunicator) */
   /* Insert the implementation of the SetCommunicator method here... */
-   return 1;
+
+   int ierr = 0;
+   struct bHYPRE_SStructParCSRVector__data * data;
+   data = bHYPRE_SStructParCSRVector__get_data( self );
+   data -> comm = (MPI_Comm) mpi_comm;
+
+   return ierr;
+
   /* DO-NOT-DELETE splicer.end(bHYPRE.SStructParCSRVector.SetCommunicator) */
 }
 
@@ -214,7 +244,18 @@ impl_bHYPRE_SStructParCSRVector_Initialize(
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructParCSRVector.Initialize) */
   /* Insert the implementation of the Initialize method here... */
-   return 1;
+
+   int ierr = 0;
+   struct bHYPRE_SStructParCSRVector__data * data;
+   HYPRE_SStructVector Hy;
+   data = bHYPRE_SStructParCSRVector__get_data( self );
+   Hy = data -> vec;
+
+   HYPRE_SStructVectorSetObjectType( Hy, HYPRE_PARCSR );
+   ierr = HYPRE_SStructVectorInitialize( Hy );
+
+   return( ierr );
+
   /* DO-NOT-DELETE splicer.end(bHYPRE.SStructParCSRVector.Initialize) */
 }
 
@@ -236,7 +277,17 @@ impl_bHYPRE_SStructParCSRVector_Assemble(
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructParCSRVector.Assemble) */
   /* Insert the implementation of the Assemble method here... */
-   return 1;
+
+   int ierr = 0;
+   struct bHYPRE_SStructParCSRVector__data * data;
+   HYPRE_SStructVector Hy;
+   data = bHYPRE_SStructParCSRVector__get_data( self );
+   Hy = data -> vec;
+
+   ierr = HYPRE_SStructVectorAssemble( Hy );
+
+   return( ierr );
+
   /* DO-NOT-DELETE splicer.end(bHYPRE.SStructParCSRVector.Assemble) */
 }
 
@@ -262,7 +313,46 @@ impl_bHYPRE_SStructParCSRVector_GetObject(
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructParCSRVector.GetObject) */
   /* Insert the implementation of the GetObject method here... */
-   return 1;
+
+   int ierr=0;
+   struct bHYPRE_SStructParCSRVector__data * data;
+   HYPRE_SStructVector Hx;
+   bHYPRE_IJParCSRVector px;
+   struct bHYPRE_IJParCSRVector__data * p_data;
+   HYPRE_ParVector Hpx;
+   HYPRE_IJVector Hijx;
+   hypre_SStructGrid      * grid;
+   int  ilower, iupper;
+
+   data = bHYPRE_SStructParCSRVector__get_data( self );
+   Hx = data -> vec;
+   grid =  hypre_SStructVectorGrid( Hx );
+
+   px = bHYPRE_IJParCSRVector__create();
+   p_data = bHYPRE_IJParCSRVector__get_data( px );
+   ierr += HYPRE_SStructVectorGetObject( Hx, (void **) (&Hpx) );
+
+   /* The purpose of the following block is to convert the HYPRE_ParVector Hpx
+      to a HYPRE_IJVector Hijx ... */
+
+   ilower = hypre_ParVectorFirstIndex( (hypre_ParVector *) Hpx );
+   iupper = hypre_VectorSize( hypre_ParVectorLocalVector( (hypre_ParVector *) Hpx ) );
+
+   ierr += HYPRE_IJVectorCreate( data->comm, ilower, iupper, &Hijx );
+   ierr += HYPRE_IJVectorSetObjectType( Hijx, HYPRE_PARCSR );
+   ierr += HYPRE_IJVectorInitialize( Hijx );
+   hypre_IJVectorObject( (hypre_IJVector *) Hijx ) = HYPRE_ParVectorCloneShallow( Hpx );
+
+   /* Now that we have made Hijx from Hpx, load it into p_data, the data of px.
+      Then px is ready for output, as A.*/
+
+   p_data -> ij_b = Hijx;
+   p_data -> comm = data->comm;
+
+   *A = sidl_BaseInterface__cast( px );
+
+   return( ierr );
+
   /* DO-NOT-DELETE splicer.end(bHYPRE.SStructParCSRVector.GetObject) */
 }
 
@@ -280,7 +370,33 @@ impl_bHYPRE_SStructParCSRVector_SetGrid(
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructParCSRVector.SetGrid) */
   /* Insert the implementation of the SetGrid method here... */
-   return 1;
+   /* N.B. This is the only grid-setting function defined in the interface.
+    So this is the only place to call HYPRE_SStructVectorCreate, which requires a grid.
+    Note that SetGrid cannot be called twice on the same vector.  The grid cannot be changed.
+
+    SetCommunicator should have been called before the time SetGrid is called.
+    Initialize, value-setting functions, and Assemble should be called afterwards.
+   */
+
+   int ierr = 0;
+   struct bHYPRE_SStructParCSRVector__data * data;
+   HYPRE_SStructVector Hy;
+   HYPRE_SStructGrid Hgrid;
+   MPI_Comm comm;
+   struct bHYPRE_SStructGrid__data * gdata;
+
+   data = bHYPRE_SStructParCSRVector__get_data( self );
+   Hy = data->vec;
+   assert( Hy==NULL ); /* shouldn't have already been created */
+   comm = data->comm;
+   gdata = bHYPRE_SStructGrid__get_data( grid );
+   Hgrid = gdata->grid;
+
+   ierr += HYPRE_SStructVectorCreate( comm, Hgrid, &Hy );
+   data->vec = Hy;
+
+   return( ierr );
+
   /* DO-NOT-DELETE splicer.end(bHYPRE.SStructParCSRVector.SetGrid) */
 }
 
@@ -304,11 +420,23 @@ int32_t
 impl_bHYPRE_SStructParCSRVector_SetValues(
   /*in*/ bHYPRE_SStructParCSRVector self, /*in*/ int32_t part,
     /*in*/ struct sidl_int__array* index, /*in*/ int32_t var,
-    /*in*/ struct sidl_double__array* value)
+    /*in*/ struct sidl_double__array* values)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructParCSRVector.SetValues) */
   /* Insert the implementation of the SetValues method here... */
-   return 1;
+
+   int ierr = 0;
+   struct bHYPRE_SStructParCSRVector__data * data;
+   HYPRE_SStructVector Hy;
+   data = bHYPRE_SStructParCSRVector__get_data( self );
+   Hy = data -> vec;
+
+   ierr += HYPRE_SStructVectorSetValues
+      ( Hy, part, sidlArrayAddr1( index, 0 ), var,
+        sidlArrayAddr1( values, 0 ) );
+
+   return ierr;
+
   /* DO-NOT-DELETE splicer.end(bHYPRE.SStructParCSRVector.SetValues) */
 }
 
@@ -337,7 +465,19 @@ impl_bHYPRE_SStructParCSRVector_SetBoxValues(
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructParCSRVector.SetBoxValues) */
   /* Insert the implementation of the SetBoxValues method here... */
-   return 1;
+
+   int ierr = 0;
+   struct bHYPRE_SStructParCSRVector__data * data;
+   HYPRE_SStructVector Hy;
+   data = bHYPRE_SStructParCSRVector__get_data( self );
+   Hy = data -> vec;
+
+   ierr += HYPRE_SStructVectorSetBoxValues
+      ( Hy, part, sidlArrayAddr1( ilower, 0 ), sidlArrayAddr1( iupper, 0 ),
+        var, sidlArrayAddr1( values, 0 ) );
+
+   return ierr;
+
   /* DO-NOT-DELETE splicer.end(bHYPRE.SStructParCSRVector.SetBoxValues) */
 }
 
@@ -361,11 +501,23 @@ int32_t
 impl_bHYPRE_SStructParCSRVector_AddToValues(
   /*in*/ bHYPRE_SStructParCSRVector self, /*in*/ int32_t part,
     /*in*/ struct sidl_int__array* index, /*in*/ int32_t var,
-    /*in*/ struct sidl_double__array* value)
+    /*in*/ struct sidl_double__array* values)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructParCSRVector.AddToValues) */
   /* Insert the implementation of the AddToValues method here... */
-   return 1;
+
+   int ierr = 0;
+   struct bHYPRE_SStructParCSRVector__data * data;
+   HYPRE_SStructVector Hy;
+   data = bHYPRE_SStructParCSRVector__get_data( self );
+   Hy = data -> vec;
+
+   ierr += HYPRE_SStructVectorAddToValues
+      ( Hy, part, sidlArrayAddr1( index, 0 ), var,
+        sidlArrayAddr1( values, 0 ) );
+
+   return ierr;
+
   /* DO-NOT-DELETE splicer.end(bHYPRE.SStructParCSRVector.AddToValues) */
 }
 
@@ -394,7 +546,19 @@ impl_bHYPRE_SStructParCSRVector_AddToBoxValues(
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructParCSRVector.AddToBoxValues) */
   /* Insert the implementation of the AddToBoxValues method here... */
-   return 1;
+
+   int ierr = 0;
+   struct bHYPRE_SStructParCSRVector__data * data;
+   HYPRE_SStructVector Hy;
+   data = bHYPRE_SStructParCSRVector__get_data( self );
+   Hy = data -> vec;
+
+   ierr += HYPRE_SStructVectorAddToBoxValues
+      ( Hy, part, sidlArrayAddr1( ilower, 0 ), sidlArrayAddr1( iupper, 0 ),
+        var, sidlArrayAddr1( values, 0 ) );
+
+   return ierr;
+
   /* DO-NOT-DELETE splicer.end(bHYPRE.SStructParCSRVector.AddToBoxValues) */
 }
 
@@ -412,7 +576,17 @@ impl_bHYPRE_SStructParCSRVector_Gather(
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructParCSRVector.Gather) */
   /* Insert the implementation of the Gather method here... */
-   return 1;
+
+   int ierr = 0;
+   struct bHYPRE_SStructParCSRVector__data * data;
+   HYPRE_SStructVector Hy;
+   data = bHYPRE_SStructParCSRVector__get_data( self );
+   Hy = data -> vec;
+
+   ierr = HYPRE_SStructVectorGather( Hy );
+
+   return( ierr );
+
   /* DO-NOT-DELETE splicer.end(bHYPRE.SStructParCSRVector.Gather) */
 }
 
@@ -439,7 +613,19 @@ impl_bHYPRE_SStructParCSRVector_GetValues(
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructParCSRVector.GetValues) */
   /* Insert the implementation of the GetValues method here... */
-   return 1;
+
+   int ierr = 0;
+   struct bHYPRE_SStructParCSRVector__data * data;
+   HYPRE_SStructVector Hy;
+   data = bHYPRE_SStructParCSRVector__get_data( self );
+   Hy = data -> vec;
+
+   ierr += HYPRE_SStructVectorGetValues
+      ( Hy, part, sidlArrayAddr1( index, 0 ), var,
+        value );
+
+   return ierr;
+
   /* DO-NOT-DELETE splicer.end(bHYPRE.SStructParCSRVector.GetValues) */
 }
 
@@ -467,7 +653,19 @@ impl_bHYPRE_SStructParCSRVector_GetBoxValues(
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructParCSRVector.GetBoxValues) */
   /* Insert the implementation of the GetBoxValues method here... */
-   return 1;
+
+   int ierr = 0;
+   struct bHYPRE_SStructParCSRVector__data * data;
+   HYPRE_SStructVector Hy;
+   data = bHYPRE_SStructParCSRVector__get_data( self );
+   Hy = data -> vec;
+
+   ierr += HYPRE_SStructVectorGetBoxValues
+      ( Hy, part, sidlArrayAddr1( ilower, 0 ), sidlArrayAddr1( iupper, 0 ),
+        var, sidlArrayAddr1( *values, 0 ) );
+
+   return ierr;
+
   /* DO-NOT-DELETE splicer.end(bHYPRE.SStructParCSRVector.GetBoxValues) */
 }
 

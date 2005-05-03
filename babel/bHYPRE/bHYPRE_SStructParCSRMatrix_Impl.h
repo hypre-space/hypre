@@ -3,15 +3,11 @@
  * Symbol:        bHYPRE.SStructParCSRMatrix-v1.0.0
  * Symbol Type:   class
  * Babel Version: 0.9.8
- * sidl Created:  20050317 11:17:39 PST
- * Generated:     20050317 11:17:43 PST
  * Description:   Server-side implementation for bHYPRE.SStructParCSRMatrix
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
  * babel-version = 0.9.8
- * source-line   = 832
- * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 
 #ifndef included_bHYPRE_SStructParCSRMatrix_Impl_h
@@ -35,6 +31,7 @@
 
 /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructParCSRMatrix._includes) */
 /* Put additional include files here... */
+#include "HYPRE_sstruct_mv.h"
 /* DO-NOT-DELETE splicer.end(bHYPRE.SStructParCSRMatrix._includes) */
 
 /*
@@ -44,7 +41,8 @@
 struct bHYPRE_SStructParCSRMatrix__data {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructParCSRMatrix._data) */
   /* Put private data members here... */
-  int ignore; /* dummy to force non-empty struct; remove if you add data */
+   HYPRE_SStructMatrix matrix;
+   MPI_Comm comm;
   /* DO-NOT-DELETE splicer.end(bHYPRE.SStructParCSRMatrix._data) */
 };
 
