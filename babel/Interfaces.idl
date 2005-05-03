@@ -436,7 +436,7 @@ package bHYPRE version 1.0.0
       int SetValues(in int part,
                     in array<int,1,column-major> index,
                     in int var,
-                    in array<double,1,column-major> value);
+                    in array<double,1,column-major> values );
       
       /**
        * Set vector coefficients a box at a time.
@@ -468,7 +468,7 @@ package bHYPRE version 1.0.0
       int AddToValues(in int part,
                       in array<int,1,column-major> index,
                       in int var,
-                      in array<double,1,column-major> value);
+                      in array<double,1,column-major> values );
       
       /**
        * Set vector coefficients a box at a time.
@@ -506,7 +506,7 @@ package bHYPRE version 1.0.0
       int GetValues(in int part,
                     in array<int,1,column-major> index,
                     in int var,
-                    out double value);
+                    out double value );
       
       /**
        * Get vector coefficients a box at a time.
@@ -915,6 +915,8 @@ package bHYPRE version 1.0.0
       int SetNumDimParts(in int ndim,
                          in int nparts);
    
+      int SetCommunicator(in opaque mpi_comm);
+
       /**
        * Set the extents for a box on a structured part of the grid.
        **/
@@ -924,10 +926,12 @@ package bHYPRE version 1.0.0
    
       /**
        * Describe the variables that live on a structured part of the
-       * grid.
+       * grid.  Input: part number, variable number, total number of
+       * variables on that part (needed for memory allocation),
+       * variable type.
        **/
       int SetVariable(in int part,
-                      in int var,
+                      in int var, in int nvars,
                       in SStructVariable vartype);
    
       /**
@@ -996,6 +1000,8 @@ package bHYPRE version 1.0.0
        * Setting ghost in the sgrids.
        **/
       int SetNumGhost(in array<int,1,column-major> num_ghost);
+
+      int Assemble();
    }
    
    /*-----------------------*/
@@ -1024,12 +1030,12 @@ package bHYPRE version 1.0.0
    /**
     * The semi-structured grid graph class.
     **/
-   class SStructGraph
+   class SStructGraph implements-all ProblemDefinition
    {
       /**
-       * Set the grid.
+       * Set the grid and communicator.
        **/
-      int SetGrid(in SStructGrid grid);
+      int SetCommGrid(in opaque mpi_comm, in SStructGrid grid);
       
       /**
        * Set the stencil for a variable on a structured part of the
@@ -1054,6 +1060,7 @@ package bHYPRE version 1.0.0
                      in int to_part,
                      in array<int,1,column-major> to_index,
                      in int to_var);
+      int SetObjectType( in int type );
    }
    
    /*-----------------------*/
@@ -1078,6 +1085,7 @@ package bHYPRE version 1.0.0
     **/
    class SStructVector implements-all SStructBuildVector, Vector
    {
+      int SetObjectType( in int type );
    }
 
    /*----------- Classes ---------------------------------------------------*/
