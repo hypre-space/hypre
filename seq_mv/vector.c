@@ -301,6 +301,51 @@ hypre_SeqVectorCopy( hypre_Vector *x,
 }
 
 /*--------------------------------------------------------------------------
+ * hypre_SeqVectorCloneDeep
+ * Returns a complete copy of x - a deep copy, with its own copy of the data.
+ *--------------------------------------------------------------------------*/
+
+hypre_Vector *
+hypre_SeqVectorCloneDeep( hypre_Vector *x )
+{
+   int      size   = hypre_VectorSize(x);
+   int      num_vectors   = hypre_VectorNumVectors(x);
+   hypre_Vector * y = hypre_SeqMultiVectorCreate( size, num_vectors );
+
+   hypre_VectorMultiVecStorageMethod(y) = hypre_VectorMultiVecStorageMethod(x);
+   hypre_VectorVectorStride(y) = hypre_VectorVectorStride(x);
+   hypre_VectorIndexStride(y) = hypre_VectorIndexStride(x);
+
+   hypre_SeqVectorInitialize(y);
+   hypre_SeqVectorCopy( x, y );
+
+   return y;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_SeqVectorCloneShallow
+ * Returns a complete copy of x - a shallow copy, pointing the data of x
+ *--------------------------------------------------------------------------*/
+
+hypre_Vector *
+hypre_SeqVectorCloneShallow( hypre_Vector *x )
+{
+   int      size   = hypre_VectorSize(x);
+   int      num_vectors   = hypre_VectorNumVectors(x);
+   hypre_Vector * y = hypre_SeqMultiVectorCreate( size, num_vectors );
+
+   hypre_VectorMultiVecStorageMethod(y) = hypre_VectorMultiVecStorageMethod(x);
+   hypre_VectorVectorStride(y) = hypre_VectorVectorStride(x);
+   hypre_VectorIndexStride(y) = hypre_VectorIndexStride(x);
+
+   hypre_VectorData(y) = hypre_VectorData(x);
+   hypre_SeqVectorSetDataOwner( y, 0 );
+   hypre_SeqVectorInitialize(y);
+
+   return y;
+}
+
+/*--------------------------------------------------------------------------
  * hypre_SeqVectorScale
  *--------------------------------------------------------------------------*/
 

@@ -336,6 +336,8 @@ int hypre_SeqVectorPrint( hypre_Vector *vector , char *file_name );
 int hypre_SeqVectorSetConstantValues( hypre_Vector *v , double value );
 int hypre_SeqVectorSetRandomValues( hypre_Vector *v , int seed );
 int hypre_SeqVectorCopy( hypre_Vector *x , hypre_Vector *y );
+hypre_Vector *hypre_SeqVectorCloneDeep( hypre_Vector *x );
+hypre_Vector *hypre_SeqVectorCloneShallow( hypre_Vector *x );
 int hypre_SeqVectorScale( double alpha , hypre_Vector *y );
 int hypre_SeqVectorAxpy( double alpha , hypre_Vector *x , hypre_Vector *y );
 double hypre_SeqVectorInnerProd( hypre_Vector *x , hypre_Vector *y );
