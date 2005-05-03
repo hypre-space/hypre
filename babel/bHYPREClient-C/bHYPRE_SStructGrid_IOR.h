@@ -3,15 +3,11 @@
  * Symbol:        bHYPRE.SStructGrid-v1.0.0
  * Symbol Type:   class
  * Babel Version: 0.9.8
- * sidl Created:  20050317 11:17:45 PST
- * Generated:     20050317 11:17:47 PST
  * Description:   Intermediate Object Representation for bHYPRE.SStructGrid
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
  * babel-version = 0.9.8
- * source-line   = 909
- * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 
 #ifndef included_bHYPRE_SStructGrid_IOR_h
@@ -99,6 +95,9 @@ struct bHYPRE_SStructGrid__epv {
     struct bHYPRE_SStructGrid__object* self,
     int32_t ndim,
     int32_t nparts);
+  int32_t (*f_SetCommunicator)(
+    struct bHYPRE_SStructGrid__object* self,
+    void* mpi_comm);
   int32_t (*f_SetExtents)(
     struct bHYPRE_SStructGrid__object* self,
     int32_t part,
@@ -108,6 +107,7 @@ struct bHYPRE_SStructGrid__epv {
     struct bHYPRE_SStructGrid__object* self,
     int32_t part,
     int32_t var,
+    int32_t nvars,
     enum bHYPRE_SStructVariable__enum vartype);
   int32_t (*f_AddVariable)(
     struct bHYPRE_SStructGrid__object* self,
@@ -135,6 +135,8 @@ struct bHYPRE_SStructGrid__epv {
   int32_t (*f_SetNumGhost)(
     struct bHYPRE_SStructGrid__object* self,
     struct sidl_int__array* num_ghost);
+  int32_t (*f_Assemble)(
+    struct bHYPRE_SStructGrid__object* self);
 };
 
 /*

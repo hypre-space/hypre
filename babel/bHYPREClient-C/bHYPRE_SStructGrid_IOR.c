@@ -3,15 +3,11 @@
  * Symbol:        bHYPRE.SStructGrid-v1.0.0
  * Symbol Type:   class
  * Babel Version: 0.9.8
- * sidl Created:  20050317 11:17:45 PST
- * Generated:     20050317 11:17:47 PST
  * Description:   Intermediate Object Representation for bHYPRE.SStructGrid
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
  * babel-version = 0.9.8
- * source-line   = 909
- * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 
 #include <stdlib.h>
@@ -151,6 +147,7 @@ static void bHYPRE_SStructGrid__init_epv(
   epv->f_getClassInfo        = (struct sidl_ClassInfo__object* (*)(struct 
     bHYPRE_SStructGrid__object*)) s1->d_epv->f_getClassInfo;
   epv->f_SetNumDimParts      = NULL;
+  epv->f_SetCommunicator     = NULL;
   epv->f_SetExtents          = NULL;
   epv->f_SetVariable         = NULL;
   epv->f_AddVariable         = NULL;
@@ -158,6 +155,7 @@ static void bHYPRE_SStructGrid__init_epv(
   epv->f_AddUnstructuredPart = NULL;
   epv->f_SetPeriodic         = NULL;
   epv->f_SetNumGhost         = NULL;
+  epv->f_Assemble            = NULL;
 
   bHYPRE_SStructGrid__set_epv(epv);
 
@@ -435,6 +433,18 @@ remote_bHYPRE_SStructGrid_SetNumDimParts(
 }
 
 /*
+ * REMOTE METHOD STUB:SetCommunicator
+ */
+
+static int32_t
+remote_bHYPRE_SStructGrid_SetCommunicator(
+  struct bHYPRE_SStructGrid__object* self,
+  void* mpi_comm)
+{
+  return 0;
+}
+
+/*
  * REMOTE METHOD STUB:SetExtents
  */
 
@@ -457,6 +467,7 @@ remote_bHYPRE_SStructGrid_SetVariable(
   struct bHYPRE_SStructGrid__object* self,
   int32_t part,
   int32_t var,
+  int32_t nvars,
   enum bHYPRE_SStructVariable__enum vartype)
 {
   return 0;
@@ -534,6 +545,17 @@ remote_bHYPRE_SStructGrid_SetNumGhost(
 }
 
 /*
+ * REMOTE METHOD STUB:Assemble
+ */
+
+static int32_t
+remote_bHYPRE_SStructGrid_Assemble(
+  struct bHYPRE_SStructGrid__object* self)
+{
+  return 0;
+}
+
+/*
  * REMOTE EPV: create remote entry point vectors (EPVs).
  */
 
@@ -554,6 +576,7 @@ static void bHYPRE_SStructGrid__init_remote_epv(void)
   epv->f_isType              = remote_bHYPRE_SStructGrid_isType;
   epv->f_getClassInfo        = remote_bHYPRE_SStructGrid_getClassInfo;
   epv->f_SetNumDimParts      = remote_bHYPRE_SStructGrid_SetNumDimParts;
+  epv->f_SetCommunicator     = remote_bHYPRE_SStructGrid_SetCommunicator;
   epv->f_SetExtents          = remote_bHYPRE_SStructGrid_SetExtents;
   epv->f_SetVariable         = remote_bHYPRE_SStructGrid_SetVariable;
   epv->f_AddVariable         = remote_bHYPRE_SStructGrid_AddVariable;
@@ -561,6 +584,7 @@ static void bHYPRE_SStructGrid__init_remote_epv(void)
   epv->f_AddUnstructuredPart = remote_bHYPRE_SStructGrid_AddUnstructuredPart;
   epv->f_SetPeriodic         = remote_bHYPRE_SStructGrid_SetPeriodic;
   epv->f_SetNumGhost         = remote_bHYPRE_SStructGrid_SetNumGhost;
+  epv->f_Assemble            = remote_bHYPRE_SStructGrid_Assemble;
 
   e0->f__cast        = (void* (*)(struct sidl_BaseClass__object*,
     const char*)) epv->f__cast;

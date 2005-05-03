@@ -3,15 +3,11 @@
  * Symbol:        bHYPRE.Vector-v1.0.0
  * Symbol Type:   interface
  * Babel Version: 0.9.8
- * sidl Created:  20050317 11:17:45 PST
- * Generated:     20050317 11:17:48 PST
  * Description:   Client-side glue code for bHYPRE.Vector
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
  * babel-version = 0.9.8
- * source-line   = 672
- * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 
 #include "bHYPRE_Vector.h"

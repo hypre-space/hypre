@@ -3,15 +3,11 @@
  * Symbol:        bHYPRE.SStructGrid-v1.0.0
  * Symbol Type:   class
  * Babel Version: 0.9.8
- * sidl Created:  20050317 11:17:45 PST
- * Generated:     20050317 11:17:48 PST
  * Description:   Client-side glue code for bHYPRE.SStructGrid
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
  * babel-version = 0.9.8
- * source-line   = 909
- * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 
 #ifndef included_bHYPRE_SStructGrid_h
@@ -93,6 +89,14 @@ bHYPRE_SStructGrid_SetNumDimParts(
   /*in*/ int32_t nparts);
 
 /**
+ * Method:  SetCommunicator[]
+ */
+int32_t
+bHYPRE_SStructGrid_SetCommunicator(
+  /*in*/ bHYPRE_SStructGrid self,
+  /*in*/ void* mpi_comm);
+
+/**
  * Set the extents for a box on a structured part of the grid.
  * 
  */
@@ -105,7 +109,9 @@ bHYPRE_SStructGrid_SetExtents(
 
 /**
  * Describe the variables that live on a structured part of the
- * grid.
+ * grid.  Input: part number, variable number, total number of
+ * variables on that part (needed for memory allocation),
+ * variable type.
  * 
  */
 int32_t
@@ -113,6 +119,7 @@ bHYPRE_SStructGrid_SetVariable(
   /*in*/ bHYPRE_SStructGrid self,
   /*in*/ int32_t part,
   /*in*/ int32_t var,
+  /*in*/ int32_t nvars,
   /*in*/ enum bHYPRE_SStructVariable__enum vartype);
 
 /**
@@ -201,6 +208,13 @@ int32_t
 bHYPRE_SStructGrid_SetNumGhost(
   /*in*/ bHYPRE_SStructGrid self,
   /*in*/ struct sidl_int__array* num_ghost);
+
+/**
+ * Method:  Assemble[]
+ */
+int32_t
+bHYPRE_SStructGrid_Assemble(
+  /*in*/ bHYPRE_SStructGrid self);
 
 /**
  * Cast method for interface and class type conversions.

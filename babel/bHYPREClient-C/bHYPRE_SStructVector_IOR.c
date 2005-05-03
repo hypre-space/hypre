@@ -3,15 +3,11 @@
  * Symbol:        bHYPRE.SStructVector-v1.0.0
  * Symbol Type:   class
  * Babel Version: 0.9.8
- * sidl Created:  20050317 11:17:45 PST
- * Generated:     20050317 11:17:47 PST
  * Description:   Intermediate Object Representation for bHYPRE.SStructVector
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
  * babel-version = 0.9.8
- * source-line   = 1079
- * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 
 #include <stdlib.h>
@@ -168,6 +164,7 @@ static void bHYPRE_SStructVector__init_epv(
     const char*)) s1->d_epv->f_isType;
   epv->f_getClassInfo    = (struct sidl_ClassInfo__object* (*)(struct 
     bHYPRE_SStructVector__object*)) s1->d_epv->f_getClassInfo;
+  epv->f_SetObjectType   = NULL;
   epv->f_Clear           = NULL;
   epv->f_Copy            = NULL;
   epv->f_Clone           = NULL;
@@ -537,6 +534,18 @@ remote_bHYPRE_SStructVector_getClassInfo(
 }
 
 /*
+ * REMOTE METHOD STUB:SetObjectType
+ */
+
+static int32_t
+remote_bHYPRE_SStructVector_SetObjectType(
+  struct bHYPRE_SStructVector__object* self,
+  int32_t type)
+{
+  return 0;
+}
+
+/*
  * REMOTE METHOD STUB:Clear
  */
 
@@ -677,7 +686,7 @@ remote_bHYPRE_SStructVector_SetValues(
   int32_t part,
   struct sidl_int__array* index,
   int32_t var,
-  struct sidl_double__array* value)
+  struct sidl_double__array* values)
 {
   return 0;
 }
@@ -708,7 +717,7 @@ remote_bHYPRE_SStructVector_AddToValues(
   int32_t part,
   struct sidl_int__array* index,
   int32_t var,
-  struct sidl_double__array* value)
+  struct sidl_double__array* values)
 {
   return 0;
 }
@@ -819,6 +828,7 @@ static void bHYPRE_SStructVector__init_remote_epv(void)
   epv->f_queryInt        = remote_bHYPRE_SStructVector_queryInt;
   epv->f_isType          = remote_bHYPRE_SStructVector_isType;
   epv->f_getClassInfo    = remote_bHYPRE_SStructVector_getClassInfo;
+  epv->f_SetObjectType   = remote_bHYPRE_SStructVector_SetObjectType;
   epv->f_Clear           = remote_bHYPRE_SStructVector_Clear;
   epv->f_Copy            = remote_bHYPRE_SStructVector_Copy;
   epv->f_Clone           = remote_bHYPRE_SStructVector_Clone;

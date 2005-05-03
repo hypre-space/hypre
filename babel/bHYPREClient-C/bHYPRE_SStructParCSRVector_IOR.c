@@ -3,15 +3,11 @@
  * Symbol:        bHYPRE.SStructParCSRVector-v1.0.0
  * Symbol Type:   class
  * Babel Version: 0.9.8
- * sidl Created:  20050317 11:17:45 PST
- * Generated:     20050317 11:17:47 PST
  * Description:   Intermediate Object Representation for bHYPRE.SStructParCSRVector
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
  * babel-version = 0.9.8
- * source-line   = 842
- * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 
 #include <stdlib.h>
@@ -680,7 +676,7 @@ remote_bHYPRE_SStructParCSRVector_SetValues(
   int32_t part,
   struct sidl_int__array* index,
   int32_t var,
-  struct sidl_double__array* value)
+  struct sidl_double__array* values)
 {
   return 0;
 }
@@ -711,7 +707,7 @@ remote_bHYPRE_SStructParCSRVector_AddToValues(
   int32_t part,
   struct sidl_int__array* index,
   int32_t var,
-  struct sidl_double__array* value)
+  struct sidl_double__array* values)
 {
   return 0;
 }

@@ -3,15 +3,11 @@
  * Symbol:        bHYPRE-v1.0.0
  * Symbol Type:   package
  * Babel Version: 0.9.8
- * sidl Created:  20050317 11:17:44 PST
- * Generated:     20050317 11:17:47 PST
  * Description:   Intermediate Object Representation for bHYPRE
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
  * babel-version = 0.9.8
- * source-line   = 16
- * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 
 #ifndef included_bHYPRE_IOR_h

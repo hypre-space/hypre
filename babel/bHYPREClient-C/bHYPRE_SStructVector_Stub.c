@@ -3,15 +3,11 @@
  * Symbol:        bHYPRE.SStructVector-v1.0.0
  * Symbol Type:   class
  * Babel Version: 0.9.8
- * sidl Created:  20050317 11:17:45 PST
- * Generated:     20050317 11:17:49 PST
  * Description:   Client-side glue code for bHYPRE.SStructVector
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
  * babel-version = 0.9.8
- * source-line   = 1079
- * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 
 #include "bHYPRE_SStructVector.h"
@@ -191,6 +187,20 @@ bHYPRE_SStructVector_getClassInfo(
 {
   return (*self->d_epv->f_getClassInfo)(
     self);
+}
+
+/*
+ * Method:  SetObjectType[]
+ */
+
+int32_t
+bHYPRE_SStructVector_SetObjectType(
+  bHYPRE_SStructVector self,
+  /*in*/ int32_t type)
+{
+  return (*self->d_epv->f_SetObjectType)(
+    self,
+    type);
 }
 
 /*
@@ -392,14 +402,14 @@ bHYPRE_SStructVector_SetValues(
   /*in*/ int32_t part,
   /*in*/ struct sidl_int__array* index,
   /*in*/ int32_t var,
-  /*in*/ struct sidl_double__array* value)
+  /*in*/ struct sidl_double__array* values)
 {
   return (*self->d_epv->f_SetValues)(
     self,
     part,
     index,
     var,
-    value);
+    values);
 }
 
 /*
@@ -452,14 +462,14 @@ bHYPRE_SStructVector_AddToValues(
   /*in*/ int32_t part,
   /*in*/ struct sidl_int__array* index,
   /*in*/ int32_t var,
-  /*in*/ struct sidl_double__array* value)
+  /*in*/ struct sidl_double__array* values)
 {
   return (*self->d_epv->f_AddToValues)(
     self,
     part,
     index,
     var,
-    value);
+    values);
 }
 
 /*
