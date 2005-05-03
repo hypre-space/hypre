@@ -277,6 +277,28 @@ hypre_ParVectorCopy( hypre_ParVector *x,
 }
 
 /*--------------------------------------------------------------------------
+ * hypre_ParVectorCloneShallow
+ * returns a complete copy of a hypre_ParVector x - a shallow copy, re-using
+ * the partitioning and data arrays of x
+ *--------------------------------------------------------------------------*/
+
+hypre_ParVector *
+hypre_ParVectorCloneShallow( hypre_ParVector *x )
+{
+   hypre_ParVector * y = hypre_ParVectorCreate(
+      hypre_ParVectorComm(x), hypre_ParVectorGlobalSize(x), hypre_ParVectorPartitioning(x) );
+
+   hypre_ParVectorOwnsData(y) = 0;
+   hypre_ParVectorOwnsPartitioning(y) = 0;
+   hypre_SeqVectorDestroy( hypre_ParVectorLocalVector(y) );
+   hypre_ParVectorLocalVector(y) = hypre_SeqVectorCloneShallow(
+      hypre_ParVectorLocalVector(x) );
+   hypre_ParVectorFirstIndex(y) = hypre_ParVectorFirstIndex(x);
+
+   return y;
+}
+
+/*--------------------------------------------------------------------------
  * hypre_ParVectorScale
  *--------------------------------------------------------------------------*/
 

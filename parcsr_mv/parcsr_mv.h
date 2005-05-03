@@ -385,6 +385,109 @@ int hypre_NewCommPkgDestroy( hypre_ParCSRMatrix* );
 
 #endif /* hypre_NEW_COMMPKG */
 
+/*BHEADER**********************************************************************
+ * (c) 1996   The Regents of the University of California
+ *
+ * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
+ * notice, contact person, and disclaimer.
+ *
+ * $Revision$
+ *********************************************************************EHEADER*/
+/******************************************************************************
+ *
+ * Header info for Parallel Chord Matrix data structures
+ *
+ *
+ *****************************************************************************/
+#include <HYPRE_config.h>
+
+
+
+#ifndef hypre_PAR_CHORD_MATRIX_HEADER
+#define hypre_PAR_CHORD_MATRIX_HEADER
+
+#include "utilities.h"
+#include "seq_mv.h"
+
+/*--------------------------------------------------------------------------
+ * Parallel Chord Matrix
+ *--------------------------------------------------------------------------*/
+
+typedef struct
+{
+   MPI_Comm comm;
+
+  /*  A structure: -------------------------------------------------------- */
+  int num_inprocessors;
+  int *inprocessor;
+
+  /* receiving in idof from different (in)processors; ---------------------- */
+  int *num_idofs_inprocessor; 
+  int **idof_inprocessor; 
+
+
+  /* symmetric information: ----------------------------------------------- */
+  /* this can be replaces by CSR format: ---------------------------------- */
+  int *num_inchords;
+  int **inchord_idof;
+  int **inchord_rdof;
+  double **inchord_data;
+
+  int num_idofs;
+  int num_rdofs;
+
+  int *firstindex_idof; /* not owned by my_id; ----------------------------- */
+  int *firstindex_rdof; /* not owned by my_id; ----------------------------- */
+
+  /* --------------------------- mirror information: ---------------------- */
+  /* participation of rdof in different processors; ------------------------ */
+
+  int num_toprocessors;
+  int *toprocessor;
+
+  /* rdofs to be sentto toprocessors; --------------------------------------
+     ----------------------------------------------------------------------- */
+  int *num_rdofs_toprocessor;
+  int **rdof_toprocessor;
+
+
+} hypre_ParChordMatrix;
+
+/*--------------------------------------------------------------------------
+ * Accessor functions for the Parallel CSR Matrix structure
+ *--------------------------------------------------------------------------*/
+
+#define hypre_ParChordMatrixComm(matrix)		  ((matrix) -> comm)
+
+/*  matrix structure: ----------------------------------------------------- */
+
+#define hypre_ParChordMatrixNumInprocessors(matrix)  ((matrix) -> num_inprocessors)
+#define hypre_ParChordMatrixInprocessor(matrix) ((matrix) -> inprocessor)
+#define hypre_ParChordMatrixNumIdofsInprocessor(matrix) ((matrix) -> num_idofs_inprocessor)
+#define hypre_ParChordMatrixIdofInprocessor(matrix) ((matrix) -> idof_inprocessor)
+
+
+#define hypre_ParChordMatrixNumInchords(matrix) ((matrix) -> num_inchords)
+
+#define hypre_ParChordMatrixInchordIdof(matrix) ((matrix) -> inchord_idof)
+#define hypre_ParChordMatrixInchordRdof(matrix) ((matrix) -> inchord_rdof)
+#define hypre_ParChordMatrixInchordData(matrix) ((matrix) -> inchord_data)
+#define hypre_ParChordMatrixNumIdofs(matrix)    ((matrix) -> num_idofs)
+#define hypre_ParChordMatrixNumRdofs(matrix)    ((matrix) -> num_rdofs)
+
+#define hypre_ParChordMatrixFirstindexIdof(matrix) ((matrix) -> firstindex_idof)
+#define hypre_ParChordMatrixFirstindexRdof(matrix) ((matrix) -> firstindex_rdof) 
+
+/* participation of rdof in different processors; ---------- */
+
+
+#define hypre_ParChordMatrixNumToprocessors(matrix) ((matrix) -> num_toprocessors)
+#define hypre_ParChordMatrixToprocessor(matrix)  ((matrix) -> toprocessor)
+#define hypre_ParChordMatrixNumRdofsToprocessor(matrix) ((matrix) -> num_rdofs_toprocessor)
+#define hypre_ParChordMatrixRdofToprocessor(matrix) ((matrix) -> rdof_toprocessor)
+
+
+#endif
 
 /* communicationT.c */
 void RowsWithColumn_original( int *rowmin , int *rowmax , int column , hypre_ParCSRMatrix *A );
@@ -392,7 +495,11 @@ void RowsWithColumn( int *rowmin , int *rowmax , int column , int num_rows_diag 
 void hypre_MatTCommPkgCreate_core( MPI_Comm comm , int *col_map_offd , int first_col_diag , int *col_starts , int num_rows_diag , int num_cols_diag , int num_cols_offd , int *row_starts , int firstColDiag , int *colMapOffd , int *mat_i_diag , int *mat_j_diag , int *mat_i_offd , int *mat_j_offd , int data , int *p_num_recvs , int **p_recv_procs , int **p_recv_vec_starts , int *p_num_sends , int **p_send_procs , int **p_send_map_starts , int **p_send_map_elmts );
 int hypre_MatTCommPkgCreate( hypre_ParCSRMatrix *A );
 
+/* driver_aat2.c */
+
 /* driver_aat.c */
+
+/* driver_ab.c */
 
 /* driver_boolaat.c */
 
@@ -435,6 +542,7 @@ int HYPRE_ParVectorPrint( HYPRE_ParVector vector , const char *file_name );
 int HYPRE_ParVectorSetConstantValues( HYPRE_ParVector vector , double value );
 int HYPRE_ParVectorSetRandomValues( HYPRE_ParVector vector , int seed );
 int HYPRE_ParVectorCopy( HYPRE_ParVector x , HYPRE_ParVector y );
+HYPRE_ParVector HYPRE_ParVectorCloneShallow( HYPRE_ParVector x );
 int HYPRE_ParVectorScale( double value , HYPRE_ParVector x );
 int HYPRE_ParVectorInnerProd( HYPRE_ParVector x , HYPRE_ParVector y , double *prod );
 int HYPRE_VectorToParVector( MPI_Comm comm , HYPRE_Vector b , int *partitioning , HYPRE_ParVector *vector );
@@ -456,10 +564,20 @@ int hypre_NumbersNEntered( hypre_NumbersNode *node );
 int hypre_NumbersQuery( hypre_NumbersNode *node , const int n );
 int *hypre_NumbersArray( hypre_NumbersNode *node );
 
+/* parchord_to_parcsr.c */
+void hypre_ParChordMatrix_RowStarts( hypre_ParChordMatrix *Ac , MPI_Comm comm , int **row_starts , int *global_num_cols );
+int hypre_ParChordMatrixToParCSRMatrix( hypre_ParChordMatrix *Ac , MPI_Comm comm , hypre_ParCSRMatrix **pAp );
+int hypre_ParCSRMatrixToParChordMatrix( hypre_ParCSRMatrix *Ap , MPI_Comm comm , hypre_ParChordMatrix **pAc );
+
 /* par_csr_aat.c */
 void hypre_ParAat_RowSizes( int **C_diag_i , int **C_offd_i , int *B_marker , int *A_diag_i , int *A_diag_j , int *A_offd_i , int *A_offd_j , int *A_col_map_offd , int *A_ext_i , int *A_ext_j , int *A_ext_row_map , int *C_diag_size , int *C_offd_size , int num_rows_diag_A , int num_cols_offd_A , int num_rows_A_ext , int first_col_diag_A , int first_row_index_A );
 hypre_ParCSRMatrix *hypre_ParCSRAAt( hypre_ParCSRMatrix *A );
 hypre_CSRMatrix *hypre_ParCSRMatrixExtractAExt( hypre_ParCSRMatrix *A , int data , int **pA_ext_row_map );
+
+/* par_csr_at.c */
+int proc_of_col( int col , int num_cols_diag , int num_procs , int *col_starts );
+int pushnew( int item , int *stack , int *stacklen );
+hypre_ParCSRMatrix *hypre_ParCSRAt( hypre_ParCSRMatrix *A );
 
 /* par_csr_bool_matop.c */
 hypre_ParCSRBooleanMatrix *hypre_ParBooleanMatmul( hypre_ParCSRBooleanMatrix *A , hypre_ParCSRBooleanMatrix *B );
@@ -547,6 +665,7 @@ int hypre_ParVectorPrint( hypre_ParVector *vector , const char *file_name );
 int hypre_ParVectorSetConstantValues( hypre_ParVector *v , double value );
 int hypre_ParVectorSetRandomValues( hypre_ParVector *v , int seed );
 int hypre_ParVectorCopy( hypre_ParVector *x , hypre_ParVector *y );
+hypre_ParVector *hypre_ParVectorCloneShallow( hypre_ParVector *x );
 int hypre_ParVectorScale( double alpha , hypre_ParVector *y );
 int hypre_ParVectorAxpy( double alpha , hypre_ParVector *x , hypre_ParVector *y );
 double hypre_ParVectorInnerProd( hypre_ParVector *x , hypre_ParVector *y );

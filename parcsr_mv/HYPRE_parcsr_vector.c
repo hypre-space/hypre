@@ -126,6 +126,16 @@ HYPRE_ParVectorCopy( HYPRE_ParVector x, HYPRE_ParVector y)
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_ParVectorCloneShallow
+ *--------------------------------------------------------------------------*/
+
+HYPRE_ParVector
+HYPRE_ParVectorCloneShallow( HYPRE_ParVector x )
+{
+   return ( (HYPRE_ParVector) hypre_ParVectorCloneShallow( (hypre_ParVector *) x ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_ParVectorScale
  *--------------------------------------------------------------------------*/
 
