@@ -3,15 +3,11 @@
  * Symbol:        bHYPRE.SStructGraph-v1.0.0
  * Symbol Type:   class
  * Babel Version: 0.9.8
- * sidl Created:  20050317 11:17:50 PST
- * Generated:     20050317 11:17:51 PST
  * Description:   Intermediate Object Representation for bHYPRE.SStructGraph
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
  * babel-version = 0.9.8
- * source-line   = 1027
- * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 
 #ifndef included_bHYPRE_SStructGraph_IOR_h
@@ -19,6 +15,9 @@
 
 #ifndef included_sidl_header_h
 #include "sidl_header.h"
+#endif
+#ifndef included_bHYPRE_ProblemDefinition_IOR_h
+#include "bHYPRE_ProblemDefinition_IOR.h"
 #endif
 #ifndef included_sidl_BaseClass_IOR_h
 #include "sidl_BaseClass_IOR.h"
@@ -95,9 +94,21 @@ struct bHYPRE_SStructGraph__epv {
   struct sidl_ClassInfo__object* (*f_getClassInfo)(
     struct bHYPRE_SStructGraph__object* self);
   /* Methods introduced in sidl.BaseClass-v0.9.0 */
-  /* Methods introduced in bHYPRE.SStructGraph-v1.0.0 */
-  int32_t (*f_SetGrid)(
+  /* Methods introduced in bHYPRE.ProblemDefinition-v1.0.0 */
+  int32_t (*f_SetCommunicator)(
     struct bHYPRE_SStructGraph__object* self,
+    void* mpi_comm);
+  int32_t (*f_Initialize)(
+    struct bHYPRE_SStructGraph__object* self);
+  int32_t (*f_Assemble)(
+    struct bHYPRE_SStructGraph__object* self);
+  int32_t (*f_GetObject)(
+    struct bHYPRE_SStructGraph__object* self,
+    struct sidl_BaseInterface__object** A);
+  /* Methods introduced in bHYPRE.SStructGraph-v1.0.0 */
+  int32_t (*f_SetCommGrid)(
+    struct bHYPRE_SStructGraph__object* self,
+    void* mpi_comm,
     struct bHYPRE_SStructGrid__object* grid);
   int32_t (*f_SetStencil)(
     struct bHYPRE_SStructGraph__object* self,
@@ -112,6 +123,9 @@ struct bHYPRE_SStructGraph__epv {
     int32_t to_part,
     struct sidl_int__array* to_index,
     int32_t to_var);
+  int32_t (*f_SetObjectType)(
+    struct bHYPRE_SStructGraph__object* self,
+    int32_t type);
 };
 
 /*
@@ -119,9 +133,10 @@ struct bHYPRE_SStructGraph__epv {
  */
 
 struct bHYPRE_SStructGraph__object {
-  struct sidl_BaseClass__object    d_sidl_baseclass;
-  struct bHYPRE_SStructGraph__epv* d_epv;
-  void*                            d_data;
+  struct sidl_BaseClass__object           d_sidl_baseclass;
+  struct bHYPRE_ProblemDefinition__object d_bhypre_problemdefinition;
+  struct bHYPRE_SStructGraph__epv*        d_epv;
+  void*                                   d_data;
 };
 
 struct bHYPRE_SStructGraph__external {

@@ -3,15 +3,11 @@
  * Symbol:        bHYPRE.SStructVector-v1.0.0
  * Symbol Type:   class
  * Babel Version: 0.9.8
- * sidl Created:  20050317 11:17:50 PST
- * Generated:     20050317 11:17:55 PST
  * Description:   Client-side glue code for bHYPRE.SStructVector
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
  * babel-version = 0.9.8
- * source-line   = 1079
- * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 
 /*
@@ -346,6 +342,31 @@ SIDLFortran77Symbol(bhypre_sstructvector_getclassinfo_f,BHYPRE_SSTRUCTVECTOR_GET
       _proxy_self
     );
   *retval = (ptrdiff_t)_proxy_retval;
+}
+
+/*
+ * Method:  SetObjectType[]
+ */
+
+void
+SIDLFortran77Symbol(bhypre_sstructvector_setobjecttype_f,BHYPRE_SSTRUCTVECTOR_SETOBJECTTYPE_F,bHYPRE_SStructVector_SetObjectType_f)
+(
+  int64_t *self,
+  int32_t *type,
+  int32_t *retval
+)
+{
+  struct bHYPRE_SStructVector__epv *_epv = NULL;
+  struct bHYPRE_SStructVector__object* _proxy_self = NULL;
+  _proxy_self =
+    (struct bHYPRE_SStructVector__object*)
+    (ptrdiff_t)(*self);
+  _epv = _proxy_self->d_epv;
+  *retval = 
+    (*(_epv->f_SetObjectType))(
+      _proxy_self,
+      *type
+    );
 }
 
 /*
@@ -693,23 +714,23 @@ SIDLFortran77Symbol(bhypre_sstructvector_setvalues_f,BHYPRE_SSTRUCTVECTOR_SETVAL
   int32_t *part,
   int64_t *index,
   int32_t *var,
-  int64_t *value,
+  int64_t *values,
   int32_t *retval
 )
 {
   struct bHYPRE_SStructVector__epv *_epv = NULL;
   struct bHYPRE_SStructVector__object* _proxy_self = NULL;
   struct sidl_int__array* _proxy_index = NULL;
-  struct sidl_double__array* _proxy_value = NULL;
+  struct sidl_double__array* _proxy_values = NULL;
   _proxy_self =
     (struct bHYPRE_SStructVector__object*)
     (ptrdiff_t)(*self);
   _proxy_index =
     (struct sidl_int__array*)
     (ptrdiff_t)(*index);
-  _proxy_value =
+  _proxy_values =
     (struct sidl_double__array*)
-    (ptrdiff_t)(*value);
+    (ptrdiff_t)(*values);
   _epv = _proxy_self->d_epv;
   *retval = 
     (*(_epv->f_SetValues))(
@@ -717,7 +738,7 @@ SIDLFortran77Symbol(bhypre_sstructvector_setvalues_f,BHYPRE_SSTRUCTVECTOR_SETVAL
       *part,
       _proxy_index,
       *var,
-      _proxy_value
+      _proxy_values
     );
 }
 
@@ -795,23 +816,23 @@ SIDLFortran77Symbol(bhypre_sstructvector_addtovalues_f,BHYPRE_SSTRUCTVECTOR_ADDT
   int32_t *part,
   int64_t *index,
   int32_t *var,
-  int64_t *value,
+  int64_t *values,
   int32_t *retval
 )
 {
   struct bHYPRE_SStructVector__epv *_epv = NULL;
   struct bHYPRE_SStructVector__object* _proxy_self = NULL;
   struct sidl_int__array* _proxy_index = NULL;
-  struct sidl_double__array* _proxy_value = NULL;
+  struct sidl_double__array* _proxy_values = NULL;
   _proxy_self =
     (struct bHYPRE_SStructVector__object*)
     (ptrdiff_t)(*self);
   _proxy_index =
     (struct sidl_int__array*)
     (ptrdiff_t)(*index);
-  _proxy_value =
+  _proxy_values =
     (struct sidl_double__array*)
-    (ptrdiff_t)(*value);
+    (ptrdiff_t)(*values);
   _epv = _proxy_self->d_epv;
   *retval = 
     (*(_epv->f_AddToValues))(
@@ -819,7 +840,7 @@ SIDLFortran77Symbol(bhypre_sstructvector_addtovalues_f,BHYPRE_SSTRUCTVECTOR_ADDT
       *part,
       _proxy_index,
       *var,
-      _proxy_value
+      _proxy_values
     );
 }
 

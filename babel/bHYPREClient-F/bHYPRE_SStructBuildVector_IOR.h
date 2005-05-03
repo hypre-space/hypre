@@ -3,15 +3,11 @@
  * Symbol:        bHYPRE.SStructBuildVector-v1.0.0
  * Symbol Type:   interface
  * Babel Version: 0.9.8
- * sidl Created:  20050317 11:17:50 PST
- * Generated:     20050317 11:17:51 PST
  * Description:   Intermediate Object Representation for bHYPRE.SStructBuildVector
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
  * babel-version = 0.9.8
- * source-line   = 418
- * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 
 #ifndef included_bHYPRE_SStructBuildVector_IOR_h
@@ -92,7 +88,7 @@ struct bHYPRE_SStructBuildVector__epv {
     int32_t part,
     struct sidl_int__array* index,
     int32_t var,
-    struct sidl_double__array* value);
+    struct sidl_double__array* values);
   int32_t (*f_SetBoxValues)(
     void* self,
     int32_t part,
@@ -105,7 +101,7 @@ struct bHYPRE_SStructBuildVector__epv {
     int32_t part,
     struct sidl_int__array* index,
     int32_t var,
-    struct sidl_double__array* value);
+    struct sidl_double__array* values);
   int32_t (*f_AddToBoxValues)(
     void* self,
     int32_t part,

@@ -3,15 +3,11 @@ C       File:          bHYPRE_BoomerAMG_Impl.f
 C       Symbol:        bHYPRE.BoomerAMG-v1.0.0
 C       Symbol Type:   class
 C       Babel Version: 0.9.8
-C       sidl Created:  20050317 11:17:50 PST
-C       Generated:     20050317 11:17:53 PST
 C       Description:   Client-side documentation text for bHYPRE.BoomerAMG
 C       
 C       WARNING: Automatically generated; changes will be lost
 C       
 C       babel-version = 0.9.8
-C       source-line   = 1229
-C       source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
 C       
 
         THIS FILE IS DOCUMENTATION - DO NOT COMPILE IT!

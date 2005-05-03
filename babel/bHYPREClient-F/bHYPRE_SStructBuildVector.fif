@@ -3,15 +3,11 @@ C       File:          bHYPRE_SStructBuildVector_Impl.f
 C       Symbol:        bHYPRE.SStructBuildVector-v1.0.0
 C       Symbol Type:   interface
 C       Babel Version: 0.9.8
-C       sidl Created:  20050317 11:17:50 PST
-C       Generated:     20050317 11:17:53 PST
 C       Description:   Client-side documentation text for bHYPRE.SStructBuildVector
 C       
 C       WARNING: Automatically generated; changes will be lost
 C       
 C       babel-version = 0.9.8
-C       source-line   = 418
-C       source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
 C       
 
         THIS FILE IS DOCUMENTATION - DO NOT COMPILE IT!
@@ -267,7 +263,7 @@ C
 C       
 
         subroutine bHYPRE_SStructBuildVector_SetValues_f(self, part,
-     &     index, var, value, retval)
+     &     index, var, values, retval)
         implicit none
 C       in bHYPRE.SStructBuildVector self
         integer*8 self
@@ -277,8 +273,8 @@ C       in array<int,column-major> index
         integer*8 index
 C       in int var
         integer*4 var
-C       in array<double,column-major> value
-        integer*8 value
+C       in array<double,column-major> values
+        integer*8 values
 C       out int retval
         integer*4 retval
         end
@@ -331,7 +327,7 @@ C
 C       
 
         subroutine bHYPRE_SStructBuildVector_AddToValues_f(self, part,
-     &     index, var, value, retval)
+     &     index, var, values, retval)
         implicit none
 C       in bHYPRE.SStructBuildVector self
         integer*8 self
@@ -341,8 +337,8 @@ C       in array<int,column-major> index
         integer*8 index
 C       in int var
         integer*4 var
-C       in array<double,column-major> value
-        integer*8 value
+C       in array<double,column-major> values
+        integer*8 values
 C       out int retval
         integer*4 retval
         end

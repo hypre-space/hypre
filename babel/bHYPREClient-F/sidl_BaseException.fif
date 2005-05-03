@@ -3,8 +3,6 @@ C       File:          sidl_BaseException_Impl.f
 C       Symbol:        sidl.BaseException-v0.9.0
 C       Symbol Type:   interface
 C       Babel Version: 0.9.8
-C       sidl Created:  20050204 10:21:31 PST
-C       Generated:     20050317 11:17:54 PST
 C       Release:       $Name$
 C       Revision:      @(#) $Id$
 C       Description:   Client-side documentation text for sidl.BaseException
@@ -35,8 +33,6 @@ C
 C       WARNING: Automatically generated; changes will be lost
 C       
 C       babel-version = 0.9.8
-C       source-line   = 171
-C       source-url    = file:/home/painter/babel-0.9.8/share/../runtime/sidl/sidl.sidl
 C       
 
         THIS FILE IS DOCUMENTATION - DO NOT COMPILE IT!

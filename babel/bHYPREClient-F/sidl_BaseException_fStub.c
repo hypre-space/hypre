@@ -3,8 +3,6 @@
  * Symbol:        sidl.BaseException-v0.9.0
  * Symbol Type:   interface
  * Babel Version: 0.9.8
- * sidl Created:  20050204 10:21:31 PST
- * Generated:     20050317 11:17:54 PST
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Client-side glue code for sidl.BaseException
@@ -35,8 +33,6 @@
  * WARNING: Automatically generated; changes will be lost
  * 
  * babel-version = 0.9.8
- * source-line   = 171
- * source-url    = file:/home/painter/babel-0.9.8/share/../runtime/sidl/sidl.sidl
  */
 
 /*

@@ -3,15 +3,11 @@ C       File:          bHYPRE_SStructGrid_Impl.f
 C       Symbol:        bHYPRE.SStructGrid-v1.0.0
 C       Symbol Type:   class
 C       Babel Version: 0.9.8
-C       sidl Created:  20050317 11:17:50 PST
-C       Generated:     20050317 11:17:54 PST
 C       Description:   Client-side documentation text for bHYPRE.SStructGrid
 C       
 C       WARNING: Automatically generated; changes will be lost
 C       
 C       babel-version = 0.9.8
-C       source-line   = 909
-C       source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
 C       
 
         THIS FILE IS DOCUMENTATION - DO NOT COMPILE IT!
@@ -191,6 +187,22 @@ C       out int retval
 
 
 C       
+C       Method:  SetCommunicator[]
+C       
+
+        subroutine bHYPRE_SStructGrid_SetCommunicator_f(self, mpi_comm,
+     &     retval)
+        implicit none
+C       in bHYPRE.SStructGrid self
+        integer*8 self
+C       in opaque mpi_comm
+        integer*8 mpi_comm
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
 C       Set the extents for a box on a structured part of the grid.
 C       
 C       
@@ -213,12 +225,14 @@ C       out int retval
 
 C       
 C       Describe the variables that live on a structured part of the
-C       grid.
+C       grid.  Input: part number, variable number, total number of
+C       variables on that part (needed for memory allocation),
+C       variable type.
 C       
 C       
 
         subroutine bHYPRE_SStructGrid_SetVariable_f(self, part, var,
-     &     vartype, retval)
+     &     nvars, vartype, retval)
         implicit none
 C       in bHYPRE.SStructGrid self
         integer*8 self
@@ -226,6 +240,8 @@ C       in int part
         integer*4 part
 C       in int var
         integer*4 var
+C       in int nvars
+        integer*4 nvars
 C       in bHYPRE.SStructVariable vartype
         integer*4 vartype
 C       out int retval
@@ -367,6 +383,19 @@ C       in bHYPRE.SStructGrid self
         integer*8 self
 C       in array<int,column-major> num_ghost
         integer*8 num_ghost
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Method:  Assemble[]
+C       
+
+        subroutine bHYPRE_SStructGrid_Assemble_f(self, retval)
+        implicit none
+C       in bHYPRE.SStructGrid self
+        integer*8 self
 C       out int retval
         integer*4 retval
         end

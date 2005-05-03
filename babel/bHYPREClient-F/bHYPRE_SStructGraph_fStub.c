@@ -3,15 +3,11 @@
  * Symbol:        bHYPRE.SStructGraph-v1.0.0
  * Symbol Type:   class
  * Babel Version: 0.9.8
- * sidl Created:  20050317 11:17:50 PST
- * Generated:     20050317 11:17:53 PST
  * Description:   Client-side glue code for bHYPRE.SStructGraph
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
  * babel-version = 0.9.8
- * source-line   = 1027
- * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 
 /*
@@ -346,31 +342,37 @@ SIDLFortran77Symbol(bhypre_sstructgraph_getclassinfo_f,BHYPRE_SSTRUCTGRAPH_GETCL
 }
 
 /*
- * Set the grid.
+ * Set the grid and communicator.
  * 
  */
 
 void
-SIDLFortran77Symbol(bhypre_sstructgraph_setgrid_f,BHYPRE_SSTRUCTGRAPH_SETGRID_F,bHYPRE_SStructGraph_SetGrid_f)
+SIDLFortran77Symbol(bhypre_sstructgraph_setcommgrid_f,BHYPRE_SSTRUCTGRAPH_SETCOMMGRID_F,bHYPRE_SStructGraph_SetCommGrid_f)
 (
   int64_t *self,
+  int64_t *mpi_comm,
   int64_t *grid,
   int32_t *retval
 )
 {
   struct bHYPRE_SStructGraph__epv *_epv = NULL;
   struct bHYPRE_SStructGraph__object* _proxy_self = NULL;
+  void* _proxy_mpi_comm = NULL;
   struct bHYPRE_SStructGrid__object* _proxy_grid = NULL;
   _proxy_self =
     (struct bHYPRE_SStructGraph__object*)
     (ptrdiff_t)(*self);
+  _proxy_mpi_comm =
+    (void*)
+    (ptrdiff_t)(*mpi_comm);
   _proxy_grid =
     (struct bHYPRE_SStructGrid__object*)
     (ptrdiff_t)(*grid);
   _epv = _proxy_self->d_epv;
   *retval = 
-    (*(_epv->f_SetGrid))(
+    (*(_epv->f_SetCommGrid))(
       _proxy_self,
+      _proxy_mpi_comm,
       _proxy_grid
     );
 }
@@ -458,6 +460,150 @@ SIDLFortran77Symbol(bhypre_sstructgraph_addentries_f,BHYPRE_SSTRUCTGRAPH_ADDENTR
       _proxy_to_index,
       *to_var
     );
+}
+
+/*
+ * Method:  SetObjectType[]
+ */
+
+void
+SIDLFortran77Symbol(bhypre_sstructgraph_setobjecttype_f,BHYPRE_SSTRUCTGRAPH_SETOBJECTTYPE_F,bHYPRE_SStructGraph_SetObjectType_f)
+(
+  int64_t *self,
+  int32_t *type,
+  int32_t *retval
+)
+{
+  struct bHYPRE_SStructGraph__epv *_epv = NULL;
+  struct bHYPRE_SStructGraph__object* _proxy_self = NULL;
+  _proxy_self =
+    (struct bHYPRE_SStructGraph__object*)
+    (ptrdiff_t)(*self);
+  _epv = _proxy_self->d_epv;
+  *retval = 
+    (*(_epv->f_SetObjectType))(
+      _proxy_self,
+      *type
+    );
+}
+
+/*
+ * Set the MPI Communicator.
+ * 
+ */
+
+void
+SIDLFortran77Symbol(bhypre_sstructgraph_setcommunicator_f,BHYPRE_SSTRUCTGRAPH_SETCOMMUNICATOR_F,bHYPRE_SStructGraph_SetCommunicator_f)
+(
+  int64_t *self,
+  int64_t *mpi_comm,
+  int32_t *retval
+)
+{
+  struct bHYPRE_SStructGraph__epv *_epv = NULL;
+  struct bHYPRE_SStructGraph__object* _proxy_self = NULL;
+  void* _proxy_mpi_comm = NULL;
+  _proxy_self =
+    (struct bHYPRE_SStructGraph__object*)
+    (ptrdiff_t)(*self);
+  _proxy_mpi_comm =
+    (void*)
+    (ptrdiff_t)(*mpi_comm);
+  _epv = _proxy_self->d_epv;
+  *retval = 
+    (*(_epv->f_SetCommunicator))(
+      _proxy_self,
+      _proxy_mpi_comm
+    );
+}
+
+/*
+ * Prepare an object for setting coefficient values, whether for
+ * the first time or subsequently.
+ * 
+ */
+
+void
+SIDLFortran77Symbol(bhypre_sstructgraph_initialize_f,BHYPRE_SSTRUCTGRAPH_INITIALIZE_F,bHYPRE_SStructGraph_Initialize_f)
+(
+  int64_t *self,
+  int32_t *retval
+)
+{
+  struct bHYPRE_SStructGraph__epv *_epv = NULL;
+  struct bHYPRE_SStructGraph__object* _proxy_self = NULL;
+  _proxy_self =
+    (struct bHYPRE_SStructGraph__object*)
+    (ptrdiff_t)(*self);
+  _epv = _proxy_self->d_epv;
+  *retval = 
+    (*(_epv->f_Initialize))(
+      _proxy_self
+    );
+}
+
+/*
+ * Finalize the construction of an object before using, either
+ * for the first time or on subsequent uses. {\tt Initialize}
+ * and {\tt Assemble} always appear in a matched set, with
+ * Initialize preceding Assemble. Values can only be set in
+ * between a call to Initialize and Assemble.
+ * 
+ */
+
+void
+SIDLFortran77Symbol(bhypre_sstructgraph_assemble_f,BHYPRE_SSTRUCTGRAPH_ASSEMBLE_F,bHYPRE_SStructGraph_Assemble_f)
+(
+  int64_t *self,
+  int32_t *retval
+)
+{
+  struct bHYPRE_SStructGraph__epv *_epv = NULL;
+  struct bHYPRE_SStructGraph__object* _proxy_self = NULL;
+  _proxy_self =
+    (struct bHYPRE_SStructGraph__object*)
+    (ptrdiff_t)(*self);
+  _epv = _proxy_self->d_epv;
+  *retval = 
+    (*(_epv->f_Assemble))(
+      _proxy_self
+    );
+}
+
+/*
+ * The problem definition interface is a {\it builder} that
+ * creates an object that contains the problem definition
+ * information, e.g. a matrix. To perform subsequent operations
+ * with that object, it must be returned from the problem
+ * definition object. {\tt GetObject} performs this function.
+ * At compile time, the type of the returned object is unknown.
+ * Thus, the returned type is a sidl.BaseInterface.
+ * QueryInterface or Cast must be used on the returned object to
+ * convert it into a known type.
+ * 
+ */
+
+void
+SIDLFortran77Symbol(bhypre_sstructgraph_getobject_f,BHYPRE_SSTRUCTGRAPH_GETOBJECT_F,bHYPRE_SStructGraph_GetObject_f)
+(
+  int64_t *self,
+  int64_t *A,
+  int32_t *retval
+)
+{
+  struct bHYPRE_SStructGraph__epv *_epv = NULL;
+  struct bHYPRE_SStructGraph__object* _proxy_self = NULL;
+  struct sidl_BaseInterface__object* _proxy_A = NULL;
+  _proxy_self =
+    (struct bHYPRE_SStructGraph__object*)
+    (ptrdiff_t)(*self);
+  _epv = _proxy_self->d_epv;
+  *retval = 
+    (*(_epv->f_GetObject))(
+      _proxy_self,
+      &_proxy_A
+    );
+  *A = (ptrdiff_t)_proxy_A;
 }
 
 void

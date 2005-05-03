@@ -3,15 +3,11 @@
  * Symbol:        bHYPRE.SStructParCSRVector-v1.0.0
  * Symbol Type:   class
  * Babel Version: 0.9.8
- * sidl Created:  20050317 11:17:50 PST
- * Generated:     20050317 11:17:54 PST
  * Description:   Client-side glue code for bHYPRE.SStructParCSRVector
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
  * babel-version = 0.9.8
- * source-line   = 842
- * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 
 /*
@@ -693,23 +689,23 @@ SIDLFortran77Symbol(bhypre_sstructparcsrvector_setvalues_f,BHYPRE_SSTRUCTPARCSRV
   int32_t *part,
   int64_t *index,
   int32_t *var,
-  int64_t *value,
+  int64_t *values,
   int32_t *retval
 )
 {
   struct bHYPRE_SStructParCSRVector__epv *_epv = NULL;
   struct bHYPRE_SStructParCSRVector__object* _proxy_self = NULL;
   struct sidl_int__array* _proxy_index = NULL;
-  struct sidl_double__array* _proxy_value = NULL;
+  struct sidl_double__array* _proxy_values = NULL;
   _proxy_self =
     (struct bHYPRE_SStructParCSRVector__object*)
     (ptrdiff_t)(*self);
   _proxy_index =
     (struct sidl_int__array*)
     (ptrdiff_t)(*index);
-  _proxy_value =
+  _proxy_values =
     (struct sidl_double__array*)
-    (ptrdiff_t)(*value);
+    (ptrdiff_t)(*values);
   _epv = _proxy_self->d_epv;
   *retval = 
     (*(_epv->f_SetValues))(
@@ -717,7 +713,7 @@ SIDLFortran77Symbol(bhypre_sstructparcsrvector_setvalues_f,BHYPRE_SSTRUCTPARCSRV
       *part,
       _proxy_index,
       *var,
-      _proxy_value
+      _proxy_values
     );
 }
 
@@ -795,23 +791,23 @@ SIDLFortran77Symbol(bhypre_sstructparcsrvector_addtovalues_f,BHYPRE_SSTRUCTPARCS
   int32_t *part,
   int64_t *index,
   int32_t *var,
-  int64_t *value,
+  int64_t *values,
   int32_t *retval
 )
 {
   struct bHYPRE_SStructParCSRVector__epv *_epv = NULL;
   struct bHYPRE_SStructParCSRVector__object* _proxy_self = NULL;
   struct sidl_int__array* _proxy_index = NULL;
-  struct sidl_double__array* _proxy_value = NULL;
+  struct sidl_double__array* _proxy_values = NULL;
   _proxy_self =
     (struct bHYPRE_SStructParCSRVector__object*)
     (ptrdiff_t)(*self);
   _proxy_index =
     (struct sidl_int__array*)
     (ptrdiff_t)(*index);
-  _proxy_value =
+  _proxy_values =
     (struct sidl_double__array*)
-    (ptrdiff_t)(*value);
+    (ptrdiff_t)(*values);
   _epv = _proxy_self->d_epv;
   *retval = 
     (*(_epv->f_AddToValues))(
@@ -819,7 +815,7 @@ SIDLFortran77Symbol(bhypre_sstructparcsrvector_addtovalues_f,BHYPRE_SSTRUCTPARCS
       *part,
       _proxy_index,
       *var,
-      _proxy_value
+      _proxy_values
     );
 }
 

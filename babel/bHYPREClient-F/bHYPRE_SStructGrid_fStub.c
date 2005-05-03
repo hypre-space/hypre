@@ -3,15 +3,11 @@
  * Symbol:        bHYPRE.SStructGrid-v1.0.0
  * Symbol Type:   class
  * Babel Version: 0.9.8
- * sidl Created:  20050317 11:17:50 PST
- * Generated:     20050317 11:17:54 PST
  * Description:   Client-side glue code for bHYPRE.SStructGrid
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
  * babel-version = 0.9.8
- * source-line   = 909
- * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 
 /*
@@ -374,6 +370,35 @@ SIDLFortran77Symbol(bhypre_sstructgrid_setnumdimparts_f,BHYPRE_SSTRUCTGRID_SETNU
 }
 
 /*
+ * Method:  SetCommunicator[]
+ */
+
+void
+SIDLFortran77Symbol(bhypre_sstructgrid_setcommunicator_f,BHYPRE_SSTRUCTGRID_SETCOMMUNICATOR_F,bHYPRE_SStructGrid_SetCommunicator_f)
+(
+  int64_t *self,
+  int64_t *mpi_comm,
+  int32_t *retval
+)
+{
+  struct bHYPRE_SStructGrid__epv *_epv = NULL;
+  struct bHYPRE_SStructGrid__object* _proxy_self = NULL;
+  void* _proxy_mpi_comm = NULL;
+  _proxy_self =
+    (struct bHYPRE_SStructGrid__object*)
+    (ptrdiff_t)(*self);
+  _proxy_mpi_comm =
+    (void*)
+    (ptrdiff_t)(*mpi_comm);
+  _epv = _proxy_self->d_epv;
+  *retval = 
+    (*(_epv->f_SetCommunicator))(
+      _proxy_self,
+      _proxy_mpi_comm
+    );
+}
+
+/*
  * Set the extents for a box on a structured part of the grid.
  * 
  */
@@ -413,7 +438,9 @@ SIDLFortran77Symbol(bhypre_sstructgrid_setextents_f,BHYPRE_SSTRUCTGRID_SETEXTENT
 
 /*
  * Describe the variables that live on a structured part of the
- * grid.
+ * grid.  Input: part number, variable number, total number of
+ * variables on that part (needed for memory allocation),
+ * variable type.
  * 
  */
 
@@ -423,6 +450,7 @@ SIDLFortran77Symbol(bhypre_sstructgrid_setvariable_f,BHYPRE_SSTRUCTGRID_SETVARIA
   int64_t *self,
   int32_t *part,
   int32_t *var,
+  int32_t *nvars,
   int32_t *vartype,
   int32_t *retval
 )
@@ -442,6 +470,7 @@ SIDLFortran77Symbol(bhypre_sstructgrid_setvariable_f,BHYPRE_SSTRUCTGRID_SETVARIA
       _proxy_self,
       *part,
       *var,
+      *nvars,
       _proxy_vartype
     );
 }
@@ -662,6 +691,29 @@ SIDLFortran77Symbol(bhypre_sstructgrid_setnumghost_f,BHYPRE_SSTRUCTGRID_SETNUMGH
     (*(_epv->f_SetNumGhost))(
       _proxy_self,
       _proxy_num_ghost
+    );
+}
+
+/*
+ * Method:  Assemble[]
+ */
+
+void
+SIDLFortran77Symbol(bhypre_sstructgrid_assemble_f,BHYPRE_SSTRUCTGRID_ASSEMBLE_F,bHYPRE_SStructGrid_Assemble_f)
+(
+  int64_t *self,
+  int32_t *retval
+)
+{
+  struct bHYPRE_SStructGrid__epv *_epv = NULL;
+  struct bHYPRE_SStructGrid__object* _proxy_self = NULL;
+  _proxy_self =
+    (struct bHYPRE_SStructGrid__object*)
+    (ptrdiff_t)(*self);
+  _epv = _proxy_self->d_epv;
+  *retval = 
+    (*(_epv->f_Assemble))(
+      _proxy_self
     );
 }
 
