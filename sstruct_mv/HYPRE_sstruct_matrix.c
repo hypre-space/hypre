@@ -281,6 +281,8 @@ HYPRE_SStructMatrixInitialize( HYPRE_SStructMatrix matrix )
    {
      ilower = hypre_SStructGridStartRank(grid);
      iupper = ilower + hypre_SStructGridLocalSize(grid) - 1;
+     printf( "HYPRE_SStructMatrixInitialize ilower=%i iupper=%i\n",
+             ilower,iupper );
    }
    
     if(matrix_type == HYPRE_SSTRUCT || matrix_type == HYPRE_STRUCT)
@@ -866,6 +868,46 @@ HYPRE_SStructMatrixGetObject( HYPRE_SStructMatrix   matrix,
  *--------------------------------------------------------------------------*/
 
 int
+HYPRE_SStructMatrixGetObject2( HYPRE_SStructMatrix   matrix,
+                               void                **object )
+{
+   int ierr = 0;
+
+   int            type     = hypre_SStructMatrixObjectType(matrix);
+   HYPRE_IJMatrix ijmatrix = hypre_SStructMatrixIJMatrix(matrix);
+   hypre_SStructPMatrix *pA;
+   hypre_StructMatrix   *sA;
+   int                   part, var;
+ 
+
+   if (type == HYPRE_PARCSR)
+   {
+      /* only difference from ..GetObject: here returns an IJMatrix, not a ParCSRMatrix */
+      *object = ijmatrix;
+   }
+
+   else if (type == HYPRE_SSTRUCT)
+   {
+      *object= matrix;
+   }
+
+   else if (type == HYPRE_STRUCT)
+   {
+      /* only one part & one variable */
+      part= 0;
+      pA  = hypre_SStructMatrixPMatrix(matrix, part);
+      var = 0;
+      sA  = hypre_SStructPMatrixSMatrix(pA, var, var);
+     *object= sA;
+   }
+
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+int
 HYPRE_SStructMatrixPrint( const char          *filename,
                           HYPRE_SStructMatrix  matrix,
                           int                  all )
@@ -888,5 +930,21 @@ HYPRE_SStructMatrixPrint( const char          *filename,
    HYPRE_IJMatrixPrint(hypre_SStructMatrixIJMatrix(matrix), new_filename);
 
    return ierr;
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_StructMatrixMatvec
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_SStructMatrixMatvec( double alpha,
+                           HYPRE_SStructMatrix A,
+                           HYPRE_SStructVector x,
+                           double beta,
+                           HYPRE_SStructVector y     )
+{
+   return ( hypre_SStructMatvec( alpha, (hypre_SStructMatrix *) A,
+                                 (hypre_SStructVector *) x, beta,
+                                 (hypre_SStructVector *) y) );
 }
 

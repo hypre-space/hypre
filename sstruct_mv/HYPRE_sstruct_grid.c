@@ -170,6 +170,24 @@ int HYPRE_SStructGridSetVariables( HYPRE_SStructGrid      grid,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_SStructGridSetVariable
+ * Like HYPRE_SStructGridSetVariables, but do one variable at a time.
+ * Nevertheless, you still must provide nvars, for memory allocation.
+ *--------------------------------------------------------------------------*/
+
+int HYPRE_SStructGridSetVariable( HYPRE_SStructGrid      grid,
+                                  int                    part,
+                                  int                    var,
+                                  int                    nvars,
+                                  HYPRE_SStructVariable  vartype )
+{
+   hypre_SStructPGrid  *pgrid = hypre_SStructGridPGrid(grid, part);
+
+   return hypre_SStructPGridSetVariable( pgrid, var, nvars, vartype );
+}
+
+
+/*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
 int
@@ -207,6 +225,54 @@ HYPRE_SStructGridAddVariables( HYPRE_SStructGrid      grid,
       hypre_SStructUCVarRank(ucvar, i) = -1;           /* don't know, yet */
       hypre_SStructUCVarProc(ucvar, i) = -1;           /* don't know, yet */
    }
+   ucvars[nucvars] = ucvar;
+   nucvars++;
+
+   hypre_SStructGridNUCVars(grid) = nucvars;
+   hypre_SStructGridUCVars(grid)  = ucvars;
+
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_SStructGridAddVariable
+ * Like HYPRE_SStructGridAddVariables, but just one variable at a time.
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_SStructGridAddVariable( HYPRE_SStructGrid      grid,
+                              int                    part,
+                              int                   *index,
+                              int                    var,
+                              HYPRE_SStructVariable  vartype )
+{
+   int  ierr = 0;
+
+   int                  ndim    = hypre_SStructGridNDim(grid);
+   int                  nucvars = hypre_SStructGridNUCVars(grid);
+   hypre_SStructUCVar **ucvars  = hypre_SStructGridUCVars(grid);
+   hypre_SStructUCVar  *ucvar;
+
+   int                  memchunk = 1000;
+   int                  nvars = 1;  /* each ucvar gets only one variable */
+
+   /* allocate more space if necessary */
+   if ((nucvars % memchunk) == 0)
+   {
+      ucvars = hypre_TReAlloc(ucvars, hypre_SStructUCVar *,
+                              (nucvars + memchunk));
+   }
+
+   ucvar = hypre_TAlloc(hypre_SStructUCVar, 1);
+   hypre_SStructUCVarUVars(ucvar) = hypre_TAlloc(hypre_SStructUVar, nvars);
+   hypre_SStructUCVarPart(ucvar) = part;
+   hypre_CopyToCleanIndex(index, ndim, hypre_SStructUCVarCell(ucvar));
+   hypre_SStructUCVarNUVars(ucvar) = nvars;
+
+   hypre_SStructUCVarType(ucvar, var) = vartype;
+   hypre_SStructUCVarRank(ucvar, var) = -1;           /* don't know, yet */
+   hypre_SStructUCVarProc(ucvar, var) = -1;           /* don't know, yet */
+
    ucvars[nucvars] = ucvar;
    nucvars++;
 

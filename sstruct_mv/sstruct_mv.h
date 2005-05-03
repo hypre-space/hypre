@@ -789,6 +789,64 @@ int hypre_BoxMapFindBoxProcEntry( hypre_BoxMap *map , int box , int proc , hypre
 int hypre_BoxMapIntersect( hypre_BoxMap *map , hypre_Index ilower , hypre_Index iupper , hypre_BoxMapEntry ***entries_ptr , int *nentries_ptr );
 int hypre_BoxMapSetNumGhost( hypre_BoxMap *map , int *num_ghost );
 
+/* F90_HYPRE_sstruct_graph.c */
+void hypre_F90_IFACE( int hypre_sstructgraphcreate , int HYPRE_SSTRUCTGRAPHCREATE );
+void hypre_F90_IFACE( int hypre_sstructgraphdestroy , int HYPRE_SSTRUCTGRAPHDESTROY );
+void hypre_F90_IFACE( int hypre_sstructgraphsetstencil , int HYPRE_SSTRUCTGRAPHSETSTENCIL );
+void hypre_F90_IFACE( int hypre_sstructgraphaddentries , int HYPRE_SSTRUCTGRAPHADDENTRIES );
+void hypre_F90_IFACE( int hypre_sstructgraphassemble , int HYPRE_SSTRUCTGRAPHASSEMBLE );
+void hypre_F90_IFACE( int hypre_sstructgraphsetobjecttype , int HYPRE_SSTRUCTGRAPHSETOBJECTTYPE );
+
+/* F90_HYPRE_sstruct_grid.c */
+void hypre_F90_IFACE( int hypre_sstructgridcreate , int HYPRE_SSTRUCTGRIDCREATE );
+void hypre_F90_IFACE( int hypre_sstructgriddestroy , int HYPRE_SSTRUCTGRIDDESTROY );
+void hypre_F90_IFACE( int hypre_sstructgridsetextents , int HYPRE_SSTRUCTGRIDSETEXTENTS );
+void hypre_F90_IFACE( int hypre_sstructgridsetvariables , int HYPRE_SSTRUCTGRIDSETVARIABLES );
+void hypre_F90_IFACE( int hypre_sstructgridaddvariables , int HYPRE_SSTRUCTGRIDADDVARIABLES );
+void hypre_F90_IFACE( int hypre_sstructgridsetneighborbox , int HYPRE_SSTRUCTGRIDSETNEIGHBORBOX );
+void hypre_F90_IFACE( int hypre_sstructgridaddunstructure , int HYPRE_SSTRUCTGRIDADDUNSTRUCTURE );
+void hypre_F90_IFACE( int hypre_sstructgridassemble , int HYPRE_SSTRUCTGRIDASSEMBLE );
+void hypre_F90_IFACE( int hypre_sstructgridsetperiodic , int HYPRE_SSTRUCTGRIDSETPERIODIC );
+void hypre_F90_IFACE( int hypre_sstructgridsetnumghost , int HYPRE_SSTRUCTGRIDSETNUMGHOST );
+
+/* F90_HYPRE_sstruct_matrix.c */
+void hypre_F90_IFACE( int hypre_sstructmatrixcreate , int HYPRE_SSTRUCTMATRIXCREATE );
+void hypre_F90_IFACE( int hypre_sstructmatrixdestroy , int HYPRE_SSTRUCTMATRIXDESTROY );
+void hypre_F90_IFACE( int hypre_sstructmatrixinitialize , int HYPRE_SSTRUCTMATRIXINITIALIZE );
+void hypre_F90_IFACE( int hypre_sstructmatrixsetvalues , int HYPRE_SSTRUCTMATRIXSETVALUES );
+void hypre_F90_IFACE( int hypre_sstructmatrixsetboxvalues , int HYPRE_SSTRUCTMATRIXSETBOXVALUES );
+void hypre_F90_IFACE( int hypre_sstructmatrixgetvalues , int HYPRE_SSTRUCTMATRIXGETVALUES );
+void hypre_F90_IFACE( int hypre_sstructmatrixgetboxvalues , int HYPRE_SSTRUCTMATRIXGETBOXVALUES );
+void hypre_F90_IFACE( int hypre_sstructmatrixaddtovalues , int HYPRE_SSTRUCTMATRIXADDTOVALUES );
+void hypre_F90_IFACE( int hypre_sstructmatrixaddtoboxvalue , int HYPRE_SSTRUCTMATRIXADDTOBOXVALUE );
+void hypre_F90_IFACE( int hypre_sstructmatrixassemble , int HYPRE_SSTRUCTMATRIXASSEMBLE );
+void hypre_F90_IFACE( int hypre_sstructmatrixsetsymmetric , int HYPRE_SSTRUCTMATRIXSETSYMMETRIC );
+void hypre_F90_IFACE( int hypre_sstructmatrixsetnssymmetr , int HYPRE_SSTRUCTMATRIXSETNSSYMMETR );
+void hypre_F90_IFACE( int hypre_sstructmatrixsetobjecttyp , int HYPRE_SSTRUCTMATRIXSETOBJECTTYP );
+void hypre_F90_IFACE( int hypre_sstructmatrixgetobject , int HYPRE_SSTRUCTMATRIXGETOBJECT );
+void hypre_F90_IFACE( int hypre_sstructmatrixprint , int HYPRE_SSTRUCTMATRIXPRINT );
+
+/* F90_HYPRE_sstruct_stencil.c */
+void hypre_F90_IFACE( int hypre_sstructstencilcreate , int HYPRE_SSTRUCTSTENCILCREATE );
+void hypre_F90_IFACE( int hypre_sstructstencildestroy , int HYPRE_SSTRUCTSTENCILDESTROY );
+void hypre_F90_IFACE( int hypre_sstructstencilsetentry , int HYPRE_SSTRUCTSTENCILSETENTRY );
+
+/* F90_HYPRE_sstruct_vector.c */
+void hypre_F90_IFACE( int hypre_sstructvectorcreate , int HYPRE_SSTRUCTVECTORCREATE );
+void hypre_F90_IFACE( int hypre_sstructvectordestroy , int HYPRE_SSTRUCTVECTORDESTROY );
+void hypre_F90_IFACE( int hypre_sstructvectorinitialize , int HYPRE_SSTRUCTVECTORINITIALIZE );
+void hypre_F90_IFACE( int hypre_sstructvectorsetvalues , int HYPRE_SSTRUCTVECTORSETVALUES );
+void hypre_F90_IFACE( int hypre_sstructvectorsetboxvalues , int HYPRE_SSTRUCTVECTORSETBOXVALUES );
+void hypre_F90_IFACE( int hypre_sstructvectoraddtovalues , int HYPRE_SSTRUCTVECTORADDTOVALUES );
+void hypre_F90_IFACE( int hypre_sstructvectoraddtoboxvalu , int HYPRE_SSTRUCTVECTORADDTOBOXVALU );
+void hypre_F90_IFACE( int hypre_sstructvectorassemble , int HYPRE_SSTRUCTVECTORASSEMBLE );
+void hypre_F90_IFACE( int hypre_sstructvectorgather , int HYPRE_SSTRUCTVECTORGATHER );
+void hypre_F90_IFACE( int hypre_sstructvectorgetvalues , int HYPRE_SSTRUCTVECTORGETVALUES );
+void hypre_F90_IFACE( int hypre_sstructvectorgetboxvalues , int HYPRE_SSTRUCTVECTORGETBOXVALUES );
+void hypre_F90_IFACE( int hypre_sstructvectorsetobjecttyp , int HYPRE_SSTRUCTVECTORSETOBJECTTYP );
+void hypre_F90_IFACE( int hypre_sstructvectorgetobject , int HYPRE_SSTRUCTVECTORGETOBJECT );
+void hypre_F90_IFACE( int hypre_sstructvectorprint , int HYPRE_SSTRUCTVECTORPRINT );
+
 /* HYPRE_sstruct_graph.c */
 int HYPRE_SStructGraphCreate( MPI_Comm comm , HYPRE_SStructGrid grid , HYPRE_SStructGraph *graph_ptr );
 int HYPRE_SStructGraphDestroy( HYPRE_SStructGraph graph );
@@ -802,7 +860,9 @@ int HYPRE_SStructGridCreate( MPI_Comm comm , int ndim , int nparts , HYPRE_SStru
 int HYPRE_SStructGridDestroy( HYPRE_SStructGrid grid );
 int HYPRE_SStructGridSetExtents( HYPRE_SStructGrid grid , int part , int *ilower , int *iupper );
 int HYPRE_SStructGridSetVariables( HYPRE_SStructGrid grid , int part , int nvars , HYPRE_SStructVariable *vartypes );
+int HYPRE_SStructGridSetVariable( HYPRE_SStructGrid grid , int part , int var , int nvars , HYPRE_SStructVariable vartype );
 int HYPRE_SStructGridAddVariables( HYPRE_SStructGrid grid , int part , int *index , int nvars , HYPRE_SStructVariable *vartypes );
+int HYPRE_SStructGridAddVariable( HYPRE_SStructGrid grid , int part , int *index , int var , HYPRE_SStructVariable vartype );
 int HYPRE_SStructGridSetNeighborBox( HYPRE_SStructGrid grid , int part , int *ilower , int *iupper , int nbor_part , int *nbor_ilower , int *nbor_iupper , int *index_map );
 int HYPRE_SStructGridAddUnstructuredPart( HYPRE_SStructGrid grid , int ilower , int iupper );
 int HYPRE_SStructGridAssemble( HYPRE_SStructGrid grid );
@@ -824,7 +884,9 @@ int HYPRE_SStructMatrixSetSymmetric( HYPRE_SStructMatrix matrix , int part , int
 int HYPRE_SStructMatrixSetNSSymmetric( HYPRE_SStructMatrix matrix , int symmetric );
 int HYPRE_SStructMatrixSetObjectType( HYPRE_SStructMatrix matrix , int type );
 int HYPRE_SStructMatrixGetObject( HYPRE_SStructMatrix matrix , void **object );
+int HYPRE_SStructMatrixGetObject2( HYPRE_SStructMatrix matrix , void **object );
 int HYPRE_SStructMatrixPrint( const char *filename , HYPRE_SStructMatrix matrix , int all );
+int HYPRE_SStructMatrixMatvec( double alpha , HYPRE_SStructMatrix A , HYPRE_SStructVector x , double beta , HYPRE_SStructVector y );
 
 /* HYPRE_sstruct_stencil.c */
 int HYPRE_SStructStencilCreate( int ndim , int size , HYPRE_SStructStencil *stencil_ptr );
@@ -869,6 +931,7 @@ int hypre_SStructPGridDestroy( hypre_SStructPGrid *pgrid );
 int hypre_SStructPGridSetExtents( hypre_SStructPGrid *pgrid , hypre_Index ilower , hypre_Index iupper );
 int hypre_SStructPGridSetCellSGrid( hypre_SStructPGrid *pgrid , hypre_StructGrid *cell_sgrid );
 int hypre_SStructPGridSetVariables( hypre_SStructPGrid *pgrid , int nvars , HYPRE_SStructVariable *vartypes );
+int hypre_SStructPGridSetVariable( hypre_SStructPGrid *pgrid , int var , int nvars , HYPRE_SStructVariable vartype );
 int hypre_SStructPGridSetPNeighbor( hypre_SStructPGrid *pgrid , hypre_Box *pneighbor_box );
 int hypre_SStructPGridAssemble( hypre_SStructPGrid *pgrid );
 int hypre_SStructGridRef( hypre_SStructGrid *grid , hypre_SStructGrid **grid_ref );
