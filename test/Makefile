@@ -185,6 +185,7 @@ HYPRE_STANDARD_DRIVERS =\
 
 HYPRE_BABEL_DRIVERS =\
  struct_b.c\
+ sstruct_b.c\
  ij_b.c
 
 HYPRE_FEI_DRIVERS_CXX =\
