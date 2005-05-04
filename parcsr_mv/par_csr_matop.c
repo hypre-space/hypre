@@ -1316,3 +1316,236 @@ hypre_ParCSRMatrixTranspose( hypre_ParCSRMatrix *A,
   
    return ierr;
 }
+
+/* -----------------------------------------------------------------------------
+ * generate a parallel spanning tree (for Maxwell Equation)
+ * G_csr is the node to edge connectivity matrix
+ * ----------------------------------------------------------------------------- */
+
+void hypre_ParCSRMatrixGenSpanningTree(hypre_ParCSRMatrix *G_csr, int **indices)
+{
+   int nrows_G, ncols_G, *G_diag_i, *G_diag_j, *GT_diag_mat, i, j, k, edge;
+   int *nodes_marked, *edges_marked, *queue, queue_tail, queue_head, node;
+   int mypid, nprocs, n_children, *children, nsends, *send_procs, *recv_cnts;
+   int nrecvs, *recv_procs, n_proc_array, *proc_array, *pgraph_i, *pgraph_j;
+   int parent, proc, proc2, node2, found, *t_indices, tree_size;
+   MPI_Comm               comm;
+   hypre_ParCSRCommHandle *comm_handle;
+   hypre_ParCSRCommPkg    *comm_pkg;
+   hypre_CSRMatrix        *G_diag;
+
+   /* fetch G matrix (node to edge) */
+
+   nrows_G = hypre_ParCSRMatrixGlobalNumRows(G_csr);
+   ncols_G = hypre_ParCSRMatrixGlobalNumCols(G_csr);
+   G_diag = hypre_ParCSRMatrixDiag(G_csr);
+   G_diag_i = hypre_CSRMatrixI(G_diag);
+   G_diag_j = hypre_CSRMatrixJ(G_diag);
+
+   /* form G transpose in special form (2 nodes per edge max) */
+
+   GT_diag_mat = (int *) malloc(2 * ncols_G * sizeof(int));
+   for (i = 0; i < 2 * ncols_G; i++) GT_diag_mat[i] = -1;
+   for (i = 0; i < nrows_G; i++)
+   {
+      for (j = G_diag_i[i]; j < G_diag_i[i+1]; j++)
+      {
+         edge = G_diag_j[j];
+         if (GT_diag_mat[edge*2] == -1) GT_diag_mat[edge*2] = i;
+         else                           GT_diag_mat[edge*2+1] = i;
+      }
+   }
+
+   /* BFS on the local matrix graph to find tree */
+
+   nodes_marked = (int *) malloc(nrows_G * sizeof(int));
+   edges_marked = (int *) malloc(ncols_G * sizeof(int));
+   for (i = 0; i < nrows_G; i++) nodes_marked[i] = 0; 
+   for (i = 0; i < ncols_G; i++) edges_marked[i] = 0; 
+   queue = (int *) malloc(nrows_G * sizeof(int));
+   queue_head = 0;
+   queue_tail = 1;
+   queue[0] = 0;
+   nodes_marked[0] = 1;
+   while ((queue_tail-queue_head) > 0)
+   {
+      node = queue[queue_tail-1];
+      queue_tail--;
+      for (i = G_diag_i[node]; i < G_diag_i[node+1]; i++)
+      {
+         edge = G_diag_j[i]; 
+         if (edges_marked[edge] == 0)
+         {
+            if (GT_diag_mat[2*edge+1] != -1)
+            {
+               node2 = GT_diag_mat[2*edge];
+               if (node2 == node) node2 = GT_diag_mat[2*edge+1];
+               if (nodes_marked[node2] == 0)
+               {
+                  nodes_marked[node2] = 1;
+                  edges_marked[node2] = 1;
+                  queue[queue_tail] = node2;
+                  queue_tail++;
+               }
+            }
+         }
+      }
+   }
+   free(nodes_marked);
+   free(queue);
+   free(GT_diag_mat);
+
+   /* fetch the communication information from */
+
+   comm = hypre_ParCSRMatrixComm(G_csr);
+   MPI_Comm_rank(comm, &mypid);
+   MPI_Comm_size(comm, &nprocs);
+   comm_pkg = hypre_ParCSRMatrixCommPkg(G_csr);
+   if (comm_pkg == NULL)
+   {
+      hypre_MatvecCommPkgCreate((hypre_ParCSRMatrix *) G_csr);
+      comm_pkg = hypre_ParCSRMatrixCommPkg(G_csr);
+   }
+
+   /* construct processor graph based on node-edge connection */
+   /* (local edges connected to neighbor processor nodes)     */
+
+   n_children = 0;
+   if (nprocs > 1)
+   {
+      nsends     = hypre_ParCSRCommPkgNumSends(comm_pkg);
+      send_procs = hypre_ParCSRCommPkgSendProcs(comm_pkg);
+      nrecvs     = hypre_ParCSRCommPkgNumRecvs(comm_pkg);
+      recv_procs = hypre_ParCSRCommPkgRecvProcs(comm_pkg);
+      proc_array = NULL;
+      if ((nsends+nrecvs) > 0)
+      {
+         n_proc_array = 0;
+         proc_array = (int *) malloc((nsends+nrecvs) * sizeof(int));
+         for (i = 0; i < nsends; i++) proc_array[i] = send_procs[i];
+         for (i = 0; i < nrecvs; i++) proc_array[nsends+i] = recv_procs[i];
+         qsort0(proc_array, 0, nsends+nrecvs-1); 
+         n_proc_array = 1;
+         for (i = 1; i < nrecvs+nsends; i++) 
+            if (proc_array[i] != proc_array[n_proc_array])
+               proc_array[n_proc_array++] = proc_array[i];
+      }
+      pgraph_i = (int *) malloc((nprocs+1) * sizeof(int));
+      recv_cnts = (int *) malloc(nprocs * sizeof(int));
+      MPI_Allgather(&n_proc_array, 1, MPI_INT, recv_cnts, 1, MPI_INT, comm);
+      pgraph_i[0] = 0;
+      for (i = 1; i <= nprocs; i++)
+         pgraph_i[i] = pgraph_i[i-1] + recv_cnts[i-1];
+      pgraph_j = (int *) malloc(pgraph_i[nprocs] * sizeof(int));
+      MPI_Allgatherv(proc_array, n_proc_array, MPI_INT, pgraph_j, recv_cnts, 
+                     pgraph_i, MPI_INT, comm);
+      free(recv_cnts);
+
+      /* BFS on the processor graph to determine parent and children */
+
+      nodes_marked = (int *) malloc(nprocs * sizeof(int));
+      for (i = 0; i < nprocs; i++) nodes_marked[i] = -1; 
+      queue = (int *) malloc(nprocs * sizeof(int));
+      queue_head = 0;
+      queue_tail = 1;
+      node = 0;
+      queue[0] = node;
+      while ((queue_tail-queue_head) > 0)
+      {
+         proc = queue[queue_tail-1];
+         queue_tail--;
+         for (i = pgraph_i[proc]; i < pgraph_i[proc+1]; i++)
+         {
+            proc2 = pgraph_j[i]; 
+            if (nodes_marked[proc2] < 0)
+            {
+               nodes_marked[proc2] = proc;
+               queue[queue_tail] = proc2;
+               queue_tail++;
+            }
+         }
+      }
+      parent = nodes_marked[mypid];
+      n_children = 0;
+      for (i = 0; i < nprocs; i++) if (nodes_marked[i] == mypid) n_children++;
+      if (n_children == 0) {n_children = 0; children = NULL;}
+      else
+      {
+         children = (int *) malloc(n_children * sizeof(int));
+         n_children = 0;
+         for (i = 0; i < nprocs; i++) 
+            if (nodes_marked[i] == mypid) children[n_children++] = i;
+      } 
+      free(nodes_marked);
+      free(queue);
+      free(pgraph_i);
+      free(pgraph_j);
+   }
+
+
+   /* first, connection with my parent : if the edge in my parent *
+    * is incident to one of my nodes, then my parent will mark it */
+
+   found = 0;
+   for (i = 0; i < nrecvs; i++)
+   {
+      proc = hypre_ParCSRCommPkgRecvProc(comm_pkg, i);
+      if (proc == parent)
+      {
+         found = 1;
+         break;
+      }
+   }
+
+   /* but if all the edges connected to my parent are on my side, *
+    * then I will just pick one of them as tree edge              */
+
+   if (found == 0)
+   {
+      for (i = 0; i < nsends; i++)
+      {
+         proc = hypre_ParCSRCommPkgSendProc(comm_pkg, i);
+         if (proc == parent)
+         {
+            k = hypre_ParCSRCommPkgSendMapStart(comm_pkg,i);
+            edge = hypre_ParCSRCommPkgSendMapElmt(comm_pkg,k);
+            edges_marked[edge] = 1;
+            break;
+         }
+      }
+   }
+   
+   /* next, if my processor has an edge incident on one node in my *
+    * child, put this edge on the tree. But if there is no such    *
+    * edge, then I will assume my child will pick up an edge       */
+
+   for (j = 0; j < n_children; i++)
+   {
+      proc = children[j];
+      for (i = 0; i < nsends; i++)
+      {
+         proc2 = hypre_ParCSRCommPkgSendProc(comm_pkg, i);
+         if (proc == proc2)
+         {
+            k = hypre_ParCSRCommPkgSendMapStart(comm_pkg,i);
+            edge = hypre_ParCSRCommPkgSendMapElmt(comm_pkg,k);
+            edges_marked[edge] = 1;
+            break;
+         }
+      }
+   }
+   if (n_children > 0) free(children);
+
+   /* count the size of the tree */
+
+   tree_size = 0;
+   for (i = 0; i < nrows_G; i++)
+      if (edges_marked[i] == 1) tree_size++;
+   t_indices = (int *) malloc((tree_size+1) * sizeof(int));
+   t_indices[0] = tree_size++;
+   for (i = 0; i < nrows_G; i++)
+      if (edges_marked[i] == 1) t_indices[tree_size++] = i;
+   (*indices) = t_indices;
+   free(edges_marked);
+}
+
