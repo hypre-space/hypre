@@ -493,8 +493,6 @@ impl_bHYPRE_SStructParCSRMatrix_GetObject(
    ierr += HYPRE_SStructMatrixGetObject2( HA, (void **) (&ijA) );
 
    HYPRE_IJMatrixGetLocalRange( ijA, &ilower, &iupper, &jlower, &jupper );
-   printf( "ilower=%i iupper=%i  ", ilower, iupper );
-   printf( "jlower=%i jupper=%i\n", jlower, jupper );
 
    pA = bHYPRE_IJParCSRMatrix__create();
    p_data = bHYPRE_IJParCSRMatrix__get_data( pA );

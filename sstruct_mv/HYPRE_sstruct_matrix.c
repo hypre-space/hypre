@@ -281,8 +281,6 @@ HYPRE_SStructMatrixInitialize( HYPRE_SStructMatrix matrix )
    {
      ilower = hypre_SStructGridStartRank(grid);
      iupper = ilower + hypre_SStructGridLocalSize(grid) - 1;
-     printf( "HYPRE_SStructMatrixInitialize ilower=%i iupper=%i\n",
-             ilower,iupper );
    }
    
     if(matrix_type == HYPRE_SSTRUCT || matrix_type == HYPRE_STRUCT)
