@@ -1322,25 +1322,56 @@ hypre_ParCSRMatrixTranspose( hypre_ParCSRMatrix *A,
  * G_csr is the node to edge connectivity matrix
  * ----------------------------------------------------------------------------- */
 
-void hypre_ParCSRMatrixGenSpanningTree(hypre_ParCSRMatrix *G_csr, int **indices)
+void hypre_ParCSRMatrixGenSpanningTree(hypre_ParCSRMatrix *G_csr, int **indices,
+                                       int G_type)
 {
    int nrows_G, ncols_G, *G_diag_i, *G_diag_j, *GT_diag_mat, i, j, k, edge;
    int *nodes_marked, *edges_marked, *queue, queue_tail, queue_head, node;
    int mypid, nprocs, n_children, *children, nsends, *send_procs, *recv_cnts;
    int nrecvs, *recv_procs, n_proc_array, *proc_array, *pgraph_i, *pgraph_j;
-   int parent, proc, proc2, node2, found, *t_indices, tree_size;
-   MPI_Comm               comm;
-   hypre_ParCSRCommHandle *comm_handle;
-   hypre_ParCSRCommPkg    *comm_pkg;
-   hypre_CSRMatrix        *G_diag;
+   int parent, proc, proc2, node2, found, *t_indices, tree_size, *T_diag_i;
+   int *T_diag_j, *counts, offset;
+   MPI_Comm            comm;
+   hypre_ParCSRCommPkg *comm_pkg;
+   hypre_CSRMatrix     *G_diag;
 
-   /* fetch G matrix (node to edge) */
+   /* fetch G matrix (G_type = 0 ==> node to edge) */
 
-   nrows_G = hypre_ParCSRMatrixGlobalNumRows(G_csr);
-   ncols_G = hypre_ParCSRMatrixGlobalNumCols(G_csr);
-   G_diag = hypre_ParCSRMatrixDiag(G_csr);
-   G_diag_i = hypre_CSRMatrixI(G_diag);
-   G_diag_j = hypre_CSRMatrixJ(G_diag);
+   if (G_type == 0)
+   {
+      nrows_G = hypre_ParCSRMatrixGlobalNumRows(G_csr);
+      ncols_G = hypre_ParCSRMatrixGlobalNumCols(G_csr);
+      G_diag = hypre_ParCSRMatrixDiag(G_csr);
+      G_diag_i = hypre_CSRMatrixI(G_diag);
+      G_diag_j = hypre_CSRMatrixJ(G_diag);
+   }
+   else
+   {
+      nrows_G = hypre_ParCSRMatrixGlobalNumCols(G_csr);
+      ncols_G = hypre_ParCSRMatrixGlobalNumRows(G_csr);
+      G_diag = hypre_ParCSRMatrixDiag(G_csr);
+      T_diag_i = hypre_CSRMatrixI(G_diag);
+      T_diag_j = hypre_CSRMatrixJ(G_diag);
+      counts = (int *) malloc(nrows_G * sizeof(int));
+      for (i = 0; i < nrows_G; i++) counts[i] = 0;
+      for (i = 0; i < T_diag_i[ncols_G]; i++) counts[T_diag_j[i]]++;
+      G_diag_i = (int *) malloc((nrows_G+1) * sizeof(int));
+      G_diag_j = (int *) malloc(T_diag_i[ncols_G] * sizeof(int));
+      G_diag_i[0] = 0;
+      for (i = 1; i <= nrows_G; i++) G_diag_i[i] = G_diag_i[i-1] + counts[i-1];
+      for (i = 0; i < ncols_G; i++)
+      {
+         for (j = T_diag_i[i]; j < T_diag_i[i+1]; j++)
+         {
+            k = T_diag_j[j];
+            offset = G_diag_i[k]++;
+            G_diag_j[offset] = i;
+         }
+      }
+      G_diag_i[0] = 0;
+      for (i = 1; i <= nrows_G; i++) G_diag_i[i] = G_diag_i[i-1] + counts[i-1];
+      free(counts);
+   }
 
    /* form G transpose in special form (2 nodes per edge max) */
 
@@ -1383,7 +1414,7 @@ void hypre_ParCSRMatrixGenSpanningTree(hypre_ParCSRMatrix *G_csr, int **indices)
                if (nodes_marked[node2] == 0)
                {
                   nodes_marked[node2] = 1;
-                  edges_marked[node2] = 1;
+                  edges_marked[edge] = 1;
                   queue[queue_tail] = node2;
                   queue_tail++;
                }
@@ -1401,7 +1432,7 @@ void hypre_ParCSRMatrixGenSpanningTree(hypre_ParCSRMatrix *G_csr, int **indices)
    MPI_Comm_rank(comm, &mypid);
    MPI_Comm_size(comm, &nprocs);
    comm_pkg = hypre_ParCSRMatrixCommPkg(G_csr);
-   if (comm_pkg == NULL)
+   if (nprocs == 1 && comm_pkg == NULL)
    {
       hypre_MatvecCommPkgCreate((hypre_ParCSRMatrix *) G_csr);
       comm_pkg = hypre_ParCSRMatrixCommPkg(G_csr);
@@ -1411,6 +1442,7 @@ void hypre_ParCSRMatrixGenSpanningTree(hypre_ParCSRMatrix *G_csr, int **indices)
    /* (local edges connected to neighbor processor nodes)     */
 
    n_children = 0;
+   nrecvs = nsends = 0;
    if (nprocs > 1)
    {
       nsends     = hypre_ParCSRCommPkgNumSends(comm_pkg);
@@ -1482,7 +1514,6 @@ void hypre_ParCSRMatrixGenSpanningTree(hypre_ParCSRMatrix *G_csr, int **indices)
       free(pgraph_j);
    }
 
-
    /* first, connection with my parent : if the edge in my parent *
     * is incident to one of my nodes, then my parent will mark it */
 
@@ -1539,13 +1570,320 @@ void hypre_ParCSRMatrixGenSpanningTree(hypre_ParCSRMatrix *G_csr, int **indices)
    /* count the size of the tree */
 
    tree_size = 0;
-   for (i = 0; i < nrows_G; i++)
+   for (i = 0; i < ncols_G; i++)
       if (edges_marked[i] == 1) tree_size++;
    t_indices = (int *) malloc((tree_size+1) * sizeof(int));
-   t_indices[0] = tree_size++;
-   for (i = 0; i < nrows_G; i++)
+   t_indices[0] = tree_size;
+   tree_size = 1;
+   for (i = 0; i < ncols_G; i++)
       if (edges_marked[i] == 1) t_indices[tree_size++] = i;
    (*indices) = t_indices;
+printf("tree size = %d %d\n", t_indices[0], (*indices)[0]);
    free(edges_marked);
+   if (G_type != 0)
+   {
+      free(G_diag_i);
+      free(G_diag_j);
+   }
+}
+
+/* -----------------------------------------------------------------------------
+ * extract submatrices based on given indices
+ * ----------------------------------------------------------------------------- */
+
+void hypre_ParCSRMatrixExtractSubmatrices(hypre_ParCSRMatrix *A_csr, int *indices2,
+                                          hypre_ParCSRMatrix **submatrices)
+{
+   int    nindices, *indices, nrows_A, *A_diag_i, *A_diag_j, mypid, nprocs;
+   int    i, j, k, *proc_offsets1, *proc_offsets2, *itmp_array, *exp_indices;
+   int    nnz11, nnz12, nnz21, nnz22, col, ncols_offd, nnz_offd, nnz_diag;
+   int    global_nrows, global_ncols, *row_starts, *col_starts, nrows, nnz;
+   int    *diag_i, *diag_j, row;
+   double *A_diag_a, *diag_a;
+   hypre_ParCSRMatrix *A11_csr, *A12_csr, *A21_csr, *A22_csr;
+   hypre_CSRMatrix    *A_diag, *diag;
+   MPI_Comm           comm;
+
+   /* -----------------------------------------------------
+    * first make sure the incoming indices are in order
+    * ----------------------------------------------------- */
+
+   nindices = indices2[0];
+printf("Extract : nindices = %d\n", nindices);
+   indices  = &(indices2[1]);
+   qsort0(indices, 0, nindices-1);
+
+   /* -----------------------------------------------------
+    * fetch matrix information
+    * ----------------------------------------------------- */
+
+   nrows_A = hypre_ParCSRMatrixGlobalNumRows(A_csr);
+   A_diag = hypre_ParCSRMatrixDiag(A_csr);
+   A_diag_i = hypre_CSRMatrixI(A_diag);
+   A_diag_j = hypre_CSRMatrixJ(A_diag);
+   A_diag_a = hypre_CSRMatrixData(A_diag);
+   comm = hypre_ParCSRMatrixComm(A_csr);
+   MPI_Comm_rank(comm, &mypid);
+   MPI_Comm_size(comm, &nprocs);
+
+   /* -----------------------------------------------------
+    * compute new matrix dimensions
+    * ----------------------------------------------------- */
+
+   proc_offsets1 = (int *) malloc((nprocs+1) * sizeof(int));
+   proc_offsets2 = (int *) malloc((nprocs+1) * sizeof(int));
+   MPI_Allgather(&nindices, 1, MPI_INT, proc_offsets1, 1, MPI_INT, comm);
+   k = 0;
+   for (i = 0; i < nprocs; i++) 
+   {
+      j = proc_offsets1[i];
+      proc_offsets1[i] = k;
+      k += j;
+   } 
+   proc_offsets1[nprocs] = k;
+   itmp_array = hypre_ParCSRMatrixRowStarts(A_csr);
+   for (i = 0; i <= nprocs; i++) 
+      proc_offsets2[i] = itmp_array[i] - proc_offsets1[i];
+
+   /* -----------------------------------------------------
+    * assign id's to row and col for later processing
+    * ----------------------------------------------------- */
+
+   exp_indices = (int *) malloc(nrows_A * sizeof(int));
+   for (i = 0; i < nrows_A; i++) exp_indices[i] = -1;
+   for (i = 0; i < nindices; i++) exp_indices[indices[i]] = i;
+   k = 0;
+   for (i = 0; i < nindices; i++) 
+   {
+      if (exp_indices[indices[i]] < 0)
+      {
+         exp_indices[indices[i]] = - k - 1;
+         k++;
+      }
+   }
+
+   /* -----------------------------------------------------
+    * compute number of nonzeros for each block
+    * ----------------------------------------------------- */
+
+   nnz11 = nnz12 = nnz21 = nnz22 = 0;
+   for (i = 0; i < nrows_A; i++)
+   {
+      if (exp_indices[i] >= 0)
+      {
+         for (j = A_diag_i[i]; j < A_diag_i[i+1]; j++)
+         {
+            col = A_diag_j[j];
+            if (exp_indices[col] >= 0) nnz11++;
+            else                       nnz12++;
+         }
+      }
+      else
+      {
+         for (j = A_diag_i[i]; j < A_diag_i[i+1]; j++)
+         {
+            col = A_diag_j[j];
+            if (exp_indices[col] >= 0) nnz21++;
+            else                       nnz22++;
+         }
+      }
+   }
+printf("Extract submatrices nnz = %d %d %d %d\n", nnz11, nnz12, nnz21, nnz22);
+
+   /* -----------------------------------------------------
+    * create A11 matrix (assume sequential for the moment)
+    * ----------------------------------------------------- */
+
+   ncols_offd = 0;
+   nnz_offd   = 0;
+   nnz_diag   = nnz11;
+   global_nrows = proc_offsets1[nprocs];
+   global_ncols = proc_offsets1[nprocs];
+   row_starts = (int *) malloc((nprocs+1) * sizeof(int));
+   col_starts = (int *) malloc((nprocs+1) * sizeof(int));
+   for (i = 0; i < nprocs; i++)
+   {
+      row_starts[i] = proc_offsets1[i];
+      col_starts[i] = proc_offsets1[i];
+   }
+   A11_csr = hypre_ParCSRMatrixCreate(comm, global_nrows, global_ncols,
+                    row_starts, col_starts, ncols_offd, nnz_diag, nnz_offd); 
+   nrows = nindices;
+   diag_i = (int *) malloc((nrows+1) * sizeof(int));
+   diag_j = (int *) malloc(nnz_diag * sizeof(int));
+   diag_a = (double *) malloc(nnz_diag * sizeof(double));
+   nnz = 0;
+   row = 0;
+   diag_i[0] = 0;
+   for (i = 0; i < nrows_A; i++)
+   {
+      if (exp_indices[i] >= 0)
+      {
+         for (j = A_diag_i[i]; j < A_diag_i[i+1]; j++)
+         {
+            col = A_diag_j[j];
+            if (exp_indices[col] >= 0)
+            {
+               diag_j[nnz] = exp_indices[col];
+               diag_a[nnz++] = A_diag_a[j];
+            }
+         }
+         diag_i[row++] = nnz;
+      }
+   }
+   diag = hypre_ParCSRMatrixDiag(A11_csr);
+   hypre_CSRMatrixI(diag) = diag_i;
+   hypre_CSRMatrixJ(diag) = diag_j;
+   hypre_CSRMatrixData(diag) = diag_a;
+
+   /* -----------------------------------------------------
+    * create A12 matrix (assume sequential for the moment)
+    * ----------------------------------------------------- */
+
+   ncols_offd = 0;
+   nnz_offd   = 0;
+   nnz_diag   = nnz12;
+   global_nrows = proc_offsets1[nprocs];
+   global_ncols = proc_offsets2[nprocs];
+   row_starts = (int *) malloc((nprocs+1) * sizeof(int));
+   col_starts = (int *) malloc((nprocs+1) * sizeof(int));
+   for (i = 0; i < nprocs; i++)
+   {
+      row_starts[i] = proc_offsets1[i];
+      col_starts[i] = proc_offsets2[i];
+   }
+   A12_csr = hypre_ParCSRMatrixCreate(comm, global_nrows, global_ncols,
+                    row_starts, col_starts, ncols_offd, nnz_diag, nnz_offd); 
+   nrows = nindices;
+   diag_i = (int *) malloc((nrows+1) * sizeof(int));
+   diag_j = (int *) malloc(nnz_diag * sizeof(int));
+   diag_a = (double *) malloc(nnz_diag * sizeof(double));
+   nnz = 0;
+   row = 0;
+   diag_i[0] = 0;
+   for (i = 0; i < nrows_A; i++)
+   {
+      if (exp_indices[i] >= 0)
+      {
+         for (j = A_diag_i[i]; j < A_diag_i[i+1]; j++)
+         {
+            col = A_diag_j[j];
+            if (exp_indices[col] < 0)
+            {
+               diag_j[nnz] = - exp_indices[col] - 1;
+               diag_a[nnz++] = A_diag_a[j];
+            }
+         }
+         diag_i[row++] = nnz;
+      }
+   }
+   diag = hypre_ParCSRMatrixDiag(A12_csr);
+   hypre_CSRMatrixI(diag) = diag_i;
+   hypre_CSRMatrixJ(diag) = diag_j;
+   hypre_CSRMatrixData(diag) = diag_a;
+
+   /* -----------------------------------------------------
+    * create A21 matrix (assume sequential for the moment)
+    * ----------------------------------------------------- */
+
+   ncols_offd = 0;
+   nnz_offd   = 0;
+   nnz_diag   = nnz21;
+   global_nrows = proc_offsets2[nprocs];
+   global_ncols = proc_offsets1[nprocs];
+   row_starts = (int *) malloc((nprocs+1) * sizeof(int));
+   col_starts = (int *) malloc((nprocs+1) * sizeof(int));
+   for (i = 0; i < nprocs; i++)
+   {
+      row_starts[i] = proc_offsets2[i];
+      col_starts[i] = proc_offsets1[i];
+   }
+   A21_csr = hypre_ParCSRMatrixCreate(comm, global_nrows, global_ncols,
+                    row_starts, col_starts, ncols_offd, nnz_diag, nnz_offd); 
+   nrows = nrows_A - nindices;
+   diag_i = (int *) malloc((nrows+1) * sizeof(int));
+   diag_j = (int *) malloc(nnz_diag * sizeof(int));
+   diag_a = (double *) malloc(nnz_diag * sizeof(double));
+   nnz = 0;
+   row = 0;
+   diag_i[0] = 0;
+   for (i = 0; i < nrows_A; i++)
+   {
+      if (exp_indices[i] < 0)
+      {
+         for (j = A_diag_i[i]; j < A_diag_i[i+1]; j++)
+         {
+            col = A_diag_j[j];
+            if (exp_indices[col] >= 0)
+            {
+               diag_j[nnz] = exp_indices[col];
+               diag_a[nnz++] = A_diag_a[j];
+            }
+         }
+         diag_i[row++] = nnz;
+      }
+   }
+   diag = hypre_ParCSRMatrixDiag(A21_csr);
+   hypre_CSRMatrixI(diag) = diag_i;
+   hypre_CSRMatrixJ(diag) = diag_j;
+   hypre_CSRMatrixData(diag) = diag_a;
+
+   /* -----------------------------------------------------
+    * create A22 matrix (assume sequential for the moment)
+    * ----------------------------------------------------- */
+
+   ncols_offd = 0;
+   nnz_offd   = 0;
+   nnz_diag   = nnz22;
+   global_nrows = proc_offsets2[nprocs];
+   global_ncols = proc_offsets2[nprocs];
+   row_starts = (int *) malloc((nprocs+1) * sizeof(int));
+   col_starts = (int *) malloc((nprocs+1) * sizeof(int));
+   for (i = 0; i < nprocs; i++)
+   {
+      row_starts[i] = proc_offsets2[i];
+      col_starts[i] = proc_offsets2[i];
+   }
+   A22_csr = hypre_ParCSRMatrixCreate(comm, global_nrows, global_ncols,
+                    row_starts, col_starts, ncols_offd, nnz_diag, nnz_offd); 
+   nrows = nrows_A - nindices;
+   diag_i = (int *) malloc((nrows+1) * sizeof(int));
+   diag_j = (int *) malloc(nnz_diag * sizeof(int));
+   diag_a = (double *) malloc(nnz_diag * sizeof(double));
+   nnz = 0;
+   row = 0;
+   diag_i[0] = 0;
+   for (i = 0; i < nrows_A; i++)
+   {
+      if (exp_indices[i] < 0)
+      {
+         for (j = A_diag_i[i]; j < A_diag_i[i+1]; j++)
+         {
+            col = A_diag_j[j];
+            if (exp_indices[col] < 0)
+            {
+               diag_j[nnz] = - exp_indices[col] - 1;
+               diag_a[nnz++] = A_diag_a[j];
+            }
+         }
+         diag_i[row++] = nnz;
+      }
+   }
+   diag = hypre_ParCSRMatrixDiag(A22_csr);
+   hypre_CSRMatrixI(diag) = diag_i;
+   hypre_CSRMatrixJ(diag) = diag_j;
+   hypre_CSRMatrixData(diag) = diag_a;
+
+   /* -----------------------------------------------------
+    * hand the matrices back to the caller and clean up 
+    * ----------------------------------------------------- */
+
+   submatrices[0] = A11_csr;
+   submatrices[1] = A12_csr;
+   submatrices[2] = A21_csr;
+   submatrices[3] = A22_csr;
+   free(proc_offsets1);
+   free(proc_offsets2);
+   free(exp_indices);
 }
 
