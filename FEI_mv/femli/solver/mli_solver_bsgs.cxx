@@ -299,7 +299,10 @@ int MLI_Solver_BSGS::solve(MLI_Vector *f_in, MLI_Vector *u_in)
                      tmpA   = &(ADiagA[iStart]);
                      res    = fData[index];
                      for (jcol = iStart; jcol < iEnd; jcol++)
-                        res -= *tmpA++ * uData[*tmpJ++];
+                     {
+                        res -= *tmpA * uData[*tmpJ];
+                        tmpA++; tmpJ++;
+                     }
                      if ( ! zeroInitialGuess_)
                      {
                         iStart = AOffdI[index];
@@ -307,7 +310,10 @@ int MLI_Solver_BSGS::solve(MLI_Vector *f_in, MLI_Vector *u_in)
                         tmpJ   = &(AOffdJ[iStart]);
                         tmpA   = &(AOffdA[iStart]);
                         for (jcol = iStart; jcol < iEnd; jcol++)
-                           res -= *tmpA++ * vExtData[*tmpJ++];
+                        {
+                           res -= (*tmpA) * vExtData[(*tmpJ)];
+                           tmpA++; tmpJ++;
+                        }
                      }
                      dbleB[irow-blockStartRow] = res;
                   }
@@ -321,12 +327,13 @@ int MLI_Solver_BSGS::solve(MLI_Vector *f_in, MLI_Vector *u_in)
                      res    = fExtData[offIRow];
                      for (jcol = iStart; jcol < iEnd; jcol++)
                      {
-                        colIndex = *tmpJ++;
+                        colIndex = *tmpJ;
                         if ( colIndex >= localNRows )   
-                           res -= *tmpA++ * vExtData[colIndex-localNRows];
+                           res -= (*tmpA) * vExtData[colIndex-localNRows];
                         else if ( colIndex >= 0 )   
-                           res -= *tmpA++ * uData[colIndex];
-                        else tmpA++;
+                           res -= (*tmpA) * uData[colIndex];
+                        tmpA++; 
+                        tmpJ++;
                      }
                      offOffset += iEnd;
                      dbleB[irow-blockStartRow] = res;
@@ -418,7 +425,10 @@ int MLI_Solver_BSGS::solve(MLI_Vector *f_in, MLI_Vector *u_in)
                      tmpA   = &(ADiagA[iStart]);
                      res    = fData[index];
                      for (jcol = iStart; jcol < iEnd; jcol++)
-                        res -= *tmpA++ * uData[*tmpJ++];
+                     {
+                        res -= (*tmpA) * uData[*tmpJ];
+                        tmpA++; tmpJ++;
+                     }
                      if ( ! zeroInitialGuess_ )
                      {
                         iStart = AOffdI[index];
@@ -426,7 +436,10 @@ int MLI_Solver_BSGS::solve(MLI_Vector *f_in, MLI_Vector *u_in)
                         tmpJ   = &(AOffdJ[iStart]);
                         tmpA   = &(AOffdA[iStart]);
                         for (jcol = iStart; jcol < iEnd; jcol++)
-                           res -= *tmpA++ * vExtData[*tmpJ++];
+                        {
+                           res -= (*tmpA) * vExtData[*tmpJ];
+                           tmpA++; tmpJ++;
+                        }
                      }
                      dbleB[irow-blockStartRow] = res;
                   } 
@@ -441,12 +454,12 @@ int MLI_Solver_BSGS::solve(MLI_Vector *f_in, MLI_Vector *u_in)
                      res       = fExtData[offIRow];
                      for (jcol = iStart; jcol < iEnd; jcol++)
                      {
-                        colIndex = *tmpJ++;
+                        colIndex = *tmpJ;
                         if ( colIndex >= localNRows )   
-                           res -= *tmpA++ * vExtData[colIndex-localNRows];
+                           res -= (*tmpA) * vExtData[colIndex-localNRows];
                         else if ( colIndex >= 0 )   
-                           res -= *tmpA++ * uData[colIndex];
-                        else tmpA++;
+                           res -= (*tmpA) * uData[colIndex];
+                        tmpA++; tmpJ++;
                      }
                      dbleB[irow-blockStartRow] = res;
                   }
