@@ -39,7 +39,8 @@ HEADERS =\
  HYPRE_parcsr_ls.h\
  par_amg.h\
  parcsr_ls.h\
- schwarz.h
+ schwarz.h\
+ block_tridiag.h
 
 FILES =\
  amg_hybrid.c\
@@ -89,7 +90,9 @@ FILES =\
  par_stats.c\
  par_strength.c\
  pcg_par.c\
- schwarz.c
+ schwarz.c\
+ HYPRE_parcsr_block.c\
+ block_tridiag.c
 
 OBJS = ${FILES:.c=.o}
 
