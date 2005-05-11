@@ -79,6 +79,8 @@ hypre_CSRBlockMatrix
 int hypre_CSRBlockMatrixBlockAdd(double *, double *, double*, int);
 int hypre_CSRBlockMatrixBlockMultAdd(double *, double *, double, double *, int);
 int hypre_CSRBlockMatrixBlockInvMult(double *, double *, double *, int);
+int hypre_CSRBlockMatrixTranspose(hypre_CSRBlockMatrix *A,
+                                  hypre_CSRBlockMatrix **AT, int data);
 
 #ifdef __cplusplus
 }

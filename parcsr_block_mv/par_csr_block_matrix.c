@@ -14,6 +14,10 @@
 
 #include "par_csr_block_matrix.h"
 
+extern
+hypre_ParCSRCommHandle *hypre_ParCSRBlockCommHandleCreate(int,
+                               hypre_ParCSRCommPkg *, double *, double *);
+
 /*--------------------------------------------------------------------------
  * hypre_ParCSRBlockMatrixCreate
  *--------------------------------------------------------------------------*/
@@ -97,44 +101,23 @@ hypre_ParCSRBlockMatrixDestroy( hypre_ParCSRBlockMatrix *matrix )
 
    if (matrix)
    {
-printf("destroy 1\n");
-fflush(stdout);
       if ( hypre_ParCSRBlockMatrixOwnsData(matrix) )
       {
-printf("destroy 2\n");
-fflush(stdout);
 	hypre_CSRBlockMatrixDestroy(hypre_ParCSRBlockMatrixDiag(matrix));
-printf("destroy 3\n");
-fflush(stdout);
 	hypre_CSRBlockMatrixDestroy(hypre_ParCSRBlockMatrixOffd(matrix));
-printf("destroy 4\n");
-fflush(stdout);
 	if (hypre_ParCSRBlockMatrixColMapOffd(matrix))
 	  hypre_TFree(hypre_ParCSRBlockMatrixColMapOffd(matrix));
-printf("destroy 5\n");
-fflush(stdout);
 	if (hypre_ParCSRBlockMatrixCommPkg(matrix))
 	  hypre_MatvecCommPkgDestroy(hypre_ParCSRBlockMatrixCommPkg(matrix));
-printf("destroy 6\n");
-fflush(stdout);
 	if (hypre_ParCSRBlockMatrixCommPkg(matrix))
 	  hypre_MatvecCommPkgDestroy(hypre_ParCSRBlockMatrixCommPkg(matrix));
-printf("destroy 7\n");
-fflush(stdout);
 	if (hypre_ParCSRBlockMatrixCommPkgT(matrix))
 	  hypre_MatvecCommPkgDestroy(hypre_ParCSRBlockMatrixCommPkgT(matrix));
       }
-printf("destroy 8\n");
-fflush(stdout);
       if ( hypre_ParCSRBlockMatrixOwnsRowStarts(matrix) )
               hypre_TFree(hypre_ParCSRBlockMatrixRowStarts(matrix));
-printf("destroy 9\n");
-fflush(stdout);
       if ( hypre_ParCSRBlockMatrixOwnsColStarts(matrix) )
               hypre_TFree(hypre_ParCSRBlockMatrixColStarts(matrix));
-printf("destroy 10\n");
-fflush(stdout);
-
       hypre_TFree(matrix);
    }
 
@@ -483,13 +466,14 @@ hypre_ParCSRBlockMatrixExtractBExt(hypre_ParCSRBlockMatrix *B,
    int *jdata_recv_vec_starts;
    int *jdata_send_map_starts;
  
-   int i, j, k, l, counter;
+   int i, j, k, l, counter, bnnz;
    int start_index;
    int j_cnt, jrow;
 
    MPI_Comm_size(comm,&num_procs);
    MPI_Comm_rank(comm,&my_id);
 
+   bnnz = block_size * block_size;
    num_cols_B = hypre_ParCSRMatrixGlobalNumCols(B);
    num_rows_B_ext = recv_vec_starts[num_recvs];
    B_int_i = hypre_CTAlloc(int, send_map_starts[num_sends]+1);
@@ -520,7 +504,7 @@ hypre_ParCSRBlockMatrixExtractBExt(hypre_ParCSRBlockMatrix *B,
 		&B_int_i[1],&B_ext_i[1]);
 
    B_int_j = hypre_CTAlloc(int, num_nonzeros);
-   if (data) B_int_data = hypre_CTAlloc(double, num_nonzeros*block_size*block_size);
+   if (data) B_int_data = hypre_CTAlloc(double, num_nonzeros*bnnz);
 
    jdata_send_map_starts = hypre_CTAlloc(int, num_sends+1);
    jdata_recv_vec_starts = hypre_CTAlloc(int, num_recvs+1);
@@ -537,9 +521,8 @@ hypre_ParCSRBlockMatrixExtractBExt(hypre_ParCSRBlockMatrix *B,
 	    {
 		B_int_j[counter] = diag_j[k]+first_col_diag;
 		if (data) {
-		  for(l = 0; l < block_size*block_size; l++) 
-		    B_int_data[counter*block_size*block_size + l] = 
-                                     diag_data[k*block_size*block_size + l];
+		  for(l = 0; l < bnnz; l++) 
+		    B_int_data[counter*bnnz+ l] = diag_data[k*bnnz+ l];
 		}
 		counter++;
   	    }
@@ -547,9 +530,9 @@ hypre_ParCSRBlockMatrixExtractBExt(hypre_ParCSRBlockMatrix *B,
 	    {
 		B_int_j[counter] = col_map_offd[offd_j[k]];
 		if (data) {
-		  for(l = 0; l < block_size*block_size; l++)
-		     B_int_data[counter*block_size*block_size + l] = 
-                                         offd_data[k*block_size*block_size + l];
+		  for(l = 0; l < bnnz; l++)
+		     B_int_data[counter*bnnz+ l] = 
+                                         offd_data[k*bnnz+ l];
 		}
 		counter++;
   	    }
@@ -582,9 +565,10 @@ hypre_ParCSRBlockMatrixExtractBExt(hypre_ParCSRBlockMatrix *B,
 
    num_nonzeros = B_ext_i[num_rows_B_ext];
 
-   B_ext = hypre_CSRBlockMatrixCreate(block_size, num_rows_B_ext, num_cols_B, num_nonzeros);
+   B_ext = hypre_CSRBlockMatrixCreate(block_size, num_rows_B_ext, num_cols_B, 
+                                      num_nonzeros);
    B_ext_j = hypre_CTAlloc(int, num_nonzeros);
-   if (data) B_ext_data = hypre_CTAlloc(double, num_nonzeros*block_size*block_size);
+   if (data) B_ext_data = hypre_CTAlloc(double, num_nonzeros*bnnz);
 
    for (i=0; i < num_recvs; i++)
    {
@@ -601,14 +585,18 @@ hypre_ParCSRBlockMatrixExtractBExt(hypre_ParCSRBlockMatrix *B,
 
    if (data)
    {
-     for(i = 0; i < num_recvs; i++) jdata_recv_vec_starts[i] = jdata_recv_vec_starts[i]*block_size*block_size;
-     hypre_ParCSRCommPkgRecvVecStarts(tmp_comm_pkg) = jdata_recv_vec_starts;
-     for(i = 0; i < num_sends; i++) jdata_send_map_starts[i] = jdata_send_map_starts[i]*block_size*block_size;
-     hypre_ParCSRCommPkgSendMapStarts(tmp_comm_pkg) = jdata_send_map_starts; 
+/*
+      for(i = 0; i < num_recvs; i++) 
+         jdata_recv_vec_starts[i] = jdata_recv_vec_starts[i]*bnnz;
+      hypre_ParCSRCommPkgRecvVecStarts(tmp_comm_pkg) = jdata_recv_vec_starts;
+      for(i = 0; i < num_sends; i++)
+         jdata_send_map_starts[i] = jdata_send_map_starts[i]*bnnz;
+      hypre_ParCSRCommPkgSendMapStarts(tmp_comm_pkg) = jdata_send_map_starts; 
+*/
 
-      comm_handle = hypre_ParCSRCommHandleCreate(1,tmp_comm_pkg,B_int_data,
-						B_ext_data);
-      hypre_ParCSRCommHandleDestroy(comm_handle);
+      comm_handle = hypre_ParCSRBlockCommHandleCreate(bnnz,tmp_comm_pkg,
+                                     B_int_data, B_ext_data);
+      hypre_ParCSRBlockCommHandleDestroy(comm_handle);
       comm_handle = NULL;
    }
 

@@ -22,10 +22,8 @@
  *--------------------------------------------------------------------------*/
 
 hypre_CSRBlockMatrix *
-hypre_CSRBlockMatrixCreate( int block_size,
-				int num_rows,
-				int num_cols,
-				int num_nonzeros)
+hypre_CSRBlockMatrixCreate(int block_size, int num_rows, int num_cols,
+			   int num_nonzeros)
 {
    hypre_CSRBlockMatrix  *matrix;
 
@@ -56,19 +54,11 @@ hypre_CSRBlockMatrixDestroy(hypre_CSRBlockMatrix *matrix)
 
    if (matrix)
    {
-printf("dest 1\n");
-fflush(stdout);
       hypre_TFree(hypre_CSRBlockMatrixI(matrix));
       if ( hypre_CSRBlockMatrixOwnsData(matrix) )
       {
-printf("dest 2\n");
-fflush(stdout);
          hypre_TFree(hypre_CSRBlockMatrixData(matrix));
-printf("dest 3\n");
-fflush(stdout);
          hypre_TFree(hypre_CSRBlockMatrixJ(matrix));
-printf("dest 4\n");
-fflush(stdout);
       }
       hypre_TFree(matrix);
    }
@@ -323,13 +313,15 @@ hypre_CSRBlockMatrixBlockMultAdd(double* i1, double* i2, double beta,
 
    if (beta == 0.0)
    {
-      for(i = 0; i < block_size; i++)
+      for (i = 0; i < block_size; i++)
       {
-         for(j = 0; j < block_size; j++)
+         for (j = 0; j < block_size; j++)
          {
             ddata = 0.0;
-            for(k = 0; k < block_size; k++)
+            for (k = 0; k < block_size; k++)
+            {
                ddata += i1[i*block_size + k] * i2[k*block_size + j];
+            }
             o[i*block_size + j] = ddata;
          }
       }
@@ -376,5 +368,103 @@ hypre_CSRBlockMatrixBlockInvMult(double* i1, double* i2, double* o, int block_si
    printf("hypre_CSRblockMatrixblockInvMult : not implemented yet.\n");
    exit(1);
    return 0;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_CSRBlockMatrixTranspose
+ *--------------------------------------------------------------------------*/
+
+int hypre_CSRBlockMatrixTranspose(hypre_CSRBlockMatrix *A, 
+                                  hypre_CSRBlockMatrix **AT, int data)
+
+{
+   double       *A_data = hypre_CSRBlockMatrixData(A);
+   int          *A_i = hypre_CSRBlockMatrixI(A);
+   int          *A_j = hypre_CSRBlockMatrixJ(A);
+   int           num_rowsA = hypre_CSRBlockMatrixNumRows(A);
+   int           num_colsA = hypre_CSRBlockMatrixNumCols(A);
+   int           num_nonzerosA = hypre_CSRBlockMatrixNumNonzeros(A);
+   int           block_size = hypre_CSRBlockMatrixBlockSize(A);
+
+   double       *AT_data;
+   int          *AT_i;
+   int          *AT_j;
+   int           num_rowsAT;
+   int           num_colsAT;
+   int           num_nonzerosAT;
+
+   int           max_col;
+   int           i, j, k, m, offset, bnnz;
+
+   /*-------------------------------------------------------------- 
+    * First, ascertain that num_cols and num_nonzeros has been set. 
+    * If not, set them.
+    *--------------------------------------------------------------*/
+
+   if (! num_nonzerosA) num_nonzerosA = A_i[num_rowsA];
+   if (num_rowsA && ! num_colsA)
+   {
+      max_col = -1;
+      for (i = 0; i < num_rowsA; ++i)
+         for (j = A_i[i]; j < A_i[i+1]; j++)
+            if (A_j[j] > max_col) max_col = A_j[j];
+      num_colsA = max_col+1;
+   }
+   num_rowsAT = num_colsA;
+   num_colsAT = num_rowsA;
+   num_nonzerosAT = num_nonzerosA;
+   bnnz = block_size * block_size;
+
+   *AT = hypre_CSRBlockMatrixCreate(block_size, num_rowsAT, num_colsAT, 
+                                    num_nonzerosAT);
+
+   AT_i = hypre_CTAlloc(int, num_rowsAT+1);
+   AT_j = hypre_CTAlloc(int, num_nonzerosAT);
+   hypre_CSRBlockMatrixI(*AT) = AT_i;
+   hypre_CSRBlockMatrixJ(*AT) = AT_j;
+   if (data) 
+   {
+      AT_data = hypre_CTAlloc(double, num_nonzerosAT*bnnz);
+      hypre_CSRBlockMatrixData(*AT) = AT_data;
+   }
+
+   /*-----------------------------------------------------------------
+    * Count the number of entries in each column of A (row of AT)
+    * and fill the AT_i array.
+    *-----------------------------------------------------------------*/
+
+   for (i = 0; i < num_nonzerosA; i++) ++AT_i[A_j[i]+1];
+   for (i = 2; i <= num_rowsAT; i++) AT_i[i] += AT_i[i-1];
+
+   /*----------------------------------------------------------------
+    * Load the data and column numbers of AT
+    *----------------------------------------------------------------*/
+
+   for (i = 0; i < num_rowsA; i++)
+   {
+      for (j = A_i[i]; j < A_i[i+1]; j++)
+      {
+         AT_j[AT_i[A_j[j]]] = i;
+         if (data)
+         {
+            offset = AT_i[A_j[j]] * bnnz;
+            for (k = 0; k < block_size; k++)
+               for (m = 0; m < block_size; m++)
+                  AT_data[offset+k*block_size+m] = 
+                       A_data[j*block_size+m*block_size+k];
+         }
+         AT_i[A_j[j]]++;
+      }
+   }
+
+   /*------------------------------------------------------------
+    * AT_i[j] now points to the *end* of the jth row of entries
+    * instead of the beginning.  Restore AT_i to front of row.
+    *------------------------------------------------------------*/
+
+   for (i = num_rowsAT; i > 0; i--) AT_i[i] = AT_i[i-1];
+   AT_i[0] = 0;
+
+   return(0);
 }
 

@@ -11,10 +11,10 @@
 int main( int   argc, char *argv[] )
 {
    hypre_ParCSRMatrix      *par_matrix, *g_matrix, **submatrices;
-   hypre_CSRMatrix         *A_diag;
+   hypre_CSRMatrix         *A_diag, *A_offd;
    hypre_CSRBlockMatrix    *diag;
    hypre_CSRBlockMatrix    *offd;
-   hypre_ParCSRBlockMatrix *par_blk_matrix;
+   hypre_ParCSRBlockMatrix *par_blk_matrix, *rap_matrix;
    hypre_Vector        *x_local;
    hypre_Vector        *y_local;
    hypre_ParVector     *x;
@@ -37,14 +37,36 @@ int main( int   argc, char *argv[] )
    MPI_Comm_rank(MPI_COMM_WORLD, &mypid);
    MPI_Comm_size(MPI_COMM_WORLD, &nprocs);
 
+   /* build and fetch matrix */
    BuildParLaplacian9pt(&par_matrix);
    global_num_rows = hypre_ParCSRMatrixGlobalNumRows(par_matrix);
    global_num_cols = hypre_ParCSRMatrixGlobalNumCols(par_matrix);
    row_starts = hypre_ParCSRMatrixRowStarts(par_matrix);
-   col_starts = hypre_ParCSRMatrixRowStarts(par_matrix);
-   num_cols_offd     = hypre_CSRMatrixNumCols(hypre_ParCSRMatrixOffd(par_matrix));
-   num_nonzeros_diag = hypre_CSRMatrixNumNonzeros(hypre_ParCSRMatrixDiag(par_matrix));
-   num_nonzeros_offd = hypre_CSRMatrixNumNonzeros(hypre_ParCSRMatrixOffd(par_matrix));
+   col_starts = hypre_ParCSRMatrixColStarts(par_matrix);
+   A_diag = hypre_ParCSRMatrixDiag(par_matrix);
+   A_offd = hypre_ParCSRMatrixOffd(par_matrix);
+   num_cols_offd = hypre_CSRMatrixNumCols(A_offd);
+   num_nonzeros_diag = hypre_CSRMatrixNumNonzeros(A_diag);
+   num_nonzeros_offd = hypre_CSRMatrixNumNonzeros(A_offd);
+
+   /* build vector and apply matvec */
+   x = hypre_ParVectorCreate(MPI_COMM_WORLD,global_num_cols,col_starts);
+   hypre_ParVectorSetPartitioningOwner(x,0);
+   hypre_ParVectorInitialize(x);
+   x_local = hypre_ParVectorLocalVector(x);
+   data = hypre_VectorData(x_local);
+   local_size = col_starts[mypid+1] - col_starts[mypid];
+   for (ii = 0; ii < local_size; ii++) data[ii] = 1.0;
+   y = hypre_ParVectorCreate(MPI_COMM_WORLD,global_num_rows,row_starts);
+   hypre_ParVectorSetPartitioningOwner(y,0);
+   hypre_ParVectorInitialize(y);
+   hypre_ParCSRMatrixMatvec (1.0, par_matrix, x, 0.0, y);
+   ddata = hypre_ParVectorInnerProd(y, y);
+   if (mypid == 0) printf("y inner product = %e\n", ddata);
+   hypre_ParVectorDestroy(x);
+   hypre_ParVectorDestroy(y);
+
+   /* build block matrix */
    par_blk_matrix = hypre_ParCSRBlockMatrixCreate(MPI_COMM_WORLD,block_size,
                           global_num_rows, global_num_cols, row_starts,
                           col_starts, num_cols_offd, num_nonzeros_diag,
@@ -69,15 +91,15 @@ int main( int   argc, char *argv[] )
       diag_d2[ii*4+2] = 0.0;
    }
    hypre_CSRBlockMatrixData(diag) = diag_d2;
-                                                                                       
+
    offd_i = hypre_CSRMatrixI(hypre_ParCSRMatrixOffd(par_matrix));
    offd_j = hypre_CSRMatrixJ(hypre_ParCSRMatrixOffd(par_matrix));
    offd_d = hypre_CSRMatrixData(hypre_ParCSRMatrixOffd(par_matrix));
    offd = hypre_ParCSRBlockMatrixOffd(par_blk_matrix);
-   hypre_CSRMatrixI(offd) = offd_i;
+   hypre_CSRBlockMatrixI(offd) = offd_i;
    if (num_cols_offd)
    {
-      hypre_CSRMatrixJ(offd) = offd_j;
+      hypre_CSRBlockMatrixJ(offd) = offd_j;
       offd_d2 = (double *) malloc(num_nonzeros_offd * 4 * sizeof(double));
       for (ii = 0; ii < num_nonzeros_offd; ii++)
       {
@@ -88,48 +110,69 @@ int main( int   argc, char *argv[] )
       }
       hypre_CSRBlockMatrixData(offd) = offd_d2;
    }
-   else offd_d2 = offd_d;
+   else
+   {
+      hypre_CSRBlockMatrixJ(offd) = NULL;
+      hypre_CSRBlockMatrixData(offd) = NULL;
+   }
    hypre_ParCSRBlockMatrixSetDataOwner(par_blk_matrix, 0);
 
-   printf(" initialize vectors %d %d\n",col_starts[0], col_starts[1]);
+   /* block matvec */
    col_starts2 = (int *) malloc((nprocs+1)*sizeof(int));
-   for (ii = 0; ii <= nprocs; ii++) col_starts2[ii] = col_starts[ii] * block_size;
-   printf(" initialize vectors %d %d\n",col_starts2[0], col_starts2[1]);
-   x = hypre_ParVectorCreate(MPI_COMM_WORLD,global_num_cols*block_size,col_starts2);
+   for (ii = 0; ii <= nprocs; ii++)
+      col_starts2[ii] = col_starts[ii] * block_size;
+   x = hypre_ParVectorCreate(MPI_COMM_WORLD,global_num_cols*block_size,
+                             col_starts2);
    hypre_ParVectorInitialize(x);
    x_local = hypre_ParVectorLocalVector(x);
    data = hypre_VectorData(x_local);
    local_size = col_starts2[mypid+1] - col_starts2[mypid];
    for (ii=0; ii < local_size; ii++) data[ii] = 1.0;
    row_starts2 = (int *) malloc((nprocs+1)*sizeof(int));
-   for (ii = 0; ii <= nprocs; ii++) row_starts2[ii] = row_starts[ii] * block_size;
-   y = hypre_ParVectorCreate(MPI_COMM_WORLD,global_num_rows*block_size,row_starts2);
+   for (ii = 0; ii <= nprocs; ii++)
+      row_starts2[ii] = row_starts[ii] * block_size;
+   y = hypre_ParVectorCreate(MPI_COMM_WORLD,global_num_rows*block_size,
+                             row_starts2);
    hypre_ParVectorSetPartitioningOwner(y,0);
    hypre_ParVectorInitialize(y);
    y_local = hypre_ParVectorLocalVector(y);
-   printf(" vectors initialized\n");
 
    hypre_BlockMatvecCommPkgCreate(par_blk_matrix);
+   ddata = hypre_ParVectorInnerProd(x, x);
+   if (mypid == 0) printf("block x inner product = %e\n", ddata);
    hypre_ParCSRBlockMatrixMatvec (1.0, par_blk_matrix, x, 0.0, y);
-   hypre_ParCSRBlockMatrixDestroy(par_blk_matrix);
-   hypre_ParVectorDestroy(x);
-   hypre_ParVectorDestroy(y);
+   ddata = hypre_ParVectorInnerProd(y, y);
+   if (mypid == 0) printf("block y inner product = %e\n", ddata);
 
-   x = hypre_ParVectorCreate(MPI_COMM_WORLD,global_num_cols,col_starts);
-   hypre_ParVectorSetPartitioningOwner(x,0);
-   hypre_ParVectorInitialize(x);
-   x_local = hypre_ParVectorLocalVector(x);
-   data = hypre_VectorData(x_local);
-   local_size = col_starts[mypid+1] - col_starts[mypid];
+   /* RAP */
+   hypre_ParCSRBlockMatrixRAP(par_blk_matrix, par_blk_matrix,
+                              par_blk_matrix, &rap_matrix);
    for (ii = 0; ii < local_size; ii++) data[ii] = 1.0;
-   y = hypre_ParVectorCreate(MPI_COMM_WORLD,global_num_rows,row_starts);
-   hypre_ParVectorSetPartitioningOwner(y,0);
-   hypre_ParVectorInitialize(y);
-   hypre_ParCSRMatrixMatvec (1.0, par_matrix, x, 0.0, y);
+   hypre_ParCSRBlockMatrixMatvec (1.0, par_blk_matrix, x, 0.0, y);
+   hypre_ParCSRBlockMatrixMatvec (1.0, par_blk_matrix, y, 0.0, x);
+   hypre_ParCSRBlockMatrixMatvec (1.0, par_blk_matrix, x, 0.0, y);
+   ddata = hypre_ParVectorInnerProd(y, y);
+   if (mypid == 0) printf("(1) A^2 block inner product = %e\n", ddata);
+   for (ii = 0; ii < local_size; ii++) data[ii] = 1.0;
+   hypre_ParCSRBlockMatrixMatvec (1.0, rap_matrix, x, 0.0, y);
+   ddata = hypre_ParVectorInnerProd(y, y);
+   if (mypid == 0) printf("(2) A^2 block inner product = %e\n", ddata);
+
+printf("free 1\n");
+   hypre_ParVectorDestroy(x);
+printf("free 2\n");
+   hypre_ParVectorDestroy(y);
+printf("free 3\n");
    hypre_ParCSRMatrixDestroy(par_matrix);
+printf("free 4\n");
+   hypre_ParCSRBlockMatrixDestroy(par_blk_matrix);
+printf("free 5\n");
+   hypre_ParCSRBlockMatrixDestroy(rap_matrix);
+printf("free 6\n");
 
    /* read in the matrix and create a HYPRE_ParCSRMatrix */
 
+#if 0
    fp = fopen("Amat_ee", "r");
    fscanf(fp, "%d %d", &global_num_rows, &num_nonzeros_diag);
    diag_i = (int *) malloc((global_num_rows+1) * sizeof(int));
@@ -210,6 +253,7 @@ printf("tree size = %d\n", indices[0]);
 
    submatrices = (hypre_ParCSRMatrix **) malloc(4 * sizeof(hypre_ParCSRMatrix *));
    hypre_ParCSRMatrixExtractSubmatrices(par_matrix, indices, &submatrices);
+#endif
 
    /* Finalize MPI */
    MPI_Finalize();

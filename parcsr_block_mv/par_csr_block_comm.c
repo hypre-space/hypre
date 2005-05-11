@@ -16,30 +16,26 @@
  *--------------------------------------------------------------------------*/
 
 hypre_ParCSRCommHandle *
-hypre_ParCSRBlockCommHandleCreate(int block_size,hypre_ParCSRCommPkg *comm_pkg,
+hypre_ParCSRBlockCommHandleCreate(int bnnz, hypre_ParCSRCommPkg *comm_pkg,
                                   void *send_data, void *recv_data )
 {
-   int                  num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
-   int                  num_recvs = hypre_ParCSRCommPkgNumRecvs(comm_pkg);
-   MPI_Comm             comm      = hypre_ParCSRCommPkgComm(comm_pkg);
-
+   int      num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
+   int      num_recvs = hypre_ParCSRCommPkgNumRecvs(comm_pkg);
+   MPI_Comm comm      = hypre_ParCSRCommPkgComm(comm_pkg);
    hypre_ParCSRCommHandle *comm_handle;
-   int                  num_requests;
-   MPI_Request         *requests;
-
-   int                  i, j, bnnz;
-   int			my_id, num_procs;
-   int			ip, vec_start, vec_len;
+   int         num_requests;
+   MPI_Request *requests;
+   int    i, j, my_id, num_procs, ip, vec_start, vec_len;
    double *d_send_data = (double *) send_data;
    double *d_recv_data = (double *) recv_data;
                   
-   bnnz = block_size * block_size;
    num_requests = num_sends + num_recvs;
    requests = hypre_CTAlloc(MPI_Request, num_requests);
  
    MPI_Comm_size(comm,&num_procs);
    MPI_Comm_rank(comm,&my_id);
 
+   j = 0;
    for (i = 0; i < num_recvs; i++)
    {
       ip = hypre_ParCSRCommPkgRecvProc(comm_pkg, i); 
