@@ -17,8 +17,18 @@
  *
  *****************************************************************************/
 
+#include <HYPRE_config.h>
+
 #ifndef hypre_CSR_BLOCK_MATRIX_HEADER
 #define hypre_CSR_BLOCK_MATRIX_HEADER
+
+#include "../seq_mv/seq_mv.h"
+#include "utilities.h"
+                                                                                                               
+#ifdef __cplusplus
+extern "C" {
+#endif
+                                                                                                               
 
 /*--------------------------------------------------------------------------
  * CSR Block Matrix
@@ -51,4 +61,26 @@ typedef struct
 #define hypre_CSRBlockMatrixNumNonzeros(matrix)  ((matrix) -> num_nonzeros)
 #define hypre_CSRBlockMatrixOwnsData(matrix)     ((matrix) -> owns_data)
 
+/*--------------------------------------------------------------------------
+ * other functions for the CSR Block Matrix structure
+ *--------------------------------------------------------------------------*/
+
+hypre_CSRBlockMatrix 
+      *hypre_CSRBlockMatrixCreate(int, int, int, int);
+int hypre_CSRBlockMatrixDestroy(hypre_CSRBlockMatrix *);
+int hypre_CSRBlockMatrixInitialize(hypre_CSRBlockMatrix *);
+int hypre_CSRBlockMatrixSetDataOwner(hypre_CSRBlockMatrix *, int);
+hypre_CSRMatrix 
+      *hypre_CSRBlockMatrixCompress(hypre_CSRBlockMatrix *);
+hypre_CSRMatrix 
+      *hypre_CSRBlockMatrixConvertToCSRMatrix(hypre_CSRBlockMatrix *);
+hypre_CSRBlockMatrix
+      *hypre_CSRBlockMatrixConvertFromCSRMatrix(hypre_CSRMatrix *, int);
+int hypre_CSRBlockMatrixBlockAdd(double *, double *, double*, int);
+int hypre_CSRBlockMatrixBlockMultAdd(double *, double *, double, double *, int);
+int hypre_CSRBlockMatrixBlockInvMult(double *, double *, double *, int);
+
+#ifdef __cplusplus
+}
+#endif
 #endif
