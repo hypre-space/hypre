@@ -509,6 +509,7 @@ impl_bHYPRE_StructSMG_SetOperator(
    if ( bHYPRE_Operator_queryInt( A, "bHYPRE.StructMatrix" ) )
    {
       Amat = bHYPRE_StructMatrix__cast( A );
+      bHYPRE_StructMatrix_deleteRef( Amat ); /* extra ref from queryInt */
    }
    else
    {
@@ -517,6 +518,7 @@ impl_bHYPRE_StructSMG_SetOperator(
 
    data = bHYPRE_StructSMG__get_data( self );
    data->matrix = Amat;
+   bHYPRE_StructMatrix_addRef( data->matrix );
 
    return ierr;
 
