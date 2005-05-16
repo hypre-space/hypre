@@ -26,7 +26,6 @@
 /*--------------------------------------------------------------------------
  * Test driver for structured matrix interface (structured storage)
  * Modified to use the Babel interface.
- * ********* obsolete, needs to be reworked ********
  *--------------------------------------------------------------------------*/
  
 /*----------------------------------------------------------------------
@@ -1071,11 +1070,12 @@ main( int   argc,
          /* obsolete bHYPRE_StructSMG_destructor( solver_SMG );*/
          bHYPRE_StructSMG_deleteRef( solver_SMG );
       }
-/*
-      else if (solver_id == 11)
+      else if ( solver_id == 11 || solver_id == 13 || solver_id == 14 )
       {
-         HYPRE_StructPFMGDestroy(precond);
+         bHYPRE_StructPFMG_deleteRef( solver_PFMG );
+/*         HYPRE_StructPFMGDestroy(precond);*/
       }
+/*
       else if (solver_id == 12)
       {
          HYPRE_StructSparseMSGDestroy(precond);
