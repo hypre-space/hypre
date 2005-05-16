@@ -692,6 +692,7 @@ impl_bHYPRE_GMRES_SetOperator(
 
    data = bHYPRE_GMRES__get_data( self );
    data->matrix = A;
+   bHYPRE_Operator_addRef( data->matrix );
 
    return ierr;
   /* DO-NOT-DELETE splicer.end(bHYPRE.GMRES.SetOperator) */
@@ -905,14 +906,16 @@ impl_bHYPRE_GMRES_SetPreconditioner(
       AMG_s = bHYPRE_BoomerAMG__cast
          ( bHYPRE_Solver_queryInt( s, "bHYPRE.BoomerAMG") );
       AMG_dataprecond = bHYPRE_BoomerAMG__get_data( AMG_s );
+      bHYPRE_BoomerAMG_deleteRef( AMG_s ); /* extra reference from queryInt */
+      bHYPRE_BoomerAMG_deleteRef( AMG_s ); /* extra reference from queryInt */
       solverprecond = &AMG_dataprecond->solver;
       assert( solverprecond != NULL );
       precond = (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSolve;
       precond_setup = (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSetup;
-      bHYPRE_BoomerAMG_deleteRef( AMG_s ); /* extra reference from queryInt */
    }
    else if ( bHYPRE_Solver_queryInt( s, "bHYPRE.ParCSRDiagScale" ) )
    {
+      bHYPRE_Solver_deleteRef( s ); /* extra reference from queryInt */
       bHYPRE_Solver_deleteRef( s ); /* extra reference from queryInt */
       solverprecond = (HYPRE_Solver *) hypre_CTAlloc( double, 1 );
       /* ... HYPRE diagonal scaling needs no solver object, but we

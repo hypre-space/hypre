@@ -146,9 +146,11 @@ impl_bHYPRE_BoomerAMG__dtor(
 
    int ierr = 0;
    struct bHYPRE_BoomerAMG__data * data;
+
    data = bHYPRE_BoomerAMG__get_data( self );
-   ierr += HYPRE_BoomerAMGDestroy( data->solver );
    bHYPRE_IJParCSRMatrix_deleteRef( data->matrix );
+   ierr += HYPRE_BoomerAMGDestroy( data->solver );
+   assert( ierr== 0 );
    /* delete any nontrivial data components here */
    hypre_TFree( data );
 
@@ -747,6 +749,7 @@ impl_bHYPRE_BoomerAMG_SetOperator(
    if ( bHYPRE_Operator_queryInt( A, "bHYPRE.IJParCSRMatrix" ) )
    {
       Amat = bHYPRE_IJParCSRMatrix__cast( A );
+      bHYPRE_IJParCSRMatrix_deleteRef( Amat ); /* extra ref from queryInt */
    }
    else
    {
@@ -755,6 +758,7 @@ impl_bHYPRE_BoomerAMG_SetOperator(
 
    data = bHYPRE_BoomerAMG__get_data( self );
    data->matrix = Amat;
+   bHYPRE_IJParCSRMatrix_addRef( data->matrix );
 
    return ierr;
 

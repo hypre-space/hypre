@@ -424,6 +424,7 @@ impl_bHYPRE_ParCSRDiagScale_SetOperator(
 
    data = bHYPRE_ParCSRDiagScale__get_data( self );
    data->matrix = A;
+   bHYPRE_Operator_addRef( data->matrix );
 
    return ierr;
 
