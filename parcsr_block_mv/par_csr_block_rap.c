@@ -1,5 +1,5 @@
 /*BHEADER**********************************************************************
- * (c) 1998   The Regents of the University of California
+ * (c) 2005   The Regents of the University of California
  *
  * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
  * notice, contact person, and disclaimer.
@@ -17,45 +17,7 @@ hypre_ParCSRCommHandle *hypre_ParCSRBlockCommHandleCreate(int,
                                hypre_ParCSRCommPkg *, void *, void *);
 
 /*--------------------------------------------------------------------------
- * OLD NOTES:
- * Sketch of John's code to build RAP
- *
- * Uses two integer arrays icg and ifg as marker arrays
- *
- *  icg needs to be of size n_fine; size of ia.
- *     A negative value of icg(i) indicates i is a f-point, otherwise
- *     icg(i) is the converts from fine to coarse grid orderings. 
- *     Note that I belive the code assumes that if i<j and both are
- *     c-points, then icg(i) < icg(j).
- *  ifg needs to be of size n_coarse; size of irap
- *     I don't think it has meaning as either input or output.
- *
- * In the code, both the interpolation and restriction operator
- * are stored row-wise in the array b. If i is a f-point,
- * ib(i) points the row of the interpolation operator for point
- * i. If i is a c-point, ib(i) points the row of the restriction
- * operator for point i.
- *
- * In the CSR storage for rap, its guaranteed that the rows will
- * be ordered ( i.e. ic<jc -> irap(ic) < irap(jc)) but I don't
- * think there is a guarantee that the entries within a row will
- * be ordered in any way except that the diagonal entry comes first.
- *
- * As structured now, the code requires that the size of rap be
- * predicted up front. To avoid this, one could execute the code
- * twice, the first time would only keep track of icg ,ifg and ka.
- * Then you would know how much memory to allocate for rap and jrap.
- * The second time would fill in these arrays. Actually you might
- * be able to include the filling in of jrap into the first pass;
- * just overestimate its size (its an integer array) and cut it
- * back before the second time through. This would avoid some if tests
- * in the second pass.
- *
- * Questions
- *            1) parallel (PetSc) version?
- *            2) what if we don't store R row-wise and don't
- *               even want to store a copy of it in this form
- *               temporarily? 
+ * used in RAP function
  *--------------------------------------------------------------------------*/
          
 hypre_CSRBlockMatrix *
@@ -109,21 +71,18 @@ hypre_ExchangeRAPBlockData(hypre_CSRBlockMatrix *RAP_int,
 
    if (num_recvs)
    {
-        RAP_int_i = hypre_CSRBlockMatrixI(RAP_int);
-        RAP_int_j = hypre_CSRBlockMatrixJ(RAP_int);
-        RAP_int_data = hypre_CSRBlockMatrixData(RAP_int);
-        num_cols = hypre_CSRBlockMatrixNumCols(RAP_int);
+       RAP_int_i = hypre_CSRBlockMatrixI(RAP_int);
+       RAP_int_j = hypre_CSRBlockMatrixJ(RAP_int);
+       RAP_int_data = hypre_CSRBlockMatrixData(RAP_int);
+       num_cols = hypre_CSRBlockMatrixNumCols(RAP_int);
    }
-
    jdata_recv_vec_starts[0] = 0;
    for (i=0; i < num_recvs; i++)
-   {
-        jdata_recv_vec_starts[i+1] = RAP_int_i[recv_vec_starts[i+1]];
-   }
+      jdata_recv_vec_starts[i+1] = RAP_int_i[recv_vec_starts[i+1]];
  
    for (i=num_recvs; i > 0; i--)
-        for (j = recv_vec_starts[i]; j > recv_vec_starts[i-1]; j--)
-                RAP_int_i[j] -= RAP_int_i[j-1];
+      for (j = recv_vec_starts[i]; j > recv_vec_starts[i-1]; j--)
+         RAP_int_i[j] -= RAP_int_i[j-1];
 
 /*--------------------------------------------------------------------------
  * initialize communication 
@@ -154,8 +113,8 @@ hypre_ExchangeRAPBlockData(hypre_CSRBlockMatrix *RAP_int,
  *--------------------------------------------------------------------------*/
 
    for (i=0; i < num_sends; i++)
-        for (j = send_map_starts[i]; j < send_map_starts[i+1]; j++)
-                RAP_ext_i[j+1] += RAP_ext_i[j];
+      for (j = send_map_starts[i]; j < send_map_starts[i+1]; j++)
+         RAP_ext_i[j+1] += RAP_ext_i[j];
 
    num_rows = send_map_starts[num_sends];
    num_nonzeros = RAP_ext_i[num_rows];
@@ -167,7 +126,7 @@ hypre_ExchangeRAPBlockData(hypre_CSRBlockMatrix *RAP_int,
 
    for (i=0; i < num_sends+1; i++)
    {
-        jdata_send_map_starts[i] = RAP_ext_i[send_map_starts[i]];
+      jdata_send_map_starts[i] = RAP_ext_i[send_map_starts[i]];
    }
 
    hypre_ParCSRCommPkgRecvVecStarts(tmp_comm_pkg) = jdata_send_map_starts;      
@@ -367,19 +326,19 @@ hypre_ParCSRBlockMatrixRAP(hypre_ParCSRBlockMatrix  *RT,
 
    if (comm_pkg_RT)
    {
-        num_recvs_RT = hypre_ParCSRCommPkgNumRecvs(comm_pkg_RT);
-        num_sends_RT = hypre_ParCSRCommPkgNumSends(comm_pkg_RT);
-        send_map_starts_RT =hypre_ParCSRCommPkgSendMapStarts(comm_pkg_RT);
-        send_map_elmts_RT = hypre_ParCSRCommPkgSendMapElmts(comm_pkg_RT);
+      num_recvs_RT = hypre_ParCSRCommPkgNumRecvs(comm_pkg_RT);
+      num_sends_RT = hypre_ParCSRCommPkgNumSends(comm_pkg_RT);
+      send_map_starts_RT =hypre_ParCSRCommPkgSendMapStarts(comm_pkg_RT);
+      send_map_elmts_RT = hypre_ParCSRCommPkgSendMapElmts(comm_pkg_RT);
    }
 
    hypre_CSRBlockMatrixTranspose(RT_diag,&R_diag,1); 
    if (num_cols_offd_RT) 
    {
-        hypre_CSRBlockMatrixTranspose(RT_offd,&R_offd,1); 
-        R_offd_data = hypre_CSRBlockMatrixData(R_offd);
-        R_offd_i    = hypre_CSRBlockMatrixI(R_offd);
-        R_offd_j    = hypre_CSRBlockMatrixJ(R_offd);
+      hypre_CSRBlockMatrixTranspose(RT_offd,&R_offd,1); 
+      R_offd_data = hypre_CSRBlockMatrixData(R_offd);
+      R_offd_i    = hypre_CSRBlockMatrixI(R_offd);
+      R_offd_j    = hypre_CSRBlockMatrixJ(R_offd);
    }
 
    /*-----------------------------------------------------------------------
@@ -401,10 +360,10 @@ hypre_ParCSRBlockMatrixRAP(hypre_ParCSRBlockMatrix  *RT,
 
    if (num_procs > 1) 
    {
-        Ps_ext = hypre_ParCSRBlockMatrixExtractBExt(P,A,1);
-        Ps_ext_data = hypre_CSRBlockMatrixData(Ps_ext);
-        Ps_ext_i    = hypre_CSRBlockMatrixI(Ps_ext);
-        Ps_ext_j    = hypre_CSRBlockMatrixJ(Ps_ext);
+      Ps_ext = hypre_ParCSRBlockMatrixExtractBExt(P,A,1);
+      Ps_ext_data = hypre_CSRBlockMatrixData(Ps_ext);
+      Ps_ext_i    = hypre_CSRBlockMatrixI(Ps_ext);
+      Ps_ext_j    = hypre_CSRBlockMatrixJ(Ps_ext);
    }
 
    P_ext_diag_i = hypre_CTAlloc(int,num_cols_offd_A+1);
@@ -523,637 +482,632 @@ hypre_ParCSRBlockMatrixRAP(hypre_ParCSRBlockMatrix  *RT,
 
   if (num_cols_offd_RT)
   {
-   jj_count = hypre_CTAlloc(int, num_threads);
+     jj_count = hypre_CTAlloc(int, num_threads);
 
 #define HYPRE_SMP_PRIVATE i,ii,ic,i1,i2,i3,jj1,jj2,jj3,ns,ne,size,rest,jj_counter,jj_row_begining,A_marker,P_marker
 #include "../utilities/hypre_smp_forloop.h"
-   for (ii = 0; ii < num_threads; ii++)
-   {
-     size = num_cols_offd_RT/num_threads;
-     rest = num_cols_offd_RT - size*num_threads;
-     if (ii < rest)
+     for (ii = 0; ii < num_threads; ii++)
      {
-        ns = ii*size+ii;
-        ne = (ii+1)*size+ii+1;
-     }
-     else
-     {
-        ns = ii*size+rest;
-        ne = (ii+1)*size+rest;
-     }
+        size = num_cols_offd_RT/num_threads;
+        rest = num_cols_offd_RT - size*num_threads;
+        if (ii < rest)
+        {
+           ns = ii*size+ii;
+           ne = (ii+1)*size+ii+1;
+        }
+        else
+        {
+           ns = ii*size+rest;
+           ne = (ii+1)*size+rest;
+        }
    
-   /*-----------------------------------------------------------------------
-    *  Allocate marker arrays.
-    *-----------------------------------------------------------------------*/
+       /*-----------------------------------------------------------------------
+        *  Allocate marker arrays.
+        *-----------------------------------------------------------------------*/
 
-   if (num_cols_offd_Pext || num_cols_diag_P)
-   {
-      P_mark_array[ii] = hypre_CTAlloc(int, num_cols_diag_P+num_cols_offd_Pext);
-      P_marker = P_mark_array[ii];
-   }
-   A_mark_array[ii] = hypre_CTAlloc(int, num_nz_cols_A);
-   A_marker = A_mark_array[ii];
+        if (num_cols_offd_Pext || num_cols_diag_P)
+        {
+           P_mark_array[ii] = hypre_CTAlloc(int, num_cols_diag_P+num_cols_offd_Pext);
+           P_marker = P_mark_array[ii];
+        }
+        A_mark_array[ii] = hypre_CTAlloc(int, num_nz_cols_A);
+        A_marker = A_mark_array[ii];
 
-   /*-----------------------------------------------------------------------
-    *  Initialize some stuff.
-    *-----------------------------------------------------------------------*/
+        /*-----------------------------------------------------------------------
+         *  Initialize some stuff.
+         *-----------------------------------------------------------------------*/
 
-   jj_counter = start_indexing;
-   for (ic = 0; ic < num_cols_diag_P+num_cols_offd_Pext; ic++)
-   {      
-      P_marker[ic] = -1;
-   }
-   for (i = 0; i < num_nz_cols_A; i++)
-   {      
-      A_marker[i] = -1;
-   }   
+        jj_counter = start_indexing;
+        for (ic = 0; ic < num_cols_diag_P+num_cols_offd_Pext; ic++)
+        {      
+           P_marker[ic] = -1;
+        }
+        for (i = 0; i < num_nz_cols_A; i++)
+        {      
+           A_marker[i] = -1;
+        }   
 
-   /*-----------------------------------------------------------------------
-    *  Loop over exterior c-points
-    *-----------------------------------------------------------------------*/
+        /*-----------------------------------------------------------------------
+         *  Loop over exterior c-points
+         *-----------------------------------------------------------------------*/
     
-   for (ic = ns; ic < ne; ic++)
-   {
+        for (ic = ns; ic < ne; ic++)
+        {
       
-      jj_row_begining = jj_counter;
+           jj_row_begining = jj_counter;
 
-      /*--------------------------------------------------------------------
-       *  Loop over entries in row ic of R_offd.
-       *--------------------------------------------------------------------*/
+           /*--------------------------------------------------------------------
+            *  Loop over entries in row ic of R_offd.
+            *--------------------------------------------------------------------*/
    
-      for (jj1 = R_offd_i[ic]; jj1 < R_offd_i[ic+1]; jj1++)
-      {
-         i1  = R_offd_j[jj1];
+           for (jj1 = R_offd_i[ic]; jj1 < R_offd_i[ic+1]; jj1++)
+           {
+              i1  = R_offd_j[jj1];
 
-         /*-----------------------------------------------------------------
-          *  Loop over entries in row i1 of A_offd.
-          *-----------------------------------------------------------------*/
+              /*-----------------------------------------------------------------
+               *  Loop over entries in row i1 of A_offd.
+               *-----------------------------------------------------------------*/
          
-         for (jj2 = A_offd_i[i1]; jj2 < A_offd_i[i1+1]; jj2++)
-         {
-            i2 = A_offd_j[jj2];
+              for (jj2 = A_offd_i[i1]; jj2 < A_offd_i[i1+1]; jj2++)
+              {
+                 i2 = A_offd_j[jj2];
 
-            /*--------------------------------------------------------------
-             *  Check A_marker to see if point i2 has been previously
-             *  visited. New entries in RAP only occur from unmarked points.
-             *--------------------------------------------------------------*/
+                 /*--------------------------------------------------------------
+                  *  Check A_marker to see if point i2 has been previously
+                  *  visited. New entries in RAP only occur from unmarked points.
+                  *--------------------------------------------------------------*/
 
-            if (A_marker[i2] != ic)
-            {
+                 if (A_marker[i2] != ic)
+                 {
 
-               /*-----------------------------------------------------------
-                *  Mark i2 as visited.
-                *-----------------------------------------------------------*/
+                    /*-----------------------------------------------------------
+                     *  Mark i2 as visited.
+                     *-----------------------------------------------------------*/
 
-               A_marker[i2] = ic;
+                    A_marker[i2] = ic;
                
-               /*-----------------------------------------------------------
-                *  Loop over entries in row i2 of P_ext.
-                *-----------------------------------------------------------*/
+                    /*-----------------------------------------------------------
+                     *  Loop over entries in row i2 of P_ext.
+                     *-----------------------------------------------------------*/
 
-               for (jj3 = P_ext_diag_i[i2]; jj3 < P_ext_diag_i[i2+1]; jj3++)
-               {
-                  i3 = P_ext_diag_j[jj3];
+                    for (jj3 = P_ext_diag_i[i2]; jj3 < P_ext_diag_i[i2+1]; jj3++)
+                    {
+                       i3 = P_ext_diag_j[jj3];
                   
-                  /*--------------------------------------------------------
-                   *  Check P_marker to see that RAP_{ic,i3} has not already
-                   *  been accounted for. If it has not, mark it and increment
-                   *  counter.
-                   *--------------------------------------------------------*/
+                       /*--------------------------------------------------------
+                        *  Check P_marker to see that RAP_{ic,i3} has not already
+                        *  been accounted for. If it has not, mark it and increment
+                        *  counter.
+                        *--------------------------------------------------------*/
 
-                  if (P_marker[i3] < jj_row_begining)
-                  {
-                     P_marker[i3] = jj_counter;
-                     jj_counter++;
-                  }
-               }
-               for (jj3 = P_ext_offd_i[i2]; jj3 < P_ext_offd_i[i2+1]; jj3++)
-               {
-                  i3 = P_ext_offd_j[jj3] + num_cols_diag_P;
+                       if (P_marker[i3] < jj_row_begining)
+                       {
+                          P_marker[i3] = jj_counter;
+                          jj_counter++;
+                       }
+                    }
+                    for (jj3 = P_ext_offd_i[i2]; jj3 < P_ext_offd_i[i2+1]; jj3++)
+                    {
+                       i3 = P_ext_offd_j[jj3] + num_cols_diag_P;
                   
-                  /*--------------------------------------------------------
-                   *  Check P_marker to see that RAP_{ic,i3} has not already
-                   *  been accounted for. If it has not, mark it and increment
-                   *  counter.
-                   *--------------------------------------------------------*/
+                       /*--------------------------------------------------------
+                        *  Check P_marker to see that RAP_{ic,i3} has not already
+                        *  been accounted for. If it has not, mark it and increment
+                        *  counter.
+                        *--------------------------------------------------------*/
 
-                  if (P_marker[i3] < jj_row_begining)
-                  {
-                     P_marker[i3] = jj_counter;
-                     jj_counter++;
-                  }
-               }
-            }
-         }
-         /*-----------------------------------------------------------------
-          *  Loop over entries in row i1 of A_diag.
-          *-----------------------------------------------------------------*/
+                       if (P_marker[i3] < jj_row_begining)
+                       {
+                          P_marker[i3] = jj_counter;
+                          jj_counter++;
+                       }
+                    }
+                 }
+              }
+              /*-----------------------------------------------------------------
+               *  Loop over entries in row i1 of A_diag.
+               *-----------------------------------------------------------------*/
          
-         for (jj2 = A_diag_i[i1]; jj2 < A_diag_i[i1+1]; jj2++)
-         {
-            i2 = A_diag_j[jj2];
+              for (jj2 = A_diag_i[i1]; jj2 < A_diag_i[i1+1]; jj2++)
+              {
+                 i2 = A_diag_j[jj2];
 
-            /*--------------------------------------------------------------
-             *  Check A_marker to see if point i2 has been previously
-             *  visited. New entries in RAP only occur from unmarked points.
-             *--------------------------------------------------------------*/
+                 /*--------------------------------------------------------------
+                  *  Check A_marker to see if point i2 has been previously
+                  *  visited. New entries in RAP only occur from unmarked points.
+                  *--------------------------------------------------------------*/
 
-            if (A_marker[i2+num_cols_offd_A] != ic)
-            {
+                 if (A_marker[i2+num_cols_offd_A] != ic)
+                 {
 
-               /*-----------------------------------------------------------
-                *  Mark i2 as visited.
-                *-----------------------------------------------------------*/
+                    /*-----------------------------------------------------------
+                     *  Mark i2 as visited.
+                     *-----------------------------------------------------------*/
 
-               A_marker[i2+num_cols_offd_A] = ic;
+                    A_marker[i2+num_cols_offd_A] = ic;
                
-               /*-----------------------------------------------------------
-                *  Loop over entries in row i2 of P_diag.
-                *-----------------------------------------------------------*/
+                    /*-----------------------------------------------------------
+                     *  Loop over entries in row i2 of P_diag.
+                     *-----------------------------------------------------------*/
 
-               for (jj3 = P_diag_i[i2]; jj3 < P_diag_i[i2+1]; jj3++)
-               {
-                  i3 = P_diag_j[jj3];
+                    for (jj3 = P_diag_i[i2]; jj3 < P_diag_i[i2+1]; jj3++)
+                    {
+                       i3 = P_diag_j[jj3];
                   
-                  /*--------------------------------------------------------
-                   *  Check P_marker to see that RAP_{ic,i3} has not already
-                   *  been accounted for. If it has not, mark it and increment
-                   *  counter.
-                   *--------------------------------------------------------*/
+                       /*--------------------------------------------------------
+                        *  Check P_marker to see that RAP_{ic,i3} has not already
+                        *  been accounted for. If it has not, mark it and increment
+                        *  counter.
+                        *--------------------------------------------------------*/
 
-                  if (P_marker[i3] < jj_row_begining)
-                  {
-                     P_marker[i3] = jj_counter;
-                     jj_counter++;
-                  }
-               }
-               /*-----------------------------------------------------------
-                *  Loop over entries in row i2 of P_offd.
-                *-----------------------------------------------------------*/
+                       if (P_marker[i3] < jj_row_begining)
+                       {
+                          P_marker[i3] = jj_counter;
+                          jj_counter++;
+                       }
+                    }
+                    /*-----------------------------------------------------------
+                     *  Loop over entries in row i2 of P_offd.
+                     *-----------------------------------------------------------*/
 
-               for (jj3 = P_offd_i[i2]; jj3 < P_offd_i[i2+1]; jj3++)
-               {
-                  i3 = map_P_to_Pext[P_offd_j[jj3]] + num_cols_diag_P;
+                    for (jj3 = P_offd_i[i2]; jj3 < P_offd_i[i2+1]; jj3++)
+                    {
+                       i3 = map_P_to_Pext[P_offd_j[jj3]] + num_cols_diag_P;
                   
-                  /*--------------------------------------------------------
-                   *  Check P_marker to see that RAP_{ic,i3} has not already
-                   *  been accounted for. If it has not, mark it and increment
-                   *  counter.
-                   *--------------------------------------------------------*/
+                       /*--------------------------------------------------------
+                        *  Check P_marker to see that RAP_{ic,i3} has not already
+                        *  been accounted for. If it has not, mark it and increment
+                        *  counter.
+                        *--------------------------------------------------------*/
 
-                  if (P_marker[i3] < jj_row_begining)
-                  {
-                     P_marker[i3] = jj_counter;
-                     jj_counter++;
-                  }
-               }
-            }
-         }
-      }
-    }
-
-    jj_count[ii] = jj_counter;
-
-   }
+                       if (P_marker[i3] < jj_row_begining)
+                       {
+                          P_marker[i3] = jj_counter;
+                          jj_counter++;
+                       }
+                    }
+                 }
+              }
+           }
+        }
+        jj_count[ii] = jj_counter;
+     }
   
-   /*-----------------------------------------------------------------------
-    *  Allocate RAP_int_data and RAP_int_j arrays.
-    *-----------------------------------------------------------------------*/
+     /*-----------------------------------------------------------------------
+      *  Allocate RAP_int_data and RAP_int_j arrays.
+      *-----------------------------------------------------------------------*/
 
-   for (i = 0; i < num_threads-1; i++)
-      jj_count[i+1] += jj_count[i];
+     for (i = 0; i < num_threads-1; i++) jj_count[i+1] += jj_count[i];
     
-   RAP_size = jj_count[num_threads-1];
-   RAP_int_i = hypre_CTAlloc(int, num_cols_offd_RT+1);
-   RAP_int_data = hypre_CTAlloc(double, RAP_size*bnnz);
-   RAP_int_j    = hypre_CTAlloc(int, RAP_size);
+     RAP_size = jj_count[num_threads-1];
+     RAP_int_i = hypre_CTAlloc(int, num_cols_offd_RT+1);
+     RAP_int_data = hypre_CTAlloc(double, RAP_size*bnnz);
+     RAP_int_j    = hypre_CTAlloc(int, RAP_size);
+     RAP_int_i[num_cols_offd_RT] = RAP_size;
 
-   RAP_int_i[num_cols_offd_RT] = RAP_size;
-
-   /*-----------------------------------------------------------------------
-    *  Second Pass: Fill in RAP_int_data and RAP_int_j.
-    *-----------------------------------------------------------------------*/
+     /*-----------------------------------------------------------------------
+      *  Second Pass: Fill in RAP_int_data and RAP_int_j.
+      *-----------------------------------------------------------------------*/
 
 #define HYPRE_SMP_PRIVATE i,ii,ic,i1,i2,i3,jj1,jj2,jj3,ns,ne,size,rest,jj_counter,jj_row_begining,A_marker,P_marker
 #include "../utilities/hypre_smp_forloop.h"
-   for (ii = 0; ii < num_threads; ii++)
-   {
-      size = num_cols_offd_RT/num_threads;
-      rest = num_cols_offd_RT - size*num_threads;
-      if (ii < rest)
-      {
-         ns = ii*size+ii;
-         ne = (ii+1)*size+ii+1;
-      }
-      else
-      {
-         ns = ii*size+rest;
-         ne = (ii+1)*size+rest;
-      }
+     for (ii = 0; ii < num_threads; ii++)
+     {
+        size = num_cols_offd_RT/num_threads;
+        rest = num_cols_offd_RT - size*num_threads;
+        if (ii < rest)
+        {
+           ns = ii*size+ii;
+           ne = (ii+1)*size+ii+1;
+        }
+        else
+        {
+           ns = ii*size+rest;
+           ne = (ii+1)*size+rest;
+        }
 
-      /*--------------------------------------------------------------------
-       *  Initialize some stuff.
-       *--------------------------------------------------------------------*/
+        /*--------------------------------------------------------------------
+         *  Initialize some stuff.
+         *--------------------------------------------------------------------*/
 
-      if (num_cols_offd_Pext || num_cols_diag_P)
-         P_marker = P_mark_array[ii];
-      A_marker = A_mark_array[ii];
+        if (num_cols_offd_Pext || num_cols_diag_P)
+           P_marker = P_mark_array[ii];
+        A_marker = A_mark_array[ii];
 
-      jj_counter = start_indexing;
-      if (ii > 0) jj_counter = jj_count[ii-1];
+        jj_counter = start_indexing;
+        if (ii > 0) jj_counter = jj_count[ii-1];
 
-      for (ic = 0; ic < num_cols_diag_P+num_cols_offd_Pext; ic++)
-      {
-         P_marker[ic] = -1;
-      }
-      for (i = 0; i < num_nz_cols_A; i++)
-      {
-         A_marker[i] = -1;
-      }
+        for (ic = 0; ic < num_cols_diag_P+num_cols_offd_Pext; ic++)
+        {
+           P_marker[ic] = -1;
+        }
+        for (i = 0; i < num_nz_cols_A; i++)
+        {
+           A_marker[i] = -1;
+        }
    
-      /*--------------------------------------------------------------------
-       *  Loop over exterior c-points.
-       *--------------------------------------------------------------------*/
+        /*--------------------------------------------------------------------
+         *  Loop over exterior c-points.
+         *--------------------------------------------------------------------*/
     
-      for (ic = ns; ic < ne; ic++)
-      {
-         jj_row_begining = jj_counter;
-         RAP_int_i[ic] = jj_counter;
+        for (ic = ns; ic < ne; ic++)
+        {
+           jj_row_begining = jj_counter;
+           RAP_int_i[ic] = jj_counter;
 
-         /*-----------------------------------------------------------------
-          *  Loop over entries in row ic of R_offd.
-          *-----------------------------------------------------------------*/
+           /*-----------------------------------------------------------------
+            *  Loop over entries in row ic of R_offd.
+            *-----------------------------------------------------------------*/
    
-         for (jj1 = R_offd_i[ic]; jj1 < R_offd_i[ic+1]; jj1++)
-         {
-            i1  = R_offd_j[jj1];
-            r_entries = &(R_offd_data[jj1*bnnz]);
+           for (jj1 = R_offd_i[ic]; jj1 < R_offd_i[ic+1]; jj1++)
+           {
+              i1  = R_offd_j[jj1];
+              r_entries = &(R_offd_data[jj1*bnnz]);
          
-            /*--------------------------------------------------------------
-             *  Loop over entries in row i1 of A_offd.
-             *--------------------------------------------------------------*/
+              /*--------------------------------------------------------------
+               *  Loop over entries in row i1 of A_offd.
+               *--------------------------------------------------------------*/
          
-            for (jj2 = A_offd_i[i1]; jj2 < A_offd_i[i1+1]; jj2++)
-            {
-               i2 = A_offd_j[jj2];
-               hypre_CSRBlockMatrixBlockMultAdd(r_entries, 
-                              &(A_offd_data[jj2*bnnz]), zero, 
-                              r_a_products, block_size);
+              for (jj2 = A_offd_i[i1]; jj2 < A_offd_i[i1+1]; jj2++)
+              {
+                 i2 = A_offd_j[jj2];
+                 hypre_CSRBlockMatrixBlockMultAdd(r_entries, 
+                                &(A_offd_data[jj2*bnnz]), zero, 
+                                r_a_products, block_size);
             
-               /*-----------------------------------------------------------
-                *  Check A_marker to see if point i2 has been previously
-                *  visited. New entries in RAP only occur from unmarked points.
-                *-----------------------------------------------------------*/
+                 /*-----------------------------------------------------------
+                  *  Check A_marker to see if point i2 has been previously
+                  *  visited. New entries in RAP only occur from unmarked points.
+                  *-----------------------------------------------------------*/
 
-               if (A_marker[i2] != ic)
-               {
-                  /*--------------------------------------------------------
-                   *  Mark i2 as visited.
-                   *--------------------------------------------------------*/
+                 if (A_marker[i2] != ic)
+                 {
+                    /*--------------------------------------------------------
+                     *  Mark i2 as visited.
+                     *--------------------------------------------------------*/
 
-                  A_marker[i2] = ic;
+                    A_marker[i2] = ic;
                
-                  /*--------------------------------------------------------
-                   *  Loop over entries in row i2 of P_ext.
-                   *--------------------------------------------------------*/
+                    /*--------------------------------------------------------
+                     *  Loop over entries in row i2 of P_ext.
+                     *--------------------------------------------------------*/
 
-                  for (jj3 = P_ext_diag_i[i2]; jj3 < P_ext_diag_i[i2+1]; jj3++)
-                  {
-                     i3 = P_ext_diag_j[jj3];
-                     hypre_CSRBlockMatrixBlockMultAdd(r_a_products, 
+                    for (jj3 = P_ext_diag_i[i2]; jj3 < P_ext_diag_i[i2+1]; jj3++)
+                    {
+                       i3 = P_ext_diag_j[jj3];
+                       hypre_CSRBlockMatrixBlockMultAdd(r_a_products, 
+                                     &(P_ext_diag_data[jj3*bnnz]), zero, 
+                                     r_a_p_products, block_size);
+                  
+                       /*-----------------------------------------------------
+                        *  Check P_marker to see that RAP_{ic,i3} has not already
+                        *  been accounted for. If it has not, create a new entry.
+                        *  If it has, add new contribution.
+                        *-----------------------------------------------------*/
+
+                       if (P_marker[i3] < jj_row_begining)
+                       {
+                          P_marker[i3] = jj_counter;
+                          for (kk = 0; kk < bnnz; kk++)
+                             RAP_int_data[jj_counter*bnnz+kk] = 
+                                                r_a_p_products[kk];
+                          RAP_int_j[jj_counter] = i3 + first_col_diag_P;
+                          jj_counter++;
+                       }
+                       else
+                       {
+                          for (kk = 0; kk < bnnz; kk++)
+                             RAP_int_data[P_marker[i3]*bnnz+kk] += 
+                                            r_a_p_products[kk];
+                       }
+                    }
+                    for (jj3 = P_ext_offd_i[i2]; jj3 < P_ext_offd_i[i2+1]; jj3++)
+                    {
+                       i3 = P_ext_offd_j[jj3] + num_cols_diag_P;
+                       hypre_CSRBlockMatrixBlockMultAdd(r_a_products, 
+                               &(P_ext_offd_data[jj3*bnnz]), zero, 
+                               r_a_p_products, block_size);
+                  
+                       /*-----------------------------------------------------
+                        *  Check P_marker to see that RAP_{ic,i3} has not already
+                        *  been accounted for. If it has not, create a new entry.
+                        *  If it has, add new contribution.
+                        *-----------------------------------------------------*/
+
+                       if (P_marker[i3] < jj_row_begining)
+                       {
+                          P_marker[i3] = jj_counter;
+                          for (kk = 0; kk < bnnz; kk++)
+                             RAP_int_data[jj_counter*bnnz+kk] = 
+                                                        r_a_p_products[kk];
+                          RAP_int_j[jj_counter] 
+                                  = col_map_offd_Pext[i3-num_cols_diag_P];
+                          jj_counter++;
+                       }
+                       else
+                       {
+                          for (kk = 0; kk < bnnz; kk++)
+                             RAP_int_data[P_marker[i3]*bnnz+kk] += 
+                                                     r_a_p_products[kk];
+                       }
+                    }
+                 }
+
+                 /*-----------------------------------------------------------
+                  *  If i2 is previously visited ( A_marker[12]=ic ) it yields
+                  *  no new entries in RAP and can just add new contributions.
+                  *-----------------------------------------------------------*/
+
+                 else
+                 {
+                    for (jj3 = P_ext_diag_i[i2]; jj3 < P_ext_diag_i[i2+1]; jj3++)
+                    {
+                       i3 = P_ext_diag_j[jj3];
+                       hypre_CSRBlockMatrixBlockMultAdd(r_a_products, 
                                    &(P_ext_diag_data[jj3*bnnz]), zero, 
                                    r_a_p_products, block_size);
-                  
-                     /*-----------------------------------------------------
-                      *  Check P_marker to see that RAP_{ic,i3} has not already
-                      *  been accounted for. If it has not, create a new entry.
-                      *  If it has, add new contribution.
-                      *-----------------------------------------------------*/
-
-                     if (P_marker[i3] < jj_row_begining)
-                     {
-                        P_marker[i3] = jj_counter;
-                        for (kk = 0; kk < bnnz; kk++)
-                           RAP_int_data[jj_counter*bnnz+kk] = 
-                                              r_a_p_products[kk];
-                        RAP_int_j[jj_counter] = i3 + first_col_diag_P;
-                        jj_counter++;
-                     }
-                     else
-                     {
-                        for (kk = 0; kk < bnnz; kk++)
-                           RAP_int_data[P_marker[i3]*bnnz+kk] += 
-                                            r_a_p_products[kk];
-                     }
-                  }
-                  for (jj3 = P_ext_offd_i[i2]; jj3 < P_ext_offd_i[i2+1]; jj3++)
-                  {
-                     i3 = P_ext_offd_j[jj3] + num_cols_diag_P;
-                     hypre_CSRBlockMatrixBlockMultAdd(r_a_products, 
-                             &(P_ext_offd_data[jj3*bnnz]), zero, 
-                             r_a_p_products, block_size);
-                  
-                     /*-----------------------------------------------------
-                      *  Check P_marker to see that RAP_{ic,i3} has not already
-                      *  been accounted for. If it has not, create a new entry.
-                      *  If it has, add new contribution.
-                      *-----------------------------------------------------*/
-
-                     if (P_marker[i3] < jj_row_begining)
-                     {
-                        P_marker[i3] = jj_counter;
-                        for (kk = 0; kk < bnnz; kk++)
-                           RAP_int_data[jj_counter*bnnz+kk] = 
-                                                      r_a_p_products[kk];
-                        RAP_int_j[jj_counter] 
-                                = col_map_offd_Pext[i3-num_cols_diag_P];
-                        jj_counter++;
-                     }
-                     else
-                     {
-                        for (kk = 0; kk < bnnz; kk++)
-                           RAP_int_data[P_marker[i3]*bnnz+kk] += 
-                                                   r_a_p_products[kk];
-                     }
-                  }
-               }
-
-               /*-----------------------------------------------------------
-                *  If i2 is previously visited ( A_marker[12]=ic ) it yields
-                *  no new entries in RAP and can just add new contributions.
-                *-----------------------------------------------------------*/
-
-               else
-               {
-                  for (jj3 = P_ext_diag_i[i2]; jj3 < P_ext_diag_i[i2+1]; jj3++)
-                  {
-                     i3 = P_ext_diag_j[jj3];
-                     hypre_CSRBlockMatrixBlockMultAdd(r_a_products, 
-                                 &(P_ext_diag_data[jj3*bnnz]), zero, 
-                                 r_a_p_products, block_size);
-                     for (kk = 0; kk < bnnz; kk++)
-                        RAP_int_data[P_marker[i3]*bnnz+kk] += 
-                                                      r_a_p_products[kk];
-                  }
-                  for (jj3 = P_ext_offd_i[i2]; jj3 < P_ext_offd_i[i2+1]; jj3++)
-                  {
-                     i3 = P_ext_offd_j[jj3] + num_cols_diag_P;
-                     hypre_CSRBlockMatrixBlockMultAdd(r_a_products, 
-                                &(P_ext_offd_data[jj3*bnnz]), zero, 
-                                r_a_p_products, block_size);
-                     ind = P_marker[i3] * bnnz;
-                     for (kk = 0; kk < bnnz; kk++)
-                        RAP_int_data[ind++] += r_a_p_products[kk];
-                  }
-               }
-            }
-
-            /*--------------------------------------------------------------
-             *  Loop over entries in row i1 of A_diag.
-             *--------------------------------------------------------------*/
+                       for (kk = 0; kk < bnnz; kk++)
+                          RAP_int_data[P_marker[i3]*bnnz+kk] += 
+                                                        r_a_p_products[kk];
+                    }
+                    for (jj3 = P_ext_offd_i[i2]; jj3 < P_ext_offd_i[i2+1]; jj3++)
+                    {
+                       i3 = P_ext_offd_j[jj3] + num_cols_diag_P;
+                       hypre_CSRBlockMatrixBlockMultAdd(r_a_products, 
+                                  &(P_ext_offd_data[jj3*bnnz]), zero, 
+                                  r_a_p_products, block_size);
+                       ind = P_marker[i3] * bnnz;
+                       for (kk = 0; kk < bnnz; kk++)
+                          RAP_int_data[ind++] += r_a_p_products[kk];
+                    }
+                 }
+              }
+  
+              /*--------------------------------------------------------------
+               *  Loop over entries in row i1 of A_diag.
+               *--------------------------------------------------------------*/
          
-            for (jj2 = A_diag_i[i1]; jj2 < A_diag_i[i1+1]; jj2++)
-            {
-               i2 = A_diag_j[jj2];
-               hypre_CSRBlockMatrixBlockMultAdd(r_entries, 
-                        &(A_diag_data[jj2*bnnz]), zero, r_a_products, 
-                        block_size); 
-            
-               /*-----------------------------------------------------------
-                *  Check A_marker to see if point i2 has been previously
-                *  visited. New entries in RAP only occur from unmarked points.
-                *-----------------------------------------------------------*/
+              for (jj2 = A_diag_i[i1]; jj2 < A_diag_i[i1+1]; jj2++)
+              {
+                 i2 = A_diag_j[jj2];
+                 hypre_CSRBlockMatrixBlockMultAdd(r_entries, 
+                          &(A_diag_data[jj2*bnnz]), zero, r_a_products, 
+                          block_size); 
+              
+                 /*-----------------------------------------------------------
+                  *  Check A_marker to see if point i2 has been previously
+                  *  visited. New entries in RAP only occur from unmarked points.
+                  *-----------------------------------------------------------*/
 
-               if (A_marker[i2+num_cols_offd_A] != ic)
-               {
+                 if (A_marker[i2+num_cols_offd_A] != ic)
+                 {
 
-                  /*--------------------------------------------------------
-                   *  Mark i2 as visited.
-                   *--------------------------------------------------------*/
+                    /*--------------------------------------------------------
+                     *  Mark i2 as visited.
+                     *--------------------------------------------------------*/
 
-                  A_marker[i2+num_cols_offd_A] = ic;
+                    A_marker[i2+num_cols_offd_A] = ic;
                
-                  /*--------------------------------------------------------
-                   *  Loop over entries in row i2 of P_diag.
-                   *--------------------------------------------------------*/
+                    /*--------------------------------------------------------
+                     *  Loop over entries in row i2 of P_diag.
+                     *--------------------------------------------------------*/
+  
+                    for (jj3 = P_diag_i[i2]; jj3 < P_diag_i[i2+1]; jj3++)
+                    {
+                       i3 = P_diag_j[jj3];
+                       hypre_CSRBlockMatrixBlockMultAdd(r_a_products, 
+                                   &(P_diag_data[jj3*bnnz]), zero, 
+                                   r_a_p_products, block_size); 
+                    
+                       /*-----------------------------------------------------
+                        *  Check P_marker to see that RAP_{ic,i3} has not already
+                        *  been accounted for. If it has not, create a new entry.
+                        *  If it has, add new contribution.
+                        *-----------------------------------------------------*/
+  
+                       if (P_marker[i3] < jj_row_begining)
+                       {
+                          P_marker[i3] = jj_counter;
+                          ind = jj_counter * bnnz;
+                          for (kk = 0; kk < bnnz; kk++)
+                             RAP_int_data[ind++] = r_a_p_products[kk];
+                          RAP_int_j[jj_counter] = i3 + first_col_diag_P;
+                          jj_counter++;
+                       }
+                       else
+                       {
+                          ind = P_marker[i3] * bnnz;
+                          for (kk = 0; kk < bnnz; kk++)
+                             RAP_int_data[ind++] += r_a_p_products[kk];
+                       }
+                    }
+                    for (jj3 = P_offd_i[i2]; jj3 < P_offd_i[i2+1]; jj3++)
+                    {
+                       i3 = map_P_to_Pext[P_offd_j[jj3]] + num_cols_diag_P;
+                       hypre_CSRBlockMatrixBlockMultAdd(r_a_products, 
+                                 &(P_offd_data[jj3*bnnz]), zero, 
+                                 r_a_p_products, block_size); 
+                    
+                       /*-----------------------------------------------------
+                        *  Check P_marker to see that RAP_{ic,i3} has not already
+                        *  been accounted for. If it has not, create a new entry.
+                        *  If it has, add new contribution.
+                        *-----------------------------------------------------*/
+  
+                       if (P_marker[i3] < jj_row_begining)
+                       {
+                          P_marker[i3] = jj_counter;
+                          ind = jj_counter * bnnz;
+                          for (kk = 0; kk < bnnz; kk++)
+                             RAP_int_data[ind++] = r_a_p_products[kk];
+                          RAP_int_j[jj_counter] = 
+                                     col_map_offd_Pext[i3-num_cols_diag_P];
+                          jj_counter++;
+                       }
+                       else
+                       {
+                          ind = P_marker[i3] * bnnz;
+                          for (kk = 0; kk < bnnz; kk++)
+                             RAP_int_data[ind++] += r_a_p_products[kk];
+                       }
+                    }
+                 }
 
-                  for (jj3 = P_diag_i[i2]; jj3 < P_diag_i[i2+1]; jj3++)
-                  {
-                     i3 = P_diag_j[jj3];
-                     hypre_CSRBlockMatrixBlockMultAdd(r_a_products, 
-                                 &(P_diag_data[jj3*bnnz]), zero, 
-                                 r_a_products, block_size); 
-                  
-                     /*-----------------------------------------------------
-                      *  Check P_marker to see that RAP_{ic,i3} has not already
-                      *  been accounted for. If it has not, create a new entry.
-                      *  If it has, add new contribution.
-                      *-----------------------------------------------------*/
+                 /*-----------------------------------------------------------
+                  *  If i2 is previously visited ( A_marker[12]=ic ) it yields
+                  *  no new entries in RAP and can just add new contributions.
+                  *-----------------------------------------------------------*/
+  
+                 else
+                 {
+                    for (jj3 = P_diag_i[i2]; jj3 < P_diag_i[i2+1]; jj3++)
+                    {
+                       i3 = P_diag_j[jj3];
+                       hypre_CSRBlockMatrixBlockMultAdd(r_a_products, 
+                                    &(P_diag_data[jj3*bnnz]), zero, 
+                                    r_a_p_products, block_size); 
+                       ind = P_marker[i3] * bnnz;
+                       for (kk = 0; kk < bnnz; kk++)
+                          RAP_int_data[ind++] += r_a_p_products[kk];
+                    }
+                    for (jj3 = P_offd_i[i2]; jj3 < P_offd_i[i2+1]; jj3++)
+                    {
+                       i3 = map_P_to_Pext[P_offd_j[jj3]] + num_cols_diag_P;
+                       hypre_CSRBlockMatrixBlockMultAdd(r_a_products, 
+                             &(P_offd_data[jj3*bnnz]), zero, 
+                             r_a_p_products, block_size); 
+                       ind = P_marker[i3] * bnnz;
+                       for (kk = 0; kk < bnnz; kk++)
+                          RAP_int_data[ind++] += r_a_p_products[kk];
+                    }
+                 }
+              }
+           }
+        }
+        if (num_cols_offd_Pext || num_cols_diag_P)
+           hypre_TFree(P_mark_array[ii]);
+        hypre_TFree(A_mark_array[ii]);
+     }
 
-                     if (P_marker[i3] < jj_row_begining)
-                     {
-                        P_marker[i3] = jj_counter;
-                        ind = jj_counter * bnnz;
-                        for (kk = 0; kk < bnnz; kk++)
-                           RAP_int_data[ind++] = r_a_p_products[kk];
-                        RAP_int_j[jj_counter] = i3 + first_col_diag_P;
-                        jj_counter++;
-                     }
-                     else
-                     {
-                        ind = P_marker[i3] * bnnz;
-                        for (kk = 0; kk < bnnz; kk++)
-                           RAP_int_data[ind++] += r_a_p_products[kk];
-                     }
-                  }
-                  for (jj3 = P_offd_i[i2]; jj3 < P_offd_i[i2+1]; jj3++)
-                  {
-                     i3 = map_P_to_Pext[P_offd_j[jj3]] + num_cols_diag_P;
-                     hypre_CSRBlockMatrixBlockMultAdd(r_a_products, 
-                               &(P_offd_data[jj3*bnnz]), zero, 
-                               r_a_products, block_size); 
-                  
-                     /*-----------------------------------------------------
-                      *  Check P_marker to see that RAP_{ic,i3} has not already
-                      *  been accounted for. If it has not, create a new entry.
-                      *  If it has, add new contribution.
-                      *-----------------------------------------------------*/
-
-                     if (P_marker[i3] < jj_row_begining)
-                     {
-                        P_marker[i3] = jj_counter;
-                        ind = jj_counter * bnnz;
-                        for (kk = 0; kk < bnnz; kk++)
-                           RAP_int_data[ind++] = r_a_p_products[kk];
-                        RAP_int_j[jj_counter] = 
-                                   col_map_offd_Pext[i3-num_cols_diag_P];
-                        jj_counter++;
-                     }
-                     else
-                     {
-                        ind = P_marker[i3] * bnnz;
-                        for (kk = 0; kk < bnnz; kk++)
-                           RAP_int_data[ind++] += r_a_p_products[kk];
-                     }
-                  }
-               }
-
-               /*-----------------------------------------------------------
-                *  If i2 is previously visited ( A_marker[12]=ic ) it yields
-                *  no new entries in RAP and can just add new contributions.
-                *-----------------------------------------------------------*/
-
-               else
-               {
-                  for (jj3 = P_diag_i[i2]; jj3 < P_diag_i[i2+1]; jj3++)
-                  {
-                     i3 = P_diag_j[jj3];
-                     hypre_CSRBlockMatrixBlockMultAdd(r_a_products, 
-                                  &(P_diag_data[jj3*bnnz]), zero, 
-                                  r_a_products, block_size); 
-                     ind = P_marker[i3] * bnnz;
-                     for (kk = 0; kk < bnnz; kk++)
-                        RAP_int_data[ind++] += r_a_p_products[kk];
-                  }
-                  for (jj3 = P_offd_i[i2]; jj3 < P_offd_i[i2+1]; jj3++)
-                  {
-                     i3 = map_P_to_Pext[P_offd_j[jj3]] + num_cols_diag_P;
-                     hypre_CSRBlockMatrixBlockMultAdd(r_a_products, 
-                           &(P_offd_data[jj3*bnnz]), zero, 
-                           r_a_products, block_size); 
-                     ind = P_marker[i3] * bnnz;
-                     for (kk = 0; kk < bnnz; kk++)
-                        RAP_int_data[ind++] += r_a_p_products[kk];
-                  }
-               }
-            }
-         }
-      }
-      if (num_cols_offd_Pext || num_cols_diag_P)
-         hypre_TFree(P_mark_array[ii]);
-      hypre_TFree(A_mark_array[ii]);
-   }
-
-   RAP_int = hypre_CSRBlockMatrixCreate(block_size,num_cols_offd_RT,
-                                        num_rows_offd_RT,RAP_size);
-   hypre_CSRBlockMatrixI(RAP_int) = RAP_int_i;
-   hypre_CSRBlockMatrixJ(RAP_int) = RAP_int_j;
-   hypre_CSRBlockMatrixData(RAP_int) = RAP_int_data;
-   hypre_TFree(jj_count);
+     RAP_int = hypre_CSRBlockMatrixCreate(block_size,num_cols_offd_RT,
+                                          num_rows_offd_RT,RAP_size);
+     hypre_CSRBlockMatrixI(RAP_int) = RAP_int_i;
+     hypre_CSRBlockMatrixJ(RAP_int) = RAP_int_j;
+     hypre_CSRBlockMatrixData(RAP_int) = RAP_int_data;
+     hypre_TFree(jj_count);
   }
 
-   RAP_ext_size = 0;
-   if (num_sends_RT || num_recvs_RT)
-   {
-        RAP_ext = hypre_ExchangeRAPBlockData(RAP_int,comm_pkg_RT);
-        RAP_ext_i = hypre_CSRBlockMatrixI(RAP_ext);
-        RAP_ext_j = hypre_CSRBlockMatrixJ(RAP_ext);
-        RAP_ext_data = hypre_CSRBlockMatrixData(RAP_ext);
-        RAP_ext_size = RAP_ext_i[hypre_CSRBlockMatrixNumRows(RAP_ext)];
-   }
-   if (num_cols_offd_RT)
-   {
-      hypre_CSRBlockMatrixDestroy(RAP_int);
-      RAP_int = NULL;
-   }
+  RAP_ext_size = 0;
+  if (num_sends_RT || num_recvs_RT)
+  {
+     RAP_ext = hypre_ExchangeRAPBlockData(RAP_int,comm_pkg_RT);
+     RAP_ext_i = hypre_CSRBlockMatrixI(RAP_ext);
+     RAP_ext_j = hypre_CSRBlockMatrixJ(RAP_ext);
+     RAP_ext_data = hypre_CSRBlockMatrixData(RAP_ext);
+     RAP_ext_size = RAP_ext_i[hypre_CSRBlockMatrixNumRows(RAP_ext)];
+  }
+  if (num_cols_offd_RT)
+  {
+     hypre_CSRBlockMatrixDestroy(RAP_int);
+     RAP_int = NULL;
+  }
  
-   RAP_diag_i = hypre_CTAlloc(int, num_cols_diag_P+1);
-   RAP_offd_i = hypre_CTAlloc(int, num_cols_diag_P+1);
+  RAP_diag_i = hypre_CTAlloc(int, num_cols_diag_P+1);
+  RAP_offd_i = hypre_CTAlloc(int, num_cols_diag_P+1);
 
-   first_col_diag_RAP = first_col_diag_P;
-   last_col_diag_RAP = first_col_diag_P + num_cols_diag_P - 1;
+  first_col_diag_RAP = first_col_diag_P;
+  last_col_diag_RAP = first_col_diag_P + num_cols_diag_P - 1;
 
-   /*-----------------------------------------------------------------------
-    *  check for new nonzero columns in RAP_offd generated through RAP_ext
-    *-----------------------------------------------------------------------*/
+  /*-----------------------------------------------------------------------
+   *  check for new nonzero columns in RAP_offd generated through RAP_ext
+   *-----------------------------------------------------------------------*/
 
-   if (RAP_ext_size || num_cols_offd_Pext)
-   {
-      temp = hypre_CTAlloc(int,RAP_ext_size+num_cols_offd_Pext);
-      cnt = 0;
-      for (i=0; i < RAP_ext_size; i++)
-         if (RAP_ext_j[i] < first_col_diag_RAP 
-                        || RAP_ext_j[i] > last_col_diag_RAP)
-            temp[cnt++] = RAP_ext_j[i];
-      for (i=0; i < num_cols_offd_Pext; i++)
-         temp[cnt++] = col_map_offd_Pext[i];
+  if (RAP_ext_size || num_cols_offd_Pext)
+  {
+     temp = hypre_CTAlloc(int,RAP_ext_size+num_cols_offd_Pext);
+     cnt = 0;
+     for (i=0; i < RAP_ext_size; i++)
+        if (RAP_ext_j[i] < first_col_diag_RAP 
+                       || RAP_ext_j[i] > last_col_diag_RAP)
+           temp[cnt++] = RAP_ext_j[i];
+     for (i=0; i < num_cols_offd_Pext; i++)
+        temp[cnt++] = col_map_offd_Pext[i];
 
-
-      if (cnt)
-      {
-         qsort0(temp,0,cnt-1);
-         value = temp[0];
-         num_cols_offd_RAP = 1;
-         for (i=1; i < cnt; i++)
-         {
-            if (temp[i] > value)
-            {
-               value = temp[i];
-               temp[num_cols_offd_RAP++] = value;
-            }
-         }
-      }
+     if (cnt)
+     {
+        qsort0(temp,0,cnt-1);
+        value = temp[0];
+        num_cols_offd_RAP = 1;
+        for (i=1; i < cnt; i++)
+        {
+           if (temp[i] > value)
+           {
+              value = temp[i];
+              temp[num_cols_offd_RAP++] = value;
+           }
+        }
+     }
 
    /* now evaluate col_map_offd_RAP */
-      if (num_cols_offd_RAP)
-         col_map_offd_RAP = hypre_CTAlloc(int, num_cols_offd_RAP);
+     if (num_cols_offd_RAP)
+        col_map_offd_RAP = hypre_CTAlloc(int, num_cols_offd_RAP);
 
-      for (i=0 ; i < num_cols_offd_RAP; i++)
-         col_map_offd_RAP[i] = temp[i];
-  
-      hypre_TFree(temp);
-   }
+     for (i=0 ; i < num_cols_offd_RAP; i++)
+        col_map_offd_RAP[i] = temp[i];
+ 
+     hypre_TFree(temp);
+  }
 
-   if (num_cols_offd_P)
-   {
-      map_P_to_RAP = hypre_CTAlloc(int,num_cols_offd_P);
+  if (num_cols_offd_P)
+  {
+     map_P_to_RAP = hypre_CTAlloc(int,num_cols_offd_P);
 
-      cnt = 0;
-      for (i=0; i < num_cols_offd_RAP; i++)
-         if (col_map_offd_RAP[i] == col_map_offd_P[cnt])
-         {
-            map_P_to_RAP[cnt++] = i;
-            if (cnt == num_cols_offd_P) break;
-         }
-   }
+     cnt = 0;
+     for (i=0; i < num_cols_offd_RAP; i++)
+        if (col_map_offd_RAP[i] == col_map_offd_P[cnt])
+        {
+           map_P_to_RAP[cnt++] = i;
+           if (cnt == num_cols_offd_P) break;
+        }
+  }
 
-   if (num_cols_offd_Pext)
-   {
-      map_Pext_to_RAP = hypre_CTAlloc(int,num_cols_offd_Pext);
+  if (num_cols_offd_Pext)
+  {
+     map_Pext_to_RAP = hypre_CTAlloc(int,num_cols_offd_Pext);
 
-      cnt = 0;
-      for (i=0; i < num_cols_offd_RAP; i++)
-         if (col_map_offd_RAP[i] == col_map_offd_Pext[cnt])
-         {
-            map_Pext_to_RAP[cnt++] = i;
-            if (cnt == num_cols_offd_Pext) break;
-         }
-   }
+     cnt = 0;
+     for (i=0; i < num_cols_offd_RAP; i++)
+        if (col_map_offd_RAP[i] == col_map_offd_Pext[cnt])
+        {
+           map_Pext_to_RAP[cnt++] = i;
+           if (cnt == num_cols_offd_Pext) break;
+        }
+  }
 
-   /*-----------------------------------------------------------------------
-    *  Convert RAP_ext column indices
-    *-----------------------------------------------------------------------*/
+  /*-----------------------------------------------------------------------
+   *  Convert RAP_ext column indices
+   *-----------------------------------------------------------------------*/
 
-   for (i=0; i < RAP_ext_size; i++)
-      if (RAP_ext_j[i] < first_col_diag_RAP 
-                        || RAP_ext_j[i] > last_col_diag_RAP)
-            RAP_ext_j[i] = num_cols_diag_P
-                                + hypre_BinarySearch(col_map_offd_RAP,
-                                                RAP_ext_j[i],num_cols_offd_RAP);
-      else
-            RAP_ext_j[i] -= first_col_diag_RAP;
+  for (i=0; i < RAP_ext_size; i++)
+     if (RAP_ext_j[i] < first_col_diag_RAP 
+                       || RAP_ext_j[i] > last_col_diag_RAP)
+        RAP_ext_j[i] = num_cols_diag_P
+                               + hypre_BinarySearch(col_map_offd_RAP,
+                                               RAP_ext_j[i],num_cols_offd_RAP);
+     else
+        RAP_ext_j[i] -= first_col_diag_RAP;
 
 /*   need to allocate new P_marker etc. and make further changes */
    /*-----------------------------------------------------------------------
     *  Initialize some stuff.
     *-----------------------------------------------------------------------*/
-   jj_cnt_diag = hypre_CTAlloc(int, num_threads);
-   jj_cnt_offd = hypre_CTAlloc(int, num_threads);
+  jj_cnt_diag = hypre_CTAlloc(int, num_threads);
+  jj_cnt_offd = hypre_CTAlloc(int, num_threads);
 
 #define HYPRE_SMP_PRIVATE i,j,k,jcol,ii,ic,i1,i2,i3,jj1,jj2,jj3,ns,ne,size,rest,jj_count_diag,jj_count_offd,jj_row_begin_diag,jj_row_begin_offd,A_marker,P_marker
 #include "../utilities/hypre_smp_forloop.h"
-   for (ii = 0; ii < num_threads; ii++)
-   {
+  for (ii = 0; ii < num_threads; ii++)
+  {
      size = num_cols_diag_P/num_threads;
      rest = num_cols_diag_P - size*num_threads;
      if (ii < rest)
@@ -1167,263 +1121,262 @@ hypre_ParCSRBlockMatrixRAP(hypre_ParCSRBlockMatrix  *RT,
         ne = (ii+1)*size+rest;
      }
 
-   P_mark_array[ii] = hypre_CTAlloc(int, num_cols_diag_P+num_cols_offd_RAP);
-   A_mark_array[ii] = hypre_CTAlloc(int, num_nz_cols_A);
-   P_marker = P_mark_array[ii];
-   A_marker = A_mark_array[ii];
-   jj_count_diag = start_indexing;
-   jj_count_offd = start_indexing;
+     P_mark_array[ii] = hypre_CTAlloc(int, num_cols_diag_P+num_cols_offd_RAP);
+     A_mark_array[ii] = hypre_CTAlloc(int, num_nz_cols_A);
+     P_marker = P_mark_array[ii];
+     A_marker = A_mark_array[ii];
+     jj_count_diag = start_indexing;
+     jj_count_offd = start_indexing;
 
-   for (ic = 0; ic < num_cols_diag_P+num_cols_offd_RAP; ic++)
-   {      
-      P_marker[ic] = -1;
-   }
-   for (i = 0; i < num_nz_cols_A; i++)
-   {      
-      A_marker[i] = -1;
-   }   
+     for (ic = 0; ic < num_cols_diag_P+num_cols_offd_RAP; ic++)
+     {      
+        P_marker[ic] = -1;
+     }
+     for (i = 0; i < num_nz_cols_A; i++)
+     {      
+        A_marker[i] = -1;
+     }   
 
-   /*-----------------------------------------------------------------------
-    *  Loop over interior c-points.
-    *-----------------------------------------------------------------------*/
-   
-   for (ic = ns; ic < ne; ic++)
-   {
-      
-      /*--------------------------------------------------------------------
-       *  Set marker for diagonal entry, RAP_{ic,ic}. and for all points
-       *  being added to row ic of RAP_diag and RAP_offd through RAP_ext
-       *--------------------------------------------------------------------*/
- 
-      P_marker[ic] = jj_count_diag;
-      jj_row_begin_diag = jj_count_diag;
-      jj_row_begin_offd = jj_count_offd;
-      jj_count_diag++;
+     /*-----------------------------------------------------------------------
+      *  Loop over interior c-points.
+      *-----------------------------------------------------------------------*/
+  
+     for (ic = ns; ic < ne; ic++)
+     {
+     
+        /*--------------------------------------------------------------------
+         *  Set marker for diagonal entry, RAP_{ic,ic}. and for all points
+         *  being added to row ic of RAP_diag and RAP_offd through RAP_ext
+         *--------------------------------------------------------------------*/
 
-      for (i=0; i < num_sends_RT; i++)
-        for (j = send_map_starts_RT[i]; j < send_map_starts_RT[i+1]; j++)
-            if (send_map_elmts_RT[j] == ic)
-            {
-                for (k=RAP_ext_i[j]; k < RAP_ext_i[j+1]; k++)
-                {
-                   jcol = RAP_ext_j[k];
-                   if (jcol < num_cols_diag_P)
-                   {
+        P_marker[ic] = jj_count_diag;
+        jj_row_begin_diag = jj_count_diag;
+        jj_row_begin_offd = jj_count_offd;
+        jj_count_diag++;
+
+        for (i=0; i < num_sends_RT; i++)
+           for (j = send_map_starts_RT[i]; j < send_map_starts_RT[i+1]; j++)
+              if (send_map_elmts_RT[j] == ic)
+              {
+                  for (k=RAP_ext_i[j]; k < RAP_ext_i[j+1]; k++)
+                  {
+                     jcol = RAP_ext_j[k];
+                     if (jcol < num_cols_diag_P)
+                     {
                         if (P_marker[jcol] < jj_row_begin_diag)
                         {
-                                P_marker[jcol] = jj_count_diag;
-                                jj_count_diag++;
+                           P_marker[jcol] = jj_count_diag;
+                           jj_count_diag++;
                         }
-                   }
-                   else
-                   {
+                     }
+                     else
+                     {
                         if (P_marker[jcol] < jj_row_begin_offd)
                         {
-                                P_marker[jcol] = jj_count_offd;
-                                jj_count_offd++;
+                           P_marker[jcol] = jj_count_offd;
+                           jj_count_offd++;
                         }
-                   }
-                }
-                break;
-            }
+                     }
+                  }
+                  break;
+               }
  
-      /*--------------------------------------------------------------------
-       *  Loop over entries in row ic of R_diag.
-       *--------------------------------------------------------------------*/
+         /*--------------------------------------------------------------------
+          *  Loop over entries in row ic of R_diag.
+          *--------------------------------------------------------------------*/
    
-      for (jj1 = R_diag_i[ic]; jj1 < R_diag_i[ic+1]; jj1++)
-      {
-         i1  = R_diag_j[jj1];
- 
-         /*-----------------------------------------------------------------
-          *  Loop over entries in row i1 of A_offd.
-          *-----------------------------------------------------------------*/
-         
-         if (num_cols_offd_A)
-         {
-           for (jj2 = A_offd_i[i1]; jj2 < A_offd_i[i1+1]; jj2++)
+        for (jj1 = R_diag_i[ic]; jj1 < R_diag_i[ic+1]; jj1++)
+        {
+           i1  = R_diag_j[jj1];
+
+           /*-----------------------------------------------------------------
+            *  Loop over entries in row i1 of A_offd.
+            *-----------------------------------------------------------------*/
+        
+           if (num_cols_offd_A)
            {
-            i2 = A_offd_j[jj2];
- 
-            /*--------------------------------------------------------------
-             *  Check A_marker to see if point i2 has been previously
-             *  visited. New entries in RAP only occur from unmarked points.
-             *--------------------------------------------------------------*/
- 
-            if (A_marker[i2] != ic)
-            {
- 
-               /*-----------------------------------------------------------
-                *  Mark i2 as visited.
-                *-----------------------------------------------------------*/
- 
-               A_marker[i2] = ic;
-               
-               /*-----------------------------------------------------------
-                *  Loop over entries in row i2 of P_ext.
-                *-----------------------------------------------------------*/
- 
-               for (jj3 = P_ext_diag_i[i2]; jj3 < P_ext_diag_i[i2+1]; jj3++)
-               {
-                  i3 = P_ext_diag_j[jj3];
-                  
-                  /*--------------------------------------------------------
-                   *  Check P_marker to see that RAP_{ic,i3} has not already
-                   *  been accounted for. If it has not, mark it and increment
-                   *  counter.
-                   *--------------------------------------------------------*/
+              for (jj2 = A_offd_i[i1]; jj2 < A_offd_i[i1+1]; jj2++)
+              {
+                 i2 = A_offd_j[jj2];
 
-                  if (P_marker[i3] < jj_row_begin_diag)
-                  {
-                     P_marker[i3] = jj_count_diag;
-                     jj_count_diag++;
-                  }
-               }
-               for (jj3 = P_ext_offd_i[i2]; jj3 < P_ext_offd_i[i2+1]; jj3++)
-               {
-                  i3 = map_Pext_to_RAP[P_ext_offd_j[jj3]]+num_cols_diag_P;
-                  
-                  /*--------------------------------------------------------
-                   *  Check P_marker to see that RAP_{ic,i3} has not already
-                   *  been accounted for. If it has not, mark it and increment
-                   *  counter.
-                   *--------------------------------------------------------*/
-
-                  if (P_marker[i3] < jj_row_begin_offd)
-                  {
-                     P_marker[i3] = jj_count_offd;
-                     jj_count_offd++;
-                  }
-               }
-            }
-           }
-         }
-         /*-----------------------------------------------------------------
-          *  Loop over entries in row i1 of A_diag.
-          *-----------------------------------------------------------------*/
-         
-         for (jj2 = A_diag_i[i1]; jj2 < A_diag_i[i1+1]; jj2++)
-         {
-            i2 = A_diag_j[jj2];
- 
-            /*--------------------------------------------------------------
-             *  Check A_marker to see if point i2 has been previously
-             *  visited. New entries in RAP only occur from unmarked points.
-             *--------------------------------------------------------------*/
- 
-            if (A_marker[i2+num_cols_offd_A] != ic)
-            {
- 
-               /*-----------------------------------------------------------
-                *  Mark i2 as visited.
-                *-----------------------------------------------------------*/
- 
-               A_marker[i2+num_cols_offd_A] = ic;
-               
-               /*-----------------------------------------------------------
-                *  Loop over entries in row i2 of P_diag.
-                *-----------------------------------------------------------*/
- 
-               for (jj3 = P_diag_i[i2]; jj3 < P_diag_i[i2+1]; jj3++)
-               {
-                  i3 = P_diag_j[jj3];
-                  
-                  /*--------------------------------------------------------
-                   *  Check P_marker to see that RAP_{ic,i3} has not already
-                   *  been accounted for. If it has not, mark it and increment
-                   *  counter.
-                   *--------------------------------------------------------*/
- 
-                  if (P_marker[i3] < jj_row_begin_diag)
-                  {
-                     P_marker[i3] = jj_count_diag;
-                     jj_count_diag++;
-                  }
-               }
-               /*-----------------------------------------------------------
-                *  Loop over entries in row i2 of P_offd.
-                *-----------------------------------------------------------*/
-
-               if (num_cols_offd_P)
-               { 
-                 for (jj3 = P_offd_i[i2]; jj3 < P_offd_i[i2+1]; jj3++)
+                 /*--------------------------------------------------------------
+                  *  Check A_marker to see if point i2 has been previously
+                  *  visited. New entries in RAP only occur from unmarked points.
+                  *--------------------------------------------------------------*/
+    
+                 if (A_marker[i2] != ic)
                  {
-                  i3 = map_P_to_RAP[P_offd_j[jj3]] + num_cols_diag_P;
+    
+                    /*-----------------------------------------------------------
+                     *  Mark i2 as visited.
+                     *-----------------------------------------------------------*/
+    
+                    A_marker[i2] = ic;
                   
-                  /*--------------------------------------------------------
-                   *  Check P_marker to see that RAP_{ic,i3} has not already
-                   *  been accounted for. If it has not, mark it and increment
-                   *  counter.
-                   *--------------------------------------------------------*/
+                    /*-----------------------------------------------------------
+                     *  Loop over entries in row i2 of P_ext.
+                     *-----------------------------------------------------------*/
  
-                  if (P_marker[i3] < jj_row_begin_offd)
-                  {
-                     P_marker[i3] = jj_count_offd;
-                     jj_count_offd++;
-                  }
+                    for (jj3 = P_ext_diag_i[i2]; jj3 < P_ext_diag_i[i2+1]; jj3++)
+                    {
+                       i3 = P_ext_diag_j[jj3];
+                  
+                       /*--------------------------------------------------------
+                        *  Check P_marker to see that RAP_{ic,i3} has not already
+                        *  been accounted for. If it has not, mark it and increment
+                        *  counter.
+                        *--------------------------------------------------------*/
+     
+                       if (P_marker[i3] < jj_row_begin_diag)
+                       {
+                          P_marker[i3] = jj_count_diag;
+                          jj_count_diag++;
+                       }
+                    }
+                    for (jj3 = P_ext_offd_i[i2]; jj3 < P_ext_offd_i[i2+1]; jj3++)
+                    {
+                       i3 = map_Pext_to_RAP[P_ext_offd_j[jj3]]+num_cols_diag_P;
+                  
+                       /*--------------------------------------------------------
+                        *  Check P_marker to see that RAP_{ic,i3} has not already
+                        *  been accounted for. If it has not, mark it and increment
+                        *  counter.
+                        *--------------------------------------------------------*/
+     
+                       if (P_marker[i3] < jj_row_begin_offd)
+                       {
+                          P_marker[i3] = jj_count_offd;
+                          jj_count_offd++;
+                       }
+                    }
                  }
-               } 
-            }
-         }
-      }
+              }
+           }
+
+           /*-----------------------------------------------------------------
+            *  Loop over entries in row i1 of A_diag.
+            *-----------------------------------------------------------------*/
+         
+           for (jj2 = A_diag_i[i1]; jj2 < A_diag_i[i1+1]; jj2++)
+           {
+              i2 = A_diag_j[jj2];
+    
+              /*--------------------------------------------------------------
+               *  Check A_marker to see if point i2 has been previously
+               *  visited. New entries in RAP only occur from unmarked points.
+               *--------------------------------------------------------------*/
+    
+              if (A_marker[i2+num_cols_offd_A] != ic)
+              {
+   
+                 /*-----------------------------------------------------------
+                  *  Mark i2 as visited.
+                  *-----------------------------------------------------------*/
+   
+                 A_marker[i2+num_cols_offd_A] = ic;
+                 
+                 /*-----------------------------------------------------------
+                  *  Loop over entries in row i2 of P_diag.
+                  *-----------------------------------------------------------*/
+    
+                 for (jj3 = P_diag_i[i2]; jj3 < P_diag_i[i2+1]; jj3++)
+                 {
+                    i3 = P_diag_j[jj3];
+                    
+                    /*--------------------------------------------------------
+                     *  Check P_marker to see that RAP_{ic,i3} has not already
+                     *  been accounted for. If it has not, mark it and increment
+                     *  counter.
+                     *--------------------------------------------------------*/
+
+                    if (P_marker[i3] < jj_row_begin_diag)
+                    {
+                       P_marker[i3] = jj_count_diag;
+                       jj_count_diag++;
+                    }
+                 }
+
+                 /*-----------------------------------------------------------
+                  *  Loop over entries in row i2 of P_offd.
+                  *-----------------------------------------------------------*/
+
+                 if (num_cols_offd_P)
+                 { 
+                    for (jj3 = P_offd_i[i2]; jj3 < P_offd_i[i2+1]; jj3++)
+                    {
+                       i3 = map_P_to_RAP[P_offd_j[jj3]] + num_cols_diag_P;
+                 
+                       /*--------------------------------------------------------
+                        *  Check P_marker to see that RAP_{ic,i3} has not already
+                        *  been accounted for. If it has not, mark it and increment
+                        *  counter.
+                        *--------------------------------------------------------*/
+
+                       if (P_marker[i3] < jj_row_begin_offd)
+                       {
+                          P_marker[i3] = jj_count_offd;
+                          jj_count_offd++;
+                       }
+                    }
+                 } 
+              }
+           }
+        }
             
-      /*--------------------------------------------------------------------
-       * Set RAP_diag_i and RAP_offd_i for this row.
-       *--------------------------------------------------------------------*/
-/* 
-      RAP_diag_i[ic] = jj_row_begin_diag;
-      RAP_offd_i[ic] = jj_row_begin_offd;
-*/      
-    }
-    jj_cnt_diag[ii] = jj_count_diag;
-    jj_cnt_offd[ii] = jj_count_offd;
-   }
+        /*--------------------------------------------------------------------
+         * Set RAP_diag_i and RAP_offd_i for this row.
+         *--------------------------------------------------------------------*/
+     }
+     jj_cnt_diag[ii] = jj_count_diag;
+     jj_cnt_offd[ii] = jj_count_offd;
+  }
 
-   for (i=0; i < num_threads-1; i++)
-   {
-      jj_cnt_diag[i+1] += jj_cnt_diag[i];
-      jj_cnt_offd[i+1] += jj_cnt_offd[i];
-   }
+  for (i=0; i < num_threads-1; i++)
+  {
+     jj_cnt_diag[i+1] += jj_cnt_diag[i];
+     jj_cnt_offd[i+1] += jj_cnt_offd[i];
+  }
 
-   jj_count_diag = jj_cnt_diag[num_threads-1];
-   jj_count_offd = jj_cnt_offd[num_threads-1];
+  jj_count_diag = jj_cnt_diag[num_threads-1];
+  jj_count_offd = jj_cnt_offd[num_threads-1];
 
-   RAP_diag_i[num_cols_diag_P] = jj_count_diag;
-   RAP_offd_i[num_cols_diag_P] = jj_count_offd;
+  RAP_diag_i[num_cols_diag_P] = jj_count_diag;
+  RAP_offd_i[num_cols_diag_P] = jj_count_offd;
  
-   /*-----------------------------------------------------------------------
-    *  Allocate RAP_diag_data and RAP_diag_j arrays.
-    *  Allocate RAP_offd_data and RAP_offd_j arrays.
-    *-----------------------------------------------------------------------*/
+  /*-----------------------------------------------------------------------
+   *  Allocate RAP_diag_data and RAP_diag_j arrays.
+   *  Allocate RAP_offd_data and RAP_offd_j arrays.
+   *-----------------------------------------------------------------------*/
  
-   RAP_diag_size = jj_count_diag;
-   if (RAP_diag_size)
-   { 
-      RAP_diag_data = hypre_CTAlloc(double, RAP_diag_size*bnnz);
-      RAP_diag_j    = hypre_CTAlloc(int, RAP_diag_size);
-   } 
+  RAP_diag_size = jj_count_diag;
+  if (RAP_diag_size)
+  { 
+     RAP_diag_data = hypre_CTAlloc(double, RAP_diag_size*bnnz);
+     RAP_diag_j    = hypre_CTAlloc(int, RAP_diag_size);
+  } 
  
-   RAP_offd_size = jj_count_offd;
-   if (RAP_offd_size)
-   { 
-        RAP_offd_data = hypre_CTAlloc(double, RAP_offd_size*bnnz);
-        RAP_offd_j    = hypre_CTAlloc(int, RAP_offd_size);
-   } 
+  RAP_offd_size = jj_count_offd;
+  if (RAP_offd_size)
+  { 
+     RAP_offd_data = hypre_CTAlloc(double, RAP_offd_size*bnnz);
+     RAP_offd_j    = hypre_CTAlloc(int, RAP_offd_size);
+  } 
 
-   if (RAP_offd_size == 0 && num_cols_offd_RAP != 0)
-   {
-      num_cols_offd_RAP = 0;
-      hypre_TFree(col_map_offd_RAP);
-   }
-   /*-----------------------------------------------------------------------
-    *  Second Pass: Fill in RAP_diag_data and RAP_diag_j.
-    *  Second Pass: Fill in RAP_offd_data and RAP_offd_j.
-    *-----------------------------------------------------------------------*/
+  if (RAP_offd_size == 0 && num_cols_offd_RAP != 0)
+  {
+     num_cols_offd_RAP = 0;
+     hypre_TFree(col_map_offd_RAP);
+  }
+
+  /*-----------------------------------------------------------------------
+   *  Second Pass: Fill in RAP_diag_data and RAP_diag_j.
+   *  Second Pass: Fill in RAP_offd_data and RAP_offd_j.
+   *-----------------------------------------------------------------------*/
 
 #define HYPRE_SMP_PRIVATE i,j,k,jcol,ii,ic,i1,i2,i3,jj1,jj2,jj3,ns,ne,size,rest,jj_count_diag,jj_count_offd,jj_row_begin_diag,jj_row_begin_offd,A_marker,P_marker
 #include "../utilities/hypre_smp_forloop.h"
-   for (ii = 0; ii < num_threads; ii++)
-   {
+  for (ii = 0; ii < num_threads; ii++)
+  {
      size = num_cols_diag_P/num_threads;
      rest = num_cols_diag_P - size*num_threads;
      if (ii < rest)
@@ -1437,424 +1390,433 @@ hypre_ParCSRBlockMatrixRAP(hypre_ParCSRBlockMatrix  *RT,
         ne = (ii+1)*size+rest;
      }
 
-   /*-----------------------------------------------------------------------
-    *  Initialize some stuff.
-    *-----------------------------------------------------------------------*/
+     /*-----------------------------------------------------------------------
+      *  Initialize some stuff.
+      *-----------------------------------------------------------------------*/
 
-   P_marker = P_mark_array[ii];
-   A_marker = A_mark_array[ii];
-   for (ic = 0; ic < num_cols_diag_P+num_cols_offd_RAP; ic++)
-   {      
-      P_marker[ic] = -1;
-   }
-   for (i = 0; i < num_nz_cols_A ; i++)
-   {      
-      A_marker[i] = -1;
-   }   
+     P_marker = P_mark_array[ii];
+     A_marker = A_mark_array[ii];
+     for (ic = 0; ic < num_cols_diag_P+num_cols_offd_RAP; ic++)
+     {      
+        P_marker[ic] = -1;
+     }
+     for (i = 0; i < num_nz_cols_A ; i++)
+     {      
+        A_marker[i] = -1;
+     }   
    
-   jj_count_diag = start_indexing;
-   jj_count_offd = start_indexing;
-   if (ii > 0)
-   {
-      jj_count_diag = jj_cnt_diag[ii-1];
-      jj_count_offd = jj_cnt_offd[ii-1];
-   }
+     jj_count_diag = start_indexing;
+     jj_count_offd = start_indexing;
+     if (ii > 0)
+     {
+        jj_count_diag = jj_cnt_diag[ii-1];
+        jj_count_offd = jj_cnt_offd[ii-1];
+     }
 
-   /*-----------------------------------------------------------------------
-    *  Loop over interior c-points.
-    *-----------------------------------------------------------------------*/
+     /*-----------------------------------------------------------------------
+      *  Loop over interior c-points.
+      *-----------------------------------------------------------------------*/
     
-   for (ic = ns; ic < ne; ic++)
-   {
+     for (ic = ns; ic < ne; ic++)
+     {
       
-      /*--------------------------------------------------------------------
-       *  Create diagonal entry, RAP_{ic,ic} and add entries of RAP_ext 
-       *--------------------------------------------------------------------*/
+        /*--------------------------------------------------------------------
+         *  Create diagonal entry, RAP_{ic,ic} and add entries of RAP_ext 
+         *--------------------------------------------------------------------*/
 
-      P_marker[ic] = jj_count_diag;
-      jj_row_begin_diag = jj_count_diag;
-      jj_row_begin_offd = jj_count_offd;
-      RAP_diag_i[ic] = jj_row_begin_diag;
-      RAP_offd_i[ic] = jj_row_begin_offd;
-      ind = jj_count_diag * bnnz;
-      for (kk = 0; kk < bnnz; kk++)
-         RAP_diag_data[ind++] = zero;
-      RAP_diag_j[jj_count_diag] = ic;
-      jj_count_diag++;
+        P_marker[ic] = jj_count_diag;
+        jj_row_begin_diag = jj_count_diag;
+        jj_row_begin_offd = jj_count_offd;
+        RAP_diag_i[ic] = jj_row_begin_diag;
+        RAP_offd_i[ic] = jj_row_begin_offd;
+        ind = jj_count_diag * bnnz;
+        for (kk = 0; kk < bnnz; kk++)
+           RAP_diag_data[ind++] = zero;
+        RAP_diag_j[jj_count_diag] = ic;
+        jj_count_diag++;
 
-      for (i=0; i < num_sends_RT; i++)
-         for (j = send_map_starts_RT[i]; j < send_map_starts_RT[i+1]; j++)
-            if (send_map_elmts_RT[j] == ic)
-            {
-               for (k=RAP_ext_i[j]; k < RAP_ext_i[j+1]; k++)
-               {
-                  jcol = RAP_ext_j[k];
-                  if (jcol < num_cols_diag_P)
-                  {
-                     if (P_marker[jcol] < jj_row_begin_diag)
-                     {
-                        P_marker[jcol] = jj_count_diag;
-                        ind = jj_count_diag * bnnz;
-                        for (kk = 0; kk < bnnz; kk++)
-                           RAP_diag_data[ind++] = RAP_ext_data[k*bnnz+kk];
-                        RAP_diag_j[jj_count_diag] = jcol;
-                        jj_count_diag++;
-                     }
-                     else
-                     {
-                        ind = P_marker[jcol] * bnnz;
-                        for (kk = 0; kk < bnnz; kk++)
-                           RAP_diag_data[ind++] = RAP_ext_data[k*bnnz+kk];
-                     }
-                  }
-                  else
-                  {
-                     if (P_marker[jcol] < jj_row_begin_offd)
-                     {
-                        P_marker[jcol] = jj_count_offd;
-                        ind = jj_count_offd * bnnz;
-                        for (kk = 0; kk < bnnz; kk++)
-                           RAP_offd_data[ind++] = RAP_ext_data[k*bnnz+kk];
-                        RAP_offd_j[jj_count_offd] 
-                                        = jcol-num_cols_diag_P;
-                        jj_count_offd++;
-                     }
-                     else
-                     {
-                        ind = P_marker[jcol] * bnnz;
-                        for (kk = 0; kk < bnnz; kk++)
-                           RAP_offd_data[ind++] += RAP_ext_data[k*bnnz+kk];
-                     }
-                  }
-               }
-               break;
-            }
+        for (i=0; i < num_sends_RT; i++)
+           for (j = send_map_starts_RT[i]; j < send_map_starts_RT[i+1]; j++)
+              if (send_map_elmts_RT[j] == ic)
+              {
+                 for (k=RAP_ext_i[j]; k < RAP_ext_i[j+1]; k++)
+                 {
+                    jcol = RAP_ext_j[k];
+                    if (jcol < num_cols_diag_P)
+                    {
+                       if (P_marker[jcol] < jj_row_begin_diag)
+                       {
+                          P_marker[jcol] = jj_count_diag;
+                          ind = jj_count_diag * bnnz;
+                          for (kk = 0; kk < bnnz; kk++)
+                             RAP_diag_data[ind++] = RAP_ext_data[k*bnnz+kk];
+                          RAP_diag_j[jj_count_diag] = jcol;
+                          jj_count_diag++;
+                       }
+                       else
+                       {
+                          ind = P_marker[jcol] * bnnz;
+                          for (kk = 0; kk < bnnz; kk++)
+                             RAP_diag_data[ind++] += RAP_ext_data[k*bnnz+kk];
+                       }
+                    }
+                    else
+                    {
+                       if (P_marker[jcol] < jj_row_begin_offd)
+                       {
+                          P_marker[jcol] = jj_count_offd;
+                          ind = jj_count_offd * bnnz;
+                          for (kk = 0; kk < bnnz; kk++)
+                             RAP_offd_data[ind++] = RAP_ext_data[k*bnnz+kk];
+                          RAP_offd_j[jj_count_offd] 
+                                          = jcol-num_cols_diag_P;
+                          jj_count_offd++;
+                       }
+                       else
+                       {
+                          ind = P_marker[jcol] * bnnz;
+                          for (kk = 0; kk < bnnz; kk++)
+                             RAP_offd_data[ind++] += RAP_ext_data[k*bnnz+kk];
+                       }
+                    }
+                 }
+                 break;
+              }
  
-      /*--------------------------------------------------------------------
-       *  Loop over entries in row ic of R_diag.
-       *--------------------------------------------------------------------*/
+        /*--------------------------------------------------------------------
+         *  Loop over entries in row ic of R_diag.
+         *--------------------------------------------------------------------*/
 
-      for (jj1 = R_diag_i[ic]; jj1 < R_diag_i[ic+1]; jj1++)
-      {
-         i1  = R_diag_j[jj1];
-         r_entries = &(R_diag_data[jj1*bnnz]);
+        for (jj1 = R_diag_i[ic]; jj1 < R_diag_i[ic+1]; jj1++)
+        {
+           i1  = R_diag_j[jj1];
+           r_entries = &(R_diag_data[jj1*bnnz]);
 
-         /*-----------------------------------------------------------------
-          *  Loop over entries in row i1 of A_offd.
-          *-----------------------------------------------------------------*/
+           /*-----------------------------------------------------------------
+            *  Loop over entries in row i1 of A_offd.
+            *-----------------------------------------------------------------*/
          
-         if (num_cols_offd_A)
-         {
-          for (jj2 = A_offd_i[i1]; jj2 < A_offd_i[i1+1]; jj2++)
-          {
-            i2 = A_offd_j[jj2];
-            hypre_CSRBlockMatrixBlockMultAdd(r_entries, &(A_offd_data[jj2*bnnz]),
+           if (num_cols_offd_A)
+           {
+              for (jj2 = A_offd_i[i1]; jj2 < A_offd_i[i1+1]; jj2++)
+              {
+                 i2 = A_offd_j[jj2];
+                 hypre_CSRBlockMatrixBlockMultAdd(r_entries,&(A_offd_data[jj2*bnnz]),
                                  zero, r_a_products, block_size);
             
-            /*--------------------------------------------------------------
-             *  Check A_marker to see if point i2 has been previously
-             *  visited. New entries in RAP only occur from unmarked points.
-             *--------------------------------------------------------------*/
+                 /*--------------------------------------------------------------
+                  *  Check A_marker to see if point i2 has been previously
+                  *  visited. New entries in RAP only occur from unmarked points.
+                  *--------------------------------------------------------------*/
 
-            if (A_marker[i2] != ic)
-            {
+                 if (A_marker[i2] != ic)
+                 {
 
-               /*-----------------------------------------------------------
-                *  Mark i2 as visited.
-                *-----------------------------------------------------------*/
+                    /*-----------------------------------------------------------
+                     *  Mark i2 as visited.
+                     *-----------------------------------------------------------*/
 
-               A_marker[i2] = ic;
+                    A_marker[i2] = ic;
                
-               /*-----------------------------------------------------------
-                *  Loop over entries in row i2 of P_ext.
-                *-----------------------------------------------------------*/
+                    /*-----------------------------------------------------------
+                     *  Loop over entries in row i2 of P_ext.
+                     *-----------------------------------------------------------*/
 
-               for (jj3 = P_ext_diag_i[i2]; jj3 < P_ext_diag_i[i2+1]; jj3++)
-               {
-                  i3 = P_ext_diag_j[jj3];
-                  hypre_CSRBlockMatrixBlockMultAdd(r_a_products, &(P_ext_diag_data[jj3*bnnz]),
+                    for (jj3 = P_ext_diag_i[i2]; jj3 < P_ext_diag_i[i2+1]; jj3++)
+                    {
+                       i3 = P_ext_diag_j[jj3];
+                       hypre_CSRBlockMatrixBlockMultAdd(r_a_products, 
+                              &(P_ext_diag_data[jj3*bnnz]), zero, 
+                              r_a_p_products, block_size);
+                  
+                       /*--------------------------------------------------------
+                        *  Check P_marker to see that RAP_{ic,i3} has not already
+                        *  been accounted for. If it has not, create a new entry.
+                        *  If it has, add new contribution.
+                        *--------------------------------------------------------*/
+                       if (P_marker[i3] < jj_row_begin_diag)
+                       {
+                          P_marker[i3] = jj_count_diag;
+                          ind = jj_count_diag * bnnz;
+                          for (kk = 0; kk < bnnz; kk++)
+                             RAP_diag_data[ind++] = r_a_p_products[kk];
+                          RAP_diag_j[jj_count_diag] = i3;
+                          jj_count_diag++;
+                       }
+                       else
+                       {
+                          ind = P_marker[i3] * bnnz;
+                          for (kk = 0; kk < bnnz; kk++)
+                             RAP_diag_data[ind++] += r_a_p_products[kk];
+                       }
+                    }
+                    for (jj3 = P_ext_offd_i[i2]; jj3 < P_ext_offd_i[i2+1]; jj3++)
+                    {
+                       i3 = map_Pext_to_RAP[P_ext_offd_j[jj3]] + num_cols_diag_P;
+                       hypre_CSRBlockMatrixBlockMultAdd(r_a_products, 
+                                     &(P_ext_offd_data[jj3*bnnz]),
+                                     zero, r_a_p_products, block_size);
+                  
+                       /*--------------------------------------------------------
+                        *  Check P_marker to see that RAP_{ic,i3} has not already
+                        *  been accounted for. If it has not, create a new entry.
+                        *  If it has, add new contribution.
+                        *--------------------------------------------------------*/
+                       if (P_marker[i3] < jj_row_begin_offd)
+                       {
+                          P_marker[i3] = jj_count_offd;
+                          ind = jj_count_offd * bnnz;
+                          for (kk = 0; kk < bnnz; kk++)
+                             RAP_offd_data[ind++] = r_a_p_products[kk];
+                          RAP_offd_j[jj_count_offd] = i3 - num_cols_diag_P;
+                          jj_count_offd++;
+                       }
+                       else
+                       {
+                          ind = P_marker[i3] * bnnz;
+                          for (kk = 0; kk < bnnz; kk++)
+                             RAP_offd_data[ind++] += r_a_p_products[kk];
+                       }
+                    }
+                 }
+
+                 /*--------------------------------------------------------------
+                  *  If i2 is previously visited ( A_marker[12]=ic ) it yields
+                  *  no new entries in RAP and can just add new contributions.
+                  *--------------------------------------------------------------*/
+                 else
+                 {
+                    for (jj3 = P_ext_diag_i[i2]; jj3 < P_ext_diag_i[i2+1]; jj3++)
+                    {
+                       i3 = P_ext_diag_j[jj3];
+                       hypre_CSRBlockMatrixBlockMultAdd(r_a_products, 
+                                 &(P_ext_diag_data[jj3*bnnz]), zero, 
+                                 r_a_p_products, block_size);
+                       ind = P_marker[i3] * bnnz;
+                       for (kk = 0; kk < bnnz; kk++)
+                          RAP_diag_data[ind++] += r_a_p_products[kk];
+                    }
+                    for (jj3 = P_ext_offd_i[i2]; jj3 < P_ext_offd_i[i2+1]; jj3++)
+                    {
+                       i3 = map_Pext_to_RAP[P_ext_offd_j[jj3]] + num_cols_diag_P;
+                       hypre_CSRBlockMatrixBlockMultAdd(r_a_products, 
+                                      &(P_ext_offd_data[jj3*bnnz]),
+                                      zero, r_a_p_products, block_size);
+                       ind = P_marker[i3] * bnnz;
+                       for (kk = 0; kk < bnnz; kk++)
+                          RAP_offd_data[ind++] += r_a_p_products[kk];
+                    }
+                 }
+              }
+           }
+
+           /*-----------------------------------------------------------------
+            *  Loop over entries in row i1 of A_diag.
+            *-----------------------------------------------------------------*/
+         
+           for (jj2 = A_diag_i[i1]; jj2 < A_diag_i[i1+1]; jj2++)
+           {
+              i2 = A_diag_j[jj2];
+              hypre_CSRBlockMatrixBlockMultAdd(r_entries, 
+                               &(A_diag_data[jj2*bnnz]),
+                               zero, r_a_products, block_size);
+              
+              /*--------------------------------------------------------------
+               *  Check A_marker to see if point i2 has been previously
+               *  visited. New entries in RAP only occur from unmarked points.
+               *--------------------------------------------------------------*/
+
+              if (A_marker[i2+num_cols_offd_A] != ic)
+              {
+
+                 /*-----------------------------------------------------------
+                  *  Mark i2 as visited.
+                  *-----------------------------------------------------------*/
+
+                 A_marker[i2+num_cols_offd_A] = ic;
+                 
+                 /*-----------------------------------------------------------
+                  *  Loop over entries in row i2 of P_diag.
+                  *-----------------------------------------------------------*/
+  
+                 for (jj3 = P_diag_i[i2]; jj3 < P_diag_i[i2+1]; jj3++)
+                 {
+                    i3 = P_diag_j[jj3];
+                    hypre_CSRBlockMatrixBlockMultAdd(r_a_products, 
+                                   &(P_diag_data[jj3*bnnz]),
+                                   zero, r_a_p_products, block_size);
+                  
+                    /*--------------------------------------------------------
+                     *  Check P_marker to see that RAP_{ic,i3} has not already
+                     *  been accounted for. If it has not, create a new entry.
+                     *  If it has, add new contribution.
+                     *--------------------------------------------------------*/
+  
+                    if (P_marker[i3] < jj_row_begin_diag)
+                    {
+                       P_marker[i3] = jj_count_diag;
+                       ind = jj_count_diag * bnnz;
+                       for (kk = 0; kk < bnnz; kk++)
+                          RAP_diag_data[ind++] = r_a_p_products[kk];
+                       RAP_diag_j[jj_count_diag] = P_diag_j[jj3];
+                       jj_count_diag++;
+                    }
+                    else
+                    {
+                       ind = P_marker[i3] * bnnz;
+                       for (kk = 0; kk < bnnz; kk++)
+                          RAP_diag_data[ind++] += r_a_p_products[kk];
+                    }
+                 }
+                 if (num_cols_offd_P)
+                 {
+                    for (jj3 = P_offd_i[i2]; jj3 < P_offd_i[i2+1]; jj3++)
+                    {
+                      i3 = map_P_to_RAP[P_offd_j[jj3]] + num_cols_diag_P;
+                      hypre_CSRBlockMatrixBlockMultAdd(r_a_products, 
+                                 &(P_offd_data[jj3*bnnz]),
                                  zero, r_a_p_products, block_size);
                   
-                  /*--------------------------------------------------------
-                   *  Check P_marker to see that RAP_{ic,i3} has not already
-                   *  been accounted for. If it has not, create a new entry.
-                   *  If it has, add new contribution.
-                   *--------------------------------------------------------*/
-                  if (P_marker[i3] < jj_row_begin_diag)
-                  {
-                     P_marker[i3] = jj_count_diag;
-                     ind = jj_count_diag * bnnz;
-                     for (kk = 0; kk < bnnz; kk++)
-                        RAP_diag_data[ind++] = r_a_p_products[kk];
-                     RAP_diag_j[jj_count_diag] = i3;
-                     jj_count_diag++;
-                  }
-                  else
-                  {
-                     ind = P_marker[i3] * bnnz;
-                     for (kk = 0; kk < bnnz; kk++)
-                        RAP_diag_data[ind++] += r_a_p_products[kk];
-                  }
-               }
-               for (jj3 = P_ext_offd_i[i2]; jj3 < P_ext_offd_i[i2+1]; jj3++)
-               {
-                  i3 = map_Pext_to_RAP[P_ext_offd_j[jj3]] + num_cols_diag_P;
-                  hypre_CSRBlockMatrixBlockMultAdd(r_a_products, &(P_ext_offd_data[jj3*bnnz]),
-                                 zero, r_a_p_products, block_size);
-                  
-                  /*--------------------------------------------------------
-                   *  Check P_marker to see that RAP_{ic,i3} has not already
-                   *  been accounted for. If it has not, create a new entry.
-                   *  If it has, add new contribution.
-                   *--------------------------------------------------------*/
-                  if (P_marker[i3] < jj_row_begin_offd)
-                  {
-                     P_marker[i3] = jj_count_offd;
-                     ind = jj_count_offd * bnnz;
-                     for (kk = 0; kk < bnnz; kk++)
-                        RAP_offd_data[ind++] = r_a_p_products[kk];
-                     RAP_offd_j[jj_count_offd] = i3 - num_cols_diag_P;
-                     jj_count_offd++;
-                  }
-                  else
-                  {
-                     ind = P_marker[i3] * bnnz;
-                     for (kk = 0; kk < bnnz; kk++)
-                        RAP_offd_data[ind++] += r_a_p_products[kk];
-                  }
-               }
-            }
+                      /*--------------------------------------------------------
+                       *  Check P_marker to see that RAP_{ic,i3} has not already
+                       *  been accounted for. If it has not, create a new entry.
+                       *  If it has, add new contribution.
+                       *--------------------------------------------------------*/
 
-            /*--------------------------------------------------------------
-             *  If i2 is previously visited ( A_marker[12]=ic ) it yields
-             *  no new entries in RAP and can just add new contributions.
-             *--------------------------------------------------------------*/
-            else
-            {
-               for (jj3 = P_ext_diag_i[i2]; jj3 < P_ext_diag_i[i2+1]; jj3++)
-               {
-                  i3 = P_ext_diag_j[jj3];
-                  hypre_CSRBlockMatrixBlockMultAdd(r_a_products, &(P_ext_diag_data[jj3*bnnz]),
+                      if (P_marker[i3] < jj_row_begin_offd)
+                      {
+                         P_marker[i3] = jj_count_offd;
+                         ind = jj_count_offd * bnnz;
+                         for (kk = 0; kk < bnnz; kk++)
+                            RAP_offd_data[ind++] = r_a_p_products[kk];
+                         RAP_offd_j[jj_count_offd] = i3 - num_cols_diag_P;
+                         jj_count_offd++;
+                      }
+                      else
+                      {
+                         ind = P_marker[i3] * bnnz;
+                         for (kk = 0; kk < bnnz; kk++)
+                            RAP_offd_data[ind++] += r_a_p_products[kk];
+                      }
+                   }
+                }
+             }
+
+             /*--------------------------------------------------------------
+              *  If i2 is previously visited ( A_marker[12]=ic ) it yields
+              *  no new entries in RAP and can just add new contributions.
+              *--------------------------------------------------------------*/
+
+             else
+             {
+                for (jj3 = P_diag_i[i2]; jj3 < P_diag_i[i2+1]; jj3++)
+                {
+                   i3 = P_diag_j[jj3];
+                   hypre_CSRBlockMatrixBlockMultAdd(r_a_products, 
+                                  &(P_diag_data[jj3*bnnz]),
+                                  zero, r_a_p_products, block_size);
+                   ind = P_marker[i3] * bnnz;
+                   for (kk = 0; kk < bnnz; kk++)
+                      RAP_diag_data[ind++] += r_a_p_products[kk];
+                }
+                if (num_cols_offd_P)
+                {
+                   for (jj3 = P_offd_i[i2]; jj3 < P_offd_i[i2+1]; jj3++)
+                   {
+                      i3 = map_P_to_RAP[P_offd_j[jj3]] + num_cols_diag_P;
+                      hypre_CSRBlockMatrixBlockMultAdd(r_a_products, 
+                                 &(P_offd_data[jj3*bnnz]),
                                  zero, r_a_p_products, block_size);
-                  ind = P_marker[i3] * bnnz;
-                  for (kk = 0; kk < bnnz; kk++)
-                     RAP_diag_data[ind++] += r_a_p_products[kk];
-               }
-               for (jj3 = P_ext_offd_i[i2]; jj3 < P_ext_offd_i[i2+1]; jj3++)
-               {
-                  i3 = map_Pext_to_RAP[P_ext_offd_j[jj3]] + num_cols_diag_P;
-                  hypre_CSRBlockMatrixBlockMultAdd(r_a_products, &(P_ext_offd_data[jj3*bnnz]),
-                                 zero, r_a_p_products, block_size);
-                  ind = P_marker[i3] * bnnz;
-                  for (kk = 0; kk < bnnz; kk++)
-                     RAP_offd_data[ind++] += r_a_p_products[kk];
-               }
-            }
+                      ind = P_marker[i3] * bnnz;
+                      for (kk = 0; kk < bnnz; kk++)
+                         RAP_offd_data[ind++] += r_a_p_products[kk];
+                   }
+                }
+             }
           }
-         }
+       }
+    }
+    hypre_TFree(P_mark_array[ii]);   
+    hypre_TFree(A_mark_array[ii]);   
+  }
 
-         /*-----------------------------------------------------------------
-          *  Loop over entries in row i1 of A_diag.
-          *-----------------------------------------------------------------*/
-         
-         for (jj2 = A_diag_i[i1]; jj2 < A_diag_i[i1+1]; jj2++)
-         {
-            i2 = A_diag_j[jj2];
-            hypre_CSRBlockMatrixBlockMultAdd(r_entries, &(A_diag_data[jj2*bnnz]),
-                                 zero, r_a_products, block_size);
-            
-            /*--------------------------------------------------------------
-             *  Check A_marker to see if point i2 has been previously
-             *  visited. New entries in RAP only occur from unmarked points.
-             *--------------------------------------------------------------*/
-
-            if (A_marker[i2+num_cols_offd_A] != ic)
-            {
-
-               /*-----------------------------------------------------------
-                *  Mark i2 as visited.
-                *-----------------------------------------------------------*/
-
-               A_marker[i2+num_cols_offd_A] = ic;
-               
-               /*-----------------------------------------------------------
-                *  Loop over entries in row i2 of P_diag.
-                *-----------------------------------------------------------*/
-
-               for (jj3 = P_diag_i[i2]; jj3 < P_diag_i[i2+1]; jj3++)
-               {
-                  i3 = P_diag_j[jj3];
-                  hypre_CSRBlockMatrixBlockMultAdd(r_a_products, &(P_diag_data[jj3*bnnz]),
-                                 zero, r_a_p_products, block_size);
-                  
-                  /*--------------------------------------------------------
-                   *  Check P_marker to see that RAP_{ic,i3} has not already
-                   *  been accounted for. If it has not, create a new entry.
-                   *  If it has, add new contribution.
-                   *--------------------------------------------------------*/
-
-                  if (P_marker[i3] < jj_row_begin_diag)
-                  {
-                     P_marker[i3] = jj_count_diag;
-                     ind = jj_count_diag * bnnz;
-                     for (kk = 0; kk < bnnz; kk++)
-                        RAP_diag_data[ind++] = r_a_p_products[kk];
-                     RAP_diag_j[jj_count_diag] = P_diag_j[jj3];
-                     jj_count_diag++;
-                  }
-                  else
-                  {
-                     ind = P_marker[i3] * bnnz;
-                     for (kk = 0; kk < bnnz; kk++)
-                        RAP_diag_data[ind++] += r_a_p_products[kk];
-                  }
-               }
-               if (num_cols_offd_P)
-               {
-                for (jj3 = P_offd_i[i2]; jj3 < P_offd_i[i2+1]; jj3++)
-                {
-                  i3 = map_P_to_RAP[P_offd_j[jj3]] + num_cols_diag_P;
-                  hypre_CSRBlockMatrixBlockMultAdd(r_a_products, &(P_offd_data[jj3*bnnz]),
-                                 zero, r_a_p_products, block_size);
-                  
-                  /*--------------------------------------------------------
-                   *  Check P_marker to see that RAP_{ic,i3} has not already
-                   *  been accounted for. If it has not, create a new entry.
-                   *  If it has, add new contribution.
-                   *--------------------------------------------------------*/
-
-                  if (P_marker[i3] < jj_row_begin_offd)
-                  {
-                     P_marker[i3] = jj_count_offd;
-                     ind = jj_count_offd * bnnz;
-                     for (kk = 0; kk < bnnz; kk++)
-                        RAP_offd_data[ind++] = r_a_p_products[kk];
-                     RAP_offd_j[jj_count_offd] = i3 - num_cols_diag_P;
-                     jj_count_offd++;
-                  }
-                  else
-                  {
-                     ind = P_marker[i3] * bnnz;
-                     for (kk = 0; kk < bnnz; kk++)
-                        RAP_offd_data[ind++] = r_a_p_products[kk];
-                  }
-                }
-               }
-            }
-
-            /*--------------------------------------------------------------
-             *  If i2 is previously visited ( A_marker[12]=ic ) it yields
-             *  no new entries in RAP and can just add new contributions.
-             *--------------------------------------------------------------*/
-
-            else
-            {
-               for (jj3 = P_diag_i[i2]; jj3 < P_diag_i[i2+1]; jj3++)
-               {
-                  i3 = P_diag_j[jj3];
-                  hypre_CSRBlockMatrixBlockMultAdd(r_a_products, &(P_diag_data[jj3*bnnz]),
-                                 zero, r_a_p_products, block_size);
-                  ind = P_marker[i3] * bnnz;
-                  for (kk = 0; kk < bnnz; kk++)
-                     RAP_diag_data[ind++] += r_a_p_products[kk];
-               }
-               if (num_cols_offd_P)
-               {
-                for (jj3 = P_offd_i[i2]; jj3 < P_offd_i[i2+1]; jj3++)
-                {
-                  i3 = map_P_to_RAP[P_offd_j[jj3]] + num_cols_diag_P;
-                  hypre_CSRBlockMatrixBlockMultAdd(r_a_products, &(P_offd_data[jj3*bnnz]),
-                                 zero, r_a_p_products, block_size);
-                  ind = P_marker[i3] * bnnz;
-                  for (kk = 0; kk < bnnz; kk++)
-                     RAP_offd_data[ind++] += r_a_p_products[kk];
-                }
-               }
-            }
-         }
-      }
-   }
-      hypre_TFree(P_mark_array[ii]);   
-      hypre_TFree(A_mark_array[ii]);   
-   }
-
-   RAP = hypre_ParCSRBlockMatrixCreate(comm, block_size, n_coarse, n_coarse, 
-        coarse_partitioning, coarse_partitioning,
-        num_cols_offd_RAP, RAP_diag_size, RAP_offd_size);
+  RAP = hypre_ParCSRBlockMatrixCreate(comm, block_size, n_coarse, n_coarse, 
+                               coarse_partitioning, coarse_partitioning,
+                               num_cols_offd_RAP, RAP_diag_size, RAP_offd_size);
 
 /* Have RAP own coarse_partitioning instead of P */
-   hypre_ParCSRBlockMatrixSetColStartsOwner(P,0);
+  hypre_ParCSRBlockMatrixSetColStartsOwner(P,0);
 
-   RAP_diag = hypre_ParCSRBlockMatrixDiag(RAP);
-   hypre_CSRBlockMatrixI(RAP_diag) = RAP_diag_i; 
-   if (RAP_diag_size)
-   {
-      hypre_CSRBlockMatrixData(RAP_diag) = RAP_diag_data; 
-      hypre_CSRBlockMatrixJ(RAP_diag) = RAP_diag_j; 
-   }
+  RAP_diag = hypre_ParCSRBlockMatrixDiag(RAP);
+  hypre_CSRBlockMatrixI(RAP_diag) = RAP_diag_i; 
+  if (RAP_diag_size)
+  {
+     hypre_CSRBlockMatrixData(RAP_diag) = RAP_diag_data; 
+     hypre_CSRBlockMatrixJ(RAP_diag) = RAP_diag_j; 
+  }
 
-   RAP_offd = hypre_ParCSRBlockMatrixOffd(RAP);
-   hypre_CSRBlockMatrixI(RAP_offd) = RAP_offd_i; 
-   if (num_cols_offd_RAP)
-   {
-        hypre_CSRBlockMatrixData(RAP_offd) = RAP_offd_data; 
-        hypre_CSRBlockMatrixJ(RAP_offd) = RAP_offd_j; 
-        hypre_ParCSRBlockMatrixColMapOffd(RAP) = col_map_offd_RAP;
-   }
-   if (num_procs > 1)
-   {
+  RAP_offd = hypre_ParCSRBlockMatrixOffd(RAP);
+  hypre_CSRBlockMatrixI(RAP_offd) = RAP_offd_i; 
+  if (num_cols_offd_RAP)
+  {
+     hypre_CSRBlockMatrixData(RAP_offd) = RAP_offd_data; 
+     hypre_CSRBlockMatrixJ(RAP_offd) = RAP_offd_j; 
+     hypre_ParCSRBlockMatrixColMapOffd(RAP) = col_map_offd_RAP;
+  }
+  if (num_procs > 1)
+  {
         /* hypre_GenerateRAPCommPkg(RAP, A); */
-        hypre_BlockMatvecCommPkgCreate(RAP); 
-   }
+     hypre_BlockMatvecCommPkgCreate(RAP); 
+  }
 
-   *RAP_ptr = RAP;
+  *RAP_ptr = RAP;
 
    /*-----------------------------------------------------------------------
     *  Free R, P_ext and marker arrays.
     *-----------------------------------------------------------------------*/
 
-   hypre_CSRBlockMatrixDestroy(R_diag);
-   R_diag = NULL;
+  hypre_CSRBlockMatrixDestroy(R_diag);
+  R_diag = NULL;
 
-   if (num_cols_offd_RT) 
-   {
-      hypre_CSRBlockMatrixDestroy(R_offd);
-      R_offd = NULL;
-   }
+  if (num_cols_offd_RT) 
+  {
+     hypre_CSRBlockMatrixDestroy(R_offd);
+     R_offd = NULL;
+  }
 
-   if (num_sends_RT || num_recvs_RT) 
-   {
-      hypre_CSRBlockMatrixDestroy(RAP_ext);
-      RAP_ext = NULL;
-   }
-   hypre_TFree(P_mark_array);   
-   hypre_TFree(A_mark_array);
-   hypre_TFree(P_ext_diag_i);
-   hypre_TFree(P_ext_offd_i);
-   hypre_TFree(jj_cnt_diag);   
-   hypre_TFree(jj_cnt_offd);   
-   if (num_cols_offd_P)
-   {
-      hypre_TFree(map_P_to_Pext);
-      hypre_TFree(map_P_to_RAP);
-   }
-   if (num_cols_offd_Pext)
-   {
-      hypre_TFree(col_map_offd_Pext);
-      hypre_TFree(map_Pext_to_RAP);
-   }
-   if (P_ext_diag_size)
-   {
-      hypre_TFree(P_ext_diag_data);
-      hypre_TFree(P_ext_diag_j);
-   }
-   if (P_ext_offd_size)
-   {
-      hypre_TFree(P_ext_offd_data);
-      hypre_TFree(P_ext_offd_j);
-   }
-   free(r_a_products);
-   free(r_a_p_products);
-   return(0);
+  if (num_sends_RT || num_recvs_RT) 
+  {
+     hypre_CSRBlockMatrixDestroy(RAP_ext);
+     RAP_ext = NULL;
+  }
+  hypre_TFree(P_mark_array);   
+  hypre_TFree(A_mark_array);
+  hypre_TFree(P_ext_diag_i);
+  hypre_TFree(P_ext_offd_i);
+  hypre_TFree(jj_cnt_diag);   
+  hypre_TFree(jj_cnt_offd);   
+  if (num_cols_offd_P)
+  {
+     hypre_TFree(map_P_to_Pext);
+     hypre_TFree(map_P_to_RAP);
+  }
+  if (num_cols_offd_Pext)
+  {
+     hypre_TFree(col_map_offd_Pext);
+     hypre_TFree(map_Pext_to_RAP);
+  }
+  if (P_ext_diag_size)
+  {
+     hypre_TFree(P_ext_diag_data);
+     hypre_TFree(P_ext_diag_j);
+  }
+  if (P_ext_offd_size)
+  {
+     hypre_TFree(P_ext_offd_data);
+     hypre_TFree(P_ext_offd_j);
+  }
+  free(r_a_products);
+  free(r_a_p_products);
+  return(0);
 }
 
