@@ -288,7 +288,8 @@ hypre_ParVectorCloneShallow( hypre_ParVector *x )
    hypre_ParVector * y = hypre_ParVectorCreate(
       hypre_ParVectorComm(x), hypre_ParVectorGlobalSize(x), hypre_ParVectorPartitioning(x) );
 
-   hypre_ParVectorOwnsData(y) = 0;
+   hypre_ParVectorOwnsData(y) = 1;
+   /* ...This vector owns its local vector, although the local vector doesn't own _its_ data */
    hypre_ParVectorOwnsPartitioning(y) = 0;
    hypre_SeqVectorDestroy( hypre_ParVectorLocalVector(y) );
    hypre_ParVectorLocalVector(y) = hypre_SeqVectorCloneShallow(
