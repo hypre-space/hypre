@@ -1810,7 +1810,6 @@ main( int   argc,
       /* GridAddVariabes */
 
       /* GridSet_NeighborBox */
-      b_index_map= sidl_int__array_create1d( data.ndim );
       for (box = 0; box < pdata.glue_nboxes; box++)
       {
          b_lower = sidl_int__array_borrow( pdata.glue_ilowers[box], 1, &zero,
@@ -1870,7 +1869,6 @@ main( int   argc,
 
    b_graph = bHYPRE_SStructGraph__create();
    bHYPRE_SStructGraph_SetCommGrid( b_graph, (void *) MPI_COMM_WORLD, b_grid );
-
    bHYPRE_SStructGraph_SetObjectType( b_graph, matvec_type );
 
    for (part = 0; part < data.nparts; part++)
@@ -2739,6 +2737,9 @@ main( int   argc,
       bHYPRE_GMRES_SetPrintLevel( b_solver_GMRES, 1 );
       bHYPRE_GMRES_SetLogging( b_solver_GMRES, 1 );
 
+      b_A_O = bHYPRE_Operator__cast( b_pA );
+      ierr += bHYPRE_GMRES_SetOperator( b_solver_GMRES, b_A_O );
+
       if (solver_id == 40)
       {
          /* use BoomerAMG as preconditioner */
@@ -2752,6 +2753,12 @@ main( int   argc,
          bHYPRE_BoomerAMG_SetStringParameter( b_boomeramg,
                                               "PrintFileName", "sstruct.out.log");
          bHYPRE_BoomerAMG_SetMaxIterations( b_boomeramg, 1 );
+         ierr += bHYPRE_BoomerAMG_SetOperator( b_boomeramg, b_A_O );
+         /* ... Note regarding the translation from HYPRE to babel (bHYPRE) interface:
+            Although HYPRE_*Setup* does (among other things) the same job as SetOperator,
+            HYPRE_*Setup* of GMRES calls the preconditioner's Setup, but SetOperator
+            does not  */
+
          b_precond = (bHYPRE_Solver) bHYPRE_BoomerAMG__cast2
             ( b_boomeramg, "bHYPRE.Solver" ); 
          bHYPRE_GMRES_SetPreconditioner( b_solver_GMRES, b_precond );
@@ -2782,11 +2789,8 @@ main( int   argc,
       }
 #endif
 
-      b_A_O = bHYPRE_Operator__cast( b_pA );
-      ierr += bHYPRE_GMRES_SetOperator( b_solver_GMRES, b_A_O );
       bV_b = bHYPRE_Vector__cast( b_pb );
       bV_x = bHYPRE_Vector__cast( b_px );
-
       ierr += bHYPRE_GMRES_Setup( b_solver_GMRES, bV_b, bV_x );
 
       hypre_EndTiming(time_index);
@@ -2807,8 +2811,6 @@ main( int   argc,
       ierr += bHYPRE_GMRES_GetNumIterations( b_solver_GMRES, &num_iterations );
       ierr += bHYPRE_GMRES_GetRelResidualNorm( b_solver_GMRES, &final_res_norm );
 
-      bHYPRE_GMRES_deleteRef( b_solver_GMRES );
-
       if (solver_id == 40)
       {
          bHYPRE_BoomerAMG_deleteRef( b_boomeramg );
@@ -2823,6 +2825,8 @@ main( int   argc,
          HYPRE_ParCSRParaSailsDestroy(par_precond);
       }
 #endif
+
+      bHYPRE_GMRES_deleteRef( b_solver_GMRES );
    }
 
    /*-----------------------------------------------------------
@@ -3761,18 +3765,30 @@ main( int   argc,
     * Finalize things
     *-----------------------------------------------------------*/
 
-#if DO_THIS_LATER
-   HYPRE_SStructGridDestroy(grid);
+   bHYPRE_SStructGraph_deleteRef( b_graph );
+   bHYPRE_SStructGrid_deleteRef( b_grid );
    for (s = 0; s < data.nstencils; s++)
+      bHYPRE_SStructStencil_deleteRef( b_stencils[s] );
+   hypre_TFree( b_stencils );
+
+   if ( matvec_type == HYPRE_PARCSR )
    {
-      HYPRE_SStructStencilDestroy(stencils[s]);
+      bHYPRE_IJParCSRMatrix_deleteRef( b_pA );
+      bHYPRE_IJParCSRVector_deleteRef( b_pb );
+      bHYPRE_IJParCSRVector_deleteRef( b_px );
+      bHYPRE_SStructParCSRMatrix_deleteRef(  b_spA);
+      bHYPRE_SStructParCSRVector_deleteRef(  b_spb);
+      bHYPRE_SStructParCSRVector_deleteRef(  b_spx);
    }
-   hypre_TFree(stencils);
-   HYPRE_SStructGraphDestroy(graph);
-   HYPRE_SStructMatrixDestroy(A);
-   HYPRE_SStructVectorDestroy(b);
-   HYPRE_SStructVectorDestroy(x);
-#endif
+   else if ( matvec_type = HYPRE_STRUCT )
+   {
+      bHYPRE_SStructMatrix_deleteRef( b_A );
+      bHYPRE_SStructVector_deleteRef( b_b );
+      bHYPRE_SStructVector_deleteRef( b_x );
+      bHYPRE_StructMatrix_deleteRef( b_sA );
+      bHYPRE_StructVector_deleteRef( b_sb );
+      bHYPRE_StructVector_deleteRef( b_sx );
+   }
 
    DestroyData(data);
 
