@@ -67,6 +67,7 @@ BABELLIBFLAGS =\
  -lbHYPRE\
  -lbHYPREClient-C\
  -lbHYPREClient-F\
+ -lbHYPRE\
  -lsidl
 
 ###########################################
