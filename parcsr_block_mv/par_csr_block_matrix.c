@@ -109,8 +109,6 @@ hypre_ParCSRBlockMatrixDestroy( hypre_ParCSRBlockMatrix *matrix )
 	  hypre_TFree(hypre_ParCSRBlockMatrixColMapOffd(matrix));
 	if (hypre_ParCSRBlockMatrixCommPkg(matrix))
 	  hypre_MatvecCommPkgDestroy(hypre_ParCSRBlockMatrixCommPkg(matrix));
-	if (hypre_ParCSRBlockMatrixCommPkg(matrix))
-	  hypre_MatvecCommPkgDestroy(hypre_ParCSRBlockMatrixCommPkg(matrix));
 	if (hypre_ParCSRBlockMatrixCommPkgT(matrix))
 	  hypre_MatvecCommPkgDestroy(hypre_ParCSRBlockMatrixCommPkgT(matrix));
       }
@@ -585,15 +583,6 @@ hypre_ParCSRBlockMatrixExtractBExt(hypre_ParCSRBlockMatrix *B,
 
    if (data)
    {
-/*
-      for(i = 0; i < num_recvs; i++) 
-         jdata_recv_vec_starts[i] = jdata_recv_vec_starts[i]*bnnz;
-      hypre_ParCSRCommPkgRecvVecStarts(tmp_comm_pkg) = jdata_recv_vec_starts;
-      for(i = 0; i < num_sends; i++)
-         jdata_send_map_starts[i] = jdata_send_map_starts[i]*bnnz;
-      hypre_ParCSRCommPkgSendMapStarts(tmp_comm_pkg) = jdata_send_map_starts; 
-*/
-
       comm_handle = hypre_ParCSRBlockCommHandleCreate(bnnz,tmp_comm_pkg,
                                      B_int_data, B_ext_data);
       hypre_ParCSRBlockCommHandleDestroy(comm_handle);

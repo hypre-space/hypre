@@ -294,8 +294,8 @@ hypre_CSRBlockMatrixBlockAdd(double* i1, double* i2, double* o, int block_size)
 {
    int i, j;
 
-   for(i = 0; i < block_size; i++)
-      for(j = 0; j < block_size; j++)
+   for (i = 0; i < block_size; i++)
+      for (j = 0; j < block_size; j++)
          o[i*block_size+j] = i1[i*block_size+j] + i2[i*block_size+j];
    return 0;
 }
@@ -451,7 +451,7 @@ int hypre_CSRBlockMatrixTranspose(hypre_CSRBlockMatrix *A,
             for (k = 0; k < block_size; k++)
                for (m = 0; m < block_size; m++)
                   AT_data[offset+k*block_size+m] = 
-                       A_data[j*block_size+m*block_size+k];
+                       A_data[j*bnnz+m*block_size+k];
          }
          AT_i[A_j[j]]++;
       }
