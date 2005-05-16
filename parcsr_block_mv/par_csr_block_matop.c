@@ -705,30 +705,8 @@ void hypre_ParCSRMatrixExtractBExt_Arrays
   double * diag_data, double * offd_data
   )
 {
-/* begin generic part.
- inputs:
-    int data, find_row_map
-    MPI_Comm comm
-    hypre_ParCSRCommPkg *comm_pkg
-    int num_cols_B, num_rows_B_ext, num_recvs, num_sends
-    int first_col_diag,
-    int* recv_vec_starts, send_map_starts, send_map_elmts
-    int* diag_i, diag_j, offd_i, offd_j, diag_i, col_map_offd
- inputs if data!=0:
-    double* diag_data, offd_data
- outputs:
-    int num_nonzeros
-    int* B_ext_i, B_ext_j
- outputs if data!=0:
-    double* B_ext_data;
- inputs if find_row_map!=0: first_row_index
- outputs if find_row_map!=0:
-    int* B_ext_row_map  (B_ext_row_map[i] is global row no. of row i of B_ext)
-*/
-
    hypre_ParCSRCommHandle *comm_handle;
    hypre_ParCSRCommPkg *tmp_comm_pkg;
-
    int *B_int_i;
    int *B_int_j;
    int *B_ext_i;
@@ -737,12 +715,7 @@ void hypre_ParCSRMatrixExtractBExt_Arrays
    double * B_int_data;
    int * B_int_row_map;
    int * B_ext_row_map;
-
    int num_procs, my_id;
-
-/*   MPI_Datatype *recv_matrix_types;
-   MPI_Datatype *send_matrix_types; */
-
    int *jdata_recv_vec_starts;
    int *jdata_send_map_starts;
  
@@ -771,9 +744,7 @@ void hypre_ParCSRMatrixExtractBExt_Arrays
       B_ext_row_map = hypre_CTAlloc( int, num_rows_B_ext+1 );
       *pB_ext_row_map = B_ext_row_map;
    };
-/*   send_matrix_types = hypre_CTAlloc(MPI_Datatype, num_sends);
-   recv_matrix_types = hypre_CTAlloc(MPI_Datatype, num_recvs);
-*/  
+
 /*--------------------------------------------------------------------------
  * generate B_int_i through adding number of row-elements of offd and diag
  * for corresponding rows. B_int_i[j+1] contains the number of elements of
@@ -785,19 +756,19 @@ void hypre_ParCSRMatrixExtractBExt_Arrays
    *num_nonzeros = 0;
    for (i=0; i < num_sends; i++)
    {
-	for (j = send_map_starts[i]; j < send_map_starts[i+1]; j++)
-	{
-	    jrow = send_map_elmts[j];
-	    B_int_i[++j_cnt] = offd_i[jrow+1] - offd_i[jrow]
+      for (j = send_map_starts[i]; j < send_map_starts[i+1]; j++)
+      {
+         jrow = send_map_elmts[j];
+         B_int_i[++j_cnt] = offd_i[jrow+1] - offd_i[jrow]
 			  + diag_i[jrow+1] - diag_i[jrow];
 	    *num_nonzeros += B_int_i[j_cnt];
-	}
-        if ( find_row_map ) {
-           for (j = send_map_starts[i]; j < send_map_starts[i+1]; j++) {
-              jrow = send_map_elmts[j];
-              B_int_row_map[j_cnt_rm++] = jrow + first_row_index;
-           }
-        }
+      }
+      if ( find_row_map ) {
+         for (j = send_map_starts[i]; j < send_map_starts[i+1]; j++) {
+            jrow = send_map_elmts[j];
+            B_int_row_map[j_cnt_rm++] = jrow + first_row_index;
+         }
+      }
    }
 
 /*--------------------------------------------------------------------------
