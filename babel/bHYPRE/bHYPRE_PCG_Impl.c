@@ -456,7 +456,14 @@ impl_bHYPRE_PCG_GetIntValue(
    assert( data->solver != NULL );
    solver = data->solver;
 
-   ierr=1;
+   if ( strcmp(name,"Number of Iterations")==0 || strcmp(name,"NumIterations")==0 )
+   {
+      ierr += HYPRE_PCGGetNumIterations( solver, value );
+   }
+   else
+   {
+      ierr=1;
+   }
 
    return ierr;
 
@@ -494,7 +501,14 @@ impl_bHYPRE_PCG_GetDoubleValue(
    assert( data->solver != NULL );
    solver = data->solver;
 
-   ierr = 1;
+   if ( strcmp(name,"Final Relative Residual Norm")==0 || strcmp(name,"RelResidualNorm")==0 )
+   {
+      ierr += HYPRE_PCGGetFinalRelativeResidualNorm( solver, value );
+   }
+   else
+   {
+      ierr = 1;
+   }
 
    return ierr;
 
@@ -836,6 +850,7 @@ impl_bHYPRE_PCG_SetOperator(
 
    data = bHYPRE_PCG__get_data( self );
    data->matrix = A;
+   bHYPRE_Operator_addRef( data->matrix );
 
    return ierr;
 
@@ -1069,6 +1084,7 @@ impl_bHYPRE_PCG_SetPreconditioner(
       precond = (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSolve;
       precond_setup = (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSetup;
       bHYPRE_BoomerAMG_deleteRef( AMG_s ); /* extra reference from queryInt */
+      bHYPRE_BoomerAMG_deleteRef( AMG_s ); /* extra reference from queryInt */
    }
    else if ( bHYPRE_Solver_queryInt( s, "bHYPRE.ParCSRDiagScale" ) )
    {
@@ -1091,6 +1107,7 @@ impl_bHYPRE_PCG_SetPreconditioner(
       precond = (HYPRE_PtrToSolverFcn) HYPRE_StructSMGSolve;
       precond_setup = (HYPRE_PtrToSolverFcn) HYPRE_StructSMGSetup;
       bHYPRE_StructSMG_deleteRef( SMG_s ); /* extra reference from queryInt */
+      bHYPRE_StructSMG_deleteRef( SMG_s ); /* extra reference from queryInt */
    }
    else if ( bHYPRE_Solver_queryInt( s, "bHYPRE.StructPFMG" ) )
    {
@@ -1102,6 +1119,7 @@ impl_bHYPRE_PCG_SetPreconditioner(
       assert( solverprecond != NULL );
       precond = (HYPRE_PtrToSolverFcn) HYPRE_StructPFMGSolve;
       precond_setup = (HYPRE_PtrToSolverFcn) HYPRE_StructPFMGSetup;
+      bHYPRE_StructPFMG_deleteRef( PFMG_s ); /* extra reference from queryInt */
       bHYPRE_StructPFMG_deleteRef( PFMG_s ); /* extra reference from queryInt */
    }
    /* put other preconditioner types here */
