@@ -377,6 +377,7 @@ c     It is the Queryint that actually has semantic meaning.
 c     ( cast removed for Fortran )
       call SIDL_BaseInterface_queryint_f(
      1     bHYPRE_object, "bHYPRE.IJParCSRMatrix", bHYPRE_parcsr_A )
+      call SIDL_BaseInterface_deleteref_f( bHYPRE_object )
       if ( bHYPRE_parcsr_A .eq. 0 ) then
          write (6,*) 'Matrix cast/QI failed\n'
          stop
@@ -442,6 +443,7 @@ c-----------------------------------------------------------------------
       call bHYPRE_IJBuildVector_deleteref_f( bHYPRE_ij_b )
       call SIDL_BaseInterface_queryint_f(
      1     bHYPRE_object, "bHYPRE.IJParCSRVector", bHYPRE_object_tmp )
+      call SIDL_BaseInterface_deleteRef_f( bHYPRE_object );
       call SIDL_BaseInterface__cast2_f(
      1     bHYPRE_object_tmp, "bHYPRE.IJParCSRVector", bHYPRE_parcsr_b )
       if ( bHYPRE_parcsr_b .eq. 0 ) then
@@ -462,6 +464,7 @@ c-----------------------------------------------------------------------
          stop
       endif
       call bHYPRE_IJBuildVector_addref_f( bHYPRE_ij_x )
+      call bHYPRE_IJParCSRVector_deleteref_f( bHYPRE_parcsr_x );
       call bHYPRE_IJBuildVector_SetCommunicator_f( bHYPRE_ij_x,
      1     mpi_comm, ierrtmp )
       ierr = ierr + ierrtmp
@@ -497,6 +500,7 @@ c-----------------------------------------------------------------------
       call bHYPRE_IJBuildVector_deleteref_f( bHYPRE_ij_x )
       call SIDL_BaseInterface_queryint_f(
      1     bHYPRE_object, "bHYPRE.IJParCSRVector", bHYPRE_object_tmp )
+      call SIDL_BaseInterface_deleteref_f( bHYPRE_object );
       call SIDL_BaseInterface__cast2_f(
      1     bHYPRE_object_tmp, "bHYPRE.IJParCSRVector", bHYPRE_parcsr_x )
       if ( bHYPRE_parcsr_x .eq. 0 ) then
@@ -658,10 +662,13 @@ c-----------------------------------------------------------------------
 c     Finalize things
 c-----------------------------------------------------------------------
 
+      call bHYPRE_BoomerAMG_deleteref_f( bHYPRE_AMG );
       call bHYPRE_IJParCSRVector_deleteref_f( bHYPRE_parcsr_x )
-      call HYPRE_ParCSRMatrixDestroy(A_storage, ierr)
+      call bHYPRE_IJParCSRVector_deleteref_f( bHYPRE_parcsr_b )
+      call bHYPRE_IJParCSRMatrix_deleteref_f( bHYPRE_parcsr_A )
+c      call HYPRE_ParCSRMatrixDestroy(A_storage, ierr)
 c      call HYPRE_IJVectorDestroy(b, ierr)
-      call HYPRE_IJVectorDestroy(x, ierr)
+c      call HYPRE_IJVectorDestroy(x, ierr)
 
 c     Finalize MPI
 

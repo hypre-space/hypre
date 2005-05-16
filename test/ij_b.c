@@ -1843,6 +1843,8 @@ main( int   argc,
       ierr = HYPRE_IJVectorGetObject( ij_x, &object );
       x = (HYPRE_ParVector) object;
 
+      bHYPRE_BoomerAMG_deleteRef( bHYPRE_AMG );
+
 #else
       HYPRE_BoomerAMGCreate(&amg_solver); 
       HYPRE_BoomerAMGSetCoarsenType(amg_solver, (hybrid*coarsen_type));
@@ -1925,7 +1927,8 @@ main( int   argc,
       bHYPRE_PCG_SetIntParameter( bHYPRE_PCG, "TwoNorm", 1 );
       bHYPRE_PCG_SetIntParameter( bHYPRE_PCG, "RelChange", 0 );
       bHYPRE_PCG_SetPrintLevel( bHYPRE_PCG, 1 );
-      ierr += bHYPRE_PCG_Setup( bHYPRE_PCG, bHYPRE_Vector_b, bHYPRE_Vector_x );
+      /* This was an error , Setup or Apply should not be called until after SetPreconditioner...*/
+      /*ierr += bHYPRE_PCG_Setup( bHYPRE_PCG, bHYPRE_Vector_b, bHYPRE_Vector_x );*/
 
 #else
       HYPRE_ParCSRPCGCreate(MPI_COMM_WORLD, &pcg_solver);
@@ -1976,17 +1979,18 @@ main( int   argc,
          /* use diagonal scaling as preconditioner */
 
 #ifdef USE_BABEL_INTERFACE
-      /* To call a bHYPRE solver:
-         create, set comm, set operator, set other parameters,
-         Setup (noop in this case), Apply */
-      bHYPRE_ParCSRDiagScale = bHYPRE_ParCSRDiagScale__create();
-      ierr += bHYPRE_ParCSRDiagScale_SetCommunicator( bHYPRE_ParCSRDiagScale, (void *)comm );
-      bHYPRE_ParCSRDiagScale_SetOperator( bHYPRE_ParCSRDiagScale, bHYPRE_op_A );
-      ierr += bHYPRE_ParCSRDiagScale_Setup( bHYPRE_ParCSRDiagScale,
-                                        bHYPRE_Vector_b, bHYPRE_Vector_x );
-      bHYPRE_SolverPC =
-         bHYPRE_Solver__cast( bHYPRE_ParCSRDiagScale );
-      ierr += bHYPRE_PCG_SetPreconditioner( bHYPRE_PCG, bHYPRE_SolverPC );
+         /* To call a bHYPRE solver:
+            create, set comm, set operator, set other parameters,
+            Setup (noop in this case), Apply */
+         bHYPRE_ParCSRDiagScale = bHYPRE_ParCSRDiagScale__create();
+         ierr += bHYPRE_ParCSRDiagScale_SetCommunicator( bHYPRE_ParCSRDiagScale, (void *)comm );
+         bHYPRE_ParCSRDiagScale_SetOperator( bHYPRE_ParCSRDiagScale, bHYPRE_op_A );
+         ierr += bHYPRE_ParCSRDiagScale_Setup( bHYPRE_ParCSRDiagScale,
+                                               bHYPRE_Vector_b, bHYPRE_Vector_x );
+         bHYPRE_SolverPC =
+            bHYPRE_Solver__cast( bHYPRE_ParCSRDiagScale );
+         ierr += bHYPRE_PCG_SetPreconditioner( bHYPRE_PCG, bHYPRE_SolverPC );
+         ierr += bHYPRE_PCG_Setup( bHYPRE_PCG, bHYPRE_Vector_b, bHYPRE_Vector_x );
 #else
          if (myid == 0) printf("Solver: DS-PCG\n");
          pcg_precond = NULL;
@@ -2075,6 +2079,32 @@ main( int   argc,
       ij_x = temp_vecdata ->ij_b ;
       ierr = HYPRE_IJVectorGetObject( ij_x, &object );
       x = (HYPRE_ParVector) object;
+
+      bHYPRE_PCG_deleteRef( bHYPRE_PCG );
+ 
+      if ( solver_id == 1 )
+      {
+         bHYPRE_BoomerAMG_deleteRef( bHYPRE_AMG );
+      }
+      else if ( solver_id == 2 )
+      {
+         bHYPRE_ParCSRDiagScale_deleteRef( bHYPRE_ParCSRDiagScale );
+      }
+/* not implemented yet:
+      else if (solver_id == 8)
+      {
+	 HYPRE_ParaSailsDestroy(pcg_precond);
+      }
+      else if (solver_id == 12)
+      {
+	 HYPRE_SchwarzDestroy(pcg_precond);
+      }
+      else if (solver_id == 43)
+      {
+	/ * HYPRE_EuclidPrintParams(pcg_precond); * /
+        HYPRE_EuclidDestroy(pcg_precond);
+      }
+*/
 
 #else
       HYPRE_PCGGetPrecond(pcg_solver, &pcg_precond_gotten);
@@ -2625,8 +2655,6 @@ main( int   argc,
    bHYPRE_IJParCSRMatrix_deleteRef( bHYPRE_parcsr_A );
    bHYPRE_IJParCSRVector_deleteRef( bHYPRE_b );
    bHYPRE_IJParCSRVector_deleteRef( bHYPRE_x );
-
-   bHYPRE_BoomerAMG_deleteRef( bHYPRE_AMG );
 
    if (num_grid_sweeps)
       hypre_TFree(num_grid_sweeps);
