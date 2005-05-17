@@ -86,7 +86,7 @@ impl_bHYPRE_SStructParCSRMatrix__dtor(
    HYPRE_SStructMatrix matrix;
    data = bHYPRE_SStructParCSRMatrix__get_data( self );
    matrix = data -> matrix;
-   ierr += HYPRE_SStructMatrixDestroy( matrix );
+   if ( matrix ) ierr += HYPRE_SStructMatrixDestroy( matrix );
    assert( ierr==0 );
    hypre_TFree( data );
 
@@ -491,12 +491,19 @@ impl_bHYPRE_SStructParCSRMatrix_GetObject(
    data = bHYPRE_SStructParCSRMatrix__get_data( self );
    HA = data -> matrix;
    ierr += HYPRE_SStructMatrixGetObject2( HA, (void **) (&ijA) );
+   /* ...Be careful about this HYPRE_IJMatrix ijA.  There are now two pointers
+    to the same HYPRE_IJMatrix, ijA and something inside HA.  They don't know
+    about each other, and if you use one to destroy it once you mustn't use the
+    other to destroy it again. It would be better to use reference counting for
+    IJ matrices, as is done for SStruct matrices.  My solution for here involves
+    an owns_matrix flag, see below. */
 
    HYPRE_IJMatrixGetLocalRange( ijA, &ilower, &iupper, &jlower, &jupper );
 
    pA = bHYPRE_IJParCSRMatrix__create();
    p_data = bHYPRE_IJParCSRMatrix__get_data( pA );
    p_data->ij_A = ijA;
+   p_data->owns_matrix = 0;  /* the matrix still belongs to "self", not to pA.
    p_data->comm = data -> comm;
    /* The grid and stencil slots of p_data haven't been set, but they shouldn't
       be needed- they are just used for creation of the HYPRE_StructMatrix object.

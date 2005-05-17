@@ -57,6 +57,7 @@ impl_bHYPRE_IJParCSRMatrix__ctor(
 
    data -> comm = MPI_COMM_NULL;
    data -> ij_A = NULL;
+   data -> owns_matrix = 1;
 
    bHYPRE_IJParCSRMatrix__set_data( self, data );
    
@@ -85,7 +86,7 @@ impl_bHYPRE_IJParCSRMatrix__dtor(
 
    ij_A = data -> ij_A;
 
-   ierr = HYPRE_IJMatrixDestroy( ij_A );
+   if ( ij_A && data->owns_matrix ) ierr += HYPRE_IJMatrixDestroy( ij_A );
    assert( ierr == 0 );
 
    hypre_TFree( data );

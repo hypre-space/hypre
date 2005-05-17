@@ -41,8 +41,9 @@
 struct bHYPRE_IJParCSRMatrix__data {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRMatrix._data) */
   /* Put private data members here... */
-  HYPRE_IJMatrix ij_A;
-  MPI_Comm comm;
+   HYPRE_IJMatrix ij_A;
+   int owns_matrix;
+   MPI_Comm comm;
   /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRMatrix._data) */
 };
 
