@@ -26,7 +26,7 @@ typedef struct
    double threshold;
    hypre_ParCSRMatrix *A11, *A21, *A22;
    hypre_ParVector    *F1, *U1, *F2, *U2;
-   HYPRE_Solver       *precon1, *precon2;
+   HYPRE_Solver       precon1, precon2;
 
 } hypre_BlockTridiagData;
 

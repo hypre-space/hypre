@@ -519,6 +519,33 @@ int hypre_ParAMGCreateDomainDof( hypre_ParCSRMatrix *A , int domain_type , int o
 int hypre_ParGenerateScale( hypre_ParCSRMatrix *A , hypre_CSRMatrix *domain_structure , double relaxation_weight , double **scale_pointer );
 int hypre_ParGenerateHybridScale( hypre_ParCSRMatrix *A , hypre_CSRMatrix *domain_structure , hypre_CSRMatrix **A_boundary_pointer , double **scale_pointer );
 
+/* HYPRE_parcsr_block.c */
+
+int HYPRE_BlockTridiagCreate(HYPRE_Solver *solver);
+int HYPRE_BlockTridiagDestroy(HYPRE_Solver solver);
+int HYPRE_BlockTridiagSetup(HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
+                            HYPRE_ParVector b, HYPRE_ParVector x);
+int HYPRE_BlockTridiagSolve(HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
+                            HYPRE_ParVector b,   HYPRE_ParVector x);
+int HYPRE_BlockTridiagSetIndexSet(HYPRE_Solver solver,int n, int *inds);
+int HYPRE_BlockTridiagSetAMGStrengthThreshold(HYPRE_Solver solver,double thresh);
+int HYPRE_BlockTridiagSetAMGNumSweeps(HYPRE_Solver solver, int num_sweeps);
+int HYPRE_BlockTridiagSetAMGRelaxType(HYPRE_Solver solver, int relax_type);
+int HYPRE_BlockTridiagSetPrintLevel(HYPRE_Solver solver, int print_level);
+
+/* block_tridiag.c */
+
+void *hypre_BlockTridiagCreate();
+int hypre_BlockTridiagDestroy(void *data);
+int hypre_BlockTridiagSetup(void *data, hypre_ParCSRMatrix *A,
+                            hypre_ParVector *b, hypre_ParVector *x);
+int hypre_BlockTridiagSolve(void *data, hypre_ParCSRMatrix *A,
+                            hypre_ParVector *b, hypre_ParVector *x);
+int hypre_BlockTridiagSetIndexSet(void *data, int n, int *inds);
+int hypre_BlockTridiagSetAMGStrengthThreshold(void *data, double thresh);
+int hypre_BlockTridiagSetAMGNumSweeps(void *data, int nsweeps);
+int hypre_BlockTridiagSetRelaxType(void *data, int relax_type);
+int hypre_BlockTridiagSetPrintLevel(void *data, int print_level);
 
 #ifdef __cplusplus
 }
