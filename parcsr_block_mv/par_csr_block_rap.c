@@ -216,6 +216,7 @@ hypre_ParCSRBlockMatrixRAP(hypre_ParCSRBlockMatrix  *RT,
    int  num_cols_diag_P = hypre_CSRBlockMatrixNumCols(P_diag);
    int  num_cols_offd_P = hypre_CSRBlockMatrixNumCols(P_offd);
    int *coarse_partitioning = hypre_ParCSRBlockMatrixColStarts(P);
+   int *row_starts, *col_starts;
 
    hypre_ParCSRBlockMatrix *RAP;
    int                     *col_map_offd_RAP;
@@ -501,21 +502,21 @@ hypre_ParCSRBlockMatrixRAP(hypre_ParCSRBlockMatrix  *RT,
            ne = (ii+1)*size+rest;
         }
    
-       /*-----------------------------------------------------------------------
-        *  Allocate marker arrays.
-        *-----------------------------------------------------------------------*/
+        /*--------------------------------------------------------------------
+         *  Allocate marker arrays.
+         *--------------------------------------------------------------------*/
 
         if (num_cols_offd_Pext || num_cols_diag_P)
         {
-           P_mark_array[ii] = hypre_CTAlloc(int, num_cols_diag_P+num_cols_offd_Pext);
+           P_mark_array[ii] = hypre_CTAlloc(int,num_cols_diag_P+num_cols_offd_Pext);
            P_marker = P_mark_array[ii];
         }
         A_mark_array[ii] = hypre_CTAlloc(int, num_nz_cols_A);
         A_marker = A_mark_array[ii];
 
-        /*-----------------------------------------------------------------------
+        /*--------------------------------------------------------------------
          *  Initialize some stuff.
-         *-----------------------------------------------------------------------*/
+         *--------------------------------------------------------------------*/
 
         jj_counter = start_indexing;
         for (ic = 0; ic < num_cols_diag_P+num_cols_offd_Pext; ic++)
@@ -527,58 +528,58 @@ hypre_ParCSRBlockMatrixRAP(hypre_ParCSRBlockMatrix  *RT,
            A_marker[i] = -1;
         }   
 
-        /*-----------------------------------------------------------------------
+        /*--------------------------------------------------------------------
          *  Loop over exterior c-points
-         *-----------------------------------------------------------------------*/
+         *--------------------------------------------------------------------*/
     
         for (ic = ns; ic < ne; ic++)
         {
       
            jj_row_begining = jj_counter;
 
-           /*--------------------------------------------------------------------
+           /*-----------------------------------------------------------------
             *  Loop over entries in row ic of R_offd.
-            *--------------------------------------------------------------------*/
+            *-----------------------------------------------------------------*/
    
            for (jj1 = R_offd_i[ic]; jj1 < R_offd_i[ic+1]; jj1++)
            {
               i1  = R_offd_j[jj1];
 
-              /*-----------------------------------------------------------------
+              /*--------------------------------------------------------------
                *  Loop over entries in row i1 of A_offd.
-               *-----------------------------------------------------------------*/
+               *--------------------------------------------------------------*/
          
               for (jj2 = A_offd_i[i1]; jj2 < A_offd_i[i1+1]; jj2++)
               {
                  i2 = A_offd_j[jj2];
 
-                 /*--------------------------------------------------------------
+                 /*-----------------------------------------------------------
                   *  Check A_marker to see if point i2 has been previously
                   *  visited. New entries in RAP only occur from unmarked points.
-                  *--------------------------------------------------------------*/
+                  *-----------------------------------------------------------*/
 
                  if (A_marker[i2] != ic)
                  {
 
-                    /*-----------------------------------------------------------
+                    /*--------------------------------------------------------
                      *  Mark i2 as visited.
-                     *-----------------------------------------------------------*/
+                     *--------------------------------------------------------*/
 
                     A_marker[i2] = ic;
                
-                    /*-----------------------------------------------------------
+                    /*--------------------------------------------------------
                      *  Loop over entries in row i2 of P_ext.
-                     *-----------------------------------------------------------*/
+                     *--------------------------------------------------------*/
 
-                    for (jj3 = P_ext_diag_i[i2]; jj3 < P_ext_diag_i[i2+1]; jj3++)
+                    for (jj3=P_ext_diag_i[i2]; jj3 < P_ext_diag_i[i2+1]; jj3++)
                     {
                        i3 = P_ext_diag_j[jj3];
                   
-                       /*--------------------------------------------------------
-                        *  Check P_marker to see that RAP_{ic,i3} has not already
-                        *  been accounted for. If it has not, mark it and increment
-                        *  counter.
-                        *--------------------------------------------------------*/
+                       /*-----------------------------------------------------
+                        *  Check P_marker to see that RAP_{ic,i3} has not 
+                        *  been accounted for. If it has not, mark it and 
+                        *  increment counter.
+                        *-----------------------------------------------------*/
 
                        if (P_marker[i3] < jj_row_begining)
                        {
@@ -586,15 +587,15 @@ hypre_ParCSRBlockMatrixRAP(hypre_ParCSRBlockMatrix  *RT,
                           jj_counter++;
                        }
                     }
-                    for (jj3 = P_ext_offd_i[i2]; jj3 < P_ext_offd_i[i2+1]; jj3++)
+                    for (jj3=P_ext_offd_i[i2]; jj3 < P_ext_offd_i[i2+1]; jj3++)
                     {
                        i3 = P_ext_offd_j[jj3] + num_cols_diag_P;
                   
-                       /*--------------------------------------------------------
-                        *  Check P_marker to see that RAP_{ic,i3} has not already
-                        *  been accounted for. If it has not, mark it and increment
-                        *  counter.
-                        *--------------------------------------------------------*/
+                       /*-----------------------------------------------------
+                        *  Check P_marker to see that RAP_{ic,i3} has not 
+                        *  been accounted for. If it has not, mark it and
+                        *  increment counter.
+                        *-----------------------------------------------------*/
 
                        if (P_marker[i3] < jj_row_begining)
                        {
@@ -604,41 +605,42 @@ hypre_ParCSRBlockMatrixRAP(hypre_ParCSRBlockMatrix  *RT,
                     }
                  }
               }
-              /*-----------------------------------------------------------------
+              /*--------------------------------------------------------------
                *  Loop over entries in row i1 of A_diag.
-               *-----------------------------------------------------------------*/
+               *--------------------------------------------------------------*/
          
               for (jj2 = A_diag_i[i1]; jj2 < A_diag_i[i1+1]; jj2++)
               {
                  i2 = A_diag_j[jj2];
 
-                 /*--------------------------------------------------------------
+                 /*-----------------------------------------------------------
                   *  Check A_marker to see if point i2 has been previously
-                  *  visited. New entries in RAP only occur from unmarked points.
-                  *--------------------------------------------------------------*/
+                  *  visited. New entries in RAP only occur from unmarked 
+                  * points.
+                  *-----------------------------------------------------------*/
 
                  if (A_marker[i2+num_cols_offd_A] != ic)
                  {
 
-                    /*-----------------------------------------------------------
+                    /*--------------------------------------------------------
                      *  Mark i2 as visited.
-                     *-----------------------------------------------------------*/
+                     *--------------------------------------------------------*/
 
                     A_marker[i2+num_cols_offd_A] = ic;
                
-                    /*-----------------------------------------------------------
+                    /*--------------------------------------------------------
                      *  Loop over entries in row i2 of P_diag.
-                     *-----------------------------------------------------------*/
+                     *--------------------------------------------------------*/
 
                     for (jj3 = P_diag_i[i2]; jj3 < P_diag_i[i2+1]; jj3++)
                     {
                        i3 = P_diag_j[jj3];
                   
-                       /*--------------------------------------------------------
-                        *  Check P_marker to see that RAP_{ic,i3} has not already
-                        *  been accounted for. If it has not, mark it and increment
-                        *  counter.
-                        *--------------------------------------------------------*/
+                       /*-----------------------------------------------------
+                        *  Check P_marker to see that RAP_{ic,i3} has not 
+                        *  been accounted for. If it has not, mark it and 
+                        *  increment counter.
+                        *-----------------------------------------------------*/
 
                        if (P_marker[i3] < jj_row_begining)
                        {
@@ -646,19 +648,20 @@ hypre_ParCSRBlockMatrixRAP(hypre_ParCSRBlockMatrix  *RT,
                           jj_counter++;
                        }
                     }
-                    /*-----------------------------------------------------------
+
+                    /*--------------------------------------------------------
                      *  Loop over entries in row i2 of P_offd.
-                     *-----------------------------------------------------------*/
+                     *--------------------------------------------------------*/
 
                     for (jj3 = P_offd_i[i2]; jj3 < P_offd_i[i2+1]; jj3++)
                     {
                        i3 = map_P_to_Pext[P_offd_j[jj3]] + num_cols_diag_P;
                   
-                       /*--------------------------------------------------------
-                        *  Check P_marker to see that RAP_{ic,i3} has not already
-                        *  been accounted for. If it has not, mark it and increment
-                        *  counter.
-                        *--------------------------------------------------------*/
+                       /*-----------------------------------------------------
+                        *  Check P_marker to see that RAP_{ic,i3} has not 
+                        *  been accounted for. If it has not, mark it and 
+                        *  increment counter.
+                        *-----------------------------------------------------*/
 
                        if (P_marker[i3] < jj_row_begining)
                        {
@@ -757,7 +760,7 @@ hypre_ParCSRBlockMatrixRAP(hypre_ParCSRBlockMatrix  *RT,
             
                  /*-----------------------------------------------------------
                   *  Check A_marker to see if point i2 has been previously
-                  *  visited. New entries in RAP only occur from unmarked points.
+                  *  visited.New entries in RAP only occur from unmarked points.
                   *-----------------------------------------------------------*/
 
                  if (A_marker[i2] != ic)
@@ -772,7 +775,7 @@ hypre_ParCSRBlockMatrixRAP(hypre_ParCSRBlockMatrix  *RT,
                      *  Loop over entries in row i2 of P_ext.
                      *--------------------------------------------------------*/
 
-                    for (jj3 = P_ext_diag_i[i2]; jj3 < P_ext_diag_i[i2+1]; jj3++)
+                    for (jj3=P_ext_diag_i[i2]; jj3 < P_ext_diag_i[i2+1]; jj3++)
                     {
                        i3 = P_ext_diag_j[jj3];
                        hypre_CSRBlockMatrixBlockMultAdd(r_a_products, 
@@ -780,9 +783,9 @@ hypre_ParCSRBlockMatrixRAP(hypre_ParCSRBlockMatrix  *RT,
                                      r_a_p_products, block_size);
                   
                        /*-----------------------------------------------------
-                        *  Check P_marker to see that RAP_{ic,i3} has not already
-                        *  been accounted for. If it has not, create a new entry.
-                        *  If it has, add new contribution.
+                        *  Check P_marker to see that RAP_{ic,i3} has not 
+                        *  been accounted for. If it has not, create a new
+                        *  entry. If it has, add new contribution.
                         *-----------------------------------------------------*/
 
                        if (P_marker[i3] < jj_row_begining)
@@ -801,18 +804,18 @@ hypre_ParCSRBlockMatrixRAP(hypre_ParCSRBlockMatrix  *RT,
                                             r_a_p_products[kk];
                        }
                     }
-                    for (jj3 = P_ext_offd_i[i2]; jj3 < P_ext_offd_i[i2+1]; jj3++)
+                    for (jj3=P_ext_offd_i[i2]; jj3 < P_ext_offd_i[i2+1]; jj3++)
                     {
                        i3 = P_ext_offd_j[jj3] + num_cols_diag_P;
                        hypre_CSRBlockMatrixBlockMultAdd(r_a_products, 
                                &(P_ext_offd_data[jj3*bnnz]), zero, 
                                r_a_p_products, block_size);
                   
-                       /*-----------------------------------------------------
-                        *  Check P_marker to see that RAP_{ic,i3} has not already
-                        *  been accounted for. If it has not, create a new entry.
-                        *  If it has, add new contribution.
-                        *-----------------------------------------------------*/
+                       /*--------------------------------------------------
+                        *  Check P_marker to see that RAP_{ic,i3} has not 
+                        *  been accounted for. If it has not, create a new 
+                        *  entry. If it has, add new contribution.
+                        *--------------------------------------------------*/
 
                        if (P_marker[i3] < jj_row_begining)
                        {
@@ -840,7 +843,7 @@ hypre_ParCSRBlockMatrixRAP(hypre_ParCSRBlockMatrix  *RT,
 
                  else
                  {
-                    for (jj3 = P_ext_diag_i[i2]; jj3 < P_ext_diag_i[i2+1]; jj3++)
+                    for (jj3=P_ext_diag_i[i2]; jj3 < P_ext_diag_i[i2+1]; jj3++)
                     {
                        i3 = P_ext_diag_j[jj3];
                        hypre_CSRBlockMatrixBlockMultAdd(r_a_products, 
@@ -850,7 +853,7 @@ hypre_ParCSRBlockMatrixRAP(hypre_ParCSRBlockMatrix  *RT,
                           RAP_int_data[P_marker[i3]*bnnz+kk] += 
                                                         r_a_p_products[kk];
                     }
-                    for (jj3 = P_ext_offd_i[i2]; jj3 < P_ext_offd_i[i2+1]; jj3++)
+                    for (jj3=P_ext_offd_i[i2]; jj3 < P_ext_offd_i[i2+1]; jj3++)
                     {
                        i3 = P_ext_offd_j[jj3] + num_cols_diag_P;
                        hypre_CSRBlockMatrixBlockMultAdd(r_a_products, 
@@ -900,9 +903,9 @@ hypre_ParCSRBlockMatrixRAP(hypre_ParCSRBlockMatrix  *RT,
                                    r_a_p_products, block_size); 
                     
                        /*-----------------------------------------------------
-                        *  Check P_marker to see that RAP_{ic,i3} has not already
-                        *  been accounted for. If it has not, create a new entry.
-                        *  If it has, add new contribution.
+                        *  Check P_marker to see that RAP_{ic,i3} has not 
+                        *  been accounted for. If it has not, create a new 
+                        *  entry. If it has, add new contribution.
                         *-----------------------------------------------------*/
   
                        if (P_marker[i3] < jj_row_begining)
@@ -929,9 +932,9 @@ hypre_ParCSRBlockMatrixRAP(hypre_ParCSRBlockMatrix  *RT,
                                  r_a_p_products, block_size); 
                     
                        /*-----------------------------------------------------
-                        *  Check P_marker to see that RAP_{ic,i3} has not already
-                        *  been accounted for. If it has not, create a new entry.
-                        *  If it has, add new contribution.
+                        *  Check P_marker to see that RAP_{ic,i3} has not 
+                        *  been accounted for. If it has not, create a new
+                        *  entry. If it has, add new contribution.
                         *-----------------------------------------------------*/
   
                        if (P_marker[i3] < jj_row_begining)
@@ -1097,10 +1100,10 @@ hypre_ParCSRBlockMatrixRAP(hypre_ParCSRBlockMatrix  *RT,
      else
         RAP_ext_j[i] -= first_col_diag_RAP;
 
-/*   need to allocate new P_marker etc. and make further changes */
    /*-----------------------------------------------------------------------
     *  Initialize some stuff.
     *-----------------------------------------------------------------------*/
+
   jj_cnt_diag = hypre_CTAlloc(int, num_threads);
   jj_cnt_offd = hypre_CTAlloc(int, num_threads);
 
@@ -1181,9 +1184,9 @@ hypre_ParCSRBlockMatrixRAP(hypre_ParCSRBlockMatrix  *RT,
                   break;
                }
  
-         /*--------------------------------------------------------------------
+         /*-----------------------------------------------------------------
           *  Loop over entries in row ic of R_diag.
-          *--------------------------------------------------------------------*/
+          *-----------------------------------------------------------------*/
    
         for (jj1 = R_diag_i[ic]; jj1 < R_diag_i[ic+1]; jj1++)
         {
@@ -1199,33 +1202,32 @@ hypre_ParCSRBlockMatrixRAP(hypre_ParCSRBlockMatrix  *RT,
               {
                  i2 = A_offd_j[jj2];
 
-                 /*--------------------------------------------------------------
+                 /*-----------------------------------------------------------
                   *  Check A_marker to see if point i2 has been previously
-                  *  visited. New entries in RAP only occur from unmarked points.
-                  *--------------------------------------------------------------*/
+                  *  visited.New entries in RAP only occur from unmarked points.
+                  *-----------------------------------------------------------*/
     
                  if (A_marker[i2] != ic)
                  {
-    
-                    /*-----------------------------------------------------------
+                    /*--------------------------------------------------------
                      *  Mark i2 as visited.
-                     *-----------------------------------------------------------*/
+                     *--------------------------------------------------------*/
     
                     A_marker[i2] = ic;
                   
-                    /*-----------------------------------------------------------
+                    /*--------------------------------------------------------
                      *  Loop over entries in row i2 of P_ext.
-                     *-----------------------------------------------------------*/
+                     *--------------------------------------------------------*/
  
-                    for (jj3 = P_ext_diag_i[i2]; jj3 < P_ext_diag_i[i2+1]; jj3++)
+                    for (jj3=P_ext_diag_i[i2]; jj3 < P_ext_diag_i[i2+1]; jj3++)
                     {
                        i3 = P_ext_diag_j[jj3];
                   
-                       /*--------------------------------------------------------
-                        *  Check P_marker to see that RAP_{ic,i3} has not already
-                        *  been accounted for. If it has not, mark it and increment
-                        *  counter.
-                        *--------------------------------------------------------*/
+                       /*-----------------------------------------------------
+                        *  Check P_marker to see that RAP_{ic,i3} has not 
+                        *  been accounted for. If it has not, mark it and 
+                        *  increment counter.
+                        *-----------------------------------------------------*/
      
                        if (P_marker[i3] < jj_row_begin_diag)
                        {
@@ -1233,15 +1235,15 @@ hypre_ParCSRBlockMatrixRAP(hypre_ParCSRBlockMatrix  *RT,
                           jj_count_diag++;
                        }
                     }
-                    for (jj3 = P_ext_offd_i[i2]; jj3 < P_ext_offd_i[i2+1]; jj3++)
+                    for (jj3=P_ext_offd_i[i2]; jj3 < P_ext_offd_i[i2+1]; jj3++)
                     {
                        i3 = map_Pext_to_RAP[P_ext_offd_j[jj3]]+num_cols_diag_P;
                   
-                       /*--------------------------------------------------------
-                        *  Check P_marker to see that RAP_{ic,i3} has not already
-                        *  been accounted for. If it has not, mark it and increment
-                        *  counter.
-                        *--------------------------------------------------------*/
+                       /*-----------------------------------------------------
+                        *  Check P_marker to see that RAP_{ic,i3} has not 
+                        *  been accounted for. If it has not, mark it and 
+                        *  increment counter.
+                        *-----------------------------------------------------*/
      
                        if (P_marker[i3] < jj_row_begin_offd)
                        {
@@ -1306,11 +1308,11 @@ hypre_ParCSRBlockMatrixRAP(hypre_ParCSRBlockMatrix  *RT,
                     {
                        i3 = map_P_to_RAP[P_offd_j[jj3]] + num_cols_diag_P;
                  
-                       /*--------------------------------------------------------
-                        *  Check P_marker to see that RAP_{ic,i3} has not already
-                        *  been accounted for. If it has not, mark it and increment
-                        *  counter.
-                        *--------------------------------------------------------*/
+                       /*-----------------------------------------------------
+                        *  Check P_marker to see that RAP_{ic,i3} has not 
+                        *  been accounted for. If it has not, mark it and 
+                        *  increment counter.
+                        *-----------------------------------------------------*/
 
                        if (P_marker[i3] < jj_row_begin_offd)
                        {
@@ -1501,39 +1503,40 @@ hypre_ParCSRBlockMatrixRAP(hypre_ParCSRBlockMatrix  *RT,
               for (jj2 = A_offd_i[i1]; jj2 < A_offd_i[i1+1]; jj2++)
               {
                  i2 = A_offd_j[jj2];
-                 hypre_CSRBlockMatrixBlockMultAdd(r_entries,&(A_offd_data[jj2*bnnz]),
-                                 zero, r_a_products, block_size);
+                 hypre_CSRBlockMatrixBlockMultAdd(r_entries,
+                        &(A_offd_data[jj2*bnnz]), zero, r_a_products, 
+                        block_size);
             
-                 /*--------------------------------------------------------------
+                 /*-----------------------------------------------------------
                   *  Check A_marker to see if point i2 has been previously
-                  *  visited. New entries in RAP only occur from unmarked points.
-                  *--------------------------------------------------------------*/
+                  *  visited.New entries in RAP only occur from unmarked points.
+                  *-----------------------------------------------------------*/
 
                  if (A_marker[i2] != ic)
                  {
-
-                    /*-----------------------------------------------------------
+                    /*--------------------------------------------------------
                      *  Mark i2 as visited.
-                     *-----------------------------------------------------------*/
+                     *--------------------------------------------------------*/
 
                     A_marker[i2] = ic;
                
-                    /*-----------------------------------------------------------
+                    /*--------------------------------------------------------
                      *  Loop over entries in row i2 of P_ext.
-                     *-----------------------------------------------------------*/
+                     *--------------------------------------------------------*/
 
-                    for (jj3 = P_ext_diag_i[i2]; jj3 < P_ext_diag_i[i2+1]; jj3++)
+                    for (jj3=P_ext_diag_i[i2]; jj3 < P_ext_diag_i[i2+1]; jj3++)
                     {
                        i3 = P_ext_diag_j[jj3];
                        hypre_CSRBlockMatrixBlockMultAdd(r_a_products, 
                               &(P_ext_diag_data[jj3*bnnz]), zero, 
                               r_a_p_products, block_size);
                   
-                       /*--------------------------------------------------------
-                        *  Check P_marker to see that RAP_{ic,i3} has not already
-                        *  been accounted for. If it has not, create a new entry.
-                        *  If it has, add new contribution.
-                        *--------------------------------------------------------*/
+                       /*-----------------------------------------------------
+                        *  Check P_marker to see that RAP_{ic,i3} has not 
+                        *  been accounted for. If it has not, create a new 
+                        *  entry. If it has, add new contribution.
+                        *-----------------------------------------------------*/
+
                        if (P_marker[i3] < jj_row_begin_diag)
                        {
                           P_marker[i3] = jj_count_diag;
@@ -1550,18 +1553,18 @@ hypre_ParCSRBlockMatrixRAP(hypre_ParCSRBlockMatrix  *RT,
                              RAP_diag_data[ind++] += r_a_p_products[kk];
                        }
                     }
-                    for (jj3 = P_ext_offd_i[i2]; jj3 < P_ext_offd_i[i2+1]; jj3++)
+                    for (jj3=P_ext_offd_i[i2]; jj3 < P_ext_offd_i[i2+1]; jj3++)
                     {
-                       i3 = map_Pext_to_RAP[P_ext_offd_j[jj3]] + num_cols_diag_P;
+                       i3 = map_Pext_to_RAP[P_ext_offd_j[jj3]]+num_cols_diag_P;
                        hypre_CSRBlockMatrixBlockMultAdd(r_a_products, 
                                      &(P_ext_offd_data[jj3*bnnz]),
                                      zero, r_a_p_products, block_size);
                   
-                       /*--------------------------------------------------------
-                        *  Check P_marker to see that RAP_{ic,i3} has not already
-                        *  been accounted for. If it has not, create a new entry.
-                        *  If it has, add new contribution.
-                        *--------------------------------------------------------*/
+                       /*-----------------------------------------------------
+                        *  Check P_marker to see that RAP_{ic,i3} has not 
+                        *  been accounted for. If it has not, create a new 
+                        *  entry. If it has, add new contribution.
+                        *-----------------------------------------------------*/
                        if (P_marker[i3] < jj_row_begin_offd)
                        {
                           P_marker[i3] = jj_count_offd;
@@ -1580,13 +1583,13 @@ hypre_ParCSRBlockMatrixRAP(hypre_ParCSRBlockMatrix  *RT,
                     }
                  }
 
-                 /*--------------------------------------------------------------
+                 /*-----------------------------------------------------------
                   *  If i2 is previously visited ( A_marker[12]=ic ) it yields
                   *  no new entries in RAP and can just add new contributions.
-                  *--------------------------------------------------------------*/
+                  *-----------------------------------------------------------*/
                  else
                  {
-                    for (jj3 = P_ext_diag_i[i2]; jj3 < P_ext_diag_i[i2+1]; jj3++)
+                    for (jj3=P_ext_diag_i[i2]; jj3 < P_ext_diag_i[i2+1]; jj3++)
                     {
                        i3 = P_ext_diag_j[jj3];
                        hypre_CSRBlockMatrixBlockMultAdd(r_a_products, 
@@ -1596,9 +1599,9 @@ hypre_ParCSRBlockMatrixRAP(hypre_ParCSRBlockMatrix  *RT,
                        for (kk = 0; kk < bnnz; kk++)
                           RAP_diag_data[ind++] += r_a_p_products[kk];
                     }
-                    for (jj3 = P_ext_offd_i[i2]; jj3 < P_ext_offd_i[i2+1]; jj3++)
+                    for (jj3=P_ext_offd_i[i2]; jj3 < P_ext_offd_i[i2+1]; jj3++)
                     {
-                       i3 = map_Pext_to_RAP[P_ext_offd_j[jj3]] + num_cols_diag_P;
+                       i3=map_Pext_to_RAP[P_ext_offd_j[jj3]] + num_cols_diag_P;
                        hypre_CSRBlockMatrixBlockMultAdd(r_a_products, 
                                       &(P_ext_offd_data[jj3*bnnz]),
                                       zero, r_a_p_products, block_size);
@@ -1677,11 +1680,11 @@ hypre_ParCSRBlockMatrixRAP(hypre_ParCSRBlockMatrix  *RT,
                                  &(P_offd_data[jj3*bnnz]),
                                  zero, r_a_p_products, block_size);
                   
-                      /*--------------------------------------------------------
+                      /*-----------------------------------------------------
                        *  Check P_marker to see that RAP_{ic,i3} has not already
                        *  been accounted for. If it has not, create a new entry.
                        *  If it has, add new contribution.
-                       *--------------------------------------------------------*/
+                       *-----------------------------------------------------*/
 
                       if (P_marker[i3] < jj_row_begin_offd)
                       {
@@ -1740,12 +1743,14 @@ hypre_ParCSRBlockMatrixRAP(hypre_ParCSRBlockMatrix  *RT,
     hypre_TFree(A_mark_array[ii]);   
   }
 
-  RAP = hypre_ParCSRBlockMatrixCreate(comm, block_size, n_coarse, n_coarse, 
-                               coarse_partitioning, coarse_partitioning,
-                               num_cols_offd_RAP, RAP_diag_size, RAP_offd_size);
+  row_starts = hypre_CTAlloc(int, num_procs+1);
+  col_starts = hypre_CTAlloc(int, num_procs+1);
+  for (i = 0; i <= num_procs; i++) 
+     row_starts[i] = col_starts[i] = coarse_partitioning[i];
 
-/* Have RAP own coarse_partitioning instead of P */
-  hypre_ParCSRBlockMatrixSetColStartsOwner(P,0);
+  RAP = hypre_ParCSRBlockMatrixCreate(comm, block_size, n_coarse, n_coarse, 
+                               row_starts, col_starts,
+                               num_cols_offd_RAP, RAP_diag_size, RAP_offd_size);
 
   RAP_diag = hypre_ParCSRBlockMatrixDiag(RAP);
   hypre_CSRBlockMatrixI(RAP_diag) = RAP_diag_i; 
