@@ -1578,7 +1578,6 @@ void hypre_ParCSRMatrixGenSpanningTree(hypre_ParCSRMatrix *G_csr, int **indices,
    for (i = 0; i < ncols_G; i++)
       if (edges_marked[i] == 1) t_indices[tree_size++] = i;
    (*indices) = t_indices;
-printf("tree size = %d %d\n", t_indices[0], (*indices)[0]);
    free(edges_marked);
    if (G_type != 0)
    {
@@ -1592,16 +1591,16 @@ printf("tree size = %d %d\n", t_indices[0], (*indices)[0]);
  * ----------------------------------------------------------------------------- */
 
 void hypre_ParCSRMatrixExtractSubmatrices(hypre_ParCSRMatrix *A_csr, int *indices2,
-                                          hypre_ParCSRMatrix **submatrices)
+                                          hypre_ParCSRMatrix ***submatrices)
 {
    int    nindices, *indices, nrows_A, *A_diag_i, *A_diag_j, mypid, nprocs;
    int    i, j, k, *proc_offsets1, *proc_offsets2, *itmp_array, *exp_indices;
    int    nnz11, nnz12, nnz21, nnz22, col, ncols_offd, nnz_offd, nnz_diag;
    int    global_nrows, global_ncols, *row_starts, *col_starts, nrows, nnz;
-   int    *diag_i, *diag_j, row;
+   int    *diag_i, *diag_j, row, *offd_i;
    double *A_diag_a, *diag_a;
    hypre_ParCSRMatrix *A11_csr, *A12_csr, *A21_csr, *A22_csr;
-   hypre_CSRMatrix    *A_diag, *diag;
+   hypre_CSRMatrix    *A_diag, *diag, *offd;
    MPI_Comm           comm;
 
    /* -----------------------------------------------------
@@ -1609,7 +1608,6 @@ void hypre_ParCSRMatrixExtractSubmatrices(hypre_ParCSRMatrix *A_csr, int *indice
     * ----------------------------------------------------- */
 
    nindices = indices2[0];
-printf("Extract : nindices = %d\n", nindices);
    indices  = &(indices2[1]);
    qsort0(indices, 0, nindices-1);
 
@@ -1651,13 +1649,21 @@ printf("Extract : nindices = %d\n", nindices);
 
    exp_indices = (int *) malloc(nrows_A * sizeof(int));
    for (i = 0; i < nrows_A; i++) exp_indices[i] = -1;
-   for (i = 0; i < nindices; i++) exp_indices[indices[i]] = i;
-   k = 0;
    for (i = 0; i < nindices; i++) 
    {
-      if (exp_indices[indices[i]] < 0)
+      if (exp_indices[indices[i]] == -1) exp_indices[indices[i]] = i;
+      else
       {
-         exp_indices[indices[i]] = - k - 1;
+         printf("ExtractSubmatrices: wrong index %d %d\n", i, indices[i]);
+         exit(1);
+      }
+   }
+   k = 0;
+   for (i = 0; i < nrows_A; i++) 
+   {
+      if (exp_indices[i] < 0)
+      {
+         exp_indices[i] = - k - 1;
          k++;
       }
    }
@@ -1688,7 +1694,6 @@ printf("Extract : nindices = %d\n", nindices);
          }
       }
    }
-printf("Extract submatrices nnz = %d %d %d %d\n", nnz11, nnz12, nnz21, nnz22);
 
    /* -----------------------------------------------------
     * create A11 matrix (assume sequential for the moment)
@@ -1699,9 +1704,9 @@ printf("Extract submatrices nnz = %d %d %d %d\n", nnz11, nnz12, nnz21, nnz22);
    nnz_diag   = nnz11;
    global_nrows = proc_offsets1[nprocs];
    global_ncols = proc_offsets1[nprocs];
-   row_starts = (int *) malloc((nprocs+1) * sizeof(int));
-   col_starts = (int *) malloc((nprocs+1) * sizeof(int));
-   for (i = 0; i < nprocs; i++)
+   row_starts = hypre_CTAlloc(int, nprocs+1);
+   col_starts = hypre_CTAlloc(int, nprocs+1);
+   for (i = 0; i <= nprocs; i++)
    {
       row_starts[i] = proc_offsets1[i];
       col_starts[i] = proc_offsets1[i];
@@ -1709,9 +1714,9 @@ printf("Extract submatrices nnz = %d %d %d %d\n", nnz11, nnz12, nnz21, nnz22);
    A11_csr = hypre_ParCSRMatrixCreate(comm, global_nrows, global_ncols,
                     row_starts, col_starts, ncols_offd, nnz_diag, nnz_offd); 
    nrows = nindices;
-   diag_i = (int *) malloc((nrows+1) * sizeof(int));
-   diag_j = (int *) malloc(nnz_diag * sizeof(int));
-   diag_a = (double *) malloc(nnz_diag * sizeof(double));
+   diag_i = hypre_CTAlloc(int, nrows+1);
+   diag_j = hypre_CTAlloc(int, nnz_diag);
+   diag_a = hypre_CTAlloc(double, nnz_diag);
    nnz = 0;
    row = 0;
    diag_i[0] = 0;
@@ -1728,13 +1733,21 @@ printf("Extract submatrices nnz = %d %d %d %d\n", nnz11, nnz12, nnz21, nnz22);
                diag_a[nnz++] = A_diag_a[j];
             }
          }
-         diag_i[row++] = nnz;
+         row++;
+         diag_i[row] = nnz;
       }
    }
    diag = hypre_ParCSRMatrixDiag(A11_csr);
    hypre_CSRMatrixI(diag) = diag_i;
    hypre_CSRMatrixJ(diag) = diag_j;
    hypre_CSRMatrixData(diag) = diag_a;
+
+   offd_i = hypre_CTAlloc(int, nrows+1);
+   for (i = 0; i <= nrows; i++) offd_i[i] = 0;
+   offd = hypre_ParCSRMatrixOffd(A11_csr);
+   hypre_CSRMatrixI(offd) = offd_i;
+   hypre_CSRMatrixJ(offd) = NULL;
+   hypre_CSRMatrixData(offd) = NULL;
 
    /* -----------------------------------------------------
     * create A12 matrix (assume sequential for the moment)
@@ -1745,9 +1758,9 @@ printf("Extract submatrices nnz = %d %d %d %d\n", nnz11, nnz12, nnz21, nnz22);
    nnz_diag   = nnz12;
    global_nrows = proc_offsets1[nprocs];
    global_ncols = proc_offsets2[nprocs];
-   row_starts = (int *) malloc((nprocs+1) * sizeof(int));
-   col_starts = (int *) malloc((nprocs+1) * sizeof(int));
-   for (i = 0; i < nprocs; i++)
+   row_starts = hypre_CTAlloc(int, nprocs+1);
+   col_starts = hypre_CTAlloc(int, nprocs+1);
+   for (i = 0; i <= nprocs; i++)
    {
       row_starts[i] = proc_offsets1[i];
       col_starts[i] = proc_offsets2[i];
@@ -1755,9 +1768,9 @@ printf("Extract submatrices nnz = %d %d %d %d\n", nnz11, nnz12, nnz21, nnz22);
    A12_csr = hypre_ParCSRMatrixCreate(comm, global_nrows, global_ncols,
                     row_starts, col_starts, ncols_offd, nnz_diag, nnz_offd); 
    nrows = nindices;
-   diag_i = (int *) malloc((nrows+1) * sizeof(int));
-   diag_j = (int *) malloc(nnz_diag * sizeof(int));
-   diag_a = (double *) malloc(nnz_diag * sizeof(double));
+   diag_i = hypre_CTAlloc(int, nrows+1);
+   diag_j = hypre_CTAlloc(int, nnz_diag);
+   diag_a = hypre_CTAlloc(double, nnz_diag);
    nnz = 0;
    row = 0;
    diag_i[0] = 0;
@@ -1774,13 +1787,22 @@ printf("Extract submatrices nnz = %d %d %d %d\n", nnz11, nnz12, nnz21, nnz22);
                diag_a[nnz++] = A_diag_a[j];
             }
          }
-         diag_i[row++] = nnz;
+         row++;
+         diag_i[row] = nnz;
       }
    }
+   if (nnz > nnz_diag) printf("WARNING WARNING WARNING\n");
    diag = hypre_ParCSRMatrixDiag(A12_csr);
    hypre_CSRMatrixI(diag) = diag_i;
    hypre_CSRMatrixJ(diag) = diag_j;
    hypre_CSRMatrixData(diag) = diag_a;
+
+   offd_i = hypre_CTAlloc(int, nrows+1);
+   for (i = 0; i <= nrows; i++) offd_i[i] = 0;
+   offd = hypre_ParCSRMatrixOffd(A12_csr);
+   hypre_CSRMatrixI(offd) = offd_i;
+   hypre_CSRMatrixJ(offd) = NULL;
+   hypre_CSRMatrixData(offd) = NULL;
 
    /* -----------------------------------------------------
     * create A21 matrix (assume sequential for the moment)
@@ -1791,9 +1813,9 @@ printf("Extract submatrices nnz = %d %d %d %d\n", nnz11, nnz12, nnz21, nnz22);
    nnz_diag   = nnz21;
    global_nrows = proc_offsets2[nprocs];
    global_ncols = proc_offsets1[nprocs];
-   row_starts = (int *) malloc((nprocs+1) * sizeof(int));
-   col_starts = (int *) malloc((nprocs+1) * sizeof(int));
-   for (i = 0; i < nprocs; i++)
+   row_starts = hypre_CTAlloc(int, nprocs+1);
+   col_starts = hypre_CTAlloc(int, nprocs+1);
+   for (i = 0; i <= nprocs; i++)
    {
       row_starts[i] = proc_offsets2[i];
       col_starts[i] = proc_offsets1[i];
@@ -1801,9 +1823,9 @@ printf("Extract submatrices nnz = %d %d %d %d\n", nnz11, nnz12, nnz21, nnz22);
    A21_csr = hypre_ParCSRMatrixCreate(comm, global_nrows, global_ncols,
                     row_starts, col_starts, ncols_offd, nnz_diag, nnz_offd); 
    nrows = nrows_A - nindices;
-   diag_i = (int *) malloc((nrows+1) * sizeof(int));
-   diag_j = (int *) malloc(nnz_diag * sizeof(int));
-   diag_a = (double *) malloc(nnz_diag * sizeof(double));
+   diag_i = hypre_CTAlloc(int, nrows+1);
+   diag_j = hypre_CTAlloc(int, nnz_diag);
+   diag_a = hypre_CTAlloc(double, nnz_diag);
    nnz = 0;
    row = 0;
    diag_i[0] = 0;
@@ -1820,13 +1842,21 @@ printf("Extract submatrices nnz = %d %d %d %d\n", nnz11, nnz12, nnz21, nnz22);
                diag_a[nnz++] = A_diag_a[j];
             }
          }
-         diag_i[row++] = nnz;
+         row++;
+         diag_i[row] = nnz;
       }
    }
    diag = hypre_ParCSRMatrixDiag(A21_csr);
    hypre_CSRMatrixI(diag) = diag_i;
    hypre_CSRMatrixJ(diag) = diag_j;
    hypre_CSRMatrixData(diag) = diag_a;
+
+   offd_i = hypre_CTAlloc(int, nrows+1);
+   for (i = 0; i <= nrows; i++) offd_i[i] = 0;
+   offd = hypre_ParCSRMatrixOffd(A21_csr);
+   hypre_CSRMatrixI(offd) = offd_i;
+   hypre_CSRMatrixJ(offd) = NULL;
+   hypre_CSRMatrixData(offd) = NULL;
 
    /* -----------------------------------------------------
     * create A22 matrix (assume sequential for the moment)
@@ -1837,9 +1867,9 @@ printf("Extract submatrices nnz = %d %d %d %d\n", nnz11, nnz12, nnz21, nnz22);
    nnz_diag   = nnz22;
    global_nrows = proc_offsets2[nprocs];
    global_ncols = proc_offsets2[nprocs];
-   row_starts = (int *) malloc((nprocs+1) * sizeof(int));
-   col_starts = (int *) malloc((nprocs+1) * sizeof(int));
-   for (i = 0; i < nprocs; i++)
+   row_starts = hypre_CTAlloc(int, nprocs+1);
+   col_starts = hypre_CTAlloc(int, nprocs+1);
+   for (i = 0; i <= nprocs; i++)
    {
       row_starts[i] = proc_offsets2[i];
       col_starts[i] = proc_offsets2[i];
@@ -1847,9 +1877,9 @@ printf("Extract submatrices nnz = %d %d %d %d\n", nnz11, nnz12, nnz21, nnz22);
    A22_csr = hypre_ParCSRMatrixCreate(comm, global_nrows, global_ncols,
                     row_starts, col_starts, ncols_offd, nnz_diag, nnz_offd); 
    nrows = nrows_A - nindices;
-   diag_i = (int *) malloc((nrows+1) * sizeof(int));
-   diag_j = (int *) malloc(nnz_diag * sizeof(int));
-   diag_a = (double *) malloc(nnz_diag * sizeof(double));
+   diag_i = hypre_CTAlloc(int, nrows+1);
+   diag_j = hypre_CTAlloc(int, nnz_diag);
+   diag_a = hypre_CTAlloc(double, nnz_diag);
    nnz = 0;
    row = 0;
    diag_i[0] = 0;
@@ -1866,7 +1896,8 @@ printf("Extract submatrices nnz = %d %d %d %d\n", nnz11, nnz12, nnz21, nnz22);
                diag_a[nnz++] = A_diag_a[j];
             }
          }
-         diag_i[row++] = nnz;
+         row++;
+         diag_i[row] = nnz;
       }
    }
    diag = hypre_ParCSRMatrixDiag(A22_csr);
@@ -1874,14 +1905,21 @@ printf("Extract submatrices nnz = %d %d %d %d\n", nnz11, nnz12, nnz21, nnz22);
    hypre_CSRMatrixJ(diag) = diag_j;
    hypre_CSRMatrixData(diag) = diag_a;
 
+   offd_i = hypre_CTAlloc(int, nrows+1);
+   for (i = 0; i <= nrows; i++) offd_i[i] = 0;
+   offd = hypre_ParCSRMatrixOffd(A22_csr);
+   hypre_CSRMatrixI(offd) = offd_i;
+   hypre_CSRMatrixJ(offd) = NULL;
+   hypre_CSRMatrixData(offd) = NULL;
+
    /* -----------------------------------------------------
     * hand the matrices back to the caller and clean up 
     * ----------------------------------------------------- */
 
-   submatrices[0] = A11_csr;
-   submatrices[1] = A12_csr;
-   submatrices[2] = A21_csr;
-   submatrices[3] = A22_csr;
+   (*submatrices)[0] = A11_csr;
+   (*submatrices)[1] = A12_csr;
+   (*submatrices)[2] = A21_csr;
+   (*submatrices)[3] = A22_csr;
    free(proc_offsets1);
    free(proc_offsets2);
    free(exp_indices);
