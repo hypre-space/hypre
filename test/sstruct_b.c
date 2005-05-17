@@ -3780,7 +3780,7 @@ main( int   argc,
       bHYPRE_SStructParCSRVector_deleteRef(  b_spb);
       bHYPRE_SStructParCSRVector_deleteRef(  b_spx);
    }
-   else if ( matvec_type = HYPRE_STRUCT )
+   else if ( matvec_type == HYPRE_STRUCT )
    {
       bHYPRE_SStructMatrix_deleteRef( b_A );
       bHYPRE_SStructVector_deleteRef( b_b );
