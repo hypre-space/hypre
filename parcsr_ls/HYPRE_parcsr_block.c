@@ -56,10 +56,10 @@ int HYPRE_BlockTridiagSolve(HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_BlockTridiagSetBlock1Indices
+ * HYPRE_BlockTridiagSetIndexSet
  *--------------------------------------------------------------------------*/
 
-int HYPRE_BlockTridiagSetBlock1Indices(HYPRE_Solver solver,int n, int *inds)
+int HYPRE_BlockTridiagSetIndexSet(HYPRE_Solver solver,int n, int *inds)
 {
    return(hypre_BlockTridiagSetIndexSet((void *) solver, n, inds));
 }
