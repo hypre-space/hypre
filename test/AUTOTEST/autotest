@@ -211,20 +211,11 @@ do
         DEBUGMODE="yes"
         set -xv
         shift;;
-    -emperor)
-        HYPRE_ARCH="linux"
-        HYPRE_COMPILE_MACHINE="emperor"
-        HYPRE_RUN_MACHINE="emperor"
-        HYPRE_REMOTE_DIR="/usr/casc/hypre/i686-pc-linux-gnu-chaos2/AUTOTEST"
-        HYPRE_MACHINE_COMMANDS="-mnse 1 -a 2 -cf"
-        HYPRE_MESSAGE='SECONDARY[EMPEROR]'
-	perform_test
-        shift;;
     -frost | -frostmp)
         HYPRE_ARCH="blue"
         HYPRE_COMPILE_MACHINE="frost"
         HYPRE_RUN_MACHINE="frost"
-        HYPRE_REMOTE_DIR="/usr/casc/hypre/powerpcll-ibm-aix5.1.0.0/AUTOTEST"
+        HYPRE_REMOTE_DIR="/usr/casc/hypre/aix_5_ll/AUTOTEST"
         if [ "$1" = "-frostmp" ] ; then
 	  HYPRE_MACHINE_COMMANDS="-mnse 1 -a 1 -cfo 2"
           HYPRE_MESSAGE='SECONDARY[OpenMP-Frost]'
@@ -238,7 +229,7 @@ do
         HYPRE_ARCH="dec"
         HYPRE_COMPILE_MACHINE="gps"
         HYPRE_RUN_MACHINE="gps320"
-        HYPRE_REMOTE_DIR="/usr/casc/hypre/alphaev68-dec-osf5.1/AUTOTEST"
+        HYPRE_REMOTE_DIR="/usr/casc/hypre/tru64_5/AUTOTEST"
         if [ "$1" = "-gps" ] ; then
 	  HYPRE_MACHINE_COMMANDS="-m -r $HYPRE_RUN_MACHINE -nse 1 -a 2 -cf"
           HYPRE_MESSAGE='SECONDARY[GPS]'
@@ -255,7 +246,7 @@ do
         HYPRE_ARCH="linux"
         HYPRE_COMPILE_MACHINE="ilx"
         HYPRE_RUN_MACHINE="ilx"
-        HYPRE_REMOTE_DIR="/usr/casc/hypre/i686-pc-linux-gnu-ilx/AUTOTEST"
+        HYPRE_REMOTE_DIR="/usr/casc/hypre/chaos_2_ia32/AUTOTEST"
 	HYPRE_MACHINE_COMMANDS="-mne 1 -a 2 -cf"
         HYPRE_MESSAGE='SECONDARY[ILX]'
 	perform_test
@@ -275,7 +266,7 @@ do
         HYPRE_ARCH="linux"
         HYPRE_COMPILE_MACHINE="mcr"
         HYPRE_RUN_MACHINE="mcr"
-        HYPRE_REMOTE_DIR="/usr/casc/hypre/i686-pc-linux-gnu-chaos2/AUTOTEST"
+        HYPRE_REMOTE_DIR="/usr/casc/hypre/chaos_2_ia32_elan3/AUTOTEST"
         HYPRE_MACHINE_COMMANDS="-mnse 1 -a 2 -cf"
         HYPRE_MESSAGE='SECONDARY[MCR]'
 	perform_test
@@ -288,7 +279,7 @@ do
         HYPRE_ARCH="linux"
         HYPRE_COMPILE_MACHINE="pengra"
         HYPRE_RUN_MACHINE="pengra"
-        HYPRE_REMOTE_DIR="/usr/casc/hypre/i686-pc-linux-gnu-chaos2/AUTOTEST"
+        HYPRE_REMOTE_DIR="/usr/casc/hypre/chaos_2_ia32_elan3/AUTOTEST"
         HYPRE_MACHINE_COMMANDS="-mnse 1 -a 2 -cf"
         HYPRE_MESSAGE='SECONDARY[Pengra]'
 	perform_test
@@ -306,15 +297,6 @@ do
         echo "ERROR: -rev option MUST be first argument! Quiting..."
         help
         exit;;
-    -sc*)
-        HYPRE_ARCH="dec"
-        HYPRE_COMPILE_MACHINE="sc"
-        HYPRE_RUN_MACHINE="sc"
-        HYPRE_REMOTE_DIR="/usr/casc/hypre/alphaev68-dec-osf5.1/AUTOTEST"
-        HYPRE_MACHINE_COMMANDS="-m -r $HYPRE_RUN_MACHINE -nse 1 -a 2 -cf"
-        HYPRE_MESSAGE='SECONDARY[SC]'
-	perform_test
-        shift;;
     -tux149)
         HYPRE_ARCH="linux"
         HYPRE_COMPILE_MACHINE="tux149"
@@ -383,26 +365,6 @@ do
 	HYPRE_MACHINE_COMMANDS="-mb 1 -nde 1 -a 2 -cf"
         HYPRE_MESSAGE='SECONDARY[KCC]'
         COMPILERSELECT="kai"
-	perform_test
-        shift;;
-    -vivid)
-        HYPRE_ARCH="linux"
-        HYPRE_COMPILE_MACHINE="vivid"
-        HYPRE_RUN_MACHINE="vivid"
-        HYPRE_REMOTE_DIR="vivid:/usr/gapps/hypre/i686-pc-linux-gnu-vivid/AUTOTEST"
-        HYPRE_MACHINE_COMMANDS="-mne 1 -a 2 -cf"
-        HYPRE_MESSAGE='OTHER[VIVID]'
-        SCP_COMMAND="scp -q"
-	perform_test
-        SCP_COMMAND="cp"
-        shift;;
-    -white)
-        HYPRE_ARCH="blue"
-        HYPRE_COMPILE_MACHINE="white"
-        HYPRE_RUN_MACHINE="white"
-        HYPRE_REMOTE_DIR="/usr/casc/hypre/powerpcll-ibm-aix5.1.0.0/AUTOTEST"
-	HYPRE_MACHINE_COMMANDS="-me 1 -nsb 1 -o 1 -a 2 -cf"
-        HYPRE_MESSAGE='SECONDARY[white]'
 	perform_test
         shift;;
     *)
