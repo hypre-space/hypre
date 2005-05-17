@@ -340,8 +340,8 @@ impl_bHYPRE_SStructParCSRVector_GetObject(
 
    ierr += HYPRE_IJVectorCreate( data->comm, ilower, iupper, &Hijx );
    ierr += HYPRE_IJVectorSetObjectType( Hijx, HYPRE_PARCSR );
-   ierr += HYPRE_IJVectorInitialize( Hijx );
    hypre_IJVectorObject( (hypre_IJVector *) Hijx ) = HYPRE_ParVectorCloneShallow( Hpx );
+   ierr += HYPRE_IJVectorInitialize( Hijx );
 
    /* Now that we have made Hijx from Hpx, load it into p_data, the data of px.
       Then px is ready for output, as A.*/
