@@ -28,7 +28,7 @@ void *hypre_BlockTridiagCreate()
 {
    hypre_BlockTridiagData *b_data;
    b_data = hypre_CTAlloc(hypre_BlockTridiagData, 1);
-   b_data->threshold = 0.25;
+   b_data->threshold = 0.0;
    b_data->num_sweeps = 1;
    b_data->relax_type = 6;
    b_data->print_level = 0;
@@ -101,12 +101,12 @@ int hypre_BlockTridiagDestroy(void *data)
    }
    if (b_data->precon1)
    {
-      HYPRE_BoomerAMGDestroy(*(b_data->precon1));
+      HYPRE_BoomerAMGDestroy(b_data->precon1);
       b_data->precon1 = NULL;
    }
    if (b_data->precon2)
    {
-      HYPRE_BoomerAMGDestroy(*(b_data->precon2));
+      HYPRE_BoomerAMGDestroy(b_data->precon2);
       b_data->precon2 = NULL;
    }
    hypre_TFree(b_data);
@@ -125,8 +125,8 @@ int hypre_BlockTridiagSetup(void *data, hypre_ParCSRMatrix *A,
    int                count, ierr;
    double             threshold;
    hypre_ParCSRMatrix **submatrices;
-   HYPRE_Solver       *precon1;
-   HYPRE_Solver       *precon2;
+   HYPRE_Solver       precon1;
+   HYPRE_Solver       precon2;
    HYPRE_IJVector     ij_u1, ij_u2, ij_f1, ij_f2;
    hypre_ParVector    *vector;
    MPI_Comm           comm;
@@ -141,55 +141,14 @@ int hypre_BlockTridiagSetup(void *data, hypre_ParCSRMatrix *A,
    index_set2 = b_data->index_set2;
    index_set2[0] = nrows2;
    count = 1;
-   for (i = 0; i < index_set1[0]; i++) index_set2[count++] = i;
-   for (i = 0; i < nrows1-1; i++) 
+   for (i = 0; i < index_set1[1]; i++) index_set2[count++] = i;
+   for (i = 1; i < nrows1; i++) 
       for (j = index_set1[i]+1; i < index_set1[i+1]; i++) 
          index_set2[count++] = i;
-   for (i = index_set1[nrows1-1]+1; i < nrows; i++) index_set2[count++] = i;
+   for (i = index_set1[nrows1]+1; i < nrows; i++) index_set2[count++] = i;
 
    submatrices = hypre_CTAlloc(hypre_ParCSRMatrix *, 4);
-   for (i = 0; i < 4; i++)
-      submatrices[i] = hypre_CTAlloc(hypre_ParCSRMatrix, 1);
-   hypre_ParCSRMatrixExtractSubmatrices(A, index_set1, submatrices);
-
-   print_level = b_data->print_level;
-   threshold   = b_data->threshold;
-   nsweeps     = b_data->num_sweeps;
-   relax_type  = b_data->relax_type;
-   precon1     = b_data->precon1;
-   precon2     = b_data->precon2;
-   HYPRE_BoomerAMGCreate(precon1);
-   HYPRE_BoomerAMGSetMaxIter(*precon1, 1);
-   HYPRE_BoomerAMGSetCycleType(*precon1, 1);
-   HYPRE_BoomerAMGSetPrintLevel(*precon1, print_level);
-   HYPRE_BoomerAMGSetMaxLevels(*precon1, 25);
-   HYPRE_BoomerAMGSetMeasureType(*precon1, 0);
-   HYPRE_BoomerAMGSetCoarsenType(*precon1, 0);
-   HYPRE_BoomerAMGSetMeasureType(*precon1, 1);
-   HYPRE_BoomerAMGSetStrongThreshold(*precon1, threshold);
-   HYPRE_BoomerAMGSetNumFunctions(*precon1, 1);
-   HYPRE_BoomerAMGSetNumSweeps(*precon1, nsweeps);
-   HYPRE_BoomerAMGSetRelaxType(*precon1, relax_type);
-   hypre_BoomerAMGSetup(*precon1, submatrices[0], NULL, NULL);
-
-   HYPRE_BoomerAMGCreate(precon2);
-   HYPRE_BoomerAMGSetMaxIter(*precon2, 1);
-   HYPRE_BoomerAMGSetCycleType(*precon2, 1);
-   HYPRE_BoomerAMGSetPrintLevel(*precon2, print_level);
-   HYPRE_BoomerAMGSetMaxLevels(*precon2, 25);
-   HYPRE_BoomerAMGSetMeasureType(*precon2, 0);
-   HYPRE_BoomerAMGSetCoarsenType(*precon2, 0);
-   HYPRE_BoomerAMGSetMeasureType(*precon2, 1);
-   HYPRE_BoomerAMGSetStrongThreshold(*precon2, threshold);
-   HYPRE_BoomerAMGSetNumFunctions(*precon2, 1);
-   HYPRE_BoomerAMGSetNumSweeps(*precon2, nsweeps);
-   HYPRE_BoomerAMGSetRelaxType(*precon2, relax_type);
-   hypre_BoomerAMGSetup(*precon2, submatrices[3], NULL, NULL);
-
-   b_data->A11 = submatrices[0];
-   hypre_ParCSRMatrixDestroy(submatrices[1]);
-   b_data->A21 = submatrices[2];
-   b_data->A22 = submatrices[3];
+   hypre_ParCSRMatrixExtractSubmatrices(A, index_set1, &submatrices);
 
    nrows1 = hypre_ParCSRMatrixNumRows(submatrices[0]);
    nrows2 = hypre_ParCSRMatrixNumRows(submatrices[3]); 
@@ -197,22 +156,22 @@ int hypre_BlockTridiagSetup(void *data, hypre_ParCSRMatrix *A,
    start2 = hypre_ParCSRMatrixFirstRowIndex(submatrices[3]);
    HYPRE_IJVectorCreate(comm, start1, start1+nrows1-1, &ij_u1);
    HYPRE_IJVectorSetObjectType(ij_u1, HYPRE_PARCSR);
-   ierr += HYPRE_IJVectorInitialize(ij_u1);
+   ierr  = HYPRE_IJVectorInitialize(ij_u1);
    ierr += HYPRE_IJVectorAssemble(ij_u1);
    assert(!ierr);
    HYPRE_IJVectorCreate(comm, start1, start1+nrows1-1, &ij_f1);
    HYPRE_IJVectorSetObjectType(ij_f1, HYPRE_PARCSR);
-   ierr += HYPRE_IJVectorInitialize(ij_f1);
+   ierr  = HYPRE_IJVectorInitialize(ij_f1);
    ierr += HYPRE_IJVectorAssemble(ij_f1);
    assert(!ierr);
    HYPRE_IJVectorCreate(comm, start2, start2+nrows2-1, &ij_u2);
    HYPRE_IJVectorSetObjectType(ij_u2, HYPRE_PARCSR);
-   ierr += HYPRE_IJVectorInitialize(ij_u2);
+   ierr  = HYPRE_IJVectorInitialize(ij_u2);
    ierr += HYPRE_IJVectorAssemble(ij_u2);
    assert(!ierr);
    HYPRE_IJVectorCreate(comm, start2, start2+nrows1-1, &ij_f2);
    HYPRE_IJVectorSetObjectType(ij_f2, HYPRE_PARCSR);
-   ierr += HYPRE_IJVectorInitialize(ij_f2);
+   ierr  = HYPRE_IJVectorInitialize(ij_f2);
    ierr += HYPRE_IJVectorAssemble(ij_f2);
    assert(!ierr);
    HYPRE_IJVectorGetObject(ij_f1, (void **) &vector);
@@ -223,6 +182,47 @@ int hypre_BlockTridiagSetup(void *data, hypre_ParCSRMatrix *A,
    b_data->F2 = vector;
    HYPRE_IJVectorGetObject(ij_u2, (void **) &vector);
    b_data->U2 = vector;
+
+   print_level = b_data->print_level;
+   threshold   = b_data->threshold;
+   nsweeps     = b_data->num_sweeps;
+   relax_type  = b_data->relax_type;
+   threshold = b_data->threshold;
+   HYPRE_BoomerAMGCreate(&precon1);
+   HYPRE_BoomerAMGSetMaxIter(precon1, 1);
+   HYPRE_BoomerAMGSetCycleType(precon1, 1);
+   HYPRE_BoomerAMGSetPrintLevel(precon1, print_level);
+   HYPRE_BoomerAMGSetMaxLevels(precon1, 25);
+   HYPRE_BoomerAMGSetMeasureType(precon1, 0);
+   HYPRE_BoomerAMGSetCoarsenType(precon1, 0);
+   HYPRE_BoomerAMGSetStrongThreshold(precon1, threshold);
+   HYPRE_BoomerAMGSetNumFunctions(precon1, 1);
+   HYPRE_BoomerAMGSetNumSweeps(precon1, nsweeps);
+   HYPRE_BoomerAMGSetRelaxType(precon1, relax_type);
+   hypre_BoomerAMGSetup(precon1, submatrices[0], b_data->U1, b_data->F1);
+
+   HYPRE_BoomerAMGCreate(&precon2);
+   HYPRE_BoomerAMGSetMaxIter(precon2, 1);
+   HYPRE_BoomerAMGSetCycleType(precon2, 1);
+   HYPRE_BoomerAMGSetPrintLevel(precon2, print_level);
+   HYPRE_BoomerAMGSetMaxLevels(precon2, 25);
+   HYPRE_BoomerAMGSetMeasureType(precon2, 0);
+   HYPRE_BoomerAMGSetCoarsenType(precon2, 0);
+   HYPRE_BoomerAMGSetMeasureType(precon2, 1);
+   HYPRE_BoomerAMGSetStrongThreshold(precon2, threshold);
+   HYPRE_BoomerAMGSetNumFunctions(precon2, 1);
+   HYPRE_BoomerAMGSetNumSweeps(precon2, nsweeps);
+   HYPRE_BoomerAMGSetRelaxType(precon2, relax_type);
+   hypre_BoomerAMGSetup(precon2, submatrices[3], NULL, NULL);
+
+   b_data->precon1 = precon1;
+   b_data->precon2 = precon2;
+
+   b_data->A11 = submatrices[0];
+   hypre_ParCSRMatrixDestroy(submatrices[1]);
+   b_data->A21 = submatrices[2];
+   b_data->A22 = submatrices[3];
+
    hypre_TFree(submatrices);
    return (0);
 }
@@ -238,7 +238,7 @@ int hypre_BlockTridiagSolve(void *data, hypre_ParCSRMatrix *A,
    double             *ffv, *uuv, *f1v, *f2v, *u1v, *u2v;
    HYPRE_ParCSRMatrix A21, A11, A22;
    hypre_ParVector    *F1, *U1, *F2, *U2;
-   HYPRE_Solver       *precon1, *precon2;
+   HYPRE_Solver       precon1, precon2;
    hypre_BlockTridiagData *b_data = (hypre_BlockTridiagData *) data;
  
    index_set1 = b_data->index_set1;
@@ -264,17 +264,20 @@ int hypre_BlockTridiagSolve(void *data, hypre_ParCSRMatrix *A,
    {
       ind = index_set1[i+1];
       f1v[i] = ffv[ind];
-      u1v[i] = uuv[ind];
+      u1v[i] = 0.0;
    }
-   HYPRE_BoomerAMGSolve(*precon1, A11, (HYPRE_ParVector) F1, (HYPRE_ParVector) U1);
+   HYPRE_BoomerAMGSolve(precon1, A11, (HYPRE_ParVector) F1, 
+                        (HYPRE_ParVector) U1);
    for (i = 0; i < nrows2; i++)
    {
       ind = index_set2[i+1];
       f2v[i] = ffv[ind];
-      u2v[i] = uuv[ind];
+      u2v[i] = 0.0;
    }
-   HYPRE_ParCSRMatrixMatvec(-1.0, A21, (HYPRE_ParVector) U1, 1.0, (HYPRE_ParVector) F2);
-   HYPRE_BoomerAMGSolve(*precon2, A22, (HYPRE_ParVector) F2, (HYPRE_ParVector) U2);
+   HYPRE_ParCSRMatrixMatvec(-1.0,A21,(HYPRE_ParVector) U1,1.0,
+                            (HYPRE_ParVector) F2);
+   HYPRE_BoomerAMGSolve(precon2, A22, (HYPRE_ParVector) F2, 
+                        (HYPRE_ParVector) U2);
    for (i = 0; i < nrows1; i++)
    {
       ind = index_set1[i+1];
@@ -331,7 +334,7 @@ int hypre_BlockTridiagSetAMGNumSweeps(void *data, int nsweeps)
  * Routines to set the relaxation method for AMG
  *--------------------------------------------------------------------------*/
 
-int hypre_BlockTridiagSetRelaxType(void *data, int relax_type)
+int hypre_BlockTridiagSetAMGRelaxType(void *data, int relax_type)
 {
    hypre_BlockTridiagData *b_data = data;
    b_data->relax_type = relax_type;
