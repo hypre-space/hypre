@@ -372,6 +372,7 @@ apply_error_filters () {
       tux*)
         for ii in \
           'autoconf\ has\ been\ disabled'\
+          'automake\ has\ been\ disabled'\
           'configure:\ WARNING:\ Configuration\ for'\
           'babel_config.h.in:\ No\ such\ file\ or\ directory'\
           'Insure\ messages\ will\ be\ written\ to\ insure'\
