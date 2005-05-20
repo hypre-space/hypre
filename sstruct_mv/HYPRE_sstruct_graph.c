@@ -99,7 +99,6 @@ HYPRE_SStructGraphDestroy( HYPRE_SStructGraph graph )
          iUventries = hypre_SStructGraphIUVEntries(graph);
 
          Uventries  = hypre_SStructGraphUVEntries(graph);
-         HYPRE_SStructGridDestroy(hypre_SStructGraphGrid(graph));
          for (part = 0; part < nparts; part++)
          {
             nvars = hypre_SStructPGridNVars(pgrids[part]);
@@ -109,6 +108,7 @@ HYPRE_SStructGraphDestroy( HYPRE_SStructGraph graph )
             }
             hypre_TFree(stencils[part]);
          }
+         HYPRE_SStructGridDestroy(hypre_SStructGraphGrid(graph));
          hypre_TFree(stencils);
          for (i = 0; i < nUventries; i++)
          {
