@@ -60,6 +60,7 @@ hypre_AMR_CFCoarsen( hypre_SStructMatrix  *   A,
                      int                      level ) 
 
 {
+   MPI_Comm                comm       = hypre_SStructMatrixComm(A);
    hypre_SStructGraph     *graph      = hypre_SStructMatrixGraph(A);
    int                     graph_type = hypre_SStructGraphObjectType(graph);
    hypre_SStructGrid      *grid       = hypre_SStructGraphGrid(graph);
@@ -127,7 +128,7 @@ hypre_AMR_CFCoarsen( hypre_SStructMatrix  *   A,
 
    int                     myid;
 
-   MPI_Comm_rank(MPI_COMM_WORLD, &myid);
+   MPI_Comm_rank(comm, &myid);
    hypre_SetIndex(zero_index, 0, 0, 0);
    
    /*--------------------------------------------------------------------------

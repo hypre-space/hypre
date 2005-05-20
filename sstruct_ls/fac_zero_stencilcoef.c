@@ -193,6 +193,7 @@ hypre_FacZeroFCSten( hypre_SStructPMatrix  *A,
                      hypre_SStructGrid     *grid,
                      int                    fine_part)
 {
+   MPI_Comm               comm=   hypre_SStructGridComm(grid); 
    hypre_BoxMap          *fmap;
    hypre_BoxMapEntry    **map_entries;
    int                    nmap_entries;
@@ -231,7 +232,7 @@ hypre_FacZeroFCSten( hypre_SStructPMatrix  *A,
    int                    myid, proc;
    int                    ierr = 0;
 
-   MPI_Comm_rank(MPI_COMM_WORLD, &myid);
+   MPI_Comm_rank(comm, &myid);
    hypre_SetIndex(stride, 1, 1, 1);
 
    p_fgrid  = hypre_SStructPMatrixPGrid(A);

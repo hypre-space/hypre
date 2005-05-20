@@ -73,7 +73,7 @@ hypre_AMR_RAP( hypre_SStructMatrix  *A,
    int                          myid;
    int                          ierr= 0;
 
-   MPI_Comm_rank(MPI_COMM_WORLD, &myid);
+   MPI_Comm_rank(comm, &myid);
    hypre_ClearIndex(zero_index);
 
    hypre_SStructGraphRef(graph, &fac_graph);
