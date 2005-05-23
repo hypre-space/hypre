@@ -42,7 +42,6 @@ HYPRE_ALL_EMAIL="$HYPRE_DEFAULT_EMAIL\
  kolev1@llnl.gov\
  yang11@llnl.gov\
  vhenson@llnl.gov\
- chow8@llnl.gov\
  chtong@llnl.gov"
 
 export HYPRE_DEFAULT_EMAIL HYPRE_ALL_EMAIL
