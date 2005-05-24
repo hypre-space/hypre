@@ -34,6 +34,9 @@
 #ifndef included_bHYPRE_IJParCSRVector_h
 #include "bHYPRE_IJParCSRVector.h"
 #endif
+#ifndef included_bHYPRE_IdentitySolver_h
+#include "bHYPRE_IdentitySolver.h"
+#endif
 #ifndef included_bHYPRE_Operator_h
 #include "bHYPRE_Operator.h"
 #endif
