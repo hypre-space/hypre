@@ -41,6 +41,9 @@
 #ifndef included_bHYPRE_IJParCSRVector_IOR_h
 #include "bHYPRE_IJParCSRVector_IOR.h"
 #endif
+#ifndef included_bHYPRE_IdentitySolver_IOR_h
+#include "bHYPRE_IdentitySolver_IOR.h"
+#endif
 #ifndef included_bHYPRE_Operator_IOR_h
 #include "bHYPRE_Operator_IOR.h"
 #endif
