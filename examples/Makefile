@@ -15,6 +15,14 @@ CFLAGS    = $(COPTS) $(CINCLUDES) $(CDEFS)
 LINKOPTS  = $(COPTS)
 LIBS      = -L$(HYPRE_DIR)/lib -lHYPRE -llapack -lblas -lg2c -lm
 LFLAGS    = $(LINKOPTS) $(LIBS) -lstdc++
+LFLAGS_B =\
+ -L${HYPRE_DIR}/lib\
+ -L${HYPRE_DIR}/../babel-runtime/sidl/.libs\
+ -lbHYPRE\
+ -lbHYPREClient-C\
+ -lbHYPREClient-F\
+ -lbHYPRE\
+ -lsidl
 
 ########################################################################
 # Rules for compiling the source files
@@ -58,6 +66,12 @@ ex4: ex4.o
 ########################################################################
 ex5: ex5.o
 	$(CC) -o $@ $^ $(LFLAGS)
+
+########################################################################
+# Example 5 Babel
+########################################################################
+ex5b: ex5b.o
+	$(CC) -o $@ $^ $(LFLAGS_B) $(LFLAGS)
 
 ########################################################################
 # Clean up
