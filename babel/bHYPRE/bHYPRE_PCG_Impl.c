@@ -1122,6 +1122,17 @@ impl_bHYPRE_PCG_SetPreconditioner(
       bHYPRE_StructPFMG_deleteRef( PFMG_s ); /* extra reference from queryInt */
       bHYPRE_StructPFMG_deleteRef( PFMG_s ); /* extra reference from queryInt */
    }
+   else if ( bHYPRE_Solver_queryInt( s, "bHYPRE.IdentitySolver" ) )
+   {
+      /* s is an IdentitySolver, a dummy which just "solves" the identity matrix */
+      bHYPRE_Solver_deleteRef( s ); /* extra ref from queryInt */
+      /* The right thing at this point is to check for vector type, then specify
+         the right hypre identity solver (_really_ the right thing is to use the
+         babel-level identity solver, but that requires PCG to be implemented at the
+         babel level). */
+      precond = (HYPRE_PtrToSolverFcn) hypre_ParKrylovIdentity;
+      precond_setup = (HYPRE_PtrToSolverFcn) hypre_ParKrylovIdentitySetup;
+   }
    /* put other preconditioner types here */
    else
    {
