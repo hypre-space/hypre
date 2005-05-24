@@ -1152,6 +1152,17 @@ package bHYPRE version 1.0.0
    /*----------- Classes ---------------------------------------------------*/
 
    /**
+    * Identity solver, just solves an identity matrix, for when you don't really
+    * want a preconditioner
+    *
+    * Objects of this type can be cast to Solver objects using the
+    * {\tt \_\_cast} methods.
+    **/
+   class IdentitySolver implements-all Solver
+   {
+   }
+
+   /**
     * Diagonal scaling preconditioner for ParCSR matrix class.
     *
     * Objects of this type can be cast to Solver objects using the
