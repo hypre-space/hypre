@@ -9,7 +9,7 @@
 
 include ../config/Makefile.config
 
-HYPRE_BABEL_DIRS =\
+BHYPRE_BABEL_DIRS =\
  bHYPRE \
  bHYPREClient-C\
  bHYPREClient-F
@@ -18,7 +18,7 @@ HYPRE_BABEL_RUNTIME_SIDL_DIR = ${HYPRE_SRC_TOP_DIR}/babel-runtime/sidl
 
 all:
 	@ \
-	for i in ${HYPRE_BABEL_DIRS}; \
+	for i in ${BHYPRE_BABEL_DIRS}; \
 	do \
 	  if [ -d $$i ]; \
 	  then \
@@ -30,7 +30,7 @@ all:
 
 install:
 	@ \
-	for i in ${HYPRE_BABEL_DIRS}; \
+	for i in ${BHYPRE_BABEL_DIRS}; \
 	do \
 	  if [ -d $$i ]; \
 	  then \
@@ -42,7 +42,7 @@ install:
 
 clean:
 	@ \
-	for i in ${HYPRE_BABEL_DIRS}; \
+	for i in ${BHYPRE_BABEL_DIRS}; \
 	do \
 	  if [ -d $$i ]; \
 	  then \
@@ -52,7 +52,7 @@ clean:
 
 distclean:
 	@ \
-	for i in ${HYPRE_BABEL_DIRS}; \
+	for i in ${BHYPRE_BABEL_DIRS}; \
 	do \
 	  if [ -d $$i ]; \
 	  then \
