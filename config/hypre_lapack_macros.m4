@@ -140,6 +140,7 @@ AC_DEFUN([HYPRE_SET_LAPACK_FILES],
   F13="HYPRE_TOP_SRC_DIR/lapack/dlas2.c HYPRE_TOP_SRC_DIR/lapack/dlascl.c"
   F14="HYPRE_TOP_SRC_DIR/lapack/dlaset.c HYPRE_TOP_SRC_DIR/lapack/dlasq1.c"
   F15="HYPRE_TOP_SRC_DIR/lapack/dlasq2.c HYPRE_TOP_SRC_DIR/lapack/dlasq3.c"
+
   F16="HYPRE_TOP_SRC_DIR/lapack/dlasq4.c HYPRE_TOP_SRC_DIR/lapack/dlasq5.c"
   F17="HYPRE_TOP_SRC_DIR/lapack/dlasq6.c HYPRE_TOP_SRC_DIR/lapack/dlasr.c"
   F18="HYPRE_TOP_SRC_DIR/lapack/dlasrt.c HYPRE_TOP_SRC_DIR/lapack/dlassq.c"
@@ -155,16 +156,20 @@ AC_DEFUN([HYPRE_SET_LAPACK_FILES],
   F28="HYPRE_TOP_SRC_DIR/lapack/dsteqr.c HYPRE_TOP_SRC_DIR/lapack/dsterf.c"
   F29="HYPRE_TOP_SRC_DIR/lapack/dsyev.c HYPRE_TOP_SRC_DIR/lapack/dsygs2.c"
   F30="HYPRE_TOP_SRC_DIR/lapack/dsygst.c HYPRE_TOP_SRC_DIR/lapack/dsygv.c"
+
   F31="HYPRE_TOP_SRC_DIR/lapack/dsytd2.c HYPRE_TOP_SRC_DIR/lapack/dsytrd.c"
   F32="HYPRE_TOP_SRC_DIR/lapack/ieeeck.c HYPRE_TOP_SRC_DIR/lapack/ilaenv.c"
   F33="HYPRE_TOP_SRC_DIR/lapack/lapack_utils.c"
   F34="HYPRE_TOP_SRC_DIR/lapack/lsame.c HYPRE_TOP_SRC_DIR/lapack/xerbla.c"
 
   Fil0="$FL1 $FL2 $FL3 $FL4 $FL5 $FL6 $FL7 $FL8 $FL9 $F10"
-  Fil1="$F11 $F12 $F13 $F14 $F15 $F16 $F17 $F18 $F19 $F20"
-  Fil2="$F21 $F22 $F23 $F24 $F25 $F26 $F27 $F28 $F29 $F30"
-  Fil3="$F31 $F32 $F33 $F34"
+  Fil1="$F11 $F12 $F13 $F14 $F15"
+  Fil2="$F16 $F17 $F18 $F19 $F20 $F21 $F22 $F23 $F24 $F25"
+  Fil3="$F26 $F27 $F28 $F29 $F30"
+  Fil4="$F31 $F32 $F33 $F34"
 
-  HYPRELAPACKFILES="$Fil0 $Fil1 $Fil2 $Fil3"
+  HYPRELAPACKFILS1="$Fil0 $Fil1"
+  HYPRELAPACKFILS2="$Fil2 $Fil3"
+  HYPRELAPACKFILS3="$Fil4"
 
 ])dnl HYPRE_SET_LAPACK_FILES

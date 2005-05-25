@@ -83,7 +83,9 @@ HYPRE_BABEL_DIRS = @BABELDIR@
 ##################################################################
 LAPACKLIBS = @LAPACKLIBS@
 LAPACKLIBDIRS = @LAPACKLIBDIRS@
-HYPRE_LAPACKFILES = @HYPRELAPACKFILES@
+HYPRE_LAPACKFILS1 = @HYPRELAPACKFILS1@
+HYPRE_LAPACKFILS2 = @HYPRELAPACKFILS2@
+HYPRE_LAPACKFILS3 = @HYPRELAPACKFILS3@
 
 ##################################################################
 ##  BLAS Library Flags 
