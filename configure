@@ -322,7 +322,7 @@ ac_includes_default="\
 #endif"
 
 ac_subdirs_all="$ac_subdirs_all babel-runtime"
-ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS build build_cpu build_vendor build_os host host_cpu host_vendor host_os PACKAGE_DATETIME HYPRE_TOP_SRCDIR HYPRE_RELEASEVERSION HYPRE_RELEASEDATE HYPRE_RELEASETIME HYPRE_RELEASEDATETIME CC CXX F77 RANLIB ac_ct_RANLIB INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA AWK CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT CPP LN_S SET_MAKE CXXFLAGS ac_ct_CXX FFLAGS ac_ct_F77 FLIBS CXXCPP FPP EGREP POW_LIB LIBOBJS MPILIBS subdirs BABELDIR HYPRE_ARCH HOSTNAME F77FLAGS HYPRE_INSTALLDIR HYPRE_LIBINSTALL HYPRE_INCINSTALL INCLUDES LIBDIRS LDLIBS LDLIBDIRS HYPRE_LIBSUFFIX MPIINCLUDE MPILIBDIRS MPIFLAGS TIMERDEFS FEILIBS FEILIBDIRS FEIINCLUDE MLI_DIR MLILIBS MLILIBDIRS MLIINCLUDE BLASLIBDIRS BLASLIBS HYPREBLASFILES HYPREBLASHEADERS LAPACKLIBDIRS LAPACKLIBS HYPRELAPACKFILES HYPRELAPACKHEADERS AR LTLIBOBJS'
+ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS build build_cpu build_vendor build_os host host_cpu host_vendor host_os PACKAGE_DATETIME HYPRE_TOP_SRCDIR HYPRE_RELEASEVERSION HYPRE_RELEASEDATE HYPRE_RELEASETIME HYPRE_RELEASEDATETIME CC CXX F77 RANLIB ac_ct_RANLIB INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA AWK CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT CPP LN_S SET_MAKE CXXFLAGS ac_ct_CXX FFLAGS ac_ct_F77 FLIBS CXXCPP FPP EGREP POW_LIB LIBOBJS MPILIBS subdirs BABELDIR HYPRE_ARCH HOSTNAME F77FLAGS HYPRE_INSTALLDIR HYPRE_LIBINSTALL HYPRE_INCINSTALL INCLUDES LIBDIRS LDLIBS LDLIBDIRS HYPRE_LIBSUFFIX MPIINCLUDE MPILIBDIRS MPIFLAGS TIMERDEFS FEILIBS FEILIBDIRS FEIINCLUDE MLI_DIR MLILIBS MLILIBDIRS MLIINCLUDE BLASLIBDIRS BLASLIBS HYPREBLASFILES HYPREBLASHEADERS LAPACKLIBDIRS LAPACKLIBS HYPRELAPACKFILS1 HYPRELAPACKFILS2 HYPRELAPACKFILS3 HYPRELAPACKHEADERS AR LTLIBOBJS'
 ac_subst_files=''
 
 # Initialize some variables set by options.
@@ -8681,6 +8681,7 @@ echo "$as_me: WARNING: ***************************************" >&2;}
   F13="`pwd`/lapack/dlas2.c `pwd`/lapack/dlascl.c"
   F14="`pwd`/lapack/dlaset.c `pwd`/lapack/dlasq1.c"
   F15="`pwd`/lapack/dlasq2.c `pwd`/lapack/dlasq3.c"
+
   F16="`pwd`/lapack/dlasq4.c `pwd`/lapack/dlasq5.c"
   F17="`pwd`/lapack/dlasq6.c `pwd`/lapack/dlasr.c"
   F18="`pwd`/lapack/dlasrt.c `pwd`/lapack/dlassq.c"
@@ -8696,17 +8697,21 @@ echo "$as_me: WARNING: ***************************************" >&2;}
   F28="`pwd`/lapack/dsteqr.c `pwd`/lapack/dsterf.c"
   F29="`pwd`/lapack/dsyev.c `pwd`/lapack/dsygs2.c"
   F30="`pwd`/lapack/dsygst.c `pwd`/lapack/dsygv.c"
+
   F31="`pwd`/lapack/dsytd2.c `pwd`/lapack/dsytrd.c"
   F32="`pwd`/lapack/ieeeck.c `pwd`/lapack/ilaenv.c"
   F33="`pwd`/lapack/lapack_utils.c"
   F34="`pwd`/lapack/lsame.c `pwd`/lapack/xerbla.c"
 
   Fil0="$FL1 $FL2 $FL3 $FL4 $FL5 $FL6 $FL7 $FL8 $FL9 $F10"
-  Fil1="$F11 $F12 $F13 $F14 $F15 $F16 $F17 $F18 $F19 $F20"
-  Fil2="$F21 $F22 $F23 $F24 $F25 $F26 $F27 $F28 $F29 $F30"
-  Fil3="$F31 $F32 $F33 $F34"
+  Fil1="$F11 $F12 $F13 $F14 $F15"
+  Fil2="$F16 $F17 $F18 $F19 $F20 $F21 $F22 $F23 $F24 $F25"
+  Fil3="$F26 $F27 $F28 $F29 $F30"
+  Fil4="$F31 $F32 $F33 $F34"
 
-  HYPRELAPACKFILES="$Fil0 $Fil1 $Fil2 $Fil3"
+  HYPRELAPACKFILS1="$Fil0 $Fil1"
+  HYPRELAPACKFILS2="$Fil2 $Fil3"
+  HYPRELAPACKFILS3="$Fil4"
 
 
 
@@ -8739,6 +8744,7 @@ _ACEOF
   F13="`pwd`/lapack/dlas2.c `pwd`/lapack/dlascl.c"
   F14="`pwd`/lapack/dlaset.c `pwd`/lapack/dlasq1.c"
   F15="`pwd`/lapack/dlasq2.c `pwd`/lapack/dlasq3.c"
+
   F16="`pwd`/lapack/dlasq4.c `pwd`/lapack/dlasq5.c"
   F17="`pwd`/lapack/dlasq6.c `pwd`/lapack/dlasr.c"
   F18="`pwd`/lapack/dlasrt.c `pwd`/lapack/dlassq.c"
@@ -8754,17 +8760,21 @@ _ACEOF
   F28="`pwd`/lapack/dsteqr.c `pwd`/lapack/dsterf.c"
   F29="`pwd`/lapack/dsyev.c `pwd`/lapack/dsygs2.c"
   F30="`pwd`/lapack/dsygst.c `pwd`/lapack/dsygv.c"
+
   F31="`pwd`/lapack/dsytd2.c `pwd`/lapack/dsytrd.c"
   F32="`pwd`/lapack/ieeeck.c `pwd`/lapack/ilaenv.c"
   F33="`pwd`/lapack/lapack_utils.c"
   F34="`pwd`/lapack/lsame.c `pwd`/lapack/xerbla.c"
 
   Fil0="$FL1 $FL2 $FL3 $FL4 $FL5 $FL6 $FL7 $FL8 $FL9 $F10"
-  Fil1="$F11 $F12 $F13 $F14 $F15 $F16 $F17 $F18 $F19 $F20"
-  Fil2="$F21 $F22 $F23 $F24 $F25 $F26 $F27 $F28 $F29 $F30"
-  Fil3="$F31 $F32 $F33 $F34"
+  Fil1="$F11 $F12 $F13 $F14 $F15"
+  Fil2="$F16 $F17 $F18 $F19 $F20 $F21 $F22 $F23 $F24 $F25"
+  Fil3="$F26 $F27 $F28 $F29 $F30"
+  Fil4="$F31 $F32 $F33 $F34"
 
-  HYPRELAPACKFILES="$Fil0 $Fil1 $Fil2 $Fil3"
+  HYPRELAPACKFILS1="$Fil0 $Fil1"
+  HYPRELAPACKFILS2="$Fil2 $Fil3"
+  HYPRELAPACKFILS3="$Fil4"
 
 
 
@@ -9390,6 +9400,8 @@ _ACEOF
 
        ;;
 esac
+
+
 
 
 
@@ -10137,7 +10149,9 @@ s,@HYPREBLASFILES@,$HYPREBLASFILES,;t t
 s,@HYPREBLASHEADERS@,$HYPREBLASHEADERS,;t t
 s,@LAPACKLIBDIRS@,$LAPACKLIBDIRS,;t t
 s,@LAPACKLIBS@,$LAPACKLIBS,;t t
-s,@HYPRELAPACKFILES@,$HYPRELAPACKFILES,;t t
+s,@HYPRELAPACKFILS1@,$HYPRELAPACKFILS1,;t t
+s,@HYPRELAPACKFILS2@,$HYPRELAPACKFILS2,;t t
+s,@HYPRELAPACKFILS3@,$HYPRELAPACKFILS3,;t t
 s,@HYPRELAPACKHEADERS@,$HYPRELAPACKHEADERS,;t t
 s,@AR@,$AR,;t t
 s,@LTLIBOBJS@,$LTLIBOBJS,;t t
