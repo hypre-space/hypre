@@ -62,6 +62,7 @@ struct bHYPRE_PCG__data {
    int stop_crit;
 
    /* preconditioner cache, to save in SetPreconditioner and apply in Apply:*/
+   char * precond_name;
    HYPRE_Solver * solverprecond;
    HYPRE_PtrToSolverFcn precond; /* function */
    HYPRE_PtrToSolverFcn precond_setup; /* function */

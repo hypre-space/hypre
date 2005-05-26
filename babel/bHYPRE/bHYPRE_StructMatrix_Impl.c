@@ -90,7 +90,7 @@ impl_bHYPRE_StructMatrix__dtor(
    HYPRE_StructMatrix matrix;
    data = bHYPRE_StructMatrix__get_data( self );
    matrix = data -> matrix;
-   ierr += HYPRE_StructMatrixDestroy( matrix );
+   if ( matrix ) ierr += HYPRE_StructMatrixDestroy( matrix );
    assert( ierr==0 );
    hypre_TFree( data );
 

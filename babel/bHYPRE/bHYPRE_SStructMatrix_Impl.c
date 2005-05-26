@@ -493,6 +493,13 @@ impl_bHYPRE_SStructMatrix_GetObject(
    sA = bHYPRE_StructMatrix__create();
    s_data = bHYPRE_StructMatrix__get_data( sA );
    ierr += HYPRE_SStructMatrixGetObject( HA, (void **) (&HsA) );
+   /* ...Be careful about this HYPRE_StructMatrix HsA.  There are now two pointers
+    to the same HYPRE_StructMatrix, HsA and something inside HA.  They don't know
+    about each other, and if you use one to destroy it once you mustn't use the
+    other to destroy it again. It would be better to use reference counting for
+    struct matrices, as is done for SStruct matrices.  My solution for here involves
+    an owns_matrix flag, see below. */
+
    s_data -> matrix = HsA;
    s_data -> comm = data -> comm;
    /* The grid and stencil slots of s_data haven't been set, but they shouldn't

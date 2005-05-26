@@ -633,6 +633,9 @@ impl_bHYPRE_PCG_Setup(
    }
    else if ( data->vector_type == "StructVector" )
    {
+      if ( data->precond_name=="IdentitySolver" )
+         assert( "IdentitySolver does not yet work with struct vectors"==0 );
+
       bHYPRES_b = bHYPRE_StructVector__cast
          ( bHYPRE_Vector_queryInt( b, "bHYPRE.StructVector") );
       datab_S = bHYPRE_StructVector__get_data( bHYPRES_b );
@@ -1061,6 +1064,7 @@ impl_bHYPRE_PCG_SetPreconditioner(
   /* Insert the implementation of the SetPreconditioner method here... */
 
    int ierr = 0;
+   char * precond_name;
    HYPRE_Solver * solverprecond;
    struct bHYPRE_PCG__data * dataself;
    struct bHYPRE_BoomerAMG__data * AMG_dataprecond;
@@ -1075,7 +1079,7 @@ impl_bHYPRE_PCG_SetPreconditioner(
 
    if ( bHYPRE_Solver_queryInt( s, "bHYPRE.BoomerAMG" ) )
    {
-      /* s is a bHYPRE_BoomerAMG */
+      precond_name = "BoomerAMG";
       AMG_s = bHYPRE_BoomerAMG__cast
          ( bHYPRE_Solver_queryInt( s, "bHYPRE.BoomerAMG") );
       AMG_dataprecond = bHYPRE_BoomerAMG__get_data( AMG_s );
@@ -1088,6 +1092,7 @@ impl_bHYPRE_PCG_SetPreconditioner(
    }
    else if ( bHYPRE_Solver_queryInt( s, "bHYPRE.ParCSRDiagScale" ) )
    {
+      precond_name = "ParCSRDiagScale";
       bHYPRE_Solver_deleteRef( s ); /* extra reference from queryInt */
       solverprecond = (HYPRE_Solver *) hypre_CTAlloc( double, 1 );
       /* ... HYPRE diagonal scaling needs no solver object, but we
@@ -1098,7 +1103,7 @@ impl_bHYPRE_PCG_SetPreconditioner(
    }
    else if ( bHYPRE_Solver_queryInt( s, "bHYPRE.StructSMG" ) )
    {
-      /* s is a bHYPRE_StructSMG */
+      precond_name = "StructSMG";
       SMG_s = bHYPRE_StructSMG__cast
          ( bHYPRE_Solver_queryInt( s, "bHYPRE.StructSMG") );
       SMG_dataprecond = bHYPRE_StructSMG__get_data( SMG_s );
@@ -1111,7 +1116,7 @@ impl_bHYPRE_PCG_SetPreconditioner(
    }
    else if ( bHYPRE_Solver_queryInt( s, "bHYPRE.StructPFMG" ) )
    {
-      /* s is a bHYPRE_StructPFMG */
+      precond_name = "StructPFMG";
       PFMG_s = bHYPRE_StructPFMG__cast
          ( bHYPRE_Solver_queryInt( s, "bHYPRE.StructPFMG") );
       PFMG_dataprecond = bHYPRE_StructPFMG__get_data( PFMG_s );
@@ -1125,6 +1130,7 @@ impl_bHYPRE_PCG_SetPreconditioner(
    else if ( bHYPRE_Solver_queryInt( s, "bHYPRE.IdentitySolver" ) )
    {
       /* s is an IdentitySolver, a dummy which just "solves" the identity matrix */
+      precond_name = "IdentitySolver";
       bHYPRE_Solver_deleteRef( s ); /* extra ref from queryInt */
       /* The right thing at this point is to check for vector type, then specify
          the right hypre identity solver (_really_ the right thing is to use the
@@ -1145,6 +1151,7 @@ impl_bHYPRE_PCG_SetPreconditioner(
     * matrix and vectors we'll need; not known until Apply is called.
     * So save the information in the bHYPRE data structure, and stick
     * it in HYPRE later... */
+   dataself->precond_name = precond_name;
    dataself->precond = precond;
    dataself->precond_setup = precond_setup;
    dataself->solverprecond = solverprecond;
