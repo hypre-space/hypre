@@ -97,6 +97,3 @@ libHYPRE_utilities.a: ${OBJS}
 	${RANLIB} $@
 
 ${OBJS}: ${HEADERS}
-
-timer.o: timer.c
-	${CC} -D_POSIX_SOURCE -o $@ -c ${CFLAGS} $<
