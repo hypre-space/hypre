@@ -8,10 +8,8 @@
 /* some debugging tools*/
 #define mydebug 0
 #define timeparts 0
-#define badpartition 0
-#define badpartition2 0
 
-int hypre_LocateAssummedPartition(int, int, int, hypre_SmIJPartition*, int);
+int hypre_LocateAssummedPartition(int, int, int, hypre_IJAssumedPart*, int);
 int hypre_GetAssumedPartitionProcFromRow( int, int, int* );
 int hypre_GetAssumedPartitionRowRange( int, int, int*, int* );
 int hypre_FillResponseIJDetermineSendProcs(void*, int, int, void*, MPI_Comm, void**, int*);
@@ -62,7 +60,7 @@ hypre_NewCommPkgCreate( hypre_ParCSRMatrix *parcsr_A)
    int        first_col_diag;
    int        max_response_size;
    
-   hypre_SmIJPartition               apart;
+   hypre_IJAssumedPart               apart;
    hypre_DataExchangeResponse        response_obj1, response_obj2;
    hypre_ProcListElements            send_proc_obj; 
 
@@ -585,7 +583,7 @@ hypre_NewCommPkgDestroy(hypre_ParCSRMatrix *parcsr_A)
 
 int 
 hypre_LocateAssummedPartition(int row_start, int row_end, int global_num_rows, 
-                        hypre_SmIJPartition *part, int myid)
+                        hypre_IJAssumedPart *part, int myid)
 {  
 
    int       i, ierr;
@@ -890,7 +888,7 @@ hypre_RangeFillResponseIJDetermineRecvProcs(void *p_recv_contact_buf,
 
 
    hypre_DataExchangeResponse  *response_obj = ro; 
-   hypre_SmIJPartition               *part = response_obj->data1;
+   hypre_IJAssumedPart               *part = response_obj->data1;
    
    int overhead = response_obj->send_response_overhead;
 
@@ -1069,38 +1067,6 @@ hypre_GetAssumedPartitionProcFromRow( int row, int global_num_rows, int *proc_id
    }
 
 
-#if badpartition
-
-   /*here is "bad" partition for testing - need more rows than procs*/
-
-   if (row <= (global_num_rows - num_procs))
-   {
-      *proc_id = 0;
-   }
-   else
-   {
-      *proc_id =  num_procs - global_num_rows + row;
-   }
-#endif
-
-#if badpartition2
-
-   /*here is another "bad" partition for testing - need more rows than procs*/
-
-   if (row == 0 )
-   {
-      *proc_id = 0; 
-   }
-   else if (row <= (global_num_rows - num_procs+1))
-   {
-      *proc_id = 1;
-   }
-   else
-   {
-      *proc_id =  num_procs - global_num_rows + row;
-   }
-#endif
-
 
    return(0);
 
@@ -1141,43 +1107,6 @@ hypre_GetAssumedPartitionRowRange( int proc_id, int global_num_rows,
 
 
 
-#if badpartition
-
-   /*a bad partition for testing - need more rows than procs*/
-
-   if (proc_id)
-   {
-      *row_start = global_num_rows - (num_procs - proc_id);
-      *row_end = global_num_rows - (num_procs - proc_id);
-   }
-   else
-   {
-      *row_start = 0;
-      *row_end = global_num_rows - num_procs;
-   }
-   
-#endif
-
-#if badpartition2
-
-   /*a bad partition for testing - need more rows than procs*/
-
-   if (proc_id == 0 )
-   {
-       *row_start = 0;
-       *row_end = 0;
-   }
-   else if (proc_id == 1)
-   {
-      *row_start =1;
-      *row_end = global_num_rows - num_procs + 1;
-   }
-   else
-   {
-      *row_start = global_num_rows - (num_procs - proc_id);
-      *row_end = global_num_rows - (num_procs - proc_id);
-   }
-#endif
 
    return(0);
 

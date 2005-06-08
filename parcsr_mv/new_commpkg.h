@@ -12,7 +12,7 @@ typedef struct
    int		         *row_start_list;
    int                   *row_end_list;  
   int                    *sort_index;
-} hypre_SmIJPartition;
+} hypre_IJAssumedPart;
 
 typedef struct
 {

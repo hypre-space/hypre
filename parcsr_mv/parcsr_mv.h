@@ -366,7 +366,7 @@ typedef struct
    int		         *row_start_list;
    int                   *row_end_list;  
   int                    *sort_index;
-} hypre_SmIJPartition;
+} hypre_IJAssumedPart;
 
 typedef struct
 {
@@ -550,7 +550,7 @@ int HYPRE_VectorToParVector( MPI_Comm comm , HYPRE_Vector b , int *partitioning 
 /* new_commpkg.c */
 int hypre_NewCommPkgCreate( hypre_ParCSRMatrix *parcsr_A );
 int hypre_NewCommPkgDestroy( hypre_ParCSRMatrix *parcsr_A );
-int hypre_LocateAssummedPartition( int row_start , int row_end , int global_num_rows , hypre_SmIJPartition *part , int myid );
+int hypre_LocateAssummedPartition( int row_start , int row_end , int global_num_rows , hypre_IJAssumedPart *part , int myid );
 int hypre_RangeFillResponseIJDetermineRecvProcs( void *p_recv_contact_buf , int contact_size , int contact_proc , void *ro , MPI_Comm comm , void **p_send_response_buf , int *response_message_size );
 int hypre_FillResponseIJDetermineSendProcs( void *p_recv_contact_buf , int contact_size , int contact_proc , void *ro , MPI_Comm comm , void **p_send_response_buf , int *response_message_size );
 int hypre_GetAssumedPartitionProcFromRow( int row , int global_num_rows , int *proc_id );
