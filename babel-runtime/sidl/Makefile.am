@@ -156,9 +156,7 @@ SOURCES_BABEL = \
 	sidl_ClassInfoI_IOR.c \
 	sidl_ClassInfoI_Stub.c \
 	sidl_ClassInfoI_Skel.c \
-	sidl_Resolve_IOR.c \
 	sidl_Resolve_Stub.c \
-	sidl_Scope_IOR.c \
 	sidl_Scope_Stub.c
 
 HEADERS_BABEL = \
