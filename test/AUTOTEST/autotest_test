@@ -729,7 +729,10 @@ if [ ${BuildOpt} -ne $Skip ] ; then
 
     if [ "$MessageStr" != "insure" ]
     then			# don't want to delete previous build
-        $MAKE clean	        # assumed working with --enable-debug build
+       if [ "$MessageStr" != "babel" ]
+       then
+          $MAKE clean
+       fi
     fi
 
     makeit "all" $MessageStr "$HYPRE_DEFAULT_EMAIL"
