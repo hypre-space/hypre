@@ -1,4 +1,4 @@
-README for the dataExchangeList() function
+README for the hypre_DataExchangeList() function
 
 **************
 *  Purpose:  *  
@@ -22,11 +22,11 @@ how to create a response message based on a contact message.
 *  Function:  *
 ***************
 
-int dataExchangeList(int num_contacts, 
+int hypre_DataExchangeList(int num_contacts, 
 		     int *contact_proc_list, void *contact_send_buf, 
 		     int *contact_send_buf_starts, int contact_obj_size, 
 		     int response_obj_size,
-		     dataExchangeResponse *response_obj, 
+		     hypre_DataExchangeResponse *response_obj, 
                      int max_response_size, int rnum,
 		     MPI_Comm comm, void **p_response_recv_buf,	   
                      int **p_response_recv_buf_starts)
@@ -67,7 +67,7 @@ int dataExchangeList(int num_contacts,
       This should be a reasonable estimate - not an absolute upper bound!
       If a contacted processor needs to respond with more than
       max_response_size data, then a second communication is used - this is
-      transparent to the user and occurs inside dataExchangeList().
+      transparent to the user and occurs inside hypre_DataExchangeList().
       Choosing a max_response_size that is way too large will result in
       the passing of overly large messages. THIS NEEDS TO BE THE SAME
       NUMBER FOR ALL PROCESSORS.
@@ -93,7 +93,7 @@ int dataExchangeList(int num_contacts,
 **********************
 
 This object has a function pointer to assign before including it in a
-call to dataExchangeList(). In addition, one or more of the void
+call to hypre_DataExchangeList(). In addition, one or more of the void
 pointers may be set. Each item in the structure is explained below.
 
 typedef struct
@@ -107,7 +107,7 @@ typedef struct
    void    *data1;                 
    void    *data2; 
    
-} dataExchangeResponse;
+} hypre_DataExchangeResponse;
 
 
   int  (*fill_response)(void* recv_buf,
@@ -117,7 +117,7 @@ typedef struct
                         int* response_message_size, ); 
 
     The user writes a function to assign to this pointer.  This function
-    is called by exchangeDataList() upon receipt of a contact message
+    is called by hypre_DataExchangeList() upon receipt of a contact message
     and must determine a response.  The data from the contact message is
     stored in recv_buf, where contact_size indicates the number of
     objects and contact_proc indicates the processor that made the
@@ -133,7 +133,7 @@ typedef struct
     response (a confirmation), simply assign response_message_size to
     zero - do NOT set the response_buf to NULL.
    
-    Note 2: cast the response_obj argument to a dataExchangeResponse
+    Note 2: cast the response_obj argument to a hypre_DataExchangeResponse
     object to access the data fields.
 
   send_response_storage - this number indicates the amount of storage
@@ -145,12 +145,12 @@ typedef struct
      send_response_overhead)*(size of response object).
 
   send_response_overhead - this is extra overhead needed by
-     dataExchangeList.  Include this if you need to realloc response_buf
-     (see previous entry). This is determined by the dataExchangeFunction().
+     hypre_DataExchangeList.  Include this if you need to realloc response_buf
+     (see previous entry). This is determined by the hypre_DataExchangeFunction().
 
   data1, data2 - these are void pointers that the user may want
      to assign to data from the program that calls exchangeDataList()
      in the event that (1) certain data is needed to formulate an
      appropriate response or (2) data needs to be saved from the
-     contacts to be manipulated after dataExchangeList() completes.
+     contacts to be manipulated after hypre_DataExchangeList() completes.
 
