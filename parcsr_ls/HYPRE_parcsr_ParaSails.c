@@ -398,6 +398,38 @@ HYPRE_ParaSailsSetParams(HYPRE_Solver solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_ParaSailsSetThresh - Set the "thresh" parameter only
+ * for a ParaSails object.
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_ParaSailsSetThresh( HYPRE_Solver solver, 
+                          double       thresh )
+{
+   Secret *secret = (Secret *) solver;
+
+   secret->thresh  = thresh;
+
+   return 0;
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_ParaSailsSetNlevels - Set the "nlevels" parameter only
+ * for a ParaSails object.
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_ParaSailsSetNlevels( HYPRE_Solver solver, 
+                           int          nlevels )
+{
+   Secret *secret = (Secret *) solver;
+
+   secret->nlevels  = nlevels;
+
+   return 0;
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_ParaSailsSetFilter - Set the filter parameter.
  *--------------------------------------------------------------------------*/
 
