@@ -1,0 +1,518 @@
+C       
+C       File:          bHYPRE_ParaSails_Impl.f
+C       Symbol:        bHYPRE.ParaSails-v1.0.0
+C       Symbol Type:   class
+C       Babel Version: 0.9.8
+C       Description:   Client-side documentation text for bHYPRE.ParaSails
+C       
+C       WARNING: Automatically generated; changes will be lost
+C       
+C       babel-version = 0.9.8
+C       
+
+        THIS FILE IS DOCUMENTATION - DO NOT COMPILE IT!
+
+C       
+C       Symbol "bHYPRE.ParaSails" (version 1.0.0)
+C       
+C       Objects of this type can be cast to Solver objects using the
+C       {\tt \_\_cast} methods.
+C       
+C       RDF: Documentation goes here.
+C       
+C       
+
+
+
+
+C       
+C       Create an instance of class bHYPRE.ParaSails
+C       
+
+        subroutine bHYPRE_ParaSails__create_f(retval)
+        implicit none
+C       out bHYPRE.ParaSails retval
+        integer*8 retval
+        end
+
+
+C       
+C       Cast method for interface and type conversions.
+C       
+
+        subroutine bHYPRE_ParaSails__cast_f(ref, retval)
+        implicit none
+C       in opaque ref
+        integer*8 ref
+C       out bHYPRE.ParaSails retval
+        integer*8 retval
+        end
+
+
+C       
+C       Cast method for interface and class type conversions.
+C       
+
+        subroutine bHYPRE_ParaSails__cast2_f(self, name, retval)
+        implicit none
+C       in bHYPRE.ParaSails self
+        integer*8 self
+C       in string name
+        character*(*) name
+C       out opaque retval
+        integer*8 retval
+        end
+
+
+C       
+C       <p>
+C       Add one to the intrinsic reference count in the underlying object.
+C       Object in <code>sidl</code> have an intrinsic reference count.
+C       Objects continue to exist as long as the reference count is
+C       positive. Clients should call this method whenever they
+C       create another ongoing reference to an object or interface.
+C       </p>
+C       <p>
+C       This does not have a return value because there is no language
+C       independent type that can refer to an interface or a
+C       class.
+C       </p>
+C       
+
+        subroutine bHYPRE_ParaSails_addRef_f(self)
+        implicit none
+C       in bHYPRE.ParaSails self
+        integer*8 self
+        end
+
+
+C       
+C       Decrease by one the intrinsic reference count in the underlying
+C       object, and delete the object if the reference is non-positive.
+C       Objects in <code>sidl</code> have an intrinsic reference count.
+C       Clients should call this method whenever they remove a
+C       reference to an object or interface.
+C       
+
+        subroutine bHYPRE_ParaSails_deleteRef_f(self)
+        implicit none
+C       in bHYPRE.ParaSails self
+        integer*8 self
+        end
+
+
+C       
+C       Return true if and only if <code>obj</code> refers to the same
+C       object as this object.
+C       
+
+        subroutine bHYPRE_ParaSails_isSame_f(self, iobj, retval)
+        implicit none
+C       in bHYPRE.ParaSails self
+        integer*8 self
+C       in sidl.BaseInterface iobj
+        integer*8 iobj
+C       out bool retval
+        logical retval
+        end
+
+
+C       
+C       Check whether the object can support the specified interface or
+C       class.  If the <code>sidl</code> type name in <code>name</code>
+C       is supported, then a reference to that object is returned with the
+C       reference count incremented.  The callee will be responsible for
+C       calling <code>deleteRef</code> on the returned object.  If
+C       the specified type is not supported, then a null reference is
+C       returned.
+C       
+
+        subroutine bHYPRE_ParaSails_queryInt_f(self, name, retval)
+        implicit none
+C       in bHYPRE.ParaSails self
+        integer*8 self
+C       in string name
+        character*(*) name
+C       out sidl.BaseInterface retval
+        integer*8 retval
+        end
+
+
+C       
+C       Return whether this object is an instance of the specified type.
+C       The string name must be the <code>sidl</code> type name.  This
+C       routine will return <code>true</code> if and only if a cast to
+C       the string type name would succeed.
+C       
+
+        subroutine bHYPRE_ParaSails_isType_f(self, name, retval)
+        implicit none
+C       in bHYPRE.ParaSails self
+        integer*8 self
+C       in string name
+        character*(*) name
+C       out bool retval
+        logical retval
+        end
+
+
+C       
+C       Return the meta-data about the class implementing this interface.
+C       
+
+        subroutine bHYPRE_ParaSails_getClassInfo_f(self, retval)
+        implicit none
+C       in bHYPRE.ParaSails self
+        integer*8 self
+C       out sidl.ClassInfo retval
+        integer*8 retval
+        end
+
+
+C       
+C       Set the MPI Communicator.
+C       
+C       
+
+        subroutine bHYPRE_ParaSails_SetCommunicator_f(self, mpi_comm,
+     &     retval)
+        implicit none
+C       in bHYPRE.ParaSails self
+        integer*8 self
+C       in opaque mpi_comm
+        integer*8 mpi_comm
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Set the int parameter associated with {\tt name}.
+C       
+C       
+
+        subroutine bHYPRE_ParaSails_SetIntParameter_f(self, name, value,
+     &     retval)
+        implicit none
+C       in bHYPRE.ParaSails self
+        integer*8 self
+C       in string name
+        character*(*) name
+C       in int value
+        integer*4 value
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Set the double parameter associated with {\tt name}.
+C       
+C       
+
+        subroutine bHYPRE_ParaSails_SetDoubleParameter_f(self, name,
+     &     value, retval)
+        implicit none
+C       in bHYPRE.ParaSails self
+        integer*8 self
+C       in string name
+        character*(*) name
+C       in double value
+        double precision value
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Set the string parameter associated with {\tt name}.
+C       
+C       
+
+        subroutine bHYPRE_ParaSails_SetStringParameter_f(self, name,
+     &     value, retval)
+        implicit none
+C       in bHYPRE.ParaSails self
+        integer*8 self
+C       in string name
+        character*(*) name
+C       in string value
+        character*(*) value
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Set the int 1-D array parameter associated with {\tt name}.
+C       
+C       
+
+        subroutine bHYPRE_ParaSails_SetIntArray1Parameter_f(self, name,
+     &     value, retval)
+        implicit none
+C       in bHYPRE.ParaSails self
+        integer*8 self
+C       in string name
+        character*(*) name
+C       in array<int,column-major> value
+        integer*8 value
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Set the int 2-D array parameter associated with {\tt name}.
+C       
+C       
+
+        subroutine bHYPRE_ParaSails_SetIntArray2Parameter_f(self, name,
+     &     value, retval)
+        implicit none
+C       in bHYPRE.ParaSails self
+        integer*8 self
+C       in string name
+        character*(*) name
+C       in array<int,2,column-major> value
+        integer*8 value
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Set the double 1-D array parameter associated with {\tt name}.
+C       
+C       
+
+        subroutine bHYPRE_ParaSails_SetDoubleArray1Parameter_f(self,
+     &     name, value, retval)
+        implicit none
+C       in bHYPRE.ParaSails self
+        integer*8 self
+C       in string name
+        character*(*) name
+C       in array<double,column-major> value
+        integer*8 value
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Set the double 2-D array parameter associated with {\tt name}.
+C       
+C       
+
+        subroutine bHYPRE_ParaSails_SetDoubleArray2Parameter_f(self,
+     &     name, value, retval)
+        implicit none
+C       in bHYPRE.ParaSails self
+        integer*8 self
+C       in string name
+        character*(*) name
+C       in array<double,2,column-major> value
+        integer*8 value
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Set the int parameter associated with {\tt name}.
+C       
+C       
+
+        subroutine bHYPRE_ParaSails_GetIntValue_f(self, name, value,
+     &     retval)
+        implicit none
+C       in bHYPRE.ParaSails self
+        integer*8 self
+C       in string name
+        character*(*) name
+C       out int value
+        integer*4 value
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Get the double parameter associated with {\tt name}.
+C       
+C       
+
+        subroutine bHYPRE_ParaSails_GetDoubleValue_f(self, name, value,
+     &     retval)
+        implicit none
+C       in bHYPRE.ParaSails self
+        integer*8 self
+C       in string name
+        character*(*) name
+C       out double value
+        double precision value
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       (Optional) Do any preprocessing that may be necessary in
+C       order to execute {\tt Apply}.
+C       
+C       
+
+        subroutine bHYPRE_ParaSails_Setup_f(self, b, x, retval)
+        implicit none
+C       in bHYPRE.ParaSails self
+        integer*8 self
+C       in bHYPRE.Vector b
+        integer*8 b
+C       in bHYPRE.Vector x
+        integer*8 x
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Apply the operator to {\tt b}, returning {\tt x}.
+C       
+C       
+
+        subroutine bHYPRE_ParaSails_Apply_f(self, b, x, retval)
+        implicit none
+C       in bHYPRE.ParaSails self
+        integer*8 self
+C       in bHYPRE.Vector b
+        integer*8 b
+C       inout bHYPRE.Vector x
+        integer*8 x
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Set the operator for the linear system being solved.
+C       
+C       
+
+        subroutine bHYPRE_ParaSails_SetOperator_f(self, A, retval)
+        implicit none
+C       in bHYPRE.ParaSails self
+        integer*8 self
+C       in bHYPRE.Operator A
+        integer*8 A
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       (Optional) Set the convergence tolerance.
+C       
+C       
+
+        subroutine bHYPRE_ParaSails_SetTolerance_f(self, tolerance,
+     &     retval)
+        implicit none
+C       in bHYPRE.ParaSails self
+        integer*8 self
+C       in double tolerance
+        double precision tolerance
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       (Optional) Set maximum number of iterations.
+C       
+C       
+
+        subroutine bHYPRE_ParaSails_SetMaxIterations_f(self,
+     &     max_iterations, retval)
+        implicit none
+C       in bHYPRE.ParaSails self
+        integer*8 self
+C       in int max_iterations
+        integer*4 max_iterations
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       (Optional) Set the {\it logging level}, specifying the degree
+C       of additional informational data to be accumulated.  Does
+C       nothing by default (level = 0).  Other levels (if any) are
+C       implementation-specific.  Must be called before {\tt Setup}
+C       and {\tt Apply}.
+C       
+C       
+
+        subroutine bHYPRE_ParaSails_SetLogging_f(self, level, retval)
+        implicit none
+C       in bHYPRE.ParaSails self
+        integer*8 self
+C       in int level
+        integer*4 level
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       (Optional) Set the {\it print level}, specifying the degree
+C       of informational data to be printed either to the screen or
+C       to a file.  Does nothing by default (level=0).  Other levels
+C       (if any) are implementation-specific.  Must be called before
+C       {\tt Setup} and {\tt Apply}.
+C       
+C       
+
+        subroutine bHYPRE_ParaSails_SetPrintLevel_f(self, level, retval)
+        implicit none
+C       in bHYPRE.ParaSails self
+        integer*8 self
+C       in int level
+        integer*4 level
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       (Optional) Return the number of iterations taken.
+C       
+C       
+
+        subroutine bHYPRE_ParaSails_GetNumIterations_f(self,
+     &     num_iterations, retval)
+        implicit none
+C       in bHYPRE.ParaSails self
+        integer*8 self
+C       out int num_iterations
+        integer*4 num_iterations
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       (Optional) Return the norm of the relative residual.
+C       
+C       
+
+        subroutine bHYPRE_ParaSails_GetRelResidualNorm_f(self, norm,
+     &     retval)
+        implicit none
+C       in bHYPRE.ParaSails self
+        integer*8 self
+C       out double norm
+        double precision norm
+C       out int retval
+        integer*4 retval
+        end
