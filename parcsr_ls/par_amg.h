@@ -10,6 +10,8 @@
 #ifndef hypre_ParAMG_DATA_HEADER
 #define hypre_ParAMG_DATA_HEADER
 
+#define CUMNUMIT
+
 /*--------------------------------------------------------------------------
  * hypre_ParAMGData
  *--------------------------------------------------------------------------*/
@@ -97,6 +99,9 @@ typedef struct
    /* log info */
    int      logging;
    int      num_iterations;
+#ifdef CUMNUMIT
+   int      cum_num_iterations;
+#endif
    double   rel_resid_norm;
    hypre_ParVector *residual; /* available if logging>1 */
 
@@ -196,6 +201,9 @@ typedef struct
 /* log info data */
 #define hypre_ParAMGDataLogging(amg_data) ((amg_data)->logging)
 #define hypre_ParAMGDataNumIterations(amg_data) ((amg_data)->num_iterations)
+#ifdef CUMNUMIT
+#define hypre_ParAMGDataCumNumIterations(amg_data) ((amg_data)->cum_num_iterations)
+#endif
 #define hypre_ParAMGDataRelativeResidualNorm(amg_data) ((amg_data)->rel_resid_norm)
 #define hypre_ParAMGDataResidual(amg_data) ((amg_data)->residual)
 

@@ -65,6 +65,7 @@ hypre_BoomerAMGCreate()
 
    /* log info */
    int      num_iterations;
+   int      cum_num_iterations;
 
    /* output params */
    int      print_level;
@@ -120,6 +121,7 @@ hypre_BoomerAMGCreate()
 
    /* log info */
    num_iterations = 0;
+   cum_num_iterations = 0;
 
    /* output params */
    print_level = 0;
@@ -172,6 +174,9 @@ hypre_BoomerAMGCreate()
    hypre_BoomerAMGSetSmoothNumSweeps(amg_data, smooth_num_sweeps);
 
    hypre_BoomerAMGSetNumIterations(amg_data, num_iterations);
+#ifdef CUMNUMIT
+   hypre_ParAMGDataCumNumIterations(amg_data) = cum_num_iterations;
+#endif
    hypre_BoomerAMGSetPrintLevel(amg_data, print_level);
    hypre_BoomerAMGSetLogging(amg_data, logging);
    hypre_BoomerAMGSetPrintFileName(amg_data, log_file_name); 
@@ -335,7 +340,8 @@ hypre_BoomerAMGDestroy( void *data )
       hypre_TFree (hypre_ParAMGDataSmoother(amg_data));
    }
    if ( hypre_ParAMGDataResidual(amg_data) ) {
-      hypre_TFree( hypre_ParAMGDataResidual(amg_data) );
+      /* jfp: was... hypre_TFree( hypre_ParAMGDataResidual(amg_data) );*/
+      hypre_ParVectorDestroy( hypre_ParAMGDataResidual(amg_data) );
       hypre_ParAMGDataResidual(amg_data) = NULL;
    }
 
@@ -1015,6 +1021,20 @@ hypre_BoomerAMGGetNumIterations( void     *data,
    hypre_ParAMGData  *amg_data = data;
 
    *num_iterations = hypre_ParAMGDataNumIterations(amg_data);
+
+   return (ierr);
+}
+
+int
+hypre_BoomerAMGGetCumNumIterations( void     *data,
+                                    int      *cum_num_iterations )
+{
+   int ierr = 0;
+   hypre_ParAMGData  *amg_data = data;
+
+#ifdef CUMNUMIT
+   *cum_num_iterations = hypre_ParAMGDataCumNumIterations(amg_data);
+#endif
 
    return (ierr);
 }

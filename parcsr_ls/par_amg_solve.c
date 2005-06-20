@@ -253,6 +253,9 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
       ++cycle_count;
 
       hypre_ParAMGDataNumIterations(amg_data) = cycle_count;
+#ifdef CUMNUMIT
+      ++hypre_ParAMGDataCumNumIterations(amg_data);
+#endif
 
       if (my_id == 0 && amg_print_level > 1 && tol > 0.)
       { 

@@ -247,6 +247,9 @@ HYPRE_BoomerAMGSetTol( HYPRE_Solver solver,
 
 /*--------------------------------------------------------------------------
  * HYPRE_BoomerAMGSetNumGridSweeps
+ * DEPRECATED.  There are memory management problems associated with the
+ * use of a user-supplied array (who releases it?).
+ * Use SetNumSweeps and SetCycleNumSweeps instead.
  *--------------------------------------------------------------------------*/
 
 int
@@ -370,6 +373,9 @@ HYPRE_BoomerAMGInitGridRelaxation( int     **num_grid_sweeps_ptr,
 
 /*--------------------------------------------------------------------------
  * HYPRE_BoomerAMGSetGridRelaxType
+ * DEPRECATED.  There are memory management problems associated with the
+ * use of a user-supplied array (who releases it?).
+ * Use SetRelaxType and SetCycleRelaxType instead.
  *--------------------------------------------------------------------------*/
 
 int
@@ -414,6 +420,9 @@ HYPRE_BoomerAMGSetRelaxOrder( HYPRE_Solver  solver,
 
 /*--------------------------------------------------------------------------
  * HYPRE_BoomerAMGSetGridRelaxPoints
+ * DEPRECATED.  There are memory management problems associated with the
+ * use of a user-supplied array (who releases it?).
+ * Ulrike Yang suspects that nobody uses this function.
  *--------------------------------------------------------------------------*/
 
 int
@@ -425,6 +434,9 @@ HYPRE_BoomerAMGSetGridRelaxPoints( HYPRE_Solver   solver,
 
 /*--------------------------------------------------------------------------
  * HYPRE_BoomerAMGSetRelaxWeight
+ * DEPRECATED.  There are memory management problems associated with the
+ * use of a user-supplied array (who releases it?).
+ * Use SetRelaxWt and SetLevelRelaxWt instead.
  *--------------------------------------------------------------------------*/
 
 int
@@ -583,6 +595,17 @@ HYPRE_BoomerAMGGetNumIterations( HYPRE_Solver  solver,
                               int          *num_iterations  )
 {
    return( hypre_BoomerAMGGetNumIterations( (void *) solver, num_iterations ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGGetCumNumIterations
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_BoomerAMGGetCumNumIterations( HYPRE_Solver  solver,
+                                    int          *cum_num_iterations  )
+{
+   return( hypre_BoomerAMGGetCumNumIterations( (void *) solver, cum_num_iterations ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -759,6 +782,11 @@ HYPRE_BoomerAMGSetNodal( HYPRE_Solver  solver,
 int
 HYPRE_BoomerAMGSetDofFunc( HYPRE_Solver  solver,
                               int          *dof_func  )
+/* Warning about a possible memory problem: When the BoomerAMG object is destroyed
+   in hypre_BoomerAMGDestroy, dof_func aka DofFunc will be destroyed (currently
+   line 246 of par_amg.c).  Normally this is what we want.  But if the user provided
+   dof_func by calling HYPRE_BoomerAMGSetDofFunc, this could be an unwanted surprise.
+   As hypre is currently commonly used, this situation is likely to be rare. */
 {
    return( hypre_BoomerAMGSetDofFunc( (void *) solver, dof_func ) );
 }

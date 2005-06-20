@@ -10,6 +10,8 @@
 #include "krylov.h"
 #include "seq_mv.h"
 #include "parcsr_mv.h"
+#include "temp_multivector.h"
+ /* ... needed to make sense of functions in HYPRE_parcsr_int.c */
 
 #ifdef __cplusplus
 extern "C" {
@@ -58,6 +60,17 @@ int hypre_AMGHybridGetPCGNumIterations( void *AMGhybrid_vdata , int *pcg_num_its
 int hypre_AMGHybridGetFinalRelativeResidualNorm( void *AMGhybrid_vdata , double *final_rel_res_norm );
 int hypre_AMGHybridSetup( void *AMGhybrid_vdata , hypre_ParCSRMatrix *A , hypre_ParVector *b , hypre_ParVector *x );
 int hypre_AMGHybridSolve( void *AMGhybrid_vdata , hypre_ParCSRMatrix *A , hypre_ParVector *b , hypre_ParVector *x );
+
+/* block_tridiag.c */
+void *hypre_BlockTridiagCreate( void );
+int hypre_BlockTridiagDestroy( void *data );
+int hypre_BlockTridiagSetup( void *data , hypre_ParCSRMatrix *A , hypre_ParVector *b , hypre_ParVector *x );
+int hypre_BlockTridiagSolve( void *data , hypre_ParCSRMatrix *A , hypre_ParVector *b , hypre_ParVector *x );
+int hypre_BlockTridiagSetIndexSet( void *data , int n , int *inds );
+int hypre_BlockTridiagSetAMGStrengthThreshold( void *data , double thresh );
+int hypre_BlockTridiagSetAMGNumSweeps( void *data , int nsweeps );
+int hypre_BlockTridiagSetAMGRelaxType( void *data , int relax_type );
+int hypre_BlockTridiagSetPrintLevel( void *data , int print_level );
 
 /* driver.c */
 int BuildParFromFile( int argc , char *argv [], int arg_index , HYPRE_ParCSRMatrix *A_ptr );
@@ -111,6 +124,7 @@ int HYPRE_BoomerAMGSetPrintLevel( HYPRE_Solver solver , int print_level );
 int HYPRE_BoomerAMGSetPrintFileName( HYPRE_Solver solver , const char *print_file_name );
 int HYPRE_BoomerAMGSetDebugFlag( HYPRE_Solver solver , int debug_flag );
 int HYPRE_BoomerAMGGetNumIterations( HYPRE_Solver solver , int *num_iterations );
+int HYPRE_BoomerAMGGetCumNumIterations( HYPRE_Solver solver , int *cum_num_iterations );
 int HYPRE_BoomerAMGGetResidual( HYPRE_Solver solver , HYPRE_ParVector *residual );
 int HYPRE_BoomerAMGGetFinalRelativeResidualNorm( HYPRE_Solver solver , double *rel_resid_norm );
 int HYPRE_BoomerAMGSetVariant( HYPRE_Solver solver , int variant );
@@ -145,6 +159,17 @@ int HYPRE_ParCSRBiCGSTABSetLogging( HYPRE_Solver solver , int logging );
 int HYPRE_ParCSRBiCGSTABSetPrintLevel( HYPRE_Solver solver , int print_level );
 int HYPRE_ParCSRBiCGSTABGetNumIterations( HYPRE_Solver solver , int *num_iterations );
 int HYPRE_ParCSRBiCGSTABGetFinalRelativeResidualNorm( HYPRE_Solver solver , double *norm );
+
+/* HYPRE_parcsr_block.c */
+int HYPRE_BlockTridiagCreate( HYPRE_Solver *solver );
+int HYPRE_BlockTridiagDestroy( HYPRE_Solver solver );
+int HYPRE_BlockTridiagSetup( HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE_ParVector b , HYPRE_ParVector x );
+int HYPRE_BlockTridiagSolve( HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE_ParVector b , HYPRE_ParVector x );
+int HYPRE_BlockTridiagSetIndexSet( HYPRE_Solver solver , int n , int *inds );
+int HYPRE_BlockTridiagSetAMGStrengthThreshold( HYPRE_Solver solver , double thresh );
+int HYPRE_BlockTridiagSetAMGNumSweeps( HYPRE_Solver solver , int num_sweeps );
+int HYPRE_BlockTridiagSetAMGRelaxType( HYPRE_Solver solver , int relax_type );
+int HYPRE_BlockTridiagSetPrintLevel( HYPRE_Solver solver , int print_level );
 
 /* HYPRE_parcsr_cgnr.c */
 int HYPRE_ParCSRCGNRCreate( MPI_Comm comm , HYPRE_Solver *solver );
@@ -229,6 +254,13 @@ int HYPRE_ParCSRHybridGetDSCGNumIterations( HYPRE_Solver solver , int *dscg_num_
 int HYPRE_ParCSRHybridGetPCGNumIterations( HYPRE_Solver solver , int *pcg_num_its );
 int HYPRE_ParCSRHybridGetFinalRelativeResidualNorm( HYPRE_Solver solver , double *norm );
 
+/* HYPRE_parcsr_int.c */
+int hypre_ParSetRandomValues( void *v , int seed );
+int hypre_ParPrintVector( void *v , const char *file );
+void *hypre_ParReadVector( MPI_Comm comm , const char *file );
+int HYPRE_ParCSRSetupInterpreter( HYPRE_InterfaceInterpreter *i );
+int HYPRE_TempParCSRSetupInterpreter( HYPRE_InterfaceInterpreter *i );
+
 /* HYPRE_parcsr_ParaSails.c */
 int HYPRE_ParCSRParaSailsCreate( MPI_Comm comm , HYPRE_Solver *solver );
 int HYPRE_ParCSRParaSailsDestroy( HYPRE_Solver solver );
@@ -245,6 +277,8 @@ int HYPRE_ParaSailsDestroy( HYPRE_Solver solver );
 int HYPRE_ParaSailsSetup( HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE_ParVector b , HYPRE_ParVector x );
 int HYPRE_ParaSailsSolve( HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE_ParVector b , HYPRE_ParVector x );
 int HYPRE_ParaSailsSetParams( HYPRE_Solver solver , double thresh , int nlevels );
+int HYPRE_ParaSailsSetThresh( HYPRE_Solver solver , double thresh );
+int HYPRE_ParaSailsSetNlevels( HYPRE_Solver solver , int nlevels );
 int HYPRE_ParaSailsSetFilter( HYPRE_Solver solver , double filter );
 int HYPRE_ParaSailsSetSym( HYPRE_Solver solver , int sym );
 int HYPRE_ParaSailsSetLoadbal( HYPRE_Solver solver , double loadbal );
@@ -341,6 +375,7 @@ int hypre_BoomerAMGSetDofFunc( void *data , int *dof_func );
 int hypre_BoomerAMGSetPointDofMap( void *data , int *point_dof_map );
 int hypre_BoomerAMGSetDofPoint( void *data , int *dof_point );
 int hypre_BoomerAMGGetNumIterations( void *data , int *num_iterations );
+int hypre_BoomerAMGGetCumNumIterations( void *data , int *cum_num_iterations );
 int hypre_BoomerAMGGetResidual( void *data , hypre_ParVector **resid );
 int hypre_BoomerAMGGetRelResidualNorm( void *data , double *rel_resid_norm );
 int hypre_BoomerAMGSetVariant( void *data , int variant );
@@ -387,6 +422,7 @@ int hypre_BoomerAMGCycle( void *amg_vdata , hypre_ParVector **F_array , hypre_Pa
 HYPRE_ParCSRMatrix GenerateDifConv( MPI_Comm comm , int nx , int ny , int nz , int P , int Q , int R , int p , int q , int r , double *value );
 
 /* par_gsmg.c */
+void hypre_F90_NAME_BLAS( int dgels , int DGELS );
 int hypre_ParCSRMatrixClone( hypre_ParCSRMatrix *A , hypre_ParCSRMatrix **Sp , int copy_data );
 int hypre_ParCSRMatrixFillSmooth( int nsamples , double *samples , hypre_ParCSRMatrix *S , hypre_ParCSRMatrix *A , int num_functions , int *dof_func );
 double hypre_ParCSRMatrixChooseThresh( hypre_ParCSRMatrix *S );
@@ -440,20 +476,8 @@ int gselim( double *A , double *x , int n );
 int hypre_BoomerAMGRelaxIF( hypre_ParCSRMatrix *A , hypre_ParVector *f , int *cf_marker , int relax_type , int relax_order , int cycle_type , double relax_weight , double omega , hypre_ParVector *u , hypre_ParVector *Vtemp );
 
 /* par_rotate_7pt.c */
-HYPRE_ParCSRMatrix GenerateRotate7pt( MPI_Comm comm , int nx , int ny , int P , int Q , int p , int q , double alpha, double eps );
-                                                                                
-/* par_vardifconv.c */
-HYPRE_ParCSRMatrix GenerateVarDifConv( MPI_Comm comm , int nx , int ny , int nz , int P , int Q , int R , int p , int q , int r , double eps, HYPRE_ParVector *rhs_ptr );
-double afun( double xx , double yy , double zz );
-double bfun( double xx , double yy , double zz );
-double cfun( double xx , double yy , double zz );
-double dfun( double xx , double yy , double zz );
-double efun( double xx , double yy , double zz );
-double ffun( double xx , double yy , double zz );
-double gfun( double xx , double yy , double zz );
-double rfun( double xx , double yy , double zz );
-double bndfun( double xx , double yy , double zz );
-                                                                                
+HYPRE_ParCSRMatrix GenerateRotate7pt( MPI_Comm comm , int nx , int ny , int P , int Q , int p , int q , double alpha , double eps );
+
 /* par_scaled_matnorm.c */
 int hypre_ParCSRMatrixScaledNorm( hypre_ParCSRMatrix *A , double *scnorm );
 
@@ -481,6 +505,18 @@ int hypre_BoomerAMGCreateS( hypre_ParCSRMatrix *A , double strength_threshold , 
 int hypre_BoomerAMGCreateSabs( hypre_ParCSRMatrix *A , double strength_threshold , double max_row_sum , int num_functions , int *dof_func , hypre_ParCSRMatrix **S_ptr );
 int hypre_BoomerAMGCreateSCommPkg( hypre_ParCSRMatrix *A , hypre_ParCSRMatrix *S , int **col_offd_S_to_A_ptr );
 
+/* par_vardifconv.c */
+HYPRE_ParCSRMatrix GenerateVarDifConv( MPI_Comm comm , int nx , int ny , int nz , int P , int Q , int R , int p , int q , int r , double eps , HYPRE_ParVector *rhs_ptr );
+double afun( double xx , double yy , double zz );
+double bfun( double xx , double yy , double zz );
+double cfun( double xx , double yy , double zz );
+double dfun( double xx , double yy , double zz );
+double efun( double xx , double yy , double zz );
+double ffun( double xx , double yy , double zz );
+double gfun( double xx , double yy , double zz );
+double rfun( double xx , double yy , double zz );
+double bndfun( double xx , double yy , double zz );
+
 /* pcg_par.c */
 char *hypre_ParKrylovCAlloc( int count , int elt_size );
 int hypre_ParKrylovFree( char *ptr );
@@ -501,6 +537,7 @@ int hypre_ParKrylovIdentitySetup( void *vdata , void *A , void *b , void *x );
 int hypre_ParKrylovIdentity( void *vdata , void *A , void *b , void *x );
 
 /* schwarz.c */
+void hypre_F90_NAME_BLAS( int dpotrf , int DPOTRF );
 int hypre_ParMPSchwarzSolve( hypre_ParCSRMatrix *par_A , hypre_CSRMatrix *A_boundary , hypre_ParVector *rhs_vector , hypre_CSRMatrix *domain_structure , hypre_ParVector *par_x , double relax_wt , double *scale , hypre_ParVector *Vtemp );
 int hypre_MPSchwarzSolve( hypre_ParCSRMatrix *par_A , hypre_Vector *rhs_vector , hypre_CSRMatrix *domain_structure , hypre_ParVector *par_x , double relax_wt , hypre_Vector *aux_vector );
 int transpose_matrix_create( int **i_face_element_pointer , int **j_face_element_pointer , int *i_element_face , int *j_element_face , int num_elements , int num_faces );
@@ -519,33 +556,6 @@ int hypre_ParAMGCreateDomainDof( hypre_ParCSRMatrix *A , int domain_type , int o
 int hypre_ParGenerateScale( hypre_ParCSRMatrix *A , hypre_CSRMatrix *domain_structure , double relaxation_weight , double **scale_pointer );
 int hypre_ParGenerateHybridScale( hypre_ParCSRMatrix *A , hypre_CSRMatrix *domain_structure , hypre_CSRMatrix **A_boundary_pointer , double **scale_pointer );
 
-/* HYPRE_parcsr_block.c */
-
-int HYPRE_BlockTridiagCreate(HYPRE_Solver *solver);
-int HYPRE_BlockTridiagDestroy(HYPRE_Solver solver);
-int HYPRE_BlockTridiagSetup(HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
-                            HYPRE_ParVector b, HYPRE_ParVector x);
-int HYPRE_BlockTridiagSolve(HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
-                            HYPRE_ParVector b,   HYPRE_ParVector x);
-int HYPRE_BlockTridiagSetIndexSet(HYPRE_Solver solver,int n, int *inds);
-int HYPRE_BlockTridiagSetAMGStrengthThreshold(HYPRE_Solver solver,double thresh);
-int HYPRE_BlockTridiagSetAMGNumSweeps(HYPRE_Solver solver, int num_sweeps);
-int HYPRE_BlockTridiagSetAMGRelaxType(HYPRE_Solver solver, int relax_type);
-int HYPRE_BlockTridiagSetPrintLevel(HYPRE_Solver solver, int print_level);
-
-/* block_tridiag.c */
-
-void *hypre_BlockTridiagCreate();
-int hypre_BlockTridiagDestroy(void *data);
-int hypre_BlockTridiagSetup(void *data, hypre_ParCSRMatrix *A,
-                            hypre_ParVector *b, hypre_ParVector *x);
-int hypre_BlockTridiagSolve(void *data, hypre_ParCSRMatrix *A,
-                            hypre_ParVector *b, hypre_ParVector *x);
-int hypre_BlockTridiagSetIndexSet(void *data, int n, int *inds);
-int hypre_BlockTridiagSetAMGStrengthThreshold(void *data, double thresh);
-int hypre_BlockTridiagSetAMGNumSweeps(void *data, int nsweeps);
-int hypre_BlockTridiagSetRelaxType(void *data, int relax_type);
-int hypre_BlockTridiagSetPrintLevel(void *data, int print_level);
 
 #ifdef __cplusplus
 }
