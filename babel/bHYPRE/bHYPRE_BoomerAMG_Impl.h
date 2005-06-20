@@ -78,6 +78,12 @@ impl_bHYPRE_BoomerAMG__dtor(
  */
 
 extern int32_t
+impl_bHYPRE_BoomerAMG_SetLevelRelaxWt(
+  bHYPRE_BoomerAMG,
+  double,
+  int32_t);
+
+extern int32_t
 impl_bHYPRE_BoomerAMG_SetCommunicator(
   bHYPRE_BoomerAMG,
   void*);

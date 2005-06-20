@@ -58,15 +58,43 @@ extern "C" {
  * (default) or a W-cycle.
  * 
  * \item[NumGridSweeps] ({\tt IntArray 1D}) - number of sweeps for
- * fine and coarse grid, up and down cycle.
+ * fine and coarse grid, up and down cycle. DEPRECATED:
+ * Use NumSweeps or Cycle?NumSweeps instead.
+ * 
+ * \item[NumSweeps] ({\tt Int}) - number of sweeps for fine grid, up and
+ * down cycle.
+ * 
+ * \item[Cycle0NumSweeps] ({\tt Int}) - number of sweeps for fine grid
+ * 
+ * \item[Cycle1NumSweeps] ({\tt Int}) - number of sweeps for down cycle
+ * 
+ * \item[Cycle2NumSweeps] ({\tt Int}) - number of sweeps for up cycle
+ * 
+ * \item[Cycle3NumSweeps] ({\tt Int}) - number of sweeps for coarse grid
  * 
  * \item[GridRelaxType] ({\tt IntArray 1D}) - type of smoother used on
- * fine and coarse grid, up and down cycle.
+ * fine and coarse grid, up and down cycle. DEPRECATED:
+ * Use RelaxType or Cycle?RelaxType instead.
+ * 
+ * \item[RelaxType] ({\tt Int}) - type of smoother for fine grid, up and
+ * down cycle.
+ * 
+ * \item[Cycle0RelaxType] ({\tt Int}) - type of smoother for fine grid
+ * 
+ * \item[Cycle1RelaxType] ({\tt Int}) - type of smoother for down cycle
+ * 
+ * \item[Cycle2RelaxType] ({\tt Int}) - type of smoother for up cycle
+ * 
+ * \item[Cycle3RelaxType] ({\tt Int}) - type of smoother for coarse grid
  * 
  * \item[GridRelaxPoints] ({\tt IntArray 2D}) - point ordering used in
- * relaxation.
+ * relaxation.  DEPRECATED.
  * 
  * \item[RelaxWeight] ({\tt DoubleArray 1D}) - relaxation weight for
+ * smoothed Jacobi and hybrid SOR.  DEPRECATED:
+ * Instead, use the RelaxWt parameter and the SetLevelRelaxWt function.
+ * 
+ * \item[RelaxWt] ({\tt Int}) - relaxation weight for all levels for
  * smoothed Jacobi and hybrid SOR.
  * 
  * \item[TruncFactor] ({\tt Double}) - truncation factor for
@@ -99,6 +127,15 @@ extern "C" {
  * for additive Schwarz.
  * 
  * \item[DebugFlag] ({\tt Int}) -
+ * 
+ * \end{description}
+ * 
+ * The following function is specific to this class:
+ * 
+ * \begin{description}
+ * 
+ * \item[SetLevelRelxWeight] ({\tt Double , \tt Int}) -
+ * relaxation weight for one specified level of smoothed Jacobi and hybrid SOR.
  * 
  * \end{description}
  * 
@@ -236,6 +273,10 @@ struct bHYPRE_BoomerAMG__epv {
     struct bHYPRE_BoomerAMG__object* self,
     double* norm);
   /* Methods introduced in bHYPRE.BoomerAMG-v1.0.0 */
+  int32_t (*f_SetLevelRelaxWt)(
+    struct bHYPRE_BoomerAMG__object* self,
+    double relax_wt,
+    int32_t level);
 };
 
 /*

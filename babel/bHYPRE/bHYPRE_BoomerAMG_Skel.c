@@ -23,6 +23,12 @@ impl_bHYPRE_BoomerAMG__dtor(
   bHYPRE_BoomerAMG);
 
 extern int32_t
+impl_bHYPRE_BoomerAMG_SetLevelRelaxWt(
+  bHYPRE_BoomerAMG,
+  double,
+  int32_t);
+
+extern int32_t
 impl_bHYPRE_BoomerAMG_SetCommunicator(
   bHYPRE_BoomerAMG,
   void*);
@@ -209,6 +215,7 @@ bHYPRE_BoomerAMG__set_epv(struct bHYPRE_BoomerAMG__epv *epv)
 {
   epv->f__ctor = impl_bHYPRE_BoomerAMG__ctor;
   epv->f__dtor = impl_bHYPRE_BoomerAMG__dtor;
+  epv->f_SetLevelRelaxWt = impl_bHYPRE_BoomerAMG_SetLevelRelaxWt;
   epv->f_SetCommunicator = impl_bHYPRE_BoomerAMG_SetCommunicator;
   epv->f_SetIntParameter = impl_bHYPRE_BoomerAMG_SetIntParameter;
   epv->f_SetDoubleParameter = impl_bHYPRE_BoomerAMG_SetDoubleParameter;

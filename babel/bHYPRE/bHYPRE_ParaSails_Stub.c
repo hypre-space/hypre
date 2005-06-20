@@ -1,17 +1,17 @@
 /*
- * File:          bHYPRE_BoomerAMG_Stub.c
- * Symbol:        bHYPRE.BoomerAMG-v1.0.0
+ * File:          bHYPRE_ParaSails_Stub.c
+ * Symbol:        bHYPRE.ParaSails-v1.0.0
  * Symbol Type:   class
  * Babel Version: 0.9.8
- * Description:   Client-side glue code for bHYPRE.BoomerAMG
+ * Description:   Client-side glue code for bHYPRE.ParaSails
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
  * babel-version = 0.9.8
  */
 
-#include "bHYPRE_BoomerAMG.h"
-#include "bHYPRE_BoomerAMG_IOR.h"
+#include "bHYPRE_ParaSails.h"
+#include "bHYPRE_ParaSails_IOR.h"
 #ifndef included_sidl_interface_IOR_h
 #include "sidl_interface_IOR.h"
 #endif
@@ -28,45 +28,45 @@
  * Hold pointer to IOR functions.
  */
 
-static const struct bHYPRE_BoomerAMG__external *_ior = NULL;
+static const struct bHYPRE_ParaSails__external *_ior = NULL;
 /*
  * Lookup the symbol to get the IOR functions.
  */
 
-static const struct bHYPRE_BoomerAMG__external* _loadIOR(void)
+static const struct bHYPRE_ParaSails__external* _loadIOR(void)
 /*
  * Return pointer to internal IOR functions.
  */
 
 {
 #ifdef SIDL_STATIC_LIBRARY
-  _ior = bHYPRE_BoomerAMG__externals();
+  _ior = bHYPRE_ParaSails__externals();
 #else
   sidl_DLL dll = sidl_DLL__create();
-  const struct bHYPRE_BoomerAMG__external*(*dll_f)(void);
+  const struct bHYPRE_ParaSails__external*(*dll_f)(void);
   /* check global namespace for symbol first */
   if (dll && sidl_DLL_loadLibrary(dll, "main:", TRUE, FALSE)) {
     dll_f =
-      (const struct bHYPRE_BoomerAMG__external*(*)(void)) sidl_DLL_lookupSymbol(
-        dll, "bHYPRE_BoomerAMG__externals");
+      (const struct bHYPRE_ParaSails__external*(*)(void)) sidl_DLL_lookupSymbol(
+        dll, "bHYPRE_ParaSails__externals");
     _ior = (dll_f ? (*dll_f)() : NULL);
   }
   if (dll) sidl_DLL_deleteRef(dll);
   if (!_ior) {
-    dll = sidl_Loader_findLibrary("bHYPRE.BoomerAMG",
+    dll = sidl_Loader_findLibrary("bHYPRE.ParaSails",
       "ior/impl", sidl_Scope_SCLSCOPE,
       sidl_Resolve_SCLRESOLVE);
     if (dll) {
       dll_f =
-        (const struct bHYPRE_BoomerAMG__external*(*)(void)) 
+        (const struct bHYPRE_ParaSails__external*(*)(void)) 
           sidl_DLL_lookupSymbol(
-          dll, "bHYPRE_BoomerAMG__externals");
+          dll, "bHYPRE_ParaSails__externals");
       _ior = (dll_f ? (*dll_f)() : NULL);
       sidl_DLL_deleteRef(dll);
     }
   }
   if (!_ior) {
-    fputs("Babel: unable to load the implementation for bHYPRE.BoomerAMG; please set SIDL_DLL_PATH\n", stderr);
+    fputs("Babel: unable to load the implementation for bHYPRE.ParaSails; please set SIDL_DLL_PATH\n", stderr);
     exit(-1);
   }
 #endif
@@ -79,8 +79,8 @@ static const struct bHYPRE_BoomerAMG__external* _loadIOR(void)
  * Constructor function for the class.
  */
 
-bHYPRE_BoomerAMG
-bHYPRE_BoomerAMG__create()
+bHYPRE_ParaSails
+bHYPRE_ParaSails__create()
 {
   return (*(_getIOR()->createObject))();
 }
@@ -101,8 +101,8 @@ bHYPRE_BoomerAMG__create()
  */
 
 void
-bHYPRE_BoomerAMG_addRef(
-  bHYPRE_BoomerAMG self)
+bHYPRE_ParaSails_addRef(
+  bHYPRE_ParaSails self)
 {
   (*self->d_epv->f_addRef)(
     self);
@@ -117,8 +117,8 @@ bHYPRE_BoomerAMG_addRef(
  */
 
 void
-bHYPRE_BoomerAMG_deleteRef(
-  bHYPRE_BoomerAMG self)
+bHYPRE_ParaSails_deleteRef(
+  bHYPRE_ParaSails self)
 {
   (*self->d_epv->f_deleteRef)(
     self);
@@ -130,8 +130,8 @@ bHYPRE_BoomerAMG_deleteRef(
  */
 
 sidl_bool
-bHYPRE_BoomerAMG_isSame(
-  bHYPRE_BoomerAMG self,
+bHYPRE_ParaSails_isSame(
+  bHYPRE_ParaSails self,
   /*in*/ sidl_BaseInterface iobj)
 {
   return (*self->d_epv->f_isSame)(
@@ -150,8 +150,8 @@ bHYPRE_BoomerAMG_isSame(
  */
 
 sidl_BaseInterface
-bHYPRE_BoomerAMG_queryInt(
-  bHYPRE_BoomerAMG self,
+bHYPRE_ParaSails_queryInt(
+  bHYPRE_ParaSails self,
   /*in*/ const char* name)
 {
   return (*self->d_epv->f_queryInt)(
@@ -167,8 +167,8 @@ bHYPRE_BoomerAMG_queryInt(
  */
 
 sidl_bool
-bHYPRE_BoomerAMG_isType(
-  bHYPRE_BoomerAMG self,
+bHYPRE_ParaSails_isType(
+  bHYPRE_ParaSails self,
   /*in*/ const char* name)
 {
   return (*self->d_epv->f_isType)(
@@ -181,27 +181,11 @@ bHYPRE_BoomerAMG_isType(
  */
 
 sidl_ClassInfo
-bHYPRE_BoomerAMG_getClassInfo(
-  bHYPRE_BoomerAMG self)
+bHYPRE_ParaSails_getClassInfo(
+  bHYPRE_ParaSails self)
 {
   return (*self->d_epv->f_getClassInfo)(
     self);
-}
-
-/*
- * Method:  SetLevelRelaxWt[]
- */
-
-int32_t
-bHYPRE_BoomerAMG_SetLevelRelaxWt(
-  bHYPRE_BoomerAMG self,
-  /*in*/ double relax_wt,
-  /*in*/ int32_t level)
-{
-  return (*self->d_epv->f_SetLevelRelaxWt)(
-    self,
-    relax_wt,
-    level);
 }
 
 /*
@@ -210,8 +194,8 @@ bHYPRE_BoomerAMG_SetLevelRelaxWt(
  */
 
 int32_t
-bHYPRE_BoomerAMG_SetCommunicator(
-  bHYPRE_BoomerAMG self,
+bHYPRE_ParaSails_SetCommunicator(
+  bHYPRE_ParaSails self,
   /*in*/ void* mpi_comm)
 {
   return (*self->d_epv->f_SetCommunicator)(
@@ -225,8 +209,8 @@ bHYPRE_BoomerAMG_SetCommunicator(
  */
 
 int32_t
-bHYPRE_BoomerAMG_SetIntParameter(
-  bHYPRE_BoomerAMG self,
+bHYPRE_ParaSails_SetIntParameter(
+  bHYPRE_ParaSails self,
   /*in*/ const char* name,
   /*in*/ int32_t value)
 {
@@ -242,8 +226,8 @@ bHYPRE_BoomerAMG_SetIntParameter(
  */
 
 int32_t
-bHYPRE_BoomerAMG_SetDoubleParameter(
-  bHYPRE_BoomerAMG self,
+bHYPRE_ParaSails_SetDoubleParameter(
+  bHYPRE_ParaSails self,
   /*in*/ const char* name,
   /*in*/ double value)
 {
@@ -259,8 +243,8 @@ bHYPRE_BoomerAMG_SetDoubleParameter(
  */
 
 int32_t
-bHYPRE_BoomerAMG_SetStringParameter(
-  bHYPRE_BoomerAMG self,
+bHYPRE_ParaSails_SetStringParameter(
+  bHYPRE_ParaSails self,
   /*in*/ const char* name,
   /*in*/ const char* value)
 {
@@ -276,8 +260,8 @@ bHYPRE_BoomerAMG_SetStringParameter(
  */
 
 int32_t
-bHYPRE_BoomerAMG_SetIntArray1Parameter(
-  bHYPRE_BoomerAMG self,
+bHYPRE_ParaSails_SetIntArray1Parameter(
+  bHYPRE_ParaSails self,
   /*in*/ const char* name,
   /*in*/ struct sidl_int__array* value)
 {
@@ -293,8 +277,8 @@ bHYPRE_BoomerAMG_SetIntArray1Parameter(
  */
 
 int32_t
-bHYPRE_BoomerAMG_SetIntArray2Parameter(
-  bHYPRE_BoomerAMG self,
+bHYPRE_ParaSails_SetIntArray2Parameter(
+  bHYPRE_ParaSails self,
   /*in*/ const char* name,
   /*in*/ struct sidl_int__array* value)
 {
@@ -310,8 +294,8 @@ bHYPRE_BoomerAMG_SetIntArray2Parameter(
  */
 
 int32_t
-bHYPRE_BoomerAMG_SetDoubleArray1Parameter(
-  bHYPRE_BoomerAMG self,
+bHYPRE_ParaSails_SetDoubleArray1Parameter(
+  bHYPRE_ParaSails self,
   /*in*/ const char* name,
   /*in*/ struct sidl_double__array* value)
 {
@@ -327,8 +311,8 @@ bHYPRE_BoomerAMG_SetDoubleArray1Parameter(
  */
 
 int32_t
-bHYPRE_BoomerAMG_SetDoubleArray2Parameter(
-  bHYPRE_BoomerAMG self,
+bHYPRE_ParaSails_SetDoubleArray2Parameter(
+  bHYPRE_ParaSails self,
   /*in*/ const char* name,
   /*in*/ struct sidl_double__array* value)
 {
@@ -344,8 +328,8 @@ bHYPRE_BoomerAMG_SetDoubleArray2Parameter(
  */
 
 int32_t
-bHYPRE_BoomerAMG_GetIntValue(
-  bHYPRE_BoomerAMG self,
+bHYPRE_ParaSails_GetIntValue(
+  bHYPRE_ParaSails self,
   /*in*/ const char* name,
   /*out*/ int32_t* value)
 {
@@ -361,8 +345,8 @@ bHYPRE_BoomerAMG_GetIntValue(
  */
 
 int32_t
-bHYPRE_BoomerAMG_GetDoubleValue(
-  bHYPRE_BoomerAMG self,
+bHYPRE_ParaSails_GetDoubleValue(
+  bHYPRE_ParaSails self,
   /*in*/ const char* name,
   /*out*/ double* value)
 {
@@ -379,8 +363,8 @@ bHYPRE_BoomerAMG_GetDoubleValue(
  */
 
 int32_t
-bHYPRE_BoomerAMG_Setup(
-  bHYPRE_BoomerAMG self,
+bHYPRE_ParaSails_Setup(
+  bHYPRE_ParaSails self,
   /*in*/ bHYPRE_Vector b,
   /*in*/ bHYPRE_Vector x)
 {
@@ -396,8 +380,8 @@ bHYPRE_BoomerAMG_Setup(
  */
 
 int32_t
-bHYPRE_BoomerAMG_Apply(
-  bHYPRE_BoomerAMG self,
+bHYPRE_ParaSails_Apply(
+  bHYPRE_ParaSails self,
   /*in*/ bHYPRE_Vector b,
   /*inout*/ bHYPRE_Vector* x)
 {
@@ -413,8 +397,8 @@ bHYPRE_BoomerAMG_Apply(
  */
 
 int32_t
-bHYPRE_BoomerAMG_SetOperator(
-  bHYPRE_BoomerAMG self,
+bHYPRE_ParaSails_SetOperator(
+  bHYPRE_ParaSails self,
   /*in*/ bHYPRE_Operator A)
 {
   return (*self->d_epv->f_SetOperator)(
@@ -428,8 +412,8 @@ bHYPRE_BoomerAMG_SetOperator(
  */
 
 int32_t
-bHYPRE_BoomerAMG_SetTolerance(
-  bHYPRE_BoomerAMG self,
+bHYPRE_ParaSails_SetTolerance(
+  bHYPRE_ParaSails self,
   /*in*/ double tolerance)
 {
   return (*self->d_epv->f_SetTolerance)(
@@ -443,8 +427,8 @@ bHYPRE_BoomerAMG_SetTolerance(
  */
 
 int32_t
-bHYPRE_BoomerAMG_SetMaxIterations(
-  bHYPRE_BoomerAMG self,
+bHYPRE_ParaSails_SetMaxIterations(
+  bHYPRE_ParaSails self,
   /*in*/ int32_t max_iterations)
 {
   return (*self->d_epv->f_SetMaxIterations)(
@@ -462,8 +446,8 @@ bHYPRE_BoomerAMG_SetMaxIterations(
  */
 
 int32_t
-bHYPRE_BoomerAMG_SetLogging(
-  bHYPRE_BoomerAMG self,
+bHYPRE_ParaSails_SetLogging(
+  bHYPRE_ParaSails self,
   /*in*/ int32_t level)
 {
   return (*self->d_epv->f_SetLogging)(
@@ -481,8 +465,8 @@ bHYPRE_BoomerAMG_SetLogging(
  */
 
 int32_t
-bHYPRE_BoomerAMG_SetPrintLevel(
-  bHYPRE_BoomerAMG self,
+bHYPRE_ParaSails_SetPrintLevel(
+  bHYPRE_ParaSails self,
   /*in*/ int32_t level)
 {
   return (*self->d_epv->f_SetPrintLevel)(
@@ -496,8 +480,8 @@ bHYPRE_BoomerAMG_SetPrintLevel(
  */
 
 int32_t
-bHYPRE_BoomerAMG_GetNumIterations(
-  bHYPRE_BoomerAMG self,
+bHYPRE_ParaSails_GetNumIterations(
+  bHYPRE_ParaSails self,
   /*out*/ int32_t* num_iterations)
 {
   return (*self->d_epv->f_GetNumIterations)(
@@ -511,8 +495,8 @@ bHYPRE_BoomerAMG_GetNumIterations(
  */
 
 int32_t
-bHYPRE_BoomerAMG_GetRelResidualNorm(
-  bHYPRE_BoomerAMG self,
+bHYPRE_ParaSails_GetRelResidualNorm(
+  bHYPRE_ParaSails self,
   /*out*/ double* norm)
 {
   return (*self->d_epv->f_GetRelResidualNorm)(
@@ -524,17 +508,17 @@ bHYPRE_BoomerAMG_GetRelResidualNorm(
  * Cast method for interface and class type conversions.
  */
 
-bHYPRE_BoomerAMG
-bHYPRE_BoomerAMG__cast(
+bHYPRE_ParaSails
+bHYPRE_ParaSails__cast(
   void* obj)
 {
-  bHYPRE_BoomerAMG cast = NULL;
+  bHYPRE_ParaSails cast = NULL;
 
   if (obj != NULL) {
     sidl_BaseInterface base = (sidl_BaseInterface) obj;
-    cast = (bHYPRE_BoomerAMG) (*base->d_epv->f__cast)(
+    cast = (bHYPRE_ParaSails) (*base->d_epv->f__cast)(
       base->d_object,
-      "bHYPRE.BoomerAMG");
+      "bHYPRE.ParaSails");
   }
 
   return cast;
@@ -545,7 +529,7 @@ bHYPRE_BoomerAMG__cast(
  */
 
 void*
-bHYPRE_BoomerAMG__cast2(
+bHYPRE_ParaSails__cast2(
   void* obj,
   const char* type)
 {
@@ -558,154 +542,154 @@ bHYPRE_BoomerAMG__cast2(
 
   return cast;
 }
-struct bHYPRE_BoomerAMG__array*
-bHYPRE_BoomerAMG__array_createCol(
+struct bHYPRE_ParaSails__array*
+bHYPRE_ParaSails__array_createCol(
   int32_t       dimen,
   const int32_t lower[],
   const int32_t upper[])
 {
-  return (struct bHYPRE_BoomerAMG__array*)sidl_interface__array_createCol(dimen,
+  return (struct bHYPRE_ParaSails__array*)sidl_interface__array_createCol(dimen,
     lower, upper);
 }
 
-struct bHYPRE_BoomerAMG__array*
-bHYPRE_BoomerAMG__array_createRow(
+struct bHYPRE_ParaSails__array*
+bHYPRE_ParaSails__array_createRow(
   int32_t       dimen,
   const int32_t lower[],
   const int32_t upper[])
 {
-  return (struct bHYPRE_BoomerAMG__array*)sidl_interface__array_createRow(dimen,
+  return (struct bHYPRE_ParaSails__array*)sidl_interface__array_createRow(dimen,
     lower, upper);
 }
 
-struct bHYPRE_BoomerAMG__array*
-bHYPRE_BoomerAMG__array_create1d(int32_t len)
+struct bHYPRE_ParaSails__array*
+bHYPRE_ParaSails__array_create1d(int32_t len)
 {
-  return (struct bHYPRE_BoomerAMG__array*)sidl_interface__array_create1d(len);
+  return (struct bHYPRE_ParaSails__array*)sidl_interface__array_create1d(len);
 }
 
-struct bHYPRE_BoomerAMG__array*
-bHYPRE_BoomerAMG__array_create1dInit(
+struct bHYPRE_ParaSails__array*
+bHYPRE_ParaSails__array_create1dInit(
   int32_t len, 
-  bHYPRE_BoomerAMG* data)
+  bHYPRE_ParaSails* data)
 {
   return (struct 
-    bHYPRE_BoomerAMG__array*)sidl_interface__array_create1dInit(len,
+    bHYPRE_ParaSails__array*)sidl_interface__array_create1dInit(len,
     (struct sidl_BaseInterface__object **)data);
 }
 
-struct bHYPRE_BoomerAMG__array*
-bHYPRE_BoomerAMG__array_create2dCol(int32_t m, int32_t n)
+struct bHYPRE_ParaSails__array*
+bHYPRE_ParaSails__array_create2dCol(int32_t m, int32_t n)
 {
-  return (struct bHYPRE_BoomerAMG__array*)sidl_interface__array_create2dCol(m,
+  return (struct bHYPRE_ParaSails__array*)sidl_interface__array_create2dCol(m,
     n);
 }
 
-struct bHYPRE_BoomerAMG__array*
-bHYPRE_BoomerAMG__array_create2dRow(int32_t m, int32_t n)
+struct bHYPRE_ParaSails__array*
+bHYPRE_ParaSails__array_create2dRow(int32_t m, int32_t n)
 {
-  return (struct bHYPRE_BoomerAMG__array*)sidl_interface__array_create2dRow(m,
+  return (struct bHYPRE_ParaSails__array*)sidl_interface__array_create2dRow(m,
     n);
 }
 
-struct bHYPRE_BoomerAMG__array*
-bHYPRE_BoomerAMG__array_borrow(
-  bHYPRE_BoomerAMG* firstElement,
+struct bHYPRE_ParaSails__array*
+bHYPRE_ParaSails__array_borrow(
+  bHYPRE_ParaSails* firstElement,
   int32_t       dimen,
   const int32_t lower[],
   const int32_t upper[],
   const int32_t stride[])
 {
-  return (struct bHYPRE_BoomerAMG__array*)sidl_interface__array_borrow(
+  return (struct bHYPRE_ParaSails__array*)sidl_interface__array_borrow(
     (struct sidl_BaseInterface__object **)
     firstElement, dimen, lower, upper, stride);
 }
 
-struct bHYPRE_BoomerAMG__array*
-bHYPRE_BoomerAMG__array_smartCopy(
-  struct bHYPRE_BoomerAMG__array *array)
+struct bHYPRE_ParaSails__array*
+bHYPRE_ParaSails__array_smartCopy(
+  struct bHYPRE_ParaSails__array *array)
 {
-  return (struct bHYPRE_BoomerAMG__array*)
+  return (struct bHYPRE_ParaSails__array*)
     sidl_interface__array_smartCopy((struct sidl_interface__array *)array);
 }
 
 void
-bHYPRE_BoomerAMG__array_addRef(
-  struct bHYPRE_BoomerAMG__array* array)
+bHYPRE_ParaSails__array_addRef(
+  struct bHYPRE_ParaSails__array* array)
 {
   sidl_interface__array_addRef((struct sidl_interface__array *)array);
 }
 
 void
-bHYPRE_BoomerAMG__array_deleteRef(
-  struct bHYPRE_BoomerAMG__array* array)
+bHYPRE_ParaSails__array_deleteRef(
+  struct bHYPRE_ParaSails__array* array)
 {
   sidl_interface__array_deleteRef((struct sidl_interface__array *)array);
 }
 
-bHYPRE_BoomerAMG
-bHYPRE_BoomerAMG__array_get1(
-  const struct bHYPRE_BoomerAMG__array* array,
+bHYPRE_ParaSails
+bHYPRE_ParaSails__array_get1(
+  const struct bHYPRE_ParaSails__array* array,
   const int32_t i1)
 {
-  return (bHYPRE_BoomerAMG)
+  return (bHYPRE_ParaSails)
     sidl_interface__array_get1((const struct sidl_interface__array *)array
     , i1);
 }
 
-bHYPRE_BoomerAMG
-bHYPRE_BoomerAMG__array_get2(
-  const struct bHYPRE_BoomerAMG__array* array,
+bHYPRE_ParaSails
+bHYPRE_ParaSails__array_get2(
+  const struct bHYPRE_ParaSails__array* array,
   const int32_t i1,
   const int32_t i2)
 {
-  return (bHYPRE_BoomerAMG)
+  return (bHYPRE_ParaSails)
     sidl_interface__array_get2((const struct sidl_interface__array *)array
     , i1, i2);
 }
 
-bHYPRE_BoomerAMG
-bHYPRE_BoomerAMG__array_get3(
-  const struct bHYPRE_BoomerAMG__array* array,
+bHYPRE_ParaSails
+bHYPRE_ParaSails__array_get3(
+  const struct bHYPRE_ParaSails__array* array,
   const int32_t i1,
   const int32_t i2,
   const int32_t i3)
 {
-  return (bHYPRE_BoomerAMG)
+  return (bHYPRE_ParaSails)
     sidl_interface__array_get3((const struct sidl_interface__array *)array
     , i1, i2, i3);
 }
 
-bHYPRE_BoomerAMG
-bHYPRE_BoomerAMG__array_get4(
-  const struct bHYPRE_BoomerAMG__array* array,
+bHYPRE_ParaSails
+bHYPRE_ParaSails__array_get4(
+  const struct bHYPRE_ParaSails__array* array,
   const int32_t i1,
   const int32_t i2,
   const int32_t i3,
   const int32_t i4)
 {
-  return (bHYPRE_BoomerAMG)
+  return (bHYPRE_ParaSails)
     sidl_interface__array_get4((const struct sidl_interface__array *)array
     , i1, i2, i3, i4);
 }
 
-bHYPRE_BoomerAMG
-bHYPRE_BoomerAMG__array_get5(
-  const struct bHYPRE_BoomerAMG__array* array,
+bHYPRE_ParaSails
+bHYPRE_ParaSails__array_get5(
+  const struct bHYPRE_ParaSails__array* array,
   const int32_t i1,
   const int32_t i2,
   const int32_t i3,
   const int32_t i4,
   const int32_t i5)
 {
-  return (bHYPRE_BoomerAMG)
+  return (bHYPRE_ParaSails)
     sidl_interface__array_get5((const struct sidl_interface__array *)array
     , i1, i2, i3, i4, i5);
 }
 
-bHYPRE_BoomerAMG
-bHYPRE_BoomerAMG__array_get6(
-  const struct bHYPRE_BoomerAMG__array* array,
+bHYPRE_ParaSails
+bHYPRE_ParaSails__array_get6(
+  const struct bHYPRE_ParaSails__array* array,
   const int32_t i1,
   const int32_t i2,
   const int32_t i3,
@@ -713,14 +697,14 @@ bHYPRE_BoomerAMG__array_get6(
   const int32_t i5,
   const int32_t i6)
 {
-  return (bHYPRE_BoomerAMG)
+  return (bHYPRE_ParaSails)
     sidl_interface__array_get6((const struct sidl_interface__array *)array
     , i1, i2, i3, i4, i5, i6);
 }
 
-bHYPRE_BoomerAMG
-bHYPRE_BoomerAMG__array_get7(
-  const struct bHYPRE_BoomerAMG__array* array,
+bHYPRE_ParaSails
+bHYPRE_ParaSails__array_get7(
+  const struct bHYPRE_ParaSails__array* array,
   const int32_t i1,
   const int32_t i2,
   const int32_t i3,
@@ -729,99 +713,99 @@ bHYPRE_BoomerAMG__array_get7(
   const int32_t i6,
   const int32_t i7)
 {
-  return (bHYPRE_BoomerAMG)
+  return (bHYPRE_ParaSails)
     sidl_interface__array_get7((const struct sidl_interface__array *)array
     , i1, i2, i3, i4, i5, i6, i7);
 }
 
-bHYPRE_BoomerAMG
-bHYPRE_BoomerAMG__array_get(
-  const struct bHYPRE_BoomerAMG__array* array,
+bHYPRE_ParaSails
+bHYPRE_ParaSails__array_get(
+  const struct bHYPRE_ParaSails__array* array,
   const int32_t indices[])
 {
-  return (bHYPRE_BoomerAMG)
+  return (bHYPRE_ParaSails)
     sidl_interface__array_get((const struct sidl_interface__array *)array,
       indices);
 }
 
 void
-bHYPRE_BoomerAMG__array_set1(
-  struct bHYPRE_BoomerAMG__array* array,
+bHYPRE_ParaSails__array_set1(
+  struct bHYPRE_ParaSails__array* array,
   const int32_t i1,
-  bHYPRE_BoomerAMG const value)
+  bHYPRE_ParaSails const value)
 {
   sidl_interface__array_set1((struct sidl_interface__array *)array
   , i1, (struct sidl_BaseInterface__object *)value);
 }
 
 void
-bHYPRE_BoomerAMG__array_set2(
-  struct bHYPRE_BoomerAMG__array* array,
+bHYPRE_ParaSails__array_set2(
+  struct bHYPRE_ParaSails__array* array,
   const int32_t i1,
   const int32_t i2,
-  bHYPRE_BoomerAMG const value)
+  bHYPRE_ParaSails const value)
 {
   sidl_interface__array_set2((struct sidl_interface__array *)array
   , i1, i2, (struct sidl_BaseInterface__object *)value);
 }
 
 void
-bHYPRE_BoomerAMG__array_set3(
-  struct bHYPRE_BoomerAMG__array* array,
+bHYPRE_ParaSails__array_set3(
+  struct bHYPRE_ParaSails__array* array,
   const int32_t i1,
   const int32_t i2,
   const int32_t i3,
-  bHYPRE_BoomerAMG const value)
+  bHYPRE_ParaSails const value)
 {
   sidl_interface__array_set3((struct sidl_interface__array *)array
   , i1, i2, i3, (struct sidl_BaseInterface__object *)value);
 }
 
 void
-bHYPRE_BoomerAMG__array_set4(
-  struct bHYPRE_BoomerAMG__array* array,
+bHYPRE_ParaSails__array_set4(
+  struct bHYPRE_ParaSails__array* array,
   const int32_t i1,
   const int32_t i2,
   const int32_t i3,
   const int32_t i4,
-  bHYPRE_BoomerAMG const value)
+  bHYPRE_ParaSails const value)
 {
   sidl_interface__array_set4((struct sidl_interface__array *)array
   , i1, i2, i3, i4, (struct sidl_BaseInterface__object *)value);
 }
 
 void
-bHYPRE_BoomerAMG__array_set5(
-  struct bHYPRE_BoomerAMG__array* array,
+bHYPRE_ParaSails__array_set5(
+  struct bHYPRE_ParaSails__array* array,
   const int32_t i1,
   const int32_t i2,
   const int32_t i3,
   const int32_t i4,
   const int32_t i5,
-  bHYPRE_BoomerAMG const value)
+  bHYPRE_ParaSails const value)
 {
   sidl_interface__array_set5((struct sidl_interface__array *)array
   , i1, i2, i3, i4, i5, (struct sidl_BaseInterface__object *)value);
 }
 
 void
-bHYPRE_BoomerAMG__array_set6(
-  struct bHYPRE_BoomerAMG__array* array,
+bHYPRE_ParaSails__array_set6(
+  struct bHYPRE_ParaSails__array* array,
   const int32_t i1,
   const int32_t i2,
   const int32_t i3,
   const int32_t i4,
   const int32_t i5,
   const int32_t i6,
-  bHYPRE_BoomerAMG const value)
+  bHYPRE_ParaSails const value)
 {
   sidl_interface__array_set6((struct sidl_interface__array *)array
   , i1, i2, i3, i4, i5, i6, (struct sidl_BaseInterface__object *)value);
 }
 
 void
-bHYPRE_BoomerAMG__array_set7(
-  struct bHYPRE_BoomerAMG__array* array,
+bHYPRE_ParaSails__array_set7(
+  struct bHYPRE_ParaSails__array* array,
   const int32_t i1,
   const int32_t i2,
   const int32_t i3,
@@ -829,32 +813,32 @@ bHYPRE_BoomerAMG__array_set7(
   const int32_t i5,
   const int32_t i6,
   const int32_t i7,
-  bHYPRE_BoomerAMG const value)
+  bHYPRE_ParaSails const value)
 {
   sidl_interface__array_set7((struct sidl_interface__array *)array
   , i1, i2, i3, i4, i5, i6, i7, (struct sidl_BaseInterface__object *)value);
 }
 
 void
-bHYPRE_BoomerAMG__array_set(
-  struct bHYPRE_BoomerAMG__array* array,
+bHYPRE_ParaSails__array_set(
+  struct bHYPRE_ParaSails__array* array,
   const int32_t indices[],
-  bHYPRE_BoomerAMG const value)
+  bHYPRE_ParaSails const value)
 {
   sidl_interface__array_set((struct sidl_interface__array *)array, indices,
     (struct sidl_BaseInterface__object *)value);
 }
 
 int32_t
-bHYPRE_BoomerAMG__array_dimen(
-  const struct bHYPRE_BoomerAMG__array* array)
+bHYPRE_ParaSails__array_dimen(
+  const struct bHYPRE_ParaSails__array* array)
 {
   return sidl_interface__array_dimen((struct sidl_interface__array *)array);
 }
 
 int32_t
-bHYPRE_BoomerAMG__array_lower(
-  const struct bHYPRE_BoomerAMG__array* array,
+bHYPRE_ParaSails__array_lower(
+  const struct bHYPRE_ParaSails__array* array,
   const int32_t ind)
 {
   return sidl_interface__array_lower((struct sidl_interface__array *)array,
@@ -862,8 +846,8 @@ bHYPRE_BoomerAMG__array_lower(
 }
 
 int32_t
-bHYPRE_BoomerAMG__array_upper(
-  const struct bHYPRE_BoomerAMG__array* array,
+bHYPRE_ParaSails__array_upper(
+  const struct bHYPRE_ParaSails__array* array,
   const int32_t ind)
 {
   return sidl_interface__array_upper((struct sidl_interface__array *)array,
@@ -871,8 +855,8 @@ bHYPRE_BoomerAMG__array_upper(
 }
 
 int32_t
-bHYPRE_BoomerAMG__array_length(
-  const struct bHYPRE_BoomerAMG__array* array,
+bHYPRE_ParaSails__array_length(
+  const struct bHYPRE_ParaSails__array* array,
   const int32_t ind)
 {
   return sidl_interface__array_length((struct sidl_interface__array *)array,
@@ -880,8 +864,8 @@ bHYPRE_BoomerAMG__array_length(
 }
 
 int32_t
-bHYPRE_BoomerAMG__array_stride(
-  const struct bHYPRE_BoomerAMG__array* array,
+bHYPRE_ParaSails__array_stride(
+  const struct bHYPRE_ParaSails__array* array,
   const int32_t ind)
 {
   return sidl_interface__array_stride((struct sidl_interface__array *)array,
@@ -889,51 +873,51 @@ bHYPRE_BoomerAMG__array_stride(
 }
 
 int
-bHYPRE_BoomerAMG__array_isColumnOrder(
-  const struct bHYPRE_BoomerAMG__array* array)
+bHYPRE_ParaSails__array_isColumnOrder(
+  const struct bHYPRE_ParaSails__array* array)
 {
   return sidl_interface__array_isColumnOrder((struct sidl_interface__array 
     *)array);
 }
 
 int
-bHYPRE_BoomerAMG__array_isRowOrder(
-  const struct bHYPRE_BoomerAMG__array* array)
+bHYPRE_ParaSails__array_isRowOrder(
+  const struct bHYPRE_ParaSails__array* array)
 {
   return sidl_interface__array_isRowOrder((struct sidl_interface__array 
     *)array);
 }
 
 void
-bHYPRE_BoomerAMG__array_copy(
-  const struct bHYPRE_BoomerAMG__array* src,
-  struct bHYPRE_BoomerAMG__array* dest)
+bHYPRE_ParaSails__array_copy(
+  const struct bHYPRE_ParaSails__array* src,
+  struct bHYPRE_ParaSails__array* dest)
 {
   sidl_interface__array_copy((const struct sidl_interface__array *)src,
                              (struct sidl_interface__array *)dest);
 }
 
-struct bHYPRE_BoomerAMG__array*
-bHYPRE_BoomerAMG__array_slice(
-  struct bHYPRE_BoomerAMG__array* src,
+struct bHYPRE_ParaSails__array*
+bHYPRE_ParaSails__array_slice(
+  struct bHYPRE_ParaSails__array* src,
   int32_t        dimen,
   const int32_t  numElem[],
   const int32_t  *srcStart,
   const int32_t  *srcStride,
   const int32_t  *newStart)
 {
-  return (struct bHYPRE_BoomerAMG__array*)
+  return (struct bHYPRE_ParaSails__array*)
     sidl_interface__array_slice((struct sidl_interface__array *)src,
                                 dimen, numElem, srcStart, srcStride, newStart);
 }
 
-struct bHYPRE_BoomerAMG__array*
-bHYPRE_BoomerAMG__array_ensure(
-  struct bHYPRE_BoomerAMG__array* src,
+struct bHYPRE_ParaSails__array*
+bHYPRE_ParaSails__array_ensure(
+  struct bHYPRE_ParaSails__array* src,
   int32_t dimen,
   int     ordering)
 {
-  return (struct bHYPRE_BoomerAMG__array*)
+  return (struct bHYPRE_ParaSails__array*)
     sidl_interface__array_ensure((struct sidl_interface__array *)src, dimen,
       ordering);
 }

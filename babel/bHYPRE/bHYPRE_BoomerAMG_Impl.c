@@ -43,15 +43,43 @@
  * (default) or a W-cycle.
  * 
  * \item[NumGridSweeps] ({\tt IntArray 1D}) - number of sweeps for
- * fine and coarse grid, up and down cycle.
+ * fine and coarse grid, up and down cycle. DEPRECATED:
+ * Use NumSweeps or Cycle?NumSweeps instead.
+ * 
+ * \item[NumSweeps] ({\tt Int}) - number of sweeps for fine grid, up and
+ * down cycle.
+ * 
+ * \item[Cycle0NumSweeps] ({\tt Int}) - number of sweeps for fine grid
+ * 
+ * \item[Cycle1NumSweeps] ({\tt Int}) - number of sweeps for down cycle
+ * 
+ * \item[Cycle2NumSweeps] ({\tt Int}) - number of sweeps for up cycle
+ * 
+ * \item[Cycle3NumSweeps] ({\tt Int}) - number of sweeps for coarse grid
  * 
  * \item[GridRelaxType] ({\tt IntArray 1D}) - type of smoother used on
- * fine and coarse grid, up and down cycle.
+ * fine and coarse grid, up and down cycle. DEPRECATED:
+ * Use RelaxType or Cycle?RelaxType instead.
+ * 
+ * \item[RelaxType] ({\tt Int}) - type of smoother for fine grid, up and
+ * down cycle.
+ * 
+ * \item[Cycle0RelaxType] ({\tt Int}) - type of smoother for fine grid
+ * 
+ * \item[Cycle1RelaxType] ({\tt Int}) - type of smoother for down cycle
+ * 
+ * \item[Cycle2RelaxType] ({\tt Int}) - type of smoother for up cycle
+ * 
+ * \item[Cycle3RelaxType] ({\tt Int}) - type of smoother for coarse grid
  * 
  * \item[GridRelaxPoints] ({\tt IntArray 2D}) - point ordering used in
- * relaxation.
+ * relaxation.  DEPRECATED.
  * 
  * \item[RelaxWeight] ({\tt DoubleArray 1D}) - relaxation weight for
+ * smoothed Jacobi and hybrid SOR.  DEPRECATED:
+ * Instead, use the RelaxWt parameter and the SetLevelRelaxWt function.
+ * 
+ * \item[RelaxWt] ({\tt Int}) - relaxation weight for all levels for
  * smoothed Jacobi and hybrid SOR.
  * 
  * \item[TruncFactor] ({\tt Double}) - truncation factor for
@@ -84,6 +112,15 @@
  * for additive Schwarz.
  * 
  * \item[DebugFlag] ({\tt Int}) -
+ * 
+ * \end{description}
+ * 
+ * The following function is specific to this class:
+ * 
+ * \begin{description}
+ * 
+ * \item[SetLevelRelxWeight] ({\tt Double , \tt Int}) -
+ * relaxation weight for one specified level of smoothed Jacobi and hybrid SOR.
  * 
  * \end{description}
  * 
@@ -158,6 +195,31 @@ impl_bHYPRE_BoomerAMG__dtor(
 }
 
 /*
+ * Method:  SetLevelRelaxWt[]
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_BoomerAMG_SetLevelRelaxWt"
+
+int32_t
+impl_bHYPRE_BoomerAMG_SetLevelRelaxWt(
+  /*in*/ bHYPRE_BoomerAMG self, /*in*/ double relax_wt, /*in*/ int32_t level)
+{
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.BoomerAMG.SetLevelRelaxWt) */
+  /* Insert the implementation of the SetLevelRelaxWt method here... */
+
+   HYPRE_Solver solver;
+   struct bHYPRE_BoomerAMG__data * data;
+
+   data = bHYPRE_BoomerAMG__get_data( self );
+   solver = data->solver;
+
+   return HYPRE_BoomerAMGSetLevelRelaxWt( solver, relax_wt, level );
+
+  /* DO-NOT-DELETE splicer.end(bHYPRE.BoomerAMG.SetLevelRelaxWt) */
+}
+
+/*
  * Set the MPI Communicator.
  * 
  */
@@ -213,6 +275,50 @@ impl_bHYPRE_BoomerAMG_SetIntParameter(
    else if ( strcmp(name,"CycleType")==0 )
    {
       ierr += HYPRE_BoomerAMGSetCycleType( solver, value );
+   }
+   else if ( strcmp(name,"NumSweeps")==0 )
+   {
+      ierr += HYPRE_BoomerAMGSetNumSweeps( solver, value );
+   }
+   else if ( strcmp(name,"Cycle0NumSweeps")==0 )
+   {
+      ierr += HYPRE_BoomerAMGSetCycleNumSweeps( solver, value, 0 );
+   }
+   else if ( strcmp(name,"Cycle1NumSweeps")==0 )
+   {
+      ierr += HYPRE_BoomerAMGSetCycleNumSweeps( solver, value, 1 );
+   }
+   else if ( strcmp(name,"Cycle2NumSweeps")==0 )
+   {
+      ierr += HYPRE_BoomerAMGSetCycleNumSweeps( solver, value, 2 );
+   }
+   else if ( strcmp(name,"Cycle3NumSweeps")==0 )
+   {
+      ierr += HYPRE_BoomerAMGSetCycleNumSweeps( solver, value, 3 );
+   }
+   else if ( strcmp(name,"RelaxType")==0 )
+   {
+      ierr += HYPRE_BoomerAMGSetRelaxType( solver, value );
+   }
+   else if ( strcmp(name,"Cycle0RelaxType")==0 )
+   {
+      ierr += HYPRE_BoomerAMGSetCycleRelaxType( solver, value, 0 );
+   }
+   else if ( strcmp(name,"Cycle1RelaxType")==0 )
+   {
+      ierr += HYPRE_BoomerAMGSetCycleRelaxType( solver, value, 1 );
+   }
+   else if ( strcmp(name,"Cycle2RelaxType")==0 )
+   {
+      ierr += HYPRE_BoomerAMGSetCycleRelaxType( solver, value, 2 );
+   }
+   else if ( strcmp(name,"Cycle3RelaxType")==0 )
+   {
+      ierr += HYPRE_BoomerAMGSetCycleRelaxType( solver, value, 3 );
+   }
+   else if ( strcmp(name,"RelaxWt")==0 )
+   {
+      ierr += HYPRE_BoomerAMGSetRelaxWt( solver, value );
    }
    else if ( strcmp(name,"SmoothType")==0 )
    {
@@ -374,11 +480,13 @@ impl_bHYPRE_BoomerAMG_SetIntArray1Parameter(
 
    if ( strcmp(name,"NumGridSweeps")==0 )
    {
+      /* *** DEPRECATED *** Use IntParameter NumSweeps and Cycle?NumSweeps instead. */
       assert( dim==1 );
       ierr += HYPRE_BoomerAMGSetNumGridSweeps( solver, data1_c );
    }
    else if ( strcmp(name,"GridRelaxType")==0 )
    {
+      /* *** DEPRECATED *** Use RelaxType and Cycle?RelaxType instead. */
       assert( dim==1 );
       ierr += HYPRE_BoomerAMGSetGridRelaxType( solver, data1_c );
    }
@@ -424,6 +532,8 @@ impl_bHYPRE_BoomerAMG_SetIntArray2Parameter(
 
    if ( strcmp(name,"GridRelaxPoints")==0 )
    {
+      /* *** DEPRECATED ***  There is no substitute because Ulrike Yang
+         thinks nobody uses this anyway. */
       assert( dim==2 );
       lb0 = sidl_int__array_lower( value, 0 );
       ub0 = sidl_int__array_upper( value, 0 );
@@ -477,6 +587,8 @@ impl_bHYPRE_BoomerAMG_SetDoubleArray1Parameter(
 
    if ( strcmp(name,"RelaxWeight")==0 )
    {
+      /* *** DEPRECATED *** Use the RelaxWt parameter and SetLevelRelaxWt function
+         instead. */
       assert( dim==1 );
       ierr += HYPRE_BoomerAMGSetRelaxWeight( solver, value->d_firstElement );
    }

@@ -1,0 +1,675 @@
+/*
+ * File:          bHYPRE_ParaSails_Impl.c
+ * Symbol:        bHYPRE.ParaSails-v1.0.0
+ * Symbol Type:   class
+ * Babel Version: 0.9.8
+ * Description:   Server-side implementation for bHYPRE.ParaSails
+ * 
+ * WARNING: Automatically generated; only changes within splicers preserved
+ * 
+ * babel-version = 0.9.8
+ */
+
+/*
+ * DEVELOPERS ARE EXPECTED TO PROVIDE IMPLEMENTATIONS
+ * FOR THE FOLLOWING METHODS BETWEEN SPLICER PAIRS.
+ */
+
+/*
+ * Symbol "bHYPRE.ParaSails" (version 1.0.0)
+ * 
+ * Objects of this type can be cast to Solver objects using the
+ * {\tt \_\_cast} methods.
+ * 
+ * RDF: Documentation goes here.
+ * 
+ */
+
+#include "bHYPRE_ParaSails_Impl.h"
+
+/* DO-NOT-DELETE splicer.begin(bHYPRE.ParaSails._includes) */
+/* Put additional includes or other arbitrary code here... */
+#include <assert.h>
+#include "bHYPRE_IJParCSRMatrix_Impl.h"
+#include "bHYPRE_IJParCSRVector_Impl.h"
+/* DO-NOT-DELETE splicer.end(bHYPRE.ParaSails._includes) */
+
+/*
+ * Class constructor called when the class is created.
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_ParaSails__ctor"
+
+void
+impl_bHYPRE_ParaSails__ctor(
+  /*in*/ bHYPRE_ParaSails self)
+{
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.ParaSails._ctor) */
+  /* Insert the implementation of the constructor method here... */
+
+   struct bHYPRE_ParaSails__data * data;
+   data = hypre_CTAlloc( struct bHYPRE_ParaSails__data, 1 );
+   data -> comm = NULL;
+   data -> solver = (HYPRE_Solver) NULL;
+   /* set any other data components here */
+   bHYPRE_ParaSails__set_data( self, data );
+
+  /* DO-NOT-DELETE splicer.end(bHYPRE.ParaSails._ctor) */
+}
+
+/*
+ * Class destructor called when the class is deleted.
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_ParaSails__dtor"
+
+void
+impl_bHYPRE_ParaSails__dtor(
+  /*in*/ bHYPRE_ParaSails self)
+{
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.ParaSails._dtor) */
+  /* Insert the implementation of the destructor method here... */
+
+   int ierr = 0;
+   struct bHYPRE_ParaSails__data * data;
+
+   data = bHYPRE_ParaSails__get_data( self );
+   bHYPRE_IJParCSRMatrix_deleteRef( data->matrix );
+   ierr += HYPRE_ParaSailsDestroy( data->solver );
+   assert( ierr== 0 );
+   /* delete any nontrivial data components here */
+   hypre_TFree( data );
+
+  /* DO-NOT-DELETE splicer.end(bHYPRE.ParaSails._dtor) */
+}
+
+/*
+ * Set the MPI Communicator.
+ * 
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_ParaSails_SetCommunicator"
+
+int32_t
+impl_bHYPRE_ParaSails_SetCommunicator(
+  /*in*/ bHYPRE_ParaSails self, /*in*/ void* mpi_comm)
+{
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.ParaSails.SetCommunicator) */
+  /* Insert the implementation of the SetCommunicator method here... */
+
+   int ierr = 0;
+   HYPRE_Solver dummy;
+   HYPRE_Solver * solver = &dummy;
+
+   struct bHYPRE_ParaSails__data * data = bHYPRE_ParaSails__get_data( self );
+   data -> comm = (MPI_Comm) mpi_comm;
+
+   ierr += HYPRE_ParCSRParaSailsCreate( (data->comm), solver );
+   data -> solver = *solver;
+
+   return ierr;
+
+  /* DO-NOT-DELETE splicer.end(bHYPRE.ParaSails.SetCommunicator) */
+}
+
+/*
+ * Set the int parameter associated with {\tt name}.
+ * 
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_ParaSails_SetIntParameter"
+
+int32_t
+impl_bHYPRE_ParaSails_SetIntParameter(
+  /*in*/ bHYPRE_ParaSails self, /*in*/ const char* name, /*in*/ int32_t value)
+{
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.ParaSails.SetIntParameter) */
+  /* Insert the implementation of the SetIntParameter method here... */
+
+   int ierr = 0;
+   HYPRE_Solver solver;
+   struct bHYPRE_ParaSails__data * data;
+
+   data = bHYPRE_ParaSails__get_data( self );
+   solver = data->solver;
+
+   if ( strcmp(name,"Nlevels")==0 )
+   {
+      ierr += HYPRE_ParaSailsSetNlevels( solver, value );
+   }
+   else if ( strcmp(name,"Sym")==0 )
+   {
+      ierr += HYPRE_ParaSailsSetSym( solver, value );
+   }
+   else if ( strcmp(name,"Reuse")==0 )
+   {
+      ierr += HYPRE_ParaSailsSetReuse( solver, value );
+   }
+   else
+   {
+      ierr = 1;
+   }
+
+   return ierr;
+
+  /* DO-NOT-DELETE splicer.end(bHYPRE.ParaSails.SetIntParameter) */
+}
+
+/*
+ * Set the double parameter associated with {\tt name}.
+ * 
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_ParaSails_SetDoubleParameter"
+
+int32_t
+impl_bHYPRE_ParaSails_SetDoubleParameter(
+  /*in*/ bHYPRE_ParaSails self, /*in*/ const char* name, /*in*/ double value)
+{
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.ParaSails.SetDoubleParameter) */
+  /* Insert the implementation of the SetDoubleParameter method here... */
+
+   int ierr = 0;
+   HYPRE_Solver solver;
+   struct bHYPRE_ParaSails__data * data;
+
+   data = bHYPRE_ParaSails__get_data( self );
+   solver = data->solver;
+
+   if ( strcmp(name,"Thresh")==0 )
+   {
+      ierr += HYPRE_ParaSailsSetThresh( solver, value );
+   }
+   else if (strcmp(name,"Loadbal")==0 )
+   {
+      ierr += HYPRE_ParaSailsSetLoadbal( solver, value );
+   }
+   else if (strcmp(name,"Filter")==0 )
+   {
+      ierr += HYPRE_ParaSailsSetFilter( solver, value );
+   }
+   else
+   {
+      ierr = 1;
+   }
+
+   return ierr;
+
+  /* DO-NOT-DELETE splicer.end(bHYPRE.ParaSails.SetDoubleParameter) */
+}
+
+/*
+ * Set the string parameter associated with {\tt name}.
+ * 
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_ParaSails_SetStringParameter"
+
+int32_t
+impl_bHYPRE_ParaSails_SetStringParameter(
+  /*in*/ bHYPRE_ParaSails self, /*in*/ const char* name,
+    /*in*/ const char* value)
+{
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.ParaSails.SetStringParameter) */
+  /* Insert the implementation of the SetStringParameter method here... */
+   return 1;
+  /* DO-NOT-DELETE splicer.end(bHYPRE.ParaSails.SetStringParameter) */
+}
+
+/*
+ * Set the int 1-D array parameter associated with {\tt name}.
+ * 
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_ParaSails_SetIntArray1Parameter"
+
+int32_t
+impl_bHYPRE_ParaSails_SetIntArray1Parameter(
+  /*in*/ bHYPRE_ParaSails self, /*in*/ const char* name,
+    /*in*/ struct sidl_int__array* value)
+{
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.ParaSails.SetIntArray1Parameter) */
+  /* Insert the implementation of the SetIntArray1Parameter method here... */
+   return 1;
+  /* DO-NOT-DELETE splicer.end(bHYPRE.ParaSails.SetIntArray1Parameter) */
+}
+
+/*
+ * Set the int 2-D array parameter associated with {\tt name}.
+ * 
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_ParaSails_SetIntArray2Parameter"
+
+int32_t
+impl_bHYPRE_ParaSails_SetIntArray2Parameter(
+  /*in*/ bHYPRE_ParaSails self, /*in*/ const char* name,
+    /*in*/ struct sidl_int__array* value)
+{
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.ParaSails.SetIntArray2Parameter) */
+  /* Insert the implementation of the SetIntArray2Parameter method here... */
+   return 1;
+  /* DO-NOT-DELETE splicer.end(bHYPRE.ParaSails.SetIntArray2Parameter) */
+}
+
+/*
+ * Set the double 1-D array parameter associated with {\tt name}.
+ * 
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_ParaSails_SetDoubleArray1Parameter"
+
+int32_t
+impl_bHYPRE_ParaSails_SetDoubleArray1Parameter(
+  /*in*/ bHYPRE_ParaSails self, /*in*/ const char* name,
+    /*in*/ struct sidl_double__array* value)
+{
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.ParaSails.SetDoubleArray1Parameter) */
+  /* Insert the implementation of the SetDoubleArray1Parameter method here... */
+   return 1;
+  /* DO-NOT-DELETE splicer.end(bHYPRE.ParaSails.SetDoubleArray1Parameter) */
+}
+
+/*
+ * Set the double 2-D array parameter associated with {\tt name}.
+ * 
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_ParaSails_SetDoubleArray2Parameter"
+
+int32_t
+impl_bHYPRE_ParaSails_SetDoubleArray2Parameter(
+  /*in*/ bHYPRE_ParaSails self, /*in*/ const char* name,
+    /*in*/ struct sidl_double__array* value)
+{
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.ParaSails.SetDoubleArray2Parameter) */
+  /* Insert the implementation of the SetDoubleArray2Parameter method here... */
+   return 1;
+  /* DO-NOT-DELETE splicer.end(bHYPRE.ParaSails.SetDoubleArray2Parameter) */
+}
+
+/*
+ * Set the int parameter associated with {\tt name}.
+ * 
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_ParaSails_GetIntValue"
+
+int32_t
+impl_bHYPRE_ParaSails_GetIntValue(
+  /*in*/ bHYPRE_ParaSails self, /*in*/ const char* name, /*out*/ int32_t* value)
+{
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.ParaSails.GetIntValue) */
+  /* Insert the implementation of the GetIntValue method here... */
+   return 1;
+  /* DO-NOT-DELETE splicer.end(bHYPRE.ParaSails.GetIntValue) */
+}
+
+/*
+ * Get the double parameter associated with {\tt name}.
+ * 
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_ParaSails_GetDoubleValue"
+
+int32_t
+impl_bHYPRE_ParaSails_GetDoubleValue(
+  /*in*/ bHYPRE_ParaSails self, /*in*/ const char* name, /*out*/ double* value)
+{
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.ParaSails.GetDoubleValue) */
+  /* Insert the implementation of the GetDoubleValue method here... */
+   return 1;
+  /* DO-NOT-DELETE splicer.end(bHYPRE.ParaSails.GetDoubleValue) */
+}
+
+/*
+ * (Optional) Do any preprocessing that may be necessary in
+ * order to execute {\tt Apply}.
+ * 
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_ParaSails_Setup"
+
+int32_t
+impl_bHYPRE_ParaSails_Setup(
+  /*in*/ bHYPRE_ParaSails self, /*in*/ bHYPRE_Vector b, /*in*/ bHYPRE_Vector x)
+{
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.ParaSails.Setup) */
+  /* Insert the implementation of the Setup method here... */
+
+   /* SetCommunicator should have been called by now, to trigger the
+      solver's Create call. */
+
+   int ierr = 0;
+   void * objectA, * objectb, * objectx;
+   HYPRE_Solver solver;
+   struct bHYPRE_ParaSails__data * data;
+   struct bHYPRE_IJParCSRMatrix__data * dataA;
+   struct bHYPRE_IJParCSRVector__data * datab, * datax;
+   bHYPRE_IJParCSRMatrix A;
+   HYPRE_IJMatrix ij_A;
+   HYPRE_ParCSRMatrix bHYPREP_A;
+   bHYPRE_IJParCSRVector bHYPREP_b, bHYPREP_x;
+   HYPRE_ParVector bb, xx;
+   HYPRE_IJVector ij_b, ij_x;
+
+   data = bHYPRE_ParaSails__get_data( self );
+   solver = data->solver;
+   A = data->matrix;
+
+   dataA = bHYPRE_IJParCSRMatrix__get_data( A );
+   ij_A = dataA -> ij_A;
+   ierr += HYPRE_IJMatrixGetObject( ij_A, &objectA );
+   bHYPREP_A = (HYPRE_ParCSRMatrix) objectA;
+
+   if ( bHYPRE_Vector_queryInt(b, "bHYPRE.IJParCSRVector" ) )
+   {
+      bHYPREP_b = bHYPRE_IJParCSRVector__cast( b );
+   }
+   else
+   {
+      assert( "Unrecognized vector type."==(char *)x );
+   }
+
+   datab = bHYPRE_IJParCSRVector__get_data( bHYPREP_b );
+   bHYPRE_IJParCSRVector_deleteRef( bHYPREP_b );
+   ij_b = datab -> ij_b;
+   ierr += HYPRE_IJVectorGetObject( ij_b, &objectb );
+   bb = (HYPRE_ParVector) objectb;
+
+   if ( bHYPRE_Vector_queryInt( x, "bHYPRE.IJParCSRVector" ) )
+   {
+      bHYPREP_x = bHYPRE_IJParCSRVector__cast( x );
+   }
+   else
+   {
+      assert( "Unrecognized vector type."==(char *)(x) );
+   }
+
+   datax = bHYPRE_IJParCSRVector__get_data( bHYPREP_x );
+   bHYPRE_IJParCSRVector_deleteRef( bHYPREP_x );
+   ij_x = datax -> ij_b;
+   ierr += HYPRE_IJVectorGetObject( ij_x, &objectx );
+   xx = (HYPRE_ParVector) objectx;
+   ierr += HYPRE_ParaSailsSetup( solver, bHYPREP_A, bb, xx );
+
+   return ierr;
+
+  /* DO-NOT-DELETE splicer.end(bHYPRE.ParaSails.Setup) */
+}
+
+/*
+ * Apply the operator to {\tt b}, returning {\tt x}.
+ * 
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_ParaSails_Apply"
+
+int32_t
+impl_bHYPRE_ParaSails_Apply(
+  /*in*/ bHYPRE_ParaSails self, /*in*/ bHYPRE_Vector b,
+    /*inout*/ bHYPRE_Vector* x)
+{
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.ParaSails.Apply) */
+  /* Insert the implementation of the Apply method here... */
+
+   int ierr = 0;
+   void * objectA, * objectb, * objectx;
+   HYPRE_Solver solver;
+   struct bHYPRE_ParaSails__data * data;
+   struct bHYPRE_IJParCSRMatrix__data * dataA;
+   struct bHYPRE_IJParCSRVector__data * datab, * datax;
+   bHYPRE_IJParCSRMatrix A;
+   HYPRE_IJMatrix ij_A;
+   HYPRE_ParCSRMatrix bHYPREP_A;
+   bHYPRE_IJParCSRVector bHYPREP_b, bHYPREP_x;
+   HYPRE_ParVector bb, xx;
+   HYPRE_IJVector ij_b, ij_x;
+
+   data = bHYPRE_ParaSails__get_data( self );
+   solver = data->solver;
+   A = data->matrix;
+
+   dataA = bHYPRE_IJParCSRMatrix__get_data( A );
+   ij_A = dataA -> ij_A;
+   ierr += HYPRE_IJMatrixGetObject( ij_A, &objectA );
+   bHYPREP_A = (HYPRE_ParCSRMatrix) objectA;
+
+   if ( bHYPRE_Vector_queryInt(b, "bHYPRE.IJParCSRVector" ) )
+   {
+      bHYPREP_b = bHYPRE_IJParCSRVector__cast( b );
+   }
+   else
+   {
+      assert( "Unrecognized vector type."==(char *)x );
+   }
+
+   datab = bHYPRE_IJParCSRVector__get_data( bHYPREP_b );
+   bHYPRE_IJParCSRVector_deleteRef( bHYPREP_b );
+   ij_b = datab -> ij_b;
+   ierr += HYPRE_IJVectorGetObject( ij_b, &objectb );
+   bb = (HYPRE_ParVector) objectb;
+
+   if ( *x==NULL )
+   {
+      /* If vector not supplied, make one...*/
+      /* There's no good way to check the size of x.  It would be good
+       * to do something similar if x had zero length.  Or assert(x
+       * has the right size) */
+      bHYPRE_Vector_Clone( b, x );
+      bHYPRE_Vector_Clear( *x );
+   }
+   if ( bHYPRE_Vector_queryInt( *x, "bHYPRE.IJParCSRVector" ) )
+   {
+      bHYPREP_x = bHYPRE_IJParCSRVector__cast( *x );
+   }
+   else
+   {
+      assert( "Unrecognized vector type."==(char *)(*x) );
+   }
+
+   datax = bHYPRE_IJParCSRVector__get_data( bHYPREP_x );
+   bHYPRE_IJParCSRVector_deleteRef( bHYPREP_x );
+   ij_x = datax -> ij_b;
+   ierr += HYPRE_IJVectorGetObject( ij_x, &objectx );
+   xx = (HYPRE_ParVector) objectx;
+
+   ierr += HYPRE_ParaSailsSolve( solver, bHYPREP_A, bb, xx );
+
+   return ierr;
+
+  /* DO-NOT-DELETE splicer.end(bHYPRE.ParaSails.Apply) */
+}
+
+/*
+ * Set the operator for the linear system being solved.
+ * 
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_ParaSails_SetOperator"
+
+int32_t
+impl_bHYPRE_ParaSails_SetOperator(
+  /*in*/ bHYPRE_ParaSails self, /*in*/ bHYPRE_Operator A)
+{
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.ParaSails.SetOperator) */
+  /* Insert the implementation of the SetOperator method here... */
+
+   int ierr = 0;
+   struct bHYPRE_ParaSails__data * data;
+   bHYPRE_IJParCSRMatrix Amat;
+
+   if ( bHYPRE_Operator_queryInt( A, "bHYPRE.IJParCSRMatrix" ) )
+   {
+      Amat = bHYPRE_IJParCSRMatrix__cast( A );
+      bHYPRE_IJParCSRMatrix_deleteRef( Amat ); /* extra ref from queryInt */
+   }
+   else
+   {
+      assert( "Unrecognized operator type."==(char *)A );
+   }
+
+   data = bHYPRE_ParaSails__get_data( self );
+   data->matrix = Amat;
+   bHYPRE_IJParCSRMatrix_addRef( data->matrix );
+
+   return ierr;
+
+  /* DO-NOT-DELETE splicer.end(bHYPRE.ParaSails.SetOperator) */
+}
+
+/*
+ * (Optional) Set the convergence tolerance.
+ * 
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_ParaSails_SetTolerance"
+
+int32_t
+impl_bHYPRE_ParaSails_SetTolerance(
+  /*in*/ bHYPRE_ParaSails self, /*in*/ double tolerance)
+{
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.ParaSails.SetTolerance) */
+  /* Insert the implementation of the SetTolerance method here... */
+
+   return 1;  /* no such function, this shouldn't be called */
+
+  /* DO-NOT-DELETE splicer.end(bHYPRE.ParaSails.SetTolerance) */
+}
+
+/*
+ * (Optional) Set maximum number of iterations.
+ * 
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_ParaSails_SetMaxIterations"
+
+int32_t
+impl_bHYPRE_ParaSails_SetMaxIterations(
+  /*in*/ bHYPRE_ParaSails self, /*in*/ int32_t max_iterations)
+{
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.ParaSails.SetMaxIterations) */
+  /* Insert the implementation of the SetMaxIterations method here... */
+
+   return 1;  /* no such function, this shouldn't be called */
+
+  /* DO-NOT-DELETE splicer.end(bHYPRE.ParaSails.SetMaxIterations) */
+}
+
+/*
+ * (Optional) Set the {\it logging level}, specifying the degree
+ * of additional informational data to be accumulated.  Does
+ * nothing by default (level = 0).  Other levels (if any) are
+ * implementation-specific.  Must be called before {\tt Setup}
+ * and {\tt Apply}.
+ * 
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_ParaSails_SetLogging"
+
+int32_t
+impl_bHYPRE_ParaSails_SetLogging(
+  /*in*/ bHYPRE_ParaSails self, /*in*/ int32_t level)
+{
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.ParaSails.SetLogging) */
+  /* Insert the implementation of the SetLogging method here... */
+
+   /* This function should be called before Setup.  Log level changes
+    * may require allocation or freeing of arrays, which is presently
+    * only done there.  It may be possible to support log_level
+    * changes at other times, but there is little need.  */
+   int ierr = 0;
+   HYPRE_Solver solver;
+   struct bHYPRE_ParaSails__data * data;
+
+   data = bHYPRE_ParaSails__get_data( self );
+   solver = data->solver;
+
+   ierr += HYPRE_ParaSailsSetLogging( solver, level );
+
+   return ierr;
+
+  /* DO-NOT-DELETE splicer.end(bHYPRE.ParaSails.SetLogging) */
+}
+
+/*
+ * (Optional) Set the {\it print level}, specifying the degree
+ * of informational data to be printed either to the screen or
+ * to a file.  Does nothing by default (level=0).  Other levels
+ * (if any) are implementation-specific.  Must be called before
+ * {\tt Setup} and {\tt Apply}.
+ * 
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_ParaSails_SetPrintLevel"
+
+int32_t
+impl_bHYPRE_ParaSails_SetPrintLevel(
+  /*in*/ bHYPRE_ParaSails self, /*in*/ int32_t level)
+{
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.ParaSails.SetPrintLevel) */
+  /* Insert the implementation of the SetPrintLevel method here... */
+
+   return 1;  /* no such function, this shouldn't be called */
+
+  /* DO-NOT-DELETE splicer.end(bHYPRE.ParaSails.SetPrintLevel) */
+}
+
+/*
+ * (Optional) Return the number of iterations taken.
+ * 
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_ParaSails_GetNumIterations"
+
+int32_t
+impl_bHYPRE_ParaSails_GetNumIterations(
+  /*in*/ bHYPRE_ParaSails self, /*out*/ int32_t* num_iterations)
+{
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.ParaSails.GetNumIterations) */
+  /* Insert the implementation of the GetNumIterations method here... */
+
+   return 1;  /* no such function, this shouldn't be called */
+
+  /* DO-NOT-DELETE splicer.end(bHYPRE.ParaSails.GetNumIterations) */
+}
+
+/*
+ * (Optional) Return the norm of the relative residual.
+ * 
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_ParaSails_GetRelResidualNorm"
+
+int32_t
+impl_bHYPRE_ParaSails_GetRelResidualNorm(
+  /*in*/ bHYPRE_ParaSails self, /*out*/ double* norm)
+{
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.ParaSails.GetRelResidualNorm) */
+  /* Insert the implementation of the GetRelResidualNorm method here... */
+
+   return 1;  /* no such function, this shouldn't be called */
+
+  /* DO-NOT-DELETE splicer.end(bHYPRE.ParaSails.GetRelResidualNorm) */
+}

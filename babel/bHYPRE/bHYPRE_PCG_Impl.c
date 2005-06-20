@@ -39,6 +39,8 @@
 #include "bHYPRE_StructVector_Impl.h"
 #include "bHYPRE_BoomerAMG.h"
 #include "bHYPRE_BoomerAMG_Impl.h"
+#include "bHYPRE_ParaSails.h"
+#include "bHYPRE_ParaSails_Impl.h"
 #include "bHYPRE_ParCSRDiagScale.h"
 #include "bHYPRE_ParCSRDiagScale_Impl.h"
 #include "bHYPRE_StructSMG.h"
@@ -1069,6 +1071,8 @@ impl_bHYPRE_PCG_SetPreconditioner(
    struct bHYPRE_PCG__data * dataself;
    struct bHYPRE_BoomerAMG__data * AMG_dataprecond;
    bHYPRE_BoomerAMG AMG_s;
+   struct bHYPRE_ParaSails__data * PS_dataprecond;
+   bHYPRE_ParaSails PS_s;
    struct bHYPRE_StructSMG__data * SMG_dataprecond;
    bHYPRE_StructSMG SMG_s;
    struct bHYPRE_StructPFMG__data * PFMG_dataprecond;
@@ -1089,6 +1093,19 @@ impl_bHYPRE_PCG_SetPreconditioner(
       precond_setup = (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSetup;
       bHYPRE_BoomerAMG_deleteRef( AMG_s ); /* extra reference from queryInt */
       bHYPRE_BoomerAMG_deleteRef( AMG_s ); /* extra reference from queryInt */
+   }
+   else if ( bHYPRE_Solver_queryInt( s, "bHYPRE.ParaSails" ) )
+   {
+      precond_name = "ParaSails";
+      PS_s = bHYPRE_ParaSails__cast
+         ( bHYPRE_Solver_queryInt( s, "bHYPRE.ParaSails") );
+      PS_dataprecond = bHYPRE_ParaSails__get_data( PS_s );
+      solverprecond = &PS_dataprecond->solver;
+      assert( solverprecond != NULL );
+      precond = (HYPRE_PtrToSolverFcn) HYPRE_ParaSailsSolve;
+      precond_setup = (HYPRE_PtrToSolverFcn) HYPRE_ParaSailsSetup;
+      bHYPRE_ParaSails_deleteRef( PS_s ); /* extra reference from queryInt */
+      bHYPRE_ParaSails_deleteRef( PS_s ); /* extra reference from queryInt */
    }
    else if ( bHYPRE_Solver_queryInt( s, "bHYPRE.ParCSRDiagScale" ) )
    {
