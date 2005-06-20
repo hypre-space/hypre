@@ -56,14 +56,14 @@ int main (int argc, char *argv[])
 
    bHYPRE_IJParCSRMatrix parcsr_A;
    bHYPRE_Operator           op_A;
-   sidl_BaseInterface * base_object;
    bHYPRE_IJParCSRVector par_b;
    bHYPRE_IJParCSRVector par_x;
    bHYPRE_Vector vec_b;
    bHYPRE_Vector vec_x;
 
-   bHYPRE_Solver solver, precond;
+   bHYPRE_Solver precond;
    bHYPRE_BoomerAMG amg_solver;
+   bHYPRE_ParaSails ps_solver;
    bHYPRE_PCG pcg_solver;
    bHYPRE_IdentitySolver identity;
 
@@ -436,7 +436,7 @@ int main (int argc, char *argv[])
       bHYPRE_PCG_deleteRef( pcg_solver );
       bHYPRE_Solver_deleteRef( precond );
    }
-#if 0 /* waiting for Parasails Babel interface to be written
+
    /* PCG with Parasails Preconditioner */
    else if (solver_id == 8)
    {
@@ -461,26 +461,29 @@ int main (int argc, char *argv[])
       bHYPRE_PCG_SetLogging( pcg_solver, 1 ); /* needed to get run info later */
 
       /* Now set up the ParaSails preconditioner and specify any parameters */
-      HYPRE_ParaSailsCreate(MPI_COMM_WORLD, &precond);
+      ps_solver = bHYPRE_ParaSails__create();
+      bHYPRE_ParaSails_SetCommunicator( ps_solver, (void *)MPI_COMM_WORLD );
+      bHYPRE_ParaSails_SetOperator( ps_solver, op_A );
 
       /* Set some parameters (See Reference Manual for more parameters) */
-      HYPRE_ParaSailsSetParams(precond, sai_threshold, sai_max_levels);
-      HYPRE_ParaSailsSetFilter(precond, sai_filter);
-      HYPRE_ParaSailsSetSym(precond, sai_sym);
-      HYPRE_ParaSailsSetLogging(precond, 3);
+      bHYPRE_ParaSails_SetDoubleParameter( ps_solver, "Thresh", sai_threshold );
+      bHYPRE_ParaSails_SetIntParameter( ps_solver, "Nlevels", sai_max_levels );
+      bHYPRE_ParaSails_SetDoubleParameter( ps_solver, "Filter", sai_filter );
+      bHYPRE_ParaSails_SetIntParameter( ps_solver, "Sym", sai_sym );
+      bHYPRE_ParaSails_SetLogging( ps_solver, 3 );
 
       /* Set the PCG preconditioner */
-      HYPRE_PCGSetPrecond(solver, (HYPRE_PtrToSolverFcn) HYPRE_ParaSailsSolve,
-                          (HYPRE_PtrToSolverFcn) HYPRE_ParaSailsSetup, precond);
+      precond = bHYPRE_Solver__cast( ps_solver );
+      bHYPRE_PCG_SetPreconditioner( pcg_solver, precond );
 
       /* Now setup and solve! */
-      HYPRE_ParCSRPCGSetup(solver, parcsr_A, par_b, par_x);
-      HYPRE_ParCSRPCGSolve(solver, parcsr_A, par_b, par_x);
+      bHYPRE_PCG_Setup( pcg_solver, vec_b, vec_x);
+      bHYPRE_PCG_Apply( pcg_solver, vec_b, &vec_x);
 
 
       /* Run info - needed logging turned on */
-      HYPRE_PCGGetNumIterations(solver, &num_iterations);
-      HYPRE_PCGGetFinalRelativeResidualNorm(solver, &final_res_norm);
+      bHYPRE_PCG_GetNumIterations( pcg_solver, &num_iterations );
+      bHYPRE_PCG_GetRelResidualNorm( pcg_solver, &final_res_norm );
       if (myid == 0)
       {
          printf("\n");
@@ -490,10 +493,10 @@ int main (int argc, char *argv[])
       }
 
       /* Destory solver and preconditioner */
-      HYPRE_ParCSRPCGDestroy(solver);
-      HYPRE_ParaSailsDestroy(precond);
+      bHYPRE_PCG_deleteRef( pcg_solver );
+      bHYPRE_Solver_deleteRef( precond );
    }
-#endif
+
    else
    {
       if (myid ==0) printf("Invalid solver id specified.\n");
