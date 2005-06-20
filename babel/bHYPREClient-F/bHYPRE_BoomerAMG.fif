@@ -40,15 +40,43 @@ C       \item[CycleType] ({\tt Int}) - type of cycle used; a V-cycle
 C       (default) or a W-cycle.
 C       
 C       \item[NumGridSweeps] ({\tt IntArray 1D}) - number of sweeps for
-C       fine and coarse grid, up and down cycle.
+C       fine and coarse grid, up and down cycle. DEPRECATED:
+C       Use NumSweeps or Cycle?NumSweeps instead.
+C       
+C       \item[NumSweeps] ({\tt Int}) - number of sweeps for fine grid, up and
+C       down cycle.
+C       
+C       \item[Cycle0NumSweeps] ({\tt Int}) - number of sweeps for fine grid
+C       
+C       \item[Cycle1NumSweeps] ({\tt Int}) - number of sweeps for down cycle
+C       
+C       \item[Cycle2NumSweeps] ({\tt Int}) - number of sweeps for up cycle
+C       
+C       \item[Cycle3NumSweeps] ({\tt Int}) - number of sweeps for coarse grid
 C       
 C       \item[GridRelaxType] ({\tt IntArray 1D}) - type of smoother used on
-C       fine and coarse grid, up and down cycle.
+C       fine and coarse grid, up and down cycle. DEPRECATED:
+C       Use RelaxType or Cycle?RelaxType instead.
+C       
+C       \item[RelaxType] ({\tt Int}) - type of smoother for fine grid, up and
+C       down cycle.
+C       
+C       \item[Cycle0RelaxType] ({\tt Int}) - type of smoother for fine grid
+C       
+C       \item[Cycle1RelaxType] ({\tt Int}) - type of smoother for down cycle
+C       
+C       \item[Cycle2RelaxType] ({\tt Int}) - type of smoother for up cycle
+C       
+C       \item[Cycle3RelaxType] ({\tt Int}) - type of smoother for coarse grid
 C       
 C       \item[GridRelaxPoints] ({\tt IntArray 2D}) - point ordering used in
-C       relaxation.
+C       relaxation.  DEPRECATED.
 C       
 C       \item[RelaxWeight] ({\tt DoubleArray 1D}) - relaxation weight for
+C       smoothed Jacobi and hybrid SOR.  DEPRECATED:
+C       Instead, use the RelaxWt parameter and the SetLevelRelaxWt function.
+C       
+C       \item[RelaxWt] ({\tt Int}) - relaxation weight for all levels for
 C       smoothed Jacobi and hybrid SOR.
 C       
 C       \item[TruncFactor] ({\tt Double}) - truncation factor for
@@ -81,6 +109,15 @@ C       \item[SchwarzRlxWeight] ({\tt Double}) - the smoothing parameter
 C       for additive Schwarz.
 C       
 C       \item[DebugFlag] ({\tt Int}) -
+C       
+C       \end{description}
+C       
+C       The following function is specific to this class:
+C       
+C       \begin{description}
+C       
+C       \item[SetLevelRelxWeight] ({\tt Double , \tt Int}) -
+C       relaxation weight for one specified level of smoothed Jacobi and hybrid SOR.
 C       
 C       \end{description}
 C       
@@ -233,6 +270,24 @@ C       in bHYPRE.BoomerAMG self
         integer*8 self
 C       out sidl.ClassInfo retval
         integer*8 retval
+        end
+
+
+C       
+C       Method:  SetLevelRelaxWt[]
+C       
+
+        subroutine bHYPRE_BoomerAMG_SetLevelRelaxWt_f(self, relax_wt,
+     &     level, retval)
+        implicit none
+C       in bHYPRE.BoomerAMG self
+        integer*8 self
+C       in double relax_wt
+        double precision relax_wt
+C       in int level
+        integer*4 level
+C       out int retval
+        integer*4 retval
         end
 
 

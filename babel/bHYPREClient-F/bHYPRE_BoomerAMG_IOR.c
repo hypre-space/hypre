@@ -158,6 +158,7 @@ static void bHYPRE_BoomerAMG__init_epv(
     bHYPRE_BoomerAMG__object*,const char*)) s1->d_epv->f_isType;
   epv->f_getClassInfo             = (struct sidl_ClassInfo__object* (*)(struct 
     bHYPRE_BoomerAMG__object*)) s1->d_epv->f_getClassInfo;
+  epv->f_SetLevelRelaxWt          = NULL;
   epv->f_SetCommunicator          = NULL;
   epv->f_SetIntParameter          = NULL;
   epv->f_SetDoubleParameter       = NULL;
@@ -535,6 +536,19 @@ remote_bHYPRE_BoomerAMG_getClassInfo(
 }
 
 /*
+ * REMOTE METHOD STUB:SetLevelRelaxWt
+ */
+
+static int32_t
+remote_bHYPRE_BoomerAMG_SetLevelRelaxWt(
+  struct bHYPRE_BoomerAMG__object* self,
+  double relax_wt,
+  int32_t level)
+{
+  return 0;
+}
+
+/*
  * REMOTE METHOD STUB:SetCommunicator
  */
 
@@ -795,6 +809,7 @@ static void bHYPRE_BoomerAMG__init_remote_epv(void)
   epv->f_queryInt                 = remote_bHYPRE_BoomerAMG_queryInt;
   epv->f_isType                   = remote_bHYPRE_BoomerAMG_isType;
   epv->f_getClassInfo             = remote_bHYPRE_BoomerAMG_getClassInfo;
+  epv->f_SetLevelRelaxWt          = remote_bHYPRE_BoomerAMG_SetLevelRelaxWt;
   epv->f_SetCommunicator          = remote_bHYPRE_BoomerAMG_SetCommunicator;
   epv->f_SetIntParameter          = remote_bHYPRE_BoomerAMG_SetIntParameter;
   epv->f_SetDoubleParameter       = remote_bHYPRE_BoomerAMG_SetDoubleParameter;

@@ -46,6 +46,9 @@
 #ifndef included_bHYPRE_ParCSRDiagScale_h
 #include "bHYPRE_ParCSRDiagScale.h"
 #endif
+#ifndef included_bHYPRE_ParaSails_h
+#include "bHYPRE_ParaSails.h"
+#endif
 #ifndef included_bHYPRE_Pilut_h
 #include "bHYPRE_Pilut.h"
 #endif

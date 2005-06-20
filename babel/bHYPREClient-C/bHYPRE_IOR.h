@@ -53,6 +53,9 @@
 #ifndef included_bHYPRE_ParCSRDiagScale_IOR_h
 #include "bHYPRE_ParCSRDiagScale_IOR.h"
 #endif
+#ifndef included_bHYPRE_ParaSails_IOR_h
+#include "bHYPRE_ParaSails_IOR.h"
+#endif
 #ifndef included_bHYPRE_Pilut_IOR_h
 #include "bHYPRE_Pilut_IOR.h"
 #endif

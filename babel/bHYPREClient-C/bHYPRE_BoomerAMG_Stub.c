@@ -189,6 +189,22 @@ bHYPRE_BoomerAMG_getClassInfo(
 }
 
 /*
+ * Method:  SetLevelRelaxWt[]
+ */
+
+int32_t
+bHYPRE_BoomerAMG_SetLevelRelaxWt(
+  bHYPRE_BoomerAMG self,
+  /*in*/ double relax_wt,
+  /*in*/ int32_t level)
+{
+  return (*self->d_epv->f_SetLevelRelaxWt)(
+    self,
+    relax_wt,
+    level);
+}
+
+/*
  * Set the MPI Communicator.
  * 
  */
