@@ -18,7 +18,7 @@ MLI_INCLUDES = \
  -I$(srcdir)/../../../utilities\
  -I$(srcdir)/../../../IJ_mv\
  -I$(srcdir)/../../../krylov\
- -I$(srcdir)/../../../eigensolvers/krylov\
+ -I$(srcdir)/../../../multivector\
  -I$(srcdir)/../../../parcsr_mv\
  -I$(srcdir)/../../../parcsr_ls\
  -I$(srcdir)/../../../seq_mv\
