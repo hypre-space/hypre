@@ -16,7 +16,7 @@ typedef struct
   
 } hypre_MultiVector;
 
-typedef struct hypre_MultiVector* hypre_MultiVectorPtr;
+typedef hypre_MultiVector* hypre_MultiVectorPtr;
 
 /* The functions below simply call the respective functions pointed to
    in the HYPRE_InterfaceInterpreter structure */

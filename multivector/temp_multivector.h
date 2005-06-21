@@ -18,7 +18,7 @@ typedef struct
   
 } hypre_TempMultiVector;
 
-typedef struct hypre_TempMultiVector* hypre_TempMultiVectorPtr;
+typedef hypre_TempMultiVector* hypre_TempMultiVectorPtr;
 
 /*******************************************************************/
 /*
