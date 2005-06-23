@@ -6,6 +6,7 @@
 #ifndef hypre_PARCSR_LS_HEADER
 #define hypre_PARCSR_LS_HEADER
 
+#include "fortran.h"
 #include "utilities.h"
 #include "krylov.h"
 #include "seq_mv.h"
@@ -422,7 +423,7 @@ int hypre_BoomerAMGCycle( void *amg_vdata , hypre_ParVector **F_array , hypre_Pa
 HYPRE_ParCSRMatrix GenerateDifConv( MPI_Comm comm , int nx , int ny , int nz , int P , int Q , int R , int p , int q , int r , double *value );
 
 /* par_gsmg.c */
-void hypre_F90_NAME_BLAS(dgels, DGELS ) (char *, int *, int *, int *, double *,
+void hypre_F90_NAME_BLAS(dgels, DGELS) (char *, int *, int *, int *, double *,
                                          int *, double *, int *, double *, int *, int *);
 int hypre_ParCSRMatrixClone( hypre_ParCSRMatrix *A , hypre_ParCSRMatrix **Sp , int copy_data );
 int hypre_ParCSRMatrixFillSmooth( int nsamples , double *samples , hypre_ParCSRMatrix *S , hypre_ParCSRMatrix *A , int num_functions , int *dof_func );
