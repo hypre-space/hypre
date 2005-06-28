@@ -22,10 +22,9 @@ you run bash)
 
   Some build system bugs which need to be fixed...
 ****** In subdirectory sidl there are 2 empty .c files.  I had to make
-corresonding empty .o files by hand.  sidl_Resolve_IOR.o, sidl_Scope_IOR.o
-
-****** Even after configuring --with-babel, hypre's make doesn't reach
-babel-runtime.  That needs to be fixed.
+corresponding empty .o files by hand.  sidl_Resolve_IOR.o,
+sidl_Scope_IOR.o
+A "make clean" will delete these, so you have to restore them by hand.
 
 ***** sidl/*.h needs to be automatically copied into hypre/include -
       many header files are needed to build test drivers.  For now I'm
