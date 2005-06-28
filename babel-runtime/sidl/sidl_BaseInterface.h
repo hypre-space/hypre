@@ -1,8 +1,8 @@
 /*
  * File:          sidl_BaseInterface.h
- * Symbol:        sidl.BaseInterface-v0.9.0
+ * Symbol:        sidl.BaseInterface-v0.9.3
  * Symbol Type:   interface
- * Babel Version: 0.9.8
+ * Babel Version: 0.10.4
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Client-side glue code for sidl.BaseInterface
@@ -32,14 +32,14 @@
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.9.8
+ * babel-version = 0.10.4
  */
 
 #ifndef included_sidl_BaseInterface_h
 #define included_sidl_BaseInterface_h
 
 /**
- * Symbol "sidl.BaseInterface" (version 0.9.0)
+ * Symbol "sidl.BaseInterface" (version 0.9.3)
  * 
  * Every interface in <code>sidl</code> implicitly inherits
  * from <code>BaseInterface</code>, and it is implemented
@@ -60,10 +60,21 @@ typedef struct sidl_BaseInterface__object* sidl_BaseInterface;
 #include "sidl_ClassInfo.h"
 #endif
 
+#ifndef included_sidl_io_Serializer_h
+#include "sidl_io_Serializer.h"
+#endif
+#ifndef included_sidl_io_Deserializer_h
+#include "sidl_io_Deserializer.h"
+#endif
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+/**
+ * RMI connector function for the class.
+ */
+sidl_BaseInterface
+sidl_BaseInterface__connect(const char *, sidl_BaseInterface *_ex);
 /**
  * <p>
  * Add one to the intrinsic reference count in the underlying object.
@@ -80,7 +91,7 @@ extern "C" {
  */
 void
 sidl_BaseInterface_addRef(
-  /*in*/ sidl_BaseInterface self);
+  /* in */ sidl_BaseInterface self);
 
 /**
  * Decrease by one the intrinsic reference count in the underlying
@@ -91,7 +102,7 @@ sidl_BaseInterface_addRef(
  */
 void
 sidl_BaseInterface_deleteRef(
-  /*in*/ sidl_BaseInterface self);
+  /* in */ sidl_BaseInterface self);
 
 /**
  * Return true if and only if <code>obj</code> refers to the same
@@ -99,8 +110,8 @@ sidl_BaseInterface_deleteRef(
  */
 sidl_bool
 sidl_BaseInterface_isSame(
-  /*in*/ sidl_BaseInterface self,
-  /*in*/ sidl_BaseInterface iobj);
+  /* in */ sidl_BaseInterface self,
+  /* in */ sidl_BaseInterface iobj);
 
 /**
  * Check whether the object can support the specified interface or
@@ -113,8 +124,8 @@ sidl_BaseInterface_isSame(
  */
 sidl_BaseInterface
 sidl_BaseInterface_queryInt(
-  /*in*/ sidl_BaseInterface self,
-  /*in*/ const char* name);
+  /* in */ sidl_BaseInterface self,
+  /* in */ const char* name);
 
 /**
  * Return whether this object is an instance of the specified type.
@@ -124,20 +135,20 @@ sidl_BaseInterface_queryInt(
  */
 sidl_bool
 sidl_BaseInterface_isType(
-  /*in*/ sidl_BaseInterface self,
-  /*in*/ const char* name);
+  /* in */ sidl_BaseInterface self,
+  /* in */ const char* name);
 
 /**
  * Return the meta-data about the class implementing this interface.
  */
 sidl_ClassInfo
 sidl_BaseInterface_getClassInfo(
-  /*in*/ sidl_BaseInterface self);
+  /* in */ sidl_BaseInterface self);
 
 /**
  * Cast method for interface and class type conversions.
  */
-sidl_BaseInterface
+struct sidl_BaseInterface__object*
 sidl_BaseInterface__cast(
   void* obj);
 
@@ -149,6 +160,29 @@ sidl_BaseInterface__cast2(
   void* obj,
   const char* type);
 
+/**
+ * Select and execute a method by name
+ */
+void
+sidl_BaseInterface__exec(
+  /* in */ sidl_BaseInterface self,
+  /* in */ const char* methodName,
+  /* in */ sidl_io_Deserializer inArgs,
+  /* in */ sidl_io_Serializer outArgs);
+/**
+ * static Exec method for reflexity.
+ */
+void
+sidl_BaseInterface__sexec(
+  /* in */ const char* methodName,
+  /* in */ sidl_io_Deserializer inArgs,
+  /* in */ sidl_io_Serializer outArgs);
+/**
+ * Get the URL of the Implementation of this object (for RMI)
+ */
+char*
+sidl_BaseInterface__getURL(
+  /* in */ sidl_BaseInterface self);
 /**
  * Create a contiguous array of the given dimension with specified
  * index bounds in column-major order. This array

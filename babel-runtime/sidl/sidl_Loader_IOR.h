@@ -1,8 +1,8 @@
 /*
  * File:          sidl_Loader_IOR.h
- * Symbol:        sidl.Loader-v0.9.0
+ * Symbol:        sidl.Loader-v0.9.3
  * Symbol Type:   class
- * Babel Version: 0.9.8
+ * Babel Version: 0.10.4
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Intermediate Object Representation for sidl.Loader
@@ -32,7 +32,7 @@
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.9.8
+ * babel-version = 0.10.4
  */
 
 #ifndef included_sidl_Loader_IOR_h
@@ -56,14 +56,19 @@ extern "C" {
 #endif
 
 /*
- * Symbol "sidl.Loader" (version 0.9.0)
+ * Symbol "sidl.Loader" (version 0.9.3)
  * 
  * Class <code>Loader</code> manages dyanamic loading and symbol name
  * resolution for the sidl runtime system.  The <code>Loader</code> class
  * manages a library search path and keeps a record of all libraries
  * loaded through this interface, including the initial "global" symbols
- * in the main program.  Unless explicitly set, the search path is taken
- * from the environment variable SIDL_DLL_PATH, which is a semi-colon
+ * in the main program.
+ * 
+ * Unless explicitly set, the <code>Loader</code> uses the default
+ * <code>sidl.Finder</code> implemented in <code>sidl.DFinder</code>.
+ * This class searches the filesystem for <code>.scl</code> files when
+ * trying to find a class. The initial path is taken from the
+ * environment variable SIDL_DLL_PATH, which is a semi-colon
  * separated sequence of URIs as described in class <code>DLL</code>.
  */
 
@@ -73,9 +78,6 @@ struct sidl_Loader__sepv;
 
 extern struct sidl_Loader__object*
 sidl_Loader__new(void);
-
-extern struct sidl_Loader__object*
-sidl_Loader__remote(const char *url);
 
 extern struct sidl_Loader__sepv*
 sidl_Loader__statics(void);
@@ -96,34 +98,45 @@ struct sidl_ClassInfo__array;
 struct sidl_ClassInfo__object;
 struct sidl_DLL__array;
 struct sidl_DLL__object;
+struct sidl_Finder__array;
+struct sidl_Finder__object;
+struct sidl_io_Deserializer__array;
+struct sidl_io_Deserializer__object;
+struct sidl_io_Serializer__array;
+struct sidl_io_Serializer__object;
 
 /*
- * Declare the static entry point vector.
+ * Declare the static method entry point vector.
  */
 
 struct sidl_Loader__sepv {
-  /* Methods introduced in sidl.BaseInterface-v0.9.0 */
-  /* Methods introduced in sidl.BaseClass-v0.9.0 */
-  /* Methods introduced in sidl.Loader-v0.9.0 */
-  void (*f_setSearchPath)(
-    const char* path_name);
-  char* (*f_getSearchPath)(
-    void);
-  void (*f_addSearchPath)(
-    const char* path_fragment);
+  /* Implicit builtin methods */
+  /* Methods introduced in sidl.BaseInterface-v0.9.3 */
+  /* Methods introduced in sidl.BaseClass-v0.9.3 */
+  /* Methods introduced in sidl.Loader-v0.9.3 */
   struct sidl_DLL__object* (*f_loadLibrary)(
-    const char* uri,
-    sidl_bool loadGlobally,
-    sidl_bool loadLazy);
+    /* in */ const char* uri,
+    /* in */ sidl_bool loadGlobally,
+    /* in */ sidl_bool loadLazy);
   void (*f_addDLL)(
-    struct sidl_DLL__object* dll);
+    /* in */ struct sidl_DLL__object* dll);
   void (*f_unloadLibraries)(
     void);
   struct sidl_DLL__object* (*f_findLibrary)(
-    const char* sidl_name,
-    const char* target,
-    enum sidl_Scope__enum lScope,
-    enum sidl_Resolve__enum lResolve);
+    /* in */ const char* sidl_name,
+    /* in */ const char* target,
+    /* in */ enum sidl_Scope__enum lScope,
+    /* in */ enum sidl_Resolve__enum lResolve);
+  void (*f_setSearchPath)(
+    /* in */ const char* path_name);
+  char* (*f_getSearchPath)(
+    void);
+  void (*f_addSearchPath)(
+    /* in */ const char* path_fragment);
+  void (*f_setFinder)(
+    /* in */ struct sidl_Finder__object* f);
+  struct sidl_Finder__object* (*f_getFinder)(
+    void);
 };
 
 /*
@@ -133,32 +146,39 @@ struct sidl_Loader__sepv {
 struct sidl_Loader__epv {
   /* Implicit builtin methods */
   void* (*f__cast)(
-    struct sidl_Loader__object* self,
-    const char* name);
+    /* in */ struct sidl_Loader__object* self,
+    /* in */ const char* name);
   void (*f__delete)(
-    struct sidl_Loader__object* self);
+    /* in */ struct sidl_Loader__object* self);
+  void (*f__exec)(
+    /* in */ struct sidl_Loader__object* self,
+    /* in */ const char* methodName,
+    /* in */ struct sidl_io_Deserializer__object* inArgs,
+    /* in */ struct sidl_io_Serializer__object* outArgs);
+  char* (*f__getURL)(
+    /* in */ struct sidl_Loader__object* self);
   void (*f__ctor)(
-    struct sidl_Loader__object* self);
+    /* in */ struct sidl_Loader__object* self);
   void (*f__dtor)(
-    struct sidl_Loader__object* self);
-  /* Methods introduced in sidl.BaseInterface-v0.9.0 */
+    /* in */ struct sidl_Loader__object* self);
+  /* Methods introduced in sidl.BaseInterface-v0.9.3 */
   void (*f_addRef)(
-    struct sidl_Loader__object* self);
+    /* in */ struct sidl_Loader__object* self);
   void (*f_deleteRef)(
-    struct sidl_Loader__object* self);
+    /* in */ struct sidl_Loader__object* self);
   sidl_bool (*f_isSame)(
-    struct sidl_Loader__object* self,
-    struct sidl_BaseInterface__object* iobj);
+    /* in */ struct sidl_Loader__object* self,
+    /* in */ struct sidl_BaseInterface__object* iobj);
   struct sidl_BaseInterface__object* (*f_queryInt)(
-    struct sidl_Loader__object* self,
-    const char* name);
+    /* in */ struct sidl_Loader__object* self,
+    /* in */ const char* name);
   sidl_bool (*f_isType)(
-    struct sidl_Loader__object* self,
-    const char* name);
+    /* in */ struct sidl_Loader__object* self,
+    /* in */ const char* name);
   struct sidl_ClassInfo__object* (*f_getClassInfo)(
-    struct sidl_Loader__object* self);
-  /* Methods introduced in sidl.BaseClass-v0.9.0 */
-  /* Methods introduced in sidl.Loader-v0.9.0 */
+    /* in */ struct sidl_Loader__object* self);
+  /* Methods introduced in sidl.BaseClass-v0.9.3 */
+  /* Methods introduced in sidl.Loader-v0.9.3 */
 };
 
 /*
@@ -175,13 +195,10 @@ struct sidl_Loader__external {
   struct sidl_Loader__object*
   (*createObject)(void);
 
-  struct sidl_Loader__object*
-  (*createRemote)(const char *url);
-
   struct sidl_Loader__sepv*
   (*getStaticEPV)(void);
-
-struct sidl_BaseClass__epv*(*getSuperEPV)(void);};
+  struct sidl_BaseClass__epv*(*getSuperEPV)(void);
+};
 
 /*
  * This function returns a pointer to a static structure of
@@ -191,6 +208,34 @@ struct sidl_BaseClass__epv*(*getSuperEPV)(void);};
 
 const struct sidl_Loader__external*
 sidl_Loader__externals(void);
+
+struct sidl_Finder__object* skel_sidl_Loader_fconnect_sidl_Finder(char* url,
+  struct sidl_BaseInterface__object **_ex);
+char* skel_sidl_Loader_fgetURL_sidl_Finder(struct sidl_Finder__object* obj); 
+
+struct sidl_ClassInfo__object* skel_sidl_Loader_fconnect_sidl_ClassInfo(char* 
+  url, struct sidl_BaseInterface__object **_ex);
+char* skel_sidl_Loader_fgetURL_sidl_ClassInfo(struct sidl_ClassInfo__object* 
+  obj); 
+
+struct sidl_DLL__object* skel_sidl_Loader_fconnect_sidl_DLL(char* url,
+  struct sidl_BaseInterface__object **_ex);
+char* skel_sidl_Loader_fgetURL_sidl_DLL(struct sidl_DLL__object* obj); 
+
+struct sidl_Loader__object* skel_sidl_Loader_fconnect_sidl_Loader(char* url,
+  struct sidl_BaseInterface__object **_ex);
+char* skel_sidl_Loader_fgetURL_sidl_Loader(struct sidl_Loader__object* obj); 
+
+struct sidl_BaseInterface__object* 
+  skel_sidl_Loader_fconnect_sidl_BaseInterface(char* url,
+  struct sidl_BaseInterface__object **_ex);
+char* skel_sidl_Loader_fgetURL_sidl_BaseInterface(struct 
+  sidl_BaseInterface__object* obj); 
+
+struct sidl_BaseClass__object* skel_sidl_Loader_fconnect_sidl_BaseClass(char* 
+  url, struct sidl_BaseInterface__object **_ex);
+char* skel_sidl_Loader_fgetURL_sidl_BaseClass(struct sidl_BaseClass__object* 
+  obj); 
 
 #ifdef __cplusplus
 }

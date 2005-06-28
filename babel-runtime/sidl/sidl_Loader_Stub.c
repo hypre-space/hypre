@@ -1,8 +1,8 @@
 /*
  * File:          sidl_Loader_Stub.c
- * Symbol:        sidl.Loader-v0.9.0
+ * Symbol:        sidl.Loader-v0.9.3
  * Symbol Type:   class
- * Babel Version: 0.9.8
+ * Babel Version: 0.10.4
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Client-side glue code for sidl.Loader
@@ -32,7 +32,7 @@
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.9.8
+ * babel-version = 0.10.4
  */
 
 #include "sidl_Loader.h"
@@ -40,14 +40,30 @@
 #ifndef included_sidl_interface_IOR_h
 #include "sidl_interface_IOR.h"
 #endif
+#ifndef included_sidl_rmi_InstanceHandle_h
+#include "sidl_rmi_InstanceHandle.h"
+#endif
+#ifndef included_sidl_rmi_ConnectRegistry_h
+#include "sidl_rmi_ConnectRegistry.h"
+#endif
+#ifndef included_sidl_interface_IOR_h
+#include "sidl_interface_IOR.h"
+#endif
 #include <stddef.h>
+#include <string.h>
 #include "sidl_BaseInterface_IOR.h"
+
+/*
+ * connect_loaded is a boolean value showing if the IHConnect for this object has been loaded into the connectRegistry
+ */
+
+static int connect_loaded = 0;
 
 /*
  * Hold pointer to IOR functions.
  */
 
-static const struct sidl_Loader__external *_ior = NULL;
+static const struct sidl_Loader__external *_externals = NULL;
 /*
  * Lookup the symbol to get the IOR functions.
  */
@@ -58,11 +74,11 @@ static const struct sidl_Loader__external* _loadIOR(void)
  */
 
 {
-  _ior = sidl_Loader__externals();
-  return _ior;
+  _externals = sidl_Loader__externals();
+  return _externals;
 }
 
-#define _getIOR() (_ior ? _ior : _loadIOR())
+#define _getExternals() (_externals ? _externals : _loadIOR())
 
 /*
  * Hold pointer to static entry point vector
@@ -73,7 +89,12 @@ static const struct sidl_Loader__sepv *_sepv = NULL;
  * Return pointer to static functions.
  */
 
-#define _getSEPV() (_sepv ? _sepv : (_sepv = (*(_getIOR()->getStaticEPV))()))
+#define _getSEPV() (_sepv ? _sepv : (_sepv = (*(_getExternals()->getStaticEPV))()))
+/*
+ * Reset point to static functions.
+ */
+
+#define _resetSEPV() (_sepv = (*(_getExternals()->getStaticEPV))())
 
 /*
  * Constructor function for the class.
@@ -82,7 +103,34 @@ static const struct sidl_Loader__sepv *_sepv = NULL;
 sidl_Loader
 sidl_Loader__create()
 {
-  return (*(_getIOR()->createObject))();
+  return (*(_getExternals()->createObject))();
+}
+
+static sidl_Loader sidl_Loader__remote(const char* url,
+  sidl_BaseInterface *_ex);
+/*
+ * RMI constructor function for the class.
+ */
+
+sidl_Loader
+sidl_Loader__createRemote(const char* url, sidl_BaseInterface *_ex)
+{
+  return sidl_Loader__remote(url, _ex);
+}
+
+static struct sidl_Loader__object* sidl_Loader__remoteConnect(const char* url,
+  sidl_BaseInterface *_ex);
+static struct sidl_Loader__object* 
+  sidl_Loader__IHConnect(sidl_rmi_InstanceHandle instance,
+  sidl_BaseInterface *_ex);
+/*
+ * RMI connector function for the class.
+ */
+
+sidl_Loader
+sidl_Loader__connect(const char* url, sidl_BaseInterface *_ex)
+{
+  return sidl_Loader__remoteConnect(url, _ex);
 }
 
 /*
@@ -102,7 +150,7 @@ sidl_Loader__create()
 
 void
 sidl_Loader_addRef(
-  sidl_Loader self)
+  /* in */ sidl_Loader self)
 {
   (*self->d_epv->f_addRef)(
     self);
@@ -118,7 +166,7 @@ sidl_Loader_addRef(
 
 void
 sidl_Loader_deleteRef(
-  sidl_Loader self)
+  /* in */ sidl_Loader self)
 {
   (*self->d_epv->f_deleteRef)(
     self);
@@ -131,8 +179,8 @@ sidl_Loader_deleteRef(
 
 sidl_bool
 sidl_Loader_isSame(
-  sidl_Loader self,
-  /*in*/ sidl_BaseInterface iobj)
+  /* in */ sidl_Loader self,
+  /* in */ sidl_BaseInterface iobj)
 {
   return (*self->d_epv->f_isSame)(
     self,
@@ -151,8 +199,8 @@ sidl_Loader_isSame(
 
 sidl_BaseInterface
 sidl_Loader_queryInt(
-  sidl_Loader self,
-  /*in*/ const char* name)
+  /* in */ sidl_Loader self,
+  /* in */ const char* name)
 {
   return (*self->d_epv->f_queryInt)(
     self,
@@ -168,8 +216,8 @@ sidl_Loader_queryInt(
 
 sidl_bool
 sidl_Loader_isType(
-  sidl_Loader self,
-  /*in*/ const char* name)
+  /* in */ sidl_Loader self,
+  /* in */ const char* name)
 {
   return (*self->d_epv->f_isType)(
     self,
@@ -182,53 +230,10 @@ sidl_Loader_isType(
 
 sidl_ClassInfo
 sidl_Loader_getClassInfo(
-  sidl_Loader self)
+  /* in */ sidl_Loader self)
 {
   return (*self->d_epv->f_getClassInfo)(
     self);
-}
-
-/*
- * Set the search path, which is a semi-colon separated sequence of
- * URIs as described in class <code>DLL</code>.  This method will
- * invalidate any existing search path.
- */
-
-void
-sidl_Loader_setSearchPath(
-  /*in*/ const char* path_name)
-{
-  (_getSEPV()->f_setSearchPath)(
-    path_name);
-}
-
-/*
- * Return the current search path.  If the search path has not been
- * set, then the search path will be taken from environment variable
- * SIDL_DLL_PATH.
- */
-
-char*
-sidl_Loader_getSearchPath(
-  void)
-{
-  return (_getSEPV()->f_getSearchPath)(
-    );
-}
-
-/*
- * Append the specified path fragment to the beginning of the
- * current search path.  If the search path has not yet been set
- * by a call to <code>setSearchPath</code>, then this fragment will
- * be appended to the path in environment variable SIDL_DLL_PATH.
- */
-
-void
-sidl_Loader_addSearchPath(
-  /*in*/ const char* path_fragment)
-{
-  (_getSEPV()->f_addSearchPath)(
-    path_fragment);
 }
 
 /*
@@ -257,9 +262,9 @@ sidl_Loader_addSearchPath(
 
 sidl_DLL
 sidl_Loader_loadLibrary(
-  /*in*/ const char* uri,
-  /*in*/ sidl_bool loadGlobally,
-  /*in*/ sidl_bool loadLazy)
+  /* in */ const char* uri,
+  /* in */ sidl_bool loadGlobally,
+  /* in */ sidl_bool loadLazy)
 {
   return (_getSEPV()->f_loadLibrary)(
     uri,
@@ -274,7 +279,7 @@ sidl_Loader_loadLibrary(
 
 void
 sidl_Loader_addDLL(
-  /*in*/ sidl_DLL dll)
+  /* in */ sidl_DLL dll)
 {
   (_getSEPV()->f_addDLL)(
     dll);
@@ -301,6 +306,11 @@ sidl_Loader_unloadLibraries(
  * for a shared library that contains the client-side or IOR
  * for a particular sidl class.
  * 
+ * This call is implemented by calling the current
+ * <code>Finder</code>. The default finder searches the local
+ * file system for <code>.scl</code> files to locate the
+ * target class/interface.
+ * 
  * @param sidl_name  the fully qualified (long) name of the
  *                   class/interface to be found. Package names
  *                   are separated by period characters from each
@@ -323,16 +333,296 @@ sidl_Loader_unloadLibraries(
 
 sidl_DLL
 sidl_Loader_findLibrary(
-  /*in*/ const char* sidl_name,
-  /*in*/ const char* target,
-  /*in*/ enum sidl_Scope__enum lScope,
-  /*in*/ enum sidl_Resolve__enum lResolve)
+  /* in */ const char* sidl_name,
+  /* in */ const char* target,
+  /* in */ enum sidl_Scope__enum lScope,
+  /* in */ enum sidl_Resolve__enum lResolve)
 {
   return (_getSEPV()->f_findLibrary)(
     sidl_name,
     target,
     lScope,
     lResolve);
+}
+
+/*
+ * Set the search path, which is a semi-colon separated sequence of
+ * URIs as described in class <code>DLL</code>.  This method will
+ * invalidate any existing search path.
+ * 
+ * This updates the search path in the current <code>Finder</code>.
+ */
+
+void
+sidl_Loader_setSearchPath(
+  /* in */ const char* path_name)
+{
+  (_getSEPV()->f_setSearchPath)(
+    path_name);
+}
+
+/*
+ * Return the current search path.  The default
+ * <code>Finder</code> initializes the search path
+ * from environment variable SIDL_DLL_PATH.
+ * 
+ */
+
+char*
+sidl_Loader_getSearchPath(
+  void)
+{
+  return (_getSEPV()->f_getSearchPath)(
+    );
+}
+
+/*
+ * Append the specified path fragment to the beginning of the
+ * current search path.  This method operates on the Loader's
+ * current <code>Finder</code>. This will add a path to the
+ * current search path. Normally, the search path is initialized
+ * from the SIDL_DLL_PATH environment variable.
+ */
+
+void
+sidl_Loader_addSearchPath(
+  /* in */ const char* path_fragment)
+{
+  (_getSEPV()->f_addSearchPath)(
+    path_fragment);
+}
+
+/*
+ * This method sets the <code>Finder</code> that
+ * <code>Loader</code> will use to find DLLs.  If no
+ * <code>Finder</code> is set or if NULL is passed in, the Default
+ * Finder <code>DFinder</code> will be used.
+ * 
+ * Future calls to <code>findLibrary</code>,
+ * <code>addSearchPath</code>, <code>getSearchPath</code>, and
+ * <code>setSearchPath</code> are deligated to the
+ * <code>Finder</code> set here.
+ */
+
+void
+sidl_Loader_setFinder(
+  /* in */ sidl_Finder f)
+{
+  (_getSEPV()->f_setFinder)(
+    f);
+}
+
+/*
+ * This method gets the <code>Finder</code> that <code>Loader</code>
+ * uses to find DLLs.  
+ */
+
+sidl_Finder
+sidl_Loader_getFinder(
+  void)
+{
+  return (_getSEPV()->f_getFinder)(
+    );
+}
+
+void
+sidl_Loader_loadLibrary__sexec(
+        struct sidl_io_Deserializer__object* inArgs,
+        struct sidl_io_Serializer__object* outArgs) {
+  /* stack space for arguments */
+  char* uri;
+  sidl_bool loadGlobally;
+  sidl_bool loadLazy;
+  sidl_DLL _retval;
+  sidl_BaseInterface _ex   = NULL;
+  sidl_BaseInterface *_ex2 = &_ex;
+
+  /* unpack in and inout argments */
+
+  sidl_io_Deserializer_unpackString( inArgs, "uri", &uri, _ex2);
+
+  sidl_io_Deserializer_unpackBool( inArgs, "loadGlobally", &loadGlobally, _ex2);
+
+  sidl_io_Deserializer_unpackBool( inArgs, "loadLazy", &loadLazy, _ex2);
+
+  /* make the call */
+  _retval = (_getSEPV()->f_loadLibrary)(
+    uri,
+    loadGlobally,
+    loadLazy);
+
+  /* pack return value */
+  /* pack out and inout argments */
+
+}
+
+void
+sidl_Loader_addDLL__sexec(
+        struct sidl_io_Deserializer__object* inArgs,
+        struct sidl_io_Serializer__object* outArgs) {
+  /* stack space for arguments */
+  sidl_DLL dll;
+
+  /* unpack in and inout argments */
+
+  /* make the call */
+  (_getSEPV()->f_addDLL)(
+    dll);
+
+  /* pack return value */
+  /* pack out and inout argments */
+
+}
+
+void
+sidl_Loader_unloadLibraries__sexec(
+        struct sidl_io_Deserializer__object* inArgs,
+        struct sidl_io_Serializer__object* outArgs) {
+  /* stack space for arguments */
+
+  /* unpack in and inout argments */
+
+  /* make the call */
+  (_getSEPV()->f_unloadLibraries)(
+    );
+
+  /* pack return value */
+  /* pack out and inout argments */
+
+}
+
+void
+sidl_Loader_findLibrary__sexec(
+        struct sidl_io_Deserializer__object* inArgs,
+        struct sidl_io_Serializer__object* outArgs) {
+  /* stack space for arguments */
+  char* sidl_name;
+  char* target;
+  enum sidl_Scope__enum lScope;
+  enum sidl_Resolve__enum lResolve;
+  sidl_DLL _retval;
+  sidl_BaseInterface _ex   = NULL;
+  sidl_BaseInterface *_ex2 = &_ex;
+
+  /* unpack in and inout argments */
+
+  sidl_io_Deserializer_unpackString( inArgs, "sidl_name", &sidl_name, _ex2);
+
+  sidl_io_Deserializer_unpackString( inArgs, "target", &target, _ex2);
+
+  /* make the call */
+  _retval = (_getSEPV()->f_findLibrary)(
+    sidl_name,
+    target,
+    lScope,
+    lResolve);
+
+  /* pack return value */
+  /* pack out and inout argments */
+
+}
+
+void
+sidl_Loader_setSearchPath__sexec(
+        struct sidl_io_Deserializer__object* inArgs,
+        struct sidl_io_Serializer__object* outArgs) {
+  /* stack space for arguments */
+  char* path_name;
+  sidl_BaseInterface _ex   = NULL;
+  sidl_BaseInterface *_ex2 = &_ex;
+
+  /* unpack in and inout argments */
+
+  sidl_io_Deserializer_unpackString( inArgs, "path_name", &path_name, _ex2);
+
+  /* make the call */
+  (_getSEPV()->f_setSearchPath)(
+    path_name);
+
+  /* pack return value */
+  /* pack out and inout argments */
+
+}
+
+void
+sidl_Loader_getSearchPath__sexec(
+        struct sidl_io_Deserializer__object* inArgs,
+        struct sidl_io_Serializer__object* outArgs) {
+  /* stack space for arguments */
+  char* _retval;
+  sidl_BaseInterface _ex   = NULL;
+  sidl_BaseInterface *_ex2 = &_ex;
+
+  /* unpack in and inout argments */
+
+  /* make the call */
+  _retval = (_getSEPV()->f_getSearchPath)(
+    );
+
+  /* pack return value */
+  sidl_io_Serializer_packString( outArgs, "_retval", _retval, _ex2);
+
+  /* pack out and inout argments */
+
+}
+
+void
+sidl_Loader_addSearchPath__sexec(
+        struct sidl_io_Deserializer__object* inArgs,
+        struct sidl_io_Serializer__object* outArgs) {
+  /* stack space for arguments */
+  char* path_fragment;
+  sidl_BaseInterface _ex   = NULL;
+  sidl_BaseInterface *_ex2 = &_ex;
+
+  /* unpack in and inout argments */
+
+  sidl_io_Deserializer_unpackString( inArgs, "path_fragment", &path_fragment,
+    _ex2);
+
+  /* make the call */
+  (_getSEPV()->f_addSearchPath)(
+    path_fragment);
+
+  /* pack return value */
+  /* pack out and inout argments */
+
+}
+
+void
+sidl_Loader_setFinder__sexec(
+        struct sidl_io_Deserializer__object* inArgs,
+        struct sidl_io_Serializer__object* outArgs) {
+  /* stack space for arguments */
+  sidl_Finder f;
+
+  /* unpack in and inout argments */
+
+  /* make the call */
+  (_getSEPV()->f_setFinder)(
+    f);
+
+  /* pack return value */
+  /* pack out and inout argments */
+
+}
+
+void
+sidl_Loader_getFinder__sexec(
+        struct sidl_io_Deserializer__object* inArgs,
+        struct sidl_io_Serializer__object* outArgs) {
+  /* stack space for arguments */
+  sidl_Finder _retval;
+
+  /* unpack in and inout argments */
+
+  /* make the call */
+  _retval = (_getSEPV()->f_getFinder)(
+    );
+
+  /* pack return value */
+  /* pack out and inout argments */
+
 }
 
 /*
@@ -345,6 +635,11 @@ sidl_Loader__cast(
 {
   sidl_Loader cast = NULL;
 
+  if(!connect_loaded) {
+    sidl_rmi_ConnectRegistry_registerConnect("sidl.Loader",
+      (void*)sidl_Loader__IHConnect);
+    connect_loaded = 1;
+  }
   if (obj != NULL) {
     sidl_BaseInterface base = (sidl_BaseInterface) obj;
     cast = (sidl_Loader) (*base->d_epv->f__cast)(
@@ -373,6 +668,74 @@ sidl_Loader__cast2(
 
   return cast;
 }
+/*
+ * Select and execute a method by name
+ */
+
+void
+sidl_Loader__exec(
+  /* in */ sidl_Loader self,
+  /* in */ const char* methodName,
+  /* in */ sidl_io_Deserializer inArgs,
+  /* in */ sidl_io_Serializer outArgs)
+{
+  (*self->d_epv->f__exec)(
+  self,
+  methodName,
+  inArgs,
+  outArgs);
+}
+
+struct sidl_Loader__smethod {
+  const char *d_name;
+  void (*d_func)(struct sidl_io_Deserializer__object *,
+    struct sidl_io_Serializer__object *);
+};
+
+void
+sidl_Loader__sexec(
+        const char* methodName,
+        struct sidl_io_Deserializer__object* inArgs,
+        struct sidl_io_Serializer__object* outArgs ) { 
+  static const struct sidl_Loader__smethod s_methods[] = {
+    { "addDLL", sidl_Loader_addDLL__sexec },
+    { "addSearchPath", sidl_Loader_addSearchPath__sexec },
+    { "findLibrary", sidl_Loader_findLibrary__sexec },
+    { "getFinder", sidl_Loader_getFinder__sexec },
+    { "getSearchPath", sidl_Loader_getSearchPath__sexec },
+    { "loadLibrary", sidl_Loader_loadLibrary__sexec },
+    { "setFinder", sidl_Loader_setFinder__sexec },
+    { "setSearchPath", sidl_Loader_setSearchPath__sexec },
+    { "unloadLibraries", sidl_Loader_unloadLibraries__sexec }
+  };
+  int i, cmp, l = 0;
+  int u = sizeof(s_methods)/sizeof(struct sidl_Loader__smethod);
+  if (methodName) {
+    /* Use binary search to locate method */
+    while (l < u) {
+      i = (l + u) >> 1;
+      if (!(cmp=strcmp(methodName, s_methods[i].d_name))) {
+        (s_methods[i].d_func)(inArgs, outArgs);
+        return;
+      }
+      else if (cmp < 0) u = i;
+      else l = i + 1;
+    }
+  }
+  /* TODO: add code for method not found */
+}
+/*
+ * Get the URL of the Implementation of this object (for RMI)
+ */
+
+char*
+sidl_Loader__getURL(
+  /* in */ sidl_Loader self)
+{
+  return (*self->d_epv->f__getURL)(
+  self);
+}
+
 /**
  * Create a contiguous array of the given dimension with specified
  * index bounds in column-major order. This array
@@ -1010,3 +1373,377 @@ sidl_Loader__array_ensure(
       ordering);
 }
 
+#include <stdlib.h>
+#include <string.h>
+#ifndef included_sidl_BaseClass_h
+#include "sidl_BaseClass.h"
+#endif
+#ifndef included_sidl_ClassInfo_h
+#include "sidl_ClassInfo.h"
+#endif
+#include "sidl_rmi_ProtocolFactory.h"
+#include "sidl_rmi_Invocation.h"
+#include "sidl_rmi_Response.h"
+
+#ifndef NULL
+#define NULL 0
+#endif
+
+#include "sidl_thread.h"
+#ifdef HAVE_PTHREAD
+static struct sidl_recursive_mutex_t sidl_Loader__mutex= SIDL_RECURSIVE_MUTEX_INITIALIZER;
+#define LOCK_STATIC_GLOBALS sidl_recursive_mutex_lock( &sidl_Loader__mutex )
+#define UNLOCK_STATIC_GLOBALS sidl_recursive_mutex_unlock( &sidl_Loader__mutex )
+/* #define HAVE_LOCKED_STATIC_GLOBALS (sidl_recursive_mutex_trylock( &sidl_Loader__mutex )==EDEADLOCK) */
+#else
+#define LOCK_STATIC_GLOBALS
+#define UNLOCK_STATIC_GLOBALS
+/* #define HAVE_LOCKED_STATIC_GLOBALS (1) */
+#endif
+
+/* Static variables to hold version of IOR */
+static const int32_t s_IOR_MAJOR_VERSION = 0;
+static const int32_t s_IOR_MINOR_VERSION = 9;
+
+/* Static variables for managing EPV initialization. */
+static int s_remote_initialized = 0;
+
+static struct sidl_Loader__epv s_rem_epv__sidl_loader;
+
+static struct sidl_BaseClass__epv  s_rem_epv__sidl_baseclass;
+
+static struct sidl_BaseInterface__epv  s_rem_epv__sidl_baseinterface;
+
+/* REMOTE CAST: dynamic type casting for remote objects. */
+static void* remote_sidl_Loader__cast(
+struct sidl_Loader__object* self,
+const char* name)
+{
+  void* cast = NULL;
+
+  struct sidl_Loader__object* s0;
+  struct sidl_BaseClass__object* s1;
+   s0 =                         self;
+   s1 =                         &s0->d_sidl_baseclass;
+
+  if (!strcmp(name, "sidl.Loader")) {
+    cast = (void*) s0;
+  } else if (!strcmp(name, "sidl.BaseClass")) {
+    cast = (void*) s1;
+  } else if (!strcmp(name, "sidl.BaseInterface")) {
+    cast = (void*) &s1->d_sidl_baseinterface;
+  }
+  else if(sidl_Loader_isType(self, name)) {
+    void* (*func)(sidl_rmi_InstanceHandle) = 
+      (void* (*)(sidl_rmi_InstanceHandle)) 
+      sidl_rmi_ConnectRegistry_getConnect(name);
+    cast =  (*func)((sidl_rmi_InstanceHandle)self->d_data);
+  }
+
+  return cast;
+}
+
+/* REMOTE DELETE: call the remote destructor for the object. */
+static void remote_sidl_Loader__delete(
+  struct sidl_Loader__object* self)
+{
+  free((void*) self);
+}
+
+/* REMOTE GETURL: call the getURL function for the object. */
+static char* remote_sidl_Loader__getURL(
+  struct sidl_Loader__object* self)
+{
+  sidl_rmi_InstanceHandle conn = (sidl_rmi_InstanceHandle)self->d_data;
+  sidl_BaseInterface _ex = NULL;
+  if(conn != NULL) {
+    return sidl_rmi_InstanceHandle_getURL(conn, &_ex);
+  }
+  return NULL;
+}
+
+/* REMOTE EXEC: call the exec function for the object. */
+static void remote_sidl_Loader__exec(
+  struct sidl_Loader__object* self,
+  const char* methodName,
+  sidl_io_Deserializer inArgs,
+  sidl_io_Serializer outArgs)
+{
+}
+
+/* REMOTE METHOD STUB:addRef */
+static void
+remote_sidl_Loader_addRef(
+  /* in */ struct sidl_Loader__object* self /* TLD */)
+{
+  /* FIXME  need to think through all of these special cases */
+}
+
+/* REMOTE METHOD STUB:deleteRef */
+static void
+remote_sidl_Loader_deleteRef(
+  /* in */ struct sidl_Loader__object* self /* TLD */)
+{
+  sidl_BaseInterface _ex = NULL;
+  sidl_BaseInterface *_ex2 =&_ex;
+  /* initialize a new invocation */
+  sidl_rmi_InstanceHandle _conn = (sidl_rmi_InstanceHandle)self->d_data;
+  sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
+    "deleteRef", _ex2 );
+  sidl_rmi_Response _rsvp = NULL;
+
+  /* pack in and inout arguments */
+
+  /* send actual RMI request */
+  _rsvp = sidl_rmi_Invocation_invokeMethod(_inv,_ex2);
+
+  /* extract return value */
+
+  /* unpack out and inout arguments */
+
+  /* cleanup and return */
+  sidl_rmi_Response_done(_rsvp, _ex2);
+  sidl_rmi_Invocation_deleteRef(_inv);
+  sidl_rmi_Response_deleteRef(_rsvp);
+}
+
+/* REMOTE METHOD STUB:isSame */
+static sidl_bool
+remote_sidl_Loader_isSame(
+  /* in */ struct sidl_Loader__object* self /* TLD */,
+  /* in */ struct sidl_BaseInterface__object* iobj)
+{
+  /* FIXME  need to think through all of these special cases */
+  return 0;
+}
+
+/* REMOTE METHOD STUB:queryInt */
+static struct sidl_BaseInterface__object*
+remote_sidl_Loader_queryInt(
+  /* in */ struct sidl_Loader__object* self /* TLD */,
+  /* in */ const char* name)
+{
+  /* FIXME  need to think through all of these special cases */
+  return 0;
+}
+
+/* REMOTE METHOD STUB:isType */
+static sidl_bool
+remote_sidl_Loader_isType(
+  /* in */ struct sidl_Loader__object* self /* TLD */,
+  /* in */ const char* name)
+{
+  sidl_BaseInterface _ex = NULL;
+  sidl_BaseInterface *_ex2 =&_ex;
+  /* initialize a new invocation */
+  sidl_rmi_InstanceHandle _conn = (sidl_rmi_InstanceHandle)self->d_data;
+  sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
+    "isType", _ex2 );
+  sidl_rmi_Response _rsvp = NULL;
+  sidl_bool _retval;
+
+  /* pack in and inout arguments */
+  sidl_rmi_Invocation_packString( _inv, "name", name, _ex2);
+
+  /* send actual RMI request */
+  _rsvp = sidl_rmi_Invocation_invokeMethod(_inv,_ex2);
+
+  /* extract return value */
+  sidl_rmi_Response_unpackBool( _rsvp, "_retval", &_retval, _ex2);
+
+  /* unpack out and inout arguments */
+
+  /* cleanup and return */
+  sidl_rmi_Response_done(_rsvp, _ex2);
+  sidl_rmi_Invocation_deleteRef(_inv);
+  sidl_rmi_Response_deleteRef(_rsvp);
+  return _retval;
+}
+
+/* REMOTE METHOD STUB:getClassInfo */
+static struct sidl_ClassInfo__object*
+remote_sidl_Loader_getClassInfo(
+  /* in */ struct sidl_Loader__object* self /* TLD */)
+{
+  /* FIXME  need to think through all of these special cases */
+  return 0;
+}
+
+/* REMOTE EPV: create remote entry point vectors (EPVs). */
+static void sidl_Loader__init_remote_epv(void)
+{
+  /* assert( HAVE_LOCKED_STATIC_GLOBALS ); */
+  struct sidl_Loader__epv*        epv = &s_rem_epv__sidl_loader;
+  struct sidl_BaseClass__epv*     e0  = &s_rem_epv__sidl_baseclass;
+  struct sidl_BaseInterface__epv* e1  = &s_rem_epv__sidl_baseinterface;
+
+  epv->f__cast             = remote_sidl_Loader__cast;
+  epv->f__delete           = remote_sidl_Loader__delete;
+  epv->f__exec             = remote_sidl_Loader__exec;
+  epv->f__getURL           = remote_sidl_Loader__getURL;
+  epv->f__ctor             = NULL;
+  epv->f__dtor             = NULL;
+  epv->f_addRef            = remote_sidl_Loader_addRef;
+  epv->f_deleteRef         = remote_sidl_Loader_deleteRef;
+  epv->f_isSame            = remote_sidl_Loader_isSame;
+  epv->f_queryInt          = remote_sidl_Loader_queryInt;
+  epv->f_isType            = remote_sidl_Loader_isType;
+  epv->f_getClassInfo      = remote_sidl_Loader_getClassInfo;
+
+  e0->f__cast        = (void* (*)(struct sidl_BaseClass__object*,
+    const char*)) epv->f__cast;
+  e0->f__delete      = (void (*)(struct sidl_BaseClass__object*)) 
+    epv->f__delete;
+  e0->f__exec        = (void (*)(struct sidl_BaseClass__object*,const char*,
+    struct sidl_io_Deserializer__object*,
+    struct sidl_io_Serializer__object*)) epv->f__exec;
+  e0->f_addRef       = (void (*)(struct sidl_BaseClass__object*)) epv->f_addRef;
+  e0->f_deleteRef    = (void (*)(struct sidl_BaseClass__object*)) 
+    epv->f_deleteRef;
+  e0->f_isSame       = (sidl_bool (*)(struct sidl_BaseClass__object*,
+    struct sidl_BaseInterface__object*)) epv->f_isSame;
+  e0->f_queryInt     = (struct sidl_BaseInterface__object* (*)(struct 
+    sidl_BaseClass__object*,const char*)) epv->f_queryInt;
+  e0->f_isType       = (sidl_bool (*)(struct sidl_BaseClass__object*,
+    const char*)) epv->f_isType;
+  e0->f_getClassInfo = (struct sidl_ClassInfo__object* (*)(struct 
+    sidl_BaseClass__object*)) epv->f_getClassInfo;
+
+  e1->f__cast        = (void* (*)(void*,const char*)) epv->f__cast;
+  e1->f__delete      = (void (*)(void*)) epv->f__delete;
+  e1->f__exec        = (void (*)(void*,const char*,
+    struct sidl_io_Deserializer__object*,
+    struct sidl_io_Serializer__object*)) epv->f__exec;
+  e1->f_addRef       = (void (*)(void*)) epv->f_addRef;
+  e1->f_deleteRef    = (void (*)(void*)) epv->f_deleteRef;
+  e1->f_isSame       = (sidl_bool (*)(void*,
+    struct sidl_BaseInterface__object*)) epv->f_isSame;
+  e1->f_queryInt     = (struct sidl_BaseInterface__object* (*)(void*,
+    const char*)) epv->f_queryInt;
+  e1->f_isType       = (sidl_bool (*)(void*,const char*)) epv->f_isType;
+  e1->f_getClassInfo = (struct sidl_ClassInfo__object* (*)(void*)) 
+    epv->f_getClassInfo;
+
+  s_remote_initialized = 1;
+}
+
+/* Create an instance that connects to an existing remote object. */
+static struct sidl_Loader__object*
+sidl_Loader__remoteConnect(const char *url, sidl_BaseInterface *_ex)
+{
+  struct sidl_Loader__object* self;
+
+  struct sidl_Loader__object* s0;
+  struct sidl_BaseClass__object* s1;
+
+  sidl_rmi_InstanceHandle instance = 
+    sidl_rmi_ProtocolFactory_connectInstance(url, _ex );
+  if ( instance == NULL) { return NULL; }
+  self =
+    (struct sidl_Loader__object*) malloc(
+      sizeof(struct sidl_Loader__object));
+
+   s0 =                         self;
+   s1 =                         &s0->d_sidl_baseclass;
+
+  LOCK_STATIC_GLOBALS;
+  if (!s_remote_initialized) {
+    sidl_Loader__init_remote_epv();
+  }
+  UNLOCK_STATIC_GLOBALS;
+
+  s1->d_sidl_baseinterface.d_epv    = &s_rem_epv__sidl_baseinterface;
+  s1->d_sidl_baseinterface.d_object = (void*) self;
+
+  s1->d_data = (void*) instance;
+  s1->d_epv  = &s_rem_epv__sidl_baseclass;
+
+  s0->d_data = (void*) instance;
+  s0->d_epv  = &s_rem_epv__sidl_loader;
+
+  self->d_data = (void*) instance;
+  LOCK_STATIC_GLOBALS;
+  if (!s_remote_initialized) {
+    sidl_Loader__init_remote_epv();
+  }
+  UNLOCK_STATIC_GLOBALS;
+
+
+  return self;
+}
+/* Create an instance that uses an already existing InstanceHandel to connect 
+  to an existing remote object. */
+static struct sidl_Loader__object*
+sidl_Loader__IHConnect(sidl_rmi_InstanceHandle instance,
+  sidl_BaseInterface *_ex)
+{
+  struct sidl_Loader__object* self;
+
+  struct sidl_Loader__object* s0;
+  struct sidl_BaseClass__object* s1;
+
+  self =
+    (struct sidl_Loader__object*) malloc(
+      sizeof(struct sidl_Loader__object));
+
+   s0 =                         self;
+   s1 =                         &s0->d_sidl_baseclass;
+
+  LOCK_STATIC_GLOBALS;
+  if (!s_remote_initialized) {
+    sidl_Loader__init_remote_epv();
+  }
+  UNLOCK_STATIC_GLOBALS;
+
+  s1->d_sidl_baseinterface.d_epv    = &s_rem_epv__sidl_baseinterface;
+  s1->d_sidl_baseinterface.d_object = (void*) self;
+
+  s1->d_data = (void*) instance;
+  s1->d_epv  = &s_rem_epv__sidl_baseclass;
+
+  s0->d_data = (void*) instance;
+  s0->d_epv  = &s_rem_epv__sidl_loader;
+
+  self->d_data = (void*) instance;
+
+  sidl_rmi_InstanceHandle_addRef(instance);
+  return self;
+}
+/* REMOTE: generate remote instance given URL string. */
+static struct sidl_Loader__object*
+sidl_Loader__remote(const char *url, sidl_BaseInterface *_ex)
+{
+  struct sidl_Loader__object* self;
+
+  struct sidl_Loader__object* s0;
+  struct sidl_BaseClass__object* s1;
+
+  sidl_rmi_InstanceHandle instance = 
+    sidl_rmi_ProtocolFactory_createInstance(url, "sidl.Loader", _ex );
+  if ( instance == NULL) { return NULL; }
+  self =
+    (struct sidl_Loader__object*) malloc(
+      sizeof(struct sidl_Loader__object));
+
+   s0 =                         self;
+   s1 =                         &s0->d_sidl_baseclass;
+
+  LOCK_STATIC_GLOBALS;
+  if (!s_remote_initialized) {
+    sidl_Loader__init_remote_epv();
+  }
+  UNLOCK_STATIC_GLOBALS;
+
+  s1->d_sidl_baseinterface.d_epv    = &s_rem_epv__sidl_baseinterface;
+  s1->d_sidl_baseinterface.d_object = (void*) self;
+
+  s1->d_data = (void*) instance;
+  s1->d_epv  = &s_rem_epv__sidl_baseclass;
+
+  s0->d_data = (void*) instance;
+  s0->d_epv  = &s_rem_epv__sidl_loader;
+
+  self->d_data = (void*) instance;
+
+  return self;
+}

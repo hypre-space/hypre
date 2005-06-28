@@ -1,8 +1,8 @@
 /*
  * File:          sidl_BaseException.h
- * Symbol:        sidl.BaseException-v0.9.0
+ * Symbol:        sidl.BaseException-v0.9.3
  * Symbol Type:   interface
- * Babel Version: 0.9.8
+ * Babel Version: 0.10.4
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Client-side glue code for sidl.BaseException
@@ -32,14 +32,14 @@
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.9.8
+ * babel-version = 0.10.4
  */
 
 #ifndef included_sidl_BaseException_h
 #define included_sidl_BaseException_h
 
 /**
- * Symbol "sidl.BaseException" (version 0.9.0)
+ * Symbol "sidl.BaseException" (version 0.9.3)
  * 
  * Every exception implements <code>BaseException</code>. This interface
  * declares the basic functionality to get and set error messages and stack
@@ -63,10 +63,21 @@ typedef struct sidl_BaseException__object* sidl_BaseException;
 #include "sidl_ClassInfo.h"
 #endif
 
+#ifndef included_sidl_io_Serializer_h
+#include "sidl_io_Serializer.h"
+#endif
+#ifndef included_sidl_io_Deserializer_h
+#include "sidl_io_Deserializer.h"
+#endif
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+/**
+ * RMI connector function for the class.
+ */
+sidl_BaseException
+sidl_BaseException__connect(const char *, sidl_BaseInterface *_ex);
 /**
  * <p>
  * Add one to the intrinsic reference count in the underlying object.
@@ -83,7 +94,7 @@ extern "C" {
  */
 void
 sidl_BaseException_addRef(
-  /*in*/ sidl_BaseException self);
+  /* in */ sidl_BaseException self);
 
 /**
  * Decrease by one the intrinsic reference count in the underlying
@@ -94,7 +105,7 @@ sidl_BaseException_addRef(
  */
 void
 sidl_BaseException_deleteRef(
-  /*in*/ sidl_BaseException self);
+  /* in */ sidl_BaseException self);
 
 /**
  * Return true if and only if <code>obj</code> refers to the same
@@ -102,8 +113,8 @@ sidl_BaseException_deleteRef(
  */
 sidl_bool
 sidl_BaseException_isSame(
-  /*in*/ sidl_BaseException self,
-  /*in*/ sidl_BaseInterface iobj);
+  /* in */ sidl_BaseException self,
+  /* in */ sidl_BaseInterface iobj);
 
 /**
  * Check whether the object can support the specified interface or
@@ -116,8 +127,8 @@ sidl_BaseException_isSame(
  */
 sidl_BaseInterface
 sidl_BaseException_queryInt(
-  /*in*/ sidl_BaseException self,
-  /*in*/ const char* name);
+  /* in */ sidl_BaseException self,
+  /* in */ const char* name);
 
 /**
  * Return whether this object is an instance of the specified type.
@@ -127,30 +138,30 @@ sidl_BaseException_queryInt(
  */
 sidl_bool
 sidl_BaseException_isType(
-  /*in*/ sidl_BaseException self,
-  /*in*/ const char* name);
+  /* in */ sidl_BaseException self,
+  /* in */ const char* name);
 
 /**
  * Return the meta-data about the class implementing this interface.
  */
 sidl_ClassInfo
 sidl_BaseException_getClassInfo(
-  /*in*/ sidl_BaseException self);
+  /* in */ sidl_BaseException self);
 
 /**
  * Return the message associated with the exception.
  */
 char*
 sidl_BaseException_getNote(
-  /*in*/ sidl_BaseException self);
+  /* in */ sidl_BaseException self);
 
 /**
  * Set the message associated with the exception.
  */
 void
 sidl_BaseException_setNote(
-  /*in*/ sidl_BaseException self,
-  /*in*/ const char* message);
+  /* in */ sidl_BaseException self,
+  /* in */ const char* message);
 
 /**
  * Returns formatted string containing the concatenation of all 
@@ -158,15 +169,15 @@ sidl_BaseException_setNote(
  */
 char*
 sidl_BaseException_getTrace(
-  /*in*/ sidl_BaseException self);
+  /* in */ sidl_BaseException self);
 
 /**
  * Adds a stringified entry/line to the stack trace.
  */
 void
 sidl_BaseException_addLine(
-  /*in*/ sidl_BaseException self,
-  /*in*/ const char* traceline);
+  /* in */ sidl_BaseException self,
+  /* in */ const char* traceline);
 
 /**
  * Formats and adds an entry to the stack trace based on the 
@@ -174,15 +185,15 @@ sidl_BaseException_addLine(
  */
 void
 sidl_BaseException_add(
-  /*in*/ sidl_BaseException self,
-  /*in*/ const char* filename,
-  /*in*/ int32_t lineno,
-  /*in*/ const char* methodname);
+  /* in */ sidl_BaseException self,
+  /* in */ const char* filename,
+  /* in */ int32_t lineno,
+  /* in */ const char* methodname);
 
 /**
  * Cast method for interface and class type conversions.
  */
-sidl_BaseException
+struct sidl_BaseException__object*
 sidl_BaseException__cast(
   void* obj);
 
@@ -194,6 +205,29 @@ sidl_BaseException__cast2(
   void* obj,
   const char* type);
 
+/**
+ * Select and execute a method by name
+ */
+void
+sidl_BaseException__exec(
+  /* in */ sidl_BaseException self,
+  /* in */ const char* methodName,
+  /* in */ sidl_io_Deserializer inArgs,
+  /* in */ sidl_io_Serializer outArgs);
+/**
+ * static Exec method for reflexity.
+ */
+void
+sidl_BaseException__sexec(
+  /* in */ const char* methodName,
+  /* in */ sidl_io_Deserializer inArgs,
+  /* in */ sidl_io_Serializer outArgs);
+/**
+ * Get the URL of the Implementation of this object (for RMI)
+ */
+char*
+sidl_BaseException__getURL(
+  /* in */ sidl_BaseException self);
 /**
  * Create a contiguous array of the given dimension with specified
  * index bounds in column-major order. This array

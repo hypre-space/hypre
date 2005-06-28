@@ -1,8 +1,8 @@
 /*
  * File:          sidl_BaseClass_Skel.c
- * Symbol:        sidl.BaseClass-v0.9.0
+ * Symbol:        sidl.BaseClass-v0.9.3
  * Symbol Type:   class
- * Babel Version: 0.9.8
+ * Babel Version: 0.10.4
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Server-side glue code for sidl.BaseClass
@@ -32,7 +32,7 @@
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.9.8
+ * babel-version = 0.10.4
  */
 
 #include "sidl_BaseClass_IOR.h"
@@ -40,48 +40,91 @@
 #include <stddef.h>
 
 void
-sidl_BaseClass__delete(struct sidl_BaseClass__object* self) {
+sidl_BaseClass__delete(sidl_BaseClass self) {
   if (self) {
     /* call the IOR method */
     self->d_epv->f__delete(self);
   }
 }
 
-extern void
+extern
+void
+impl_sidl_BaseClass__load(
+  void);
+
+extern
+void
 impl_sidl_BaseClass__ctor(
-  sidl_BaseClass);
+  /* in */ sidl_BaseClass self);
 
-extern void
+extern
+void
 impl_sidl_BaseClass__dtor(
-  sidl_BaseClass);
+  /* in */ sidl_BaseClass self);
 
-extern void
+extern struct sidl_ClassInfo__object* 
+  impl_sidl_BaseClass_fconnect_sidl_ClassInfo(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_sidl_BaseClass_fgetURL_sidl_ClassInfo(struct 
+  sidl_ClassInfo__object* obj);
+extern struct sidl_BaseInterface__object* 
+  impl_sidl_BaseClass_fconnect_sidl_BaseInterface(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_sidl_BaseClass_fgetURL_sidl_BaseInterface(struct 
+  sidl_BaseInterface__object* obj);
+extern struct sidl_BaseClass__object* 
+  impl_sidl_BaseClass_fconnect_sidl_BaseClass(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_sidl_BaseClass_fgetURL_sidl_BaseClass(struct 
+  sidl_BaseClass__object* obj);
+extern
+void
 impl_sidl_BaseClass_addRef(
-  sidl_BaseClass);
+  /* in */ sidl_BaseClass self);
 
-extern void
+extern
+void
 impl_sidl_BaseClass_deleteRef(
-  sidl_BaseClass);
+  /* in */ sidl_BaseClass self);
 
-extern sidl_bool
+extern
+sidl_bool
 impl_sidl_BaseClass_isSame(
-  sidl_BaseClass,
-  sidl_BaseInterface);
+  /* in */ sidl_BaseClass self,
+  /* in */ sidl_BaseInterface iobj);
 
-extern sidl_BaseInterface
+extern
+sidl_BaseInterface
 impl_sidl_BaseClass_queryInt(
-  sidl_BaseClass,
-  const char*);
+  /* in */ sidl_BaseClass self,
+  /* in */ const char* name);
 
-extern sidl_bool
+extern
+sidl_bool
 impl_sidl_BaseClass_isType(
-  sidl_BaseClass,
-  const char*);
+  /* in */ sidl_BaseClass self,
+  /* in */ const char* name);
 
-extern sidl_ClassInfo
+extern
+sidl_ClassInfo
 impl_sidl_BaseClass_getClassInfo(
-  sidl_BaseClass);
+  /* in */ sidl_BaseClass self);
 
+extern struct sidl_ClassInfo__object* 
+  impl_sidl_BaseClass_fconnect_sidl_ClassInfo(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_sidl_BaseClass_fgetURL_sidl_ClassInfo(struct 
+  sidl_ClassInfo__object* obj);
+extern struct sidl_BaseInterface__object* 
+  impl_sidl_BaseClass_fconnect_sidl_BaseInterface(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_sidl_BaseClass_fgetURL_sidl_BaseInterface(struct 
+  sidl_BaseInterface__object* obj);
+extern struct sidl_BaseClass__object* 
+  impl_sidl_BaseClass_fconnect_sidl_BaseClass(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_sidl_BaseClass_fgetURL_sidl_BaseClass(struct 
+  sidl_BaseClass__object* obj);
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -97,10 +140,51 @@ sidl_BaseClass__set_epv(struct sidl_BaseClass__epv *epv)
   epv->f_queryInt = impl_sidl_BaseClass_queryInt;
   epv->f_isType = impl_sidl_BaseClass_isType;
   epv->f_getClassInfo = impl_sidl_BaseClass_getClassInfo;
+
 }
 #ifdef __cplusplus
 }
 #endif
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+void sidl_BaseClass__call_load(void) { 
+  impl_sidl_BaseClass__load();
+}
+struct sidl_ClassInfo__object* 
+  skel_sidl_BaseClass_fconnect_sidl_ClassInfo(char* url,
+  sidl_BaseInterface *_ex) { 
+  return impl_sidl_BaseClass_fconnect_sidl_ClassInfo(url, _ex);
+}
+
+char* skel_sidl_BaseClass_fgetURL_sidl_ClassInfo(struct sidl_ClassInfo__object* 
+  obj) { 
+  return impl_sidl_BaseClass_fgetURL_sidl_ClassInfo(obj);
+}
+
+struct sidl_BaseInterface__object* 
+  skel_sidl_BaseClass_fconnect_sidl_BaseInterface(char* url,
+  sidl_BaseInterface *_ex) { 
+  return impl_sidl_BaseClass_fconnect_sidl_BaseInterface(url, _ex);
+}
+
+char* skel_sidl_BaseClass_fgetURL_sidl_BaseInterface(struct 
+  sidl_BaseInterface__object* obj) { 
+  return impl_sidl_BaseClass_fgetURL_sidl_BaseInterface(obj);
+}
+
+struct sidl_BaseClass__object* 
+  skel_sidl_BaseClass_fconnect_sidl_BaseClass(char* url,
+  sidl_BaseInterface *_ex) { 
+  return impl_sidl_BaseClass_fconnect_sidl_BaseClass(url, _ex);
+}
+
+char* skel_sidl_BaseClass_fgetURL_sidl_BaseClass(struct sidl_BaseClass__object* 
+  obj) { 
+  return impl_sidl_BaseClass_fgetURL_sidl_BaseClass(obj);
+}
 
 struct sidl_BaseClass__data*
 sidl_BaseClass__get_data(sidl_BaseClass self)
@@ -116,3 +200,6 @@ void sidl_BaseClass__set_data(
     self->d_data = data;
   }
 }
+#ifdef __cplusplus
+}
+#endif

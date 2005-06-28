@@ -1,8 +1,8 @@
 /*
  * File:          sidl_BaseClass_IOR.h
- * Symbol:        sidl.BaseClass-v0.9.0
+ * Symbol:        sidl.BaseClass-v0.9.3
  * Symbol Type:   class
- * Babel Version: 0.9.8
+ * Babel Version: 0.10.4
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Intermediate Object Representation for sidl.BaseClass
@@ -32,7 +32,7 @@
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.9.8
+ * babel-version = 0.10.4
  */
 
 #ifndef included_sidl_BaseClass_IOR_h
@@ -50,7 +50,7 @@ extern "C" {
 #endif
 
 /*
- * Symbol "sidl.BaseClass" (version 0.9.0)
+ * Symbol "sidl.BaseClass" (version 0.9.3)
  * 
  * Every class implicitly inherits from <code>BaseClass</code>.  This
  * class implements the methods in <code>BaseInterface</code>.
@@ -61,9 +61,6 @@ struct sidl_BaseClass__object;
 
 extern struct sidl_BaseClass__object*
 sidl_BaseClass__new(void);
-
-extern struct sidl_BaseClass__object*
-sidl_BaseClass__remote(const char *url);
 
 extern void sidl_BaseClass__init(
   struct sidl_BaseClass__object* self);
@@ -77,6 +74,10 @@ extern void sidl_BaseClass__IOR_version(int32_t *major, int32_t *minor);
 
 struct sidl_ClassInfo__array;
 struct sidl_ClassInfo__object;
+struct sidl_io_Deserializer__array;
+struct sidl_io_Deserializer__object;
+struct sidl_io_Serializer__array;
+struct sidl_io_Serializer__object;
 
 /*
  * Declare the method entry point vector.
@@ -85,31 +86,38 @@ struct sidl_ClassInfo__object;
 struct sidl_BaseClass__epv {
   /* Implicit builtin methods */
   void* (*f__cast)(
-    struct sidl_BaseClass__object* self,
-    const char* name);
+    /* in */ struct sidl_BaseClass__object* self,
+    /* in */ const char* name);
   void (*f__delete)(
-    struct sidl_BaseClass__object* self);
+    /* in */ struct sidl_BaseClass__object* self);
+  void (*f__exec)(
+    /* in */ struct sidl_BaseClass__object* self,
+    /* in */ const char* methodName,
+    /* in */ struct sidl_io_Deserializer__object* inArgs,
+    /* in */ struct sidl_io_Serializer__object* outArgs);
+  char* (*f__getURL)(
+    /* in */ struct sidl_BaseClass__object* self);
   void (*f__ctor)(
-    struct sidl_BaseClass__object* self);
+    /* in */ struct sidl_BaseClass__object* self);
   void (*f__dtor)(
-    struct sidl_BaseClass__object* self);
-  /* Methods introduced in sidl.BaseInterface-v0.9.0 */
+    /* in */ struct sidl_BaseClass__object* self);
+  /* Methods introduced in sidl.BaseInterface-v0.9.3 */
   void (*f_addRef)(
-    struct sidl_BaseClass__object* self);
+    /* in */ struct sidl_BaseClass__object* self);
   void (*f_deleteRef)(
-    struct sidl_BaseClass__object* self);
+    /* in */ struct sidl_BaseClass__object* self);
   sidl_bool (*f_isSame)(
-    struct sidl_BaseClass__object* self,
-    struct sidl_BaseInterface__object* iobj);
+    /* in */ struct sidl_BaseClass__object* self,
+    /* in */ struct sidl_BaseInterface__object* iobj);
   struct sidl_BaseInterface__object* (*f_queryInt)(
-    struct sidl_BaseClass__object* self,
-    const char* name);
+    /* in */ struct sidl_BaseClass__object* self,
+    /* in */ const char* name);
   sidl_bool (*f_isType)(
-    struct sidl_BaseClass__object* self,
-    const char* name);
+    /* in */ struct sidl_BaseClass__object* self,
+    /* in */ const char* name);
   struct sidl_ClassInfo__object* (*f_getClassInfo)(
-    struct sidl_BaseClass__object* self);
-  /* Methods introduced in sidl.BaseClass-v0.9.0 */
+    /* in */ struct sidl_BaseClass__object* self);
+  /* Methods introduced in sidl.BaseClass-v0.9.3 */
 };
 
 /*
@@ -126,9 +134,6 @@ struct sidl_BaseClass__external {
   struct sidl_BaseClass__object*
   (*createObject)(void);
 
-  struct sidl_BaseClass__object*
-  (*createRemote)(const char *url);
-
 };
 
 /*
@@ -139,6 +144,24 @@ struct sidl_BaseClass__external {
 
 const struct sidl_BaseClass__external*
 sidl_BaseClass__externals(void);
+
+struct sidl_ClassInfo__object* 
+  skel_sidl_BaseClass_fconnect_sidl_ClassInfo(char* url,
+  struct sidl_BaseInterface__object **_ex);
+char* skel_sidl_BaseClass_fgetURL_sidl_ClassInfo(struct sidl_ClassInfo__object* 
+  obj); 
+
+struct sidl_BaseInterface__object* 
+  skel_sidl_BaseClass_fconnect_sidl_BaseInterface(char* url,
+  struct sidl_BaseInterface__object **_ex);
+char* skel_sidl_BaseClass_fgetURL_sidl_BaseInterface(struct 
+  sidl_BaseInterface__object* obj); 
+
+struct sidl_BaseClass__object* 
+  skel_sidl_BaseClass_fconnect_sidl_BaseClass(char* url,
+  struct sidl_BaseInterface__object **_ex);
+char* skel_sidl_BaseClass_fgetURL_sidl_BaseClass(struct sidl_BaseClass__object* 
+  obj); 
 
 #ifdef __cplusplus
 }

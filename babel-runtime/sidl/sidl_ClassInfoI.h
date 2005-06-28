@@ -1,8 +1,8 @@
 /*
  * File:          sidl_ClassInfoI.h
- * Symbol:        sidl.ClassInfoI-v0.9.0
+ * Symbol:        sidl.ClassInfoI-v0.9.3
  * Symbol Type:   class
- * Babel Version: 0.9.8
+ * Babel Version: 0.10.4
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Client-side glue code for sidl.ClassInfoI
@@ -32,14 +32,14 @@
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.9.8
+ * babel-version = 0.10.4
  */
 
 #ifndef included_sidl_ClassInfoI_h
 #define included_sidl_ClassInfoI_h
 
 /**
- * Symbol "sidl.ClassInfoI" (version 0.9.0)
+ * Symbol "sidl.ClassInfoI" (version 0.9.3)
  * 
  * An implementation of the <code>ClassInfo</code> interface. This provides
  * methods to set all the attributes that are read-only in the
@@ -63,6 +63,12 @@ typedef struct sidl_ClassInfoI__object* sidl_ClassInfoI;
 #include "sidl_ClassInfo.h"
 #endif
 
+#ifndef included_sidl_io_Serializer_h
+#include "sidl_io_Serializer.h"
+#endif
+#ifndef included_sidl_io_Deserializer_h
+#include "sidl_io_Deserializer.h"
+#endif
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -70,9 +76,20 @@ extern "C" {
 /**
  * Constructor function for the class.
  */
-sidl_ClassInfoI
+struct sidl_ClassInfoI__object*
 sidl_ClassInfoI__create(void);
 
+/**
+ * RMI constructor function for the class.
+ */
+sidl_ClassInfoI
+sidl_ClassInfoI__createRemote(const char *, sidl_BaseInterface *_ex);
+
+/**
+ * RMI connector function for the class.
+ */
+sidl_ClassInfoI
+sidl_ClassInfoI__connect(const char *, sidl_BaseInterface *_ex);
 /**
  * <p>
  * Add one to the intrinsic reference count in the underlying object.
@@ -89,7 +106,7 @@ sidl_ClassInfoI__create(void);
  */
 void
 sidl_ClassInfoI_addRef(
-  /*in*/ sidl_ClassInfoI self);
+  /* in */ sidl_ClassInfoI self);
 
 /**
  * Decrease by one the intrinsic reference count in the underlying
@@ -100,7 +117,7 @@ sidl_ClassInfoI_addRef(
  */
 void
 sidl_ClassInfoI_deleteRef(
-  /*in*/ sidl_ClassInfoI self);
+  /* in */ sidl_ClassInfoI self);
 
 /**
  * Return true if and only if <code>obj</code> refers to the same
@@ -108,8 +125,8 @@ sidl_ClassInfoI_deleteRef(
  */
 sidl_bool
 sidl_ClassInfoI_isSame(
-  /*in*/ sidl_ClassInfoI self,
-  /*in*/ sidl_BaseInterface iobj);
+  /* in */ sidl_ClassInfoI self,
+  /* in */ sidl_BaseInterface iobj);
 
 /**
  * Check whether the object can support the specified interface or
@@ -122,8 +139,8 @@ sidl_ClassInfoI_isSame(
  */
 sidl_BaseInterface
 sidl_ClassInfoI_queryInt(
-  /*in*/ sidl_ClassInfoI self,
-  /*in*/ const char* name);
+  /* in */ sidl_ClassInfoI self,
+  /* in */ const char* name);
 
 /**
  * Return whether this object is an instance of the specified type.
@@ -133,39 +150,39 @@ sidl_ClassInfoI_queryInt(
  */
 sidl_bool
 sidl_ClassInfoI_isType(
-  /*in*/ sidl_ClassInfoI self,
-  /*in*/ const char* name);
+  /* in */ sidl_ClassInfoI self,
+  /* in */ const char* name);
 
 /**
  * Return the meta-data about the class implementing this interface.
  */
 sidl_ClassInfo
 sidl_ClassInfoI_getClassInfo(
-  /*in*/ sidl_ClassInfoI self);
+  /* in */ sidl_ClassInfoI self);
 
 /**
  * Set the name of the class.
  */
 void
 sidl_ClassInfoI_setName(
-  /*in*/ sidl_ClassInfoI self,
-  /*in*/ const char* name);
+  /* in */ sidl_ClassInfoI self,
+  /* in */ const char* name);
 
 /**
  * Set the IOR major and minor version numbers.
  */
 void
 sidl_ClassInfoI_setIORVersion(
-  /*in*/ sidl_ClassInfoI self,
-  /*in*/ int32_t major,
-  /*in*/ int32_t minor);
+  /* in */ sidl_ClassInfoI self,
+  /* in */ int32_t major,
+  /* in */ int32_t minor);
 
 /**
  * Return the name of the class.
  */
 char*
 sidl_ClassInfoI_getName(
-  /*in*/ sidl_ClassInfoI self);
+  /* in */ sidl_ClassInfoI self);
 
 /**
  * Get the version of the intermediate object representation.
@@ -173,12 +190,12 @@ sidl_ClassInfoI_getName(
  */
 char*
 sidl_ClassInfoI_getIORVersion(
-  /*in*/ sidl_ClassInfoI self);
+  /* in */ sidl_ClassInfoI self);
 
 /**
  * Cast method for interface and class type conversions.
  */
-sidl_ClassInfoI
+struct sidl_ClassInfoI__object*
 sidl_ClassInfoI__cast(
   void* obj);
 
@@ -190,6 +207,29 @@ sidl_ClassInfoI__cast2(
   void* obj,
   const char* type);
 
+/**
+ * Select and execute a method by name
+ */
+void
+sidl_ClassInfoI__exec(
+  /* in */ sidl_ClassInfoI self,
+  /* in */ const char* methodName,
+  /* in */ sidl_io_Deserializer inArgs,
+  /* in */ sidl_io_Serializer outArgs);
+/**
+ * static Exec method for reflexity.
+ */
+void
+sidl_ClassInfoI__sexec(
+  /* in */ const char* methodName,
+  /* in */ sidl_io_Deserializer inArgs,
+  /* in */ sidl_io_Serializer outArgs);
+/**
+ * Get the URL of the Implementation of this object (for RMI)
+ */
+char*
+sidl_ClassInfoI__getURL(
+  /* in */ sidl_ClassInfoI self);
 /**
  * Create a contiguous array of the given dimension with specified
  * index bounds in column-major order. This array

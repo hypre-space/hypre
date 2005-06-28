@@ -1,8 +1,8 @@
 /*
  * File:          sidl_IOR.h
- * Symbol:        sidl-v0.9.0
+ * Symbol:        sidl-v0.9.3
  * Symbol Type:   package
- * Babel Version: 0.9.8
+ * Babel Version: 0.10.4
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Intermediate Object Representation for sidl
@@ -32,14 +32,14 @@
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.9.8
+ * babel-version = 0.10.4
  */
 
 #ifndef included_sidl_IOR_h
 #define included_sidl_IOR_h
 
 /*
- * Symbol "sidl" (version 0.9.0)
+ * Symbol "sidl" (version 0.9.3)
  * 
  * The <code>sidl</code> package contains the fundamental type and interface
  * definitions for the <code>sidl</code> interface definition language.  It
@@ -64,11 +64,26 @@
 #ifndef included_sidl_ClassInfoI_IOR_h
 #include "sidl_ClassInfoI_IOR.h"
 #endif
+#ifndef included_sidl_DFinder_IOR_h
+#include "sidl_DFinder_IOR.h"
+#endif
 #ifndef included_sidl_DLL_IOR_h
 #include "sidl_DLL_IOR.h"
 #endif
+#ifndef included_sidl_Finder_IOR_h
+#include "sidl_Finder_IOR.h"
+#endif
+#ifndef included_sidl_InvViolation_IOR_h
+#include "sidl_InvViolation_IOR.h"
+#endif
 #ifndef included_sidl_Loader_IOR_h
 #include "sidl_Loader_IOR.h"
+#endif
+#ifndef included_sidl_PostViolation_IOR_h
+#include "sidl_PostViolation_IOR.h"
+#endif
+#ifndef included_sidl_PreViolation_IOR_h
+#include "sidl_PreViolation_IOR.h"
 #endif
 #ifndef included_sidl_Resolve_IOR_h
 #include "sidl_Resolve_IOR.h"
@@ -78,6 +93,12 @@
 #endif
 #ifndef included_sidl_Scope_IOR_h
 #include "sidl_Scope_IOR.h"
+#endif
+#ifndef included_sidl_io_IOR_h
+#include "sidl_io_IOR.h"
+#endif
+#ifndef included_sidl_rmi_IOR_h
+#include "sidl_rmi_IOR.h"
 #endif
 
 #endif

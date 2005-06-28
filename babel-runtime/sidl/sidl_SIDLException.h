@@ -1,8 +1,8 @@
 /*
  * File:          sidl_SIDLException.h
- * Symbol:        sidl.SIDLException-v0.9.0
+ * Symbol:        sidl.SIDLException-v0.9.3
  * Symbol Type:   class
- * Babel Version: 0.9.8
+ * Babel Version: 0.10.4
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Client-side glue code for sidl.SIDLException
@@ -32,14 +32,14 @@
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.9.8
+ * babel-version = 0.10.4
  */
 
 #ifndef included_sidl_SIDLException_h
 #define included_sidl_SIDLException_h
 
 /**
- * Symbol "sidl.SIDLException" (version 0.9.0)
+ * Symbol "sidl.SIDLException" (version 0.9.3)
  * 
  * <code>SIDLException</code> provides the basic functionality of the
  * <code>BaseException</code> interface for getting and setting error
@@ -63,6 +63,12 @@ typedef struct sidl_SIDLException__object* sidl_SIDLException;
 #include "sidl_ClassInfo.h"
 #endif
 
+#ifndef included_sidl_io_Serializer_h
+#include "sidl_io_Serializer.h"
+#endif
+#ifndef included_sidl_io_Deserializer_h
+#include "sidl_io_Deserializer.h"
+#endif
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -70,9 +76,20 @@ extern "C" {
 /**
  * Constructor function for the class.
  */
-sidl_SIDLException
+struct sidl_SIDLException__object*
 sidl_SIDLException__create(void);
 
+/**
+ * RMI constructor function for the class.
+ */
+sidl_SIDLException
+sidl_SIDLException__createRemote(const char *, sidl_BaseInterface *_ex);
+
+/**
+ * RMI connector function for the class.
+ */
+sidl_SIDLException
+sidl_SIDLException__connect(const char *, sidl_BaseInterface *_ex);
 /**
  * <p>
  * Add one to the intrinsic reference count in the underlying object.
@@ -89,7 +106,7 @@ sidl_SIDLException__create(void);
  */
 void
 sidl_SIDLException_addRef(
-  /*in*/ sidl_SIDLException self);
+  /* in */ sidl_SIDLException self);
 
 /**
  * Decrease by one the intrinsic reference count in the underlying
@@ -100,7 +117,7 @@ sidl_SIDLException_addRef(
  */
 void
 sidl_SIDLException_deleteRef(
-  /*in*/ sidl_SIDLException self);
+  /* in */ sidl_SIDLException self);
 
 /**
  * Return true if and only if <code>obj</code> refers to the same
@@ -108,8 +125,8 @@ sidl_SIDLException_deleteRef(
  */
 sidl_bool
 sidl_SIDLException_isSame(
-  /*in*/ sidl_SIDLException self,
-  /*in*/ sidl_BaseInterface iobj);
+  /* in */ sidl_SIDLException self,
+  /* in */ sidl_BaseInterface iobj);
 
 /**
  * Check whether the object can support the specified interface or
@@ -122,8 +139,8 @@ sidl_SIDLException_isSame(
  */
 sidl_BaseInterface
 sidl_SIDLException_queryInt(
-  /*in*/ sidl_SIDLException self,
-  /*in*/ const char* name);
+  /* in */ sidl_SIDLException self,
+  /* in */ const char* name);
 
 /**
  * Return whether this object is an instance of the specified type.
@@ -133,30 +150,30 @@ sidl_SIDLException_queryInt(
  */
 sidl_bool
 sidl_SIDLException_isType(
-  /*in*/ sidl_SIDLException self,
-  /*in*/ const char* name);
+  /* in */ sidl_SIDLException self,
+  /* in */ const char* name);
 
 /**
  * Return the meta-data about the class implementing this interface.
  */
 sidl_ClassInfo
 sidl_SIDLException_getClassInfo(
-  /*in*/ sidl_SIDLException self);
+  /* in */ sidl_SIDLException self);
 
 /**
  * Return the message associated with the exception.
  */
 char*
 sidl_SIDLException_getNote(
-  /*in*/ sidl_SIDLException self);
+  /* in */ sidl_SIDLException self);
 
 /**
  * Set the message associated with the exception.
  */
 void
 sidl_SIDLException_setNote(
-  /*in*/ sidl_SIDLException self,
-  /*in*/ const char* message);
+  /* in */ sidl_SIDLException self,
+  /* in */ const char* message);
 
 /**
  * Returns formatted string containing the concatenation of all 
@@ -164,15 +181,15 @@ sidl_SIDLException_setNote(
  */
 char*
 sidl_SIDLException_getTrace(
-  /*in*/ sidl_SIDLException self);
+  /* in */ sidl_SIDLException self);
 
 /**
  * Adds a stringified entry/line to the stack trace.
  */
 void
 sidl_SIDLException_addLine(
-  /*in*/ sidl_SIDLException self,
-  /*in*/ const char* traceline);
+  /* in */ sidl_SIDLException self,
+  /* in */ const char* traceline);
 
 /**
  * Formats and adds an entry to the stack trace based on the 
@@ -180,15 +197,15 @@ sidl_SIDLException_addLine(
  */
 void
 sidl_SIDLException_add(
-  /*in*/ sidl_SIDLException self,
-  /*in*/ const char* filename,
-  /*in*/ int32_t lineno,
-  /*in*/ const char* methodname);
+  /* in */ sidl_SIDLException self,
+  /* in */ const char* filename,
+  /* in */ int32_t lineno,
+  /* in */ const char* methodname);
 
 /**
  * Cast method for interface and class type conversions.
  */
-sidl_SIDLException
+struct sidl_SIDLException__object*
 sidl_SIDLException__cast(
   void* obj);
 
@@ -200,6 +217,29 @@ sidl_SIDLException__cast2(
   void* obj,
   const char* type);
 
+/**
+ * Select and execute a method by name
+ */
+void
+sidl_SIDLException__exec(
+  /* in */ sidl_SIDLException self,
+  /* in */ const char* methodName,
+  /* in */ sidl_io_Deserializer inArgs,
+  /* in */ sidl_io_Serializer outArgs);
+/**
+ * static Exec method for reflexity.
+ */
+void
+sidl_SIDLException__sexec(
+  /* in */ const char* methodName,
+  /* in */ sidl_io_Deserializer inArgs,
+  /* in */ sidl_io_Serializer outArgs);
+/**
+ * Get the URL of the Implementation of this object (for RMI)
+ */
+char*
+sidl_SIDLException__getURL(
+  /* in */ sidl_SIDLException self);
 /**
  * Create a contiguous array of the given dimension with specified
  * index bounds in column-major order. This array

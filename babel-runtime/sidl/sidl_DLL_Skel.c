@@ -1,8 +1,8 @@
 /*
  * File:          sidl_DLL_Skel.c
- * Symbol:        sidl.DLL-v0.9.0
+ * Symbol:        sidl.DLL-v0.9.3
  * Symbol Type:   class
- * Babel Version: 0.9.8
+ * Babel Version: 0.10.4
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Server-side glue code for sidl.DLL
@@ -32,46 +32,88 @@
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.9.8
+ * babel-version = 0.10.4
  */
 
 #include "sidl_DLL_IOR.h"
 #include "sidl_DLL.h"
 #include <stddef.h>
 
-extern void
+extern
+void
+impl_sidl_DLL__load(
+  void);
+
+extern
+void
 impl_sidl_DLL__ctor(
-  sidl_DLL);
+  /* in */ sidl_DLL self);
 
-extern void
+extern
+void
 impl_sidl_DLL__dtor(
-  sidl_DLL);
+  /* in */ sidl_DLL self);
 
-extern sidl_bool
+extern struct sidl_DLL__object* impl_sidl_DLL_fconnect_sidl_DLL(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_sidl_DLL_fgetURL_sidl_DLL(struct sidl_DLL__object* obj);
+extern struct sidl_ClassInfo__object* 
+  impl_sidl_DLL_fconnect_sidl_ClassInfo(char* url, sidl_BaseInterface *_ex);
+extern char* impl_sidl_DLL_fgetURL_sidl_ClassInfo(struct 
+  sidl_ClassInfo__object* obj);
+extern struct sidl_BaseInterface__object* 
+  impl_sidl_DLL_fconnect_sidl_BaseInterface(char* url, sidl_BaseInterface *_ex);
+extern char* impl_sidl_DLL_fgetURL_sidl_BaseInterface(struct 
+  sidl_BaseInterface__object* obj);
+extern struct sidl_BaseClass__object* 
+  impl_sidl_DLL_fconnect_sidl_BaseClass(char* url, sidl_BaseInterface *_ex);
+extern char* impl_sidl_DLL_fgetURL_sidl_BaseClass(struct 
+  sidl_BaseClass__object* obj);
+extern
+sidl_bool
 impl_sidl_DLL_loadLibrary(
-  sidl_DLL,
-  const char*,
-  sidl_bool,
-  sidl_bool);
+  /* in */ sidl_DLL self,
+  /* in */ const char* uri,
+  /* in */ sidl_bool loadGlobally,
+  /* in */ sidl_bool loadLazy);
 
-extern char*
+extern
+char*
 impl_sidl_DLL_getName(
-  sidl_DLL);
+  /* in */ sidl_DLL self);
 
-extern void
+extern
+void
 impl_sidl_DLL_unloadLibrary(
-  sidl_DLL);
+  /* in */ sidl_DLL self);
 
-extern void*
+extern
+void*
 impl_sidl_DLL_lookupSymbol(
-  sidl_DLL,
-  const char*);
+  /* in */ sidl_DLL self,
+  /* in */ const char* linker_name);
 
-extern sidl_BaseClass
+extern
+sidl_BaseClass
 impl_sidl_DLL_createClass(
-  sidl_DLL,
-  const char*);
+  /* in */ sidl_DLL self,
+  /* in */ const char* sidl_name);
 
+extern struct sidl_DLL__object* impl_sidl_DLL_fconnect_sidl_DLL(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_sidl_DLL_fgetURL_sidl_DLL(struct sidl_DLL__object* obj);
+extern struct sidl_ClassInfo__object* 
+  impl_sidl_DLL_fconnect_sidl_ClassInfo(char* url, sidl_BaseInterface *_ex);
+extern char* impl_sidl_DLL_fgetURL_sidl_ClassInfo(struct 
+  sidl_ClassInfo__object* obj);
+extern struct sidl_BaseInterface__object* 
+  impl_sidl_DLL_fconnect_sidl_BaseInterface(char* url, sidl_BaseInterface *_ex);
+extern char* impl_sidl_DLL_fgetURL_sidl_BaseInterface(struct 
+  sidl_BaseInterface__object* obj);
+extern struct sidl_BaseClass__object* 
+  impl_sidl_DLL_fconnect_sidl_BaseClass(char* url, sidl_BaseInterface *_ex);
+extern char* impl_sidl_DLL_fgetURL_sidl_BaseClass(struct 
+  sidl_BaseClass__object* obj);
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -86,10 +128,58 @@ sidl_DLL__set_epv(struct sidl_DLL__epv *epv)
   epv->f_unloadLibrary = impl_sidl_DLL_unloadLibrary;
   epv->f_lookupSymbol = impl_sidl_DLL_lookupSymbol;
   epv->f_createClass = impl_sidl_DLL_createClass;
+
 }
 #ifdef __cplusplus
 }
 #endif
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+void sidl_DLL__call_load(void) { 
+  impl_sidl_DLL__load();
+}
+struct sidl_DLL__object* skel_sidl_DLL_fconnect_sidl_DLL(char* url,
+  sidl_BaseInterface *_ex) { 
+  return impl_sidl_DLL_fconnect_sidl_DLL(url, _ex);
+}
+
+char* skel_sidl_DLL_fgetURL_sidl_DLL(struct sidl_DLL__object* obj) { 
+  return impl_sidl_DLL_fgetURL_sidl_DLL(obj);
+}
+
+struct sidl_ClassInfo__object* skel_sidl_DLL_fconnect_sidl_ClassInfo(char* url,
+  sidl_BaseInterface *_ex) { 
+  return impl_sidl_DLL_fconnect_sidl_ClassInfo(url, _ex);
+}
+
+char* skel_sidl_DLL_fgetURL_sidl_ClassInfo(struct sidl_ClassInfo__object* obj) 
+  { 
+  return impl_sidl_DLL_fgetURL_sidl_ClassInfo(obj);
+}
+
+struct sidl_BaseInterface__object* 
+  skel_sidl_DLL_fconnect_sidl_BaseInterface(char* url,
+  sidl_BaseInterface *_ex) { 
+  return impl_sidl_DLL_fconnect_sidl_BaseInterface(url, _ex);
+}
+
+char* skel_sidl_DLL_fgetURL_sidl_BaseInterface(struct 
+  sidl_BaseInterface__object* obj) { 
+  return impl_sidl_DLL_fgetURL_sidl_BaseInterface(obj);
+}
+
+struct sidl_BaseClass__object* skel_sidl_DLL_fconnect_sidl_BaseClass(char* url,
+  sidl_BaseInterface *_ex) { 
+  return impl_sidl_DLL_fconnect_sidl_BaseClass(url, _ex);
+}
+
+char* skel_sidl_DLL_fgetURL_sidl_BaseClass(struct sidl_BaseClass__object* obj) 
+  { 
+  return impl_sidl_DLL_fgetURL_sidl_BaseClass(obj);
+}
 
 struct sidl_DLL__data*
 sidl_DLL__get_data(sidl_DLL self)
@@ -105,3 +195,6 @@ void sidl_DLL__set_data(
     self->d_data = data;
   }
 }
+#ifdef __cplusplus
+}
+#endif

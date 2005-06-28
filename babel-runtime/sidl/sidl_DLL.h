@@ -1,8 +1,8 @@
 /*
  * File:          sidl_DLL.h
- * Symbol:        sidl.DLL-v0.9.0
+ * Symbol:        sidl.DLL-v0.9.3
  * Symbol Type:   class
- * Babel Version: 0.9.8
+ * Babel Version: 0.10.4
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Client-side glue code for sidl.DLL
@@ -32,14 +32,14 @@
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.9.8
+ * babel-version = 0.10.4
  */
 
 #ifndef included_sidl_DLL_h
 #define included_sidl_DLL_h
 
 /**
- * Symbol "sidl.DLL" (version 0.9.0)
+ * Symbol "sidl.DLL" (version 0.9.3)
  * 
  * The <code>DLL</code> class encapsulates access to a single
  * dynamically linked library.  DLLs are loaded at run-time using
@@ -69,6 +69,12 @@ typedef struct sidl_DLL__object* sidl_DLL;
 #include "sidl_ClassInfo.h"
 #endif
 
+#ifndef included_sidl_io_Serializer_h
+#include "sidl_io_Serializer.h"
+#endif
+#ifndef included_sidl_io_Deserializer_h
+#include "sidl_io_Deserializer.h"
+#endif
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -76,9 +82,20 @@ extern "C" {
 /**
  * Constructor function for the class.
  */
-sidl_DLL
+struct sidl_DLL__object*
 sidl_DLL__create(void);
 
+/**
+ * RMI constructor function for the class.
+ */
+sidl_DLL
+sidl_DLL__createRemote(const char *, sidl_BaseInterface *_ex);
+
+/**
+ * RMI connector function for the class.
+ */
+sidl_DLL
+sidl_DLL__connect(const char *, sidl_BaseInterface *_ex);
 /**
  * <p>
  * Add one to the intrinsic reference count in the underlying object.
@@ -95,7 +112,7 @@ sidl_DLL__create(void);
  */
 void
 sidl_DLL_addRef(
-  /*in*/ sidl_DLL self);
+  /* in */ sidl_DLL self);
 
 /**
  * Decrease by one the intrinsic reference count in the underlying
@@ -106,7 +123,7 @@ sidl_DLL_addRef(
  */
 void
 sidl_DLL_deleteRef(
-  /*in*/ sidl_DLL self);
+  /* in */ sidl_DLL self);
 
 /**
  * Return true if and only if <code>obj</code> refers to the same
@@ -114,8 +131,8 @@ sidl_DLL_deleteRef(
  */
 sidl_bool
 sidl_DLL_isSame(
-  /*in*/ sidl_DLL self,
-  /*in*/ sidl_BaseInterface iobj);
+  /* in */ sidl_DLL self,
+  /* in */ sidl_BaseInterface iobj);
 
 /**
  * Check whether the object can support the specified interface or
@@ -128,8 +145,8 @@ sidl_DLL_isSame(
  */
 sidl_BaseInterface
 sidl_DLL_queryInt(
-  /*in*/ sidl_DLL self,
-  /*in*/ const char* name);
+  /* in */ sidl_DLL self,
+  /* in */ const char* name);
 
 /**
  * Return whether this object is an instance of the specified type.
@@ -139,15 +156,15 @@ sidl_DLL_queryInt(
  */
 sidl_bool
 sidl_DLL_isType(
-  /*in*/ sidl_DLL self,
-  /*in*/ const char* name);
+  /* in */ sidl_DLL self,
+  /* in */ const char* name);
 
 /**
  * Return the meta-data about the class implementing this interface.
  */
 sidl_ClassInfo
 sidl_DLL_getClassInfo(
-  /*in*/ sidl_DLL self);
+  /* in */ sidl_DLL self);
 
 /**
  * Load a dynamic link library using the specified URI.  The
@@ -184,10 +201,10 @@ sidl_DLL_getClassInfo(
  */
 sidl_bool
 sidl_DLL_loadLibrary(
-  /*in*/ sidl_DLL self,
-  /*in*/ const char* uri,
-  /*in*/ sidl_bool loadGlobally,
-  /*in*/ sidl_bool loadLazy);
+  /* in */ sidl_DLL self,
+  /* in */ const char* uri,
+  /* in */ sidl_bool loadGlobally,
+  /* in */ sidl_bool loadLazy);
 
 /**
  * Get the library name.  This is the name used to load the
@@ -196,7 +213,7 @@ sidl_DLL_loadLibrary(
  */
 char*
 sidl_DLL_getName(
-  /*in*/ sidl_DLL self);
+  /* in */ sidl_DLL self);
 
 /**
  * Unload the dynamic link library.  The library may no longer
@@ -206,7 +223,7 @@ sidl_DLL_getName(
  */
 void
 sidl_DLL_unloadLibrary(
-  /*in*/ sidl_DLL self);
+  /* in */ sidl_DLL self);
 
 /**
  * Lookup a symbol from the DLL and return the associated pointer.
@@ -214,8 +231,8 @@ sidl_DLL_unloadLibrary(
  */
 void*
 sidl_DLL_lookupSymbol(
-  /*in*/ sidl_DLL self,
-  /*in*/ const char* linker_name);
+  /* in */ sidl_DLL self,
+  /* in */ const char* linker_name);
 
 /**
  * Create an instance of the sidl class.  If the class constructor
@@ -223,13 +240,13 @@ sidl_DLL_lookupSymbol(
  */
 sidl_BaseClass
 sidl_DLL_createClass(
-  /*in*/ sidl_DLL self,
-  /*in*/ const char* sidl_name);
+  /* in */ sidl_DLL self,
+  /* in */ const char* sidl_name);
 
 /**
  * Cast method for interface and class type conversions.
  */
-sidl_DLL
+struct sidl_DLL__object*
 sidl_DLL__cast(
   void* obj);
 
@@ -241,6 +258,29 @@ sidl_DLL__cast2(
   void* obj,
   const char* type);
 
+/**
+ * Select and execute a method by name
+ */
+void
+sidl_DLL__exec(
+  /* in */ sidl_DLL self,
+  /* in */ const char* methodName,
+  /* in */ sidl_io_Deserializer inArgs,
+  /* in */ sidl_io_Serializer outArgs);
+/**
+ * static Exec method for reflexity.
+ */
+void
+sidl_DLL__sexec(
+  /* in */ const char* methodName,
+  /* in */ sidl_io_Deserializer inArgs,
+  /* in */ sidl_io_Serializer outArgs);
+/**
+ * Get the URL of the Implementation of this object (for RMI)
+ */
+char*
+sidl_DLL__getURL(
+  /* in */ sidl_DLL self);
 /**
  * Create a contiguous array of the given dimension with specified
  * index bounds in column-major order. This array

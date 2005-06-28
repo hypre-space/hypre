@@ -1,8 +1,8 @@
 /*
  * File:          sidl_Resolve_IOR.h
- * Symbol:        sidl.Resolve-v0.9.0
+ * Symbol:        sidl.Resolve-v0.9.3
  * Symbol Type:   enumeration
- * Babel Version: 0.9.8
+ * Babel Version: 0.10.4
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Intermediate Object Representation for sidl.Resolve
@@ -32,7 +32,7 @@
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.9.8
+ * babel-version = 0.10.4
  */
 
 #ifndef included_sidl_Resolve_IOR_h
@@ -46,7 +46,7 @@ extern "C" {
 #endif
 
 /*
- * Symbol "sidl.Resolve" (version 0.9.0)
+ * Symbol "sidl.Resolve" (version 0.9.3)
  * 
  * When loading a dynmaically linked library, there are three
  * settings: LAZY, NOW, SCLRESOLVE

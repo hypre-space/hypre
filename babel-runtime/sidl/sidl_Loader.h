@@ -1,8 +1,8 @@
 /*
  * File:          sidl_Loader.h
- * Symbol:        sidl.Loader-v0.9.0
+ * Symbol:        sidl.Loader-v0.9.3
  * Symbol Type:   class
- * Babel Version: 0.9.8
+ * Babel Version: 0.10.4
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Client-side glue code for sidl.Loader
@@ -32,21 +32,26 @@
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.9.8
+ * babel-version = 0.10.4
  */
 
 #ifndef included_sidl_Loader_h
 #define included_sidl_Loader_h
 
 /**
- * Symbol "sidl.Loader" (version 0.9.0)
+ * Symbol "sidl.Loader" (version 0.9.3)
  * 
  * Class <code>Loader</code> manages dyanamic loading and symbol name
  * resolution for the sidl runtime system.  The <code>Loader</code> class
  * manages a library search path and keeps a record of all libraries
  * loaded through this interface, including the initial "global" symbols
- * in the main program.  Unless explicitly set, the search path is taken
- * from the environment variable SIDL_DLL_PATH, which is a semi-colon
+ * in the main program.
+ * 
+ * Unless explicitly set, the <code>Loader</code> uses the default
+ * <code>sidl.Finder</code> implemented in <code>sidl.DFinder</code>.
+ * This class searches the filesystem for <code>.scl</code> files when
+ * trying to find a class. The initial path is taken from the
+ * environment variable SIDL_DLL_PATH, which is a semi-colon
  * separated sequence of URIs as described in class <code>DLL</code>.
  */
 struct sidl_Loader__object;
@@ -69,6 +74,9 @@ typedef struct sidl_Loader__object* sidl_Loader;
 #ifndef included_sidl_DLL_h
 #include "sidl_DLL.h"
 #endif
+#ifndef included_sidl_Finder_h
+#include "sidl_Finder.h"
+#endif
 #ifndef included_sidl_Resolve_h
 #include "sidl_Resolve.h"
 #endif
@@ -76,6 +84,12 @@ typedef struct sidl_Loader__object* sidl_Loader;
 #include "sidl_Scope.h"
 #endif
 
+#ifndef included_sidl_io_Serializer_h
+#include "sidl_io_Serializer.h"
+#endif
+#ifndef included_sidl_io_Deserializer_h
+#include "sidl_io_Deserializer.h"
+#endif
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -83,9 +97,20 @@ extern "C" {
 /**
  * Constructor function for the class.
  */
-sidl_Loader
+struct sidl_Loader__object*
 sidl_Loader__create(void);
 
+/**
+ * RMI constructor function for the class.
+ */
+sidl_Loader
+sidl_Loader__createRemote(const char *, sidl_BaseInterface *_ex);
+
+/**
+ * RMI connector function for the class.
+ */
+sidl_Loader
+sidl_Loader__connect(const char *, sidl_BaseInterface *_ex);
 /**
  * <p>
  * Add one to the intrinsic reference count in the underlying object.
@@ -102,7 +127,7 @@ sidl_Loader__create(void);
  */
 void
 sidl_Loader_addRef(
-  /*in*/ sidl_Loader self);
+  /* in */ sidl_Loader self);
 
 /**
  * Decrease by one the intrinsic reference count in the underlying
@@ -113,7 +138,7 @@ sidl_Loader_addRef(
  */
 void
 sidl_Loader_deleteRef(
-  /*in*/ sidl_Loader self);
+  /* in */ sidl_Loader self);
 
 /**
  * Return true if and only if <code>obj</code> refers to the same
@@ -121,8 +146,8 @@ sidl_Loader_deleteRef(
  */
 sidl_bool
 sidl_Loader_isSame(
-  /*in*/ sidl_Loader self,
-  /*in*/ sidl_BaseInterface iobj);
+  /* in */ sidl_Loader self,
+  /* in */ sidl_BaseInterface iobj);
 
 /**
  * Check whether the object can support the specified interface or
@@ -135,8 +160,8 @@ sidl_Loader_isSame(
  */
 sidl_BaseInterface
 sidl_Loader_queryInt(
-  /*in*/ sidl_Loader self,
-  /*in*/ const char* name);
+  /* in */ sidl_Loader self,
+  /* in */ const char* name);
 
 /**
  * Return whether this object is an instance of the specified type.
@@ -146,43 +171,15 @@ sidl_Loader_queryInt(
  */
 sidl_bool
 sidl_Loader_isType(
-  /*in*/ sidl_Loader self,
-  /*in*/ const char* name);
+  /* in */ sidl_Loader self,
+  /* in */ const char* name);
 
 /**
  * Return the meta-data about the class implementing this interface.
  */
 sidl_ClassInfo
 sidl_Loader_getClassInfo(
-  /*in*/ sidl_Loader self);
-
-/**
- * Set the search path, which is a semi-colon separated sequence of
- * URIs as described in class <code>DLL</code>.  This method will
- * invalidate any existing search path.
- */
-void
-sidl_Loader_setSearchPath(
-  /*in*/ const char* path_name);
-
-/**
- * Return the current search path.  If the search path has not been
- * set, then the search path will be taken from environment variable
- * SIDL_DLL_PATH.
- */
-char*
-sidl_Loader_getSearchPath(
-  void);
-
-/**
- * Append the specified path fragment to the beginning of the
- * current search path.  If the search path has not yet been set
- * by a call to <code>setSearchPath</code>, then this fragment will
- * be appended to the path in environment variable SIDL_DLL_PATH.
- */
-void
-sidl_Loader_addSearchPath(
-  /*in*/ const char* path_fragment);
+  /* in */ sidl_Loader self);
 
 /**
  * Load the specified library if it has not already been loaded.
@@ -209,9 +206,9 @@ sidl_Loader_addSearchPath(
  */
 sidl_DLL
 sidl_Loader_loadLibrary(
-  /*in*/ const char* uri,
-  /*in*/ sidl_bool loadGlobally,
-  /*in*/ sidl_bool loadLazy);
+  /* in */ const char* uri,
+  /* in */ sidl_bool loadGlobally,
+  /* in */ sidl_bool loadLazy);
 
 /**
  * Append the specified DLL to the beginning of the list of already
@@ -219,7 +216,7 @@ sidl_Loader_loadLibrary(
  */
 void
 sidl_Loader_addDLL(
-  /*in*/ sidl_DLL dll);
+  /* in */ sidl_DLL dll);
 
 /**
  * Unload all dynamic link libraries.  The library may no longer
@@ -236,6 +233,11 @@ sidl_Loader_unloadLibraries(
  * class. This method searches SCL files in the search path looking
  * for a shared library that contains the client-side or IOR
  * for a particular sidl class.
+ * 
+ * This call is implemented by calling the current
+ * <code>Finder</code>. The default finder searches the local
+ * file system for <code>.scl</code> files to locate the
+ * target class/interface.
  * 
  * @param sidl_name  the fully qualified (long) name of the
  *                   class/interface to be found. Package names
@@ -258,15 +260,70 @@ sidl_Loader_unloadLibraries(
  */
 sidl_DLL
 sidl_Loader_findLibrary(
-  /*in*/ const char* sidl_name,
-  /*in*/ const char* target,
-  /*in*/ enum sidl_Scope__enum lScope,
-  /*in*/ enum sidl_Resolve__enum lResolve);
+  /* in */ const char* sidl_name,
+  /* in */ const char* target,
+  /* in */ enum sidl_Scope__enum lScope,
+  /* in */ enum sidl_Resolve__enum lResolve);
+
+/**
+ * Set the search path, which is a semi-colon separated sequence of
+ * URIs as described in class <code>DLL</code>.  This method will
+ * invalidate any existing search path.
+ * 
+ * This updates the search path in the current <code>Finder</code>.
+ */
+void
+sidl_Loader_setSearchPath(
+  /* in */ const char* path_name);
+
+/**
+ * Return the current search path.  The default
+ * <code>Finder</code> initializes the search path
+ * from environment variable SIDL_DLL_PATH.
+ * 
+ */
+char*
+sidl_Loader_getSearchPath(
+  void);
+
+/**
+ * Append the specified path fragment to the beginning of the
+ * current search path.  This method operates on the Loader's
+ * current <code>Finder</code>. This will add a path to the
+ * current search path. Normally, the search path is initialized
+ * from the SIDL_DLL_PATH environment variable.
+ */
+void
+sidl_Loader_addSearchPath(
+  /* in */ const char* path_fragment);
+
+/**
+ * This method sets the <code>Finder</code> that
+ * <code>Loader</code> will use to find DLLs.  If no
+ * <code>Finder</code> is set or if NULL is passed in, the Default
+ * Finder <code>DFinder</code> will be used.
+ * 
+ * Future calls to <code>findLibrary</code>,
+ * <code>addSearchPath</code>, <code>getSearchPath</code>, and
+ * <code>setSearchPath</code> are deligated to the
+ * <code>Finder</code> set here.
+ */
+void
+sidl_Loader_setFinder(
+  /* in */ sidl_Finder f);
+
+/**
+ * This method gets the <code>Finder</code> that <code>Loader</code>
+ * uses to find DLLs.  
+ */
+sidl_Finder
+sidl_Loader_getFinder(
+  void);
 
 /**
  * Cast method for interface and class type conversions.
  */
-sidl_Loader
+struct sidl_Loader__object*
 sidl_Loader__cast(
   void* obj);
 
@@ -278,6 +335,29 @@ sidl_Loader__cast2(
   void* obj,
   const char* type);
 
+/**
+ * Select and execute a method by name
+ */
+void
+sidl_Loader__exec(
+  /* in */ sidl_Loader self,
+  /* in */ const char* methodName,
+  /* in */ sidl_io_Deserializer inArgs,
+  /* in */ sidl_io_Serializer outArgs);
+/**
+ * static Exec method for reflexity.
+ */
+void
+sidl_Loader__sexec(
+  /* in */ const char* methodName,
+  /* in */ sidl_io_Deserializer inArgs,
+  /* in */ sidl_io_Serializer outArgs);
+/**
+ * Get the URL of the Implementation of this object (for RMI)
+ */
+char*
+sidl_Loader__getURL(
+  /* in */ sidl_Loader self);
 /**
  * Create a contiguous array of the given dimension with specified
  * index bounds in column-major order. This array

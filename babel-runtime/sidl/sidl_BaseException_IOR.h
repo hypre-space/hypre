@@ -1,8 +1,8 @@
 /*
  * File:          sidl_BaseException_IOR.h
- * Symbol:        sidl.BaseException-v0.9.0
+ * Symbol:        sidl.BaseException-v0.9.3
  * Symbol Type:   interface
- * Babel Version: 0.9.8
+ * Babel Version: 0.10.4
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Intermediate Object Representation for sidl.BaseException
@@ -32,7 +32,7 @@
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.9.8
+ * babel-version = 0.10.4
  */
 
 #ifndef included_sidl_BaseException_IOR_h
@@ -46,7 +46,7 @@ extern "C" {
 #endif
 
 /*
- * Symbol "sidl.BaseException" (version 0.9.0)
+ * Symbol "sidl.BaseException" (version 0.9.3)
  * 
  * Every exception implements <code>BaseException</code>. This interface
  * declares the basic functionality to get and set error messages and stack
@@ -56,9 +56,6 @@ extern "C" {
 struct sidl_BaseException__array;
 struct sidl_BaseException__object;
 
-extern struct sidl_BaseException__object*
-sidl_BaseException__remote(const char *url);
-
 /*
  * Forward references for external classes and interfaces.
  */
@@ -67,6 +64,10 @@ struct sidl_BaseInterface__array;
 struct sidl_BaseInterface__object;
 struct sidl_ClassInfo__array;
 struct sidl_ClassInfo__object;
+struct sidl_io_Deserializer__array;
+struct sidl_io_Deserializer__object;
+struct sidl_io_Serializer__array;
+struct sidl_io_Serializer__object;
 
 /*
  * Declare the method entry point vector.
@@ -75,42 +76,49 @@ struct sidl_ClassInfo__object;
 struct sidl_BaseException__epv {
   /* Implicit builtin methods */
   void* (*f__cast)(
-    void* self,
-    const char* name);
+    /* in */ void* self,
+    /* in */ const char* name);
   void (*f__delete)(
-    void* self);
-  /* Methods introduced in sidl.BaseInterface-v0.9.0 */
+    /* in */ void* self);
+  void (*f__exec)(
+    /* in */ void* self,
+    /* in */ const char* methodName,
+    /* in */ struct sidl_io_Deserializer__object* inArgs,
+    /* in */ struct sidl_io_Serializer__object* outArgs);
+  char* (*f__getURL)(
+    /* in */ void* self);
+  /* Methods introduced in sidl.BaseInterface-v0.9.3 */
   void (*f_addRef)(
-    void* self);
+    /* in */ void* self);
   void (*f_deleteRef)(
-    void* self);
+    /* in */ void* self);
   sidl_bool (*f_isSame)(
-    void* self,
-    struct sidl_BaseInterface__object* iobj);
+    /* in */ void* self,
+    /* in */ struct sidl_BaseInterface__object* iobj);
   struct sidl_BaseInterface__object* (*f_queryInt)(
-    void* self,
-    const char* name);
+    /* in */ void* self,
+    /* in */ const char* name);
   sidl_bool (*f_isType)(
-    void* self,
-    const char* name);
+    /* in */ void* self,
+    /* in */ const char* name);
   struct sidl_ClassInfo__object* (*f_getClassInfo)(
-    void* self);
-  /* Methods introduced in sidl.BaseException-v0.9.0 */
+    /* in */ void* self);
+  /* Methods introduced in sidl.BaseException-v0.9.3 */
   char* (*f_getNote)(
-    void* self);
+    /* in */ void* self);
   void (*f_setNote)(
-    void* self,
-    const char* message);
+    /* in */ void* self,
+    /* in */ const char* message);
   char* (*f_getTrace)(
-    void* self);
+    /* in */ void* self);
   void (*f_addLine)(
-    void* self,
-    const char* traceline);
+    /* in */ void* self,
+    /* in */ const char* traceline);
   void (*f_add)(
-    void* self,
-    const char* filename,
-    int32_t lineno,
-    const char* methodname);
+    /* in */ void* self,
+    /* in */ const char* filename,
+    /* in */ int32_t lineno,
+    /* in */ const char* methodname);
 };
 
 /*
@@ -121,6 +129,96 @@ struct sidl_BaseException__object {
   struct sidl_BaseException__epv* d_epv;
   void*                           d_object;
 };
+
+/**
+ * 
+ * 
+ * Anonymous class definition
+ * 
+ * 
+ */
+#ifndef included_sidl_BaseException_IOR_h
+#include "sidl_BaseException_IOR.h"
+#endif
+#ifndef included_sidl_BaseInterface_IOR_h
+#include "sidl_BaseInterface_IOR.h"
+#endif
+
+/*
+ * Symbol "sidl._BaseException" (version 1.0)
+ */
+
+struct sidl__BaseException__array;
+struct sidl__BaseException__object;
+
+/*
+ * Declare the method entry point vector.
+ */
+
+struct sidl__BaseException__epv {
+  /* Implicit builtin methods */
+  void* (*f__cast)(
+    /* in */ struct sidl__BaseException__object* self,
+    /* in */ const char* name);
+  void (*f__delete)(
+    /* in */ struct sidl__BaseException__object* self);
+  void (*f__exec)(
+    /* in */ struct sidl__BaseException__object* self,
+    /* in */ const char* methodName,
+    /* in */ struct sidl_io_Deserializer__object* inArgs,
+    /* in */ struct sidl_io_Serializer__object* outArgs);
+  char* (*f__getURL)(
+    /* in */ struct sidl__BaseException__object* self);
+  void (*f__ctor)(
+    /* in */ struct sidl__BaseException__object* self);
+  void (*f__dtor)(
+    /* in */ struct sidl__BaseException__object* self);
+  /* Methods introduced in sidl.BaseInterface-v0.9.3 */
+  void (*f_addRef)(
+    /* in */ struct sidl__BaseException__object* self);
+  void (*f_deleteRef)(
+    /* in */ struct sidl__BaseException__object* self);
+  sidl_bool (*f_isSame)(
+    /* in */ struct sidl__BaseException__object* self,
+    /* in */ struct sidl_BaseInterface__object* iobj);
+  struct sidl_BaseInterface__object* (*f_queryInt)(
+    /* in */ struct sidl__BaseException__object* self,
+    /* in */ const char* name);
+  sidl_bool (*f_isType)(
+    /* in */ struct sidl__BaseException__object* self,
+    /* in */ const char* name);
+  struct sidl_ClassInfo__object* (*f_getClassInfo)(
+    /* in */ struct sidl__BaseException__object* self);
+  /* Methods introduced in sidl.BaseException-v0.9.3 */
+  char* (*f_getNote)(
+    /* in */ struct sidl__BaseException__object* self);
+  void (*f_setNote)(
+    /* in */ struct sidl__BaseException__object* self,
+    /* in */ const char* message);
+  char* (*f_getTrace)(
+    /* in */ struct sidl__BaseException__object* self);
+  void (*f_addLine)(
+    /* in */ struct sidl__BaseException__object* self,
+    /* in */ const char* traceline);
+  void (*f_add)(
+    /* in */ struct sidl__BaseException__object* self,
+    /* in */ const char* filename,
+    /* in */ int32_t lineno,
+    /* in */ const char* methodname);
+  /* Methods introduced in sidl._BaseException-v1.0 */
+};
+
+/*
+ * Define the class object structure.
+ */
+
+struct sidl__BaseException__object {
+  struct sidl_BaseException__object d_sidl_baseexception;
+  struct sidl_BaseInterface__object d_sidl_baseinterface;
+  struct sidl__BaseException__epv*  d_epv;
+  void*                             d_data;
+};
+
 
 #ifdef __cplusplus
 }
