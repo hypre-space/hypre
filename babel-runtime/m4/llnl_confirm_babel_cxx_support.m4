@@ -25,12 +25,11 @@ AC_DEFUN([LLNL_CONFIRM_BABEL_CXX_SUPPORT],[
   fi
 
   AC_ARG_ENABLE([cxx],
-        AC_HELP_STRING([--enable-cxx@<:@=C++@:>@],
-                       [C++ language bindings @<:@default=yes@:>@]),
+        AS_HELP_STRING(--enable-cxx@<:@=C++@:>@,C++ language bindings @<:@default=yes@:>@),
                [enable_cxx="$enableval"],
                [enable_cxx=yes])
   test -z "$enable_cxx" && enable_cxx=yes
-  if test $enable_cxx != no; then
+  if test "$enable_cxx" != no; then
     if test $enable_cxx != yes; then 
       CCC=$enable_cxx
       enable_cxx=yes
@@ -40,6 +39,13 @@ AC_DEFUN([LLNL_CONFIRM_BABEL_CXX_SUPPORT],[
     AC_MSG_ERROR([Sorry, this package cannot work without C++ enabled.])
   fi
   AC_PROG_CXX
+  # confirm that that C++ compiler can compile a trivial file issue146
+  AC_MSG_CHECKING([if C++ compiler works])
+  AC_LANG_PUSH([C++])
+  AC_TRY_COMPILE([],[],AC_MSG_RESULT([yes]),[
+    AC_MSG_RESULT([no])
+    AC_MSG_ERROR([The C++ compiler $CXX fails to compile a trivial program (see config.log)])])
+  AC_LANG_POP([])
 ])
 
 AC_DEFUN([LLNL_CONFIRM_BABEL_CXX_SUPPORT2], [

@@ -1,7 +1,6 @@
 //
 // File:	BaseInterface.java
 // Package:	gov.llnl.sidl
-// Release:	$Name$
 // Revision:	$Revision$
 // Modified:	$Date$
 // Description:	base interface for the sidl Java runtime system

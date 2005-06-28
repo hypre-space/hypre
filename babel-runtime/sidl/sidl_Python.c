@@ -1,6 +1,5 @@
 /*
  * File:        sidl_Python.c
- * Release:     $Name$
  * Revision:    @(#) $Revision$
  * Date:        $Date$
  * Description: Initialize a Python language interpretter
@@ -32,7 +31,6 @@ void sidl_Python_Init(void)
   static const char initName[] = "Py_Initialize";
   static const char finalName[] = "Py_Finalize";
   void (*pyinit)(void);
-  void *handle;
   if (python_notinitialized) {
     dll = sidl_Loader_loadLibrary("main:", TRUE, TRUE);
     if (dll) {

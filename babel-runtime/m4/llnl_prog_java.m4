@@ -50,7 +50,8 @@ dnl
 dnl This is a sample configure.in
 dnl Process this file with autoconf to produce a configure script.
 dnl
-dnl    AC_INIT(UnTag.java)
+dnl    AC_INIT
+dnl    AC_CONFIG_SRCDIR([UnTag.java])
 dnl
 dnl    dnl Checks for programs.
 dnl    AC_CHECK_CLASSPATH
@@ -61,7 +62,8 @@ dnl    dnl Checks for classes
 dnl    AC_CHECK_RQRD_CLASS(org.xml.sax.Parser)
 dnl    AC_CHECK_RQRD_CLASS(com.jclark.xml.sax.Driver)
 dnl
-dnl    AC_OUTPUT(Makefile)
+dnl    AC_CONFIG_FILES([Makefile])
+dnl    AC_OUTPUT
 dnl
 dnl @author Stephane Bortzmeyer <bortzmeyer@pasteur.fr>
 dnl @version $Id$
@@ -124,16 +126,16 @@ fi
 if AC_TRY_COMMAND($myjavac $JAVACFLAGS $JAVA_TEST) && test -s $CLASS_TEST; then
         :
 else
-  echo "configure: failed program was:" >&AC_FD_CC
-  cat $JAVA_TEST >&AC_FD_CC
-  AC_MSG_ERROR(The Java compiler $JAVAC failed (see config.log, check the CLASSPATH?))
+  echo "configure: failed program was:" >&AS_MESSAGE_LOG_FD()
+  cat $JAVA_TEST >&AS_MESSAGE_LOG_FD()
+  AC_MSG_ERROR([The Java compiler $JAVAC failed (see config.log, check the CLASSPATH? If set CLASSPATH should have the current directory, '.', in it.)])
 fi
 if AC_TRY_COMMAND($myjava $JAVAFLAGS $TEST) >/dev/null 2>&1; then
   ac_cv_prog_java_works=yes
 else
   ac_cv_prog_java_works=no
-  echo "configure: failed program was:" >&AC_FD_CC
-  cat $JAVA_TEST >&AC_FD_CC
+  echo "configure: failed program was:" >&AS_MESSAGE_LOG_FD()
+  cat $JAVA_TEST >&AS_MESSAGE_LOG_FD()
   AC_MSG_ERROR(The Java VM $JAVA failed (see config.log, check the CLASSPATH?))
 fi
 rm -fr $JAVA_TEST $CLASS_TEST Test.uue

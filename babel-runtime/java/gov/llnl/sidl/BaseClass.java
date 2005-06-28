@@ -1,7 +1,6 @@
 //
 // File:	BaseClass.java
 // Package:	gov.llnl.sidl
-// Release:	$Name$
 // Revision:	$Revision$
 // Modified:	$Date$
 // Description:	base class for the sidl Java runtime system

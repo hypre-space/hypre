@@ -25,6 +25,34 @@ for arg in $foutput; do
         fmain="$arg"
       fi
     ;;
+    -L*)
+      tmp_path="$tmp_path "`echo $arg | sed -e 's/^-L//'`
+      ;;
+    -lfrtbegin) #(gkk) needed for g77
+      found=true
+      fmain="$arg"
+      case $target_os in
+	"darwin7"*)
+	  if test -n "$tmp_path"; then
+	    libname="frtbegin"
+	    for tp in $tmp_path; do
+	      if test -d $tp -a -r $tp; then
+		shortpath=`cd $tp 2>/dev/null && pwd`
+	      else
+		shortpath=$tp
+	      fi
+	      if test -r "$shortpath/lib$libname.a" ; then
+		fmain="$shortpath/lib$libname.a"
+	      elif test -r "$shortpath/lib$libname.so" ; then
+		fmain="$shortpath/lib$libname.so"
+		elif test -r "$shortpath/lib$libname.dylib" ; then
+		fmain="$shortpath/lib$libname.dylib"
+	      fi
+	    done
+	  fi
+	;;
+      esac
+      ;;
   esac
 done
 llnl_lib_fmain="$fmain"

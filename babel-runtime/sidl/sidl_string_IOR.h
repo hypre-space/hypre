@@ -1,7 +1,6 @@
 /*
  * File:        sidl_string_IOR.h
  * Copyright:   (c) 2001-2002 The Regents of the University of California
- * Release:     $Name$
  * Revision:    @(#) $Revision$
  * Date:        $Date$
  * Description: string array declarations and definitions
@@ -46,6 +45,19 @@ struct sidl_string__array *
 sidl_string__array_createRow(int32_t       dimen,
                              const int32_t lower[],
                              const int32_t upper[]);
+
+/**
+ * Initialize the array meta-data for this sidl array from the passed
+ * in pointers. This is a little wierd, but all these pointers must
+ * be allocated, but only upper and c_array actually need to be
+ * initialized.  (We use upper, dim, andc_array to figure out the
+ * correct values for the rest of the data.)
+ * This function initializes the contents of the array to NULL.
+ */
+void
+sidl_string__array_init(const char ** c_array,
+struct sidl_string__array* sidl_array, int32_t dim,
+int32_t lower[], int32_t upper[], int32_t stride[]);
 
 /**
  * Create a dense one-dimensional vector of strings with a lower
@@ -179,6 +191,17 @@ sidl_string__array_addRef(struct sidl_string__array* array);
  */
 void
 sidl_string__array_deleteRef(struct sidl_string__array* array);
+
+/**
+ * Attempt to cast a generic array reference to an string
+ * array. A non-NULL return value indicates that the cast was
+ * successful, and the returned pointer is a valid string
+ * array. A NULL return value indicates that the cast failed.
+ * This function never alters the reference count of array.
+ * 
+ */
+struct sidl_string__array*
+sidl_string__array_cast(struct sidl__array* array);
 
 /**
  * Retrieve element i1 of a one-dimensional array.

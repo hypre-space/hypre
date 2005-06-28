@@ -151,6 +151,7 @@ while test $[@%:@] != 1; do
           # Ignore these flags.
         -lang* | -lcrt[[012]].o | -lcrtbegin.o | -lc | -lgcc* | -libmil | -LANG:=*)
           ;;
+	-lfrtbegin )  ;; #(gkk) Ignore this one too
         -lkernel32)
           test x"$CYGWIN" != xyes && ac_cv_flibs="$ac_cv_flibs $ac_arg"
           ;;
@@ -193,6 +194,50 @@ case `(uname -sr) 2>/dev/null` in
                         sed -n 's,^.*LD_RUN_PATH *= *\(/[[^ ]]*\).*$,-R\1,p'`
       test "x$ac_ld_run_path" != x &&
         _AC_LINKER_OPTION([$ac_ld_run_path], ac_cv_flibs)
+      ;;
+   "Darwin 7"*)
+      if test -n "$ac_cv_flibs"; then
+	for ac_arg in $ac_cv_flibs; do
+	  case $ac_arg in
+	  -L*)
+	    tmp_path="$tmp_path "`echo $ECHO_N $ac_arg | sed -e 's/^-L//'`
+	    ;;
+	  -lSystem) ;; # ignore this one
+	  -lm)
+	    modified_flibs="$modified_flibs $ac_arg"
+	    ;;
+	  -l*)
+	    found="no"
+	    if test -n "$tmp_path"; then
+	      libname=`echo $ECHO_N $ac_arg | sed -e 's/^-l//'`
+	      for tp in $tmp_path; do
+		if test $found = "no"; then
+		  if test -d $tp -a -r $tp; then
+		    shortpath=`cd $tp 2>/dev/null && pwd`
+		  else
+		    shortpath=$tp
+		  fi
+		  if test -r "$shortpath/lib$libname.a" ; then
+		    modified_flibs="$modified_flibs $shortpath/lib$libname.a"
+		    found="yes"
+		  elif test -r "$shortpath/lib$libname.so" ; then
+		    modified_flibs="$modified_flibs $shortpath/lib$libname.so"
+		    found="yes"
+		  elif test -r "$shortpath/lib$libname.dylib" ; then
+		    modified_flibs="$modified_flibs $shortpath/lib$libname.dylib"
+		    found="yes"
+		  fi
+		fi
+	      done
+	    fi
+	    if test $found = "no"; then
+	      modified_flibs="$modified_flibs $ac_arg"
+	    fi
+	    ;;
+	  esac
+	done
+	ac_cv_flibs="$modified_flibs"
+      fi
       ;;
 esac
 fi # test "x$FLIBS" = "x"

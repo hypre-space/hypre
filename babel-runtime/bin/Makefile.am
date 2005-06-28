@@ -1,7 +1,6 @@
 ##
 ## File:        Makefile.am 
 ## Package:     Babel makefiles
-## Release:     $Name$
 ## Revision:    $Revision$
 ## Modified:    $Date$
 ## Description: automake makefile to build the runtime library

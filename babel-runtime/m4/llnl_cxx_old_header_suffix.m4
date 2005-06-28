@@ -11,13 +11,9 @@ AC_DEFUN([LLNL_CXX_OLD_HEADER_SUFFIX],
 AC_MSG_CHECKING([if ${CXX} requires requires old .h-style header includes])
 AC_CACHE_VAL(llnl_cv_old_cxx_header_suffix,
 [
-AC_LANG_SAVE
-AC_LANG_CPLUSPLUS
-AC_TRY_COMPILE([#include <iostream>],
-[ using namespace std; cout;],
-llnl_cv_old_cxx_header_suffix=no,
-llnl_cv_old_cxx_header_suffix=yes)
-AC_LANG_RESTORE
+AC_LANG_PUSH([C++])
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <iostream>]], [[ using namespace std; cout;]])],[llnl_cv_old_cxx_header_suffix=no],[llnl_cv_old_cxx_header_suffix=yes])
+AC_LANG_POP([])
 ])
 AC_MSG_RESULT($llnl_cv_old_cxx_header_suffix)
 if test "$llnl_cv_old_cxx_header_suffix" = yes; then

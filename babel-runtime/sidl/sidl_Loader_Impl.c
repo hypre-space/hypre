@@ -1,8 +1,8 @@
 /*
  * File:          sidl_Loader_Impl.c
- * Symbol:        sidl.Loader-v0.9.0
+ * Symbol:        sidl.Loader-v0.9.3
  * Symbol Type:   class
- * Babel Version: 0.9.8
+ * Babel Version: 0.10.4
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Server-side implementation for sidl.Loader
@@ -32,7 +32,7 @@
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.9.8
+ * babel-version = 0.10.4
  */
 
 /*
@@ -41,20 +41,24 @@
  */
 
 /*
- * Symbol "sidl.Loader" (version 0.9.0)
+ * Symbol "sidl.Loader" (version 0.9.3)
  * 
  * Class <code>Loader</code> manages dyanamic loading and symbol name
  * resolution for the sidl runtime system.  The <code>Loader</code> class
  * manages a library search path and keeps a record of all libraries
  * loaded through this interface, including the initial "global" symbols
- * in the main program.  Unless explicitly set, the search path is taken
- * from the environment variable SIDL_DLL_PATH, which is a semi-colon
+ * in the main program.
+ * 
+ * Unless explicitly set, the <code>Loader</code> uses the default
+ * <code>sidl.Finder</code> implemented in <code>sidl.DFinder</code>.
+ * This class searches the filesystem for <code>.scl</code> files when
+ * trying to find a class. The initial path is taken from the
+ * environment variable SIDL_DLL_PATH, which is a semi-colon
  * separated sequence of URIs as described in class <code>DLL</code>.
  */
 
 #include "sidl_Loader_Impl.h"
 
-#line 57 "../../../babel/runtime/sidl/sidl_Loader_Impl.c"
 /* DO-NOT-DELETE splicer.begin(sidl.Loader._includes) */
 #include "sidl_DLL.h"
 #include "sidl_String.h"
@@ -66,6 +70,8 @@
 #include <unistd.h>
 #include <stdio.h>
 #include "sidl_search_scl.h"
+#include "sidl_Finder.h"
+#include "sidl_DFinder.h"
 
 #ifndef NULL
 #define NULL 0
@@ -94,23 +100,8 @@ typedef struct DLL_List {
    struct DLL_List* d_next;
 } DLL_List;
 
-static char*     s_search_path = NULL;
 static DLL_List* s_dll_list    = NULL;
-
-/*
- * Initialize the search path if it has not yet been initialized.  The initial
- * search path value is taken from environment variable SIDL_DLL_PATH.
- */
-static char *get_search_path(void)
-{
-  if (!s_search_path) {
-    s_search_path = sidl_String_strdup(getenv("SIDL_DLL_PATH"));
-    if (!s_search_path) {
-      s_search_path = sidl_String_strdup("");
-    }
-  }
-  return s_search_path;
-}
+static sidl_Finder s_finder   = NULL; 
 
 /*
  * Initialize the list of DLLs if it has not yet been initialized.  The initial
@@ -131,158 +122,29 @@ static void initialize_dll_list(void)
   }
 }
 
-/*
- * A simple utility routine to calculate the current working directory.
- * A null is returned if we cannot determine the current working directory.
- */
-static char* util_getCWD(void)
-{
-  char*  cwd  = NULL;
-  size_t size = 64;
-
-  while (TRUE) {
-    char* buf = sidl_String_alloc(size);
-    if (getcwd(buf, size) != NULL) {
-      cwd = buf;
-      break;
-    } else if (errno == ERANGE) {
-      sidl_String_free(buf);
-      size *= 2;
-    } else {
-      sidl_String_free(buf);
-      break;
-    }
-  }
-
-  return cwd;
-}
-
-/*
- * Return whether the specified URI refers to a file.  We assume that any
- * URI that we do not understand points to a file.
- */
-static int is_file_uri(const char* uri)
-{
-  int file = TRUE;
-
-  if (sidl_String_startsWith(uri, "file:")) {
-    file = TRUE;
-  } else if (sidl_String_equals(uri, "main:")) {
-    file = FALSE;
-  } else if (sidl_String_startsWith(uri, "lib:")) {
-    file = FALSE;
-#ifdef HAVE_LIBWWW
-  } else if (sidl_String_startsWith(uri, "ftp:")) {
-    file = FALSE;
-  } else if (sidl_String_startsWith(uri, "http:")) {
-    file = FALSE;
-#endif
-  }
-
-  return file;
-}
-
-/*
- * Search through the list of DLLs to find out whether we have already
- * loaded the specified uri.
- */
-static int already_loaded(const char* uri)
-{
-  DLL_List* head = NULL;
-  int       same = FALSE;
-
-  initialize_dll_list();
-
-  head = s_dll_list;
-  while ((head != NULL) && !same) {
-    char* name = sidl_DLL_getName(head->d_dll);
-    same = sidl_String_equals(uri, name);
-    sidl_String_free(name);
-    head = head->d_next;
-  }
-
-  return same;
-}
-
-/**
- * Find the SCL entry matching a class.
- */
-static 
-struct sidl_scl_entry *
-searchFile(const char            *sidl_name,
-           const char            *target,
-           const char            *scl_file,
-           struct sidl_scl_entry *result)
-{
-  struct sidl_scl_entry *entry;
-  if ((entry = sidl_search_scl(sidl_name, target, scl_file))) {
-    if (result) {
-      sidl_scl_reportDuplicate(sidl_name, entry, result);
-      sidl_destroy_scl(entry);
-    }
-    else {
-      result = entry;
-    }
-  }
-  return result;
-}
-
-
-static
-struct sidl_scl_entry *
-findSCLEntry(const char *sidl_name,
-             const char *target)
-{
-  struct sidl_scl_entry *result=NULL;
-  int len;
-  const char *path = get_search_path(), *next;
-  char *buffer = malloc(strlen(path)+1);
-  while ((next = strchr(path, ';'))) {
-    len = next - path;
-    memcpy(buffer, path, len);
-    buffer[len] = '\0';
-    result = searchFile(sidl_name, target, buffer, result);
-    path = next + 1;
-  }
-  result = searchFile(sidl_name, target, path, result);
-  free(buffer);
-  return result;
-}
-             
-
-static int
-chooseScope(enum sidl_Scope__enum uScope,
-            enum sidl_Scope__enum sScope)
-{
-  return (uScope == sidl_Scope_SCLSCOPE) ?
-    (sScope == sidl_Scope_GLOBAL) :
-    (uScope == sidl_Scope_GLOBAL);
-}
-
-static int
-chooseResolve(enum sidl_Resolve__enum uResolve,
-              enum sidl_Resolve__enum sResolve)
-{
-  return (uResolve == sidl_Resolve_SCLRESOLVE) ?
-    (sResolve == sidl_Resolve_LAZY) :
-    (uResolve == sidl_Resolve_LAZY);
-}
-
-static
-sidl_DLL
-loadLibraryFromSCL(struct sidl_scl_entry *scl,
-                   const char *sidl_name,
-                   enum sidl_Scope__enum   lScope,
-                   enum sidl_Resolve__enum lResolve)
-{
-  return 
-    sidl_Loader_loadLibrary(scl->d_uri,
-                            chooseScope(lScope, scl->d_scope),
-                            chooseResolve(lResolve, scl->d_resolve));
-}
 /* DO-NOT-DELETE splicer.end(sidl.Loader._includes) */
-#line 284 "sidl_Loader_Impl.c"
 
+/*
+ * Static class initializer called exactly once before any user-defined method is dispatched
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_sidl_Loader__load"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+void
+impl_sidl_Loader__load(
+  void)
+{
+  /* DO-NOT-DELETE splicer.begin(sidl.Loader._load) */
+  /*Use our friend the static initilizer to make sure there's always a Finder*/
+  sidl_DFinder temp_find = NULL; 
+  temp_find = sidl_DFinder__create(); 
+  s_finder = sidl_Finder__cast(temp_find); 
+  /* DO-NOT-DELETE splicer.end(sidl.Loader._load) */
+}
 /*
  * Class constructor called when the class is created.
  */
@@ -290,11 +152,13 @@ loadLibraryFromSCL(struct sidl_scl_entry *scl,
 #undef __FUNC__
 #define __FUNC__ "impl_sidl_Loader__ctor"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 void
 impl_sidl_Loader__ctor(
-  /*in*/ sidl_Loader self)
+  /* in */ sidl_Loader self)
 {
-#line 295 "../../../babel/runtime/sidl/sidl_Loader_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidl.Loader._ctor) */
 
   /*
@@ -303,7 +167,6 @@ impl_sidl_Loader__ctor(
    */
 
   /* DO-NOT-DELETE splicer.end(sidl.Loader._ctor) */
-#line 306 "sidl_Loader_Impl.c"
 }
 
 /*
@@ -313,11 +176,13 @@ impl_sidl_Loader__ctor(
 #undef __FUNC__
 #define __FUNC__ "impl_sidl_Loader__dtor"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 void
 impl_sidl_Loader__dtor(
-  /*in*/ sidl_Loader self)
+  /* in */ sidl_Loader self)
 {
-#line 316 "../../../babel/runtime/sidl/sidl_Loader_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidl.Loader._dtor) */
 
   /*
@@ -326,76 +191,6 @@ impl_sidl_Loader__dtor(
    */
 
   /* DO-NOT-DELETE splicer.end(sidl.Loader._dtor) */
-#line 329 "sidl_Loader_Impl.c"
-}
-
-/*
- * Set the search path, which is a semi-colon separated sequence of
- * URIs as described in class <code>DLL</code>.  This method will
- * invalidate any existing search path.
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_sidl_Loader_setSearchPath"
-
-void
-impl_sidl_Loader_setSearchPath(
-  /*in*/ const char* path_name)
-{
-#line 339 "../../../babel/runtime/sidl/sidl_Loader_Impl.c"
-  /* DO-NOT-DELETE splicer.begin(sidl.Loader.setSearchPath) */
-  sidl_String_free(s_search_path);
-  s_search_path = sidl_String_strdup(path_name);
-  if (!s_search_path) {
-    s_search_path = sidl_String_strdup("");
-  }
-  /* DO-NOT-DELETE splicer.end(sidl.Loader.setSearchPath) */
-#line 353 "sidl_Loader_Impl.c"
-}
-
-/*
- * Return the current search path.  If the search path has not been
- * set, then the search path will be taken from environment variable
- * SIDL_DLL_PATH.
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_sidl_Loader_getSearchPath"
-
-char*
-impl_sidl_Loader_getSearchPath(
-void)
-{
-#line 361 "../../../babel/runtime/sidl/sidl_Loader_Impl.c"
-  /* DO-NOT-DELETE splicer.begin(sidl.Loader.getSearchPath) */
-  return sidl_String_strdup(get_search_path());
-  /* DO-NOT-DELETE splicer.end(sidl.Loader.getSearchPath) */
-#line 373 "sidl_Loader_Impl.c"
-}
-
-/*
- * Append the specified path fragment to the beginning of the
- * current search path.  If the search path has not yet been set
- * by a call to <code>setSearchPath</code>, then this fragment will
- * be appended to the path in environment variable SIDL_DLL_PATH.
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_sidl_Loader_addSearchPath"
-
-void
-impl_sidl_Loader_addSearchPath(
-  /*in*/ const char* path_fragment)
-{
-#line 380 "../../../babel/runtime/sidl/sidl_Loader_Impl.c"
-  /* DO-NOT-DELETE splicer.begin(sidl.Loader.addSearchPath) */
-  if (path_fragment) {
-    char* s = sidl_String_concat3(path_fragment, ";", get_search_path());
-    sidl_String_free(s_search_path);
-    s_search_path = s;
-  }
-  /* DO-NOT-DELETE splicer.end(sidl.Loader.addSearchPath) */
-#line 398 "sidl_Loader_Impl.c"
 }
 
 /*
@@ -425,12 +220,15 @@ impl_sidl_Loader_addSearchPath(
 #undef __FUNC__
 #define __FUNC__ "impl_sidl_Loader_loadLibrary"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 sidl_DLL
 impl_sidl_Loader_loadLibrary(
-  /*in*/ const char* uri, /*in*/ sidl_bool loadGlobally,
-    /*in*/ sidl_bool loadLazy)
+  /* in */ const char* uri,
+  /* in */ sidl_bool loadGlobally,
+  /* in */ sidl_bool loadLazy)
 {
-#line 421 "../../../babel/runtime/sidl/sidl_Loader_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidl.Loader.loadLibrary) */
   int ok = FALSE;
   sidl_DLL dll = sidl_DLL__create();
@@ -446,7 +244,6 @@ impl_sidl_Loader_loadLibrary(
     return NULL;
   }
   /* DO-NOT-DELETE splicer.end(sidl.Loader.loadLibrary) */
-#line 449 "sidl_Loader_Impl.c"
 }
 
 /*
@@ -457,11 +254,13 @@ impl_sidl_Loader_loadLibrary(
 #undef __FUNC__
 #define __FUNC__ "impl_sidl_Loader_addDLL"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 void
 impl_sidl_Loader_addDLL(
-  /*in*/ sidl_DLL dll)
+  /* in */ sidl_DLL dll)
 {
-#line 450 "../../../babel/runtime/sidl/sidl_Loader_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidl.Loader.addDLL) */
   if (dll) {
     DLL_List* item = NULL;
@@ -473,7 +272,6 @@ impl_sidl_Loader_addDLL(
     s_dll_list = item;
   }
   /* DO-NOT-DELETE splicer.end(sidl.Loader.addDLL) */
-#line 476 "sidl_Loader_Impl.c"
 }
 
 /*
@@ -486,11 +284,13 @@ impl_sidl_Loader_addDLL(
 #undef __FUNC__
 #define __FUNC__ "impl_sidl_Loader_unloadLibraries"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 void
 impl_sidl_Loader_unloadLibraries(
-void)
+  void)
 {
-#line 477 "../../../babel/runtime/sidl/sidl_Loader_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidl.Loader.unloadLibraries) */
   DLL_List* head = s_dll_list;
 
@@ -503,7 +303,6 @@ void)
 
   s_dll_list = NULL;
   /* DO-NOT-DELETE splicer.end(sidl.Loader.unloadLibraries) */
-#line 506 "sidl_Loader_Impl.c"
 }
 
 /*
@@ -511,6 +310,11 @@ void)
  * class. This method searches SCL files in the search path looking
  * for a shared library that contains the client-side or IOR
  * for a particular sidl class.
+ * 
+ * This call is implemented by calling the current
+ * <code>Finder</code>. The default finder searches the local
+ * file system for <code>.scl</code> files to locate the
+ * target class/interface.
  * 
  * @param sidl_name  the fully qualified (long) name of the
  *                   class/interface to be found. Package names
@@ -535,21 +339,186 @@ void)
 #undef __FUNC__
 #define __FUNC__ "impl_sidl_Loader_findLibrary"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 sidl_DLL
 impl_sidl_Loader_findLibrary(
-  /*in*/ const char* sidl_name, /*in*/ const char* target,
-    /*in*/ enum sidl_Scope__enum lScope,
-    /*in*/ enum sidl_Resolve__enum lResolve)
+  /* in */ const char* sidl_name,
+  /* in */ const char* target,
+  /* in */ enum sidl_Scope__enum lScope,
+  /* in */ enum sidl_Resolve__enum lResolve)
 {
-#line 526 "../../../babel/runtime/sidl/sidl_Loader_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidl.Loader.findLibrary) */
-  sidl_DLL result = NULL;
-  struct sidl_scl_entry *scl = findSCLEntry(sidl_name, target);
-  if (scl) {
-    result = loadLibraryFromSCL(scl, sidl_name, lScope, lResolve);
-    sidl_destroy_scl(scl);
-  }
-  return result;
+  return sidl_Finder_findLibrary(s_finder, sidl_name, target, lScope, lResolve);
   /* DO-NOT-DELETE splicer.end(sidl.Loader.findLibrary) */
-#line 554 "sidl_Loader_Impl.c"
+}
+
+/*
+ * Set the search path, which is a semi-colon separated sequence of
+ * URIs as described in class <code>DLL</code>.  This method will
+ * invalidate any existing search path.
+ * 
+ * This updates the search path in the current <code>Finder</code>.
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_sidl_Loader_setSearchPath"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+void
+impl_sidl_Loader_setSearchPath(
+  /* in */ const char* path_name)
+{
+  /* DO-NOT-DELETE splicer.begin(sidl.Loader.setSearchPath) */
+  sidl_Finder_setSearchPath(s_finder, path_name);
+  /* DO-NOT-DELETE splicer.end(sidl.Loader.setSearchPath) */
+}
+
+/*
+ * Return the current search path.  The default
+ * <code>Finder</code> initializes the search path
+ * from environment variable SIDL_DLL_PATH.
+ * 
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_sidl_Loader_getSearchPath"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+char*
+impl_sidl_Loader_getSearchPath(
+  void)
+{
+  /* DO-NOT-DELETE splicer.begin(sidl.Loader.getSearchPath) */
+  return sidl_Finder_getSearchPath(s_finder);
+  /* DO-NOT-DELETE splicer.end(sidl.Loader.getSearchPath) */
+}
+
+/*
+ * Append the specified path fragment to the beginning of the
+ * current search path.  This method operates on the Loader's
+ * current <code>Finder</code>. This will add a path to the
+ * current search path. Normally, the search path is initialized
+ * from the SIDL_DLL_PATH environment variable.
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_sidl_Loader_addSearchPath"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+void
+impl_sidl_Loader_addSearchPath(
+  /* in */ const char* path_fragment)
+{
+  /* DO-NOT-DELETE splicer.begin(sidl.Loader.addSearchPath) */
+  sidl_Finder_addSearchPath(s_finder, path_fragment);
+  /* DO-NOT-DELETE splicer.end(sidl.Loader.addSearchPath) */
+}
+
+/*
+ * This method sets the <code>Finder</code> that
+ * <code>Loader</code> will use to find DLLs.  If no
+ * <code>Finder</code> is set or if NULL is passed in, the Default
+ * Finder <code>DFinder</code> will be used.
+ * 
+ * Future calls to <code>findLibrary</code>,
+ * <code>addSearchPath</code>, <code>getSearchPath</code>, and
+ * <code>setSearchPath</code> are deligated to the
+ * <code>Finder</code> set here.
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_sidl_Loader_setFinder"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+void
+impl_sidl_Loader_setFinder(
+  /* in */ sidl_Finder f)
+{
+  /* DO-NOT-DELETE splicer.begin(sidl.Loader.setFinder) */
+  sidl_DFinder temp_find = NULL;
+  if(f != NULL)
+    s_finder = f;
+  else {
+    temp_find = sidl_DFinder__create();
+    s_finder = sidl_Finder__cast(temp_find);
+  } 
+  /* DO-NOT-DELETE splicer.end(sidl.Loader.setFinder) */
+}
+
+/*
+ * This method gets the <code>Finder</code> that <code>Loader</code>
+ * uses to find DLLs.  
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_sidl_Loader_getFinder"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+sidl_Finder
+impl_sidl_Loader_getFinder(
+  void)
+{
+  /* DO-NOT-DELETE splicer.begin(sidl.Loader.getFinder) */
+  sidl_Finder_addRef(s_finder);
+  return s_finder;
+  /* DO-NOT-DELETE splicer.end(sidl.Loader.getFinder) */
+}
+/* Babel internal methods, Users should not edit below this line. */
+struct sidl_Finder__object* impl_sidl_Loader_fconnect_sidl_Finder(char* url,
+  sidl_BaseInterface *_ex) {
+  return sidl_Finder__connect(url, _ex);
+}
+char * impl_sidl_Loader_fgetURL_sidl_Finder(struct sidl_Finder__object* obj) {
+  return sidl_Finder__getURL(obj);
+}
+struct sidl_ClassInfo__object* impl_sidl_Loader_fconnect_sidl_ClassInfo(char* 
+  url, sidl_BaseInterface *_ex) {
+  return sidl_ClassInfo__connect(url, _ex);
+}
+char * impl_sidl_Loader_fgetURL_sidl_ClassInfo(struct sidl_ClassInfo__object* 
+  obj) {
+  return sidl_ClassInfo__getURL(obj);
+}
+struct sidl_DLL__object* impl_sidl_Loader_fconnect_sidl_DLL(char* url,
+  sidl_BaseInterface *_ex) {
+  return sidl_DLL__connect(url, _ex);
+}
+char * impl_sidl_Loader_fgetURL_sidl_DLL(struct sidl_DLL__object* obj) {
+  return sidl_DLL__getURL(obj);
+}
+struct sidl_Loader__object* impl_sidl_Loader_fconnect_sidl_Loader(char* url,
+  sidl_BaseInterface *_ex) {
+  return sidl_Loader__connect(url, _ex);
+}
+char * impl_sidl_Loader_fgetURL_sidl_Loader(struct sidl_Loader__object* obj) {
+  return sidl_Loader__getURL(obj);
+}
+struct sidl_BaseInterface__object* 
+  impl_sidl_Loader_fconnect_sidl_BaseInterface(char* url,
+  sidl_BaseInterface *_ex) {
+  return sidl_BaseInterface__connect(url, _ex);
+}
+char * impl_sidl_Loader_fgetURL_sidl_BaseInterface(struct 
+  sidl_BaseInterface__object* obj) {
+  return sidl_BaseInterface__getURL(obj);
+}
+struct sidl_BaseClass__object* impl_sidl_Loader_fconnect_sidl_BaseClass(char* 
+  url, sidl_BaseInterface *_ex) {
+  return sidl_BaseClass__connect(url, _ex);
+}
+char * impl_sidl_Loader_fgetURL_sidl_BaseClass(struct sidl_BaseClass__object* 
+  obj) {
+  return sidl_BaseClass__getURL(obj);
 }

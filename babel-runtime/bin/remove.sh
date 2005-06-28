@@ -2,7 +2,6 @@
 ## File:        remove.sh
 ## Package:     Babel binary
 ## Copyright:   (c) 2000-2001 The Regents of the University of California
-## Release:     $Name$
 ## Revision:    $Revision$
 ## Modified:    $Date$
 ## Description: utility to remove files for babel build

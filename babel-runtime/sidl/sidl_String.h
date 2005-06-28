@@ -1,7 +1,6 @@
 /*
  * File:        sidl_String.h
  * Copyright:   (c) 2001 The Regents of the University of California
- * Release:     $Name$
  * Revision:    @(#) $Revision$
  * Date:        $Date$
  * Description: convenience string manipulation functions for C clients

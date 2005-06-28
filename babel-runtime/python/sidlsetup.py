@@ -54,12 +54,13 @@ for i in old_argv:
       
 setup(name="babel",
       author="Tom Epperly",
-      version="0.9.8",
+      version="0.10.4",
       description="Build Python support extension modules for sidl",
       author_email="components@llnl.gov",
       url="http://www.llnl.gov/CASC/components/",
       include_dirs=inc_dirs,
       headers = ["sidlObjA.h", "sidlPyArrays.h"],
+      py_modules = [ 'sidlBaseException' ],
       ext_modules = [
     Extension('sidlObjA',
               ["sidlObjA.c"],

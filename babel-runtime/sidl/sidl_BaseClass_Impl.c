@@ -1,8 +1,8 @@
 /*
  * File:          sidl_BaseClass_Impl.c
- * Symbol:        sidl.BaseClass-v0.9.0
+ * Symbol:        sidl.BaseClass-v0.9.3
  * Symbol Type:   class
- * Babel Version: 0.9.8
+ * Babel Version: 0.10.4
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Server-side implementation for sidl.BaseClass
@@ -32,7 +32,7 @@
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.9.8
+ * babel-version = 0.10.4
  */
 
 /*
@@ -41,7 +41,7 @@
  */
 
 /*
- * Symbol "sidl.BaseClass" (version 0.9.0)
+ * Symbol "sidl.BaseClass" (version 0.9.3)
  * 
  * Every class implicitly inherits from <code>BaseClass</code>.  This
  * class implements the methods in <code>BaseInterface</code>.
@@ -49,7 +49,6 @@
 
 #include "sidl_BaseClass_Impl.h"
 
-#line 52 "../../../babel/runtime/sidl/sidl_BaseClass_Impl.c"
 /* DO-NOT-DELETE splicer.begin(sidl.BaseClass._includes) */
 #include <stdlib.h>
 #include "sidl_BaseInterface.h"
@@ -151,8 +150,25 @@ sidl_remove_object(sidl_BaseClass cls)
 }
 #endif /* SIDL_DEBUG_REFCOUNT */
 /* DO-NOT-DELETE splicer.end(sidl.BaseClass._includes) */
-#line 154 "sidl_BaseClass_Impl.c"
 
+/*
+ * Static class initializer called exactly once before any user-defined method is dispatched
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_sidl_BaseClass__load"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+void
+impl_sidl_BaseClass__load(
+  void)
+{
+  /* DO-NOT-DELETE splicer.begin(sidl.BaseClass._load) */
+  /* Insert the implementation of the static class initializer method here... */
+  /* DO-NOT-DELETE splicer.end(sidl.BaseClass._load) */
+}
 /*
  * Class constructor called when the class is created.
  */
@@ -160,11 +176,13 @@ sidl_remove_object(sidl_BaseClass cls)
 #undef __FUNC__
 #define __FUNC__ "impl_sidl_BaseClass__ctor"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 void
 impl_sidl_BaseClass__ctor(
-  /*in*/ sidl_BaseClass self)
+  /* in */ sidl_BaseClass self)
 {
-#line 165 "../../../babel/runtime/sidl/sidl_BaseClass_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidl.BaseClass._ctor) */
   struct sidl_BaseClass__data *data = (struct sidl_BaseClass__data *)
     malloc(sizeof (struct sidl_BaseClass__data));
@@ -180,7 +198,6 @@ impl_sidl_BaseClass__ctor(
   sidl_add_object(self);
 #endif
   /* DO-NOT-DELETE splicer.end(sidl.BaseClass._ctor) */
-#line 183 "sidl_BaseClass_Impl.c"
 }
 
 /*
@@ -190,11 +207,13 @@ impl_sidl_BaseClass__ctor(
 #undef __FUNC__
 #define __FUNC__ "impl_sidl_BaseClass__dtor"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 void
 impl_sidl_BaseClass__dtor(
-  /*in*/ sidl_BaseClass self)
+  /* in */ sidl_BaseClass self)
 {
-#line 193 "../../../babel/runtime/sidl/sidl_BaseClass_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidl.BaseClass._dtor) */
   struct sidl_BaseClass__data *data = sidl_BaseClass__get_data(self);
 #ifdef SIDL_DEBUG_REFCOUNT
@@ -212,7 +231,6 @@ impl_sidl_BaseClass__dtor(
   }
   sidl_BaseClass__set_data(self, NULL);
   /* DO-NOT-DELETE splicer.end(sidl.BaseClass._dtor) */
-#line 215 "sidl_BaseClass_Impl.c"
 }
 
 /*
@@ -233,11 +251,13 @@ impl_sidl_BaseClass__dtor(
 #undef __FUNC__
 #define __FUNC__ "impl_sidl_BaseClass_addRef"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 void
 impl_sidl_BaseClass_addRef(
-  /*in*/ sidl_BaseClass self)
+  /* in */ sidl_BaseClass self)
 {
-#line 234 "../../../babel/runtime/sidl/sidl_BaseClass_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidl.BaseClass.addRef) */
   struct sidl_BaseClass__data* data = sidl_BaseClass__get_data(self);
   
@@ -262,7 +282,6 @@ impl_sidl_BaseClass_addRef(
 #endif
    }
    /* DO-NOT-DELETE splicer.end(sidl.BaseClass.addRef) */
-#line 265 "sidl_BaseClass_Impl.c"
 }
 
 /*
@@ -276,11 +295,13 @@ impl_sidl_BaseClass_addRef(
 #undef __FUNC__
 #define __FUNC__ "impl_sidl_BaseClass_deleteRef"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 void
 impl_sidl_BaseClass_deleteRef(
-  /*in*/ sidl_BaseClass self)
+  /* in */ sidl_BaseClass self)
 {
-#line 275 "../../../babel/runtime/sidl/sidl_BaseClass_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidl.BaseClass.deleteRef) */
    struct sidl_BaseClass__data* data = sidl_BaseClass__get_data(self);
    int self_destruct = TRUE;
@@ -312,7 +333,6 @@ impl_sidl_BaseClass_deleteRef(
      sidl_BaseClass__delete(self);
    }
    /* DO-NOT-DELETE splicer.end(sidl.BaseClass.deleteRef) */
-#line 315 "sidl_BaseClass_Impl.c"
 }
 
 /*
@@ -323,15 +343,17 @@ impl_sidl_BaseClass_deleteRef(
 #undef __FUNC__
 #define __FUNC__ "impl_sidl_BaseClass_isSame"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 sidl_bool
 impl_sidl_BaseClass_isSame(
-  /*in*/ sidl_BaseClass self, /*in*/ sidl_BaseInterface iobj)
+  /* in */ sidl_BaseClass self,
+  /* in */ sidl_BaseInterface iobj)
 {
-#line 320 "../../../babel/runtime/sidl/sidl_BaseClass_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidl.BaseClass.isSame) */
   return self == sidl_BaseClass__cast(iobj);
   /* DO-NOT-DELETE splicer.end(sidl.BaseClass.isSame) */
-#line 334 "sidl_BaseClass_Impl.c"
 }
 
 /*
@@ -347,11 +369,14 @@ impl_sidl_BaseClass_isSame(
 #undef __FUNC__
 #define __FUNC__ "impl_sidl_BaseClass_queryInt"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 sidl_BaseInterface
 impl_sidl_BaseClass_queryInt(
-  /*in*/ sidl_BaseClass self, /*in*/ const char* name)
+  /* in */ sidl_BaseClass self,
+  /* in */ const char* name)
 {
-#line 342 "../../../babel/runtime/sidl/sidl_BaseClass_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidl.BaseClass.queryInt) */
   sidl_BaseInterface result = 
     (sidl_BaseInterface)sidl_BaseInterface__cast2(self, name);
@@ -360,7 +385,6 @@ impl_sidl_BaseClass_queryInt(
   }
   return result;
   /* DO-NOT-DELETE splicer.end(sidl.BaseClass.queryInt) */
-#line 363 "sidl_BaseClass_Impl.c"
 }
 
 /*
@@ -373,15 +397,17 @@ impl_sidl_BaseClass_queryInt(
 #undef __FUNC__
 #define __FUNC__ "impl_sidl_BaseClass_isType"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 sidl_bool
 impl_sidl_BaseClass_isType(
-  /*in*/ sidl_BaseClass self, /*in*/ const char* name)
+  /* in */ sidl_BaseClass self,
+  /* in */ const char* name)
 {
-#line 366 "../../../babel/runtime/sidl/sidl_BaseClass_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidl.BaseClass.isType) */
   return sidl_BaseClass__cast2(self, name) ? TRUE : FALSE;
   /* DO-NOT-DELETE splicer.end(sidl.BaseClass.isType) */
-#line 384 "sidl_BaseClass_Impl.c"
 }
 
 /*
@@ -391,11 +417,13 @@ impl_sidl_BaseClass_isType(
 #undef __FUNC__
 #define __FUNC__ "impl_sidl_BaseClass_getClassInfo"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 sidl_ClassInfo
 impl_sidl_BaseClass_getClassInfo(
-  /*in*/ sidl_BaseClass self)
+  /* in */ sidl_BaseClass self)
 {
-#line 382 "../../../babel/runtime/sidl/sidl_BaseClass_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidl.BaseClass.getClassInfo) */
    struct sidl_BaseClass__data* data = sidl_BaseClass__get_data(self);
    if (data) {
@@ -407,5 +435,32 @@ impl_sidl_BaseClass_getClassInfo(
    }
    return NULL;
   /* DO-NOT-DELETE splicer.end(sidl.BaseClass.getClassInfo) */
-#line 410 "sidl_BaseClass_Impl.c"
+}
+/* Babel internal methods, Users should not edit below this line. */
+struct sidl_ClassInfo__object* 
+  impl_sidl_BaseClass_fconnect_sidl_ClassInfo(char* url,
+  sidl_BaseInterface *_ex) {
+  return sidl_ClassInfo__connect(url, _ex);
+}
+char * impl_sidl_BaseClass_fgetURL_sidl_ClassInfo(struct 
+  sidl_ClassInfo__object* obj) {
+  return sidl_ClassInfo__getURL(obj);
+}
+struct sidl_BaseInterface__object* 
+  impl_sidl_BaseClass_fconnect_sidl_BaseInterface(char* url,
+  sidl_BaseInterface *_ex) {
+  return sidl_BaseInterface__connect(url, _ex);
+}
+char * impl_sidl_BaseClass_fgetURL_sidl_BaseInterface(struct 
+  sidl_BaseInterface__object* obj) {
+  return sidl_BaseInterface__getURL(obj);
+}
+struct sidl_BaseClass__object* 
+  impl_sidl_BaseClass_fconnect_sidl_BaseClass(char* url,
+  sidl_BaseInterface *_ex) {
+  return sidl_BaseClass__connect(url, _ex);
+}
+char * impl_sidl_BaseClass_fgetURL_sidl_BaseClass(struct 
+  sidl_BaseClass__object* obj) {
+  return sidl_BaseClass__getURL(obj);
 }

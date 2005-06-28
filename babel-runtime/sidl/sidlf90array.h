@@ -1,7 +1,6 @@
 /*
  * File:        sidlf90array.h
  * Copyright:   (c) 2003 The Regents of the University of California
- * Release:     $Name$
  * Revision:    @(#) $Revision$
  * Date:        $Date$
  * Description: Functions to convert sidl arrays into F90 derived type

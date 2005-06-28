@@ -18,7 +18,7 @@ dnl @version $Id$
 dnl
 AC_DEFUN([AC_PROG_JAVA_WORKS], [
 AC_CHECK_PROG(uudecode, uudecode$EXEEXT, yes)
-if test x$uudecode = xyes; then
+if test "x$uudecode" = xyes; then
 AC_CACHE_CHECK([if uudecode can decode base 64 file], ac_cv_prog_uudecode_base64, [
 dnl /**
 dnl  * Test.java: used to test if java compiler works.
@@ -47,20 +47,20 @@ EOF
 if uudecode$EXEEXT Test.uue; then
         ac_cv_prog_uudecode_base64=yes
 else
-        echo "configure: __oline__: uudecode had trouble decoding base 64 file 'Test.uue'" >&AC_FD_CC
-        echo "configure: failed file was:" >&AC_FD_CC
-        cat Test.uue >&AC_FD_CC
+        echo "configure: __oline__: uudecode had trouble decoding base 64 file 'Test.uue'" >&AS_MESSAGE_LOG_FD()
+        echo "configure: failed file was:" >&AS_MESSAGE_LOG_FD()
+        cat Test.uue >&AS_MESSAGE_LOG_FD()
         ac_cv_prog_uudecode_base64=no
 fi
 rm -f Test.uue])
 fi
-if test x$ac_cv_prog_uudecode_base64 != xyes; then
+if test "x$ac_cv_prog_uudecode_base64" != xyes; then
         rm -f Test.class
         AC_MSG_WARN([I have to compile Test.class from scratch])
-        if test x$ac_cv_prog_javac_works = xno; then
+        if test "x$ac_cv_prog_javac_works" = xno; then
                 AC_MSG_ERROR([Cannot compile java source. $JAVAC does not work properly])
         fi
-        if test x$ac_cv_prog_javac_works = x; then
+        if test "x$ac_cv_prog_javac_works" = x; then
                 AC_PROG_JAVAC
         fi
 fi
@@ -84,20 +84,20 @@ else
   myjavac=$JAVAC
   myjava=$JAVA
 fi 
-if test x$ac_cv_prog_uudecode_base64 != xyes; then
+if test "x$ac_cv_prog_uudecode_base64" != xyes; then
         if AC_TRY_COMMAND($myjavac $JAVACFLAGS $JAVA_TEST) && test -s $CLASS_TEST; then
                 :
         else
-          echo "configure: failed program was:" >&AC_FD_CC
-          cat $JAVA_TEST >&AC_FD_CC
+          echo "configure: failed program was:" >&AS_MESSAGE_LOG_FD()
+          cat $JAVA_TEST >&AS_MESSAGE_LOG_FD()
           AC_MSG_ERROR(The Java compiler $JAVAC failed (see config.log, check the CLASSPATH?))
         fi
 fi
 if AC_TRY_COMMAND($myjava $JAVAFLAGS $TEST) >/dev/null 2>&1; then
   ac_cv_prog_java_works=yes
 else
-  echo "configure: failed program was:" >&AC_FD_CC
-  cat $JAVA_TEST >&AC_FD_CC
+  echo "configure: failed program was:" >&AS_MESSAGE_LOG_FD()
+  cat $JAVA_TEST >&AS_MESSAGE_LOG_FD()
   AC_MSG_ERROR(The Java VM $JAVA failed (see config.log, check the CLASSPATH?))
 fi
 rm -fr $JAVA_TEST $CLASS_TEST Test.uue

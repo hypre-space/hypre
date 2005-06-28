@@ -67,7 +67,7 @@ elif test $sidl_cv_f77_number_underscores -eq 1; then
    AC_DEFINE(SIDL_F77_ONE_UNDERSCORE,,[one underscore after F77 symbols])
 else
   if test $sidl_cv_f77_number_underscores -ne 0; then
-     AC_WARN([number of underscores after F77 symbols undetermined, assuming zero])
+     AC_MSG_WARN([number of underscores after F77 symbols undetermined, assuming zero])
   fi;
    AC_DEFINE(SIDL_F77_ZERO_UNDERSCORE,,[no underscores after F77 symbols])
 fi;
@@ -78,7 +78,7 @@ elif test "$sidl_cv_f77_case" = "upper"; then
    AC_DEFINE(SIDL_F77_UPPER_CASE,,[F77 symbols are upper case])
 else
    if test "$sidl_cv_f77_case" != "lower"; then
-      AC_WARN([case of f77 symbols undetermined, assuming lower case])
+      AC_MSG_WARN([case of f77 symbols undetermined, assuming lower case])
    fi  
    AC_DEFINE(SIDL_F77_LOWER_CASE,,[F77 symbols are lower case])
 fi;
@@ -88,19 +88,19 @@ if test "$sidl_cv_f77_str" = "struct"; then
       AC_DEFINE(SIDL_F77_STR_STRUCT_LEN_STR,,[F77 strings as length-char* structs])
    else 
       if test "$sidl_cv_f77_str_struct" != "str_len"; then
-         AC_WARN([string structs as length-charptr or char_ptr/length undetermined, assuming the latter])   
+         AC_MSG_WARN([string structs as length-charptr or char_ptr/length undetermined, assuming the latter])   
       fi;
       AC_DEFINE(SIDL_F77_STR_STRUCT_STR_LEN,,[F77 strings as char*-length structs])
    fi;
 else
    if test "$sidl_cv_f77_str" != "str"; then 
-      AC_WARN([strings passed as structs or char*/length undetermined, assumming the latter])
+      AC_MSG_WARN([strings passed as structs or char*/length undetermined, assumming the latter])
    fi;
    if test "$sidl_cv_f77_str_len" = "near"; then
       AC_DEFINE(SIDL_F77_STR_LEN_NEAR,,[F77 strings lengths at end])
    else
       if test "$sidl_cv_f77_str_len" != "far"; then
-         AC_WARN([string length immediately following char* or at end undetermined, assuming at end])
+         AC_MSG_WARN([string length immediately following char* or at end undetermined, assuming at end])
       fi
       AC_DEFINE(SIDL_F77_STR_LEN_FAR,,[F77 strings lengths immediately follow string])
    fi;

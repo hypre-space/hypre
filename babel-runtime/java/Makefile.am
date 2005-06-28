@@ -1,7 +1,6 @@
 ##
 ## File:        Makefile.am 
 ## Package:     gov.llnl.babel
-## Release:     $Name$
 ## Revision:    $Revision$
 ## Modified:    $Date$
 ## Description: automake makefile for the sidl Java runtime support
@@ -37,6 +36,11 @@ JAR     = @JAR@
 VERSION = @VERSION@
 JARFILE = sidl-$(VERSION).jar
 
+if BABEL_RUNTIME_ONLY
+jardir=$(prefix)/lib
+jar_DATA=$(JARFILE)
+endif
+
 #
 # Compile the sidl jar file.  Recompile only if the jar file does not
 # exist or if any of the java sources are newer than the jar file.
@@ -49,19 +53,22 @@ jarfile:
 	@if test ! -f $(JARFILE); then					\
 	  $(MAKE) $(AM_MAKEFLAGS) force-jarfile;			\
 	else								\
-	  newfiles=`find $(srcdir)/gov $(srcdir)/sidl -name SCCS -prune \
+	  newfiles=`find $(srcdir)/gov $(srcdir)/sidl 			\
+	    -name SCCS -prune 						\
 	    -o -name CVS -prune						\
+	    -o -name .svn -prune					\
             -o -name "*.java" -newer $(JARFILE) -print`;		\
 	  if test "x$$newfiles" != "x"; then                         	\
 	    $(MAKE) $(AM_MAKEFLAGS) force-jarfile;			\
 	  fi								\
 	fi
 
-JAVAC_FLAGS = -g -d .
+JAVAC_FLAGS = -g -d . -source 1.4 -target 1.4
 
 force-jarfile:
 	@javafiles=`find $(srcdir)/gov $(srcdir)/sidl			\
 	  -name SCCS -prune -o 						\
+	  -name .svn -prune -o 						\
 	  -name CVS -prune -o -name "*.java" -print`;			\
 	echo "$(JAVAC) $(JAVAC_FLAGS) $$javafiles";			\
 	if $(JAVAC) $(JAVAC_FLAGS) $$javafiles; then			\
@@ -79,12 +86,13 @@ clean-local:
 
 dist-hook:
 	dirs=`cd $(srcdir); find gov sidl -type d \( -name SCCS -prune -o  \
-		-name CVS -prune -o -print \)`;				\
+		-name CVS -prune -o -name .svn -prune -o -print \)`;	\
 	for d in $$dirs; do						\
 	  mkdir -p $(distdir)/$$d;					\
 	done
 	files=`cd $(srcdir); find gov sidl -name SCCS -prune -o 	\
 		-name CVS -prune -o					\
+		-name .svn -prune -o					\
 		-name "*.j*" -print`;					\
 	for f in $$files; do						\
 	  echo cp $(srcdir)/$$f $(distdir)/$$f;				\

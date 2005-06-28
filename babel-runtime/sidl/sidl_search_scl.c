@@ -1,7 +1,6 @@
 /*
  * File:        sidl_search_scl.c
  * Copyright:   (c) 2003 The Regents of the University of California
- * Release:     $Name$
  * Revision:    @(#) $Revision$
  * Date:        $Date$
  * Description: Search SCL files and directories
@@ -250,7 +249,6 @@ sclStartElement(void *ctx,
                 const xmlChar **attrs)
 {
   struct sidl_xml_context *xmlCtx = (struct sidl_xml_context *)ctx;
-  int result;
   if (!xmlStrcmp(fullname, (const xmlChar *) "class")) {
     if (sclLibrary == xmlCtx->d_state) {
       xmlCtx->d_state = sclClass;

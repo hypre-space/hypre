@@ -1,8 +1,8 @@
 /*
  * File:          sidl_Loader_Impl.h
- * Symbol:        sidl.Loader-v0.9.0
+ * Symbol:        sidl.Loader-v0.9.3
  * Symbol Type:   class
- * Babel Version: 0.9.8
+ * Babel Version: 0.10.4
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Server-side implementation for sidl.Loader
@@ -32,7 +32,7 @@
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.9.8
+ * babel-version = 0.10.4
  */
 
 #ifndef included_sidl_Loader_Impl_h
@@ -41,35 +41,37 @@
 #ifndef included_sidl_header_h
 #include "sidl_header.h"
 #endif
+#ifndef included_sidl_Finder_h
+#include "sidl_Finder.h"
+#endif
+#ifndef included_sidl_ClassInfo_h
+#include "sidl_ClassInfo.h"
+#endif
 #ifndef included_sidl_DLL_h
 #include "sidl_DLL.h"
 #endif
 #ifndef included_sidl_Loader_h
 #include "sidl_Loader.h"
 #endif
-#ifndef included_sidl_Scope_h
-#include "sidl_Scope.h"
+#ifndef included_sidl_BaseInterface_h
+#include "sidl_BaseInterface.h"
 #endif
-#ifndef included_sidl_Resolve_h
-#include "sidl_Resolve.h"
+#ifndef included_sidl_BaseClass_h
+#include "sidl_BaseClass.h"
 #endif
 
-#line 57 "../../../babel/runtime/sidl/sidl_Loader_Impl.h"
 /* DO-NOT-DELETE splicer.begin(sidl.Loader._includes) */
 /* Put additional include files here... */
 /* DO-NOT-DELETE splicer.end(sidl.Loader._includes) */
-#line 61 "sidl_Loader_Impl.h"
 
 /*
  * Private data for class sidl.Loader
  */
 
 struct sidl_Loader__data {
-#line 66 "../../../babel/runtime/sidl/sidl_Loader_Impl.h"
   /* DO-NOT-DELETE splicer.begin(sidl.Loader._data) */
   int ignore; /* dummy to force non-empty struct; remove if you add data */
   /* DO-NOT-DELETE splicer.end(sidl.Loader._data) */
-#line 72 "sidl_Loader_Impl.h"
 };
 
 #ifdef __cplusplus
@@ -89,49 +91,123 @@ sidl_Loader__set_data(
   sidl_Loader,
   struct sidl_Loader__data*);
 
-extern void
-impl_sidl_Loader__ctor(
-  sidl_Loader);
+extern
+void
+impl_sidl_Loader__load(
+  void);
 
-extern void
+extern
+void
+impl_sidl_Loader__ctor(
+  /* in */ sidl_Loader self);
+
+extern
+void
 impl_sidl_Loader__dtor(
-  sidl_Loader);
+  /* in */ sidl_Loader self);
 
 /*
  * User-defined object methods
  */
 
-extern void
-impl_sidl_Loader_setSearchPath(
-  const char*);
-
-extern char*
-impl_sidl_Loader_getSearchPath(
-void);
-extern void
-impl_sidl_Loader_addSearchPath(
-  const char*);
-
-extern sidl_DLL
+extern
+sidl_DLL
 impl_sidl_Loader_loadLibrary(
-  const char*,
-  sidl_bool,
-  sidl_bool);
+  /* in */ const char* uri,
+  /* in */ sidl_bool loadGlobally,
+  /* in */ sidl_bool loadLazy);
 
-extern void
+extern
+void
 impl_sidl_Loader_addDLL(
-  sidl_DLL);
+  /* in */ sidl_DLL dll);
 
-extern void
+extern
+void
 impl_sidl_Loader_unloadLibraries(
-void);
-extern sidl_DLL
-impl_sidl_Loader_findLibrary(
-  const char*,
-  const char*,
-  enum sidl_Scope__enum,
-  enum sidl_Resolve__enum);
+  void);
 
+extern
+sidl_DLL
+impl_sidl_Loader_findLibrary(
+  /* in */ const char* sidl_name,
+  /* in */ const char* target,
+  /* in */ enum sidl_Scope__enum lScope,
+  /* in */ enum sidl_Resolve__enum lResolve);
+
+extern
+void
+impl_sidl_Loader_setSearchPath(
+  /* in */ const char* path_name);
+
+extern
+char*
+impl_sidl_Loader_getSearchPath(
+  void);
+
+extern
+void
+impl_sidl_Loader_addSearchPath(
+  /* in */ const char* path_fragment);
+
+extern
+void
+impl_sidl_Loader_setFinder(
+  /* in */ sidl_Finder f);
+
+extern
+sidl_Finder
+impl_sidl_Loader_getFinder(
+  void);
+
+extern struct sidl_Finder__object* impl_sidl_Loader_fconnect_sidl_Finder(char* 
+  url, sidl_BaseInterface *_ex);
+extern char* impl_sidl_Loader_fgetURL_sidl_Finder(struct sidl_Finder__object* 
+  obj);
+extern struct sidl_ClassInfo__object* 
+  impl_sidl_Loader_fconnect_sidl_ClassInfo(char* url, sidl_BaseInterface *_ex);
+extern char* impl_sidl_Loader_fgetURL_sidl_ClassInfo(struct 
+  sidl_ClassInfo__object* obj);
+extern struct sidl_DLL__object* impl_sidl_Loader_fconnect_sidl_DLL(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_sidl_Loader_fgetURL_sidl_DLL(struct sidl_DLL__object* obj);
+extern struct sidl_Loader__object* impl_sidl_Loader_fconnect_sidl_Loader(char* 
+  url, sidl_BaseInterface *_ex);
+extern char* impl_sidl_Loader_fgetURL_sidl_Loader(struct sidl_Loader__object* 
+  obj);
+extern struct sidl_BaseInterface__object* 
+  impl_sidl_Loader_fconnect_sidl_BaseInterface(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_sidl_Loader_fgetURL_sidl_BaseInterface(struct 
+  sidl_BaseInterface__object* obj);
+extern struct sidl_BaseClass__object* 
+  impl_sidl_Loader_fconnect_sidl_BaseClass(char* url, sidl_BaseInterface *_ex);
+extern char* impl_sidl_Loader_fgetURL_sidl_BaseClass(struct 
+  sidl_BaseClass__object* obj);
+extern struct sidl_Finder__object* impl_sidl_Loader_fconnect_sidl_Finder(char* 
+  url, sidl_BaseInterface *_ex);
+extern char* impl_sidl_Loader_fgetURL_sidl_Finder(struct sidl_Finder__object* 
+  obj);
+extern struct sidl_ClassInfo__object* 
+  impl_sidl_Loader_fconnect_sidl_ClassInfo(char* url, sidl_BaseInterface *_ex);
+extern char* impl_sidl_Loader_fgetURL_sidl_ClassInfo(struct 
+  sidl_ClassInfo__object* obj);
+extern struct sidl_DLL__object* impl_sidl_Loader_fconnect_sidl_DLL(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_sidl_Loader_fgetURL_sidl_DLL(struct sidl_DLL__object* obj);
+extern struct sidl_Loader__object* impl_sidl_Loader_fconnect_sidl_Loader(char* 
+  url, sidl_BaseInterface *_ex);
+extern char* impl_sidl_Loader_fgetURL_sidl_Loader(struct sidl_Loader__object* 
+  obj);
+extern struct sidl_BaseInterface__object* 
+  impl_sidl_Loader_fconnect_sidl_BaseInterface(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_sidl_Loader_fgetURL_sidl_BaseInterface(struct 
+  sidl_BaseInterface__object* obj);
+extern struct sidl_BaseClass__object* 
+  impl_sidl_Loader_fconnect_sidl_BaseClass(char* url, sidl_BaseInterface *_ex);
+extern char* impl_sidl_Loader_fgetURL_sidl_BaseClass(struct 
+  sidl_BaseClass__object* obj);
 #ifdef __cplusplus
 }
 #endif

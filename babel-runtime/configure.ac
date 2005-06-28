@@ -22,7 +22,7 @@
 #  Libtool Options
 #  Cygwin conditional Makefile Support
 #  Shared/Dynamic Library Details
-#  babel_config.h headers and footers
+#  babel_internal.h headers and footers
 #  File Generation
 
 ############################################################
@@ -43,27 +43,17 @@ msgs="
 #
 # Basic startup stuff
 #
-AC_INIT(babel-runtime, 0.9.8, components@llnl.gov)
+AC_INIT([babel-runtime],[0.10.4],[babel-bugs@llnl.gov])
 AC_CONFIG_SRCDIR([sidl/sidlArray.h])
 AC_CONFIG_AUX_DIR([config])
 AC_CONFIG_MACRO_DIR([m4])
 AC_CANONICAL_TARGET
 
 AM_INIT_AUTOMAKE([foreign no-dependencies no-installinfo no-installman no-texinfo.tex 1.8])
-AC_CONFIG_HEADERS([sidl/babel_config.h])
+AC_CONFIG_HEADERS([sidl/babel_internal.h])
 
-LLNL_CHECK_AUTOMAKE(1.8.3)
+LLNL_CHECK_AUTOMAKE(1.9.3)
 LLNL_CHECK_AUTOCONF(2.59)
-
-
-############################################################
-#
-# Additions for hypre
-#
-AC_PREFIX_DEFAULT(`pwd`/../hypre)
-with_fortran90=no
-# ... was with_fortran90=yes    which doesn't work on frost
-enable_shared=no
 
 
 ############################################################
@@ -72,18 +62,42 @@ enable_shared=no
 #
 AM_CONDITIONAL(BABEL_RUNTIME_ONLY, ! ((grep UCRL-CODE-2002-054 $srcdir/../COPYRIGHT > /dev/null 2>&1) && (test -e ../bin/babel) ))
 
+AC_PROG_CC
+############################################################
+#
+# F90 Compiler
+#
+LLNL_CONFIRM_BABEL_F90_SUPPORT
+if test "X$enable_fortran90" = "Xyes"; then #begin real F90 checking
+LLNL_CONFIRM_BABEL_F90_SUPPORT2 
+fi #end real F90 checking
+LLNL_CONFIRM_BABEL_F90_SUPPORT3
+
+# XML
+LLNL_LIBXML_CONFIG
+LLNL_PROG_TEST_EF
+AC_PROG_LD
+
+# CCA
+CCA_BUNDLE_TAG
+
+############################################################
+#
+# Python Support.
+#
+LLNL_CONFIRM_BABEL_PYTHON_SUPPORT
+
 ############################################################
 #
 # Critical applications.
 #
 AC_PROG_INSTALL
-AC_PROG_AWK
 AC_PROG_CPP
+AC_PROG_AWK
 AC_PROG_LD
 AC_PROG_LN_S
 AC_PROG_INSTALL
 AC_PROG_MAKE_SET
-AC_CHECK_PROGS(PERL, perl /bin/perl /usr/bin/perl /usr/local/bin/perl)
 
 ############################################################
 #
@@ -112,32 +126,13 @@ LLNL_CONFIRM_BABEL_CXX_SUPPORT2
 #
 LLNL_CONFIRM_BABEL_JAVA_SUPPORT
 
-# XML
-LLNL_LIBXML_CONFIG
-
-############################################################
-#
-# Python Support.
-#
-LLNL_CONFIRM_BABEL_PYTHON_SUPPORT
-
-############################################################
-#
-# F90 Compiler
-#
-LLNL_CONFIRM_BABEL_F90_SUPPORT
-if test "X$enable_fortran90" = "Xyes"; then #begin real F90 checking
-LLNL_CONFIRM_BABEL_F90_SUPPORT2 
-fi #end real F90 checking
-LLNL_CONFIRM_BABEL_F90_SUPPORT3
-
 ############################################################
 #
 # Libtool Options
 #
 AC_LIBTOOL_WIN32_DLL
 AC_LIBTOOL_DLOPEN
-AC_PROG_LIBTOOL
+AM_PROG_LIBTOOL
 AC_SUBST(LIBTOOL_DEPS)
 AC_LIB_LTDL
 
@@ -155,7 +150,7 @@ AM_CONDITIONAL(SUPPORT_CYGWIN, test "X$CYGWIN" = "Xyes")
 #
 # Shared/Dynamic Library Details.
 #
-
+LLNL_PURE_STATIC_RUNTIME
 AM_CONDITIONAL(SUPPORT_STATIC, test "X$enable_static" = "Xyes")
 AM_CONDITIONAL(SUPPORT_SHARED, test "X$enable_shared" = "Xyes" -a "X$XML2_CONFIG" != "Xno")
 if test "X$enable_shared" != "Xyes" -o "X$XML2_CONFIG" = "Xno"; then
@@ -170,18 +165,18 @@ fi
 # Experimental sidl extensions
 #
 if test -z "$with_sidlx"; then
-  with_sidlx=no
+  with_sidlx=yes
 fi
-AC_ARG_WITH(sidlx,   [  --with-sidlx            enable experimental (undocumented) libsidlx.{a,so}])
+AC_ARG_WITH(sidlx,   [  --without-sidlx         disable experimental (undocumented) libsidlx.{a,so}])
 AM_CONDITIONAL(WITH_SIDLX, test "X$with_sidlx" != "Xno" )
 
 ############################################################
 #
-# babel_config.h headers and footers
+# babel_internal.h headers and footers
 #
 AH_TOP([
-#ifndef included_babel_config_h
-#define included_babel_config_h
+#ifndef included_babel_internal_h
+#define included_babel_internal_h
 ])
 
 AH_BOTTOM([
@@ -231,5 +226,7 @@ AC_CONFIG_FILES([Makefile
                  sidl/Makefile
 		 sidlx/Makefile])
 AC_OUTPUT
+echo "$msgs
+" >&5
 echo "$msgs
 "

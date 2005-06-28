@@ -1,6 +1,5 @@
 /*
  * File:        sidlfortran.h
- * Release:     $Name$
  * Revision:    @(#) $Revision$
  * Date:        $Date$
  * Description: Macros for FORTRAN interoperability

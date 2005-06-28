@@ -1,7 +1,6 @@
 //
 // File:	BaseArray.java
 // Package:	gov.llnl.sidl
-// Release:	$Name$
 // Revision:	$Revision$
 // Modified:	$Date$
 // Description:	base array for the sidl Java runtime system
@@ -41,6 +40,9 @@ public abstract class BaseArray {
   protected long d_array;
   protected boolean d_owner;
 
+  static {
+    gov.llnl.sidl.BaseClass._registerNatives("gov.llnl.sidl.BaseArray");
+  }
   /**
    * Construct an empty array object.  This object must be allocated before
    * any actions are performed on the array data.
@@ -78,75 +80,92 @@ public abstract class BaseArray {
   }
 
   /**
-   * Abstract method to get the dimension of the array.  This method
+   * Native method returns the enumerated type of this array
+   */
+  public native int _type();
+  
+  /**
+   * Native method to get the dimension of the array.  This method
    * will be implemented in subclasses as a native method.
    */
-  public abstract int _dim();
+  public native int _dim();
 
   /**
-   * Abstract method to fetch the specified lower bound of the array.
+   * Native method to fetch the specified lower bound of the array.
    * This method will be implemented in subclasses as a native method.
    * The specified array dimension must be between zero and the array
    * dimension minus one.  Invalid values will have unpredictable (but
    * almost certainly bad) results.
    */
-  public abstract int _lower(int dim);
+  public native int _lower(int dim);
 
   /**
-   * Abstract method to fetch the specified upper bound of the array.
+   * Native method to fetch the specified upper bound of the array.
    * This method will be implemented in subclasses as a native method.
    * The specified array dimension must be between zero and the array
    * dimension minus one.  Invalid values will have unpredictable (but
    * almost certainly bad) results.
    */
-  public abstract int _upper(int dim);
+  public native int _upper(int dim);
+
 
   /**
-   * Abstract method to fetch the stride of the specified dimen of the array.
+   * Routine to get the length of the array at the specified dimension
+   */
+    public int _length(int dim) {
+      return 1 + _upper(dim) - lower(dim);
+    }
+  /**
+   * Native method to fetch the stride of the specified dimen of the array.
    * This method will be implemented in subclasses as a native method.
    * The specified array dimension must be between zero and the array
    * dimension minus one.  Invalid values will have unpredictable (but
    * almost certainly bad) results.
    */
-  public abstract int _stride(int dim);
+  public native int _stride(int dim);
 
   /**
-   * Abstract method returns true if array is ColumnOrder.
+   * Native method returns true if array is ColumnOrder.
    * This method will be implemented in subclasses as a native method.
    */
-  public abstract boolean _isColumnOrder();
+  public native boolean _isColumnOrder();
 
   /**
-   * Abstract method returns true if array if RowOrder.
+   * Native method returns true if array if RowOrder.
    * This method will be implemented in subclasses as a native method.
    */
-  public abstract boolean _isRowOrder();
+  public native boolean _isRowOrder();
 
   /** 
-   * Abstract method adds 1 to array's reference count.  Not for users   
+   * Native method adds 1 to array's reference count.  Not for users   
    * but for internal babel stuff.
    */
-  public abstract void _addRef();
+  public native void _addRef();
 
+  /**
+   * Method smartCopy returns a a copy of a borrowed array, or         
+   * increments the reference count of an array that manages it's
+   * own data.  Useful if you wish to keep a copy of an incoming array
+   */
+  public native BaseArray _smartCopy();
 
   /** Deallocate deletes java's reference to the array (calls deleteRef)
    *  But does not (nessecarily) case the array to be GCed.
    */
-  public abstract void _deallocate();
-
+  public native void _deallocate();
     
   /**
-   * Abstract method to destroy the array.  This will be called by the
+   * Native method to destroy the array.  This will be called by the
    * object finalizer if the array is owned by this object.
    */
-  protected abstract void _destroy();
+  public native void _destroy();
 
   /**
    * Abstract method to reallocate array data using the specified dimension,
    * lower bounds, and upper bounds.  This routine assumes that the dimension
    * and indices are valid.
    */
-  protected abstract void _reallocate(int dim, int[] lower, int[] upper, boolean isRow);
+  public abstract void _reallocate(int dim, int[] lower, int[] upper, boolean isRow);
  
   /**
    * Destroy the existing array and make it null.  This method deallocates
@@ -396,6 +415,41 @@ public abstract class BaseArray {
   public int stride(int dim) {
     checkNullArray();
     return _stride(dim);
+  }
+
+  /**
+   * Holder class for inout and out arguments.
+   */
+  public static class Holder {
+    private gov.llnl.sidl.BaseArray d_obj;
+    
+    /**
+     * Create a holder with a null holdee object.
+     */
+    public Holder() {
+      d_obj = null;
+    }
+    
+    /**
+     * Create a holder with the specified object.
+     */
+    public Holder(gov.llnl.sidl.BaseArray obj) {
+      d_obj = obj;
+    }
+    
+    /**
+     * Set the value of the holdee object.
+     */
+    public void set(gov.llnl.sidl.BaseArray obj) {
+      d_obj = obj;
+    }
+    
+    /**
+     * Get the value of the holdee object.
+     */
+    public gov.llnl.sidl.BaseArray get() {
+      return d_obj;
+    }
   }
 
 } 

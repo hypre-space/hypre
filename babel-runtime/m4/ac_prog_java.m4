@@ -51,7 +51,8 @@ dnl
 dnl This is a sample configure.in
 dnl Process this file with autoconf to produce a configure script.
 dnl
-dnl    AC_INIT(UnTag.java)
+dnl    AC_INIT 
+dnl    AC_CONFIG_SRCDIR([UnTag.java])
 dnl
 dnl    dnl Checks for programs.
 dnl    AC_CHECK_CLASSPATH
@@ -62,19 +63,20 @@ dnl    dnl Checks for classes
 dnl    AC_CHECK_RQRD_CLASS(org.xml.sax.Parser)
 dnl    AC_CHECK_RQRD_CLASS(com.jclark.xml.sax.Driver)
 dnl
-dnl    AC_OUTPUT(Makefile)
+dnl    AC_CONFIG_FILES([Makefile])
+dnl    AC_OUTPUT
 dnl
 dnl @author Stephane Bortzmeyer <bortzmeyer@pasteur.fr>
 dnl @version $Id$
 dnl
 AC_DEFUN([AC_PROG_JAVA],[
 AC_REQUIRE([AC_EXEEXT])dnl
-if test x$JAVAPREFIX = x; then
-        test x$JAVA = x && AC_CHECK_PROGS(JAVA, kaffe$EXEEXT java$EXEEXT)
+if test "x$JAVAPREFIX" = x; then
+        test "x$JAVA" = x && AC_CHECK_PROGS(JAVA, kaffe$EXEEXT java$EXEEXT)
 else
-        test x$JAVA = x && AC_CHECK_PROGS(JAVA, kaffe$EXEEXT java$EXEEXT, $JAVAPREFIX)
+        test "x$JAVA" = x && AC_CHECK_PROGS(JAVA, kaffe$EXEEXT java$EXEEXT, $JAVAPREFIX)
 fi
-test x$JAVA = x && AC_MSG_ERROR([no acceptable Java virtual machine found in \$PATH])
+test "x$JAVA" = x && AC_MSG_ERROR([no acceptable Java virtual machine found in \$PATH])
 AC_PROG_JAVA_WORKS
 AC_PROVIDE([$0])dnl
 ])

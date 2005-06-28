@@ -27,6 +27,8 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
 
 #  include "babel_config.h"
 
+#if defined(PIC) || !defined(SIDL_PURE_STATIC_RUNTIME)
+
 #if HAVE_UNISTD_H
 #  include <unistd.h>
 #endif
@@ -209,13 +211,13 @@ static char   *lt_estrdup	LT_PARAMS((const char *str));
 static lt_ptr lt_emalloc	LT_PARAMS((size_t size));
 static lt_ptr lt_erealloc	LT_PARAMS((lt_ptr addr, size_t size));
 
-static lt_ptr rpl_realloc	LT_PARAMS((lt_ptr ptr, size_t size));
+static lt_ptr ltrpl_realloc	LT_PARAMS((lt_ptr ptr, size_t size));
 
 /* These are the pointers that can be changed by the caller:  */
 LT_GLOBAL_DATA lt_ptr (*lt_dlmalloc)	LT_PARAMS((size_t size))
  			= (lt_ptr (*) LT_PARAMS((size_t))) malloc;
 LT_GLOBAL_DATA lt_ptr (*lt_dlrealloc)	LT_PARAMS((lt_ptr ptr, size_t size))
- 			= (lt_ptr (*) LT_PARAMS((lt_ptr, size_t))) rpl_realloc;
+ 			= (lt_ptr (*) LT_PARAMS((lt_ptr, size_t))) ltrpl_realloc;
 LT_GLOBAL_DATA void   (*lt_dlfree)	LT_PARAMS((lt_ptr ptr))
  			= (void (*) LT_PARAMS((lt_ptr))) free;
 
@@ -234,7 +236,7 @@ LT_GLOBAL_DATA void   (*lt_dlfree)	LT_PARAMS((lt_ptr ptr))
 #else
 
 #define LT_DLMALLOC(tp, n)	((tp *) lt_dlmalloc ((n) * sizeof(tp)))
-#define LT_DLREALLOC(tp, p, n)	((tp *) rpl_realloc ((p), (n) * sizeof(tp)))
+#define LT_DLREALLOC(tp, p, n)	((tp *) ltrpl_realloc ((p), (n) * sizeof(tp)))
 #define LT_DLFREE(p)						\
 	LT_STMT_START { if (p) (p) = (lt_dlfree (p), (lt_ptr) 0); } LT_STMT_END
 
@@ -380,11 +382,13 @@ memcpy (dest, src, size)
      const lt_ptr src;
      size_t size;
 {
+  const char *	s = src;
+  char *	d = dest;
   size_t i = 0;
 
   for (i = 0; i < size; ++i)
     {
-      dest[i] = src[i];
+      d[i] = s[i];
     }
 
   return dest;
@@ -404,17 +408,19 @@ memmove (dest, src, size)
      const lt_ptr src;
      size_t size;
 {
+  const char *	s = src;
+  char *	d = dest;
   size_t i;
 
-  if (dest < src)
+  if (d < s)
     for (i = 0; i < size; ++i)
       {
-	dest[i] = src[i];
+	d[i] = s[i];
       }
-  else if (dest > src)
+  else if (d > s)
     for (i = size -1; i >= 0; --i)
       {
-	dest[i] = src[i];
+	d[i] = s[i];
       }
 
   return dest;
@@ -510,7 +516,7 @@ static struct dirent *readdir(entry)
   */
 
 static lt_ptr
-rpl_realloc (ptr, size)
+ltrpl_realloc (ptr, size)
      lt_ptr ptr;
      size_t size;
 {
@@ -1000,7 +1006,7 @@ lt_erealloc (addr, size)
      lt_ptr addr;
      size_t size;
 {
-  lt_ptr mem = rpl_realloc (addr, size);
+  lt_ptr mem = ltrpl_realloc (addr, size);
   if (size && !mem)
     LT_DLMUTEX_SETERROR (LT_DLSTRERROR (NO_MEMORY));
   return mem;
@@ -4561,3 +4567,5 @@ lt_dlloader_find (loader_name)
 
   return place;
 }
+
+#endif /* defined(PIC) || !defined(SIDL_PURE_STATIC_RUNTIME) */

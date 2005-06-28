@@ -54,7 +54,7 @@ for arg in $cxx_output; do
             cxx_flags="$cxx_flags $arg"
           fi
           arg=`basename $orig_arg .a`
-          arg=`echo $arg | sed 's/^lib/-l'/'`
+          arg=`echo $arg | sed 's/^lib/-l/'`
         ;;
         -lang* | -lcrt[012].o)
           arg=

@@ -1,7 +1,6 @@
 ##
 ## File:        Makefile.am 
 ## Package:     Babel makefiles
-## Release:     $Name$
 ## Revision:    $Revision$
 ## Modified:    $Date$
 ## Description: automake makefile to build the Babel config files
@@ -41,6 +40,5 @@ EXTRA_DIST      = disabled
 
 AUTOHEADER = @AUTOHEADER@ \
 	     && cd sidl \
-	     && @PERL@ -p -i.bak changeundef.pl \
-	          babel_config.h.in \
+	     && @PYTHON@ changeundef.py babel_config.h.in \
              && rm -f babel_config.h.in.bak

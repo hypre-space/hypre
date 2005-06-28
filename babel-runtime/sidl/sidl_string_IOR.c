@@ -1,7 +1,6 @@
 /*
  * File:        sidl_string_IOR.c
  * Copyright:   (c) 2001 The Regents of the University of California
- * Release:     $Name$
  * Revision:    @(#) $Revision$
  * Date:        $Date$
  * Description: string array implementation
@@ -38,43 +37,14 @@ static void swap_i32(int32_t *i1, int32_t *i2)
 static char * const sidl_string__array_zero = NULL;
 
 
-/* forward declaration of struct sidl_string__array */
-struct sidl_string__array;
-
-/**
- * The virtual function table for the multi-dimensional arrays for
- * sidl string.
- */
-struct sidl_string__vtable {
-  /*
-   * This function should release resources associates with the array
-   * passed in.  It is called when the reference count goes to zero.
-   */
-  void (*d_destroy)(struct sidl_string__array *);
-
-  /*
-   * If this array controls its own data (i.e. owns the memory), this
-   * can simply increment the reference count of the argument and
-   * return it.  If the data is borrowed (e.g. a borrowed array), this
-   * should make a new array of the same size and copy data from the
-   * passed in array to the new array.
-   */
-  struct sidl_string__array *(*d_smartcopy)(struct sidl_string__array *);
-};
-
 /**
  * The data structure for multi-dimensional arrays for sidl string.
  * The client may access this with the functions below or using
  * the macros in the header file sidlArray.h.
  */
 struct sidl_string__array {
+  struct sidl__array   d_metadata;
   char * *d_firstElement;
-  int32_t       *d_lower;
-  int32_t       *d_upper;
-  int32_t       *d_stride;
-  int32_t        d_dimen;
-  int32_t        d_refcount;
-  const struct sidl_string__vtable *d_vtable;
 };
 
 /**
@@ -86,7 +56,7 @@ sidl_string__array_bdestroy(struct sidl_string__array* array)
 {
   if (array) {
     memset(array, 0, sizeof(struct sidl_string__array) +
-           3 * array->d_dimen * sizeof(int32_t));
+           3 * array->d_metadata.d_dimen * sizeof(int32_t));
     free(array);
   }
 }
@@ -102,8 +72,9 @@ sidl_string__array_destroy(struct sidl_string__array* array)
     char * *ptr = array->d_firstElement;
     int32_t i;
     int32_t size = 1;
-    for(i = 0; i < array->d_dimen;++i){
-      size *= (1 + array->d_upper[i] - array->d_lower[i]);
+    for(i = 0; i < array->d_metadata.d_dimen;++i){
+      size *= (1 + array->d_metadata.d_upper[i] -
+                   array->d_metadata.d_lower[i]);
     }
     while (size--) {
       DESTROY_VALUE(*ptr);
@@ -115,6 +86,12 @@ sidl_string__array_destroy(struct sidl_string__array* array)
   }
 }
 
+/**
+ * Destroy the given rarray. Actually doesn't do anything.
+ */
+static void
+sidl_string__array_rdestroy(struct sidl_string__array* array)
+{ }
 /**
  * Destroy the given sliced array. Trying to destroy a NULL array is
  * a noop.
@@ -128,7 +105,7 @@ sidl_string__array_sdestroy(struct sidl_string__array* array)
                         % sizeof(int32_t))) % sizeof(int32_t);
     struct sidl_string__array **orig;
     orig = (struct sidl_string__array **)((char *)array + arraySize +
-      3 * sizeof(int32_t)*array->d_dimen);
+      3 * sizeof(int32_t)*array->d_metadata.d_dimen);
     if (*orig) {
       sidl_string__array_deleteRef(*orig);
       *orig = NULL;
@@ -158,14 +135,14 @@ sidl_string__array_borrowSmartCp(struct sidl_string__array* array)
   struct sidl_string__array* copy = NULL;
   if (array) {
     if (sidl_string__array_isColumnOrder(array)) {
-      copy = sidl_string__array_createCol(array->d_dimen,
-                                                array->d_lower,
-                                                array->d_upper);
+      copy = sidl_string__array_createCol(array->d_metadata.d_dimen,
+                                                array->d_metadata.d_lower,
+                                                array->d_metadata.d_upper);
     }
     else {
-      copy = sidl_string__array_createRow(array->d_dimen,
-                                                array->d_lower,
-                                                array->d_upper);
+      copy = sidl_string__array_createRow(array->d_metadata.d_dimen,
+                                                array->d_metadata.d_lower,
+                                                array->d_metadata.d_upper);
     }
     sidl_string__array_copy(array, copy);
   }
@@ -173,38 +150,64 @@ sidl_string__array_borrowSmartCp(struct sidl_string__array* array)
 }
 
 /**
+ * Simple function to return the type of the array.
+ */
+static int32_t
+string_arrayType(void)
+{
+  return sidl_string_array;
+}
+/**
+ * Virtual function table for rarrays.
+ */
+
+static const struct sidl__array_vtable rarray_string_vtable = {
+  (void (*)(struct sidl__array *))sidl_string__array_rdestroy,
+  (struct sidl__array *(*)(struct sidl__array *))
+    sidl_string__array_borrowSmartCp,
+  string_arrayType
+};
+/**
  * Virtual function table for normal, self-sufficient arrays.
  */
 
-static const struct sidl_string__vtable normal_string_vtable = {
-  sidl_string__array_destroy,
-  sidl_string__array_smartCp
+static const struct sidl__array_vtable normal_string_vtable = {
+  (void (*)(struct sidl__array *))sidl_string__array_destroy,
+  (struct sidl__array *(*)(struct sidl__array *))
+    sidl_string__array_smartCp,
+  string_arrayType
 };
 /**
  * Virtual function table for borrowed arrays.
  */
 
-static const struct sidl_string__vtable borrowed_string_vtable = {
-  sidl_string__array_bdestroy,
-  sidl_string__array_borrowSmartCp
+static const struct sidl__array_vtable borrowed_string_vtable = {
+  (void (*)(struct sidl__array *))sidl_string__array_bdestroy,
+  (struct sidl__array *(*)(struct sidl__array *))
+    sidl_string__array_borrowSmartCp,
+  string_arrayType
 };
 /**
  * Virtual function table for sliced arrays with self-sufficient original
  * arrays.
  */
 
-static const struct sidl_string__vtable sliced_string_vtable = {
-  sidl_string__array_sdestroy,
-  sidl_string__array_smartCp
+static const struct sidl__array_vtable sliced_string_vtable = {
+  (void (*)(struct sidl__array *))sidl_string__array_sdestroy,
+  (struct sidl__array *(*)(struct sidl__array *))
+    sidl_string__array_smartCp,
+  string_arrayType
 };
 /**
  * Virtual function table for sliced arrays with borrowed original
  * arrays.
  */
 
-static const struct sidl_string__vtable bsliced_string_vtable = {
-  sidl_string__array_sdestroy,
-  sidl_string__array_borrowSmartCp
+static const struct sidl__array_vtable bsliced_string_vtable = {
+  (void (*)(struct sidl__array *))sidl_string__array_sdestroy,
+  (struct sidl__array *(*)(struct sidl__array *))
+    sidl_string__array_borrowSmartCp,
+  string_arrayType
 };
 /**
  * Allocate memory for the array meta-data and initialize the reference
@@ -220,24 +223,24 @@ newArray(int32_t dimen, const int32_t lower[], const int32_t upper[],
   struct sidl_string__array *result = (struct sidl_string__array *)
     malloc(arraySize + 3 * sizeof(int32_t) * dimen +
            (orig ? sizeof(struct sidl_string__array *) : 0));
-  result->d_dimen = dimen;
-  result->d_refcount = 1;
-  result->d_lower = (int32_t *)((char *)result + arraySize);
-  result->d_upper = result->d_lower + dimen;
-  result->d_stride = result->d_upper + dimen;
+  result->d_metadata.d_dimen = dimen;
+  result->d_metadata.d_refcount = 1;
+  result->d_metadata.d_lower = (int32_t *)((char *)result + arraySize);
+  result->d_metadata.d_upper = result->d_metadata.d_lower + dimen;
+  result->d_metadata.d_stride = result->d_metadata.d_upper + dimen;
   if (orig) {
     struct sidl_string__array **ref;
     ref = (struct sidl_string__array **)
       ((char *)result + arraySize + 3 * sizeof(int32_t)*dimen);
     *ref = orig;
     sidl_string__array_addRef(orig);
-    result->d_vtable = &sliced_string_vtable;
+    result->d_metadata.d_vtable = &sliced_string_vtable;
   }
   else {
-    result->d_vtable = &normal_string_vtable;
+    result->d_metadata.d_vtable = &normal_string_vtable;
   }
-  memcpy(result->d_lower, lower, sizeof(int32_t)*dimen);
-  memcpy(result->d_upper, upper, sizeof(int32_t)*dimen);
+  memcpy(result->d_metadata.d_lower, lower, sizeof(int32_t)*dimen);
+  memcpy(result->d_metadata.d_upper, upper, sizeof(int32_t)*dimen);
   return result;
 }
 
@@ -254,7 +257,7 @@ sidl_string__array_createCol(int32_t       dimen,
   int32_t size=1, i;
   struct sidl_string__array *result = newArray(dimen, lower, upper, NULL);
   for(i = 0; i < dimen; ++i) {
-    result->d_stride[i] = size;
+    result->d_metadata.d_stride[i] = size;
     size *= (1 + upper[i] - lower[i]);
   }
   size *= sizeof(char *);
@@ -276,13 +279,46 @@ sidl_string__array_createRow(int32_t       dimen,
   int32_t size=1, i;
   struct sidl_string__array *result = newArray(dimen, lower, upper, NULL);
   for(i = dimen-1; i >= 0; --i) {
-    result->d_stride[i] = size;
+    result->d_metadata.d_stride[i] = size;
     size *= (1 + upper[i] - lower[i]);
   }
   size *= sizeof(char *);
   result->d_firstElement = (char * *)malloc(size);
   INIT_VALUES(result->d_firstElement, size);
   return result;
+}
+
+/**
+ * Initialize the array meta-data for this sidl array from the passed
+ * in pointers. This is a little wierd, but all these pointers must
+ * be allocated, but only upper and c_array actually need to be
+ * initialized.  (We use upper, dim, andc_array to figure out the
+ * correct values for the rest of the data.)
+ * This function initializes the contents of the array to NULL.
+ */
+void
+sidl_string__array_init(const char ** c_array,
+struct sidl_string__array* sidl_array, int32_t dim,
+int32_t lower[], int32_t upper[], int32_t stride[])
+{
+  int32_t i = 0;
+  int32_t size = 1;
+  for(i=0; i < dim; ++i) 
+     lower[i] = 0;
+
+  for(i = 0; i < dim; ++i) {
+    stride[i] = size;
+    size *= (1 + upper[i] - lower[i]);
+  }
+
+  sidl_array->d_metadata.d_lower = lower;
+  sidl_array->d_metadata.d_upper = upper;
+  sidl_array->d_metadata.d_stride = stride;
+  sidl_array->d_metadata.d_dimen = dim;	
+  sidl_array->d_metadata.d_lower = lower;
+  sidl_array->d_metadata.d_vtable = &rarray_string_vtable;
+  sidl_array->d_metadata.d_refcount = 1;
+  sidl_array->d_firstElement = (char * *)c_array; 
 }
 
 /**
@@ -319,10 +355,12 @@ sidl_string__array_create1dInit(int32_t len,
     const int32_t upper = len - 1;
     result = newArray(1, &lower, &upper, NULL);
     if (result) {
-      const char * * restrict src = (const char * * restrict)data;
+      const char * * restrict src =
+        (const char * * restrict)data;
       char * * restrict dest;
-      result->d_stride[0] = 1;
-      result->d_firstElement = (char * *)malloc(len*sizeof(char *));
+      result->d_metadata.d_stride[0] = 1;
+      result->d_firstElement =
+        (char * *)malloc(len*sizeof(char *));
       dest = (char * * restrict)(result->d_firstElement);
       while (len--) {
         *dest = COPY_VALUE(*src);
@@ -388,21 +426,21 @@ goodSliceArgs(struct sidl_string__array* src,
                const int32_t *newStart,
                const int32_t *numElem)
 {
-  if (src && numElem && (dimen > 0) && (dimen <= src->d_dimen)) {
+  if (src && numElem && (dimen > 0) && (dimen <= src->d_metadata.d_dimen)) {
     int32_t i, numZeros;
-    const int32_t *srcFirst = (srcStart ? srcStart : src->d_lower);
-    for(i = 0, numZeros=0; i < src->d_dimen; ++i) {
-      if ((srcFirst[i] < src->d_lower[i]) ||
-          (srcFirst[i] > src->d_upper[i]) ||
+    const int32_t *srcFirst = (srcStart ? srcStart : src->d_metadata.d_lower);
+    for(i = 0, numZeros=0; i < src->d_metadata.d_dimen; ++i) {
+      if ((srcFirst[i] < src->d_metadata.d_lower[i]) ||
+          (srcFirst[i] > src->d_metadata.d_upper[i]) ||
           (numElem[i] &&
            (((srcFirst[i] + (numElem[i]-1)*getStride(srcStride,i)) >
-              src->d_upper[i]) ||
+              src->d_metadata.d_upper[i]) ||
             ((srcFirst[i] + (numElem[i]-1)*getStride(srcStride,i)) <
-              src->d_lower[i]))))
+              src->d_metadata.d_lower[i]))))
         return 0;
       if (!numElem[i]) ++numZeros;
     }
-    return (dimen + numZeros) == src->d_dimen;
+    return (dimen + numZeros) == src->d_metadata.d_dimen;
   }
   return 0;
 }
@@ -464,12 +502,12 @@ sidl_string__array_slice(struct sidl_string__array *src,
 {
   struct sidl_string__array *result = NULL;
   if (goodSliceArgs(src, dimen, srcStart, srcStride, newStart, numElem)) {
-    const int32_t *srcFirst = (srcStart ? srcStart : src->d_lower);
+    const int32_t *srcFirst = (srcStart ? srcStart : src->d_metadata.d_lower);
     const int32_t *newFirst = (newStart ? newStart : srcFirst);
     int32_t *newLast = malloc(sizeof(int32_t)*dimen);
     int32_t i, j;
     if (!newLast) return NULL;
-    for(i = 0, j = 0; i < src->d_dimen; ++i) {
+    for(i = 0, j = 0; i < src->d_metadata.d_dimen; ++i) {
       if (numElem[i]) {
         newLast[j] = newFirst[j] + numElem[i] - 1;
         ++j;
@@ -479,20 +517,23 @@ sidl_string__array_slice(struct sidl_string__array *src,
     free(newLast);
     if (result) {
       result->d_firstElement = src->d_firstElement;
-      for(i = 0, j = 0; i < src->d_dimen; ++i) {
+      for(i = 0, j = 0; i < src->d_metadata.d_dimen; ++i) {
         result->d_firstElement +=
-          ((srcFirst[i] - src->d_lower[i])*src->d_stride[i]);
+          ((srcFirst[i] - src->d_metadata.d_lower[i])*
+           src->d_metadata.d_stride[i]);
         if (numElem[i]) {
-          result->d_stride[j] = src->d_stride[i]*getStride(srcStride, i);
+          result->d_metadata.d_stride[j] = src->d_metadata.d_stride[i]*
+            getStride(srcStride, i);
           ++j;
         }
       }
-      if (src->d_vtable->d_smartcopy ==
-          sidl_string__array_smartCp) {
-        result->d_vtable = &sliced_string_vtable;
+      if (src->d_metadata.d_vtable->d_smartcopy ==
+          (struct sidl__array *(*)(struct sidl__array *))
+           sidl_string__array_smartCp) {
+        result->d_metadata.d_vtable = &sliced_string_vtable;
       }
       else {
-        result->d_vtable = &bsliced_string_vtable;
+        result->d_metadata.d_vtable = &bsliced_string_vtable;
       }
     }
   }
@@ -511,9 +552,9 @@ sidl_string__array_borrow(char ** firstElement,
                           const int32_t  stride[])
 {
   struct sidl_string__array *result = newArray(dimen, lower, upper, NULL);
-  memcpy(result->d_stride, stride, sizeof(int32_t)*dimen);
+  memcpy(result->d_metadata.d_stride, stride, sizeof(int32_t)*dimen);
   result->d_firstElement = firstElement;
-  result->d_vtable = &borrowed_string_vtable;
+  result->d_metadata.d_vtable = &borrowed_string_vtable;
   return result;
 }
 
@@ -527,8 +568,10 @@ sidl_string__array_borrow(char ** firstElement,
 struct sidl_string__array *
 sidl_string__array_smartCopy(struct sidl_string__array *array)
 {
-  return array ? ((array->d_vtable->d_smartcopy)(array)) : NULL;
+  return (struct sidl_string__array *)
+     sidl__array_smartCopy((struct sidl__array*)array);
 }
+
 /**
  * Increment the arrays internal reference count by one. To make a
  * persistent copy (i.e. that lives longer than the current method
@@ -537,9 +580,7 @@ sidl_string__array_smartCopy(struct sidl_string__array *array)
 void
 sidl_string__array_addRef(struct sidl_string__array* array)
 {
-  if (array) {
-    ++(array->d_refcount);
-  }
+  sidl__array_addRef((struct sidl__array*)array);
 }
 
 /**
@@ -550,10 +591,23 @@ sidl_string__array_addRef(struct sidl_string__array* array)
 void
 sidl_string__array_deleteRef(struct sidl_string__array* array)
 {
-  if (array && !(--(array->d_refcount))) {
-    /* self destruct */
-    (*(array->d_vtable->d_destroy))(array);
-  }
+  sidl__array_deleteRef((struct sidl__array*)array);
+}
+
+/**
+ * Attempt to cast a generic array reference to an string
+ * array. A non-NULL return value indicates that the cast was
+ * successful, and the returned pointer is a valid string
+ * array. A NULL return value indicates that the cast failed.
+ * This function never alters the reference count of array.
+ * 
+ */
+struct sidl_string__array*
+sidl_string__array_cast(struct sidl__array* array)
+{
+  return (array &&
+          (sidl_string_array == ((array->d_vtable->d_arraytype)())))
+    ? (struct sidl_string__array *)array : NULL;
 }
 
 /**
@@ -563,10 +617,12 @@ char *
 sidl_string__array_get1(const struct sidl_string__array* array,
                         const int32_t i1)
 {
-  if (array && (1 == array->d_dimen) &&
-      ((array->d_lower[0] <= i1) && (array->d_upper[0] >= i1))) {
+  if (array && (1 == array->d_metadata.d_dimen) &&
+      ((array->d_metadata.d_lower[0] <= i1) &&
+      (array->d_metadata.d_upper[0] >= i1))) {
     return COPY_VALUE(*(array->d_firstElement +
-                        (i1 - array->d_lower[0])*array->d_stride[0]));
+                        (i1 - array->d_metadata.d_lower[0])*
+                        array->d_metadata.d_stride[0]));
   }
   return sidl_string__array_zero;
 }
@@ -579,19 +635,21 @@ sidl_string__array_get2(const struct sidl_string__array* array,
                         const int32_t i1,
                         const int32_t i2)
 {
-  if (array && (2 == array->d_dimen)){
+  if (array && (2 == array->d_metadata.d_dimen)){
     /* unserialize array bounds checking (i.e. avoid strict left to right */
     /* evaluation of && which serializes evaluation) */
-    register int c1 = (array->d_lower[0] <= i1);
-    register int c2 = (array->d_upper[0] >= i1);
-    register int c3 = (array->d_lower[1] <= i2);
-    register int c4 = (array->d_upper[1] >= i2);
+    register int c1 = (array->d_metadata.d_lower[0] <= i1);
+    register int c2 = (array->d_metadata.d_upper[0] >= i1);
+    register int c3 = (array->d_metadata.d_lower[1] <= i2);
+    register int c4 = (array->d_metadata.d_upper[1] >= i2);
     c1 = c1 && c2;
     c3 = c3 && c4;
     if (c1 && c3) {
       return COPY_VALUE(*(array->d_firstElement +
-                          (i1 - array->d_lower[0])*array->d_stride[0] +
-                          (i2 - array->d_lower[1])*array->d_stride[1]));
+                          (i1 - array->d_metadata.d_lower[0])*
+                           array->d_metadata.d_stride[0] +
+                          (i2 - array->d_metadata.d_lower[1])*
+                           array->d_metadata.d_stride[1]));
     }
   }
   return sidl_string__array_zero;
@@ -606,20 +664,23 @@ sidl_string__array_get3(const struct sidl_string__array* array,
                         const int32_t i2,
                         const int32_t i3)
 {
-  if (array && (3 == array->d_dimen)){
+  if (array && (3 == array->d_metadata.d_dimen)){
     /* unserialize array bounds checking (i.e. avoid strict left to right */
     /* evaluation of && which serializes evaluation) */
-    register int c1 = (array->d_lower[0] <= i1);
-    register int c2 = (array->d_lower[1] <= i2);
-    register int c3 = (array->d_lower[2] <= i3);
-    c1 = c1 && (array->d_upper[0] >= i1);
-    c2 = c2 && (array->d_upper[1] >= i2);
-    c3 = c3 && (array->d_upper[2] >= i3);
+    register int c1 = (array->d_metadata.d_lower[0] <= i1);
+    register int c2 = (array->d_metadata.d_lower[1] <= i2);
+    register int c3 = (array->d_metadata.d_lower[2] <= i3);
+    c1 = c1 && (array->d_metadata.d_upper[0] >= i1);
+    c2 = c2 && (array->d_metadata.d_upper[1] >= i2);
+    c3 = c3 && (array->d_metadata.d_upper[2] >= i3);
     if (c1 && c2 && c3) {
       return COPY_VALUE(*(array->d_firstElement +
-                          (i1 - array->d_lower[0])*array->d_stride[0] +
-                          (i2 - array->d_lower[1])*array->d_stride[1] +
-                          (i3 - array->d_lower[2])*array->d_stride[2]));
+                          (i1 - array->d_metadata.d_lower[0])*
+                           array->d_metadata.d_stride[0] +
+                          (i2 - array->d_metadata.d_lower[1])*
+                           array->d_metadata.d_stride[1] +
+                          (i3 - array->d_metadata.d_lower[2])*
+                           array->d_metadata.d_stride[2]));
     }
   }
   return sidl_string__array_zero;
@@ -635,25 +696,29 @@ sidl_string__array_get4(const struct sidl_string__array* array,
                         const int32_t i3,
                         const int32_t i4)
 {
-  if (array && (4 == array->d_dimen)){
+  if (array && (4 == array->d_metadata.d_dimen)){
     /* unserialize array bounds checking to avoid strict left to right */
     /* evaluation of && which serializes evaluation */
-    register int c1 = (array->d_lower[0] <= i1);
-    register int c2 = (array->d_lower[1] <= i2);
-    register int c3 = (array->d_lower[2] <= i3);
-    register int c4 = (array->d_lower[3] <= i4);
-    c1 = c1 && (array->d_upper[0] >= i1);
-    c2 = c2 && (array->d_upper[1] >= i2);
-    c3 = c3 && (array->d_upper[2] >= i3);
-    c4 = c4 && (array->d_upper[3] >= i4);
+    register int c1 = (array->d_metadata.d_lower[0] <= i1);
+    register int c2 = (array->d_metadata.d_lower[1] <= i2);
+    register int c3 = (array->d_metadata.d_lower[2] <= i3);
+    register int c4 = (array->d_metadata.d_lower[3] <= i4);
+    c1 = c1 && (array->d_metadata.d_upper[0] >= i1);
+    c2 = c2 && (array->d_metadata.d_upper[1] >= i2);
+    c3 = c3 && (array->d_metadata.d_upper[2] >= i3);
+    c4 = c4 && (array->d_metadata.d_upper[3] >= i4);
     c1 = c1 && c2;
     c3 = c3 && c4;
     if (c1 && c3) {
       return COPY_VALUE(*(array->d_firstElement +
-                         (((i1 - array->d_lower[0])*array->d_stride[0] +
-                           (i2 - array->d_lower[1])*array->d_stride[1]) +
-                          ((i3 - array->d_lower[2])*array->d_stride[2] +
-                           (i4 - array->d_lower[3])*array->d_stride[3]))));
+                         (((i1 - array->d_metadata.d_lower[0])*
+                          array->d_metadata.d_stride[0] +
+                           (i2 - array->d_metadata.d_lower[1])*
+                            array->d_metadata.d_stride[1]) +
+                          ((i3 - array->d_metadata.d_lower[2])*
+                           array->d_metadata.d_stride[2] +
+                           (i4 - array->d_metadata.d_lower[3])*
+                            array->d_metadata.d_stride[3]))));
     }
   }
   return sidl_string__array_zero;
@@ -670,29 +735,34 @@ sidl_string__array_get5(const struct sidl_string__array* array,
                         const int32_t i4,
                         const int32_t i5)
 {
-  if (array && (5 == array->d_dimen)){
+  if (array && (5 == array->d_metadata.d_dimen)){
     /* unserialize array bounds checking (i.e. avoid strict left to right */
     /* evaluation of && which serializes evaluation) */
-    register int c1 = (array->d_lower[0] <= i1);
-    register int c2 = (array->d_lower[1] <= i2);
-    register int c3 = (array->d_lower[2] <= i3);
-    register int c4 = (array->d_lower[3] <= i4);
-    register int c5 = (array->d_lower[4] <= i5);
-    c1 = c1 && (array->d_upper[0] >= i1);
-    c2 = c2 && (array->d_upper[1] >= i2);
-    c3 = c3 && (array->d_upper[2] >= i3);
-    c4 = c4 && (array->d_upper[3] >= i4);
-    c5 = c5 && (array->d_upper[4] >= i5);
+    register int c1 = (array->d_metadata.d_lower[0] <= i1);
+    register int c2 = (array->d_metadata.d_lower[1] <= i2);
+    register int c3 = (array->d_metadata.d_lower[2] <= i3);
+    register int c4 = (array->d_metadata.d_lower[3] <= i4);
+    register int c5 = (array->d_metadata.d_lower[4] <= i5);
+    c1 = c1 && (array->d_metadata.d_upper[0] >= i1);
+    c2 = c2 && (array->d_metadata.d_upper[1] >= i2);
+    c3 = c3 && (array->d_metadata.d_upper[2] >= i3);
+    c4 = c4 && (array->d_metadata.d_upper[3] >= i4);
+    c5 = c5 && (array->d_metadata.d_upper[4] >= i5);
     c1 = c1 && c2;
     c3 = c3 && c4;
     c1 = c1 && c3;
     if (c1 && c5) {
       return COPY_VALUE(*(array->d_firstElement +
-                          (i1 - array->d_lower[0])*array->d_stride[0] +
-                          (i2 - array->d_lower[1])*array->d_stride[1] +
-                          (i3 - array->d_lower[2])*array->d_stride[2] +
-                          (i4 - array->d_lower[3])*array->d_stride[3] +
-                          (i5 - array->d_lower[4])*array->d_stride[4]));
+                          (i1 - array->d_metadata.d_lower[0])*
+                           array->d_metadata.d_stride[0] +
+                          (i2 - array->d_metadata.d_lower[1])*
+                           array->d_metadata.d_stride[1] +
+                          (i3 - array->d_metadata.d_lower[2])*
+                           array->d_metadata.d_stride[2] +
+                          (i4 - array->d_metadata.d_lower[3])*
+                           array->d_metadata.d_stride[3] +
+                          (i5 - array->d_metadata.d_lower[4])*
+                           array->d_metadata.d_stride[4]));
     }
   }
   return sidl_string__array_zero;
@@ -710,33 +780,39 @@ sidl_string__array_get6(const struct sidl_string__array* array,
                         const int32_t i5,
                         const int32_t i6)
 {
-  if (array && (6 == array->d_dimen)){
+  if (array && (6 == array->d_metadata.d_dimen)){
     /* unserialize array bounds checking (i.e. avoid strict left to right */
     /* evaluation of && which serializes evaluation) */
-    register int c1 = (array->d_lower[0] <= i1);
-    register int c2 = (array->d_lower[1] <= i2);
-    register int c3 = (array->d_lower[2] <= i3);
-    register int c4 = (array->d_lower[3] <= i4);
-    register int c5 = (array->d_lower[4] <= i5);
-    register int c6 = (array->d_lower[5] <= i6);
-    c1 = c1 && (array->d_upper[0] >= i1);
-    c2 = c2 && (array->d_upper[1] >= i2);
-    c3 = c3 && (array->d_upper[2] >= i3);
-    c4 = c4 && (array->d_upper[3] >= i4);
-    c5 = c5 && (array->d_upper[4] >= i5);
-    c6 = c6 && (array->d_upper[5] >= i6);
+    register int c1 = (array->d_metadata.d_lower[0] <= i1);
+    register int c2 = (array->d_metadata.d_lower[1] <= i2);
+    register int c3 = (array->d_metadata.d_lower[2] <= i3);
+    register int c4 = (array->d_metadata.d_lower[3] <= i4);
+    register int c5 = (array->d_metadata.d_lower[4] <= i5);
+    register int c6 = (array->d_metadata.d_lower[5] <= i6);
+    c1 = c1 && (array->d_metadata.d_upper[0] >= i1);
+    c2 = c2 && (array->d_metadata.d_upper[1] >= i2);
+    c3 = c3 && (array->d_metadata.d_upper[2] >= i3);
+    c4 = c4 && (array->d_metadata.d_upper[3] >= i4);
+    c5 = c5 && (array->d_metadata.d_upper[4] >= i5);
+    c6 = c6 && (array->d_metadata.d_upper[5] >= i6);
     c1 = c1 && c2;
     c3 = c3 && c4;
     c5 = c5 && c6;
     c1 = c1 && c3;
     if (c1 && c5) {
       return COPY_VALUE(*(array->d_firstElement +
-                          (i1 - array->d_lower[0])*array->d_stride[0] +
-                          (i2 - array->d_lower[1])*array->d_stride[1] +
-                          (i3 - array->d_lower[2])*array->d_stride[2] +
-                          (i4 - array->d_lower[3])*array->d_stride[3] +
-                          (i5 - array->d_lower[4])*array->d_stride[4] +
-                          (i6 - array->d_lower[5])*array->d_stride[5]));
+                          (i1 - array->d_metadata.d_lower[0])*
+                           array->d_metadata.d_stride[0] +
+                          (i2 - array->d_metadata.d_lower[1])*
+                           array->d_metadata.d_stride[1] +
+                          (i3 - array->d_metadata.d_lower[2])*
+                           array->d_metadata.d_stride[2] +
+                          (i4 - array->d_metadata.d_lower[3])*
+                           array->d_metadata.d_stride[3] +
+                          (i5 - array->d_metadata.d_lower[4])*
+                           array->d_metadata.d_stride[4] +
+                          (i6 - array->d_metadata.d_lower[5])*
+                           array->d_metadata.d_stride[5]));
     }
   }
   return sidl_string__array_zero;
@@ -756,7 +832,7 @@ sidl_string__array_get7(const struct sidl_string__array* array,
                         const int32_t i7)
 {
   if (array) {
-    switch(array->d_dimen) {
+    switch(array->d_metadata.d_dimen) {
     case 1: return sidl_string__array_get1(array, i1);
     case 2: return sidl_string__array_get2(array, i1, i2);
     case 3: return sidl_string__array_get3(array, i1, i2, i3);
@@ -767,20 +843,20 @@ sidl_string__array_get7(const struct sidl_string__array* array,
       {
         /* unserialize array bounds checking (i.e. avoid strict left to right */
         /* evaluation of && which serializes evaluation) */
-        register int c1 = (array->d_lower[0] <= i1);
-        register int c2 = (array->d_lower[1] <= i2);
-        register int c3 = (array->d_lower[2] <= i3);
-        register int c4 = (array->d_lower[3] <= i4);
-        register int c5 = (array->d_lower[4] <= i5);
-        register int c6 = (array->d_lower[5] <= i6);
-        register int c7 = (array->d_lower[6] <= i7);
-        c1 = c1 && (array->d_upper[0] >= i1);
-        c2 = c2 && (array->d_upper[1] >= i2);
-        c3 = c3 && (array->d_upper[2] >= i3);
-        c4 = c4 && (array->d_upper[3] >= i4);
-        c5 = c5 && (array->d_upper[4] >= i5);
-        c6 = c6 && (array->d_upper[5] >= i6);
-        c7 = c7 && (array->d_upper[6] >= i7);
+        register int c1 = (array->d_metadata.d_lower[0] <= i1);
+        register int c2 = (array->d_metadata.d_lower[1] <= i2);
+        register int c3 = (array->d_metadata.d_lower[2] <= i3);
+        register int c4 = (array->d_metadata.d_lower[3] <= i4);
+        register int c5 = (array->d_metadata.d_lower[4] <= i5);
+        register int c6 = (array->d_metadata.d_lower[5] <= i6);
+        register int c7 = (array->d_metadata.d_lower[6] <= i7);
+        c1 = c1 && (array->d_metadata.d_upper[0] >= i1);
+        c2 = c2 && (array->d_metadata.d_upper[1] >= i2);
+        c3 = c3 && (array->d_metadata.d_upper[2] >= i3);
+        c4 = c4 && (array->d_metadata.d_upper[3] >= i4);
+        c5 = c5 && (array->d_metadata.d_upper[4] >= i5);
+        c6 = c6 && (array->d_metadata.d_upper[5] >= i6);
+        c7 = c7 && (array->d_metadata.d_upper[6] >= i7);
         c1 = c1 && c2;
         c3 = c3 && c4;
         c5 = c5 && c6;
@@ -788,13 +864,20 @@ sidl_string__array_get7(const struct sidl_string__array* array,
         c5 = c5 && c7;
         if (c1 && c5) {
           return COPY_VALUE(*(array->d_firstElement +
-                              (i1 - array->d_lower[0])*array->d_stride[0] +
-                              (i2 - array->d_lower[1])*array->d_stride[1] +
-                              (i3 - array->d_lower[2])*array->d_stride[2] +
-                              (i4 - array->d_lower[3])*array->d_stride[3] +
-                              (i5 - array->d_lower[4])*array->d_stride[4] +
-                              (i6 - array->d_lower[5])*array->d_stride[5] +
-                              (i7 - array->d_lower[6])*array->d_stride[6]));
+                              (i1 - array->d_metadata.d_lower[0])*
+                               array->d_metadata.d_stride[0] +
+                              (i2 - array->d_metadata.d_lower[1])*
+                               array->d_metadata.d_stride[1] +
+                              (i3 - array->d_metadata.d_lower[2])*
+                               array->d_metadata.d_stride[2] +
+                              (i4 - array->d_metadata.d_lower[3])*
+                               array->d_metadata.d_stride[3] +
+                              (i5 - array->d_metadata.d_lower[4])*
+                               array->d_metadata.d_stride[4] +
+                              (i6 - array->d_metadata.d_lower[5])*
+                               array->d_metadata.d_stride[5] +
+                              (i7 - array->d_metadata.d_lower[6])*
+                               array->d_metadata.d_stride[6]));
         }
       }
     }
@@ -813,11 +896,12 @@ sidl_string__array_get(const struct sidl_string__array* array,
   if (array) {
     char * *result = array->d_firstElement;
     int32_t i = 0;
-    while (i < array->d_dimen) {
-      if ((indices[i] < array->d_lower[i]) ||
-          (indices[i] > array->d_upper[i]))
+    while (i < array->d_metadata.d_dimen) {
+      if ((indices[i] < array->d_metadata.d_lower[i]) ||
+          (indices[i] > array->d_metadata.d_upper[i]))
         return sidl_string__array_zero;
-      result += ((indices[i] - array->d_lower[i])*array->d_stride[i]);
+      result += ((indices[i] - array->d_metadata.d_lower[i])*
+       array->d_metadata.d_stride[i]);
       ++i;
     }
     return COPY_VALUE(*result);
@@ -833,12 +917,14 @@ sidl_string__array_set1(struct sidl_string__array* array,
                         const int32_t i1,
                         const char * value)
 {
-  if (array && (1 == array->d_dimen) &&
-      ((array->d_lower[0] <= i1) && (array->d_upper[0] >= i1))) {
+  if (array && (1 == array->d_metadata.d_dimen) &&
+      ((array->d_metadata.d_lower[0] <= i1) &&
+       (array->d_metadata.d_upper[0] >= i1))) {
     DESTROY_VALUE(*(array->d_firstElement +
-      (i1 - array->d_lower[0])*array->d_stride[0]));
+      (i1 - array->d_metadata.d_lower[0])*array->d_metadata.d_stride[0]));
     *(array->d_firstElement +
-      (i1 - array->d_lower[0])*array->d_stride[0]) = COPY_VALUE(value);
+      (i1 - array->d_metadata.d_lower[0])*array->d_metadata.d_stride[0]) =
+       COPY_VALUE(value);
   }
 }
 
@@ -851,22 +937,23 @@ sidl_string__array_set2(struct sidl_string__array* array,
                         const int32_t i2,
                         const char * value)
 {
-  if (array && (2 == array->d_dimen)){
+  if (array && (2 == array->d_metadata.d_dimen)){
     /* unserialize array bounds checking (i.e. avoid strict left to right */
     /* evaluation of && which serializes evaluation) */
-    register int c1 = (array->d_lower[0] <= i1);
-    register int c2 = (array->d_upper[0] >= i1);
-    register int c3 = (array->d_lower[1] <= i2);
-    register int c4 = (array->d_upper[1] >= i2);
+    register int c1 = (array->d_metadata.d_lower[0] <= i1);
+    register int c2 = (array->d_metadata.d_upper[0] >= i1);
+    register int c3 = (array->d_metadata.d_lower[1] <= i2);
+    register int c4 = (array->d_metadata.d_upper[1] >= i2);
     c1 = c1 && c2;
     c3 = c3 && c4;
     if (c1 && c3) {
       DESTROY_VALUE(*(array->d_firstElement +
-        (i1 - array->d_lower[0])*array->d_stride[0] +
-        (i2 - array->d_lower[1])*array->d_stride[1]));
+        (i1 - array->d_metadata.d_lower[0])*array->d_metadata.d_stride[0] +
+        (i2 - array->d_metadata.d_lower[1])*array->d_metadata.d_stride[1]));
       *(array->d_firstElement +
-        (i1 - array->d_lower[0])*array->d_stride[0] +
-        (i2 - array->d_lower[1])*array->d_stride[1]) = COPY_VALUE(value);
+        (i1 - array->d_metadata.d_lower[0])*array->d_metadata.d_stride[0] +
+        (i2 - array->d_metadata.d_lower[1])*array->d_metadata.d_stride[1]) =
+         COPY_VALUE(value);
     }
   }
 }
@@ -881,24 +968,25 @@ sidl_string__array_set3(struct sidl_string__array* array,
                         const int32_t i3,
                         const char * value)
 {
-  if (array && (3 == array->d_dimen)){
+  if (array && (3 == array->d_metadata.d_dimen)){
     /* unserialize array bounds checking (i.e. avoid strict left to right */
     /* evaluation of && which serializes evaluation) */
-    register int c1 = (array->d_lower[0] <= i1);
-    register int c2 = (array->d_lower[1] <= i2);
-    register int c3 = (array->d_lower[2] <= i3);
-    c1 = c1 && (array->d_upper[0] >= i1);
-    c2 = c2 && (array->d_upper[1] >= i2);
-    c3 = c3 && (array->d_upper[2] >= i3);
+    register int c1 = (array->d_metadata.d_lower[0] <= i1);
+    register int c2 = (array->d_metadata.d_lower[1] <= i2);
+    register int c3 = (array->d_metadata.d_lower[2] <= i3);
+    c1 = c1 && (array->d_metadata.d_upper[0] >= i1);
+    c2 = c2 && (array->d_metadata.d_upper[1] >= i2);
+    c3 = c3 && (array->d_metadata.d_upper[2] >= i3);
     if (c1 && c2 && c3) {
       DESTROY_VALUE(*(array->d_firstElement +
-        (i1 - array->d_lower[0])*array->d_stride[0] +
-        (i2 - array->d_lower[1])*array->d_stride[1] +
-        (i3 - array->d_lower[2])*array->d_stride[2]));
+        (i1 - array->d_metadata.d_lower[0])*array->d_metadata.d_stride[0] +
+        (i2 - array->d_metadata.d_lower[1])*array->d_metadata.d_stride[1] +
+        (i3 - array->d_metadata.d_lower[2])*array->d_metadata.d_stride[2]));
       *(array->d_firstElement +
-        (i1 - array->d_lower[0])*array->d_stride[0] +
-        (i2 - array->d_lower[1])*array->d_stride[1] +
-        (i3 - array->d_lower[2])*array->d_stride[2]) = COPY_VALUE(value);
+        (i1 - array->d_metadata.d_lower[0])*array->d_metadata.d_stride[0] +
+        (i2 - array->d_metadata.d_lower[1])*array->d_metadata.d_stride[1] +
+        (i3 - array->d_metadata.d_lower[2])*array->d_metadata.d_stride[2]) =
+         COPY_VALUE(value);
     }
   }
 }
@@ -914,30 +1002,31 @@ sidl_string__array_set4(struct sidl_string__array* array,
                         const int32_t i4,
                         const char * value)
 {
-  if (array && (array->d_dimen == 4)) {
+  if (array && (array->d_metadata.d_dimen == 4)) {
     /* unserialize array bounds checking to. avoid strict left to right */
     /* evaluation of && which serializes evaluation */
-    register int c1 = (array->d_lower[0] <= i1);
-    register int c2 = (array->d_lower[1] <= i2);
-    register int c3 = (array->d_lower[2] <= i3);
-    register int c4 = (array->d_lower[3] <= i4);
-    c1 = c1 && (array->d_upper[0] >= i1);
-    c2 = c2 && (array->d_upper[1] >= i2);
-    c3 = c3 && (array->d_upper[2] >= i3);
-    c4 = c4 && (array->d_upper[3] >= i4);
+    register int c1 = (array->d_metadata.d_lower[0] <= i1);
+    register int c2 = (array->d_metadata.d_lower[1] <= i2);
+    register int c3 = (array->d_metadata.d_lower[2] <= i3);
+    register int c4 = (array->d_metadata.d_lower[3] <= i4);
+    c1 = c1 && (array->d_metadata.d_upper[0] >= i1);
+    c2 = c2 && (array->d_metadata.d_upper[1] >= i2);
+    c3 = c3 && (array->d_metadata.d_upper[2] >= i3);
+    c4 = c4 && (array->d_metadata.d_upper[3] >= i4);
     c1 = c1 && c2;
     c3 = c3 && c4;
     if (c1 && c3) {
       DESTROY_VALUE(*(array->d_firstElement +
-        (((i1 - array->d_lower[0])*array->d_stride[0] +
-          (i2 - array->d_lower[1])*array->d_stride[1]) +
-         ((i3 - array->d_lower[2])*array->d_stride[2] +
-          (i4 - array->d_lower[3])*array->d_stride[3]))));
+        (((i1 - array->d_metadata.d_lower[0])*array->d_metadata.d_stride[0] +
+          (i2 - array->d_metadata.d_lower[1])*array->d_metadata.d_stride[1]) +
+         ((i3 - array->d_metadata.d_lower[2])*array->d_metadata.d_stride[2] +
+          (i4 - array->d_metadata.d_lower[3])*
+           array->d_metadata.d_stride[3]))));
       *(array->d_firstElement +
-        (((i1 - array->d_lower[0])*array->d_stride[0] +
-          (i2 - array->d_lower[1])*array->d_stride[1]) +
-         ((i3 - array->d_lower[2])*array->d_stride[2] +
-         (i4 - array->d_lower[3])*array->d_stride[3]))) =
+        (((i1 - array->d_metadata.d_lower[0])*array->d_metadata.d_stride[0] +
+          (i2 - array->d_metadata.d_lower[1])*array->d_metadata.d_stride[1]) +
+         ((i3 - array->d_metadata.d_lower[2])*array->d_metadata.d_stride[2] +
+         (i4 - array->d_metadata.d_lower[3])*array->d_metadata.d_stride[3]))) =
          COPY_VALUE(value);
     }
   }
@@ -955,35 +1044,36 @@ sidl_string__array_set5(struct sidl_string__array* array,
                         const int32_t i5,
                         const char * value)
 {
-  if (array && (5 == array->d_dimen)){
+  if (array && (5 == array->d_metadata.d_dimen)){
     /* unserialize array bounds checking (i.e. avoid strict left to right */
     /* evaluation of && which serializes evaluation) */
-    register int c1 = (array->d_lower[0] <= i1);
-    register int c2 = (array->d_lower[1] <= i2);
-    register int c3 = (array->d_lower[2] <= i3);
-    register int c4 = (array->d_lower[3] <= i4);
-    register int c5 = (array->d_lower[4] <= i5);
-    c1 = c1 && (array->d_upper[0] >= i1);
-    c2 = c2 && (array->d_upper[1] >= i2);
-    c3 = c3 && (array->d_upper[2] >= i3);
-    c4 = c4 && (array->d_upper[3] >= i4);
-    c5 = c5 && (array->d_upper[4] >= i5);
+    register int c1 = (array->d_metadata.d_lower[0] <= i1);
+    register int c2 = (array->d_metadata.d_lower[1] <= i2);
+    register int c3 = (array->d_metadata.d_lower[2] <= i3);
+    register int c4 = (array->d_metadata.d_lower[3] <= i4);
+    register int c5 = (array->d_metadata.d_lower[4] <= i5);
+    c1 = c1 && (array->d_metadata.d_upper[0] >= i1);
+    c2 = c2 && (array->d_metadata.d_upper[1] >= i2);
+    c3 = c3 && (array->d_metadata.d_upper[2] >= i3);
+    c4 = c4 && (array->d_metadata.d_upper[3] >= i4);
+    c5 = c5 && (array->d_metadata.d_upper[4] >= i5);
     c1 = c1 && c2;
     c3 = c3 && c4;
     c1 = c1 && c3;
     if (c1 && c5) {
       DESTROY_VALUE(*(array->d_firstElement +
-        (i1 - array->d_lower[0])*array->d_stride[0] +
-        (i2 - array->d_lower[1])*array->d_stride[1] +
-        (i3 - array->d_lower[2])*array->d_stride[2] +
-        (i4 - array->d_lower[3])*array->d_stride[3] +
-        (i5 - array->d_lower[4])*array->d_stride[4]));
+        (i1 - array->d_metadata.d_lower[0])*array->d_metadata.d_stride[0] +
+        (i2 - array->d_metadata.d_lower[1])*array->d_metadata.d_stride[1] +
+        (i3 - array->d_metadata.d_lower[2])*array->d_metadata.d_stride[2] +
+        (i4 - array->d_metadata.d_lower[3])*array->d_metadata.d_stride[3] +
+        (i5 - array->d_metadata.d_lower[4])*array->d_metadata.d_stride[4]));
       *(array->d_firstElement +
-        (i1 - array->d_lower[0])*array->d_stride[0] +
-        (i2 - array->d_lower[1])*array->d_stride[1] +
-        (i3 - array->d_lower[2])*array->d_stride[2] +
-        (i4 - array->d_lower[3])*array->d_stride[3] +
-        (i5 - array->d_lower[4])*array->d_stride[4]) = COPY_VALUE(value);
+        (i1 - array->d_metadata.d_lower[0])*array->d_metadata.d_stride[0] +
+        (i2 - array->d_metadata.d_lower[1])*array->d_metadata.d_stride[1] +
+        (i3 - array->d_metadata.d_lower[2])*array->d_metadata.d_stride[2] +
+        (i4 - array->d_metadata.d_lower[3])*array->d_metadata.d_stride[3] +
+        (i5 - array->d_metadata.d_lower[4])*array->d_metadata.d_stride[4]) =
+         COPY_VALUE(value);
     }
   }
 }
@@ -1001,40 +1091,41 @@ sidl_string__array_set6(struct sidl_string__array* array,
                         const int32_t i6,
                         const char * value)
 {
-  if (array && (6 == array->d_dimen)){
+  if (array && (6 == array->d_metadata.d_dimen)){
     /* unserialize array bounds checking (i.e. avoid strict left to right */
     /* evaluation of && which serializes evaluation) */
-    register int c1 = (array->d_lower[0] <= i1);
-    register int c2 = (array->d_lower[1] <= i2);
-    register int c3 = (array->d_lower[2] <= i3);
-    register int c4 = (array->d_lower[3] <= i4);
-    register int c5 = (array->d_lower[4] <= i5);
-    register int c6 = (array->d_lower[5] <= i6);
-    c1 = c1 && (array->d_upper[0] >= i1);
-    c2 = c2 && (array->d_upper[1] >= i2);
-    c3 = c3 && (array->d_upper[2] >= i3);
-    c4 = c4 && (array->d_upper[3] >= i4);
-    c5 = c5 && (array->d_upper[4] >= i5);
-    c6 = c6 && (array->d_upper[5] >= i6);
+    register int c1 = (array->d_metadata.d_lower[0] <= i1);
+    register int c2 = (array->d_metadata.d_lower[1] <= i2);
+    register int c3 = (array->d_metadata.d_lower[2] <= i3);
+    register int c4 = (array->d_metadata.d_lower[3] <= i4);
+    register int c5 = (array->d_metadata.d_lower[4] <= i5);
+    register int c6 = (array->d_metadata.d_lower[5] <= i6);
+    c1 = c1 && (array->d_metadata.d_upper[0] >= i1);
+    c2 = c2 && (array->d_metadata.d_upper[1] >= i2);
+    c3 = c3 && (array->d_metadata.d_upper[2] >= i3);
+    c4 = c4 && (array->d_metadata.d_upper[3] >= i4);
+    c5 = c5 && (array->d_metadata.d_upper[4] >= i5);
+    c6 = c6 && (array->d_metadata.d_upper[5] >= i6);
     c1 = c1 && c2;
     c3 = c3 && c4;
     c5 = c5 && c6;
     c1 = c1 && c3;
     if (c1 && c5) {
       DESTROY_VALUE(*(array->d_firstElement +
-        (i1 - array->d_lower[0])*array->d_stride[0] +
-        (i2 - array->d_lower[1])*array->d_stride[1] +
-        (i3 - array->d_lower[2])*array->d_stride[2] +
-        (i4 - array->d_lower[3])*array->d_stride[3] +
-        (i5 - array->d_lower[4])*array->d_stride[4] +
-        (i6 - array->d_lower[5])*array->d_stride[5]));
+        (i1 - array->d_metadata.d_lower[0])*array->d_metadata.d_stride[0] +
+        (i2 - array->d_metadata.d_lower[1])*array->d_metadata.d_stride[1] +
+        (i3 - array->d_metadata.d_lower[2])*array->d_metadata.d_stride[2] +
+        (i4 - array->d_metadata.d_lower[3])*array->d_metadata.d_stride[3] +
+        (i5 - array->d_metadata.d_lower[4])*array->d_metadata.d_stride[4] +
+        (i6 - array->d_metadata.d_lower[5])*array->d_metadata.d_stride[5]));
       *(array->d_firstElement +
-        (i1 - array->d_lower[0])*array->d_stride[0] +
-        (i2 - array->d_lower[1])*array->d_stride[1] +
-        (i3 - array->d_lower[2])*array->d_stride[2] +
-        (i4 - array->d_lower[3])*array->d_stride[3] +
-        (i5 - array->d_lower[4])*array->d_stride[4] +
-        (i6 - array->d_lower[5])*array->d_stride[5]) = COPY_VALUE(value);
+        (i1 - array->d_metadata.d_lower[0])*array->d_metadata.d_stride[0] +
+        (i2 - array->d_metadata.d_lower[1])*array->d_metadata.d_stride[1] +
+        (i3 - array->d_metadata.d_lower[2])*array->d_metadata.d_stride[2] +
+        (i4 - array->d_metadata.d_lower[3])*array->d_metadata.d_stride[3] +
+        (i5 - array->d_metadata.d_lower[4])*array->d_metadata.d_stride[4] +
+        (i6 - array->d_metadata.d_lower[5])*array->d_metadata.d_stride[5]) =
+         COPY_VALUE(value);
     }
   }
 }
@@ -1054,7 +1145,7 @@ sidl_string__array_set7(struct sidl_string__array* array,
                         const char * value)
 {
   if (array) {
-    switch(array->d_dimen) {
+    switch(array->d_metadata.d_dimen) {
     case 1: sidl_string__array_set1(array, i1, value); break;
     case 2: sidl_string__array_set2(array, i1, i2, value); break;
     case 3: sidl_string__array_set3(array, i1, i2, i3, value); break;
@@ -1065,20 +1156,20 @@ sidl_string__array_set7(struct sidl_string__array* array,
       {
         /* unserialize array bounds checking (i.e. avoid strict left to right */
         /* evaluation of && which serializes evaluation) */
-        register int c1 = (array->d_lower[0] <= i1);
-        register int c2 = (array->d_lower[1] <= i2);
-        register int c3 = (array->d_lower[2] <= i3);
-        register int c4 = (array->d_lower[3] <= i4);
-        register int c5 = (array->d_lower[4] <= i5);
-        register int c6 = (array->d_lower[5] <= i6);
-        register int c7 = (array->d_lower[6] <= i7);
-        c1 = c1 && (array->d_upper[0] >= i1);
-        c2 = c2 && (array->d_upper[1] >= i2);
-        c3 = c3 && (array->d_upper[2] >= i3);
-        c4 = c4 && (array->d_upper[3] >= i4);
-        c5 = c5 && (array->d_upper[4] >= i5);
-        c6 = c6 && (array->d_upper[5] >= i6);
-        c7 = c7 && (array->d_upper[6] >= i7);
+        register int c1 = (array->d_metadata.d_lower[0] <= i1);
+        register int c2 = (array->d_metadata.d_lower[1] <= i2);
+        register int c3 = (array->d_metadata.d_lower[2] <= i3);
+        register int c4 = (array->d_metadata.d_lower[3] <= i4);
+        register int c5 = (array->d_metadata.d_lower[4] <= i5);
+        register int c6 = (array->d_metadata.d_lower[5] <= i6);
+        register int c7 = (array->d_metadata.d_lower[6] <= i7);
+        c1 = c1 && (array->d_metadata.d_upper[0] >= i1);
+        c2 = c2 && (array->d_metadata.d_upper[1] >= i2);
+        c3 = c3 && (array->d_metadata.d_upper[2] >= i3);
+        c4 = c4 && (array->d_metadata.d_upper[3] >= i4);
+        c5 = c5 && (array->d_metadata.d_upper[4] >= i5);
+        c6 = c6 && (array->d_metadata.d_upper[5] >= i6);
+        c7 = c7 && (array->d_metadata.d_upper[6] >= i7);
         c1 = c1 && c2;
         c3 = c3 && c4;
         c5 = c5 && c6;
@@ -1086,21 +1177,22 @@ sidl_string__array_set7(struct sidl_string__array* array,
         c5 = c5 && c7;
         if (c1 && c5) {
            DESTROY_VALUE(*(array->d_firstElement +
-            (i1 - array->d_lower[0])*array->d_stride[0] +
-            (i2 - array->d_lower[1])*array->d_stride[1] +
-            (i3 - array->d_lower[2])*array->d_stride[2] +
-            (i4 - array->d_lower[3])*array->d_stride[3] +
-            (i5 - array->d_lower[4])*array->d_stride[4] +
-            (i6 - array->d_lower[5])*array->d_stride[5] +
-            (i7 - array->d_lower[6])*array->d_stride[6]));
+            (i1 - array->d_metadata.d_lower[0])*array->d_metadata.d_stride[0] +
+            (i2 - array->d_metadata.d_lower[1])*array->d_metadata.d_stride[1] +
+            (i3 - array->d_metadata.d_lower[2])*array->d_metadata.d_stride[2] +
+            (i4 - array->d_metadata.d_lower[3])*array->d_metadata.d_stride[3] +
+            (i5 - array->d_metadata.d_lower[4])*array->d_metadata.d_stride[4] +
+            (i6 - array->d_metadata.d_lower[5])*array->d_metadata.d_stride[5] +
+            (i7 - array->d_metadata.d_lower[6])*array->d_metadata.d_stride[6]));
           *(array->d_firstElement +
-            (i1 - array->d_lower[0])*array->d_stride[0] +
-            (i2 - array->d_lower[1])*array->d_stride[1] +
-            (i3 - array->d_lower[2])*array->d_stride[2] +
-            (i4 - array->d_lower[3])*array->d_stride[3] +
-            (i5 - array->d_lower[4])*array->d_stride[4] +
-            (i6 - array->d_lower[5])*array->d_stride[5] +
-            (i7 - array->d_lower[6])*array->d_stride[6]) = COPY_VALUE(value);
+            (i1 - array->d_metadata.d_lower[0])*array->d_metadata.d_stride[0] +
+            (i2 - array->d_metadata.d_lower[1])*array->d_metadata.d_stride[1] +
+            (i3 - array->d_metadata.d_lower[2])*array->d_metadata.d_stride[2] +
+            (i4 - array->d_metadata.d_lower[3])*array->d_metadata.d_stride[3] +
+            (i5 - array->d_metadata.d_lower[4])*array->d_metadata.d_stride[4] +
+            (i6 - array->d_metadata.d_lower[5])*array->d_metadata.d_stride[5] +
+            (i7 - array->d_metadata.d_lower[6])*array->d_metadata.d_stride[6])
+             = COPY_VALUE(value);
         }
       }
     }
@@ -1119,10 +1211,11 @@ sidl_string__array_set(struct sidl_string__array* array,
   if (array) {
     char * *result = array->d_firstElement;
     int32_t i = 0;
-    while (i < array->d_dimen) {
-      if ((indices[i] < array->d_lower[i]) ||
-          (indices[i] > array->d_upper[i])) return;
-      result += ((indices[i] - array->d_lower[i])*array->d_stride[i]);
+    while (i < array->d_metadata.d_dimen) {
+      if ((indices[i] < array->d_metadata.d_lower[i]) ||
+          (indices[i] > array->d_metadata.d_upper[i])) return;
+      result += ((indices[i] - array->d_metadata.d_lower[i])*
+       array->d_metadata.d_stride[i]);
       ++i;
     }
     DESTROY_VALUE(*result);
@@ -1137,7 +1230,7 @@ sidl_string__array_set(struct sidl_string__array* array,
 int32_t
 sidl_string__array_dimen(const struct sidl_string__array* array)
 {
-  return (array) ? (array->d_dimen) : 0;
+  return sidl__array_dimen((const struct sidl__array*)array);
 }
 
 /**
@@ -1148,8 +1241,7 @@ int32_t
 sidl_string__array_lower(const struct sidl_string__array* array,
                          const int32_t ind)
 {
-  return (array && (ind >= 0) && (ind < array->d_dimen)) ?
-    array->d_lower[ind] : 0;
+  return sidl__array_lower((const struct sidl__array*)array, ind);
 }
 
 /**
@@ -1161,8 +1253,7 @@ int32_t
 sidl_string__array_upper(const struct sidl_string__array* array,
                          const int32_t ind)
 {
-  return (array && (ind >= 0) && (ind < array->d_dimen)) ?
-    array->d_upper[ind] : -1;
+  return sidl__array_upper((const struct sidl__array*)array, ind);
 }
 
 /**
@@ -1174,8 +1265,7 @@ int32_t
 sidl_string__array_length(const struct sidl_string__array* array,
                           const int32_t ind)
 {
-  return (array && (ind >= 0) && (ind < array->d_dimen)) ?
-    (array->d_upper[ind] - array->d_lower[ind] + 1) : -1;
+  return sidl__array_length((const struct sidl__array*)array, ind);
 }
 
 /**
@@ -1187,8 +1277,7 @@ int32_t
 sidl_string__array_stride(const struct sidl_string__array* array,
                           const int32_t ind)
 {
-  return (array && (ind >= 0) && (ind < array->d_dimen)) ?
-    array->d_stride[ind] : -1;
+  return sidl__array_stride((const struct sidl__array*)array, ind);
 }
 
 /**
@@ -1198,17 +1287,7 @@ sidl_string__array_stride(const struct sidl_string__array* array,
 sidl_bool
 sidl_string__array_isColumnOrder(const struct sidl_string__array* array)
 {
-  if (!array) return FALSE;
-  else {
-    register int32_t i;
-    register int32_t size;
-    register const int32_t dimen = array->d_dimen;
-    for(i = 0, size = 1; i < dimen ; ++i) {
-      if (array->d_stride[i] != size) return FALSE;
-      size *= (1 + array->d_upper[i] - array->d_lower[i]);
-    }
-    return TRUE;
-  }
+  return sidl__array_isColumnOrder((const struct sidl__array*)array);
 }
 
 /**
@@ -1218,16 +1297,7 @@ sidl_string__array_isColumnOrder(const struct sidl_string__array* array)
 sidl_bool
 sidl_string__array_isRowOrder(const struct sidl_string__array* array)
 {
-  if (!array) return FALSE;
-  else {
-    register int32_t i = array->d_dimen - 1;
-    register int32_t size;
-    for(size = 1; i >= 0 ; --i) {
-      if (array->d_stride[i] != size) return FALSE;
-      size *= (1 + array->d_upper[i] - array->d_lower[i]);
-    }
-    return TRUE;
-  }
+  return sidl__array_isRowOrder((const struct sidl__array*)array);
 }
 
 /**
@@ -1255,9 +1325,10 @@ void
 sidl_string__array_copy(const struct sidl_string__array* src,
                               struct sidl_string__array* dest)
 {
-  if (src && dest && (src != dest) && (src->d_dimen == dest->d_dimen) &&
-      src->d_dimen) {
-    const int32_t dimen = src->d_dimen;
+  if (src && dest && (src != dest) &&
+     (src->d_metadata.d_dimen == dest->d_metadata.d_dimen) &&
+      src->d_metadata.d_dimen) {
+    const int32_t dimen = src->d_metadata.d_dimen;
     int32_t * restrict overlap = (int32_t *)malloc(sizeof(int32_t)*dimen*4);
     if (overlap) {
       register char * const * restrict srcFirst =
@@ -1270,15 +1341,17 @@ sidl_string__array_copy(const struct sidl_string__array* src,
       int32_t * restrict dst_stride = src_stride + dimen;
       int32_t lower, upper, fastMover = dimen - 1, moverRank = 0;
       for(i = 0; i < dimen; ++i){
-        lower = MAX(src->d_lower[i],dest->d_lower[i]);
-        upper = MIN(src->d_upper[i],dest->d_upper[i]);
+        lower = MAX(src->d_metadata.d_lower[i],dest->d_metadata.d_lower[i]);
+        upper = MIN(src->d_metadata.d_upper[i],dest->d_metadata.d_upper[i]);
         overlap[i] = 1 + upper - lower;
         if (overlap[i] <= 0) goto cleanup;
-        srcFirst += (src->d_stride[i]*(lower - src->d_lower[i]));
-        destFirst += (dest->d_stride[i]*(lower - dest->d_lower[i]));
+        srcFirst += (src->d_metadata.d_stride[i]*
+           (lower - src->d_metadata.d_lower[i]));
+        destFirst += (dest->d_metadata.d_stride[i]*
+           (lower - dest->d_metadata.d_lower[i]));
         current[i] = 0;
-        src_stride[i] = src->d_stride[i];
-        dst_stride[i] = dest->d_stride[i];
+        src_stride[i] = src->d_metadata.d_stride[i];
+        dst_stride[i] = dest->d_metadata.d_stride[i];
         if (((src_stride[i] == 1) || (src_stride[i] == -1) ||
              (dst_stride[i] == 1) || (dst_stride[i] == -1)) &&
             (overlap[i] >= moverRank)) {
@@ -1336,8 +1409,8 @@ sidl_string__array_copy(const struct sidl_string__array* src,
           const int32_t sstride2 = src_stride[2];
           const int32_t dstride1 = dst_stride[1] - bound2*dstride2;
           const int32_t sstride1 = src_stride[1] - bound2*sstride2;
-          const int32_t dstride0 = dst_stride[0] - bound1*dstride1;
-          const int32_t sstride0 = src_stride[0] - bound1*sstride1;
+          const int32_t dstride0 = dst_stride[0] - bound1*(dstride1 + bound2*dstride2);
+          const int32_t sstride0 = src_stride[0] - bound1*(sstride1 + bound2*sstride2);
           
           int32_t j, k;
           for(i = 0; i < bound0; ++i) {
@@ -1406,7 +1479,7 @@ sidl_string__array_ensure(struct sidl_string__array* src,
                           int                    ordering)
 {
   struct sidl_string__array* result = NULL;
-  if (src && (src->d_dimen == dimen)) {
+  if (src && (src->d_metadata.d_dimen == dimen)) {
     switch(ordering) {
     case sidl_column_major_order:
       if (sidl_string__array_isColumnOrder(src)) {
@@ -1415,7 +1488,7 @@ sidl_string__array_ensure(struct sidl_string__array* src,
       }
       else {
         result = sidl_string__array_createCol
-          (dimen, src->d_lower, src->d_upper);
+          (dimen, src->d_metadata.d_lower, src->d_metadata.d_upper);
         sidl_string__array_copy(src, result);
       }
       break;
@@ -1426,7 +1499,7 @@ sidl_string__array_ensure(struct sidl_string__array* src,
       }
       else {
         result = sidl_string__array_createRow
-          (dimen, src->d_lower, src->d_upper);
+          (dimen, src->d_metadata.d_lower, src->d_metadata.d_upper);
         sidl_string__array_copy(src, result);
       }
       break;

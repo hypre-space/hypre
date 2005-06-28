@@ -1,7 +1,6 @@
 /*
  * File:        sidl_float_IOR.h
  * Copyright:   (c) 2001-2002 The Regents of the University of California
- * Release:     $Name$
  * Revision:    @(#) $Revision$
  * Date:        $Date$
  * Description: float array declarations and definitions
@@ -21,43 +20,14 @@
 #endif
 
 
-/* forward declaration of struct sidl_float__array */
-struct sidl_float__array;
-
-/**
- * The virtual function table for the multi-dimensional arrays for
- * sidl float.
- */
-struct sidl_float__vtable {
-  /*
-   * This function should release resources associates with the array
-   * passed in.  It is called when the reference count goes to zero.
-   */
-  void (*d_destroy)(struct sidl_float__array *);
-
-  /*
-   * If this array controls its own data (i.e. owns the memory), this
-   * can simply increment the reference count of the argument and
-   * return it.  If the data is borrowed (e.g. a borrowed array), this
-   * should make a new array of the same size and copy data from the
-   * passed in array to the new array.
-   */
-  struct sidl_float__array *(*d_smartcopy)(struct sidl_float__array *);
-};
-
 /**
  * The data structure for multi-dimensional arrays for sidl float.
  * The client may access this with the functions below or using
  * the macros in the header file sidlArray.h.
  */
 struct sidl_float__array {
+  struct sidl__array   d_metadata;
   float *d_firstElement;
-  int32_t       *d_lower;
-  int32_t       *d_upper;
-  int32_t       *d_stride;
-  int32_t        d_dimen;
-  int32_t        d_refcount;
-  const struct sidl_float__vtable *d_vtable;
 };
 
 
@@ -84,6 +54,19 @@ struct sidl_float__array *
 sidl_float__array_createRow(int32_t       dimen,
                             const int32_t lower[],
                             const int32_t upper[]);
+
+/**
+ * Initialize the array meta-data for this sidl array from the passed
+ * in pointers. This is a little wierd, but all these pointers must
+ * be allocated, but only upper and c_array actually need to be
+ * initialized.  (We use upper, dim, andc_array to figure out the
+ * correct values for the rest of the data.)
+ * This function does not initialize the contents of the array.
+ */
+void
+sidl_float__array_init(const float* c_array,
+struct sidl_float__array* sidl_array, int32_t dim,
+int32_t lower[], int32_t upper[], int32_t stride[]);
 
 /**
  * Create a dense one-dimensional vector of floats with a lower
@@ -217,6 +200,17 @@ sidl_float__array_addRef(struct sidl_float__array* array);
  */
 void
 sidl_float__array_deleteRef(struct sidl_float__array* array);
+
+/**
+ * Attempt to cast a generic array reference to an float
+ * array. A non-NULL return value indicates that the cast was
+ * successful, and the returned pointer is a valid float
+ * array. A NULL return value indicates that the cast failed.
+ * This function never alters the reference count of array.
+ * 
+ */
+struct sidl_float__array*
+sidl_float__array_cast(struct sidl__array* array);
 
 /**
  * Retrieve element i1 of a one-dimensional array.

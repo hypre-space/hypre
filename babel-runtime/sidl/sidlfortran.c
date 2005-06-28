@@ -1,6 +1,5 @@
 /*
  * File:        sidlfortran.c
- * Release:     $Name$
  * Revision:    @(#) $Revision$
  * Date:        $Date$
  * Description: Functions for FORTRAN interoperability

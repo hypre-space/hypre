@@ -1,8 +1,8 @@
 /*
  * File:          sidl_DLL_Impl.h
- * Symbol:        sidl.DLL-v0.9.0
+ * Symbol:        sidl.DLL-v0.9.3
  * Symbol Type:   class
- * Babel Version: 0.9.8
+ * Babel Version: 0.10.4
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Server-side implementation for sidl.DLL
@@ -32,7 +32,7 @@
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.9.8
+ * babel-version = 0.10.4
  */
 
 #ifndef included_sidl_DLL_Impl_h
@@ -41,32 +41,38 @@
 #ifndef included_sidl_header_h
 #include "sidl_header.h"
 #endif
-#ifndef included_sidl_BaseClass_h
-#include "sidl_BaseClass.h"
-#endif
 #ifndef included_sidl_DLL_h
 #include "sidl_DLL.h"
 #endif
+#ifndef included_sidl_ClassInfo_h
+#include "sidl_ClassInfo.h"
+#endif
+#ifndef included_sidl_BaseInterface_h
+#include "sidl_BaseInterface.h"
+#endif
+#ifndef included_sidl_BaseClass_h
+#include "sidl_BaseClass.h"
+#endif
 
-#line 51 "../../../babel/runtime/sidl/sidl_DLL_Impl.h"
 /* DO-NOT-DELETE splicer.begin(sidl.DLL._includes) */
+#if defined(PIC) || !defined(SIDL_PURE_STATIC_RUNTIME)
 #ifndef LTDL_H
 #include "ltdl.h"
 #endif
+#else
+typedef void *lt_dlhandle;
+#endif /* defined(PIC) || !defined(SIDL_PURE_STATIC_RUNTIME) */
 /* DO-NOT-DELETE splicer.end(sidl.DLL._includes) */
-#line 57 "sidl_DLL_Impl.h"
 
 /*
  * Private data for class sidl.DLL
  */
 
 struct sidl_DLL__data {
-#line 62 "../../../babel/runtime/sidl/sidl_DLL_Impl.h"
   /* DO-NOT-DELETE splicer.begin(sidl.DLL._data) */
   lt_dlhandle d_library_handle;
   char* d_library_name;
   /* DO-NOT-DELETE splicer.end(sidl.DLL._data) */
-#line 69 "sidl_DLL_Impl.h"
 };
 
 #ifdef __cplusplus
@@ -86,43 +92,85 @@ sidl_DLL__set_data(
   sidl_DLL,
   struct sidl_DLL__data*);
 
-extern void
-impl_sidl_DLL__ctor(
-  sidl_DLL);
+extern
+void
+impl_sidl_DLL__load(
+  void);
 
-extern void
+extern
+void
+impl_sidl_DLL__ctor(
+  /* in */ sidl_DLL self);
+
+extern
+void
 impl_sidl_DLL__dtor(
-  sidl_DLL);
+  /* in */ sidl_DLL self);
 
 /*
  * User-defined object methods
  */
 
-extern sidl_bool
+extern struct sidl_DLL__object* impl_sidl_DLL_fconnect_sidl_DLL(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_sidl_DLL_fgetURL_sidl_DLL(struct sidl_DLL__object* obj);
+extern struct sidl_ClassInfo__object* 
+  impl_sidl_DLL_fconnect_sidl_ClassInfo(char* url, sidl_BaseInterface *_ex);
+extern char* impl_sidl_DLL_fgetURL_sidl_ClassInfo(struct 
+  sidl_ClassInfo__object* obj);
+extern struct sidl_BaseInterface__object* 
+  impl_sidl_DLL_fconnect_sidl_BaseInterface(char* url, sidl_BaseInterface *_ex);
+extern char* impl_sidl_DLL_fgetURL_sidl_BaseInterface(struct 
+  sidl_BaseInterface__object* obj);
+extern struct sidl_BaseClass__object* 
+  impl_sidl_DLL_fconnect_sidl_BaseClass(char* url, sidl_BaseInterface *_ex);
+extern char* impl_sidl_DLL_fgetURL_sidl_BaseClass(struct 
+  sidl_BaseClass__object* obj);
+extern
+sidl_bool
 impl_sidl_DLL_loadLibrary(
-  sidl_DLL,
-  const char*,
-  sidl_bool,
-  sidl_bool);
+  /* in */ sidl_DLL self,
+  /* in */ const char* uri,
+  /* in */ sidl_bool loadGlobally,
+  /* in */ sidl_bool loadLazy);
 
-extern char*
+extern
+char*
 impl_sidl_DLL_getName(
-  sidl_DLL);
+  /* in */ sidl_DLL self);
 
-extern void
+extern
+void
 impl_sidl_DLL_unloadLibrary(
-  sidl_DLL);
+  /* in */ sidl_DLL self);
 
-extern void*
+extern
+void*
 impl_sidl_DLL_lookupSymbol(
-  sidl_DLL,
-  const char*);
+  /* in */ sidl_DLL self,
+  /* in */ const char* linker_name);
 
-extern sidl_BaseClass
+extern
+sidl_BaseClass
 impl_sidl_DLL_createClass(
-  sidl_DLL,
-  const char*);
+  /* in */ sidl_DLL self,
+  /* in */ const char* sidl_name);
 
+extern struct sidl_DLL__object* impl_sidl_DLL_fconnect_sidl_DLL(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_sidl_DLL_fgetURL_sidl_DLL(struct sidl_DLL__object* obj);
+extern struct sidl_ClassInfo__object* 
+  impl_sidl_DLL_fconnect_sidl_ClassInfo(char* url, sidl_BaseInterface *_ex);
+extern char* impl_sidl_DLL_fgetURL_sidl_ClassInfo(struct 
+  sidl_ClassInfo__object* obj);
+extern struct sidl_BaseInterface__object* 
+  impl_sidl_DLL_fconnect_sidl_BaseInterface(char* url, sidl_BaseInterface *_ex);
+extern char* impl_sidl_DLL_fgetURL_sidl_BaseInterface(struct 
+  sidl_BaseInterface__object* obj);
+extern struct sidl_BaseClass__object* 
+  impl_sidl_DLL_fconnect_sidl_BaseClass(char* url, sidl_BaseInterface *_ex);
+extern char* impl_sidl_DLL_fgetURL_sidl_BaseClass(struct 
+  sidl_BaseClass__object* obj);
 #ifdef __cplusplus
 }
 #endif

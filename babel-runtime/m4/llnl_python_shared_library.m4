@@ -36,6 +36,22 @@ AC_DEFUN([LLNL_PYTHON_SHARED_LIBRARY],[
     fi
   done
 
+  if test "$llnl_python_shared_library_found" != "yes"; then
+    case "$target_os" in
+      darwin*)
+        llnl_python_shared_library="libpython$llnl_cv_python_version.dylib"
+        for f in `echo $llnl_python_shared_lib_path | tr ';:' '  '` $llnl_cv_python_library/config /bin /lib /usr/lib `test -f /etc/ld.so.conf && cat /etc/ld.so.conf` ; do
+          if test -f "$f/$llnl_python_shared_library"; then
+            llnl_python_shared_library_found=yes
+            llnl_python_shared_library="$f/$llnl_python_shared_library"
+            llnl_python_shared_library_dir="$f"
+            break
+          fi
+        done
+        ;;
+    esac
+  fi
+
   if test "$llnl_python_shared_library_found" = "yes"; then
     AC_DEFINE_UNQUOTED(PYTHON_SHARED_LIBRARY,"$llnl_python_shared_library",[Fully qualified string name of the Python shared library])
     AC_DEFINE_UNQUOTED(PYTHON_SHARED_LIBRARY_DIR,"$llnl_python_shared_library_dir",[Directory of the Python shared library])

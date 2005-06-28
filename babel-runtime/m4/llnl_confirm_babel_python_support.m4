@@ -19,8 +19,7 @@ AC_DEFUN([LLNL_CONFIRM_BABEL_PYTHON_SUPPORT],
  [AC_REQUIRE([LLNL_LIBXML_CONFIG])dnl
   AC_ARG_VAR([JAR],[Python interpreter])
   AC_ARG_ENABLE([python],
-        AC_HELP_STRING([--enable-python@<:@=PYTHON@:>@],
-                       [python language bindings @<:@default=yes@:>@]),
+        AS_HELP_STRING(--enable-python@<:@=PYTHON@:>@,python language bindings @<:@default=yes@:>@),
                [enable_python="$enableval"],
                [enable_python=yes])
   test -z "$enable_python" && enable_python=yes

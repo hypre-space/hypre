@@ -12,9 +12,9 @@ AC_DEFUN([LLNL_CHECK_INT32_T],
 [AC_REQUIRE([LLNL_FIND_32BIT_SIGNED_INT])dnl
  AC_REQUIRE([AC_HEADER_STDC])dnl
  AC_CACHE_CHECK(for int32_t, llnl_cv_int32_t,
- [AC_LANG_SAVE
-  AC_LANG_C
-  AC_TRY_COMPILE([#ifdef HAVE_INTTYPES_H
+ [
+  AC_LANG_PUSH([C])
+  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#ifdef HAVE_INTTYPES_H
 #include <inttypes.h>
 #endif
 #include <sys/types.h>
@@ -22,8 +22,8 @@ AC_DEFUN([LLNL_CHECK_INT32_T],
 #include <stdlib.h>
 #include <stddef.h>
 #endif
-],[int32_t t],llnl_cv_int32_t=yes,llnl_cv_int32_t=no)
-  AC_LANG_RESTORE
+]], [[int32_t t]])],[llnl_cv_int32_t=yes],[llnl_cv_int32_t=no])
+  AC_LANG_POP([])
 ])
 if test "$llnl_cv_int32_t" = no; then 
   if test "$llnl_cv_find_32bit_signed_int" = "unresolved"; then

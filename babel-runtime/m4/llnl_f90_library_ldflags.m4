@@ -62,7 +62,7 @@ while test $[@%:@] != 1; do
              [_AC_LINKER_OPTION([$ac_arg], ac_cv_[]_AC_LANG_ABBREV[]_libs)])
           ;;
           # Ignore these flags.
-        -lang* | -lcrt[[012]].o | -lcrtbegin.o | -lc | -lgcc | -libmil | -LANG:=*)
+        -lang* | -lcrt[[012]].o | -lcrtbegin.o | -lc | -lgcc | -libmil | -LANG:=* | -lgfortranbegin )
           ;;
         -lkernel32)
           test x"$CYGWIN" != xyes && ac_cv_[]_AC_LANG_ABBREV[]_libs="$ac_cv_[]_AC_LANG_ABBREV[]_libs $ac_arg"
@@ -107,6 +107,8 @@ case `(uname -sr) 2>/dev/null` in
                         sed -n 's,^.*LD_RUN_PATH *= *\(/[[^ ]]*\).*$,-R\1,p'`
       test "x$ac_ld_run_path" != x &&
         _AC_LINKER_OPTION([$ac_ld_run_path], ac_cv_[]_AC_LANG_ABBREV[]_libs)
+      # add -mimpure-text
+      ac_cv_[]_AC_LANG_ABBREV[]_libs="-mimpure-text $ac_cv_[]_AC_LANG_ABBREV[]_libs"
       ;;
 esac
 

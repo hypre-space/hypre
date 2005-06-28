@@ -25,8 +25,8 @@ changequote([, ])dnl
     if AC_TRY_COMMAND($JAVAC $JAVACFLAGS $JAVA_TEST) && test -s $CLASS_TEST; then
       :
     else
-      echo "configure: failed program was:" >&AC_FD_CC
-      cat $JAVA_TEST >&AC_FD_CC
+      echo "configure: failed program was:" >&AS_MESSAGE_LOG_FD()
+      cat $JAVA_TEST >&AS_MESSAGE_LOG_FD()
       AC_MSG_ERROR(The Java compiler $JAVAC failed (see config.log, check the CLASSPATH?))
     fi
     if AC_TRY_COMMAND($JAVA $JAVAFLAGS -addclasspath . $TEST) >/dev/null 2>&1; then
@@ -36,8 +36,8 @@ changequote([, ])dnl
       llnl_cv_check_java_addclasspath="-classpath"
       rm -fr $JAVA_TEST $CLASS_TEST
     elif AC_TRY_COMMAND($JAVA $JAVAFLAGS $TEST) >/dev/null 2>&1; then
-      echo "configure: failed program was:" >&AC_FD_CC
-      cat $JAVA_TEST >&AC_FD_CC
+      echo "configure: failed program was:" >&AS_MESSAGE_LOG_FD()
+      cat $JAVA_TEST >&AS_MESSAGE_LOG_FD()
       AC_MSG_ERROR($JAVA $JAVAFLAGS $TEST failed with both -classpath and -addclasspath )
     else 
       llnl_cv_check_java_addclasspath=

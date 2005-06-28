@@ -1,7 +1,6 @@
 ##
 ## File:        Makefile.am 
 ## Package:     Babel makefiles
-## Release:     $Name$
 ## Revision:    $Revision$
 ## Modified:    $Date$
 ## Description: automake makefile to build the sidl runtime library
@@ -31,47 +30,67 @@
 ## Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
 
-INCLUDEDIR  = $(top_builddir)/sidl
+INCLUDEDIR  = $(srcdir)/../sidl
 INCLUDEDIR2 = .
 LIBSIDL    = $(top_builddir)/sidl/libsidl.la
 
-VERSION=@VERSION@
-
-data_DATA = sidlx.sidl
+dist_data_DATA = sidlx.sidl
+include_HEADERS = $(STUBHDRS) sidlx_common.h
 
 lib_LTLIBRARIES = libsidlx.la 
-libsidlx_la_SOURCES = force_cxx_linker.cc sidlx_common.c 
-libsidlx_la_DEPENDENCIES = babel-stamp $(STUBHDRS) sidlx_common.h $(ALLOBJS)
-libsidlx_la_LIBADD = $(ALLOBJS)
-libsidlx_la_LDFLAGS = -no-undefined -release $(VERSION) -rpath `pwd`
+libsidlx_la_SOURCES = $(IMPLSRCS) $(IMPLHDRS) sidlx_common.c sidlx_common.h \
+	$(STUBSRCS) $(STUBHDRS) $(IORSRCS) $(IORHDRS) \
+	$(SKELSRCS) $(SKELHDRS) 
+libsidlx_la_LDFLAGS = -no-undefined -release $(VERSION) $(LIBSIDL)
 
-EXTRA_DIST = $(data_DATA) $(IMPLSRCS) $(IMPLHDRS) babel.make 
+AM_CPPFLAGS = -I$(INCLUDEDIR) -I$(INCLUDEDIR2)
 
-IOROBJS  = $(IORSRCS:.c=.lo)
-STUBOBJS = $(STUBSRCS:.cc=.lo)
-SKELOBJS = $(SKELSRCS:.cc=.lo)
-IMPLOBJS = $(IMPLSRCS:.cc=.lo)
-ALLOBJS = $(STUBOBJS) $(IOROBJS) $(SKELOBJS) $(IMPLOBJS)
+EXTRA_DIST = babel.make libsidlx.scl.in
 
+libsidlx.scl:
+	sed -e 's,@@DIR@@,'`pwd`',g' < $(srcdir)/libsidlx.scl.in > libsidlx.scl
 
-# $(STUBHDRS) $(IOROBJS) $(STUBOBJS) $(SKELOBJS) $(IMPLOBJS): babel-stamp
-
-babel-stamp: $(srcdir)/sidlx.sidl
-	$(SHELL) ../../bin/babel --vpath="$(srcdir)" --server=C \
-	  --suppress-timestamp $(srcdir)/sidlx.sidl
-	rm -f sidlx.scl
-	echo "<?xml version=\"1.0\" ?>" > sidlx.scl
-	echo "<scl>" >> sidlx.scl
-	echo "  <library uri=\""`pwd`"/libsidlx.la\" scope=\"local\" resolution=\"lazy\" >" >> sidlx.scl
-	grep __set_epv $(IORSRCS) /dev/null | awk 'BEGIN {FS=":"} { print $$1}' | sort -u | sed -e 's/_IOR.c//g' -e 's/_/./g' | awk ' { printf "    <class name=\"%s\" desc=\"ior/impl\" />\n", $$1 }' >> sidlx.scl
-	echo "  </library>" >> sidlx.scl
-	echo "</scl>" >> sidlx.scl
+if BABEL_RUNTIME_ONLY
+babel-stamp:
 	touch babel-stamp
-#	$(MAKE) $(AM_MAKEFLAGS) $(IOROBJS) $(STUBOBJS) $(SKELOBJS) $(IMPLOBJS)
+
+else
+$(STUBSRCS) $(STUBHDRS) $(IORSRCS) $(IORHDRS) $(SKELSRCS) $(SKELHEDRS) $(IMPLSRCS) $(IMPLHDRS) : babel-stamp
+	@if test -f $@; then \
+		touch $@; \
+	 else \
+		rm -f babel-stamp; \
+		$(MAKE) $(AM_MAKEFLAGS) babel-stamp; \
+	 fi
+
+babel-stamp: $(srcdir)/sidlx.sidl libsidlx.scl
+	@rm -f babel-temp
+	@touch babel-temp
+	$(SHELL) ../../bin/babel --vpath="$(srcdir)" --server=C \
+	  --suppress-timestamp -! $(srcdir)/../sidl/sidl.sidl \
+	$(srcdir)/sidlx.sidl
+	@mv -f babel-temp $@
+endif
+
+CLEANFILES = babel-stamp babel-temp libsidlx.scl \
+	$(STUBSRCS) $(STUBHDRS) $(IORSRCS) $(IORHDRS) $(SKELSRCS) $(SKELHDRS) \
+	babel.make.package babel.make.depends
 
 clean-local:
-	rm -f babel-stamp *.a *.so *.scl stamp-installcheck core 
-	rm -f $(IORHDRS) $(IORSRCS) $(SKELSRCS) $(STUBHDRS) $(STUBSRCS) 
-	test "X$(srcdir)" = "X." || rm -f $(IMPLSRCS) $(IMPLHDRS) babel.make 
+	test "X$(srcdir)" = "X." || rm -f $(IMPLSRCS) $(IMPLHDRS)
+
 
 include babel.make
+
+# Make sure Makefile.in is newer than babel.make
+dist-hook:
+	touch -c $(distdir)/Makefile.in
+
+install-data-local:
+	sed -e 's,@@DIR@@,$(DESTDIR)$(libdir),g' < $(srcdir)/libsidlx.scl.in \
+		> libsidlx_inst.scl
+	$(INSTALL_DATA) libsidlx_inst.scl $(DESTDIR)$(libdir)/libsidlx.scl
+	rm -f libsidlx_inst.scl
+
+uninstall-local:
+	$(RM) $(DESTDIR)$(libdir)/libsidlx.scl

@@ -1,7 +1,6 @@
 /*
  * File:        sidl_search_scl.h
  * Copyright:   (c) 2003 The Regents of the University of California
- * Release:     $Name$
  * Revision:    @(#) $Revision$
  * Date:        $Date$
  * Description: Method to search an SCL file for a particular class

@@ -35,6 +35,7 @@ LLNL_M4_FILES=\
 	llnl_confirm_babel_f77_support.m4\
 	llnl_confirm_babel_f90_support.m4\
 	llnl_confirm_babel_java_support.m4\
+	llnl_confirm_babel_java_support_runtime.m4\
 	llnl_confirm_babel_python_support.m4\
 	llnl_cxx_library_ldflags.m4\
 	llnl_cxx_old_header_suffix.m4\
@@ -61,6 +62,7 @@ LLNL_M4_FILES=\
 	llnl_prog_java.m4\
 	llnl_prog_python.m4\
 	llnl_prog_test_ef.m4\
+	llnl_pure_static_runtime.m4\
 	llnl_python_aix.m4\
 	llnl_python_library.m4\
 	llnl_python_numeric.m4\
@@ -69,7 +71,8 @@ LLNL_M4_FILES=\
 	llnl_sort_flibs.m4\
 	llnl_which_prog.m4
 
-MISC_M4_FILES=libtool.m4 ltdl.m4
+MISC_M4_FILES=libtool.m4 ltdl.m4 cca_bundle_tag.m4
+EXTRA_DIST=llnl_confirm_babel_java_support.m4
 
 aclocaldir=$(datadir)/aclocal
 

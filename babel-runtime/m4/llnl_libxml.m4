@@ -8,8 +8,7 @@ AC_DEFUN([LLNL_LIBXML_CONFIG],
 [LIBXML_REQUIRED_VERSION=2.4.0
 
  AC_ARG_WITH([libxml2],
-	[AC_HELP_STRING([--with-libxml2@<:@=DIR@:>@],
-		[use libxml2 in @<:@DIR@:>@ (YES if found)])],,[withval=maybe])
+	[AS_HELP_STRING(--with-libxml2@<:@=DIR@:>@,use libxml2 in @<:@DIR@:>@ (YES if found))],,[withval=maybe])
 
 dnl if the user explicitly asked for no libxml2 (Babel requires it)
 if test "$withval" != "no"; then

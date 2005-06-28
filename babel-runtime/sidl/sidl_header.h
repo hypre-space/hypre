@@ -1,7 +1,6 @@
 /*
  * File:        sidl_header.h
  * Copyright:   (c) 2001 The Regents of the University of California
- * Release:     $Name$
  * Revision:    @(#) $Revision$
  * Date:        $Date$
  * Description: 
@@ -39,6 +38,9 @@
 #endif
 #ifndef included_sidlArray_h
 #include "sidlArray.h"
+#endif
+#ifndef included_sidlOps_h
+#include "sidlOps.h"
 #endif
 #ifndef included_sidl_double_IOR_h
 #include "sidl_double_IOR.h"

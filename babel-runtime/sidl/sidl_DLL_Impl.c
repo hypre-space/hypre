@@ -1,8 +1,8 @@
 /*
  * File:          sidl_DLL_Impl.c
- * Symbol:        sidl.DLL-v0.9.0
+ * Symbol:        sidl.DLL-v0.9.3
  * Symbol Type:   class
- * Babel Version: 0.9.8
+ * Babel Version: 0.10.4
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Server-side implementation for sidl.DLL
@@ -32,7 +32,7 @@
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.9.8
+ * babel-version = 0.10.4
  */
 
 /*
@@ -41,7 +41,7 @@
  */
 
 /*
- * Symbol "sidl.DLL" (version 0.9.0)
+ * Symbol "sidl.DLL" (version 0.9.3)
  * 
  * The <code>DLL</code> class encapsulates access to a single
  * dynamically linked library.  DLLs are loaded at run-time using
@@ -53,7 +53,6 @@
 
 #include "sidl_DLL_Impl.h"
 
-#line 56 "../../../babel/runtime/sidl/sidl_DLL_Impl.c"
 /* DO-NOT-DELETE splicer.begin(sidl.DLL._includes) */
 #include <dlfcn.h>
 #include <stdlib.h>
@@ -105,7 +104,9 @@ static void check_lt_initialized(void)
 {
   static int initialized = FALSE;
   if (!initialized) {
+#if defined(PIC) || !defined(SIDL_PURE_STATIC_RUNTIME)
     (void) lt_dlinit();
+#endif /* defined(PIC) || !defined(SIDL_PURE_STATIC_RUNTIME) */
     initialized = TRUE;
   }
 }
@@ -129,14 +130,33 @@ static void showLoadResult(void *handle)
     fprintf(stderr, "ok\n");
   }
   else {
+#if defined(PIC) || !defined(SIDL_PURE_STATIC_RUNTIME)
     const char *errmsg = lt_dlerror(); 
     fprintf(stderr,"ERROR\n%s\n", errmsg);
+#endif
   }
 }
 
 /* DO-NOT-DELETE splicer.end(sidl.DLL._includes) */
-#line 138 "sidl_DLL_Impl.c"
 
+/*
+ * Static class initializer called exactly once before any user-defined method is dispatched
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_sidl_DLL__load"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+void
+impl_sidl_DLL__load(
+  void)
+{
+  /* DO-NOT-DELETE splicer.begin(sidl.DLL._load) */
+  /* Insert the implementation of the static class initializer method here... */
+  /* DO-NOT-DELETE splicer.end(sidl.DLL._load) */
+}
 /*
  * Class constructor called when the class is created.
  */
@@ -144,11 +164,13 @@ static void showLoadResult(void *handle)
 #undef __FUNC__
 #define __FUNC__ "impl_sidl_DLL__ctor"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 void
 impl_sidl_DLL__ctor(
-  /*in*/ sidl_DLL self)
+  /* in */ sidl_DLL self)
 {
-#line 149 "../../../babel/runtime/sidl/sidl_DLL_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidl.DLL._ctor) */
   struct sidl_DLL__data* data =
     (struct sidl_DLL__data*) malloc(sizeof (struct sidl_DLL__data));
@@ -162,7 +184,6 @@ impl_sidl_DLL__ctor(
 
   sidl_DLL__set_data(self, data);
   /* DO-NOT-DELETE splicer.end(sidl.DLL._ctor) */
-#line 165 "sidl_DLL_Impl.c"
 }
 
 /*
@@ -172,11 +193,13 @@ impl_sidl_DLL__ctor(
 #undef __FUNC__
 #define __FUNC__ "impl_sidl_DLL__dtor"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 void
 impl_sidl_DLL__dtor(
-  /*in*/ sidl_DLL self)
+  /* in */ sidl_DLL self)
 {
-#line 175 "../../../babel/runtime/sidl/sidl_DLL_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidl.DLL._dtor) */
   struct sidl_DLL__data *data = sidl_DLL__get_data(self);
 
@@ -185,7 +208,6 @@ impl_sidl_DLL__dtor(
   free((void*) data);
   sidl_DLL__set_data(self, NULL);
   /* DO-NOT-DELETE splicer.end(sidl.DLL._dtor) */
-#line 188 "sidl_DLL_Impl.c"
 }
 
 /*
@@ -225,12 +247,16 @@ impl_sidl_DLL__dtor(
 #undef __FUNC__
 #define __FUNC__ "impl_sidl_DLL_loadLibrary"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 sidl_bool
 impl_sidl_DLL_loadLibrary(
-  /*in*/ sidl_DLL self, /*in*/ const char* uri, /*in*/ sidl_bool loadGlobally,
-    /*in*/ sidl_bool loadLazy)
+  /* in */ sidl_DLL self,
+  /* in */ const char* uri,
+  /* in */ sidl_bool loadGlobally,
+  /* in */ sidl_bool loadLazy)
 {
-#line 227 "../../../babel/runtime/sidl/sidl_DLL_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidl.DLL.loadLibrary) */
   struct sidl_DLL__data *data = sidl_DLL__get_data(self);
 
@@ -246,6 +272,11 @@ impl_sidl_DLL_loadLibrary(
   if (sidl_String_equals(uri, "main:")) {
     dllfile = NULL;
     dllname = sidl_String_strdup(uri);
+#if !defined(PIC) && defined(SIDL_PURE_STATIC_RUNTIME)
+    data->d_library_handle = NULL;
+    data->d_library_name = dllname;
+    return TRUE;
+#endif
 
   } else if (sidl_String_startsWith(uri, "lib:")) {
     char* dll = sidl_String_substring(uri, 4);
@@ -274,7 +305,11 @@ impl_sidl_DLL_loadLibrary(
 
   if (s_sidl_debug_dlopen) showLoading(dllfile);
   check_lt_initialized();
+#if defined(PIC) || !defined(SIDL_PURE_STATIC_RUNTIME)
   handle = lt_dlopen(dllfile, loadGlobally, loadLazy);
+#else
+  handle = NULL;
+#endif
   if (s_sidl_debug_dlopen) showLoadResult((void *)handle);
   sidl_String_free(dllfile);
 
@@ -289,7 +324,6 @@ impl_sidl_DLL_loadLibrary(
 
   return ok;
   /* DO-NOT-DELETE splicer.end(sidl.DLL.loadLibrary) */
-#line 292 "sidl_DLL_Impl.c"
 }
 
 /*
@@ -301,11 +335,13 @@ impl_sidl_DLL_loadLibrary(
 #undef __FUNC__
 #define __FUNC__ "impl_sidl_DLL_getName"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 char*
 impl_sidl_DLL_getName(
-  /*in*/ sidl_DLL self)
+  /* in */ sidl_DLL self)
 {
-#line 300 "../../../babel/runtime/sidl/sidl_DLL_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidl.DLL.getName) */
   struct sidl_DLL__data *data = sidl_DLL__get_data(self);
 
@@ -315,7 +351,6 @@ impl_sidl_DLL_getName(
   }
   return name;
   /* DO-NOT-DELETE splicer.end(sidl.DLL.getName) */
-#line 318 "sidl_DLL_Impl.c"
 }
 
 /*
@@ -328,22 +363,25 @@ impl_sidl_DLL_getName(
 #undef __FUNC__
 #define __FUNC__ "impl_sidl_DLL_unloadLibrary"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 void
 impl_sidl_DLL_unloadLibrary(
-  /*in*/ sidl_DLL self)
+  /* in */ sidl_DLL self)
 {
-#line 325 "../../../babel/runtime/sidl/sidl_DLL_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidl.DLL.unloadLibrary) */
   struct sidl_DLL__data *data = sidl_DLL__get_data(self);
 
   if (data->d_library_handle) {
+#if defined(PIC) || !defined(SIDL_PURE_STATIC_RUNTIME)
     (void) lt_dlclose(data->d_library_handle);
+#endif
     sidl_String_free(data->d_library_name);
     data->d_library_handle = NULL;
     data->d_library_name   = NULL;
   }
   /* DO-NOT-DELETE splicer.end(sidl.DLL.unloadLibrary) */
-#line 346 "sidl_DLL_Impl.c"
 }
 
 /*
@@ -354,21 +392,25 @@ impl_sidl_DLL_unloadLibrary(
 #undef __FUNC__
 #define __FUNC__ "impl_sidl_DLL_lookupSymbol"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 void*
 impl_sidl_DLL_lookupSymbol(
-  /*in*/ sidl_DLL self, /*in*/ const char* linker_name)
+  /* in */ sidl_DLL self,
+  /* in */ const char* linker_name)
 {
-#line 349 "../../../babel/runtime/sidl/sidl_DLL_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidl.DLL.lookupSymbol) */
   struct sidl_DLL__data *data = sidl_DLL__get_data(self);
 
   void* address = NULL;
   if (data->d_library_handle) {
+#if defined(PIC) || !defined(SIDL_PURE_STATIC_RUNTIME)
     address = (void*) lt_dlsym(data->d_library_handle, linker_name);
+#endif
   }
   return address;
   /* DO-NOT-DELETE splicer.end(sidl.DLL.lookupSymbol) */
-#line 371 "sidl_DLL_Impl.c"
 }
 
 /*
@@ -379,11 +421,14 @@ impl_sidl_DLL_lookupSymbol(
 #undef __FUNC__
 #define __FUNC__ "impl_sidl_DLL_createClass"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 sidl_BaseClass
 impl_sidl_DLL_createClass(
-  /*in*/ sidl_DLL self, /*in*/ const char* sidl_name)
+  /* in */ sidl_DLL self,
+  /* in */ const char* sidl_name)
 {
-#line 372 "../../../babel/runtime/sidl/sidl_DLL_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidl.DLL.createClass) */
   struct sidl_DLL__data *data = sidl_DLL__get_data(self);
   sidl_BaseClass (*ctor)(void) = NULL;
@@ -399,11 +444,47 @@ impl_sidl_DLL_createClass(
       ptr++;
     }
 
+#if defined(PIC) || !defined(SIDL_PURE_STATIC_RUNTIME)
     ctor = (sidl_BaseClass (*)(void)) lt_dlsym(data->d_library_handle, linker);
+#else
+    ctor = NULL;
+#endif
     sidl_String_free(linker);
   }
 
   return ctor ? (*ctor)() : NULL;
   /* DO-NOT-DELETE splicer.end(sidl.DLL.createClass) */
-#line 408 "sidl_DLL_Impl.c"
+}
+/* Babel internal methods, Users should not edit below this line. */
+struct sidl_DLL__object* impl_sidl_DLL_fconnect_sidl_DLL(char* url,
+  sidl_BaseInterface *_ex) {
+  return sidl_DLL__connect(url, _ex);
+}
+char * impl_sidl_DLL_fgetURL_sidl_DLL(struct sidl_DLL__object* obj) {
+  return sidl_DLL__getURL(obj);
+}
+struct sidl_ClassInfo__object* impl_sidl_DLL_fconnect_sidl_ClassInfo(char* url,
+  sidl_BaseInterface *_ex) {
+  return sidl_ClassInfo__connect(url, _ex);
+}
+char * impl_sidl_DLL_fgetURL_sidl_ClassInfo(struct sidl_ClassInfo__object* obj) 
+  {
+  return sidl_ClassInfo__getURL(obj);
+}
+struct sidl_BaseInterface__object* 
+  impl_sidl_DLL_fconnect_sidl_BaseInterface(char* url,
+  sidl_BaseInterface *_ex) {
+  return sidl_BaseInterface__connect(url, _ex);
+}
+char * impl_sidl_DLL_fgetURL_sidl_BaseInterface(struct 
+  sidl_BaseInterface__object* obj) {
+  return sidl_BaseInterface__getURL(obj);
+}
+struct sidl_BaseClass__object* impl_sidl_DLL_fconnect_sidl_BaseClass(char* url,
+  sidl_BaseInterface *_ex) {
+  return sidl_BaseClass__connect(url, _ex);
+}
+char * impl_sidl_DLL_fgetURL_sidl_BaseClass(struct sidl_BaseClass__object* obj) 
+  {
+  return sidl_BaseClass__getURL(obj);
 }

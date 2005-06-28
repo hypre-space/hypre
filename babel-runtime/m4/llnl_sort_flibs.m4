@@ -15,6 +15,7 @@ dnl @author Gary Kumfert <kumfert1@llnl.gov>
 dnl
 AC_DEFUN([LLNL_SORT_FLIBS],
 [AC_REQUIRE([LLNL_F77_LIBRARY_LDFLAGS])dnl
+AC_MSG_CHECKING([form of Fortran 77 library flags])
 flibs1=
 flibs2=
 for arg in $FLIBS; do
@@ -27,12 +28,12 @@ for arg in $FLIBS; do
     /*.a)
       arg1=-L`dirname $arg`
       arg2=`basename $arg .a`
-      arg2=`echo $arg2 | sed 's/^lib/-l'/'`
+      arg2=`echo $ECHO_N $arg2 | sed -e 's/^lib/-l/'`
       ;;
     /*.so)
       arg1=-L`dirname $arg`
       arg2=`basename $arg .so`
-      arg2=`echo $arg2 | sed 's/^lib/-l'/'`
+      arg2=`echo $ECHO_N $arg2 | sed -e 's/^lib/-l/'`
       ;;
     *)
       arg1=$arg
@@ -41,11 +42,11 @@ for arg in $FLIBS; do
   if test -n "$arg1"; then
     exists=false
     for f in $flibs1; do
-      if test x$arg1 = x$f; then 
+      if test "x$arg1" = "x$f"; then 
         exists=true
       fi
     done
-    if $exists; then
+    if test "$exists" = true; then
       :
     else
       flibs1="$flibs1 $arg1"
@@ -54,11 +55,11 @@ for arg in $FLIBS; do
   if test -n "$arg2"; then
     exists=false
     for f in $flibs2; do
-      if test x$arg2 = x$f; then 
+      if test "x$arg2" = "x$f"; then 
         exists=true
       fi
     done
-    if $exists; then
+    if test "$exists" = true; then
       :
     else
       flibs2="$flibs2 $arg2"
@@ -67,4 +68,5 @@ for arg in $FLIBS; do
 done
 FLIBS="$flibs1 $flibs2"
 AC_SUBST(FLIBS)
+AC_MSG_RESULT($FLIBS)
 ])

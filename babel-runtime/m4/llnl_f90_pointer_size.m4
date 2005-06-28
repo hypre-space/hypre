@@ -35,6 +35,7 @@ extern "C"
 void $ac_cv_f90_pointer_func(char *p1, char *p2)
 {
   printf("%ld\n", (long)(p2 - p1));
+  fflush(stdout); /* needed for gfortran */
 }
 ],
    [mv conftest.$ac_objext cf90_test.$ac_objext
@@ -42,7 +43,7 @@ void $ac_cv_f90_pointer_func(char *p1, char *p2)
     AC_LANG_PUSH(Fortran)dnl
     ac_save_LIBS=$LIBS
     LIBS="cf90_test.$ac_objext $LIBS"
-    AC_TRY_LINK(,[
+    AC_LINK_IFELSE([AC_LANG_PROGRAM([[]], [[
   implicit none
   type foo 
     sequence
@@ -57,7 +58,7 @@ void $ac_cv_f90_pointer_func(char *p1, char *p2)
   external pointerdiff
   type(foowrap), dimension(2) :: fooa
   call pointerdiff(fooa(1), fooa(2))
-],[dnl
+]])],[dnl
       ac_cv_f90_pointer_size=`./conftest$ac_exeext`
       if test -z "$ac_cv_f90_pointer_size"; then
 	AC_MSG_ERROR([Unable to determine pointer size (running ./conftest$ac_exeext produced no output)])

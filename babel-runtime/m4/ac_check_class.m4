@@ -27,7 +27,7 @@ dnl Normaly I'd use a AC_CACHE_CHECK here but since the variable name is
 dnl dynamic I need an extra level of extraction
 AC_MSG_CHECKING([for $1 class])
 AC_CACHE_VAL(ac_cv_class_$ac_var_name, [
-if test x$ac_cv_prog_uudecode_base64 = xyes; then
+if test "x$ac_cv_prog_uudecode_base64" = "xyes"; then
 dnl /**
 dnl  * Test.java: used to test dynamicaly if a class exists.
 dnl  */
@@ -78,9 +78,9 @@ EOF
                 if uudecode$EXEEXT Test.uue; then
                         :
                 else
-                        echo "configure: __oline__: uudecode had trouble decoding base 64 file 'Test.uue'" >&AC_FD_CC
-                        echo "configure: failed file was:" >&AC_FD_CC
-                        cat Test.uue >&AC_FD_CC
+                        echo "configure: __oline__: uudecode had trouble decoding base 64 file 'Test.uue'" >&AS_MESSAGE_LOG_FD()
+                        echo "configure: failed file was:" >&AS_MESSAGE_LOG_FD()
+                        cat Test.uue >&AS_MESSAGE_LOG_FD()
                         ac_cv_prog_uudecode_base64=no
                 fi
         rm -f Test.uue
@@ -97,7 +97,7 @@ fi
 eval "ac_var_val=$`eval echo ac_cv_class_$ac_var_name`"
 eval "HAVE_$ac_var_name=$`echo ac_cv_class_$ac_var_val`"
 HAVE_LAST_CLASS=$ac_var_val
-if test x$ac_var_val = xyes; then
+if test "x$ac_var_val" = xyes; then
         ifelse([$2], , :, [$2])
 else
         ifelse([$3], , :, [$3])

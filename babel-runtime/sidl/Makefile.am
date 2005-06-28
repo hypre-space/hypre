@@ -1,7 +1,6 @@
 ##
 ## File:        Makefile.am 
 ## Package:     Babel makefiles
-## Release:     $Name$
 ## Revision:    $Revision$
 ## Modified:    $Date$
 ## Description: automake makefile to build the sidl runtime library
@@ -30,12 +29,36 @@
 ## along with this program; if not, write to the Free Software Foundation,
 ## Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
+dist_data_DATA = sidl.sidl
+
+execincldir = $(exec_prefix)/include
+nodist_execincl_HEADERS =  babel_config.h
+DISTCLEANFILES=babel_config.h
+
+#(gkk) Seems all IOR.c's require sidl_BaseClass__get_data.
+#(gkk) So we'll install this one Impl.h.... for now 
+include_HEADERS = $(STUBHDRS) $(IORHDRS) $(CUSTOMHDRS) sidl_BaseClass_Impl.h
+
+lib_LTLIBRARIES = libsidl.la 
+# Note do not use nodist_libsidl_la_SOURCES here unless you've
+# thought through how babel-runtime.tar.gz is going to work.
+libsidl_la_SOURCES = $(IMPLSRCS) $(IMPLHDRS) ltdl.c \
+	$(CUSTOMSRCS) $(CUSTOMHDRS) \
+	$(STUBSRCS) $(STUBHDRS) $(IORSRCS) $(IORHDRS) \
+	$(SKELSRCS) $(SKELHDRS)
+libsidl_la_DEPENDENCIES = ../sidlx/babel-stamp
+libsidl_la_LIBADD = $(LIBADD_DL) $(CHASM_LIBS) $(LIBXML2_LIB)
+libsidl_la_LDFLAGS = -no-undefined -release $(VERSION)
+$(libsidl_la_OBJECTS) $(nodist_libsidl_la_OBJECTS) : babel_config.h
+
+EXTRA_DIST = $(SRCS_EXCLUDED) ltdl.h ignore_me.h.in \
+	libsidl.scl.in scl.dtd changeundef.py
 
 
-INCLUDES=$(CHASM_CFLAGS) $(LIBXML2_CFLAGS)
-VERSION=@VERSION@
+AM_CPPFLAGS=$(CHASM_CFLAGS) $(LIBXML2_CFLAGS) $(JNI_INCLUDES) -I$(srcdir)/../sidlx
 
-data_DATA = sidl.sidl
+SRCS_EXCLUDED = $(FORTRAN_EXCLUDED) $(PYTHON_EXCLUDED) $(JAVA_EXCLUDED)
+SRCS_INCLUDED = $(FORTRAN_SOURCES) $(PYTHON_SOURCES) $(JAVA_SOURCES)
 
 if SUPPORT_FORTRAN77 
 FORTRAN_SOURCES = sidlfortran.c sidlf90array.c
@@ -59,28 +82,14 @@ else
 JAVA_EXCLUDED = sidl_Java.c
 endif
 
-SRCS_EXCLUDED = $(FORTRAN_EXCLUDED) $(PYTHON_EXCLUDED) $(JAVA_EXCLUDED)
-SRCS_INCLUDED = $(FORTRAN_SOURCES) $(PYTHON_SOURCES) $(JAVA_SOURCES)
-
-lib_LTLIBRARIES = libsidl.la 
-include_HEADERS = $(HEADERS_INSTALL)
-
-execincldir = $(exec_prefix)/include
-nodist_execincl_HEADERS =  babel_config.h
-
-libsidl_la_SOURCES = $(SOURCES_HAND) ltdl.c
-libsidl_la_DEPENDENCIES = $(HEADERS_BABEL) $(OBJECTS_BABEL) $(OBJECTS_SPLICE)
-libsidl_la_LIBADD = $(OBJECTS_BABEL) $(OBJECTS_SPLICE) $(LIBADD_DL) $(CHASM_LIBS) $(LIBXML2_LIB)
-libsidl_la_LDFLAGS = -no-undefined -release $(VERSION)
-
-AM_CPPFLAGS = $(JNI_INCLUDES)
-EXTRA_DIST = $(data_DATA) $(RUNTIME_ONLY_FILES) ltdl.h ignore_me.h.in babel.make \
-	libsidl.scl.in scl.dtd changeundef.pl
-
-HEADERS_HAND = \
+CUSTOMHDRS = \
 	sidlArray.h \
+	sidlAsserts.h \
+	sidlAssertUtils.h \
+	sidlMemory.h \
 	sidl_Exception.h \
 	sidlType.h \
+	sidlOps.h \
 	sidl_search_scl.h \
 	sidlfortran.h \
 	sidlf90array.h \
@@ -100,20 +109,21 @@ HEADERS_HAND = \
 	sidl_string_IOR.h \
 	sidl_interface_IOR.h \
 	sidl_ucxx.hh \
-	sidl_cxx.hh 
+	sidl_cxx.hh \
+	sidl_thread.h \
+	sidl_net.h \
+	sidl_hashtable.h \
+	sidl_hashtable_private.h
 
-HEADERS_SPLICE = \
-	sidl_BaseClass_Impl.h \
-	sidl_SIDLException_Impl.h \
-	sidl_DLL_Impl.h \
-	sidl_Loader_Impl.h \
-	sidl_ClassInfoI_Impl.h
-
-SOURCES_HAND = \
+CUSTOMSRCS = \
 	$(FORTRAN_SOURCES) \
 	$(JAVA_SOURCES) \
 	$(PYTHON_SOURCES) \
+	sidlAssertUtils.c \
 	sidl_String.c \
+	sidlArray.c \
+	sidlMemory.c \
+	sidlOps.c \
 	sidl_bool_IOR.c \
 	sidl_search_scl.c \
 	sidl_char_IOR.c \
@@ -125,131 +135,75 @@ SOURCES_HAND = \
 	sidl_dcomplex_IOR.c \
 	sidl_opaque_IOR.c \
 	sidl_string_IOR.c \
-	sidl_interface_IOR.c
+	sidl_interface_IOR.c \
+	sidl_thread.c \
+	sidl_net.c \
+	sidl_hashtable.c
 
-SOURCES_SPLICE = \
-	sidl_BaseClass_Impl.c \
-	sidl_SIDLException_Impl.c \
-	sidl_DLL_Impl.c \
-	sidl_Loader_Impl.c \
-	sidl_ClassInfoI_Impl.c
+libsidl.scl: 
+	sed -e 's,@@DIR@@,'`pwd`',g' < $(srcdir)/libsidl.scl.in > libsidl.scl
 
-SOURCES_BABEL = \
-	sidl_BaseClass_IOR.c \
-	sidl_BaseClass_Skel.c \
-	sidl_BaseClass_Stub.c \
-	sidl_BaseException_IOR.c \
-	sidl_BaseException_Stub.c \
-	sidl_SIDLException_IOR.c \
-	sidl_SIDLException_Skel.c \
-	sidl_SIDLException_Stub.c \
-	sidl_BaseInterface_IOR.c \
-	sidl_BaseInterface_Stub.c \
-	sidl_DLL_IOR.c \
-	sidl_DLL_Skel.c \
-	sidl_DLL_Stub.c \
-	sidl_Loader_IOR.c \
-	sidl_Loader_Skel.c \
-	sidl_Loader_Stub.c \
-	sidl_ClassInfo_IOR.c \
-	sidl_ClassInfo_Stub.c \
-	sidl_ClassInfoI_IOR.c \
-	sidl_ClassInfoI_Stub.c \
-	sidl_ClassInfoI_Skel.c \
-	sidl_Resolve_Stub.c \
-	sidl_Scope_Stub.c
-
-HEADERS_BABEL = \
-	sidl.h \
-	sidl_IOR.h \
-	sidl_BaseClass.h \
-	sidl_BaseClass_IOR.h \
-	sidl_BaseException.h \
-	sidl_BaseException_IOR.h \
-	sidl_SIDLException.h \
-	sidl_SIDLException_IOR.h \
-	sidl_BaseInterface.h \
-	sidl_BaseInterface_IOR.h \
-	sidl_DLL.h \
-	sidl_DLL_IOR.h \
-	sidl_Loader.h \
-	sidl_Loader_IOR.h \
-	sidl_ClassInfo_IOR.h \
-	sidl_ClassInfoI_IOR.h \
-	sidl_ClassInfo.h \
-	sidl_ClassInfoI.h \
-	sidl_Resolve_IOR.h \
-	sidl_Resolve.h \
-	sidl_Scope_IOR.h \
-	sidl_Scope.h
-
-HEADERS_INSTALL = \
-	$(HEADERS_HAND) \
-	sidl.h \
-	sidl_BaseClass.h \
-	sidl_BaseClass_IOR.h \
-	sidl_BaseClass_Impl.h \
-	sidl_BaseException.h \
-	sidl_BaseException_IOR.h \
-	sidl_SIDLException.h \
-	sidl_SIDLException_IOR.h \
-	sidl_BaseInterface.h \
-	sidl_BaseInterface_IOR.h \
-	sidl_DLL.h \
-	sidl_DLL_IOR.h \
-	sidl_Loader.h \
-	sidl_Loader_IOR.h \
-	sidl_ClassInfo.h \
-	sidl_ClassInfo_IOR.h \
-	sidl_ClassInfoI.h \
-	sidl_ClassInfoI_IOR.h \
-	sidl_Resolve_IOR.h \
-	sidl_Resolve.h \
-	sidl_Scope_IOR.h \
-	sidl_Scope.h
-
-OBJECTS_BABEL  = $(SOURCES_BABEL:.c=.lo)
-OBJECTS_HAND   = $(SOURCES_HAND:.c=.lo)
-OBJECTS_SPLICE = $(SOURCES_SPLICE:.c=.lo)
-OBJECTS_INCLUDED =$(SOURCES_INCLUDED:.c=.lo)
-FILES_COPY = $(HEADERS_SPLICE) $(SOURCES_SPLICE) $(HEADERS_HAND)
-
-$(OBJECTS_INCLUDED) $(OBJECTS_BABEL) $(OBJECTS_HAND) $(OBJECTS_SPLICE): babel-compile
-$(HEADERS_INSTALL) $(HEADERS_BABEL) $(SOURCES_BABEL): babel-stamp
-RUNTIME_ONLY_FILES= $(SOURCES_HAND) $(HEADERS_HAND) \
-			$(SOURCES_SPLICE) $(HEADERS_SPLICE) \
-			$(SOURCES_BABEL) $(HEADERS_BABEL) $(SRCS_EXCLUDED)
-
+../sidlx/babel-stamp: babel-stamp
+	cd ../sidlx && $(MAKE) $(AM_MAKEFLAGS) babel-stamp
 
 if BABEL_RUNTIME_ONLY
-babel-compile:
-	touch babel-compile
-
 babel-stamp:
-	touch babel-stamp
+	@rm -f babel-temp
+	@touch babel-temp
+	@if test "X$(srcdir)" != "X." ; then \
+	    list='$(CUSTOMHDRS)'; \
+	    for i in $$list; do \
+		echo cp $(srcdir)/$$i . ; \
+		cp $(srcdir)/$$i . ;\
+	    done; \
+	fi
+	@mv -f babel-temp $@
 
-clean-local:
-	rm -f babel-stamp babel-compile stamp-h1 *.o *.lo
+CLEANFILES = babel-stamp babel-temp babel.make.depends babel.make.package
+
 else
-babel-compile: babel-stamp
-	touch babel-compile
-	$(MAKE) $(AM_MAKEFLAGS) $(OBJECTS_BABEL) $(OBJECTS_SPLICE)
+$(STUBSRCS) $(STUBHDRS) $(IORSRCS) $(IORHDRS) $(SKELSRCS) $(SKELHDRS) $(IMPLSRCS) $(IMPLHDRS) : babel-stamp
+	@if test -f $@; then \
+		touch $@; \
+	 else \
+		rm -f babel-stamp; \
+		$(MAKE) $(AM_MAKEFLAGS) babel-stamp; \
+	 fi 
 
-babel-stamp: $(srcdir)/sidl.sidl 
-	$(SHELL) $(top_srcdir)/bin/copy.sh $(srcdir) . $(HEADERS_HAND)
-	sed -e 's,@@DIR@@,'`pwd`',g' < $(srcdir)/libsidl.scl.in > libsidl.scl
+babel-stamp: $(srcdir)/sidl.sidl libsidl.scl 
+	@rm -f babel-temp
+	@touch babel-temp
 	$(SHELL) ../../bin/babel --suppress-timestamp --no-default-repository\
-	  --generate-sidl-stdlib --vpath=$(srcdir) $(srcdir)/sidl.sidl 
-	touch babel-stamp
+	  --generate-sidl-stdlib --server=c --vpath=$(srcdir) \
+	  $(srcdir)/sidl.sidl 
+	@if test "X$(srcdir)" != "X." ; then \
+	    list='$(CUSTOMHDRS)'; \
+	    for i in $$list; do \
+		echo cp $(srcdir)/$$i . ; \
+		cp $(srcdir)/$$i . ;\
+	    done; \
+	fi
+	@mv -f babel-temp $@
 
+CLEANFILES = babel-stamp babel-temp  libsidl.scl $(STUBSRCS) $(STUBHDRS) $(IORSRCS) \
+		$(IORHDRS) $(SKELHDRS) $(SKELSRCS) libsidl.scl \
+		babel.make.depends babel.make.package
 
 clean-local:
-	rm -f $(HEADERS_BABEL) $(OBJECTS_BABEL) $(SOURCES_BABEL)
-	rm -f babel-stamp babel-compile stamp-h1 *.scl
-	$(SHELL) $(top_srcdir)/bin/remove.sh $(srcdir) $(FILES_COPY)
-	test "X$(srcdir)" = "X." || rm -f babel.make
+	test "X$(srcdir)" = "X." || rm -f $(IMPLSRCS) $(IMPLHDRS) $(CUSTOMHDRS)
 
 endif
+
+# special link for Java on Mac OS X
+check-local:
+	-test -d .libs -a -h .libs/libsidl.dylib \
+	     -a \! -h .libs/libsidl.jnilib && \
+	(cd .libs ; ln -s libsidl.dylib libsidl.jnilib )
+
+install-exec-hook:
+	-test -d $(DESTDIR)$(libdir) -a -h $(DESTDIR)$(libdir)/libsidl.dylib \
+	     -a \! -h $(DESTDIR)$(libdir)/libsidl.jnilib  && \
+	( cd $(DESTDIR)$(libdir) ; ln -s libsidl.dylib libsidl.jnilib )
 
 install-data-hook:
 	sed -e 's,@@DIR@@,$(DESTDIR)$(libdir),g' < $(srcdir)/libsidl.scl.in \
@@ -257,15 +211,23 @@ install-data-hook:
 	$(INSTALL_DATA) libsidl_inst.scl $(DESTDIR)$(libdir)/libsidl.scl
 	rm -f libsidl_inst.scl
 
-dist-hook:
-	touch $(distdir)/Makefile.am $(distdir)/Makefile.in
-distclean-local:
-	rm -f babel_config.h
+uninstall-hook:
+	rm -f $(DESTDIR)$(libdir)/libsidl.scl
+	rm -f $(DESTDIR)$(libdir)/libsidl.jnilib
+
+babel_config.h: babel_internal.h
+	sed -e 's,babel_internal,babel_config,g' \
+	    -e 's,PACKAGE,BABEL_PACKAGE,g' \
+	   < $< > $@
 
 AUTOHEADER = @AUTOHEADER@ \
 	     && cd sidl \
-	     && @PERL@ -p -i.bak changeundef.pl \
-	          babel_config.h.in \
-             && rm -f babel_config.h.in.bak
+	     && @PYTHON@ changeundef.py \
+	          babel_internal.h.in \
+             && rm -f babel_internal.h.in.bak
 
 include babel.make
+
+# Make sure Makefile.in is newer than babel.make
+dist-hook:
+	touch -c $(distdir)/Makefile.in

@@ -29,13 +29,12 @@ AC_DEFUN([LLNL_CONFIRM_BABEL_F90_SUPPORT], [
   fi
 
   AC_ARG_ENABLE([fortran90],
-        AC_HELP_STRING([--enable-fortran90@<:@=FC@:>@],
-                       [fortran 90 language bindings @<:@default=yes@:>@]),
+        AS_HELP_STRING(--enable-fortran90@<:@=FC@:>@,fortran 90 language bindings @<:@default=yes@:>@),
                [enable_fortran90="$enableval"],
                [enable_fortran90=yes])
   test -z "$enable_fortran90" && enable_fortran90=yes
-  if test $enable_fortran90 != no; then
-    if test $enable_fortran90 != yes; then 
+  if test "$enable_fortran90" != no; then
+    if test "$enable_fortran90" != yes; then 
       FC=$enable_fortran90
       enable_fortran90=yes
     fi
@@ -43,10 +42,10 @@ AC_DEFUN([LLNL_CONFIRM_BABEL_F90_SUPPORT], [
 
   if test "X$enable_fortran90" != "Xno"; then
     AC_PROG_FC(,1990)dnl was AC_PROG_F90
-   AC_LANG_PUSH(Fortran) dnl gkk Do I need this?
+    AC_LANG_PUSH(Fortran) dnl gkk Do I need this?
     AC_FC_SRCEXT([f90],[])
-   AC_LANG_POP(Fortran) dnl gkk Do I need this?
     LLNL_LIB_CHASM
+    AC_LANG_POP(Fortran) dnl gkk Do I need this?
   else
     FC=
   fi
@@ -59,6 +58,14 @@ AC_DEFUN([LLNL_CONFIRM_BABEL_F90_SUPPORT2],[
     #begin LLNL_CONFIRM_BABEL_F90_SUPPORT2
     if test \( -n "$FC" \) -a \( "X$enable_chasm" = "Xyes" \); then 
 	F90="$FC"
+        # confirm that that F90 compiler can compile a trivial file issue146
+	AC_MSG_CHECKING([if F90 compiler works])
+        AC_LANG_PUSH(Fortran)dnl
+        AC_TRY_COMPILE([],[       write (*,*) 'Hello world'
+],AC_MSG_RESULT([yes]),[
+        AC_MSG_RESULT([no])
+        AC_MSG_ERROR([The F90 compiler $FC fails to compile a trivial program (see config.log)])])
+        AC_LANG_POP([])
         # 5.a. Libraries (existence)
 	dnl LLNL_F90_LIBRARY_LDFLAGS dnl slight mod to AC_FC_LIBRARY_LDFLAGS
 	LLNL_FC_MAIN dnl changed to requie LLNL_FC_LIBRARY_LDFLAGS
@@ -71,7 +78,7 @@ AC_DEFUN([LLNL_CONFIRM_BABEL_F90_SUPPORT2],[
 	LLNL_F90_POINTER_SIZE
 	LLNL_F90_VOLATILE
     else
-	AC_WARN([Disabling F90 Support])
+	AC_MSG_WARN([Disabling F90 Support])
 	if test \( -n "$FC" \); then
           enable_fortran90="no_chasm"
         else
@@ -98,6 +105,7 @@ AC_DEFUN([LLNL_CONFIRM_BABEL_F90_SUPPORT3],[
   fi 
   if test "X$enable_fortran90" != "Xyes"; then
     AC_DEFINE(FORTRAN90_DISABLED, 1, [If defined, F90 support was disabled at configure time])
+    FC=""
   fi
   AM_CONDITIONAL(SUPPORT_FORTRAN90, test "X$enable_fortran90" = "Xyes")
   LLNL_WHICH_PROG(WHICH_FC)

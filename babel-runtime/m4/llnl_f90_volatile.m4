@@ -7,10 +7,10 @@ AC_DEFUN([LLNL_F90_VOLATILE],
 AC_CACHE_CHECK([whether $F90 supports volatile],
                [llnl_cv_f90_volatile],
 [AC_LANG_PUSH(Fortran)dnl
-AC_TRY_COMPILE(,[
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[]], [[
   integer(selected_int_kind(18)) :: tin
   volatile :: tin
-],[
+]])],[
  llnl_cv_f90_volatile=["volatile ::"]
 ],[
  llnl_cv_f90_volatile=["! no volatile"]

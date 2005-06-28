@@ -1,6 +1,5 @@
 //
 // File:        sidl.sidl
-// Release:     $Name$
 // Revision:    @(#) $Revision$
 // Date:        $Date$
 // Description: sidl interface description for the basic sidl run-time library
@@ -37,7 +36,7 @@
  * and every class implicitly inherits from <code>sidl.BaseClass</code>.
  * 
  */
-package sidl version 0.9.0 {
+package sidl version 0.9.3 {
 
   /**
    * Every interface in <code>sidl</code> implicitly inherits
@@ -207,6 +206,27 @@ package sidl version 0.9.0 {
   }
 
   /**
+   * <code>PreViolation</code> provides the basic marker for 
+   * a pre-condition exception.
+   */
+  class PreViolation extends SIDLException {
+  }
+
+  /**
+   * <code>PostViolation</code> provides the basic marker for 
+   * a post-condition exception.
+   */
+  class PostViolation extends SIDLException {
+  }
+
+  /**
+   * <code>InvViolation</code> provides the basic marker for 
+   * a invariant exception.
+   */
+  class InvViolation extends SIDLException {
+  }
+
+  /**
    * When loading a dynamically linked library, there are three 
    * settings: LOCAL, GLOBAL and SCLSCOPE.
    */
@@ -308,29 +328,56 @@ package sidl version 0.9.0 {
   }
 
   /**
-   * Class <code>Loader</code> manages dyanamic loading and symbol name
-   * resolution for the sidl runtime system.  The <code>Loader</code> class
-   * manages a library search path and keeps a record of all libraries
-   * loaded through this interface, including the initial "global" symbols
-   * in the main program.  Unless explicitly set, the search path is taken
-   * from the environment variable SIDL_DLL_PATH, which is a semi-colon
-   * separated sequence of URIs as described in class <code>DLL</code>.
+   * Interface <code>Finder</code> is an interface for classes that resolve 
+   * dynamic libraries.  
+   * Class <code>Loader</code> takes one of these interfaces through the 
+   * method <code>setFinder</code>.  If NULL is passed to setFinder, the 
+   * class <code>DefaultFinder</code> is used.
    */
-  class Loader {
+  interface Finder {
+    /**
+     * Find a DLL containing the specified information for a sidl
+     * class. This method searches through the files in set set path
+     * looking for a shared library that contains the client-side or IOR
+     * for a particular sidl class.
+     *
+     * @param sidl_name  the fully qualified (long) name of the
+     *                   class/interface to be found. Package names
+     *                   are separated by period characters from each
+     *                   other and the class/interface name.
+     * @param target     to find a client-side binding, this is
+     *                   normally the name of the language.
+     *                   To find the implementation of a class
+     *                   in order to make one, you should pass
+     *                   the string "ior/impl" here.
+     * @param lScope     this specifies whether the symbols should
+     *                   be loaded into the global scope, a local
+     *                   scope, or use the setting in the file.
+     * @param lResolve   this specifies whether symbols should be
+     *                   resolved as needed (LAZY), completely
+     *                   resolved at load time (NOW), or use the
+     *                   setting from the file.
+     * @return a non-NULL object means the search was successful.
+     *         The DLL has already been added.
+     */
+    DLL findLibrary(in string  sidl_name,
+                           in string  target,
+                           in Scope   lScope,
+                           in Resolve lResolve);
 
     /**
      * Set the search path, which is a semi-colon separated sequence of
      * URIs as described in class <code>DLL</code>.  This method will
      * invalidate any existing search path.
      */
-    static void setSearchPath(in string path_name);
+    void setSearchPath(in string path_name);
 
     /**
      * Return the current search path.  If the search path has not been
      * set, then the search path will be taken from environment variable
      * SIDL_DLL_PATH.
      */
-    static string getSearchPath();
+    string getSearchPath();
 
     /**
      * Append the specified path fragment to the beginning of the
@@ -338,7 +385,40 @@ package sidl version 0.9.0 {
      * by a call to <code>setSearchPath</code>, then this fragment will
      * be appended to the path in environment variable SIDL_DLL_PATH.
      */
-    static void addSearchPath(in string path_fragment);
+    void addSearchPath(in string path_fragment);
+
+  }
+
+  /**
+   *  This class is the Default Finder.  If no Finder is set in class Loader,
+   *  this finder is used.  It uses SCL files from the filesystem to
+   *  resolve dynamic libraries.
+   *
+   * The initial search path is taken from the SIDL_DLL_PATH
+   * environment variable.
+   */
+
+  class DFinder implements-all Finder {
+
+
+  }
+
+
+  /**
+   * Class <code>Loader</code> manages dyanamic loading and symbol name
+   * resolution for the sidl runtime system.  The <code>Loader</code> class
+   * manages a library search path and keeps a record of all libraries
+   * loaded through this interface, including the initial "global" symbols
+   * in the main program.
+   * 
+   * Unless explicitly set, the <code>Loader</code> uses the default
+   * <code>sidl.Finder</code> implemented in <code>sidl.DFinder</code>.
+   * This class searches the filesystem for <code>.scl</code> files when
+   * trying to find a class. The initial path is taken from the
+   * environment variable SIDL_DLL_PATH, which is a semi-colon
+   * separated sequence of URIs as described in class <code>DLL</code>.
+   */
+  class Loader {
 
     /**
      * Load the specified library if it has not already been loaded.
@@ -387,6 +467,11 @@ package sidl version 0.9.0 {
      * for a shared library that contains the client-side or IOR
      * for a particular sidl class.
      *
+     * This call is implemented by calling the current
+     * <code>Finder</code>. The default finder searches the local
+     * file system for <code>.scl</code> files to locate the
+     * target class/interface.
+     *
      * @param sidl_name  the fully qualified (long) name of the
      *                   class/interface to be found. Package names
      *                   are separated by period characters from each
@@ -410,6 +495,51 @@ package sidl version 0.9.0 {
                            in string  target,
                            in Scope   lScope,
                            in Resolve lResolve);
+
+    /**
+     * Set the search path, which is a semi-colon separated sequence of
+     * URIs as described in class <code>DLL</code>.  This method will
+     * invalidate any existing search path.
+     *
+     * This updates the search path in the current <code>Finder</code>.
+     */
+    static void setSearchPath(in string path_name);
+
+    /**
+     * Return the current search path.  The default
+     * <code>Finder</code> initializes the search path
+     * from environment variable SIDL_DLL_PATH.
+     *
+     */
+    static string getSearchPath();
+
+    /**
+     * Append the specified path fragment to the beginning of the
+     * current search path.  This method operates on the Loader's
+     * current <code>Finder</code>. This will add a path to the
+     * current search path. Normally, the search path is initialized
+     * from the SIDL_DLL_PATH environment variable.
+     */
+    static void addSearchPath(in string path_fragment);
+
+    /**
+     * This method sets the <code>Finder</code> that
+     * <code>Loader</code> will use to find DLLs.  If no
+     * <code>Finder</code> is set or if NULL is passed in, the Default
+     * Finder <code>DFinder</code> will be used.
+     * 
+     * Future calls to <code>findLibrary</code>,
+     * <code>addSearchPath</code>, <code>getSearchPath</code>, and
+     * <code>setSearchPath</code> are deligated to the
+     * <code>Finder</code> set here.
+     */
+    static void setFinder(in Finder f);
+
+    /**
+     * This method gets the <code>Finder</code> that <code>Loader</code>
+     * uses to find DLLs.  
+     */
+    static Finder getFinder();
   }
 
   /**
@@ -444,5 +574,281 @@ package sidl version 0.9.0 {
       * Set the IOR major and minor version numbers.
       */
      final void setIORVersion(in int major, in int minor);
+  }
+
+  /** 
+   * This package has some I/O capability that's not core to the 
+   * SIDL object model, but still needed by parts of the generated code
+   */
+  package io { 
+      
+      /** generic exception for I/O issues */
+      class IOException extends sidl.SIDLException {
+      }
+      
+      /**
+       * Standard interface for packing Babel types
+       */
+      interface Serializer { 
+	  void packBool( in string key, in bool value ) throws IOException ;
+	  void packChar( in string key, in char value ) throws IOException ;
+	  void packInt( in string key, in int value ) throws IOException ;
+	  void packLong( in string key, in long value ) throws IOException ;
+	  void packFloat( in string key, in float value ) throws IOException ;
+	  void packDouble( in string key, in double value ) throws IOException ;
+	  void packFcomplex( in string key, in fcomplex value ) throws IOException ;
+	  void packDcomplex( in string key, in dcomplex value ) throws IOException ;
+	  void packString( in string key, in string value ) throws IOException ;
+	  //void pack[Serializable]( in string key, in Serializable value ) throws IOException;
+	  
+	  /* pack arrays of values */
+	  // void pack[BoolArray]( in string key, in array<bool> value ) throws IOException ;
+	  // void pack[CharArray]( in string key, in array<char> value ) throws IOException ;
+	  // void pack[IntArray]( in string key, in array<int> value ) throws IOException ;
+	  // void pack[LongArray]( in string key, in array<long> value ) throws IOException ;
+	  // void pack[FloatArray]( in string key, in array<float> value ) throws IOException ;
+	  // void pack[DoubleArray]( in string key, in array<double> value ) throws IOException ;
+	  // void pack[FcomplexArray]( in string key, in array<fcomplex> value ) throws IOException ;
+	  // void pack[DcomplexArray]( in string key, in array<dcomplex> value ) throws IOException ;
+	  // void pack[StringArray]( in string key, in array<string> value ) throws IOException ;
+	  // void pack[SerializableArray]( in string key, in array<Serializable> value ) throws IOException;
+      }
+
+      /**
+       * Standard interface for unpacking Babel types
+       */
+      interface Deserializer { 
+	  /* unpack values */
+	  void unpackBool( in string key, out bool value ) throws IOException ;
+	  void unpackChar( in string key, out char value ) throws IOException ;
+	  void unpackInt( in string key, out int value ) throws IOException ;
+	  void unpackLong( in string key, out long value ) throws IOException ;
+	  void unpackFloat( in string key, out float value ) throws IOException ;
+	  void unpackDouble( in string key, out double value ) throws IOException ;
+	  void unpackFcomplex( in string key, out fcomplex value ) throws IOException ;
+	  void unpackDcomplex( in string key, out dcomplex value ) throws IOException ;
+	  void unpackString( in string key, out string value ) throws IOException ;
+	  // void unpack[Serializable]( in string key, out Serializable value ) throws IOException;
+	  
+	  /* unpack arrays of values */
+	  // void unpack[BoolArray]( in string key, out array<bool> value ) throws IOException ;
+	  // void unpack[CharArray]( in string key, out array<char> value ) throws IOException ;
+	  // void unpack[IntArray]( in string key, out array<int> value ) throws IOException ;
+	  // void unpack[LongArray]( in string key, out array<long> value ) throws IOException ;
+	  // void unpack[FloatArray]( in string key, out array<float> value ) throws IOException ;
+	  // void unpack[DoubleArray]( in string key, out array<double> value ) throws IOException ;
+	  // void unpack[FcomplexArray]( in string key, out array<fcomplex> value ) throws IOException ;
+	  // void unpack[DcomplexArray]( in string key, out array<dcomplex> value ) throws IOException ;
+	  // void unpack[StringArray]( in string key, out array<string> value ) throws IOException ;
+	  // void unpack[SerializableArray]( in string key, out array<Serializable> value ) throws IOException ;
+      }
+      
+      /** Classes that can pack or unpack themselves should implement this interface */
+      interface Serializeable { 
+	  void packObj( in Serializer ser );
+	  void unpackObj( in Deserializer des );
+      } 
+  }
+
+  /**
+   * This package contains necessary interfaces for RMI protocols to 
+   * hook into Babel, plus a Protocol Factory class.  The intention is 
+   * that authors of new protocols will create classes that implement
+   * InstanceHandle, Invocation and Response (they could even have one object
+   * that implements all three interfaces).
+   */
+  package rmi { 
+
+      /**
+       * Generic Network Exception
+       */
+      class NetworkException extends sidl.io.IOException {
+      }	
+
+      /** 
+       * This singleton class keeps a table of string prefixes (e.g. "babel" or "proteus")
+       * to protocol implementations.  The intent is to parse a URL (e.g. "babel://server:port/class")
+       * and create classes that implement <code>sidl.rmi.InstanceHandle</code>.
+       */
+      class ProtocolFactory { 
+	  /** 
+	   * Associate a particular prefix in the URL to a typeName <code>sidl.Loader</code> can find.
+	   * The actual type is expected to implement <code>sidl.rmi.InstanceHandle</code>
+	   * Return true iff the addition is successful.  (no collisions allowed)
+	   */
+	  static bool addProtocol( in string prefix, in string typeName ) throws NetworkException;
+	  
+	  /**
+	   * Return the typeName associated with a particular prefix.
+	   * Return empty string if the prefix
+	   */
+	  static string getProtocol( in string prefix ) throws NetworkException;
+
+	  /**
+	   * Remove a protocol from the active list.
+	   */
+	  static bool deleteProtocol( in string prefix ) throws NetworkException;
+	  
+	  /**
+	   * Create a new remote object and a return an instance handle for that object. 
+	   * The server and port number are in the url.  Return nil 
+	   * if protocol unknown or InstanceHandle.init() failed.
+	   */
+	  static InstanceHandle createInstance( in string url, in string typeName ) throws NetworkException;
+
+	  /**
+	   * Create an new connection linked to an already existing object on a remote 
+	   * server.  The server and port number are in the url, the objectID is the unique ID
+           * of the remote object in the remote instance registry. 
+	   * Return nil if protocol unknown or InstanceHandle.init() failed.
+	   */
+	  static InstanceHandle connectInstance( in string url) throws NetworkException;	
+      }
+
+      /**
+       * This interface holds the state information for handles to remote
+       * objects.  Client-side messaging libraries are expected to implement
+       * <code>sidl.rmi.InstanceHandle</code>, <code>sidl.rmi.Invocation</code>
+       * and <code>sidl.rmi.Response</code>.
+       * 
+       *  When a connection is created between a stub and a real object:
+       *       sidl_rmi_InstanceHandle c = sidl_rmi_ProtocolFactory_createInstance( url, typeName );
+       * 
+       *  When a method is invoked:
+       *       sidl_rmi_Invocation i = sidl_rmi_InstanceHandle_createInvocationHandle( methodname );
+       *       sidl_rmi_Invocation_packDouble( i, "input_val" , 2.0 );
+       *       sidl_rmi_Invocation_packString( i, "input_str", "Hello" );
+       *       ...
+       *       sidl_rmi_Response r = sidl_rmi_Invocation_invokeMethod( i );
+       *       sidl_rmi_Response_unpackBool( i, "_retval", &succeeded );
+       *       sidl_rmi_Response_unpackFloat( i, "output_val", &f );
+       * 
+       */
+      interface InstanceHandle {
+
+	  /** initialize a connection (intended for use by the ProtocolFactory) */
+	  bool init[Create]( in string url, /*in string protocol, in string server, in int port, */ in string typeName ) throws NetworkException;
+
+	  /** initialize a connection (intended for use by the ProtocolFactory) */
+	  bool init[Connect]( in string url/*, in string protocol, in string server, in int port, in string typeName, in string objectID */) throws NetworkException;
+
+	  /** return the name of the protocol */
+	  string getProtocol() throws NetworkException;
+
+	  /** return the name of the server */
+	  //string getServerName() throws NetworkException;
+	  
+	  /** return the port number on the server */
+	  //int getPort() throws NetworkException;
+
+	  /** return the session ID */
+	  string getObjectID() throws NetworkException;
+
+	  /** return the full URL for this object, takes the form: 
+	   *  protocol://server:port/class/objectID
+	   */
+	  string getURL() throws NetworkException;
+
+	  /** create a handle to invoke a named method */
+	  Invocation createInvocation( in string methodName ) throws NetworkException;
+	  
+	  /** closes the connection (called be destructor, if not done explicitly) 
+	   * returns true if successful, false otherwise (including subsequent calls)
+	   */
+	  bool close() throws NetworkException;
+      }
+
+      /**
+       * This type is used to pack arguments and make the actual 
+       * method invocation.
+       */	 
+      interface Invocation extends sidl.io.Serializer {
+
+	  /** this method may be called only once at the end of the object's lifetime */
+	  Response invokeMethod() throws NetworkException;
+      }
+
+      /**
+       * This type is created when an InvocationHandle actually invokes its method.
+        * It encapsulates all the results that users will want to pull out of a
+       * remote method invocation.
+       */
+      interface Response extends sidl.io.Deserializer { 
+
+	  /** if returns null, then safe to unpack arguments */
+	  sidl.BaseException getExceptionThrown() throws NetworkException;
+	  
+	  /** signal that all is complete */
+	  bool done() throws NetworkException;
+      }
+  
+      /**
+       * This singleton class is implemented by Babel's runtime for RMI libraries to 
+       * invoke methods on server objects.  It is assumed that the RMI library
+       * has a self-describing stream of data, but the data may be reordered
+       * from the natural argument list.
+       * 
+       * 
+       * In the case of the RMI library receiving a self-describing stream
+       * and wishing to invoke a method on a class... the RMI library would 
+       * make a sequence of calls like:
+       * 
+       *       sidl_BaseClass bc = sidl_rmi_InstanceRegistry_getInstance( "instanceID" );
+       *       sidl_rmi_TypeMap inArgs = sidl_rmi_TypeMap__create();
+       *       
+       *       sidl_rmi_TypeMap_putDouble( inArgs, "input_val" , 2.0 );
+       *       sidl_rmi_TypeMap_putString( inArgs, "input_str", "Hello" );
+       *       ...
+       *       sidl_rmi_TypeMap ourArgs = sidl_BaseClass_execMethod( bc, "methodName" , t );
+       * 
+       *       sidl_rmi_Response_unpackBool( i, "_retval", &succeeded );
+       *       sidl_rmi_Response_unpackFloat( i, "output_val", &f );
+       */
+      class InstanceRegistry { 
+
+	  /** register an instance of a class
+	   *  the registry will return a string guaranteed to be unique for
+	   *  the lifetime of the process
+	   */	      
+	  static string registerInstance( in sidl.BaseClass instance ) throws NetworkException;
+
+	  /** 
+	   * returns a handle to the class based on the unique string
+	   */
+	  static sidl.BaseClass getInstance( in string instanceID ) throws NetworkException;
+
+	  /** 	
+	   * returns a handle to the class based on the unique string
+	   * and removes the instance from the table.  
+	   */
+	  static sidl.BaseClass removeInstance( in string instanceID ) throws NetworkException;
+      }
+
+      /**
+       * This singleton class is implemented by Babel's runtime for to allow RMI 
+       * downcasting of objects.  When we downcast an RMI object, we may be required to
+       * create a new derived class object with a connect function.  We store all the
+       * connect functions in this table for easy access.
+       */
+      class ConnectRegistry { 
+
+	  /** register an instance of a class
+	   *  the registry will return a string guaranteed to be unique for
+	   *  the lifetime of the process
+	   */	      
+	  static void registerConnect( in string key, in opaque func);
+
+	  /** 
+	   * returns a handle to the class based on the unique string
+	   */
+	  static opaque getConnect( in string key );
+
+	  /** 	
+	   * returns a handle to the class based on the unique string
+	   * and removes the instance from the table.  
+	   */
+	  static opaque removeConnect( in string key );
+      }	
+
   }
 }

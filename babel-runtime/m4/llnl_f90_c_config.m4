@@ -72,7 +72,7 @@ elif test $sidl_cv_f90_number_underscores -eq 1; then
    AC_DEFINE(SIDL_F90_ONE_UNDERSCORE,,[one underscore after Fortran 90 symbols])
 else
   if test $sidl_cv_f90_number_underscores -ne 0; then
-     AC_WARN([number of underscores after Fortran 90 symbols undetermined, assuming zero])
+     AC_MSG_WARN([number of underscores after Fortran 90 symbols undetermined, assuming zero])
   fi;
    AC_DEFINE(SIDL_F90_ZERO_UNDERSCORE,,[no underscores after Fortran 90 symbols])
 fi;
@@ -83,7 +83,7 @@ elif test "$sidl_cv_f90_case" = "upper"; then
    AC_DEFINE(SIDL_F90_UPPER_CASE,,[Fortran 90 symbols are upper case])
 else
    if test "$sidl_cv_f90_case" != "lower"; then
-      AC_WARN([case of Fortran 90 symbols undetermined, assuming lower case])
+      AC_MSG_WARN([case of Fortran 90 symbols undetermined, assuming lower case])
    fi  
    AC_DEFINE(SIDL_F90_LOWER_CASE,,[Fortran 90 symbols are lower case])
 fi;
@@ -93,19 +93,19 @@ if test "$sidl_cv_f90_str" = "struct"; then
       AC_DEFINE(SIDL_F90_STR_STRUCT_LEN_STR,,[Fortran 90 strings as length-char* structs])
    else 
       if test "$sidl_cv_f90_str_struct" != "str_len"; then
-         AC_WARN([string structs as length-charptr or char_ptr/length undetermined, assuming the latter])   
+         AC_MSG_WARN([string structs as length-charptr or char_ptr/length undetermined, assuming the latter])   
       fi;
       AC_DEFINE(SIDL_F90_STR_STRUCT_STR_LEN,,[Fortran 90 strings as char*-length structs])
    fi;
 else
    if test "$sidl_cv_f90_str" != "str"; then 
-      AC_WARN([strings passed as structs or char*/length undetermined, assumming the latter])
+      AC_MSG_WARN([strings passed as structs or char*/length undetermined, assumming the latter])
    fi;
    if test "$sidl_cv_f90_str_len" = "near"; then
       AC_DEFINE(SIDL_F90_STR_LEN_NEAR,,[Fortran 90 strings lengths at end])
    else
       if test "$sidl_cv_f90_str_len" != "far"; then
-         AC_WARN([string length immediately following char* or at end undetermined, assuming at end])
+         AC_MSG_WARN([string length immediately following char* or at end undetermined, assuming at end])
       fi
       AC_DEFINE(SIDL_F90_STR_LEN_FAR,,[Fortran 90 strings lengths immediately follow string])
    fi;

@@ -12,14 +12,21 @@ AC_DEFUN([LLNL_CONFIRM_BABEL_C_SUPPORT], [
   #
   # C Compiler
   #
-  AC_PROG_CC
+  # AC_PROG_CC
+  # Verify C compiler can compile trivial C program issue146
+  AC_MSG_CHECKING([if C compiler works])
+  AC_LANG_PUSH([C])
+  AC_TRY_COMPILE([],[],AC_MSG_RESULT([yes]),[
+    AC_MSG_RESULT([no])
+    AC_MSG_ERROR([The C compiler $CC fails to compile a trivial program (see config.log)])])
+  AC_LANG_POP([])
   LLNL_WHICH_PROG(WHICH_CC)
   # a. Libraries (existence)
   # b. Header Files.
   AC_HEADER_DIRENT
   AC_HEADER_STDC
   AC_HEADER_STDBOOL
-  AC_CHECK_HEADERS([float.h inttypes.h limits.h malloc.h memory.h netinet/in.h stddef.h stdlib.h string.h strings.h sys/socket.h unistd.h ctype.h sys/stat.h sys/types.h])
+  AC_CHECK_HEADERS([argz.h float.h inttypes.h limits.h malloc.h memory.h netinet/in.h stddef.h stdlib.h string.h strings.h sys/socket.h unistd.h ctype.h sys/stat.h sys/types.h])
   # c. Typedefs, Structs, Compiler Characteristics
   AC_C_CONST
   AC_TYPE_SIZE_T
@@ -35,18 +42,22 @@ AC_DEFUN([LLNL_CONFIRM_BABEL_C_SUPPORT], [
   LLNL_FIND_64BIT_SIGNED_INT
   LLNL_CHECK_INT64_T
   AC_CHECK_SIZEOF(void *,4)
+  AC_C_INLINE
   AC_C_RESTRICT
   AC_C_VOLATILE
   # d. Specific Library Functions.
+  AC_FUNC_MALLOC
+  AC_FUNC_REALLOC
   AC_FUNC_MEMCMP 
   AC_FUNC_STAT
   AC_FUNC_CLOSEDIR_VOID
   AC_FUNC_ERROR_AT_LINE
-  AC_LANG_SAVE
+  AC_FUNC_FORK
   AC_LANG_C
+  AC_LANG_PUSH([C])
   if test "$ac_compiler_gnu" = yes; then
     CFLAGS="$CFLAGS -fno-strict-aliasing"
   fi
-  AC_LANG_RESTORE
+  AC_LANG_POP([])
   AC_CHECK_FUNCS([atexit bzero getcwd memset socket strchr strdup strrchr])
 ])

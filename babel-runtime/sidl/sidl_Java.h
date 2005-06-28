@@ -1,7 +1,6 @@
 /*
  * File:        sidl_Java.h
  * Copyright:   (c) 2001 The Regents of the University of California
- * Release:     $Name$
  * Revision:    @(#) $Revision$
  * Date:        $Date$
  * Description: run-time support for Java integration with the JVM
@@ -66,7 +65,7 @@ JNIEnv* sidl_Java_getEnv(void);
  */
 void sidl_Java_CheckException(
   JNIEnv* env,
-  struct sidl_BaseException__object* ex,
+  struct sidl_BaseInterface__object* ex,
   ...);
 
 /*
@@ -367,6 +366,23 @@ jobject sidl_Java_I2J_ifc(
   void* value,
   const char* java_name);
 
+/**
+ * Create a new Java object to represent the sidl interface.  The Java
+ * class name must be supplied in the java_name argument.
+ *
+ * This function is ONLY FOR GETTING OBJECT OUT OF ARRAYS.  It's been created 
+ * as a hack to get around a refcount problem in Java.  Basically, all objects
+ * on creation need to be refcounted before they are passed to java, however,
+ * objects that come from arrays have already by the IOR Array.  The is the 
+ * same function as sidl_Java_I2J_ifc but without the addRef.
+ * 
+ */
+jobject sidl_Java_Array2J_ifc(
+  JNIEnv* env,
+  void* value,
+  const char* java_name);
+
+
 /*
  * Set the IOR class type in the holder class.  The name of the held array
  * must be provided in the java_name.
@@ -397,9 +413,8 @@ void* sidl_Java_J2I_borrow_array(
   jobject obj);
 
 /**
- * Extract the sidl array pointer from the Java array object.  This method
- * "takes" the pointer; responsibility for the sidl array is transferred to
- * the IOR code.  This is used for "inout" arguments.
+ * Extract the sidl array pointer from the Java array object AND addRef it.
+ * This is used for "inout" arguments.
  */
 void* sidl_Java_J2I_take_array(
   JNIEnv* env,

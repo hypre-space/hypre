@@ -31,11 +31,13 @@ AC_CACHE_CHECK([for location of jni.h],[llnl_cv_header_jni_h],[
 llnl_cv_header_jni_h=no;
 if test -n "$JNI_INCLUDES"; then
 changequote(, )dnl
-  incl_guess= `echo $JNI_INCLUDES | sed 's,\-I,,'`
+
+  incl_guess=`echo "$JNI_INCLUDES" | sed 's,\-I,,g'`
+
 changequote([, ])dnl
   for i in $incl_guess ; do
     if test -e "$i/jni.h"; then
-      llnl_cv_header_jni_h="$i/jni.h"
+      llnl_cv_header_jni_h="$i/jni.h";
     fi
   done 
 fi
@@ -76,7 +78,11 @@ fi
 dnl finally, try to compute exactly
  if test "x$llnl_cv_jni_includes" = xno; then
 changequote(, )dnl
-    ac_dir=`echo $ac_cv_path_JAVAH | sed 's,\(.*\)//*[^/]*//*[^/]*$,\1/include,'`
+    if test -f "$llnl_cv_header_jni_h"; then
+      ac_dir=`dirname "$llnl_cv_header_jni_h"`
+    else
+      ac_dir=`echo $ac_cv_path_JAVAH | sed 's,\(.*\)//*[^/]*//*[^/]*$,\1/include,'`
+    fi
     ac_machdep=`echo $build_os | sed 's,[-0-9].*,,' | sed 's,cygwin,win32,'`
 changequote([, ])dnl
     if test -d "$ac_dir"; then 
@@ -88,10 +94,17 @@ changequote([, ])dnl
     else 
 	AC_MSG_WARN([computed include dirs ($ac_dir) for <jni.h> do not exist])
     fi 
-    computed_includes="$JNI_INCLUDES -I$ac_dir -I$ac_dir/$ac_machdep"
+    computed_includes="$JNI_INCLUDES -I$ac_dir/$ac_machdep"
     CPPFLAGS="$ac_save_CPPFLAGS $computed_includes"
     AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <jni.h>]],[])],
 	[llnl_cv_jni_includes="$computed_includes"])
+    if test "x$llnl_cv_jni_includes" = xno; then
+dnl try specifying both the generic and machine specific directories
+	computed_includes="$JNI_INCLUDES -I$ac_dir -I$ac_dir/$ac_machdep"
+	CPPFLAGS="$ac_save_CPPFLAGS $computed_includes"
+        AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <jni.h>]],[])],
+	    [llnl_cv_jni_includes="$computed_includes"])
+    fi
  fi
 CPPFLAGS="$ac_save_CPPFLAGS"
 ])
@@ -128,17 +141,28 @@ dnl
 AC_DEFUN([LLNL_LIB_JVM],[AC_REQUIRE([LLNL_LIB_JAVA])dnl
 AC_CACHE_CHECK([for path to libjvm.{a,so} or client/libjvm.{a,so} ],
 	[llnl_cv_lib_jvm],
-[javatopdir="$llnl_cv_lib_java"
+[javatopdir=`dirname "$llnl_cv_header_jni_h"`
+ javatopdir=`dirname "$javatopdir"`
  case $host_os in 
    cygwin* | mingw* | pw23* ) 
      llnl_cv_lib_jvm=`find $javatopdir -follow \( \
 	\( -name server -type d -prune \) -o \
 	\( -name "jvm.dll" -print \) \) 2> /dev/null | head -1`
      ;;
+   darwin*)
+     llnl_cv_lib_jvm=`find $javatopdir -follow \( \
+	\( -name server -type d -prune \) -o \
+	\( -name "libjvm_compat.*" -print \) \) 2> /dev/null | head -1`
+     ;;
    *)
      llnl_cv_lib_jvm=`find $javatopdir -follow \( \
 	\( -name server -type d -prune \) -o \
 	\( -name "libjvm.*" -print \) \) 2> /dev/null | head -1`
+     if test -z "$llnl_cv_lib_jvm"; then
+	llnl_cv_lib_jvm=`find $javatopdir -follow \( \
+	   \( -name server -type d -prune \) -o \
+	   \( -name "libkaffevm.*" -print \) \) 2> /dev/null | head -1`
+     fi
      ;;
  esac
 ])
@@ -151,8 +175,8 @@ dnl
 AC_DEFUN([LLNL_LIB_JVM_DIR],[AC_REQUIRE([LLNL_LIB_JAVA])dnl
 AC_CACHE_CHECK([for directory where libjvm.{a,so} or client/libjvm.{a,so} resides],
 	[llnl_cv_lib_jvm_dir],
-[javatopdir="$llnl_cv_lib_java"
- lib_jvm=
+[javatopdir=`dirname "$llnl_cv_header_jni_h"`
+ javatopdir=`dirname "$javatopdir"`
  case $host_os in 
    cygwin* | mingw* | pw23* ) 
      llnl_cv_lib_jvm_dir=`find $javatopdir -follow \( \
@@ -163,6 +187,11 @@ AC_CACHE_CHECK([for directory where libjvm.{a,so} or client/libjvm.{a,so} reside
      llnl_cv_lib_jvm_dir=`find $javatopdir -follow \( \
 	\( -name server -type d -prune \) -o \
 	\( -name "libjvm.*" -exec dirname {} \; \) \) 2> /dev/null | tr "\n" " "`
+     if test -z "$llnl_cv_lib_jvm_dir"; then
+	llnl_cv_lib_jvm_dir=`find $javatopdir -follow \( \
+	   \( -name server -type d -prune \) -o \
+	   \( -name "libkaffevm.*" -exec dirname {} \; \) \) 2> /dev/null | tr "\n" " "`
+     fi
      ;;
  esac
 ])

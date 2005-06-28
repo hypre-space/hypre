@@ -23,10 +23,11 @@ AC_DEFUN([LLNL_CONFIRM_BABEL_JAVA_SUPPORT], [
   AC_ARG_VAR([JAVAFLAGS],[Flags for Java Runtime])
   AC_ARG_VAR([JAVAH],[JNI C stub and header generator])
   AC_ARG_VAR([JAR],[Java Archive Tool])
+  AC_ARG_VAR([JNI_INCLUDES],[Preprocessor flags used @<:@e.g., -I$JAVAPREFIX/include@:>@ to #include <jni.h>])
 
   # First determine enable_java == true or false, and value of $JAVA (before testing JAVAPREFIX)
   AC_ARG_ENABLE([java],
-	AC_HELP_STRING([--enable-java@<:@=JVM@:>@],[java languange bindings @<:@default=yes@:>@]),
+	AS_HELP_STRING(--enable-java@<:@=JVM@:>@,java languange bindings @<:@default=yes@:>@),
 	[enable_java="$enableval"],
 	[enable_java="yes"])
   test -z "$enable_java" && enable_java="yes" #zero length is yes

@@ -1,7 +1,6 @@
 /*
  * File:        sidlf90array.c
  * Copyright:   (c) 2003 The Regents of the University of California
- * Release:     $Name$
  * Revision:    @(#) $Revision$
  * Date:        $Date$
  * Description: Functions to convert sidl arrays into F90 derived types
@@ -65,12 +64,19 @@ genericConvert(void *ior,
                struct sidl_fortran_array *dest)
 {
   long unsigned extent[7];
-  long low[7], chasmStride[7];
+#if (SIZEOF_LONG == 4)
+  long * const low = (long *)lower;
+#else
+  long low[7];
+#endif
+  long chasmStride[7];
   int i;
   if (getCompilerCharacteristics()) return 1;
   dest->d_ior = (ptrdiff_t)ior;
   for(i = 0; i < dimen; ++i){
-    low[i] = lower[i];
+#if (SIZEOF_LONG != 4)
+    low[i] = (long)lower[i];
+#endif
     extent[i] = (upper[i] >= (lower[i]-1)) ? (1 + upper[i] - lower[i]) : 0;
     chasmStride[i] = stride[i]*elem_size;
   }
@@ -112,10 +118,10 @@ sidl_dcomplex__array_convert2f90(const struct sidl_dcomplex__array *src,
   return src 
     ? genericConvert((void *)src,
                      (void *)src->d_firstElement,
-                     src->d_lower,
-                     src->d_upper,
-                     src->d_stride,
-                     src->d_dimen,
+                     src->d_metadata.d_lower,
+                     src->d_metadata.d_upper,
+                     src->d_metadata.d_stride,
+                     src->d_metadata.d_dimen,
                      F90_DComplex,
                      sizeof(struct sidl_dcomplex),
                      dest)
@@ -131,9 +137,9 @@ sidl_double__array_convert2f90(const struct sidl_double__array *src,
   return src 
     ? genericConvert((void *)src,
                      (void *)src->d_firstElement,
-                     src->d_lower,
-                     src->d_upper,
-                     src->d_stride,
+                     src->d_metadata.d_lower,
+                     src->d_metadata.d_upper,
+                     src->d_metadata.d_stride,
                      src_dimen,
                      F90_Double,
                      sizeof(double),
@@ -150,9 +156,9 @@ sidl_fcomplex__array_convert2f90(const struct sidl_fcomplex__array *src,
   return src 
     ? genericConvert((void *)src,
                      (void *)src->d_firstElement,
-                     src->d_lower,
-                     src->d_upper,
-                     src->d_stride,
+                     src->d_metadata.d_lower,
+                     src->d_metadata.d_upper,
+                     src->d_metadata.d_stride,
                      src_dimen,
                      F90_Complex,
                      sizeof(struct sidl_fcomplex),
@@ -169,9 +175,9 @@ sidl_float__array_convert2f90(const struct sidl_float__array *src,
   return src 
     ? genericConvert((void *)src,
                      (void *)src->d_firstElement,
-                     src->d_lower,
-                     src->d_upper,
-                     src->d_stride,
+                     src->d_metadata.d_lower,
+                     src->d_metadata.d_upper,
+                     src->d_metadata.d_stride,
                      src_dimen,
                      F90_Real,
                      sizeof(float),
@@ -188,9 +194,9 @@ sidl_int__array_convert2f90(const struct sidl_int__array *src,
   return src 
     ? genericConvert((void *)src,
                      (void *)src->d_firstElement,
-                     src->d_lower,
-                     src->d_upper,
-                     src->d_stride,
+                     src->d_metadata.d_lower,
+                     src->d_metadata.d_upper,
+                     src->d_metadata.d_stride,
                      src_dimen,
                      F90_Integer4,
                      sizeof(int32_t),
@@ -208,9 +214,9 @@ sidl_long__array_convert2f90(const struct sidl_long__array *src,
   return src 
     ? genericConvert((void *)src,
                      (void *)src->d_firstElement,
-                     src->d_lower,
-                     src->d_upper,
-                     src->d_stride,
+                     src->d_metadata.d_lower,
+                     src->d_metadata.d_upper,
+                     src->d_metadata.d_stride,
                      src_dimen,
                      F90_Integer8,
                      sizeof(int64_t),

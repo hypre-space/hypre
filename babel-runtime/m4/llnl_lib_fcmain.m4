@@ -23,6 +23,10 @@ fi
 f90main=no
 for arg in $foutput; do
   case "$arg" in
+    -lgfortranbegin)
+      found=true
+      f90main="$arg"
+    ;;
     *f90main.o)
       if test -e $arg; then 
         found=true

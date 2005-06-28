@@ -18,6 +18,7 @@ dnl
 
 AC_DEFUN([LLNL_SORT_FCLIBS],
 [AC_REQUIRE([LLNL_F90_LIBRARY_LDFLAGS])dnl
+AC_MSG_CHECKING([form of Fortran 90 library flags])
 f90libs1=
 f90libs2=
 for arg in $FCLIBS; do
@@ -30,12 +31,12 @@ for arg in $FCLIBS; do
     /*.a)
       arg1=-L`dirname $arg`
       arg2=`basename $arg .a`
-      arg2=`echo $arg2 | sed 's/^lib/-l'/'`
+      arg2=`echo $arg2 | sed 's/^lib/-l/'`
       ;;
     /*.so)
       arg1=-L`dirname $arg`
       arg2=`basename $arg .so`
-      arg2=`echo $arg2 | sed 's/^lib/-l'/'`
+      arg2=`echo $arg2 | sed 's/^lib/-l/'`
       ;;
     *)
       arg1=$arg
@@ -44,11 +45,11 @@ for arg in $FCLIBS; do
   if test -n "$arg1"; then
     exists=false
     for f in $f90libs1; do
-      if test x$arg1 = x$f; then 
+      if test "x$arg1" = "x$f"; then 
         exists=true
       fi
     done
-    if $exists; then
+    if test "$exists" = true; then
       :
     else
       f90libs1="$f90libs1 $arg1"
@@ -57,11 +58,11 @@ for arg in $FCLIBS; do
   if test -n "$arg2"; then
     exists=false
     for f in $f90libs2; do
-      if test x$arg2 = x$f; then 
+      if test "x$arg2" = "x$f"; then 
         exists=true
       fi
     done
-    if $exists; then
+    if test "$exists" = true; then
       :
     else
       f90libs2="$f90libs2 $arg2"
@@ -69,5 +70,6 @@ for arg in $FCLIBS; do
   fi
 done
 FCLIBS="$f90libs1 $f90libs2"
+AC_MSG_RESULT($FCLIBS)
 AC_SUBST(FCLIBS)
 ])
