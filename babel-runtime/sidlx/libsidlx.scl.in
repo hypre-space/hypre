@@ -1,0 +1,20 @@
+<?xml version="1.0" ?> 
+<scl>
+  <library uri="@@DIR@@/libsidlx.la" scope="global" resolution="now" > 
+    <class name="sidlx.io.IOException" desc="ior/impl" />
+    <class name="sidlx.io.TxtIStream" desc="ior/impl" />
+    <class name="sidlx.io.TxtOStream" desc="ior/impl" />
+    <class name="sidlx.io.TxtIOStream" desc="ior/impl" />
+    <class name="sidlx.rmi.GenNetworkException" desc="ior/impl" />		
+    <class name="sidlx.rmi.IPv4Socket" desc="ior/impl" />	
+    <class name="sidlx.rmi.ServerSocket" desc="ior/impl" />
+    <class name="sidlx.rmi.ClientSocket" desc="ior/impl" />	
+    <class name="sidlx.rmi.ChildSocket" desc="ior/impl" />
+    <class name="sidlx.rmi.SimpleServer" desc="ior/impl" />	
+    <class name="sidlx.rmi.JimEchoServer" desc="ior/impl" />	
+    <class name="sidlx.rmi.Common" desc="ior/impl" />
+    <class name="sidlx.rmi.SimHandle" desc="ior/impl" />
+    <class name="sidlx.rmi.Simvocation" desc="ior/impl" />
+    <class name="sidlx.rmi.Simsponse" desc="ior/impl" />
+  </library>    
+</scl>
