@@ -391,9 +391,9 @@ libsidlx_la_SOURCES = $(IMPLSRCS) $(IMPLHDRS) sidlx_common.c sidlx_common.h \
 libsidlx_la_LDFLAGS = -no-undefined -release $(VERSION) $(LIBSIDL)
 AM_CPPFLAGS = -I$(INCLUDEDIR) -I$(INCLUDEDIR2)
 EXTRA_DIST = babel.make libsidlx.scl.in
-CLEANFILES = babel-stamp babel-temp libsidlx.scl \
-	$(STUBSRCS) $(STUBHDRS) $(IORSRCS) $(IORHDRS) $(SKELSRCS) $(SKELHDRS) \
-	babel.make.package babel.make.depends
+@BABEL_RUNTIME_ONLY_FALSE@CLEANFILES = babel-stamp babel-temp libsidlx.scl \
+@BABEL_RUNTIME_ONLY_FALSE@	$(STUBSRCS) $(STUBHDRS) $(IORSRCS) $(IORHDRS) $(SKELSRCS) $(SKELHDRS) \
+@BABEL_RUNTIME_ONLY_FALSE@	babel.make.package babel.make.depends
 
 IMPLHDRS = sidlx_io_IOException_Impl.h sidlx_io_TxtIOStream_Impl.h            \
   sidlx_io_TxtIStream_Impl.h sidlx_io_TxtOStream_Impl.h                       \
