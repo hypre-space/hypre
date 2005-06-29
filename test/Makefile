@@ -68,7 +68,7 @@ BABELLIBFLAGS =\
  -lbHYPREClient-C\
  -lbHYPREClient-F\
  -lbHYPRE\
- -lsidl
+ -lsidl -ldl -lxml2
 
 ###########################################
 # Commpkg definitions
