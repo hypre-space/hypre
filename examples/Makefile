@@ -22,7 +22,7 @@ LFLAGS_B =\
  -lbHYPREClient-C\
  -lbHYPREClient-F\
  -lbHYPRE\
- -lsidl
+ -lsidl -ldl -lxml2
 
 ########################################################################
 # Rules for compiling the source files
