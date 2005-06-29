@@ -655,8 +655,6 @@ main( int   argc,
 /*   HYPRE_StructMatrixPrint("driver.out.A", A, 0); */
 #endif
 
-   hypre_TFree(values);
-
    /*-----------------------------------------------------------
     * Set up the linear system
     *-----------------------------------------------------------*/
