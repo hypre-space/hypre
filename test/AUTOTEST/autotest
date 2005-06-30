@@ -98,8 +98,6 @@ help () {
   printf "       Valid host IDs are:\n"
   printf "%s\n" "     -debug    Turn on debug mode."
   printf "%s\n" "     -emperor  Intel Linux, CHAOS2."
-  printf "%s\n" "     -frost    ASCI Frost."
-  printf "%s\n" "     -frostmp  ASCI Frost executing OpenMP."
   printf "%s\n" "     -gps      Compaq gps320 system."
   printf "%s\n" "     -gpsmp    Compaq gps320 system executing OpenMP."
   printf "%s\n" "     -ilx      Intel running Linux."
@@ -210,20 +208,6 @@ do
     -d|-debug) 
         DEBUGMODE="yes"
         set -xv
-        shift;;
-    -frost | -frostmp)
-        HYPRE_ARCH="blue"
-        HYPRE_COMPILE_MACHINE="frost"
-        HYPRE_RUN_MACHINE="frost"
-        HYPRE_REMOTE_DIR="/usr/casc/hypre/aix_5_ll/AUTOTEST"
-        if [ "$1" = "-frostmp" ] ; then
-	  HYPRE_MACHINE_COMMANDS="-mnse 1 -a 1 -cfo 2"
-          HYPRE_MESSAGE='SECONDARY[OpenMP-Frost]'
-        else
-	  HYPRE_MACHINE_COMMANDS="-me 1 -nsb 1 -o 1 -a 2 -cf"
-          HYPRE_MESSAGE='SECONDARY[Frost]'
-        fi
-	perform_test
         shift;;
     -gps | -gpsmp)
         HYPRE_ARCH="dec"
