@@ -58,6 +58,15 @@ LLNL_CHECK_AUTOCONF(2.59)
 
 ############################################################
 #
+# Additions for hypre
+#
+AC_PREFIX_DEFAULT(`pwd`/../hypre)
+with_fortran90=no
+# ... was with_fortran90=yes    which doesn't work on frost
+enable_shared=no
+
+############################################################
+#
 # Additional configure options. (all "yes" by default)
 #
 AM_CONDITIONAL(BABEL_RUNTIME_ONLY, ! ((grep UCRL-CODE-2002-054 $srcdir/../COPYRIGHT > /dev/null 2>&1) && (test -e ../bin/babel) ))
