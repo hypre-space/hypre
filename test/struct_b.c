@@ -556,22 +556,29 @@ main( int   argc,
          break;
    } 
 
+/* for use with sidl arrays:
    sidl_upper= sidl_int__array_create1d( dim );
    sidl_lower= sidl_int__array_create1d( dim );
+*/
    grid = bHYPRE_StructGrid__create();
    ierr += bHYPRE_StructGrid_SetCommunicator( grid, (void *) comm );
    ierr += bHYPRE_StructGrid_SetDimension( grid, dim );
    for (ib = 0; ib < nblocks; ib++)
    {
+/* for use with sidl arrays; or use sidl_int__array_borrow:
       for ( i=0; i < dim; i++ )
       {
          sidl_int__array_set1( sidl_upper, i, iupper[ib][i] );
          sidl_int__array_set1( sidl_lower, i, ilower[ib][i] );
       }
       bHYPRE_StructGrid_SetExtents( grid, sidl_lower, sidl_upper );
+*/
+      bHYPRE_StructGrid_SetExtents( grid, ilower[ib], iupper[ib], dim );
    }
+/* for use with sidl arrays:
    sidl_int__array_deleteRef( sidl_upper );
    sidl_int__array_deleteRef( sidl_lower );
+*/
 
    sidl_periodic= sidl_int__array_create1d( dim );
    for ( i=0; i < dim; i++ )
@@ -854,8 +861,13 @@ main( int   argc,
       time_index = hypre_InitializeTiming("PFMG Setup");
       hypre_BeginTiming(time_index);
 
-      solver_PFMG = bHYPRE_StructPFMG__create();
-      ierr += bHYPRE_StructPFMG_SetCommunicator( solver_PFMG, (void *) comm );
+
+      /* old create method:
+         solver_PFMG = bHYPRE_StructPFMG__create();
+         ierr += bHYPRE_StructPFMG_SetCommunicator( solver_PFMG, (void *) comm );*/
+      solver_PFMG = bHYPRE_StructPFMG_Create( (void *) comm );
+
+
       bHYPRE_StructPFMG_SetIntParameter( solver_PFMG, "max iter", 50 );
       bHYPRE_StructPFMG_SetDoubleParameter( solver_PFMG, "tol", 1.0e-6 );
       bHYPRE_StructPFMG_SetIntParameter( solver_PFMG, "rel change", 0 );
