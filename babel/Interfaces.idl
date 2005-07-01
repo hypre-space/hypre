@@ -42,7 +42,7 @@ package bHYPRE version 1.0.0
    interface ProblemDefinition 
    {
       /**
-       * Set the MPI Communicator.
+       * Set the MPI Communicator.  DEPRECATED, Use Create()
        **/
       int SetCommunicator(in opaque mpi_comm);
 
@@ -73,6 +73,19 @@ package bHYPRE version 1.0.0
        * convert it into a known type.
        **/
       int GetObject(out sidl.BaseInterface A);
+
+      /**
+       *  Create function, like the builtin __create() except you must specify
+       *  the MPI communicator in an argument.
+       *  Derived classes may override this to have more arguments.
+       **/
+      /**
+       *  This function is documented here because it will be defined for all
+       *  classes.  However, the argument list is variable and it is declared
+       *  in the classes, not in this interface.
+       *  (Static member functions may be declared only in classes, not interfaces.)
+       **/
+      /* static int Create( in opaque mpi_comm );*/
    }
 
    /*----------- Interface -------------------------------------------------*/
@@ -1120,12 +1133,16 @@ package bHYPRE version 1.0.0
 
       int SetDimension(in int dim);
 
-      int SetExtents(in array<int,1,column-major> ilower,
-                     in array<int,1,column-major> iupper);
+      /* For comparison, here is some former code using sidl arrays:
+         int SetExtents(in array<int,1,column-major> ilower,
+         in array<int,1,column-major> iupper); */
+      int SetExtents( in rarray<int,1> ilower(dim),
+                      in rarray<int,1> iupper(dim),
+                      in int dim );
 
       int SetPeriodic(in array<int,1,column-major> periodic);
 
-      int SetNumGhost(in array<int,1,column-major> num_ghost);
+      int SetNumGhost( in rarray<int,1> num_ghost(len), in int len );
 
       int Assemble();
    }
@@ -1333,5 +1350,5 @@ package bHYPRE version 1.0.0
 
    class StructPFMG implements-all Solver
    {
-   }
+      static StructPFMG Create( in opaque mpi_comm );   }
 }
