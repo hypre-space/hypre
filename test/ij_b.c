@@ -2676,8 +2676,8 @@ main( int   argc,
 
 /*
    hypre_FinalizeMemoryDebug();
-*/
    printf("about to call MPI_Finalize\n");
+*/
 
    MPI_Finalize();
 
