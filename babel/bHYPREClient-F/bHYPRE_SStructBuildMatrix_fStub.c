@@ -2,12 +2,12 @@
  * File:          bHYPRE_SStructBuildMatrix_fStub.c
  * Symbol:        bHYPRE.SStructBuildMatrix-v1.0.0
  * Symbol Type:   interface
- * Babel Version: 0.9.8
+ * Babel Version: 0.10.4
  * Description:   Client-side glue code for bHYPRE.SStructBuildMatrix
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.9.8
+ * babel-version = 0.10.4
  */
 
 /*
@@ -27,8 +27,8 @@
 #include "sidl_Loader.h"
 #endif
 #include "bHYPRE_SStructBuildMatrix_IOR.h"
-#include "sidl_BaseInterface_IOR.h"
 #include "sidl_ClassInfo_IOR.h"
+#include "sidl_BaseInterface_IOR.h"
 #include "bHYPRE_SStructGraph_IOR.h"
 
 /*
@@ -49,8 +49,7 @@ SIDLFortran77Symbol(bhypre_sstructbuildmatrix__cast_f,BHYPRE_SSTRUCTBUILDMATRIX_
       *_base->d_epv->f__cast)(
       _base->d_object,
       "bHYPRE.SStructBuildMatrix");
-  }
-  else {
+  } else {
     *retval = 0;
   }
 }
@@ -281,7 +280,7 @@ SIDLFortran77Symbol(bhypre_sstructbuildmatrix_getclassinfo_f,BHYPRE_SSTRUCTBUILD
 }
 
 /*
- * Set the MPI Communicator.
+ * Set the MPI Communicator.  DEPRECATED, Use Create()
  * 
  */
 

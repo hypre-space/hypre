@@ -2,12 +2,12 @@
  * File:          bHYPRE_StructStencil_fStub.c
  * Symbol:        bHYPRE.StructStencil-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.9.8
+ * Babel Version: 0.10.4
  * Description:   Client-side glue code for bHYPRE.StructStencil
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.9.8
+ * babel-version = 0.10.4
  */
 
 /*
@@ -33,8 +33,8 @@
 #include "sidl_Loader.h"
 #endif
 #include "bHYPRE_StructStencil_IOR.h"
-#include "sidl_BaseInterface_IOR.h"
 #include "sidl_ClassInfo_IOR.h"
+#include "sidl_BaseInterface_IOR.h"
 
 /*
  * Return pointer to internal IOR functions.
@@ -47,34 +47,9 @@ static const struct bHYPRE_StructStencil__external* _getIOR(void)
 #ifdef SIDL_STATIC_LIBRARY
     _ior = bHYPRE_StructStencil__externals();
 #else
-    sidl_DLL dll = sidl_DLL__create();
-    const struct bHYPRE_StructStencil__external*(*dll_f)(void);
-    /* check global namespace for symbol first */
-    if (dll && sidl_DLL_loadLibrary(dll, "main:", TRUE, FALSE)) {
-      dll_f =
-        (const struct bHYPRE_StructStencil__external*(*)(void)) 
-          sidl_DLL_lookupSymbol(
-          dll, "bHYPRE_StructStencil__externals");
-      _ior = (dll_f ? (*dll_f)() : NULL);
-    }
-    if (dll) sidl_DLL_deleteRef(dll);
-    if (!_ior) {
-      dll = sidl_Loader_findLibrary("bHYPRE.StructStencil",
-        "ior/impl", sidl_Scope_SCLSCOPE,
-        sidl_Resolve_SCLRESOLVE);
-      if (dll) {
-        dll_f =
-          (const struct bHYPRE_StructStencil__external*(*)(void)) 
-            sidl_DLL_lookupSymbol(
-            dll, "bHYPRE_StructStencil__externals");
-        _ior = (dll_f ? (*dll_f)() : NULL);
-        sidl_DLL_deleteRef(dll);
-      }
-    }
-    if (!_ior) {
-      fputs("Unable to find the implementation for bHYPRE.StructStencil; please set SIDL_DLL_PATH\n", stderr);
-      exit(-1);
-    }
+    _ior = (struct 
+      bHYPRE_StructStencil__external*)sidl_dynamicLoadIOR(
+      "bHYPRE.StructStencil","bHYPRE_StructStencil__externals") ;
 #endif
   }
   return _ior;
@@ -111,8 +86,7 @@ SIDLFortran77Symbol(bhypre_structstencil__cast_f,BHYPRE_STRUCTSTENCIL__CAST_F,bH
       *_base->d_epv->f__cast)(
       _base->d_object,
       "bHYPRE.StructStencil");
-  }
-  else {
+  } else {
     *retval = 0;
   }
 }

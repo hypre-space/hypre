@@ -2,12 +2,12 @@
  * File:          bHYPRE_SStructGrid.h
  * Symbol:        bHYPRE.SStructGrid-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.9.8
+ * Babel Version: 0.10.4
  * Description:   Client-side glue code for bHYPRE.SStructGrid
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.9.8
+ * babel-version = 0.10.4
  */
 
 #ifndef included_bHYPRE_SStructGrid_h
@@ -40,6 +40,12 @@ typedef struct bHYPRE_SStructGrid__object* bHYPRE_SStructGrid;
 #include "sidl_ClassInfo.h"
 #endif
 
+#ifndef included_sidl_io_Serializer_h
+#include "sidl_io_Serializer.h"
+#endif
+#ifndef included_sidl_io_Deserializer_h
+#include "sidl_io_Deserializer.h"
+#endif
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -47,35 +53,46 @@ extern "C" {
 /**
  * Constructor function for the class.
  */
-bHYPRE_SStructGrid
+struct bHYPRE_SStructGrid__object*
 bHYPRE_SStructGrid__create(void);
 
+/**
+ * RMI constructor function for the class.
+ */
+bHYPRE_SStructGrid
+bHYPRE_SStructGrid__createRemote(const char *, sidl_BaseInterface *_ex);
+
+/**
+ * RMI connector function for the class.
+ */
+bHYPRE_SStructGrid
+bHYPRE_SStructGrid__connect(const char *, sidl_BaseInterface *_ex);
 void
 bHYPRE_SStructGrid_addRef(
-  /*in*/ bHYPRE_SStructGrid self);
+  /* in */ bHYPRE_SStructGrid self);
 
 void
 bHYPRE_SStructGrid_deleteRef(
-  /*in*/ bHYPRE_SStructGrid self);
+  /* in */ bHYPRE_SStructGrid self);
 
 sidl_bool
 bHYPRE_SStructGrid_isSame(
-  /*in*/ bHYPRE_SStructGrid self,
-  /*in*/ sidl_BaseInterface iobj);
+  /* in */ bHYPRE_SStructGrid self,
+  /* in */ sidl_BaseInterface iobj);
 
 sidl_BaseInterface
 bHYPRE_SStructGrid_queryInt(
-  /*in*/ bHYPRE_SStructGrid self,
-  /*in*/ const char* name);
+  /* in */ bHYPRE_SStructGrid self,
+  /* in */ const char* name);
 
 sidl_bool
 bHYPRE_SStructGrid_isType(
-  /*in*/ bHYPRE_SStructGrid self,
-  /*in*/ const char* name);
+  /* in */ bHYPRE_SStructGrid self,
+  /* in */ const char* name);
 
 sidl_ClassInfo
 bHYPRE_SStructGrid_getClassInfo(
-  /*in*/ bHYPRE_SStructGrid self);
+  /* in */ bHYPRE_SStructGrid self);
 
 /**
  * Set the number of dimensions {\tt ndim} and the number of
@@ -84,17 +101,17 @@ bHYPRE_SStructGrid_getClassInfo(
  */
 int32_t
 bHYPRE_SStructGrid_SetNumDimParts(
-  /*in*/ bHYPRE_SStructGrid self,
-  /*in*/ int32_t ndim,
-  /*in*/ int32_t nparts);
+  /* in */ bHYPRE_SStructGrid self,
+  /* in */ int32_t ndim,
+  /* in */ int32_t nparts);
 
 /**
  * Method:  SetCommunicator[]
  */
 int32_t
 bHYPRE_SStructGrid_SetCommunicator(
-  /*in*/ bHYPRE_SStructGrid self,
-  /*in*/ void* mpi_comm);
+  /* in */ bHYPRE_SStructGrid self,
+  /* in */ void* mpi_comm);
 
 /**
  * Set the extents for a box on a structured part of the grid.
@@ -102,10 +119,10 @@ bHYPRE_SStructGrid_SetCommunicator(
  */
 int32_t
 bHYPRE_SStructGrid_SetExtents(
-  /*in*/ bHYPRE_SStructGrid self,
-  /*in*/ int32_t part,
-  /*in*/ struct sidl_int__array* ilower,
-  /*in*/ struct sidl_int__array* iupper);
+  /* in */ bHYPRE_SStructGrid self,
+  /* in */ int32_t part,
+  /* in */ struct sidl_int__array* ilower,
+  /* in */ struct sidl_int__array* iupper);
 
 /**
  * Describe the variables that live on a structured part of the
@@ -116,11 +133,11 @@ bHYPRE_SStructGrid_SetExtents(
  */
 int32_t
 bHYPRE_SStructGrid_SetVariable(
-  /*in*/ bHYPRE_SStructGrid self,
-  /*in*/ int32_t part,
-  /*in*/ int32_t var,
-  /*in*/ int32_t nvars,
-  /*in*/ enum bHYPRE_SStructVariable__enum vartype);
+  /* in */ bHYPRE_SStructGrid self,
+  /* in */ int32_t part,
+  /* in */ int32_t var,
+  /* in */ int32_t nvars,
+  /* in */ enum bHYPRE_SStructVariable__enum vartype);
 
 /**
  * Describe additional variables that live at a particular
@@ -131,11 +148,11 @@ bHYPRE_SStructGrid_SetVariable(
  */
 int32_t
 bHYPRE_SStructGrid_AddVariable(
-  /*in*/ bHYPRE_SStructGrid self,
-  /*in*/ int32_t part,
-  /*in*/ struct sidl_int__array* index,
-  /*in*/ int32_t var,
-  /*in*/ enum bHYPRE_SStructVariable__enum vartype);
+  /* in */ bHYPRE_SStructGrid self,
+  /* in */ int32_t part,
+  /* in */ struct sidl_int__array* index,
+  /* in */ int32_t var,
+  /* in */ enum bHYPRE_SStructVariable__enum vartype);
 
 /**
  * Describe how regions just outside of a part relate to other
@@ -164,14 +181,14 @@ bHYPRE_SStructGrid_AddVariable(
  */
 int32_t
 bHYPRE_SStructGrid_SetNeighborBox(
-  /*in*/ bHYPRE_SStructGrid self,
-  /*in*/ int32_t part,
-  /*in*/ struct sidl_int__array* ilower,
-  /*in*/ struct sidl_int__array* iupper,
-  /*in*/ int32_t nbor_part,
-  /*in*/ struct sidl_int__array* nbor_ilower,
-  /*in*/ struct sidl_int__array* nbor_iupper,
-  /*in*/ struct sidl_int__array* index_map);
+  /* in */ bHYPRE_SStructGrid self,
+  /* in */ int32_t part,
+  /* in */ struct sidl_int__array* ilower,
+  /* in */ struct sidl_int__array* iupper,
+  /* in */ int32_t nbor_part,
+  /* in */ struct sidl_int__array* nbor_ilower,
+  /* in */ struct sidl_int__array* nbor_iupper,
+  /* in */ struct sidl_int__array* index_map);
 
 /**
  * Add an unstructured part to the grid.  The variables in the
@@ -186,9 +203,9 @@ bHYPRE_SStructGrid_SetNeighborBox(
  */
 int32_t
 bHYPRE_SStructGrid_AddUnstructuredPart(
-  /*in*/ bHYPRE_SStructGrid self,
-  /*in*/ int32_t ilower,
-  /*in*/ int32_t iupper);
+  /* in */ bHYPRE_SStructGrid self,
+  /* in */ int32_t ilower,
+  /* in */ int32_t iupper);
 
 /**
  * (Optional) Set periodic for a particular part.
@@ -196,9 +213,9 @@ bHYPRE_SStructGrid_AddUnstructuredPart(
  */
 int32_t
 bHYPRE_SStructGrid_SetPeriodic(
-  /*in*/ bHYPRE_SStructGrid self,
-  /*in*/ int32_t part,
-  /*in*/ struct sidl_int__array* periodic);
+  /* in */ bHYPRE_SStructGrid self,
+  /* in */ int32_t part,
+  /* in */ struct sidl_int__array* periodic);
 
 /**
  * Setting ghost in the sgrids.
@@ -206,20 +223,20 @@ bHYPRE_SStructGrid_SetPeriodic(
  */
 int32_t
 bHYPRE_SStructGrid_SetNumGhost(
-  /*in*/ bHYPRE_SStructGrid self,
-  /*in*/ struct sidl_int__array* num_ghost);
+  /* in */ bHYPRE_SStructGrid self,
+  /* in */ struct sidl_int__array* num_ghost);
 
 /**
  * Method:  Assemble[]
  */
 int32_t
 bHYPRE_SStructGrid_Assemble(
-  /*in*/ bHYPRE_SStructGrid self);
+  /* in */ bHYPRE_SStructGrid self);
 
 /**
  * Cast method for interface and class type conversions.
  */
-bHYPRE_SStructGrid
+struct bHYPRE_SStructGrid__object*
 bHYPRE_SStructGrid__cast(
   void* obj);
 
@@ -231,6 +248,29 @@ bHYPRE_SStructGrid__cast2(
   void* obj,
   const char* type);
 
+/**
+ * Select and execute a method by name
+ */
+void
+bHYPRE_SStructGrid__exec(
+  /* in */ bHYPRE_SStructGrid self,
+  /* in */ const char* methodName,
+  /* in */ sidl_io_Deserializer inArgs,
+  /* in */ sidl_io_Serializer outArgs);
+/**
+ * static Exec method for reflexity.
+ */
+void
+bHYPRE_SStructGrid__sexec(
+  /* in */ const char* methodName,
+  /* in */ sidl_io_Deserializer inArgs,
+  /* in */ sidl_io_Serializer outArgs);
+/**
+ * Get the URL of the Implementation of this object (for RMI)
+ */
+char*
+bHYPRE_SStructGrid__getURL(
+  /* in */ bHYPRE_SStructGrid self);
 struct bHYPRE_SStructGrid__array*
 bHYPRE_SStructGrid__array_createCol(
   int32_t       dimen,

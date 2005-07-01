@@ -2,12 +2,12 @@
  * File:          bHYPRE_SStructBuildVector.h
  * Symbol:        bHYPRE.SStructBuildVector-v1.0.0
  * Symbol Type:   interface
- * Babel Version: 0.9.8
+ * Babel Version: 0.10.4
  * Description:   Client-side glue code for bHYPRE.SStructBuildVector
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.9.8
+ * babel-version = 0.10.4
  */
 
 #ifndef included_bHYPRE_SStructBuildVector_h
@@ -37,54 +37,65 @@ typedef struct bHYPRE_SStructBuildVector__object* bHYPRE_SStructBuildVector;
 #include "sidl_ClassInfo.h"
 #endif
 
+#ifndef included_sidl_io_Serializer_h
+#include "sidl_io_Serializer.h"
+#endif
+#ifndef included_sidl_io_Deserializer_h
+#include "sidl_io_Deserializer.h"
+#endif
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+/**
+ * RMI connector function for the class.
+ */
+bHYPRE_SStructBuildVector
+bHYPRE_SStructBuildVector__connect(const char *, sidl_BaseInterface *_ex);
 void
 bHYPRE_SStructBuildVector_addRef(
-  /*in*/ bHYPRE_SStructBuildVector self);
+  /* in */ bHYPRE_SStructBuildVector self);
 
 void
 bHYPRE_SStructBuildVector_deleteRef(
-  /*in*/ bHYPRE_SStructBuildVector self);
+  /* in */ bHYPRE_SStructBuildVector self);
 
 sidl_bool
 bHYPRE_SStructBuildVector_isSame(
-  /*in*/ bHYPRE_SStructBuildVector self,
-  /*in*/ sidl_BaseInterface iobj);
+  /* in */ bHYPRE_SStructBuildVector self,
+  /* in */ sidl_BaseInterface iobj);
 
 sidl_BaseInterface
 bHYPRE_SStructBuildVector_queryInt(
-  /*in*/ bHYPRE_SStructBuildVector self,
-  /*in*/ const char* name);
+  /* in */ bHYPRE_SStructBuildVector self,
+  /* in */ const char* name);
 
 sidl_bool
 bHYPRE_SStructBuildVector_isType(
-  /*in*/ bHYPRE_SStructBuildVector self,
-  /*in*/ const char* name);
+  /* in */ bHYPRE_SStructBuildVector self,
+  /* in */ const char* name);
 
 sidl_ClassInfo
 bHYPRE_SStructBuildVector_getClassInfo(
-  /*in*/ bHYPRE_SStructBuildVector self);
+  /* in */ bHYPRE_SStructBuildVector self);
 
 int32_t
 bHYPRE_SStructBuildVector_SetCommunicator(
-  /*in*/ bHYPRE_SStructBuildVector self,
-  /*in*/ void* mpi_comm);
+  /* in */ bHYPRE_SStructBuildVector self,
+  /* in */ void* mpi_comm);
 
 int32_t
 bHYPRE_SStructBuildVector_Initialize(
-  /*in*/ bHYPRE_SStructBuildVector self);
+  /* in */ bHYPRE_SStructBuildVector self);
 
 int32_t
 bHYPRE_SStructBuildVector_Assemble(
-  /*in*/ bHYPRE_SStructBuildVector self);
+  /* in */ bHYPRE_SStructBuildVector self);
 
 int32_t
 bHYPRE_SStructBuildVector_GetObject(
-  /*in*/ bHYPRE_SStructBuildVector self,
-  /*out*/ sidl_BaseInterface* A);
+  /* in */ bHYPRE_SStructBuildVector self,
+  /* out */ sidl_BaseInterface* A);
 
 /**
  * Set the vector grid.
@@ -92,8 +103,8 @@ bHYPRE_SStructBuildVector_GetObject(
  */
 int32_t
 bHYPRE_SStructBuildVector_SetGrid(
-  /*in*/ bHYPRE_SStructBuildVector self,
-  /*in*/ bHYPRE_SStructGrid grid);
+  /* in */ bHYPRE_SStructBuildVector self,
+  /* in */ bHYPRE_SStructGrid grid);
 
 /**
  * Set vector coefficients index by index.
@@ -109,11 +120,11 @@ bHYPRE_SStructBuildVector_SetGrid(
  */
 int32_t
 bHYPRE_SStructBuildVector_SetValues(
-  /*in*/ bHYPRE_SStructBuildVector self,
-  /*in*/ int32_t part,
-  /*in*/ struct sidl_int__array* index,
-  /*in*/ int32_t var,
-  /*in*/ struct sidl_double__array* values);
+  /* in */ bHYPRE_SStructBuildVector self,
+  /* in */ int32_t part,
+  /* in */ struct sidl_int__array* index,
+  /* in */ int32_t var,
+  /* in */ struct sidl_double__array* values);
 
 /**
  * Set vector coefficients a box at a time.
@@ -129,12 +140,12 @@ bHYPRE_SStructBuildVector_SetValues(
  */
 int32_t
 bHYPRE_SStructBuildVector_SetBoxValues(
-  /*in*/ bHYPRE_SStructBuildVector self,
-  /*in*/ int32_t part,
-  /*in*/ struct sidl_int__array* ilower,
-  /*in*/ struct sidl_int__array* iupper,
-  /*in*/ int32_t var,
-  /*in*/ struct sidl_double__array* values);
+  /* in */ bHYPRE_SStructBuildVector self,
+  /* in */ int32_t part,
+  /* in */ struct sidl_int__array* ilower,
+  /* in */ struct sidl_int__array* iupper,
+  /* in */ int32_t var,
+  /* in */ struct sidl_double__array* values);
 
 /**
  * Set vector coefficients index by index.
@@ -150,11 +161,11 @@ bHYPRE_SStructBuildVector_SetBoxValues(
  */
 int32_t
 bHYPRE_SStructBuildVector_AddToValues(
-  /*in*/ bHYPRE_SStructBuildVector self,
-  /*in*/ int32_t part,
-  /*in*/ struct sidl_int__array* index,
-  /*in*/ int32_t var,
-  /*in*/ struct sidl_double__array* values);
+  /* in */ bHYPRE_SStructBuildVector self,
+  /* in */ int32_t part,
+  /* in */ struct sidl_int__array* index,
+  /* in */ int32_t var,
+  /* in */ struct sidl_double__array* values);
 
 /**
  * Set vector coefficients a box at a time.
@@ -170,12 +181,12 @@ bHYPRE_SStructBuildVector_AddToValues(
  */
 int32_t
 bHYPRE_SStructBuildVector_AddToBoxValues(
-  /*in*/ bHYPRE_SStructBuildVector self,
-  /*in*/ int32_t part,
-  /*in*/ struct sidl_int__array* ilower,
-  /*in*/ struct sidl_int__array* iupper,
-  /*in*/ int32_t var,
-  /*in*/ struct sidl_double__array* values);
+  /* in */ bHYPRE_SStructBuildVector self,
+  /* in */ int32_t part,
+  /* in */ struct sidl_int__array* ilower,
+  /* in */ struct sidl_int__array* iupper,
+  /* in */ int32_t var,
+  /* in */ struct sidl_double__array* values);
 
 /**
  * Gather vector data before calling {\tt GetValues}.
@@ -183,7 +194,7 @@ bHYPRE_SStructBuildVector_AddToBoxValues(
  */
 int32_t
 bHYPRE_SStructBuildVector_Gather(
-  /*in*/ bHYPRE_SStructBuildVector self);
+  /* in */ bHYPRE_SStructBuildVector self);
 
 /**
  * Get vector coefficients index by index.
@@ -198,11 +209,11 @@ bHYPRE_SStructBuildVector_Gather(
  */
 int32_t
 bHYPRE_SStructBuildVector_GetValues(
-  /*in*/ bHYPRE_SStructBuildVector self,
-  /*in*/ int32_t part,
-  /*in*/ struct sidl_int__array* index,
-  /*in*/ int32_t var,
-  /*out*/ double* value);
+  /* in */ bHYPRE_SStructBuildVector self,
+  /* in */ int32_t part,
+  /* in */ struct sidl_int__array* index,
+  /* in */ int32_t var,
+  /* out */ double* value);
 
 /**
  * Get vector coefficients a box at a time.
@@ -217,12 +228,12 @@ bHYPRE_SStructBuildVector_GetValues(
  */
 int32_t
 bHYPRE_SStructBuildVector_GetBoxValues(
-  /*in*/ bHYPRE_SStructBuildVector self,
-  /*in*/ int32_t part,
-  /*in*/ struct sidl_int__array* ilower,
-  /*in*/ struct sidl_int__array* iupper,
-  /*in*/ int32_t var,
-  /*inout*/ struct sidl_double__array** values);
+  /* in */ bHYPRE_SStructBuildVector self,
+  /* in */ int32_t part,
+  /* in */ struct sidl_int__array* ilower,
+  /* in */ struct sidl_int__array* iupper,
+  /* in */ int32_t var,
+  /* inout */ struct sidl_double__array** values);
 
 /**
  * Set the vector to be complex.
@@ -230,7 +241,7 @@ bHYPRE_SStructBuildVector_GetBoxValues(
  */
 int32_t
 bHYPRE_SStructBuildVector_SetComplex(
-  /*in*/ bHYPRE_SStructBuildVector self);
+  /* in */ bHYPRE_SStructBuildVector self);
 
 /**
  * Print the vector to file.  This is mainly for debugging
@@ -239,14 +250,14 @@ bHYPRE_SStructBuildVector_SetComplex(
  */
 int32_t
 bHYPRE_SStructBuildVector_Print(
-  /*in*/ bHYPRE_SStructBuildVector self,
-  /*in*/ const char* filename,
-  /*in*/ int32_t all);
+  /* in */ bHYPRE_SStructBuildVector self,
+  /* in */ const char* filename,
+  /* in */ int32_t all);
 
 /**
  * Cast method for interface and class type conversions.
  */
-bHYPRE_SStructBuildVector
+struct bHYPRE_SStructBuildVector__object*
 bHYPRE_SStructBuildVector__cast(
   void* obj);
 
@@ -258,6 +269,29 @@ bHYPRE_SStructBuildVector__cast2(
   void* obj,
   const char* type);
 
+/**
+ * Select and execute a method by name
+ */
+void
+bHYPRE_SStructBuildVector__exec(
+  /* in */ bHYPRE_SStructBuildVector self,
+  /* in */ const char* methodName,
+  /* in */ sidl_io_Deserializer inArgs,
+  /* in */ sidl_io_Serializer outArgs);
+/**
+ * static Exec method for reflexity.
+ */
+void
+bHYPRE_SStructBuildVector__sexec(
+  /* in */ const char* methodName,
+  /* in */ sidl_io_Deserializer inArgs,
+  /* in */ sidl_io_Serializer outArgs);
+/**
+ * Get the URL of the Implementation of this object (for RMI)
+ */
+char*
+bHYPRE_SStructBuildVector__getURL(
+  /* in */ bHYPRE_SStructBuildVector self);
 struct bHYPRE_SStructBuildVector__array*
 bHYPRE_SStructBuildVector__array_createCol(
   int32_t       dimen,

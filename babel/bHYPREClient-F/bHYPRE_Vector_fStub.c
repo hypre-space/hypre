@@ -2,12 +2,12 @@
  * File:          bHYPRE_Vector_fStub.c
  * Symbol:        bHYPRE.Vector-v1.0.0
  * Symbol Type:   interface
- * Babel Version: 0.9.8
+ * Babel Version: 0.10.4
  * Description:   Client-side glue code for bHYPRE.Vector
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.9.8
+ * babel-version = 0.10.4
  */
 
 /*
@@ -27,8 +27,8 @@
 #include "sidl_Loader.h"
 #endif
 #include "bHYPRE_Vector_IOR.h"
-#include "sidl_BaseInterface_IOR.h"
 #include "sidl_ClassInfo_IOR.h"
+#include "sidl_BaseInterface_IOR.h"
 
 /*
  * Cast method for interface and type conversions.
@@ -48,8 +48,7 @@ SIDLFortran77Symbol(bhypre_vector__cast_f,BHYPRE_VECTOR__CAST_F,bHYPRE_Vector__c
       *_base->d_epv->f__cast)(
       _base->d_object,
       "bHYPRE.Vector");
-  }
-  else {
+  } else {
     *retval = 0;
   }
 }

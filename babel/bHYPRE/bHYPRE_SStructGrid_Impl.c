@@ -2,12 +2,12 @@
  * File:          bHYPRE_SStructGrid_Impl.c
  * Symbol:        bHYPRE.SStructGrid-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.9.8
+ * Babel Version: 0.10.4
  * Description:   Server-side implementation for bHYPRE.SStructGrid
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.9.8
+ * babel-version = 0.10.4
  */
 
 /*
@@ -34,15 +34,36 @@
 /* DO-NOT-DELETE splicer.end(bHYPRE.SStructGrid._includes) */
 
 /*
+ * Static class initializer called exactly once before any user-defined method is dispatched
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_SStructGrid__load"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+void
+impl_bHYPRE_SStructGrid__load(
+  void)
+{
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructGrid._load) */
+  /* Insert-Code-Here {bHYPRE.SStructGrid._load} (static class initializer method) */
+  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructGrid._load) */
+}
+/*
  * Class constructor called when the class is created.
  */
 
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_SStructGrid__ctor"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 void
 impl_bHYPRE_SStructGrid__ctor(
-  /*in*/ bHYPRE_SStructGrid self)
+  /* in */ bHYPRE_SStructGrid self)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructGrid._ctor) */
   /* Insert the implementation of the constructor method here... */
@@ -63,9 +84,12 @@ impl_bHYPRE_SStructGrid__ctor(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_SStructGrid__dtor"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 void
 impl_bHYPRE_SStructGrid__dtor(
-  /*in*/ bHYPRE_SStructGrid self)
+  /* in */ bHYPRE_SStructGrid self)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructGrid._dtor) */
   /* Insert the implementation of the destructor method here... */
@@ -91,9 +115,14 @@ impl_bHYPRE_SStructGrid__dtor(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_SStructGrid_SetNumDimParts"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_SStructGrid_SetNumDimParts(
-  /*in*/ bHYPRE_SStructGrid self, /*in*/ int32_t ndim, /*in*/ int32_t nparts)
+  /* in */ bHYPRE_SStructGrid self,
+  /* in */ int32_t ndim,
+  /* in */ int32_t nparts)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructGrid.SetNumDimParts) */
   /* Insert the implementation of the SetNumDimParts method here... */
@@ -119,9 +148,13 @@ impl_bHYPRE_SStructGrid_SetNumDimParts(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_SStructGrid_SetCommunicator"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_SStructGrid_SetCommunicator(
-  /*in*/ bHYPRE_SStructGrid self, /*in*/ void* mpi_comm)
+  /* in */ bHYPRE_SStructGrid self,
+  /* in */ void* mpi_comm)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructGrid.SetCommunicator) */
   /* Insert the implementation of the SetCommunicator method here... */
@@ -144,11 +177,15 @@ impl_bHYPRE_SStructGrid_SetCommunicator(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_SStructGrid_SetExtents"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_SStructGrid_SetExtents(
-  /*in*/ bHYPRE_SStructGrid self, /*in*/ int32_t part,
-    /*in*/ struct sidl_int__array* ilower,
-    /*in*/ struct sidl_int__array* iupper)
+  /* in */ bHYPRE_SStructGrid self,
+  /* in */ int32_t part,
+  /* in */ struct sidl_int__array* ilower,
+  /* in */ struct sidl_int__array* iupper)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructGrid.SetExtents) */
   /* Insert the implementation of the SetExtents method here... */
@@ -178,10 +215,16 @@ impl_bHYPRE_SStructGrid_SetExtents(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_SStructGrid_SetVariable"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_SStructGrid_SetVariable(
-  /*in*/ bHYPRE_SStructGrid self, /*in*/ int32_t part, /*in*/ int32_t var,
-    /*in*/ int32_t nvars, /*in*/ enum bHYPRE_SStructVariable__enum vartype)
+  /* in */ bHYPRE_SStructGrid self,
+  /* in */ int32_t part,
+  /* in */ int32_t var,
+  /* in */ int32_t nvars,
+  /* in */ enum bHYPRE_SStructVariable__enum vartype)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructGrid.SetVariable) */
   /* Insert the implementation of the SetVariable method here... */
@@ -217,11 +260,16 @@ impl_bHYPRE_SStructGrid_SetVariable(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_SStructGrid_AddVariable"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_SStructGrid_AddVariable(
-  /*in*/ bHYPRE_SStructGrid self, /*in*/ int32_t part,
-    /*in*/ struct sidl_int__array* index, /*in*/ int32_t var,
-    /*in*/ enum bHYPRE_SStructVariable__enum vartype)
+  /* in */ bHYPRE_SStructGrid self,
+  /* in */ int32_t part,
+  /* in */ struct sidl_int__array* index,
+  /* in */ int32_t var,
+  /* in */ enum bHYPRE_SStructVariable__enum vartype)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructGrid.AddVariable) */
   /* Insert the implementation of the AddVariable method here... */
@@ -271,14 +319,19 @@ impl_bHYPRE_SStructGrid_AddVariable(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_SStructGrid_SetNeighborBox"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_SStructGrid_SetNeighborBox(
-  /*in*/ bHYPRE_SStructGrid self, /*in*/ int32_t part,
-    /*in*/ struct sidl_int__array* ilower,
-    /*in*/ struct sidl_int__array* iupper, /*in*/ int32_t nbor_part,
-    /*in*/ struct sidl_int__array* nbor_ilower,
-    /*in*/ struct sidl_int__array* nbor_iupper,
-    /*in*/ struct sidl_int__array* index_map)
+  /* in */ bHYPRE_SStructGrid self,
+  /* in */ int32_t part,
+  /* in */ struct sidl_int__array* ilower,
+  /* in */ struct sidl_int__array* iupper,
+  /* in */ int32_t nbor_part,
+  /* in */ struct sidl_int__array* nbor_ilower,
+  /* in */ struct sidl_int__array* nbor_iupper,
+  /* in */ struct sidl_int__array* index_map)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructGrid.SetNeighborBox) */
   /* Insert the implementation of the SetNeighborBox method here... */
@@ -318,9 +371,14 @@ impl_bHYPRE_SStructGrid_SetNeighborBox(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_SStructGrid_AddUnstructuredPart"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_SStructGrid_AddUnstructuredPart(
-  /*in*/ bHYPRE_SStructGrid self, /*in*/ int32_t ilower, /*in*/ int32_t iupper)
+  /* in */ bHYPRE_SStructGrid self,
+  /* in */ int32_t ilower,
+  /* in */ int32_t iupper)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructGrid.AddUnstructuredPart) */
   /* Insert the implementation of the AddUnstructuredPart method here... */
@@ -351,10 +409,14 @@ impl_bHYPRE_SStructGrid_AddUnstructuredPart(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_SStructGrid_SetPeriodic"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_SStructGrid_SetPeriodic(
-  /*in*/ bHYPRE_SStructGrid self, /*in*/ int32_t part,
-    /*in*/ struct sidl_int__array* periodic)
+  /* in */ bHYPRE_SStructGrid self,
+  /* in */ int32_t part,
+  /* in */ struct sidl_int__array* periodic)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructGrid.SetPeriodic) */
   /* Insert the implementation of the SetPeriodic method here... */
@@ -381,9 +443,13 @@ impl_bHYPRE_SStructGrid_SetPeriodic(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_SStructGrid_SetNumGhost"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_SStructGrid_SetNumGhost(
-  /*in*/ bHYPRE_SStructGrid self, /*in*/ struct sidl_int__array* num_ghost)
+  /* in */ bHYPRE_SStructGrid self,
+  /* in */ struct sidl_int__array* num_ghost)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructGrid.SetNumGhost) */
   /* Insert the implementation of the SetNumGhost method here... */
@@ -408,9 +474,12 @@ impl_bHYPRE_SStructGrid_SetNumGhost(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_SStructGrid_Assemble"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_SStructGrid_Assemble(
-  /*in*/ bHYPRE_SStructGrid self)
+  /* in */ bHYPRE_SStructGrid self)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructGrid.Assemble) */
   /* Insert the implementation of the Assemble method here... */
@@ -426,4 +495,41 @@ impl_bHYPRE_SStructGrid_Assemble(
    return ierr;
 
   /* DO-NOT-DELETE splicer.end(bHYPRE.SStructGrid.Assemble) */
+}
+/* Babel internal methods, Users should not edit below this line. */
+struct bHYPRE_SStructGrid__object* 
+  impl_bHYPRE_SStructGrid_fconnect_bHYPRE_SStructGrid(char* url,
+  sidl_BaseInterface *_ex) {
+  return bHYPRE_SStructGrid__connect(url, _ex);
+}
+char * impl_bHYPRE_SStructGrid_fgetURL_bHYPRE_SStructGrid(struct 
+  bHYPRE_SStructGrid__object* obj) {
+  return bHYPRE_SStructGrid__getURL(obj);
+}
+struct sidl_ClassInfo__object* 
+  impl_bHYPRE_SStructGrid_fconnect_sidl_ClassInfo(char* url,
+  sidl_BaseInterface *_ex) {
+  return sidl_ClassInfo__connect(url, _ex);
+}
+char * impl_bHYPRE_SStructGrid_fgetURL_sidl_ClassInfo(struct 
+  sidl_ClassInfo__object* obj) {
+  return sidl_ClassInfo__getURL(obj);
+}
+struct sidl_BaseInterface__object* 
+  impl_bHYPRE_SStructGrid_fconnect_sidl_BaseInterface(char* url,
+  sidl_BaseInterface *_ex) {
+  return sidl_BaseInterface__connect(url, _ex);
+}
+char * impl_bHYPRE_SStructGrid_fgetURL_sidl_BaseInterface(struct 
+  sidl_BaseInterface__object* obj) {
+  return sidl_BaseInterface__getURL(obj);
+}
+struct sidl_BaseClass__object* 
+  impl_bHYPRE_SStructGrid_fconnect_sidl_BaseClass(char* url,
+  sidl_BaseInterface *_ex) {
+  return sidl_BaseClass__connect(url, _ex);
+}
+char * impl_bHYPRE_SStructGrid_fgetURL_sidl_BaseClass(struct 
+  sidl_BaseClass__object* obj) {
+  return sidl_BaseClass__getURL(obj);
 }

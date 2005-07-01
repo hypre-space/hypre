@@ -2,137 +2,233 @@
  * File:          bHYPRE_ParCSRDiagScale_Skel.c
  * Symbol:        bHYPRE.ParCSRDiagScale-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.9.8
+ * Babel Version: 0.10.4
  * Description:   Server-side glue code for bHYPRE.ParCSRDiagScale
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.9.8
+ * babel-version = 0.10.4
  */
 
 #include "bHYPRE_ParCSRDiagScale_IOR.h"
 #include "bHYPRE_ParCSRDiagScale.h"
 #include <stddef.h>
 
-extern void
+extern
+void
+impl_bHYPRE_ParCSRDiagScale__load(
+  void);
+
+extern
+void
 impl_bHYPRE_ParCSRDiagScale__ctor(
-  bHYPRE_ParCSRDiagScale);
+  /* in */ bHYPRE_ParCSRDiagScale self);
 
-extern void
+extern
+void
 impl_bHYPRE_ParCSRDiagScale__dtor(
-  bHYPRE_ParCSRDiagScale);
+  /* in */ bHYPRE_ParCSRDiagScale self);
 
-extern int32_t
+extern struct bHYPRE_ParCSRDiagScale__object* 
+  impl_bHYPRE_ParCSRDiagScale_fconnect_bHYPRE_ParCSRDiagScale(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_ParCSRDiagScale_fgetURL_bHYPRE_ParCSRDiagScale(struct 
+  bHYPRE_ParCSRDiagScale__object* obj);
+extern struct bHYPRE_Solver__object* 
+  impl_bHYPRE_ParCSRDiagScale_fconnect_bHYPRE_Solver(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_ParCSRDiagScale_fgetURL_bHYPRE_Solver(struct 
+  bHYPRE_Solver__object* obj);
+extern struct bHYPRE_Operator__object* 
+  impl_bHYPRE_ParCSRDiagScale_fconnect_bHYPRE_Operator(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_ParCSRDiagScale_fgetURL_bHYPRE_Operator(struct 
+  bHYPRE_Operator__object* obj);
+extern struct sidl_ClassInfo__object* 
+  impl_bHYPRE_ParCSRDiagScale_fconnect_sidl_ClassInfo(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_ParCSRDiagScale_fgetURL_sidl_ClassInfo(struct 
+  sidl_ClassInfo__object* obj);
+extern struct bHYPRE_Vector__object* 
+  impl_bHYPRE_ParCSRDiagScale_fconnect_bHYPRE_Vector(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_ParCSRDiagScale_fgetURL_bHYPRE_Vector(struct 
+  bHYPRE_Vector__object* obj);
+extern struct sidl_BaseInterface__object* 
+  impl_bHYPRE_ParCSRDiagScale_fconnect_sidl_BaseInterface(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_ParCSRDiagScale_fgetURL_sidl_BaseInterface(struct 
+  sidl_BaseInterface__object* obj);
+extern struct sidl_BaseClass__object* 
+  impl_bHYPRE_ParCSRDiagScale_fconnect_sidl_BaseClass(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_ParCSRDiagScale_fgetURL_sidl_BaseClass(struct 
+  sidl_BaseClass__object* obj);
+extern
+int32_t
 impl_bHYPRE_ParCSRDiagScale_SetCommunicator(
-  bHYPRE_ParCSRDiagScale,
-  void*);
+  /* in */ bHYPRE_ParCSRDiagScale self,
+  /* in */ void* mpi_comm);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_ParCSRDiagScale_SetIntParameter(
-  bHYPRE_ParCSRDiagScale,
-  const char*,
-  int32_t);
+  /* in */ bHYPRE_ParCSRDiagScale self,
+  /* in */ const char* name,
+  /* in */ int32_t value);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_ParCSRDiagScale_SetDoubleParameter(
-  bHYPRE_ParCSRDiagScale,
-  const char*,
-  double);
+  /* in */ bHYPRE_ParCSRDiagScale self,
+  /* in */ const char* name,
+  /* in */ double value);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_ParCSRDiagScale_SetStringParameter(
-  bHYPRE_ParCSRDiagScale,
-  const char*,
-  const char*);
+  /* in */ bHYPRE_ParCSRDiagScale self,
+  /* in */ const char* name,
+  /* in */ const char* value);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_ParCSRDiagScale_SetIntArray1Parameter(
-  bHYPRE_ParCSRDiagScale,
-  const char*,
-  struct sidl_int__array*);
+  /* in */ bHYPRE_ParCSRDiagScale self,
+  /* in */ const char* name,
+  /* in */ struct sidl_int__array* value);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_ParCSRDiagScale_SetIntArray2Parameter(
-  bHYPRE_ParCSRDiagScale,
-  const char*,
-  struct sidl_int__array*);
+  /* in */ bHYPRE_ParCSRDiagScale self,
+  /* in */ const char* name,
+  /* in */ struct sidl_int__array* value);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_ParCSRDiagScale_SetDoubleArray1Parameter(
-  bHYPRE_ParCSRDiagScale,
-  const char*,
-  struct sidl_double__array*);
+  /* in */ bHYPRE_ParCSRDiagScale self,
+  /* in */ const char* name,
+  /* in */ struct sidl_double__array* value);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_ParCSRDiagScale_SetDoubleArray2Parameter(
-  bHYPRE_ParCSRDiagScale,
-  const char*,
-  struct sidl_double__array*);
+  /* in */ bHYPRE_ParCSRDiagScale self,
+  /* in */ const char* name,
+  /* in */ struct sidl_double__array* value);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_ParCSRDiagScale_GetIntValue(
-  bHYPRE_ParCSRDiagScale,
-  const char*,
-  int32_t*);
+  /* in */ bHYPRE_ParCSRDiagScale self,
+  /* in */ const char* name,
+  /* out */ int32_t* value);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_ParCSRDiagScale_GetDoubleValue(
-  bHYPRE_ParCSRDiagScale,
-  const char*,
-  double*);
+  /* in */ bHYPRE_ParCSRDiagScale self,
+  /* in */ const char* name,
+  /* out */ double* value);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_ParCSRDiagScale_Setup(
-  bHYPRE_ParCSRDiagScale,
-  bHYPRE_Vector,
-  bHYPRE_Vector);
+  /* in */ bHYPRE_ParCSRDiagScale self,
+  /* in */ bHYPRE_Vector b,
+  /* in */ bHYPRE_Vector x);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_ParCSRDiagScale_Apply(
-  bHYPRE_ParCSRDiagScale,
-  bHYPRE_Vector,
-  bHYPRE_Vector*);
+  /* in */ bHYPRE_ParCSRDiagScale self,
+  /* in */ bHYPRE_Vector b,
+  /* inout */ bHYPRE_Vector* x);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_ParCSRDiagScale_SetOperator(
-  bHYPRE_ParCSRDiagScale,
-  bHYPRE_Operator);
+  /* in */ bHYPRE_ParCSRDiagScale self,
+  /* in */ bHYPRE_Operator A);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_ParCSRDiagScale_SetTolerance(
-  bHYPRE_ParCSRDiagScale,
-  double);
+  /* in */ bHYPRE_ParCSRDiagScale self,
+  /* in */ double tolerance);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_ParCSRDiagScale_SetMaxIterations(
-  bHYPRE_ParCSRDiagScale,
-  int32_t);
+  /* in */ bHYPRE_ParCSRDiagScale self,
+  /* in */ int32_t max_iterations);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_ParCSRDiagScale_SetLogging(
-  bHYPRE_ParCSRDiagScale,
-  int32_t);
+  /* in */ bHYPRE_ParCSRDiagScale self,
+  /* in */ int32_t level);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_ParCSRDiagScale_SetPrintLevel(
-  bHYPRE_ParCSRDiagScale,
-  int32_t);
+  /* in */ bHYPRE_ParCSRDiagScale self,
+  /* in */ int32_t level);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_ParCSRDiagScale_GetNumIterations(
-  bHYPRE_ParCSRDiagScale,
-  int32_t*);
+  /* in */ bHYPRE_ParCSRDiagScale self,
+  /* out */ int32_t* num_iterations);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_ParCSRDiagScale_GetRelResidualNorm(
-  bHYPRE_ParCSRDiagScale,
-  double*);
+  /* in */ bHYPRE_ParCSRDiagScale self,
+  /* out */ double* norm);
 
+extern struct bHYPRE_ParCSRDiagScale__object* 
+  impl_bHYPRE_ParCSRDiagScale_fconnect_bHYPRE_ParCSRDiagScale(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_ParCSRDiagScale_fgetURL_bHYPRE_ParCSRDiagScale(struct 
+  bHYPRE_ParCSRDiagScale__object* obj);
+extern struct bHYPRE_Solver__object* 
+  impl_bHYPRE_ParCSRDiagScale_fconnect_bHYPRE_Solver(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_ParCSRDiagScale_fgetURL_bHYPRE_Solver(struct 
+  bHYPRE_Solver__object* obj);
+extern struct bHYPRE_Operator__object* 
+  impl_bHYPRE_ParCSRDiagScale_fconnect_bHYPRE_Operator(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_ParCSRDiagScale_fgetURL_bHYPRE_Operator(struct 
+  bHYPRE_Operator__object* obj);
+extern struct sidl_ClassInfo__object* 
+  impl_bHYPRE_ParCSRDiagScale_fconnect_sidl_ClassInfo(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_ParCSRDiagScale_fgetURL_sidl_ClassInfo(struct 
+  sidl_ClassInfo__object* obj);
+extern struct bHYPRE_Vector__object* 
+  impl_bHYPRE_ParCSRDiagScale_fconnect_bHYPRE_Vector(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_ParCSRDiagScale_fgetURL_bHYPRE_Vector(struct 
+  bHYPRE_Vector__object* obj);
+extern struct sidl_BaseInterface__object* 
+  impl_bHYPRE_ParCSRDiagScale_fconnect_sidl_BaseInterface(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_ParCSRDiagScale_fgetURL_sidl_BaseInterface(struct 
+  sidl_BaseInterface__object* obj);
+extern struct sidl_BaseClass__object* 
+  impl_bHYPRE_ParCSRDiagScale_fconnect_sidl_BaseClass(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_ParCSRDiagScale_fgetURL_sidl_BaseClass(struct 
+  sidl_BaseClass__object* obj);
 static int32_t
 skel_bHYPRE_ParCSRDiagScale_SetIntArray1Parameter(
-  /*in*/ bHYPRE_ParCSRDiagScale self,
-  /*in*/ const char* name,
-  /*in*/ struct sidl_int__array* value)
+  /* in */ bHYPRE_ParCSRDiagScale self,
+  /* in */ const char* name,
+/* in */ struct sidl_int__array* value)
 {
   int32_t _return;
   struct sidl_int__array* value_proxy = sidl_int__array_ensure(value, 1,
@@ -148,9 +244,9 @@ skel_bHYPRE_ParCSRDiagScale_SetIntArray1Parameter(
 
 static int32_t
 skel_bHYPRE_ParCSRDiagScale_SetIntArray2Parameter(
-  /*in*/ bHYPRE_ParCSRDiagScale self,
-  /*in*/ const char* name,
-  /*in*/ struct sidl_int__array* value)
+  /* in */ bHYPRE_ParCSRDiagScale self,
+  /* in */ const char* name,
+/* in */ struct sidl_int__array* value)
 {
   int32_t _return;
   struct sidl_int__array* value_proxy = sidl_int__array_ensure(value, 2,
@@ -166,9 +262,9 @@ skel_bHYPRE_ParCSRDiagScale_SetIntArray2Parameter(
 
 static int32_t
 skel_bHYPRE_ParCSRDiagScale_SetDoubleArray1Parameter(
-  /*in*/ bHYPRE_ParCSRDiagScale self,
-  /*in*/ const char* name,
-  /*in*/ struct sidl_double__array* value)
+  /* in */ bHYPRE_ParCSRDiagScale self,
+  /* in */ const char* name,
+/* in */ struct sidl_double__array* value)
 {
   int32_t _return;
   struct sidl_double__array* value_proxy = sidl_double__array_ensure(value, 1,
@@ -184,9 +280,9 @@ skel_bHYPRE_ParCSRDiagScale_SetDoubleArray1Parameter(
 
 static int32_t
 skel_bHYPRE_ParCSRDiagScale_SetDoubleArray2Parameter(
-  /*in*/ bHYPRE_ParCSRDiagScale self,
-  /*in*/ const char* name,
-  /*in*/ struct sidl_double__array* value)
+  /* in */ bHYPRE_ParCSRDiagScale self,
+  /* in */ const char* name,
+/* in */ struct sidl_double__array* value)
 {
   int32_t _return;
   struct sidl_double__array* value_proxy = sidl_double__array_ensure(value, 2,
@@ -232,10 +328,95 @@ bHYPRE_ParCSRDiagScale__set_epv(struct bHYPRE_ParCSRDiagScale__epv *epv)
   epv->f_SetPrintLevel = impl_bHYPRE_ParCSRDiagScale_SetPrintLevel;
   epv->f_GetNumIterations = impl_bHYPRE_ParCSRDiagScale_GetNumIterations;
   epv->f_GetRelResidualNorm = impl_bHYPRE_ParCSRDiagScale_GetRelResidualNorm;
+
 }
 #ifdef __cplusplus
 }
 #endif
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+void bHYPRE_ParCSRDiagScale__call_load(void) { 
+  impl_bHYPRE_ParCSRDiagScale__load();
+}
+struct bHYPRE_ParCSRDiagScale__object* 
+  skel_bHYPRE_ParCSRDiagScale_fconnect_bHYPRE_ParCSRDiagScale(char* url,
+  sidl_BaseInterface *_ex) { 
+  return impl_bHYPRE_ParCSRDiagScale_fconnect_bHYPRE_ParCSRDiagScale(url, _ex);
+}
+
+char* skel_bHYPRE_ParCSRDiagScale_fgetURL_bHYPRE_ParCSRDiagScale(struct 
+  bHYPRE_ParCSRDiagScale__object* obj) { 
+  return impl_bHYPRE_ParCSRDiagScale_fgetURL_bHYPRE_ParCSRDiagScale(obj);
+}
+
+struct bHYPRE_Solver__object* 
+  skel_bHYPRE_ParCSRDiagScale_fconnect_bHYPRE_Solver(char* url,
+  sidl_BaseInterface *_ex) { 
+  return impl_bHYPRE_ParCSRDiagScale_fconnect_bHYPRE_Solver(url, _ex);
+}
+
+char* skel_bHYPRE_ParCSRDiagScale_fgetURL_bHYPRE_Solver(struct 
+  bHYPRE_Solver__object* obj) { 
+  return impl_bHYPRE_ParCSRDiagScale_fgetURL_bHYPRE_Solver(obj);
+}
+
+struct bHYPRE_Operator__object* 
+  skel_bHYPRE_ParCSRDiagScale_fconnect_bHYPRE_Operator(char* url,
+  sidl_BaseInterface *_ex) { 
+  return impl_bHYPRE_ParCSRDiagScale_fconnect_bHYPRE_Operator(url, _ex);
+}
+
+char* skel_bHYPRE_ParCSRDiagScale_fgetURL_bHYPRE_Operator(struct 
+  bHYPRE_Operator__object* obj) { 
+  return impl_bHYPRE_ParCSRDiagScale_fgetURL_bHYPRE_Operator(obj);
+}
+
+struct sidl_ClassInfo__object* 
+  skel_bHYPRE_ParCSRDiagScale_fconnect_sidl_ClassInfo(char* url,
+  sidl_BaseInterface *_ex) { 
+  return impl_bHYPRE_ParCSRDiagScale_fconnect_sidl_ClassInfo(url, _ex);
+}
+
+char* skel_bHYPRE_ParCSRDiagScale_fgetURL_sidl_ClassInfo(struct 
+  sidl_ClassInfo__object* obj) { 
+  return impl_bHYPRE_ParCSRDiagScale_fgetURL_sidl_ClassInfo(obj);
+}
+
+struct bHYPRE_Vector__object* 
+  skel_bHYPRE_ParCSRDiagScale_fconnect_bHYPRE_Vector(char* url,
+  sidl_BaseInterface *_ex) { 
+  return impl_bHYPRE_ParCSRDiagScale_fconnect_bHYPRE_Vector(url, _ex);
+}
+
+char* skel_bHYPRE_ParCSRDiagScale_fgetURL_bHYPRE_Vector(struct 
+  bHYPRE_Vector__object* obj) { 
+  return impl_bHYPRE_ParCSRDiagScale_fgetURL_bHYPRE_Vector(obj);
+}
+
+struct sidl_BaseInterface__object* 
+  skel_bHYPRE_ParCSRDiagScale_fconnect_sidl_BaseInterface(char* url,
+  sidl_BaseInterface *_ex) { 
+  return impl_bHYPRE_ParCSRDiagScale_fconnect_sidl_BaseInterface(url, _ex);
+}
+
+char* skel_bHYPRE_ParCSRDiagScale_fgetURL_sidl_BaseInterface(struct 
+  sidl_BaseInterface__object* obj) { 
+  return impl_bHYPRE_ParCSRDiagScale_fgetURL_sidl_BaseInterface(obj);
+}
+
+struct sidl_BaseClass__object* 
+  skel_bHYPRE_ParCSRDiagScale_fconnect_sidl_BaseClass(char* url,
+  sidl_BaseInterface *_ex) { 
+  return impl_bHYPRE_ParCSRDiagScale_fconnect_sidl_BaseClass(url, _ex);
+}
+
+char* skel_bHYPRE_ParCSRDiagScale_fgetURL_sidl_BaseClass(struct 
+  sidl_BaseClass__object* obj) { 
+  return impl_bHYPRE_ParCSRDiagScale_fgetURL_sidl_BaseClass(obj);
+}
 
 struct bHYPRE_ParCSRDiagScale__data*
 bHYPRE_ParCSRDiagScale__get_data(bHYPRE_ParCSRDiagScale self)
@@ -251,3 +432,6 @@ void bHYPRE_ParCSRDiagScale__set_data(
     self->d_data = data;
   }
 }
+#ifdef __cplusplus
+}
+#endif

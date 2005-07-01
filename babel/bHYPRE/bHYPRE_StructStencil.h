@@ -2,12 +2,12 @@
  * File:          bHYPRE_StructStencil.h
  * Symbol:        bHYPRE.StructStencil-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.9.8
+ * Babel Version: 0.10.4
  * Description:   Client-side glue code for bHYPRE.StructStencil
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.9.8
+ * babel-version = 0.10.4
  */
 
 #ifndef included_bHYPRE_StructStencil_h
@@ -40,6 +40,12 @@ typedef struct bHYPRE_StructStencil__object* bHYPRE_StructStencil;
 #include "sidl_ClassInfo.h"
 #endif
 
+#ifndef included_sidl_io_Serializer_h
+#include "sidl_io_Serializer.h"
+#endif
+#ifndef included_sidl_io_Deserializer_h
+#include "sidl_io_Deserializer.h"
+#endif
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -47,65 +53,76 @@ extern "C" {
 /**
  * Constructor function for the class.
  */
-bHYPRE_StructStencil
+struct bHYPRE_StructStencil__object*
 bHYPRE_StructStencil__create(void);
 
+/**
+ * RMI constructor function for the class.
+ */
+bHYPRE_StructStencil
+bHYPRE_StructStencil__createRemote(const char *, sidl_BaseInterface *_ex);
+
+/**
+ * RMI connector function for the class.
+ */
+bHYPRE_StructStencil
+bHYPRE_StructStencil__connect(const char *, sidl_BaseInterface *_ex);
 void
 bHYPRE_StructStencil_addRef(
-  /*in*/ bHYPRE_StructStencil self);
+  /* in */ bHYPRE_StructStencil self);
 
 void
 bHYPRE_StructStencil_deleteRef(
-  /*in*/ bHYPRE_StructStencil self);
+  /* in */ bHYPRE_StructStencil self);
 
 sidl_bool
 bHYPRE_StructStencil_isSame(
-  /*in*/ bHYPRE_StructStencil self,
-  /*in*/ sidl_BaseInterface iobj);
+  /* in */ bHYPRE_StructStencil self,
+  /* in */ sidl_BaseInterface iobj);
 
 sidl_BaseInterface
 bHYPRE_StructStencil_queryInt(
-  /*in*/ bHYPRE_StructStencil self,
-  /*in*/ const char* name);
+  /* in */ bHYPRE_StructStencil self,
+  /* in */ const char* name);
 
 sidl_bool
 bHYPRE_StructStencil_isType(
-  /*in*/ bHYPRE_StructStencil self,
-  /*in*/ const char* name);
+  /* in */ bHYPRE_StructStencil self,
+  /* in */ const char* name);
 
 sidl_ClassInfo
 bHYPRE_StructStencil_getClassInfo(
-  /*in*/ bHYPRE_StructStencil self);
+  /* in */ bHYPRE_StructStencil self);
 
 /**
  * Method:  SetDimension[]
  */
 int32_t
 bHYPRE_StructStencil_SetDimension(
-  /*in*/ bHYPRE_StructStencil self,
-  /*in*/ int32_t dim);
+  /* in */ bHYPRE_StructStencil self,
+  /* in */ int32_t dim);
 
 /**
  * Method:  SetSize[]
  */
 int32_t
 bHYPRE_StructStencil_SetSize(
-  /*in*/ bHYPRE_StructStencil self,
-  /*in*/ int32_t size);
+  /* in */ bHYPRE_StructStencil self,
+  /* in */ int32_t size);
 
 /**
  * Method:  SetElement[]
  */
 int32_t
 bHYPRE_StructStencil_SetElement(
-  /*in*/ bHYPRE_StructStencil self,
-  /*in*/ int32_t index,
-  /*in*/ struct sidl_int__array* offset);
+  /* in */ bHYPRE_StructStencil self,
+  /* in */ int32_t index,
+  /* in */ struct sidl_int__array* offset);
 
 /**
  * Cast method for interface and class type conversions.
  */
-bHYPRE_StructStencil
+struct bHYPRE_StructStencil__object*
 bHYPRE_StructStencil__cast(
   void* obj);
 
@@ -117,6 +134,29 @@ bHYPRE_StructStencil__cast2(
   void* obj,
   const char* type);
 
+/**
+ * Select and execute a method by name
+ */
+void
+bHYPRE_StructStencil__exec(
+  /* in */ bHYPRE_StructStencil self,
+  /* in */ const char* methodName,
+  /* in */ sidl_io_Deserializer inArgs,
+  /* in */ sidl_io_Serializer outArgs);
+/**
+ * static Exec method for reflexity.
+ */
+void
+bHYPRE_StructStencil__sexec(
+  /* in */ const char* methodName,
+  /* in */ sidl_io_Deserializer inArgs,
+  /* in */ sidl_io_Serializer outArgs);
+/**
+ * Get the URL of the Implementation of this object (for RMI)
+ */
+char*
+bHYPRE_StructStencil__getURL(
+  /* in */ bHYPRE_StructStencil self);
 struct bHYPRE_StructStencil__array*
 bHYPRE_StructStencil__array_createCol(
   int32_t       dimen,

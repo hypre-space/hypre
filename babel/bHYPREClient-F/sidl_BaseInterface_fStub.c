@@ -1,8 +1,8 @@
 /*
  * File:          sidl_BaseInterface_fStub.c
- * Symbol:        sidl.BaseInterface-v0.9.0
+ * Symbol:        sidl.BaseInterface-v0.9.3
  * Symbol Type:   interface
- * Babel Version: 0.9.8
+ * Babel Version: 0.10.4
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Client-side glue code for sidl.BaseInterface
@@ -32,11 +32,12 @@
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.9.8
+ * babel-version = 0.10.4
+ * xml-url       = /home/painter/babel/share/babel-0.10.4/repository/sidl.BaseInterface-v0.9.3.xml
  */
 
 /*
- * Symbol "sidl.BaseInterface" (version 0.9.0)
+ * Symbol "sidl.BaseInterface" (version 0.9.3)
  * 
  * Every interface in <code>sidl</code> implicitly inherits
  * from <code>BaseInterface</code>, and it is implemented
@@ -72,8 +73,7 @@ SIDLFortran77Symbol(sidl_baseinterface__cast_f,SIDL_BASEINTERFACE__CAST_F,sidl_B
       *_base->d_epv->f__cast)(
       _base->d_object,
       "sidl.BaseInterface");
-  }
-  else {
+  } else {
     *retval = 0;
   }
 }

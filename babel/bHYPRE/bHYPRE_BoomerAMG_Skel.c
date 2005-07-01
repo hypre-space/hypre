@@ -2,143 +2,240 @@
  * File:          bHYPRE_BoomerAMG_Skel.c
  * Symbol:        bHYPRE.BoomerAMG-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.9.8
+ * Babel Version: 0.10.4
  * Description:   Server-side glue code for bHYPRE.BoomerAMG
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.9.8
+ * babel-version = 0.10.4
  */
 
 #include "bHYPRE_BoomerAMG_IOR.h"
 #include "bHYPRE_BoomerAMG.h"
 #include <stddef.h>
 
-extern void
+extern
+void
+impl_bHYPRE_BoomerAMG__load(
+  void);
+
+extern
+void
 impl_bHYPRE_BoomerAMG__ctor(
-  bHYPRE_BoomerAMG);
+  /* in */ bHYPRE_BoomerAMG self);
 
-extern void
+extern
+void
 impl_bHYPRE_BoomerAMG__dtor(
-  bHYPRE_BoomerAMG);
+  /* in */ bHYPRE_BoomerAMG self);
 
-extern int32_t
+extern struct bHYPRE_Solver__object* 
+  impl_bHYPRE_BoomerAMG_fconnect_bHYPRE_Solver(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_BoomerAMG_fgetURL_bHYPRE_Solver(struct 
+  bHYPRE_Solver__object* obj);
+extern struct bHYPRE_BoomerAMG__object* 
+  impl_bHYPRE_BoomerAMG_fconnect_bHYPRE_BoomerAMG(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_BoomerAMG_fgetURL_bHYPRE_BoomerAMG(struct 
+  bHYPRE_BoomerAMG__object* obj);
+extern struct bHYPRE_Operator__object* 
+  impl_bHYPRE_BoomerAMG_fconnect_bHYPRE_Operator(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_BoomerAMG_fgetURL_bHYPRE_Operator(struct 
+  bHYPRE_Operator__object* obj);
+extern struct sidl_ClassInfo__object* 
+  impl_bHYPRE_BoomerAMG_fconnect_sidl_ClassInfo(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_BoomerAMG_fgetURL_sidl_ClassInfo(struct 
+  sidl_ClassInfo__object* obj);
+extern struct bHYPRE_Vector__object* 
+  impl_bHYPRE_BoomerAMG_fconnect_bHYPRE_Vector(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_BoomerAMG_fgetURL_bHYPRE_Vector(struct 
+  bHYPRE_Vector__object* obj);
+extern struct sidl_BaseInterface__object* 
+  impl_bHYPRE_BoomerAMG_fconnect_sidl_BaseInterface(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_BoomerAMG_fgetURL_sidl_BaseInterface(struct 
+  sidl_BaseInterface__object* obj);
+extern struct sidl_BaseClass__object* 
+  impl_bHYPRE_BoomerAMG_fconnect_sidl_BaseClass(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_BoomerAMG_fgetURL_sidl_BaseClass(struct 
+  sidl_BaseClass__object* obj);
+extern
+int32_t
 impl_bHYPRE_BoomerAMG_SetLevelRelaxWt(
-  bHYPRE_BoomerAMG,
-  double,
-  int32_t);
+  /* in */ bHYPRE_BoomerAMG self,
+  /* in */ double relax_wt,
+  /* in */ int32_t level);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_BoomerAMG_SetCommunicator(
-  bHYPRE_BoomerAMG,
-  void*);
+  /* in */ bHYPRE_BoomerAMG self,
+  /* in */ void* mpi_comm);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_BoomerAMG_SetIntParameter(
-  bHYPRE_BoomerAMG,
-  const char*,
-  int32_t);
+  /* in */ bHYPRE_BoomerAMG self,
+  /* in */ const char* name,
+  /* in */ int32_t value);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_BoomerAMG_SetDoubleParameter(
-  bHYPRE_BoomerAMG,
-  const char*,
-  double);
+  /* in */ bHYPRE_BoomerAMG self,
+  /* in */ const char* name,
+  /* in */ double value);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_BoomerAMG_SetStringParameter(
-  bHYPRE_BoomerAMG,
-  const char*,
-  const char*);
+  /* in */ bHYPRE_BoomerAMG self,
+  /* in */ const char* name,
+  /* in */ const char* value);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_BoomerAMG_SetIntArray1Parameter(
-  bHYPRE_BoomerAMG,
-  const char*,
-  struct sidl_int__array*);
+  /* in */ bHYPRE_BoomerAMG self,
+  /* in */ const char* name,
+  /* in */ struct sidl_int__array* value);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_BoomerAMG_SetIntArray2Parameter(
-  bHYPRE_BoomerAMG,
-  const char*,
-  struct sidl_int__array*);
+  /* in */ bHYPRE_BoomerAMG self,
+  /* in */ const char* name,
+  /* in */ struct sidl_int__array* value);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_BoomerAMG_SetDoubleArray1Parameter(
-  bHYPRE_BoomerAMG,
-  const char*,
-  struct sidl_double__array*);
+  /* in */ bHYPRE_BoomerAMG self,
+  /* in */ const char* name,
+  /* in */ struct sidl_double__array* value);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_BoomerAMG_SetDoubleArray2Parameter(
-  bHYPRE_BoomerAMG,
-  const char*,
-  struct sidl_double__array*);
+  /* in */ bHYPRE_BoomerAMG self,
+  /* in */ const char* name,
+  /* in */ struct sidl_double__array* value);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_BoomerAMG_GetIntValue(
-  bHYPRE_BoomerAMG,
-  const char*,
-  int32_t*);
+  /* in */ bHYPRE_BoomerAMG self,
+  /* in */ const char* name,
+  /* out */ int32_t* value);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_BoomerAMG_GetDoubleValue(
-  bHYPRE_BoomerAMG,
-  const char*,
-  double*);
+  /* in */ bHYPRE_BoomerAMG self,
+  /* in */ const char* name,
+  /* out */ double* value);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_BoomerAMG_Setup(
-  bHYPRE_BoomerAMG,
-  bHYPRE_Vector,
-  bHYPRE_Vector);
+  /* in */ bHYPRE_BoomerAMG self,
+  /* in */ bHYPRE_Vector b,
+  /* in */ bHYPRE_Vector x);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_BoomerAMG_Apply(
-  bHYPRE_BoomerAMG,
-  bHYPRE_Vector,
-  bHYPRE_Vector*);
+  /* in */ bHYPRE_BoomerAMG self,
+  /* in */ bHYPRE_Vector b,
+  /* inout */ bHYPRE_Vector* x);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_BoomerAMG_SetOperator(
-  bHYPRE_BoomerAMG,
-  bHYPRE_Operator);
+  /* in */ bHYPRE_BoomerAMG self,
+  /* in */ bHYPRE_Operator A);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_BoomerAMG_SetTolerance(
-  bHYPRE_BoomerAMG,
-  double);
+  /* in */ bHYPRE_BoomerAMG self,
+  /* in */ double tolerance);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_BoomerAMG_SetMaxIterations(
-  bHYPRE_BoomerAMG,
-  int32_t);
+  /* in */ bHYPRE_BoomerAMG self,
+  /* in */ int32_t max_iterations);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_BoomerAMG_SetLogging(
-  bHYPRE_BoomerAMG,
-  int32_t);
+  /* in */ bHYPRE_BoomerAMG self,
+  /* in */ int32_t level);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_BoomerAMG_SetPrintLevel(
-  bHYPRE_BoomerAMG,
-  int32_t);
+  /* in */ bHYPRE_BoomerAMG self,
+  /* in */ int32_t level);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_BoomerAMG_GetNumIterations(
-  bHYPRE_BoomerAMG,
-  int32_t*);
+  /* in */ bHYPRE_BoomerAMG self,
+  /* out */ int32_t* num_iterations);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_BoomerAMG_GetRelResidualNorm(
-  bHYPRE_BoomerAMG,
-  double*);
+  /* in */ bHYPRE_BoomerAMG self,
+  /* out */ double* norm);
 
+extern struct bHYPRE_Solver__object* 
+  impl_bHYPRE_BoomerAMG_fconnect_bHYPRE_Solver(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_BoomerAMG_fgetURL_bHYPRE_Solver(struct 
+  bHYPRE_Solver__object* obj);
+extern struct bHYPRE_BoomerAMG__object* 
+  impl_bHYPRE_BoomerAMG_fconnect_bHYPRE_BoomerAMG(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_BoomerAMG_fgetURL_bHYPRE_BoomerAMG(struct 
+  bHYPRE_BoomerAMG__object* obj);
+extern struct bHYPRE_Operator__object* 
+  impl_bHYPRE_BoomerAMG_fconnect_bHYPRE_Operator(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_BoomerAMG_fgetURL_bHYPRE_Operator(struct 
+  bHYPRE_Operator__object* obj);
+extern struct sidl_ClassInfo__object* 
+  impl_bHYPRE_BoomerAMG_fconnect_sidl_ClassInfo(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_BoomerAMG_fgetURL_sidl_ClassInfo(struct 
+  sidl_ClassInfo__object* obj);
+extern struct bHYPRE_Vector__object* 
+  impl_bHYPRE_BoomerAMG_fconnect_bHYPRE_Vector(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_BoomerAMG_fgetURL_bHYPRE_Vector(struct 
+  bHYPRE_Vector__object* obj);
+extern struct sidl_BaseInterface__object* 
+  impl_bHYPRE_BoomerAMG_fconnect_sidl_BaseInterface(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_BoomerAMG_fgetURL_sidl_BaseInterface(struct 
+  sidl_BaseInterface__object* obj);
+extern struct sidl_BaseClass__object* 
+  impl_bHYPRE_BoomerAMG_fconnect_sidl_BaseClass(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_BoomerAMG_fgetURL_sidl_BaseClass(struct 
+  sidl_BaseClass__object* obj);
 static int32_t
 skel_bHYPRE_BoomerAMG_SetIntArray1Parameter(
-  /*in*/ bHYPRE_BoomerAMG self,
-  /*in*/ const char* name,
-  /*in*/ struct sidl_int__array* value)
+  /* in */ bHYPRE_BoomerAMG self,
+  /* in */ const char* name,
+/* in */ struct sidl_int__array* value)
 {
   int32_t _return;
   struct sidl_int__array* value_proxy = sidl_int__array_ensure(value, 1,
@@ -154,9 +251,9 @@ skel_bHYPRE_BoomerAMG_SetIntArray1Parameter(
 
 static int32_t
 skel_bHYPRE_BoomerAMG_SetIntArray2Parameter(
-  /*in*/ bHYPRE_BoomerAMG self,
-  /*in*/ const char* name,
-  /*in*/ struct sidl_int__array* value)
+  /* in */ bHYPRE_BoomerAMG self,
+  /* in */ const char* name,
+/* in */ struct sidl_int__array* value)
 {
   int32_t _return;
   struct sidl_int__array* value_proxy = sidl_int__array_ensure(value, 2,
@@ -172,9 +269,9 @@ skel_bHYPRE_BoomerAMG_SetIntArray2Parameter(
 
 static int32_t
 skel_bHYPRE_BoomerAMG_SetDoubleArray1Parameter(
-  /*in*/ bHYPRE_BoomerAMG self,
-  /*in*/ const char* name,
-  /*in*/ struct sidl_double__array* value)
+  /* in */ bHYPRE_BoomerAMG self,
+  /* in */ const char* name,
+/* in */ struct sidl_double__array* value)
 {
   int32_t _return;
   struct sidl_double__array* value_proxy = sidl_double__array_ensure(value, 1,
@@ -190,9 +287,9 @@ skel_bHYPRE_BoomerAMG_SetDoubleArray1Parameter(
 
 static int32_t
 skel_bHYPRE_BoomerAMG_SetDoubleArray2Parameter(
-  /*in*/ bHYPRE_BoomerAMG self,
-  /*in*/ const char* name,
-  /*in*/ struct sidl_double__array* value)
+  /* in */ bHYPRE_BoomerAMG self,
+  /* in */ const char* name,
+/* in */ struct sidl_double__array* value)
 {
   int32_t _return;
   struct sidl_double__array* value_proxy = sidl_double__array_ensure(value, 2,
@@ -237,10 +334,95 @@ bHYPRE_BoomerAMG__set_epv(struct bHYPRE_BoomerAMG__epv *epv)
   epv->f_SetPrintLevel = impl_bHYPRE_BoomerAMG_SetPrintLevel;
   epv->f_GetNumIterations = impl_bHYPRE_BoomerAMG_GetNumIterations;
   epv->f_GetRelResidualNorm = impl_bHYPRE_BoomerAMG_GetRelResidualNorm;
+
 }
 #ifdef __cplusplus
 }
 #endif
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+void bHYPRE_BoomerAMG__call_load(void) { 
+  impl_bHYPRE_BoomerAMG__load();
+}
+struct bHYPRE_Solver__object* 
+  skel_bHYPRE_BoomerAMG_fconnect_bHYPRE_Solver(char* url,
+  sidl_BaseInterface *_ex) { 
+  return impl_bHYPRE_BoomerAMG_fconnect_bHYPRE_Solver(url, _ex);
+}
+
+char* skel_bHYPRE_BoomerAMG_fgetURL_bHYPRE_Solver(struct bHYPRE_Solver__object* 
+  obj) { 
+  return impl_bHYPRE_BoomerAMG_fgetURL_bHYPRE_Solver(obj);
+}
+
+struct bHYPRE_BoomerAMG__object* 
+  skel_bHYPRE_BoomerAMG_fconnect_bHYPRE_BoomerAMG(char* url,
+  sidl_BaseInterface *_ex) { 
+  return impl_bHYPRE_BoomerAMG_fconnect_bHYPRE_BoomerAMG(url, _ex);
+}
+
+char* skel_bHYPRE_BoomerAMG_fgetURL_bHYPRE_BoomerAMG(struct 
+  bHYPRE_BoomerAMG__object* obj) { 
+  return impl_bHYPRE_BoomerAMG_fgetURL_bHYPRE_BoomerAMG(obj);
+}
+
+struct bHYPRE_Operator__object* 
+  skel_bHYPRE_BoomerAMG_fconnect_bHYPRE_Operator(char* url,
+  sidl_BaseInterface *_ex) { 
+  return impl_bHYPRE_BoomerAMG_fconnect_bHYPRE_Operator(url, _ex);
+}
+
+char* skel_bHYPRE_BoomerAMG_fgetURL_bHYPRE_Operator(struct 
+  bHYPRE_Operator__object* obj) { 
+  return impl_bHYPRE_BoomerAMG_fgetURL_bHYPRE_Operator(obj);
+}
+
+struct sidl_ClassInfo__object* 
+  skel_bHYPRE_BoomerAMG_fconnect_sidl_ClassInfo(char* url,
+  sidl_BaseInterface *_ex) { 
+  return impl_bHYPRE_BoomerAMG_fconnect_sidl_ClassInfo(url, _ex);
+}
+
+char* skel_bHYPRE_BoomerAMG_fgetURL_sidl_ClassInfo(struct 
+  sidl_ClassInfo__object* obj) { 
+  return impl_bHYPRE_BoomerAMG_fgetURL_sidl_ClassInfo(obj);
+}
+
+struct bHYPRE_Vector__object* 
+  skel_bHYPRE_BoomerAMG_fconnect_bHYPRE_Vector(char* url,
+  sidl_BaseInterface *_ex) { 
+  return impl_bHYPRE_BoomerAMG_fconnect_bHYPRE_Vector(url, _ex);
+}
+
+char* skel_bHYPRE_BoomerAMG_fgetURL_bHYPRE_Vector(struct bHYPRE_Vector__object* 
+  obj) { 
+  return impl_bHYPRE_BoomerAMG_fgetURL_bHYPRE_Vector(obj);
+}
+
+struct sidl_BaseInterface__object* 
+  skel_bHYPRE_BoomerAMG_fconnect_sidl_BaseInterface(char* url,
+  sidl_BaseInterface *_ex) { 
+  return impl_bHYPRE_BoomerAMG_fconnect_sidl_BaseInterface(url, _ex);
+}
+
+char* skel_bHYPRE_BoomerAMG_fgetURL_sidl_BaseInterface(struct 
+  sidl_BaseInterface__object* obj) { 
+  return impl_bHYPRE_BoomerAMG_fgetURL_sidl_BaseInterface(obj);
+}
+
+struct sidl_BaseClass__object* 
+  skel_bHYPRE_BoomerAMG_fconnect_sidl_BaseClass(char* url,
+  sidl_BaseInterface *_ex) { 
+  return impl_bHYPRE_BoomerAMG_fconnect_sidl_BaseClass(url, _ex);
+}
+
+char* skel_bHYPRE_BoomerAMG_fgetURL_sidl_BaseClass(struct 
+  sidl_BaseClass__object* obj) { 
+  return impl_bHYPRE_BoomerAMG_fgetURL_sidl_BaseClass(obj);
+}
 
 struct bHYPRE_BoomerAMG__data*
 bHYPRE_BoomerAMG__get_data(bHYPRE_BoomerAMG self)
@@ -256,3 +438,6 @@ void bHYPRE_BoomerAMG__set_data(
     self->d_data = data;
   }
 }
+#ifdef __cplusplus
+}
+#endif

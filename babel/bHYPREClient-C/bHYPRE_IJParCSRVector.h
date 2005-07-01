@@ -2,12 +2,12 @@
  * File:          bHYPRE_IJParCSRVector.h
  * Symbol:        bHYPRE.IJParCSRVector-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.9.8
+ * Babel Version: 0.10.4
  * Description:   Client-side glue code for bHYPRE.IJParCSRVector
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.9.8
+ * babel-version = 0.10.4
  */
 
 #ifndef included_bHYPRE_IJParCSRVector_h
@@ -43,6 +43,12 @@ typedef struct bHYPRE_IJParCSRVector__object* bHYPRE_IJParCSRVector;
 #include "sidl_ClassInfo.h"
 #endif
 
+#ifndef included_sidl_io_Serializer_h
+#include "sidl_io_Serializer.h"
+#endif
+#ifndef included_sidl_io_Deserializer_h
+#include "sidl_io_Deserializer.h"
+#endif
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -50,35 +56,46 @@ extern "C" {
 /**
  * Constructor function for the class.
  */
-bHYPRE_IJParCSRVector
+struct bHYPRE_IJParCSRVector__object*
 bHYPRE_IJParCSRVector__create(void);
 
+/**
+ * RMI constructor function for the class.
+ */
+bHYPRE_IJParCSRVector
+bHYPRE_IJParCSRVector__createRemote(const char *, sidl_BaseInterface *_ex);
+
+/**
+ * RMI connector function for the class.
+ */
+bHYPRE_IJParCSRVector
+bHYPRE_IJParCSRVector__connect(const char *, sidl_BaseInterface *_ex);
 void
 bHYPRE_IJParCSRVector_addRef(
-  /*in*/ bHYPRE_IJParCSRVector self);
+  /* in */ bHYPRE_IJParCSRVector self);
 
 void
 bHYPRE_IJParCSRVector_deleteRef(
-  /*in*/ bHYPRE_IJParCSRVector self);
+  /* in */ bHYPRE_IJParCSRVector self);
 
 sidl_bool
 bHYPRE_IJParCSRVector_isSame(
-  /*in*/ bHYPRE_IJParCSRVector self,
-  /*in*/ sidl_BaseInterface iobj);
+  /* in */ bHYPRE_IJParCSRVector self,
+  /* in */ sidl_BaseInterface iobj);
 
 sidl_BaseInterface
 bHYPRE_IJParCSRVector_queryInt(
-  /*in*/ bHYPRE_IJParCSRVector self,
-  /*in*/ const char* name);
+  /* in */ bHYPRE_IJParCSRVector self,
+  /* in */ const char* name);
 
 sidl_bool
 bHYPRE_IJParCSRVector_isType(
-  /*in*/ bHYPRE_IJParCSRVector self,
-  /*in*/ const char* name);
+  /* in */ bHYPRE_IJParCSRVector self,
+  /* in */ const char* name);
 
 sidl_ClassInfo
 bHYPRE_IJParCSRVector_getClassInfo(
-  /*in*/ bHYPRE_IJParCSRVector self);
+  /* in */ bHYPRE_IJParCSRVector self);
 
 /**
  * Set {\tt self} to 0.
@@ -86,7 +103,7 @@ bHYPRE_IJParCSRVector_getClassInfo(
  */
 int32_t
 bHYPRE_IJParCSRVector_Clear(
-  /*in*/ bHYPRE_IJParCSRVector self);
+  /* in */ bHYPRE_IJParCSRVector self);
 
 /**
  * Copy x into {\tt self}.
@@ -94,8 +111,8 @@ bHYPRE_IJParCSRVector_Clear(
  */
 int32_t
 bHYPRE_IJParCSRVector_Copy(
-  /*in*/ bHYPRE_IJParCSRVector self,
-  /*in*/ bHYPRE_Vector x);
+  /* in */ bHYPRE_IJParCSRVector self,
+  /* in */ bHYPRE_Vector x);
 
 /**
  * Create an {\tt x} compatible with {\tt self}.
@@ -107,8 +124,8 @@ bHYPRE_IJParCSRVector_Copy(
  */
 int32_t
 bHYPRE_IJParCSRVector_Clone(
-  /*in*/ bHYPRE_IJParCSRVector self,
-  /*out*/ bHYPRE_Vector* x);
+  /* in */ bHYPRE_IJParCSRVector self,
+  /* out */ bHYPRE_Vector* x);
 
 /**
  * Scale {\tt self} by {\tt a}.
@@ -116,8 +133,8 @@ bHYPRE_IJParCSRVector_Clone(
  */
 int32_t
 bHYPRE_IJParCSRVector_Scale(
-  /*in*/ bHYPRE_IJParCSRVector self,
-  /*in*/ double a);
+  /* in */ bHYPRE_IJParCSRVector self,
+  /* in */ double a);
 
 /**
  * Compute {\tt d}, the inner-product of {\tt self} and {\tt x}.
@@ -125,9 +142,9 @@ bHYPRE_IJParCSRVector_Scale(
  */
 int32_t
 bHYPRE_IJParCSRVector_Dot(
-  /*in*/ bHYPRE_IJParCSRVector self,
-  /*in*/ bHYPRE_Vector x,
-  /*out*/ double* d);
+  /* in */ bHYPRE_IJParCSRVector self,
+  /* in */ bHYPRE_Vector x,
+  /* out */ double* d);
 
 /**
  * Add {\tt a}*{\tt x} to {\tt self}.
@@ -135,18 +152,18 @@ bHYPRE_IJParCSRVector_Dot(
  */
 int32_t
 bHYPRE_IJParCSRVector_Axpy(
-  /*in*/ bHYPRE_IJParCSRVector self,
-  /*in*/ double a,
-  /*in*/ bHYPRE_Vector x);
+  /* in */ bHYPRE_IJParCSRVector self,
+  /* in */ double a,
+  /* in */ bHYPRE_Vector x);
 
 /**
- * Set the MPI Communicator.
+ * Set the MPI Communicator.  DEPRECATED, Use Create()
  * 
  */
 int32_t
 bHYPRE_IJParCSRVector_SetCommunicator(
-  /*in*/ bHYPRE_IJParCSRVector self,
-  /*in*/ void* mpi_comm);
+  /* in */ bHYPRE_IJParCSRVector self,
+  /* in */ void* mpi_comm);
 
 /**
  * Prepare an object for setting coefficient values, whether for
@@ -155,7 +172,7 @@ bHYPRE_IJParCSRVector_SetCommunicator(
  */
 int32_t
 bHYPRE_IJParCSRVector_Initialize(
-  /*in*/ bHYPRE_IJParCSRVector self);
+  /* in */ bHYPRE_IJParCSRVector self);
 
 /**
  * Finalize the construction of an object before using, either
@@ -167,7 +184,7 @@ bHYPRE_IJParCSRVector_Initialize(
  */
 int32_t
 bHYPRE_IJParCSRVector_Assemble(
-  /*in*/ bHYPRE_IJParCSRVector self);
+  /* in */ bHYPRE_IJParCSRVector self);
 
 /**
  * The problem definition interface is a {\it builder} that
@@ -183,8 +200,8 @@ bHYPRE_IJParCSRVector_Assemble(
  */
 int32_t
 bHYPRE_IJParCSRVector_GetObject(
-  /*in*/ bHYPRE_IJParCSRVector self,
-  /*out*/ sidl_BaseInterface* A);
+  /* in */ bHYPRE_IJParCSRVector self,
+  /* out */ sidl_BaseInterface* A);
 
 /**
  * Set the local range for a vector object.  Each process owns
@@ -201,9 +218,9 @@ bHYPRE_IJParCSRVector_GetObject(
  */
 int32_t
 bHYPRE_IJParCSRVector_SetLocalRange(
-  /*in*/ bHYPRE_IJParCSRVector self,
-  /*in*/ int32_t jlower,
-  /*in*/ int32_t jupper);
+  /* in */ bHYPRE_IJParCSRVector self,
+  /* in */ int32_t jlower,
+  /* in */ int32_t jupper);
 
 /**
  * Sets values in vector.  The arrays {\tt values} and {\tt
@@ -217,10 +234,10 @@ bHYPRE_IJParCSRVector_SetLocalRange(
  */
 int32_t
 bHYPRE_IJParCSRVector_SetValues(
-  /*in*/ bHYPRE_IJParCSRVector self,
-  /*in*/ int32_t nvalues,
-  /*in*/ struct sidl_int__array* indices,
-  /*in*/ struct sidl_double__array* values);
+  /* in */ bHYPRE_IJParCSRVector self,
+  /* in */ int32_t nvalues,
+  /* in */ struct sidl_int__array* indices,
+  /* in */ struct sidl_double__array* values);
 
 /**
  * Adds to values in vector.  Usage details are analogous to
@@ -231,10 +248,10 @@ bHYPRE_IJParCSRVector_SetValues(
  */
 int32_t
 bHYPRE_IJParCSRVector_AddToValues(
-  /*in*/ bHYPRE_IJParCSRVector self,
-  /*in*/ int32_t nvalues,
-  /*in*/ struct sidl_int__array* indices,
-  /*in*/ struct sidl_double__array* values);
+  /* in */ bHYPRE_IJParCSRVector self,
+  /* in */ int32_t nvalues,
+  /* in */ struct sidl_int__array* indices,
+  /* in */ struct sidl_double__array* values);
 
 /**
  * Returns range of the part of the vector owned by this
@@ -243,9 +260,9 @@ bHYPRE_IJParCSRVector_AddToValues(
  */
 int32_t
 bHYPRE_IJParCSRVector_GetLocalRange(
-  /*in*/ bHYPRE_IJParCSRVector self,
-  /*out*/ int32_t* jlower,
-  /*out*/ int32_t* jupper);
+  /* in */ bHYPRE_IJParCSRVector self,
+  /* out */ int32_t* jlower,
+  /* out */ int32_t* jupper);
 
 /**
  * Gets values in vector.  Usage details are analogous to {\tt
@@ -256,10 +273,10 @@ bHYPRE_IJParCSRVector_GetLocalRange(
  */
 int32_t
 bHYPRE_IJParCSRVector_GetValues(
-  /*in*/ bHYPRE_IJParCSRVector self,
-  /*in*/ int32_t nvalues,
-  /*in*/ struct sidl_int__array* indices,
-  /*inout*/ struct sidl_double__array** values);
+  /* in */ bHYPRE_IJParCSRVector self,
+  /* in */ int32_t nvalues,
+  /* in */ struct sidl_int__array* indices,
+  /* inout */ struct sidl_double__array** values);
 
 /**
  * Print the vector to file.  This is mainly for debugging
@@ -268,8 +285,8 @@ bHYPRE_IJParCSRVector_GetValues(
  */
 int32_t
 bHYPRE_IJParCSRVector_Print(
-  /*in*/ bHYPRE_IJParCSRVector self,
-  /*in*/ const char* filename);
+  /* in */ bHYPRE_IJParCSRVector self,
+  /* in */ const char* filename);
 
 /**
  * Read the vector from file.  This is mainly for debugging
@@ -278,14 +295,14 @@ bHYPRE_IJParCSRVector_Print(
  */
 int32_t
 bHYPRE_IJParCSRVector_Read(
-  /*in*/ bHYPRE_IJParCSRVector self,
-  /*in*/ const char* filename,
-  /*in*/ void* comm);
+  /* in */ bHYPRE_IJParCSRVector self,
+  /* in */ const char* filename,
+  /* in */ void* comm);
 
 /**
  * Cast method for interface and class type conversions.
  */
-bHYPRE_IJParCSRVector
+struct bHYPRE_IJParCSRVector__object*
 bHYPRE_IJParCSRVector__cast(
   void* obj);
 
@@ -297,6 +314,29 @@ bHYPRE_IJParCSRVector__cast2(
   void* obj,
   const char* type);
 
+/**
+ * Select and execute a method by name
+ */
+void
+bHYPRE_IJParCSRVector__exec(
+  /* in */ bHYPRE_IJParCSRVector self,
+  /* in */ const char* methodName,
+  /* in */ sidl_io_Deserializer inArgs,
+  /* in */ sidl_io_Serializer outArgs);
+/**
+ * static Exec method for reflexity.
+ */
+void
+bHYPRE_IJParCSRVector__sexec(
+  /* in */ const char* methodName,
+  /* in */ sidl_io_Deserializer inArgs,
+  /* in */ sidl_io_Serializer outArgs);
+/**
+ * Get the URL of the Implementation of this object (for RMI)
+ */
+char*
+bHYPRE_IJParCSRVector__getURL(
+  /* in */ bHYPRE_IJParCSRVector self);
 struct bHYPRE_IJParCSRVector__array*
 bHYPRE_IJParCSRVector__array_createCol(
   int32_t       dimen,

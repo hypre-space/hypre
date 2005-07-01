@@ -2,12 +2,12 @@
  * File:          bHYPRE_SStructMatrix.h
  * Symbol:        bHYPRE.SStructMatrix-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.9.8
+ * Babel Version: 0.10.4
  * Description:   Client-side glue code for bHYPRE.SStructMatrix
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.9.8
+ * babel-version = 0.10.4
  */
 
 #ifndef included_bHYPRE_SStructMatrix_h
@@ -46,6 +46,12 @@ typedef struct bHYPRE_SStructMatrix__object* bHYPRE_SStructMatrix;
 #include "sidl_ClassInfo.h"
 #endif
 
+#ifndef included_sidl_io_Serializer_h
+#include "sidl_io_Serializer.h"
+#endif
+#ifndef included_sidl_io_Deserializer_h
+#include "sidl_io_Deserializer.h"
+#endif
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -53,155 +59,55 @@ extern "C" {
 /**
  * Constructor function for the class.
  */
-bHYPRE_SStructMatrix
+struct bHYPRE_SStructMatrix__object*
 bHYPRE_SStructMatrix__create(void);
 
+/**
+ * RMI constructor function for the class.
+ */
+bHYPRE_SStructMatrix
+bHYPRE_SStructMatrix__createRemote(const char *, sidl_BaseInterface *_ex);
+
+/**
+ * RMI connector function for the class.
+ */
+bHYPRE_SStructMatrix
+bHYPRE_SStructMatrix__connect(const char *, sidl_BaseInterface *_ex);
 void
 bHYPRE_SStructMatrix_addRef(
-  /*in*/ bHYPRE_SStructMatrix self);
+  /* in */ bHYPRE_SStructMatrix self);
 
 void
 bHYPRE_SStructMatrix_deleteRef(
-  /*in*/ bHYPRE_SStructMatrix self);
+  /* in */ bHYPRE_SStructMatrix self);
 
 sidl_bool
 bHYPRE_SStructMatrix_isSame(
-  /*in*/ bHYPRE_SStructMatrix self,
-  /*in*/ sidl_BaseInterface iobj);
+  /* in */ bHYPRE_SStructMatrix self,
+  /* in */ sidl_BaseInterface iobj);
 
 sidl_BaseInterface
 bHYPRE_SStructMatrix_queryInt(
-  /*in*/ bHYPRE_SStructMatrix self,
-  /*in*/ const char* name);
+  /* in */ bHYPRE_SStructMatrix self,
+  /* in */ const char* name);
 
 sidl_bool
 bHYPRE_SStructMatrix_isType(
-  /*in*/ bHYPRE_SStructMatrix self,
-  /*in*/ const char* name);
+  /* in */ bHYPRE_SStructMatrix self,
+  /* in */ const char* name);
 
 sidl_ClassInfo
 bHYPRE_SStructMatrix_getClassInfo(
-  /*in*/ bHYPRE_SStructMatrix self);
+  /* in */ bHYPRE_SStructMatrix self);
 
 /**
- * Set the MPI Communicator.
+ * Set the MPI Communicator.  DEPRECATED, Use Create()
  * 
  */
 int32_t
 bHYPRE_SStructMatrix_SetCommunicator(
-  /*in*/ bHYPRE_SStructMatrix self,
-  /*in*/ void* mpi_comm);
-
-/**
- * Set the int parameter associated with {\tt name}.
- * 
- */
-int32_t
-bHYPRE_SStructMatrix_SetIntParameter(
-  /*in*/ bHYPRE_SStructMatrix self,
-  /*in*/ const char* name,
-  /*in*/ int32_t value);
-
-/**
- * Set the double parameter associated with {\tt name}.
- * 
- */
-int32_t
-bHYPRE_SStructMatrix_SetDoubleParameter(
-  /*in*/ bHYPRE_SStructMatrix self,
-  /*in*/ const char* name,
-  /*in*/ double value);
-
-/**
- * Set the string parameter associated with {\tt name}.
- * 
- */
-int32_t
-bHYPRE_SStructMatrix_SetStringParameter(
-  /*in*/ bHYPRE_SStructMatrix self,
-  /*in*/ const char* name,
-  /*in*/ const char* value);
-
-/**
- * Set the int 1-D array parameter associated with {\tt name}.
- * 
- */
-int32_t
-bHYPRE_SStructMatrix_SetIntArray1Parameter(
-  /*in*/ bHYPRE_SStructMatrix self,
-  /*in*/ const char* name,
-  /*in*/ struct sidl_int__array* value);
-
-/**
- * Set the int 2-D array parameter associated with {\tt name}.
- * 
- */
-int32_t
-bHYPRE_SStructMatrix_SetIntArray2Parameter(
-  /*in*/ bHYPRE_SStructMatrix self,
-  /*in*/ const char* name,
-  /*in*/ struct sidl_int__array* value);
-
-/**
- * Set the double 1-D array parameter associated with {\tt name}.
- * 
- */
-int32_t
-bHYPRE_SStructMatrix_SetDoubleArray1Parameter(
-  /*in*/ bHYPRE_SStructMatrix self,
-  /*in*/ const char* name,
-  /*in*/ struct sidl_double__array* value);
-
-/**
- * Set the double 2-D array parameter associated with {\tt name}.
- * 
- */
-int32_t
-bHYPRE_SStructMatrix_SetDoubleArray2Parameter(
-  /*in*/ bHYPRE_SStructMatrix self,
-  /*in*/ const char* name,
-  /*in*/ struct sidl_double__array* value);
-
-/**
- * Set the int parameter associated with {\tt name}.
- * 
- */
-int32_t
-bHYPRE_SStructMatrix_GetIntValue(
-  /*in*/ bHYPRE_SStructMatrix self,
-  /*in*/ const char* name,
-  /*out*/ int32_t* value);
-
-/**
- * Get the double parameter associated with {\tt name}.
- * 
- */
-int32_t
-bHYPRE_SStructMatrix_GetDoubleValue(
-  /*in*/ bHYPRE_SStructMatrix self,
-  /*in*/ const char* name,
-  /*out*/ double* value);
-
-/**
- * (Optional) Do any preprocessing that may be necessary in
- * order to execute {\tt Apply}.
- * 
- */
-int32_t
-bHYPRE_SStructMatrix_Setup(
-  /*in*/ bHYPRE_SStructMatrix self,
-  /*in*/ bHYPRE_Vector b,
-  /*in*/ bHYPRE_Vector x);
-
-/**
- * Apply the operator to {\tt b}, returning {\tt x}.
- * 
- */
-int32_t
-bHYPRE_SStructMatrix_Apply(
-  /*in*/ bHYPRE_SStructMatrix self,
-  /*in*/ bHYPRE_Vector b,
-  /*inout*/ bHYPRE_Vector* x);
+  /* in */ bHYPRE_SStructMatrix self,
+  /* in */ void* mpi_comm);
 
 /**
  * Prepare an object for setting coefficient values, whether for
@@ -210,7 +116,7 @@ bHYPRE_SStructMatrix_Apply(
  */
 int32_t
 bHYPRE_SStructMatrix_Initialize(
-  /*in*/ bHYPRE_SStructMatrix self);
+  /* in */ bHYPRE_SStructMatrix self);
 
 /**
  * Finalize the construction of an object before using, either
@@ -222,7 +128,7 @@ bHYPRE_SStructMatrix_Initialize(
  */
 int32_t
 bHYPRE_SStructMatrix_Assemble(
-  /*in*/ bHYPRE_SStructMatrix self);
+  /* in */ bHYPRE_SStructMatrix self);
 
 /**
  * The problem definition interface is a {\it builder} that
@@ -238,8 +144,8 @@ bHYPRE_SStructMatrix_Assemble(
  */
 int32_t
 bHYPRE_SStructMatrix_GetObject(
-  /*in*/ bHYPRE_SStructMatrix self,
-  /*out*/ sidl_BaseInterface* A);
+  /* in */ bHYPRE_SStructMatrix self,
+  /* out */ sidl_BaseInterface* A);
 
 /**
  * Set the matrix graph.
@@ -247,8 +153,8 @@ bHYPRE_SStructMatrix_GetObject(
  */
 int32_t
 bHYPRE_SStructMatrix_SetGraph(
-  /*in*/ bHYPRE_SStructMatrix self,
-  /*in*/ bHYPRE_SStructGraph graph);
+  /* in */ bHYPRE_SStructMatrix self,
+  /* in */ bHYPRE_SStructGraph graph);
 
 /**
  * Set matrix coefficients index by index.
@@ -270,13 +176,13 @@ bHYPRE_SStructMatrix_SetGraph(
  */
 int32_t
 bHYPRE_SStructMatrix_SetValues(
-  /*in*/ bHYPRE_SStructMatrix self,
-  /*in*/ int32_t part,
-  /*in*/ struct sidl_int__array* index,
-  /*in*/ int32_t var,
-  /*in*/ int32_t nentries,
-  /*in*/ struct sidl_int__array* entries,
-  /*in*/ struct sidl_double__array* values);
+  /* in */ bHYPRE_SStructMatrix self,
+  /* in */ int32_t part,
+  /* in */ struct sidl_int__array* index,
+  /* in */ int32_t var,
+  /* in */ int32_t nentries,
+  /* in */ struct sidl_int__array* entries,
+  /* in */ struct sidl_double__array* values);
 
 /**
  * Set matrix coefficients a box at a time.
@@ -298,14 +204,14 @@ bHYPRE_SStructMatrix_SetValues(
  */
 int32_t
 bHYPRE_SStructMatrix_SetBoxValues(
-  /*in*/ bHYPRE_SStructMatrix self,
-  /*in*/ int32_t part,
-  /*in*/ struct sidl_int__array* ilower,
-  /*in*/ struct sidl_int__array* iupper,
-  /*in*/ int32_t var,
-  /*in*/ int32_t nentries,
-  /*in*/ struct sidl_int__array* entries,
-  /*in*/ struct sidl_double__array* values);
+  /* in */ bHYPRE_SStructMatrix self,
+  /* in */ int32_t part,
+  /* in */ struct sidl_int__array* ilower,
+  /* in */ struct sidl_int__array* iupper,
+  /* in */ int32_t var,
+  /* in */ int32_t nentries,
+  /* in */ struct sidl_int__array* entries,
+  /* in */ struct sidl_double__array* values);
 
 /**
  * Add to matrix coefficients index by index.
@@ -326,13 +232,13 @@ bHYPRE_SStructMatrix_SetBoxValues(
  */
 int32_t
 bHYPRE_SStructMatrix_AddToValues(
-  /*in*/ bHYPRE_SStructMatrix self,
-  /*in*/ int32_t part,
-  /*in*/ struct sidl_int__array* index,
-  /*in*/ int32_t var,
-  /*in*/ int32_t nentries,
-  /*in*/ struct sidl_int__array* entries,
-  /*in*/ struct sidl_double__array* values);
+  /* in */ bHYPRE_SStructMatrix self,
+  /* in */ int32_t part,
+  /* in */ struct sidl_int__array* index,
+  /* in */ int32_t var,
+  /* in */ int32_t nentries,
+  /* in */ struct sidl_int__array* entries,
+  /* in */ struct sidl_double__array* values);
 
 /**
  * Add to matrix coefficients a box at a time.
@@ -352,14 +258,14 @@ bHYPRE_SStructMatrix_AddToValues(
  */
 int32_t
 bHYPRE_SStructMatrix_AddToBoxValues(
-  /*in*/ bHYPRE_SStructMatrix self,
-  /*in*/ int32_t part,
-  /*in*/ struct sidl_int__array* ilower,
-  /*in*/ struct sidl_int__array* iupper,
-  /*in*/ int32_t var,
-  /*in*/ int32_t nentries,
-  /*in*/ struct sidl_int__array* entries,
-  /*in*/ struct sidl_double__array* values);
+  /* in */ bHYPRE_SStructMatrix self,
+  /* in */ int32_t part,
+  /* in */ struct sidl_int__array* ilower,
+  /* in */ struct sidl_int__array* iupper,
+  /* in */ int32_t var,
+  /* in */ int32_t nentries,
+  /* in */ struct sidl_int__array* entries,
+  /* in */ struct sidl_double__array* values);
 
 /**
  * Define symmetry properties for the stencil entries in the
@@ -379,11 +285,11 @@ bHYPRE_SStructMatrix_AddToBoxValues(
  */
 int32_t
 bHYPRE_SStructMatrix_SetSymmetric(
-  /*in*/ bHYPRE_SStructMatrix self,
-  /*in*/ int32_t part,
-  /*in*/ int32_t var,
-  /*in*/ int32_t to_var,
-  /*in*/ int32_t symmetric);
+  /* in */ bHYPRE_SStructMatrix self,
+  /* in */ int32_t part,
+  /* in */ int32_t var,
+  /* in */ int32_t to_var,
+  /* in */ int32_t symmetric);
 
 /**
  * Define symmetry properties for all non-stencil matrix
@@ -392,8 +298,8 @@ bHYPRE_SStructMatrix_SetSymmetric(
  */
 int32_t
 bHYPRE_SStructMatrix_SetNSSymmetric(
-  /*in*/ bHYPRE_SStructMatrix self,
-  /*in*/ int32_t symmetric);
+  /* in */ bHYPRE_SStructMatrix self,
+  /* in */ int32_t symmetric);
 
 /**
  * Set the matrix to be complex.
@@ -401,7 +307,7 @@ bHYPRE_SStructMatrix_SetNSSymmetric(
  */
 int32_t
 bHYPRE_SStructMatrix_SetComplex(
-  /*in*/ bHYPRE_SStructMatrix self);
+  /* in */ bHYPRE_SStructMatrix self);
 
 /**
  * Print the matrix to file.  This is mainly for debugging
@@ -410,14 +316,125 @@ bHYPRE_SStructMatrix_SetComplex(
  */
 int32_t
 bHYPRE_SStructMatrix_Print(
-  /*in*/ bHYPRE_SStructMatrix self,
-  /*in*/ const char* filename,
-  /*in*/ int32_t all);
+  /* in */ bHYPRE_SStructMatrix self,
+  /* in */ const char* filename,
+  /* in */ int32_t all);
+
+/**
+ * Set the int parameter associated with {\tt name}.
+ * 
+ */
+int32_t
+bHYPRE_SStructMatrix_SetIntParameter(
+  /* in */ bHYPRE_SStructMatrix self,
+  /* in */ const char* name,
+  /* in */ int32_t value);
+
+/**
+ * Set the double parameter associated with {\tt name}.
+ * 
+ */
+int32_t
+bHYPRE_SStructMatrix_SetDoubleParameter(
+  /* in */ bHYPRE_SStructMatrix self,
+  /* in */ const char* name,
+  /* in */ double value);
+
+/**
+ * Set the string parameter associated with {\tt name}.
+ * 
+ */
+int32_t
+bHYPRE_SStructMatrix_SetStringParameter(
+  /* in */ bHYPRE_SStructMatrix self,
+  /* in */ const char* name,
+  /* in */ const char* value);
+
+/**
+ * Set the int 1-D array parameter associated with {\tt name}.
+ * 
+ */
+int32_t
+bHYPRE_SStructMatrix_SetIntArray1Parameter(
+  /* in */ bHYPRE_SStructMatrix self,
+  /* in */ const char* name,
+  /* in */ struct sidl_int__array* value);
+
+/**
+ * Set the int 2-D array parameter associated with {\tt name}.
+ * 
+ */
+int32_t
+bHYPRE_SStructMatrix_SetIntArray2Parameter(
+  /* in */ bHYPRE_SStructMatrix self,
+  /* in */ const char* name,
+  /* in */ struct sidl_int__array* value);
+
+/**
+ * Set the double 1-D array parameter associated with {\tt name}.
+ * 
+ */
+int32_t
+bHYPRE_SStructMatrix_SetDoubleArray1Parameter(
+  /* in */ bHYPRE_SStructMatrix self,
+  /* in */ const char* name,
+  /* in */ struct sidl_double__array* value);
+
+/**
+ * Set the double 2-D array parameter associated with {\tt name}.
+ * 
+ */
+int32_t
+bHYPRE_SStructMatrix_SetDoubleArray2Parameter(
+  /* in */ bHYPRE_SStructMatrix self,
+  /* in */ const char* name,
+  /* in */ struct sidl_double__array* value);
+
+/**
+ * Set the int parameter associated with {\tt name}.
+ * 
+ */
+int32_t
+bHYPRE_SStructMatrix_GetIntValue(
+  /* in */ bHYPRE_SStructMatrix self,
+  /* in */ const char* name,
+  /* out */ int32_t* value);
+
+/**
+ * Get the double parameter associated with {\tt name}.
+ * 
+ */
+int32_t
+bHYPRE_SStructMatrix_GetDoubleValue(
+  /* in */ bHYPRE_SStructMatrix self,
+  /* in */ const char* name,
+  /* out */ double* value);
+
+/**
+ * (Optional) Do any preprocessing that may be necessary in
+ * order to execute {\tt Apply}.
+ * 
+ */
+int32_t
+bHYPRE_SStructMatrix_Setup(
+  /* in */ bHYPRE_SStructMatrix self,
+  /* in */ bHYPRE_Vector b,
+  /* in */ bHYPRE_Vector x);
+
+/**
+ * Apply the operator to {\tt b}, returning {\tt x}.
+ * 
+ */
+int32_t
+bHYPRE_SStructMatrix_Apply(
+  /* in */ bHYPRE_SStructMatrix self,
+  /* in */ bHYPRE_Vector b,
+  /* inout */ bHYPRE_Vector* x);
 
 /**
  * Cast method for interface and class type conversions.
  */
-bHYPRE_SStructMatrix
+struct bHYPRE_SStructMatrix__object*
 bHYPRE_SStructMatrix__cast(
   void* obj);
 
@@ -429,6 +446,29 @@ bHYPRE_SStructMatrix__cast2(
   void* obj,
   const char* type);
 
+/**
+ * Select and execute a method by name
+ */
+void
+bHYPRE_SStructMatrix__exec(
+  /* in */ bHYPRE_SStructMatrix self,
+  /* in */ const char* methodName,
+  /* in */ sidl_io_Deserializer inArgs,
+  /* in */ sidl_io_Serializer outArgs);
+/**
+ * static Exec method for reflexity.
+ */
+void
+bHYPRE_SStructMatrix__sexec(
+  /* in */ const char* methodName,
+  /* in */ sidl_io_Deserializer inArgs,
+  /* in */ sidl_io_Serializer outArgs);
+/**
+ * Get the URL of the Implementation of this object (for RMI)
+ */
+char*
+bHYPRE_SStructMatrix__getURL(
+  /* in */ bHYPRE_SStructMatrix self);
 struct bHYPRE_SStructMatrix__array*
 bHYPRE_SStructMatrix__array_createCol(
   int32_t       dimen,

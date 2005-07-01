@@ -2,12 +2,12 @@
  * File:          bHYPRE_ParCSRDiagScale.h
  * Symbol:        bHYPRE.ParCSRDiagScale-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.9.8
+ * Babel Version: 0.10.4
  * Description:   Client-side glue code for bHYPRE.ParCSRDiagScale
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.9.8
+ * babel-version = 0.10.4
  */
 
 #ifndef included_bHYPRE_ParCSRDiagScale_h
@@ -46,6 +46,12 @@ typedef struct bHYPRE_ParCSRDiagScale__object* bHYPRE_ParCSRDiagScale;
 #include "sidl_ClassInfo.h"
 #endif
 
+#ifndef included_sidl_io_Serializer_h
+#include "sidl_io_Serializer.h"
+#endif
+#ifndef included_sidl_io_Deserializer_h
+#include "sidl_io_Deserializer.h"
+#endif
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -53,35 +59,46 @@ extern "C" {
 /**
  * Constructor function for the class.
  */
-bHYPRE_ParCSRDiagScale
+struct bHYPRE_ParCSRDiagScale__object*
 bHYPRE_ParCSRDiagScale__create(void);
 
+/**
+ * RMI constructor function for the class.
+ */
+bHYPRE_ParCSRDiagScale
+bHYPRE_ParCSRDiagScale__createRemote(const char *, sidl_BaseInterface *_ex);
+
+/**
+ * RMI connector function for the class.
+ */
+bHYPRE_ParCSRDiagScale
+bHYPRE_ParCSRDiagScale__connect(const char *, sidl_BaseInterface *_ex);
 void
 bHYPRE_ParCSRDiagScale_addRef(
-  /*in*/ bHYPRE_ParCSRDiagScale self);
+  /* in */ bHYPRE_ParCSRDiagScale self);
 
 void
 bHYPRE_ParCSRDiagScale_deleteRef(
-  /*in*/ bHYPRE_ParCSRDiagScale self);
+  /* in */ bHYPRE_ParCSRDiagScale self);
 
 sidl_bool
 bHYPRE_ParCSRDiagScale_isSame(
-  /*in*/ bHYPRE_ParCSRDiagScale self,
-  /*in*/ sidl_BaseInterface iobj);
+  /* in */ bHYPRE_ParCSRDiagScale self,
+  /* in */ sidl_BaseInterface iobj);
 
 sidl_BaseInterface
 bHYPRE_ParCSRDiagScale_queryInt(
-  /*in*/ bHYPRE_ParCSRDiagScale self,
-  /*in*/ const char* name);
+  /* in */ bHYPRE_ParCSRDiagScale self,
+  /* in */ const char* name);
 
 sidl_bool
 bHYPRE_ParCSRDiagScale_isType(
-  /*in*/ bHYPRE_ParCSRDiagScale self,
-  /*in*/ const char* name);
+  /* in */ bHYPRE_ParCSRDiagScale self,
+  /* in */ const char* name);
 
 sidl_ClassInfo
 bHYPRE_ParCSRDiagScale_getClassInfo(
-  /*in*/ bHYPRE_ParCSRDiagScale self);
+  /* in */ bHYPRE_ParCSRDiagScale self);
 
 /**
  * Set the MPI Communicator.
@@ -89,8 +106,8 @@ bHYPRE_ParCSRDiagScale_getClassInfo(
  */
 int32_t
 bHYPRE_ParCSRDiagScale_SetCommunicator(
-  /*in*/ bHYPRE_ParCSRDiagScale self,
-  /*in*/ void* mpi_comm);
+  /* in */ bHYPRE_ParCSRDiagScale self,
+  /* in */ void* mpi_comm);
 
 /**
  * Set the int parameter associated with {\tt name}.
@@ -98,9 +115,9 @@ bHYPRE_ParCSRDiagScale_SetCommunicator(
  */
 int32_t
 bHYPRE_ParCSRDiagScale_SetIntParameter(
-  /*in*/ bHYPRE_ParCSRDiagScale self,
-  /*in*/ const char* name,
-  /*in*/ int32_t value);
+  /* in */ bHYPRE_ParCSRDiagScale self,
+  /* in */ const char* name,
+  /* in */ int32_t value);
 
 /**
  * Set the double parameter associated with {\tt name}.
@@ -108,9 +125,9 @@ bHYPRE_ParCSRDiagScale_SetIntParameter(
  */
 int32_t
 bHYPRE_ParCSRDiagScale_SetDoubleParameter(
-  /*in*/ bHYPRE_ParCSRDiagScale self,
-  /*in*/ const char* name,
-  /*in*/ double value);
+  /* in */ bHYPRE_ParCSRDiagScale self,
+  /* in */ const char* name,
+  /* in */ double value);
 
 /**
  * Set the string parameter associated with {\tt name}.
@@ -118,9 +135,9 @@ bHYPRE_ParCSRDiagScale_SetDoubleParameter(
  */
 int32_t
 bHYPRE_ParCSRDiagScale_SetStringParameter(
-  /*in*/ bHYPRE_ParCSRDiagScale self,
-  /*in*/ const char* name,
-  /*in*/ const char* value);
+  /* in */ bHYPRE_ParCSRDiagScale self,
+  /* in */ const char* name,
+  /* in */ const char* value);
 
 /**
  * Set the int 1-D array parameter associated with {\tt name}.
@@ -128,9 +145,9 @@ bHYPRE_ParCSRDiagScale_SetStringParameter(
  */
 int32_t
 bHYPRE_ParCSRDiagScale_SetIntArray1Parameter(
-  /*in*/ bHYPRE_ParCSRDiagScale self,
-  /*in*/ const char* name,
-  /*in*/ struct sidl_int__array* value);
+  /* in */ bHYPRE_ParCSRDiagScale self,
+  /* in */ const char* name,
+  /* in */ struct sidl_int__array* value);
 
 /**
  * Set the int 2-D array parameter associated with {\tt name}.
@@ -138,9 +155,9 @@ bHYPRE_ParCSRDiagScale_SetIntArray1Parameter(
  */
 int32_t
 bHYPRE_ParCSRDiagScale_SetIntArray2Parameter(
-  /*in*/ bHYPRE_ParCSRDiagScale self,
-  /*in*/ const char* name,
-  /*in*/ struct sidl_int__array* value);
+  /* in */ bHYPRE_ParCSRDiagScale self,
+  /* in */ const char* name,
+  /* in */ struct sidl_int__array* value);
 
 /**
  * Set the double 1-D array parameter associated with {\tt name}.
@@ -148,9 +165,9 @@ bHYPRE_ParCSRDiagScale_SetIntArray2Parameter(
  */
 int32_t
 bHYPRE_ParCSRDiagScale_SetDoubleArray1Parameter(
-  /*in*/ bHYPRE_ParCSRDiagScale self,
-  /*in*/ const char* name,
-  /*in*/ struct sidl_double__array* value);
+  /* in */ bHYPRE_ParCSRDiagScale self,
+  /* in */ const char* name,
+  /* in */ struct sidl_double__array* value);
 
 /**
  * Set the double 2-D array parameter associated with {\tt name}.
@@ -158,9 +175,9 @@ bHYPRE_ParCSRDiagScale_SetDoubleArray1Parameter(
  */
 int32_t
 bHYPRE_ParCSRDiagScale_SetDoubleArray2Parameter(
-  /*in*/ bHYPRE_ParCSRDiagScale self,
-  /*in*/ const char* name,
-  /*in*/ struct sidl_double__array* value);
+  /* in */ bHYPRE_ParCSRDiagScale self,
+  /* in */ const char* name,
+  /* in */ struct sidl_double__array* value);
 
 /**
  * Set the int parameter associated with {\tt name}.
@@ -168,9 +185,9 @@ bHYPRE_ParCSRDiagScale_SetDoubleArray2Parameter(
  */
 int32_t
 bHYPRE_ParCSRDiagScale_GetIntValue(
-  /*in*/ bHYPRE_ParCSRDiagScale self,
-  /*in*/ const char* name,
-  /*out*/ int32_t* value);
+  /* in */ bHYPRE_ParCSRDiagScale self,
+  /* in */ const char* name,
+  /* out */ int32_t* value);
 
 /**
  * Get the double parameter associated with {\tt name}.
@@ -178,9 +195,9 @@ bHYPRE_ParCSRDiagScale_GetIntValue(
  */
 int32_t
 bHYPRE_ParCSRDiagScale_GetDoubleValue(
-  /*in*/ bHYPRE_ParCSRDiagScale self,
-  /*in*/ const char* name,
-  /*out*/ double* value);
+  /* in */ bHYPRE_ParCSRDiagScale self,
+  /* in */ const char* name,
+  /* out */ double* value);
 
 /**
  * (Optional) Do any preprocessing that may be necessary in
@@ -189,9 +206,9 @@ bHYPRE_ParCSRDiagScale_GetDoubleValue(
  */
 int32_t
 bHYPRE_ParCSRDiagScale_Setup(
-  /*in*/ bHYPRE_ParCSRDiagScale self,
-  /*in*/ bHYPRE_Vector b,
-  /*in*/ bHYPRE_Vector x);
+  /* in */ bHYPRE_ParCSRDiagScale self,
+  /* in */ bHYPRE_Vector b,
+  /* in */ bHYPRE_Vector x);
 
 /**
  * Apply the operator to {\tt b}, returning {\tt x}.
@@ -199,9 +216,9 @@ bHYPRE_ParCSRDiagScale_Setup(
  */
 int32_t
 bHYPRE_ParCSRDiagScale_Apply(
-  /*in*/ bHYPRE_ParCSRDiagScale self,
-  /*in*/ bHYPRE_Vector b,
-  /*inout*/ bHYPRE_Vector* x);
+  /* in */ bHYPRE_ParCSRDiagScale self,
+  /* in */ bHYPRE_Vector b,
+  /* inout */ bHYPRE_Vector* x);
 
 /**
  * Set the operator for the linear system being solved.
@@ -209,8 +226,8 @@ bHYPRE_ParCSRDiagScale_Apply(
  */
 int32_t
 bHYPRE_ParCSRDiagScale_SetOperator(
-  /*in*/ bHYPRE_ParCSRDiagScale self,
-  /*in*/ bHYPRE_Operator A);
+  /* in */ bHYPRE_ParCSRDiagScale self,
+  /* in */ bHYPRE_Operator A);
 
 /**
  * (Optional) Set the convergence tolerance.
@@ -218,8 +235,8 @@ bHYPRE_ParCSRDiagScale_SetOperator(
  */
 int32_t
 bHYPRE_ParCSRDiagScale_SetTolerance(
-  /*in*/ bHYPRE_ParCSRDiagScale self,
-  /*in*/ double tolerance);
+  /* in */ bHYPRE_ParCSRDiagScale self,
+  /* in */ double tolerance);
 
 /**
  * (Optional) Set maximum number of iterations.
@@ -227,8 +244,8 @@ bHYPRE_ParCSRDiagScale_SetTolerance(
  */
 int32_t
 bHYPRE_ParCSRDiagScale_SetMaxIterations(
-  /*in*/ bHYPRE_ParCSRDiagScale self,
-  /*in*/ int32_t max_iterations);
+  /* in */ bHYPRE_ParCSRDiagScale self,
+  /* in */ int32_t max_iterations);
 
 /**
  * (Optional) Set the {\it logging level}, specifying the degree
@@ -240,8 +257,8 @@ bHYPRE_ParCSRDiagScale_SetMaxIterations(
  */
 int32_t
 bHYPRE_ParCSRDiagScale_SetLogging(
-  /*in*/ bHYPRE_ParCSRDiagScale self,
-  /*in*/ int32_t level);
+  /* in */ bHYPRE_ParCSRDiagScale self,
+  /* in */ int32_t level);
 
 /**
  * (Optional) Set the {\it print level}, specifying the degree
@@ -253,8 +270,8 @@ bHYPRE_ParCSRDiagScale_SetLogging(
  */
 int32_t
 bHYPRE_ParCSRDiagScale_SetPrintLevel(
-  /*in*/ bHYPRE_ParCSRDiagScale self,
-  /*in*/ int32_t level);
+  /* in */ bHYPRE_ParCSRDiagScale self,
+  /* in */ int32_t level);
 
 /**
  * (Optional) Return the number of iterations taken.
@@ -262,8 +279,8 @@ bHYPRE_ParCSRDiagScale_SetPrintLevel(
  */
 int32_t
 bHYPRE_ParCSRDiagScale_GetNumIterations(
-  /*in*/ bHYPRE_ParCSRDiagScale self,
-  /*out*/ int32_t* num_iterations);
+  /* in */ bHYPRE_ParCSRDiagScale self,
+  /* out */ int32_t* num_iterations);
 
 /**
  * (Optional) Return the norm of the relative residual.
@@ -271,13 +288,13 @@ bHYPRE_ParCSRDiagScale_GetNumIterations(
  */
 int32_t
 bHYPRE_ParCSRDiagScale_GetRelResidualNorm(
-  /*in*/ bHYPRE_ParCSRDiagScale self,
-  /*out*/ double* norm);
+  /* in */ bHYPRE_ParCSRDiagScale self,
+  /* out */ double* norm);
 
 /**
  * Cast method for interface and class type conversions.
  */
-bHYPRE_ParCSRDiagScale
+struct bHYPRE_ParCSRDiagScale__object*
 bHYPRE_ParCSRDiagScale__cast(
   void* obj);
 
@@ -289,6 +306,29 @@ bHYPRE_ParCSRDiagScale__cast2(
   void* obj,
   const char* type);
 
+/**
+ * Select and execute a method by name
+ */
+void
+bHYPRE_ParCSRDiagScale__exec(
+  /* in */ bHYPRE_ParCSRDiagScale self,
+  /* in */ const char* methodName,
+  /* in */ sidl_io_Deserializer inArgs,
+  /* in */ sidl_io_Serializer outArgs);
+/**
+ * static Exec method for reflexity.
+ */
+void
+bHYPRE_ParCSRDiagScale__sexec(
+  /* in */ const char* methodName,
+  /* in */ sidl_io_Deserializer inArgs,
+  /* in */ sidl_io_Serializer outArgs);
+/**
+ * Get the URL of the Implementation of this object (for RMI)
+ */
+char*
+bHYPRE_ParCSRDiagScale__getURL(
+  /* in */ bHYPRE_ParCSRDiagScale self);
 struct bHYPRE_ParCSRDiagScale__array*
 bHYPRE_ParCSRDiagScale__array_createCol(
   int32_t       dimen,

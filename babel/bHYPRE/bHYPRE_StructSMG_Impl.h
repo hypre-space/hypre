@@ -2,12 +2,12 @@
  * File:          bHYPRE_StructSMG_Impl.h
  * Symbol:        bHYPRE.StructSMG-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.9.8
+ * Babel Version: 0.10.4
  * Description:   Server-side implementation for bHYPRE.StructSMG
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.9.8
+ * babel-version = 0.10.4
  */
 
 #ifndef included_bHYPRE_StructSMG_Impl_h
@@ -16,14 +16,26 @@
 #ifndef included_sidl_header_h
 #include "sidl_header.h"
 #endif
-#ifndef included_bHYPRE_Operator_h
-#include "bHYPRE_Operator.h"
+#ifndef included_bHYPRE_Solver_h
+#include "bHYPRE_Solver.h"
 #endif
 #ifndef included_bHYPRE_StructSMG_h
 #include "bHYPRE_StructSMG.h"
 #endif
+#ifndef included_bHYPRE_Operator_h
+#include "bHYPRE_Operator.h"
+#endif
+#ifndef included_sidl_ClassInfo_h
+#include "sidl_ClassInfo.h"
+#endif
 #ifndef included_bHYPRE_Vector_h
 #include "bHYPRE_Vector.h"
+#endif
+#ifndef included_sidl_BaseInterface_h
+#include "sidl_BaseInterface.h"
+#endif
+#ifndef included_sidl_BaseClass_h
+#include "sidl_BaseClass.h"
 #endif
 
 /* DO-NOT-DELETE splicer.begin(bHYPRE.StructSMG._includes) */
@@ -65,124 +77,220 @@ bHYPRE_StructSMG__set_data(
   bHYPRE_StructSMG,
   struct bHYPRE_StructSMG__data*);
 
-extern void
-impl_bHYPRE_StructSMG__ctor(
-  bHYPRE_StructSMG);
+extern
+void
+impl_bHYPRE_StructSMG__load(
+  void);
 
-extern void
+extern
+void
+impl_bHYPRE_StructSMG__ctor(
+  /* in */ bHYPRE_StructSMG self);
+
+extern
+void
 impl_bHYPRE_StructSMG__dtor(
-  bHYPRE_StructSMG);
+  /* in */ bHYPRE_StructSMG self);
 
 /*
  * User-defined object methods
  */
 
-extern int32_t
+extern struct bHYPRE_Solver__object* 
+  impl_bHYPRE_StructSMG_fconnect_bHYPRE_Solver(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_StructSMG_fgetURL_bHYPRE_Solver(struct 
+  bHYPRE_Solver__object* obj);
+extern struct bHYPRE_StructSMG__object* 
+  impl_bHYPRE_StructSMG_fconnect_bHYPRE_StructSMG(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_StructSMG_fgetURL_bHYPRE_StructSMG(struct 
+  bHYPRE_StructSMG__object* obj);
+extern struct bHYPRE_Operator__object* 
+  impl_bHYPRE_StructSMG_fconnect_bHYPRE_Operator(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_StructSMG_fgetURL_bHYPRE_Operator(struct 
+  bHYPRE_Operator__object* obj);
+extern struct sidl_ClassInfo__object* 
+  impl_bHYPRE_StructSMG_fconnect_sidl_ClassInfo(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_StructSMG_fgetURL_sidl_ClassInfo(struct 
+  sidl_ClassInfo__object* obj);
+extern struct bHYPRE_Vector__object* 
+  impl_bHYPRE_StructSMG_fconnect_bHYPRE_Vector(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_StructSMG_fgetURL_bHYPRE_Vector(struct 
+  bHYPRE_Vector__object* obj);
+extern struct sidl_BaseInterface__object* 
+  impl_bHYPRE_StructSMG_fconnect_sidl_BaseInterface(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_StructSMG_fgetURL_sidl_BaseInterface(struct 
+  sidl_BaseInterface__object* obj);
+extern struct sidl_BaseClass__object* 
+  impl_bHYPRE_StructSMG_fconnect_sidl_BaseClass(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_StructSMG_fgetURL_sidl_BaseClass(struct 
+  sidl_BaseClass__object* obj);
+extern
+int32_t
 impl_bHYPRE_StructSMG_SetCommunicator(
-  bHYPRE_StructSMG,
-  void*);
+  /* in */ bHYPRE_StructSMG self,
+  /* in */ void* mpi_comm);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_StructSMG_SetIntParameter(
-  bHYPRE_StructSMG,
-  const char*,
-  int32_t);
+  /* in */ bHYPRE_StructSMG self,
+  /* in */ const char* name,
+  /* in */ int32_t value);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_StructSMG_SetDoubleParameter(
-  bHYPRE_StructSMG,
-  const char*,
-  double);
+  /* in */ bHYPRE_StructSMG self,
+  /* in */ const char* name,
+  /* in */ double value);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_StructSMG_SetStringParameter(
-  bHYPRE_StructSMG,
-  const char*,
-  const char*);
+  /* in */ bHYPRE_StructSMG self,
+  /* in */ const char* name,
+  /* in */ const char* value);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_StructSMG_SetIntArray1Parameter(
-  bHYPRE_StructSMG,
-  const char*,
-  struct sidl_int__array*);
+  /* in */ bHYPRE_StructSMG self,
+  /* in */ const char* name,
+  /* in */ struct sidl_int__array* value);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_StructSMG_SetIntArray2Parameter(
-  bHYPRE_StructSMG,
-  const char*,
-  struct sidl_int__array*);
+  /* in */ bHYPRE_StructSMG self,
+  /* in */ const char* name,
+  /* in */ struct sidl_int__array* value);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_StructSMG_SetDoubleArray1Parameter(
-  bHYPRE_StructSMG,
-  const char*,
-  struct sidl_double__array*);
+  /* in */ bHYPRE_StructSMG self,
+  /* in */ const char* name,
+  /* in */ struct sidl_double__array* value);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_StructSMG_SetDoubleArray2Parameter(
-  bHYPRE_StructSMG,
-  const char*,
-  struct sidl_double__array*);
+  /* in */ bHYPRE_StructSMG self,
+  /* in */ const char* name,
+  /* in */ struct sidl_double__array* value);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_StructSMG_GetIntValue(
-  bHYPRE_StructSMG,
-  const char*,
-  int32_t*);
+  /* in */ bHYPRE_StructSMG self,
+  /* in */ const char* name,
+  /* out */ int32_t* value);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_StructSMG_GetDoubleValue(
-  bHYPRE_StructSMG,
-  const char*,
-  double*);
+  /* in */ bHYPRE_StructSMG self,
+  /* in */ const char* name,
+  /* out */ double* value);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_StructSMG_Setup(
-  bHYPRE_StructSMG,
-  bHYPRE_Vector,
-  bHYPRE_Vector);
+  /* in */ bHYPRE_StructSMG self,
+  /* in */ bHYPRE_Vector b,
+  /* in */ bHYPRE_Vector x);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_StructSMG_Apply(
-  bHYPRE_StructSMG,
-  bHYPRE_Vector,
-  bHYPRE_Vector*);
+  /* in */ bHYPRE_StructSMG self,
+  /* in */ bHYPRE_Vector b,
+  /* inout */ bHYPRE_Vector* x);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_StructSMG_SetOperator(
-  bHYPRE_StructSMG,
-  bHYPRE_Operator);
+  /* in */ bHYPRE_StructSMG self,
+  /* in */ bHYPRE_Operator A);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_StructSMG_SetTolerance(
-  bHYPRE_StructSMG,
-  double);
+  /* in */ bHYPRE_StructSMG self,
+  /* in */ double tolerance);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_StructSMG_SetMaxIterations(
-  bHYPRE_StructSMG,
-  int32_t);
+  /* in */ bHYPRE_StructSMG self,
+  /* in */ int32_t max_iterations);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_StructSMG_SetLogging(
-  bHYPRE_StructSMG,
-  int32_t);
+  /* in */ bHYPRE_StructSMG self,
+  /* in */ int32_t level);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_StructSMG_SetPrintLevel(
-  bHYPRE_StructSMG,
-  int32_t);
+  /* in */ bHYPRE_StructSMG self,
+  /* in */ int32_t level);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_StructSMG_GetNumIterations(
-  bHYPRE_StructSMG,
-  int32_t*);
+  /* in */ bHYPRE_StructSMG self,
+  /* out */ int32_t* num_iterations);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_StructSMG_GetRelResidualNorm(
-  bHYPRE_StructSMG,
-  double*);
+  /* in */ bHYPRE_StructSMG self,
+  /* out */ double* norm);
 
+extern struct bHYPRE_Solver__object* 
+  impl_bHYPRE_StructSMG_fconnect_bHYPRE_Solver(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_StructSMG_fgetURL_bHYPRE_Solver(struct 
+  bHYPRE_Solver__object* obj);
+extern struct bHYPRE_StructSMG__object* 
+  impl_bHYPRE_StructSMG_fconnect_bHYPRE_StructSMG(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_StructSMG_fgetURL_bHYPRE_StructSMG(struct 
+  bHYPRE_StructSMG__object* obj);
+extern struct bHYPRE_Operator__object* 
+  impl_bHYPRE_StructSMG_fconnect_bHYPRE_Operator(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_StructSMG_fgetURL_bHYPRE_Operator(struct 
+  bHYPRE_Operator__object* obj);
+extern struct sidl_ClassInfo__object* 
+  impl_bHYPRE_StructSMG_fconnect_sidl_ClassInfo(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_StructSMG_fgetURL_sidl_ClassInfo(struct 
+  sidl_ClassInfo__object* obj);
+extern struct bHYPRE_Vector__object* 
+  impl_bHYPRE_StructSMG_fconnect_bHYPRE_Vector(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_StructSMG_fgetURL_bHYPRE_Vector(struct 
+  bHYPRE_Vector__object* obj);
+extern struct sidl_BaseInterface__object* 
+  impl_bHYPRE_StructSMG_fconnect_sidl_BaseInterface(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_StructSMG_fgetURL_sidl_BaseInterface(struct 
+  sidl_BaseInterface__object* obj);
+extern struct sidl_BaseClass__object* 
+  impl_bHYPRE_StructSMG_fconnect_sidl_BaseClass(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_StructSMG_fgetURL_sidl_BaseClass(struct 
+  sidl_BaseClass__object* obj);
 #ifdef __cplusplus
 }
 #endif

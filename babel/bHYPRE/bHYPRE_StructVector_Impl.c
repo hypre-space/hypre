@@ -2,12 +2,12 @@
  * File:          bHYPRE_StructVector_Impl.c
  * Symbol:        bHYPRE.StructVector-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.9.8
+ * Babel Version: 0.10.4
  * Description:   Server-side implementation for bHYPRE.StructVector
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.9.8
+ * babel-version = 0.10.4
  */
 
 /*
@@ -30,15 +30,36 @@
 /* DO-NOT-DELETE splicer.end(bHYPRE.StructVector._includes) */
 
 /*
+ * Static class initializer called exactly once before any user-defined method is dispatched
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_StructVector__load"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+void
+impl_bHYPRE_StructVector__load(
+  void)
+{
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructVector._load) */
+  /* Insert-Code-Here {bHYPRE.StructVector._load} (static class initializer method) */
+  /* DO-NOT-DELETE splicer.end(bHYPRE.StructVector._load) */
+}
+/*
  * Class constructor called when the class is created.
  */
 
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_StructVector__ctor"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 void
 impl_bHYPRE_StructVector__ctor(
-  /*in*/ bHYPRE_StructVector self)
+  /* in */ bHYPRE_StructVector self)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.StructVector._ctor) */
   /* Insert the implementation of the constructor method here... */
@@ -65,9 +86,12 @@ impl_bHYPRE_StructVector__ctor(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_StructVector__dtor"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 void
 impl_bHYPRE_StructVector__dtor(
-  /*in*/ bHYPRE_StructVector self)
+  /* in */ bHYPRE_StructVector self)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.StructVector._dtor) */
   /* Insert the implementation of the destructor method here... */
@@ -85,6 +109,281 @@ impl_bHYPRE_StructVector__dtor(
 }
 
 /*
+ * Set the MPI Communicator.  DEPRECATED, Use Create()
+ * 
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_StructVector_SetCommunicator"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+int32_t
+impl_bHYPRE_StructVector_SetCommunicator(
+  /* in */ bHYPRE_StructVector self,
+  /* in */ void* mpi_comm)
+{
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructVector.SetCommunicator) */
+  /* Insert the implementation of the SetCommunicator method here... */
+   /* N.B. This function will have no effect unless called _before_
+      SetGrid.
+    */
+
+   int ierr = 0;
+   struct bHYPRE_StructVector__data * data;
+   data = bHYPRE_StructVector__get_data( self );
+   data -> comm = (MPI_Comm) mpi_comm;
+
+   return ierr;
+
+  /* DO-NOT-DELETE splicer.end(bHYPRE.StructVector.SetCommunicator) */
+}
+
+/*
+ * Prepare an object for setting coefficient values, whether for
+ * the first time or subsequently.
+ * 
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_StructVector_Initialize"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+int32_t
+impl_bHYPRE_StructVector_Initialize(
+  /* in */ bHYPRE_StructVector self)
+{
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructVector.Initialize) */
+  /* Insert the implementation of the Initialize method here... */
+
+   int ierr = 0;
+   struct bHYPRE_StructVector__data * data;
+   HYPRE_StructVector Hy;
+   data = bHYPRE_StructVector__get_data( self );
+   Hy = data -> vec;
+   ierr = HYPRE_StructVectorInitialize( Hy );
+   return( ierr );
+
+  /* DO-NOT-DELETE splicer.end(bHYPRE.StructVector.Initialize) */
+}
+
+/*
+ * Finalize the construction of an object before using, either
+ * for the first time or on subsequent uses. {\tt Initialize}
+ * and {\tt Assemble} always appear in a matched set, with
+ * Initialize preceding Assemble. Values can only be set in
+ * between a call to Initialize and Assemble.
+ * 
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_StructVector_Assemble"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+int32_t
+impl_bHYPRE_StructVector_Assemble(
+  /* in */ bHYPRE_StructVector self)
+{
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructVector.Assemble) */
+  /* Insert the implementation of the Assemble method here... */
+
+   int ierr = 0;
+   struct bHYPRE_StructVector__data * data;
+   HYPRE_StructVector Hy;
+   data = bHYPRE_StructVector__get_data( self );
+   Hy = data -> vec;
+
+   ierr = HYPRE_StructVectorAssemble( Hy );
+   return( ierr );
+
+  /* DO-NOT-DELETE splicer.end(bHYPRE.StructVector.Assemble) */
+}
+
+/*
+ * The problem definition interface is a {\it builder} that
+ * creates an object that contains the problem definition
+ * information, e.g. a matrix. To perform subsequent operations
+ * with that object, it must be returned from the problem
+ * definition object. {\tt GetObject} performs this function.
+ * At compile time, the type of the returned object is unknown.
+ * Thus, the returned type is a sidl.BaseInterface.
+ * QueryInterface or Cast must be used on the returned object to
+ * convert it into a known type.
+ * 
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_StructVector_GetObject"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+int32_t
+impl_bHYPRE_StructVector_GetObject(
+  /* in */ bHYPRE_StructVector self,
+  /* out */ sidl_BaseInterface* A)
+{
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructVector.GetObject) */
+  /* Insert the implementation of the GetObject method here... */
+
+   bHYPRE_StructVector_addRef( self );
+   *A = sidl_BaseInterface__cast( self );
+   return( 0 );
+
+  /* DO-NOT-DELETE splicer.end(bHYPRE.StructVector.GetObject) */
+}
+
+/*
+ * Method:  SetGrid[]
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_StructVector_SetGrid"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+int32_t
+impl_bHYPRE_StructVector_SetGrid(
+  /* in */ bHYPRE_StructVector self,
+  /* in */ bHYPRE_StructGrid grid)
+{
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructVector.SetGrid) */
+  /* Insert the implementation of the SetGrid method here... */
+   /* N.B. This is the only grid-setting function defined in the interface.
+    So this is the only place to call HYPRE_StructVectorCreate, which requires a grid.
+    Note that SetGrid cannot be called twice on the same vector.  The grid cannot be changed.
+
+    SetCommunicator should have been called before the time SetGrid is called.
+    Initialize, value-setting functions, and Assemble should be called afterwards.
+   */
+
+   int ierr = 0;
+   struct bHYPRE_StructVector__data * data;
+   HYPRE_StructVector Hy;
+   HYPRE_StructGrid Hgrid;
+   MPI_Comm comm;
+   struct bHYPRE_StructGrid__data * gdata;
+
+   data = bHYPRE_StructVector__get_data( self );
+   Hy = data->vec;
+   assert( Hy==NULL ); /* shouldn't have already been created */
+   comm = data->comm;
+   gdata = bHYPRE_StructGrid__get_data( grid );
+   Hgrid = gdata->grid;
+
+   ierr += HYPRE_StructVectorCreate( comm, Hgrid, &Hy );
+   data->vec = Hy;
+
+   return( ierr );
+
+  /* DO-NOT-DELETE splicer.end(bHYPRE.StructVector.SetGrid) */
+}
+
+/*
+ * Method:  SetNumGhost[]
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_StructVector_SetNumGhost"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+int32_t
+impl_bHYPRE_StructVector_SetNumGhost(
+  /* in */ bHYPRE_StructVector self,
+  /* in */ struct sidl_int__array* num_ghost)
+{
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructVector.SetNumGhost) */
+  /* Insert the implementation of the SetNumGhost method here... */
+
+   int ierr = 0;
+   struct bHYPRE_StructVector__data * data;
+   HYPRE_StructVector Hy;
+   data = bHYPRE_StructVector__get_data( self );
+   Hy = data -> vec;
+
+   ierr += HYPRE_StructVectorSetNumGhost( Hy, sidlArrayAddr1( num_ghost, 0 ) );
+
+   return ierr;
+
+  /* DO-NOT-DELETE splicer.end(bHYPRE.StructVector.SetNumGhost) */
+}
+
+/*
+ * Method:  SetValue[]
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_StructVector_SetValue"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+int32_t
+impl_bHYPRE_StructVector_SetValue(
+  /* in */ bHYPRE_StructVector self,
+  /* in */ struct sidl_int__array* grid_index,
+  /* in */ double value)
+{
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructVector.SetValue) */
+  /* Insert the implementation of the SetValue method here... */
+
+   int ierr = 0;
+   struct bHYPRE_StructVector__data * data;
+   HYPRE_StructVector Hy;
+   data = bHYPRE_StructVector__get_data( self );
+   Hy = data -> vec;
+
+   ierr += HYPRE_StructVectorSetValues( Hy, sidlArrayAddr1( grid_index, 0 ), value );
+
+   return ierr;
+
+  /* DO-NOT-DELETE splicer.end(bHYPRE.StructVector.SetValue) */
+}
+
+/*
+ * Method:  SetBoxValues[]
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_StructVector_SetBoxValues"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+int32_t
+impl_bHYPRE_StructVector_SetBoxValues(
+  /* in */ bHYPRE_StructVector self,
+  /* in */ struct sidl_int__array* ilower,
+  /* in */ struct sidl_int__array* iupper,
+  /* in */ struct sidl_double__array* values)
+{
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructVector.SetBoxValues) */
+  /* Insert the implementation of the SetBoxValues method here... */
+
+   int ierr = 0;
+   struct bHYPRE_StructVector__data * data;
+   HYPRE_StructVector Hy;
+   data = bHYPRE_StructVector__get_data( self );
+   Hy = data -> vec;
+
+   ierr += HYPRE_StructVectorSetBoxValues
+      ( Hy, sidlArrayAddr1( ilower, 0 ), sidlArrayAddr1( iupper, 0 ),
+        sidlArrayAddr1( values, 0 ) );
+
+   return ierr;
+
+  /* DO-NOT-DELETE splicer.end(bHYPRE.StructVector.SetBoxValues) */
+}
+
+/*
  * Set {\tt self} to 0.
  * 
  */
@@ -92,9 +391,12 @@ impl_bHYPRE_StructVector__dtor(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_StructVector_Clear"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_StructVector_Clear(
-  /*in*/ bHYPRE_StructVector self)
+  /* in */ bHYPRE_StructVector self)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.StructVector.Clear) */
   /* Insert the implementation of the Clear method here... */
@@ -119,9 +421,13 @@ impl_bHYPRE_StructVector_Clear(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_StructVector_Copy"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_StructVector_Copy(
-  /*in*/ bHYPRE_StructVector self, /*in*/ bHYPRE_Vector x)
+  /* in */ bHYPRE_StructVector self,
+  /* in */ bHYPRE_Vector x)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.StructVector.Copy) */
   /* Insert the implementation of the Copy method here... */
@@ -173,9 +479,13 @@ impl_bHYPRE_StructVector_Copy(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_StructVector_Clone"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_StructVector_Clone(
-  /*in*/ bHYPRE_StructVector self, /*out*/ bHYPRE_Vector* x)
+  /* in */ bHYPRE_StructVector self,
+  /* out */ bHYPRE_Vector* x)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.StructVector.Clone) */
   /* Insert the implementation of the Clone method here... */
@@ -233,9 +543,13 @@ impl_bHYPRE_StructVector_Clone(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_StructVector_Scale"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_StructVector_Scale(
-  /*in*/ bHYPRE_StructVector self, /*in*/ double a)
+  /* in */ bHYPRE_StructVector self,
+  /* in */ double a)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.StructVector.Scale) */
   /* Insert the implementation of the Scale method here... */
@@ -259,9 +573,14 @@ impl_bHYPRE_StructVector_Scale(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_StructVector_Dot"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_StructVector_Dot(
-  /*in*/ bHYPRE_StructVector self, /*in*/ bHYPRE_Vector x, /*out*/ double* d)
+  /* in */ bHYPRE_StructVector self,
+  /* in */ bHYPRE_Vector x,
+  /* out */ double* d)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.StructVector.Dot) */
   /* Insert the implementation of the Dot method here... */
@@ -305,9 +624,14 @@ impl_bHYPRE_StructVector_Dot(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_StructVector_Axpy"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_StructVector_Axpy(
-  /*in*/ bHYPRE_StructVector self, /*in*/ double a, /*in*/ bHYPRE_Vector x)
+  /* in */ bHYPRE_StructVector self,
+  /* in */ double a,
+  /* in */ bHYPRE_Vector x)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.StructVector.Axpy) */
   /* Insert the implementation of the Axpy method here... */
@@ -343,248 +667,76 @@ impl_bHYPRE_StructVector_Axpy(
 
   /* DO-NOT-DELETE splicer.end(bHYPRE.StructVector.Axpy) */
 }
-
-/*
- * Set the MPI Communicator.
- * 
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_bHYPRE_StructVector_SetCommunicator"
-
-int32_t
-impl_bHYPRE_StructVector_SetCommunicator(
-  /*in*/ bHYPRE_StructVector self, /*in*/ void* mpi_comm)
-{
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructVector.SetCommunicator) */
-  /* Insert the implementation of the SetCommunicator method here... */
-   /* N.B. This function will have no effect unless called _before_
-      SetGrid.
-    */
-
-   int ierr = 0;
-   struct bHYPRE_StructVector__data * data;
-   data = bHYPRE_StructVector__get_data( self );
-   data -> comm = (MPI_Comm) mpi_comm;
-
-   return ierr;
-
-  /* DO-NOT-DELETE splicer.end(bHYPRE.StructVector.SetCommunicator) */
+/* Babel internal methods, Users should not edit below this line. */
+struct bHYPRE_StructGrid__object* 
+  impl_bHYPRE_StructVector_fconnect_bHYPRE_StructGrid(char* url,
+  sidl_BaseInterface *_ex) {
+  return bHYPRE_StructGrid__connect(url, _ex);
 }
-
-/*
- * Prepare an object for setting coefficient values, whether for
- * the first time or subsequently.
- * 
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_bHYPRE_StructVector_Initialize"
-
-int32_t
-impl_bHYPRE_StructVector_Initialize(
-  /*in*/ bHYPRE_StructVector self)
-{
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructVector.Initialize) */
-  /* Insert the implementation of the Initialize method here... */
-
-   int ierr = 0;
-   struct bHYPRE_StructVector__data * data;
-   HYPRE_StructVector Hy;
-   data = bHYPRE_StructVector__get_data( self );
-   Hy = data -> vec;
-   ierr = HYPRE_StructVectorInitialize( Hy );
-   return( ierr );
-
-  /* DO-NOT-DELETE splicer.end(bHYPRE.StructVector.Initialize) */
+char * impl_bHYPRE_StructVector_fgetURL_bHYPRE_StructGrid(struct 
+  bHYPRE_StructGrid__object* obj) {
+  return bHYPRE_StructGrid__getURL(obj);
 }
-
-/*
- * Finalize the construction of an object before using, either
- * for the first time or on subsequent uses. {\tt Initialize}
- * and {\tt Assemble} always appear in a matched set, with
- * Initialize preceding Assemble. Values can only be set in
- * between a call to Initialize and Assemble.
- * 
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_bHYPRE_StructVector_Assemble"
-
-int32_t
-impl_bHYPRE_StructVector_Assemble(
-  /*in*/ bHYPRE_StructVector self)
-{
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructVector.Assemble) */
-  /* Insert the implementation of the Assemble method here... */
-
-   int ierr = 0;
-   struct bHYPRE_StructVector__data * data;
-   HYPRE_StructVector Hy;
-   data = bHYPRE_StructVector__get_data( self );
-   Hy = data -> vec;
-
-   ierr = HYPRE_StructVectorAssemble( Hy );
-   return( ierr );
-
-  /* DO-NOT-DELETE splicer.end(bHYPRE.StructVector.Assemble) */
+struct bHYPRE_StructBuildVector__object* 
+  impl_bHYPRE_StructVector_fconnect_bHYPRE_StructBuildVector(char* url,
+  sidl_BaseInterface *_ex) {
+  return bHYPRE_StructBuildVector__connect(url, _ex);
 }
-
-/*
- * The problem definition interface is a {\it builder} that
- * creates an object that contains the problem definition
- * information, e.g. a matrix. To perform subsequent operations
- * with that object, it must be returned from the problem
- * definition object. {\tt GetObject} performs this function.
- * At compile time, the type of the returned object is unknown.
- * Thus, the returned type is a sidl.BaseInterface.
- * QueryInterface or Cast must be used on the returned object to
- * convert it into a known type.
- * 
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_bHYPRE_StructVector_GetObject"
-
-int32_t
-impl_bHYPRE_StructVector_GetObject(
-  /*in*/ bHYPRE_StructVector self, /*out*/ sidl_BaseInterface* A)
-{
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructVector.GetObject) */
-  /* Insert the implementation of the GetObject method here... */
-
-   bHYPRE_StructVector_addRef( self );
-   *A = sidl_BaseInterface__cast( self );
-   return( 0 );
-
-  /* DO-NOT-DELETE splicer.end(bHYPRE.StructVector.GetObject) */
+char * impl_bHYPRE_StructVector_fgetURL_bHYPRE_StructBuildVector(struct 
+  bHYPRE_StructBuildVector__object* obj) {
+  return bHYPRE_StructBuildVector__getURL(obj);
 }
-
-/*
- * Method:  SetGrid[]
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_bHYPRE_StructVector_SetGrid"
-
-int32_t
-impl_bHYPRE_StructVector_SetGrid(
-  /*in*/ bHYPRE_StructVector self, /*in*/ bHYPRE_StructGrid grid)
-{
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructVector.SetGrid) */
-  /* Insert the implementation of the SetGrid method here... */
-   /* N.B. This is the only grid-setting function defined in the interface.
-    So this is the only place to call HYPRE_StructVectorCreate, which requires a grid.
-    Note that SetGrid cannot be called twice on the same vector.  The grid cannot be changed.
-
-    SetCommunicator should have been called before the time SetGrid is called.
-    Initialize, value-setting functions, and Assemble should be called afterwards.
-   */
-
-   int ierr = 0;
-   struct bHYPRE_StructVector__data * data;
-   HYPRE_StructVector Hy;
-   HYPRE_StructGrid Hgrid;
-   MPI_Comm comm;
-   struct bHYPRE_StructGrid__data * gdata;
-
-   data = bHYPRE_StructVector__get_data( self );
-   Hy = data->vec;
-   assert( Hy==NULL ); /* shouldn't have already been created */
-   comm = data->comm;
-   gdata = bHYPRE_StructGrid__get_data( grid );
-   Hgrid = gdata->grid;
-
-   ierr += HYPRE_StructVectorCreate( comm, Hgrid, &Hy );
-   data->vec = Hy;
-
-   return( ierr );
-
-  /* DO-NOT-DELETE splicer.end(bHYPRE.StructVector.SetGrid) */
+struct sidl_ClassInfo__object* 
+  impl_bHYPRE_StructVector_fconnect_sidl_ClassInfo(char* url,
+  sidl_BaseInterface *_ex) {
+  return sidl_ClassInfo__connect(url, _ex);
 }
-
-/*
- * Method:  SetNumGhost[]
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_bHYPRE_StructVector_SetNumGhost"
-
-int32_t
-impl_bHYPRE_StructVector_SetNumGhost(
-  /*in*/ bHYPRE_StructVector self, /*in*/ struct sidl_int__array* num_ghost)
-{
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructVector.SetNumGhost) */
-  /* Insert the implementation of the SetNumGhost method here... */
-
-   int ierr = 0;
-   struct bHYPRE_StructVector__data * data;
-   HYPRE_StructVector Hy;
-   data = bHYPRE_StructVector__get_data( self );
-   Hy = data -> vec;
-
-   ierr += HYPRE_StructVectorSetNumGhost( Hy, sidlArrayAddr1( num_ghost, 0 ) );
-
-   return ierr;
-
-  /* DO-NOT-DELETE splicer.end(bHYPRE.StructVector.SetNumGhost) */
+char * impl_bHYPRE_StructVector_fgetURL_sidl_ClassInfo(struct 
+  sidl_ClassInfo__object* obj) {
+  return sidl_ClassInfo__getURL(obj);
 }
-
-/*
- * Method:  SetValue[]
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_bHYPRE_StructVector_SetValue"
-
-int32_t
-impl_bHYPRE_StructVector_SetValue(
-  /*in*/ bHYPRE_StructVector self, /*in*/ struct sidl_int__array* grid_index,
-    /*in*/ double value)
-{
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructVector.SetValue) */
-  /* Insert the implementation of the SetValue method here... */
-
-   int ierr = 0;
-   struct bHYPRE_StructVector__data * data;
-   HYPRE_StructVector Hy;
-   data = bHYPRE_StructVector__get_data( self );
-   Hy = data -> vec;
-
-   ierr += HYPRE_StructVectorSetValues( Hy, sidlArrayAddr1( grid_index, 0 ), value );
-
-   return ierr;
-
-  /* DO-NOT-DELETE splicer.end(bHYPRE.StructVector.SetValue) */
+struct bHYPRE_Vector__object* 
+  impl_bHYPRE_StructVector_fconnect_bHYPRE_Vector(char* url,
+  sidl_BaseInterface *_ex) {
+  return bHYPRE_Vector__connect(url, _ex);
 }
-
-/*
- * Method:  SetBoxValues[]
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_bHYPRE_StructVector_SetBoxValues"
-
-int32_t
-impl_bHYPRE_StructVector_SetBoxValues(
-  /*in*/ bHYPRE_StructVector self, /*in*/ struct sidl_int__array* ilower,
-    /*in*/ struct sidl_int__array* iupper,
-    /*in*/ struct sidl_double__array* values)
-{
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructVector.SetBoxValues) */
-  /* Insert the implementation of the SetBoxValues method here... */
-
-   int ierr = 0;
-   struct bHYPRE_StructVector__data * data;
-   HYPRE_StructVector Hy;
-   data = bHYPRE_StructVector__get_data( self );
-   Hy = data -> vec;
-
-   ierr += HYPRE_StructVectorSetBoxValues
-      ( Hy, sidlArrayAddr1( ilower, 0 ), sidlArrayAddr1( iupper, 0 ),
-        sidlArrayAddr1( values, 0 ) );
-
-   return ierr;
-
-  /* DO-NOT-DELETE splicer.end(bHYPRE.StructVector.SetBoxValues) */
+char * impl_bHYPRE_StructVector_fgetURL_bHYPRE_Vector(struct 
+  bHYPRE_Vector__object* obj) {
+  return bHYPRE_Vector__getURL(obj);
+}
+struct bHYPRE_ProblemDefinition__object* 
+  impl_bHYPRE_StructVector_fconnect_bHYPRE_ProblemDefinition(char* url,
+  sidl_BaseInterface *_ex) {
+  return bHYPRE_ProblemDefinition__connect(url, _ex);
+}
+char * impl_bHYPRE_StructVector_fgetURL_bHYPRE_ProblemDefinition(struct 
+  bHYPRE_ProblemDefinition__object* obj) {
+  return bHYPRE_ProblemDefinition__getURL(obj);
+}
+struct bHYPRE_StructVector__object* 
+  impl_bHYPRE_StructVector_fconnect_bHYPRE_StructVector(char* url,
+  sidl_BaseInterface *_ex) {
+  return bHYPRE_StructVector__connect(url, _ex);
+}
+char * impl_bHYPRE_StructVector_fgetURL_bHYPRE_StructVector(struct 
+  bHYPRE_StructVector__object* obj) {
+  return bHYPRE_StructVector__getURL(obj);
+}
+struct sidl_BaseInterface__object* 
+  impl_bHYPRE_StructVector_fconnect_sidl_BaseInterface(char* url,
+  sidl_BaseInterface *_ex) {
+  return sidl_BaseInterface__connect(url, _ex);
+}
+char * impl_bHYPRE_StructVector_fgetURL_sidl_BaseInterface(struct 
+  sidl_BaseInterface__object* obj) {
+  return sidl_BaseInterface__getURL(obj);
+}
+struct sidl_BaseClass__object* 
+  impl_bHYPRE_StructVector_fconnect_sidl_BaseClass(char* url,
+  sidl_BaseInterface *_ex) {
+  return sidl_BaseClass__connect(url, _ex);
+}
+char * impl_bHYPRE_StructVector_fgetURL_sidl_BaseClass(struct 
+  sidl_BaseClass__object* obj) {
+  return sidl_BaseClass__getURL(obj);
 }

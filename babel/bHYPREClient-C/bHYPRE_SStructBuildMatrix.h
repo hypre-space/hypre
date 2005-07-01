@@ -2,12 +2,12 @@
  * File:          bHYPRE_SStructBuildMatrix.h
  * Symbol:        bHYPRE.SStructBuildMatrix-v1.0.0
  * Symbol Type:   interface
- * Babel Version: 0.9.8
+ * Babel Version: 0.10.4
  * Description:   Client-side glue code for bHYPRE.SStructBuildMatrix
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.9.8
+ * babel-version = 0.10.4
  */
 
 #ifndef included_bHYPRE_SStructBuildMatrix_h
@@ -37,54 +37,65 @@ typedef struct bHYPRE_SStructBuildMatrix__object* bHYPRE_SStructBuildMatrix;
 #include "sidl_ClassInfo.h"
 #endif
 
+#ifndef included_sidl_io_Serializer_h
+#include "sidl_io_Serializer.h"
+#endif
+#ifndef included_sidl_io_Deserializer_h
+#include "sidl_io_Deserializer.h"
+#endif
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+/**
+ * RMI connector function for the class.
+ */
+bHYPRE_SStructBuildMatrix
+bHYPRE_SStructBuildMatrix__connect(const char *, sidl_BaseInterface *_ex);
 void
 bHYPRE_SStructBuildMatrix_addRef(
-  /*in*/ bHYPRE_SStructBuildMatrix self);
+  /* in */ bHYPRE_SStructBuildMatrix self);
 
 void
 bHYPRE_SStructBuildMatrix_deleteRef(
-  /*in*/ bHYPRE_SStructBuildMatrix self);
+  /* in */ bHYPRE_SStructBuildMatrix self);
 
 sidl_bool
 bHYPRE_SStructBuildMatrix_isSame(
-  /*in*/ bHYPRE_SStructBuildMatrix self,
-  /*in*/ sidl_BaseInterface iobj);
+  /* in */ bHYPRE_SStructBuildMatrix self,
+  /* in */ sidl_BaseInterface iobj);
 
 sidl_BaseInterface
 bHYPRE_SStructBuildMatrix_queryInt(
-  /*in*/ bHYPRE_SStructBuildMatrix self,
-  /*in*/ const char* name);
+  /* in */ bHYPRE_SStructBuildMatrix self,
+  /* in */ const char* name);
 
 sidl_bool
 bHYPRE_SStructBuildMatrix_isType(
-  /*in*/ bHYPRE_SStructBuildMatrix self,
-  /*in*/ const char* name);
+  /* in */ bHYPRE_SStructBuildMatrix self,
+  /* in */ const char* name);
 
 sidl_ClassInfo
 bHYPRE_SStructBuildMatrix_getClassInfo(
-  /*in*/ bHYPRE_SStructBuildMatrix self);
+  /* in */ bHYPRE_SStructBuildMatrix self);
 
 int32_t
 bHYPRE_SStructBuildMatrix_SetCommunicator(
-  /*in*/ bHYPRE_SStructBuildMatrix self,
-  /*in*/ void* mpi_comm);
+  /* in */ bHYPRE_SStructBuildMatrix self,
+  /* in */ void* mpi_comm);
 
 int32_t
 bHYPRE_SStructBuildMatrix_Initialize(
-  /*in*/ bHYPRE_SStructBuildMatrix self);
+  /* in */ bHYPRE_SStructBuildMatrix self);
 
 int32_t
 bHYPRE_SStructBuildMatrix_Assemble(
-  /*in*/ bHYPRE_SStructBuildMatrix self);
+  /* in */ bHYPRE_SStructBuildMatrix self);
 
 int32_t
 bHYPRE_SStructBuildMatrix_GetObject(
-  /*in*/ bHYPRE_SStructBuildMatrix self,
-  /*out*/ sidl_BaseInterface* A);
+  /* in */ bHYPRE_SStructBuildMatrix self,
+  /* out */ sidl_BaseInterface* A);
 
 /**
  * Set the matrix graph.
@@ -92,8 +103,8 @@ bHYPRE_SStructBuildMatrix_GetObject(
  */
 int32_t
 bHYPRE_SStructBuildMatrix_SetGraph(
-  /*in*/ bHYPRE_SStructBuildMatrix self,
-  /*in*/ bHYPRE_SStructGraph graph);
+  /* in */ bHYPRE_SStructBuildMatrix self,
+  /* in */ bHYPRE_SStructGraph graph);
 
 /**
  * Set matrix coefficients index by index.
@@ -115,13 +126,13 @@ bHYPRE_SStructBuildMatrix_SetGraph(
  */
 int32_t
 bHYPRE_SStructBuildMatrix_SetValues(
-  /*in*/ bHYPRE_SStructBuildMatrix self,
-  /*in*/ int32_t part,
-  /*in*/ struct sidl_int__array* index,
-  /*in*/ int32_t var,
-  /*in*/ int32_t nentries,
-  /*in*/ struct sidl_int__array* entries,
-  /*in*/ struct sidl_double__array* values);
+  /* in */ bHYPRE_SStructBuildMatrix self,
+  /* in */ int32_t part,
+  /* in */ struct sidl_int__array* index,
+  /* in */ int32_t var,
+  /* in */ int32_t nentries,
+  /* in */ struct sidl_int__array* entries,
+  /* in */ struct sidl_double__array* values);
 
 /**
  * Set matrix coefficients a box at a time.
@@ -143,14 +154,14 @@ bHYPRE_SStructBuildMatrix_SetValues(
  */
 int32_t
 bHYPRE_SStructBuildMatrix_SetBoxValues(
-  /*in*/ bHYPRE_SStructBuildMatrix self,
-  /*in*/ int32_t part,
-  /*in*/ struct sidl_int__array* ilower,
-  /*in*/ struct sidl_int__array* iupper,
-  /*in*/ int32_t var,
-  /*in*/ int32_t nentries,
-  /*in*/ struct sidl_int__array* entries,
-  /*in*/ struct sidl_double__array* values);
+  /* in */ bHYPRE_SStructBuildMatrix self,
+  /* in */ int32_t part,
+  /* in */ struct sidl_int__array* ilower,
+  /* in */ struct sidl_int__array* iupper,
+  /* in */ int32_t var,
+  /* in */ int32_t nentries,
+  /* in */ struct sidl_int__array* entries,
+  /* in */ struct sidl_double__array* values);
 
 /**
  * Add to matrix coefficients index by index.
@@ -171,13 +182,13 @@ bHYPRE_SStructBuildMatrix_SetBoxValues(
  */
 int32_t
 bHYPRE_SStructBuildMatrix_AddToValues(
-  /*in*/ bHYPRE_SStructBuildMatrix self,
-  /*in*/ int32_t part,
-  /*in*/ struct sidl_int__array* index,
-  /*in*/ int32_t var,
-  /*in*/ int32_t nentries,
-  /*in*/ struct sidl_int__array* entries,
-  /*in*/ struct sidl_double__array* values);
+  /* in */ bHYPRE_SStructBuildMatrix self,
+  /* in */ int32_t part,
+  /* in */ struct sidl_int__array* index,
+  /* in */ int32_t var,
+  /* in */ int32_t nentries,
+  /* in */ struct sidl_int__array* entries,
+  /* in */ struct sidl_double__array* values);
 
 /**
  * Add to matrix coefficients a box at a time.
@@ -197,14 +208,14 @@ bHYPRE_SStructBuildMatrix_AddToValues(
  */
 int32_t
 bHYPRE_SStructBuildMatrix_AddToBoxValues(
-  /*in*/ bHYPRE_SStructBuildMatrix self,
-  /*in*/ int32_t part,
-  /*in*/ struct sidl_int__array* ilower,
-  /*in*/ struct sidl_int__array* iupper,
-  /*in*/ int32_t var,
-  /*in*/ int32_t nentries,
-  /*in*/ struct sidl_int__array* entries,
-  /*in*/ struct sidl_double__array* values);
+  /* in */ bHYPRE_SStructBuildMatrix self,
+  /* in */ int32_t part,
+  /* in */ struct sidl_int__array* ilower,
+  /* in */ struct sidl_int__array* iupper,
+  /* in */ int32_t var,
+  /* in */ int32_t nentries,
+  /* in */ struct sidl_int__array* entries,
+  /* in */ struct sidl_double__array* values);
 
 /**
  * Define symmetry properties for the stencil entries in the
@@ -224,11 +235,11 @@ bHYPRE_SStructBuildMatrix_AddToBoxValues(
  */
 int32_t
 bHYPRE_SStructBuildMatrix_SetSymmetric(
-  /*in*/ bHYPRE_SStructBuildMatrix self,
-  /*in*/ int32_t part,
-  /*in*/ int32_t var,
-  /*in*/ int32_t to_var,
-  /*in*/ int32_t symmetric);
+  /* in */ bHYPRE_SStructBuildMatrix self,
+  /* in */ int32_t part,
+  /* in */ int32_t var,
+  /* in */ int32_t to_var,
+  /* in */ int32_t symmetric);
 
 /**
  * Define symmetry properties for all non-stencil matrix
@@ -237,8 +248,8 @@ bHYPRE_SStructBuildMatrix_SetSymmetric(
  */
 int32_t
 bHYPRE_SStructBuildMatrix_SetNSSymmetric(
-  /*in*/ bHYPRE_SStructBuildMatrix self,
-  /*in*/ int32_t symmetric);
+  /* in */ bHYPRE_SStructBuildMatrix self,
+  /* in */ int32_t symmetric);
 
 /**
  * Set the matrix to be complex.
@@ -246,7 +257,7 @@ bHYPRE_SStructBuildMatrix_SetNSSymmetric(
  */
 int32_t
 bHYPRE_SStructBuildMatrix_SetComplex(
-  /*in*/ bHYPRE_SStructBuildMatrix self);
+  /* in */ bHYPRE_SStructBuildMatrix self);
 
 /**
  * Print the matrix to file.  This is mainly for debugging
@@ -255,14 +266,14 @@ bHYPRE_SStructBuildMatrix_SetComplex(
  */
 int32_t
 bHYPRE_SStructBuildMatrix_Print(
-  /*in*/ bHYPRE_SStructBuildMatrix self,
-  /*in*/ const char* filename,
-  /*in*/ int32_t all);
+  /* in */ bHYPRE_SStructBuildMatrix self,
+  /* in */ const char* filename,
+  /* in */ int32_t all);
 
 /**
  * Cast method for interface and class type conversions.
  */
-bHYPRE_SStructBuildMatrix
+struct bHYPRE_SStructBuildMatrix__object*
 bHYPRE_SStructBuildMatrix__cast(
   void* obj);
 
@@ -274,6 +285,29 @@ bHYPRE_SStructBuildMatrix__cast2(
   void* obj,
   const char* type);
 
+/**
+ * Select and execute a method by name
+ */
+void
+bHYPRE_SStructBuildMatrix__exec(
+  /* in */ bHYPRE_SStructBuildMatrix self,
+  /* in */ const char* methodName,
+  /* in */ sidl_io_Deserializer inArgs,
+  /* in */ sidl_io_Serializer outArgs);
+/**
+ * static Exec method for reflexity.
+ */
+void
+bHYPRE_SStructBuildMatrix__sexec(
+  /* in */ const char* methodName,
+  /* in */ sidl_io_Deserializer inArgs,
+  /* in */ sidl_io_Serializer outArgs);
+/**
+ * Get the URL of the Implementation of this object (for RMI)
+ */
+char*
+bHYPRE_SStructBuildMatrix__getURL(
+  /* in */ bHYPRE_SStructBuildMatrix self);
 struct bHYPRE_SStructBuildMatrix__array*
 bHYPRE_SStructBuildMatrix__array_createCol(
   int32_t       dimen,

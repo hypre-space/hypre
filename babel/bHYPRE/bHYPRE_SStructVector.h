@@ -2,12 +2,12 @@
  * File:          bHYPRE_SStructVector.h
  * Symbol:        bHYPRE.SStructVector-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.9.8
+ * Babel Version: 0.10.4
  * Description:   Client-side glue code for bHYPRE.SStructVector
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.9.8
+ * babel-version = 0.10.4
  */
 
 #ifndef included_bHYPRE_SStructVector_h
@@ -46,6 +46,12 @@ typedef struct bHYPRE_SStructVector__object* bHYPRE_SStructVector;
 #include "sidl_ClassInfo.h"
 #endif
 
+#ifndef included_sidl_io_Serializer_h
+#include "sidl_io_Serializer.h"
+#endif
+#ifndef included_sidl_io_Deserializer_h
+#include "sidl_io_Deserializer.h"
+#endif
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -53,111 +59,63 @@ extern "C" {
 /**
  * Constructor function for the class.
  */
-bHYPRE_SStructVector
+struct bHYPRE_SStructVector__object*
 bHYPRE_SStructVector__create(void);
 
+/**
+ * RMI constructor function for the class.
+ */
+bHYPRE_SStructVector
+bHYPRE_SStructVector__createRemote(const char *, sidl_BaseInterface *_ex);
+
+/**
+ * RMI connector function for the class.
+ */
+bHYPRE_SStructVector
+bHYPRE_SStructVector__connect(const char *, sidl_BaseInterface *_ex);
 void
 bHYPRE_SStructVector_addRef(
-  /*in*/ bHYPRE_SStructVector self);
+  /* in */ bHYPRE_SStructVector self);
 
 void
 bHYPRE_SStructVector_deleteRef(
-  /*in*/ bHYPRE_SStructVector self);
+  /* in */ bHYPRE_SStructVector self);
 
 sidl_bool
 bHYPRE_SStructVector_isSame(
-  /*in*/ bHYPRE_SStructVector self,
-  /*in*/ sidl_BaseInterface iobj);
+  /* in */ bHYPRE_SStructVector self,
+  /* in */ sidl_BaseInterface iobj);
 
 sidl_BaseInterface
 bHYPRE_SStructVector_queryInt(
-  /*in*/ bHYPRE_SStructVector self,
-  /*in*/ const char* name);
+  /* in */ bHYPRE_SStructVector self,
+  /* in */ const char* name);
 
 sidl_bool
 bHYPRE_SStructVector_isType(
-  /*in*/ bHYPRE_SStructVector self,
-  /*in*/ const char* name);
+  /* in */ bHYPRE_SStructVector self,
+  /* in */ const char* name);
 
 sidl_ClassInfo
 bHYPRE_SStructVector_getClassInfo(
-  /*in*/ bHYPRE_SStructVector self);
+  /* in */ bHYPRE_SStructVector self);
 
 /**
  * Method:  SetObjectType[]
  */
 int32_t
 bHYPRE_SStructVector_SetObjectType(
-  /*in*/ bHYPRE_SStructVector self,
-  /*in*/ int32_t type);
+  /* in */ bHYPRE_SStructVector self,
+  /* in */ int32_t type);
 
 /**
- * Set {\tt self} to 0.
- * 
- */
-int32_t
-bHYPRE_SStructVector_Clear(
-  /*in*/ bHYPRE_SStructVector self);
-
-/**
- * Copy x into {\tt self}.
- * 
- */
-int32_t
-bHYPRE_SStructVector_Copy(
-  /*in*/ bHYPRE_SStructVector self,
-  /*in*/ bHYPRE_Vector x);
-
-/**
- * Create an {\tt x} compatible with {\tt self}.
- * 
- * NOTE: When this method is used in an inherited class, the
- * cloned {\tt Vector} object can be cast to an object with the
- * inherited class type.
- * 
- */
-int32_t
-bHYPRE_SStructVector_Clone(
-  /*in*/ bHYPRE_SStructVector self,
-  /*out*/ bHYPRE_Vector* x);
-
-/**
- * Scale {\tt self} by {\tt a}.
- * 
- */
-int32_t
-bHYPRE_SStructVector_Scale(
-  /*in*/ bHYPRE_SStructVector self,
-  /*in*/ double a);
-
-/**
- * Compute {\tt d}, the inner-product of {\tt self} and {\tt x}.
- * 
- */
-int32_t
-bHYPRE_SStructVector_Dot(
-  /*in*/ bHYPRE_SStructVector self,
-  /*in*/ bHYPRE_Vector x,
-  /*out*/ double* d);
-
-/**
- * Add {\tt a}*{\tt x} to {\tt self}.
- * 
- */
-int32_t
-bHYPRE_SStructVector_Axpy(
-  /*in*/ bHYPRE_SStructVector self,
-  /*in*/ double a,
-  /*in*/ bHYPRE_Vector x);
-
-/**
- * Set the MPI Communicator.
+ * Set the MPI Communicator.  DEPRECATED, Use Create()
  * 
  */
 int32_t
 bHYPRE_SStructVector_SetCommunicator(
-  /*in*/ bHYPRE_SStructVector self,
-  /*in*/ void* mpi_comm);
+  /* in */ bHYPRE_SStructVector self,
+  /* in */ void* mpi_comm);
 
 /**
  * Prepare an object for setting coefficient values, whether for
@@ -166,7 +124,7 @@ bHYPRE_SStructVector_SetCommunicator(
  */
 int32_t
 bHYPRE_SStructVector_Initialize(
-  /*in*/ bHYPRE_SStructVector self);
+  /* in */ bHYPRE_SStructVector self);
 
 /**
  * Finalize the construction of an object before using, either
@@ -178,7 +136,7 @@ bHYPRE_SStructVector_Initialize(
  */
 int32_t
 bHYPRE_SStructVector_Assemble(
-  /*in*/ bHYPRE_SStructVector self);
+  /* in */ bHYPRE_SStructVector self);
 
 /**
  * The problem definition interface is a {\it builder} that
@@ -194,8 +152,8 @@ bHYPRE_SStructVector_Assemble(
  */
 int32_t
 bHYPRE_SStructVector_GetObject(
-  /*in*/ bHYPRE_SStructVector self,
-  /*out*/ sidl_BaseInterface* A);
+  /* in */ bHYPRE_SStructVector self,
+  /* out */ sidl_BaseInterface* A);
 
 /**
  * Set the vector grid.
@@ -203,8 +161,8 @@ bHYPRE_SStructVector_GetObject(
  */
 int32_t
 bHYPRE_SStructVector_SetGrid(
-  /*in*/ bHYPRE_SStructVector self,
-  /*in*/ bHYPRE_SStructGrid grid);
+  /* in */ bHYPRE_SStructVector self,
+  /* in */ bHYPRE_SStructGrid grid);
 
 /**
  * Set vector coefficients index by index.
@@ -220,11 +178,11 @@ bHYPRE_SStructVector_SetGrid(
  */
 int32_t
 bHYPRE_SStructVector_SetValues(
-  /*in*/ bHYPRE_SStructVector self,
-  /*in*/ int32_t part,
-  /*in*/ struct sidl_int__array* index,
-  /*in*/ int32_t var,
-  /*in*/ struct sidl_double__array* values);
+  /* in */ bHYPRE_SStructVector self,
+  /* in */ int32_t part,
+  /* in */ struct sidl_int__array* index,
+  /* in */ int32_t var,
+  /* in */ struct sidl_double__array* values);
 
 /**
  * Set vector coefficients a box at a time.
@@ -240,12 +198,12 @@ bHYPRE_SStructVector_SetValues(
  */
 int32_t
 bHYPRE_SStructVector_SetBoxValues(
-  /*in*/ bHYPRE_SStructVector self,
-  /*in*/ int32_t part,
-  /*in*/ struct sidl_int__array* ilower,
-  /*in*/ struct sidl_int__array* iupper,
-  /*in*/ int32_t var,
-  /*in*/ struct sidl_double__array* values);
+  /* in */ bHYPRE_SStructVector self,
+  /* in */ int32_t part,
+  /* in */ struct sidl_int__array* ilower,
+  /* in */ struct sidl_int__array* iupper,
+  /* in */ int32_t var,
+  /* in */ struct sidl_double__array* values);
 
 /**
  * Set vector coefficients index by index.
@@ -261,11 +219,11 @@ bHYPRE_SStructVector_SetBoxValues(
  */
 int32_t
 bHYPRE_SStructVector_AddToValues(
-  /*in*/ bHYPRE_SStructVector self,
-  /*in*/ int32_t part,
-  /*in*/ struct sidl_int__array* index,
-  /*in*/ int32_t var,
-  /*in*/ struct sidl_double__array* values);
+  /* in */ bHYPRE_SStructVector self,
+  /* in */ int32_t part,
+  /* in */ struct sidl_int__array* index,
+  /* in */ int32_t var,
+  /* in */ struct sidl_double__array* values);
 
 /**
  * Set vector coefficients a box at a time.
@@ -281,12 +239,12 @@ bHYPRE_SStructVector_AddToValues(
  */
 int32_t
 bHYPRE_SStructVector_AddToBoxValues(
-  /*in*/ bHYPRE_SStructVector self,
-  /*in*/ int32_t part,
-  /*in*/ struct sidl_int__array* ilower,
-  /*in*/ struct sidl_int__array* iupper,
-  /*in*/ int32_t var,
-  /*in*/ struct sidl_double__array* values);
+  /* in */ bHYPRE_SStructVector self,
+  /* in */ int32_t part,
+  /* in */ struct sidl_int__array* ilower,
+  /* in */ struct sidl_int__array* iupper,
+  /* in */ int32_t var,
+  /* in */ struct sidl_double__array* values);
 
 /**
  * Gather vector data before calling {\tt GetValues}.
@@ -294,7 +252,7 @@ bHYPRE_SStructVector_AddToBoxValues(
  */
 int32_t
 bHYPRE_SStructVector_Gather(
-  /*in*/ bHYPRE_SStructVector self);
+  /* in */ bHYPRE_SStructVector self);
 
 /**
  * Get vector coefficients index by index.
@@ -309,11 +267,11 @@ bHYPRE_SStructVector_Gather(
  */
 int32_t
 bHYPRE_SStructVector_GetValues(
-  /*in*/ bHYPRE_SStructVector self,
-  /*in*/ int32_t part,
-  /*in*/ struct sidl_int__array* index,
-  /*in*/ int32_t var,
-  /*out*/ double* value);
+  /* in */ bHYPRE_SStructVector self,
+  /* in */ int32_t part,
+  /* in */ struct sidl_int__array* index,
+  /* in */ int32_t var,
+  /* out */ double* value);
 
 /**
  * Get vector coefficients a box at a time.
@@ -328,12 +286,12 @@ bHYPRE_SStructVector_GetValues(
  */
 int32_t
 bHYPRE_SStructVector_GetBoxValues(
-  /*in*/ bHYPRE_SStructVector self,
-  /*in*/ int32_t part,
-  /*in*/ struct sidl_int__array* ilower,
-  /*in*/ struct sidl_int__array* iupper,
-  /*in*/ int32_t var,
-  /*inout*/ struct sidl_double__array** values);
+  /* in */ bHYPRE_SStructVector self,
+  /* in */ int32_t part,
+  /* in */ struct sidl_int__array* ilower,
+  /* in */ struct sidl_int__array* iupper,
+  /* in */ int32_t var,
+  /* inout */ struct sidl_double__array** values);
 
 /**
  * Set the vector to be complex.
@@ -341,7 +299,7 @@ bHYPRE_SStructVector_GetBoxValues(
  */
 int32_t
 bHYPRE_SStructVector_SetComplex(
-  /*in*/ bHYPRE_SStructVector self);
+  /* in */ bHYPRE_SStructVector self);
 
 /**
  * Print the vector to file.  This is mainly for debugging
@@ -350,14 +308,73 @@ bHYPRE_SStructVector_SetComplex(
  */
 int32_t
 bHYPRE_SStructVector_Print(
-  /*in*/ bHYPRE_SStructVector self,
-  /*in*/ const char* filename,
-  /*in*/ int32_t all);
+  /* in */ bHYPRE_SStructVector self,
+  /* in */ const char* filename,
+  /* in */ int32_t all);
+
+/**
+ * Set {\tt self} to 0.
+ * 
+ */
+int32_t
+bHYPRE_SStructVector_Clear(
+  /* in */ bHYPRE_SStructVector self);
+
+/**
+ * Copy x into {\tt self}.
+ * 
+ */
+int32_t
+bHYPRE_SStructVector_Copy(
+  /* in */ bHYPRE_SStructVector self,
+  /* in */ bHYPRE_Vector x);
+
+/**
+ * Create an {\tt x} compatible with {\tt self}.
+ * 
+ * NOTE: When this method is used in an inherited class, the
+ * cloned {\tt Vector} object can be cast to an object with the
+ * inherited class type.
+ * 
+ */
+int32_t
+bHYPRE_SStructVector_Clone(
+  /* in */ bHYPRE_SStructVector self,
+  /* out */ bHYPRE_Vector* x);
+
+/**
+ * Scale {\tt self} by {\tt a}.
+ * 
+ */
+int32_t
+bHYPRE_SStructVector_Scale(
+  /* in */ bHYPRE_SStructVector self,
+  /* in */ double a);
+
+/**
+ * Compute {\tt d}, the inner-product of {\tt self} and {\tt x}.
+ * 
+ */
+int32_t
+bHYPRE_SStructVector_Dot(
+  /* in */ bHYPRE_SStructVector self,
+  /* in */ bHYPRE_Vector x,
+  /* out */ double* d);
+
+/**
+ * Add {\tt a}*{\tt x} to {\tt self}.
+ * 
+ */
+int32_t
+bHYPRE_SStructVector_Axpy(
+  /* in */ bHYPRE_SStructVector self,
+  /* in */ double a,
+  /* in */ bHYPRE_Vector x);
 
 /**
  * Cast method for interface and class type conversions.
  */
-bHYPRE_SStructVector
+struct bHYPRE_SStructVector__object*
 bHYPRE_SStructVector__cast(
   void* obj);
 
@@ -369,6 +386,29 @@ bHYPRE_SStructVector__cast2(
   void* obj,
   const char* type);
 
+/**
+ * Select and execute a method by name
+ */
+void
+bHYPRE_SStructVector__exec(
+  /* in */ bHYPRE_SStructVector self,
+  /* in */ const char* methodName,
+  /* in */ sidl_io_Deserializer inArgs,
+  /* in */ sidl_io_Serializer outArgs);
+/**
+ * static Exec method for reflexity.
+ */
+void
+bHYPRE_SStructVector__sexec(
+  /* in */ const char* methodName,
+  /* in */ sidl_io_Deserializer inArgs,
+  /* in */ sidl_io_Serializer outArgs);
+/**
+ * Get the URL of the Implementation of this object (for RMI)
+ */
+char*
+bHYPRE_SStructVector__getURL(
+  /* in */ bHYPRE_SStructVector self);
 struct bHYPRE_SStructVector__array*
 bHYPRE_SStructVector__array_createCol(
   int32_t       dimen,

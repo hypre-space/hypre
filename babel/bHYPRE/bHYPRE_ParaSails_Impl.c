@@ -2,12 +2,12 @@
  * File:          bHYPRE_ParaSails_Impl.c
  * Symbol:        bHYPRE.ParaSails-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.9.8
+ * Babel Version: 0.10.4
  * Description:   Server-side implementation for bHYPRE.ParaSails
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.9.8
+ * babel-version = 0.10.4
  */
 
 /*
@@ -35,22 +35,43 @@
 /* DO-NOT-DELETE splicer.end(bHYPRE.ParaSails._includes) */
 
 /*
+ * Static class initializer called exactly once before any user-defined method is dispatched
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_ParaSails__load"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+void
+impl_bHYPRE_ParaSails__load(
+  void)
+{
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.ParaSails._load) */
+  /* Insert-Code-Here {bHYPRE.ParaSails._load} (static class initializer method) */
+  /* DO-NOT-DELETE splicer.end(bHYPRE.ParaSails._load) */
+}
+/*
  * Class constructor called when the class is created.
  */
 
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_ParaSails__ctor"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 void
 impl_bHYPRE_ParaSails__ctor(
-  /*in*/ bHYPRE_ParaSails self)
+  /* in */ bHYPRE_ParaSails self)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.ParaSails._ctor) */
   /* Insert the implementation of the constructor method here... */
 
    struct bHYPRE_ParaSails__data * data;
    data = hypre_CTAlloc( struct bHYPRE_ParaSails__data, 1 );
-   data -> comm = NULL;
+   data -> comm = (MPI_Comm) NULL;
    data -> solver = (HYPRE_Solver) NULL;
    /* set any other data components here */
    bHYPRE_ParaSails__set_data( self, data );
@@ -65,9 +86,12 @@ impl_bHYPRE_ParaSails__ctor(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_ParaSails__dtor"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 void
 impl_bHYPRE_ParaSails__dtor(
-  /*in*/ bHYPRE_ParaSails self)
+  /* in */ bHYPRE_ParaSails self)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.ParaSails._dtor) */
   /* Insert the implementation of the destructor method here... */
@@ -93,9 +117,13 @@ impl_bHYPRE_ParaSails__dtor(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_ParaSails_SetCommunicator"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_ParaSails_SetCommunicator(
-  /*in*/ bHYPRE_ParaSails self, /*in*/ void* mpi_comm)
+  /* in */ bHYPRE_ParaSails self,
+  /* in */ void* mpi_comm)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.ParaSails.SetCommunicator) */
   /* Insert the implementation of the SetCommunicator method here... */
@@ -123,9 +151,14 @@ impl_bHYPRE_ParaSails_SetCommunicator(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_ParaSails_SetIntParameter"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_ParaSails_SetIntParameter(
-  /*in*/ bHYPRE_ParaSails self, /*in*/ const char* name, /*in*/ int32_t value)
+  /* in */ bHYPRE_ParaSails self,
+  /* in */ const char* name,
+  /* in */ int32_t value)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.ParaSails.SetIntParameter) */
   /* Insert the implementation of the SetIntParameter method here... */
@@ -167,9 +200,14 @@ impl_bHYPRE_ParaSails_SetIntParameter(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_ParaSails_SetDoubleParameter"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_ParaSails_SetDoubleParameter(
-  /*in*/ bHYPRE_ParaSails self, /*in*/ const char* name, /*in*/ double value)
+  /* in */ bHYPRE_ParaSails self,
+  /* in */ const char* name,
+  /* in */ double value)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.ParaSails.SetDoubleParameter) */
   /* Insert the implementation of the SetDoubleParameter method here... */
@@ -211,10 +249,14 @@ impl_bHYPRE_ParaSails_SetDoubleParameter(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_ParaSails_SetStringParameter"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_ParaSails_SetStringParameter(
-  /*in*/ bHYPRE_ParaSails self, /*in*/ const char* name,
-    /*in*/ const char* value)
+  /* in */ bHYPRE_ParaSails self,
+  /* in */ const char* name,
+  /* in */ const char* value)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.ParaSails.SetStringParameter) */
   /* Insert the implementation of the SetStringParameter method here... */
@@ -230,10 +272,14 @@ impl_bHYPRE_ParaSails_SetStringParameter(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_ParaSails_SetIntArray1Parameter"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_ParaSails_SetIntArray1Parameter(
-  /*in*/ bHYPRE_ParaSails self, /*in*/ const char* name,
-    /*in*/ struct sidl_int__array* value)
+  /* in */ bHYPRE_ParaSails self,
+  /* in */ const char* name,
+  /* in */ struct sidl_int__array* value)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.ParaSails.SetIntArray1Parameter) */
   /* Insert the implementation of the SetIntArray1Parameter method here... */
@@ -249,10 +295,14 @@ impl_bHYPRE_ParaSails_SetIntArray1Parameter(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_ParaSails_SetIntArray2Parameter"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_ParaSails_SetIntArray2Parameter(
-  /*in*/ bHYPRE_ParaSails self, /*in*/ const char* name,
-    /*in*/ struct sidl_int__array* value)
+  /* in */ bHYPRE_ParaSails self,
+  /* in */ const char* name,
+  /* in */ struct sidl_int__array* value)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.ParaSails.SetIntArray2Parameter) */
   /* Insert the implementation of the SetIntArray2Parameter method here... */
@@ -268,10 +318,14 @@ impl_bHYPRE_ParaSails_SetIntArray2Parameter(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_ParaSails_SetDoubleArray1Parameter"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_ParaSails_SetDoubleArray1Parameter(
-  /*in*/ bHYPRE_ParaSails self, /*in*/ const char* name,
-    /*in*/ struct sidl_double__array* value)
+  /* in */ bHYPRE_ParaSails self,
+  /* in */ const char* name,
+  /* in */ struct sidl_double__array* value)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.ParaSails.SetDoubleArray1Parameter) */
   /* Insert the implementation of the SetDoubleArray1Parameter method here... */
@@ -287,10 +341,14 @@ impl_bHYPRE_ParaSails_SetDoubleArray1Parameter(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_ParaSails_SetDoubleArray2Parameter"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_ParaSails_SetDoubleArray2Parameter(
-  /*in*/ bHYPRE_ParaSails self, /*in*/ const char* name,
-    /*in*/ struct sidl_double__array* value)
+  /* in */ bHYPRE_ParaSails self,
+  /* in */ const char* name,
+  /* in */ struct sidl_double__array* value)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.ParaSails.SetDoubleArray2Parameter) */
   /* Insert the implementation of the SetDoubleArray2Parameter method here... */
@@ -306,9 +364,14 @@ impl_bHYPRE_ParaSails_SetDoubleArray2Parameter(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_ParaSails_GetIntValue"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_ParaSails_GetIntValue(
-  /*in*/ bHYPRE_ParaSails self, /*in*/ const char* name, /*out*/ int32_t* value)
+  /* in */ bHYPRE_ParaSails self,
+  /* in */ const char* name,
+  /* out */ int32_t* value)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.ParaSails.GetIntValue) */
   /* Insert the implementation of the GetIntValue method here... */
@@ -324,9 +387,14 @@ impl_bHYPRE_ParaSails_GetIntValue(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_ParaSails_GetDoubleValue"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_ParaSails_GetDoubleValue(
-  /*in*/ bHYPRE_ParaSails self, /*in*/ const char* name, /*out*/ double* value)
+  /* in */ bHYPRE_ParaSails self,
+  /* in */ const char* name,
+  /* out */ double* value)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.ParaSails.GetDoubleValue) */
   /* Insert the implementation of the GetDoubleValue method here... */
@@ -343,9 +411,14 @@ impl_bHYPRE_ParaSails_GetDoubleValue(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_ParaSails_Setup"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_ParaSails_Setup(
-  /*in*/ bHYPRE_ParaSails self, /*in*/ bHYPRE_Vector b, /*in*/ bHYPRE_Vector x)
+  /* in */ bHYPRE_ParaSails self,
+  /* in */ bHYPRE_Vector b,
+  /* in */ bHYPRE_Vector x)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.ParaSails.Setup) */
   /* Insert the implementation of the Setup method here... */
@@ -419,10 +492,14 @@ impl_bHYPRE_ParaSails_Setup(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_ParaSails_Apply"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_ParaSails_Apply(
-  /*in*/ bHYPRE_ParaSails self, /*in*/ bHYPRE_Vector b,
-    /*inout*/ bHYPRE_Vector* x)
+  /* in */ bHYPRE_ParaSails self,
+  /* in */ bHYPRE_Vector b,
+  /* inout */ bHYPRE_Vector* x)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.ParaSails.Apply) */
   /* Insert the implementation of the Apply method here... */
@@ -503,9 +580,13 @@ impl_bHYPRE_ParaSails_Apply(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_ParaSails_SetOperator"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_ParaSails_SetOperator(
-  /*in*/ bHYPRE_ParaSails self, /*in*/ bHYPRE_Operator A)
+  /* in */ bHYPRE_ParaSails self,
+  /* in */ bHYPRE_Operator A)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.ParaSails.SetOperator) */
   /* Insert the implementation of the SetOperator method here... */
@@ -541,9 +622,13 @@ impl_bHYPRE_ParaSails_SetOperator(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_ParaSails_SetTolerance"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_ParaSails_SetTolerance(
-  /*in*/ bHYPRE_ParaSails self, /*in*/ double tolerance)
+  /* in */ bHYPRE_ParaSails self,
+  /* in */ double tolerance)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.ParaSails.SetTolerance) */
   /* Insert the implementation of the SetTolerance method here... */
@@ -561,9 +646,13 @@ impl_bHYPRE_ParaSails_SetTolerance(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_ParaSails_SetMaxIterations"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_ParaSails_SetMaxIterations(
-  /*in*/ bHYPRE_ParaSails self, /*in*/ int32_t max_iterations)
+  /* in */ bHYPRE_ParaSails self,
+  /* in */ int32_t max_iterations)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.ParaSails.SetMaxIterations) */
   /* Insert the implementation of the SetMaxIterations method here... */
@@ -585,9 +674,13 @@ impl_bHYPRE_ParaSails_SetMaxIterations(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_ParaSails_SetLogging"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_ParaSails_SetLogging(
-  /*in*/ bHYPRE_ParaSails self, /*in*/ int32_t level)
+  /* in */ bHYPRE_ParaSails self,
+  /* in */ int32_t level)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.ParaSails.SetLogging) */
   /* Insert the implementation of the SetLogging method here... */
@@ -622,9 +715,13 @@ impl_bHYPRE_ParaSails_SetLogging(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_ParaSails_SetPrintLevel"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_ParaSails_SetPrintLevel(
-  /*in*/ bHYPRE_ParaSails self, /*in*/ int32_t level)
+  /* in */ bHYPRE_ParaSails self,
+  /* in */ int32_t level)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.ParaSails.SetPrintLevel) */
   /* Insert the implementation of the SetPrintLevel method here... */
@@ -642,9 +739,13 @@ impl_bHYPRE_ParaSails_SetPrintLevel(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_ParaSails_GetNumIterations"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_ParaSails_GetNumIterations(
-  /*in*/ bHYPRE_ParaSails self, /*out*/ int32_t* num_iterations)
+  /* in */ bHYPRE_ParaSails self,
+  /* out */ int32_t* num_iterations)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.ParaSails.GetNumIterations) */
   /* Insert the implementation of the GetNumIterations method here... */
@@ -662,9 +763,13 @@ impl_bHYPRE_ParaSails_GetNumIterations(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_ParaSails_GetRelResidualNorm"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_ParaSails_GetRelResidualNorm(
-  /*in*/ bHYPRE_ParaSails self, /*out*/ double* norm)
+  /* in */ bHYPRE_ParaSails self,
+  /* out */ double* norm)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.ParaSails.GetRelResidualNorm) */
   /* Insert the implementation of the GetRelResidualNorm method here... */
@@ -672,4 +777,68 @@ impl_bHYPRE_ParaSails_GetRelResidualNorm(
    return 1;  /* no such function, this shouldn't be called */
 
   /* DO-NOT-DELETE splicer.end(bHYPRE.ParaSails.GetRelResidualNorm) */
+}
+/* Babel internal methods, Users should not edit below this line. */
+struct bHYPRE_Solver__object* 
+  impl_bHYPRE_ParaSails_fconnect_bHYPRE_Solver(char* url,
+  sidl_BaseInterface *_ex) {
+  return bHYPRE_Solver__connect(url, _ex);
+}
+char * impl_bHYPRE_ParaSails_fgetURL_bHYPRE_Solver(struct 
+  bHYPRE_Solver__object* obj) {
+  return bHYPRE_Solver__getURL(obj);
+}
+struct bHYPRE_ParaSails__object* 
+  impl_bHYPRE_ParaSails_fconnect_bHYPRE_ParaSails(char* url,
+  sidl_BaseInterface *_ex) {
+  return bHYPRE_ParaSails__connect(url, _ex);
+}
+char * impl_bHYPRE_ParaSails_fgetURL_bHYPRE_ParaSails(struct 
+  bHYPRE_ParaSails__object* obj) {
+  return bHYPRE_ParaSails__getURL(obj);
+}
+struct bHYPRE_Operator__object* 
+  impl_bHYPRE_ParaSails_fconnect_bHYPRE_Operator(char* url,
+  sidl_BaseInterface *_ex) {
+  return bHYPRE_Operator__connect(url, _ex);
+}
+char * impl_bHYPRE_ParaSails_fgetURL_bHYPRE_Operator(struct 
+  bHYPRE_Operator__object* obj) {
+  return bHYPRE_Operator__getURL(obj);
+}
+struct sidl_ClassInfo__object* 
+  impl_bHYPRE_ParaSails_fconnect_sidl_ClassInfo(char* url,
+  sidl_BaseInterface *_ex) {
+  return sidl_ClassInfo__connect(url, _ex);
+}
+char * impl_bHYPRE_ParaSails_fgetURL_sidl_ClassInfo(struct 
+  sidl_ClassInfo__object* obj) {
+  return sidl_ClassInfo__getURL(obj);
+}
+struct bHYPRE_Vector__object* 
+  impl_bHYPRE_ParaSails_fconnect_bHYPRE_Vector(char* url,
+  sidl_BaseInterface *_ex) {
+  return bHYPRE_Vector__connect(url, _ex);
+}
+char * impl_bHYPRE_ParaSails_fgetURL_bHYPRE_Vector(struct 
+  bHYPRE_Vector__object* obj) {
+  return bHYPRE_Vector__getURL(obj);
+}
+struct sidl_BaseInterface__object* 
+  impl_bHYPRE_ParaSails_fconnect_sidl_BaseInterface(char* url,
+  sidl_BaseInterface *_ex) {
+  return sidl_BaseInterface__connect(url, _ex);
+}
+char * impl_bHYPRE_ParaSails_fgetURL_sidl_BaseInterface(struct 
+  sidl_BaseInterface__object* obj) {
+  return sidl_BaseInterface__getURL(obj);
+}
+struct sidl_BaseClass__object* 
+  impl_bHYPRE_ParaSails_fconnect_sidl_BaseClass(char* url,
+  sidl_BaseInterface *_ex) {
+  return sidl_BaseClass__connect(url, _ex);
+}
+char * impl_bHYPRE_ParaSails_fgetURL_sidl_BaseClass(struct 
+  sidl_BaseClass__object* obj) {
+  return sidl_BaseClass__getURL(obj);
 }

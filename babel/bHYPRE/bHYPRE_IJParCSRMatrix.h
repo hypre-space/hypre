@@ -2,12 +2,12 @@
  * File:          bHYPRE_IJParCSRMatrix.h
  * Symbol:        bHYPRE.IJParCSRMatrix-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.9.8
+ * Babel Version: 0.10.4
  * Description:   Client-side glue code for bHYPRE.IJParCSRMatrix
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.9.8
+ * babel-version = 0.10.4
  */
 
 #ifndef included_bHYPRE_IJParCSRMatrix_h
@@ -43,6 +43,12 @@ typedef struct bHYPRE_IJParCSRMatrix__object* bHYPRE_IJParCSRMatrix;
 #include "sidl_ClassInfo.h"
 #endif
 
+#ifndef included_sidl_io_Serializer_h
+#include "sidl_io_Serializer.h"
+#endif
+#ifndef included_sidl_io_Deserializer_h
+#include "sidl_io_Deserializer.h"
+#endif
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -50,35 +56,46 @@ extern "C" {
 /**
  * Constructor function for the class.
  */
-bHYPRE_IJParCSRMatrix
+struct bHYPRE_IJParCSRMatrix__object*
 bHYPRE_IJParCSRMatrix__create(void);
 
+/**
+ * RMI constructor function for the class.
+ */
+bHYPRE_IJParCSRMatrix
+bHYPRE_IJParCSRMatrix__createRemote(const char *, sidl_BaseInterface *_ex);
+
+/**
+ * RMI connector function for the class.
+ */
+bHYPRE_IJParCSRMatrix
+bHYPRE_IJParCSRMatrix__connect(const char *, sidl_BaseInterface *_ex);
 void
 bHYPRE_IJParCSRMatrix_addRef(
-  /*in*/ bHYPRE_IJParCSRMatrix self);
+  /* in */ bHYPRE_IJParCSRMatrix self);
 
 void
 bHYPRE_IJParCSRMatrix_deleteRef(
-  /*in*/ bHYPRE_IJParCSRMatrix self);
+  /* in */ bHYPRE_IJParCSRMatrix self);
 
 sidl_bool
 bHYPRE_IJParCSRMatrix_isSame(
-  /*in*/ bHYPRE_IJParCSRMatrix self,
-  /*in*/ sidl_BaseInterface iobj);
+  /* in */ bHYPRE_IJParCSRMatrix self,
+  /* in */ sidl_BaseInterface iobj);
 
 sidl_BaseInterface
 bHYPRE_IJParCSRMatrix_queryInt(
-  /*in*/ bHYPRE_IJParCSRMatrix self,
-  /*in*/ const char* name);
+  /* in */ bHYPRE_IJParCSRMatrix self,
+  /* in */ const char* name);
 
 sidl_bool
 bHYPRE_IJParCSRMatrix_isType(
-  /*in*/ bHYPRE_IJParCSRMatrix self,
-  /*in*/ const char* name);
+  /* in */ bHYPRE_IJParCSRMatrix self,
+  /* in */ const char* name);
 
 sidl_ClassInfo
 bHYPRE_IJParCSRMatrix_getClassInfo(
-  /*in*/ bHYPRE_IJParCSRMatrix self);
+  /* in */ bHYPRE_IJParCSRMatrix self);
 
 /**
  * (Optional) Set the max number of nonzeros to expect in each
@@ -96,129 +113,9 @@ bHYPRE_IJParCSRMatrix_getClassInfo(
  */
 int32_t
 bHYPRE_IJParCSRMatrix_SetDiagOffdSizes(
-  /*in*/ bHYPRE_IJParCSRMatrix self,
-  /*in*/ struct sidl_int__array* diag_sizes,
-  /*in*/ struct sidl_int__array* offdiag_sizes);
-
-/**
- * Set the MPI Communicator.
- * 
- */
-int32_t
-bHYPRE_IJParCSRMatrix_SetCommunicator(
-  /*in*/ bHYPRE_IJParCSRMatrix self,
-  /*in*/ void* mpi_comm);
-
-/**
- * Set the int parameter associated with {\tt name}.
- * 
- */
-int32_t
-bHYPRE_IJParCSRMatrix_SetIntParameter(
-  /*in*/ bHYPRE_IJParCSRMatrix self,
-  /*in*/ const char* name,
-  /*in*/ int32_t value);
-
-/**
- * Set the double parameter associated with {\tt name}.
- * 
- */
-int32_t
-bHYPRE_IJParCSRMatrix_SetDoubleParameter(
-  /*in*/ bHYPRE_IJParCSRMatrix self,
-  /*in*/ const char* name,
-  /*in*/ double value);
-
-/**
- * Set the string parameter associated with {\tt name}.
- * 
- */
-int32_t
-bHYPRE_IJParCSRMatrix_SetStringParameter(
-  /*in*/ bHYPRE_IJParCSRMatrix self,
-  /*in*/ const char* name,
-  /*in*/ const char* value);
-
-/**
- * Set the int 1-D array parameter associated with {\tt name}.
- * 
- */
-int32_t
-bHYPRE_IJParCSRMatrix_SetIntArray1Parameter(
-  /*in*/ bHYPRE_IJParCSRMatrix self,
-  /*in*/ const char* name,
-  /*in*/ struct sidl_int__array* value);
-
-/**
- * Set the int 2-D array parameter associated with {\tt name}.
- * 
- */
-int32_t
-bHYPRE_IJParCSRMatrix_SetIntArray2Parameter(
-  /*in*/ bHYPRE_IJParCSRMatrix self,
-  /*in*/ const char* name,
-  /*in*/ struct sidl_int__array* value);
-
-/**
- * Set the double 1-D array parameter associated with {\tt name}.
- * 
- */
-int32_t
-bHYPRE_IJParCSRMatrix_SetDoubleArray1Parameter(
-  /*in*/ bHYPRE_IJParCSRMatrix self,
-  /*in*/ const char* name,
-  /*in*/ struct sidl_double__array* value);
-
-/**
- * Set the double 2-D array parameter associated with {\tt name}.
- * 
- */
-int32_t
-bHYPRE_IJParCSRMatrix_SetDoubleArray2Parameter(
-  /*in*/ bHYPRE_IJParCSRMatrix self,
-  /*in*/ const char* name,
-  /*in*/ struct sidl_double__array* value);
-
-/**
- * Set the int parameter associated with {\tt name}.
- * 
- */
-int32_t
-bHYPRE_IJParCSRMatrix_GetIntValue(
-  /*in*/ bHYPRE_IJParCSRMatrix self,
-  /*in*/ const char* name,
-  /*out*/ int32_t* value);
-
-/**
- * Get the double parameter associated with {\tt name}.
- * 
- */
-int32_t
-bHYPRE_IJParCSRMatrix_GetDoubleValue(
-  /*in*/ bHYPRE_IJParCSRMatrix self,
-  /*in*/ const char* name,
-  /*out*/ double* value);
-
-/**
- * (Optional) Do any preprocessing that may be necessary in
- * order to execute {\tt Apply}.
- * 
- */
-int32_t
-bHYPRE_IJParCSRMatrix_Setup(
-  /*in*/ bHYPRE_IJParCSRMatrix self,
-  /*in*/ bHYPRE_Vector b,
-  /*in*/ bHYPRE_Vector x);
-
-/**
- * Apply the operator to {\tt b}, returning {\tt x}.
- * 
- */
-int32_t
-bHYPRE_IJParCSRMatrix_Apply(
-  /*in*/ bHYPRE_IJParCSRMatrix self,
-  /*in*/ bHYPRE_Vector b,
-  /*inout*/ bHYPRE_Vector* x);
+  /* in */ bHYPRE_IJParCSRMatrix self,
+  /* in */ struct sidl_int__array* diag_sizes,
+  /* in */ struct sidl_int__array* offdiag_sizes);
 
 /**
  * The GetRow method will allocate space for its two output
@@ -230,11 +127,20 @@ bHYPRE_IJParCSRMatrix_Apply(
  */
 int32_t
 bHYPRE_IJParCSRMatrix_GetRow(
-  /*in*/ bHYPRE_IJParCSRMatrix self,
-  /*in*/ int32_t row,
-  /*out*/ int32_t* size,
-  /*out*/ struct sidl_int__array** col_ind,
-  /*out*/ struct sidl_double__array** values);
+  /* in */ bHYPRE_IJParCSRMatrix self,
+  /* in */ int32_t row,
+  /* out */ int32_t* size,
+  /* out */ struct sidl_int__array** col_ind,
+  /* out */ struct sidl_double__array** values);
+
+/**
+ * Set the MPI Communicator.  DEPRECATED, Use Create()
+ * 
+ */
+int32_t
+bHYPRE_IJParCSRMatrix_SetCommunicator(
+  /* in */ bHYPRE_IJParCSRMatrix self,
+  /* in */ void* mpi_comm);
 
 /**
  * Prepare an object for setting coefficient values, whether for
@@ -243,7 +149,7 @@ bHYPRE_IJParCSRMatrix_GetRow(
  */
 int32_t
 bHYPRE_IJParCSRMatrix_Initialize(
-  /*in*/ bHYPRE_IJParCSRMatrix self);
+  /* in */ bHYPRE_IJParCSRMatrix self);
 
 /**
  * Finalize the construction of an object before using, either
@@ -255,7 +161,7 @@ bHYPRE_IJParCSRMatrix_Initialize(
  */
 int32_t
 bHYPRE_IJParCSRMatrix_Assemble(
-  /*in*/ bHYPRE_IJParCSRMatrix self);
+  /* in */ bHYPRE_IJParCSRMatrix self);
 
 /**
  * The problem definition interface is a {\it builder} that
@@ -271,8 +177,8 @@ bHYPRE_IJParCSRMatrix_Assemble(
  */
 int32_t
 bHYPRE_IJParCSRMatrix_GetObject(
-  /*in*/ bHYPRE_IJParCSRMatrix self,
-  /*out*/ sidl_BaseInterface* A);
+  /* in */ bHYPRE_IJParCSRMatrix self,
+  /* out */ sidl_BaseInterface* A);
 
 /**
  * Set the local range for a matrix object.  Each process owns
@@ -299,11 +205,11 @@ bHYPRE_IJParCSRMatrix_GetObject(
  */
 int32_t
 bHYPRE_IJParCSRMatrix_SetLocalRange(
-  /*in*/ bHYPRE_IJParCSRMatrix self,
-  /*in*/ int32_t ilower,
-  /*in*/ int32_t iupper,
-  /*in*/ int32_t jlower,
-  /*in*/ int32_t jupper);
+  /* in */ bHYPRE_IJParCSRMatrix self,
+  /* in */ int32_t ilower,
+  /* in */ int32_t iupper,
+  /* in */ int32_t jlower,
+  /* in */ int32_t jupper);
 
 /**
  * Sets values for {\tt nrows} of the matrix.  The arrays {\tt
@@ -322,12 +228,12 @@ bHYPRE_IJParCSRMatrix_SetLocalRange(
  */
 int32_t
 bHYPRE_IJParCSRMatrix_SetValues(
-  /*in*/ bHYPRE_IJParCSRMatrix self,
-  /*in*/ int32_t nrows,
-  /*in*/ struct sidl_int__array* ncols,
-  /*in*/ struct sidl_int__array* rows,
-  /*in*/ struct sidl_int__array* cols,
-  /*in*/ struct sidl_double__array* values);
+  /* in */ bHYPRE_IJParCSRMatrix self,
+  /* in */ int32_t nrows,
+  /* in */ struct sidl_int__array* ncols,
+  /* in */ struct sidl_int__array* rows,
+  /* in */ struct sidl_int__array* cols,
+  /* in */ struct sidl_double__array* values);
 
 /**
  * Adds to values for {\tt nrows} of the matrix.  Usage details
@@ -340,12 +246,12 @@ bHYPRE_IJParCSRMatrix_SetValues(
  */
 int32_t
 bHYPRE_IJParCSRMatrix_AddToValues(
-  /*in*/ bHYPRE_IJParCSRMatrix self,
-  /*in*/ int32_t nrows,
-  /*in*/ struct sidl_int__array* ncols,
-  /*in*/ struct sidl_int__array* rows,
-  /*in*/ struct sidl_int__array* cols,
-  /*in*/ struct sidl_double__array* values);
+  /* in */ bHYPRE_IJParCSRMatrix self,
+  /* in */ int32_t nrows,
+  /* in */ struct sidl_int__array* ncols,
+  /* in */ struct sidl_int__array* rows,
+  /* in */ struct sidl_int__array* cols,
+  /* in */ struct sidl_double__array* values);
 
 /**
  * Gets range of rows owned by this processor and range of
@@ -354,11 +260,11 @@ bHYPRE_IJParCSRMatrix_AddToValues(
  */
 int32_t
 bHYPRE_IJParCSRMatrix_GetLocalRange(
-  /*in*/ bHYPRE_IJParCSRMatrix self,
-  /*out*/ int32_t* ilower,
-  /*out*/ int32_t* iupper,
-  /*out*/ int32_t* jlower,
-  /*out*/ int32_t* jupper);
+  /* in */ bHYPRE_IJParCSRMatrix self,
+  /* out */ int32_t* ilower,
+  /* out */ int32_t* iupper,
+  /* out */ int32_t* jlower,
+  /* out */ int32_t* jupper);
 
 /**
  * Gets number of nonzeros elements for {\tt nrows} rows
@@ -368,10 +274,10 @@ bHYPRE_IJParCSRMatrix_GetLocalRange(
  */
 int32_t
 bHYPRE_IJParCSRMatrix_GetRowCounts(
-  /*in*/ bHYPRE_IJParCSRMatrix self,
-  /*in*/ int32_t nrows,
-  /*in*/ struct sidl_int__array* rows,
-  /*inout*/ struct sidl_int__array** ncols);
+  /* in */ bHYPRE_IJParCSRMatrix self,
+  /* in */ int32_t nrows,
+  /* in */ struct sidl_int__array* rows,
+  /* inout */ struct sidl_int__array** ncols);
 
 /**
  * Gets values for {\tt nrows} rows or partial rows of the
@@ -380,12 +286,12 @@ bHYPRE_IJParCSRMatrix_GetRowCounts(
  */
 int32_t
 bHYPRE_IJParCSRMatrix_GetValues(
-  /*in*/ bHYPRE_IJParCSRMatrix self,
-  /*in*/ int32_t nrows,
-  /*in*/ struct sidl_int__array* ncols,
-  /*in*/ struct sidl_int__array* rows,
-  /*in*/ struct sidl_int__array* cols,
-  /*inout*/ struct sidl_double__array** values);
+  /* in */ bHYPRE_IJParCSRMatrix self,
+  /* in */ int32_t nrows,
+  /* in */ struct sidl_int__array* ncols,
+  /* in */ struct sidl_int__array* rows,
+  /* in */ struct sidl_int__array* cols,
+  /* inout */ struct sidl_double__array** values);
 
 /**
  * (Optional) Set the max number of nonzeros to expect in each
@@ -399,8 +305,8 @@ bHYPRE_IJParCSRMatrix_GetValues(
  */
 int32_t
 bHYPRE_IJParCSRMatrix_SetRowSizes(
-  /*in*/ bHYPRE_IJParCSRMatrix self,
-  /*in*/ struct sidl_int__array* sizes);
+  /* in */ bHYPRE_IJParCSRMatrix self,
+  /* in */ struct sidl_int__array* sizes);
 
 /**
  * Print the matrix to file.  This is mainly for debugging
@@ -409,8 +315,8 @@ bHYPRE_IJParCSRMatrix_SetRowSizes(
  */
 int32_t
 bHYPRE_IJParCSRMatrix_Print(
-  /*in*/ bHYPRE_IJParCSRMatrix self,
-  /*in*/ const char* filename);
+  /* in */ bHYPRE_IJParCSRMatrix self,
+  /* in */ const char* filename);
 
 /**
  * Read the matrix from file.  This is mainly for debugging
@@ -419,14 +325,125 @@ bHYPRE_IJParCSRMatrix_Print(
  */
 int32_t
 bHYPRE_IJParCSRMatrix_Read(
-  /*in*/ bHYPRE_IJParCSRMatrix self,
-  /*in*/ const char* filename,
-  /*in*/ void* comm);
+  /* in */ bHYPRE_IJParCSRMatrix self,
+  /* in */ const char* filename,
+  /* in */ void* comm);
+
+/**
+ * Set the int parameter associated with {\tt name}.
+ * 
+ */
+int32_t
+bHYPRE_IJParCSRMatrix_SetIntParameter(
+  /* in */ bHYPRE_IJParCSRMatrix self,
+  /* in */ const char* name,
+  /* in */ int32_t value);
+
+/**
+ * Set the double parameter associated with {\tt name}.
+ * 
+ */
+int32_t
+bHYPRE_IJParCSRMatrix_SetDoubleParameter(
+  /* in */ bHYPRE_IJParCSRMatrix self,
+  /* in */ const char* name,
+  /* in */ double value);
+
+/**
+ * Set the string parameter associated with {\tt name}.
+ * 
+ */
+int32_t
+bHYPRE_IJParCSRMatrix_SetStringParameter(
+  /* in */ bHYPRE_IJParCSRMatrix self,
+  /* in */ const char* name,
+  /* in */ const char* value);
+
+/**
+ * Set the int 1-D array parameter associated with {\tt name}.
+ * 
+ */
+int32_t
+bHYPRE_IJParCSRMatrix_SetIntArray1Parameter(
+  /* in */ bHYPRE_IJParCSRMatrix self,
+  /* in */ const char* name,
+  /* in */ struct sidl_int__array* value);
+
+/**
+ * Set the int 2-D array parameter associated with {\tt name}.
+ * 
+ */
+int32_t
+bHYPRE_IJParCSRMatrix_SetIntArray2Parameter(
+  /* in */ bHYPRE_IJParCSRMatrix self,
+  /* in */ const char* name,
+  /* in */ struct sidl_int__array* value);
+
+/**
+ * Set the double 1-D array parameter associated with {\tt name}.
+ * 
+ */
+int32_t
+bHYPRE_IJParCSRMatrix_SetDoubleArray1Parameter(
+  /* in */ bHYPRE_IJParCSRMatrix self,
+  /* in */ const char* name,
+  /* in */ struct sidl_double__array* value);
+
+/**
+ * Set the double 2-D array parameter associated with {\tt name}.
+ * 
+ */
+int32_t
+bHYPRE_IJParCSRMatrix_SetDoubleArray2Parameter(
+  /* in */ bHYPRE_IJParCSRMatrix self,
+  /* in */ const char* name,
+  /* in */ struct sidl_double__array* value);
+
+/**
+ * Set the int parameter associated with {\tt name}.
+ * 
+ */
+int32_t
+bHYPRE_IJParCSRMatrix_GetIntValue(
+  /* in */ bHYPRE_IJParCSRMatrix self,
+  /* in */ const char* name,
+  /* out */ int32_t* value);
+
+/**
+ * Get the double parameter associated with {\tt name}.
+ * 
+ */
+int32_t
+bHYPRE_IJParCSRMatrix_GetDoubleValue(
+  /* in */ bHYPRE_IJParCSRMatrix self,
+  /* in */ const char* name,
+  /* out */ double* value);
+
+/**
+ * (Optional) Do any preprocessing that may be necessary in
+ * order to execute {\tt Apply}.
+ * 
+ */
+int32_t
+bHYPRE_IJParCSRMatrix_Setup(
+  /* in */ bHYPRE_IJParCSRMatrix self,
+  /* in */ bHYPRE_Vector b,
+  /* in */ bHYPRE_Vector x);
+
+/**
+ * Apply the operator to {\tt b}, returning {\tt x}.
+ * 
+ */
+int32_t
+bHYPRE_IJParCSRMatrix_Apply(
+  /* in */ bHYPRE_IJParCSRMatrix self,
+  /* in */ bHYPRE_Vector b,
+  /* inout */ bHYPRE_Vector* x);
 
 /**
  * Cast method for interface and class type conversions.
  */
-bHYPRE_IJParCSRMatrix
+struct bHYPRE_IJParCSRMatrix__object*
 bHYPRE_IJParCSRMatrix__cast(
   void* obj);
 
@@ -438,6 +455,29 @@ bHYPRE_IJParCSRMatrix__cast2(
   void* obj,
   const char* type);
 
+/**
+ * Select and execute a method by name
+ */
+void
+bHYPRE_IJParCSRMatrix__exec(
+  /* in */ bHYPRE_IJParCSRMatrix self,
+  /* in */ const char* methodName,
+  /* in */ sidl_io_Deserializer inArgs,
+  /* in */ sidl_io_Serializer outArgs);
+/**
+ * static Exec method for reflexity.
+ */
+void
+bHYPRE_IJParCSRMatrix__sexec(
+  /* in */ const char* methodName,
+  /* in */ sidl_io_Deserializer inArgs,
+  /* in */ sidl_io_Serializer outArgs);
+/**
+ * Get the URL of the Implementation of this object (for RMI)
+ */
+char*
+bHYPRE_IJParCSRMatrix__getURL(
+  /* in */ bHYPRE_IJParCSRMatrix self);
 struct bHYPRE_IJParCSRMatrix__array*
 bHYPRE_IJParCSRMatrix__array_createCol(
   int32_t       dimen,

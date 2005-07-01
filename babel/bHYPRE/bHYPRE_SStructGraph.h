@@ -2,12 +2,12 @@
  * File:          bHYPRE_SStructGraph.h
  * Symbol:        bHYPRE.SStructGraph-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.9.8
+ * Babel Version: 0.10.4
  * Description:   Client-side glue code for bHYPRE.SStructGraph
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.9.8
+ * babel-version = 0.10.4
  */
 
 #ifndef included_bHYPRE_SStructGraph_h
@@ -43,6 +43,12 @@ typedef struct bHYPRE_SStructGraph__object* bHYPRE_SStructGraph;
 #include "sidl_ClassInfo.h"
 #endif
 
+#ifndef included_sidl_io_Serializer_h
+#include "sidl_io_Serializer.h"
+#endif
+#ifndef included_sidl_io_Deserializer_h
+#include "sidl_io_Deserializer.h"
+#endif
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -50,35 +56,46 @@ extern "C" {
 /**
  * Constructor function for the class.
  */
-bHYPRE_SStructGraph
+struct bHYPRE_SStructGraph__object*
 bHYPRE_SStructGraph__create(void);
 
+/**
+ * RMI constructor function for the class.
+ */
+bHYPRE_SStructGraph
+bHYPRE_SStructGraph__createRemote(const char *, sidl_BaseInterface *_ex);
+
+/**
+ * RMI connector function for the class.
+ */
+bHYPRE_SStructGraph
+bHYPRE_SStructGraph__connect(const char *, sidl_BaseInterface *_ex);
 void
 bHYPRE_SStructGraph_addRef(
-  /*in*/ bHYPRE_SStructGraph self);
+  /* in */ bHYPRE_SStructGraph self);
 
 void
 bHYPRE_SStructGraph_deleteRef(
-  /*in*/ bHYPRE_SStructGraph self);
+  /* in */ bHYPRE_SStructGraph self);
 
 sidl_bool
 bHYPRE_SStructGraph_isSame(
-  /*in*/ bHYPRE_SStructGraph self,
-  /*in*/ sidl_BaseInterface iobj);
+  /* in */ bHYPRE_SStructGraph self,
+  /* in */ sidl_BaseInterface iobj);
 
 sidl_BaseInterface
 bHYPRE_SStructGraph_queryInt(
-  /*in*/ bHYPRE_SStructGraph self,
-  /*in*/ const char* name);
+  /* in */ bHYPRE_SStructGraph self,
+  /* in */ const char* name);
 
 sidl_bool
 bHYPRE_SStructGraph_isType(
-  /*in*/ bHYPRE_SStructGraph self,
-  /*in*/ const char* name);
+  /* in */ bHYPRE_SStructGraph self,
+  /* in */ const char* name);
 
 sidl_ClassInfo
 bHYPRE_SStructGraph_getClassInfo(
-  /*in*/ bHYPRE_SStructGraph self);
+  /* in */ bHYPRE_SStructGraph self);
 
 /**
  * Set the grid and communicator.
@@ -86,9 +103,9 @@ bHYPRE_SStructGraph_getClassInfo(
  */
 int32_t
 bHYPRE_SStructGraph_SetCommGrid(
-  /*in*/ bHYPRE_SStructGraph self,
-  /*in*/ void* mpi_comm,
-  /*in*/ bHYPRE_SStructGrid grid);
+  /* in */ bHYPRE_SStructGraph self,
+  /* in */ void* mpi_comm,
+  /* in */ bHYPRE_SStructGrid grid);
 
 /**
  * Set the stencil for a variable on a structured part of the
@@ -97,10 +114,10 @@ bHYPRE_SStructGraph_SetCommGrid(
  */
 int32_t
 bHYPRE_SStructGraph_SetStencil(
-  /*in*/ bHYPRE_SStructGraph self,
-  /*in*/ int32_t part,
-  /*in*/ int32_t var,
-  /*in*/ bHYPRE_SStructStencil stencil);
+  /* in */ bHYPRE_SStructGraph self,
+  /* in */ int32_t part,
+  /* in */ int32_t var,
+  /* in */ bHYPRE_SStructStencil stencil);
 
 /**
  * Add a non-stencil graph entry at a particular index.  This
@@ -114,30 +131,30 @@ bHYPRE_SStructGraph_SetStencil(
  */
 int32_t
 bHYPRE_SStructGraph_AddEntries(
-  /*in*/ bHYPRE_SStructGraph self,
-  /*in*/ int32_t part,
-  /*in*/ struct sidl_int__array* index,
-  /*in*/ int32_t var,
-  /*in*/ int32_t to_part,
-  /*in*/ struct sidl_int__array* to_index,
-  /*in*/ int32_t to_var);
+  /* in */ bHYPRE_SStructGraph self,
+  /* in */ int32_t part,
+  /* in */ struct sidl_int__array* index,
+  /* in */ int32_t var,
+  /* in */ int32_t to_part,
+  /* in */ struct sidl_int__array* to_index,
+  /* in */ int32_t to_var);
 
 /**
  * Method:  SetObjectType[]
  */
 int32_t
 bHYPRE_SStructGraph_SetObjectType(
-  /*in*/ bHYPRE_SStructGraph self,
-  /*in*/ int32_t type);
+  /* in */ bHYPRE_SStructGraph self,
+  /* in */ int32_t type);
 
 /**
- * Set the MPI Communicator.
+ * Set the MPI Communicator.  DEPRECATED, Use Create()
  * 
  */
 int32_t
 bHYPRE_SStructGraph_SetCommunicator(
-  /*in*/ bHYPRE_SStructGraph self,
-  /*in*/ void* mpi_comm);
+  /* in */ bHYPRE_SStructGraph self,
+  /* in */ void* mpi_comm);
 
 /**
  * Prepare an object for setting coefficient values, whether for
@@ -146,7 +163,7 @@ bHYPRE_SStructGraph_SetCommunicator(
  */
 int32_t
 bHYPRE_SStructGraph_Initialize(
-  /*in*/ bHYPRE_SStructGraph self);
+  /* in */ bHYPRE_SStructGraph self);
 
 /**
  * Finalize the construction of an object before using, either
@@ -158,7 +175,7 @@ bHYPRE_SStructGraph_Initialize(
  */
 int32_t
 bHYPRE_SStructGraph_Assemble(
-  /*in*/ bHYPRE_SStructGraph self);
+  /* in */ bHYPRE_SStructGraph self);
 
 /**
  * The problem definition interface is a {\it builder} that
@@ -174,13 +191,13 @@ bHYPRE_SStructGraph_Assemble(
  */
 int32_t
 bHYPRE_SStructGraph_GetObject(
-  /*in*/ bHYPRE_SStructGraph self,
-  /*out*/ sidl_BaseInterface* A);
+  /* in */ bHYPRE_SStructGraph self,
+  /* out */ sidl_BaseInterface* A);
 
 /**
  * Cast method for interface and class type conversions.
  */
-bHYPRE_SStructGraph
+struct bHYPRE_SStructGraph__object*
 bHYPRE_SStructGraph__cast(
   void* obj);
 
@@ -192,6 +209,29 @@ bHYPRE_SStructGraph__cast2(
   void* obj,
   const char* type);
 
+/**
+ * Select and execute a method by name
+ */
+void
+bHYPRE_SStructGraph__exec(
+  /* in */ bHYPRE_SStructGraph self,
+  /* in */ const char* methodName,
+  /* in */ sidl_io_Deserializer inArgs,
+  /* in */ sidl_io_Serializer outArgs);
+/**
+ * static Exec method for reflexity.
+ */
+void
+bHYPRE_SStructGraph__sexec(
+  /* in */ const char* methodName,
+  /* in */ sidl_io_Deserializer inArgs,
+  /* in */ sidl_io_Serializer outArgs);
+/**
+ * Get the URL of the Implementation of this object (for RMI)
+ */
+char*
+bHYPRE_SStructGraph__getURL(
+  /* in */ bHYPRE_SStructGraph self);
 struct bHYPRE_SStructGraph__array*
 bHYPRE_SStructGraph__array_createCol(
   int32_t       dimen,

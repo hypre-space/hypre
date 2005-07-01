@@ -2,12 +2,12 @@
  * File:          bHYPRE_IJBuildVector.h
  * Symbol:        bHYPRE.IJBuildVector-v1.0.0
  * Symbol Type:   interface
- * Babel Version: 0.9.8
+ * Babel Version: 0.10.4
  * Description:   Client-side glue code for bHYPRE.IJBuildVector
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.9.8
+ * babel-version = 0.10.4
  */
 
 #ifndef included_bHYPRE_IJBuildVector_h
@@ -34,54 +34,65 @@ typedef struct bHYPRE_IJBuildVector__object* bHYPRE_IJBuildVector;
 #include "sidl_ClassInfo.h"
 #endif
 
+#ifndef included_sidl_io_Serializer_h
+#include "sidl_io_Serializer.h"
+#endif
+#ifndef included_sidl_io_Deserializer_h
+#include "sidl_io_Deserializer.h"
+#endif
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+/**
+ * RMI connector function for the class.
+ */
+bHYPRE_IJBuildVector
+bHYPRE_IJBuildVector__connect(const char *, sidl_BaseInterface *_ex);
 void
 bHYPRE_IJBuildVector_addRef(
-  /*in*/ bHYPRE_IJBuildVector self);
+  /* in */ bHYPRE_IJBuildVector self);
 
 void
 bHYPRE_IJBuildVector_deleteRef(
-  /*in*/ bHYPRE_IJBuildVector self);
+  /* in */ bHYPRE_IJBuildVector self);
 
 sidl_bool
 bHYPRE_IJBuildVector_isSame(
-  /*in*/ bHYPRE_IJBuildVector self,
-  /*in*/ sidl_BaseInterface iobj);
+  /* in */ bHYPRE_IJBuildVector self,
+  /* in */ sidl_BaseInterface iobj);
 
 sidl_BaseInterface
 bHYPRE_IJBuildVector_queryInt(
-  /*in*/ bHYPRE_IJBuildVector self,
-  /*in*/ const char* name);
+  /* in */ bHYPRE_IJBuildVector self,
+  /* in */ const char* name);
 
 sidl_bool
 bHYPRE_IJBuildVector_isType(
-  /*in*/ bHYPRE_IJBuildVector self,
-  /*in*/ const char* name);
+  /* in */ bHYPRE_IJBuildVector self,
+  /* in */ const char* name);
 
 sidl_ClassInfo
 bHYPRE_IJBuildVector_getClassInfo(
-  /*in*/ bHYPRE_IJBuildVector self);
+  /* in */ bHYPRE_IJBuildVector self);
 
 int32_t
 bHYPRE_IJBuildVector_SetCommunicator(
-  /*in*/ bHYPRE_IJBuildVector self,
-  /*in*/ void* mpi_comm);
+  /* in */ bHYPRE_IJBuildVector self,
+  /* in */ void* mpi_comm);
 
 int32_t
 bHYPRE_IJBuildVector_Initialize(
-  /*in*/ bHYPRE_IJBuildVector self);
+  /* in */ bHYPRE_IJBuildVector self);
 
 int32_t
 bHYPRE_IJBuildVector_Assemble(
-  /*in*/ bHYPRE_IJBuildVector self);
+  /* in */ bHYPRE_IJBuildVector self);
 
 int32_t
 bHYPRE_IJBuildVector_GetObject(
-  /*in*/ bHYPRE_IJBuildVector self,
-  /*out*/ sidl_BaseInterface* A);
+  /* in */ bHYPRE_IJBuildVector self,
+  /* out */ sidl_BaseInterface* A);
 
 /**
  * Set the local range for a vector object.  Each process owns
@@ -98,9 +109,9 @@ bHYPRE_IJBuildVector_GetObject(
  */
 int32_t
 bHYPRE_IJBuildVector_SetLocalRange(
-  /*in*/ bHYPRE_IJBuildVector self,
-  /*in*/ int32_t jlower,
-  /*in*/ int32_t jupper);
+  /* in */ bHYPRE_IJBuildVector self,
+  /* in */ int32_t jlower,
+  /* in */ int32_t jupper);
 
 /**
  * Sets values in vector.  The arrays {\tt values} and {\tt
@@ -114,10 +125,10 @@ bHYPRE_IJBuildVector_SetLocalRange(
  */
 int32_t
 bHYPRE_IJBuildVector_SetValues(
-  /*in*/ bHYPRE_IJBuildVector self,
-  /*in*/ int32_t nvalues,
-  /*in*/ struct sidl_int__array* indices,
-  /*in*/ struct sidl_double__array* values);
+  /* in */ bHYPRE_IJBuildVector self,
+  /* in */ int32_t nvalues,
+  /* in */ struct sidl_int__array* indices,
+  /* in */ struct sidl_double__array* values);
 
 /**
  * Adds to values in vector.  Usage details are analogous to
@@ -128,10 +139,10 @@ bHYPRE_IJBuildVector_SetValues(
  */
 int32_t
 bHYPRE_IJBuildVector_AddToValues(
-  /*in*/ bHYPRE_IJBuildVector self,
-  /*in*/ int32_t nvalues,
-  /*in*/ struct sidl_int__array* indices,
-  /*in*/ struct sidl_double__array* values);
+  /* in */ bHYPRE_IJBuildVector self,
+  /* in */ int32_t nvalues,
+  /* in */ struct sidl_int__array* indices,
+  /* in */ struct sidl_double__array* values);
 
 /**
  * Returns range of the part of the vector owned by this
@@ -140,9 +151,9 @@ bHYPRE_IJBuildVector_AddToValues(
  */
 int32_t
 bHYPRE_IJBuildVector_GetLocalRange(
-  /*in*/ bHYPRE_IJBuildVector self,
-  /*out*/ int32_t* jlower,
-  /*out*/ int32_t* jupper);
+  /* in */ bHYPRE_IJBuildVector self,
+  /* out */ int32_t* jlower,
+  /* out */ int32_t* jupper);
 
 /**
  * Gets values in vector.  Usage details are analogous to {\tt
@@ -153,10 +164,10 @@ bHYPRE_IJBuildVector_GetLocalRange(
  */
 int32_t
 bHYPRE_IJBuildVector_GetValues(
-  /*in*/ bHYPRE_IJBuildVector self,
-  /*in*/ int32_t nvalues,
-  /*in*/ struct sidl_int__array* indices,
-  /*inout*/ struct sidl_double__array** values);
+  /* in */ bHYPRE_IJBuildVector self,
+  /* in */ int32_t nvalues,
+  /* in */ struct sidl_int__array* indices,
+  /* inout */ struct sidl_double__array** values);
 
 /**
  * Print the vector to file.  This is mainly for debugging
@@ -165,8 +176,8 @@ bHYPRE_IJBuildVector_GetValues(
  */
 int32_t
 bHYPRE_IJBuildVector_Print(
-  /*in*/ bHYPRE_IJBuildVector self,
-  /*in*/ const char* filename);
+  /* in */ bHYPRE_IJBuildVector self,
+  /* in */ const char* filename);
 
 /**
  * Read the vector from file.  This is mainly for debugging
@@ -175,14 +186,14 @@ bHYPRE_IJBuildVector_Print(
  */
 int32_t
 bHYPRE_IJBuildVector_Read(
-  /*in*/ bHYPRE_IJBuildVector self,
-  /*in*/ const char* filename,
-  /*in*/ void* comm);
+  /* in */ bHYPRE_IJBuildVector self,
+  /* in */ const char* filename,
+  /* in */ void* comm);
 
 /**
  * Cast method for interface and class type conversions.
  */
-bHYPRE_IJBuildVector
+struct bHYPRE_IJBuildVector__object*
 bHYPRE_IJBuildVector__cast(
   void* obj);
 
@@ -194,6 +205,29 @@ bHYPRE_IJBuildVector__cast2(
   void* obj,
   const char* type);
 
+/**
+ * Select and execute a method by name
+ */
+void
+bHYPRE_IJBuildVector__exec(
+  /* in */ bHYPRE_IJBuildVector self,
+  /* in */ const char* methodName,
+  /* in */ sidl_io_Deserializer inArgs,
+  /* in */ sidl_io_Serializer outArgs);
+/**
+ * static Exec method for reflexity.
+ */
+void
+bHYPRE_IJBuildVector__sexec(
+  /* in */ const char* methodName,
+  /* in */ sidl_io_Deserializer inArgs,
+  /* in */ sidl_io_Serializer outArgs);
+/**
+ * Get the URL of the Implementation of this object (for RMI)
+ */
+char*
+bHYPRE_IJBuildVector__getURL(
+  /* in */ bHYPRE_IJBuildVector self);
 struct bHYPRE_IJBuildVector__array*
 bHYPRE_IJBuildVector__array_createCol(
   int32_t       dimen,

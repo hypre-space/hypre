@@ -2,12 +2,12 @@
  * File:          bHYPRE_IJBuildMatrix.h
  * Symbol:        bHYPRE.IJBuildMatrix-v1.0.0
  * Symbol Type:   interface
- * Babel Version: 0.9.8
+ * Babel Version: 0.10.4
  * Description:   Client-side glue code for bHYPRE.IJBuildMatrix
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.9.8
+ * babel-version = 0.10.4
  */
 
 #ifndef included_bHYPRE_IJBuildMatrix_h
@@ -39,54 +39,65 @@ typedef struct bHYPRE_IJBuildMatrix__object* bHYPRE_IJBuildMatrix;
 #include "sidl_ClassInfo.h"
 #endif
 
+#ifndef included_sidl_io_Serializer_h
+#include "sidl_io_Serializer.h"
+#endif
+#ifndef included_sidl_io_Deserializer_h
+#include "sidl_io_Deserializer.h"
+#endif
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+/**
+ * RMI connector function for the class.
+ */
+bHYPRE_IJBuildMatrix
+bHYPRE_IJBuildMatrix__connect(const char *, sidl_BaseInterface *_ex);
 void
 bHYPRE_IJBuildMatrix_addRef(
-  /*in*/ bHYPRE_IJBuildMatrix self);
+  /* in */ bHYPRE_IJBuildMatrix self);
 
 void
 bHYPRE_IJBuildMatrix_deleteRef(
-  /*in*/ bHYPRE_IJBuildMatrix self);
+  /* in */ bHYPRE_IJBuildMatrix self);
 
 sidl_bool
 bHYPRE_IJBuildMatrix_isSame(
-  /*in*/ bHYPRE_IJBuildMatrix self,
-  /*in*/ sidl_BaseInterface iobj);
+  /* in */ bHYPRE_IJBuildMatrix self,
+  /* in */ sidl_BaseInterface iobj);
 
 sidl_BaseInterface
 bHYPRE_IJBuildMatrix_queryInt(
-  /*in*/ bHYPRE_IJBuildMatrix self,
-  /*in*/ const char* name);
+  /* in */ bHYPRE_IJBuildMatrix self,
+  /* in */ const char* name);
 
 sidl_bool
 bHYPRE_IJBuildMatrix_isType(
-  /*in*/ bHYPRE_IJBuildMatrix self,
-  /*in*/ const char* name);
+  /* in */ bHYPRE_IJBuildMatrix self,
+  /* in */ const char* name);
 
 sidl_ClassInfo
 bHYPRE_IJBuildMatrix_getClassInfo(
-  /*in*/ bHYPRE_IJBuildMatrix self);
+  /* in */ bHYPRE_IJBuildMatrix self);
 
 int32_t
 bHYPRE_IJBuildMatrix_SetCommunicator(
-  /*in*/ bHYPRE_IJBuildMatrix self,
-  /*in*/ void* mpi_comm);
+  /* in */ bHYPRE_IJBuildMatrix self,
+  /* in */ void* mpi_comm);
 
 int32_t
 bHYPRE_IJBuildMatrix_Initialize(
-  /*in*/ bHYPRE_IJBuildMatrix self);
+  /* in */ bHYPRE_IJBuildMatrix self);
 
 int32_t
 bHYPRE_IJBuildMatrix_Assemble(
-  /*in*/ bHYPRE_IJBuildMatrix self);
+  /* in */ bHYPRE_IJBuildMatrix self);
 
 int32_t
 bHYPRE_IJBuildMatrix_GetObject(
-  /*in*/ bHYPRE_IJBuildMatrix self,
-  /*out*/ sidl_BaseInterface* A);
+  /* in */ bHYPRE_IJBuildMatrix self,
+  /* out */ sidl_BaseInterface* A);
 
 /**
  * Set the local range for a matrix object.  Each process owns
@@ -113,11 +124,11 @@ bHYPRE_IJBuildMatrix_GetObject(
  */
 int32_t
 bHYPRE_IJBuildMatrix_SetLocalRange(
-  /*in*/ bHYPRE_IJBuildMatrix self,
-  /*in*/ int32_t ilower,
-  /*in*/ int32_t iupper,
-  /*in*/ int32_t jlower,
-  /*in*/ int32_t jupper);
+  /* in */ bHYPRE_IJBuildMatrix self,
+  /* in */ int32_t ilower,
+  /* in */ int32_t iupper,
+  /* in */ int32_t jlower,
+  /* in */ int32_t jupper);
 
 /**
  * Sets values for {\tt nrows} of the matrix.  The arrays {\tt
@@ -136,12 +147,12 @@ bHYPRE_IJBuildMatrix_SetLocalRange(
  */
 int32_t
 bHYPRE_IJBuildMatrix_SetValues(
-  /*in*/ bHYPRE_IJBuildMatrix self,
-  /*in*/ int32_t nrows,
-  /*in*/ struct sidl_int__array* ncols,
-  /*in*/ struct sidl_int__array* rows,
-  /*in*/ struct sidl_int__array* cols,
-  /*in*/ struct sidl_double__array* values);
+  /* in */ bHYPRE_IJBuildMatrix self,
+  /* in */ int32_t nrows,
+  /* in */ struct sidl_int__array* ncols,
+  /* in */ struct sidl_int__array* rows,
+  /* in */ struct sidl_int__array* cols,
+  /* in */ struct sidl_double__array* values);
 
 /**
  * Adds to values for {\tt nrows} of the matrix.  Usage details
@@ -154,12 +165,12 @@ bHYPRE_IJBuildMatrix_SetValues(
  */
 int32_t
 bHYPRE_IJBuildMatrix_AddToValues(
-  /*in*/ bHYPRE_IJBuildMatrix self,
-  /*in*/ int32_t nrows,
-  /*in*/ struct sidl_int__array* ncols,
-  /*in*/ struct sidl_int__array* rows,
-  /*in*/ struct sidl_int__array* cols,
-  /*in*/ struct sidl_double__array* values);
+  /* in */ bHYPRE_IJBuildMatrix self,
+  /* in */ int32_t nrows,
+  /* in */ struct sidl_int__array* ncols,
+  /* in */ struct sidl_int__array* rows,
+  /* in */ struct sidl_int__array* cols,
+  /* in */ struct sidl_double__array* values);
 
 /**
  * Gets range of rows owned by this processor and range of
@@ -168,11 +179,11 @@ bHYPRE_IJBuildMatrix_AddToValues(
  */
 int32_t
 bHYPRE_IJBuildMatrix_GetLocalRange(
-  /*in*/ bHYPRE_IJBuildMatrix self,
-  /*out*/ int32_t* ilower,
-  /*out*/ int32_t* iupper,
-  /*out*/ int32_t* jlower,
-  /*out*/ int32_t* jupper);
+  /* in */ bHYPRE_IJBuildMatrix self,
+  /* out */ int32_t* ilower,
+  /* out */ int32_t* iupper,
+  /* out */ int32_t* jlower,
+  /* out */ int32_t* jupper);
 
 /**
  * Gets number of nonzeros elements for {\tt nrows} rows
@@ -182,10 +193,10 @@ bHYPRE_IJBuildMatrix_GetLocalRange(
  */
 int32_t
 bHYPRE_IJBuildMatrix_GetRowCounts(
-  /*in*/ bHYPRE_IJBuildMatrix self,
-  /*in*/ int32_t nrows,
-  /*in*/ struct sidl_int__array* rows,
-  /*inout*/ struct sidl_int__array** ncols);
+  /* in */ bHYPRE_IJBuildMatrix self,
+  /* in */ int32_t nrows,
+  /* in */ struct sidl_int__array* rows,
+  /* inout */ struct sidl_int__array** ncols);
 
 /**
  * Gets values for {\tt nrows} rows or partial rows of the
@@ -194,12 +205,12 @@ bHYPRE_IJBuildMatrix_GetRowCounts(
  */
 int32_t
 bHYPRE_IJBuildMatrix_GetValues(
-  /*in*/ bHYPRE_IJBuildMatrix self,
-  /*in*/ int32_t nrows,
-  /*in*/ struct sidl_int__array* ncols,
-  /*in*/ struct sidl_int__array* rows,
-  /*in*/ struct sidl_int__array* cols,
-  /*inout*/ struct sidl_double__array** values);
+  /* in */ bHYPRE_IJBuildMatrix self,
+  /* in */ int32_t nrows,
+  /* in */ struct sidl_int__array* ncols,
+  /* in */ struct sidl_int__array* rows,
+  /* in */ struct sidl_int__array* cols,
+  /* inout */ struct sidl_double__array** values);
 
 /**
  * (Optional) Set the max number of nonzeros to expect in each
@@ -213,8 +224,8 @@ bHYPRE_IJBuildMatrix_GetValues(
  */
 int32_t
 bHYPRE_IJBuildMatrix_SetRowSizes(
-  /*in*/ bHYPRE_IJBuildMatrix self,
-  /*in*/ struct sidl_int__array* sizes);
+  /* in */ bHYPRE_IJBuildMatrix self,
+  /* in */ struct sidl_int__array* sizes);
 
 /**
  * Print the matrix to file.  This is mainly for debugging
@@ -223,8 +234,8 @@ bHYPRE_IJBuildMatrix_SetRowSizes(
  */
 int32_t
 bHYPRE_IJBuildMatrix_Print(
-  /*in*/ bHYPRE_IJBuildMatrix self,
-  /*in*/ const char* filename);
+  /* in */ bHYPRE_IJBuildMatrix self,
+  /* in */ const char* filename);
 
 /**
  * Read the matrix from file.  This is mainly for debugging
@@ -233,14 +244,14 @@ bHYPRE_IJBuildMatrix_Print(
  */
 int32_t
 bHYPRE_IJBuildMatrix_Read(
-  /*in*/ bHYPRE_IJBuildMatrix self,
-  /*in*/ const char* filename,
-  /*in*/ void* comm);
+  /* in */ bHYPRE_IJBuildMatrix self,
+  /* in */ const char* filename,
+  /* in */ void* comm);
 
 /**
  * Cast method for interface and class type conversions.
  */
-bHYPRE_IJBuildMatrix
+struct bHYPRE_IJBuildMatrix__object*
 bHYPRE_IJBuildMatrix__cast(
   void* obj);
 
@@ -252,6 +263,29 @@ bHYPRE_IJBuildMatrix__cast2(
   void* obj,
   const char* type);
 
+/**
+ * Select and execute a method by name
+ */
+void
+bHYPRE_IJBuildMatrix__exec(
+  /* in */ bHYPRE_IJBuildMatrix self,
+  /* in */ const char* methodName,
+  /* in */ sidl_io_Deserializer inArgs,
+  /* in */ sidl_io_Serializer outArgs);
+/**
+ * static Exec method for reflexity.
+ */
+void
+bHYPRE_IJBuildMatrix__sexec(
+  /* in */ const char* methodName,
+  /* in */ sidl_io_Deserializer inArgs,
+  /* in */ sidl_io_Serializer outArgs);
+/**
+ * Get the URL of the Implementation of this object (for RMI)
+ */
+char*
+bHYPRE_IJBuildMatrix__getURL(
+  /* in */ bHYPRE_IJBuildMatrix self);
 struct bHYPRE_IJBuildMatrix__array*
 bHYPRE_IJBuildMatrix__array_createCol(
   int32_t       dimen,

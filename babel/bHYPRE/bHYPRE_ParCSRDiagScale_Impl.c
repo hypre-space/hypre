@@ -2,12 +2,12 @@
  * File:          bHYPRE_ParCSRDiagScale_Impl.c
  * Symbol:        bHYPRE.ParCSRDiagScale-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.9.8
+ * Babel Version: 0.10.4
  * Description:   Server-side implementation for bHYPRE.ParCSRDiagScale
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.9.8
+ * babel-version = 0.10.4
  */
 
 /*
@@ -39,15 +39,36 @@
 /* DO-NOT-DELETE splicer.end(bHYPRE.ParCSRDiagScale._includes) */
 
 /*
+ * Static class initializer called exactly once before any user-defined method is dispatched
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_ParCSRDiagScale__load"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+void
+impl_bHYPRE_ParCSRDiagScale__load(
+  void)
+{
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.ParCSRDiagScale._load) */
+  /* Insert-Code-Here {bHYPRE.ParCSRDiagScale._load} (static class initializer method) */
+  /* DO-NOT-DELETE splicer.end(bHYPRE.ParCSRDiagScale._load) */
+}
+/*
  * Class constructor called when the class is created.
  */
 
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_ParCSRDiagScale__ctor"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 void
 impl_bHYPRE_ParCSRDiagScale__ctor(
-  /*in*/ bHYPRE_ParCSRDiagScale self)
+  /* in */ bHYPRE_ParCSRDiagScale self)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.ParCSRDiagScale._ctor) */
   /* Insert the implementation of the constructor method here... */
@@ -70,9 +91,12 @@ impl_bHYPRE_ParCSRDiagScale__ctor(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_ParCSRDiagScale__dtor"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 void
 impl_bHYPRE_ParCSRDiagScale__dtor(
-  /*in*/ bHYPRE_ParCSRDiagScale self)
+  /* in */ bHYPRE_ParCSRDiagScale self)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.ParCSRDiagScale._dtor) */
   /* Insert the implementation of the destructor method here... */
@@ -95,9 +119,13 @@ impl_bHYPRE_ParCSRDiagScale__dtor(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_ParCSRDiagScale_SetCommunicator"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_ParCSRDiagScale_SetCommunicator(
-  /*in*/ bHYPRE_ParCSRDiagScale self, /*in*/ void* mpi_comm)
+  /* in */ bHYPRE_ParCSRDiagScale self,
+  /* in */ void* mpi_comm)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.ParCSRDiagScale.SetCommunicator) */
   /* Insert the implementation of the SetCommunicator method here... */
@@ -121,10 +149,14 @@ impl_bHYPRE_ParCSRDiagScale_SetCommunicator(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_ParCSRDiagScale_SetIntParameter"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_ParCSRDiagScale_SetIntParameter(
-  /*in*/ bHYPRE_ParCSRDiagScale self, /*in*/ const char* name,
-    /*in*/ int32_t value)
+  /* in */ bHYPRE_ParCSRDiagScale self,
+  /* in */ const char* name,
+  /* in */ int32_t value)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.ParCSRDiagScale.SetIntParameter) */
   /* Insert the implementation of the SetIntParameter method here... */
@@ -142,10 +174,14 @@ impl_bHYPRE_ParCSRDiagScale_SetIntParameter(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_ParCSRDiagScale_SetDoubleParameter"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_ParCSRDiagScale_SetDoubleParameter(
-  /*in*/ bHYPRE_ParCSRDiagScale self, /*in*/ const char* name,
-    /*in*/ double value)
+  /* in */ bHYPRE_ParCSRDiagScale self,
+  /* in */ const char* name,
+  /* in */ double value)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.ParCSRDiagScale.SetDoubleParameter) */
   /* Insert the implementation of the SetDoubleParameter method here... */
@@ -163,10 +199,14 @@ impl_bHYPRE_ParCSRDiagScale_SetDoubleParameter(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_ParCSRDiagScale_SetStringParameter"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_ParCSRDiagScale_SetStringParameter(
-  /*in*/ bHYPRE_ParCSRDiagScale self, /*in*/ const char* name,
-    /*in*/ const char* value)
+  /* in */ bHYPRE_ParCSRDiagScale self,
+  /* in */ const char* name,
+  /* in */ const char* value)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.ParCSRDiagScale.SetStringParameter) */
   /* Insert the implementation of the SetStringParameter method here... */
@@ -184,10 +224,14 @@ impl_bHYPRE_ParCSRDiagScale_SetStringParameter(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_ParCSRDiagScale_SetIntArray1Parameter"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_ParCSRDiagScale_SetIntArray1Parameter(
-  /*in*/ bHYPRE_ParCSRDiagScale self, /*in*/ const char* name,
-    /*in*/ struct sidl_int__array* value)
+  /* in */ bHYPRE_ParCSRDiagScale self,
+  /* in */ const char* name,
+  /* in */ struct sidl_int__array* value)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.ParCSRDiagScale.SetIntArray1Parameter) 
     */
@@ -204,10 +248,14 @@ impl_bHYPRE_ParCSRDiagScale_SetIntArray1Parameter(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_ParCSRDiagScale_SetIntArray2Parameter"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_ParCSRDiagScale_SetIntArray2Parameter(
-  /*in*/ bHYPRE_ParCSRDiagScale self, /*in*/ const char* name,
-    /*in*/ struct sidl_int__array* value)
+  /* in */ bHYPRE_ParCSRDiagScale self,
+  /* in */ const char* name,
+  /* in */ struct sidl_int__array* value)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.ParCSRDiagScale.SetIntArray2Parameter) 
     */
@@ -224,10 +272,14 @@ impl_bHYPRE_ParCSRDiagScale_SetIntArray2Parameter(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_ParCSRDiagScale_SetDoubleArray1Parameter"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_ParCSRDiagScale_SetDoubleArray1Parameter(
-  /*in*/ bHYPRE_ParCSRDiagScale self, /*in*/ const char* name,
-    /*in*/ struct sidl_double__array* value)
+  /* in */ bHYPRE_ParCSRDiagScale self,
+  /* in */ const char* name,
+  /* in */ struct sidl_double__array* value)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.ParCSRDiagScale.SetDoubleArray1Parameter) */
   /* Insert the implementation of the SetDoubleArray1Parameter method here... */
@@ -243,10 +295,14 @@ impl_bHYPRE_ParCSRDiagScale_SetDoubleArray1Parameter(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_ParCSRDiagScale_SetDoubleArray2Parameter"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_ParCSRDiagScale_SetDoubleArray2Parameter(
-  /*in*/ bHYPRE_ParCSRDiagScale self, /*in*/ const char* name,
-    /*in*/ struct sidl_double__array* value)
+  /* in */ bHYPRE_ParCSRDiagScale self,
+  /* in */ const char* name,
+  /* in */ struct sidl_double__array* value)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.ParCSRDiagScale.SetDoubleArray2Parameter) */
   /* Insert the implementation of the SetDoubleArray2Parameter method here... */
@@ -262,10 +318,14 @@ impl_bHYPRE_ParCSRDiagScale_SetDoubleArray2Parameter(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_ParCSRDiagScale_GetIntValue"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_ParCSRDiagScale_GetIntValue(
-  /*in*/ bHYPRE_ParCSRDiagScale self, /*in*/ const char* name,
-    /*out*/ int32_t* value)
+  /* in */ bHYPRE_ParCSRDiagScale self,
+  /* in */ const char* name,
+  /* out */ int32_t* value)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.ParCSRDiagScale.GetIntValue) */
   /* Insert the implementation of the GetIntValue method here... */
@@ -283,10 +343,14 @@ impl_bHYPRE_ParCSRDiagScale_GetIntValue(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_ParCSRDiagScale_GetDoubleValue"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_ParCSRDiagScale_GetDoubleValue(
-  /*in*/ bHYPRE_ParCSRDiagScale self, /*in*/ const char* name,
-    /*out*/ double* value)
+  /* in */ bHYPRE_ParCSRDiagScale self,
+  /* in */ const char* name,
+  /* out */ double* value)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.ParCSRDiagScale.GetDoubleValue) */
   /* Insert the implementation of the GetDoubleValue method here... */
@@ -305,10 +369,14 @@ impl_bHYPRE_ParCSRDiagScale_GetDoubleValue(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_ParCSRDiagScale_Setup"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_ParCSRDiagScale_Setup(
-  /*in*/ bHYPRE_ParCSRDiagScale self, /*in*/ bHYPRE_Vector b,
-    /*in*/ bHYPRE_Vector x)
+  /* in */ bHYPRE_ParCSRDiagScale self,
+  /* in */ bHYPRE_Vector b,
+  /* in */ bHYPRE_Vector x)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.ParCSRDiagScale.Setup) */
   /* Insert the implementation of the Setup method here... */
@@ -326,10 +394,14 @@ impl_bHYPRE_ParCSRDiagScale_Setup(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_ParCSRDiagScale_Apply"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_ParCSRDiagScale_Apply(
-  /*in*/ bHYPRE_ParCSRDiagScale self, /*in*/ bHYPRE_Vector b,
-    /*inout*/ bHYPRE_Vector* x)
+  /* in */ bHYPRE_ParCSRDiagScale self,
+  /* in */ bHYPRE_Vector b,
+  /* inout */ bHYPRE_Vector* x)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.ParCSRDiagScale.Apply) */
   /* Insert the implementation of the Apply method here... */
@@ -412,9 +484,13 @@ impl_bHYPRE_ParCSRDiagScale_Apply(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_ParCSRDiagScale_SetOperator"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_ParCSRDiagScale_SetOperator(
-  /*in*/ bHYPRE_ParCSRDiagScale self, /*in*/ bHYPRE_Operator A)
+  /* in */ bHYPRE_ParCSRDiagScale self,
+  /* in */ bHYPRE_Operator A)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.ParCSRDiagScale.SetOperator) */
   /* Insert the implementation of the SetOperator method here... */
@@ -439,9 +515,13 @@ impl_bHYPRE_ParCSRDiagScale_SetOperator(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_ParCSRDiagScale_SetTolerance"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_ParCSRDiagScale_SetTolerance(
-  /*in*/ bHYPRE_ParCSRDiagScale self, /*in*/ double tolerance)
+  /* in */ bHYPRE_ParCSRDiagScale self,
+  /* in */ double tolerance)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.ParCSRDiagScale.SetTolerance) */
   /* Insert the implementation of the SetTolerance method here... */
@@ -459,9 +539,13 @@ impl_bHYPRE_ParCSRDiagScale_SetTolerance(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_ParCSRDiagScale_SetMaxIterations"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_ParCSRDiagScale_SetMaxIterations(
-  /*in*/ bHYPRE_ParCSRDiagScale self, /*in*/ int32_t max_iterations)
+  /* in */ bHYPRE_ParCSRDiagScale self,
+  /* in */ int32_t max_iterations)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.ParCSRDiagScale.SetMaxIterations) */
   /* Insert the implementation of the SetMaxIterations method here... */
@@ -483,9 +567,13 @@ impl_bHYPRE_ParCSRDiagScale_SetMaxIterations(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_ParCSRDiagScale_SetLogging"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_ParCSRDiagScale_SetLogging(
-  /*in*/ bHYPRE_ParCSRDiagScale self, /*in*/ int32_t level)
+  /* in */ bHYPRE_ParCSRDiagScale self,
+  /* in */ int32_t level)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.ParCSRDiagScale.SetLogging) */
   /* Insert the implementation of the SetLogging method here... */
@@ -507,9 +595,13 @@ impl_bHYPRE_ParCSRDiagScale_SetLogging(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_ParCSRDiagScale_SetPrintLevel"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_ParCSRDiagScale_SetPrintLevel(
-  /*in*/ bHYPRE_ParCSRDiagScale self, /*in*/ int32_t level)
+  /* in */ bHYPRE_ParCSRDiagScale self,
+  /* in */ int32_t level)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.ParCSRDiagScale.SetPrintLevel) */
   /* Insert the implementation of the SetPrintLevel method here... */
@@ -527,9 +619,13 @@ impl_bHYPRE_ParCSRDiagScale_SetPrintLevel(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_ParCSRDiagScale_GetNumIterations"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_ParCSRDiagScale_GetNumIterations(
-  /*in*/ bHYPRE_ParCSRDiagScale self, /*out*/ int32_t* num_iterations)
+  /* in */ bHYPRE_ParCSRDiagScale self,
+  /* out */ int32_t* num_iterations)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.ParCSRDiagScale.GetNumIterations) */
   /* Insert the implementation of the GetNumIterations method here... */
@@ -549,9 +645,13 @@ impl_bHYPRE_ParCSRDiagScale_GetNumIterations(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_ParCSRDiagScale_GetRelResidualNorm"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_ParCSRDiagScale_GetRelResidualNorm(
-  /*in*/ bHYPRE_ParCSRDiagScale self, /*out*/ double* norm)
+  /* in */ bHYPRE_ParCSRDiagScale self,
+  /* out */ double* norm)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.ParCSRDiagScale.GetRelResidualNorm) */
   /* Insert the implementation of the GetRelResidualNorm method here... */
@@ -559,4 +659,68 @@ impl_bHYPRE_ParCSRDiagScale_GetRelResidualNorm(
    return 1;
 
   /* DO-NOT-DELETE splicer.end(bHYPRE.ParCSRDiagScale.GetRelResidualNorm) */
+}
+/* Babel internal methods, Users should not edit below this line. */
+struct bHYPRE_ParCSRDiagScale__object* 
+  impl_bHYPRE_ParCSRDiagScale_fconnect_bHYPRE_ParCSRDiagScale(char* url,
+  sidl_BaseInterface *_ex) {
+  return bHYPRE_ParCSRDiagScale__connect(url, _ex);
+}
+char * impl_bHYPRE_ParCSRDiagScale_fgetURL_bHYPRE_ParCSRDiagScale(struct 
+  bHYPRE_ParCSRDiagScale__object* obj) {
+  return bHYPRE_ParCSRDiagScale__getURL(obj);
+}
+struct bHYPRE_Solver__object* 
+  impl_bHYPRE_ParCSRDiagScale_fconnect_bHYPRE_Solver(char* url,
+  sidl_BaseInterface *_ex) {
+  return bHYPRE_Solver__connect(url, _ex);
+}
+char * impl_bHYPRE_ParCSRDiagScale_fgetURL_bHYPRE_Solver(struct 
+  bHYPRE_Solver__object* obj) {
+  return bHYPRE_Solver__getURL(obj);
+}
+struct bHYPRE_Operator__object* 
+  impl_bHYPRE_ParCSRDiagScale_fconnect_bHYPRE_Operator(char* url,
+  sidl_BaseInterface *_ex) {
+  return bHYPRE_Operator__connect(url, _ex);
+}
+char * impl_bHYPRE_ParCSRDiagScale_fgetURL_bHYPRE_Operator(struct 
+  bHYPRE_Operator__object* obj) {
+  return bHYPRE_Operator__getURL(obj);
+}
+struct sidl_ClassInfo__object* 
+  impl_bHYPRE_ParCSRDiagScale_fconnect_sidl_ClassInfo(char* url,
+  sidl_BaseInterface *_ex) {
+  return sidl_ClassInfo__connect(url, _ex);
+}
+char * impl_bHYPRE_ParCSRDiagScale_fgetURL_sidl_ClassInfo(struct 
+  sidl_ClassInfo__object* obj) {
+  return sidl_ClassInfo__getURL(obj);
+}
+struct bHYPRE_Vector__object* 
+  impl_bHYPRE_ParCSRDiagScale_fconnect_bHYPRE_Vector(char* url,
+  sidl_BaseInterface *_ex) {
+  return bHYPRE_Vector__connect(url, _ex);
+}
+char * impl_bHYPRE_ParCSRDiagScale_fgetURL_bHYPRE_Vector(struct 
+  bHYPRE_Vector__object* obj) {
+  return bHYPRE_Vector__getURL(obj);
+}
+struct sidl_BaseInterface__object* 
+  impl_bHYPRE_ParCSRDiagScale_fconnect_sidl_BaseInterface(char* url,
+  sidl_BaseInterface *_ex) {
+  return sidl_BaseInterface__connect(url, _ex);
+}
+char * impl_bHYPRE_ParCSRDiagScale_fgetURL_sidl_BaseInterface(struct 
+  sidl_BaseInterface__object* obj) {
+  return sidl_BaseInterface__getURL(obj);
+}
+struct sidl_BaseClass__object* 
+  impl_bHYPRE_ParCSRDiagScale_fconnect_sidl_BaseClass(char* url,
+  sidl_BaseInterface *_ex) {
+  return sidl_BaseClass__connect(url, _ex);
+}
+char * impl_bHYPRE_ParCSRDiagScale_fgetURL_sidl_BaseClass(struct 
+  sidl_BaseClass__object* obj) {
+  return sidl_BaseClass__getURL(obj);
 }

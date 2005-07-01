@@ -2,12 +2,12 @@
  * File:          bHYPRE_IJParCSRVector_Impl.c
  * Symbol:        bHYPRE.IJParCSRVector-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.9.8
+ * Babel Version: 0.10.4
  * Description:   Server-side implementation for bHYPRE.IJParCSRVector
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.9.8
+ * babel-version = 0.10.4
  */
 
 /*
@@ -36,15 +36,36 @@
 /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRVector._includes) */
 
 /*
+ * Static class initializer called exactly once before any user-defined method is dispatched
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_IJParCSRVector__load"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+void
+impl_bHYPRE_IJParCSRVector__load(
+  void)
+{
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRVector._load) */
+  /* Insert-Code-Here {bHYPRE.IJParCSRVector._load} (static class initializer method) */
+  /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRVector._load) */
+}
+/*
  * Class constructor called when the class is created.
  */
 
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_IJParCSRVector__ctor"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 void
 impl_bHYPRE_IJParCSRVector__ctor(
-  /*in*/ bHYPRE_IJParCSRVector self)
+  /* in */ bHYPRE_IJParCSRVector self)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRVector._ctor) */
   /* Insert the implementation of the constructor method here... */
@@ -65,9 +86,12 @@ impl_bHYPRE_IJParCSRVector__ctor(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_IJParCSRVector__dtor"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 void
 impl_bHYPRE_IJParCSRVector__dtor(
-  /*in*/ bHYPRE_IJParCSRVector self)
+  /* in */ bHYPRE_IJParCSRVector self)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRVector._dtor) */
   /* Insert the implementation of the destructor method here... */
@@ -92,9 +116,12 @@ impl_bHYPRE_IJParCSRVector__dtor(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_IJParCSRVector_Clear"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_IJParCSRVector_Clear(
-  /*in*/ bHYPRE_IJParCSRVector self)
+  /* in */ bHYPRE_IJParCSRVector self)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRVector.Clear) */
   /* Insert the implementation of the Clear method here... */
@@ -124,9 +151,13 @@ impl_bHYPRE_IJParCSRVector_Clear(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_IJParCSRVector_Copy"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_IJParCSRVector_Copy(
-  /*in*/ bHYPRE_IJParCSRVector self, /*in*/ bHYPRE_Vector x)
+  /* in */ bHYPRE_IJParCSRVector self,
+  /* in */ bHYPRE_Vector x)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRVector.Copy) */
   /* Insert the implementation of the Copy method here... */
@@ -193,9 +224,13 @@ impl_bHYPRE_IJParCSRVector_Copy(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_IJParCSRVector_Clone"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_IJParCSRVector_Clone(
-  /*in*/ bHYPRE_IJParCSRVector self, /*out*/ bHYPRE_Vector* x)
+  /* in */ bHYPRE_IJParCSRVector self,
+  /* out */ bHYPRE_Vector* x)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRVector.Clone) */
   /* Insert the implementation of the Clone method here... */
@@ -261,9 +296,13 @@ impl_bHYPRE_IJParCSRVector_Clone(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_IJParCSRVector_Scale"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_IJParCSRVector_Scale(
-  /*in*/ bHYPRE_IJParCSRVector self, /*in*/ double a)
+  /* in */ bHYPRE_IJParCSRVector self,
+  /* in */ double a)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRVector.Scale) */
   /* Insert the implementation of the Scale method here... */
@@ -292,9 +331,14 @@ impl_bHYPRE_IJParCSRVector_Scale(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_IJParCSRVector_Dot"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_IJParCSRVector_Dot(
-  /*in*/ bHYPRE_IJParCSRVector self, /*in*/ bHYPRE_Vector x, /*out*/ double* d)
+  /* in */ bHYPRE_IJParCSRVector self,
+  /* in */ bHYPRE_Vector x,
+  /* out */ double* d)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRVector.Dot) */
   /* Insert the implementation of the Dot method here... */
@@ -344,9 +388,14 @@ impl_bHYPRE_IJParCSRVector_Dot(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_IJParCSRVector_Axpy"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_IJParCSRVector_Axpy(
-  /*in*/ bHYPRE_IJParCSRVector self, /*in*/ double a, /*in*/ bHYPRE_Vector x)
+  /* in */ bHYPRE_IJParCSRVector self,
+  /* in */ double a,
+  /* in */ bHYPRE_Vector x)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRVector.Axpy) */
   /* Insert the implementation of the Axpy method here... */
@@ -397,16 +446,20 @@ impl_bHYPRE_IJParCSRVector_Axpy(
 }
 
 /*
- * Set the MPI Communicator.
+ * Set the MPI Communicator.  DEPRECATED, Use Create()
  * 
  */
 
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_IJParCSRVector_SetCommunicator"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_IJParCSRVector_SetCommunicator(
-  /*in*/ bHYPRE_IJParCSRVector self, /*in*/ void* mpi_comm)
+  /* in */ bHYPRE_IJParCSRVector self,
+  /* in */ void* mpi_comm)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRVector.SetCommunicator) */
   /* Insert the implementation of the SetCommunicator method here... */
@@ -429,9 +482,12 @@ impl_bHYPRE_IJParCSRVector_SetCommunicator(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_IJParCSRVector_Initialize"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_IJParCSRVector_Initialize(
-  /*in*/ bHYPRE_IJParCSRVector self)
+  /* in */ bHYPRE_IJParCSRVector self)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRVector.Initialize) */
   /* Insert the implementation of the Initialize method here... */
@@ -459,9 +515,12 @@ impl_bHYPRE_IJParCSRVector_Initialize(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_IJParCSRVector_Assemble"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_IJParCSRVector_Assemble(
-  /*in*/ bHYPRE_IJParCSRVector self)
+  /* in */ bHYPRE_IJParCSRVector self)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRVector.Assemble) */
   /* Insert the implementation of the Assemble method here... */
@@ -494,9 +553,13 @@ impl_bHYPRE_IJParCSRVector_Assemble(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_IJParCSRVector_GetObject"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_IJParCSRVector_GetObject(
-  /*in*/ bHYPRE_IJParCSRVector self, /*out*/ sidl_BaseInterface* A)
+  /* in */ bHYPRE_IJParCSRVector self,
+  /* out */ sidl_BaseInterface* A)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRVector.GetObject) */
   /* Insert the implementation of the GetObject method here... */
@@ -525,10 +588,14 @@ impl_bHYPRE_IJParCSRVector_GetObject(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_IJParCSRVector_SetLocalRange"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_IJParCSRVector_SetLocalRange(
-  /*in*/ bHYPRE_IJParCSRVector self, /*in*/ int32_t jlower,
-    /*in*/ int32_t jupper)
+  /* in */ bHYPRE_IJParCSRVector self,
+  /* in */ int32_t jlower,
+  /* in */ int32_t jupper)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRVector.SetLocalRange) */
   /* Insert the implementation of the SetLocalRange method here... */
@@ -564,11 +631,15 @@ impl_bHYPRE_IJParCSRVector_SetLocalRange(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_IJParCSRVector_SetValues"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_IJParCSRVector_SetValues(
-  /*in*/ bHYPRE_IJParCSRVector self, /*in*/ int32_t nvalues,
-    /*in*/ struct sidl_int__array* indices,
-    /*in*/ struct sidl_double__array* values)
+  /* in */ bHYPRE_IJParCSRVector self,
+  /* in */ int32_t nvalues,
+  /* in */ struct sidl_int__array* indices,
+  /* in */ struct sidl_double__array* values)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRVector.SetValues) */
   /* Insert the implementation of the SetValues method here... */
@@ -598,11 +669,15 @@ impl_bHYPRE_IJParCSRVector_SetValues(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_IJParCSRVector_AddToValues"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_IJParCSRVector_AddToValues(
-  /*in*/ bHYPRE_IJParCSRVector self, /*in*/ int32_t nvalues,
-    /*in*/ struct sidl_int__array* indices,
-    /*in*/ struct sidl_double__array* values)
+  /* in */ bHYPRE_IJParCSRVector self,
+  /* in */ int32_t nvalues,
+  /* in */ struct sidl_int__array* indices,
+  /* in */ struct sidl_double__array* values)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRVector.AddToValues) */
   /* Insert the implementation of the AddToValues method here... */
@@ -630,10 +705,14 @@ impl_bHYPRE_IJParCSRVector_AddToValues(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_IJParCSRVector_GetLocalRange"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_IJParCSRVector_GetLocalRange(
-  /*in*/ bHYPRE_IJParCSRVector self, /*out*/ int32_t* jlower,
-    /*out*/ int32_t* jupper)
+  /* in */ bHYPRE_IJParCSRVector self,
+  /* out */ int32_t* jlower,
+  /* out */ int32_t* jupper)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRVector.GetLocalRange) */
   /* Insert the implementation of the GetLocalRange method here... */
@@ -662,11 +741,15 @@ impl_bHYPRE_IJParCSRVector_GetLocalRange(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_IJParCSRVector_GetValues"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_IJParCSRVector_GetValues(
-  /*in*/ bHYPRE_IJParCSRVector self, /*in*/ int32_t nvalues,
-    /*in*/ struct sidl_int__array* indices,
-    /*inout*/ struct sidl_double__array** values)
+  /* in */ bHYPRE_IJParCSRVector self,
+  /* in */ int32_t nvalues,
+  /* in */ struct sidl_int__array* indices,
+  /* inout */ struct sidl_double__array** values)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRVector.GetValues) */
   /* Insert the implementation of the GetValues method here... */
@@ -694,9 +777,13 @@ impl_bHYPRE_IJParCSRVector_GetValues(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_IJParCSRVector_Print"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_IJParCSRVector_Print(
-  /*in*/ bHYPRE_IJParCSRVector self, /*in*/ const char* filename)
+  /* in */ bHYPRE_IJParCSRVector self,
+  /* in */ const char* filename)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRVector.Print) */
   /* Insert the implementation of the Print method here... */
@@ -723,10 +810,14 @@ impl_bHYPRE_IJParCSRVector_Print(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_IJParCSRVector_Read"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_IJParCSRVector_Read(
-  /*in*/ bHYPRE_IJParCSRVector self, /*in*/ const char* filename,
-    /*in*/ void* comm)
+  /* in */ bHYPRE_IJParCSRVector self,
+  /* in */ const char* filename,
+  /* in */ void* comm)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRVector.Read) */
   /* Insert the implementation of the Read method here... */
@@ -748,4 +839,68 @@ impl_bHYPRE_IJParCSRVector_Read(
    return( ierr );
 
   /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRVector.Read) */
+}
+/* Babel internal methods, Users should not edit below this line. */
+struct bHYPRE_IJParCSRVector__object* 
+  impl_bHYPRE_IJParCSRVector_fconnect_bHYPRE_IJParCSRVector(char* url,
+  sidl_BaseInterface *_ex) {
+  return bHYPRE_IJParCSRVector__connect(url, _ex);
+}
+char * impl_bHYPRE_IJParCSRVector_fgetURL_bHYPRE_IJParCSRVector(struct 
+  bHYPRE_IJParCSRVector__object* obj) {
+  return bHYPRE_IJParCSRVector__getURL(obj);
+}
+struct sidl_ClassInfo__object* 
+  impl_bHYPRE_IJParCSRVector_fconnect_sidl_ClassInfo(char* url,
+  sidl_BaseInterface *_ex) {
+  return sidl_ClassInfo__connect(url, _ex);
+}
+char * impl_bHYPRE_IJParCSRVector_fgetURL_sidl_ClassInfo(struct 
+  sidl_ClassInfo__object* obj) {
+  return sidl_ClassInfo__getURL(obj);
+}
+struct bHYPRE_IJBuildVector__object* 
+  impl_bHYPRE_IJParCSRVector_fconnect_bHYPRE_IJBuildVector(char* url,
+  sidl_BaseInterface *_ex) {
+  return bHYPRE_IJBuildVector__connect(url, _ex);
+}
+char * impl_bHYPRE_IJParCSRVector_fgetURL_bHYPRE_IJBuildVector(struct 
+  bHYPRE_IJBuildVector__object* obj) {
+  return bHYPRE_IJBuildVector__getURL(obj);
+}
+struct bHYPRE_Vector__object* 
+  impl_bHYPRE_IJParCSRVector_fconnect_bHYPRE_Vector(char* url,
+  sidl_BaseInterface *_ex) {
+  return bHYPRE_Vector__connect(url, _ex);
+}
+char * impl_bHYPRE_IJParCSRVector_fgetURL_bHYPRE_Vector(struct 
+  bHYPRE_Vector__object* obj) {
+  return bHYPRE_Vector__getURL(obj);
+}
+struct bHYPRE_ProblemDefinition__object* 
+  impl_bHYPRE_IJParCSRVector_fconnect_bHYPRE_ProblemDefinition(char* url,
+  sidl_BaseInterface *_ex) {
+  return bHYPRE_ProblemDefinition__connect(url, _ex);
+}
+char * impl_bHYPRE_IJParCSRVector_fgetURL_bHYPRE_ProblemDefinition(struct 
+  bHYPRE_ProblemDefinition__object* obj) {
+  return bHYPRE_ProblemDefinition__getURL(obj);
+}
+struct sidl_BaseInterface__object* 
+  impl_bHYPRE_IJParCSRVector_fconnect_sidl_BaseInterface(char* url,
+  sidl_BaseInterface *_ex) {
+  return sidl_BaseInterface__connect(url, _ex);
+}
+char * impl_bHYPRE_IJParCSRVector_fgetURL_sidl_BaseInterface(struct 
+  sidl_BaseInterface__object* obj) {
+  return sidl_BaseInterface__getURL(obj);
+}
+struct sidl_BaseClass__object* 
+  impl_bHYPRE_IJParCSRVector_fconnect_sidl_BaseClass(char* url,
+  sidl_BaseInterface *_ex) {
+  return sidl_BaseClass__connect(url, _ex);
+}
+char * impl_bHYPRE_IJParCSRVector_fgetURL_sidl_BaseClass(struct 
+  sidl_BaseClass__object* obj) {
+  return sidl_BaseClass__getURL(obj);
 }

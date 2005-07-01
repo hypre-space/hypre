@@ -2,12 +2,12 @@
  * File:          bHYPRE_StructBuildVector.h
  * Symbol:        bHYPRE.StructBuildVector-v1.0.0
  * Symbol Type:   interface
- * Babel Version: 0.9.8
+ * Babel Version: 0.10.4
  * Description:   Client-side glue code for bHYPRE.StructBuildVector
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.9.8
+ * babel-version = 0.10.4
  */
 
 #ifndef included_bHYPRE_StructBuildVector_h
@@ -37,94 +37,105 @@ typedef struct bHYPRE_StructBuildVector__object* bHYPRE_StructBuildVector;
 #include "sidl_ClassInfo.h"
 #endif
 
+#ifndef included_sidl_io_Serializer_h
+#include "sidl_io_Serializer.h"
+#endif
+#ifndef included_sidl_io_Deserializer_h
+#include "sidl_io_Deserializer.h"
+#endif
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+/**
+ * RMI connector function for the class.
+ */
+bHYPRE_StructBuildVector
+bHYPRE_StructBuildVector__connect(const char *, sidl_BaseInterface *_ex);
 void
 bHYPRE_StructBuildVector_addRef(
-  /*in*/ bHYPRE_StructBuildVector self);
+  /* in */ bHYPRE_StructBuildVector self);
 
 void
 bHYPRE_StructBuildVector_deleteRef(
-  /*in*/ bHYPRE_StructBuildVector self);
+  /* in */ bHYPRE_StructBuildVector self);
 
 sidl_bool
 bHYPRE_StructBuildVector_isSame(
-  /*in*/ bHYPRE_StructBuildVector self,
-  /*in*/ sidl_BaseInterface iobj);
+  /* in */ bHYPRE_StructBuildVector self,
+  /* in */ sidl_BaseInterface iobj);
 
 sidl_BaseInterface
 bHYPRE_StructBuildVector_queryInt(
-  /*in*/ bHYPRE_StructBuildVector self,
-  /*in*/ const char* name);
+  /* in */ bHYPRE_StructBuildVector self,
+  /* in */ const char* name);
 
 sidl_bool
 bHYPRE_StructBuildVector_isType(
-  /*in*/ bHYPRE_StructBuildVector self,
-  /*in*/ const char* name);
+  /* in */ bHYPRE_StructBuildVector self,
+  /* in */ const char* name);
 
 sidl_ClassInfo
 bHYPRE_StructBuildVector_getClassInfo(
-  /*in*/ bHYPRE_StructBuildVector self);
+  /* in */ bHYPRE_StructBuildVector self);
 
 int32_t
 bHYPRE_StructBuildVector_SetCommunicator(
-  /*in*/ bHYPRE_StructBuildVector self,
-  /*in*/ void* mpi_comm);
+  /* in */ bHYPRE_StructBuildVector self,
+  /* in */ void* mpi_comm);
 
 int32_t
 bHYPRE_StructBuildVector_Initialize(
-  /*in*/ bHYPRE_StructBuildVector self);
+  /* in */ bHYPRE_StructBuildVector self);
 
 int32_t
 bHYPRE_StructBuildVector_Assemble(
-  /*in*/ bHYPRE_StructBuildVector self);
+  /* in */ bHYPRE_StructBuildVector self);
 
 int32_t
 bHYPRE_StructBuildVector_GetObject(
-  /*in*/ bHYPRE_StructBuildVector self,
-  /*out*/ sidl_BaseInterface* A);
+  /* in */ bHYPRE_StructBuildVector self,
+  /* out */ sidl_BaseInterface* A);
 
 /**
  * Method:  SetGrid[]
  */
 int32_t
 bHYPRE_StructBuildVector_SetGrid(
-  /*in*/ bHYPRE_StructBuildVector self,
-  /*in*/ bHYPRE_StructGrid grid);
+  /* in */ bHYPRE_StructBuildVector self,
+  /* in */ bHYPRE_StructGrid grid);
 
 /**
  * Method:  SetNumGhost[]
  */
 int32_t
 bHYPRE_StructBuildVector_SetNumGhost(
-  /*in*/ bHYPRE_StructBuildVector self,
-  /*in*/ struct sidl_int__array* num_ghost);
+  /* in */ bHYPRE_StructBuildVector self,
+  /* in */ struct sidl_int__array* num_ghost);
 
 /**
  * Method:  SetValue[]
  */
 int32_t
 bHYPRE_StructBuildVector_SetValue(
-  /*in*/ bHYPRE_StructBuildVector self,
-  /*in*/ struct sidl_int__array* grid_index,
-  /*in*/ double value);
+  /* in */ bHYPRE_StructBuildVector self,
+  /* in */ struct sidl_int__array* grid_index,
+  /* in */ double value);
 
 /**
  * Method:  SetBoxValues[]
  */
 int32_t
 bHYPRE_StructBuildVector_SetBoxValues(
-  /*in*/ bHYPRE_StructBuildVector self,
-  /*in*/ struct sidl_int__array* ilower,
-  /*in*/ struct sidl_int__array* iupper,
-  /*in*/ struct sidl_double__array* values);
+  /* in */ bHYPRE_StructBuildVector self,
+  /* in */ struct sidl_int__array* ilower,
+  /* in */ struct sidl_int__array* iupper,
+  /* in */ struct sidl_double__array* values);
 
 /**
  * Cast method for interface and class type conversions.
  */
-bHYPRE_StructBuildVector
+struct bHYPRE_StructBuildVector__object*
 bHYPRE_StructBuildVector__cast(
   void* obj);
 
@@ -136,6 +147,29 @@ bHYPRE_StructBuildVector__cast2(
   void* obj,
   const char* type);
 
+/**
+ * Select and execute a method by name
+ */
+void
+bHYPRE_StructBuildVector__exec(
+  /* in */ bHYPRE_StructBuildVector self,
+  /* in */ const char* methodName,
+  /* in */ sidl_io_Deserializer inArgs,
+  /* in */ sidl_io_Serializer outArgs);
+/**
+ * static Exec method for reflexity.
+ */
+void
+bHYPRE_StructBuildVector__sexec(
+  /* in */ const char* methodName,
+  /* in */ sidl_io_Deserializer inArgs,
+  /* in */ sidl_io_Serializer outArgs);
+/**
+ * Get the URL of the Implementation of this object (for RMI)
+ */
+char*
+bHYPRE_StructBuildVector__getURL(
+  /* in */ bHYPRE_StructBuildVector self);
 struct bHYPRE_StructBuildVector__array*
 bHYPRE_StructBuildVector__array_createCol(
   int32_t       dimen,

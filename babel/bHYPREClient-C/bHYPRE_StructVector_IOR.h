@@ -2,12 +2,12 @@
  * File:          bHYPRE_StructVector_IOR.h
  * Symbol:        bHYPRE.StructVector-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.9.8
+ * Babel Version: 0.10.4
  * Description:   Intermediate Object Representation for bHYPRE.StructVector
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.9.8
+ * babel-version = 0.10.4
  */
 
 #ifndef included_bHYPRE_StructVector_IOR_h
@@ -43,9 +43,6 @@ struct bHYPRE_StructVector__object;
 extern struct bHYPRE_StructVector__object*
 bHYPRE_StructVector__new(void);
 
-extern struct bHYPRE_StructVector__object*
-bHYPRE_StructVector__remote(const char *url);
-
 extern void bHYPRE_StructVector__init(
   struct bHYPRE_StructVector__object* self);
 extern void bHYPRE_StructVector__fini(
@@ -62,6 +59,10 @@ struct sidl_BaseInterface__array;
 struct sidl_BaseInterface__object;
 struct sidl_ClassInfo__array;
 struct sidl_ClassInfo__object;
+struct sidl_io_Deserializer__array;
+struct sidl_io_Deserializer__object;
+struct sidl_io_Serializer__array;
+struct sidl_io_Serializer__object;
 
 /*
  * Declare the method entry point vector.
@@ -70,78 +71,85 @@ struct sidl_ClassInfo__object;
 struct bHYPRE_StructVector__epv {
   /* Implicit builtin methods */
   void* (*f__cast)(
-    struct bHYPRE_StructVector__object* self,
-    const char* name);
+    /* in */ struct bHYPRE_StructVector__object* self,
+    /* in */ const char* name);
   void (*f__delete)(
-    struct bHYPRE_StructVector__object* self);
+    /* in */ struct bHYPRE_StructVector__object* self);
+  void (*f__exec)(
+    /* in */ struct bHYPRE_StructVector__object* self,
+    /* in */ const char* methodName,
+    /* in */ struct sidl_io_Deserializer__object* inArgs,
+    /* in */ struct sidl_io_Serializer__object* outArgs);
+  char* (*f__getURL)(
+    /* in */ struct bHYPRE_StructVector__object* self);
   void (*f__ctor)(
-    struct bHYPRE_StructVector__object* self);
+    /* in */ struct bHYPRE_StructVector__object* self);
   void (*f__dtor)(
-    struct bHYPRE_StructVector__object* self);
-  /* Methods introduced in sidl.BaseInterface-v0.9.0 */
+    /* in */ struct bHYPRE_StructVector__object* self);
+  /* Methods introduced in sidl.BaseInterface-v0.9.3 */
   void (*f_addRef)(
-    struct bHYPRE_StructVector__object* self);
+    /* in */ struct bHYPRE_StructVector__object* self);
   void (*f_deleteRef)(
-    struct bHYPRE_StructVector__object* self);
+    /* in */ struct bHYPRE_StructVector__object* self);
   sidl_bool (*f_isSame)(
-    struct bHYPRE_StructVector__object* self,
-    struct sidl_BaseInterface__object* iobj);
+    /* in */ struct bHYPRE_StructVector__object* self,
+    /* in */ struct sidl_BaseInterface__object* iobj);
   struct sidl_BaseInterface__object* (*f_queryInt)(
-    struct bHYPRE_StructVector__object* self,
-    const char* name);
+    /* in */ struct bHYPRE_StructVector__object* self,
+    /* in */ const char* name);
   sidl_bool (*f_isType)(
-    struct bHYPRE_StructVector__object* self,
-    const char* name);
+    /* in */ struct bHYPRE_StructVector__object* self,
+    /* in */ const char* name);
   struct sidl_ClassInfo__object* (*f_getClassInfo)(
-    struct bHYPRE_StructVector__object* self);
-  /* Methods introduced in sidl.BaseClass-v0.9.0 */
+    /* in */ struct bHYPRE_StructVector__object* self);
+  /* Methods introduced in sidl.BaseClass-v0.9.3 */
   /* Methods introduced in bHYPRE.ProblemDefinition-v1.0.0 */
   int32_t (*f_SetCommunicator)(
-    struct bHYPRE_StructVector__object* self,
-    void* mpi_comm);
+    /* in */ struct bHYPRE_StructVector__object* self,
+    /* in */ void* mpi_comm);
   int32_t (*f_Initialize)(
-    struct bHYPRE_StructVector__object* self);
+    /* in */ struct bHYPRE_StructVector__object* self);
   int32_t (*f_Assemble)(
-    struct bHYPRE_StructVector__object* self);
+    /* in */ struct bHYPRE_StructVector__object* self);
   int32_t (*f_GetObject)(
-    struct bHYPRE_StructVector__object* self,
-    struct sidl_BaseInterface__object** A);
+    /* in */ struct bHYPRE_StructVector__object* self,
+    /* out */ struct sidl_BaseInterface__object** A);
   /* Methods introduced in bHYPRE.StructBuildVector-v1.0.0 */
   int32_t (*f_SetGrid)(
-    struct bHYPRE_StructVector__object* self,
-    struct bHYPRE_StructGrid__object* grid);
+    /* in */ struct bHYPRE_StructVector__object* self,
+    /* in */ struct bHYPRE_StructGrid__object* grid);
   int32_t (*f_SetNumGhost)(
-    struct bHYPRE_StructVector__object* self,
-    struct sidl_int__array* num_ghost);
+    /* in */ struct bHYPRE_StructVector__object* self,
+    /* in */ struct sidl_int__array* num_ghost);
   int32_t (*f_SetValue)(
-    struct bHYPRE_StructVector__object* self,
-    struct sidl_int__array* grid_index,
-    double value);
+    /* in */ struct bHYPRE_StructVector__object* self,
+    /* in */ struct sidl_int__array* grid_index,
+    /* in */ double value);
   int32_t (*f_SetBoxValues)(
-    struct bHYPRE_StructVector__object* self,
-    struct sidl_int__array* ilower,
-    struct sidl_int__array* iupper,
-    struct sidl_double__array* values);
+    /* in */ struct bHYPRE_StructVector__object* self,
+    /* in */ struct sidl_int__array* ilower,
+    /* in */ struct sidl_int__array* iupper,
+    /* in */ struct sidl_double__array* values);
   /* Methods introduced in bHYPRE.Vector-v1.0.0 */
   int32_t (*f_Clear)(
-    struct bHYPRE_StructVector__object* self);
+    /* in */ struct bHYPRE_StructVector__object* self);
   int32_t (*f_Copy)(
-    struct bHYPRE_StructVector__object* self,
-    struct bHYPRE_Vector__object* x);
+    /* in */ struct bHYPRE_StructVector__object* self,
+    /* in */ struct bHYPRE_Vector__object* x);
   int32_t (*f_Clone)(
-    struct bHYPRE_StructVector__object* self,
-    struct bHYPRE_Vector__object** x);
+    /* in */ struct bHYPRE_StructVector__object* self,
+    /* out */ struct bHYPRE_Vector__object** x);
   int32_t (*f_Scale)(
-    struct bHYPRE_StructVector__object* self,
-    double a);
+    /* in */ struct bHYPRE_StructVector__object* self,
+    /* in */ double a);
   int32_t (*f_Dot)(
-    struct bHYPRE_StructVector__object* self,
-    struct bHYPRE_Vector__object* x,
-    double* d);
+    /* in */ struct bHYPRE_StructVector__object* self,
+    /* in */ struct bHYPRE_Vector__object* x,
+    /* out */ double* d);
   int32_t (*f_Axpy)(
-    struct bHYPRE_StructVector__object* self,
-    double a,
-    struct bHYPRE_Vector__object* x);
+    /* in */ struct bHYPRE_StructVector__object* self,
+    /* in */ double a,
+    /* in */ struct bHYPRE_Vector__object* x);
   /* Methods introduced in bHYPRE.StructVector-v1.0.0 */
 };
 
@@ -162,10 +170,8 @@ struct bHYPRE_StructVector__external {
   struct bHYPRE_StructVector__object*
   (*createObject)(void);
 
-  struct bHYPRE_StructVector__object*
-  (*createRemote)(const char *url);
-
-struct sidl_BaseClass__epv*(*getSuperEPV)(void);};
+  struct sidl_BaseClass__epv*(*getSuperEPV)(void);
+};
 
 /*
  * This function returns a pointer to a static structure of
@@ -175,6 +181,54 @@ struct sidl_BaseClass__epv*(*getSuperEPV)(void);};
 
 const struct bHYPRE_StructVector__external*
 bHYPRE_StructVector__externals(void);
+
+struct bHYPRE_StructGrid__object* 
+  skel_bHYPRE_StructVector_fconnect_bHYPRE_StructGrid(char* url,
+  struct sidl_BaseInterface__object **_ex);
+char* skel_bHYPRE_StructVector_fgetURL_bHYPRE_StructGrid(struct 
+  bHYPRE_StructGrid__object* obj); 
+
+struct bHYPRE_StructBuildVector__object* 
+  skel_bHYPRE_StructVector_fconnect_bHYPRE_StructBuildVector(char* url,
+  struct sidl_BaseInterface__object **_ex);
+char* skel_bHYPRE_StructVector_fgetURL_bHYPRE_StructBuildVector(struct 
+  bHYPRE_StructBuildVector__object* obj); 
+
+struct sidl_ClassInfo__object* 
+  skel_bHYPRE_StructVector_fconnect_sidl_ClassInfo(char* url,
+  struct sidl_BaseInterface__object **_ex);
+char* skel_bHYPRE_StructVector_fgetURL_sidl_ClassInfo(struct 
+  sidl_ClassInfo__object* obj); 
+
+struct bHYPRE_Vector__object* 
+  skel_bHYPRE_StructVector_fconnect_bHYPRE_Vector(char* url,
+  struct sidl_BaseInterface__object **_ex);
+char* skel_bHYPRE_StructVector_fgetURL_bHYPRE_Vector(struct 
+  bHYPRE_Vector__object* obj); 
+
+struct bHYPRE_ProblemDefinition__object* 
+  skel_bHYPRE_StructVector_fconnect_bHYPRE_ProblemDefinition(char* url,
+  struct sidl_BaseInterface__object **_ex);
+char* skel_bHYPRE_StructVector_fgetURL_bHYPRE_ProblemDefinition(struct 
+  bHYPRE_ProblemDefinition__object* obj); 
+
+struct bHYPRE_StructVector__object* 
+  skel_bHYPRE_StructVector_fconnect_bHYPRE_StructVector(char* url,
+  struct sidl_BaseInterface__object **_ex);
+char* skel_bHYPRE_StructVector_fgetURL_bHYPRE_StructVector(struct 
+  bHYPRE_StructVector__object* obj); 
+
+struct sidl_BaseInterface__object* 
+  skel_bHYPRE_StructVector_fconnect_sidl_BaseInterface(char* url,
+  struct sidl_BaseInterface__object **_ex);
+char* skel_bHYPRE_StructVector_fgetURL_sidl_BaseInterface(struct 
+  sidl_BaseInterface__object* obj); 
+
+struct sidl_BaseClass__object* 
+  skel_bHYPRE_StructVector_fconnect_sidl_BaseClass(char* url,
+  struct sidl_BaseInterface__object **_ex);
+char* skel_bHYPRE_StructVector_fgetURL_sidl_BaseClass(struct 
+  sidl_BaseClass__object* obj); 
 
 #ifdef __cplusplus
 }

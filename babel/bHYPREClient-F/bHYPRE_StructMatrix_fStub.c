@@ -2,12 +2,12 @@
  * File:          bHYPRE_StructMatrix_fStub.c
  * Symbol:        bHYPRE.StructMatrix-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.9.8
+ * Babel Version: 0.10.4
  * Description:   Client-side glue code for bHYPRE.StructMatrix
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.9.8
+ * babel-version = 0.10.4
  */
 
 /*
@@ -36,10 +36,10 @@
 #endif
 #include "bHYPRE_StructMatrix_IOR.h"
 #include "bHYPRE_StructGrid_IOR.h"
-#include "sidl_BaseInterface_IOR.h"
-#include "bHYPRE_Vector_IOR.h"
 #include "sidl_ClassInfo_IOR.h"
+#include "bHYPRE_Vector_IOR.h"
 #include "bHYPRE_StructStencil_IOR.h"
+#include "sidl_BaseInterface_IOR.h"
 
 /*
  * Return pointer to internal IOR functions.
@@ -52,34 +52,9 @@ static const struct bHYPRE_StructMatrix__external* _getIOR(void)
 #ifdef SIDL_STATIC_LIBRARY
     _ior = bHYPRE_StructMatrix__externals();
 #else
-    sidl_DLL dll = sidl_DLL__create();
-    const struct bHYPRE_StructMatrix__external*(*dll_f)(void);
-    /* check global namespace for symbol first */
-    if (dll && sidl_DLL_loadLibrary(dll, "main:", TRUE, FALSE)) {
-      dll_f =
-        (const struct bHYPRE_StructMatrix__external*(*)(void)) 
-          sidl_DLL_lookupSymbol(
-          dll, "bHYPRE_StructMatrix__externals");
-      _ior = (dll_f ? (*dll_f)() : NULL);
-    }
-    if (dll) sidl_DLL_deleteRef(dll);
-    if (!_ior) {
-      dll = sidl_Loader_findLibrary("bHYPRE.StructMatrix",
-        "ior/impl", sidl_Scope_SCLSCOPE,
-        sidl_Resolve_SCLRESOLVE);
-      if (dll) {
-        dll_f =
-          (const struct bHYPRE_StructMatrix__external*(*)(void)) 
-            sidl_DLL_lookupSymbol(
-            dll, "bHYPRE_StructMatrix__externals");
-        _ior = (dll_f ? (*dll_f)() : NULL);
-        sidl_DLL_deleteRef(dll);
-      }
-    }
-    if (!_ior) {
-      fputs("Unable to find the implementation for bHYPRE.StructMatrix; please set SIDL_DLL_PATH\n", stderr);
-      exit(-1);
-    }
+    _ior = (struct 
+      bHYPRE_StructMatrix__external*)sidl_dynamicLoadIOR("bHYPRE.StructMatrix",
+      "bHYPRE_StructMatrix__externals") ;
 #endif
   }
   return _ior;
@@ -116,8 +91,7 @@ SIDLFortran77Symbol(bhypre_structmatrix__cast_f,BHYPRE_STRUCTMATRIX__CAST_F,bHYP
       *_base->d_epv->f__cast)(
       _base->d_object,
       "bHYPRE.StructMatrix");
-  }
-  else {
+  } else {
     *retval = 0;
   }
 }
@@ -348,7 +322,7 @@ SIDLFortran77Symbol(bhypre_structmatrix_getclassinfo_f,BHYPRE_STRUCTMATRIX_GETCL
 }
 
 /*
- * Set the MPI Communicator.
+ * Set the MPI Communicator.  DEPRECATED, Use Create()
  * 
  */
 
@@ -374,6 +348,367 @@ SIDLFortran77Symbol(bhypre_structmatrix_setcommunicator_f,BHYPRE_STRUCTMATRIX_SE
     (*(_epv->f_SetCommunicator))(
       _proxy_self,
       _proxy_mpi_comm
+    );
+}
+
+/*
+ * Prepare an object for setting coefficient values, whether for
+ * the first time or subsequently.
+ * 
+ */
+
+void
+SIDLFortran77Symbol(bhypre_structmatrix_initialize_f,BHYPRE_STRUCTMATRIX_INITIALIZE_F,bHYPRE_StructMatrix_Initialize_f)
+(
+  int64_t *self,
+  int32_t *retval
+)
+{
+  struct bHYPRE_StructMatrix__epv *_epv = NULL;
+  struct bHYPRE_StructMatrix__object* _proxy_self = NULL;
+  _proxy_self =
+    (struct bHYPRE_StructMatrix__object*)
+    (ptrdiff_t)(*self);
+  _epv = _proxy_self->d_epv;
+  *retval = 
+    (*(_epv->f_Initialize))(
+      _proxy_self
+    );
+}
+
+/*
+ * Finalize the construction of an object before using, either
+ * for the first time or on subsequent uses. {\tt Initialize}
+ * and {\tt Assemble} always appear in a matched set, with
+ * Initialize preceding Assemble. Values can only be set in
+ * between a call to Initialize and Assemble.
+ * 
+ */
+
+void
+SIDLFortran77Symbol(bhypre_structmatrix_assemble_f,BHYPRE_STRUCTMATRIX_ASSEMBLE_F,bHYPRE_StructMatrix_Assemble_f)
+(
+  int64_t *self,
+  int32_t *retval
+)
+{
+  struct bHYPRE_StructMatrix__epv *_epv = NULL;
+  struct bHYPRE_StructMatrix__object* _proxy_self = NULL;
+  _proxy_self =
+    (struct bHYPRE_StructMatrix__object*)
+    (ptrdiff_t)(*self);
+  _epv = _proxy_self->d_epv;
+  *retval = 
+    (*(_epv->f_Assemble))(
+      _proxy_self
+    );
+}
+
+/*
+ * The problem definition interface is a {\it builder} that
+ * creates an object that contains the problem definition
+ * information, e.g. a matrix. To perform subsequent operations
+ * with that object, it must be returned from the problem
+ * definition object. {\tt GetObject} performs this function.
+ * At compile time, the type of the returned object is unknown.
+ * Thus, the returned type is a sidl.BaseInterface.
+ * QueryInterface or Cast must be used on the returned object to
+ * convert it into a known type.
+ * 
+ */
+
+void
+SIDLFortran77Symbol(bhypre_structmatrix_getobject_f,BHYPRE_STRUCTMATRIX_GETOBJECT_F,bHYPRE_StructMatrix_GetObject_f)
+(
+  int64_t *self,
+  int64_t *A,
+  int32_t *retval
+)
+{
+  struct bHYPRE_StructMatrix__epv *_epv = NULL;
+  struct bHYPRE_StructMatrix__object* _proxy_self = NULL;
+  struct sidl_BaseInterface__object* _proxy_A = NULL;
+  _proxy_self =
+    (struct bHYPRE_StructMatrix__object*)
+    (ptrdiff_t)(*self);
+  _epv = _proxy_self->d_epv;
+  *retval = 
+    (*(_epv->f_GetObject))(
+      _proxy_self,
+      &_proxy_A
+    );
+  *A = (ptrdiff_t)_proxy_A;
+}
+
+/*
+ * Method:  SetGrid[]
+ */
+
+void
+SIDLFortran77Symbol(bhypre_structmatrix_setgrid_f,BHYPRE_STRUCTMATRIX_SETGRID_F,bHYPRE_StructMatrix_SetGrid_f)
+(
+  int64_t *self,
+  int64_t *grid,
+  int32_t *retval
+)
+{
+  struct bHYPRE_StructMatrix__epv *_epv = NULL;
+  struct bHYPRE_StructMatrix__object* _proxy_self = NULL;
+  struct bHYPRE_StructGrid__object* _proxy_grid = NULL;
+  _proxy_self =
+    (struct bHYPRE_StructMatrix__object*)
+    (ptrdiff_t)(*self);
+  _proxy_grid =
+    (struct bHYPRE_StructGrid__object*)
+    (ptrdiff_t)(*grid);
+  _epv = _proxy_self->d_epv;
+  *retval = 
+    (*(_epv->f_SetGrid))(
+      _proxy_self,
+      _proxy_grid
+    );
+}
+
+/*
+ * Method:  SetStencil[]
+ */
+
+void
+SIDLFortran77Symbol(bhypre_structmatrix_setstencil_f,BHYPRE_STRUCTMATRIX_SETSTENCIL_F,bHYPRE_StructMatrix_SetStencil_f)
+(
+  int64_t *self,
+  int64_t *stencil,
+  int32_t *retval
+)
+{
+  struct bHYPRE_StructMatrix__epv *_epv = NULL;
+  struct bHYPRE_StructMatrix__object* _proxy_self = NULL;
+  struct bHYPRE_StructStencil__object* _proxy_stencil = NULL;
+  _proxy_self =
+    (struct bHYPRE_StructMatrix__object*)
+    (ptrdiff_t)(*self);
+  _proxy_stencil =
+    (struct bHYPRE_StructStencil__object*)
+    (ptrdiff_t)(*stencil);
+  _epv = _proxy_self->d_epv;
+  *retval = 
+    (*(_epv->f_SetStencil))(
+      _proxy_self,
+      _proxy_stencil
+    );
+}
+
+/*
+ * Method:  SetValues[]
+ */
+
+void
+SIDLFortran77Symbol(bhypre_structmatrix_setvalues_f,BHYPRE_STRUCTMATRIX_SETVALUES_F,bHYPRE_StructMatrix_SetValues_f)
+(
+  int64_t *self,
+  int64_t *index,
+  int32_t *num_stencil_indices,
+  int64_t *stencil_indices,
+  int64_t *values,
+  int32_t *retval
+)
+{
+  struct bHYPRE_StructMatrix__epv *_epv = NULL;
+  struct bHYPRE_StructMatrix__object* _proxy_self = NULL;
+  struct sidl_int__array* _proxy_index = NULL;
+  struct sidl_int__array* _proxy_stencil_indices = NULL;
+  struct sidl_double__array* _proxy_values = NULL;
+  _proxy_self =
+    (struct bHYPRE_StructMatrix__object*)
+    (ptrdiff_t)(*self);
+  _proxy_index =
+    (struct sidl_int__array*)
+    (ptrdiff_t)(*index);
+  _proxy_stencil_indices =
+    (struct sidl_int__array*)
+    (ptrdiff_t)(*stencil_indices);
+  _proxy_values =
+    (struct sidl_double__array*)
+    (ptrdiff_t)(*values);
+  _epv = _proxy_self->d_epv;
+  *retval = 
+    (*(_epv->f_SetValues))(
+      _proxy_self,
+      _proxy_index,
+      *num_stencil_indices,
+      _proxy_stencil_indices,
+      _proxy_values
+    );
+}
+
+/*
+ * Method:  SetBoxValues[]
+ */
+
+void
+SIDLFortran77Symbol(bhypre_structmatrix_setboxvalues_f,BHYPRE_STRUCTMATRIX_SETBOXVALUES_F,bHYPRE_StructMatrix_SetBoxValues_f)
+(
+  int64_t *self,
+  int64_t *ilower,
+  int64_t *iupper,
+  int32_t *num_stencil_indices,
+  int64_t *stencil_indices,
+  int64_t *values,
+  int32_t *retval
+)
+{
+  struct bHYPRE_StructMatrix__epv *_epv = NULL;
+  struct bHYPRE_StructMatrix__object* _proxy_self = NULL;
+  struct sidl_int__array* _proxy_ilower = NULL;
+  struct sidl_int__array* _proxy_iupper = NULL;
+  struct sidl_int__array* _proxy_stencil_indices = NULL;
+  struct sidl_double__array* _proxy_values = NULL;
+  _proxy_self =
+    (struct bHYPRE_StructMatrix__object*)
+    (ptrdiff_t)(*self);
+  _proxy_ilower =
+    (struct sidl_int__array*)
+    (ptrdiff_t)(*ilower);
+  _proxy_iupper =
+    (struct sidl_int__array*)
+    (ptrdiff_t)(*iupper);
+  _proxy_stencil_indices =
+    (struct sidl_int__array*)
+    (ptrdiff_t)(*stencil_indices);
+  _proxy_values =
+    (struct sidl_double__array*)
+    (ptrdiff_t)(*values);
+  _epv = _proxy_self->d_epv;
+  *retval = 
+    (*(_epv->f_SetBoxValues))(
+      _proxy_self,
+      _proxy_ilower,
+      _proxy_iupper,
+      *num_stencil_indices,
+      _proxy_stencil_indices,
+      _proxy_values
+    );
+}
+
+/*
+ * Method:  SetNumGhost[]
+ */
+
+void
+SIDLFortran77Symbol(bhypre_structmatrix_setnumghost_f,BHYPRE_STRUCTMATRIX_SETNUMGHOST_F,bHYPRE_StructMatrix_SetNumGhost_f)
+(
+  int64_t *self,
+  int64_t *num_ghost,
+  int32_t *retval
+)
+{
+  struct bHYPRE_StructMatrix__epv *_epv = NULL;
+  struct bHYPRE_StructMatrix__object* _proxy_self = NULL;
+  struct sidl_int__array* _proxy_num_ghost = NULL;
+  _proxy_self =
+    (struct bHYPRE_StructMatrix__object*)
+    (ptrdiff_t)(*self);
+  _proxy_num_ghost =
+    (struct sidl_int__array*)
+    (ptrdiff_t)(*num_ghost);
+  _epv = _proxy_self->d_epv;
+  *retval = 
+    (*(_epv->f_SetNumGhost))(
+      _proxy_self,
+      _proxy_num_ghost
+    );
+}
+
+/*
+ * Method:  SetSymmetric[]
+ */
+
+void
+SIDLFortran77Symbol(bhypre_structmatrix_setsymmetric_f,BHYPRE_STRUCTMATRIX_SETSYMMETRIC_F,bHYPRE_StructMatrix_SetSymmetric_f)
+(
+  int64_t *self,
+  int32_t *symmetric,
+  int32_t *retval
+)
+{
+  struct bHYPRE_StructMatrix__epv *_epv = NULL;
+  struct bHYPRE_StructMatrix__object* _proxy_self = NULL;
+  _proxy_self =
+    (struct bHYPRE_StructMatrix__object*)
+    (ptrdiff_t)(*self);
+  _epv = _proxy_self->d_epv;
+  *retval = 
+    (*(_epv->f_SetSymmetric))(
+      _proxy_self,
+      *symmetric
+    );
+}
+
+/*
+ * Method:  SetConstantEntries[]
+ */
+
+void
+SIDLFortran77Symbol(bhypre_structmatrix_setconstantentries_f,BHYPRE_STRUCTMATRIX_SETCONSTANTENTRIES_F,bHYPRE_StructMatrix_SetConstantEntries_f)
+(
+  int64_t *self,
+  int32_t *num_stencil_constant_points,
+  int64_t *stencil_constant_points,
+  int32_t *retval
+)
+{
+  struct bHYPRE_StructMatrix__epv *_epv = NULL;
+  struct bHYPRE_StructMatrix__object* _proxy_self = NULL;
+  struct sidl_int__array* _proxy_stencil_constant_points = NULL;
+  _proxy_self =
+    (struct bHYPRE_StructMatrix__object*)
+    (ptrdiff_t)(*self);
+  _proxy_stencil_constant_points =
+    (struct sidl_int__array*)
+    (ptrdiff_t)(*stencil_constant_points);
+  _epv = _proxy_self->d_epv;
+  *retval = 
+    (*(_epv->f_SetConstantEntries))(
+      _proxy_self,
+      *num_stencil_constant_points,
+      _proxy_stencil_constant_points
+    );
+}
+
+/*
+ * Method:  SetConstantValues[]
+ */
+
+void
+SIDLFortran77Symbol(bhypre_structmatrix_setconstantvalues_f,BHYPRE_STRUCTMATRIX_SETCONSTANTVALUES_F,bHYPRE_StructMatrix_SetConstantValues_f)
+(
+  int64_t *self,
+  int32_t *num_stencil_indices,
+  int64_t *stencil_indices,
+  int64_t *values,
+  int32_t *retval
+)
+{
+  struct bHYPRE_StructMatrix__epv *_epv = NULL;
+  struct bHYPRE_StructMatrix__object* _proxy_self = NULL;
+  struct sidl_int__array* _proxy_stencil_indices = NULL;
+  struct sidl_double__array* _proxy_values = NULL;
+  _proxy_self =
+    (struct bHYPRE_StructMatrix__object*)
+    (ptrdiff_t)(*self);
+  _proxy_stencil_indices =
+    (struct sidl_int__array*)
+    (ptrdiff_t)(*stencil_indices);
+  _proxy_values =
+    (struct sidl_double__array*)
+    (ptrdiff_t)(*values);
+  _epv = _proxy_self->d_epv;
+  *retval = 
+    (*(_epv->f_SetConstantValues))(
+      _proxy_self,
+      *num_stencil_indices,
+      _proxy_stencil_indices,
+      _proxy_values
     );
 }
 
@@ -787,367 +1122,6 @@ SIDLFortran77Symbol(bhypre_structmatrix_apply_f,BHYPRE_STRUCTMATRIX_APPLY_F,bHYP
       &_proxy_x
     );
   *x = (ptrdiff_t)_proxy_x;
-}
-
-/*
- * Prepare an object for setting coefficient values, whether for
- * the first time or subsequently.
- * 
- */
-
-void
-SIDLFortran77Symbol(bhypre_structmatrix_initialize_f,BHYPRE_STRUCTMATRIX_INITIALIZE_F,bHYPRE_StructMatrix_Initialize_f)
-(
-  int64_t *self,
-  int32_t *retval
-)
-{
-  struct bHYPRE_StructMatrix__epv *_epv = NULL;
-  struct bHYPRE_StructMatrix__object* _proxy_self = NULL;
-  _proxy_self =
-    (struct bHYPRE_StructMatrix__object*)
-    (ptrdiff_t)(*self);
-  _epv = _proxy_self->d_epv;
-  *retval = 
-    (*(_epv->f_Initialize))(
-      _proxy_self
-    );
-}
-
-/*
- * Finalize the construction of an object before using, either
- * for the first time or on subsequent uses. {\tt Initialize}
- * and {\tt Assemble} always appear in a matched set, with
- * Initialize preceding Assemble. Values can only be set in
- * between a call to Initialize and Assemble.
- * 
- */
-
-void
-SIDLFortran77Symbol(bhypre_structmatrix_assemble_f,BHYPRE_STRUCTMATRIX_ASSEMBLE_F,bHYPRE_StructMatrix_Assemble_f)
-(
-  int64_t *self,
-  int32_t *retval
-)
-{
-  struct bHYPRE_StructMatrix__epv *_epv = NULL;
-  struct bHYPRE_StructMatrix__object* _proxy_self = NULL;
-  _proxy_self =
-    (struct bHYPRE_StructMatrix__object*)
-    (ptrdiff_t)(*self);
-  _epv = _proxy_self->d_epv;
-  *retval = 
-    (*(_epv->f_Assemble))(
-      _proxy_self
-    );
-}
-
-/*
- * The problem definition interface is a {\it builder} that
- * creates an object that contains the problem definition
- * information, e.g. a matrix. To perform subsequent operations
- * with that object, it must be returned from the problem
- * definition object. {\tt GetObject} performs this function.
- * At compile time, the type of the returned object is unknown.
- * Thus, the returned type is a sidl.BaseInterface.
- * QueryInterface or Cast must be used on the returned object to
- * convert it into a known type.
- * 
- */
-
-void
-SIDLFortran77Symbol(bhypre_structmatrix_getobject_f,BHYPRE_STRUCTMATRIX_GETOBJECT_F,bHYPRE_StructMatrix_GetObject_f)
-(
-  int64_t *self,
-  int64_t *A,
-  int32_t *retval
-)
-{
-  struct bHYPRE_StructMatrix__epv *_epv = NULL;
-  struct bHYPRE_StructMatrix__object* _proxy_self = NULL;
-  struct sidl_BaseInterface__object* _proxy_A = NULL;
-  _proxy_self =
-    (struct bHYPRE_StructMatrix__object*)
-    (ptrdiff_t)(*self);
-  _epv = _proxy_self->d_epv;
-  *retval = 
-    (*(_epv->f_GetObject))(
-      _proxy_self,
-      &_proxy_A
-    );
-  *A = (ptrdiff_t)_proxy_A;
-}
-
-/*
- * Method:  SetGrid[]
- */
-
-void
-SIDLFortran77Symbol(bhypre_structmatrix_setgrid_f,BHYPRE_STRUCTMATRIX_SETGRID_F,bHYPRE_StructMatrix_SetGrid_f)
-(
-  int64_t *self,
-  int64_t *grid,
-  int32_t *retval
-)
-{
-  struct bHYPRE_StructMatrix__epv *_epv = NULL;
-  struct bHYPRE_StructMatrix__object* _proxy_self = NULL;
-  struct bHYPRE_StructGrid__object* _proxy_grid = NULL;
-  _proxy_self =
-    (struct bHYPRE_StructMatrix__object*)
-    (ptrdiff_t)(*self);
-  _proxy_grid =
-    (struct bHYPRE_StructGrid__object*)
-    (ptrdiff_t)(*grid);
-  _epv = _proxy_self->d_epv;
-  *retval = 
-    (*(_epv->f_SetGrid))(
-      _proxy_self,
-      _proxy_grid
-    );
-}
-
-/*
- * Method:  SetStencil[]
- */
-
-void
-SIDLFortran77Symbol(bhypre_structmatrix_setstencil_f,BHYPRE_STRUCTMATRIX_SETSTENCIL_F,bHYPRE_StructMatrix_SetStencil_f)
-(
-  int64_t *self,
-  int64_t *stencil,
-  int32_t *retval
-)
-{
-  struct bHYPRE_StructMatrix__epv *_epv = NULL;
-  struct bHYPRE_StructMatrix__object* _proxy_self = NULL;
-  struct bHYPRE_StructStencil__object* _proxy_stencil = NULL;
-  _proxy_self =
-    (struct bHYPRE_StructMatrix__object*)
-    (ptrdiff_t)(*self);
-  _proxy_stencil =
-    (struct bHYPRE_StructStencil__object*)
-    (ptrdiff_t)(*stencil);
-  _epv = _proxy_self->d_epv;
-  *retval = 
-    (*(_epv->f_SetStencil))(
-      _proxy_self,
-      _proxy_stencil
-    );
-}
-
-/*
- * Method:  SetValues[]
- */
-
-void
-SIDLFortran77Symbol(bhypre_structmatrix_setvalues_f,BHYPRE_STRUCTMATRIX_SETVALUES_F,bHYPRE_StructMatrix_SetValues_f)
-(
-  int64_t *self,
-  int64_t *index,
-  int32_t *num_stencil_indices,
-  int64_t *stencil_indices,
-  int64_t *values,
-  int32_t *retval
-)
-{
-  struct bHYPRE_StructMatrix__epv *_epv = NULL;
-  struct bHYPRE_StructMatrix__object* _proxy_self = NULL;
-  struct sidl_int__array* _proxy_index = NULL;
-  struct sidl_int__array* _proxy_stencil_indices = NULL;
-  struct sidl_double__array* _proxy_values = NULL;
-  _proxy_self =
-    (struct bHYPRE_StructMatrix__object*)
-    (ptrdiff_t)(*self);
-  _proxy_index =
-    (struct sidl_int__array*)
-    (ptrdiff_t)(*index);
-  _proxy_stencil_indices =
-    (struct sidl_int__array*)
-    (ptrdiff_t)(*stencil_indices);
-  _proxy_values =
-    (struct sidl_double__array*)
-    (ptrdiff_t)(*values);
-  _epv = _proxy_self->d_epv;
-  *retval = 
-    (*(_epv->f_SetValues))(
-      _proxy_self,
-      _proxy_index,
-      *num_stencil_indices,
-      _proxy_stencil_indices,
-      _proxy_values
-    );
-}
-
-/*
- * Method:  SetBoxValues[]
- */
-
-void
-SIDLFortran77Symbol(bhypre_structmatrix_setboxvalues_f,BHYPRE_STRUCTMATRIX_SETBOXVALUES_F,bHYPRE_StructMatrix_SetBoxValues_f)
-(
-  int64_t *self,
-  int64_t *ilower,
-  int64_t *iupper,
-  int32_t *num_stencil_indices,
-  int64_t *stencil_indices,
-  int64_t *values,
-  int32_t *retval
-)
-{
-  struct bHYPRE_StructMatrix__epv *_epv = NULL;
-  struct bHYPRE_StructMatrix__object* _proxy_self = NULL;
-  struct sidl_int__array* _proxy_ilower = NULL;
-  struct sidl_int__array* _proxy_iupper = NULL;
-  struct sidl_int__array* _proxy_stencil_indices = NULL;
-  struct sidl_double__array* _proxy_values = NULL;
-  _proxy_self =
-    (struct bHYPRE_StructMatrix__object*)
-    (ptrdiff_t)(*self);
-  _proxy_ilower =
-    (struct sidl_int__array*)
-    (ptrdiff_t)(*ilower);
-  _proxy_iupper =
-    (struct sidl_int__array*)
-    (ptrdiff_t)(*iupper);
-  _proxy_stencil_indices =
-    (struct sidl_int__array*)
-    (ptrdiff_t)(*stencil_indices);
-  _proxy_values =
-    (struct sidl_double__array*)
-    (ptrdiff_t)(*values);
-  _epv = _proxy_self->d_epv;
-  *retval = 
-    (*(_epv->f_SetBoxValues))(
-      _proxy_self,
-      _proxy_ilower,
-      _proxy_iupper,
-      *num_stencil_indices,
-      _proxy_stencil_indices,
-      _proxy_values
-    );
-}
-
-/*
- * Method:  SetNumGhost[]
- */
-
-void
-SIDLFortran77Symbol(bhypre_structmatrix_setnumghost_f,BHYPRE_STRUCTMATRIX_SETNUMGHOST_F,bHYPRE_StructMatrix_SetNumGhost_f)
-(
-  int64_t *self,
-  int64_t *num_ghost,
-  int32_t *retval
-)
-{
-  struct bHYPRE_StructMatrix__epv *_epv = NULL;
-  struct bHYPRE_StructMatrix__object* _proxy_self = NULL;
-  struct sidl_int__array* _proxy_num_ghost = NULL;
-  _proxy_self =
-    (struct bHYPRE_StructMatrix__object*)
-    (ptrdiff_t)(*self);
-  _proxy_num_ghost =
-    (struct sidl_int__array*)
-    (ptrdiff_t)(*num_ghost);
-  _epv = _proxy_self->d_epv;
-  *retval = 
-    (*(_epv->f_SetNumGhost))(
-      _proxy_self,
-      _proxy_num_ghost
-    );
-}
-
-/*
- * Method:  SetSymmetric[]
- */
-
-void
-SIDLFortran77Symbol(bhypre_structmatrix_setsymmetric_f,BHYPRE_STRUCTMATRIX_SETSYMMETRIC_F,bHYPRE_StructMatrix_SetSymmetric_f)
-(
-  int64_t *self,
-  int32_t *symmetric,
-  int32_t *retval
-)
-{
-  struct bHYPRE_StructMatrix__epv *_epv = NULL;
-  struct bHYPRE_StructMatrix__object* _proxy_self = NULL;
-  _proxy_self =
-    (struct bHYPRE_StructMatrix__object*)
-    (ptrdiff_t)(*self);
-  _epv = _proxy_self->d_epv;
-  *retval = 
-    (*(_epv->f_SetSymmetric))(
-      _proxy_self,
-      *symmetric
-    );
-}
-
-/*
- * Method:  SetConstantEntries[]
- */
-
-void
-SIDLFortran77Symbol(bhypre_structmatrix_setconstantentries_f,BHYPRE_STRUCTMATRIX_SETCONSTANTENTRIES_F,bHYPRE_StructMatrix_SetConstantEntries_f)
-(
-  int64_t *self,
-  int32_t *num_stencil_constant_points,
-  int64_t *stencil_constant_points,
-  int32_t *retval
-)
-{
-  struct bHYPRE_StructMatrix__epv *_epv = NULL;
-  struct bHYPRE_StructMatrix__object* _proxy_self = NULL;
-  struct sidl_int__array* _proxy_stencil_constant_points = NULL;
-  _proxy_self =
-    (struct bHYPRE_StructMatrix__object*)
-    (ptrdiff_t)(*self);
-  _proxy_stencil_constant_points =
-    (struct sidl_int__array*)
-    (ptrdiff_t)(*stencil_constant_points);
-  _epv = _proxy_self->d_epv;
-  *retval = 
-    (*(_epv->f_SetConstantEntries))(
-      _proxy_self,
-      *num_stencil_constant_points,
-      _proxy_stencil_constant_points
-    );
-}
-
-/*
- * Method:  SetConstantValues[]
- */
-
-void
-SIDLFortran77Symbol(bhypre_structmatrix_setconstantvalues_f,BHYPRE_STRUCTMATRIX_SETCONSTANTVALUES_F,bHYPRE_StructMatrix_SetConstantValues_f)
-(
-  int64_t *self,
-  int32_t *num_stencil_indices,
-  int64_t *stencil_indices,
-  int64_t *values,
-  int32_t *retval
-)
-{
-  struct bHYPRE_StructMatrix__epv *_epv = NULL;
-  struct bHYPRE_StructMatrix__object* _proxy_self = NULL;
-  struct sidl_int__array* _proxy_stencil_indices = NULL;
-  struct sidl_double__array* _proxy_values = NULL;
-  _proxy_self =
-    (struct bHYPRE_StructMatrix__object*)
-    (ptrdiff_t)(*self);
-  _proxy_stencil_indices =
-    (struct sidl_int__array*)
-    (ptrdiff_t)(*stencil_indices);
-  _proxy_values =
-    (struct sidl_double__array*)
-    (ptrdiff_t)(*values);
-  _epv = _proxy_self->d_epv;
-  *retval = 
-    (*(_epv->f_SetConstantValues))(
-      _proxy_self,
-      *num_stencil_indices,
-      _proxy_stencil_indices,
-      _proxy_values
-    );
 }
 
 void

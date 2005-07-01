@@ -2,12 +2,12 @@
  * File:          bHYPRE_StructGrid.h
  * Symbol:        bHYPRE.StructGrid-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.9.8
+ * Babel Version: 0.10.4
  * Description:   Client-side glue code for bHYPRE.StructGrid
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.9.8
+ * babel-version = 0.10.4
  */
 
 #ifndef included_bHYPRE_StructGrid_h
@@ -37,6 +37,12 @@ typedef struct bHYPRE_StructGrid__object* bHYPRE_StructGrid;
 #include "sidl_ClassInfo.h"
 #endif
 
+#ifndef included_sidl_io_Serializer_h
+#include "sidl_io_Serializer.h"
+#endif
+#ifndef included_sidl_io_Deserializer_h
+#include "sidl_io_Deserializer.h"
+#endif
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -44,35 +50,46 @@ extern "C" {
 /**
  * Constructor function for the class.
  */
-bHYPRE_StructGrid
+struct bHYPRE_StructGrid__object*
 bHYPRE_StructGrid__create(void);
 
+/**
+ * RMI constructor function for the class.
+ */
+bHYPRE_StructGrid
+bHYPRE_StructGrid__createRemote(const char *, sidl_BaseInterface *_ex);
+
+/**
+ * RMI connector function for the class.
+ */
+bHYPRE_StructGrid
+bHYPRE_StructGrid__connect(const char *, sidl_BaseInterface *_ex);
 void
 bHYPRE_StructGrid_addRef(
-  /*in*/ bHYPRE_StructGrid self);
+  /* in */ bHYPRE_StructGrid self);
 
 void
 bHYPRE_StructGrid_deleteRef(
-  /*in*/ bHYPRE_StructGrid self);
+  /* in */ bHYPRE_StructGrid self);
 
 sidl_bool
 bHYPRE_StructGrid_isSame(
-  /*in*/ bHYPRE_StructGrid self,
-  /*in*/ sidl_BaseInterface iobj);
+  /* in */ bHYPRE_StructGrid self,
+  /* in */ sidl_BaseInterface iobj);
 
 sidl_BaseInterface
 bHYPRE_StructGrid_queryInt(
-  /*in*/ bHYPRE_StructGrid self,
-  /*in*/ const char* name);
+  /* in */ bHYPRE_StructGrid self,
+  /* in */ const char* name);
 
 sidl_bool
 bHYPRE_StructGrid_isType(
-  /*in*/ bHYPRE_StructGrid self,
-  /*in*/ const char* name);
+  /* in */ bHYPRE_StructGrid self,
+  /* in */ const char* name);
 
 sidl_ClassInfo
 bHYPRE_StructGrid_getClassInfo(
-  /*in*/ bHYPRE_StructGrid self);
+  /* in */ bHYPRE_StructGrid self);
 
 /**
  * Set the MPI Communicator.
@@ -80,53 +97,55 @@ bHYPRE_StructGrid_getClassInfo(
  */
 int32_t
 bHYPRE_StructGrid_SetCommunicator(
-  /*in*/ bHYPRE_StructGrid self,
-  /*in*/ void* mpi_comm);
+  /* in */ bHYPRE_StructGrid self,
+  /* in */ void* mpi_comm);
 
 /**
  * Method:  SetDimension[]
  */
 int32_t
 bHYPRE_StructGrid_SetDimension(
-  /*in*/ bHYPRE_StructGrid self,
-  /*in*/ int32_t dim);
+  /* in */ bHYPRE_StructGrid self,
+  /* in */ int32_t dim);
 
 /**
  * Method:  SetExtents[]
  */
 int32_t
 bHYPRE_StructGrid_SetExtents(
-  /*in*/ bHYPRE_StructGrid self,
-  /*in*/ struct sidl_int__array* ilower,
-  /*in*/ struct sidl_int__array* iupper);
+  /* in */ bHYPRE_StructGrid self,
+  /* in */ int32_t* ilower,
+  /* in */ int32_t* iupper,
+  /* in */ int32_t dim);
 
 /**
  * Method:  SetPeriodic[]
  */
 int32_t
 bHYPRE_StructGrid_SetPeriodic(
-  /*in*/ bHYPRE_StructGrid self,
-  /*in*/ struct sidl_int__array* periodic);
+  /* in */ bHYPRE_StructGrid self,
+  /* in */ struct sidl_int__array* periodic);
 
 /**
  * Method:  SetNumGhost[]
  */
 int32_t
 bHYPRE_StructGrid_SetNumGhost(
-  /*in*/ bHYPRE_StructGrid self,
-  /*in*/ struct sidl_int__array* num_ghost);
+  /* in */ bHYPRE_StructGrid self,
+  /* in */ int32_t* num_ghost,
+  /* in */ int32_t len);
 
 /**
  * Method:  Assemble[]
  */
 int32_t
 bHYPRE_StructGrid_Assemble(
-  /*in*/ bHYPRE_StructGrid self);
+  /* in */ bHYPRE_StructGrid self);
 
 /**
  * Cast method for interface and class type conversions.
  */
-bHYPRE_StructGrid
+struct bHYPRE_StructGrid__object*
 bHYPRE_StructGrid__cast(
   void* obj);
 
@@ -138,6 +157,29 @@ bHYPRE_StructGrid__cast2(
   void* obj,
   const char* type);
 
+/**
+ * Select and execute a method by name
+ */
+void
+bHYPRE_StructGrid__exec(
+  /* in */ bHYPRE_StructGrid self,
+  /* in */ const char* methodName,
+  /* in */ sidl_io_Deserializer inArgs,
+  /* in */ sidl_io_Serializer outArgs);
+/**
+ * static Exec method for reflexity.
+ */
+void
+bHYPRE_StructGrid__sexec(
+  /* in */ const char* methodName,
+  /* in */ sidl_io_Deserializer inArgs,
+  /* in */ sidl_io_Serializer outArgs);
+/**
+ * Get the URL of the Implementation of this object (for RMI)
+ */
+char*
+bHYPRE_StructGrid__getURL(
+  /* in */ bHYPRE_StructGrid self);
 struct bHYPRE_StructGrid__array*
 bHYPRE_StructGrid__array_createCol(
   int32_t       dimen,

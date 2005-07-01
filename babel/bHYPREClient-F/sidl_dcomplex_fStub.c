@@ -120,6 +120,17 @@ SIDLFortran77Symbol(sidl_dcomplex__array_slice_f,
 
 
 void
+SIDLFortran77Symbol(sidl_dcomplex__array_cast_f,
+                    SIDL_DCOMPLEX__ARRAY_CAST_F,
+                    sidl_dcomplex__array_cast_f)
+  (int64_t *array, int64_t *result)
+{
+  *result = (ptrdiff_t)
+    sidl_dcomplex__array_cast((struct sidl__array *)(ptrdiff_t)*array);
+}
+
+
+void
 SIDLFortran77Symbol(sidl_dcomplex__array_copy_f,
                     SIDL_DCOMPLEX__ARRAY_COPY_F,
                     sidl_dcomplex__array_copy_f)

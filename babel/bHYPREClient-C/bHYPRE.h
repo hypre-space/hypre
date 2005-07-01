@@ -2,16 +2,13 @@
  * File:          bHYPRE.h
  * Symbol:        bHYPRE-v1.0.0
  * Symbol Type:   package
- * Babel Version: 0.9.8
+ * Babel Version: 0.10.4
  * Description:   Client-side glue code for bHYPRE
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.9.8
+ * babel-version = 0.10.4
  */
-
-#ifndef included_bHYPRE_h
-#define included_bHYPRE_h
 
 #ifndef included_bHYPRE_BoomerAMG_h
 #include "bHYPRE_BoomerAMG.h"
@@ -119,4 +116,3 @@
 #include "bHYPRE_Vector.h"
 #endif
 
-#endif

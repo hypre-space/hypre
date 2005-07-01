@@ -2,12 +2,12 @@
  * File:          bHYPRE_CoefficientAccess.h
  * Symbol:        bHYPRE.CoefficientAccess-v1.0.0
  * Symbol Type:   interface
- * Babel Version: 0.9.8
+ * Babel Version: 0.10.4
  * Description:   Client-side glue code for bHYPRE.CoefficientAccess
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.9.8
+ * babel-version = 0.10.4
  */
 
 #ifndef included_bHYPRE_CoefficientAccess_h
@@ -34,36 +34,47 @@ typedef struct bHYPRE_CoefficientAccess__object* bHYPRE_CoefficientAccess;
 #include "sidl_ClassInfo.h"
 #endif
 
+#ifndef included_sidl_io_Serializer_h
+#include "sidl_io_Serializer.h"
+#endif
+#ifndef included_sidl_io_Deserializer_h
+#include "sidl_io_Deserializer.h"
+#endif
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+/**
+ * RMI connector function for the class.
+ */
+bHYPRE_CoefficientAccess
+bHYPRE_CoefficientAccess__connect(const char *, sidl_BaseInterface *_ex);
 void
 bHYPRE_CoefficientAccess_addRef(
-  /*in*/ bHYPRE_CoefficientAccess self);
+  /* in */ bHYPRE_CoefficientAccess self);
 
 void
 bHYPRE_CoefficientAccess_deleteRef(
-  /*in*/ bHYPRE_CoefficientAccess self);
+  /* in */ bHYPRE_CoefficientAccess self);
 
 sidl_bool
 bHYPRE_CoefficientAccess_isSame(
-  /*in*/ bHYPRE_CoefficientAccess self,
-  /*in*/ sidl_BaseInterface iobj);
+  /* in */ bHYPRE_CoefficientAccess self,
+  /* in */ sidl_BaseInterface iobj);
 
 sidl_BaseInterface
 bHYPRE_CoefficientAccess_queryInt(
-  /*in*/ bHYPRE_CoefficientAccess self,
-  /*in*/ const char* name);
+  /* in */ bHYPRE_CoefficientAccess self,
+  /* in */ const char* name);
 
 sidl_bool
 bHYPRE_CoefficientAccess_isType(
-  /*in*/ bHYPRE_CoefficientAccess self,
-  /*in*/ const char* name);
+  /* in */ bHYPRE_CoefficientAccess self,
+  /* in */ const char* name);
 
 sidl_ClassInfo
 bHYPRE_CoefficientAccess_getClassInfo(
-  /*in*/ bHYPRE_CoefficientAccess self);
+  /* in */ bHYPRE_CoefficientAccess self);
 
 /**
  * The GetRow method will allocate space for its two output
@@ -75,16 +86,16 @@ bHYPRE_CoefficientAccess_getClassInfo(
  */
 int32_t
 bHYPRE_CoefficientAccess_GetRow(
-  /*in*/ bHYPRE_CoefficientAccess self,
-  /*in*/ int32_t row,
-  /*out*/ int32_t* size,
-  /*out*/ struct sidl_int__array** col_ind,
-  /*out*/ struct sidl_double__array** values);
+  /* in */ bHYPRE_CoefficientAccess self,
+  /* in */ int32_t row,
+  /* out */ int32_t* size,
+  /* out */ struct sidl_int__array** col_ind,
+  /* out */ struct sidl_double__array** values);
 
 /**
  * Cast method for interface and class type conversions.
  */
-bHYPRE_CoefficientAccess
+struct bHYPRE_CoefficientAccess__object*
 bHYPRE_CoefficientAccess__cast(
   void* obj);
 
@@ -96,6 +107,29 @@ bHYPRE_CoefficientAccess__cast2(
   void* obj,
   const char* type);
 
+/**
+ * Select and execute a method by name
+ */
+void
+bHYPRE_CoefficientAccess__exec(
+  /* in */ bHYPRE_CoefficientAccess self,
+  /* in */ const char* methodName,
+  /* in */ sidl_io_Deserializer inArgs,
+  /* in */ sidl_io_Serializer outArgs);
+/**
+ * static Exec method for reflexity.
+ */
+void
+bHYPRE_CoefficientAccess__sexec(
+  /* in */ const char* methodName,
+  /* in */ sidl_io_Deserializer inArgs,
+  /* in */ sidl_io_Serializer outArgs);
+/**
+ * Get the URL of the Implementation of this object (for RMI)
+ */
+char*
+bHYPRE_CoefficientAccess__getURL(
+  /* in */ bHYPRE_CoefficientAccess self);
 struct bHYPRE_CoefficientAccess__array*
 bHYPRE_CoefficientAccess__array_createCol(
   int32_t       dimen,

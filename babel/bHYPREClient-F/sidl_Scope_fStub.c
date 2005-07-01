@@ -1,8 +1,8 @@
 /*
  * File:          sidl_Scope_fStub.c
- * Symbol:        sidl.Scope-v0.9.0
+ * Symbol:        sidl.Scope-v0.9.3
  * Symbol Type:   enumeration
- * Babel Version: 0.9.8
+ * Babel Version: 0.10.4
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Client-side glue code for sidl.Scope
@@ -32,7 +32,8 @@
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.9.8
+ * babel-version = 0.10.4
+ * xml-url       = /home/painter/babel/share/babel-0.10.4/repository/sidl.Scope-v0.9.3.xml
  */
 
 #ifndef included_sidl_int_IOR_h

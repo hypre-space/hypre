@@ -2,12 +2,12 @@ C
 C       File:          bHYPRE_IJBuildVector_Impl.f
 C       Symbol:        bHYPRE.IJBuildVector-v1.0.0
 C       Symbol Type:   interface
-C       Babel Version: 0.9.8
+C       Babel Version: 0.10.4
 C       Description:   Client-side documentation text for bHYPRE.IJBuildVector
 C       
 C       WARNING: Automatically generated; changes will be lost
 C       
-C       babel-version = 0.9.8
+C       babel-version = 0.10.4
 C       
 
         THIS FILE IS DOCUMENTATION - DO NOT COMPILE IT!
@@ -153,7 +153,7 @@ C       out sidl.ClassInfo retval
 
 
 C       
-C       Set the MPI Communicator.
+C       Set the MPI Communicator.  DEPRECATED, Use Create()
 C       
 C       
 

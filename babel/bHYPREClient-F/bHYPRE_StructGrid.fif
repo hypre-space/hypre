@@ -2,12 +2,12 @@ C
 C       File:          bHYPRE_StructGrid_Impl.f
 C       Symbol:        bHYPRE.StructGrid-v1.0.0
 C       Symbol Type:   class
-C       Babel Version: 0.9.8
+C       Babel Version: 0.10.4
 C       Description:   Client-side documentation text for bHYPRE.StructGrid
 C       
 C       WARNING: Automatically generated; changes will be lost
 C       
-C       babel-version = 0.9.8
+C       babel-version = 0.10.4
 C       
 
         THIS FILE IS DOCUMENTATION - DO NOT COMPILE IT!
@@ -207,12 +207,12 @@ C
         implicit none
 C       in bHYPRE.StructGrid self
         integer*8 self
-C       in array<int,column-major> ilower
-        integer*8 ilower
-C       in array<int,column-major> iupper
-        integer*8 iupper
 C       out int retval
         integer*4 retval
+C       in rarray<int> ilower(dim)
+        integer*4 ilower(0:dim-1)
+C       in rarray<int> iupper(dim)
+        integer*4 iupper(0:dim-1)
         end
 
 
@@ -241,10 +241,10 @@ C
         implicit none
 C       in bHYPRE.StructGrid self
         integer*8 self
-C       in array<int,column-major> num_ghost
-        integer*8 num_ghost
 C       out int retval
         integer*4 retval
+C       in rarray<int> num_ghost(len)
+        integer*4 num_ghost(0:len-1)
         end
 
 

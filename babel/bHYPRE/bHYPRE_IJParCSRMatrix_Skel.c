@@ -2,195 +2,318 @@
  * File:          bHYPRE_IJParCSRMatrix_Skel.c
  * Symbol:        bHYPRE.IJParCSRMatrix-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.9.8
+ * Babel Version: 0.10.4
  * Description:   Server-side glue code for bHYPRE.IJParCSRMatrix
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.9.8
+ * babel-version = 0.10.4
  */
 
 #include "bHYPRE_IJParCSRMatrix_IOR.h"
 #include "bHYPRE_IJParCSRMatrix.h"
 #include <stddef.h>
 
-extern void
+extern
+void
+impl_bHYPRE_IJParCSRMatrix__load(
+  void);
+
+extern
+void
 impl_bHYPRE_IJParCSRMatrix__ctor(
-  bHYPRE_IJParCSRMatrix);
+  /* in */ bHYPRE_IJParCSRMatrix self);
 
-extern void
+extern
+void
 impl_bHYPRE_IJParCSRMatrix__dtor(
-  bHYPRE_IJParCSRMatrix);
+  /* in */ bHYPRE_IJParCSRMatrix self);
 
-extern int32_t
+extern struct bHYPRE_CoefficientAccess__object* 
+  impl_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_CoefficientAccess(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_IJParCSRMatrix_fgetURL_bHYPRE_CoefficientAccess(struct 
+  bHYPRE_CoefficientAccess__object* obj);
+extern struct bHYPRE_IJBuildMatrix__object* 
+  impl_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_IJBuildMatrix(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_IJParCSRMatrix_fgetURL_bHYPRE_IJBuildMatrix(struct 
+  bHYPRE_IJBuildMatrix__object* obj);
+extern struct bHYPRE_Operator__object* 
+  impl_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_Operator(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_IJParCSRMatrix_fgetURL_bHYPRE_Operator(struct 
+  bHYPRE_Operator__object* obj);
+extern struct bHYPRE_IJParCSRMatrix__object* 
+  impl_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_IJParCSRMatrix(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_IJParCSRMatrix_fgetURL_bHYPRE_IJParCSRMatrix(struct 
+  bHYPRE_IJParCSRMatrix__object* obj);
+extern struct sidl_ClassInfo__object* 
+  impl_bHYPRE_IJParCSRMatrix_fconnect_sidl_ClassInfo(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_IJParCSRMatrix_fgetURL_sidl_ClassInfo(struct 
+  sidl_ClassInfo__object* obj);
+extern struct bHYPRE_Vector__object* 
+  impl_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_Vector(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_IJParCSRMatrix_fgetURL_bHYPRE_Vector(struct 
+  bHYPRE_Vector__object* obj);
+extern struct bHYPRE_ProblemDefinition__object* 
+  impl_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_ProblemDefinition(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_IJParCSRMatrix_fgetURL_bHYPRE_ProblemDefinition(struct 
+  bHYPRE_ProblemDefinition__object* obj);
+extern struct sidl_BaseInterface__object* 
+  impl_bHYPRE_IJParCSRMatrix_fconnect_sidl_BaseInterface(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_IJParCSRMatrix_fgetURL_sidl_BaseInterface(struct 
+  sidl_BaseInterface__object* obj);
+extern struct sidl_BaseClass__object* 
+  impl_bHYPRE_IJParCSRMatrix_fconnect_sidl_BaseClass(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_IJParCSRMatrix_fgetURL_sidl_BaseClass(struct 
+  sidl_BaseClass__object* obj);
+extern
+int32_t
 impl_bHYPRE_IJParCSRMatrix_SetDiagOffdSizes(
-  bHYPRE_IJParCSRMatrix,
-  struct sidl_int__array*,
-  struct sidl_int__array*);
+  /* in */ bHYPRE_IJParCSRMatrix self,
+  /* in */ struct sidl_int__array* diag_sizes,
+  /* in */ struct sidl_int__array* offdiag_sizes);
 
-extern int32_t
-impl_bHYPRE_IJParCSRMatrix_SetCommunicator(
-  bHYPRE_IJParCSRMatrix,
-  void*);
-
-extern int32_t
-impl_bHYPRE_IJParCSRMatrix_SetIntParameter(
-  bHYPRE_IJParCSRMatrix,
-  const char*,
-  int32_t);
-
-extern int32_t
-impl_bHYPRE_IJParCSRMatrix_SetDoubleParameter(
-  bHYPRE_IJParCSRMatrix,
-  const char*,
-  double);
-
-extern int32_t
-impl_bHYPRE_IJParCSRMatrix_SetStringParameter(
-  bHYPRE_IJParCSRMatrix,
-  const char*,
-  const char*);
-
-extern int32_t
-impl_bHYPRE_IJParCSRMatrix_SetIntArray1Parameter(
-  bHYPRE_IJParCSRMatrix,
-  const char*,
-  struct sidl_int__array*);
-
-extern int32_t
-impl_bHYPRE_IJParCSRMatrix_SetIntArray2Parameter(
-  bHYPRE_IJParCSRMatrix,
-  const char*,
-  struct sidl_int__array*);
-
-extern int32_t
-impl_bHYPRE_IJParCSRMatrix_SetDoubleArray1Parameter(
-  bHYPRE_IJParCSRMatrix,
-  const char*,
-  struct sidl_double__array*);
-
-extern int32_t
-impl_bHYPRE_IJParCSRMatrix_SetDoubleArray2Parameter(
-  bHYPRE_IJParCSRMatrix,
-  const char*,
-  struct sidl_double__array*);
-
-extern int32_t
-impl_bHYPRE_IJParCSRMatrix_GetIntValue(
-  bHYPRE_IJParCSRMatrix,
-  const char*,
-  int32_t*);
-
-extern int32_t
-impl_bHYPRE_IJParCSRMatrix_GetDoubleValue(
-  bHYPRE_IJParCSRMatrix,
-  const char*,
-  double*);
-
-extern int32_t
-impl_bHYPRE_IJParCSRMatrix_Setup(
-  bHYPRE_IJParCSRMatrix,
-  bHYPRE_Vector,
-  bHYPRE_Vector);
-
-extern int32_t
-impl_bHYPRE_IJParCSRMatrix_Apply(
-  bHYPRE_IJParCSRMatrix,
-  bHYPRE_Vector,
-  bHYPRE_Vector*);
-
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_IJParCSRMatrix_GetRow(
-  bHYPRE_IJParCSRMatrix,
-  int32_t,
-  int32_t*,
-  struct sidl_int__array**,
-  struct sidl_double__array**);
+  /* in */ bHYPRE_IJParCSRMatrix self,
+  /* in */ int32_t row,
+  /* out */ int32_t* size,
+  /* out */ struct sidl_int__array** col_ind,
+  /* out */ struct sidl_double__array** values);
 
-extern int32_t
+extern
+int32_t
+impl_bHYPRE_IJParCSRMatrix_SetCommunicator(
+  /* in */ bHYPRE_IJParCSRMatrix self,
+  /* in */ void* mpi_comm);
+
+extern
+int32_t
 impl_bHYPRE_IJParCSRMatrix_Initialize(
-  bHYPRE_IJParCSRMatrix);
+  /* in */ bHYPRE_IJParCSRMatrix self);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_IJParCSRMatrix_Assemble(
-  bHYPRE_IJParCSRMatrix);
+  /* in */ bHYPRE_IJParCSRMatrix self);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_IJParCSRMatrix_GetObject(
-  bHYPRE_IJParCSRMatrix,
-  sidl_BaseInterface*);
+  /* in */ bHYPRE_IJParCSRMatrix self,
+  /* out */ sidl_BaseInterface* A);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_IJParCSRMatrix_SetLocalRange(
-  bHYPRE_IJParCSRMatrix,
-  int32_t,
-  int32_t,
-  int32_t,
-  int32_t);
+  /* in */ bHYPRE_IJParCSRMatrix self,
+  /* in */ int32_t ilower,
+  /* in */ int32_t iupper,
+  /* in */ int32_t jlower,
+  /* in */ int32_t jupper);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_IJParCSRMatrix_SetValues(
-  bHYPRE_IJParCSRMatrix,
-  int32_t,
-  struct sidl_int__array*,
-  struct sidl_int__array*,
-  struct sidl_int__array*,
-  struct sidl_double__array*);
+  /* in */ bHYPRE_IJParCSRMatrix self,
+  /* in */ int32_t nrows,
+  /* in */ struct sidl_int__array* ncols,
+  /* in */ struct sidl_int__array* rows,
+  /* in */ struct sidl_int__array* cols,
+  /* in */ struct sidl_double__array* values);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_IJParCSRMatrix_AddToValues(
-  bHYPRE_IJParCSRMatrix,
-  int32_t,
-  struct sidl_int__array*,
-  struct sidl_int__array*,
-  struct sidl_int__array*,
-  struct sidl_double__array*);
+  /* in */ bHYPRE_IJParCSRMatrix self,
+  /* in */ int32_t nrows,
+  /* in */ struct sidl_int__array* ncols,
+  /* in */ struct sidl_int__array* rows,
+  /* in */ struct sidl_int__array* cols,
+  /* in */ struct sidl_double__array* values);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_IJParCSRMatrix_GetLocalRange(
-  bHYPRE_IJParCSRMatrix,
-  int32_t*,
-  int32_t*,
-  int32_t*,
-  int32_t*);
+  /* in */ bHYPRE_IJParCSRMatrix self,
+  /* out */ int32_t* ilower,
+  /* out */ int32_t* iupper,
+  /* out */ int32_t* jlower,
+  /* out */ int32_t* jupper);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_IJParCSRMatrix_GetRowCounts(
-  bHYPRE_IJParCSRMatrix,
-  int32_t,
-  struct sidl_int__array*,
-  struct sidl_int__array**);
+  /* in */ bHYPRE_IJParCSRMatrix self,
+  /* in */ int32_t nrows,
+  /* in */ struct sidl_int__array* rows,
+  /* inout */ struct sidl_int__array** ncols);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_IJParCSRMatrix_GetValues(
-  bHYPRE_IJParCSRMatrix,
-  int32_t,
-  struct sidl_int__array*,
-  struct sidl_int__array*,
-  struct sidl_int__array*,
-  struct sidl_double__array**);
+  /* in */ bHYPRE_IJParCSRMatrix self,
+  /* in */ int32_t nrows,
+  /* in */ struct sidl_int__array* ncols,
+  /* in */ struct sidl_int__array* rows,
+  /* in */ struct sidl_int__array* cols,
+  /* inout */ struct sidl_double__array** values);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_IJParCSRMatrix_SetRowSizes(
-  bHYPRE_IJParCSRMatrix,
-  struct sidl_int__array*);
+  /* in */ bHYPRE_IJParCSRMatrix self,
+  /* in */ struct sidl_int__array* sizes);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_IJParCSRMatrix_Print(
-  bHYPRE_IJParCSRMatrix,
-  const char*);
+  /* in */ bHYPRE_IJParCSRMatrix self,
+  /* in */ const char* filename);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_IJParCSRMatrix_Read(
-  bHYPRE_IJParCSRMatrix,
-  const char*,
-  void*);
+  /* in */ bHYPRE_IJParCSRMatrix self,
+  /* in */ const char* filename,
+  /* in */ void* comm);
 
+extern
+int32_t
+impl_bHYPRE_IJParCSRMatrix_SetIntParameter(
+  /* in */ bHYPRE_IJParCSRMatrix self,
+  /* in */ const char* name,
+  /* in */ int32_t value);
+
+extern
+int32_t
+impl_bHYPRE_IJParCSRMatrix_SetDoubleParameter(
+  /* in */ bHYPRE_IJParCSRMatrix self,
+  /* in */ const char* name,
+  /* in */ double value);
+
+extern
+int32_t
+impl_bHYPRE_IJParCSRMatrix_SetStringParameter(
+  /* in */ bHYPRE_IJParCSRMatrix self,
+  /* in */ const char* name,
+  /* in */ const char* value);
+
+extern
+int32_t
+impl_bHYPRE_IJParCSRMatrix_SetIntArray1Parameter(
+  /* in */ bHYPRE_IJParCSRMatrix self,
+  /* in */ const char* name,
+  /* in */ struct sidl_int__array* value);
+
+extern
+int32_t
+impl_bHYPRE_IJParCSRMatrix_SetIntArray2Parameter(
+  /* in */ bHYPRE_IJParCSRMatrix self,
+  /* in */ const char* name,
+  /* in */ struct sidl_int__array* value);
+
+extern
+int32_t
+impl_bHYPRE_IJParCSRMatrix_SetDoubleArray1Parameter(
+  /* in */ bHYPRE_IJParCSRMatrix self,
+  /* in */ const char* name,
+  /* in */ struct sidl_double__array* value);
+
+extern
+int32_t
+impl_bHYPRE_IJParCSRMatrix_SetDoubleArray2Parameter(
+  /* in */ bHYPRE_IJParCSRMatrix self,
+  /* in */ const char* name,
+  /* in */ struct sidl_double__array* value);
+
+extern
+int32_t
+impl_bHYPRE_IJParCSRMatrix_GetIntValue(
+  /* in */ bHYPRE_IJParCSRMatrix self,
+  /* in */ const char* name,
+  /* out */ int32_t* value);
+
+extern
+int32_t
+impl_bHYPRE_IJParCSRMatrix_GetDoubleValue(
+  /* in */ bHYPRE_IJParCSRMatrix self,
+  /* in */ const char* name,
+  /* out */ double* value);
+
+extern
+int32_t
+impl_bHYPRE_IJParCSRMatrix_Setup(
+  /* in */ bHYPRE_IJParCSRMatrix self,
+  /* in */ bHYPRE_Vector b,
+  /* in */ bHYPRE_Vector x);
+
+extern
+int32_t
+impl_bHYPRE_IJParCSRMatrix_Apply(
+  /* in */ bHYPRE_IJParCSRMatrix self,
+  /* in */ bHYPRE_Vector b,
+  /* inout */ bHYPRE_Vector* x);
+
+extern struct bHYPRE_CoefficientAccess__object* 
+  impl_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_CoefficientAccess(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_IJParCSRMatrix_fgetURL_bHYPRE_CoefficientAccess(struct 
+  bHYPRE_CoefficientAccess__object* obj);
+extern struct bHYPRE_IJBuildMatrix__object* 
+  impl_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_IJBuildMatrix(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_IJParCSRMatrix_fgetURL_bHYPRE_IJBuildMatrix(struct 
+  bHYPRE_IJBuildMatrix__object* obj);
+extern struct bHYPRE_Operator__object* 
+  impl_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_Operator(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_IJParCSRMatrix_fgetURL_bHYPRE_Operator(struct 
+  bHYPRE_Operator__object* obj);
+extern struct bHYPRE_IJParCSRMatrix__object* 
+  impl_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_IJParCSRMatrix(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_IJParCSRMatrix_fgetURL_bHYPRE_IJParCSRMatrix(struct 
+  bHYPRE_IJParCSRMatrix__object* obj);
+extern struct sidl_ClassInfo__object* 
+  impl_bHYPRE_IJParCSRMatrix_fconnect_sidl_ClassInfo(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_IJParCSRMatrix_fgetURL_sidl_ClassInfo(struct 
+  sidl_ClassInfo__object* obj);
+extern struct bHYPRE_Vector__object* 
+  impl_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_Vector(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_IJParCSRMatrix_fgetURL_bHYPRE_Vector(struct 
+  bHYPRE_Vector__object* obj);
+extern struct bHYPRE_ProblemDefinition__object* 
+  impl_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_ProblemDefinition(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_IJParCSRMatrix_fgetURL_bHYPRE_ProblemDefinition(struct 
+  bHYPRE_ProblemDefinition__object* obj);
+extern struct sidl_BaseInterface__object* 
+  impl_bHYPRE_IJParCSRMatrix_fconnect_sidl_BaseInterface(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_IJParCSRMatrix_fgetURL_sidl_BaseInterface(struct 
+  sidl_BaseInterface__object* obj);
+extern struct sidl_BaseClass__object* 
+  impl_bHYPRE_IJParCSRMatrix_fconnect_sidl_BaseClass(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_IJParCSRMatrix_fgetURL_sidl_BaseClass(struct 
+  sidl_BaseClass__object* obj);
 static int32_t
 skel_bHYPRE_IJParCSRMatrix_SetDiagOffdSizes(
-  /*in*/ bHYPRE_IJParCSRMatrix self,
-  /*in*/ struct sidl_int__array* diag_sizes,
-  /*in*/ struct sidl_int__array* offdiag_sizes)
+  /* in */ bHYPRE_IJParCSRMatrix self,
+  /* in */ struct sidl_int__array* diag_sizes,
+/* in */ struct sidl_int__array* offdiag_sizes)
 {
   int32_t _return;
   struct sidl_int__array* diag_sizes_proxy = sidl_int__array_ensure(diag_sizes,
@@ -208,84 +331,12 @@ skel_bHYPRE_IJParCSRMatrix_SetDiagOffdSizes(
 }
 
 static int32_t
-skel_bHYPRE_IJParCSRMatrix_SetIntArray1Parameter(
-  /*in*/ bHYPRE_IJParCSRMatrix self,
-  /*in*/ const char* name,
-  /*in*/ struct sidl_int__array* value)
-{
-  int32_t _return;
-  struct sidl_int__array* value_proxy = sidl_int__array_ensure(value, 1,
-    sidl_column_major_order);
-  _return =
-    impl_bHYPRE_IJParCSRMatrix_SetIntArray1Parameter(
-      self,
-      name,
-      value_proxy);
-  sidl_int__array_deleteRef(value_proxy);
-  return _return;
-}
-
-static int32_t
-skel_bHYPRE_IJParCSRMatrix_SetIntArray2Parameter(
-  /*in*/ bHYPRE_IJParCSRMatrix self,
-  /*in*/ const char* name,
-  /*in*/ struct sidl_int__array* value)
-{
-  int32_t _return;
-  struct sidl_int__array* value_proxy = sidl_int__array_ensure(value, 2,
-    sidl_column_major_order);
-  _return =
-    impl_bHYPRE_IJParCSRMatrix_SetIntArray2Parameter(
-      self,
-      name,
-      value_proxy);
-  sidl_int__array_deleteRef(value_proxy);
-  return _return;
-}
-
-static int32_t
-skel_bHYPRE_IJParCSRMatrix_SetDoubleArray1Parameter(
-  /*in*/ bHYPRE_IJParCSRMatrix self,
-  /*in*/ const char* name,
-  /*in*/ struct sidl_double__array* value)
-{
-  int32_t _return;
-  struct sidl_double__array* value_proxy = sidl_double__array_ensure(value, 1,
-    sidl_column_major_order);
-  _return =
-    impl_bHYPRE_IJParCSRMatrix_SetDoubleArray1Parameter(
-      self,
-      name,
-      value_proxy);
-  sidl_double__array_deleteRef(value_proxy);
-  return _return;
-}
-
-static int32_t
-skel_bHYPRE_IJParCSRMatrix_SetDoubleArray2Parameter(
-  /*in*/ bHYPRE_IJParCSRMatrix self,
-  /*in*/ const char* name,
-  /*in*/ struct sidl_double__array* value)
-{
-  int32_t _return;
-  struct sidl_double__array* value_proxy = sidl_double__array_ensure(value, 2,
-    sidl_column_major_order);
-  _return =
-    impl_bHYPRE_IJParCSRMatrix_SetDoubleArray2Parameter(
-      self,
-      name,
-      value_proxy);
-  sidl_double__array_deleteRef(value_proxy);
-  return _return;
-}
-
-static int32_t
 skel_bHYPRE_IJParCSRMatrix_GetRow(
-  /*in*/ bHYPRE_IJParCSRMatrix self,
-  /*in*/ int32_t row,
-  /*out*/ int32_t* size,
-  /*out*/ struct sidl_int__array** col_ind,
-  /*out*/ struct sidl_double__array** values)
+  /* in */ bHYPRE_IJParCSRMatrix self,
+  /* in */ int32_t row,
+  /* out */ int32_t* size,
+  /* out */ struct sidl_int__array** col_ind,
+/* out */ struct sidl_double__array** values)
 {
   int32_t _return;
   struct sidl_int__array* col_ind_proxy = NULL;
@@ -306,12 +357,12 @@ skel_bHYPRE_IJParCSRMatrix_GetRow(
 
 static int32_t
 skel_bHYPRE_IJParCSRMatrix_SetValues(
-  /*in*/ bHYPRE_IJParCSRMatrix self,
-  /*in*/ int32_t nrows,
-  /*in*/ struct sidl_int__array* ncols,
-  /*in*/ struct sidl_int__array* rows,
-  /*in*/ struct sidl_int__array* cols,
-  /*in*/ struct sidl_double__array* values)
+  /* in */ bHYPRE_IJParCSRMatrix self,
+  /* in */ int32_t nrows,
+  /* in */ struct sidl_int__array* ncols,
+  /* in */ struct sidl_int__array* rows,
+  /* in */ struct sidl_int__array* cols,
+/* in */ struct sidl_double__array* values)
 {
   int32_t _return;
   struct sidl_int__array* ncols_proxy = sidl_int__array_ensure(ncols, 1,
@@ -339,12 +390,12 @@ skel_bHYPRE_IJParCSRMatrix_SetValues(
 
 static int32_t
 skel_bHYPRE_IJParCSRMatrix_AddToValues(
-  /*in*/ bHYPRE_IJParCSRMatrix self,
-  /*in*/ int32_t nrows,
-  /*in*/ struct sidl_int__array* ncols,
-  /*in*/ struct sidl_int__array* rows,
-  /*in*/ struct sidl_int__array* cols,
-  /*in*/ struct sidl_double__array* values)
+  /* in */ bHYPRE_IJParCSRMatrix self,
+  /* in */ int32_t nrows,
+  /* in */ struct sidl_int__array* ncols,
+  /* in */ struct sidl_int__array* rows,
+  /* in */ struct sidl_int__array* cols,
+/* in */ struct sidl_double__array* values)
 {
   int32_t _return;
   struct sidl_int__array* ncols_proxy = sidl_int__array_ensure(ncols, 1,
@@ -372,10 +423,10 @@ skel_bHYPRE_IJParCSRMatrix_AddToValues(
 
 static int32_t
 skel_bHYPRE_IJParCSRMatrix_GetRowCounts(
-  /*in*/ bHYPRE_IJParCSRMatrix self,
-  /*in*/ int32_t nrows,
-  /*in*/ struct sidl_int__array* rows,
-  /*inout*/ struct sidl_int__array** ncols)
+  /* in */ bHYPRE_IJParCSRMatrix self,
+  /* in */ int32_t nrows,
+  /* in */ struct sidl_int__array* rows,
+/* inout */ struct sidl_int__array** ncols)
 {
   int32_t _return;
   struct sidl_int__array* rows_proxy = sidl_int__array_ensure(rows, 1,
@@ -397,12 +448,12 @@ skel_bHYPRE_IJParCSRMatrix_GetRowCounts(
 
 static int32_t
 skel_bHYPRE_IJParCSRMatrix_GetValues(
-  /*in*/ bHYPRE_IJParCSRMatrix self,
-  /*in*/ int32_t nrows,
-  /*in*/ struct sidl_int__array* ncols,
-  /*in*/ struct sidl_int__array* rows,
-  /*in*/ struct sidl_int__array* cols,
-  /*inout*/ struct sidl_double__array** values)
+  /* in */ bHYPRE_IJParCSRMatrix self,
+  /* in */ int32_t nrows,
+  /* in */ struct sidl_int__array* ncols,
+  /* in */ struct sidl_int__array* rows,
+  /* in */ struct sidl_int__array* cols,
+/* inout */ struct sidl_double__array** values)
 {
   int32_t _return;
   struct sidl_int__array* ncols_proxy = sidl_int__array_ensure(ncols, 1,
@@ -432,8 +483,8 @@ skel_bHYPRE_IJParCSRMatrix_GetValues(
 
 static int32_t
 skel_bHYPRE_IJParCSRMatrix_SetRowSizes(
-  /*in*/ bHYPRE_IJParCSRMatrix self,
-  /*in*/ struct sidl_int__array* sizes)
+  /* in */ bHYPRE_IJParCSRMatrix self,
+/* in */ struct sidl_int__array* sizes)
 {
   int32_t _return;
   struct sidl_int__array* sizes_proxy = sidl_int__array_ensure(sizes, 1,
@@ -443,6 +494,78 @@ skel_bHYPRE_IJParCSRMatrix_SetRowSizes(
       self,
       sizes_proxy);
   sidl_int__array_deleteRef(sizes_proxy);
+  return _return;
+}
+
+static int32_t
+skel_bHYPRE_IJParCSRMatrix_SetIntArray1Parameter(
+  /* in */ bHYPRE_IJParCSRMatrix self,
+  /* in */ const char* name,
+/* in */ struct sidl_int__array* value)
+{
+  int32_t _return;
+  struct sidl_int__array* value_proxy = sidl_int__array_ensure(value, 1,
+    sidl_column_major_order);
+  _return =
+    impl_bHYPRE_IJParCSRMatrix_SetIntArray1Parameter(
+      self,
+      name,
+      value_proxy);
+  sidl_int__array_deleteRef(value_proxy);
+  return _return;
+}
+
+static int32_t
+skel_bHYPRE_IJParCSRMatrix_SetIntArray2Parameter(
+  /* in */ bHYPRE_IJParCSRMatrix self,
+  /* in */ const char* name,
+/* in */ struct sidl_int__array* value)
+{
+  int32_t _return;
+  struct sidl_int__array* value_proxy = sidl_int__array_ensure(value, 2,
+    sidl_column_major_order);
+  _return =
+    impl_bHYPRE_IJParCSRMatrix_SetIntArray2Parameter(
+      self,
+      name,
+      value_proxy);
+  sidl_int__array_deleteRef(value_proxy);
+  return _return;
+}
+
+static int32_t
+skel_bHYPRE_IJParCSRMatrix_SetDoubleArray1Parameter(
+  /* in */ bHYPRE_IJParCSRMatrix self,
+  /* in */ const char* name,
+/* in */ struct sidl_double__array* value)
+{
+  int32_t _return;
+  struct sidl_double__array* value_proxy = sidl_double__array_ensure(value, 1,
+    sidl_column_major_order);
+  _return =
+    impl_bHYPRE_IJParCSRMatrix_SetDoubleArray1Parameter(
+      self,
+      name,
+      value_proxy);
+  sidl_double__array_deleteRef(value_proxy);
+  return _return;
+}
+
+static int32_t
+skel_bHYPRE_IJParCSRMatrix_SetDoubleArray2Parameter(
+  /* in */ bHYPRE_IJParCSRMatrix self,
+  /* in */ const char* name,
+/* in */ struct sidl_double__array* value)
+{
+  int32_t _return;
+  struct sidl_double__array* value_proxy = sidl_double__array_ensure(value, 2,
+    sidl_column_major_order);
+  _return =
+    impl_bHYPRE_IJParCSRMatrix_SetDoubleArray2Parameter(
+      self,
+      name,
+      value_proxy);
+  sidl_double__array_deleteRef(value_proxy);
   return _return;
 }
 
@@ -456,7 +579,20 @@ bHYPRE_IJParCSRMatrix__set_epv(struct bHYPRE_IJParCSRMatrix__epv *epv)
   epv->f__ctor = impl_bHYPRE_IJParCSRMatrix__ctor;
   epv->f__dtor = impl_bHYPRE_IJParCSRMatrix__dtor;
   epv->f_SetDiagOffdSizes = skel_bHYPRE_IJParCSRMatrix_SetDiagOffdSizes;
+  epv->f_GetRow = skel_bHYPRE_IJParCSRMatrix_GetRow;
   epv->f_SetCommunicator = impl_bHYPRE_IJParCSRMatrix_SetCommunicator;
+  epv->f_Initialize = impl_bHYPRE_IJParCSRMatrix_Initialize;
+  epv->f_Assemble = impl_bHYPRE_IJParCSRMatrix_Assemble;
+  epv->f_GetObject = impl_bHYPRE_IJParCSRMatrix_GetObject;
+  epv->f_SetLocalRange = impl_bHYPRE_IJParCSRMatrix_SetLocalRange;
+  epv->f_SetValues = skel_bHYPRE_IJParCSRMatrix_SetValues;
+  epv->f_AddToValues = skel_bHYPRE_IJParCSRMatrix_AddToValues;
+  epv->f_GetLocalRange = impl_bHYPRE_IJParCSRMatrix_GetLocalRange;
+  epv->f_GetRowCounts = skel_bHYPRE_IJParCSRMatrix_GetRowCounts;
+  epv->f_GetValues = skel_bHYPRE_IJParCSRMatrix_GetValues;
+  epv->f_SetRowSizes = skel_bHYPRE_IJParCSRMatrix_SetRowSizes;
+  epv->f_Print = impl_bHYPRE_IJParCSRMatrix_Print;
+  epv->f_Read = impl_bHYPRE_IJParCSRMatrix_Read;
   epv->f_SetIntParameter = impl_bHYPRE_IJParCSRMatrix_SetIntParameter;
   epv->f_SetDoubleParameter = impl_bHYPRE_IJParCSRMatrix_SetDoubleParameter;
   epv->f_SetStringParameter = impl_bHYPRE_IJParCSRMatrix_SetStringParameter;
@@ -472,23 +608,117 @@ bHYPRE_IJParCSRMatrix__set_epv(struct bHYPRE_IJParCSRMatrix__epv *epv)
   epv->f_GetDoubleValue = impl_bHYPRE_IJParCSRMatrix_GetDoubleValue;
   epv->f_Setup = impl_bHYPRE_IJParCSRMatrix_Setup;
   epv->f_Apply = impl_bHYPRE_IJParCSRMatrix_Apply;
-  epv->f_GetRow = skel_bHYPRE_IJParCSRMatrix_GetRow;
-  epv->f_Initialize = impl_bHYPRE_IJParCSRMatrix_Initialize;
-  epv->f_Assemble = impl_bHYPRE_IJParCSRMatrix_Assemble;
-  epv->f_GetObject = impl_bHYPRE_IJParCSRMatrix_GetObject;
-  epv->f_SetLocalRange = impl_bHYPRE_IJParCSRMatrix_SetLocalRange;
-  epv->f_SetValues = skel_bHYPRE_IJParCSRMatrix_SetValues;
-  epv->f_AddToValues = skel_bHYPRE_IJParCSRMatrix_AddToValues;
-  epv->f_GetLocalRange = impl_bHYPRE_IJParCSRMatrix_GetLocalRange;
-  epv->f_GetRowCounts = skel_bHYPRE_IJParCSRMatrix_GetRowCounts;
-  epv->f_GetValues = skel_bHYPRE_IJParCSRMatrix_GetValues;
-  epv->f_SetRowSizes = skel_bHYPRE_IJParCSRMatrix_SetRowSizes;
-  epv->f_Print = impl_bHYPRE_IJParCSRMatrix_Print;
-  epv->f_Read = impl_bHYPRE_IJParCSRMatrix_Read;
+
 }
 #ifdef __cplusplus
 }
 #endif
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+void bHYPRE_IJParCSRMatrix__call_load(void) { 
+  impl_bHYPRE_IJParCSRMatrix__load();
+}
+struct bHYPRE_CoefficientAccess__object* 
+  skel_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_CoefficientAccess(char* url,
+  sidl_BaseInterface *_ex) { 
+  return impl_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_CoefficientAccess(url, _ex);
+}
+
+char* skel_bHYPRE_IJParCSRMatrix_fgetURL_bHYPRE_CoefficientAccess(struct 
+  bHYPRE_CoefficientAccess__object* obj) { 
+  return impl_bHYPRE_IJParCSRMatrix_fgetURL_bHYPRE_CoefficientAccess(obj);
+}
+
+struct bHYPRE_IJBuildMatrix__object* 
+  skel_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_IJBuildMatrix(char* url,
+  sidl_BaseInterface *_ex) { 
+  return impl_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_IJBuildMatrix(url, _ex);
+}
+
+char* skel_bHYPRE_IJParCSRMatrix_fgetURL_bHYPRE_IJBuildMatrix(struct 
+  bHYPRE_IJBuildMatrix__object* obj) { 
+  return impl_bHYPRE_IJParCSRMatrix_fgetURL_bHYPRE_IJBuildMatrix(obj);
+}
+
+struct bHYPRE_Operator__object* 
+  skel_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_Operator(char* url,
+  sidl_BaseInterface *_ex) { 
+  return impl_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_Operator(url, _ex);
+}
+
+char* skel_bHYPRE_IJParCSRMatrix_fgetURL_bHYPRE_Operator(struct 
+  bHYPRE_Operator__object* obj) { 
+  return impl_bHYPRE_IJParCSRMatrix_fgetURL_bHYPRE_Operator(obj);
+}
+
+struct bHYPRE_IJParCSRMatrix__object* 
+  skel_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_IJParCSRMatrix(char* url,
+  sidl_BaseInterface *_ex) { 
+  return impl_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_IJParCSRMatrix(url, _ex);
+}
+
+char* skel_bHYPRE_IJParCSRMatrix_fgetURL_bHYPRE_IJParCSRMatrix(struct 
+  bHYPRE_IJParCSRMatrix__object* obj) { 
+  return impl_bHYPRE_IJParCSRMatrix_fgetURL_bHYPRE_IJParCSRMatrix(obj);
+}
+
+struct sidl_ClassInfo__object* 
+  skel_bHYPRE_IJParCSRMatrix_fconnect_sidl_ClassInfo(char* url,
+  sidl_BaseInterface *_ex) { 
+  return impl_bHYPRE_IJParCSRMatrix_fconnect_sidl_ClassInfo(url, _ex);
+}
+
+char* skel_bHYPRE_IJParCSRMatrix_fgetURL_sidl_ClassInfo(struct 
+  sidl_ClassInfo__object* obj) { 
+  return impl_bHYPRE_IJParCSRMatrix_fgetURL_sidl_ClassInfo(obj);
+}
+
+struct bHYPRE_Vector__object* 
+  skel_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_Vector(char* url,
+  sidl_BaseInterface *_ex) { 
+  return impl_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_Vector(url, _ex);
+}
+
+char* skel_bHYPRE_IJParCSRMatrix_fgetURL_bHYPRE_Vector(struct 
+  bHYPRE_Vector__object* obj) { 
+  return impl_bHYPRE_IJParCSRMatrix_fgetURL_bHYPRE_Vector(obj);
+}
+
+struct bHYPRE_ProblemDefinition__object* 
+  skel_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_ProblemDefinition(char* url,
+  sidl_BaseInterface *_ex) { 
+  return impl_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_ProblemDefinition(url, _ex);
+}
+
+char* skel_bHYPRE_IJParCSRMatrix_fgetURL_bHYPRE_ProblemDefinition(struct 
+  bHYPRE_ProblemDefinition__object* obj) { 
+  return impl_bHYPRE_IJParCSRMatrix_fgetURL_bHYPRE_ProblemDefinition(obj);
+}
+
+struct sidl_BaseInterface__object* 
+  skel_bHYPRE_IJParCSRMatrix_fconnect_sidl_BaseInterface(char* url,
+  sidl_BaseInterface *_ex) { 
+  return impl_bHYPRE_IJParCSRMatrix_fconnect_sidl_BaseInterface(url, _ex);
+}
+
+char* skel_bHYPRE_IJParCSRMatrix_fgetURL_sidl_BaseInterface(struct 
+  sidl_BaseInterface__object* obj) { 
+  return impl_bHYPRE_IJParCSRMatrix_fgetURL_sidl_BaseInterface(obj);
+}
+
+struct sidl_BaseClass__object* 
+  skel_bHYPRE_IJParCSRMatrix_fconnect_sidl_BaseClass(char* url,
+  sidl_BaseInterface *_ex) { 
+  return impl_bHYPRE_IJParCSRMatrix_fconnect_sidl_BaseClass(url, _ex);
+}
+
+char* skel_bHYPRE_IJParCSRMatrix_fgetURL_sidl_BaseClass(struct 
+  sidl_BaseClass__object* obj) { 
+  return impl_bHYPRE_IJParCSRMatrix_fgetURL_sidl_BaseClass(obj);
+}
 
 struct bHYPRE_IJParCSRMatrix__data*
 bHYPRE_IJParCSRMatrix__get_data(bHYPRE_IJParCSRMatrix self)
@@ -504,3 +734,6 @@ void bHYPRE_IJParCSRMatrix__set_data(
     self->d_data = data;
   }
 }
+#ifdef __cplusplus
+}
+#endif

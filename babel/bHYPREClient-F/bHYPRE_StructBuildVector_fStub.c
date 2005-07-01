@@ -2,12 +2,12 @@
  * File:          bHYPRE_StructBuildVector_fStub.c
  * Symbol:        bHYPRE.StructBuildVector-v1.0.0
  * Symbol Type:   interface
- * Babel Version: 0.9.8
+ * Babel Version: 0.10.4
  * Description:   Client-side glue code for bHYPRE.StructBuildVector
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.9.8
+ * babel-version = 0.10.4
  */
 
 /*
@@ -28,8 +28,8 @@
 #endif
 #include "bHYPRE_StructBuildVector_IOR.h"
 #include "bHYPRE_StructGrid_IOR.h"
-#include "sidl_BaseInterface_IOR.h"
 #include "sidl_ClassInfo_IOR.h"
+#include "sidl_BaseInterface_IOR.h"
 
 /*
  * Cast method for interface and type conversions.
@@ -49,8 +49,7 @@ SIDLFortran77Symbol(bhypre_structbuildvector__cast_f,BHYPRE_STRUCTBUILDVECTOR__C
       *_base->d_epv->f__cast)(
       _base->d_object,
       "bHYPRE.StructBuildVector");
-  }
-  else {
+  } else {
     *retval = 0;
   }
 }
@@ -281,7 +280,7 @@ SIDLFortran77Symbol(bhypre_structbuildvector_getclassinfo_f,BHYPRE_STRUCTBUILDVE
 }
 
 /*
- * Set the MPI Communicator.
+ * Set the MPI Communicator.  DEPRECATED, Use Create()
  * 
  */
 

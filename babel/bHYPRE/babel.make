@@ -33,21 +33,15 @@ IORHDRS = bHYPRE_BoomerAMG_IOR.h bHYPRE_CoefficientAccess_IOR.h               \
   bHYPRE_StructGrid_IOR.h bHYPRE_StructMatrix_IOR.h bHYPRE_StructPFMG_IOR.h   \
   bHYPRE_StructSMG_IOR.h bHYPRE_StructStencil_IOR.h bHYPRE_StructVector_IOR.h \
   bHYPRE_Vector_IOR.h
-IORSRCS = bHYPRE_BoomerAMG_IOR.c bHYPRE_CoefficientAccess_IOR.c               \
-  bHYPRE_GMRES_IOR.c bHYPRE_IJBuildMatrix_IOR.c bHYPRE_IJBuildVector_IOR.c    \
+IORSRCS = bHYPRE_BoomerAMG_IOR.c bHYPRE_GMRES_IOR.c                           \
   bHYPRE_IJParCSRMatrix_IOR.c bHYPRE_IJParCSRVector_IOR.c                     \
-  bHYPRE_IdentitySolver_IOR.c bHYPRE_Operator_IOR.c bHYPRE_PCG_IOR.c          \
-  bHYPRE_ParCSRDiagScale_IOR.c bHYPRE_ParaSails_IOR.c bHYPRE_Pilut_IOR.c      \
-  bHYPRE_PreconditionedSolver_IOR.c bHYPRE_ProblemDefinition_IOR.c            \
-  bHYPRE_SStructBuildMatrix_IOR.c bHYPRE_SStructBuildVector_IOR.c             \
-  bHYPRE_SStructGraph_IOR.c bHYPRE_SStructGrid_IOR.c                          \
-  bHYPRE_SStructMatrix_IOR.c bHYPRE_SStructParCSRMatrix_IOR.c                 \
-  bHYPRE_SStructParCSRVector_IOR.c bHYPRE_SStructStencil_IOR.c                \
-  bHYPRE_SStructVariable_IOR.c bHYPRE_SStructVector_IOR.c bHYPRE_Solver_IOR.c \
-  bHYPRE_StructBuildMatrix_IOR.c bHYPRE_StructBuildVector_IOR.c               \
+  bHYPRE_IdentitySolver_IOR.c bHYPRE_PCG_IOR.c bHYPRE_ParCSRDiagScale_IOR.c   \
+  bHYPRE_ParaSails_IOR.c bHYPRE_Pilut_IOR.c bHYPRE_SStructGraph_IOR.c         \
+  bHYPRE_SStructGrid_IOR.c bHYPRE_SStructMatrix_IOR.c                         \
+  bHYPRE_SStructParCSRMatrix_IOR.c bHYPRE_SStructParCSRVector_IOR.c           \
+  bHYPRE_SStructStencil_IOR.c bHYPRE_SStructVector_IOR.c                      \
   bHYPRE_StructGrid_IOR.c bHYPRE_StructMatrix_IOR.c bHYPRE_StructPFMG_IOR.c   \
-  bHYPRE_StructSMG_IOR.c bHYPRE_StructStencil_IOR.c bHYPRE_StructVector_IOR.c \
-  bHYPRE_Vector_IOR.c
+  bHYPRE_StructSMG_IOR.c bHYPRE_StructStencil_IOR.c bHYPRE_StructVector_IOR.c
 SKELSRCS = bHYPRE_BoomerAMG_Skel.c bHYPRE_GMRES_Skel.c                        \
   bHYPRE_IJParCSRMatrix_Skel.c bHYPRE_IJParCSRVector_Skel.c                   \
   bHYPRE_IdentitySolver_Skel.c bHYPRE_PCG_Skel.c                              \

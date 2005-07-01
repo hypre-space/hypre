@@ -2,98 +2,155 @@
  * File:          bHYPRE_SStructGrid_Skel.c
  * Symbol:        bHYPRE.SStructGrid-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.9.8
+ * Babel Version: 0.10.4
  * Description:   Server-side glue code for bHYPRE.SStructGrid
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.9.8
+ * babel-version = 0.10.4
  */
 
 #include "bHYPRE_SStructGrid_IOR.h"
 #include "bHYPRE_SStructGrid.h"
 #include <stddef.h>
 
-extern void
+extern
+void
+impl_bHYPRE_SStructGrid__load(
+  void);
+
+extern
+void
 impl_bHYPRE_SStructGrid__ctor(
-  bHYPRE_SStructGrid);
+  /* in */ bHYPRE_SStructGrid self);
 
-extern void
+extern
+void
 impl_bHYPRE_SStructGrid__dtor(
-  bHYPRE_SStructGrid);
+  /* in */ bHYPRE_SStructGrid self);
 
-extern int32_t
+extern struct bHYPRE_SStructGrid__object* 
+  impl_bHYPRE_SStructGrid_fconnect_bHYPRE_SStructGrid(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_SStructGrid_fgetURL_bHYPRE_SStructGrid(struct 
+  bHYPRE_SStructGrid__object* obj);
+extern struct sidl_ClassInfo__object* 
+  impl_bHYPRE_SStructGrid_fconnect_sidl_ClassInfo(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_SStructGrid_fgetURL_sidl_ClassInfo(struct 
+  sidl_ClassInfo__object* obj);
+extern struct sidl_BaseInterface__object* 
+  impl_bHYPRE_SStructGrid_fconnect_sidl_BaseInterface(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_SStructGrid_fgetURL_sidl_BaseInterface(struct 
+  sidl_BaseInterface__object* obj);
+extern struct sidl_BaseClass__object* 
+  impl_bHYPRE_SStructGrid_fconnect_sidl_BaseClass(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_SStructGrid_fgetURL_sidl_BaseClass(struct 
+  sidl_BaseClass__object* obj);
+extern
+int32_t
 impl_bHYPRE_SStructGrid_SetNumDimParts(
-  bHYPRE_SStructGrid,
-  int32_t,
-  int32_t);
+  /* in */ bHYPRE_SStructGrid self,
+  /* in */ int32_t ndim,
+  /* in */ int32_t nparts);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_SStructGrid_SetCommunicator(
-  bHYPRE_SStructGrid,
-  void*);
+  /* in */ bHYPRE_SStructGrid self,
+  /* in */ void* mpi_comm);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_SStructGrid_SetExtents(
-  bHYPRE_SStructGrid,
-  int32_t,
-  struct sidl_int__array*,
-  struct sidl_int__array*);
+  /* in */ bHYPRE_SStructGrid self,
+  /* in */ int32_t part,
+  /* in */ struct sidl_int__array* ilower,
+  /* in */ struct sidl_int__array* iupper);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_SStructGrid_SetVariable(
-  bHYPRE_SStructGrid,
-  int32_t,
-  int32_t,
-  int32_t,
-  enum bHYPRE_SStructVariable__enum);
+  /* in */ bHYPRE_SStructGrid self,
+  /* in */ int32_t part,
+  /* in */ int32_t var,
+  /* in */ int32_t nvars,
+  /* in */ enum bHYPRE_SStructVariable__enum vartype);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_SStructGrid_AddVariable(
-  bHYPRE_SStructGrid,
-  int32_t,
-  struct sidl_int__array*,
-  int32_t,
-  enum bHYPRE_SStructVariable__enum);
+  /* in */ bHYPRE_SStructGrid self,
+  /* in */ int32_t part,
+  /* in */ struct sidl_int__array* index,
+  /* in */ int32_t var,
+  /* in */ enum bHYPRE_SStructVariable__enum vartype);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_SStructGrid_SetNeighborBox(
-  bHYPRE_SStructGrid,
-  int32_t,
-  struct sidl_int__array*,
-  struct sidl_int__array*,
-  int32_t,
-  struct sidl_int__array*,
-  struct sidl_int__array*,
-  struct sidl_int__array*);
+  /* in */ bHYPRE_SStructGrid self,
+  /* in */ int32_t part,
+  /* in */ struct sidl_int__array* ilower,
+  /* in */ struct sidl_int__array* iupper,
+  /* in */ int32_t nbor_part,
+  /* in */ struct sidl_int__array* nbor_ilower,
+  /* in */ struct sidl_int__array* nbor_iupper,
+  /* in */ struct sidl_int__array* index_map);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_SStructGrid_AddUnstructuredPart(
-  bHYPRE_SStructGrid,
-  int32_t,
-  int32_t);
+  /* in */ bHYPRE_SStructGrid self,
+  /* in */ int32_t ilower,
+  /* in */ int32_t iupper);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_SStructGrid_SetPeriodic(
-  bHYPRE_SStructGrid,
-  int32_t,
-  struct sidl_int__array*);
+  /* in */ bHYPRE_SStructGrid self,
+  /* in */ int32_t part,
+  /* in */ struct sidl_int__array* periodic);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_SStructGrid_SetNumGhost(
-  bHYPRE_SStructGrid,
-  struct sidl_int__array*);
+  /* in */ bHYPRE_SStructGrid self,
+  /* in */ struct sidl_int__array* num_ghost);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_SStructGrid_Assemble(
-  bHYPRE_SStructGrid);
+  /* in */ bHYPRE_SStructGrid self);
 
+extern struct bHYPRE_SStructGrid__object* 
+  impl_bHYPRE_SStructGrid_fconnect_bHYPRE_SStructGrid(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_SStructGrid_fgetURL_bHYPRE_SStructGrid(struct 
+  bHYPRE_SStructGrid__object* obj);
+extern struct sidl_ClassInfo__object* 
+  impl_bHYPRE_SStructGrid_fconnect_sidl_ClassInfo(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_SStructGrid_fgetURL_sidl_ClassInfo(struct 
+  sidl_ClassInfo__object* obj);
+extern struct sidl_BaseInterface__object* 
+  impl_bHYPRE_SStructGrid_fconnect_sidl_BaseInterface(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_SStructGrid_fgetURL_sidl_BaseInterface(struct 
+  sidl_BaseInterface__object* obj);
+extern struct sidl_BaseClass__object* 
+  impl_bHYPRE_SStructGrid_fconnect_sidl_BaseClass(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_SStructGrid_fgetURL_sidl_BaseClass(struct 
+  sidl_BaseClass__object* obj);
 static int32_t
 skel_bHYPRE_SStructGrid_SetExtents(
-  /*in*/ bHYPRE_SStructGrid self,
-  /*in*/ int32_t part,
-  /*in*/ struct sidl_int__array* ilower,
-  /*in*/ struct sidl_int__array* iupper)
+  /* in */ bHYPRE_SStructGrid self,
+  /* in */ int32_t part,
+  /* in */ struct sidl_int__array* ilower,
+/* in */ struct sidl_int__array* iupper)
 {
   int32_t _return;
   struct sidl_int__array* ilower_proxy = sidl_int__array_ensure(ilower, 1,
@@ -113,11 +170,11 @@ skel_bHYPRE_SStructGrid_SetExtents(
 
 static int32_t
 skel_bHYPRE_SStructGrid_AddVariable(
-  /*in*/ bHYPRE_SStructGrid self,
-  /*in*/ int32_t part,
-  /*in*/ struct sidl_int__array* index,
-  /*in*/ int32_t var,
-  /*in*/ enum bHYPRE_SStructVariable__enum vartype)
+  /* in */ bHYPRE_SStructGrid self,
+  /* in */ int32_t part,
+  /* in */ struct sidl_int__array* index,
+  /* in */ int32_t var,
+/* in */ enum bHYPRE_SStructVariable__enum vartype)
 {
   int32_t _return;
   struct sidl_int__array* index_proxy = sidl_int__array_ensure(index, 1,
@@ -135,14 +192,14 @@ skel_bHYPRE_SStructGrid_AddVariable(
 
 static int32_t
 skel_bHYPRE_SStructGrid_SetNeighborBox(
-  /*in*/ bHYPRE_SStructGrid self,
-  /*in*/ int32_t part,
-  /*in*/ struct sidl_int__array* ilower,
-  /*in*/ struct sidl_int__array* iupper,
-  /*in*/ int32_t nbor_part,
-  /*in*/ struct sidl_int__array* nbor_ilower,
-  /*in*/ struct sidl_int__array* nbor_iupper,
-  /*in*/ struct sidl_int__array* index_map)
+  /* in */ bHYPRE_SStructGrid self,
+  /* in */ int32_t part,
+  /* in */ struct sidl_int__array* ilower,
+  /* in */ struct sidl_int__array* iupper,
+  /* in */ int32_t nbor_part,
+  /* in */ struct sidl_int__array* nbor_ilower,
+  /* in */ struct sidl_int__array* nbor_iupper,
+/* in */ struct sidl_int__array* index_map)
 {
   int32_t _return;
   struct sidl_int__array* ilower_proxy = sidl_int__array_ensure(ilower, 1,
@@ -175,9 +232,9 @@ skel_bHYPRE_SStructGrid_SetNeighborBox(
 
 static int32_t
 skel_bHYPRE_SStructGrid_SetPeriodic(
-  /*in*/ bHYPRE_SStructGrid self,
-  /*in*/ int32_t part,
-  /*in*/ struct sidl_int__array* periodic)
+  /* in */ bHYPRE_SStructGrid self,
+  /* in */ int32_t part,
+/* in */ struct sidl_int__array* periodic)
 {
   int32_t _return;
   struct sidl_int__array* periodic_proxy = sidl_int__array_ensure(periodic, 1,
@@ -193,8 +250,8 @@ skel_bHYPRE_SStructGrid_SetPeriodic(
 
 static int32_t
 skel_bHYPRE_SStructGrid_SetNumGhost(
-  /*in*/ bHYPRE_SStructGrid self,
-  /*in*/ struct sidl_int__array* num_ghost)
+  /* in */ bHYPRE_SStructGrid self,
+/* in */ struct sidl_int__array* num_ghost)
 {
   int32_t _return;
   struct sidl_int__array* num_ghost_proxy = sidl_int__array_ensure(num_ghost, 1,
@@ -226,10 +283,62 @@ bHYPRE_SStructGrid__set_epv(struct bHYPRE_SStructGrid__epv *epv)
   epv->f_SetPeriodic = skel_bHYPRE_SStructGrid_SetPeriodic;
   epv->f_SetNumGhost = skel_bHYPRE_SStructGrid_SetNumGhost;
   epv->f_Assemble = impl_bHYPRE_SStructGrid_Assemble;
+
 }
 #ifdef __cplusplus
 }
 #endif
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+void bHYPRE_SStructGrid__call_load(void) { 
+  impl_bHYPRE_SStructGrid__load();
+}
+struct bHYPRE_SStructGrid__object* 
+  skel_bHYPRE_SStructGrid_fconnect_bHYPRE_SStructGrid(char* url,
+  sidl_BaseInterface *_ex) { 
+  return impl_bHYPRE_SStructGrid_fconnect_bHYPRE_SStructGrid(url, _ex);
+}
+
+char* skel_bHYPRE_SStructGrid_fgetURL_bHYPRE_SStructGrid(struct 
+  bHYPRE_SStructGrid__object* obj) { 
+  return impl_bHYPRE_SStructGrid_fgetURL_bHYPRE_SStructGrid(obj);
+}
+
+struct sidl_ClassInfo__object* 
+  skel_bHYPRE_SStructGrid_fconnect_sidl_ClassInfo(char* url,
+  sidl_BaseInterface *_ex) { 
+  return impl_bHYPRE_SStructGrid_fconnect_sidl_ClassInfo(url, _ex);
+}
+
+char* skel_bHYPRE_SStructGrid_fgetURL_sidl_ClassInfo(struct 
+  sidl_ClassInfo__object* obj) { 
+  return impl_bHYPRE_SStructGrid_fgetURL_sidl_ClassInfo(obj);
+}
+
+struct sidl_BaseInterface__object* 
+  skel_bHYPRE_SStructGrid_fconnect_sidl_BaseInterface(char* url,
+  sidl_BaseInterface *_ex) { 
+  return impl_bHYPRE_SStructGrid_fconnect_sidl_BaseInterface(url, _ex);
+}
+
+char* skel_bHYPRE_SStructGrid_fgetURL_sidl_BaseInterface(struct 
+  sidl_BaseInterface__object* obj) { 
+  return impl_bHYPRE_SStructGrid_fgetURL_sidl_BaseInterface(obj);
+}
+
+struct sidl_BaseClass__object* 
+  skel_bHYPRE_SStructGrid_fconnect_sidl_BaseClass(char* url,
+  sidl_BaseInterface *_ex) { 
+  return impl_bHYPRE_SStructGrid_fconnect_sidl_BaseClass(url, _ex);
+}
+
+char* skel_bHYPRE_SStructGrid_fgetURL_sidl_BaseClass(struct 
+  sidl_BaseClass__object* obj) { 
+  return impl_bHYPRE_SStructGrid_fgetURL_sidl_BaseClass(obj);
+}
 
 struct bHYPRE_SStructGrid__data*
 bHYPRE_SStructGrid__get_data(bHYPRE_SStructGrid self)
@@ -245,3 +354,6 @@ void bHYPRE_SStructGrid__set_data(
     self->d_data = data;
   }
 }
+#ifdef __cplusplus
+}
+#endif

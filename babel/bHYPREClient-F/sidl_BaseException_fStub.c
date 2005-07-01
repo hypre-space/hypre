@@ -1,8 +1,8 @@
 /*
  * File:          sidl_BaseException_fStub.c
- * Symbol:        sidl.BaseException-v0.9.0
+ * Symbol:        sidl.BaseException-v0.9.3
  * Symbol Type:   interface
- * Babel Version: 0.9.8
+ * Babel Version: 0.10.4
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Client-side glue code for sidl.BaseException
@@ -32,11 +32,12 @@
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.9.8
+ * babel-version = 0.10.4
+ * xml-url       = /home/painter/babel/share/babel-0.10.4/repository/sidl.BaseException-v0.9.3.xml
  */
 
 /*
- * Symbol "sidl.BaseException" (version 0.9.0)
+ * Symbol "sidl.BaseException" (version 0.9.3)
  * 
  * Every exception implements <code>BaseException</code>. This interface
  * declares the basic functionality to get and set error messages and stack
@@ -52,8 +53,8 @@
 #endif
 #include <stdio.h>
 #include "sidl_BaseException_IOR.h"
-#include "sidl_BaseInterface_IOR.h"
 #include "sidl_ClassInfo_IOR.h"
+#include "sidl_BaseInterface_IOR.h"
 
 /*
  * Cast method for interface and type conversions.
@@ -73,8 +74,7 @@ SIDLFortran77Symbol(sidl_baseexception__cast_f,SIDL_BASEEXCEPTION__CAST_F,sidl_B
       *_base->d_epv->f__cast)(
       _base->d_object,
       "sidl.BaseException");
-  }
-  else {
+  } else {
     *retval = 0;
   }
 }

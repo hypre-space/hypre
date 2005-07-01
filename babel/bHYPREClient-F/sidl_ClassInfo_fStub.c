@@ -1,8 +1,8 @@
 /*
  * File:          sidl_ClassInfo_fStub.c
- * Symbol:        sidl.ClassInfo-v0.9.0
+ * Symbol:        sidl.ClassInfo-v0.9.3
  * Symbol Type:   interface
- * Babel Version: 0.9.8
+ * Babel Version: 0.10.4
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Client-side glue code for sidl.ClassInfo
@@ -32,11 +32,12 @@
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.9.8
+ * babel-version = 0.10.4
+ * xml-url       = /home/painter/babel/share/babel-0.10.4/repository/sidl.ClassInfo-v0.9.3.xml
  */
 
 /*
- * Symbol "sidl.ClassInfo" (version 0.9.0)
+ * Symbol "sidl.ClassInfo" (version 0.9.3)
  * 
  * This provides an interface to the meta-data available on the
  * class.
@@ -71,8 +72,7 @@ SIDLFortran77Symbol(sidl_classinfo__cast_f,SIDL_CLASSINFO__CAST_F,sidl_ClassInfo
       *_base->d_epv->f__cast)(
       _base->d_object,
       "sidl.ClassInfo");
-  }
-  else {
+  } else {
     *retval = 0;
   }
 }

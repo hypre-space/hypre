@@ -2,12 +2,12 @@
  * File:          bHYPRE_StructBuildMatrix.h
  * Symbol:        bHYPRE.StructBuildMatrix-v1.0.0
  * Symbol Type:   interface
- * Babel Version: 0.9.8
+ * Babel Version: 0.10.4
  * Description:   Client-side glue code for bHYPRE.StructBuildMatrix
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.9.8
+ * babel-version = 0.10.4
  */
 
 #ifndef included_bHYPRE_StructBuildMatrix_h
@@ -40,133 +40,144 @@ typedef struct bHYPRE_StructBuildMatrix__object* bHYPRE_StructBuildMatrix;
 #include "sidl_ClassInfo.h"
 #endif
 
+#ifndef included_sidl_io_Serializer_h
+#include "sidl_io_Serializer.h"
+#endif
+#ifndef included_sidl_io_Deserializer_h
+#include "sidl_io_Deserializer.h"
+#endif
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+/**
+ * RMI connector function for the class.
+ */
+bHYPRE_StructBuildMatrix
+bHYPRE_StructBuildMatrix__connect(const char *, sidl_BaseInterface *_ex);
 void
 bHYPRE_StructBuildMatrix_addRef(
-  /*in*/ bHYPRE_StructBuildMatrix self);
+  /* in */ bHYPRE_StructBuildMatrix self);
 
 void
 bHYPRE_StructBuildMatrix_deleteRef(
-  /*in*/ bHYPRE_StructBuildMatrix self);
+  /* in */ bHYPRE_StructBuildMatrix self);
 
 sidl_bool
 bHYPRE_StructBuildMatrix_isSame(
-  /*in*/ bHYPRE_StructBuildMatrix self,
-  /*in*/ sidl_BaseInterface iobj);
+  /* in */ bHYPRE_StructBuildMatrix self,
+  /* in */ sidl_BaseInterface iobj);
 
 sidl_BaseInterface
 bHYPRE_StructBuildMatrix_queryInt(
-  /*in*/ bHYPRE_StructBuildMatrix self,
-  /*in*/ const char* name);
+  /* in */ bHYPRE_StructBuildMatrix self,
+  /* in */ const char* name);
 
 sidl_bool
 bHYPRE_StructBuildMatrix_isType(
-  /*in*/ bHYPRE_StructBuildMatrix self,
-  /*in*/ const char* name);
+  /* in */ bHYPRE_StructBuildMatrix self,
+  /* in */ const char* name);
 
 sidl_ClassInfo
 bHYPRE_StructBuildMatrix_getClassInfo(
-  /*in*/ bHYPRE_StructBuildMatrix self);
+  /* in */ bHYPRE_StructBuildMatrix self);
 
 int32_t
 bHYPRE_StructBuildMatrix_SetCommunicator(
-  /*in*/ bHYPRE_StructBuildMatrix self,
-  /*in*/ void* mpi_comm);
+  /* in */ bHYPRE_StructBuildMatrix self,
+  /* in */ void* mpi_comm);
 
 int32_t
 bHYPRE_StructBuildMatrix_Initialize(
-  /*in*/ bHYPRE_StructBuildMatrix self);
+  /* in */ bHYPRE_StructBuildMatrix self);
 
 int32_t
 bHYPRE_StructBuildMatrix_Assemble(
-  /*in*/ bHYPRE_StructBuildMatrix self);
+  /* in */ bHYPRE_StructBuildMatrix self);
 
 int32_t
 bHYPRE_StructBuildMatrix_GetObject(
-  /*in*/ bHYPRE_StructBuildMatrix self,
-  /*out*/ sidl_BaseInterface* A);
+  /* in */ bHYPRE_StructBuildMatrix self,
+  /* out */ sidl_BaseInterface* A);
 
 /**
  * Method:  SetGrid[]
  */
 int32_t
 bHYPRE_StructBuildMatrix_SetGrid(
-  /*in*/ bHYPRE_StructBuildMatrix self,
-  /*in*/ bHYPRE_StructGrid grid);
+  /* in */ bHYPRE_StructBuildMatrix self,
+  /* in */ bHYPRE_StructGrid grid);
 
 /**
  * Method:  SetStencil[]
  */
 int32_t
 bHYPRE_StructBuildMatrix_SetStencil(
-  /*in*/ bHYPRE_StructBuildMatrix self,
-  /*in*/ bHYPRE_StructStencil stencil);
+  /* in */ bHYPRE_StructBuildMatrix self,
+  /* in */ bHYPRE_StructStencil stencil);
 
 /**
  * Method:  SetValues[]
  */
 int32_t
 bHYPRE_StructBuildMatrix_SetValues(
-  /*in*/ bHYPRE_StructBuildMatrix self,
-  /*in*/ struct sidl_int__array* index,
-  /*in*/ int32_t num_stencil_indices,
-  /*in*/ struct sidl_int__array* stencil_indices,
-  /*in*/ struct sidl_double__array* values);
+  /* in */ bHYPRE_StructBuildMatrix self,
+  /* in */ struct sidl_int__array* index,
+  /* in */ int32_t num_stencil_indices,
+  /* in */ struct sidl_int__array* stencil_indices,
+  /* in */ struct sidl_double__array* values);
 
 /**
  * Method:  SetBoxValues[]
  */
 int32_t
 bHYPRE_StructBuildMatrix_SetBoxValues(
-  /*in*/ bHYPRE_StructBuildMatrix self,
-  /*in*/ struct sidl_int__array* ilower,
-  /*in*/ struct sidl_int__array* iupper,
-  /*in*/ int32_t num_stencil_indices,
-  /*in*/ struct sidl_int__array* stencil_indices,
-  /*in*/ struct sidl_double__array* values);
+  /* in */ bHYPRE_StructBuildMatrix self,
+  /* in */ struct sidl_int__array* ilower,
+  /* in */ struct sidl_int__array* iupper,
+  /* in */ int32_t num_stencil_indices,
+  /* in */ struct sidl_int__array* stencil_indices,
+  /* in */ struct sidl_double__array* values);
 
 /**
  * Method:  SetNumGhost[]
  */
 int32_t
 bHYPRE_StructBuildMatrix_SetNumGhost(
-  /*in*/ bHYPRE_StructBuildMatrix self,
-  /*in*/ struct sidl_int__array* num_ghost);
+  /* in */ bHYPRE_StructBuildMatrix self,
+  /* in */ struct sidl_int__array* num_ghost);
 
 /**
  * Method:  SetSymmetric[]
  */
 int32_t
 bHYPRE_StructBuildMatrix_SetSymmetric(
-  /*in*/ bHYPRE_StructBuildMatrix self,
-  /*in*/ int32_t symmetric);
+  /* in */ bHYPRE_StructBuildMatrix self,
+  /* in */ int32_t symmetric);
 
 /**
  * Method:  SetConstantEntries[]
  */
 int32_t
 bHYPRE_StructBuildMatrix_SetConstantEntries(
-  /*in*/ bHYPRE_StructBuildMatrix self,
-  /*in*/ int32_t num_stencil_constant_points,
-  /*in*/ struct sidl_int__array* stencil_constant_points);
+  /* in */ bHYPRE_StructBuildMatrix self,
+  /* in */ int32_t num_stencil_constant_points,
+  /* in */ struct sidl_int__array* stencil_constant_points);
 
 /**
  * Method:  SetConstantValues[]
  */
 int32_t
 bHYPRE_StructBuildMatrix_SetConstantValues(
-  /*in*/ bHYPRE_StructBuildMatrix self,
-  /*in*/ int32_t num_stencil_indices,
-  /*in*/ struct sidl_int__array* stencil_indices,
-  /*in*/ struct sidl_double__array* values);
+  /* in */ bHYPRE_StructBuildMatrix self,
+  /* in */ int32_t num_stencil_indices,
+  /* in */ struct sidl_int__array* stencil_indices,
+  /* in */ struct sidl_double__array* values);
 
 /**
  * Cast method for interface and class type conversions.
  */
-bHYPRE_StructBuildMatrix
+struct bHYPRE_StructBuildMatrix__object*
 bHYPRE_StructBuildMatrix__cast(
   void* obj);
 
@@ -178,6 +189,29 @@ bHYPRE_StructBuildMatrix__cast2(
   void* obj,
   const char* type);
 
+/**
+ * Select and execute a method by name
+ */
+void
+bHYPRE_StructBuildMatrix__exec(
+  /* in */ bHYPRE_StructBuildMatrix self,
+  /* in */ const char* methodName,
+  /* in */ sidl_io_Deserializer inArgs,
+  /* in */ sidl_io_Serializer outArgs);
+/**
+ * static Exec method for reflexity.
+ */
+void
+bHYPRE_StructBuildMatrix__sexec(
+  /* in */ const char* methodName,
+  /* in */ sidl_io_Deserializer inArgs,
+  /* in */ sidl_io_Serializer outArgs);
+/**
+ * Get the URL of the Implementation of this object (for RMI)
+ */
+char*
+bHYPRE_StructBuildMatrix__getURL(
+  /* in */ bHYPRE_StructBuildMatrix self);
 struct bHYPRE_StructBuildMatrix__array*
 bHYPRE_StructBuildMatrix__array_createCol(
   int32_t       dimen,

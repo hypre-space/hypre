@@ -1,8 +1,8 @@
 /*
  * File:          sidl_Loader_fStub.c
- * Symbol:        sidl.Loader-v0.9.0
+ * Symbol:        sidl.Loader-v0.9.3
  * Symbol Type:   class
- * Babel Version: 0.9.8
+ * Babel Version: 0.10.4
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Client-side glue code for sidl.Loader
@@ -32,18 +32,24 @@
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.9.8
+ * babel-version = 0.10.4
+ * xml-url       = /home/painter/babel/share/babel-0.10.4/repository/sidl.Loader-v0.9.3.xml
  */
 
 /*
- * Symbol "sidl.Loader" (version 0.9.0)
+ * Symbol "sidl.Loader" (version 0.9.3)
  * 
  * Class <code>Loader</code> manages dyanamic loading and symbol name
  * resolution for the sidl runtime system.  The <code>Loader</code> class
  * manages a library search path and keeps a record of all libraries
  * loaded through this interface, including the initial "global" symbols
- * in the main program.  Unless explicitly set, the search path is taken
- * from the environment variable SIDL_DLL_PATH, which is a semi-colon
+ * in the main program.
+ * 
+ * Unless explicitly set, the <code>Loader</code> uses the default
+ * <code>sidl.Finder</code> implemented in <code>sidl.DFinder</code>.
+ * This class searches the filesystem for <code>.scl</code> files when
+ * trying to find a class. The initial path is taken from the
+ * environment variable SIDL_DLL_PATH, which is a semi-colon
  * separated sequence of URIs as described in class <code>DLL</code>.
  */
 
@@ -56,11 +62,12 @@
 #endif
 #include <stdio.h>
 #include "sidl_Loader_IOR.h"
-#include "sidl_BaseInterface_IOR.h"
+#include "sidl_Finder_IOR.h"
 #include "sidl_DLL_IOR.h"
 #include "sidl_ClassInfo_IOR.h"
-#include "sidl_Scope_IOR.h"
 #include "sidl_Resolve_IOR.h"
+#include "sidl_BaseInterface_IOR.h"
+#include "sidl_Scope_IOR.h"
 
 /*
  * Return pointer to internal IOR functions.
@@ -119,8 +126,7 @@ SIDLFortran77Symbol(sidl_loader__cast_f,SIDL_LOADER__CAST_F,sidl_Loader__cast_f)
       *_base->d_epv->f__cast)(
       _base->d_object,
       "sidl.Loader");
-  }
-  else {
+  } else {
     *retval = 0;
   }
 }
@@ -351,84 +357,6 @@ SIDLFortran77Symbol(sidl_loader_getclassinfo_f,SIDL_LOADER_GETCLASSINFO_F,sidl_L
 }
 
 /*
- * Set the search path, which is a semi-colon separated sequence of
- * URIs as described in class <code>DLL</code>.  This method will
- * invalidate any existing search path.
- */
-
-void
-SIDLFortran77Symbol(sidl_loader_setsearchpath_f,SIDL_LOADER_SETSEARCHPATH_F,sidl_Loader_setSearchPath_f)
-(
-  SIDL_F77_String path_name
-  SIDL_F77_STR_NEAR_LEN_DECL(path_name)
-  SIDL_F77_STR_FAR_LEN_DECL(path_name)
-)
-{
-  const struct sidl_Loader__sepv *_epv = _getSEPV();
-  char* _proxy_path_name = NULL;
-  _proxy_path_name =
-    sidl_copy_fortran_str(SIDL_F77_STR(path_name),
-      SIDL_F77_STR_LEN(path_name));
-  (*(_epv->f_setSearchPath))(
-    _proxy_path_name
-  );
-  free((void *)_proxy_path_name);
-}
-
-/*
- * Return the current search path.  If the search path has not been
- * set, then the search path will be taken from environment variable
- * SIDL_DLL_PATH.
- */
-
-void
-SIDLFortran77Symbol(sidl_loader_getsearchpath_f,SIDL_LOADER_GETSEARCHPATH_F,sidl_Loader_getSearchPath_f)
-(
-  SIDL_F77_String retval
-  SIDL_F77_STR_NEAR_LEN_DECL(retval)
-  SIDL_F77_STR_FAR_LEN_DECL(retval)
-)
-{
-  const struct sidl_Loader__sepv *_epv = _getSEPV();
-  char* _proxy_retval = NULL;
-  _proxy_retval = 
-    (*(_epv->f_getSearchPath))(
-
-    );
-  sidl_copy_c_str(
-    SIDL_F77_STR(retval),
-    SIDL_F77_STR_LEN(retval),
-    _proxy_retval);
-  free((void *)_proxy_retval);
-}
-
-/*
- * Append the specified path fragment to the beginning of the
- * current search path.  If the search path has not yet been set
- * by a call to <code>setSearchPath</code>, then this fragment will
- * be appended to the path in environment variable SIDL_DLL_PATH.
- */
-
-void
-SIDLFortran77Symbol(sidl_loader_addsearchpath_f,SIDL_LOADER_ADDSEARCHPATH_F,sidl_Loader_addSearchPath_f)
-(
-  SIDL_F77_String path_fragment
-  SIDL_F77_STR_NEAR_LEN_DECL(path_fragment)
-  SIDL_F77_STR_FAR_LEN_DECL(path_fragment)
-)
-{
-  const struct sidl_Loader__sepv *_epv = _getSEPV();
-  char* _proxy_path_fragment = NULL;
-  _proxy_path_fragment =
-    sidl_copy_fortran_str(SIDL_F77_STR(path_fragment),
-      SIDL_F77_STR_LEN(path_fragment));
-  (*(_epv->f_addSearchPath))(
-    _proxy_path_fragment
-  );
-  free((void *)_proxy_path_fragment);
-}
-
-/*
  * Load the specified library if it has not already been loaded.
  * The URI format is defined in class <code>DLL</code>.  The search
  * path is not searched to resolve the library name.
@@ -528,6 +456,11 @@ void)
  * for a shared library that contains the client-side or IOR
  * for a particular sidl class.
  * 
+ * This call is implemented by calling the current
+ * <code>Finder</code>. The default finder searches the local
+ * file system for <code>.scl</code> files to locate the
+ * target class/interface.
+ * 
  * @param sidl_name  the fully qualified (long) name of the
  *                   class/interface to be found. Package names
  *                   are separated by period characters from each
@@ -590,6 +523,136 @@ SIDLFortran77Symbol(sidl_loader_findlibrary_f,SIDL_LOADER_FINDLIBRARY_F,sidl_Loa
   *retval = (ptrdiff_t)_proxy_retval;
   free((void *)_proxy_sidl_name);
   free((void *)_proxy_target);
+}
+
+/*
+ * Set the search path, which is a semi-colon separated sequence of
+ * URIs as described in class <code>DLL</code>.  This method will
+ * invalidate any existing search path.
+ * 
+ * This updates the search path in the current <code>Finder</code>.
+ */
+
+void
+SIDLFortran77Symbol(sidl_loader_setsearchpath_f,SIDL_LOADER_SETSEARCHPATH_F,sidl_Loader_setSearchPath_f)
+(
+  SIDL_F77_String path_name
+  SIDL_F77_STR_NEAR_LEN_DECL(path_name)
+  SIDL_F77_STR_FAR_LEN_DECL(path_name)
+)
+{
+  const struct sidl_Loader__sepv *_epv = _getSEPV();
+  char* _proxy_path_name = NULL;
+  _proxy_path_name =
+    sidl_copy_fortran_str(SIDL_F77_STR(path_name),
+      SIDL_F77_STR_LEN(path_name));
+  (*(_epv->f_setSearchPath))(
+    _proxy_path_name
+  );
+  free((void *)_proxy_path_name);
+}
+
+/*
+ * Return the current search path.  The default
+ * <code>Finder</code> initializes the search path
+ * from environment variable SIDL_DLL_PATH.
+ * 
+ */
+
+void
+SIDLFortran77Symbol(sidl_loader_getsearchpath_f,SIDL_LOADER_GETSEARCHPATH_F,sidl_Loader_getSearchPath_f)
+(
+  SIDL_F77_String retval
+  SIDL_F77_STR_NEAR_LEN_DECL(retval)
+  SIDL_F77_STR_FAR_LEN_DECL(retval)
+)
+{
+  const struct sidl_Loader__sepv *_epv = _getSEPV();
+  char* _proxy_retval = NULL;
+  _proxy_retval = 
+    (*(_epv->f_getSearchPath))(
+
+    );
+  sidl_copy_c_str(
+    SIDL_F77_STR(retval),
+    SIDL_F77_STR_LEN(retval),
+    _proxy_retval);
+  free((void *)_proxy_retval);
+}
+
+/*
+ * Append the specified path fragment to the beginning of the
+ * current search path.  This method operates on the Loader's
+ * current <code>Finder</code>. This will add a path to the
+ * current search path. Normally, the search path is initialized
+ * from the SIDL_DLL_PATH environment variable.
+ */
+
+void
+SIDLFortran77Symbol(sidl_loader_addsearchpath_f,SIDL_LOADER_ADDSEARCHPATH_F,sidl_Loader_addSearchPath_f)
+(
+  SIDL_F77_String path_fragment
+  SIDL_F77_STR_NEAR_LEN_DECL(path_fragment)
+  SIDL_F77_STR_FAR_LEN_DECL(path_fragment)
+)
+{
+  const struct sidl_Loader__sepv *_epv = _getSEPV();
+  char* _proxy_path_fragment = NULL;
+  _proxy_path_fragment =
+    sidl_copy_fortran_str(SIDL_F77_STR(path_fragment),
+      SIDL_F77_STR_LEN(path_fragment));
+  (*(_epv->f_addSearchPath))(
+    _proxy_path_fragment
+  );
+  free((void *)_proxy_path_fragment);
+}
+
+/*
+ * This method sets the <code>Finder</code> that
+ * <code>Loader</code> will use to find DLLs.  If no
+ * <code>Finder</code> is set or if NULL is passed in, the Default
+ * Finder <code>DFinder</code> will be used.
+ * 
+ * Future calls to <code>findLibrary</code>,
+ * <code>addSearchPath</code>, <code>getSearchPath</code>, and
+ * <code>setSearchPath</code> are deligated to the
+ * <code>Finder</code> set here.
+ */
+
+void
+SIDLFortran77Symbol(sidl_loader_setfinder_f,SIDL_LOADER_SETFINDER_F,sidl_Loader_setFinder_f)
+(
+  int64_t *f
+)
+{
+  const struct sidl_Loader__sepv *_epv = _getSEPV();
+  struct sidl_Finder__object* _proxy_f = NULL;
+  _proxy_f =
+    (struct sidl_Finder__object*)
+    (ptrdiff_t)(*f);
+  (*(_epv->f_setFinder))(
+    _proxy_f
+  );
+}
+
+/*
+ * This method gets the <code>Finder</code> that <code>Loader</code>
+ * uses to find DLLs.  
+ */
+
+void
+SIDLFortran77Symbol(sidl_loader_getfinder_f,SIDL_LOADER_GETFINDER_F,sidl_Loader_getFinder_f)
+(
+  int64_t *retval
+)
+{
+  const struct sidl_Loader__sepv *_epv = _getSEPV();
+  struct sidl_Finder__object* _proxy_retval = NULL;
+  _proxy_retval = 
+    (*(_epv->f_getFinder))(
+
+    );
+  *retval = (ptrdiff_t)_proxy_retval;
 }
 
 void

@@ -2,12 +2,12 @@
  * File:          bHYPRE_StructSMG.h
  * Symbol:        bHYPRE.StructSMG-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.9.8
+ * Babel Version: 0.10.4
  * Description:   Client-side glue code for bHYPRE.StructSMG
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.9.8
+ * babel-version = 0.10.4
  */
 
 #ifndef included_bHYPRE_StructSMG_h
@@ -40,6 +40,12 @@ typedef struct bHYPRE_StructSMG__object* bHYPRE_StructSMG;
 #include "sidl_ClassInfo.h"
 #endif
 
+#ifndef included_sidl_io_Serializer_h
+#include "sidl_io_Serializer.h"
+#endif
+#ifndef included_sidl_io_Deserializer_h
+#include "sidl_io_Deserializer.h"
+#endif
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -47,35 +53,46 @@ extern "C" {
 /**
  * Constructor function for the class.
  */
-bHYPRE_StructSMG
+struct bHYPRE_StructSMG__object*
 bHYPRE_StructSMG__create(void);
 
+/**
+ * RMI constructor function for the class.
+ */
+bHYPRE_StructSMG
+bHYPRE_StructSMG__createRemote(const char *, sidl_BaseInterface *_ex);
+
+/**
+ * RMI connector function for the class.
+ */
+bHYPRE_StructSMG
+bHYPRE_StructSMG__connect(const char *, sidl_BaseInterface *_ex);
 void
 bHYPRE_StructSMG_addRef(
-  /*in*/ bHYPRE_StructSMG self);
+  /* in */ bHYPRE_StructSMG self);
 
 void
 bHYPRE_StructSMG_deleteRef(
-  /*in*/ bHYPRE_StructSMG self);
+  /* in */ bHYPRE_StructSMG self);
 
 sidl_bool
 bHYPRE_StructSMG_isSame(
-  /*in*/ bHYPRE_StructSMG self,
-  /*in*/ sidl_BaseInterface iobj);
+  /* in */ bHYPRE_StructSMG self,
+  /* in */ sidl_BaseInterface iobj);
 
 sidl_BaseInterface
 bHYPRE_StructSMG_queryInt(
-  /*in*/ bHYPRE_StructSMG self,
-  /*in*/ const char* name);
+  /* in */ bHYPRE_StructSMG self,
+  /* in */ const char* name);
 
 sidl_bool
 bHYPRE_StructSMG_isType(
-  /*in*/ bHYPRE_StructSMG self,
-  /*in*/ const char* name);
+  /* in */ bHYPRE_StructSMG self,
+  /* in */ const char* name);
 
 sidl_ClassInfo
 bHYPRE_StructSMG_getClassInfo(
-  /*in*/ bHYPRE_StructSMG self);
+  /* in */ bHYPRE_StructSMG self);
 
 /**
  * Set the MPI Communicator.
@@ -83,8 +100,8 @@ bHYPRE_StructSMG_getClassInfo(
  */
 int32_t
 bHYPRE_StructSMG_SetCommunicator(
-  /*in*/ bHYPRE_StructSMG self,
-  /*in*/ void* mpi_comm);
+  /* in */ bHYPRE_StructSMG self,
+  /* in */ void* mpi_comm);
 
 /**
  * Set the int parameter associated with {\tt name}.
@@ -92,9 +109,9 @@ bHYPRE_StructSMG_SetCommunicator(
  */
 int32_t
 bHYPRE_StructSMG_SetIntParameter(
-  /*in*/ bHYPRE_StructSMG self,
-  /*in*/ const char* name,
-  /*in*/ int32_t value);
+  /* in */ bHYPRE_StructSMG self,
+  /* in */ const char* name,
+  /* in */ int32_t value);
 
 /**
  * Set the double parameter associated with {\tt name}.
@@ -102,9 +119,9 @@ bHYPRE_StructSMG_SetIntParameter(
  */
 int32_t
 bHYPRE_StructSMG_SetDoubleParameter(
-  /*in*/ bHYPRE_StructSMG self,
-  /*in*/ const char* name,
-  /*in*/ double value);
+  /* in */ bHYPRE_StructSMG self,
+  /* in */ const char* name,
+  /* in */ double value);
 
 /**
  * Set the string parameter associated with {\tt name}.
@@ -112,9 +129,9 @@ bHYPRE_StructSMG_SetDoubleParameter(
  */
 int32_t
 bHYPRE_StructSMG_SetStringParameter(
-  /*in*/ bHYPRE_StructSMG self,
-  /*in*/ const char* name,
-  /*in*/ const char* value);
+  /* in */ bHYPRE_StructSMG self,
+  /* in */ const char* name,
+  /* in */ const char* value);
 
 /**
  * Set the int 1-D array parameter associated with {\tt name}.
@@ -122,9 +139,9 @@ bHYPRE_StructSMG_SetStringParameter(
  */
 int32_t
 bHYPRE_StructSMG_SetIntArray1Parameter(
-  /*in*/ bHYPRE_StructSMG self,
-  /*in*/ const char* name,
-  /*in*/ struct sidl_int__array* value);
+  /* in */ bHYPRE_StructSMG self,
+  /* in */ const char* name,
+  /* in */ struct sidl_int__array* value);
 
 /**
  * Set the int 2-D array parameter associated with {\tt name}.
@@ -132,9 +149,9 @@ bHYPRE_StructSMG_SetIntArray1Parameter(
  */
 int32_t
 bHYPRE_StructSMG_SetIntArray2Parameter(
-  /*in*/ bHYPRE_StructSMG self,
-  /*in*/ const char* name,
-  /*in*/ struct sidl_int__array* value);
+  /* in */ bHYPRE_StructSMG self,
+  /* in */ const char* name,
+  /* in */ struct sidl_int__array* value);
 
 /**
  * Set the double 1-D array parameter associated with {\tt name}.
@@ -142,9 +159,9 @@ bHYPRE_StructSMG_SetIntArray2Parameter(
  */
 int32_t
 bHYPRE_StructSMG_SetDoubleArray1Parameter(
-  /*in*/ bHYPRE_StructSMG self,
-  /*in*/ const char* name,
-  /*in*/ struct sidl_double__array* value);
+  /* in */ bHYPRE_StructSMG self,
+  /* in */ const char* name,
+  /* in */ struct sidl_double__array* value);
 
 /**
  * Set the double 2-D array parameter associated with {\tt name}.
@@ -152,9 +169,9 @@ bHYPRE_StructSMG_SetDoubleArray1Parameter(
  */
 int32_t
 bHYPRE_StructSMG_SetDoubleArray2Parameter(
-  /*in*/ bHYPRE_StructSMG self,
-  /*in*/ const char* name,
-  /*in*/ struct sidl_double__array* value);
+  /* in */ bHYPRE_StructSMG self,
+  /* in */ const char* name,
+  /* in */ struct sidl_double__array* value);
 
 /**
  * Set the int parameter associated with {\tt name}.
@@ -162,9 +179,9 @@ bHYPRE_StructSMG_SetDoubleArray2Parameter(
  */
 int32_t
 bHYPRE_StructSMG_GetIntValue(
-  /*in*/ bHYPRE_StructSMG self,
-  /*in*/ const char* name,
-  /*out*/ int32_t* value);
+  /* in */ bHYPRE_StructSMG self,
+  /* in */ const char* name,
+  /* out */ int32_t* value);
 
 /**
  * Get the double parameter associated with {\tt name}.
@@ -172,9 +189,9 @@ bHYPRE_StructSMG_GetIntValue(
  */
 int32_t
 bHYPRE_StructSMG_GetDoubleValue(
-  /*in*/ bHYPRE_StructSMG self,
-  /*in*/ const char* name,
-  /*out*/ double* value);
+  /* in */ bHYPRE_StructSMG self,
+  /* in */ const char* name,
+  /* out */ double* value);
 
 /**
  * (Optional) Do any preprocessing that may be necessary in
@@ -183,9 +200,9 @@ bHYPRE_StructSMG_GetDoubleValue(
  */
 int32_t
 bHYPRE_StructSMG_Setup(
-  /*in*/ bHYPRE_StructSMG self,
-  /*in*/ bHYPRE_Vector b,
-  /*in*/ bHYPRE_Vector x);
+  /* in */ bHYPRE_StructSMG self,
+  /* in */ bHYPRE_Vector b,
+  /* in */ bHYPRE_Vector x);
 
 /**
  * Apply the operator to {\tt b}, returning {\tt x}.
@@ -193,9 +210,9 @@ bHYPRE_StructSMG_Setup(
  */
 int32_t
 bHYPRE_StructSMG_Apply(
-  /*in*/ bHYPRE_StructSMG self,
-  /*in*/ bHYPRE_Vector b,
-  /*inout*/ bHYPRE_Vector* x);
+  /* in */ bHYPRE_StructSMG self,
+  /* in */ bHYPRE_Vector b,
+  /* inout */ bHYPRE_Vector* x);
 
 /**
  * Set the operator for the linear system being solved.
@@ -203,8 +220,8 @@ bHYPRE_StructSMG_Apply(
  */
 int32_t
 bHYPRE_StructSMG_SetOperator(
-  /*in*/ bHYPRE_StructSMG self,
-  /*in*/ bHYPRE_Operator A);
+  /* in */ bHYPRE_StructSMG self,
+  /* in */ bHYPRE_Operator A);
 
 /**
  * (Optional) Set the convergence tolerance.
@@ -212,8 +229,8 @@ bHYPRE_StructSMG_SetOperator(
  */
 int32_t
 bHYPRE_StructSMG_SetTolerance(
-  /*in*/ bHYPRE_StructSMG self,
-  /*in*/ double tolerance);
+  /* in */ bHYPRE_StructSMG self,
+  /* in */ double tolerance);
 
 /**
  * (Optional) Set maximum number of iterations.
@@ -221,8 +238,8 @@ bHYPRE_StructSMG_SetTolerance(
  */
 int32_t
 bHYPRE_StructSMG_SetMaxIterations(
-  /*in*/ bHYPRE_StructSMG self,
-  /*in*/ int32_t max_iterations);
+  /* in */ bHYPRE_StructSMG self,
+  /* in */ int32_t max_iterations);
 
 /**
  * (Optional) Set the {\it logging level}, specifying the degree
@@ -234,8 +251,8 @@ bHYPRE_StructSMG_SetMaxIterations(
  */
 int32_t
 bHYPRE_StructSMG_SetLogging(
-  /*in*/ bHYPRE_StructSMG self,
-  /*in*/ int32_t level);
+  /* in */ bHYPRE_StructSMG self,
+  /* in */ int32_t level);
 
 /**
  * (Optional) Set the {\it print level}, specifying the degree
@@ -247,8 +264,8 @@ bHYPRE_StructSMG_SetLogging(
  */
 int32_t
 bHYPRE_StructSMG_SetPrintLevel(
-  /*in*/ bHYPRE_StructSMG self,
-  /*in*/ int32_t level);
+  /* in */ bHYPRE_StructSMG self,
+  /* in */ int32_t level);
 
 /**
  * (Optional) Return the number of iterations taken.
@@ -256,8 +273,8 @@ bHYPRE_StructSMG_SetPrintLevel(
  */
 int32_t
 bHYPRE_StructSMG_GetNumIterations(
-  /*in*/ bHYPRE_StructSMG self,
-  /*out*/ int32_t* num_iterations);
+  /* in */ bHYPRE_StructSMG self,
+  /* out */ int32_t* num_iterations);
 
 /**
  * (Optional) Return the norm of the relative residual.
@@ -265,13 +282,13 @@ bHYPRE_StructSMG_GetNumIterations(
  */
 int32_t
 bHYPRE_StructSMG_GetRelResidualNorm(
-  /*in*/ bHYPRE_StructSMG self,
-  /*out*/ double* norm);
+  /* in */ bHYPRE_StructSMG self,
+  /* out */ double* norm);
 
 /**
  * Cast method for interface and class type conversions.
  */
-bHYPRE_StructSMG
+struct bHYPRE_StructSMG__object*
 bHYPRE_StructSMG__cast(
   void* obj);
 
@@ -283,6 +300,29 @@ bHYPRE_StructSMG__cast2(
   void* obj,
   const char* type);
 
+/**
+ * Select and execute a method by name
+ */
+void
+bHYPRE_StructSMG__exec(
+  /* in */ bHYPRE_StructSMG self,
+  /* in */ const char* methodName,
+  /* in */ sidl_io_Deserializer inArgs,
+  /* in */ sidl_io_Serializer outArgs);
+/**
+ * static Exec method for reflexity.
+ */
+void
+bHYPRE_StructSMG__sexec(
+  /* in */ const char* methodName,
+  /* in */ sidl_io_Deserializer inArgs,
+  /* in */ sidl_io_Serializer outArgs);
+/**
+ * Get the URL of the Implementation of this object (for RMI)
+ */
+char*
+bHYPRE_StructSMG__getURL(
+  /* in */ bHYPRE_StructSMG self);
 struct bHYPRE_StructSMG__array*
 bHYPRE_StructSMG__array_createCol(
   int32_t       dimen,

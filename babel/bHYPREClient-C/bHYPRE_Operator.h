@@ -2,12 +2,12 @@
  * File:          bHYPRE_Operator.h
  * Symbol:        bHYPRE.Operator-v1.0.0
  * Symbol Type:   interface
- * Babel Version: 0.9.8
+ * Babel Version: 0.10.4
  * Description:   Client-side glue code for bHYPRE.Operator
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.9.8
+ * babel-version = 0.10.4
  */
 
 #ifndef included_bHYPRE_Operator_h
@@ -43,36 +43,47 @@ typedef struct bHYPRE_Operator__object* bHYPRE_Operator;
 #include "sidl_ClassInfo.h"
 #endif
 
+#ifndef included_sidl_io_Serializer_h
+#include "sidl_io_Serializer.h"
+#endif
+#ifndef included_sidl_io_Deserializer_h
+#include "sidl_io_Deserializer.h"
+#endif
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+/**
+ * RMI connector function for the class.
+ */
+bHYPRE_Operator
+bHYPRE_Operator__connect(const char *, sidl_BaseInterface *_ex);
 void
 bHYPRE_Operator_addRef(
-  /*in*/ bHYPRE_Operator self);
+  /* in */ bHYPRE_Operator self);
 
 void
 bHYPRE_Operator_deleteRef(
-  /*in*/ bHYPRE_Operator self);
+  /* in */ bHYPRE_Operator self);
 
 sidl_bool
 bHYPRE_Operator_isSame(
-  /*in*/ bHYPRE_Operator self,
-  /*in*/ sidl_BaseInterface iobj);
+  /* in */ bHYPRE_Operator self,
+  /* in */ sidl_BaseInterface iobj);
 
 sidl_BaseInterface
 bHYPRE_Operator_queryInt(
-  /*in*/ bHYPRE_Operator self,
-  /*in*/ const char* name);
+  /* in */ bHYPRE_Operator self,
+  /* in */ const char* name);
 
 sidl_bool
 bHYPRE_Operator_isType(
-  /*in*/ bHYPRE_Operator self,
-  /*in*/ const char* name);
+  /* in */ bHYPRE_Operator self,
+  /* in */ const char* name);
 
 sidl_ClassInfo
 bHYPRE_Operator_getClassInfo(
-  /*in*/ bHYPRE_Operator self);
+  /* in */ bHYPRE_Operator self);
 
 /**
  * Set the MPI Communicator.
@@ -80,8 +91,8 @@ bHYPRE_Operator_getClassInfo(
  */
 int32_t
 bHYPRE_Operator_SetCommunicator(
-  /*in*/ bHYPRE_Operator self,
-  /*in*/ void* mpi_comm);
+  /* in */ bHYPRE_Operator self,
+  /* in */ void* mpi_comm);
 
 /**
  * Set the int parameter associated with {\tt name}.
@@ -89,9 +100,9 @@ bHYPRE_Operator_SetCommunicator(
  */
 int32_t
 bHYPRE_Operator_SetIntParameter(
-  /*in*/ bHYPRE_Operator self,
-  /*in*/ const char* name,
-  /*in*/ int32_t value);
+  /* in */ bHYPRE_Operator self,
+  /* in */ const char* name,
+  /* in */ int32_t value);
 
 /**
  * Set the double parameter associated with {\tt name}.
@@ -99,9 +110,9 @@ bHYPRE_Operator_SetIntParameter(
  */
 int32_t
 bHYPRE_Operator_SetDoubleParameter(
-  /*in*/ bHYPRE_Operator self,
-  /*in*/ const char* name,
-  /*in*/ double value);
+  /* in */ bHYPRE_Operator self,
+  /* in */ const char* name,
+  /* in */ double value);
 
 /**
  * Set the string parameter associated with {\tt name}.
@@ -109,9 +120,9 @@ bHYPRE_Operator_SetDoubleParameter(
  */
 int32_t
 bHYPRE_Operator_SetStringParameter(
-  /*in*/ bHYPRE_Operator self,
-  /*in*/ const char* name,
-  /*in*/ const char* value);
+  /* in */ bHYPRE_Operator self,
+  /* in */ const char* name,
+  /* in */ const char* value);
 
 /**
  * Set the int 1-D array parameter associated with {\tt name}.
@@ -119,9 +130,9 @@ bHYPRE_Operator_SetStringParameter(
  */
 int32_t
 bHYPRE_Operator_SetIntArray1Parameter(
-  /*in*/ bHYPRE_Operator self,
-  /*in*/ const char* name,
-  /*in*/ struct sidl_int__array* value);
+  /* in */ bHYPRE_Operator self,
+  /* in */ const char* name,
+  /* in */ struct sidl_int__array* value);
 
 /**
  * Set the int 2-D array parameter associated with {\tt name}.
@@ -129,9 +140,9 @@ bHYPRE_Operator_SetIntArray1Parameter(
  */
 int32_t
 bHYPRE_Operator_SetIntArray2Parameter(
-  /*in*/ bHYPRE_Operator self,
-  /*in*/ const char* name,
-  /*in*/ struct sidl_int__array* value);
+  /* in */ bHYPRE_Operator self,
+  /* in */ const char* name,
+  /* in */ struct sidl_int__array* value);
 
 /**
  * Set the double 1-D array parameter associated with {\tt name}.
@@ -139,9 +150,9 @@ bHYPRE_Operator_SetIntArray2Parameter(
  */
 int32_t
 bHYPRE_Operator_SetDoubleArray1Parameter(
-  /*in*/ bHYPRE_Operator self,
-  /*in*/ const char* name,
-  /*in*/ struct sidl_double__array* value);
+  /* in */ bHYPRE_Operator self,
+  /* in */ const char* name,
+  /* in */ struct sidl_double__array* value);
 
 /**
  * Set the double 2-D array parameter associated with {\tt name}.
@@ -149,9 +160,9 @@ bHYPRE_Operator_SetDoubleArray1Parameter(
  */
 int32_t
 bHYPRE_Operator_SetDoubleArray2Parameter(
-  /*in*/ bHYPRE_Operator self,
-  /*in*/ const char* name,
-  /*in*/ struct sidl_double__array* value);
+  /* in */ bHYPRE_Operator self,
+  /* in */ const char* name,
+  /* in */ struct sidl_double__array* value);
 
 /**
  * Set the int parameter associated with {\tt name}.
@@ -159,9 +170,9 @@ bHYPRE_Operator_SetDoubleArray2Parameter(
  */
 int32_t
 bHYPRE_Operator_GetIntValue(
-  /*in*/ bHYPRE_Operator self,
-  /*in*/ const char* name,
-  /*out*/ int32_t* value);
+  /* in */ bHYPRE_Operator self,
+  /* in */ const char* name,
+  /* out */ int32_t* value);
 
 /**
  * Get the double parameter associated with {\tt name}.
@@ -169,9 +180,9 @@ bHYPRE_Operator_GetIntValue(
  */
 int32_t
 bHYPRE_Operator_GetDoubleValue(
-  /*in*/ bHYPRE_Operator self,
-  /*in*/ const char* name,
-  /*out*/ double* value);
+  /* in */ bHYPRE_Operator self,
+  /* in */ const char* name,
+  /* out */ double* value);
 
 /**
  * (Optional) Do any preprocessing that may be necessary in
@@ -180,9 +191,9 @@ bHYPRE_Operator_GetDoubleValue(
  */
 int32_t
 bHYPRE_Operator_Setup(
-  /*in*/ bHYPRE_Operator self,
-  /*in*/ bHYPRE_Vector b,
-  /*in*/ bHYPRE_Vector x);
+  /* in */ bHYPRE_Operator self,
+  /* in */ bHYPRE_Vector b,
+  /* in */ bHYPRE_Vector x);
 
 /**
  * Apply the operator to {\tt b}, returning {\tt x}.
@@ -190,14 +201,14 @@ bHYPRE_Operator_Setup(
  */
 int32_t
 bHYPRE_Operator_Apply(
-  /*in*/ bHYPRE_Operator self,
-  /*in*/ bHYPRE_Vector b,
-  /*inout*/ bHYPRE_Vector* x);
+  /* in */ bHYPRE_Operator self,
+  /* in */ bHYPRE_Vector b,
+  /* inout */ bHYPRE_Vector* x);
 
 /**
  * Cast method for interface and class type conversions.
  */
-bHYPRE_Operator
+struct bHYPRE_Operator__object*
 bHYPRE_Operator__cast(
   void* obj);
 
@@ -209,6 +220,29 @@ bHYPRE_Operator__cast2(
   void* obj,
   const char* type);
 
+/**
+ * Select and execute a method by name
+ */
+void
+bHYPRE_Operator__exec(
+  /* in */ bHYPRE_Operator self,
+  /* in */ const char* methodName,
+  /* in */ sidl_io_Deserializer inArgs,
+  /* in */ sidl_io_Serializer outArgs);
+/**
+ * static Exec method for reflexity.
+ */
+void
+bHYPRE_Operator__sexec(
+  /* in */ const char* methodName,
+  /* in */ sidl_io_Deserializer inArgs,
+  /* in */ sidl_io_Serializer outArgs);
+/**
+ * Get the URL of the Implementation of this object (for RMI)
+ */
+char*
+bHYPRE_Operator__getURL(
+  /* in */ bHYPRE_Operator self);
 struct bHYPRE_Operator__array*
 bHYPRE_Operator__array_createCol(
   int32_t       dimen,

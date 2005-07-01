@@ -2,12 +2,12 @@
  * File:          bHYPRE_StructBuildMatrix_IOR.h
  * Symbol:        bHYPRE.StructBuildMatrix-v1.0.0
  * Symbol Type:   interface
- * Babel Version: 0.9.8
+ * Babel Version: 0.10.4
  * Description:   Intermediate Object Representation for bHYPRE.StructBuildMatrix
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.9.8
+ * babel-version = 0.10.4
  */
 
 #ifndef included_bHYPRE_StructBuildMatrix_IOR_h
@@ -27,9 +27,6 @@ extern "C" {
 struct bHYPRE_StructBuildMatrix__array;
 struct bHYPRE_StructBuildMatrix__object;
 
-extern struct bHYPRE_StructBuildMatrix__object*
-bHYPRE_StructBuildMatrix__remote(const char *url);
-
 /*
  * Forward references for external classes and interfaces.
  */
@@ -42,6 +39,10 @@ struct sidl_BaseInterface__array;
 struct sidl_BaseInterface__object;
 struct sidl_ClassInfo__array;
 struct sidl_ClassInfo__object;
+struct sidl_io_Deserializer__array;
+struct sidl_io_Deserializer__object;
+struct sidl_io_Serializer__array;
+struct sidl_io_Serializer__object;
 
 /*
  * Declare the method entry point vector.
@@ -50,72 +51,79 @@ struct sidl_ClassInfo__object;
 struct bHYPRE_StructBuildMatrix__epv {
   /* Implicit builtin methods */
   void* (*f__cast)(
-    void* self,
-    const char* name);
+    /* in */ void* self,
+    /* in */ const char* name);
   void (*f__delete)(
-    void* self);
-  /* Methods introduced in sidl.BaseInterface-v0.9.0 */
+    /* in */ void* self);
+  void (*f__exec)(
+    /* in */ void* self,
+    /* in */ const char* methodName,
+    /* in */ struct sidl_io_Deserializer__object* inArgs,
+    /* in */ struct sidl_io_Serializer__object* outArgs);
+  char* (*f__getURL)(
+    /* in */ void* self);
+  /* Methods introduced in sidl.BaseInterface-v0.9.3 */
   void (*f_addRef)(
-    void* self);
+    /* in */ void* self);
   void (*f_deleteRef)(
-    void* self);
+    /* in */ void* self);
   sidl_bool (*f_isSame)(
-    void* self,
-    struct sidl_BaseInterface__object* iobj);
+    /* in */ void* self,
+    /* in */ struct sidl_BaseInterface__object* iobj);
   struct sidl_BaseInterface__object* (*f_queryInt)(
-    void* self,
-    const char* name);
+    /* in */ void* self,
+    /* in */ const char* name);
   sidl_bool (*f_isType)(
-    void* self,
-    const char* name);
+    /* in */ void* self,
+    /* in */ const char* name);
   struct sidl_ClassInfo__object* (*f_getClassInfo)(
-    void* self);
+    /* in */ void* self);
   /* Methods introduced in bHYPRE.ProblemDefinition-v1.0.0 */
   int32_t (*f_SetCommunicator)(
-    void* self,
-    void* mpi_comm);
+    /* in */ void* self,
+    /* in */ void* mpi_comm);
   int32_t (*f_Initialize)(
-    void* self);
+    /* in */ void* self);
   int32_t (*f_Assemble)(
-    void* self);
+    /* in */ void* self);
   int32_t (*f_GetObject)(
-    void* self,
-    struct sidl_BaseInterface__object** A);
+    /* in */ void* self,
+    /* out */ struct sidl_BaseInterface__object** A);
   /* Methods introduced in bHYPRE.StructBuildMatrix-v1.0.0 */
   int32_t (*f_SetGrid)(
-    void* self,
-    struct bHYPRE_StructGrid__object* grid);
+    /* in */ void* self,
+    /* in */ struct bHYPRE_StructGrid__object* grid);
   int32_t (*f_SetStencil)(
-    void* self,
-    struct bHYPRE_StructStencil__object* stencil);
+    /* in */ void* self,
+    /* in */ struct bHYPRE_StructStencil__object* stencil);
   int32_t (*f_SetValues)(
-    void* self,
-    struct sidl_int__array* index,
-    int32_t num_stencil_indices,
-    struct sidl_int__array* stencil_indices,
-    struct sidl_double__array* values);
+    /* in */ void* self,
+    /* in */ struct sidl_int__array* index,
+    /* in */ int32_t num_stencil_indices,
+    /* in */ struct sidl_int__array* stencil_indices,
+    /* in */ struct sidl_double__array* values);
   int32_t (*f_SetBoxValues)(
-    void* self,
-    struct sidl_int__array* ilower,
-    struct sidl_int__array* iupper,
-    int32_t num_stencil_indices,
-    struct sidl_int__array* stencil_indices,
-    struct sidl_double__array* values);
+    /* in */ void* self,
+    /* in */ struct sidl_int__array* ilower,
+    /* in */ struct sidl_int__array* iupper,
+    /* in */ int32_t num_stencil_indices,
+    /* in */ struct sidl_int__array* stencil_indices,
+    /* in */ struct sidl_double__array* values);
   int32_t (*f_SetNumGhost)(
-    void* self,
-    struct sidl_int__array* num_ghost);
+    /* in */ void* self,
+    /* in */ struct sidl_int__array* num_ghost);
   int32_t (*f_SetSymmetric)(
-    void* self,
-    int32_t symmetric);
+    /* in */ void* self,
+    /* in */ int32_t symmetric);
   int32_t (*f_SetConstantEntries)(
-    void* self,
-    int32_t num_stencil_constant_points,
-    struct sidl_int__array* stencil_constant_points);
+    /* in */ void* self,
+    /* in */ int32_t num_stencil_constant_points,
+    /* in */ struct sidl_int__array* stencil_constant_points);
   int32_t (*f_SetConstantValues)(
-    void* self,
-    int32_t num_stencil_indices,
-    struct sidl_int__array* stencil_indices,
-    struct sidl_double__array* values);
+    /* in */ void* self,
+    /* in */ int32_t num_stencil_indices,
+    /* in */ struct sidl_int__array* stencil_indices,
+    /* in */ struct sidl_double__array* values);
 };
 
 /*
@@ -126,6 +134,130 @@ struct bHYPRE_StructBuildMatrix__object {
   struct bHYPRE_StructBuildMatrix__epv* d_epv;
   void*                                 d_object;
 };
+
+/**
+ * 
+ * 
+ * Anonymous class definition
+ * 
+ * 
+ */
+#ifndef included_bHYPRE_ProblemDefinition_IOR_h
+#include "bHYPRE_ProblemDefinition_IOR.h"
+#endif
+#ifndef included_bHYPRE_StructBuildMatrix_IOR_h
+#include "bHYPRE_StructBuildMatrix_IOR.h"
+#endif
+#ifndef included_sidl_BaseInterface_IOR_h
+#include "sidl_BaseInterface_IOR.h"
+#endif
+
+/*
+ * Symbol "bHYPRE._StructBuildMatrix" (version 1.0)
+ */
+
+struct bHYPRE__StructBuildMatrix__array;
+struct bHYPRE__StructBuildMatrix__object;
+
+/*
+ * Declare the method entry point vector.
+ */
+
+struct bHYPRE__StructBuildMatrix__epv {
+  /* Implicit builtin methods */
+  void* (*f__cast)(
+    /* in */ struct bHYPRE__StructBuildMatrix__object* self,
+    /* in */ const char* name);
+  void (*f__delete)(
+    /* in */ struct bHYPRE__StructBuildMatrix__object* self);
+  void (*f__exec)(
+    /* in */ struct bHYPRE__StructBuildMatrix__object* self,
+    /* in */ const char* methodName,
+    /* in */ struct sidl_io_Deserializer__object* inArgs,
+    /* in */ struct sidl_io_Serializer__object* outArgs);
+  char* (*f__getURL)(
+    /* in */ struct bHYPRE__StructBuildMatrix__object* self);
+  void (*f__ctor)(
+    /* in */ struct bHYPRE__StructBuildMatrix__object* self);
+  void (*f__dtor)(
+    /* in */ struct bHYPRE__StructBuildMatrix__object* self);
+  /* Methods introduced in sidl.BaseInterface-v0.9.3 */
+  void (*f_addRef)(
+    /* in */ struct bHYPRE__StructBuildMatrix__object* self);
+  void (*f_deleteRef)(
+    /* in */ struct bHYPRE__StructBuildMatrix__object* self);
+  sidl_bool (*f_isSame)(
+    /* in */ struct bHYPRE__StructBuildMatrix__object* self,
+    /* in */ struct sidl_BaseInterface__object* iobj);
+  struct sidl_BaseInterface__object* (*f_queryInt)(
+    /* in */ struct bHYPRE__StructBuildMatrix__object* self,
+    /* in */ const char* name);
+  sidl_bool (*f_isType)(
+    /* in */ struct bHYPRE__StructBuildMatrix__object* self,
+    /* in */ const char* name);
+  struct sidl_ClassInfo__object* (*f_getClassInfo)(
+    /* in */ struct bHYPRE__StructBuildMatrix__object* self);
+  /* Methods introduced in bHYPRE.ProblemDefinition-v1.0.0 */
+  int32_t (*f_SetCommunicator)(
+    /* in */ struct bHYPRE__StructBuildMatrix__object* self,
+    /* in */ void* mpi_comm);
+  int32_t (*f_Initialize)(
+    /* in */ struct bHYPRE__StructBuildMatrix__object* self);
+  int32_t (*f_Assemble)(
+    /* in */ struct bHYPRE__StructBuildMatrix__object* self);
+  int32_t (*f_GetObject)(
+    /* in */ struct bHYPRE__StructBuildMatrix__object* self,
+    /* out */ struct sidl_BaseInterface__object** A);
+  /* Methods introduced in bHYPRE.StructBuildMatrix-v1.0.0 */
+  int32_t (*f_SetGrid)(
+    /* in */ struct bHYPRE__StructBuildMatrix__object* self,
+    /* in */ struct bHYPRE_StructGrid__object* grid);
+  int32_t (*f_SetStencil)(
+    /* in */ struct bHYPRE__StructBuildMatrix__object* self,
+    /* in */ struct bHYPRE_StructStencil__object* stencil);
+  int32_t (*f_SetValues)(
+    /* in */ struct bHYPRE__StructBuildMatrix__object* self,
+    /* in */ struct sidl_int__array* index,
+    /* in */ int32_t num_stencil_indices,
+    /* in */ struct sidl_int__array* stencil_indices,
+    /* in */ struct sidl_double__array* values);
+  int32_t (*f_SetBoxValues)(
+    /* in */ struct bHYPRE__StructBuildMatrix__object* self,
+    /* in */ struct sidl_int__array* ilower,
+    /* in */ struct sidl_int__array* iupper,
+    /* in */ int32_t num_stencil_indices,
+    /* in */ struct sidl_int__array* stencil_indices,
+    /* in */ struct sidl_double__array* values);
+  int32_t (*f_SetNumGhost)(
+    /* in */ struct bHYPRE__StructBuildMatrix__object* self,
+    /* in */ struct sidl_int__array* num_ghost);
+  int32_t (*f_SetSymmetric)(
+    /* in */ struct bHYPRE__StructBuildMatrix__object* self,
+    /* in */ int32_t symmetric);
+  int32_t (*f_SetConstantEntries)(
+    /* in */ struct bHYPRE__StructBuildMatrix__object* self,
+    /* in */ int32_t num_stencil_constant_points,
+    /* in */ struct sidl_int__array* stencil_constant_points);
+  int32_t (*f_SetConstantValues)(
+    /* in */ struct bHYPRE__StructBuildMatrix__object* self,
+    /* in */ int32_t num_stencil_indices,
+    /* in */ struct sidl_int__array* stencil_indices,
+    /* in */ struct sidl_double__array* values);
+  /* Methods introduced in bHYPRE._StructBuildMatrix-v1.0 */
+};
+
+/*
+ * Define the class object structure.
+ */
+
+struct bHYPRE__StructBuildMatrix__object {
+  struct bHYPRE_ProblemDefinition__object d_bhypre_problemdefinition;
+  struct bHYPRE_StructBuildMatrix__object d_bhypre_structbuildmatrix;
+  struct sidl_BaseInterface__object       d_sidl_baseinterface;
+  struct bHYPRE__StructBuildMatrix__epv*  d_epv;
+  void*                                   d_data;
+};
+
 
 #ifdef __cplusplus
 }

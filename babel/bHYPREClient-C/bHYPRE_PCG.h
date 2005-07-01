@@ -2,12 +2,12 @@
  * File:          bHYPRE_PCG.h
  * Symbol:        bHYPRE.PCG-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.9.8
+ * Babel Version: 0.10.4
  * Description:   Client-side glue code for bHYPRE.PCG
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.9.8
+ * babel-version = 0.10.4
  */
 
 #ifndef included_bHYPRE_PCG_h
@@ -49,6 +49,12 @@ typedef struct bHYPRE_PCG__object* bHYPRE_PCG;
 #include "sidl_ClassInfo.h"
 #endif
 
+#ifndef included_sidl_io_Serializer_h
+#include "sidl_io_Serializer.h"
+#endif
+#ifndef included_sidl_io_Deserializer_h
+#include "sidl_io_Deserializer.h"
+#endif
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -56,35 +62,46 @@ extern "C" {
 /**
  * Constructor function for the class.
  */
-bHYPRE_PCG
+struct bHYPRE_PCG__object*
 bHYPRE_PCG__create(void);
 
+/**
+ * RMI constructor function for the class.
+ */
+bHYPRE_PCG
+bHYPRE_PCG__createRemote(const char *, sidl_BaseInterface *_ex);
+
+/**
+ * RMI connector function for the class.
+ */
+bHYPRE_PCG
+bHYPRE_PCG__connect(const char *, sidl_BaseInterface *_ex);
 void
 bHYPRE_PCG_addRef(
-  /*in*/ bHYPRE_PCG self);
+  /* in */ bHYPRE_PCG self);
 
 void
 bHYPRE_PCG_deleteRef(
-  /*in*/ bHYPRE_PCG self);
+  /* in */ bHYPRE_PCG self);
 
 sidl_bool
 bHYPRE_PCG_isSame(
-  /*in*/ bHYPRE_PCG self,
-  /*in*/ sidl_BaseInterface iobj);
+  /* in */ bHYPRE_PCG self,
+  /* in */ sidl_BaseInterface iobj);
 
 sidl_BaseInterface
 bHYPRE_PCG_queryInt(
-  /*in*/ bHYPRE_PCG self,
-  /*in*/ const char* name);
+  /* in */ bHYPRE_PCG self,
+  /* in */ const char* name);
 
 sidl_bool
 bHYPRE_PCG_isType(
-  /*in*/ bHYPRE_PCG self,
-  /*in*/ const char* name);
+  /* in */ bHYPRE_PCG self,
+  /* in */ const char* name);
 
 sidl_ClassInfo
 bHYPRE_PCG_getClassInfo(
-  /*in*/ bHYPRE_PCG self);
+  /* in */ bHYPRE_PCG self);
 
 /**
  * Set the MPI Communicator.
@@ -92,8 +109,8 @@ bHYPRE_PCG_getClassInfo(
  */
 int32_t
 bHYPRE_PCG_SetCommunicator(
-  /*in*/ bHYPRE_PCG self,
-  /*in*/ void* mpi_comm);
+  /* in */ bHYPRE_PCG self,
+  /* in */ void* mpi_comm);
 
 /**
  * Set the int parameter associated with {\tt name}.
@@ -101,9 +118,9 @@ bHYPRE_PCG_SetCommunicator(
  */
 int32_t
 bHYPRE_PCG_SetIntParameter(
-  /*in*/ bHYPRE_PCG self,
-  /*in*/ const char* name,
-  /*in*/ int32_t value);
+  /* in */ bHYPRE_PCG self,
+  /* in */ const char* name,
+  /* in */ int32_t value);
 
 /**
  * Set the double parameter associated with {\tt name}.
@@ -111,9 +128,9 @@ bHYPRE_PCG_SetIntParameter(
  */
 int32_t
 bHYPRE_PCG_SetDoubleParameter(
-  /*in*/ bHYPRE_PCG self,
-  /*in*/ const char* name,
-  /*in*/ double value);
+  /* in */ bHYPRE_PCG self,
+  /* in */ const char* name,
+  /* in */ double value);
 
 /**
  * Set the string parameter associated with {\tt name}.
@@ -121,9 +138,9 @@ bHYPRE_PCG_SetDoubleParameter(
  */
 int32_t
 bHYPRE_PCG_SetStringParameter(
-  /*in*/ bHYPRE_PCG self,
-  /*in*/ const char* name,
-  /*in*/ const char* value);
+  /* in */ bHYPRE_PCG self,
+  /* in */ const char* name,
+  /* in */ const char* value);
 
 /**
  * Set the int 1-D array parameter associated with {\tt name}.
@@ -131,9 +148,9 @@ bHYPRE_PCG_SetStringParameter(
  */
 int32_t
 bHYPRE_PCG_SetIntArray1Parameter(
-  /*in*/ bHYPRE_PCG self,
-  /*in*/ const char* name,
-  /*in*/ struct sidl_int__array* value);
+  /* in */ bHYPRE_PCG self,
+  /* in */ const char* name,
+  /* in */ struct sidl_int__array* value);
 
 /**
  * Set the int 2-D array parameter associated with {\tt name}.
@@ -141,9 +158,9 @@ bHYPRE_PCG_SetIntArray1Parameter(
  */
 int32_t
 bHYPRE_PCG_SetIntArray2Parameter(
-  /*in*/ bHYPRE_PCG self,
-  /*in*/ const char* name,
-  /*in*/ struct sidl_int__array* value);
+  /* in */ bHYPRE_PCG self,
+  /* in */ const char* name,
+  /* in */ struct sidl_int__array* value);
 
 /**
  * Set the double 1-D array parameter associated with {\tt name}.
@@ -151,9 +168,9 @@ bHYPRE_PCG_SetIntArray2Parameter(
  */
 int32_t
 bHYPRE_PCG_SetDoubleArray1Parameter(
-  /*in*/ bHYPRE_PCG self,
-  /*in*/ const char* name,
-  /*in*/ struct sidl_double__array* value);
+  /* in */ bHYPRE_PCG self,
+  /* in */ const char* name,
+  /* in */ struct sidl_double__array* value);
 
 /**
  * Set the double 2-D array parameter associated with {\tt name}.
@@ -161,9 +178,9 @@ bHYPRE_PCG_SetDoubleArray1Parameter(
  */
 int32_t
 bHYPRE_PCG_SetDoubleArray2Parameter(
-  /*in*/ bHYPRE_PCG self,
-  /*in*/ const char* name,
-  /*in*/ struct sidl_double__array* value);
+  /* in */ bHYPRE_PCG self,
+  /* in */ const char* name,
+  /* in */ struct sidl_double__array* value);
 
 /**
  * Set the int parameter associated with {\tt name}.
@@ -171,9 +188,9 @@ bHYPRE_PCG_SetDoubleArray2Parameter(
  */
 int32_t
 bHYPRE_PCG_GetIntValue(
-  /*in*/ bHYPRE_PCG self,
-  /*in*/ const char* name,
-  /*out*/ int32_t* value);
+  /* in */ bHYPRE_PCG self,
+  /* in */ const char* name,
+  /* out */ int32_t* value);
 
 /**
  * Get the double parameter associated with {\tt name}.
@@ -181,9 +198,9 @@ bHYPRE_PCG_GetIntValue(
  */
 int32_t
 bHYPRE_PCG_GetDoubleValue(
-  /*in*/ bHYPRE_PCG self,
-  /*in*/ const char* name,
-  /*out*/ double* value);
+  /* in */ bHYPRE_PCG self,
+  /* in */ const char* name,
+  /* out */ double* value);
 
 /**
  * (Optional) Do any preprocessing that may be necessary in
@@ -192,9 +209,9 @@ bHYPRE_PCG_GetDoubleValue(
  */
 int32_t
 bHYPRE_PCG_Setup(
-  /*in*/ bHYPRE_PCG self,
-  /*in*/ bHYPRE_Vector b,
-  /*in*/ bHYPRE_Vector x);
+  /* in */ bHYPRE_PCG self,
+  /* in */ bHYPRE_Vector b,
+  /* in */ bHYPRE_Vector x);
 
 /**
  * Apply the operator to {\tt b}, returning {\tt x}.
@@ -202,9 +219,9 @@ bHYPRE_PCG_Setup(
  */
 int32_t
 bHYPRE_PCG_Apply(
-  /*in*/ bHYPRE_PCG self,
-  /*in*/ bHYPRE_Vector b,
-  /*inout*/ bHYPRE_Vector* x);
+  /* in */ bHYPRE_PCG self,
+  /* in */ bHYPRE_Vector b,
+  /* inout */ bHYPRE_Vector* x);
 
 /**
  * Set the operator for the linear system being solved.
@@ -212,8 +229,8 @@ bHYPRE_PCG_Apply(
  */
 int32_t
 bHYPRE_PCG_SetOperator(
-  /*in*/ bHYPRE_PCG self,
-  /*in*/ bHYPRE_Operator A);
+  /* in */ bHYPRE_PCG self,
+  /* in */ bHYPRE_Operator A);
 
 /**
  * (Optional) Set the convergence tolerance.
@@ -221,8 +238,8 @@ bHYPRE_PCG_SetOperator(
  */
 int32_t
 bHYPRE_PCG_SetTolerance(
-  /*in*/ bHYPRE_PCG self,
-  /*in*/ double tolerance);
+  /* in */ bHYPRE_PCG self,
+  /* in */ double tolerance);
 
 /**
  * (Optional) Set maximum number of iterations.
@@ -230,8 +247,8 @@ bHYPRE_PCG_SetTolerance(
  */
 int32_t
 bHYPRE_PCG_SetMaxIterations(
-  /*in*/ bHYPRE_PCG self,
-  /*in*/ int32_t max_iterations);
+  /* in */ bHYPRE_PCG self,
+  /* in */ int32_t max_iterations);
 
 /**
  * (Optional) Set the {\it logging level}, specifying the degree
@@ -243,8 +260,8 @@ bHYPRE_PCG_SetMaxIterations(
  */
 int32_t
 bHYPRE_PCG_SetLogging(
-  /*in*/ bHYPRE_PCG self,
-  /*in*/ int32_t level);
+  /* in */ bHYPRE_PCG self,
+  /* in */ int32_t level);
 
 /**
  * (Optional) Set the {\it print level}, specifying the degree
@@ -256,8 +273,8 @@ bHYPRE_PCG_SetLogging(
  */
 int32_t
 bHYPRE_PCG_SetPrintLevel(
-  /*in*/ bHYPRE_PCG self,
-  /*in*/ int32_t level);
+  /* in */ bHYPRE_PCG self,
+  /* in */ int32_t level);
 
 /**
  * (Optional) Return the number of iterations taken.
@@ -265,8 +282,8 @@ bHYPRE_PCG_SetPrintLevel(
  */
 int32_t
 bHYPRE_PCG_GetNumIterations(
-  /*in*/ bHYPRE_PCG self,
-  /*out*/ int32_t* num_iterations);
+  /* in */ bHYPRE_PCG self,
+  /* out */ int32_t* num_iterations);
 
 /**
  * (Optional) Return the norm of the relative residual.
@@ -274,8 +291,8 @@ bHYPRE_PCG_GetNumIterations(
  */
 int32_t
 bHYPRE_PCG_GetRelResidualNorm(
-  /*in*/ bHYPRE_PCG self,
-  /*out*/ double* norm);
+  /* in */ bHYPRE_PCG self,
+  /* out */ double* norm);
 
 /**
  * Set the preconditioner.
@@ -283,13 +300,13 @@ bHYPRE_PCG_GetRelResidualNorm(
  */
 int32_t
 bHYPRE_PCG_SetPreconditioner(
-  /*in*/ bHYPRE_PCG self,
-  /*in*/ bHYPRE_Solver s);
+  /* in */ bHYPRE_PCG self,
+  /* in */ bHYPRE_Solver s);
 
 /**
  * Cast method for interface and class type conversions.
  */
-bHYPRE_PCG
+struct bHYPRE_PCG__object*
 bHYPRE_PCG__cast(
   void* obj);
 
@@ -301,6 +318,29 @@ bHYPRE_PCG__cast2(
   void* obj,
   const char* type);
 
+/**
+ * Select and execute a method by name
+ */
+void
+bHYPRE_PCG__exec(
+  /* in */ bHYPRE_PCG self,
+  /* in */ const char* methodName,
+  /* in */ sidl_io_Deserializer inArgs,
+  /* in */ sidl_io_Serializer outArgs);
+/**
+ * static Exec method for reflexity.
+ */
+void
+bHYPRE_PCG__sexec(
+  /* in */ const char* methodName,
+  /* in */ sidl_io_Deserializer inArgs,
+  /* in */ sidl_io_Serializer outArgs);
+/**
+ * Get the URL of the Implementation of this object (for RMI)
+ */
+char*
+bHYPRE_PCG__getURL(
+  /* in */ bHYPRE_PCG self);
 struct bHYPRE_PCG__array*
 bHYPRE_PCG__array_createCol(
   int32_t       dimen,

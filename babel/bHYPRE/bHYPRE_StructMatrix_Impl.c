@@ -2,12 +2,12 @@
  * File:          bHYPRE_StructMatrix_Impl.c
  * Symbol:        bHYPRE.StructMatrix-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.9.8
+ * Babel Version: 0.10.4
  * Description:   Server-side implementation for bHYPRE.StructMatrix
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.9.8
+ * babel-version = 0.10.4
  */
 
 /*
@@ -40,15 +40,36 @@
 /* DO-NOT-DELETE splicer.end(bHYPRE.StructMatrix._includes) */
 
 /*
+ * Static class initializer called exactly once before any user-defined method is dispatched
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_StructMatrix__load"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+void
+impl_bHYPRE_StructMatrix__load(
+  void)
+{
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructMatrix._load) */
+  /* Insert-Code-Here {bHYPRE.StructMatrix._load} (static class initializer method) */
+  /* DO-NOT-DELETE splicer.end(bHYPRE.StructMatrix._load) */
+}
+/*
  * Class constructor called when the class is created.
  */
 
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_StructMatrix__ctor"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 void
 impl_bHYPRE_StructMatrix__ctor(
-  /*in*/ bHYPRE_StructMatrix self)
+  /* in */ bHYPRE_StructMatrix self)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.StructMatrix._ctor) */
   /* Insert the implementation of the constructor method here... */
@@ -78,9 +99,12 @@ impl_bHYPRE_StructMatrix__ctor(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_StructMatrix__dtor"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 void
 impl_bHYPRE_StructMatrix__dtor(
-  /*in*/ bHYPRE_StructMatrix self)
+  /* in */ bHYPRE_StructMatrix self)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.StructMatrix._dtor) */
   /* Insert the implementation of the destructor method here... */
@@ -98,16 +122,20 @@ impl_bHYPRE_StructMatrix__dtor(
 }
 
 /*
- * Set the MPI Communicator.
+ * Set the MPI Communicator.  DEPRECATED, Use Create()
  * 
  */
 
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_StructMatrix_SetCommunicator"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_StructMatrix_SetCommunicator(
-  /*in*/ bHYPRE_StructMatrix self, /*in*/ void* mpi_comm)
+  /* in */ bHYPRE_StructMatrix self,
+  /* in */ void* mpi_comm)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.StructMatrix.SetCommunicator) */
   /* Insert the implementation of the SetCommunicator method here... */
@@ -123,6 +151,422 @@ impl_bHYPRE_StructMatrix_SetCommunicator(
 }
 
 /*
+ * Prepare an object for setting coefficient values, whether for
+ * the first time or subsequently.
+ * 
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_StructMatrix_Initialize"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+int32_t
+impl_bHYPRE_StructMatrix_Initialize(
+  /* in */ bHYPRE_StructMatrix self)
+{
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructMatrix.Initialize) */
+  /* Insert the implementation of the Initialize method here... */
+
+   int ierr = 0;
+   struct bHYPRE_StructMatrix__data * data;
+   HYPRE_StructMatrix HA;
+
+   data = bHYPRE_StructMatrix__get_data( self );
+
+   HA = data -> matrix;
+
+   ierr = HYPRE_StructMatrixInitialize( HA );
+
+   return( ierr );
+
+  /* DO-NOT-DELETE splicer.end(bHYPRE.StructMatrix.Initialize) */
+}
+
+/*
+ * Finalize the construction of an object before using, either
+ * for the first time or on subsequent uses. {\tt Initialize}
+ * and {\tt Assemble} always appear in a matched set, with
+ * Initialize preceding Assemble. Values can only be set in
+ * between a call to Initialize and Assemble.
+ * 
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_StructMatrix_Assemble"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+int32_t
+impl_bHYPRE_StructMatrix_Assemble(
+  /* in */ bHYPRE_StructMatrix self)
+{
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructMatrix.Assemble) */
+  /* Insert the implementation of the Assemble method here... */
+
+   int ierr=0;
+   struct bHYPRE_StructMatrix__data * data;
+   HYPRE_StructMatrix HA;
+
+   data = bHYPRE_StructMatrix__get_data( self );
+
+   HA = data -> matrix;
+
+   ierr += HYPRE_StructMatrixAssemble( HA );
+
+   return( ierr );
+
+  /* DO-NOT-DELETE splicer.end(bHYPRE.StructMatrix.Assemble) */
+}
+
+/*
+ * The problem definition interface is a {\it builder} that
+ * creates an object that contains the problem definition
+ * information, e.g. a matrix. To perform subsequent operations
+ * with that object, it must be returned from the problem
+ * definition object. {\tt GetObject} performs this function.
+ * At compile time, the type of the returned object is unknown.
+ * Thus, the returned type is a sidl.BaseInterface.
+ * QueryInterface or Cast must be used on the returned object to
+ * convert it into a known type.
+ * 
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_StructMatrix_GetObject"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+int32_t
+impl_bHYPRE_StructMatrix_GetObject(
+  /* in */ bHYPRE_StructMatrix self,
+  /* out */ sidl_BaseInterface* A)
+{
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructMatrix.GetObject) */
+  /* Insert the implementation of the GetObject method here... */
+ 
+   bHYPRE_StructMatrix_addRef( self );
+   *A = sidl_BaseInterface__cast( self );
+   return( 0 );
+
+  /* DO-NOT-DELETE splicer.end(bHYPRE.StructMatrix.GetObject) */
+}
+
+/*
+ * Method:  SetGrid[]
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_StructMatrix_SetGrid"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+int32_t
+impl_bHYPRE_StructMatrix_SetGrid(
+  /* in */ bHYPRE_StructMatrix self,
+  /* in */ bHYPRE_StructGrid grid)
+{
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructMatrix.SetGrid) */
+  /* Insert the implementation of the SetGrid method here... */
+
+   /* To create a matrix one needs a grid, stencil, and communicator.
+      We assume SetCommunicator will be called first or can be changed.
+      SetGrid and SetStencil both check for whether the other one has been called.
+      If both have been called, we have enough information to call
+      HYPRE_StructMatrixCreate, so we do so.  It is an error to call this function
+      if HYPRE_StructMatrixCreate has already been called for this matrix.
+   */
+
+   int ierr = 0;
+   struct bHYPRE_StructMatrix__data * data;
+   HYPRE_StructMatrix HA;
+   HYPRE_StructGrid Hgrid;
+   HYPRE_StructStencil Hstencil;
+   MPI_Comm comm;
+   struct bHYPRE_StructGrid__data * gdata;
+
+   data = bHYPRE_StructMatrix__get_data( self );
+   HA = data->matrix;
+   assert( HA==NULL ); /* shouldn't have already been created */
+   comm = data->comm;
+   Hstencil = data->stencil;
+
+   gdata = bHYPRE_StructGrid__get_data( grid );
+   Hgrid = gdata->grid;
+   data->grid = Hgrid;
+
+   if ( Hstencil != NULL )
+   {
+      ierr += HYPRE_StructMatrixCreate( comm, Hgrid, Hstencil, &HA );
+      data->matrix = HA;
+   }
+
+   return( ierr );
+
+  /* DO-NOT-DELETE splicer.end(bHYPRE.StructMatrix.SetGrid) */
+}
+
+/*
+ * Method:  SetStencil[]
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_StructMatrix_SetStencil"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+int32_t
+impl_bHYPRE_StructMatrix_SetStencil(
+  /* in */ bHYPRE_StructMatrix self,
+  /* in */ bHYPRE_StructStencil stencil)
+{
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructMatrix.SetStencil) */
+  /* Insert the implementation of the SetStencil method here... */
+
+   int ierr = 0;
+   struct bHYPRE_StructMatrix__data * data;
+   HYPRE_StructMatrix HA;
+   HYPRE_StructGrid Hgrid;
+   HYPRE_StructStencil Hstencil;
+   MPI_Comm comm;
+   struct bHYPRE_StructStencil__data * sdata;
+
+   data = bHYPRE_StructMatrix__get_data( self );
+   HA = data->matrix;
+   assert( HA==NULL ); /* shouldn't have already been created */
+   comm = data->comm;
+   Hgrid = data->grid;
+
+   sdata = bHYPRE_StructStencil__get_data( stencil );
+   Hstencil = sdata->stencil;
+   data->stencil = Hstencil;
+
+   if ( Hgrid != NULL )
+   {
+      ierr += HYPRE_StructMatrixCreate( comm, Hgrid, Hstencil, &HA );
+      data->matrix = HA;
+   }
+
+   return( ierr );
+
+  /* DO-NOT-DELETE splicer.end(bHYPRE.StructMatrix.SetStencil) */
+}
+
+/*
+ * Method:  SetValues[]
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_StructMatrix_SetValues"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+int32_t
+impl_bHYPRE_StructMatrix_SetValues(
+  /* in */ bHYPRE_StructMatrix self,
+  /* in */ struct sidl_int__array* index,
+  /* in */ int32_t num_stencil_indices,
+  /* in */ struct sidl_int__array* stencil_indices,
+  /* in */ struct sidl_double__array* values)
+{
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructMatrix.SetValues) */
+  /* Insert the implementation of the SetValues method here... */
+
+   int ierr = 0;
+   struct bHYPRE_StructMatrix__data * data;
+   HYPRE_StructMatrix HA;
+   data = bHYPRE_StructMatrix__get_data( self );
+   HA = data -> matrix;
+
+   ierr += HYPRE_StructMatrixSetValues
+      ( HA, sidlArrayAddr1( index, 0 ), num_stencil_indices,
+        sidlArrayAddr1( stencil_indices, 0 ), sidlArrayAddr1( values, 0 ) );
+
+   return ierr;
+
+  /* DO-NOT-DELETE splicer.end(bHYPRE.StructMatrix.SetValues) */
+}
+
+/*
+ * Method:  SetBoxValues[]
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_StructMatrix_SetBoxValues"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+int32_t
+impl_bHYPRE_StructMatrix_SetBoxValues(
+  /* in */ bHYPRE_StructMatrix self,
+  /* in */ struct sidl_int__array* ilower,
+  /* in */ struct sidl_int__array* iupper,
+  /* in */ int32_t num_stencil_indices,
+  /* in */ struct sidl_int__array* stencil_indices,
+  /* in */ struct sidl_double__array* values)
+{
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructMatrix.SetBoxValues) */
+  /* Insert the implementation of the SetBoxValues method here... */
+
+   int ierr = 0;
+   struct bHYPRE_StructMatrix__data * data;
+   HYPRE_StructMatrix HA;
+   data = bHYPRE_StructMatrix__get_data( self );
+   HA = data -> matrix;
+
+   ierr += HYPRE_StructMatrixSetBoxValues
+      ( HA, sidlArrayAddr1( ilower, 0 ), sidlArrayAddr1( iupper, 0 ),
+        num_stencil_indices, sidlArrayAddr1( stencil_indices, 0 ),
+        sidlArrayAddr1( values, 0 ) );
+
+   return ierr;
+
+
+  /* DO-NOT-DELETE splicer.end(bHYPRE.StructMatrix.SetBoxValues) */
+}
+
+/*
+ * Method:  SetNumGhost[]
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_StructMatrix_SetNumGhost"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+int32_t
+impl_bHYPRE_StructMatrix_SetNumGhost(
+  /* in */ bHYPRE_StructMatrix self,
+  /* in */ struct sidl_int__array* num_ghost)
+{
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructMatrix.SetNumGhost) */
+  /* Insert the implementation of the SetNumGhost method here... */
+
+   int ierr = 0;
+   struct bHYPRE_StructMatrix__data * data;
+   HYPRE_StructMatrix HA;
+
+   data = bHYPRE_StructMatrix__get_data( self );
+   HA = data->matrix;
+
+   ierr += HYPRE_StructMatrixSetNumGhost( HA, sidlArrayAddr1( num_ghost, 0 ) );
+
+   return( ierr );
+
+  /* DO-NOT-DELETE splicer.end(bHYPRE.StructMatrix.SetNumGhost) */
+}
+
+/*
+ * Method:  SetSymmetric[]
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_StructMatrix_SetSymmetric"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+int32_t
+impl_bHYPRE_StructMatrix_SetSymmetric(
+  /* in */ bHYPRE_StructMatrix self,
+  /* in */ int32_t symmetric)
+{
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructMatrix.SetSymmetric) */
+  /* Insert the implementation of the SetSymmetric method here... */
+
+   int ierr = 0;
+   struct bHYPRE_StructMatrix__data * data;
+   HYPRE_StructMatrix HA;
+
+   data = bHYPRE_StructMatrix__get_data( self );
+   HA = data->matrix;
+
+   ierr += HYPRE_StructMatrixSetSymmetric( HA, symmetric );
+
+   return( ierr );
+
+  /* DO-NOT-DELETE splicer.end(bHYPRE.StructMatrix.SetSymmetric) */
+}
+
+/*
+ * Method:  SetConstantEntries[]
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_StructMatrix_SetConstantEntries"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+int32_t
+impl_bHYPRE_StructMatrix_SetConstantEntries(
+  /* in */ bHYPRE_StructMatrix self,
+  /* in */ int32_t num_stencil_constant_points,
+  /* in */ struct sidl_int__array* stencil_constant_points)
+{
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructMatrix.SetConstantEntries) */
+  /* Insert the implementation of the SetConstantEntries method here... */
+
+   int ierr = 0;
+   struct bHYPRE_StructMatrix__data * data;
+   HYPRE_StructMatrix HA;
+
+   data = bHYPRE_StructMatrix__get_data( self );
+   HA = data -> matrix;
+
+   ierr += HYPRE_StructMatrixSetConstantEntries
+      ( HA, num_stencil_constant_points, sidlArrayAddr1( stencil_constant_points, 0 ) );
+
+   return ierr;
+
+  /* DO-NOT-DELETE splicer.end(bHYPRE.StructMatrix.SetConstantEntries) */
+}
+
+/*
+ * Method:  SetConstantValues[]
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_StructMatrix_SetConstantValues"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+int32_t
+impl_bHYPRE_StructMatrix_SetConstantValues(
+  /* in */ bHYPRE_StructMatrix self,
+  /* in */ int32_t num_stencil_indices,
+  /* in */ struct sidl_int__array* stencil_indices,
+  /* in */ struct sidl_double__array* values)
+{
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructMatrix.SetConstantValues) */
+  /* Insert the implementation of the SetConstantValues method here... */
+
+
+   int ierr = 0;
+   struct bHYPRE_StructMatrix__data * data;
+   HYPRE_StructMatrix HA;
+   data = bHYPRE_StructMatrix__get_data( self );
+   HA = data -> matrix;
+
+   ierr += HYPRE_StructMatrixSetConstantValues(
+      HA, num_stencil_indices,
+      sidlArrayAddr1( stencil_indices, 0 ), sidlArrayAddr1( values, 0 ) );
+
+   return ierr;
+
+  /* DO-NOT-DELETE splicer.end(bHYPRE.StructMatrix.SetConstantValues) */
+}
+
+/*
  * Set the int parameter associated with {\tt name}.
  * 
  */
@@ -130,10 +574,14 @@ impl_bHYPRE_StructMatrix_SetCommunicator(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_StructMatrix_SetIntParameter"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_StructMatrix_SetIntParameter(
-  /*in*/ bHYPRE_StructMatrix self, /*in*/ const char* name,
-    /*in*/ int32_t value)
+  /* in */ bHYPRE_StructMatrix self,
+  /* in */ const char* name,
+  /* in */ int32_t value)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.StructMatrix.SetIntParameter) */
   /* Insert the implementation of the SetIntParameter method here... */
@@ -149,9 +597,14 @@ impl_bHYPRE_StructMatrix_SetIntParameter(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_StructMatrix_SetDoubleParameter"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_StructMatrix_SetDoubleParameter(
-  /*in*/ bHYPRE_StructMatrix self, /*in*/ const char* name, /*in*/ double value)
+  /* in */ bHYPRE_StructMatrix self,
+  /* in */ const char* name,
+  /* in */ double value)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.StructMatrix.SetDoubleParameter) */
   /* Insert the implementation of the SetDoubleParameter method here... */
@@ -167,10 +620,14 @@ impl_bHYPRE_StructMatrix_SetDoubleParameter(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_StructMatrix_SetStringParameter"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_StructMatrix_SetStringParameter(
-  /*in*/ bHYPRE_StructMatrix self, /*in*/ const char* name,
-    /*in*/ const char* value)
+  /* in */ bHYPRE_StructMatrix self,
+  /* in */ const char* name,
+  /* in */ const char* value)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.StructMatrix.SetStringParameter) */
   /* Insert the implementation of the SetStringParameter method here... */
@@ -186,10 +643,14 @@ impl_bHYPRE_StructMatrix_SetStringParameter(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_StructMatrix_SetIntArray1Parameter"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_StructMatrix_SetIntArray1Parameter(
-  /*in*/ bHYPRE_StructMatrix self, /*in*/ const char* name,
-    /*in*/ struct sidl_int__array* value)
+  /* in */ bHYPRE_StructMatrix self,
+  /* in */ const char* name,
+  /* in */ struct sidl_int__array* value)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.StructMatrix.SetIntArray1Parameter) */
   /* Insert the implementation of the SetIntArray1Parameter method here... */
@@ -205,10 +666,14 @@ impl_bHYPRE_StructMatrix_SetIntArray1Parameter(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_StructMatrix_SetIntArray2Parameter"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_StructMatrix_SetIntArray2Parameter(
-  /*in*/ bHYPRE_StructMatrix self, /*in*/ const char* name,
-    /*in*/ struct sidl_int__array* value)
+  /* in */ bHYPRE_StructMatrix self,
+  /* in */ const char* name,
+  /* in */ struct sidl_int__array* value)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.StructMatrix.SetIntArray2Parameter) */
   /* Insert the implementation of the SetIntArray2Parameter method here... */
@@ -224,10 +689,14 @@ impl_bHYPRE_StructMatrix_SetIntArray2Parameter(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_StructMatrix_SetDoubleArray1Parameter"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_StructMatrix_SetDoubleArray1Parameter(
-  /*in*/ bHYPRE_StructMatrix self, /*in*/ const char* name,
-    /*in*/ struct sidl_double__array* value)
+  /* in */ bHYPRE_StructMatrix self,
+  /* in */ const char* name,
+  /* in */ struct sidl_double__array* value)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.StructMatrix.SetDoubleArray1Parameter) 
     */
@@ -244,10 +713,14 @@ impl_bHYPRE_StructMatrix_SetDoubleArray1Parameter(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_StructMatrix_SetDoubleArray2Parameter"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_StructMatrix_SetDoubleArray2Parameter(
-  /*in*/ bHYPRE_StructMatrix self, /*in*/ const char* name,
-    /*in*/ struct sidl_double__array* value)
+  /* in */ bHYPRE_StructMatrix self,
+  /* in */ const char* name,
+  /* in */ struct sidl_double__array* value)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.StructMatrix.SetDoubleArray2Parameter) 
     */
@@ -264,10 +737,14 @@ impl_bHYPRE_StructMatrix_SetDoubleArray2Parameter(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_StructMatrix_GetIntValue"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_StructMatrix_GetIntValue(
-  /*in*/ bHYPRE_StructMatrix self, /*in*/ const char* name,
-    /*out*/ int32_t* value)
+  /* in */ bHYPRE_StructMatrix self,
+  /* in */ const char* name,
+  /* out */ int32_t* value)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.StructMatrix.GetIntValue) */
   /* Insert the implementation of the GetIntValue method here... */
@@ -283,10 +760,14 @@ impl_bHYPRE_StructMatrix_GetIntValue(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_StructMatrix_GetDoubleValue"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_StructMatrix_GetDoubleValue(
-  /*in*/ bHYPRE_StructMatrix self, /*in*/ const char* name,
-    /*out*/ double* value)
+  /* in */ bHYPRE_StructMatrix self,
+  /* in */ const char* name,
+  /* out */ double* value)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.StructMatrix.GetDoubleValue) */
   /* Insert the implementation of the GetDoubleValue method here... */
@@ -303,10 +784,14 @@ impl_bHYPRE_StructMatrix_GetDoubleValue(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_StructMatrix_Setup"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_StructMatrix_Setup(
-  /*in*/ bHYPRE_StructMatrix self, /*in*/ bHYPRE_Vector b,
-    /*in*/ bHYPRE_Vector x)
+  /* in */ bHYPRE_StructMatrix self,
+  /* in */ bHYPRE_Vector b,
+  /* in */ bHYPRE_Vector x)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.StructMatrix.Setup) */
   /* Insert the implementation of the Setup method here... */
@@ -333,10 +818,14 @@ impl_bHYPRE_StructMatrix_Setup(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_StructMatrix_Apply"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_StructMatrix_Apply(
-  /*in*/ bHYPRE_StructMatrix self, /*in*/ bHYPRE_Vector b,
-    /*inout*/ bHYPRE_Vector* x)
+  /* in */ bHYPRE_StructMatrix self,
+  /* in */ bHYPRE_Vector b,
+  /* inout */ bHYPRE_Vector* x)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.StructMatrix.Apply) */
   /* Insert the implementation of the Apply method here... */
@@ -390,376 +879,94 @@ impl_bHYPRE_StructMatrix_Apply(
 
   /* DO-NOT-DELETE splicer.end(bHYPRE.StructMatrix.Apply) */
 }
-
-/*
- * Prepare an object for setting coefficient values, whether for
- * the first time or subsequently.
- * 
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_bHYPRE_StructMatrix_Initialize"
-
-int32_t
-impl_bHYPRE_StructMatrix_Initialize(
-  /*in*/ bHYPRE_StructMatrix self)
-{
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructMatrix.Initialize) */
-  /* Insert the implementation of the Initialize method here... */
-
-   int ierr = 0;
-   struct bHYPRE_StructMatrix__data * data;
-   HYPRE_StructMatrix HA;
-
-   data = bHYPRE_StructMatrix__get_data( self );
-
-   HA = data -> matrix;
-
-   ierr = HYPRE_StructMatrixInitialize( HA );
-
-   return( ierr );
-
-  /* DO-NOT-DELETE splicer.end(bHYPRE.StructMatrix.Initialize) */
+/* Babel internal methods, Users should not edit below this line. */
+struct bHYPRE_StructMatrix__object* 
+  impl_bHYPRE_StructMatrix_fconnect_bHYPRE_StructMatrix(char* url,
+  sidl_BaseInterface *_ex) {
+  return bHYPRE_StructMatrix__connect(url, _ex);
 }
-
-/*
- * Finalize the construction of an object before using, either
- * for the first time or on subsequent uses. {\tt Initialize}
- * and {\tt Assemble} always appear in a matched set, with
- * Initialize preceding Assemble. Values can only be set in
- * between a call to Initialize and Assemble.
- * 
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_bHYPRE_StructMatrix_Assemble"
-
-int32_t
-impl_bHYPRE_StructMatrix_Assemble(
-  /*in*/ bHYPRE_StructMatrix self)
-{
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructMatrix.Assemble) */
-  /* Insert the implementation of the Assemble method here... */
-
-   int ierr=0;
-   struct bHYPRE_StructMatrix__data * data;
-   HYPRE_StructMatrix HA;
-
-   data = bHYPRE_StructMatrix__get_data( self );
-
-   HA = data -> matrix;
-
-   ierr += HYPRE_StructMatrixAssemble( HA );
-
-   return( ierr );
-
-  /* DO-NOT-DELETE splicer.end(bHYPRE.StructMatrix.Assemble) */
+char * impl_bHYPRE_StructMatrix_fgetURL_bHYPRE_StructMatrix(struct 
+  bHYPRE_StructMatrix__object* obj) {
+  return bHYPRE_StructMatrix__getURL(obj);
 }
-
-/*
- * The problem definition interface is a {\it builder} that
- * creates an object that contains the problem definition
- * information, e.g. a matrix. To perform subsequent operations
- * with that object, it must be returned from the problem
- * definition object. {\tt GetObject} performs this function.
- * At compile time, the type of the returned object is unknown.
- * Thus, the returned type is a sidl.BaseInterface.
- * QueryInterface or Cast must be used on the returned object to
- * convert it into a known type.
- * 
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_bHYPRE_StructMatrix_GetObject"
-
-int32_t
-impl_bHYPRE_StructMatrix_GetObject(
-  /*in*/ bHYPRE_StructMatrix self, /*out*/ sidl_BaseInterface* A)
-{
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructMatrix.GetObject) */
-  /* Insert the implementation of the GetObject method here... */
- 
-   bHYPRE_StructMatrix_addRef( self );
-   *A = sidl_BaseInterface__cast( self );
-   return( 0 );
-
-  /* DO-NOT-DELETE splicer.end(bHYPRE.StructMatrix.GetObject) */
+struct bHYPRE_StructGrid__object* 
+  impl_bHYPRE_StructMatrix_fconnect_bHYPRE_StructGrid(char* url,
+  sidl_BaseInterface *_ex) {
+  return bHYPRE_StructGrid__connect(url, _ex);
 }
-
-/*
- * Method:  SetGrid[]
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_bHYPRE_StructMatrix_SetGrid"
-
-int32_t
-impl_bHYPRE_StructMatrix_SetGrid(
-  /*in*/ bHYPRE_StructMatrix self, /*in*/ bHYPRE_StructGrid grid)
-{
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructMatrix.SetGrid) */
-  /* Insert the implementation of the SetGrid method here... */
-
-   /* To create a matrix one needs a grid, stencil, and communicator.
-      We assume SetCommunicator will be called first or can be changed.
-      SetGrid and SetStencil both check for whether the other one has been called.
-      If both have been called, we have enough information to call
-      HYPRE_StructMatrixCreate, so we do so.  It is an error to call this function
-      if HYPRE_StructMatrixCreate has already been called for this matrix.
-   */
-
-   int ierr = 0;
-   struct bHYPRE_StructMatrix__data * data;
-   HYPRE_StructMatrix HA;
-   HYPRE_StructGrid Hgrid;
-   HYPRE_StructStencil Hstencil;
-   MPI_Comm comm;
-   struct bHYPRE_StructGrid__data * gdata;
-
-   data = bHYPRE_StructMatrix__get_data( self );
-   HA = data->matrix;
-   assert( HA==NULL ); /* shouldn't have already been created */
-   comm = data->comm;
-   Hstencil = data->stencil;
-
-   gdata = bHYPRE_StructGrid__get_data( grid );
-   Hgrid = gdata->grid;
-   data->grid = Hgrid;
-
-   if ( Hstencil != NULL )
-   {
-      ierr += HYPRE_StructMatrixCreate( comm, Hgrid, Hstencil, &HA );
-      data->matrix = HA;
-   }
-
-   return( ierr );
-
-  /* DO-NOT-DELETE splicer.end(bHYPRE.StructMatrix.SetGrid) */
+char * impl_bHYPRE_StructMatrix_fgetURL_bHYPRE_StructGrid(struct 
+  bHYPRE_StructGrid__object* obj) {
+  return bHYPRE_StructGrid__getURL(obj);
 }
-
-/*
- * Method:  SetStencil[]
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_bHYPRE_StructMatrix_SetStencil"
-
-int32_t
-impl_bHYPRE_StructMatrix_SetStencil(
-  /*in*/ bHYPRE_StructMatrix self, /*in*/ bHYPRE_StructStencil stencil)
-{
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructMatrix.SetStencil) */
-  /* Insert the implementation of the SetStencil method here... */
-
-   int ierr = 0;
-   struct bHYPRE_StructMatrix__data * data;
-   HYPRE_StructMatrix HA;
-   HYPRE_StructGrid Hgrid;
-   HYPRE_StructStencil Hstencil;
-   MPI_Comm comm;
-   struct bHYPRE_StructStencil__data * sdata;
-
-   data = bHYPRE_StructMatrix__get_data( self );
-   HA = data->matrix;
-   assert( HA==NULL ); /* shouldn't have already been created */
-   comm = data->comm;
-   Hgrid = data->grid;
-
-   sdata = bHYPRE_StructStencil__get_data( stencil );
-   Hstencil = sdata->stencil;
-   data->stencil = Hstencil;
-
-   if ( Hgrid != NULL )
-   {
-      ierr += HYPRE_StructMatrixCreate( comm, Hgrid, Hstencil, &HA );
-      data->matrix = HA;
-   }
-
-   return( ierr );
-
-  /* DO-NOT-DELETE splicer.end(bHYPRE.StructMatrix.SetStencil) */
+struct bHYPRE_StructBuildMatrix__object* 
+  impl_bHYPRE_StructMatrix_fconnect_bHYPRE_StructBuildMatrix(char* url,
+  sidl_BaseInterface *_ex) {
+  return bHYPRE_StructBuildMatrix__connect(url, _ex);
 }
-
-/*
- * Method:  SetValues[]
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_bHYPRE_StructMatrix_SetValues"
-
-int32_t
-impl_bHYPRE_StructMatrix_SetValues(
-  /*in*/ bHYPRE_StructMatrix self, /*in*/ struct sidl_int__array* index,
-    /*in*/ int32_t num_stencil_indices,
-    /*in*/ struct sidl_int__array* stencil_indices,
-    /*in*/ struct sidl_double__array* values)
-{
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructMatrix.SetValues) */
-  /* Insert the implementation of the SetValues method here... */
-
-   int ierr = 0;
-   struct bHYPRE_StructMatrix__data * data;
-   HYPRE_StructMatrix HA;
-   data = bHYPRE_StructMatrix__get_data( self );
-   HA = data -> matrix;
-
-   ierr += HYPRE_StructMatrixSetValues
-      ( HA, sidlArrayAddr1( index, 0 ), num_stencil_indices,
-        sidlArrayAddr1( stencil_indices, 0 ), sidlArrayAddr1( values, 0 ) );
-
-   return ierr;
-
-  /* DO-NOT-DELETE splicer.end(bHYPRE.StructMatrix.SetValues) */
+char * impl_bHYPRE_StructMatrix_fgetURL_bHYPRE_StructBuildMatrix(struct 
+  bHYPRE_StructBuildMatrix__object* obj) {
+  return bHYPRE_StructBuildMatrix__getURL(obj);
 }
-
-/*
- * Method:  SetBoxValues[]
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_bHYPRE_StructMatrix_SetBoxValues"
-
-int32_t
-impl_bHYPRE_StructMatrix_SetBoxValues(
-  /*in*/ bHYPRE_StructMatrix self, /*in*/ struct sidl_int__array* ilower,
-    /*in*/ struct sidl_int__array* iupper, /*in*/ int32_t num_stencil_indices,
-    /*in*/ struct sidl_int__array* stencil_indices,
-    /*in*/ struct sidl_double__array* values)
-{
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructMatrix.SetBoxValues) */
-  /* Insert the implementation of the SetBoxValues method here... */
-
-   int ierr = 0;
-   struct bHYPRE_StructMatrix__data * data;
-   HYPRE_StructMatrix HA;
-   data = bHYPRE_StructMatrix__get_data( self );
-   HA = data -> matrix;
-
-   ierr += HYPRE_StructMatrixSetBoxValues
-      ( HA, sidlArrayAddr1( ilower, 0 ), sidlArrayAddr1( iupper, 0 ),
-        num_stencil_indices, sidlArrayAddr1( stencil_indices, 0 ),
-        sidlArrayAddr1( values, 0 ) );
-
-   return ierr;
-
-
-  /* DO-NOT-DELETE splicer.end(bHYPRE.StructMatrix.SetBoxValues) */
+struct bHYPRE_Operator__object* 
+  impl_bHYPRE_StructMatrix_fconnect_bHYPRE_Operator(char* url,
+  sidl_BaseInterface *_ex) {
+  return bHYPRE_Operator__connect(url, _ex);
 }
-
-/*
- * Method:  SetNumGhost[]
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_bHYPRE_StructMatrix_SetNumGhost"
-
-int32_t
-impl_bHYPRE_StructMatrix_SetNumGhost(
-  /*in*/ bHYPRE_StructMatrix self, /*in*/ struct sidl_int__array* num_ghost)
-{
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructMatrix.SetNumGhost) */
-  /* Insert the implementation of the SetNumGhost method here... */
-
-   int ierr = 0;
-   struct bHYPRE_StructMatrix__data * data;
-   HYPRE_StructMatrix HA;
-
-   data = bHYPRE_StructMatrix__get_data( self );
-   HA = data->matrix;
-
-   ierr += HYPRE_StructMatrixSetNumGhost( HA, sidlArrayAddr1( num_ghost, 0 ) );
-
-   return( ierr );
-
-  /* DO-NOT-DELETE splicer.end(bHYPRE.StructMatrix.SetNumGhost) */
+char * impl_bHYPRE_StructMatrix_fgetURL_bHYPRE_Operator(struct 
+  bHYPRE_Operator__object* obj) {
+  return bHYPRE_Operator__getURL(obj);
 }
-
-/*
- * Method:  SetSymmetric[]
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_bHYPRE_StructMatrix_SetSymmetric"
-
-int32_t
-impl_bHYPRE_StructMatrix_SetSymmetric(
-  /*in*/ bHYPRE_StructMatrix self, /*in*/ int32_t symmetric)
-{
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructMatrix.SetSymmetric) */
-  /* Insert the implementation of the SetSymmetric method here... */
-
-   int ierr = 0;
-   struct bHYPRE_StructMatrix__data * data;
-   HYPRE_StructMatrix HA;
-
-   data = bHYPRE_StructMatrix__get_data( self );
-   HA = data->matrix;
-
-   ierr += HYPRE_StructMatrixSetSymmetric( HA, symmetric );
-
-   return( ierr );
-
-  /* DO-NOT-DELETE splicer.end(bHYPRE.StructMatrix.SetSymmetric) */
+struct sidl_ClassInfo__object* 
+  impl_bHYPRE_StructMatrix_fconnect_sidl_ClassInfo(char* url,
+  sidl_BaseInterface *_ex) {
+  return sidl_ClassInfo__connect(url, _ex);
 }
-
-/*
- * Method:  SetConstantEntries[]
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_bHYPRE_StructMatrix_SetConstantEntries"
-
-int32_t
-impl_bHYPRE_StructMatrix_SetConstantEntries(
-  /*in*/ bHYPRE_StructMatrix self, /*in*/ int32_t num_stencil_constant_points,
-    /*in*/ struct sidl_int__array* stencil_constant_points)
-{
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructMatrix.SetConstantEntries) */
-  /* Insert the implementation of the SetConstantEntries method here... */
-
-   int ierr = 0;
-   struct bHYPRE_StructMatrix__data * data;
-   HYPRE_StructMatrix HA;
-
-   data = bHYPRE_StructMatrix__get_data( self );
-   HA = data -> matrix;
-
-   ierr += HYPRE_StructMatrixSetConstantEntries
-      ( HA, num_stencil_constant_points, sidlArrayAddr1( stencil_constant_points, 0 ) );
-
-   return ierr;
-
-  /* DO-NOT-DELETE splicer.end(bHYPRE.StructMatrix.SetConstantEntries) */
+char * impl_bHYPRE_StructMatrix_fgetURL_sidl_ClassInfo(struct 
+  sidl_ClassInfo__object* obj) {
+  return sidl_ClassInfo__getURL(obj);
 }
-
-/*
- * Method:  SetConstantValues[]
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_bHYPRE_StructMatrix_SetConstantValues"
-
-int32_t
-impl_bHYPRE_StructMatrix_SetConstantValues(
-  /*in*/ bHYPRE_StructMatrix self, /*in*/ int32_t num_stencil_indices,
-    /*in*/ struct sidl_int__array* stencil_indices,
-    /*in*/ struct sidl_double__array* values)
-{
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructMatrix.SetConstantValues) */
-  /* Insert the implementation of the SetConstantValues method here... */
-
-
-   int ierr = 0;
-   struct bHYPRE_StructMatrix__data * data;
-   HYPRE_StructMatrix HA;
-   data = bHYPRE_StructMatrix__get_data( self );
-   HA = data -> matrix;
-
-   ierr += HYPRE_StructMatrixSetConstantValues(
-      HA, num_stencil_indices,
-      sidlArrayAddr1( stencil_indices, 0 ), sidlArrayAddr1( values, 0 ) );
-
-   return ierr;
-
-  /* DO-NOT-DELETE splicer.end(bHYPRE.StructMatrix.SetConstantValues) */
+struct bHYPRE_Vector__object* 
+  impl_bHYPRE_StructMatrix_fconnect_bHYPRE_Vector(char* url,
+  sidl_BaseInterface *_ex) {
+  return bHYPRE_Vector__connect(url, _ex);
+}
+char * impl_bHYPRE_StructMatrix_fgetURL_bHYPRE_Vector(struct 
+  bHYPRE_Vector__object* obj) {
+  return bHYPRE_Vector__getURL(obj);
+}
+struct bHYPRE_ProblemDefinition__object* 
+  impl_bHYPRE_StructMatrix_fconnect_bHYPRE_ProblemDefinition(char* url,
+  sidl_BaseInterface *_ex) {
+  return bHYPRE_ProblemDefinition__connect(url, _ex);
+}
+char * impl_bHYPRE_StructMatrix_fgetURL_bHYPRE_ProblemDefinition(struct 
+  bHYPRE_ProblemDefinition__object* obj) {
+  return bHYPRE_ProblemDefinition__getURL(obj);
+}
+struct sidl_BaseInterface__object* 
+  impl_bHYPRE_StructMatrix_fconnect_sidl_BaseInterface(char* url,
+  sidl_BaseInterface *_ex) {
+  return sidl_BaseInterface__connect(url, _ex);
+}
+char * impl_bHYPRE_StructMatrix_fgetURL_sidl_BaseInterface(struct 
+  sidl_BaseInterface__object* obj) {
+  return sidl_BaseInterface__getURL(obj);
+}
+struct bHYPRE_StructStencil__object* 
+  impl_bHYPRE_StructMatrix_fconnect_bHYPRE_StructStencil(char* url,
+  sidl_BaseInterface *_ex) {
+  return bHYPRE_StructStencil__connect(url, _ex);
+}
+char * impl_bHYPRE_StructMatrix_fgetURL_bHYPRE_StructStencil(struct 
+  bHYPRE_StructStencil__object* obj) {
+  return bHYPRE_StructStencil__getURL(obj);
+}
+struct sidl_BaseClass__object* 
+  impl_bHYPRE_StructMatrix_fconnect_sidl_BaseClass(char* url,
+  sidl_BaseInterface *_ex) {
+  return sidl_BaseClass__connect(url, _ex);
+}
+char * impl_bHYPRE_StructMatrix_fgetURL_sidl_BaseClass(struct 
+  sidl_BaseClass__object* obj) {
+  return sidl_BaseClass__getURL(obj);
 }

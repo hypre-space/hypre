@@ -1,8 +1,8 @@
 /*
  * File:          sidl_BaseClass_fStub.c
- * Symbol:        sidl.BaseClass-v0.9.0
+ * Symbol:        sidl.BaseClass-v0.9.3
  * Symbol Type:   class
- * Babel Version: 0.9.8
+ * Babel Version: 0.10.4
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Client-side glue code for sidl.BaseClass
@@ -32,11 +32,12 @@
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.9.8
+ * babel-version = 0.10.4
+ * xml-url       = /home/painter/babel/share/babel-0.10.4/repository/sidl.BaseClass-v0.9.3.xml
  */
 
 /*
- * Symbol "sidl.BaseClass" (version 0.9.0)
+ * Symbol "sidl.BaseClass" (version 0.9.3)
  * 
  * Every class implicitly inherits from <code>BaseClass</code>.  This
  * class implements the methods in <code>BaseInterface</code>.
@@ -51,8 +52,8 @@
 #endif
 #include <stdio.h>
 #include "sidl_BaseClass_IOR.h"
-#include "sidl_BaseInterface_IOR.h"
 #include "sidl_ClassInfo_IOR.h"
+#include "sidl_BaseInterface_IOR.h"
 
 /*
  * Return pointer to internal IOR functions.
@@ -98,8 +99,7 @@ SIDLFortran77Symbol(sidl_baseclass__cast_f,SIDL_BASECLASS__CAST_F,sidl_BaseClass
       *_base->d_epv->f__cast)(
       _base->d_object,
       "sidl.BaseClass");
-  }
-  else {
+  } else {
     *retval = 0;
   }
 }

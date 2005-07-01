@@ -2,12 +2,12 @@
  * File:          bHYPRE_Pilut.h
  * Symbol:        bHYPRE.Pilut-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.9.8
+ * Babel Version: 0.10.4
  * Description:   Client-side glue code for bHYPRE.Pilut
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.9.8
+ * babel-version = 0.10.4
  */
 
 #ifndef included_bHYPRE_Pilut_h
@@ -46,6 +46,12 @@ typedef struct bHYPRE_Pilut__object* bHYPRE_Pilut;
 #include "sidl_ClassInfo.h"
 #endif
 
+#ifndef included_sidl_io_Serializer_h
+#include "sidl_io_Serializer.h"
+#endif
+#ifndef included_sidl_io_Deserializer_h
+#include "sidl_io_Deserializer.h"
+#endif
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -53,35 +59,46 @@ extern "C" {
 /**
  * Constructor function for the class.
  */
-bHYPRE_Pilut
+struct bHYPRE_Pilut__object*
 bHYPRE_Pilut__create(void);
 
+/**
+ * RMI constructor function for the class.
+ */
+bHYPRE_Pilut
+bHYPRE_Pilut__createRemote(const char *, sidl_BaseInterface *_ex);
+
+/**
+ * RMI connector function for the class.
+ */
+bHYPRE_Pilut
+bHYPRE_Pilut__connect(const char *, sidl_BaseInterface *_ex);
 void
 bHYPRE_Pilut_addRef(
-  /*in*/ bHYPRE_Pilut self);
+  /* in */ bHYPRE_Pilut self);
 
 void
 bHYPRE_Pilut_deleteRef(
-  /*in*/ bHYPRE_Pilut self);
+  /* in */ bHYPRE_Pilut self);
 
 sidl_bool
 bHYPRE_Pilut_isSame(
-  /*in*/ bHYPRE_Pilut self,
-  /*in*/ sidl_BaseInterface iobj);
+  /* in */ bHYPRE_Pilut self,
+  /* in */ sidl_BaseInterface iobj);
 
 sidl_BaseInterface
 bHYPRE_Pilut_queryInt(
-  /*in*/ bHYPRE_Pilut self,
-  /*in*/ const char* name);
+  /* in */ bHYPRE_Pilut self,
+  /* in */ const char* name);
 
 sidl_bool
 bHYPRE_Pilut_isType(
-  /*in*/ bHYPRE_Pilut self,
-  /*in*/ const char* name);
+  /* in */ bHYPRE_Pilut self,
+  /* in */ const char* name);
 
 sidl_ClassInfo
 bHYPRE_Pilut_getClassInfo(
-  /*in*/ bHYPRE_Pilut self);
+  /* in */ bHYPRE_Pilut self);
 
 /**
  * Set the MPI Communicator.
@@ -89,8 +106,8 @@ bHYPRE_Pilut_getClassInfo(
  */
 int32_t
 bHYPRE_Pilut_SetCommunicator(
-  /*in*/ bHYPRE_Pilut self,
-  /*in*/ void* mpi_comm);
+  /* in */ bHYPRE_Pilut self,
+  /* in */ void* mpi_comm);
 
 /**
  * Set the int parameter associated with {\tt name}.
@@ -98,9 +115,9 @@ bHYPRE_Pilut_SetCommunicator(
  */
 int32_t
 bHYPRE_Pilut_SetIntParameter(
-  /*in*/ bHYPRE_Pilut self,
-  /*in*/ const char* name,
-  /*in*/ int32_t value);
+  /* in */ bHYPRE_Pilut self,
+  /* in */ const char* name,
+  /* in */ int32_t value);
 
 /**
  * Set the double parameter associated with {\tt name}.
@@ -108,9 +125,9 @@ bHYPRE_Pilut_SetIntParameter(
  */
 int32_t
 bHYPRE_Pilut_SetDoubleParameter(
-  /*in*/ bHYPRE_Pilut self,
-  /*in*/ const char* name,
-  /*in*/ double value);
+  /* in */ bHYPRE_Pilut self,
+  /* in */ const char* name,
+  /* in */ double value);
 
 /**
  * Set the string parameter associated with {\tt name}.
@@ -118,9 +135,9 @@ bHYPRE_Pilut_SetDoubleParameter(
  */
 int32_t
 bHYPRE_Pilut_SetStringParameter(
-  /*in*/ bHYPRE_Pilut self,
-  /*in*/ const char* name,
-  /*in*/ const char* value);
+  /* in */ bHYPRE_Pilut self,
+  /* in */ const char* name,
+  /* in */ const char* value);
 
 /**
  * Set the int 1-D array parameter associated with {\tt name}.
@@ -128,9 +145,9 @@ bHYPRE_Pilut_SetStringParameter(
  */
 int32_t
 bHYPRE_Pilut_SetIntArray1Parameter(
-  /*in*/ bHYPRE_Pilut self,
-  /*in*/ const char* name,
-  /*in*/ struct sidl_int__array* value);
+  /* in */ bHYPRE_Pilut self,
+  /* in */ const char* name,
+  /* in */ struct sidl_int__array* value);
 
 /**
  * Set the int 2-D array parameter associated with {\tt name}.
@@ -138,9 +155,9 @@ bHYPRE_Pilut_SetIntArray1Parameter(
  */
 int32_t
 bHYPRE_Pilut_SetIntArray2Parameter(
-  /*in*/ bHYPRE_Pilut self,
-  /*in*/ const char* name,
-  /*in*/ struct sidl_int__array* value);
+  /* in */ bHYPRE_Pilut self,
+  /* in */ const char* name,
+  /* in */ struct sidl_int__array* value);
 
 /**
  * Set the double 1-D array parameter associated with {\tt name}.
@@ -148,9 +165,9 @@ bHYPRE_Pilut_SetIntArray2Parameter(
  */
 int32_t
 bHYPRE_Pilut_SetDoubleArray1Parameter(
-  /*in*/ bHYPRE_Pilut self,
-  /*in*/ const char* name,
-  /*in*/ struct sidl_double__array* value);
+  /* in */ bHYPRE_Pilut self,
+  /* in */ const char* name,
+  /* in */ struct sidl_double__array* value);
 
 /**
  * Set the double 2-D array parameter associated with {\tt name}.
@@ -158,9 +175,9 @@ bHYPRE_Pilut_SetDoubleArray1Parameter(
  */
 int32_t
 bHYPRE_Pilut_SetDoubleArray2Parameter(
-  /*in*/ bHYPRE_Pilut self,
-  /*in*/ const char* name,
-  /*in*/ struct sidl_double__array* value);
+  /* in */ bHYPRE_Pilut self,
+  /* in */ const char* name,
+  /* in */ struct sidl_double__array* value);
 
 /**
  * Set the int parameter associated with {\tt name}.
@@ -168,9 +185,9 @@ bHYPRE_Pilut_SetDoubleArray2Parameter(
  */
 int32_t
 bHYPRE_Pilut_GetIntValue(
-  /*in*/ bHYPRE_Pilut self,
-  /*in*/ const char* name,
-  /*out*/ int32_t* value);
+  /* in */ bHYPRE_Pilut self,
+  /* in */ const char* name,
+  /* out */ int32_t* value);
 
 /**
  * Get the double parameter associated with {\tt name}.
@@ -178,9 +195,9 @@ bHYPRE_Pilut_GetIntValue(
  */
 int32_t
 bHYPRE_Pilut_GetDoubleValue(
-  /*in*/ bHYPRE_Pilut self,
-  /*in*/ const char* name,
-  /*out*/ double* value);
+  /* in */ bHYPRE_Pilut self,
+  /* in */ const char* name,
+  /* out */ double* value);
 
 /**
  * (Optional) Do any preprocessing that may be necessary in
@@ -189,9 +206,9 @@ bHYPRE_Pilut_GetDoubleValue(
  */
 int32_t
 bHYPRE_Pilut_Setup(
-  /*in*/ bHYPRE_Pilut self,
-  /*in*/ bHYPRE_Vector b,
-  /*in*/ bHYPRE_Vector x);
+  /* in */ bHYPRE_Pilut self,
+  /* in */ bHYPRE_Vector b,
+  /* in */ bHYPRE_Vector x);
 
 /**
  * Apply the operator to {\tt b}, returning {\tt x}.
@@ -199,9 +216,9 @@ bHYPRE_Pilut_Setup(
  */
 int32_t
 bHYPRE_Pilut_Apply(
-  /*in*/ bHYPRE_Pilut self,
-  /*in*/ bHYPRE_Vector b,
-  /*inout*/ bHYPRE_Vector* x);
+  /* in */ bHYPRE_Pilut self,
+  /* in */ bHYPRE_Vector b,
+  /* inout */ bHYPRE_Vector* x);
 
 /**
  * Set the operator for the linear system being solved.
@@ -209,8 +226,8 @@ bHYPRE_Pilut_Apply(
  */
 int32_t
 bHYPRE_Pilut_SetOperator(
-  /*in*/ bHYPRE_Pilut self,
-  /*in*/ bHYPRE_Operator A);
+  /* in */ bHYPRE_Pilut self,
+  /* in */ bHYPRE_Operator A);
 
 /**
  * (Optional) Set the convergence tolerance.
@@ -218,8 +235,8 @@ bHYPRE_Pilut_SetOperator(
  */
 int32_t
 bHYPRE_Pilut_SetTolerance(
-  /*in*/ bHYPRE_Pilut self,
-  /*in*/ double tolerance);
+  /* in */ bHYPRE_Pilut self,
+  /* in */ double tolerance);
 
 /**
  * (Optional) Set maximum number of iterations.
@@ -227,8 +244,8 @@ bHYPRE_Pilut_SetTolerance(
  */
 int32_t
 bHYPRE_Pilut_SetMaxIterations(
-  /*in*/ bHYPRE_Pilut self,
-  /*in*/ int32_t max_iterations);
+  /* in */ bHYPRE_Pilut self,
+  /* in */ int32_t max_iterations);
 
 /**
  * (Optional) Set the {\it logging level}, specifying the degree
@@ -240,8 +257,8 @@ bHYPRE_Pilut_SetMaxIterations(
  */
 int32_t
 bHYPRE_Pilut_SetLogging(
-  /*in*/ bHYPRE_Pilut self,
-  /*in*/ int32_t level);
+  /* in */ bHYPRE_Pilut self,
+  /* in */ int32_t level);
 
 /**
  * (Optional) Set the {\it print level}, specifying the degree
@@ -253,8 +270,8 @@ bHYPRE_Pilut_SetLogging(
  */
 int32_t
 bHYPRE_Pilut_SetPrintLevel(
-  /*in*/ bHYPRE_Pilut self,
-  /*in*/ int32_t level);
+  /* in */ bHYPRE_Pilut self,
+  /* in */ int32_t level);
 
 /**
  * (Optional) Return the number of iterations taken.
@@ -262,8 +279,8 @@ bHYPRE_Pilut_SetPrintLevel(
  */
 int32_t
 bHYPRE_Pilut_GetNumIterations(
-  /*in*/ bHYPRE_Pilut self,
-  /*out*/ int32_t* num_iterations);
+  /* in */ bHYPRE_Pilut self,
+  /* out */ int32_t* num_iterations);
 
 /**
  * (Optional) Return the norm of the relative residual.
@@ -271,13 +288,13 @@ bHYPRE_Pilut_GetNumIterations(
  */
 int32_t
 bHYPRE_Pilut_GetRelResidualNorm(
-  /*in*/ bHYPRE_Pilut self,
-  /*out*/ double* norm);
+  /* in */ bHYPRE_Pilut self,
+  /* out */ double* norm);
 
 /**
  * Cast method for interface and class type conversions.
  */
-bHYPRE_Pilut
+struct bHYPRE_Pilut__object*
 bHYPRE_Pilut__cast(
   void* obj);
 
@@ -289,6 +306,29 @@ bHYPRE_Pilut__cast2(
   void* obj,
   const char* type);
 
+/**
+ * Select and execute a method by name
+ */
+void
+bHYPRE_Pilut__exec(
+  /* in */ bHYPRE_Pilut self,
+  /* in */ const char* methodName,
+  /* in */ sidl_io_Deserializer inArgs,
+  /* in */ sidl_io_Serializer outArgs);
+/**
+ * static Exec method for reflexity.
+ */
+void
+bHYPRE_Pilut__sexec(
+  /* in */ const char* methodName,
+  /* in */ sidl_io_Deserializer inArgs,
+  /* in */ sidl_io_Serializer outArgs);
+/**
+ * Get the URL of the Implementation of this object (for RMI)
+ */
+char*
+bHYPRE_Pilut__getURL(
+  /* in */ bHYPRE_Pilut self);
 struct bHYPRE_Pilut__array*
 bHYPRE_Pilut__array_createCol(
   int32_t       dimen,

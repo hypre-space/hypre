@@ -2,12 +2,12 @@
  * File:          bHYPRE_IdentitySolver.h
  * Symbol:        bHYPRE.IdentitySolver-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.9.8
+ * Babel Version: 0.10.4
  * Description:   Client-side glue code for bHYPRE.IdentitySolver
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.9.8
+ * babel-version = 0.10.4
  */
 
 #ifndef included_bHYPRE_IdentitySolver_h
@@ -47,6 +47,12 @@ typedef struct bHYPRE_IdentitySolver__object* bHYPRE_IdentitySolver;
 #include "sidl_ClassInfo.h"
 #endif
 
+#ifndef included_sidl_io_Serializer_h
+#include "sidl_io_Serializer.h"
+#endif
+#ifndef included_sidl_io_Deserializer_h
+#include "sidl_io_Deserializer.h"
+#endif
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -54,35 +60,46 @@ extern "C" {
 /**
  * Constructor function for the class.
  */
-bHYPRE_IdentitySolver
+struct bHYPRE_IdentitySolver__object*
 bHYPRE_IdentitySolver__create(void);
 
+/**
+ * RMI constructor function for the class.
+ */
+bHYPRE_IdentitySolver
+bHYPRE_IdentitySolver__createRemote(const char *, sidl_BaseInterface *_ex);
+
+/**
+ * RMI connector function for the class.
+ */
+bHYPRE_IdentitySolver
+bHYPRE_IdentitySolver__connect(const char *, sidl_BaseInterface *_ex);
 void
 bHYPRE_IdentitySolver_addRef(
-  /*in*/ bHYPRE_IdentitySolver self);
+  /* in */ bHYPRE_IdentitySolver self);
 
 void
 bHYPRE_IdentitySolver_deleteRef(
-  /*in*/ bHYPRE_IdentitySolver self);
+  /* in */ bHYPRE_IdentitySolver self);
 
 sidl_bool
 bHYPRE_IdentitySolver_isSame(
-  /*in*/ bHYPRE_IdentitySolver self,
-  /*in*/ sidl_BaseInterface iobj);
+  /* in */ bHYPRE_IdentitySolver self,
+  /* in */ sidl_BaseInterface iobj);
 
 sidl_BaseInterface
 bHYPRE_IdentitySolver_queryInt(
-  /*in*/ bHYPRE_IdentitySolver self,
-  /*in*/ const char* name);
+  /* in */ bHYPRE_IdentitySolver self,
+  /* in */ const char* name);
 
 sidl_bool
 bHYPRE_IdentitySolver_isType(
-  /*in*/ bHYPRE_IdentitySolver self,
-  /*in*/ const char* name);
+  /* in */ bHYPRE_IdentitySolver self,
+  /* in */ const char* name);
 
 sidl_ClassInfo
 bHYPRE_IdentitySolver_getClassInfo(
-  /*in*/ bHYPRE_IdentitySolver self);
+  /* in */ bHYPRE_IdentitySolver self);
 
 /**
  * Set the MPI Communicator.
@@ -90,8 +107,8 @@ bHYPRE_IdentitySolver_getClassInfo(
  */
 int32_t
 bHYPRE_IdentitySolver_SetCommunicator(
-  /*in*/ bHYPRE_IdentitySolver self,
-  /*in*/ void* mpi_comm);
+  /* in */ bHYPRE_IdentitySolver self,
+  /* in */ void* mpi_comm);
 
 /**
  * Set the int parameter associated with {\tt name}.
@@ -99,9 +116,9 @@ bHYPRE_IdentitySolver_SetCommunicator(
  */
 int32_t
 bHYPRE_IdentitySolver_SetIntParameter(
-  /*in*/ bHYPRE_IdentitySolver self,
-  /*in*/ const char* name,
-  /*in*/ int32_t value);
+  /* in */ bHYPRE_IdentitySolver self,
+  /* in */ const char* name,
+  /* in */ int32_t value);
 
 /**
  * Set the double parameter associated with {\tt name}.
@@ -109,9 +126,9 @@ bHYPRE_IdentitySolver_SetIntParameter(
  */
 int32_t
 bHYPRE_IdentitySolver_SetDoubleParameter(
-  /*in*/ bHYPRE_IdentitySolver self,
-  /*in*/ const char* name,
-  /*in*/ double value);
+  /* in */ bHYPRE_IdentitySolver self,
+  /* in */ const char* name,
+  /* in */ double value);
 
 /**
  * Set the string parameter associated with {\tt name}.
@@ -119,9 +136,9 @@ bHYPRE_IdentitySolver_SetDoubleParameter(
  */
 int32_t
 bHYPRE_IdentitySolver_SetStringParameter(
-  /*in*/ bHYPRE_IdentitySolver self,
-  /*in*/ const char* name,
-  /*in*/ const char* value);
+  /* in */ bHYPRE_IdentitySolver self,
+  /* in */ const char* name,
+  /* in */ const char* value);
 
 /**
  * Set the int 1-D array parameter associated with {\tt name}.
@@ -129,9 +146,9 @@ bHYPRE_IdentitySolver_SetStringParameter(
  */
 int32_t
 bHYPRE_IdentitySolver_SetIntArray1Parameter(
-  /*in*/ bHYPRE_IdentitySolver self,
-  /*in*/ const char* name,
-  /*in*/ struct sidl_int__array* value);
+  /* in */ bHYPRE_IdentitySolver self,
+  /* in */ const char* name,
+  /* in */ struct sidl_int__array* value);
 
 /**
  * Set the int 2-D array parameter associated with {\tt name}.
@@ -139,9 +156,9 @@ bHYPRE_IdentitySolver_SetIntArray1Parameter(
  */
 int32_t
 bHYPRE_IdentitySolver_SetIntArray2Parameter(
-  /*in*/ bHYPRE_IdentitySolver self,
-  /*in*/ const char* name,
-  /*in*/ struct sidl_int__array* value);
+  /* in */ bHYPRE_IdentitySolver self,
+  /* in */ const char* name,
+  /* in */ struct sidl_int__array* value);
 
 /**
  * Set the double 1-D array parameter associated with {\tt name}.
@@ -149,9 +166,9 @@ bHYPRE_IdentitySolver_SetIntArray2Parameter(
  */
 int32_t
 bHYPRE_IdentitySolver_SetDoubleArray1Parameter(
-  /*in*/ bHYPRE_IdentitySolver self,
-  /*in*/ const char* name,
-  /*in*/ struct sidl_double__array* value);
+  /* in */ bHYPRE_IdentitySolver self,
+  /* in */ const char* name,
+  /* in */ struct sidl_double__array* value);
 
 /**
  * Set the double 2-D array parameter associated with {\tt name}.
@@ -159,9 +176,9 @@ bHYPRE_IdentitySolver_SetDoubleArray1Parameter(
  */
 int32_t
 bHYPRE_IdentitySolver_SetDoubleArray2Parameter(
-  /*in*/ bHYPRE_IdentitySolver self,
-  /*in*/ const char* name,
-  /*in*/ struct sidl_double__array* value);
+  /* in */ bHYPRE_IdentitySolver self,
+  /* in */ const char* name,
+  /* in */ struct sidl_double__array* value);
 
 /**
  * Set the int parameter associated with {\tt name}.
@@ -169,9 +186,9 @@ bHYPRE_IdentitySolver_SetDoubleArray2Parameter(
  */
 int32_t
 bHYPRE_IdentitySolver_GetIntValue(
-  /*in*/ bHYPRE_IdentitySolver self,
-  /*in*/ const char* name,
-  /*out*/ int32_t* value);
+  /* in */ bHYPRE_IdentitySolver self,
+  /* in */ const char* name,
+  /* out */ int32_t* value);
 
 /**
  * Get the double parameter associated with {\tt name}.
@@ -179,9 +196,9 @@ bHYPRE_IdentitySolver_GetIntValue(
  */
 int32_t
 bHYPRE_IdentitySolver_GetDoubleValue(
-  /*in*/ bHYPRE_IdentitySolver self,
-  /*in*/ const char* name,
-  /*out*/ double* value);
+  /* in */ bHYPRE_IdentitySolver self,
+  /* in */ const char* name,
+  /* out */ double* value);
 
 /**
  * (Optional) Do any preprocessing that may be necessary in
@@ -190,9 +207,9 @@ bHYPRE_IdentitySolver_GetDoubleValue(
  */
 int32_t
 bHYPRE_IdentitySolver_Setup(
-  /*in*/ bHYPRE_IdentitySolver self,
-  /*in*/ bHYPRE_Vector b,
-  /*in*/ bHYPRE_Vector x);
+  /* in */ bHYPRE_IdentitySolver self,
+  /* in */ bHYPRE_Vector b,
+  /* in */ bHYPRE_Vector x);
 
 /**
  * Apply the operator to {\tt b}, returning {\tt x}.
@@ -200,9 +217,9 @@ bHYPRE_IdentitySolver_Setup(
  */
 int32_t
 bHYPRE_IdentitySolver_Apply(
-  /*in*/ bHYPRE_IdentitySolver self,
-  /*in*/ bHYPRE_Vector b,
-  /*inout*/ bHYPRE_Vector* x);
+  /* in */ bHYPRE_IdentitySolver self,
+  /* in */ bHYPRE_Vector b,
+  /* inout */ bHYPRE_Vector* x);
 
 /**
  * Set the operator for the linear system being solved.
@@ -210,8 +227,8 @@ bHYPRE_IdentitySolver_Apply(
  */
 int32_t
 bHYPRE_IdentitySolver_SetOperator(
-  /*in*/ bHYPRE_IdentitySolver self,
-  /*in*/ bHYPRE_Operator A);
+  /* in */ bHYPRE_IdentitySolver self,
+  /* in */ bHYPRE_Operator A);
 
 /**
  * (Optional) Set the convergence tolerance.
@@ -219,8 +236,8 @@ bHYPRE_IdentitySolver_SetOperator(
  */
 int32_t
 bHYPRE_IdentitySolver_SetTolerance(
-  /*in*/ bHYPRE_IdentitySolver self,
-  /*in*/ double tolerance);
+  /* in */ bHYPRE_IdentitySolver self,
+  /* in */ double tolerance);
 
 /**
  * (Optional) Set maximum number of iterations.
@@ -228,8 +245,8 @@ bHYPRE_IdentitySolver_SetTolerance(
  */
 int32_t
 bHYPRE_IdentitySolver_SetMaxIterations(
-  /*in*/ bHYPRE_IdentitySolver self,
-  /*in*/ int32_t max_iterations);
+  /* in */ bHYPRE_IdentitySolver self,
+  /* in */ int32_t max_iterations);
 
 /**
  * (Optional) Set the {\it logging level}, specifying the degree
@@ -241,8 +258,8 @@ bHYPRE_IdentitySolver_SetMaxIterations(
  */
 int32_t
 bHYPRE_IdentitySolver_SetLogging(
-  /*in*/ bHYPRE_IdentitySolver self,
-  /*in*/ int32_t level);
+  /* in */ bHYPRE_IdentitySolver self,
+  /* in */ int32_t level);
 
 /**
  * (Optional) Set the {\it print level}, specifying the degree
@@ -254,8 +271,8 @@ bHYPRE_IdentitySolver_SetLogging(
  */
 int32_t
 bHYPRE_IdentitySolver_SetPrintLevel(
-  /*in*/ bHYPRE_IdentitySolver self,
-  /*in*/ int32_t level);
+  /* in */ bHYPRE_IdentitySolver self,
+  /* in */ int32_t level);
 
 /**
  * (Optional) Return the number of iterations taken.
@@ -263,8 +280,8 @@ bHYPRE_IdentitySolver_SetPrintLevel(
  */
 int32_t
 bHYPRE_IdentitySolver_GetNumIterations(
-  /*in*/ bHYPRE_IdentitySolver self,
-  /*out*/ int32_t* num_iterations);
+  /* in */ bHYPRE_IdentitySolver self,
+  /* out */ int32_t* num_iterations);
 
 /**
  * (Optional) Return the norm of the relative residual.
@@ -272,13 +289,13 @@ bHYPRE_IdentitySolver_GetNumIterations(
  */
 int32_t
 bHYPRE_IdentitySolver_GetRelResidualNorm(
-  /*in*/ bHYPRE_IdentitySolver self,
-  /*out*/ double* norm);
+  /* in */ bHYPRE_IdentitySolver self,
+  /* out */ double* norm);
 
 /**
  * Cast method for interface and class type conversions.
  */
-bHYPRE_IdentitySolver
+struct bHYPRE_IdentitySolver__object*
 bHYPRE_IdentitySolver__cast(
   void* obj);
 
@@ -290,6 +307,29 @@ bHYPRE_IdentitySolver__cast2(
   void* obj,
   const char* type);
 
+/**
+ * Select and execute a method by name
+ */
+void
+bHYPRE_IdentitySolver__exec(
+  /* in */ bHYPRE_IdentitySolver self,
+  /* in */ const char* methodName,
+  /* in */ sidl_io_Deserializer inArgs,
+  /* in */ sidl_io_Serializer outArgs);
+/**
+ * static Exec method for reflexity.
+ */
+void
+bHYPRE_IdentitySolver__sexec(
+  /* in */ const char* methodName,
+  /* in */ sidl_io_Deserializer inArgs,
+  /* in */ sidl_io_Serializer outArgs);
+/**
+ * Get the URL of the Implementation of this object (for RMI)
+ */
+char*
+bHYPRE_IdentitySolver__getURL(
+  /* in */ bHYPRE_IdentitySolver self);
 struct bHYPRE_IdentitySolver__array*
 bHYPRE_IdentitySolver__array_createCol(
   int32_t       dimen,

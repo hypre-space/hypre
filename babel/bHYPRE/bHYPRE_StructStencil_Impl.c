@@ -2,12 +2,12 @@
  * File:          bHYPRE_StructStencil_Impl.c
  * Symbol:        bHYPRE.StructStencil-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.9.8
+ * Babel Version: 0.10.4
  * Description:   Server-side implementation for bHYPRE.StructStencil
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.9.8
+ * babel-version = 0.10.4
  */
 
 /*
@@ -35,15 +35,36 @@
 /* DO-NOT-DELETE splicer.end(bHYPRE.StructStencil._includes) */
 
 /*
+ * Static class initializer called exactly once before any user-defined method is dispatched
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_StructStencil__load"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+void
+impl_bHYPRE_StructStencil__load(
+  void)
+{
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructStencil._load) */
+  /* Insert-Code-Here {bHYPRE.StructStencil._load} (static class initializer method) */
+  /* DO-NOT-DELETE splicer.end(bHYPRE.StructStencil._load) */
+}
+/*
  * Class constructor called when the class is created.
  */
 
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_StructStencil__ctor"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 void
 impl_bHYPRE_StructStencil__ctor(
-  /*in*/ bHYPRE_StructStencil self)
+  /* in */ bHYPRE_StructStencil self)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.StructStencil._ctor) */
   /* Insert the implementation of the constructor method here... */
@@ -65,9 +86,12 @@ impl_bHYPRE_StructStencil__ctor(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_StructStencil__dtor"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 void
 impl_bHYPRE_StructStencil__dtor(
-  /*in*/ bHYPRE_StructStencil self)
+  /* in */ bHYPRE_StructStencil self)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.StructStencil._dtor) */
   /* Insert the implementation of the destructor method here... */
@@ -91,9 +115,13 @@ impl_bHYPRE_StructStencil__dtor(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_StructStencil_SetDimension"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_StructStencil_SetDimension(
-  /*in*/ bHYPRE_StructStencil self, /*in*/ int32_t dim)
+  /* in */ bHYPRE_StructStencil self,
+  /* in */ int32_t dim)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.StructStencil.SetDimension) */
   /* Insert the implementation of the SetDimension method here... */
@@ -128,9 +156,13 @@ impl_bHYPRE_StructStencil_SetDimension(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_StructStencil_SetSize"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_StructStencil_SetSize(
-  /*in*/ bHYPRE_StructStencil self, /*in*/ int32_t size)
+  /* in */ bHYPRE_StructStencil self,
+  /* in */ int32_t size)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.StructStencil.SetSize) */
   /* Insert the implementation of the SetSize method here... */
@@ -165,10 +197,14 @@ impl_bHYPRE_StructStencil_SetSize(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_StructStencil_SetElement"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_StructStencil_SetElement(
-  /*in*/ bHYPRE_StructStencil self, /*in*/ int32_t index,
-    /*in*/ struct sidl_int__array* offset)
+  /* in */ bHYPRE_StructStencil self,
+  /* in */ int32_t index,
+  /* in */ struct sidl_int__array* offset)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.StructStencil.SetElement) */
   /* Insert the implementation of the SetElement method here... */
@@ -187,4 +223,41 @@ impl_bHYPRE_StructStencil_SetElement(
    return ierr;
 
   /* DO-NOT-DELETE splicer.end(bHYPRE.StructStencil.SetElement) */
+}
+/* Babel internal methods, Users should not edit below this line. */
+struct sidl_ClassInfo__object* 
+  impl_bHYPRE_StructStencil_fconnect_sidl_ClassInfo(char* url,
+  sidl_BaseInterface *_ex) {
+  return sidl_ClassInfo__connect(url, _ex);
+}
+char * impl_bHYPRE_StructStencil_fgetURL_sidl_ClassInfo(struct 
+  sidl_ClassInfo__object* obj) {
+  return sidl_ClassInfo__getURL(obj);
+}
+struct bHYPRE_StructStencil__object* 
+  impl_bHYPRE_StructStencil_fconnect_bHYPRE_StructStencil(char* url,
+  sidl_BaseInterface *_ex) {
+  return bHYPRE_StructStencil__connect(url, _ex);
+}
+char * impl_bHYPRE_StructStencil_fgetURL_bHYPRE_StructStencil(struct 
+  bHYPRE_StructStencil__object* obj) {
+  return bHYPRE_StructStencil__getURL(obj);
+}
+struct sidl_BaseInterface__object* 
+  impl_bHYPRE_StructStencil_fconnect_sidl_BaseInterface(char* url,
+  sidl_BaseInterface *_ex) {
+  return sidl_BaseInterface__connect(url, _ex);
+}
+char * impl_bHYPRE_StructStencil_fgetURL_sidl_BaseInterface(struct 
+  sidl_BaseInterface__object* obj) {
+  return sidl_BaseInterface__getURL(obj);
+}
+struct sidl_BaseClass__object* 
+  impl_bHYPRE_StructStencil_fconnect_sidl_BaseClass(char* url,
+  sidl_BaseInterface *_ex) {
+  return sidl_BaseClass__connect(url, _ex);
+}
+char * impl_bHYPRE_StructStencil_fgetURL_sidl_BaseClass(struct 
+  sidl_BaseClass__object* obj) {
+  return sidl_BaseClass__getURL(obj);
 }

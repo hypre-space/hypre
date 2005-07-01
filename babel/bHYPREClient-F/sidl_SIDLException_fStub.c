@@ -1,8 +1,8 @@
 /*
  * File:          sidl_SIDLException_fStub.c
- * Symbol:        sidl.SIDLException-v0.9.0
+ * Symbol:        sidl.SIDLException-v0.9.3
  * Symbol Type:   class
- * Babel Version: 0.9.8
+ * Babel Version: 0.10.4
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Client-side glue code for sidl.SIDLException
@@ -32,11 +32,12 @@
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.9.8
+ * babel-version = 0.10.4
+ * xml-url       = /home/painter/babel/share/babel-0.10.4/repository/sidl.SIDLException-v0.9.3.xml
  */
 
 /*
- * Symbol "sidl.SIDLException" (version 0.9.0)
+ * Symbol "sidl.SIDLException" (version 0.9.3)
  * 
  * <code>SIDLException</code> provides the basic functionality of the
  * <code>BaseException</code> interface for getting and setting error
@@ -52,8 +53,8 @@
 #endif
 #include <stdio.h>
 #include "sidl_SIDLException_IOR.h"
-#include "sidl_BaseInterface_IOR.h"
 #include "sidl_ClassInfo_IOR.h"
+#include "sidl_BaseInterface_IOR.h"
 
 /*
  * Return pointer to internal IOR functions.
@@ -99,8 +100,7 @@ SIDLFortran77Symbol(sidl_sidlexception__cast_f,SIDL_SIDLEXCEPTION__CAST_F,sidl_S
       *_base->d_epv->f__cast)(
       _base->d_object,
       "sidl.SIDLException");
-  }
-  else {
+  } else {
     *retval = 0;
   }
 }

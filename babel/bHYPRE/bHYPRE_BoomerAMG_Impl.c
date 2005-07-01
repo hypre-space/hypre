@@ -2,12 +2,12 @@
  * File:          bHYPRE_BoomerAMG_Impl.c
  * Symbol:        bHYPRE.BoomerAMG-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.9.8
+ * Babel Version: 0.10.4
  * Description:   Server-side implementation for bHYPRE.BoomerAMG
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.9.8
+ * babel-version = 0.10.4
  */
 
 /*
@@ -139,15 +139,36 @@
 /* DO-NOT-DELETE splicer.end(bHYPRE.BoomerAMG._includes) */
 
 /*
+ * Static class initializer called exactly once before any user-defined method is dispatched
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_BoomerAMG__load"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+void
+impl_bHYPRE_BoomerAMG__load(
+  void)
+{
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.BoomerAMG._load) */
+  /* Insert-Code-Here {bHYPRE.BoomerAMG._load} (static class initializer method) */
+  /* DO-NOT-DELETE splicer.end(bHYPRE.BoomerAMG._load) */
+}
+/*
  * Class constructor called when the class is created.
  */
 
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_BoomerAMG__ctor"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 void
 impl_bHYPRE_BoomerAMG__ctor(
-  /*in*/ bHYPRE_BoomerAMG self)
+  /* in */ bHYPRE_BoomerAMG self)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.BoomerAMG._ctor) */
   /* Insert the implementation of the constructor method here... */
@@ -174,9 +195,12 @@ impl_bHYPRE_BoomerAMG__ctor(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_BoomerAMG__dtor"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 void
 impl_bHYPRE_BoomerAMG__dtor(
-  /*in*/ bHYPRE_BoomerAMG self)
+  /* in */ bHYPRE_BoomerAMG self)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.BoomerAMG._dtor) */
   /* Insert the implementation of the destructor method here... */
@@ -201,9 +225,14 @@ impl_bHYPRE_BoomerAMG__dtor(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_BoomerAMG_SetLevelRelaxWt"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_BoomerAMG_SetLevelRelaxWt(
-  /*in*/ bHYPRE_BoomerAMG self, /*in*/ double relax_wt, /*in*/ int32_t level)
+  /* in */ bHYPRE_BoomerAMG self,
+  /* in */ double relax_wt,
+  /* in */ int32_t level)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.BoomerAMG.SetLevelRelaxWt) */
   /* Insert the implementation of the SetLevelRelaxWt method here... */
@@ -227,9 +256,13 @@ impl_bHYPRE_BoomerAMG_SetLevelRelaxWt(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_BoomerAMG_SetCommunicator"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_BoomerAMG_SetCommunicator(
-  /*in*/ bHYPRE_BoomerAMG self, /*in*/ void* mpi_comm)
+  /* in */ bHYPRE_BoomerAMG self,
+  /* in */ void* mpi_comm)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.BoomerAMG.SetCommunicator) */
   /* Insert the implementation of the SetCommunicator method here... */
@@ -250,9 +283,14 @@ impl_bHYPRE_BoomerAMG_SetCommunicator(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_BoomerAMG_SetIntParameter"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_BoomerAMG_SetIntParameter(
-  /*in*/ bHYPRE_BoomerAMG self, /*in*/ const char* name, /*in*/ int32_t value)
+  /* in */ bHYPRE_BoomerAMG self,
+  /* in */ const char* name,
+  /* in */ int32_t value)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.BoomerAMG.SetIntParameter) */
   /* Insert the implementation of the SetIntParameter method here... */
@@ -374,9 +412,14 @@ impl_bHYPRE_BoomerAMG_SetIntParameter(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_BoomerAMG_SetDoubleParameter"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_BoomerAMG_SetDoubleParameter(
-  /*in*/ bHYPRE_BoomerAMG self, /*in*/ const char* name, /*in*/ double value)
+  /* in */ bHYPRE_BoomerAMG self,
+  /* in */ const char* name,
+  /* in */ double value)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.BoomerAMG.SetDoubleParameter) */
   /* Insert the implementation of the SetDoubleParameter method here... */
@@ -422,10 +465,14 @@ impl_bHYPRE_BoomerAMG_SetDoubleParameter(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_BoomerAMG_SetStringParameter"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_BoomerAMG_SetStringParameter(
-  /*in*/ bHYPRE_BoomerAMG self, /*in*/ const char* name,
-    /*in*/ const char* value)
+  /* in */ bHYPRE_BoomerAMG self,
+  /* in */ const char* name,
+  /* in */ const char* value)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.BoomerAMG.SetStringParameter) */
   /* Insert the implementation of the SetStringParameter method here... */
@@ -459,10 +506,14 @@ impl_bHYPRE_BoomerAMG_SetStringParameter(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_BoomerAMG_SetIntArray1Parameter"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_BoomerAMG_SetIntArray1Parameter(
-  /*in*/ bHYPRE_BoomerAMG self, /*in*/ const char* name,
-    /*in*/ struct sidl_int__array* value)
+  /* in */ bHYPRE_BoomerAMG self,
+  /* in */ const char* name,
+  /* in */ struct sidl_int__array* value)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.BoomerAMG.SetIntArray1Parameter) */
   /* Insert the implementation of the SetIntArray1Parameter method here... */
@@ -512,10 +563,14 @@ impl_bHYPRE_BoomerAMG_SetIntArray1Parameter(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_BoomerAMG_SetIntArray2Parameter"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_BoomerAMG_SetIntArray2Parameter(
-  /*in*/ bHYPRE_BoomerAMG self, /*in*/ const char* name,
-    /*in*/ struct sidl_int__array* value)
+  /* in */ bHYPRE_BoomerAMG self,
+  /* in */ const char* name,
+  /* in */ struct sidl_int__array* value)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.BoomerAMG.SetIntArray2Parameter) */
   /* Insert the implementation of the SetIntArray2Parameter method here... */
@@ -569,10 +624,14 @@ impl_bHYPRE_BoomerAMG_SetIntArray2Parameter(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_BoomerAMG_SetDoubleArray1Parameter"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_BoomerAMG_SetDoubleArray1Parameter(
-  /*in*/ bHYPRE_BoomerAMG self, /*in*/ const char* name,
-    /*in*/ struct sidl_double__array* value)
+  /* in */ bHYPRE_BoomerAMG self,
+  /* in */ const char* name,
+  /* in */ struct sidl_double__array* value)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.BoomerAMG.SetDoubleArray1Parameter) */
   /* Insert the implementation of the SetDoubleArray1Parameter method here... */
@@ -610,10 +669,14 @@ impl_bHYPRE_BoomerAMG_SetDoubleArray1Parameter(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_BoomerAMG_SetDoubleArray2Parameter"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_BoomerAMG_SetDoubleArray2Parameter(
-  /*in*/ bHYPRE_BoomerAMG self, /*in*/ const char* name,
-    /*in*/ struct sidl_double__array* value)
+  /* in */ bHYPRE_BoomerAMG self,
+  /* in */ const char* name,
+  /* in */ struct sidl_double__array* value)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.BoomerAMG.SetDoubleArray2Parameter) */
   /* Insert the implementation of the SetDoubleArray2Parameter method here... */
@@ -629,9 +692,14 @@ impl_bHYPRE_BoomerAMG_SetDoubleArray2Parameter(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_BoomerAMG_GetIntValue"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_BoomerAMG_GetIntValue(
-  /*in*/ bHYPRE_BoomerAMG self, /*in*/ const char* name, /*out*/ int32_t* value)
+  /* in */ bHYPRE_BoomerAMG self,
+  /* in */ const char* name,
+  /* out */ int32_t* value)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.BoomerAMG.GetIntValue) */
   /* Insert the implementation of the GetIntValue method here... */
@@ -659,9 +727,14 @@ impl_bHYPRE_BoomerAMG_GetIntValue(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_BoomerAMG_GetDoubleValue"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_BoomerAMG_GetDoubleValue(
-  /*in*/ bHYPRE_BoomerAMG self, /*in*/ const char* name, /*out*/ double* value)
+  /* in */ bHYPRE_BoomerAMG self,
+  /* in */ const char* name,
+  /* out */ double* value)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.BoomerAMG.GetDoubleValue) */
   /* Insert the implementation of the GetDoubleValue method here... */
@@ -690,9 +763,14 @@ impl_bHYPRE_BoomerAMG_GetDoubleValue(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_BoomerAMG_Setup"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_BoomerAMG_Setup(
-  /*in*/ bHYPRE_BoomerAMG self, /*in*/ bHYPRE_Vector b, /*in*/ bHYPRE_Vector x)
+  /* in */ bHYPRE_BoomerAMG self,
+  /* in */ bHYPRE_Vector b,
+  /* in */ bHYPRE_Vector x)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.BoomerAMG.Setup) */
   /* Insert the implementation of the Setup method here... */
@@ -763,10 +841,14 @@ impl_bHYPRE_BoomerAMG_Setup(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_BoomerAMG_Apply"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_BoomerAMG_Apply(
-  /*in*/ bHYPRE_BoomerAMG self, /*in*/ bHYPRE_Vector b,
-    /*inout*/ bHYPRE_Vector* x)
+  /* in */ bHYPRE_BoomerAMG self,
+  /* in */ bHYPRE_Vector b,
+  /* inout */ bHYPRE_Vector* x)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.BoomerAMG.Apply) */
   /* Insert the implementation of the Apply method here... */
@@ -847,9 +929,13 @@ impl_bHYPRE_BoomerAMG_Apply(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_BoomerAMG_SetOperator"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_BoomerAMG_SetOperator(
-  /*in*/ bHYPRE_BoomerAMG self, /*in*/ bHYPRE_Operator A)
+  /* in */ bHYPRE_BoomerAMG self,
+  /* in */ bHYPRE_Operator A)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.BoomerAMG.SetOperator) */
   /* Insert the implementation of the SetOperator method here... */
@@ -885,9 +971,13 @@ impl_bHYPRE_BoomerAMG_SetOperator(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_BoomerAMG_SetTolerance"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_BoomerAMG_SetTolerance(
-  /*in*/ bHYPRE_BoomerAMG self, /*in*/ double tolerance)
+  /* in */ bHYPRE_BoomerAMG self,
+  /* in */ double tolerance)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.BoomerAMG.SetTolerance) */
   /* Insert the implementation of the SetTolerance method here... */
@@ -914,9 +1004,13 @@ impl_bHYPRE_BoomerAMG_SetTolerance(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_BoomerAMG_SetMaxIterations"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_BoomerAMG_SetMaxIterations(
-  /*in*/ bHYPRE_BoomerAMG self, /*in*/ int32_t max_iterations)
+  /* in */ bHYPRE_BoomerAMG self,
+  /* in */ int32_t max_iterations)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.BoomerAMG.SetMaxIterations) */
   /* Insert the implementation of the SetMaxIterations method here... */
@@ -947,9 +1041,13 @@ impl_bHYPRE_BoomerAMG_SetMaxIterations(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_BoomerAMG_SetLogging"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_BoomerAMG_SetLogging(
-  /*in*/ bHYPRE_BoomerAMG self, /*in*/ int32_t level)
+  /* in */ bHYPRE_BoomerAMG self,
+  /* in */ int32_t level)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.BoomerAMG.SetLogging) */
   /* Insert the implementation of the SetLogging method here... */
@@ -984,9 +1082,13 @@ impl_bHYPRE_BoomerAMG_SetLogging(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_BoomerAMG_SetPrintLevel"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_BoomerAMG_SetPrintLevel(
-  /*in*/ bHYPRE_BoomerAMG self, /*in*/ int32_t level)
+  /* in */ bHYPRE_BoomerAMG self,
+  /* in */ int32_t level)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.BoomerAMG.SetPrintLevel) */
   /* Insert the implementation of the SetPrintLevel method here... */
@@ -1013,9 +1115,13 @@ impl_bHYPRE_BoomerAMG_SetPrintLevel(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_BoomerAMG_GetNumIterations"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_BoomerAMG_GetNumIterations(
-  /*in*/ bHYPRE_BoomerAMG self, /*out*/ int32_t* num_iterations)
+  /* in */ bHYPRE_BoomerAMG self,
+  /* out */ int32_t* num_iterations)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.BoomerAMG.GetNumIterations) */
   /* Insert the implementation of the GetNumIterations method here... */
@@ -1042,9 +1148,13 @@ impl_bHYPRE_BoomerAMG_GetNumIterations(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_BoomerAMG_GetRelResidualNorm"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_BoomerAMG_GetRelResidualNorm(
-  /*in*/ bHYPRE_BoomerAMG self, /*out*/ double* norm)
+  /* in */ bHYPRE_BoomerAMG self,
+  /* out */ double* norm)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.BoomerAMG.GetRelResidualNorm) */
   /* Insert the implementation of the GetRelResidualNorm method here... */
@@ -1061,4 +1171,68 @@ impl_bHYPRE_BoomerAMG_GetRelResidualNorm(
    return ierr;
 
   /* DO-NOT-DELETE splicer.end(bHYPRE.BoomerAMG.GetRelResidualNorm) */
+}
+/* Babel internal methods, Users should not edit below this line. */
+struct bHYPRE_Solver__object* 
+  impl_bHYPRE_BoomerAMG_fconnect_bHYPRE_Solver(char* url,
+  sidl_BaseInterface *_ex) {
+  return bHYPRE_Solver__connect(url, _ex);
+}
+char * impl_bHYPRE_BoomerAMG_fgetURL_bHYPRE_Solver(struct 
+  bHYPRE_Solver__object* obj) {
+  return bHYPRE_Solver__getURL(obj);
+}
+struct bHYPRE_BoomerAMG__object* 
+  impl_bHYPRE_BoomerAMG_fconnect_bHYPRE_BoomerAMG(char* url,
+  sidl_BaseInterface *_ex) {
+  return bHYPRE_BoomerAMG__connect(url, _ex);
+}
+char * impl_bHYPRE_BoomerAMG_fgetURL_bHYPRE_BoomerAMG(struct 
+  bHYPRE_BoomerAMG__object* obj) {
+  return bHYPRE_BoomerAMG__getURL(obj);
+}
+struct bHYPRE_Operator__object* 
+  impl_bHYPRE_BoomerAMG_fconnect_bHYPRE_Operator(char* url,
+  sidl_BaseInterface *_ex) {
+  return bHYPRE_Operator__connect(url, _ex);
+}
+char * impl_bHYPRE_BoomerAMG_fgetURL_bHYPRE_Operator(struct 
+  bHYPRE_Operator__object* obj) {
+  return bHYPRE_Operator__getURL(obj);
+}
+struct sidl_ClassInfo__object* 
+  impl_bHYPRE_BoomerAMG_fconnect_sidl_ClassInfo(char* url,
+  sidl_BaseInterface *_ex) {
+  return sidl_ClassInfo__connect(url, _ex);
+}
+char * impl_bHYPRE_BoomerAMG_fgetURL_sidl_ClassInfo(struct 
+  sidl_ClassInfo__object* obj) {
+  return sidl_ClassInfo__getURL(obj);
+}
+struct bHYPRE_Vector__object* 
+  impl_bHYPRE_BoomerAMG_fconnect_bHYPRE_Vector(char* url,
+  sidl_BaseInterface *_ex) {
+  return bHYPRE_Vector__connect(url, _ex);
+}
+char * impl_bHYPRE_BoomerAMG_fgetURL_bHYPRE_Vector(struct 
+  bHYPRE_Vector__object* obj) {
+  return bHYPRE_Vector__getURL(obj);
+}
+struct sidl_BaseInterface__object* 
+  impl_bHYPRE_BoomerAMG_fconnect_sidl_BaseInterface(char* url,
+  sidl_BaseInterface *_ex) {
+  return sidl_BaseInterface__connect(url, _ex);
+}
+char * impl_bHYPRE_BoomerAMG_fgetURL_sidl_BaseInterface(struct 
+  sidl_BaseInterface__object* obj) {
+  return sidl_BaseInterface__getURL(obj);
+}
+struct sidl_BaseClass__object* 
+  impl_bHYPRE_BoomerAMG_fconnect_sidl_BaseClass(char* url,
+  sidl_BaseInterface *_ex) {
+  return sidl_BaseClass__connect(url, _ex);
+}
+char * impl_bHYPRE_BoomerAMG_fgetURL_sidl_BaseClass(struct 
+  sidl_BaseClass__object* obj) {
+  return sidl_BaseClass__getURL(obj);
 }

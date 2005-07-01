@@ -2,12 +2,12 @@
  * File:          bHYPRE_BoomerAMG.h
  * Symbol:        bHYPRE.BoomerAMG-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.9.8
+ * Babel Version: 0.10.4
  * Description:   Client-side glue code for bHYPRE.BoomerAMG
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.9.8
+ * babel-version = 0.10.4
  */
 
 #ifndef included_bHYPRE_BoomerAMG_h
@@ -150,6 +150,12 @@ typedef struct bHYPRE_BoomerAMG__object* bHYPRE_BoomerAMG;
 #include "sidl_ClassInfo.h"
 #endif
 
+#ifndef included_sidl_io_Serializer_h
+#include "sidl_io_Serializer.h"
+#endif
+#ifndef included_sidl_io_Deserializer_h
+#include "sidl_io_Deserializer.h"
+#endif
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -157,44 +163,55 @@ extern "C" {
 /**
  * Constructor function for the class.
  */
-bHYPRE_BoomerAMG
+struct bHYPRE_BoomerAMG__object*
 bHYPRE_BoomerAMG__create(void);
 
+/**
+ * RMI constructor function for the class.
+ */
+bHYPRE_BoomerAMG
+bHYPRE_BoomerAMG__createRemote(const char *, sidl_BaseInterface *_ex);
+
+/**
+ * RMI connector function for the class.
+ */
+bHYPRE_BoomerAMG
+bHYPRE_BoomerAMG__connect(const char *, sidl_BaseInterface *_ex);
 void
 bHYPRE_BoomerAMG_addRef(
-  /*in*/ bHYPRE_BoomerAMG self);
+  /* in */ bHYPRE_BoomerAMG self);
 
 void
 bHYPRE_BoomerAMG_deleteRef(
-  /*in*/ bHYPRE_BoomerAMG self);
+  /* in */ bHYPRE_BoomerAMG self);
 
 sidl_bool
 bHYPRE_BoomerAMG_isSame(
-  /*in*/ bHYPRE_BoomerAMG self,
-  /*in*/ sidl_BaseInterface iobj);
+  /* in */ bHYPRE_BoomerAMG self,
+  /* in */ sidl_BaseInterface iobj);
 
 sidl_BaseInterface
 bHYPRE_BoomerAMG_queryInt(
-  /*in*/ bHYPRE_BoomerAMG self,
-  /*in*/ const char* name);
+  /* in */ bHYPRE_BoomerAMG self,
+  /* in */ const char* name);
 
 sidl_bool
 bHYPRE_BoomerAMG_isType(
-  /*in*/ bHYPRE_BoomerAMG self,
-  /*in*/ const char* name);
+  /* in */ bHYPRE_BoomerAMG self,
+  /* in */ const char* name);
 
 sidl_ClassInfo
 bHYPRE_BoomerAMG_getClassInfo(
-  /*in*/ bHYPRE_BoomerAMG self);
+  /* in */ bHYPRE_BoomerAMG self);
 
 /**
  * Method:  SetLevelRelaxWt[]
  */
 int32_t
 bHYPRE_BoomerAMG_SetLevelRelaxWt(
-  /*in*/ bHYPRE_BoomerAMG self,
-  /*in*/ double relax_wt,
-  /*in*/ int32_t level);
+  /* in */ bHYPRE_BoomerAMG self,
+  /* in */ double relax_wt,
+  /* in */ int32_t level);
 
 /**
  * Set the MPI Communicator.
@@ -202,8 +219,8 @@ bHYPRE_BoomerAMG_SetLevelRelaxWt(
  */
 int32_t
 bHYPRE_BoomerAMG_SetCommunicator(
-  /*in*/ bHYPRE_BoomerAMG self,
-  /*in*/ void* mpi_comm);
+  /* in */ bHYPRE_BoomerAMG self,
+  /* in */ void* mpi_comm);
 
 /**
  * Set the int parameter associated with {\tt name}.
@@ -211,9 +228,9 @@ bHYPRE_BoomerAMG_SetCommunicator(
  */
 int32_t
 bHYPRE_BoomerAMG_SetIntParameter(
-  /*in*/ bHYPRE_BoomerAMG self,
-  /*in*/ const char* name,
-  /*in*/ int32_t value);
+  /* in */ bHYPRE_BoomerAMG self,
+  /* in */ const char* name,
+  /* in */ int32_t value);
 
 /**
  * Set the double parameter associated with {\tt name}.
@@ -221,9 +238,9 @@ bHYPRE_BoomerAMG_SetIntParameter(
  */
 int32_t
 bHYPRE_BoomerAMG_SetDoubleParameter(
-  /*in*/ bHYPRE_BoomerAMG self,
-  /*in*/ const char* name,
-  /*in*/ double value);
+  /* in */ bHYPRE_BoomerAMG self,
+  /* in */ const char* name,
+  /* in */ double value);
 
 /**
  * Set the string parameter associated with {\tt name}.
@@ -231,9 +248,9 @@ bHYPRE_BoomerAMG_SetDoubleParameter(
  */
 int32_t
 bHYPRE_BoomerAMG_SetStringParameter(
-  /*in*/ bHYPRE_BoomerAMG self,
-  /*in*/ const char* name,
-  /*in*/ const char* value);
+  /* in */ bHYPRE_BoomerAMG self,
+  /* in */ const char* name,
+  /* in */ const char* value);
 
 /**
  * Set the int 1-D array parameter associated with {\tt name}.
@@ -241,9 +258,9 @@ bHYPRE_BoomerAMG_SetStringParameter(
  */
 int32_t
 bHYPRE_BoomerAMG_SetIntArray1Parameter(
-  /*in*/ bHYPRE_BoomerAMG self,
-  /*in*/ const char* name,
-  /*in*/ struct sidl_int__array* value);
+  /* in */ bHYPRE_BoomerAMG self,
+  /* in */ const char* name,
+  /* in */ struct sidl_int__array* value);
 
 /**
  * Set the int 2-D array parameter associated with {\tt name}.
@@ -251,9 +268,9 @@ bHYPRE_BoomerAMG_SetIntArray1Parameter(
  */
 int32_t
 bHYPRE_BoomerAMG_SetIntArray2Parameter(
-  /*in*/ bHYPRE_BoomerAMG self,
-  /*in*/ const char* name,
-  /*in*/ struct sidl_int__array* value);
+  /* in */ bHYPRE_BoomerAMG self,
+  /* in */ const char* name,
+  /* in */ struct sidl_int__array* value);
 
 /**
  * Set the double 1-D array parameter associated with {\tt name}.
@@ -261,9 +278,9 @@ bHYPRE_BoomerAMG_SetIntArray2Parameter(
  */
 int32_t
 bHYPRE_BoomerAMG_SetDoubleArray1Parameter(
-  /*in*/ bHYPRE_BoomerAMG self,
-  /*in*/ const char* name,
-  /*in*/ struct sidl_double__array* value);
+  /* in */ bHYPRE_BoomerAMG self,
+  /* in */ const char* name,
+  /* in */ struct sidl_double__array* value);
 
 /**
  * Set the double 2-D array parameter associated with {\tt name}.
@@ -271,9 +288,9 @@ bHYPRE_BoomerAMG_SetDoubleArray1Parameter(
  */
 int32_t
 bHYPRE_BoomerAMG_SetDoubleArray2Parameter(
-  /*in*/ bHYPRE_BoomerAMG self,
-  /*in*/ const char* name,
-  /*in*/ struct sidl_double__array* value);
+  /* in */ bHYPRE_BoomerAMG self,
+  /* in */ const char* name,
+  /* in */ struct sidl_double__array* value);
 
 /**
  * Set the int parameter associated with {\tt name}.
@@ -281,9 +298,9 @@ bHYPRE_BoomerAMG_SetDoubleArray2Parameter(
  */
 int32_t
 bHYPRE_BoomerAMG_GetIntValue(
-  /*in*/ bHYPRE_BoomerAMG self,
-  /*in*/ const char* name,
-  /*out*/ int32_t* value);
+  /* in */ bHYPRE_BoomerAMG self,
+  /* in */ const char* name,
+  /* out */ int32_t* value);
 
 /**
  * Get the double parameter associated with {\tt name}.
@@ -291,9 +308,9 @@ bHYPRE_BoomerAMG_GetIntValue(
  */
 int32_t
 bHYPRE_BoomerAMG_GetDoubleValue(
-  /*in*/ bHYPRE_BoomerAMG self,
-  /*in*/ const char* name,
-  /*out*/ double* value);
+  /* in */ bHYPRE_BoomerAMG self,
+  /* in */ const char* name,
+  /* out */ double* value);
 
 /**
  * (Optional) Do any preprocessing that may be necessary in
@@ -302,9 +319,9 @@ bHYPRE_BoomerAMG_GetDoubleValue(
  */
 int32_t
 bHYPRE_BoomerAMG_Setup(
-  /*in*/ bHYPRE_BoomerAMG self,
-  /*in*/ bHYPRE_Vector b,
-  /*in*/ bHYPRE_Vector x);
+  /* in */ bHYPRE_BoomerAMG self,
+  /* in */ bHYPRE_Vector b,
+  /* in */ bHYPRE_Vector x);
 
 /**
  * Apply the operator to {\tt b}, returning {\tt x}.
@@ -312,9 +329,9 @@ bHYPRE_BoomerAMG_Setup(
  */
 int32_t
 bHYPRE_BoomerAMG_Apply(
-  /*in*/ bHYPRE_BoomerAMG self,
-  /*in*/ bHYPRE_Vector b,
-  /*inout*/ bHYPRE_Vector* x);
+  /* in */ bHYPRE_BoomerAMG self,
+  /* in */ bHYPRE_Vector b,
+  /* inout */ bHYPRE_Vector* x);
 
 /**
  * Set the operator for the linear system being solved.
@@ -322,8 +339,8 @@ bHYPRE_BoomerAMG_Apply(
  */
 int32_t
 bHYPRE_BoomerAMG_SetOperator(
-  /*in*/ bHYPRE_BoomerAMG self,
-  /*in*/ bHYPRE_Operator A);
+  /* in */ bHYPRE_BoomerAMG self,
+  /* in */ bHYPRE_Operator A);
 
 /**
  * (Optional) Set the convergence tolerance.
@@ -331,8 +348,8 @@ bHYPRE_BoomerAMG_SetOperator(
  */
 int32_t
 bHYPRE_BoomerAMG_SetTolerance(
-  /*in*/ bHYPRE_BoomerAMG self,
-  /*in*/ double tolerance);
+  /* in */ bHYPRE_BoomerAMG self,
+  /* in */ double tolerance);
 
 /**
  * (Optional) Set maximum number of iterations.
@@ -340,8 +357,8 @@ bHYPRE_BoomerAMG_SetTolerance(
  */
 int32_t
 bHYPRE_BoomerAMG_SetMaxIterations(
-  /*in*/ bHYPRE_BoomerAMG self,
-  /*in*/ int32_t max_iterations);
+  /* in */ bHYPRE_BoomerAMG self,
+  /* in */ int32_t max_iterations);
 
 /**
  * (Optional) Set the {\it logging level}, specifying the degree
@@ -353,8 +370,8 @@ bHYPRE_BoomerAMG_SetMaxIterations(
  */
 int32_t
 bHYPRE_BoomerAMG_SetLogging(
-  /*in*/ bHYPRE_BoomerAMG self,
-  /*in*/ int32_t level);
+  /* in */ bHYPRE_BoomerAMG self,
+  /* in */ int32_t level);
 
 /**
  * (Optional) Set the {\it print level}, specifying the degree
@@ -366,8 +383,8 @@ bHYPRE_BoomerAMG_SetLogging(
  */
 int32_t
 bHYPRE_BoomerAMG_SetPrintLevel(
-  /*in*/ bHYPRE_BoomerAMG self,
-  /*in*/ int32_t level);
+  /* in */ bHYPRE_BoomerAMG self,
+  /* in */ int32_t level);
 
 /**
  * (Optional) Return the number of iterations taken.
@@ -375,8 +392,8 @@ bHYPRE_BoomerAMG_SetPrintLevel(
  */
 int32_t
 bHYPRE_BoomerAMG_GetNumIterations(
-  /*in*/ bHYPRE_BoomerAMG self,
-  /*out*/ int32_t* num_iterations);
+  /* in */ bHYPRE_BoomerAMG self,
+  /* out */ int32_t* num_iterations);
 
 /**
  * (Optional) Return the norm of the relative residual.
@@ -384,13 +401,13 @@ bHYPRE_BoomerAMG_GetNumIterations(
  */
 int32_t
 bHYPRE_BoomerAMG_GetRelResidualNorm(
-  /*in*/ bHYPRE_BoomerAMG self,
-  /*out*/ double* norm);
+  /* in */ bHYPRE_BoomerAMG self,
+  /* out */ double* norm);
 
 /**
  * Cast method for interface and class type conversions.
  */
-bHYPRE_BoomerAMG
+struct bHYPRE_BoomerAMG__object*
 bHYPRE_BoomerAMG__cast(
   void* obj);
 
@@ -402,6 +419,29 @@ bHYPRE_BoomerAMG__cast2(
   void* obj,
   const char* type);
 
+/**
+ * Select and execute a method by name
+ */
+void
+bHYPRE_BoomerAMG__exec(
+  /* in */ bHYPRE_BoomerAMG self,
+  /* in */ const char* methodName,
+  /* in */ sidl_io_Deserializer inArgs,
+  /* in */ sidl_io_Serializer outArgs);
+/**
+ * static Exec method for reflexity.
+ */
+void
+bHYPRE_BoomerAMG__sexec(
+  /* in */ const char* methodName,
+  /* in */ sidl_io_Deserializer inArgs,
+  /* in */ sidl_io_Serializer outArgs);
+/**
+ * Get the URL of the Implementation of this object (for RMI)
+ */
+char*
+bHYPRE_BoomerAMG__getURL(
+  /* in */ bHYPRE_BoomerAMG self);
 struct bHYPRE_BoomerAMG__array*
 bHYPRE_BoomerAMG__array_createCol(
   int32_t       dimen,

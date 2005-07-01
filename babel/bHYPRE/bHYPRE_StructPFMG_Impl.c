@@ -2,12 +2,12 @@
  * File:          bHYPRE_StructPFMG_Impl.c
  * Symbol:        bHYPRE.StructPFMG-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.9.8
+ * Babel Version: 0.10.4
  * Description:   Server-side implementation for bHYPRE.StructPFMG
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.9.8
+ * babel-version = 0.10.4
  */
 
 /*
@@ -33,15 +33,36 @@
 /* DO-NOT-DELETE splicer.end(bHYPRE.StructPFMG._includes) */
 
 /*
+ * Static class initializer called exactly once before any user-defined method is dispatched
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_StructPFMG__load"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+void
+impl_bHYPRE_StructPFMG__load(
+  void)
+{
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructPFMG._load) */
+  /* Insert-Code-Here {bHYPRE.StructPFMG._load} (static class initializer method) */
+  /* DO-NOT-DELETE splicer.end(bHYPRE.StructPFMG._load) */
+}
+/*
  * Class constructor called when the class is created.
  */
 
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_StructPFMG__ctor"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 void
 impl_bHYPRE_StructPFMG__ctor(
-  /*in*/ bHYPRE_StructPFMG self)
+  /* in */ bHYPRE_StructPFMG self)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.StructPFMG._ctor) */
   /* Insert the implementation of the constructor method here... */
@@ -63,9 +84,12 @@ impl_bHYPRE_StructPFMG__ctor(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_StructPFMG__dtor"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 void
 impl_bHYPRE_StructPFMG__dtor(
-  /*in*/ bHYPRE_StructPFMG self)
+  /* in */ bHYPRE_StructPFMG self)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.StructPFMG._dtor) */
   /* Insert the implementation of the destructor method here... */
@@ -81,6 +105,40 @@ impl_bHYPRE_StructPFMG__dtor(
 }
 
 /*
+ * Method:  Create[]
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_StructPFMG_Create"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+bHYPRE_StructPFMG
+impl_bHYPRE_StructPFMG_Create(
+  /* in */ void* mpi_comm)
+{
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructPFMG.Create) */
+  /* Insert-Code-Here {bHYPRE.StructPFMG.Create} (Create method) */
+
+   int ierr = 0;
+   bHYPRE_StructPFMG solver = bHYPRE_StructPFMG__create();
+   struct bHYPRE_StructPFMG__data * data = bHYPRE_StructPFMG__get_data( solver );
+   HYPRE_StructSolver dummy;
+   HYPRE_StructSolver * Hsolver = &dummy;
+
+   data -> comm = (MPI_Comm) mpi_comm;
+
+   ierr += HYPRE_StructPFMGCreate( (data->comm), Hsolver );
+   assert( ierr==0 );
+   data -> solver = *Hsolver;
+
+   return solver;
+
+  /* DO-NOT-DELETE splicer.end(bHYPRE.StructPFMG.Create) */
+}
+
+/*
  * Set the MPI Communicator.
  * 
  */
@@ -88,9 +146,13 @@ impl_bHYPRE_StructPFMG__dtor(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_StructPFMG_SetCommunicator"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_StructPFMG_SetCommunicator(
-  /*in*/ bHYPRE_StructPFMG self, /*in*/ void* mpi_comm)
+  /* in */ bHYPRE_StructPFMG self,
+  /* in */ void* mpi_comm)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.StructPFMG.SetCommunicator) */
   /* Insert the implementation of the SetCommunicator method here... */
@@ -102,8 +164,11 @@ impl_bHYPRE_StructPFMG_SetCommunicator(
 
    data -> comm = (MPI_Comm) mpi_comm;
 
-   ierr += HYPRE_StructPFMGCreate( (data->comm), solver );
-   data -> solver = *solver;
+   if ( data->solver == NULL )
+   {
+      ierr += HYPRE_StructPFMGCreate( (data->comm), solver );
+      data -> solver = *solver;
+   }
 
    return ierr;
 
@@ -118,9 +183,14 @@ impl_bHYPRE_StructPFMG_SetCommunicator(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_StructPFMG_SetIntParameter"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_StructPFMG_SetIntParameter(
-  /*in*/ bHYPRE_StructPFMG self, /*in*/ const char* name, /*in*/ int32_t value)
+  /* in */ bHYPRE_StructPFMG self,
+  /* in */ const char* name,
+  /* in */ int32_t value)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.StructPFMG.SetIntParameter) */
   /* Insert the implementation of the SetIntParameter method here... */
@@ -198,9 +268,14 @@ impl_bHYPRE_StructPFMG_SetIntParameter(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_StructPFMG_SetDoubleParameter"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_StructPFMG_SetDoubleParameter(
-  /*in*/ bHYPRE_StructPFMG self, /*in*/ const char* name, /*in*/ double value)
+  /* in */ bHYPRE_StructPFMG self,
+  /* in */ const char* name,
+  /* in */ double value)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.StructPFMG.SetDoubleParameter) */
   /* Insert the implementation of the SetDoubleParameter method here... */
@@ -234,10 +309,14 @@ impl_bHYPRE_StructPFMG_SetDoubleParameter(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_StructPFMG_SetStringParameter"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_StructPFMG_SetStringParameter(
-  /*in*/ bHYPRE_StructPFMG self, /*in*/ const char* name,
-    /*in*/ const char* value)
+  /* in */ bHYPRE_StructPFMG self,
+  /* in */ const char* name,
+  /* in */ const char* value)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.StructPFMG.SetStringParameter) */
   /* Insert the implementation of the SetStringParameter method here... */
@@ -253,10 +332,14 @@ impl_bHYPRE_StructPFMG_SetStringParameter(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_StructPFMG_SetIntArray1Parameter"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_StructPFMG_SetIntArray1Parameter(
-  /*in*/ bHYPRE_StructPFMG self, /*in*/ const char* name,
-    /*in*/ struct sidl_int__array* value)
+  /* in */ bHYPRE_StructPFMG self,
+  /* in */ const char* name,
+  /* in */ struct sidl_int__array* value)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.StructPFMG.SetIntArray1Parameter) */
   /* Insert the implementation of the SetIntArray1Parameter method here... */
@@ -272,10 +355,14 @@ impl_bHYPRE_StructPFMG_SetIntArray1Parameter(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_StructPFMG_SetIntArray2Parameter"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_StructPFMG_SetIntArray2Parameter(
-  /*in*/ bHYPRE_StructPFMG self, /*in*/ const char* name,
-    /*in*/ struct sidl_int__array* value)
+  /* in */ bHYPRE_StructPFMG self,
+  /* in */ const char* name,
+  /* in */ struct sidl_int__array* value)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.StructPFMG.SetIntArray2Parameter) */
   /* Insert the implementation of the SetIntArray2Parameter method here... */
@@ -291,10 +378,14 @@ impl_bHYPRE_StructPFMG_SetIntArray2Parameter(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_StructPFMG_SetDoubleArray1Parameter"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_StructPFMG_SetDoubleArray1Parameter(
-  /*in*/ bHYPRE_StructPFMG self, /*in*/ const char* name,
-    /*in*/ struct sidl_double__array* value)
+  /* in */ bHYPRE_StructPFMG self,
+  /* in */ const char* name,
+  /* in */ struct sidl_double__array* value)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.StructPFMG.SetDoubleArray1Parameter) */
   /* Insert the implementation of the SetDoubleArray1Parameter method here... */
@@ -330,10 +421,14 @@ impl_bHYPRE_StructPFMG_SetDoubleArray1Parameter(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_StructPFMG_SetDoubleArray2Parameter"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_StructPFMG_SetDoubleArray2Parameter(
-  /*in*/ bHYPRE_StructPFMG self, /*in*/ const char* name,
-    /*in*/ struct sidl_double__array* value)
+  /* in */ bHYPRE_StructPFMG self,
+  /* in */ const char* name,
+  /* in */ struct sidl_double__array* value)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.StructPFMG.SetDoubleArray2Parameter) */
   /* Insert the implementation of the SetDoubleArray2Parameter method here... */
@@ -349,10 +444,14 @@ impl_bHYPRE_StructPFMG_SetDoubleArray2Parameter(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_StructPFMG_GetIntValue"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_StructPFMG_GetIntValue(
-  /*in*/ bHYPRE_StructPFMG self, /*in*/ const char* name,
-    /*out*/ int32_t* value)
+  /* in */ bHYPRE_StructPFMG self,
+  /* in */ const char* name,
+  /* out */ int32_t* value)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.StructPFMG.GetIntValue) */
   /* Insert the implementation of the GetIntValue method here... */
@@ -368,9 +467,14 @@ impl_bHYPRE_StructPFMG_GetIntValue(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_StructPFMG_GetDoubleValue"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_StructPFMG_GetDoubleValue(
-  /*in*/ bHYPRE_StructPFMG self, /*in*/ const char* name, /*out*/ double* value)
+  /* in */ bHYPRE_StructPFMG self,
+  /* in */ const char* name,
+  /* out */ double* value)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.StructPFMG.GetDoubleValue) */
   /* Insert the implementation of the GetDoubleValue method here... */
@@ -387,9 +491,14 @@ impl_bHYPRE_StructPFMG_GetDoubleValue(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_StructPFMG_Setup"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_StructPFMG_Setup(
-  /*in*/ bHYPRE_StructPFMG self, /*in*/ bHYPRE_Vector b, /*in*/ bHYPRE_Vector x)
+  /* in */ bHYPRE_StructPFMG self,
+  /* in */ bHYPRE_Vector b,
+  /* in */ bHYPRE_Vector x)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.StructPFMG.Setup) */
   /* Insert the implementation of the Setup method here... */
@@ -449,10 +558,14 @@ impl_bHYPRE_StructPFMG_Setup(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_StructPFMG_Apply"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_StructPFMG_Apply(
-  /*in*/ bHYPRE_StructPFMG self, /*in*/ bHYPRE_Vector b,
-    /*inout*/ bHYPRE_Vector* x)
+  /* in */ bHYPRE_StructPFMG self,
+  /* in */ bHYPRE_Vector b,
+  /* inout */ bHYPRE_Vector* x)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.StructPFMG.Apply) */
   /* Insert the implementation of the Apply method here... */
@@ -521,9 +634,13 @@ impl_bHYPRE_StructPFMG_Apply(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_StructPFMG_SetOperator"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_StructPFMG_SetOperator(
-  /*in*/ bHYPRE_StructPFMG self, /*in*/ bHYPRE_Operator A)
+  /* in */ bHYPRE_StructPFMG self,
+  /* in */ bHYPRE_Operator A)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.StructPFMG.SetOperator) */
   /* Insert the implementation of the SetOperator method here... */
@@ -559,9 +676,13 @@ impl_bHYPRE_StructPFMG_SetOperator(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_StructPFMG_SetTolerance"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_StructPFMG_SetTolerance(
-  /*in*/ bHYPRE_StructPFMG self, /*in*/ double tolerance)
+  /* in */ bHYPRE_StructPFMG self,
+  /* in */ double tolerance)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.StructPFMG.SetTolerance) */
   /* Insert the implementation of the SetTolerance method here... */
@@ -588,9 +709,13 @@ impl_bHYPRE_StructPFMG_SetTolerance(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_StructPFMG_SetMaxIterations"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_StructPFMG_SetMaxIterations(
-  /*in*/ bHYPRE_StructPFMG self, /*in*/ int32_t max_iterations)
+  /* in */ bHYPRE_StructPFMG self,
+  /* in */ int32_t max_iterations)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.StructPFMG.SetMaxIterations) */
   /* Insert the implementation of the SetMaxIterations method here... */
@@ -621,9 +746,13 @@ impl_bHYPRE_StructPFMG_SetMaxIterations(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_StructPFMG_SetLogging"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_StructPFMG_SetLogging(
-  /*in*/ bHYPRE_StructPFMG self, /*in*/ int32_t level)
+  /* in */ bHYPRE_StructPFMG self,
+  /* in */ int32_t level)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.StructPFMG.SetLogging) */
   /* Insert the implementation of the SetLogging method here... */
@@ -654,9 +783,13 @@ impl_bHYPRE_StructPFMG_SetLogging(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_StructPFMG_SetPrintLevel"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_StructPFMG_SetPrintLevel(
-  /*in*/ bHYPRE_StructPFMG self, /*in*/ int32_t level)
+  /* in */ bHYPRE_StructPFMG self,
+  /* in */ int32_t level)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.StructPFMG.SetPrintLevel) */
   /* Insert the implementation of the SetPrintLevel method here... */
@@ -683,9 +816,13 @@ impl_bHYPRE_StructPFMG_SetPrintLevel(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_StructPFMG_GetNumIterations"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_StructPFMG_GetNumIterations(
-  /*in*/ bHYPRE_StructPFMG self, /*out*/ int32_t* num_iterations)
+  /* in */ bHYPRE_StructPFMG self,
+  /* out */ int32_t* num_iterations)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.StructPFMG.GetNumIterations) */
   /* Insert the implementation of the GetNumIterations method here... */
@@ -712,9 +849,13 @@ impl_bHYPRE_StructPFMG_GetNumIterations(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_StructPFMG_GetRelResidualNorm"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_StructPFMG_GetRelResidualNorm(
-  /*in*/ bHYPRE_StructPFMG self, /*out*/ double* norm)
+  /* in */ bHYPRE_StructPFMG self,
+  /* out */ double* norm)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.StructPFMG.GetRelResidualNorm) */
   /* Insert the implementation of the GetRelResidualNorm method here... */
@@ -731,4 +872,68 @@ impl_bHYPRE_StructPFMG_GetRelResidualNorm(
    return ierr;
 
   /* DO-NOT-DELETE splicer.end(bHYPRE.StructPFMG.GetRelResidualNorm) */
+}
+/* Babel internal methods, Users should not edit below this line. */
+struct bHYPRE_Solver__object* 
+  impl_bHYPRE_StructPFMG_fconnect_bHYPRE_Solver(char* url,
+  sidl_BaseInterface *_ex) {
+  return bHYPRE_Solver__connect(url, _ex);
+}
+char * impl_bHYPRE_StructPFMG_fgetURL_bHYPRE_Solver(struct 
+  bHYPRE_Solver__object* obj) {
+  return bHYPRE_Solver__getURL(obj);
+}
+struct bHYPRE_StructPFMG__object* 
+  impl_bHYPRE_StructPFMG_fconnect_bHYPRE_StructPFMG(char* url,
+  sidl_BaseInterface *_ex) {
+  return bHYPRE_StructPFMG__connect(url, _ex);
+}
+char * impl_bHYPRE_StructPFMG_fgetURL_bHYPRE_StructPFMG(struct 
+  bHYPRE_StructPFMG__object* obj) {
+  return bHYPRE_StructPFMG__getURL(obj);
+}
+struct bHYPRE_Operator__object* 
+  impl_bHYPRE_StructPFMG_fconnect_bHYPRE_Operator(char* url,
+  sidl_BaseInterface *_ex) {
+  return bHYPRE_Operator__connect(url, _ex);
+}
+char * impl_bHYPRE_StructPFMG_fgetURL_bHYPRE_Operator(struct 
+  bHYPRE_Operator__object* obj) {
+  return bHYPRE_Operator__getURL(obj);
+}
+struct sidl_ClassInfo__object* 
+  impl_bHYPRE_StructPFMG_fconnect_sidl_ClassInfo(char* url,
+  sidl_BaseInterface *_ex) {
+  return sidl_ClassInfo__connect(url, _ex);
+}
+char * impl_bHYPRE_StructPFMG_fgetURL_sidl_ClassInfo(struct 
+  sidl_ClassInfo__object* obj) {
+  return sidl_ClassInfo__getURL(obj);
+}
+struct bHYPRE_Vector__object* 
+  impl_bHYPRE_StructPFMG_fconnect_bHYPRE_Vector(char* url,
+  sidl_BaseInterface *_ex) {
+  return bHYPRE_Vector__connect(url, _ex);
+}
+char * impl_bHYPRE_StructPFMG_fgetURL_bHYPRE_Vector(struct 
+  bHYPRE_Vector__object* obj) {
+  return bHYPRE_Vector__getURL(obj);
+}
+struct sidl_BaseInterface__object* 
+  impl_bHYPRE_StructPFMG_fconnect_sidl_BaseInterface(char* url,
+  sidl_BaseInterface *_ex) {
+  return sidl_BaseInterface__connect(url, _ex);
+}
+char * impl_bHYPRE_StructPFMG_fgetURL_sidl_BaseInterface(struct 
+  sidl_BaseInterface__object* obj) {
+  return sidl_BaseInterface__getURL(obj);
+}
+struct sidl_BaseClass__object* 
+  impl_bHYPRE_StructPFMG_fconnect_sidl_BaseClass(char* url,
+  sidl_BaseInterface *_ex) {
+  return sidl_BaseClass__connect(url, _ex);
+}
+char * impl_bHYPRE_StructPFMG_fgetURL_sidl_BaseClass(struct 
+  sidl_BaseClass__object* obj) {
+  return sidl_BaseClass__getURL(obj);
 }

@@ -1,8 +1,8 @@
 C       
 C       File:          sidl_Loader_Impl.f
-C       Symbol:        sidl.Loader-v0.9.0
+C       Symbol:        sidl.Loader-v0.9.3
 C       Symbol Type:   class
-C       Babel Version: 0.9.8
+C       Babel Version: 0.10.4
 C       Release:       $Name$
 C       Revision:      @(#) $Id$
 C       Description:   Client-side documentation text for sidl.Loader
@@ -32,20 +32,26 @@ C       Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 C       
 C       WARNING: Automatically generated; changes will be lost
 C       
-C       babel-version = 0.9.8
+C       babel-version = 0.10.4
+C       xml-url       = /home/painter/babel/share/babel-0.10.4/repository/sidl.Loader-v0.9.3.xml
 C       
 
         THIS FILE IS DOCUMENTATION - DO NOT COMPILE IT!
 
 C       
-C       Symbol "sidl.Loader" (version 0.9.0)
+C       Symbol "sidl.Loader" (version 0.9.3)
 C       
 C       Class <code>Loader</code> manages dyanamic loading and symbol name
 C       resolution for the sidl runtime system.  The <code>Loader</code> class
 C       manages a library search path and keeps a record of all libraries
 C       loaded through this interface, including the initial "global" symbols
-C       in the main program.  Unless explicitly set, the search path is taken
-C       from the environment variable SIDL_DLL_PATH, which is a semi-colon
+C       in the main program.
+C       
+C       Unless explicitly set, the <code>Loader</code> uses the default
+C       <code>sidl.Finder</code> implemented in <code>sidl.DFinder</code>.
+C       This class searches the filesystem for <code>.scl</code> files when
+C       trying to find a class. The initial path is taken from the
+C       environment variable SIDL_DLL_PATH, which is a semi-colon
 C       separated sequence of URIs as described in class <code>DLL</code>.
 C       
 
@@ -197,46 +203,6 @@ C       out sidl.ClassInfo retval
 
 
 C       
-C       Set the search path, which is a semi-colon separated sequence of
-C       URIs as described in class <code>DLL</code>.  This method will
-C       invalidate any existing search path.
-C       
-
-        subroutine sidl_Loader_setSearchPath_f(path_name)
-        implicit none
-C       in string path_name
-        character*(*) path_name
-        end
-
-
-C       
-C       Return the current search path.  If the search path has not been
-C       set, then the search path will be taken from environment variable
-C       SIDL_DLL_PATH.
-C       
-
-        subroutine sidl_Loader_getSearchPath_f(retval)
-        implicit none
-C       out string retval
-        character*(*) retval
-        end
-
-
-C       
-C       Append the specified path fragment to the beginning of the
-C       current search path.  If the search path has not yet been set
-C       by a call to <code>setSearchPath</code>, then this fragment will
-C       be appended to the path in environment variable SIDL_DLL_PATH.
-C       
-
-        subroutine sidl_Loader_addSearchPath_f(path_fragment)
-        implicit none
-C       in string path_fragment
-        character*(*) path_fragment
-        end
-
-
-C       
 C       Load the specified library if it has not already been loaded.
 C       The URI format is defined in class <code>DLL</code>.  The search
 C       path is not searched to resolve the library name.
@@ -304,6 +270,11 @@ C       class. This method searches SCL files in the search path looking
 C       for a shared library that contains the client-side or IOR
 C       for a particular sidl class.
 C       
+C       This call is implemented by calling the current
+C       <code>Finder</code>. The default finder searches the local
+C       file system for <code>.scl</code> files to locate the
+C       target class/interface.
+C       
 C       @param sidl_name  the fully qualified (long) name of the
 C                         class/interface to be found. Package names
 C                         are separated by period characters from each
@@ -336,5 +307,80 @@ C       in sidl.Scope lScope
 C       in sidl.Resolve lResolve
         integer*4 lResolve
 C       out sidl.DLL retval
+        integer*8 retval
+        end
+
+
+C       
+C       Set the search path, which is a semi-colon separated sequence of
+C       URIs as described in class <code>DLL</code>.  This method will
+C       invalidate any existing search path.
+C       
+C       This updates the search path in the current <code>Finder</code>.
+C       
+
+        subroutine sidl_Loader_setSearchPath_f(path_name)
+        implicit none
+C       in string path_name
+        character*(*) path_name
+        end
+
+
+C       
+C       Return the current search path.  The default
+C       <code>Finder</code> initializes the search path
+C       from environment variable SIDL_DLL_PATH.
+C       
+C       
+
+        subroutine sidl_Loader_getSearchPath_f(retval)
+        implicit none
+C       out string retval
+        character*(*) retval
+        end
+
+
+C       
+C       Append the specified path fragment to the beginning of the
+C       current search path.  This method operates on the Loader's
+C       current <code>Finder</code>. This will add a path to the
+C       current search path. Normally, the search path is initialized
+C       from the SIDL_DLL_PATH environment variable.
+C       
+
+        subroutine sidl_Loader_addSearchPath_f(path_fragment)
+        implicit none
+C       in string path_fragment
+        character*(*) path_fragment
+        end
+
+
+C       
+C       This method sets the <code>Finder</code> that
+C       <code>Loader</code> will use to find DLLs.  If no
+C       <code>Finder</code> is set or if NULL is passed in, the Default
+C       Finder <code>DFinder</code> will be used.
+C       
+C       Future calls to <code>findLibrary</code>,
+C       <code>addSearchPath</code>, <code>getSearchPath</code>, and
+C       <code>setSearchPath</code> are deligated to the
+C       <code>Finder</code> set here.
+C       
+
+        subroutine sidl_Loader_setFinder_f(f)
+        implicit none
+C       in sidl.Finder f
+        integer*8 f
+        end
+
+
+C       
+C       This method gets the <code>Finder</code> that <code>Loader</code>
+C       uses to find DLLs.  
+C       
+
+        subroutine sidl_Loader_getFinder_f(retval)
+        implicit none
+C       out sidl.Finder retval
         integer*8 retval
         end

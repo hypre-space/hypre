@@ -2,12 +2,12 @@
  * File:          bHYPRE_SStructParCSRVector_Impl.c
  * Symbol:        bHYPRE.SStructParCSRVector-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.9.8
+ * Babel Version: 0.10.4
  * Description:   Server-side implementation for bHYPRE.SStructParCSRVector
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.9.8
+ * babel-version = 0.10.4
  */
 
 /*
@@ -37,15 +37,36 @@
 /* DO-NOT-DELETE splicer.end(bHYPRE.SStructParCSRVector._includes) */
 
 /*
+ * Static class initializer called exactly once before any user-defined method is dispatched
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_SStructParCSRVector__load"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+void
+impl_bHYPRE_SStructParCSRVector__load(
+  void)
+{
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructParCSRVector._load) */
+  /* Insert-Code-Here {bHYPRE.SStructParCSRVector._load} (static class initializer method) */
+  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructParCSRVector._load) */
+}
+/*
  * Class constructor called when the class is created.
  */
 
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_SStructParCSRVector__ctor"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 void
 impl_bHYPRE_SStructParCSRVector__ctor(
-  /*in*/ bHYPRE_SStructParCSRVector self)
+  /* in */ bHYPRE_SStructParCSRVector self)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructParCSRVector._ctor) */
   /* Insert the implementation of the constructor method here... */
@@ -71,9 +92,12 @@ impl_bHYPRE_SStructParCSRVector__ctor(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_SStructParCSRVector__dtor"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 void
 impl_bHYPRE_SStructParCSRVector__dtor(
-  /*in*/ bHYPRE_SStructParCSRVector self)
+  /* in */ bHYPRE_SStructParCSRVector self)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructParCSRVector._dtor) */
   /* Insert the implementation of the destructor method here... */
@@ -91,130 +115,20 @@ impl_bHYPRE_SStructParCSRVector__dtor(
 }
 
 /*
- * Set {\tt self} to 0.
- * 
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_bHYPRE_SStructParCSRVector_Clear"
-
-int32_t
-impl_bHYPRE_SStructParCSRVector_Clear(
-  /*in*/ bHYPRE_SStructParCSRVector self)
-{
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructParCSRVector.Clear) */
-  /* Insert the implementation of the Clear method here... */
-   return 1;
-  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructParCSRVector.Clear) */
-}
-
-/*
- * Copy x into {\tt self}.
- * 
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_bHYPRE_SStructParCSRVector_Copy"
-
-int32_t
-impl_bHYPRE_SStructParCSRVector_Copy(
-  /*in*/ bHYPRE_SStructParCSRVector self, /*in*/ bHYPRE_Vector x)
-{
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructParCSRVector.Copy) */
-  /* Insert the implementation of the Copy method here... */
-   return 1;
-  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructParCSRVector.Copy) */
-}
-
-/*
- * Create an {\tt x} compatible with {\tt self}.
- * 
- * NOTE: When this method is used in an inherited class, the
- * cloned {\tt Vector} object can be cast to an object with the
- * inherited class type.
- * 
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_bHYPRE_SStructParCSRVector_Clone"
-
-int32_t
-impl_bHYPRE_SStructParCSRVector_Clone(
-  /*in*/ bHYPRE_SStructParCSRVector self, /*out*/ bHYPRE_Vector* x)
-{
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructParCSRVector.Clone) */
-  /* Insert the implementation of the Clone method here... */
-   return 1;
-  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructParCSRVector.Clone) */
-}
-
-/*
- * Scale {\tt self} by {\tt a}.
- * 
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_bHYPRE_SStructParCSRVector_Scale"
-
-int32_t
-impl_bHYPRE_SStructParCSRVector_Scale(
-  /*in*/ bHYPRE_SStructParCSRVector self, /*in*/ double a)
-{
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructParCSRVector.Scale) */
-  /* Insert the implementation of the Scale method here... */
-   return 1;
-  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructParCSRVector.Scale) */
-}
-
-/*
- * Compute {\tt d}, the inner-product of {\tt self} and {\tt x}.
- * 
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_bHYPRE_SStructParCSRVector_Dot"
-
-int32_t
-impl_bHYPRE_SStructParCSRVector_Dot(
-  /*in*/ bHYPRE_SStructParCSRVector self, /*in*/ bHYPRE_Vector x,
-    /*out*/ double* d)
-{
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructParCSRVector.Dot) */
-  /* Insert the implementation of the Dot method here... */
-   return 1;
-  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructParCSRVector.Dot) */
-}
-
-/*
- * Add {\tt a}*{\tt x} to {\tt self}.
- * 
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_bHYPRE_SStructParCSRVector_Axpy"
-
-int32_t
-impl_bHYPRE_SStructParCSRVector_Axpy(
-  /*in*/ bHYPRE_SStructParCSRVector self, /*in*/ double a,
-    /*in*/ bHYPRE_Vector x)
-{
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructParCSRVector.Axpy) */
-  /* Insert the implementation of the Axpy method here... */
-   return 1;
-  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructParCSRVector.Axpy) */
-}
-
-/*
- * Set the MPI Communicator.
+ * Set the MPI Communicator.  DEPRECATED, Use Create()
  * 
  */
 
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_SStructParCSRVector_SetCommunicator"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_SStructParCSRVector_SetCommunicator(
-  /*in*/ bHYPRE_SStructParCSRVector self, /*in*/ void* mpi_comm)
+  /* in */ bHYPRE_SStructParCSRVector self,
+  /* in */ void* mpi_comm)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructParCSRVector.SetCommunicator) */
   /* Insert the implementation of the SetCommunicator method here... */
@@ -238,9 +152,12 @@ impl_bHYPRE_SStructParCSRVector_SetCommunicator(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_SStructParCSRVector_Initialize"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_SStructParCSRVector_Initialize(
-  /*in*/ bHYPRE_SStructParCSRVector self)
+  /* in */ bHYPRE_SStructParCSRVector self)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructParCSRVector.Initialize) */
   /* Insert the implementation of the Initialize method here... */
@@ -271,9 +188,12 @@ impl_bHYPRE_SStructParCSRVector_Initialize(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_SStructParCSRVector_Assemble"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_SStructParCSRVector_Assemble(
-  /*in*/ bHYPRE_SStructParCSRVector self)
+  /* in */ bHYPRE_SStructParCSRVector self)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructParCSRVector.Assemble) */
   /* Insert the implementation of the Assemble method here... */
@@ -307,9 +227,13 @@ impl_bHYPRE_SStructParCSRVector_Assemble(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_SStructParCSRVector_GetObject"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_SStructParCSRVector_GetObject(
-  /*in*/ bHYPRE_SStructParCSRVector self, /*out*/ sidl_BaseInterface* A)
+  /* in */ bHYPRE_SStructParCSRVector self,
+  /* out */ sidl_BaseInterface* A)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructParCSRVector.GetObject) */
   /* Insert the implementation of the GetObject method here... */
@@ -364,9 +288,13 @@ impl_bHYPRE_SStructParCSRVector_GetObject(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_SStructParCSRVector_SetGrid"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_SStructParCSRVector_SetGrid(
-  /*in*/ bHYPRE_SStructParCSRVector self, /*in*/ bHYPRE_SStructGrid grid)
+  /* in */ bHYPRE_SStructParCSRVector self,
+  /* in */ bHYPRE_SStructGrid grid)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructParCSRVector.SetGrid) */
   /* Insert the implementation of the SetGrid method here... */
@@ -416,11 +344,16 @@ impl_bHYPRE_SStructParCSRVector_SetGrid(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_SStructParCSRVector_SetValues"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_SStructParCSRVector_SetValues(
-  /*in*/ bHYPRE_SStructParCSRVector self, /*in*/ int32_t part,
-    /*in*/ struct sidl_int__array* index, /*in*/ int32_t var,
-    /*in*/ struct sidl_double__array* values)
+  /* in */ bHYPRE_SStructParCSRVector self,
+  /* in */ int32_t part,
+  /* in */ struct sidl_int__array* index,
+  /* in */ int32_t var,
+  /* in */ struct sidl_double__array* values)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructParCSRVector.SetValues) */
   /* Insert the implementation of the SetValues method here... */
@@ -456,12 +389,17 @@ impl_bHYPRE_SStructParCSRVector_SetValues(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_SStructParCSRVector_SetBoxValues"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_SStructParCSRVector_SetBoxValues(
-  /*in*/ bHYPRE_SStructParCSRVector self, /*in*/ int32_t part,
-    /*in*/ struct sidl_int__array* ilower,
-    /*in*/ struct sidl_int__array* iupper, /*in*/ int32_t var,
-    /*in*/ struct sidl_double__array* values)
+  /* in */ bHYPRE_SStructParCSRVector self,
+  /* in */ int32_t part,
+  /* in */ struct sidl_int__array* ilower,
+  /* in */ struct sidl_int__array* iupper,
+  /* in */ int32_t var,
+  /* in */ struct sidl_double__array* values)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructParCSRVector.SetBoxValues) */
   /* Insert the implementation of the SetBoxValues method here... */
@@ -497,11 +435,16 @@ impl_bHYPRE_SStructParCSRVector_SetBoxValues(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_SStructParCSRVector_AddToValues"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_SStructParCSRVector_AddToValues(
-  /*in*/ bHYPRE_SStructParCSRVector self, /*in*/ int32_t part,
-    /*in*/ struct sidl_int__array* index, /*in*/ int32_t var,
-    /*in*/ struct sidl_double__array* values)
+  /* in */ bHYPRE_SStructParCSRVector self,
+  /* in */ int32_t part,
+  /* in */ struct sidl_int__array* index,
+  /* in */ int32_t var,
+  /* in */ struct sidl_double__array* values)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructParCSRVector.AddToValues) */
   /* Insert the implementation of the AddToValues method here... */
@@ -537,12 +480,17 @@ impl_bHYPRE_SStructParCSRVector_AddToValues(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_SStructParCSRVector_AddToBoxValues"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_SStructParCSRVector_AddToBoxValues(
-  /*in*/ bHYPRE_SStructParCSRVector self, /*in*/ int32_t part,
-    /*in*/ struct sidl_int__array* ilower,
-    /*in*/ struct sidl_int__array* iupper, /*in*/ int32_t var,
-    /*in*/ struct sidl_double__array* values)
+  /* in */ bHYPRE_SStructParCSRVector self,
+  /* in */ int32_t part,
+  /* in */ struct sidl_int__array* ilower,
+  /* in */ struct sidl_int__array* iupper,
+  /* in */ int32_t var,
+  /* in */ struct sidl_double__array* values)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructParCSRVector.AddToBoxValues) */
   /* Insert the implementation of the AddToBoxValues method here... */
@@ -570,9 +518,12 @@ impl_bHYPRE_SStructParCSRVector_AddToBoxValues(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_SStructParCSRVector_Gather"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_SStructParCSRVector_Gather(
-  /*in*/ bHYPRE_SStructParCSRVector self)
+  /* in */ bHYPRE_SStructParCSRVector self)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructParCSRVector.Gather) */
   /* Insert the implementation of the Gather method here... */
@@ -605,11 +556,16 @@ impl_bHYPRE_SStructParCSRVector_Gather(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_SStructParCSRVector_GetValues"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_SStructParCSRVector_GetValues(
-  /*in*/ bHYPRE_SStructParCSRVector self, /*in*/ int32_t part,
-    /*in*/ struct sidl_int__array* index, /*in*/ int32_t var,
-    /*out*/ double* value)
+  /* in */ bHYPRE_SStructParCSRVector self,
+  /* in */ int32_t part,
+  /* in */ struct sidl_int__array* index,
+  /* in */ int32_t var,
+  /* out */ double* value)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructParCSRVector.GetValues) */
   /* Insert the implementation of the GetValues method here... */
@@ -644,12 +600,17 @@ impl_bHYPRE_SStructParCSRVector_GetValues(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_SStructParCSRVector_GetBoxValues"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_SStructParCSRVector_GetBoxValues(
-  /*in*/ bHYPRE_SStructParCSRVector self, /*in*/ int32_t part,
-    /*in*/ struct sidl_int__array* ilower,
-    /*in*/ struct sidl_int__array* iupper, /*in*/ int32_t var,
-    /*inout*/ struct sidl_double__array** values)
+  /* in */ bHYPRE_SStructParCSRVector self,
+  /* in */ int32_t part,
+  /* in */ struct sidl_int__array* ilower,
+  /* in */ struct sidl_int__array* iupper,
+  /* in */ int32_t var,
+  /* inout */ struct sidl_double__array** values)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructParCSRVector.GetBoxValues) */
   /* Insert the implementation of the GetBoxValues method here... */
@@ -677,9 +638,12 @@ impl_bHYPRE_SStructParCSRVector_GetBoxValues(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_SStructParCSRVector_SetComplex"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_SStructParCSRVector_SetComplex(
-  /*in*/ bHYPRE_SStructParCSRVector self)
+  /* in */ bHYPRE_SStructParCSRVector self)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructParCSRVector.SetComplex) */
   /* Insert the implementation of the SetComplex method here... */
@@ -696,13 +660,228 @@ impl_bHYPRE_SStructParCSRVector_SetComplex(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_SStructParCSRVector_Print"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_SStructParCSRVector_Print(
-  /*in*/ bHYPRE_SStructParCSRVector self, /*in*/ const char* filename,
-    /*in*/ int32_t all)
+  /* in */ bHYPRE_SStructParCSRVector self,
+  /* in */ const char* filename,
+  /* in */ int32_t all)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructParCSRVector.Print) */
   /* Insert the implementation of the Print method here... */
    return 1;
   /* DO-NOT-DELETE splicer.end(bHYPRE.SStructParCSRVector.Print) */
+}
+
+/*
+ * Set {\tt self} to 0.
+ * 
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_SStructParCSRVector_Clear"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+int32_t
+impl_bHYPRE_SStructParCSRVector_Clear(
+  /* in */ bHYPRE_SStructParCSRVector self)
+{
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructParCSRVector.Clear) */
+  /* Insert the implementation of the Clear method here... */
+   return 1;
+  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructParCSRVector.Clear) */
+}
+
+/*
+ * Copy x into {\tt self}.
+ * 
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_SStructParCSRVector_Copy"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+int32_t
+impl_bHYPRE_SStructParCSRVector_Copy(
+  /* in */ bHYPRE_SStructParCSRVector self,
+  /* in */ bHYPRE_Vector x)
+{
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructParCSRVector.Copy) */
+  /* Insert the implementation of the Copy method here... */
+   return 1;
+  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructParCSRVector.Copy) */
+}
+
+/*
+ * Create an {\tt x} compatible with {\tt self}.
+ * 
+ * NOTE: When this method is used in an inherited class, the
+ * cloned {\tt Vector} object can be cast to an object with the
+ * inherited class type.
+ * 
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_SStructParCSRVector_Clone"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+int32_t
+impl_bHYPRE_SStructParCSRVector_Clone(
+  /* in */ bHYPRE_SStructParCSRVector self,
+  /* out */ bHYPRE_Vector* x)
+{
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructParCSRVector.Clone) */
+  /* Insert the implementation of the Clone method here... */
+   return 1;
+  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructParCSRVector.Clone) */
+}
+
+/*
+ * Scale {\tt self} by {\tt a}.
+ * 
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_SStructParCSRVector_Scale"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+int32_t
+impl_bHYPRE_SStructParCSRVector_Scale(
+  /* in */ bHYPRE_SStructParCSRVector self,
+  /* in */ double a)
+{
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructParCSRVector.Scale) */
+  /* Insert the implementation of the Scale method here... */
+   return 1;
+  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructParCSRVector.Scale) */
+}
+
+/*
+ * Compute {\tt d}, the inner-product of {\tt self} and {\tt x}.
+ * 
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_SStructParCSRVector_Dot"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+int32_t
+impl_bHYPRE_SStructParCSRVector_Dot(
+  /* in */ bHYPRE_SStructParCSRVector self,
+  /* in */ bHYPRE_Vector x,
+  /* out */ double* d)
+{
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructParCSRVector.Dot) */
+  /* Insert the implementation of the Dot method here... */
+   return 1;
+  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructParCSRVector.Dot) */
+}
+
+/*
+ * Add {\tt a}*{\tt x} to {\tt self}.
+ * 
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_SStructParCSRVector_Axpy"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+int32_t
+impl_bHYPRE_SStructParCSRVector_Axpy(
+  /* in */ bHYPRE_SStructParCSRVector self,
+  /* in */ double a,
+  /* in */ bHYPRE_Vector x)
+{
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructParCSRVector.Axpy) */
+  /* Insert the implementation of the Axpy method here... */
+   return 1;
+  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructParCSRVector.Axpy) */
+}
+/* Babel internal methods, Users should not edit below this line. */
+struct bHYPRE_SStructGrid__object* 
+  impl_bHYPRE_SStructParCSRVector_fconnect_bHYPRE_SStructGrid(char* url,
+  sidl_BaseInterface *_ex) {
+  return bHYPRE_SStructGrid__connect(url, _ex);
+}
+char * impl_bHYPRE_SStructParCSRVector_fgetURL_bHYPRE_SStructGrid(struct 
+  bHYPRE_SStructGrid__object* obj) {
+  return bHYPRE_SStructGrid__getURL(obj);
+}
+struct bHYPRE_SStructBuildVector__object* 
+  impl_bHYPRE_SStructParCSRVector_fconnect_bHYPRE_SStructBuildVector(char* url,
+  sidl_BaseInterface *_ex) {
+  return bHYPRE_SStructBuildVector__connect(url, _ex);
+}
+char * impl_bHYPRE_SStructParCSRVector_fgetURL_bHYPRE_SStructBuildVector(struct 
+  bHYPRE_SStructBuildVector__object* obj) {
+  return bHYPRE_SStructBuildVector__getURL(obj);
+}
+struct sidl_ClassInfo__object* 
+  impl_bHYPRE_SStructParCSRVector_fconnect_sidl_ClassInfo(char* url,
+  sidl_BaseInterface *_ex) {
+  return sidl_ClassInfo__connect(url, _ex);
+}
+char * impl_bHYPRE_SStructParCSRVector_fgetURL_sidl_ClassInfo(struct 
+  sidl_ClassInfo__object* obj) {
+  return sidl_ClassInfo__getURL(obj);
+}
+struct bHYPRE_Vector__object* 
+  impl_bHYPRE_SStructParCSRVector_fconnect_bHYPRE_Vector(char* url,
+  sidl_BaseInterface *_ex) {
+  return bHYPRE_Vector__connect(url, _ex);
+}
+char * impl_bHYPRE_SStructParCSRVector_fgetURL_bHYPRE_Vector(struct 
+  bHYPRE_Vector__object* obj) {
+  return bHYPRE_Vector__getURL(obj);
+}
+struct bHYPRE_ProblemDefinition__object* 
+  impl_bHYPRE_SStructParCSRVector_fconnect_bHYPRE_ProblemDefinition(char* url,
+  sidl_BaseInterface *_ex) {
+  return bHYPRE_ProblemDefinition__connect(url, _ex);
+}
+char * impl_bHYPRE_SStructParCSRVector_fgetURL_bHYPRE_ProblemDefinition(struct 
+  bHYPRE_ProblemDefinition__object* obj) {
+  return bHYPRE_ProblemDefinition__getURL(obj);
+}
+struct bHYPRE_SStructParCSRVector__object* 
+  impl_bHYPRE_SStructParCSRVector_fconnect_bHYPRE_SStructParCSRVector(char* url,
+  sidl_BaseInterface *_ex) {
+  return bHYPRE_SStructParCSRVector__connect(url, _ex);
+}
+char * 
+  impl_bHYPRE_SStructParCSRVector_fgetURL_bHYPRE_SStructParCSRVector(struct 
+  bHYPRE_SStructParCSRVector__object* obj) {
+  return bHYPRE_SStructParCSRVector__getURL(obj);
+}
+struct sidl_BaseInterface__object* 
+  impl_bHYPRE_SStructParCSRVector_fconnect_sidl_BaseInterface(char* url,
+  sidl_BaseInterface *_ex) {
+  return sidl_BaseInterface__connect(url, _ex);
+}
+char * impl_bHYPRE_SStructParCSRVector_fgetURL_sidl_BaseInterface(struct 
+  sidl_BaseInterface__object* obj) {
+  return sidl_BaseInterface__getURL(obj);
+}
+struct sidl_BaseClass__object* 
+  impl_bHYPRE_SStructParCSRVector_fconnect_sidl_BaseClass(char* url,
+  sidl_BaseInterface *_ex) {
+  return sidl_BaseClass__connect(url, _ex);
+}
+char * impl_bHYPRE_SStructParCSRVector_fgetURL_sidl_BaseClass(struct 
+  sidl_BaseClass__object* obj) {
+  return sidl_BaseClass__getURL(obj);
 }

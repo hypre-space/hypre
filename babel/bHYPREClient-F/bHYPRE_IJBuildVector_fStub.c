@@ -2,12 +2,12 @@
  * File:          bHYPRE_IJBuildVector_fStub.c
  * Symbol:        bHYPRE.IJBuildVector-v1.0.0
  * Symbol Type:   interface
- * Babel Version: 0.9.8
+ * Babel Version: 0.10.4
  * Description:   Client-side glue code for bHYPRE.IJBuildVector
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.9.8
+ * babel-version = 0.10.4
  */
 
 /*
@@ -27,8 +27,8 @@
 #include "sidl_Loader.h"
 #endif
 #include "bHYPRE_IJBuildVector_IOR.h"
-#include "sidl_BaseInterface_IOR.h"
 #include "sidl_ClassInfo_IOR.h"
+#include "sidl_BaseInterface_IOR.h"
 
 /*
  * Cast method for interface and type conversions.
@@ -48,8 +48,7 @@ SIDLFortran77Symbol(bhypre_ijbuildvector__cast_f,BHYPRE_IJBUILDVECTOR__CAST_F,bH
       *_base->d_epv->f__cast)(
       _base->d_object,
       "bHYPRE.IJBuildVector");
-  }
-  else {
+  } else {
     *retval = 0;
   }
 }
@@ -280,7 +279,7 @@ SIDLFortran77Symbol(bhypre_ijbuildvector_getclassinfo_f,BHYPRE_IJBUILDVECTOR_GET
 }
 
 /*
- * Set the MPI Communicator.
+ * Set the MPI Communicator.  DEPRECATED, Use Create()
  * 
  */
 

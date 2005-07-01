@@ -2,12 +2,12 @@
  * File:          bHYPRE_PCG_Impl.h
  * Symbol:        bHYPRE.PCG-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.9.8
+ * Babel Version: 0.10.4
  * Description:   Server-side implementation for bHYPRE.PCG
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.9.8
+ * babel-version = 0.10.4
  */
 
 #ifndef included_bHYPRE_PCG_Impl_h
@@ -16,17 +16,29 @@
 #ifndef included_sidl_header_h
 #include "sidl_header.h"
 #endif
-#ifndef included_bHYPRE_Solver_h
-#include "bHYPRE_Solver.h"
-#endif
 #ifndef included_bHYPRE_PCG_h
 #include "bHYPRE_PCG.h"
+#endif
+#ifndef included_bHYPRE_Solver_h
+#include "bHYPRE_Solver.h"
 #endif
 #ifndef included_bHYPRE_Operator_h
 #include "bHYPRE_Operator.h"
 #endif
+#ifndef included_sidl_ClassInfo_h
+#include "sidl_ClassInfo.h"
+#endif
 #ifndef included_bHYPRE_Vector_h
 #include "bHYPRE_Vector.h"
+#endif
+#ifndef included_sidl_BaseInterface_h
+#include "sidl_BaseInterface.h"
+#endif
+#ifndef included_sidl_BaseClass_h
+#include "sidl_BaseClass.h"
+#endif
+#ifndef included_bHYPRE_PreconditionedSolver_h
+#include "bHYPRE_PreconditionedSolver.h"
 #endif
 
 /* DO-NOT-DELETE splicer.begin(bHYPRE.PCG._includes) */
@@ -87,129 +99,222 @@ bHYPRE_PCG__set_data(
   bHYPRE_PCG,
   struct bHYPRE_PCG__data*);
 
-extern void
-impl_bHYPRE_PCG__ctor(
-  bHYPRE_PCG);
+extern
+void
+impl_bHYPRE_PCG__load(
+  void);
 
-extern void
+extern
+void
+impl_bHYPRE_PCG__ctor(
+  /* in */ bHYPRE_PCG self);
+
+extern
+void
 impl_bHYPRE_PCG__dtor(
-  bHYPRE_PCG);
+  /* in */ bHYPRE_PCG self);
 
 /*
  * User-defined object methods
  */
 
-extern int32_t
+extern struct bHYPRE_PCG__object* impl_bHYPRE_PCG_fconnect_bHYPRE_PCG(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_PCG_fgetURL_bHYPRE_PCG(struct bHYPRE_PCG__object* obj);
+extern struct bHYPRE_Solver__object* 
+  impl_bHYPRE_PCG_fconnect_bHYPRE_Solver(char* url, sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_PCG_fgetURL_bHYPRE_Solver(struct 
+  bHYPRE_Solver__object* obj);
+extern struct bHYPRE_Operator__object* 
+  impl_bHYPRE_PCG_fconnect_bHYPRE_Operator(char* url, sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_PCG_fgetURL_bHYPRE_Operator(struct 
+  bHYPRE_Operator__object* obj);
+extern struct sidl_ClassInfo__object* 
+  impl_bHYPRE_PCG_fconnect_sidl_ClassInfo(char* url, sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_PCG_fgetURL_sidl_ClassInfo(struct 
+  sidl_ClassInfo__object* obj);
+extern struct bHYPRE_Vector__object* 
+  impl_bHYPRE_PCG_fconnect_bHYPRE_Vector(char* url, sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_PCG_fgetURL_bHYPRE_Vector(struct 
+  bHYPRE_Vector__object* obj);
+extern struct sidl_BaseInterface__object* 
+  impl_bHYPRE_PCG_fconnect_sidl_BaseInterface(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_PCG_fgetURL_sidl_BaseInterface(struct 
+  sidl_BaseInterface__object* obj);
+extern struct sidl_BaseClass__object* 
+  impl_bHYPRE_PCG_fconnect_sidl_BaseClass(char* url, sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_PCG_fgetURL_sidl_BaseClass(struct 
+  sidl_BaseClass__object* obj);
+extern struct bHYPRE_PreconditionedSolver__object* 
+  impl_bHYPRE_PCG_fconnect_bHYPRE_PreconditionedSolver(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_PCG_fgetURL_bHYPRE_PreconditionedSolver(struct 
+  bHYPRE_PreconditionedSolver__object* obj);
+extern
+int32_t
 impl_bHYPRE_PCG_SetCommunicator(
-  bHYPRE_PCG,
-  void*);
+  /* in */ bHYPRE_PCG self,
+  /* in */ void* mpi_comm);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_PCG_SetIntParameter(
-  bHYPRE_PCG,
-  const char*,
-  int32_t);
+  /* in */ bHYPRE_PCG self,
+  /* in */ const char* name,
+  /* in */ int32_t value);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_PCG_SetDoubleParameter(
-  bHYPRE_PCG,
-  const char*,
-  double);
+  /* in */ bHYPRE_PCG self,
+  /* in */ const char* name,
+  /* in */ double value);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_PCG_SetStringParameter(
-  bHYPRE_PCG,
-  const char*,
-  const char*);
+  /* in */ bHYPRE_PCG self,
+  /* in */ const char* name,
+  /* in */ const char* value);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_PCG_SetIntArray1Parameter(
-  bHYPRE_PCG,
-  const char*,
-  struct sidl_int__array*);
+  /* in */ bHYPRE_PCG self,
+  /* in */ const char* name,
+  /* in */ struct sidl_int__array* value);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_PCG_SetIntArray2Parameter(
-  bHYPRE_PCG,
-  const char*,
-  struct sidl_int__array*);
+  /* in */ bHYPRE_PCG self,
+  /* in */ const char* name,
+  /* in */ struct sidl_int__array* value);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_PCG_SetDoubleArray1Parameter(
-  bHYPRE_PCG,
-  const char*,
-  struct sidl_double__array*);
+  /* in */ bHYPRE_PCG self,
+  /* in */ const char* name,
+  /* in */ struct sidl_double__array* value);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_PCG_SetDoubleArray2Parameter(
-  bHYPRE_PCG,
-  const char*,
-  struct sidl_double__array*);
+  /* in */ bHYPRE_PCG self,
+  /* in */ const char* name,
+  /* in */ struct sidl_double__array* value);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_PCG_GetIntValue(
-  bHYPRE_PCG,
-  const char*,
-  int32_t*);
+  /* in */ bHYPRE_PCG self,
+  /* in */ const char* name,
+  /* out */ int32_t* value);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_PCG_GetDoubleValue(
-  bHYPRE_PCG,
-  const char*,
-  double*);
+  /* in */ bHYPRE_PCG self,
+  /* in */ const char* name,
+  /* out */ double* value);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_PCG_Setup(
-  bHYPRE_PCG,
-  bHYPRE_Vector,
-  bHYPRE_Vector);
+  /* in */ bHYPRE_PCG self,
+  /* in */ bHYPRE_Vector b,
+  /* in */ bHYPRE_Vector x);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_PCG_Apply(
-  bHYPRE_PCG,
-  bHYPRE_Vector,
-  bHYPRE_Vector*);
+  /* in */ bHYPRE_PCG self,
+  /* in */ bHYPRE_Vector b,
+  /* inout */ bHYPRE_Vector* x);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_PCG_SetOperator(
-  bHYPRE_PCG,
-  bHYPRE_Operator);
+  /* in */ bHYPRE_PCG self,
+  /* in */ bHYPRE_Operator A);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_PCG_SetTolerance(
-  bHYPRE_PCG,
-  double);
+  /* in */ bHYPRE_PCG self,
+  /* in */ double tolerance);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_PCG_SetMaxIterations(
-  bHYPRE_PCG,
-  int32_t);
+  /* in */ bHYPRE_PCG self,
+  /* in */ int32_t max_iterations);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_PCG_SetLogging(
-  bHYPRE_PCG,
-  int32_t);
+  /* in */ bHYPRE_PCG self,
+  /* in */ int32_t level);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_PCG_SetPrintLevel(
-  bHYPRE_PCG,
-  int32_t);
+  /* in */ bHYPRE_PCG self,
+  /* in */ int32_t level);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_PCG_GetNumIterations(
-  bHYPRE_PCG,
-  int32_t*);
+  /* in */ bHYPRE_PCG self,
+  /* out */ int32_t* num_iterations);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_PCG_GetRelResidualNorm(
-  bHYPRE_PCG,
-  double*);
+  /* in */ bHYPRE_PCG self,
+  /* out */ double* norm);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_PCG_SetPreconditioner(
-  bHYPRE_PCG,
-  bHYPRE_Solver);
+  /* in */ bHYPRE_PCG self,
+  /* in */ bHYPRE_Solver s);
 
+extern struct bHYPRE_PCG__object* impl_bHYPRE_PCG_fconnect_bHYPRE_PCG(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_PCG_fgetURL_bHYPRE_PCG(struct bHYPRE_PCG__object* obj);
+extern struct bHYPRE_Solver__object* 
+  impl_bHYPRE_PCG_fconnect_bHYPRE_Solver(char* url, sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_PCG_fgetURL_bHYPRE_Solver(struct 
+  bHYPRE_Solver__object* obj);
+extern struct bHYPRE_Operator__object* 
+  impl_bHYPRE_PCG_fconnect_bHYPRE_Operator(char* url, sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_PCG_fgetURL_bHYPRE_Operator(struct 
+  bHYPRE_Operator__object* obj);
+extern struct sidl_ClassInfo__object* 
+  impl_bHYPRE_PCG_fconnect_sidl_ClassInfo(char* url, sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_PCG_fgetURL_sidl_ClassInfo(struct 
+  sidl_ClassInfo__object* obj);
+extern struct bHYPRE_Vector__object* 
+  impl_bHYPRE_PCG_fconnect_bHYPRE_Vector(char* url, sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_PCG_fgetURL_bHYPRE_Vector(struct 
+  bHYPRE_Vector__object* obj);
+extern struct sidl_BaseInterface__object* 
+  impl_bHYPRE_PCG_fconnect_sidl_BaseInterface(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_PCG_fgetURL_sidl_BaseInterface(struct 
+  sidl_BaseInterface__object* obj);
+extern struct sidl_BaseClass__object* 
+  impl_bHYPRE_PCG_fconnect_sidl_BaseClass(char* url, sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_PCG_fgetURL_sidl_BaseClass(struct 
+  sidl_BaseClass__object* obj);
+extern struct bHYPRE_PreconditionedSolver__object* 
+  impl_bHYPRE_PCG_fconnect_bHYPRE_PreconditionedSolver(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_PCG_fgetURL_bHYPRE_PreconditionedSolver(struct 
+  bHYPRE_PreconditionedSolver__object* obj);
 #ifdef __cplusplus
 }
 #endif

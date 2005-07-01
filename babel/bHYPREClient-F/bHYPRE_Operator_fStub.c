@@ -2,12 +2,12 @@
  * File:          bHYPRE_Operator_fStub.c
  * Symbol:        bHYPRE.Operator-v1.0.0
  * Symbol Type:   interface
- * Babel Version: 0.9.8
+ * Babel Version: 0.10.4
  * Description:   Client-side glue code for bHYPRE.Operator
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.9.8
+ * babel-version = 0.10.4
  */
 
 /*
@@ -33,9 +33,9 @@
 #include "sidl_Loader.h"
 #endif
 #include "bHYPRE_Operator_IOR.h"
-#include "sidl_BaseInterface_IOR.h"
-#include "bHYPRE_Vector_IOR.h"
 #include "sidl_ClassInfo_IOR.h"
+#include "bHYPRE_Vector_IOR.h"
+#include "sidl_BaseInterface_IOR.h"
 
 /*
  * Cast method for interface and type conversions.
@@ -55,8 +55,7 @@ SIDLFortran77Symbol(bhypre_operator__cast_f,BHYPRE_OPERATOR__CAST_F,bHYPRE_Opera
       *_base->d_epv->f__cast)(
       _base->d_object,
       "bHYPRE.Operator");
-  }
-  else {
+  } else {
     *retval = 0;
   }
 }

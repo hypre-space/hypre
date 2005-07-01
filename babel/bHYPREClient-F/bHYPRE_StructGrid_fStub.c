@@ -2,12 +2,12 @@
  * File:          bHYPRE_StructGrid_fStub.c
  * Symbol:        bHYPRE.StructGrid-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.9.8
+ * Babel Version: 0.10.4
  * Description:   Client-side glue code for bHYPRE.StructGrid
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.9.8
+ * babel-version = 0.10.4
  */
 
 /*
@@ -30,8 +30,8 @@
 #include "sidl_Loader.h"
 #endif
 #include "bHYPRE_StructGrid_IOR.h"
-#include "sidl_BaseInterface_IOR.h"
 #include "sidl_ClassInfo_IOR.h"
+#include "sidl_BaseInterface_IOR.h"
 
 /*
  * Return pointer to internal IOR functions.
@@ -44,34 +44,9 @@ static const struct bHYPRE_StructGrid__external* _getIOR(void)
 #ifdef SIDL_STATIC_LIBRARY
     _ior = bHYPRE_StructGrid__externals();
 #else
-    sidl_DLL dll = sidl_DLL__create();
-    const struct bHYPRE_StructGrid__external*(*dll_f)(void);
-    /* check global namespace for symbol first */
-    if (dll && sidl_DLL_loadLibrary(dll, "main:", TRUE, FALSE)) {
-      dll_f =
-        (const struct bHYPRE_StructGrid__external*(*)(void)) 
-          sidl_DLL_lookupSymbol(
-          dll, "bHYPRE_StructGrid__externals");
-      _ior = (dll_f ? (*dll_f)() : NULL);
-    }
-    if (dll) sidl_DLL_deleteRef(dll);
-    if (!_ior) {
-      dll = sidl_Loader_findLibrary("bHYPRE.StructGrid",
-        "ior/impl", sidl_Scope_SCLSCOPE,
-        sidl_Resolve_SCLRESOLVE);
-      if (dll) {
-        dll_f =
-          (const struct bHYPRE_StructGrid__external*(*)(void)) 
-            sidl_DLL_lookupSymbol(
-            dll, "bHYPRE_StructGrid__externals");
-        _ior = (dll_f ? (*dll_f)() : NULL);
-        sidl_DLL_deleteRef(dll);
-      }
-    }
-    if (!_ior) {
-      fputs("Unable to find the implementation for bHYPRE.StructGrid; please set SIDL_DLL_PATH\n", stderr);
-      exit(-1);
-    }
+    _ior = (struct 
+      bHYPRE_StructGrid__external*)sidl_dynamicLoadIOR("bHYPRE.StructGrid",
+      "bHYPRE_StructGrid__externals") ;
 #endif
   }
   return _ior;
@@ -108,8 +83,7 @@ SIDLFortran77Symbol(bhypre_structgrid__cast_f,BHYPRE_STRUCTGRID__CAST_F,bHYPRE_S
       *_base->d_epv->f__cast)(
       _base->d_object,
       "bHYPRE.StructGrid");
-  }
-  else {
+  } else {
     *retval = 0;
   }
 }
@@ -402,24 +376,29 @@ void
 SIDLFortran77Symbol(bhypre_structgrid_setextents_f,BHYPRE_STRUCTGRID_SETEXTENTS_F,bHYPRE_StructGrid_SetExtents_f)
 (
   int64_t *self,
-  int64_t *ilower,
-  int64_t *iupper,
+  int32_t *ilower,
+  int32_t *iupper,
+  int32_t *dim,
   int32_t *retval
 )
 {
   struct bHYPRE_StructGrid__epv *_epv = NULL;
   struct bHYPRE_StructGrid__object* _proxy_self = NULL;
-  struct sidl_int__array* _proxy_ilower = NULL;
-  struct sidl_int__array* _proxy_iupper = NULL;
+  struct sidl_int__array _alt_ilower;
+  struct sidl_int__array* _proxy_ilower = &_alt_ilower;
+  int32_t ilower_lower[1], ilower_upper[1], ilower_stride[1];
+  struct sidl_int__array _alt_iupper;
+  struct sidl_int__array* _proxy_iupper = &_alt_iupper;
+  int32_t iupper_lower[1], iupper_upper[1], iupper_stride[1];
   _proxy_self =
     (struct bHYPRE_StructGrid__object*)
     (ptrdiff_t)(*self);
-  _proxy_ilower =
-    (struct sidl_int__array*)
-    (ptrdiff_t)(*ilower);
-  _proxy_iupper =
-    (struct sidl_int__array*)
-    (ptrdiff_t)(*iupper);
+  ilower_upper[0] = (*dim)-1;
+  sidl_int__array_init(ilower, _proxy_ilower, 1, ilower_lower, ilower_upper,
+    ilower_stride);
+  iupper_upper[0] = (*dim)-1;
+  sidl_int__array_init(iupper, _proxy_iupper, 1, iupper_lower, iupper_upper,
+    iupper_stride);
   _epv = _proxy_self->d_epv;
   *retval = 
     (*(_epv->f_SetExtents))(
@@ -466,19 +445,22 @@ void
 SIDLFortran77Symbol(bhypre_structgrid_setnumghost_f,BHYPRE_STRUCTGRID_SETNUMGHOST_F,bHYPRE_StructGrid_SetNumGhost_f)
 (
   int64_t *self,
-  int64_t *num_ghost,
+  int32_t *num_ghost,
+  int32_t *len,
   int32_t *retval
 )
 {
   struct bHYPRE_StructGrid__epv *_epv = NULL;
   struct bHYPRE_StructGrid__object* _proxy_self = NULL;
-  struct sidl_int__array* _proxy_num_ghost = NULL;
+  struct sidl_int__array _alt_num_ghost;
+  struct sidl_int__array* _proxy_num_ghost = &_alt_num_ghost;
+  int32_t num_ghost_lower[1], num_ghost_upper[1], num_ghost_stride[1];
   _proxy_self =
     (struct bHYPRE_StructGrid__object*)
     (ptrdiff_t)(*self);
-  _proxy_num_ghost =
-    (struct sidl_int__array*)
-    (ptrdiff_t)(*num_ghost);
+  num_ghost_upper[0] = (*len)-1;
+  sidl_int__array_init(num_ghost, _proxy_num_ghost, 1, num_ghost_lower,
+    num_ghost_upper, num_ghost_stride);
   _epv = _proxy_self->d_epv;
   *retval = 
     (*(_epv->f_SetNumGhost))(

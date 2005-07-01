@@ -2,12 +2,12 @@ C
 C       File:          bHYPRE_SStructParCSRVector_Impl.f
 C       Symbol:        bHYPRE.SStructParCSRVector-v1.0.0
 C       Symbol Type:   class
-C       Babel Version: 0.9.8
+C       Babel Version: 0.10.4
 C       Description:   Client-side documentation text for bHYPRE.SStructParCSRVector
 C       
 C       WARNING: Automatically generated; changes will be lost
 C       
-C       babel-version = 0.9.8
+C       babel-version = 0.10.4
 C       
 
         THIS FILE IS DOCUMENTATION - DO NOT COMPILE IT!
@@ -175,109 +175,7 @@ C       out sidl.ClassInfo retval
 
 
 C       
-C       Set {\tt self} to 0.
-C       
-C       
-
-        subroutine bHYPRE_SStructParCSRVector_Clear_f(self, retval)
-        implicit none
-C       in bHYPRE.SStructParCSRVector self
-        integer*8 self
-C       out int retval
-        integer*4 retval
-        end
-
-
-C       
-C       Copy x into {\tt self}.
-C       
-C       
-
-        subroutine bHYPRE_SStructParCSRVector_Copy_f(self, x, retval)
-        implicit none
-C       in bHYPRE.SStructParCSRVector self
-        integer*8 self
-C       in bHYPRE.Vector x
-        integer*8 x
-C       out int retval
-        integer*4 retval
-        end
-
-
-C       
-C       Create an {\tt x} compatible with {\tt self}.
-C       
-C       NOTE: When this method is used in an inherited class, the
-C       cloned {\tt Vector} object can be cast to an object with the
-C       inherited class type.
-C       
-C       
-
-        subroutine bHYPRE_SStructParCSRVector_Clone_f(self, x, retval)
-        implicit none
-C       in bHYPRE.SStructParCSRVector self
-        integer*8 self
-C       out bHYPRE.Vector x
-        integer*8 x
-C       out int retval
-        integer*4 retval
-        end
-
-
-C       
-C       Scale {\tt self} by {\tt a}.
-C       
-C       
-
-        subroutine bHYPRE_SStructParCSRVector_Scale_f(self, a, retval)
-        implicit none
-C       in bHYPRE.SStructParCSRVector self
-        integer*8 self
-C       in double a
-        double precision a
-C       out int retval
-        integer*4 retval
-        end
-
-
-C       
-C       Compute {\tt d}, the inner-product of {\tt self} and {\tt x}.
-C       
-C       
-
-        subroutine bHYPRE_SStructParCSRVector_Dot_f(self, x, d, retval)
-        implicit none
-C       in bHYPRE.SStructParCSRVector self
-        integer*8 self
-C       in bHYPRE.Vector x
-        integer*8 x
-C       out double d
-        double precision d
-C       out int retval
-        integer*4 retval
-        end
-
-
-C       
-C       Add {\tt a}*{\tt x} to {\tt self}.
-C       
-C       
-
-        subroutine bHYPRE_SStructParCSRVector_Axpy_f(self, a, x, retval)
-        implicit none
-C       in bHYPRE.SStructParCSRVector self
-        integer*8 self
-C       in double a
-        double precision a
-C       in bHYPRE.Vector x
-        integer*8 x
-C       out int retval
-        integer*4 retval
-        end
-
-
-C       
-C       Set the MPI Communicator.
+C       Set the MPI Communicator.  DEPRECATED, Use Create()
 C       
 C       
 
@@ -601,6 +499,108 @@ C       in string filename
         character*(*) filename
 C       in int all
         integer*4 all
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Set {\tt self} to 0.
+C       
+C       
+
+        subroutine bHYPRE_SStructParCSRVector_Clear_f(self, retval)
+        implicit none
+C       in bHYPRE.SStructParCSRVector self
+        integer*8 self
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Copy x into {\tt self}.
+C       
+C       
+
+        subroutine bHYPRE_SStructParCSRVector_Copy_f(self, x, retval)
+        implicit none
+C       in bHYPRE.SStructParCSRVector self
+        integer*8 self
+C       in bHYPRE.Vector x
+        integer*8 x
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Create an {\tt x} compatible with {\tt self}.
+C       
+C       NOTE: When this method is used in an inherited class, the
+C       cloned {\tt Vector} object can be cast to an object with the
+C       inherited class type.
+C       
+C       
+
+        subroutine bHYPRE_SStructParCSRVector_Clone_f(self, x, retval)
+        implicit none
+C       in bHYPRE.SStructParCSRVector self
+        integer*8 self
+C       out bHYPRE.Vector x
+        integer*8 x
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Scale {\tt self} by {\tt a}.
+C       
+C       
+
+        subroutine bHYPRE_SStructParCSRVector_Scale_f(self, a, retval)
+        implicit none
+C       in bHYPRE.SStructParCSRVector self
+        integer*8 self
+C       in double a
+        double precision a
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Compute {\tt d}, the inner-product of {\tt self} and {\tt x}.
+C       
+C       
+
+        subroutine bHYPRE_SStructParCSRVector_Dot_f(self, x, d, retval)
+        implicit none
+C       in bHYPRE.SStructParCSRVector self
+        integer*8 self
+C       in bHYPRE.Vector x
+        integer*8 x
+C       out double d
+        double precision d
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Add {\tt a}*{\tt x} to {\tt self}.
+C       
+C       
+
+        subroutine bHYPRE_SStructParCSRVector_Axpy_f(self, a, x, retval)
+        implicit none
+C       in bHYPRE.SStructParCSRVector self
+        integer*8 self
+C       in double a
+        double precision a
+C       in bHYPRE.Vector x
+        integer*8 x
 C       out int retval
         integer*4 retval
         end

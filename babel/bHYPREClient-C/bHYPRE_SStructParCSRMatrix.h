@@ -2,12 +2,12 @@
  * File:          bHYPRE_SStructParCSRMatrix.h
  * Symbol:        bHYPRE.SStructParCSRMatrix-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.9.8
+ * Babel Version: 0.10.4
  * Description:   Client-side glue code for bHYPRE.SStructParCSRMatrix
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.9.8
+ * babel-version = 0.10.4
  */
 
 #ifndef included_bHYPRE_SStructParCSRMatrix_h
@@ -46,6 +46,12 @@ typedef struct bHYPRE_SStructParCSRMatrix__object* bHYPRE_SStructParCSRMatrix;
 #include "sidl_ClassInfo.h"
 #endif
 
+#ifndef included_sidl_io_Serializer_h
+#include "sidl_io_Serializer.h"
+#endif
+#ifndef included_sidl_io_Deserializer_h
+#include "sidl_io_Deserializer.h"
+#endif
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -53,155 +59,55 @@ extern "C" {
 /**
  * Constructor function for the class.
  */
-bHYPRE_SStructParCSRMatrix
+struct bHYPRE_SStructParCSRMatrix__object*
 bHYPRE_SStructParCSRMatrix__create(void);
 
+/**
+ * RMI constructor function for the class.
+ */
+bHYPRE_SStructParCSRMatrix
+bHYPRE_SStructParCSRMatrix__createRemote(const char *, sidl_BaseInterface *_ex);
+
+/**
+ * RMI connector function for the class.
+ */
+bHYPRE_SStructParCSRMatrix
+bHYPRE_SStructParCSRMatrix__connect(const char *, sidl_BaseInterface *_ex);
 void
 bHYPRE_SStructParCSRMatrix_addRef(
-  /*in*/ bHYPRE_SStructParCSRMatrix self);
+  /* in */ bHYPRE_SStructParCSRMatrix self);
 
 void
 bHYPRE_SStructParCSRMatrix_deleteRef(
-  /*in*/ bHYPRE_SStructParCSRMatrix self);
+  /* in */ bHYPRE_SStructParCSRMatrix self);
 
 sidl_bool
 bHYPRE_SStructParCSRMatrix_isSame(
-  /*in*/ bHYPRE_SStructParCSRMatrix self,
-  /*in*/ sidl_BaseInterface iobj);
+  /* in */ bHYPRE_SStructParCSRMatrix self,
+  /* in */ sidl_BaseInterface iobj);
 
 sidl_BaseInterface
 bHYPRE_SStructParCSRMatrix_queryInt(
-  /*in*/ bHYPRE_SStructParCSRMatrix self,
-  /*in*/ const char* name);
+  /* in */ bHYPRE_SStructParCSRMatrix self,
+  /* in */ const char* name);
 
 sidl_bool
 bHYPRE_SStructParCSRMatrix_isType(
-  /*in*/ bHYPRE_SStructParCSRMatrix self,
-  /*in*/ const char* name);
+  /* in */ bHYPRE_SStructParCSRMatrix self,
+  /* in */ const char* name);
 
 sidl_ClassInfo
 bHYPRE_SStructParCSRMatrix_getClassInfo(
-  /*in*/ bHYPRE_SStructParCSRMatrix self);
+  /* in */ bHYPRE_SStructParCSRMatrix self);
 
 /**
- * Set the MPI Communicator.
+ * Set the MPI Communicator.  DEPRECATED, Use Create()
  * 
  */
 int32_t
 bHYPRE_SStructParCSRMatrix_SetCommunicator(
-  /*in*/ bHYPRE_SStructParCSRMatrix self,
-  /*in*/ void* mpi_comm);
-
-/**
- * Set the int parameter associated with {\tt name}.
- * 
- */
-int32_t
-bHYPRE_SStructParCSRMatrix_SetIntParameter(
-  /*in*/ bHYPRE_SStructParCSRMatrix self,
-  /*in*/ const char* name,
-  /*in*/ int32_t value);
-
-/**
- * Set the double parameter associated with {\tt name}.
- * 
- */
-int32_t
-bHYPRE_SStructParCSRMatrix_SetDoubleParameter(
-  /*in*/ bHYPRE_SStructParCSRMatrix self,
-  /*in*/ const char* name,
-  /*in*/ double value);
-
-/**
- * Set the string parameter associated with {\tt name}.
- * 
- */
-int32_t
-bHYPRE_SStructParCSRMatrix_SetStringParameter(
-  /*in*/ bHYPRE_SStructParCSRMatrix self,
-  /*in*/ const char* name,
-  /*in*/ const char* value);
-
-/**
- * Set the int 1-D array parameter associated with {\tt name}.
- * 
- */
-int32_t
-bHYPRE_SStructParCSRMatrix_SetIntArray1Parameter(
-  /*in*/ bHYPRE_SStructParCSRMatrix self,
-  /*in*/ const char* name,
-  /*in*/ struct sidl_int__array* value);
-
-/**
- * Set the int 2-D array parameter associated with {\tt name}.
- * 
- */
-int32_t
-bHYPRE_SStructParCSRMatrix_SetIntArray2Parameter(
-  /*in*/ bHYPRE_SStructParCSRMatrix self,
-  /*in*/ const char* name,
-  /*in*/ struct sidl_int__array* value);
-
-/**
- * Set the double 1-D array parameter associated with {\tt name}.
- * 
- */
-int32_t
-bHYPRE_SStructParCSRMatrix_SetDoubleArray1Parameter(
-  /*in*/ bHYPRE_SStructParCSRMatrix self,
-  /*in*/ const char* name,
-  /*in*/ struct sidl_double__array* value);
-
-/**
- * Set the double 2-D array parameter associated with {\tt name}.
- * 
- */
-int32_t
-bHYPRE_SStructParCSRMatrix_SetDoubleArray2Parameter(
-  /*in*/ bHYPRE_SStructParCSRMatrix self,
-  /*in*/ const char* name,
-  /*in*/ struct sidl_double__array* value);
-
-/**
- * Set the int parameter associated with {\tt name}.
- * 
- */
-int32_t
-bHYPRE_SStructParCSRMatrix_GetIntValue(
-  /*in*/ bHYPRE_SStructParCSRMatrix self,
-  /*in*/ const char* name,
-  /*out*/ int32_t* value);
-
-/**
- * Get the double parameter associated with {\tt name}.
- * 
- */
-int32_t
-bHYPRE_SStructParCSRMatrix_GetDoubleValue(
-  /*in*/ bHYPRE_SStructParCSRMatrix self,
-  /*in*/ const char* name,
-  /*out*/ double* value);
-
-/**
- * (Optional) Do any preprocessing that may be necessary in
- * order to execute {\tt Apply}.
- * 
- */
-int32_t
-bHYPRE_SStructParCSRMatrix_Setup(
-  /*in*/ bHYPRE_SStructParCSRMatrix self,
-  /*in*/ bHYPRE_Vector b,
-  /*in*/ bHYPRE_Vector x);
-
-/**
- * Apply the operator to {\tt b}, returning {\tt x}.
- * 
- */
-int32_t
-bHYPRE_SStructParCSRMatrix_Apply(
-  /*in*/ bHYPRE_SStructParCSRMatrix self,
-  /*in*/ bHYPRE_Vector b,
-  /*inout*/ bHYPRE_Vector* x);
+  /* in */ bHYPRE_SStructParCSRMatrix self,
+  /* in */ void* mpi_comm);
 
 /**
  * Prepare an object for setting coefficient values, whether for
@@ -210,7 +116,7 @@ bHYPRE_SStructParCSRMatrix_Apply(
  */
 int32_t
 bHYPRE_SStructParCSRMatrix_Initialize(
-  /*in*/ bHYPRE_SStructParCSRMatrix self);
+  /* in */ bHYPRE_SStructParCSRMatrix self);
 
 /**
  * Finalize the construction of an object before using, either
@@ -222,7 +128,7 @@ bHYPRE_SStructParCSRMatrix_Initialize(
  */
 int32_t
 bHYPRE_SStructParCSRMatrix_Assemble(
-  /*in*/ bHYPRE_SStructParCSRMatrix self);
+  /* in */ bHYPRE_SStructParCSRMatrix self);
 
 /**
  * The problem definition interface is a {\it builder} that
@@ -238,8 +144,8 @@ bHYPRE_SStructParCSRMatrix_Assemble(
  */
 int32_t
 bHYPRE_SStructParCSRMatrix_GetObject(
-  /*in*/ bHYPRE_SStructParCSRMatrix self,
-  /*out*/ sidl_BaseInterface* A);
+  /* in */ bHYPRE_SStructParCSRMatrix self,
+  /* out */ sidl_BaseInterface* A);
 
 /**
  * Set the matrix graph.
@@ -247,8 +153,8 @@ bHYPRE_SStructParCSRMatrix_GetObject(
  */
 int32_t
 bHYPRE_SStructParCSRMatrix_SetGraph(
-  /*in*/ bHYPRE_SStructParCSRMatrix self,
-  /*in*/ bHYPRE_SStructGraph graph);
+  /* in */ bHYPRE_SStructParCSRMatrix self,
+  /* in */ bHYPRE_SStructGraph graph);
 
 /**
  * Set matrix coefficients index by index.
@@ -270,13 +176,13 @@ bHYPRE_SStructParCSRMatrix_SetGraph(
  */
 int32_t
 bHYPRE_SStructParCSRMatrix_SetValues(
-  /*in*/ bHYPRE_SStructParCSRMatrix self,
-  /*in*/ int32_t part,
-  /*in*/ struct sidl_int__array* index,
-  /*in*/ int32_t var,
-  /*in*/ int32_t nentries,
-  /*in*/ struct sidl_int__array* entries,
-  /*in*/ struct sidl_double__array* values);
+  /* in */ bHYPRE_SStructParCSRMatrix self,
+  /* in */ int32_t part,
+  /* in */ struct sidl_int__array* index,
+  /* in */ int32_t var,
+  /* in */ int32_t nentries,
+  /* in */ struct sidl_int__array* entries,
+  /* in */ struct sidl_double__array* values);
 
 /**
  * Set matrix coefficients a box at a time.
@@ -298,14 +204,14 @@ bHYPRE_SStructParCSRMatrix_SetValues(
  */
 int32_t
 bHYPRE_SStructParCSRMatrix_SetBoxValues(
-  /*in*/ bHYPRE_SStructParCSRMatrix self,
-  /*in*/ int32_t part,
-  /*in*/ struct sidl_int__array* ilower,
-  /*in*/ struct sidl_int__array* iupper,
-  /*in*/ int32_t var,
-  /*in*/ int32_t nentries,
-  /*in*/ struct sidl_int__array* entries,
-  /*in*/ struct sidl_double__array* values);
+  /* in */ bHYPRE_SStructParCSRMatrix self,
+  /* in */ int32_t part,
+  /* in */ struct sidl_int__array* ilower,
+  /* in */ struct sidl_int__array* iupper,
+  /* in */ int32_t var,
+  /* in */ int32_t nentries,
+  /* in */ struct sidl_int__array* entries,
+  /* in */ struct sidl_double__array* values);
 
 /**
  * Add to matrix coefficients index by index.
@@ -326,13 +232,13 @@ bHYPRE_SStructParCSRMatrix_SetBoxValues(
  */
 int32_t
 bHYPRE_SStructParCSRMatrix_AddToValues(
-  /*in*/ bHYPRE_SStructParCSRMatrix self,
-  /*in*/ int32_t part,
-  /*in*/ struct sidl_int__array* index,
-  /*in*/ int32_t var,
-  /*in*/ int32_t nentries,
-  /*in*/ struct sidl_int__array* entries,
-  /*in*/ struct sidl_double__array* values);
+  /* in */ bHYPRE_SStructParCSRMatrix self,
+  /* in */ int32_t part,
+  /* in */ struct sidl_int__array* index,
+  /* in */ int32_t var,
+  /* in */ int32_t nentries,
+  /* in */ struct sidl_int__array* entries,
+  /* in */ struct sidl_double__array* values);
 
 /**
  * Add to matrix coefficients a box at a time.
@@ -352,14 +258,14 @@ bHYPRE_SStructParCSRMatrix_AddToValues(
  */
 int32_t
 bHYPRE_SStructParCSRMatrix_AddToBoxValues(
-  /*in*/ bHYPRE_SStructParCSRMatrix self,
-  /*in*/ int32_t part,
-  /*in*/ struct sidl_int__array* ilower,
-  /*in*/ struct sidl_int__array* iupper,
-  /*in*/ int32_t var,
-  /*in*/ int32_t nentries,
-  /*in*/ struct sidl_int__array* entries,
-  /*in*/ struct sidl_double__array* values);
+  /* in */ bHYPRE_SStructParCSRMatrix self,
+  /* in */ int32_t part,
+  /* in */ struct sidl_int__array* ilower,
+  /* in */ struct sidl_int__array* iupper,
+  /* in */ int32_t var,
+  /* in */ int32_t nentries,
+  /* in */ struct sidl_int__array* entries,
+  /* in */ struct sidl_double__array* values);
 
 /**
  * Define symmetry properties for the stencil entries in the
@@ -379,11 +285,11 @@ bHYPRE_SStructParCSRMatrix_AddToBoxValues(
  */
 int32_t
 bHYPRE_SStructParCSRMatrix_SetSymmetric(
-  /*in*/ bHYPRE_SStructParCSRMatrix self,
-  /*in*/ int32_t part,
-  /*in*/ int32_t var,
-  /*in*/ int32_t to_var,
-  /*in*/ int32_t symmetric);
+  /* in */ bHYPRE_SStructParCSRMatrix self,
+  /* in */ int32_t part,
+  /* in */ int32_t var,
+  /* in */ int32_t to_var,
+  /* in */ int32_t symmetric);
 
 /**
  * Define symmetry properties for all non-stencil matrix
@@ -392,8 +298,8 @@ bHYPRE_SStructParCSRMatrix_SetSymmetric(
  */
 int32_t
 bHYPRE_SStructParCSRMatrix_SetNSSymmetric(
-  /*in*/ bHYPRE_SStructParCSRMatrix self,
-  /*in*/ int32_t symmetric);
+  /* in */ bHYPRE_SStructParCSRMatrix self,
+  /* in */ int32_t symmetric);
 
 /**
  * Set the matrix to be complex.
@@ -401,7 +307,7 @@ bHYPRE_SStructParCSRMatrix_SetNSSymmetric(
  */
 int32_t
 bHYPRE_SStructParCSRMatrix_SetComplex(
-  /*in*/ bHYPRE_SStructParCSRMatrix self);
+  /* in */ bHYPRE_SStructParCSRMatrix self);
 
 /**
  * Print the matrix to file.  This is mainly for debugging
@@ -410,14 +316,125 @@ bHYPRE_SStructParCSRMatrix_SetComplex(
  */
 int32_t
 bHYPRE_SStructParCSRMatrix_Print(
-  /*in*/ bHYPRE_SStructParCSRMatrix self,
-  /*in*/ const char* filename,
-  /*in*/ int32_t all);
+  /* in */ bHYPRE_SStructParCSRMatrix self,
+  /* in */ const char* filename,
+  /* in */ int32_t all);
+
+/**
+ * Set the int parameter associated with {\tt name}.
+ * 
+ */
+int32_t
+bHYPRE_SStructParCSRMatrix_SetIntParameter(
+  /* in */ bHYPRE_SStructParCSRMatrix self,
+  /* in */ const char* name,
+  /* in */ int32_t value);
+
+/**
+ * Set the double parameter associated with {\tt name}.
+ * 
+ */
+int32_t
+bHYPRE_SStructParCSRMatrix_SetDoubleParameter(
+  /* in */ bHYPRE_SStructParCSRMatrix self,
+  /* in */ const char* name,
+  /* in */ double value);
+
+/**
+ * Set the string parameter associated with {\tt name}.
+ * 
+ */
+int32_t
+bHYPRE_SStructParCSRMatrix_SetStringParameter(
+  /* in */ bHYPRE_SStructParCSRMatrix self,
+  /* in */ const char* name,
+  /* in */ const char* value);
+
+/**
+ * Set the int 1-D array parameter associated with {\tt name}.
+ * 
+ */
+int32_t
+bHYPRE_SStructParCSRMatrix_SetIntArray1Parameter(
+  /* in */ bHYPRE_SStructParCSRMatrix self,
+  /* in */ const char* name,
+  /* in */ struct sidl_int__array* value);
+
+/**
+ * Set the int 2-D array parameter associated with {\tt name}.
+ * 
+ */
+int32_t
+bHYPRE_SStructParCSRMatrix_SetIntArray2Parameter(
+  /* in */ bHYPRE_SStructParCSRMatrix self,
+  /* in */ const char* name,
+  /* in */ struct sidl_int__array* value);
+
+/**
+ * Set the double 1-D array parameter associated with {\tt name}.
+ * 
+ */
+int32_t
+bHYPRE_SStructParCSRMatrix_SetDoubleArray1Parameter(
+  /* in */ bHYPRE_SStructParCSRMatrix self,
+  /* in */ const char* name,
+  /* in */ struct sidl_double__array* value);
+
+/**
+ * Set the double 2-D array parameter associated with {\tt name}.
+ * 
+ */
+int32_t
+bHYPRE_SStructParCSRMatrix_SetDoubleArray2Parameter(
+  /* in */ bHYPRE_SStructParCSRMatrix self,
+  /* in */ const char* name,
+  /* in */ struct sidl_double__array* value);
+
+/**
+ * Set the int parameter associated with {\tt name}.
+ * 
+ */
+int32_t
+bHYPRE_SStructParCSRMatrix_GetIntValue(
+  /* in */ bHYPRE_SStructParCSRMatrix self,
+  /* in */ const char* name,
+  /* out */ int32_t* value);
+
+/**
+ * Get the double parameter associated with {\tt name}.
+ * 
+ */
+int32_t
+bHYPRE_SStructParCSRMatrix_GetDoubleValue(
+  /* in */ bHYPRE_SStructParCSRMatrix self,
+  /* in */ const char* name,
+  /* out */ double* value);
+
+/**
+ * (Optional) Do any preprocessing that may be necessary in
+ * order to execute {\tt Apply}.
+ * 
+ */
+int32_t
+bHYPRE_SStructParCSRMatrix_Setup(
+  /* in */ bHYPRE_SStructParCSRMatrix self,
+  /* in */ bHYPRE_Vector b,
+  /* in */ bHYPRE_Vector x);
+
+/**
+ * Apply the operator to {\tt b}, returning {\tt x}.
+ * 
+ */
+int32_t
+bHYPRE_SStructParCSRMatrix_Apply(
+  /* in */ bHYPRE_SStructParCSRMatrix self,
+  /* in */ bHYPRE_Vector b,
+  /* inout */ bHYPRE_Vector* x);
 
 /**
  * Cast method for interface and class type conversions.
  */
-bHYPRE_SStructParCSRMatrix
+struct bHYPRE_SStructParCSRMatrix__object*
 bHYPRE_SStructParCSRMatrix__cast(
   void* obj);
 
@@ -429,6 +446,29 @@ bHYPRE_SStructParCSRMatrix__cast2(
   void* obj,
   const char* type);
 
+/**
+ * Select and execute a method by name
+ */
+void
+bHYPRE_SStructParCSRMatrix__exec(
+  /* in */ bHYPRE_SStructParCSRMatrix self,
+  /* in */ const char* methodName,
+  /* in */ sidl_io_Deserializer inArgs,
+  /* in */ sidl_io_Serializer outArgs);
+/**
+ * static Exec method for reflexity.
+ */
+void
+bHYPRE_SStructParCSRMatrix__sexec(
+  /* in */ const char* methodName,
+  /* in */ sidl_io_Deserializer inArgs,
+  /* in */ sidl_io_Serializer outArgs);
+/**
+ * Get the URL of the Implementation of this object (for RMI)
+ */
+char*
+bHYPRE_SStructParCSRMatrix__getURL(
+  /* in */ bHYPRE_SStructParCSRMatrix self);
 struct bHYPRE_SStructParCSRMatrix__array*
 bHYPRE_SStructParCSRMatrix__array_createCol(
   int32_t       dimen,

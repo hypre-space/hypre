@@ -1,8 +1,8 @@
 C       
 C       File:          sidl_SIDLException_Impl.f
-C       Symbol:        sidl.SIDLException-v0.9.0
+C       Symbol:        sidl.SIDLException-v0.9.3
 C       Symbol Type:   class
-C       Babel Version: 0.9.8
+C       Babel Version: 0.10.4
 C       Release:       $Name$
 C       Revision:      @(#) $Id$
 C       Description:   Client-side documentation text for sidl.SIDLException
@@ -32,13 +32,14 @@ C       Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 C       
 C       WARNING: Automatically generated; changes will be lost
 C       
-C       babel-version = 0.9.8
+C       babel-version = 0.10.4
+C       xml-url       = /home/painter/babel/share/babel-0.10.4/repository/sidl.SIDLException-v0.9.3.xml
 C       
 
         THIS FILE IS DOCUMENTATION - DO NOT COMPILE IT!
 
 C       
-C       Symbol "sidl.SIDLException" (version 0.9.0)
+C       Symbol "sidl.SIDLException" (version 0.9.3)
 C       
 C       <code>SIDLException</code> provides the basic functionality of the
 C       <code>BaseException</code> interface for getting and setting error

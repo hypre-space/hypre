@@ -1,8 +1,8 @@
 /*
  * File:          sidl_DLL_fStub.c
- * Symbol:        sidl.DLL-v0.9.0
+ * Symbol:        sidl.DLL-v0.9.3
  * Symbol Type:   class
- * Babel Version: 0.9.8
+ * Babel Version: 0.10.4
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Client-side glue code for sidl.DLL
@@ -32,11 +32,12 @@
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.9.8
+ * babel-version = 0.10.4
+ * xml-url       = /home/painter/babel/share/babel-0.10.4/repository/sidl.DLL-v0.9.3.xml
  */
 
 /*
- * Symbol "sidl.DLL" (version 0.9.0)
+ * Symbol "sidl.DLL" (version 0.9.3)
  * 
  * The <code>DLL</code> class encapsulates access to a single
  * dynamically linked library.  DLLs are loaded at run-time using
@@ -55,9 +56,9 @@
 #endif
 #include <stdio.h>
 #include "sidl_DLL_IOR.h"
-#include "sidl_BaseClass_IOR.h"
-#include "sidl_BaseInterface_IOR.h"
 #include "sidl_ClassInfo_IOR.h"
+#include "sidl_BaseInterface_IOR.h"
+#include "sidl_BaseClass_IOR.h"
 
 /*
  * Return pointer to internal IOR functions.
@@ -103,8 +104,7 @@ SIDLFortran77Symbol(sidl_dll__cast_f,SIDL_DLL__CAST_F,sidl_DLL__cast_f)
       *_base->d_epv->f__cast)(
       _base->d_object,
       "sidl.DLL");
-  }
-  else {
+  } else {
     *retval = 0;
   }
 }

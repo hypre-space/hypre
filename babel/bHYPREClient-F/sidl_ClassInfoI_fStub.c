@@ -1,8 +1,8 @@
 /*
  * File:          sidl_ClassInfoI_fStub.c
- * Symbol:        sidl.ClassInfoI-v0.9.0
+ * Symbol:        sidl.ClassInfoI-v0.9.3
  * Symbol Type:   class
- * Babel Version: 0.9.8
+ * Babel Version: 0.10.4
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Client-side glue code for sidl.ClassInfoI
@@ -32,11 +32,12 @@
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.9.8
+ * babel-version = 0.10.4
+ * xml-url       = /home/painter/babel/share/babel-0.10.4/repository/sidl.ClassInfoI-v0.9.3.xml
  */
 
 /*
- * Symbol "sidl.ClassInfoI" (version 0.9.0)
+ * Symbol "sidl.ClassInfoI" (version 0.9.3)
  * 
  * An implementation of the <code>ClassInfo</code> interface. This provides
  * methods to set all the attributes that are read-only in the
@@ -52,8 +53,8 @@
 #endif
 #include <stdio.h>
 #include "sidl_ClassInfoI_IOR.h"
-#include "sidl_BaseInterface_IOR.h"
 #include "sidl_ClassInfo_IOR.h"
+#include "sidl_BaseInterface_IOR.h"
 
 /*
  * Return pointer to internal IOR functions.
@@ -99,8 +100,7 @@ SIDLFortran77Symbol(sidl_classinfoi__cast_f,SIDL_CLASSINFOI__CAST_F,sidl_ClassIn
       *_base->d_epv->f__cast)(
       _base->d_object,
       "sidl.ClassInfoI");
-  }
-  else {
+  } else {
     *retval = 0;
   }
 }

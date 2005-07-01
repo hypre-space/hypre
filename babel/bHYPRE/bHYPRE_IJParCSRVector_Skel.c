@@ -2,125 +2,219 @@
  * File:          bHYPRE_IJParCSRVector_Skel.c
  * Symbol:        bHYPRE.IJParCSRVector-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.9.8
+ * Babel Version: 0.10.4
  * Description:   Server-side glue code for bHYPRE.IJParCSRVector
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.9.8
+ * babel-version = 0.10.4
  */
 
 #include "bHYPRE_IJParCSRVector_IOR.h"
 #include "bHYPRE_IJParCSRVector.h"
 #include <stddef.h>
 
-extern void
+extern
+void
+impl_bHYPRE_IJParCSRVector__load(
+  void);
+
+extern
+void
 impl_bHYPRE_IJParCSRVector__ctor(
-  bHYPRE_IJParCSRVector);
+  /* in */ bHYPRE_IJParCSRVector self);
 
-extern void
+extern
+void
 impl_bHYPRE_IJParCSRVector__dtor(
-  bHYPRE_IJParCSRVector);
+  /* in */ bHYPRE_IJParCSRVector self);
 
-extern int32_t
+extern struct bHYPRE_IJParCSRVector__object* 
+  impl_bHYPRE_IJParCSRVector_fconnect_bHYPRE_IJParCSRVector(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_IJParCSRVector_fgetURL_bHYPRE_IJParCSRVector(struct 
+  bHYPRE_IJParCSRVector__object* obj);
+extern struct sidl_ClassInfo__object* 
+  impl_bHYPRE_IJParCSRVector_fconnect_sidl_ClassInfo(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_IJParCSRVector_fgetURL_sidl_ClassInfo(struct 
+  sidl_ClassInfo__object* obj);
+extern struct bHYPRE_IJBuildVector__object* 
+  impl_bHYPRE_IJParCSRVector_fconnect_bHYPRE_IJBuildVector(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_IJParCSRVector_fgetURL_bHYPRE_IJBuildVector(struct 
+  bHYPRE_IJBuildVector__object* obj);
+extern struct bHYPRE_Vector__object* 
+  impl_bHYPRE_IJParCSRVector_fconnect_bHYPRE_Vector(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_IJParCSRVector_fgetURL_bHYPRE_Vector(struct 
+  bHYPRE_Vector__object* obj);
+extern struct bHYPRE_ProblemDefinition__object* 
+  impl_bHYPRE_IJParCSRVector_fconnect_bHYPRE_ProblemDefinition(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_IJParCSRVector_fgetURL_bHYPRE_ProblemDefinition(struct 
+  bHYPRE_ProblemDefinition__object* obj);
+extern struct sidl_BaseInterface__object* 
+  impl_bHYPRE_IJParCSRVector_fconnect_sidl_BaseInterface(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_IJParCSRVector_fgetURL_sidl_BaseInterface(struct 
+  sidl_BaseInterface__object* obj);
+extern struct sidl_BaseClass__object* 
+  impl_bHYPRE_IJParCSRVector_fconnect_sidl_BaseClass(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_IJParCSRVector_fgetURL_sidl_BaseClass(struct 
+  sidl_BaseClass__object* obj);
+extern
+int32_t
 impl_bHYPRE_IJParCSRVector_Clear(
-  bHYPRE_IJParCSRVector);
+  /* in */ bHYPRE_IJParCSRVector self);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_IJParCSRVector_Copy(
-  bHYPRE_IJParCSRVector,
-  bHYPRE_Vector);
+  /* in */ bHYPRE_IJParCSRVector self,
+  /* in */ bHYPRE_Vector x);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_IJParCSRVector_Clone(
-  bHYPRE_IJParCSRVector,
-  bHYPRE_Vector*);
+  /* in */ bHYPRE_IJParCSRVector self,
+  /* out */ bHYPRE_Vector* x);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_IJParCSRVector_Scale(
-  bHYPRE_IJParCSRVector,
-  double);
+  /* in */ bHYPRE_IJParCSRVector self,
+  /* in */ double a);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_IJParCSRVector_Dot(
-  bHYPRE_IJParCSRVector,
-  bHYPRE_Vector,
-  double*);
+  /* in */ bHYPRE_IJParCSRVector self,
+  /* in */ bHYPRE_Vector x,
+  /* out */ double* d);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_IJParCSRVector_Axpy(
-  bHYPRE_IJParCSRVector,
-  double,
-  bHYPRE_Vector);
+  /* in */ bHYPRE_IJParCSRVector self,
+  /* in */ double a,
+  /* in */ bHYPRE_Vector x);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_IJParCSRVector_SetCommunicator(
-  bHYPRE_IJParCSRVector,
-  void*);
+  /* in */ bHYPRE_IJParCSRVector self,
+  /* in */ void* mpi_comm);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_IJParCSRVector_Initialize(
-  bHYPRE_IJParCSRVector);
+  /* in */ bHYPRE_IJParCSRVector self);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_IJParCSRVector_Assemble(
-  bHYPRE_IJParCSRVector);
+  /* in */ bHYPRE_IJParCSRVector self);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_IJParCSRVector_GetObject(
-  bHYPRE_IJParCSRVector,
-  sidl_BaseInterface*);
+  /* in */ bHYPRE_IJParCSRVector self,
+  /* out */ sidl_BaseInterface* A);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_IJParCSRVector_SetLocalRange(
-  bHYPRE_IJParCSRVector,
-  int32_t,
-  int32_t);
+  /* in */ bHYPRE_IJParCSRVector self,
+  /* in */ int32_t jlower,
+  /* in */ int32_t jupper);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_IJParCSRVector_SetValues(
-  bHYPRE_IJParCSRVector,
-  int32_t,
-  struct sidl_int__array*,
-  struct sidl_double__array*);
+  /* in */ bHYPRE_IJParCSRVector self,
+  /* in */ int32_t nvalues,
+  /* in */ struct sidl_int__array* indices,
+  /* in */ struct sidl_double__array* values);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_IJParCSRVector_AddToValues(
-  bHYPRE_IJParCSRVector,
-  int32_t,
-  struct sidl_int__array*,
-  struct sidl_double__array*);
+  /* in */ bHYPRE_IJParCSRVector self,
+  /* in */ int32_t nvalues,
+  /* in */ struct sidl_int__array* indices,
+  /* in */ struct sidl_double__array* values);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_IJParCSRVector_GetLocalRange(
-  bHYPRE_IJParCSRVector,
-  int32_t*,
-  int32_t*);
+  /* in */ bHYPRE_IJParCSRVector self,
+  /* out */ int32_t* jlower,
+  /* out */ int32_t* jupper);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_IJParCSRVector_GetValues(
-  bHYPRE_IJParCSRVector,
-  int32_t,
-  struct sidl_int__array*,
-  struct sidl_double__array**);
+  /* in */ bHYPRE_IJParCSRVector self,
+  /* in */ int32_t nvalues,
+  /* in */ struct sidl_int__array* indices,
+  /* inout */ struct sidl_double__array** values);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_IJParCSRVector_Print(
-  bHYPRE_IJParCSRVector,
-  const char*);
+  /* in */ bHYPRE_IJParCSRVector self,
+  /* in */ const char* filename);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_IJParCSRVector_Read(
-  bHYPRE_IJParCSRVector,
-  const char*,
-  void*);
+  /* in */ bHYPRE_IJParCSRVector self,
+  /* in */ const char* filename,
+  /* in */ void* comm);
 
+extern struct bHYPRE_IJParCSRVector__object* 
+  impl_bHYPRE_IJParCSRVector_fconnect_bHYPRE_IJParCSRVector(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_IJParCSRVector_fgetURL_bHYPRE_IJParCSRVector(struct 
+  bHYPRE_IJParCSRVector__object* obj);
+extern struct sidl_ClassInfo__object* 
+  impl_bHYPRE_IJParCSRVector_fconnect_sidl_ClassInfo(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_IJParCSRVector_fgetURL_sidl_ClassInfo(struct 
+  sidl_ClassInfo__object* obj);
+extern struct bHYPRE_IJBuildVector__object* 
+  impl_bHYPRE_IJParCSRVector_fconnect_bHYPRE_IJBuildVector(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_IJParCSRVector_fgetURL_bHYPRE_IJBuildVector(struct 
+  bHYPRE_IJBuildVector__object* obj);
+extern struct bHYPRE_Vector__object* 
+  impl_bHYPRE_IJParCSRVector_fconnect_bHYPRE_Vector(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_IJParCSRVector_fgetURL_bHYPRE_Vector(struct 
+  bHYPRE_Vector__object* obj);
+extern struct bHYPRE_ProblemDefinition__object* 
+  impl_bHYPRE_IJParCSRVector_fconnect_bHYPRE_ProblemDefinition(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_IJParCSRVector_fgetURL_bHYPRE_ProblemDefinition(struct 
+  bHYPRE_ProblemDefinition__object* obj);
+extern struct sidl_BaseInterface__object* 
+  impl_bHYPRE_IJParCSRVector_fconnect_sidl_BaseInterface(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_IJParCSRVector_fgetURL_sidl_BaseInterface(struct 
+  sidl_BaseInterface__object* obj);
+extern struct sidl_BaseClass__object* 
+  impl_bHYPRE_IJParCSRVector_fconnect_sidl_BaseClass(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_IJParCSRVector_fgetURL_sidl_BaseClass(struct 
+  sidl_BaseClass__object* obj);
 static int32_t
 skel_bHYPRE_IJParCSRVector_SetValues(
-  /*in*/ bHYPRE_IJParCSRVector self,
-  /*in*/ int32_t nvalues,
-  /*in*/ struct sidl_int__array* indices,
-  /*in*/ struct sidl_double__array* values)
+  /* in */ bHYPRE_IJParCSRVector self,
+  /* in */ int32_t nvalues,
+  /* in */ struct sidl_int__array* indices,
+/* in */ struct sidl_double__array* values)
 {
   int32_t _return;
   struct sidl_int__array* indices_proxy = sidl_int__array_ensure(indices, 1,
@@ -140,10 +234,10 @@ skel_bHYPRE_IJParCSRVector_SetValues(
 
 static int32_t
 skel_bHYPRE_IJParCSRVector_AddToValues(
-  /*in*/ bHYPRE_IJParCSRVector self,
-  /*in*/ int32_t nvalues,
-  /*in*/ struct sidl_int__array* indices,
-  /*in*/ struct sidl_double__array* values)
+  /* in */ bHYPRE_IJParCSRVector self,
+  /* in */ int32_t nvalues,
+  /* in */ struct sidl_int__array* indices,
+/* in */ struct sidl_double__array* values)
 {
   int32_t _return;
   struct sidl_int__array* indices_proxy = sidl_int__array_ensure(indices, 1,
@@ -160,10 +254,10 @@ skel_bHYPRE_IJParCSRVector_AddToValues(
 
 static int32_t
 skel_bHYPRE_IJParCSRVector_GetValues(
-  /*in*/ bHYPRE_IJParCSRVector self,
-  /*in*/ int32_t nvalues,
-  /*in*/ struct sidl_int__array* indices,
-  /*inout*/ struct sidl_double__array** values)
+  /* in */ bHYPRE_IJParCSRVector self,
+  /* in */ int32_t nvalues,
+  /* in */ struct sidl_int__array* indices,
+/* inout */ struct sidl_double__array** values)
 {
   int32_t _return;
   struct sidl_int__array* indices_proxy = sidl_int__array_ensure(indices, 1,
@@ -209,10 +303,95 @@ bHYPRE_IJParCSRVector__set_epv(struct bHYPRE_IJParCSRVector__epv *epv)
   epv->f_GetValues = skel_bHYPRE_IJParCSRVector_GetValues;
   epv->f_Print = impl_bHYPRE_IJParCSRVector_Print;
   epv->f_Read = impl_bHYPRE_IJParCSRVector_Read;
+
 }
 #ifdef __cplusplus
 }
 #endif
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+void bHYPRE_IJParCSRVector__call_load(void) { 
+  impl_bHYPRE_IJParCSRVector__load();
+}
+struct bHYPRE_IJParCSRVector__object* 
+  skel_bHYPRE_IJParCSRVector_fconnect_bHYPRE_IJParCSRVector(char* url,
+  sidl_BaseInterface *_ex) { 
+  return impl_bHYPRE_IJParCSRVector_fconnect_bHYPRE_IJParCSRVector(url, _ex);
+}
+
+char* skel_bHYPRE_IJParCSRVector_fgetURL_bHYPRE_IJParCSRVector(struct 
+  bHYPRE_IJParCSRVector__object* obj) { 
+  return impl_bHYPRE_IJParCSRVector_fgetURL_bHYPRE_IJParCSRVector(obj);
+}
+
+struct sidl_ClassInfo__object* 
+  skel_bHYPRE_IJParCSRVector_fconnect_sidl_ClassInfo(char* url,
+  sidl_BaseInterface *_ex) { 
+  return impl_bHYPRE_IJParCSRVector_fconnect_sidl_ClassInfo(url, _ex);
+}
+
+char* skel_bHYPRE_IJParCSRVector_fgetURL_sidl_ClassInfo(struct 
+  sidl_ClassInfo__object* obj) { 
+  return impl_bHYPRE_IJParCSRVector_fgetURL_sidl_ClassInfo(obj);
+}
+
+struct bHYPRE_IJBuildVector__object* 
+  skel_bHYPRE_IJParCSRVector_fconnect_bHYPRE_IJBuildVector(char* url,
+  sidl_BaseInterface *_ex) { 
+  return impl_bHYPRE_IJParCSRVector_fconnect_bHYPRE_IJBuildVector(url, _ex);
+}
+
+char* skel_bHYPRE_IJParCSRVector_fgetURL_bHYPRE_IJBuildVector(struct 
+  bHYPRE_IJBuildVector__object* obj) { 
+  return impl_bHYPRE_IJParCSRVector_fgetURL_bHYPRE_IJBuildVector(obj);
+}
+
+struct bHYPRE_Vector__object* 
+  skel_bHYPRE_IJParCSRVector_fconnect_bHYPRE_Vector(char* url,
+  sidl_BaseInterface *_ex) { 
+  return impl_bHYPRE_IJParCSRVector_fconnect_bHYPRE_Vector(url, _ex);
+}
+
+char* skel_bHYPRE_IJParCSRVector_fgetURL_bHYPRE_Vector(struct 
+  bHYPRE_Vector__object* obj) { 
+  return impl_bHYPRE_IJParCSRVector_fgetURL_bHYPRE_Vector(obj);
+}
+
+struct bHYPRE_ProblemDefinition__object* 
+  skel_bHYPRE_IJParCSRVector_fconnect_bHYPRE_ProblemDefinition(char* url,
+  sidl_BaseInterface *_ex) { 
+  return impl_bHYPRE_IJParCSRVector_fconnect_bHYPRE_ProblemDefinition(url, _ex);
+}
+
+char* skel_bHYPRE_IJParCSRVector_fgetURL_bHYPRE_ProblemDefinition(struct 
+  bHYPRE_ProblemDefinition__object* obj) { 
+  return impl_bHYPRE_IJParCSRVector_fgetURL_bHYPRE_ProblemDefinition(obj);
+}
+
+struct sidl_BaseInterface__object* 
+  skel_bHYPRE_IJParCSRVector_fconnect_sidl_BaseInterface(char* url,
+  sidl_BaseInterface *_ex) { 
+  return impl_bHYPRE_IJParCSRVector_fconnect_sidl_BaseInterface(url, _ex);
+}
+
+char* skel_bHYPRE_IJParCSRVector_fgetURL_sidl_BaseInterface(struct 
+  sidl_BaseInterface__object* obj) { 
+  return impl_bHYPRE_IJParCSRVector_fgetURL_sidl_BaseInterface(obj);
+}
+
+struct sidl_BaseClass__object* 
+  skel_bHYPRE_IJParCSRVector_fconnect_sidl_BaseClass(char* url,
+  sidl_BaseInterface *_ex) { 
+  return impl_bHYPRE_IJParCSRVector_fconnect_sidl_BaseClass(url, _ex);
+}
+
+char* skel_bHYPRE_IJParCSRVector_fgetURL_sidl_BaseClass(struct 
+  sidl_BaseClass__object* obj) { 
+  return impl_bHYPRE_IJParCSRVector_fgetURL_sidl_BaseClass(obj);
+}
 
 struct bHYPRE_IJParCSRVector__data*
 bHYPRE_IJParCSRVector__get_data(bHYPRE_IJParCSRVector self)
@@ -228,3 +407,6 @@ void bHYPRE_IJParCSRVector__set_data(
     self->d_data = data;
   }
 }
+#ifdef __cplusplus
+}
+#endif

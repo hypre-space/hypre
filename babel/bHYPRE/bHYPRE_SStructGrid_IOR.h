@@ -2,12 +2,12 @@
  * File:          bHYPRE_SStructGrid_IOR.h
  * Symbol:        bHYPRE.SStructGrid-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.9.8
+ * Babel Version: 0.10.4
  * Description:   Intermediate Object Representation for bHYPRE.SStructGrid
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.9.8
+ * babel-version = 0.10.4
  */
 
 #ifndef included_bHYPRE_SStructGrid_IOR_h
@@ -40,9 +40,6 @@ struct bHYPRE_SStructGrid__object;
 extern struct bHYPRE_SStructGrid__object*
 bHYPRE_SStructGrid__new(void);
 
-extern struct bHYPRE_SStructGrid__object*
-bHYPRE_SStructGrid__remote(const char *url);
-
 extern void bHYPRE_SStructGrid__init(
   struct bHYPRE_SStructGrid__object* self);
 extern void bHYPRE_SStructGrid__fini(
@@ -57,6 +54,10 @@ struct sidl_BaseInterface__array;
 struct sidl_BaseInterface__object;
 struct sidl_ClassInfo__array;
 struct sidl_ClassInfo__object;
+struct sidl_io_Deserializer__array;
+struct sidl_io_Deserializer__object;
+struct sidl_io_Serializer__array;
+struct sidl_io_Serializer__object;
 
 /*
  * Declare the method entry point vector.
@@ -65,78 +66,85 @@ struct sidl_ClassInfo__object;
 struct bHYPRE_SStructGrid__epv {
   /* Implicit builtin methods */
   void* (*f__cast)(
-    struct bHYPRE_SStructGrid__object* self,
-    const char* name);
+    /* in */ struct bHYPRE_SStructGrid__object* self,
+    /* in */ const char* name);
   void (*f__delete)(
-    struct bHYPRE_SStructGrid__object* self);
+    /* in */ struct bHYPRE_SStructGrid__object* self);
+  void (*f__exec)(
+    /* in */ struct bHYPRE_SStructGrid__object* self,
+    /* in */ const char* methodName,
+    /* in */ struct sidl_io_Deserializer__object* inArgs,
+    /* in */ struct sidl_io_Serializer__object* outArgs);
+  char* (*f__getURL)(
+    /* in */ struct bHYPRE_SStructGrid__object* self);
   void (*f__ctor)(
-    struct bHYPRE_SStructGrid__object* self);
+    /* in */ struct bHYPRE_SStructGrid__object* self);
   void (*f__dtor)(
-    struct bHYPRE_SStructGrid__object* self);
-  /* Methods introduced in sidl.BaseInterface-v0.9.0 */
+    /* in */ struct bHYPRE_SStructGrid__object* self);
+  /* Methods introduced in sidl.BaseInterface-v0.9.3 */
   void (*f_addRef)(
-    struct bHYPRE_SStructGrid__object* self);
+    /* in */ struct bHYPRE_SStructGrid__object* self);
   void (*f_deleteRef)(
-    struct bHYPRE_SStructGrid__object* self);
+    /* in */ struct bHYPRE_SStructGrid__object* self);
   sidl_bool (*f_isSame)(
-    struct bHYPRE_SStructGrid__object* self,
-    struct sidl_BaseInterface__object* iobj);
+    /* in */ struct bHYPRE_SStructGrid__object* self,
+    /* in */ struct sidl_BaseInterface__object* iobj);
   struct sidl_BaseInterface__object* (*f_queryInt)(
-    struct bHYPRE_SStructGrid__object* self,
-    const char* name);
+    /* in */ struct bHYPRE_SStructGrid__object* self,
+    /* in */ const char* name);
   sidl_bool (*f_isType)(
-    struct bHYPRE_SStructGrid__object* self,
-    const char* name);
+    /* in */ struct bHYPRE_SStructGrid__object* self,
+    /* in */ const char* name);
   struct sidl_ClassInfo__object* (*f_getClassInfo)(
-    struct bHYPRE_SStructGrid__object* self);
-  /* Methods introduced in sidl.BaseClass-v0.9.0 */
+    /* in */ struct bHYPRE_SStructGrid__object* self);
+  /* Methods introduced in sidl.BaseClass-v0.9.3 */
   /* Methods introduced in bHYPRE.SStructGrid-v1.0.0 */
   int32_t (*f_SetNumDimParts)(
-    struct bHYPRE_SStructGrid__object* self,
-    int32_t ndim,
-    int32_t nparts);
+    /* in */ struct bHYPRE_SStructGrid__object* self,
+    /* in */ int32_t ndim,
+    /* in */ int32_t nparts);
   int32_t (*f_SetCommunicator)(
-    struct bHYPRE_SStructGrid__object* self,
-    void* mpi_comm);
+    /* in */ struct bHYPRE_SStructGrid__object* self,
+    /* in */ void* mpi_comm);
   int32_t (*f_SetExtents)(
-    struct bHYPRE_SStructGrid__object* self,
-    int32_t part,
-    struct sidl_int__array* ilower,
-    struct sidl_int__array* iupper);
+    /* in */ struct bHYPRE_SStructGrid__object* self,
+    /* in */ int32_t part,
+    /* in */ struct sidl_int__array* ilower,
+    /* in */ struct sidl_int__array* iupper);
   int32_t (*f_SetVariable)(
-    struct bHYPRE_SStructGrid__object* self,
-    int32_t part,
-    int32_t var,
-    int32_t nvars,
-    enum bHYPRE_SStructVariable__enum vartype);
+    /* in */ struct bHYPRE_SStructGrid__object* self,
+    /* in */ int32_t part,
+    /* in */ int32_t var,
+    /* in */ int32_t nvars,
+    /* in */ enum bHYPRE_SStructVariable__enum vartype);
   int32_t (*f_AddVariable)(
-    struct bHYPRE_SStructGrid__object* self,
-    int32_t part,
-    struct sidl_int__array* index,
-    int32_t var,
-    enum bHYPRE_SStructVariable__enum vartype);
+    /* in */ struct bHYPRE_SStructGrid__object* self,
+    /* in */ int32_t part,
+    /* in */ struct sidl_int__array* index,
+    /* in */ int32_t var,
+    /* in */ enum bHYPRE_SStructVariable__enum vartype);
   int32_t (*f_SetNeighborBox)(
-    struct bHYPRE_SStructGrid__object* self,
-    int32_t part,
-    struct sidl_int__array* ilower,
-    struct sidl_int__array* iupper,
-    int32_t nbor_part,
-    struct sidl_int__array* nbor_ilower,
-    struct sidl_int__array* nbor_iupper,
-    struct sidl_int__array* index_map);
+    /* in */ struct bHYPRE_SStructGrid__object* self,
+    /* in */ int32_t part,
+    /* in */ struct sidl_int__array* ilower,
+    /* in */ struct sidl_int__array* iupper,
+    /* in */ int32_t nbor_part,
+    /* in */ struct sidl_int__array* nbor_ilower,
+    /* in */ struct sidl_int__array* nbor_iupper,
+    /* in */ struct sidl_int__array* index_map);
   int32_t (*f_AddUnstructuredPart)(
-    struct bHYPRE_SStructGrid__object* self,
-    int32_t ilower,
-    int32_t iupper);
+    /* in */ struct bHYPRE_SStructGrid__object* self,
+    /* in */ int32_t ilower,
+    /* in */ int32_t iupper);
   int32_t (*f_SetPeriodic)(
-    struct bHYPRE_SStructGrid__object* self,
-    int32_t part,
-    struct sidl_int__array* periodic);
+    /* in */ struct bHYPRE_SStructGrid__object* self,
+    /* in */ int32_t part,
+    /* in */ struct sidl_int__array* periodic);
   int32_t (*f_SetNumGhost)(
-    struct bHYPRE_SStructGrid__object* self,
-    struct sidl_int__array* num_ghost);
+    /* in */ struct bHYPRE_SStructGrid__object* self,
+    /* in */ struct sidl_int__array* num_ghost);
   int32_t (*f_Assemble)(
-    struct bHYPRE_SStructGrid__object* self);
+    /* in */ struct bHYPRE_SStructGrid__object* self);
 };
 
 /*
@@ -153,10 +161,8 @@ struct bHYPRE_SStructGrid__external {
   struct bHYPRE_SStructGrid__object*
   (*createObject)(void);
 
-  struct bHYPRE_SStructGrid__object*
-  (*createRemote)(const char *url);
-
-struct sidl_BaseClass__epv*(*getSuperEPV)(void);};
+  struct sidl_BaseClass__epv*(*getSuperEPV)(void);
+};
 
 /*
  * This function returns a pointer to a static structure of
@@ -166,6 +172,30 @@ struct sidl_BaseClass__epv*(*getSuperEPV)(void);};
 
 const struct bHYPRE_SStructGrid__external*
 bHYPRE_SStructGrid__externals(void);
+
+struct bHYPRE_SStructGrid__object* 
+  skel_bHYPRE_SStructGrid_fconnect_bHYPRE_SStructGrid(char* url,
+  struct sidl_BaseInterface__object **_ex);
+char* skel_bHYPRE_SStructGrid_fgetURL_bHYPRE_SStructGrid(struct 
+  bHYPRE_SStructGrid__object* obj); 
+
+struct sidl_ClassInfo__object* 
+  skel_bHYPRE_SStructGrid_fconnect_sidl_ClassInfo(char* url,
+  struct sidl_BaseInterface__object **_ex);
+char* skel_bHYPRE_SStructGrid_fgetURL_sidl_ClassInfo(struct 
+  sidl_ClassInfo__object* obj); 
+
+struct sidl_BaseInterface__object* 
+  skel_bHYPRE_SStructGrid_fconnect_sidl_BaseInterface(char* url,
+  struct sidl_BaseInterface__object **_ex);
+char* skel_bHYPRE_SStructGrid_fgetURL_sidl_BaseInterface(struct 
+  sidl_BaseInterface__object* obj); 
+
+struct sidl_BaseClass__object* 
+  skel_bHYPRE_SStructGrid_fconnect_sidl_BaseClass(char* url,
+  struct sidl_BaseInterface__object **_ex);
+char* skel_bHYPRE_SStructGrid_fgetURL_sidl_BaseClass(struct 
+  sidl_BaseClass__object* obj); 
 
 #ifdef __cplusplus
 }

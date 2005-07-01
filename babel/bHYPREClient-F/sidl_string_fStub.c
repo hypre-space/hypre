@@ -131,6 +131,17 @@ SIDLFortran77Symbol(sidl_string__array_slice_f,
 
 
 void
+SIDLFortran77Symbol(sidl_string__array_cast_f,
+                    SIDL_STRING__ARRAY_CAST_F,
+                    sidl_string__array_cast_f)
+  (int64_t *array, int64_t *result)
+{
+  *result = (ptrdiff_t)
+    sidl_string__array_cast((struct sidl__array *)(ptrdiff_t)*array);
+}
+
+
+void
 SIDLFortran77Symbol(sidl_string__array_iscolumnorder_f,
                     SIDL_STRING__ARRAY_ISCOLUMNORDER_F,
                     sidl_string__array_isColumnOrder_f)

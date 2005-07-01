@@ -2,12 +2,12 @@
  * File:          bHYPRE_SStructGraph_fStub.c
  * Symbol:        bHYPRE.SStructGraph-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.9.8
+ * Babel Version: 0.10.4
  * Description:   Client-side glue code for bHYPRE.SStructGraph
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.9.8
+ * babel-version = 0.10.4
  */
 
 /*
@@ -32,8 +32,8 @@
 #include "bHYPRE_SStructGraph_IOR.h"
 #include "bHYPRE_SStructStencil_IOR.h"
 #include "bHYPRE_SStructGrid_IOR.h"
-#include "sidl_BaseInterface_IOR.h"
 #include "sidl_ClassInfo_IOR.h"
+#include "sidl_BaseInterface_IOR.h"
 
 /*
  * Return pointer to internal IOR functions.
@@ -46,34 +46,9 @@ static const struct bHYPRE_SStructGraph__external* _getIOR(void)
 #ifdef SIDL_STATIC_LIBRARY
     _ior = bHYPRE_SStructGraph__externals();
 #else
-    sidl_DLL dll = sidl_DLL__create();
-    const struct bHYPRE_SStructGraph__external*(*dll_f)(void);
-    /* check global namespace for symbol first */
-    if (dll && sidl_DLL_loadLibrary(dll, "main:", TRUE, FALSE)) {
-      dll_f =
-        (const struct bHYPRE_SStructGraph__external*(*)(void)) 
-          sidl_DLL_lookupSymbol(
-          dll, "bHYPRE_SStructGraph__externals");
-      _ior = (dll_f ? (*dll_f)() : NULL);
-    }
-    if (dll) sidl_DLL_deleteRef(dll);
-    if (!_ior) {
-      dll = sidl_Loader_findLibrary("bHYPRE.SStructGraph",
-        "ior/impl", sidl_Scope_SCLSCOPE,
-        sidl_Resolve_SCLRESOLVE);
-      if (dll) {
-        dll_f =
-          (const struct bHYPRE_SStructGraph__external*(*)(void)) 
-            sidl_DLL_lookupSymbol(
-            dll, "bHYPRE_SStructGraph__externals");
-        _ior = (dll_f ? (*dll_f)() : NULL);
-        sidl_DLL_deleteRef(dll);
-      }
-    }
-    if (!_ior) {
-      fputs("Unable to find the implementation for bHYPRE.SStructGraph; please set SIDL_DLL_PATH\n", stderr);
-      exit(-1);
-    }
+    _ior = (struct 
+      bHYPRE_SStructGraph__external*)sidl_dynamicLoadIOR("bHYPRE.SStructGraph",
+      "bHYPRE_SStructGraph__externals") ;
 #endif
   }
   return _ior;
@@ -110,8 +85,7 @@ SIDLFortran77Symbol(bhypre_sstructgraph__cast_f,BHYPRE_SSTRUCTGRAPH__CAST_F,bHYP
       *_base->d_epv->f__cast)(
       _base->d_object,
       "bHYPRE.SStructGraph");
-  }
-  else {
+  } else {
     *retval = 0;
   }
 }
@@ -488,7 +462,7 @@ SIDLFortran77Symbol(bhypre_sstructgraph_setobjecttype_f,BHYPRE_SSTRUCTGRAPH_SETO
 }
 
 /*
- * Set the MPI Communicator.
+ * Set the MPI Communicator.  DEPRECATED, Use Create()
  * 
  */
 

@@ -2,45 +2,94 @@
  * File:          bHYPRE_SStructStencil_Skel.c
  * Symbol:        bHYPRE.SStructStencil-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.9.8
+ * Babel Version: 0.10.4
  * Description:   Server-side glue code for bHYPRE.SStructStencil
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.9.8
+ * babel-version = 0.10.4
  */
 
 #include "bHYPRE_SStructStencil_IOR.h"
 #include "bHYPRE_SStructStencil.h"
 #include <stddef.h>
 
-extern void
+extern
+void
+impl_bHYPRE_SStructStencil__load(
+  void);
+
+extern
+void
 impl_bHYPRE_SStructStencil__ctor(
-  bHYPRE_SStructStencil);
+  /* in */ bHYPRE_SStructStencil self);
 
-extern void
+extern
+void
 impl_bHYPRE_SStructStencil__dtor(
-  bHYPRE_SStructStencil);
+  /* in */ bHYPRE_SStructStencil self);
 
-extern int32_t
+extern struct bHYPRE_SStructStencil__object* 
+  impl_bHYPRE_SStructStencil_fconnect_bHYPRE_SStructStencil(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_SStructStencil_fgetURL_bHYPRE_SStructStencil(struct 
+  bHYPRE_SStructStencil__object* obj);
+extern struct sidl_ClassInfo__object* 
+  impl_bHYPRE_SStructStencil_fconnect_sidl_ClassInfo(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_SStructStencil_fgetURL_sidl_ClassInfo(struct 
+  sidl_ClassInfo__object* obj);
+extern struct sidl_BaseInterface__object* 
+  impl_bHYPRE_SStructStencil_fconnect_sidl_BaseInterface(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_SStructStencil_fgetURL_sidl_BaseInterface(struct 
+  sidl_BaseInterface__object* obj);
+extern struct sidl_BaseClass__object* 
+  impl_bHYPRE_SStructStencil_fconnect_sidl_BaseClass(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_SStructStencil_fgetURL_sidl_BaseClass(struct 
+  sidl_BaseClass__object* obj);
+extern
+int32_t
 impl_bHYPRE_SStructStencil_SetNumDimSize(
-  bHYPRE_SStructStencil,
-  int32_t,
-  int32_t);
+  /* in */ bHYPRE_SStructStencil self,
+  /* in */ int32_t ndim,
+  /* in */ int32_t size);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_SStructStencil_SetEntry(
-  bHYPRE_SStructStencil,
-  int32_t,
-  struct sidl_int__array*,
-  int32_t);
+  /* in */ bHYPRE_SStructStencil self,
+  /* in */ int32_t entry,
+  /* in */ struct sidl_int__array* offset,
+  /* in */ int32_t var);
 
+extern struct bHYPRE_SStructStencil__object* 
+  impl_bHYPRE_SStructStencil_fconnect_bHYPRE_SStructStencil(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_SStructStencil_fgetURL_bHYPRE_SStructStencil(struct 
+  bHYPRE_SStructStencil__object* obj);
+extern struct sidl_ClassInfo__object* 
+  impl_bHYPRE_SStructStencil_fconnect_sidl_ClassInfo(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_SStructStencil_fgetURL_sidl_ClassInfo(struct 
+  sidl_ClassInfo__object* obj);
+extern struct sidl_BaseInterface__object* 
+  impl_bHYPRE_SStructStencil_fconnect_sidl_BaseInterface(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_SStructStencil_fgetURL_sidl_BaseInterface(struct 
+  sidl_BaseInterface__object* obj);
+extern struct sidl_BaseClass__object* 
+  impl_bHYPRE_SStructStencil_fconnect_sidl_BaseClass(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_SStructStencil_fgetURL_sidl_BaseClass(struct 
+  sidl_BaseClass__object* obj);
 static int32_t
 skel_bHYPRE_SStructStencil_SetEntry(
-  /*in*/ bHYPRE_SStructStencil self,
-  /*in*/ int32_t entry,
-  /*in*/ struct sidl_int__array* offset,
-  /*in*/ int32_t var)
+  /* in */ bHYPRE_SStructStencil self,
+  /* in */ int32_t entry,
+  /* in */ struct sidl_int__array* offset,
+/* in */ int32_t var)
 {
   int32_t _return;
   struct sidl_int__array* offset_proxy = sidl_int__array_ensure(offset, 1,
@@ -66,10 +115,62 @@ bHYPRE_SStructStencil__set_epv(struct bHYPRE_SStructStencil__epv *epv)
   epv->f__dtor = impl_bHYPRE_SStructStencil__dtor;
   epv->f_SetNumDimSize = impl_bHYPRE_SStructStencil_SetNumDimSize;
   epv->f_SetEntry = skel_bHYPRE_SStructStencil_SetEntry;
+
 }
 #ifdef __cplusplus
 }
 #endif
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+void bHYPRE_SStructStencil__call_load(void) { 
+  impl_bHYPRE_SStructStencil__load();
+}
+struct bHYPRE_SStructStencil__object* 
+  skel_bHYPRE_SStructStencil_fconnect_bHYPRE_SStructStencil(char* url,
+  sidl_BaseInterface *_ex) { 
+  return impl_bHYPRE_SStructStencil_fconnect_bHYPRE_SStructStencil(url, _ex);
+}
+
+char* skel_bHYPRE_SStructStencil_fgetURL_bHYPRE_SStructStencil(struct 
+  bHYPRE_SStructStencil__object* obj) { 
+  return impl_bHYPRE_SStructStencil_fgetURL_bHYPRE_SStructStencil(obj);
+}
+
+struct sidl_ClassInfo__object* 
+  skel_bHYPRE_SStructStencil_fconnect_sidl_ClassInfo(char* url,
+  sidl_BaseInterface *_ex) { 
+  return impl_bHYPRE_SStructStencil_fconnect_sidl_ClassInfo(url, _ex);
+}
+
+char* skel_bHYPRE_SStructStencil_fgetURL_sidl_ClassInfo(struct 
+  sidl_ClassInfo__object* obj) { 
+  return impl_bHYPRE_SStructStencil_fgetURL_sidl_ClassInfo(obj);
+}
+
+struct sidl_BaseInterface__object* 
+  skel_bHYPRE_SStructStencil_fconnect_sidl_BaseInterface(char* url,
+  sidl_BaseInterface *_ex) { 
+  return impl_bHYPRE_SStructStencil_fconnect_sidl_BaseInterface(url, _ex);
+}
+
+char* skel_bHYPRE_SStructStencil_fgetURL_sidl_BaseInterface(struct 
+  sidl_BaseInterface__object* obj) { 
+  return impl_bHYPRE_SStructStencil_fgetURL_sidl_BaseInterface(obj);
+}
+
+struct sidl_BaseClass__object* 
+  skel_bHYPRE_SStructStencil_fconnect_sidl_BaseClass(char* url,
+  sidl_BaseInterface *_ex) { 
+  return impl_bHYPRE_SStructStencil_fconnect_sidl_BaseClass(url, _ex);
+}
+
+char* skel_bHYPRE_SStructStencil_fgetURL_sidl_BaseClass(struct 
+  sidl_BaseClass__object* obj) { 
+  return impl_bHYPRE_SStructStencil_fgetURL_sidl_BaseClass(obj);
+}
 
 struct bHYPRE_SStructStencil__data*
 bHYPRE_SStructStencil__get_data(bHYPRE_SStructStencil self)
@@ -85,3 +186,6 @@ void bHYPRE_SStructStencil__set_data(
     self->d_data = data;
   }
 }
+#ifdef __cplusplus
+}
+#endif

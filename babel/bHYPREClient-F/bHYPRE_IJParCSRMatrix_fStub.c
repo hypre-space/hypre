@@ -2,12 +2,12 @@
  * File:          bHYPRE_IJParCSRMatrix_fStub.c
  * Symbol:        bHYPRE.IJParCSRMatrix-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.9.8
+ * Babel Version: 0.10.4
  * Description:   Client-side glue code for bHYPRE.IJParCSRMatrix
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.9.8
+ * babel-version = 0.10.4
  */
 
 /*
@@ -33,9 +33,9 @@
 #include "sidl_Loader.h"
 #endif
 #include "bHYPRE_IJParCSRMatrix_IOR.h"
-#include "sidl_BaseInterface_IOR.h"
-#include "bHYPRE_Vector_IOR.h"
 #include "sidl_ClassInfo_IOR.h"
+#include "bHYPRE_Vector_IOR.h"
+#include "sidl_BaseInterface_IOR.h"
 
 /*
  * Return pointer to internal IOR functions.
@@ -48,34 +48,9 @@ static const struct bHYPRE_IJParCSRMatrix__external* _getIOR(void)
 #ifdef SIDL_STATIC_LIBRARY
     _ior = bHYPRE_IJParCSRMatrix__externals();
 #else
-    sidl_DLL dll = sidl_DLL__create();
-    const struct bHYPRE_IJParCSRMatrix__external*(*dll_f)(void);
-    /* check global namespace for symbol first */
-    if (dll && sidl_DLL_loadLibrary(dll, "main:", TRUE, FALSE)) {
-      dll_f =
-        (const struct bHYPRE_IJParCSRMatrix__external*(*)(void)) 
-          sidl_DLL_lookupSymbol(
-          dll, "bHYPRE_IJParCSRMatrix__externals");
-      _ior = (dll_f ? (*dll_f)() : NULL);
-    }
-    if (dll) sidl_DLL_deleteRef(dll);
-    if (!_ior) {
-      dll = sidl_Loader_findLibrary("bHYPRE.IJParCSRMatrix",
-        "ior/impl", sidl_Scope_SCLSCOPE,
-        sidl_Resolve_SCLRESOLVE);
-      if (dll) {
-        dll_f =
-          (const struct bHYPRE_IJParCSRMatrix__external*(*)(void)) 
-            sidl_DLL_lookupSymbol(
-            dll, "bHYPRE_IJParCSRMatrix__externals");
-        _ior = (dll_f ? (*dll_f)() : NULL);
-        sidl_DLL_deleteRef(dll);
-      }
-    }
-    if (!_ior) {
-      fputs("Unable to find the implementation for bHYPRE.IJParCSRMatrix; please set SIDL_DLL_PATH\n", stderr);
-      exit(-1);
-    }
+    _ior = (struct 
+      bHYPRE_IJParCSRMatrix__external*)sidl_dynamicLoadIOR(
+      "bHYPRE.IJParCSRMatrix","bHYPRE_IJParCSRMatrix__externals") ;
 #endif
   }
   return _ior;
@@ -112,8 +87,7 @@ SIDLFortran77Symbol(bhypre_ijparcsrmatrix__cast_f,BHYPRE_IJPARCSRMATRIX__CAST_F,
       *_base->d_epv->f__cast)(
       _base->d_object,
       "bHYPRE.IJParCSRMatrix");
-  }
-  else {
+  } else {
     *retval = 0;
   }
 }
@@ -390,448 +364,6 @@ SIDLFortran77Symbol(bhypre_ijparcsrmatrix_setdiagoffdsizes_f,BHYPRE_IJPARCSRMATR
 }
 
 /*
- * Set the MPI Communicator.
- * 
- */
-
-void
-SIDLFortran77Symbol(bhypre_ijparcsrmatrix_setcommunicator_f,BHYPRE_IJPARCSRMATRIX_SETCOMMUNICATOR_F,bHYPRE_IJParCSRMatrix_SetCommunicator_f)
-(
-  int64_t *self,
-  int64_t *mpi_comm,
-  int32_t *retval
-)
-{
-  struct bHYPRE_IJParCSRMatrix__epv *_epv = NULL;
-  struct bHYPRE_IJParCSRMatrix__object* _proxy_self = NULL;
-  void* _proxy_mpi_comm = NULL;
-  _proxy_self =
-    (struct bHYPRE_IJParCSRMatrix__object*)
-    (ptrdiff_t)(*self);
-  _proxy_mpi_comm =
-    (void*)
-    (ptrdiff_t)(*mpi_comm);
-  _epv = _proxy_self->d_epv;
-  *retval = 
-    (*(_epv->f_SetCommunicator))(
-      _proxy_self,
-      _proxy_mpi_comm
-    );
-}
-
-/*
- * Set the int parameter associated with {\tt name}.
- * 
- */
-
-void
-SIDLFortran77Symbol(bhypre_ijparcsrmatrix_setintparameter_f,BHYPRE_IJPARCSRMATRIX_SETINTPARAMETER_F,bHYPRE_IJParCSRMatrix_SetIntParameter_f)
-(
-  int64_t *self,
-  SIDL_F77_String name
-  SIDL_F77_STR_NEAR_LEN_DECL(name),
-  int32_t *value,
-  int32_t *retval
-  SIDL_F77_STR_FAR_LEN_DECL(name)
-)
-{
-  struct bHYPRE_IJParCSRMatrix__epv *_epv = NULL;
-  struct bHYPRE_IJParCSRMatrix__object* _proxy_self = NULL;
-  char* _proxy_name = NULL;
-  _proxy_self =
-    (struct bHYPRE_IJParCSRMatrix__object*)
-    (ptrdiff_t)(*self);
-  _proxy_name =
-    sidl_copy_fortran_str(SIDL_F77_STR(name),
-      SIDL_F77_STR_LEN(name));
-  _epv = _proxy_self->d_epv;
-  *retval = 
-    (*(_epv->f_SetIntParameter))(
-      _proxy_self,
-      _proxy_name,
-      *value
-    );
-  free((void *)_proxy_name);
-}
-
-/*
- * Set the double parameter associated with {\tt name}.
- * 
- */
-
-void
-SIDLFortran77Symbol(bhypre_ijparcsrmatrix_setdoubleparameter_f,BHYPRE_IJPARCSRMATRIX_SETDOUBLEPARAMETER_F,bHYPRE_IJParCSRMatrix_SetDoubleParameter_f)
-(
-  int64_t *self,
-  SIDL_F77_String name
-  SIDL_F77_STR_NEAR_LEN_DECL(name),
-  double *value,
-  int32_t *retval
-  SIDL_F77_STR_FAR_LEN_DECL(name)
-)
-{
-  struct bHYPRE_IJParCSRMatrix__epv *_epv = NULL;
-  struct bHYPRE_IJParCSRMatrix__object* _proxy_self = NULL;
-  char* _proxy_name = NULL;
-  _proxy_self =
-    (struct bHYPRE_IJParCSRMatrix__object*)
-    (ptrdiff_t)(*self);
-  _proxy_name =
-    sidl_copy_fortran_str(SIDL_F77_STR(name),
-      SIDL_F77_STR_LEN(name));
-  _epv = _proxy_self->d_epv;
-  *retval = 
-    (*(_epv->f_SetDoubleParameter))(
-      _proxy_self,
-      _proxy_name,
-      *value
-    );
-  free((void *)_proxy_name);
-}
-
-/*
- * Set the string parameter associated with {\tt name}.
- * 
- */
-
-void
-SIDLFortran77Symbol(bhypre_ijparcsrmatrix_setstringparameter_f,BHYPRE_IJPARCSRMATRIX_SETSTRINGPARAMETER_F,bHYPRE_IJParCSRMatrix_SetStringParameter_f)
-(
-  int64_t *self,
-  SIDL_F77_String name
-  SIDL_F77_STR_NEAR_LEN_DECL(name),
-  SIDL_F77_String value
-  SIDL_F77_STR_NEAR_LEN_DECL(value),
-  int32_t *retval
-  SIDL_F77_STR_FAR_LEN_DECL(name)
-  SIDL_F77_STR_FAR_LEN_DECL(value)
-)
-{
-  struct bHYPRE_IJParCSRMatrix__epv *_epv = NULL;
-  struct bHYPRE_IJParCSRMatrix__object* _proxy_self = NULL;
-  char* _proxy_name = NULL;
-  char* _proxy_value = NULL;
-  _proxy_self =
-    (struct bHYPRE_IJParCSRMatrix__object*)
-    (ptrdiff_t)(*self);
-  _proxy_name =
-    sidl_copy_fortran_str(SIDL_F77_STR(name),
-      SIDL_F77_STR_LEN(name));
-  _proxy_value =
-    sidl_copy_fortran_str(SIDL_F77_STR(value),
-      SIDL_F77_STR_LEN(value));
-  _epv = _proxy_self->d_epv;
-  *retval = 
-    (*(_epv->f_SetStringParameter))(
-      _proxy_self,
-      _proxy_name,
-      _proxy_value
-    );
-  free((void *)_proxy_name);
-  free((void *)_proxy_value);
-}
-
-/*
- * Set the int 1-D array parameter associated with {\tt name}.
- * 
- */
-
-void
-SIDLFortran77Symbol(bhypre_ijparcsrmatrix_setintarray1parameter_f,BHYPRE_IJPARCSRMATRIX_SETINTARRAY1PARAMETER_F,bHYPRE_IJParCSRMatrix_SetIntArray1Parameter_f)
-(
-  int64_t *self,
-  SIDL_F77_String name
-  SIDL_F77_STR_NEAR_LEN_DECL(name),
-  int64_t *value,
-  int32_t *retval
-  SIDL_F77_STR_FAR_LEN_DECL(name)
-)
-{
-  struct bHYPRE_IJParCSRMatrix__epv *_epv = NULL;
-  struct bHYPRE_IJParCSRMatrix__object* _proxy_self = NULL;
-  char* _proxy_name = NULL;
-  struct sidl_int__array* _proxy_value = NULL;
-  _proxy_self =
-    (struct bHYPRE_IJParCSRMatrix__object*)
-    (ptrdiff_t)(*self);
-  _proxy_name =
-    sidl_copy_fortran_str(SIDL_F77_STR(name),
-      SIDL_F77_STR_LEN(name));
-  _proxy_value =
-    (struct sidl_int__array*)
-    (ptrdiff_t)(*value);
-  _epv = _proxy_self->d_epv;
-  *retval = 
-    (*(_epv->f_SetIntArray1Parameter))(
-      _proxy_self,
-      _proxy_name,
-      _proxy_value
-    );
-  free((void *)_proxy_name);
-}
-
-/*
- * Set the int 2-D array parameter associated with {\tt name}.
- * 
- */
-
-void
-SIDLFortran77Symbol(bhypre_ijparcsrmatrix_setintarray2parameter_f,BHYPRE_IJPARCSRMATRIX_SETINTARRAY2PARAMETER_F,bHYPRE_IJParCSRMatrix_SetIntArray2Parameter_f)
-(
-  int64_t *self,
-  SIDL_F77_String name
-  SIDL_F77_STR_NEAR_LEN_DECL(name),
-  int64_t *value,
-  int32_t *retval
-  SIDL_F77_STR_FAR_LEN_DECL(name)
-)
-{
-  struct bHYPRE_IJParCSRMatrix__epv *_epv = NULL;
-  struct bHYPRE_IJParCSRMatrix__object* _proxy_self = NULL;
-  char* _proxy_name = NULL;
-  struct sidl_int__array* _proxy_value = NULL;
-  _proxy_self =
-    (struct bHYPRE_IJParCSRMatrix__object*)
-    (ptrdiff_t)(*self);
-  _proxy_name =
-    sidl_copy_fortran_str(SIDL_F77_STR(name),
-      SIDL_F77_STR_LEN(name));
-  _proxy_value =
-    (struct sidl_int__array*)
-    (ptrdiff_t)(*value);
-  _epv = _proxy_self->d_epv;
-  *retval = 
-    (*(_epv->f_SetIntArray2Parameter))(
-      _proxy_self,
-      _proxy_name,
-      _proxy_value
-    );
-  free((void *)_proxy_name);
-}
-
-/*
- * Set the double 1-D array parameter associated with {\tt name}.
- * 
- */
-
-void
-SIDLFortran77Symbol(bhypre_ijparcsrmatrix_setdoublearray1parameter_f,BHYPRE_IJPARCSRMATRIX_SETDOUBLEARRAY1PARAMETER_F,bHYPRE_IJParCSRMatrix_SetDoubleArray1Parameter_f)
-(
-  int64_t *self,
-  SIDL_F77_String name
-  SIDL_F77_STR_NEAR_LEN_DECL(name),
-  int64_t *value,
-  int32_t *retval
-  SIDL_F77_STR_FAR_LEN_DECL(name)
-)
-{
-  struct bHYPRE_IJParCSRMatrix__epv *_epv = NULL;
-  struct bHYPRE_IJParCSRMatrix__object* _proxy_self = NULL;
-  char* _proxy_name = NULL;
-  struct sidl_double__array* _proxy_value = NULL;
-  _proxy_self =
-    (struct bHYPRE_IJParCSRMatrix__object*)
-    (ptrdiff_t)(*self);
-  _proxy_name =
-    sidl_copy_fortran_str(SIDL_F77_STR(name),
-      SIDL_F77_STR_LEN(name));
-  _proxy_value =
-    (struct sidl_double__array*)
-    (ptrdiff_t)(*value);
-  _epv = _proxy_self->d_epv;
-  *retval = 
-    (*(_epv->f_SetDoubleArray1Parameter))(
-      _proxy_self,
-      _proxy_name,
-      _proxy_value
-    );
-  free((void *)_proxy_name);
-}
-
-/*
- * Set the double 2-D array parameter associated with {\tt name}.
- * 
- */
-
-void
-SIDLFortran77Symbol(bhypre_ijparcsrmatrix_setdoublearray2parameter_f,BHYPRE_IJPARCSRMATRIX_SETDOUBLEARRAY2PARAMETER_F,bHYPRE_IJParCSRMatrix_SetDoubleArray2Parameter_f)
-(
-  int64_t *self,
-  SIDL_F77_String name
-  SIDL_F77_STR_NEAR_LEN_DECL(name),
-  int64_t *value,
-  int32_t *retval
-  SIDL_F77_STR_FAR_LEN_DECL(name)
-)
-{
-  struct bHYPRE_IJParCSRMatrix__epv *_epv = NULL;
-  struct bHYPRE_IJParCSRMatrix__object* _proxy_self = NULL;
-  char* _proxy_name = NULL;
-  struct sidl_double__array* _proxy_value = NULL;
-  _proxy_self =
-    (struct bHYPRE_IJParCSRMatrix__object*)
-    (ptrdiff_t)(*self);
-  _proxy_name =
-    sidl_copy_fortran_str(SIDL_F77_STR(name),
-      SIDL_F77_STR_LEN(name));
-  _proxy_value =
-    (struct sidl_double__array*)
-    (ptrdiff_t)(*value);
-  _epv = _proxy_self->d_epv;
-  *retval = 
-    (*(_epv->f_SetDoubleArray2Parameter))(
-      _proxy_self,
-      _proxy_name,
-      _proxy_value
-    );
-  free((void *)_proxy_name);
-}
-
-/*
- * Set the int parameter associated with {\tt name}.
- * 
- */
-
-void
-SIDLFortran77Symbol(bhypre_ijparcsrmatrix_getintvalue_f,BHYPRE_IJPARCSRMATRIX_GETINTVALUE_F,bHYPRE_IJParCSRMatrix_GetIntValue_f)
-(
-  int64_t *self,
-  SIDL_F77_String name
-  SIDL_F77_STR_NEAR_LEN_DECL(name),
-  int32_t *value,
-  int32_t *retval
-  SIDL_F77_STR_FAR_LEN_DECL(name)
-)
-{
-  struct bHYPRE_IJParCSRMatrix__epv *_epv = NULL;
-  struct bHYPRE_IJParCSRMatrix__object* _proxy_self = NULL;
-  char* _proxy_name = NULL;
-  _proxy_self =
-    (struct bHYPRE_IJParCSRMatrix__object*)
-    (ptrdiff_t)(*self);
-  _proxy_name =
-    sidl_copy_fortran_str(SIDL_F77_STR(name),
-      SIDL_F77_STR_LEN(name));
-  _epv = _proxy_self->d_epv;
-  *retval = 
-    (*(_epv->f_GetIntValue))(
-      _proxy_self,
-      _proxy_name,
-      value
-    );
-  free((void *)_proxy_name);
-}
-
-/*
- * Get the double parameter associated with {\tt name}.
- * 
- */
-
-void
-SIDLFortran77Symbol(bhypre_ijparcsrmatrix_getdoublevalue_f,BHYPRE_IJPARCSRMATRIX_GETDOUBLEVALUE_F,bHYPRE_IJParCSRMatrix_GetDoubleValue_f)
-(
-  int64_t *self,
-  SIDL_F77_String name
-  SIDL_F77_STR_NEAR_LEN_DECL(name),
-  double *value,
-  int32_t *retval
-  SIDL_F77_STR_FAR_LEN_DECL(name)
-)
-{
-  struct bHYPRE_IJParCSRMatrix__epv *_epv = NULL;
-  struct bHYPRE_IJParCSRMatrix__object* _proxy_self = NULL;
-  char* _proxy_name = NULL;
-  _proxy_self =
-    (struct bHYPRE_IJParCSRMatrix__object*)
-    (ptrdiff_t)(*self);
-  _proxy_name =
-    sidl_copy_fortran_str(SIDL_F77_STR(name),
-      SIDL_F77_STR_LEN(name));
-  _epv = _proxy_self->d_epv;
-  *retval = 
-    (*(_epv->f_GetDoubleValue))(
-      _proxy_self,
-      _proxy_name,
-      value
-    );
-  free((void *)_proxy_name);
-}
-
-/*
- * (Optional) Do any preprocessing that may be necessary in
- * order to execute {\tt Apply}.
- * 
- */
-
-void
-SIDLFortran77Symbol(bhypre_ijparcsrmatrix_setup_f,BHYPRE_IJPARCSRMATRIX_SETUP_F,bHYPRE_IJParCSRMatrix_Setup_f)
-(
-  int64_t *self,
-  int64_t *b,
-  int64_t *x,
-  int32_t *retval
-)
-{
-  struct bHYPRE_IJParCSRMatrix__epv *_epv = NULL;
-  struct bHYPRE_IJParCSRMatrix__object* _proxy_self = NULL;
-  struct bHYPRE_Vector__object* _proxy_b = NULL;
-  struct bHYPRE_Vector__object* _proxy_x = NULL;
-  _proxy_self =
-    (struct bHYPRE_IJParCSRMatrix__object*)
-    (ptrdiff_t)(*self);
-  _proxy_b =
-    (struct bHYPRE_Vector__object*)
-    (ptrdiff_t)(*b);
-  _proxy_x =
-    (struct bHYPRE_Vector__object*)
-    (ptrdiff_t)(*x);
-  _epv = _proxy_self->d_epv;
-  *retval = 
-    (*(_epv->f_Setup))(
-      _proxy_self,
-      _proxy_b,
-      _proxy_x
-    );
-}
-
-/*
- * Apply the operator to {\tt b}, returning {\tt x}.
- * 
- */
-
-void
-SIDLFortran77Symbol(bhypre_ijparcsrmatrix_apply_f,BHYPRE_IJPARCSRMATRIX_APPLY_F,bHYPRE_IJParCSRMatrix_Apply_f)
-(
-  int64_t *self,
-  int64_t *b,
-  int64_t *x,
-  int32_t *retval
-)
-{
-  struct bHYPRE_IJParCSRMatrix__epv *_epv = NULL;
-  struct bHYPRE_IJParCSRMatrix__object* _proxy_self = NULL;
-  struct bHYPRE_Vector__object* _proxy_b = NULL;
-  struct bHYPRE_Vector__object* _proxy_x = NULL;
-  _proxy_self =
-    (struct bHYPRE_IJParCSRMatrix__object*)
-    (ptrdiff_t)(*self);
-  _proxy_b =
-    (struct bHYPRE_Vector__object*)
-    (ptrdiff_t)(*b);
-  _proxy_x =
-    (struct bHYPRE_Vector__object*)
-    (ptrdiff_t)(*x);
-  _epv = _proxy_self->d_epv;
-  *retval = 
-    (*(_epv->f_Apply))(
-      _proxy_self,
-      _proxy_b,
-      &_proxy_x
-    );
-  *x = (ptrdiff_t)_proxy_x;
-}
-
-/*
  * The GetRow method will allocate space for its two output
  * arrays on the first call.  The space will be reused on
  * subsequent calls.  Thus the user must not delete them, yet
@@ -869,6 +401,36 @@ SIDLFortran77Symbol(bhypre_ijparcsrmatrix_getrow_f,BHYPRE_IJPARCSRMATRIX_GETROW_
     );
   *col_ind = (ptrdiff_t)_proxy_col_ind;
   *values = (ptrdiff_t)_proxy_values;
+}
+
+/*
+ * Set the MPI Communicator.  DEPRECATED, Use Create()
+ * 
+ */
+
+void
+SIDLFortran77Symbol(bhypre_ijparcsrmatrix_setcommunicator_f,BHYPRE_IJPARCSRMATRIX_SETCOMMUNICATOR_F,bHYPRE_IJParCSRMatrix_SetCommunicator_f)
+(
+  int64_t *self,
+  int64_t *mpi_comm,
+  int32_t *retval
+)
+{
+  struct bHYPRE_IJParCSRMatrix__epv *_epv = NULL;
+  struct bHYPRE_IJParCSRMatrix__object* _proxy_self = NULL;
+  void* _proxy_mpi_comm = NULL;
+  _proxy_self =
+    (struct bHYPRE_IJParCSRMatrix__object*)
+    (ptrdiff_t)(*self);
+  _proxy_mpi_comm =
+    (void*)
+    (ptrdiff_t)(*mpi_comm);
+  _epv = _proxy_self->d_epv;
+  *retval = 
+    (*(_epv->f_SetCommunicator))(
+      _proxy_self,
+      _proxy_mpi_comm
+    );
 }
 
 /*
@@ -1361,6 +923,418 @@ SIDLFortran77Symbol(bhypre_ijparcsrmatrix_read_f,BHYPRE_IJPARCSRMATRIX_READ_F,bH
       _proxy_comm
     );
   free((void *)_proxy_filename);
+}
+
+/*
+ * Set the int parameter associated with {\tt name}.
+ * 
+ */
+
+void
+SIDLFortran77Symbol(bhypre_ijparcsrmatrix_setintparameter_f,BHYPRE_IJPARCSRMATRIX_SETINTPARAMETER_F,bHYPRE_IJParCSRMatrix_SetIntParameter_f)
+(
+  int64_t *self,
+  SIDL_F77_String name
+  SIDL_F77_STR_NEAR_LEN_DECL(name),
+  int32_t *value,
+  int32_t *retval
+  SIDL_F77_STR_FAR_LEN_DECL(name)
+)
+{
+  struct bHYPRE_IJParCSRMatrix__epv *_epv = NULL;
+  struct bHYPRE_IJParCSRMatrix__object* _proxy_self = NULL;
+  char* _proxy_name = NULL;
+  _proxy_self =
+    (struct bHYPRE_IJParCSRMatrix__object*)
+    (ptrdiff_t)(*self);
+  _proxy_name =
+    sidl_copy_fortran_str(SIDL_F77_STR(name),
+      SIDL_F77_STR_LEN(name));
+  _epv = _proxy_self->d_epv;
+  *retval = 
+    (*(_epv->f_SetIntParameter))(
+      _proxy_self,
+      _proxy_name,
+      *value
+    );
+  free((void *)_proxy_name);
+}
+
+/*
+ * Set the double parameter associated with {\tt name}.
+ * 
+ */
+
+void
+SIDLFortran77Symbol(bhypre_ijparcsrmatrix_setdoubleparameter_f,BHYPRE_IJPARCSRMATRIX_SETDOUBLEPARAMETER_F,bHYPRE_IJParCSRMatrix_SetDoubleParameter_f)
+(
+  int64_t *self,
+  SIDL_F77_String name
+  SIDL_F77_STR_NEAR_LEN_DECL(name),
+  double *value,
+  int32_t *retval
+  SIDL_F77_STR_FAR_LEN_DECL(name)
+)
+{
+  struct bHYPRE_IJParCSRMatrix__epv *_epv = NULL;
+  struct bHYPRE_IJParCSRMatrix__object* _proxy_self = NULL;
+  char* _proxy_name = NULL;
+  _proxy_self =
+    (struct bHYPRE_IJParCSRMatrix__object*)
+    (ptrdiff_t)(*self);
+  _proxy_name =
+    sidl_copy_fortran_str(SIDL_F77_STR(name),
+      SIDL_F77_STR_LEN(name));
+  _epv = _proxy_self->d_epv;
+  *retval = 
+    (*(_epv->f_SetDoubleParameter))(
+      _proxy_self,
+      _proxy_name,
+      *value
+    );
+  free((void *)_proxy_name);
+}
+
+/*
+ * Set the string parameter associated with {\tt name}.
+ * 
+ */
+
+void
+SIDLFortran77Symbol(bhypre_ijparcsrmatrix_setstringparameter_f,BHYPRE_IJPARCSRMATRIX_SETSTRINGPARAMETER_F,bHYPRE_IJParCSRMatrix_SetStringParameter_f)
+(
+  int64_t *self,
+  SIDL_F77_String name
+  SIDL_F77_STR_NEAR_LEN_DECL(name),
+  SIDL_F77_String value
+  SIDL_F77_STR_NEAR_LEN_DECL(value),
+  int32_t *retval
+  SIDL_F77_STR_FAR_LEN_DECL(name)
+  SIDL_F77_STR_FAR_LEN_DECL(value)
+)
+{
+  struct bHYPRE_IJParCSRMatrix__epv *_epv = NULL;
+  struct bHYPRE_IJParCSRMatrix__object* _proxy_self = NULL;
+  char* _proxy_name = NULL;
+  char* _proxy_value = NULL;
+  _proxy_self =
+    (struct bHYPRE_IJParCSRMatrix__object*)
+    (ptrdiff_t)(*self);
+  _proxy_name =
+    sidl_copy_fortran_str(SIDL_F77_STR(name),
+      SIDL_F77_STR_LEN(name));
+  _proxy_value =
+    sidl_copy_fortran_str(SIDL_F77_STR(value),
+      SIDL_F77_STR_LEN(value));
+  _epv = _proxy_self->d_epv;
+  *retval = 
+    (*(_epv->f_SetStringParameter))(
+      _proxy_self,
+      _proxy_name,
+      _proxy_value
+    );
+  free((void *)_proxy_name);
+  free((void *)_proxy_value);
+}
+
+/*
+ * Set the int 1-D array parameter associated with {\tt name}.
+ * 
+ */
+
+void
+SIDLFortran77Symbol(bhypre_ijparcsrmatrix_setintarray1parameter_f,BHYPRE_IJPARCSRMATRIX_SETINTARRAY1PARAMETER_F,bHYPRE_IJParCSRMatrix_SetIntArray1Parameter_f)
+(
+  int64_t *self,
+  SIDL_F77_String name
+  SIDL_F77_STR_NEAR_LEN_DECL(name),
+  int64_t *value,
+  int32_t *retval
+  SIDL_F77_STR_FAR_LEN_DECL(name)
+)
+{
+  struct bHYPRE_IJParCSRMatrix__epv *_epv = NULL;
+  struct bHYPRE_IJParCSRMatrix__object* _proxy_self = NULL;
+  char* _proxy_name = NULL;
+  struct sidl_int__array* _proxy_value = NULL;
+  _proxy_self =
+    (struct bHYPRE_IJParCSRMatrix__object*)
+    (ptrdiff_t)(*self);
+  _proxy_name =
+    sidl_copy_fortran_str(SIDL_F77_STR(name),
+      SIDL_F77_STR_LEN(name));
+  _proxy_value =
+    (struct sidl_int__array*)
+    (ptrdiff_t)(*value);
+  _epv = _proxy_self->d_epv;
+  *retval = 
+    (*(_epv->f_SetIntArray1Parameter))(
+      _proxy_self,
+      _proxy_name,
+      _proxy_value
+    );
+  free((void *)_proxy_name);
+}
+
+/*
+ * Set the int 2-D array parameter associated with {\tt name}.
+ * 
+ */
+
+void
+SIDLFortran77Symbol(bhypre_ijparcsrmatrix_setintarray2parameter_f,BHYPRE_IJPARCSRMATRIX_SETINTARRAY2PARAMETER_F,bHYPRE_IJParCSRMatrix_SetIntArray2Parameter_f)
+(
+  int64_t *self,
+  SIDL_F77_String name
+  SIDL_F77_STR_NEAR_LEN_DECL(name),
+  int64_t *value,
+  int32_t *retval
+  SIDL_F77_STR_FAR_LEN_DECL(name)
+)
+{
+  struct bHYPRE_IJParCSRMatrix__epv *_epv = NULL;
+  struct bHYPRE_IJParCSRMatrix__object* _proxy_self = NULL;
+  char* _proxy_name = NULL;
+  struct sidl_int__array* _proxy_value = NULL;
+  _proxy_self =
+    (struct bHYPRE_IJParCSRMatrix__object*)
+    (ptrdiff_t)(*self);
+  _proxy_name =
+    sidl_copy_fortran_str(SIDL_F77_STR(name),
+      SIDL_F77_STR_LEN(name));
+  _proxy_value =
+    (struct sidl_int__array*)
+    (ptrdiff_t)(*value);
+  _epv = _proxy_self->d_epv;
+  *retval = 
+    (*(_epv->f_SetIntArray2Parameter))(
+      _proxy_self,
+      _proxy_name,
+      _proxy_value
+    );
+  free((void *)_proxy_name);
+}
+
+/*
+ * Set the double 1-D array parameter associated with {\tt name}.
+ * 
+ */
+
+void
+SIDLFortran77Symbol(bhypre_ijparcsrmatrix_setdoublearray1parameter_f,BHYPRE_IJPARCSRMATRIX_SETDOUBLEARRAY1PARAMETER_F,bHYPRE_IJParCSRMatrix_SetDoubleArray1Parameter_f)
+(
+  int64_t *self,
+  SIDL_F77_String name
+  SIDL_F77_STR_NEAR_LEN_DECL(name),
+  int64_t *value,
+  int32_t *retval
+  SIDL_F77_STR_FAR_LEN_DECL(name)
+)
+{
+  struct bHYPRE_IJParCSRMatrix__epv *_epv = NULL;
+  struct bHYPRE_IJParCSRMatrix__object* _proxy_self = NULL;
+  char* _proxy_name = NULL;
+  struct sidl_double__array* _proxy_value = NULL;
+  _proxy_self =
+    (struct bHYPRE_IJParCSRMatrix__object*)
+    (ptrdiff_t)(*self);
+  _proxy_name =
+    sidl_copy_fortran_str(SIDL_F77_STR(name),
+      SIDL_F77_STR_LEN(name));
+  _proxy_value =
+    (struct sidl_double__array*)
+    (ptrdiff_t)(*value);
+  _epv = _proxy_self->d_epv;
+  *retval = 
+    (*(_epv->f_SetDoubleArray1Parameter))(
+      _proxy_self,
+      _proxy_name,
+      _proxy_value
+    );
+  free((void *)_proxy_name);
+}
+
+/*
+ * Set the double 2-D array parameter associated with {\tt name}.
+ * 
+ */
+
+void
+SIDLFortran77Symbol(bhypre_ijparcsrmatrix_setdoublearray2parameter_f,BHYPRE_IJPARCSRMATRIX_SETDOUBLEARRAY2PARAMETER_F,bHYPRE_IJParCSRMatrix_SetDoubleArray2Parameter_f)
+(
+  int64_t *self,
+  SIDL_F77_String name
+  SIDL_F77_STR_NEAR_LEN_DECL(name),
+  int64_t *value,
+  int32_t *retval
+  SIDL_F77_STR_FAR_LEN_DECL(name)
+)
+{
+  struct bHYPRE_IJParCSRMatrix__epv *_epv = NULL;
+  struct bHYPRE_IJParCSRMatrix__object* _proxy_self = NULL;
+  char* _proxy_name = NULL;
+  struct sidl_double__array* _proxy_value = NULL;
+  _proxy_self =
+    (struct bHYPRE_IJParCSRMatrix__object*)
+    (ptrdiff_t)(*self);
+  _proxy_name =
+    sidl_copy_fortran_str(SIDL_F77_STR(name),
+      SIDL_F77_STR_LEN(name));
+  _proxy_value =
+    (struct sidl_double__array*)
+    (ptrdiff_t)(*value);
+  _epv = _proxy_self->d_epv;
+  *retval = 
+    (*(_epv->f_SetDoubleArray2Parameter))(
+      _proxy_self,
+      _proxy_name,
+      _proxy_value
+    );
+  free((void *)_proxy_name);
+}
+
+/*
+ * Set the int parameter associated with {\tt name}.
+ * 
+ */
+
+void
+SIDLFortran77Symbol(bhypre_ijparcsrmatrix_getintvalue_f,BHYPRE_IJPARCSRMATRIX_GETINTVALUE_F,bHYPRE_IJParCSRMatrix_GetIntValue_f)
+(
+  int64_t *self,
+  SIDL_F77_String name
+  SIDL_F77_STR_NEAR_LEN_DECL(name),
+  int32_t *value,
+  int32_t *retval
+  SIDL_F77_STR_FAR_LEN_DECL(name)
+)
+{
+  struct bHYPRE_IJParCSRMatrix__epv *_epv = NULL;
+  struct bHYPRE_IJParCSRMatrix__object* _proxy_self = NULL;
+  char* _proxy_name = NULL;
+  _proxy_self =
+    (struct bHYPRE_IJParCSRMatrix__object*)
+    (ptrdiff_t)(*self);
+  _proxy_name =
+    sidl_copy_fortran_str(SIDL_F77_STR(name),
+      SIDL_F77_STR_LEN(name));
+  _epv = _proxy_self->d_epv;
+  *retval = 
+    (*(_epv->f_GetIntValue))(
+      _proxy_self,
+      _proxy_name,
+      value
+    );
+  free((void *)_proxy_name);
+}
+
+/*
+ * Get the double parameter associated with {\tt name}.
+ * 
+ */
+
+void
+SIDLFortran77Symbol(bhypre_ijparcsrmatrix_getdoublevalue_f,BHYPRE_IJPARCSRMATRIX_GETDOUBLEVALUE_F,bHYPRE_IJParCSRMatrix_GetDoubleValue_f)
+(
+  int64_t *self,
+  SIDL_F77_String name
+  SIDL_F77_STR_NEAR_LEN_DECL(name),
+  double *value,
+  int32_t *retval
+  SIDL_F77_STR_FAR_LEN_DECL(name)
+)
+{
+  struct bHYPRE_IJParCSRMatrix__epv *_epv = NULL;
+  struct bHYPRE_IJParCSRMatrix__object* _proxy_self = NULL;
+  char* _proxy_name = NULL;
+  _proxy_self =
+    (struct bHYPRE_IJParCSRMatrix__object*)
+    (ptrdiff_t)(*self);
+  _proxy_name =
+    sidl_copy_fortran_str(SIDL_F77_STR(name),
+      SIDL_F77_STR_LEN(name));
+  _epv = _proxy_self->d_epv;
+  *retval = 
+    (*(_epv->f_GetDoubleValue))(
+      _proxy_self,
+      _proxy_name,
+      value
+    );
+  free((void *)_proxy_name);
+}
+
+/*
+ * (Optional) Do any preprocessing that may be necessary in
+ * order to execute {\tt Apply}.
+ * 
+ */
+
+void
+SIDLFortran77Symbol(bhypre_ijparcsrmatrix_setup_f,BHYPRE_IJPARCSRMATRIX_SETUP_F,bHYPRE_IJParCSRMatrix_Setup_f)
+(
+  int64_t *self,
+  int64_t *b,
+  int64_t *x,
+  int32_t *retval
+)
+{
+  struct bHYPRE_IJParCSRMatrix__epv *_epv = NULL;
+  struct bHYPRE_IJParCSRMatrix__object* _proxy_self = NULL;
+  struct bHYPRE_Vector__object* _proxy_b = NULL;
+  struct bHYPRE_Vector__object* _proxy_x = NULL;
+  _proxy_self =
+    (struct bHYPRE_IJParCSRMatrix__object*)
+    (ptrdiff_t)(*self);
+  _proxy_b =
+    (struct bHYPRE_Vector__object*)
+    (ptrdiff_t)(*b);
+  _proxy_x =
+    (struct bHYPRE_Vector__object*)
+    (ptrdiff_t)(*x);
+  _epv = _proxy_self->d_epv;
+  *retval = 
+    (*(_epv->f_Setup))(
+      _proxy_self,
+      _proxy_b,
+      _proxy_x
+    );
+}
+
+/*
+ * Apply the operator to {\tt b}, returning {\tt x}.
+ * 
+ */
+
+void
+SIDLFortran77Symbol(bhypre_ijparcsrmatrix_apply_f,BHYPRE_IJPARCSRMATRIX_APPLY_F,bHYPRE_IJParCSRMatrix_Apply_f)
+(
+  int64_t *self,
+  int64_t *b,
+  int64_t *x,
+  int32_t *retval
+)
+{
+  struct bHYPRE_IJParCSRMatrix__epv *_epv = NULL;
+  struct bHYPRE_IJParCSRMatrix__object* _proxy_self = NULL;
+  struct bHYPRE_Vector__object* _proxy_b = NULL;
+  struct bHYPRE_Vector__object* _proxy_x = NULL;
+  _proxy_self =
+    (struct bHYPRE_IJParCSRMatrix__object*)
+    (ptrdiff_t)(*self);
+  _proxy_b =
+    (struct bHYPRE_Vector__object*)
+    (ptrdiff_t)(*b);
+  _proxy_x =
+    (struct bHYPRE_Vector__object*)
+    (ptrdiff_t)(*x);
+  _epv = _proxy_self->d_epv;
+  *retval = 
+    (*(_epv->f_Apply))(
+      _proxy_self,
+      _proxy_b,
+      &_proxy_x
+    );
+  *x = (ptrdiff_t)_proxy_x;
 }
 
 void

@@ -2,12 +2,12 @@
  * File:          bHYPRE_Solver_fStub.c
  * Symbol:        bHYPRE.Solver-v1.0.0
  * Symbol Type:   interface
- * Babel Version: 0.9.8
+ * Babel Version: 0.10.4
  * Description:   Client-side glue code for bHYPRE.Solver
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.9.8
+ * babel-version = 0.10.4
  */
 
 /*
@@ -27,10 +27,10 @@
 #include "sidl_Loader.h"
 #endif
 #include "bHYPRE_Solver_IOR.h"
-#include "sidl_BaseInterface_IOR.h"
 #include "bHYPRE_Operator_IOR.h"
-#include "bHYPRE_Vector_IOR.h"
 #include "sidl_ClassInfo_IOR.h"
+#include "bHYPRE_Vector_IOR.h"
+#include "sidl_BaseInterface_IOR.h"
 
 /*
  * Cast method for interface and type conversions.
@@ -50,8 +50,7 @@ SIDLFortran77Symbol(bhypre_solver__cast_f,BHYPRE_SOLVER__CAST_F,bHYPRE_Solver__c
       *_base->d_epv->f__cast)(
       _base->d_object,
       "bHYPRE.Solver");
-  }
-  else {
+  } else {
     *retval = 0;
   }
 }

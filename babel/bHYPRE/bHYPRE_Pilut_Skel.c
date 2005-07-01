@@ -2,137 +2,223 @@
  * File:          bHYPRE_Pilut_Skel.c
  * Symbol:        bHYPRE.Pilut-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.9.8
+ * Babel Version: 0.10.4
  * Description:   Server-side glue code for bHYPRE.Pilut
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.9.8
+ * babel-version = 0.10.4
  */
 
 #include "bHYPRE_Pilut_IOR.h"
 #include "bHYPRE_Pilut.h"
 #include <stddef.h>
 
-extern void
+extern
+void
+impl_bHYPRE_Pilut__load(
+  void);
+
+extern
+void
 impl_bHYPRE_Pilut__ctor(
-  bHYPRE_Pilut);
+  /* in */ bHYPRE_Pilut self);
 
-extern void
+extern
+void
 impl_bHYPRE_Pilut__dtor(
-  bHYPRE_Pilut);
+  /* in */ bHYPRE_Pilut self);
 
-extern int32_t
+extern struct bHYPRE_Solver__object* 
+  impl_bHYPRE_Pilut_fconnect_bHYPRE_Solver(char* url, sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_Pilut_fgetURL_bHYPRE_Solver(struct 
+  bHYPRE_Solver__object* obj);
+extern struct bHYPRE_Operator__object* 
+  impl_bHYPRE_Pilut_fconnect_bHYPRE_Operator(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_Pilut_fgetURL_bHYPRE_Operator(struct 
+  bHYPRE_Operator__object* obj);
+extern struct sidl_ClassInfo__object* 
+  impl_bHYPRE_Pilut_fconnect_sidl_ClassInfo(char* url, sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_Pilut_fgetURL_sidl_ClassInfo(struct 
+  sidl_ClassInfo__object* obj);
+extern struct bHYPRE_Pilut__object* 
+  impl_bHYPRE_Pilut_fconnect_bHYPRE_Pilut(char* url, sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_Pilut_fgetURL_bHYPRE_Pilut(struct 
+  bHYPRE_Pilut__object* obj);
+extern struct bHYPRE_Vector__object* 
+  impl_bHYPRE_Pilut_fconnect_bHYPRE_Vector(char* url, sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_Pilut_fgetURL_bHYPRE_Vector(struct 
+  bHYPRE_Vector__object* obj);
+extern struct sidl_BaseInterface__object* 
+  impl_bHYPRE_Pilut_fconnect_sidl_BaseInterface(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_Pilut_fgetURL_sidl_BaseInterface(struct 
+  sidl_BaseInterface__object* obj);
+extern struct sidl_BaseClass__object* 
+  impl_bHYPRE_Pilut_fconnect_sidl_BaseClass(char* url, sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_Pilut_fgetURL_sidl_BaseClass(struct 
+  sidl_BaseClass__object* obj);
+extern
+int32_t
 impl_bHYPRE_Pilut_SetCommunicator(
-  bHYPRE_Pilut,
-  void*);
+  /* in */ bHYPRE_Pilut self,
+  /* in */ void* mpi_comm);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_Pilut_SetIntParameter(
-  bHYPRE_Pilut,
-  const char*,
-  int32_t);
+  /* in */ bHYPRE_Pilut self,
+  /* in */ const char* name,
+  /* in */ int32_t value);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_Pilut_SetDoubleParameter(
-  bHYPRE_Pilut,
-  const char*,
-  double);
+  /* in */ bHYPRE_Pilut self,
+  /* in */ const char* name,
+  /* in */ double value);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_Pilut_SetStringParameter(
-  bHYPRE_Pilut,
-  const char*,
-  const char*);
+  /* in */ bHYPRE_Pilut self,
+  /* in */ const char* name,
+  /* in */ const char* value);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_Pilut_SetIntArray1Parameter(
-  bHYPRE_Pilut,
-  const char*,
-  struct sidl_int__array*);
+  /* in */ bHYPRE_Pilut self,
+  /* in */ const char* name,
+  /* in */ struct sidl_int__array* value);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_Pilut_SetIntArray2Parameter(
-  bHYPRE_Pilut,
-  const char*,
-  struct sidl_int__array*);
+  /* in */ bHYPRE_Pilut self,
+  /* in */ const char* name,
+  /* in */ struct sidl_int__array* value);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_Pilut_SetDoubleArray1Parameter(
-  bHYPRE_Pilut,
-  const char*,
-  struct sidl_double__array*);
+  /* in */ bHYPRE_Pilut self,
+  /* in */ const char* name,
+  /* in */ struct sidl_double__array* value);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_Pilut_SetDoubleArray2Parameter(
-  bHYPRE_Pilut,
-  const char*,
-  struct sidl_double__array*);
+  /* in */ bHYPRE_Pilut self,
+  /* in */ const char* name,
+  /* in */ struct sidl_double__array* value);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_Pilut_GetIntValue(
-  bHYPRE_Pilut,
-  const char*,
-  int32_t*);
+  /* in */ bHYPRE_Pilut self,
+  /* in */ const char* name,
+  /* out */ int32_t* value);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_Pilut_GetDoubleValue(
-  bHYPRE_Pilut,
-  const char*,
-  double*);
+  /* in */ bHYPRE_Pilut self,
+  /* in */ const char* name,
+  /* out */ double* value);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_Pilut_Setup(
-  bHYPRE_Pilut,
-  bHYPRE_Vector,
-  bHYPRE_Vector);
+  /* in */ bHYPRE_Pilut self,
+  /* in */ bHYPRE_Vector b,
+  /* in */ bHYPRE_Vector x);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_Pilut_Apply(
-  bHYPRE_Pilut,
-  bHYPRE_Vector,
-  bHYPRE_Vector*);
+  /* in */ bHYPRE_Pilut self,
+  /* in */ bHYPRE_Vector b,
+  /* inout */ bHYPRE_Vector* x);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_Pilut_SetOperator(
-  bHYPRE_Pilut,
-  bHYPRE_Operator);
+  /* in */ bHYPRE_Pilut self,
+  /* in */ bHYPRE_Operator A);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_Pilut_SetTolerance(
-  bHYPRE_Pilut,
-  double);
+  /* in */ bHYPRE_Pilut self,
+  /* in */ double tolerance);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_Pilut_SetMaxIterations(
-  bHYPRE_Pilut,
-  int32_t);
+  /* in */ bHYPRE_Pilut self,
+  /* in */ int32_t max_iterations);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_Pilut_SetLogging(
-  bHYPRE_Pilut,
-  int32_t);
+  /* in */ bHYPRE_Pilut self,
+  /* in */ int32_t level);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_Pilut_SetPrintLevel(
-  bHYPRE_Pilut,
-  int32_t);
+  /* in */ bHYPRE_Pilut self,
+  /* in */ int32_t level);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_Pilut_GetNumIterations(
-  bHYPRE_Pilut,
-  int32_t*);
+  /* in */ bHYPRE_Pilut self,
+  /* out */ int32_t* num_iterations);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_Pilut_GetRelResidualNorm(
-  bHYPRE_Pilut,
-  double*);
+  /* in */ bHYPRE_Pilut self,
+  /* out */ double* norm);
 
+extern struct bHYPRE_Solver__object* 
+  impl_bHYPRE_Pilut_fconnect_bHYPRE_Solver(char* url, sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_Pilut_fgetURL_bHYPRE_Solver(struct 
+  bHYPRE_Solver__object* obj);
+extern struct bHYPRE_Operator__object* 
+  impl_bHYPRE_Pilut_fconnect_bHYPRE_Operator(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_Pilut_fgetURL_bHYPRE_Operator(struct 
+  bHYPRE_Operator__object* obj);
+extern struct sidl_ClassInfo__object* 
+  impl_bHYPRE_Pilut_fconnect_sidl_ClassInfo(char* url, sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_Pilut_fgetURL_sidl_ClassInfo(struct 
+  sidl_ClassInfo__object* obj);
+extern struct bHYPRE_Pilut__object* 
+  impl_bHYPRE_Pilut_fconnect_bHYPRE_Pilut(char* url, sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_Pilut_fgetURL_bHYPRE_Pilut(struct 
+  bHYPRE_Pilut__object* obj);
+extern struct bHYPRE_Vector__object* 
+  impl_bHYPRE_Pilut_fconnect_bHYPRE_Vector(char* url, sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_Pilut_fgetURL_bHYPRE_Vector(struct 
+  bHYPRE_Vector__object* obj);
+extern struct sidl_BaseInterface__object* 
+  impl_bHYPRE_Pilut_fconnect_sidl_BaseInterface(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_Pilut_fgetURL_sidl_BaseInterface(struct 
+  sidl_BaseInterface__object* obj);
+extern struct sidl_BaseClass__object* 
+  impl_bHYPRE_Pilut_fconnect_sidl_BaseClass(char* url, sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_Pilut_fgetURL_sidl_BaseClass(struct 
+  sidl_BaseClass__object* obj);
 static int32_t
 skel_bHYPRE_Pilut_SetIntArray1Parameter(
-  /*in*/ bHYPRE_Pilut self,
-  /*in*/ const char* name,
-  /*in*/ struct sidl_int__array* value)
+  /* in */ bHYPRE_Pilut self,
+  /* in */ const char* name,
+/* in */ struct sidl_int__array* value)
 {
   int32_t _return;
   struct sidl_int__array* value_proxy = sidl_int__array_ensure(value, 1,
@@ -148,9 +234,9 @@ skel_bHYPRE_Pilut_SetIntArray1Parameter(
 
 static int32_t
 skel_bHYPRE_Pilut_SetIntArray2Parameter(
-  /*in*/ bHYPRE_Pilut self,
-  /*in*/ const char* name,
-  /*in*/ struct sidl_int__array* value)
+  /* in */ bHYPRE_Pilut self,
+  /* in */ const char* name,
+/* in */ struct sidl_int__array* value)
 {
   int32_t _return;
   struct sidl_int__array* value_proxy = sidl_int__array_ensure(value, 2,
@@ -166,9 +252,9 @@ skel_bHYPRE_Pilut_SetIntArray2Parameter(
 
 static int32_t
 skel_bHYPRE_Pilut_SetDoubleArray1Parameter(
-  /*in*/ bHYPRE_Pilut self,
-  /*in*/ const char* name,
-  /*in*/ struct sidl_double__array* value)
+  /* in */ bHYPRE_Pilut self,
+  /* in */ const char* name,
+/* in */ struct sidl_double__array* value)
 {
   int32_t _return;
   struct sidl_double__array* value_proxy = sidl_double__array_ensure(value, 1,
@@ -184,9 +270,9 @@ skel_bHYPRE_Pilut_SetDoubleArray1Parameter(
 
 static int32_t
 skel_bHYPRE_Pilut_SetDoubleArray2Parameter(
-  /*in*/ bHYPRE_Pilut self,
-  /*in*/ const char* name,
-  /*in*/ struct sidl_double__array* value)
+  /* in */ bHYPRE_Pilut self,
+  /* in */ const char* name,
+/* in */ struct sidl_double__array* value)
 {
   int32_t _return;
   struct sidl_double__array* value_proxy = sidl_double__array_ensure(value, 2,
@@ -228,10 +314,90 @@ bHYPRE_Pilut__set_epv(struct bHYPRE_Pilut__epv *epv)
   epv->f_SetPrintLevel = impl_bHYPRE_Pilut_SetPrintLevel;
   epv->f_GetNumIterations = impl_bHYPRE_Pilut_GetNumIterations;
   epv->f_GetRelResidualNorm = impl_bHYPRE_Pilut_GetRelResidualNorm;
+
 }
 #ifdef __cplusplus
 }
 #endif
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+void bHYPRE_Pilut__call_load(void) { 
+  impl_bHYPRE_Pilut__load();
+}
+struct bHYPRE_Solver__object* skel_bHYPRE_Pilut_fconnect_bHYPRE_Solver(char* 
+  url, sidl_BaseInterface *_ex) { 
+  return impl_bHYPRE_Pilut_fconnect_bHYPRE_Solver(url, _ex);
+}
+
+char* skel_bHYPRE_Pilut_fgetURL_bHYPRE_Solver(struct bHYPRE_Solver__object* 
+  obj) { 
+  return impl_bHYPRE_Pilut_fgetURL_bHYPRE_Solver(obj);
+}
+
+struct bHYPRE_Operator__object* 
+  skel_bHYPRE_Pilut_fconnect_bHYPRE_Operator(char* url,
+  sidl_BaseInterface *_ex) { 
+  return impl_bHYPRE_Pilut_fconnect_bHYPRE_Operator(url, _ex);
+}
+
+char* skel_bHYPRE_Pilut_fgetURL_bHYPRE_Operator(struct bHYPRE_Operator__object* 
+  obj) { 
+  return impl_bHYPRE_Pilut_fgetURL_bHYPRE_Operator(obj);
+}
+
+struct sidl_ClassInfo__object* skel_bHYPRE_Pilut_fconnect_sidl_ClassInfo(char* 
+  url, sidl_BaseInterface *_ex) { 
+  return impl_bHYPRE_Pilut_fconnect_sidl_ClassInfo(url, _ex);
+}
+
+char* skel_bHYPRE_Pilut_fgetURL_sidl_ClassInfo(struct sidl_ClassInfo__object* 
+  obj) { 
+  return impl_bHYPRE_Pilut_fgetURL_sidl_ClassInfo(obj);
+}
+
+struct bHYPRE_Pilut__object* skel_bHYPRE_Pilut_fconnect_bHYPRE_Pilut(char* url,
+  sidl_BaseInterface *_ex) { 
+  return impl_bHYPRE_Pilut_fconnect_bHYPRE_Pilut(url, _ex);
+}
+
+char* skel_bHYPRE_Pilut_fgetURL_bHYPRE_Pilut(struct bHYPRE_Pilut__object* obj) 
+  { 
+  return impl_bHYPRE_Pilut_fgetURL_bHYPRE_Pilut(obj);
+}
+
+struct bHYPRE_Vector__object* skel_bHYPRE_Pilut_fconnect_bHYPRE_Vector(char* 
+  url, sidl_BaseInterface *_ex) { 
+  return impl_bHYPRE_Pilut_fconnect_bHYPRE_Vector(url, _ex);
+}
+
+char* skel_bHYPRE_Pilut_fgetURL_bHYPRE_Vector(struct bHYPRE_Vector__object* 
+  obj) { 
+  return impl_bHYPRE_Pilut_fgetURL_bHYPRE_Vector(obj);
+}
+
+struct sidl_BaseInterface__object* 
+  skel_bHYPRE_Pilut_fconnect_sidl_BaseInterface(char* url,
+  sidl_BaseInterface *_ex) { 
+  return impl_bHYPRE_Pilut_fconnect_sidl_BaseInterface(url, _ex);
+}
+
+char* skel_bHYPRE_Pilut_fgetURL_sidl_BaseInterface(struct 
+  sidl_BaseInterface__object* obj) { 
+  return impl_bHYPRE_Pilut_fgetURL_sidl_BaseInterface(obj);
+}
+
+struct sidl_BaseClass__object* skel_bHYPRE_Pilut_fconnect_sidl_BaseClass(char* 
+  url, sidl_BaseInterface *_ex) { 
+  return impl_bHYPRE_Pilut_fconnect_sidl_BaseClass(url, _ex);
+}
+
+char* skel_bHYPRE_Pilut_fgetURL_sidl_BaseClass(struct sidl_BaseClass__object* 
+  obj) { 
+  return impl_bHYPRE_Pilut_fgetURL_sidl_BaseClass(obj);
+}
 
 struct bHYPRE_Pilut__data*
 bHYPRE_Pilut__get_data(bHYPRE_Pilut self)
@@ -247,3 +413,6 @@ void bHYPRE_Pilut__set_data(
     self->d_data = data;
   }
 }
+#ifdef __cplusplus
+}
+#endif

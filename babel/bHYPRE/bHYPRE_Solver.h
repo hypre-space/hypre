@@ -2,12 +2,12 @@
  * File:          bHYPRE_Solver.h
  * Symbol:        bHYPRE.Solver-v1.0.0
  * Symbol Type:   interface
- * Babel Version: 0.9.8
+ * Babel Version: 0.10.4
  * Description:   Client-side glue code for bHYPRE.Solver
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.9.8
+ * babel-version = 0.10.4
  */
 
 #ifndef included_bHYPRE_Solver_h
@@ -40,107 +40,118 @@ typedef struct bHYPRE_Solver__object* bHYPRE_Solver;
 #include "sidl_ClassInfo.h"
 #endif
 
+#ifndef included_sidl_io_Serializer_h
+#include "sidl_io_Serializer.h"
+#endif
+#ifndef included_sidl_io_Deserializer_h
+#include "sidl_io_Deserializer.h"
+#endif
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+/**
+ * RMI connector function for the class.
+ */
+bHYPRE_Solver
+bHYPRE_Solver__connect(const char *, sidl_BaseInterface *_ex);
 void
 bHYPRE_Solver_addRef(
-  /*in*/ bHYPRE_Solver self);
+  /* in */ bHYPRE_Solver self);
 
 void
 bHYPRE_Solver_deleteRef(
-  /*in*/ bHYPRE_Solver self);
+  /* in */ bHYPRE_Solver self);
 
 sidl_bool
 bHYPRE_Solver_isSame(
-  /*in*/ bHYPRE_Solver self,
-  /*in*/ sidl_BaseInterface iobj);
+  /* in */ bHYPRE_Solver self,
+  /* in */ sidl_BaseInterface iobj);
 
 sidl_BaseInterface
 bHYPRE_Solver_queryInt(
-  /*in*/ bHYPRE_Solver self,
-  /*in*/ const char* name);
+  /* in */ bHYPRE_Solver self,
+  /* in */ const char* name);
 
 sidl_bool
 bHYPRE_Solver_isType(
-  /*in*/ bHYPRE_Solver self,
-  /*in*/ const char* name);
+  /* in */ bHYPRE_Solver self,
+  /* in */ const char* name);
 
 sidl_ClassInfo
 bHYPRE_Solver_getClassInfo(
-  /*in*/ bHYPRE_Solver self);
+  /* in */ bHYPRE_Solver self);
 
 int32_t
 bHYPRE_Solver_SetCommunicator(
-  /*in*/ bHYPRE_Solver self,
-  /*in*/ void* mpi_comm);
+  /* in */ bHYPRE_Solver self,
+  /* in */ void* mpi_comm);
 
 int32_t
 bHYPRE_Solver_SetIntParameter(
-  /*in*/ bHYPRE_Solver self,
-  /*in*/ const char* name,
-  /*in*/ int32_t value);
+  /* in */ bHYPRE_Solver self,
+  /* in */ const char* name,
+  /* in */ int32_t value);
 
 int32_t
 bHYPRE_Solver_SetDoubleParameter(
-  /*in*/ bHYPRE_Solver self,
-  /*in*/ const char* name,
-  /*in*/ double value);
+  /* in */ bHYPRE_Solver self,
+  /* in */ const char* name,
+  /* in */ double value);
 
 int32_t
 bHYPRE_Solver_SetStringParameter(
-  /*in*/ bHYPRE_Solver self,
-  /*in*/ const char* name,
-  /*in*/ const char* value);
+  /* in */ bHYPRE_Solver self,
+  /* in */ const char* name,
+  /* in */ const char* value);
 
 int32_t
 bHYPRE_Solver_SetIntArray1Parameter(
-  /*in*/ bHYPRE_Solver self,
-  /*in*/ const char* name,
-  /*in*/ struct sidl_int__array* value);
+  /* in */ bHYPRE_Solver self,
+  /* in */ const char* name,
+  /* in */ struct sidl_int__array* value);
 
 int32_t
 bHYPRE_Solver_SetIntArray2Parameter(
-  /*in*/ bHYPRE_Solver self,
-  /*in*/ const char* name,
-  /*in*/ struct sidl_int__array* value);
+  /* in */ bHYPRE_Solver self,
+  /* in */ const char* name,
+  /* in */ struct sidl_int__array* value);
 
 int32_t
 bHYPRE_Solver_SetDoubleArray1Parameter(
-  /*in*/ bHYPRE_Solver self,
-  /*in*/ const char* name,
-  /*in*/ struct sidl_double__array* value);
+  /* in */ bHYPRE_Solver self,
+  /* in */ const char* name,
+  /* in */ struct sidl_double__array* value);
 
 int32_t
 bHYPRE_Solver_SetDoubleArray2Parameter(
-  /*in*/ bHYPRE_Solver self,
-  /*in*/ const char* name,
-  /*in*/ struct sidl_double__array* value);
+  /* in */ bHYPRE_Solver self,
+  /* in */ const char* name,
+  /* in */ struct sidl_double__array* value);
 
 int32_t
 bHYPRE_Solver_GetIntValue(
-  /*in*/ bHYPRE_Solver self,
-  /*in*/ const char* name,
-  /*out*/ int32_t* value);
+  /* in */ bHYPRE_Solver self,
+  /* in */ const char* name,
+  /* out */ int32_t* value);
 
 int32_t
 bHYPRE_Solver_GetDoubleValue(
-  /*in*/ bHYPRE_Solver self,
-  /*in*/ const char* name,
-  /*out*/ double* value);
+  /* in */ bHYPRE_Solver self,
+  /* in */ const char* name,
+  /* out */ double* value);
 
 int32_t
 bHYPRE_Solver_Setup(
-  /*in*/ bHYPRE_Solver self,
-  /*in*/ bHYPRE_Vector b,
-  /*in*/ bHYPRE_Vector x);
+  /* in */ bHYPRE_Solver self,
+  /* in */ bHYPRE_Vector b,
+  /* in */ bHYPRE_Vector x);
 
 int32_t
 bHYPRE_Solver_Apply(
-  /*in*/ bHYPRE_Solver self,
-  /*in*/ bHYPRE_Vector b,
-  /*inout*/ bHYPRE_Vector* x);
+  /* in */ bHYPRE_Solver self,
+  /* in */ bHYPRE_Vector b,
+  /* inout */ bHYPRE_Vector* x);
 
 /**
  * Set the operator for the linear system being solved.
@@ -148,8 +159,8 @@ bHYPRE_Solver_Apply(
  */
 int32_t
 bHYPRE_Solver_SetOperator(
-  /*in*/ bHYPRE_Solver self,
-  /*in*/ bHYPRE_Operator A);
+  /* in */ bHYPRE_Solver self,
+  /* in */ bHYPRE_Operator A);
 
 /**
  * (Optional) Set the convergence tolerance.
@@ -157,8 +168,8 @@ bHYPRE_Solver_SetOperator(
  */
 int32_t
 bHYPRE_Solver_SetTolerance(
-  /*in*/ bHYPRE_Solver self,
-  /*in*/ double tolerance);
+  /* in */ bHYPRE_Solver self,
+  /* in */ double tolerance);
 
 /**
  * (Optional) Set maximum number of iterations.
@@ -166,8 +177,8 @@ bHYPRE_Solver_SetTolerance(
  */
 int32_t
 bHYPRE_Solver_SetMaxIterations(
-  /*in*/ bHYPRE_Solver self,
-  /*in*/ int32_t max_iterations);
+  /* in */ bHYPRE_Solver self,
+  /* in */ int32_t max_iterations);
 
 /**
  * (Optional) Set the {\it logging level}, specifying the degree
@@ -179,8 +190,8 @@ bHYPRE_Solver_SetMaxIterations(
  */
 int32_t
 bHYPRE_Solver_SetLogging(
-  /*in*/ bHYPRE_Solver self,
-  /*in*/ int32_t level);
+  /* in */ bHYPRE_Solver self,
+  /* in */ int32_t level);
 
 /**
  * (Optional) Set the {\it print level}, specifying the degree
@@ -192,8 +203,8 @@ bHYPRE_Solver_SetLogging(
  */
 int32_t
 bHYPRE_Solver_SetPrintLevel(
-  /*in*/ bHYPRE_Solver self,
-  /*in*/ int32_t level);
+  /* in */ bHYPRE_Solver self,
+  /* in */ int32_t level);
 
 /**
  * (Optional) Return the number of iterations taken.
@@ -201,8 +212,8 @@ bHYPRE_Solver_SetPrintLevel(
  */
 int32_t
 bHYPRE_Solver_GetNumIterations(
-  /*in*/ bHYPRE_Solver self,
-  /*out*/ int32_t* num_iterations);
+  /* in */ bHYPRE_Solver self,
+  /* out */ int32_t* num_iterations);
 
 /**
  * (Optional) Return the norm of the relative residual.
@@ -210,13 +221,13 @@ bHYPRE_Solver_GetNumIterations(
  */
 int32_t
 bHYPRE_Solver_GetRelResidualNorm(
-  /*in*/ bHYPRE_Solver self,
-  /*out*/ double* norm);
+  /* in */ bHYPRE_Solver self,
+  /* out */ double* norm);
 
 /**
  * Cast method for interface and class type conversions.
  */
-bHYPRE_Solver
+struct bHYPRE_Solver__object*
 bHYPRE_Solver__cast(
   void* obj);
 
@@ -228,6 +239,29 @@ bHYPRE_Solver__cast2(
   void* obj,
   const char* type);
 
+/**
+ * Select and execute a method by name
+ */
+void
+bHYPRE_Solver__exec(
+  /* in */ bHYPRE_Solver self,
+  /* in */ const char* methodName,
+  /* in */ sidl_io_Deserializer inArgs,
+  /* in */ sidl_io_Serializer outArgs);
+/**
+ * static Exec method for reflexity.
+ */
+void
+bHYPRE_Solver__sexec(
+  /* in */ const char* methodName,
+  /* in */ sidl_io_Deserializer inArgs,
+  /* in */ sidl_io_Serializer outArgs);
+/**
+ * Get the URL of the Implementation of this object (for RMI)
+ */
+char*
+bHYPRE_Solver__getURL(
+  /* in */ bHYPRE_Solver self);
 struct bHYPRE_Solver__array*
 bHYPRE_Solver__array_createCol(
   int32_t       dimen,

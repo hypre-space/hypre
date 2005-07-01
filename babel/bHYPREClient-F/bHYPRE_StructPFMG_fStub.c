@@ -2,12 +2,12 @@
  * File:          bHYPRE_StructPFMG_fStub.c
  * Symbol:        bHYPRE.StructPFMG-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.9.8
+ * Babel Version: 0.10.4
  * Description:   Client-side glue code for bHYPRE.StructPFMG
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.9.8
+ * babel-version = 0.10.4
  */
 
 /*
@@ -27,10 +27,10 @@
 #include "sidl_Loader.h"
 #endif
 #include "bHYPRE_StructPFMG_IOR.h"
-#include "sidl_BaseInterface_IOR.h"
 #include "bHYPRE_Operator_IOR.h"
-#include "bHYPRE_Vector_IOR.h"
 #include "sidl_ClassInfo_IOR.h"
+#include "bHYPRE_Vector_IOR.h"
+#include "sidl_BaseInterface_IOR.h"
 
 /*
  * Return pointer to internal IOR functions.
@@ -43,37 +43,25 @@ static const struct bHYPRE_StructPFMG__external* _getIOR(void)
 #ifdef SIDL_STATIC_LIBRARY
     _ior = bHYPRE_StructPFMG__externals();
 #else
-    sidl_DLL dll = sidl_DLL__create();
-    const struct bHYPRE_StructPFMG__external*(*dll_f)(void);
-    /* check global namespace for symbol first */
-    if (dll && sidl_DLL_loadLibrary(dll, "main:", TRUE, FALSE)) {
-      dll_f =
-        (const struct bHYPRE_StructPFMG__external*(*)(void)) 
-          sidl_DLL_lookupSymbol(
-          dll, "bHYPRE_StructPFMG__externals");
-      _ior = (dll_f ? (*dll_f)() : NULL);
-    }
-    if (dll) sidl_DLL_deleteRef(dll);
-    if (!_ior) {
-      dll = sidl_Loader_findLibrary("bHYPRE.StructPFMG",
-        "ior/impl", sidl_Scope_SCLSCOPE,
-        sidl_Resolve_SCLRESOLVE);
-      if (dll) {
-        dll_f =
-          (const struct bHYPRE_StructPFMG__external*(*)(void)) 
-            sidl_DLL_lookupSymbol(
-            dll, "bHYPRE_StructPFMG__externals");
-        _ior = (dll_f ? (*dll_f)() : NULL);
-        sidl_DLL_deleteRef(dll);
-      }
-    }
-    if (!_ior) {
-      fputs("Unable to find the implementation for bHYPRE.StructPFMG; please set SIDL_DLL_PATH\n", stderr);
-      exit(-1);
-    }
+    _ior = (struct 
+      bHYPRE_StructPFMG__external*)sidl_dynamicLoadIOR("bHYPRE.StructPFMG",
+      "bHYPRE_StructPFMG__externals") ;
 #endif
   }
   return _ior;
+}
+
+/*
+ * Return pointer to static functions.
+ */
+
+static const struct bHYPRE_StructPFMG__sepv* _getSEPV(void)
+{
+  static const struct bHYPRE_StructPFMG__sepv *_sepv = NULL;
+  if (!_sepv) {
+    _sepv = (*(_getIOR()->getStaticEPV))();
+  }
+  return _sepv;
 }
 
 /*
@@ -107,8 +95,7 @@ SIDLFortran77Symbol(bhypre_structpfmg__cast_f,BHYPRE_STRUCTPFMG__CAST_F,bHYPRE_S
       *_base->d_epv->f__cast)(
       _base->d_object,
       "bHYPRE.StructPFMG");
-  }
-  else {
+  } else {
     *retval = 0;
   }
 }
@@ -334,6 +321,30 @@ SIDLFortran77Symbol(bhypre_structpfmg_getclassinfo_f,BHYPRE_STRUCTPFMG_GETCLASSI
   _proxy_retval = 
     (*(_epv->f_getClassInfo))(
       _proxy_self
+    );
+  *retval = (ptrdiff_t)_proxy_retval;
+}
+
+/*
+ * Method:  Create[]
+ */
+
+void
+SIDLFortran77Symbol(bhypre_structpfmg_create_f,BHYPRE_STRUCTPFMG_CREATE_F,bHYPRE_StructPFMG_Create_f)
+(
+  int64_t *mpi_comm,
+  int64_t *retval
+)
+{
+  const struct bHYPRE_StructPFMG__sepv *_epv = _getSEPV();
+  void* _proxy_mpi_comm = NULL;
+  struct bHYPRE_StructPFMG__object* _proxy_retval = NULL;
+  _proxy_mpi_comm =
+    (void*)
+    (ptrdiff_t)(*mpi_comm);
+  _proxy_retval = 
+    (*(_epv->f_Create))(
+      _proxy_mpi_comm
     );
   *retval = (ptrdiff_t)_proxy_retval;
 }

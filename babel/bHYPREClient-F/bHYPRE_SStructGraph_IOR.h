@@ -2,12 +2,12 @@
  * File:          bHYPRE_SStructGraph_IOR.h
  * Symbol:        bHYPRE.SStructGraph-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.9.8
+ * Babel Version: 0.10.4
  * Description:   Intermediate Object Representation for bHYPRE.SStructGraph
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.9.8
+ * babel-version = 0.10.4
  */
 
 #ifndef included_bHYPRE_SStructGraph_IOR_h
@@ -40,9 +40,6 @@ struct bHYPRE_SStructGraph__object;
 extern struct bHYPRE_SStructGraph__object*
 bHYPRE_SStructGraph__new(void);
 
-extern struct bHYPRE_SStructGraph__object*
-bHYPRE_SStructGraph__remote(const char *url);
-
 extern void bHYPRE_SStructGraph__init(
   struct bHYPRE_SStructGraph__object* self);
 extern void bHYPRE_SStructGraph__fini(
@@ -61,6 +58,10 @@ struct sidl_BaseInterface__array;
 struct sidl_BaseInterface__object;
 struct sidl_ClassInfo__array;
 struct sidl_ClassInfo__object;
+struct sidl_io_Deserializer__array;
+struct sidl_io_Deserializer__object;
+struct sidl_io_Serializer__array;
+struct sidl_io_Serializer__object;
 
 /*
  * Declare the method entry point vector.
@@ -69,63 +70,70 @@ struct sidl_ClassInfo__object;
 struct bHYPRE_SStructGraph__epv {
   /* Implicit builtin methods */
   void* (*f__cast)(
-    struct bHYPRE_SStructGraph__object* self,
-    const char* name);
+    /* in */ struct bHYPRE_SStructGraph__object* self,
+    /* in */ const char* name);
   void (*f__delete)(
-    struct bHYPRE_SStructGraph__object* self);
+    /* in */ struct bHYPRE_SStructGraph__object* self);
+  void (*f__exec)(
+    /* in */ struct bHYPRE_SStructGraph__object* self,
+    /* in */ const char* methodName,
+    /* in */ struct sidl_io_Deserializer__object* inArgs,
+    /* in */ struct sidl_io_Serializer__object* outArgs);
+  char* (*f__getURL)(
+    /* in */ struct bHYPRE_SStructGraph__object* self);
   void (*f__ctor)(
-    struct bHYPRE_SStructGraph__object* self);
+    /* in */ struct bHYPRE_SStructGraph__object* self);
   void (*f__dtor)(
-    struct bHYPRE_SStructGraph__object* self);
-  /* Methods introduced in sidl.BaseInterface-v0.9.0 */
+    /* in */ struct bHYPRE_SStructGraph__object* self);
+  /* Methods introduced in sidl.BaseInterface-v0.9.3 */
   void (*f_addRef)(
-    struct bHYPRE_SStructGraph__object* self);
+    /* in */ struct bHYPRE_SStructGraph__object* self);
   void (*f_deleteRef)(
-    struct bHYPRE_SStructGraph__object* self);
+    /* in */ struct bHYPRE_SStructGraph__object* self);
   sidl_bool (*f_isSame)(
-    struct bHYPRE_SStructGraph__object* self,
-    struct sidl_BaseInterface__object* iobj);
+    /* in */ struct bHYPRE_SStructGraph__object* self,
+    /* in */ struct sidl_BaseInterface__object* iobj);
   struct sidl_BaseInterface__object* (*f_queryInt)(
-    struct bHYPRE_SStructGraph__object* self,
-    const char* name);
+    /* in */ struct bHYPRE_SStructGraph__object* self,
+    /* in */ const char* name);
   sidl_bool (*f_isType)(
-    struct bHYPRE_SStructGraph__object* self,
-    const char* name);
+    /* in */ struct bHYPRE_SStructGraph__object* self,
+    /* in */ const char* name);
   struct sidl_ClassInfo__object* (*f_getClassInfo)(
-    struct bHYPRE_SStructGraph__object* self);
-  /* Methods introduced in sidl.BaseClass-v0.9.0 */
+    /* in */ struct bHYPRE_SStructGraph__object* self);
+  /* Methods introduced in sidl.BaseClass-v0.9.3 */
   /* Methods introduced in bHYPRE.ProblemDefinition-v1.0.0 */
   int32_t (*f_SetCommunicator)(
-    struct bHYPRE_SStructGraph__object* self,
-    void* mpi_comm);
+    /* in */ struct bHYPRE_SStructGraph__object* self,
+    /* in */ void* mpi_comm);
   int32_t (*f_Initialize)(
-    struct bHYPRE_SStructGraph__object* self);
+    /* in */ struct bHYPRE_SStructGraph__object* self);
   int32_t (*f_Assemble)(
-    struct bHYPRE_SStructGraph__object* self);
+    /* in */ struct bHYPRE_SStructGraph__object* self);
   int32_t (*f_GetObject)(
-    struct bHYPRE_SStructGraph__object* self,
-    struct sidl_BaseInterface__object** A);
+    /* in */ struct bHYPRE_SStructGraph__object* self,
+    /* out */ struct sidl_BaseInterface__object** A);
   /* Methods introduced in bHYPRE.SStructGraph-v1.0.0 */
   int32_t (*f_SetCommGrid)(
-    struct bHYPRE_SStructGraph__object* self,
-    void* mpi_comm,
-    struct bHYPRE_SStructGrid__object* grid);
+    /* in */ struct bHYPRE_SStructGraph__object* self,
+    /* in */ void* mpi_comm,
+    /* in */ struct bHYPRE_SStructGrid__object* grid);
   int32_t (*f_SetStencil)(
-    struct bHYPRE_SStructGraph__object* self,
-    int32_t part,
-    int32_t var,
-    struct bHYPRE_SStructStencil__object* stencil);
+    /* in */ struct bHYPRE_SStructGraph__object* self,
+    /* in */ int32_t part,
+    /* in */ int32_t var,
+    /* in */ struct bHYPRE_SStructStencil__object* stencil);
   int32_t (*f_AddEntries)(
-    struct bHYPRE_SStructGraph__object* self,
-    int32_t part,
-    struct sidl_int__array* index,
-    int32_t var,
-    int32_t to_part,
-    struct sidl_int__array* to_index,
-    int32_t to_var);
+    /* in */ struct bHYPRE_SStructGraph__object* self,
+    /* in */ int32_t part,
+    /* in */ struct sidl_int__array* index,
+    /* in */ int32_t var,
+    /* in */ int32_t to_part,
+    /* in */ struct sidl_int__array* to_index,
+    /* in */ int32_t to_var);
   int32_t (*f_SetObjectType)(
-    struct bHYPRE_SStructGraph__object* self,
-    int32_t type);
+    /* in */ struct bHYPRE_SStructGraph__object* self,
+    /* in */ int32_t type);
 };
 
 /*
@@ -143,10 +151,8 @@ struct bHYPRE_SStructGraph__external {
   struct bHYPRE_SStructGraph__object*
   (*createObject)(void);
 
-  struct bHYPRE_SStructGraph__object*
-  (*createRemote)(const char *url);
-
-struct sidl_BaseClass__epv*(*getSuperEPV)(void);};
+  struct sidl_BaseClass__epv*(*getSuperEPV)(void);
+};
 
 /*
  * This function returns a pointer to a static structure of
@@ -156,6 +162,48 @@ struct sidl_BaseClass__epv*(*getSuperEPV)(void);};
 
 const struct bHYPRE_SStructGraph__external*
 bHYPRE_SStructGraph__externals(void);
+
+struct bHYPRE_SStructGrid__object* 
+  skel_bHYPRE_SStructGraph_fconnect_bHYPRE_SStructGrid(char* url,
+  struct sidl_BaseInterface__object **_ex);
+char* skel_bHYPRE_SStructGraph_fgetURL_bHYPRE_SStructGrid(struct 
+  bHYPRE_SStructGrid__object* obj); 
+
+struct bHYPRE_SStructStencil__object* 
+  skel_bHYPRE_SStructGraph_fconnect_bHYPRE_SStructStencil(char* url,
+  struct sidl_BaseInterface__object **_ex);
+char* skel_bHYPRE_SStructGraph_fgetURL_bHYPRE_SStructStencil(struct 
+  bHYPRE_SStructStencil__object* obj); 
+
+struct sidl_ClassInfo__object* 
+  skel_bHYPRE_SStructGraph_fconnect_sidl_ClassInfo(char* url,
+  struct sidl_BaseInterface__object **_ex);
+char* skel_bHYPRE_SStructGraph_fgetURL_sidl_ClassInfo(struct 
+  sidl_ClassInfo__object* obj); 
+
+struct bHYPRE_ProblemDefinition__object* 
+  skel_bHYPRE_SStructGraph_fconnect_bHYPRE_ProblemDefinition(char* url,
+  struct sidl_BaseInterface__object **_ex);
+char* skel_bHYPRE_SStructGraph_fgetURL_bHYPRE_ProblemDefinition(struct 
+  bHYPRE_ProblemDefinition__object* obj); 
+
+struct sidl_BaseInterface__object* 
+  skel_bHYPRE_SStructGraph_fconnect_sidl_BaseInterface(char* url,
+  struct sidl_BaseInterface__object **_ex);
+char* skel_bHYPRE_SStructGraph_fgetURL_sidl_BaseInterface(struct 
+  sidl_BaseInterface__object* obj); 
+
+struct bHYPRE_SStructGraph__object* 
+  skel_bHYPRE_SStructGraph_fconnect_bHYPRE_SStructGraph(char* url,
+  struct sidl_BaseInterface__object **_ex);
+char* skel_bHYPRE_SStructGraph_fgetURL_bHYPRE_SStructGraph(struct 
+  bHYPRE_SStructGraph__object* obj); 
+
+struct sidl_BaseClass__object* 
+  skel_bHYPRE_SStructGraph_fconnect_sidl_BaseClass(char* url,
+  struct sidl_BaseInterface__object **_ex);
+char* skel_bHYPRE_SStructGraph_fgetURL_sidl_BaseClass(struct 
+  sidl_BaseClass__object* obj); 
 
 #ifdef __cplusplus
 }

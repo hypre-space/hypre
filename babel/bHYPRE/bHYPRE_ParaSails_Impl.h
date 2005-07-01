@@ -2,12 +2,12 @@
  * File:          bHYPRE_ParaSails_Impl.h
  * Symbol:        bHYPRE.ParaSails-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.9.8
+ * Babel Version: 0.10.4
  * Description:   Server-side implementation for bHYPRE.ParaSails
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.9.8
+ * babel-version = 0.10.4
  */
 
 #ifndef included_bHYPRE_ParaSails_Impl_h
@@ -16,14 +16,26 @@
 #ifndef included_sidl_header_h
 #include "sidl_header.h"
 #endif
+#ifndef included_bHYPRE_Solver_h
+#include "bHYPRE_Solver.h"
+#endif
 #ifndef included_bHYPRE_ParaSails_h
 #include "bHYPRE_ParaSails.h"
 #endif
 #ifndef included_bHYPRE_Operator_h
 #include "bHYPRE_Operator.h"
 #endif
+#ifndef included_sidl_ClassInfo_h
+#include "sidl_ClassInfo.h"
+#endif
 #ifndef included_bHYPRE_Vector_h
 #include "bHYPRE_Vector.h"
+#endif
+#ifndef included_sidl_BaseInterface_h
+#include "sidl_BaseInterface.h"
+#endif
+#ifndef included_sidl_BaseClass_h
+#include "sidl_BaseClass.h"
 #endif
 
 /* DO-NOT-DELETE splicer.begin(bHYPRE.ParaSails._includes) */
@@ -65,124 +77,220 @@ bHYPRE_ParaSails__set_data(
   bHYPRE_ParaSails,
   struct bHYPRE_ParaSails__data*);
 
-extern void
-impl_bHYPRE_ParaSails__ctor(
-  bHYPRE_ParaSails);
+extern
+void
+impl_bHYPRE_ParaSails__load(
+  void);
 
-extern void
+extern
+void
+impl_bHYPRE_ParaSails__ctor(
+  /* in */ bHYPRE_ParaSails self);
+
+extern
+void
 impl_bHYPRE_ParaSails__dtor(
-  bHYPRE_ParaSails);
+  /* in */ bHYPRE_ParaSails self);
 
 /*
  * User-defined object methods
  */
 
-extern int32_t
+extern struct bHYPRE_Solver__object* 
+  impl_bHYPRE_ParaSails_fconnect_bHYPRE_Solver(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_ParaSails_fgetURL_bHYPRE_Solver(struct 
+  bHYPRE_Solver__object* obj);
+extern struct bHYPRE_ParaSails__object* 
+  impl_bHYPRE_ParaSails_fconnect_bHYPRE_ParaSails(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_ParaSails_fgetURL_bHYPRE_ParaSails(struct 
+  bHYPRE_ParaSails__object* obj);
+extern struct bHYPRE_Operator__object* 
+  impl_bHYPRE_ParaSails_fconnect_bHYPRE_Operator(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_ParaSails_fgetURL_bHYPRE_Operator(struct 
+  bHYPRE_Operator__object* obj);
+extern struct sidl_ClassInfo__object* 
+  impl_bHYPRE_ParaSails_fconnect_sidl_ClassInfo(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_ParaSails_fgetURL_sidl_ClassInfo(struct 
+  sidl_ClassInfo__object* obj);
+extern struct bHYPRE_Vector__object* 
+  impl_bHYPRE_ParaSails_fconnect_bHYPRE_Vector(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_ParaSails_fgetURL_bHYPRE_Vector(struct 
+  bHYPRE_Vector__object* obj);
+extern struct sidl_BaseInterface__object* 
+  impl_bHYPRE_ParaSails_fconnect_sidl_BaseInterface(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_ParaSails_fgetURL_sidl_BaseInterface(struct 
+  sidl_BaseInterface__object* obj);
+extern struct sidl_BaseClass__object* 
+  impl_bHYPRE_ParaSails_fconnect_sidl_BaseClass(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_ParaSails_fgetURL_sidl_BaseClass(struct 
+  sidl_BaseClass__object* obj);
+extern
+int32_t
 impl_bHYPRE_ParaSails_SetCommunicator(
-  bHYPRE_ParaSails,
-  void*);
+  /* in */ bHYPRE_ParaSails self,
+  /* in */ void* mpi_comm);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_ParaSails_SetIntParameter(
-  bHYPRE_ParaSails,
-  const char*,
-  int32_t);
+  /* in */ bHYPRE_ParaSails self,
+  /* in */ const char* name,
+  /* in */ int32_t value);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_ParaSails_SetDoubleParameter(
-  bHYPRE_ParaSails,
-  const char*,
-  double);
+  /* in */ bHYPRE_ParaSails self,
+  /* in */ const char* name,
+  /* in */ double value);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_ParaSails_SetStringParameter(
-  bHYPRE_ParaSails,
-  const char*,
-  const char*);
+  /* in */ bHYPRE_ParaSails self,
+  /* in */ const char* name,
+  /* in */ const char* value);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_ParaSails_SetIntArray1Parameter(
-  bHYPRE_ParaSails,
-  const char*,
-  struct sidl_int__array*);
+  /* in */ bHYPRE_ParaSails self,
+  /* in */ const char* name,
+  /* in */ struct sidl_int__array* value);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_ParaSails_SetIntArray2Parameter(
-  bHYPRE_ParaSails,
-  const char*,
-  struct sidl_int__array*);
+  /* in */ bHYPRE_ParaSails self,
+  /* in */ const char* name,
+  /* in */ struct sidl_int__array* value);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_ParaSails_SetDoubleArray1Parameter(
-  bHYPRE_ParaSails,
-  const char*,
-  struct sidl_double__array*);
+  /* in */ bHYPRE_ParaSails self,
+  /* in */ const char* name,
+  /* in */ struct sidl_double__array* value);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_ParaSails_SetDoubleArray2Parameter(
-  bHYPRE_ParaSails,
-  const char*,
-  struct sidl_double__array*);
+  /* in */ bHYPRE_ParaSails self,
+  /* in */ const char* name,
+  /* in */ struct sidl_double__array* value);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_ParaSails_GetIntValue(
-  bHYPRE_ParaSails,
-  const char*,
-  int32_t*);
+  /* in */ bHYPRE_ParaSails self,
+  /* in */ const char* name,
+  /* out */ int32_t* value);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_ParaSails_GetDoubleValue(
-  bHYPRE_ParaSails,
-  const char*,
-  double*);
+  /* in */ bHYPRE_ParaSails self,
+  /* in */ const char* name,
+  /* out */ double* value);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_ParaSails_Setup(
-  bHYPRE_ParaSails,
-  bHYPRE_Vector,
-  bHYPRE_Vector);
+  /* in */ bHYPRE_ParaSails self,
+  /* in */ bHYPRE_Vector b,
+  /* in */ bHYPRE_Vector x);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_ParaSails_Apply(
-  bHYPRE_ParaSails,
-  bHYPRE_Vector,
-  bHYPRE_Vector*);
+  /* in */ bHYPRE_ParaSails self,
+  /* in */ bHYPRE_Vector b,
+  /* inout */ bHYPRE_Vector* x);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_ParaSails_SetOperator(
-  bHYPRE_ParaSails,
-  bHYPRE_Operator);
+  /* in */ bHYPRE_ParaSails self,
+  /* in */ bHYPRE_Operator A);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_ParaSails_SetTolerance(
-  bHYPRE_ParaSails,
-  double);
+  /* in */ bHYPRE_ParaSails self,
+  /* in */ double tolerance);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_ParaSails_SetMaxIterations(
-  bHYPRE_ParaSails,
-  int32_t);
+  /* in */ bHYPRE_ParaSails self,
+  /* in */ int32_t max_iterations);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_ParaSails_SetLogging(
-  bHYPRE_ParaSails,
-  int32_t);
+  /* in */ bHYPRE_ParaSails self,
+  /* in */ int32_t level);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_ParaSails_SetPrintLevel(
-  bHYPRE_ParaSails,
-  int32_t);
+  /* in */ bHYPRE_ParaSails self,
+  /* in */ int32_t level);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_ParaSails_GetNumIterations(
-  bHYPRE_ParaSails,
-  int32_t*);
+  /* in */ bHYPRE_ParaSails self,
+  /* out */ int32_t* num_iterations);
 
-extern int32_t
+extern
+int32_t
 impl_bHYPRE_ParaSails_GetRelResidualNorm(
-  bHYPRE_ParaSails,
-  double*);
+  /* in */ bHYPRE_ParaSails self,
+  /* out */ double* norm);
 
+extern struct bHYPRE_Solver__object* 
+  impl_bHYPRE_ParaSails_fconnect_bHYPRE_Solver(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_ParaSails_fgetURL_bHYPRE_Solver(struct 
+  bHYPRE_Solver__object* obj);
+extern struct bHYPRE_ParaSails__object* 
+  impl_bHYPRE_ParaSails_fconnect_bHYPRE_ParaSails(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_ParaSails_fgetURL_bHYPRE_ParaSails(struct 
+  bHYPRE_ParaSails__object* obj);
+extern struct bHYPRE_Operator__object* 
+  impl_bHYPRE_ParaSails_fconnect_bHYPRE_Operator(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_ParaSails_fgetURL_bHYPRE_Operator(struct 
+  bHYPRE_Operator__object* obj);
+extern struct sidl_ClassInfo__object* 
+  impl_bHYPRE_ParaSails_fconnect_sidl_ClassInfo(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_ParaSails_fgetURL_sidl_ClassInfo(struct 
+  sidl_ClassInfo__object* obj);
+extern struct bHYPRE_Vector__object* 
+  impl_bHYPRE_ParaSails_fconnect_bHYPRE_Vector(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_ParaSails_fgetURL_bHYPRE_Vector(struct 
+  bHYPRE_Vector__object* obj);
+extern struct sidl_BaseInterface__object* 
+  impl_bHYPRE_ParaSails_fconnect_sidl_BaseInterface(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_ParaSails_fgetURL_sidl_BaseInterface(struct 
+  sidl_BaseInterface__object* obj);
+extern struct sidl_BaseClass__object* 
+  impl_bHYPRE_ParaSails_fconnect_sidl_BaseClass(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_ParaSails_fgetURL_sidl_BaseClass(struct 
+  sidl_BaseClass__object* obj);
 #ifdef __cplusplus
 }
 #endif

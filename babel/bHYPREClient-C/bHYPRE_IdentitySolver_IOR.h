@@ -2,12 +2,12 @@
  * File:          bHYPRE_IdentitySolver_IOR.h
  * Symbol:        bHYPRE.IdentitySolver-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.9.8
+ * Babel Version: 0.10.4
  * Description:   Intermediate Object Representation for bHYPRE.IdentitySolver
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.9.8
+ * babel-version = 0.10.4
  */
 
 #ifndef included_bHYPRE_IdentitySolver_IOR_h
@@ -47,9 +47,6 @@ struct bHYPRE_IdentitySolver__object;
 extern struct bHYPRE_IdentitySolver__object*
 bHYPRE_IdentitySolver__new(void);
 
-extern struct bHYPRE_IdentitySolver__object*
-bHYPRE_IdentitySolver__remote(const char *url);
-
 extern void bHYPRE_IdentitySolver__init(
   struct bHYPRE_IdentitySolver__object* self);
 extern void bHYPRE_IdentitySolver__fini(
@@ -66,6 +63,10 @@ struct sidl_BaseInterface__array;
 struct sidl_BaseInterface__object;
 struct sidl_ClassInfo__array;
 struct sidl_ClassInfo__object;
+struct sidl_io_Deserializer__array;
+struct sidl_io_Deserializer__object;
+struct sidl_io_Serializer__array;
+struct sidl_io_Serializer__object;
 
 /*
  * Declare the method entry point vector.
@@ -74,101 +75,108 @@ struct sidl_ClassInfo__object;
 struct bHYPRE_IdentitySolver__epv {
   /* Implicit builtin methods */
   void* (*f__cast)(
-    struct bHYPRE_IdentitySolver__object* self,
-    const char* name);
+    /* in */ struct bHYPRE_IdentitySolver__object* self,
+    /* in */ const char* name);
   void (*f__delete)(
-    struct bHYPRE_IdentitySolver__object* self);
+    /* in */ struct bHYPRE_IdentitySolver__object* self);
+  void (*f__exec)(
+    /* in */ struct bHYPRE_IdentitySolver__object* self,
+    /* in */ const char* methodName,
+    /* in */ struct sidl_io_Deserializer__object* inArgs,
+    /* in */ struct sidl_io_Serializer__object* outArgs);
+  char* (*f__getURL)(
+    /* in */ struct bHYPRE_IdentitySolver__object* self);
   void (*f__ctor)(
-    struct bHYPRE_IdentitySolver__object* self);
+    /* in */ struct bHYPRE_IdentitySolver__object* self);
   void (*f__dtor)(
-    struct bHYPRE_IdentitySolver__object* self);
-  /* Methods introduced in sidl.BaseInterface-v0.9.0 */
+    /* in */ struct bHYPRE_IdentitySolver__object* self);
+  /* Methods introduced in sidl.BaseInterface-v0.9.3 */
   void (*f_addRef)(
-    struct bHYPRE_IdentitySolver__object* self);
+    /* in */ struct bHYPRE_IdentitySolver__object* self);
   void (*f_deleteRef)(
-    struct bHYPRE_IdentitySolver__object* self);
+    /* in */ struct bHYPRE_IdentitySolver__object* self);
   sidl_bool (*f_isSame)(
-    struct bHYPRE_IdentitySolver__object* self,
-    struct sidl_BaseInterface__object* iobj);
+    /* in */ struct bHYPRE_IdentitySolver__object* self,
+    /* in */ struct sidl_BaseInterface__object* iobj);
   struct sidl_BaseInterface__object* (*f_queryInt)(
-    struct bHYPRE_IdentitySolver__object* self,
-    const char* name);
+    /* in */ struct bHYPRE_IdentitySolver__object* self,
+    /* in */ const char* name);
   sidl_bool (*f_isType)(
-    struct bHYPRE_IdentitySolver__object* self,
-    const char* name);
+    /* in */ struct bHYPRE_IdentitySolver__object* self,
+    /* in */ const char* name);
   struct sidl_ClassInfo__object* (*f_getClassInfo)(
-    struct bHYPRE_IdentitySolver__object* self);
-  /* Methods introduced in sidl.BaseClass-v0.9.0 */
+    /* in */ struct bHYPRE_IdentitySolver__object* self);
+  /* Methods introduced in sidl.BaseClass-v0.9.3 */
   /* Methods introduced in bHYPRE.Operator-v1.0.0 */
   int32_t (*f_SetCommunicator)(
-    struct bHYPRE_IdentitySolver__object* self,
-    void* mpi_comm);
+    /* in */ struct bHYPRE_IdentitySolver__object* self,
+    /* in */ void* mpi_comm);
   int32_t (*f_SetIntParameter)(
-    struct bHYPRE_IdentitySolver__object* self,
-    const char* name,
-    int32_t value);
+    /* in */ struct bHYPRE_IdentitySolver__object* self,
+    /* in */ const char* name,
+    /* in */ int32_t value);
   int32_t (*f_SetDoubleParameter)(
-    struct bHYPRE_IdentitySolver__object* self,
-    const char* name,
-    double value);
+    /* in */ struct bHYPRE_IdentitySolver__object* self,
+    /* in */ const char* name,
+    /* in */ double value);
   int32_t (*f_SetStringParameter)(
-    struct bHYPRE_IdentitySolver__object* self,
-    const char* name,
-    const char* value);
+    /* in */ struct bHYPRE_IdentitySolver__object* self,
+    /* in */ const char* name,
+    /* in */ const char* value);
   int32_t (*f_SetIntArray1Parameter)(
-    struct bHYPRE_IdentitySolver__object* self,
-    const char* name,
-    struct sidl_int__array* value);
+    /* in */ struct bHYPRE_IdentitySolver__object* self,
+    /* in */ const char* name,
+    /* in */ struct sidl_int__array* value);
   int32_t (*f_SetIntArray2Parameter)(
-    struct bHYPRE_IdentitySolver__object* self,
-    const char* name,
-    struct sidl_int__array* value);
+    /* in */ struct bHYPRE_IdentitySolver__object* self,
+    /* in */ const char* name,
+    /* in */ struct sidl_int__array* value);
   int32_t (*f_SetDoubleArray1Parameter)(
-    struct bHYPRE_IdentitySolver__object* self,
-    const char* name,
-    struct sidl_double__array* value);
+    /* in */ struct bHYPRE_IdentitySolver__object* self,
+    /* in */ const char* name,
+    /* in */ struct sidl_double__array* value);
   int32_t (*f_SetDoubleArray2Parameter)(
-    struct bHYPRE_IdentitySolver__object* self,
-    const char* name,
-    struct sidl_double__array* value);
+    /* in */ struct bHYPRE_IdentitySolver__object* self,
+    /* in */ const char* name,
+    /* in */ struct sidl_double__array* value);
   int32_t (*f_GetIntValue)(
-    struct bHYPRE_IdentitySolver__object* self,
-    const char* name,
-    int32_t* value);
+    /* in */ struct bHYPRE_IdentitySolver__object* self,
+    /* in */ const char* name,
+    /* out */ int32_t* value);
   int32_t (*f_GetDoubleValue)(
-    struct bHYPRE_IdentitySolver__object* self,
-    const char* name,
-    double* value);
+    /* in */ struct bHYPRE_IdentitySolver__object* self,
+    /* in */ const char* name,
+    /* out */ double* value);
   int32_t (*f_Setup)(
-    struct bHYPRE_IdentitySolver__object* self,
-    struct bHYPRE_Vector__object* b,
-    struct bHYPRE_Vector__object* x);
+    /* in */ struct bHYPRE_IdentitySolver__object* self,
+    /* in */ struct bHYPRE_Vector__object* b,
+    /* in */ struct bHYPRE_Vector__object* x);
   int32_t (*f_Apply)(
-    struct bHYPRE_IdentitySolver__object* self,
-    struct bHYPRE_Vector__object* b,
-    struct bHYPRE_Vector__object** x);
+    /* in */ struct bHYPRE_IdentitySolver__object* self,
+    /* in */ struct bHYPRE_Vector__object* b,
+    /* inout */ struct bHYPRE_Vector__object** x);
   /* Methods introduced in bHYPRE.Solver-v1.0.0 */
   int32_t (*f_SetOperator)(
-    struct bHYPRE_IdentitySolver__object* self,
-    struct bHYPRE_Operator__object* A);
+    /* in */ struct bHYPRE_IdentitySolver__object* self,
+    /* in */ struct bHYPRE_Operator__object* A);
   int32_t (*f_SetTolerance)(
-    struct bHYPRE_IdentitySolver__object* self,
-    double tolerance);
+    /* in */ struct bHYPRE_IdentitySolver__object* self,
+    /* in */ double tolerance);
   int32_t (*f_SetMaxIterations)(
-    struct bHYPRE_IdentitySolver__object* self,
-    int32_t max_iterations);
+    /* in */ struct bHYPRE_IdentitySolver__object* self,
+    /* in */ int32_t max_iterations);
   int32_t (*f_SetLogging)(
-    struct bHYPRE_IdentitySolver__object* self,
-    int32_t level);
+    /* in */ struct bHYPRE_IdentitySolver__object* self,
+    /* in */ int32_t level);
   int32_t (*f_SetPrintLevel)(
-    struct bHYPRE_IdentitySolver__object* self,
-    int32_t level);
+    /* in */ struct bHYPRE_IdentitySolver__object* self,
+    /* in */ int32_t level);
   int32_t (*f_GetNumIterations)(
-    struct bHYPRE_IdentitySolver__object* self,
-    int32_t* num_iterations);
+    /* in */ struct bHYPRE_IdentitySolver__object* self,
+    /* out */ int32_t* num_iterations);
   int32_t (*f_GetRelResidualNorm)(
-    struct bHYPRE_IdentitySolver__object* self,
-    double* norm);
+    /* in */ struct bHYPRE_IdentitySolver__object* self,
+    /* out */ double* norm);
   /* Methods introduced in bHYPRE.IdentitySolver-v1.0.0 */
 };
 
@@ -188,10 +196,8 @@ struct bHYPRE_IdentitySolver__external {
   struct bHYPRE_IdentitySolver__object*
   (*createObject)(void);
 
-  struct bHYPRE_IdentitySolver__object*
-  (*createRemote)(const char *url);
-
-struct sidl_BaseClass__epv*(*getSuperEPV)(void);};
+  struct sidl_BaseClass__epv*(*getSuperEPV)(void);
+};
 
 /*
  * This function returns a pointer to a static structure of
@@ -201,6 +207,48 @@ struct sidl_BaseClass__epv*(*getSuperEPV)(void);};
 
 const struct bHYPRE_IdentitySolver__external*
 bHYPRE_IdentitySolver__externals(void);
+
+struct bHYPRE_Solver__object* 
+  skel_bHYPRE_IdentitySolver_fconnect_bHYPRE_Solver(char* url,
+  struct sidl_BaseInterface__object **_ex);
+char* skel_bHYPRE_IdentitySolver_fgetURL_bHYPRE_Solver(struct 
+  bHYPRE_Solver__object* obj); 
+
+struct bHYPRE_Operator__object* 
+  skel_bHYPRE_IdentitySolver_fconnect_bHYPRE_Operator(char* url,
+  struct sidl_BaseInterface__object **_ex);
+char* skel_bHYPRE_IdentitySolver_fgetURL_bHYPRE_Operator(struct 
+  bHYPRE_Operator__object* obj); 
+
+struct bHYPRE_IdentitySolver__object* 
+  skel_bHYPRE_IdentitySolver_fconnect_bHYPRE_IdentitySolver(char* url,
+  struct sidl_BaseInterface__object **_ex);
+char* skel_bHYPRE_IdentitySolver_fgetURL_bHYPRE_IdentitySolver(struct 
+  bHYPRE_IdentitySolver__object* obj); 
+
+struct sidl_ClassInfo__object* 
+  skel_bHYPRE_IdentitySolver_fconnect_sidl_ClassInfo(char* url,
+  struct sidl_BaseInterface__object **_ex);
+char* skel_bHYPRE_IdentitySolver_fgetURL_sidl_ClassInfo(struct 
+  sidl_ClassInfo__object* obj); 
+
+struct bHYPRE_Vector__object* 
+  skel_bHYPRE_IdentitySolver_fconnect_bHYPRE_Vector(char* url,
+  struct sidl_BaseInterface__object **_ex);
+char* skel_bHYPRE_IdentitySolver_fgetURL_bHYPRE_Vector(struct 
+  bHYPRE_Vector__object* obj); 
+
+struct sidl_BaseInterface__object* 
+  skel_bHYPRE_IdentitySolver_fconnect_sidl_BaseInterface(char* url,
+  struct sidl_BaseInterface__object **_ex);
+char* skel_bHYPRE_IdentitySolver_fgetURL_sidl_BaseInterface(struct 
+  sidl_BaseInterface__object* obj); 
+
+struct sidl_BaseClass__object* 
+  skel_bHYPRE_IdentitySolver_fconnect_sidl_BaseClass(char* url,
+  struct sidl_BaseInterface__object **_ex);
+char* skel_bHYPRE_IdentitySolver_fgetURL_sidl_BaseClass(struct 
+  sidl_BaseClass__object* obj); 
 
 #ifdef __cplusplus
 }

@@ -2,12 +2,12 @@
  * File:          bHYPRE_ProblemDefinition.h
  * Symbol:        bHYPRE.ProblemDefinition-v1.0.0
  * Symbol Type:   interface
- * Babel Version: 0.9.8
+ * Babel Version: 0.10.4
  * Description:   Client-side glue code for bHYPRE.ProblemDefinition
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.9.8
+ * babel-version = 0.10.4
  */
 
 #ifndef included_bHYPRE_ProblemDefinition_h
@@ -55,45 +55,56 @@ typedef struct bHYPRE_ProblemDefinition__object* bHYPRE_ProblemDefinition;
 #include "sidl_ClassInfo.h"
 #endif
 
+#ifndef included_sidl_io_Serializer_h
+#include "sidl_io_Serializer.h"
+#endif
+#ifndef included_sidl_io_Deserializer_h
+#include "sidl_io_Deserializer.h"
+#endif
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+/**
+ * RMI connector function for the class.
+ */
+bHYPRE_ProblemDefinition
+bHYPRE_ProblemDefinition__connect(const char *, sidl_BaseInterface *_ex);
 void
 bHYPRE_ProblemDefinition_addRef(
-  /*in*/ bHYPRE_ProblemDefinition self);
+  /* in */ bHYPRE_ProblemDefinition self);
 
 void
 bHYPRE_ProblemDefinition_deleteRef(
-  /*in*/ bHYPRE_ProblemDefinition self);
+  /* in */ bHYPRE_ProblemDefinition self);
 
 sidl_bool
 bHYPRE_ProblemDefinition_isSame(
-  /*in*/ bHYPRE_ProblemDefinition self,
-  /*in*/ sidl_BaseInterface iobj);
+  /* in */ bHYPRE_ProblemDefinition self,
+  /* in */ sidl_BaseInterface iobj);
 
 sidl_BaseInterface
 bHYPRE_ProblemDefinition_queryInt(
-  /*in*/ bHYPRE_ProblemDefinition self,
-  /*in*/ const char* name);
+  /* in */ bHYPRE_ProblemDefinition self,
+  /* in */ const char* name);
 
 sidl_bool
 bHYPRE_ProblemDefinition_isType(
-  /*in*/ bHYPRE_ProblemDefinition self,
-  /*in*/ const char* name);
+  /* in */ bHYPRE_ProblemDefinition self,
+  /* in */ const char* name);
 
 sidl_ClassInfo
 bHYPRE_ProblemDefinition_getClassInfo(
-  /*in*/ bHYPRE_ProblemDefinition self);
+  /* in */ bHYPRE_ProblemDefinition self);
 
 /**
- * Set the MPI Communicator.
+ * Set the MPI Communicator.  DEPRECATED, Use Create()
  * 
  */
 int32_t
 bHYPRE_ProblemDefinition_SetCommunicator(
-  /*in*/ bHYPRE_ProblemDefinition self,
-  /*in*/ void* mpi_comm);
+  /* in */ bHYPRE_ProblemDefinition self,
+  /* in */ void* mpi_comm);
 
 /**
  * Prepare an object for setting coefficient values, whether for
@@ -102,7 +113,7 @@ bHYPRE_ProblemDefinition_SetCommunicator(
  */
 int32_t
 bHYPRE_ProblemDefinition_Initialize(
-  /*in*/ bHYPRE_ProblemDefinition self);
+  /* in */ bHYPRE_ProblemDefinition self);
 
 /**
  * Finalize the construction of an object before using, either
@@ -114,7 +125,7 @@ bHYPRE_ProblemDefinition_Initialize(
  */
 int32_t
 bHYPRE_ProblemDefinition_Assemble(
-  /*in*/ bHYPRE_ProblemDefinition self);
+  /* in */ bHYPRE_ProblemDefinition self);
 
 /**
  * The problem definition interface is a {\it builder} that
@@ -130,13 +141,13 @@ bHYPRE_ProblemDefinition_Assemble(
  */
 int32_t
 bHYPRE_ProblemDefinition_GetObject(
-  /*in*/ bHYPRE_ProblemDefinition self,
-  /*out*/ sidl_BaseInterface* A);
+  /* in */ bHYPRE_ProblemDefinition self,
+  /* out */ sidl_BaseInterface* A);
 
 /**
  * Cast method for interface and class type conversions.
  */
-bHYPRE_ProblemDefinition
+struct bHYPRE_ProblemDefinition__object*
 bHYPRE_ProblemDefinition__cast(
   void* obj);
 
@@ -148,6 +159,29 @@ bHYPRE_ProblemDefinition__cast2(
   void* obj,
   const char* type);
 
+/**
+ * Select and execute a method by name
+ */
+void
+bHYPRE_ProblemDefinition__exec(
+  /* in */ bHYPRE_ProblemDefinition self,
+  /* in */ const char* methodName,
+  /* in */ sidl_io_Deserializer inArgs,
+  /* in */ sidl_io_Serializer outArgs);
+/**
+ * static Exec method for reflexity.
+ */
+void
+bHYPRE_ProblemDefinition__sexec(
+  /* in */ const char* methodName,
+  /* in */ sidl_io_Deserializer inArgs,
+  /* in */ sidl_io_Serializer outArgs);
+/**
+ * Get the URL of the Implementation of this object (for RMI)
+ */
+char*
+bHYPRE_ProblemDefinition__getURL(
+  /* in */ bHYPRE_ProblemDefinition self);
 struct bHYPRE_ProblemDefinition__array*
 bHYPRE_ProblemDefinition__array_createCol(
   int32_t       dimen,
