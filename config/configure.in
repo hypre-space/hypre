@@ -822,11 +822,11 @@ then
 fi
 
 dnl *********************************************************************
-dnl * Set Purify options if needed
+dnl * Set Purify options if needed; path is for LC Linux platforms as of 7/2005.
 dnl *********************************************************************
 if test "$casc_using_purify" = "yes"
 then
-   HYPRE_PURIFY_PATH="/usr/apps/Rational"
+   HYPRE_PURIFY_PATH="/usr/global/tools/Rational/releases/purify/i386_linux2.2003a.06.13.FixPack0177"
    CC="${HYPRE_PURIFY_PATH}/purify $CC ${casc_purify_flags}"
    CXX="${HYPRE_PURIFY_PATH}/purify $CXX ${casc_purify_flags}"
 fi
