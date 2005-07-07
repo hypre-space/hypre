@@ -2658,7 +2658,11 @@ hypre_ParAMGCreateDomainDof(hypre_ParCSRMatrix   *A,
   int *i_dof_index;
   int *i_dof_index_offd;
   int *i_proc;
-  int *row_starts = hypre_ParCSRMatrixRowStarts(A);
+  /* int *row_starts = hypre_ParCSRMatrixRowStarts(A);*/
+  hypre_ParCSRCommPkg *comm_pkg = hypre_ParCSRMatrixCommPkg(A);
+  int num_recvs = 0;
+  int *recv_procs = NULL;
+  int *recv_vec_starts = NULL;
 
   int ierr = 0;
   int i,j,k, jj,  l_loc, i_loc, j_loc;
@@ -2756,21 +2760,27 @@ hypre_ParAMGCreateDomainDof(hypre_ParCSRMatrix   *A,
            i_dof_to_aggregate[j_aggregate_dof[j]] = i;
 
      i_proc = hypre_CTAlloc (int, num_cols_offd);
-    
-     indx = 0; 
-     for (i=0; i < num_procs; i++)
+
+     for (i=0; i < num_cols_offd; i++)
+	i_proc[i] = 0;
+
+     if (comm_pkg)
      {
-	while (indx < num_cols_offd)
-        {
-           if (col_map_offd[indx] < row_starts[i+1] && indx < num_cols_offd)
-           {
-              i_proc[indx] = i;
-              indx++;
-           }
-           else
-              break;
-        }
+	num_recvs = hypre_ParCSRCommPkgNumRecvs(comm_pkg);    
+	recv_procs = hypre_ParCSRCommPkgRecvProcs(comm_pkg);    
+	recv_vec_starts = hypre_ParCSRCommPkgRecvVecStarts(comm_pkg);    
      }
+     else if (num_procs > 1)
+     {
+        hypre_MatvecCommPkgCreate(A);
+	num_recvs = hypre_ParCSRCommPkgNumRecvs(comm_pkg);    
+	recv_procs = hypre_ParCSRCommPkgRecvProcs(comm_pkg);    
+	recv_vec_starts = hypre_ParCSRCommPkgRecvVecStarts(comm_pkg);    
+     }
+
+     for (i=0; i < num_recvs; i++)
+	for (indx=recv_vec_starts[i]; indx < recv_vec_starts[i+1]; indx++)
+              i_proc[indx] = i;
 
      /* make domains from aggregates: *********************************/
 

@@ -817,11 +817,6 @@ hypre_BoomerAMGBuildInterpLS( hypre_ParCSRMatrix   *A,
    int              ns, ne, size, rest;
    int             *int_buf_data;
 
-   double           max_coef;
-   double           row_sum, scale;
-   int              next_open,now_checking,num_lost,start_j;
-   int              next_open_offd,now_checking_offd,num_lost_offd;
-
    double           wall_time;  /* for debugging instrumentation  */
 
    MPI_Comm_size(comm, &num_procs);   
@@ -1174,89 +1169,39 @@ hypre_BoomerAMGBuildInterpLS( hypre_ParCSRMatrix   *A,
    }
    P_diag_i[i] = jj_counter; /* check that this is in right place for threads */
 
+   P = hypre_ParCSRMatrixCreate(comm,
+                                hypre_ParCSRMatrixGlobalNumRows(S),
+                                total_global_cpts,
+                                hypre_ParCSRMatrixColStarts(S),
+                                num_cpts_global,
+                                0,
+                                P_diag_i[n_fine],
+                                P_offd_i[n_fine]);
+                                                                                
+                                                                                
+   P_diag = hypre_ParCSRMatrixDiag(P);
+   hypre_CSRMatrixData(P_diag) = P_diag_data;
+   hypre_CSRMatrixI(P_diag) = P_diag_i;
+   hypre_CSRMatrixJ(P_diag) = P_diag_j;
+   P_offd = hypre_ParCSRMatrixOffd(P);
+   hypre_CSRMatrixData(P_offd) = P_offd_data;
+   hypre_CSRMatrixI(P_offd) = P_offd_i;
+   hypre_CSRMatrixJ(P_offd) = P_offd_j;
+   hypre_ParCSRMatrixOwnsRowStarts(P) = 0;
+                                                                                
    /* Compress P, removing coefficients smaller than trunc_factor * Max */
 
    if (trunc_factor != 0.0)
    {
-      next_open = 0;
-      now_checking = 0;
-      num_lost = 0;
-      next_open_offd = 0;
-      now_checking_offd = 0;
-      num_lost_offd = 0;
-
-      for (i = 0; i < n_fine; i++)
-      {
-       /*  if (CF_marker[i] < 0) */
-         {
-            max_coef = 0;
-            for (j = P_diag_i[i]; j < P_diag_i[i+1]; j++)
-               max_coef = (max_coef < fabs(P_diag_data[j])) ? 
-				fabs(P_diag_data[j]) : max_coef;
-            for (j = P_offd_i[i]; j < P_offd_i[i+1]; j++)
-               max_coef = (max_coef < fabs(P_offd_data[j])) ? 
-				fabs(P_offd_data[j]) : max_coef;
-            max_coef *= trunc_factor;
-
-            start_j = P_diag_i[i];
-            P_diag_i[i] -= num_lost;
-	    row_sum = 0;
-	    scale = 0;
-            for (j = start_j; j < P_diag_i[i+1]; j++)
-            {
-	       row_sum += P_diag_data[now_checking];
-               if (fabs(P_diag_data[now_checking]) < max_coef)
-               {
-                  num_lost++;
-                  now_checking++;
-               }
-               else
-               {
-		  scale += P_diag_data[now_checking];
-                  P_diag_data[next_open] = P_diag_data[now_checking];
-                  P_diag_j[next_open] = P_diag_j[now_checking];
-                  now_checking++;
-                  next_open++;
-               }
-            }
-
-            start_j = P_offd_i[i];
-            P_offd_i[i] -= num_lost_offd;
-
-            for (j = start_j; j < P_offd_i[i+1]; j++)
-            {
-	       row_sum += P_offd_data[now_checking_offd];
-               if (fabs(P_offd_data[now_checking_offd]) < max_coef)
-               {
-                  num_lost_offd++;
-                  now_checking_offd++;
-               }
-               else
-               {
-		  scale += P_offd_data[now_checking_offd];
-                  P_offd_data[next_open_offd] = P_offd_data[now_checking_offd];
-                  P_offd_j[next_open_offd] = P_offd_j[now_checking_offd];
-                  now_checking_offd++;
-                  next_open_offd++;
-               }
-            }
-	    /* normalize row of P */
-
-	    if (scale != 0.)
-	    {
-	     if (scale != row_sum)
-	     {
-   	       scale = row_sum/scale;
-   	       for (j = P_diag_i[i]; j < (P_diag_i[i+1]-num_lost); j++)
-      	          P_diag_data[j] *= scale;
-   	       for (j = P_offd_i[i]; j < (P_offd_i[i+1]-num_lost_offd); j++)
-      	          P_offd_data[j] *= scale;
-	     }
-	    }
-         }
-      }
-      P_diag_i[n_fine] -= num_lost;
-      P_offd_i[n_fine] -= num_lost_offd;
+      hypre_BoomerAMGInterpTruncation(P, trunc_factor);
+      P_diag_data = hypre_CSRMatrixData(P_diag);
+      P_diag_i = hypre_CSRMatrixI(P_diag);
+      P_diag_j = hypre_CSRMatrixJ(P_diag);
+      P_offd_data = hypre_CSRMatrixData(P_offd);
+      P_offd_i = hypre_CSRMatrixI(P_offd);
+      P_offd_j = hypre_CSRMatrixJ(P_offd);
+      P_diag_size = P_diag_i[n_fine];
+      P_offd_size = P_offd_i[n_fine];
    }
 
    num_cols_P_offd = 0;
@@ -1296,41 +1241,13 @@ hypre_BoomerAMGBuildInterpLS( hypre_ParCSRMatrix   *A,
       hypre_TFree(P_marker); 
    }
 
-   P = hypre_ParCSRMatrixCreate(comm, 
-                                hypre_ParCSRMatrixGlobalNumRows(S), 
-                                total_global_cpts,
-                                hypre_ParCSRMatrixColStarts(S),
-                                num_cpts_global,
-                                num_cols_P_offd, 
-                                P_diag_i[n_fine],
-                                P_offd_i[n_fine]);
-
-   P_diag = hypre_ParCSRMatrixDiag(P);
-   hypre_CSRMatrixData(P_diag) = P_diag_data; 
-   hypre_CSRMatrixI(P_diag) = P_diag_i; 
-   hypre_CSRMatrixJ(P_diag) = P_diag_j; 
-   hypre_ParCSRMatrixOwnsRowStarts(P) = 0; 
-
-   /*-------------------------------------------------------------------
-    * The following block was originally in an 
-    *
-    *           if (num_cols_P_offd)
-    *
-    * block, which has been eliminated to ensure that the code 
-    * runs on one processor.
-    *
-    *-------------------------------------------------------------------*/
-
-   P_offd = hypre_ParCSRMatrixOffd(P);
-   hypre_CSRMatrixI(P_offd) = P_offd_i; 
    if (num_cols_P_offd)
    { 
-	hypre_CSRMatrixData(P_offd) = P_offd_data; 
-   	hypre_CSRMatrixJ(P_offd) = P_offd_j; 
    	hypre_ParCSRMatrixColMapOffd(P) = col_map_offd_P;
+        hypre_CSRMatrixNumCols(P_offd) = num_cols_P_offd;
    } 
-   hypre_ParCSRMatrixOffd(P) = P_offd;
-   hypre_GetCommPkgRTFromCommPkgA(P,S);
+
+   hypre_GetCommPkgRTFromCommPkgA(P,S,fine_to_coarse_offd);
 
    *P_ptr = P;
 
@@ -1344,12 +1261,6 @@ hypre_BoomerAMGBuildInterpLS( hypre_ParCSRMatrix   *A,
    hypre_TFree(jj_count_offd);
 
    if (num_procs > 1) hypre_CSRMatrixDestroy(S_ext);
-
-/*
-    for (i=0; i<n_fine; i++)
-        for (j=P_diag_i[i]; j<P_diag_i[i+1]; j++)
-            printf("%d %d %f\n", i+1, P_diag_j[j]+1, P_diag_data[j]);
-*/
 
    return(0);  
 
@@ -1452,11 +1363,6 @@ hypre_BoomerAMGBuildInterpGSMG( hypre_ParCSRMatrix   *A,
    int              index;
    int              ns, ne, size, rest;
    int             *int_buf_data;
-
-   double           max_coef;
-   double           row_sum, scale;
-   int              next_open,now_checking,num_lost,start_j;
-   int              next_open_offd,now_checking_offd,num_lost_offd;
 
    int col_1 = hypre_ParCSRMatrixFirstRowIndex(S);
    int local_numrows = hypre_CSRMatrixNumRows(S_diag);
@@ -1849,7 +1755,7 @@ hypre_BoomerAMGBuildInterpGSMG( hypre_ParCSRMatrix   *A,
                if (CF_marker_offd[i1] >= 0)
                {
                   P_marker_offd[i1] = jj_counter_offd;
-                  P_offd_j[jj_counter_offd]  = fine_to_coarse_offd[i1];
+		  P_offd_j[jj_counter_offd]  = i1;
                   P_offd_data[jj_counter_offd] = zero;
                   jj_counter_offd++;
                }
@@ -2106,89 +2012,39 @@ hypre_BoomerAMGBuildInterpGSMG( hypre_ParCSRMatrix   *A,
      hypre_TFree(P_marker_offd);
    }
 
-   /* Compress P, removing coefficients smaller than trunc_factor * Max */
+   P = hypre_ParCSRMatrixCreate(comm,
+                                hypre_ParCSRMatrixGlobalNumRows(S),
+                                total_global_cpts,
+                                hypre_ParCSRMatrixColStarts(S),
+                                num_cpts_global,
+                                0,
+                                P_diag_i[n_fine],
+                                P_offd_i[n_fine]);
+                                                                                
+                                                                                
+   P_diag = hypre_ParCSRMatrixDiag(P);
+   hypre_CSRMatrixData(P_diag) = P_diag_data;
+   hypre_CSRMatrixI(P_diag) = P_diag_i;
+   hypre_CSRMatrixJ(P_diag) = P_diag_j;
+   P_offd = hypre_ParCSRMatrixOffd(P);
+   hypre_CSRMatrixData(P_offd) = P_offd_data;
+   hypre_CSRMatrixI(P_offd) = P_offd_i;
+   hypre_CSRMatrixJ(P_offd) = P_offd_j;
+   hypre_ParCSRMatrixOwnsRowStarts(P) = 0;
 
+   /* Compress P, removing coefficients smaller than trunc_factor * Max */
+                                                                                
    if (trunc_factor != 0.0)
    {
-      next_open = 0;
-      now_checking = 0;
-      num_lost = 0;
-      next_open_offd = 0;
-      now_checking_offd = 0;
-      num_lost_offd = 0;
-
-      for (i = 0; i < n_fine; i++)
-      {
-       /*  if (CF_marker[i] < 0) */
-         {
-            max_coef = 0;
-            for (j = P_diag_i[i]; j < P_diag_i[i+1]; j++)
-               max_coef = (max_coef < fabs(P_diag_data[j])) ? 
-				fabs(P_diag_data[j]) : max_coef;
-            for (j = P_offd_i[i]; j < P_offd_i[i+1]; j++)
-               max_coef = (max_coef < fabs(P_offd_data[j])) ? 
-				fabs(P_offd_data[j]) : max_coef;
-            max_coef *= trunc_factor;
-
-            start_j = P_diag_i[i];
-            P_diag_i[i] -= num_lost;
-	    row_sum = 0;
-	    scale = 0;
-            for (j = start_j; j < P_diag_i[i+1]; j++)
-            {
-	       row_sum += P_diag_data[now_checking];
-               if (fabs(P_diag_data[now_checking]) < max_coef)
-               {
-                  num_lost++;
-                  now_checking++;
-               }
-               else
-               {
-		  scale += P_diag_data[now_checking];
-                  P_diag_data[next_open] = P_diag_data[now_checking];
-                  P_diag_j[next_open] = P_diag_j[now_checking];
-                  now_checking++;
-                  next_open++;
-               }
-            }
-
-            start_j = P_offd_i[i];
-            P_offd_i[i] -= num_lost_offd;
-
-            for (j = start_j; j < P_offd_i[i+1]; j++)
-            {
-	       row_sum += P_offd_data[now_checking_offd];
-               if (fabs(P_offd_data[now_checking_offd]) < max_coef)
-               {
-                  num_lost_offd++;
-                  now_checking_offd++;
-               }
-               else
-               {
-		  scale += P_offd_data[now_checking_offd];
-                  P_offd_data[next_open_offd] = P_offd_data[now_checking_offd];
-                  P_offd_j[next_open_offd] = P_offd_j[now_checking_offd];
-                  now_checking_offd++;
-                  next_open_offd++;
-               }
-            }
-	    /* normalize row of P */
-
-	    if (scale != 0.)
-	    {
-	     if (scale != row_sum)
-	     {
-   	       scale = row_sum/scale;
-   	       for (j = P_diag_i[i]; j < (P_diag_i[i+1]-num_lost); j++)
-      	          P_diag_data[j] *= scale;
-   	       for (j = P_offd_i[i]; j < (P_offd_i[i+1]-num_lost_offd); j++)
-      	          P_offd_data[j] *= scale;
-	     }
-	    }
-         }
-      }
-      P_diag_i[n_fine] -= num_lost;
-      P_offd_i[n_fine] -= num_lost_offd;
+      hypre_BoomerAMGInterpTruncation(P, trunc_factor);
+      P_diag_data = hypre_CSRMatrixData(P_diag);
+      P_diag_i = hypre_CSRMatrixI(P_diag);
+      P_diag_j = hypre_CSRMatrixJ(P_diag);
+      P_offd_data = hypre_CSRMatrixData(P_offd);
+      P_offd_i = hypre_CSRMatrixI(P_offd);
+      P_offd_j = hypre_CSRMatrixJ(P_offd);
+      P_diag_size = P_diag_i[n_fine];
+      P_offd_size = P_offd_i[n_fine];
    }
 
    num_cols_P_offd = 0;
@@ -2228,41 +2084,13 @@ hypre_BoomerAMGBuildInterpGSMG( hypre_ParCSRMatrix   *A,
       hypre_TFree(P_marker); 
    }
 
-   P = hypre_ParCSRMatrixCreate(comm, 
-                                hypre_ParCSRMatrixGlobalNumRows(S), 
-                                total_global_cpts,
-                                hypre_ParCSRMatrixColStarts(S),
-                                num_cpts_global,
-                                num_cols_P_offd, 
-                                P_diag_i[n_fine],
-                                P_offd_i[n_fine]);
-
-   P_diag = hypre_ParCSRMatrixDiag(P);
-   hypre_CSRMatrixData(P_diag) = P_diag_data; 
-   hypre_CSRMatrixI(P_diag) = P_diag_i; 
-   hypre_CSRMatrixJ(P_diag) = P_diag_j; 
-   hypre_ParCSRMatrixOwnsRowStarts(P) = 0; 
-
-   /*-------------------------------------------------------------------
-    * The following block was originally in an 
-    *
-    *           if (num_cols_P_offd)
-    *
-    * block, which has been eliminated to ensure that the code 
-    * runs on one processor.
-    *
-    *-------------------------------------------------------------------*/
-
-   P_offd = hypre_ParCSRMatrixOffd(P);
-   hypre_CSRMatrixI(P_offd) = P_offd_i; 
    if (num_cols_P_offd)
    { 
-	hypre_CSRMatrixData(P_offd) = P_offd_data; 
-   	hypre_CSRMatrixJ(P_offd) = P_offd_j; 
    	hypre_ParCSRMatrixColMapOffd(P) = col_map_offd_P;
+        hypre_CSRMatrixNumCols(P_offd) = num_cols_P_offd;
    } 
-   hypre_ParCSRMatrixOffd(P) = P_offd;
-   hypre_GetCommPkgRTFromCommPkgA(P,S);
+
+   hypre_GetCommPkgRTFromCommPkgA(P,S,fine_to_coarse_offd);
 
    *P_ptr = P;
 
@@ -2276,12 +2104,6 @@ hypre_BoomerAMGBuildInterpGSMG( hypre_ParCSRMatrix   *A,
    hypre_TFree(jj_count_offd);
 
    if (num_procs > 1) hypre_CSRMatrixDestroy(S_ext);
-
-/*
-    for (i=0; i<n_fine; i++)
-        for (j=P_diag_i[i]; j<P_diag_i[i+1]; j++)
-            printf("%d %d %f\n", i+1, P_diag_j[j]+1, P_diag_data[j]);
-*/
 
    return(0);  
 
