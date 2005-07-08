@@ -90,8 +90,12 @@ hypre_ParCSRMatrixMatvec( double           alpha,
     *--------------------------------------------------------------------*/
    if (!comm_pkg)
    {
-	hypre_MatvecCommPkgCreate(A);
-	comm_pkg = hypre_ParCSRMatrixCommPkg(A); 
+#ifdef HYPRE_NO_GLOBAL_PARTITION
+      hypre_NewCommPkgCreate(A);
+#else
+      hypre_MatvecCommPkgCreate(A);
+#endif
+      comm_pkg = hypre_ParCSRMatrixCommPkg(A); 
    }
 
    num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
@@ -236,8 +240,12 @@ hypre_ParCSRMatrixMatvecT( double           alpha,
     *--------------------------------------------------------------------*/
    if (!comm_pkg)
    {
-	hypre_MatvecCommPkgCreate(A);
-	comm_pkg = hypre_ParCSRMatrixCommPkg(A); 
+#ifdef HYPRE_NO_GLOBAL_PARTITION
+      hypre_NewCommPkgCreate(A);
+#else
+      hypre_MatvecCommPkgCreate(A);
+#endif
+      comm_pkg = hypre_ParCSRMatrixCommPkg(A); 
    }
 
    num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);

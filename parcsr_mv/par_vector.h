@@ -26,6 +26,7 @@ typedef struct
 
    int      	 global_size;
    int      	 first_index;
+   int           last_index;
    int      	*partitioning;
    hypre_Vector	*local_vector; 
 
@@ -42,12 +43,15 @@ typedef struct
 #define hypre_ParVectorComm(vector)  	        ((vector) -> comm)
 #define hypre_ParVectorGlobalSize(vector)       ((vector) -> global_size)
 #define hypre_ParVectorFirstIndex(vector)       ((vector) -> first_index)
+#define hypre_ParVectorLastIndex(vector)        ((vector) -> last_index)
 #define hypre_ParVectorPartitioning(vector)     ((vector) -> partitioning)
 #define hypre_ParVectorLocalVector(vector)      ((vector) -> local_vector)
 #define hypre_ParVectorOwnsData(vector)         ((vector) -> owns_data)
 #define hypre_ParVectorOwnsPartitioning(vector) ((vector) -> owns_partitioning)
 #define hypre_ParVectorNumVectors(vector)\
  (hypre_VectorNumVectors( hypre_ParVectorLocalVector(vector) ))
+
+
 
 
 #endif

@@ -262,6 +262,7 @@ int hypre_CSRMatrixMatvecT( double alpha , hypre_CSRMatrix *A , hypre_Vector *x 
 
 /* genpart.c */
 int hypre_GeneratePartitioning( int length , int num_procs , int **part_ptr );
+int hypre_GenerateLocalPartitioning( int length , int num_procs , int myid, int **part_ptr );
 
 /* HYPRE_csr_matrix.c */
 HYPRE_CSRMatrix HYPRE_CSRMatrixCreate( int num_rows , int num_cols , int *row_sizes );

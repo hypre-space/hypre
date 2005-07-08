@@ -1005,7 +1005,11 @@ hypre_ParCSRMatrixExtractBExt( hypre_ParCSRMatrix *B, hypre_ParCSRMatrix *A, int
     *--------------------------------------------------------------------*/
    if (!hypre_ParCSRMatrixCommPkg(A))
    {
+#ifdef HYPRE_NO_GLOBAL_PARTITION
+      hypre_NewCommPkgCreate(A);
+#else
        	hypre_MatvecCommPkgCreate(A);
+#endif
    }
     
    comm_pkg = hypre_ParCSRMatrixCommPkg(A);
@@ -1272,6 +1276,22 @@ hypre_ParCSRMatrixTranspose( hypre_ParCSRMatrix *A,
    hypre_CSRMatrixJ(AT_offd) = AT_offd_j;
    hypre_CSRMatrixData(AT_offd) = AT_offd_data;
 
+#ifdef HYPRE_NO_GLOBAL_PARTITION
+   row_starts_AT = hypre_CTAlloc(int,2);
+   for (i=0; i < 2; i++)
+      row_starts_AT[i] = col_starts[i];
+
+   if (row_starts != col_starts)
+   {
+      col_starts_AT = hypre_CTAlloc(int,2);
+      for (i=0; i < 2; i++)
+         col_starts_AT[i] = row_starts[i];
+   }
+   else
+   {
+      col_starts_AT = row_starts_AT;
+   }
+#else
    row_starts_AT = hypre_CTAlloc(int,num_procs+1);
    for (i=0; i < num_procs+1; i++)
       row_starts_AT[i] = col_starts[i];
@@ -1286,6 +1306,7 @@ hypre_ParCSRMatrixTranspose( hypre_ParCSRMatrix *A,
    {
       col_starts_AT = row_starts_AT;
    }
+#endif
 
    AT = hypre_CTAlloc(hypre_ParCSRMatrix,1);
    hypre_ParCSRMatrixComm(AT) = comm;
@@ -1296,8 +1317,19 @@ hypre_ParCSRMatrixTranspose( hypre_ParCSRMatrix *A,
    hypre_ParCSRMatrixRowStarts(AT) = row_starts_AT;
    hypre_ParCSRMatrixColStarts(AT) = col_starts_AT;
    hypre_ParCSRMatrixColMapOffd(AT) = col_map_offd_AT;
+
+#ifdef HYPRE_NO_GLOBAL_PARTITION
+   hypre_ParCSRMatrixFirstRowIndex(AT) = row_starts_AT[0];
+   hypre_ParCSRMatrixFirstColDiag(AT) = col_starts_AT[0];
+   hypre_ParCSRMatrixLastRowIndex(AT) = row_starts_AT[1]-1;
+   hypre_ParCSRMatrixLastColDiag(AT) = col_starts_AT[1]-1;
+#else
    hypre_ParCSRMatrixFirstRowIndex(AT) = row_starts_AT[my_id];
    hypre_ParCSRMatrixFirstColDiag(AT) = col_starts_AT[my_id];
+   hypre_ParCSRMatrixLastRowIndex(AT) = row_starts_AT[my_id+1]-1;
+   hypre_ParCSRMatrixLastColDiag(AT) = col_starts_AT[my_id+1]-1;
+#endif
+
 
    hypre_ParCSRMatrixOwnsData(AT) = 1;
    hypre_ParCSRMatrixOwnsRowStarts(AT) = 1;
@@ -1702,6 +1734,10 @@ void hypre_ParCSRMatrixExtractSubmatrices(hypre_ParCSRMatrix *A_csr, int *indice
    ncols_offd = 0;
    nnz_offd   = 0;
    nnz_diag   = nnz11;
+#ifdef HYPRE_NO_GLOBAL_PARTITION
+
+
+#else
    global_nrows = proc_offsets1[nprocs];
    global_ncols = proc_offsets1[nprocs];
    row_starts = hypre_CTAlloc(int, nprocs+1);
@@ -1711,6 +1747,7 @@ void hypre_ParCSRMatrixExtractSubmatrices(hypre_ParCSRMatrix *A_csr, int *indice
       row_starts[i] = proc_offsets1[i];
       col_starts[i] = proc_offsets1[i];
    }
+#endif
    A11_csr = hypre_ParCSRMatrixCreate(comm, global_nrows, global_ncols,
                     row_starts, col_starts, ncols_offd, nnz_diag, nnz_offd); 
    nrows = nindices;

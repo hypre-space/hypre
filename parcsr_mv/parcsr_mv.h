@@ -121,6 +121,7 @@ typedef struct
 
    int      	 global_size;
    int      	 first_index;
+   int           last_index;
    int      	*partitioning;
    hypre_Vector	*local_vector; 
 
@@ -137,6 +138,7 @@ typedef struct
 #define hypre_ParVectorComm(vector)  	        ((vector) -> comm)
 #define hypre_ParVectorGlobalSize(vector)       ((vector) -> global_size)
 #define hypre_ParVectorFirstIndex(vector)       ((vector) -> first_index)
+#define hypre_ParVectorLastIndex(vector)        ((vector) -> last_index)
 #define hypre_ParVectorPartitioning(vector)     ((vector) -> partitioning)
 #define hypre_ParVectorLocalVector(vector)      ((vector) -> local_vector)
 #define hypre_ParVectorOwnsData(vector)         ((vector) -> owns_data)
@@ -178,6 +180,11 @@ typedef struct
    int     		global_num_cols;
    int			first_row_index;
    int			first_col_diag;
+ /* need to know entire local range in case row_starts and col_starts 
+      are null  (i.e., bgl) AHB 6/05*/
+   int                  last_row_index;
+   int                  last_col_diag;
+
    hypre_CSRMatrix	*diag;
    hypre_CSRMatrix	*offd;
    int			*col_map_offd; 
@@ -220,6 +227,8 @@ typedef struct
 #define hypre_ParCSRMatrixGlobalNumCols(matrix)   ((matrix) -> global_num_cols)
 #define hypre_ParCSRMatrixFirstRowIndex(matrix)   ((matrix) -> first_row_index)
 #define hypre_ParCSRMatrixFirstColDiag(matrix)    ((matrix) -> first_col_diag)
+#define hypre_ParCSRMatrixLastRowIndex(matrix)    ((matrix) -> last_row_index)
+#define hypre_ParCSRMatrixLastColDiag(matrix)     ((matrix) -> last_col_diag)
 #define hypre_ParCSRMatrixDiag(matrix)  	  ((matrix) -> diag)
 #define hypre_ParCSRMatrixOffd(matrix)  	  ((matrix) -> offd)
 #define hypre_ParCSRMatrixColMapOffd(matrix)  	  ((matrix) -> col_map_offd)

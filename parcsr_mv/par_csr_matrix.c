@@ -22,9 +22,18 @@
 */
 #include "../seq_mv/csr_matrix.h"
 
+
+#ifdef HYPRE_NO_GLOBAL_PARTITION
+int hypre_FillResponseParToCSRMatrix(void*, int, int, void*, MPI_Comm, void**, int*);
+#endif
+
 /*--------------------------------------------------------------------------
  * hypre_ParCSRMatrixCreate
  *--------------------------------------------------------------------------*/
+
+/* If create is called for HYPRE_NO_GLOBAL_PARTITION and row_starts and col_starts are NOT null,
+   then it is assumed that they are array of length 2 containing the start row of 
+   the calling processor followed by the start row of the next processor - AHB 6/05 */
 
 hypre_ParCSRMatrix *
 hypre_ParCSRMatrixCreate( MPI_Comm comm,
@@ -48,9 +57,13 @@ hypre_ParCSRMatrixCreate( MPI_Comm comm,
 
    if (!row_starts)
    {
-        hypre_GeneratePartitioning(global_num_rows,num_procs,&row_starts);
+    
+#ifdef HYPRE_NO_GLOBAL_PARTITION  
+      hypre_GenerateLocalPartitioning(global_num_rows, num_procs, my_id, &row_starts);
+#else
+      hypre_GeneratePartitioning(global_num_rows,num_procs,&row_starts);
+#endif
    }
-
    if (!col_starts)
    {
       if (global_num_rows == global_num_cols)
@@ -59,14 +72,29 @@ hypre_ParCSRMatrixCreate( MPI_Comm comm,
       }
       else
       {
-        hypre_GeneratePartitioning(global_num_cols,num_procs,&col_starts);
+#ifdef HYPRE_NO_GLOBAL_PARTITION   
+      hypre_GenerateLocalPartitioning(global_num_cols, num_procs, my_id, &col_starts);
+#else
+      hypre_GeneratePartitioning(global_num_cols,num_procs,&col_starts);
+#endif
       }
    }
 
+#ifdef HYPRE_NO_GLOBAL_PARTITION
+   /* row_starts[0] is start of local rows.  row_starts[1] is start of next 
+      processor's rows */
+   first_row_index = row_starts[0];
+   local_num_rows = row_starts[1]-first_row_index ;
+   first_col_diag = col_starts[0];
+   local_num_cols = col_starts[1]-first_col_diag;
+#else
    first_row_index = row_starts[my_id];
    local_num_rows = row_starts[my_id+1]-first_row_index;
    first_col_diag = col_starts[my_id];
    local_num_cols = col_starts[my_id+1]-first_col_diag;
+#endif
+
+
    hypre_ParCSRMatrixComm(matrix) = comm;
    hypre_ParCSRMatrixDiag(matrix) = hypre_CSRMatrixCreate(local_num_rows,
                 local_num_cols,num_nonzeros_diag);
@@ -76,9 +104,20 @@ hypre_ParCSRMatrixCreate( MPI_Comm comm,
    hypre_ParCSRMatrixGlobalNumCols(matrix) = global_num_cols;
    hypre_ParCSRMatrixFirstRowIndex(matrix) = first_row_index;
    hypre_ParCSRMatrixFirstColDiag(matrix) = first_col_diag;
+ 
+   hypre_ParCSRMatrixLastRowIndex(matrix) = first_row_index + local_num_rows - 1;
+   hypre_ParCSRMatrixLastColDiag(matrix) = first_col_diag + local_num_cols - 1;
+
    hypre_ParCSRMatrixColMapOffd(matrix) = NULL;
+
+   /* When NO_GLOBAL_PARTITION is set we could make these null, instead
+      of leaving the range.  If that change is made, then when this create
+      is called from functions like the matrix-matrix multiply, be careful
+      not to generate a new partition */
+
    hypre_ParCSRMatrixRowStarts(matrix) = row_starts;
    hypre_ParCSRMatrixColStarts(matrix) = col_starts;
+
    hypre_ParCSRMatrixCommPkg(matrix) = NULL;
    hypre_ParCSRMatrixCommPkgT(matrix) = NULL;
 
@@ -88,7 +127,6 @@ hypre_ParCSRMatrixCreate( MPI_Comm comm,
    hypre_ParCSRMatrixOwnsColStarts(matrix) = 1;
    if (row_starts == col_starts)
         hypre_ParCSRMatrixOwnsColStarts(matrix) = 0;
-
    hypre_ParCSRMatrixRowindices(matrix) = NULL;
    hypre_ParCSRMatrixRowvalues(matrix) = NULL;
    hypre_ParCSRMatrixGetrowactive(matrix) = 0;
@@ -237,12 +275,21 @@ hypre_ParCSRMatrixRead( MPI_Comm    comm,
    int  *col_starts;
    int  *col_map_offd;
    FILE *fp;
-   int equal = 1;
+   int   equal = 1;
+#ifdef HYPRE_NO_GLOBAL_PARTITION
+   int   row_s, row_e, col_s, col_e;
+#endif
+   
 
    MPI_Comm_rank(comm,&my_id);
    MPI_Comm_size(comm,&num_procs);
+#ifdef HYPRE_NO_GLOBAL_PARTITION
+   row_starts = hypre_CTAlloc(int, 2);
+   col_starts =  hypre_CTAlloc(int, 2);
+#else
    row_starts = hypre_CTAlloc(int, num_procs+1);
    col_starts = hypre_CTAlloc(int, num_procs+1);
+#endif
    sprintf(new_file_d,"%s.D.%d",file_name,my_id);
    sprintf(new_file_o,"%s.O.%d",file_name,my_id);
    sprintf(new_file_info,"%s.INFO.%d",file_name,my_id);
@@ -250,29 +297,52 @@ hypre_ParCSRMatrixRead( MPI_Comm    comm,
    fscanf(fp, "%d", &global_num_rows);
    fscanf(fp, "%d", &global_num_cols);
    fscanf(fp, "%d", &num_cols_offd);
+#ifdef HYPRE_NO_GLOBAL_PARTITION
+   /* the bgl input file should only contain the EXACT range for local processor */
+   fscanf(fp, "%d %d %d %d", &row_s, &row_e, &col_s, &col_e);
+   row_starts[0] = row_s;
+   row_starts[1] = row_e;
+   col_starts[0] = col_s;
+   col_starts[1] = col_e;
+   
+#else
    for (i=0; i < num_procs; i++)
            fscanf(fp, "%d %d", &row_starts[i], &col_starts[i]);
    row_starts[num_procs] = global_num_rows;
    col_starts[num_procs] = global_num_cols;
+#endif
+
    col_map_offd = hypre_CTAlloc(int, num_cols_offd);
+
    for (i=0; i < num_cols_offd; i++)
         fscanf(fp, "%d", &col_map_offd[i]);
         
    fclose(fp);
 
+#ifdef HYPRE_NO_GLOBAL_PARTITION
+   for (i=1; i >= 0; i--)
+      if (row_starts[i] != col_starts[i])
+      {
+         equal = 0;
+         break;
+      }
+#else
    for (i=num_procs; i >= 0; i--)
         if (row_starts[i] != col_starts[i])
         {
                 equal = 0;
                 break;
         }
-
+#endif
    if (equal)
    {
         hypre_TFree(col_starts);
         col_starts = row_starts;
    }
-   
+
+
+
+
    diag = hypre_CSRMatrixRead(new_file_d);
    local_num_rows = hypre_CSRMatrixNumRows(diag);
 
@@ -292,8 +362,18 @@ hypre_ParCSRMatrixRead( MPI_Comm    comm,
    hypre_ParCSRMatrixComm(matrix) = comm;
    hypre_ParCSRMatrixGlobalNumRows(matrix) = global_num_rows;
    hypre_ParCSRMatrixGlobalNumCols(matrix) = global_num_cols;
+#ifdef HYPRE_NO_GLOBAL_PARTITION
+   hypre_ParCSRMatrixFirstRowIndex(matrix) = row_s;
+   hypre_ParCSRMatrixFirstColDiag(matrix) = col_s;
+   hypre_ParCSRMatrixLastRowIndex(matrix) = row_e - 1;
+   hypre_ParCSRMatrixLastColDiag(matrix) = col_e - 1;
+#else
    hypre_ParCSRMatrixFirstRowIndex(matrix) = row_starts[my_id];
    hypre_ParCSRMatrixFirstColDiag(matrix) = col_starts[my_id];
+   hypre_ParCSRMatrixLastRowIndex(matrix) = row_starts[my_id+1]-1;
+   hypre_ParCSRMatrixLastColDiag(matrix) = col_starts[my_id+1]-1;
+#endif
+
    hypre_ParCSRMatrixRowStarts(matrix) = row_starts;
    hypre_ParCSRMatrixColStarts(matrix) = col_starts;
    hypre_ParCSRMatrixCommPkg(matrix) = NULL;
@@ -327,14 +407,18 @@ hypre_ParCSRMatrixPrint( hypre_ParCSRMatrix *matrix,
    int global_num_rows = hypre_ParCSRMatrixGlobalNumRows(matrix);
    int global_num_cols = hypre_ParCSRMatrixGlobalNumCols(matrix);
    int *col_map_offd = hypre_ParCSRMatrixColMapOffd(matrix);
+#ifndef HYPRE_NO_GLOBAL_PARTITION
    int *row_starts = hypre_ParCSRMatrixRowStarts(matrix);
    int *col_starts = hypre_ParCSRMatrixColStarts(matrix);
+#endif
    int  my_id, i, num_procs;
    char   new_file_d[80], new_file_o[80], new_file_info[80];
    int  ierr = 0;
    FILE *fp;
    int num_cols_offd = 0;
-
+#ifdef HYPRE_NO_GLOBAL_PARTITION
+   int row_s, row_e, col_s, col_e;
+#endif
    if (hypre_ParCSRMatrixOffd(matrix))
         num_cols_offd = hypre_CSRMatrixNumCols(hypre_ParCSRMatrixOffd(matrix));
 
@@ -352,8 +436,17 @@ hypre_ParCSRMatrixPrint( hypre_ParCSRMatrix *matrix,
    fprintf(fp, "%d\n", global_num_rows);
    fprintf(fp, "%d\n", global_num_cols);
    fprintf(fp, "%d\n", num_cols_offd);
+#ifdef HYPRE_NO_GLOBAL_PARTITION
+   row_s = hypre_ParCSRMatrixFirstRowIndex(matrix);
+   row_e = hypre_ParCSRMatrixLastRowIndex(matrix);
+   col_s =  hypre_ParCSRMatrixFirstColDiag(matrix);
+   col_e =  hypre_ParCSRMatrixLastColDiag(matrix);
+   /* add 1 to the ends because this is a starts partition */
+   fprintf(fp, "%d %d %d %d\n", row_s, row_e + 1, col_s, col_e + 1);
+#else
    for (i=0; i < num_procs; i++)
         fprintf(fp, "%d %d\n", row_starts[i], col_starts[i]);
+#endif
    for (i=0; i < num_cols_offd; i++)
         fprintf(fp, "%d\n", col_map_offd[i]);
    fclose(fp);
@@ -425,13 +518,21 @@ hypre_ParCSRMatrixPrintIJ( hypre_ParCSRMatrix *matrix,
    fprintf(file, "%d %d %d\n", num_rows, num_cols, num_cols_offd);
    fprintf(file, "%d %d\n", num_nonzeros_diag, num_nonzeros_offd);
 
+#ifdef HYPRE_NO_GLOBAL_PARTITION
+   for (i=0; i <= 1; i++)
+   {
+	row = row_starts[i]+base_i;
+	col = col_starts[i]+base_j;
+        fprintf(file, "%d %d\n", row, col);
+   }
+#else
    for (i=0; i <= num_procs; i++)
    {
 	row = row_starts[i]+base_i;
 	col = col_starts[i]+base_j;
         fprintf(file, "%d %d\n", row, col);
    }
-
+#endif
    for (i = 0; i < num_rows; i++)
    {
       I = first_row_index + i + base_i;
@@ -656,10 +757,17 @@ hypre_ParCSRMatrixGetLocalRange( hypre_ParCSRMatrix *matrix,
 
    MPI_Comm_rank( hypre_ParCSRMatrixComm(matrix), &my_id );
 
+#ifdef HYPRE_NO_GLOBAL_PARTITION
+  *row_start = hypre_ParCSRMatrixFirstRowIndex(matrix);
+  *row_end = hypre_ParCSRMatrixLastRowIndex(matrix);
+  *col_start =  hypre_ParCSRMatrixFirstColDiag(matrix);
+  *col_end =  hypre_ParCSRMatrixLastColDiag(matrix);
+#else
    *row_start = hypre_ParCSRMatrixRowStarts(matrix)[ my_id ];
    *row_end = hypre_ParCSRMatrixRowStarts(matrix)[ my_id + 1 ]-1;
    *col_start = hypre_ParCSRMatrixColStarts(matrix)[ my_id ];
    *col_end = hypre_ParCSRMatrixColStarts(matrix)[ my_id + 1 ]-1;
+#endif
 
    return( ierr );
 }
@@ -702,10 +810,13 @@ hypre_ParCSRMatrixGetRow( hypre_ParCSRMatrix  *mat,
    MPI_Comm_rank( hypre_ParCSRMatrixComm(mat), &my_id );
 
    hypre_ParCSRMatrixGetrowactive(mat) = 1;
-
+#ifdef HYPRE_NO_GLOBAL_PARTITION
+   row_start = hypre_ParCSRMatrixFirstRowIndex(mat);
+   row_end = hypre_ParCSRMatrixLastRowIndex(mat) + 1;
+#else
    row_end = hypre_ParCSRMatrixRowStarts(mat)[ my_id + 1 ];
    row_start = hypre_ParCSRMatrixRowStarts(mat)[ my_id ];
-
+#endif
    if (row < row_start || row >= row_end) return(-1);
 
    /* if buffer is not allocated and some information is requested,
@@ -821,6 +932,9 @@ hypre_ParCSRMatrixRestoreRow( hypre_ParCSRMatrix *matrix,
  * hypre_CSRMatrixToParCSRMatrix:
  * generates a ParCSRMatrix distributed across the processors in comm
  * from a CSRMatrix on proc 0 .
+ *
+ * This shouldn't be used with the HYPRE_NO_GLOBAL_PARTITON option 
+ *
  *--------------------------------------------------------------------------*/
 
 hypre_ParCSRMatrix *
@@ -1258,8 +1372,9 @@ hypre_ParCSRMatrixToCSRMatrixAll(hypre_ParCSRMatrix *par_matrix)
    hypre_CSRMatrix *local_matrix;
    int num_rows = hypre_ParCSRMatrixGlobalNumRows(par_matrix);
    int num_cols = hypre_ParCSRMatrixGlobalNumCols(par_matrix);
+#ifndef HYPRE_NO_GLOBAL_PARTITION
    int *row_starts = hypre_ParCSRMatrixRowStarts(par_matrix);
-  
+#endif
    int *matrix_i;
    int *matrix_j;
    double *matrix_data;
@@ -1285,9 +1400,268 @@ hypre_ParCSRMatrixToCSRMatrixAll(hypre_ParCSRMatrix *par_matrix)
    MPI_Status *status;
    /* MPI_Datatype *data_type; */
 
+
+#ifdef HYPRE_NO_GLOBAL_PARTITION
+
+   int *new_vec_starts;
+   
+   int num_contacts;
+   int contact_proc_list[1];
+   int contact_send_buf[1];
+   int contact_send_buf_starts[2];
+   int max_response_size;
+   int *response_recv_buf=NULL;
+   int *response_recv_buf_starts = NULL;
+   hypre_DataExchangeResponse response_obj;
+   hypre_ProcListElements send_proc_obj;
+   
+   int *send_info = NULL;
+   MPI_Status  status1;
+   int count, tag1 = 1, tag2 = 2;
+   int start;
+   
+#endif
+
+
+
    MPI_Comm_size(comm, &num_procs);
    MPI_Comm_rank(comm, &my_id);
 
+#ifdef HYPRE_NO_GLOBAL_PARTITION
+
+   local_num_rows = hypre_ParCSRMatrixLastRowIndex(par_matrix)  - 
+                    hypre_ParCSRMatrixFirstRowIndex(par_matrix) + 1;
+   
+
+   local_matrix = hypre_MergeDiagAndOffd(par_matrix);
+   local_matrix_i = hypre_CSRMatrixI(local_matrix);
+   local_matrix_j = hypre_CSRMatrixJ(local_matrix);
+   local_matrix_data = hypre_CSRMatrixData(local_matrix);
+
+ 
+/* determine procs that have vector data and store their ids in used_procs */
+/* we need to do an exchange data for this.  If I own row then I will contact
+   processor 0 with the endpoint of my local range */
+
+   if (local_num_rows > 0)
+   {
+      num_contacts = 1;
+      contact_proc_list[0] = 0;
+      contact_send_buf[0] =  hypre_ParCSRMatrixLastRowIndex(par_matrix);
+      contact_send_buf_starts[0] = 0;
+      contact_send_buf_starts[1] = 1;
+      
+   }
+   else
+   {
+      num_contacts = 0;
+      contact_send_buf_starts[0] = 0;
+      contact_send_buf_starts[1] = 0;
+   }
+  /*build the response object*/
+   /*send_proc_obj will  be for saving info from contacts */
+   send_proc_obj.length = 0;
+   send_proc_obj.storage_length = 10;
+   send_proc_obj.id = hypre_CTAlloc(int, send_proc_obj.storage_length);
+   send_proc_obj.vec_starts = hypre_CTAlloc(int, send_proc_obj.storage_length + 1); 
+   send_proc_obj.vec_starts[0] = 0;
+   send_proc_obj.element_storage_length = 10;
+   send_proc_obj.elements = hypre_CTAlloc(int, send_proc_obj.element_storage_length);
+
+   max_response_size = 0; /* each response is null */
+   response_obj.fill_response = hypre_FillResponseParToCSRMatrix;
+   response_obj.data1 = NULL;
+   response_obj.data2 = &send_proc_obj; /*this is where we keep info from contacts*/
+  
+   
+   hypre_DataExchangeList(num_contacts, 
+                          contact_proc_list, contact_send_buf, 
+                          contact_send_buf_starts, sizeof(int), 
+                          sizeof(int), &response_obj, 
+                          max_response_size, 1,
+                          comm, (void**) &response_recv_buf,	   
+                          &response_recv_buf_starts);
+   
+
+
+
+   /* now processor 0 should have a list of ranges for processors that have rows -
+      these are in send_proc_obj - it needs to create the new list of processors
+      and also an array of vec starts - and send to those who own row*/
+   if (my_id)
+   {
+      if (local_num_rows)      
+      {
+         /* look for a message from processor 0 */         
+         MPI_Probe(0, tag1, comm, &status1);
+         MPI_Get_count(&status1, MPI_INT, &count);
+         
+         send_info = hypre_CTAlloc(int, count);
+         MPI_Recv(send_info, count, MPI_INT, 0, tag1, comm, &status1);
+
+         /* now unpack */  
+         num_types = send_info[0];
+         used_procs =  hypre_CTAlloc(int, num_types);  
+         new_vec_starts = hypre_CTAlloc(int, num_types+1);
+
+         for (i=1; i<= num_types; i++)
+         {
+            used_procs[i-1] = send_info[i];
+         }
+         for (i=num_types+1; i< count; i++)
+         {
+            new_vec_starts[i-num_types-1] = send_info[i] ;
+         }
+      }
+      else /* clean up and exit */
+      {
+         hypre_TFree(send_proc_obj.vec_starts);
+         hypre_TFree(send_proc_obj.id);
+         hypre_TFree(send_proc_obj.elements);
+         if(response_recv_buf)        hypre_TFree(response_recv_buf);
+         if(response_recv_buf_starts) hypre_TFree(response_recv_buf_starts);
+         return NULL;
+      }
+   }
+   else /* my_id ==0 */
+   {
+      num_types = send_proc_obj.length;
+      used_procs =  hypre_CTAlloc(int, num_types);  
+      new_vec_starts = hypre_CTAlloc(int, num_types+1);
+      
+      new_vec_starts[0] = 0;
+      for (i=0; i< num_types; i++)
+      {
+         used_procs[i] = send_proc_obj.id[i];
+         new_vec_starts[i+1] = send_proc_obj.elements[i]+1;
+      }
+      qsort0(used_procs, 0, num_types-1);
+      qsort0(new_vec_starts, 0, num_types);
+      /*now we need to put into an array to send */
+      count =  2*num_types+2;
+      send_info = hypre_CTAlloc(int, count);
+      send_info[0] = num_types;
+      for (i=1; i<= num_types; i++)
+      {
+         send_info[i] = used_procs[i-1];
+      }
+      for (i=num_types+1; i< count; i++)
+      {
+         send_info[i] = new_vec_starts[i-num_types-1];
+      }
+      requests = hypre_CTAlloc(MPI_Request, num_types);
+      status =  hypre_CTAlloc(MPI_Status, num_types);
+
+      /* don't send to myself  - these are sorted so my id would be first*/
+      start = 0;
+      if (used_procs[0] == 0)
+      {
+         start = 1;
+      }
+   
+      
+      for (i=start; i < num_types; i++)
+      {
+         MPI_Isend(send_info, count, MPI_INT, used_procs[i], tag1, comm, &requests[i-start]);
+      }
+      MPI_Waitall(num_types-start, requests, status);
+
+      hypre_TFree(status);
+      hypre_TFree(requests);
+      
+
+   }
+   /* clean up */
+   hypre_TFree(send_proc_obj.vec_starts);
+   hypre_TFree(send_proc_obj.id);
+   hypre_TFree(send_proc_obj.elements);
+   hypre_TFree(send_info);
+   if(response_recv_buf)        hypre_TFree(response_recv_buf);
+   if(response_recv_buf_starts) hypre_TFree(response_recv_buf_starts);
+
+   /* now proc 0 can exit if it has no rows */
+   if (!local_num_rows) return NULL;
+   
+
+   /* everyone left has rows and knows: new_vec_starts, num_types, and used_procs */
+
+  /* this matrix should be rather small */
+   matrix_i = hypre_CTAlloc(int, num_rows+1);
+
+
+   num_requests = 4*num_types;
+   requests = hypre_CTAlloc(MPI_Request, num_requests);
+   status = hypre_CTAlloc(MPI_Status, num_requests);
+
+
+   /* exchange contents of local_matrix_i - here we are sending to ourself also*/
+
+   j = 0;
+   for (i = 0; i < num_types; i++)
+   {
+        proc_id = used_procs[i];
+        vec_len = new_vec_starts[i+1] - new_vec_starts[i];
+        MPI_Irecv(&matrix_i[new_vec_starts[i]+1], vec_len, MPI_INT,
+                                proc_id, tag2, comm, &requests[j++]);
+   }
+   for (i = 0; i < num_types; i++)
+   {
+        proc_id = used_procs[i];
+        MPI_Isend(&local_matrix_i[1], local_num_rows, MPI_INT,
+                                proc_id, tag2, comm, &requests[j++]);
+   }
+
+   MPI_Waitall(j, requests, status);
+
+
+
+/* generate matrix_i from received data */
+/* global numbering?*/
+   offset = matrix_i[new_vec_starts[1]];
+   for (i=1; i < num_types; i++)
+   {
+        for (j = new_vec_starts[i]; j < new_vec_starts[i+1]; j++)
+           matrix_i[j+1] += offset;
+        offset = matrix_i[new_vec_starts[i+1]];
+   }
+
+   num_nonzeros = matrix_i[num_rows];
+
+   matrix = hypre_CSRMatrixCreate(num_rows, num_cols, num_nonzeros);
+   hypre_CSRMatrixI(matrix) = matrix_i;
+   hypre_CSRMatrixInitialize(matrix);
+   matrix_j = hypre_CSRMatrixJ(matrix);
+   matrix_data = hypre_CSRMatrixData(matrix);
+
+/* generate datatypes for further data exchange and exchange remaining
+   data, i.e. column info and actual data */
+
+   j = 0;
+   for (i = 0; i < num_types; i++)
+   {
+        proc_id = used_procs[i];
+        start_index = matrix_i[new_vec_starts[i]];
+        num_data = matrix_i[new_vec_starts[i+1]] - start_index; 
+        MPI_Irecv(&matrix_data[start_index], num_data, MPI_DOUBLE,
+                        used_procs[i], 0, comm, &requests[j++]);
+        MPI_Irecv(&matrix_j[start_index], num_data, MPI_INT,
+                        used_procs[i], 0, comm, &requests[j++]);
+   }
+   local_num_nonzeros = local_matrix_i[local_num_rows];
+   for (i=0; i < num_types; i++)
+   {
+        MPI_Isend(local_matrix_data, local_num_nonzeros, MPI_DOUBLE,
+                        used_procs[i], 0, comm, &requests[j++]);
+        MPI_Isend(local_matrix_j, local_num_nonzeros, MPI_INT,
+                        used_procs[i], 0, comm, &requests[j++]);
+   }
+
+
+   MPI_Waitall(num_requests, requests, status);
+
+   hypre_TFree(new_vec_starts);
+   
+#else
    local_num_rows = row_starts[my_id+1] - row_starts[my_id];
 
 /* if my_id contains no data, return NULL */
@@ -1425,6 +1799,9 @@ hypre_ParCSRMatrixToCSRMatrixAll(hypre_ParCSRMatrix *par_matrix)
    for (i=0; i <= num_types; i++)
         MPI_Type_free(&data_type[i]);
 */
+
+#endif
+
    if (hypre_CSRMatrixOwnsData(local_matrix))
         hypre_CSRMatrixDestroy(local_matrix);
    else
@@ -1468,4 +1845,71 @@ hypre_ParCSRMatrixCopy( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *B,
         col_map_offd_B[i] = col_map_offd_A[i];
         
    return ierr;
+}
+/*--------------------------------------------------------------------
+ * hypre_FillResponseParToCSRMatrix
+ * Fill response function for determining the send processors
+ * data exchange
+ *--------------------------------------------------------------------*/
+
+int
+hypre_FillResponseParToCSRMatrix(void *p_recv_contact_buf, 
+                                 int contact_size, int contact_proc, void *ro, 
+                                 MPI_Comm comm, void **p_send_response_buf, 
+                                 int *response_message_size )
+{
+   int    myid;
+   int    i, index, count, elength;
+
+   int    *recv_contact_buf = (int * ) p_recv_contact_buf;
+
+   hypre_DataExchangeResponse  *response_obj = ro;  
+
+   hypre_ProcListElements      *send_proc_obj = response_obj->data2;   
+
+
+   MPI_Comm_rank(comm, &myid );
+
+
+   /*check to see if we need to allocate more space in send_proc_obj for ids*/
+   if (send_proc_obj->length == send_proc_obj->storage_length)
+   {
+      send_proc_obj->storage_length +=10; /*add space for 10 more processors*/
+      send_proc_obj->id = hypre_TReAlloc(send_proc_obj->id,int, 
+					 send_proc_obj->storage_length);
+      send_proc_obj->vec_starts = hypre_TReAlloc(send_proc_obj->vec_starts,int, 
+                                  send_proc_obj->storage_length + 1);
+   }
+  
+   /*initialize*/ 
+   count = send_proc_obj->length;
+   index = send_proc_obj->vec_starts[count]; /*this is the number of elements*/
+
+   /*send proc*/ 
+   send_proc_obj->id[count] = contact_proc; 
+
+   /*do we need more storage for the elements?*/
+     if (send_proc_obj->element_storage_length < index + contact_size)
+   {
+      elength = hypre_max(contact_size, 10);   
+      elength += index;
+      send_proc_obj->elements = hypre_TReAlloc(send_proc_obj->elements, 
+					       int, elength);
+      send_proc_obj->element_storage_length = elength; 
+   }
+   /*populate send_proc_obj*/
+   for (i=0; i< contact_size; i++) 
+   { 
+      send_proc_obj->elements[index++] = recv_contact_buf[i];
+   }
+   send_proc_obj->vec_starts[count+1] = index;
+   send_proc_obj->length++;
+   
+
+  /*output - no message to return (confirmation) */
+   *response_message_size = 0; 
+  
+   
+   return(0);
+
 }

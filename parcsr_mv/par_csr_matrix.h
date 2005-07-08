@@ -30,6 +30,11 @@ typedef struct
    int     		global_num_cols;
    int			first_row_index;
    int			first_col_diag;
+   /* need to know entire local range in case row_starts and col_starts 
+      are null  (i.e., bgl) AHB 6/05*/
+   int                  last_row_index;
+   int                  last_col_diag;
+
    hypre_CSRMatrix	*diag;
    hypre_CSRMatrix	*offd;
    int			*col_map_offd; 
@@ -72,6 +77,8 @@ typedef struct
 #define hypre_ParCSRMatrixGlobalNumCols(matrix)   ((matrix) -> global_num_cols)
 #define hypre_ParCSRMatrixFirstRowIndex(matrix)   ((matrix) -> first_row_index)
 #define hypre_ParCSRMatrixFirstColDiag(matrix)    ((matrix) -> first_col_diag)
+#define hypre_ParCSRMatrixLastRowIndex(matrix)    ((matrix) -> last_row_index)
+#define hypre_ParCSRMatrixLastColDiag(matrix)     ((matrix) -> last_col_diag)
 #define hypre_ParCSRMatrixDiag(matrix)  	  ((matrix) -> diag)
 #define hypre_ParCSRMatrixOffd(matrix)  	  ((matrix) -> offd)
 #define hypre_ParCSRMatrixColMapOffd(matrix)  	  ((matrix) -> col_map_offd)
@@ -104,6 +111,8 @@ typedef struct
    int                   global_num_cols;
    int                   first_row_index;
    int                   first_col_diag;
+   int                   last_row_index;
+   int                   last_col_diag;
    hypre_CSRBooleanMatrix *diag;
    hypre_CSRBooleanMatrix *offd;
    int	                *col_map_offd; 
@@ -130,6 +139,8 @@ typedef struct
 #define hypre_ParCSRBooleanMatrix_Get_StartRow(matrix)      ((matrix)->first_row_index)
 #define hypre_ParCSRBooleanMatrix_Get_FirstRowIndex(matrix) ((matrix)->first_row_index)
 #define hypre_ParCSRBooleanMatrix_Get_FirstColDiag(matrix)  ((matrix)->first_col_diag)
+#define hypre_ParCSRBooleanMatrix_Get_LastRowIndex(matrix)  ((matrix)->last_row_index)
+#define hypre_ParCSRBooleanMatrix_Get_LastColDiag(matrix)   ((matrix)->last_col_diag)
 #define hypre_ParCSRBooleanMatrix_Get_Diag(matrix)          ((matrix)->diag)
 #define hypre_ParCSRBooleanMatrix_Get_Offd(matrix)          ((matrix)->offd)
 #define hypre_ParCSRBooleanMatrix_Get_ColMapOffd(matrix)    ((matrix)->col_map_offd)
