@@ -77,17 +77,6 @@ main( int   argc,
    bHYPRE_StructPFMG solver_PFMG;
    bHYPRE_PCG  solver_PCG;
 
-   int zero = 0;
-   int one = 1;
-   int size;
-   struct sidl_int__array* sidl_upper;
-   struct sidl_int__array* sidl_lower;
-   struct sidl_int__array* sidl_periodic;
-   struct sidl_int__array* sidl_offsets;
-   struct sidl_int__array* sidl_num_ghost;
-   struct sidl_int__array* sidl_constant_stencil_points;
-   struct sidl_double__array* sidl_values;
-
    int constant_coefficient = 0;
    int symmetric = 1;
    MPI_Comm comm = MPI_COMM_WORLD;
@@ -556,37 +545,15 @@ main( int   argc,
          break;
    } 
 
-/* for use with sidl arrays:
-   sidl_upper= sidl_int__array_create1d( dim );
-   sidl_lower= sidl_int__array_create1d( dim );
-*/
    grid = bHYPRE_StructGrid__create();
    ierr += bHYPRE_StructGrid_SetCommunicator( grid, (void *) comm );
    ierr += bHYPRE_StructGrid_SetDimension( grid, dim );
    for (ib = 0; ib < nblocks; ib++)
    {
-/* for use with sidl arrays; or use sidl_int__array_borrow:
-      for ( i=0; i < dim; i++ )
-      {
-         sidl_int__array_set1( sidl_upper, i, iupper[ib][i] );
-         sidl_int__array_set1( sidl_lower, i, ilower[ib][i] );
-      }
-      bHYPRE_StructGrid_SetExtents( grid, sidl_lower, sidl_upper );
-*/
       bHYPRE_StructGrid_SetExtents( grid, ilower[ib], iupper[ib], dim );
    }
-/* for use with sidl arrays:
-   sidl_int__array_deleteRef( sidl_upper );
-   sidl_int__array_deleteRef( sidl_lower );
-*/
 
-   sidl_periodic= sidl_int__array_create1d( dim );
-   for ( i=0; i < dim; i++ )
-   {
-      sidl_int__array_set1( sidl_periodic, i, periodic[i] );
-   }
-   bHYPRE_StructGrid_SetPeriodic( grid, sidl_periodic );
-   sidl_int__array_deleteRef( sidl_periodic );
+   bHYPRE_StructGrid_SetPeriodic( grid, periodic, dim );
 
    bHYPRE_StructGrid_Assemble( grid );
 
@@ -599,16 +566,10 @@ main( int   argc,
    ierr += bHYPRE_StructStencil_SetSize( stencil, dim+1 );
    /* ...SetSize recognizes that ...SetDimension has been called, so it calls
       HYPRE_StructStencilCreate */
-   sidl_offsets= sidl_int__array_create1d( dim );
    for (s = 0; s < dim + 1; s++)
    {
-      for ( i=0; i < dim; i++ )
-      {
-         sidl_int__array_set1( sidl_offsets, i, offsets[s][i] );
-      }
-      bHYPRE_StructStencil_SetElement( stencil, s, sidl_offsets );
+      bHYPRE_StructStencil_SetElement( stencil, s, offsets[s], dim );
    };
-   sidl_int__array_deleteRef( sidl_offsets );
 
    /*-----------------------------------------------------------
     * Set up the matrix structure
@@ -628,18 +589,11 @@ main( int   argc,
    /* ... the above matrix Set functions _must_ be called before the following ones ... */
    ierr += bHYPRE_StructMatrix_SetStencil( A_b, stencil );
    ierr += bHYPRE_StructMatrix_SetSymmetric( A_b, symmetric );
-   size = 2*dim;
-   sidl_num_ghost= sidl_int__array_borrow( A_num_ghost, 1, &zero, &size, &one );
-   ierr += bHYPRE_StructMatrix_SetNumGhost( A_b, sidl_num_ghost );
-   sidl_int__array_deleteRef( sidl_num_ghost );
+   ierr += bHYPRE_StructMatrix_SetNumGhost( A_b, A_num_ghost, 2*dim );
 
    if ( solver_id == 3 || solver_id == 4 || solver_id == 13 || solver_id == 14 )
    {
-      size = dim+1;
-      sidl_constant_stencil_points = sidl_int__array_borrow
-         ( constant_stencil_points, 1, &zero, &size, &one );
-      bHYPRE_StructMatrix_SetConstantEntries( A_b, dim+1, sidl_constant_stencil_points );
-      sidl_int__array_deleteRef( sidl_constant_stencil_points );
+      bHYPRE_StructMatrix_SetConstantEntries( A_b, dim+1, constant_stencil_points );
    }
 
    ierr += bHYPRE_StructMatrix_Initialize( A_b );
@@ -697,21 +651,11 @@ main( int   argc,
       }
    }
 
-   sidl_lower= sidl_int__array_create1d( dim );
-   sidl_upper= sidl_int__array_create1d( dim );
-   sidl_values= sidl_double__array_borrow( values, 1, &zero, &volume, &one );
    for (ib = 0; ib < nblocks; ib++)
    {
-      for ( i=0; i < dim; i++ )
-      {
-         sidl_int__array_set1( sidl_lower, i, ilower[ib][i] );
-         sidl_int__array_set1( sidl_upper, i, iupper[ib][i] );
-      }
-      ierr += bHYPRE_StructVector_SetBoxValues( b_SV, sidl_lower, sidl_upper, sidl_values );
+      ierr += bHYPRE_StructVector_SetBoxValues( b_SV, ilower[ib], iupper[ib],
+                                                dim, values, volume );
    }
-   sidl_int__array_deleteRef( sidl_lower );
-   sidl_int__array_deleteRef( sidl_upper );
-   sidl_double__array_deleteRef( sidl_values );
 
    bHYPRE_StructVector_Assemble( b_SV );
 
@@ -725,25 +669,15 @@ main( int   argc,
    ierr += bHYPRE_StructVector_SetGrid( x_SV, grid );
    ierr += bHYPRE_StructVector_Initialize( x_SV );
 
-   sidl_lower= sidl_int__array_create1d( dim );
-   sidl_upper= sidl_int__array_create1d( dim );
-   sidl_values= sidl_double__array_borrow( values, 1, &zero, &volume, &one );
    for (i = 0; i < volume; i++)
    {
       values[i] = 0.0;
    }
    for (ib = 0; ib < nblocks; ib++)
    {
-      for ( i=0; i < dim; i++ )
-      {
-         sidl_int__array_set1( sidl_lower, i, ilower[ib][i] );
-         sidl_int__array_set1( sidl_upper, i, iupper[ib][i] );
-      }
-      ierr += bHYPRE_StructVector_SetBoxValues( x_SV, sidl_lower, sidl_upper, sidl_values );
+      ierr += bHYPRE_StructVector_SetBoxValues( x_SV, ilower[ib], iupper[ib],
+                                                dim, values, volume );
    }
-   sidl_int__array_deleteRef( sidl_lower );
-   sidl_int__array_deleteRef( sidl_upper );
-   sidl_double__array_deleteRef( sidl_values );
 
    bHYPRE_StructVector_Assemble( b_SV );
 
@@ -1452,12 +1386,6 @@ int SetStencilBndry
   int                volume, dim;
   int               *stencil_indices;
   int                constant_coefficient;
-  int zero = 0;
-  int one = 1;
-  struct sidl_int__array* sidl_upper;
-  struct sidl_int__array* sidl_lower;
-  struct sidl_int__array* sidl_stencil_indices;
-  struct sidl_double__array* sidl_values;
 
   struct bHYPRE_StructGrid__data * grid_data;
   HYPRE_StructGrid Hgrid;
@@ -1511,9 +1439,6 @@ int SetStencilBndry
 
   if ( constant_coefficient==0 )
   {
-     sidl_lower= sidl_int__array_create1d( dim );
-     sidl_upper= sidl_int__array_create1d( dim );
-     sidl_stencil_indices= sidl_int__array_create1d( 1 );
      for (d = 0; d < dim; d++)
      {
         for (ib = 0; ib < size; ib++)
@@ -1524,7 +1449,6 @@ int SetStencilBndry
            {
               values[i] = 0.0;
            }
-           sidl_values= sidl_double__array_borrow( values, 1, &zero, &(vol[ib]), &one );
 
            if( ilower[ib][d] == istart[d] && period[d] == 0 )
            {
@@ -1532,14 +1456,9 @@ int SetStencilBndry
               iupper[ib][d] = istart[d];
               stencil_indices[0] = d;
 
-              for ( i=0; i < dim; i++ )
-              {
-                 sidl_int__array_set1( sidl_lower, i, ilower[ib][i] );
-                 sidl_int__array_set1( sidl_upper, i, iupper[ib][i] );
-              }
-              sidl_int__array_set1( sidl_stencil_indices, 0, stencil_indices[0] );
               bHYPRE_StructMatrix_SetBoxValues
-                 ( A_b, sidl_lower, sidl_upper, 1, sidl_stencil_indices, sidl_values );
+                 ( A_b, ilower[ib], iupper[ib], dim, 1, stencil_indices,
+                   values, vol[ib] );
               /* HYPRE_StructMatrixSetBoxValues(A, ilower[ib], iupper[ib],
                  1, stencil_indices, values);*/
               iupper[ib][d] = j;
@@ -1550,25 +1469,16 @@ int SetStencilBndry
               j = ilower[ib][d];
               ilower[ib][d] = iend[d];
               stencil_indices[0] = dim + 1 + d;
-              for ( i=0; i < dim; i++ )
-              {
-                 sidl_int__array_set1( sidl_lower, i, ilower[ib][i] );
-                 sidl_int__array_set1( sidl_upper, i, iupper[ib][i] );
-              }
-              sidl_int__array_set1( sidl_stencil_indices, 0, stencil_indices[0] );
               bHYPRE_StructMatrix_SetBoxValues
-                 ( A_b, sidl_lower, sidl_upper, 1, sidl_stencil_indices, sidl_values );
+                 ( A_b, ilower[ib], iupper[ib], dim, 1, stencil_indices,
+                   values, vol[ib] );
               /* HYPRE_StructMatrixSetBoxValues(A, ilower[ib], iupper[ib],
                  1, stencil_indices, values);*/
               ilower[ib][d] = j;
            }
-           sidl_double__array_deleteRef( sidl_values );
            hypre_TFree(values);
         }
      }
-     sidl_int__array_deleteRef( sidl_lower );
-     sidl_int__array_deleteRef( sidl_upper );
-     sidl_int__array_deleteRef( sidl_stencil_indices );
   }
   
   hypre_TFree(vol);
@@ -1602,11 +1512,6 @@ AddValuesMatrix( bHYPRE_StructMatrix A_b,
 
   int ierr=0;
   int                 i, s, bi;
-  struct sidl_int__array* sidl_upper;
-  struct sidl_int__array* sidl_lower;
-  struct sidl_int__array* sidl_stencil_indices;
-  struct sidl_int__array* sidl_stencil_index_center;
-  struct sidl_double__array* sidl_values;
   double             *values;
   double              east,west;
   double              north,south;
@@ -1614,13 +1519,7 @@ AddValuesMatrix( bHYPRE_StructMatrix A_b,
   double              center;
   int                 volume ;
   int                *stencil_indices;
-  int                 stencil_size;
-  int zero = 0;
-  int one = 1;
-  int size;
-
-  sidl_lower= sidl_int__array_create1d( dim );
-  sidl_upper= sidl_int__array_create1d( dim );
+  int                 stencil_size, size;
 
   bi=0;
 
@@ -1640,10 +1539,6 @@ AddValuesMatrix( bHYPRE_StructMatrix A_b,
   {
      stencil_indices[s] = s;
   }
-  sidl_stencil_indices= sidl_int__array_borrow(
-     stencil_indices, 1, &zero, &stencil_size, &one );
-  sidl_stencil_index_center= sidl_int__array_borrow(
-     stencil_indices+dim, 1, &zero, &one, &one );
 
   if(symmetric)
   {
@@ -1679,19 +1574,12 @@ AddValuesMatrix( bHYPRE_StructMatrix A_b,
                     break;
                  }
               }
-              for ( i=0; i < dim; i++ )
-              {
-                 sidl_int__array_set1( sidl_lower, i, ilower[bi][i] );
-                 sidl_int__array_set1( sidl_upper, i, iupper[bi][i] );
-              }
               size = stencil_size*volume;
-              sidl_values= sidl_double__array_borrow( values, 1, &zero, &size, &one );
 
               bHYPRE_StructMatrix_SetBoxValues(
-                 A_b, sidl_lower, sidl_upper, stencil_size,
-                 sidl_stencil_indices, sidl_values );
+                 A_b, ilower[bi], iupper[bi], dim, stencil_size,
+                 stencil_indices, values, size );
 
-              sidl_double__array_deleteRef( sidl_values );
               hypre_TFree(values);
            }
      }
@@ -1717,14 +1605,10 @@ AddValuesMatrix( bHYPRE_StructMatrix A_b,
            break;
         }
 
-        size = stencil_size*volume;
-        sidl_values= sidl_double__array_borrow( values, 1, &zero, &size, &one );
-
         bHYPRE_StructMatrix_SetConstantValues(
            A_b, stencil_size,
-           sidl_stencil_indices, sidl_values );
+           stencil_indices, values );
 
-        sidl_double__array_deleteRef( sidl_values );
         hypre_TFree(values);
      }
      else
@@ -1749,14 +1633,10 @@ AddValuesMatrix( bHYPRE_StructMatrix A_b,
            break;
         }
 
-        size = stencil_size*volume;
-        sidl_values= sidl_double__array_borrow( values, 1, &zero, &size, &one );
-
         bHYPRE_StructMatrix_SetConstantValues(
            A_b, stencil_size-1,
-           sidl_stencil_indices, sidl_values );
+           stencil_indices, values );
 
-        sidl_double__array_deleteRef( sidl_values );
         hypre_TFree(values);
 
         for ( bi=0; bi<nblocks; ++bi )
@@ -1772,19 +1652,11 @@ AddValuesMatrix( bHYPRE_StructMatrix A_b,
               {
                  values[i] = center;
               }
-              for ( i=0; i < dim; i++ )
-              {
-                 sidl_int__array_set1( sidl_lower, i, ilower[bi][i] );
-                 sidl_int__array_set1( sidl_upper, i, iupper[bi][i] );
-              }
-              size = volume;
-              sidl_values= sidl_double__array_borrow( values, 1, &zero, &size, &one );
 
               bHYPRE_StructMatrix_SetBoxValues(
-                 A_b, sidl_lower, sidl_upper, 1,
-                 sidl_stencil_index_center, sidl_values );
+                 A_b, ilower[bi], iupper[bi], dim, 1,
+                 &(stencil_indices[dim]), values, volume );
 
-              sidl_double__array_deleteRef( sidl_values );
               hypre_TFree(values);
            }
      }
@@ -1860,19 +1732,12 @@ AddValuesMatrix( bHYPRE_StructMatrix A_b,
                     break;
                  }
               }
-              for ( i=0; i < dim; i++ )
-              {
-                 sidl_int__array_set1( sidl_lower, i, ilower[bi][i] );
-                 sidl_int__array_set1( sidl_upper, i, iupper[bi][i] );
-              }
               size = stencil_size*volume;
-              sidl_values= sidl_double__array_borrow( values, 1, &zero, &size, &one );
 
               bHYPRE_StructMatrix_SetBoxValues(
-                 A_b, sidl_lower, sidl_upper, stencil_size,
-                 sidl_stencil_indices, sidl_values );
+                 A_b, ilower[bi], iupper[bi], dim, stencil_size,
+                 stencil_indices, values, size );
 
-              sidl_double__array_deleteRef( sidl_values );
               hypre_TFree(values);
            }
      }
@@ -1905,14 +1770,9 @@ AddValuesMatrix( bHYPRE_StructMatrix A_b,
            break;
         }
 
-        size = stencil_size*volume;
-        sidl_values= sidl_double__array_borrow( values, 1, &zero, &size, &one );
-
         bHYPRE_StructMatrix_SetConstantValues(
            A_b, stencil_size,
-           sidl_stencil_indices, sidl_values );
-
-        sidl_double__array_deleteRef( sidl_values );
+           stencil_indices, values );
 
         hypre_TFree(values);
      }
@@ -1954,14 +1814,10 @@ AddValuesMatrix( bHYPRE_StructMatrix A_b,
            break;
         }
 
-        size = (stencil_size-1)*volume;
-        sidl_values= sidl_double__array_borrow( values, 1, &zero, &size, &one );
-
         bHYPRE_StructMatrix_SetConstantValues(
            A_b, stencil_size-1,
-           sidl_stencil_indices, sidl_values );
+           stencil_indices, values );
 
-        sidl_double__array_deleteRef( sidl_values );
         hypre_TFree(values);
 
 
@@ -1980,29 +1836,18 @@ AddValuesMatrix( bHYPRE_StructMatrix A_b,
               {
                  values[i] = center;
               }
-              for ( i=0; i < dim; i++ )
-              {
-                 sidl_int__array_set1( sidl_lower, i, ilower[bi][i] );
-                 sidl_int__array_set1( sidl_upper, i, iupper[bi][i] );
-              }
               size = volume;
-              sidl_values= sidl_double__array_borrow( values, 1, &zero, &size, &one );
 
               bHYPRE_StructMatrix_SetBoxValues(
-                 A_b, sidl_lower, sidl_upper, 1,
-                 sidl_stencil_index_center, sidl_values );
+                 A_b, ilower[bi], iupper[bi], dim, 1,
+                 &(stencil_indices[dim]), values, size );
 
-              sidl_double__array_deleteRef( sidl_values );
               hypre_TFree(values);
            }
      }
   }
 
   hypre_TFree(stencil_indices);
-  sidl_int__array_deleteRef( sidl_lower );
-  sidl_int__array_deleteRef( sidl_upper );
-  sidl_int__array_deleteRef( sidl_stencil_indices );
-  sidl_double__array_deleteRef( sidl_values );
 
   return ierr;
 }
