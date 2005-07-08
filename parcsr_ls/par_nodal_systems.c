@@ -117,7 +117,11 @@ hypre_BoomerAMGCreateNodalA(hypre_ParCSRMatrix    *A,
 
    if (!comm_pkg)
    {
+#ifdef HYPRE_NO_GLOBAL_PARTITION
+      hypre_NewCommPkgCreate(A);
+#else
       hypre_MatvecCommPkgCreate(A);
+#endif
       comm_pkg = hypre_ParCSRMatrixCommPkg(A);
    }
 

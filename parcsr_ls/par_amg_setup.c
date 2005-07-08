@@ -646,7 +646,14 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
          dof_func_array[level+1] = NULL;
          if (num_functions > 1 && nodal > -1)
 	    dof_func_array[level+1] = coarse_dof_func;
+
+#ifdef HYPRE_NO_GLOBAL_PARTITION
+         if (my_id == (num_procs -1)) coarse_size = coarse_pnts_global[1];
+         MPI_Bcast(&coarse_size, 1, MPI_INT, num_procs-1, comm);
+         
+#else
 	 coarse_size = coarse_pnts_global[num_procs];
+#endif
       
       }
       else
@@ -785,6 +792,12 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                  coarse_pnts_global, num_functions, dof_func_array[level], 
 		 debug_flag, trunc_factor, &P);
       }
+
+#ifdef HYPRE_NO_GLOBAL_PARTITION 
+/* we need to set the global nuumber of cols in P, as this was not done in the interp
+   (which calls the matrix create) since we didn't have the global partition */
+      hypre_ParCSRMatrixGlobalNumCols(P) = coarse_size;
+#endif
 
       if (debug_flag==1)
       {

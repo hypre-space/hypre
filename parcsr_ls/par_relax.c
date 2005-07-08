@@ -2281,11 +2281,19 @@ int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
          /*-----------------------------------------------------------------
           *  Generate CSR matrix from ParCSRMatrix A
           *-----------------------------------------------------------------*/
-
+#ifdef HYPRE_NO_GLOBAL_PARTITION
+         /* all processors are needed for these routines */
+         A_CSR = hypre_ParCSRMatrixToCSRMatrixAll(A);
+         f_vector = hypre_ParVectorToVectorAll(f);
+	 if (n)
+	 {
+	 
+#else
 	 if (n)
 	 {
 	    A_CSR = hypre_ParCSRMatrixToCSRMatrixAll(A);
 	    f_vector = hypre_ParVectorToVectorAll(f);
+#endif
  	    A_CSR_i = hypre_CSRMatrixI(A_CSR);
  	    A_CSR_j = hypre_CSRMatrixJ(A_CSR);
  	    A_CSR_data = hypre_CSRMatrixData(A_CSR);

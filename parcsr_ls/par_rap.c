@@ -1693,7 +1693,11 @@ hypre_BoomerAMGBuildCoarseOperator( hypre_ParCSRMatrix  *RT,
    if (num_procs > 1)
    {
         /* hypre_GenerateRAPCommPkg(RAP, A); */
+#ifdef HYPRE_NO_GLOBAL_PARTITION
+        hypre_NewCommPkgCreate(RAP);
+#else
         hypre_MatvecCommPkgCreate(RAP); 
+#endif
    }
 
    *RAP_ptr = RAP;

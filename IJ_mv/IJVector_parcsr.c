@@ -40,14 +40,28 @@ hypre_IJVectorCreatePar(hypre_IJVector *vector, int *IJpartitioning)
    int num_procs, jmin, global_n, *partitioning, j;
    MPI_Comm_size(comm, &num_procs);
 
+#ifdef HYPRE_NO_GLOBAL_PARTITION
+   jmin = hypre_IJVectorGlobalFirstRow(vector);
+   global_n = hypre_IJVectorGlobalNumRows(vector);
+
+   partitioning = hypre_CTAlloc(int, 2); 
+
+/* Shift to zero-based partitioning for ParVector object */
+   for (j = 0; j < 2; j++) 
+      partitioning[j] = IJpartitioning[j] - jmin;
+
+#else
    jmin = IJpartitioning[0];
    global_n = IJpartitioning[num_procs] - jmin;
-   
+
    partitioning = hypre_CTAlloc(int, num_procs+1); 
 
 /* Shift to zero-based partitioning for ParVector object */
    for (j = 0; j < num_procs+1; j++) 
       partitioning[j] = IJpartitioning[j] - jmin;
+
+#endif
+  
 
    hypre_IJVectorObject(vector) = hypre_ParVectorCreate(comm,
             global_n, (int *) partitioning); 
@@ -94,9 +108,14 @@ hypre_IJVectorInitializePar(hypre_IJVector *vector)
       exit(1);
    }
 
-
+#ifdef HYPRE_NO_GLOBAL_PARTITION
+   hypre_VectorSize(local_vector) = partitioning[1] -
+                                    partitioning[0];
+#else
    hypre_VectorSize(local_vector) = partitioning[my_id+1] -
                                     partitioning[my_id];
+#endif
+
 
    ierr += hypre_ParVectorInitialize(par_vector);
 
@@ -224,9 +243,15 @@ hypre_IJVectorZeroValuesPar(hypre_IJVector *vector)
       exit(1);
    }
 
+#ifdef HYPRE_NO_GLOBAL_PARTITION
+   vec_start = partitioning[0];
+   vec_stop  = partitioning[1];
+#else
    vec_start = partitioning[my_id];
    vec_stop  = partitioning[my_id+1];
-   
+#endif
+
+
    if (vec_start > vec_stop) 
    {
       printf("vec_start > vec_stop -- ");
@@ -296,9 +321,14 @@ hypre_IJVectorSetValuesPar(hypre_IJVector *vector,
       exit(1);
    }
 
+#ifdef HYPRE_NO_GLOBAL_PARTITION
+   vec_start = IJpartitioning[0];
+   vec_stop  = IJpartitioning[1]-1;
+#else
    vec_start = IJpartitioning[my_id];
    vec_stop  = IJpartitioning[my_id+1]-1;
-  
+#endif
+
    if (vec_start > vec_stop) 
    {
       printf("vec_start > vec_stop -- ");
@@ -435,8 +465,13 @@ hypre_IJVectorAddToValuesPar(hypre_IJVector *vector,
       exit(1);
    }
 
+#ifdef HYPRE_NO_GLOBAL_PARTITION
+   vec_start = IJpartitioning[0];
+   vec_stop  = IJpartitioning[1]-1;
+#else
    vec_start = IJpartitioning[my_id];
    vec_stop  = IJpartitioning[my_id+1]-1;
+#endif
 
    if (vec_start > vec_stop) 
    {
@@ -653,8 +688,13 @@ hypre_IJVectorGetValuesPar(hypre_IJVector *vector,
       exit(1);
    }
 
+#ifdef HYPRE_NO_GLOBAL_PARTITION
+   vec_start = IJpartitioning[0];
+   vec_stop  = IJpartitioning[1];
+#else
    vec_start = IJpartitioning[my_id];
    vec_stop  = IJpartitioning[my_id+1];
+#endif
 
    if (vec_start > vec_stop) 
    {
@@ -743,8 +783,10 @@ hypre_IJVectorAssembleOffProcValsPar( hypre_IJVector *vector,
    MPI_Comm_size(comm,&num_procs);
    MPI_Comm_rank(comm, &my_id);
    partitioning = hypre_IJVectorPartitioning(vector);
+
    first_index = partitioning[my_id];
-   
+
+
    info = hypre_CTAlloc(int,num_procs);  
    proc_id_mem = hypre_CTAlloc(int,current_num_elmts);
    for (i=0; i < current_num_elmts; i++)

@@ -38,6 +38,7 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
    double          *A_offd_data;
    int             *A_offd_i;
 
+#ifndef HYPRE_NO_GLOBAL_PARTITION
    hypre_CSRMatrix *P_diag;
    double          *P_diag_data;
    int             *P_diag_i;
@@ -46,9 +47,11 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
    double          *P_offd_data;
    int             *P_offd_i;
 
+   int	    numrows;
+#endif
    int		   *row_starts;
 
-   int	    numrows;
+ 
    int      num_levels; 
    int      coarsen_type;
    int      measure_type;
@@ -60,20 +63,29 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
    /* Local variables */
 
    int       level;
-   int       i,j;
+   int       j;
    int       fine_size;
-   int       coarse_size;
-   int       entries;
+ 
    int       min_entries;
    int       max_entries;
 
    int       num_procs,my_id;
 
-   double    avg_entries;
-   double    rowsum;
+
    double    min_rowsum;
    double    max_rowsum;
    double    sparse;
+
+#ifndef HYPRE_NO_GLOBAL_PARTITION
+   int       i;
+   
+
+   int       coarse_size;
+   int       entries;
+
+   double    avg_entries;
+   double    rowsum;
+
    double    min_weight;
    double    max_weight;
 
@@ -83,7 +95,7 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
    double    global_max_rsum;
    double    global_min_wt;
    double    global_max_wt;
-
+#endif
    double  *num_coeffs;
    double  *num_variables;
    double   total_variables; 
@@ -206,6 +218,10 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
       	printf(" measures are determined %s\n\n", 
                   (measure_type ? "globally" : "locally"));
 
+#ifdef HYPRE_NO_GLOBAL_PARTITION
+      printf( "\nCannot print Operator and Interpolation Matrix Information\n due to 'no global partition' option.\n\n");
+
+#else
       printf( "\nOperator Matrix Information:\n\n");
 
       printf("            nonzero         entries p");
@@ -214,6 +230,7 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
       printf("avg       min         max\n");
       printf("=======================================");
       printf("============================\n");
+#endif
    }
   
    /*-----------------------------------------------------
@@ -248,7 +265,7 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
        max_entries = 0;
        min_rowsum = 0.0;
        max_rowsum = 0.0;
-
+#ifndef HYPRE_NO_GLOBAL_PARTITION
   if (hypre_CSRMatrixNumRows(A_diag))
   {
        min_entries = (A_diag_i[1]-A_diag_i[0])+(A_offd_i[1]-A_offd_i[0]);
@@ -276,44 +293,45 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
            max_rowsum = hypre_max(rowsum, max_rowsum);
        }
   }
-       avg_entries = global_nonzeros / ((double) fine_size);
+  avg_entries = global_nonzeros / ((double) fine_size);
 
-       send_buff[0] = (double) min_entries;
-       send_buff[1] = (double) max_entries;
-       send_buff[2] = min_rowsum;
-       send_buff[3] = max_rowsum;
-
-       MPI_Gather(send_buff,4,MPI_DOUBLE,gather_buff,4,MPI_DOUBLE,0,comm);
-
-       if (my_id == 0)
-       {
-          global_min_e = 1000;
-          global_max_e = 0;
-          global_min_rsum = 1000.0;
-          global_max_rsum = 0.0;
-          
-          for (j = 0; j < num_procs; j++)
-          {
-	      numrows = row_starts[j+1]-row_starts[j];
-	      if (numrows)
-	      {
-                 global_min_e = hypre_min(global_min_e, (int) gather_buff[j*4]);
-                 global_min_rsum = hypre_min(global_min_rsum, gather_buff[j*4 +2]);
-              }
-	      global_max_e = hypre_max(global_max_e, (int) gather_buff[j*4 +1]);
-              global_max_rsum = hypre_max(global_max_rsum, gather_buff[j*4 +3]);
-          }
-
-          printf( "%2d %7d %8.0f  %0.3f  %4d %4d",
-                    level, fine_size, global_nonzeros, sparse, global_min_e, 
-                    global_max_e);
-          printf("  %4.1f  %10.3e  %10.3e\n", avg_entries,
-                                    global_min_rsum, global_max_rsum);
-       }
+  send_buff[0] = (double) min_entries;
+  send_buff[1] = (double) max_entries;
+  send_buff[2] = min_rowsum;
+  send_buff[3] = max_rowsum;
+  
+  MPI_Gather(send_buff,4,MPI_DOUBLE,gather_buff,4,MPI_DOUBLE,0,comm);
+  
+  if (my_id == 0)
+  {
+     global_min_e = 1000;
+     global_max_e = 0;
+     global_min_rsum = 1000.0;
+     global_max_rsum = 0.0;
+     
+     for (j = 0; j < num_procs; j++)
+     {
+        numrows = row_starts[j+1]-row_starts[j];
+        if (numrows)
+        {
+           global_min_e = hypre_min(global_min_e, (int) gather_buff[j*4]);
+           global_min_rsum = hypre_min(global_min_rsum, gather_buff[j*4 +2]);
+        }
+        global_max_e = hypre_max(global_max_e, (int) gather_buff[j*4 +1]);
+        global_max_rsum = hypre_max(global_max_rsum, gather_buff[j*4 +3]);
+     }
+     
+     printf( "%2d %7d %8.0f  %0.3f  %4d %4d",
+             level, fine_size, global_nonzeros, sparse, global_min_e, 
+             global_max_e);
+     printf("  %4.1f  %10.3e  %10.3e\n", avg_entries,
+            global_min_rsum, global_max_rsum);
+  }
+#endif  
 
    }
 
-
+#ifndef HYPRE_NO_GLOBAL_PARTITION
        
    if (my_id == 0)
    {
@@ -448,6 +466,7 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
                     global_min_rsum, global_max_rsum);
        }
    }
+#endif
 
    total_variables = 0;
    operat_cmplxty = 0;

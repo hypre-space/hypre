@@ -27,9 +27,15 @@ int HYPRE_IJVectorCreate( MPI_Comm comm,
 {
    hypre_IJVector *vec;
    int num_procs, my_id, *partitioning;
-   int ierr, i, i2;
-   int *info;
-   int *recv_buf;
+   int ierr;
+ 
+#ifdef HYPRE_NO_GLOBAL_PARTITION
+   int  row0, rowN;
+#else
+  int *recv_buf;
+  int *info;
+  int i, i2;
+#endif
 
    vec = hypre_CTAlloc(hypre_IJVector, 1);
    
@@ -41,6 +47,35 @@ int HYPRE_IJVectorCreate( MPI_Comm comm,
 
    MPI_Comm_size(comm, &num_procs);
    MPI_Comm_rank(comm, &my_id);
+
+#ifdef HYPRE_NO_GLOBAL_PARTITION
+
+   partitioning = hypre_CTAlloc(int, 2);
+
+   partitioning[0] = jlower;
+   partitioning[1] = jupper+1;
+
+      
+   /* now we need the global number of rows as well
+      as the global first row index */
+
+   /* proc 0 has the first row  */
+   if (my_id==0) 
+   {
+      row0 = jlower;
+   }
+   MPI_Bcast(&row0, 1, MPI_INT, 0, comm);
+   /* proc (num_procs-1) has the last row  */   
+   if (my_id == (num_procs-1))
+   {
+      rowN = jupper;
+   }
+   MPI_Bcast(&rowN, 1, MPI_INT, num_procs-1, comm);
+
+   hypre_IJVectorGlobalFirstRow(vec) = row0;
+   hypre_IJVectorGlobalNumRows(vec) = rowN - row0 + 1;
+   
+#else
 
    info = hypre_CTAlloc(int,2);
    recv_buf = hypre_CTAlloc(int, 2*num_procs);
@@ -69,6 +104,15 @@ int HYPRE_IJVectorCreate( MPI_Comm comm,
 
    hypre_TFree(info);
    hypre_TFree(recv_buf);
+
+
+   hypre_IJVectorGlobalFirstRow(vec) = partitioning[0];
+   hypre_IJVectorGlobalNumRows(vec)= partitioning[num_procs]-1;
+   
+
+
+#endif
+
 
    hypre_IJVectorComm(vec)         = comm;
    hypre_IJVectorPartitioning(vec) = partitioning;
@@ -430,9 +474,13 @@ HYPRE_IJVectorGetLocalRange( HYPRE_IJVector vector, int *jlower, int *jupper )
    partitioning = hypre_IJVectorPartitioning(vec);
    MPI_Comm_rank(comm, &my_id);
 
+#ifdef HYPRE_NO_GLOBAL_PARTITION
+   *jlower = partitioning[0];
+   *jupper = partitioning[1]-1;
+#else
    *jlower = partitioning[my_id];
    *jupper = partitioning[my_id+1]-1;
-
+#endif
    return 0;
 }
 
@@ -541,9 +589,13 @@ HYPRE_IJVectorPrint( HYPRE_IJVector  vector,
    }
 
    partitioning = hypre_IJVectorPartitioning(vector);
+#ifdef HYPRE_NO_GLOBAL_PARTITION
+   jlower = partitioning[0];
+   jupper = partitioning[1] - 1;
+#else
    jlower = partitioning[myid];
    jupper = partitioning[myid+1] - 1;
-
+#endif
    fprintf(file, "%d %d\n", jlower, jupper);
 
    for (j = jlower; j <= jupper; j++)

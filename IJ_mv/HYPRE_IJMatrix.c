@@ -28,12 +28,19 @@ int HYPRE_IJMatrixCreate( MPI_Comm comm, int ilower, int iupper,
    int *row_partitioning;
    int *col_partitioning;
    int *info;
-   int *recv_buf;
    int num_procs;
-   int i, i4;
-   int square;
+   int myid;
+   
 
    hypre_IJMatrix *ijmatrix;
+
+#ifdef HYPRE_NO_GLOBAL_PARTITION
+   int  row0, col0, rowN, colN;
+#else
+ int *recv_buf;
+   int i, i4;
+   int square;
+#endif
 
    ijmatrix = hypre_CTAlloc(hypre_IJMatrix, 1);
 
@@ -44,15 +51,8 @@ int HYPRE_IJMatrixCreate( MPI_Comm comm, int ilower, int iupper,
    hypre_IJMatrixAssembleFlag(ijmatrix) = 0;
 
    MPI_Comm_size(comm,&num_procs);
- 
-   info = hypre_CTAlloc(int,4);
-   recv_buf = hypre_CTAlloc(int,4*num_procs);
-   row_partitioning = hypre_CTAlloc(int, num_procs+1);
-
-   info[0] = ilower;
-   info[1] = iupper;
-   info[2] = jlower;
-   info[3] = jupper;
+   MPI_Comm_rank(comm, &myid);
+   
 
    if (ilower > iupper+1)
    {
@@ -66,6 +66,63 @@ int HYPRE_IJMatrixCreate( MPI_Comm comm, int ilower, int iupper,
       printf("Warning! jlower larger than jupper+1!\n");
    }
 
+
+#ifdef HYPRE_NO_GLOBAL_PARTITION
+
+   info = hypre_CTAlloc(int,2);
+
+   row_partitioning = hypre_CTAlloc(int, 2);
+   col_partitioning = hypre_CTAlloc(int, 2);
+
+   row_partitioning[0] = ilower;
+   row_partitioning[1] = iupper+1;
+   col_partitioning[0] = jlower;
+   col_partitioning[1] = jupper+1;
+
+   /* now we need the global number of rows and columns as well
+      as the global first row and column index */
+
+   /* proc 0 has the first row and col */
+   if (myid==0) 
+   {
+      info[0] = ilower;
+      info[1] = jlower;
+   }
+   MPI_Bcast(info, 2, MPI_INT, 0, comm);
+   row0 = info[0];
+   col0 = info[1];
+   
+   /* proc (num_procs-1) has the last row and col */   
+   if (myid == (num_procs-1))
+   {
+      info[0] = iupper;
+      info[1] = jupper;
+   }
+   MPI_Bcast(info, 2, MPI_INT, num_procs-1, comm);
+
+   rowN = info[0];
+   colN = info[1];
+
+   hypre_IJMatrixGlobalFirstRow(ijmatrix) = row0;
+   hypre_IJMatrixGlobalFirstCol(ijmatrix) = col0;
+   hypre_IJMatrixGlobalNumRows(ijmatrix) = rowN - row0 + 1;
+   hypre_IJMatrixGlobalNumCols(ijmatrix) = colN - col0 + 1;
+   
+   hypre_TFree(info);
+   
+
+#else
+
+   info = hypre_CTAlloc(int,4);
+   recv_buf = hypre_CTAlloc(int,4*num_procs);
+   row_partitioning = hypre_CTAlloc(int, num_procs+1);
+
+   info[0] = ilower;
+   info[1] = iupper;
+   info[2] = jlower;
+   info[3] = jupper;
+
+  
    /* Generate row- and column-partitioning through information exchange
       across all processors, check whether the matrix is square, and
       if the partitionings match. i.e. no overlaps or gaps,
@@ -121,9 +178,23 @@ int HYPRE_IJMatrixCreate( MPI_Comm comm, int ilower, int iupper,
       col_partitioning[num_procs] = recv_buf[num_procs*4-1]+1;
    }
 
+
+
+   hypre_IJMatrixGlobalFirstRow(ijmatrix) = row_partitioning[0];
+   hypre_IJMatrixGlobalFirstCol(ijmatrix) = col_partitioning[0];
+   hypre_IJMatrixGlobalNumRows(ijmatrix) = row_partitioning[num_procs] - 
+      row_partitioning[0];
+   hypre_IJMatrixGlobalNumCols(ijmatrix) = col_partitioning[num_procs] - 
+      col_partitioning[0];
+   
+
+
    hypre_TFree(info);
    hypre_TFree(recv_buf);
    
+#endif
+
+
    hypre_IJMatrixRowPartitioning(ijmatrix) = row_partitioning;
    hypre_IJMatrixColPartitioning(ijmatrix) = col_partitioning;
 
@@ -454,10 +525,17 @@ HYPRE_IJMatrixGetLocalRange( HYPRE_IJMatrix matrix, int *ilower, int *iupper,
 
    MPI_Comm_rank(comm, &my_id);
 
+#ifdef HYPRE_NO_GLOBAL_PARTITION
+   *ilower = row_partitioning[0];
+   *iupper = row_partitioning[1]-1;
+   *jlower = col_partitioning[0];
+   *jupper = col_partitioning[1]-1;
+#else
    *ilower = row_partitioning[my_id];
    *iupper = row_partitioning[my_id+1]-1;
    *jlower = col_partitioning[my_id];
    *jupper = col_partitioning[my_id+1]-1;
+#endif
 
    return 0;
 }
@@ -694,11 +772,17 @@ HYPRE_IJMatrixPrint( HYPRE_IJMatrix  matrix,
 
    row_partitioning = hypre_IJMatrixRowPartitioning(matrix);
    col_partitioning = hypre_IJMatrixColPartitioning(matrix);
+#ifdef HYPRE_NO_GLOBAL_PARTITION
+   ilower = row_partitioning[0];
+   iupper = row_partitioning[1] - 1;
+   jlower = col_partitioning[0];
+   jupper = col_partitioning[1] - 1;
+#else
    ilower = row_partitioning[myid];
    iupper = row_partitioning[myid+1] - 1;
    jlower = col_partitioning[myid];
    jupper = col_partitioning[myid+1] - 1;
-
+#endif
    fprintf(file, "%d %d %d %d\n", ilower, iupper, jlower, jupper);
 
    ierr += HYPRE_IJMatrixGetObject(matrix, &object);

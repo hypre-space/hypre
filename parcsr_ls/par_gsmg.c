@@ -481,7 +481,11 @@ hypre_BoomerAMGCreateSmoothVecs(void         *data,
 
    if (!comm_pkg)
    {
-        hypre_MatvecCommPkgCreate(A);
+#ifdef HYPRE_NO_GLOBAL_PARTITION
+      hypre_NewCommPkgCreate(A);
+#else
+      hypre_MatvecCommPkgCreate(A);
+#endif
         comm_pkg = hypre_ParCSRMatrixCommPkg(A);
    }
 
@@ -837,7 +841,11 @@ hypre_BoomerAMGBuildInterpLS( hypre_ParCSRMatrix   *A,
 
    if (!comm_pkg)
    {
-	hypre_MatvecCommPkgCreate(S);
+#ifdef HYPRE_NO_GLOBAL_PARTITION
+      hypre_NewCommPkgCreate(S);
+#else
+      hypre_MatvecCommPkgCreate(S);
+#endif
 	comm_pkg = hypre_ParCSRMatrixCommPkg(S); 
    }
 
@@ -1373,8 +1381,17 @@ hypre_BoomerAMGBuildInterpGSMG( hypre_ParCSRMatrix   *A,
    MPI_Comm_size(comm, &num_procs);   
    MPI_Comm_rank(comm,&my_id);
    num_threads = hypre_NumThreads();
+
+#ifdef HYPRE_NO_GLOBAL_PARTITION
+   my_first_cpt = num_cpts_global[0];
+   total_global_cpts = 0; /* we will set this later for the matrix in the setup */
+
+   /* if (myid == (num_procs -1)) total_global_cpts = coarse_pts_global[1];
+      MPI_Bcast(&total_global_cpts, 1, MPI_INT, num_procs-1, comm);*/
+#else
    my_first_cpt = num_cpts_global[my_id];
    total_global_cpts = num_cpts_global[num_procs];
+#endif
 
    /*-------------------------------------------------------------------
     * Get the CF_marker data for the off-processor columns
@@ -1388,7 +1405,11 @@ hypre_BoomerAMGBuildInterpGSMG( hypre_ParCSRMatrix   *A,
 
    if (!comm_pkg)
    {
+#ifdef HYPRE_NO_GLOBAL_PARTITION
+      hypre_NewCommPkgCreate(S);
+#else
 	hypre_MatvecCommPkgCreate(S);
+#endif
 	comm_pkg = hypre_ParCSRMatrixCommPkg(S); 
    }
 
