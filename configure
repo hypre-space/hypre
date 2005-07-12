@@ -979,6 +979,8 @@ Optional Packages:
                           /usr/fei/include>. The options --with-fei-libs,
                           --with-fei-inc-dir and --with-fei-lib-dir must be
                           used together.
+    --with-no-global-partition
+                          Do not use global partitioning.
     --with-COMM_SIMPLE    Do not use MPI derived data types. This option is
                           automatically chosen for IBM, may also be selected
                           for other platforms as well.
@@ -2113,6 +2115,21 @@ if test "${with_fei_inc_dir+set}" = set; then
  casc_user_chose_fei=yes
 else
   FEIINTERNAL=yes; FEIINCLUDE=""
+
+fi;
+
+
+# Check whether --with-no-global-partition or --without-no-global-partition was given.
+if test "${with_no_global_partition+set}" = set; then
+  withval="$with_no_global_partition"
+  if test "$withval" = "yes"
+ then
+
+cat >>confdefs.h <<\_ACEOF
+#define HYPRE_NO_GLOBAL_PARTITION 1
+_ACEOF
+
+ fi
 
 fi;
 
@@ -5150,7 +5167,7 @@ fi
 
 
 # Provide some information about the compiler.
-echo "$as_me:5153:" \
+echo "$as_me:5170:" \
      "checking for Fortran 77 compiler version" >&5
 ac_compiler=`set X $ac_compile; echo $2`
 { (eval echo "$as_me:$LINENO: \"$ac_compiler --version </dev/null >&5\"") >&5
@@ -5346,7 +5363,7 @@ _ACEOF
 # flags.
 ac_save_FFLAGS=$FFLAGS
 FFLAGS="$FFLAGS $ac_verb"
-(eval echo $as_me:5349: \"$ac_link\") >&5
+(eval echo $as_me:5366: \"$ac_link\") >&5
 ac_f77_v_output=`eval $ac_link 5>&1 2>&1 | grep -v 'Driving:'`
 echo "$ac_f77_v_output" >&5
 FFLAGS=$ac_save_FFLAGS
@@ -5424,7 +5441,7 @@ _ACEOF
 # flags.
 ac_save_FFLAGS=$FFLAGS
 FFLAGS="$FFLAGS $ac_cv_prog_f77_v"
-(eval echo $as_me:5427: \"$ac_link\") >&5
+(eval echo $as_me:5444: \"$ac_link\") >&5
 ac_f77_v_output=`eval $ac_link 5>&1 2>&1 | grep -v 'Driving:'`
 echo "$ac_f77_v_output" >&5
 FFLAGS=$ac_save_FFLAGS
@@ -9288,7 +9305,7 @@ fi
 
 if test "$casc_using_purify" = "yes"
 then
-   HYPRE_PURIFY_PATH="/usr/apps/Rational"
+   HYPRE_PURIFY_PATH="/usr/global/tools/Rational/releases/purify/i386_linux2.2003a.06.13.FixPack0177"
    CC="${HYPRE_PURIFY_PATH}/purify $CC ${casc_purify_flags}"
    CXX="${HYPRE_PURIFY_PATH}/purify $CXX ${casc_purify_flags}"
 fi

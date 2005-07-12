@@ -524,6 +524,15 @@ dnl * section identifies the options and assigns yes or no values to
 dnl * appropriate macros.  These values will be used to determine 
 dnl * compilers, flags and libraries needed.
 dnl *********************************************************************
+AC_ARG_WITH(no-global-partition,
+  AS_HELP_STRING([  --with-no-global-partition],
+                 [ Do not use global partitioning.]),
+[if test "$withval" = "yes"
+ then
+   AC_DEFINE(HYPRE_NO_GLOBAL_PARTITION,1,[No global partitioning being used.])
+ fi]
+)
+
 AC_ARG_WITH(COMM_SIMPLE,
   AS_HELP_STRING([  --with-COMM_SIMPLE],
                  [ Do not use MPI derived data types.  This option is

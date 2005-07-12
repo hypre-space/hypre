@@ -140,6 +140,9 @@
 /* Using internal Hypre routines. */
 #undef HYPRE_USING_HYPRE_LAPACK
 
+/* No global partitioning being used */
+#undef HYPRE_NO_GLOBAL_PARTITION
+
 /* Enable OpenMP support */
 #undef HYPRE_USING_OPENMP
 
