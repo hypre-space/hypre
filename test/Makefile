@@ -252,14 +252,10 @@ distclean: clean
 ##################################################################
 # Rules
 ##################################################################
-PURIFY = purify
-PURIFY_TO_FILE = purify \
- -log-file=struct_linear_solvers.purify \
- -append-logfile=yes
 
 struct: struct.o
 	@echo  "Building" $@ "... "
-	${CC} -o $@ $@.o ${STRUCT_LFLAGS}
+	/usr/apps/ParaSoft/default/bin.linux2/insure -o $@ $@.o ${STRUCT_LFLAGS}
 
 sstruct: sstruct.o
 	@echo  "Building" $@ "... "
