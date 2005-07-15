@@ -23,6 +23,7 @@
 */
 
 #include "krylov.h"
+#include "utilities.h"
 
 /*--------------------------------------------------------------------------
  * hypre_PCGFunctionsCreate
@@ -573,7 +574,7 @@ hypre_PCGSolve( void *pcg_vdata,
 	 cf_ave_1 = pow( i_prod / i_prod_0, 1.0/(2.0*i)); 
 
          weight   = fabs(cf_ave_1 - cf_ave_0);
-         weight   = weight / max(cf_ave_1, cf_ave_0);
+         weight   = weight / hypre_max(cf_ave_1, cf_ave_0);
          weight   = 1.0 - weight;
 #if 0
          printf("I = %d: cf_new = %e, cf_old = %e, weight = %e\n",

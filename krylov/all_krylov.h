@@ -27,9 +27,11 @@
 #include <stdio.h>
 #include <math.h>
 
+/*
 #ifndef max
 #define max(a,b)  (((a)<(b)) ? (b) : (a))
 #endif
+*/
 
 #define hypre_CTAllocF(type, count, funcs) \
 ( (type *)(*(funcs->CAlloc))\
