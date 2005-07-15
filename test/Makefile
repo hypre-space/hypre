@@ -255,7 +255,7 @@ distclean: clean
 
 struct: struct.o
 	@echo  "Building" $@ "... "
-	/usr/apps/ParaSoft/default/bin.linux2/insure -o $@ $@.o ${STRUCT_LFLAGS}
+	${CC} -o $@ $@.o ${STRUCT_LFLAGS}
 
 sstruct: sstruct.o
 	@echo  "Building" $@ "... "
