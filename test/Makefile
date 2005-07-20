@@ -10,7 +10,7 @@
 include ../config/Makefile.config
 
 CINCLUDES = ${INCLUDES} ${MPIINCLUDE}
-CDEFS = -DHYPRE_TIMING
+CDEFS = -DHYPRE_TIMING -DHYPRE_FORTRAN
 CXXDEFS = -DNOFEI -DHYPRE_TIMING -DMPICH_SKIP_MPICXX
 
 C_COMPILE_FLAGS = \
@@ -248,6 +248,7 @@ distclean: clean
 	rm -f ${HYPRE_BABEL_DRIVER_CXX_EXECS}
 	rm -f ${HYPRE_BABEL_DRIVER_F77_EXECS}
 	rm -f ${HYPRE_FEI_DRIVER_CXX_EXECS}
+	rm -f ex*_for
 
 ##################################################################
 # Rules
@@ -256,6 +257,50 @@ distclean: clean
 struct: struct.o
 	@echo  "Building" $@ "... "
 	${CC} -o $@ $@.o ${STRUCT_LFLAGS}
+
+fij_mv.o: fij_mv.f
+	@echo  "Building" $@ "... "
+	${F77} -c fij_mv.f  ${FFLAGS}
+
+fparcsr_ls.o: fparcsr_ls.f
+	@echo  "Building" $@ "... "
+	${F77} -c fparcsr_ls.f  ${FFLAGS}
+
+fparcsr_mv.o: fparcsr_mv.f
+	@echo  "Building" $@ "... "
+	${F77} -c fparcsr_mv.f ${FFLAGS}
+
+fsstruct_ls.o: fsstruct_ls.f
+	@echo  "Building" $@ "... "
+	${F77} -c fsstruct_ls.f  ${FFLAGS}
+
+fsstruct_mv.o: fsstruct_mv.f
+	@echo  "Building" $@ "... "
+	${F77} -c fsstruct_mv.f ${FFLAGS}
+
+fstruct_ls.o: fstruct_ls.f
+	@echo  "Building" $@ "... "
+	${F77} -c fstruct_ls.f  ${FFLAGS}
+
+fstruct_mv.o: fstruct_mv.f
+	@echo  "Building" $@ "... "
+	${F77} -c fstruct_mv.f ${FFLAGS}
+
+struct_for: fstruct_mv.o fstruct_ls.o struct_for.o
+	@echo  "Building" $@ "... "
+	${CC} -o $@ fstruct_mv.o fstruct_ls.o $@.o ${FFLAGS} ${STRUCT_LFLAGS}
+
+ex1_for: fstruct_mv.o fstruct_ls.o ex1_for.o
+	@echo  "Building" $@ "... "
+	${CC} -o $@ fstruct_mv.o fstruct_ls.o $@.o ${FFLAGS} ${STRUCT_LFLAGS}
+
+ex3_for: fstruct_mv.o fstruct_ls.o ex3_for.o
+	@echo  "Building" $@ "... "
+	${CC} -o $@ fstruct_mv.o fstruct_ls.o $@.o ${FFLAGS} ${STRUCT_LFLAGS}
+
+ex5_for: fij_mv.o fparcsr_mv.o fparcsr_ls.o ex5_for.o
+	@echo  "Building" $@ "... "
+	${CC} -o $@ fij_mv.o fparcsr_mv.o fparcsr_ls.o $@.o ${FFLAGS} ${LFLAGS}
 
 sstruct: sstruct.o
 	@echo  "Building" $@ "... "
