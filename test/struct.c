@@ -25,7 +25,9 @@
  
 #include "fortran_matrix.h"
 #include "HYPRE_lobpcg.h"
-#include "HYPRE_interpreter.h"
+#include "interpreter.h"
+#include "multivector.h"
+#include "HYPRE_MatvecFunctions.h"
 #include "HYPRE_struct_int.h"
 
 /* end lobpcg */
@@ -147,8 +149,8 @@ main( int   argc,
 
    FILE* filePtr;
 
-   hypre_MultiVectorPtr eigenvectors = NULL;
-   hypre_MultiVectorPtr constrains = NULL;
+   mv_MultiVectorPtr eigenvectors = NULL;
+   mv_MultiVectorPtr constrains = NULL;
    double* eigenvalues = NULL;
 
    double* residuals;
@@ -161,8 +163,8 @@ main( int   argc,
 
    HYPRE_StructSolver        lobpcg_solver;
 
-   HYPRE_InterfaceInterpreter* interpreter;
-
+   mv_InterfaceInterpreter* interpreter;
+   HYPRE_MatvecFunctions matvec_fn;
    /* end lobpcg */
 
    /*-----------------------------------------------------------
@@ -1603,9 +1605,10 @@ main( int   argc,
 
    if ( lobpcgFlag ) {
 
-     interpreter = hypre_CTAlloc(HYPRE_InterfaceInterpreter,1);
+     interpreter = hypre_CTAlloc(mv_InterfaceInterpreter,1);
 
      HYPRE_StructSetupInterpreter( interpreter );
+     HYPRE_StructSetupMatvec(&matvec_fn);
 
      if (myid != 0)
        verbosity = 0;
@@ -1720,7 +1723,7 @@ main( int   argc,
        hypre_FinalizeTiming(time_index);
        hypre_ClearTiming();
    
-       HYPRE_LOBPCGCreate(interpreter, (HYPRE_Solver*)&lobpcg_solver);
+       HYPRE_LOBPCGCreate(interpreter, &matvec_fn, (HYPRE_Solver*)&lobpcg_solver);
        HYPRE_LOBPCGSetMaxIter((HYPRE_Solver)lobpcg_solver, maxIterations);
        HYPRE_LOBPCGSetPrecondUsageMode((HYPRE_Solver)lobpcg_solver, pcgMode);
        HYPRE_LOBPCGSetTol((HYPRE_Solver)lobpcg_solver, tol);
@@ -1734,15 +1737,15 @@ main( int   argc,
        HYPRE_LOBPCGSetup((HYPRE_Solver)lobpcg_solver, (HYPRE_Matrix)A, 
 			 (HYPRE_Vector)b, (HYPRE_Vector)x);
 
-       eigenvectors = hypre_MultiVectorCreateFromSampleVector( interpreter,
+       eigenvectors = mv_MultiVectorCreateFromSampleVector( interpreter,
 							       blockSize, 
 							       x );
        eigenvalues = (double*) calloc( blockSize, sizeof(double) );
 
        if ( lobpcgSeed )
-	 hypre_MultiVectorSetRandom( eigenvectors, lobpcgSeed );
+	 mv_MultiVectorSetRandom( eigenvectors, lobpcgSeed );
        else
-	 hypre_MultiVectorSetRandom( eigenvectors, (unsigned int)time(0) );
+	 mv_MultiVectorSetRandom( eigenvectors, (unsigned int)time(0) );
 
        time_index = hypre_InitializeTiming("LOBPCG Solve");
        hypre_BeginTiming(time_index);
@@ -1777,8 +1780,6 @@ main( int   argc,
 
        if ( printLevel ) {
 		  
-	 hypre_MultiVectorPrint(eigenvectors, "vectors");
-
 	 if ( myid == 0 ) {	  
 	   if ( (filePtr = fopen("values.txt", "w")) ) {
 	     fprintf(filePtr, "%d\n", blockSize);
@@ -1837,7 +1838,7 @@ main( int   argc,
 	 }
 
        HYPRE_LOBPCGDestroy((HYPRE_Solver)lobpcg_solver);
-       hypre_MultiVectorDestroy( eigenvectors );
+       mv_MultiVectorDestroy( eigenvectors );
        free( eigenvalues );
     
      } 
@@ -1846,7 +1847,7 @@ main( int   argc,
        time_index = hypre_InitializeTiming("LOBPCG Setup");
        hypre_BeginTiming(time_index);
 
-       HYPRE_LOBPCGCreate(interpreter, (HYPRE_Solver*)&solver);
+       HYPRE_LOBPCGCreate(interpreter, &matvec_fn, (HYPRE_Solver*)&solver);
        HYPRE_LOBPCGSetMaxIter( (HYPRE_Solver)solver, maxIterations );
        HYPRE_LOBPCGSetTol( (HYPRE_Solver)solver, tol );
        HYPRE_LOBPCGSetPrintLevel( (HYPRE_Solver)solver, verbosity );
@@ -1952,15 +1953,15 @@ main( int   argc,
        hypre_FinalizeTiming(time_index);
        hypre_ClearTiming();
        
-       eigenvectors = hypre_MultiVectorCreateFromSampleVector( interpreter,
+       eigenvectors = mv_MultiVectorCreateFromSampleVector( interpreter,
 							       blockSize, 
 							       x );
        eigenvalues = (double*) calloc( blockSize, sizeof(double) );
        
        if ( lobpcgSeed )
-	 hypre_MultiVectorSetRandom( eigenvectors, lobpcgSeed );
+	 mv_MultiVectorSetRandom( eigenvectors, lobpcgSeed );
        else
-	 hypre_MultiVectorSetRandom( eigenvectors, (unsigned int)time(0) );
+	 mv_MultiVectorSetRandom( eigenvectors, (unsigned int)time(0) );
        
        time_index = hypre_InitializeTiming("PCG Solve");
        hypre_BeginTiming(time_index);
@@ -1995,8 +1996,6 @@ main( int   argc,
 
        if ( printLevel ) {
 	  
-	 hypre_MultiVectorPrint(eigenvectors, "vectors");
-
 	 if ( myid == 0 ) {
 	   if ( (filePtr = fopen("values.txt", "w")) ) {
 	     fprintf(filePtr, "%d\n", blockSize);
@@ -2054,7 +2053,7 @@ main( int   argc,
 	   HYPRE_StructJacobiDestroy(precond);
 	 }
        
-       hypre_MultiVectorDestroy( eigenvectors );
+       mv_MultiVectorDestroy( eigenvectors );
        free( eigenvalues );
      }
 

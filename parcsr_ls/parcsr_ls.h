@@ -259,8 +259,8 @@ int HYPRE_ParCSRHybridGetFinalRelativeResidualNorm( HYPRE_Solver solver , double
 int hypre_ParSetRandomValues( void *v , int seed );
 int hypre_ParPrintVector( void *v , const char *file );
 void *hypre_ParReadVector( MPI_Comm comm , const char *file );
-int HYPRE_ParCSRSetupInterpreter( HYPRE_InterfaceInterpreter *i );
-int HYPRE_TempParCSRSetupInterpreter( HYPRE_InterfaceInterpreter *i );
+int HYPRE_ParCSRSetupInterpreter( mv_InterfaceInterpreter *i );
+int HYPRE_TempParCSRSetupInterpreter( mv_InterfaceInterpreter *i );
 
 /* HYPRE_parcsr_ParaSails.c */
 int HYPRE_ParCSRParaSailsCreate( MPI_Comm comm , HYPRE_Solver *solver );

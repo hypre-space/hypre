@@ -1,10 +1,7 @@
 #ifndef TEMPORARY_MULTIVECTOR_FUNCTION_PROTOTYPES
 #define TEMPORARY_MULTIVECTOR_FUNCTION_PROTOTYPES
 
-#include "utilities.h"
-
-#include "HYPRE_interpreter.h"
-#include "multivector.h"
+#include "interpreter.h"
 
 typedef struct
 {
@@ -14,11 +11,12 @@ typedef struct
   int	 ownsVectors;
   int    ownsMask;
   
-  HYPRE_InterfaceInterpreter* interpreter;
+  mv_InterfaceInterpreter* interpreter;
   
-} hypre_TempMultiVector;
+} mv_TempMultiVector;
 
-typedef hypre_TempMultiVector* hypre_TempMultiVectorPtr;
+/*typedef struct mv_TempMultiVector* mv_TempMultiVectorPtr;  */
+typedef  mv_TempMultiVector* mv_TempMultiVectorPtr;
 
 /*******************************************************************/
 /*
@@ -73,72 +71,60 @@ extern "C" {
 #endif
 
 void*
-hypre_TempMultiVectorCreateFromSampleVector( void*, int n, void* sample );
+mv_TempMultiVectorCreateFromSampleVector( void*, int n, void* sample );
 
 void*
-hypre_TempMultiVectorCreateCopy( void*, int copyValues );
+mv_TempMultiVectorCreateCopy( void*, int copyValues );
 
 void 
-hypre_TempMultiVectorDestroy( void* );
+mv_TempMultiVectorDestroy( void* );
 
 int
-hypre_TempMultiVectorWidth( void* v );
+mv_TempMultiVectorWidth( void* v );
 
 int
-hypre_TempMultiVectorHeight( void* v );
+mv_TempMultiVectorHeight( void* v );
 
 void
-hypre_TempMultiVectorSetMask( void* v, int* mask );
+mv_TempMultiVectorSetMask( void* v, int* mask );
 
 void 
-hypre_TempMultiVectorClear( void* );
+mv_TempMultiVectorClear( void* );
 
 void 
-hypre_TempMultiVectorSetRandom( void* v, int seed );
+mv_TempMultiVectorSetRandom( void* v, int seed );
 
 void 
-hypre_TempMultiVectorCopy( void* src, void* dest );
+mv_TempMultiVectorCopy( void* src, void* dest );
 
 void 
-hypre_TempMultiVectorAxpy( double, void*, void* ); 
+mv_TempMultiVectorAxpy( double, void*, void* ); 
 
 void 
-hypre_TempMultiVectorByMultiVector( void*, void*,
+mv_TempMultiVectorByMultiVector( void*, void*,
 				    int gh, int h, int w, double* v );
 
 void 
-hypre_TempMultiVectorByMultiVectorDiag( void* x, void* y,
+mv_TempMultiVectorByMultiVectorDiag( void* x, void* y,
 					int* mask, int n, double* diag );
 
 void 
-hypre_TempMultiVectorByMatrix( void*, 
+mv_TempMultiVectorByMatrix( void*, 
 			       int gh, int h, int w, double* v,
 			       void* );
 
 void 
-hypre_TempMultiVectorXapy( void* x, 
+mv_TempMultiVectorXapy( void* x, 
 			   int gh, int h, int w, double* v,
 			   void* y );
 
-void hypre_TempMultiVectorByDiagonal( void* x, 
+void mv_TempMultiVectorByDiagonal( void* x, 
 				      int* mask, int n, double* diag,
 				      void* y );
 
 void 
-hypre_TempMultiVectorEval( void (*f)( void*, void*, void* ), void* par,
+mv_TempMultiVectorEval( void (*f)( void*, void*, void* ), void* par,
 			   void* x, void* y );
-
-int
-hypre_TempMultiVectorPrint( void* x, const char* fileName );
-
-void* 
-hypre_TempMultiVectorRead( MPI_Comm comm, void*, const char* fileName );
-
-int
-aux_maskCount( int n, int* mask );
-
-void
-aux_indexFromMask( int n, int* mask, int* index );
 
 #ifdef __cplusplus
 }

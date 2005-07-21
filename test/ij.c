@@ -27,7 +27,11 @@
 
 #include "fortran_matrix.h"
 #include "HYPRE_lobpcg.h"
-#include "HYPRE_interpreter.h"
+
+#include "interpreter.h"
+#include "multivector.h"
+#include "HYPRE_MatvecFunctions.h"
+
 #include "HYPRE_parcsr_int.h"
 
 int
@@ -175,9 +179,9 @@ main( int   argc,
    
    FILE* filePtr;
 
-   hypre_MultiVectorPtr eigenvectors = NULL;
-   hypre_MultiVectorPtr constraints = NULL;
-   hypre_MultiVectorPtr workspace = NULL;
+   mv_MultiVectorPtr eigenvectors = NULL;
+   mv_MultiVectorPtr constraints = NULL;
+   mv_MultiVectorPtr workspace = NULL;
 
    double* eigenvalues = NULL;
 
@@ -191,7 +195,8 @@ main( int   argc,
 
    HYPRE_Solver        lobpcg_solver;
 
-   HYPRE_InterfaceInterpreter* interpreter;
+   mv_InterfaceInterpreter* interpreter;
+   HYPRE_MatvecFunctions matvec_fn;
 
    HYPRE_IJMatrix      ij_B; 
    HYPRE_ParCSRMatrix  parcsr_B;
@@ -2229,9 +2234,10 @@ main( int   argc,
 
    if ( lobpcgFlag ) {
 
-     interpreter = hypre_CTAlloc(HYPRE_InterfaceInterpreter,1);
+     interpreter = hypre_CTAlloc(mv_InterfaceInterpreter,1);
 
      HYPRE_ParCSRSetupInterpreter( interpreter );
+     HYPRE_ParCSRSetupMatvec(&matvec_fn);
 
      if (myid != 0)
        verbosity = 0;
@@ -2551,7 +2557,8 @@ main( int   argc,
        hypre_FinalizeTiming(time_index);
        hypre_ClearTiming();
 	
-       HYPRE_LOBPCGCreate(interpreter, &lobpcg_solver);
+       HYPRE_LOBPCGCreate(interpreter, &matvec_fn, &lobpcg_solver);
+
        HYPRE_LOBPCGSetMaxIter(lobpcg_solver, maxIterations);
        HYPRE_LOBPCGSetPrecondUsageMode(lobpcg_solver, pcgMode);
        HYPRE_LOBPCGSetTol(lobpcg_solver, tol);
@@ -2573,26 +2580,28 @@ main( int   argc,
 			    (HYPRE_Vector)x);
 
        if ( vFromFileFlag ) {
-	 eigenvectors = hypre_MultiVectorRead( MPI_COMM_WORLD, 
-					       interpreter, 
-					       "vectors" );
+	 eigenvectors = mv_MultiVectorWrap( interpreter,
+                         hypre_ParCSRMultiVectorRead(MPI_COMM_WORLD, 
+					             interpreter, 
+					             "vectors" ),1);
 	 assert( eigenvectors != NULL );
-	 blockSize = hypre_MultiVectorWidth( eigenvectors );
+	 blockSize = mv_MultiVectorWidth( eigenvectors );
        }
        else {
-	 eigenvectors = hypre_MultiVectorCreateFromSampleVector( interpreter,
+	 eigenvectors = mv_MultiVectorCreateFromSampleVector( interpreter,
 								 blockSize, 
 								 x );
 	 if ( lobpcgSeed )
-	   hypre_MultiVectorSetRandom( eigenvectors, lobpcgSeed );
+	   mv_MultiVectorSetRandom( eigenvectors, lobpcgSeed );
 	 else
-	   hypre_MultiVectorSetRandom( eigenvectors, (unsigned int)time(0) );
+	   mv_MultiVectorSetRandom( eigenvectors, (unsigned int)time(0) );
        }
 
        if ( constrained ) {
-	 constraints = hypre_MultiVectorRead( MPI_COMM_WORLD, 
-					       interpreter, 
-					       "vectors" );
+	 constraints = mv_MultiVectorWrap( interpreter,
+                         hypre_ParCSRMultiVectorRead(MPI_COMM_WORLD,
+                                                     interpreter,
+                                                     "vectors" ),1);
 	 assert( constraints != NULL );
        }	
 
@@ -2608,6 +2617,7 @@ main( int   argc,
        hypre_FinalizeTiming(time_index);
        hypre_ClearTiming();
 
+
        if ( checkOrtho ) {
 		
 	 gramXX = utilities_FortranMatrixCreate();
@@ -2617,8 +2627,10 @@ main( int   argc,
 	 utilities_FortranMatrixAllocateData( blockSize, blockSize, identity );
 
 	 if ( lobpcgGen ) {
-	   workspace = hypre_MultiVectorCreateCopy( eigenvectors, 0 );
-	   hypre_LOBPCGMultiOperatorB( lobpcg_solver, eigenvectors, workspace );
+	   workspace = mv_MultiVectorCreateCopy( eigenvectors, 0 );
+	   hypre_LOBPCGMultiOperatorB( lobpcg_solver, 
+	                               mv_MultiVectorGetData(eigenvectors),
+	                               mv_MultiVectorGetData(workspace) );
 	   lobpcg_MultiVectorByMultiVector( eigenvectors, workspace, gramXX );
 	 }
 	 else
@@ -2637,7 +2649,7 @@ main( int   argc,
 
        if ( printLevel ) {
 		  
-	 hypre_MultiVectorPrint( eigenvectors, "vectors" );
+	 hypre_ParCSRMultiVectorPrint( mv_MultiVectorGetData(eigenvectors), "vectors" );
 
 	 if ( myid == 0 ) {	  
 	   if ( (filePtr = fopen("values.txt", "w")) ) {
@@ -2678,11 +2690,11 @@ main( int   argc,
        }
 
        HYPRE_LOBPCGDestroy(lobpcg_solver);
-       hypre_MultiVectorDestroy( eigenvectors );
+       mv_MultiVectorDestroy( eigenvectors );
        if ( constrained )
-	 hypre_MultiVectorDestroy( constraints );
+	 mv_MultiVectorDestroy( constraints );
        if ( lobpcgGen )
-	 hypre_MultiVectorDestroy( workspace );
+	 mv_MultiVectorDestroy( workspace );
        free( eigenvalues );
 	
        HYPRE_ParCSRPCGDestroy(pcg_solver);
@@ -2716,7 +2728,7 @@ main( int   argc,
        if (myid != 0) 
 	 verbosity = 0;
  
-       HYPRE_LOBPCGCreate(interpreter, &pcg_solver);
+       HYPRE_LOBPCGCreate(interpreter, &matvec_fn, &pcg_solver);
        HYPRE_LOBPCGSetMaxIter(pcg_solver, maxIterations);
        HYPRE_LOBPCGSetTol(pcg_solver, tol);
        HYPRE_LOBPCGSetPrintLevel(pcg_solver, verbosity);
@@ -2934,26 +2946,28 @@ main( int   argc,
        hypre_ClearTiming();
 
        if ( vFromFileFlag ) {
-	 eigenvectors = hypre_MultiVectorRead( MPI_COMM_WORLD, 
-					       interpreter, 
-					       "vectors" );
+         eigenvectors = mv_MultiVectorWrap( interpreter,
+                         hypre_ParCSRMultiVectorRead(MPI_COMM_WORLD,
+                                                     interpreter,
+                                                     "vectors" ),1);
 	 assert( eigenvectors != NULL );
-	 blockSize = hypre_MultiVectorWidth( eigenvectors );
+	 blockSize = mv_MultiVectorWidth( eigenvectors );
        }
        else {
-	 eigenvectors = hypre_MultiVectorCreateFromSampleVector( interpreter,
+	 eigenvectors = mv_MultiVectorCreateFromSampleVector( interpreter,
 								 blockSize, 
 								 x );
 	 if ( lobpcgSeed )
-	   hypre_MultiVectorSetRandom( eigenvectors, lobpcgSeed );
+	   mv_MultiVectorSetRandom( eigenvectors, lobpcgSeed );
 	 else
-	   hypre_MultiVectorSetRandom( eigenvectors, (unsigned int)time(0) );
+	   mv_MultiVectorSetRandom( eigenvectors, (unsigned int)time(0) );
        }
 	
        if ( constrained ) {
-	 constraints = hypre_MultiVectorRead( MPI_COMM_WORLD, 
-					       interpreter, 
-					       "vectors" );
+         constraints = mv_MultiVectorWrap( interpreter,
+                         hypre_ParCSRMultiVectorRead(MPI_COMM_WORLD,
+                                                     interpreter,
+                                                     "vectors" ),1);
 	 assert( constraints != NULL );
        }	
 
@@ -2978,8 +2992,10 @@ main( int   argc,
 	 utilities_FortranMatrixAllocateData( blockSize, blockSize, identity );
 
 	 if ( lobpcgGen ) {
-	   workspace = hypre_MultiVectorCreateCopy( eigenvectors, 0 );
-	   hypre_LOBPCGMultiOperatorB( pcg_solver, eigenvectors, workspace );
+	   workspace = mv_MultiVectorCreateCopy( eigenvectors, 0 );
+           hypre_LOBPCGMultiOperatorB( pcg_solver,
+                                       mv_MultiVectorGetData(eigenvectors),
+                                       mv_MultiVectorGetData(workspace) );
 	   lobpcg_MultiVectorByMultiVector( eigenvectors, workspace, gramXX );
 	 }
 	 else
@@ -2998,7 +3014,7 @@ main( int   argc,
 
        if ( printLevel ) {
 	  
-	 hypre_MultiVectorPrint( eigenvectors, "vectors" );
+         hypre_ParCSRMultiVectorPrint( mv_MultiVectorGetData(eigenvectors), "vectors" );
 	  
 	 if ( myid == 0 ) {
 	   if ( (filePtr = fopen("values.txt", "w")) ) {
@@ -3040,7 +3056,7 @@ main( int   argc,
 
 #if SECOND_TIME
        /* run a second time to check for memory leaks */
-       hypre_MultiVectorSetRandom( eigenvectors, 775 );
+       mv_MultiVectorSetRandom( eigenvectors, 775 );
        HYPRE_LOBPCGSetup(pcg_solver, (HYPRE_Matrix)parcsr_A, 
 			 (HYPRE_Vector)b, (HYPRE_Vector)x);
        HYPRE_LOBPCGSolve(pcg_solver, constraints, eigenvectors, eigenvalues );
@@ -3069,11 +3085,11 @@ main( int   argc,
 	   HYPRE_EuclidDestroy(pcg_precond);
 	 }
 
-       hypre_MultiVectorDestroy( eigenvectors );
+       mv_MultiVectorDestroy( eigenvectors );
        if ( constrained )
-	 hypre_MultiVectorDestroy( constraints );
+	 mv_MultiVectorDestroy( constraints );
        if ( lobpcgGen )
-	 hypre_MultiVectorDestroy( workspace );
+	 mv_MultiVectorDestroy( workspace );
        free( eigenvalues );
 	
      } /* if ( pcgIterations > 0 ) */

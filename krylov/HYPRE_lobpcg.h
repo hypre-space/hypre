@@ -9,50 +9,24 @@
 
 #include "krylov.h"
 
-#include "HYPRE_interpreter.h"
-
-#include "lobpcg.h"
+#include "fortran_matrix.h"
+#include "multivector.h"
+#include "interpreter.h"
+#include "HYPRE_MatvecFunctions.h"
 
 #ifndef HYPRE_LOBPCG_SOLVER
 #define HYPRE_LOBPCG_SOLVER
-
-typedef struct
-{
-  int    (*Precond)();
-  int    (*PrecondSetup)();
-
-} hypre_LOBPCGPrecond;
-
-typedef struct
-{
-
-  lobpcg_Data	       	        lobpcgData;
-
-  HYPRE_InterfaceInterpreter*   interpreter;
-
-  void*			       	A;
-  void*			       	matvecData;
-  void*			       	precondData;
-
-  void*			       	B;
-  void*			       	matvecDataB;
-  void*			       	T;
-  void*			       	matvecDataT;
-
-  hypre_LOBPCGPrecond	        precondFunctions;
-   
-} hypre_LOBPCGData;
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-
   /* HYPRE_lobpcg.c */
 
   /* LOBPCG Constructor */
 void
-HYPRE_LOBPCGCreate( HYPRE_InterfaceInterpreter*, HYPRE_Solver* );
+HYPRE_LOBPCGCreate( mv_InterfaceInterpreter*, HYPRE_MatvecFunctions*,
+                    HYPRE_Solver* );
 
   /* LOBPCG Destructor */
 int 
@@ -84,8 +58,8 @@ HYPRE_LOBPCGSetupT( HYPRE_Solver solver,
 
   /* Solves A x = lambda B x, y'x = 0 */
 int 
-HYPRE_LOBPCGSolve( HYPRE_Solver data, hypre_MultiVectorPtr y, 
-		   hypre_MultiVectorPtr x, double* lambda );
+HYPRE_LOBPCGSolve( HYPRE_Solver data, mv_MultiVectorPtr y, 
+		   mv_MultiVectorPtr x, double* lambda );
 
   /* Sets the absolute tolerance */
 int 
@@ -120,115 +94,17 @@ HYPRE_LOBPCGEigenvaluesHistory( HYPRE_Solver solver );
 int
 HYPRE_LOBPCGIterations( HYPRE_Solver solver );
 
-  /* The implementation of the above */
-
-int 
-hypre_LOBPCGDestroy( void *pcg_vdata );
-
-int 
-hypre_LOBPCGSetup( void *pcg_vdata, void *A, void *b, void *x );
-
-int 
-hypre_LOBPCGSetupB( void *pcg_vdata, void *A, void *x );
-
-int 
-hypre_LOBPCGSetupT( void *pcg_vdata, void *A, void *x );
-
-int 
-hypre_LOBPCGSetTol( void *pcg_vdata, double tol );
-
-int 
-hypre_LOBPCGSetMaxIter( void *pcg_vdata, int max_iter );
-
-int 
-hypre_LOBPCGGetPrecond( void *pcg_vdata, HYPRE_Solver *precond_data_ptr );
-
-int 
-hypre_LOBPCGSetPrecond( void *pcg_vdata, 
-			int (*precond )(), 
-			int (*precond_setup )(), 
-			void *precond_data );
-
-int 
-hypre_LOBPCGSetPrecondUsageMode( void* data, int mode );
-
-int 
-hypre_LOBPCGSetPrintLevel( void *pcg_vdata, int level );
-
-int 
-hypre_LOBPCGSolve( void *pcg_vdata, hypre_MultiVectorPtr, 
-		   hypre_MultiVectorPtr, double* );
-
-utilities_FortranMatrix*
-hypre_LOBPCGResidualNorms( void *pcg_vdata );
-
-utilities_FortranMatrix*
-hypre_LOBPCGResidualNormsHistory( void *pcg_vdata );
-
-utilities_FortranMatrix*
-hypre_LOBPCGEigenvaluesHistory( void *pcg_vdata );
-
-int
-hypre_LOBPCGIterations( void* pcg_vdata );
-
-  /* applies the preconditioner T to a vector x: y = Tx */
 void
-hypre_LOBPCGPreconditioner( void *vdata, void* x, void* y );
+hypre_LOBPCGMultiOperatorB( void *data, void * x, void*  y );
 
-  /* applies the operator A to a vector x: y = Ax */
 void
-hypre_LOBPCGOperatorA( void *pcg_vdata, void* x, void* y );
-
-  /* applies the operator B to a vector x: y = Bx */
-void
-hypre_LOBPCGOperatorB( void *pcg_vdata, void* x, void* y );
-
-  /* applies the preconditioner T to a multivector x: y = Tx */
-void
-hypre_LOBPCGMultiPreconditioner( void *data, hypre_MultiVectorPtr x, hypre_MultiVectorPtr y );
-
-  /* applies the operator A to a multivector x: y = Ax */
-void
-hypre_LOBPCGMultiOperatorA( void *data, hypre_MultiVectorPtr x, hypre_MultiVectorPtr y );
-
-  /* applies the operator B to a multivector x: y = Bx */
-void
-hypre_LOBPCGMultiOperatorB( void *data, hypre_MultiVectorPtr x, hypre_MultiVectorPtr y );
-
-  /* solves the generalized eigenvalue problem mtxA x = lambda mtxB x using DSYGV */
-int
-lobpcg_solveGEVP( 
-utilities_FortranMatrix* mtxA, 
-utilities_FortranMatrix* mtxB,
-utilities_FortranMatrix* lambda
-);
-
-  /* prototypes for DSYGV and DPOTRF routines from LAPACK */
-
-#include "HYPRE_config.h"
-
-#ifdef HYPRE_USING_ESSL
-
-#include <essl.h>
-
-#else
-
-#include "fortran.h"
-
-void hypre_F90_NAME_BLAS(dsygv, DSYGV)
-( int *itype, char *jobz, char *uplo, int *n,
-  double *a, int *lda, double *b, int *ldb, double *w, 
-  double *work, int *lwork, /*@out@*/ int *info
-);
-
-void hypre_F90_NAME_BLAS( dpotrf, DPOTRF )
-( char* uplo, int* n, double* aval, int* lda, int* ierr );
-
-#endif
+lobpcg_MultiVectorByMultiVector(
+mv_MultiVectorPtr x,
+mv_MultiVectorPtr y,
+utilities_FortranMatrix* xy);
 
 #ifdef __cplusplus
 }
 #endif
 
 #endif /* HYPRE_LOBPCG_SOLVER */
-

@@ -18,7 +18,6 @@ C_COMPILE_FLAGS = \
  ${CINCLUDES}
 
 HEADERS =\
- HYPRE_interpreter.h\
  multivector.h\
  temp_multivector.h
 

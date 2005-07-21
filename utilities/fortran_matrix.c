@@ -3,11 +3,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-/*
-#include "fortran.h"
-#include "hypre_blas.h"
-*/
-
 #include "fortran_matrix.h"
 
 utilities_FortranMatrix*
@@ -469,8 +464,6 @@ void
 utilities_FortranMatrixMultiply( utilities_FortranMatrix* mtxA, int tA, 
 				      utilities_FortranMatrix* mtxB, int tB,
 				      utilities_FortranMatrix* mtxC ) {
-  /*#ifdef HYPRE_USING_ESSL*/
-
   long h, w;
   long i, j, k, l;
   long iA, kA;
@@ -529,40 +522,6 @@ utilities_FortranMatrixMultiply( utilities_FortranMatrix* mtxA, int tA,
 	s += *pAik * (*pBkj);
       *pCij = s;
     }
-
-  /*#else*/
-
-#if 0
-
-  char trA, trB;
-  int m, n, k;
-  int ldA, ldB, ldC;
-  double alpha = 1.0, beta = 0.0;
-
-  m = mtxC->height;
-  n = mtxC->width;
-
-  if ( tA ) {
-    trA = 't';
-    k = mtxA->height;
-  }
-  else {
-    trA = 'n';
-    k = mtxA->width;
-  }
-
-  trB = tB ? 't' : 'n';
-
-  ldA = mtxA->globalHeight;
-  ldB = mtxB->globalHeight;
-  ldC = mtxC->globalHeight;
-
-  hypre_F90_NAME_BLAS( dgemm, DGEMM )( &trA, &trB, &m, &n, &k, &alpha, 
-				       mtxA->value, &ldA, 
-				       mtxB->value, &ldB, &beta, 
-				       mtxC->value, &ldC );
-#endif
-
 }
 
 double 

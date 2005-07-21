@@ -1,13 +1,3 @@
-/*BHEADER**********************************************************************
- * (c) 2000   The Regents of the University of California
- *
- * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
- * notice, contact person, and disclaimer.
- *
- * $Revision$
- *********************************************************************EHEADER*/
-
-#include "fortran_matrix.h"
 #include "multivector.h"
 
 #ifndef LOCALLY_OPTIMAL_BLOCK_PRECONDITIONED_CONJUGATE_GRADIENTS
@@ -25,110 +15,66 @@ typedef struct {
 
 } lobpcg_Tolerance;
 
-typedef struct
-{
+typedef struct {
 
-  lobpcg_Tolerance	       	tolerance;
-  int		       	       	maxIterations;
-  int		      	       	verbosityLevel;
-  int		       		precondUsageMode;
+/* these pointers should point to 2 functions providing standard lapack  functionality */
+   int   (*dpotrf) (char *uplo, int *n, double *a, int *
+        lda, int *info);
+   int   (*dsygv) (int *itype, char *jobz, char *uplo, int *
+        n, double *a, int *lda, double *b, int *ldb,
+        double *w, double *work, int *lwork, int *info);
 
-  int	       	       		iterationNumber;
-
-  utilities_FortranMatrix*      eigenvaluesHistory;
-  utilities_FortranMatrix*      residualNorms;
-  utilities_FortranMatrix*      residualNormsHistory; 
-
-} lobpcg_Data;
-
-#define lobpcg_tolerance(data)            ((data).tolerance)
-#define lobpcg_absoluteTolerance(data)    ((data).tolerance.absolute)
-#define lobpcg_relativeTolerance(data)    ((data).tolerance.relative)
-#define lobpcg_maxIterations(data)        ((data).maxIterations)
-#define lobpcg_verbosityLevel(data)       ((data).verbosityLevel)
-#define lobpcg_precondUsageMode(data)     ((data).precondUsageMode)
-#define lobpcg_iterationNumber(data)      ((data).iterationNumber)
-#define lobpcg_eigenvaluesHistory(data)   ((data).eigenvaluesHistory)
-#define lobpcg_residualNorms(data)        ((data).residualNorms)
-#define lobpcg_residualNormsHistory(data) ((data).residualNormsHistory)
+} lobpcg_BLASLAPACKFunctions;
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 int
-lobpcg_initialize( lobpcg_Data* data );
-
-int
-lobpcg_clean( lobpcg_Data* data );
-
-int
-lobpcg_solve( hypre_MultiVectorPtr blockVectorX,
+lobpcg_solve( mv_MultiVectorPtr blockVectorX,
 	      void* operatorAData,
-	      void (*operatorA)( void*, hypre_MultiVectorPtr, hypre_MultiVectorPtr ),
+	      void (*operatorA)( void*, void*, void* ),
 	      void* operatorBData,
-	      void (*operatorB)( void*, hypre_MultiVectorPtr, hypre_MultiVectorPtr ),
+	      void (*operatorB)( void*, void*, void* ),
 	      void* operatorTData,
-	      void (*operatorT)( void*, hypre_MultiVectorPtr, hypre_MultiVectorPtr ),
-	      hypre_MultiVectorPtr blockVectorY,
+	      void (*operatorT)( void*, void*, void* ),
+	      mv_MultiVectorPtr blockVectorY,
+              lobpcg_BLASLAPACKFunctions blap_fn,
 	      lobpcg_Tolerance tolerance,
 	      int maxIterations,
 	      int verbosityLevel,
 	      int* iterationNumber,
-	      utilities_FortranMatrix* lambda,
-	      utilities_FortranMatrix* lambdaHistory,
-	      utilities_FortranMatrix* residualNorms,
-	      utilities_FortranMatrix* residualNormsHistory 
-	);
 
-void
-lobpcg_MultiVectorByMultiVector(
-hypre_MultiVectorPtr x,
-hypre_MultiVectorPtr y,
-utilities_FortranMatrix* xy
+/* eigenvalues; "lambda_values" should point to array  containing <blocksize> doubles where <blocksi
+ze> is the width of multivector "blockVectorX" */
+              double * lambda_values,
+
+/* eigenvalues history; a pointer to the entries of the  <blocksize>-by-(<maxIterations>+1) matrix s
+tored
+in  fortran-style. (i.e. column-wise) The matrix may be  a submatrix of a larger matrix, see next
+argument; If you don't need eigenvalues history, provide NULL in this entry */
+              double * lambdaHistory_values,
+
+/* global height of the matrix (stored in fotran-style)  specified by previous argument */
+              int lambdaHistory_gh,
+
+/* residual norms; argument should point to array of <blocksize> doubles */
+              double * residualNorms_values,
+
+/* residual norms history; a pointer to the entries of the  <blocksize>-by-(<maxIterations>+1) matri
+x
+stored in  fortran-style. (i.e. column-wise) The matrix may be  a submatrix of a larger matrix, see
+next
+argument If you don't need residual norms history, provide NULL in this entry */
+              double * residualNormsHistory_values ,
+
+/* global height of the matrix (stored in fotran-style)  specified by previous argument */
+              int residualNormsHistory_gh
+
 );
-
-void
-lobpcg_MultiVectorByMatrix(
-hypre_MultiVectorPtr x,
-utilities_FortranMatrix* r,
-hypre_MultiVectorPtr y
-);
-
-int
-lobpcg_MultiVectorImplicitQR( 
-hypre_MultiVectorPtr x,  hypre_MultiVectorPtr y, 
-utilities_FortranMatrix* r,
-hypre_MultiVectorPtr z
-);
-
-void
-lobpcg_sqrtVector( int n, int* mask, double* v );
-
-int
-lobpcg_checkResiduals( 
-utilities_FortranMatrix* resNorms,
-utilities_FortranMatrix* lambda,
-lobpcg_Tolerance tol,
-int* activeMask
-);
-
-int
-lobpcg_solveGEVP( 
-utilities_FortranMatrix* mtxA, 
-utilities_FortranMatrix* mtxB,
-utilities_FortranMatrix* eigVal
-);
-
-int
-lobpcg_chol( utilities_FortranMatrix* a );
-
-void
-lobpcg_errorMessage( int, char* );
 
 #ifdef __cplusplus
 }
 #endif
 
 #endif /* LOCALLY_OPTIMAL_BLOCK_PRECONDITIONED_CONJUGATE_GRADIENTS */
-

@@ -1,5 +1,7 @@
 #include "HYPRE_sstruct_int.h"
-
+#include "sstruct_ls.h"
+#include "interpreter.h"
+#include "HYPRE_MatvecFunctions.h"
 #include "temp_multivector.h"
 
 int 
@@ -103,50 +105,48 @@ hypre_SStructSetRandomValues( void* v, int seed ) {
 }
 
 int
-HYPRE_SStructSetupInterpreter( HYPRE_InterfaceInterpreter *i )
+HYPRE_SStructSetupInterpreter( mv_InterfaceInterpreter *i )
 {
-  i->CAlloc = hypre_CAlloc;
-  i->Free = hypre_SStructKrylovFree;
-  i->CommInfo = hypre_SStructKrylovCommInfo;
-
   i->CreateVector = hypre_SStructKrylovCreateVector;
   i->DestroyVector = hypre_SStructKrylovDestroyVector; 
-  i->MatvecCreate = hypre_SStructKrylovMatvecCreate;
-  i->Matvec = hypre_SStructKrylovMatvec; 
-  i->MatvecDestroy = hypre_SStructKrylovMatvecDestroy;
   i->InnerProd = hypre_SStructKrylovInnerProd; 
   i->CopyVector = hypre_SStructKrylovCopyVector;
   i->ClearVector = hypre_SStructKrylovClearVector;
   i->SetRandomValues = hypre_SStructSetRandomValues;
   i->ScaleVector = hypre_SStructKrylovScaleVector;
   i->Axpy = hypre_SStructKrylovAxpy;
-  i->PrintVector = NULL;
-  i->ReadVector = NULL;
 
-  i->CreateMultiVector = hypre_TempMultiVectorCreateFromSampleVector;
-  i->CopyCreateMultiVector = hypre_TempMultiVectorCreateCopy;
-  i->DestroyMultiVector = hypre_TempMultiVectorDestroy;
+  i->CreateMultiVector = mv_TempMultiVectorCreateFromSampleVector;
+  i->CopyCreateMultiVector = mv_TempMultiVectorCreateCopy;
+  i->DestroyMultiVector = mv_TempMultiVectorDestroy;
 
-  i->MatMultiVecCreate = NULL;
-  i->MatMultiVec = NULL;
-  i->MatMultiVecDestroy = NULL;
-
-  i->Width = hypre_TempMultiVectorWidth;
-  i->Height = hypre_TempMultiVectorHeight;
-  i->SetMask = hypre_TempMultiVectorSetMask;
-  i->CopyMultiVector = hypre_TempMultiVectorCopy;
-  i->ClearMultiVector = hypre_TempMultiVectorClear;
-  i->SetRandomVectors = hypre_TempMultiVectorSetRandom;
-  i->MultiInnerProd = hypre_TempMultiVectorByMultiVector;
-  i->MultiInnerProdDiag = hypre_TempMultiVectorByMultiVectorDiag;
-  i->MultiVecMat = hypre_TempMultiVectorByMatrix;
-  i->MultiVecMatDiag = hypre_TempMultiVectorByDiagonal;
-  i->MultiAxpy = hypre_TempMultiVectorAxpy;
-  i->MultiXapy = hypre_TempMultiVectorXapy;
-  i->Eval = hypre_TempMultiVectorEval;
-  i->PrintMultiVector = hypre_TempMultiVectorPrint;
-  i->ReadMultiVector = hypre_TempMultiVectorRead;
+  i->Width = mv_TempMultiVectorWidth;
+  i->Height = mv_TempMultiVectorHeight;
+  i->SetMask = mv_TempMultiVectorSetMask;
+  i->CopyMultiVector = mv_TempMultiVectorCopy;
+  i->ClearMultiVector = mv_TempMultiVectorClear;
+  i->SetRandomVectors = mv_TempMultiVectorSetRandom;
+  i->MultiInnerProd = mv_TempMultiVectorByMultiVector;
+  i->MultiInnerProdDiag = mv_TempMultiVectorByMultiVectorDiag;
+  i->MultiVecMat = mv_TempMultiVectorByMatrix;
+  i->MultiVecMatDiag = mv_TempMultiVectorByDiagonal;
+  i->MultiAxpy = mv_TempMultiVectorAxpy;
+  i->MultiXapy = mv_TempMultiVectorXapy;
+  i->Eval = mv_TempMultiVectorEval;
 
   return 0;
 }
 
+int
+HYPRE_SStructSetupMatvec(HYPRE_MatvecFunctions * mv)
+{
+  mv->MatvecCreate = hypre_SStructKrylovMatvecCreate;
+  mv->Matvec = hypre_SStructKrylovMatvec; 
+  mv->MatvecDestroy = hypre_SStructKrylovMatvecDestroy;
+
+  mv->MatMultiVecCreate = NULL;
+  mv->MatMultiVec = NULL;
+  mv->MatMultiVecDestroy = NULL;
+
+  return 0;
+}
