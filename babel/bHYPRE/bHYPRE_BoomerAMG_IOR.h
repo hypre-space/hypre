@@ -35,6 +35,8 @@ extern "C" {
  * 
  * Algebraic multigrid solver, based on classical Ruge-Stueben.
  * 
+ * BoomerAMG requires an IJParCSR matrix
+ * 
  * The following optional parameters are available and may be set
  * using the appropriate {\tt Parameter} function (as indicated in
  * parentheses):

@@ -263,17 +263,36 @@ bHYPRE_StructBuildMatrix_SetStencil(
 int32_t
 bHYPRE_StructBuildMatrix_SetValues(
   /* in */ bHYPRE_StructBuildMatrix self,
-  /* in */ struct sidl_int__array* index,
+  /* in */ int32_t* index,
+  /* in */ int32_t dim,
   /* in */ int32_t num_stencil_indices,
-  /* in */ struct sidl_int__array* stencil_indices,
-  /* in */ struct sidl_double__array* values)
+  /* in */ int32_t* stencil_indices,
+  /* in */ double* values)
 {
+  int32_t index_lower[1], index_upper[1], index_stride[1]; 
+  struct sidl_int__array index_real;
+  struct sidl_int__array*index_tmp = &index_real;
+  int32_t stencil_indices_lower[1], stencil_indices_upper[1],
+    stencil_indices_stride[1]; 
+  struct sidl_int__array stencil_indices_real;
+  struct sidl_int__array*stencil_indices_tmp = &stencil_indices_real;
+  int32_t values_lower[1], values_upper[1], values_stride[1]; 
+  struct sidl_double__array values_real;
+  struct sidl_double__array*values_tmp = &values_real;
+  index_upper[0] = dim-1;
+  sidl_int__array_init(index, index_tmp, 1, index_lower, index_upper,
+    index_stride);
+  stencil_indices_upper[0] = num_stencil_indices-1;
+  sidl_int__array_init(stencil_indices, stencil_indices_tmp, 1,
+    stencil_indices_lower, stencil_indices_upper, stencil_indices_stride);
+  values_upper[0] = num_stencil_indices-1;
+  sidl_double__array_init(values, values_tmp, 1, values_lower, values_upper,
+    values_stride);
   return (*self->d_epv->f_SetValues)(
     self->d_object,
-    index,
-    num_stencil_indices,
-    stencil_indices,
-    values);
+    index_tmp,
+    stencil_indices_tmp,
+    values_tmp);
 }
 
 /*
@@ -283,19 +302,45 @@ bHYPRE_StructBuildMatrix_SetValues(
 int32_t
 bHYPRE_StructBuildMatrix_SetBoxValues(
   /* in */ bHYPRE_StructBuildMatrix self,
-  /* in */ struct sidl_int__array* ilower,
-  /* in */ struct sidl_int__array* iupper,
+  /* in */ int32_t* ilower,
+  /* in */ int32_t* iupper,
+  /* in */ int32_t dim,
   /* in */ int32_t num_stencil_indices,
-  /* in */ struct sidl_int__array* stencil_indices,
-  /* in */ struct sidl_double__array* values)
+  /* in */ int32_t* stencil_indices,
+  /* in */ double* values,
+  /* in */ int32_t nvalues)
 {
+  int32_t ilower_lower[1], ilower_upper[1], ilower_stride[1]; 
+  struct sidl_int__array ilower_real;
+  struct sidl_int__array*ilower_tmp = &ilower_real;
+  int32_t iupper_lower[1], iupper_upper[1], iupper_stride[1]; 
+  struct sidl_int__array iupper_real;
+  struct sidl_int__array*iupper_tmp = &iupper_real;
+  int32_t stencil_indices_lower[1], stencil_indices_upper[1],
+    stencil_indices_stride[1]; 
+  struct sidl_int__array stencil_indices_real;
+  struct sidl_int__array*stencil_indices_tmp = &stencil_indices_real;
+  int32_t values_lower[1], values_upper[1], values_stride[1]; 
+  struct sidl_double__array values_real;
+  struct sidl_double__array*values_tmp = &values_real;
+  ilower_upper[0] = dim-1;
+  sidl_int__array_init(ilower, ilower_tmp, 1, ilower_lower, ilower_upper,
+    ilower_stride);
+  iupper_upper[0] = dim-1;
+  sidl_int__array_init(iupper, iupper_tmp, 1, iupper_lower, iupper_upper,
+    iupper_stride);
+  stencil_indices_upper[0] = num_stencil_indices-1;
+  sidl_int__array_init(stencil_indices, stencil_indices_tmp, 1,
+    stencil_indices_lower, stencil_indices_upper, stencil_indices_stride);
+  values_upper[0] = nvalues-1;
+  sidl_double__array_init(values, values_tmp, 1, values_lower, values_upper,
+    values_stride);
   return (*self->d_epv->f_SetBoxValues)(
     self->d_object,
-    ilower,
-    iupper,
-    num_stencil_indices,
-    stencil_indices,
-    values);
+    ilower_tmp,
+    iupper_tmp,
+    stencil_indices_tmp,
+    values_tmp);
 }
 
 /*
@@ -305,11 +350,18 @@ bHYPRE_StructBuildMatrix_SetBoxValues(
 int32_t
 bHYPRE_StructBuildMatrix_SetNumGhost(
   /* in */ bHYPRE_StructBuildMatrix self,
-  /* in */ struct sidl_int__array* num_ghost)
+  /* in */ int32_t* num_ghost,
+  /* in */ int32_t dim2)
 {
+  int32_t num_ghost_lower[1], num_ghost_upper[1], num_ghost_stride[1]; 
+  struct sidl_int__array num_ghost_real;
+  struct sidl_int__array*num_ghost_tmp = &num_ghost_real;
+  num_ghost_upper[0] = dim2-1;
+  sidl_int__array_init(num_ghost, num_ghost_tmp, 1, num_ghost_lower,
+    num_ghost_upper, num_ghost_stride);
   return (*self->d_epv->f_SetNumGhost)(
     self->d_object,
-    num_ghost);
+    num_ghost_tmp);
 }
 
 /*
@@ -334,12 +386,20 @@ int32_t
 bHYPRE_StructBuildMatrix_SetConstantEntries(
   /* in */ bHYPRE_StructBuildMatrix self,
   /* in */ int32_t num_stencil_constant_points,
-  /* in */ struct sidl_int__array* stencil_constant_points)
+  /* in */ int32_t* stencil_constant_points)
 {
+  int32_t stencil_constant_points_lower[1], stencil_constant_points_upper[1],
+    stencil_constant_points_stride[1]; 
+  struct sidl_int__array stencil_constant_points_real;
+  struct sidl_int__array*stencil_constant_points_tmp = 
+    &stencil_constant_points_real;
+  stencil_constant_points_upper[0] = num_stencil_constant_points-1;
+  sidl_int__array_init(stencil_constant_points, stencil_constant_points_tmp, 1,
+    stencil_constant_points_lower, stencil_constant_points_upper,
+    stencil_constant_points_stride);
   return (*self->d_epv->f_SetConstantEntries)(
     self->d_object,
-    num_stencil_constant_points,
-    stencil_constant_points);
+    stencil_constant_points_tmp);
 }
 
 /*
@@ -350,14 +410,26 @@ int32_t
 bHYPRE_StructBuildMatrix_SetConstantValues(
   /* in */ bHYPRE_StructBuildMatrix self,
   /* in */ int32_t num_stencil_indices,
-  /* in */ struct sidl_int__array* stencil_indices,
-  /* in */ struct sidl_double__array* values)
+  /* in */ int32_t* stencil_indices,
+  /* in */ double* values)
 {
+  int32_t stencil_indices_lower[1], stencil_indices_upper[1],
+    stencil_indices_stride[1]; 
+  struct sidl_int__array stencil_indices_real;
+  struct sidl_int__array*stencil_indices_tmp = &stencil_indices_real;
+  int32_t values_lower[1], values_upper[1], values_stride[1]; 
+  struct sidl_double__array values_real;
+  struct sidl_double__array*values_tmp = &values_real;
+  stencil_indices_upper[0] = num_stencil_indices-1;
+  sidl_int__array_init(stencil_indices, stencil_indices_tmp, 1,
+    stencil_indices_lower, stencil_indices_upper, stencil_indices_stride);
+  values_upper[0] = num_stencil_indices-1;
+  sidl_double__array_init(values, values_tmp, 1, values_lower, values_upper,
+    values_stride);
   return (*self->d_epv->f_SetConstantValues)(
     self->d_object,
-    num_stencil_indices,
-    stencil_indices,
-    values);
+    stencil_indices_tmp,
+    values_tmp);
 }
 
 /*
@@ -1210,7 +1282,6 @@ static int32_t
 remote_bHYPRE__StructBuildMatrix_SetValues(
   /* in */ struct bHYPRE__StructBuildMatrix__object* self /* TLD */,
   /* in */ struct sidl_int__array* index,
-  /* in */ int32_t num_stencil_indices,
   /* in */ struct sidl_int__array* stencil_indices,
   /* in */ struct sidl_double__array* values)
 {
@@ -1224,8 +1295,6 @@ remote_bHYPRE__StructBuildMatrix_SetValues(
   int32_t _retval;
 
   /* pack in and inout arguments */
-  sidl_rmi_Invocation_packInt( _inv, "num_stencil_indices", num_stencil_indices,
-    _ex2);
 
   /* send actual RMI request */
   _rsvp = sidl_rmi_Invocation_invokeMethod(_inv,_ex2);
@@ -1248,7 +1317,6 @@ remote_bHYPRE__StructBuildMatrix_SetBoxValues(
   /* in */ struct bHYPRE__StructBuildMatrix__object* self /* TLD */,
   /* in */ struct sidl_int__array* ilower,
   /* in */ struct sidl_int__array* iupper,
-  /* in */ int32_t num_stencil_indices,
   /* in */ struct sidl_int__array* stencil_indices,
   /* in */ struct sidl_double__array* values)
 {
@@ -1262,8 +1330,6 @@ remote_bHYPRE__StructBuildMatrix_SetBoxValues(
   int32_t _retval;
 
   /* pack in and inout arguments */
-  sidl_rmi_Invocation_packInt( _inv, "num_stencil_indices", num_stencil_indices,
-    _ex2);
 
   /* send actual RMI request */
   _rsvp = sidl_rmi_Invocation_invokeMethod(_inv,_ex2);
@@ -1349,7 +1415,6 @@ remote_bHYPRE__StructBuildMatrix_SetSymmetric(
 static int32_t
 remote_bHYPRE__StructBuildMatrix_SetConstantEntries(
   /* in */ struct bHYPRE__StructBuildMatrix__object* self /* TLD */,
-  /* in */ int32_t num_stencil_constant_points,
   /* in */ struct sidl_int__array* stencil_constant_points)
 {
   sidl_BaseInterface _ex = NULL;
@@ -1362,8 +1427,6 @@ remote_bHYPRE__StructBuildMatrix_SetConstantEntries(
   int32_t _retval;
 
   /* pack in and inout arguments */
-  sidl_rmi_Invocation_packInt( _inv, "num_stencil_constant_points",
-    num_stencil_constant_points, _ex2);
 
   /* send actual RMI request */
   _rsvp = sidl_rmi_Invocation_invokeMethod(_inv,_ex2);
@@ -1384,7 +1447,6 @@ remote_bHYPRE__StructBuildMatrix_SetConstantEntries(
 static int32_t
 remote_bHYPRE__StructBuildMatrix_SetConstantValues(
   /* in */ struct bHYPRE__StructBuildMatrix__object* self /* TLD */,
-  /* in */ int32_t num_stencil_indices,
   /* in */ struct sidl_int__array* stencil_indices,
   /* in */ struct sidl_double__array* values)
 {
@@ -1398,8 +1460,6 @@ remote_bHYPRE__StructBuildMatrix_SetConstantValues(
   int32_t _retval;
 
   /* pack in and inout arguments */
-  sidl_rmi_Invocation_packInt( _inv, "num_stencil_indices", num_stencil_indices,
-    _ex2);
 
   /* send actual RMI request */
   _rsvp = sidl_rmi_Invocation_invokeMethod(_inv,_ex2);
@@ -1502,17 +1562,17 @@ static void bHYPRE__StructBuildMatrix__init_remote_epv(void)
     struct bHYPRE_StructGrid__object*)) epv->f_SetGrid;
   e1->f_SetStencil         = (int32_t (*)(void*,
     struct bHYPRE_StructStencil__object*)) epv->f_SetStencil;
-  e1->f_SetValues          = (int32_t (*)(void*,struct sidl_int__array*,int32_t,
+  e1->f_SetValues          = (int32_t (*)(void*,struct sidl_int__array*,
     struct sidl_int__array*,struct sidl_double__array*)) epv->f_SetValues;
   e1->f_SetBoxValues       = (int32_t (*)(void*,struct sidl_int__array*,
-    struct sidl_int__array*,int32_t,struct sidl_int__array*,
+    struct sidl_int__array*,struct sidl_int__array*,
     struct sidl_double__array*)) epv->f_SetBoxValues;
   e1->f_SetNumGhost        = (int32_t (*)(void*,
     struct sidl_int__array*)) epv->f_SetNumGhost;
   e1->f_SetSymmetric       = (int32_t (*)(void*,int32_t)) epv->f_SetSymmetric;
-  e1->f_SetConstantEntries = (int32_t (*)(void*,int32_t,
+  e1->f_SetConstantEntries = (int32_t (*)(void*,
     struct sidl_int__array*)) epv->f_SetConstantEntries;
-  e1->f_SetConstantValues  = (int32_t (*)(void*,int32_t,struct sidl_int__array*,
+  e1->f_SetConstantValues  = (int32_t (*)(void*,struct sidl_int__array*,
     struct sidl_double__array*)) epv->f_SetConstantValues;
 
   e2->f__cast        = (void* (*)(void*,const char*)) epv->f__cast;

@@ -15,6 +15,15 @@
 
 /**
  * Symbol "bHYPRE.StructSMG" (version 1.0.0)
+ * 
+ * Objects of this type can be cast to PreconditionedSolver objects
+ * using the {\tt \_\_cast} methods.
+ * 
+ * RDF: Documentation goes here.
+ * 
+ * The StructSMG solver requires a Struct matrix.
+ * 
+ * 
  */
 struct bHYPRE_StructSMG__object;
 struct bHYPRE_StructSMG__array;
@@ -141,7 +150,8 @@ int32_t
 bHYPRE_StructSMG_SetIntArray1Parameter(
   /* in */ bHYPRE_StructSMG self,
   /* in */ const char* name,
-  /* in */ struct sidl_int__array* value);
+  /* in */ int32_t* value,
+  /* in */ int32_t nvalues);
 
 /**
  * Set the int 2-D array parameter associated with {\tt name}.
@@ -161,7 +171,8 @@ int32_t
 bHYPRE_StructSMG_SetDoubleArray1Parameter(
   /* in */ bHYPRE_StructSMG self,
   /* in */ const char* name,
-  /* in */ struct sidl_double__array* value);
+  /* in */ double* value,
+  /* in */ int32_t nvalues);
 
 /**
  * Set the double 2-D array parameter associated with {\tt name}.

@@ -318,6 +318,400 @@ SIDLFortran77Symbol(bhypre_ijparcsrvector_getclassinfo_f,BHYPRE_IJPARCSRVECTOR_G
 }
 
 /*
+ * Set the MPI Communicator.  DEPRECATED, Use Create()
+ * 
+ */
+
+void
+SIDLFortran77Symbol(bhypre_ijparcsrvector_setcommunicator_f,BHYPRE_IJPARCSRVECTOR_SETCOMMUNICATOR_F,bHYPRE_IJParCSRVector_SetCommunicator_f)
+(
+  int64_t *self,
+  int64_t *mpi_comm,
+  int32_t *retval
+)
+{
+  struct bHYPRE_IJParCSRVector__epv *_epv = NULL;
+  struct bHYPRE_IJParCSRVector__object* _proxy_self = NULL;
+  void* _proxy_mpi_comm = NULL;
+  _proxy_self =
+    (struct bHYPRE_IJParCSRVector__object*)
+    (ptrdiff_t)(*self);
+  _proxy_mpi_comm =
+    (void*)
+    (ptrdiff_t)(*mpi_comm);
+  _epv = _proxy_self->d_epv;
+  *retval = 
+    (*(_epv->f_SetCommunicator))(
+      _proxy_self,
+      _proxy_mpi_comm
+    );
+}
+
+/*
+ * Prepare an object for setting coefficient values, whether for
+ * the first time or subsequently.
+ * 
+ */
+
+void
+SIDLFortran77Symbol(bhypre_ijparcsrvector_initialize_f,BHYPRE_IJPARCSRVECTOR_INITIALIZE_F,bHYPRE_IJParCSRVector_Initialize_f)
+(
+  int64_t *self,
+  int32_t *retval
+)
+{
+  struct bHYPRE_IJParCSRVector__epv *_epv = NULL;
+  struct bHYPRE_IJParCSRVector__object* _proxy_self = NULL;
+  _proxy_self =
+    (struct bHYPRE_IJParCSRVector__object*)
+    (ptrdiff_t)(*self);
+  _epv = _proxy_self->d_epv;
+  *retval = 
+    (*(_epv->f_Initialize))(
+      _proxy_self
+    );
+}
+
+/*
+ * Finalize the construction of an object before using, either
+ * for the first time or on subsequent uses. {\tt Initialize}
+ * and {\tt Assemble} always appear in a matched set, with
+ * Initialize preceding Assemble. Values can only be set in
+ * between a call to Initialize and Assemble.
+ * 
+ */
+
+void
+SIDLFortran77Symbol(bhypre_ijparcsrvector_assemble_f,BHYPRE_IJPARCSRVECTOR_ASSEMBLE_F,bHYPRE_IJParCSRVector_Assemble_f)
+(
+  int64_t *self,
+  int32_t *retval
+)
+{
+  struct bHYPRE_IJParCSRVector__epv *_epv = NULL;
+  struct bHYPRE_IJParCSRVector__object* _proxy_self = NULL;
+  _proxy_self =
+    (struct bHYPRE_IJParCSRVector__object*)
+    (ptrdiff_t)(*self);
+  _epv = _proxy_self->d_epv;
+  *retval = 
+    (*(_epv->f_Assemble))(
+      _proxy_self
+    );
+}
+
+/*
+ * The problem definition interface is a {\it builder} that
+ * creates an object that contains the problem definition
+ * information, e.g. a matrix. To perform subsequent operations
+ * with that object, it must be returned from the problem
+ * definition object. {\tt GetObject} performs this function.
+ * At compile time, the type of the returned object is unknown.
+ * Thus, the returned type is a sidl.BaseInterface.
+ * QueryInterface or Cast must be used on the returned object to
+ * convert it into a known type.
+ * 
+ */
+
+void
+SIDLFortran77Symbol(bhypre_ijparcsrvector_getobject_f,BHYPRE_IJPARCSRVECTOR_GETOBJECT_F,bHYPRE_IJParCSRVector_GetObject_f)
+(
+  int64_t *self,
+  int64_t *A,
+  int32_t *retval
+)
+{
+  struct bHYPRE_IJParCSRVector__epv *_epv = NULL;
+  struct bHYPRE_IJParCSRVector__object* _proxy_self = NULL;
+  struct sidl_BaseInterface__object* _proxy_A = NULL;
+  _proxy_self =
+    (struct bHYPRE_IJParCSRVector__object*)
+    (ptrdiff_t)(*self);
+  _epv = _proxy_self->d_epv;
+  *retval = 
+    (*(_epv->f_GetObject))(
+      _proxy_self,
+      &_proxy_A
+    );
+  *A = (ptrdiff_t)_proxy_A;
+}
+
+/*
+ * Set the local range for a vector object.  Each process owns
+ * some unique consecutive range of vector unknowns, indicated
+ * by the global indices {\tt jlower} and {\tt jupper}.  The
+ * data is required to be such that the value of {\tt jlower} on
+ * any process $p$ be exactly one more than the value of {\tt
+ * jupper} on process $p-1$.  Note that the first index of the
+ * global vector may start with any integer value.  In
+ * particular, one may use zero- or one-based indexing.
+ * 
+ * Collective.
+ * 
+ */
+
+void
+SIDLFortran77Symbol(bhypre_ijparcsrvector_setlocalrange_f,BHYPRE_IJPARCSRVECTOR_SETLOCALRANGE_F,bHYPRE_IJParCSRVector_SetLocalRange_f)
+(
+  int64_t *self,
+  int32_t *jlower,
+  int32_t *jupper,
+  int32_t *retval
+)
+{
+  struct bHYPRE_IJParCSRVector__epv *_epv = NULL;
+  struct bHYPRE_IJParCSRVector__object* _proxy_self = NULL;
+  _proxy_self =
+    (struct bHYPRE_IJParCSRVector__object*)
+    (ptrdiff_t)(*self);
+  _epv = _proxy_self->d_epv;
+  *retval = 
+    (*(_epv->f_SetLocalRange))(
+      _proxy_self,
+      *jlower,
+      *jupper
+    );
+}
+
+/*
+ * Sets values in vector.  The arrays {\tt values} and {\tt
+ * indices} are of dimension {\tt nvalues} and contain the
+ * vector values to be set and the corresponding global vector
+ * indices, respectively.  Erases any previous values at the
+ * specified locations and replaces them with new ones.
+ * 
+ * Not collective.
+ * 
+ */
+
+void
+SIDLFortran77Symbol(bhypre_ijparcsrvector_setvalues_f,BHYPRE_IJPARCSRVECTOR_SETVALUES_F,bHYPRE_IJParCSRVector_SetValues_f)
+(
+  int64_t *self,
+  int32_t *nvalues,
+  int32_t *indices,
+  double *values,
+  int32_t *retval
+)
+{
+  struct bHYPRE_IJParCSRVector__epv *_epv = NULL;
+  struct bHYPRE_IJParCSRVector__object* _proxy_self = NULL;
+  struct sidl_int__array _alt_indices;
+  struct sidl_int__array* _proxy_indices = &_alt_indices;
+  int32_t indices_lower[1], indices_upper[1], indices_stride[1];
+  struct sidl_double__array _alt_values;
+  struct sidl_double__array* _proxy_values = &_alt_values;
+  int32_t values_lower[1], values_upper[1], values_stride[1];
+  _proxy_self =
+    (struct bHYPRE_IJParCSRVector__object*)
+    (ptrdiff_t)(*self);
+  indices_upper[0] = (*nvalues)-1;
+  sidl_int__array_init(indices, _proxy_indices, 1, indices_lower, indices_upper,
+    indices_stride);
+  values_upper[0] = (*nvalues)-1;
+  sidl_double__array_init(values, _proxy_values, 1, values_lower, values_upper,
+    values_stride);
+  _epv = _proxy_self->d_epv;
+  *retval = 
+    (*(_epv->f_SetValues))(
+      _proxy_self,
+      _proxy_indices,
+      _proxy_values
+    );
+}
+
+/*
+ * Adds to values in vector.  Usage details are analogous to
+ * {\tt SetValues}.
+ * 
+ * Not collective.
+ * 
+ */
+
+void
+SIDLFortran77Symbol(bhypre_ijparcsrvector_addtovalues_f,BHYPRE_IJPARCSRVECTOR_ADDTOVALUES_F,bHYPRE_IJParCSRVector_AddToValues_f)
+(
+  int64_t *self,
+  int32_t *nvalues,
+  int32_t *indices,
+  double *values,
+  int32_t *retval
+)
+{
+  struct bHYPRE_IJParCSRVector__epv *_epv = NULL;
+  struct bHYPRE_IJParCSRVector__object* _proxy_self = NULL;
+  struct sidl_int__array _alt_indices;
+  struct sidl_int__array* _proxy_indices = &_alt_indices;
+  int32_t indices_lower[1], indices_upper[1], indices_stride[1];
+  struct sidl_double__array _alt_values;
+  struct sidl_double__array* _proxy_values = &_alt_values;
+  int32_t values_lower[1], values_upper[1], values_stride[1];
+  _proxy_self =
+    (struct bHYPRE_IJParCSRVector__object*)
+    (ptrdiff_t)(*self);
+  indices_upper[0] = (*nvalues)-1;
+  sidl_int__array_init(indices, _proxy_indices, 1, indices_lower, indices_upper,
+    indices_stride);
+  values_upper[0] = (*nvalues)-1;
+  sidl_double__array_init(values, _proxy_values, 1, values_lower, values_upper,
+    values_stride);
+  _epv = _proxy_self->d_epv;
+  *retval = 
+    (*(_epv->f_AddToValues))(
+      _proxy_self,
+      _proxy_indices,
+      _proxy_values
+    );
+}
+
+/*
+ * Returns range of the part of the vector owned by this
+ * processor.
+ * 
+ */
+
+void
+SIDLFortran77Symbol(bhypre_ijparcsrvector_getlocalrange_f,BHYPRE_IJPARCSRVECTOR_GETLOCALRANGE_F,bHYPRE_IJParCSRVector_GetLocalRange_f)
+(
+  int64_t *self,
+  int32_t *jlower,
+  int32_t *jupper,
+  int32_t *retval
+)
+{
+  struct bHYPRE_IJParCSRVector__epv *_epv = NULL;
+  struct bHYPRE_IJParCSRVector__object* _proxy_self = NULL;
+  _proxy_self =
+    (struct bHYPRE_IJParCSRVector__object*)
+    (ptrdiff_t)(*self);
+  _epv = _proxy_self->d_epv;
+  *retval = 
+    (*(_epv->f_GetLocalRange))(
+      _proxy_self,
+      jlower,
+      jupper
+    );
+}
+
+/*
+ * Gets values in vector.  Usage details are analogous to {\tt
+ * SetValues}.
+ * 
+ * Not collective.
+ * 
+ */
+
+void
+SIDLFortran77Symbol(bhypre_ijparcsrvector_getvalues_f,BHYPRE_IJPARCSRVECTOR_GETVALUES_F,bHYPRE_IJParCSRVector_GetValues_f)
+(
+  int64_t *self,
+  int32_t *nvalues,
+  int32_t *indices,
+  double *values,
+  int32_t *retval
+)
+{
+  struct bHYPRE_IJParCSRVector__epv *_epv = NULL;
+  struct bHYPRE_IJParCSRVector__object* _proxy_self = NULL;
+  struct sidl_int__array _alt_indices;
+  struct sidl_int__array* _proxy_indices = &_alt_indices;
+  int32_t indices_lower[1], indices_upper[1], indices_stride[1];
+  struct sidl_double__array _alt_values;
+  struct sidl_double__array* _proxy_values = &_alt_values;
+  int32_t values_lower[1], values_upper[1], values_stride[1];
+  _proxy_self =
+    (struct bHYPRE_IJParCSRVector__object*)
+    (ptrdiff_t)(*self);
+  indices_upper[0] = (*nvalues)-1;
+  sidl_int__array_init(indices, _proxy_indices, 1, indices_lower, indices_upper,
+    indices_stride);
+  values_upper[0] = (*nvalues)-1;
+  sidl_double__array_init(values, _proxy_values, 1, values_lower, values_upper,
+    values_stride);
+  _epv = _proxy_self->d_epv;
+  *retval = 
+    (*(_epv->f_GetValues))(
+      _proxy_self,
+      _proxy_indices,
+      &_proxy_values
+    );
+}
+
+/*
+ * Print the vector to file.  This is mainly for debugging
+ * purposes.
+ * 
+ */
+
+void
+SIDLFortran77Symbol(bhypre_ijparcsrvector_print_f,BHYPRE_IJPARCSRVECTOR_PRINT_F,bHYPRE_IJParCSRVector_Print_f)
+(
+  int64_t *self,
+  SIDL_F77_String filename
+  SIDL_F77_STR_NEAR_LEN_DECL(filename),
+  int32_t *retval
+  SIDL_F77_STR_FAR_LEN_DECL(filename)
+)
+{
+  struct bHYPRE_IJParCSRVector__epv *_epv = NULL;
+  struct bHYPRE_IJParCSRVector__object* _proxy_self = NULL;
+  char* _proxy_filename = NULL;
+  _proxy_self =
+    (struct bHYPRE_IJParCSRVector__object*)
+    (ptrdiff_t)(*self);
+  _proxy_filename =
+    sidl_copy_fortran_str(SIDL_F77_STR(filename),
+      SIDL_F77_STR_LEN(filename));
+  _epv = _proxy_self->d_epv;
+  *retval = 
+    (*(_epv->f_Print))(
+      _proxy_self,
+      _proxy_filename
+    );
+  free((void *)_proxy_filename);
+}
+
+/*
+ * Read the vector from file.  This is mainly for debugging
+ * purposes.
+ * 
+ */
+
+void
+SIDLFortran77Symbol(bhypre_ijparcsrvector_read_f,BHYPRE_IJPARCSRVECTOR_READ_F,bHYPRE_IJParCSRVector_Read_f)
+(
+  int64_t *self,
+  SIDL_F77_String filename
+  SIDL_F77_STR_NEAR_LEN_DECL(filename),
+  int64_t *comm,
+  int32_t *retval
+  SIDL_F77_STR_FAR_LEN_DECL(filename)
+)
+{
+  struct bHYPRE_IJParCSRVector__epv *_epv = NULL;
+  struct bHYPRE_IJParCSRVector__object* _proxy_self = NULL;
+  char* _proxy_filename = NULL;
+  void* _proxy_comm = NULL;
+  _proxy_self =
+    (struct bHYPRE_IJParCSRVector__object*)
+    (ptrdiff_t)(*self);
+  _proxy_filename =
+    sidl_copy_fortran_str(SIDL_F77_STR(filename),
+      SIDL_F77_STR_LEN(filename));
+  _proxy_comm =
+    (void*)
+    (ptrdiff_t)(*comm);
+  _epv = _proxy_self->d_epv;
+  *retval = 
+    (*(_epv->f_Read))(
+      _proxy_self,
+      _proxy_filename,
+      _proxy_comm
+    );
+  free((void *)_proxy_filename);
+}
+
+/*
  * Set {\tt self} to 0.
  * 
  */
@@ -491,392 +885,6 @@ SIDLFortran77Symbol(bhypre_ijparcsrvector_axpy_f,BHYPRE_IJPARCSRVECTOR_AXPY_F,bH
       *a,
       _proxy_x
     );
-}
-
-/*
- * Set the MPI Communicator.  DEPRECATED, Use Create()
- * 
- */
-
-void
-SIDLFortran77Symbol(bhypre_ijparcsrvector_setcommunicator_f,BHYPRE_IJPARCSRVECTOR_SETCOMMUNICATOR_F,bHYPRE_IJParCSRVector_SetCommunicator_f)
-(
-  int64_t *self,
-  int64_t *mpi_comm,
-  int32_t *retval
-)
-{
-  struct bHYPRE_IJParCSRVector__epv *_epv = NULL;
-  struct bHYPRE_IJParCSRVector__object* _proxy_self = NULL;
-  void* _proxy_mpi_comm = NULL;
-  _proxy_self =
-    (struct bHYPRE_IJParCSRVector__object*)
-    (ptrdiff_t)(*self);
-  _proxy_mpi_comm =
-    (void*)
-    (ptrdiff_t)(*mpi_comm);
-  _epv = _proxy_self->d_epv;
-  *retval = 
-    (*(_epv->f_SetCommunicator))(
-      _proxy_self,
-      _proxy_mpi_comm
-    );
-}
-
-/*
- * Prepare an object for setting coefficient values, whether for
- * the first time or subsequently.
- * 
- */
-
-void
-SIDLFortran77Symbol(bhypre_ijparcsrvector_initialize_f,BHYPRE_IJPARCSRVECTOR_INITIALIZE_F,bHYPRE_IJParCSRVector_Initialize_f)
-(
-  int64_t *self,
-  int32_t *retval
-)
-{
-  struct bHYPRE_IJParCSRVector__epv *_epv = NULL;
-  struct bHYPRE_IJParCSRVector__object* _proxy_self = NULL;
-  _proxy_self =
-    (struct bHYPRE_IJParCSRVector__object*)
-    (ptrdiff_t)(*self);
-  _epv = _proxy_self->d_epv;
-  *retval = 
-    (*(_epv->f_Initialize))(
-      _proxy_self
-    );
-}
-
-/*
- * Finalize the construction of an object before using, either
- * for the first time or on subsequent uses. {\tt Initialize}
- * and {\tt Assemble} always appear in a matched set, with
- * Initialize preceding Assemble. Values can only be set in
- * between a call to Initialize and Assemble.
- * 
- */
-
-void
-SIDLFortran77Symbol(bhypre_ijparcsrvector_assemble_f,BHYPRE_IJPARCSRVECTOR_ASSEMBLE_F,bHYPRE_IJParCSRVector_Assemble_f)
-(
-  int64_t *self,
-  int32_t *retval
-)
-{
-  struct bHYPRE_IJParCSRVector__epv *_epv = NULL;
-  struct bHYPRE_IJParCSRVector__object* _proxy_self = NULL;
-  _proxy_self =
-    (struct bHYPRE_IJParCSRVector__object*)
-    (ptrdiff_t)(*self);
-  _epv = _proxy_self->d_epv;
-  *retval = 
-    (*(_epv->f_Assemble))(
-      _proxy_self
-    );
-}
-
-/*
- * The problem definition interface is a {\it builder} that
- * creates an object that contains the problem definition
- * information, e.g. a matrix. To perform subsequent operations
- * with that object, it must be returned from the problem
- * definition object. {\tt GetObject} performs this function.
- * At compile time, the type of the returned object is unknown.
- * Thus, the returned type is a sidl.BaseInterface.
- * QueryInterface or Cast must be used on the returned object to
- * convert it into a known type.
- * 
- */
-
-void
-SIDLFortran77Symbol(bhypre_ijparcsrvector_getobject_f,BHYPRE_IJPARCSRVECTOR_GETOBJECT_F,bHYPRE_IJParCSRVector_GetObject_f)
-(
-  int64_t *self,
-  int64_t *A,
-  int32_t *retval
-)
-{
-  struct bHYPRE_IJParCSRVector__epv *_epv = NULL;
-  struct bHYPRE_IJParCSRVector__object* _proxy_self = NULL;
-  struct sidl_BaseInterface__object* _proxy_A = NULL;
-  _proxy_self =
-    (struct bHYPRE_IJParCSRVector__object*)
-    (ptrdiff_t)(*self);
-  _epv = _proxy_self->d_epv;
-  *retval = 
-    (*(_epv->f_GetObject))(
-      _proxy_self,
-      &_proxy_A
-    );
-  *A = (ptrdiff_t)_proxy_A;
-}
-
-/*
- * Set the local range for a vector object.  Each process owns
- * some unique consecutive range of vector unknowns, indicated
- * by the global indices {\tt jlower} and {\tt jupper}.  The
- * data is required to be such that the value of {\tt jlower} on
- * any process $p$ be exactly one more than the value of {\tt
- * jupper} on process $p-1$.  Note that the first index of the
- * global vector may start with any integer value.  In
- * particular, one may use zero- or one-based indexing.
- * 
- * Collective.
- * 
- */
-
-void
-SIDLFortran77Symbol(bhypre_ijparcsrvector_setlocalrange_f,BHYPRE_IJPARCSRVECTOR_SETLOCALRANGE_F,bHYPRE_IJParCSRVector_SetLocalRange_f)
-(
-  int64_t *self,
-  int32_t *jlower,
-  int32_t *jupper,
-  int32_t *retval
-)
-{
-  struct bHYPRE_IJParCSRVector__epv *_epv = NULL;
-  struct bHYPRE_IJParCSRVector__object* _proxy_self = NULL;
-  _proxy_self =
-    (struct bHYPRE_IJParCSRVector__object*)
-    (ptrdiff_t)(*self);
-  _epv = _proxy_self->d_epv;
-  *retval = 
-    (*(_epv->f_SetLocalRange))(
-      _proxy_self,
-      *jlower,
-      *jupper
-    );
-}
-
-/*
- * Sets values in vector.  The arrays {\tt values} and {\tt
- * indices} are of dimension {\tt nvalues} and contain the
- * vector values to be set and the corresponding global vector
- * indices, respectively.  Erases any previous values at the
- * specified locations and replaces them with new ones.
- * 
- * Not collective.
- * 
- */
-
-void
-SIDLFortran77Symbol(bhypre_ijparcsrvector_setvalues_f,BHYPRE_IJPARCSRVECTOR_SETVALUES_F,bHYPRE_IJParCSRVector_SetValues_f)
-(
-  int64_t *self,
-  int32_t *nvalues,
-  int64_t *indices,
-  int64_t *values,
-  int32_t *retval
-)
-{
-  struct bHYPRE_IJParCSRVector__epv *_epv = NULL;
-  struct bHYPRE_IJParCSRVector__object* _proxy_self = NULL;
-  struct sidl_int__array* _proxy_indices = NULL;
-  struct sidl_double__array* _proxy_values = NULL;
-  _proxy_self =
-    (struct bHYPRE_IJParCSRVector__object*)
-    (ptrdiff_t)(*self);
-  _proxy_indices =
-    (struct sidl_int__array*)
-    (ptrdiff_t)(*indices);
-  _proxy_values =
-    (struct sidl_double__array*)
-    (ptrdiff_t)(*values);
-  _epv = _proxy_self->d_epv;
-  *retval = 
-    (*(_epv->f_SetValues))(
-      _proxy_self,
-      *nvalues,
-      _proxy_indices,
-      _proxy_values
-    );
-}
-
-/*
- * Adds to values in vector.  Usage details are analogous to
- * {\tt SetValues}.
- * 
- * Not collective.
- * 
- */
-
-void
-SIDLFortran77Symbol(bhypre_ijparcsrvector_addtovalues_f,BHYPRE_IJPARCSRVECTOR_ADDTOVALUES_F,bHYPRE_IJParCSRVector_AddToValues_f)
-(
-  int64_t *self,
-  int32_t *nvalues,
-  int64_t *indices,
-  int64_t *values,
-  int32_t *retval
-)
-{
-  struct bHYPRE_IJParCSRVector__epv *_epv = NULL;
-  struct bHYPRE_IJParCSRVector__object* _proxy_self = NULL;
-  struct sidl_int__array* _proxy_indices = NULL;
-  struct sidl_double__array* _proxy_values = NULL;
-  _proxy_self =
-    (struct bHYPRE_IJParCSRVector__object*)
-    (ptrdiff_t)(*self);
-  _proxy_indices =
-    (struct sidl_int__array*)
-    (ptrdiff_t)(*indices);
-  _proxy_values =
-    (struct sidl_double__array*)
-    (ptrdiff_t)(*values);
-  _epv = _proxy_self->d_epv;
-  *retval = 
-    (*(_epv->f_AddToValues))(
-      _proxy_self,
-      *nvalues,
-      _proxy_indices,
-      _proxy_values
-    );
-}
-
-/*
- * Returns range of the part of the vector owned by this
- * processor.
- * 
- */
-
-void
-SIDLFortran77Symbol(bhypre_ijparcsrvector_getlocalrange_f,BHYPRE_IJPARCSRVECTOR_GETLOCALRANGE_F,bHYPRE_IJParCSRVector_GetLocalRange_f)
-(
-  int64_t *self,
-  int32_t *jlower,
-  int32_t *jupper,
-  int32_t *retval
-)
-{
-  struct bHYPRE_IJParCSRVector__epv *_epv = NULL;
-  struct bHYPRE_IJParCSRVector__object* _proxy_self = NULL;
-  _proxy_self =
-    (struct bHYPRE_IJParCSRVector__object*)
-    (ptrdiff_t)(*self);
-  _epv = _proxy_self->d_epv;
-  *retval = 
-    (*(_epv->f_GetLocalRange))(
-      _proxy_self,
-      jlower,
-      jupper
-    );
-}
-
-/*
- * Gets values in vector.  Usage details are analogous to {\tt
- * SetValues}.
- * 
- * Not collective.
- * 
- */
-
-void
-SIDLFortran77Symbol(bhypre_ijparcsrvector_getvalues_f,BHYPRE_IJPARCSRVECTOR_GETVALUES_F,bHYPRE_IJParCSRVector_GetValues_f)
-(
-  int64_t *self,
-  int32_t *nvalues,
-  int64_t *indices,
-  int64_t *values,
-  int32_t *retval
-)
-{
-  struct bHYPRE_IJParCSRVector__epv *_epv = NULL;
-  struct bHYPRE_IJParCSRVector__object* _proxy_self = NULL;
-  struct sidl_int__array* _proxy_indices = NULL;
-  struct sidl_double__array* _proxy_values = NULL;
-  _proxy_self =
-    (struct bHYPRE_IJParCSRVector__object*)
-    (ptrdiff_t)(*self);
-  _proxy_indices =
-    (struct sidl_int__array*)
-    (ptrdiff_t)(*indices);
-  _proxy_values =
-    (struct sidl_double__array*)
-    (ptrdiff_t)(*values);
-  _epv = _proxy_self->d_epv;
-  *retval = 
-    (*(_epv->f_GetValues))(
-      _proxy_self,
-      *nvalues,
-      _proxy_indices,
-      &_proxy_values
-    );
-  *values = (ptrdiff_t)_proxy_values;
-}
-
-/*
- * Print the vector to file.  This is mainly for debugging
- * purposes.
- * 
- */
-
-void
-SIDLFortran77Symbol(bhypre_ijparcsrvector_print_f,BHYPRE_IJPARCSRVECTOR_PRINT_F,bHYPRE_IJParCSRVector_Print_f)
-(
-  int64_t *self,
-  SIDL_F77_String filename
-  SIDL_F77_STR_NEAR_LEN_DECL(filename),
-  int32_t *retval
-  SIDL_F77_STR_FAR_LEN_DECL(filename)
-)
-{
-  struct bHYPRE_IJParCSRVector__epv *_epv = NULL;
-  struct bHYPRE_IJParCSRVector__object* _proxy_self = NULL;
-  char* _proxy_filename = NULL;
-  _proxy_self =
-    (struct bHYPRE_IJParCSRVector__object*)
-    (ptrdiff_t)(*self);
-  _proxy_filename =
-    sidl_copy_fortran_str(SIDL_F77_STR(filename),
-      SIDL_F77_STR_LEN(filename));
-  _epv = _proxy_self->d_epv;
-  *retval = 
-    (*(_epv->f_Print))(
-      _proxy_self,
-      _proxy_filename
-    );
-  free((void *)_proxy_filename);
-}
-
-/*
- * Read the vector from file.  This is mainly for debugging
- * purposes.
- * 
- */
-
-void
-SIDLFortran77Symbol(bhypre_ijparcsrvector_read_f,BHYPRE_IJPARCSRVECTOR_READ_F,bHYPRE_IJParCSRVector_Read_f)
-(
-  int64_t *self,
-  SIDL_F77_String filename
-  SIDL_F77_STR_NEAR_LEN_DECL(filename),
-  int64_t *comm,
-  int32_t *retval
-  SIDL_F77_STR_FAR_LEN_DECL(filename)
-)
-{
-  struct bHYPRE_IJParCSRVector__epv *_epv = NULL;
-  struct bHYPRE_IJParCSRVector__object* _proxy_self = NULL;
-  char* _proxy_filename = NULL;
-  void* _proxy_comm = NULL;
-  _proxy_self =
-    (struct bHYPRE_IJParCSRVector__object*)
-    (ptrdiff_t)(*self);
-  _proxy_filename =
-    sidl_copy_fortran_str(SIDL_F77_STR(filename),
-      SIDL_F77_STR_LEN(filename));
-  _proxy_comm =
-    (void*)
-    (ptrdiff_t)(*comm);
-  _epv = _proxy_self->d_epv;
-  *retval = 
-    (*(_epv->f_Read))(
-      _proxy_self,
-      _proxy_filename,
-      _proxy_comm
-    );
-  free((void *)_proxy_filename);
 }
 
 void

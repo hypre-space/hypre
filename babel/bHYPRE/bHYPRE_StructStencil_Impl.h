@@ -120,7 +120,8 @@ int32_t
 impl_bHYPRE_StructStencil_SetElement(
   /* in */ bHYPRE_StructStencil self,
   /* in */ int32_t index,
-  /* in */ struct sidl_int__array* offset);
+  /* in */ int32_t* offset,
+  /* in */ int32_t dim);
 
 extern struct sidl_ClassInfo__object* 
   impl_bHYPRE_StructStencil_fconnect_sidl_ClassInfo(char* url,

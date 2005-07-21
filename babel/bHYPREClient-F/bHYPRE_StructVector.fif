@@ -261,10 +261,10 @@ C
         implicit none
 C       in bHYPRE.StructVector self
         integer*8 self
-C       in array<int,column-major> num_ghost
-        integer*8 num_ghost
 C       out int retval
         integer*4 retval
+C       in rarray<int> num_ghost(dim2)
+        integer*4 num_ghost(0:dim2-1)
         end
 
 
@@ -277,12 +277,12 @@ C
         implicit none
 C       in bHYPRE.StructVector self
         integer*8 self
-C       in array<int,column-major> grid_index
-        integer*8 grid_index
 C       in double value
         double precision value
 C       out int retval
         integer*4 retval
+C       in rarray<int> grid_index(dim)
+        integer*4 grid_index(0:dim-1)
         end
 
 
@@ -295,14 +295,14 @@ C
         implicit none
 C       in bHYPRE.StructVector self
         integer*8 self
-C       in array<int,column-major> ilower
-        integer*8 ilower
-C       in array<int,column-major> iupper
-        integer*8 iupper
-C       in array<double,column-major> values
-        integer*8 values
 C       out int retval
         integer*4 retval
+C       in rarray<int> ilower(dim)
+        integer*4 ilower(0:dim-1)
+C       in rarray<int> iupper(dim)
+        integer*4 iupper(0:dim-1)
+C       in rarray<double> values(nvalues)
+        double precision values(0:nvalues-1)
         end
 
 

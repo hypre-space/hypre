@@ -99,14 +99,12 @@ struct bHYPRE_IJBuildMatrix__epv {
     /* in */ int32_t jupper);
   int32_t (*f_SetValues)(
     /* in */ void* self,
-    /* in */ int32_t nrows,
     /* in */ struct sidl_int__array* ncols,
     /* in */ struct sidl_int__array* rows,
     /* in */ struct sidl_int__array* cols,
     /* in */ struct sidl_double__array* values);
   int32_t (*f_AddToValues)(
     /* in */ void* self,
-    /* in */ int32_t nrows,
     /* in */ struct sidl_int__array* ncols,
     /* in */ struct sidl_int__array* rows,
     /* in */ struct sidl_int__array* cols,
@@ -119,12 +117,10 @@ struct bHYPRE_IJBuildMatrix__epv {
     /* out */ int32_t* jupper);
   int32_t (*f_GetRowCounts)(
     /* in */ void* self,
-    /* in */ int32_t nrows,
     /* in */ struct sidl_int__array* rows,
     /* inout */ struct sidl_int__array** ncols);
   int32_t (*f_GetValues)(
     /* in */ void* self,
-    /* in */ int32_t nrows,
     /* in */ struct sidl_int__array* ncols,
     /* in */ struct sidl_int__array* rows,
     /* in */ struct sidl_int__array* cols,
@@ -232,14 +228,12 @@ struct bHYPRE__IJBuildMatrix__epv {
     /* in */ int32_t jupper);
   int32_t (*f_SetValues)(
     /* in */ struct bHYPRE__IJBuildMatrix__object* self,
-    /* in */ int32_t nrows,
     /* in */ struct sidl_int__array* ncols,
     /* in */ struct sidl_int__array* rows,
     /* in */ struct sidl_int__array* cols,
     /* in */ struct sidl_double__array* values);
   int32_t (*f_AddToValues)(
     /* in */ struct bHYPRE__IJBuildMatrix__object* self,
-    /* in */ int32_t nrows,
     /* in */ struct sidl_int__array* ncols,
     /* in */ struct sidl_int__array* rows,
     /* in */ struct sidl_int__array* cols,
@@ -252,12 +246,10 @@ struct bHYPRE__IJBuildMatrix__epv {
     /* out */ int32_t* jupper);
   int32_t (*f_GetRowCounts)(
     /* in */ struct bHYPRE__IJBuildMatrix__object* self,
-    /* in */ int32_t nrows,
     /* in */ struct sidl_int__array* rows,
     /* inout */ struct sidl_int__array** ncols);
   int32_t (*f_GetValues)(
     /* in */ struct bHYPRE__IJBuildMatrix__object* self,
-    /* in */ int32_t nrows,
     /* in */ struct sidl_int__array* ncols,
     /* in */ struct sidl_int__array* rows,
     /* in */ struct sidl_int__array* cols,

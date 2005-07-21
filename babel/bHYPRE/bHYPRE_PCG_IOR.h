@@ -41,6 +41,15 @@ extern "C" {
  * 
  * RDF: Documentation goes here.
  * 
+ * This PCG solver checks whether the matrix, vectors, and preconditioner
+ * are of known types, and will not work with any other types.
+ * Presently, the recognized data types are:
+ * matrix, vector: IJParCSRMatrix, IJParCSRVector
+ * matrix, vector: StructMatrix, StructVector
+ * preconditioner: BoomerAMG, ParaSails, ParCSRDiagScale, IdentitySolver
+ * preconditioner: StructSMG, StructPFMG
+ * 
+ * 
  */
 
 struct bHYPRE_PCG__array;

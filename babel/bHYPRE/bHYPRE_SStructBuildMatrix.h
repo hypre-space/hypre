@@ -123,16 +123,18 @@ bHYPRE_SStructBuildMatrix_SetGraph(
  * of doubles representing the real and imaginary parts of each
  * complex value.
  * 
+ * 
  */
 int32_t
 bHYPRE_SStructBuildMatrix_SetValues(
   /* in */ bHYPRE_SStructBuildMatrix self,
   /* in */ int32_t part,
-  /* in */ struct sidl_int__array* index,
+  /* in */ int32_t* index,
+  /* in */ int32_t dim,
   /* in */ int32_t var,
   /* in */ int32_t nentries,
-  /* in */ struct sidl_int__array* entries,
-  /* in */ struct sidl_double__array* values);
+  /* in */ int32_t* entries,
+  /* in */ double* values);
 
 /**
  * Set matrix coefficients a box at a time.
@@ -156,12 +158,14 @@ int32_t
 bHYPRE_SStructBuildMatrix_SetBoxValues(
   /* in */ bHYPRE_SStructBuildMatrix self,
   /* in */ int32_t part,
-  /* in */ struct sidl_int__array* ilower,
-  /* in */ struct sidl_int__array* iupper,
+  /* in */ int32_t* ilower,
+  /* in */ int32_t* iupper,
+  /* in */ int32_t dim,
   /* in */ int32_t var,
   /* in */ int32_t nentries,
-  /* in */ struct sidl_int__array* entries,
-  /* in */ struct sidl_double__array* values);
+  /* in */ int32_t* entries,
+  /* in */ double* values,
+  /* in */ int32_t nvalues);
 
 /**
  * Add to matrix coefficients index by index.
@@ -184,11 +188,12 @@ int32_t
 bHYPRE_SStructBuildMatrix_AddToValues(
   /* in */ bHYPRE_SStructBuildMatrix self,
   /* in */ int32_t part,
-  /* in */ struct sidl_int__array* index,
+  /* in */ int32_t* index,
+  /* in */ int32_t dim,
   /* in */ int32_t var,
   /* in */ int32_t nentries,
-  /* in */ struct sidl_int__array* entries,
-  /* in */ struct sidl_double__array* values);
+  /* in */ int32_t* entries,
+  /* in */ double* values);
 
 /**
  * Add to matrix coefficients a box at a time.
@@ -210,12 +215,14 @@ int32_t
 bHYPRE_SStructBuildMatrix_AddToBoxValues(
   /* in */ bHYPRE_SStructBuildMatrix self,
   /* in */ int32_t part,
-  /* in */ struct sidl_int__array* ilower,
-  /* in */ struct sidl_int__array* iupper,
+  /* in */ int32_t* ilower,
+  /* in */ int32_t* iupper,
+  /* in */ int32_t dim,
   /* in */ int32_t var,
   /* in */ int32_t nentries,
-  /* in */ struct sidl_int__array* entries,
-  /* in */ struct sidl_double__array* values);
+  /* in */ int32_t* entries,
+  /* in */ double* values,
+  /* in */ int32_t nvalues);
 
 /**
  * Define symmetry properties for the stencil entries in the

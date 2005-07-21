@@ -377,21 +377,17 @@ bHYPRE_StructMatrix_SetValues__exec(
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
   struct sidl_int__array* index;
-  int32_t num_stencil_indices;
   struct sidl_int__array* stencil_indices;
   struct sidl_double__array* values;
   int32_t _retval;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
-  sidl_io_Deserializer_unpackInt( inArgs, "num_stencil_indices",
-    &num_stencil_indices, _ex2);
 
   /* make the call */
   _retval = (self->d_epv->f_SetValues)(
     self,
     index,
-    num_stencil_indices,
     stencil_indices,
     values);
 
@@ -410,22 +406,18 @@ bHYPRE_StructMatrix_SetBoxValues__exec(
   /* stack space for arguments */
   struct sidl_int__array* ilower;
   struct sidl_int__array* iupper;
-  int32_t num_stencil_indices;
   struct sidl_int__array* stencil_indices;
   struct sidl_double__array* values;
   int32_t _retval;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
-  sidl_io_Deserializer_unpackInt( inArgs, "num_stencil_indices",
-    &num_stencil_indices, _ex2);
 
   /* make the call */
   _retval = (self->d_epv->f_SetBoxValues)(
     self,
     ilower,
     iupper,
-    num_stencil_indices,
     stencil_indices,
     values);
 
@@ -491,19 +483,15 @@ bHYPRE_StructMatrix_SetConstantEntries__exec(
         struct sidl_io_Deserializer__object* inArgs,
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
-  int32_t num_stencil_constant_points;
   struct sidl_int__array* stencil_constant_points;
   int32_t _retval;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
-  sidl_io_Deserializer_unpackInt( inArgs, "num_stencil_constant_points",
-    &num_stencil_constant_points, _ex2);
 
   /* make the call */
   _retval = (self->d_epv->f_SetConstantEntries)(
     self,
-    num_stencil_constant_points,
     stencil_constant_points);
 
   /* pack return value */
@@ -519,20 +507,16 @@ bHYPRE_StructMatrix_SetConstantValues__exec(
         struct sidl_io_Deserializer__object* inArgs,
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
-  int32_t num_stencil_indices;
   struct sidl_int__array* stencil_indices;
   struct sidl_double__array* values;
   int32_t _retval;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
-  sidl_io_Deserializer_unpackInt( inArgs, "num_stencil_indices",
-    &num_stencil_indices, _ex2);
 
   /* make the call */
   _retval = (self->d_epv->f_SetConstantValues)(
     self,
-    num_stencil_indices,
     stencil_indices,
     values);
 
@@ -1125,18 +1109,16 @@ static void bHYPRE_StructMatrix__init_epv(
   e2->f_SetStencil          = (int32_t (*)(void*,
     struct bHYPRE_StructStencil__object*)) epv->f_SetStencil;
   e2->f_SetValues           = (int32_t (*)(void*,struct sidl_int__array*,
-    int32_t,struct sidl_int__array*,
-    struct sidl_double__array*)) epv->f_SetValues;
+    struct sidl_int__array*,struct sidl_double__array*)) epv->f_SetValues;
   e2->f_SetBoxValues        = (int32_t (*)(void*,struct sidl_int__array*,
-    struct sidl_int__array*,int32_t,struct sidl_int__array*,
+    struct sidl_int__array*,struct sidl_int__array*,
     struct sidl_double__array*)) epv->f_SetBoxValues;
   e2->f_SetNumGhost         = (int32_t (*)(void*,
     struct sidl_int__array*)) epv->f_SetNumGhost;
   e2->f_SetSymmetric        = (int32_t (*)(void*,int32_t)) epv->f_SetSymmetric;
-  e2->f_SetConstantEntries  = (int32_t (*)(void*,int32_t,
+  e2->f_SetConstantEntries  = (int32_t (*)(void*,
     struct sidl_int__array*)) epv->f_SetConstantEntries;
-  e2->f_SetConstantValues   = (int32_t (*)(void*,int32_t,
-    struct sidl_int__array*,
+  e2->f_SetConstantValues   = (int32_t (*)(void*,struct sidl_int__array*,
     struct sidl_double__array*)) epv->f_SetConstantValues;
 
   e3->f__cast               = (void* (*)(struct sidl_BaseClass__object*,

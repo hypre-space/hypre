@@ -249,11 +249,18 @@ bHYPRE_StructBuildVector_SetGrid(
 int32_t
 bHYPRE_StructBuildVector_SetNumGhost(
   /* in */ bHYPRE_StructBuildVector self,
-  /* in */ struct sidl_int__array* num_ghost)
+  /* in */ int32_t* num_ghost,
+  /* in */ int32_t dim2)
 {
+  int32_t num_ghost_lower[1], num_ghost_upper[1], num_ghost_stride[1]; 
+  struct sidl_int__array num_ghost_real;
+  struct sidl_int__array*num_ghost_tmp = &num_ghost_real;
+  num_ghost_upper[0] = dim2-1;
+  sidl_int__array_init(num_ghost, num_ghost_tmp, 1, num_ghost_lower,
+    num_ghost_upper, num_ghost_stride);
   return (*self->d_epv->f_SetNumGhost)(
     self->d_object,
-    num_ghost);
+    num_ghost_tmp);
 }
 
 /*
@@ -263,12 +270,19 @@ bHYPRE_StructBuildVector_SetNumGhost(
 int32_t
 bHYPRE_StructBuildVector_SetValue(
   /* in */ bHYPRE_StructBuildVector self,
-  /* in */ struct sidl_int__array* grid_index,
+  /* in */ int32_t* grid_index,
+  /* in */ int32_t dim,
   /* in */ double value)
 {
+  int32_t grid_index_lower[1], grid_index_upper[1], grid_index_stride[1]; 
+  struct sidl_int__array grid_index_real;
+  struct sidl_int__array*grid_index_tmp = &grid_index_real;
+  grid_index_upper[0] = dim-1;
+  sidl_int__array_init(grid_index, grid_index_tmp, 1, grid_index_lower,
+    grid_index_upper, grid_index_stride);
   return (*self->d_epv->f_SetValue)(
     self->d_object,
-    grid_index,
+    grid_index_tmp,
     value);
 }
 
@@ -279,15 +293,35 @@ bHYPRE_StructBuildVector_SetValue(
 int32_t
 bHYPRE_StructBuildVector_SetBoxValues(
   /* in */ bHYPRE_StructBuildVector self,
-  /* in */ struct sidl_int__array* ilower,
-  /* in */ struct sidl_int__array* iupper,
-  /* in */ struct sidl_double__array* values)
+  /* in */ int32_t* ilower,
+  /* in */ int32_t* iupper,
+  /* in */ int32_t dim,
+  /* in */ double* values,
+  /* in */ int32_t nvalues)
 {
+  int32_t ilower_lower[1], ilower_upper[1], ilower_stride[1]; 
+  struct sidl_int__array ilower_real;
+  struct sidl_int__array*ilower_tmp = &ilower_real;
+  int32_t iupper_lower[1], iupper_upper[1], iupper_stride[1]; 
+  struct sidl_int__array iupper_real;
+  struct sidl_int__array*iupper_tmp = &iupper_real;
+  int32_t values_lower[1], values_upper[1], values_stride[1]; 
+  struct sidl_double__array values_real;
+  struct sidl_double__array*values_tmp = &values_real;
+  ilower_upper[0] = dim-1;
+  sidl_int__array_init(ilower, ilower_tmp, 1, ilower_lower, ilower_upper,
+    ilower_stride);
+  iupper_upper[0] = dim-1;
+  sidl_int__array_init(iupper, iupper_tmp, 1, iupper_lower, iupper_upper,
+    iupper_stride);
+  values_upper[0] = nvalues-1;
+  sidl_double__array_init(values, values_tmp, 1, values_lower, values_upper,
+    values_stride);
   return (*self->d_epv->f_SetBoxValues)(
     self->d_object,
-    ilower,
-    iupper,
-    values);
+    ilower_tmp,
+    iupper_tmp,
+    values_tmp);
 }
 
 /*

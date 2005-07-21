@@ -157,7 +157,8 @@ int32_t
 impl_bHYPRE_SStructStencil_SetEntry(
   /* in */ bHYPRE_SStructStencil self,
   /* in */ int32_t entry,
-  /* in */ struct sidl_int__array* offset,
+  /* in */ int32_t* offset,
+  /* in */ int32_t dim,
   /* in */ int32_t var)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructStencil.SetEntry) */
@@ -171,7 +172,7 @@ impl_bHYPRE_SStructStencil_SetEntry(
    Hstencil = data -> stencil;
 
    ierr += HYPRE_SStructStencilSetEntry( Hstencil, entry,
-                                         sidlArrayAddr1( offset, 0 ), var );
+                                         offset, var );
 
    return ierr;
 

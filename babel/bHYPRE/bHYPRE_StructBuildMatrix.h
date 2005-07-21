@@ -122,10 +122,11 @@ bHYPRE_StructBuildMatrix_SetStencil(
 int32_t
 bHYPRE_StructBuildMatrix_SetValues(
   /* in */ bHYPRE_StructBuildMatrix self,
-  /* in */ struct sidl_int__array* index,
+  /* in */ int32_t* index,
+  /* in */ int32_t dim,
   /* in */ int32_t num_stencil_indices,
-  /* in */ struct sidl_int__array* stencil_indices,
-  /* in */ struct sidl_double__array* values);
+  /* in */ int32_t* stencil_indices,
+  /* in */ double* values);
 
 /**
  * Method:  SetBoxValues[]
@@ -133,11 +134,13 @@ bHYPRE_StructBuildMatrix_SetValues(
 int32_t
 bHYPRE_StructBuildMatrix_SetBoxValues(
   /* in */ bHYPRE_StructBuildMatrix self,
-  /* in */ struct sidl_int__array* ilower,
-  /* in */ struct sidl_int__array* iupper,
+  /* in */ int32_t* ilower,
+  /* in */ int32_t* iupper,
+  /* in */ int32_t dim,
   /* in */ int32_t num_stencil_indices,
-  /* in */ struct sidl_int__array* stencil_indices,
-  /* in */ struct sidl_double__array* values);
+  /* in */ int32_t* stencil_indices,
+  /* in */ double* values,
+  /* in */ int32_t nvalues);
 
 /**
  * Method:  SetNumGhost[]
@@ -145,7 +148,8 @@ bHYPRE_StructBuildMatrix_SetBoxValues(
 int32_t
 bHYPRE_StructBuildMatrix_SetNumGhost(
   /* in */ bHYPRE_StructBuildMatrix self,
-  /* in */ struct sidl_int__array* num_ghost);
+  /* in */ int32_t* num_ghost,
+  /* in */ int32_t dim2);
 
 /**
  * Method:  SetSymmetric[]
@@ -162,7 +166,7 @@ int32_t
 bHYPRE_StructBuildMatrix_SetConstantEntries(
   /* in */ bHYPRE_StructBuildMatrix self,
   /* in */ int32_t num_stencil_constant_points,
-  /* in */ struct sidl_int__array* stencil_constant_points);
+  /* in */ int32_t* stencil_constant_points);
 
 /**
  * Method:  SetConstantValues[]
@@ -171,8 +175,8 @@ int32_t
 bHYPRE_StructBuildMatrix_SetConstantValues(
   /* in */ bHYPRE_StructBuildMatrix self,
   /* in */ int32_t num_stencil_indices,
-  /* in */ struct sidl_int__array* stencil_indices,
-  /* in */ struct sidl_double__array* values);
+  /* in */ int32_t* stencil_indices,
+  /* in */ double* values);
 
 /**
  * Cast method for interface and class type conversions.

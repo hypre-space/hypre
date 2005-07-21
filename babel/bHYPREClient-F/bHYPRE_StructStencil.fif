@@ -211,8 +211,8 @@ C       in bHYPRE.StructStencil self
         integer*8 self
 C       in int index
         integer*4 index
-C       in array<int,column-major> offset
-        integer*8 offset
 C       out int retval
         integer*4 retval
+C       in rarray<int> offset(dim)
+        integer*4 offset(0:dim-1)
         end

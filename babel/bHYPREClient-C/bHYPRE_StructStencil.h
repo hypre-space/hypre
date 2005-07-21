@@ -117,7 +117,8 @@ int32_t
 bHYPRE_StructStencil_SetElement(
   /* in */ bHYPRE_StructStencil self,
   /* in */ int32_t index,
-  /* in */ struct sidl_int__array* offset);
+  /* in */ int32_t* offset,
+  /* in */ int32_t dim);
 
 /**
  * Cast method for interface and class type conversions.

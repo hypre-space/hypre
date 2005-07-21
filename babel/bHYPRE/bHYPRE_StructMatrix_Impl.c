@@ -370,10 +370,11 @@ extern "C"
 int32_t
 impl_bHYPRE_StructMatrix_SetValues(
   /* in */ bHYPRE_StructMatrix self,
-  /* in */ struct sidl_int__array* index,
+  /* in */ int32_t* index,
+  /* in */ int32_t dim,
   /* in */ int32_t num_stencil_indices,
-  /* in */ struct sidl_int__array* stencil_indices,
-  /* in */ struct sidl_double__array* values)
+  /* in */ int32_t* stencil_indices,
+  /* in */ double* values)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.StructMatrix.SetValues) */
   /* Insert the implementation of the SetValues method here... */
@@ -385,8 +386,8 @@ impl_bHYPRE_StructMatrix_SetValues(
    HA = data -> matrix;
 
    ierr += HYPRE_StructMatrixSetValues
-      ( HA, sidlArrayAddr1( index, 0 ), num_stencil_indices,
-        sidlArrayAddr1( stencil_indices, 0 ), sidlArrayAddr1( values, 0 ) );
+      ( HA, index, num_stencil_indices,
+        stencil_indices, values );
 
    return ierr;
 
@@ -406,11 +407,13 @@ extern "C"
 int32_t
 impl_bHYPRE_StructMatrix_SetBoxValues(
   /* in */ bHYPRE_StructMatrix self,
-  /* in */ struct sidl_int__array* ilower,
-  /* in */ struct sidl_int__array* iupper,
+  /* in */ int32_t* ilower,
+  /* in */ int32_t* iupper,
+  /* in */ int32_t dim,
   /* in */ int32_t num_stencil_indices,
-  /* in */ struct sidl_int__array* stencil_indices,
-  /* in */ struct sidl_double__array* values)
+  /* in */ int32_t* stencil_indices,
+  /* in */ double* values,
+  /* in */ int32_t nvalues)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.StructMatrix.SetBoxValues) */
   /* Insert the implementation of the SetBoxValues method here... */
@@ -422,9 +425,9 @@ impl_bHYPRE_StructMatrix_SetBoxValues(
    HA = data -> matrix;
 
    ierr += HYPRE_StructMatrixSetBoxValues
-      ( HA, sidlArrayAddr1( ilower, 0 ), sidlArrayAddr1( iupper, 0 ),
-        num_stencil_indices, sidlArrayAddr1( stencil_indices, 0 ),
-        sidlArrayAddr1( values, 0 ) );
+      ( HA, ilower, iupper,
+        num_stencil_indices, stencil_indices,
+        values );
 
    return ierr;
 
@@ -445,7 +448,8 @@ extern "C"
 int32_t
 impl_bHYPRE_StructMatrix_SetNumGhost(
   /* in */ bHYPRE_StructMatrix self,
-  /* in */ struct sidl_int__array* num_ghost)
+  /* in */ int32_t* num_ghost,
+  /* in */ int32_t dim2)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.StructMatrix.SetNumGhost) */
   /* Insert the implementation of the SetNumGhost method here... */
@@ -457,7 +461,7 @@ impl_bHYPRE_StructMatrix_SetNumGhost(
    data = bHYPRE_StructMatrix__get_data( self );
    HA = data->matrix;
 
-   ierr += HYPRE_StructMatrixSetNumGhost( HA, sidlArrayAddr1( num_ghost, 0 ) );
+   ierr += HYPRE_StructMatrixSetNumGhost( HA, num_ghost );
 
    return( ierr );
 
@@ -510,7 +514,7 @@ int32_t
 impl_bHYPRE_StructMatrix_SetConstantEntries(
   /* in */ bHYPRE_StructMatrix self,
   /* in */ int32_t num_stencil_constant_points,
-  /* in */ struct sidl_int__array* stencil_constant_points)
+  /* in */ int32_t* stencil_constant_points)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.StructMatrix.SetConstantEntries) */
   /* Insert the implementation of the SetConstantEntries method here... */
@@ -523,7 +527,7 @@ impl_bHYPRE_StructMatrix_SetConstantEntries(
    HA = data -> matrix;
 
    ierr += HYPRE_StructMatrixSetConstantEntries
-      ( HA, num_stencil_constant_points, sidlArrayAddr1( stencil_constant_points, 0 ) );
+      ( HA, num_stencil_constant_points, stencil_constant_points );
 
    return ierr;
 
@@ -544,8 +548,8 @@ int32_t
 impl_bHYPRE_StructMatrix_SetConstantValues(
   /* in */ bHYPRE_StructMatrix self,
   /* in */ int32_t num_stencil_indices,
-  /* in */ struct sidl_int__array* stencil_indices,
-  /* in */ struct sidl_double__array* values)
+  /* in */ int32_t* stencil_indices,
+  /* in */ double* values)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.StructMatrix.SetConstantValues) */
   /* Insert the implementation of the SetConstantValues method here... */
@@ -559,7 +563,7 @@ impl_bHYPRE_StructMatrix_SetConstantValues(
 
    ierr += HYPRE_StructMatrixSetConstantValues(
       HA, num_stencil_indices,
-      sidlArrayAddr1( stencil_indices, 0 ), sidlArrayAddr1( values, 0 ) );
+      stencil_indices, values );
 
    return ierr;
 
@@ -650,7 +654,8 @@ int32_t
 impl_bHYPRE_StructMatrix_SetIntArray1Parameter(
   /* in */ bHYPRE_StructMatrix self,
   /* in */ const char* name,
-  /* in */ struct sidl_int__array* value)
+  /* in */ int32_t* value,
+  /* in */ int32_t nvalues)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.StructMatrix.SetIntArray1Parameter) */
   /* Insert the implementation of the SetIntArray1Parameter method here... */
@@ -696,7 +701,8 @@ int32_t
 impl_bHYPRE_StructMatrix_SetDoubleArray1Parameter(
   /* in */ bHYPRE_StructMatrix self,
   /* in */ const char* name,
-  /* in */ struct sidl_double__array* value)
+  /* in */ double* value,
+  /* in */ int32_t nvalues)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.StructMatrix.SetDoubleArray1Parameter) 
     */

@@ -32,6 +32,15 @@ extern "C" {
 
 /*
  * Symbol "bHYPRE.StructSMG" (version 1.0.0)
+ * 
+ * Objects of this type can be cast to PreconditionedSolver objects
+ * using the {\tt \_\_cast} methods.
+ * 
+ * RDF: Documentation goes here.
+ * 
+ * The StructSMG solver requires a Struct matrix.
+ * 
+ * 
  */
 
 struct bHYPRE_StructSMG__array;

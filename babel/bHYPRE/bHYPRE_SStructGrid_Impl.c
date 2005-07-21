@@ -184,8 +184,9 @@ int32_t
 impl_bHYPRE_SStructGrid_SetExtents(
   /* in */ bHYPRE_SStructGrid self,
   /* in */ int32_t part,
-  /* in */ struct sidl_int__array* ilower,
-  /* in */ struct sidl_int__array* iupper)
+  /* in */ int32_t* ilower,
+  /* in */ int32_t* iupper,
+  /* in */ int32_t dim)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructGrid.SetExtents) */
   /* Insert the implementation of the SetExtents method here... */
@@ -197,8 +198,8 @@ impl_bHYPRE_SStructGrid_SetExtents(
    Hgrid = data -> grid;
 
    ierr += HYPRE_SStructGridSetExtents( Hgrid, part,
-                                        sidlArrayAddr1( ilower, 0 ),
-                                        sidlArrayAddr1( iupper, 0 ) );
+                                        ilower,
+                                        iupper );
    return ierr;
 
   /* DO-NOT-DELETE splicer.end(bHYPRE.SStructGrid.SetExtents) */
@@ -267,7 +268,8 @@ int32_t
 impl_bHYPRE_SStructGrid_AddVariable(
   /* in */ bHYPRE_SStructGrid self,
   /* in */ int32_t part,
-  /* in */ struct sidl_int__array* index,
+  /* in */ int32_t* index,
+  /* in */ int32_t dim,
   /* in */ int32_t var,
   /* in */ enum bHYPRE_SStructVariable__enum vartype)
 {
@@ -281,7 +283,7 @@ impl_bHYPRE_SStructGrid_AddVariable(
    Hgrid = data -> grid;
 
    ierr += HYPRE_SStructGridAddVariable( Hgrid, part, 
-                                         sidlArrayAddr1( index, 0 ),
+                                         index,
                                          var,
                                          (HYPRE_SStructVariable) vartype );
 
@@ -326,12 +328,13 @@ int32_t
 impl_bHYPRE_SStructGrid_SetNeighborBox(
   /* in */ bHYPRE_SStructGrid self,
   /* in */ int32_t part,
-  /* in */ struct sidl_int__array* ilower,
-  /* in */ struct sidl_int__array* iupper,
+  /* in */ int32_t* ilower,
+  /* in */ int32_t* iupper,
   /* in */ int32_t nbor_part,
-  /* in */ struct sidl_int__array* nbor_ilower,
-  /* in */ struct sidl_int__array* nbor_iupper,
-  /* in */ struct sidl_int__array* index_map)
+  /* in */ int32_t* nbor_ilower,
+  /* in */ int32_t* nbor_iupper,
+  /* in */ int32_t* index_map,
+  /* in */ int32_t dim)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructGrid.SetNeighborBox) */
   /* Insert the implementation of the SetNeighborBox method here... */
@@ -344,12 +347,12 @@ impl_bHYPRE_SStructGrid_SetNeighborBox(
 
    ierr += HYPRE_SStructGridSetNeighborBox
       ( Hgrid, part,
-        sidlArrayAddr1( ilower, 0 ),
-        sidlArrayAddr1( iupper, 0 ),
+        ilower,
+        iupper,
         nbor_part,
-        sidlArrayAddr1( nbor_ilower, 0 ),
-        sidlArrayAddr1( nbor_iupper, 0 ),
-        sidlArrayAddr1( index_map, 0 ) );
+        nbor_ilower,
+        nbor_iupper,
+        index_map );
 
       return ierr;
 
@@ -416,7 +419,8 @@ int32_t
 impl_bHYPRE_SStructGrid_SetPeriodic(
   /* in */ bHYPRE_SStructGrid self,
   /* in */ int32_t part,
-  /* in */ struct sidl_int__array* periodic)
+  /* in */ int32_t* periodic,
+  /* in */ int32_t dim)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructGrid.SetPeriodic) */
   /* Insert the implementation of the SetPeriodic method here... */
@@ -428,7 +432,7 @@ impl_bHYPRE_SStructGrid_SetPeriodic(
    Hgrid = data -> grid;
 
    ierr += HYPRE_SStructGridSetPeriodic( Hgrid, part,
-                                         sidlArrayAddr1( periodic, 0 ) );
+                                         periodic );
 
    return ierr;
 
@@ -449,7 +453,8 @@ extern "C"
 int32_t
 impl_bHYPRE_SStructGrid_SetNumGhost(
   /* in */ bHYPRE_SStructGrid self,
-  /* in */ struct sidl_int__array* num_ghost)
+  /* in */ int32_t* num_ghost,
+  /* in */ int32_t dim2)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructGrid.SetNumGhost) */
   /* Insert the implementation of the SetNumGhost method here... */
@@ -460,7 +465,7 @@ impl_bHYPRE_SStructGrid_SetNumGhost(
    data = bHYPRE_SStructGrid__get_data( self );
    Hgrid = data -> grid;
 
-   ierr += HYPRE_SStructGridSetNumGhost( Hgrid, sidlArrayAddr1( num_ghost, 0 ) );
+   ierr += HYPRE_SStructGridSetNumGhost( Hgrid, num_ghost );
 
    return ierr;
 

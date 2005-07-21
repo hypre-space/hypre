@@ -107,46 +107,52 @@ int32_t
 impl_bHYPRE_SStructMatrix_SetValues(
   /* in */ bHYPRE_SStructMatrix self,
   /* in */ int32_t part,
-  /* in */ struct sidl_int__array* index,
+  /* in */ int32_t* index,
+  /* in */ int32_t dim,
   /* in */ int32_t var,
   /* in */ int32_t nentries,
-  /* in */ struct sidl_int__array* entries,
-  /* in */ struct sidl_double__array* values);
+  /* in */ int32_t* entries,
+  /* in */ double* values);
 
 extern
 int32_t
 impl_bHYPRE_SStructMatrix_SetBoxValues(
   /* in */ bHYPRE_SStructMatrix self,
   /* in */ int32_t part,
-  /* in */ struct sidl_int__array* ilower,
-  /* in */ struct sidl_int__array* iupper,
+  /* in */ int32_t* ilower,
+  /* in */ int32_t* iupper,
+  /* in */ int32_t dim,
   /* in */ int32_t var,
   /* in */ int32_t nentries,
-  /* in */ struct sidl_int__array* entries,
-  /* in */ struct sidl_double__array* values);
+  /* in */ int32_t* entries,
+  /* in */ double* values,
+  /* in */ int32_t nvalues);
 
 extern
 int32_t
 impl_bHYPRE_SStructMatrix_AddToValues(
   /* in */ bHYPRE_SStructMatrix self,
   /* in */ int32_t part,
-  /* in */ struct sidl_int__array* index,
+  /* in */ int32_t* index,
+  /* in */ int32_t dim,
   /* in */ int32_t var,
   /* in */ int32_t nentries,
-  /* in */ struct sidl_int__array* entries,
-  /* in */ struct sidl_double__array* values);
+  /* in */ int32_t* entries,
+  /* in */ double* values);
 
 extern
 int32_t
 impl_bHYPRE_SStructMatrix_AddToBoxValues(
   /* in */ bHYPRE_SStructMatrix self,
   /* in */ int32_t part,
-  /* in */ struct sidl_int__array* ilower,
-  /* in */ struct sidl_int__array* iupper,
+  /* in */ int32_t* ilower,
+  /* in */ int32_t* iupper,
+  /* in */ int32_t dim,
   /* in */ int32_t var,
   /* in */ int32_t nentries,
-  /* in */ struct sidl_int__array* entries,
-  /* in */ struct sidl_double__array* values);
+  /* in */ int32_t* entries,
+  /* in */ double* values,
+  /* in */ int32_t nvalues);
 
 extern
 int32_t
@@ -201,7 +207,8 @@ int32_t
 impl_bHYPRE_SStructMatrix_SetIntArray1Parameter(
   /* in */ bHYPRE_SStructMatrix self,
   /* in */ const char* name,
-  /* in */ struct sidl_int__array* value);
+  /* in */ int32_t* value,
+  /* in */ int32_t nvalues);
 
 extern
 int32_t
@@ -215,7 +222,8 @@ int32_t
 impl_bHYPRE_SStructMatrix_SetDoubleArray1Parameter(
   /* in */ bHYPRE_SStructMatrix self,
   /* in */ const char* name,
-  /* in */ struct sidl_double__array* value);
+  /* in */ double* value,
+  /* in */ int32_t nvalues);
 
 extern
 int32_t
@@ -303,29 +311,31 @@ skel_bHYPRE_SStructMatrix_SetValues(
   /* in */ int32_t part,
   /* in */ struct sidl_int__array* index,
   /* in */ int32_t var,
-  /* in */ int32_t nentries,
   /* in */ struct sidl_int__array* entries,
 /* in */ struct sidl_double__array* values)
 {
   int32_t _return;
   struct sidl_int__array* index_proxy = sidl_int__array_ensure(index, 1,
     sidl_column_major_order);
+  int32_t* index_tmp = index_proxy->d_firstElement;
   struct sidl_int__array* entries_proxy = sidl_int__array_ensure(entries, 1,
     sidl_column_major_order);
+  int32_t* entries_tmp = entries_proxy->d_firstElement;
   struct sidl_double__array* values_proxy = sidl_double__array_ensure(values, 1,
     sidl_column_major_order);
+  double* values_tmp = values_proxy->d_firstElement;
+  int32_t nentries = sidlLength(values_proxy,0);
+  int32_t dim = sidlLength(index_proxy,0);
   _return =
     impl_bHYPRE_SStructMatrix_SetValues(
       self,
       part,
-      index_proxy,
+      index_tmp,
+      dim,
       var,
       nentries,
-      entries_proxy,
-      values_proxy);
-  sidl_int__array_deleteRef(index_proxy);
-  sidl_int__array_deleteRef(entries_proxy);
-  sidl_double__array_deleteRef(values_proxy);
+      entries_tmp,
+      values_tmp);
   return _return;
 }
 
@@ -336,33 +346,37 @@ skel_bHYPRE_SStructMatrix_SetBoxValues(
   /* in */ struct sidl_int__array* ilower,
   /* in */ struct sidl_int__array* iupper,
   /* in */ int32_t var,
-  /* in */ int32_t nentries,
   /* in */ struct sidl_int__array* entries,
 /* in */ struct sidl_double__array* values)
 {
   int32_t _return;
   struct sidl_int__array* ilower_proxy = sidl_int__array_ensure(ilower, 1,
     sidl_column_major_order);
+  int32_t* ilower_tmp = ilower_proxy->d_firstElement;
   struct sidl_int__array* iupper_proxy = sidl_int__array_ensure(iupper, 1,
     sidl_column_major_order);
+  int32_t* iupper_tmp = iupper_proxy->d_firstElement;
   struct sidl_int__array* entries_proxy = sidl_int__array_ensure(entries, 1,
     sidl_column_major_order);
+  int32_t* entries_tmp = entries_proxy->d_firstElement;
   struct sidl_double__array* values_proxy = sidl_double__array_ensure(values, 1,
     sidl_column_major_order);
+  double* values_tmp = values_proxy->d_firstElement;
+  int32_t nentries = sidlLength(entries_proxy,0);
+  int32_t nvalues = sidlLength(values_proxy,0);
+  int32_t dim = sidlLength(iupper_proxy,0);
   _return =
     impl_bHYPRE_SStructMatrix_SetBoxValues(
       self,
       part,
-      ilower_proxy,
-      iupper_proxy,
+      ilower_tmp,
+      iupper_tmp,
+      dim,
       var,
       nentries,
-      entries_proxy,
-      values_proxy);
-  sidl_int__array_deleteRef(ilower_proxy);
-  sidl_int__array_deleteRef(iupper_proxy);
-  sidl_int__array_deleteRef(entries_proxy);
-  sidl_double__array_deleteRef(values_proxy);
+      entries_tmp,
+      values_tmp,
+      nvalues);
   return _return;
 }
 
@@ -372,29 +386,31 @@ skel_bHYPRE_SStructMatrix_AddToValues(
   /* in */ int32_t part,
   /* in */ struct sidl_int__array* index,
   /* in */ int32_t var,
-  /* in */ int32_t nentries,
   /* in */ struct sidl_int__array* entries,
 /* in */ struct sidl_double__array* values)
 {
   int32_t _return;
   struct sidl_int__array* index_proxy = sidl_int__array_ensure(index, 1,
     sidl_column_major_order);
+  int32_t* index_tmp = index_proxy->d_firstElement;
   struct sidl_int__array* entries_proxy = sidl_int__array_ensure(entries, 1,
     sidl_column_major_order);
+  int32_t* entries_tmp = entries_proxy->d_firstElement;
   struct sidl_double__array* values_proxy = sidl_double__array_ensure(values, 1,
     sidl_column_major_order);
+  double* values_tmp = values_proxy->d_firstElement;
+  int32_t nentries = sidlLength(values_proxy,0);
+  int32_t dim = sidlLength(index_proxy,0);
   _return =
     impl_bHYPRE_SStructMatrix_AddToValues(
       self,
       part,
-      index_proxy,
+      index_tmp,
+      dim,
       var,
       nentries,
-      entries_proxy,
-      values_proxy);
-  sidl_int__array_deleteRef(index_proxy);
-  sidl_int__array_deleteRef(entries_proxy);
-  sidl_double__array_deleteRef(values_proxy);
+      entries_tmp,
+      values_tmp);
   return _return;
 }
 
@@ -405,33 +421,37 @@ skel_bHYPRE_SStructMatrix_AddToBoxValues(
   /* in */ struct sidl_int__array* ilower,
   /* in */ struct sidl_int__array* iupper,
   /* in */ int32_t var,
-  /* in */ int32_t nentries,
   /* in */ struct sidl_int__array* entries,
 /* in */ struct sidl_double__array* values)
 {
   int32_t _return;
   struct sidl_int__array* ilower_proxy = sidl_int__array_ensure(ilower, 1,
     sidl_column_major_order);
+  int32_t* ilower_tmp = ilower_proxy->d_firstElement;
   struct sidl_int__array* iupper_proxy = sidl_int__array_ensure(iupper, 1,
     sidl_column_major_order);
+  int32_t* iupper_tmp = iupper_proxy->d_firstElement;
   struct sidl_int__array* entries_proxy = sidl_int__array_ensure(entries, 1,
     sidl_column_major_order);
+  int32_t* entries_tmp = entries_proxy->d_firstElement;
   struct sidl_double__array* values_proxy = sidl_double__array_ensure(values, 1,
     sidl_column_major_order);
+  double* values_tmp = values_proxy->d_firstElement;
+  int32_t nentries = sidlLength(entries_proxy,0);
+  int32_t nvalues = sidlLength(values_proxy,0);
+  int32_t dim = sidlLength(iupper_proxy,0);
   _return =
     impl_bHYPRE_SStructMatrix_AddToBoxValues(
       self,
       part,
-      ilower_proxy,
-      iupper_proxy,
+      ilower_tmp,
+      iupper_tmp,
+      dim,
       var,
       nentries,
-      entries_proxy,
-      values_proxy);
-  sidl_int__array_deleteRef(ilower_proxy);
-  sidl_int__array_deleteRef(iupper_proxy);
-  sidl_int__array_deleteRef(entries_proxy);
-  sidl_double__array_deleteRef(values_proxy);
+      entries_tmp,
+      values_tmp,
+      nvalues);
   return _return;
 }
 
@@ -444,12 +464,14 @@ skel_bHYPRE_SStructMatrix_SetIntArray1Parameter(
   int32_t _return;
   struct sidl_int__array* value_proxy = sidl_int__array_ensure(value, 1,
     sidl_column_major_order);
+  int32_t* value_tmp = value_proxy->d_firstElement;
+  int32_t nvalues = sidlLength(value_proxy,0);
   _return =
     impl_bHYPRE_SStructMatrix_SetIntArray1Parameter(
       self,
       name,
-      value_proxy);
-  sidl_int__array_deleteRef(value_proxy);
+      value_tmp,
+      nvalues);
   return _return;
 }
 
@@ -480,12 +502,14 @@ skel_bHYPRE_SStructMatrix_SetDoubleArray1Parameter(
   int32_t _return;
   struct sidl_double__array* value_proxy = sidl_double__array_ensure(value, 1,
     sidl_column_major_order);
+  double* value_tmp = value_proxy->d_firstElement;
+  int32_t nvalues = sidlLength(value_proxy,0);
   _return =
     impl_bHYPRE_SStructMatrix_SetDoubleArray1Parameter(
       self,
       name,
-      value_proxy);
-  sidl_double__array_deleteRef(value_proxy);
+      value_tmp,
+      nvalues);
   return _return;
 }
 

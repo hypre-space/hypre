@@ -204,7 +204,8 @@ int32_t
 impl_bHYPRE_StructStencil_SetElement(
   /* in */ bHYPRE_StructStencil self,
   /* in */ int32_t index,
-  /* in */ struct sidl_int__array* offset)
+  /* in */ int32_t* offset,
+  /* in */ int32_t dim)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.StructStencil.SetElement) */
   /* Insert the implementation of the SetElement method here... */
@@ -218,7 +219,7 @@ impl_bHYPRE_StructStencil_SetElement(
    assert( stencil != NULL );
 
    ierr += HYPRE_StructStencilSetElement( stencil, index,
-                                          sidlArrayAddr1( offset, 0 ) );
+                                          offset );
 
    return ierr;
 

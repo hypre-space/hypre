@@ -216,10 +216,11 @@ int32_t
 impl_bHYPRE_SStructGraph_AddEntries(
   /* in */ bHYPRE_SStructGraph self,
   /* in */ int32_t part,
-  /* in */ struct sidl_int__array* index,
+  /* in */ int32_t* index,
+  /* in */ int32_t dim,
   /* in */ int32_t var,
   /* in */ int32_t to_part,
-  /* in */ struct sidl_int__array* to_index,
+  /* in */ int32_t* to_index,
   /* in */ int32_t to_var)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructGraph.AddEntries) */
@@ -232,8 +233,8 @@ impl_bHYPRE_SStructGraph_AddEntries(
    Hgraph = data -> graph;
 
    ierr += HYPRE_SStructGraphAddEntries
-      ( Hgraph, part, sidlArrayAddr1( index, 0 ), var, to_part,
-        sidlArrayAddr1( to_index, 0 ), to_var );
+      ( Hgraph, part, index, var, to_part,
+        to_index, to_var );
 
    return ierr;
 

@@ -416,19 +416,22 @@ void
 SIDLFortran77Symbol(bhypre_structgrid_setperiodic_f,BHYPRE_STRUCTGRID_SETPERIODIC_F,bHYPRE_StructGrid_SetPeriodic_f)
 (
   int64_t *self,
-  int64_t *periodic,
+  int32_t *periodic,
+  int32_t *dim,
   int32_t *retval
 )
 {
   struct bHYPRE_StructGrid__epv *_epv = NULL;
   struct bHYPRE_StructGrid__object* _proxy_self = NULL;
-  struct sidl_int__array* _proxy_periodic = NULL;
+  struct sidl_int__array _alt_periodic;
+  struct sidl_int__array* _proxy_periodic = &_alt_periodic;
+  int32_t periodic_lower[1], periodic_upper[1], periodic_stride[1];
   _proxy_self =
     (struct bHYPRE_StructGrid__object*)
     (ptrdiff_t)(*self);
-  _proxy_periodic =
-    (struct sidl_int__array*)
-    (ptrdiff_t)(*periodic);
+  periodic_upper[0] = (*dim)-1;
+  sidl_int__array_init(periodic, _proxy_periodic, 1, periodic_lower,
+    periodic_upper, periodic_stride);
   _epv = _proxy_self->d_epv;
   *retval = 
     (*(_epv->f_SetPeriodic))(
@@ -446,7 +449,7 @@ SIDLFortran77Symbol(bhypre_structgrid_setnumghost_f,BHYPRE_STRUCTGRID_SETNUMGHOS
 (
   int64_t *self,
   int32_t *num_ghost,
-  int32_t *len,
+  int32_t *dim2,
   int32_t *retval
 )
 {
@@ -458,7 +461,7 @@ SIDLFortran77Symbol(bhypre_structgrid_setnumghost_f,BHYPRE_STRUCTGRID_SETNUMGHOS
   _proxy_self =
     (struct bHYPRE_StructGrid__object*)
     (ptrdiff_t)(*self);
-  num_ghost_upper[0] = (*len)-1;
+  num_ghost_upper[0] = (*dim2)-1;
   sidl_int__array_init(num_ghost, _proxy_num_ghost, 1, num_ghost_lower,
     num_ghost_upper, num_ghost_stride);
   _epv = _proxy_self->d_epv;

@@ -460,9 +460,11 @@ SIDLFortran77Symbol(bhypre_ijbuildmatrix_setlocalrange_f,BHYPRE_IJBUILDMATRIX_SE
  * indices, respectively.  The array {\tt cols} contains the
  * column indices for each of the {\tt rows}, and is ordered by
  * rows.  The data in the {\tt values} array corresponds
- * directly to the column entries in {\tt cols}.  Erases any
- * previous values at the specified locations and replaces them
- * with new ones, or, if there was no value there before,
+ * directly to the column entries in {\tt cols}.  The last argument
+ * is the size of the cols and values arrays, i.e. the total number
+ * of nonzeros being provided, i.e. the sum of all values in ncols.
+ * This functin erases any previous values at the specified locations and
+ * replaces them with new ones, or, if there was no value there before,
  * inserts a new one.
  * 
  * Not collective.
@@ -474,39 +476,47 @@ SIDLFortran77Symbol(bhypre_ijbuildmatrix_setvalues_f,BHYPRE_IJBUILDMATRIX_SETVAL
 (
   int64_t *self,
   int32_t *nrows,
-  int64_t *ncols,
-  int64_t *rows,
-  int64_t *cols,
-  int64_t *values,
+  int32_t *ncols,
+  int32_t *rows,
+  int32_t *cols,
+  double *values,
+  int32_t *nnonzeros,
   int32_t *retval
 )
 {
   struct bHYPRE_IJBuildMatrix__epv *_epv = NULL;
   struct bHYPRE_IJBuildMatrix__object* _proxy_self = NULL;
-  struct sidl_int__array* _proxy_ncols = NULL;
-  struct sidl_int__array* _proxy_rows = NULL;
-  struct sidl_int__array* _proxy_cols = NULL;
-  struct sidl_double__array* _proxy_values = NULL;
+  struct sidl_int__array _alt_ncols;
+  struct sidl_int__array* _proxy_ncols = &_alt_ncols;
+  int32_t ncols_lower[1], ncols_upper[1], ncols_stride[1];
+  struct sidl_int__array _alt_rows;
+  struct sidl_int__array* _proxy_rows = &_alt_rows;
+  int32_t rows_lower[1], rows_upper[1], rows_stride[1];
+  struct sidl_int__array _alt_cols;
+  struct sidl_int__array* _proxy_cols = &_alt_cols;
+  int32_t cols_lower[1], cols_upper[1], cols_stride[1];
+  struct sidl_double__array _alt_values;
+  struct sidl_double__array* _proxy_values = &_alt_values;
+  int32_t values_lower[1], values_upper[1], values_stride[1];
   _proxy_self =
     (struct bHYPRE_IJBuildMatrix__object*)
     (ptrdiff_t)(*self);
-  _proxy_ncols =
-    (struct sidl_int__array*)
-    (ptrdiff_t)(*ncols);
-  _proxy_rows =
-    (struct sidl_int__array*)
-    (ptrdiff_t)(*rows);
-  _proxy_cols =
-    (struct sidl_int__array*)
-    (ptrdiff_t)(*cols);
-  _proxy_values =
-    (struct sidl_double__array*)
-    (ptrdiff_t)(*values);
+  ncols_upper[0] = (*nrows)-1;
+  sidl_int__array_init(ncols, _proxy_ncols, 1, ncols_lower, ncols_upper,
+    ncols_stride);
+  rows_upper[0] = (*nrows)-1;
+  sidl_int__array_init(rows, _proxy_rows, 1, rows_lower, rows_upper,
+    rows_stride);
+  cols_upper[0] = (*nnonzeros)-1;
+  sidl_int__array_init(cols, _proxy_cols, 1, cols_lower, cols_upper,
+    cols_stride);
+  values_upper[0] = (*nnonzeros)-1;
+  sidl_double__array_init(values, _proxy_values, 1, values_lower, values_upper,
+    values_stride);
   _epv = _proxy_self->d_epv;
   *retval = 
     (*(_epv->f_SetValues))(
       _proxy_self->d_object,
-      *nrows,
       _proxy_ncols,
       _proxy_rows,
       _proxy_cols,
@@ -529,39 +539,47 @@ SIDLFortran77Symbol(bhypre_ijbuildmatrix_addtovalues_f,BHYPRE_IJBUILDMATRIX_ADDT
 (
   int64_t *self,
   int32_t *nrows,
-  int64_t *ncols,
-  int64_t *rows,
-  int64_t *cols,
-  int64_t *values,
+  int32_t *ncols,
+  int32_t *rows,
+  int32_t *cols,
+  double *values,
+  int32_t *nnonzeros,
   int32_t *retval
 )
 {
   struct bHYPRE_IJBuildMatrix__epv *_epv = NULL;
   struct bHYPRE_IJBuildMatrix__object* _proxy_self = NULL;
-  struct sidl_int__array* _proxy_ncols = NULL;
-  struct sidl_int__array* _proxy_rows = NULL;
-  struct sidl_int__array* _proxy_cols = NULL;
-  struct sidl_double__array* _proxy_values = NULL;
+  struct sidl_int__array _alt_ncols;
+  struct sidl_int__array* _proxy_ncols = &_alt_ncols;
+  int32_t ncols_lower[1], ncols_upper[1], ncols_stride[1];
+  struct sidl_int__array _alt_rows;
+  struct sidl_int__array* _proxy_rows = &_alt_rows;
+  int32_t rows_lower[1], rows_upper[1], rows_stride[1];
+  struct sidl_int__array _alt_cols;
+  struct sidl_int__array* _proxy_cols = &_alt_cols;
+  int32_t cols_lower[1], cols_upper[1], cols_stride[1];
+  struct sidl_double__array _alt_values;
+  struct sidl_double__array* _proxy_values = &_alt_values;
+  int32_t values_lower[1], values_upper[1], values_stride[1];
   _proxy_self =
     (struct bHYPRE_IJBuildMatrix__object*)
     (ptrdiff_t)(*self);
-  _proxy_ncols =
-    (struct sidl_int__array*)
-    (ptrdiff_t)(*ncols);
-  _proxy_rows =
-    (struct sidl_int__array*)
-    (ptrdiff_t)(*rows);
-  _proxy_cols =
-    (struct sidl_int__array*)
-    (ptrdiff_t)(*cols);
-  _proxy_values =
-    (struct sidl_double__array*)
-    (ptrdiff_t)(*values);
+  ncols_upper[0] = (*nrows)-1;
+  sidl_int__array_init(ncols, _proxy_ncols, 1, ncols_lower, ncols_upper,
+    ncols_stride);
+  rows_upper[0] = (*nrows)-1;
+  sidl_int__array_init(rows, _proxy_rows, 1, rows_lower, rows_upper,
+    rows_stride);
+  cols_upper[0] = (*nnonzeros)-1;
+  sidl_int__array_init(cols, _proxy_cols, 1, cols_lower, cols_upper,
+    cols_stride);
+  values_upper[0] = (*nnonzeros)-1;
+  sidl_double__array_init(values, _proxy_values, 1, values_lower, values_upper,
+    values_stride);
   _epv = _proxy_self->d_epv;
   *retval = 
     (*(_epv->f_AddToValues))(
       _proxy_self->d_object,
-      *nrows,
       _proxy_ncols,
       _proxy_rows,
       _proxy_cols,
@@ -614,33 +632,35 @@ SIDLFortran77Symbol(bhypre_ijbuildmatrix_getrowcounts_f,BHYPRE_IJBUILDMATRIX_GET
 (
   int64_t *self,
   int32_t *nrows,
-  int64_t *rows,
-  int64_t *ncols,
+  int32_t *rows,
+  int32_t *ncols,
   int32_t *retval
 )
 {
   struct bHYPRE_IJBuildMatrix__epv *_epv = NULL;
   struct bHYPRE_IJBuildMatrix__object* _proxy_self = NULL;
-  struct sidl_int__array* _proxy_rows = NULL;
-  struct sidl_int__array* _proxy_ncols = NULL;
+  struct sidl_int__array _alt_rows;
+  struct sidl_int__array* _proxy_rows = &_alt_rows;
+  int32_t rows_lower[1], rows_upper[1], rows_stride[1];
+  struct sidl_int__array _alt_ncols;
+  struct sidl_int__array* _proxy_ncols = &_alt_ncols;
+  int32_t ncols_lower[1], ncols_upper[1], ncols_stride[1];
   _proxy_self =
     (struct bHYPRE_IJBuildMatrix__object*)
     (ptrdiff_t)(*self);
-  _proxy_rows =
-    (struct sidl_int__array*)
-    (ptrdiff_t)(*rows);
-  _proxy_ncols =
-    (struct sidl_int__array*)
-    (ptrdiff_t)(*ncols);
+  rows_upper[0] = (*nrows)-1;
+  sidl_int__array_init(rows, _proxy_rows, 1, rows_lower, rows_upper,
+    rows_stride);
+  ncols_upper[0] = (*nrows)-1;
+  sidl_int__array_init(ncols, _proxy_ncols, 1, ncols_lower, ncols_upper,
+    ncols_stride);
   _epv = _proxy_self->d_epv;
   *retval = 
     (*(_epv->f_GetRowCounts))(
       _proxy_self->d_object,
-      *nrows,
       _proxy_rows,
       &_proxy_ncols
     );
-  *ncols = (ptrdiff_t)_proxy_ncols;
 }
 
 /*
@@ -654,51 +674,59 @@ SIDLFortran77Symbol(bhypre_ijbuildmatrix_getvalues_f,BHYPRE_IJBUILDMATRIX_GETVAL
 (
   int64_t *self,
   int32_t *nrows,
-  int64_t *ncols,
-  int64_t *rows,
-  int64_t *cols,
-  int64_t *values,
+  int32_t *ncols,
+  int32_t *rows,
+  int32_t *cols,
+  double *values,
+  int32_t *nnonzeros,
   int32_t *retval
 )
 {
   struct bHYPRE_IJBuildMatrix__epv *_epv = NULL;
   struct bHYPRE_IJBuildMatrix__object* _proxy_self = NULL;
-  struct sidl_int__array* _proxy_ncols = NULL;
-  struct sidl_int__array* _proxy_rows = NULL;
-  struct sidl_int__array* _proxy_cols = NULL;
-  struct sidl_double__array* _proxy_values = NULL;
+  struct sidl_int__array _alt_ncols;
+  struct sidl_int__array* _proxy_ncols = &_alt_ncols;
+  int32_t ncols_lower[1], ncols_upper[1], ncols_stride[1];
+  struct sidl_int__array _alt_rows;
+  struct sidl_int__array* _proxy_rows = &_alt_rows;
+  int32_t rows_lower[1], rows_upper[1], rows_stride[1];
+  struct sidl_int__array _alt_cols;
+  struct sidl_int__array* _proxy_cols = &_alt_cols;
+  int32_t cols_lower[1], cols_upper[1], cols_stride[1];
+  struct sidl_double__array _alt_values;
+  struct sidl_double__array* _proxy_values = &_alt_values;
+  int32_t values_lower[1], values_upper[1], values_stride[1];
   _proxy_self =
     (struct bHYPRE_IJBuildMatrix__object*)
     (ptrdiff_t)(*self);
-  _proxy_ncols =
-    (struct sidl_int__array*)
-    (ptrdiff_t)(*ncols);
-  _proxy_rows =
-    (struct sidl_int__array*)
-    (ptrdiff_t)(*rows);
-  _proxy_cols =
-    (struct sidl_int__array*)
-    (ptrdiff_t)(*cols);
-  _proxy_values =
-    (struct sidl_double__array*)
-    (ptrdiff_t)(*values);
+  ncols_upper[0] = (*nrows)-1;
+  sidl_int__array_init(ncols, _proxy_ncols, 1, ncols_lower, ncols_upper,
+    ncols_stride);
+  rows_upper[0] = (*nrows)-1;
+  sidl_int__array_init(rows, _proxy_rows, 1, rows_lower, rows_upper,
+    rows_stride);
+  cols_upper[0] = (*nnonzeros)-1;
+  sidl_int__array_init(cols, _proxy_cols, 1, cols_lower, cols_upper,
+    cols_stride);
+  values_upper[0] = (*nnonzeros)-1;
+  sidl_double__array_init(values, _proxy_values, 1, values_lower, values_upper,
+    values_stride);
   _epv = _proxy_self->d_epv;
   *retval = 
     (*(_epv->f_GetValues))(
       _proxy_self->d_object,
-      *nrows,
       _proxy_ncols,
       _proxy_rows,
       _proxy_cols,
       &_proxy_values
     );
-  *values = (ptrdiff_t)_proxy_values;
 }
 
 /*
  * (Optional) Set the max number of nonzeros to expect in each
  * row.  The array {\tt sizes} contains estimated sizes for each
- * row on this process.  This call can significantly improve the
+ * row on this process.  The integer nrows is the number of rows in
+ * the local matrix.  This call can significantly improve the
  * efficiency of matrix construction, and should always be
  * utilized if possible.
  * 
@@ -710,19 +738,22 @@ void
 SIDLFortran77Symbol(bhypre_ijbuildmatrix_setrowsizes_f,BHYPRE_IJBUILDMATRIX_SETROWSIZES_F,bHYPRE_IJBuildMatrix_SetRowSizes_f)
 (
   int64_t *self,
-  int64_t *sizes,
+  int32_t *sizes,
+  int32_t *nrows,
   int32_t *retval
 )
 {
   struct bHYPRE_IJBuildMatrix__epv *_epv = NULL;
   struct bHYPRE_IJBuildMatrix__object* _proxy_self = NULL;
-  struct sidl_int__array* _proxy_sizes = NULL;
+  struct sidl_int__array _alt_sizes;
+  struct sidl_int__array* _proxy_sizes = &_alt_sizes;
+  int32_t sizes_lower[1], sizes_upper[1], sizes_stride[1];
   _proxy_self =
     (struct bHYPRE_IJBuildMatrix__object*)
     (ptrdiff_t)(*self);
-  _proxy_sizes =
-    (struct sidl_int__array*)
-    (ptrdiff_t)(*sizes);
+  sizes_upper[0] = (*nrows)-1;
+  sidl_int__array_init(sizes, _proxy_sizes, 1, sizes_lower, sizes_upper,
+    sizes_stride);
   _epv = _proxy_self->d_epv;
   *retval = 
     (*(_epv->f_SetRowSizes))(

@@ -274,9 +274,11 @@ bHYPRE_IJBuildMatrix_SetLocalRange(
  * indices, respectively.  The array {\tt cols} contains the
  * column indices for each of the {\tt rows}, and is ordered by
  * rows.  The data in the {\tt values} array corresponds
- * directly to the column entries in {\tt cols}.  Erases any
- * previous values at the specified locations and replaces them
- * with new ones, or, if there was no value there before,
+ * directly to the column entries in {\tt cols}.  The last argument
+ * is the size of the cols and values arrays, i.e. the total number
+ * of nonzeros being provided, i.e. the sum of all values in ncols.
+ * This functin erases any previous values at the specified locations and
+ * replaces them with new ones, or, if there was no value there before,
  * inserts a new one.
  * 
  * Not collective.
@@ -287,18 +289,40 @@ int32_t
 bHYPRE_IJBuildMatrix_SetValues(
   /* in */ bHYPRE_IJBuildMatrix self,
   /* in */ int32_t nrows,
-  /* in */ struct sidl_int__array* ncols,
-  /* in */ struct sidl_int__array* rows,
-  /* in */ struct sidl_int__array* cols,
-  /* in */ struct sidl_double__array* values)
+  /* in */ int32_t* ncols,
+  /* in */ int32_t* rows,
+  /* in */ int32_t* cols,
+  /* in */ double* values,
+  /* in */ int32_t nnonzeros)
 {
+  int32_t ncols_lower[1], ncols_upper[1], ncols_stride[1]; 
+  struct sidl_int__array ncols_real;
+  struct sidl_int__array*ncols_tmp = &ncols_real;
+  int32_t rows_lower[1], rows_upper[1], rows_stride[1]; 
+  struct sidl_int__array rows_real;
+  struct sidl_int__array*rows_tmp = &rows_real;
+  int32_t cols_lower[1], cols_upper[1], cols_stride[1]; 
+  struct sidl_int__array cols_real;
+  struct sidl_int__array*cols_tmp = &cols_real;
+  int32_t values_lower[1], values_upper[1], values_stride[1]; 
+  struct sidl_double__array values_real;
+  struct sidl_double__array*values_tmp = &values_real;
+  ncols_upper[0] = nrows-1;
+  sidl_int__array_init(ncols, ncols_tmp, 1, ncols_lower, ncols_upper,
+    ncols_stride);
+  rows_upper[0] = nrows-1;
+  sidl_int__array_init(rows, rows_tmp, 1, rows_lower, rows_upper, rows_stride);
+  cols_upper[0] = nnonzeros-1;
+  sidl_int__array_init(cols, cols_tmp, 1, cols_lower, cols_upper, cols_stride);
+  values_upper[0] = nnonzeros-1;
+  sidl_double__array_init(values, values_tmp, 1, values_lower, values_upper,
+    values_stride);
   return (*self->d_epv->f_SetValues)(
     self->d_object,
-    nrows,
-    ncols,
-    rows,
-    cols,
-    values);
+    ncols_tmp,
+    rows_tmp,
+    cols_tmp,
+    values_tmp);
 }
 
 /*
@@ -315,18 +339,40 @@ int32_t
 bHYPRE_IJBuildMatrix_AddToValues(
   /* in */ bHYPRE_IJBuildMatrix self,
   /* in */ int32_t nrows,
-  /* in */ struct sidl_int__array* ncols,
-  /* in */ struct sidl_int__array* rows,
-  /* in */ struct sidl_int__array* cols,
-  /* in */ struct sidl_double__array* values)
+  /* in */ int32_t* ncols,
+  /* in */ int32_t* rows,
+  /* in */ int32_t* cols,
+  /* in */ double* values,
+  /* in */ int32_t nnonzeros)
 {
+  int32_t ncols_lower[1], ncols_upper[1], ncols_stride[1]; 
+  struct sidl_int__array ncols_real;
+  struct sidl_int__array*ncols_tmp = &ncols_real;
+  int32_t rows_lower[1], rows_upper[1], rows_stride[1]; 
+  struct sidl_int__array rows_real;
+  struct sidl_int__array*rows_tmp = &rows_real;
+  int32_t cols_lower[1], cols_upper[1], cols_stride[1]; 
+  struct sidl_int__array cols_real;
+  struct sidl_int__array*cols_tmp = &cols_real;
+  int32_t values_lower[1], values_upper[1], values_stride[1]; 
+  struct sidl_double__array values_real;
+  struct sidl_double__array*values_tmp = &values_real;
+  ncols_upper[0] = nrows-1;
+  sidl_int__array_init(ncols, ncols_tmp, 1, ncols_lower, ncols_upper,
+    ncols_stride);
+  rows_upper[0] = nrows-1;
+  sidl_int__array_init(rows, rows_tmp, 1, rows_lower, rows_upper, rows_stride);
+  cols_upper[0] = nnonzeros-1;
+  sidl_int__array_init(cols, cols_tmp, 1, cols_lower, cols_upper, cols_stride);
+  values_upper[0] = nnonzeros-1;
+  sidl_double__array_init(values, values_tmp, 1, values_lower, values_upper,
+    values_stride);
   return (*self->d_epv->f_AddToValues)(
     self->d_object,
-    nrows,
-    ncols,
-    rows,
-    cols,
-    values);
+    ncols_tmp,
+    rows_tmp,
+    cols_tmp,
+    values_tmp);
 }
 
 /*
@@ -362,14 +408,24 @@ int32_t
 bHYPRE_IJBuildMatrix_GetRowCounts(
   /* in */ bHYPRE_IJBuildMatrix self,
   /* in */ int32_t nrows,
-  /* in */ struct sidl_int__array* rows,
-  /* inout */ struct sidl_int__array** ncols)
+  /* in */ int32_t* rows,
+  /* inout */ int32_t* ncols)
 {
+  int32_t rows_lower[1], rows_upper[1], rows_stride[1]; 
+  struct sidl_int__array rows_real;
+  struct sidl_int__array*rows_tmp = &rows_real;
+  int32_t ncols_lower[1], ncols_upper[1], ncols_stride[1]; 
+  struct sidl_int__array ncols_real;
+  struct sidl_int__array*ncols_tmp = &ncols_real;
+  rows_upper[0] = nrows-1;
+  sidl_int__array_init(rows, rows_tmp, 1, rows_lower, rows_upper, rows_stride);
+  ncols_upper[0] = nrows-1;
+  sidl_int__array_init(ncols, ncols_tmp, 1, ncols_lower, ncols_upper,
+    ncols_stride);
   return (*self->d_epv->f_GetRowCounts)(
     self->d_object,
-    nrows,
-    rows,
-    ncols);
+    rows_tmp,
+    &ncols_tmp);
 }
 
 /*
@@ -382,24 +438,47 @@ int32_t
 bHYPRE_IJBuildMatrix_GetValues(
   /* in */ bHYPRE_IJBuildMatrix self,
   /* in */ int32_t nrows,
-  /* in */ struct sidl_int__array* ncols,
-  /* in */ struct sidl_int__array* rows,
-  /* in */ struct sidl_int__array* cols,
-  /* inout */ struct sidl_double__array** values)
+  /* in */ int32_t* ncols,
+  /* in */ int32_t* rows,
+  /* in */ int32_t* cols,
+  /* inout */ double* values,
+  /* in */ int32_t nnonzeros)
 {
+  int32_t ncols_lower[1], ncols_upper[1], ncols_stride[1]; 
+  struct sidl_int__array ncols_real;
+  struct sidl_int__array*ncols_tmp = &ncols_real;
+  int32_t rows_lower[1], rows_upper[1], rows_stride[1]; 
+  struct sidl_int__array rows_real;
+  struct sidl_int__array*rows_tmp = &rows_real;
+  int32_t cols_lower[1], cols_upper[1], cols_stride[1]; 
+  struct sidl_int__array cols_real;
+  struct sidl_int__array*cols_tmp = &cols_real;
+  int32_t values_lower[1], values_upper[1], values_stride[1]; 
+  struct sidl_double__array values_real;
+  struct sidl_double__array*values_tmp = &values_real;
+  ncols_upper[0] = nrows-1;
+  sidl_int__array_init(ncols, ncols_tmp, 1, ncols_lower, ncols_upper,
+    ncols_stride);
+  rows_upper[0] = nrows-1;
+  sidl_int__array_init(rows, rows_tmp, 1, rows_lower, rows_upper, rows_stride);
+  cols_upper[0] = nnonzeros-1;
+  sidl_int__array_init(cols, cols_tmp, 1, cols_lower, cols_upper, cols_stride);
+  values_upper[0] = nnonzeros-1;
+  sidl_double__array_init(values, values_tmp, 1, values_lower, values_upper,
+    values_stride);
   return (*self->d_epv->f_GetValues)(
     self->d_object,
-    nrows,
-    ncols,
-    rows,
-    cols,
-    values);
+    ncols_tmp,
+    rows_tmp,
+    cols_tmp,
+    &values_tmp);
 }
 
 /*
  * (Optional) Set the max number of nonzeros to expect in each
  * row.  The array {\tt sizes} contains estimated sizes for each
- * row on this process.  This call can significantly improve the
+ * row on this process.  The integer nrows is the number of rows in
+ * the local matrix.  This call can significantly improve the
  * efficiency of matrix construction, and should always be
  * utilized if possible.
  * 
@@ -410,11 +489,18 @@ bHYPRE_IJBuildMatrix_GetValues(
 int32_t
 bHYPRE_IJBuildMatrix_SetRowSizes(
   /* in */ bHYPRE_IJBuildMatrix self,
-  /* in */ struct sidl_int__array* sizes)
+  /* in */ int32_t* sizes,
+  /* in */ int32_t nrows)
 {
+  int32_t sizes_lower[1], sizes_upper[1], sizes_stride[1]; 
+  struct sidl_int__array sizes_real;
+  struct sidl_int__array*sizes_tmp = &sizes_real;
+  sizes_upper[0] = nrows-1;
+  sidl_int__array_init(sizes, sizes_tmp, 1, sizes_lower, sizes_upper,
+    sizes_stride);
   return (*self->d_epv->f_SetRowSizes)(
     self->d_object,
-    sizes);
+    sizes_tmp);
 }
 
 /*
@@ -1270,7 +1356,6 @@ remote_bHYPRE__IJBuildMatrix_SetLocalRange(
 static int32_t
 remote_bHYPRE__IJBuildMatrix_SetValues(
   /* in */ struct bHYPRE__IJBuildMatrix__object* self /* TLD */,
-  /* in */ int32_t nrows,
   /* in */ struct sidl_int__array* ncols,
   /* in */ struct sidl_int__array* rows,
   /* in */ struct sidl_int__array* cols,
@@ -1286,7 +1371,6 @@ remote_bHYPRE__IJBuildMatrix_SetValues(
   int32_t _retval;
 
   /* pack in and inout arguments */
-  sidl_rmi_Invocation_packInt( _inv, "nrows", nrows, _ex2);
 
   /* send actual RMI request */
   _rsvp = sidl_rmi_Invocation_invokeMethod(_inv,_ex2);
@@ -1307,7 +1391,6 @@ remote_bHYPRE__IJBuildMatrix_SetValues(
 static int32_t
 remote_bHYPRE__IJBuildMatrix_AddToValues(
   /* in */ struct bHYPRE__IJBuildMatrix__object* self /* TLD */,
-  /* in */ int32_t nrows,
   /* in */ struct sidl_int__array* ncols,
   /* in */ struct sidl_int__array* rows,
   /* in */ struct sidl_int__array* cols,
@@ -1323,7 +1406,6 @@ remote_bHYPRE__IJBuildMatrix_AddToValues(
   int32_t _retval;
 
   /* pack in and inout arguments */
-  sidl_rmi_Invocation_packInt( _inv, "nrows", nrows, _ex2);
 
   /* send actual RMI request */
   _rsvp = sidl_rmi_Invocation_invokeMethod(_inv,_ex2);
@@ -1383,7 +1465,6 @@ remote_bHYPRE__IJBuildMatrix_GetLocalRange(
 static int32_t
 remote_bHYPRE__IJBuildMatrix_GetRowCounts(
   /* in */ struct bHYPRE__IJBuildMatrix__object* self /* TLD */,
-  /* in */ int32_t nrows,
   /* in */ struct sidl_int__array* rows,
   /* inout */ struct sidl_int__array** ncols)
 {
@@ -1397,7 +1478,6 @@ remote_bHYPRE__IJBuildMatrix_GetRowCounts(
   int32_t _retval;
 
   /* pack in and inout arguments */
-  sidl_rmi_Invocation_packInt( _inv, "nrows", nrows, _ex2);
 
   /* send actual RMI request */
   _rsvp = sidl_rmi_Invocation_invokeMethod(_inv,_ex2);
@@ -1418,7 +1498,6 @@ remote_bHYPRE__IJBuildMatrix_GetRowCounts(
 static int32_t
 remote_bHYPRE__IJBuildMatrix_GetValues(
   /* in */ struct bHYPRE__IJBuildMatrix__object* self /* TLD */,
-  /* in */ int32_t nrows,
   /* in */ struct sidl_int__array* ncols,
   /* in */ struct sidl_int__array* rows,
   /* in */ struct sidl_int__array* cols,
@@ -1434,7 +1513,6 @@ remote_bHYPRE__IJBuildMatrix_GetValues(
   int32_t _retval;
 
   /* pack in and inout arguments */
-  sidl_rmi_Invocation_packInt( _inv, "nrows", nrows, _ex2);
 
   /* send actual RMI request */
   _rsvp = sidl_rmi_Invocation_invokeMethod(_inv,_ex2);
@@ -1607,17 +1685,17 @@ static void bHYPRE__IJBuildMatrix__init_remote_epv(void)
     struct sidl_BaseInterface__object**)) epv->f_GetObject;
   e0->f_SetLocalRange   = (int32_t (*)(void*,int32_t,int32_t,int32_t,
     int32_t)) epv->f_SetLocalRange;
-  e0->f_SetValues       = (int32_t (*)(void*,int32_t,struct sidl_int__array*,
+  e0->f_SetValues       = (int32_t (*)(void*,struct sidl_int__array*,
     struct sidl_int__array*,struct sidl_int__array*,
     struct sidl_double__array*)) epv->f_SetValues;
-  e0->f_AddToValues     = (int32_t (*)(void*,int32_t,struct sidl_int__array*,
+  e0->f_AddToValues     = (int32_t (*)(void*,struct sidl_int__array*,
     struct sidl_int__array*,struct sidl_int__array*,
     struct sidl_double__array*)) epv->f_AddToValues;
   e0->f_GetLocalRange   = (int32_t (*)(void*,int32_t*,int32_t*,int32_t*,
     int32_t*)) epv->f_GetLocalRange;
-  e0->f_GetRowCounts    = (int32_t (*)(void*,int32_t,struct sidl_int__array*,
+  e0->f_GetRowCounts    = (int32_t (*)(void*,struct sidl_int__array*,
     struct sidl_int__array**)) epv->f_GetRowCounts;
-  e0->f_GetValues       = (int32_t (*)(void*,int32_t,struct sidl_int__array*,
+  e0->f_GetValues       = (int32_t (*)(void*,struct sidl_int__array*,
     struct sidl_int__array*,struct sidl_int__array*,
     struct sidl_double__array**)) epv->f_GetValues;
   e0->f_SetRowSizes     = (int32_t (*)(void*,

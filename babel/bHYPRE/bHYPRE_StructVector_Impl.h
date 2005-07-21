@@ -169,22 +169,26 @@ extern
 int32_t
 impl_bHYPRE_StructVector_SetNumGhost(
   /* in */ bHYPRE_StructVector self,
-  /* in */ struct sidl_int__array* num_ghost);
+  /* in */ int32_t* num_ghost,
+  /* in */ int32_t dim2);
 
 extern
 int32_t
 impl_bHYPRE_StructVector_SetValue(
   /* in */ bHYPRE_StructVector self,
-  /* in */ struct sidl_int__array* grid_index,
+  /* in */ int32_t* grid_index,
+  /* in */ int32_t dim,
   /* in */ double value);
 
 extern
 int32_t
 impl_bHYPRE_StructVector_SetBoxValues(
   /* in */ bHYPRE_StructVector self,
-  /* in */ struct sidl_int__array* ilower,
-  /* in */ struct sidl_int__array* iupper,
-  /* in */ struct sidl_double__array* values);
+  /* in */ int32_t* ilower,
+  /* in */ int32_t* iupper,
+  /* in */ int32_t dim,
+  /* in */ double* values,
+  /* in */ int32_t nvalues);
 
 extern
 int32_t

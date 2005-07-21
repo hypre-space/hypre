@@ -21,6 +21,9 @@
  * 
  * RDF: Documentation goes here.
  * 
+ * ParaSails requires an IJParCSR matrix
+ * 
+ * 
  */
 struct bHYPRE_ParaSails__object;
 struct bHYPRE_ParaSails__array;
@@ -147,7 +150,8 @@ int32_t
 bHYPRE_ParaSails_SetIntArray1Parameter(
   /* in */ bHYPRE_ParaSails self,
   /* in */ const char* name,
-  /* in */ struct sidl_int__array* value);
+  /* in */ int32_t* value,
+  /* in */ int32_t nvalues);
 
 /**
  * Set the int 2-D array parameter associated with {\tt name}.
@@ -167,7 +171,8 @@ int32_t
 bHYPRE_ParaSails_SetDoubleArray1Parameter(
   /* in */ bHYPRE_ParaSails self,
   /* in */ const char* name,
-  /* in */ struct sidl_double__array* value);
+  /* in */ double* value,
+  /* in */ int32_t nvalues);
 
 /**
  * Set the double 2-D array parameter associated with {\tt name}.

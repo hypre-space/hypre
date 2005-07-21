@@ -120,8 +120,9 @@ int32_t
 impl_bHYPRE_SStructGrid_SetExtents(
   /* in */ bHYPRE_SStructGrid self,
   /* in */ int32_t part,
-  /* in */ struct sidl_int__array* ilower,
-  /* in */ struct sidl_int__array* iupper);
+  /* in */ int32_t* ilower,
+  /* in */ int32_t* iupper,
+  /* in */ int32_t dim);
 
 extern
 int32_t
@@ -137,7 +138,8 @@ int32_t
 impl_bHYPRE_SStructGrid_AddVariable(
   /* in */ bHYPRE_SStructGrid self,
   /* in */ int32_t part,
-  /* in */ struct sidl_int__array* index,
+  /* in */ int32_t* index,
+  /* in */ int32_t dim,
   /* in */ int32_t var,
   /* in */ enum bHYPRE_SStructVariable__enum vartype);
 
@@ -146,12 +148,13 @@ int32_t
 impl_bHYPRE_SStructGrid_SetNeighborBox(
   /* in */ bHYPRE_SStructGrid self,
   /* in */ int32_t part,
-  /* in */ struct sidl_int__array* ilower,
-  /* in */ struct sidl_int__array* iupper,
+  /* in */ int32_t* ilower,
+  /* in */ int32_t* iupper,
   /* in */ int32_t nbor_part,
-  /* in */ struct sidl_int__array* nbor_ilower,
-  /* in */ struct sidl_int__array* nbor_iupper,
-  /* in */ struct sidl_int__array* index_map);
+  /* in */ int32_t* nbor_ilower,
+  /* in */ int32_t* nbor_iupper,
+  /* in */ int32_t* index_map,
+  /* in */ int32_t dim);
 
 extern
 int32_t
@@ -165,13 +168,15 @@ int32_t
 impl_bHYPRE_SStructGrid_SetPeriodic(
   /* in */ bHYPRE_SStructGrid self,
   /* in */ int32_t part,
-  /* in */ struct sidl_int__array* periodic);
+  /* in */ int32_t* periodic,
+  /* in */ int32_t dim);
 
 extern
 int32_t
 impl_bHYPRE_SStructGrid_SetNumGhost(
   /* in */ bHYPRE_SStructGrid self,
-  /* in */ struct sidl_int__array* num_ghost);
+  /* in */ int32_t* num_ghost,
+  /* in */ int32_t dim2);
 
 extern
 int32_t

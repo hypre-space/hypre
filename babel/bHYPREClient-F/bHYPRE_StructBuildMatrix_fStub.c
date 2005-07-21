@@ -465,36 +465,43 @@ void
 SIDLFortran77Symbol(bhypre_structbuildmatrix_setvalues_f,BHYPRE_STRUCTBUILDMATRIX_SETVALUES_F,bHYPRE_StructBuildMatrix_SetValues_f)
 (
   int64_t *self,
-  int64_t *index,
+  int32_t *index,
+  int32_t *dim,
   int32_t *num_stencil_indices,
-  int64_t *stencil_indices,
-  int64_t *values,
+  int32_t *stencil_indices,
+  double *values,
   int32_t *retval
 )
 {
   struct bHYPRE_StructBuildMatrix__epv *_epv = NULL;
   struct bHYPRE_StructBuildMatrix__object* _proxy_self = NULL;
-  struct sidl_int__array* _proxy_index = NULL;
-  struct sidl_int__array* _proxy_stencil_indices = NULL;
-  struct sidl_double__array* _proxy_values = NULL;
+  struct sidl_int__array _alt_index;
+  struct sidl_int__array* _proxy_index = &_alt_index;
+  int32_t index_lower[1], index_upper[1], index_stride[1];
+  struct sidl_int__array _alt_stencil_indices;
+  struct sidl_int__array* _proxy_stencil_indices = &_alt_stencil_indices;
+  int32_t stencil_indices_lower[1], stencil_indices_upper[1],
+    stencil_indices_stride[1];
+  struct sidl_double__array _alt_values;
+  struct sidl_double__array* _proxy_values = &_alt_values;
+  int32_t values_lower[1], values_upper[1], values_stride[1];
   _proxy_self =
     (struct bHYPRE_StructBuildMatrix__object*)
     (ptrdiff_t)(*self);
-  _proxy_index =
-    (struct sidl_int__array*)
-    (ptrdiff_t)(*index);
-  _proxy_stencil_indices =
-    (struct sidl_int__array*)
-    (ptrdiff_t)(*stencil_indices);
-  _proxy_values =
-    (struct sidl_double__array*)
-    (ptrdiff_t)(*values);
+  index_upper[0] = (*dim)-1;
+  sidl_int__array_init(index, _proxy_index, 1, index_lower, index_upper,
+    index_stride);
+  stencil_indices_upper[0] = (*num_stencil_indices)-1;
+  sidl_int__array_init(stencil_indices, _proxy_stencil_indices, 1,
+    stencil_indices_lower, stencil_indices_upper, stencil_indices_stride);
+  values_upper[0] = (*num_stencil_indices)-1;
+  sidl_double__array_init(values, _proxy_values, 1, values_lower, values_upper,
+    values_stride);
   _epv = _proxy_self->d_epv;
   *retval = 
     (*(_epv->f_SetValues))(
       _proxy_self->d_object,
       _proxy_index,
-      *num_stencil_indices,
       _proxy_stencil_indices,
       _proxy_values
     );
@@ -508,42 +515,52 @@ void
 SIDLFortran77Symbol(bhypre_structbuildmatrix_setboxvalues_f,BHYPRE_STRUCTBUILDMATRIX_SETBOXVALUES_F,bHYPRE_StructBuildMatrix_SetBoxValues_f)
 (
   int64_t *self,
-  int64_t *ilower,
-  int64_t *iupper,
+  int32_t *ilower,
+  int32_t *iupper,
+  int32_t *dim,
   int32_t *num_stencil_indices,
-  int64_t *stencil_indices,
-  int64_t *values,
+  int32_t *stencil_indices,
+  double *values,
+  int32_t *nvalues,
   int32_t *retval
 )
 {
   struct bHYPRE_StructBuildMatrix__epv *_epv = NULL;
   struct bHYPRE_StructBuildMatrix__object* _proxy_self = NULL;
-  struct sidl_int__array* _proxy_ilower = NULL;
-  struct sidl_int__array* _proxy_iupper = NULL;
-  struct sidl_int__array* _proxy_stencil_indices = NULL;
-  struct sidl_double__array* _proxy_values = NULL;
+  struct sidl_int__array _alt_ilower;
+  struct sidl_int__array* _proxy_ilower = &_alt_ilower;
+  int32_t ilower_lower[1], ilower_upper[1], ilower_stride[1];
+  struct sidl_int__array _alt_iupper;
+  struct sidl_int__array* _proxy_iupper = &_alt_iupper;
+  int32_t iupper_lower[1], iupper_upper[1], iupper_stride[1];
+  struct sidl_int__array _alt_stencil_indices;
+  struct sidl_int__array* _proxy_stencil_indices = &_alt_stencil_indices;
+  int32_t stencil_indices_lower[1], stencil_indices_upper[1],
+    stencil_indices_stride[1];
+  struct sidl_double__array _alt_values;
+  struct sidl_double__array* _proxy_values = &_alt_values;
+  int32_t values_lower[1], values_upper[1], values_stride[1];
   _proxy_self =
     (struct bHYPRE_StructBuildMatrix__object*)
     (ptrdiff_t)(*self);
-  _proxy_ilower =
-    (struct sidl_int__array*)
-    (ptrdiff_t)(*ilower);
-  _proxy_iupper =
-    (struct sidl_int__array*)
-    (ptrdiff_t)(*iupper);
-  _proxy_stencil_indices =
-    (struct sidl_int__array*)
-    (ptrdiff_t)(*stencil_indices);
-  _proxy_values =
-    (struct sidl_double__array*)
-    (ptrdiff_t)(*values);
+  ilower_upper[0] = (*dim)-1;
+  sidl_int__array_init(ilower, _proxy_ilower, 1, ilower_lower, ilower_upper,
+    ilower_stride);
+  iupper_upper[0] = (*dim)-1;
+  sidl_int__array_init(iupper, _proxy_iupper, 1, iupper_lower, iupper_upper,
+    iupper_stride);
+  stencil_indices_upper[0] = (*num_stencil_indices)-1;
+  sidl_int__array_init(stencil_indices, _proxy_stencil_indices, 1,
+    stencil_indices_lower, stencil_indices_upper, stencil_indices_stride);
+  values_upper[0] = (*nvalues)-1;
+  sidl_double__array_init(values, _proxy_values, 1, values_lower, values_upper,
+    values_stride);
   _epv = _proxy_self->d_epv;
   *retval = 
     (*(_epv->f_SetBoxValues))(
       _proxy_self->d_object,
       _proxy_ilower,
       _proxy_iupper,
-      *num_stencil_indices,
       _proxy_stencil_indices,
       _proxy_values
     );
@@ -557,19 +574,22 @@ void
 SIDLFortran77Symbol(bhypre_structbuildmatrix_setnumghost_f,BHYPRE_STRUCTBUILDMATRIX_SETNUMGHOST_F,bHYPRE_StructBuildMatrix_SetNumGhost_f)
 (
   int64_t *self,
-  int64_t *num_ghost,
+  int32_t *num_ghost,
+  int32_t *dim2,
   int32_t *retval
 )
 {
   struct bHYPRE_StructBuildMatrix__epv *_epv = NULL;
   struct bHYPRE_StructBuildMatrix__object* _proxy_self = NULL;
-  struct sidl_int__array* _proxy_num_ghost = NULL;
+  struct sidl_int__array _alt_num_ghost;
+  struct sidl_int__array* _proxy_num_ghost = &_alt_num_ghost;
+  int32_t num_ghost_lower[1], num_ghost_upper[1], num_ghost_stride[1];
   _proxy_self =
     (struct bHYPRE_StructBuildMatrix__object*)
     (ptrdiff_t)(*self);
-  _proxy_num_ghost =
-    (struct sidl_int__array*)
-    (ptrdiff_t)(*num_ghost);
+  num_ghost_upper[0] = (*dim2)-1;
+  sidl_int__array_init(num_ghost, _proxy_num_ghost, 1, num_ghost_lower,
+    num_ghost_upper, num_ghost_stride);
   _epv = _proxy_self->d_epv;
   *retval = 
     (*(_epv->f_SetNumGhost))(
@@ -612,24 +632,28 @@ SIDLFortran77Symbol(bhypre_structbuildmatrix_setconstantentries_f,BHYPRE_STRUCTB
 (
   int64_t *self,
   int32_t *num_stencil_constant_points,
-  int64_t *stencil_constant_points,
+  int32_t *stencil_constant_points,
   int32_t *retval
 )
 {
   struct bHYPRE_StructBuildMatrix__epv *_epv = NULL;
   struct bHYPRE_StructBuildMatrix__object* _proxy_self = NULL;
-  struct sidl_int__array* _proxy_stencil_constant_points = NULL;
+  struct sidl_int__array _alt_stencil_constant_points;
+  struct sidl_int__array* _proxy_stencil_constant_points = 
+    &_alt_stencil_constant_points;
+  int32_t stencil_constant_points_lower[1], stencil_constant_points_upper[1],
+    stencil_constant_points_stride[1];
   _proxy_self =
     (struct bHYPRE_StructBuildMatrix__object*)
     (ptrdiff_t)(*self);
-  _proxy_stencil_constant_points =
-    (struct sidl_int__array*)
-    (ptrdiff_t)(*stencil_constant_points);
+  stencil_constant_points_upper[0] = (*num_stencil_constant_points)-1;
+  sidl_int__array_init(stencil_constant_points, _proxy_stencil_constant_points,
+    1, stencil_constant_points_lower, stencil_constant_points_upper,
+    stencil_constant_points_stride);
   _epv = _proxy_self->d_epv;
   *retval = 
     (*(_epv->f_SetConstantEntries))(
       _proxy_self->d_object,
-      *num_stencil_constant_points,
       _proxy_stencil_constant_points
     );
 }
@@ -643,29 +667,33 @@ SIDLFortran77Symbol(bhypre_structbuildmatrix_setconstantvalues_f,BHYPRE_STRUCTBU
 (
   int64_t *self,
   int32_t *num_stencil_indices,
-  int64_t *stencil_indices,
-  int64_t *values,
+  int32_t *stencil_indices,
+  double *values,
   int32_t *retval
 )
 {
   struct bHYPRE_StructBuildMatrix__epv *_epv = NULL;
   struct bHYPRE_StructBuildMatrix__object* _proxy_self = NULL;
-  struct sidl_int__array* _proxy_stencil_indices = NULL;
-  struct sidl_double__array* _proxy_values = NULL;
+  struct sidl_int__array _alt_stencil_indices;
+  struct sidl_int__array* _proxy_stencil_indices = &_alt_stencil_indices;
+  int32_t stencil_indices_lower[1], stencil_indices_upper[1],
+    stencil_indices_stride[1];
+  struct sidl_double__array _alt_values;
+  struct sidl_double__array* _proxy_values = &_alt_values;
+  int32_t values_lower[1], values_upper[1], values_stride[1];
   _proxy_self =
     (struct bHYPRE_StructBuildMatrix__object*)
     (ptrdiff_t)(*self);
-  _proxy_stencil_indices =
-    (struct sidl_int__array*)
-    (ptrdiff_t)(*stencil_indices);
-  _proxy_values =
-    (struct sidl_double__array*)
-    (ptrdiff_t)(*values);
+  stencil_indices_upper[0] = (*num_stencil_indices)-1;
+  sidl_int__array_init(stencil_indices, _proxy_stencil_indices, 1,
+    stencil_indices_lower, stencil_indices_upper, stencil_indices_stride);
+  values_upper[0] = (*num_stencil_indices)-1;
+  sidl_double__array_init(values, _proxy_values, 1, values_lower, values_upper,
+    values_stride);
   _epv = _proxy_self->d_epv;
   *retval = 
     (*(_epv->f_SetConstantValues))(
       _proxy_self->d_object,
-      *num_stencil_indices,
       _proxy_stencil_indices,
       _proxy_values
     );

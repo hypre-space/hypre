@@ -259,19 +259,32 @@ int32_t
 bHYPRE_SStructGraph_AddEntries(
   /* in */ bHYPRE_SStructGraph self,
   /* in */ int32_t part,
-  /* in */ struct sidl_int__array* index,
+  /* in */ int32_t* index,
+  /* in */ int32_t dim,
   /* in */ int32_t var,
   /* in */ int32_t to_part,
-  /* in */ struct sidl_int__array* to_index,
+  /* in */ int32_t* to_index,
   /* in */ int32_t to_var)
 {
+  int32_t index_lower[1], index_upper[1], index_stride[1]; 
+  struct sidl_int__array index_real;
+  struct sidl_int__array*index_tmp = &index_real;
+  int32_t to_index_lower[1], to_index_upper[1], to_index_stride[1]; 
+  struct sidl_int__array to_index_real;
+  struct sidl_int__array*to_index_tmp = &to_index_real;
+  index_upper[0] = dim-1;
+  sidl_int__array_init(index, index_tmp, 1, index_lower, index_upper,
+    index_stride);
+  to_index_upper[0] = dim-1;
+  sidl_int__array_init(to_index, to_index_tmp, 1, to_index_lower,
+    to_index_upper, to_index_stride);
   return (*self->d_epv->f_AddEntries)(
     self,
     part,
-    index,
+    index_tmp,
     var,
     to_part,
-    to_index,
+    to_index_tmp,
     to_var);
 }
 

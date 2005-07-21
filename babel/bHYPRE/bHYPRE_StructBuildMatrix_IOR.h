@@ -99,14 +99,12 @@ struct bHYPRE_StructBuildMatrix__epv {
   int32_t (*f_SetValues)(
     /* in */ void* self,
     /* in */ struct sidl_int__array* index,
-    /* in */ int32_t num_stencil_indices,
     /* in */ struct sidl_int__array* stencil_indices,
     /* in */ struct sidl_double__array* values);
   int32_t (*f_SetBoxValues)(
     /* in */ void* self,
     /* in */ struct sidl_int__array* ilower,
     /* in */ struct sidl_int__array* iupper,
-    /* in */ int32_t num_stencil_indices,
     /* in */ struct sidl_int__array* stencil_indices,
     /* in */ struct sidl_double__array* values);
   int32_t (*f_SetNumGhost)(
@@ -117,11 +115,9 @@ struct bHYPRE_StructBuildMatrix__epv {
     /* in */ int32_t symmetric);
   int32_t (*f_SetConstantEntries)(
     /* in */ void* self,
-    /* in */ int32_t num_stencil_constant_points,
     /* in */ struct sidl_int__array* stencil_constant_points);
   int32_t (*f_SetConstantValues)(
     /* in */ void* self,
-    /* in */ int32_t num_stencil_indices,
     /* in */ struct sidl_int__array* stencil_indices,
     /* in */ struct sidl_double__array* values);
 };
@@ -218,14 +214,12 @@ struct bHYPRE__StructBuildMatrix__epv {
   int32_t (*f_SetValues)(
     /* in */ struct bHYPRE__StructBuildMatrix__object* self,
     /* in */ struct sidl_int__array* index,
-    /* in */ int32_t num_stencil_indices,
     /* in */ struct sidl_int__array* stencil_indices,
     /* in */ struct sidl_double__array* values);
   int32_t (*f_SetBoxValues)(
     /* in */ struct bHYPRE__StructBuildMatrix__object* self,
     /* in */ struct sidl_int__array* ilower,
     /* in */ struct sidl_int__array* iupper,
-    /* in */ int32_t num_stencil_indices,
     /* in */ struct sidl_int__array* stencil_indices,
     /* in */ struct sidl_double__array* values);
   int32_t (*f_SetNumGhost)(
@@ -236,11 +230,9 @@ struct bHYPRE__StructBuildMatrix__epv {
     /* in */ int32_t symmetric);
   int32_t (*f_SetConstantEntries)(
     /* in */ struct bHYPRE__StructBuildMatrix__object* self,
-    /* in */ int32_t num_stencil_constant_points,
     /* in */ struct sidl_int__array* stencil_constant_points);
   int32_t (*f_SetConstantValues)(
     /* in */ struct bHYPRE__StructBuildMatrix__object* self,
-    /* in */ int32_t num_stencil_indices,
     /* in */ struct sidl_int__array* stencil_indices,
     /* in */ struct sidl_double__array* values);
   /* Methods introduced in bHYPRE._StructBuildMatrix-v1.0 */

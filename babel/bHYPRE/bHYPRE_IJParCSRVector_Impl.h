@@ -130,6 +130,79 @@ extern char* impl_bHYPRE_IJParCSRVector_fgetURL_sidl_BaseClass(struct
   sidl_BaseClass__object* obj);
 extern
 int32_t
+impl_bHYPRE_IJParCSRVector_SetCommunicator(
+  /* in */ bHYPRE_IJParCSRVector self,
+  /* in */ void* mpi_comm);
+
+extern
+int32_t
+impl_bHYPRE_IJParCSRVector_Initialize(
+  /* in */ bHYPRE_IJParCSRVector self);
+
+extern
+int32_t
+impl_bHYPRE_IJParCSRVector_Assemble(
+  /* in */ bHYPRE_IJParCSRVector self);
+
+extern
+int32_t
+impl_bHYPRE_IJParCSRVector_GetObject(
+  /* in */ bHYPRE_IJParCSRVector self,
+  /* out */ sidl_BaseInterface* A);
+
+extern
+int32_t
+impl_bHYPRE_IJParCSRVector_SetLocalRange(
+  /* in */ bHYPRE_IJParCSRVector self,
+  /* in */ int32_t jlower,
+  /* in */ int32_t jupper);
+
+extern
+int32_t
+impl_bHYPRE_IJParCSRVector_SetValues(
+  /* in */ bHYPRE_IJParCSRVector self,
+  /* in */ int32_t nvalues,
+  /* in */ int32_t* indices,
+  /* in */ double* values);
+
+extern
+int32_t
+impl_bHYPRE_IJParCSRVector_AddToValues(
+  /* in */ bHYPRE_IJParCSRVector self,
+  /* in */ int32_t nvalues,
+  /* in */ int32_t* indices,
+  /* in */ double* values);
+
+extern
+int32_t
+impl_bHYPRE_IJParCSRVector_GetLocalRange(
+  /* in */ bHYPRE_IJParCSRVector self,
+  /* out */ int32_t* jlower,
+  /* out */ int32_t* jupper);
+
+extern
+int32_t
+impl_bHYPRE_IJParCSRVector_GetValues(
+  /* in */ bHYPRE_IJParCSRVector self,
+  /* in */ int32_t nvalues,
+  /* in */ int32_t* indices,
+  /* inout */ double* values);
+
+extern
+int32_t
+impl_bHYPRE_IJParCSRVector_Print(
+  /* in */ bHYPRE_IJParCSRVector self,
+  /* in */ const char* filename);
+
+extern
+int32_t
+impl_bHYPRE_IJParCSRVector_Read(
+  /* in */ bHYPRE_IJParCSRVector self,
+  /* in */ const char* filename,
+  /* in */ void* comm);
+
+extern
+int32_t
 impl_bHYPRE_IJParCSRVector_Clear(
   /* in */ bHYPRE_IJParCSRVector self);
 
@@ -164,79 +237,6 @@ impl_bHYPRE_IJParCSRVector_Axpy(
   /* in */ bHYPRE_IJParCSRVector self,
   /* in */ double a,
   /* in */ bHYPRE_Vector x);
-
-extern
-int32_t
-impl_bHYPRE_IJParCSRVector_SetCommunicator(
-  /* in */ bHYPRE_IJParCSRVector self,
-  /* in */ void* mpi_comm);
-
-extern
-int32_t
-impl_bHYPRE_IJParCSRVector_Initialize(
-  /* in */ bHYPRE_IJParCSRVector self);
-
-extern
-int32_t
-impl_bHYPRE_IJParCSRVector_Assemble(
-  /* in */ bHYPRE_IJParCSRVector self);
-
-extern
-int32_t
-impl_bHYPRE_IJParCSRVector_GetObject(
-  /* in */ bHYPRE_IJParCSRVector self,
-  /* out */ sidl_BaseInterface* A);
-
-extern
-int32_t
-impl_bHYPRE_IJParCSRVector_SetLocalRange(
-  /* in */ bHYPRE_IJParCSRVector self,
-  /* in */ int32_t jlower,
-  /* in */ int32_t jupper);
-
-extern
-int32_t
-impl_bHYPRE_IJParCSRVector_SetValues(
-  /* in */ bHYPRE_IJParCSRVector self,
-  /* in */ int32_t nvalues,
-  /* in */ struct sidl_int__array* indices,
-  /* in */ struct sidl_double__array* values);
-
-extern
-int32_t
-impl_bHYPRE_IJParCSRVector_AddToValues(
-  /* in */ bHYPRE_IJParCSRVector self,
-  /* in */ int32_t nvalues,
-  /* in */ struct sidl_int__array* indices,
-  /* in */ struct sidl_double__array* values);
-
-extern
-int32_t
-impl_bHYPRE_IJParCSRVector_GetLocalRange(
-  /* in */ bHYPRE_IJParCSRVector self,
-  /* out */ int32_t* jlower,
-  /* out */ int32_t* jupper);
-
-extern
-int32_t
-impl_bHYPRE_IJParCSRVector_GetValues(
-  /* in */ bHYPRE_IJParCSRVector self,
-  /* in */ int32_t nvalues,
-  /* in */ struct sidl_int__array* indices,
-  /* inout */ struct sidl_double__array** values);
-
-extern
-int32_t
-impl_bHYPRE_IJParCSRVector_Print(
-  /* in */ bHYPRE_IJParCSRVector self,
-  /* in */ const char* filename);
-
-extern
-int32_t
-impl_bHYPRE_IJParCSRVector_Read(
-  /* in */ bHYPRE_IJParCSRVector self,
-  /* in */ const char* filename,
-  /* in */ void* comm);
 
 extern struct bHYPRE_IJParCSRVector__object* 
   impl_bHYPRE_IJParCSRVector_fconnect_bHYPRE_IJParCSRVector(char* url,

@@ -18,6 +18,15 @@
  * 
  * RDF: Documentation goes here.
  * 
+ * This PCG solver checks whether the matrix, vectors, and preconditioner
+ * are of known types, and will not work with any other types.
+ * Presently, the recognized data types are:
+ * matrix, vector: IJParCSRMatrix, IJParCSRVector
+ * matrix, vector: StructMatrix, StructVector
+ * preconditioner: BoomerAMG, ParaSails, ParCSRDiagScale, IdentitySolver
+ * preconditioner: StructSMG, StructPFMG
+ * 
+ * 
  */
 
 #include <stddef.h>
@@ -471,7 +480,8 @@ SIDLFortran77Symbol(bhypre_pcg_setintarray1parameter_f,BHYPRE_PCG_SETINTARRAY1PA
   int64_t *self,
   SIDL_F77_String name
   SIDL_F77_STR_NEAR_LEN_DECL(name),
-  int64_t *value,
+  int32_t *value,
+  int32_t *nvalues,
   int32_t *retval
   SIDL_F77_STR_FAR_LEN_DECL(name)
 )
@@ -479,16 +489,18 @@ SIDLFortran77Symbol(bhypre_pcg_setintarray1parameter_f,BHYPRE_PCG_SETINTARRAY1PA
   struct bHYPRE_PCG__epv *_epv = NULL;
   struct bHYPRE_PCG__object* _proxy_self = NULL;
   char* _proxy_name = NULL;
-  struct sidl_int__array* _proxy_value = NULL;
+  struct sidl_int__array _alt_value;
+  struct sidl_int__array* _proxy_value = &_alt_value;
+  int32_t value_lower[1], value_upper[1], value_stride[1];
   _proxy_self =
     (struct bHYPRE_PCG__object*)
     (ptrdiff_t)(*self);
   _proxy_name =
     sidl_copy_fortran_str(SIDL_F77_STR(name),
       SIDL_F77_STR_LEN(name));
-  _proxy_value =
-    (struct sidl_int__array*)
-    (ptrdiff_t)(*value);
+  value_upper[0] = (*nvalues)-1;
+  sidl_int__array_init(value, _proxy_value, 1, value_lower, value_upper,
+    value_stride);
   _epv = _proxy_self->d_epv;
   *retval = 
     (*(_epv->f_SetIntArray1Parameter))(
@@ -549,7 +561,8 @@ SIDLFortran77Symbol(bhypre_pcg_setdoublearray1parameter_f,BHYPRE_PCG_SETDOUBLEAR
   int64_t *self,
   SIDL_F77_String name
   SIDL_F77_STR_NEAR_LEN_DECL(name),
-  int64_t *value,
+  double *value,
+  int32_t *nvalues,
   int32_t *retval
   SIDL_F77_STR_FAR_LEN_DECL(name)
 )
@@ -557,16 +570,18 @@ SIDLFortran77Symbol(bhypre_pcg_setdoublearray1parameter_f,BHYPRE_PCG_SETDOUBLEAR
   struct bHYPRE_PCG__epv *_epv = NULL;
   struct bHYPRE_PCG__object* _proxy_self = NULL;
   char* _proxy_name = NULL;
-  struct sidl_double__array* _proxy_value = NULL;
+  struct sidl_double__array _alt_value;
+  struct sidl_double__array* _proxy_value = &_alt_value;
+  int32_t value_lower[1], value_upper[1], value_stride[1];
   _proxy_self =
     (struct bHYPRE_PCG__object*)
     (ptrdiff_t)(*self);
   _proxy_name =
     sidl_copy_fortran_str(SIDL_F77_STR(name),
       SIDL_F77_STR_LEN(name));
-  _proxy_value =
-    (struct sidl_double__array*)
-    (ptrdiff_t)(*value);
+  value_upper[0] = (*nvalues)-1;
+  sidl_double__array_init(value, _proxy_value, 1, value_lower, value_upper,
+    value_stride);
   _epv = _proxy_self->d_epv;
   *retval = 
     (*(_epv->f_SetDoubleArray1Parameter))(

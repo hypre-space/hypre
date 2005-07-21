@@ -269,14 +269,14 @@ C       in bHYPRE.SStructBuildVector self
         integer*8 self
 C       in int part
         integer*4 part
-C       in array<int,column-major> index
-        integer*8 index
 C       in int var
         integer*4 var
-C       in array<double,column-major> values
-        integer*8 values
 C       out int retval
         integer*4 retval
+C       in rarray<int> index(dim)
+        integer*4 index(0:dim-1)
+C       in rarray<double> values(one)
+        double precision values(0:one-1)
         end
 
 
@@ -300,16 +300,16 @@ C       in bHYPRE.SStructBuildVector self
         integer*8 self
 C       in int part
         integer*4 part
-C       in array<int,column-major> ilower
-        integer*8 ilower
-C       in array<int,column-major> iupper
-        integer*8 iupper
 C       in int var
         integer*4 var
-C       in array<double,column-major> values
-        integer*8 values
 C       out int retval
         integer*4 retval
+C       in rarray<int> ilower(dim)
+        integer*4 ilower(0:dim-1)
+C       in rarray<int> iupper(dim)
+        integer*4 iupper(0:dim-1)
+C       in rarray<double> values(nvalues)
+        double precision values(0:nvalues-1)
         end
 
 
@@ -333,14 +333,14 @@ C       in bHYPRE.SStructBuildVector self
         integer*8 self
 C       in int part
         integer*4 part
-C       in array<int,column-major> index
-        integer*8 index
 C       in int var
         integer*4 var
-C       in array<double,column-major> values
-        integer*8 values
 C       out int retval
         integer*4 retval
+C       in rarray<int> index(dim)
+        integer*4 index(0:dim-1)
+C       in rarray<double> values(one)
+        double precision values(0:one-1)
         end
 
 
@@ -364,16 +364,16 @@ C       in bHYPRE.SStructBuildVector self
         integer*8 self
 C       in int part
         integer*4 part
-C       in array<int,column-major> ilower
-        integer*8 ilower
-C       in array<int,column-major> iupper
-        integer*8 iupper
 C       in int var
         integer*4 var
-C       in array<double,column-major> values
-        integer*8 values
 C       out int retval
         integer*4 retval
+C       in rarray<int> ilower(dim)
+        integer*4 ilower(0:dim-1)
+C       in rarray<int> iupper(dim)
+        integer*4 iupper(0:dim-1)
+C       in rarray<double> values(nvalues)
+        double precision values(0:nvalues-1)
         end
 
 
@@ -410,14 +410,14 @@ C       in bHYPRE.SStructBuildVector self
         integer*8 self
 C       in int part
         integer*4 part
-C       in array<int,column-major> index
-        integer*8 index
 C       in int var
         integer*4 var
 C       out double value
         double precision value
 C       out int retval
         integer*4 retval
+C       in rarray<int> index(dim)
+        integer*4 index(0:dim-1)
         end
 
 
@@ -440,16 +440,16 @@ C       in bHYPRE.SStructBuildVector self
         integer*8 self
 C       in int part
         integer*4 part
-C       in array<int,column-major> ilower
-        integer*8 ilower
-C       in array<int,column-major> iupper
-        integer*8 iupper
 C       in int var
         integer*4 var
-C       inout array<double,column-major> values
-        integer*8 values
 C       out int retval
         integer*4 retval
+C       in rarray<int> ilower(dim)
+        integer*4 ilower(0:dim-1)
+C       in rarray<int> iupper(dim)
+        integer*4 iupper(0:dim-1)
+C       inout rarray<double> values(nvalues)
+        double precision values(0:nvalues-1)
         end
 
 

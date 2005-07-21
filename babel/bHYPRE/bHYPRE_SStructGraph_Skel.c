@@ -84,10 +84,11 @@ int32_t
 impl_bHYPRE_SStructGraph_AddEntries(
   /* in */ bHYPRE_SStructGraph self,
   /* in */ int32_t part,
-  /* in */ struct sidl_int__array* index,
+  /* in */ int32_t* index,
+  /* in */ int32_t dim,
   /* in */ int32_t var,
   /* in */ int32_t to_part,
-  /* in */ struct sidl_int__array* to_index,
+  /* in */ int32_t* to_index,
   /* in */ int32_t to_var);
 
 extern
@@ -166,19 +167,21 @@ skel_bHYPRE_SStructGraph_AddEntries(
   int32_t _return;
   struct sidl_int__array* index_proxy = sidl_int__array_ensure(index, 1,
     sidl_column_major_order);
+  int32_t* index_tmp = index_proxy->d_firstElement;
   struct sidl_int__array* to_index_proxy = sidl_int__array_ensure(to_index, 1,
     sidl_column_major_order);
+  int32_t* to_index_tmp = to_index_proxy->d_firstElement;
+  int32_t dim = sidlLength(index_proxy,0);
   _return =
     impl_bHYPRE_SStructGraph_AddEntries(
       self,
       part,
-      index_proxy,
+      index_tmp,
+      dim,
       var,
       to_part,
-      to_index_proxy,
+      to_index_tmp,
       to_var);
-  sidl_int__array_deleteRef(index_proxy);
-  sidl_int__array_deleteRef(to_index_proxy);
   return _return;
 }
 

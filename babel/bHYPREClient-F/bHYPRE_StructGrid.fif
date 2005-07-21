@@ -225,10 +225,10 @@ C
         implicit none
 C       in bHYPRE.StructGrid self
         integer*8 self
-C       in array<int,column-major> periodic
-        integer*8 periodic
 C       out int retval
         integer*4 retval
+C       in rarray<int> periodic(dim)
+        integer*4 periodic(0:dim-1)
         end
 
 
@@ -243,8 +243,8 @@ C       in bHYPRE.StructGrid self
         integer*8 self
 C       out int retval
         integer*4 retval
-C       in rarray<int> num_ghost(len)
-        integer*4 num_ghost(0:len-1)
+C       in rarray<int> num_ghost(dim2)
+        integer*4 num_ghost(0:dim2-1)
         end
 
 

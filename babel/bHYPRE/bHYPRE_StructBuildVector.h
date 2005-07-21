@@ -111,7 +111,8 @@ bHYPRE_StructBuildVector_SetGrid(
 int32_t
 bHYPRE_StructBuildVector_SetNumGhost(
   /* in */ bHYPRE_StructBuildVector self,
-  /* in */ struct sidl_int__array* num_ghost);
+  /* in */ int32_t* num_ghost,
+  /* in */ int32_t dim2);
 
 /**
  * Method:  SetValue[]
@@ -119,7 +120,8 @@ bHYPRE_StructBuildVector_SetNumGhost(
 int32_t
 bHYPRE_StructBuildVector_SetValue(
   /* in */ bHYPRE_StructBuildVector self,
-  /* in */ struct sidl_int__array* grid_index,
+  /* in */ int32_t* grid_index,
+  /* in */ int32_t dim,
   /* in */ double value);
 
 /**
@@ -128,9 +130,11 @@ bHYPRE_StructBuildVector_SetValue(
 int32_t
 bHYPRE_StructBuildVector_SetBoxValues(
   /* in */ bHYPRE_StructBuildVector self,
-  /* in */ struct sidl_int__array* ilower,
-  /* in */ struct sidl_int__array* iupper,
-  /* in */ struct sidl_double__array* values);
+  /* in */ int32_t* ilower,
+  /* in */ int32_t* iupper,
+  /* in */ int32_t dim,
+  /* in */ double* values,
+  /* in */ int32_t nvalues);
 
 /**
  * Cast method for interface and class type conversions.

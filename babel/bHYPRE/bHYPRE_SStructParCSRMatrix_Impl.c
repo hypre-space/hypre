@@ -349,6 +349,7 @@ impl_bHYPRE_SStructParCSRMatrix_SetGraph(
  * of doubles representing the real and imaginary parts of each
  * complex value.
  * 
+ * 
  */
 
 #undef __FUNC__
@@ -361,11 +362,12 @@ int32_t
 impl_bHYPRE_SStructParCSRMatrix_SetValues(
   /* in */ bHYPRE_SStructParCSRMatrix self,
   /* in */ int32_t part,
-  /* in */ struct sidl_int__array* index,
+  /* in */ int32_t* index,
+  /* in */ int32_t dim,
   /* in */ int32_t var,
   /* in */ int32_t nentries,
-  /* in */ struct sidl_int__array* entries,
-  /* in */ struct sidl_double__array* values)
+  /* in */ int32_t* entries,
+  /* in */ double* values)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructParCSRMatrix.SetValues) */
   /* Insert the implementation of the SetValues method here... */
@@ -377,8 +379,8 @@ impl_bHYPRE_SStructParCSRMatrix_SetValues(
    HA = data -> matrix;
 
    ierr += HYPRE_SStructMatrixSetValues
-      ( HA, part, sidlArrayAddr1( index, 0 ), var, nentries,
-        sidlArrayAddr1( entries, 0 ), sidlArrayAddr1( values, 0 ) );
+      ( HA, part, index, var, nentries,
+        entries, values );
 
    return ierr;
 
@@ -414,12 +416,14 @@ int32_t
 impl_bHYPRE_SStructParCSRMatrix_SetBoxValues(
   /* in */ bHYPRE_SStructParCSRMatrix self,
   /* in */ int32_t part,
-  /* in */ struct sidl_int__array* ilower,
-  /* in */ struct sidl_int__array* iupper,
+  /* in */ int32_t* ilower,
+  /* in */ int32_t* iupper,
+  /* in */ int32_t dim,
   /* in */ int32_t var,
   /* in */ int32_t nentries,
-  /* in */ struct sidl_int__array* entries,
-  /* in */ struct sidl_double__array* values)
+  /* in */ int32_t* entries,
+  /* in */ double* values,
+  /* in */ int32_t nvalues)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructParCSRMatrix.SetBoxValues) */
   /* Insert the implementation of the SetBoxValues method here... */
@@ -431,8 +435,8 @@ impl_bHYPRE_SStructParCSRMatrix_SetBoxValues(
    HA = data -> matrix;
 
    ierr += HYPRE_SStructMatrixSetBoxValues
-      ( HA, part, sidlArrayAddr1( ilower, 0 ), sidlArrayAddr1( iupper, 0 ),
-        var, nentries, sidlArrayAddr1( entries, 0 ), sidlArrayAddr1( values, 0 ) );
+      ( HA, part, ilower, iupper,
+        var, nentries, entries, values );
 
    return ierr;
 
@@ -467,11 +471,12 @@ int32_t
 impl_bHYPRE_SStructParCSRMatrix_AddToValues(
   /* in */ bHYPRE_SStructParCSRMatrix self,
   /* in */ int32_t part,
-  /* in */ struct sidl_int__array* index,
+  /* in */ int32_t* index,
+  /* in */ int32_t dim,
   /* in */ int32_t var,
   /* in */ int32_t nentries,
-  /* in */ struct sidl_int__array* entries,
-  /* in */ struct sidl_double__array* values)
+  /* in */ int32_t* entries,
+  /* in */ double* values)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructParCSRMatrix.AddToValues) */
   /* Insert the implementation of the AddToValues method here... */
@@ -483,8 +488,8 @@ impl_bHYPRE_SStructParCSRMatrix_AddToValues(
    HA = data -> matrix;
 
    ierr += HYPRE_SStructMatrixAddToValues
-      ( HA, part, sidlArrayAddr1( index, 0 ), var, nentries,
-        sidlArrayAddr1( entries, 0 ), sidlArrayAddr1( values, 0 ) );
+      ( HA, part, index, var, nentries,
+        entries, values );
 
    return ierr;
 
@@ -518,12 +523,14 @@ int32_t
 impl_bHYPRE_SStructParCSRMatrix_AddToBoxValues(
   /* in */ bHYPRE_SStructParCSRMatrix self,
   /* in */ int32_t part,
-  /* in */ struct sidl_int__array* ilower,
-  /* in */ struct sidl_int__array* iupper,
+  /* in */ int32_t* ilower,
+  /* in */ int32_t* iupper,
+  /* in */ int32_t dim,
   /* in */ int32_t var,
   /* in */ int32_t nentries,
-  /* in */ struct sidl_int__array* entries,
-  /* in */ struct sidl_double__array* values)
+  /* in */ int32_t* entries,
+  /* in */ double* values,
+  /* in */ int32_t nvalues)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructParCSRMatrix.AddToBoxValues) */
   /* Insert the implementation of the AddToBoxValues method here... */
@@ -535,8 +542,8 @@ impl_bHYPRE_SStructParCSRMatrix_AddToBoxValues(
    HA = data -> matrix;
 
    ierr += HYPRE_SStructMatrixAddToBoxValues
-      ( HA, part, sidlArrayAddr1( ilower, 0 ), sidlArrayAddr1( iupper, 0 ),
-        var, nentries, sidlArrayAddr1( entries, 0 ), sidlArrayAddr1( values, 0 ) );
+      ( HA, part, ilower, iupper,
+        var, nentries, entries, values );
 
    return ierr;
 
@@ -767,7 +774,8 @@ int32_t
 impl_bHYPRE_SStructParCSRMatrix_SetIntArray1Parameter(
   /* in */ bHYPRE_SStructParCSRMatrix self,
   /* in */ const char* name,
-  /* in */ struct sidl_int__array* value)
+  /* in */ int32_t* value,
+  /* in */ int32_t nvalues)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructParCSRMatrix.SetIntArray1Parameter) */
   /* Insert the implementation of the SetIntArray1Parameter method here... */
@@ -813,7 +821,8 @@ int32_t
 impl_bHYPRE_SStructParCSRMatrix_SetDoubleArray1Parameter(
   /* in */ bHYPRE_SStructParCSRMatrix self,
   /* in */ const char* name,
-  /* in */ struct sidl_double__array* value)
+  /* in */ double* value,
+  /* in */ int32_t nvalues)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructParCSRMatrix.SetDoubleArray1Parameter) */
   /* Insert the implementation of the SetDoubleArray1Parameter method here... */

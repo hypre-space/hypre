@@ -181,14 +181,12 @@ struct bHYPRE_StructMatrix__epv {
   int32_t (*f_SetValues)(
     /* in */ struct bHYPRE_StructMatrix__object* self,
     /* in */ struct sidl_int__array* index,
-    /* in */ int32_t num_stencil_indices,
     /* in */ struct sidl_int__array* stencil_indices,
     /* in */ struct sidl_double__array* values);
   int32_t (*f_SetBoxValues)(
     /* in */ struct bHYPRE_StructMatrix__object* self,
     /* in */ struct sidl_int__array* ilower,
     /* in */ struct sidl_int__array* iupper,
-    /* in */ int32_t num_stencil_indices,
     /* in */ struct sidl_int__array* stencil_indices,
     /* in */ struct sidl_double__array* values);
   int32_t (*f_SetNumGhost)(
@@ -199,11 +197,9 @@ struct bHYPRE_StructMatrix__epv {
     /* in */ int32_t symmetric);
   int32_t (*f_SetConstantEntries)(
     /* in */ struct bHYPRE_StructMatrix__object* self,
-    /* in */ int32_t num_stencil_constant_points,
     /* in */ struct sidl_int__array* stencil_constant_points);
   int32_t (*f_SetConstantValues)(
     /* in */ struct bHYPRE_StructMatrix__object* self,
-    /* in */ int32_t num_stencil_indices,
     /* in */ struct sidl_int__array* stencil_indices,
     /* in */ struct sidl_double__array* values);
   /* Methods introduced in bHYPRE.StructMatrix-v1.0.0 */

@@ -175,46 +175,52 @@ int32_t
 impl_bHYPRE_SStructMatrix_SetValues(
   /* in */ bHYPRE_SStructMatrix self,
   /* in */ int32_t part,
-  /* in */ struct sidl_int__array* index,
+  /* in */ int32_t* index,
+  /* in */ int32_t dim,
   /* in */ int32_t var,
   /* in */ int32_t nentries,
-  /* in */ struct sidl_int__array* entries,
-  /* in */ struct sidl_double__array* values);
+  /* in */ int32_t* entries,
+  /* in */ double* values);
 
 extern
 int32_t
 impl_bHYPRE_SStructMatrix_SetBoxValues(
   /* in */ bHYPRE_SStructMatrix self,
   /* in */ int32_t part,
-  /* in */ struct sidl_int__array* ilower,
-  /* in */ struct sidl_int__array* iupper,
+  /* in */ int32_t* ilower,
+  /* in */ int32_t* iupper,
+  /* in */ int32_t dim,
   /* in */ int32_t var,
   /* in */ int32_t nentries,
-  /* in */ struct sidl_int__array* entries,
-  /* in */ struct sidl_double__array* values);
+  /* in */ int32_t* entries,
+  /* in */ double* values,
+  /* in */ int32_t nvalues);
 
 extern
 int32_t
 impl_bHYPRE_SStructMatrix_AddToValues(
   /* in */ bHYPRE_SStructMatrix self,
   /* in */ int32_t part,
-  /* in */ struct sidl_int__array* index,
+  /* in */ int32_t* index,
+  /* in */ int32_t dim,
   /* in */ int32_t var,
   /* in */ int32_t nentries,
-  /* in */ struct sidl_int__array* entries,
-  /* in */ struct sidl_double__array* values);
+  /* in */ int32_t* entries,
+  /* in */ double* values);
 
 extern
 int32_t
 impl_bHYPRE_SStructMatrix_AddToBoxValues(
   /* in */ bHYPRE_SStructMatrix self,
   /* in */ int32_t part,
-  /* in */ struct sidl_int__array* ilower,
-  /* in */ struct sidl_int__array* iupper,
+  /* in */ int32_t* ilower,
+  /* in */ int32_t* iupper,
+  /* in */ int32_t dim,
   /* in */ int32_t var,
   /* in */ int32_t nentries,
-  /* in */ struct sidl_int__array* entries,
-  /* in */ struct sidl_double__array* values);
+  /* in */ int32_t* entries,
+  /* in */ double* values,
+  /* in */ int32_t nvalues);
 
 extern
 int32_t
@@ -269,7 +275,8 @@ int32_t
 impl_bHYPRE_SStructMatrix_SetIntArray1Parameter(
   /* in */ bHYPRE_SStructMatrix self,
   /* in */ const char* name,
-  /* in */ struct sidl_int__array* value);
+  /* in */ int32_t* value,
+  /* in */ int32_t nvalues);
 
 extern
 int32_t
@@ -283,7 +290,8 @@ int32_t
 impl_bHYPRE_SStructMatrix_SetDoubleArray1Parameter(
   /* in */ bHYPRE_SStructMatrix self,
   /* in */ const char* name,
-  /* in */ struct sidl_double__array* value);
+  /* in */ double* value,
+  /* in */ int32_t nvalues);
 
 extern
 int32_t

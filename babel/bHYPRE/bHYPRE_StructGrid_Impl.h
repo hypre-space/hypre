@@ -126,14 +126,15 @@ extern
 int32_t
 impl_bHYPRE_StructGrid_SetPeriodic(
   /* in */ bHYPRE_StructGrid self,
-  /* in */ struct sidl_int__array* periodic);
+  /* in */ int32_t* periodic,
+  /* in */ int32_t dim);
 
 extern
 int32_t
 impl_bHYPRE_StructGrid_SetNumGhost(
   /* in */ bHYPRE_StructGrid self,
   /* in */ int32_t* num_ghost,
-  /* in */ int32_t len);
+  /* in */ int32_t dim2);
 
 extern
 int32_t

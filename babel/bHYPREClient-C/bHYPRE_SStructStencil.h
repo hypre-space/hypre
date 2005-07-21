@@ -109,7 +109,8 @@ int32_t
 bHYPRE_SStructStencil_SetEntry(
   /* in */ bHYPRE_SStructStencil self,
   /* in */ int32_t entry,
-  /* in */ struct sidl_int__array* offset,
+  /* in */ int32_t* offset,
+  /* in */ int32_t dim,
   /* in */ int32_t var);
 
 /**

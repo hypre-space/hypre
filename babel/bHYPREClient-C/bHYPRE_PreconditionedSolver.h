@@ -112,7 +112,8 @@ int32_t
 bHYPRE_PreconditionedSolver_SetIntArray1Parameter(
   /* in */ bHYPRE_PreconditionedSolver self,
   /* in */ const char* name,
-  /* in */ struct sidl_int__array* value);
+  /* in */ int32_t* value,
+  /* in */ int32_t nvalues);
 
 int32_t
 bHYPRE_PreconditionedSolver_SetIntArray2Parameter(
@@ -124,7 +125,8 @@ int32_t
 bHYPRE_PreconditionedSolver_SetDoubleArray1Parameter(
   /* in */ bHYPRE_PreconditionedSolver self,
   /* in */ const char* name,
-  /* in */ struct sidl_double__array* value);
+  /* in */ double* value,
+  /* in */ int32_t nvalues);
 
 int32_t
 bHYPRE_PreconditionedSolver_SetDoubleArray2Parameter(

@@ -32,6 +32,15 @@ extern "C" {
 
 /*
  * Symbol "bHYPRE.StructPFMG" (version 1.0.0)
+ * 
+ * Objects of this type can be cast to PreconditionedSolver objects
+ * using the {\tt \_\_cast} methods.
+ * 
+ * RDF: Documentation goes here.
+ * 
+ * The StructPFMG solver requires a Struct matrix.
+ * 
+ * 
  */
 
 struct bHYPRE_StructPFMG__array;

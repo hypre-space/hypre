@@ -418,7 +418,6 @@ bHYPRE_IJParCSRMatrix_SetValues__exec(
         struct sidl_io_Deserializer__object* inArgs,
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
-  int32_t nrows;
   struct sidl_int__array* ncols;
   struct sidl_int__array* rows;
   struct sidl_int__array* cols;
@@ -427,12 +426,10 @@ bHYPRE_IJParCSRMatrix_SetValues__exec(
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
-  sidl_io_Deserializer_unpackInt( inArgs, "nrows", &nrows, _ex2);
 
   /* make the call */
   _retval = (self->d_epv->f_SetValues)(
     self,
-    nrows,
     ncols,
     rows,
     cols,
@@ -451,7 +448,6 @@ bHYPRE_IJParCSRMatrix_AddToValues__exec(
         struct sidl_io_Deserializer__object* inArgs,
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
-  int32_t nrows;
   struct sidl_int__array* ncols;
   struct sidl_int__array* rows;
   struct sidl_int__array* cols;
@@ -460,12 +456,10 @@ bHYPRE_IJParCSRMatrix_AddToValues__exec(
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
-  sidl_io_Deserializer_unpackInt( inArgs, "nrows", &nrows, _ex2);
 
   /* make the call */
   _retval = (self->d_epv->f_AddToValues)(
     self,
-    nrows,
     ncols,
     rows,
     cols,
@@ -522,7 +516,6 @@ bHYPRE_IJParCSRMatrix_GetRowCounts__exec(
         struct sidl_io_Deserializer__object* inArgs,
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
-  int32_t nrows;
   struct sidl_int__array* rows;
   struct sidl_int__array* ncols_tmp;
   struct sidl_int__array** ncols= &ncols_tmp;
@@ -530,12 +523,10 @@ bHYPRE_IJParCSRMatrix_GetRowCounts__exec(
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
-  sidl_io_Deserializer_unpackInt( inArgs, "nrows", &nrows, _ex2);
 
   /* make the call */
   _retval = (self->d_epv->f_GetRowCounts)(
     self,
-    nrows,
     rows,
     ncols);
 
@@ -552,7 +543,6 @@ bHYPRE_IJParCSRMatrix_GetValues__exec(
         struct sidl_io_Deserializer__object* inArgs,
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
-  int32_t nrows;
   struct sidl_int__array* ncols;
   struct sidl_int__array* rows;
   struct sidl_int__array* cols;
@@ -562,12 +552,10 @@ bHYPRE_IJParCSRMatrix_GetValues__exec(
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
-  sidl_io_Deserializer_unpackInt( inArgs, "nrows", &nrows, _ex2);
 
   /* make the call */
   _retval = (self->d_epv->f_GetValues)(
     self,
-    nrows,
     ncols,
     rows,
     cols,
@@ -1203,18 +1191,18 @@ static void bHYPRE_IJParCSRMatrix__init_epv(
     struct sidl_BaseInterface__object**)) epv->f_GetObject;
   e1->f_SetLocalRange       = (int32_t (*)(void*,int32_t,int32_t,int32_t,
     int32_t)) epv->f_SetLocalRange;
-  e1->f_SetValues           = (int32_t (*)(void*,int32_t,
-    struct sidl_int__array*,struct sidl_int__array*,struct sidl_int__array*,
+  e1->f_SetValues           = (int32_t (*)(void*,struct sidl_int__array*,
+    struct sidl_int__array*,struct sidl_int__array*,
     struct sidl_double__array*)) epv->f_SetValues;
-  e1->f_AddToValues         = (int32_t (*)(void*,int32_t,
-    struct sidl_int__array*,struct sidl_int__array*,struct sidl_int__array*,
+  e1->f_AddToValues         = (int32_t (*)(void*,struct sidl_int__array*,
+    struct sidl_int__array*,struct sidl_int__array*,
     struct sidl_double__array*)) epv->f_AddToValues;
   e1->f_GetLocalRange       = (int32_t (*)(void*,int32_t*,int32_t*,int32_t*,
     int32_t*)) epv->f_GetLocalRange;
-  e1->f_GetRowCounts        = (int32_t (*)(void*,int32_t,
-    struct sidl_int__array*,struct sidl_int__array**)) epv->f_GetRowCounts;
-  e1->f_GetValues           = (int32_t (*)(void*,int32_t,
-    struct sidl_int__array*,struct sidl_int__array*,struct sidl_int__array*,
+  e1->f_GetRowCounts        = (int32_t (*)(void*,struct sidl_int__array*,
+    struct sidl_int__array**)) epv->f_GetRowCounts;
+  e1->f_GetValues           = (int32_t (*)(void*,struct sidl_int__array*,
+    struct sidl_int__array*,struct sidl_int__array*,
     struct sidl_double__array**)) epv->f_GetValues;
   e1->f_SetRowSizes         = (int32_t (*)(void*,
     struct sidl_int__array*)) epv->f_SetRowSizes;

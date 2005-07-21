@@ -114,8 +114,9 @@ bHYPRE_IJParCSRMatrix_getClassInfo(
 int32_t
 bHYPRE_IJParCSRMatrix_SetDiagOffdSizes(
   /* in */ bHYPRE_IJParCSRMatrix self,
-  /* in */ struct sidl_int__array* diag_sizes,
-  /* in */ struct sidl_int__array* offdiag_sizes);
+  /* in */ int32_t* diag_sizes,
+  /* in */ int32_t* offdiag_sizes,
+  /* in */ int32_t local_nrows);
 
 /**
  * The GetRow method will allocate space for its two output
@@ -218,9 +219,11 @@ bHYPRE_IJParCSRMatrix_SetLocalRange(
  * indices, respectively.  The array {\tt cols} contains the
  * column indices for each of the {\tt rows}, and is ordered by
  * rows.  The data in the {\tt values} array corresponds
- * directly to the column entries in {\tt cols}.  Erases any
- * previous values at the specified locations and replaces them
- * with new ones, or, if there was no value there before,
+ * directly to the column entries in {\tt cols}.  The last argument
+ * is the size of the cols and values arrays, i.e. the total number
+ * of nonzeros being provided, i.e. the sum of all values in ncols.
+ * This functin erases any previous values at the specified locations and
+ * replaces them with new ones, or, if there was no value there before,
  * inserts a new one.
  * 
  * Not collective.
@@ -230,10 +233,11 @@ int32_t
 bHYPRE_IJParCSRMatrix_SetValues(
   /* in */ bHYPRE_IJParCSRMatrix self,
   /* in */ int32_t nrows,
-  /* in */ struct sidl_int__array* ncols,
-  /* in */ struct sidl_int__array* rows,
-  /* in */ struct sidl_int__array* cols,
-  /* in */ struct sidl_double__array* values);
+  /* in */ int32_t* ncols,
+  /* in */ int32_t* rows,
+  /* in */ int32_t* cols,
+  /* in */ double* values,
+  /* in */ int32_t nnonzeros);
 
 /**
  * Adds to values for {\tt nrows} of the matrix.  Usage details
@@ -248,10 +252,11 @@ int32_t
 bHYPRE_IJParCSRMatrix_AddToValues(
   /* in */ bHYPRE_IJParCSRMatrix self,
   /* in */ int32_t nrows,
-  /* in */ struct sidl_int__array* ncols,
-  /* in */ struct sidl_int__array* rows,
-  /* in */ struct sidl_int__array* cols,
-  /* in */ struct sidl_double__array* values);
+  /* in */ int32_t* ncols,
+  /* in */ int32_t* rows,
+  /* in */ int32_t* cols,
+  /* in */ double* values,
+  /* in */ int32_t nnonzeros);
 
 /**
  * Gets range of rows owned by this processor and range of
@@ -276,8 +281,8 @@ int32_t
 bHYPRE_IJParCSRMatrix_GetRowCounts(
   /* in */ bHYPRE_IJParCSRMatrix self,
   /* in */ int32_t nrows,
-  /* in */ struct sidl_int__array* rows,
-  /* inout */ struct sidl_int__array** ncols);
+  /* in */ int32_t* rows,
+  /* inout */ int32_t* ncols);
 
 /**
  * Gets values for {\tt nrows} rows or partial rows of the
@@ -288,15 +293,17 @@ int32_t
 bHYPRE_IJParCSRMatrix_GetValues(
   /* in */ bHYPRE_IJParCSRMatrix self,
   /* in */ int32_t nrows,
-  /* in */ struct sidl_int__array* ncols,
-  /* in */ struct sidl_int__array* rows,
-  /* in */ struct sidl_int__array* cols,
-  /* inout */ struct sidl_double__array** values);
+  /* in */ int32_t* ncols,
+  /* in */ int32_t* rows,
+  /* in */ int32_t* cols,
+  /* inout */ double* values,
+  /* in */ int32_t nnonzeros);
 
 /**
  * (Optional) Set the max number of nonzeros to expect in each
  * row.  The array {\tt sizes} contains estimated sizes for each
- * row on this process.  This call can significantly improve the
+ * row on this process.  The integer nrows is the number of rows in
+ * the local matrix.  This call can significantly improve the
  * efficiency of matrix construction, and should always be
  * utilized if possible.
  * 
@@ -306,7 +313,8 @@ bHYPRE_IJParCSRMatrix_GetValues(
 int32_t
 bHYPRE_IJParCSRMatrix_SetRowSizes(
   /* in */ bHYPRE_IJParCSRMatrix self,
-  /* in */ struct sidl_int__array* sizes);
+  /* in */ int32_t* sizes,
+  /* in */ int32_t nrows);
 
 /**
  * Print the matrix to file.  This is mainly for debugging
@@ -367,7 +375,8 @@ int32_t
 bHYPRE_IJParCSRMatrix_SetIntArray1Parameter(
   /* in */ bHYPRE_IJParCSRMatrix self,
   /* in */ const char* name,
-  /* in */ struct sidl_int__array* value);
+  /* in */ int32_t* value,
+  /* in */ int32_t nvalues);
 
 /**
  * Set the int 2-D array parameter associated with {\tt name}.
@@ -387,7 +396,8 @@ int32_t
 bHYPRE_IJParCSRMatrix_SetDoubleArray1Parameter(
   /* in */ bHYPRE_IJParCSRMatrix self,
   /* in */ const char* name,
-  /* in */ struct sidl_double__array* value);
+  /* in */ double* value,
+  /* in */ int32_t nvalues);
 
 /**
  * Set the double 2-D array parameter associated with {\tt name}.

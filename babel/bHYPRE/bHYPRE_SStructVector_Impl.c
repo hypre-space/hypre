@@ -366,9 +366,11 @@ int32_t
 impl_bHYPRE_SStructVector_SetValues(
   /* in */ bHYPRE_SStructVector self,
   /* in */ int32_t part,
-  /* in */ struct sidl_int__array* index,
+  /* in */ int32_t* index,
+  /* in */ int32_t dim,
   /* in */ int32_t var,
-  /* in */ struct sidl_double__array* values)
+  /* in */ double* values,
+  /* in */ int32_t one)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructVector.SetValues) */
   /* Insert the implementation of the SetValues method here... */
@@ -380,8 +382,8 @@ impl_bHYPRE_SStructVector_SetValues(
    Hy = data -> vec;
 
    ierr += HYPRE_SStructVectorSetValues
-      ( Hy, part, sidlArrayAddr1( index, 0 ), var,
-        sidlArrayAddr1( values, 0 ) );
+      ( Hy, part, index, var,
+        values );
 
    return ierr;
 
@@ -411,10 +413,12 @@ int32_t
 impl_bHYPRE_SStructVector_SetBoxValues(
   /* in */ bHYPRE_SStructVector self,
   /* in */ int32_t part,
-  /* in */ struct sidl_int__array* ilower,
-  /* in */ struct sidl_int__array* iupper,
+  /* in */ int32_t* ilower,
+  /* in */ int32_t* iupper,
+  /* in */ int32_t dim,
   /* in */ int32_t var,
-  /* in */ struct sidl_double__array* values)
+  /* in */ double* values,
+  /* in */ int32_t nvalues)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructVector.SetBoxValues) */
   /* Insert the implementation of the SetBoxValues method here... */
@@ -426,8 +430,8 @@ impl_bHYPRE_SStructVector_SetBoxValues(
    Hy = data -> vec;
 
    ierr += HYPRE_SStructVectorSetBoxValues
-      ( Hy, part, sidlArrayAddr1( ilower, 0 ), sidlArrayAddr1( iupper, 0 ),
-        var, sidlArrayAddr1( values, 0 ) );
+      ( Hy, part, ilower, iupper,
+        var, values );
 
    return ierr;
 
@@ -457,9 +461,11 @@ int32_t
 impl_bHYPRE_SStructVector_AddToValues(
   /* in */ bHYPRE_SStructVector self,
   /* in */ int32_t part,
-  /* in */ struct sidl_int__array* index,
+  /* in */ int32_t* index,
+  /* in */ int32_t dim,
   /* in */ int32_t var,
-  /* in */ struct sidl_double__array* values)
+  /* in */ double* values,
+  /* in */ int32_t one)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructVector.AddToValues) */
   /* Insert the implementation of the AddToValues method here... */
@@ -471,8 +477,7 @@ impl_bHYPRE_SStructVector_AddToValues(
    Hy = data -> vec;
 
    ierr += HYPRE_SStructVectorAddToValues
-      ( Hy, part, sidlArrayAddr1( index, 0 ), var,
-        sidlArrayAddr1( values, 0 ) );
+      ( Hy, part, index, var, values );
 
    return ierr;
 
@@ -502,10 +507,12 @@ int32_t
 impl_bHYPRE_SStructVector_AddToBoxValues(
   /* in */ bHYPRE_SStructVector self,
   /* in */ int32_t part,
-  /* in */ struct sidl_int__array* ilower,
-  /* in */ struct sidl_int__array* iupper,
+  /* in */ int32_t* ilower,
+  /* in */ int32_t* iupper,
+  /* in */ int32_t dim,
   /* in */ int32_t var,
-  /* in */ struct sidl_double__array* values)
+  /* in */ double* values,
+  /* in */ int32_t nvalues)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructVector.AddToBoxValues) */
   /* Insert the implementation of the AddToBoxValues method here... */
@@ -517,8 +524,8 @@ impl_bHYPRE_SStructVector_AddToBoxValues(
    Hy = data -> vec;
 
    ierr += HYPRE_SStructVectorAddToBoxValues
-      ( Hy, part, sidlArrayAddr1( ilower, 0 ), sidlArrayAddr1( iupper, 0 ),
-        var, sidlArrayAddr1( values, 0 ) );
+      ( Hy, part, ilower, iupper,
+        var, values );
 
    return ierr;
 
@@ -578,7 +585,8 @@ int32_t
 impl_bHYPRE_SStructVector_GetValues(
   /* in */ bHYPRE_SStructVector self,
   /* in */ int32_t part,
-  /* in */ struct sidl_int__array* index,
+  /* in */ int32_t* index,
+  /* in */ int32_t dim,
   /* in */ int32_t var,
   /* out */ double* value)
 {
@@ -592,7 +600,7 @@ impl_bHYPRE_SStructVector_GetValues(
    Hy = data -> vec;
 
    ierr += HYPRE_SStructVectorGetValues
-      ( Hy, part, sidlArrayAddr1( index, 0 ), var,
+      ( Hy, part, index, var,
         value );
 
    return ierr;
@@ -622,10 +630,12 @@ int32_t
 impl_bHYPRE_SStructVector_GetBoxValues(
   /* in */ bHYPRE_SStructVector self,
   /* in */ int32_t part,
-  /* in */ struct sidl_int__array* ilower,
-  /* in */ struct sidl_int__array* iupper,
+  /* in */ int32_t* ilower,
+  /* in */ int32_t* iupper,
+  /* in */ int32_t dim,
   /* in */ int32_t var,
-  /* inout */ struct sidl_double__array** values)
+  /* inout */ double* values,
+  /* in */ int32_t nvalues)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructVector.GetBoxValues) */
   /* Insert the implementation of the GetBoxValues method here... */
@@ -637,8 +647,8 @@ impl_bHYPRE_SStructVector_GetBoxValues(
    Hy = data -> vec;
 
    ierr += HYPRE_SStructVectorGetBoxValues
-      ( Hy, part, sidlArrayAddr1( ilower, 0 ), sidlArrayAddr1( iupper, 0 ),
-        var, sidlArrayAddr1( *values, 0 ) );
+      ( Hy, part, ilower, iupper,
+        var, values );
 
    return ierr;
 

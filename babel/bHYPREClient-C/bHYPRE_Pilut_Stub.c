@@ -282,12 +282,19 @@ int32_t
 bHYPRE_Pilut_SetIntArray1Parameter(
   /* in */ bHYPRE_Pilut self,
   /* in */ const char* name,
-  /* in */ struct sidl_int__array* value)
+  /* in */ int32_t* value,
+  /* in */ int32_t nvalues)
 {
+  int32_t value_lower[1], value_upper[1], value_stride[1]; 
+  struct sidl_int__array value_real;
+  struct sidl_int__array*value_tmp = &value_real;
+  value_upper[0] = nvalues-1;
+  sidl_int__array_init(value, value_tmp, 1, value_lower, value_upper,
+    value_stride);
   return (*self->d_epv->f_SetIntArray1Parameter)(
     self,
     name,
-    value);
+    value_tmp);
 }
 
 /*
@@ -316,12 +323,19 @@ int32_t
 bHYPRE_Pilut_SetDoubleArray1Parameter(
   /* in */ bHYPRE_Pilut self,
   /* in */ const char* name,
-  /* in */ struct sidl_double__array* value)
+  /* in */ double* value,
+  /* in */ int32_t nvalues)
 {
+  int32_t value_lower[1], value_upper[1], value_stride[1]; 
+  struct sidl_double__array value_real;
+  struct sidl_double__array*value_tmp = &value_real;
+  value_upper[0] = nvalues-1;
+  sidl_double__array_init(value, value_tmp, 1, value_lower, value_upper,
+    value_stride);
   return (*self->d_epv->f_SetDoubleArray1Parameter)(
     self,
     name,
-    value);
+    value_tmp);
 }
 
 /*

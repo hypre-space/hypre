@@ -280,32 +280,32 @@ C       contain the number of columns in each row and the row
 C       indices, respectively.  The array {\tt cols} contains the
 C       column indices for each of the {\tt rows}, and is ordered by
 C       rows.  The data in the {\tt values} array corresponds
-C       directly to the column entries in {\tt cols}.  Erases any
-C       previous values at the specified locations and replaces them
-C       with new ones, or, if there was no value there before,
+C       directly to the column entries in {\tt cols}.  The last argument
+C       is the size of the cols and values arrays, i.e. the total number
+C       of nonzeros being provided, i.e. the sum of all values in ncols.
+C       This functin erases any previous values at the specified locations and
+C       replaces them with new ones, or, if there was no value there before,
 C       inserts a new one.
 C       
 C       Not collective.
 C       
 C       
 
-        subroutine bHYPRE_IJBuildMatrix_SetValues_f(self, nrows, ncols,
-     &     rows, cols, values, retval)
+        subroutine bHYPRE_IJBuildMatrix_SetValues_f(self, ncols, rows,
+     &     cols, values, retval)
         implicit none
 C       in bHYPRE.IJBuildMatrix self
         integer*8 self
-C       in int nrows
-        integer*4 nrows
-C       in array<int,column-major> ncols
-        integer*8 ncols
-C       in array<int,column-major> rows
-        integer*8 rows
-C       in array<int,column-major> cols
-        integer*8 cols
-C       in array<double,column-major> values
-        integer*8 values
 C       out int retval
         integer*4 retval
+C       in rarray<int> ncols(nrows)
+        integer*4 ncols(0:nrows-1)
+C       in rarray<int> rows(nrows)
+        integer*4 rows(0:nrows-1)
+C       in rarray<int> cols(nnonzeros)
+        integer*4 cols(0:nnonzeros-1)
+C       in rarray<double> values(nnonzeros)
+        double precision values(0:nnonzeros-1)
         end
 
 
@@ -319,23 +319,21 @@ C       Not collective.
 C       
 C       
 
-        subroutine bHYPRE_IJBuildMatrix_AddToValues_f(self, nrows,
-     &     ncols, rows, cols, values, retval)
+        subroutine bHYPRE_IJBuildMatrix_AddToValues_f(self, ncols, rows,
+     &     cols, values, retval)
         implicit none
 C       in bHYPRE.IJBuildMatrix self
         integer*8 self
-C       in int nrows
-        integer*4 nrows
-C       in array<int,column-major> ncols
-        integer*8 ncols
-C       in array<int,column-major> rows
-        integer*8 rows
-C       in array<int,column-major> cols
-        integer*8 cols
-C       in array<double,column-major> values
-        integer*8 values
 C       out int retval
         integer*4 retval
+C       in rarray<int> ncols(nrows)
+        integer*4 ncols(0:nrows-1)
+C       in rarray<int> rows(nrows)
+        integer*4 rows(0:nrows-1)
+C       in rarray<int> cols(nnonzeros)
+        integer*4 cols(0:nnonzeros-1)
+C       in rarray<double> values(nnonzeros)
+        double precision values(0:nnonzeros-1)
         end
 
 
@@ -370,19 +368,17 @@ C       which needs to be allocated by the user.
 C       
 C       
 
-        subroutine bHYPRE_IJBuildMatrix_GetRowCounts_f(self, nrows,
-     &     rows, ncols, retval)
+        subroutine bHYPRE_IJBuildMatrix_GetRowCounts_f(self, rows,
+     &     ncols, retval)
         implicit none
 C       in bHYPRE.IJBuildMatrix self
         integer*8 self
-C       in int nrows
-        integer*4 nrows
-C       in array<int,column-major> rows
-        integer*8 rows
-C       inout array<int,column-major> ncols
-        integer*8 ncols
 C       out int retval
         integer*4 retval
+C       in rarray<int> rows(nrows)
+        integer*4 rows(0:nrows-1)
+C       inout rarray<int> ncols(nrows)
+        integer*4 ncols(0:nrows-1)
         end
 
 
@@ -392,30 +388,29 @@ C       matrix.  Usage details are analogous to {\tt SetValues}.
 C       
 C       
 
-        subroutine bHYPRE_IJBuildMatrix_GetValues_f(self, nrows, ncols,
-     &     rows, cols, values, retval)
+        subroutine bHYPRE_IJBuildMatrix_GetValues_f(self, ncols, rows,
+     &     cols, values, retval)
         implicit none
 C       in bHYPRE.IJBuildMatrix self
         integer*8 self
-C       in int nrows
-        integer*4 nrows
-C       in array<int,column-major> ncols
-        integer*8 ncols
-C       in array<int,column-major> rows
-        integer*8 rows
-C       in array<int,column-major> cols
-        integer*8 cols
-C       inout array<double,column-major> values
-        integer*8 values
 C       out int retval
         integer*4 retval
+C       in rarray<int> ncols(nrows)
+        integer*4 ncols(0:nrows-1)
+C       in rarray<int> rows(nrows)
+        integer*4 rows(0:nrows-1)
+C       in rarray<int> cols(nnonzeros)
+        integer*4 cols(0:nnonzeros-1)
+C       inout rarray<double> values(nnonzeros)
+        double precision values(0:nnonzeros-1)
         end
 
 
 C       
 C       (Optional) Set the max number of nonzeros to expect in each
 C       row.  The array {\tt sizes} contains estimated sizes for each
-C       row on this process.  This call can significantly improve the
+C       row on this process.  The integer nrows is the number of rows in
+C       the local matrix.  This call can significantly improve the
 C       efficiency of matrix construction, and should always be
 C       utilized if possible.
 C       
@@ -428,10 +423,10 @@ C
         implicit none
 C       in bHYPRE.IJBuildMatrix self
         integer*8 self
-C       in array<int,column-major> sizes
-        integer*8 sizes
 C       out int retval
         integer*4 retval
+C       in rarray<int> sizes(nrows)
+        integer*4 sizes(0:nrows-1)
         end
 
 

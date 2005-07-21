@@ -20,6 +20,8 @@
  * 
  * Algebraic multigrid solver, based on classical Ruge-Stueben.
  * 
+ * BoomerAMG requires an IJParCSR matrix
+ * 
  * The following optional parameters are available and may be set
  * using the appropriate {\tt Parameter} function (as indicated in
  * parentheses):
@@ -513,38 +515,31 @@ int32_t
 impl_bHYPRE_BoomerAMG_SetIntArray1Parameter(
   /* in */ bHYPRE_BoomerAMG self,
   /* in */ const char* name,
-  /* in */ struct sidl_int__array* value)
+  /* in */ int32_t* value,
+  /* in */ int32_t nvalues)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.BoomerAMG.SetIntArray1Parameter) */
   /* Insert the implementation of the SetIntArray1Parameter method here... */
    int ierr = 0;
-   int dim;
-   int * data1_c;
    HYPRE_Solver solver;
    struct bHYPRE_BoomerAMG__data * data;
 
    data = bHYPRE_BoomerAMG__get_data( self );
    solver = data->solver;
-   data1_c = value->d_firstElement;
-
-   dim = sidl_int__array_dimen( value );
 
    if ( strcmp(name,"NumGridSweeps")==0 )
    {
       /* *** DEPRECATED *** Use IntParameter NumSweeps and Cycle?NumSweeps instead. */
-      assert( dim==1 );
-      ierr += HYPRE_BoomerAMGSetNumGridSweeps( solver, data1_c );
+      ierr += HYPRE_BoomerAMGSetNumGridSweeps( solver, value );
    }
    else if ( strcmp(name,"GridRelaxType")==0 )
    {
       /* *** DEPRECATED *** Use RelaxType and Cycle?RelaxType instead. */
-      assert( dim==1 );
-      ierr += HYPRE_BoomerAMGSetGridRelaxType( solver, data1_c );
+      ierr += HYPRE_BoomerAMGSetGridRelaxType( solver, value );
    }
    else if ( strcmp(name,"DOFFunc")==0 )
    {
-      assert( dim==1 );
-      ierr += HYPRE_BoomerAMGSetDofFunc( solver, data1_c );
+      ierr += HYPRE_BoomerAMGSetDofFunc( solver, value );
    }
    else
    {
@@ -576,7 +571,7 @@ impl_bHYPRE_BoomerAMG_SetIntArray2Parameter(
   /* Insert the implementation of the SetIntArray2Parameter method here... */
    int ierr = 0;
    int dim, lb0, ub0, lb1, ub1, i, j;
-    int ** data2_c;
+   int ** data2_c;
    HYPRE_Solver solver;
    struct bHYPRE_BoomerAMG__data * data;
 
@@ -631,25 +626,23 @@ int32_t
 impl_bHYPRE_BoomerAMG_SetDoubleArray1Parameter(
   /* in */ bHYPRE_BoomerAMG self,
   /* in */ const char* name,
-  /* in */ struct sidl_double__array* value)
+  /* in */ double* value,
+  /* in */ int32_t nvalues)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.BoomerAMG.SetDoubleArray1Parameter) */
   /* Insert the implementation of the SetDoubleArray1Parameter method here... */
-   int ierr = 0, dim;
+   int ierr = 0;
    HYPRE_Solver solver;
    struct bHYPRE_BoomerAMG__data * data;
 
    data = bHYPRE_BoomerAMG__get_data( self );
    solver = data->solver;
 
-   dim = sidl_double__array_dimen( value );
-
    if ( strcmp(name,"RelaxWeight")==0 )
    {
       /* *** DEPRECATED *** Use the RelaxWt parameter and SetLevelRelaxWt function
          instead. */
-      assert( dim==1 );
-      ierr += HYPRE_BoomerAMGSetRelaxWeight( solver, value->d_firstElement );
+      ierr += HYPRE_BoomerAMGSetRelaxWeight( solver, value );
    }
    else
    {

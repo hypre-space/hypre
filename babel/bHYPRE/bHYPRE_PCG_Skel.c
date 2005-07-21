@@ -94,7 +94,8 @@ int32_t
 impl_bHYPRE_PCG_SetIntArray1Parameter(
   /* in */ bHYPRE_PCG self,
   /* in */ const char* name,
-  /* in */ struct sidl_int__array* value);
+  /* in */ int32_t* value,
+  /* in */ int32_t nvalues);
 
 extern
 int32_t
@@ -108,7 +109,8 @@ int32_t
 impl_bHYPRE_PCG_SetDoubleArray1Parameter(
   /* in */ bHYPRE_PCG self,
   /* in */ const char* name,
-  /* in */ struct sidl_double__array* value);
+  /* in */ double* value,
+  /* in */ int32_t nvalues);
 
 extern
 int32_t
@@ -235,12 +237,14 @@ skel_bHYPRE_PCG_SetIntArray1Parameter(
   int32_t _return;
   struct sidl_int__array* value_proxy = sidl_int__array_ensure(value, 1,
     sidl_column_major_order);
+  int32_t* value_tmp = value_proxy->d_firstElement;
+  int32_t nvalues = sidlLength(value_proxy,0);
   _return =
     impl_bHYPRE_PCG_SetIntArray1Parameter(
       self,
       name,
-      value_proxy);
-  sidl_int__array_deleteRef(value_proxy);
+      value_tmp,
+      nvalues);
   return _return;
 }
 
@@ -271,12 +275,14 @@ skel_bHYPRE_PCG_SetDoubleArray1Parameter(
   int32_t _return;
   struct sidl_double__array* value_proxy = sidl_double__array_ensure(value, 1,
     sidl_column_major_order);
+  double* value_tmp = value_proxy->d_firstElement;
+  int32_t nvalues = sidlLength(value_proxy,0);
   _return =
     impl_bHYPRE_PCG_SetDoubleArray1Parameter(
       self,
       name,
-      value_proxy);
-  sidl_double__array_deleteRef(value_proxy);
+      value_tmp,
+      nvalues);
   return _return;
 }
 

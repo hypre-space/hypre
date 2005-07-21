@@ -272,11 +272,18 @@ bHYPRE_StructGrid_SetExtents(
 int32_t
 bHYPRE_StructGrid_SetPeriodic(
   /* in */ bHYPRE_StructGrid self,
-  /* in */ struct sidl_int__array* periodic)
+  /* in */ int32_t* periodic,
+  /* in */ int32_t dim)
 {
+  int32_t periodic_lower[1], periodic_upper[1], periodic_stride[1]; 
+  struct sidl_int__array periodic_real;
+  struct sidl_int__array*periodic_tmp = &periodic_real;
+  periodic_upper[0] = dim-1;
+  sidl_int__array_init(periodic, periodic_tmp, 1, periodic_lower,
+    periodic_upper, periodic_stride);
   return (*self->d_epv->f_SetPeriodic)(
     self,
-    periodic);
+    periodic_tmp);
 }
 
 /*
@@ -287,12 +294,12 @@ int32_t
 bHYPRE_StructGrid_SetNumGhost(
   /* in */ bHYPRE_StructGrid self,
   /* in */ int32_t* num_ghost,
-  /* in */ int32_t len)
+  /* in */ int32_t dim2)
 {
   int32_t num_ghost_lower[1], num_ghost_upper[1], num_ghost_stride[1]; 
   struct sidl_int__array num_ghost_real;
   struct sidl_int__array*num_ghost_tmp = &num_ghost_real;
-  num_ghost_upper[0] = len-1;
+  num_ghost_upper[0] = dim2-1;
   sidl_int__array_init(num_ghost, num_ghost_tmp, 1, num_ghost_lower,
     num_ghost_upper, num_ghost_stride);
   return (*self->d_epv->f_SetNumGhost)(

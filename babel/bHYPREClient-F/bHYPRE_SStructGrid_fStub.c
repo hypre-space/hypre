@@ -382,24 +382,29 @@ SIDLFortran77Symbol(bhypre_sstructgrid_setextents_f,BHYPRE_SSTRUCTGRID_SETEXTENT
 (
   int64_t *self,
   int32_t *part,
-  int64_t *ilower,
-  int64_t *iupper,
+  int32_t *ilower,
+  int32_t *iupper,
+  int32_t *dim,
   int32_t *retval
 )
 {
   struct bHYPRE_SStructGrid__epv *_epv = NULL;
   struct bHYPRE_SStructGrid__object* _proxy_self = NULL;
-  struct sidl_int__array* _proxy_ilower = NULL;
-  struct sidl_int__array* _proxy_iupper = NULL;
+  struct sidl_int__array _alt_ilower;
+  struct sidl_int__array* _proxy_ilower = &_alt_ilower;
+  int32_t ilower_lower[1], ilower_upper[1], ilower_stride[1];
+  struct sidl_int__array _alt_iupper;
+  struct sidl_int__array* _proxy_iupper = &_alt_iupper;
+  int32_t iupper_lower[1], iupper_upper[1], iupper_stride[1];
   _proxy_self =
     (struct bHYPRE_SStructGrid__object*)
     (ptrdiff_t)(*self);
-  _proxy_ilower =
-    (struct sidl_int__array*)
-    (ptrdiff_t)(*ilower);
-  _proxy_iupper =
-    (struct sidl_int__array*)
-    (ptrdiff_t)(*iupper);
+  ilower_upper[0] = (*dim)-1;
+  sidl_int__array_init(ilower, _proxy_ilower, 1, ilower_lower, ilower_upper,
+    ilower_stride);
+  iupper_upper[0] = (*dim)-1;
+  sidl_int__array_init(iupper, _proxy_iupper, 1, iupper_lower, iupper_upper,
+    iupper_stride);
   _epv = _proxy_self->d_epv;
   *retval = 
     (*(_epv->f_SetExtents))(
@@ -462,7 +467,8 @@ SIDLFortran77Symbol(bhypre_sstructgrid_addvariable_f,BHYPRE_SSTRUCTGRID_ADDVARIA
 (
   int64_t *self,
   int32_t *part,
-  int64_t *index,
+  int32_t *index,
+  int32_t *dim,
   int32_t *var,
   int32_t *vartype,
   int32_t *retval
@@ -470,14 +476,16 @@ SIDLFortran77Symbol(bhypre_sstructgrid_addvariable_f,BHYPRE_SSTRUCTGRID_ADDVARIA
 {
   struct bHYPRE_SStructGrid__epv *_epv = NULL;
   struct bHYPRE_SStructGrid__object* _proxy_self = NULL;
-  struct sidl_int__array* _proxy_index = NULL;
+  struct sidl_int__array _alt_index;
+  struct sidl_int__array* _proxy_index = &_alt_index;
+  int32_t index_lower[1], index_upper[1], index_stride[1];
   enum bHYPRE_SStructVariable__enum _proxy_vartype;
   _proxy_self =
     (struct bHYPRE_SStructGrid__object*)
     (ptrdiff_t)(*self);
-  _proxy_index =
-    (struct sidl_int__array*)
-    (ptrdiff_t)(*index);
+  index_upper[0] = (*dim)-1;
+  sidl_int__array_init(index, _proxy_index, 1, index_lower, index_upper,
+    index_stride);
   _proxy_vartype =
     (enum bHYPRE_SStructVariable__enum)*
     vartype;
@@ -523,40 +531,51 @@ SIDLFortran77Symbol(bhypre_sstructgrid_setneighborbox_f,BHYPRE_SSTRUCTGRID_SETNE
 (
   int64_t *self,
   int32_t *part,
-  int64_t *ilower,
-  int64_t *iupper,
+  int32_t *ilower,
+  int32_t *iupper,
   int32_t *nbor_part,
-  int64_t *nbor_ilower,
-  int64_t *nbor_iupper,
-  int64_t *index_map,
+  int32_t *nbor_ilower,
+  int32_t *nbor_iupper,
+  int32_t *index_map,
+  int32_t *dim,
   int32_t *retval
 )
 {
   struct bHYPRE_SStructGrid__epv *_epv = NULL;
   struct bHYPRE_SStructGrid__object* _proxy_self = NULL;
-  struct sidl_int__array* _proxy_ilower = NULL;
-  struct sidl_int__array* _proxy_iupper = NULL;
-  struct sidl_int__array* _proxy_nbor_ilower = NULL;
-  struct sidl_int__array* _proxy_nbor_iupper = NULL;
-  struct sidl_int__array* _proxy_index_map = NULL;
+  struct sidl_int__array _alt_ilower;
+  struct sidl_int__array* _proxy_ilower = &_alt_ilower;
+  int32_t ilower_lower[1], ilower_upper[1], ilower_stride[1];
+  struct sidl_int__array _alt_iupper;
+  struct sidl_int__array* _proxy_iupper = &_alt_iupper;
+  int32_t iupper_lower[1], iupper_upper[1], iupper_stride[1];
+  struct sidl_int__array _alt_nbor_ilower;
+  struct sidl_int__array* _proxy_nbor_ilower = &_alt_nbor_ilower;
+  int32_t nbor_ilower_lower[1], nbor_ilower_upper[1], nbor_ilower_stride[1];
+  struct sidl_int__array _alt_nbor_iupper;
+  struct sidl_int__array* _proxy_nbor_iupper = &_alt_nbor_iupper;
+  int32_t nbor_iupper_lower[1], nbor_iupper_upper[1], nbor_iupper_stride[1];
+  struct sidl_int__array _alt_index_map;
+  struct sidl_int__array* _proxy_index_map = &_alt_index_map;
+  int32_t index_map_lower[1], index_map_upper[1], index_map_stride[1];
   _proxy_self =
     (struct bHYPRE_SStructGrid__object*)
     (ptrdiff_t)(*self);
-  _proxy_ilower =
-    (struct sidl_int__array*)
-    (ptrdiff_t)(*ilower);
-  _proxy_iupper =
-    (struct sidl_int__array*)
-    (ptrdiff_t)(*iupper);
-  _proxy_nbor_ilower =
-    (struct sidl_int__array*)
-    (ptrdiff_t)(*nbor_ilower);
-  _proxy_nbor_iupper =
-    (struct sidl_int__array*)
-    (ptrdiff_t)(*nbor_iupper);
-  _proxy_index_map =
-    (struct sidl_int__array*)
-    (ptrdiff_t)(*index_map);
+  ilower_upper[0] = (*dim)-1;
+  sidl_int__array_init(ilower, _proxy_ilower, 1, ilower_lower, ilower_upper,
+    ilower_stride);
+  iupper_upper[0] = (*dim)-1;
+  sidl_int__array_init(iupper, _proxy_iupper, 1, iupper_lower, iupper_upper,
+    iupper_stride);
+  nbor_ilower_upper[0] = (*dim)-1;
+  sidl_int__array_init(nbor_ilower, _proxy_nbor_ilower, 1, nbor_ilower_lower,
+    nbor_ilower_upper, nbor_ilower_stride);
+  nbor_iupper_upper[0] = (*dim)-1;
+  sidl_int__array_init(nbor_iupper, _proxy_nbor_iupper, 1, nbor_iupper_lower,
+    nbor_iupper_upper, nbor_iupper_stride);
+  index_map_upper[0] = (*dim)-1;
+  sidl_int__array_init(index_map, _proxy_index_map, 1, index_map_lower,
+    index_map_upper, index_map_stride);
   _epv = _proxy_self->d_epv;
   *retval = 
     (*(_epv->f_SetNeighborBox))(
@@ -616,19 +635,22 @@ SIDLFortran77Symbol(bhypre_sstructgrid_setperiodic_f,BHYPRE_SSTRUCTGRID_SETPERIO
 (
   int64_t *self,
   int32_t *part,
-  int64_t *periodic,
+  int32_t *periodic,
+  int32_t *dim,
   int32_t *retval
 )
 {
   struct bHYPRE_SStructGrid__epv *_epv = NULL;
   struct bHYPRE_SStructGrid__object* _proxy_self = NULL;
-  struct sidl_int__array* _proxy_periodic = NULL;
+  struct sidl_int__array _alt_periodic;
+  struct sidl_int__array* _proxy_periodic = &_alt_periodic;
+  int32_t periodic_lower[1], periodic_upper[1], periodic_stride[1];
   _proxy_self =
     (struct bHYPRE_SStructGrid__object*)
     (ptrdiff_t)(*self);
-  _proxy_periodic =
-    (struct sidl_int__array*)
-    (ptrdiff_t)(*periodic);
+  periodic_upper[0] = (*dim)-1;
+  sidl_int__array_init(periodic, _proxy_periodic, 1, periodic_lower,
+    periodic_upper, periodic_stride);
   _epv = _proxy_self->d_epv;
   *retval = 
     (*(_epv->f_SetPeriodic))(
@@ -647,19 +669,22 @@ void
 SIDLFortran77Symbol(bhypre_sstructgrid_setnumghost_f,BHYPRE_SSTRUCTGRID_SETNUMGHOST_F,bHYPRE_SStructGrid_SetNumGhost_f)
 (
   int64_t *self,
-  int64_t *num_ghost,
+  int32_t *num_ghost,
+  int32_t *dim2,
   int32_t *retval
 )
 {
   struct bHYPRE_SStructGrid__epv *_epv = NULL;
   struct bHYPRE_SStructGrid__object* _proxy_self = NULL;
-  struct sidl_int__array* _proxy_num_ghost = NULL;
+  struct sidl_int__array _alt_num_ghost;
+  struct sidl_int__array* _proxy_num_ghost = &_alt_num_ghost;
+  int32_t num_ghost_lower[1], num_ghost_upper[1], num_ghost_stride[1];
   _proxy_self =
     (struct bHYPRE_SStructGrid__object*)
     (ptrdiff_t)(*self);
-  _proxy_num_ghost =
-    (struct sidl_int__array*)
-    (ptrdiff_t)(*num_ghost);
+  num_ghost_upper[0] = (*dim2)-1;
+  sidl_int__array_init(num_ghost, _proxy_num_ghost, 1, num_ghost_lower,
+    num_ghost_upper, num_ghost_stride);
   _epv = _proxy_self->d_epv;
   *retval = 
     (*(_epv->f_SetNumGhost))(

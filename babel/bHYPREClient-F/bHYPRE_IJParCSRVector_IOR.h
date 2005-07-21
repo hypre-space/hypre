@@ -125,12 +125,10 @@ struct bHYPRE_IJParCSRVector__epv {
     /* in */ int32_t jupper);
   int32_t (*f_SetValues)(
     /* in */ struct bHYPRE_IJParCSRVector__object* self,
-    /* in */ int32_t nvalues,
     /* in */ struct sidl_int__array* indices,
     /* in */ struct sidl_double__array* values);
   int32_t (*f_AddToValues)(
     /* in */ struct bHYPRE_IJParCSRVector__object* self,
-    /* in */ int32_t nvalues,
     /* in */ struct sidl_int__array* indices,
     /* in */ struct sidl_double__array* values);
   int32_t (*f_GetLocalRange)(
@@ -139,7 +137,6 @@ struct bHYPRE_IJParCSRVector__epv {
     /* out */ int32_t* jupper);
   int32_t (*f_GetValues)(
     /* in */ struct bHYPRE_IJParCSRVector__object* self,
-    /* in */ int32_t nvalues,
     /* in */ struct sidl_int__array* indices,
     /* inout */ struct sidl_double__array** values);
   int32_t (*f_Print)(

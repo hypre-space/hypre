@@ -267,26 +267,25 @@ C       of doubles representing the real and imaginary parts of each
 C       complex value.
 C       
 C       
+C       
 
         subroutine bHYPRE_SStructBuildMatrix_SetValues_f(self, part,
-     &     index, var, nentries, entries, values, retval)
+     &     index, var, entries, values, retval)
         implicit none
 C       in bHYPRE.SStructBuildMatrix self
         integer*8 self
 C       in int part
         integer*4 part
-C       in array<int,column-major> index
-        integer*8 index
 C       in int var
         integer*4 var
-C       in int nentries
-        integer*4 nentries
-C       in array<int,column-major> entries
-        integer*8 entries
-C       in array<double,column-major> values
-        integer*8 values
 C       out int retval
         integer*4 retval
+C       in rarray<int> index(dim)
+        integer*4 index(0:dim-1)
+C       in rarray<int> entries(nentries)
+        integer*4 entries(0:nentries-1)
+C       in rarray<double> values(nentries)
+        double precision values(0:nentries-1)
         end
 
 
@@ -310,26 +309,24 @@ C
 C       
 
         subroutine bHYPRE_SStructBuildMatrix_SetBoxValues_f(self, part,
-     &     ilower, iupper, var, nentries, entries, values, retval)
+     &     ilower, iupper, var, entries, values, retval)
         implicit none
 C       in bHYPRE.SStructBuildMatrix self
         integer*8 self
 C       in int part
         integer*4 part
-C       in array<int,column-major> ilower
-        integer*8 ilower
-C       in array<int,column-major> iupper
-        integer*8 iupper
 C       in int var
         integer*4 var
-C       in int nentries
-        integer*4 nentries
-C       in array<int,column-major> entries
-        integer*8 entries
-C       in array<double,column-major> values
-        integer*8 values
 C       out int retval
         integer*4 retval
+C       in rarray<int> ilower(dim)
+        integer*4 ilower(0:dim-1)
+C       in rarray<int> iupper(dim)
+        integer*4 iupper(0:dim-1)
+C       in rarray<int> entries(nentries)
+        integer*4 entries(0:nentries-1)
+C       in rarray<double> values(nvalues)
+        double precision values(0:nvalues-1)
         end
 
 
@@ -352,24 +349,22 @@ C
 C       
 
         subroutine bHYPRE_SStructBuildMatrix_AddToValues_f(self, part,
-     &     index, var, nentries, entries, values, retval)
+     &     index, var, entries, values, retval)
         implicit none
 C       in bHYPRE.SStructBuildMatrix self
         integer*8 self
 C       in int part
         integer*4 part
-C       in array<int,column-major> index
-        integer*8 index
 C       in int var
         integer*4 var
-C       in int nentries
-        integer*4 nentries
-C       in array<int,column-major> entries
-        integer*8 entries
-C       in array<double,column-major> values
-        integer*8 values
 C       out int retval
         integer*4 retval
+C       in rarray<int> index(dim)
+        integer*4 index(0:dim-1)
+C       in rarray<int> entries(nentries)
+        integer*4 entries(0:nentries-1)
+C       in rarray<double> values(nentries)
+        double precision values(0:nentries-1)
         end
 
 
@@ -391,26 +386,24 @@ C
 C       
 
         subroutine bHYPRE_SStructBuildMatrix_AddToBoxValues_f(self,
-     &     part, ilower, iupper, var, nentries, entries, values, retval)
+     &     part, ilower, iupper, var, entries, values, retval)
         implicit none
 C       in bHYPRE.SStructBuildMatrix self
         integer*8 self
 C       in int part
         integer*4 part
-C       in array<int,column-major> ilower
-        integer*8 ilower
-C       in array<int,column-major> iupper
-        integer*8 iupper
 C       in int var
         integer*4 var
-C       in int nentries
-        integer*4 nentries
-C       in array<int,column-major> entries
-        integer*8 entries
-C       in array<double,column-major> values
-        integer*8 values
 C       out int retval
         integer*4 retval
+C       in rarray<int> ilower(dim)
+        integer*4 ilower(0:dim-1)
+C       in rarray<int> iupper(dim)
+        integer*4 iupper(0:dim-1)
+C       in rarray<int> entries(nentries)
+        integer*4 entries(0:nentries-1)
+C       in rarray<double> values(nvalues)
+        double precision values(0:nvalues-1)
         end
 
 

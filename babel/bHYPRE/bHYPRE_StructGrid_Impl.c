@@ -200,8 +200,8 @@ impl_bHYPRE_StructGrid_SetExtents(
    Hgrid = data -> grid;
 
    /* for sidl arrays:
-      ierr += HYPRE_StructGridSetExtents( Hgrid, sidlArrayAddr1( ilower, 0 ),
-      sidlArrayAddr1( iupper, 0 ) );
+      ierr += HYPRE_StructGridSetExtents( Hgrid, ilower,
+      iupper );
    */
    ierr += HYPRE_StructGridSetExtents( Hgrid, ilower, iupper );
 
@@ -223,7 +223,8 @@ extern "C"
 int32_t
 impl_bHYPRE_StructGrid_SetPeriodic(
   /* in */ bHYPRE_StructGrid self,
-  /* in */ struct sidl_int__array* periodic)
+  /* in */ int32_t* periodic,
+  /* in */ int32_t dim)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.StructGrid.SetPeriodic) */
   /* Insert the implementation of the SetPeriodic method here... */
@@ -234,7 +235,7 @@ impl_bHYPRE_StructGrid_SetPeriodic(
    data = bHYPRE_StructGrid__get_data( self );
    Hgrid = data -> grid;
 
-   ierr += HYPRE_StructGridSetPeriodic( Hgrid, sidlArrayAddr1( periodic, 0 ) );
+   ierr += HYPRE_StructGridSetPeriodic( Hgrid, periodic );
 
    return ierr;
 
@@ -255,7 +256,7 @@ int32_t
 impl_bHYPRE_StructGrid_SetNumGhost(
   /* in */ bHYPRE_StructGrid self,
   /* in */ int32_t* num_ghost,
-  /* in */ int32_t len)
+  /* in */ int32_t dim2)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.StructGrid.SetNumGhost) */
   /* Insert the implementation of the SetNumGhost method here... */
@@ -266,7 +267,7 @@ impl_bHYPRE_StructGrid_SetNumGhost(
    data = bHYPRE_StructGrid__get_data( self );
    Hgrid = data -> grid;
 
-   /* for sidl arrays: ierr += HYPRE_StructGridSetNumGhost( Hgrid, sidlArrayAddr1( num_ghost, 0 ) ); */
+   /* for sidl arrays: ierr += HYPRE_StructGridSetNumGhost( Hgrid, num_ghost ); */
    ierr += HYPRE_StructGridSetNumGhost( Hgrid, num_ghost );
 
    return ierr;

@@ -225,18 +225,18 @@ C       in bHYPRE.SStructGraph self
         integer*8 self
 C       in int part
         integer*4 part
-C       in array<int,column-major> index
-        integer*8 index
 C       in int var
         integer*4 var
 C       in int to_part
         integer*4 to_part
-C       in array<int,column-major> to_index
-        integer*8 to_index
 C       in int to_var
         integer*4 to_var
 C       out int retval
         integer*4 retval
+C       in rarray<int> index(dim)
+        integer*4 index(0:dim-1)
+C       in rarray<int> to_index(dim)
+        integer*4 to_index(0:dim-1)
         end
 
 

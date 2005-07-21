@@ -167,7 +167,8 @@ int32_t
 impl_bHYPRE_StructPFMG_SetIntArray1Parameter(
   /* in */ bHYPRE_StructPFMG self,
   /* in */ const char* name,
-  /* in */ struct sidl_int__array* value);
+  /* in */ int32_t* value,
+  /* in */ int32_t nvalues);
 
 extern
 int32_t
@@ -181,7 +182,8 @@ int32_t
 impl_bHYPRE_StructPFMG_SetDoubleArray1Parameter(
   /* in */ bHYPRE_StructPFMG self,
   /* in */ const char* name,
-  /* in */ struct sidl_double__array* value);
+  /* in */ double* value,
+  /* in */ int32_t nvalues);
 
 extern
 int32_t

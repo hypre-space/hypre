@@ -133,10 +133,11 @@ int32_t
 bHYPRE_SStructGraph_AddEntries(
   /* in */ bHYPRE_SStructGraph self,
   /* in */ int32_t part,
-  /* in */ struct sidl_int__array* index,
+  /* in */ int32_t* index,
+  /* in */ int32_t dim,
   /* in */ int32_t var,
   /* in */ int32_t to_part,
-  /* in */ struct sidl_int__array* to_index,
+  /* in */ int32_t* to_index,
   /* in */ int32_t to_var);
 
 /**

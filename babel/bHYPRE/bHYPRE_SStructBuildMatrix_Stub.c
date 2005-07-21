@@ -260,26 +260,45 @@ bHYPRE_SStructBuildMatrix_SetGraph(
  * of doubles representing the real and imaginary parts of each
  * complex value.
  * 
+ * 
  */
 
 int32_t
 bHYPRE_SStructBuildMatrix_SetValues(
   /* in */ bHYPRE_SStructBuildMatrix self,
   /* in */ int32_t part,
-  /* in */ struct sidl_int__array* index,
+  /* in */ int32_t* index,
+  /* in */ int32_t dim,
   /* in */ int32_t var,
   /* in */ int32_t nentries,
-  /* in */ struct sidl_int__array* entries,
-  /* in */ struct sidl_double__array* values)
+  /* in */ int32_t* entries,
+  /* in */ double* values)
 {
+  int32_t index_lower[1], index_upper[1], index_stride[1]; 
+  struct sidl_int__array index_real;
+  struct sidl_int__array*index_tmp = &index_real;
+  int32_t entries_lower[1], entries_upper[1], entries_stride[1]; 
+  struct sidl_int__array entries_real;
+  struct sidl_int__array*entries_tmp = &entries_real;
+  int32_t values_lower[1], values_upper[1], values_stride[1]; 
+  struct sidl_double__array values_real;
+  struct sidl_double__array*values_tmp = &values_real;
+  index_upper[0] = dim-1;
+  sidl_int__array_init(index, index_tmp, 1, index_lower, index_upper,
+    index_stride);
+  entries_upper[0] = nentries-1;
+  sidl_int__array_init(entries, entries_tmp, 1, entries_lower, entries_upper,
+    entries_stride);
+  values_upper[0] = nentries-1;
+  sidl_double__array_init(values, values_tmp, 1, values_lower, values_upper,
+    values_stride);
   return (*self->d_epv->f_SetValues)(
     self->d_object,
     part,
-    index,
+    index_tmp,
     var,
-    nentries,
-    entries,
-    values);
+    entries_tmp,
+    values_tmp);
 }
 
 /*
@@ -305,22 +324,47 @@ int32_t
 bHYPRE_SStructBuildMatrix_SetBoxValues(
   /* in */ bHYPRE_SStructBuildMatrix self,
   /* in */ int32_t part,
-  /* in */ struct sidl_int__array* ilower,
-  /* in */ struct sidl_int__array* iupper,
+  /* in */ int32_t* ilower,
+  /* in */ int32_t* iupper,
+  /* in */ int32_t dim,
   /* in */ int32_t var,
   /* in */ int32_t nentries,
-  /* in */ struct sidl_int__array* entries,
-  /* in */ struct sidl_double__array* values)
+  /* in */ int32_t* entries,
+  /* in */ double* values,
+  /* in */ int32_t nvalues)
 {
+  int32_t ilower_lower[1], ilower_upper[1], ilower_stride[1]; 
+  struct sidl_int__array ilower_real;
+  struct sidl_int__array*ilower_tmp = &ilower_real;
+  int32_t iupper_lower[1], iupper_upper[1], iupper_stride[1]; 
+  struct sidl_int__array iupper_real;
+  struct sidl_int__array*iupper_tmp = &iupper_real;
+  int32_t entries_lower[1], entries_upper[1], entries_stride[1]; 
+  struct sidl_int__array entries_real;
+  struct sidl_int__array*entries_tmp = &entries_real;
+  int32_t values_lower[1], values_upper[1], values_stride[1]; 
+  struct sidl_double__array values_real;
+  struct sidl_double__array*values_tmp = &values_real;
+  ilower_upper[0] = dim-1;
+  sidl_int__array_init(ilower, ilower_tmp, 1, ilower_lower, ilower_upper,
+    ilower_stride);
+  iupper_upper[0] = dim-1;
+  sidl_int__array_init(iupper, iupper_tmp, 1, iupper_lower, iupper_upper,
+    iupper_stride);
+  entries_upper[0] = nentries-1;
+  sidl_int__array_init(entries, entries_tmp, 1, entries_lower, entries_upper,
+    entries_stride);
+  values_upper[0] = nvalues-1;
+  sidl_double__array_init(values, values_tmp, 1, values_lower, values_upper,
+    values_stride);
   return (*self->d_epv->f_SetBoxValues)(
     self->d_object,
     part,
-    ilower,
-    iupper,
+    ilower_tmp,
+    iupper_tmp,
     var,
-    nentries,
-    entries,
-    values);
+    entries_tmp,
+    values_tmp);
 }
 
 /*
@@ -345,20 +389,38 @@ int32_t
 bHYPRE_SStructBuildMatrix_AddToValues(
   /* in */ bHYPRE_SStructBuildMatrix self,
   /* in */ int32_t part,
-  /* in */ struct sidl_int__array* index,
+  /* in */ int32_t* index,
+  /* in */ int32_t dim,
   /* in */ int32_t var,
   /* in */ int32_t nentries,
-  /* in */ struct sidl_int__array* entries,
-  /* in */ struct sidl_double__array* values)
+  /* in */ int32_t* entries,
+  /* in */ double* values)
 {
+  int32_t index_lower[1], index_upper[1], index_stride[1]; 
+  struct sidl_int__array index_real;
+  struct sidl_int__array*index_tmp = &index_real;
+  int32_t entries_lower[1], entries_upper[1], entries_stride[1]; 
+  struct sidl_int__array entries_real;
+  struct sidl_int__array*entries_tmp = &entries_real;
+  int32_t values_lower[1], values_upper[1], values_stride[1]; 
+  struct sidl_double__array values_real;
+  struct sidl_double__array*values_tmp = &values_real;
+  index_upper[0] = dim-1;
+  sidl_int__array_init(index, index_tmp, 1, index_lower, index_upper,
+    index_stride);
+  entries_upper[0] = nentries-1;
+  sidl_int__array_init(entries, entries_tmp, 1, entries_lower, entries_upper,
+    entries_stride);
+  values_upper[0] = nentries-1;
+  sidl_double__array_init(values, values_tmp, 1, values_lower, values_upper,
+    values_stride);
   return (*self->d_epv->f_AddToValues)(
     self->d_object,
     part,
-    index,
+    index_tmp,
     var,
-    nentries,
-    entries,
-    values);
+    entries_tmp,
+    values_tmp);
 }
 
 /*
@@ -382,22 +444,47 @@ int32_t
 bHYPRE_SStructBuildMatrix_AddToBoxValues(
   /* in */ bHYPRE_SStructBuildMatrix self,
   /* in */ int32_t part,
-  /* in */ struct sidl_int__array* ilower,
-  /* in */ struct sidl_int__array* iupper,
+  /* in */ int32_t* ilower,
+  /* in */ int32_t* iupper,
+  /* in */ int32_t dim,
   /* in */ int32_t var,
   /* in */ int32_t nentries,
-  /* in */ struct sidl_int__array* entries,
-  /* in */ struct sidl_double__array* values)
+  /* in */ int32_t* entries,
+  /* in */ double* values,
+  /* in */ int32_t nvalues)
 {
+  int32_t ilower_lower[1], ilower_upper[1], ilower_stride[1]; 
+  struct sidl_int__array ilower_real;
+  struct sidl_int__array*ilower_tmp = &ilower_real;
+  int32_t iupper_lower[1], iupper_upper[1], iupper_stride[1]; 
+  struct sidl_int__array iupper_real;
+  struct sidl_int__array*iupper_tmp = &iupper_real;
+  int32_t entries_lower[1], entries_upper[1], entries_stride[1]; 
+  struct sidl_int__array entries_real;
+  struct sidl_int__array*entries_tmp = &entries_real;
+  int32_t values_lower[1], values_upper[1], values_stride[1]; 
+  struct sidl_double__array values_real;
+  struct sidl_double__array*values_tmp = &values_real;
+  ilower_upper[0] = dim-1;
+  sidl_int__array_init(ilower, ilower_tmp, 1, ilower_lower, ilower_upper,
+    ilower_stride);
+  iupper_upper[0] = dim-1;
+  sidl_int__array_init(iupper, iupper_tmp, 1, iupper_lower, iupper_upper,
+    iupper_stride);
+  entries_upper[0] = nentries-1;
+  sidl_int__array_init(entries, entries_tmp, 1, entries_lower, entries_upper,
+    entries_stride);
+  values_upper[0] = nvalues-1;
+  sidl_double__array_init(values, values_tmp, 1, values_lower, values_upper,
+    values_stride);
   return (*self->d_epv->f_AddToBoxValues)(
     self->d_object,
     part,
-    ilower,
-    iupper,
+    ilower_tmp,
+    iupper_tmp,
     var,
-    nentries,
-    entries,
-    values);
+    entries_tmp,
+    values_tmp);
 }
 
 /*
@@ -1299,7 +1386,6 @@ remote_bHYPRE__SStructBuildMatrix_SetValues(
   /* in */ int32_t part,
   /* in */ struct sidl_int__array* index,
   /* in */ int32_t var,
-  /* in */ int32_t nentries,
   /* in */ struct sidl_int__array* entries,
   /* in */ struct sidl_double__array* values)
 {
@@ -1315,7 +1401,6 @@ remote_bHYPRE__SStructBuildMatrix_SetValues(
   /* pack in and inout arguments */
   sidl_rmi_Invocation_packInt( _inv, "part", part, _ex2);
   sidl_rmi_Invocation_packInt( _inv, "var", var, _ex2);
-  sidl_rmi_Invocation_packInt( _inv, "nentries", nentries, _ex2);
 
   /* send actual RMI request */
   _rsvp = sidl_rmi_Invocation_invokeMethod(_inv,_ex2);
@@ -1340,7 +1425,6 @@ remote_bHYPRE__SStructBuildMatrix_SetBoxValues(
   /* in */ struct sidl_int__array* ilower,
   /* in */ struct sidl_int__array* iupper,
   /* in */ int32_t var,
-  /* in */ int32_t nentries,
   /* in */ struct sidl_int__array* entries,
   /* in */ struct sidl_double__array* values)
 {
@@ -1356,7 +1440,6 @@ remote_bHYPRE__SStructBuildMatrix_SetBoxValues(
   /* pack in and inout arguments */
   sidl_rmi_Invocation_packInt( _inv, "part", part, _ex2);
   sidl_rmi_Invocation_packInt( _inv, "var", var, _ex2);
-  sidl_rmi_Invocation_packInt( _inv, "nentries", nentries, _ex2);
 
   /* send actual RMI request */
   _rsvp = sidl_rmi_Invocation_invokeMethod(_inv,_ex2);
@@ -1380,7 +1463,6 @@ remote_bHYPRE__SStructBuildMatrix_AddToValues(
   /* in */ int32_t part,
   /* in */ struct sidl_int__array* index,
   /* in */ int32_t var,
-  /* in */ int32_t nentries,
   /* in */ struct sidl_int__array* entries,
   /* in */ struct sidl_double__array* values)
 {
@@ -1396,7 +1478,6 @@ remote_bHYPRE__SStructBuildMatrix_AddToValues(
   /* pack in and inout arguments */
   sidl_rmi_Invocation_packInt( _inv, "part", part, _ex2);
   sidl_rmi_Invocation_packInt( _inv, "var", var, _ex2);
-  sidl_rmi_Invocation_packInt( _inv, "nentries", nentries, _ex2);
 
   /* send actual RMI request */
   _rsvp = sidl_rmi_Invocation_invokeMethod(_inv,_ex2);
@@ -1421,7 +1502,6 @@ remote_bHYPRE__SStructBuildMatrix_AddToBoxValues(
   /* in */ struct sidl_int__array* ilower,
   /* in */ struct sidl_int__array* iupper,
   /* in */ int32_t var,
-  /* in */ int32_t nentries,
   /* in */ struct sidl_int__array* entries,
   /* in */ struct sidl_double__array* values)
 {
@@ -1437,7 +1517,6 @@ remote_bHYPRE__SStructBuildMatrix_AddToBoxValues(
   /* pack in and inout arguments */
   sidl_rmi_Invocation_packInt( _inv, "part", part, _ex2);
   sidl_rmi_Invocation_packInt( _inv, "var", var, _ex2);
-  sidl_rmi_Invocation_packInt( _inv, "nentries", nentries, _ex2);
 
   /* send actual RMI request */
   _rsvp = sidl_rmi_Invocation_invokeMethod(_inv,_ex2);
@@ -1675,16 +1754,16 @@ static void bHYPRE__SStructBuildMatrix__init_remote_epv(void)
   e1->f_SetGraph        = (int32_t (*)(void*,
     struct bHYPRE_SStructGraph__object*)) epv->f_SetGraph;
   e1->f_SetValues       = (int32_t (*)(void*,int32_t,struct sidl_int__array*,
-    int32_t,int32_t,struct sidl_int__array*,
+    int32_t,struct sidl_int__array*,
     struct sidl_double__array*)) epv->f_SetValues;
   e1->f_SetBoxValues    = (int32_t (*)(void*,int32_t,struct sidl_int__array*,
-    struct sidl_int__array*,int32_t,int32_t,struct sidl_int__array*,
+    struct sidl_int__array*,int32_t,struct sidl_int__array*,
     struct sidl_double__array*)) epv->f_SetBoxValues;
   e1->f_AddToValues     = (int32_t (*)(void*,int32_t,struct sidl_int__array*,
-    int32_t,int32_t,struct sidl_int__array*,
+    int32_t,struct sidl_int__array*,
     struct sidl_double__array*)) epv->f_AddToValues;
   e1->f_AddToBoxValues  = (int32_t (*)(void*,int32_t,struct sidl_int__array*,
-    struct sidl_int__array*,int32_t,int32_t,struct sidl_int__array*,
+    struct sidl_int__array*,int32_t,struct sidl_int__array*,
     struct sidl_double__array*)) epv->f_AddToBoxValues;
   e1->f_SetSymmetric    = (int32_t (*)(void*,int32_t,int32_t,int32_t,
     int32_t)) epv->f_SetSymmetric;

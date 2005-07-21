@@ -223,6 +223,288 @@ bHYPRE_IJParCSRVector_getClassInfo__exec(
 }
 
 static void
+bHYPRE_IJParCSRVector_SetCommunicator__exec(
+        struct bHYPRE_IJParCSRVector__object* self,
+        struct sidl_io_Deserializer__object* inArgs,
+        struct sidl_io_Serializer__object* outArgs) {
+  /* stack space for arguments */
+  void* mpi_comm;
+  int32_t _retval;
+  sidl_BaseInterface _ex   = NULL;
+  sidl_BaseInterface *_ex2 = &_ex;
+  /* unpack in and inout argments */
+
+  /* make the call */
+  _retval = (self->d_epv->f_SetCommunicator)(
+    self,
+    mpi_comm);
+
+  /* pack return value */
+  sidl_io_Serializer_packInt( outArgs, "_retval", _retval, _ex2);
+
+  /* pack out and inout argments */
+
+}
+
+static void
+bHYPRE_IJParCSRVector_Initialize__exec(
+        struct bHYPRE_IJParCSRVector__object* self,
+        struct sidl_io_Deserializer__object* inArgs,
+        struct sidl_io_Serializer__object* outArgs) {
+  /* stack space for arguments */
+  int32_t _retval;
+  sidl_BaseInterface _ex   = NULL;
+  sidl_BaseInterface *_ex2 = &_ex;
+  /* unpack in and inout argments */
+
+  /* make the call */
+  _retval = (self->d_epv->f_Initialize)(
+    self);
+
+  /* pack return value */
+  sidl_io_Serializer_packInt( outArgs, "_retval", _retval, _ex2);
+
+  /* pack out and inout argments */
+
+}
+
+static void
+bHYPRE_IJParCSRVector_Assemble__exec(
+        struct bHYPRE_IJParCSRVector__object* self,
+        struct sidl_io_Deserializer__object* inArgs,
+        struct sidl_io_Serializer__object* outArgs) {
+  /* stack space for arguments */
+  int32_t _retval;
+  sidl_BaseInterface _ex   = NULL;
+  sidl_BaseInterface *_ex2 = &_ex;
+  /* unpack in and inout argments */
+
+  /* make the call */
+  _retval = (self->d_epv->f_Assemble)(
+    self);
+
+  /* pack return value */
+  sidl_io_Serializer_packInt( outArgs, "_retval", _retval, _ex2);
+
+  /* pack out and inout argments */
+
+}
+
+static void
+bHYPRE_IJParCSRVector_GetObject__exec(
+        struct bHYPRE_IJParCSRVector__object* self,
+        struct sidl_io_Deserializer__object* inArgs,
+        struct sidl_io_Serializer__object* outArgs) {
+  /* stack space for arguments */
+  struct sidl_BaseInterface__object* A_tmp;
+  struct sidl_BaseInterface__object** A= &A_tmp;
+  int32_t _retval;
+  sidl_BaseInterface _ex   = NULL;
+  sidl_BaseInterface *_ex2 = &_ex;
+  /* unpack in and inout argments */
+
+  /* make the call */
+  _retval = (self->d_epv->f_GetObject)(
+    self,
+    A);
+
+  /* pack return value */
+  sidl_io_Serializer_packInt( outArgs, "_retval", _retval, _ex2);
+
+  /* pack out and inout argments */
+
+}
+
+static void
+bHYPRE_IJParCSRVector_SetLocalRange__exec(
+        struct bHYPRE_IJParCSRVector__object* self,
+        struct sidl_io_Deserializer__object* inArgs,
+        struct sidl_io_Serializer__object* outArgs) {
+  /* stack space for arguments */
+  int32_t jlower;
+  int32_t jupper;
+  int32_t _retval;
+  sidl_BaseInterface _ex   = NULL;
+  sidl_BaseInterface *_ex2 = &_ex;
+  /* unpack in and inout argments */
+  sidl_io_Deserializer_unpackInt( inArgs, "jlower", &jlower, _ex2);
+  sidl_io_Deserializer_unpackInt( inArgs, "jupper", &jupper, _ex2);
+
+  /* make the call */
+  _retval = (self->d_epv->f_SetLocalRange)(
+    self,
+    jlower,
+    jupper);
+
+  /* pack return value */
+  sidl_io_Serializer_packInt( outArgs, "_retval", _retval, _ex2);
+
+  /* pack out and inout argments */
+
+}
+
+static void
+bHYPRE_IJParCSRVector_SetValues__exec(
+        struct bHYPRE_IJParCSRVector__object* self,
+        struct sidl_io_Deserializer__object* inArgs,
+        struct sidl_io_Serializer__object* outArgs) {
+  /* stack space for arguments */
+  struct sidl_int__array* indices;
+  struct sidl_double__array* values;
+  int32_t _retval;
+  sidl_BaseInterface _ex   = NULL;
+  sidl_BaseInterface *_ex2 = &_ex;
+  /* unpack in and inout argments */
+
+  /* make the call */
+  _retval = (self->d_epv->f_SetValues)(
+    self,
+    indices,
+    values);
+
+  /* pack return value */
+  sidl_io_Serializer_packInt( outArgs, "_retval", _retval, _ex2);
+
+  /* pack out and inout argments */
+
+}
+
+static void
+bHYPRE_IJParCSRVector_AddToValues__exec(
+        struct bHYPRE_IJParCSRVector__object* self,
+        struct sidl_io_Deserializer__object* inArgs,
+        struct sidl_io_Serializer__object* outArgs) {
+  /* stack space for arguments */
+  struct sidl_int__array* indices;
+  struct sidl_double__array* values;
+  int32_t _retval;
+  sidl_BaseInterface _ex   = NULL;
+  sidl_BaseInterface *_ex2 = &_ex;
+  /* unpack in and inout argments */
+
+  /* make the call */
+  _retval = (self->d_epv->f_AddToValues)(
+    self,
+    indices,
+    values);
+
+  /* pack return value */
+  sidl_io_Serializer_packInt( outArgs, "_retval", _retval, _ex2);
+
+  /* pack out and inout argments */
+
+}
+
+static void
+bHYPRE_IJParCSRVector_GetLocalRange__exec(
+        struct bHYPRE_IJParCSRVector__object* self,
+        struct sidl_io_Deserializer__object* inArgs,
+        struct sidl_io_Serializer__object* outArgs) {
+  /* stack space for arguments */
+  int32_t jlower_tmp;
+  int32_t* jlower= &jlower_tmp;
+  int32_t jupper_tmp;
+  int32_t* jupper= &jupper_tmp;
+  int32_t _retval;
+  sidl_BaseInterface _ex   = NULL;
+  sidl_BaseInterface *_ex2 = &_ex;
+  /* unpack in and inout argments */
+
+  /* make the call */
+  _retval = (self->d_epv->f_GetLocalRange)(
+    self,
+    jlower,
+    jupper);
+
+  /* pack return value */
+  sidl_io_Serializer_packInt( outArgs, "_retval", _retval, _ex2);
+
+  /* pack out and inout argments */
+  sidl_io_Serializer_packInt( outArgs, "jlower", *jlower, _ex2);
+  sidl_io_Serializer_packInt( outArgs, "jupper", *jupper, _ex2);
+
+}
+
+static void
+bHYPRE_IJParCSRVector_GetValues__exec(
+        struct bHYPRE_IJParCSRVector__object* self,
+        struct sidl_io_Deserializer__object* inArgs,
+        struct sidl_io_Serializer__object* outArgs) {
+  /* stack space for arguments */
+  struct sidl_int__array* indices;
+  struct sidl_double__array* values_tmp;
+  struct sidl_double__array** values= &values_tmp;
+  int32_t _retval;
+  sidl_BaseInterface _ex   = NULL;
+  sidl_BaseInterface *_ex2 = &_ex;
+  /* unpack in and inout argments */
+
+  /* make the call */
+  _retval = (self->d_epv->f_GetValues)(
+    self,
+    indices,
+    values);
+
+  /* pack return value */
+  sidl_io_Serializer_packInt( outArgs, "_retval", _retval, _ex2);
+
+  /* pack out and inout argments */
+
+}
+
+static void
+bHYPRE_IJParCSRVector_Print__exec(
+        struct bHYPRE_IJParCSRVector__object* self,
+        struct sidl_io_Deserializer__object* inArgs,
+        struct sidl_io_Serializer__object* outArgs) {
+  /* stack space for arguments */
+  char* filename= NULL;
+  int32_t _retval;
+  sidl_BaseInterface _ex   = NULL;
+  sidl_BaseInterface *_ex2 = &_ex;
+  /* unpack in and inout argments */
+  sidl_io_Deserializer_unpackString( inArgs, "filename", &filename, _ex2);
+
+  /* make the call */
+  _retval = (self->d_epv->f_Print)(
+    self,
+    filename);
+
+  /* pack return value */
+  sidl_io_Serializer_packInt( outArgs, "_retval", _retval, _ex2);
+
+  /* pack out and inout argments */
+
+}
+
+static void
+bHYPRE_IJParCSRVector_Read__exec(
+        struct bHYPRE_IJParCSRVector__object* self,
+        struct sidl_io_Deserializer__object* inArgs,
+        struct sidl_io_Serializer__object* outArgs) {
+  /* stack space for arguments */
+  char* filename= NULL;
+  void* comm;
+  int32_t _retval;
+  sidl_BaseInterface _ex   = NULL;
+  sidl_BaseInterface *_ex2 = &_ex;
+  /* unpack in and inout argments */
+  sidl_io_Deserializer_unpackString( inArgs, "filename", &filename, _ex2);
+
+  /* make the call */
+  _retval = (self->d_epv->f_Read)(
+    self,
+    filename,
+    comm);
+
+  /* pack return value */
+  sidl_io_Serializer_packInt( outArgs, "_retval", _retval, _ex2);
+
+  /* pack out and inout argments */
+
+}
+
+static void
 bHYPRE_IJParCSRVector_Clear__exec(
         struct bHYPRE_IJParCSRVector__object* self,
         struct sidl_io_Deserializer__object* inArgs,
@@ -365,297 +647,6 @@ bHYPRE_IJParCSRVector_Axpy__exec(
     self,
     a,
     x);
-
-  /* pack return value */
-  sidl_io_Serializer_packInt( outArgs, "_retval", _retval, _ex2);
-
-  /* pack out and inout argments */
-
-}
-
-static void
-bHYPRE_IJParCSRVector_SetCommunicator__exec(
-        struct bHYPRE_IJParCSRVector__object* self,
-        struct sidl_io_Deserializer__object* inArgs,
-        struct sidl_io_Serializer__object* outArgs) {
-  /* stack space for arguments */
-  void* mpi_comm;
-  int32_t _retval;
-  sidl_BaseInterface _ex   = NULL;
-  sidl_BaseInterface *_ex2 = &_ex;
-  /* unpack in and inout argments */
-
-  /* make the call */
-  _retval = (self->d_epv->f_SetCommunicator)(
-    self,
-    mpi_comm);
-
-  /* pack return value */
-  sidl_io_Serializer_packInt( outArgs, "_retval", _retval, _ex2);
-
-  /* pack out and inout argments */
-
-}
-
-static void
-bHYPRE_IJParCSRVector_Initialize__exec(
-        struct bHYPRE_IJParCSRVector__object* self,
-        struct sidl_io_Deserializer__object* inArgs,
-        struct sidl_io_Serializer__object* outArgs) {
-  /* stack space for arguments */
-  int32_t _retval;
-  sidl_BaseInterface _ex   = NULL;
-  sidl_BaseInterface *_ex2 = &_ex;
-  /* unpack in and inout argments */
-
-  /* make the call */
-  _retval = (self->d_epv->f_Initialize)(
-    self);
-
-  /* pack return value */
-  sidl_io_Serializer_packInt( outArgs, "_retval", _retval, _ex2);
-
-  /* pack out and inout argments */
-
-}
-
-static void
-bHYPRE_IJParCSRVector_Assemble__exec(
-        struct bHYPRE_IJParCSRVector__object* self,
-        struct sidl_io_Deserializer__object* inArgs,
-        struct sidl_io_Serializer__object* outArgs) {
-  /* stack space for arguments */
-  int32_t _retval;
-  sidl_BaseInterface _ex   = NULL;
-  sidl_BaseInterface *_ex2 = &_ex;
-  /* unpack in and inout argments */
-
-  /* make the call */
-  _retval = (self->d_epv->f_Assemble)(
-    self);
-
-  /* pack return value */
-  sidl_io_Serializer_packInt( outArgs, "_retval", _retval, _ex2);
-
-  /* pack out and inout argments */
-
-}
-
-static void
-bHYPRE_IJParCSRVector_GetObject__exec(
-        struct bHYPRE_IJParCSRVector__object* self,
-        struct sidl_io_Deserializer__object* inArgs,
-        struct sidl_io_Serializer__object* outArgs) {
-  /* stack space for arguments */
-  struct sidl_BaseInterface__object* A_tmp;
-  struct sidl_BaseInterface__object** A= &A_tmp;
-  int32_t _retval;
-  sidl_BaseInterface _ex   = NULL;
-  sidl_BaseInterface *_ex2 = &_ex;
-  /* unpack in and inout argments */
-
-  /* make the call */
-  _retval = (self->d_epv->f_GetObject)(
-    self,
-    A);
-
-  /* pack return value */
-  sidl_io_Serializer_packInt( outArgs, "_retval", _retval, _ex2);
-
-  /* pack out and inout argments */
-
-}
-
-static void
-bHYPRE_IJParCSRVector_SetLocalRange__exec(
-        struct bHYPRE_IJParCSRVector__object* self,
-        struct sidl_io_Deserializer__object* inArgs,
-        struct sidl_io_Serializer__object* outArgs) {
-  /* stack space for arguments */
-  int32_t jlower;
-  int32_t jupper;
-  int32_t _retval;
-  sidl_BaseInterface _ex   = NULL;
-  sidl_BaseInterface *_ex2 = &_ex;
-  /* unpack in and inout argments */
-  sidl_io_Deserializer_unpackInt( inArgs, "jlower", &jlower, _ex2);
-  sidl_io_Deserializer_unpackInt( inArgs, "jupper", &jupper, _ex2);
-
-  /* make the call */
-  _retval = (self->d_epv->f_SetLocalRange)(
-    self,
-    jlower,
-    jupper);
-
-  /* pack return value */
-  sidl_io_Serializer_packInt( outArgs, "_retval", _retval, _ex2);
-
-  /* pack out and inout argments */
-
-}
-
-static void
-bHYPRE_IJParCSRVector_SetValues__exec(
-        struct bHYPRE_IJParCSRVector__object* self,
-        struct sidl_io_Deserializer__object* inArgs,
-        struct sidl_io_Serializer__object* outArgs) {
-  /* stack space for arguments */
-  int32_t nvalues;
-  struct sidl_int__array* indices;
-  struct sidl_double__array* values;
-  int32_t _retval;
-  sidl_BaseInterface _ex   = NULL;
-  sidl_BaseInterface *_ex2 = &_ex;
-  /* unpack in and inout argments */
-  sidl_io_Deserializer_unpackInt( inArgs, "nvalues", &nvalues, _ex2);
-
-  /* make the call */
-  _retval = (self->d_epv->f_SetValues)(
-    self,
-    nvalues,
-    indices,
-    values);
-
-  /* pack return value */
-  sidl_io_Serializer_packInt( outArgs, "_retval", _retval, _ex2);
-
-  /* pack out and inout argments */
-
-}
-
-static void
-bHYPRE_IJParCSRVector_AddToValues__exec(
-        struct bHYPRE_IJParCSRVector__object* self,
-        struct sidl_io_Deserializer__object* inArgs,
-        struct sidl_io_Serializer__object* outArgs) {
-  /* stack space for arguments */
-  int32_t nvalues;
-  struct sidl_int__array* indices;
-  struct sidl_double__array* values;
-  int32_t _retval;
-  sidl_BaseInterface _ex   = NULL;
-  sidl_BaseInterface *_ex2 = &_ex;
-  /* unpack in and inout argments */
-  sidl_io_Deserializer_unpackInt( inArgs, "nvalues", &nvalues, _ex2);
-
-  /* make the call */
-  _retval = (self->d_epv->f_AddToValues)(
-    self,
-    nvalues,
-    indices,
-    values);
-
-  /* pack return value */
-  sidl_io_Serializer_packInt( outArgs, "_retval", _retval, _ex2);
-
-  /* pack out and inout argments */
-
-}
-
-static void
-bHYPRE_IJParCSRVector_GetLocalRange__exec(
-        struct bHYPRE_IJParCSRVector__object* self,
-        struct sidl_io_Deserializer__object* inArgs,
-        struct sidl_io_Serializer__object* outArgs) {
-  /* stack space for arguments */
-  int32_t jlower_tmp;
-  int32_t* jlower= &jlower_tmp;
-  int32_t jupper_tmp;
-  int32_t* jupper= &jupper_tmp;
-  int32_t _retval;
-  sidl_BaseInterface _ex   = NULL;
-  sidl_BaseInterface *_ex2 = &_ex;
-  /* unpack in and inout argments */
-
-  /* make the call */
-  _retval = (self->d_epv->f_GetLocalRange)(
-    self,
-    jlower,
-    jupper);
-
-  /* pack return value */
-  sidl_io_Serializer_packInt( outArgs, "_retval", _retval, _ex2);
-
-  /* pack out and inout argments */
-  sidl_io_Serializer_packInt( outArgs, "jlower", *jlower, _ex2);
-  sidl_io_Serializer_packInt( outArgs, "jupper", *jupper, _ex2);
-
-}
-
-static void
-bHYPRE_IJParCSRVector_GetValues__exec(
-        struct bHYPRE_IJParCSRVector__object* self,
-        struct sidl_io_Deserializer__object* inArgs,
-        struct sidl_io_Serializer__object* outArgs) {
-  /* stack space for arguments */
-  int32_t nvalues;
-  struct sidl_int__array* indices;
-  struct sidl_double__array* values_tmp;
-  struct sidl_double__array** values= &values_tmp;
-  int32_t _retval;
-  sidl_BaseInterface _ex   = NULL;
-  sidl_BaseInterface *_ex2 = &_ex;
-  /* unpack in and inout argments */
-  sidl_io_Deserializer_unpackInt( inArgs, "nvalues", &nvalues, _ex2);
-
-  /* make the call */
-  _retval = (self->d_epv->f_GetValues)(
-    self,
-    nvalues,
-    indices,
-    values);
-
-  /* pack return value */
-  sidl_io_Serializer_packInt( outArgs, "_retval", _retval, _ex2);
-
-  /* pack out and inout argments */
-
-}
-
-static void
-bHYPRE_IJParCSRVector_Print__exec(
-        struct bHYPRE_IJParCSRVector__object* self,
-        struct sidl_io_Deserializer__object* inArgs,
-        struct sidl_io_Serializer__object* outArgs) {
-  /* stack space for arguments */
-  char* filename= NULL;
-  int32_t _retval;
-  sidl_BaseInterface _ex   = NULL;
-  sidl_BaseInterface *_ex2 = &_ex;
-  /* unpack in and inout argments */
-  sidl_io_Deserializer_unpackString( inArgs, "filename", &filename, _ex2);
-
-  /* make the call */
-  _retval = (self->d_epv->f_Print)(
-    self,
-    filename);
-
-  /* pack return value */
-  sidl_io_Serializer_packInt( outArgs, "_retval", _retval, _ex2);
-
-  /* pack out and inout argments */
-
-}
-
-static void
-bHYPRE_IJParCSRVector_Read__exec(
-        struct bHYPRE_IJParCSRVector__object* self,
-        struct sidl_io_Deserializer__object* inArgs,
-        struct sidl_io_Serializer__object* outArgs) {
-  /* stack space for arguments */
-  char* filename= NULL;
-  void* comm;
-  int32_t _retval;
-  sidl_BaseInterface _ex   = NULL;
-  sidl_BaseInterface *_ex2 = &_ex;
-  /* unpack in and inout argments */
-  sidl_io_Deserializer_unpackString( inArgs, "filename", &filename, _ex2);
-
-  /* make the call */
-  _retval = (self->d_epv->f_Read)(
-    self,
-    filename,
-    comm);
 
   /* pack return value */
   sidl_io_Serializer_packInt( outArgs, "_retval", _retval, _ex2);
@@ -824,12 +815,6 @@ static void bHYPRE_IJParCSRVector__init_epv(
     bHYPRE_IJParCSRVector__object*,const char*)) s1->d_epv->f_isType;
   epv->f_getClassInfo             = (struct sidl_ClassInfo__object* (*)(struct 
     bHYPRE_IJParCSRVector__object*)) s1->d_epv->f_getClassInfo;
-  epv->f_Clear                    = NULL;
-  epv->f_Copy                     = NULL;
-  epv->f_Clone                    = NULL;
-  epv->f_Scale                    = NULL;
-  epv->f_Dot                      = NULL;
-  epv->f_Axpy                     = NULL;
   epv->f_SetCommunicator          = NULL;
   epv->f_Initialize               = NULL;
   epv->f_Assemble                 = NULL;
@@ -841,6 +826,12 @@ static void bHYPRE_IJParCSRVector__init_epv(
   epv->f_GetValues                = NULL;
   epv->f_Print                    = NULL;
   epv->f_Read                     = NULL;
+  epv->f_Clear                    = NULL;
+  epv->f_Copy                     = NULL;
+  epv->f_Clone                    = NULL;
+  epv->f_Scale                    = NULL;
+  epv->f_Dot                      = NULL;
+  epv->f_Axpy                     = NULL;
 
   bHYPRE_IJParCSRVector__set_epv(epv);
 
@@ -865,14 +856,14 @@ static void bHYPRE_IJParCSRVector__init_epv(
     struct sidl_BaseInterface__object**)) epv->f_GetObject;
   e0->f_SetLocalRange       = (int32_t (*)(void*,int32_t,
     int32_t)) epv->f_SetLocalRange;
-  e0->f_SetValues           = (int32_t (*)(void*,int32_t,
-    struct sidl_int__array*,struct sidl_double__array*)) epv->f_SetValues;
-  e0->f_AddToValues         = (int32_t (*)(void*,int32_t,
-    struct sidl_int__array*,struct sidl_double__array*)) epv->f_AddToValues;
+  e0->f_SetValues           = (int32_t (*)(void*,struct sidl_int__array*,
+    struct sidl_double__array*)) epv->f_SetValues;
+  e0->f_AddToValues         = (int32_t (*)(void*,struct sidl_int__array*,
+    struct sidl_double__array*)) epv->f_AddToValues;
   e0->f_GetLocalRange       = (int32_t (*)(void*,int32_t*,
     int32_t*)) epv->f_GetLocalRange;
-  e0->f_GetValues           = (int32_t (*)(void*,int32_t,
-    struct sidl_int__array*,struct sidl_double__array**)) epv->f_GetValues;
+  e0->f_GetValues           = (int32_t (*)(void*,struct sidl_int__array*,
+    struct sidl_double__array**)) epv->f_GetValues;
   e0->f_Print               = (int32_t (*)(void*,const char*)) epv->f_Print;
   e0->f_Read                = (int32_t (*)(void*,const char*,
     void*)) epv->f_Read;

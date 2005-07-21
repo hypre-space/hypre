@@ -23,6 +23,13 @@
  * 
  * RDF: Documentation goes here.
  * 
+ * This GMRES solver checks whether the matrix, vectors, and preconditioner
+ * are of known types, and will not work with any other types.
+ * Presently, the recognized data types are:
+ * matrix, vector: IJParCSRMatrix, IJParCSRVector
+ * preconditioner: BoomerAMG, ParCSRDiagScale
+ * 
+ * 
  */
 
 #include "bHYPRE_GMRES_Impl.h"
@@ -340,7 +347,8 @@ int32_t
 impl_bHYPRE_GMRES_SetIntArray1Parameter(
   /* in */ bHYPRE_GMRES self,
   /* in */ const char* name,
-  /* in */ struct sidl_int__array* value)
+  /* in */ int32_t* value,
+  /* in */ int32_t nvalues)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.GMRES.SetIntArray1Parameter) */
   /* Insert the implementation of the SetIntArray1Parameter method here... */
@@ -386,7 +394,8 @@ int32_t
 impl_bHYPRE_GMRES_SetDoubleArray1Parameter(
   /* in */ bHYPRE_GMRES self,
   /* in */ const char* name,
-  /* in */ struct sidl_double__array* value)
+  /* in */ double* value,
+  /* in */ int32_t nvalues)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.GMRES.SetDoubleArray1Parameter) */
   /* Insert the implementation of the SetDoubleArray1Parameter method here... */

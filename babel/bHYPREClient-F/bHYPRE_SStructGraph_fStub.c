@@ -402,27 +402,32 @@ SIDLFortran77Symbol(bhypre_sstructgraph_addentries_f,BHYPRE_SSTRUCTGRAPH_ADDENTR
 (
   int64_t *self,
   int32_t *part,
-  int64_t *index,
+  int32_t *index,
+  int32_t *dim,
   int32_t *var,
   int32_t *to_part,
-  int64_t *to_index,
+  int32_t *to_index,
   int32_t *to_var,
   int32_t *retval
 )
 {
   struct bHYPRE_SStructGraph__epv *_epv = NULL;
   struct bHYPRE_SStructGraph__object* _proxy_self = NULL;
-  struct sidl_int__array* _proxy_index = NULL;
-  struct sidl_int__array* _proxy_to_index = NULL;
+  struct sidl_int__array _alt_index;
+  struct sidl_int__array* _proxy_index = &_alt_index;
+  int32_t index_lower[1], index_upper[1], index_stride[1];
+  struct sidl_int__array _alt_to_index;
+  struct sidl_int__array* _proxy_to_index = &_alt_to_index;
+  int32_t to_index_lower[1], to_index_upper[1], to_index_stride[1];
   _proxy_self =
     (struct bHYPRE_SStructGraph__object*)
     (ptrdiff_t)(*self);
-  _proxy_index =
-    (struct sidl_int__array*)
-    (ptrdiff_t)(*index);
-  _proxy_to_index =
-    (struct sidl_int__array*)
-    (ptrdiff_t)(*to_index);
+  index_upper[0] = (*dim)-1;
+  sidl_int__array_init(index, _proxy_index, 1, index_lower, index_upper,
+    index_stride);
+  to_index_upper[0] = (*dim)-1;
+  sidl_int__array_init(to_index, _proxy_to_index, 1, to_index_lower,
+    to_index_upper, to_index_stride);
   _epv = _proxy_self->d_epv;
   *retval = 
     (*(_epv->f_AddEntries))(

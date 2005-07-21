@@ -268,14 +268,25 @@ int32_t
 bHYPRE_IJBuildVector_SetValues(
   /* in */ bHYPRE_IJBuildVector self,
   /* in */ int32_t nvalues,
-  /* in */ struct sidl_int__array* indices,
-  /* in */ struct sidl_double__array* values)
+  /* in */ int32_t* indices,
+  /* in */ double* values)
 {
+  int32_t indices_lower[1], indices_upper[1], indices_stride[1]; 
+  struct sidl_int__array indices_real;
+  struct sidl_int__array*indices_tmp = &indices_real;
+  int32_t values_lower[1], values_upper[1], values_stride[1]; 
+  struct sidl_double__array values_real;
+  struct sidl_double__array*values_tmp = &values_real;
+  indices_upper[0] = nvalues-1;
+  sidl_int__array_init(indices, indices_tmp, 1, indices_lower, indices_upper,
+    indices_stride);
+  values_upper[0] = nvalues-1;
+  sidl_double__array_init(values, values_tmp, 1, values_lower, values_upper,
+    values_stride);
   return (*self->d_epv->f_SetValues)(
     self->d_object,
-    nvalues,
-    indices,
-    values);
+    indices_tmp,
+    values_tmp);
 }
 
 /*
@@ -290,14 +301,25 @@ int32_t
 bHYPRE_IJBuildVector_AddToValues(
   /* in */ bHYPRE_IJBuildVector self,
   /* in */ int32_t nvalues,
-  /* in */ struct sidl_int__array* indices,
-  /* in */ struct sidl_double__array* values)
+  /* in */ int32_t* indices,
+  /* in */ double* values)
 {
+  int32_t indices_lower[1], indices_upper[1], indices_stride[1]; 
+  struct sidl_int__array indices_real;
+  struct sidl_int__array*indices_tmp = &indices_real;
+  int32_t values_lower[1], values_upper[1], values_stride[1]; 
+  struct sidl_double__array values_real;
+  struct sidl_double__array*values_tmp = &values_real;
+  indices_upper[0] = nvalues-1;
+  sidl_int__array_init(indices, indices_tmp, 1, indices_lower, indices_upper,
+    indices_stride);
+  values_upper[0] = nvalues-1;
+  sidl_double__array_init(values, values_tmp, 1, values_lower, values_upper,
+    values_stride);
   return (*self->d_epv->f_AddToValues)(
     self->d_object,
-    nvalues,
-    indices,
-    values);
+    indices_tmp,
+    values_tmp);
 }
 
 /*
@@ -330,14 +352,25 @@ int32_t
 bHYPRE_IJBuildVector_GetValues(
   /* in */ bHYPRE_IJBuildVector self,
   /* in */ int32_t nvalues,
-  /* in */ struct sidl_int__array* indices,
-  /* inout */ struct sidl_double__array** values)
+  /* in */ int32_t* indices,
+  /* inout */ double* values)
 {
+  int32_t indices_lower[1], indices_upper[1], indices_stride[1]; 
+  struct sidl_int__array indices_real;
+  struct sidl_int__array*indices_tmp = &indices_real;
+  int32_t values_lower[1], values_upper[1], values_stride[1]; 
+  struct sidl_double__array values_real;
+  struct sidl_double__array*values_tmp = &values_real;
+  indices_upper[0] = nvalues-1;
+  sidl_int__array_init(indices, indices_tmp, 1, indices_lower, indices_upper,
+    indices_stride);
+  values_upper[0] = nvalues-1;
+  sidl_double__array_init(values, values_tmp, 1, values_lower, values_upper,
+    values_stride);
   return (*self->d_epv->f_GetValues)(
     self->d_object,
-    nvalues,
-    indices,
-    values);
+    indices_tmp,
+    &values_tmp);
 }
 
 /*
@@ -1189,7 +1222,6 @@ remote_bHYPRE__IJBuildVector_SetLocalRange(
 static int32_t
 remote_bHYPRE__IJBuildVector_SetValues(
   /* in */ struct bHYPRE__IJBuildVector__object* self /* TLD */,
-  /* in */ int32_t nvalues,
   /* in */ struct sidl_int__array* indices,
   /* in */ struct sidl_double__array* values)
 {
@@ -1203,7 +1235,6 @@ remote_bHYPRE__IJBuildVector_SetValues(
   int32_t _retval;
 
   /* pack in and inout arguments */
-  sidl_rmi_Invocation_packInt( _inv, "nvalues", nvalues, _ex2);
 
   /* send actual RMI request */
   _rsvp = sidl_rmi_Invocation_invokeMethod(_inv,_ex2);
@@ -1224,7 +1255,6 @@ remote_bHYPRE__IJBuildVector_SetValues(
 static int32_t
 remote_bHYPRE__IJBuildVector_AddToValues(
   /* in */ struct bHYPRE__IJBuildVector__object* self /* TLD */,
-  /* in */ int32_t nvalues,
   /* in */ struct sidl_int__array* indices,
   /* in */ struct sidl_double__array* values)
 {
@@ -1238,7 +1268,6 @@ remote_bHYPRE__IJBuildVector_AddToValues(
   int32_t _retval;
 
   /* pack in and inout arguments */
-  sidl_rmi_Invocation_packInt( _inv, "nvalues", nvalues, _ex2);
 
   /* send actual RMI request */
   _rsvp = sidl_rmi_Invocation_invokeMethod(_inv,_ex2);
@@ -1294,7 +1323,6 @@ remote_bHYPRE__IJBuildVector_GetLocalRange(
 static int32_t
 remote_bHYPRE__IJBuildVector_GetValues(
   /* in */ struct bHYPRE__IJBuildVector__object* self /* TLD */,
-  /* in */ int32_t nvalues,
   /* in */ struct sidl_int__array* indices,
   /* inout */ struct sidl_double__array** values)
 {
@@ -1308,7 +1336,6 @@ remote_bHYPRE__IJBuildVector_GetValues(
   int32_t _retval;
 
   /* pack in and inout arguments */
-  sidl_rmi_Invocation_packInt( _inv, "nvalues", nvalues, _ex2);
 
   /* send actual RMI request */
   _rsvp = sidl_rmi_Invocation_invokeMethod(_inv,_ex2);
@@ -1447,13 +1474,13 @@ static void bHYPRE__IJBuildVector__init_remote_epv(void)
     struct sidl_BaseInterface__object**)) epv->f_GetObject;
   e0->f_SetLocalRange   = (int32_t (*)(void*,int32_t,
     int32_t)) epv->f_SetLocalRange;
-  e0->f_SetValues       = (int32_t (*)(void*,int32_t,struct sidl_int__array*,
+  e0->f_SetValues       = (int32_t (*)(void*,struct sidl_int__array*,
     struct sidl_double__array*)) epv->f_SetValues;
-  e0->f_AddToValues     = (int32_t (*)(void*,int32_t,struct sidl_int__array*,
+  e0->f_AddToValues     = (int32_t (*)(void*,struct sidl_int__array*,
     struct sidl_double__array*)) epv->f_AddToValues;
   e0->f_GetLocalRange   = (int32_t (*)(void*,int32_t*,
     int32_t*)) epv->f_GetLocalRange;
-  e0->f_GetValues       = (int32_t (*)(void*,int32_t,struct sidl_int__array*,
+  e0->f_GetValues       = (int32_t (*)(void*,struct sidl_int__array*,
     struct sidl_double__array**)) epv->f_GetValues;
   e0->f_Print           = (int32_t (*)(void*,const char*)) epv->f_Print;
   e0->f_Read            = (int32_t (*)(void*,const char*,void*)) epv->f_Read;

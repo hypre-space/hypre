@@ -38,6 +38,9 @@ extern "C" {
  * 
  * RDF: Documentation goes here.
  * 
+ * Pilut has not been implemented yet.
+ * 
+ * 
  */
 
 struct bHYPRE_Pilut__array;

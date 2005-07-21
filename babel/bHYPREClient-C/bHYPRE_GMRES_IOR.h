@@ -41,6 +41,13 @@ extern "C" {
  * 
  * RDF: Documentation goes here.
  * 
+ * This GMRES solver checks whether the matrix, vectors, and preconditioner
+ * are of known types, and will not work with any other types.
+ * Presently, the recognized data types are:
+ * matrix, vector: IJParCSRMatrix, IJParCSRVector
+ * preconditioner: BoomerAMG, ParCSRDiagScale
+ * 
+ * 
  */
 
 struct bHYPRE_GMRES__array;

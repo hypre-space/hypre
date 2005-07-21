@@ -484,6 +484,7 @@ SIDLFortran77Symbol(bhypre_sstructmatrix_setgraph_f,BHYPRE_SSTRUCTMATRIX_SETGRAP
  * of doubles representing the real and imaginary parts of each
  * complex value.
  * 
+ * 
  */
 
 void
@@ -491,31 +492,38 @@ SIDLFortran77Symbol(bhypre_sstructmatrix_setvalues_f,BHYPRE_SSTRUCTMATRIX_SETVAL
 (
   int64_t *self,
   int32_t *part,
-  int64_t *index,
+  int32_t *index,
+  int32_t *dim,
   int32_t *var,
   int32_t *nentries,
-  int64_t *entries,
-  int64_t *values,
+  int32_t *entries,
+  double *values,
   int32_t *retval
 )
 {
   struct bHYPRE_SStructMatrix__epv *_epv = NULL;
   struct bHYPRE_SStructMatrix__object* _proxy_self = NULL;
-  struct sidl_int__array* _proxy_index = NULL;
-  struct sidl_int__array* _proxy_entries = NULL;
-  struct sidl_double__array* _proxy_values = NULL;
+  struct sidl_int__array _alt_index;
+  struct sidl_int__array* _proxy_index = &_alt_index;
+  int32_t index_lower[1], index_upper[1], index_stride[1];
+  struct sidl_int__array _alt_entries;
+  struct sidl_int__array* _proxy_entries = &_alt_entries;
+  int32_t entries_lower[1], entries_upper[1], entries_stride[1];
+  struct sidl_double__array _alt_values;
+  struct sidl_double__array* _proxy_values = &_alt_values;
+  int32_t values_lower[1], values_upper[1], values_stride[1];
   _proxy_self =
     (struct bHYPRE_SStructMatrix__object*)
     (ptrdiff_t)(*self);
-  _proxy_index =
-    (struct sidl_int__array*)
-    (ptrdiff_t)(*index);
-  _proxy_entries =
-    (struct sidl_int__array*)
-    (ptrdiff_t)(*entries);
-  _proxy_values =
-    (struct sidl_double__array*)
-    (ptrdiff_t)(*values);
+  index_upper[0] = (*dim)-1;
+  sidl_int__array_init(index, _proxy_index, 1, index_lower, index_upper,
+    index_stride);
+  entries_upper[0] = (*nentries)-1;
+  sidl_int__array_init(entries, _proxy_entries, 1, entries_lower, entries_upper,
+    entries_stride);
+  values_upper[0] = (*nentries)-1;
+  sidl_double__array_init(values, _proxy_values, 1, values_lower, values_upper,
+    values_stride);
   _epv = _proxy_self->d_epv;
   *retval = 
     (*(_epv->f_SetValues))(
@@ -523,7 +531,6 @@ SIDLFortran77Symbol(bhypre_sstructmatrix_setvalues_f,BHYPRE_SSTRUCTMATRIX_SETVAL
       *part,
       _proxy_index,
       *var,
-      *nentries,
       _proxy_entries,
       _proxy_values
     );
@@ -553,36 +560,46 @@ SIDLFortran77Symbol(bhypre_sstructmatrix_setboxvalues_f,BHYPRE_SSTRUCTMATRIX_SET
 (
   int64_t *self,
   int32_t *part,
-  int64_t *ilower,
-  int64_t *iupper,
+  int32_t *ilower,
+  int32_t *iupper,
+  int32_t *dim,
   int32_t *var,
   int32_t *nentries,
-  int64_t *entries,
-  int64_t *values,
+  int32_t *entries,
+  double *values,
+  int32_t *nvalues,
   int32_t *retval
 )
 {
   struct bHYPRE_SStructMatrix__epv *_epv = NULL;
   struct bHYPRE_SStructMatrix__object* _proxy_self = NULL;
-  struct sidl_int__array* _proxy_ilower = NULL;
-  struct sidl_int__array* _proxy_iupper = NULL;
-  struct sidl_int__array* _proxy_entries = NULL;
-  struct sidl_double__array* _proxy_values = NULL;
+  struct sidl_int__array _alt_ilower;
+  struct sidl_int__array* _proxy_ilower = &_alt_ilower;
+  int32_t ilower_lower[1], ilower_upper[1], ilower_stride[1];
+  struct sidl_int__array _alt_iupper;
+  struct sidl_int__array* _proxy_iupper = &_alt_iupper;
+  int32_t iupper_lower[1], iupper_upper[1], iupper_stride[1];
+  struct sidl_int__array _alt_entries;
+  struct sidl_int__array* _proxy_entries = &_alt_entries;
+  int32_t entries_lower[1], entries_upper[1], entries_stride[1];
+  struct sidl_double__array _alt_values;
+  struct sidl_double__array* _proxy_values = &_alt_values;
+  int32_t values_lower[1], values_upper[1], values_stride[1];
   _proxy_self =
     (struct bHYPRE_SStructMatrix__object*)
     (ptrdiff_t)(*self);
-  _proxy_ilower =
-    (struct sidl_int__array*)
-    (ptrdiff_t)(*ilower);
-  _proxy_iupper =
-    (struct sidl_int__array*)
-    (ptrdiff_t)(*iupper);
-  _proxy_entries =
-    (struct sidl_int__array*)
-    (ptrdiff_t)(*entries);
-  _proxy_values =
-    (struct sidl_double__array*)
-    (ptrdiff_t)(*values);
+  ilower_upper[0] = (*dim)-1;
+  sidl_int__array_init(ilower, _proxy_ilower, 1, ilower_lower, ilower_upper,
+    ilower_stride);
+  iupper_upper[0] = (*dim)-1;
+  sidl_int__array_init(iupper, _proxy_iupper, 1, iupper_lower, iupper_upper,
+    iupper_stride);
+  entries_upper[0] = (*nentries)-1;
+  sidl_int__array_init(entries, _proxy_entries, 1, entries_lower, entries_upper,
+    entries_stride);
+  values_upper[0] = (*nvalues)-1;
+  sidl_double__array_init(values, _proxy_values, 1, values_lower, values_upper,
+    values_stride);
   _epv = _proxy_self->d_epv;
   *retval = 
     (*(_epv->f_SetBoxValues))(
@@ -591,7 +608,6 @@ SIDLFortran77Symbol(bhypre_sstructmatrix_setboxvalues_f,BHYPRE_SSTRUCTMATRIX_SET
       _proxy_ilower,
       _proxy_iupper,
       *var,
-      *nentries,
       _proxy_entries,
       _proxy_values
     );
@@ -620,31 +636,38 @@ SIDLFortran77Symbol(bhypre_sstructmatrix_addtovalues_f,BHYPRE_SSTRUCTMATRIX_ADDT
 (
   int64_t *self,
   int32_t *part,
-  int64_t *index,
+  int32_t *index,
+  int32_t *dim,
   int32_t *var,
   int32_t *nentries,
-  int64_t *entries,
-  int64_t *values,
+  int32_t *entries,
+  double *values,
   int32_t *retval
 )
 {
   struct bHYPRE_SStructMatrix__epv *_epv = NULL;
   struct bHYPRE_SStructMatrix__object* _proxy_self = NULL;
-  struct sidl_int__array* _proxy_index = NULL;
-  struct sidl_int__array* _proxy_entries = NULL;
-  struct sidl_double__array* _proxy_values = NULL;
+  struct sidl_int__array _alt_index;
+  struct sidl_int__array* _proxy_index = &_alt_index;
+  int32_t index_lower[1], index_upper[1], index_stride[1];
+  struct sidl_int__array _alt_entries;
+  struct sidl_int__array* _proxy_entries = &_alt_entries;
+  int32_t entries_lower[1], entries_upper[1], entries_stride[1];
+  struct sidl_double__array _alt_values;
+  struct sidl_double__array* _proxy_values = &_alt_values;
+  int32_t values_lower[1], values_upper[1], values_stride[1];
   _proxy_self =
     (struct bHYPRE_SStructMatrix__object*)
     (ptrdiff_t)(*self);
-  _proxy_index =
-    (struct sidl_int__array*)
-    (ptrdiff_t)(*index);
-  _proxy_entries =
-    (struct sidl_int__array*)
-    (ptrdiff_t)(*entries);
-  _proxy_values =
-    (struct sidl_double__array*)
-    (ptrdiff_t)(*values);
+  index_upper[0] = (*dim)-1;
+  sidl_int__array_init(index, _proxy_index, 1, index_lower, index_upper,
+    index_stride);
+  entries_upper[0] = (*nentries)-1;
+  sidl_int__array_init(entries, _proxy_entries, 1, entries_lower, entries_upper,
+    entries_stride);
+  values_upper[0] = (*nentries)-1;
+  sidl_double__array_init(values, _proxy_values, 1, values_lower, values_upper,
+    values_stride);
   _epv = _proxy_self->d_epv;
   *retval = 
     (*(_epv->f_AddToValues))(
@@ -652,7 +675,6 @@ SIDLFortran77Symbol(bhypre_sstructmatrix_addtovalues_f,BHYPRE_SSTRUCTMATRIX_ADDT
       *part,
       _proxy_index,
       *var,
-      *nentries,
       _proxy_entries,
       _proxy_values
     );
@@ -680,36 +702,46 @@ SIDLFortran77Symbol(bhypre_sstructmatrix_addtoboxvalues_f,BHYPRE_SSTRUCTMATRIX_A
 (
   int64_t *self,
   int32_t *part,
-  int64_t *ilower,
-  int64_t *iupper,
+  int32_t *ilower,
+  int32_t *iupper,
+  int32_t *dim,
   int32_t *var,
   int32_t *nentries,
-  int64_t *entries,
-  int64_t *values,
+  int32_t *entries,
+  double *values,
+  int32_t *nvalues,
   int32_t *retval
 )
 {
   struct bHYPRE_SStructMatrix__epv *_epv = NULL;
   struct bHYPRE_SStructMatrix__object* _proxy_self = NULL;
-  struct sidl_int__array* _proxy_ilower = NULL;
-  struct sidl_int__array* _proxy_iupper = NULL;
-  struct sidl_int__array* _proxy_entries = NULL;
-  struct sidl_double__array* _proxy_values = NULL;
+  struct sidl_int__array _alt_ilower;
+  struct sidl_int__array* _proxy_ilower = &_alt_ilower;
+  int32_t ilower_lower[1], ilower_upper[1], ilower_stride[1];
+  struct sidl_int__array _alt_iupper;
+  struct sidl_int__array* _proxy_iupper = &_alt_iupper;
+  int32_t iupper_lower[1], iupper_upper[1], iupper_stride[1];
+  struct sidl_int__array _alt_entries;
+  struct sidl_int__array* _proxy_entries = &_alt_entries;
+  int32_t entries_lower[1], entries_upper[1], entries_stride[1];
+  struct sidl_double__array _alt_values;
+  struct sidl_double__array* _proxy_values = &_alt_values;
+  int32_t values_lower[1], values_upper[1], values_stride[1];
   _proxy_self =
     (struct bHYPRE_SStructMatrix__object*)
     (ptrdiff_t)(*self);
-  _proxy_ilower =
-    (struct sidl_int__array*)
-    (ptrdiff_t)(*ilower);
-  _proxy_iupper =
-    (struct sidl_int__array*)
-    (ptrdiff_t)(*iupper);
-  _proxy_entries =
-    (struct sidl_int__array*)
-    (ptrdiff_t)(*entries);
-  _proxy_values =
-    (struct sidl_double__array*)
-    (ptrdiff_t)(*values);
+  ilower_upper[0] = (*dim)-1;
+  sidl_int__array_init(ilower, _proxy_ilower, 1, ilower_lower, ilower_upper,
+    ilower_stride);
+  iupper_upper[0] = (*dim)-1;
+  sidl_int__array_init(iupper, _proxy_iupper, 1, iupper_lower, iupper_upper,
+    iupper_stride);
+  entries_upper[0] = (*nentries)-1;
+  sidl_int__array_init(entries, _proxy_entries, 1, entries_lower, entries_upper,
+    entries_stride);
+  values_upper[0] = (*nvalues)-1;
+  sidl_double__array_init(values, _proxy_values, 1, values_lower, values_upper,
+    values_stride);
   _epv = _proxy_self->d_epv;
   *retval = 
     (*(_epv->f_AddToBoxValues))(
@@ -718,7 +750,6 @@ SIDLFortran77Symbol(bhypre_sstructmatrix_addtoboxvalues_f,BHYPRE_SSTRUCTMATRIX_A
       _proxy_ilower,
       _proxy_iupper,
       *var,
-      *nentries,
       _proxy_entries,
       _proxy_values
     );
@@ -978,7 +1009,8 @@ SIDLFortran77Symbol(bhypre_sstructmatrix_setintarray1parameter_f,BHYPRE_SSTRUCTM
   int64_t *self,
   SIDL_F77_String name
   SIDL_F77_STR_NEAR_LEN_DECL(name),
-  int64_t *value,
+  int32_t *value,
+  int32_t *nvalues,
   int32_t *retval
   SIDL_F77_STR_FAR_LEN_DECL(name)
 )
@@ -986,16 +1018,18 @@ SIDLFortran77Symbol(bhypre_sstructmatrix_setintarray1parameter_f,BHYPRE_SSTRUCTM
   struct bHYPRE_SStructMatrix__epv *_epv = NULL;
   struct bHYPRE_SStructMatrix__object* _proxy_self = NULL;
   char* _proxy_name = NULL;
-  struct sidl_int__array* _proxy_value = NULL;
+  struct sidl_int__array _alt_value;
+  struct sidl_int__array* _proxy_value = &_alt_value;
+  int32_t value_lower[1], value_upper[1], value_stride[1];
   _proxy_self =
     (struct bHYPRE_SStructMatrix__object*)
     (ptrdiff_t)(*self);
   _proxy_name =
     sidl_copy_fortran_str(SIDL_F77_STR(name),
       SIDL_F77_STR_LEN(name));
-  _proxy_value =
-    (struct sidl_int__array*)
-    (ptrdiff_t)(*value);
+  value_upper[0] = (*nvalues)-1;
+  sidl_int__array_init(value, _proxy_value, 1, value_lower, value_upper,
+    value_stride);
   _epv = _proxy_self->d_epv;
   *retval = 
     (*(_epv->f_SetIntArray1Parameter))(
@@ -1056,7 +1090,8 @@ SIDLFortran77Symbol(bhypre_sstructmatrix_setdoublearray1parameter_f,BHYPRE_SSTRU
   int64_t *self,
   SIDL_F77_String name
   SIDL_F77_STR_NEAR_LEN_DECL(name),
-  int64_t *value,
+  double *value,
+  int32_t *nvalues,
   int32_t *retval
   SIDL_F77_STR_FAR_LEN_DECL(name)
 )
@@ -1064,16 +1099,18 @@ SIDLFortran77Symbol(bhypre_sstructmatrix_setdoublearray1parameter_f,BHYPRE_SSTRU
   struct bHYPRE_SStructMatrix__epv *_epv = NULL;
   struct bHYPRE_SStructMatrix__object* _proxy_self = NULL;
   char* _proxy_name = NULL;
-  struct sidl_double__array* _proxy_value = NULL;
+  struct sidl_double__array _alt_value;
+  struct sidl_double__array* _proxy_value = &_alt_value;
+  int32_t value_lower[1], value_upper[1], value_stride[1];
   _proxy_self =
     (struct bHYPRE_SStructMatrix__object*)
     (ptrdiff_t)(*self);
   _proxy_name =
     sidl_copy_fortran_str(SIDL_F77_STR(name),
       SIDL_F77_STR_LEN(name));
-  _proxy_value =
-    (struct sidl_double__array*)
-    (ptrdiff_t)(*value);
+  value_upper[0] = (*nvalues)-1;
+  sidl_double__array_init(value, _proxy_value, 1, value_lower, value_upper,
+    value_stride);
   _epv = _proxy_self->d_epv;
   *retval = 
     (*(_epv->f_SetDoubleArray1Parameter))(

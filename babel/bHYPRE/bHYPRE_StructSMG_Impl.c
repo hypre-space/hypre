@@ -17,6 +17,15 @@
 
 /*
  * Symbol "bHYPRE.StructSMG" (version 1.0.0)
+ * 
+ * Objects of this type can be cast to PreconditionedSolver objects
+ * using the {\tt \_\_cast} methods.
+ * 
+ * RDF: Documentation goes here.
+ * 
+ * The StructSMG solver requires a Struct matrix.
+ * 
+ * 
  */
 
 #include "bHYPRE_StructSMG_Impl.h"
@@ -297,7 +306,8 @@ int32_t
 impl_bHYPRE_StructSMG_SetIntArray1Parameter(
   /* in */ bHYPRE_StructSMG self,
   /* in */ const char* name,
-  /* in */ struct sidl_int__array* value)
+  /* in */ int32_t* value,
+  /* in */ int32_t nvalues)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.StructSMG.SetIntArray1Parameter) */
   /* Insert the implementation of the SetIntArray1Parameter method here... */
@@ -343,7 +353,8 @@ int32_t
 impl_bHYPRE_StructSMG_SetDoubleArray1Parameter(
   /* in */ bHYPRE_StructSMG self,
   /* in */ const char* name,
-  /* in */ struct sidl_double__array* value)
+  /* in */ double* value,
+  /* in */ int32_t nvalues)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.StructSMG.SetDoubleArray1Parameter) */
   /* Insert the implementation of the SetDoubleArray1Parameter method here... */

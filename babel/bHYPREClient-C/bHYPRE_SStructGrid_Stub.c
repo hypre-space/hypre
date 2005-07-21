@@ -248,14 +248,27 @@ int32_t
 bHYPRE_SStructGrid_SetExtents(
   /* in */ bHYPRE_SStructGrid self,
   /* in */ int32_t part,
-  /* in */ struct sidl_int__array* ilower,
-  /* in */ struct sidl_int__array* iupper)
+  /* in */ int32_t* ilower,
+  /* in */ int32_t* iupper,
+  /* in */ int32_t dim)
 {
+  int32_t ilower_lower[1], ilower_upper[1], ilower_stride[1]; 
+  struct sidl_int__array ilower_real;
+  struct sidl_int__array*ilower_tmp = &ilower_real;
+  int32_t iupper_lower[1], iupper_upper[1], iupper_stride[1]; 
+  struct sidl_int__array iupper_real;
+  struct sidl_int__array*iupper_tmp = &iupper_real;
+  ilower_upper[0] = dim-1;
+  sidl_int__array_init(ilower, ilower_tmp, 1, ilower_lower, ilower_upper,
+    ilower_stride);
+  iupper_upper[0] = dim-1;
+  sidl_int__array_init(iupper, iupper_tmp, 1, iupper_lower, iupper_upper,
+    iupper_stride);
   return (*self->d_epv->f_SetExtents)(
     self,
     part,
-    ilower,
-    iupper);
+    ilower_tmp,
+    iupper_tmp);
 }
 
 /*
@@ -294,14 +307,21 @@ int32_t
 bHYPRE_SStructGrid_AddVariable(
   /* in */ bHYPRE_SStructGrid self,
   /* in */ int32_t part,
-  /* in */ struct sidl_int__array* index,
+  /* in */ int32_t* index,
+  /* in */ int32_t dim,
   /* in */ int32_t var,
   /* in */ enum bHYPRE_SStructVariable__enum vartype)
 {
+  int32_t index_lower[1], index_upper[1], index_stride[1]; 
+  struct sidl_int__array index_real;
+  struct sidl_int__array*index_tmp = &index_real;
+  index_upper[0] = dim-1;
+  sidl_int__array_init(index, index_tmp, 1, index_lower, index_upper,
+    index_stride);
   return (*self->d_epv->f_AddVariable)(
     self,
     part,
-    index,
+    index_tmp,
     var,
     vartype);
 }
@@ -336,22 +356,53 @@ int32_t
 bHYPRE_SStructGrid_SetNeighborBox(
   /* in */ bHYPRE_SStructGrid self,
   /* in */ int32_t part,
-  /* in */ struct sidl_int__array* ilower,
-  /* in */ struct sidl_int__array* iupper,
+  /* in */ int32_t* ilower,
+  /* in */ int32_t* iupper,
   /* in */ int32_t nbor_part,
-  /* in */ struct sidl_int__array* nbor_ilower,
-  /* in */ struct sidl_int__array* nbor_iupper,
-  /* in */ struct sidl_int__array* index_map)
+  /* in */ int32_t* nbor_ilower,
+  /* in */ int32_t* nbor_iupper,
+  /* in */ int32_t* index_map,
+  /* in */ int32_t dim)
 {
+  int32_t ilower_lower[1], ilower_upper[1], ilower_stride[1]; 
+  struct sidl_int__array ilower_real;
+  struct sidl_int__array*ilower_tmp = &ilower_real;
+  int32_t iupper_lower[1], iupper_upper[1], iupper_stride[1]; 
+  struct sidl_int__array iupper_real;
+  struct sidl_int__array*iupper_tmp = &iupper_real;
+  int32_t nbor_ilower_lower[1], nbor_ilower_upper[1], nbor_ilower_stride[1]; 
+  struct sidl_int__array nbor_ilower_real;
+  struct sidl_int__array*nbor_ilower_tmp = &nbor_ilower_real;
+  int32_t nbor_iupper_lower[1], nbor_iupper_upper[1], nbor_iupper_stride[1]; 
+  struct sidl_int__array nbor_iupper_real;
+  struct sidl_int__array*nbor_iupper_tmp = &nbor_iupper_real;
+  int32_t index_map_lower[1], index_map_upper[1], index_map_stride[1]; 
+  struct sidl_int__array index_map_real;
+  struct sidl_int__array*index_map_tmp = &index_map_real;
+  ilower_upper[0] = dim-1;
+  sidl_int__array_init(ilower, ilower_tmp, 1, ilower_lower, ilower_upper,
+    ilower_stride);
+  iupper_upper[0] = dim-1;
+  sidl_int__array_init(iupper, iupper_tmp, 1, iupper_lower, iupper_upper,
+    iupper_stride);
+  nbor_ilower_upper[0] = dim-1;
+  sidl_int__array_init(nbor_ilower, nbor_ilower_tmp, 1, nbor_ilower_lower,
+    nbor_ilower_upper, nbor_ilower_stride);
+  nbor_iupper_upper[0] = dim-1;
+  sidl_int__array_init(nbor_iupper, nbor_iupper_tmp, 1, nbor_iupper_lower,
+    nbor_iupper_upper, nbor_iupper_stride);
+  index_map_upper[0] = dim-1;
+  sidl_int__array_init(index_map, index_map_tmp, 1, index_map_lower,
+    index_map_upper, index_map_stride);
   return (*self->d_epv->f_SetNeighborBox)(
     self,
     part,
-    ilower,
-    iupper,
+    ilower_tmp,
+    iupper_tmp,
     nbor_part,
-    nbor_ilower,
-    nbor_iupper,
-    index_map);
+    nbor_ilower_tmp,
+    nbor_iupper_tmp,
+    index_map_tmp);
 }
 
 /*
@@ -387,12 +438,19 @@ int32_t
 bHYPRE_SStructGrid_SetPeriodic(
   /* in */ bHYPRE_SStructGrid self,
   /* in */ int32_t part,
-  /* in */ struct sidl_int__array* periodic)
+  /* in */ int32_t* periodic,
+  /* in */ int32_t dim)
 {
+  int32_t periodic_lower[1], periodic_upper[1], periodic_stride[1]; 
+  struct sidl_int__array periodic_real;
+  struct sidl_int__array*periodic_tmp = &periodic_real;
+  periodic_upper[0] = dim-1;
+  sidl_int__array_init(periodic, periodic_tmp, 1, periodic_lower,
+    periodic_upper, periodic_stride);
   return (*self->d_epv->f_SetPeriodic)(
     self,
     part,
-    periodic);
+    periodic_tmp);
 }
 
 /*
@@ -403,11 +461,18 @@ bHYPRE_SStructGrid_SetPeriodic(
 int32_t
 bHYPRE_SStructGrid_SetNumGhost(
   /* in */ bHYPRE_SStructGrid self,
-  /* in */ struct sidl_int__array* num_ghost)
+  /* in */ int32_t* num_ghost,
+  /* in */ int32_t dim2)
 {
+  int32_t num_ghost_lower[1], num_ghost_upper[1], num_ghost_stride[1]; 
+  struct sidl_int__array num_ghost_real;
+  struct sidl_int__array*num_ghost_tmp = &num_ghost_real;
+  num_ghost_upper[0] = dim2-1;
+  sidl_int__array_init(num_ghost, num_ghost_tmp, 1, num_ghost_lower,
+    num_ghost_upper, num_ghost_stride);
   return (*self->d_epv->f_SetNumGhost)(
     self,
-    num_ghost);
+    num_ghost_tmp);
 }
 
 /*

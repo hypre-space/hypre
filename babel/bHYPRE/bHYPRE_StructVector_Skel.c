@@ -101,22 +101,26 @@ extern
 int32_t
 impl_bHYPRE_StructVector_SetNumGhost(
   /* in */ bHYPRE_StructVector self,
-  /* in */ struct sidl_int__array* num_ghost);
+  /* in */ int32_t* num_ghost,
+  /* in */ int32_t dim2);
 
 extern
 int32_t
 impl_bHYPRE_StructVector_SetValue(
   /* in */ bHYPRE_StructVector self,
-  /* in */ struct sidl_int__array* grid_index,
+  /* in */ int32_t* grid_index,
+  /* in */ int32_t dim,
   /* in */ double value);
 
 extern
 int32_t
 impl_bHYPRE_StructVector_SetBoxValues(
   /* in */ bHYPRE_StructVector self,
-  /* in */ struct sidl_int__array* ilower,
-  /* in */ struct sidl_int__array* iupper,
-  /* in */ struct sidl_double__array* values);
+  /* in */ int32_t* ilower,
+  /* in */ int32_t* iupper,
+  /* in */ int32_t dim,
+  /* in */ double* values,
+  /* in */ int32_t nvalues);
 
 extern
 int32_t
@@ -203,11 +207,13 @@ skel_bHYPRE_StructVector_SetNumGhost(
   int32_t _return;
   struct sidl_int__array* num_ghost_proxy = sidl_int__array_ensure(num_ghost, 1,
     sidl_column_major_order);
+  int32_t* num_ghost_tmp = num_ghost_proxy->d_firstElement;
+  int32_t dim2 = sidlLength(num_ghost_proxy,0);
   _return =
     impl_bHYPRE_StructVector_SetNumGhost(
       self,
-      num_ghost_proxy);
-  sidl_int__array_deleteRef(num_ghost_proxy);
+      num_ghost_tmp,
+      dim2);
   return _return;
 }
 
@@ -220,12 +226,14 @@ skel_bHYPRE_StructVector_SetValue(
   int32_t _return;
   struct sidl_int__array* grid_index_proxy = sidl_int__array_ensure(grid_index,
     1, sidl_column_major_order);
+  int32_t* grid_index_tmp = grid_index_proxy->d_firstElement;
+  int32_t dim = sidlLength(grid_index_proxy,0);
   _return =
     impl_bHYPRE_StructVector_SetValue(
       self,
-      grid_index_proxy,
+      grid_index_tmp,
+      dim,
       value);
-  sidl_int__array_deleteRef(grid_index_proxy);
   return _return;
 }
 
@@ -239,19 +247,23 @@ skel_bHYPRE_StructVector_SetBoxValues(
   int32_t _return;
   struct sidl_int__array* ilower_proxy = sidl_int__array_ensure(ilower, 1,
     sidl_column_major_order);
+  int32_t* ilower_tmp = ilower_proxy->d_firstElement;
   struct sidl_int__array* iupper_proxy = sidl_int__array_ensure(iupper, 1,
     sidl_column_major_order);
+  int32_t* iupper_tmp = iupper_proxy->d_firstElement;
   struct sidl_double__array* values_proxy = sidl_double__array_ensure(values, 1,
     sidl_column_major_order);
+  double* values_tmp = values_proxy->d_firstElement;
+  int32_t nvalues = sidlLength(values_proxy,0);
+  int32_t dim = sidlLength(iupper_proxy,0);
   _return =
     impl_bHYPRE_StructVector_SetBoxValues(
       self,
-      ilower_proxy,
-      iupper_proxy,
-      values_proxy);
-  sidl_int__array_deleteRef(ilower_proxy);
-  sidl_int__array_deleteRef(iupper_proxy);
-  sidl_double__array_deleteRef(values_proxy);
+      ilower_tmp,
+      iupper_tmp,
+      dim,
+      values_tmp,
+      nvalues);
   return _return;
 }
 

@@ -21,6 +21,9 @@
  * 
  * RDF: Documentation goes here.
  * 
+ * Pilut has not been implemented yet.
+ * 
+ * 
  */
 struct bHYPRE_Pilut__object;
 struct bHYPRE_Pilut__array;
@@ -147,7 +150,8 @@ int32_t
 bHYPRE_Pilut_SetIntArray1Parameter(
   /* in */ bHYPRE_Pilut self,
   /* in */ const char* name,
-  /* in */ struct sidl_int__array* value);
+  /* in */ int32_t* value,
+  /* in */ int32_t nvalues);
 
 /**
  * Set the int 2-D array parameter associated with {\tt name}.
@@ -167,7 +171,8 @@ int32_t
 bHYPRE_Pilut_SetDoubleArray1Parameter(
   /* in */ bHYPRE_Pilut self,
   /* in */ const char* name,
-  /* in */ struct sidl_double__array* value);
+  /* in */ double* value,
+  /* in */ int32_t nvalues);
 
 /**
  * Set the double 2-D array parameter associated with {\tt name}.

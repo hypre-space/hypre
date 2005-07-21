@@ -109,7 +109,8 @@ int32_t
 bHYPRE_Solver_SetIntArray1Parameter(
   /* in */ bHYPRE_Solver self,
   /* in */ const char* name,
-  /* in */ struct sidl_int__array* value);
+  /* in */ int32_t* value,
+  /* in */ int32_t nvalues);
 
 int32_t
 bHYPRE_Solver_SetIntArray2Parameter(
@@ -121,7 +122,8 @@ int32_t
 bHYPRE_Solver_SetDoubleArray1Parameter(
   /* in */ bHYPRE_Solver self,
   /* in */ const char* name,
-  /* in */ struct sidl_double__array* value);
+  /* in */ double* value,
+  /* in */ int32_t nvalues);
 
 int32_t
 bHYPRE_Solver_SetDoubleArray2Parameter(

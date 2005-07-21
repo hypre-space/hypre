@@ -109,6 +109,402 @@ impl_bHYPRE_IJParCSRVector__dtor(
 }
 
 /*
+ * Set the MPI Communicator.  DEPRECATED, Use Create()
+ * 
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_IJParCSRVector_SetCommunicator"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+int32_t
+impl_bHYPRE_IJParCSRVector_SetCommunicator(
+  /* in */ bHYPRE_IJParCSRVector self,
+  /* in */ void* mpi_comm)
+{
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRVector.SetCommunicator) */
+  /* Insert the implementation of the SetCommunicator method here... */
+
+   int ierr = 0;
+   struct bHYPRE_IJParCSRVector__data * data;
+   data = bHYPRE_IJParCSRVector__get_data( self );
+   data -> comm = (MPI_Comm) mpi_comm;
+   return ierr;
+
+  /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRVector.SetCommunicator) */
+}
+
+/*
+ * Prepare an object for setting coefficient values, whether for
+ * the first time or subsequently.
+ * 
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_IJParCSRVector_Initialize"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+int32_t
+impl_bHYPRE_IJParCSRVector_Initialize(
+  /* in */ bHYPRE_IJParCSRVector self)
+{
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRVector.Initialize) */
+  /* Insert the implementation of the Initialize method here... */
+
+   int ierr = 0;
+   struct bHYPRE_IJParCSRVector__data * data;
+   HYPRE_IJVector ij_b;
+   data = bHYPRE_IJParCSRVector__get_data( self );
+   ij_b = data -> ij_b;
+   ierr = HYPRE_IJVectorInitialize( ij_b );
+   return( ierr );
+
+  /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRVector.Initialize) */
+}
+
+/*
+ * Finalize the construction of an object before using, either
+ * for the first time or on subsequent uses. {\tt Initialize}
+ * and {\tt Assemble} always appear in a matched set, with
+ * Initialize preceding Assemble. Values can only be set in
+ * between a call to Initialize and Assemble.
+ * 
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_IJParCSRVector_Assemble"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+int32_t
+impl_bHYPRE_IJParCSRVector_Assemble(
+  /* in */ bHYPRE_IJParCSRVector self)
+{
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRVector.Assemble) */
+  /* Insert the implementation of the Assemble method here... */
+
+   int ierr = 0;
+   struct bHYPRE_IJParCSRVector__data * data;
+   HYPRE_IJVector ij_b;
+   data = bHYPRE_IJParCSRVector__get_data( self );
+   ij_b = data -> ij_b;
+
+   ierr = HYPRE_IJVectorAssemble( ij_b );
+   return( ierr );
+
+  /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRVector.Assemble) */
+}
+
+/*
+ * The problem definition interface is a {\it builder} that
+ * creates an object that contains the problem definition
+ * information, e.g. a matrix. To perform subsequent operations
+ * with that object, it must be returned from the problem
+ * definition object. {\tt GetObject} performs this function.
+ * At compile time, the type of the returned object is unknown.
+ * Thus, the returned type is a sidl.BaseInterface.
+ * QueryInterface or Cast must be used on the returned object to
+ * convert it into a known type.
+ * 
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_IJParCSRVector_GetObject"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+int32_t
+impl_bHYPRE_IJParCSRVector_GetObject(
+  /* in */ bHYPRE_IJParCSRVector self,
+  /* out */ sidl_BaseInterface* A)
+{
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRVector.GetObject) */
+  /* Insert the implementation of the GetObject method here... */
+
+   bHYPRE_IJParCSRVector_addRef( self );
+   *A = sidl_BaseInterface__cast( self );
+   return( 0 );
+
+  /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRVector.GetObject) */
+}
+
+/*
+ * Set the local range for a vector object.  Each process owns
+ * some unique consecutive range of vector unknowns, indicated
+ * by the global indices {\tt jlower} and {\tt jupper}.  The
+ * data is required to be such that the value of {\tt jlower} on
+ * any process $p$ be exactly one more than the value of {\tt
+ * jupper} on process $p-1$.  Note that the first index of the
+ * global vector may start with any integer value.  In
+ * particular, one may use zero- or one-based indexing.
+ * 
+ * Collective.
+ * 
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_IJParCSRVector_SetLocalRange"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+int32_t
+impl_bHYPRE_IJParCSRVector_SetLocalRange(
+  /* in */ bHYPRE_IJParCSRVector self,
+  /* in */ int32_t jlower,
+  /* in */ int32_t jupper)
+{
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRVector.SetLocalRange) */
+  /* Insert the implementation of the SetLocalRange method here... */
+
+   int ierr = 0;
+   struct bHYPRE_IJParCSRVector__data * data;
+   HYPRE_IJVector ij_b;
+   data = bHYPRE_IJParCSRVector__get_data( self );
+   ij_b = data -> ij_b;
+   /* SetCommunicator should be called before Create */
+   assert( data->comm != MPI_COMM_NULL );
+
+   ierr = HYPRE_IJVectorCreate( data->comm, jlower, jupper, &ij_b );
+   ierr += HYPRE_IJVectorSetObjectType( ij_b, HYPRE_PARCSR );
+   data -> ij_b = ij_b;
+
+   return( ierr );
+
+  /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRVector.SetLocalRange) */
+}
+
+/*
+ * Sets values in vector.  The arrays {\tt values} and {\tt
+ * indices} are of dimension {\tt nvalues} and contain the
+ * vector values to be set and the corresponding global vector
+ * indices, respectively.  Erases any previous values at the
+ * specified locations and replaces them with new ones.
+ * 
+ * Not collective.
+ * 
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_IJParCSRVector_SetValues"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+int32_t
+impl_bHYPRE_IJParCSRVector_SetValues(
+  /* in */ bHYPRE_IJParCSRVector self,
+  /* in */ int32_t nvalues,
+  /* in */ int32_t* indices,
+  /* in */ double* values)
+{
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRVector.SetValues) */
+  /* Insert the implementation of the SetValues method here... */
+
+   int ierr = 0;
+   struct bHYPRE_IJParCSRVector__data * data;
+   HYPRE_IJVector ij_b;
+   data = bHYPRE_IJParCSRVector__get_data( self );
+   ij_b = data -> ij_b;
+
+   ierr = HYPRE_IJVectorSetValues( ij_b, nvalues,
+                                   indices,
+                                   values );
+   return( ierr );
+
+  /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRVector.SetValues) */
+}
+
+/*
+ * Adds to values in vector.  Usage details are analogous to
+ * {\tt SetValues}.
+ * 
+ * Not collective.
+ * 
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_IJParCSRVector_AddToValues"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+int32_t
+impl_bHYPRE_IJParCSRVector_AddToValues(
+  /* in */ bHYPRE_IJParCSRVector self,
+  /* in */ int32_t nvalues,
+  /* in */ int32_t* indices,
+  /* in */ double* values)
+{
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRVector.AddToValues) */
+  /* Insert the implementation of the AddToValues method here... */
+
+   int ierr = 0;
+   struct bHYPRE_IJParCSRVector__data * data;
+   HYPRE_IJVector ij_b;
+   data = bHYPRE_IJParCSRVector__get_data( self );
+   ij_b = data->ij_b;
+
+   ierr = HYPRE_IJVectorAddToValues( ij_b, nvalues,
+                                     indices,
+                                     values );
+   return( ierr );
+
+  /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRVector.AddToValues) */
+}
+
+/*
+ * Returns range of the part of the vector owned by this
+ * processor.
+ * 
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_IJParCSRVector_GetLocalRange"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+int32_t
+impl_bHYPRE_IJParCSRVector_GetLocalRange(
+  /* in */ bHYPRE_IJParCSRVector self,
+  /* out */ int32_t* jlower,
+  /* out */ int32_t* jupper)
+{
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRVector.GetLocalRange) */
+  /* Insert the implementation of the GetLocalRange method here... */
+
+   int ierr = 0;
+   struct bHYPRE_IJParCSRVector__data * data;
+   HYPRE_IJVector ij_b;
+   data = bHYPRE_IJParCSRVector__get_data( self );
+   ij_b = data -> ij_b;
+
+   ierr = HYPRE_IJVectorGetLocalRange( ij_b, jlower, jupper );
+
+   return( ierr );
+
+  /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRVector.GetLocalRange) */
+}
+
+/*
+ * Gets values in vector.  Usage details are analogous to {\tt
+ * SetValues}.
+ * 
+ * Not collective.
+ * 
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_IJParCSRVector_GetValues"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+int32_t
+impl_bHYPRE_IJParCSRVector_GetValues(
+  /* in */ bHYPRE_IJParCSRVector self,
+  /* in */ int32_t nvalues,
+  /* in */ int32_t* indices,
+  /* inout */ double* values)
+{
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRVector.GetValues) */
+  /* Insert the implementation of the GetValues method here... */
+
+   int ierr = 0;
+   struct bHYPRE_IJParCSRVector__data * data;
+   HYPRE_IJVector ij_b;
+   data = bHYPRE_IJParCSRVector__get_data( self );
+   ij_b = data -> ij_b;
+
+   ierr = HYPRE_IJVectorGetValues( ij_b, nvalues,
+                                   indices,
+                                   values );
+   return( ierr );
+
+  /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRVector.GetValues) */
+}
+
+/*
+ * Print the vector to file.  This is mainly for debugging
+ * purposes.
+ * 
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_IJParCSRVector_Print"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+int32_t
+impl_bHYPRE_IJParCSRVector_Print(
+  /* in */ bHYPRE_IJParCSRVector self,
+  /* in */ const char* filename)
+{
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRVector.Print) */
+  /* Insert the implementation of the Print method here... */
+
+   int ierr = 0;
+   struct bHYPRE_IJParCSRVector__data * data;
+   HYPRE_IJVector ij_b;
+   data = bHYPRE_IJParCSRVector__get_data( self );
+   ij_b = data->ij_b;
+
+   ierr = HYPRE_IJVectorPrint( ij_b, filename );
+
+   return ierr;
+
+  /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRVector.Print) */
+}
+
+/*
+ * Read the vector from file.  This is mainly for debugging
+ * purposes.
+ * 
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_IJParCSRVector_Read"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+int32_t
+impl_bHYPRE_IJParCSRVector_Read(
+  /* in */ bHYPRE_IJParCSRVector self,
+  /* in */ const char* filename,
+  /* in */ void* comm)
+{
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRVector.Read) */
+  /* Insert the implementation of the Read method here... */
+
+   int ierr = 0;
+   struct bHYPRE_IJParCSRVector__data * data;
+   HYPRE_IJVector ij_b;
+   data = bHYPRE_IJParCSRVector__get_data( self );
+   ij_b = data->ij_b;
+
+   /* HYPRE_IJVectorRead will make a new one */
+   ierr = HYPRE_IJVectorDestroy( ij_b );
+
+   ierr = HYPRE_IJVectorRead( filename, data->comm,
+                              HYPRE_PARCSR, &ij_b );
+   data->ij_b = ij_b;
+   bHYPRE_IJParCSRVector__set_data( self, data );
+
+   return( ierr );
+
+  /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRVector.Read) */
+}
+
+/*
  * Set {\tt self} to 0.
  * 
  */
@@ -443,402 +839,6 @@ impl_bHYPRE_IJParCSRVector_Axpy(
    return( ierr );
 
   /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRVector.Axpy) */
-}
-
-/*
- * Set the MPI Communicator.  DEPRECATED, Use Create()
- * 
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_bHYPRE_IJParCSRVector_SetCommunicator"
-
-#ifdef __cplusplus
-extern "C"
-#endif
-int32_t
-impl_bHYPRE_IJParCSRVector_SetCommunicator(
-  /* in */ bHYPRE_IJParCSRVector self,
-  /* in */ void* mpi_comm)
-{
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRVector.SetCommunicator) */
-  /* Insert the implementation of the SetCommunicator method here... */
-
-   int ierr = 0;
-   struct bHYPRE_IJParCSRVector__data * data;
-   data = bHYPRE_IJParCSRVector__get_data( self );
-   data -> comm = (MPI_Comm) mpi_comm;
-   return ierr;
-
-  /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRVector.SetCommunicator) */
-}
-
-/*
- * Prepare an object for setting coefficient values, whether for
- * the first time or subsequently.
- * 
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_bHYPRE_IJParCSRVector_Initialize"
-
-#ifdef __cplusplus
-extern "C"
-#endif
-int32_t
-impl_bHYPRE_IJParCSRVector_Initialize(
-  /* in */ bHYPRE_IJParCSRVector self)
-{
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRVector.Initialize) */
-  /* Insert the implementation of the Initialize method here... */
-
-   int ierr = 0;
-   struct bHYPRE_IJParCSRVector__data * data;
-   HYPRE_IJVector ij_b;
-   data = bHYPRE_IJParCSRVector__get_data( self );
-   ij_b = data -> ij_b;
-   ierr = HYPRE_IJVectorInitialize( ij_b );
-   return( ierr );
-
-  /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRVector.Initialize) */
-}
-
-/*
- * Finalize the construction of an object before using, either
- * for the first time or on subsequent uses. {\tt Initialize}
- * and {\tt Assemble} always appear in a matched set, with
- * Initialize preceding Assemble. Values can only be set in
- * between a call to Initialize and Assemble.
- * 
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_bHYPRE_IJParCSRVector_Assemble"
-
-#ifdef __cplusplus
-extern "C"
-#endif
-int32_t
-impl_bHYPRE_IJParCSRVector_Assemble(
-  /* in */ bHYPRE_IJParCSRVector self)
-{
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRVector.Assemble) */
-  /* Insert the implementation of the Assemble method here... */
-
-   int ierr = 0;
-   struct bHYPRE_IJParCSRVector__data * data;
-   HYPRE_IJVector ij_b;
-   data = bHYPRE_IJParCSRVector__get_data( self );
-   ij_b = data -> ij_b;
-
-   ierr = HYPRE_IJVectorAssemble( ij_b );
-   return( ierr );
-
-  /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRVector.Assemble) */
-}
-
-/*
- * The problem definition interface is a {\it builder} that
- * creates an object that contains the problem definition
- * information, e.g. a matrix. To perform subsequent operations
- * with that object, it must be returned from the problem
- * definition object. {\tt GetObject} performs this function.
- * At compile time, the type of the returned object is unknown.
- * Thus, the returned type is a sidl.BaseInterface.
- * QueryInterface or Cast must be used on the returned object to
- * convert it into a known type.
- * 
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_bHYPRE_IJParCSRVector_GetObject"
-
-#ifdef __cplusplus
-extern "C"
-#endif
-int32_t
-impl_bHYPRE_IJParCSRVector_GetObject(
-  /* in */ bHYPRE_IJParCSRVector self,
-  /* out */ sidl_BaseInterface* A)
-{
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRVector.GetObject) */
-  /* Insert the implementation of the GetObject method here... */
-
-   bHYPRE_IJParCSRVector_addRef( self );
-   *A = sidl_BaseInterface__cast( self );
-   return( 0 );
-
-  /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRVector.GetObject) */
-}
-
-/*
- * Set the local range for a vector object.  Each process owns
- * some unique consecutive range of vector unknowns, indicated
- * by the global indices {\tt jlower} and {\tt jupper}.  The
- * data is required to be such that the value of {\tt jlower} on
- * any process $p$ be exactly one more than the value of {\tt
- * jupper} on process $p-1$.  Note that the first index of the
- * global vector may start with any integer value.  In
- * particular, one may use zero- or one-based indexing.
- * 
- * Collective.
- * 
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_bHYPRE_IJParCSRVector_SetLocalRange"
-
-#ifdef __cplusplus
-extern "C"
-#endif
-int32_t
-impl_bHYPRE_IJParCSRVector_SetLocalRange(
-  /* in */ bHYPRE_IJParCSRVector self,
-  /* in */ int32_t jlower,
-  /* in */ int32_t jupper)
-{
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRVector.SetLocalRange) */
-  /* Insert the implementation of the SetLocalRange method here... */
-
-   int ierr = 0;
-   struct bHYPRE_IJParCSRVector__data * data;
-   HYPRE_IJVector ij_b;
-   data = bHYPRE_IJParCSRVector__get_data( self );
-   ij_b = data -> ij_b;
-   /* SetCommunicator should be called before Create */
-   assert( data->comm != MPI_COMM_NULL );
-
-   ierr = HYPRE_IJVectorCreate( data->comm, jlower, jupper, &ij_b );
-   ierr += HYPRE_IJVectorSetObjectType( ij_b, HYPRE_PARCSR );
-   data -> ij_b = ij_b;
-
-   return( ierr );
-
-  /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRVector.SetLocalRange) */
-}
-
-/*
- * Sets values in vector.  The arrays {\tt values} and {\tt
- * indices} are of dimension {\tt nvalues} and contain the
- * vector values to be set and the corresponding global vector
- * indices, respectively.  Erases any previous values at the
- * specified locations and replaces them with new ones.
- * 
- * Not collective.
- * 
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_bHYPRE_IJParCSRVector_SetValues"
-
-#ifdef __cplusplus
-extern "C"
-#endif
-int32_t
-impl_bHYPRE_IJParCSRVector_SetValues(
-  /* in */ bHYPRE_IJParCSRVector self,
-  /* in */ int32_t nvalues,
-  /* in */ struct sidl_int__array* indices,
-  /* in */ struct sidl_double__array* values)
-{
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRVector.SetValues) */
-  /* Insert the implementation of the SetValues method here... */
-
-   int ierr = 0;
-   struct bHYPRE_IJParCSRVector__data * data;
-   HYPRE_IJVector ij_b;
-   data = bHYPRE_IJParCSRVector__get_data( self );
-   ij_b = data -> ij_b;
-
-   ierr = HYPRE_IJVectorSetValues( ij_b, nvalues,
-                                   sidlArrayAddr1( indices, 0 ),
-                                   sidlArrayAddr1( values, 0 ) );
-   return( ierr );
-
-  /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRVector.SetValues) */
-}
-
-/*
- * Adds to values in vector.  Usage details are analogous to
- * {\tt SetValues}.
- * 
- * Not collective.
- * 
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_bHYPRE_IJParCSRVector_AddToValues"
-
-#ifdef __cplusplus
-extern "C"
-#endif
-int32_t
-impl_bHYPRE_IJParCSRVector_AddToValues(
-  /* in */ bHYPRE_IJParCSRVector self,
-  /* in */ int32_t nvalues,
-  /* in */ struct sidl_int__array* indices,
-  /* in */ struct sidl_double__array* values)
-{
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRVector.AddToValues) */
-  /* Insert the implementation of the AddToValues method here... */
-
-   int ierr = 0;
-   struct bHYPRE_IJParCSRVector__data * data;
-   HYPRE_IJVector ij_b;
-   data = bHYPRE_IJParCSRVector__get_data( self );
-   ij_b = data->ij_b;
-
-   ierr = HYPRE_IJVectorAddToValues( ij_b, nvalues,
-                                     sidlArrayAddr1( indices, 0 ),
-                                     sidlArrayAddr1( values, 0 ) );
-   return( ierr );
-
-  /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRVector.AddToValues) */
-}
-
-/*
- * Returns range of the part of the vector owned by this
- * processor.
- * 
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_bHYPRE_IJParCSRVector_GetLocalRange"
-
-#ifdef __cplusplus
-extern "C"
-#endif
-int32_t
-impl_bHYPRE_IJParCSRVector_GetLocalRange(
-  /* in */ bHYPRE_IJParCSRVector self,
-  /* out */ int32_t* jlower,
-  /* out */ int32_t* jupper)
-{
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRVector.GetLocalRange) */
-  /* Insert the implementation of the GetLocalRange method here... */
-
-   int ierr = 0;
-   struct bHYPRE_IJParCSRVector__data * data;
-   HYPRE_IJVector ij_b;
-   data = bHYPRE_IJParCSRVector__get_data( self );
-   ij_b = data -> ij_b;
-
-   ierr = HYPRE_IJVectorGetLocalRange( ij_b, jlower, jupper );
-
-   return( ierr );
-
-  /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRVector.GetLocalRange) */
-}
-
-/*
- * Gets values in vector.  Usage details are analogous to {\tt
- * SetValues}.
- * 
- * Not collective.
- * 
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_bHYPRE_IJParCSRVector_GetValues"
-
-#ifdef __cplusplus
-extern "C"
-#endif
-int32_t
-impl_bHYPRE_IJParCSRVector_GetValues(
-  /* in */ bHYPRE_IJParCSRVector self,
-  /* in */ int32_t nvalues,
-  /* in */ struct sidl_int__array* indices,
-  /* inout */ struct sidl_double__array** values)
-{
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRVector.GetValues) */
-  /* Insert the implementation of the GetValues method here... */
-
-   int ierr = 0;
-   struct bHYPRE_IJParCSRVector__data * data;
-   HYPRE_IJVector ij_b;
-   data = bHYPRE_IJParCSRVector__get_data( self );
-   ij_b = data -> ij_b;
-
-   ierr = HYPRE_IJVectorGetValues( ij_b, nvalues,
-                                   sidlArrayAddr1( indices, 0 ),
-                                   sidlArrayAddr1( *values, 0 ) );
-   return( ierr );
-
-  /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRVector.GetValues) */
-}
-
-/*
- * Print the vector to file.  This is mainly for debugging
- * purposes.
- * 
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_bHYPRE_IJParCSRVector_Print"
-
-#ifdef __cplusplus
-extern "C"
-#endif
-int32_t
-impl_bHYPRE_IJParCSRVector_Print(
-  /* in */ bHYPRE_IJParCSRVector self,
-  /* in */ const char* filename)
-{
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRVector.Print) */
-  /* Insert the implementation of the Print method here... */
-
-   int ierr = 0;
-   struct bHYPRE_IJParCSRVector__data * data;
-   HYPRE_IJVector ij_b;
-   data = bHYPRE_IJParCSRVector__get_data( self );
-   ij_b = data->ij_b;
-
-   ierr = HYPRE_IJVectorPrint( ij_b, filename );
-
-   return ierr;
-
-  /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRVector.Print) */
-}
-
-/*
- * Read the vector from file.  This is mainly for debugging
- * purposes.
- * 
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_bHYPRE_IJParCSRVector_Read"
-
-#ifdef __cplusplus
-extern "C"
-#endif
-int32_t
-impl_bHYPRE_IJParCSRVector_Read(
-  /* in */ bHYPRE_IJParCSRVector self,
-  /* in */ const char* filename,
-  /* in */ void* comm)
-{
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRVector.Read) */
-  /* Insert the implementation of the Read method here... */
-
-   int ierr = 0;
-   struct bHYPRE_IJParCSRVector__data * data;
-   HYPRE_IJVector ij_b;
-   data = bHYPRE_IJParCSRVector__get_data( self );
-   ij_b = data->ij_b;
-
-   /* HYPRE_IJVectorRead will make a new one */
-   ierr = HYPRE_IJVectorDestroy( ij_b );
-
-   ierr = HYPRE_IJVectorRead( filename, data->comm,
-                              HYPRE_PARCSR, &ij_b );
-   data->ij_b = ij_b;
-   bHYPRE_IJParCSRVector__set_data( self, data );
-
-   return( ierr );
-
-  /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRVector.Read) */
 }
 /* Babel internal methods, Users should not edit below this line. */
 struct bHYPRE_IJParCSRVector__object* 

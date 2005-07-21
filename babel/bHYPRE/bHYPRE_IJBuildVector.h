@@ -127,8 +127,8 @@ int32_t
 bHYPRE_IJBuildVector_SetValues(
   /* in */ bHYPRE_IJBuildVector self,
   /* in */ int32_t nvalues,
-  /* in */ struct sidl_int__array* indices,
-  /* in */ struct sidl_double__array* values);
+  /* in */ int32_t* indices,
+  /* in */ double* values);
 
 /**
  * Adds to values in vector.  Usage details are analogous to
@@ -141,8 +141,8 @@ int32_t
 bHYPRE_IJBuildVector_AddToValues(
   /* in */ bHYPRE_IJBuildVector self,
   /* in */ int32_t nvalues,
-  /* in */ struct sidl_int__array* indices,
-  /* in */ struct sidl_double__array* values);
+  /* in */ int32_t* indices,
+  /* in */ double* values);
 
 /**
  * Returns range of the part of the vector owned by this
@@ -166,8 +166,8 @@ int32_t
 bHYPRE_IJBuildVector_GetValues(
   /* in */ bHYPRE_IJBuildVector self,
   /* in */ int32_t nvalues,
-  /* in */ struct sidl_int__array* indices,
-  /* inout */ struct sidl_double__array** values);
+  /* in */ int32_t* indices,
+  /* inout */ double* values);
 
 /**
  * Print the vector to file.  This is mainly for debugging

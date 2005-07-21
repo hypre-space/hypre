@@ -298,7 +298,8 @@ extern "C"
 int32_t
 impl_bHYPRE_StructVector_SetNumGhost(
   /* in */ bHYPRE_StructVector self,
-  /* in */ struct sidl_int__array* num_ghost)
+  /* in */ int32_t* num_ghost,
+  /* in */ int32_t dim2)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.StructVector.SetNumGhost) */
   /* Insert the implementation of the SetNumGhost method here... */
@@ -309,7 +310,7 @@ impl_bHYPRE_StructVector_SetNumGhost(
    data = bHYPRE_StructVector__get_data( self );
    Hy = data -> vec;
 
-   ierr += HYPRE_StructVectorSetNumGhost( Hy, sidlArrayAddr1( num_ghost, 0 ) );
+   ierr += HYPRE_StructVectorSetNumGhost( Hy, num_ghost );
 
    return ierr;
 
@@ -329,7 +330,8 @@ extern "C"
 int32_t
 impl_bHYPRE_StructVector_SetValue(
   /* in */ bHYPRE_StructVector self,
-  /* in */ struct sidl_int__array* grid_index,
+  /* in */ int32_t* grid_index,
+  /* in */ int32_t dim,
   /* in */ double value)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.StructVector.SetValue) */
@@ -341,7 +343,7 @@ impl_bHYPRE_StructVector_SetValue(
    data = bHYPRE_StructVector__get_data( self );
    Hy = data -> vec;
 
-   ierr += HYPRE_StructVectorSetValues( Hy, sidlArrayAddr1( grid_index, 0 ), value );
+   ierr += HYPRE_StructVectorSetValues( Hy, grid_index, value );
 
    return ierr;
 
@@ -361,9 +363,11 @@ extern "C"
 int32_t
 impl_bHYPRE_StructVector_SetBoxValues(
   /* in */ bHYPRE_StructVector self,
-  /* in */ struct sidl_int__array* ilower,
-  /* in */ struct sidl_int__array* iupper,
-  /* in */ struct sidl_double__array* values)
+  /* in */ int32_t* ilower,
+  /* in */ int32_t* iupper,
+  /* in */ int32_t dim,
+  /* in */ double* values,
+  /* in */ int32_t nvalues)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.StructVector.SetBoxValues) */
   /* Insert the implementation of the SetBoxValues method here... */
@@ -375,8 +379,8 @@ impl_bHYPRE_StructVector_SetBoxValues(
    Hy = data -> vec;
 
    ierr += HYPRE_StructVectorSetBoxValues
-      ( Hy, sidlArrayAddr1( ilower, 0 ), sidlArrayAddr1( iupper, 0 ),
-        sidlArrayAddr1( values, 0 ) );
+      ( Hy, ilower, iupper,
+        values );
 
    return ierr;
 

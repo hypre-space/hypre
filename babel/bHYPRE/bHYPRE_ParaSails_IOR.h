@@ -38,6 +38,9 @@ extern "C" {
  * 
  * RDF: Documentation goes here.
  * 
+ * ParaSails requires an IJParCSR matrix
+ * 
+ * 
  */
 
 struct bHYPRE_ParaSails__array;

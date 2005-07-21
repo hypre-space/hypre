@@ -17,6 +17,15 @@
 
 /*
  * Symbol "bHYPRE.StructPFMG" (version 1.0.0)
+ * 
+ * Objects of this type can be cast to PreconditionedSolver objects
+ * using the {\tt \_\_cast} methods.
+ * 
+ * RDF: Documentation goes here.
+ * 
+ * The StructPFMG solver requires a Struct matrix.
+ * 
+ * 
  */
 
 #include "bHYPRE_StructPFMG_Impl.h"
@@ -339,7 +348,8 @@ int32_t
 impl_bHYPRE_StructPFMG_SetIntArray1Parameter(
   /* in */ bHYPRE_StructPFMG self,
   /* in */ const char* name,
-  /* in */ struct sidl_int__array* value)
+  /* in */ int32_t* value,
+  /* in */ int32_t nvalues)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.StructPFMG.SetIntArray1Parameter) */
   /* Insert the implementation of the SetIntArray1Parameter method here... */
@@ -385,23 +395,21 @@ int32_t
 impl_bHYPRE_StructPFMG_SetDoubleArray1Parameter(
   /* in */ bHYPRE_StructPFMG self,
   /* in */ const char* name,
-  /* in */ struct sidl_double__array* value)
+  /* in */ double* value,
+  /* in */ int32_t nvalues)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.StructPFMG.SetDoubleArray1Parameter) */
   /* Insert the implementation of the SetDoubleArray1Parameter method here... */
-   int ierr = 0, dim;
+   int ierr = 0;
    HYPRE_StructSolver solver;
    struct bHYPRE_StructPFMG__data * data;
 
    data = bHYPRE_StructPFMG__get_data( self );
    solver = data->solver;
 
-   dim = sidl_double__array_dimen( value );
-
    if ( strcmp(name,"Dxyz")==0 )
    {
-      assert( dim==1 );
-      ierr += HYPRE_StructPFMGSetDxyz( solver, value->d_firstElement );
+      ierr += HYPRE_StructPFMGSetDxyz( solver, value );
    }
    else
    {

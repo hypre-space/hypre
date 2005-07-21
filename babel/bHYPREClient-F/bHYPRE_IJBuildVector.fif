@@ -265,19 +265,17 @@ C       Not collective.
 C       
 C       
 
-        subroutine bHYPRE_IJBuildVector_SetValues_f(self, nvalues,
-     &     indices, values, retval)
+        subroutine bHYPRE_IJBuildVector_SetValues_f(self, indices,
+     &     values, retval)
         implicit none
 C       in bHYPRE.IJBuildVector self
         integer*8 self
-C       in int nvalues
-        integer*4 nvalues
-C       in array<int,column-major> indices
-        integer*8 indices
-C       in array<double,column-major> values
-        integer*8 values
 C       out int retval
         integer*4 retval
+C       in rarray<int> indices(nvalues)
+        integer*4 indices(0:nvalues-1)
+C       in rarray<double> values(nvalues)
+        double precision values(0:nvalues-1)
         end
 
 
@@ -289,19 +287,17 @@ C       Not collective.
 C       
 C       
 
-        subroutine bHYPRE_IJBuildVector_AddToValues_f(self, nvalues,
-     &     indices, values, retval)
+        subroutine bHYPRE_IJBuildVector_AddToValues_f(self, indices,
+     &     values, retval)
         implicit none
 C       in bHYPRE.IJBuildVector self
         integer*8 self
-C       in int nvalues
-        integer*4 nvalues
-C       in array<int,column-major> indices
-        integer*8 indices
-C       in array<double> values
-        integer*8 values
 C       out int retval
         integer*4 retval
+C       in rarray<int> indices(nvalues)
+        integer*4 indices(0:nvalues-1)
+C       in rarray<double> values(nvalues)
+        double precision values(0:nvalues-1)
         end
 
 
@@ -333,19 +329,17 @@ C       Not collective.
 C       
 C       
 
-        subroutine bHYPRE_IJBuildVector_GetValues_f(self, nvalues,
-     &     indices, values, retval)
+        subroutine bHYPRE_IJBuildVector_GetValues_f(self, indices,
+     &     values, retval)
         implicit none
 C       in bHYPRE.IJBuildVector self
         integer*8 self
-C       in int nvalues
-        integer*4 nvalues
-C       in array<int,column-major> indices
-        integer*8 indices
-C       inout array<double,column-major> values
-        integer*8 values
 C       out int retval
         integer*4 retval
+C       in rarray<int> indices(nvalues)
+        integer*4 indices(0:nvalues-1)
+C       inout rarray<double> values(nvalues)
+        double precision values(0:nvalues-1)
         end
 
 

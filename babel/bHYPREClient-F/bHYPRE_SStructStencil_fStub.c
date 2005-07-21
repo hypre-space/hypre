@@ -351,20 +351,23 @@ SIDLFortran77Symbol(bhypre_sstructstencil_setentry_f,BHYPRE_SSTRUCTSTENCIL_SETEN
 (
   int64_t *self,
   int32_t *entry,
-  int64_t *offset,
+  int32_t *offset,
+  int32_t *dim,
   int32_t *var,
   int32_t *retval
 )
 {
   struct bHYPRE_SStructStencil__epv *_epv = NULL;
   struct bHYPRE_SStructStencil__object* _proxy_self = NULL;
-  struct sidl_int__array* _proxy_offset = NULL;
+  struct sidl_int__array _alt_offset;
+  struct sidl_int__array* _proxy_offset = &_alt_offset;
+  int32_t offset_lower[1], offset_upper[1], offset_stride[1];
   _proxy_self =
     (struct bHYPRE_SStructStencil__object*)
     (ptrdiff_t)(*self);
-  _proxy_offset =
-    (struct sidl_int__array*)
-    (ptrdiff_t)(*offset);
+  offset_upper[0] = (*dim)-1;
+  sidl_int__array_init(offset, _proxy_offset, 1, offset_lower, offset_upper,
+    offset_stride);
   _epv = _proxy_self->d_epv;
   *retval = 
     (*(_epv->f_SetEntry))(

@@ -122,9 +122,11 @@ int32_t
 bHYPRE_SStructBuildVector_SetValues(
   /* in */ bHYPRE_SStructBuildVector self,
   /* in */ int32_t part,
-  /* in */ struct sidl_int__array* index,
+  /* in */ int32_t* index,
+  /* in */ int32_t dim,
   /* in */ int32_t var,
-  /* in */ struct sidl_double__array* values);
+  /* in */ double* values,
+  /* in */ int32_t one);
 
 /**
  * Set vector coefficients a box at a time.
@@ -142,10 +144,12 @@ int32_t
 bHYPRE_SStructBuildVector_SetBoxValues(
   /* in */ bHYPRE_SStructBuildVector self,
   /* in */ int32_t part,
-  /* in */ struct sidl_int__array* ilower,
-  /* in */ struct sidl_int__array* iupper,
+  /* in */ int32_t* ilower,
+  /* in */ int32_t* iupper,
+  /* in */ int32_t dim,
   /* in */ int32_t var,
-  /* in */ struct sidl_double__array* values);
+  /* in */ double* values,
+  /* in */ int32_t nvalues);
 
 /**
  * Set vector coefficients index by index.
@@ -163,9 +167,11 @@ int32_t
 bHYPRE_SStructBuildVector_AddToValues(
   /* in */ bHYPRE_SStructBuildVector self,
   /* in */ int32_t part,
-  /* in */ struct sidl_int__array* index,
+  /* in */ int32_t* index,
+  /* in */ int32_t dim,
   /* in */ int32_t var,
-  /* in */ struct sidl_double__array* values);
+  /* in */ double* values,
+  /* in */ int32_t one);
 
 /**
  * Set vector coefficients a box at a time.
@@ -183,10 +189,12 @@ int32_t
 bHYPRE_SStructBuildVector_AddToBoxValues(
   /* in */ bHYPRE_SStructBuildVector self,
   /* in */ int32_t part,
-  /* in */ struct sidl_int__array* ilower,
-  /* in */ struct sidl_int__array* iupper,
+  /* in */ int32_t* ilower,
+  /* in */ int32_t* iupper,
+  /* in */ int32_t dim,
   /* in */ int32_t var,
-  /* in */ struct sidl_double__array* values);
+  /* in */ double* values,
+  /* in */ int32_t nvalues);
 
 /**
  * Gather vector data before calling {\tt GetValues}.
@@ -211,7 +219,8 @@ int32_t
 bHYPRE_SStructBuildVector_GetValues(
   /* in */ bHYPRE_SStructBuildVector self,
   /* in */ int32_t part,
-  /* in */ struct sidl_int__array* index,
+  /* in */ int32_t* index,
+  /* in */ int32_t dim,
   /* in */ int32_t var,
   /* out */ double* value);
 
@@ -230,10 +239,12 @@ int32_t
 bHYPRE_SStructBuildVector_GetBoxValues(
   /* in */ bHYPRE_SStructBuildVector self,
   /* in */ int32_t part,
-  /* in */ struct sidl_int__array* ilower,
-  /* in */ struct sidl_int__array* iupper,
+  /* in */ int32_t* ilower,
+  /* in */ int32_t* iupper,
+  /* in */ int32_t dim,
   /* in */ int32_t var,
-  /* inout */ struct sidl_double__array** values);
+  /* inout */ double* values,
+  /* in */ int32_t nvalues);
 
 /**
  * Set the vector to be complex.

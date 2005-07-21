@@ -96,7 +96,6 @@ struct bHYPRE_SStructBuildMatrix__epv {
     /* in */ int32_t part,
     /* in */ struct sidl_int__array* index,
     /* in */ int32_t var,
-    /* in */ int32_t nentries,
     /* in */ struct sidl_int__array* entries,
     /* in */ struct sidl_double__array* values);
   int32_t (*f_SetBoxValues)(
@@ -105,7 +104,6 @@ struct bHYPRE_SStructBuildMatrix__epv {
     /* in */ struct sidl_int__array* ilower,
     /* in */ struct sidl_int__array* iupper,
     /* in */ int32_t var,
-    /* in */ int32_t nentries,
     /* in */ struct sidl_int__array* entries,
     /* in */ struct sidl_double__array* values);
   int32_t (*f_AddToValues)(
@@ -113,7 +111,6 @@ struct bHYPRE_SStructBuildMatrix__epv {
     /* in */ int32_t part,
     /* in */ struct sidl_int__array* index,
     /* in */ int32_t var,
-    /* in */ int32_t nentries,
     /* in */ struct sidl_int__array* entries,
     /* in */ struct sidl_double__array* values);
   int32_t (*f_AddToBoxValues)(
@@ -122,7 +119,6 @@ struct bHYPRE_SStructBuildMatrix__epv {
     /* in */ struct sidl_int__array* ilower,
     /* in */ struct sidl_int__array* iupper,
     /* in */ int32_t var,
-    /* in */ int32_t nentries,
     /* in */ struct sidl_int__array* entries,
     /* in */ struct sidl_double__array* values);
   int32_t (*f_SetSymmetric)(
@@ -233,7 +229,6 @@ struct bHYPRE__SStructBuildMatrix__epv {
     /* in */ int32_t part,
     /* in */ struct sidl_int__array* index,
     /* in */ int32_t var,
-    /* in */ int32_t nentries,
     /* in */ struct sidl_int__array* entries,
     /* in */ struct sidl_double__array* values);
   int32_t (*f_SetBoxValues)(
@@ -242,7 +237,6 @@ struct bHYPRE__SStructBuildMatrix__epv {
     /* in */ struct sidl_int__array* ilower,
     /* in */ struct sidl_int__array* iupper,
     /* in */ int32_t var,
-    /* in */ int32_t nentries,
     /* in */ struct sidl_int__array* entries,
     /* in */ struct sidl_double__array* values);
   int32_t (*f_AddToValues)(
@@ -250,7 +244,6 @@ struct bHYPRE__SStructBuildMatrix__epv {
     /* in */ int32_t part,
     /* in */ struct sidl_int__array* index,
     /* in */ int32_t var,
-    /* in */ int32_t nentries,
     /* in */ struct sidl_int__array* entries,
     /* in */ struct sidl_double__array* values);
   int32_t (*f_AddToBoxValues)(
@@ -259,7 +252,6 @@ struct bHYPRE__SStructBuildMatrix__epv {
     /* in */ struct sidl_int__array* ilower,
     /* in */ struct sidl_int__array* iupper,
     /* in */ int32_t var,
-    /* in */ int32_t nentries,
     /* in */ struct sidl_int__array* entries,
     /* in */ struct sidl_double__array* values);
   int32_t (*f_SetSymmetric)(

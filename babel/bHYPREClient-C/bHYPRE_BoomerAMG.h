@@ -18,6 +18,8 @@
  * 
  * Algebraic multigrid solver, based on classical Ruge-Stueben.
  * 
+ * BoomerAMG requires an IJParCSR matrix
+ * 
  * The following optional parameters are available and may be set
  * using the appropriate {\tt Parameter} function (as indicated in
  * parentheses):
@@ -260,7 +262,8 @@ int32_t
 bHYPRE_BoomerAMG_SetIntArray1Parameter(
   /* in */ bHYPRE_BoomerAMG self,
   /* in */ const char* name,
-  /* in */ struct sidl_int__array* value);
+  /* in */ int32_t* value,
+  /* in */ int32_t nvalues);
 
 /**
  * Set the int 2-D array parameter associated with {\tt name}.
@@ -280,7 +283,8 @@ int32_t
 bHYPRE_BoomerAMG_SetDoubleArray1Parameter(
   /* in */ bHYPRE_BoomerAMG self,
   /* in */ const char* name,
-  /* in */ struct sidl_double__array* value);
+  /* in */ double* value,
+  /* in */ int32_t nvalues);
 
 /**
  * Set the double 2-D array parameter associated with {\tt name}.

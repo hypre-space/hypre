@@ -73,14 +73,15 @@ extern
 int32_t
 impl_bHYPRE_StructGrid_SetPeriodic(
   /* in */ bHYPRE_StructGrid self,
-  /* in */ struct sidl_int__array* periodic);
+  /* in */ int32_t* periodic,
+  /* in */ int32_t dim);
 
 extern
 int32_t
 impl_bHYPRE_StructGrid_SetNumGhost(
   /* in */ bHYPRE_StructGrid self,
   /* in */ int32_t* num_ghost,
-  /* in */ int32_t len);
+  /* in */ int32_t dim2);
 
 extern
 int32_t
@@ -138,11 +139,13 @@ skel_bHYPRE_StructGrid_SetPeriodic(
   int32_t _return;
   struct sidl_int__array* periodic_proxy = sidl_int__array_ensure(periodic, 1,
     sidl_column_major_order);
+  int32_t* periodic_tmp = periodic_proxy->d_firstElement;
+  int32_t dim = sidlLength(periodic_proxy,0);
   _return =
     impl_bHYPRE_StructGrid_SetPeriodic(
       self,
-      periodic_proxy);
-  sidl_int__array_deleteRef(periodic_proxy);
+      periodic_tmp,
+      dim);
   return _return;
 }
 
@@ -155,12 +158,12 @@ skel_bHYPRE_StructGrid_SetNumGhost(
   struct sidl_int__array* num_ghost_proxy = sidl_int__array_ensure(num_ghost, 1,
     sidl_column_major_order);
   int32_t* num_ghost_tmp = num_ghost_proxy->d_firstElement;
-  int32_t len = sidlLength(num_ghost_proxy,0);
+  int32_t dim2 = sidlLength(num_ghost_proxy,0);
   _return =
     impl_bHYPRE_StructGrid_SetNumGhost(
       self,
       num_ghost_tmp,
-      len);
+      dim2);
   return _return;
 }
 

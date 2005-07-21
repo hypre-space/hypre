@@ -17,6 +17,8 @@ C       Symbol "bHYPRE.BoomerAMG" (version 1.0.0)
 C       
 C       Algebraic multigrid solver, based on classical Ruge-Stueben.
 C       
+C       BoomerAMG requires an IJParCSR matrix
+C       
 C       The following optional parameters are available and may be set
 C       using the appropriate {\tt Parameter} function (as indicated in
 C       parentheses):
@@ -377,10 +379,10 @@ C       in bHYPRE.BoomerAMG self
         integer*8 self
 C       in string name
         character*(*) name
-C       in array<int,column-major> value
-        integer*8 value
 C       out int retval
         integer*4 retval
+C       in rarray<int> value(nvalues)
+        integer*4 value(0:nvalues-1)
         end
 
 
@@ -415,10 +417,10 @@ C       in bHYPRE.BoomerAMG self
         integer*8 self
 C       in string name
         character*(*) name
-C       in array<double,column-major> value
-        integer*8 value
 C       out int retval
         integer*4 retval
+C       in rarray<double> value(nvalues)
+        double precision value(0:nvalues-1)
         end
 
 

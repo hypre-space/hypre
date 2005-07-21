@@ -23,6 +23,9 @@
  * 
  * RDF: Documentation goes here.
  * 
+ * Pilut has not been implemented yet.
+ * 
+ * 
  */
 
 #include "bHYPRE_Pilut_Impl.h"
@@ -193,7 +196,8 @@ int32_t
 impl_bHYPRE_Pilut_SetIntArray1Parameter(
   /* in */ bHYPRE_Pilut self,
   /* in */ const char* name,
-  /* in */ struct sidl_int__array* value)
+  /* in */ int32_t* value,
+  /* in */ int32_t nvalues)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.Pilut.SetIntArray1Parameter) */
   /* Insert the implementation of the SetIntArray1Parameter method here... */
@@ -239,7 +243,8 @@ int32_t
 impl_bHYPRE_Pilut_SetDoubleArray1Parameter(
   /* in */ bHYPRE_Pilut self,
   /* in */ const char* name,
-  /* in */ struct sidl_double__array* value)
+  /* in */ double* value,
+  /* in */ int32_t nvalues)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.Pilut.SetDoubleArray1Parameter) */
   /* Insert the implementation of the SetDoubleArray1Parameter method here... */

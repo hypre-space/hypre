@@ -170,108 +170,6 @@ C       out sidl.ClassInfo retval
 
 
 C       
-C       Set {\tt self} to 0.
-C       
-C       
-
-        subroutine bHYPRE_IJParCSRVector_Clear_f(self, retval)
-        implicit none
-C       in bHYPRE.IJParCSRVector self
-        integer*8 self
-C       out int retval
-        integer*4 retval
-        end
-
-
-C       
-C       Copy x into {\tt self}.
-C       
-C       
-
-        subroutine bHYPRE_IJParCSRVector_Copy_f(self, x, retval)
-        implicit none
-C       in bHYPRE.IJParCSRVector self
-        integer*8 self
-C       in bHYPRE.Vector x
-        integer*8 x
-C       out int retval
-        integer*4 retval
-        end
-
-
-C       
-C       Create an {\tt x} compatible with {\tt self}.
-C       
-C       NOTE: When this method is used in an inherited class, the
-C       cloned {\tt Vector} object can be cast to an object with the
-C       inherited class type.
-C       
-C       
-
-        subroutine bHYPRE_IJParCSRVector_Clone_f(self, x, retval)
-        implicit none
-C       in bHYPRE.IJParCSRVector self
-        integer*8 self
-C       out bHYPRE.Vector x
-        integer*8 x
-C       out int retval
-        integer*4 retval
-        end
-
-
-C       
-C       Scale {\tt self} by {\tt a}.
-C       
-C       
-
-        subroutine bHYPRE_IJParCSRVector_Scale_f(self, a, retval)
-        implicit none
-C       in bHYPRE.IJParCSRVector self
-        integer*8 self
-C       in double a
-        double precision a
-C       out int retval
-        integer*4 retval
-        end
-
-
-C       
-C       Compute {\tt d}, the inner-product of {\tt self} and {\tt x}.
-C       
-C       
-
-        subroutine bHYPRE_IJParCSRVector_Dot_f(self, x, d, retval)
-        implicit none
-C       in bHYPRE.IJParCSRVector self
-        integer*8 self
-C       in bHYPRE.Vector x
-        integer*8 x
-C       out double d
-        double precision d
-C       out int retval
-        integer*4 retval
-        end
-
-
-C       
-C       Add {\tt a}*{\tt x} to {\tt self}.
-C       
-C       
-
-        subroutine bHYPRE_IJParCSRVector_Axpy_f(self, a, x, retval)
-        implicit none
-C       in bHYPRE.IJParCSRVector self
-        integer*8 self
-C       in double a
-        double precision a
-C       in bHYPRE.Vector x
-        integer*8 x
-C       out int retval
-        integer*4 retval
-        end
-
-
-C       
 C       Set the MPI Communicator.  DEPRECATED, Use Create()
 C       
 C       
@@ -384,19 +282,17 @@ C       Not collective.
 C       
 C       
 
-        subroutine bHYPRE_IJParCSRVector_SetValues_f(self, nvalues,
-     &     indices, values, retval)
+        subroutine bHYPRE_IJParCSRVector_SetValues_f(self, indices,
+     &     values, retval)
         implicit none
 C       in bHYPRE.IJParCSRVector self
         integer*8 self
-C       in int nvalues
-        integer*4 nvalues
-C       in array<int,column-major> indices
-        integer*8 indices
-C       in array<double,column-major> values
-        integer*8 values
 C       out int retval
         integer*4 retval
+C       in rarray<int> indices(nvalues)
+        integer*4 indices(0:nvalues-1)
+C       in rarray<double> values(nvalues)
+        double precision values(0:nvalues-1)
         end
 
 
@@ -408,19 +304,17 @@ C       Not collective.
 C       
 C       
 
-        subroutine bHYPRE_IJParCSRVector_AddToValues_f(self, nvalues,
-     &     indices, values, retval)
+        subroutine bHYPRE_IJParCSRVector_AddToValues_f(self, indices,
+     &     values, retval)
         implicit none
 C       in bHYPRE.IJParCSRVector self
         integer*8 self
-C       in int nvalues
-        integer*4 nvalues
-C       in array<int,column-major> indices
-        integer*8 indices
-C       in array<double> values
-        integer*8 values
 C       out int retval
         integer*4 retval
+C       in rarray<int> indices(nvalues)
+        integer*4 indices(0:nvalues-1)
+C       in rarray<double> values(nvalues)
+        double precision values(0:nvalues-1)
         end
 
 
@@ -452,19 +346,17 @@ C       Not collective.
 C       
 C       
 
-        subroutine bHYPRE_IJParCSRVector_GetValues_f(self, nvalues,
-     &     indices, values, retval)
+        subroutine bHYPRE_IJParCSRVector_GetValues_f(self, indices,
+     &     values, retval)
         implicit none
 C       in bHYPRE.IJParCSRVector self
         integer*8 self
-C       in int nvalues
-        integer*4 nvalues
-C       in array<int,column-major> indices
-        integer*8 indices
-C       inout array<double,column-major> values
-        integer*8 values
 C       out int retval
         integer*4 retval
+C       in rarray<int> indices(nvalues)
+        integer*4 indices(0:nvalues-1)
+C       inout rarray<double> values(nvalues)
+        double precision values(0:nvalues-1)
         end
 
 
@@ -500,6 +392,108 @@ C       in string filename
         character*(*) filename
 C       in opaque comm
         integer*8 comm
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Set {\tt self} to 0.
+C       
+C       
+
+        subroutine bHYPRE_IJParCSRVector_Clear_f(self, retval)
+        implicit none
+C       in bHYPRE.IJParCSRVector self
+        integer*8 self
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Copy x into {\tt self}.
+C       
+C       
+
+        subroutine bHYPRE_IJParCSRVector_Copy_f(self, x, retval)
+        implicit none
+C       in bHYPRE.IJParCSRVector self
+        integer*8 self
+C       in bHYPRE.Vector x
+        integer*8 x
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Create an {\tt x} compatible with {\tt self}.
+C       
+C       NOTE: When this method is used in an inherited class, the
+C       cloned {\tt Vector} object can be cast to an object with the
+C       inherited class type.
+C       
+C       
+
+        subroutine bHYPRE_IJParCSRVector_Clone_f(self, x, retval)
+        implicit none
+C       in bHYPRE.IJParCSRVector self
+        integer*8 self
+C       out bHYPRE.Vector x
+        integer*8 x
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Scale {\tt self} by {\tt a}.
+C       
+C       
+
+        subroutine bHYPRE_IJParCSRVector_Scale_f(self, a, retval)
+        implicit none
+C       in bHYPRE.IJParCSRVector self
+        integer*8 self
+C       in double a
+        double precision a
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Compute {\tt d}, the inner-product of {\tt self} and {\tt x}.
+C       
+C       
+
+        subroutine bHYPRE_IJParCSRVector_Dot_f(self, x, d, retval)
+        implicit none
+C       in bHYPRE.IJParCSRVector self
+        integer*8 self
+C       in bHYPRE.Vector x
+        integer*8 x
+C       out double d
+        double precision d
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Add {\tt a}*{\tt x} to {\tt self}.
+C       
+C       
+
+        subroutine bHYPRE_IJParCSRVector_Axpy_f(self, a, x, retval)
+        implicit none
+C       in bHYPRE.IJParCSRVector self
+        integer*8 self
+C       in double a
+        double precision a
+C       in bHYPRE.Vector x
+        integer*8 x
 C       out int retval
         integer*4 retval
         end

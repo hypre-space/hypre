@@ -238,10 +238,10 @@ C       in bHYPRE.Solver self
         integer*8 self
 C       in string name
         character*(*) name
-C       in array<int,column-major> value
-        integer*8 value
 C       out int retval
         integer*4 retval
+C       in rarray<int> value(nvalues)
+        integer*4 value(0:nvalues-1)
         end
 
 
@@ -276,10 +276,10 @@ C       in bHYPRE.Solver self
         integer*8 self
 C       in string name
         character*(*) name
-C       in array<double,column-major> value
-        integer*8 value
 C       out int retval
         integer*4 retval
+C       in rarray<double> value(nvalues)
+        double precision value(0:nvalues-1)
         end
 
 

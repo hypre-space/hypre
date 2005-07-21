@@ -61,7 +61,8 @@ int32_t
 impl_bHYPRE_SStructStencil_SetEntry(
   /* in */ bHYPRE_SStructStencil self,
   /* in */ int32_t entry,
-  /* in */ struct sidl_int__array* offset,
+  /* in */ int32_t* offset,
+  /* in */ int32_t dim,
   /* in */ int32_t var);
 
 extern struct bHYPRE_SStructStencil__object* 
@@ -94,13 +95,15 @@ skel_bHYPRE_SStructStencil_SetEntry(
   int32_t _return;
   struct sidl_int__array* offset_proxy = sidl_int__array_ensure(offset, 1,
     sidl_column_major_order);
+  int32_t* offset_tmp = offset_proxy->d_firstElement;
+  int32_t dim = sidlLength(offset_proxy,0);
   _return =
     impl_bHYPRE_SStructStencil_SetEntry(
       self,
       entry,
-      offset_proxy,
+      offset_tmp,
+      dim,
       var);
-  sidl_int__array_deleteRef(offset_proxy);
   return _return;
 }
 

@@ -23,6 +23,15 @@
  * 
  * RDF: Documentation goes here.
  * 
+ * This PCG solver checks whether the matrix, vectors, and preconditioner
+ * are of known types, and will not work with any other types.
+ * Presently, the recognized data types are:
+ * matrix, vector: IJParCSRMatrix, IJParCSRVector
+ * matrix, vector: StructMatrix, StructVector
+ * preconditioner: BoomerAMG, ParaSails, ParCSRDiagScale, IdentitySolver
+ * preconditioner: StructSMG, StructPFMG
+ * 
+ * 
  */
 
 #include "bHYPRE_PCG_Impl.h"
@@ -409,7 +418,8 @@ int32_t
 impl_bHYPRE_PCG_SetIntArray1Parameter(
   /* in */ bHYPRE_PCG self,
   /* in */ const char* name,
-  /* in */ struct sidl_int__array* value)
+  /* in */ int32_t* value,
+  /* in */ int32_t nvalues)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.PCG.SetIntArray1Parameter) */
   /* Insert the implementation of the SetIntArray1Parameter method here... */
@@ -455,7 +465,8 @@ int32_t
 impl_bHYPRE_PCG_SetDoubleArray1Parameter(
   /* in */ bHYPRE_PCG self,
   /* in */ const char* name,
-  /* in */ struct sidl_double__array* value)
+  /* in */ double* value,
+  /* in */ int32_t nvalues)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.PCG.SetDoubleArray1Parameter) */
   /* Insert the implementation of the SetDoubleArray1Parameter method here... */

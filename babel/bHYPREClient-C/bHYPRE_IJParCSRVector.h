@@ -98,65 +98,6 @@ bHYPRE_IJParCSRVector_getClassInfo(
   /* in */ bHYPRE_IJParCSRVector self);
 
 /**
- * Set {\tt self} to 0.
- * 
- */
-int32_t
-bHYPRE_IJParCSRVector_Clear(
-  /* in */ bHYPRE_IJParCSRVector self);
-
-/**
- * Copy x into {\tt self}.
- * 
- */
-int32_t
-bHYPRE_IJParCSRVector_Copy(
-  /* in */ bHYPRE_IJParCSRVector self,
-  /* in */ bHYPRE_Vector x);
-
-/**
- * Create an {\tt x} compatible with {\tt self}.
- * 
- * NOTE: When this method is used in an inherited class, the
- * cloned {\tt Vector} object can be cast to an object with the
- * inherited class type.
- * 
- */
-int32_t
-bHYPRE_IJParCSRVector_Clone(
-  /* in */ bHYPRE_IJParCSRVector self,
-  /* out */ bHYPRE_Vector* x);
-
-/**
- * Scale {\tt self} by {\tt a}.
- * 
- */
-int32_t
-bHYPRE_IJParCSRVector_Scale(
-  /* in */ bHYPRE_IJParCSRVector self,
-  /* in */ double a);
-
-/**
- * Compute {\tt d}, the inner-product of {\tt self} and {\tt x}.
- * 
- */
-int32_t
-bHYPRE_IJParCSRVector_Dot(
-  /* in */ bHYPRE_IJParCSRVector self,
-  /* in */ bHYPRE_Vector x,
-  /* out */ double* d);
-
-/**
- * Add {\tt a}*{\tt x} to {\tt self}.
- * 
- */
-int32_t
-bHYPRE_IJParCSRVector_Axpy(
-  /* in */ bHYPRE_IJParCSRVector self,
-  /* in */ double a,
-  /* in */ bHYPRE_Vector x);
-
-/**
  * Set the MPI Communicator.  DEPRECATED, Use Create()
  * 
  */
@@ -236,8 +177,8 @@ int32_t
 bHYPRE_IJParCSRVector_SetValues(
   /* in */ bHYPRE_IJParCSRVector self,
   /* in */ int32_t nvalues,
-  /* in */ struct sidl_int__array* indices,
-  /* in */ struct sidl_double__array* values);
+  /* in */ int32_t* indices,
+  /* in */ double* values);
 
 /**
  * Adds to values in vector.  Usage details are analogous to
@@ -250,8 +191,8 @@ int32_t
 bHYPRE_IJParCSRVector_AddToValues(
   /* in */ bHYPRE_IJParCSRVector self,
   /* in */ int32_t nvalues,
-  /* in */ struct sidl_int__array* indices,
-  /* in */ struct sidl_double__array* values);
+  /* in */ int32_t* indices,
+  /* in */ double* values);
 
 /**
  * Returns range of the part of the vector owned by this
@@ -275,8 +216,8 @@ int32_t
 bHYPRE_IJParCSRVector_GetValues(
   /* in */ bHYPRE_IJParCSRVector self,
   /* in */ int32_t nvalues,
-  /* in */ struct sidl_int__array* indices,
-  /* inout */ struct sidl_double__array** values);
+  /* in */ int32_t* indices,
+  /* inout */ double* values);
 
 /**
  * Print the vector to file.  This is mainly for debugging
@@ -298,6 +239,65 @@ bHYPRE_IJParCSRVector_Read(
   /* in */ bHYPRE_IJParCSRVector self,
   /* in */ const char* filename,
   /* in */ void* comm);
+
+/**
+ * Set {\tt self} to 0.
+ * 
+ */
+int32_t
+bHYPRE_IJParCSRVector_Clear(
+  /* in */ bHYPRE_IJParCSRVector self);
+
+/**
+ * Copy x into {\tt self}.
+ * 
+ */
+int32_t
+bHYPRE_IJParCSRVector_Copy(
+  /* in */ bHYPRE_IJParCSRVector self,
+  /* in */ bHYPRE_Vector x);
+
+/**
+ * Create an {\tt x} compatible with {\tt self}.
+ * 
+ * NOTE: When this method is used in an inherited class, the
+ * cloned {\tt Vector} object can be cast to an object with the
+ * inherited class type.
+ * 
+ */
+int32_t
+bHYPRE_IJParCSRVector_Clone(
+  /* in */ bHYPRE_IJParCSRVector self,
+  /* out */ bHYPRE_Vector* x);
+
+/**
+ * Scale {\tt self} by {\tt a}.
+ * 
+ */
+int32_t
+bHYPRE_IJParCSRVector_Scale(
+  /* in */ bHYPRE_IJParCSRVector self,
+  /* in */ double a);
+
+/**
+ * Compute {\tt d}, the inner-product of {\tt self} and {\tt x}.
+ * 
+ */
+int32_t
+bHYPRE_IJParCSRVector_Dot(
+  /* in */ bHYPRE_IJParCSRVector self,
+  /* in */ bHYPRE_Vector x,
+  /* out */ double* d);
+
+/**
+ * Add {\tt a}*{\tt x} to {\tt self}.
+ * 
+ */
+int32_t
+bHYPRE_IJParCSRVector_Axpy(
+  /* in */ bHYPRE_IJParCSRVector self,
+  /* in */ double a,
+  /* in */ bHYPRE_Vector x);
 
 /**
  * Cast method for interface and class type conversions.

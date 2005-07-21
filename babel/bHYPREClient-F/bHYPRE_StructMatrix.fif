@@ -281,20 +281,18 @@ C       Method:  SetValues[]
 C       
 
         subroutine bHYPRE_StructMatrix_SetValues_f(self, index,
-     &     num_stencil_indices, stencil_indices, values, retval)
+     &     stencil_indices, values, retval)
         implicit none
 C       in bHYPRE.StructMatrix self
         integer*8 self
-C       in array<int,column-major> index
-        integer*8 index
-C       in int num_stencil_indices
-        integer*4 num_stencil_indices
-C       in array<int,column-major> stencil_indices
-        integer*8 stencil_indices
-C       in array<double,column-major> values
-        integer*8 values
 C       out int retval
         integer*4 retval
+C       in rarray<int> index(dim)
+        integer*4 index(0:dim-1)
+C       in rarray<int> stencil_indices(num_stencil_indices)
+        integer*4 stencil_indices(0:num_stencil_indices-1)
+C       in rarray<double> values(num_stencil_indices)
+        double precision values(0:num_stencil_indices-1)
         end
 
 
@@ -303,22 +301,20 @@ C       Method:  SetBoxValues[]
 C       
 
         subroutine bHYPRE_StructMatrix_SetBoxValues_f(self, ilower,
-     &     iupper, num_stencil_indices, stencil_indices, values, retval)
+     &     iupper, stencil_indices, values, retval)
         implicit none
 C       in bHYPRE.StructMatrix self
         integer*8 self
-C       in array<int,column-major> ilower
-        integer*8 ilower
-C       in array<int,column-major> iupper
-        integer*8 iupper
-C       in int num_stencil_indices
-        integer*4 num_stencil_indices
-C       in array<int,column-major> stencil_indices
-        integer*8 stencil_indices
-C       in array<double,column-major> values
-        integer*8 values
 C       out int retval
         integer*4 retval
+C       in rarray<int> ilower(dim)
+        integer*4 ilower(0:dim-1)
+C       in rarray<int> iupper(dim)
+        integer*4 iupper(0:dim-1)
+C       in rarray<int> stencil_indices(num_stencil_indices)
+        integer*4 stencil_indices(0:num_stencil_indices-1)
+C       in rarray<double> values(nvalues)
+        double precision values(0:nvalues-1)
         end
 
 
@@ -331,10 +327,10 @@ C
         implicit none
 C       in bHYPRE.StructMatrix self
         integer*8 self
-C       in array<int,column-major> num_ghost
-        integer*8 num_ghost
 C       out int retval
         integer*4 retval
+C       in rarray<int> num_ghost(dim2)
+        integer*4 num_ghost(0:dim2-1)
         end
 
 
@@ -359,16 +355,15 @@ C       Method:  SetConstantEntries[]
 C       
 
         subroutine bHYPRE_StructMatrix_SetConstantEntries_f(self,
-     &     num_stencil_constant_points, stencil_constant_points, retval)
+     &     stencil_constant_points, retval)
         implicit none
 C       in bHYPRE.StructMatrix self
         integer*8 self
-C       in int num_stencil_constant_points
-        integer*4 num_stencil_constant_points
-C       in array<int,column-major> stencil_constant_points
-        integer*8 stencil_constant_points
 C       out int retval
         integer*4 retval
+C       in rarray<int> stencil_constant_points(num_stencil_constant_points)
+        integer*4 
+     &     stencil_constant_points(0:num_stencil_constant_points-1)
         end
 
 
@@ -377,18 +372,16 @@ C       Method:  SetConstantValues[]
 C       
 
         subroutine bHYPRE_StructMatrix_SetConstantValues_f(self,
-     &     num_stencil_indices, stencil_indices, values, retval)
+     &     stencil_indices, values, retval)
         implicit none
 C       in bHYPRE.StructMatrix self
         integer*8 self
-C       in int num_stencil_indices
-        integer*4 num_stencil_indices
-C       in array<int,column-major> stencil_indices
-        integer*8 stencil_indices
-C       in array<double,column-major> values
-        integer*8 values
 C       out int retval
         integer*4 retval
+C       in rarray<int> stencil_indices(num_stencil_indices)
+        integer*4 stencil_indices(0:num_stencil_indices-1)
+C       in rarray<double> values(num_stencil_indices)
+        double precision values(0:num_stencil_indices-1)
         end
 
 
@@ -461,10 +454,10 @@ C       in bHYPRE.StructMatrix self
         integer*8 self
 C       in string name
         character*(*) name
-C       in array<int,column-major> value
-        integer*8 value
 C       out int retval
         integer*4 retval
+C       in rarray<int> value(nvalues)
+        integer*4 value(0:nvalues-1)
         end
 
 
@@ -499,10 +492,10 @@ C       in bHYPRE.StructMatrix self
         integer*8 self
 C       in string name
         character*(*) name
-C       in array<double,column-major> value
-        integer*8 value
 C       out int retval
         integer*4 retval
+C       in rarray<double> value(nvalues)
+        double precision value(0:nvalues-1)
         end
 
 

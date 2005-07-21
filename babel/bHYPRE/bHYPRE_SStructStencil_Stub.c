@@ -234,13 +234,20 @@ int32_t
 bHYPRE_SStructStencil_SetEntry(
   /* in */ bHYPRE_SStructStencil self,
   /* in */ int32_t entry,
-  /* in */ struct sidl_int__array* offset,
+  /* in */ int32_t* offset,
+  /* in */ int32_t dim,
   /* in */ int32_t var)
 {
+  int32_t offset_lower[1], offset_upper[1], offset_stride[1]; 
+  struct sidl_int__array offset_real;
+  struct sidl_int__array*offset_tmp = &offset_real;
+  offset_upper[0] = dim-1;
+  sidl_int__array_init(offset, offset_tmp, 1, offset_lower, offset_upper,
+    offset_stride);
   return (*self->d_epv->f_SetEntry)(
     self,
     entry,
-    offset,
+    offset_tmp,
     var);
 }
 
