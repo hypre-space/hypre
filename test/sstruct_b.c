@@ -1483,22 +1483,7 @@ main( int   argc,
    bHYPRE_StructVector    b_sx;
 
    sidl_BaseInterface     b_BI;
-   struct sidl_int__array* b_upper;
-   struct sidl_int__array* b_lower;
-   struct sidl_int__array* b_nbor_upper;
-   struct sidl_int__array* b_nbor_lower;
-   struct sidl_int__array* b_index_map;
-   struct sidl_int__array* b_periodic;
-   struct sidl_int__array* b_offset;
-   struct sidl_int__array* b_index;
-   struct sidl_int__array* b_to_index;
-   struct sidl_int__array* b_entries;
-   struct sidl_double__array* b_values;
-   struct sidl_double__array* b_values1;
 
-   int zero = 0;
-   int one = 1;
-   int three = 3;
    int ierr, matvec_type;
 
    Index                 ilower, iupper;
@@ -1793,13 +1778,8 @@ main( int   argc,
       pdata = data.pdata[part];
       for (box = 0; box < pdata.nboxes; box++)
       {
-         b_lower = sidl_int__array_borrow( pdata.ilowers[box], 1, &zero, &(data.ndim), &one );
-         b_upper = sidl_int__array_borrow( pdata.iuppers[box], 1, &zero, &(data.ndim), &one );
-
-         bHYPRE_SStructGrid_SetExtents(b_grid, part, b_lower, b_upper );
-
-         sidl_int__array_deleteRef( b_lower );
-         sidl_int__array_deleteRef( b_upper );
+         bHYPRE_SStructGrid_SetExtents( b_grid, part, pdata.ilowers[box],
+                                        pdata.iuppers[box], data.ndim );
       }
 
       for ( var=0; var<pdata.nvars; ++var )
@@ -1812,32 +1792,15 @@ main( int   argc,
       /* GridSet_NeighborBox */
       for (box = 0; box < pdata.glue_nboxes; box++)
       {
-         b_lower = sidl_int__array_borrow( pdata.glue_ilowers[box], 1, &zero,
-                                          &(data.ndim), &one );
-         b_upper = sidl_int__array_borrow( pdata.glue_iuppers[box], 1, &zero,
-                                          &(data.ndim), &one );
-         b_nbor_lower = sidl_int__array_borrow
-            ( pdata.glue_nbor_ilowers[box], 1, &zero, &(data.ndim), &one );
-         b_nbor_upper = sidl_int__array_borrow
-            ( pdata.glue_nbor_iuppers[box], 1, &zero, &(data.ndim), &one );
-         b_index_map = sidl_int__array_borrow
-            ( pdata.glue_index_maps[box], 1, &zero, &(data.ndim), &one );
-
          bHYPRE_SStructGrid_SetNeighborBox(
             b_grid, part,
-            b_lower, b_upper, pdata.glue_nbor_parts[box],
-            b_nbor_lower, b_nbor_upper, b_index_map );
-
-         sidl_int__array_deleteRef( b_lower );
-         sidl_int__array_deleteRef( b_upper );
-         sidl_int__array_deleteRef( b_nbor_lower );
-         sidl_int__array_deleteRef( b_nbor_upper );
-         sidl_int__array_deleteRef( b_index_map );
+            pdata.glue_ilowers[box], pdata.glue_iuppers[box],
+            pdata.glue_nbor_parts[box],
+            pdata.glue_nbor_ilowers[box], pdata.glue_nbor_iuppers[box],
+            pdata.glue_index_maps[box], data.ndim );
       }
 
-      b_periodic= sidl_int__array_borrow( pdata.periodic, 1, &zero, &(data.ndim), &one );
-      bHYPRE_SStructGrid_SetPeriodic( b_grid, part, b_periodic );
-      sidl_int__array_deleteRef( b_periodic );
+      bHYPRE_SStructGrid_SetPeriodic( b_grid, part, pdata.periodic, data.ndim );
    }
 
    bHYPRE_SStructGrid_Assemble( b_grid );
@@ -1855,11 +1818,9 @@ main( int   argc,
 
       for (i = 0; i < data.stencil_sizes[s]; i++)
       {
-         b_offset = sidl_int__array_borrow
-            ( data.stencil_offsets[s][i], 1, &zero, &(data.ndim), &one );
-         bHYPRE_SStructStencil_SetEntry( b_stencils[s], i, b_offset,
+         bHYPRE_SStructStencil_SetEntry( b_stencils[s], i,
+                                         data.stencil_offsets[s][i], data.ndim,
                                          data.stencil_vars[s][i] );
-         sidl_int__array_deleteRef( b_offset );
       }
    }
 
@@ -1906,16 +1867,10 @@ main( int   argc,
                      to_index[j] = pdata.graph_to_ilowers[entry][j] +
                         k * pdata.graph_to_strides[entry][j];
                   }
-                  b_index= sidl_int__array_borrow
-                     ( index, 1, &zero, &three, &one );
-                  b_to_index= sidl_int__array_borrow
-                     ( to_index, 1, &zero, &three, &one );
                   bHYPRE_SStructGraph_AddEntries
-                     ( b_graph, part, b_index, pdata.graph_vars[entry],
-                       pdata.graph_to_parts[entry], b_to_index,
+                     ( b_graph, part, index, 3, pdata.graph_vars[entry],
+                       pdata.graph_to_parts[entry], to_index,
                        pdata.graph_to_vars[entry] );
-                  sidl_int__array_deleteRef( b_index );
-                  sidl_int__array_deleteRef( b_to_index );
                }
             }
          }
@@ -1970,8 +1925,6 @@ main( int   argc,
       bHYPRE_SStructMatrix_Initialize( b_A );
    }
 
-   b_values1 = sidl_double__array_create1d( 1 );
-   b_entries = sidl_int__array_create1d( 1 );
    for (part = 0; part < data.nparts; part++)
    {
       pdata = data.pdata[part];
@@ -1990,28 +1943,19 @@ main( int   argc,
             {
                GetVariableBox(pdata.ilowers[box], pdata.iuppers[box],
                               pdata.vartypes[var], ilower, iupper);
-               b_lower = sidl_int__array_borrow
-                  ( ilower, 1, &zero, &(data.ndim), &one );
-               b_upper = sidl_int__array_borrow
-                  ( iupper, 1, &zero, &(data.ndim), &one );
-               sidl_int__array_set1( b_entries, 0, i );
-               b_values = sidl_double__array_borrow
-                  ( values, 1, &zero, &(pdata.max_boxsize), &one );
 
                if ( matvec_type == HYPRE_PARCSR )
                {
                bHYPRE_SStructParCSRMatrix_SetBoxValues
-                  ( b_spA, part, b_lower, b_upper, var, 1, b_entries, b_values );
+                  ( b_spA, part, ilower, iupper, data.ndim, var,
+                    1, &i, values, pdata.max_boxsize );
                }
                else
                {
                   bHYPRE_SStructMatrix_SetBoxValues
-                     ( b_A, part, b_lower, b_upper, var, 1, b_entries, b_values );
+                     ( b_A, part, ilower, iupper, data.ndim, var,
+                       1, &i, values, pdata.max_boxsize );
                }
-
-               sidl_double__array_deleteRef( b_values );
-               sidl_int__array_deleteRef( b_lower );
-               sidl_int__array_deleteRef( b_upper );
             }
          }
       }
@@ -2031,23 +1975,20 @@ main( int   argc,
                     index[0] <= pdata.graph_iuppers[entry][0];
                     index[0] += pdata.graph_strides[entry][0])
                {
-                  b_index= sidl_int__array_borrow
-                     ( index, 1, &zero, &three, &one );
-                  sidl_int__array_set1( b_entries, 0, pdata.graph_entries[entry] );
-                  sidl_double__array_set1( b_values1, 0, pdata.graph_values[entry] );
                   if ( matvec_type == HYPRE_PARCSR )
                   {
                      bHYPRE_SStructParCSRMatrix_SetValues
-                        ( b_spA, part, b_index, pdata.graph_vars[entry],
-                          1, b_entries, b_values1 );
+                        ( b_spA, part, index, 3, pdata.graph_vars[entry],
+                          1, &(pdata.graph_entries[entry]),
+                          &(pdata.graph_values[entry]) );
                   }
                   else
                   {
                      bHYPRE_SStructMatrix_SetValues
-                        ( b_A, part, b_index, pdata.graph_vars[entry],
-                          1, b_entries, b_values1 );
+                        ( b_A, part, index, 3, pdata.graph_vars[entry],
+                          1, &(pdata.graph_entries[entry]),
+                          &(pdata.graph_values[entry]) );
                   }
-                  sidl_int__array_deleteRef( b_index );
                }
             }
          }
@@ -2076,30 +2017,23 @@ main( int   argc,
                     index[0] <= pdata.matrix_iuppers[entry][0];
                     index[0] += pdata.matrix_strides[entry][0])
                {
-                  b_index= sidl_int__array_borrow
-                     ( index, 1, &zero, &three, &one );
-                  sidl_int__array_set1( b_entries, 0, pdata.matrix_entries[entry] );
-                  sidl_double__array_set1( b_values1, 0, pdata.matrix_values[entry] );
                   if ( matvec_type == HYPRE_PARCSR )
                   {
                      bHYPRE_SStructParCSRMatrix_SetValues
-                        ( b_spA, part, b_index, pdata.matrix_vars[entry],
-                          1, b_entries, b_values1 );
+                        ( b_spA, part, index, 3, pdata.matrix_vars[entry],
+                          1, &(pdata.matrix_entries[entry]), &(pdata.matrix_values[entry]) );
                   }
                   else
                   {
                      bHYPRE_SStructMatrix_SetValues
-                        ( b_A, part, b_index, pdata.matrix_vars[entry],
-                          1, b_entries, b_values1 );
+                        ( b_A, part, index, 3, pdata.matrix_vars[entry],
+                          1, &(pdata.matrix_entries[entry]), &(pdata.matrix_values[entry]) );
                   }
-                  sidl_int__array_deleteRef( b_index );
                }
             }
          }
       }
    }
-   sidl_int__array_deleteRef( b_entries );
-   sidl_double__array_deleteRef( b_values1 );
 
    if ( matvec_type == HYPRE_PARCSR )
    {
@@ -2153,27 +2087,17 @@ main( int   argc,
          {
             GetVariableBox(pdata.ilowers[box], pdata.iuppers[box], 
                            pdata.vartypes[var], ilower, iupper);
-            b_lower = sidl_int__array_borrow
-               ( ilower, 1, &zero, &(data.ndim), &one );
-            b_upper = sidl_int__array_borrow
-               ( iupper, 1, &zero, &(data.ndim), &one );
-            b_values = sidl_double__array_borrow
-               ( values, 1, &zero, &(pdata.max_boxsize), &one );
 
             if ( matvec_type == HYPRE_PARCSR )
             {
                bHYPRE_SStructParCSRVector_SetBoxValues
-                  ( b_spb, part, b_lower, b_upper, var, b_values );
+                  ( b_spb, part, ilower, iupper, data.ndim, var, values, pdata.max_boxsize );
             }
             else
             {
                bHYPRE_SStructVector_SetBoxValues
-                  ( b_b, part, b_lower, b_upper, var, b_values );
+                  ( b_b, part, ilower, iupper, data.ndim, var, values, pdata.max_boxsize );
             }
-
-            sidl_double__array_deleteRef( b_values );
-            sidl_int__array_deleteRef( b_lower );
-            sidl_int__array_deleteRef( b_upper );
          }
       }
    }
@@ -2227,27 +2151,18 @@ main( int   argc,
             GetVariableBox(pdata.ilowers[box], pdata.iuppers[box], 
                            pdata.vartypes[var], ilower, iupper);
 
-            b_lower = sidl_int__array_borrow
-               ( ilower, 1, &zero, &(data.ndim), &one );
-            b_upper = sidl_int__array_borrow
-               ( iupper, 1, &zero, &(data.ndim), &one );
-            b_values = sidl_double__array_borrow
-               ( values, 1, &zero, &(pdata.max_boxsize), &one );
-
             if ( matvec_type == HYPRE_PARCSR )
             {
                bHYPRE_SStructParCSRVector_SetBoxValues
-                  ( b_spx, part, b_lower, b_upper, var, b_values );
+                  ( b_spx, part, ilower, iupper, data.ndim, var,
+                    values, pdata.max_boxsize );
             }
             else
             {
                bHYPRE_SStructVector_SetBoxValues
-                  ( b_x, part, b_lower, b_upper, var, b_values );
+                  ( b_x, part, ilower, iupper, data.ndim, var,
+                    values, pdata.max_boxsize );
             }
-
-            sidl_double__array_deleteRef( b_values );
-            sidl_int__array_deleteRef( b_lower );
-            sidl_int__array_deleteRef( b_upper );
          }
       }
    }

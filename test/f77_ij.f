@@ -53,6 +53,7 @@ c parameters for BoomerAMG
       integer             cycle_type
       integer             smooth_num_sweep
       integer*8           num_grid_sweeps
+      integer*8           num_grid_sweeps2(4)
       integer*8           grid_relax_type
       integer*8           grid_relax_points
       integer*8           relax_weights
@@ -446,8 +447,12 @@ c Set defaults for BoomerAMG
      &                                      coarsen_type,
      &                                      relax_weights,
      &                                      MAXLEVELS,ierr)
+        num_grid_sweeps2(1) = 1
+        num_grid_sweeps2(2) = 1
+        num_grid_sweeps2(3) = 1
+        num_grid_sweeps2(4) = 1
         call HYPRE_BoomerAMGSetNumGridSweeps(solver,
-     &                                       num_grid_sweeps, ierr)
+     &                                       num_grid_sweeps2, ierr)
         call HYPRE_BoomerAMGSetGridRelaxType(solver,
      &                                       grid_relax_type, ierr)
         call HYPRE_BoomerAMGSetRelaxWeight(solver,
