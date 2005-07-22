@@ -50,10 +50,6 @@ int main (int argc, char *argv[])
     Most functions return error flags, 0 unless there's an error.
     For clarity, they aren't checked much in this file. */
 
-   int zero = 0;
-   int one  = 1;
-   int five = 5;
-
    bHYPRE_IJParCSRMatrix parcsr_A;
    bHYPRE_Operator           op_A;
    bHYPRE_IJParCSRVector par_b;
@@ -184,10 +180,7 @@ int main (int argc, char *argv[])
       int nnz;
       double values[5];
       int cols[5];
-      struct sidl_int__array* s_nnz;
-      struct sidl_int__array* s_i;
-      struct sidl_int__array* s_cols;
-      struct sidl_double__array* s_values;
+
       for (i = ilower; i <= iupper; i++)
       {
          nnz = 0;
@@ -229,22 +222,8 @@ int main (int argc, char *argv[])
             nnz++;
          }
 
-         /* Set up sidl arrays for the Babel interface.
-            The "borrow" command simply wraps the data with meta information -
-            dimension, index range, and stride of the array. */
-         s_nnz =  sidl_int__array_borrow( &nnz, 1, &zero, &one, &one );
-         s_i =    sidl_int__array_borrow( &i,   1, &zero, &one, &one );
-         s_cols = sidl_int__array_borrow( cols, 1, &zero, &five, &one );
-         s_values = sidl_double__array_borrow( values, 1, &zero, &five, &one );
-
          /* Set the values for row i */
-         bHYPRE_IJParCSRMatrix_SetValues( parcsr_A, 1, s_nnz, s_i, s_cols, s_values );
-
-         /* Clean up the sidl arrays: */
-         sidl_int__array_deleteRef( s_nnz );
-         sidl_int__array_deleteRef( s_i );
-         sidl_int__array_deleteRef( s_cols );
-         sidl_double__array_deleteRef( s_values );
+         bHYPRE_IJParCSRMatrix_SetValues( parcsr_A, 1, &nnz, &i, cols, values, 5 );
       }
    }
 
@@ -270,14 +249,10 @@ int main (int argc, char *argv[])
    {
       double *rhs_values, *x_values;
       int    *rows;
-      struct sidl_double__array* s_rhs_values;
-      struct sidl_double__array* s_x_values;
-      struct sidl_int__array* s_rows;
 
       rhs_values = calloc(local_size, sizeof(double));
       x_values = calloc(local_size, sizeof(double));
       rows = calloc(local_size, sizeof(int));
-
       for (i=0; i<local_size; i++)
       {
          rhs_values[i] = h2;
@@ -285,16 +260,9 @@ int main (int argc, char *argv[])
          rows[i] = ilower + i;
       }
 
-      s_rhs_values = sidl_double__array_borrow( rhs_values, 1, &zero, &local_size, &one );
-      s_x_values   = sidl_double__array_borrow(   x_values, 1, &zero, &local_size, &one );
-      s_rows   = sidl_int__array_borrow(   rows, 1, &zero, &local_size, &one );
+      bHYPRE_IJParCSRVector_SetValues( par_b, local_size, rows, rhs_values );
+      bHYPRE_IJParCSRVector_SetValues( par_x, local_size, rows, x_values );
 
-      bHYPRE_IJParCSRVector_SetValues( par_b, local_size, s_rows, s_rhs_values );
-      bHYPRE_IJParCSRVector_SetValues( par_x, local_size, s_rows, s_x_values );
-
-      sidl_double__array_deleteRef( s_rhs_values );
-      sidl_double__array_deleteRef( s_x_values );
-      sidl_int__array_deleteRef( s_rows );
       free(x_values);
       free(rhs_values);
       free(rows);
