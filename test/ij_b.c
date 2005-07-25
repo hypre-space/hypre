@@ -6,6 +6,11 @@
  * works by first building a parcsr matrix as before and then "copying"
  * that matrix row-by-row into the IJMatrix interface. AJC 7/99.
  *--------------------------------------------------------------------------*/
+/* As of July 2005, only solver types 0 and 2 are implemented.  They only use the
+   babel (bHYPRE) interface, except for creating the matrix.  There, we are still
+   using the functions GenerateLaplacian* in parcsr_ls/par_laplace*.c, which produce
+   a HYPRE_ParCSRMatrix.  The matrix is then copied into a bHYPRE_IJParCSRMatrix.
+*/
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
@@ -28,8 +33,8 @@ int BuildParFromFile (int argc , char *argv [], int arg_index , HYPRE_ParCSRMatr
 int BuildParLaplacian (int argc , char *argv [], int arg_index , HYPRE_ParCSRMatrix *A_ptr );
 int BuildParDifConv (int argc , char *argv [], int arg_index , HYPRE_ParCSRMatrix *A_ptr );
 int BuildParFromOneFile (int argc , char *argv [], int arg_index , HYPRE_ParCSRMatrix *A_ptr );
-int BuildFuncsFromFiles (int argc , char *argv [], int arg_index , HYPRE_ParCSRMatrix A , int **dof_func_ptr );
-int BuildFuncsFromOneFile (int argc , char *argv [], int arg_index , HYPRE_ParCSRMatrix A , int **dof_func_ptr );
+int BuildFuncsFromFiles (int argc , char *argv [], int arg_index , bHYPRE_IJParCSRMatrix A , int **dof_func_ptr );
+int BuildFuncsFromOneFile (int argc , char *argv [], int arg_index , bHYPRE_IJParCSRMatrix A , int **dof_func_ptr );
 int BuildRhsParFromOneFile_ (int argc , char *argv [], int arg_index , int *partitioning , HYPRE_ParVector *b_ptr );
 int BuildParLaplacian9pt (int argc , char *argv [], int arg_index , HYPRE_ParCSRMatrix *A_ptr );
 int BuildParLaplacian27pt (int argc , char *argv [], int arg_index , HYPRE_ParCSRMatrix *A_ptr );
@@ -60,15 +65,12 @@ main( int   argc,
    int                 indx, rest, tms;
    int                 max_levels = 25;
    int                 num_iterations; 
-   double              norm, tmp;
+   /*double              norm;*/
+   double tmp;
    double              final_res_norm;
-   void               *object;
    sidl_BaseInterface  bHYPRE_object;
 
-   HYPRE_IJMatrix      ij_A; 
    bHYPRE_IJBuildMatrix bHYPRE_ij_A ;
-   HYPRE_IJVector      ij_b;
-   HYPRE_IJVector      ij_x;
    bHYPRE_IJBuildVector bHYPRE_ij_b;
    bHYPRE_IJBuildVector bHYPRE_ij_x;
    bHYPRE_IJBuildVector bHYPRE_ij_y;
@@ -77,32 +79,20 @@ main( int   argc,
    HYPRE_ParCSRMatrix    parcsr_A;
    bHYPRE_IJParCSRMatrix  bHYPRE_parcsr_A;
    bHYPRE_Operator        bHYPRE_op_A;
-   HYPRE_ParVector       b;
-   HYPRE_ParVector       x;
    bHYPRE_IJParCSRVector  bHYPRE_b;
    bHYPRE_IJParCSRVector  bHYPRE_x;
    bHYPRE_IJParCSRVector  bHYPRE_y;
    bHYPRE_IJParCSRVector  bHYPRE_y2;
    bHYPRE_Vector          y,bHYPRE_Vector_x, bHYPRE_Vector_b;
 
-/* >>> To make this a pure Babel-interface test code, all the HYPRE objects need
-   to be taken out, as well as things like the following>>>*/
-   struct bHYPRE_IJParCSRVector__data * temp_vecdata;
-
-/* not used   HYPRE_Solver        amg_solver;*/
-   HYPRE_Solver        pcg_solver;
-   HYPRE_Solver        pcg_precond, pcg_precond_gotten;
    bHYPRE_BoomerAMG        bHYPRE_AMG;
    bHYPRE_PCG           bHYPRE_PCG;
    bHYPRE_ParCSRDiagScale  bHYPRE_ParCSRDiagScale;
    bHYPRE_Solver        bHYPRE_SolverPC;
 
    int                 num_procs, myid;
-   int                 local_row;
    int                *row_sizes;
-   int                *diag_sizes;
    int                 stride[3]; /* Do not really need to be 3, but safe */
-   int                *offdiag_sizes;
    int                *rows;
    int                 size;
    int                *ncols;
@@ -134,7 +124,7 @@ main( int   argc,
    int      coarsen_type = 6;
    int      hybrid = 1;
    int      measure_type = 0;
-   int     *num_grid_sweeps;  
+   int     *num_grid_sweeps = NULL;  
    int     *grid_relax_type = NULL;   
    int    **grid_relax_points = NULL;
    int	    smooth_type = 6;
@@ -143,7 +133,8 @@ main( int   argc,
    int      smooth_num_sweep = 1;
    int      num_sweep = 1;
    double  *relax_weight = NULL; 
-   double   tol = 1.e-8, pc_tol = 0.;
+   double   tol = 1.e-8;
+   /*double pc_tol = 0.;*/
    double   max_row_sum = 1.;
 
    /* parameters for ParaSAILS */
@@ -664,6 +655,7 @@ main( int   argc,
       printf("matrix read in CSR format from a file on one processor\n");
       printf("\n");
       printf("  -laplacian [<options>] : build 5pt 2D laplacian problem (default) \n");
+      printf(" only the default is supported at present\n" );
       printf("  -9pt [<opts>]          : build 9pt 2D laplacian problem\n");
       printf("  -27pt [<opts>]         : build 27pt 3D laplacian problem\n");
       printf("  -difconv [<opts>]      : build convection-diffusion problem\n");
@@ -680,9 +672,12 @@ main( int   argc,
       printf("  -rhsfromonefile        : rhs read from a file one one processor\n");
       printf("  -rhsrand               : rhs is random vector\n");
       printf("  -rhsisone              : rhs is vector with unit components (default)\n");
+      printf(" only the default is supported at present\n" );
       printf("  -xisone                : solution of all ones\n");
       printf("  -rhszero               : rhs is zero vector\n");
       printf("\n");
+      printf(" the backward Euler and src options are not supported yet\n");
+#ifdef DO_THIS_LATER
       printf("  -dt <val>              : specify finite backward Euler time step\n");
       printf("                         :    -rhsfromfile, -rhsfromonefile, -rhsrand,\n");
       printf("                         :    -rhsrand, or -xisone will be ignored\n");
@@ -696,6 +691,7 @@ main( int   argc,
       printf("  -srczero               : ");
       printf("backward Euler source is zero-vector\n");
       printf("\n");
+#endif /* DO_THIS_LATER */
       printf("  -solver <ID>           : solver ID\n");
       printf("       0=AMG               1=AMG-PCG        \n");
       printf("       2=DS-PCG            3=AMG-GMRES      \n");
@@ -773,16 +769,22 @@ main( int   argc,
 
    if ( build_matrix_type == -1 )
    {
+#ifdef DO_THIS_LATER
       HYPRE_IJMatrixRead( argv[build_matrix_arg_index], comm,
                           HYPRE_PARCSR, &ij_A );
+#endif /* DO_THIS_LATER */
    }
    else if ( build_matrix_type == 0 )
    {
+#ifdef DO_THIS_LATER
       BuildParFromFile(argc, argv, build_matrix_arg_index, &parcsr_A);
+#endif /* DO_THIS_LATER */
    }
    else if ( build_matrix_type == 1 )
    {
+#ifdef DO_THIS_LATER
       BuildParFromOneFile(argc, argv, build_matrix_arg_index, &parcsr_A);
+#endif /* DO_THIS_LATER */
    }
    else if ( build_matrix_type == 2 )
    {
@@ -790,15 +792,21 @@ main( int   argc,
    }
    else if ( build_matrix_type == 3 )
    {
+#ifdef DO_THIS_LATER
       BuildParLaplacian9pt(argc, argv, build_matrix_arg_index, &parcsr_A);
+#endif /* DO_THIS_LATER */
    }
    else if ( build_matrix_type == 4 )
    {
+#ifdef DO_THIS_LATER
       BuildParLaplacian27pt(argc, argv, build_matrix_arg_index, &parcsr_A);
+#endif /* DO_THIS_LATER */
    }
    else if ( build_matrix_type == 5 )
    {
+#ifdef DO_THIS_LATER
       BuildParDifConv(argc, argv, build_matrix_arg_index, &parcsr_A);
+#endif /* DO_THIS_LATER */
    }
    else
    {
@@ -812,6 +820,7 @@ main( int   argc,
 
    if (build_matrix_type < 2)
    {
+#ifdef DO_THIS_LATER
       ierr += HYPRE_IJMatrixGetObject( ij_A, &object);
       parcsr_A = (HYPRE_ParCSRMatrix) object;
 
@@ -823,6 +832,7 @@ main( int   argc,
       local_num_cols = last_local_col - first_local_col + 1;
 
       ierr = HYPRE_IJMatrixInitialize( ij_A );
+#endif /*DO_THIS_LATER*/
 
    }
    else
@@ -866,57 +876,12 @@ main( int   argc,
 /* the following shows how to build an IJMatrix if one has only an
    estimate for the row sizes */
       if (sparsity_known == 1)
-      {   
-/*  build IJMatrix using exact row_sizes for diag and offdiag */
-
-         diag_sizes = hypre_CTAlloc(int, local_num_rows);
-         offdiag_sizes = hypre_CTAlloc(int, local_num_rows);
-         local_row = 0;
-         for (i=first_local_row; i<= last_local_row; i++)
-         {
-            ierr += HYPRE_ParCSRMatrixGetRow( parcsr_A, i, &size, 
-                                              &col_inds, &values );
- 
-            for (j=0; j < size; j++)
-            {
-               if (col_inds[j] < first_local_row || col_inds[j] > last_local_row)
-                  offdiag_sizes[local_row]++;
-               else
-                  diag_sizes[local_row]++;
-            }
-            local_row++;
-            ierr += HYPRE_ParCSRMatrixRestoreRow( parcsr_A, i, &size, 
-                                                  &col_inds, &values );
-         }
-
-/* no longer needed?...       lower[0] = 0;  upper[0] = local_num_rows - 1;*/
-   
-         ierr += bHYPRE_IJParCSRMatrix_SetDiagOffdSizes
-            ( bHYPRE_parcsr_A, diag_sizes, offdiag_sizes, local_num_rows );
-
-         hypre_TFree(diag_sizes);
-         hypre_TFree(offdiag_sizes);
-
-
-         ierr = HYPRE_IJMatrixInitialize( ij_A );
-
-         for (i=first_local_row; i<= last_local_row; i++)
-         {
-            ierr += HYPRE_ParCSRMatrixGetRow( parcsr_A, i, &size,
-                                              &col_inds, &values );
-
-            ierr += HYPRE_IJMatrixSetValues( ij_A, 1, &size, &i,
-                                             (const int *) col_inds,
-                                             (const double *) values );
-
-            ierr += HYPRE_ParCSRMatrixRestoreRow( parcsr_A, i, &size,
-                                                  &col_inds, &values );
-         }
+      {
+         printf( "sparsity_known == 1 not implemented\n");
+         return 1;
       }
       else
       {
-/* no longer needed?...      lower[0] = 0;    upper[0] = local_num_rows - 1;*/
-
          row_sizes = hypre_CTAlloc( int, local_num_rows );
 
          size = 5; /* this is in general too low, and supposed to test
@@ -941,7 +906,6 @@ main( int   argc,
 
          ierr = bHYPRE_IJBuildMatrix_Initialize( bHYPRE_ij_A );
 
-/* no longer needed?...    lower[ 0 ] = 0;     upper[ 0 ] = 0;*/
 
          row_sizes = hypre_CTAlloc( int, 1 );
          ncols = hypre_CTAlloc( int, 1 );
@@ -953,8 +917,6 @@ main( int   argc,
          {
             ierr += HYPRE_ParCSRMatrixGetRow( parcsr_A, i, &size,
                                               &col_inds, &values );
-/* no longer needed?...   row_sizes[0] = size;       ncols[0] = i;
-   upper[ 0 ] = size - 1; */
 
             ierr += bHYPRE_IJBuildMatrix_SetValues( bHYPRE_ij_A, 1, &size, &i,
                                                     col_inds, values,
@@ -992,8 +954,6 @@ main( int   argc,
    col_inds = hypre_CTAlloc(int, last_local_row - first_local_row + 1);
    values   = hypre_CTAlloc(double, last_local_row - first_local_row + 1);
    
-   /* no longer needed? upper[ 0 ] = last_local_row - first_local_row;*/
-
    if (dt < dt_inf)
       val = 1./dt;
    else 
@@ -1038,20 +998,6 @@ main( int   argc,
    }
    sidl_BaseInterface_deleteRef( bHYPRE_object );
 
-
-   {
-      /* Break encapsulation so that the rest of the driver stays the same */
-      struct bHYPRE_IJParCSRMatrix__data * temp_data;
-      temp_data = bHYPRE_IJParCSRMatrix__get_data( bHYPRE_parcsr_A );
-      
-      ij_A = temp_data ->ij_A ;
-      
-      ierr += HYPRE_IJMatrixGetObject( ij_A, &object);
-      parcsr_A = (HYPRE_ParCSRMatrix) object;
-   }
-
-   /* return; */
-
    /*-----------------------------------------------------------
     * Set up the RHS and initial guess
     *-----------------------------------------------------------*/
@@ -1061,6 +1007,7 @@ main( int   argc,
 
    if ( build_rhs_type == 0 )
    {
+#ifdef DO_THIS_LATER
       if (myid == 0)
       {
          printf("  RHS vector read from file %s\n", argv[build_rhs_arg_index]);
@@ -1088,12 +1035,12 @@ main( int   argc,
 
       ierr = HYPRE_IJVectorGetObject( ij_x, &object );
       x = (HYPRE_ParVector) object;
-   }
+#endif /* DO_THIS_LATER */
+}
    else if ( build_rhs_type == 1 )
    {
       printf("build_rhs_type == 1 not currently implemented\n");
       return(-1);
-
 #if 0
 /* RHS */
       BuildRhsParFromOneFile(argc, argv, build_rhs_arg_index, part_b, &b);
@@ -1133,12 +1080,6 @@ main( int   argc,
       }
       sidl_BaseInterface_deleteRef( bHYPRE_object );
 
-      /* Break encapsulation so that the rest of the driver stays the same */
-      temp_vecdata = bHYPRE_IJParCSRVector__get_data( bHYPRE_b );
-      ij_b = temp_vecdata ->ij_b ;
-      ierr = HYPRE_IJVectorGetObject( ij_b, &object );
-      b = (HYPRE_ParVector) object;
-
 /* Initial guess */
       bHYPRE_x = bHYPRE_IJParCSRVector__create();
       bHYPRE_ij_x = bHYPRE_IJBuildVector__cast( bHYPRE_x );
@@ -1164,15 +1105,10 @@ main( int   argc,
          return 1;
       }
       sidl_BaseInterface_deleteRef( bHYPRE_object );
-
-      /* Break encapsulation so that the rest of the driver stays the same */
-      temp_vecdata = bHYPRE_IJParCSRVector__get_data( bHYPRE_x );
-      ij_x = temp_vecdata ->ij_b ;
-      ierr = HYPRE_IJVectorGetObject( ij_x, &object );
-      x = (HYPRE_ParVector) object;
    }
    else if ( build_rhs_type == 3 )
    {
+#ifdef DO_THIS_LATER
       if (myid == 0)
       {
          printf("  RHS vector has random components and unit 2-norm\n");
@@ -1211,9 +1147,11 @@ main( int   argc,
 
       ierr = HYPRE_IJVectorGetObject( ij_x, &object );
       x = (HYPRE_ParVector) object;
+#endif /* DO_THIS_LATER */
    }
    else if ( build_rhs_type == 4 )
    {
+#ifdef DO_THIS_LATER
       if (myid == 0)
       {
          printf("  RHS vector set for solution with unit components\n");
@@ -1253,9 +1191,11 @@ main( int   argc,
       }
       HYPRE_IJVectorSetValues(ij_x, local_num_cols, NULL, values);
       hypre_TFree(values);
+#endif /* DO_THIS_LATER */
    }
    else if ( build_rhs_type == 5 )
    {
+#ifdef DO_THIS_LATER
       if (myid == 0)
       {
          printf("  RHS vector is 0\n");
@@ -1293,8 +1233,10 @@ main( int   argc,
 
       ierr = HYPRE_IJVectorGetObject( ij_x, &object );
       x = (HYPRE_ParVector) object;
+#endif /* DO_THIS_LATER */
    }
 
+#ifdef DO_THIS_LATER
    if ( build_src_type == 0 )
    {
 #if 0
@@ -1469,14 +1411,13 @@ main( int   argc,
       ierr = HYPRE_IJVectorGetObject( ij_x, &object );
       x = (HYPRE_ParVector) object;
    }
+#endif /* DO_THIS_LATER */
 
    hypre_EndTiming(time_index);
    hypre_PrintTiming("IJ Vector Setup", MPI_COMM_WORLD);
    hypre_FinalizeTiming(time_index);
    hypre_ClearTiming();
    
-   HYPRE_IJMatrixPrint(ij_A, "driver.out.A");
-   HYPRE_IJVectorPrint(ij_x, "driver.out.x0");
    bHYPRE_IJParCSRMatrix_Print( bHYPRE_parcsr_A, "driver.out.HA");
    bHYPRE_IJParCSRVector_Print( bHYPRE_b, "driver.out.Hb0");
    bHYPRE_IJParCSRVector_Print( bHYPRE_x, "driver.out.Hx0");
@@ -1486,11 +1427,11 @@ main( int   argc,
       dof_func = NULL;
       if (build_funcs_type == 1)
       {
-	 BuildFuncsFromOneFile(argc, argv, build_funcs_arg_index, parcsr_A, &dof_func);
+	 BuildFuncsFromOneFile(argc, argv, build_funcs_arg_index, bHYPRE_parcsr_A, &dof_func);
       }
       else if (build_funcs_type == 2)
       {
-	 BuildFuncsFromFiles(argc, argv, build_funcs_arg_index, parcsr_A, &dof_func);
+	 BuildFuncsFromFiles(argc, argv, build_funcs_arg_index, bHYPRE_parcsr_A, &dof_func);
       }
       else
       {
@@ -1528,8 +1469,8 @@ main( int   argc,
     *-----------------------------------------------------------*/
 
 #define DEBUG 1
-#if DEBUG
    {
+#if DEBUG
 /* not used      FILE *file;*/
 /* not used      char  filename[255];*/
                        
@@ -1621,8 +1562,8 @@ main( int   argc,
       /* Clear,x=0, which restores its initial value of 0 */
       bHYPRE_IJParCSRVector_Clear( bHYPRE_x );
       bHYPRE_IJParCSRVector_Print( bHYPRE_x, "test.clear" );
-   }
 #endif
+   }
 
 
    /*-----------------------------------------------------------
@@ -1718,12 +1659,6 @@ main( int   argc,
       hypre_FinalizeTiming(time_index);
       hypre_ClearTiming();
 
-      /* Break encapsulation so that the rest of the driver stays the same */
-      temp_vecdata = bHYPRE_IJParCSRVector__get_data( bHYPRE_x );
-      ij_x = temp_vecdata ->ij_b ;
-      ierr = HYPRE_IJVectorGetObject( ij_x, &object );
-      x = (HYPRE_ParVector) object;
-
       bHYPRE_BoomerAMG_deleteRef( bHYPRE_AMG );
 
    }
@@ -1759,6 +1694,7 @@ main( int   argc,
 
       if (solver_id == 1)
       {
+#ifdef DO_THIS_LATER
          /* use BoomerAMG as preconditioner */
 	 ioutdat = 1;
          if (myid == 0) printf("Solver: AMG-PCG\n");
@@ -1791,6 +1727,7 @@ main( int   argc,
                              (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSolve,
                              (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSetup,
                              pcg_precond);
+#endif  /*DO_THIS_LATER*/
       }
       else if (solver_id == 2)
       {
@@ -1812,6 +1749,7 @@ main( int   argc,
       }
       else if (solver_id == 8)
       {
+#ifdef DO_THIS_LATER
          /* use ParaSails preconditioner */
          if (myid == 0) printf("Solver: ParaSails-PCG\n");
 
@@ -1824,9 +1762,11 @@ main( int   argc,
                              (HYPRE_PtrToSolverFcn) HYPRE_ParaSailsSolve,
                              (HYPRE_PtrToSolverFcn) HYPRE_ParaSailsSetup,
                              pcg_precond);
+#endif  /*DO_THIS_LATER*/
       }
       else if (solver_id == 12)
       {
+#ifdef DO_THIS_LATER
          /* use ParaSails preconditioner */
          if (myid == 0) printf("Solver: Schwarz-PCG\n");
 
@@ -1840,9 +1780,11 @@ main( int   argc,
                              (HYPRE_PtrToSolverFcn) HYPRE_SchwarzSolve,
                              (HYPRE_PtrToSolverFcn) HYPRE_SchwarzSetup,
                              pcg_precond);
+#endif  /*DO_THIS_LATER*/
       }
       else if (solver_id == 43)
       {
+#ifdef DO_THIS_LATER
          /* use Euclid preconditioning */
          if (myid == 0) printf("Solver: Euclid-PCG\n");
 
@@ -1859,6 +1801,7 @@ main( int   argc,
                              (HYPRE_PtrToSolverFcn) HYPRE_EuclidSolve,
                              (HYPRE_PtrToSolverFcn) HYPRE_EuclidSetup,
                              pcg_precond);
+#endif  /*DO_THIS_LATER*/
       }
  
 
@@ -1882,14 +1825,7 @@ main( int   argc,
       ierr += bHYPRE_PCG_GetDoubleValue( bHYPRE_PCG, "Final Relative Residual Norm",
                                          &final_res_norm );
 
-      /* Break encapsulation so that the rest of the driver stays the same */
-      temp_vecdata = bHYPRE_IJParCSRVector__get_data( bHYPRE_x );
-      ij_x = temp_vecdata ->ij_b ;
-      ierr = HYPRE_IJVectorGetObject( ij_x, &object );
-      x = (HYPRE_ParVector) object;
-
       bHYPRE_PCG_deleteRef( bHYPRE_PCG );
- 
       if ( solver_id == 1 )
       {
          bHYPRE_BoomerAMG_deleteRef( bHYPRE_AMG );
@@ -1898,7 +1834,7 @@ main( int   argc,
       {
          bHYPRE_ParCSRDiagScale_deleteRef( bHYPRE_ParCSRDiagScale );
       }
-/* not implemented yet:
+#ifdef DO_THIS_LATER
    else if (solver_id == 8)
    {
    HYPRE_ParaSailsDestroy(pcg_precond);
@@ -1912,7 +1848,7 @@ main( int   argc,
    / * HYPRE_EuclidPrintParams(pcg_precond); * /
    HYPRE_EuclidDestroy(pcg_precond);
    }
-*/
+#endif  /*DO_THIS_LATER*/
 
       if (myid == 0)
       {
@@ -1931,6 +1867,7 @@ main( int   argc,
    if (solver_id == 3 || solver_id == 4 || solver_id == 7 
        || solver_id == 18 || solver_id == 44)
    {
+#ifdef DO_THIS_LATER
       time_index = hypre_InitializeTiming("GMRES Setup");
       hypre_BeginTiming(time_index);
  
@@ -2109,6 +2046,7 @@ main( int   argc,
          printf("Final GMRES Relative Residual Norm = %e\n", final_res_norm);
          printf("\n");
       }
+#endif  /*DO_THIS_LATER*/
    }
    /*-----------------------------------------------------------
     * Solve the system using BiCGSTAB 
@@ -2116,6 +2054,7 @@ main( int   argc,
 
    if (solver_id == 9 || solver_id == 10 || solver_id == 11 || solver_id == 45)
    {
+#ifdef DO_THIS_LATER
       time_index = hypre_InitializeTiming("BiCGSTAB Setup");
       hypre_BeginTiming(time_index);
  
@@ -2262,6 +2201,7 @@ main( int   argc,
          printf("Final BiCGSTAB Relative Residual Norm = %e\n", final_res_norm);
          printf("\n");
       }
+#endif  /*DO_THIS_LATER*/
    }
    /*-----------------------------------------------------------
     * Solve the system using CGNR 
@@ -2269,6 +2209,7 @@ main( int   argc,
 
    if (solver_id == 5 || solver_id == 6)
    {
+#ifdef DO_THIS_LATER
       time_index = hypre_InitializeTiming("CGNR Setup");
       hypre_BeginTiming(time_index);
  
@@ -2374,15 +2315,15 @@ main( int   argc,
          printf("Final Relative Residual Norm = %e\n", final_res_norm);
          printf("\n");
       }
+#endif  /*DO_THIS_LATER*/
    }
 
    /*-----------------------------------------------------------
     * Print the solution and other info
     *-----------------------------------------------------------*/
 
-   HYPRE_IJVectorGetObjectType(ij_b, &j);
-   HYPRE_IJVectorPrint(ij_b, "driver.out.b");
-   HYPRE_IJVectorPrint(ij_x, "driver.out.x");
+   bHYPRE_IJParCSRVector_Print( bHYPRE_b, "driver.out.b");
+   bHYPRE_IJParCSRVector_Print( bHYPRE_x, "driver.out.x");
 
    /*-----------------------------------------------------------
     * Finalize things
@@ -2871,7 +2812,7 @@ int
 BuildFuncsFromFiles(    int                  argc,
                         char                *argv[],
                         int                  arg_index,
-                        HYPRE_ParCSRMatrix   parcsr_A,
+                        bHYPRE_IJParCSRMatrix   parcsr_A,
                         int                **dof_func_ptr     )
 {
 /*----------------------------------------------------------------------
@@ -2888,7 +2829,7 @@ int
 BuildFuncsFromOneFile(  int                  argc,
                         char                *argv[],
                         int                  arg_index,
-                        HYPRE_ParCSRMatrix   parcsr_A,
+                        bHYPRE_IJParCSRMatrix   bHYPRE_parcsr_A,
                         int                **dof_func_ptr     )
 {
    char           *filename;
@@ -2902,6 +2843,17 @@ BuildFuncsFromOneFile(  int                  argc,
    MPI_Request	  *requests;
    MPI_Status	  *status, status0;
    MPI_Comm	   comm;
+
+   HYPRE_ParCSRMatrix parcsr_A;
+   struct bHYPRE_IJParCSRMatrix__data * temp_data;
+   void               *object;
+
+   /*-----------------------------------------------------------
+    * extract HYPRE_ParCSRMatrix from bHYPRE_IJParCSRMatrix
+    *-----------------------------------------------------------*/
+      temp_data = bHYPRE_IJParCSRMatrix__get_data( bHYPRE_parcsr_A );
+      HYPRE_IJMatrixGetObject( temp_data->ij_A, &object);
+      parcsr_A = (HYPRE_ParCSRMatrix) object;
 
    /*-----------------------------------------------------------
     * Initialize some stuff
