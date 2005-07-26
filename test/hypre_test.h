@@ -1,12 +1,19 @@
 /*--------------------------------------------------------------------------
  * Header file for test drivers
  *--------------------------------------------------------------------------*/
+#ifndef HYPRE_TEST_INCLUDES
+#define HYPRE_TEST_INCLUDES
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
 
+#include "krylov.h"
 #include "utilities.h"
 #include "HYPRE.h"
+#include "HYPRE_parcsr_ls.h"
+#include "HYPRE_struct_ls.h"
+#include "HYPRE_sstruct_ls.h"
  
 #define HYPRE_BICGSTAB   99100
 #define HYPRE_BOOMERAMG  99110
@@ -14,14 +21,15 @@
 #define HYPRE_DIAGSCALE  99130
 #define HYPRE_EUCLID     99140
 #define HYPRE_GMRES      99150
+#define HYPRE_GSMG       99155
 #define HYPRE_HYBRID     99160
 #define HYPRE_JACOBI     99170
 #define HYPRE_PARASAILS  99180
 #define HYPRE_PCG        99190
-#define HYPRE_PFMG       99200
+#define HYPRE_PFMG_1     99200
 #define HYPRE_PILUT      99210
-#define HYPRE_SCHWARTZ   99220
-#define HYPRE_SMG        99230
+#define HYPRE_SCHWARZ    99220
+#define HYPRE_SMG_1      99230
 #define HYPRE_SPARSEMSG  99240
 #define HYPRE_SPLIT      99250
 #define HYPRE_SPLITPFMG  99260
@@ -36,8 +44,10 @@ int hypre_set_precond(int matrix_id, int solver_id, int precond_id,
 
 int hypre_set_precond_params(int precond_id, void *precond);
 
+int hypre_destroy_precond(int precond_id, void *precond);
+
 /****************************************************************************
- * Prototypes for testing routines
+ * Variables for testing routines
  ***************************************************************************/
 int      k_dim = 5;
 int      gsmg_samples = 5;
@@ -76,3 +86,5 @@ double   strong_threshold;
 double   trunc_factor;
 double  *relax_weight; 
 double  *omega;
+
+#endif

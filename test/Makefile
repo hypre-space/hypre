@@ -310,6 +310,14 @@ sstruct_fac: sstruct_fac.o
 	@echo  "Building" $@ "... "
 	${CC} -o $@ $@.o ${SSTRUCT_LFLAGS}
 
+hypre_set_precond: hypre_set_precond.o
+	@echo  "Building" $@ "... "
+	${CC} -o $@ $@.o ${IJ_LFLAGS}
+
+test_ij: hypre_set_precond.o test_ij.o
+	@echo  "Building" $@ "... "
+	${CC} -o $@ hypre_set_precond.o $@.o ${IJ_LFLAGS}
+
 ij: ij.o
 	@echo  "Building" $@ "... "
 	${CC} -o $@ $@.o ${IJ_LFLAGS}
