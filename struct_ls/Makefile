@@ -37,6 +37,7 @@ FILES =\
  F90_HYPRE_struct_bicgstab.c\
  F90_HYPRE_struct_gmres.c\
  F90_HYPRE_struct_hybrid.c\
+ F90_HYPRE_struct_int.c\
  F90_HYPRE_struct_jacobi.c\
  F90_HYPRE_struct_pcg.c\
  F90_HYPRE_struct_pfmg.c\

@@ -47,13 +47,19 @@ FILES =\
  F90_hypre_laplace.c\
  F90_HYPRE_parcsr_amg.c\
  F90_HYPRE_parcsr_bicgstab.c\
+ F90_HYPRE_parcsr_block.c\
  F90_HYPRE_parcsr_cgnr.c\
+ F90_HYPRE_parcsr_Euclid.c\
  F90_HYPRE_parcsr_gmres.c\
+ F90_HYPRE_parcsr_hybrid.c\
+ F90_HYPRE_parcsr_int.c\
  F90_HYPRE_parcsr_ParaSails.c\
  F90_HYPRE_parcsr_pcg.c\
  F90_HYPRE_parcsr_pilut.c\
+ F90_HYPRE_parcsr_schwarz.c\
  HYPRE_parcsr_amg.c\
  HYPRE_parcsr_bicgstab.c\
+ HYPRE_parcsr_block.c\
  HYPRE_parcsr_cgnr.c\
  HYPRE_parcsr_Euclid.c\
  HYPRE_parcsr_gmres.c\
@@ -91,7 +97,6 @@ FILES =\
  par_strength.c\
  pcg_par.c\
  schwarz.c\
- HYPRE_parcsr_block.c\
  block_tridiag.c
 
 OBJS = ${FILES:.c=.o}
