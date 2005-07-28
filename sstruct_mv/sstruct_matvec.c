@@ -124,7 +124,7 @@ hypre_SStructPMatvecCompute( void                 *pmatvec_vdata,
       }
       else
       {
-         hypre_StructAxpy(beta, sy, sy);
+         hypre_StructScale(beta, sy);
       }
 
       /* off-diagonal block computation */
