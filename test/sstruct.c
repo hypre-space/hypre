@@ -1479,7 +1479,7 @@ main( int   argc,
    Index                *refine;
    Index                *distribute;
    Index                *block;
-   int                   solver_id;
+   int                   solver_id, object_type;
    int                   print_system;
    int                   cosine, struct_cosine;
    double                scale;
@@ -1921,22 +1921,34 @@ main( int   argc,
    }
 
    /*-----------------------------------------------------------
-    * Set up the graph
+    * Set object type
     *-----------------------------------------------------------*/
 
-   HYPRE_SStructGraphCreate(MPI_COMM_WORLD, grid, &graph);
+   object_type = HYPRE_SSTRUCT;
 
    if ( ((solver_id >= 20) && (solver_id < 30)) ||
         ((solver_id >= 40) && (solver_id < 50)) ||
         ((solver_id >= 60) && (solver_id < 70)) ||
         (solver_id == 120))
    {
-       HYPRE_SStructGraphSetObjectType(graph, HYPRE_PARCSR);  
+       object_type = HYPRE_PARCSR;  
    }
 
    if (solver_id >= 200)
    {
-       HYPRE_SStructGraphSetObjectType(graph, HYPRE_STRUCT);
+       object_type = HYPRE_STRUCT;
+   }
+
+   /*-----------------------------------------------------------
+    * Set up the graph
+    *-----------------------------------------------------------*/
+
+   HYPRE_SStructGraphCreate(MPI_COMM_WORLD, grid, &graph);
+
+   /* HYPRE_SSTRUCT is the default, so we don't have to call SetObjectType */
+   if ( object_type != HYPRE_SSTRUCT )
+   {
+       HYPRE_SStructGraphSetObjectType(graph, object_type);
    }
 
    for (part = 0; part < data.nparts; part++)
@@ -2006,16 +2018,10 @@ main( int   argc,
    }
    HYPRE_SStructMatrixSetNSSymmetric(A, data.ns_symmetric);
 
-   if ( ((solver_id >= 20) && (solver_id < 30)) ||
-        ((solver_id >= 40) && (solver_id < 50)) ||
-        ((solver_id >= 60) && (solver_id < 70)) ||
-        (solver_id == 120))
+   /* HYPRE_SSTRUCT is the default, so we don't have to call SetObjectType */
+   if ( object_type != HYPRE_SSTRUCT )
    {
-      HYPRE_SStructMatrixSetObjectType(A, HYPRE_PARCSR);
-   }
-   else if (solver_id >= 200)
-   {
-      HYPRE_SStructMatrixSetObjectType(A, HYPRE_STRUCT);
+       HYPRE_SStructMatrixSetObjectType(A, object_type);
    }
 
    HYPRE_SStructMatrixInitialize(A);
@@ -2124,35 +2130,18 @@ main( int   argc,
    }
 
    HYPRE_SStructMatrixAssemble(A);
-   if ( ((solver_id >= 20) && (solver_id < 30)) ||
-        ((solver_id >= 40) && (solver_id < 50)) ||
-        ((solver_id >= 60) && (solver_id < 70)) ||
-        (solver_id == 120))
-   {
-      HYPRE_SStructMatrixGetObject(A, (void **) &par_A);
-   }
-   else if ( solver_id >= 200 )
-   {
-      HYPRE_SStructMatrixGetObject(A, (void **) &sA);
-   }
 
    /*-----------------------------------------------------------
     * Set up the linear system
     *-----------------------------------------------------------*/
 
    HYPRE_SStructVectorCreate(MPI_COMM_WORLD, grid, &b);
-   if ( ((solver_id >= 20) && (solver_id < 30)) ||
-        ((solver_id >= 40) && (solver_id < 50)) ||
-        ((solver_id >= 60) && (solver_id < 70)) ||
-        (solver_id == 120))
-   {
-      HYPRE_SStructVectorSetObjectType(b, HYPRE_PARCSR);
-   }
-   else if ( solver_id >= 200 )
-   {
-      HYPRE_SStructVectorSetObjectType(b, HYPRE_STRUCT);
-   }
 
+   /* HYPRE_SSTRUCT is the default, so we don't have to call SetObjectType */
+   if ( object_type != HYPRE_SSTRUCT )
+   {
+       HYPRE_SStructVectorSetObjectType(b, object_type);
+   }
 
    HYPRE_SStructVectorInitialize(b);
    for (j = 0; j < data.max_boxsize; j++)
@@ -2174,29 +2163,13 @@ main( int   argc,
       }
    }
    HYPRE_SStructVectorAssemble(b);
-   if ( ((solver_id >= 20) && (solver_id < 30)) ||
-        ((solver_id >= 40) && (solver_id < 50)) ||
-        ((solver_id >= 60) && (solver_id < 70)) ||
-        (solver_id == 120))
-   {
-      HYPRE_SStructVectorGetObject(b, (void **) &par_b);
-   }
-   else if (solver_id >= 200)
-   {
-      HYPRE_SStructVectorGetObject(b, (void **) &sb);
-   }
 
    HYPRE_SStructVectorCreate(MPI_COMM_WORLD, grid, &x);
-   if ( ((solver_id >= 20) && (solver_id < 30)) ||
-        ((solver_id >= 40) && (solver_id < 50)) ||
-        ((solver_id >= 60) && (solver_id < 70)) ||
-        (solver_id == 120))
+
+   /* HYPRE_SSTRUCT is the default, so we don't have to call SetObjectType */
+   if ( object_type != HYPRE_SSTRUCT )
    {
-      HYPRE_SStructVectorSetObjectType(x, HYPRE_PARCSR);
-   }
-   else if (solver_id >= 200)
-   {
-      HYPRE_SStructVectorSetObjectType(x, HYPRE_STRUCT);
+       HYPRE_SStructVectorSetObjectType(x, object_type);
    }
 
    HYPRE_SStructVectorInitialize(x);
@@ -2219,18 +2192,6 @@ main( int   argc,
       }
    }
    HYPRE_SStructVectorAssemble(x);
-   if ( ((solver_id >= 20) && (solver_id < 30)) ||
-        ((solver_id >= 40) && (solver_id < 50)) ||
-        ((solver_id >= 60) && (solver_id < 70)) ||
-        (solver_id == 120))
-   {
-      HYPRE_SStructVectorGetObject(x, (void **) &par_x);
-   }
-
-   else if (solver_id >= 200)
-   {
-      HYPRE_SStructVectorGetObject(x, (void **) &sx);
-   }
 
    hypre_EndTiming(time_index);
    hypre_PrintTiming("SStruct Interface", MPI_COMM_WORLD);
@@ -2244,9 +2205,10 @@ main( int   argc,
     *   u(part,var,i,j,k) = (part+1)*(var+1)*cosine[(i+j+k)/10]
     * 
     *-----------------------------------------------------------*/
-   if (solver_id >= 200)
+
+   if (object_type == HYPRE_STRUCT)
    {
-      cosine= struct_cosine;
+      cosine = struct_cosine;
    }
 
    if (cosine)
@@ -2267,13 +2229,48 @@ main( int   argc,
             }
          }
       }
-      HYPRE_SStructVectorAssemble(x);
+   }
 
-      /* Apply A to cosine vector to yield righthand side */
-      hypre_SStructMatvec(1.0, A, x, 0.0, b);
-      /* Reset initial guess to zero */
-      hypre_SStructMatvec(0.0, A, b, 0.0, x);
+   /*-----------------------------------------------------------
+    * Get the objects out
+    * NOTE: This should go after the cosine part, but for the bug
+    *-----------------------------------------------------------*/
 
+   if (object_type == HYPRE_PARCSR)
+   {
+      HYPRE_SStructMatrixGetObject(A, (void **) &par_A);
+      HYPRE_SStructVectorGetObject(b, (void **) &par_b);
+      HYPRE_SStructVectorGetObject(x, (void **) &par_x);
+   }
+   else if (object_type == HYPRE_STRUCT)
+   {
+      HYPRE_SStructMatrixGetObject(A, (void **) &sA);
+      HYPRE_SStructVectorGetObject(b, (void **) &sb);
+      HYPRE_SStructVectorGetObject(x, (void **) &sx);
+   }
+
+   /*-----------------------------------------------------------
+    * Finish resetting the linear system
+    *-----------------------------------------------------------*/
+
+   if (cosine)
+   {
+      /* This if/else is due to a bug in SStructMatvec */
+      if (object_type != HYPRE_PARCSR)
+      {
+         HYPRE_SStructVectorAssemble(x);
+         /* Apply A to cosine vector to yield righthand side */
+         hypre_SStructMatvec(1.0, A, x, 0.0, b);
+         /* Reset initial guess to zero */
+         hypre_SStructMatvec(0.0, A, b, 0.0, x);
+      }
+      else
+      {
+         /* Apply A to cosine vector to yield righthand side */
+         HYPRE_ParCSRMatrixMatvec(1.0, par_A, par_x, 0.0, par_b );
+         /* Reset initial guess to zero */
+         HYPRE_ParCSRMatrixMatvec(0.0, par_A, par_b, 0.0, par_x );
+      }
    }
 
    /*-----------------------------------------------------------
