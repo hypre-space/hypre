@@ -97,6 +97,12 @@ impl_bHYPRE_SStructVector__dtor(
  * User-defined object methods
  */
 
+extern
+bHYPRE_SStructVector
+impl_bHYPRE_SStructVector_Create(
+  /* in */ void* mpi_comm,
+  /* in */ bHYPRE_SStructGrid grid);
+
 extern struct bHYPRE_SStructGrid__object* 
   impl_bHYPRE_SStructVector_fconnect_bHYPRE_SStructGrid(char* url,
   sidl_BaseInterface *_ex);

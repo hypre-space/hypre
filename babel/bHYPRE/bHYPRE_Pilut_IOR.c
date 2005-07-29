@@ -68,8 +68,10 @@ static int s_load_called = 0;
  */
 
 static int s_method_initialized = 0;
+static int s_static_initialized = 0;
 
-static struct bHYPRE_Pilut__epv s_new_epv__bhypre_pilut;
+static struct bHYPRE_Pilut__epv  s_new_epv__bhypre_pilut;
+static struct bHYPRE_Pilut__sepv s_stc_epv__bhypre_pilut;
 
 static struct bHYPRE_Operator__epv s_new_epv__bhypre_operator;
 
@@ -91,6 +93,8 @@ extern "C" {
 
 extern void bHYPRE_Pilut__set_epv(
   struct bHYPRE_Pilut__epv* epv);
+extern void bHYPRE_Pilut__set_sepv(
+  struct bHYPRE_Pilut__sepv* sepv);
 extern void bHYPRE_Pilut__call_load(void);
 #ifdef __cplusplus
 }
@@ -1036,6 +1040,41 @@ static void bHYPRE_Pilut__init_epv(
 }
 
 /*
+ * SEPV: create the static entry point vector (SEPV).
+ */
+
+static void bHYPRE_Pilut__init_sepv(void)
+{
+  /*
+   * assert( HAVE_LOCKED_STATIC_GLOBALS );
+   */
+
+  struct bHYPRE_Pilut__sepv*  s = &s_stc_epv__bhypre_pilut;
+
+  s->f_Create         = NULL;
+
+  bHYPRE_Pilut__set_sepv(s);
+
+  s_static_initialized = 1;
+  ior_bHYPRE_Pilut__ensure_load_called();
+}
+
+/*
+ * STATIC: return pointer to static EPV structure.
+ */
+
+struct bHYPRE_Pilut__sepv*
+bHYPRE_Pilut__statics(void)
+{
+  LOCK_STATIC_GLOBALS;
+  if (!s_static_initialized) {
+    bHYPRE_Pilut__init_sepv();
+  }
+  UNLOCK_STATIC_GLOBALS;
+  return &s_stc_epv__bhypre_pilut;
+}
+
+/*
  * SUPER: return's parent's non-overrided EPV
  */
 
@@ -1172,6 +1211,7 @@ bHYPRE_Pilut__IOR_version(int32_t *major, int32_t *minor)
 static const struct bHYPRE_Pilut__external
 s_externalEntryPoints = {
   bHYPRE_Pilut__new,
+  bHYPRE_Pilut__statics,
   bHYPRE_Pilut__super
 };
 

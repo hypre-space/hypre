@@ -96,6 +96,11 @@ impl_bHYPRE_BoomerAMG__dtor(
  * User-defined object methods
  */
 
+extern
+bHYPRE_BoomerAMG
+impl_bHYPRE_BoomerAMG_Create(
+  /* in */ void* mpi_comm);
+
 extern struct bHYPRE_Solver__object* 
   impl_bHYPRE_BoomerAMG_fconnect_bHYPRE_Solver(char* url,
   sidl_BaseInterface *_ex);

@@ -83,6 +83,8 @@ impl_bHYPRE_StructSMG__ctor(
        Destroy the solver by calling deleteRef.
     */
 
+   /* Note: user calls of __create() are DEPRECATED, _Create also calls this function */
+
    struct bHYPRE_StructSMG__data * data;
    data = hypre_CTAlloc( struct bHYPRE_StructSMG__data, 1 );
    data -> comm = MPI_COMM_NULL;
@@ -121,7 +123,41 @@ impl_bHYPRE_StructSMG__dtor(
 }
 
 /*
+ * Method:  Create[]
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_StructSMG_Create"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+bHYPRE_StructSMG
+impl_bHYPRE_StructSMG_Create(
+  /* in */ void* mpi_comm)
+{
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructSMG.Create) */
+  /* Insert-Code-Here {bHYPRE.StructSMG.Create} (Create method) */
+
+   int ierr = 0;
+   HYPRE_StructSolver dummy;
+   HYPRE_StructSolver * Hsolver = &dummy;
+   bHYPRE_StructSMG solver = bHYPRE_StructSMG__create();
+   struct bHYPRE_StructSMG__data * data = bHYPRE_StructSMG__get_data( solver );
+
+   data -> comm = (MPI_Comm) mpi_comm;
+   ierr += HYPRE_StructSMGCreate( (data->comm), Hsolver );
+   assert( ierr==0 );
+   data -> solver = *Hsolver;
+
+   return solver;
+
+  /* DO-NOT-DELETE splicer.end(bHYPRE.StructSMG.Create) */
+}
+
+/*
  * Set the MPI Communicator.
+ * DEPRECATED, use Create:
  * 
  */
 
@@ -138,6 +174,8 @@ impl_bHYPRE_StructSMG_SetCommunicator(
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.StructSMG.SetCommunicator) */
   /* Insert the implementation of the SetCommunicator method here... */
+
+   /* DEPRECATED   Use Create */
 
    int ierr = 0;
    HYPRE_StructSolver dummy;

@@ -72,9 +72,8 @@ impl_bHYPRE_SStructMatrix__ctor(
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructMatrix._ctor) */
   /* Insert the implementation of the constructor method here... */
 
-   /* To build a SStructMatrix via Babel: first call the constructor,
-      then SetCommunicator, then SetGraph (which internally calls
-      HYPRE_SStructMatrixCreate), then any optional parameter set functions
+   /* To build a SStructMatrix via Babel: first call _Create,
+      then any optional parameter set functions
       (e.g. SetSymmetric) then Initialize, then value set functions (such as
       SetValues or SetBoxValues), and finally Assemble (Setup is equivalent to Assemble).
     */
@@ -118,6 +117,46 @@ impl_bHYPRE_SStructMatrix__dtor(
 }
 
 /*
+ * Method:  Create[]
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_SStructMatrix_Create"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+bHYPRE_SStructMatrix
+impl_bHYPRE_SStructMatrix_Create(
+  /* in */ void* mpi_comm,
+  /* in */ bHYPRE_SStructGraph graph)
+{
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructMatrix.Create) */
+  /* Insert-Code-Here {bHYPRE.SStructMatrix.Create} (Create method) */
+
+   int ierr = 0;
+   bHYPRE_SStructMatrix mat;
+   struct bHYPRE_SStructMatrix__data * data;
+   HYPRE_SStructMatrix Hmat;
+   struct bHYPRE_SStructGraph__data * gdata;
+   HYPRE_SStructGraph Hgraph;
+
+   mat = bHYPRE_SStructMatrix__create();
+   data = bHYPRE_SStructMatrix__get_data( mat );
+
+   gdata = bHYPRE_SStructGraph__get_data( graph );
+   Hgraph = gdata->graph;
+
+   ierr += HYPRE_SStructMatrixCreate( (MPI_Comm) mpi_comm, Hgraph, &Hmat );
+   data->matrix = Hmat;
+   data->comm = (MPI_Comm) mpi_comm;
+
+   return( mat );
+
+  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructMatrix.Create) */
+}
+
+/*
  * Set the MPI Communicator.  DEPRECATED, Use Create()
  * 
  */
@@ -135,6 +174,8 @@ impl_bHYPRE_SStructMatrix_SetCommunicator(
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructMatrix.SetCommunicator) */
   /* Insert the implementation of the SetCommunicator method here... */
+
+   /* DEPRECATED    use _Create */
 
    int ierr = 0;
    struct bHYPRE_SStructMatrix__data * data;
@@ -282,6 +323,7 @@ impl_bHYPRE_SStructMatrix_GetObject(
 
 /*
  * Set the matrix graph.
+ * DEPRECATED     Use Create
  * 
  */
 
@@ -305,6 +347,8 @@ impl_bHYPRE_SStructMatrix_SetGraph(
       It is an error to call this function
       if HYPRE_StructMatrixCreate has already been called for this matrix.
    */
+
+   /* DEPRECATED   use _Create */
 
    int ierr = 0;
    struct bHYPRE_SStructMatrix__data * data;

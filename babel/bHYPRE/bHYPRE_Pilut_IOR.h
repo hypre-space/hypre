@@ -45,9 +45,13 @@ extern "C" {
 
 struct bHYPRE_Pilut__array;
 struct bHYPRE_Pilut__object;
+struct bHYPRE_Pilut__sepv;
 
 extern struct bHYPRE_Pilut__object*
 bHYPRE_Pilut__new(void);
+
+extern struct bHYPRE_Pilut__sepv*
+bHYPRE_Pilut__statics(void);
 
 extern void bHYPRE_Pilut__init(
   struct bHYPRE_Pilut__object* self);
@@ -69,6 +73,21 @@ struct sidl_io_Deserializer__array;
 struct sidl_io_Deserializer__object;
 struct sidl_io_Serializer__array;
 struct sidl_io_Serializer__object;
+
+/*
+ * Declare the static method entry point vector.
+ */
+
+struct bHYPRE_Pilut__sepv {
+  /* Implicit builtin methods */
+  /* Methods introduced in sidl.BaseInterface-v0.9.3 */
+  /* Methods introduced in sidl.BaseClass-v0.9.3 */
+  /* Methods introduced in bHYPRE.Operator-v1.0.0 */
+  /* Methods introduced in bHYPRE.Solver-v1.0.0 */
+  /* Methods introduced in bHYPRE.Pilut-v1.0.0 */
+  struct bHYPRE_Pilut__object* (*f_Create)(
+    /* in */ void* mpi_comm);
+};
 
 /*
  * Declare the method entry point vector.
@@ -198,6 +217,8 @@ struct bHYPRE_Pilut__external {
   struct bHYPRE_Pilut__object*
   (*createObject)(void);
 
+  struct bHYPRE_Pilut__sepv*
+  (*getStaticEPV)(void);
   struct sidl_BaseClass__epv*(*getSuperEPV)(void);
 };
 

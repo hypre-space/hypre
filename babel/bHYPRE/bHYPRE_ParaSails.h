@@ -104,7 +104,15 @@ bHYPRE_ParaSails_getClassInfo(
   /* in */ bHYPRE_ParaSails self);
 
 /**
+ * Method:  Create[]
+ */
+bHYPRE_ParaSails
+bHYPRE_ParaSails_Create(
+  /* in */ void* mpi_comm);
+
+/**
  * Set the MPI Communicator.
+ * DEPRECATED, use Create:
  * 
  */
 int32_t

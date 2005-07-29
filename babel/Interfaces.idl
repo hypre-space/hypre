@@ -85,7 +85,7 @@ package bHYPRE version 1.0.0
        *  in the classes, not in this interface.
        *  (Static member functions may be declared only in classes, not interfaces.)
        **/
-      /* static int Create( in opaque mpi_comm );*/
+      /* cannot do this here, need a class: static int Create( in opaque mpi_comm );*/
    }
 
    /*----------- Interface -------------------------------------------------*/
@@ -237,6 +237,7 @@ package bHYPRE version 1.0.0
        *
        * Collective.
        **/
+
       int SetLocalRange(in int jlower,
                         in int jupper);
 
@@ -300,6 +301,7 @@ package bHYPRE version 1.0.0
    {
       /**
        * Set the matrix graph.
+       * DEPRECATED     Use Create
        **/
       int SetGraph(in SStructGraph graph);
    
@@ -657,6 +659,7 @@ package bHYPRE version 1.0.0
    {
       /**
        * Set the MPI Communicator.
+       * DEPRECATED, use Create:
        **/
       int SetCommunicator(in opaque mpi_comm);
 
@@ -861,6 +864,12 @@ package bHYPRE version 1.0.0
    class IJParCSRMatrix implements-all IJBuildMatrix, Operator,
       CoefficientAccess
    {
+      static IJParCSRMatrix Create( in opaque mpi_comm,
+                                    in int ilower,
+                                    in int iupper,
+                                    in int jlower,
+                                    in int jupper);
+
       /**
        * (Optional) Set the max number of nonzeros to expect in each
        * row of the diagonal and off-diagonal blocks.  The diagonal
@@ -887,6 +896,8 @@ package bHYPRE version 1.0.0
     **/
    class IJParCSRVector implements-all IJBuildVector, Vector
    {
+      static IJParCSRVector Create( in opaque mpi_comm,
+                                    in int jlower, in int jupper );
    }
 
    /*----------- Classes ---------------------------------------------------*/
@@ -899,6 +910,8 @@ package bHYPRE version 1.0.0
     **/
    class SStructParCSRMatrix implements-all SStructBuildMatrix, Operator
    {
+      static SStructParCSRMatrix Create( in opaque mpi_comm,
+                                         in SStructGraph graph );
    }
 
    /**
@@ -909,6 +922,8 @@ package bHYPRE version 1.0.0
     **/
    class SStructParCSRVector implements-all SStructBuildVector, Vector
    {
+      static SStructParCSRVector Create( in opaque mpi_comm,
+                                         in SStructGrid grid );
    }
 
    /*----------- Classes ---------------------------------------------------*/
@@ -980,9 +995,15 @@ package bHYPRE version 1.0.0
        * Set the number of dimensions {\tt ndim} and the number of
        * structured parts {\tt nparts}.
        **/
+      static SStructGrid Create( in opaque mpi_comm,
+                                 in int ndim,
+                                 in int nparts );
+
+      /* DEPRECATED, use Create: */
       int SetNumDimParts(in int ndim,
                          in int nparts);
    
+      /* DEPRECATED, use Create: */
       int SetCommunicator(in opaque mpi_comm);
 
       /**
@@ -1084,8 +1105,11 @@ package bHYPRE version 1.0.0
     **/
    class SStructStencil
    {
+      static SStructStencil Create( in int ndim,
+                                    in int size );
       /**
        * Set the number of spatial dimensions and stencil entries.
+       * DEPRECATED, use Create:
        **/
       int SetNumDimSize(in int ndim,
                         in int size);
@@ -1106,8 +1130,12 @@ package bHYPRE version 1.0.0
     **/
    class SStructGraph implements-all ProblemDefinition
    {
+      static SStructGraph Create(in opaque mpi_comm,
+                                 in SStructGrid grid);
+
       /**
        * Set the grid and communicator.
+       * DEPRECATED, use Create:
        **/
       int SetCommGrid(in opaque mpi_comm, in SStructGrid grid);
       
@@ -1148,6 +1176,8 @@ package bHYPRE version 1.0.0
     **/
    class SStructMatrix implements-all SStructBuildMatrix, Operator
    {
+      static SStructMatrix Create( in opaque mpi_comm,
+                                   in SStructGraph graph );
    }
 
    /*-----------------------*/
@@ -1160,6 +1190,8 @@ package bHYPRE version 1.0.0
     **/
    class SStructVector implements-all SStructBuildVector, Vector
    {
+      static SStructVector Create( in opaque mpi_comm,
+                                   in SStructGrid grid );
       int SetObjectType( in int type );
    }
 
@@ -1175,6 +1207,8 @@ package bHYPRE version 1.0.0
     **/
    class StructStencil 
    {
+      static StructStencil Create( in int ndim,
+                                    in int size );
       int SetDimension(in int dim);
       int SetSize(in int size);
       int SetElement( in int index,
@@ -1189,11 +1223,15 @@ package bHYPRE version 1.0.0
     **/
    class StructGrid 
    {
+      static StructGrid Create( in opaque mpi_comm,
+                                   in int dim );
       /**
        * Set the MPI Communicator.
+       * DEPRECATED, use Create:
        **/
       int SetCommunicator(in opaque mpi_comm);
 
+      /* DEPRECATED, use Create:*/
       int SetDimension(in int dim);
 
       /* For comparison, here is some former code using sidl arrays:
@@ -1224,12 +1262,18 @@ package bHYPRE version 1.0.0
     **/
    class StructMatrix implements-all StructBuildMatrix, Operator
    {
+      static StructMatrix Create( in opaque mpi_comm,
+                                  in StructGrid grid,
+                                  in StructStencil stencil );
    }
 
    /*-----------------------*/
    
    class StructVector implements-all StructBuildVector, Vector
-   { }
+   {
+         static StructVector Create( in opaque mpi_comm,
+                                     in StructGrid grid );
+   }
 
    /*----------- Classes ---------------------------------------------------*/
 
@@ -1242,6 +1286,7 @@ package bHYPRE version 1.0.0
     **/
    class IdentitySolver implements-all Solver
    {
+      static IdentitySolver Create( in opaque mpi_comm );
    }
 
    /**
@@ -1252,6 +1297,7 @@ package bHYPRE version 1.0.0
     **/
    class ParCSRDiagScale implements-all Solver
    {
+      static ParCSRDiagScale Create( in opaque mpi_comm );
    }
 
    /**
@@ -1368,6 +1414,7 @@ package bHYPRE version 1.0.0
     **/
    class BoomerAMG implements-all Solver
    {
+      static BoomerAMG Create( in opaque mpi_comm );
       int SetLevelRelaxWt( in double relax_wt, in int level );
    }
 
@@ -1382,6 +1429,7 @@ package bHYPRE version 1.0.0
     **/
    class Pilut implements-all Solver
    {
+      static Pilut Create( in opaque mpi_comm );
    }
 
    /**
@@ -1395,6 +1443,7 @@ package bHYPRE version 1.0.0
     **/
    class ParaSails implements-all Solver
    {
+      static ParaSails Create( in opaque mpi_comm );
    }
 
    /**
@@ -1414,6 +1463,7 @@ package bHYPRE version 1.0.0
     **/
    class PCG implements-all PreconditionedSolver
    {
+      static PCG Create( in opaque mpi_comm );
    }
 
    /**
@@ -1431,6 +1481,7 @@ package bHYPRE version 1.0.0
     **/
    class GMRES implements-all PreconditionedSolver
    {
+      static GMRES Create( in opaque mpi_comm );
    }
 
    /**
@@ -1444,6 +1495,7 @@ package bHYPRE version 1.0.0
     **/
    class StructSMG implements-all Solver
    {
+      static StructSMG Create( in opaque mpi_comm );
    }
 
    /**
@@ -1457,5 +1509,6 @@ package bHYPRE version 1.0.0
     **/
    class StructPFMG implements-all Solver
    {
-      static StructPFMG Create( in opaque mpi_comm );   }
+      static StructPFMG Create( in opaque mpi_comm );
+   }
 }

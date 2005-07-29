@@ -81,6 +81,12 @@ impl_bHYPRE_SStructStencil__dtor(
  * User-defined object methods
  */
 
+extern
+bHYPRE_SStructStencil
+impl_bHYPRE_SStructStencil_Create(
+  /* in */ int32_t ndim,
+  /* in */ int32_t size);
+
 extern struct bHYPRE_SStructStencil__object* 
   impl_bHYPRE_SStructStencil_fconnect_bHYPRE_SStructStencil(char* url,
   sidl_BaseInterface *_ex);

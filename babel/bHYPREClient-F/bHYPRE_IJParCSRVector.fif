@@ -170,6 +170,24 @@ C       out sidl.ClassInfo retval
 
 
 C       
+C       Method:  Create[]
+C       
+
+        subroutine bHYPRE_IJParCSRVector_Create_f(mpi_comm, jlower,
+     &     jupper, retval)
+        implicit none
+C       in opaque mpi_comm
+        integer*8 mpi_comm
+C       in int jlower
+        integer*4 jlower
+C       in int jupper
+        integer*4 jupper
+C       out bHYPRE.IJParCSRVector retval
+        integer*8 retval
+        end
+
+
+C       
 C       Set the MPI Communicator.  DEPRECATED, Use Create()
 C       
 C       

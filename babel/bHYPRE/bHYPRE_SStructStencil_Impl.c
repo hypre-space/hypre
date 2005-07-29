@@ -104,7 +104,42 @@ impl_bHYPRE_SStructStencil__dtor(
 }
 
 /*
+ * Method:  Create[]
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_SStructStencil_Create"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+bHYPRE_SStructStencil
+impl_bHYPRE_SStructStencil_Create(
+  /* in */ int32_t ndim,
+  /* in */ int32_t size)
+{
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructStencil.Create) */
+  /* Insert-Code-Here {bHYPRE.SStructStencil.Create} (Create method) */
+
+   int ierr = 0;
+   bHYPRE_SStructStencil stencil;
+   struct bHYPRE_SStructStencil__data * data;
+   HYPRE_SStructStencil Hstencil;
+
+   stencil = bHYPRE_SStructStencil__create();
+   data = bHYPRE_SStructStencil__get_data( stencil );
+
+   ierr += HYPRE_SStructStencilCreate( ndim, size, &Hstencil );
+   data->stencil = Hstencil;
+
+   return stencil;
+
+  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructStencil.Create) */
+}
+
+/*
  * Set the number of spatial dimensions and stencil entries.
+ * DEPRECATED, use Create:
  * 
  */
 
@@ -127,6 +162,8 @@ impl_bHYPRE_SStructStencil_SetNumDimSize(
       different, and no other stencil classes are expected to exist, so there
       is little point in reconciling this */
  
+   /* DEPRECATED   use _Create */
+
    int ierr = 0;
    struct bHYPRE_SStructStencil__data * data;
    HYPRE_SStructStencil stencil;

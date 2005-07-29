@@ -71,8 +71,7 @@ impl_bHYPRE_SStructParCSRVector__ctor(
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructParCSRVector._ctor) */
   /* Insert the implementation of the constructor method here... */
 
-  /* How to make a vector: first call the constructor.
-     Then SetCommunicator, then SetGrid (which calls HYPRE_SStructParCSRVectorCreate),
+  /* How to make a vector: first call _Create (not __create),
      then Initialize, then SetValues (or SetBoxValues, etc.), then Assemble.
   */
 
@@ -115,6 +114,46 @@ impl_bHYPRE_SStructParCSRVector__dtor(
 }
 
 /*
+ * Method:  Create[]
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_SStructParCSRVector_Create"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+bHYPRE_SStructParCSRVector
+impl_bHYPRE_SStructParCSRVector_Create(
+  /* in */ void* mpi_comm,
+  /* in */ bHYPRE_SStructGrid grid)
+{
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructParCSRVector.Create) */
+  /* Insert-Code-Here {bHYPRE.SStructParCSRVector.Create} (Create method) */
+
+   int ierr = 0;
+   bHYPRE_SStructParCSRVector vec;
+   struct bHYPRE_SStructParCSRVector__data * data;
+   HYPRE_SStructVector Hvec;
+   struct bHYPRE_SStructGrid__data * gdata;
+   HYPRE_SStructGrid Hgrid;
+
+   vec = bHYPRE_SStructParCSRVector__create();
+   data = bHYPRE_SStructParCSRVector__get_data( vec );
+
+   gdata = bHYPRE_SStructGrid__get_data( grid );
+   Hgrid = gdata->grid;
+
+   ierr += HYPRE_SStructVectorCreate( (MPI_Comm) mpi_comm, Hgrid, &Hvec );
+   data->vec = Hvec;
+   data -> comm = (MPI_Comm) mpi_comm;
+
+   return( vec );
+
+  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructParCSRVector.Create) */
+}
+
+/*
  * Set the MPI Communicator.  DEPRECATED, Use Create()
  * 
  */
@@ -132,6 +171,8 @@ impl_bHYPRE_SStructParCSRVector_SetCommunicator(
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructParCSRVector.SetCommunicator) */
   /* Insert the implementation of the SetCommunicator method here... */
+
+   /* DEPRECATED   use _Create */
 
    int ierr = 0;
    struct bHYPRE_SStructParCSRVector__data * data;
@@ -305,6 +346,8 @@ impl_bHYPRE_SStructParCSRVector_SetGrid(
     SetCommunicator should have been called before the time SetGrid is called.
     Initialize, value-setting functions, and Assemble should be called afterwards.
    */
+
+   /* DEPRECATED   use _Create */
 
    int ierr = 0;
    struct bHYPRE_SStructParCSRVector__data * data;

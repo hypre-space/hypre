@@ -29,6 +29,11 @@ void
 impl_bHYPRE_ParaSails__dtor(
   /* in */ bHYPRE_ParaSails self);
 
+extern
+bHYPRE_ParaSails
+impl_bHYPRE_ParaSails_Create(
+  /* in */ void* mpi_comm);
+
 extern struct bHYPRE_Solver__object* 
   impl_bHYPRE_ParaSails_fconnect_bHYPRE_Solver(char* url,
   sidl_BaseInterface *_ex);
@@ -333,6 +338,19 @@ bHYPRE_ParaSails__set_epv(struct bHYPRE_ParaSails__epv *epv)
   epv->f_GetNumIterations = impl_bHYPRE_ParaSails_GetNumIterations;
   epv->f_GetRelResidualNorm = impl_bHYPRE_ParaSails_GetRelResidualNorm;
 
+}
+#ifdef __cplusplus
+}
+#endif
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+void
+bHYPRE_ParaSails__set_sepv(struct bHYPRE_ParaSails__sepv *sepv)
+{
+  sepv->f_Create = impl_bHYPRE_ParaSails_Create;
 }
 #ifdef __cplusplus
 }

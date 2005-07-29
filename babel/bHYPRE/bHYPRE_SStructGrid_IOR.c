@@ -68,8 +68,10 @@ static int s_load_called = 0;
  */
 
 static int s_method_initialized = 0;
+static int s_static_initialized = 0;
 
-static struct bHYPRE_SStructGrid__epv s_new_epv__bhypre_sstructgrid;
+static struct bHYPRE_SStructGrid__epv  s_new_epv__bhypre_sstructgrid;
+static struct bHYPRE_SStructGrid__sepv s_stc_epv__bhypre_sstructgrid;
 
 static struct sidl_BaseClass__epv  s_new_epv__sidl_baseclass;
 static struct sidl_BaseClass__epv* s_old_epv__sidl_baseclass;
@@ -87,6 +89,8 @@ extern "C" {
 
 extern void bHYPRE_SStructGrid__set_epv(
   struct bHYPRE_SStructGrid__epv* epv);
+extern void bHYPRE_SStructGrid__set_sepv(
+  struct bHYPRE_SStructGrid__sepv* sepv);
 extern void bHYPRE_SStructGrid__call_load(void);
 #ifdef __cplusplus
 }
@@ -695,6 +699,41 @@ static void bHYPRE_SStructGrid__init_epv(
 }
 
 /*
+ * SEPV: create the static entry point vector (SEPV).
+ */
+
+static void bHYPRE_SStructGrid__init_sepv(void)
+{
+  /*
+   * assert( HAVE_LOCKED_STATIC_GLOBALS );
+   */
+
+  struct bHYPRE_SStructGrid__sepv*  s = &s_stc_epv__bhypre_sstructgrid;
+
+  s->f_Create         = NULL;
+
+  bHYPRE_SStructGrid__set_sepv(s);
+
+  s_static_initialized = 1;
+  ior_bHYPRE_SStructGrid__ensure_load_called();
+}
+
+/*
+ * STATIC: return pointer to static EPV structure.
+ */
+
+struct bHYPRE_SStructGrid__sepv*
+bHYPRE_SStructGrid__statics(void)
+{
+  LOCK_STATIC_GLOBALS;
+  if (!s_static_initialized) {
+    bHYPRE_SStructGrid__init_sepv();
+  }
+  UNLOCK_STATIC_GLOBALS;
+  return &s_stc_epv__bhypre_sstructgrid;
+}
+
+/*
  * SUPER: return's parent's non-overrided EPV
  */
 
@@ -825,6 +864,7 @@ bHYPRE_SStructGrid__IOR_version(int32_t *major, int32_t *minor)
 static const struct bHYPRE_SStructGrid__external
 s_externalEntryPoints = {
   bHYPRE_SStructGrid__new,
+  bHYPRE_SStructGrid__statics,
   bHYPRE_SStructGrid__super
 };
 

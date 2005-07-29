@@ -29,6 +29,11 @@ void
 impl_bHYPRE_BoomerAMG__dtor(
   /* in */ bHYPRE_BoomerAMG self);
 
+extern
+bHYPRE_BoomerAMG
+impl_bHYPRE_BoomerAMG_Create(
+  /* in */ void* mpi_comm);
+
 extern struct bHYPRE_Solver__object* 
   impl_bHYPRE_BoomerAMG_fconnect_bHYPRE_Solver(char* url,
   sidl_BaseInterface *_ex);
@@ -341,6 +346,19 @@ bHYPRE_BoomerAMG__set_epv(struct bHYPRE_BoomerAMG__epv *epv)
   epv->f_GetNumIterations = impl_bHYPRE_BoomerAMG_GetNumIterations;
   epv->f_GetRelResidualNorm = impl_bHYPRE_BoomerAMG_GetRelResidualNorm;
 
+}
+#ifdef __cplusplus
+}
+#endif
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+void
+bHYPRE_BoomerAMG__set_sepv(struct bHYPRE_BoomerAMG__sepv *sepv)
+{
+  sepv->f_Create = impl_bHYPRE_BoomerAMG_Create;
 }
 #ifdef __cplusplus
 }

@@ -99,6 +99,15 @@ bHYPRE_SStructGrid_getClassInfo(
  * structured parts {\tt nparts}.
  * 
  */
+bHYPRE_SStructGrid
+bHYPRE_SStructGrid_Create(
+  /* in */ void* mpi_comm,
+  /* in */ int32_t ndim,
+  /* in */ int32_t nparts);
+
+/**
+ * Method:  SetNumDimParts[]
+ */
 int32_t
 bHYPRE_SStructGrid_SetNumDimParts(
   /* in */ bHYPRE_SStructGrid self,

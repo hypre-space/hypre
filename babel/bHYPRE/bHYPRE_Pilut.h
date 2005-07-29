@@ -104,7 +104,15 @@ bHYPRE_Pilut_getClassInfo(
   /* in */ bHYPRE_Pilut self);
 
 /**
+ * Method:  Create[]
+ */
+bHYPRE_Pilut
+bHYPRE_Pilut_Create(
+  /* in */ void* mpi_comm);
+
+/**
  * Set the MPI Communicator.
+ * DEPRECATED, use Create:
  * 
  */
 int32_t

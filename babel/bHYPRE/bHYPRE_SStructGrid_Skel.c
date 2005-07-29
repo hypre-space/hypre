@@ -29,6 +29,13 @@ void
 impl_bHYPRE_SStructGrid__dtor(
   /* in */ bHYPRE_SStructGrid self);
 
+extern
+bHYPRE_SStructGrid
+impl_bHYPRE_SStructGrid_Create(
+  /* in */ void* mpi_comm,
+  /* in */ int32_t ndim,
+  /* in */ int32_t nparts);
+
 extern struct bHYPRE_SStructGrid__object* 
   impl_bHYPRE_SStructGrid_fconnect_bHYPRE_SStructGrid(char* url,
   sidl_BaseInterface *_ex);
@@ -299,6 +306,19 @@ bHYPRE_SStructGrid__set_epv(struct bHYPRE_SStructGrid__epv *epv)
   epv->f_SetNumGhost = skel_bHYPRE_SStructGrid_SetNumGhost;
   epv->f_Assemble = impl_bHYPRE_SStructGrid_Assemble;
 
+}
+#ifdef __cplusplus
+}
+#endif
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+void
+bHYPRE_SStructGrid__set_sepv(struct bHYPRE_SStructGrid__sepv *sepv)
+{
+  sepv->f_Create = impl_bHYPRE_SStructGrid_Create;
 }
 #ifdef __cplusplus
 }

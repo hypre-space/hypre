@@ -60,6 +60,19 @@ static const struct bHYPRE_Pilut__external* _getIOR(void)
 }
 
 /*
+ * Return pointer to static functions.
+ */
+
+static const struct bHYPRE_Pilut__sepv* _getSEPV(void)
+{
+  static const struct bHYPRE_Pilut__sepv *_sepv = NULL;
+  if (!_sepv) {
+    _sepv = (*(_getIOR()->getStaticEPV))();
+  }
+  return _sepv;
+}
+
+/*
  * Constructor for the class.
  */
 
@@ -321,7 +334,32 @@ SIDLFortran77Symbol(bhypre_pilut_getclassinfo_f,BHYPRE_PILUT_GETCLASSINFO_F,bHYP
 }
 
 /*
+ * Method:  Create[]
+ */
+
+void
+SIDLFortran77Symbol(bhypre_pilut_create_f,BHYPRE_PILUT_CREATE_F,bHYPRE_Pilut_Create_f)
+(
+  int64_t *mpi_comm,
+  int64_t *retval
+)
+{
+  const struct bHYPRE_Pilut__sepv *_epv = _getSEPV();
+  void* _proxy_mpi_comm = NULL;
+  struct bHYPRE_Pilut__object* _proxy_retval = NULL;
+  _proxy_mpi_comm =
+    (void*)
+    (ptrdiff_t)(*mpi_comm);
+  _proxy_retval = 
+    (*(_epv->f_Create))(
+      _proxy_mpi_comm
+    );
+  *retval = (ptrdiff_t)_proxy_retval;
+}
+
+/*
  * Set the MPI Communicator.
+ * DEPRECATED, use Create:
  * 
  */
 

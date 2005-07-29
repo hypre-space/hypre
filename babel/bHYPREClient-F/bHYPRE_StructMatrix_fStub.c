@@ -61,6 +61,19 @@ static const struct bHYPRE_StructMatrix__external* _getIOR(void)
 }
 
 /*
+ * Return pointer to static functions.
+ */
+
+static const struct bHYPRE_StructMatrix__sepv* _getSEPV(void)
+{
+  static const struct bHYPRE_StructMatrix__sepv *_sepv = NULL;
+  if (!_sepv) {
+    _sepv = (*(_getIOR()->getStaticEPV))();
+  }
+  return _sepv;
+}
+
+/*
  * Constructor for the class.
  */
 
@@ -317,6 +330,42 @@ SIDLFortran77Symbol(bhypre_structmatrix_getclassinfo_f,BHYPRE_STRUCTMATRIX_GETCL
   _proxy_retval = 
     (*(_epv->f_getClassInfo))(
       _proxy_self
+    );
+  *retval = (ptrdiff_t)_proxy_retval;
+}
+
+/*
+ * Method:  Create[]
+ */
+
+void
+SIDLFortran77Symbol(bhypre_structmatrix_create_f,BHYPRE_STRUCTMATRIX_CREATE_F,bHYPRE_StructMatrix_Create_f)
+(
+  int64_t *mpi_comm,
+  int64_t *grid,
+  int64_t *stencil,
+  int64_t *retval
+)
+{
+  const struct bHYPRE_StructMatrix__sepv *_epv = _getSEPV();
+  void* _proxy_mpi_comm = NULL;
+  struct bHYPRE_StructGrid__object* _proxy_grid = NULL;
+  struct bHYPRE_StructStencil__object* _proxy_stencil = NULL;
+  struct bHYPRE_StructMatrix__object* _proxy_retval = NULL;
+  _proxy_mpi_comm =
+    (void*)
+    (ptrdiff_t)(*mpi_comm);
+  _proxy_grid =
+    (struct bHYPRE_StructGrid__object*)
+    (ptrdiff_t)(*grid);
+  _proxy_stencil =
+    (struct bHYPRE_StructStencil__object*)
+    (ptrdiff_t)(*stencil);
+  _proxy_retval = 
+    (*(_epv->f_Create))(
+      _proxy_mpi_comm,
+      _proxy_grid,
+      _proxy_stencil
     );
   *retval = (ptrdiff_t)_proxy_retval;
 }

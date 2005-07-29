@@ -91,7 +91,38 @@ impl_bHYPRE_Pilut__dtor(
 }
 
 /*
+ * Method:  Create[]
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_Pilut_Create"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+bHYPRE_Pilut
+impl_bHYPRE_Pilut_Create(
+  /* in */ void* mpi_comm)
+{
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.Pilut.Create) */
+  /* Insert-Code-Here {bHYPRE.Pilut.Create} (Create method) */
+
+   /* int ierr = 0;*/
+   bHYPRE_Pilut solver = bHYPRE_Pilut__create(); /* assumed to call HYPRE_PilutCreate()*/
+   /* >>> requires data to be set up...
+      struct bHYPRE_Pilut__data * data = bHYPRE_Pilut__get_data( self );
+
+      data -> comm = (MPI_Comm *) mpi_comm;
+   */
+
+   return solver;
+
+  /* DO-NOT-DELETE splicer.end(bHYPRE.Pilut.Create) */
+}
+
+/*
  * Set the MPI Communicator.
+ * DEPRECATED, use Create:
  * 
  */
 

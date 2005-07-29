@@ -68,8 +68,10 @@ static int s_load_called = 0;
  */
 
 static int s_method_initialized = 0;
+static int s_static_initialized = 0;
 
-static struct bHYPRE_SStructMatrix__epv s_new_epv__bhypre_sstructmatrix;
+static struct bHYPRE_SStructMatrix__epv  s_new_epv__bhypre_sstructmatrix;
+static struct bHYPRE_SStructMatrix__sepv s_stc_epv__bhypre_sstructmatrix;
 
 static struct bHYPRE_Operator__epv s_new_epv__bhypre_operator;
 
@@ -94,6 +96,8 @@ extern "C" {
 
 extern void bHYPRE_SStructMatrix__set_epv(
   struct bHYPRE_SStructMatrix__epv* epv);
+extern void bHYPRE_SStructMatrix__set_sepv(
+  struct bHYPRE_SStructMatrix__sepv* sepv);
 extern void bHYPRE_SStructMatrix__call_load(void);
 #ifdef __cplusplus
 }
@@ -1236,6 +1240,41 @@ static void bHYPRE_SStructMatrix__init_epv(
 }
 
 /*
+ * SEPV: create the static entry point vector (SEPV).
+ */
+
+static void bHYPRE_SStructMatrix__init_sepv(void)
+{
+  /*
+   * assert( HAVE_LOCKED_STATIC_GLOBALS );
+   */
+
+  struct bHYPRE_SStructMatrix__sepv*  s = &s_stc_epv__bhypre_sstructmatrix;
+
+  s->f_Create         = NULL;
+
+  bHYPRE_SStructMatrix__set_sepv(s);
+
+  s_static_initialized = 1;
+  ior_bHYPRE_SStructMatrix__ensure_load_called();
+}
+
+/*
+ * STATIC: return pointer to static EPV structure.
+ */
+
+struct bHYPRE_SStructMatrix__sepv*
+bHYPRE_SStructMatrix__statics(void)
+{
+  LOCK_STATIC_GLOBALS;
+  if (!s_static_initialized) {
+    bHYPRE_SStructMatrix__init_sepv();
+  }
+  UNLOCK_STATIC_GLOBALS;
+  return &s_stc_epv__bhypre_sstructmatrix;
+}
+
+/*
  * SUPER: return's parent's non-overrided EPV
  */
 
@@ -1375,6 +1414,7 @@ bHYPRE_SStructMatrix__IOR_version(int32_t *major, int32_t *minor)
 static const struct bHYPRE_SStructMatrix__external
 s_externalEntryPoints = {
   bHYPRE_SStructMatrix__new,
+  bHYPRE_SStructMatrix__statics,
   bHYPRE_SStructMatrix__super
 };
 

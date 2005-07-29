@@ -167,7 +167,23 @@ C       out sidl.ClassInfo retval
 
 
 C       
+C       Method:  Create[]
+C       
+
+        subroutine bHYPRE_StructGrid_Create_f(mpi_comm, dim, retval)
+        implicit none
+C       in opaque mpi_comm
+        integer*8 mpi_comm
+C       in int dim
+        integer*4 dim
+C       out bHYPRE.StructGrid retval
+        integer*8 retval
+        end
+
+
+C       
 C       Set the MPI Communicator.
+C       DEPRECATED, use Create:
 C       
 C       
 

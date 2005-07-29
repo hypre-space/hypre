@@ -33,9 +33,13 @@ extern "C" {
 
 struct bHYPRE_SStructStencil__array;
 struct bHYPRE_SStructStencil__object;
+struct bHYPRE_SStructStencil__sepv;
 
 extern struct bHYPRE_SStructStencil__object*
 bHYPRE_SStructStencil__new(void);
+
+extern struct bHYPRE_SStructStencil__sepv*
+bHYPRE_SStructStencil__statics(void);
 
 extern void bHYPRE_SStructStencil__init(
   struct bHYPRE_SStructStencil__object* self);
@@ -55,6 +59,20 @@ struct sidl_io_Deserializer__array;
 struct sidl_io_Deserializer__object;
 struct sidl_io_Serializer__array;
 struct sidl_io_Serializer__object;
+
+/*
+ * Declare the static method entry point vector.
+ */
+
+struct bHYPRE_SStructStencil__sepv {
+  /* Implicit builtin methods */
+  /* Methods introduced in sidl.BaseInterface-v0.9.3 */
+  /* Methods introduced in sidl.BaseClass-v0.9.3 */
+  /* Methods introduced in bHYPRE.SStructStencil-v1.0.0 */
+  struct bHYPRE_SStructStencil__object* (*f_Create)(
+    /* in */ int32_t ndim,
+    /* in */ int32_t size);
+};
 
 /*
  * Declare the method entry point vector.
@@ -121,6 +139,8 @@ struct bHYPRE_SStructStencil__external {
   struct bHYPRE_SStructStencil__object*
   (*createObject)(void);
 
+  struct bHYPRE_SStructStencil__sepv*
+  (*getStaticEPV)(void);
   struct sidl_BaseClass__epv*(*getSuperEPV)(void);
 };
 

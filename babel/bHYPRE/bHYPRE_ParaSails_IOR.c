@@ -68,8 +68,10 @@ static int s_load_called = 0;
  */
 
 static int s_method_initialized = 0;
+static int s_static_initialized = 0;
 
-static struct bHYPRE_ParaSails__epv s_new_epv__bhypre_parasails;
+static struct bHYPRE_ParaSails__epv  s_new_epv__bhypre_parasails;
+static struct bHYPRE_ParaSails__sepv s_stc_epv__bhypre_parasails;
 
 static struct bHYPRE_Operator__epv s_new_epv__bhypre_operator;
 
@@ -91,6 +93,8 @@ extern "C" {
 
 extern void bHYPRE_ParaSails__set_epv(
   struct bHYPRE_ParaSails__epv* epv);
+extern void bHYPRE_ParaSails__set_sepv(
+  struct bHYPRE_ParaSails__sepv* sepv);
 extern void bHYPRE_ParaSails__call_load(void);
 #ifdef __cplusplus
 }
@@ -1038,6 +1042,41 @@ static void bHYPRE_ParaSails__init_epv(
 }
 
 /*
+ * SEPV: create the static entry point vector (SEPV).
+ */
+
+static void bHYPRE_ParaSails__init_sepv(void)
+{
+  /*
+   * assert( HAVE_LOCKED_STATIC_GLOBALS );
+   */
+
+  struct bHYPRE_ParaSails__sepv*  s = &s_stc_epv__bhypre_parasails;
+
+  s->f_Create         = NULL;
+
+  bHYPRE_ParaSails__set_sepv(s);
+
+  s_static_initialized = 1;
+  ior_bHYPRE_ParaSails__ensure_load_called();
+}
+
+/*
+ * STATIC: return pointer to static EPV structure.
+ */
+
+struct bHYPRE_ParaSails__sepv*
+bHYPRE_ParaSails__statics(void)
+{
+  LOCK_STATIC_GLOBALS;
+  if (!s_static_initialized) {
+    bHYPRE_ParaSails__init_sepv();
+  }
+  UNLOCK_STATIC_GLOBALS;
+  return &s_stc_epv__bhypre_parasails;
+}
+
+/*
  * SUPER: return's parent's non-overrided EPV
  */
 
@@ -1174,6 +1213,7 @@ bHYPRE_ParaSails__IOR_version(int32_t *major, int32_t *minor)
 static const struct bHYPRE_ParaSails__external
 s_externalEntryPoints = {
   bHYPRE_ParaSails__new,
+  bHYPRE_ParaSails__statics,
   bHYPRE_ParaSails__super
 };
 

@@ -29,6 +29,11 @@ void
 impl_bHYPRE_PCG__dtor(
   /* in */ bHYPRE_PCG self);
 
+extern
+bHYPRE_PCG
+impl_bHYPRE_PCG_Create(
+  /* in */ void* mpi_comm);
+
 extern struct bHYPRE_PCG__object* impl_bHYPRE_PCG_fconnect_bHYPRE_PCG(char* url,
   sidl_BaseInterface *_ex);
 extern char* impl_bHYPRE_PCG_fgetURL_bHYPRE_PCG(struct bHYPRE_PCG__object* obj);
@@ -334,6 +339,19 @@ bHYPRE_PCG__set_epv(struct bHYPRE_PCG__epv *epv)
   epv->f_GetRelResidualNorm = impl_bHYPRE_PCG_GetRelResidualNorm;
   epv->f_SetPreconditioner = impl_bHYPRE_PCG_SetPreconditioner;
 
+}
+#ifdef __cplusplus
+}
+#endif
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+void
+bHYPRE_PCG__set_sepv(struct bHYPRE_PCG__sepv *sepv)
+{
+  sepv->f_Create = impl_bHYPRE_PCG_Create;
 }
 #ifdef __cplusplus
 }

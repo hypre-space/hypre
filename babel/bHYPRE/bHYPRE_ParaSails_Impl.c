@@ -72,6 +72,8 @@ impl_bHYPRE_ParaSails__ctor(
   /* DO-NOT-DELETE splicer.begin(bHYPRE.ParaSails._ctor) */
   /* Insert the implementation of the constructor method here... */
 
+   /* Note: user calls of __create() are DEPRECATED, _Create also calls this function */
+
    struct bHYPRE_ParaSails__data * data;
    data = hypre_CTAlloc( struct bHYPRE_ParaSails__data, 1 );
    data -> comm = (MPI_Comm) NULL;
@@ -113,7 +115,41 @@ impl_bHYPRE_ParaSails__dtor(
 }
 
 /*
+ * Method:  Create[]
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_ParaSails_Create"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+bHYPRE_ParaSails
+impl_bHYPRE_ParaSails_Create(
+  /* in */ void* mpi_comm)
+{
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.ParaSails.Create) */
+  /* Insert-Code-Here {bHYPRE.ParaSails.Create} (Create method) */
+
+   int ierr = 0;
+   HYPRE_Solver dummy;
+   HYPRE_Solver * Hsolver = &dummy;
+   bHYPRE_ParaSails solver = bHYPRE_ParaSails__create();
+   struct bHYPRE_ParaSails__data * data = bHYPRE_ParaSails__get_data( solver );
+
+   data -> comm = (MPI_Comm) mpi_comm;
+   ierr += HYPRE_ParCSRParaSailsCreate( (data->comm), Hsolver );
+   assert( ierr==0 );
+   data -> solver = *Hsolver;
+
+   return solver;
+
+  /* DO-NOT-DELETE splicer.end(bHYPRE.ParaSails.Create) */
+}
+
+/*
  * Set the MPI Communicator.
+ * DEPRECATED, use Create:
  * 
  */
 
@@ -130,6 +166,8 @@ impl_bHYPRE_ParaSails_SetCommunicator(
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.ParaSails.SetCommunicator) */
   /* Insert the implementation of the SetCommunicator method here... */
+
+   /* DEPRECATED  Use _Create */
 
    int ierr = 0;
    HYPRE_Solver dummy;
@@ -428,7 +466,7 @@ impl_bHYPRE_ParaSails_Setup(
   /* DO-NOT-DELETE splicer.begin(bHYPRE.ParaSails.Setup) */
   /* Insert the implementation of the Setup method here... */
 
-   /* SetCommunicator should have been called by now, to trigger the
+   /* SetCommunicator or Create should have been called by now, to trigger the
       solver's Create call. */
 
    int ierr = 0;

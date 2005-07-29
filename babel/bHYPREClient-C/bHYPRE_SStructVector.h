@@ -101,6 +101,14 @@ bHYPRE_SStructVector_getClassInfo(
   /* in */ bHYPRE_SStructVector self);
 
 /**
+ * Method:  Create[]
+ */
+bHYPRE_SStructVector
+bHYPRE_SStructVector_Create(
+  /* in */ void* mpi_comm,
+  /* in */ bHYPRE_SStructGrid grid);
+
+/**
  * Method:  SetObjectType[]
  */
 int32_t

@@ -58,6 +58,19 @@ static const struct bHYPRE_SStructMatrix__external* _getIOR(void)
 }
 
 /*
+ * Return pointer to static functions.
+ */
+
+static const struct bHYPRE_SStructMatrix__sepv* _getSEPV(void)
+{
+  static const struct bHYPRE_SStructMatrix__sepv *_sepv = NULL;
+  if (!_sepv) {
+    _sepv = (*(_getIOR()->getStaticEPV))();
+  }
+  return _sepv;
+}
+
+/*
  * Constructor for the class.
  */
 
@@ -319,6 +332,36 @@ SIDLFortran77Symbol(bhypre_sstructmatrix_getclassinfo_f,BHYPRE_SSTRUCTMATRIX_GET
 }
 
 /*
+ * Method:  Create[]
+ */
+
+void
+SIDLFortran77Symbol(bhypre_sstructmatrix_create_f,BHYPRE_SSTRUCTMATRIX_CREATE_F,bHYPRE_SStructMatrix_Create_f)
+(
+  int64_t *mpi_comm,
+  int64_t *graph,
+  int64_t *retval
+)
+{
+  const struct bHYPRE_SStructMatrix__sepv *_epv = _getSEPV();
+  void* _proxy_mpi_comm = NULL;
+  struct bHYPRE_SStructGraph__object* _proxy_graph = NULL;
+  struct bHYPRE_SStructMatrix__object* _proxy_retval = NULL;
+  _proxy_mpi_comm =
+    (void*)
+    (ptrdiff_t)(*mpi_comm);
+  _proxy_graph =
+    (struct bHYPRE_SStructGraph__object*)
+    (ptrdiff_t)(*graph);
+  _proxy_retval = 
+    (*(_epv->f_Create))(
+      _proxy_mpi_comm,
+      _proxy_graph
+    );
+  *retval = (ptrdiff_t)_proxy_retval;
+}
+
+/*
  * Set the MPI Communicator.  DEPRECATED, Use Create()
  * 
  */
@@ -439,6 +482,7 @@ SIDLFortran77Symbol(bhypre_sstructmatrix_getobject_f,BHYPRE_SSTRUCTMATRIX_GETOBJ
 
 /*
  * Set the matrix graph.
+ * DEPRECATED     Use Create
  * 
  */
 

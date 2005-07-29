@@ -92,7 +92,16 @@ bHYPRE_StructGrid_getClassInfo(
   /* in */ bHYPRE_StructGrid self);
 
 /**
+ * Method:  Create[]
+ */
+bHYPRE_StructGrid
+bHYPRE_StructGrid_Create(
+  /* in */ void* mpi_comm,
+  /* in */ int32_t dim);
+
+/**
  * Set the MPI Communicator.
+ * DEPRECATED, use Create:
  * 
  */
 int32_t

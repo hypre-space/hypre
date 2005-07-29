@@ -113,7 +113,15 @@ bHYPRE_PCG_getClassInfo(
   /* in */ bHYPRE_PCG self);
 
 /**
+ * Method:  Create[]
+ */
+bHYPRE_PCG
+bHYPRE_PCG_Create(
+  /* in */ void* mpi_comm);
+
+/**
  * Set the MPI Communicator.
+ * DEPRECATED, use Create:
  * 
  */
 int32_t

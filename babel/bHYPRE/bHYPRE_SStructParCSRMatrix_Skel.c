@@ -29,6 +29,12 @@ void
 impl_bHYPRE_SStructParCSRMatrix__dtor(
   /* in */ bHYPRE_SStructParCSRMatrix self);
 
+extern
+bHYPRE_SStructParCSRMatrix
+impl_bHYPRE_SStructParCSRMatrix_Create(
+  /* in */ void* mpi_comm,
+  /* in */ bHYPRE_SStructGraph graph);
+
 extern struct bHYPRE_SStructParCSRMatrix__object* 
   impl_bHYPRE_SStructParCSRMatrix_fconnect_bHYPRE_SStructParCSRMatrix(char* url,
   sidl_BaseInterface *_ex);
@@ -577,6 +583,20 @@ bHYPRE_SStructParCSRMatrix__set_epv(struct bHYPRE_SStructParCSRMatrix__epv *epv)
   epv->f_Setup = impl_bHYPRE_SStructParCSRMatrix_Setup;
   epv->f_Apply = impl_bHYPRE_SStructParCSRMatrix_Apply;
 
+}
+#ifdef __cplusplus
+}
+#endif
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+void
+bHYPRE_SStructParCSRMatrix__set_sepv(struct bHYPRE_SStructParCSRMatrix__sepv 
+  *sepv)
+{
+  sepv->f_Create = impl_bHYPRE_SStructParCSRMatrix_Create;
 }
 #ifdef __cplusplus
 }

@@ -167,7 +167,23 @@ C       out sidl.ClassInfo retval
 
 
 C       
+C       Method:  Create[]
+C       
+
+        subroutine bHYPRE_SStructStencil_Create_f(ndim, size, retval)
+        implicit none
+C       in int ndim
+        integer*4 ndim
+C       in int size
+        integer*4 size
+C       out bHYPRE.SStructStencil retval
+        integer*8 retval
+        end
+
+
+C       
 C       Set the number of spatial dimensions and stencil entries.
+C       DEPRECATED, use Create:
 C       
 C       
 

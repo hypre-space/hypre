@@ -234,6 +234,7 @@ C       out int retval
 
 C       
 C       Set the matrix graph.
+C       DEPRECATED     Use Create
 C       
 C       
 

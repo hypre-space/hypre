@@ -92,7 +92,16 @@ bHYPRE_SStructStencil_getClassInfo(
   /* in */ bHYPRE_SStructStencil self);
 
 /**
+ * Method:  Create[]
+ */
+bHYPRE_SStructStencil
+bHYPRE_SStructStencil_Create(
+  /* in */ int32_t ndim,
+  /* in */ int32_t size);
+
+/**
  * Set the number of spatial dimensions and stencil entries.
+ * DEPRECATED, use Create:
  * 
  */
 int32_t

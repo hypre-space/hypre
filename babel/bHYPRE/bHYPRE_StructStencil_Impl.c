@@ -69,6 +69,9 @@ impl_bHYPRE_StructStencil__ctor(
   /* DO-NOT-DELETE splicer.begin(bHYPRE.StructStencil._ctor) */
   /* Insert the implementation of the constructor method here... */
 
+   /* User calls of __create are DEPRECATED.  Instead, call _Create, which
+      also calls this function. */
+
    struct bHYPRE_StructStencil__data * data;
    data = hypre_CTAlloc( struct bHYPRE_StructStencil__data, 1 );
    data -> stencil = NULL;
@@ -109,6 +112,45 @@ impl_bHYPRE_StructStencil__dtor(
 }
 
 /*
+ * Method:  Create[]
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_StructStencil_Create"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+bHYPRE_StructStencil
+impl_bHYPRE_StructStencil_Create(
+  /* in */ int32_t ndim,
+  /* in */ int32_t size)
+{
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructStencil.Create) */
+  /* Insert-Code-Here {bHYPRE.StructStencil.Create} (Create method) */
+
+   int ierr = 0;
+   bHYPRE_StructStencil stencil;
+   struct bHYPRE_StructStencil__data * data;
+   HYPRE_StructStencil Hstencil;
+
+   stencil = bHYPRE_StructStencil__create();
+   data = bHYPRE_StructStencil__get_data( stencil );
+   assert( ndim > 0 );
+   assert( size > 0 );
+   data->dim = ndim;
+   data->size = size;
+
+   ierr += HYPRE_StructStencilCreate( ndim, size, &Hstencil );
+   assert( ierr==0 );
+   data->stencil = Hstencil;
+
+   return stencil;
+
+  /* DO-NOT-DELETE splicer.end(bHYPRE.StructStencil.Create) */
+}
+
+/*
  * Method:  SetDimension[]
  */
 
@@ -125,6 +167,8 @@ impl_bHYPRE_StructStencil_SetDimension(
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.StructStencil.SetDimension) */
   /* Insert the implementation of the SetDimension method here... */
+
+   /* DEPRECATED   use _Create */
 
    int ierr = 0;
    struct bHYPRE_StructStencil__data * data;
@@ -167,6 +211,8 @@ impl_bHYPRE_StructStencil_SetSize(
   /* DO-NOT-DELETE splicer.begin(bHYPRE.StructStencil.SetSize) */
   /* Insert the implementation of the SetSize method here... */
  
+   /* DEPRECATED   use _Create */
+
    int ierr = 0;
    struct bHYPRE_StructStencil__data * data;
    HYPRE_StructStencil stencil;

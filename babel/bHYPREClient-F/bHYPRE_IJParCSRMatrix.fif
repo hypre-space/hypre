@@ -170,6 +170,28 @@ C       out sidl.ClassInfo retval
 
 
 C       
+C       Method:  Create[]
+C       
+
+        subroutine bHYPRE_IJParCSRMatrix_Create_f(mpi_comm, ilower,
+     &     iupper, jlower, jupper, retval)
+        implicit none
+C       in opaque mpi_comm
+        integer*8 mpi_comm
+C       in int ilower
+        integer*4 ilower
+C       in int iupper
+        integer*4 iupper
+C       in int jlower
+        integer*4 jlower
+C       in int jupper
+        integer*4 jupper
+C       out bHYPRE.IJParCSRMatrix retval
+        integer*8 retval
+        end
+
+
+C       
 C       (Optional) Set the max number of nonzeros to expect in each
 C       row of the diagonal and off-diagonal blocks.  The diagonal
 C       block is the submatrix whose column numbers correspond to

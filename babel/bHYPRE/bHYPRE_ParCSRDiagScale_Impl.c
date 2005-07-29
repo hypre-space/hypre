@@ -73,6 +73,8 @@ impl_bHYPRE_ParCSRDiagScale__ctor(
   /* DO-NOT-DELETE splicer.begin(bHYPRE.ParCSRDiagScale._ctor) */
   /* Insert the implementation of the constructor method here... */
 
+   /* Note: user calls of __create() are DEPRECATED, _Create also calls this function */
+
    struct bHYPRE_ParCSRDiagScale__data * data;
    data = hypre_CTAlloc( struct bHYPRE_ParCSRDiagScale__data, 1 );
    data -> comm = NULL;
@@ -112,7 +114,36 @@ impl_bHYPRE_ParCSRDiagScale__dtor(
 }
 
 /*
+ * Method:  Create[]
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_ParCSRDiagScale_Create"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+bHYPRE_ParCSRDiagScale
+impl_bHYPRE_ParCSRDiagScale_Create(
+  /* in */ void* mpi_comm)
+{
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.ParCSRDiagScale.Create) */
+  /* Insert-Code-Here {bHYPRE.ParCSRDiagScale.Create} (Create method) */
+
+   int ierr = 0;
+   bHYPRE_ParCSRDiagScale solver = bHYPRE_ParCSRDiagScale__create();
+   struct bHYPRE_ParCSRDiagScale__data * data = bHYPRE_ParCSRDiagScale__get_data( solver );
+
+   data -> comm = (MPI_Comm *) mpi_comm;
+
+   return solver;
+
+  /* DO-NOT-DELETE splicer.end(bHYPRE.ParCSRDiagScale.Create) */
+}
+
+/*
  * Set the MPI Communicator.
+ * DEPRECATED, use Create:
  * 
  */
 
@@ -129,6 +160,8 @@ impl_bHYPRE_ParCSRDiagScale_SetCommunicator(
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.ParCSRDiagScale.SetCommunicator) */
   /* Insert the implementation of the SetCommunicator method here... */
+
+   /* DEPRECATED   Use Create */
 
    int ierr = 0;
    struct bHYPRE_ParCSRDiagScale__data * data;

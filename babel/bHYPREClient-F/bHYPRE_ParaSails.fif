@@ -173,7 +173,21 @@ C       out sidl.ClassInfo retval
 
 
 C       
+C       Method:  Create[]
+C       
+
+        subroutine bHYPRE_ParaSails_Create_f(mpi_comm, retval)
+        implicit none
+C       in opaque mpi_comm
+        integer*8 mpi_comm
+C       out bHYPRE.ParaSails retval
+        integer*8 retval
+        end
+
+
+C       
 C       Set the MPI Communicator.
+C       DEPRECATED, use Create:
 C       
 C       
 

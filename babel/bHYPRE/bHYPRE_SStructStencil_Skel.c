@@ -29,6 +29,12 @@ void
 impl_bHYPRE_SStructStencil__dtor(
   /* in */ bHYPRE_SStructStencil self);
 
+extern
+bHYPRE_SStructStencil
+impl_bHYPRE_SStructStencil_Create(
+  /* in */ int32_t ndim,
+  /* in */ int32_t size);
+
 extern struct bHYPRE_SStructStencil__object* 
   impl_bHYPRE_SStructStencil_fconnect_bHYPRE_SStructStencil(char* url,
   sidl_BaseInterface *_ex);
@@ -119,6 +125,19 @@ bHYPRE_SStructStencil__set_epv(struct bHYPRE_SStructStencil__epv *epv)
   epv->f_SetNumDimSize = impl_bHYPRE_SStructStencil_SetNumDimSize;
   epv->f_SetEntry = skel_bHYPRE_SStructStencil_SetEntry;
 
+}
+#ifdef __cplusplus
+}
+#endif
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+void
+bHYPRE_SStructStencil__set_sepv(struct bHYPRE_SStructStencil__sepv *sepv)
+{
+  sepv->f_Create = impl_bHYPRE_SStructStencil_Create;
 }
 #ifdef __cplusplus
 }

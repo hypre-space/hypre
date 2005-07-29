@@ -74,9 +74,9 @@ impl_bHYPRE_StructMatrix__ctor(
   /* DO-NOT-DELETE splicer.begin(bHYPRE.StructMatrix._ctor) */
   /* Insert the implementation of the constructor method here... */
 
-   /* To build a StructMatrix via Babel: first call the constructor,
-      then SetCommunicator, then SetGrid and SetStencil (which internally call
-      HYPRE_StructMatrixCreate), then any optional parameter set functions
+   /* To build a StructMatrix via Babel: first call Create.
+      (User calls of __create are DEPRECATED.)
+      Then call any optional parameter set functions
       (e.g. SetSymmetric) then Initialize, then value set functions (presently
       SetValues or SetBoxValues), and finally Assemble (Setup is equivalent to Assemble).
     */
@@ -122,6 +122,52 @@ impl_bHYPRE_StructMatrix__dtor(
 }
 
 /*
+ * Method:  Create[]
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_StructMatrix_Create"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+bHYPRE_StructMatrix
+impl_bHYPRE_StructMatrix_Create(
+  /* in */ void* mpi_comm,
+  /* in */ bHYPRE_StructGrid grid,
+  /* in */ bHYPRE_StructStencil stencil)
+{
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructMatrix.Create) */
+  /* Insert-Code-Here {bHYPRE.StructMatrix.Create} (Create method) */
+
+   int ierr = 0;
+   bHYPRE_StructMatrix mat;
+   struct bHYPRE_StructMatrix__data * data;
+   HYPRE_StructMatrix Hmat;
+   struct bHYPRE_StructGrid__data * gdata;
+   HYPRE_StructGrid Hgrid;
+   struct bHYPRE_StructStencil__data * sdata;
+   HYPRE_StructStencil Hstencil;
+
+   mat = bHYPRE_StructMatrix__create();
+   data = bHYPRE_StructMatrix__get_data( mat );
+
+   gdata = bHYPRE_StructGrid__get_data( grid );
+   Hgrid = gdata->grid;
+
+   sdata = bHYPRE_StructStencil__get_data( stencil );
+   Hstencil = sdata->stencil;
+
+   ierr += HYPRE_StructMatrixCreate( (MPI_Comm)mpi_comm, Hgrid, Hstencil, &Hmat );
+   data->matrix = Hmat;
+   data->comm = (MPI_Comm) mpi_comm;
+
+   return( mat );
+
+  /* DO-NOT-DELETE splicer.end(bHYPRE.StructMatrix.Create) */
+}
+
+/*
  * Set the MPI Communicator.  DEPRECATED, Use Create()
  * 
  */
@@ -139,6 +185,8 @@ impl_bHYPRE_StructMatrix_SetCommunicator(
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.StructMatrix.SetCommunicator) */
   /* Insert the implementation of the SetCommunicator method here... */
+
+   /* DEPRECATED   call Create */
 
    int ierr = 0;
    struct bHYPRE_StructMatrix__data * data;
@@ -273,6 +321,8 @@ impl_bHYPRE_StructMatrix_SetGrid(
   /* DO-NOT-DELETE splicer.begin(bHYPRE.StructMatrix.SetGrid) */
   /* Insert the implementation of the SetGrid method here... */
 
+   /* DEPRECATED   call Create */
+
    /* To create a matrix one needs a grid, stencil, and communicator.
       We assume SetCommunicator will be called first or can be changed.
       SetGrid and SetStencil both check for whether the other one has been called.
@@ -327,6 +377,8 @@ impl_bHYPRE_StructMatrix_SetStencil(
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.StructMatrix.SetStencil) */
   /* Insert the implementation of the SetStencil method here... */
+
+   /* DEPRECATED   call Create */
 
    int ierr = 0;
    struct bHYPRE_StructMatrix__data * data;

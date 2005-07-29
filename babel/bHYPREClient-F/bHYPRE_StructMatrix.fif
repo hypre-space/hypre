@@ -172,6 +172,24 @@ C       out sidl.ClassInfo retval
 
 
 C       
+C       Method:  Create[]
+C       
+
+        subroutine bHYPRE_StructMatrix_Create_f(mpi_comm, grid, stencil,
+     &     retval)
+        implicit none
+C       in opaque mpi_comm
+        integer*8 mpi_comm
+C       in bHYPRE.StructGrid grid
+        integer*8 grid
+C       in bHYPRE.StructStencil stencil
+        integer*8 stencil
+C       out bHYPRE.StructMatrix retval
+        integer*8 retval
+        end
+
+
+C       
 C       Set the MPI Communicator.  DEPRECATED, Use Create()
 C       
 C       

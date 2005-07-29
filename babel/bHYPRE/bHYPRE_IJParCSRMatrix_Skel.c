@@ -29,6 +29,15 @@ void
 impl_bHYPRE_IJParCSRMatrix__dtor(
   /* in */ bHYPRE_IJParCSRMatrix self);
 
+extern
+bHYPRE_IJParCSRMatrix
+impl_bHYPRE_IJParCSRMatrix_Create(
+  /* in */ void* mpi_comm,
+  /* in */ int32_t ilower,
+  /* in */ int32_t iupper,
+  /* in */ int32_t jlower,
+  /* in */ int32_t jupper);
+
 extern struct bHYPRE_CoefficientAccess__object* 
   impl_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_CoefficientAccess(char* url,
   sidl_BaseInterface *_ex);
@@ -632,6 +641,19 @@ bHYPRE_IJParCSRMatrix__set_epv(struct bHYPRE_IJParCSRMatrix__epv *epv)
   epv->f_Setup = impl_bHYPRE_IJParCSRMatrix_Setup;
   epv->f_Apply = impl_bHYPRE_IJParCSRMatrix_Apply;
 
+}
+#ifdef __cplusplus
+}
+#endif
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+void
+bHYPRE_IJParCSRMatrix__set_sepv(struct bHYPRE_IJParCSRMatrix__sepv *sepv)
+{
+  sepv->f_Create = impl_bHYPRE_IJParCSRMatrix_Create;
 }
 #ifdef __cplusplus
 }

@@ -175,6 +175,8 @@ impl_bHYPRE_BoomerAMG__ctor(
   /* DO-NOT-DELETE splicer.begin(bHYPRE.BoomerAMG._ctor) */
   /* Insert the implementation of the constructor method here... */
 
+   /* Note: user calls of __create() are DEPRECATED, _Create also calls this function */
+
    int ierr=0;
    HYPRE_Solver dummy;
    /* will really be initialized by Create call */
@@ -221,6 +223,33 @@ impl_bHYPRE_BoomerAMG__dtor(
 }
 
 /*
+ * Method:  Create[]
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_BoomerAMG_Create"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+bHYPRE_BoomerAMG
+impl_bHYPRE_BoomerAMG_Create(
+  /* in */ void* mpi_comm)
+{
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.BoomerAMG.Create) */
+  /* Insert-Code-Here {bHYPRE.BoomerAMG.Create} (Create method) */
+
+   bHYPRE_BoomerAMG solver = bHYPRE_BoomerAMG__create();
+   struct bHYPRE_BoomerAMG__data * data = bHYPRE_BoomerAMG__get_data( solver );
+
+   data -> comm = (MPI_Comm *) mpi_comm;
+
+   return solver;
+
+  /* DO-NOT-DELETE splicer.end(bHYPRE.BoomerAMG.Create) */
+}
+
+/*
  * Method:  SetLevelRelaxWt[]
  */
 
@@ -252,6 +281,7 @@ impl_bHYPRE_BoomerAMG_SetLevelRelaxWt(
 
 /*
  * Set the MPI Communicator.
+ * DEPRECATED, use Create:
  * 
  */
 
@@ -268,6 +298,8 @@ impl_bHYPRE_BoomerAMG_SetCommunicator(
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.BoomerAMG.SetCommunicator) */
   /* Insert the implementation of the SetCommunicator method here... */
+
+   /* DEPRECATED  Use Create */
 
    int ierr = 0;
    struct bHYPRE_BoomerAMG__data * data = bHYPRE_BoomerAMG__get_data( self );

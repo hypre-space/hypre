@@ -29,6 +29,12 @@ void
 impl_bHYPRE_StructVector__dtor(
   /* in */ bHYPRE_StructVector self);
 
+extern
+bHYPRE_StructVector
+impl_bHYPRE_StructVector_Create(
+  /* in */ void* mpi_comm,
+  /* in */ bHYPRE_StructGrid grid);
+
 extern struct bHYPRE_StructGrid__object* 
   impl_bHYPRE_StructVector_fconnect_bHYPRE_StructGrid(char* url,
   sidl_BaseInterface *_ex);
@@ -291,6 +297,19 @@ bHYPRE_StructVector__set_epv(struct bHYPRE_StructVector__epv *epv)
   epv->f_Dot = impl_bHYPRE_StructVector_Dot;
   epv->f_Axpy = impl_bHYPRE_StructVector_Axpy;
 
+}
+#ifdef __cplusplus
+}
+#endif
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+void
+bHYPRE_StructVector__set_sepv(struct bHYPRE_StructVector__sepv *sepv)
+{
+  sepv->f_Create = impl_bHYPRE_StructVector_Create;
 }
 #ifdef __cplusplus
 }

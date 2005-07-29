@@ -64,9 +64,9 @@ impl_bHYPRE_StructVector__ctor(
   /* DO-NOT-DELETE splicer.begin(bHYPRE.StructVector._ctor) */
   /* Insert the implementation of the constructor method here... */
 
-  /* How to make a vector: first call the constructor.
-     Then SetCommunicator, then SetGrid (which calls HYPRE_StructVectorCreate),
-     then Initialize, then SetValue (or SetBoxValues, etc.), then Assemble.
+  /* How to make a vector: call Create, which will call this function.
+     User calls of __create are DEPRECATED.
+     Then call Initialize, then SetValue (or SetBoxValues, etc.), then Assemble.
      Or you can call Clone.
   */
 
@@ -109,6 +109,46 @@ impl_bHYPRE_StructVector__dtor(
 }
 
 /*
+ * Method:  Create[]
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_StructVector_Create"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+bHYPRE_StructVector
+impl_bHYPRE_StructVector_Create(
+  /* in */ void* mpi_comm,
+  /* in */ bHYPRE_StructGrid grid)
+{
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructVector.Create) */
+  /* Insert-Code-Here {bHYPRE.StructVector.Create} (Create method) */
+
+   int ierr = 0;
+   bHYPRE_StructVector vec;
+   struct bHYPRE_StructVector__data * data;
+   HYPRE_StructVector Hy;
+   struct bHYPRE_StructGrid__data * gdata;
+   HYPRE_StructGrid Hgrid;
+
+   vec = bHYPRE_StructVector__create();
+   data = bHYPRE_StructVector__get_data( vec );
+
+   gdata = bHYPRE_StructGrid__get_data( grid );
+   Hgrid = gdata->grid;
+
+   ierr += HYPRE_StructVectorCreate( (MPI_Comm) mpi_comm, Hgrid, &Hy );
+   data->vec = Hy;
+   data->comm = (MPI_Comm) mpi_comm;
+
+   return( vec );
+
+  /* DO-NOT-DELETE splicer.end(bHYPRE.StructVector.Create) */
+}
+
+/*
  * Set the MPI Communicator.  DEPRECATED, Use Create()
  * 
  */
@@ -129,6 +169,8 @@ impl_bHYPRE_StructVector_SetCommunicator(
    /* N.B. This function will have no effect unless called _before_
       SetGrid.
     */
+
+   /* DEPRECATED   call Create */
 
    int ierr = 0;
    struct bHYPRE_StructVector__data * data;
@@ -262,6 +304,8 @@ impl_bHYPRE_StructVector_SetGrid(
     SetCommunicator should have been called before the time SetGrid is called.
     Initialize, value-setting functions, and Assemble should be called afterwards.
    */
+
+   /* DEPRECATED  Call Create */
 
    int ierr = 0;
    struct bHYPRE_StructVector__data * data;

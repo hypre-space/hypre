@@ -29,6 +29,11 @@ void
 impl_bHYPRE_Pilut__dtor(
   /* in */ bHYPRE_Pilut self);
 
+extern
+bHYPRE_Pilut
+impl_bHYPRE_Pilut_Create(
+  /* in */ void* mpi_comm);
+
 extern struct bHYPRE_Solver__object* 
   impl_bHYPRE_Pilut_fconnect_bHYPRE_Solver(char* url, sidl_BaseInterface *_ex);
 extern char* impl_bHYPRE_Pilut_fgetURL_bHYPRE_Solver(struct 
@@ -321,6 +326,19 @@ bHYPRE_Pilut__set_epv(struct bHYPRE_Pilut__epv *epv)
   epv->f_GetNumIterations = impl_bHYPRE_Pilut_GetNumIterations;
   epv->f_GetRelResidualNorm = impl_bHYPRE_Pilut_GetRelResidualNorm;
 
+}
+#ifdef __cplusplus
+}
+#endif
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+void
+bHYPRE_Pilut__set_sepv(struct bHYPRE_Pilut__sepv *sepv)
+{
+  sepv->f_Create = impl_bHYPRE_Pilut_Create;
 }
 #ifdef __cplusplus
 }

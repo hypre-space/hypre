@@ -282,6 +282,7 @@ SIDLFortran77Symbol(bhypre_solver_getclassinfo_f,BHYPRE_SOLVER_GETCLASSINFO_F,bH
 
 /*
  * Set the MPI Communicator.
+ * DEPRECATED, use Create:
  * 
  */
 

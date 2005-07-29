@@ -101,6 +101,14 @@ bHYPRE_SStructParCSRMatrix_getClassInfo(
   /* in */ bHYPRE_SStructParCSRMatrix self);
 
 /**
+ * Method:  Create[]
+ */
+bHYPRE_SStructParCSRMatrix
+bHYPRE_SStructParCSRMatrix_Create(
+  /* in */ void* mpi_comm,
+  /* in */ bHYPRE_SStructGraph graph);
+
+/**
  * Set the MPI Communicator.  DEPRECATED, Use Create()
  * 
  */
@@ -149,6 +157,7 @@ bHYPRE_SStructParCSRMatrix_GetObject(
 
 /**
  * Set the matrix graph.
+ * DEPRECATED     Use Create
  * 
  */
 int32_t

@@ -72,9 +72,8 @@ impl_bHYPRE_SStructParCSRMatrix__ctor(
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructParCSRMatrix._ctor) */
   /* Insert the implementation of the constructor method here... */
 
-   /* To build a SStructParCSRMatrix via Babel: first call the constructor,
-      then SetCommunicator, then SetGraph (which internally calls
-      HYPRE_SStructMatrixCreate), then any optional parameter set functions
+   /* To build a SStructParCSRMatrix via Babel: first call _Create (not __create),
+      then any optional parameter set functions
       (e.g. SetSymmetric) then Initialize, then value set functions (such as
       SetValues or SetBoxValues), and finally Assemble (Setup is equivalent to Assemble).
     */
@@ -118,6 +117,47 @@ impl_bHYPRE_SStructParCSRMatrix__dtor(
 }
 
 /*
+ * Method:  Create[]
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_SStructParCSRMatrix_Create"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+bHYPRE_SStructParCSRMatrix
+impl_bHYPRE_SStructParCSRMatrix_Create(
+  /* in */ void* mpi_comm,
+  /* in */ bHYPRE_SStructGraph graph)
+{
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructParCSRMatrix.Create) */
+  /* Insert-Code-Here {bHYPRE.SStructParCSRMatrix.Create} (Create method) */
+
+   int ierr = 0;
+   bHYPRE_SStructParCSRMatrix mat;
+   struct bHYPRE_SStructParCSRMatrix__data * data;
+   HYPRE_SStructMatrix Hmat;
+   struct bHYPRE_SStructGraph__data * gdata;
+   HYPRE_SStructGraph Hgraph;
+
+   mat = bHYPRE_SStructParCSRMatrix__create();
+   data = bHYPRE_SStructParCSRMatrix__get_data( mat );
+   Hmat = data->matrix;
+
+   gdata = bHYPRE_SStructGraph__get_data( graph );
+   Hgraph = gdata->graph;
+
+   ierr += HYPRE_SStructMatrixCreate( (MPI_Comm) mpi_comm, Hgraph, &Hmat );
+   data->matrix = Hmat;
+   data->comm = (MPI_Comm) mpi_comm;
+
+   return( mat );
+
+  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructParCSRMatrix.Create) */
+}
+
+/*
  * Set the MPI Communicator.  DEPRECATED, Use Create()
  * 
  */
@@ -135,6 +175,8 @@ impl_bHYPRE_SStructParCSRMatrix_SetCommunicator(
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructParCSRMatrix.SetCommunicator) */
   /* Insert the implementation of the SetCommunicator method here... */
+
+   /* DEPRECATED   use _Create */
 
    int ierr = 0;
    struct bHYPRE_SStructParCSRMatrix__data * data;
@@ -285,6 +327,7 @@ impl_bHYPRE_SStructParCSRMatrix_GetObject(
 
 /*
  * Set the matrix graph.
+ * DEPRECATED     Use Create
  * 
  */
 
@@ -308,6 +351,9 @@ impl_bHYPRE_SStructParCSRMatrix_SetGraph(
       It is an error to call this function
       if HYPRE_StructMatrixCreate has already been called for this matrix.
    */
+
+
+   /* DEPRECATED   use _Create */
 
    int ierr = 0;
    struct bHYPRE_SStructParCSRMatrix__data * data;

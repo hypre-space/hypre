@@ -101,6 +101,15 @@ impl_bHYPRE_IJParCSRMatrix__dtor(
  * User-defined object methods
  */
 
+extern
+bHYPRE_IJParCSRMatrix
+impl_bHYPRE_IJParCSRMatrix_Create(
+  /* in */ void* mpi_comm,
+  /* in */ int32_t ilower,
+  /* in */ int32_t iupper,
+  /* in */ int32_t jlower,
+  /* in */ int32_t jupper);
+
 extern struct bHYPRE_CoefficientAccess__object* 
   impl_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_CoefficientAccess(char* url,
   sidl_BaseInterface *_ex);

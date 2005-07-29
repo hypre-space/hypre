@@ -89,6 +89,11 @@ impl_bHYPRE_IdentitySolver__dtor(
  * User-defined object methods
  */
 
+extern
+bHYPRE_IdentitySolver
+impl_bHYPRE_IdentitySolver_Create(
+  /* in */ void* mpi_comm);
+
 extern struct bHYPRE_Solver__object* 
   impl_bHYPRE_IdentitySolver_fconnect_bHYPRE_Solver(char* url,
   sidl_BaseInterface *_ex);

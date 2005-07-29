@@ -45,9 +45,13 @@ extern "C" {
 
 struct bHYPRE_ParaSails__array;
 struct bHYPRE_ParaSails__object;
+struct bHYPRE_ParaSails__sepv;
 
 extern struct bHYPRE_ParaSails__object*
 bHYPRE_ParaSails__new(void);
+
+extern struct bHYPRE_ParaSails__sepv*
+bHYPRE_ParaSails__statics(void);
 
 extern void bHYPRE_ParaSails__init(
   struct bHYPRE_ParaSails__object* self);
@@ -69,6 +73,21 @@ struct sidl_io_Deserializer__array;
 struct sidl_io_Deserializer__object;
 struct sidl_io_Serializer__array;
 struct sidl_io_Serializer__object;
+
+/*
+ * Declare the static method entry point vector.
+ */
+
+struct bHYPRE_ParaSails__sepv {
+  /* Implicit builtin methods */
+  /* Methods introduced in sidl.BaseInterface-v0.9.3 */
+  /* Methods introduced in sidl.BaseClass-v0.9.3 */
+  /* Methods introduced in bHYPRE.Operator-v1.0.0 */
+  /* Methods introduced in bHYPRE.Solver-v1.0.0 */
+  /* Methods introduced in bHYPRE.ParaSails-v1.0.0 */
+  struct bHYPRE_ParaSails__object* (*f_Create)(
+    /* in */ void* mpi_comm);
+};
 
 /*
  * Declare the method entry point vector.
@@ -198,6 +217,8 @@ struct bHYPRE_ParaSails__external {
   struct bHYPRE_ParaSails__object*
   (*createObject)(void);
 
+  struct bHYPRE_ParaSails__sepv*
+  (*getStaticEPV)(void);
   struct sidl_BaseClass__epv*(*getSuperEPV)(void);
 };
 

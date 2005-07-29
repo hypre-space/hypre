@@ -29,6 +29,11 @@ void
 impl_bHYPRE_IdentitySolver__dtor(
   /* in */ bHYPRE_IdentitySolver self);
 
+extern
+bHYPRE_IdentitySolver
+impl_bHYPRE_IdentitySolver_Create(
+  /* in */ void* mpi_comm);
+
 extern struct bHYPRE_Solver__object* 
   impl_bHYPRE_IdentitySolver_fconnect_bHYPRE_Solver(char* url,
   sidl_BaseInterface *_ex);
@@ -335,6 +340,19 @@ bHYPRE_IdentitySolver__set_epv(struct bHYPRE_IdentitySolver__epv *epv)
   epv->f_GetNumIterations = impl_bHYPRE_IdentitySolver_GetNumIterations;
   epv->f_GetRelResidualNorm = impl_bHYPRE_IdentitySolver_GetRelResidualNorm;
 
+}
+#ifdef __cplusplus
+}
+#endif
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+void
+bHYPRE_IdentitySolver__set_sepv(struct bHYPRE_IdentitySolver__sepv *sepv)
+{
+  sepv->f_Create = impl_bHYPRE_IdentitySolver_Create;
 }
 #ifdef __cplusplus
 }

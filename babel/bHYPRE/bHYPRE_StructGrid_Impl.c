@@ -67,6 +67,9 @@ impl_bHYPRE_StructGrid__ctor(
   /* DO-NOT-DELETE splicer.begin(bHYPRE.StructGrid._ctor) */
   /* Insert the implementation of the constructor method here... */
 
+   /* User calls of __create are DEPRECATED.  Instead, call _Create, which
+      also calls this function. */
+
    struct bHYPRE_StructGrid__data * data;
    data = hypre_CTAlloc( struct bHYPRE_StructGrid__data, 1 );
    data -> grid = NULL;
@@ -106,7 +109,44 @@ impl_bHYPRE_StructGrid__dtor(
 }
 
 /*
+ * Method:  Create[]
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_StructGrid_Create"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+bHYPRE_StructGrid
+impl_bHYPRE_StructGrid_Create(
+  /* in */ void* mpi_comm,
+  /* in */ int32_t dim)
+{
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructGrid.Create) */
+  /* Insert-Code-Here {bHYPRE.StructGrid.Create} (Create method) */
+
+   int ierr = 0;
+   bHYPRE_StructGrid grid;
+   struct bHYPRE_StructGrid__data * data;
+   HYPRE_StructGrid Hgrid;
+
+   grid = bHYPRE_StructGrid__create();
+   data = bHYPRE_StructGrid__get_data( grid );
+   data->comm = (MPI_Comm) mpi_comm;
+
+   ierr += HYPRE_StructGridCreate( data->comm, dim, &Hgrid );
+   assert( ierr==0 );
+   data->grid = Hgrid;
+
+   return grid;
+
+  /* DO-NOT-DELETE splicer.end(bHYPRE.StructGrid.Create) */
+}
+
+/*
  * Set the MPI Communicator.
+ * DEPRECATED, use Create:
  * 
  */
 
@@ -123,6 +163,8 @@ impl_bHYPRE_StructGrid_SetCommunicator(
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.StructGrid.SetCommunicator) */
   /* Insert the implementation of the SetCommunicator method here... */
+
+   /* DEPRECATED   use _Create */
 
    /* This should be called before SetDimension */
    int ierr = 0;
@@ -155,6 +197,8 @@ impl_bHYPRE_StructGrid_SetDimension(
    /* SetCommunicator should be called before this function.
       In Hypre, the dimension is permanently set at creation,
       so HYPRE_StructGridCreate is called here .*/
+
+   /* DEPRECATED   use _Create */
 
    int ierr = 0;
    struct bHYPRE_StructGrid__data * data;

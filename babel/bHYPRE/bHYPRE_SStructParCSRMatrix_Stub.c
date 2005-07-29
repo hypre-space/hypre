@@ -68,6 +68,22 @@ static const struct bHYPRE_SStructParCSRMatrix__external* _loadIOR(void)
 #define _getExternals() (_externals ? _externals : _loadIOR())
 
 /*
+ * Hold pointer to static entry point vector
+ */
+
+static const struct bHYPRE_SStructParCSRMatrix__sepv *_sepv = NULL;
+/*
+ * Return pointer to static functions.
+ */
+
+#define _getSEPV() (_sepv ? _sepv : (_sepv = (*(_getExternals()->getStaticEPV))()))
+/*
+ * Reset point to static functions.
+ */
+
+#define _resetSEPV() (_sepv = (*(_getExternals()->getStaticEPV))())
+
+/*
  * Constructor function for the class.
  */
 
@@ -210,6 +226,20 @@ bHYPRE_SStructParCSRMatrix_getClassInfo(
 }
 
 /*
+ * Method:  Create[]
+ */
+
+bHYPRE_SStructParCSRMatrix
+bHYPRE_SStructParCSRMatrix_Create(
+  /* in */ void* mpi_comm,
+  /* in */ bHYPRE_SStructGraph graph)
+{
+  return (_getSEPV()->f_Create)(
+    mpi_comm,
+    graph);
+}
+
+/*
  * Set the MPI Communicator.  DEPRECATED, Use Create()
  * 
  */
@@ -280,6 +310,7 @@ bHYPRE_SStructParCSRMatrix_GetObject(
 
 /*
  * Set the matrix graph.
+ * DEPRECATED     Use Create
  * 
  */
 
@@ -819,6 +850,29 @@ bHYPRE_SStructParCSRMatrix_Apply(
     x);
 }
 
+void
+bHYPRE_SStructParCSRMatrix_Create__sexec(
+        struct sidl_io_Deserializer__object* inArgs,
+        struct sidl_io_Serializer__object* outArgs) {
+  /* stack space for arguments */
+  void* mpi_comm;
+  bHYPRE_SStructGraph graph;
+  bHYPRE_SStructParCSRMatrix _retval;
+  sidl_BaseInterface _ex   = NULL;
+  sidl_BaseInterface *_ex2 = &_ex;
+
+  /* unpack in and inout argments */
+
+  /* make the call */
+  _retval = (_getSEPV()->f_Create)(
+    mpi_comm,
+    graph);
+
+  /* pack return value */
+  /* pack out and inout argments */
+
+}
+
 /*
  * Cast method for interface and class type conversions.
  */
@@ -880,6 +934,36 @@ bHYPRE_SStructParCSRMatrix__exec(
   outArgs);
 }
 
+struct bHYPRE_SStructParCSRMatrix__smethod {
+  const char *d_name;
+  void (*d_func)(struct sidl_io_Deserializer__object *,
+    struct sidl_io_Serializer__object *);
+};
+
+void
+bHYPRE_SStructParCSRMatrix__sexec(
+        const char* methodName,
+        struct sidl_io_Deserializer__object* inArgs,
+        struct sidl_io_Serializer__object* outArgs ) { 
+  static const struct bHYPRE_SStructParCSRMatrix__smethod s_methods[] = {
+    { "Create", bHYPRE_SStructParCSRMatrix_Create__sexec }
+  };
+  int i, cmp, l = 0;
+  int u = sizeof(s_methods)/sizeof(struct bHYPRE_SStructParCSRMatrix__smethod);
+  if (methodName) {
+    /* Use binary search to locate method */
+    while (l < u) {
+      i = (l + u) >> 1;
+      if (!(cmp=strcmp(methodName, s_methods[i].d_name))) {
+        (s_methods[i].d_func)(inArgs, outArgs);
+        return;
+      }
+      else if (cmp < 0) u = i;
+      else l = i + 1;
+    }
+  }
+  /* TODO: add code for method not found */
+}
 /*
  * Get the URL of the Implementation of this object (for RMI)
  */

@@ -68,6 +68,22 @@ static const struct bHYPRE_IJParCSRMatrix__external* _loadIOR(void)
 #define _getExternals() (_externals ? _externals : _loadIOR())
 
 /*
+ * Hold pointer to static entry point vector
+ */
+
+static const struct bHYPRE_IJParCSRMatrix__sepv *_sepv = NULL;
+/*
+ * Return pointer to static functions.
+ */
+
+#define _getSEPV() (_sepv ? _sepv : (_sepv = (*(_getExternals()->getStaticEPV))()))
+/*
+ * Reset point to static functions.
+ */
+
+#define _resetSEPV() (_sepv = (*(_getExternals()->getStaticEPV))())
+
+/*
  * Constructor function for the class.
  */
 
@@ -206,6 +222,26 @@ bHYPRE_IJParCSRMatrix_getClassInfo(
 {
   return (*self->d_epv->f_getClassInfo)(
     self);
+}
+
+/*
+ * Method:  Create[]
+ */
+
+bHYPRE_IJParCSRMatrix
+bHYPRE_IJParCSRMatrix_Create(
+  /* in */ void* mpi_comm,
+  /* in */ int32_t ilower,
+  /* in */ int32_t iupper,
+  /* in */ int32_t jlower,
+  /* in */ int32_t jupper)
+{
+  return (_getSEPV()->f_Create)(
+    mpi_comm,
+    ilower,
+    iupper,
+    jlower,
+    jupper);
 }
 
 /*
@@ -855,6 +891,43 @@ bHYPRE_IJParCSRMatrix_Apply(
     x);
 }
 
+void
+bHYPRE_IJParCSRMatrix_Create__sexec(
+        struct sidl_io_Deserializer__object* inArgs,
+        struct sidl_io_Serializer__object* outArgs) {
+  /* stack space for arguments */
+  void* mpi_comm;
+  int32_t ilower;
+  int32_t iupper;
+  int32_t jlower;
+  int32_t jupper;
+  bHYPRE_IJParCSRMatrix _retval;
+  sidl_BaseInterface _ex   = NULL;
+  sidl_BaseInterface *_ex2 = &_ex;
+
+  /* unpack in and inout argments */
+
+  sidl_io_Deserializer_unpackInt( inArgs, "ilower", &ilower, _ex2);
+
+  sidl_io_Deserializer_unpackInt( inArgs, "iupper", &iupper, _ex2);
+
+  sidl_io_Deserializer_unpackInt( inArgs, "jlower", &jlower, _ex2);
+
+  sidl_io_Deserializer_unpackInt( inArgs, "jupper", &jupper, _ex2);
+
+  /* make the call */
+  _retval = (_getSEPV()->f_Create)(
+    mpi_comm,
+    ilower,
+    iupper,
+    jlower,
+    jupper);
+
+  /* pack return value */
+  /* pack out and inout argments */
+
+}
+
 /*
  * Cast method for interface and class type conversions.
  */
@@ -916,6 +989,36 @@ bHYPRE_IJParCSRMatrix__exec(
   outArgs);
 }
 
+struct bHYPRE_IJParCSRMatrix__smethod {
+  const char *d_name;
+  void (*d_func)(struct sidl_io_Deserializer__object *,
+    struct sidl_io_Serializer__object *);
+};
+
+void
+bHYPRE_IJParCSRMatrix__sexec(
+        const char* methodName,
+        struct sidl_io_Deserializer__object* inArgs,
+        struct sidl_io_Serializer__object* outArgs ) { 
+  static const struct bHYPRE_IJParCSRMatrix__smethod s_methods[] = {
+    { "Create", bHYPRE_IJParCSRMatrix_Create__sexec }
+  };
+  int i, cmp, l = 0;
+  int u = sizeof(s_methods)/sizeof(struct bHYPRE_IJParCSRMatrix__smethod);
+  if (methodName) {
+    /* Use binary search to locate method */
+    while (l < u) {
+      i = (l + u) >> 1;
+      if (!(cmp=strcmp(methodName, s_methods[i].d_name))) {
+        (s_methods[i].d_func)(inArgs, outArgs);
+        return;
+      }
+      else if (cmp < 0) u = i;
+      else l = i + 1;
+    }
+  }
+  /* TODO: add code for method not found */
+}
 /*
  * Get the URL of the Implementation of this object (for RMI)
  */

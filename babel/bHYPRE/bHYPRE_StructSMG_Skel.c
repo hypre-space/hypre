@@ -29,6 +29,11 @@ void
 impl_bHYPRE_StructSMG__dtor(
   /* in */ bHYPRE_StructSMG self);
 
+extern
+bHYPRE_StructSMG
+impl_bHYPRE_StructSMG_Create(
+  /* in */ void* mpi_comm);
+
 extern struct bHYPRE_Solver__object* 
   impl_bHYPRE_StructSMG_fconnect_bHYPRE_Solver(char* url,
   sidl_BaseInterface *_ex);
@@ -333,6 +338,19 @@ bHYPRE_StructSMG__set_epv(struct bHYPRE_StructSMG__epv *epv)
   epv->f_GetNumIterations = impl_bHYPRE_StructSMG_GetNumIterations;
   epv->f_GetRelResidualNorm = impl_bHYPRE_StructSMG_GetRelResidualNorm;
 
+}
+#ifdef __cplusplus
+}
+#endif
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+void
+bHYPRE_StructSMG__set_sepv(struct bHYPRE_StructSMG__sepv *sepv)
+{
+  sepv->f_Create = impl_bHYPRE_StructSMG_Create;
 }
 #ifdef __cplusplus
 }

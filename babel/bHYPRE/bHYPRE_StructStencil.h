@@ -95,6 +95,14 @@ bHYPRE_StructStencil_getClassInfo(
   /* in */ bHYPRE_StructStencil self);
 
 /**
+ * Method:  Create[]
+ */
+bHYPRE_StructStencil
+bHYPRE_StructStencil_Create(
+  /* in */ int32_t ndim,
+  /* in */ int32_t size);
+
+/**
  * Method:  SetDimension[]
  */
 int32_t

@@ -90,6 +90,12 @@ impl_bHYPRE_SStructGraph__dtor(
  * User-defined object methods
  */
 
+extern
+bHYPRE_SStructGraph
+impl_bHYPRE_SStructGraph_Create(
+  /* in */ void* mpi_comm,
+  /* in */ bHYPRE_SStructGrid grid);
+
 extern struct bHYPRE_SStructGrid__object* 
   impl_bHYPRE_SStructGraph_fconnect_bHYPRE_SStructGrid(char* url,
   sidl_BaseInterface *_ex);

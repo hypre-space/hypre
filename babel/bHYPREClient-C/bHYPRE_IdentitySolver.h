@@ -102,7 +102,15 @@ bHYPRE_IdentitySolver_getClassInfo(
   /* in */ bHYPRE_IdentitySolver self);
 
 /**
+ * Method:  Create[]
+ */
+bHYPRE_IdentitySolver
+bHYPRE_IdentitySolver_Create(
+  /* in */ void* mpi_comm);
+
+/**
  * Set the MPI Communicator.
+ * DEPRECATED, use Create:
  * 
  */
 int32_t

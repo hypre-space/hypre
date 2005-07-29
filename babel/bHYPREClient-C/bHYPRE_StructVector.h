@@ -95,6 +95,14 @@ bHYPRE_StructVector_getClassInfo(
   /* in */ bHYPRE_StructVector self);
 
 /**
+ * Method:  Create[]
+ */
+bHYPRE_StructVector
+bHYPRE_StructVector_Create(
+  /* in */ void* mpi_comm,
+  /* in */ bHYPRE_StructGrid grid);
+
+/**
  * Set the MPI Communicator.  DEPRECATED, Use Create()
  * 
  */

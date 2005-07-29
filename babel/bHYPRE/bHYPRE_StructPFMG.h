@@ -112,6 +112,7 @@ bHYPRE_StructPFMG_Create(
 
 /**
  * Set the MPI Communicator.
+ * DEPRECATED, use Create:
  * 
  */
 int32_t

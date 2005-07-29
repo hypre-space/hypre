@@ -360,6 +360,7 @@ SIDLFortran77Symbol(bhypre_structpfmg_create_f,BHYPRE_STRUCTPFMG_CREATE_F,bHYPRE
 
 /*
  * Set the MPI Communicator.
+ * DEPRECATED, use Create:
  * 
  */
 

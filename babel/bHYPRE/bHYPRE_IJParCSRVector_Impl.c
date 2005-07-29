@@ -70,6 +70,9 @@ impl_bHYPRE_IJParCSRVector__ctor(
   /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRVector._ctor) */
   /* Insert the implementation of the constructor method here... */
 
+   /* Note: User calls of__create are DEPRECATED.
+      Use Create(), which also calls this function */
+
    struct bHYPRE_IJParCSRVector__data * data;
    data = hypre_CTAlloc( struct bHYPRE_IJParCSRVector__data, 1 );
    data -> comm = MPI_COMM_NULL;
@@ -109,6 +112,43 @@ impl_bHYPRE_IJParCSRVector__dtor(
 }
 
 /*
+ * Method:  Create[]
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_IJParCSRVector_Create"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+bHYPRE_IJParCSRVector
+impl_bHYPRE_IJParCSRVector_Create(
+  /* in */ void* mpi_comm,
+  /* in */ int32_t jlower,
+  /* in */ int32_t jupper)
+{
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRVector.Create) */
+  /* Insert-Code-Here {bHYPRE.IJParCSRVector.Create} (Create method) */
+
+   int ierr = 0;
+   HYPRE_IJVector dummy;
+   HYPRE_IJVector * Hvec = &dummy;
+   struct bHYPRE_IJParCSRVector__data * data;
+
+   bHYPRE_IJParCSRVector vec = bHYPRE_IJParCSRVector__create();
+   data = bHYPRE_IJParCSRVector__get_data( vec );
+   data -> comm = (MPI_Comm) mpi_comm;
+   ierr += HYPRE_IJVectorCreate( data->comm, jlower, jupper, Hvec );
+   assert( ierr == 0 );
+   ierr += HYPRE_IJVectorSetObjectType( *Hvec, HYPRE_PARCSR );
+   data -> ij_b = *Hvec;
+
+   return vec;
+
+  /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRVector.Create) */
+}
+
+/*
  * Set the MPI Communicator.  DEPRECATED, Use Create()
  * 
  */
@@ -126,6 +166,8 @@ impl_bHYPRE_IJParCSRVector_SetCommunicator(
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRVector.SetCommunicator) */
   /* Insert the implementation of the SetCommunicator method here... */
+
+   /* DEPRECATED  Use Create */
 
    int ierr = 0;
    struct bHYPRE_IJParCSRVector__data * data;
@@ -263,12 +305,14 @@ impl_bHYPRE_IJParCSRVector_SetLocalRange(
   /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRVector.SetLocalRange) */
   /* Insert the implementation of the SetLocalRange method here... */
 
+   /* DEPRECATED ... use Create */
+
    int ierr = 0;
    struct bHYPRE_IJParCSRVector__data * data;
    HYPRE_IJVector ij_b;
    data = bHYPRE_IJParCSRVector__get_data( self );
    ij_b = data -> ij_b;
-   /* SetCommunicator should be called before Create */
+   /* Create or SetCommunicator should have be called by now... */
    assert( data->comm != MPI_COMM_NULL );
 
    ierr = HYPRE_IJVectorCreate( data->comm, jlower, jupper, &ij_b );

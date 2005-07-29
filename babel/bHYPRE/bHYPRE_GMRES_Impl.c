@@ -118,6 +118,8 @@ impl_bHYPRE_GMRES__ctor(
   /* DO-NOT-DELETE splicer.begin(bHYPRE.GMRES._ctor) */
   /* Insert the implementation of the constructor method here... */
 
+   /* Note: user calls of __create() are DEPRECATED, _Create also calls this function */
+
    struct bHYPRE_GMRES__data * data;
    data = hypre_CTAlloc( struct bHYPRE_GMRES__data, 1 );
    data -> comm = MPI_COMM_NULL;
@@ -186,7 +188,38 @@ impl_bHYPRE_GMRES__dtor(
 }
 
 /*
+ * Method:  Create[]
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_GMRES_Create"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+bHYPRE_GMRES
+impl_bHYPRE_GMRES_Create(
+  /* in */ void* mpi_comm)
+{
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.GMRES.Create) */
+  /* Insert-Code-Here {bHYPRE.GMRES.Create} (Create method) */
+
+   /* HYPRE_ParCSRGMRESCreate or HYPRE_StructGMRESCreate or ... cannot be
+      called until later because we don't know the vector type yet */
+
+   bHYPRE_GMRES solver = bHYPRE_GMRES__create();
+   struct bHYPRE_GMRES__data * data;
+   data = bHYPRE_GMRES__get_data( solver );
+   data -> comm = (MPI_Comm) mpi_comm;
+
+   return solver;
+
+  /* DO-NOT-DELETE splicer.end(bHYPRE.GMRES.Create) */
+}
+
+/*
  * Set the MPI Communicator.
+ * DEPRECATED, use Create:
  * 
  */
 
@@ -203,6 +236,8 @@ impl_bHYPRE_GMRES_SetCommunicator(
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.GMRES.SetCommunicator) */
   /* Insert the implementation of the SetCommunicator method here... */
+
+   /* DEPRECATED  Use Create */
 
    int ierr = 0;
    struct bHYPRE_GMRES__data * data;

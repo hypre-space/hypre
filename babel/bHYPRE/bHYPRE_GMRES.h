@@ -111,7 +111,15 @@ bHYPRE_GMRES_getClassInfo(
   /* in */ bHYPRE_GMRES self);
 
 /**
+ * Method:  Create[]
+ */
+bHYPRE_GMRES
+bHYPRE_GMRES_Create(
+  /* in */ void* mpi_comm);
+
+/**
  * Set the MPI Communicator.
+ * DEPRECATED, use Create:
  * 
  */
 int32_t

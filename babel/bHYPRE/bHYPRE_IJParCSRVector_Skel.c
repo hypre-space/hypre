@@ -29,6 +29,13 @@ void
 impl_bHYPRE_IJParCSRVector__dtor(
   /* in */ bHYPRE_IJParCSRVector self);
 
+extern
+bHYPRE_IJParCSRVector
+impl_bHYPRE_IJParCSRVector_Create(
+  /* in */ void* mpi_comm,
+  /* in */ int32_t jlower,
+  /* in */ int32_t jupper);
+
 extern struct bHYPRE_IJParCSRVector__object* 
   impl_bHYPRE_IJParCSRVector_fconnect_bHYPRE_IJParCSRVector(char* url,
   sidl_BaseInterface *_ex);
@@ -308,6 +315,19 @@ bHYPRE_IJParCSRVector__set_epv(struct bHYPRE_IJParCSRVector__epv *epv)
   epv->f_Dot = impl_bHYPRE_IJParCSRVector_Dot;
   epv->f_Axpy = impl_bHYPRE_IJParCSRVector_Axpy;
 
+}
+#ifdef __cplusplus
+}
+#endif
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+void
+bHYPRE_IJParCSRVector__set_sepv(struct bHYPRE_IJParCSRVector__sepv *sepv)
+{
+  sepv->f_Create = impl_bHYPRE_IJParCSRVector_Create;
 }
 #ifdef __cplusplus
 }

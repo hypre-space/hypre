@@ -161,6 +161,7 @@ bHYPRE_PreconditionedSolver_getClassInfo(
 
 /*
  * Set the MPI Communicator.
+ * DEPRECATED, use Create:
  * 
  */
 

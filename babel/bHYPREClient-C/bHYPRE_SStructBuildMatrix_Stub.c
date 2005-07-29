@@ -230,6 +230,7 @@ bHYPRE_SStructBuildMatrix_GetObject(
 
 /*
  * Set the matrix graph.
+ * DEPRECATED     Use Create
  * 
  */
 

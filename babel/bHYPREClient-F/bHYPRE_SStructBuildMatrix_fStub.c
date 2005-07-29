@@ -400,6 +400,7 @@ SIDLFortran77Symbol(bhypre_sstructbuildmatrix_getobject_f,BHYPRE_SSTRUCTBUILDMAT
 
 /*
  * Set the matrix graph.
+ * DEPRECATED     Use Create
  * 
  */
 

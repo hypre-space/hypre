@@ -159,6 +159,7 @@ C       out sidl.ClassInfo retval
 
 C       
 C       Set the MPI Communicator.
+C       DEPRECATED, use Create:
 C       
 C       
 

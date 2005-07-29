@@ -70,6 +70,9 @@ impl_bHYPRE_IJParCSRMatrix__ctor(
   /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRMatrix._ctor) */
   /* Insert the implementation of the constructor method here... */
 
+   /* Note: User calls of __create are DEPRECATED.
+      Use Create(), which also calls this function */
+
    struct bHYPRE_IJParCSRMatrix__data * data;
 
    data = hypre_CTAlloc(struct bHYPRE_IJParCSRMatrix__data,1);
@@ -116,6 +119,46 @@ impl_bHYPRE_IJParCSRMatrix__dtor(
    hypre_TFree( data );
 
   /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRMatrix._dtor) */
+}
+
+/*
+ * Method:  Create[]
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_IJParCSRMatrix_Create"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+bHYPRE_IJParCSRMatrix
+impl_bHYPRE_IJParCSRMatrix_Create(
+  /* in */ void* mpi_comm,
+  /* in */ int32_t ilower,
+  /* in */ int32_t iupper,
+  /* in */ int32_t jlower,
+  /* in */ int32_t jupper)
+{
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRMatrix.Create) */
+  /* Insert-Code-Here {bHYPRE.IJParCSRMatrix.Create} (Create method) */
+
+   int ierr = 0;
+   HYPRE_IJMatrix dummy;
+   HYPRE_IJMatrix * Hmat = &dummy;
+   struct bHYPRE_IJParCSRMatrix__data * data;
+   bHYPRE_IJParCSRMatrix mat = bHYPRE_IJParCSRMatrix__create();
+
+   data = bHYPRE_IJParCSRMatrix__get_data( mat );
+   data -> comm = (MPI_Comm) mpi_comm;
+   ierr += HYPRE_IJMatrixCreate( data -> comm,
+                                ilower, iupper, jlower, jupper, Hmat );
+   ierr += HYPRE_IJMatrixSetObjectType( *Hmat, HYPRE_PARCSR );
+   assert( ierr == 0 );
+   data -> ij_A = *Hmat;
+
+   return mat;
+
+  /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRMatrix.Create) */
 }
 
 /*
@@ -404,6 +447,8 @@ impl_bHYPRE_IJParCSRMatrix_SetLocalRange(
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRMatrix.SetLocalRange) */
   /* Insert the implementation of the SetLocalRange method here... */
+
+   /* DEPRECATED  Use Create */
 
    int ierr=0;
    struct bHYPRE_IJParCSRMatrix__data * data;

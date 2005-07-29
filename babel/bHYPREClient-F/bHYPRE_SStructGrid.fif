@@ -172,6 +172,24 @@ C       structured parts {\tt nparts}.
 C       
 C       
 
+        subroutine bHYPRE_SStructGrid_Create_f(mpi_comm, ndim, nparts,
+     &     retval)
+        implicit none
+C       in opaque mpi_comm
+        integer*8 mpi_comm
+C       in int ndim
+        integer*4 ndim
+C       in int nparts
+        integer*4 nparts
+C       out bHYPRE.SStructGrid retval
+        integer*8 retval
+        end
+
+
+C       
+C       Method:  SetNumDimParts[]
+C       
+
         subroutine bHYPRE_SStructGrid_SetNumDimParts_f(self, ndim,
      &     nparts, retval)
         implicit none

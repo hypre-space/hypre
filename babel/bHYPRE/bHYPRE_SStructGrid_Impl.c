@@ -113,6 +113,42 @@ impl_bHYPRE_SStructGrid__dtor(
  */
 
 #undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_SStructGrid_Create"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+bHYPRE_SStructGrid
+impl_bHYPRE_SStructGrid_Create(
+  /* in */ void* mpi_comm,
+  /* in */ int32_t ndim,
+  /* in */ int32_t nparts)
+{
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructGrid.Create) */
+  /* Insert-Code-Here {bHYPRE.SStructGrid.Create} (Create method) */
+
+   int ierr = 0;
+   bHYPRE_SStructGrid grid;
+   struct bHYPRE_SStructGrid__data * data;
+   HYPRE_SStructGrid Hgrid;
+
+   grid = bHYPRE_SStructGrid__create();
+   data = bHYPRE_SStructGrid__get_data( grid );
+
+   ierr += HYPRE_SStructGridCreate( (MPI_Comm) mpi_comm, ndim, nparts, &Hgrid );
+   data->grid = Hgrid;
+   data->comm = (MPI_Comm) mpi_comm;
+
+   return grid;
+
+  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructGrid.Create) */
+}
+
+/*
+ * Method:  SetNumDimParts[]
+ */
+
+#undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_SStructGrid_SetNumDimParts"
 
 #ifdef __cplusplus
@@ -126,6 +162,8 @@ impl_bHYPRE_SStructGrid_SetNumDimParts(
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructGrid.SetNumDimParts) */
   /* Insert the implementation of the SetNumDimParts method here... */
+
+   /* DEPRECATED   use _Create */
 
    int ierr = 0;
    struct bHYPRE_SStructGrid__data * data;
@@ -158,6 +196,8 @@ impl_bHYPRE_SStructGrid_SetCommunicator(
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructGrid.SetCommunicator) */
   /* Insert the implementation of the SetCommunicator method here... */
+
+   /* DEPRECATED   use _Create */
 
    int ierr = 0;
    struct bHYPRE_SStructGrid__data * data;

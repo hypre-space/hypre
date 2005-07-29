@@ -148,9 +148,13 @@ extern "C" {
 
 struct bHYPRE_BoomerAMG__array;
 struct bHYPRE_BoomerAMG__object;
+struct bHYPRE_BoomerAMG__sepv;
 
 extern struct bHYPRE_BoomerAMG__object*
 bHYPRE_BoomerAMG__new(void);
+
+extern struct bHYPRE_BoomerAMG__sepv*
+bHYPRE_BoomerAMG__statics(void);
 
 extern void bHYPRE_BoomerAMG__init(
   struct bHYPRE_BoomerAMG__object* self);
@@ -172,6 +176,21 @@ struct sidl_io_Deserializer__array;
 struct sidl_io_Deserializer__object;
 struct sidl_io_Serializer__array;
 struct sidl_io_Serializer__object;
+
+/*
+ * Declare the static method entry point vector.
+ */
+
+struct bHYPRE_BoomerAMG__sepv {
+  /* Implicit builtin methods */
+  /* Methods introduced in sidl.BaseInterface-v0.9.3 */
+  /* Methods introduced in sidl.BaseClass-v0.9.3 */
+  /* Methods introduced in bHYPRE.Operator-v1.0.0 */
+  /* Methods introduced in bHYPRE.Solver-v1.0.0 */
+  /* Methods introduced in bHYPRE.BoomerAMG-v1.0.0 */
+  struct bHYPRE_BoomerAMG__object* (*f_Create)(
+    /* in */ void* mpi_comm);
+};
 
 /*
  * Declare the method entry point vector.
@@ -305,6 +324,8 @@ struct bHYPRE_BoomerAMG__external {
   struct bHYPRE_BoomerAMG__object*
   (*createObject)(void);
 
+  struct bHYPRE_BoomerAMG__sepv*
+  (*getStaticEPV)(void);
   struct sidl_BaseClass__epv*(*getSuperEPV)(void);
 };
 

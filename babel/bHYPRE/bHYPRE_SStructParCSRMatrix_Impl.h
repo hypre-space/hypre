@@ -97,6 +97,12 @@ impl_bHYPRE_SStructParCSRMatrix__dtor(
  * User-defined object methods
  */
 
+extern
+bHYPRE_SStructParCSRMatrix
+impl_bHYPRE_SStructParCSRMatrix_Create(
+  /* in */ void* mpi_comm,
+  /* in */ bHYPRE_SStructGraph graph);
+
 extern struct bHYPRE_SStructParCSRMatrix__object* 
   impl_bHYPRE_SStructParCSRMatrix_fconnect_bHYPRE_SStructParCSRMatrix(char* url,
   sidl_BaseInterface *_ex);

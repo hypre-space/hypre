@@ -82,6 +82,12 @@ impl_bHYPRE_StructGrid__dtor(
  * User-defined object methods
  */
 
+extern
+bHYPRE_StructGrid
+impl_bHYPRE_StructGrid_Create(
+  /* in */ void* mpi_comm,
+  /* in */ int32_t dim);
+
 extern struct bHYPRE_StructGrid__object* 
   impl_bHYPRE_StructGrid_fconnect_bHYPRE_StructGrid(char* url,
   sidl_BaseInterface *_ex);

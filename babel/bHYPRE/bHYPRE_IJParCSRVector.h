@@ -98,6 +98,15 @@ bHYPRE_IJParCSRVector_getClassInfo(
   /* in */ bHYPRE_IJParCSRVector self);
 
 /**
+ * Method:  Create[]
+ */
+bHYPRE_IJParCSRVector
+bHYPRE_IJParCSRVector_Create(
+  /* in */ void* mpi_comm,
+  /* in */ int32_t jlower,
+  /* in */ int32_t jupper);
+
+/**
  * Set the MPI Communicator.  DEPRECATED, Use Create()
  * 
  */

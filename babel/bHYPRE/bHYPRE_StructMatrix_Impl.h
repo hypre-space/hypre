@@ -102,6 +102,13 @@ impl_bHYPRE_StructMatrix__dtor(
  * User-defined object methods
  */
 
+extern
+bHYPRE_StructMatrix
+impl_bHYPRE_StructMatrix_Create(
+  /* in */ void* mpi_comm,
+  /* in */ bHYPRE_StructGrid grid,
+  /* in */ bHYPRE_StructStencil stencil);
+
 extern struct bHYPRE_StructMatrix__object* 
   impl_bHYPRE_StructMatrix_fconnect_bHYPRE_StructMatrix(char* url,
   sidl_BaseInterface *_ex);

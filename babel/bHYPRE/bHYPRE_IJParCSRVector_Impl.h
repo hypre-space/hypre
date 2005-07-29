@@ -93,6 +93,13 @@ impl_bHYPRE_IJParCSRVector__dtor(
  * User-defined object methods
  */
 
+extern
+bHYPRE_IJParCSRVector
+impl_bHYPRE_IJParCSRVector_Create(
+  /* in */ void* mpi_comm,
+  /* in */ int32_t jlower,
+  /* in */ int32_t jupper);
+
 extern struct bHYPRE_IJParCSRVector__object* 
   impl_bHYPRE_IJParCSRVector_fconnect_bHYPRE_IJParCSRVector(char* url,
   sidl_BaseInterface *_ex);

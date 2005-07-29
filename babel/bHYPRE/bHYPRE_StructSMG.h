@@ -104,7 +104,15 @@ bHYPRE_StructSMG_getClassInfo(
   /* in */ bHYPRE_StructSMG self);
 
 /**
+ * Method:  Create[]
+ */
+bHYPRE_StructSMG
+bHYPRE_StructSMG_Create(
+  /* in */ void* mpi_comm);
+
+/**
  * Set the MPI Communicator.
+ * DEPRECATED, use Create:
  * 
  */
 int32_t

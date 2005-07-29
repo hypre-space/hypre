@@ -101,6 +101,14 @@ bHYPRE_SStructParCSRVector_getClassInfo(
   /* in */ bHYPRE_SStructParCSRVector self);
 
 /**
+ * Method:  Create[]
+ */
+bHYPRE_SStructParCSRVector
+bHYPRE_SStructParCSRVector_Create(
+  /* in */ void* mpi_comm,
+  /* in */ bHYPRE_SStructGrid grid);
+
+/**
  * Set the MPI Communicator.  DEPRECATED, Use Create()
  * 
  */

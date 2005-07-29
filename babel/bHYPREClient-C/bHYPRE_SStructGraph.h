@@ -98,7 +98,16 @@ bHYPRE_SStructGraph_getClassInfo(
   /* in */ bHYPRE_SStructGraph self);
 
 /**
+ * Method:  Create[]
+ */
+bHYPRE_SStructGraph
+bHYPRE_SStructGraph_Create(
+  /* in */ void* mpi_comm,
+  /* in */ bHYPRE_SStructGrid grid);
+
+/**
  * Set the grid and communicator.
+ * DEPRECATED, use Create:
  * 
  */
 int32_t

@@ -29,6 +29,12 @@ void
 impl_bHYPRE_SStructGraph__dtor(
   /* in */ bHYPRE_SStructGraph self);
 
+extern
+bHYPRE_SStructGraph
+impl_bHYPRE_SStructGraph_Create(
+  /* in */ void* mpi_comm,
+  /* in */ bHYPRE_SStructGrid grid);
+
 extern struct bHYPRE_SStructGrid__object* 
   impl_bHYPRE_SStructGraph_fconnect_bHYPRE_SStructGrid(char* url,
   sidl_BaseInterface *_ex);
@@ -203,6 +209,19 @@ bHYPRE_SStructGraph__set_epv(struct bHYPRE_SStructGraph__epv *epv)
   epv->f_Assemble = impl_bHYPRE_SStructGraph_Assemble;
   epv->f_GetObject = impl_bHYPRE_SStructGraph_GetObject;
 
+}
+#ifdef __cplusplus
+}
+#endif
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+void
+bHYPRE_SStructGraph__set_sepv(struct bHYPRE_SStructGraph__sepv *sepv)
+{
+  sepv->f_Create = impl_bHYPRE_SStructGraph_Create;
 }
 #ifdef __cplusplus
 }

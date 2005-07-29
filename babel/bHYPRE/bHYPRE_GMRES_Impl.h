@@ -116,6 +116,11 @@ impl_bHYPRE_GMRES__dtor(
  * User-defined object methods
  */
 
+extern
+bHYPRE_GMRES
+impl_bHYPRE_GMRES_Create(
+  /* in */ void* mpi_comm);
+
 extern struct bHYPRE_Solver__object* 
   impl_bHYPRE_GMRES_fconnect_bHYPRE_Solver(char* url, sidl_BaseInterface *_ex);
 extern char* impl_bHYPRE_GMRES_fgetURL_bHYPRE_Solver(struct 

@@ -118,6 +118,11 @@ impl_bHYPRE_PCG__dtor(
  * User-defined object methods
  */
 
+extern
+bHYPRE_PCG
+impl_bHYPRE_PCG_Create(
+  /* in */ void* mpi_comm);
+
 extern struct bHYPRE_PCG__object* impl_bHYPRE_PCG_fconnect_bHYPRE_PCG(char* url,
   sidl_BaseInterface *_ex);
 extern char* impl_bHYPRE_PCG_fgetURL_bHYPRE_PCG(struct bHYPRE_PCG__object* obj);

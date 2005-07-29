@@ -89,7 +89,30 @@ impl_bHYPRE_IdentitySolver__dtor(
 }
 
 /*
+ * Method:  Create[]
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_IdentitySolver_Create"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+bHYPRE_IdentitySolver
+impl_bHYPRE_IdentitySolver_Create(
+  /* in */ void* mpi_comm)
+{
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.IdentitySolver.Create) */
+  /* Insert-Code-Here {bHYPRE.IdentitySolver.Create} (Create method) */
+
+   return bHYPRE_IdentitySolver__create();
+
+  /* DO-NOT-DELETE splicer.end(bHYPRE.IdentitySolver.Create) */
+}
+
+/*
  * Set the MPI Communicator.
+ * DEPRECATED, use Create:
  * 
  */
 

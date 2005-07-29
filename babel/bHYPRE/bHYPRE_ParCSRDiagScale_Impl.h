@@ -93,6 +93,11 @@ impl_bHYPRE_ParCSRDiagScale__dtor(
  * User-defined object methods
  */
 
+extern
+bHYPRE_ParCSRDiagScale
+impl_bHYPRE_ParCSRDiagScale_Create(
+  /* in */ void* mpi_comm);
+
 extern struct bHYPRE_ParCSRDiagScale__object* 
   impl_bHYPRE_ParCSRDiagScale_fconnect_bHYPRE_ParCSRDiagScale(char* url,
   sidl_BaseInterface *_ex);

@@ -106,6 +106,15 @@ bHYPRE_StructMatrix_getClassInfo(
   /* in */ bHYPRE_StructMatrix self);
 
 /**
+ * Method:  Create[]
+ */
+bHYPRE_StructMatrix
+bHYPRE_StructMatrix_Create(
+  /* in */ void* mpi_comm,
+  /* in */ bHYPRE_StructGrid grid,
+  /* in */ bHYPRE_StructStencil stencil);
+
+/**
  * Set the MPI Communicator.  DEPRECATED, Use Create()
  * 
  */

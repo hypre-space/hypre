@@ -96,6 +96,11 @@ impl_bHYPRE_ParaSails__dtor(
  * User-defined object methods
  */
 
+extern
+bHYPRE_ParaSails
+impl_bHYPRE_ParaSails_Create(
+  /* in */ void* mpi_comm);
+
 extern struct bHYPRE_Solver__object* 
   impl_bHYPRE_ParaSails_fconnect_bHYPRE_Solver(char* url,
   sidl_BaseInterface *_ex);

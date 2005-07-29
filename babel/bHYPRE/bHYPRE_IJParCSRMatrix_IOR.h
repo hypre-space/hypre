@@ -48,9 +48,13 @@ extern "C" {
 
 struct bHYPRE_IJParCSRMatrix__array;
 struct bHYPRE_IJParCSRMatrix__object;
+struct bHYPRE_IJParCSRMatrix__sepv;
 
 extern struct bHYPRE_IJParCSRMatrix__object*
 bHYPRE_IJParCSRMatrix__new(void);
+
+extern struct bHYPRE_IJParCSRMatrix__sepv*
+bHYPRE_IJParCSRMatrix__statics(void);
 
 extern void bHYPRE_IJParCSRMatrix__init(
   struct bHYPRE_IJParCSRMatrix__object* self);
@@ -72,6 +76,27 @@ struct sidl_io_Deserializer__array;
 struct sidl_io_Deserializer__object;
 struct sidl_io_Serializer__array;
 struct sidl_io_Serializer__object;
+
+/*
+ * Declare the static method entry point vector.
+ */
+
+struct bHYPRE_IJParCSRMatrix__sepv {
+  /* Implicit builtin methods */
+  /* Methods introduced in sidl.BaseInterface-v0.9.3 */
+  /* Methods introduced in sidl.BaseClass-v0.9.3 */
+  /* Methods introduced in bHYPRE.CoefficientAccess-v1.0.0 */
+  /* Methods introduced in bHYPRE.ProblemDefinition-v1.0.0 */
+  /* Methods introduced in bHYPRE.IJBuildMatrix-v1.0.0 */
+  /* Methods introduced in bHYPRE.Operator-v1.0.0 */
+  /* Methods introduced in bHYPRE.IJParCSRMatrix-v1.0.0 */
+  struct bHYPRE_IJParCSRMatrix__object* (*f_Create)(
+    /* in */ void* mpi_comm,
+    /* in */ int32_t ilower,
+    /* in */ int32_t iupper,
+    /* in */ int32_t jlower,
+    /* in */ int32_t jupper);
+};
 
 /*
  * Declare the method entry point vector.
@@ -245,6 +270,8 @@ struct bHYPRE_IJParCSRMatrix__external {
   struct bHYPRE_IJParCSRMatrix__object*
   (*createObject)(void);
 
+  struct bHYPRE_IJParCSRMatrix__sepv*
+  (*getStaticEPV)(void);
   struct sidl_BaseClass__epv*(*getSuperEPV)(void);
 };
 

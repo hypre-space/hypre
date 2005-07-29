@@ -71,8 +71,7 @@ impl_bHYPRE_SStructVector__ctor(
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructVector._ctor) */
   /* Insert the implementation of the constructor method here... */
 
-  /* How to make a vector: first call the constructor.
-     Then SetCommunicator, then SetGrid (which calls HYPRE_SStructVectorCreate),
+  /* How to make a vector: first call _Create (not the old constructor, __create)
      then Initialize, then SetValues (or SetBoxValues, etc.), then Assemble.
   */
 
@@ -112,6 +111,45 @@ impl_bHYPRE_SStructVector__dtor(
    hypre_TFree( data );
 
   /* DO-NOT-DELETE splicer.end(bHYPRE.SStructVector._dtor) */
+}
+
+/*
+ * Method:  Create[]
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_SStructVector_Create"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+bHYPRE_SStructVector
+impl_bHYPRE_SStructVector_Create(
+  /* in */ void* mpi_comm,
+  /* in */ bHYPRE_SStructGrid grid)
+{
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructVector.Create) */
+  /* Insert-Code-Here {bHYPRE.SStructVector.Create} (Create method) */
+
+   int ierr = 0;
+   bHYPRE_SStructVector vec;
+   struct bHYPRE_SStructVector__data * data;
+   HYPRE_SStructVector Hvec;
+   struct bHYPRE_SStructGrid__data * gdata;
+   HYPRE_SStructGrid Hgrid;
+
+   vec = bHYPRE_SStructVector__create();
+   data = bHYPRE_SStructVector__get_data( vec );
+   gdata = bHYPRE_SStructGrid__get_data( grid );
+   Hgrid = gdata->grid;
+
+   ierr += HYPRE_SStructVectorCreate( (MPI_Comm)mpi_comm, Hgrid, &Hvec );
+   data->vec = Hvec;
+   data->comm = (MPI_Comm) mpi_comm;
+
+   return( vec );
+
+  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructVector.Create) */
 }
 
 /*
@@ -166,6 +204,8 @@ impl_bHYPRE_SStructVector_SetCommunicator(
    /* N.B. This function will have no effect unless called _before_
       SetGrid.
     */
+
+   /* DEPRECATED   use _Create */
 
    int ierr = 0;
    struct bHYPRE_SStructVector__data * data;
@@ -320,6 +360,8 @@ impl_bHYPRE_SStructVector_SetGrid(
     SetCommunicator should have been called before the time SetGrid is called.
     Initialize, value-setting functions, and Assemble should be called afterwards.
    */
+
+   /* DEPRECATED   use _Create */
 
    int ierr = 0;
    struct bHYPRE_SStructVector__data * data;

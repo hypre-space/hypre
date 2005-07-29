@@ -29,6 +29,12 @@ void
 impl_bHYPRE_SStructParCSRVector__dtor(
   /* in */ bHYPRE_SStructParCSRVector self);
 
+extern
+bHYPRE_SStructParCSRVector
+impl_bHYPRE_SStructParCSRVector_Create(
+  /* in */ void* mpi_comm,
+  /* in */ bHYPRE_SStructGrid grid);
+
 extern struct bHYPRE_SStructGrid__object* 
   impl_bHYPRE_SStructParCSRVector_fconnect_bHYPRE_SStructGrid(char* url,
   sidl_BaseInterface *_ex);
@@ -482,6 +488,20 @@ bHYPRE_SStructParCSRVector__set_epv(struct bHYPRE_SStructParCSRVector__epv *epv)
   epv->f_Dot = impl_bHYPRE_SStructParCSRVector_Dot;
   epv->f_Axpy = impl_bHYPRE_SStructParCSRVector_Axpy;
 
+}
+#ifdef __cplusplus
+}
+#endif
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+void
+bHYPRE_SStructParCSRVector__set_sepv(struct bHYPRE_SStructParCSRVector__sepv 
+  *sepv)
+{
+  sepv->f_Create = impl_bHYPRE_SStructParCSRVector_Create;
 }
 #ifdef __cplusplus
 }

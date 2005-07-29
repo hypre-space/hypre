@@ -68,8 +68,10 @@ static int s_load_called = 0;
  */
 
 static int s_method_initialized = 0;
+static int s_static_initialized = 0;
 
-static struct bHYPRE_IJParCSRVector__epv s_new_epv__bhypre_ijparcsrvector;
+static struct bHYPRE_IJParCSRVector__epv  s_new_epv__bhypre_ijparcsrvector;
+static struct bHYPRE_IJParCSRVector__sepv s_stc_epv__bhypre_ijparcsrvector;
 
 static struct bHYPRE_IJBuildVector__epv s_new_epv__bhypre_ijbuildvector;
 
@@ -93,6 +95,8 @@ extern "C" {
 
 extern void bHYPRE_IJParCSRVector__set_epv(
   struct bHYPRE_IJParCSRVector__epv* epv);
+extern void bHYPRE_IJParCSRVector__set_sepv(
+  struct bHYPRE_IJParCSRVector__sepv* sepv);
 extern void bHYPRE_IJParCSRVector__call_load(void);
 #ifdef __cplusplus
 }
@@ -953,6 +957,41 @@ static void bHYPRE_IJParCSRVector__init_epv(
 }
 
 /*
+ * SEPV: create the static entry point vector (SEPV).
+ */
+
+static void bHYPRE_IJParCSRVector__init_sepv(void)
+{
+  /*
+   * assert( HAVE_LOCKED_STATIC_GLOBALS );
+   */
+
+  struct bHYPRE_IJParCSRVector__sepv*  s = &s_stc_epv__bhypre_ijparcsrvector;
+
+  s->f_Create         = NULL;
+
+  bHYPRE_IJParCSRVector__set_sepv(s);
+
+  s_static_initialized = 1;
+  ior_bHYPRE_IJParCSRVector__ensure_load_called();
+}
+
+/*
+ * STATIC: return pointer to static EPV structure.
+ */
+
+struct bHYPRE_IJParCSRVector__sepv*
+bHYPRE_IJParCSRVector__statics(void)
+{
+  LOCK_STATIC_GLOBALS;
+  if (!s_static_initialized) {
+    bHYPRE_IJParCSRVector__init_sepv();
+  }
+  UNLOCK_STATIC_GLOBALS;
+  return &s_stc_epv__bhypre_ijparcsrvector;
+}
+
+/*
  * SUPER: return's parent's non-overrided EPV
  */
 
@@ -1092,6 +1131,7 @@ bHYPRE_IJParCSRVector__IOR_version(int32_t *major, int32_t *minor)
 static const struct bHYPRE_IJParCSRVector__external
 s_externalEntryPoints = {
   bHYPRE_IJParCSRVector__new,
+  bHYPRE_IJParCSRVector__statics,
   bHYPRE_IJParCSRVector__super
 };
 

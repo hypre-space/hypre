@@ -96,6 +96,11 @@ impl_bHYPRE_StructSMG__dtor(
  * User-defined object methods
  */
 
+extern
+bHYPRE_StructSMG
+impl_bHYPRE_StructSMG_Create(
+  /* in */ void* mpi_comm);
+
 extern struct bHYPRE_Solver__object* 
   impl_bHYPRE_StructSMG_fconnect_bHYPRE_Solver(char* url,
   sidl_BaseInterface *_ex);

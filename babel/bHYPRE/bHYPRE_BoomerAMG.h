@@ -207,6 +207,13 @@ bHYPRE_BoomerAMG_getClassInfo(
   /* in */ bHYPRE_BoomerAMG self);
 
 /**
+ * Method:  Create[]
+ */
+bHYPRE_BoomerAMG
+bHYPRE_BoomerAMG_Create(
+  /* in */ void* mpi_comm);
+
+/**
  * Method:  SetLevelRelaxWt[]
  */
 int32_t
@@ -217,6 +224,7 @@ bHYPRE_BoomerAMG_SetLevelRelaxWt(
 
 /**
  * Set the MPI Communicator.
+ * DEPRECATED, use Create:
  * 
  */
 int32_t

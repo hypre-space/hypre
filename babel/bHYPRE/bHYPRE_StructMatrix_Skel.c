@@ -29,6 +29,13 @@ void
 impl_bHYPRE_StructMatrix__dtor(
   /* in */ bHYPRE_StructMatrix self);
 
+extern
+bHYPRE_StructMatrix
+impl_bHYPRE_StructMatrix_Create(
+  /* in */ void* mpi_comm,
+  /* in */ bHYPRE_StructGrid grid,
+  /* in */ bHYPRE_StructStencil stencil);
+
 extern struct bHYPRE_StructMatrix__object* 
   impl_bHYPRE_StructMatrix_fconnect_bHYPRE_StructMatrix(char* url,
   sidl_BaseInterface *_ex);
@@ -531,6 +538,19 @@ bHYPRE_StructMatrix__set_epv(struct bHYPRE_StructMatrix__epv *epv)
   epv->f_Setup = impl_bHYPRE_StructMatrix_Setup;
   epv->f_Apply = impl_bHYPRE_StructMatrix_Apply;
 
+}
+#ifdef __cplusplus
+}
+#endif
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+void
+bHYPRE_StructMatrix__set_sepv(struct bHYPRE_StructMatrix__sepv *sepv)
+{
+  sepv->f_Create = impl_bHYPRE_StructMatrix_Create;
 }
 #ifdef __cplusplus
 }

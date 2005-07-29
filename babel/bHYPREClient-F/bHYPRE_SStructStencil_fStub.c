@@ -53,6 +53,19 @@ static const struct bHYPRE_SStructStencil__external* _getIOR(void)
 }
 
 /*
+ * Return pointer to static functions.
+ */
+
+static const struct bHYPRE_SStructStencil__sepv* _getSEPV(void)
+{
+  static const struct bHYPRE_SStructStencil__sepv *_sepv = NULL;
+  if (!_sepv) {
+    _sepv = (*(_getIOR()->getStaticEPV))();
+  }
+  return _sepv;
+}
+
+/*
  * Constructor for the class.
  */
 
@@ -314,7 +327,30 @@ SIDLFortran77Symbol(bhypre_sstructstencil_getclassinfo_f,BHYPRE_SSTRUCTSTENCIL_G
 }
 
 /*
+ * Method:  Create[]
+ */
+
+void
+SIDLFortran77Symbol(bhypre_sstructstencil_create_f,BHYPRE_SSTRUCTSTENCIL_CREATE_F,bHYPRE_SStructStencil_Create_f)
+(
+  int32_t *ndim,
+  int32_t *size,
+  int64_t *retval
+)
+{
+  const struct bHYPRE_SStructStencil__sepv *_epv = _getSEPV();
+  struct bHYPRE_SStructStencil__object* _proxy_retval = NULL;
+  _proxy_retval = 
+    (*(_epv->f_Create))(
+      *ndim,
+      *size
+    );
+  *retval = (ptrdiff_t)_proxy_retval;
+}
+
+/*
  * Set the number of spatial dimensions and stencil entries.
+ * DEPRECATED, use Create:
  * 
  */
 

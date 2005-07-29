@@ -117,7 +117,47 @@ impl_bHYPRE_SStructGraph__dtor(
 }
 
 /*
+ * Method:  Create[]
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_SStructGraph_Create"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+bHYPRE_SStructGraph
+impl_bHYPRE_SStructGraph_Create(
+  /* in */ void* mpi_comm,
+  /* in */ bHYPRE_SStructGrid grid)
+{
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructGraph.Create) */
+  /* Insert-Code-Here {bHYPRE.SStructGraph.Create} (Create method) */
+
+   int ierr = 0;
+   bHYPRE_SStructGraph graph;
+   struct bHYPRE_SStructGraph__data * data;
+   HYPRE_SStructGraph Hgraph;
+   struct bHYPRE_SStructGrid__data * data_grid;
+   HYPRE_SStructGrid Hgrid;
+
+   graph = bHYPRE_SStructGraph__create();
+   data = bHYPRE_SStructGraph__get_data( graph );
+
+   data_grid = bHYPRE_SStructGrid__get_data( grid );
+   Hgrid = data_grid -> grid;
+
+   ierr += HYPRE_SStructGraphCreate( (MPI_Comm) mpi_comm, Hgrid, &Hgraph );
+   data->graph = Hgraph;
+
+   return graph;
+
+  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructGraph.Create) */
+}
+
+/*
  * Set the grid and communicator.
+ * DEPRECATED, use Create:
  * 
  */
 
@@ -135,6 +175,8 @@ impl_bHYPRE_SStructGraph_SetCommGrid(
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructGraph.SetCommGrid) */
   /* Insert the implementation of the SetCommGrid method here... */
+
+   /* DEPRECATED    use Create */
 
    int ierr = 0;
    struct bHYPRE_SStructGraph__data * data;
@@ -290,7 +332,7 @@ impl_bHYPRE_SStructGraph_SetCommunicator(
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructGraph.SetCommunicator) */
   /* Insert the implementation of the SetCommunicator method here... */
-   return 1; /* corresponding HYPRE function isn't implemented */
+   return 1; /* corresponding HYPRE function isn't implemented, and shouldn't be */
   /* DO-NOT-DELETE splicer.end(bHYPRE.SStructGraph.SetCommunicator) */
 }
 

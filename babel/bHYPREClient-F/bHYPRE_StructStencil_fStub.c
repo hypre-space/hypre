@@ -56,6 +56,19 @@ static const struct bHYPRE_StructStencil__external* _getIOR(void)
 }
 
 /*
+ * Return pointer to static functions.
+ */
+
+static const struct bHYPRE_StructStencil__sepv* _getSEPV(void)
+{
+  static const struct bHYPRE_StructStencil__sepv *_sepv = NULL;
+  if (!_sepv) {
+    _sepv = (*(_getIOR()->getStaticEPV))();
+  }
+  return _sepv;
+}
+
+/*
  * Constructor for the class.
  */
 
@@ -312,6 +325,28 @@ SIDLFortran77Symbol(bhypre_structstencil_getclassinfo_f,BHYPRE_STRUCTSTENCIL_GET
   _proxy_retval = 
     (*(_epv->f_getClassInfo))(
       _proxy_self
+    );
+  *retval = (ptrdiff_t)_proxy_retval;
+}
+
+/*
+ * Method:  Create[]
+ */
+
+void
+SIDLFortran77Symbol(bhypre_structstencil_create_f,BHYPRE_STRUCTSTENCIL_CREATE_F,bHYPRE_StructStencil_Create_f)
+(
+  int32_t *ndim,
+  int32_t *size,
+  int64_t *retval
+)
+{
+  const struct bHYPRE_StructStencil__sepv *_epv = _getSEPV();
+  struct bHYPRE_StructStencil__object* _proxy_retval = NULL;
+  _proxy_retval = 
+    (*(_epv->f_Create))(
+      *ndim,
+      *size
     );
   *retval = (ptrdiff_t)_proxy_retval;
 }

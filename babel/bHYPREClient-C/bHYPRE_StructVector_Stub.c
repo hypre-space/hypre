@@ -68,6 +68,22 @@ static const struct bHYPRE_StructVector__external* _loadIOR(void)
 #define _getExternals() (_externals ? _externals : _loadIOR())
 
 /*
+ * Hold pointer to static entry point vector
+ */
+
+static const struct bHYPRE_StructVector__sepv *_sepv = NULL;
+/*
+ * Return pointer to static functions.
+ */
+
+#define _getSEPV() (_sepv ? _sepv : (_sepv = (*(_getExternals()->getStaticEPV))()))
+/*
+ * Reset point to static functions.
+ */
+
+#define _resetSEPV() (_sepv = (*(_getExternals()->getStaticEPV))())
+
+/*
  * Constructor function for the class.
  */
 
@@ -205,6 +221,20 @@ bHYPRE_StructVector_getClassInfo(
 {
   return (*self->d_epv->f_getClassInfo)(
     self);
+}
+
+/*
+ * Method:  Create[]
+ */
+
+bHYPRE_StructVector
+bHYPRE_StructVector_Create(
+  /* in */ void* mpi_comm,
+  /* in */ bHYPRE_StructGrid grid)
+{
+  return (_getSEPV()->f_Create)(
+    mpi_comm,
+    grid);
 }
 
 /*
@@ -468,6 +498,29 @@ bHYPRE_StructVector_Axpy(
     x);
 }
 
+void
+bHYPRE_StructVector_Create__sexec(
+        struct sidl_io_Deserializer__object* inArgs,
+        struct sidl_io_Serializer__object* outArgs) {
+  /* stack space for arguments */
+  void* mpi_comm;
+  bHYPRE_StructGrid grid;
+  bHYPRE_StructVector _retval;
+  sidl_BaseInterface _ex   = NULL;
+  sidl_BaseInterface *_ex2 = &_ex;
+
+  /* unpack in and inout argments */
+
+  /* make the call */
+  _retval = (_getSEPV()->f_Create)(
+    mpi_comm,
+    grid);
+
+  /* pack return value */
+  /* pack out and inout argments */
+
+}
+
 /*
  * Cast method for interface and class type conversions.
  */
@@ -529,6 +582,36 @@ bHYPRE_StructVector__exec(
   outArgs);
 }
 
+struct bHYPRE_StructVector__smethod {
+  const char *d_name;
+  void (*d_func)(struct sidl_io_Deserializer__object *,
+    struct sidl_io_Serializer__object *);
+};
+
+void
+bHYPRE_StructVector__sexec(
+        const char* methodName,
+        struct sidl_io_Deserializer__object* inArgs,
+        struct sidl_io_Serializer__object* outArgs ) { 
+  static const struct bHYPRE_StructVector__smethod s_methods[] = {
+    { "Create", bHYPRE_StructVector_Create__sexec }
+  };
+  int i, cmp, l = 0;
+  int u = sizeof(s_methods)/sizeof(struct bHYPRE_StructVector__smethod);
+  if (methodName) {
+    /* Use binary search to locate method */
+    while (l < u) {
+      i = (l + u) >> 1;
+      if (!(cmp=strcmp(methodName, s_methods[i].d_name))) {
+        (s_methods[i].d_func)(inArgs, outArgs);
+        return;
+      }
+      else if (cmp < 0) u = i;
+      else l = i + 1;
+    }
+  }
+  /* TODO: add code for method not found */
+}
 /*
  * Get the URL of the Implementation of this object (for RMI)
  */

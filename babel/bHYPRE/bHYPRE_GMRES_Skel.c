@@ -29,6 +29,11 @@ void
 impl_bHYPRE_GMRES__dtor(
   /* in */ bHYPRE_GMRES self);
 
+extern
+bHYPRE_GMRES
+impl_bHYPRE_GMRES_Create(
+  /* in */ void* mpi_comm);
+
 extern struct bHYPRE_Solver__object* 
   impl_bHYPRE_GMRES_fconnect_bHYPRE_Solver(char* url, sidl_BaseInterface *_ex);
 extern char* impl_bHYPRE_GMRES_fgetURL_bHYPRE_Solver(struct 
@@ -338,6 +343,19 @@ bHYPRE_GMRES__set_epv(struct bHYPRE_GMRES__epv *epv)
   epv->f_GetRelResidualNorm = impl_bHYPRE_GMRES_GetRelResidualNorm;
   epv->f_SetPreconditioner = impl_bHYPRE_GMRES_SetPreconditioner;
 
+}
+#ifdef __cplusplus
+}
+#endif
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+void
+bHYPRE_GMRES__set_sepv(struct bHYPRE_GMRES__sepv *sepv)
+{
+  sepv->f_Create = impl_bHYPRE_GMRES_Create;
 }
 #ifdef __cplusplus
 }

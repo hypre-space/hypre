@@ -170,6 +170,21 @@ C       out sidl.ClassInfo retval
 
 
 C       
+C       Method:  Create[]
+C       
+
+        subroutine bHYPRE_SStructVector_Create_f(mpi_comm, grid, retval)
+        implicit none
+C       in opaque mpi_comm
+        integer*8 mpi_comm
+C       in bHYPRE.SStructGrid grid
+        integer*8 grid
+C       out bHYPRE.SStructVector retval
+        integer*8 retval
+        end
+
+
+C       
 C       Method:  SetObjectType[]
 C       
 

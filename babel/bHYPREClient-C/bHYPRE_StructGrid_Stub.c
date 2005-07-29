@@ -68,6 +68,22 @@ static const struct bHYPRE_StructGrid__external* _loadIOR(void)
 #define _getExternals() (_externals ? _externals : _loadIOR())
 
 /*
+ * Hold pointer to static entry point vector
+ */
+
+static const struct bHYPRE_StructGrid__sepv *_sepv = NULL;
+/*
+ * Return pointer to static functions.
+ */
+
+#define _getSEPV() (_sepv ? _sepv : (_sepv = (*(_getExternals()->getStaticEPV))()))
+/*
+ * Reset point to static functions.
+ */
+
+#define _resetSEPV() (_sepv = (*(_getExternals()->getStaticEPV))())
+
+/*
  * Constructor function for the class.
  */
 
@@ -208,7 +224,22 @@ bHYPRE_StructGrid_getClassInfo(
 }
 
 /*
+ * Method:  Create[]
+ */
+
+bHYPRE_StructGrid
+bHYPRE_StructGrid_Create(
+  /* in */ void* mpi_comm,
+  /* in */ int32_t dim)
+{
+  return (_getSEPV()->f_Create)(
+    mpi_comm,
+    dim);
+}
+
+/*
  * Set the MPI Communicator.
+ * DEPRECATED, use Create:
  * 
  */
 
@@ -319,6 +350,31 @@ bHYPRE_StructGrid_Assemble(
     self);
 }
 
+void
+bHYPRE_StructGrid_Create__sexec(
+        struct sidl_io_Deserializer__object* inArgs,
+        struct sidl_io_Serializer__object* outArgs) {
+  /* stack space for arguments */
+  void* mpi_comm;
+  int32_t dim;
+  bHYPRE_StructGrid _retval;
+  sidl_BaseInterface _ex   = NULL;
+  sidl_BaseInterface *_ex2 = &_ex;
+
+  /* unpack in and inout argments */
+
+  sidl_io_Deserializer_unpackInt( inArgs, "dim", &dim, _ex2);
+
+  /* make the call */
+  _retval = (_getSEPV()->f_Create)(
+    mpi_comm,
+    dim);
+
+  /* pack return value */
+  /* pack out and inout argments */
+
+}
+
 /*
  * Cast method for interface and class type conversions.
  */
@@ -380,6 +436,36 @@ bHYPRE_StructGrid__exec(
   outArgs);
 }
 
+struct bHYPRE_StructGrid__smethod {
+  const char *d_name;
+  void (*d_func)(struct sidl_io_Deserializer__object *,
+    struct sidl_io_Serializer__object *);
+};
+
+void
+bHYPRE_StructGrid__sexec(
+        const char* methodName,
+        struct sidl_io_Deserializer__object* inArgs,
+        struct sidl_io_Serializer__object* outArgs ) { 
+  static const struct bHYPRE_StructGrid__smethod s_methods[] = {
+    { "Create", bHYPRE_StructGrid_Create__sexec }
+  };
+  int i, cmp, l = 0;
+  int u = sizeof(s_methods)/sizeof(struct bHYPRE_StructGrid__smethod);
+  if (methodName) {
+    /* Use binary search to locate method */
+    while (l < u) {
+      i = (l + u) >> 1;
+      if (!(cmp=strcmp(methodName, s_methods[i].d_name))) {
+        (s_methods[i].d_func)(inArgs, outArgs);
+        return;
+      }
+      else if (cmp < 0) u = i;
+      else l = i + 1;
+    }
+  }
+  /* TODO: add code for method not found */
+}
 /*
  * Get the URL of the Implementation of this object (for RMI)
  */

@@ -89,6 +89,11 @@ impl_bHYPRE_Pilut__dtor(
  * User-defined object methods
  */
 
+extern
+bHYPRE_Pilut
+impl_bHYPRE_Pilut_Create(
+  /* in */ void* mpi_comm);
+
 extern struct bHYPRE_Solver__object* 
   impl_bHYPRE_Pilut_fconnect_bHYPRE_Solver(char* url, sidl_BaseInterface *_ex);
 extern char* impl_bHYPRE_Pilut_fgetURL_bHYPRE_Solver(struct 

@@ -45,9 +45,13 @@ extern "C" {
 
 struct bHYPRE_SStructParCSRMatrix__array;
 struct bHYPRE_SStructParCSRMatrix__object;
+struct bHYPRE_SStructParCSRMatrix__sepv;
 
 extern struct bHYPRE_SStructParCSRMatrix__object*
 bHYPRE_SStructParCSRMatrix__new(void);
+
+extern struct bHYPRE_SStructParCSRMatrix__sepv*
+bHYPRE_SStructParCSRMatrix__statics(void);
 
 extern void bHYPRE_SStructParCSRMatrix__init(
   struct bHYPRE_SStructParCSRMatrix__object* self);
@@ -72,6 +76,23 @@ struct sidl_io_Deserializer__array;
 struct sidl_io_Deserializer__object;
 struct sidl_io_Serializer__array;
 struct sidl_io_Serializer__object;
+
+/*
+ * Declare the static method entry point vector.
+ */
+
+struct bHYPRE_SStructParCSRMatrix__sepv {
+  /* Implicit builtin methods */
+  /* Methods introduced in sidl.BaseInterface-v0.9.3 */
+  /* Methods introduced in sidl.BaseClass-v0.9.3 */
+  /* Methods introduced in bHYPRE.Operator-v1.0.0 */
+  /* Methods introduced in bHYPRE.ProblemDefinition-v1.0.0 */
+  /* Methods introduced in bHYPRE.SStructBuildMatrix-v1.0.0 */
+  /* Methods introduced in bHYPRE.SStructParCSRMatrix-v1.0.0 */
+  struct bHYPRE_SStructParCSRMatrix__object* (*f_Create)(
+    /* in */ void* mpi_comm,
+    /* in */ struct bHYPRE_SStructGraph__object* graph);
+};
 
 /*
  * Declare the method entry point vector.
@@ -237,6 +258,8 @@ struct bHYPRE_SStructParCSRMatrix__external {
   struct bHYPRE_SStructParCSRMatrix__object*
   (*createObject)(void);
 
+  struct bHYPRE_SStructParCSRMatrix__sepv*
+  (*getStaticEPV)(void);
   struct sidl_BaseClass__epv*(*getSuperEPV)(void);
 };
 

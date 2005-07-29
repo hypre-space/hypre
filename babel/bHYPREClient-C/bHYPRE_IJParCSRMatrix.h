@@ -98,6 +98,17 @@ bHYPRE_IJParCSRMatrix_getClassInfo(
   /* in */ bHYPRE_IJParCSRMatrix self);
 
 /**
+ * Method:  Create[]
+ */
+bHYPRE_IJParCSRMatrix
+bHYPRE_IJParCSRMatrix_Create(
+  /* in */ void* mpi_comm,
+  /* in */ int32_t ilower,
+  /* in */ int32_t iupper,
+  /* in */ int32_t jlower,
+  /* in */ int32_t jupper);
+
+/**
  * (Optional) Set the max number of nonzeros to expect in each
  * row of the diagonal and off-diagonal blocks.  The diagonal
  * block is the submatrix whose column numbers correspond to
