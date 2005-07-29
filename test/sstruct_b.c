@@ -1769,9 +1769,7 @@ main( int   argc,
    time_index = hypre_InitializeTiming("SStruct Interface");
    hypre_BeginTiming(time_index);
 
-   b_grid = bHYPRE_SStructGrid__create();
-   ierr += bHYPRE_SStructGrid_SetCommunicator( b_grid, (void *) MPI_COMM_WORLD );
-   ierr += bHYPRE_SStructGrid_SetNumDimParts( b_grid, data.ndim, data.nparts );
+   b_grid = bHYPRE_SStructGrid_Create( (void *)MPI_COMM_WORLD, data.ndim, data.nparts );
 
    for (part = 0; part < data.nparts; part++)
    {
@@ -1812,9 +1810,7 @@ main( int   argc,
    b_stencils = hypre_CTAlloc( bHYPRE_SStructStencil, data.nstencils );
    for (s = 0; s < data.nstencils; s++)
    {
-      b_stencils[s] = bHYPRE_SStructStencil__create();
-      bHYPRE_SStructStencil_SetNumDimSize( b_stencils[s], data.ndim,
-                                           data.stencil_sizes[s] );
+      b_stencils[s] = bHYPRE_SStructStencil_Create( data.ndim, data.stencil_sizes[s] );
 
       for (i = 0; i < data.stencil_sizes[s]; i++)
       {
@@ -1828,8 +1824,8 @@ main( int   argc,
     * Set up the graph
     *-----------------------------------------------------------*/
 
-   b_graph = bHYPRE_SStructGraph__create();
-   bHYPRE_SStructGraph_SetCommGrid( b_graph, (void *) MPI_COMM_WORLD, b_grid );
+   b_graph = bHYPRE_SStructGraph_Create( (void *)MPI_COMM_WORLD, b_grid );
+
    bHYPRE_SStructGraph_SetObjectType( b_graph, matvec_type );
 
    for (part = 0; part < data.nparts; part++)
@@ -1887,9 +1883,7 @@ main( int   argc,
 
    if ( matvec_type == HYPRE_PARCSR )
    {
-      b_spA = bHYPRE_SStructParCSRMatrix__create();
-      bHYPRE_SStructParCSRMatrix_SetCommunicator( b_spA, (void *) MPI_COMM_WORLD );
-      bHYPRE_SStructParCSRMatrix_SetGraph( b_spA, b_graph );
+      b_spA = bHYPRE_SStructParCSRMatrix_Create( (void *)MPI_COMM_WORLD, b_graph );
 
       /* TODO HYPRE_SStructMatrixSetSymmetric(A, 1); */
       for (entry = 0; entry < data.symmetric_nentries; entry++)
@@ -1907,9 +1901,7 @@ main( int   argc,
 
    else
    {
-      b_A = bHYPRE_SStructMatrix__create();
-      bHYPRE_SStructMatrix_SetCommunicator( b_A, (void *) MPI_COMM_WORLD );
-      bHYPRE_SStructMatrix_SetGraph( b_A, b_graph );
+      b_A = bHYPRE_SStructMatrix_Create( (void *)MPI_COMM_WORLD, b_graph );
 
       /* TODO HYPRE_SStructMatrixSetSymmetric(A, 1); */
       for (entry = 0; entry < data.symmetric_nentries; entry++)
@@ -2058,17 +2050,13 @@ main( int   argc,
 
    if ( matvec_type == HYPRE_PARCSR )
    {
-      b_spb = bHYPRE_SStructParCSRVector__create();
-      bHYPRE_SStructParCSRVector_SetCommunicator( b_spb, (void *) MPI_COMM_WORLD );
-      bHYPRE_SStructParCSRVector_SetGrid( b_spb, b_grid );
+      b_spb = bHYPRE_SStructParCSRVector_Create( (void *)MPI_COMM_WORLD, b_grid );
 
       bHYPRE_SStructParCSRVector_Initialize( b_spb );
    }
    else
    {
-      b_b = bHYPRE_SStructVector__create();
-      bHYPRE_SStructVector_SetCommunicator( b_b, (void *) MPI_COMM_WORLD );
-      bHYPRE_SStructVector_SetGrid( b_b, b_grid );
+      b_b = bHYPRE_SStructVector_Create( (void *)MPI_COMM_WORLD, b_grid );
 
       bHYPRE_SStructVector_Initialize( b_b );
    }
@@ -2122,17 +2110,13 @@ main( int   argc,
 
    if ( matvec_type == HYPRE_PARCSR )
    {
-      b_spx = bHYPRE_SStructParCSRVector__create();
-      bHYPRE_SStructParCSRVector_SetCommunicator( b_spx, (void *) MPI_COMM_WORLD );
-      bHYPRE_SStructParCSRVector_SetGrid( b_spx, b_grid );
+      b_spx = bHYPRE_SStructParCSRVector_Create( (void *)MPI_COMM_WORLD, b_grid );
 
       bHYPRE_SStructParCSRVector_Initialize( b_spx );
    }
    else
    {
-      b_x = bHYPRE_SStructVector__create();
-      bHYPRE_SStructVector_SetCommunicator( b_x, (void *) MPI_COMM_WORLD );
-      bHYPRE_SStructVector_SetGrid( b_x, b_grid );
+      b_x = bHYPRE_SStructVector_Create( (void *)MPI_COMM_WORLD, b_grid );
 
       bHYPRE_SStructVector_Initialize( b_x );
    }
@@ -2644,8 +2628,7 @@ main( int   argc,
       time_index = hypre_InitializeTiming("GMRES Setup");
       hypre_BeginTiming(time_index);
 
-      b_solver_GMRES = bHYPRE_GMRES__create();
-      ierr += bHYPRE_GMRES_SetCommunicator( b_solver_GMRES, (void *) MPI_COMM_WORLD );
+      b_solver_GMRES = bHYPRE_GMRES_Create( (void *) MPI_COMM_WORLD );
       bHYPRE_GMRES_SetIntParameter( b_solver_GMRES, "KDim", 5 );
       bHYPRE_GMRES_SetIntParameter( b_solver_GMRES, "MaxIter", 100 );
       bHYPRE_GMRES_SetTolerance( b_solver_GMRES, 1.0e-06 );
@@ -2658,9 +2641,7 @@ main( int   argc,
       if (solver_id == 40)
       {
          /* use BoomerAMG as preconditioner */
-         b_boomeramg = bHYPRE_BoomerAMG__create();
-         ierr += bHYPRE_BoomerAMG_SetCommunicator( b_boomeramg,
-                                                   (void *) MPI_COMM_WORLD );
+         b_boomeramg = bHYPRE_BoomerAMG_Create( (void *) MPI_COMM_WORLD );
          bHYPRE_BoomerAMG_SetIntParameter( b_boomeramg, "CoarsenType", 6);
          bHYPRE_BoomerAMG_SetIntParameter( b_boomeramg, "StrongThreshold", 0.25);
          bHYPRE_BoomerAMG_SetTolerance( b_boomeramg, 0.0 );
@@ -2965,8 +2946,7 @@ main( int   argc,
       time_index = hypre_InitializeTiming("SMG Setup");
       hypre_BeginTiming(time_index);
 
-      b_solver_SMG = bHYPRE_StructSMG__create();
-      ierr += bHYPRE_StructSMG_SetCommunicator( b_solver_SMG, (void *) MPI_COMM_WORLD );
+      b_solver_SMG = bHYPRE_StructSMG_Create( (void *) MPI_COMM_WORLD );
       bHYPRE_StructSMG_SetIntParameter( b_solver_SMG, "MemoryUse", 0);
       bHYPRE_StructSMG_SetIntParameter( b_solver_SMG, "MaxIter", 50);
       bHYPRE_StructSMG_SetDoubleParameter( b_solver_SMG, "Tol", 1.0e-6);

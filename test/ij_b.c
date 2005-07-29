@@ -851,12 +851,11 @@ main( int   argc,
 
       ierr += HYPRE_ParCSRMatrixGetDims( parcsr_A, &M, &N );
 
-      /* In Babel, must set the type before calling bHYPRE's create
-         (note that the default name for the "new-like" constructor automatically provided
-         by Babel is also create, albeit with two underscores. This name
-         confusion is merely coincidental). AJC 08/01. */
-      bHYPRE_parcsr_A = bHYPRE_IJParCSRMatrix__create();
-      /*printf("finished __create\n");*/
+      bHYPRE_parcsr_A = bHYPRE_IJParCSRMatrix_Create( (void *)comm,
+                                                      first_local_row,
+                                                      last_local_row,
+                                                      first_local_col,
+                                                      last_local_col );
 
       bHYPRE_ij_A = bHYPRE_IJBuildMatrix__cast( bHYPRE_parcsr_A );
       /*printf("finished cast\n");*/
@@ -865,13 +864,6 @@ main( int   argc,
          printf("Cast failed\n");
          return 1;
       }
-
-      ierr += bHYPRE_IJBuildMatrix_SetCommunicator( bHYPRE_ij_A, (void *)comm );
-      ierr += bHYPRE_IJBuildMatrix_SetLocalRange( bHYPRE_ij_A, 
-                                                  first_local_row,
-                                                  last_local_row,
-                                                  first_local_col,
-                                                  last_local_col );
 
 /* the following shows how to build an IJMatrix if one has only an
    estimate for the row sizes */
@@ -1055,12 +1047,11 @@ main( int   argc,
       }
 
 /* RHS */
-      bHYPRE_b = bHYPRE_IJParCSRVector__create();
+      bHYPRE_b = bHYPRE_IJParCSRVector_Create( (void *)comm,
+                                               first_local_row,
+                                               last_local_row );
       bHYPRE_ij_b = bHYPRE_IJBuildVector__cast( bHYPRE_b );
-      ierr += bHYPRE_IJBuildVector_SetCommunicator( bHYPRE_ij_b, (void *)comm );
-      ierr += bHYPRE_IJBuildVector_SetLocalRange( bHYPRE_ij_b,
-                                                  first_local_row,
-                                                  last_local_row );
+
       ierr += bHYPRE_IJBuildVector_Initialize( bHYPRE_ij_b );
 
 
@@ -1081,12 +1072,11 @@ main( int   argc,
       sidl_BaseInterface_deleteRef( bHYPRE_object );
 
 /* Initial guess */
-      bHYPRE_x = bHYPRE_IJParCSRVector__create();
+      bHYPRE_x = bHYPRE_IJParCSRVector_Create( (void *)comm,
+                                               first_local_row,
+                                               last_local_row );
       bHYPRE_ij_x = bHYPRE_IJBuildVector__cast( bHYPRE_x );
-      ierr += bHYPRE_IJBuildVector_SetCommunicator( bHYPRE_ij_x, (void *)comm );
-      ierr += bHYPRE_IJBuildVector_SetLocalRange( bHYPRE_ij_x,
-                                                  first_local_col,
-                                                  last_local_col );
+
       ierr += bHYPRE_IJBuildVector_Initialize( bHYPRE_ij_x );
 
       values = hypre_CTAlloc(double, local_num_cols);
@@ -1475,12 +1465,10 @@ main( int   argc,
 /* not used      char  filename[255];*/
                        
       /*  Apply, y=A*b: result is 1's on the interior of the grid */
-      bHYPRE_y = bHYPRE_IJParCSRVector__create();
+      bHYPRE_y = bHYPRE_IJParCSRVector_Create( (void *)comm,
+                                               first_local_col,
+                                               last_local_col );
       bHYPRE_ij_y = bHYPRE_IJBuildVector__cast( bHYPRE_y );
-      ierr += bHYPRE_IJBuildVector_SetCommunicator( bHYPRE_ij_y, (void *)comm );
-      ierr += bHYPRE_IJBuildVector_SetLocalRange( bHYPRE_ij_y,
-                                                  first_local_col,
-                                                  last_local_col );
       ierr += bHYPRE_IJBuildVector_Initialize( bHYPRE_ij_y );
       y = bHYPRE_Vector__cast( bHYPRE_y );
 
@@ -1517,12 +1505,10 @@ main( int   argc,
       bHYPRE_Vector_deleteRef( y );
 
       /* Read y2=y; result is all 1's */
-      bHYPRE_y2 = bHYPRE_IJParCSRVector__create();
+      bHYPRE_y2 = bHYPRE_IJParCSRVector_Create( (void *)comm,
+                                                first_local_col,
+                                                last_local_col );
       bHYPRE_ij_y2 = bHYPRE_IJBuildVector__cast( bHYPRE_y2 );
-      ierr += bHYPRE_IJBuildVector_SetCommunicator( bHYPRE_ij_y2, (void *)comm );
-      ierr += bHYPRE_IJBuildVector_SetLocalRange( bHYPRE_ij_y2,
-                                                  first_local_col,
-                                                  last_local_col );
       ierr += bHYPRE_IJBuildVector_Initialize( bHYPRE_ij_y2 );
       bHYPRE_IJParCSRVector_Read( bHYPRE_y2, "test.clone", (void *)comm );
       bHYPRE_IJParCSRVector_Print( bHYPRE_y2, "test.read" );
@@ -1580,12 +1566,11 @@ main( int   argc,
       /* To call a bHYPRE solver:
          create, set comm, set operator, set other parameters,
          Setup (noop in this case), Apply */
-      bHYPRE_AMG = bHYPRE_BoomerAMG__create();
+      bHYPRE_AMG = bHYPRE_BoomerAMG_Create( (void *)comm );
       bHYPRE_Vector_b = bHYPRE_Vector__cast( bHYPRE_b );
       bHYPRE_Vector_x = bHYPRE_Vector__cast( bHYPRE_x );
       bHYPRE_op_A = bHYPRE_Operator__cast( bHYPRE_parcsr_A );
 
-      ierr += bHYPRE_BoomerAMG_SetCommunicator( bHYPRE_AMG, (void *)comm );
       bHYPRE_BoomerAMG_SetOperator( bHYPRE_AMG, bHYPRE_op_A );
       bHYPRE_BoomerAMG_SetTolerance( bHYPRE_AMG, tol);
       bHYPRE_BoomerAMG_SetPrintLevel( bHYPRE_AMG, ioutdat ); 
@@ -1674,12 +1659,11 @@ main( int   argc,
       time_index = hypre_InitializeTiming("PCG Setup");
       hypre_BeginTiming(time_index);
  
-      bHYPRE_PCG = bHYPRE_PCG__create();
+      bHYPRE_PCG = bHYPRE_PCG_Create( (void *)comm );
       bHYPRE_Vector_b = bHYPRE_Vector__cast( bHYPRE_b );
       bHYPRE_Vector_x = bHYPRE_Vector__cast( bHYPRE_x );
 
       bHYPRE_op_A = bHYPRE_Operator__cast( bHYPRE_parcsr_A );
-      ierr += bHYPRE_PCG_SetCommunicator( bHYPRE_PCG, (void *)comm );
       bHYPRE_PCG_SetOperator( bHYPRE_PCG, bHYPRE_op_A );
       bHYPRE_PCG_SetMaxIterations( bHYPRE_PCG, 500);
       bHYPRE_PCG_SetTolerance( bHYPRE_PCG, tol);
@@ -1736,8 +1720,7 @@ main( int   argc,
          /* To call a bHYPRE solver:
             create, set comm, set operator, set other parameters,
             Setup (noop in this case), Apply */
-         bHYPRE_ParCSRDiagScale = bHYPRE_ParCSRDiagScale__create();
-         ierr += bHYPRE_ParCSRDiagScale_SetCommunicator( bHYPRE_ParCSRDiagScale, (void *)comm );
+         bHYPRE_ParCSRDiagScale = bHYPRE_ParCSRDiagScale_Create( (void *)comm );
          bHYPRE_ParCSRDiagScale_SetOperator( bHYPRE_ParCSRDiagScale, bHYPRE_op_A );
          ierr += bHYPRE_ParCSRDiagScale_Setup( bHYPRE_ParCSRDiagScale,
                                                bHYPRE_Vector_b, bHYPRE_Vector_x );
