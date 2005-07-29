@@ -153,9 +153,8 @@ int main (int argc, char *argv[])
    /* Create the matrix.
       Note that this is a square matrix, so we indicate the row partition
       size twice (since number of rows = number of cols) */
-   parcsr_A = bHYPRE_IJParCSRMatrix__create();
-   bHYPRE_IJParCSRMatrix_SetCommunicator( parcsr_A, (void * )MPI_COMM_WORLD );
-   bHYPRE_IJParCSRMatrix_SetLocalRange( parcsr_A, ilower, iupper, ilower, iupper );
+   parcsr_A = bHYPRE_IJParCSRMatrix_Create( (void *)MPI_COMM_WORLD,
+                                            ilower, iupper, ilower, iupper );
 
    op_A = bHYPRE_Operator__cast( parcsr_A ); /* needed later as a function argument */
 
@@ -231,16 +230,14 @@ int main (int argc, char *argv[])
    bHYPRE_IJParCSRMatrix_Assemble( parcsr_A );
 
    /* Create the rhs and solution */
-   par_b = bHYPRE_IJParCSRVector__create();
-   bHYPRE_IJParCSRVector_SetCommunicator( par_b, (void *)MPI_COMM_WORLD );
-   bHYPRE_IJParCSRVector_SetLocalRange( par_b, ilower, iupper );
+   par_b = bHYPRE_IJParCSRVector_Create( (void *)MPI_COMM_WORLD, ilower, iupper );
+
    vec_b = bHYPRE_Vector__cast( par_b ); /* needed later for function arguments */
 
    bHYPRE_IJParCSRVector_Initialize( par_b );
 
-   par_x = bHYPRE_IJParCSRVector__create();
-   bHYPRE_IJParCSRVector_SetCommunicator( par_x, (void *)MPI_COMM_WORLD );
-   bHYPRE_IJParCSRVector_SetLocalRange( par_x, ilower, iupper );
+   par_x = bHYPRE_IJParCSRVector_Create( (void *)MPI_COMM_WORLD, ilower, iupper );
+
    vec_x = bHYPRE_Vector__cast( par_x ); /* needed later for function arguments */
 
    bHYPRE_IJParCSRVector_Initialize( par_x );
@@ -280,8 +277,8 @@ int main (int argc, char *argv[])
       double final_res_norm;
 
       /* Create solver */
-      amg_solver = bHYPRE_BoomerAMG__create();
-      bHYPRE_BoomerAMG_SetCommunicator( amg_solver, (void *)MPI_COMM_WORLD );
+      amg_solver = bHYPRE_BoomerAMG_Create( (void *)MPI_COMM_WORLD );
+
       bHYPRE_BoomerAMG_SetOperator( amg_solver, op_A );
 
       /* Set some parameters (See Reference Manual for more parameters) */
@@ -319,8 +316,8 @@ int main (int argc, char *argv[])
       double final_res_norm;
 
       /* Create solver */
-      pcg_solver = bHYPRE_PCG__create();
-      bHYPRE_PCG_SetCommunicator( pcg_solver, (void *)MPI_COMM_WORLD );
+      pcg_solver = bHYPRE_PCG_Create( (void *)MPI_COMM_WORLD );
+
       bHYPRE_PCG_SetOperator( pcg_solver, op_A );
 
       /* Set some parameters (See Reference Manual for more parameters) */
@@ -330,7 +327,7 @@ int main (int argc, char *argv[])
       bHYPRE_PCG_SetPrintLevel( pcg_solver, 2 ); /* prints out the iteration info */
       bHYPRE_PCG_SetLogging( pcg_solver, 1 ); /* needed to get run info later */
 
-      identity = bHYPRE_IdentitySolver__create();
+      identity = bHYPRE_IdentitySolver_Create( (void *)MPI_COMM_WORLD );
       precond = bHYPRE_Solver__cast( identity );
       bHYPRE_PCG_SetPreconditioner( pcg_solver, precond );
 
@@ -360,8 +357,7 @@ int main (int argc, char *argv[])
       double final_res_norm;
 
       /* Create solver */
-      pcg_solver = bHYPRE_PCG__create();
-      bHYPRE_PCG_SetCommunicator( pcg_solver, (void *)MPI_COMM_WORLD );
+      pcg_solver = bHYPRE_PCG_Create( (void *)MPI_COMM_WORLD );
       bHYPRE_PCG_SetOperator( pcg_solver, op_A );
 
       /* Set some parameters (See Reference Manual for more parameters) */
@@ -372,8 +368,7 @@ int main (int argc, char *argv[])
       bHYPRE_PCG_SetLogging( pcg_solver, 1 ); /* needed to get run info later */
 
       /* Now set up the AMG preconditioner and specify any parameters */
-      amg_solver = bHYPRE_BoomerAMG__create();
-      bHYPRE_BoomerAMG_SetCommunicator( amg_solver, (void *)MPI_COMM_WORLD );
+      amg_solver = bHYPRE_BoomerAMG_Create( (void *)MPI_COMM_WORLD );
       bHYPRE_BoomerAMG_SetOperator( amg_solver, op_A );
       bHYPRE_BoomerAMG_SetPrintLevel( amg_solver, 1 ); /* print amg solution info*/
       bHYPRE_BoomerAMG_SetIntParameter( amg_solver, "CoarsenType", 6); /* Falgout coarsening */
@@ -417,8 +412,7 @@ int main (int argc, char *argv[])
       int      sai_sym = 1;
 
       /* Create solver */
-      pcg_solver = bHYPRE_PCG__create();
-      bHYPRE_PCG_SetCommunicator( pcg_solver, (void *)MPI_COMM_WORLD );
+      pcg_solver = bHYPRE_PCG_Create( (void *)MPI_COMM_WORLD );
       bHYPRE_PCG_SetOperator( pcg_solver, op_A );
 
       /* Set some parameters (See Reference Manual for more parameters) */
@@ -429,8 +423,7 @@ int main (int argc, char *argv[])
       bHYPRE_PCG_SetLogging( pcg_solver, 1 ); /* needed to get run info later */
 
       /* Now set up the ParaSails preconditioner and specify any parameters */
-      ps_solver = bHYPRE_ParaSails__create();
-      bHYPRE_ParaSails_SetCommunicator( ps_solver, (void *)MPI_COMM_WORLD );
+      ps_solver = bHYPRE_ParaSails_Create( (void *)MPI_COMM_WORLD );
       bHYPRE_ParaSails_SetOperator( ps_solver, op_A );
 
       /* Set some parameters (See Reference Manual for more parameters) */
