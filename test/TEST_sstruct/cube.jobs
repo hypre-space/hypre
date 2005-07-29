@@ -8,12 +8,12 @@
 # $Revision$
 #EHEADER***********************************************************************
 
-mpirun -np 1 ./sstruct -in sstruct.in.cube -r 10 10 10 -solver 28 \
+mpirun -np 1 ./sstruct -in sstruct.in.cube -r 10 10 10 -rhsone -solver 28 \
  > cube.out.0
 
-mpirun -np 1 ./sstruct -in sstruct.in.bcube -r 10 10 10 -solver 28 \
+mpirun -np 1 ./sstruct -in sstruct.in.bcube -r 10 10 10 -rhsone -solver 28 \
  > cube.out.1
 
-mpirun -np 2 ./sstruct -in sstruct.in.pcube -r 10 10 10 -solver 28 \
+mpirun -np 2 ./sstruct -in sstruct.in.pcube -r 10 10 10 -rhsone -solver 28 \
  > cube.out.2
 
