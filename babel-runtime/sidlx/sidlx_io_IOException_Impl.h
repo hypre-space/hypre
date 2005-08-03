@@ -2,12 +2,12 @@
  * File:          sidlx_io_IOException_Impl.h
  * Symbol:        sidlx.io.IOException-v0.1
  * Symbol Type:   class
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.8
  * Description:   Server-side implementation for sidlx.io.IOException
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.8
  */
 
 #ifndef included_sidlx_io_IOException_Impl_h
@@ -35,19 +35,23 @@
 #include "sidl_BaseClass.h"
 #endif
 
+#line 38 "../../../babel/runtime/sidlx/sidlx_io_IOException_Impl.h"
 /* DO-NOT-DELETE splicer.begin(sidlx.io.IOException._includes) */
 #include "sidlx_common.h"
 /* DO-NOT-DELETE splicer.end(sidlx.io.IOException._includes) */
+#line 42 "sidlx_io_IOException_Impl.h"
 
 /*
  * Private data for class sidlx.io.IOException
  */
 
 struct sidlx_io_IOException__data {
+#line 47 "../../../babel/runtime/sidlx/sidlx_io_IOException_Impl.h"
   /* DO-NOT-DELETE splicer.begin(sidlx.io.IOException._data) */
   /* Put private data members here... */
   int ignore; /* dummy to force non-empty struct; remove if you add data */
   /* DO-NOT-DELETE splicer.end(sidlx.io.IOException._data) */
+#line 54 "sidlx_io_IOException_Impl.h"
 };
 
 #ifdef __cplusplus

@@ -2,12 +2,12 @@
  * File:          sidlx_io_OStream.h
  * Symbol:        sidlx.io.OStream-v0.1
  * Symbol Type:   interface
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.8
  * Description:   Client-side glue code for sidlx.io.OStream
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.8
  */
 
 #ifndef included_sidlx_io_OStream_h
@@ -143,7 +143,7 @@ sidlx_io_OStream_flush(
 int32_t
 sidlx_io_OStream_write(
   /* in */ sidlx_io_OStream self,
-  /* in */ struct sidl_char__array* data,
+  /* in array<char,row-major> */ struct sidl_char__array* data,
   /* out */ sidl_BaseInterface *_ex);
 
 /**

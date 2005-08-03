@@ -51,10 +51,17 @@ libsidlx.scl:
 	sed -e 's,@@DIR@@,'`pwd`',g' < $(srcdir)/libsidlx.scl.in > libsidlx.scl
 
 if BABEL_RUNTIME_ONLY
+CLEANFILES = babel-stamp babel-temp libsidlx.scl \
+	babel.make.package babel.make.depends
+
 babel-stamp:
 	touch babel-stamp
 
 else
+CLEANFILES = babel-stamp babel-temp libsidlx.scl \
+	$(STUBSRCS) $(STUBHDRS) $(IORSRCS) $(IORHDRS) $(SKELSRCS) $(SKELHDRS) \
+	babel.make.package babel.make.depends
+
 $(STUBSRCS) $(STUBHDRS) $(IORSRCS) $(IORHDRS) $(SKELSRCS) $(SKELHEDRS) $(IMPLSRCS) $(IMPLHDRS) : babel-stamp
 	@if test -f $@; then \
 		touch $@; \
@@ -71,10 +78,6 @@ babel-stamp: $(srcdir)/sidlx.sidl libsidlx.scl
 	$(srcdir)/sidlx.sidl
 	@mv -f babel-temp $@
 endif
-
-CLEANFILES = babel-stamp babel-temp libsidlx.scl \
-	$(STUBSRCS) $(STUBHDRS) $(IORSRCS) $(IORHDRS) $(SKELSRCS) $(SKELHDRS) \
-	babel.make.package babel.make.depends
 
 clean-local:
 	test "X$(srcdir)" = "X." || rm -f $(IMPLSRCS) $(IMPLHDRS)

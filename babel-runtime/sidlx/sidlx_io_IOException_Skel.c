@@ -2,12 +2,12 @@
  * File:          sidlx_io_IOException_Skel.c
  * Symbol:        sidlx.io.IOException-v0.1
  * Symbol Type:   class
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.8
  * Description:   Server-side glue code for sidlx.io.IOException
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.8
  */
 
 #include "sidlx_io_IOException_IOR.h"

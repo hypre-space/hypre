@@ -2,12 +2,12 @@
  * File:          sidlx_io_Serializable_Stub.c
  * Symbol:        sidlx.io.Serializable-v0.1
  * Symbol Type:   interface
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.8
  * Description:   Client-side glue code for sidlx.io.Serializable
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.8
  */
 
 #include "sidlx_io_Serializable.h"
@@ -1107,6 +1107,8 @@ remote_sidlx_io__Serializable_pack(
   sidl_rmi_Response _rsvp = NULL;
 
   /* pack in and inout arguments */
+  sidl_rmi_Invocation_packString( _inv, "ostr", sidlx_io_OStream__getURL(ostr),
+    _ex2);
 
   /* send actual RMI request */
   _rsvp = sidl_rmi_Invocation_invokeMethod(_inv,_ex2);
@@ -1136,6 +1138,8 @@ remote_sidlx_io__Serializable_unpack(
   sidl_rmi_Response _rsvp = NULL;
 
   /* pack in and inout arguments */
+  sidl_rmi_Invocation_packString( _inv, "istr", sidlx_io_IStream__getURL(istr),
+    _ex2);
 
   /* send actual RMI request */
   _rsvp = sidl_rmi_Invocation_invokeMethod(_inv,_ex2);

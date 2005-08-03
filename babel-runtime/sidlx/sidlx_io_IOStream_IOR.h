@@ -2,12 +2,12 @@
  * File:          sidlx_io_IOStream_IOR.h
  * Symbol:        sidlx.io.IOStream-v0.1
  * Symbol Type:   interface
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.8
  * Description:   Intermediate Object Representation for sidlx.io.IOStream
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.8
  */
 
 #ifndef included_sidlx_io_IOStream_IOR_h
@@ -84,11 +84,11 @@ struct sidlx_io_IOStream__epv {
   int32_t (*f_read)(
     /* in */ void* self,
     /* in */ int32_t nbytes,
-    /* out */ struct sidl_char__array** data,
+    /* out array<char,row-major> */ struct sidl_char__array** data,
     /* out */ struct sidl_BaseInterface__object* *_ex);
   int32_t (*f_readline)(
     /* in */ void* self,
-    /* out */ struct sidl_char__array** data,
+    /* out array<char,row-major> */ struct sidl_char__array** data,
     /* out */ struct sidl_BaseInterface__object* *_ex);
   void (*f_getBool)(
     /* in */ void* self,
@@ -131,7 +131,7 @@ struct sidlx_io_IOStream__epv {
     /* in */ void* self);
   int32_t (*f_write)(
     /* in */ void* self,
-    /* in */ struct sidl_char__array* data,
+    /* in array<char,row-major> */ struct sidl_char__array* data,
     /* out */ struct sidl_BaseInterface__object* *_ex);
   void (*f_putBool)(
     /* in */ void* self,
@@ -252,11 +252,11 @@ struct sidlx_io__IOStream__epv {
   int32_t (*f_read)(
     /* in */ struct sidlx_io__IOStream__object* self,
     /* in */ int32_t nbytes,
-    /* out */ struct sidl_char__array** data,
+    /* out array<char,row-major> */ struct sidl_char__array** data,
     /* out */ struct sidl_BaseInterface__object* *_ex);
   int32_t (*f_readline)(
     /* in */ struct sidlx_io__IOStream__object* self,
-    /* out */ struct sidl_char__array** data,
+    /* out array<char,row-major> */ struct sidl_char__array** data,
     /* out */ struct sidl_BaseInterface__object* *_ex);
   void (*f_getBool)(
     /* in */ struct sidlx_io__IOStream__object* self,
@@ -299,7 +299,7 @@ struct sidlx_io__IOStream__epv {
     /* in */ struct sidlx_io__IOStream__object* self);
   int32_t (*f_write)(
     /* in */ struct sidlx_io__IOStream__object* self,
-    /* in */ struct sidl_char__array* data,
+    /* in array<char,row-major> */ struct sidl_char__array* data,
     /* out */ struct sidl_BaseInterface__object* *_ex);
   void (*f_putBool)(
     /* in */ struct sidlx_io__IOStream__object* self,

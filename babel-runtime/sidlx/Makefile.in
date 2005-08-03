@@ -395,6 +395,9 @@ EXTRA_DIST = babel.make libsidlx.scl.in
 @BABEL_RUNTIME_ONLY_FALSE@	$(STUBSRCS) $(STUBHDRS) $(IORSRCS) $(IORHDRS) $(SKELSRCS) $(SKELHDRS) \
 @BABEL_RUNTIME_ONLY_FALSE@	babel.make.package babel.make.depends
 
+@BABEL_RUNTIME_ONLY_TRUE@CLEANFILES = babel-stamp babel-temp libsidlx.scl \
+@BABEL_RUNTIME_ONLY_TRUE@	babel.make.package babel.make.depends
+
 IMPLHDRS = sidlx_io_IOException_Impl.h sidlx_io_TxtIOStream_Impl.h            \
   sidlx_io_TxtIStream_Impl.h sidlx_io_TxtOStream_Impl.h                       \
   sidlx_rmi_ChildSocket_Impl.h sidlx_rmi_ClientSocket_Impl.h                  \

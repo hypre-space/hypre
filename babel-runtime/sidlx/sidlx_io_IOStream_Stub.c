@@ -2,12 +2,12 @@
  * File:          sidlx_io_IOStream_Stub.c
  * Symbol:        sidlx.io.IOStream-v0.1
  * Symbol Type:   interface
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.8
  * Description:   Client-side glue code for sidlx.io.IOStream
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.8
  */
 
 #include "sidlx_io_IOStream.h"
@@ -178,7 +178,7 @@ int32_t
 sidlx_io_IOStream_read(
   /* in */ sidlx_io_IOStream self,
   /* in */ int32_t nbytes,
-  /* out */ struct sidl_char__array** data,
+  /* out array<char,row-major> */ struct sidl_char__array** data,
   /* out */ sidl_BaseInterface *_ex)
 {
   return (*self->d_epv->f_read)(
@@ -195,7 +195,7 @@ sidlx_io_IOStream_read(
 int32_t
 sidlx_io_IOStream_readline(
   /* in */ sidlx_io_IOStream self,
-  /* out */ struct sidl_char__array** data,
+  /* out array<char,row-major> */ struct sidl_char__array** data,
   /* out */ sidl_BaseInterface *_ex)
 {
   return (*self->d_epv->f_readline)(
@@ -367,7 +367,7 @@ sidlx_io_IOStream_flush(
 int32_t
 sidlx_io_IOStream_write(
   /* in */ sidlx_io_IOStream self,
-  /* in */ struct sidl_char__array* data,
+  /* in array<char,row-major> */ struct sidl_char__array* data,
   /* out */ sidl_BaseInterface *_ex)
 {
   return (*self->d_epv->f_write)(
@@ -1468,7 +1468,7 @@ static int32_t
 remote_sidlx_io__IOStream_read(
   /* in */ struct sidlx_io__IOStream__object* self /* TLD */,
   /* in */ int32_t nbytes,
-  /* out */ struct sidl_char__array** data,
+  /* out array<char,row-major> */ struct sidl_char__array** data,
   /* out */ struct sidl_BaseInterface__object* *_ex)
 {
   sidl_BaseInterface *_ex2 =_ex;
@@ -1504,7 +1504,7 @@ remote_sidlx_io__IOStream_read(
 static int32_t
 remote_sidlx_io__IOStream_readline(
   /* in */ struct sidlx_io__IOStream__object* self /* TLD */,
-  /* out */ struct sidl_char__array** data,
+  /* out array<char,row-major> */ struct sidl_char__array** data,
   /* out */ struct sidl_BaseInterface__object* *_ex)
 {
   sidl_BaseInterface *_ex2 =_ex;
@@ -1864,7 +1864,7 @@ remote_sidlx_io__IOStream_flush(
 static int32_t
 remote_sidlx_io__IOStream_write(
   /* in */ struct sidlx_io__IOStream__object* self /* TLD */,
-  /* in */ struct sidl_char__array* data,
+  /* in array<char,row-major> */ struct sidl_char__array* data,
   /* out */ struct sidl_BaseInterface__object* *_ex)
 {
   sidl_BaseInterface *_ex2 =_ex;

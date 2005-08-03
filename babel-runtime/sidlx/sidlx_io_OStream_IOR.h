@@ -2,12 +2,12 @@
  * File:          sidlx_io_OStream_IOR.h
  * Symbol:        sidlx.io.OStream-v0.1
  * Symbol Type:   interface
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.8
  * Description:   Intermediate Object Representation for sidlx.io.OStream
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.8
  */
 
 #ifndef included_sidlx_io_OStream_IOR_h
@@ -85,7 +85,7 @@ struct sidlx_io_OStream__epv {
     /* in */ void* self);
   int32_t (*f_write)(
     /* in */ void* self,
-    /* in */ struct sidl_char__array* data,
+    /* in array<char,row-major> */ struct sidl_char__array* data,
     /* out */ struct sidl_BaseInterface__object* *_ex);
   void (*f_putBool)(
     /* in */ void* self,
@@ -198,7 +198,7 @@ struct sidlx_io__OStream__epv {
     /* in */ struct sidlx_io__OStream__object* self);
   int32_t (*f_write)(
     /* in */ struct sidlx_io__OStream__object* self,
-    /* in */ struct sidl_char__array* data,
+    /* in array<char,row-major> */ struct sidl_char__array* data,
     /* out */ struct sidl_BaseInterface__object* *_ex);
   void (*f_putBool)(
     /* in */ struct sidlx_io__OStream__object* self,

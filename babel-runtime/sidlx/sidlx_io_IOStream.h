@@ -2,12 +2,12 @@
  * File:          sidlx_io_IOStream.h
  * Symbol:        sidlx.io.IOStream-v0.1
  * Symbol Type:   interface
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.8
  * Description:   Client-side glue code for sidlx.io.IOStream
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.8
  */
 
 #ifndef included_sidlx_io_IOStream_h
@@ -142,7 +142,7 @@ int32_t
 sidlx_io_IOStream_read(
   /* in */ sidlx_io_IOStream self,
   /* in */ int32_t nbytes,
-  /* out */ struct sidl_char__array** data,
+  /* out array<char,row-major> */ struct sidl_char__array** data,
   /* out */ sidl_BaseInterface *_ex);
 
 /**
@@ -151,7 +151,7 @@ sidlx_io_IOStream_read(
 int32_t
 sidlx_io_IOStream_readline(
   /* in */ sidlx_io_IOStream self,
-  /* out */ struct sidl_char__array** data,
+  /* out array<char,row-major> */ struct sidl_char__array** data,
   /* out */ sidl_BaseInterface *_ex);
 
 /**
@@ -248,7 +248,7 @@ sidlx_io_IOStream_flush(
 int32_t
 sidlx_io_IOStream_write(
   /* in */ sidlx_io_IOStream self,
-  /* in */ struct sidl_char__array* data,
+  /* in array<char,row-major> */ struct sidl_char__array* data,
   /* out */ sidl_BaseInterface *_ex);
 
 /**
