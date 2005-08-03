@@ -838,6 +838,7 @@ SIDLFortran77Symbol(bhypre_pilut_setoperator_f,BHYPRE_PILUT_SETOPERATOR_F,bHYPRE
 
 /*
  * (Optional) Set the convergence tolerance.
+ * DEPRECATED.  use SetDoubleParameter
  * 
  */
 
@@ -864,6 +865,7 @@ SIDLFortran77Symbol(bhypre_pilut_settolerance_f,BHYPRE_PILUT_SETTOLERANCE_F,bHYP
 
 /*
  * (Optional) Set maximum number of iterations.
+ * DEPRECATED   use SetIntParameter
  * 
  */
 
@@ -894,6 +896,7 @@ SIDLFortran77Symbol(bhypre_pilut_setmaxiterations_f,BHYPRE_PILUT_SETMAXITERATION
  * nothing by default (level = 0).  Other levels (if any) are
  * implementation-specific.  Must be called before {\tt Setup}
  * and {\tt Apply}.
+ * DEPRECATED   use SetIntParameter
  * 
  */
 
@@ -924,6 +927,7 @@ SIDLFortran77Symbol(bhypre_pilut_setlogging_f,BHYPRE_PILUT_SETLOGGING_F,bHYPRE_P
  * to a file.  Does nothing by default (level=0).  Other levels
  * (if any) are implementation-specific.  Must be called before
  * {\tt Setup} and {\tt Apply}.
+ * DEPRECATED   use SetIntParameter
  * 
  */
 

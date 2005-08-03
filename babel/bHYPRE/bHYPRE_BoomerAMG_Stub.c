@@ -486,6 +486,7 @@ bHYPRE_BoomerAMG_SetOperator(
 
 /*
  * (Optional) Set the convergence tolerance.
+ * DEPRECATED.  use SetDoubleParameter
  * 
  */
 
@@ -501,6 +502,7 @@ bHYPRE_BoomerAMG_SetTolerance(
 
 /*
  * (Optional) Set maximum number of iterations.
+ * DEPRECATED   use SetIntParameter
  * 
  */
 
@@ -520,6 +522,7 @@ bHYPRE_BoomerAMG_SetMaxIterations(
  * nothing by default (level = 0).  Other levels (if any) are
  * implementation-specific.  Must be called before {\tt Setup}
  * and {\tt Apply}.
+ * DEPRECATED   use SetIntParameter
  * 
  */
 
@@ -539,6 +542,7 @@ bHYPRE_BoomerAMG_SetLogging(
  * to a file.  Does nothing by default (level=0).  Other levels
  * (if any) are implementation-specific.  Must be called before
  * {\tt Setup} and {\tt Apply}.
+ * DEPRECATED   use SetIntParameter
  * 
  */
 

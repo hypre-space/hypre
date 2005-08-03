@@ -843,6 +843,7 @@ SIDLFortran77Symbol(bhypre_gmres_setoperator_f,BHYPRE_GMRES_SETOPERATOR_F,bHYPRE
 
 /*
  * (Optional) Set the convergence tolerance.
+ * DEPRECATED.  use SetDoubleParameter
  * 
  */
 
@@ -869,6 +870,7 @@ SIDLFortran77Symbol(bhypre_gmres_settolerance_f,BHYPRE_GMRES_SETTOLERANCE_F,bHYP
 
 /*
  * (Optional) Set maximum number of iterations.
+ * DEPRECATED   use SetIntParameter
  * 
  */
 
@@ -899,6 +901,7 @@ SIDLFortran77Symbol(bhypre_gmres_setmaxiterations_f,BHYPRE_GMRES_SETMAXITERATION
  * nothing by default (level = 0).  Other levels (if any) are
  * implementation-specific.  Must be called before {\tt Setup}
  * and {\tt Apply}.
+ * DEPRECATED   use SetIntParameter
  * 
  */
 
@@ -929,6 +932,7 @@ SIDLFortran77Symbol(bhypre_gmres_setlogging_f,BHYPRE_GMRES_SETLOGGING_F,bHYPRE_G
  * to a file.  Does nothing by default (level=0).  Other levels
  * (if any) are implementation-specific.  Must be called before
  * {\tt Setup} and {\tt Apply}.
+ * DEPRECATED   use SetIntParameter
  * 
  */
 

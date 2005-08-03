@@ -471,6 +471,7 @@ bHYPRE_IdentitySolver_SetOperator(
 
 /*
  * (Optional) Set the convergence tolerance.
+ * DEPRECATED.  use SetDoubleParameter
  * 
  */
 
@@ -486,6 +487,7 @@ bHYPRE_IdentitySolver_SetTolerance(
 
 /*
  * (Optional) Set maximum number of iterations.
+ * DEPRECATED   use SetIntParameter
  * 
  */
 
@@ -505,6 +507,7 @@ bHYPRE_IdentitySolver_SetMaxIterations(
  * nothing by default (level = 0).  Other levels (if any) are
  * implementation-specific.  Must be called before {\tt Setup}
  * and {\tt Apply}.
+ * DEPRECATED   use SetIntParameter
  * 
  */
 
@@ -524,6 +527,7 @@ bHYPRE_IdentitySolver_SetLogging(
  * to a file.  Does nothing by default (level=0).  Other levels
  * (if any) are implementation-specific.  Must be called before
  * {\tt Setup} and {\tt Apply}.
+ * DEPRECATED   use SetIntParameter
  * 
  */
 

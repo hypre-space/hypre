@@ -969,6 +969,7 @@ SIDLFortran77Symbol(bhypre_boomeramg_setoperator_f,BHYPRE_BOOMERAMG_SETOPERATOR_
 
 /*
  * (Optional) Set the convergence tolerance.
+ * DEPRECATED.  use SetDoubleParameter
  * 
  */
 
@@ -995,6 +996,7 @@ SIDLFortran77Symbol(bhypre_boomeramg_settolerance_f,BHYPRE_BOOMERAMG_SETTOLERANC
 
 /*
  * (Optional) Set maximum number of iterations.
+ * DEPRECATED   use SetIntParameter
  * 
  */
 
@@ -1025,6 +1027,7 @@ SIDLFortran77Symbol(bhypre_boomeramg_setmaxiterations_f,BHYPRE_BOOMERAMG_SETMAXI
  * nothing by default (level = 0).  Other levels (if any) are
  * implementation-specific.  Must be called before {\tt Setup}
  * and {\tt Apply}.
+ * DEPRECATED   use SetIntParameter
  * 
  */
 
@@ -1055,6 +1058,7 @@ SIDLFortran77Symbol(bhypre_boomeramg_setlogging_f,BHYPRE_BOOMERAMG_SETLOGGING_F,
  * to a file.  Does nothing by default (level=0).  Other levels
  * (if any) are implementation-specific.  Must be called before
  * {\tt Setup} and {\tt Apply}.
+ * DEPRECATED   use SetIntParameter
  * 
  */
 

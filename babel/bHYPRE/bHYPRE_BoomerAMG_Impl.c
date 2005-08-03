@@ -428,6 +428,18 @@ impl_bHYPRE_BoomerAMG_SetIntParameter(
    {
       ierr += HYPRE_BoomerAMGSetNumFunctions( solver, value );
    }
+   else if ( strcmp(name,"MaxIterations")==0 )
+   {
+      ierr += HYPRE_BoomerAMGSetMaxIter( solver, value );
+   }
+   else if ( strcmp(name,"Logging")==0 )
+   {
+      ierr += HYPRE_BoomerAMGSetLogging( solver, value );
+   }
+   else if ( strcmp(name,"PrintLevel")==0 )
+   {
+      ierr += HYPRE_BoomerAMGSetPrintLevel( solver, value );
+   }
    else
    {
       ierr=1;
@@ -480,6 +492,10 @@ impl_bHYPRE_BoomerAMG_SetDoubleParameter(
    else if ( strcmp(name,"MaxRowSum")==0 )
    {
       ierr += HYPRE_BoomerAMGSetMaxRowSum( solver, value );
+   }
+   else if ( strcmp(name,"Tolerance")==0 || strcmp(name,"Tol")==0 )
+   {
+      ierr += HYPRE_BoomerAMGSetTol( solver, value );
    }
    else
    {
@@ -730,14 +746,19 @@ impl_bHYPRE_BoomerAMG_GetIntValue(
   /* Insert the implementation of the GetIntValue method here... */
 
    int ierr = 0;
-/* not needed until we have something to return...
    HYPRE_Solver solver;
    struct bHYPRE_BoomerAMG__data * data;
-
    data = bHYPRE_BoomerAMG__get_data( self );
    solver = data->solver;
-*/
-   ierr = 1;
+
+   if ( strcmp(name,"NumIterations")==0 )
+   {
+      ierr += HYPRE_BoomerAMGGetNumIterations( solver, value );
+   }
+   else
+   {
+      ierr = 1;
+   }
 
    return ierr;
 
@@ -765,14 +786,23 @@ impl_bHYPRE_BoomerAMG_GetDoubleValue(
   /* Insert the implementation of the GetDoubleValue method here... */
 
    int ierr = 0;
-/* not needed until we have something to return...
    HYPRE_Solver solver;
    struct bHYPRE_BoomerAMG__data * data;
 
    data = bHYPRE_BoomerAMG__get_data( self );
    solver = data->solver;
-*/
-   ierr = 1;
+
+   if ( strcmp(name,"FinalRelativeResidualNorm")==0 ||
+        strcmp(name,"Final Relative Residual Norm")==0 ||
+        strcmp(name,"RelativeResidualNorm")==0 ||
+        strcmp(name,"RelResidualNorm")==0 )
+   {
+      ierr += HYPRE_BoomerAMGGetFinalRelativeResidualNorm( solver, value );
+   }
+   else
+   {
+      ierr = 1;
+   }
 
    return ierr;
 
@@ -990,6 +1020,7 @@ impl_bHYPRE_BoomerAMG_SetOperator(
 
 /*
  * (Optional) Set the convergence tolerance.
+ * DEPRECATED.  use SetDoubleParameter
  * 
  */
 
@@ -1023,6 +1054,7 @@ impl_bHYPRE_BoomerAMG_SetTolerance(
 
 /*
  * (Optional) Set maximum number of iterations.
+ * DEPRECATED   use SetIntParameter
  * 
  */
 
@@ -1060,6 +1092,7 @@ impl_bHYPRE_BoomerAMG_SetMaxIterations(
  * nothing by default (level = 0).  Other levels (if any) are
  * implementation-specific.  Must be called before {\tt Setup}
  * and {\tt Apply}.
+ * DEPRECATED   use SetIntParameter
  * 
  */
 
@@ -1101,6 +1134,7 @@ impl_bHYPRE_BoomerAMG_SetLogging(
  * to a file.  Does nothing by default (level=0).  Other levels
  * (if any) are implementation-specific.  Must be called before
  * {\tt Setup} and {\tt Apply}.
+ * DEPRECATED   use SetIntParameter
  * 
  */
 

@@ -223,6 +223,10 @@ impl_bHYPRE_ParaSails_SetIntParameter(
    {
       ierr += HYPRE_ParaSailsSetReuse( solver, value );
    }
+   else if ( strcmp(name,"Logging")==0 )
+   {
+      ierr += HYPRE_ParaSailsSetLogging( solver, value );
+   }
    else
    {
       ierr = 1;
@@ -659,6 +663,7 @@ impl_bHYPRE_ParaSails_SetOperator(
 
 /*
  * (Optional) Set the convergence tolerance.
+ * DEPRECATED.  use SetDoubleParameter
  * 
  */
 
@@ -683,6 +688,7 @@ impl_bHYPRE_ParaSails_SetTolerance(
 
 /*
  * (Optional) Set maximum number of iterations.
+ * DEPRECATED   use SetIntParameter
  * 
  */
 
@@ -711,6 +717,7 @@ impl_bHYPRE_ParaSails_SetMaxIterations(
  * nothing by default (level = 0).  Other levels (if any) are
  * implementation-specific.  Must be called before {\tt Setup}
  * and {\tt Apply}.
+ * DEPRECATED   use SetIntParameter
  * 
  */
 
@@ -752,6 +759,7 @@ impl_bHYPRE_ParaSails_SetLogging(
  * to a file.  Does nothing by default (level=0).  Other levels
  * (if any) are implementation-specific.  Must be called before
  * {\tt Setup} and {\tt Apply}.
+ * DEPRECATED   use SetIntParameter
  * 
  */
 

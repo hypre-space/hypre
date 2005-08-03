@@ -761,6 +761,7 @@ SIDLFortran77Symbol(bhypre_solver_setoperator_f,BHYPRE_SOLVER_SETOPERATOR_F,bHYP
 
 /*
  * (Optional) Set the convergence tolerance.
+ * DEPRECATED.  use SetDoubleParameter
  * 
  */
 
@@ -787,6 +788,7 @@ SIDLFortran77Symbol(bhypre_solver_settolerance_f,BHYPRE_SOLVER_SETTOLERANCE_F,bH
 
 /*
  * (Optional) Set maximum number of iterations.
+ * DEPRECATED   use SetIntParameter
  * 
  */
 
@@ -817,6 +819,7 @@ SIDLFortran77Symbol(bhypre_solver_setmaxiterations_f,BHYPRE_SOLVER_SETMAXITERATI
  * nothing by default (level = 0).  Other levels (if any) are
  * implementation-specific.  Must be called before {\tt Setup}
  * and {\tt Apply}.
+ * DEPRECATED   use SetIntParameter
  * 
  */
 
@@ -847,6 +850,7 @@ SIDLFortran77Symbol(bhypre_solver_setlogging_f,BHYPRE_SOLVER_SETLOGGING_F,bHYPRE
  * to a file.  Does nothing by default (level=0).  Other levels
  * (if any) are implementation-specific.  Must be called before
  * {\tt Setup} and {\tt Apply}.
+ * DEPRECATED   use SetIntParameter
  * 
  */
 

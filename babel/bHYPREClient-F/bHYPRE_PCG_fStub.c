@@ -845,6 +845,7 @@ SIDLFortran77Symbol(bhypre_pcg_setoperator_f,BHYPRE_PCG_SETOPERATOR_F,bHYPRE_PCG
 
 /*
  * (Optional) Set the convergence tolerance.
+ * DEPRECATED.  use SetDoubleParameter
  * 
  */
 
@@ -871,6 +872,7 @@ SIDLFortran77Symbol(bhypre_pcg_settolerance_f,BHYPRE_PCG_SETTOLERANCE_F,bHYPRE_P
 
 /*
  * (Optional) Set maximum number of iterations.
+ * DEPRECATED   use SetIntParameter
  * 
  */
 
@@ -901,6 +903,7 @@ SIDLFortran77Symbol(bhypre_pcg_setmaxiterations_f,BHYPRE_PCG_SETMAXITERATIONS_F,
  * nothing by default (level = 0).  Other levels (if any) are
  * implementation-specific.  Must be called before {\tt Setup}
  * and {\tt Apply}.
+ * DEPRECATED   use SetIntParameter
  * 
  */
 
@@ -931,6 +934,7 @@ SIDLFortran77Symbol(bhypre_pcg_setlogging_f,BHYPRE_PCG_SETLOGGING_F,bHYPRE_PCG_S
  * to a file.  Does nothing by default (level=0).  Other levels
  * (if any) are implementation-specific.  Must be called before
  * {\tt Setup} and {\tt Apply}.
+ * DEPRECATED   use SetIntParameter
  * 
  */
 

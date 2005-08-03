@@ -836,6 +836,7 @@ SIDLFortran77Symbol(bhypre_parcsrdiagscale_setoperator_f,BHYPRE_PARCSRDIAGSCALE_
 
 /*
  * (Optional) Set the convergence tolerance.
+ * DEPRECATED.  use SetDoubleParameter
  * 
  */
 
@@ -862,6 +863,7 @@ SIDLFortran77Symbol(bhypre_parcsrdiagscale_settolerance_f,BHYPRE_PARCSRDIAGSCALE
 
 /*
  * (Optional) Set maximum number of iterations.
+ * DEPRECATED   use SetIntParameter
  * 
  */
 
@@ -892,6 +894,7 @@ SIDLFortran77Symbol(bhypre_parcsrdiagscale_setmaxiterations_f,BHYPRE_PARCSRDIAGS
  * nothing by default (level = 0).  Other levels (if any) are
  * implementation-specific.  Must be called before {\tt Setup}
  * and {\tt Apply}.
+ * DEPRECATED   use SetIntParameter
  * 
  */
 
@@ -922,6 +925,7 @@ SIDLFortran77Symbol(bhypre_parcsrdiagscale_setlogging_f,BHYPRE_PARCSRDIAGSCALE_S
  * to a file.  Does nothing by default (level=0).  Other levels
  * (if any) are implementation-specific.  Must be called before
  * {\tt Setup} and {\tt Apply}.
+ * DEPRECATED   use SetIntParameter
  * 
  */
 

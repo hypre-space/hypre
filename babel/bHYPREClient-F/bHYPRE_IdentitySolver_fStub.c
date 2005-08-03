@@ -837,6 +837,7 @@ SIDLFortran77Symbol(bhypre_identitysolver_setoperator_f,BHYPRE_IDENTITYSOLVER_SE
 
 /*
  * (Optional) Set the convergence tolerance.
+ * DEPRECATED.  use SetDoubleParameter
  * 
  */
 
@@ -863,6 +864,7 @@ SIDLFortran77Symbol(bhypre_identitysolver_settolerance_f,BHYPRE_IDENTITYSOLVER_S
 
 /*
  * (Optional) Set maximum number of iterations.
+ * DEPRECATED   use SetIntParameter
  * 
  */
 
@@ -893,6 +895,7 @@ SIDLFortran77Symbol(bhypre_identitysolver_setmaxiterations_f,BHYPRE_IDENTITYSOLV
  * nothing by default (level = 0).  Other levels (if any) are
  * implementation-specific.  Must be called before {\tt Setup}
  * and {\tt Apply}.
+ * DEPRECATED   use SetIntParameter
  * 
  */
 
@@ -923,6 +926,7 @@ SIDLFortran77Symbol(bhypre_identitysolver_setlogging_f,BHYPRE_IDENTITYSOLVER_SET
  * to a file.  Does nothing by default (level=0).  Other levels
  * (if any) are implementation-specific.  Must be called before
  * {\tt Setup} and {\tt Apply}.
+ * DEPRECATED   use SetIntParameter
  * 
  */
 

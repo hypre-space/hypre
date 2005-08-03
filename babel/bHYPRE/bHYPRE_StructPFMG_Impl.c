@@ -464,7 +464,25 @@ impl_bHYPRE_StructPFMG_GetIntValue(
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.StructPFMG.GetIntValue) */
   /* Insert the implementation of the GetIntValue method here... */
-   return 1;
+
+   int ierr = 0;
+   HYPRE_StructSolver solver;
+   struct bHYPRE_StructPFMG__data * data;
+
+   data = bHYPRE_StructPFMG__get_data( self );
+   solver = data->solver;
+
+   if ( strcmp(name,"NumIterations")==0 || strcmp(name,"Num Iterations")==0 )
+   {
+      ierr = HYPRE_StructPFMGGetNumIterations( solver, value );
+   }
+   else
+   {
+      ierr = 1;
+   }
+
+   return ierr;
+
   /* DO-NOT-DELETE splicer.end(bHYPRE.StructPFMG.GetIntValue) */
 }
 
@@ -487,7 +505,28 @@ impl_bHYPRE_StructPFMG_GetDoubleValue(
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.StructPFMG.GetDoubleValue) */
   /* Insert the implementation of the GetDoubleValue method here... */
-   return 1;
+
+   int ierr = 0;
+   HYPRE_StructSolver solver;
+   struct bHYPRE_StructPFMG__data * data;
+
+   data = bHYPRE_StructPFMG__get_data( self );
+   solver = data->solver;
+
+   if ( strcmp(name,"FinalRelativeResidualNorm")==0 ||
+        strcmp(name,"Final Relative Residual Norm")==0 ||
+        strcmp(name,"RelativeResidualNorm")==0 ||
+        strcmp(name,"RelResidualNorm")==0 )
+   {
+      ierr = HYPRE_StructPFMGGetFinalRelativeResidualNorm( solver, value );
+   }
+   else
+   {
+      ierr = 1;
+   }
+
+   return ierr;
+
   /* DO-NOT-DELETE splicer.end(bHYPRE.StructPFMG.GetDoubleValue) */
 }
 
@@ -679,6 +718,7 @@ impl_bHYPRE_StructPFMG_SetOperator(
 
 /*
  * (Optional) Set the convergence tolerance.
+ * DEPRECATED.  use SetDoubleParameter
  * 
  */
 
@@ -712,6 +752,7 @@ impl_bHYPRE_StructPFMG_SetTolerance(
 
 /*
  * (Optional) Set maximum number of iterations.
+ * DEPRECATED   use SetIntParameter
  * 
  */
 
@@ -749,6 +790,7 @@ impl_bHYPRE_StructPFMG_SetMaxIterations(
  * nothing by default (level = 0).  Other levels (if any) are
  * implementation-specific.  Must be called before {\tt Setup}
  * and {\tt Apply}.
+ * DEPRECATED   use SetIntParameter
  * 
  */
 
@@ -786,6 +828,7 @@ impl_bHYPRE_StructPFMG_SetLogging(
  * to a file.  Does nothing by default (level=0).  Other levels
  * (if any) are implementation-specific.  Must be called before
  * {\tt Setup} and {\tt Apply}.
+ * DEPRECATED   use SetIntParameter
  * 
  */
 

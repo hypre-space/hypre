@@ -289,9 +289,21 @@ impl_bHYPRE_GMRES_SetIntParameter(
    {
       data -> min_iter = value;
    }
+   else if ( strcmp(name,"MaxIter")==0 || strcmp(name,"MaxIterations")==0 )
+   {
+      data -> max_iter = value;
+   }
    else if ( strcmp(name,"RelChange")==0 )
    {
       data -> rel_change = value;
+   }
+   else if ( strcmp(name,"Logging")==0 )
+   {
+      data -> log_level = value;
+   }
+   else if ( strcmp(name,"PrintLevel")==0 )
+   {
+      data -> printlevel = value;
    }
    else
    {
@@ -335,7 +347,14 @@ impl_bHYPRE_GMRES_SetDoubleParameter(
    struct bHYPRE_GMRES__data * data;
    data = bHYPRE_GMRES__get_data( self );
 
-   ierr = 1;
+   if ( strcmp(name,"Tolerance")==0 || strcmp(name,"Tol")==0 )
+   {
+      data -> tol = value;
+   }
+   else
+   {
+      ierr = 1;
+   }
 
    return ierr;
 
@@ -497,7 +516,14 @@ impl_bHYPRE_GMRES_GetIntValue(
    assert( data->solver != NULL );
    solver = data->solver;
 
-   ierr = 1;
+   if ( strcmp(name,"NumIterations")==0 )
+   {
+      ierr += HYPRE_GMRESGetNumIterations( solver, value );
+   }
+   else
+   {
+      ierr = 1;
+   }
 
    return ierr;
 
@@ -532,6 +558,7 @@ impl_bHYPRE_GMRES_GetDoubleValue(
     * value.  Assuming the HYPRE interface is not used simultaneously
     * with the Babel interface, it is sufficient to initialize the
     * cache with whatever HYPRE is using. */
+
    int ierr = 0;
    HYPRE_Solver solver;
    struct bHYPRE_GMRES__data * data;
@@ -540,7 +567,17 @@ impl_bHYPRE_GMRES_GetDoubleValue(
    assert( data->solver != NULL );
    solver = data->solver;
 
-   ierr = 1;
+   if ( strcmp(name,"FinalRelativeResidualNorm")==0 ||
+        strcmp(name,"Final Relative Residual Norm")==0 ||
+        strcmp(name,"RelativeResidualNorm")==0 ||
+        strcmp(name,"RelResidualNorm")==0 )
+   {
+      ierr += HYPRE_GMRESGetFinalRelativeResidualNorm( solver, value );
+   }
+   else
+   {
+      ierr = 1;
+   }
 
    return ierr;
 
@@ -827,6 +864,7 @@ impl_bHYPRE_GMRES_SetOperator(
 
 /*
  * (Optional) Set the convergence tolerance.
+ * DEPRECATED.  use SetDoubleParameter
  * 
  */
 
@@ -857,6 +895,7 @@ impl_bHYPRE_GMRES_SetTolerance(
 
 /*
  * (Optional) Set maximum number of iterations.
+ * DEPRECATED   use SetIntParameter
  * 
  */
 
@@ -891,6 +930,7 @@ impl_bHYPRE_GMRES_SetMaxIterations(
  * nothing by default (level = 0).  Other levels (if any) are
  * implementation-specific.  Must be called before {\tt Setup}
  * and {\tt Apply}.
+ * DEPRECATED   use SetIntParameter
  * 
  */
 
@@ -923,6 +963,7 @@ impl_bHYPRE_GMRES_SetLogging(
  * to a file.  Does nothing by default (level=0).  Other levels
  * (if any) are implementation-specific.  Must be called before
  * {\tt Setup} and {\tt Apply}.
+ * DEPRECATED   use SetIntParameter
  * 
  */
 

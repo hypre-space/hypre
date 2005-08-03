@@ -76,16 +76,11 @@ package bHYPRE version 1.0.0
 
       /**
        *  Create function, like the builtin __create() except you must specify
-       *  the MPI communicator in an argument.
-       *  Derived classes may override this to have more arguments.
-       **/
-      /**
+       *  the MPI communicator in an argument; some classes may have more arguments.
        *  This function is documented here because it will be defined for all
-       *  classes.  However, the argument list is variable and it is declared
-       *  in the classes, not in this interface.
-       *  (Static member functions may be declared only in classes, not interfaces.)
+       *  classes.  However, it is declared in the classes, not in this interface.
+       *      static int Create( in opaque mpi_comm );
        **/
-      /* cannot do this here, need a class: static int Create( in opaque mpi_comm );*/
    }
 
    /*----------- Interface -------------------------------------------------*/
@@ -787,11 +782,13 @@ package bHYPRE version 1.0.0
 
       /**
        * (Optional) Set the convergence tolerance.
+       * DEPRECATED.  use SetDoubleParameter
        **/
       int SetTolerance(in double tolerance);
 
       /**
        * (Optional) Set maximum number of iterations.
+       * DEPRECATED   use SetIntParameter
        **/
       int SetMaxIterations(in int max_iterations);
 
@@ -801,6 +798,7 @@ package bHYPRE version 1.0.0
        * nothing by default (level = 0).  Other levels (if any) are
        * implementation-specific.  Must be called before {\tt Setup}
        * and {\tt Apply}.
+       * DEPRECATED   use SetIntParameter
        **/
       int SetLogging(in int level);
 
@@ -810,6 +808,7 @@ package bHYPRE version 1.0.0
        * to a file.  Does nothing by default (level=0).  Other levels
        * (if any) are implementation-specific.  Must be called before
        * {\tt Setup} and {\tt Apply}.
+       * DEPRECATED   use SetIntParameter
        **/
       int SetPrintLevel(in int level);
 

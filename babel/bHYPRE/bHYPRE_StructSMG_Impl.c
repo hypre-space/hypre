@@ -442,7 +442,25 @@ impl_bHYPRE_StructSMG_GetIntValue(
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.StructSMG.GetIntValue) */
   /* Insert the implementation of the GetIntValue method here... */
-   return 1; /* not implemented */
+
+   int ierr = 0;
+   HYPRE_StructSolver solver;
+   struct bHYPRE_StructSMG__data * data;
+
+   data = bHYPRE_StructSMG__get_data( self );
+   solver = data->solver;
+
+   if ( strcmp(name,"NumIterations")==0 || strcmp(name,"Num Iterations")==0 )
+   {
+      ierr = HYPRE_StructSMGGetNumIterations( solver, value );
+   }
+   else
+   {
+      ierr = 1;
+   }
+
+   return ierr;
+
   /* DO-NOT-DELETE splicer.end(bHYPRE.StructSMG.GetIntValue) */
 }
 
@@ -465,7 +483,28 @@ impl_bHYPRE_StructSMG_GetDoubleValue(
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.StructSMG.GetDoubleValue) */
   /* Insert the implementation of the GetDoubleValue method here... */
-   return 1; /* not implemented */
+
+   int ierr = 0;
+   HYPRE_StructSolver solver;
+   struct bHYPRE_StructSMG__data * data;
+
+   data = bHYPRE_StructSMG__get_data( self );
+   solver = data->solver;
+
+   if ( strcmp(name,"FinalRelativeResidualNorm")==0 ||
+        strcmp(name,"Final Relative Residual Norm")==0 ||
+        strcmp(name,"RelativeResidualNorm")==0 ||
+        strcmp(name,"RelResidualNorm")==0 )
+   {
+      ierr = HYPRE_StructSMGGetFinalRelativeResidualNorm( solver, value );
+   }
+   else
+   {
+      ierr = 1;
+   }
+
+   return ierr;
+
   /* DO-NOT-DELETE splicer.end(bHYPRE.StructSMG.GetDoubleValue) */
 }
 
@@ -657,6 +696,7 @@ impl_bHYPRE_StructSMG_SetOperator(
 
 /*
  * (Optional) Set the convergence tolerance.
+ * DEPRECATED.  use SetDoubleParameter
  * 
  */
 
@@ -690,6 +730,7 @@ impl_bHYPRE_StructSMG_SetTolerance(
 
 /*
  * (Optional) Set maximum number of iterations.
+ * DEPRECATED   use SetIntParameter
  * 
  */
 
@@ -727,6 +768,7 @@ impl_bHYPRE_StructSMG_SetMaxIterations(
  * nothing by default (level = 0).  Other levels (if any) are
  * implementation-specific.  Must be called before {\tt Setup}
  * and {\tt Apply}.
+ * DEPRECATED   use SetIntParameter
  * 
  */
 
@@ -764,6 +806,7 @@ impl_bHYPRE_StructSMG_SetLogging(
  * to a file.  Does nothing by default (level=0).  Other levels
  * (if any) are implementation-specific.  Must be called before
  * {\tt Setup} and {\tt Apply}.
+ * DEPRECATED   use SetIntParameter
  * 
  */
 

@@ -253,6 +253,7 @@ bHYPRE_PCG_SetOperator(
 
 /**
  * (Optional) Set the convergence tolerance.
+ * DEPRECATED.  use SetDoubleParameter
  * 
  */
 int32_t
@@ -262,6 +263,7 @@ bHYPRE_PCG_SetTolerance(
 
 /**
  * (Optional) Set maximum number of iterations.
+ * DEPRECATED   use SetIntParameter
  * 
  */
 int32_t
@@ -275,6 +277,7 @@ bHYPRE_PCG_SetMaxIterations(
  * nothing by default (level = 0).  Other levels (if any) are
  * implementation-specific.  Must be called before {\tt Setup}
  * and {\tt Apply}.
+ * DEPRECATED   use SetIntParameter
  * 
  */
 int32_t
@@ -288,6 +291,7 @@ bHYPRE_PCG_SetLogging(
  * to a file.  Does nothing by default (level=0).  Other levels
  * (if any) are implementation-specific.  Must be called before
  * {\tt Setup} and {\tt Apply}.
+ * DEPRECATED   use SetIntParameter
  * 
  */
 int32_t

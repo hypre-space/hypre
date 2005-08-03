@@ -410,6 +410,7 @@ C       out int retval
 
 C       
 C       (Optional) Set the convergence tolerance.
+C       DEPRECATED.  use SetDoubleParameter
 C       
 C       
 
@@ -427,6 +428,7 @@ C       out int retval
 
 C       
 C       (Optional) Set maximum number of iterations.
+C       DEPRECATED   use SetIntParameter
 C       
 C       
 
@@ -448,6 +450,7 @@ C       of additional informational data to be accumulated.  Does
 C       nothing by default (level = 0).  Other levels (if any) are
 C       implementation-specific.  Must be called before {\tt Setup}
 C       and {\tt Apply}.
+C       DEPRECATED   use SetIntParameter
 C       
 C       
 
@@ -469,6 +472,7 @@ C       of informational data to be printed either to the screen or
 C       to a file.  Does nothing by default (level=0).  Other levels
 C       (if any) are implementation-specific.  Must be called before
 C       {\tt Setup} and {\tt Apply}.
+C       DEPRECATED   use SetIntParameter
 C       
 C       
 

@@ -337,7 +337,7 @@ impl_bHYPRE_PCG_SetIntParameter(
    {
       data -> twonorm = value;
    }
-   else if ( strcmp(name,"MaxIter")==0 || strcmp(name,"max iter")==0 )
+   else if ( strcmp(name,"MaxIter")==0 || strcmp(name,"max iter")==0 || strcmp(name,"MaxIterations")==0 )
    {
       data -> maxiter = value;
    }
@@ -345,9 +345,13 @@ impl_bHYPRE_PCG_SetIntParameter(
    {
       data -> relchange = value;
    }
-   else if ( strcmp(name,"log")==0 )
+   else if ( strcmp(name,"log")==0 || strcmp(name,"Logging")==0 )
    {
       data -> log_level = value;
+   }
+   else if ( strcmp(name,"PrintLevel")==0 )
+   {
+      data -> printlevel = value;
    }
    else
    {
@@ -399,7 +403,7 @@ impl_bHYPRE_PCG_SetDoubleParameter(
       /* tolerance for special test for slow convergence */
       data -> cf_tol = value;
    }
-   else if ( strcmp(name,"tol")==0 )
+   else if ( strcmp(name,"tol")==0 || strcmp(name,"Tolerance")==0  || strcmp(name,"Tol")==0 )
    {
       data -> tol = value;
    }
@@ -618,7 +622,10 @@ impl_bHYPRE_PCG_GetDoubleValue(
    assert( data->solver != NULL );
    solver = data->solver;
 
-   if ( strcmp(name,"Final Relative Residual Norm")==0 || strcmp(name,"RelResidualNorm")==0 )
+   if ( strcmp(name,"Final Relative Residual Norm")==0 ||
+        strcmp(name,"FinalRelativeResidualNorm")==0 ||
+        strcmp(name,"RelResidualNorm")==0 ||
+        strcmp(name,"RelativeResidualNorm")==0 )
    {
       ierr += HYPRE_PCGGetFinalRelativeResidualNorm( solver, value );
    }
@@ -993,6 +1000,7 @@ impl_bHYPRE_PCG_SetOperator(
 
 /*
  * (Optional) Set the convergence tolerance.
+ * DEPRECATED.  use SetDoubleParameter
  * 
  */
 
@@ -1023,6 +1031,7 @@ impl_bHYPRE_PCG_SetTolerance(
 
 /*
  * (Optional) Set maximum number of iterations.
+ * DEPRECATED   use SetIntParameter
  * 
  */
 
@@ -1057,6 +1066,7 @@ impl_bHYPRE_PCG_SetMaxIterations(
  * nothing by default (level = 0).  Other levels (if any) are
  * implementation-specific.  Must be called before {\tt Setup}
  * and {\tt Apply}.
+ * DEPRECATED   use SetIntParameter
  * 
  */
 
@@ -1099,6 +1109,7 @@ impl_bHYPRE_PCG_SetLogging(
  * to a file.  Does nothing by default (level=0).  Other levels
  * (if any) are implementation-specific.  Must be called before
  * {\tt Setup} and {\tt Apply}.
+ * DEPRECATED   use SetIntParameter
  * 
  */
 
