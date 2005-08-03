@@ -8,6 +8,7 @@ dnl
 dnl  @author Gary Kumfert
 
 AC_DEFUN([LLNL_CONFIRM_BABEL_C_SUPPORT], [
+  AC_REQUIRE([AC_LTDL_SHLIBPATH])dnl
   ############################################################
   #
   # C Compiler
@@ -60,4 +61,6 @@ AC_DEFUN([LLNL_CONFIRM_BABEL_C_SUPPORT], [
   fi
   AC_LANG_POP([])
   AC_CHECK_FUNCS([atexit bzero getcwd memset socket strchr strdup strrchr])
+  SHARED_LIB_VAR=${libltdl_cv_shlibpath_var}
+  AC_SUBST(SHARED_LIB_VAR)
 ])

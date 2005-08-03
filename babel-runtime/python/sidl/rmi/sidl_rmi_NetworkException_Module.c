@@ -2,7 +2,7 @@
  * File:          sidl_rmi_NetworkException_Module.c
  * Symbol:        sidl.rmi.NetworkException-v0.9.3
  * Symbol Type:   class
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.8
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   implement a C extension type for a sidl extendable
@@ -32,7 +32,7 @@
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.8
  */
 
 /*
@@ -419,11 +419,11 @@ Generic Network Exception"
   Py_INCREF(&_sidl_rmi_NetworkExceptionType);
   PyDict_SetItemString(dict, "NetworkException",                              \
     (PyObject *)&_sidl_rmi_NetworkExceptionType);
+  sidl_BaseClass__import();
+  sidl_BaseInterface__import();
   sidl_ClassInfo__import();
   sidl_BaseException__import();
-  sidl_BaseClass__import();
   sidl_SIDLException__import();
-  sidl_BaseInterface__import();
   _exceptionBases = PyTuple_New(1);
   Py_INCREF(sidl_io_IOException__type);
   PyTuple_SetItem(_exceptionBases, 0, sidl_io_IOException__type);

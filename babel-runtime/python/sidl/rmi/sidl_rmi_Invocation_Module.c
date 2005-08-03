@@ -2,7 +2,7 @@
  * File:          sidl_rmi_Invocation_Module.c
  * Symbol:        sidl.rmi.Invocation-v0.9.3
  * Symbol Type:   interface
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.8
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   implement a C extension type for a sidl extendable
@@ -32,7 +32,7 @@
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.8
  */
 
 /*
@@ -467,9 +467,9 @@ method invocation."
   Py_INCREF(&_sidl_rmi_InvocationType);
   PyDict_SetItemString(dict, "Invocation",                                    \
     (PyObject *)&_sidl_rmi_InvocationType);
+  sidl_rmi_NetworkException__import();
   sidl_rmi_Response__import();
+  sidl_BaseInterface__import();
   sidl_io_IOException__import();
   sidl_ClassInfo__import();
-  sidl_rmi_NetworkException__import();
-  sidl_BaseInterface__import();
 }

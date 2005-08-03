@@ -2,7 +2,7 @@
  * File:          sidl_PostViolation_Module.h
  * Symbol:        sidl.PostViolation-v0.9.3
  * Symbol Type:   class
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.8
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   expose a constructor for the Python wrapper
@@ -32,7 +32,7 @@
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.8
  */
 
 /*

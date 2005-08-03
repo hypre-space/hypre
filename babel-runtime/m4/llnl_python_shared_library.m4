@@ -9,9 +9,6 @@ AC_DEFUN([LLNL_PYTHON_SHARED_LIBRARY],[
   AC_REQUIRE([AC_LTDL_SHLIBPATH])dnl
   AC_MSG_CHECKING([if Python shared library is available])
 
-  SHARED_LIB_VAR=${libltdl_cv_shlibpath_var}
-  AC_SUBST(SHARED_LIB_VAR)
-
   llnl_python_shared_library_found=no
 
   case "$target_os" in

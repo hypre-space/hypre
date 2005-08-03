@@ -126,6 +126,9 @@ AC_CACHE_CHECK([for path to libjava.{a,so}],
    cygwin* | mingw* | pw23* ) 
      llnl_cv_lib_java=`find $javatopdir -follow -name "java.dll" -exec dirname {} \; 2>/dev/null | tr "\n" " "`
      ;;
+   aix*) 
+     llnl_cv_lib_java=`find $javatopdir -name "libjava.*" -exec dirname {} \; 2>/dev/null | tr "\n" " "`
+     ;;
    *) 
      llnl_cv_lib_java=`find $javatopdir -follow -name "libjava.*" -exec dirname {} \; 2>/dev/null | tr "\n" " "`
      ;;
@@ -153,6 +156,16 @@ AC_CACHE_CHECK([for path to libjvm.{a,so} or client/libjvm.{a,so} ],
      llnl_cv_lib_jvm=`find $javatopdir -follow \( \
 	\( -name server -type d -prune \) -o \
 	\( -name "libjvm_compat.*" -print \) \) 2> /dev/null | head -1`
+     ;;
+   aix*)
+     llnl_cv_lib_jvm=`find $javatopdir \( \
+	\( -name server -type d -prune \) -o \
+	\( -name "libjvm.*" -print \) \) 2> /dev/null | head -1`
+     if test -z "$llnl_cv_lib_jvm"; then
+	llnl_cv_lib_jvm=`find $javatopdir \( \
+	   \( -name server -type d -prune \) -o \
+	   \( -name "libkaffevm.*" -print \) \) 2> /dev/null | head -1`
+     fi
      ;;
    *)
      llnl_cv_lib_jvm=`find $javatopdir -follow \( \
@@ -182,6 +195,16 @@ AC_CACHE_CHECK([for directory where libjvm.{a,so} or client/libjvm.{a,so} reside
      llnl_cv_lib_jvm_dir=`find $javatopdir -follow \( \
 	\( -name server -type d -prune \) -o \
 	\( -name "jvm.dll" -exec dirname {} \; \) \) 2> /dev/null | tr "\n" " "`
+     ;;
+   aix*)
+     llnl_cv_lib_jvm_dir=`find $javatopdir \( \
+	\( -name server -type d -prune \) -o \
+	\( -name "libjvm.*" -exec dirname {} \; \) \) 2> /dev/null | tr "\n" " "`
+     if test -z "$llnl_cv_lib_jvm_dir"; then
+	llnl_cv_lib_jvm_dir=`find $javatopdir \( \
+	   \( -name server -type d -prune \) -o \
+	   \( -name "libkaffevm.*" -exec dirname {} \; \) \) 2> /dev/null | tr "\n" " "`
+     fi
      ;;
    *)
      llnl_cv_lib_jvm_dir=`find $javatopdir -follow \( \

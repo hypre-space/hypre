@@ -2,7 +2,7 @@
  * File:          sidl_rmi_InstanceRegistry_Module.c
  * Symbol:        sidl.rmi.InstanceRegistry-v0.9.3
  * Symbol Type:   class
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.8
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   implement a C extension type for a sidl extendable
@@ -32,7 +32,7 @@
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.8
  */
 
 /*
@@ -630,9 +630,9 @@ make a sequence of calls like:\n\
   Py_INCREF(&_sidl_rmi_InstanceRegistryType);
   PyDict_SetItemString(dict, "InstanceRegistry",                              \
     (PyObject *)&_sidl_rmi_InstanceRegistryType);
-  sidl_ClassInfo__import();
   sidl_rmi_NetworkException__import();
   sidl_BaseInterface__import();
+  sidl_ClassInfo__import();
   _implEPV = sidl_rmi_InstanceRegistry__externals();
   if (_implEPV) {
     _sepv = (*_implEPV->getStaticEPV)();
