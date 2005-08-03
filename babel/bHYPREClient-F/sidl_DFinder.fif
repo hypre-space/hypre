@@ -1,0 +1,286 @@
+C       
+C       File:          sidl_DFinder_Impl.f
+C       Symbol:        sidl.DFinder-v0.9.3
+C       Symbol Type:   class
+C       Babel Version: 0.10.8
+C       Release:       $Name$
+C       Revision:      @(#) $Id$
+C       Description:   Client-side documentation text for sidl.DFinder
+C       
+C       Copyright (c) 2000-2002, The Regents of the University of California.
+C       Produced at the Lawrence Livermore National Laboratory.
+C       Written by the Components Team <components@llnl.gov>
+C       All rights reserved.
+C       
+C       This file is part of Babel. For more information, see
+C       http://www.llnl.gov/CASC/components/. Please read the COPYRIGHT file
+C       for Our Notice and the LICENSE file for the GNU Lesser General Public
+C       License.
+C       
+C       This program is free software; you can redistribute it and/or modify it
+C       under the terms of the GNU Lesser General Public License (as published by
+C       the Free Software Foundation) version 2.1 dated February 1999.
+C       
+C       This program is distributed in the hope that it will be useful, but
+C       WITHOUT ANY WARRANTY; without even the IMPLIED WARRANTY OF
+C       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the terms and
+C       conditions of the GNU Lesser General Public License for more details.
+C       
+C       You should have recieved a copy of the GNU Lesser General Public License
+C       along with this program; if not, write to the Free Software Foundation,
+C       Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+C       
+C       WARNING: Automatically generated; changes will be lost
+C       
+C       babel-version = 0.10.8
+C       xml-url       = /home/painter/babel/share/babel-0.10.8/repository/sidl.DFinder-v0.9.3.xml
+C       
+
+        THIS FILE IS DOCUMENTATION - DO NOT COMPILE IT!
+
+C       
+C       Symbol "sidl.DFinder" (version 0.9.3)
+C       
+C        This class is the Default Finder.  If no Finder is set in class Loader,
+C        this finder is used.  It uses SCL files from the filesystem to
+C        resolve dynamic libraries.
+C       
+C       The initial search path is taken from the SIDL_DLL_PATH
+C       environment variable.
+C       
+
+
+
+
+C       
+C       Create an instance of class sidl.DFinder
+C       
+
+        subroutine sidl_DFinder__create_f(retval)
+        implicit none
+C       out sidl.DFinder retval
+        integer*8 retval
+        end
+
+
+C       
+C       Cast method for interface and type conversions.
+C       
+
+        subroutine sidl_DFinder__cast_f(ref, retval)
+        implicit none
+C       in opaque ref
+        integer*8 ref
+C       out sidl.DFinder retval
+        integer*8 retval
+        end
+
+
+C       
+C       Cast method for interface and class type conversions.
+C       
+
+        subroutine sidl_DFinder__cast2_f(self, name, retval)
+        implicit none
+C       in sidl.DFinder self
+        integer*8 self
+C       in string name
+        character*(*) name
+C       out opaque retval
+        integer*8 retval
+        end
+
+
+C       
+C       <p>
+C       Add one to the intrinsic reference count in the underlying object.
+C       Object in <code>sidl</code> have an intrinsic reference count.
+C       Objects continue to exist as long as the reference count is
+C       positive. Clients should call this method whenever they
+C       create another ongoing reference to an object or interface.
+C       </p>
+C       <p>
+C       This does not have a return value because there is no language
+C       independent type that can refer to an interface or a
+C       class.
+C       </p>
+C       
+
+        subroutine sidl_DFinder_addRef_f(self)
+        implicit none
+C       in sidl.DFinder self
+        integer*8 self
+        end
+
+
+C       
+C       Decrease by one the intrinsic reference count in the underlying
+C       object, and delete the object if the reference is non-positive.
+C       Objects in <code>sidl</code> have an intrinsic reference count.
+C       Clients should call this method whenever they remove a
+C       reference to an object or interface.
+C       
+
+        subroutine sidl_DFinder_deleteRef_f(self)
+        implicit none
+C       in sidl.DFinder self
+        integer*8 self
+        end
+
+
+C       
+C       Return true if and only if <code>obj</code> refers to the same
+C       object as this object.
+C       
+
+        subroutine sidl_DFinder_isSame_f(self, iobj, retval)
+        implicit none
+C       in sidl.DFinder self
+        integer*8 self
+C       in sidl.BaseInterface iobj
+        integer*8 iobj
+C       out bool retval
+        logical retval
+        end
+
+
+C       
+C       Check whether the object can support the specified interface or
+C       class.  If the <code>sidl</code> type name in <code>name</code>
+C       is supported, then a reference to that object is returned with the
+C       reference count incremented.  The callee will be responsible for
+C       calling <code>deleteRef</code> on the returned object.  If
+C       the specified type is not supported, then a null reference is
+C       returned.
+C       
+
+        subroutine sidl_DFinder_queryInt_f(self, name, retval)
+        implicit none
+C       in sidl.DFinder self
+        integer*8 self
+C       in string name
+        character*(*) name
+C       out sidl.BaseInterface retval
+        integer*8 retval
+        end
+
+
+C       
+C       Return whether this object is an instance of the specified type.
+C       The string name must be the <code>sidl</code> type name.  This
+C       routine will return <code>true</code> if and only if a cast to
+C       the string type name would succeed.
+C       
+
+        subroutine sidl_DFinder_isType_f(self, name, retval)
+        implicit none
+C       in sidl.DFinder self
+        integer*8 self
+C       in string name
+        character*(*) name
+C       out bool retval
+        logical retval
+        end
+
+
+C       
+C       Return the meta-data about the class implementing this interface.
+C       
+
+        subroutine sidl_DFinder_getClassInfo_f(self, retval)
+        implicit none
+C       in sidl.DFinder self
+        integer*8 self
+C       out sidl.ClassInfo retval
+        integer*8 retval
+        end
+
+
+C       
+C       Find a DLL containing the specified information for a sidl
+C       class. This method searches through the files in set set path
+C       looking for a shared library that contains the client-side or IOR
+C       for a particular sidl class.
+C       
+C       @param sidl_name  the fully qualified (long) name of the
+C                         class/interface to be found. Package names
+C                         are separated by period characters from each
+C                         other and the class/interface name.
+C       @param target     to find a client-side binding, this is
+C                         normally the name of the language.
+C                         To find the implementation of a class
+C                         in order to make one, you should pass
+C                         the string "ior/impl" here.
+C       @param lScope     this specifies whether the symbols should
+C                         be loaded into the global scope, a local
+C                         scope, or use the setting in the file.
+C       @param lResolve   this specifies whether symbols should be
+C                         resolved as needed (LAZY), completely
+C                         resolved at load time (NOW), or use the
+C                         setting from the file.
+C       @return a non-NULL object means the search was successful.
+C               The DLL has already been added.
+C       
+
+        subroutine sidl_DFinder_findLibrary_f(self, sidl_name, target,
+     &     lScope, lResolve, retval)
+        implicit none
+C       in sidl.DFinder self
+        integer*8 self
+C       in string sidl_name
+        character*(*) sidl_name
+C       in string target
+        character*(*) target
+C       in sidl.Scope lScope
+        integer*4 lScope
+C       in sidl.Resolve lResolve
+        integer*4 lResolve
+C       out sidl.DLL retval
+        integer*8 retval
+        end
+
+
+C       
+C       Set the search path, which is a semi-colon separated sequence of
+C       URIs as described in class <code>DLL</code>.  This method will
+C       invalidate any existing search path.
+C       
+
+        subroutine sidl_DFinder_setSearchPath_f(self, path_name)
+        implicit none
+C       in sidl.DFinder self
+        integer*8 self
+C       in string path_name
+        character*(*) path_name
+        end
+
+
+C       
+C       Return the current search path.  If the search path has not been
+C       set, then the search path will be taken from environment variable
+C       SIDL_DLL_PATH.
+C       
+
+        subroutine sidl_DFinder_getSearchPath_f(self, retval)
+        implicit none
+C       in sidl.DFinder self
+        integer*8 self
+C       out string retval
+        character*(*) retval
+        end
+
+
+C       
+C       Append the specified path fragment to the beginning of the
+C       current search path.  If the search path has not yet been set
+C       by a call to <code>setSearchPath</code>, then this fragment will
+C       be appended to the path in environment variable SIDL_DLL_PATH.
+C       
+
+        subroutine sidl_DFinder_addSearchPath_f(self, path_fragment)
+        implicit none
+C       in sidl.DFinder self
+        integer*8 self
+C       in string path_fragment
+        character*(*) path_fragment
+        end
