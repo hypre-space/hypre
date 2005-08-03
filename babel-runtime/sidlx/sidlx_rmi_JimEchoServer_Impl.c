@@ -2,12 +2,12 @@
  * File:          sidlx_rmi_JimEchoServer_Impl.c
  * Symbol:        sidlx.rmi.JimEchoServer-v0.1
  * Symbol Type:   class
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.8
  * Description:   Server-side implementation for sidlx.rmi.JimEchoServer
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.8
  */
 
 /*
@@ -23,12 +23,14 @@
 
 #include "sidlx_rmi_JimEchoServer_Impl.h"
 
+#line 26 "../../../babel/runtime/sidlx/sidlx_rmi_JimEchoServer_Impl.c"
 /* DO-NOT-DELETE splicer.begin(sidlx.rmi.JimEchoServer._includes) */
 #include "sidlx_common.h"
 #include "sidlx_rmi_Socket.h"
 #include "sidlx_rmi_ServerSocket.h"
 #include "sidlx_rmi_ChildSocket.h"
 /* DO-NOT-DELETE splicer.end(sidlx.rmi.JimEchoServer._includes) */
+#line 33 "sidlx_rmi_JimEchoServer_Impl.c"
 
 /*
  * Static class initializer called exactly once before any user-defined method is dispatched
@@ -44,9 +46,11 @@ void
 impl_sidlx_rmi_JimEchoServer__load(
   void)
 {
+#line 47 "../../../babel/runtime/sidlx/sidlx_rmi_JimEchoServer_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.JimEchoServer._load) */
   /* insert implementation here: sidlx.rmi.JimEchoServer._load (static class initializer method) */
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.JimEchoServer._load) */
+#line 53 "sidlx_rmi_JimEchoServer_Impl.c"
 }
 /*
  * Class constructor called when the class is created.
@@ -62,9 +66,11 @@ void
 impl_sidlx_rmi_JimEchoServer__ctor(
   /* in */ sidlx_rmi_JimEchoServer self)
 {
+#line 65 "../../../babel/runtime/sidlx/sidlx_rmi_JimEchoServer_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.JimEchoServer._ctor) */
   /* insert implementation here: sidlx.rmi.JimEchoServer._ctor (constructor method) */
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.JimEchoServer._ctor) */
+#line 73 "sidlx_rmi_JimEchoServer_Impl.c"
 }
 
 /*
@@ -81,9 +87,11 @@ void
 impl_sidlx_rmi_JimEchoServer__dtor(
   /* in */ sidlx_rmi_JimEchoServer self)
 {
+#line 84 "../../../babel/runtime/sidlx/sidlx_rmi_JimEchoServer_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.JimEchoServer._dtor) */
   /* insert implementation here: sidlx.rmi.JimEchoServer._dtor (destructor method) */
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.JimEchoServer._dtor) */
+#line 94 "sidlx_rmi_JimEchoServer_Impl.c"
 }
 
 /*
@@ -102,6 +110,7 @@ impl_sidlx_rmi_JimEchoServer_serviceRequest(
   /* in */ sidlx_rmi_Socket sock,
   /* out */ sidl_BaseInterface *_ex)
 {
+#line 105 "../../../babel/runtime/sidlx/sidlx_rmi_JimEchoServer_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.JimEchoServer.serviceRequest) */
   anysockaddr un;
   socklen_t len;
@@ -155,6 +164,7 @@ impl_sidlx_rmi_JimEchoServer_serviceRequest(
   return;
 
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.JimEchoServer.serviceRequest) */
+#line 167 "sidlx_rmi_JimEchoServer_Impl.c"
 }
 /* Babel internal methods, Users should not edit below this line. */
 struct sidl_SIDLException__object* 

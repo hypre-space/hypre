@@ -2,12 +2,12 @@
  * File:          sidlx_rmi_GenNetworkException_Impl.c
  * Symbol:        sidlx.rmi.GenNetworkException-v0.1
  * Symbol Type:   class
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.8
  * Description:   Server-side implementation for sidlx.rmi.GenNetworkException
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.8
  */
 
 /*
@@ -23,9 +23,11 @@
 
 #include "sidlx_rmi_GenNetworkException_Impl.h"
 
+#line 26 "../../../babel/runtime/sidlx/sidlx_rmi_GenNetworkException_Impl.c"
 /* DO-NOT-DELETE splicer.begin(sidlx.rmi.GenNetworkException._includes) */
 /* insert implementation here: sidlx.rmi.GenNetworkException._includes (includes and arbitrary code) */
 /* DO-NOT-DELETE splicer.end(sidlx.rmi.GenNetworkException._includes) */
+#line 30 "sidlx_rmi_GenNetworkException_Impl.c"
 
 /*
  * Static class initializer called exactly once before any user-defined method is dispatched
@@ -41,9 +43,11 @@ void
 impl_sidlx_rmi_GenNetworkException__load(
   void)
 {
+#line 44 "../../../babel/runtime/sidlx/sidlx_rmi_GenNetworkException_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.GenNetworkException._load) */
   /* insert implementation here: sidlx.rmi.GenNetworkException._load (static class initializer method) */
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.GenNetworkException._load) */
+#line 50 "sidlx_rmi_GenNetworkException_Impl.c"
 }
 /*
  * Class constructor called when the class is created.
@@ -59,9 +63,11 @@ void
 impl_sidlx_rmi_GenNetworkException__ctor(
   /* in */ sidlx_rmi_GenNetworkException self)
 {
+#line 62 "../../../babel/runtime/sidlx/sidlx_rmi_GenNetworkException_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.GenNetworkException._ctor) */
   /* insert implementation here: sidlx.rmi.GenNetworkException._ctor (constructor method) */
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.GenNetworkException._ctor) */
+#line 70 "sidlx_rmi_GenNetworkException_Impl.c"
 }
 
 /*
@@ -78,9 +84,11 @@ void
 impl_sidlx_rmi_GenNetworkException__dtor(
   /* in */ sidlx_rmi_GenNetworkException self)
 {
+#line 81 "../../../babel/runtime/sidlx/sidlx_rmi_GenNetworkException_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.GenNetworkException._dtor) */
   /* insert implementation here: sidlx.rmi.GenNetworkException._dtor (destructor method) */
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.GenNetworkException._dtor) */
+#line 91 "sidlx_rmi_GenNetworkException_Impl.c"
 }
 /* Babel internal methods, Users should not edit below this line. */
 struct sidlx_rmi_GenNetworkException__object* 

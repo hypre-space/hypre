@@ -2,12 +2,12 @@
  * File:          sidlx_rmi_Common_Impl.c
  * Symbol:        sidlx.rmi.Common-v0.1
  * Symbol Type:   class
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.8
  * Description:   Server-side implementation for sidlx.rmi.Common
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.8
  */
 
 /*
@@ -23,6 +23,7 @@
 
 #include "sidlx_rmi_Common_Impl.h"
 
+#line 26 "../../../babel/runtime/sidlx/sidlx_rmi_Common_Impl.c"
 /* DO-NOT-DELETE splicer.begin(sidlx.rmi.Common._includes) */
 
 #include "sidlx_rmi_GenNetworkException.h"
@@ -40,6 +41,7 @@
 #include "sidlx_rmi_Socket.h"
 #include "sidl_String.h"
 /* DO-NOT-DELETE splicer.end(sidlx.rmi.Common._includes) */
+#line 44 "sidlx_rmi_Common_Impl.c"
 
 /*
  * Static class initializer called exactly once before any user-defined method is dispatched
@@ -55,9 +57,11 @@ void
 impl_sidlx_rmi_Common__load(
   void)
 {
+#line 58 "../../../babel/runtime/sidlx/sidlx_rmi_Common_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.Common._load) */
   /* insert implementation here: sidlx.rmi.Common._load (static class initializer method) */
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.Common._load) */
+#line 64 "sidlx_rmi_Common_Impl.c"
 }
 /*
  * Class constructor called when the class is created.
@@ -73,9 +77,11 @@ void
 impl_sidlx_rmi_Common__ctor(
   /* in */ sidlx_rmi_Common self)
 {
+#line 76 "../../../babel/runtime/sidlx/sidlx_rmi_Common_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.Common._ctor) */
   /* insert implementation here: sidlx.rmi.Common._ctor (constructor method) */
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.Common._ctor) */
+#line 84 "sidlx_rmi_Common_Impl.c"
 }
 
 /*
@@ -92,9 +98,11 @@ void
 impl_sidlx_rmi_Common__dtor(
   /* in */ sidlx_rmi_Common self)
 {
+#line 95 "../../../babel/runtime/sidlx/sidlx_rmi_Common_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.Common._dtor) */
   /* insert implementation here: sidlx.rmi.Common._dtor (destructor method) */
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.Common._dtor) */
+#line 105 "sidlx_rmi_Common_Impl.c"
 }
 
 /*
@@ -111,6 +119,7 @@ int32_t
 impl_sidlx_rmi_Common_fork(
   /* out */ sidl_BaseInterface *_ex)
 {
+#line 114 "../../../babel/runtime/sidlx/sidlx_rmi_Common_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.Common.fork) */
   int32_t pid;
   if ((pid=fork()) < 0) { 
@@ -119,6 +128,7 @@ impl_sidlx_rmi_Common_fork(
  EXIT:
   return pid;
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.Common.fork) */
+#line 131 "sidlx_rmi_Common_Impl.c"
 }
 
 /*
@@ -136,6 +146,7 @@ impl_sidlx_rmi_Common_gethostbyname(
   /* in */ const char* hostname,
   /* out */ sidl_BaseInterface *_ex)
 {
+#line 139 "../../../babel/runtime/sidlx/sidlx_rmi_Common_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.Common.gethostbyname) */
   /* TODO: Reimplement using gethostbyname */
   
@@ -158,6 +169,7 @@ impl_sidlx_rmi_Common_gethostbyname(
  EXIT:
   return 0;
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.Common.gethostbyname) */
+#line 172 "sidlx_rmi_Common_Impl.c"
 }
 /* Babel internal methods, Users should not edit below this line. */
 struct sidlx_rmi_Common__object* 

@@ -2,7 +2,7 @@
  * File:          sidl_rmi_InstanceRegistry_Impl.c
  * Symbol:        sidl.rmi.InstanceRegistry-v0.9.3
  * Symbol Type:   class
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.8
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Server-side implementation for sidl.rmi.InstanceRegistry
@@ -32,7 +32,7 @@
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.8
  */
 
 /*
@@ -67,6 +67,7 @@
 
 #include "sidl_rmi_InstanceRegistry_Impl.h"
 
+#line 70 "../../../babel/runtime/sidl/sidl_rmi_InstanceRegistry_Impl.c"
 /* DO-NOT-DELETE splicer.begin(sidl.rmi.InstanceRegistry._includes) */
 #include "sidl_String.h"
 
@@ -120,6 +121,7 @@ char * next_string(char * buf) {
 }
 
 /* DO-NOT-DELETE splicer.end(sidl.rmi.InstanceRegistry._includes) */
+#line 124 "sidl_rmi_InstanceRegistry_Impl.c"
 
 /*
  * Static class initializer called exactly once before any user-defined method is dispatched
@@ -135,6 +137,7 @@ void
 impl_sidl_rmi_InstanceRegistry__load(
   void)
 {
+#line 138 "../../../babel/runtime/sidl/sidl_rmi_InstanceRegistry_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidl.rmi.InstanceRegistry._load) */
   /* Insert the implementation of the static class initializer method here... */
   int i = 0;
@@ -145,6 +148,7 @@ impl_sidl_rmi_InstanceRegistry__load(
   counter[10] = '\0';
   hshtbl = create_hashtable(16, hashfromkey, (int(*)(void*,void*))sidl_String_equals);
   /* DO-NOT-DELETE splicer.end(sidl.rmi.InstanceRegistry._load) */
+#line 151 "sidl_rmi_InstanceRegistry_Impl.c"
 }
 /*
  * Class constructor called when the class is created.
@@ -160,9 +164,11 @@ void
 impl_sidl_rmi_InstanceRegistry__ctor(
   /* in */ sidl_rmi_InstanceRegistry self)
 {
+#line 163 "../../../babel/runtime/sidl/sidl_rmi_InstanceRegistry_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidl.rmi.InstanceRegistry._ctor) */
 
   /* DO-NOT-DELETE splicer.end(sidl.rmi.InstanceRegistry._ctor) */
+#line 171 "sidl_rmi_InstanceRegistry_Impl.c"
 }
 
 /*
@@ -179,6 +185,7 @@ void
 impl_sidl_rmi_InstanceRegistry__dtor(
   /* in */ sidl_rmi_InstanceRegistry self)
 {
+#line 182 "../../../babel/runtime/sidl/sidl_rmi_InstanceRegistry_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidl.rmi.InstanceRegistry._dtor) */
   /*struct sidl_rmi_InstanceRegistry__data *dptr =
      sidl_rmi_InstanceRegistry__get_data(self);
@@ -190,6 +197,7 @@ impl_sidl_rmi_InstanceRegistry__dtor(
    }
   */
   /* DO-NOT-DELETE splicer.end(sidl.rmi.InstanceRegistry._dtor) */
+#line 200 "sidl_rmi_InstanceRegistry_Impl.c"
 }
 
 /*
@@ -209,6 +217,7 @@ impl_sidl_rmi_InstanceRegistry_registerInstance(
   /* in */ sidl_BaseClass instance,
   /* out */ sidl_BaseInterface *_ex)
 {
+#line 212 "../../../babel/runtime/sidl/sidl_rmi_InstanceRegistry_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidl.rmi.InstanceRegistry.registerInstance) */
 
   /* 
@@ -232,6 +241,7 @@ impl_sidl_rmi_InstanceRegistry_registerInstance(
   return sidl_String_strdup(counter);
 
   /* DO-NOT-DELETE splicer.end(sidl.rmi.InstanceRegistry.registerInstance) */
+#line 244 "sidl_rmi_InstanceRegistry_Impl.c"
 }
 
 /*
@@ -249,6 +259,7 @@ impl_sidl_rmi_InstanceRegistry_getInstance(
   /* in */ const char* instanceID,
   /* out */ sidl_BaseInterface *_ex)
 {
+#line 252 "../../../babel/runtime/sidl/sidl_rmi_InstanceRegistry_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidl.rmi.InstanceRegistry.getInstance) */
   sidl_BaseClass bc = 0;
   /*
@@ -266,6 +277,7 @@ impl_sidl_rmi_InstanceRegistry_getInstance(
   */
 
   /* DO-NOT-DELETE splicer.end(sidl.rmi.InstanceRegistry.getInstance) */
+#line 280 "sidl_rmi_InstanceRegistry_Impl.c"
 }
 
 /*
@@ -284,6 +296,7 @@ impl_sidl_rmi_InstanceRegistry_removeInstance(
   /* in */ const char* instanceID,
   /* out */ sidl_BaseInterface *_ex)
 {
+#line 287 "../../../babel/runtime/sidl/sidl_rmi_InstanceRegistry_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidl.rmi.InstanceRegistry.removeInstance) */
   sidl_BaseClass bc = 0;
   bc = (sidl_BaseClass) hashtable_remove(hshtbl, (void*)instanceID);
@@ -292,6 +305,7 @@ impl_sidl_rmi_InstanceRegistry_removeInstance(
   return bc;
 
   /* DO-NOT-DELETE splicer.end(sidl.rmi.InstanceRegistry.removeInstance) */
+#line 308 "sidl_rmi_InstanceRegistry_Impl.c"
 }
 /* Babel internal methods, Users should not edit below this line. */
 struct sidl_rmi_InstanceRegistry__object* 

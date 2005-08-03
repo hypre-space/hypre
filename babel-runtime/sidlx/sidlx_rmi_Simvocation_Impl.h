@@ -2,12 +2,12 @@
  * File:          sidlx_rmi_Simvocation_Impl.h
  * Symbol:        sidlx.rmi.Simvocation-v0.1
  * Symbol Type:   class
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.8
  * Description:   Server-side implementation for sidlx.rmi.Simvocation
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.8
  */
 
 #ifndef included_sidlx_rmi_Simvocation_Impl_h
@@ -47,15 +47,18 @@
 #include "sidl_BaseClass.h"
 #endif
 
+#line 50 "../../../babel/runtime/sidlx/sidlx_rmi_Simvocation_Impl.h"
 /* DO-NOT-DELETE splicer.begin(sidlx.rmi.Simvocation._includes) */
 /* insert implementation here: sidlx.rmi.Simvocation._includes (include files) */
 /* DO-NOT-DELETE splicer.end(sidlx.rmi.Simvocation._includes) */
+#line 54 "sidlx_rmi_Simvocation_Impl.h"
 
 /*
  * Private data for class sidlx.rmi.Simvocation
  */
 
 struct sidlx_rmi_Simvocation__data {
+#line 59 "../../../babel/runtime/sidlx/sidlx_rmi_Simvocation_Impl.h"
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.Simvocation._data) */
   /* insert implementation here: sidlx.rmi.Simvocation._data (private data members) */
   int d_len;
@@ -66,6 +69,7 @@ struct sidlx_rmi_Simvocation__data {
   char *d_className;
   char *d_objectID;
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.Simvocation._data) */
+#line 72 "sidlx_rmi_Simvocation_Impl.h"
 };
 
 #ifdef __cplusplus

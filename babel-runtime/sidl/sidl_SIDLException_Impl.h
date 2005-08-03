@@ -2,7 +2,7 @@
  * File:          sidl_SIDLException_Impl.h
  * Symbol:        sidl.SIDLException-v0.9.3
  * Symbol Type:   class
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.8
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Server-side implementation for sidl.SIDLException
@@ -32,7 +32,7 @@
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.8
  */
 
 #ifndef included_sidl_SIDLException_Impl_h
@@ -57,6 +57,7 @@
 #include "sidl_BaseClass.h"
 #endif
 
+#line 60 "../../../babel/runtime/sidl/sidl_SIDLException_Impl.h"
 /* DO-NOT-DELETE splicer.begin(sidl.SIDLException._includes) */
 /*
  * Would be better if the splicer id was more general than "includes" so
@@ -65,12 +66,14 @@
  */
 struct sidl_SIDLException_Trace;
 /* DO-NOT-DELETE splicer.end(sidl.SIDLException._includes) */
+#line 69 "sidl_SIDLException_Impl.h"
 
 /*
  * Private data for class sidl.SIDLException
  */
 
 struct sidl_SIDLException__data {
+#line 74 "../../../babel/runtime/sidl/sidl_SIDLException_Impl.h"
   /* DO-NOT-DELETE splicer.begin(sidl.SIDLException._data) */
   /*
    * To Do...Give more consideration to the trade-offs that result from using
@@ -90,6 +93,7 @@ struct sidl_SIDLException__data {
   struct sidl_SIDLException_Trace    *d_trace_tail;
   unsigned long int                   d_trace_length;
   /* DO-NOT-DELETE splicer.end(sidl.SIDLException._data) */
+#line 96 "sidl_SIDLException_Impl.h"
 };
 
 #ifdef __cplusplus

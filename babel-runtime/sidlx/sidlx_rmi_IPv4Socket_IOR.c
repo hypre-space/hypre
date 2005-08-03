@@ -2,12 +2,12 @@
  * File:          sidlx_rmi_IPv4Socket_IOR.c
  * Symbol:        sidlx.rmi.IPv4Socket-v0.1
  * Symbol Type:   class
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.8
  * Description:   Intermediate Object Representation for sidlx.rmi.IPv4Socket
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.8
  */
 
 #include "sidl_rmi_InstanceHandle.h"

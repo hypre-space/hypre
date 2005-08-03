@@ -2,12 +2,12 @@
  * File:          sidlx_rmi_ClientSocket_Stub.c
  * Symbol:        sidlx.rmi.ClientSocket-v0.1
  * Symbol Type:   class
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.8
  * Description:   Client-side glue code for sidlx.rmi.ClientSocket
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.8
  */
 
 #include "sidlx_rmi_ClientSocket.h"
@@ -266,7 +266,7 @@ int32_t
 sidlx_rmi_ClientSocket_readn(
   /* in */ sidlx_rmi_ClientSocket self,
   /* in */ int32_t nbytes,
-  /* inout */ struct sidl_char__array** data,
+  /* inout array<char> */ struct sidl_char__array** data,
   /* out */ sidl_BaseInterface *_ex)
 {
   return (*self->d_epv->f_readn)(
@@ -284,7 +284,7 @@ int32_t
 sidlx_rmi_ClientSocket_readline(
   /* in */ sidlx_rmi_ClientSocket self,
   /* in */ int32_t nbytes,
-  /* inout */ struct sidl_char__array** data,
+  /* inout array<char> */ struct sidl_char__array** data,
   /* out */ sidl_BaseInterface *_ex)
 {
   return (*self->d_epv->f_readline)(
@@ -302,7 +302,7 @@ int32_t
 sidlx_rmi_ClientSocket_readstring(
   /* in */ sidlx_rmi_ClientSocket self,
   /* in */ int32_t nbytes,
-  /* inout */ struct sidl_char__array** data,
+  /* inout array<char> */ struct sidl_char__array** data,
   /* out */ sidl_BaseInterface *_ex)
 {
   return (*self->d_epv->f_readstring)(
@@ -319,7 +319,7 @@ sidlx_rmi_ClientSocket_readstring(
 int32_t
 sidlx_rmi_ClientSocket_readstring_alloc(
   /* in */ sidlx_rmi_ClientSocket self,
-  /* inout */ struct sidl_char__array** data,
+  /* inout array<char> */ struct sidl_char__array** data,
   /* out */ sidl_BaseInterface *_ex)
 {
   return (*self->d_epv->f_readstring_alloc)(
@@ -352,7 +352,7 @@ int32_t
 sidlx_rmi_ClientSocket_writen(
   /* in */ sidlx_rmi_ClientSocket self,
   /* in */ int32_t nbytes,
-  /* in */ struct sidl_char__array* data,
+  /* in array<char> */ struct sidl_char__array* data,
   /* out */ sidl_BaseInterface *_ex)
 {
   return (*self->d_epv->f_writen)(
@@ -370,7 +370,7 @@ int32_t
 sidlx_rmi_ClientSocket_writestring(
   /* in */ sidlx_rmi_ClientSocket self,
   /* in */ int32_t nbytes,
-  /* in */ struct sidl_char__array* data,
+  /* in array<char> */ struct sidl_char__array* data,
   /* out */ sidl_BaseInterface *_ex)
 {
   return (*self->d_epv->f_writestring)(
@@ -1485,7 +1485,7 @@ static int32_t
 remote_sidlx_rmi_ClientSocket_readn(
   /* in */ struct sidlx_rmi_ClientSocket__object* self /* TLD */,
   /* in */ int32_t nbytes,
-  /* inout */ struct sidl_char__array** data,
+  /* inout array<char> */ struct sidl_char__array** data,
   /* out */ struct sidl_BaseInterface__object* *_ex)
 {
   sidl_BaseInterface *_ex2 =_ex;
@@ -1522,7 +1522,7 @@ static int32_t
 remote_sidlx_rmi_ClientSocket_readline(
   /* in */ struct sidlx_rmi_ClientSocket__object* self /* TLD */,
   /* in */ int32_t nbytes,
-  /* inout */ struct sidl_char__array** data,
+  /* inout array<char> */ struct sidl_char__array** data,
   /* out */ struct sidl_BaseInterface__object* *_ex)
 {
   sidl_BaseInterface *_ex2 =_ex;
@@ -1559,7 +1559,7 @@ static int32_t
 remote_sidlx_rmi_ClientSocket_readstring(
   /* in */ struct sidlx_rmi_ClientSocket__object* self /* TLD */,
   /* in */ int32_t nbytes,
-  /* inout */ struct sidl_char__array** data,
+  /* inout array<char> */ struct sidl_char__array** data,
   /* out */ struct sidl_BaseInterface__object* *_ex)
 {
   sidl_BaseInterface *_ex2 =_ex;
@@ -1595,7 +1595,7 @@ remote_sidlx_rmi_ClientSocket_readstring(
 static int32_t
 remote_sidlx_rmi_ClientSocket_readstring_alloc(
   /* in */ struct sidlx_rmi_ClientSocket__object* self /* TLD */,
-  /* inout */ struct sidl_char__array** data,
+  /* inout array<char> */ struct sidl_char__array** data,
   /* out */ struct sidl_BaseInterface__object* *_ex)
 {
   sidl_BaseInterface *_ex2 =_ex;
@@ -1668,7 +1668,7 @@ static int32_t
 remote_sidlx_rmi_ClientSocket_writen(
   /* in */ struct sidlx_rmi_ClientSocket__object* self /* TLD */,
   /* in */ int32_t nbytes,
-  /* in */ struct sidl_char__array* data,
+  /* in array<char> */ struct sidl_char__array* data,
   /* out */ struct sidl_BaseInterface__object* *_ex)
 {
   sidl_BaseInterface *_ex2 =_ex;
@@ -1705,7 +1705,7 @@ static int32_t
 remote_sidlx_rmi_ClientSocket_writestring(
   /* in */ struct sidlx_rmi_ClientSocket__object* self /* TLD */,
   /* in */ int32_t nbytes,
-  /* in */ struct sidl_char__array* data,
+  /* in array<char> */ struct sidl_char__array* data,
   /* out */ struct sidl_BaseInterface__object* *_ex)
 {
   sidl_BaseInterface *_ex2 =_ex;

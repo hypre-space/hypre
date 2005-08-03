@@ -2,12 +2,12 @@
  * File:          sidlx_io_TxtIOStream_Skel.c
  * Symbol:        sidlx.io.TxtIOStream-v0.1
  * Symbol Type:   class
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.8
  * Description:   Server-side glue code for sidlx.io.TxtIOStream
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.8
  */
 
 #include "sidlx_io_TxtIOStream_IOR.h"
@@ -85,14 +85,14 @@ int32_t
 impl_sidlx_io_TxtIOStream_read(
   /* in */ sidlx_io_TxtIOStream self,
   /* in */ int32_t nbytes,
-  /* out */ struct sidl_char__array** data,
+  /* out array<char,row-major> */ struct sidl_char__array** data,
   /* out */ sidl_BaseInterface *_ex);
 
 extern
 int32_t
 impl_sidlx_io_TxtIOStream_readline(
   /* in */ sidlx_io_TxtIOStream self,
-  /* out */ struct sidl_char__array** data,
+  /* out array<char,row-major> */ struct sidl_char__array** data,
   /* out */ sidl_BaseInterface *_ex);
 
 extern
@@ -167,7 +167,7 @@ extern
 int32_t
 impl_sidlx_io_TxtIOStream_write(
   /* in */ sidlx_io_TxtIOStream self,
-  /* in */ struct sidl_char__array* data,
+  /* in array<char,row-major> */ struct sidl_char__array* data,
   /* out */ sidl_BaseInterface *_ex);
 
 extern
@@ -277,7 +277,7 @@ static int32_t
 skel_sidlx_io_TxtIOStream_read(
   /* in */ sidlx_io_TxtIOStream self,
   /* in */ int32_t nbytes,
-  /* out */ struct sidl_char__array** data,
+  /* out array<char,row-major> */ struct sidl_char__array** data,
 /* out */ sidl_BaseInterface *_ex)
 {
   int32_t _return;
@@ -296,7 +296,7 @@ skel_sidlx_io_TxtIOStream_read(
 static int32_t
 skel_sidlx_io_TxtIOStream_readline(
   /* in */ sidlx_io_TxtIOStream self,
-  /* out */ struct sidl_char__array** data,
+  /* out array<char,row-major> */ struct sidl_char__array** data,
 /* out */ sidl_BaseInterface *_ex)
 {
   int32_t _return;
@@ -314,7 +314,7 @@ skel_sidlx_io_TxtIOStream_readline(
 static int32_t
 skel_sidlx_io_TxtIOStream_write(
   /* in */ sidlx_io_TxtIOStream self,
-  /* in */ struct sidl_char__array* data,
+  /* in array<char,row-major> */ struct sidl_char__array* data,
 /* out */ sidl_BaseInterface *_ex)
 {
   int32_t _return;

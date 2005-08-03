@@ -2,12 +2,12 @@
  * File:          sidlx_rmi_GenNetworkException_Impl.h
  * Symbol:        sidlx.rmi.GenNetworkException-v0.1
  * Symbol Type:   class
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.8
  * Description:   Server-side implementation for sidlx.rmi.GenNetworkException
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.8
  */
 
 #ifndef included_sidlx_rmi_GenNetworkException_Impl_h
@@ -41,19 +41,23 @@
 #include "sidl_BaseClass.h"
 #endif
 
+#line 44 "../../../babel/runtime/sidlx/sidlx_rmi_GenNetworkException_Impl.h"
 /* DO-NOT-DELETE splicer.begin(sidlx.rmi.GenNetworkException._includes) */
 /* insert implementation here: sidlx.rmi.GenNetworkException._includes (include files) */
 /* DO-NOT-DELETE splicer.end(sidlx.rmi.GenNetworkException._includes) */
+#line 48 "sidlx_rmi_GenNetworkException_Impl.h"
 
 /*
  * Private data for class sidlx.rmi.GenNetworkException
  */
 
 struct sidlx_rmi_GenNetworkException__data {
+#line 53 "../../../babel/runtime/sidlx/sidlx_rmi_GenNetworkException_Impl.h"
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.GenNetworkException._data) */
   /* insert implementation here: sidlx.rmi.GenNetworkException._data (private data members) */
   int ignore; /* dummy to force non-empty struct; remove if you add data */
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.GenNetworkException._data) */
+#line 60 "sidlx_rmi_GenNetworkException_Impl.h"
 };
 
 #ifdef __cplusplus

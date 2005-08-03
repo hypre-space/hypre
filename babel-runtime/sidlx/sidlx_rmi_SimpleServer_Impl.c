@@ -2,12 +2,12 @@
  * File:          sidlx_rmi_SimpleServer_Impl.c
  * Symbol:        sidlx.rmi.SimpleServer-v0.1
  * Symbol Type:   class
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.8
  * Description:   Server-side implementation for sidlx.rmi.SimpleServer
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.8
  */
 
 /*
@@ -23,6 +23,7 @@
 
 #include "sidlx_rmi_SimpleServer_Impl.h"
 
+#line 26 "../../../babel/runtime/sidlx/sidlx_rmi_SimpleServer_Impl.c"
 /* DO-NOT-DELETE splicer.begin(sidlx.rmi.SimpleServer._includes) */
 #include <stdio.h>
 #include <stdlib.h>
@@ -32,6 +33,7 @@
 #define LISTENQ 1024
 #define MAXLINE 1023
 /* DO-NOT-DELETE splicer.end(sidlx.rmi.SimpleServer._includes) */
+#line 36 "sidlx_rmi_SimpleServer_Impl.c"
 
 /*
  * Static class initializer called exactly once before any user-defined method is dispatched
@@ -47,9 +49,11 @@ void
 impl_sidlx_rmi_SimpleServer__load(
   void)
 {
+#line 50 "../../../babel/runtime/sidlx/sidlx_rmi_SimpleServer_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.SimpleServer._load) */
   /* Insert the implementation of the static class initializer method here... */
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.SimpleServer._load) */
+#line 56 "sidlx_rmi_SimpleServer_Impl.c"
 }
 /*
  * Class constructor called when the class is created.
@@ -65,12 +69,14 @@ void
 impl_sidlx_rmi_SimpleServer__ctor(
   /* in */ sidlx_rmi_SimpleServer self)
 {
+#line 68 "../../../babel/runtime/sidlx/sidlx_rmi_SimpleServer_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.SimpleServer._ctor) */
   struct sidlx_rmi_SimpleServer__data *dptr;
   dptr = malloc(sizeof(struct sidlx_rmi_SimpleServer__data));
   dptr->s_sock = sidlx_rmi_ServerSocket__create();
   sidlx_rmi_SimpleServer__set_data(self, dptr);
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.SimpleServer._ctor) */
+#line 79 "sidlx_rmi_SimpleServer_Impl.c"
 }
 
 /*
@@ -87,6 +93,7 @@ void
 impl_sidlx_rmi_SimpleServer__dtor(
   /* in */ sidlx_rmi_SimpleServer self)
 {
+#line 90 "../../../babel/runtime/sidlx/sidlx_rmi_SimpleServer_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.SimpleServer._dtor) */
   struct sidlx_rmi_SimpleServer__data * data = sidlx_rmi_SimpleServer__get_data( self );
   if (data) {
@@ -95,6 +102,7 @@ impl_sidlx_rmi_SimpleServer__dtor(
   }
   sidlx_rmi_SimpleServer__set_data( self, NULL );
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.SimpleServer._dtor) */
+#line 105 "sidlx_rmi_SimpleServer_Impl.c"
 }
 
 /*
@@ -113,6 +121,7 @@ impl_sidlx_rmi_SimpleServer_setPort(
   /* in */ int32_t port,
   /* out */ sidl_BaseInterface *_ex)
 {
+#line 116 "../../../babel/runtime/sidlx/sidlx_rmi_SimpleServer_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.SimpleServer.setPort) */
   struct sidlx_rmi_SimpleServer__data *data=sidlx_rmi_SimpleServer__get_data(self);
   
@@ -122,6 +131,7 @@ impl_sidlx_rmi_SimpleServer_setPort(
   printf("Exception caught in impl_sidlx_rmi_SimpleServer_setPort\n\n");
   return;
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.SimpleServer.setPort) */
+#line 134 "sidlx_rmi_SimpleServer_Impl.c"
 }
 
 /*
@@ -139,6 +149,7 @@ impl_sidlx_rmi_SimpleServer_run(
   /* in */ sidlx_rmi_SimpleServer self,
   /* out */ sidl_BaseInterface *_ex)
 {
+#line 142 "../../../babel/runtime/sidlx/sidlx_rmi_SimpleServer_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.SimpleServer.run) */
   int i;
   int len;
@@ -197,6 +208,7 @@ impl_sidlx_rmi_SimpleServer_run(
  EXIT:
   return;
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.SimpleServer.run) */
+#line 211 "sidlx_rmi_SimpleServer_Impl.c"
 }
 /* Babel internal methods, Users should not edit below this line. */
 struct sidl_SIDLException__object* 

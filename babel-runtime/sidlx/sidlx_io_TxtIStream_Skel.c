@@ -2,12 +2,12 @@
  * File:          sidlx_io_TxtIStream_Skel.c
  * Symbol:        sidlx.io.TxtIStream-v0.1
  * Symbol Type:   class
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.8
  * Description:   Server-side glue code for sidlx.io.TxtIStream
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.8
  */
 
 #include "sidlx_io_TxtIStream_IOR.h"
@@ -75,14 +75,14 @@ int32_t
 impl_sidlx_io_TxtIStream_read(
   /* in */ sidlx_io_TxtIStream self,
   /* in */ int32_t nbytes,
-  /* out */ struct sidl_char__array** data,
+  /* out array<char,row-major> */ struct sidl_char__array** data,
   /* out */ sidl_BaseInterface *_ex);
 
 extern
 int32_t
 impl_sidlx_io_TxtIStream_readline(
   /* in */ sidlx_io_TxtIStream self,
-  /* out */ struct sidl_char__array** data,
+  /* out array<char,row-major> */ struct sidl_char__array** data,
   /* out */ sidl_BaseInterface *_ex);
 
 extern
@@ -182,7 +182,7 @@ static int32_t
 skel_sidlx_io_TxtIStream_read(
   /* in */ sidlx_io_TxtIStream self,
   /* in */ int32_t nbytes,
-  /* out */ struct sidl_char__array** data,
+  /* out array<char,row-major> */ struct sidl_char__array** data,
 /* out */ sidl_BaseInterface *_ex)
 {
   int32_t _return;
@@ -201,7 +201,7 @@ skel_sidlx_io_TxtIStream_read(
 static int32_t
 skel_sidlx_io_TxtIStream_readline(
   /* in */ sidlx_io_TxtIStream self,
-  /* out */ struct sidl_char__array** data,
+  /* out array<char,row-major> */ struct sidl_char__array** data,
 /* out */ sidl_BaseInterface *_ex)
 {
   int32_t _return;

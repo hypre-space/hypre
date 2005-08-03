@@ -496,13 +496,16 @@ libsidl_la_SOURCES = $(IMPLSRCS) $(IMPLHDRS) ltdl.c \
 	$(STUBSRCS) $(STUBHDRS) $(IORSRCS) $(IORHDRS) \
 	$(SKELSRCS) $(SKELHDRS)
 
-libsidl_la_DEPENDENCIES = ../sidlx/babel-stamp
+@WITH_SIDLX_FALSE@libsidl_la_DEPENDENCIES = 
+@WITH_SIDLX_TRUE@libsidl_la_DEPENDENCIES = ../sidlx/babel-stamp
+@WITH_SIDLX_FALSE@SIDLXINCLUDE = 
+@WITH_SIDLX_TRUE@SIDLXINCLUDE = -I$(srcdir)/../sidlx
 libsidl_la_LIBADD = $(LIBADD_DL) $(CHASM_LIBS) $(LIBXML2_LIB)
 libsidl_la_LDFLAGS = -no-undefined -release $(VERSION)
 EXTRA_DIST = $(SRCS_EXCLUDED) ltdl.h ignore_me.h.in \
 	libsidl.scl.in scl.dtd changeundef.py
 
-AM_CPPFLAGS = $(CHASM_CFLAGS) $(LIBXML2_CFLAGS) $(JNI_INCLUDES) -I$(srcdir)/../sidlx
+AM_CPPFLAGS = $(CHASM_CFLAGS) $(LIBXML2_CFLAGS) $(JNI_INCLUDES) $(SIDLXINCLUDE)
 SRCS_EXCLUDED = $(FORTRAN_EXCLUDED) $(PYTHON_EXCLUDED) $(JAVA_EXCLUDED)
 SRCS_INCLUDED = $(FORTRAN_SOURCES) $(PYTHON_SOURCES) $(JAVA_SOURCES)
 @SUPPORT_FORTRAN77_FALSE@@SUPPORT_FORTRAN90_TRUE@FORTRAN_SOURCES = sidlfortran.c sidlf90array.c
@@ -984,8 +987,8 @@ $(libsidl_la_OBJECTS) $(nodist_libsidl_la_OBJECTS) : babel_config.h
 libsidl.scl: 
 	sed -e 's,@@DIR@@,'`pwd`',g' < $(srcdir)/libsidl.scl.in > libsidl.scl
 
-../sidlx/babel-stamp: babel-stamp
-	cd ../sidlx && $(MAKE) $(AM_MAKEFLAGS) babel-stamp
+@WITH_SIDLX_TRUE@../sidlx/babel-stamp: babel-stamp
+@WITH_SIDLX_TRUE@	cd ../sidlx && $(MAKE) $(AM_MAKEFLAGS) babel-stamp
 
 @BABEL_RUNTIME_ONLY_TRUE@babel-stamp:
 @BABEL_RUNTIME_ONLY_TRUE@	@rm -f babel-temp

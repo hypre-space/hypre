@@ -2,7 +2,7 @@
  * File:          sidl_ClassInfoI_Impl.h
  * Symbol:        sidl.ClassInfoI-v0.9.3
  * Symbol Type:   class
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.8
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Server-side implementation for sidl.ClassInfoI
@@ -32,7 +32,7 @@
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.8
  */
 
 #ifndef included_sidl_ClassInfoI_Impl_h
@@ -54,20 +54,24 @@
 #include "sidl_BaseClass.h"
 #endif
 
+#line 57 "../../../babel/runtime/sidl/sidl_ClassInfoI_Impl.h"
 /* DO-NOT-DELETE splicer.begin(sidl.ClassInfoI._includes) */
 /* Put additional include files here... */
 /* DO-NOT-DELETE splicer.end(sidl.ClassInfoI._includes) */
+#line 61 "sidl_ClassInfoI_Impl.h"
 
 /*
  * Private data for class sidl.ClassInfoI
  */
 
 struct sidl_ClassInfoI__data {
+#line 66 "../../../babel/runtime/sidl/sidl_ClassInfoI_Impl.h"
   /* DO-NOT-DELETE splicer.begin(sidl.ClassInfoI._data) */
   char *d_classname;
   int32_t d_IOR_major;
   int32_t d_IOR_minor;
   /* DO-NOT-DELETE splicer.end(sidl.ClassInfoI._data) */
+#line 74 "sidl_ClassInfoI_Impl.h"
 };
 
 #ifdef __cplusplus

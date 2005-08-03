@@ -2,7 +2,7 @@
  * File:          sidl_rmi_InstanceRegistry_IOR.h
  * Symbol:        sidl.rmi.InstanceRegistry-v0.9.3
  * Symbol Type:   class
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.8
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Intermediate Object Representation for sidl.rmi.InstanceRegistry
@@ -32,7 +32,7 @@
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.8
  */
 
 #ifndef included_sidl_rmi_InstanceRegistry_IOR_h

@@ -2,7 +2,7 @@
  * File:          sidl_DFinder_Impl.c
  * Symbol:        sidl.DFinder-v0.9.3
  * Symbol Type:   class
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.8
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Server-side implementation for sidl.DFinder
@@ -32,7 +32,7 @@
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.8
  */
 
 /*
@@ -53,6 +53,7 @@
 
 #include "sidl_DFinder_Impl.h"
 
+#line 56 "../../../babel/runtime/sidl/sidl_DFinder_Impl.c"
 /* DO-NOT-DELETE splicer.begin(sidl.DFinder._includes) */
 #include "sidl_DLL.h"
 #include "sidl_String.h"
@@ -160,6 +161,7 @@ loadLibraryFromSCL(struct sidl_scl_entry *scl,
 }
 
 /* DO-NOT-DELETE splicer.end(sidl.DFinder._includes) */
+#line 164 "sidl_DFinder_Impl.c"
 
 /*
  * Static class initializer called exactly once before any user-defined method is dispatched
@@ -175,9 +177,11 @@ void
 impl_sidl_DFinder__load(
   void)
 {
+#line 178 "../../../babel/runtime/sidl/sidl_DFinder_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidl.DFinder._load) */
   /* Insert the implementation of the static class initializer method here... */
   /* DO-NOT-DELETE splicer.end(sidl.DFinder._load) */
+#line 184 "sidl_DFinder_Impl.c"
 }
 /*
  * Class constructor called when the class is created.
@@ -193,6 +197,7 @@ void
 impl_sidl_DFinder__ctor(
   /* in */ sidl_DFinder self)
 {
+#line 196 "../../../babel/runtime/sidl/sidl_DFinder_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidl.DFinder._ctor) */
   struct sidl_DFinder__data *dptr =
     (struct sidl_DFinder__data *)
@@ -202,6 +207,7 @@ impl_sidl_DFinder__ctor(
   }
   sidl_DFinder__set_data(self, dptr);
   /* DO-NOT-DELETE splicer.end(sidl.DFinder._ctor) */
+#line 210 "sidl_DFinder_Impl.c"
 }
 
 /*
@@ -218,6 +224,7 @@ void
 impl_sidl_DFinder__dtor(
   /* in */ sidl_DFinder self)
 {
+#line 221 "../../../babel/runtime/sidl/sidl_DFinder_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidl.DFinder._dtor) */
   struct sidl_DFinder__data *dptr =
     sidl_DFinder__get_data(self);
@@ -226,6 +233,7 @@ impl_sidl_DFinder__dtor(
     sidl_DFinder__set_data(self, NULL);
   }
   /* DO-NOT-DELETE splicer.end(sidl.DFinder._dtor) */
+#line 236 "sidl_DFinder_Impl.c"
 }
 
 /*
@@ -268,6 +276,7 @@ impl_sidl_DFinder_findLibrary(
   /* in */ enum sidl_Scope__enum lScope,
   /* in */ enum sidl_Resolve__enum lResolve)
 {
+#line 271 "../../../babel/runtime/sidl/sidl_DFinder_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidl.DFinder.findLibrary) */
   sidl_DLL result = NULL;
   struct sidl_scl_entry *scl = findSCLEntry(self, sidl_name, target);
@@ -278,6 +287,7 @@ impl_sidl_DFinder_findLibrary(
   return result;
 
   /* DO-NOT-DELETE splicer.end(sidl.DFinder.findLibrary) */
+#line 290 "sidl_DFinder_Impl.c"
 }
 
 /*
@@ -297,6 +307,7 @@ impl_sidl_DFinder_setSearchPath(
   /* in */ sidl_DFinder self,
   /* in */ const char* path_name)
 {
+#line 300 "../../../babel/runtime/sidl/sidl_DFinder_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidl.DFinder.setSearchPath) */
   struct sidl_DFinder__data *dptr = sidl_DFinder__get_data(self);
   sidl_String_free(dptr->d_search_path);
@@ -305,6 +316,7 @@ impl_sidl_DFinder_setSearchPath(
     dptr->d_search_path = sidl_String_strdup("");
   }
   /* DO-NOT-DELETE splicer.end(sidl.DFinder.setSearchPath) */
+#line 319 "sidl_DFinder_Impl.c"
 }
 
 /*
@@ -323,9 +335,11 @@ char*
 impl_sidl_DFinder_getSearchPath(
   /* in */ sidl_DFinder self)
 {
+#line 326 "../../../babel/runtime/sidl/sidl_DFinder_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidl.DFinder.getSearchPath) */
   return sidl_String_strdup(get_search_path(self));
   /* DO-NOT-DELETE splicer.end(sidl.DFinder.getSearchPath) */
+#line 342 "sidl_DFinder_Impl.c"
 }
 
 /*
@@ -346,6 +360,7 @@ impl_sidl_DFinder_addSearchPath(
   /* in */ sidl_DFinder self,
   /* in */ const char* path_fragment)
 {
+#line 349 "../../../babel/runtime/sidl/sidl_DFinder_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidl.DFinder.addSearchPath) */
   struct sidl_DFinder__data *dptr = sidl_DFinder__get_data(self);
   if (path_fragment) {
@@ -354,6 +369,7 @@ impl_sidl_DFinder_addSearchPath(
     dptr->d_search_path = s;
   }
   /* DO-NOT-DELETE splicer.end(sidl.DFinder.addSearchPath) */
+#line 372 "sidl_DFinder_Impl.c"
 }
 /* Babel internal methods, Users should not edit below this line. */
 struct sidl_DFinder__object* impl_sidl_DFinder_fconnect_sidl_DFinder(char* url,

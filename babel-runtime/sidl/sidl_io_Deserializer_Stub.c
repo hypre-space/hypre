@@ -2,7 +2,7 @@
  * File:          sidl_io_Deserializer_Stub.c
  * Symbol:        sidl.io.Deserializer-v0.9.3
  * Symbol Type:   interface
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.8
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Client-side glue code for sidl.io.Deserializer
@@ -32,7 +32,7 @@
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.8
  */
 
 #include "sidl_io_Deserializer.h"

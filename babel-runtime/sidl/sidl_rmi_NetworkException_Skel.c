@@ -2,7 +2,7 @@
  * File:          sidl_rmi_NetworkException_Skel.c
  * Symbol:        sidl.rmi.NetworkException-v0.9.3
  * Symbol Type:   class
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.8
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Server-side glue code for sidl.rmi.NetworkException
@@ -32,7 +32,7 @@
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.8
  */
 
 #include "sidl_rmi_NetworkException_IOR.h"

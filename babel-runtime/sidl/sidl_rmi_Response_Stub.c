@@ -2,7 +2,7 @@
  * File:          sidl_rmi_Response_Stub.c
  * Symbol:        sidl.rmi.Response-v0.9.3
  * Symbol Type:   interface
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.8
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Client-side glue code for sidl.rmi.Response
@@ -32,7 +32,7 @@
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.8
  */
 
 #include "sidl_rmi_Response.h"
@@ -1614,6 +1614,8 @@ remote_sidl_rmi__Response_getExceptionThrown(
   /* FIXME */
 
   /* extract return value */
+  sidl_rmi_Response_unpackString( _rsvp, "_retval", &_retval_str, _ex2);
+  _retval = sidl_BaseException__connect(_retval_str, _ex2);
 
   /* unpack out and inout arguments */
 

@@ -2,12 +2,12 @@
  * File:          sidlx_io_TxtIOStream_Impl.h
  * Symbol:        sidlx.io.TxtIOStream-v0.1
  * Symbol Type:   class
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.8
  * Description:   Server-side implementation for sidlx.io.TxtIOStream
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.8
  */
 
 #ifndef included_sidlx_io_TxtIOStream_Impl_h
@@ -41,19 +41,23 @@
 #include "sidlx_io_IStream.h"
 #endif
 
+#line 44 "../../../babel/runtime/sidlx/sidlx_io_TxtIOStream_Impl.h"
 /* DO-NOT-DELETE splicer.begin(sidlx.io.TxtIOStream._includes) */
 /* Put additional include files here... */
 /* DO-NOT-DELETE splicer.end(sidlx.io.TxtIOStream._includes) */
+#line 48 "sidlx_io_TxtIOStream_Impl.h"
 
 /*
  * Private data for class sidlx.io.TxtIOStream
  */
 
 struct sidlx_io_TxtIOStream__data {
+#line 53 "../../../babel/runtime/sidlx/sidlx_io_TxtIOStream_Impl.h"
   /* DO-NOT-DELETE splicer.begin(sidlx.io.TxtIOStream._data) */
   /* Put private data members here... */
   int ignore; /* dummy to force non-empty struct; remove if you add data */
   /* DO-NOT-DELETE splicer.end(sidlx.io.TxtIOStream._data) */
+#line 60 "sidlx_io_TxtIOStream_Impl.h"
 };
 
 #ifdef __cplusplus
@@ -148,14 +152,14 @@ int32_t
 impl_sidlx_io_TxtIOStream_read(
   /* in */ sidlx_io_TxtIOStream self,
   /* in */ int32_t nbytes,
-  /* out */ struct sidl_char__array** data,
+  /* out array<char,row-major> */ struct sidl_char__array** data,
   /* out */ sidl_BaseInterface *_ex);
 
 extern
 int32_t
 impl_sidlx_io_TxtIOStream_readline(
   /* in */ sidlx_io_TxtIOStream self,
-  /* out */ struct sidl_char__array** data,
+  /* out array<char,row-major> */ struct sidl_char__array** data,
   /* out */ sidl_BaseInterface *_ex);
 
 extern
@@ -230,7 +234,7 @@ extern
 int32_t
 impl_sidlx_io_TxtIOStream_write(
   /* in */ sidlx_io_TxtIOStream self,
-  /* in */ struct sidl_char__array* data,
+  /* in array<char,row-major> */ struct sidl_char__array* data,
   /* out */ sidl_BaseInterface *_ex);
 
 extern

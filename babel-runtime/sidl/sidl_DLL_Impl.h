@@ -2,7 +2,7 @@
  * File:          sidl_DLL_Impl.h
  * Symbol:        sidl.DLL-v0.9.3
  * Symbol Type:   class
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.8
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Server-side implementation for sidl.DLL
@@ -32,7 +32,7 @@
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.8
  */
 
 #ifndef included_sidl_DLL_Impl_h
@@ -54,6 +54,7 @@
 #include "sidl_BaseClass.h"
 #endif
 
+#line 57 "../../../babel/runtime/sidl/sidl_DLL_Impl.h"
 /* DO-NOT-DELETE splicer.begin(sidl.DLL._includes) */
 #if defined(PIC) || !defined(SIDL_PURE_STATIC_RUNTIME)
 #ifndef LTDL_H
@@ -63,16 +64,19 @@
 typedef void *lt_dlhandle;
 #endif /* defined(PIC) || !defined(SIDL_PURE_STATIC_RUNTIME) */
 /* DO-NOT-DELETE splicer.end(sidl.DLL._includes) */
+#line 67 "sidl_DLL_Impl.h"
 
 /*
  * Private data for class sidl.DLL
  */
 
 struct sidl_DLL__data {
+#line 72 "../../../babel/runtime/sidl/sidl_DLL_Impl.h"
   /* DO-NOT-DELETE splicer.begin(sidl.DLL._data) */
   lt_dlhandle d_library_handle;
   char* d_library_name;
   /* DO-NOT-DELETE splicer.end(sidl.DLL._data) */
+#line 79 "sidl_DLL_Impl.h"
 };
 
 #ifdef __cplusplus

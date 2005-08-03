@@ -2,7 +2,7 @@
  * File:          sidl_DLL_Module.c
  * Symbol:        sidl.DLL-v0.9.3
  * Symbol Type:   class
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.8
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   implement a C extension type for a sidl extendable
@@ -32,7 +32,7 @@
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.8
  */
 
 /*
@@ -658,8 +658,8 @@ Class instances are created by <code>createClass</code>."
   }
   Py_INCREF(&_sidl_DLLType);
   PyDict_SetItemString(dict, "DLL", (PyObject *)&_sidl_DLLType);
-  sidl_ClassInfo__import();
   sidl_BaseInterface__import();
+  sidl_ClassInfo__import();
   _implEPV = sidl_DLL__externals();
   if (!_implEPV) {
     Py_FatalError("Cannot load implementation for sidl class sidl.DLL");

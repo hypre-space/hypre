@@ -2,12 +2,12 @@
  * File:          sidlx_rmi_SimCall_Impl.c
  * Symbol:        sidlx.rmi.SimCall-v0.1
  * Symbol Type:   class
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.8
  * Description:   Server-side implementation for sidlx.rmi.SimCall
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.8
  */
 
 /*
@@ -24,6 +24,7 @@
 
 #include "sidlx_rmi_SimCall_Impl.h"
 
+#line 27 "../../../babel/runtime/sidlx/sidlx_rmi_SimCall_Impl.c"
 /* DO-NOT-DELETE splicer.begin(sidlx.rmi.SimCall._includes) */
 #include "sidlx_rmi_GenNetworkException.h"
 #include "sidlType.h"
@@ -96,6 +97,7 @@ static void flip32(int32_t* in) {
 
 
 /* DO-NOT-DELETE splicer.end(sidlx.rmi.SimCall._includes) */
+#line 100 "sidlx_rmi_SimCall_Impl.c"
 
 /*
  * Static class initializer called exactly once before any user-defined method is dispatched
@@ -111,9 +113,11 @@ void
 impl_sidlx_rmi_SimCall__load(
   void)
 {
+#line 114 "../../../babel/runtime/sidlx/sidlx_rmi_SimCall_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.SimCall._load) */
   /* insert implementation here: sidlx.rmi.SimCall._load (static class initializer method) */
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.SimCall._load) */
+#line 120 "sidlx_rmi_SimCall_Impl.c"
 }
 /*
  * Class constructor called when the class is created.
@@ -129,9 +133,11 @@ void
 impl_sidlx_rmi_SimCall__ctor(
   /* in */ sidlx_rmi_SimCall self)
 {
+#line 132 "../../../babel/runtime/sidlx/sidlx_rmi_SimCall_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.SimCall._ctor) */
   /* insert implementation here: sidlx.rmi.SimCall._ctor (constructor method) */
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.SimCall._ctor) */
+#line 140 "sidlx_rmi_SimCall_Impl.c"
 }
 
 /*
@@ -148,6 +154,7 @@ void
 impl_sidlx_rmi_SimCall__dtor(
   /* in */ sidlx_rmi_SimCall self)
 {
+#line 151 "../../../babel/runtime/sidlx/sidlx_rmi_SimCall_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.SimCall._dtor) */
   struct sidlx_rmi_SimCall__data *dptr =
     sidlx_rmi_SimCall__get_data(self);
@@ -162,6 +169,7 @@ impl_sidlx_rmi_SimCall__dtor(
        sidlx_rmi_SimReturn__set_data(self, NULL); */
   }
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.SimCall._dtor) */
+#line 172 "sidlx_rmi_SimCall_Impl.c"
 }
 
 /*
@@ -180,6 +188,7 @@ impl_sidlx_rmi_SimCall_init(
   /* in */ sidlx_rmi_Socket sock,
   /* out */ sidl_BaseInterface *_ex)
 {
+#line 183 "../../../babel/runtime/sidlx/sidlx_rmi_SimCall_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.SimCall.init) */
   struct sidlx_rmi_SimCall__data *dptr =
     sidlx_rmi_SimCall__get_data(self);
@@ -257,6 +266,7 @@ impl_sidlx_rmi_SimCall_init(
  EXIT:
   return;
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.SimCall.init) */
+#line 269 "sidlx_rmi_SimCall_Impl.c"
 }
 
 /*
@@ -274,6 +284,7 @@ impl_sidlx_rmi_SimCall_getMethodName(
   /* in */ sidlx_rmi_SimCall self,
   /* out */ sidl_BaseInterface *_ex)
 {
+#line 277 "../../../babel/runtime/sidlx/sidlx_rmi_SimCall_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.SimCall.getMethodName) */
   struct sidlx_rmi_SimCall__data *dptr =
     sidlx_rmi_SimCall__get_data(self);
@@ -286,6 +297,7 @@ impl_sidlx_rmi_SimCall_getMethodName(
   return NULL;
 
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.SimCall.getMethodName) */
+#line 300 "sidlx_rmi_SimCall_Impl.c"
 }
 
 /*
@@ -303,6 +315,7 @@ impl_sidlx_rmi_SimCall_getObjectID(
   /* in */ sidlx_rmi_SimCall self,
   /* out */ sidl_BaseInterface *_ex)
 {
+#line 306 "../../../babel/runtime/sidlx/sidlx_rmi_SimCall_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.SimCall.getObjectID) */
   struct sidlx_rmi_SimCall__data *dptr =
     sidlx_rmi_SimCall__get_data(self);
@@ -314,6 +327,7 @@ impl_sidlx_rmi_SimCall_getObjectID(
  EXIT:
   return NULL;
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.SimCall.getObjectID) */
+#line 330 "sidlx_rmi_SimCall_Impl.c"
 }
 
 /*
@@ -331,6 +345,7 @@ impl_sidlx_rmi_SimCall_getClassName(
   /* in */ sidlx_rmi_SimCall self,
   /* out */ sidl_BaseInterface *_ex)
 {
+#line 334 "../../../babel/runtime/sidlx/sidlx_rmi_SimCall_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.SimCall.getClassName) */
   struct sidlx_rmi_SimCall__data *dptr =
     sidlx_rmi_SimCall__get_data(self);
@@ -342,6 +357,7 @@ impl_sidlx_rmi_SimCall_getClassName(
  EXIT:
   return NULL;
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.SimCall.getClassName) */
+#line 360 "sidlx_rmi_SimCall_Impl.c"
 }
 
 /*
@@ -359,6 +375,7 @@ impl_sidlx_rmi_SimCall_getCallType(
   /* in */ sidlx_rmi_SimCall self,
   /* out */ sidl_BaseInterface *_ex)
 {
+#line 362 "../../../babel/runtime/sidlx/sidlx_rmi_SimCall_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.SimCall.getCallType) */
   struct sidlx_rmi_SimCall__data *dptr =
     sidlx_rmi_SimCall__get_data(self);
@@ -370,6 +387,7 @@ impl_sidlx_rmi_SimCall_getCallType(
  EXIT:
   return 0;
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.SimCall.getCallType) */
+#line 390 "sidlx_rmi_SimCall_Impl.c"
 }
 
 /*
@@ -389,6 +407,7 @@ impl_sidlx_rmi_SimCall_unpackBool(
   /* out */ sidl_bool* value,
   /* out */ sidl_BaseInterface *_ex)
 {
+#line 392 "../../../babel/runtime/sidlx/sidlx_rmi_SimCall_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.SimCall.unpackBool) */
     struct sidlx_rmi_SimCall__data *dptr =
     sidlx_rmi_SimCall__get_data(self);
@@ -406,6 +425,7 @@ impl_sidlx_rmi_SimCall_unpackBool(
  EXIT:
   return;
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.SimCall.unpackBool) */
+#line 428 "sidlx_rmi_SimCall_Impl.c"
 }
 
 /*
@@ -425,6 +445,7 @@ impl_sidlx_rmi_SimCall_unpackChar(
   /* out */ char* value,
   /* out */ sidl_BaseInterface *_ex)
 {
+#line 428 "../../../babel/runtime/sidlx/sidlx_rmi_SimCall_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.SimCall.unpackChar) */
   struct sidlx_rmi_SimCall__data *dptr =
     sidlx_rmi_SimCall__get_data(self);
@@ -436,6 +457,7 @@ impl_sidlx_rmi_SimCall_unpackChar(
  EXIT:
   return;
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.SimCall.unpackChar) */
+#line 460 "sidlx_rmi_SimCall_Impl.c"
 }
 
 /*
@@ -455,6 +477,7 @@ impl_sidlx_rmi_SimCall_unpackInt(
   /* out */ int32_t* value,
   /* out */ sidl_BaseInterface *_ex)
 {
+#line 458 "../../../babel/runtime/sidlx/sidlx_rmi_SimCall_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.SimCall.unpackInt) */
   struct sidlx_rmi_SimCall__data *dptr =
     sidlx_rmi_SimCall__get_data(self);
@@ -468,6 +491,7 @@ impl_sidlx_rmi_SimCall_unpackInt(
  EXIT:
   return;
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.SimCall.unpackInt) */
+#line 494 "sidlx_rmi_SimCall_Impl.c"
 }
 
 /*
@@ -487,6 +511,7 @@ impl_sidlx_rmi_SimCall_unpackLong(
   /* out */ int64_t* value,
   /* out */ sidl_BaseInterface *_ex)
 {
+#line 490 "../../../babel/runtime/sidlx/sidlx_rmi_SimCall_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.SimCall.unpackLong) */
   struct sidlx_rmi_SimCall__data *dptr =
     sidlx_rmi_SimCall__get_data(self);
@@ -508,6 +533,7 @@ impl_sidlx_rmi_SimCall_unpackLong(
   return;
 
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.SimCall.unpackLong) */
+#line 536 "sidlx_rmi_SimCall_Impl.c"
 }
 
 /*
@@ -527,6 +553,7 @@ impl_sidlx_rmi_SimCall_unpackFloat(
   /* out */ float* value,
   /* out */ sidl_BaseInterface *_ex)
 {
+#line 530 "../../../babel/runtime/sidlx/sidlx_rmi_SimCall_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.SimCall.unpackFloat) */
   struct sidlx_rmi_SimCall__data *dptr =
     sidlx_rmi_SimCall__get_data(self);
@@ -545,6 +572,7 @@ impl_sidlx_rmi_SimCall_unpackFloat(
  EXIT:
   return;
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.SimCall.unpackFloat) */
+#line 575 "sidlx_rmi_SimCall_Impl.c"
 }
 
 /*
@@ -564,6 +592,7 @@ impl_sidlx_rmi_SimCall_unpackDouble(
   /* out */ double* value,
   /* out */ sidl_BaseInterface *_ex)
 {
+#line 567 "../../../babel/runtime/sidlx/sidlx_rmi_SimCall_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.SimCall.unpackDouble) */
   struct sidlx_rmi_SimCall__data *dptr =
     sidlx_rmi_SimCall__get_data(self);
@@ -583,6 +612,7 @@ impl_sidlx_rmi_SimCall_unpackDouble(
  EXIT:
   return;
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.SimCall.unpackDouble) */
+#line 615 "sidlx_rmi_SimCall_Impl.c"
 }
 
 /*
@@ -602,6 +632,7 @@ impl_sidlx_rmi_SimCall_unpackFcomplex(
   /* out */ struct sidl_fcomplex* value,
   /* out */ sidl_BaseInterface *_ex)
 {
+#line 605 "../../../babel/runtime/sidlx/sidlx_rmi_SimCall_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.SimCall.unpackFcomplex) */
   struct sidlx_rmi_SimCall__data *dptr =
     sidlx_rmi_SimCall__get_data(self);
@@ -624,6 +655,7 @@ impl_sidlx_rmi_SimCall_unpackFcomplex(
  EXIT:
   return;
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.SimCall.unpackFcomplex) */
+#line 658 "sidlx_rmi_SimCall_Impl.c"
 }
 
 /*
@@ -643,6 +675,7 @@ impl_sidlx_rmi_SimCall_unpackDcomplex(
   /* out */ struct sidl_dcomplex* value,
   /* out */ sidl_BaseInterface *_ex)
 {
+#line 646 "../../../babel/runtime/sidlx/sidlx_rmi_SimCall_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.SimCall.unpackDcomplex) */
   struct sidlx_rmi_SimCall__data *dptr =
     sidlx_rmi_SimCall__get_data(self);
@@ -665,6 +698,7 @@ impl_sidlx_rmi_SimCall_unpackDcomplex(
  EXIT:
   return;
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.SimCall.unpackDcomplex) */
+#line 701 "sidlx_rmi_SimCall_Impl.c"
 }
 
 /*
@@ -684,6 +718,7 @@ impl_sidlx_rmi_SimCall_unpackString(
   /* out */ char** value,
   /* out */ sidl_BaseInterface *_ex)
 {
+#line 687 "../../../babel/runtime/sidlx/sidlx_rmi_SimCall_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.SimCall.unpackString) */
     struct sidlx_rmi_SimCall__data *dptr =
     sidlx_rmi_SimCall__get_data(self);
@@ -701,6 +736,7 @@ impl_sidlx_rmi_SimCall_unpackString(
  EXIT:
   return;
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.SimCall.unpackString) */
+#line 739 "sidlx_rmi_SimCall_Impl.c"
 }
 /* Babel internal methods, Users should not edit below this line. */
 struct sidl_ClassInfo__object* 

@@ -2,12 +2,12 @@
  * File:          sidlx_rmi_SimCall_Impl.h
  * Symbol:        sidlx.rmi.SimCall-v0.1
  * Symbol Type:   class
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.8
  * Description:   Server-side implementation for sidlx.rmi.SimCall
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.8
  */
 
 #ifndef included_sidlx_rmi_SimCall_Impl_h
@@ -41,15 +41,18 @@
 #include "sidl_BaseClass.h"
 #endif
 
+#line 44 "../../../babel/runtime/sidlx/sidlx_rmi_SimCall_Impl.h"
 /* DO-NOT-DELETE splicer.begin(sidlx.rmi.SimCall._includes) */
 /* insert implementation here: sidlx.rmi.SimCall._includes (include files) */
 /* DO-NOT-DELETE splicer.end(sidlx.rmi.SimCall._includes) */
+#line 48 "sidlx_rmi_SimCall_Impl.h"
 
 /*
  * Private data for class sidlx.rmi.SimCall
  */
 
 struct sidlx_rmi_SimCall__data {
+#line 53 "../../../babel/runtime/sidlx/sidlx_rmi_SimCall_Impl.h"
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.SimCall._data) */
   /* insert implementation here: sidlx.rmi.SimCall._data (private data members) */
   struct sidl_char__array *d_carray;
@@ -61,6 +64,7 @@ struct sidlx_rmi_SimCall__data {
   char *d_objid;
   enum sidlx_rmi_CallType__enum d_calltype; /*EXEC, CREATE, or CONNECT*/
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.SimCall._data) */
+#line 67 "sidlx_rmi_SimCall_Impl.h"
 };
 
 #ifdef __cplusplus

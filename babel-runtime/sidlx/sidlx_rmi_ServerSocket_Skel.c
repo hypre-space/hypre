@@ -2,12 +2,12 @@
  * File:          sidlx_rmi_ServerSocket_Skel.c
  * Symbol:        sidlx.rmi.ServerSocket-v0.1
  * Symbol Type:   class
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.8
  * Description:   Server-side glue code for sidlx.rmi.ServerSocket
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.8
  */
 
 #include "sidlx_rmi_ServerSocket_IOR.h"

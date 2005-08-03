@@ -2,7 +2,7 @@
  * File:          sidl_SIDLException_Impl.c
  * Symbol:        sidl.SIDLException-v0.9.3
  * Symbol Type:   class
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.8
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Server-side implementation for sidl.SIDLException
@@ -32,7 +32,7 @@
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.8
  */
 
 /*
@@ -50,6 +50,7 @@
 
 #include "sidl_SIDLException_Impl.h"
 
+#line 53 "../../../babel/runtime/sidl/sidl_SIDLException_Impl.c"
 /* DO-NOT-DELETE splicer.begin(sidl.SIDLException._includes) */
 #include <stdlib.h>
 #include <string.h>
@@ -60,6 +61,7 @@ struct sidl_SIDLException_Trace {
   char                             *line;
 };
 /* DO-NOT-DELETE splicer.end(sidl.SIDLException._includes) */
+#line 64 "sidl_SIDLException_Impl.c"
 
 /*
  * Static class initializer called exactly once before any user-defined method is dispatched
@@ -75,9 +77,11 @@ void
 impl_sidl_SIDLException__load(
   void)
 {
+#line 78 "../../../babel/runtime/sidl/sidl_SIDLException_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidl.SIDLException._load) */
   /* Insert the implementation of the static class initializer method here... */
   /* DO-NOT-DELETE splicer.end(sidl.SIDLException._load) */
+#line 84 "sidl_SIDLException_Impl.c"
 }
 /*
  * Class constructor called when the class is created.
@@ -93,6 +97,7 @@ void
 impl_sidl_SIDLException__ctor(
   /* in */ sidl_SIDLException self)
 {
+#line 96 "../../../babel/runtime/sidl/sidl_SIDLException_Impl.c"
    /* DO-NOT-DELETE splicer.begin(sidl.SIDLException._ctor) */
   struct sidl_SIDLException__data *data = 
     (struct sidl_SIDLException__data *)
@@ -108,6 +113,7 @@ impl_sidl_SIDLException__ctor(
 
   sidl_SIDLException__set_data(self, data);
    /* DO-NOT-DELETE splicer.end(sidl.SIDLException._ctor) */
+#line 116 "sidl_SIDLException_Impl.c"
 }
 
 /*
@@ -124,6 +130,7 @@ void
 impl_sidl_SIDLException__dtor(
   /* in */ sidl_SIDLException self)
 {
+#line 127 "../../../babel/runtime/sidl/sidl_SIDLException_Impl.c"
    /* DO-NOT-DELETE splicer.begin(sidl.SIDLException._dtor) */
   struct sidl_SIDLException__data *data = 
     (self ? sidl_SIDLException__get_data(self) : NULL);
@@ -156,6 +163,7 @@ impl_sidl_SIDLException__dtor(
     sidl_SIDLException__set_data(self, NULL);
   }
    /* DO-NOT-DELETE splicer.end(sidl.SIDLException._dtor) */
+#line 166 "sidl_SIDLException_Impl.c"
 }
 
 /*
@@ -172,6 +180,7 @@ char*
 impl_sidl_SIDLException_getNote(
   /* in */ sidl_SIDLException self)
 {
+#line 175 "../../../babel/runtime/sidl/sidl_SIDLException_Impl.c"
    /* DO-NOT-DELETE splicer.begin(sidl.SIDLException.getNote) */
   struct sidl_SIDLException__data *data = 
     (self ? sidl_SIDLException__get_data(self) : NULL);
@@ -182,6 +191,7 @@ impl_sidl_SIDLException_getNote(
      : NULL);
   return result;
    /* DO-NOT-DELETE splicer.end(sidl.SIDLException.getNote) */
+#line 194 "sidl_SIDLException_Impl.c"
 }
 
 /*
@@ -199,6 +209,7 @@ impl_sidl_SIDLException_setNote(
   /* in */ sidl_SIDLException self,
   /* in */ const char* message)
 {
+#line 202 "../../../babel/runtime/sidl/sidl_SIDLException_Impl.c"
    /* DO-NOT-DELETE splicer.begin(sidl.SIDLException.setNote) */
   struct sidl_SIDLException__data *data = 
     (self ? sidl_SIDLException__get_data(self) : NULL);
@@ -212,6 +223,7 @@ impl_sidl_SIDLException_setNote(
        : NULL);
   }
    /* DO-NOT-DELETE splicer.end(sidl.SIDLException.setNote) */
+#line 226 "sidl_SIDLException_Impl.c"
 }
 
 /*
@@ -229,6 +241,7 @@ char*
 impl_sidl_SIDLException_getTrace(
   /* in */ sidl_SIDLException self)
 {
+#line 232 "../../../babel/runtime/sidl/sidl_SIDLException_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidl.SIDLException.getTrace) */
   char* tmp = NULL;
   struct sidl_SIDLException__data *data = 
@@ -253,6 +266,7 @@ impl_sidl_SIDLException_getTrace(
   }
   return tmp;
   /* DO-NOT-DELETE splicer.end(sidl.SIDLException.getTrace) */
+#line 269 "sidl_SIDLException_Impl.c"
 }
 
 /*
@@ -270,6 +284,7 @@ impl_sidl_SIDLException_addLine(
   /* in */ sidl_SIDLException self,
   /* in */ const char* traceline)
 {
+#line 273 "../../../babel/runtime/sidl/sidl_SIDLException_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidl.SIDLException.addLine) */
   struct sidl_SIDLException__data *data = 
     (self ? sidl_SIDLException__get_data(self) : NULL);
@@ -305,6 +320,7 @@ impl_sidl_SIDLException_addLine(
     }
   }
   /* DO-NOT-DELETE splicer.end(sidl.SIDLException.addLine) */
+#line 323 "sidl_SIDLException_Impl.c"
 }
 
 /*
@@ -325,6 +341,7 @@ impl_sidl_SIDLException_add(
   /* in */ int32_t lineno,
   /* in */ const char* methodname)
 {
+#line 328 "../../../babel/runtime/sidl/sidl_SIDLException_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidl.SIDLException.add) */
   /*
    *  The estimated length of the trace line is the sum of the lengths of
@@ -369,6 +386,7 @@ impl_sidl_SIDLException_add(
     free((void*)tmpline);
   }
   /* DO-NOT-DELETE splicer.end(sidl.SIDLException.add) */
+#line 389 "sidl_SIDLException_Impl.c"
 }
 /* Babel internal methods, Users should not edit below this line. */
 struct sidl_SIDLException__object* 

@@ -2,12 +2,12 @@
  * File:          sidlx_rmi_ChildSocket_Impl.c
  * Symbol:        sidlx.rmi.ChildSocket-v0.1
  * Symbol Type:   class
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.8
  * Description:   Server-side implementation for sidlx.rmi.ChildSocket
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.8
  */
 
 /*
@@ -23,9 +23,11 @@
 
 #include "sidlx_rmi_ChildSocket_Impl.h"
 
+#line 26 "../../../babel/runtime/sidlx/sidlx_rmi_ChildSocket_Impl.c"
 /* DO-NOT-DELETE splicer.begin(sidlx.rmi.ChildSocket._includes) */
 /* insert implementation here: sidlx.rmi.ChildSocket._includes (includes and arbitrary code) */
 /* DO-NOT-DELETE splicer.end(sidlx.rmi.ChildSocket._includes) */
+#line 30 "sidlx_rmi_ChildSocket_Impl.c"
 
 /*
  * Static class initializer called exactly once before any user-defined method is dispatched
@@ -41,9 +43,11 @@ void
 impl_sidlx_rmi_ChildSocket__load(
   void)
 {
+#line 44 "../../../babel/runtime/sidlx/sidlx_rmi_ChildSocket_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.ChildSocket._load) */
   /* insert implementation here: sidlx.rmi.ChildSocket._load (static class initializer method) */
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.ChildSocket._load) */
+#line 50 "sidlx_rmi_ChildSocket_Impl.c"
 }
 /*
  * Class constructor called when the class is created.
@@ -59,9 +63,11 @@ void
 impl_sidlx_rmi_ChildSocket__ctor(
   /* in */ sidlx_rmi_ChildSocket self)
 {
+#line 62 "../../../babel/runtime/sidlx/sidlx_rmi_ChildSocket_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.ChildSocket._ctor) */
   /* insert implementation here: sidlx.rmi.ChildSocket._ctor (constructor method) */
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.ChildSocket._ctor) */
+#line 70 "sidlx_rmi_ChildSocket_Impl.c"
 }
 
 /*
@@ -78,9 +84,11 @@ void
 impl_sidlx_rmi_ChildSocket__dtor(
   /* in */ sidlx_rmi_ChildSocket self)
 {
+#line 81 "../../../babel/runtime/sidlx/sidlx_rmi_ChildSocket_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.ChildSocket._dtor) */
   /* insert implementation here: sidlx.rmi.ChildSocket._dtor (destructor method) */
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.ChildSocket._dtor) */
+#line 91 "sidlx_rmi_ChildSocket_Impl.c"
 }
 
 /*
@@ -99,6 +107,7 @@ impl_sidlx_rmi_ChildSocket_init(
   /* in */ int32_t fileDes,
   /* out */ sidl_BaseInterface *_ex)
 {
+#line 102 "../../../babel/runtime/sidlx/sidlx_rmi_ChildSocket_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.ChildSocket.init) */
   /*  struct sidlx_rmi_ChildSocket__data *dptr =
      sidlx_rmi_ChildSocket__get_data(self);
@@ -111,6 +120,7 @@ impl_sidlx_rmi_ChildSocket_init(
     sidlx_rmi_ChildSocket__set_data(self, dptr);*/
   sidlx_rmi_ChildSocket_setFileDescriptor(self, fileDes, _ex);
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.ChildSocket.init) */
+#line 123 "sidlx_rmi_ChildSocket_Impl.c"
 }
 /* Babel internal methods, Users should not edit below this line. */
 struct sidl_ClassInfo__object* 

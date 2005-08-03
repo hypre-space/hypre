@@ -2,12 +2,12 @@
  * File:          sidlx_rmi_SimpleOrb_Impl.c
  * Symbol:        sidlx.rmi.SimpleOrb-v0.1
  * Symbol Type:   class
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.8
  * Description:   Server-side implementation for sidlx.rmi.SimpleOrb
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.8
  */
 
 /*
@@ -23,6 +23,7 @@
 
 #include "sidlx_rmi_SimpleOrb_Impl.h"
 
+#line 26 "../../../babel/runtime/sidlx/sidlx_rmi_SimpleOrb_Impl.c"
 /* DO-NOT-DELETE splicer.begin(sidlx.rmi.SimpleOrb._includes) */
 #include "sidlx_common.h"
 #include "sidl_Loader.h"
@@ -33,6 +34,7 @@
 #include "sidl_io_Serializer.h"
 #include "sidl_rmi_InstanceRegistry.h"
 /* DO-NOT-DELETE splicer.end(sidlx.rmi.SimpleOrb._includes) */
+#line 37 "sidlx_rmi_SimpleOrb_Impl.c"
 
 /*
  * Static class initializer called exactly once before any user-defined method is dispatched
@@ -48,9 +50,11 @@ void
 impl_sidlx_rmi_SimpleOrb__load(
   void)
 {
+#line 51 "../../../babel/runtime/sidlx/sidlx_rmi_SimpleOrb_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.SimpleOrb._load) */
   /* Insert the implementation of the static class initializer method here... */
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.SimpleOrb._load) */
+#line 57 "sidlx_rmi_SimpleOrb_Impl.c"
 }
 /*
  * Class constructor called when the class is created.
@@ -66,9 +70,11 @@ void
 impl_sidlx_rmi_SimpleOrb__ctor(
   /* in */ sidlx_rmi_SimpleOrb self)
 {
+#line 69 "../../../babel/runtime/sidlx/sidlx_rmi_SimpleOrb_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.SimpleOrb._ctor) */
   /* Insert the implementation of the constructor method here... */
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.SimpleOrb._ctor) */
+#line 77 "sidlx_rmi_SimpleOrb_Impl.c"
 }
 
 /*
@@ -85,9 +91,11 @@ void
 impl_sidlx_rmi_SimpleOrb__dtor(
   /* in */ sidlx_rmi_SimpleOrb self)
 {
+#line 88 "../../../babel/runtime/sidlx/sidlx_rmi_SimpleOrb_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.SimpleOrb._dtor) */
   /* Insert the implementation of the destructor method here... */
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.SimpleOrb._dtor) */
+#line 98 "sidlx_rmi_SimpleOrb_Impl.c"
 }
 
 /*
@@ -106,6 +114,7 @@ impl_sidlx_rmi_SimpleOrb_serviceRequest(
   /* in */ sidlx_rmi_Socket sock,
   /* out */ sidl_BaseInterface *_ex)
 {
+#line 109 "../../../babel/runtime/sidlx/sidlx_rmi_SimpleOrb_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.SimpleOrb.serviceRequest) */
   sidlx_rmi_SimCall call = sidlx_rmi_SimCall__create();
   sidlx_rmi_SimReturn ret = sidlx_rmi_SimReturn__create();
@@ -161,6 +170,7 @@ impl_sidlx_rmi_SimpleOrb_serviceRequest(
   if (className) free(className);
   return;
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.SimpleOrb.serviceRequest) */
+#line 173 "sidlx_rmi_SimpleOrb_Impl.c"
 }
 /* Babel internal methods, Users should not edit below this line. */
 struct sidlx_rmi_SimpleOrb__object* 

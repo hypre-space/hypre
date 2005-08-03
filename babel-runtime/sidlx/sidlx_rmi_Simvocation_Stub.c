@@ -2,12 +2,12 @@
  * File:          sidlx_rmi_Simvocation_Stub.c
  * Symbol:        sidlx.rmi.Simvocation-v0.1
  * Symbol Type:   class
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.8
  * Description:   Client-side glue code for sidlx.rmi.Simvocation
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.8
  */
 
 #include "sidlx_rmi_Simvocation.h"
@@ -1361,6 +1361,8 @@ remote_sidlx_rmi_Simvocation_init(
   sidl_rmi_Invocation_packString( _inv, "methodName", methodName, _ex2);
   sidl_rmi_Invocation_packString( _inv, "className", className, _ex2);
   sidl_rmi_Invocation_packString( _inv, "objectid", objectid, _ex2);
+  sidl_rmi_Invocation_packString( _inv, "sock", sidlx_rmi_Socket__getURL(sock),
+    _ex2);
 
   /* send actual RMI request */
   _rsvp = sidl_rmi_Invocation_invokeMethod(_inv,_ex2);
@@ -1751,6 +1753,8 @@ remote_sidlx_rmi_Simvocation_invokeMethod(
   /* FIXME */
 
   /* extract return value */
+  sidl_rmi_Response_unpackString( _rsvp, "_retval", &_retval_str, _ex2);
+  _retval = sidl_rmi_Response__connect(_retval_str, _ex2);
 
   /* unpack out and inout arguments */
 

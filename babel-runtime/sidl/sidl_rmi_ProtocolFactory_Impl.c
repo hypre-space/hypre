@@ -2,7 +2,7 @@
  * File:          sidl_rmi_ProtocolFactory_Impl.c
  * Symbol:        sidl.rmi.ProtocolFactory-v0.9.3
  * Symbol Type:   class
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.8
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Server-side implementation for sidl.rmi.ProtocolFactory
@@ -32,7 +32,7 @@
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.8
  */
 
 /*
@@ -50,6 +50,7 @@
 
 #include "sidl_rmi_ProtocolFactory_Impl.h"
 
+#line 53 "../../../babel/runtime/sidl/sidl_rmi_ProtocolFactory_Impl.c"
 /* DO-NOT-DELETE splicer.begin(sidl.rmi.ProtocolFactory._includes) */
 #include <string.h>
 #include <stdio.h>
@@ -176,6 +177,7 @@ static void parseURL(char* url, char** protocol, char** server, int* port,
 }
 
 /* DO-NOT-DELETE splicer.end(sidl.rmi.ProtocolFactory._includes) */
+#line 180 "sidl_rmi_ProtocolFactory_Impl.c"
 
 /*
  * Static class initializer called exactly once before any user-defined method is dispatched
@@ -191,11 +193,13 @@ void
 impl_sidl_rmi_ProtocolFactory__load(
   void)
 {
+#line 194 "../../../babel/runtime/sidl/sidl_rmi_ProtocolFactory_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidl.rmi.ProtocolFactory._load) */
   maxlen=1024;
   reg = (char**) malloc ( sizeof(char*)*maxlen*2 );
   len = 0;
   /* DO-NOT-DELETE splicer.end(sidl.rmi.ProtocolFactory._load) */
+#line 202 "sidl_rmi_ProtocolFactory_Impl.c"
 }
 /*
  * Class constructor called when the class is created.
@@ -211,9 +215,11 @@ void
 impl_sidl_rmi_ProtocolFactory__ctor(
   /* in */ sidl_rmi_ProtocolFactory self)
 {
+#line 214 "../../../babel/runtime/sidl/sidl_rmi_ProtocolFactory_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidl.rmi.ProtocolFactory._ctor) */
   /* Insert the implementation of the constructor method here... */
   /* DO-NOT-DELETE splicer.end(sidl.rmi.ProtocolFactory._ctor) */
+#line 222 "sidl_rmi_ProtocolFactory_Impl.c"
 }
 
 /*
@@ -230,9 +236,11 @@ void
 impl_sidl_rmi_ProtocolFactory__dtor(
   /* in */ sidl_rmi_ProtocolFactory self)
 {
+#line 233 "../../../babel/runtime/sidl/sidl_rmi_ProtocolFactory_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidl.rmi.ProtocolFactory._dtor) */
   /* Insert the implementation of the destructor method here... */
   /* DO-NOT-DELETE splicer.end(sidl.rmi.ProtocolFactory._dtor) */
+#line 243 "sidl_rmi_ProtocolFactory_Impl.c"
 }
 
 /*
@@ -253,6 +261,7 @@ impl_sidl_rmi_ProtocolFactory_addProtocol(
   /* in */ const char* typeName,
   /* out */ sidl_BaseInterface *_ex)
 {
+#line 256 "../../../babel/runtime/sidl/sidl_rmi_ProtocolFactory_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidl.rmi.ProtocolFactory.addProtocol) */
   int i;
   /* push new protocol to back of list */
@@ -271,6 +280,7 @@ impl_sidl_rmi_ProtocolFactory_addProtocol(
   len++;
   return TRUE;
   /* DO-NOT-DELETE splicer.end(sidl.rmi.ProtocolFactory.addProtocol) */
+#line 283 "sidl_rmi_ProtocolFactory_Impl.c"
 }
 
 /*
@@ -289,6 +299,7 @@ impl_sidl_rmi_ProtocolFactory_getProtocol(
   /* in */ const char* prefix,
   /* out */ sidl_BaseInterface *_ex)
 {
+#line 292 "../../../babel/runtime/sidl/sidl_rmi_ProtocolFactory_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidl.rmi.ProtocolFactory.getProtocol) */
   int i;
   for (i=0;i<2*len;i+=2) { 
@@ -298,6 +309,7 @@ impl_sidl_rmi_ProtocolFactory_getProtocol(
   }
   return NULL;
   /* DO-NOT-DELETE splicer.end(sidl.rmi.ProtocolFactory.getProtocol) */
+#line 312 "sidl_rmi_ProtocolFactory_Impl.c"
 }
 
 /*
@@ -315,6 +327,7 @@ impl_sidl_rmi_ProtocolFactory_deleteProtocol(
   /* in */ const char* prefix,
   /* out */ sidl_BaseInterface *_ex)
 {
+#line 318 "../../../babel/runtime/sidl/sidl_rmi_ProtocolFactory_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidl.rmi.ProtocolFactory.deleteProtocol) */
   int i;
   for (i=0;i<2*len;i+=2) { 
@@ -339,6 +352,7 @@ impl_sidl_rmi_ProtocolFactory_deleteProtocol(
   }
   return FALSE;
   /* DO-NOT-DELETE splicer.end(sidl.rmi.ProtocolFactory.deleteProtocol) */
+#line 355 "sidl_rmi_ProtocolFactory_Impl.c"
 }
 
 /*
@@ -359,6 +373,7 @@ impl_sidl_rmi_ProtocolFactory_createInstance(
   /* in */ const char* typeName,
   /* out */ sidl_BaseInterface *_ex)
 {
+#line 362 "../../../babel/runtime/sidl/sidl_rmi_ProtocolFactory_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidl.rmi.ProtocolFactory.createInstance) */
   char * prefix = NULL;
   char * protocol = NULL;
@@ -402,6 +417,7 @@ impl_sidl_rmi_ProtocolFactory_createInstance(
   }
   return ih;  /* On error, ih will be NULL*/
   /* DO-NOT-DELETE splicer.end(sidl.rmi.ProtocolFactory.createInstance) */
+#line 420 "sidl_rmi_ProtocolFactory_Impl.c"
 }
 
 /*
@@ -422,6 +438,7 @@ impl_sidl_rmi_ProtocolFactory_connectInstance(
   /* in */ const char* url,
   /* out */ sidl_BaseInterface *_ex)
 {
+#line 425 "../../../babel/runtime/sidl/sidl_rmi_ProtocolFactory_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidl.rmi.ProtocolFactory.connectInstance) */
   char * prefix = NULL;
   char * protocol = NULL;
@@ -470,6 +487,7 @@ impl_sidl_rmi_ProtocolFactory_connectInstance(
   }
   return ih; /* Will be NULL if there is a problem*/
   /* DO-NOT-DELETE splicer.end(sidl.rmi.ProtocolFactory.connectInstance) */
+#line 490 "sidl_rmi_ProtocolFactory_Impl.c"
 }
 /* Babel internal methods, Users should not edit below this line. */
 struct sidl_rmi_InstanceHandle__object* 

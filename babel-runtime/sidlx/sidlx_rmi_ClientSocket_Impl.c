@@ -2,12 +2,12 @@
  * File:          sidlx_rmi_ClientSocket_Impl.c
  * Symbol:        sidlx.rmi.ClientSocket-v0.1
  * Symbol Type:   class
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.8
  * Description:   Server-side implementation for sidlx.rmi.ClientSocket
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.8
  */
 
 /*
@@ -23,10 +23,12 @@
 
 #include "sidlx_rmi_ClientSocket_Impl.h"
 
+#line 26 "../../../babel/runtime/sidlx/sidlx_rmi_ClientSocket_Impl.c"
 /* DO-NOT-DELETE splicer.begin(sidlx.rmi.ClientSocket._includes) */
 #include "sidlx_rmi_Socket.h"
 #include "sidlx_rmi_Common.h"
 /* DO-NOT-DELETE splicer.end(sidlx.rmi.ClientSocket._includes) */
+#line 31 "sidlx_rmi_ClientSocket_Impl.c"
 
 /*
  * Static class initializer called exactly once before any user-defined method is dispatched
@@ -42,9 +44,11 @@ void
 impl_sidlx_rmi_ClientSocket__load(
   void)
 {
+#line 45 "../../../babel/runtime/sidlx/sidlx_rmi_ClientSocket_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.ClientSocket._load) */
   /* insert implementation here: sidlx.rmi.ClientSocket._load (static class initializer method) */
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.ClientSocket._load) */
+#line 51 "sidlx_rmi_ClientSocket_Impl.c"
 }
 /*
  * Class constructor called when the class is created.
@@ -60,9 +64,11 @@ void
 impl_sidlx_rmi_ClientSocket__ctor(
   /* in */ sidlx_rmi_ClientSocket self)
 {
+#line 63 "../../../babel/runtime/sidlx/sidlx_rmi_ClientSocket_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.ClientSocket._ctor) */
   /* insert implementation here: sidlx.rmi.ClientSocket._ctor (constructor method) */
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.ClientSocket._ctor) */
+#line 71 "sidlx_rmi_ClientSocket_Impl.c"
 }
 
 /*
@@ -79,9 +85,11 @@ void
 impl_sidlx_rmi_ClientSocket__dtor(
   /* in */ sidlx_rmi_ClientSocket self)
 {
+#line 82 "../../../babel/runtime/sidlx/sidlx_rmi_ClientSocket_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.ClientSocket._dtor) */
   /* insert implementation here: sidlx.rmi.ClientSocket._dtor (destructor method) */
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.ClientSocket._dtor) */
+#line 92 "sidlx_rmi_ClientSocket_Impl.c"
 }
 
 /*
@@ -101,6 +109,7 @@ impl_sidlx_rmi_ClientSocket_init(
   /* in */ int32_t port,
   /* out */ sidl_BaseInterface *_ex)
 {
+#line 104 "../../../babel/runtime/sidlx/sidlx_rmi_ClientSocket_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.ClientSocket.init) */
   int sockfd;
   int n;
@@ -133,6 +142,7 @@ impl_sidlx_rmi_ClientSocket_init(
  EXIT:
   return -1;
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.ClientSocket.init) */
+#line 145 "sidlx_rmi_ClientSocket_Impl.c"
 }
 /* Babel internal methods, Users should not edit below this line. */
 struct sidlx_rmi_ClientSocket__object* 

@@ -2,12 +2,12 @@
  * File:          sidlx_rmi_ServerSocket.h
  * Symbol:        sidlx.rmi.ServerSocket-v0.1
  * Symbol Type:   class
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.8
  * Description:   Client-side glue code for sidlx.rmi.ServerSocket
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.8
  */
 
 #ifndef included_sidlx_rmi_ServerSocket_h
@@ -180,7 +180,7 @@ int32_t
 sidlx_rmi_ServerSocket_readn(
   /* in */ sidlx_rmi_ServerSocket self,
   /* in */ int32_t nbytes,
-  /* inout */ struct sidl_char__array** data,
+  /* inout array<char> */ struct sidl_char__array** data,
   /* out */ sidl_BaseInterface *_ex);
 
 /**
@@ -190,7 +190,7 @@ int32_t
 sidlx_rmi_ServerSocket_readline(
   /* in */ sidlx_rmi_ServerSocket self,
   /* in */ int32_t nbytes,
-  /* inout */ struct sidl_char__array** data,
+  /* inout array<char> */ struct sidl_char__array** data,
   /* out */ sidl_BaseInterface *_ex);
 
 /**
@@ -200,7 +200,7 @@ int32_t
 sidlx_rmi_ServerSocket_readstring(
   /* in */ sidlx_rmi_ServerSocket self,
   /* in */ int32_t nbytes,
-  /* inout */ struct sidl_char__array** data,
+  /* inout array<char> */ struct sidl_char__array** data,
   /* out */ sidl_BaseInterface *_ex);
 
 /**
@@ -209,7 +209,7 @@ sidlx_rmi_ServerSocket_readstring(
 int32_t
 sidlx_rmi_ServerSocket_readstring_alloc(
   /* in */ sidlx_rmi_ServerSocket self,
-  /* inout */ struct sidl_char__array** data,
+  /* inout array<char> */ struct sidl_char__array** data,
   /* out */ sidl_BaseInterface *_ex);
 
 /**
@@ -228,7 +228,7 @@ int32_t
 sidlx_rmi_ServerSocket_writen(
   /* in */ sidlx_rmi_ServerSocket self,
   /* in */ int32_t nbytes,
-  /* in */ struct sidl_char__array* data,
+  /* in array<char> */ struct sidl_char__array* data,
   /* out */ sidl_BaseInterface *_ex);
 
 /**
@@ -238,7 +238,7 @@ int32_t
 sidlx_rmi_ServerSocket_writestring(
   /* in */ sidlx_rmi_ServerSocket self,
   /* in */ int32_t nbytes,
-  /* in */ struct sidl_char__array* data,
+  /* in array<char> */ struct sidl_char__array* data,
   /* out */ sidl_BaseInterface *_ex);
 
 /**

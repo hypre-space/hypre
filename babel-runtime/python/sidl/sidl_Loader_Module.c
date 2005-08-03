@@ -2,7 +2,7 @@
  * File:          sidl_Loader_Module.c
  * Symbol:        sidl.Loader-v0.9.3
  * Symbol Type:   class
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.8
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   implement a C extension type for a sidl extendable
@@ -32,7 +32,7 @@
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.8
  */
 
 /*
@@ -809,10 +809,10 @@ separated sequence of URIs as described in class <code>DLL</code>."
   }
   Py_INCREF(&_sidl_LoaderType);
   PyDict_SetItemString(dict, "Loader", (PyObject *)&_sidl_LoaderType);
-  sidl_ClassInfo__import();
   sidl_BaseInterface__import();
   sidl_Finder__import();
   sidl_DLL__import();
+  sidl_ClassInfo__import();
   _implEPV = sidl_Loader__externals();
   if (_implEPV) {
     _sepv = (*_implEPV->getStaticEPV)();

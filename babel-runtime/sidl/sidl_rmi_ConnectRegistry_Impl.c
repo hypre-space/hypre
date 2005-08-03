@@ -2,7 +2,7 @@
  * File:          sidl_rmi_ConnectRegistry_Impl.c
  * Symbol:        sidl.rmi.ConnectRegistry-v0.9.3
  * Symbol Type:   class
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.8
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Server-side implementation for sidl.rmi.ConnectRegistry
@@ -32,7 +32,7 @@
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.8
  */
 
 /*
@@ -51,6 +51,7 @@
 
 #include "sidl_rmi_ConnectRegistry_Impl.h"
 
+#line 54 "../../../babel/runtime/sidl/sidl_rmi_ConnectRegistry_Impl.c"
 /* DO-NOT-DELETE splicer.begin(sidl.rmi.ConnectRegistry._includes) */
 #include "sidl_String.h"
 static struct hashtable *hshtbl;
@@ -75,6 +76,7 @@ hashfromkey(void *ky)
 }
 
 /* DO-NOT-DELETE splicer.end(sidl.rmi.ConnectRegistry._includes) */
+#line 79 "sidl_rmi_ConnectRegistry_Impl.c"
 
 /*
  * Static class initializer called exactly once before any user-defined method is dispatched
@@ -90,9 +92,11 @@ void
 impl_sidl_rmi_ConnectRegistry__load(
   void)
 {
+#line 93 "../../../babel/runtime/sidl/sidl_rmi_ConnectRegistry_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidl.rmi.ConnectRegistry._load) */
   hshtbl = create_hashtable(16, hashfromkey, (int(*)(void*,void*))sidl_String_equals);
   /* DO-NOT-DELETE splicer.end(sidl.rmi.ConnectRegistry._load) */
+#line 99 "sidl_rmi_ConnectRegistry_Impl.c"
 }
 /*
  * Class constructor called when the class is created.
@@ -108,9 +112,11 @@ void
 impl_sidl_rmi_ConnectRegistry__ctor(
   /* in */ sidl_rmi_ConnectRegistry self)
 {
+#line 111 "../../../babel/runtime/sidl/sidl_rmi_ConnectRegistry_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidl.rmi.ConnectRegistry._ctor) */
   /* Insert-Code-Here {sidl.rmi.ConnectRegistry._ctor} (constructor method) */
   /* DO-NOT-DELETE splicer.end(sidl.rmi.ConnectRegistry._ctor) */
+#line 119 "sidl_rmi_ConnectRegistry_Impl.c"
 }
 
 /*
@@ -127,9 +133,11 @@ void
 impl_sidl_rmi_ConnectRegistry__dtor(
   /* in */ sidl_rmi_ConnectRegistry self)
 {
+#line 130 "../../../babel/runtime/sidl/sidl_rmi_ConnectRegistry_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidl.rmi.ConnectRegistry._dtor) */
   /* Insert-Code-Here {sidl.rmi.ConnectRegistry._dtor} (destructor method) */
   /* DO-NOT-DELETE splicer.end(sidl.rmi.ConnectRegistry._dtor) */
+#line 140 "sidl_rmi_ConnectRegistry_Impl.c"
 }
 
 /*
@@ -149,10 +157,12 @@ impl_sidl_rmi_ConnectRegistry_registerConnect(
   /* in */ const char* key,
   /* in */ void* func)
 {
+#line 152 "../../../babel/runtime/sidl/sidl_rmi_ConnectRegistry_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidl.rmi.ConnectRegistry.registerConnect) */
   hashtable_insert(hshtbl, (void*)key, (void*)func);
   return;
   /* DO-NOT-DELETE splicer.end(sidl.rmi.ConnectRegistry.registerConnect) */
+#line 165 "sidl_rmi_ConnectRegistry_Impl.c"
 }
 
 /*
@@ -169,12 +179,14 @@ void*
 impl_sidl_rmi_ConnectRegistry_getConnect(
   /* in */ const char* key)
 {
+#line 172 "../../../babel/runtime/sidl/sidl_rmi_ConnectRegistry_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidl.rmi.ConnectRegistry.getConnect) */
   void * func = NULL;
   func = hashtable_search(hshtbl, (void*)key);
   /* If not found, returns NULL*/
   return func;
   /* DO-NOT-DELETE splicer.end(sidl.rmi.ConnectRegistry.getConnect) */
+#line 189 "sidl_rmi_ConnectRegistry_Impl.c"
 }
 
 /*
@@ -192,12 +204,14 @@ void*
 impl_sidl_rmi_ConnectRegistry_removeConnect(
   /* in */ const char* key)
 {
+#line 195 "../../../babel/runtime/sidl/sidl_rmi_ConnectRegistry_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidl.rmi.ConnectRegistry.removeConnect) */
   void * func = NULL;
   func = (sidl_BaseClass) hashtable_remove(hshtbl, (void*)key);
   /* If not found, returns NULL*/
   return func;
   /* DO-NOT-DELETE splicer.end(sidl.rmi.ConnectRegistry.removeConnect) */
+#line 214 "sidl_rmi_ConnectRegistry_Impl.c"
 }
 /* Babel internal methods, Users should not edit below this line. */
 struct sidl_rmi_ConnectRegistry__object* 

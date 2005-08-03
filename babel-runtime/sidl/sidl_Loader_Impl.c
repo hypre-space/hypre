@@ -2,7 +2,7 @@
  * File:          sidl_Loader_Impl.c
  * Symbol:        sidl.Loader-v0.9.3
  * Symbol Type:   class
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.8
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Server-side implementation for sidl.Loader
@@ -32,7 +32,7 @@
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.8
  */
 
 /*
@@ -59,6 +59,7 @@
 
 #include "sidl_Loader_Impl.h"
 
+#line 62 "../../../babel/runtime/sidl/sidl_Loader_Impl.c"
 /* DO-NOT-DELETE splicer.begin(sidl.Loader._includes) */
 #include "sidl_DLL.h"
 #include "sidl_String.h"
@@ -123,6 +124,7 @@ static void initialize_dll_list(void)
 }
 
 /* DO-NOT-DELETE splicer.end(sidl.Loader._includes) */
+#line 127 "sidl_Loader_Impl.c"
 
 /*
  * Static class initializer called exactly once before any user-defined method is dispatched
@@ -138,12 +140,14 @@ void
 impl_sidl_Loader__load(
   void)
 {
+#line 141 "../../../babel/runtime/sidl/sidl_Loader_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidl.Loader._load) */
   /*Use our friend the static initilizer to make sure there's always a Finder*/
   sidl_DFinder temp_find = NULL; 
   temp_find = sidl_DFinder__create(); 
   s_finder = sidl_Finder__cast(temp_find); 
   /* DO-NOT-DELETE splicer.end(sidl.Loader._load) */
+#line 150 "sidl_Loader_Impl.c"
 }
 /*
  * Class constructor called when the class is created.
@@ -159,6 +163,7 @@ void
 impl_sidl_Loader__ctor(
   /* in */ sidl_Loader self)
 {
+#line 162 "../../../babel/runtime/sidl/sidl_Loader_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidl.Loader._ctor) */
 
   /*
@@ -167,6 +172,7 @@ impl_sidl_Loader__ctor(
    */
 
   /* DO-NOT-DELETE splicer.end(sidl.Loader._ctor) */
+#line 175 "sidl_Loader_Impl.c"
 }
 
 /*
@@ -183,6 +189,7 @@ void
 impl_sidl_Loader__dtor(
   /* in */ sidl_Loader self)
 {
+#line 186 "../../../babel/runtime/sidl/sidl_Loader_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidl.Loader._dtor) */
 
   /*
@@ -191,6 +198,7 @@ impl_sidl_Loader__dtor(
    */
 
   /* DO-NOT-DELETE splicer.end(sidl.Loader._dtor) */
+#line 201 "sidl_Loader_Impl.c"
 }
 
 /*
@@ -229,6 +237,7 @@ impl_sidl_Loader_loadLibrary(
   /* in */ sidl_bool loadGlobally,
   /* in */ sidl_bool loadLazy)
 {
+#line 232 "../../../babel/runtime/sidl/sidl_Loader_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidl.Loader.loadLibrary) */
   int ok = FALSE;
   sidl_DLL dll = sidl_DLL__create();
@@ -244,6 +253,7 @@ impl_sidl_Loader_loadLibrary(
     return NULL;
   }
   /* DO-NOT-DELETE splicer.end(sidl.Loader.loadLibrary) */
+#line 256 "sidl_Loader_Impl.c"
 }
 
 /*
@@ -261,6 +271,7 @@ void
 impl_sidl_Loader_addDLL(
   /* in */ sidl_DLL dll)
 {
+#line 264 "../../../babel/runtime/sidl/sidl_Loader_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidl.Loader.addDLL) */
   if (dll) {
     DLL_List* item = NULL;
@@ -272,6 +283,7 @@ impl_sidl_Loader_addDLL(
     s_dll_list = item;
   }
   /* DO-NOT-DELETE splicer.end(sidl.Loader.addDLL) */
+#line 286 "sidl_Loader_Impl.c"
 }
 
 /*
@@ -291,6 +303,7 @@ void
 impl_sidl_Loader_unloadLibraries(
   void)
 {
+#line 294 "../../../babel/runtime/sidl/sidl_Loader_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidl.Loader.unloadLibraries) */
   DLL_List* head = s_dll_list;
 
@@ -303,6 +316,7 @@ impl_sidl_Loader_unloadLibraries(
 
   s_dll_list = NULL;
   /* DO-NOT-DELETE splicer.end(sidl.Loader.unloadLibraries) */
+#line 319 "sidl_Loader_Impl.c"
 }
 
 /*
@@ -349,9 +363,11 @@ impl_sidl_Loader_findLibrary(
   /* in */ enum sidl_Scope__enum lScope,
   /* in */ enum sidl_Resolve__enum lResolve)
 {
+#line 352 "../../../babel/runtime/sidl/sidl_Loader_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidl.Loader.findLibrary) */
   return sidl_Finder_findLibrary(s_finder, sidl_name, target, lScope, lResolve);
   /* DO-NOT-DELETE splicer.end(sidl.Loader.findLibrary) */
+#line 370 "sidl_Loader_Impl.c"
 }
 
 /*
@@ -372,9 +388,11 @@ void
 impl_sidl_Loader_setSearchPath(
   /* in */ const char* path_name)
 {
+#line 375 "../../../babel/runtime/sidl/sidl_Loader_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidl.Loader.setSearchPath) */
   sidl_Finder_setSearchPath(s_finder, path_name);
   /* DO-NOT-DELETE splicer.end(sidl.Loader.setSearchPath) */
+#line 395 "sidl_Loader_Impl.c"
 }
 
 /*
@@ -394,9 +412,11 @@ char*
 impl_sidl_Loader_getSearchPath(
   void)
 {
+#line 397 "../../../babel/runtime/sidl/sidl_Loader_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidl.Loader.getSearchPath) */
   return sidl_Finder_getSearchPath(s_finder);
   /* DO-NOT-DELETE splicer.end(sidl.Loader.getSearchPath) */
+#line 419 "sidl_Loader_Impl.c"
 }
 
 /*
@@ -417,9 +437,11 @@ void
 impl_sidl_Loader_addSearchPath(
   /* in */ const char* path_fragment)
 {
+#line 420 "../../../babel/runtime/sidl/sidl_Loader_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidl.Loader.addSearchPath) */
   sidl_Finder_addSearchPath(s_finder, path_fragment);
   /* DO-NOT-DELETE splicer.end(sidl.Loader.addSearchPath) */
+#line 444 "sidl_Loader_Impl.c"
 }
 
 /*
@@ -444,6 +466,7 @@ void
 impl_sidl_Loader_setFinder(
   /* in */ sidl_Finder f)
 {
+#line 447 "../../../babel/runtime/sidl/sidl_Loader_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidl.Loader.setFinder) */
   sidl_DFinder temp_find = NULL;
   if(f != NULL)
@@ -453,6 +476,7 @@ impl_sidl_Loader_setFinder(
     s_finder = sidl_Finder__cast(temp_find);
   } 
   /* DO-NOT-DELETE splicer.end(sidl.Loader.setFinder) */
+#line 479 "sidl_Loader_Impl.c"
 }
 
 /*
@@ -470,10 +494,12 @@ sidl_Finder
 impl_sidl_Loader_getFinder(
   void)
 {
+#line 473 "../../../babel/runtime/sidl/sidl_Loader_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidl.Loader.getFinder) */
   sidl_Finder_addRef(s_finder);
   return s_finder;
   /* DO-NOT-DELETE splicer.end(sidl.Loader.getFinder) */
+#line 502 "sidl_Loader_Impl.c"
 }
 /* Babel internal methods, Users should not edit below this line. */
 struct sidl_Finder__object* impl_sidl_Loader_fconnect_sidl_Finder(char* url,

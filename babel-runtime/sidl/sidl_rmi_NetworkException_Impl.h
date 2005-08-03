@@ -2,7 +2,7 @@
  * File:          sidl_rmi_NetworkException_Impl.h
  * Symbol:        sidl.rmi.NetworkException-v0.9.3
  * Symbol Type:   class
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.8
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Server-side implementation for sidl.rmi.NetworkException
@@ -32,7 +32,7 @@
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.8
  */
 
 #ifndef included_sidl_rmi_NetworkException_Impl_h
@@ -63,19 +63,23 @@
 #include "sidl_BaseClass.h"
 #endif
 
+#line 66 "../../../babel/runtime/sidl/sidl_rmi_NetworkException_Impl.h"
 /* DO-NOT-DELETE splicer.begin(sidl.rmi.NetworkException._includes) */
 /* insert implementation here: sidl.rmi.NetworkException._includes (include files) */
 /* DO-NOT-DELETE splicer.end(sidl.rmi.NetworkException._includes) */
+#line 70 "sidl_rmi_NetworkException_Impl.h"
 
 /*
  * Private data for class sidl.rmi.NetworkException
  */
 
 struct sidl_rmi_NetworkException__data {
+#line 75 "../../../babel/runtime/sidl/sidl_rmi_NetworkException_Impl.h"
   /* DO-NOT-DELETE splicer.begin(sidl.rmi.NetworkException._data) */
   /* insert implementation here: sidl.rmi.NetworkException._data (private data members) */
   int ignore; /* dummy to force non-empty struct; remove if you add data */
   /* DO-NOT-DELETE splicer.end(sidl.rmi.NetworkException._data) */
+#line 82 "sidl_rmi_NetworkException_Impl.h"
 };
 
 #ifdef __cplusplus

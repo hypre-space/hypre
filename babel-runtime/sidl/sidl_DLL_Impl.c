@@ -2,7 +2,7 @@
  * File:          sidl_DLL_Impl.c
  * Symbol:        sidl.DLL-v0.9.3
  * Symbol Type:   class
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.8
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Server-side implementation for sidl.DLL
@@ -32,7 +32,7 @@
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.8
  */
 
 /*
@@ -53,6 +53,7 @@
 
 #include "sidl_DLL_Impl.h"
 
+#line 56 "../../../babel/runtime/sidl/sidl_DLL_Impl.c"
 /* DO-NOT-DELETE splicer.begin(sidl.DLL._includes) */
 #include <dlfcn.h>
 #include <stdlib.h>
@@ -138,6 +139,7 @@ static void showLoadResult(void *handle)
 }
 
 /* DO-NOT-DELETE splicer.end(sidl.DLL._includes) */
+#line 142 "sidl_DLL_Impl.c"
 
 /*
  * Static class initializer called exactly once before any user-defined method is dispatched
@@ -153,9 +155,11 @@ void
 impl_sidl_DLL__load(
   void)
 {
+#line 156 "../../../babel/runtime/sidl/sidl_DLL_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidl.DLL._load) */
   /* Insert the implementation of the static class initializer method here... */
   /* DO-NOT-DELETE splicer.end(sidl.DLL._load) */
+#line 162 "sidl_DLL_Impl.c"
 }
 /*
  * Class constructor called when the class is created.
@@ -171,6 +175,7 @@ void
 impl_sidl_DLL__ctor(
   /* in */ sidl_DLL self)
 {
+#line 174 "../../../babel/runtime/sidl/sidl_DLL_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidl.DLL._ctor) */
   struct sidl_DLL__data* data =
     (struct sidl_DLL__data*) malloc(sizeof (struct sidl_DLL__data));
@@ -184,6 +189,7 @@ impl_sidl_DLL__ctor(
 
   sidl_DLL__set_data(self, data);
   /* DO-NOT-DELETE splicer.end(sidl.DLL._ctor) */
+#line 192 "sidl_DLL_Impl.c"
 }
 
 /*
@@ -200,6 +206,7 @@ void
 impl_sidl_DLL__dtor(
   /* in */ sidl_DLL self)
 {
+#line 203 "../../../babel/runtime/sidl/sidl_DLL_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidl.DLL._dtor) */
   struct sidl_DLL__data *data = sidl_DLL__get_data(self);
 
@@ -208,6 +215,7 @@ impl_sidl_DLL__dtor(
   free((void*) data);
   sidl_DLL__set_data(self, NULL);
   /* DO-NOT-DELETE splicer.end(sidl.DLL._dtor) */
+#line 218 "sidl_DLL_Impl.c"
 }
 
 /*
@@ -257,6 +265,7 @@ impl_sidl_DLL_loadLibrary(
   /* in */ sidl_bool loadGlobally,
   /* in */ sidl_bool loadLazy)
 {
+#line 260 "../../../babel/runtime/sidl/sidl_DLL_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidl.DLL.loadLibrary) */
   struct sidl_DLL__data *data = sidl_DLL__get_data(self);
 
@@ -324,6 +333,7 @@ impl_sidl_DLL_loadLibrary(
 
   return ok;
   /* DO-NOT-DELETE splicer.end(sidl.DLL.loadLibrary) */
+#line 336 "sidl_DLL_Impl.c"
 }
 
 /*
@@ -342,6 +352,7 @@ char*
 impl_sidl_DLL_getName(
   /* in */ sidl_DLL self)
 {
+#line 345 "../../../babel/runtime/sidl/sidl_DLL_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidl.DLL.getName) */
   struct sidl_DLL__data *data = sidl_DLL__get_data(self);
 
@@ -351,6 +362,7 @@ impl_sidl_DLL_getName(
   }
   return name;
   /* DO-NOT-DELETE splicer.end(sidl.DLL.getName) */
+#line 365 "sidl_DLL_Impl.c"
 }
 
 /*
@@ -370,6 +382,7 @@ void
 impl_sidl_DLL_unloadLibrary(
   /* in */ sidl_DLL self)
 {
+#line 373 "../../../babel/runtime/sidl/sidl_DLL_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidl.DLL.unloadLibrary) */
   struct sidl_DLL__data *data = sidl_DLL__get_data(self);
 
@@ -382,6 +395,7 @@ impl_sidl_DLL_unloadLibrary(
     data->d_library_name   = NULL;
   }
   /* DO-NOT-DELETE splicer.end(sidl.DLL.unloadLibrary) */
+#line 398 "sidl_DLL_Impl.c"
 }
 
 /*
@@ -400,6 +414,7 @@ impl_sidl_DLL_lookupSymbol(
   /* in */ sidl_DLL self,
   /* in */ const char* linker_name)
 {
+#line 403 "../../../babel/runtime/sidl/sidl_DLL_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidl.DLL.lookupSymbol) */
   struct sidl_DLL__data *data = sidl_DLL__get_data(self);
 
@@ -411,6 +426,7 @@ impl_sidl_DLL_lookupSymbol(
   }
   return address;
   /* DO-NOT-DELETE splicer.end(sidl.DLL.lookupSymbol) */
+#line 429 "sidl_DLL_Impl.c"
 }
 
 /*
@@ -429,6 +445,7 @@ impl_sidl_DLL_createClass(
   /* in */ sidl_DLL self,
   /* in */ const char* sidl_name)
 {
+#line 432 "../../../babel/runtime/sidl/sidl_DLL_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidl.DLL.createClass) */
   struct sidl_DLL__data *data = sidl_DLL__get_data(self);
   sidl_BaseClass (*ctor)(void) = NULL;
@@ -454,6 +471,7 @@ impl_sidl_DLL_createClass(
 
   return ctor ? (*ctor)() : NULL;
   /* DO-NOT-DELETE splicer.end(sidl.DLL.createClass) */
+#line 474 "sidl_DLL_Impl.c"
 }
 /* Babel internal methods, Users should not edit below this line. */
 struct sidl_DLL__object* impl_sidl_DLL_fconnect_sidl_DLL(char* url,

@@ -2,7 +2,7 @@
  * File:          sidl_rmi_InstanceRegistry_Impl.h
  * Symbol:        sidl.rmi.InstanceRegistry-v0.9.3
  * Symbol Type:   class
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.8
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Server-side implementation for sidl.rmi.InstanceRegistry
@@ -32,7 +32,7 @@
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.8
  */
 
 #ifndef included_sidl_rmi_InstanceRegistry_Impl_h
@@ -57,20 +57,24 @@
 #include "sidl_BaseClass.h"
 #endif
 
+#line 60 "../../../babel/runtime/sidl/sidl_rmi_InstanceRegistry_Impl.h"
 /* DO-NOT-DELETE splicer.begin(sidl.rmi.InstanceRegistry._includes) */
 #include "sidl_hashtable.h"
 /* DO-NOT-DELETE splicer.end(sidl.rmi.InstanceRegistry._includes) */
+#line 64 "sidl_rmi_InstanceRegistry_Impl.h"
 
 /*
  * Private data for class sidl.rmi.InstanceRegistry
  */
 
 struct sidl_rmi_InstanceRegistry__data {
+#line 69 "../../../babel/runtime/sidl/sidl_rmi_InstanceRegistry_Impl.h"
   /* DO-NOT-DELETE splicer.begin(sidl.rmi.InstanceRegistry._data) */
   /* Put private data members here... */
   char* counter;
   struct hashtable *hshtbl;
   /* DO-NOT-DELETE splicer.end(sidl.rmi.InstanceRegistry._data) */
+#line 77 "sidl_rmi_InstanceRegistry_Impl.h"
 };
 
 #ifdef __cplusplus

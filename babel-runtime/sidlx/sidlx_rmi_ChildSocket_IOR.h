@@ -2,12 +2,12 @@
  * File:          sidlx_rmi_ChildSocket_IOR.h
  * Symbol:        sidlx.rmi.ChildSocket-v0.1
  * Symbol Type:   class
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.8
  * Description:   Intermediate Object Representation for sidlx.rmi.ChildSocket
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.8
  */
 
 #ifndef included_sidlx_rmi_ChildSocket_IOR_h
@@ -105,21 +105,21 @@ struct sidlx_rmi_ChildSocket__epv {
   int32_t (*f_readn)(
     /* in */ struct sidlx_rmi_ChildSocket__object* self,
     /* in */ int32_t nbytes,
-    /* inout */ struct sidl_char__array** data,
+    /* inout array<char> */ struct sidl_char__array** data,
     /* out */ struct sidl_BaseInterface__object* *_ex);
   int32_t (*f_readline)(
     /* in */ struct sidlx_rmi_ChildSocket__object* self,
     /* in */ int32_t nbytes,
-    /* inout */ struct sidl_char__array** data,
+    /* inout array<char> */ struct sidl_char__array** data,
     /* out */ struct sidl_BaseInterface__object* *_ex);
   int32_t (*f_readstring)(
     /* in */ struct sidlx_rmi_ChildSocket__object* self,
     /* in */ int32_t nbytes,
-    /* inout */ struct sidl_char__array** data,
+    /* inout array<char> */ struct sidl_char__array** data,
     /* out */ struct sidl_BaseInterface__object* *_ex);
   int32_t (*f_readstring_alloc)(
     /* in */ struct sidlx_rmi_ChildSocket__object* self,
-    /* inout */ struct sidl_char__array** data,
+    /* inout array<char> */ struct sidl_char__array** data,
     /* out */ struct sidl_BaseInterface__object* *_ex);
   int32_t (*f_readint)(
     /* in */ struct sidlx_rmi_ChildSocket__object* self,
@@ -128,12 +128,12 @@ struct sidlx_rmi_ChildSocket__epv {
   int32_t (*f_writen)(
     /* in */ struct sidlx_rmi_ChildSocket__object* self,
     /* in */ int32_t nbytes,
-    /* in */ struct sidl_char__array* data,
+    /* in array<char> */ struct sidl_char__array* data,
     /* out */ struct sidl_BaseInterface__object* *_ex);
   int32_t (*f_writestring)(
     /* in */ struct sidlx_rmi_ChildSocket__object* self,
     /* in */ int32_t nbytes,
-    /* in */ struct sidl_char__array* data,
+    /* in array<char> */ struct sidl_char__array* data,
     /* out */ struct sidl_BaseInterface__object* *_ex);
   int32_t (*f_writeint)(
     /* in */ struct sidlx_rmi_ChildSocket__object* self,

@@ -2,7 +2,7 @@
  * File:          sidl_Loader_Impl.h
  * Symbol:        sidl.Loader-v0.9.3
  * Symbol Type:   class
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.8
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Server-side implementation for sidl.Loader
@@ -32,7 +32,7 @@
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.8
  */
 
 #ifndef included_sidl_Loader_Impl_h
@@ -60,18 +60,22 @@
 #include "sidl_BaseClass.h"
 #endif
 
+#line 63 "../../../babel/runtime/sidl/sidl_Loader_Impl.h"
 /* DO-NOT-DELETE splicer.begin(sidl.Loader._includes) */
 /* Put additional include files here... */
 /* DO-NOT-DELETE splicer.end(sidl.Loader._includes) */
+#line 67 "sidl_Loader_Impl.h"
 
 /*
  * Private data for class sidl.Loader
  */
 
 struct sidl_Loader__data {
+#line 72 "../../../babel/runtime/sidl/sidl_Loader_Impl.h"
   /* DO-NOT-DELETE splicer.begin(sidl.Loader._data) */
   int ignore; /* dummy to force non-empty struct; remove if you add data */
   /* DO-NOT-DELETE splicer.end(sidl.Loader._data) */
+#line 78 "sidl_Loader_Impl.h"
 };
 
 #ifdef __cplusplus

@@ -2,12 +2,12 @@
  * File:          sidlx_rmi_IPv4Socket.h
  * Symbol:        sidlx.rmi.IPv4Socket-v0.1
  * Symbol Type:   class
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.8
  * Description:   Client-side glue code for sidlx.rmi.IPv4Socket
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.8
  */
 
 #ifndef included_sidlx_rmi_IPv4Socket_h
@@ -177,7 +177,7 @@ int32_t
 sidlx_rmi_IPv4Socket_readn(
   /* in */ sidlx_rmi_IPv4Socket self,
   /* in */ int32_t nbytes,
-  /* inout */ struct sidl_char__array** data,
+  /* inout array<char> */ struct sidl_char__array** data,
   /* out */ sidl_BaseInterface *_ex);
 
 /**
@@ -187,7 +187,7 @@ int32_t
 sidlx_rmi_IPv4Socket_readline(
   /* in */ sidlx_rmi_IPv4Socket self,
   /* in */ int32_t nbytes,
-  /* inout */ struct sidl_char__array** data,
+  /* inout array<char> */ struct sidl_char__array** data,
   /* out */ sidl_BaseInterface *_ex);
 
 /**
@@ -197,7 +197,7 @@ int32_t
 sidlx_rmi_IPv4Socket_readstring(
   /* in */ sidlx_rmi_IPv4Socket self,
   /* in */ int32_t nbytes,
-  /* inout */ struct sidl_char__array** data,
+  /* inout array<char> */ struct sidl_char__array** data,
   /* out */ sidl_BaseInterface *_ex);
 
 /**
@@ -206,7 +206,7 @@ sidlx_rmi_IPv4Socket_readstring(
 int32_t
 sidlx_rmi_IPv4Socket_readstring_alloc(
   /* in */ sidlx_rmi_IPv4Socket self,
-  /* inout */ struct sidl_char__array** data,
+  /* inout array<char> */ struct sidl_char__array** data,
   /* out */ sidl_BaseInterface *_ex);
 
 /**
@@ -225,7 +225,7 @@ int32_t
 sidlx_rmi_IPv4Socket_writen(
   /* in */ sidlx_rmi_IPv4Socket self,
   /* in */ int32_t nbytes,
-  /* in */ struct sidl_char__array* data,
+  /* in array<char> */ struct sidl_char__array* data,
   /* out */ sidl_BaseInterface *_ex);
 
 /**
@@ -235,7 +235,7 @@ int32_t
 sidlx_rmi_IPv4Socket_writestring(
   /* in */ sidlx_rmi_IPv4Socket self,
   /* in */ int32_t nbytes,
-  /* in */ struct sidl_char__array* data,
+  /* in array<char> */ struct sidl_char__array* data,
   /* out */ sidl_BaseInterface *_ex);
 
 /**

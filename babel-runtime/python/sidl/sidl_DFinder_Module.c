@@ -2,7 +2,7 @@
  * File:          sidl_DFinder_Module.c
  * Symbol:        sidl.DFinder-v0.9.3
  * Symbol Type:   class
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.8
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   implement a C extension type for a sidl extendable
@@ -32,7 +32,7 @@
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.8
  */
 
 /*
@@ -413,9 +413,9 @@ environment variable."
   }
   Py_INCREF(&_sidl_DFinderType);
   PyDict_SetItemString(dict, "DFinder", (PyObject *)&_sidl_DFinderType);
-  sidl_ClassInfo__import();
   sidl_BaseInterface__import();
   sidl_DLL__import();
+  sidl_ClassInfo__import();
   _implEPV = sidl_DFinder__externals();
   if (!_implEPV) {
     Py_FatalError("Cannot load implementation for sidl class sidl.DFinder");

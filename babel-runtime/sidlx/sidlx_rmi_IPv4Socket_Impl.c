@@ -2,12 +2,12 @@
  * File:          sidlx_rmi_IPv4Socket_Impl.c
  * Symbol:        sidlx.rmi.IPv4Socket-v0.1
  * Symbol Type:   class
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.8
  * Description:   Server-side implementation for sidlx.rmi.IPv4Socket
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.8
  */
 
 /*
@@ -23,6 +23,7 @@
 
 #include "sidlx_rmi_IPv4Socket_Impl.h"
 
+#line 26 "../../../babel/runtime/sidlx/sidlx_rmi_IPv4Socket_Impl.c"
 /* DO-NOT-DELETE splicer.begin(sidlx.rmi.IPv4Socket._includes) */
 #include <stdio.h>
 #include <stddef.h>
@@ -166,6 +167,7 @@ int32_t writen2( int filedes, const int32_t nbytes, const char * data,
 }
 
 /* DO-NOT-DELETE splicer.end(sidlx.rmi.IPv4Socket._includes) */
+#line 170 "sidlx_rmi_IPv4Socket_Impl.c"
 
 /*
  * Static class initializer called exactly once before any user-defined method is dispatched
@@ -181,9 +183,11 @@ void
 impl_sidlx_rmi_IPv4Socket__load(
   void)
 {
+#line 184 "../../../babel/runtime/sidlx/sidlx_rmi_IPv4Socket_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.IPv4Socket._load) */
   /* insert implementation here: sidlx.rmi.IPv4Socket._load (static class initializer method) */
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.IPv4Socket._load) */
+#line 190 "sidlx_rmi_IPv4Socket_Impl.c"
 }
 /*
  * Class constructor called when the class is created.
@@ -199,9 +203,11 @@ void
 impl_sidlx_rmi_IPv4Socket__ctor(
   /* in */ sidlx_rmi_IPv4Socket self)
 {
+#line 202 "../../../babel/runtime/sidlx/sidlx_rmi_IPv4Socket_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.IPv4Socket._ctor) */
   /*Actually, I don't want to do anything here.  I want data to be null.*/
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.IPv4Socket._ctor) */
+#line 210 "sidlx_rmi_IPv4Socket_Impl.c"
 }
 
 /*
@@ -218,6 +224,7 @@ void
 impl_sidlx_rmi_IPv4Socket__dtor(
   /* in */ sidlx_rmi_IPv4Socket self)
 {
+#line 221 "../../../babel/runtime/sidlx/sidlx_rmi_IPv4Socket_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.IPv4Socket._dtor) */
   struct sidlx_rmi_IPv4Socket__data * data = sidlx_rmi_IPv4Socket__get_data( self );
   sidl_BaseInterface _ex = NULL;
@@ -228,6 +235,7 @@ impl_sidlx_rmi_IPv4Socket__dtor(
  EXIT:
   sidl_BaseInterface_deleteRef(_ex);
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.IPv4Socket._dtor) */
+#line 238 "sidlx_rmi_IPv4Socket_Impl.c"
 }
 
 /*
@@ -247,6 +255,7 @@ impl_sidlx_rmi_IPv4Socket_getsockname(
   /* inout */ int32_t* port,
   /* out */ sidl_BaseInterface *_ex)
 {
+#line 250 "../../../babel/runtime/sidlx/sidlx_rmi_IPv4Socket_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.IPv4Socket.getsockname) */
   struct sockaddr_in localaddr;
   socklen_t len = sizeof(struct sockaddr_in);
@@ -267,6 +276,7 @@ impl_sidlx_rmi_IPv4Socket_getsockname(
  EXIT:
   return -1;
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.IPv4Socket.getsockname) */
+#line 279 "sidlx_rmi_IPv4Socket_Impl.c"
 }
 
 /*
@@ -286,6 +296,7 @@ impl_sidlx_rmi_IPv4Socket_getpeername(
   /* inout */ int32_t* port,
   /* out */ sidl_BaseInterface *_ex)
 {
+#line 289 "../../../babel/runtime/sidlx/sidlx_rmi_IPv4Socket_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.IPv4Socket.getpeername) */
   struct sockaddr_in localaddr;
   socklen_t len = sizeof(struct sockaddr_in);
@@ -307,6 +318,7 @@ impl_sidlx_rmi_IPv4Socket_getpeername(
   return -1;
 
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.IPv4Socket.getpeername) */
+#line 321 "sidlx_rmi_IPv4Socket_Impl.c"
 }
 
 /*
@@ -324,6 +336,7 @@ impl_sidlx_rmi_IPv4Socket_close(
   /* in */ sidlx_rmi_IPv4Socket self,
   /* out */ sidl_BaseInterface *_ex)
 {
+#line 327 "../../../babel/runtime/sidlx/sidlx_rmi_IPv4Socket_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.IPv4Socket.close) */
   int32_t n = 0;
   struct sidlx_rmi_IPv4Socket__data *dptr =
@@ -340,6 +353,7 @@ impl_sidlx_rmi_IPv4Socket_close(
  EXIT:
   return -1;
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.IPv4Socket.close) */
+#line 356 "sidlx_rmi_IPv4Socket_Impl.c"
 }
 
 /*
@@ -356,9 +370,10 @@ int32_t
 impl_sidlx_rmi_IPv4Socket_readn(
   /* in */ sidlx_rmi_IPv4Socket self,
   /* in */ int32_t nbytes,
-  /* inout */ struct sidl_char__array** data,
+  /* inout array<char> */ struct sidl_char__array** data,
   /* out */ sidl_BaseInterface *_ex)
 {
+#line 362 "../../../babel/runtime/sidlx/sidlx_rmi_IPv4Socket_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.IPv4Socket.readn) */
   char* ptr;
   int32_t n_read = 0;
@@ -377,6 +392,7 @@ impl_sidlx_rmi_IPv4Socket_readn(
  EXIT:
   return n_read;
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.IPv4Socket.readn) */
+#line 395 "sidlx_rmi_IPv4Socket_Impl.c"
 }
 
 /*
@@ -393,9 +409,10 @@ int32_t
 impl_sidlx_rmi_IPv4Socket_readline(
   /* in */ sidlx_rmi_IPv4Socket self,
   /* in */ int32_t nbytes,
-  /* inout */ struct sidl_char__array** data,
+  /* inout array<char> */ struct sidl_char__array** data,
   /* out */ sidl_BaseInterface *_ex)
 {
+#line 399 "../../../babel/runtime/sidlx/sidlx_rmi_IPv4Socket_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.IPv4Socket.readline) */
   char* ptr;
   int32_t n_read = -1;
@@ -414,6 +431,7 @@ impl_sidlx_rmi_IPv4Socket_readline(
  EXIT:
   return n_read;
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.IPv4Socket.readline) */
+#line 434 "sidlx_rmi_IPv4Socket_Impl.c"
 }
 
 /*
@@ -430,9 +448,10 @@ int32_t
 impl_sidlx_rmi_IPv4Socket_readstring(
   /* in */ sidlx_rmi_IPv4Socket self,
   /* in */ int32_t nbytes,
-  /* inout */ struct sidl_char__array** data,
+  /* inout array<char> */ struct sidl_char__array** data,
   /* out */ sidl_BaseInterface *_ex)
 {
+#line 436 "../../../babel/runtime/sidlx/sidlx_rmi_IPv4Socket_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.IPv4Socket.readstring) */
   /*I don't really like this.  I think we should have some what communicating back when
     the array was not big enough to handle all the data, so we can handle it later.
@@ -471,6 +490,7 @@ impl_sidlx_rmi_IPv4Socket_readstring(
   return n_read;
 
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.IPv4Socket.readstring) */
+#line 493 "sidlx_rmi_IPv4Socket_Impl.c"
 }
 
 /*
@@ -486,9 +506,10 @@ extern "C"
 int32_t
 impl_sidlx_rmi_IPv4Socket_readstring_alloc(
   /* in */ sidlx_rmi_IPv4Socket self,
-  /* inout */ struct sidl_char__array** data,
+  /* inout array<char> */ struct sidl_char__array** data,
   /* out */ sidl_BaseInterface *_ex)
 {
+#line 492 "../../../babel/runtime/sidlx/sidlx_rmi_IPv4Socket_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.IPv4Socket.readstring_alloc) */
   /* read a string up into character array (newline preserved)
    frees the current sidl_char__array and allocates a new one if length < the incoming string
@@ -533,6 +554,7 @@ impl_sidlx_rmi_IPv4Socket_readstring_alloc(
   return -1;
 
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.IPv4Socket.readstring_alloc) */
+#line 557 "sidlx_rmi_IPv4Socket_Impl.c"
 }
 
 /*
@@ -551,6 +573,7 @@ impl_sidlx_rmi_IPv4Socket_readint(
   /* inout */ int32_t* data,
   /* out */ sidl_BaseInterface *_ex)
 {
+#line 554 "../../../babel/runtime/sidlx/sidlx_rmi_IPv4Socket_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.IPv4Socket.readint) */
   int32_t ret = 0;
   char ** cast_data = (char**) &data;
@@ -565,6 +588,7 @@ impl_sidlx_rmi_IPv4Socket_readint(
  EXIT:
   return 0;
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.IPv4Socket.readint) */
+#line 591 "sidlx_rmi_IPv4Socket_Impl.c"
 }
 
 /*
@@ -581,9 +605,10 @@ int32_t
 impl_sidlx_rmi_IPv4Socket_writen(
   /* in */ sidlx_rmi_IPv4Socket self,
   /* in */ int32_t nbytes,
-  /* in */ struct sidl_char__array* data,
+  /* in array<char> */ struct sidl_char__array* data,
   /* out */ sidl_BaseInterface *_ex)
 {
+#line 587 "../../../babel/runtime/sidlx/sidlx_rmi_IPv4Socket_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.IPv4Socket.writen) */
   char * ptr= sidl_char__array_first( data );
   int32_t n = sidl_char__array_length(data,0);
@@ -602,6 +627,7 @@ impl_sidlx_rmi_IPv4Socket_writen(
  EXIT:
   return -1;
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.IPv4Socket.writen) */
+#line 630 "sidlx_rmi_IPv4Socket_Impl.c"
 }
 
 /*
@@ -618,9 +644,10 @@ int32_t
 impl_sidlx_rmi_IPv4Socket_writestring(
   /* in */ sidlx_rmi_IPv4Socket self,
   /* in */ int32_t nbytes,
-  /* in */ struct sidl_char__array* data,
+  /* in array<char> */ struct sidl_char__array* data,
   /* out */ sidl_BaseInterface *_ex)
 {
+#line 624 "../../../babel/runtime/sidlx/sidlx_rmi_IPv4Socket_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.IPv4Socket.writestring) */
   char * ptr= sidl_char__array_first( data );
   int32_t n = sidl_char__array_length(data,0);
@@ -640,6 +667,7 @@ impl_sidlx_rmi_IPv4Socket_writestring(
  EXIT:
   return -1;
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.IPv4Socket.writestring) */
+#line 670 "sidlx_rmi_IPv4Socket_Impl.c"
 }
 
 /*
@@ -658,9 +686,11 @@ impl_sidlx_rmi_IPv4Socket_writeint(
   /* in */ int32_t data,
   /* out */ sidl_BaseInterface *_ex)
 {
+#line 661 "../../../babel/runtime/sidlx/sidlx_rmi_IPv4Socket_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.IPv4Socket.writeint) */
   /* Insert-Code-Here {sidlx.rmi.IPv4Socket.writeint} (writeint method) */
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.IPv4Socket.writeint) */
+#line 693 "sidlx_rmi_IPv4Socket_Impl.c"
 }
 
 /*
@@ -679,6 +709,7 @@ impl_sidlx_rmi_IPv4Socket_setFileDescriptor(
   /* in */ int32_t fd,
   /* out */ sidl_BaseInterface *_ex)
 {
+#line 682 "../../../babel/runtime/sidlx/sidlx_rmi_IPv4Socket_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.IPv4Socket.setFileDescriptor) */
   struct sidlx_rmi_IPv4Socket__data *dptr =
     sidlx_rmi_IPv4Socket__get_data(self);
@@ -690,6 +721,7 @@ impl_sidlx_rmi_IPv4Socket_setFileDescriptor(
   }
   sidlx_rmi_IPv4Socket__set_data(self, dptr);
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.IPv4Socket.setFileDescriptor) */
+#line 724 "sidlx_rmi_IPv4Socket_Impl.c"
 }
 
 /*
@@ -707,6 +739,7 @@ impl_sidlx_rmi_IPv4Socket_getFileDescriptor(
   /* in */ sidlx_rmi_IPv4Socket self,
   /* out */ sidl_BaseInterface *_ex)
 {
+#line 710 "../../../babel/runtime/sidlx/sidlx_rmi_IPv4Socket_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.IPv4Socket.getFileDescriptor) */
   struct sidlx_rmi_IPv4Socket__data *dptr =
     sidlx_rmi_IPv4Socket__get_data(self);
@@ -717,6 +750,7 @@ impl_sidlx_rmi_IPv4Socket_getFileDescriptor(
  EXIT:
   return -1;
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.IPv4Socket.getFileDescriptor) */
+#line 753 "sidlx_rmi_IPv4Socket_Impl.c"
 }
 /* Babel internal methods, Users should not edit below this line. */
 struct sidl_ClassInfo__object* 

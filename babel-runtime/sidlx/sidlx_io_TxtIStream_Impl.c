@@ -2,12 +2,12 @@
  * File:          sidlx_io_TxtIStream_Impl.c
  * Symbol:        sidlx.io.TxtIStream-v0.1
  * Symbol Type:   class
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.8
  * Description:   Server-side implementation for sidlx.io.TxtIStream
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.8
  */
 
 /*
@@ -25,9 +25,11 @@
 
 #include "sidlx_io_TxtIStream_Impl.h"
 
+#line 28 "../../../babel/runtime/sidlx/sidlx_io_TxtIStream_Impl.c"
 /* DO-NOT-DELETE splicer.begin(sidlx.io.TxtIStream._includes) */
 #include "sidlx_common.h"
 /* DO-NOT-DELETE splicer.end(sidlx.io.TxtIStream._includes) */
+#line 32 "sidlx_io_TxtIStream_Impl.c"
 
 /*
  * Static class initializer called exactly once before any user-defined method is dispatched
@@ -43,9 +45,11 @@ void
 impl_sidlx_io_TxtIStream__load(
   void)
 {
+#line 46 "../../../babel/runtime/sidlx/sidlx_io_TxtIStream_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidlx.io.TxtIStream._load) */
   /* Insert the implementation of the static class initializer method here... */
   /* DO-NOT-DELETE splicer.end(sidlx.io.TxtIStream._load) */
+#line 52 "sidlx_io_TxtIStream_Impl.c"
 }
 /*
  * Class constructor called when the class is created.
@@ -61,12 +65,14 @@ void
 impl_sidlx_io_TxtIStream__ctor(
   /* in */ sidlx_io_TxtIStream self)
 {
+#line 64 "../../../babel/runtime/sidlx/sidlx_io_TxtIStream_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidlx.io.TxtIStream._ctor) */
   struct sidlx_io_TxtIStream__data *data = (struct sidlx_io_TxtIStream__data *)
     malloc( sizeof (  struct sidlx_io_TxtIStream__data) );
   data->filedes = -1;
   sidlx_io_TxtIStream__set_data(self,data);
   /* DO-NOT-DELETE splicer.end(sidlx.io.TxtIStream._ctor) */
+#line 75 "sidlx_io_TxtIStream_Impl.c"
 }
 
 /*
@@ -83,6 +89,7 @@ void
 impl_sidlx_io_TxtIStream__dtor(
   /* in */ sidlx_io_TxtIStream self)
 {
+#line 86 "../../../babel/runtime/sidlx/sidlx_io_TxtIStream_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidlx.io.TxtIStream._dtor) */
   struct sidlx_io_TxtIStream__data *data = sidlx_io_TxtIStream__get_data(self);
   if (data) { 
@@ -90,6 +97,7 @@ impl_sidlx_io_TxtIStream__dtor(
   }
   sidlx_io_TxtIStream__set_data(self,NULL);
   /* DO-NOT-DELETE splicer.end(sidlx.io.TxtIStream._dtor) */
+#line 100 "sidlx_io_TxtIStream_Impl.c"
 }
 
 /*
@@ -107,9 +115,11 @@ impl_sidlx_io_TxtIStream_setFD(
   /* in */ sidlx_io_TxtIStream self,
   /* in */ int32_t fd)
 {
+#line 110 "../../../babel/runtime/sidlx/sidlx_io_TxtIStream_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidlx.io.TxtIStream.setFD) */
   sidlx_io_TxtIStream__get_data(self)->filedes=fd;
   /* DO-NOT-DELETE splicer.end(sidlx.io.TxtIStream.setFD) */
+#line 122 "sidlx_io_TxtIStream_Impl.c"
 }
 
 /*
@@ -126,9 +136,11 @@ sidl_bool
 impl_sidlx_io_TxtIStream_atEnd(
   /* in */ sidlx_io_TxtIStream self)
 {
+#line 129 "../../../babel/runtime/sidlx/sidlx_io_TxtIStream_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidlx.io.TxtIStream.atEnd) */
   /* Insert the implementation of the atEnd method here... */
   /* DO-NOT-DELETE splicer.end(sidlx.io.TxtIStream.atEnd) */
+#line 143 "sidlx_io_TxtIStream_Impl.c"
 }
 
 /*
@@ -145,9 +157,10 @@ int32_t
 impl_sidlx_io_TxtIStream_read(
   /* in */ sidlx_io_TxtIStream self,
   /* in */ int32_t nbytes,
-  /* out */ struct sidl_char__array** data,
+  /* out array<char,row-major> */ struct sidl_char__array** data,
   /* out */ sidl_BaseInterface *_ex)
 {
+#line 151 "../../../babel/runtime/sidlx/sidlx_io_TxtIStream_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidlx.io.TxtIStream.read) */
   int fd = sidlx_io_TxtIStream__get_data(self)->filedes;
   int n = s_readn( fd, nbytes, data, _ex ); SIDL_CHECK(*_ex);
@@ -155,6 +168,7 @@ impl_sidlx_io_TxtIStream_read(
   return n;
 
   /* DO-NOT-DELETE splicer.end(sidlx.io.TxtIStream.read) */
+#line 171 "sidlx_io_TxtIStream_Impl.c"
 }
 
 /*
@@ -170,9 +184,10 @@ extern "C"
 int32_t
 impl_sidlx_io_TxtIStream_readline(
   /* in */ sidlx_io_TxtIStream self,
-  /* out */ struct sidl_char__array** data,
+  /* out array<char,row-major> */ struct sidl_char__array** data,
   /* out */ sidl_BaseInterface *_ex)
 {
+#line 176 "../../../babel/runtime/sidlx/sidlx_io_TxtIStream_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidlx.io.TxtIStream.readline) */
   int fd;
   int maxlen=4*1024;
@@ -183,6 +198,7 @@ impl_sidlx_io_TxtIStream_readline(
  EXIT:
   return n;
   /* DO-NOT-DELETE splicer.end(sidlx.io.TxtIStream.readline) */
+#line 201 "sidlx_io_TxtIStream_Impl.c"
 }
 
 /*
@@ -201,6 +217,7 @@ impl_sidlx_io_TxtIStream_getBool(
   /* out */ sidl_bool* item,
   /* out */ sidl_BaseInterface *_ex)
 {
+#line 204 "../../../babel/runtime/sidlx/sidlx_io_TxtIStream_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidlx.io.TxtIStream.getBool) */
   const int fd = sidlx_io_TxtIStream__get_data(self)->filedes;
   char buffer[2], *tmp = buffer;
@@ -221,6 +238,7 @@ impl_sidlx_io_TxtIStream_getBool(
  EXIT:
   return;
   /* DO-NOT-DELETE splicer.end(sidlx.io.TxtIStream.getBool) */
+#line 241 "sidlx_io_TxtIStream_Impl.c"
 }
 
 /*
@@ -239,6 +257,7 @@ impl_sidlx_io_TxtIStream_getChar(
   /* out */ char* item,
   /* out */ sidl_BaseInterface *_ex)
 {
+#line 242 "../../../babel/runtime/sidlx/sidlx_io_TxtIStream_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidlx.io.TxtIStream.getChar) */
   const int fd = sidlx_io_TxtIStream__get_data(self)->filedes;
   char buffer[2], *tmp = buffer;
@@ -252,6 +271,7 @@ impl_sidlx_io_TxtIStream_getChar(
  EXIT:
   return;
   /* DO-NOT-DELETE splicer.end(sidlx.io.TxtIStream.getChar) */
+#line 274 "sidlx_io_TxtIStream_Impl.c"
 }
 
 /*
@@ -270,6 +290,7 @@ impl_sidlx_io_TxtIStream_getInt(
   /* out */ int32_t* item,
   /* out */ sidl_BaseInterface *_ex)
 {
+#line 273 "../../../babel/runtime/sidlx/sidlx_io_TxtIStream_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidlx.io.TxtIStream.getInt) */
   const int fd = sidlx_io_TxtIStream__get_data(self)->filedes;
   char buffer[5], *tmp=buffer; /*int32_t is 4 bytes */
@@ -286,6 +307,7 @@ impl_sidlx_io_TxtIStream_getInt(
  EXIT:
   return;
   /* DO-NOT-DELETE splicer.end(sidlx.io.TxtIStream.getInt) */
+#line 310 "sidlx_io_TxtIStream_Impl.c"
 }
 
 /*
@@ -304,9 +326,11 @@ impl_sidlx_io_TxtIStream_getLong(
   /* out */ int64_t* item,
   /* out */ sidl_BaseInterface *_ex)
 {
+#line 307 "../../../babel/runtime/sidlx/sidlx_io_TxtIStream_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidlx.io.TxtIStream.getLong) */
   /* Insert the implementation of the getLong method here... */
   /* DO-NOT-DELETE splicer.end(sidlx.io.TxtIStream.getLong) */
+#line 333 "sidlx_io_TxtIStream_Impl.c"
 }
 
 /*
@@ -325,9 +349,11 @@ impl_sidlx_io_TxtIStream_getFloat(
   /* out */ float* item,
   /* out */ sidl_BaseInterface *_ex)
 {
+#line 328 "../../../babel/runtime/sidlx/sidlx_io_TxtIStream_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidlx.io.TxtIStream.getFloat) */
   /* Insert the implementation of the getFloat method here... */
   /* DO-NOT-DELETE splicer.end(sidlx.io.TxtIStream.getFloat) */
+#line 356 "sidlx_io_TxtIStream_Impl.c"
 }
 
 /*
@@ -346,9 +372,11 @@ impl_sidlx_io_TxtIStream_getDouble(
   /* out */ double* item,
   /* out */ sidl_BaseInterface *_ex)
 {
+#line 349 "../../../babel/runtime/sidlx/sidlx_io_TxtIStream_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidlx.io.TxtIStream.getDouble) */
   /* Insert the implementation of the getDouble method here... */
   /* DO-NOT-DELETE splicer.end(sidlx.io.TxtIStream.getDouble) */
+#line 379 "sidlx_io_TxtIStream_Impl.c"
 }
 
 /*
@@ -367,9 +395,11 @@ impl_sidlx_io_TxtIStream_getFcomplex(
   /* out */ struct sidl_fcomplex* item,
   /* out */ sidl_BaseInterface *_ex)
 {
+#line 370 "../../../babel/runtime/sidlx/sidlx_io_TxtIStream_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidlx.io.TxtIStream.getFcomplex) */
   /* Insert the implementation of the getFcomplex method here... */
   /* DO-NOT-DELETE splicer.end(sidlx.io.TxtIStream.getFcomplex) */
+#line 402 "sidlx_io_TxtIStream_Impl.c"
 }
 
 /*
@@ -388,9 +418,11 @@ impl_sidlx_io_TxtIStream_getDcomplex(
   /* out */ struct sidl_dcomplex* item,
   /* out */ sidl_BaseInterface *_ex)
 {
+#line 391 "../../../babel/runtime/sidlx/sidlx_io_TxtIStream_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidlx.io.TxtIStream.getDcomplex) */
   /* Insert the implementation of the getDcomplex method here... */
   /* DO-NOT-DELETE splicer.end(sidlx.io.TxtIStream.getDcomplex) */
+#line 425 "sidlx_io_TxtIStream_Impl.c"
 }
 
 /*
@@ -409,9 +441,11 @@ impl_sidlx_io_TxtIStream_getString(
   /* out */ char** item,
   /* out */ sidl_BaseInterface *_ex)
 {
+#line 412 "../../../babel/runtime/sidlx/sidlx_io_TxtIStream_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidlx.io.TxtIStream.getString) */
   /* Insert the implementation of the getString method here... */
   /* DO-NOT-DELETE splicer.end(sidlx.io.TxtIStream.getString) */
+#line 448 "sidlx_io_TxtIStream_Impl.c"
 }
 /* Babel internal methods, Users should not edit below this line. */
 struct sidlx_io_IOException__object* 

@@ -2,12 +2,12 @@
  * File:          sidlx_io_TxtIStream.h
  * Symbol:        sidlx.io.TxtIStream-v0.1
  * Symbol Type:   class
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.8
  * Description:   Client-side glue code for sidlx.io.TxtIStream
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.8
  */
 
 #ifndef included_sidlx_io_TxtIStream_h
@@ -166,7 +166,7 @@ int32_t
 sidlx_io_TxtIStream_read(
   /* in */ sidlx_io_TxtIStream self,
   /* in */ int32_t nbytes,
-  /* out */ struct sidl_char__array** data,
+  /* out array<char,row-major> */ struct sidl_char__array** data,
   /* out */ sidl_BaseInterface *_ex);
 
 /**
@@ -175,7 +175,7 @@ sidlx_io_TxtIStream_read(
 int32_t
 sidlx_io_TxtIStream_readline(
   /* in */ sidlx_io_TxtIStream self,
-  /* out */ struct sidl_char__array** data,
+  /* out array<char,row-major> */ struct sidl_char__array** data,
   /* out */ sidl_BaseInterface *_ex);
 
 /**

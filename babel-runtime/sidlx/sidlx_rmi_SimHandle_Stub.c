@@ -2,12 +2,12 @@
  * File:          sidlx_rmi_SimHandle_Stub.c
  * Symbol:        sidlx.rmi.SimHandle-v0.1
  * Symbol Type:   class
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.8
  * Description:   Client-side glue code for sidlx.rmi.SimHandle
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.8
  */
 
 #include "sidlx_rmi_SimHandle.h"
@@ -1433,6 +1433,8 @@ remote_sidlx_rmi_SimHandle_createInvocation(
   /* FIXME */
 
   /* extract return value */
+  sidl_rmi_Response_unpackString( _rsvp, "_retval", &_retval_str, _ex2);
+  _retval = sidl_rmi_Invocation__connect(_retval_str, _ex2);
 
   /* unpack out and inout arguments */
 

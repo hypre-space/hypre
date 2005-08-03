@@ -2,12 +2,12 @@
  * File:          sidlx_io_TxtOStream_Skel.c
  * Symbol:        sidlx.io.TxtOStream-v0.1
  * Symbol Type:   class
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.8
  * Description:   Server-side glue code for sidlx.io.TxtOStream
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.8
  */
 
 #include "sidlx_io_TxtOStream_IOR.h"
@@ -74,7 +74,7 @@ extern
 int32_t
 impl_sidlx_io_TxtOStream_write(
   /* in */ sidlx_io_TxtOStream self,
-  /* in */ struct sidl_char__array* data,
+  /* in array<char,row-major> */ struct sidl_char__array* data,
   /* out */ sidl_BaseInterface *_ex);
 
 extern
@@ -173,7 +173,7 @@ extern char* impl_sidlx_io_TxtOStream_fgetURL_sidl_BaseClass(struct
 static int32_t
 skel_sidlx_io_TxtOStream_write(
   /* in */ sidlx_io_TxtOStream self,
-  /* in */ struct sidl_char__array* data,
+  /* in array<char,row-major> */ struct sidl_char__array* data,
 /* out */ sidl_BaseInterface *_ex)
 {
   int32_t _return;

@@ -2,7 +2,7 @@
  * File:          sidl_rmi_ProtocolFactory_Impl.h
  * Symbol:        sidl.rmi.ProtocolFactory-v0.9.3
  * Symbol Type:   class
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.8
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Server-side implementation for sidl.rmi.ProtocolFactory
@@ -32,7 +32,7 @@
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.8
  */
 
 #ifndef included_sidl_rmi_ProtocolFactory_Impl_h
@@ -60,20 +60,24 @@
 #include "sidl_BaseClass.h"
 #endif
 
+#line 63 "../../../babel/runtime/sidl/sidl_rmi_ProtocolFactory_Impl.h"
 /* DO-NOT-DELETE splicer.begin(sidl.rmi.ProtocolFactory._includes) */
 /* Put additional include files here... */
 /* DO-NOT-DELETE splicer.end(sidl.rmi.ProtocolFactory._includes) */
+#line 67 "sidl_rmi_ProtocolFactory_Impl.h"
 
 /*
  * Private data for class sidl.rmi.ProtocolFactory
  */
 
 struct sidl_rmi_ProtocolFactory__data {
+#line 72 "../../../babel/runtime/sidl/sidl_rmi_ProtocolFactory_Impl.h"
   /* DO-NOT-DELETE splicer.begin(sidl.rmi.ProtocolFactory._data) */
   char ** reg; /* reg[2*i] is associated w/ reg[2*i+1] */
   int len; /* len/2 entries, len always even */
   int maxlen; /* size of buffer */
   /* DO-NOT-DELETE splicer.end(sidl.rmi.ProtocolFactory._data) */
+#line 80 "sidl_rmi_ProtocolFactory_Impl.h"
 };
 
 #ifdef __cplusplus

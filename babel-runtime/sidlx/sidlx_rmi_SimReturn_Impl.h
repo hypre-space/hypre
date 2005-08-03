@@ -2,12 +2,12 @@
  * File:          sidlx_rmi_SimReturn_Impl.h
  * Symbol:        sidlx.rmi.SimReturn-v0.1
  * Symbol Type:   class
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.8
  * Description:   Server-side implementation for sidlx.rmi.SimReturn
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.8
  */
 
 #ifndef included_sidlx_rmi_SimReturn_Impl_h
@@ -41,15 +41,18 @@
 #include "sidl_BaseClass.h"
 #endif
 
+#line 44 "../../../babel/runtime/sidlx/sidlx_rmi_SimReturn_Impl.h"
 /* DO-NOT-DELETE splicer.begin(sidlx.rmi.SimReturn._includes) */
 /* insert implementation here: sidlx.rmi.SimReturn._includes (include files) */
 /* DO-NOT-DELETE splicer.end(sidlx.rmi.SimReturn._includes) */
+#line 48 "sidlx_rmi_SimReturn_Impl.h"
 
 /*
  * Private data for class sidlx.rmi.SimReturn
  */
 
 struct sidlx_rmi_SimReturn__data {
+#line 53 "../../../babel/runtime/sidlx/sidlx_rmi_SimReturn_Impl.h"
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.SimReturn._data) */
   /* insert implementation here: sidlx.rmi.SimReturn._data (private data members) */
   int d_len;
@@ -58,6 +61,7 @@ struct sidlx_rmi_SimReturn__data {
   sidlx_rmi_Socket d_sock;
   char *d_methodName;
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.SimReturn._data) */
+#line 64 "sidlx_rmi_SimReturn_Impl.h"
 };
 
 #ifdef __cplusplus

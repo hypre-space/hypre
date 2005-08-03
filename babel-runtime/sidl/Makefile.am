@@ -46,7 +46,13 @@ libsidl_la_SOURCES = $(IMPLSRCS) $(IMPLHDRS) ltdl.c \
 	$(CUSTOMSRCS) $(CUSTOMHDRS) \
 	$(STUBSRCS) $(STUBHDRS) $(IORSRCS) $(IORHDRS) \
 	$(SKELSRCS) $(SKELHDRS)
+if WITH_SIDLX
 libsidl_la_DEPENDENCIES = ../sidlx/babel-stamp
+SIDLXINCLUDE=-I$(srcdir)/../sidlx
+else
+libsidl_la_DEPENDENCIES =
+SIDLXINCLUDE=
+endif
 libsidl_la_LIBADD = $(LIBADD_DL) $(CHASM_LIBS) $(LIBXML2_LIB)
 libsidl_la_LDFLAGS = -no-undefined -release $(VERSION)
 $(libsidl_la_OBJECTS) $(nodist_libsidl_la_OBJECTS) : babel_config.h
@@ -55,7 +61,7 @@ EXTRA_DIST = $(SRCS_EXCLUDED) ltdl.h ignore_me.h.in \
 	libsidl.scl.in scl.dtd changeundef.py
 
 
-AM_CPPFLAGS=$(CHASM_CFLAGS) $(LIBXML2_CFLAGS) $(JNI_INCLUDES) -I$(srcdir)/../sidlx
+AM_CPPFLAGS=$(CHASM_CFLAGS) $(LIBXML2_CFLAGS) $(JNI_INCLUDES) $(SIDLXINCLUDE)
 
 SRCS_EXCLUDED = $(FORTRAN_EXCLUDED) $(PYTHON_EXCLUDED) $(JAVA_EXCLUDED)
 SRCS_INCLUDED = $(FORTRAN_SOURCES) $(PYTHON_SOURCES) $(JAVA_SOURCES)
@@ -143,8 +149,10 @@ CUSTOMSRCS = \
 libsidl.scl: 
 	sed -e 's,@@DIR@@,'`pwd`',g' < $(srcdir)/libsidl.scl.in > libsidl.scl
 
+if WITH_SIDLX
 ../sidlx/babel-stamp: babel-stamp
 	cd ../sidlx && $(MAKE) $(AM_MAKEFLAGS) babel-stamp
+endif
 
 if BABEL_RUNTIME_ONLY
 babel-stamp:

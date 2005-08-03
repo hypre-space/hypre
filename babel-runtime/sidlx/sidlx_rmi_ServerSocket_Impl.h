@@ -2,12 +2,12 @@
  * File:          sidlx_rmi_ServerSocket_Impl.h
  * Symbol:        sidlx.rmi.ServerSocket-v0.1
  * Symbol Type:   class
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.8
  * Description:   Server-side implementation for sidlx.rmi.ServerSocket
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.8
  */
 
 #ifndef included_sidlx_rmi_ServerSocket_Impl_h
@@ -38,6 +38,7 @@
 #include "sidl_BaseClass.h"
 #endif
 
+#line 41 "../../../babel/runtime/sidlx/sidlx_rmi_ServerSocket_Impl.h"
 /* DO-NOT-DELETE splicer.begin(sidlx.rmi.ServerSocket._includes) */
 #include <stdio.h>
 #include <stddef.h>
@@ -54,17 +55,20 @@
 #include "sidl_Exception.h"
 /* insert implementation here: sidlx.rmi.ServerSocket._includes (include files) */
 /* DO-NOT-DELETE splicer.end(sidlx.rmi.ServerSocket._includes) */
+#line 58 "sidlx_rmi_ServerSocket_Impl.h"
 
 /*
  * Private data for class sidlx.rmi.ServerSocket
  */
 
 struct sidlx_rmi_ServerSocket__data {
+#line 63 "../../../babel/runtime/sidlx/sidlx_rmi_ServerSocket_Impl.h"
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.ServerSocket._data) */
   /* insert implementation here: sidlx.rmi.ServerSocket._data (private data members) */
   int addrlen;
   struct sockaddr_in d_serv_addr;
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.ServerSocket._data) */
+#line 71 "sidlx_rmi_ServerSocket_Impl.h"
 };
 
 #ifdef __cplusplus

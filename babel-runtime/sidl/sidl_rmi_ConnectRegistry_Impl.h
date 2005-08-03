@@ -2,7 +2,7 @@
  * File:          sidl_rmi_ConnectRegistry_Impl.h
  * Symbol:        sidl.rmi.ConnectRegistry-v0.9.3
  * Symbol Type:   class
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.8
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Server-side implementation for sidl.rmi.ConnectRegistry
@@ -32,7 +32,7 @@
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.8
  */
 
 #ifndef included_sidl_rmi_ConnectRegistry_Impl_h
@@ -54,19 +54,23 @@
 #include "sidl_BaseClass.h"
 #endif
 
+#line 57 "../../../babel/runtime/sidl/sidl_rmi_ConnectRegistry_Impl.h"
 /* DO-NOT-DELETE splicer.begin(sidl.rmi.ConnectRegistry._includes) */
 #include "sidl_hashtable.h"
 /* DO-NOT-DELETE splicer.end(sidl.rmi.ConnectRegistry._includes) */
+#line 61 "sidl_rmi_ConnectRegistry_Impl.h"
 
 /*
  * Private data for class sidl.rmi.ConnectRegistry
  */
 
 struct sidl_rmi_ConnectRegistry__data {
+#line 66 "../../../babel/runtime/sidl/sidl_rmi_ConnectRegistry_Impl.h"
   /* DO-NOT-DELETE splicer.begin(sidl.rmi.ConnectRegistry._data) */
   /* Insert-Code-Here {sidl.rmi.ConnectRegistry._data} (private data members) */
   struct hashtable *hshtbl;
   /* DO-NOT-DELETE splicer.end(sidl.rmi.ConnectRegistry._data) */
+#line 73 "sidl_rmi_ConnectRegistry_Impl.h"
 };
 
 #ifdef __cplusplus

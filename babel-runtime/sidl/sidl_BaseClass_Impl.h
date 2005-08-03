@@ -2,7 +2,7 @@
  * File:          sidl_BaseClass_Impl.h
  * Symbol:        sidl.BaseClass-v0.9.3
  * Symbol Type:   class
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.8
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Server-side implementation for sidl.BaseClass
@@ -32,7 +32,7 @@
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.8
  */
 
 #ifndef included_sidl_BaseClass_Impl_h
@@ -51,6 +51,7 @@
 #include "sidl_BaseClass.h"
 #endif
 
+#line 54 "../../../babel/runtime/sidl/sidl_BaseClass_Impl.h"
 /* DO-NOT-DELETE splicer.begin(sidl.BaseClass._includes) */
 struct sidl_ClassInfo__object;
 
@@ -58,12 +59,14 @@ struct sidl_ClassInfo__object;
 #include <pthread.h>
 #endif /* HAVE_PTHREAD */
 /* DO-NOT-DELETE splicer.end(sidl.BaseClass._includes) */
+#line 62 "sidl_BaseClass_Impl.h"
 
 /*
  * Private data for class sidl.BaseClass
  */
 
 struct sidl_BaseClass__data {
+#line 67 "../../../babel/runtime/sidl/sidl_BaseClass_Impl.h"
   /* DO-NOT-DELETE splicer.begin(sidl.BaseClass._data) */
   int                            d_refcount;
   int32_t                        d_IOR_major_version;
@@ -73,6 +76,7 @@ struct sidl_BaseClass__data {
   pthread_mutex_t                d_mutex; /* lock for reference count */
 #endif /* HAVE_PTHREAD */
   /* DO-NOT-DELETE splicer.end(sidl.BaseClass._data) */
+#line 79 "sidl_BaseClass_Impl.h"
 };
 
 #ifdef __cplusplus

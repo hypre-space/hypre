@@ -2,12 +2,12 @@
  * File:          sidlx_rmi_CallType_IOR.h
  * Symbol:        sidlx.rmi.CallType-v0.1
  * Symbol Type:   enumeration
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.8
  * Description:   Intermediate Object Representation for sidlx.rmi.CallType
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.8
  */
 
 #ifndef included_sidlx_rmi_CallType_IOR_h

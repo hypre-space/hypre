@@ -2,12 +2,12 @@
  * File:          sidlx_rmi_SimpleOrb_Impl.h
  * Symbol:        sidlx.rmi.SimpleOrb-v0.1
  * Symbol Type:   class
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.8
  * Description:   Server-side implementation for sidlx.rmi.SimpleOrb
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.8
  */
 
 #ifndef included_sidlx_rmi_SimpleOrb_Impl_h
@@ -38,19 +38,23 @@
 #include "sidl_BaseClass.h"
 #endif
 
+#line 41 "../../../babel/runtime/sidlx/sidlx_rmi_SimpleOrb_Impl.h"
 /* DO-NOT-DELETE splicer.begin(sidlx.rmi.SimpleOrb._includes) */
 /* Put additional include files here... */
 /* DO-NOT-DELETE splicer.end(sidlx.rmi.SimpleOrb._includes) */
+#line 45 "sidlx_rmi_SimpleOrb_Impl.h"
 
 /*
  * Private data for class sidlx.rmi.SimpleOrb
  */
 
 struct sidlx_rmi_SimpleOrb__data {
+#line 50 "../../../babel/runtime/sidlx/sidlx_rmi_SimpleOrb_Impl.h"
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.SimpleOrb._data) */
   /* Put private data members here... */
   int ignore; /* dummy to force non-empty struct; remove if you add data */
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.SimpleOrb._data) */
+#line 57 "sidlx_rmi_SimpleOrb_Impl.h"
 };
 
 #ifdef __cplusplus

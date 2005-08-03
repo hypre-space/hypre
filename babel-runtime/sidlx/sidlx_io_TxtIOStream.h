@@ -2,12 +2,12 @@
  * File:          sidlx_io_TxtIOStream.h
  * Symbol:        sidlx.io.TxtIOStream-v0.1
  * Symbol Type:   class
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.8
  * Description:   Client-side glue code for sidlx.io.TxtIOStream
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.8
  */
 
 #ifndef included_sidlx_io_TxtIOStream_h
@@ -164,7 +164,7 @@ int32_t
 sidlx_io_TxtIOStream_read(
   /* in */ sidlx_io_TxtIOStream self,
   /* in */ int32_t nbytes,
-  /* out */ struct sidl_char__array** data,
+  /* out array<char,row-major> */ struct sidl_char__array** data,
   /* out */ sidl_BaseInterface *_ex);
 
 /**
@@ -173,7 +173,7 @@ sidlx_io_TxtIOStream_read(
 int32_t
 sidlx_io_TxtIOStream_readline(
   /* in */ sidlx_io_TxtIOStream self,
-  /* out */ struct sidl_char__array** data,
+  /* out array<char,row-major> */ struct sidl_char__array** data,
   /* out */ sidl_BaseInterface *_ex);
 
 /**
@@ -270,7 +270,7 @@ sidlx_io_TxtIOStream_flush(
 int32_t
 sidlx_io_TxtIOStream_write(
   /* in */ sidlx_io_TxtIOStream self,
-  /* in */ struct sidl_char__array* data,
+  /* in array<char,row-major> */ struct sidl_char__array* data,
   /* out */ sidl_BaseInterface *_ex);
 
 /**

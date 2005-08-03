@@ -2,12 +2,12 @@
  * File:          sidlx_rmi_Common_Impl.h
  * Symbol:        sidlx.rmi.Common-v0.1
  * Symbol Type:   class
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.8
  * Description:   Server-side implementation for sidlx.rmi.Common
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.8
  */
 
 #ifndef included_sidlx_rmi_Common_Impl_h
@@ -32,19 +32,23 @@
 #include "sidl_BaseClass.h"
 #endif
 
+#line 35 "../../../babel/runtime/sidlx/sidlx_rmi_Common_Impl.h"
 /* DO-NOT-DELETE splicer.begin(sidlx.rmi.Common._includes) */
 /* insert implementation here: sidlx.rmi.Common._includes (include files) */
 /* DO-NOT-DELETE splicer.end(sidlx.rmi.Common._includes) */
+#line 39 "sidlx_rmi_Common_Impl.h"
 
 /*
  * Private data for class sidlx.rmi.Common
  */
 
 struct sidlx_rmi_Common__data {
+#line 44 "../../../babel/runtime/sidlx/sidlx_rmi_Common_Impl.h"
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.Common._data) */
   /* insert implementation here: sidlx.rmi.Common._data (private data members) */
   int ignore; /* dummy to force non-empty struct; remove if you add data */
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.Common._data) */
+#line 51 "sidlx_rmi_Common_Impl.h"
 };
 
 #ifdef __cplusplus

@@ -2,7 +2,7 @@
  * File:          sidl_DFinder_Impl.h
  * Symbol:        sidl.DFinder-v0.9.3
  * Symbol Type:   class
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.8
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Server-side implementation for sidl.DFinder
@@ -32,7 +32,7 @@
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.8
  */
 
 #ifndef included_sidl_DFinder_Impl_h
@@ -60,19 +60,23 @@
 #include "sidl_BaseClass.h"
 #endif
 
+#line 63 "../../../babel/runtime/sidl/sidl_DFinder_Impl.h"
 /* DO-NOT-DELETE splicer.begin(sidl.DFinder._includes) */
 /* Put additional include files here... */
 /* DO-NOT-DELETE splicer.end(sidl.DFinder._includes) */
+#line 67 "sidl_DFinder_Impl.h"
 
 /*
  * Private data for class sidl.DFinder
  */
 
 struct sidl_DFinder__data {
+#line 72 "../../../babel/runtime/sidl/sidl_DFinder_Impl.h"
   /* DO-NOT-DELETE splicer.begin(sidl.DFinder._data) */
   /* Put private data members here... */
   char*     d_search_path;
   /* DO-NOT-DELETE splicer.end(sidl.DFinder._data) */
+#line 79 "sidl_DFinder_Impl.h"
 };
 
 #ifdef __cplusplus

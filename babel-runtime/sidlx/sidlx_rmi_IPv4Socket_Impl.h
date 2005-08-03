@@ -2,12 +2,12 @@
  * File:          sidlx_rmi_IPv4Socket_Impl.h
  * Symbol:        sidlx.rmi.IPv4Socket-v0.1
  * Symbol Type:   class
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.8
  * Description:   Server-side implementation for sidlx.rmi.IPv4Socket
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.8
  */
 
 #ifndef included_sidlx_rmi_IPv4Socket_Impl_h
@@ -35,19 +35,23 @@
 #include "sidl_BaseClass.h"
 #endif
 
+#line 38 "../../../babel/runtime/sidlx/sidlx_rmi_IPv4Socket_Impl.h"
 /* DO-NOT-DELETE splicer.begin(sidlx.rmi.IPv4Socket._includes) */
 /* insert implementation here: sidlx.rmi.IPv4Socket._includes (include files) */
 /* DO-NOT-DELETE splicer.end(sidlx.rmi.IPv4Socket._includes) */
+#line 42 "sidlx_rmi_IPv4Socket_Impl.h"
 
 /*
  * Private data for class sidlx.rmi.IPv4Socket
  */
 
 struct sidlx_rmi_IPv4Socket__data {
+#line 47 "../../../babel/runtime/sidlx/sidlx_rmi_IPv4Socket_Impl.h"
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.IPv4Socket._data) */
   /* insert implementation here: sidlx.rmi.IPv4Socket._data (private data members) */
   int fd; /* File descriptor (Socket) */
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.IPv4Socket._data) */
+#line 54 "sidlx_rmi_IPv4Socket_Impl.h"
 };
 
 #ifdef __cplusplus
@@ -143,7 +147,7 @@ int32_t
 impl_sidlx_rmi_IPv4Socket_readn(
   /* in */ sidlx_rmi_IPv4Socket self,
   /* in */ int32_t nbytes,
-  /* inout */ struct sidl_char__array** data,
+  /* inout array<char> */ struct sidl_char__array** data,
   /* out */ sidl_BaseInterface *_ex);
 
 extern
@@ -151,7 +155,7 @@ int32_t
 impl_sidlx_rmi_IPv4Socket_readline(
   /* in */ sidlx_rmi_IPv4Socket self,
   /* in */ int32_t nbytes,
-  /* inout */ struct sidl_char__array** data,
+  /* inout array<char> */ struct sidl_char__array** data,
   /* out */ sidl_BaseInterface *_ex);
 
 extern
@@ -159,14 +163,14 @@ int32_t
 impl_sidlx_rmi_IPv4Socket_readstring(
   /* in */ sidlx_rmi_IPv4Socket self,
   /* in */ int32_t nbytes,
-  /* inout */ struct sidl_char__array** data,
+  /* inout array<char> */ struct sidl_char__array** data,
   /* out */ sidl_BaseInterface *_ex);
 
 extern
 int32_t
 impl_sidlx_rmi_IPv4Socket_readstring_alloc(
   /* in */ sidlx_rmi_IPv4Socket self,
-  /* inout */ struct sidl_char__array** data,
+  /* inout array<char> */ struct sidl_char__array** data,
   /* out */ sidl_BaseInterface *_ex);
 
 extern
@@ -181,7 +185,7 @@ int32_t
 impl_sidlx_rmi_IPv4Socket_writen(
   /* in */ sidlx_rmi_IPv4Socket self,
   /* in */ int32_t nbytes,
-  /* in */ struct sidl_char__array* data,
+  /* in array<char> */ struct sidl_char__array* data,
   /* out */ sidl_BaseInterface *_ex);
 
 extern
@@ -189,7 +193,7 @@ int32_t
 impl_sidlx_rmi_IPv4Socket_writestring(
   /* in */ sidlx_rmi_IPv4Socket self,
   /* in */ int32_t nbytes,
-  /* in */ struct sidl_char__array* data,
+  /* in array<char> */ struct sidl_char__array* data,
   /* out */ sidl_BaseInterface *_ex);
 
 extern

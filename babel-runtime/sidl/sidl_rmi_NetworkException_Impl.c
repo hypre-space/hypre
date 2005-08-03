@@ -2,7 +2,7 @@
  * File:          sidl_rmi_NetworkException_Impl.c
  * Symbol:        sidl.rmi.NetworkException-v0.9.3
  * Symbol Type:   class
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.8
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Server-side implementation for sidl.rmi.NetworkException
@@ -32,7 +32,7 @@
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.8
  */
 
 /*
@@ -48,9 +48,11 @@
 
 #include "sidl_rmi_NetworkException_Impl.h"
 
+#line 51 "../../../babel/runtime/sidl/sidl_rmi_NetworkException_Impl.c"
 /* DO-NOT-DELETE splicer.begin(sidl.rmi.NetworkException._includes) */
 /* insert implementation here: sidl.rmi.NetworkException._includes (includes and arbitrary code) */
 /* DO-NOT-DELETE splicer.end(sidl.rmi.NetworkException._includes) */
+#line 55 "sidl_rmi_NetworkException_Impl.c"
 
 /*
  * Static class initializer called exactly once before any user-defined method is dispatched
@@ -66,9 +68,11 @@ void
 impl_sidl_rmi_NetworkException__load(
   void)
 {
+#line 69 "../../../babel/runtime/sidl/sidl_rmi_NetworkException_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidl.rmi.NetworkException._load) */
   /* insert implementation here: sidl.rmi.NetworkException._load (static class initializer method) */
   /* DO-NOT-DELETE splicer.end(sidl.rmi.NetworkException._load) */
+#line 75 "sidl_rmi_NetworkException_Impl.c"
 }
 /*
  * Class constructor called when the class is created.
@@ -84,9 +88,11 @@ void
 impl_sidl_rmi_NetworkException__ctor(
   /* in */ sidl_rmi_NetworkException self)
 {
+#line 87 "../../../babel/runtime/sidl/sidl_rmi_NetworkException_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidl.rmi.NetworkException._ctor) */
   /* insert implementation here: sidl.rmi.NetworkException._ctor (constructor method) */
   /* DO-NOT-DELETE splicer.end(sidl.rmi.NetworkException._ctor) */
+#line 95 "sidl_rmi_NetworkException_Impl.c"
 }
 
 /*
@@ -103,9 +109,11 @@ void
 impl_sidl_rmi_NetworkException__dtor(
   /* in */ sidl_rmi_NetworkException self)
 {
+#line 106 "../../../babel/runtime/sidl/sidl_rmi_NetworkException_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidl.rmi.NetworkException._dtor) */
   /* insert implementation here: sidl.rmi.NetworkException._dtor (destructor method) */
   /* DO-NOT-DELETE splicer.end(sidl.rmi.NetworkException._dtor) */
+#line 116 "sidl_rmi_NetworkException_Impl.c"
 }
 /* Babel internal methods, Users should not edit below this line. */
 struct sidl_SIDLException__object* 

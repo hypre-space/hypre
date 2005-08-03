@@ -2,7 +2,7 @@
  * File:          sidl_Finder_Module.c
  * Symbol:        sidl.Finder-v0.9.3
  * Symbol Type:   interface
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.8
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   implement a C extension type for a sidl extendable
@@ -32,7 +32,7 @@
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.8
  */
 
 /*
@@ -609,6 +609,6 @@ class <code>DefaultFinder</code> is used."
   }
   Py_INCREF(&_sidl_FinderType);
   PyDict_SetItemString(dict, "Finder", (PyObject *)&_sidl_FinderType);
-  sidl_ClassInfo__import();
   sidl_DLL__import();
+  sidl_ClassInfo__import();
 }

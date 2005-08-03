@@ -2,12 +2,12 @@
  * File:          sidlx_rmi_Simsponse_Impl.c
  * Symbol:        sidlx.rmi.Simsponse-v0.1
  * Symbol Type:   class
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.8
  * Description:   Server-side implementation for sidlx.rmi.Simsponse
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.8
  */
 
 /*
@@ -24,6 +24,7 @@
 
 #include "sidlx_rmi_Simsponse_Impl.h"
 
+#line 27 "../../../babel/runtime/sidlx/sidlx_rmi_Simsponse_Impl.c"
 /* DO-NOT-DELETE splicer.begin(sidlx.rmi.Simsponse._includes) */
 #include "sidlx_rmi_GenNetworkException.h"
 #include "sidlType.h"
@@ -107,6 +108,7 @@ static void flip32(int32_t* in) {
 }
 
 /* DO-NOT-DELETE splicer.end(sidlx.rmi.Simsponse._includes) */
+#line 111 "sidlx_rmi_Simsponse_Impl.c"
 
 /*
  * Static class initializer called exactly once before any user-defined method is dispatched
@@ -122,9 +124,11 @@ void
 impl_sidlx_rmi_Simsponse__load(
   void)
 {
+#line 125 "../../../babel/runtime/sidlx/sidlx_rmi_Simsponse_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.Simsponse._load) */
   /* insert implementation here: sidlx.rmi.Simsponse._load (static class initializer method) */
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.Simsponse._load) */
+#line 131 "sidlx_rmi_Simsponse_Impl.c"
 }
 /*
  * Class constructor called when the class is created.
@@ -140,9 +144,11 @@ void
 impl_sidlx_rmi_Simsponse__ctor(
   /* in */ sidlx_rmi_Simsponse self)
 {
+#line 143 "../../../babel/runtime/sidlx/sidlx_rmi_Simsponse_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.Simsponse._ctor) */
   /* insert implementation here: sidlx.rmi.Simsponse._ctor (constructor method) */
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.Simsponse._ctor) */
+#line 151 "sidlx_rmi_Simsponse_Impl.c"
 }
 
 /*
@@ -159,6 +165,7 @@ void
 impl_sidlx_rmi_Simsponse__dtor(
   /* in */ sidlx_rmi_Simsponse self)
 {
+#line 162 "../../../babel/runtime/sidlx/sidlx_rmi_Simsponse_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.Simsponse._dtor) */
   struct sidlx_rmi_Simsponse__data *dptr =
     sidlx_rmi_Simsponse__get_data(self);
@@ -175,6 +182,7 @@ impl_sidlx_rmi_Simsponse__dtor(
     sidlx_rmi_Simsponse__set_data(self, NULL);
   }
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.Simsponse._dtor) */
+#line 185 "sidlx_rmi_Simsponse_Impl.c"
 }
 
 /*
@@ -196,6 +204,7 @@ impl_sidlx_rmi_Simsponse_init(
   /* in */ sidlx_rmi_Socket sock,
   /* out */ sidl_BaseInterface *_ex)
 {
+#line 199 "../../../babel/runtime/sidlx/sidlx_rmi_Simsponse_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.Simsponse.init) */
   struct sidlx_rmi_Simsponse__data *dptr =
     sidlx_rmi_Simsponse__get_data(self);
@@ -279,6 +288,7 @@ impl_sidlx_rmi_Simsponse_init(
     return;
 
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.Simsponse.init) */
+#line 291 "sidlx_rmi_Simsponse_Impl.c"
 }
 
 /*
@@ -296,6 +306,7 @@ impl_sidlx_rmi_Simsponse_getMethodName(
   /* in */ sidlx_rmi_Simsponse self,
   /* out */ sidl_BaseInterface *_ex)
 {
+#line 299 "../../../babel/runtime/sidlx/sidlx_rmi_Simsponse_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.Simsponse.getMethodName) */
   struct sidlx_rmi_Simsponse__data *dptr =
     sidlx_rmi_Simsponse__get_data(self);
@@ -307,6 +318,7 @@ impl_sidlx_rmi_Simsponse_getMethodName(
  EXIT:
   return NULL;
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.Simsponse.getMethodName) */
+#line 321 "sidlx_rmi_Simsponse_Impl.c"
 }
 
 /*
@@ -324,6 +336,7 @@ impl_sidlx_rmi_Simsponse_getClassName(
   /* in */ sidlx_rmi_Simsponse self,
   /* out */ sidl_BaseInterface *_ex)
 {
+#line 327 "../../../babel/runtime/sidlx/sidlx_rmi_Simsponse_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.Simsponse.getClassName) */
   struct sidlx_rmi_Simsponse__data *dptr =
     sidlx_rmi_Simsponse__get_data(self);
@@ -335,6 +348,7 @@ impl_sidlx_rmi_Simsponse_getClassName(
  EXIT:
   return NULL;
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.Simsponse.getClassName) */
+#line 351 "sidlx_rmi_Simsponse_Impl.c"
 }
 
 /*
@@ -352,6 +366,7 @@ impl_sidlx_rmi_Simsponse_getObjectID(
   /* in */ sidlx_rmi_Simsponse self,
   /* out */ sidl_BaseInterface *_ex)
 {
+#line 355 "../../../babel/runtime/sidlx/sidlx_rmi_Simsponse_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.Simsponse.getObjectID) */
   struct sidlx_rmi_Simsponse__data *dptr =
     sidlx_rmi_Simsponse__get_data(self);
@@ -363,6 +378,7 @@ impl_sidlx_rmi_Simsponse_getObjectID(
  EXIT:
   return NULL;
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.Simsponse.getObjectID) */
+#line 381 "sidlx_rmi_Simsponse_Impl.c"
 }
 
 /*
@@ -382,6 +398,7 @@ impl_sidlx_rmi_Simsponse_unpackBool(
   /* out */ sidl_bool* value,
   /* out */ sidl_BaseInterface *_ex)
 {
+#line 385 "../../../babel/runtime/sidlx/sidlx_rmi_Simsponse_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.Simsponse.unpackBool) */
   struct sidlx_rmi_Simsponse__data *dptr =
     sidlx_rmi_Simsponse__get_data(self);
@@ -399,6 +416,7 @@ impl_sidlx_rmi_Simsponse_unpackBool(
  EXIT:
   return;
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.Simsponse.unpackBool) */
+#line 419 "sidlx_rmi_Simsponse_Impl.c"
 }
 
 /*
@@ -418,6 +436,7 @@ impl_sidlx_rmi_Simsponse_unpackChar(
   /* out */ char* value,
   /* out */ sidl_BaseInterface *_ex)
 {
+#line 421 "../../../babel/runtime/sidlx/sidlx_rmi_Simsponse_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.Simsponse.unpackChar) */
   struct sidlx_rmi_Simsponse__data *dptr =
     sidlx_rmi_Simsponse__get_data(self);
@@ -429,6 +448,7 @@ impl_sidlx_rmi_Simsponse_unpackChar(
  EXIT:
   return;
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.Simsponse.unpackChar) */
+#line 451 "sidlx_rmi_Simsponse_Impl.c"
 }
 
 /*
@@ -448,6 +468,7 @@ impl_sidlx_rmi_Simsponse_unpackInt(
   /* out */ int32_t* value,
   /* out */ sidl_BaseInterface *_ex)
 {
+#line 451 "../../../babel/runtime/sidlx/sidlx_rmi_Simsponse_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.Simsponse.unpackInt) */
   struct sidlx_rmi_Simsponse__data *dptr =
     sidlx_rmi_Simsponse__get_data(self);
@@ -461,6 +482,7 @@ impl_sidlx_rmi_Simsponse_unpackInt(
  EXIT:
   return;
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.Simsponse.unpackInt) */
+#line 485 "sidlx_rmi_Simsponse_Impl.c"
 }
 
 /*
@@ -480,6 +502,7 @@ impl_sidlx_rmi_Simsponse_unpackLong(
   /* out */ int64_t* value,
   /* out */ sidl_BaseInterface *_ex)
 {
+#line 483 "../../../babel/runtime/sidlx/sidlx_rmi_Simsponse_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.Simsponse.unpackLong) */
   struct sidlx_rmi_Simsponse__data *dptr =
     sidlx_rmi_Simsponse__get_data(self);
@@ -501,6 +524,7 @@ impl_sidlx_rmi_Simsponse_unpackLong(
   return;
 
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.Simsponse.unpackLong) */
+#line 527 "sidlx_rmi_Simsponse_Impl.c"
 }
 
 /*
@@ -520,6 +544,7 @@ impl_sidlx_rmi_Simsponse_unpackFloat(
   /* out */ float* value,
   /* out */ sidl_BaseInterface *_ex)
 {
+#line 523 "../../../babel/runtime/sidlx/sidlx_rmi_Simsponse_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.Simsponse.unpackFloat) */
   struct sidlx_rmi_Simsponse__data *dptr =
     sidlx_rmi_Simsponse__get_data(self);
@@ -538,6 +563,7 @@ impl_sidlx_rmi_Simsponse_unpackFloat(
  EXIT:
   return;
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.Simsponse.unpackFloat) */
+#line 566 "sidlx_rmi_Simsponse_Impl.c"
 }
 
 /*
@@ -557,6 +583,7 @@ impl_sidlx_rmi_Simsponse_unpackDouble(
   /* out */ double* value,
   /* out */ sidl_BaseInterface *_ex)
 {
+#line 560 "../../../babel/runtime/sidlx/sidlx_rmi_Simsponse_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.Simsponse.unpackDouble) */
   struct sidlx_rmi_Simsponse__data *dptr =
     sidlx_rmi_Simsponse__get_data(self);
@@ -576,6 +603,7 @@ impl_sidlx_rmi_Simsponse_unpackDouble(
  EXIT:
   return;
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.Simsponse.unpackDouble) */
+#line 606 "sidlx_rmi_Simsponse_Impl.c"
 }
 
 /*
@@ -595,6 +623,7 @@ impl_sidlx_rmi_Simsponse_unpackFcomplex(
   /* out */ struct sidl_fcomplex* value,
   /* out */ sidl_BaseInterface *_ex)
 {
+#line 598 "../../../babel/runtime/sidlx/sidlx_rmi_Simsponse_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.Simsponse.unpackFcomplex) */
   struct sidlx_rmi_Simsponse__data *dptr =
     sidlx_rmi_Simsponse__get_data(self);
@@ -617,6 +646,7 @@ impl_sidlx_rmi_Simsponse_unpackFcomplex(
  EXIT:
   return;
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.Simsponse.unpackFcomplex) */
+#line 649 "sidlx_rmi_Simsponse_Impl.c"
 }
 
 /*
@@ -636,6 +666,7 @@ impl_sidlx_rmi_Simsponse_unpackDcomplex(
   /* out */ struct sidl_dcomplex* value,
   /* out */ sidl_BaseInterface *_ex)
 {
+#line 639 "../../../babel/runtime/sidlx/sidlx_rmi_Simsponse_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.Simsponse.unpackDcomplex) */
   struct sidlx_rmi_Simsponse__data *dptr =
     sidlx_rmi_Simsponse__get_data(self);
@@ -658,6 +689,7 @@ impl_sidlx_rmi_Simsponse_unpackDcomplex(
  EXIT:
   return;
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.Simsponse.unpackDcomplex) */
+#line 692 "sidlx_rmi_Simsponse_Impl.c"
 }
 
 /*
@@ -677,6 +709,7 @@ impl_sidlx_rmi_Simsponse_unpackString(
   /* out */ char** value,
   /* out */ sidl_BaseInterface *_ex)
 {
+#line 680 "../../../babel/runtime/sidlx/sidlx_rmi_Simsponse_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.Simsponse.unpackString) */
     struct sidlx_rmi_Simsponse__data *dptr =
     sidlx_rmi_Simsponse__get_data(self);
@@ -695,6 +728,7 @@ impl_sidlx_rmi_Simsponse_unpackString(
   return;
 
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.Simsponse.unpackString) */
+#line 731 "sidlx_rmi_Simsponse_Impl.c"
 }
 
 /*
@@ -712,6 +746,7 @@ impl_sidlx_rmi_Simsponse_getExceptionThrown(
   /* in */ sidlx_rmi_Simsponse self,
   /* out */ sidl_BaseInterface *_ex)
 {
+#line 715 "../../../babel/runtime/sidlx/sidlx_rmi_Simsponse_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.Simsponse.getExceptionThrown) */
   /*TODO: Where did this come from, what to do?*/
   struct sidlx_rmi_Simsponse__data *dptr =
@@ -722,6 +757,7 @@ impl_sidlx_rmi_Simsponse_getExceptionThrown(
   } 
   return NULL; 
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.Simsponse.getExceptionThrown) */
+#line 760 "sidlx_rmi_Simsponse_Impl.c"
 }
 
 /*
@@ -739,6 +775,7 @@ impl_sidlx_rmi_Simsponse_done(
   /* in */ sidlx_rmi_Simsponse self,
   /* out */ sidl_BaseInterface *_ex)
 {
+#line 742 "../../../babel/runtime/sidlx/sidlx_rmi_Simsponse_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.Simsponse.done) */
   struct sidlx_rmi_Simsponse__data *dptr =
     sidlx_rmi_Simsponse__get_data(self);
@@ -754,6 +791,7 @@ impl_sidlx_rmi_Simsponse_done(
  EXIT:
   return 0;
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.Simsponse.done) */
+#line 794 "sidlx_rmi_Simsponse_Impl.c"
 }
 /* Babel internal methods, Users should not edit below this line. */
 struct sidl_rmi_Response__object* 

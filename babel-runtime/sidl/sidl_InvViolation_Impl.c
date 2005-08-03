@@ -2,7 +2,7 @@
  * File:          sidl_InvViolation_Impl.c
  * Symbol:        sidl.InvViolation-v0.9.3
  * Symbol Type:   class
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.8
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Server-side implementation for sidl.InvViolation
@@ -32,7 +32,7 @@
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.8
  */
 
 /*
@@ -49,9 +49,11 @@
 
 #include "sidl_InvViolation_Impl.h"
 
+#line 52 "../../../babel/runtime/sidl/sidl_InvViolation_Impl.c"
 /* DO-NOT-DELETE splicer.begin(sidl.InvViolation._includes) */
 /* Put additional includes or other arbitrary code here... */
 /* DO-NOT-DELETE splicer.end(sidl.InvViolation._includes) */
+#line 56 "sidl_InvViolation_Impl.c"
 
 /*
  * Static class initializer called exactly once before any user-defined method is dispatched
@@ -67,9 +69,11 @@ void
 impl_sidl_InvViolation__load(
   void)
 {
+#line 70 "../../../babel/runtime/sidl/sidl_InvViolation_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidl.InvViolation._load) */
   /* Insert implementation here: sidl.InvViolation._load (static class initializer method) */
   /* DO-NOT-DELETE splicer.end(sidl.InvViolation._load) */
+#line 76 "sidl_InvViolation_Impl.c"
 }
 /*
  * Class constructor called when the class is created.
@@ -85,9 +89,11 @@ void
 impl_sidl_InvViolation__ctor(
   /* in */ sidl_InvViolation self)
 {
+#line 88 "../../../babel/runtime/sidl/sidl_InvViolation_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidl.InvViolation._ctor) */
   /* Insert the implementation of the constructor method here... */
   /* DO-NOT-DELETE splicer.end(sidl.InvViolation._ctor) */
+#line 96 "sidl_InvViolation_Impl.c"
 }
 
 /*
@@ -104,9 +110,11 @@ void
 impl_sidl_InvViolation__dtor(
   /* in */ sidl_InvViolation self)
 {
+#line 107 "../../../babel/runtime/sidl/sidl_InvViolation_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidl.InvViolation._dtor) */
   /* Insert the implementation of the destructor method here... */
   /* DO-NOT-DELETE splicer.end(sidl.InvViolation._dtor) */
+#line 117 "sidl_InvViolation_Impl.c"
 }
 /* Babel internal methods, Users should not edit below this line. */
 struct sidl_SIDLException__object* 

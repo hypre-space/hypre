@@ -2,12 +2,12 @@
  * File:          sidlx_rmi_Socket.h
  * Symbol:        sidlx.rmi.Socket-v0.1
  * Symbol Type:   interface
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.8
  * Description:   Client-side glue code for sidlx.rmi.Socket
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.8
  */
 
 #ifndef included_sidlx_rmi_Socket_h
@@ -146,7 +146,7 @@ int32_t
 sidlx_rmi_Socket_readn(
   /* in */ sidlx_rmi_Socket self,
   /* in */ int32_t nbytes,
-  /* inout */ struct sidl_char__array** data,
+  /* inout array<char> */ struct sidl_char__array** data,
   /* out */ sidl_BaseInterface *_ex);
 
 /**
@@ -156,7 +156,7 @@ int32_t
 sidlx_rmi_Socket_readline(
   /* in */ sidlx_rmi_Socket self,
   /* in */ int32_t nbytes,
-  /* inout */ struct sidl_char__array** data,
+  /* inout array<char> */ struct sidl_char__array** data,
   /* out */ sidl_BaseInterface *_ex);
 
 /**
@@ -166,7 +166,7 @@ int32_t
 sidlx_rmi_Socket_readstring(
   /* in */ sidlx_rmi_Socket self,
   /* in */ int32_t nbytes,
-  /* inout */ struct sidl_char__array** data,
+  /* inout array<char> */ struct sidl_char__array** data,
   /* out */ sidl_BaseInterface *_ex);
 
 /**
@@ -175,7 +175,7 @@ sidlx_rmi_Socket_readstring(
 int32_t
 sidlx_rmi_Socket_readstring_alloc(
   /* in */ sidlx_rmi_Socket self,
-  /* inout */ struct sidl_char__array** data,
+  /* inout array<char> */ struct sidl_char__array** data,
   /* out */ sidl_BaseInterface *_ex);
 
 /**
@@ -194,7 +194,7 @@ int32_t
 sidlx_rmi_Socket_writen(
   /* in */ sidlx_rmi_Socket self,
   /* in */ int32_t nbytes,
-  /* in */ struct sidl_char__array* data,
+  /* in array<char> */ struct sidl_char__array* data,
   /* out */ sidl_BaseInterface *_ex);
 
 /**
@@ -204,7 +204,7 @@ int32_t
 sidlx_rmi_Socket_writestring(
   /* in */ sidlx_rmi_Socket self,
   /* in */ int32_t nbytes,
-  /* in */ struct sidl_char__array* data,
+  /* in array<char> */ struct sidl_char__array* data,
   /* out */ sidl_BaseInterface *_ex);
 
 /**

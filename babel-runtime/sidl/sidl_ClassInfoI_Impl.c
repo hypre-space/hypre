@@ -2,7 +2,7 @@
  * File:          sidl_ClassInfoI_Impl.c
  * Symbol:        sidl.ClassInfoI-v0.9.3
  * Symbol Type:   class
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.8
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Server-side implementation for sidl.ClassInfoI
@@ -32,7 +32,7 @@
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.8
  */
 
 /*
@@ -50,11 +50,13 @@
 
 #include "sidl_ClassInfoI_Impl.h"
 
+#line 53 "../../../babel/runtime/sidl/sidl_ClassInfoI_Impl.c"
 /* DO-NOT-DELETE splicer.begin(sidl.ClassInfoI._includes) */
 #include <stdlib.h>
 #include <stdio.h>
 #include "sidl_String.h"
 /* DO-NOT-DELETE splicer.end(sidl.ClassInfoI._includes) */
+#line 59 "sidl_ClassInfoI_Impl.c"
 
 /*
  * Static class initializer called exactly once before any user-defined method is dispatched
@@ -70,9 +72,11 @@ void
 impl_sidl_ClassInfoI__load(
   void)
 {
+#line 73 "../../../babel/runtime/sidl/sidl_ClassInfoI_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidl.ClassInfoI._load) */
   /* Insert the implementation of the static class initializer method here... */
   /* DO-NOT-DELETE splicer.end(sidl.ClassInfoI._load) */
+#line 79 "sidl_ClassInfoI_Impl.c"
 }
 /*
  * Class constructor called when the class is created.
@@ -88,6 +92,7 @@ void
 impl_sidl_ClassInfoI__ctor(
   /* in */ sidl_ClassInfoI self)
 {
+#line 91 "../../../babel/runtime/sidl/sidl_ClassInfoI_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidl.ClassInfoI._ctor) */
   struct sidl_ClassInfoI__data *data = (struct sidl_ClassInfoI__data*)
     malloc(sizeof(struct sidl_ClassInfoI__data));
@@ -97,6 +102,7 @@ impl_sidl_ClassInfoI__ctor(
   }
   sidl_ClassInfoI__set_data(self, data);
   /* DO-NOT-DELETE splicer.end(sidl.ClassInfoI._ctor) */
+#line 105 "sidl_ClassInfoI_Impl.c"
 }
 
 /*
@@ -113,6 +119,7 @@ void
 impl_sidl_ClassInfoI__dtor(
   /* in */ sidl_ClassInfoI self)
 {
+#line 116 "../../../babel/runtime/sidl/sidl_ClassInfoI_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidl.ClassInfoI._dtor) */
   struct sidl_ClassInfoI__data *data = sidl_ClassInfoI__get_data(self);
   if (data) {
@@ -120,6 +127,7 @@ impl_sidl_ClassInfoI__dtor(
     free((void *)data);
   }
   /* DO-NOT-DELETE splicer.end(sidl.ClassInfoI._dtor) */
+#line 130 "sidl_ClassInfoI_Impl.c"
 }
 
 /*
@@ -137,6 +145,7 @@ impl_sidl_ClassInfoI_setName(
   /* in */ sidl_ClassInfoI self,
   /* in */ const char* name)
 {
+#line 140 "../../../babel/runtime/sidl/sidl_ClassInfoI_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidl.ClassInfoI.setName) */
   struct sidl_ClassInfoI__data *data = sidl_ClassInfoI__get_data(self);
   if (data) {
@@ -144,6 +153,7 @@ impl_sidl_ClassInfoI_setName(
     data->d_classname = sidl_String_strdup(name);
   }
   /* DO-NOT-DELETE splicer.end(sidl.ClassInfoI.setName) */
+#line 156 "sidl_ClassInfoI_Impl.c"
 }
 
 /*
@@ -162,6 +172,7 @@ impl_sidl_ClassInfoI_setIORVersion(
   /* in */ int32_t major,
   /* in */ int32_t minor)
 {
+#line 165 "../../../babel/runtime/sidl/sidl_ClassInfoI_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidl.ClassInfoI.setIORVersion) */
   struct sidl_ClassInfoI__data *data = sidl_ClassInfoI__get_data(self);
   if (data) {
@@ -170,6 +181,7 @@ impl_sidl_ClassInfoI_setIORVersion(
   }
 
   /* DO-NOT-DELETE splicer.end(sidl.ClassInfoI.setIORVersion) */
+#line 184 "sidl_ClassInfoI_Impl.c"
 }
 
 /*
@@ -186,10 +198,12 @@ char*
 impl_sidl_ClassInfoI_getName(
   /* in */ sidl_ClassInfoI self)
 {
+#line 189 "../../../babel/runtime/sidl/sidl_ClassInfoI_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidl.ClassInfoI.getName) */
   struct sidl_ClassInfoI__data *data = sidl_ClassInfoI__get_data(self);
   return sidl_String_strdup(data ? data->d_classname : NULL);
   /* DO-NOT-DELETE splicer.end(sidl.ClassInfoI.getName) */
+#line 206 "sidl_ClassInfoI_Impl.c"
 }
 
 /*
@@ -207,6 +221,7 @@ char*
 impl_sidl_ClassInfoI_getIORVersion(
   /* in */ sidl_ClassInfoI self)
 {
+#line 210 "../../../babel/runtime/sidl/sidl_ClassInfoI_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidl.ClassInfoI.getIORVersion) */
   int32_t major, minor;
   char buf[34];
@@ -216,6 +231,7 @@ impl_sidl_ClassInfoI_getIORVersion(
   sprintf(buf, "%d.%d", major, minor);
   return sidl_String_strdup(buf);
   /* DO-NOT-DELETE splicer.end(sidl.ClassInfoI.getIORVersion) */
+#line 234 "sidl_ClassInfoI_Impl.c"
 }
 /* Babel internal methods, Users should not edit below this line. */
 struct sidl_ClassInfoI__object* 

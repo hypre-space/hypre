@@ -2,12 +2,12 @@
  * File:          sidlx_io_TxtOStream_Impl.h
  * Symbol:        sidlx.io.TxtOStream-v0.1
  * Symbol Type:   class
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.8
  * Description:   Server-side implementation for sidlx.io.TxtOStream
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.8
  */
 
 #ifndef included_sidlx_io_TxtOStream_Impl_h
@@ -35,18 +35,22 @@
 #include "sidl_BaseClass.h"
 #endif
 
+#line 38 "../../../babel/runtime/sidlx/sidlx_io_TxtOStream_Impl.h"
 /* DO-NOT-DELETE splicer.begin(sidlx.io.TxtOStream._includes) */
 /* Put additional include files here... */
 /* DO-NOT-DELETE splicer.end(sidlx.io.TxtOStream._includes) */
+#line 42 "sidlx_io_TxtOStream_Impl.h"
 
 /*
  * Private data for class sidlx.io.TxtOStream
  */
 
 struct sidlx_io_TxtOStream__data {
+#line 47 "../../../babel/runtime/sidlx/sidlx_io_TxtOStream_Impl.h"
   /* DO-NOT-DELETE splicer.begin(sidlx.io.TxtOStream._data) */
   int filedes;
   /* DO-NOT-DELETE splicer.end(sidlx.io.TxtOStream._data) */
+#line 53 "sidlx_io_TxtOStream_Impl.h"
 };
 
 #ifdef __cplusplus
@@ -130,7 +134,7 @@ extern
 int32_t
 impl_sidlx_io_TxtOStream_write(
   /* in */ sidlx_io_TxtOStream self,
-  /* in */ struct sidl_char__array* data,
+  /* in array<char,row-major> */ struct sidl_char__array* data,
   /* out */ sidl_BaseInterface *_ex);
 
 extern

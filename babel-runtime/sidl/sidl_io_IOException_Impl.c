@@ -2,7 +2,7 @@
  * File:          sidl_io_IOException_Impl.c
  * Symbol:        sidl.io.IOException-v0.9.3
  * Symbol Type:   class
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.8
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Server-side implementation for sidl.io.IOException
@@ -32,7 +32,7 @@
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.8
  */
 
 /*
@@ -48,9 +48,11 @@
 
 #include "sidl_io_IOException_Impl.h"
 
+#line 51 "../../../babel/runtime/sidl/sidl_io_IOException_Impl.c"
 /* DO-NOT-DELETE splicer.begin(sidl.io.IOException._includes) */
 /* Put additional includes or other arbitrary code here... */
 /* DO-NOT-DELETE splicer.end(sidl.io.IOException._includes) */
+#line 55 "sidl_io_IOException_Impl.c"
 
 /*
  * Static class initializer called exactly once before any user-defined method is dispatched
@@ -66,9 +68,11 @@ void
 impl_sidl_io_IOException__load(
   void)
 {
+#line 69 "../../../babel/runtime/sidl/sidl_io_IOException_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidl.io.IOException._load) */
   /* Insert the implementation of the static class initializer method here... */
   /* DO-NOT-DELETE splicer.end(sidl.io.IOException._load) */
+#line 75 "sidl_io_IOException_Impl.c"
 }
 /*
  * Class constructor called when the class is created.
@@ -84,9 +88,11 @@ void
 impl_sidl_io_IOException__ctor(
   /* in */ sidl_io_IOException self)
 {
+#line 87 "../../../babel/runtime/sidl/sidl_io_IOException_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidl.io.IOException._ctor) */
   /* Insert the implementation of the constructor method here... */
   /* DO-NOT-DELETE splicer.end(sidl.io.IOException._ctor) */
+#line 95 "sidl_io_IOException_Impl.c"
 }
 
 /*
@@ -103,9 +109,11 @@ void
 impl_sidl_io_IOException__dtor(
   /* in */ sidl_io_IOException self)
 {
+#line 106 "../../../babel/runtime/sidl/sidl_io_IOException_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidl.io.IOException._dtor) */
   /* Insert the implementation of the destructor method here... */
   /* DO-NOT-DELETE splicer.end(sidl.io.IOException._dtor) */
+#line 116 "sidl_io_IOException_Impl.c"
 }
 /* Babel internal methods, Users should not edit below this line. */
 struct sidl_SIDLException__object* 

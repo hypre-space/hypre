@@ -2,7 +2,7 @@
  * File:          sidl_InvViolation_Impl.h
  * Symbol:        sidl.InvViolation-v0.9.3
  * Symbol Type:   class
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.8
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Server-side implementation for sidl.InvViolation
@@ -32,7 +32,7 @@
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.8
  */
 
 #ifndef included_sidl_InvViolation_Impl_h
@@ -60,19 +60,23 @@
 #include "sidl_BaseClass.h"
 #endif
 
+#line 63 "../../../babel/runtime/sidl/sidl_InvViolation_Impl.h"
 /* DO-NOT-DELETE splicer.begin(sidl.InvViolation._includes) */
 /* Put additional include files here... */
 /* DO-NOT-DELETE splicer.end(sidl.InvViolation._includes) */
+#line 67 "sidl_InvViolation_Impl.h"
 
 /*
  * Private data for class sidl.InvViolation
  */
 
 struct sidl_InvViolation__data {
+#line 72 "../../../babel/runtime/sidl/sidl_InvViolation_Impl.h"
   /* DO-NOT-DELETE splicer.begin(sidl.InvViolation._data) */
   /* Put private data members here... */
   int ignore; /* dummy to force non-empty struct; remove if you add data */
   /* DO-NOT-DELETE splicer.end(sidl.InvViolation._data) */
+#line 79 "sidl_InvViolation_Impl.h"
 };
 
 #ifdef __cplusplus

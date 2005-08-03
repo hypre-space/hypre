@@ -2,12 +2,12 @@
  * File:          sidlx_io_TxtOStream_Stub.c
  * Symbol:        sidlx.io.TxtOStream-v0.1
  * Symbol Type:   class
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.8
  * Description:   Client-side glue code for sidlx.io.TxtOStream
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.8
  */
 
 #include "sidlx_io_TxtOStream.h"
@@ -240,7 +240,7 @@ sidlx_io_TxtOStream_flush(
 int32_t
 sidlx_io_TxtOStream_write(
   /* in */ sidlx_io_TxtOStream self,
-  /* in */ struct sidl_char__array* data,
+  /* in array<char,row-major> */ struct sidl_char__array* data,
   /* out */ sidl_BaseInterface *_ex)
 {
   return (*self->d_epv->f_write)(
@@ -1371,7 +1371,7 @@ remote_sidlx_io_TxtOStream_flush(
 static int32_t
 remote_sidlx_io_TxtOStream_write(
   /* in */ struct sidlx_io_TxtOStream__object* self /* TLD */,
-  /* in */ struct sidl_char__array* data,
+  /* in array<char,row-major> */ struct sidl_char__array* data,
   /* out */ struct sidl_BaseInterface__object* *_ex)
 {
   sidl_BaseInterface *_ex2 =_ex;
