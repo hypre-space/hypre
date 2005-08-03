@@ -853,6 +853,21 @@ GenerateSysLaplacian( MPI_Comm comm,
       }
    }
 
+
+#ifdef HYPRE_NO_GLOBAL_PARTITION
+/* ideally we would use less storage earlier in this function, but this is fine
+   for testing */
+   {
+      int tmp1, tmp2;
+      tmp1 = global_part[my_id];
+      tmp2 = global_part[my_id + 1];
+      hypre_TFree(global_part);
+      global_part = hypre_CTAlloc(int, 2);
+      global_part[0] = tmp1;
+      global_part[1] = tmp2;
+   }
+#endif
+
    A = hypre_ParCSRMatrixCreate(comm, num_fun*grid_size, num_fun*grid_size,
                                 global_part, global_part, num_cols_offd,
                                 diag_i[local_num_rows],
