@@ -2,12 +2,12 @@
  * File:          bHYPRE_Solver_Stub.c
  * Symbol:        bHYPRE.Solver-v1.0.0
  * Symbol Type:   interface
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.8
  * Description:   Client-side glue code for bHYPRE.Solver
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.8
  */
 
 #include "bHYPRE_Solver.h"
@@ -234,7 +234,7 @@ int32_t
 bHYPRE_Solver_SetIntArray1Parameter(
   /* in */ bHYPRE_Solver self,
   /* in */ const char* name,
-  /* in */ int32_t* value,
+  /* in rarray[nvalues] */ int32_t* value,
   /* in */ int32_t nvalues)
 {
   int32_t value_lower[1], value_upper[1], value_stride[1]; 
@@ -258,7 +258,7 @@ int32_t
 bHYPRE_Solver_SetIntArray2Parameter(
   /* in */ bHYPRE_Solver self,
   /* in */ const char* name,
-  /* in */ struct sidl_int__array* value)
+  /* in array<int,2,column-major> */ struct sidl_int__array* value)
 {
   return (*self->d_epv->f_SetIntArray2Parameter)(
     self->d_object,
@@ -275,7 +275,7 @@ int32_t
 bHYPRE_Solver_SetDoubleArray1Parameter(
   /* in */ bHYPRE_Solver self,
   /* in */ const char* name,
-  /* in */ double* value,
+  /* in rarray[nvalues] */ double* value,
   /* in */ int32_t nvalues)
 {
   int32_t value_lower[1], value_upper[1], value_stride[1]; 
@@ -299,7 +299,7 @@ int32_t
 bHYPRE_Solver_SetDoubleArray2Parameter(
   /* in */ bHYPRE_Solver self,
   /* in */ const char* name,
-  /* in */ struct sidl_double__array* value)
+  /* in array<double,2,column-major> */ struct sidl_double__array* value)
 {
   return (*self->d_epv->f_SetDoubleArray2Parameter)(
     self->d_object,
@@ -1278,7 +1278,7 @@ static int32_t
 remote_bHYPRE__Solver_SetIntArray1Parameter(
   /* in */ struct bHYPRE__Solver__object* self /* TLD */,
   /* in */ const char* name,
-  /* in */ struct sidl_int__array* value)
+  /* in rarray[nvalues] */ struct sidl_int__array* value)
 {
   sidl_BaseInterface _ex = NULL;
   sidl_BaseInterface *_ex2 =&_ex;
@@ -1312,7 +1312,7 @@ static int32_t
 remote_bHYPRE__Solver_SetIntArray2Parameter(
   /* in */ struct bHYPRE__Solver__object* self /* TLD */,
   /* in */ const char* name,
-  /* in */ struct sidl_int__array* value)
+  /* in array<int,2,column-major> */ struct sidl_int__array* value)
 {
   sidl_BaseInterface _ex = NULL;
   sidl_BaseInterface *_ex2 =&_ex;
@@ -1346,7 +1346,7 @@ static int32_t
 remote_bHYPRE__Solver_SetDoubleArray1Parameter(
   /* in */ struct bHYPRE__Solver__object* self /* TLD */,
   /* in */ const char* name,
-  /* in */ struct sidl_double__array* value)
+  /* in rarray[nvalues] */ struct sidl_double__array* value)
 {
   sidl_BaseInterface _ex = NULL;
   sidl_BaseInterface *_ex2 =&_ex;
@@ -1380,7 +1380,7 @@ static int32_t
 remote_bHYPRE__Solver_SetDoubleArray2Parameter(
   /* in */ struct bHYPRE__Solver__object* self /* TLD */,
   /* in */ const char* name,
-  /* in */ struct sidl_double__array* value)
+  /* in array<double,2,column-major> */ struct sidl_double__array* value)
 {
   sidl_BaseInterface _ex = NULL;
   sidl_BaseInterface *_ex2 =&_ex;
@@ -1496,6 +1496,8 @@ remote_bHYPRE__Solver_Setup(
   int32_t _retval;
 
   /* pack in and inout arguments */
+  sidl_rmi_Invocation_packString( _inv, "b", bHYPRE_Vector__getURL(b), _ex2);
+  sidl_rmi_Invocation_packString( _inv, "x", bHYPRE_Vector__getURL(x), _ex2);
 
   /* send actual RMI request */
   _rsvp = sidl_rmi_Invocation_invokeMethod(_inv,_ex2);
@@ -1526,9 +1528,12 @@ remote_bHYPRE__Solver_Apply(
   sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
     "Apply", _ex2 );
   sidl_rmi_Response _rsvp = NULL;
+  char* x_str= NULL;
   int32_t _retval;
 
   /* pack in and inout arguments */
+  sidl_rmi_Invocation_packString( _inv, "b", bHYPRE_Vector__getURL(b), _ex2);
+  sidl_rmi_Invocation_packString( _inv, "x", bHYPRE_Vector__getURL(*x), _ex2);
 
   /* send actual RMI request */
   _rsvp = sidl_rmi_Invocation_invokeMethod(_inv,_ex2);
@@ -1537,7 +1542,8 @@ remote_bHYPRE__Solver_Apply(
   sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval, _ex2);
 
   /* unpack out and inout arguments */
-  sidl_rmi_Response_unpackString( _rsvp, "x", x, _ex2);
+  sidl_rmi_Response_unpackString( _rsvp, "x", &x_str, _ex2);
+  bHYPRE_Vector__connect(x_str, _ex2);
 
   /* cleanup and return */
   sidl_rmi_Response_done(_rsvp, _ex2);
@@ -1562,6 +1568,7 @@ remote_bHYPRE__Solver_SetOperator(
   int32_t _retval;
 
   /* pack in and inout arguments */
+  sidl_rmi_Invocation_packString( _inv, "A", bHYPRE_Operator__getURL(A), _ex2);
 
   /* send actual RMI request */
   _rsvp = sidl_rmi_Invocation_invokeMethod(_inv,_ex2);

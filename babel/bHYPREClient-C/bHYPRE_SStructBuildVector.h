@@ -2,12 +2,12 @@
  * File:          bHYPRE_SStructBuildVector.h
  * Symbol:        bHYPRE.SStructBuildVector-v1.0.0
  * Symbol Type:   interface
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.8
  * Description:   Client-side glue code for bHYPRE.SStructBuildVector
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.8
  */
 
 #ifndef included_bHYPRE_SStructBuildVector_h
@@ -122,10 +122,10 @@ int32_t
 bHYPRE_SStructBuildVector_SetValues(
   /* in */ bHYPRE_SStructBuildVector self,
   /* in */ int32_t part,
-  /* in */ int32_t* index,
+  /* in rarray[dim] */ int32_t* index,
   /* in */ int32_t dim,
   /* in */ int32_t var,
-  /* in */ double* values,
+  /* in rarray[one] */ double* values,
   /* in */ int32_t one);
 
 /**
@@ -144,11 +144,11 @@ int32_t
 bHYPRE_SStructBuildVector_SetBoxValues(
   /* in */ bHYPRE_SStructBuildVector self,
   /* in */ int32_t part,
-  /* in */ int32_t* ilower,
-  /* in */ int32_t* iupper,
+  /* in rarray[dim] */ int32_t* ilower,
+  /* in rarray[dim] */ int32_t* iupper,
   /* in */ int32_t dim,
   /* in */ int32_t var,
-  /* in */ double* values,
+  /* in rarray[nvalues] */ double* values,
   /* in */ int32_t nvalues);
 
 /**
@@ -167,10 +167,10 @@ int32_t
 bHYPRE_SStructBuildVector_AddToValues(
   /* in */ bHYPRE_SStructBuildVector self,
   /* in */ int32_t part,
-  /* in */ int32_t* index,
+  /* in rarray[dim] */ int32_t* index,
   /* in */ int32_t dim,
   /* in */ int32_t var,
-  /* in */ double* values,
+  /* in rarray[one] */ double* values,
   /* in */ int32_t one);
 
 /**
@@ -189,11 +189,11 @@ int32_t
 bHYPRE_SStructBuildVector_AddToBoxValues(
   /* in */ bHYPRE_SStructBuildVector self,
   /* in */ int32_t part,
-  /* in */ int32_t* ilower,
-  /* in */ int32_t* iupper,
+  /* in rarray[dim] */ int32_t* ilower,
+  /* in rarray[dim] */ int32_t* iupper,
   /* in */ int32_t dim,
   /* in */ int32_t var,
-  /* in */ double* values,
+  /* in rarray[nvalues] */ double* values,
   /* in */ int32_t nvalues);
 
 /**
@@ -219,7 +219,7 @@ int32_t
 bHYPRE_SStructBuildVector_GetValues(
   /* in */ bHYPRE_SStructBuildVector self,
   /* in */ int32_t part,
-  /* in */ int32_t* index,
+  /* in rarray[dim] */ int32_t* index,
   /* in */ int32_t dim,
   /* in */ int32_t var,
   /* out */ double* value);
@@ -239,11 +239,11 @@ int32_t
 bHYPRE_SStructBuildVector_GetBoxValues(
   /* in */ bHYPRE_SStructBuildVector self,
   /* in */ int32_t part,
-  /* in */ int32_t* ilower,
-  /* in */ int32_t* iupper,
+  /* in rarray[dim] */ int32_t* ilower,
+  /* in rarray[dim] */ int32_t* iupper,
   /* in */ int32_t dim,
   /* in */ int32_t var,
-  /* inout */ double* values,
+  /* inout rarray[nvalues] */ double* values,
   /* in */ int32_t nvalues);
 
 /**

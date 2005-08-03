@@ -2,12 +2,12 @@
  * File:          bHYPRE_StructVector_Skel.c
  * Symbol:        bHYPRE.StructVector-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.8
  * Description:   Server-side glue code for bHYPRE.StructVector
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.8
  */
 
 #include "bHYPRE_StructVector_IOR.h"
@@ -107,14 +107,14 @@ extern
 int32_t
 impl_bHYPRE_StructVector_SetNumGhost(
   /* in */ bHYPRE_StructVector self,
-  /* in */ int32_t* num_ghost,
+  /* in rarray[dim2] */ int32_t* num_ghost,
   /* in */ int32_t dim2);
 
 extern
 int32_t
 impl_bHYPRE_StructVector_SetValue(
   /* in */ bHYPRE_StructVector self,
-  /* in */ int32_t* grid_index,
+  /* in rarray[dim] */ int32_t* grid_index,
   /* in */ int32_t dim,
   /* in */ double value);
 
@@ -122,10 +122,10 @@ extern
 int32_t
 impl_bHYPRE_StructVector_SetBoxValues(
   /* in */ bHYPRE_StructVector self,
-  /* in */ int32_t* ilower,
-  /* in */ int32_t* iupper,
+  /* in rarray[dim] */ int32_t* ilower,
+  /* in rarray[dim] */ int32_t* iupper,
   /* in */ int32_t dim,
-  /* in */ double* values,
+  /* in rarray[nvalues] */ double* values,
   /* in */ int32_t nvalues);
 
 extern
@@ -208,7 +208,7 @@ extern char* impl_bHYPRE_StructVector_fgetURL_sidl_BaseClass(struct
 static int32_t
 skel_bHYPRE_StructVector_SetNumGhost(
   /* in */ bHYPRE_StructVector self,
-/* in */ struct sidl_int__array* num_ghost)
+/* in rarray[dim2] */ struct sidl_int__array* num_ghost)
 {
   int32_t _return;
   struct sidl_int__array* num_ghost_proxy = sidl_int__array_ensure(num_ghost, 1,
@@ -226,7 +226,7 @@ skel_bHYPRE_StructVector_SetNumGhost(
 static int32_t
 skel_bHYPRE_StructVector_SetValue(
   /* in */ bHYPRE_StructVector self,
-  /* in */ struct sidl_int__array* grid_index,
+  /* in rarray[dim] */ struct sidl_int__array* grid_index,
 /* in */ double value)
 {
   int32_t _return;
@@ -246,9 +246,9 @@ skel_bHYPRE_StructVector_SetValue(
 static int32_t
 skel_bHYPRE_StructVector_SetBoxValues(
   /* in */ bHYPRE_StructVector self,
-  /* in */ struct sidl_int__array* ilower,
-  /* in */ struct sidl_int__array* iupper,
-/* in */ struct sidl_double__array* values)
+  /* in rarray[dim] */ struct sidl_int__array* ilower,
+  /* in rarray[dim] */ struct sidl_int__array* iupper,
+/* in rarray[nvalues] */ struct sidl_double__array* values)
 {
   int32_t _return;
   struct sidl_int__array* ilower_proxy = sidl_int__array_ensure(ilower, 1,

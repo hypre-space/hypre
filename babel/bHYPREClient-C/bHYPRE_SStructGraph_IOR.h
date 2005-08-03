@@ -2,12 +2,12 @@
  * File:          bHYPRE_SStructGraph_IOR.h
  * Symbol:        bHYPRE.SStructGraph-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.8
  * Description:   Intermediate Object Representation for bHYPRE.SStructGraph
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.8
  */
 
 #ifndef included_bHYPRE_SStructGraph_IOR_h
@@ -145,10 +145,10 @@ struct bHYPRE_SStructGraph__epv {
   int32_t (*f_AddEntries)(
     /* in */ struct bHYPRE_SStructGraph__object* self,
     /* in */ int32_t part,
-    /* in */ struct sidl_int__array* index,
+    /* in rarray[dim] */ struct sidl_int__array* index,
     /* in */ int32_t var,
     /* in */ int32_t to_part,
-    /* in */ struct sidl_int__array* to_index,
+    /* in rarray[dim] */ struct sidl_int__array* to_index,
     /* in */ int32_t to_var);
   int32_t (*f_SetObjectType)(
     /* in */ struct bHYPRE_SStructGraph__object* self,

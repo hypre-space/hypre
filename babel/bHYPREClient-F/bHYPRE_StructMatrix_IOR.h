@@ -2,12 +2,12 @@
  * File:          bHYPRE_StructMatrix_IOR.h
  * Symbol:        bHYPRE.StructMatrix-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.8
  * Description:   Intermediate Object Representation for bHYPRE.StructMatrix
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.8
  */
 
 #ifndef included_bHYPRE_StructMatrix_IOR_h
@@ -156,19 +156,19 @@ struct bHYPRE_StructMatrix__epv {
   int32_t (*f_SetIntArray1Parameter)(
     /* in */ struct bHYPRE_StructMatrix__object* self,
     /* in */ const char* name,
-    /* in */ struct sidl_int__array* value);
+    /* in rarray[nvalues] */ struct sidl_int__array* value);
   int32_t (*f_SetIntArray2Parameter)(
     /* in */ struct bHYPRE_StructMatrix__object* self,
     /* in */ const char* name,
-    /* in */ struct sidl_int__array* value);
+    /* in array<int,2,column-major> */ struct sidl_int__array* value);
   int32_t (*f_SetDoubleArray1Parameter)(
     /* in */ struct bHYPRE_StructMatrix__object* self,
     /* in */ const char* name,
-    /* in */ struct sidl_double__array* value);
+    /* in rarray[nvalues] */ struct sidl_double__array* value);
   int32_t (*f_SetDoubleArray2Parameter)(
     /* in */ struct bHYPRE_StructMatrix__object* self,
     /* in */ const char* name,
-    /* in */ struct sidl_double__array* value);
+    /* in array<double,2,column-major> */ struct sidl_double__array* value);
   int32_t (*f_GetIntValue)(
     /* in */ struct bHYPRE_StructMatrix__object* self,
     /* in */ const char* name,
@@ -202,28 +202,32 @@ struct bHYPRE_StructMatrix__epv {
     /* in */ struct bHYPRE_StructStencil__object* stencil);
   int32_t (*f_SetValues)(
     /* in */ struct bHYPRE_StructMatrix__object* self,
-    /* in */ struct sidl_int__array* index,
-    /* in */ struct sidl_int__array* stencil_indices,
-    /* in */ struct sidl_double__array* values);
+    /* in rarray[dim] */ struct sidl_int__array* index,
+    /* in rarray[num_stencil_indices] */ struct sidl_int__array* 
+      stencil_indices,
+    /* in rarray[num_stencil_indices] */ struct sidl_double__array* values);
   int32_t (*f_SetBoxValues)(
     /* in */ struct bHYPRE_StructMatrix__object* self,
-    /* in */ struct sidl_int__array* ilower,
-    /* in */ struct sidl_int__array* iupper,
-    /* in */ struct sidl_int__array* stencil_indices,
-    /* in */ struct sidl_double__array* values);
+    /* in rarray[dim] */ struct sidl_int__array* ilower,
+    /* in rarray[dim] */ struct sidl_int__array* iupper,
+    /* in rarray[num_stencil_indices] */ struct sidl_int__array* 
+      stencil_indices,
+    /* in rarray[nvalues] */ struct sidl_double__array* values);
   int32_t (*f_SetNumGhost)(
     /* in */ struct bHYPRE_StructMatrix__object* self,
-    /* in */ struct sidl_int__array* num_ghost);
+    /* in rarray[dim2] */ struct sidl_int__array* num_ghost);
   int32_t (*f_SetSymmetric)(
     /* in */ struct bHYPRE_StructMatrix__object* self,
     /* in */ int32_t symmetric);
   int32_t (*f_SetConstantEntries)(
     /* in */ struct bHYPRE_StructMatrix__object* self,
-    /* in */ struct sidl_int__array* stencil_constant_points);
+    /* in rarray[num_stencil_constant_points] */ struct sidl_int__array* 
+      stencil_constant_points);
   int32_t (*f_SetConstantValues)(
     /* in */ struct bHYPRE_StructMatrix__object* self,
-    /* in */ struct sidl_int__array* stencil_indices,
-    /* in */ struct sidl_double__array* values);
+    /* in rarray[num_stencil_indices] */ struct sidl_int__array* 
+      stencil_indices,
+    /* in rarray[num_stencil_indices] */ struct sidl_double__array* values);
   /* Methods introduced in bHYPRE.StructMatrix-v1.0.0 */
 };
 

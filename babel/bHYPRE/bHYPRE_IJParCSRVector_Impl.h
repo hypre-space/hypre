@@ -2,12 +2,12 @@
  * File:          bHYPRE_IJParCSRVector_Impl.h
  * Symbol:        bHYPRE.IJParCSRVector-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.8
  * Description:   Server-side implementation for bHYPRE.IJParCSRVector
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.8
  */
 
 #ifndef included_bHYPRE_IJParCSRVector_Impl_h
@@ -169,16 +169,16 @@ int32_t
 impl_bHYPRE_IJParCSRVector_SetValues(
   /* in */ bHYPRE_IJParCSRVector self,
   /* in */ int32_t nvalues,
-  /* in */ int32_t* indices,
-  /* in */ double* values);
+  /* in rarray[nvalues] */ int32_t* indices,
+  /* in rarray[nvalues] */ double* values);
 
 extern
 int32_t
 impl_bHYPRE_IJParCSRVector_AddToValues(
   /* in */ bHYPRE_IJParCSRVector self,
   /* in */ int32_t nvalues,
-  /* in */ int32_t* indices,
-  /* in */ double* values);
+  /* in rarray[nvalues] */ int32_t* indices,
+  /* in rarray[nvalues] */ double* values);
 
 extern
 int32_t
@@ -192,8 +192,8 @@ int32_t
 impl_bHYPRE_IJParCSRVector_GetValues(
   /* in */ bHYPRE_IJParCSRVector self,
   /* in */ int32_t nvalues,
-  /* in */ int32_t* indices,
-  /* inout */ double* values);
+  /* in rarray[nvalues] */ int32_t* indices,
+  /* inout rarray[nvalues] */ double* values);
 
 extern
 int32_t

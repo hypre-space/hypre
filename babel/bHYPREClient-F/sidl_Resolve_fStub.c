@@ -2,7 +2,7 @@
  * File:          sidl_Resolve_fStub.c
  * Symbol:        sidl.Resolve-v0.9.3
  * Symbol Type:   enumeration
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.8
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Client-side glue code for sidl.Resolve
@@ -32,8 +32,8 @@
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.4
- * xml-url       = /home/painter/babel/share/babel-0.10.4/repository/sidl.Resolve-v0.9.3.xml
+ * babel-version = 0.10.8
+ * xml-url       = /home/painter/babel/share/babel-0.10.8/repository/sidl.Resolve-v0.9.3.xml
  */
 
 #ifndef included_sidl_int_IOR_h

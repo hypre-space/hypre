@@ -2,12 +2,12 @@
  * File:          bHYPRE_SStructParCSRMatrix_Skel.c
  * Symbol:        bHYPRE.SStructParCSRMatrix-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.8
  * Description:   Server-side glue code for bHYPRE.SStructParCSRMatrix
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.8
  */
 
 #include "bHYPRE_SStructParCSRMatrix_IOR.h"
@@ -116,25 +116,25 @@ int32_t
 impl_bHYPRE_SStructParCSRMatrix_SetValues(
   /* in */ bHYPRE_SStructParCSRMatrix self,
   /* in */ int32_t part,
-  /* in */ int32_t* index,
+  /* in rarray[dim] */ int32_t* index,
   /* in */ int32_t dim,
   /* in */ int32_t var,
   /* in */ int32_t nentries,
-  /* in */ int32_t* entries,
-  /* in */ double* values);
+  /* in rarray[nentries] */ int32_t* entries,
+  /* in rarray[nentries] */ double* values);
 
 extern
 int32_t
 impl_bHYPRE_SStructParCSRMatrix_SetBoxValues(
   /* in */ bHYPRE_SStructParCSRMatrix self,
   /* in */ int32_t part,
-  /* in */ int32_t* ilower,
-  /* in */ int32_t* iupper,
+  /* in rarray[dim] */ int32_t* ilower,
+  /* in rarray[dim] */ int32_t* iupper,
   /* in */ int32_t dim,
   /* in */ int32_t var,
   /* in */ int32_t nentries,
-  /* in */ int32_t* entries,
-  /* in */ double* values,
+  /* in rarray[nentries] */ int32_t* entries,
+  /* in rarray[nvalues] */ double* values,
   /* in */ int32_t nvalues);
 
 extern
@@ -142,25 +142,25 @@ int32_t
 impl_bHYPRE_SStructParCSRMatrix_AddToValues(
   /* in */ bHYPRE_SStructParCSRMatrix self,
   /* in */ int32_t part,
-  /* in */ int32_t* index,
+  /* in rarray[dim] */ int32_t* index,
   /* in */ int32_t dim,
   /* in */ int32_t var,
   /* in */ int32_t nentries,
-  /* in */ int32_t* entries,
-  /* in */ double* values);
+  /* in rarray[nentries] */ int32_t* entries,
+  /* in rarray[nentries] */ double* values);
 
 extern
 int32_t
 impl_bHYPRE_SStructParCSRMatrix_AddToBoxValues(
   /* in */ bHYPRE_SStructParCSRMatrix self,
   /* in */ int32_t part,
-  /* in */ int32_t* ilower,
-  /* in */ int32_t* iupper,
+  /* in rarray[dim] */ int32_t* ilower,
+  /* in rarray[dim] */ int32_t* iupper,
   /* in */ int32_t dim,
   /* in */ int32_t var,
   /* in */ int32_t nentries,
-  /* in */ int32_t* entries,
-  /* in */ double* values,
+  /* in rarray[nentries] */ int32_t* entries,
+  /* in rarray[nvalues] */ double* values,
   /* in */ int32_t nvalues);
 
 extern
@@ -216,7 +216,7 @@ int32_t
 impl_bHYPRE_SStructParCSRMatrix_SetIntArray1Parameter(
   /* in */ bHYPRE_SStructParCSRMatrix self,
   /* in */ const char* name,
-  /* in */ int32_t* value,
+  /* in rarray[nvalues] */ int32_t* value,
   /* in */ int32_t nvalues);
 
 extern
@@ -224,14 +224,14 @@ int32_t
 impl_bHYPRE_SStructParCSRMatrix_SetIntArray2Parameter(
   /* in */ bHYPRE_SStructParCSRMatrix self,
   /* in */ const char* name,
-  /* in */ struct sidl_int__array* value);
+  /* in array<int,2,column-major> */ struct sidl_int__array* value);
 
 extern
 int32_t
 impl_bHYPRE_SStructParCSRMatrix_SetDoubleArray1Parameter(
   /* in */ bHYPRE_SStructParCSRMatrix self,
   /* in */ const char* name,
-  /* in */ double* value,
+  /* in rarray[nvalues] */ double* value,
   /* in */ int32_t nvalues);
 
 extern
@@ -239,7 +239,7 @@ int32_t
 impl_bHYPRE_SStructParCSRMatrix_SetDoubleArray2Parameter(
   /* in */ bHYPRE_SStructParCSRMatrix self,
   /* in */ const char* name,
-  /* in */ struct sidl_double__array* value);
+  /* in array<double,2,column-major> */ struct sidl_double__array* value);
 
 extern
 int32_t
@@ -321,10 +321,10 @@ static int32_t
 skel_bHYPRE_SStructParCSRMatrix_SetValues(
   /* in */ bHYPRE_SStructParCSRMatrix self,
   /* in */ int32_t part,
-  /* in */ struct sidl_int__array* index,
+  /* in rarray[dim] */ struct sidl_int__array* index,
   /* in */ int32_t var,
-  /* in */ struct sidl_int__array* entries,
-/* in */ struct sidl_double__array* values)
+  /* in rarray[nentries] */ struct sidl_int__array* entries,
+/* in rarray[nentries] */ struct sidl_double__array* values)
 {
   int32_t _return;
   struct sidl_int__array* index_proxy = sidl_int__array_ensure(index, 1,
@@ -355,11 +355,11 @@ static int32_t
 skel_bHYPRE_SStructParCSRMatrix_SetBoxValues(
   /* in */ bHYPRE_SStructParCSRMatrix self,
   /* in */ int32_t part,
-  /* in */ struct sidl_int__array* ilower,
-  /* in */ struct sidl_int__array* iupper,
+  /* in rarray[dim] */ struct sidl_int__array* ilower,
+  /* in rarray[dim] */ struct sidl_int__array* iupper,
   /* in */ int32_t var,
-  /* in */ struct sidl_int__array* entries,
-/* in */ struct sidl_double__array* values)
+  /* in rarray[nentries] */ struct sidl_int__array* entries,
+/* in rarray[nvalues] */ struct sidl_double__array* values)
 {
   int32_t _return;
   struct sidl_int__array* ilower_proxy = sidl_int__array_ensure(ilower, 1,
@@ -396,10 +396,10 @@ static int32_t
 skel_bHYPRE_SStructParCSRMatrix_AddToValues(
   /* in */ bHYPRE_SStructParCSRMatrix self,
   /* in */ int32_t part,
-  /* in */ struct sidl_int__array* index,
+  /* in rarray[dim] */ struct sidl_int__array* index,
   /* in */ int32_t var,
-  /* in */ struct sidl_int__array* entries,
-/* in */ struct sidl_double__array* values)
+  /* in rarray[nentries] */ struct sidl_int__array* entries,
+/* in rarray[nentries] */ struct sidl_double__array* values)
 {
   int32_t _return;
   struct sidl_int__array* index_proxy = sidl_int__array_ensure(index, 1,
@@ -430,11 +430,11 @@ static int32_t
 skel_bHYPRE_SStructParCSRMatrix_AddToBoxValues(
   /* in */ bHYPRE_SStructParCSRMatrix self,
   /* in */ int32_t part,
-  /* in */ struct sidl_int__array* ilower,
-  /* in */ struct sidl_int__array* iupper,
+  /* in rarray[dim] */ struct sidl_int__array* ilower,
+  /* in rarray[dim] */ struct sidl_int__array* iupper,
   /* in */ int32_t var,
-  /* in */ struct sidl_int__array* entries,
-/* in */ struct sidl_double__array* values)
+  /* in rarray[nentries] */ struct sidl_int__array* entries,
+/* in rarray[nvalues] */ struct sidl_double__array* values)
 {
   int32_t _return;
   struct sidl_int__array* ilower_proxy = sidl_int__array_ensure(ilower, 1,
@@ -471,7 +471,7 @@ static int32_t
 skel_bHYPRE_SStructParCSRMatrix_SetIntArray1Parameter(
   /* in */ bHYPRE_SStructParCSRMatrix self,
   /* in */ const char* name,
-/* in */ struct sidl_int__array* value)
+/* in rarray[nvalues] */ struct sidl_int__array* value)
 {
   int32_t _return;
   struct sidl_int__array* value_proxy = sidl_int__array_ensure(value, 1,
@@ -491,7 +491,7 @@ static int32_t
 skel_bHYPRE_SStructParCSRMatrix_SetIntArray2Parameter(
   /* in */ bHYPRE_SStructParCSRMatrix self,
   /* in */ const char* name,
-/* in */ struct sidl_int__array* value)
+/* in array<int,2,column-major> */ struct sidl_int__array* value)
 {
   int32_t _return;
   struct sidl_int__array* value_proxy = sidl_int__array_ensure(value, 2,
@@ -509,7 +509,7 @@ static int32_t
 skel_bHYPRE_SStructParCSRMatrix_SetDoubleArray1Parameter(
   /* in */ bHYPRE_SStructParCSRMatrix self,
   /* in */ const char* name,
-/* in */ struct sidl_double__array* value)
+/* in rarray[nvalues] */ struct sidl_double__array* value)
 {
   int32_t _return;
   struct sidl_double__array* value_proxy = sidl_double__array_ensure(value, 1,
@@ -529,7 +529,7 @@ static int32_t
 skel_bHYPRE_SStructParCSRMatrix_SetDoubleArray2Parameter(
   /* in */ bHYPRE_SStructParCSRMatrix self,
   /* in */ const char* name,
-/* in */ struct sidl_double__array* value)
+/* in array<double,2,column-major> */ struct sidl_double__array* value)
 {
   int32_t _return;
   struct sidl_double__array* value_proxy = sidl_double__array_ensure(value, 2,

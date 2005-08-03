@@ -2,12 +2,12 @@
  * File:          bHYPRE_StructMatrix_Stub.c
  * Symbol:        bHYPRE.StructMatrix-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.8
  * Description:   Client-side glue code for bHYPRE.StructMatrix
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.8
  */
 
 #include "bHYPRE_StructMatrix.h"
@@ -343,11 +343,11 @@ bHYPRE_StructMatrix_SetStencil(
 int32_t
 bHYPRE_StructMatrix_SetValues(
   /* in */ bHYPRE_StructMatrix self,
-  /* in */ int32_t* index,
+  /* in rarray[dim] */ int32_t* index,
   /* in */ int32_t dim,
   /* in */ int32_t num_stencil_indices,
-  /* in */ int32_t* stencil_indices,
-  /* in */ double* values)
+  /* in rarray[num_stencil_indices] */ int32_t* stencil_indices,
+  /* in rarray[num_stencil_indices] */ double* values)
 {
   int32_t index_lower[1], index_upper[1], index_stride[1]; 
   struct sidl_int__array index_real;
@@ -382,12 +382,12 @@ bHYPRE_StructMatrix_SetValues(
 int32_t
 bHYPRE_StructMatrix_SetBoxValues(
   /* in */ bHYPRE_StructMatrix self,
-  /* in */ int32_t* ilower,
-  /* in */ int32_t* iupper,
+  /* in rarray[dim] */ int32_t* ilower,
+  /* in rarray[dim] */ int32_t* iupper,
   /* in */ int32_t dim,
   /* in */ int32_t num_stencil_indices,
-  /* in */ int32_t* stencil_indices,
-  /* in */ double* values,
+  /* in rarray[num_stencil_indices] */ int32_t* stencil_indices,
+  /* in rarray[nvalues] */ double* values,
   /* in */ int32_t nvalues)
 {
   int32_t ilower_lower[1], ilower_upper[1], ilower_stride[1]; 
@@ -430,7 +430,7 @@ bHYPRE_StructMatrix_SetBoxValues(
 int32_t
 bHYPRE_StructMatrix_SetNumGhost(
   /* in */ bHYPRE_StructMatrix self,
-  /* in */ int32_t* num_ghost,
+  /* in rarray[dim2] */ int32_t* num_ghost,
   /* in */ int32_t dim2)
 {
   int32_t num_ghost_lower[1], num_ghost_upper[1], num_ghost_stride[1]; 
@@ -466,7 +466,7 @@ int32_t
 bHYPRE_StructMatrix_SetConstantEntries(
   /* in */ bHYPRE_StructMatrix self,
   /* in */ int32_t num_stencil_constant_points,
-  /* in */ int32_t* stencil_constant_points)
+  /* in rarray[num_stencil_constant_points] */ int32_t* stencil_constant_points)
 {
   int32_t stencil_constant_points_lower[1], stencil_constant_points_upper[1],
     stencil_constant_points_stride[1]; 
@@ -490,8 +490,8 @@ int32_t
 bHYPRE_StructMatrix_SetConstantValues(
   /* in */ bHYPRE_StructMatrix self,
   /* in */ int32_t num_stencil_indices,
-  /* in */ int32_t* stencil_indices,
-  /* in */ double* values)
+  /* in rarray[num_stencil_indices] */ int32_t* stencil_indices,
+  /* in rarray[num_stencil_indices] */ double* values)
 {
   int32_t stencil_indices_lower[1], stencil_indices_upper[1],
     stencil_indices_stride[1]; 
@@ -572,7 +572,7 @@ int32_t
 bHYPRE_StructMatrix_SetIntArray1Parameter(
   /* in */ bHYPRE_StructMatrix self,
   /* in */ const char* name,
-  /* in */ int32_t* value,
+  /* in rarray[nvalues] */ int32_t* value,
   /* in */ int32_t nvalues)
 {
   int32_t value_lower[1], value_upper[1], value_stride[1]; 
@@ -596,7 +596,7 @@ int32_t
 bHYPRE_StructMatrix_SetIntArray2Parameter(
   /* in */ bHYPRE_StructMatrix self,
   /* in */ const char* name,
-  /* in */ struct sidl_int__array* value)
+  /* in array<int,2,column-major> */ struct sidl_int__array* value)
 {
   return (*self->d_epv->f_SetIntArray2Parameter)(
     self,
@@ -613,7 +613,7 @@ int32_t
 bHYPRE_StructMatrix_SetDoubleArray1Parameter(
   /* in */ bHYPRE_StructMatrix self,
   /* in */ const char* name,
-  /* in */ double* value,
+  /* in rarray[nvalues] */ double* value,
   /* in */ int32_t nvalues)
 {
   int32_t value_lower[1], value_upper[1], value_stride[1]; 
@@ -637,7 +637,7 @@ int32_t
 bHYPRE_StructMatrix_SetDoubleArray2Parameter(
   /* in */ bHYPRE_StructMatrix self,
   /* in */ const char* name,
-  /* in */ struct sidl_double__array* value)
+  /* in array<double,2,column-major> */ struct sidl_double__array* value)
 {
   return (*self->d_epv->f_SetDoubleArray2Parameter)(
     self,
@@ -1540,6 +1540,7 @@ remote_bHYPRE_StructMatrix_GetObject(
   sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
     "GetObject", _ex2 );
   sidl_rmi_Response _rsvp = NULL;
+  char* A_str= NULL;
   int32_t _retval;
 
   /* pack in and inout arguments */
@@ -1551,7 +1552,8 @@ remote_bHYPRE_StructMatrix_GetObject(
   sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval, _ex2);
 
   /* unpack out and inout arguments */
-  sidl_rmi_Response_unpackString( _rsvp, "A", A, _ex2);
+  sidl_rmi_Response_unpackString( _rsvp, "A", &A_str, _ex2);
+  sidl_BaseInterface__connect(A_str, _ex2);
 
   /* cleanup and return */
   sidl_rmi_Response_done(_rsvp, _ex2);
@@ -1632,9 +1634,9 @@ remote_bHYPRE_StructMatrix_SetStencil(
 static int32_t
 remote_bHYPRE_StructMatrix_SetValues(
   /* in */ struct bHYPRE_StructMatrix__object* self /* TLD */,
-  /* in */ struct sidl_int__array* index,
-  /* in */ struct sidl_int__array* stencil_indices,
-  /* in */ struct sidl_double__array* values)
+  /* in rarray[dim] */ struct sidl_int__array* index,
+  /* in rarray[num_stencil_indices] */ struct sidl_int__array* stencil_indices,
+  /* in rarray[num_stencil_indices] */ struct sidl_double__array* values)
 {
   sidl_BaseInterface _ex = NULL;
   sidl_BaseInterface *_ex2 =&_ex;
@@ -1666,10 +1668,10 @@ remote_bHYPRE_StructMatrix_SetValues(
 static int32_t
 remote_bHYPRE_StructMatrix_SetBoxValues(
   /* in */ struct bHYPRE_StructMatrix__object* self /* TLD */,
-  /* in */ struct sidl_int__array* ilower,
-  /* in */ struct sidl_int__array* iupper,
-  /* in */ struct sidl_int__array* stencil_indices,
-  /* in */ struct sidl_double__array* values)
+  /* in rarray[dim] */ struct sidl_int__array* ilower,
+  /* in rarray[dim] */ struct sidl_int__array* iupper,
+  /* in rarray[num_stencil_indices] */ struct sidl_int__array* stencil_indices,
+  /* in rarray[nvalues] */ struct sidl_double__array* values)
 {
   sidl_BaseInterface _ex = NULL;
   sidl_BaseInterface *_ex2 =&_ex;
@@ -1701,7 +1703,7 @@ remote_bHYPRE_StructMatrix_SetBoxValues(
 static int32_t
 remote_bHYPRE_StructMatrix_SetNumGhost(
   /* in */ struct bHYPRE_StructMatrix__object* self /* TLD */,
-  /* in */ struct sidl_int__array* num_ghost)
+  /* in rarray[dim2] */ struct sidl_int__array* num_ghost)
 {
   sidl_BaseInterface _ex = NULL;
   sidl_BaseInterface *_ex2 =&_ex;
@@ -1766,7 +1768,8 @@ remote_bHYPRE_StructMatrix_SetSymmetric(
 static int32_t
 remote_bHYPRE_StructMatrix_SetConstantEntries(
   /* in */ struct bHYPRE_StructMatrix__object* self /* TLD */,
-  /* in */ struct sidl_int__array* stencil_constant_points)
+  /* in rarray[num_stencil_constant_points] */ struct sidl_int__array* 
+    stencil_constant_points)
 {
   sidl_BaseInterface _ex = NULL;
   sidl_BaseInterface *_ex2 =&_ex;
@@ -1798,8 +1801,8 @@ remote_bHYPRE_StructMatrix_SetConstantEntries(
 static int32_t
 remote_bHYPRE_StructMatrix_SetConstantValues(
   /* in */ struct bHYPRE_StructMatrix__object* self /* TLD */,
-  /* in */ struct sidl_int__array* stencil_indices,
-  /* in */ struct sidl_double__array* values)
+  /* in rarray[num_stencil_indices] */ struct sidl_int__array* stencil_indices,
+  /* in rarray[num_stencil_indices] */ struct sidl_double__array* values)
 {
   sidl_BaseInterface _ex = NULL;
   sidl_BaseInterface *_ex2 =&_ex;
@@ -1937,7 +1940,7 @@ static int32_t
 remote_bHYPRE_StructMatrix_SetIntArray1Parameter(
   /* in */ struct bHYPRE_StructMatrix__object* self /* TLD */,
   /* in */ const char* name,
-  /* in */ struct sidl_int__array* value)
+  /* in rarray[nvalues] */ struct sidl_int__array* value)
 {
   sidl_BaseInterface _ex = NULL;
   sidl_BaseInterface *_ex2 =&_ex;
@@ -1971,7 +1974,7 @@ static int32_t
 remote_bHYPRE_StructMatrix_SetIntArray2Parameter(
   /* in */ struct bHYPRE_StructMatrix__object* self /* TLD */,
   /* in */ const char* name,
-  /* in */ struct sidl_int__array* value)
+  /* in array<int,2,column-major> */ struct sidl_int__array* value)
 {
   sidl_BaseInterface _ex = NULL;
   sidl_BaseInterface *_ex2 =&_ex;
@@ -2005,7 +2008,7 @@ static int32_t
 remote_bHYPRE_StructMatrix_SetDoubleArray1Parameter(
   /* in */ struct bHYPRE_StructMatrix__object* self /* TLD */,
   /* in */ const char* name,
-  /* in */ struct sidl_double__array* value)
+  /* in rarray[nvalues] */ struct sidl_double__array* value)
 {
   sidl_BaseInterface _ex = NULL;
   sidl_BaseInterface *_ex2 =&_ex;
@@ -2039,7 +2042,7 @@ static int32_t
 remote_bHYPRE_StructMatrix_SetDoubleArray2Parameter(
   /* in */ struct bHYPRE_StructMatrix__object* self /* TLD */,
   /* in */ const char* name,
-  /* in */ struct sidl_double__array* value)
+  /* in array<double,2,column-major> */ struct sidl_double__array* value)
 {
   sidl_BaseInterface _ex = NULL;
   sidl_BaseInterface *_ex2 =&_ex;
@@ -2155,6 +2158,8 @@ remote_bHYPRE_StructMatrix_Setup(
   int32_t _retval;
 
   /* pack in and inout arguments */
+  sidl_rmi_Invocation_packString( _inv, "b", bHYPRE_Vector__getURL(b), _ex2);
+  sidl_rmi_Invocation_packString( _inv, "x", bHYPRE_Vector__getURL(x), _ex2);
 
   /* send actual RMI request */
   _rsvp = sidl_rmi_Invocation_invokeMethod(_inv,_ex2);
@@ -2185,9 +2190,12 @@ remote_bHYPRE_StructMatrix_Apply(
   sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
     "Apply", _ex2 );
   sidl_rmi_Response _rsvp = NULL;
+  char* x_str= NULL;
   int32_t _retval;
 
   /* pack in and inout arguments */
+  sidl_rmi_Invocation_packString( _inv, "b", bHYPRE_Vector__getURL(b), _ex2);
+  sidl_rmi_Invocation_packString( _inv, "x", bHYPRE_Vector__getURL(*x), _ex2);
 
   /* send actual RMI request */
   _rsvp = sidl_rmi_Invocation_invokeMethod(_inv,_ex2);
@@ -2196,7 +2204,8 @@ remote_bHYPRE_StructMatrix_Apply(
   sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval, _ex2);
 
   /* unpack out and inout arguments */
-  sidl_rmi_Response_unpackString( _rsvp, "x", x, _ex2);
+  sidl_rmi_Response_unpackString( _rsvp, "x", &x_str, _ex2);
+  bHYPRE_Vector__connect(x_str, _ex2);
 
   /* cleanup and return */
   sidl_rmi_Response_done(_rsvp, _ex2);

@@ -2,12 +2,12 @@
  * File:          bHYPRE_StructMatrix.h
  * Symbol:        bHYPRE.StructMatrix-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.8
  * Description:   Client-side glue code for bHYPRE.StructMatrix
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.8
  */
 
 #ifndef included_bHYPRE_StructMatrix_h
@@ -183,11 +183,11 @@ bHYPRE_StructMatrix_SetStencil(
 int32_t
 bHYPRE_StructMatrix_SetValues(
   /* in */ bHYPRE_StructMatrix self,
-  /* in */ int32_t* index,
+  /* in rarray[dim] */ int32_t* index,
   /* in */ int32_t dim,
   /* in */ int32_t num_stencil_indices,
-  /* in */ int32_t* stencil_indices,
-  /* in */ double* values);
+  /* in rarray[num_stencil_indices] */ int32_t* stencil_indices,
+  /* in rarray[num_stencil_indices] */ double* values);
 
 /**
  * Method:  SetBoxValues[]
@@ -195,12 +195,12 @@ bHYPRE_StructMatrix_SetValues(
 int32_t
 bHYPRE_StructMatrix_SetBoxValues(
   /* in */ bHYPRE_StructMatrix self,
-  /* in */ int32_t* ilower,
-  /* in */ int32_t* iupper,
+  /* in rarray[dim] */ int32_t* ilower,
+  /* in rarray[dim] */ int32_t* iupper,
   /* in */ int32_t dim,
   /* in */ int32_t num_stencil_indices,
-  /* in */ int32_t* stencil_indices,
-  /* in */ double* values,
+  /* in rarray[num_stencil_indices] */ int32_t* stencil_indices,
+  /* in rarray[nvalues] */ double* values,
   /* in */ int32_t nvalues);
 
 /**
@@ -209,7 +209,7 @@ bHYPRE_StructMatrix_SetBoxValues(
 int32_t
 bHYPRE_StructMatrix_SetNumGhost(
   /* in */ bHYPRE_StructMatrix self,
-  /* in */ int32_t* num_ghost,
+  /* in rarray[dim2] */ int32_t* num_ghost,
   /* in */ int32_t dim2);
 
 /**
@@ -227,7 +227,8 @@ int32_t
 bHYPRE_StructMatrix_SetConstantEntries(
   /* in */ bHYPRE_StructMatrix self,
   /* in */ int32_t num_stencil_constant_points,
-  /* in */ int32_t* stencil_constant_points);
+  /* in rarray[num_stencil_constant_points] */ int32_t* 
+    stencil_constant_points);
 
 /**
  * Method:  SetConstantValues[]
@@ -236,8 +237,8 @@ int32_t
 bHYPRE_StructMatrix_SetConstantValues(
   /* in */ bHYPRE_StructMatrix self,
   /* in */ int32_t num_stencil_indices,
-  /* in */ int32_t* stencil_indices,
-  /* in */ double* values);
+  /* in rarray[num_stencil_indices] */ int32_t* stencil_indices,
+  /* in rarray[num_stencil_indices] */ double* values);
 
 /**
  * Set the int parameter associated with {\tt name}.
@@ -277,7 +278,7 @@ int32_t
 bHYPRE_StructMatrix_SetIntArray1Parameter(
   /* in */ bHYPRE_StructMatrix self,
   /* in */ const char* name,
-  /* in */ int32_t* value,
+  /* in rarray[nvalues] */ int32_t* value,
   /* in */ int32_t nvalues);
 
 /**
@@ -288,7 +289,7 @@ int32_t
 bHYPRE_StructMatrix_SetIntArray2Parameter(
   /* in */ bHYPRE_StructMatrix self,
   /* in */ const char* name,
-  /* in */ struct sidl_int__array* value);
+  /* in array<int,2,column-major> */ struct sidl_int__array* value);
 
 /**
  * Set the double 1-D array parameter associated with {\tt name}.
@@ -298,7 +299,7 @@ int32_t
 bHYPRE_StructMatrix_SetDoubleArray1Parameter(
   /* in */ bHYPRE_StructMatrix self,
   /* in */ const char* name,
-  /* in */ double* value,
+  /* in rarray[nvalues] */ double* value,
   /* in */ int32_t nvalues);
 
 /**
@@ -309,7 +310,7 @@ int32_t
 bHYPRE_StructMatrix_SetDoubleArray2Parameter(
   /* in */ bHYPRE_StructMatrix self,
   /* in */ const char* name,
-  /* in */ struct sidl_double__array* value);
+  /* in array<double,2,column-major> */ struct sidl_double__array* value);
 
 /**
  * Set the int parameter associated with {\tt name}.

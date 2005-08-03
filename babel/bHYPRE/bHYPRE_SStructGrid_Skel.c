@@ -2,12 +2,12 @@
  * File:          bHYPRE_SStructGrid_Skel.c
  * Symbol:        bHYPRE.SStructGrid-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.8
  * Description:   Server-side glue code for bHYPRE.SStructGrid
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.8
  */
 
 #include "bHYPRE_SStructGrid_IOR.h"
@@ -74,8 +74,8 @@ int32_t
 impl_bHYPRE_SStructGrid_SetExtents(
   /* in */ bHYPRE_SStructGrid self,
   /* in */ int32_t part,
-  /* in */ int32_t* ilower,
-  /* in */ int32_t* iupper,
+  /* in rarray[dim] */ int32_t* ilower,
+  /* in rarray[dim] */ int32_t* iupper,
   /* in */ int32_t dim);
 
 extern
@@ -92,7 +92,7 @@ int32_t
 impl_bHYPRE_SStructGrid_AddVariable(
   /* in */ bHYPRE_SStructGrid self,
   /* in */ int32_t part,
-  /* in */ int32_t* index,
+  /* in rarray[dim] */ int32_t* index,
   /* in */ int32_t dim,
   /* in */ int32_t var,
   /* in */ enum bHYPRE_SStructVariable__enum vartype);
@@ -102,12 +102,12 @@ int32_t
 impl_bHYPRE_SStructGrid_SetNeighborBox(
   /* in */ bHYPRE_SStructGrid self,
   /* in */ int32_t part,
-  /* in */ int32_t* ilower,
-  /* in */ int32_t* iupper,
+  /* in rarray[dim] */ int32_t* ilower,
+  /* in rarray[dim] */ int32_t* iupper,
   /* in */ int32_t nbor_part,
-  /* in */ int32_t* nbor_ilower,
-  /* in */ int32_t* nbor_iupper,
-  /* in */ int32_t* index_map,
+  /* in rarray[dim] */ int32_t* nbor_ilower,
+  /* in rarray[dim] */ int32_t* nbor_iupper,
+  /* in rarray[dim] */ int32_t* index_map,
   /* in */ int32_t dim);
 
 extern
@@ -122,14 +122,14 @@ int32_t
 impl_bHYPRE_SStructGrid_SetPeriodic(
   /* in */ bHYPRE_SStructGrid self,
   /* in */ int32_t part,
-  /* in */ int32_t* periodic,
+  /* in rarray[dim] */ int32_t* periodic,
   /* in */ int32_t dim);
 
 extern
 int32_t
 impl_bHYPRE_SStructGrid_SetNumGhost(
   /* in */ bHYPRE_SStructGrid self,
-  /* in */ int32_t* num_ghost,
+  /* in rarray[dim2] */ int32_t* num_ghost,
   /* in */ int32_t dim2);
 
 extern
@@ -161,8 +161,8 @@ static int32_t
 skel_bHYPRE_SStructGrid_SetExtents(
   /* in */ bHYPRE_SStructGrid self,
   /* in */ int32_t part,
-  /* in */ struct sidl_int__array* ilower,
-/* in */ struct sidl_int__array* iupper)
+  /* in rarray[dim] */ struct sidl_int__array* ilower,
+/* in rarray[dim] */ struct sidl_int__array* iupper)
 {
   int32_t _return;
   struct sidl_int__array* ilower_proxy = sidl_int__array_ensure(ilower, 1,
@@ -186,7 +186,7 @@ static int32_t
 skel_bHYPRE_SStructGrid_AddVariable(
   /* in */ bHYPRE_SStructGrid self,
   /* in */ int32_t part,
-  /* in */ struct sidl_int__array* index,
+  /* in rarray[dim] */ struct sidl_int__array* index,
   /* in */ int32_t var,
 /* in */ enum bHYPRE_SStructVariable__enum vartype)
 {
@@ -210,12 +210,12 @@ static int32_t
 skel_bHYPRE_SStructGrid_SetNeighborBox(
   /* in */ bHYPRE_SStructGrid self,
   /* in */ int32_t part,
-  /* in */ struct sidl_int__array* ilower,
-  /* in */ struct sidl_int__array* iupper,
+  /* in rarray[dim] */ struct sidl_int__array* ilower,
+  /* in rarray[dim] */ struct sidl_int__array* iupper,
   /* in */ int32_t nbor_part,
-  /* in */ struct sidl_int__array* nbor_ilower,
-  /* in */ struct sidl_int__array* nbor_iupper,
-/* in */ struct sidl_int__array* index_map)
+  /* in rarray[dim] */ struct sidl_int__array* nbor_ilower,
+  /* in rarray[dim] */ struct sidl_int__array* nbor_iupper,
+/* in rarray[dim] */ struct sidl_int__array* index_map)
 {
   int32_t _return;
   struct sidl_int__array* ilower_proxy = sidl_int__array_ensure(ilower, 1,
@@ -252,7 +252,7 @@ static int32_t
 skel_bHYPRE_SStructGrid_SetPeriodic(
   /* in */ bHYPRE_SStructGrid self,
   /* in */ int32_t part,
-/* in */ struct sidl_int__array* periodic)
+/* in rarray[dim] */ struct sidl_int__array* periodic)
 {
   int32_t _return;
   struct sidl_int__array* periodic_proxy = sidl_int__array_ensure(periodic, 1,
@@ -271,7 +271,7 @@ skel_bHYPRE_SStructGrid_SetPeriodic(
 static int32_t
 skel_bHYPRE_SStructGrid_SetNumGhost(
   /* in */ bHYPRE_SStructGrid self,
-/* in */ struct sidl_int__array* num_ghost)
+/* in rarray[dim2] */ struct sidl_int__array* num_ghost)
 {
   int32_t _return;
   struct sidl_int__array* num_ghost_proxy = sidl_int__array_ensure(num_ghost, 1,

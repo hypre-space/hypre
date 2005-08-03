@@ -2,12 +2,12 @@
  * File:          bHYPRE_IJBuildVector.h
  * Symbol:        bHYPRE.IJBuildVector-v1.0.0
  * Symbol Type:   interface
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.8
  * Description:   Client-side glue code for bHYPRE.IJBuildVector
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.8
  */
 
 #ifndef included_bHYPRE_IJBuildVector_h
@@ -127,8 +127,8 @@ int32_t
 bHYPRE_IJBuildVector_SetValues(
   /* in */ bHYPRE_IJBuildVector self,
   /* in */ int32_t nvalues,
-  /* in */ int32_t* indices,
-  /* in */ double* values);
+  /* in rarray[nvalues] */ int32_t* indices,
+  /* in rarray[nvalues] */ double* values);
 
 /**
  * Adds to values in vector.  Usage details are analogous to
@@ -141,8 +141,8 @@ int32_t
 bHYPRE_IJBuildVector_AddToValues(
   /* in */ bHYPRE_IJBuildVector self,
   /* in */ int32_t nvalues,
-  /* in */ int32_t* indices,
-  /* in */ double* values);
+  /* in rarray[nvalues] */ int32_t* indices,
+  /* in rarray[nvalues] */ double* values);
 
 /**
  * Returns range of the part of the vector owned by this
@@ -166,8 +166,8 @@ int32_t
 bHYPRE_IJBuildVector_GetValues(
   /* in */ bHYPRE_IJBuildVector self,
   /* in */ int32_t nvalues,
-  /* in */ int32_t* indices,
-  /* inout */ double* values);
+  /* in rarray[nvalues] */ int32_t* indices,
+  /* inout rarray[nvalues] */ double* values);
 
 /**
  * Print the vector to file.  This is mainly for debugging

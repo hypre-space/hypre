@@ -2,12 +2,12 @@
  * File:          bHYPRE_SStructBuildMatrix.h
  * Symbol:        bHYPRE.SStructBuildMatrix-v1.0.0
  * Symbol Type:   interface
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.8
  * Description:   Client-side glue code for bHYPRE.SStructBuildMatrix
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.8
  */
 
 #ifndef included_bHYPRE_SStructBuildMatrix_h
@@ -130,12 +130,12 @@ int32_t
 bHYPRE_SStructBuildMatrix_SetValues(
   /* in */ bHYPRE_SStructBuildMatrix self,
   /* in */ int32_t part,
-  /* in */ int32_t* index,
+  /* in rarray[dim] */ int32_t* index,
   /* in */ int32_t dim,
   /* in */ int32_t var,
   /* in */ int32_t nentries,
-  /* in */ int32_t* entries,
-  /* in */ double* values);
+  /* in rarray[nentries] */ int32_t* entries,
+  /* in rarray[nentries] */ double* values);
 
 /**
  * Set matrix coefficients a box at a time.
@@ -159,13 +159,13 @@ int32_t
 bHYPRE_SStructBuildMatrix_SetBoxValues(
   /* in */ bHYPRE_SStructBuildMatrix self,
   /* in */ int32_t part,
-  /* in */ int32_t* ilower,
-  /* in */ int32_t* iupper,
+  /* in rarray[dim] */ int32_t* ilower,
+  /* in rarray[dim] */ int32_t* iupper,
   /* in */ int32_t dim,
   /* in */ int32_t var,
   /* in */ int32_t nentries,
-  /* in */ int32_t* entries,
-  /* in */ double* values,
+  /* in rarray[nentries] */ int32_t* entries,
+  /* in rarray[nvalues] */ double* values,
   /* in */ int32_t nvalues);
 
 /**
@@ -189,12 +189,12 @@ int32_t
 bHYPRE_SStructBuildMatrix_AddToValues(
   /* in */ bHYPRE_SStructBuildMatrix self,
   /* in */ int32_t part,
-  /* in */ int32_t* index,
+  /* in rarray[dim] */ int32_t* index,
   /* in */ int32_t dim,
   /* in */ int32_t var,
   /* in */ int32_t nentries,
-  /* in */ int32_t* entries,
-  /* in */ double* values);
+  /* in rarray[nentries] */ int32_t* entries,
+  /* in rarray[nentries] */ double* values);
 
 /**
  * Add to matrix coefficients a box at a time.
@@ -216,13 +216,13 @@ int32_t
 bHYPRE_SStructBuildMatrix_AddToBoxValues(
   /* in */ bHYPRE_SStructBuildMatrix self,
   /* in */ int32_t part,
-  /* in */ int32_t* ilower,
-  /* in */ int32_t* iupper,
+  /* in rarray[dim] */ int32_t* ilower,
+  /* in rarray[dim] */ int32_t* iupper,
   /* in */ int32_t dim,
   /* in */ int32_t var,
   /* in */ int32_t nentries,
-  /* in */ int32_t* entries,
-  /* in */ double* values,
+  /* in rarray[nentries] */ int32_t* entries,
+  /* in rarray[nvalues] */ double* values,
   /* in */ int32_t nvalues);
 
 /**

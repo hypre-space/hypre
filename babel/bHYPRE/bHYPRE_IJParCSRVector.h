@@ -2,12 +2,12 @@
  * File:          bHYPRE_IJParCSRVector.h
  * Symbol:        bHYPRE.IJParCSRVector-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.8
  * Description:   Client-side glue code for bHYPRE.IJParCSRVector
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.8
  */
 
 #ifndef included_bHYPRE_IJParCSRVector_h
@@ -186,8 +186,8 @@ int32_t
 bHYPRE_IJParCSRVector_SetValues(
   /* in */ bHYPRE_IJParCSRVector self,
   /* in */ int32_t nvalues,
-  /* in */ int32_t* indices,
-  /* in */ double* values);
+  /* in rarray[nvalues] */ int32_t* indices,
+  /* in rarray[nvalues] */ double* values);
 
 /**
  * Adds to values in vector.  Usage details are analogous to
@@ -200,8 +200,8 @@ int32_t
 bHYPRE_IJParCSRVector_AddToValues(
   /* in */ bHYPRE_IJParCSRVector self,
   /* in */ int32_t nvalues,
-  /* in */ int32_t* indices,
-  /* in */ double* values);
+  /* in rarray[nvalues] */ int32_t* indices,
+  /* in rarray[nvalues] */ double* values);
 
 /**
  * Returns range of the part of the vector owned by this
@@ -225,8 +225,8 @@ int32_t
 bHYPRE_IJParCSRVector_GetValues(
   /* in */ bHYPRE_IJParCSRVector self,
   /* in */ int32_t nvalues,
-  /* in */ int32_t* indices,
-  /* inout */ double* values);
+  /* in rarray[nvalues] */ int32_t* indices,
+  /* inout rarray[nvalues] */ double* values);
 
 /**
  * Print the vector to file.  This is mainly for debugging

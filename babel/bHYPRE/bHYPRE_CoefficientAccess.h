@@ -2,12 +2,12 @@
  * File:          bHYPRE_CoefficientAccess.h
  * Symbol:        bHYPRE.CoefficientAccess-v1.0.0
  * Symbol Type:   interface
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.8
  * Description:   Client-side glue code for bHYPRE.CoefficientAccess
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.8
  */
 
 #ifndef included_bHYPRE_CoefficientAccess_h
@@ -89,8 +89,8 @@ bHYPRE_CoefficientAccess_GetRow(
   /* in */ bHYPRE_CoefficientAccess self,
   /* in */ int32_t row,
   /* out */ int32_t* size,
-  /* out */ struct sidl_int__array** col_ind,
-  /* out */ struct sidl_double__array** values);
+  /* out array<int,column-major> */ struct sidl_int__array** col_ind,
+  /* out array<double,column-major> */ struct sidl_double__array** values);
 
 /**
  * Cast method for interface and class type conversions.

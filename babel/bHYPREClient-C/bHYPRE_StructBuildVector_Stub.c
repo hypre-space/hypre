@@ -2,12 +2,12 @@
  * File:          bHYPRE_StructBuildVector_Stub.c
  * Symbol:        bHYPRE.StructBuildVector-v1.0.0
  * Symbol Type:   interface
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.8
  * Description:   Client-side glue code for bHYPRE.StructBuildVector
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.8
  */
 
 #include "bHYPRE_StructBuildVector.h"
@@ -249,7 +249,7 @@ bHYPRE_StructBuildVector_SetGrid(
 int32_t
 bHYPRE_StructBuildVector_SetNumGhost(
   /* in */ bHYPRE_StructBuildVector self,
-  /* in */ int32_t* num_ghost,
+  /* in rarray[dim2] */ int32_t* num_ghost,
   /* in */ int32_t dim2)
 {
   int32_t num_ghost_lower[1], num_ghost_upper[1], num_ghost_stride[1]; 
@@ -270,7 +270,7 @@ bHYPRE_StructBuildVector_SetNumGhost(
 int32_t
 bHYPRE_StructBuildVector_SetValue(
   /* in */ bHYPRE_StructBuildVector self,
-  /* in */ int32_t* grid_index,
+  /* in rarray[dim] */ int32_t* grid_index,
   /* in */ int32_t dim,
   /* in */ double value)
 {
@@ -293,10 +293,10 @@ bHYPRE_StructBuildVector_SetValue(
 int32_t
 bHYPRE_StructBuildVector_SetBoxValues(
   /* in */ bHYPRE_StructBuildVector self,
-  /* in */ int32_t* ilower,
-  /* in */ int32_t* iupper,
+  /* in rarray[dim] */ int32_t* ilower,
+  /* in rarray[dim] */ int32_t* iupper,
   /* in */ int32_t dim,
-  /* in */ double* values,
+  /* in rarray[nvalues] */ double* values,
   /* in */ int32_t nvalues)
 {
   int32_t ilower_lower[1], ilower_upper[1], ilower_stride[1]; 
@@ -1081,6 +1081,7 @@ remote_bHYPRE__StructBuildVector_GetObject(
   sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
     "GetObject", _ex2 );
   sidl_rmi_Response _rsvp = NULL;
+  char* A_str= NULL;
   int32_t _retval;
 
   /* pack in and inout arguments */
@@ -1092,7 +1093,8 @@ remote_bHYPRE__StructBuildVector_GetObject(
   sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval, _ex2);
 
   /* unpack out and inout arguments */
-  sidl_rmi_Response_unpackString( _rsvp, "A", A, _ex2);
+  sidl_rmi_Response_unpackString( _rsvp, "A", &A_str, _ex2);
+  sidl_BaseInterface__connect(A_str, _ex2);
 
   /* cleanup and return */
   sidl_rmi_Response_done(_rsvp, _ex2);
@@ -1139,7 +1141,7 @@ remote_bHYPRE__StructBuildVector_SetGrid(
 static int32_t
 remote_bHYPRE__StructBuildVector_SetNumGhost(
   /* in */ struct bHYPRE__StructBuildVector__object* self /* TLD */,
-  /* in */ struct sidl_int__array* num_ghost)
+  /* in rarray[dim2] */ struct sidl_int__array* num_ghost)
 {
   sidl_BaseInterface _ex = NULL;
   sidl_BaseInterface *_ex2 =&_ex;
@@ -1171,7 +1173,7 @@ remote_bHYPRE__StructBuildVector_SetNumGhost(
 static int32_t
 remote_bHYPRE__StructBuildVector_SetValue(
   /* in */ struct bHYPRE__StructBuildVector__object* self /* TLD */,
-  /* in */ struct sidl_int__array* grid_index,
+  /* in rarray[dim] */ struct sidl_int__array* grid_index,
   /* in */ double value)
 {
   sidl_BaseInterface _ex = NULL;
@@ -1205,9 +1207,9 @@ remote_bHYPRE__StructBuildVector_SetValue(
 static int32_t
 remote_bHYPRE__StructBuildVector_SetBoxValues(
   /* in */ struct bHYPRE__StructBuildVector__object* self /* TLD */,
-  /* in */ struct sidl_int__array* ilower,
-  /* in */ struct sidl_int__array* iupper,
-  /* in */ struct sidl_double__array* values)
+  /* in rarray[dim] */ struct sidl_int__array* ilower,
+  /* in rarray[dim] */ struct sidl_int__array* iupper,
+  /* in rarray[nvalues] */ struct sidl_double__array* values)
 {
   sidl_BaseInterface _ex = NULL;
   sidl_BaseInterface *_ex2 =&_ex;

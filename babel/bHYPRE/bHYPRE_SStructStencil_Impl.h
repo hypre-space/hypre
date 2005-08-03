@@ -2,12 +2,12 @@
  * File:          bHYPRE_SStructStencil_Impl.h
  * Symbol:        bHYPRE.SStructStencil-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.8
  * Description:   Server-side implementation for bHYPRE.SStructStencil
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.8
  */
 
 #ifndef included_bHYPRE_SStructStencil_Impl_h
@@ -119,7 +119,7 @@ int32_t
 impl_bHYPRE_SStructStencil_SetEntry(
   /* in */ bHYPRE_SStructStencil self,
   /* in */ int32_t entry,
-  /* in */ int32_t* offset,
+  /* in rarray[dim] */ int32_t* offset,
   /* in */ int32_t dim,
   /* in */ int32_t var);
 

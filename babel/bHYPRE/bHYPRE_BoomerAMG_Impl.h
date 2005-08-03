@@ -2,12 +2,12 @@
  * File:          bHYPRE_BoomerAMG_Impl.h
  * Symbol:        bHYPRE.BoomerAMG-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.8
  * Description:   Server-side implementation for bHYPRE.BoomerAMG
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.8
  */
 
 #ifndef included_bHYPRE_BoomerAMG_Impl_h
@@ -175,7 +175,7 @@ int32_t
 impl_bHYPRE_BoomerAMG_SetIntArray1Parameter(
   /* in */ bHYPRE_BoomerAMG self,
   /* in */ const char* name,
-  /* in */ int32_t* value,
+  /* in rarray[nvalues] */ int32_t* value,
   /* in */ int32_t nvalues);
 
 extern
@@ -183,14 +183,14 @@ int32_t
 impl_bHYPRE_BoomerAMG_SetIntArray2Parameter(
   /* in */ bHYPRE_BoomerAMG self,
   /* in */ const char* name,
-  /* in */ struct sidl_int__array* value);
+  /* in array<int,2,column-major> */ struct sidl_int__array* value);
 
 extern
 int32_t
 impl_bHYPRE_BoomerAMG_SetDoubleArray1Parameter(
   /* in */ bHYPRE_BoomerAMG self,
   /* in */ const char* name,
-  /* in */ double* value,
+  /* in rarray[nvalues] */ double* value,
   /* in */ int32_t nvalues);
 
 extern
@@ -198,7 +198,7 @@ int32_t
 impl_bHYPRE_BoomerAMG_SetDoubleArray2Parameter(
   /* in */ bHYPRE_BoomerAMG self,
   /* in */ const char* name,
-  /* in */ struct sidl_double__array* value);
+  /* in array<double,2,column-major> */ struct sidl_double__array* value);
 
 extern
 int32_t

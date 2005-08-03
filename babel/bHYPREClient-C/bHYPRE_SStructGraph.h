@@ -2,12 +2,12 @@
  * File:          bHYPRE_SStructGraph.h
  * Symbol:        bHYPRE.SStructGraph-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.8
  * Description:   Client-side glue code for bHYPRE.SStructGraph
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.8
  */
 
 #ifndef included_bHYPRE_SStructGraph_h
@@ -142,11 +142,11 @@ int32_t
 bHYPRE_SStructGraph_AddEntries(
   /* in */ bHYPRE_SStructGraph self,
   /* in */ int32_t part,
-  /* in */ int32_t* index,
+  /* in rarray[dim] */ int32_t* index,
   /* in */ int32_t dim,
   /* in */ int32_t var,
   /* in */ int32_t to_part,
-  /* in */ int32_t* to_index,
+  /* in rarray[dim] */ int32_t* to_index,
   /* in */ int32_t to_var);
 
 /**

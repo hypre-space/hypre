@@ -2,12 +2,12 @@
  * File:          bHYPRE_SStructBuildMatrix_Stub.c
  * Symbol:        bHYPRE.SStructBuildMatrix-v1.0.0
  * Symbol Type:   interface
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.8
  * Description:   Client-side glue code for bHYPRE.SStructBuildMatrix
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.8
  */
 
 #include "bHYPRE_SStructBuildMatrix.h"
@@ -268,12 +268,12 @@ int32_t
 bHYPRE_SStructBuildMatrix_SetValues(
   /* in */ bHYPRE_SStructBuildMatrix self,
   /* in */ int32_t part,
-  /* in */ int32_t* index,
+  /* in rarray[dim] */ int32_t* index,
   /* in */ int32_t dim,
   /* in */ int32_t var,
   /* in */ int32_t nentries,
-  /* in */ int32_t* entries,
-  /* in */ double* values)
+  /* in rarray[nentries] */ int32_t* entries,
+  /* in rarray[nentries] */ double* values)
 {
   int32_t index_lower[1], index_upper[1], index_stride[1]; 
   struct sidl_int__array index_real;
@@ -325,13 +325,13 @@ int32_t
 bHYPRE_SStructBuildMatrix_SetBoxValues(
   /* in */ bHYPRE_SStructBuildMatrix self,
   /* in */ int32_t part,
-  /* in */ int32_t* ilower,
-  /* in */ int32_t* iupper,
+  /* in rarray[dim] */ int32_t* ilower,
+  /* in rarray[dim] */ int32_t* iupper,
   /* in */ int32_t dim,
   /* in */ int32_t var,
   /* in */ int32_t nentries,
-  /* in */ int32_t* entries,
-  /* in */ double* values,
+  /* in rarray[nentries] */ int32_t* entries,
+  /* in rarray[nvalues] */ double* values,
   /* in */ int32_t nvalues)
 {
   int32_t ilower_lower[1], ilower_upper[1], ilower_stride[1]; 
@@ -390,12 +390,12 @@ int32_t
 bHYPRE_SStructBuildMatrix_AddToValues(
   /* in */ bHYPRE_SStructBuildMatrix self,
   /* in */ int32_t part,
-  /* in */ int32_t* index,
+  /* in rarray[dim] */ int32_t* index,
   /* in */ int32_t dim,
   /* in */ int32_t var,
   /* in */ int32_t nentries,
-  /* in */ int32_t* entries,
-  /* in */ double* values)
+  /* in rarray[nentries] */ int32_t* entries,
+  /* in rarray[nentries] */ double* values)
 {
   int32_t index_lower[1], index_upper[1], index_stride[1]; 
   struct sidl_int__array index_real;
@@ -445,13 +445,13 @@ int32_t
 bHYPRE_SStructBuildMatrix_AddToBoxValues(
   /* in */ bHYPRE_SStructBuildMatrix self,
   /* in */ int32_t part,
-  /* in */ int32_t* ilower,
-  /* in */ int32_t* iupper,
+  /* in rarray[dim] */ int32_t* ilower,
+  /* in rarray[dim] */ int32_t* iupper,
   /* in */ int32_t dim,
   /* in */ int32_t var,
   /* in */ int32_t nentries,
-  /* in */ int32_t* entries,
-  /* in */ double* values,
+  /* in rarray[nentries] */ int32_t* entries,
+  /* in rarray[nvalues] */ double* values,
   /* in */ int32_t nvalues)
 {
   int32_t ilower_lower[1], ilower_upper[1], ilower_stride[1]; 
@@ -1326,6 +1326,7 @@ remote_bHYPRE__SStructBuildMatrix_GetObject(
   sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
     "GetObject", _ex2 );
   sidl_rmi_Response _rsvp = NULL;
+  char* A_str= NULL;
   int32_t _retval;
 
   /* pack in and inout arguments */
@@ -1337,7 +1338,8 @@ remote_bHYPRE__SStructBuildMatrix_GetObject(
   sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval, _ex2);
 
   /* unpack out and inout arguments */
-  sidl_rmi_Response_unpackString( _rsvp, "A", A, _ex2);
+  sidl_rmi_Response_unpackString( _rsvp, "A", &A_str, _ex2);
+  sidl_BaseInterface__connect(A_str, _ex2);
 
   /* cleanup and return */
   sidl_rmi_Response_done(_rsvp, _ex2);
@@ -1385,10 +1387,10 @@ static int32_t
 remote_bHYPRE__SStructBuildMatrix_SetValues(
   /* in */ struct bHYPRE__SStructBuildMatrix__object* self /* TLD */,
   /* in */ int32_t part,
-  /* in */ struct sidl_int__array* index,
+  /* in rarray[dim] */ struct sidl_int__array* index,
   /* in */ int32_t var,
-  /* in */ struct sidl_int__array* entries,
-  /* in */ struct sidl_double__array* values)
+  /* in rarray[nentries] */ struct sidl_int__array* entries,
+  /* in rarray[nentries] */ struct sidl_double__array* values)
 {
   sidl_BaseInterface _ex = NULL;
   sidl_BaseInterface *_ex2 =&_ex;
@@ -1423,11 +1425,11 @@ static int32_t
 remote_bHYPRE__SStructBuildMatrix_SetBoxValues(
   /* in */ struct bHYPRE__SStructBuildMatrix__object* self /* TLD */,
   /* in */ int32_t part,
-  /* in */ struct sidl_int__array* ilower,
-  /* in */ struct sidl_int__array* iupper,
+  /* in rarray[dim] */ struct sidl_int__array* ilower,
+  /* in rarray[dim] */ struct sidl_int__array* iupper,
   /* in */ int32_t var,
-  /* in */ struct sidl_int__array* entries,
-  /* in */ struct sidl_double__array* values)
+  /* in rarray[nentries] */ struct sidl_int__array* entries,
+  /* in rarray[nvalues] */ struct sidl_double__array* values)
 {
   sidl_BaseInterface _ex = NULL;
   sidl_BaseInterface *_ex2 =&_ex;
@@ -1462,10 +1464,10 @@ static int32_t
 remote_bHYPRE__SStructBuildMatrix_AddToValues(
   /* in */ struct bHYPRE__SStructBuildMatrix__object* self /* TLD */,
   /* in */ int32_t part,
-  /* in */ struct sidl_int__array* index,
+  /* in rarray[dim] */ struct sidl_int__array* index,
   /* in */ int32_t var,
-  /* in */ struct sidl_int__array* entries,
-  /* in */ struct sidl_double__array* values)
+  /* in rarray[nentries] */ struct sidl_int__array* entries,
+  /* in rarray[nentries] */ struct sidl_double__array* values)
 {
   sidl_BaseInterface _ex = NULL;
   sidl_BaseInterface *_ex2 =&_ex;
@@ -1500,11 +1502,11 @@ static int32_t
 remote_bHYPRE__SStructBuildMatrix_AddToBoxValues(
   /* in */ struct bHYPRE__SStructBuildMatrix__object* self /* TLD */,
   /* in */ int32_t part,
-  /* in */ struct sidl_int__array* ilower,
-  /* in */ struct sidl_int__array* iupper,
+  /* in rarray[dim] */ struct sidl_int__array* ilower,
+  /* in rarray[dim] */ struct sidl_int__array* iupper,
   /* in */ int32_t var,
-  /* in */ struct sidl_int__array* entries,
-  /* in */ struct sidl_double__array* values)
+  /* in rarray[nentries] */ struct sidl_int__array* entries,
+  /* in rarray[nvalues] */ struct sidl_double__array* values)
 {
   sidl_BaseInterface _ex = NULL;
   sidl_BaseInterface *_ex2 =&_ex;

@@ -2,12 +2,12 @@
  * File:          bHYPRE_Solver_IOR.h
  * Symbol:        bHYPRE.Solver-v1.0.0
  * Symbol Type:   interface
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.8
  * Description:   Intermediate Object Representation for bHYPRE.Solver
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.8
  */
 
 #ifndef included_bHYPRE_Solver_IOR_h
@@ -97,19 +97,19 @@ struct bHYPRE_Solver__epv {
   int32_t (*f_SetIntArray1Parameter)(
     /* in */ void* self,
     /* in */ const char* name,
-    /* in */ struct sidl_int__array* value);
+    /* in rarray[nvalues] */ struct sidl_int__array* value);
   int32_t (*f_SetIntArray2Parameter)(
     /* in */ void* self,
     /* in */ const char* name,
-    /* in */ struct sidl_int__array* value);
+    /* in array<int,2,column-major> */ struct sidl_int__array* value);
   int32_t (*f_SetDoubleArray1Parameter)(
     /* in */ void* self,
     /* in */ const char* name,
-    /* in */ struct sidl_double__array* value);
+    /* in rarray[nvalues] */ struct sidl_double__array* value);
   int32_t (*f_SetDoubleArray2Parameter)(
     /* in */ void* self,
     /* in */ const char* name,
-    /* in */ struct sidl_double__array* value);
+    /* in array<double,2,column-major> */ struct sidl_double__array* value);
   int32_t (*f_GetIntValue)(
     /* in */ void* self,
     /* in */ const char* name,
@@ -240,19 +240,19 @@ struct bHYPRE__Solver__epv {
   int32_t (*f_SetIntArray1Parameter)(
     /* in */ struct bHYPRE__Solver__object* self,
     /* in */ const char* name,
-    /* in */ struct sidl_int__array* value);
+    /* in rarray[nvalues] */ struct sidl_int__array* value);
   int32_t (*f_SetIntArray2Parameter)(
     /* in */ struct bHYPRE__Solver__object* self,
     /* in */ const char* name,
-    /* in */ struct sidl_int__array* value);
+    /* in array<int,2,column-major> */ struct sidl_int__array* value);
   int32_t (*f_SetDoubleArray1Parameter)(
     /* in */ struct bHYPRE__Solver__object* self,
     /* in */ const char* name,
-    /* in */ struct sidl_double__array* value);
+    /* in rarray[nvalues] */ struct sidl_double__array* value);
   int32_t (*f_SetDoubleArray2Parameter)(
     /* in */ struct bHYPRE__Solver__object* self,
     /* in */ const char* name,
-    /* in */ struct sidl_double__array* value);
+    /* in array<double,2,column-major> */ struct sidl_double__array* value);
   int32_t (*f_GetIntValue)(
     /* in */ struct bHYPRE__Solver__object* self,
     /* in */ const char* name,

@@ -2,12 +2,12 @@
  * File:          bHYPRE_IJBuildMatrix.h
  * Symbol:        bHYPRE.IJBuildMatrix-v1.0.0
  * Symbol Type:   interface
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.8
  * Description:   Client-side glue code for bHYPRE.IJBuildMatrix
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.8
  */
 
 #ifndef included_bHYPRE_IJBuildMatrix_h
@@ -151,10 +151,10 @@ int32_t
 bHYPRE_IJBuildMatrix_SetValues(
   /* in */ bHYPRE_IJBuildMatrix self,
   /* in */ int32_t nrows,
-  /* in */ int32_t* ncols,
-  /* in */ int32_t* rows,
-  /* in */ int32_t* cols,
-  /* in */ double* values,
+  /* in rarray[nrows] */ int32_t* ncols,
+  /* in rarray[nrows] */ int32_t* rows,
+  /* in rarray[nnonzeros] */ int32_t* cols,
+  /* in rarray[nnonzeros] */ double* values,
   /* in */ int32_t nnonzeros);
 
 /**
@@ -170,10 +170,10 @@ int32_t
 bHYPRE_IJBuildMatrix_AddToValues(
   /* in */ bHYPRE_IJBuildMatrix self,
   /* in */ int32_t nrows,
-  /* in */ int32_t* ncols,
-  /* in */ int32_t* rows,
-  /* in */ int32_t* cols,
-  /* in */ double* values,
+  /* in rarray[nrows] */ int32_t* ncols,
+  /* in rarray[nrows] */ int32_t* rows,
+  /* in rarray[nnonzeros] */ int32_t* cols,
+  /* in rarray[nnonzeros] */ double* values,
   /* in */ int32_t nnonzeros);
 
 /**
@@ -199,8 +199,8 @@ int32_t
 bHYPRE_IJBuildMatrix_GetRowCounts(
   /* in */ bHYPRE_IJBuildMatrix self,
   /* in */ int32_t nrows,
-  /* in */ int32_t* rows,
-  /* inout */ int32_t* ncols);
+  /* in rarray[nrows] */ int32_t* rows,
+  /* inout rarray[nrows] */ int32_t* ncols);
 
 /**
  * Gets values for {\tt nrows} rows or partial rows of the
@@ -211,10 +211,10 @@ int32_t
 bHYPRE_IJBuildMatrix_GetValues(
   /* in */ bHYPRE_IJBuildMatrix self,
   /* in */ int32_t nrows,
-  /* in */ int32_t* ncols,
-  /* in */ int32_t* rows,
-  /* in */ int32_t* cols,
-  /* inout */ double* values,
+  /* in rarray[nrows] */ int32_t* ncols,
+  /* in rarray[nrows] */ int32_t* rows,
+  /* in rarray[nnonzeros] */ int32_t* cols,
+  /* inout rarray[nnonzeros] */ double* values,
   /* in */ int32_t nnonzeros);
 
 /**
@@ -231,7 +231,7 @@ bHYPRE_IJBuildMatrix_GetValues(
 int32_t
 bHYPRE_IJBuildMatrix_SetRowSizes(
   /* in */ bHYPRE_IJBuildMatrix self,
-  /* in */ int32_t* sizes,
+  /* in rarray[nrows] */ int32_t* sizes,
   /* in */ int32_t nrows);
 
 /**

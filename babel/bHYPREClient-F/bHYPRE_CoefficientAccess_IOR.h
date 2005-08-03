@@ -2,12 +2,12 @@
  * File:          bHYPRE_CoefficientAccess_IOR.h
  * Symbol:        bHYPRE.CoefficientAccess-v1.0.0
  * Symbol Type:   interface
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.8
  * Description:   Intermediate Object Representation for bHYPRE.CoefficientAccess
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.8
  */
 
 #ifndef included_bHYPRE_CoefficientAccess_IOR_h
@@ -79,8 +79,8 @@ struct bHYPRE_CoefficientAccess__epv {
     /* in */ void* self,
     /* in */ int32_t row,
     /* out */ int32_t* size,
-    /* out */ struct sidl_int__array** col_ind,
-    /* out */ struct sidl_double__array** values);
+    /* out array<int,column-major> */ struct sidl_int__array** col_ind,
+    /* out array<double,column-major> */ struct sidl_double__array** values);
 };
 
 /*
@@ -156,8 +156,8 @@ struct bHYPRE__CoefficientAccess__epv {
     /* in */ struct bHYPRE__CoefficientAccess__object* self,
     /* in */ int32_t row,
     /* out */ int32_t* size,
-    /* out */ struct sidl_int__array** col_ind,
-    /* out */ struct sidl_double__array** values);
+    /* out array<int,column-major> */ struct sidl_int__array** col_ind,
+    /* out array<double,column-major> */ struct sidl_double__array** values);
   /* Methods introduced in bHYPRE._CoefficientAccess-v1.0 */
 };
 

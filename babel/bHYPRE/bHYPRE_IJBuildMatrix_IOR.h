@@ -2,12 +2,12 @@
  * File:          bHYPRE_IJBuildMatrix_IOR.h
  * Symbol:        bHYPRE.IJBuildMatrix-v1.0.0
  * Symbol Type:   interface
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.8
  * Description:   Intermediate Object Representation for bHYPRE.IJBuildMatrix
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.8
  */
 
 #ifndef included_bHYPRE_IJBuildMatrix_IOR_h
@@ -99,16 +99,16 @@ struct bHYPRE_IJBuildMatrix__epv {
     /* in */ int32_t jupper);
   int32_t (*f_SetValues)(
     /* in */ void* self,
-    /* in */ struct sidl_int__array* ncols,
-    /* in */ struct sidl_int__array* rows,
-    /* in */ struct sidl_int__array* cols,
-    /* in */ struct sidl_double__array* values);
+    /* in rarray[nrows] */ struct sidl_int__array* ncols,
+    /* in rarray[nrows] */ struct sidl_int__array* rows,
+    /* in rarray[nnonzeros] */ struct sidl_int__array* cols,
+    /* in rarray[nnonzeros] */ struct sidl_double__array* values);
   int32_t (*f_AddToValues)(
     /* in */ void* self,
-    /* in */ struct sidl_int__array* ncols,
-    /* in */ struct sidl_int__array* rows,
-    /* in */ struct sidl_int__array* cols,
-    /* in */ struct sidl_double__array* values);
+    /* in rarray[nrows] */ struct sidl_int__array* ncols,
+    /* in rarray[nrows] */ struct sidl_int__array* rows,
+    /* in rarray[nnonzeros] */ struct sidl_int__array* cols,
+    /* in rarray[nnonzeros] */ struct sidl_double__array* values);
   int32_t (*f_GetLocalRange)(
     /* in */ void* self,
     /* out */ int32_t* ilower,
@@ -117,17 +117,17 @@ struct bHYPRE_IJBuildMatrix__epv {
     /* out */ int32_t* jupper);
   int32_t (*f_GetRowCounts)(
     /* in */ void* self,
-    /* in */ struct sidl_int__array* rows,
-    /* inout */ struct sidl_int__array** ncols);
+    /* in rarray[nrows] */ struct sidl_int__array* rows,
+    /* inout rarray[nrows] */ struct sidl_int__array** ncols);
   int32_t (*f_GetValues)(
     /* in */ void* self,
-    /* in */ struct sidl_int__array* ncols,
-    /* in */ struct sidl_int__array* rows,
-    /* in */ struct sidl_int__array* cols,
-    /* inout */ struct sidl_double__array** values);
+    /* in rarray[nrows] */ struct sidl_int__array* ncols,
+    /* in rarray[nrows] */ struct sidl_int__array* rows,
+    /* in rarray[nnonzeros] */ struct sidl_int__array* cols,
+    /* inout rarray[nnonzeros] */ struct sidl_double__array** values);
   int32_t (*f_SetRowSizes)(
     /* in */ void* self,
-    /* in */ struct sidl_int__array* sizes);
+    /* in rarray[nrows] */ struct sidl_int__array* sizes);
   int32_t (*f_Print)(
     /* in */ void* self,
     /* in */ const char* filename);
@@ -228,16 +228,16 @@ struct bHYPRE__IJBuildMatrix__epv {
     /* in */ int32_t jupper);
   int32_t (*f_SetValues)(
     /* in */ struct bHYPRE__IJBuildMatrix__object* self,
-    /* in */ struct sidl_int__array* ncols,
-    /* in */ struct sidl_int__array* rows,
-    /* in */ struct sidl_int__array* cols,
-    /* in */ struct sidl_double__array* values);
+    /* in rarray[nrows] */ struct sidl_int__array* ncols,
+    /* in rarray[nrows] */ struct sidl_int__array* rows,
+    /* in rarray[nnonzeros] */ struct sidl_int__array* cols,
+    /* in rarray[nnonzeros] */ struct sidl_double__array* values);
   int32_t (*f_AddToValues)(
     /* in */ struct bHYPRE__IJBuildMatrix__object* self,
-    /* in */ struct sidl_int__array* ncols,
-    /* in */ struct sidl_int__array* rows,
-    /* in */ struct sidl_int__array* cols,
-    /* in */ struct sidl_double__array* values);
+    /* in rarray[nrows] */ struct sidl_int__array* ncols,
+    /* in rarray[nrows] */ struct sidl_int__array* rows,
+    /* in rarray[nnonzeros] */ struct sidl_int__array* cols,
+    /* in rarray[nnonzeros] */ struct sidl_double__array* values);
   int32_t (*f_GetLocalRange)(
     /* in */ struct bHYPRE__IJBuildMatrix__object* self,
     /* out */ int32_t* ilower,
@@ -246,17 +246,17 @@ struct bHYPRE__IJBuildMatrix__epv {
     /* out */ int32_t* jupper);
   int32_t (*f_GetRowCounts)(
     /* in */ struct bHYPRE__IJBuildMatrix__object* self,
-    /* in */ struct sidl_int__array* rows,
-    /* inout */ struct sidl_int__array** ncols);
+    /* in rarray[nrows] */ struct sidl_int__array* rows,
+    /* inout rarray[nrows] */ struct sidl_int__array** ncols);
   int32_t (*f_GetValues)(
     /* in */ struct bHYPRE__IJBuildMatrix__object* self,
-    /* in */ struct sidl_int__array* ncols,
-    /* in */ struct sidl_int__array* rows,
-    /* in */ struct sidl_int__array* cols,
-    /* inout */ struct sidl_double__array** values);
+    /* in rarray[nrows] */ struct sidl_int__array* ncols,
+    /* in rarray[nrows] */ struct sidl_int__array* rows,
+    /* in rarray[nnonzeros] */ struct sidl_int__array* cols,
+    /* inout rarray[nnonzeros] */ struct sidl_double__array** values);
   int32_t (*f_SetRowSizes)(
     /* in */ struct bHYPRE__IJBuildMatrix__object* self,
-    /* in */ struct sidl_int__array* sizes);
+    /* in rarray[nrows] */ struct sidl_int__array* sizes);
   int32_t (*f_Print)(
     /* in */ struct bHYPRE__IJBuildMatrix__object* self,
     /* in */ const char* filename);

@@ -2,12 +2,12 @@ C
 C       File:          bHYPRE_IJParCSRMatrix_Impl.f
 C       Symbol:        bHYPRE.IJParCSRMatrix-v1.0.0
 C       Symbol Type:   class
-C       Babel Version: 0.10.4
+C       Babel Version: 0.10.8
 C       Description:   Client-side documentation text for bHYPRE.IJParCSRMatrix
 C       
 C       WARNING: Automatically generated; changes will be lost
 C       
-C       babel-version = 0.10.4
+C       babel-version = 0.10.8
 C       
 
         THIS FILE IS DOCUMENTATION - DO NOT COMPILE IT!
@@ -217,33 +217,6 @@ C       in rarray<int> diag_sizes(local_nrows)
         integer*4 diag_sizes(0:local_nrows-1)
 C       in rarray<int> offdiag_sizes(local_nrows)
         integer*4 offdiag_sizes(0:local_nrows-1)
-        end
-
-
-C       
-C       The GetRow method will allocate space for its two output
-C       arrays on the first call.  The space will be reused on
-C       subsequent calls.  Thus the user must not delete them, yet
-C       must not depend on the data from GetRow to persist beyond the
-C       next GetRow call.
-C       
-C       
-
-        subroutine bHYPRE_IJParCSRMatrix_GetRow_f(self, row, size,
-     &     col_ind, values, retval)
-        implicit none
-C       in bHYPRE.IJParCSRMatrix self
-        integer*8 self
-C       in int row
-        integer*4 row
-C       out int size
-        integer*4 size
-C       out array<int,column-major> col_ind
-        integer*8 col_ind
-C       out array<double,column-major> values
-        integer*8 values
-C       out int retval
-        integer*4 retval
         end
 
 
@@ -762,6 +735,33 @@ C       in bHYPRE.Vector b
         integer*8 b
 C       inout bHYPRE.Vector x
         integer*8 x
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       The GetRow method will allocate space for its two output
+C       arrays on the first call.  The space will be reused on
+C       subsequent calls.  Thus the user must not delete them, yet
+C       must not depend on the data from GetRow to persist beyond the
+C       next GetRow call.
+C       
+C       
+
+        subroutine bHYPRE_IJParCSRMatrix_GetRow_f(self, row, size,
+     &     col_ind, values, retval)
+        implicit none
+C       in bHYPRE.IJParCSRMatrix self
+        integer*8 self
+C       in int row
+        integer*4 row
+C       out int size
+        integer*4 size
+C       out array<int,column-major> col_ind
+        integer*8 col_ind
+C       out array<double,column-major> values
+        integer*8 values
 C       out int retval
         integer*4 retval
         end

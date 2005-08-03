@@ -2,12 +2,12 @@
  * File:          bHYPRE_SStructVector_Impl.c
  * Symbol:        bHYPRE.SStructVector-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.8
  * Description:   Server-side implementation for bHYPRE.SStructVector
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.8
  */
 
 /*
@@ -408,10 +408,10 @@ int32_t
 impl_bHYPRE_SStructVector_SetValues(
   /* in */ bHYPRE_SStructVector self,
   /* in */ int32_t part,
-  /* in */ int32_t* index,
+  /* in rarray[dim] */ int32_t* index,
   /* in */ int32_t dim,
   /* in */ int32_t var,
-  /* in */ double* values,
+  /* in rarray[one] */ double* values,
   /* in */ int32_t one)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructVector.SetValues) */
@@ -455,11 +455,11 @@ int32_t
 impl_bHYPRE_SStructVector_SetBoxValues(
   /* in */ bHYPRE_SStructVector self,
   /* in */ int32_t part,
-  /* in */ int32_t* ilower,
-  /* in */ int32_t* iupper,
+  /* in rarray[dim] */ int32_t* ilower,
+  /* in rarray[dim] */ int32_t* iupper,
   /* in */ int32_t dim,
   /* in */ int32_t var,
-  /* in */ double* values,
+  /* in rarray[nvalues] */ double* values,
   /* in */ int32_t nvalues)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructVector.SetBoxValues) */
@@ -503,10 +503,10 @@ int32_t
 impl_bHYPRE_SStructVector_AddToValues(
   /* in */ bHYPRE_SStructVector self,
   /* in */ int32_t part,
-  /* in */ int32_t* index,
+  /* in rarray[dim] */ int32_t* index,
   /* in */ int32_t dim,
   /* in */ int32_t var,
-  /* in */ double* values,
+  /* in rarray[one] */ double* values,
   /* in */ int32_t one)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructVector.AddToValues) */
@@ -549,11 +549,11 @@ int32_t
 impl_bHYPRE_SStructVector_AddToBoxValues(
   /* in */ bHYPRE_SStructVector self,
   /* in */ int32_t part,
-  /* in */ int32_t* ilower,
-  /* in */ int32_t* iupper,
+  /* in rarray[dim] */ int32_t* ilower,
+  /* in rarray[dim] */ int32_t* iupper,
   /* in */ int32_t dim,
   /* in */ int32_t var,
-  /* in */ double* values,
+  /* in rarray[nvalues] */ double* values,
   /* in */ int32_t nvalues)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructVector.AddToBoxValues) */
@@ -627,7 +627,7 @@ int32_t
 impl_bHYPRE_SStructVector_GetValues(
   /* in */ bHYPRE_SStructVector self,
   /* in */ int32_t part,
-  /* in */ int32_t* index,
+  /* in rarray[dim] */ int32_t* index,
   /* in */ int32_t dim,
   /* in */ int32_t var,
   /* out */ double* value)
@@ -672,11 +672,11 @@ int32_t
 impl_bHYPRE_SStructVector_GetBoxValues(
   /* in */ bHYPRE_SStructVector self,
   /* in */ int32_t part,
-  /* in */ int32_t* ilower,
-  /* in */ int32_t* iupper,
+  /* in rarray[dim] */ int32_t* ilower,
+  /* in rarray[dim] */ int32_t* iupper,
   /* in */ int32_t dim,
   /* in */ int32_t var,
-  /* inout */ double* values,
+  /* inout rarray[nvalues] */ double* values,
   /* in */ int32_t nvalues)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructVector.GetBoxValues) */

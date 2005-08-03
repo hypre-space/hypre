@@ -2,12 +2,12 @@
  * File:          bHYPRE_IJParCSRMatrix_IOR.c
  * Symbol:        bHYPRE.IJParCSRMatrix-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.8
  * Description:   Intermediate Object Representation for bHYPRE.IJParCSRMatrix
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.8
  */
 
 #include "sidl_rmi_InstanceHandle.h"
@@ -251,41 +251,6 @@ bHYPRE_IJParCSRMatrix_SetDiagOffdSizes__exec(
   sidl_io_Serializer_packInt( outArgs, "_retval", _retval, _ex2);
 
   /* pack out and inout argments */
-
-}
-
-static void
-bHYPRE_IJParCSRMatrix_GetRow__exec(
-        struct bHYPRE_IJParCSRMatrix__object* self,
-        struct sidl_io_Deserializer__object* inArgs,
-        struct sidl_io_Serializer__object* outArgs) {
-  /* stack space for arguments */
-  int32_t row;
-  int32_t size_tmp;
-  int32_t* size= &size_tmp;
-  struct sidl_int__array* col_ind_tmp;
-  struct sidl_int__array** col_ind= &col_ind_tmp;
-  struct sidl_double__array* values_tmp;
-  struct sidl_double__array** values= &values_tmp;
-  int32_t _retval;
-  sidl_BaseInterface _ex   = NULL;
-  sidl_BaseInterface *_ex2 = &_ex;
-  /* unpack in and inout argments */
-  sidl_io_Deserializer_unpackInt( inArgs, "row", &row, _ex2);
-
-  /* make the call */
-  _retval = (self->d_epv->f_GetRow)(
-    self,
-    row,
-    size,
-    col_ind,
-    values);
-
-  /* pack return value */
-  sidl_io_Serializer_packInt( outArgs, "_retval", _retval, _ex2);
-
-  /* pack out and inout argments */
-  sidl_io_Serializer_packInt( outArgs, "size", *size, _ex2);
 
 }
 
@@ -951,6 +916,41 @@ bHYPRE_IJParCSRMatrix_Apply__exec(
 
 }
 
+static void
+bHYPRE_IJParCSRMatrix_GetRow__exec(
+        struct bHYPRE_IJParCSRMatrix__object* self,
+        struct sidl_io_Deserializer__object* inArgs,
+        struct sidl_io_Serializer__object* outArgs) {
+  /* stack space for arguments */
+  int32_t row;
+  int32_t size_tmp;
+  int32_t* size= &size_tmp;
+  struct sidl_int__array* col_ind_tmp;
+  struct sidl_int__array** col_ind= &col_ind_tmp;
+  struct sidl_double__array* values_tmp;
+  struct sidl_double__array** values= &values_tmp;
+  int32_t _retval;
+  sidl_BaseInterface _ex   = NULL;
+  sidl_BaseInterface *_ex2 = &_ex;
+  /* unpack in and inout argments */
+  sidl_io_Deserializer_unpackInt( inArgs, "row", &row, _ex2);
+
+  /* make the call */
+  _retval = (self->d_epv->f_GetRow)(
+    self,
+    row,
+    size,
+    col_ind,
+    values);
+
+  /* pack return value */
+  sidl_io_Serializer_packInt( outArgs, "_retval", _retval, _ex2);
+
+  /* pack out and inout argments */
+  sidl_io_Serializer_packInt( outArgs, "size", *size, _ex2);
+
+}
+
 static void ior_bHYPRE_IJParCSRMatrix__ensure_load_called(void) {
   /*
    * assert( HAVE_LOCKED_STATIC_GLOBALS );
@@ -1129,7 +1129,6 @@ static void bHYPRE_IJParCSRMatrix__init_epv(
   epv->f_getClassInfo                  = (struct sidl_ClassInfo__object* 
     (*)(struct bHYPRE_IJParCSRMatrix__object*)) s1->d_epv->f_getClassInfo;
   epv->f_SetDiagOffdSizes              = NULL;
-  epv->f_GetRow                        = NULL;
   epv->f_SetCommunicator               = NULL;
   epv->f_Initialize                    = NULL;
   epv->f_Assemble                      = NULL;
@@ -1154,6 +1153,7 @@ static void bHYPRE_IJParCSRMatrix__init_epv(
   epv->f_GetDoubleValue                = NULL;
   epv->f_Setup                         = NULL;
   epv->f_Apply                         = NULL;
+  epv->f_GetRow                        = NULL;
 
   bHYPRE_IJParCSRMatrix__set_epv(epv);
 

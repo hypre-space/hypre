@@ -2,12 +2,12 @@
  * File:          bHYPRE_SStructStencil_Skel.c
  * Symbol:        bHYPRE.SStructStencil-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.8
  * Description:   Server-side glue code for bHYPRE.SStructStencil
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.8
  */
 
 #include "bHYPRE_SStructStencil_IOR.h"
@@ -67,7 +67,7 @@ int32_t
 impl_bHYPRE_SStructStencil_SetEntry(
   /* in */ bHYPRE_SStructStencil self,
   /* in */ int32_t entry,
-  /* in */ int32_t* offset,
+  /* in rarray[dim] */ int32_t* offset,
   /* in */ int32_t dim,
   /* in */ int32_t var);
 
@@ -95,7 +95,7 @@ static int32_t
 skel_bHYPRE_SStructStencil_SetEntry(
   /* in */ bHYPRE_SStructStencil self,
   /* in */ int32_t entry,
-  /* in */ struct sidl_int__array* offset,
+  /* in rarray[dim] */ struct sidl_int__array* offset,
 /* in */ int32_t var)
 {
   int32_t _return;

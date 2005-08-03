@@ -2,12 +2,12 @@
  * File:          bHYPRE_SStructGrid_Impl.c
  * Symbol:        bHYPRE.SStructGrid-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.8
  * Description:   Server-side implementation for bHYPRE.SStructGrid
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.8
  */
 
 /*
@@ -224,8 +224,8 @@ int32_t
 impl_bHYPRE_SStructGrid_SetExtents(
   /* in */ bHYPRE_SStructGrid self,
   /* in */ int32_t part,
-  /* in */ int32_t* ilower,
-  /* in */ int32_t* iupper,
+  /* in rarray[dim] */ int32_t* ilower,
+  /* in rarray[dim] */ int32_t* iupper,
   /* in */ int32_t dim)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructGrid.SetExtents) */
@@ -308,7 +308,7 @@ int32_t
 impl_bHYPRE_SStructGrid_AddVariable(
   /* in */ bHYPRE_SStructGrid self,
   /* in */ int32_t part,
-  /* in */ int32_t* index,
+  /* in rarray[dim] */ int32_t* index,
   /* in */ int32_t dim,
   /* in */ int32_t var,
   /* in */ enum bHYPRE_SStructVariable__enum vartype)
@@ -368,12 +368,12 @@ int32_t
 impl_bHYPRE_SStructGrid_SetNeighborBox(
   /* in */ bHYPRE_SStructGrid self,
   /* in */ int32_t part,
-  /* in */ int32_t* ilower,
-  /* in */ int32_t* iupper,
+  /* in rarray[dim] */ int32_t* ilower,
+  /* in rarray[dim] */ int32_t* iupper,
   /* in */ int32_t nbor_part,
-  /* in */ int32_t* nbor_ilower,
-  /* in */ int32_t* nbor_iupper,
-  /* in */ int32_t* index_map,
+  /* in rarray[dim] */ int32_t* nbor_ilower,
+  /* in rarray[dim] */ int32_t* nbor_iupper,
+  /* in rarray[dim] */ int32_t* index_map,
   /* in */ int32_t dim)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructGrid.SetNeighborBox) */
@@ -459,7 +459,7 @@ int32_t
 impl_bHYPRE_SStructGrid_SetPeriodic(
   /* in */ bHYPRE_SStructGrid self,
   /* in */ int32_t part,
-  /* in */ int32_t* periodic,
+  /* in rarray[dim] */ int32_t* periodic,
   /* in */ int32_t dim)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructGrid.SetPeriodic) */
@@ -493,7 +493,7 @@ extern "C"
 int32_t
 impl_bHYPRE_SStructGrid_SetNumGhost(
   /* in */ bHYPRE_SStructGrid self,
-  /* in */ int32_t* num_ghost,
+  /* in rarray[dim2] */ int32_t* num_ghost,
   /* in */ int32_t dim2)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructGrid.SetNumGhost) */

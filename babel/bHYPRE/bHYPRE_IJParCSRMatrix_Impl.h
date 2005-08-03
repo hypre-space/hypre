@@ -2,12 +2,12 @@
  * File:          bHYPRE_IJParCSRMatrix_Impl.h
  * Symbol:        bHYPRE.IJParCSRMatrix-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.8
  * Description:   Server-side implementation for bHYPRE.IJParCSRMatrix
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.8
  */
 
 #ifndef included_bHYPRE_IJParCSRMatrix_Impl_h
@@ -159,18 +159,9 @@ extern
 int32_t
 impl_bHYPRE_IJParCSRMatrix_SetDiagOffdSizes(
   /* in */ bHYPRE_IJParCSRMatrix self,
-  /* in */ int32_t* diag_sizes,
-  /* in */ int32_t* offdiag_sizes,
+  /* in rarray[local_nrows] */ int32_t* diag_sizes,
+  /* in rarray[local_nrows] */ int32_t* offdiag_sizes,
   /* in */ int32_t local_nrows);
-
-extern
-int32_t
-impl_bHYPRE_IJParCSRMatrix_GetRow(
-  /* in */ bHYPRE_IJParCSRMatrix self,
-  /* in */ int32_t row,
-  /* out */ int32_t* size,
-  /* out */ struct sidl_int__array** col_ind,
-  /* out */ struct sidl_double__array** values);
 
 extern
 int32_t
@@ -208,10 +199,10 @@ int32_t
 impl_bHYPRE_IJParCSRMatrix_SetValues(
   /* in */ bHYPRE_IJParCSRMatrix self,
   /* in */ int32_t nrows,
-  /* in */ int32_t* ncols,
-  /* in */ int32_t* rows,
-  /* in */ int32_t* cols,
-  /* in */ double* values,
+  /* in rarray[nrows] */ int32_t* ncols,
+  /* in rarray[nrows] */ int32_t* rows,
+  /* in rarray[nnonzeros] */ int32_t* cols,
+  /* in rarray[nnonzeros] */ double* values,
   /* in */ int32_t nnonzeros);
 
 extern
@@ -219,10 +210,10 @@ int32_t
 impl_bHYPRE_IJParCSRMatrix_AddToValues(
   /* in */ bHYPRE_IJParCSRMatrix self,
   /* in */ int32_t nrows,
-  /* in */ int32_t* ncols,
-  /* in */ int32_t* rows,
-  /* in */ int32_t* cols,
-  /* in */ double* values,
+  /* in rarray[nrows] */ int32_t* ncols,
+  /* in rarray[nrows] */ int32_t* rows,
+  /* in rarray[nnonzeros] */ int32_t* cols,
+  /* in rarray[nnonzeros] */ double* values,
   /* in */ int32_t nnonzeros);
 
 extern
@@ -239,25 +230,25 @@ int32_t
 impl_bHYPRE_IJParCSRMatrix_GetRowCounts(
   /* in */ bHYPRE_IJParCSRMatrix self,
   /* in */ int32_t nrows,
-  /* in */ int32_t* rows,
-  /* inout */ int32_t* ncols);
+  /* in rarray[nrows] */ int32_t* rows,
+  /* inout rarray[nrows] */ int32_t* ncols);
 
 extern
 int32_t
 impl_bHYPRE_IJParCSRMatrix_GetValues(
   /* in */ bHYPRE_IJParCSRMatrix self,
   /* in */ int32_t nrows,
-  /* in */ int32_t* ncols,
-  /* in */ int32_t* rows,
-  /* in */ int32_t* cols,
-  /* inout */ double* values,
+  /* in rarray[nrows] */ int32_t* ncols,
+  /* in rarray[nrows] */ int32_t* rows,
+  /* in rarray[nnonzeros] */ int32_t* cols,
+  /* inout rarray[nnonzeros] */ double* values,
   /* in */ int32_t nnonzeros);
 
 extern
 int32_t
 impl_bHYPRE_IJParCSRMatrix_SetRowSizes(
   /* in */ bHYPRE_IJParCSRMatrix self,
-  /* in */ int32_t* sizes,
+  /* in rarray[nrows] */ int32_t* sizes,
   /* in */ int32_t nrows);
 
 extern
@@ -299,7 +290,7 @@ int32_t
 impl_bHYPRE_IJParCSRMatrix_SetIntArray1Parameter(
   /* in */ bHYPRE_IJParCSRMatrix self,
   /* in */ const char* name,
-  /* in */ int32_t* value,
+  /* in rarray[nvalues] */ int32_t* value,
   /* in */ int32_t nvalues);
 
 extern
@@ -307,14 +298,14 @@ int32_t
 impl_bHYPRE_IJParCSRMatrix_SetIntArray2Parameter(
   /* in */ bHYPRE_IJParCSRMatrix self,
   /* in */ const char* name,
-  /* in */ struct sidl_int__array* value);
+  /* in array<int,2,column-major> */ struct sidl_int__array* value);
 
 extern
 int32_t
 impl_bHYPRE_IJParCSRMatrix_SetDoubleArray1Parameter(
   /* in */ bHYPRE_IJParCSRMatrix self,
   /* in */ const char* name,
-  /* in */ double* value,
+  /* in rarray[nvalues] */ double* value,
   /* in */ int32_t nvalues);
 
 extern
@@ -322,7 +313,7 @@ int32_t
 impl_bHYPRE_IJParCSRMatrix_SetDoubleArray2Parameter(
   /* in */ bHYPRE_IJParCSRMatrix self,
   /* in */ const char* name,
-  /* in */ struct sidl_double__array* value);
+  /* in array<double,2,column-major> */ struct sidl_double__array* value);
 
 extern
 int32_t
@@ -351,6 +342,15 @@ impl_bHYPRE_IJParCSRMatrix_Apply(
   /* in */ bHYPRE_IJParCSRMatrix self,
   /* in */ bHYPRE_Vector b,
   /* inout */ bHYPRE_Vector* x);
+
+extern
+int32_t
+impl_bHYPRE_IJParCSRMatrix_GetRow(
+  /* in */ bHYPRE_IJParCSRMatrix self,
+  /* in */ int32_t row,
+  /* out */ int32_t* size,
+  /* out array<int,column-major> */ struct sidl_int__array** col_ind,
+  /* out array<double,column-major> */ struct sidl_double__array** values);
 
 extern struct bHYPRE_CoefficientAccess__object* 
   impl_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_CoefficientAccess(char* url,

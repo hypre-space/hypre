@@ -2,12 +2,12 @@
  * File:          bHYPRE_SStructParCSRVector_Impl.h
  * Symbol:        bHYPRE.SStructParCSRVector-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.8
  * Description:   Server-side implementation for bHYPRE.SStructParCSRVector
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.8
  */
 
 #ifndef included_bHYPRE_SStructParCSRVector_Impl_h
@@ -179,10 +179,10 @@ int32_t
 impl_bHYPRE_SStructParCSRVector_SetValues(
   /* in */ bHYPRE_SStructParCSRVector self,
   /* in */ int32_t part,
-  /* in */ int32_t* index,
+  /* in rarray[dim] */ int32_t* index,
   /* in */ int32_t dim,
   /* in */ int32_t var,
-  /* in */ double* values,
+  /* in rarray[one] */ double* values,
   /* in */ int32_t one);
 
 extern
@@ -190,11 +190,11 @@ int32_t
 impl_bHYPRE_SStructParCSRVector_SetBoxValues(
   /* in */ bHYPRE_SStructParCSRVector self,
   /* in */ int32_t part,
-  /* in */ int32_t* ilower,
-  /* in */ int32_t* iupper,
+  /* in rarray[dim] */ int32_t* ilower,
+  /* in rarray[dim] */ int32_t* iupper,
   /* in */ int32_t dim,
   /* in */ int32_t var,
-  /* in */ double* values,
+  /* in rarray[nvalues] */ double* values,
   /* in */ int32_t nvalues);
 
 extern
@@ -202,10 +202,10 @@ int32_t
 impl_bHYPRE_SStructParCSRVector_AddToValues(
   /* in */ bHYPRE_SStructParCSRVector self,
   /* in */ int32_t part,
-  /* in */ int32_t* index,
+  /* in rarray[dim] */ int32_t* index,
   /* in */ int32_t dim,
   /* in */ int32_t var,
-  /* in */ double* values,
+  /* in rarray[one] */ double* values,
   /* in */ int32_t one);
 
 extern
@@ -213,11 +213,11 @@ int32_t
 impl_bHYPRE_SStructParCSRVector_AddToBoxValues(
   /* in */ bHYPRE_SStructParCSRVector self,
   /* in */ int32_t part,
-  /* in */ int32_t* ilower,
-  /* in */ int32_t* iupper,
+  /* in rarray[dim] */ int32_t* ilower,
+  /* in rarray[dim] */ int32_t* iupper,
   /* in */ int32_t dim,
   /* in */ int32_t var,
-  /* in */ double* values,
+  /* in rarray[nvalues] */ double* values,
   /* in */ int32_t nvalues);
 
 extern
@@ -230,7 +230,7 @@ int32_t
 impl_bHYPRE_SStructParCSRVector_GetValues(
   /* in */ bHYPRE_SStructParCSRVector self,
   /* in */ int32_t part,
-  /* in */ int32_t* index,
+  /* in rarray[dim] */ int32_t* index,
   /* in */ int32_t dim,
   /* in */ int32_t var,
   /* out */ double* value);
@@ -240,11 +240,11 @@ int32_t
 impl_bHYPRE_SStructParCSRVector_GetBoxValues(
   /* in */ bHYPRE_SStructParCSRVector self,
   /* in */ int32_t part,
-  /* in */ int32_t* ilower,
-  /* in */ int32_t* iupper,
+  /* in rarray[dim] */ int32_t* ilower,
+  /* in rarray[dim] */ int32_t* iupper,
   /* in */ int32_t dim,
   /* in */ int32_t var,
-  /* inout */ double* values,
+  /* inout rarray[nvalues] */ double* values,
   /* in */ int32_t nvalues);
 
 extern

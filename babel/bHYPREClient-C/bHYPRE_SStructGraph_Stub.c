@@ -2,12 +2,12 @@
  * File:          bHYPRE_SStructGraph_Stub.c
  * Symbol:        bHYPRE.SStructGraph-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.8
  * Description:   Client-side glue code for bHYPRE.SStructGraph
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.8
  */
 
 #include "bHYPRE_SStructGraph.h"
@@ -290,11 +290,11 @@ int32_t
 bHYPRE_SStructGraph_AddEntries(
   /* in */ bHYPRE_SStructGraph self,
   /* in */ int32_t part,
-  /* in */ int32_t* index,
+  /* in rarray[dim] */ int32_t* index,
   /* in */ int32_t dim,
   /* in */ int32_t var,
   /* in */ int32_t to_part,
-  /* in */ int32_t* to_index,
+  /* in rarray[dim] */ int32_t* to_index,
   /* in */ int32_t to_var)
 {
   int32_t index_lower[1], index_upper[1], index_stride[1]; 
@@ -1189,10 +1189,10 @@ static int32_t
 remote_bHYPRE_SStructGraph_AddEntries(
   /* in */ struct bHYPRE_SStructGraph__object* self /* TLD */,
   /* in */ int32_t part,
-  /* in */ struct sidl_int__array* index,
+  /* in rarray[dim] */ struct sidl_int__array* index,
   /* in */ int32_t var,
   /* in */ int32_t to_part,
-  /* in */ struct sidl_int__array* to_index,
+  /* in rarray[dim] */ struct sidl_int__array* to_index,
   /* in */ int32_t to_var)
 {
   sidl_BaseInterface _ex = NULL;
@@ -1365,6 +1365,7 @@ remote_bHYPRE_SStructGraph_GetObject(
   sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
     "GetObject", _ex2 );
   sidl_rmi_Response _rsvp = NULL;
+  char* A_str= NULL;
   int32_t _retval;
 
   /* pack in and inout arguments */
@@ -1376,7 +1377,8 @@ remote_bHYPRE_SStructGraph_GetObject(
   sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval, _ex2);
 
   /* unpack out and inout arguments */
-  sidl_rmi_Response_unpackString( _rsvp, "A", A, _ex2);
+  sidl_rmi_Response_unpackString( _rsvp, "A", &A_str, _ex2);
+  sidl_BaseInterface__connect(A_str, _ex2);
 
   /* cleanup and return */
   sidl_rmi_Response_done(_rsvp, _ex2);

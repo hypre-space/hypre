@@ -2,12 +2,12 @@
  * File:          bHYPRE_StructVector_Impl.h
  * Symbol:        bHYPRE.StructVector-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.8
  * Description:   Server-side implementation for bHYPRE.StructVector
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.8
  */
 
 #ifndef included_bHYPRE_StructVector_Impl_h
@@ -175,14 +175,14 @@ extern
 int32_t
 impl_bHYPRE_StructVector_SetNumGhost(
   /* in */ bHYPRE_StructVector self,
-  /* in */ int32_t* num_ghost,
+  /* in rarray[dim2] */ int32_t* num_ghost,
   /* in */ int32_t dim2);
 
 extern
 int32_t
 impl_bHYPRE_StructVector_SetValue(
   /* in */ bHYPRE_StructVector self,
-  /* in */ int32_t* grid_index,
+  /* in rarray[dim] */ int32_t* grid_index,
   /* in */ int32_t dim,
   /* in */ double value);
 
@@ -190,10 +190,10 @@ extern
 int32_t
 impl_bHYPRE_StructVector_SetBoxValues(
   /* in */ bHYPRE_StructVector self,
-  /* in */ int32_t* ilower,
-  /* in */ int32_t* iupper,
+  /* in rarray[dim] */ int32_t* ilower,
+  /* in rarray[dim] */ int32_t* iupper,
   /* in */ int32_t dim,
-  /* in */ double* values,
+  /* in rarray[nvalues] */ double* values,
   /* in */ int32_t nvalues);
 
 extern

@@ -2,12 +2,12 @@
  * File:          bHYPRE_StructStencil_Impl.c
  * Symbol:        bHYPRE.StructStencil-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.8
  * Description:   Server-side implementation for bHYPRE.StructStencil
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.8
  */
 
 /*
@@ -250,7 +250,7 @@ int32_t
 impl_bHYPRE_StructStencil_SetElement(
   /* in */ bHYPRE_StructStencil self,
   /* in */ int32_t index,
-  /* in */ int32_t* offset,
+  /* in rarray[dim] */ int32_t* offset,
   /* in */ int32_t dim)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.StructStencil.SetElement) */

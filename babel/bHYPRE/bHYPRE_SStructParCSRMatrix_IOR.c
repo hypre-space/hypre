@@ -2,12 +2,12 @@
  * File:          bHYPRE_SStructParCSRMatrix_IOR.c
  * Symbol:        bHYPRE.SStructParCSRMatrix-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.8
  * Description:   Intermediate Object Representation for bHYPRE.SStructParCSRMatrix
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.8
  */
 
 #include "sidl_rmi_InstanceHandle.h"

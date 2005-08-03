@@ -2,12 +2,12 @@
  * File:          bHYPRE_IJParCSRVector_Stub.c
  * Symbol:        bHYPRE.IJParCSRVector-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.8
  * Description:   Client-side glue code for bHYPRE.IJParCSRVector
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.8
  */
 
 #include "bHYPRE_IJParCSRVector.h"
@@ -350,8 +350,8 @@ int32_t
 bHYPRE_IJParCSRVector_SetValues(
   /* in */ bHYPRE_IJParCSRVector self,
   /* in */ int32_t nvalues,
-  /* in */ int32_t* indices,
-  /* in */ double* values)
+  /* in rarray[nvalues] */ int32_t* indices,
+  /* in rarray[nvalues] */ double* values)
 {
   int32_t indices_lower[1], indices_upper[1], indices_stride[1]; 
   struct sidl_int__array indices_real;
@@ -383,8 +383,8 @@ int32_t
 bHYPRE_IJParCSRVector_AddToValues(
   /* in */ bHYPRE_IJParCSRVector self,
   /* in */ int32_t nvalues,
-  /* in */ int32_t* indices,
-  /* in */ double* values)
+  /* in rarray[nvalues] */ int32_t* indices,
+  /* in rarray[nvalues] */ double* values)
 {
   int32_t indices_lower[1], indices_upper[1], indices_stride[1]; 
   struct sidl_int__array indices_real;
@@ -434,8 +434,8 @@ int32_t
 bHYPRE_IJParCSRVector_GetValues(
   /* in */ bHYPRE_IJParCSRVector self,
   /* in */ int32_t nvalues,
-  /* in */ int32_t* indices,
-  /* inout */ double* values)
+  /* in rarray[nvalues] */ int32_t* indices,
+  /* inout rarray[nvalues] */ double* values)
 {
   int32_t indices_lower[1], indices_upper[1], indices_stride[1]; 
   struct sidl_int__array indices_real;
@@ -1415,6 +1415,7 @@ remote_bHYPRE_IJParCSRVector_GetObject(
   sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
     "GetObject", _ex2 );
   sidl_rmi_Response _rsvp = NULL;
+  char* A_str= NULL;
   int32_t _retval;
 
   /* pack in and inout arguments */
@@ -1426,7 +1427,8 @@ remote_bHYPRE_IJParCSRVector_GetObject(
   sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval, _ex2);
 
   /* unpack out and inout arguments */
-  sidl_rmi_Response_unpackString( _rsvp, "A", A, _ex2);
+  sidl_rmi_Response_unpackString( _rsvp, "A", &A_str, _ex2);
+  sidl_BaseInterface__connect(A_str, _ex2);
 
   /* cleanup and return */
   sidl_rmi_Response_done(_rsvp, _ex2);
@@ -1474,8 +1476,8 @@ remote_bHYPRE_IJParCSRVector_SetLocalRange(
 static int32_t
 remote_bHYPRE_IJParCSRVector_SetValues(
   /* in */ struct bHYPRE_IJParCSRVector__object* self /* TLD */,
-  /* in */ struct sidl_int__array* indices,
-  /* in */ struct sidl_double__array* values)
+  /* in rarray[nvalues] */ struct sidl_int__array* indices,
+  /* in rarray[nvalues] */ struct sidl_double__array* values)
 {
   sidl_BaseInterface _ex = NULL;
   sidl_BaseInterface *_ex2 =&_ex;
@@ -1507,8 +1509,8 @@ remote_bHYPRE_IJParCSRVector_SetValues(
 static int32_t
 remote_bHYPRE_IJParCSRVector_AddToValues(
   /* in */ struct bHYPRE_IJParCSRVector__object* self /* TLD */,
-  /* in */ struct sidl_int__array* indices,
-  /* in */ struct sidl_double__array* values)
+  /* in rarray[nvalues] */ struct sidl_int__array* indices,
+  /* in rarray[nvalues] */ struct sidl_double__array* values)
 {
   sidl_BaseInterface _ex = NULL;
   sidl_BaseInterface *_ex2 =&_ex;
@@ -1575,8 +1577,8 @@ remote_bHYPRE_IJParCSRVector_GetLocalRange(
 static int32_t
 remote_bHYPRE_IJParCSRVector_GetValues(
   /* in */ struct bHYPRE_IJParCSRVector__object* self /* TLD */,
-  /* in */ struct sidl_int__array* indices,
-  /* inout */ struct sidl_double__array** values)
+  /* in rarray[nvalues] */ struct sidl_int__array* indices,
+  /* inout rarray[nvalues] */ struct sidl_double__array** values)
 {
   sidl_BaseInterface _ex = NULL;
   sidl_BaseInterface *_ex2 =&_ex;
@@ -1718,6 +1720,7 @@ remote_bHYPRE_IJParCSRVector_Copy(
   int32_t _retval;
 
   /* pack in and inout arguments */
+  sidl_rmi_Invocation_packString( _inv, "x", bHYPRE_Vector__getURL(x), _ex2);
 
   /* send actual RMI request */
   _rsvp = sidl_rmi_Invocation_invokeMethod(_inv,_ex2);
@@ -1747,6 +1750,7 @@ remote_bHYPRE_IJParCSRVector_Clone(
   sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
     "Clone", _ex2 );
   sidl_rmi_Response _rsvp = NULL;
+  char* x_str= NULL;
   int32_t _retval;
 
   /* pack in and inout arguments */
@@ -1758,7 +1762,8 @@ remote_bHYPRE_IJParCSRVector_Clone(
   sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval, _ex2);
 
   /* unpack out and inout arguments */
-  sidl_rmi_Response_unpackString( _rsvp, "x", x, _ex2);
+  sidl_rmi_Response_unpackString( _rsvp, "x", &x_str, _ex2);
+  bHYPRE_Vector__connect(x_str, _ex2);
 
   /* cleanup and return */
   sidl_rmi_Response_done(_rsvp, _ex2);
@@ -1817,6 +1822,7 @@ remote_bHYPRE_IJParCSRVector_Dot(
   int32_t _retval;
 
   /* pack in and inout arguments */
+  sidl_rmi_Invocation_packString( _inv, "x", bHYPRE_Vector__getURL(x), _ex2);
 
   /* send actual RMI request */
   _rsvp = sidl_rmi_Invocation_invokeMethod(_inv,_ex2);
@@ -1852,6 +1858,7 @@ remote_bHYPRE_IJParCSRVector_Axpy(
 
   /* pack in and inout arguments */
   sidl_rmi_Invocation_packDouble( _inv, "a", a, _ex2);
+  sidl_rmi_Invocation_packString( _inv, "x", bHYPRE_Vector__getURL(x), _ex2);
 
   /* send actual RMI request */
   _rsvp = sidl_rmi_Invocation_invokeMethod(_inv,_ex2);

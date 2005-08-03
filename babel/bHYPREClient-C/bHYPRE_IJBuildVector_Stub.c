@@ -2,12 +2,12 @@
  * File:          bHYPRE_IJBuildVector_Stub.c
  * Symbol:        bHYPRE.IJBuildVector-v1.0.0
  * Symbol Type:   interface
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.8
  * Description:   Client-side glue code for bHYPRE.IJBuildVector
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.8
  */
 
 #include "bHYPRE_IJBuildVector.h"
@@ -268,8 +268,8 @@ int32_t
 bHYPRE_IJBuildVector_SetValues(
   /* in */ bHYPRE_IJBuildVector self,
   /* in */ int32_t nvalues,
-  /* in */ int32_t* indices,
-  /* in */ double* values)
+  /* in rarray[nvalues] */ int32_t* indices,
+  /* in rarray[nvalues] */ double* values)
 {
   int32_t indices_lower[1], indices_upper[1], indices_stride[1]; 
   struct sidl_int__array indices_real;
@@ -301,8 +301,8 @@ int32_t
 bHYPRE_IJBuildVector_AddToValues(
   /* in */ bHYPRE_IJBuildVector self,
   /* in */ int32_t nvalues,
-  /* in */ int32_t* indices,
-  /* in */ double* values)
+  /* in rarray[nvalues] */ int32_t* indices,
+  /* in rarray[nvalues] */ double* values)
 {
   int32_t indices_lower[1], indices_upper[1], indices_stride[1]; 
   struct sidl_int__array indices_real;
@@ -352,8 +352,8 @@ int32_t
 bHYPRE_IJBuildVector_GetValues(
   /* in */ bHYPRE_IJBuildVector self,
   /* in */ int32_t nvalues,
-  /* in */ int32_t* indices,
-  /* inout */ double* values)
+  /* in rarray[nvalues] */ int32_t* indices,
+  /* inout rarray[nvalues] */ double* values)
 {
   int32_t indices_lower[1], indices_upper[1], indices_stride[1]; 
   struct sidl_int__array indices_real;
@@ -1163,6 +1163,7 @@ remote_bHYPRE__IJBuildVector_GetObject(
   sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
     "GetObject", _ex2 );
   sidl_rmi_Response _rsvp = NULL;
+  char* A_str= NULL;
   int32_t _retval;
 
   /* pack in and inout arguments */
@@ -1174,7 +1175,8 @@ remote_bHYPRE__IJBuildVector_GetObject(
   sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval, _ex2);
 
   /* unpack out and inout arguments */
-  sidl_rmi_Response_unpackString( _rsvp, "A", A, _ex2);
+  sidl_rmi_Response_unpackString( _rsvp, "A", &A_str, _ex2);
+  sidl_BaseInterface__connect(A_str, _ex2);
 
   /* cleanup and return */
   sidl_rmi_Response_done(_rsvp, _ex2);
@@ -1222,8 +1224,8 @@ remote_bHYPRE__IJBuildVector_SetLocalRange(
 static int32_t
 remote_bHYPRE__IJBuildVector_SetValues(
   /* in */ struct bHYPRE__IJBuildVector__object* self /* TLD */,
-  /* in */ struct sidl_int__array* indices,
-  /* in */ struct sidl_double__array* values)
+  /* in rarray[nvalues] */ struct sidl_int__array* indices,
+  /* in rarray[nvalues] */ struct sidl_double__array* values)
 {
   sidl_BaseInterface _ex = NULL;
   sidl_BaseInterface *_ex2 =&_ex;
@@ -1255,8 +1257,8 @@ remote_bHYPRE__IJBuildVector_SetValues(
 static int32_t
 remote_bHYPRE__IJBuildVector_AddToValues(
   /* in */ struct bHYPRE__IJBuildVector__object* self /* TLD */,
-  /* in */ struct sidl_int__array* indices,
-  /* in */ struct sidl_double__array* values)
+  /* in rarray[nvalues] */ struct sidl_int__array* indices,
+  /* in rarray[nvalues] */ struct sidl_double__array* values)
 {
   sidl_BaseInterface _ex = NULL;
   sidl_BaseInterface *_ex2 =&_ex;
@@ -1323,8 +1325,8 @@ remote_bHYPRE__IJBuildVector_GetLocalRange(
 static int32_t
 remote_bHYPRE__IJBuildVector_GetValues(
   /* in */ struct bHYPRE__IJBuildVector__object* self /* TLD */,
-  /* in */ struct sidl_int__array* indices,
-  /* inout */ struct sidl_double__array** values)
+  /* in rarray[nvalues] */ struct sidl_int__array* indices,
+  /* inout rarray[nvalues] */ struct sidl_double__array** values)
 {
   sidl_BaseInterface _ex = NULL;
   sidl_BaseInterface *_ex2 =&_ex;

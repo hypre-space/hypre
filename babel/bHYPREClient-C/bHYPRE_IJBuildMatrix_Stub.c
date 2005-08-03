@@ -2,12 +2,12 @@
  * File:          bHYPRE_IJBuildMatrix_Stub.c
  * Symbol:        bHYPRE.IJBuildMatrix-v1.0.0
  * Symbol Type:   interface
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.8
  * Description:   Client-side glue code for bHYPRE.IJBuildMatrix
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.8
  */
 
 #include "bHYPRE_IJBuildMatrix.h"
@@ -289,10 +289,10 @@ int32_t
 bHYPRE_IJBuildMatrix_SetValues(
   /* in */ bHYPRE_IJBuildMatrix self,
   /* in */ int32_t nrows,
-  /* in */ int32_t* ncols,
-  /* in */ int32_t* rows,
-  /* in */ int32_t* cols,
-  /* in */ double* values,
+  /* in rarray[nrows] */ int32_t* ncols,
+  /* in rarray[nrows] */ int32_t* rows,
+  /* in rarray[nnonzeros] */ int32_t* cols,
+  /* in rarray[nnonzeros] */ double* values,
   /* in */ int32_t nnonzeros)
 {
   int32_t ncols_lower[1], ncols_upper[1], ncols_stride[1]; 
@@ -339,10 +339,10 @@ int32_t
 bHYPRE_IJBuildMatrix_AddToValues(
   /* in */ bHYPRE_IJBuildMatrix self,
   /* in */ int32_t nrows,
-  /* in */ int32_t* ncols,
-  /* in */ int32_t* rows,
-  /* in */ int32_t* cols,
-  /* in */ double* values,
+  /* in rarray[nrows] */ int32_t* ncols,
+  /* in rarray[nrows] */ int32_t* rows,
+  /* in rarray[nnonzeros] */ int32_t* cols,
+  /* in rarray[nnonzeros] */ double* values,
   /* in */ int32_t nnonzeros)
 {
   int32_t ncols_lower[1], ncols_upper[1], ncols_stride[1]; 
@@ -408,8 +408,8 @@ int32_t
 bHYPRE_IJBuildMatrix_GetRowCounts(
   /* in */ bHYPRE_IJBuildMatrix self,
   /* in */ int32_t nrows,
-  /* in */ int32_t* rows,
-  /* inout */ int32_t* ncols)
+  /* in rarray[nrows] */ int32_t* rows,
+  /* inout rarray[nrows] */ int32_t* ncols)
 {
   int32_t rows_lower[1], rows_upper[1], rows_stride[1]; 
   struct sidl_int__array rows_real;
@@ -438,10 +438,10 @@ int32_t
 bHYPRE_IJBuildMatrix_GetValues(
   /* in */ bHYPRE_IJBuildMatrix self,
   /* in */ int32_t nrows,
-  /* in */ int32_t* ncols,
-  /* in */ int32_t* rows,
-  /* in */ int32_t* cols,
-  /* inout */ double* values,
+  /* in rarray[nrows] */ int32_t* ncols,
+  /* in rarray[nrows] */ int32_t* rows,
+  /* in rarray[nnonzeros] */ int32_t* cols,
+  /* inout rarray[nnonzeros] */ double* values,
   /* in */ int32_t nnonzeros)
 {
   int32_t ncols_lower[1], ncols_upper[1], ncols_stride[1]; 
@@ -489,7 +489,7 @@ bHYPRE_IJBuildMatrix_GetValues(
 int32_t
 bHYPRE_IJBuildMatrix_SetRowSizes(
   /* in */ bHYPRE_IJBuildMatrix self,
-  /* in */ int32_t* sizes,
+  /* in rarray[nrows] */ int32_t* sizes,
   /* in */ int32_t nrows)
 {
   int32_t sizes_lower[1], sizes_upper[1], sizes_stride[1]; 
@@ -1293,6 +1293,7 @@ remote_bHYPRE__IJBuildMatrix_GetObject(
   sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
     "GetObject", _ex2 );
   sidl_rmi_Response _rsvp = NULL;
+  char* A_str= NULL;
   int32_t _retval;
 
   /* pack in and inout arguments */
@@ -1304,7 +1305,8 @@ remote_bHYPRE__IJBuildMatrix_GetObject(
   sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval, _ex2);
 
   /* unpack out and inout arguments */
-  sidl_rmi_Response_unpackString( _rsvp, "A", A, _ex2);
+  sidl_rmi_Response_unpackString( _rsvp, "A", &A_str, _ex2);
+  sidl_BaseInterface__connect(A_str, _ex2);
 
   /* cleanup and return */
   sidl_rmi_Response_done(_rsvp, _ex2);
@@ -1356,10 +1358,10 @@ remote_bHYPRE__IJBuildMatrix_SetLocalRange(
 static int32_t
 remote_bHYPRE__IJBuildMatrix_SetValues(
   /* in */ struct bHYPRE__IJBuildMatrix__object* self /* TLD */,
-  /* in */ struct sidl_int__array* ncols,
-  /* in */ struct sidl_int__array* rows,
-  /* in */ struct sidl_int__array* cols,
-  /* in */ struct sidl_double__array* values)
+  /* in rarray[nrows] */ struct sidl_int__array* ncols,
+  /* in rarray[nrows] */ struct sidl_int__array* rows,
+  /* in rarray[nnonzeros] */ struct sidl_int__array* cols,
+  /* in rarray[nnonzeros] */ struct sidl_double__array* values)
 {
   sidl_BaseInterface _ex = NULL;
   sidl_BaseInterface *_ex2 =&_ex;
@@ -1391,10 +1393,10 @@ remote_bHYPRE__IJBuildMatrix_SetValues(
 static int32_t
 remote_bHYPRE__IJBuildMatrix_AddToValues(
   /* in */ struct bHYPRE__IJBuildMatrix__object* self /* TLD */,
-  /* in */ struct sidl_int__array* ncols,
-  /* in */ struct sidl_int__array* rows,
-  /* in */ struct sidl_int__array* cols,
-  /* in */ struct sidl_double__array* values)
+  /* in rarray[nrows] */ struct sidl_int__array* ncols,
+  /* in rarray[nrows] */ struct sidl_int__array* rows,
+  /* in rarray[nnonzeros] */ struct sidl_int__array* cols,
+  /* in rarray[nnonzeros] */ struct sidl_double__array* values)
 {
   sidl_BaseInterface _ex = NULL;
   sidl_BaseInterface *_ex2 =&_ex;
@@ -1465,8 +1467,8 @@ remote_bHYPRE__IJBuildMatrix_GetLocalRange(
 static int32_t
 remote_bHYPRE__IJBuildMatrix_GetRowCounts(
   /* in */ struct bHYPRE__IJBuildMatrix__object* self /* TLD */,
-  /* in */ struct sidl_int__array* rows,
-  /* inout */ struct sidl_int__array** ncols)
+  /* in rarray[nrows] */ struct sidl_int__array* rows,
+  /* inout rarray[nrows] */ struct sidl_int__array** ncols)
 {
   sidl_BaseInterface _ex = NULL;
   sidl_BaseInterface *_ex2 =&_ex;
@@ -1498,10 +1500,10 @@ remote_bHYPRE__IJBuildMatrix_GetRowCounts(
 static int32_t
 remote_bHYPRE__IJBuildMatrix_GetValues(
   /* in */ struct bHYPRE__IJBuildMatrix__object* self /* TLD */,
-  /* in */ struct sidl_int__array* ncols,
-  /* in */ struct sidl_int__array* rows,
-  /* in */ struct sidl_int__array* cols,
-  /* inout */ struct sidl_double__array** values)
+  /* in rarray[nrows] */ struct sidl_int__array* ncols,
+  /* in rarray[nrows] */ struct sidl_int__array* rows,
+  /* in rarray[nnonzeros] */ struct sidl_int__array* cols,
+  /* inout rarray[nnonzeros] */ struct sidl_double__array** values)
 {
   sidl_BaseInterface _ex = NULL;
   sidl_BaseInterface *_ex2 =&_ex;
@@ -1533,7 +1535,7 @@ remote_bHYPRE__IJBuildMatrix_GetValues(
 static int32_t
 remote_bHYPRE__IJBuildMatrix_SetRowSizes(
   /* in */ struct bHYPRE__IJBuildMatrix__object* self /* TLD */,
-  /* in */ struct sidl_int__array* sizes)
+  /* in rarray[nrows] */ struct sidl_int__array* sizes)
 {
   sidl_BaseInterface _ex = NULL;
   sidl_BaseInterface *_ex2 =&_ex;

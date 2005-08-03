@@ -2,12 +2,12 @@
  * File:          bHYPRE_IJParCSRMatrix_IOR.h
  * Symbol:        bHYPRE.IJParCSRMatrix-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.8
  * Description:   Intermediate Object Representation for bHYPRE.IJParCSRMatrix
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.8
  */
 
 #ifndef included_bHYPRE_IJParCSRMatrix_IOR_h
@@ -142,8 +142,8 @@ struct bHYPRE_IJParCSRMatrix__epv {
     /* in */ struct bHYPRE_IJParCSRMatrix__object* self,
     /* in */ int32_t row,
     /* out */ int32_t* size,
-    /* out */ struct sidl_int__array** col_ind,
-    /* out */ struct sidl_double__array** values);
+    /* out array<int,column-major> */ struct sidl_int__array** col_ind,
+    /* out array<double,column-major> */ struct sidl_double__array** values);
   /* Methods introduced in bHYPRE.ProblemDefinition-v1.0.0 */
   int32_t (*f_SetCommunicator)(
     /* in */ struct bHYPRE_IJParCSRMatrix__object* self,
@@ -164,16 +164,16 @@ struct bHYPRE_IJParCSRMatrix__epv {
     /* in */ int32_t jupper);
   int32_t (*f_SetValues)(
     /* in */ struct bHYPRE_IJParCSRMatrix__object* self,
-    /* in */ struct sidl_int__array* ncols,
-    /* in */ struct sidl_int__array* rows,
-    /* in */ struct sidl_int__array* cols,
-    /* in */ struct sidl_double__array* values);
+    /* in rarray[nrows] */ struct sidl_int__array* ncols,
+    /* in rarray[nrows] */ struct sidl_int__array* rows,
+    /* in rarray[nnonzeros] */ struct sidl_int__array* cols,
+    /* in rarray[nnonzeros] */ struct sidl_double__array* values);
   int32_t (*f_AddToValues)(
     /* in */ struct bHYPRE_IJParCSRMatrix__object* self,
-    /* in */ struct sidl_int__array* ncols,
-    /* in */ struct sidl_int__array* rows,
-    /* in */ struct sidl_int__array* cols,
-    /* in */ struct sidl_double__array* values);
+    /* in rarray[nrows] */ struct sidl_int__array* ncols,
+    /* in rarray[nrows] */ struct sidl_int__array* rows,
+    /* in rarray[nnonzeros] */ struct sidl_int__array* cols,
+    /* in rarray[nnonzeros] */ struct sidl_double__array* values);
   int32_t (*f_GetLocalRange)(
     /* in */ struct bHYPRE_IJParCSRMatrix__object* self,
     /* out */ int32_t* ilower,
@@ -182,17 +182,17 @@ struct bHYPRE_IJParCSRMatrix__epv {
     /* out */ int32_t* jupper);
   int32_t (*f_GetRowCounts)(
     /* in */ struct bHYPRE_IJParCSRMatrix__object* self,
-    /* in */ struct sidl_int__array* rows,
-    /* inout */ struct sidl_int__array** ncols);
+    /* in rarray[nrows] */ struct sidl_int__array* rows,
+    /* inout rarray[nrows] */ struct sidl_int__array** ncols);
   int32_t (*f_GetValues)(
     /* in */ struct bHYPRE_IJParCSRMatrix__object* self,
-    /* in */ struct sidl_int__array* ncols,
-    /* in */ struct sidl_int__array* rows,
-    /* in */ struct sidl_int__array* cols,
-    /* inout */ struct sidl_double__array** values);
+    /* in rarray[nrows] */ struct sidl_int__array* ncols,
+    /* in rarray[nrows] */ struct sidl_int__array* rows,
+    /* in rarray[nnonzeros] */ struct sidl_int__array* cols,
+    /* inout rarray[nnonzeros] */ struct sidl_double__array** values);
   int32_t (*f_SetRowSizes)(
     /* in */ struct bHYPRE_IJParCSRMatrix__object* self,
-    /* in */ struct sidl_int__array* sizes);
+    /* in rarray[nrows] */ struct sidl_int__array* sizes);
   int32_t (*f_Print)(
     /* in */ struct bHYPRE_IJParCSRMatrix__object* self,
     /* in */ const char* filename);
@@ -216,19 +216,19 @@ struct bHYPRE_IJParCSRMatrix__epv {
   int32_t (*f_SetIntArray1Parameter)(
     /* in */ struct bHYPRE_IJParCSRMatrix__object* self,
     /* in */ const char* name,
-    /* in */ struct sidl_int__array* value);
+    /* in rarray[nvalues] */ struct sidl_int__array* value);
   int32_t (*f_SetIntArray2Parameter)(
     /* in */ struct bHYPRE_IJParCSRMatrix__object* self,
     /* in */ const char* name,
-    /* in */ struct sidl_int__array* value);
+    /* in array<int,2,column-major> */ struct sidl_int__array* value);
   int32_t (*f_SetDoubleArray1Parameter)(
     /* in */ struct bHYPRE_IJParCSRMatrix__object* self,
     /* in */ const char* name,
-    /* in */ struct sidl_double__array* value);
+    /* in rarray[nvalues] */ struct sidl_double__array* value);
   int32_t (*f_SetDoubleArray2Parameter)(
     /* in */ struct bHYPRE_IJParCSRMatrix__object* self,
     /* in */ const char* name,
-    /* in */ struct sidl_double__array* value);
+    /* in array<double,2,column-major> */ struct sidl_double__array* value);
   int32_t (*f_GetIntValue)(
     /* in */ struct bHYPRE_IJParCSRMatrix__object* self,
     /* in */ const char* name,
@@ -248,8 +248,8 @@ struct bHYPRE_IJParCSRMatrix__epv {
   /* Methods introduced in bHYPRE.IJParCSRMatrix-v1.0.0 */
   int32_t (*f_SetDiagOffdSizes)(
     /* in */ struct bHYPRE_IJParCSRMatrix__object* self,
-    /* in */ struct sidl_int__array* diag_sizes,
-    /* in */ struct sidl_int__array* offdiag_sizes);
+    /* in rarray[local_nrows] */ struct sidl_int__array* diag_sizes,
+    /* in rarray[local_nrows] */ struct sidl_int__array* offdiag_sizes);
 };
 
 /*

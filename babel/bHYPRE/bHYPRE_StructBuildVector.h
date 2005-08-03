@@ -2,12 +2,12 @@
  * File:          bHYPRE_StructBuildVector.h
  * Symbol:        bHYPRE.StructBuildVector-v1.0.0
  * Symbol Type:   interface
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.8
  * Description:   Client-side glue code for bHYPRE.StructBuildVector
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.8
  */
 
 #ifndef included_bHYPRE_StructBuildVector_h
@@ -111,7 +111,7 @@ bHYPRE_StructBuildVector_SetGrid(
 int32_t
 bHYPRE_StructBuildVector_SetNumGhost(
   /* in */ bHYPRE_StructBuildVector self,
-  /* in */ int32_t* num_ghost,
+  /* in rarray[dim2] */ int32_t* num_ghost,
   /* in */ int32_t dim2);
 
 /**
@@ -120,7 +120,7 @@ bHYPRE_StructBuildVector_SetNumGhost(
 int32_t
 bHYPRE_StructBuildVector_SetValue(
   /* in */ bHYPRE_StructBuildVector self,
-  /* in */ int32_t* grid_index,
+  /* in rarray[dim] */ int32_t* grid_index,
   /* in */ int32_t dim,
   /* in */ double value);
 
@@ -130,10 +130,10 @@ bHYPRE_StructBuildVector_SetValue(
 int32_t
 bHYPRE_StructBuildVector_SetBoxValues(
   /* in */ bHYPRE_StructBuildVector self,
-  /* in */ int32_t* ilower,
-  /* in */ int32_t* iupper,
+  /* in rarray[dim] */ int32_t* ilower,
+  /* in rarray[dim] */ int32_t* iupper,
   /* in */ int32_t dim,
-  /* in */ double* values,
+  /* in rarray[nvalues] */ double* values,
   /* in */ int32_t nvalues);
 
 /**
