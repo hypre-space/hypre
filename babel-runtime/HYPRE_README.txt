@@ -20,16 +20,6 @@ On CASC Linux machines, make sure you have your Java environment set
 up by doing source /usr/apps/java/default/setup.csh (or setup.sh if
 you run bash)
 
-  Some build system bugs which need to be fixed...
-****** In subdirectory sidl there are 2 empty .c files.  I had to make
-corresponding empty .o files by hand.  sidl_Resolve_IOR.o,
-sidl_Scope_IOR.o
-A "make clean" will delete these, so you have to restore them by hand.
-
-***** sidl/*.h needs to be automatically copied into hypre/include -
-      many header files are needed to build test drivers.  For now I'm
-      doing it by hand.  Not a Babel runtime issue, but the same needs
-      to be done for the Babel interface header files, babel/bHYPRE*/*.h
 
 ---- the rest of this file is from an older readme file, not recently
      tested ... 
