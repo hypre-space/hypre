@@ -130,9 +130,26 @@ hypre_BoomerAMGCreateNodalA(hypre_ParCSRMatrix    *A,
    comm_pkg_AN = NULL;
    col_map_offd_AN = NULL;
 
+#ifdef HYPRE_NO_GLOBAL_PARTITION
+   row_starts_AN = hypre_CTAlloc(int, 2);
+
+   for (i=0; i < 2; i++)
+   {
+      row_starts_AN[i] = row_starts[i]/num_functions;
+      if (row_starts_AN[i]*num_functions < row_starts[i])
+      {
+	  printf("nodes not properly aligned or incomplete info!\n");
+	  return (87);
+      }
+   }
+   
+   global_num_nodes = hypre_ParCSRMatrixGlobalNumRows(A)/num_functions;
+
+
+#else
    row_starts_AN = hypre_CTAlloc(int, num_procs+1);
 
-   for (i=0; i < num_procs+1; i++)
+  for (i=0; i < num_procs+1; i++)
    {
       row_starts_AN[i] = row_starts[i]/num_functions;
       if (row_starts_AN[i]*num_functions < row_starts[i])
@@ -143,6 +160,10 @@ hypre_BoomerAMGCreateNodalA(hypre_ParCSRMatrix    *A,
    }
    
    global_num_nodes = row_starts_AN[num_procs];
+
+#endif
+
+ 
    num_nodes =  num_variables/num_functions;
    num_fun2 = num_functions*num_functions;
 
@@ -704,6 +725,23 @@ hypre_BoomerAMGCreateScalarCFS(hypre_ParCSRMatrix    *SN,
 
    *CF_marker_ptr = CF_marker;
 
+
+#ifdef HYPRE_NO_GLOBAL_PARTITION
+   row_starts_S = hypre_CTAlloc(int,2);
+   for (i=0; i < 2; i++)
+      row_starts_S[i] = num_functions*row_starts_SN[i];
+
+   if (row_starts_SN != col_starts_SN)
+   {
+      col_starts_S = hypre_CTAlloc(int,2);
+      for (i=0; i < 2; i++)
+         col_starts_S[i] = num_functions*col_starts_SN[i];
+   }
+   else
+   {
+      col_starts_S = row_starts_S;
+   }
+#else
    row_starts_S = hypre_CTAlloc(int,num_procs+1);
    for (i=0; i < num_procs+1; i++)
       row_starts_S[i] = num_functions*row_starts_SN[i];
@@ -718,6 +756,8 @@ hypre_BoomerAMGCreateScalarCFS(hypre_ParCSRMatrix    *SN,
    {
       col_starts_S = row_starts_S;
    }
+#endif
+
 
    SN_num_nonzeros_diag = SN_diag_i[num_nodes];
    SN_num_nonzeros_offd = SN_offd_i[num_nodes];
