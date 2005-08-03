@@ -1,0 +1,22 @@
+<?xml version="1.0" ?> 
+<scl>
+  <library uri="@@DIR@@/libsidl.la" scope="global" resolution="now" > 
+    <class name="sidl.BaseClass" desc="ior/impl" />
+    <class name="gov.llnl.sidl.BaseArray" desc="java" />	
+    <class name="sidl.ClassInfoI" desc="ior/impl" />
+    <class name="sidl.DFinder" desc="ior/impl" />
+    <class name="sidl.DLL" desc="ior/impl" />
+    <class name="sidl.Loader" desc="ior/impl" />
+    <class name="sidl.Boolean" desc="java" />
+    <class name="sidl.Character" desc="java" />
+    <class name="sidl.DoubleComplex" desc="java" />
+    <class name="sidl.Double" desc="java" />
+    <class name="sidl.FloatComplex" desc="java" />
+    <class name="sidl.Float" desc="java" />
+    <class name="sidl.Integer" desc="java" />
+    <class name="sidl.Long" desc="java" />
+    <class name="sidl.Opaque" desc="java" />
+    <class name="sidl.SIDLException" desc="ior/impl" />
+    <class name="sidl.String" desc="java" />
+  </library>
+</scl>

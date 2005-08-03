@@ -43,7 +43,7 @@ msgs="
 #
 # Basic startup stuff
 #
-AC_INIT([babel-runtime],[0.10.4],[babel-bugs@llnl.gov])
+AC_INIT([babel-runtime],[0.10.8],[babel-bugs@cca-forum.org])
 AC_CONFIG_SRCDIR([sidl/sidlArray.h])
 AC_CONFIG_AUX_DIR([config])
 AC_CONFIG_MACRO_DIR([m4])

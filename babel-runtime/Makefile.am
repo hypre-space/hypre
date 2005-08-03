@@ -34,8 +34,13 @@ SIDLX_SUBDIR=sidlx
 else
 SIDLX_SUBDIR=
 endif
+if SUPPORT_JAVA
+JAVA_SUBDIR=java
+else
+JAVA_SUBDIR=
+endif
 
-SUBDIRS = m4 bin config sidl java $(SIDLX_SUBDIR)
+SUBDIRS = m4 bin config sidl $(JAVA_SUBDIR) $(SIDLX_SUBDIR)
 DISTCLEANFILES=babel-libtool
 #
 # Unfortuntately, Python uses its own makefile system so we have to 
@@ -275,8 +280,6 @@ clean-local-python2:
              config.c *setup.installed;         			\
           echo rm -f babel.make.package babel-stamp *.so *.dll *.a *.o *~; \
 	  rm -f babel.make.package babel-stamp *.so *.dll *.a *.o *~; \
-	  echo rm -f sidl_*IOR.* sidl_*_Module.h setup.py babel.make ;	\
-	  rm -f sidl*IOR.* sidl_*_Module.h setup.py babel.make ;	\
 	  if test -d sidl; then						\
 	    cd sidl;							\
 	    echo rm -f config.c *.so *.dll *.a *.o *~ babel.make ;	\
