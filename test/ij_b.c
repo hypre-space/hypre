@@ -1572,8 +1572,8 @@ main( int   argc,
       bHYPRE_op_A = bHYPRE_Operator__cast( bHYPRE_parcsr_A );
 
       bHYPRE_BoomerAMG_SetOperator( bHYPRE_AMG, bHYPRE_op_A );
-      bHYPRE_BoomerAMG_SetTolerance( bHYPRE_AMG, tol);
-      bHYPRE_BoomerAMG_SetPrintLevel( bHYPRE_AMG, ioutdat ); 
+      bHYPRE_BoomerAMG_SetDoubleParameter( bHYPRE_AMG, "Tolerance", tol);
+      bHYPRE_BoomerAMG_SetIntParameter( bHYPRE_AMG, "PrintLevel", ioutdat ); 
 
       bHYPRE_BoomerAMG_SetIntParameter( bHYPRE_AMG, "CoarsenType",
                                         (hybrid*coarsen_type));
@@ -1625,7 +1625,7 @@ main( int   argc,
                                                  dof_func, num_functions );
       }
       log_level = 3;
-      bHYPRE_BoomerAMG_SetLogging( bHYPRE_AMG, log_level );
+      bHYPRE_BoomerAMG_SetIntParameter( bHYPRE_AMG, "Logging", log_level );
 
       ierr += bHYPRE_BoomerAMG_Setup( bHYPRE_AMG, bHYPRE_Vector_b,
                                       bHYPRE_Vector_x );
@@ -1665,11 +1665,11 @@ main( int   argc,
 
       bHYPRE_op_A = bHYPRE_Operator__cast( bHYPRE_parcsr_A );
       bHYPRE_PCG_SetOperator( bHYPRE_PCG, bHYPRE_op_A );
-      bHYPRE_PCG_SetMaxIterations( bHYPRE_PCG, 500);
-      bHYPRE_PCG_SetTolerance( bHYPRE_PCG, tol);
+      bHYPRE_PCG_SetIntParameter( bHYPRE_PCG, "MaxIterations", 500);
+      bHYPRE_PCG_SetDoubleParameter( bHYPRE_PCG, "Tolerance", tol);
       bHYPRE_PCG_SetIntParameter( bHYPRE_PCG, "TwoNorm", 1 );
       bHYPRE_PCG_SetIntParameter( bHYPRE_PCG, "RelChange", 0 );
-      bHYPRE_PCG_SetPrintLevel( bHYPRE_PCG, 1 );
+      bHYPRE_PCG_SetIntParameter( bHYPRE_PCG, "PrintLevel", 1 );
       /* This was an error , Setup or Apply should not be called until after SetPreconditioner...*/
       /*ierr += bHYPRE_PCG_Setup( bHYPRE_PCG, bHYPRE_Vector_b, bHYPRE_Vector_x );*/
 

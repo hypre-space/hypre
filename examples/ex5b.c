@@ -282,20 +282,20 @@ int main (int argc, char *argv[])
       bHYPRE_BoomerAMG_SetOperator( amg_solver, op_A );
 
       /* Set some parameters (See Reference Manual for more parameters) */
-      bHYPRE_BoomerAMG_SetPrintLevel( amg_solver, 3 );  /* print solve info + parameters */
+      bHYPRE_BoomerAMG_SetIntParameter( amg_solver, "PrintLevel", 3 );  /* print solve info + parameters */
       bHYPRE_BoomerAMG_SetIntParameter( amg_solver, "CoarsenType", 6); /* Falgout coarsening */
       bHYPRE_BoomerAMG_SetIntParameter( amg_solver, "RelaxType", 3);   /* G-S/Jacobi hybrid relaxation */
       bHYPRE_BoomerAMG_SetIntParameter( amg_solver, "NumSweeps", 1);   /* Sweeeps on each level */
       bHYPRE_BoomerAMG_SetIntParameter( amg_solver, "MaxLevels", 20);  /* maximum number of levels */
-      bHYPRE_BoomerAMG_SetTolerance( amg_solver, 1e-7);      /* conv. tolerance */
+      bHYPRE_BoomerAMG_SetDoubleParameter( amg_solver, "Tolerance", 1e-7);      /* conv. tolerance */
 
       /* Now setup and solve! */
       bHYPRE_BoomerAMG_Setup( amg_solver, vec_b, vec_x );
       bHYPRE_BoomerAMG_Apply( amg_solver, vec_b, &vec_x );
 
       /* Run info - needed logging turned on */
-      bHYPRE_BoomerAMG_GetNumIterations( amg_solver, &num_iterations );
-      bHYPRE_BoomerAMG_GetRelResidualNorm( amg_solver, &final_res_norm );
+      bHYPRE_BoomerAMG_GetIntValue( amg_solver, "NumIterations", &num_iterations );
+      bHYPRE_BoomerAMG_GetDoubleValue( amg_solver, "RelResidualNorm", &final_res_norm );
 
       if (myid == 0)
       {
@@ -322,10 +322,10 @@ int main (int argc, char *argv[])
 
       /* Set some parameters (See Reference Manual for more parameters) */
       bHYPRE_PCG_SetIntParameter( pcg_solver, "MaxIter", 1000 ); /* max iterations */
-      bHYPRE_PCG_SetTolerance( pcg_solver, 1e-7 ); /* conv. tolerance */
+      bHYPRE_PCG_SetDoubleParameter( pcg_solver, "Tolerance", 1e-7 ); /* conv. tolerance */
       bHYPRE_PCG_SetIntParameter( pcg_solver, "TwoNorm", 1 ); /* use the two norm as the stopping criteria */
-      bHYPRE_PCG_SetPrintLevel( pcg_solver, 2 ); /* prints out the iteration info */
-      bHYPRE_PCG_SetLogging( pcg_solver, 1 ); /* needed to get run info later */
+      bHYPRE_PCG_SetIntParameter( pcg_solver, "PrintLevel", 2 ); /* prints out the iteration info */
+      bHYPRE_PCG_SetIntParameter( pcg_solver, "Logging", 1 ); /* needed to get run info later */
 
       identity = bHYPRE_IdentitySolver_Create( (void *)MPI_COMM_WORLD );
       precond = bHYPRE_Solver__cast( identity );
@@ -336,8 +336,8 @@ int main (int argc, char *argv[])
       bHYPRE_PCG_Apply( pcg_solver, vec_b, &vec_x );
 
       /* Run info - needed logging turned on */
-      bHYPRE_PCG_GetNumIterations( pcg_solver, &num_iterations );
-      bHYPRE_PCG_GetRelResidualNorm( pcg_solver, &final_res_norm );
+      bHYPRE_PCG_GetIntValue( pcg_solver, "NumIterations", &num_iterations );
+      bHYPRE_PCG_GetDoubleValue( pcg_solver, "RelResidualNorm", &final_res_norm );
       if (myid == 0)
       {
          printf("\n");
@@ -362,19 +362,19 @@ int main (int argc, char *argv[])
 
       /* Set some parameters (See Reference Manual for more parameters) */
       bHYPRE_PCG_SetIntParameter( pcg_solver, "MaxIter", 1000 ); /* max iterations */
-      bHYPRE_PCG_SetTolerance( pcg_solver, 1e-7 ); /* conv. tolerance */
+      bHYPRE_PCG_SetDoubleParameter( pcg_solver, "Tolerance", 1e-7 ); /* conv. tolerance */
       bHYPRE_PCG_SetIntParameter( pcg_solver, "TwoNorm", 1 ); /* use the two norm as the stopping criteria */
-      bHYPRE_PCG_SetPrintLevel( pcg_solver, 2 ); /* prints out the iteration info */
-      bHYPRE_PCG_SetLogging( pcg_solver, 1 ); /* needed to get run info later */
+      bHYPRE_PCG_SetIntParameter( pcg_solver, "PrintLevel", 2 ); /* prints out the iteration info */
+      bHYPRE_PCG_SetIntParameter( pcg_solver, "Logging", 1 ); /* needed to get run info later */
 
       /* Now set up the AMG preconditioner and specify any parameters */
       amg_solver = bHYPRE_BoomerAMG_Create( (void *)MPI_COMM_WORLD );
       bHYPRE_BoomerAMG_SetOperator( amg_solver, op_A );
-      bHYPRE_BoomerAMG_SetPrintLevel( amg_solver, 1 ); /* print amg solution info*/
+      bHYPRE_BoomerAMG_SetIntParameter( amg_solver, "PrintLevel", 1 ); /* print amg solution info*/
       bHYPRE_BoomerAMG_SetIntParameter( amg_solver, "CoarsenType", 6); /* Falgout coarsening */
       bHYPRE_BoomerAMG_SetIntParameter( amg_solver, "RelaxType", 3);   /* G-S/Jacobi hybrid relaxation */
       bHYPRE_BoomerAMG_SetIntParameter( amg_solver, "NumSweeps", 1);   /* Sweeeps on each level */
-      bHYPRE_BoomerAMG_SetTolerance( amg_solver, 1e-3);      /* conv. tolerance */
+      bHYPRE_BoomerAMG_SetDoubleParameter( amg_solver, "Tolerance", 1e-3);      /* conv. tolerance */
 
       /* Set the PCG preconditioner */
       precond = bHYPRE_Solver__cast( amg_solver );
@@ -385,8 +385,8 @@ int main (int argc, char *argv[])
       bHYPRE_PCG_Apply( pcg_solver, vec_b, &vec_x );
 
       /* Run info - needed logging turned on */
-      bHYPRE_PCG_GetNumIterations( pcg_solver, &num_iterations );
-      bHYPRE_PCG_GetRelResidualNorm( pcg_solver, &final_res_norm );
+      bHYPRE_PCG_GetIntValue( pcg_solver, "NumIterations", &num_iterations );
+      bHYPRE_PCG_GetDoubleValue( pcg_solver, "RelResidualNorm", &final_res_norm );
       if (myid == 0)
       {
          printf("\n");
@@ -417,10 +417,10 @@ int main (int argc, char *argv[])
 
       /* Set some parameters (See Reference Manual for more parameters) */
       bHYPRE_PCG_SetIntParameter( pcg_solver, "MaxIter", 1000 ); /* max iterations */
-      bHYPRE_PCG_SetTolerance( pcg_solver, 1e-7 ); /* conv. tolerance */
+      bHYPRE_PCG_SetDoubleParameter( pcg_solver, "Tolerance", 1e-7 ); /* conv. tolerance */
       bHYPRE_PCG_SetIntParameter( pcg_solver, "TwoNorm", 1 ); /* use the two norm as the stopping criteria */
-      bHYPRE_PCG_SetPrintLevel( pcg_solver, 2 ); /* prints out the iteration info */
-      bHYPRE_PCG_SetLogging( pcg_solver, 1 ); /* needed to get run info later */
+      bHYPRE_PCG_SetIntParameter( pcg_solver, "PrintLevel", 2 ); /* prints out the iteration info */
+      bHYPRE_PCG_SetIntParameter( pcg_solver, "Logging", 1 ); /* needed to get run info later */
 
       /* Now set up the ParaSails preconditioner and specify any parameters */
       ps_solver = bHYPRE_ParaSails_Create( (void *)MPI_COMM_WORLD );
@@ -431,7 +431,7 @@ int main (int argc, char *argv[])
       bHYPRE_ParaSails_SetIntParameter( ps_solver, "Nlevels", sai_max_levels );
       bHYPRE_ParaSails_SetDoubleParameter( ps_solver, "Filter", sai_filter );
       bHYPRE_ParaSails_SetIntParameter( ps_solver, "Sym", sai_sym );
-      bHYPRE_ParaSails_SetLogging( ps_solver, 3 );
+      bHYPRE_ParaSails_SetIntParameter( ps_solver, "Logging", 3 );
 
       /* Set the PCG preconditioner */
       precond = bHYPRE_Solver__cast( ps_solver );
@@ -443,8 +443,8 @@ int main (int argc, char *argv[])
 
 
       /* Run info - needed logging turned on */
-      bHYPRE_PCG_GetNumIterations( pcg_solver, &num_iterations );
-      bHYPRE_PCG_GetRelResidualNorm( pcg_solver, &final_res_norm );
+      bHYPRE_PCG_GetIntValue( pcg_solver, "NumIterations", &num_iterations );
+      bHYPRE_PCG_GetDoubleValue( pcg_solver, "RelResidualNorm", &final_res_norm );
       if (myid == 0)
       {
          printf("\n");

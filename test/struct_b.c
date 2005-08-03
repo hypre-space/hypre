@@ -768,8 +768,8 @@ main( int   argc,
       hypre_FinalizeTiming(time_index);
       hypre_ClearTiming();
    
-      ierr += bHYPRE_StructSMG_GetNumIterations( solver_SMG, &num_iterations );
-      ierr += bHYPRE_StructSMG_GetRelResidualNorm( solver_SMG, &final_res_norm );
+      ierr += bHYPRE_StructSMG_GetIntValue( solver_SMG, "NumIterations", &num_iterations );
+      ierr += bHYPRE_StructSMG_GetDoubleValue( solver_SMG, "RelResidualNorm", &final_res_norm );
 
       bHYPRE_StructSMG_deleteRef( solver_SMG );
    }
@@ -796,8 +796,8 @@ main( int   argc,
       bHYPRE_StructPFMG_SetIntParameter( solver_PFMG, "num postrelax", n_post );
       bHYPRE_StructPFMG_SetIntParameter( solver_PFMG, "skip relax", skip );
       /*HYPRE_StructPFMGSetDxyz(solver, dxyz);*/
-      bHYPRE_StructPFMG_SetLogging( solver_PFMG, 1 );
-      bHYPRE_StructPFMG_SetPrintLevel( solver_PFMG, 1 );
+      bHYPRE_StructPFMG_SetIntParameter( solver_PFMG, "Logging", 1 );
+      bHYPRE_StructPFMG_SetIntParameter( solver_PFMG, "PrintLevel", 1 );
 
       bHYPRE_StructPFMG_SetIntParameter( solver_PFMG, "rap type", rap );
 
@@ -822,8 +822,8 @@ main( int   argc,
       hypre_FinalizeTiming(time_index);
       hypre_ClearTiming();
    
-      ierr += bHYPRE_StructPFMG_GetNumIterations( solver_PFMG, &num_iterations );
-      ierr += bHYPRE_StructPFMG_GetRelResidualNorm( solver_PFMG, &final_res_norm );
+      ierr += bHYPRE_StructPFMG_GetIntValue( solver_PFMG, "NumIterations", &num_iterations );
+      ierr += bHYPRE_StructPFMG_GetDoubleValue( solver_PFMG, "RelResidualNorm", &final_res_norm );
 
       bHYPRE_StructPFMG_deleteRef( solver_PFMG );
    }
@@ -924,8 +924,8 @@ main( int   argc,
          solver_PFMG = bHYPRE_StructPFMG_Create( (void *)comm );
          ierr += bHYPRE_StructPFMG_SetOperator( solver_PFMG, A_O );
 
-         bHYPRE_StructPFMG_SetMaxIterations( solver_PFMG, 1 );
-         bHYPRE_StructPFMG_SetTolerance( solver_PFMG, 0.0 );
+         bHYPRE_StructPFMG_SetIntParameter( solver_PFMG, "MaxIterations", 1 );
+         bHYPRE_StructPFMG_SetIntParameter( solver_PFMG, "Tolerance", 0.0 );
          bHYPRE_StructPFMG_SetIntParameter( solver_PFMG, "zero_guess", 1 );
          /* weighted Jacobi = 1; red-black GS = 2 */
          bHYPRE_StructPFMG_SetIntParameter( solver_PFMG, "RelaxType", 1 );
@@ -933,7 +933,7 @@ main( int   argc,
          bHYPRE_StructPFMG_SetIntParameter( solver_PFMG, "NumPostRelax", n_post );
          bHYPRE_StructPFMG_SetIntParameter( solver_PFMG, "SkipRelax", skip );
          /*bHYPRE_StructPFMG_SetDxyz( solver_PFMG, dxyz);*/
-         bHYPRE_StructPFMG_SetLogging( solver_PFMG, 0 );
+         bHYPRE_StructPFMG_SetIntParameter( solver_PFMG, "Logging", 0 );
 
          ierr += bHYPRE_StructPFMG_Setup( solver_PFMG, b_V, x_V );
          precond = (bHYPRE_Solver) bHYPRE_StructPFMG__cast2
@@ -978,8 +978,8 @@ main( int   argc,
       hypre_FinalizeTiming(time_index);
       hypre_ClearTiming();
 
-      ierr += bHYPRE_PCG_GetNumIterations( solver_PCG, &num_iterations );
-      ierr += bHYPRE_PCG_GetRelResidualNorm( solver_PCG, &final_res_norm );
+      ierr += bHYPRE_PCG_GetIntValue( solver_PCG, "NumIterations", &num_iterations );
+      ierr += bHYPRE_PCG_GetDoubleValue( solver_PCG, "RelResidualNorm", &final_res_norm );
       /* obsolete bHYPRE_PCG_GetConvergenceInfo( solver_PCG, "number of iterations",
          &doubtemp );
          num_iterations = floor(doubtemp*1.001);  i.e. round(doubtemp)

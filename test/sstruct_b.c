@@ -2631,9 +2631,9 @@ main( int   argc,
       b_solver_GMRES = bHYPRE_GMRES_Create( (void *) MPI_COMM_WORLD );
       bHYPRE_GMRES_SetIntParameter( b_solver_GMRES, "KDim", 5 );
       bHYPRE_GMRES_SetIntParameter( b_solver_GMRES, "MaxIter", 100 );
-      bHYPRE_GMRES_SetTolerance( b_solver_GMRES, 1.0e-06 );
-      bHYPRE_GMRES_SetPrintLevel( b_solver_GMRES, 1 );
-      bHYPRE_GMRES_SetLogging( b_solver_GMRES, 1 );
+      bHYPRE_GMRES_SetDoubleParameter( b_solver_GMRES, "Tolerance", 1.0e-06 );
+      bHYPRE_GMRES_SetIntParameter( b_solver_GMRES, "PrintLevel", 1 );
+      bHYPRE_GMRES_SetIntParameter( b_solver_GMRES, "Logging", 1 );
 
       b_A_O = bHYPRE_Operator__cast( b_pA );
       ierr += bHYPRE_GMRES_SetOperator( b_solver_GMRES, b_A_O );
@@ -2644,11 +2644,11 @@ main( int   argc,
          b_boomeramg = bHYPRE_BoomerAMG_Create( (void *) MPI_COMM_WORLD );
          bHYPRE_BoomerAMG_SetIntParameter( b_boomeramg, "CoarsenType", 6);
          bHYPRE_BoomerAMG_SetIntParameter( b_boomeramg, "StrongThreshold", 0.25);
-         bHYPRE_BoomerAMG_SetTolerance( b_boomeramg, 0.0 );
-         bHYPRE_BoomerAMG_SetPrintLevel( b_boomeramg, 1 );
+         bHYPRE_BoomerAMG_SetDoubleParameter( b_boomeramg, "Tolerance", 0.0 );
+         bHYPRE_BoomerAMG_SetIntParameter( b_boomeramg, "PrintLevel", 1 );
          bHYPRE_BoomerAMG_SetStringParameter( b_boomeramg,
                                               "PrintFileName", "sstruct.out.log");
-         bHYPRE_BoomerAMG_SetMaxIterations( b_boomeramg, 1 );
+         bHYPRE_BoomerAMG_SetIntParameter( b_boomeramg, "MaxIterations", 1 );
          ierr += bHYPRE_BoomerAMG_SetOperator( b_boomeramg, b_A_O );
          /* ... Note regarding the translation from HYPRE to babel (bHYPRE) interface:
             Although HYPRE_*Setup* does (among other things) the same job as SetOperator,
@@ -2704,8 +2704,8 @@ main( int   argc,
       hypre_FinalizeTiming(time_index);
       hypre_ClearTiming();
 
-      ierr += bHYPRE_GMRES_GetNumIterations( b_solver_GMRES, &num_iterations );
-      ierr += bHYPRE_GMRES_GetRelResidualNorm( b_solver_GMRES, &final_res_norm );
+      ierr += bHYPRE_GMRES_GetIntValue( b_solver_GMRES, "NumIterations", &num_iterations );
+      ierr += bHYPRE_GMRES_GetDoubleValue( b_solver_GMRES, "RelResidualNorm", &final_res_norm );
 
       if (solver_id == 40)
       {
@@ -2977,8 +2977,8 @@ main( int   argc,
       hypre_FinalizeTiming(time_index);
       hypre_ClearTiming();
 
-      ierr += bHYPRE_StructSMG_GetNumIterations( b_solver_SMG, &num_iterations );
-      ierr += bHYPRE_StructSMG_GetRelResidualNorm( b_solver_SMG, &final_res_norm );
+      ierr += bHYPRE_StructSMG_GetIntValue( b_solver_SMG, "NumIterations", &num_iterations );
+      ierr += bHYPRE_StructSMG_GetDoubleValue( b_solver_SMG, "RelResidualNorm", &final_res_norm );
 
       bHYPRE_StructSMG_deleteRef( b_solver_SMG );
    }
