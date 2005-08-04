@@ -19,6 +19,7 @@ C_COMPILE_FLAGS = \
  ${CINCLUDES}
 
 HEADERS =\
+ assumed_part.h\
  box.h\
  box_neighbors.h\
  box_pthreads.h\
@@ -34,6 +35,7 @@ HEADERS =\
  struct_vector.h
 
 FILES =\
+ assumed_part.c\
  box_algebra.c\
  box_alloc.c\
  box_boundary.c\
@@ -50,6 +52,8 @@ FILES =\
  HYPRE_struct_matrix.c\
  HYPRE_struct_stencil.c\
  HYPRE_struct_vector.c\
+ new_assemble.c\
+ new_box_neighbors.c\
  project.c\
  struct_axpy.c\
  struct_communication.c\

@@ -1667,6 +1667,73 @@ hypre_BoxArrayBox(hypre_StructVectorDataSpace(vector), b)
  hypre_BoxIndexRank(hypre_StructVectorBox(vector, b), index))
 
 #endif
+/******************************************************************************
+ *
+ * Header info for the struct assumed partition
+ *
+ *****************************************************************************/
+
+#ifndef hypre_ASSUMED_PART_HEADER
+#define hypre_ASSUMED_PART_HEADER
+
+
+/* to prevent overflow */
+
+#define hypre_doubleBoxVolume(box) \
+   ((double) hypre_BoxSizeX(box) * (double) hypre_BoxSizeY(box) * (double) hypre_BoxSizeZ(box))
+
+
+typedef struct 
+{
+   /* the entries will be the same for all procs */  
+   hypre_BoxArray      *regions;
+   int                 num_regions;      
+   int                 *proc_partitions;
+   hypre_Index         *divisions;
+   /* these entries are specific to each proc */
+   hypre_BoxArray      *my_partition;
+   hypre_BoxArray      *my_partition_boxes;
+   int                 *my_partition_proc_ids;
+   int                 *my_partition_boxnums;
+   int                 my_partition_ids_size;   
+   int                 my_partition_ids_alloc;
+   int                 my_partition_num_distinct_procs;
+    
+} hypre_StructAssumedPart;
+
+
+/*Accessor macros */
+
+#define hypre_StructAssumedPartRegions(apart) ((apart)->regions) 
+#define hypre_StructAssumedPartNumRegions(apart) ((apart)->num_regions) 
+#define hypre_StructAssumedPartDivisions(apart) ((apart)->divisions) 
+#define hypre_StructAssumedPartDivision(apart, i) ((apart)->divisions[i]) 
+#define hypre_StructAssumedPartProcPartitions(apart) ((apart)->proc_partitions) 
+#define hypre_StructAssumedPartProcPartition(apart, i) ((apart)->proc_partitions[i]) 
+#define hypre_StructAssumedPartMyPartition(apart) ((apart)->my_partition)
+#define hypre_StructAssumedPartMyPartitionBoxes(apart) ((apart)->my_partition_boxes)
+#define hypre_StructAssumedPartMyPartitionProcIds(apart) ((apart)->my_partition_proc_ids)
+#define hypre_StructAssumedPartMyPartitionIdsSize(apart) ((apart)->my_partition_ids_size)
+#define hypre_StructAssumedPartMyPartitionIdsAlloc(apart) ((apart)->my_partition_ids_alloc)
+#define hypre_StructAssumedPartMyPartitionNumDistinctProcs(apart) ((apart)->my_partition_num_distinct_procs)
+#define hypre_StructAssumedPartMyPartitionBoxnums(apart) ((apart)->my_partition_boxnums)
+
+
+
+#endif
+
+/* assumed_part.c */
+int hypre_APSubdivideRegion( hypre_Box *region , int dim , int level , hypre_BoxArray *box_array , int *num_new_boxes );
+int hypre_APFindMyBoxesInRegions( hypre_BoxArray *region_array , hypre_BoxArray *my_box_array , int **p_count_array , double **p_vol_array );
+int hypre_APGetAllBoxesInRegions( hypre_BoxArray *region_array , hypre_BoxArray *my_box_array , int **p_count_array , double **p_vol_array , MPI_Comm comm );
+int hypre_APShrinkRegions( hypre_BoxArray *region_array , hypre_BoxArray *my_box_array , MPI_Comm comm );
+int hypre_APPruneRegions( hypre_BoxArray *region_array , int **p_count_array , double **p_vol_array );
+int hypre_APRefineRegionsByVol( hypre_BoxArray *region_array , double *vol_array , int max_regions , double gamma , int dim , int *return_code , MPI_Comm comm );
+int hypre_CreateStructAssumedPartition( int dim , hypre_Box *bounding_box , double global_boxes_size , int global_num_boxes , hypre_BoxArray *local_boxes , int max_regions , int max_refinements , double gamma , MPI_Comm comm , hypre_StructAssumedPart **p_assumed_partition );
+int hypre_DestroyStructAssumedPartition( hypre_StructAssumedPart *assumed_part );
+int hypre_APFillResponseStructAssumedPart( void *p_recv_contact_buf , int contact_size , int contact_proc , void *ro , MPI_Comm comm , void **p_send_response_buf , int *response_message_size );
+int hypre_GetStructAssumedRegionsFromProc( hypre_StructAssumedPart *assumed_part , int proc_id , hypre_BoxArray *assumed_regions );
+int hypre_GetStructAssumedProcsFromBox( hypre_StructAssumedPart *assumed_part , hypre_Box *box , int *num_proc_array , int *size_alloc_proc_array , int **p_proc_array );
 
 /* box_algebra.c */
 int hypre_IntersectBoxes( hypre_Box *box1 , hypre_Box *box2 , hypre_Box *ibox );
@@ -1797,6 +1864,15 @@ int HYPRE_StructVectorSetConstantValues( HYPRE_StructVector vector , double valu
 int HYPRE_StructVectorGetMigrateCommPkg( HYPRE_StructVector from_vector , HYPRE_StructVector to_vector , HYPRE_CommPkg *comm_pkg );
 int HYPRE_StructVectorMigrate( HYPRE_CommPkg comm_pkg , HYPRE_StructVector from_vector , HYPRE_StructVector to_vector );
 int HYPRE_CommPkgDestroy( HYPRE_CommPkg comm_pkg );
+
+/* new_assemble.c */
+int hypre_NewStructGridAssemble( hypre_StructGrid *grid );
+int hypre_FillResponseStructAssembleAP( void *p_recv_contact_buf , int contact_size , int contact_proc , void *ro , MPI_Comm comm , void **p_send_response_buf , int *response_message_size );
+int hypre_StructGridSetIDs( hypre_StructGrid *grid , int *ids );
+
+/* new_box_neighbors.c */
+int hypre_NewBoxNeighborsCreate( hypre_BoxArray *boxes , int *procs , int *boxnums , int first_local , int num_local , hypre_Index *pshifts , hypre_BoxNeighbors **neighbors_ptr );
+int hypre_NewBoxNeighborsAssemble( hypre_BoxNeighbors *neighbors , hypre_Index periodic , int max_distance , int prune );
 
 /* project.c */
 int hypre_ProjectBox( hypre_Box *box , hypre_Index index , hypre_Index stride );
