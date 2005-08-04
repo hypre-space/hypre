@@ -438,6 +438,7 @@ GenerateSysLaplacian( MPI_Comm comm,
    int nx_size, ny_size, nz_size;
    int num_cols_offd;
    int grid_size;
+   int local_grid_size;
    int first_j, j_ind;
    int num_coeffs, num_offd_coeffs;
 
@@ -484,7 +485,8 @@ GenerateSysLaplacian( MPI_Comm comm,
    my_id = r*(P*Q) + q*P + p;
    num_procs = P*Q*R;
 
-   local_num_rows = num_fun*nx_local*ny_local*nz_local;
+   local_grid_size = nx_local*ny_local*nz_local;
+   local_num_rows = num_fun*local_grid_size;
    diag_i = hypre_CTAlloc(int, local_num_rows+1);
    offd_i = hypre_CTAlloc(int, local_num_rows+1);
 
@@ -839,7 +841,7 @@ GenerateSysLaplacian( MPI_Comm comm,
 
    for (j=1; j< num_fun; j++)
    {
-      for (i=0; i<grid_size; i++)
+      for (i=0; i<local_grid_size; i++)
       {
 	  row = i*num_fun+j;
 	  diag_index = diag_i[row];
