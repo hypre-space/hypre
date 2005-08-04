@@ -63,7 +63,7 @@ hypre_StructMapCoarseToFine( hypre_Index cindex,
    return 0;
 }
 
-#if 1
+#ifndef HYPRE_NO_GLOBAL_PARTITION
 
 /*--------------------------------------------------------------------------
  * hypre_StructCoarsen
@@ -548,6 +548,106 @@ hypre_StructCoarsen( hypre_StructGrid  *fgrid,
 
 #else
 
+
+/*--------------------------------------------------------------------------
+ * hypre_StructCoarsen  - modified OLD version (to work without global partition)
+ * AHB 6/5
+ *--------------------------------------------------------------------------*/
+
+int
+hypre_StructCoarsen( hypre_StructGrid  *fgrid,
+                     hypre_Index        index,
+                     hypre_Index        stride,
+                     int                prune,
+                     hypre_StructGrid **cgrid_ptr )
+{
+   int ierr = 0;
+
+   hypre_StructGrid *cgrid;
+
+   MPI_Comm          comm  = hypre_StructGridComm(fgrid);
+   int               dim   = hypre_StructGridDim(fgrid);
+   hypre_BoxArray   *boxes;
+   hypre_Index       periodic;
+
+   hypre_Box        *box;
+                    
+
+   int               i, myid, count;
+   int              *fids, *cids;
+
+
+
+   MPI_Comm_rank(comm, &myid );
+
+   fids = hypre_StructGridIDs(fgrid);
+
+   hypre_StructGridCreate(comm, dim, &cgrid);
+
+   /* coarsen boxes */
+   boxes = hypre_BoxArrayDuplicate(hypre_StructGridBoxes(fgrid));
+   hypre_ProjectBoxArray(boxes, index, stride);
+   for (i = 0; i < hypre_BoxArraySize(boxes); i++)
+   {
+      box = hypre_BoxArrayBox(boxes, i);
+      hypre_StructMapFineToCoarse(hypre_BoxIMin(box), index, stride,
+                                  hypre_BoxIMin(box));
+      hypre_StructMapFineToCoarse(hypre_BoxIMax(box), index, stride,
+                                  hypre_BoxIMax(box));
+   }
+
+   /* create the coarse grid ids */
+   cids = hypre_TAlloc(int,  hypre_BoxArraySize(boxes));
+   hypre_ForBoxI(i, boxes)
+   {
+      cids[i] = fids[i];
+   }
+   
+   /* zero volume boxes are needed when forming
+      P and P^T, so prune only if forming the coarse grid */ 
+   if (prune)
+   {
+      count = 0;    
+      hypre_ForBoxI(i, boxes)
+      {
+         box = hypre_BoxArrayBox(boxes, i);
+         if (hypre_BoxVolume(box))
+         {
+            hypre_CopyBox(box, hypre_BoxArrayBox(boxes, count));
+            cids[count] = cids[i];
+            count++;
+         }
+      }
+      hypre_BoxArraySetSize(boxes, count);
+   }
+
+
+   /* set boxes */
+   hypre_StructGridSetBoxes(cgrid, boxes);
+
+   /*set the ids */ 
+   hypre_StructGridSetIDs(cgrid, cids);
+
+   /* adjust periodicity */
+   hypre_CopyIndex(hypre_StructGridPeriodic(fgrid), periodic);
+   for (i = 0; i < dim; i++)
+   {
+      hypre_IndexD(periodic,i) /= hypre_IndexD(stride,i);
+   }
+
+   hypre_StructGridSetPeriodic(cgrid, periodic);
+
+
+   hypre_NewStructGridAssemble(cgrid);
+
+   *cgrid_ptr = cgrid;
+
+   return ierr;
+}
+
+#endif
+
+#if 0
 /*--------------------------------------------------------------------------
  * hypre_StructCoarsen    - OLD
  *--------------------------------------------------------------------------*/
@@ -571,6 +671,8 @@ hypre_StructCoarsen( hypre_StructGrid  *fgrid,
    hypre_Box        *box;
                     
    int               i, d;
+
+
 
    hypre_StructGridCreate(comm, dim, &cgrid);
 

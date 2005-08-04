@@ -642,8 +642,11 @@ hypre_StructGridRead( MPI_Comm           comm,
       hypre_StructGridSetExtents(grid, ilower, iupper);
    }
 
+#ifdef HYPRE_NO-GLOBAL_PARTITION
+   hypre_NewStructGridAssemble(grid);
+#else
    hypre_StructGridAssemble(grid);
-
+#endif
    *grid_ptr = grid;
 
    return ierr;

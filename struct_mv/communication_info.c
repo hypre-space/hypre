@@ -196,7 +196,32 @@ hypre_CommInfoDestroy( hypre_CommInfo  *comm_info )
  * redundant communication patterns can be produced when the grid
  * boxes overlap.
  *
+ *
+ *  CHANGEs for "HYPRE_NO_GLOBAL_PARTITION":
+ *  Changes made for use with the assumed partition
+ *      because (1) we may not have ALL the perioic boxes corresponding to a single box 
+ *     in neighbor->boxes (2) we may have a periodic box but not the "real" box
+ * 
+ *
  *--------------------------------------------------------------------------*/
+
+
+
+
+#ifdef HYPRE_NO_GLOBAL_PARTITION
+
+#define hypre_NewBeginBoxNeighborsLoop(n, neighbors, b, prank)        \
+{\
+   hypre_RankLink *hypre__rank_link;\
+\
+   hypre__rank_link = hypre_BoxNeighborsRankLink(neighbors, b);\
+   while (hypre__rank_link)\
+   {\
+      n = hypre_RankLinkRank(hypre__rank_link);\
+      prank = hypre_RankLinkPRank(hypre__rank_link);   
+
+
+#endif
 
 int
 hypre_CreateCommInfoFromStencil( hypre_StructGrid      *grid,
@@ -323,9 +348,12 @@ hypre_CreateCommInfoFromStencil( hypre_StructGrid      *grid,
    grow_box = hypre_BoxCreate();
    int_box  = hypre_BoxCreate();
 
+#ifdef HYPRE_NO_GLOBAL_PARTITION
+   num_hood = hypre_BoxArraySize(hood_boxes);
+#else
    num_hood = hypre_BoxArraySize(hood_boxes) /
       hypre_BoxNeighborsNumPeriods(neighbors);
-
+#endif
    cboxes       = hypre_CTAlloc(hypre_Box *, num_hood);
    cboxes_mem   = hypre_CTAlloc(hypre_Box, num_hood);
    cboxes_j     = hypre_CTAlloc(int, num_hood);
@@ -350,7 +378,12 @@ hypre_CreateCommInfoFromStencil( hypre_StructGrid      *grid,
       lastj = -1;
       num_cboxes = 0;
       recv_box_array_size = 0;
+#ifdef HYPRE_NO_GLOBAL_PARTITION
+  /*  note: now we may not have all the periodic boxes periodic*/ 
+      hypre_NewBeginBoxNeighborsLoop(k, neighbors, i, p)
+#else
       hypre_BeginBoxNeighborsLoop(k, neighbors, i)
+#endif
          {
             hood_box = hypre_BoxArrayBox(hood_boxes, k);
 
@@ -377,9 +410,12 @@ hypre_CreateCommInfoFromStencil( hypre_StructGrid      *grid,
                
                if (hypre_BoxVolume(int_box))
                {
+#ifdef HYPRE_NO_GLOBAL_PARTITION
+                  j = k ; /* don't need to account for periodic here*/ 
+#else
                   j = k % num_hood;
-                  
                   if (j != lastj)
+#endif
                   {
                      cboxes_j[num_cboxes] = j;
                      num_cboxes++;
@@ -387,7 +423,14 @@ hypre_CreateCommInfoFromStencil( hypre_StructGrid      *grid,
                   }
                   recv_box_array_size++;
                   
+#ifdef HYPRE_NO_GLOBAL_PARTITION
+                  /* the neighbor was not periodic */
+                  cboxes[j] = &cboxes_mem[j];
+                  hypre_CopyBox(int_box, cboxes[j]);
+                 
+#else
                   if (k < num_hood)
+
                   {
                      /* the neighbor was not periodic */
                      cboxes[j] = &cboxes_mem[j];
@@ -403,6 +446,8 @@ hypre_CreateCommInfoFromStencil( hypre_StructGrid      *grid,
                      }
                      hypre_AppendBox(int_box, cper_arrays[j]);
                   }
+#endif
+
                }
             }
          }
@@ -417,6 +462,13 @@ hypre_CreateCommInfoFromStencil( hypre_StructGrid      *grid,
       {
          j = cboxes_j[m];
 
+#ifdef HYPRE_NO_GLOBAL_PARTITION
+         /* add the non-periodic box */
+         recv_procs[i][n] = hood_procs[j];
+         hypre_CopyBox(cboxes[j], hypre_BoxArrayBox(recv_box_array, n));
+         n++;
+         cboxes[j] = NULL;
+#else
          /* add the non-periodic box */
          if (cboxes[j] != NULL)
          {
@@ -440,6 +492,7 @@ hypre_CreateCommInfoFromStencil( hypre_StructGrid      *grid,
             hypre_BoxArrayDestroy(cper_arrays[j]);
             cper_arrays[j] = NULL;
          }
+#endif
       }
 
       /*------------------------------------------------
@@ -449,7 +502,11 @@ hypre_CreateCommInfoFromStencil( hypre_StructGrid      *grid,
       lastj = -1;
       num_cboxes = 0;
       send_box_array_size = 0;
+#ifdef HYPRE_NO_GLOBAL_PARTITION
+      hypre_NewBeginBoxNeighborsLoop(k, neighbors, i, p)
+#else
       hypre_BeginBoxNeighborsLoop(k, neighbors, i)
+#endif
          {
             hood_box = hypre_BoxArrayBox(hood_boxes, k);
 
@@ -482,17 +539,24 @@ hypre_CreateCommInfoFromStencil( hypre_StructGrid      *grid,
 
                if (hypre_BoxVolume(int_box))
                {
+#ifdef HYPRE_NO_GLOBAL_PARTITION
+                  j = k ; /* don't need to account for periodic here*/ 
+#else
                   j = k % num_hood;
-
                   if (j != lastj)
+#endif
                   {
                      cboxes_j[num_cboxes] = j;
                      num_cboxes++;
                      lastj = j;
                   }
                   send_box_array_size++;
-
+                  /* get which periodic box this is so we know how to shift */ 
+#ifdef HYPRE_NO_GLOBAL_PARTITION
+                  if (p==0)  
+#else
                   if (k < num_hood)
+#endif 
                   {
                      /* the neighbor was not periodic */
                      cboxes[j] = &cboxes_mem[j];
@@ -507,7 +571,9 @@ hypre_CreateCommInfoFromStencil( hypre_StructGrid      *grid,
                         hypre_BoxArraySetSize(cper_arrays[j], 0);
                      }
                      hypre_AppendBox(int_box, cper_arrays[j]);
+#ifndef HYPRE_NO_GLOBAL_PARTITION
                      p = k / num_hood;
+#endif
                      pshift = hypre_BoxNeighborsPShift(neighbors, p);
                      hypre_BoxShiftNeg(int_box, pshift);
                      hypre_AppendBox(int_box, cper_arrays[j]);
