@@ -1882,7 +1882,8 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
       hypre_TFree(ci_array);
    }   
    hypre_TFree(graph_array);
-   if ((measure_type || coarsen_type != 1) && num_procs > 1)
+   if ((measure_type || coarsen_type != 1 || coarsen_type != 11) 
+		&& num_procs > 1)
    	hypre_CSRMatrixDestroy(S_ext); 
    
    *CF_marker_ptr   = CF_marker;

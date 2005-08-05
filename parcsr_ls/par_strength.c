@@ -808,7 +808,7 @@ hypre_BoomerAMGCreateSCommPkg(hypre_ParCSRMatrix *A,
    hypre_CSRMatrix    *S_offd = hypre_ParCSRMatrixOffd(S);
    int                *S_offd_i = hypre_CSRMatrixI(S_offd);
    int                *S_offd_j = hypre_CSRMatrixJ(S_offd);
-   int    	      *col_map_offd_S;
+   int    	      *col_map_offd_S = hypre_ParCSRMatrixColMapOffd(S);
 
    int                *recv_procs_A = hypre_ParCSRCommPkgRecvProcs(comm_pkg_A);
    int                *recv_vec_starts_A = 
@@ -881,6 +881,7 @@ hypre_BoomerAMGCreateSCommPkg(hypre_ParCSRMatrix *A,
    recv_change = NULL;
    recv_procs_S = NULL;
    send_change = NULL;
+   if (col_map_offd_S) hypre_TFree(col_map_offd_S);
    col_map_offd_S = NULL;
    col_offd_S_to_A = NULL;
    if (num_recvs_A) recv_change = hypre_CTAlloc(int, num_recvs_A);
@@ -953,6 +954,7 @@ hypre_BoomerAMGCreateSCommPkg(hypre_ParCSRMatrix *A,
    status = hypre_CTAlloc(MPI_Status,j);
    MPI_Waitall(j,requests,status);
    hypre_TFree(status);
+   hypre_TFree(requests);
 
    num_sends_S = 0;
    total_nz = send_map_starts_A[num_sends_A];
