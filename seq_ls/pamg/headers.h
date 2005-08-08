@@ -13,6 +13,4 @@
 
 #include "pamg.h"
 
-#include "general.h" 
-
-#include "bcsr_matrix.h"
+#include "HYPRE_ls.h"
