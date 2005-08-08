@@ -37,7 +37,14 @@ extern "C" {
 # Structures and prototypes
 #===========================================================================
 
-../../utilities/protos *.c               >> $INTERNAL_HEADER
+cat  bcsr_matrix.h  >> $INTERNAL_HEADER
+cat bcsr_matrix_dense_block.h  >> $INTERNAL_HEADER
+cat  amg.h  >> $INTERNAL_HEADER
+cat  general.h  >> $INTERNAL_HEADER
+cat  pcg.h  >> $INTERNAL_HEADER
+
+
+../../utilities/protos [!F]*.c               >> $INTERNAL_HEADER
 
 #===========================================================================
 # Include guards
