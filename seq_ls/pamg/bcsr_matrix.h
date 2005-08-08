@@ -36,6 +36,9 @@ typedef struct {
 #define hypre_BCSRMatrixNumRowsPerBlock(A) ((A) -> num_rows_per_block)
 #define hypre_BCSRMatrixNumColsPerBlock(A) ((A) -> num_cols_per_block)
 
+
+#if 0
+
 /*****************************************************************************
  *
  * Prototypes
@@ -88,5 +91,7 @@ hypre_BCSRMatrixBuildCoarseOperator(hypre_BCSRMatrix* RT,
 				    hypre_BCSRMatrix* A,
 				    hypre_BCSRMatrix* P,
 				    hypre_BCSRMatrix** RAP_ptr);
+
+#endif
 
 #endif
