@@ -10,7 +10,8 @@
 
 include ../../config/Makefile.config
 
-CINCLUDES = ${INCLUDES} ${MPIINCLUDES}
+CINCLUDES = ${INCLUDES} ${MPIINCLUDE}
+LIBFLAGS = ${LIBDIRS} ${LIBS}
 
 C_COMPILE_FLAGS =\
  -I../..\
@@ -26,26 +27,33 @@ LFLAGS =\
  -L.\
  -L../../seq_mv\
  -L../../utilities\
+ -L../../krylov\
  -lHYPRE_amg_ls\
  -lHYPRE_seq_mv\
  -lHYPRE_utilities\
- -L../../krylov -lkrylov\
- ${MPILIBFLAGS} ${LIBFLAGS} ${LDLIBFLAGS}
+ -lHYPRE_krylov\
+ ${MPILIBFLAGS} ${LIBS}
  
 
 HEADERS =\
  headers.h\
  amg.h\
  pcg.h\
+ bcsr_matrix.h\
+ bcsr_matrix_dense_block.h\
  pamg.h\
  HYPRE_ls.h
 
 FILES =\
- driver.c\
  amg.c\
  amgstats.c\
  amg_setup.c\
- amg_solve.c \
+ amg_solve.c\
+ Atrunc.c\
+ bcsr_interp.c\
+ bcsr_matrix.c\
+ bcsr_matrix_dense_block.c\
+ bcsr_relax.c\
  cg_fun.c\
  coarsen.c\
  coarsenCR.c\
@@ -55,14 +63,20 @@ FILES =\
  interp.c\
  interpCR.c\
  interpRBM.c\
+ inx_part_of_u_interp.c\
  laplace.c\
  laplace_9pt.c\
  laplace_27pt.c\
+ pcg.c\
  random.c\
- rap.c \
+ rap.c\
  relax.c\
  schwarz.c\
  scaled_matnorm.c\
+ strength.c\
+ SPamg-pcg.c\
+ stencil_matrix.c\
+ trunc.c\
  HYPRE_amg.c\
  HYPRE_csr_pcg.c\
  HYPRE_csr_gmres.c
@@ -72,6 +86,8 @@ OBJS = ${FILES:.c=.o}
 ##################################################################
 # Targets
 ##################################################################
+
+lib: libHYPRE_amg_ls.a
 
 all: libHYPRE_amg_ls.a driver
 
