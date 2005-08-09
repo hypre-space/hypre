@@ -26,7 +26,7 @@ main( int   argc,
    int                 relax_default;
    int                 coarsen_type;
    int                 max_levels;
-   int                 num_functions;
+   int                 num_functions, num_fun;
    int                 num_relax_steps;
    int                 mode = 0;
    int use_block_flag;
@@ -76,7 +76,8 @@ main( int   argc,
       double   final_res_norm;
       int     *schwarz_option;
       int      schwarz_lev;
-      int     *coarsen_option;
+      int      print_matrix = 0;
+      
 
    /*-----------------------------------------------------------
     * Initialize some stuff
@@ -331,6 +332,16 @@ main( int   argc,
          arg_index++;
 	 use_block_flag = 1;
       }
+      else if ( strcmp(argv[arg_index], "-sysL") == 0 )
+      {
+         arg_index++;
+         num_fun = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-print") == 0 )
+      {
+         arg_index++;
+         print_matrix = 1;
+      }
       else
       {
          arg_index++;
@@ -349,6 +360,7 @@ main( int   argc,
       printf("  -fromfile <filename>   : build matrix from file\n");
       printf("\n");
       printf("  -laplacian (default)   : build laplacian 7pt operator\n");
+      printf("  -sysL <num functions>  : build SYSTEMS laplacian 7pt operator\n");
       printf("  -stencil <infile>      : build general stencil operator\n");
       printf("  -9pt                   : build laplacian 9pt operator\n");
       printf("  -27pt                  : build laplacian 27pt operator\n");
@@ -387,11 +399,14 @@ main( int   argc,
       printf("  -P <Px> <Py> <Pz>      : processor topology\n");
       printf("  -c <cx> <cy> <cz>      : diffusion coefficients\n");
       printf("  -a <ax> <ay> <az>      : convection coefficients\n");
+      printf("  -nf <val>              : set number of functions for systems AMG\n");
+
       printf("\n");
       printf("  -solver <ID>           : solver ID\n");
       printf("      0=AMG, 1=AMG-CG, 2=CG, 3=AMG-GMRES, 4=GMRES\n");
       printf("\n");
-
+      printf("  -print                 : print out the system matrix\n");
+      printf("\n");
       exit(1);
    }
 
@@ -440,9 +455,11 @@ main( int   argc,
     * Set up the RHS and initial guess
     *-----------------------------------------------------------*/
 
-#if 0
-   hypre_CSRMatrixPrint(A, "driver.out.A");
-#endif
+   if (print_matrix)
+   {
+      hypre_CSRMatrixPrint(A, "driver.out.A");
+   }
+   
 
    if ( build_rhs_type == 1 )
    {
@@ -1004,6 +1021,10 @@ BuildLaplacian( int               argc,
    int                 nx, ny, nz;
    int                 P, Q, R;
    double              cx, cy, cz;
+   int                 num_fun = 1;
+   double             *values;
+   double             *mtrx;
+
 
 #if 0
    hypre_ParCSRMatrix *A;
@@ -1013,7 +1034,7 @@ BuildLaplacian( int               argc,
    hypre_CSRMatrix    *A;
 
    int                 num_procs, myid;
-   double             *values;
+
 
    /*-----------------------------------------------------------
     * Initialize some stuff
@@ -1070,6 +1091,12 @@ BuildLaplacian( int               argc,
          cy = atof(argv[arg_index++]);
          cz = atof(argv[arg_index++]);
       }
+      else if ( strcmp(argv[arg_index], "-sysL") == 0 )
+      {
+         arg_index++;
+         num_fun = atoi(argv[arg_index++]);
+      }
+
       else
       {
          arg_index++;
@@ -1093,6 +1120,7 @@ BuildLaplacian( int               argc,
    if (myid == 0)
    {
       printf("  Laplacian:\n");
+      printf("  Laplacian:   num_fun = %d\n", num_fun);
       printf("    (nx, ny, nz) = (%d, %d, %d)\n", nx, ny, nz);
       printf("    (Px, Py, Pz) = (%d, %d, %d)\n", P,  Q,  R);
       printf("    (cx, cy, cz) = (%f, %f, %f)\n", cx, cy, cz);
@@ -1136,7 +1164,39 @@ BuildLaplacian( int               argc,
                                nx, ny, nz, P, Q, R, p, q, r,
                                values, &global_part);
 #endif
-   A = hypre_GenerateLaplacian(nx, ny, nz, P, Q, R, values);
+
+   if (num_fun ==1)
+   {
+      A = hypre_GenerateLaplacian(nx, ny, nz, P, Q, R, values);
+   }
+   else
+   {
+      mtrx = hypre_CTAlloc(double, num_fun*num_fun);
+      
+      if (num_fun == 2)
+      {
+         mtrx[0] = 2;
+         mtrx[1] = 1;
+         mtrx[2] = 1;
+         mtrx[3] = 2;
+      }
+      else if (num_fun == 3)
+      {
+         mtrx[0] = 1.01;
+         mtrx[1] = 1;
+         mtrx[2] = 0.0;
+         mtrx[3] = 1;
+         mtrx[4] = 2;
+         mtrx[5] = 1;
+         mtrx[6] = 0.0;
+         mtrx[7] = 1;
+         mtrx[8] = 1.01;
+      }
+
+      A = hypre_GenerateSysLaplacian(nx, ny, nz, P, Q, R, num_fun, mtrx, values);
+
+      hypre_TFree(mtrx);
+   }
 
    hypre_TFree(values);
 
