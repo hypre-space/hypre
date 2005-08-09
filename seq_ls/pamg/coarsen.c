@@ -106,11 +106,12 @@ hypre_AMGCoarsen( hypre_CSRMatrix    *A,
                   int               **CF_marker_ptr,
                   int                *coarse_size_ptr     )
 {
-   int             *A_i           = hypre_CSRMatrixI(A);
-   int             *A_j           = hypre_CSRMatrixJ(A);
-   double          *A_data        = hypre_CSRMatrixData(A);
    int              num_variables = hypre_CSRMatrixNumRows(A);
-                  
+/*
+    int             *A_i           = hypre_CSRMatrixI(A);
+    int             *A_j           = hypre_CSRMatrixJ(A);
+    double          *A_data        = hypre_CSRMatrixData(A);
+*/                
    int             *S_i;
    int             *S_j;
    double          *S_data;
@@ -122,8 +123,10 @@ hypre_AMGCoarsen( hypre_CSRMatrix    *A,
    int             *graph_array;
    int              graph_size;
 
-   double           diag, row_scale;
-   int              i, j, k, jA, jS, kS, ig;
+/*  double           diag, row_scale;
+    int              jS; */
+
+   int              i, j, k, jS, kS, ig;
 
    int              ierr = 0;
 
@@ -407,10 +410,14 @@ hypre_AMGCoarsenRuge( hypre_CSRMatrix    *A,
                       int               **CF_marker_ptr,
                       int                *coarse_size_ptr     )
 {
-   int             *A_i           = hypre_CSRMatrixI(A);
-   int             *A_j           = hypre_CSRMatrixJ(A);
-   double          *A_data        = hypre_CSRMatrixData(A);
+
    int              num_variables = hypre_CSRMatrixNumRows(A);
+
+/*
+    int             *A_i           = hypre_CSRMatrixI(A);
+    int             *A_j           = hypre_CSRMatrixJ(A);
+    double          *A_data        = hypre_CSRMatrixData(A);
+*/
                   
    int             *S_i;
    int             *S_j;
@@ -427,9 +434,13 @@ hypre_AMGCoarsenRuge( hypre_CSRMatrix    *A,
    int             *graph_ptr;
    int              graph_size;
 
-   double           diag, row_scale;
+/*   double           diag, row_scale;
+
+    int              jA, jS;
+*/
+
    int              measure, max_measure;
-   int              i, j, jA, jS, ig;
+   int              i, j, ig;
    int		    ic, ji, jj, jl, index;
    int		    ci_tilde = -1;
    int		    ci_tilde_mark = -1;
@@ -688,10 +699,14 @@ hypre_AMGCoarsenRugeLoL( hypre_CSRMatrix    *A,
 			 int               **CF_marker_ptr,
 			 int                *coarse_size_ptr     )
 {
-   int             *A_i           = hypre_CSRMatrixI(A);
-   int             *A_j           = hypre_CSRMatrixJ(A);
-   double          *A_data        = hypre_CSRMatrixData(A);
    int              num_variables = hypre_CSRMatrixNumRows(A);
+
+/*
+    int             *A_i           = hypre_CSRMatrixI(A);
+    int             *A_j           = hypre_CSRMatrixJ(A);
+    double          *A_data        = hypre_CSRMatrixData(A);
+*/
+
                   
    int             *S_i;
    int             *S_j;
@@ -705,10 +720,13 @@ hypre_AMGCoarsenRugeLoL( hypre_CSRMatrix    *A,
 
    int             *measure_array;
    int             *graph_array;
+/*
+    double           diag, row_scale;
+    int              jA, jS;
+*/
 
-   double           diag, row_scale;
    int              measure;
-   int              i, j, k, jA, jS;
+   int              i, j, k;
    int		    ji, jj, index;
    int		    ci_tilde = -1;
    int		    ci_tilde_mark = -1;
@@ -1051,10 +1069,14 @@ hypre_AMGCoarsenwLJP( hypre_CSRMatrix    *A,
                   int               **CF_marker_ptr,
                   int                *coarse_size_ptr     )
 {
-   int             *A_i           = hypre_CSRMatrixI(A);
-   int             *A_j           = hypre_CSRMatrixJ(A);
-   double          *A_data        = hypre_CSRMatrixData(A);
    int              num_variables = hypre_CSRMatrixNumRows(A);
+
+/*
+    int             *A_i           = hypre_CSRMatrixI(A);
+    int             *A_j           = hypre_CSRMatrixJ(A);
+    double          *A_data        = hypre_CSRMatrixData(A);
+*/
+
                   
    int             *S_i;
    int             *S_j;
@@ -1066,18 +1088,20 @@ hypre_AMGCoarsenwLJP( hypre_CSRMatrix    *A,
    double          *measure_array;
    int             *graph_array;
    int              graph_size;
-
-   double           diag, row_scale;
-   int              i, j, k, jA, jS, kS, ig;
+/*
+    double           diag, row_scale;
+    int              i, j, k, jA, jS, kS, ig;
+*/
+   int              i, j, jS, ig;
    int              jjS;
 
    int              ierr = 0;
 
-   /* #if 0 /* debugging */
+   #if 0  
    char  filename[256];
    FILE *fp;
+   #endif
    int   iter = 0;
-   /* #endif */
 
    printf("\n");
    printf("wLJP coarsening...\n");
@@ -1448,9 +1472,13 @@ hypre_AMGCoarsenRugeOnePass( hypre_CSRMatrix    *A,
                       int               **CF_marker_ptr,
                       int                *coarse_size_ptr     )
 {
+
    int             *A_i           = hypre_CSRMatrixI(A);
-   int             *A_j           = hypre_CSRMatrixJ(A);
-   double          *A_data        = hypre_CSRMatrixData(A);
+/*
+    int             *A_j           = hypre_CSRMatrixJ(A);
+    double          *A_data        = hypre_CSRMatrixData(A);
+*/
+
    int              num_variables = hypre_CSRMatrixNumRows(A);
                   
    /*hypre_CSRMatrix *S;*/
@@ -1468,24 +1496,27 @@ hypre_AMGCoarsenRugeOnePass( hypre_CSRMatrix    *A,
    int             *graph_array;
    int             *graph_ptr;
    int              graph_size;
-
+/*
    double           diag, row_scale;
+    int              i, j, jA, jS, ig;
+*/
    int              measure, max_measure;
-   int              i, j, jA, jS, ig;
+   int              i, j, jS, ig;
    int		    ic, ji, jj, jl, index;
-   int		    ci_tilde = -1;
-   int		    ci_tilde_mark = -1;
-   int		    set_empty = 1;
-   int		    C_i_nonempty = 0;
    int		    num_strong;
-
+/*
+    int                    ci_tilde = -1;
+    int                    ci_tilde_mark = -1;
+    int                    set_empty = 1;
+    int                    C_i_nonempty = 0;
+*/
    int              ierr = 0;
 
-   /* #if 0 /* debugging */
+   #if 0 /* debugging */
    char  filename[256];
    FILE *fp;
    int   iter = 0;
-   /* #endif*/
+   #endif 
 
    /*--------------------------------------------------------------
     * Compute a CSR strength matrix, S.

@@ -66,14 +66,14 @@ hypre_AMGSetup( void            *amg_vdata,
    int              *new_CF_marker;
    hypre_CSRMatrix  *S;
    hypre_CSRMatrix  *S2;
-   hypre_CSRMatrix  *S3;
+/*   hypre_CSRMatrix  *S3;*/
    hypre_CSRMatrix  *P;
    hypre_CSRMatrix  *A_H;
    hypre_CSRMatrix  *A_tilde;
    hypre_BCSRMatrix *B;
    hypre_BCSRMatrix *PB;
-   double *S2_data;
-   int       num_nz;
+/*   double *S2_data; */
+/*   int       num_nz; */
 
    int       num_levels;
    int       level;
@@ -97,8 +97,8 @@ hypre_AMGSetup( void            *amg_vdata,
 
    int* fake_dof_func;
 
-   char f_name[256];
-   FILE* f_out;
+/*   char f_name[256];
+     FILE* f_out; */
 
    mode = hypre_AMGDataMode(amg_data);
    S_mode = 0;

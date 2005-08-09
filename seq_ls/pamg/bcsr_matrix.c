@@ -119,6 +119,11 @@ hypre_BCSRMatrixPrint(hypre_BCSRMatrix* A, char* file_name) {
   for(i = 0; i < hypre_BCSRMatrixNumNonzeroBlocks(A); i++) {
     hypre_BCSRMatrixBlockPrint(hypre_BCSRMatrixBlocks(A)[i], out_file);
   }
+
+
+  return 0;
+  
+
 }
 
 /*****************************************************************************
@@ -145,7 +150,7 @@ hypre_BCSRMatrixTranspose(hypre_BCSRMatrix* A, hypre_BCSRMatrix** AT) {
    int           num_colsAT;
    int           num_nonzerosAT;
 
-   int           max_col;
+/*    int           max_col; */
    int           i, j;
 
    num_rowsAT = num_colsA;

@@ -44,7 +44,7 @@ hypre_BCSRMatrixBuildInterp(hypre_BCSRMatrix* A, int* CF_marker,
 
   int i, i1, i2;
   int jj, jj1;
-  int sgn;
+/*   int sgn; */
 
   int num_rows_per_block = hypre_BCSRMatrixNumRowsPerBlock(A);
   int num_cols_per_block = hypre_BCSRMatrixNumColsPerBlock(A);
@@ -357,7 +357,7 @@ hypre_BCSRMatrixBuildInterpD(hypre_BCSRMatrix* A, int* CF_marker,
 
   int i, i1, i2;
   int jj, jj1;
-  int sgn;
+/*   int sgn; */
 
   int num_rows_per_block = hypre_BCSRMatrixNumRowsPerBlock(A);
   int num_cols_per_block = hypre_BCSRMatrixNumColsPerBlock(A);

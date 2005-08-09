@@ -394,8 +394,6 @@ hypre_AMGBuildMultipass( hypre_CSRMatrix  *A,
    int             *coarse_dof_func;
 
    int              jj_counter;
-   int              jj_begin_row;
-   int              jj_end_row;
    
    int              start_indexing = 0; /* start indexing for P_data at 0 */
 
@@ -403,7 +401,6 @@ hypre_AMGBuildMultipass( hypre_CSRMatrix  *A,
    int              n_fine_remaining;
    int              n_coarse;
 
-   int              strong_f_marker;
 
    int             *fine_to_coarse;
 
@@ -425,12 +422,10 @@ hypre_AMGBuildMultipass( hypre_CSRMatrix  *A,
    
    int              i,i1,i2;
    int              jj,jj1;
-   int              sgn;
+
    
    double           diagonal;
-   double           sum;
-   double           distribute;          
-   
+
    double           zero = 0.0;
    double           one  = 1.0;
    
@@ -474,7 +469,7 @@ hypre_AMGBuildMultipass( hypre_CSRMatrix  *A,
     *  formula already, and which are thus available to interpolate from.
     *  assigned[i]=1 for C points, and 2, 3, 4, ... for F points, depending
     *  in which pass their interpolation formula is determined.
-   /*-----------------------------------------------------------------------
+    *-----------------------------------------------------------------------*/
    
    /*-----------------------------------------------------------------------
     *  First mark all C points as 'assigned'.
@@ -507,7 +502,8 @@ hypre_AMGBuildMultipass( hypre_CSRMatrix  *A,
      loopCount++;
      if(loopCount > 10){
        printf("too many multipass loops, first pass...\n");
-       end();
+       /* end();*/
+       return(-1);
      }
 
      printf("*** PASS %d: %d fine points to be treated out of total %d\n",loopCount-1,n_fine_remaining,n_fine);
@@ -637,7 +633,9 @@ hypre_AMGBuildMultipass( hypre_CSRMatrix  *A,
      loopCount++;
      if(loopCount > 10){
        printf("too many multipass loops, second pass...\n");
-       end();
+       /* end(); */
+       return(-1);
+       
      }
 
      printf("+++ PASS %d: %d fine points to be treated out of total %d\n",loopCount-1,n_fine_remaining,n_fine);
@@ -780,7 +778,7 @@ hypre_AMGBuildMultipass( hypre_CSRMatrix  *A,
 
    hypre_CSRMatrixNumNonzeros(P) = jP;
 
-   printf("!!!!!!! compression factor %e %\n",100.*((double)(P_size-jP))/(double)P_size);
+   printf("!!!!!!! compression factor %e \n",(100.0 *((double)(P_size-jP))/(double)P_size));
 
    /*-----------------------------------------------------------------------
     *  Build and return dof_func array for coarse grid.
@@ -849,7 +847,6 @@ hypre_AMGJacobiIterate( hypre_CSRMatrix  *A,
    int             *PJac_i;
    int             *PJac_j;
 
-   int              P_size;
    int              PJac_size;
    
    int             *P_marker;
@@ -857,8 +854,6 @@ hypre_AMGJacobiIterate( hypre_CSRMatrix  *A,
    int             *coarse_dof_func;
 
    int              jj_counter;
-   int              jj_begin_row;
-   int              jj_end_row;
    
    int              start_indexing = 0; /* start indexing for P_data at 0 */
 
@@ -866,13 +861,13 @@ hypre_AMGJacobiIterate( hypre_CSRMatrix  *A,
    int              n_fine_remaining;
    int              n_coarse;
 
-   int              strong_f_marker;
+
 
    int             *fine_to_coarse;
 
    int             *elementsPerRow;
    int             *elementsPerRowNew;
-   int              loopCount;
+
    int              elem;
    double           wsum;
    double           rsum;
@@ -887,11 +882,9 @@ hypre_AMGJacobiIterate( hypre_CSRMatrix  *A,
    
    int              i,i1,i2;
    int              jj,jj1;
-   int              sgn;
+
    
    double           diagonal;
-   double           sum;
-   double           distribute;          
    
    double           zero = 0.0;
    double           one  = 1.0;
@@ -1208,7 +1201,7 @@ hypre_AMGJacobiIterate( hypre_CSRMatrix  *A,
 
    hypre_CSRMatrixNumNonzeros(PJac) = jP;
 
-   printf("!!!!!!! compression factor %e %\n",100.*((double)(PJac_size-jP))/(double)PJac_size);
+   printf("!!!!!!! compression factor %e \n",100.*((double)(PJac_size-jP))/(double)PJac_size);
 
    /*-----------------------------------------------------------------------
     *  Build and return dof_func array for coarse grid.

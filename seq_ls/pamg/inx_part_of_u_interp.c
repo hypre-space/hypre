@@ -370,13 +370,20 @@ end_cg:
 	  aux = x[j_domain_dof[j]];
 	  for (k=i_dof_dof[j_domain_dof[j]];
 	       k<i_dof_dof[j_domain_dof[j]+1]; k++)
-	    if (i_global_to_local[j_dof_dof[k]] > -1)
+             if (i_global_to_local[j_dof_dof[k]] > -1)
+             {
 	      /* this is a_{i_loc, j_loc} --------------------------------- */
-	      if (j_dof_dof[k] != j_domain_dof[j])
-		aux -= a_dof_dof[k] * h[i_global_to_local[j_dof_dof[k]]];
-	      else
-		diag = a_dof_dof[k];
-	  
+               if (j_dof_dof[k] != j_domain_dof[j])
+               {
+                  aux -= a_dof_dof[k] * h[i_global_to_local[j_dof_dof[k]]];
+               }
+               else
+               {
+                  diag = a_dof_dof[k];
+               }
+             }
+          
+
 	  h[i_global_to_local[j_domain_dof[j]]] = aux/diag;
 	}
 
@@ -385,13 +392,19 @@ end_cg:
 	  aux = x[j_domain_dof[j]];
 	  for (k =i_dof_dof[j_domain_dof[j]+1]-1;
 	       k>=i_dof_dof[j_domain_dof[j]]; k--)
-	    if (i_global_to_local[j_dof_dof[k]] > -1)
+             if (i_global_to_local[j_dof_dof[k]] > -1)
+             {
 	      /* this is a_{i_loc, j_loc} --------------------------------- */
-	      if (j_dof_dof[k] != j_domain_dof[j])
-		aux -= a_dof_dof[k] * h[i_global_to_local[j_dof_dof[k]]];
-	      else
-		diag = a_dof_dof[k];
-	  
+               if (j_dof_dof[k] != j_domain_dof[j])
+               {
+                  aux -= a_dof_dof[k] * h[i_global_to_local[j_dof_dof[k]]];
+               }
+               else
+               {
+                  diag = a_dof_dof[k];
+               }
+             }
+          
 	  h[i_global_to_local[j_domain_dof[j]]] = aux/diag;
 	}
       nu++;
@@ -505,12 +518,18 @@ compute_sym_GS_T_action(double *x,
 	  for (k=i_dof_dof[j_domain_dof[j]];
 	       k<i_dof_dof[j_domain_dof[j]+1]; k++)
 	    if (i_global_to_local[j_dof_dof[k]] > -1)
-	      /* this is a_{i_loc, j_loc} --------------------------------- */
+	    {  /* this is a_{i_loc, j_loc} --------------------------------- */
 	      if (j_dof_dof[k] != j_domain_dof[j])
-		aux -= a_dof_dof[k] * w[i_global_to_local[j_dof_dof[k]]];
+              {
+                 aux -= a_dof_dof[k] * w[i_global_to_local[j_dof_dof[k]]];
+              }
 	      else
-		diag = a_dof_dof[k];
-	  
+              {
+                 diag = a_dof_dof[k];
+              }
+              
+            }
+          
 	  w[i_global_to_local[j_domain_dof[j]]] = aux/diag;
 	}
 
@@ -519,13 +538,19 @@ compute_sym_GS_T_action(double *x,
 	  aux = v[j_domain_dof[j]];
 	  for (k =i_dof_dof[j_domain_dof[j]+1]-1;
 	       k>=i_dof_dof[j_domain_dof[j]]; k--)
-	    if (i_global_to_local[j_dof_dof[k]] > -1)
+             if (i_global_to_local[j_dof_dof[k]] > -1)
+             {
 	      /* this is a_{i_loc, j_loc} --------------------------------- */
-	      if (j_dof_dof[k] != j_domain_dof[j])
-		aux -= a_dof_dof[k] * w[i_global_to_local[j_dof_dof[k]]];
-	      else
-		diag = a_dof_dof[k];
-	  
+                if (j_dof_dof[k] != j_domain_dof[j])
+                {
+                   aux -= a_dof_dof[k] * w[i_global_to_local[j_dof_dof[k]]];
+                }
+                else
+                {
+                   diag = a_dof_dof[k];
+                }
+             }
+          
 	  w[i_global_to_local[j_domain_dof[j]]] = aux/diag;
 	}
       nu++;

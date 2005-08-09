@@ -56,7 +56,7 @@ hypre_AMGCreateS( hypre_CSRMatrix    *A,
    double          *S_data;
                  
    double           diag, row_scale;
-   int              i, j, k, jA, jS, kS, ig;
+   int              i, jA, jS;
 
    int              ierr = 0;
 

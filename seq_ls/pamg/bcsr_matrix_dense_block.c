@@ -23,6 +23,10 @@ hypre_BCSRMatrixDenseBlockCreate(int num_rows, int num_cols) {
   A->data = NULL;
   A->num_rows = num_rows;
   A->num_cols = num_cols;
+
+  return A;
+  
+
 }
 
 int
@@ -52,6 +56,10 @@ hypre_BCSRMatrixDenseBlockFillData(hypre_BCSRMatrixDenseBlock* A,
   for(i = 0; i < A->num_rows*A->num_cols; i++) {
     A->data[i] = data[i];
   }
+
+  return 0;
+  
+
 }
 
 int
@@ -62,6 +70,10 @@ hypre_BCSRMatrixDenseBlockGetData(hypre_BCSRMatrixDenseBlock* A,
   for(i = 0; i < A->num_rows*A->num_cols; i++) {
     data[i] = A->data[i];
   }
+
+  return 0;
+  
+
 }
 
 hypre_BCSRMatrixDenseBlock*
@@ -299,6 +311,10 @@ hypre_BCSRMatrixDenseBlockMatvec(double alpha, hypre_BCSRMatrixBlock* A,
   if (alpha != 1.0) {
     for (i = 0; i < num_rows; i++) y_data[i] *= alpha;
   }
+
+  return 0;
+  
+
 }
 
 int
@@ -354,6 +370,10 @@ hypre_BCSRMatrixDenseBlockMatvecT(double alpha, hypre_BCSRMatrixBlock* A,
   if (alpha != 1.0) {
     for (i = 0; i < num_cols; i++) y_data[i] *= alpha;
   }
+
+  return 0;
+  
+
 }
 
 double
@@ -425,4 +445,8 @@ hypre_BCSRMatrixDenseBlockPrint(hypre_BCSRMatrixDenseBlock* A,
     fprintf(out_file, "%f ", A->data[i]);
   }
   fprintf(out_file, "\n");
+
+  return 0;
+  
+
 }
