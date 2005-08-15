@@ -16,7 +16,7 @@
 
 #define DEBUG 0
 
-#if DEBUG
+#if DEBU
 char       filename[255];
 FILE      *file;
 int        my_rank;
@@ -642,7 +642,7 @@ hypre_StructGridRead( MPI_Comm           comm,
       hypre_StructGridSetExtents(grid, ilower, iupper);
    }
 
-#ifdef HYPRE_NO-GLOBAL_PARTITION
+#ifdef HYPRE_NO_GLOBAL_PARTITION
    hypre_NewStructGridAssemble(grid);
 #else
    hypre_StructGridAssemble(grid);

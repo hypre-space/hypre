@@ -281,7 +281,7 @@ int hypre_APGetAllBoxesInRegions( hypre_BoxArray *region_array,
                                   MPI_Comm comm )
 {
    
-   int      i, ierr = 0, size;
+   int      i, ierr = 0;
    int     *count_array;
    int      num_regions;
    int     *send_buf_count;
@@ -618,7 +618,7 @@ int hypre_APRefineRegionsByVol( hypre_BoxArray *region_array,  double *vol_array
    
    double            *fraction_full;
    int               *order;
-   int                myid, num_procs, size, est_size;
+   int                myid, num_procs, est_size;
    int                new, regions_intact;
 
       
@@ -806,7 +806,7 @@ int hypre_CreateStructAssumedPartition(int dim, hypre_Box *bounding_box,
    int                total_boxes, proc_count, max_position, tmp_num;
    int                *proc_array=NULL;
    int                i1, i2, i11, i22, pos1, pos2, pos0;
-   int                tmp, ti1, ti2, t_tmp, t_total, vol;
+   int                tmp, ti1, ti2, t_tmp, t_total;
    double             f1, f2, r,x_box, y_box, z_box, dbl_vol;
    int                initial_level;
    int                grow, grow_array[6];
@@ -826,13 +826,11 @@ int hypre_CreateStructAssumedPartition(int dim, hypre_Box *bounding_box,
    int        *proc_array_starts=NULL;
    
 
-   hypre_BoxArray              *my_partition, *partition_copy;
+   hypre_BoxArray              *my_partition;
    hypre_DataExchangeResponse  response_obj;
 
    int        *contact_boxinfo;
    int        index;
-   int        *order_index;
-   int        less_procs;
    
 
 
@@ -1667,7 +1665,6 @@ hypre_APFillResponseStructAssumedPart(void *p_recv_contact_buf,
    int    *ids, *boxnums;
    int    *recv_contact_buf;
 
-   hypre_Index  imin, imax;
    hypre_Box    *box;
      
    hypre_BoxArray              *part_boxes;

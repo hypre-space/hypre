@@ -52,7 +52,6 @@ int hypre_NewStructGridAssemble( hypre_StructGrid *grid )
    int                  prune;
        
    hypre_Box           *box;
-   hypre_BoxArray      *region_array;
    
 
    MPI_Comm             comm         = hypre_StructGridComm(grid);

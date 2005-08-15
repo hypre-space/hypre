@@ -102,7 +102,6 @@ hypre_NewBoxNeighborsAssemble( hypre_BoxNeighbors *neighbors,
    hypre_Index         *pshifts;
 
    hypre_IndexRef       pshift;
-   int                  period;
    int                  keep_box;
    int                  num_boxes, num_nonperiodic_boxes;
 
@@ -113,8 +112,8 @@ hypre_NewBoxNeighborsAssemble( hypre_BoxNeighbors *neighbors,
    hypre_Box           *neighbor_box;
 
    int                  distance;
-   int                  diff, firstproc, firstproci;
-   int                  i, j, p, d, ilocal, inew, ii;
+   int                  diff;
+   int                  i, j, p, d, ilocal, inew;
 
    int                  px = hypre_IndexX(periodic);
    int                  py = hypre_IndexY(periodic);
@@ -126,10 +125,7 @@ hypre_NewBoxNeighborsAssemble( hypre_BoxNeighbors *neighbors,
 
    int                  ierr = 0;
 
-   hypre_BoxArray *tmp_boxes;
-   
-   int            *tmp_ids, *tmp_boxnums, *tmp_procs, *tmp_p;
-   int             tmp_first_local;
+   int            *tmp_p;
    
    int             first_local_orig, check_loc;;
    
@@ -163,7 +159,6 @@ hypre_NewBoxNeighborsAssemble( hypre_BoxNeighbors *neighbors,
    
    if( num_periods > 1 )
    {
-      int  ip, jp, kp;
 
       hypre_BoxArraySetSize(boxes, num_periods*num_boxes);
       procs = hypre_TReAlloc(procs, int, num_periods*num_boxes);
