@@ -62,11 +62,17 @@ m4_pattern_allow([HYPRE_[A-Z_]+])
 dnl *********************************************************************
 dnl * Initialize Variables
 dnl *********************************************************************
-AC_DEFINE([PACKAGE_DATE], ["HYPRE_DATE"], [Date of release])
-AC_DEFINE([PACKAGE_TIME], ["HYPRE_TIME"], [Time of release])
-AC_DEFINE([PACKAGE_DATETIME], ["HYPRE_DATETIME"], [Date and time of release])
-PACKAGE_DATETIME="HYPRE_DATE HYPRE_TIME"
-AC_SUBST([PACKAGE_DATETIME])
+AC_DEFINE([HYPRE_PACKAGE_DATE], ["HYPRE_DATE"], [Date of release])
+AC_DEFINE([HYPRE_PACKAGE_TIME], ["HYPRE_TIME"], [Time of release])
+AC_DEFINE([HYPRE_PACKAGE_DATETIME], ["HYPRE_DATETIME"], [Date and time of release])
+AC_DEFINE([HYPRE_PACKAGE_NAME], ["HYPRE_NAME"], [Package name])
+AC_DEFINE([HYPRE_PACKAGE_VERSION], ["HYPRE_VERSION"], [Version Number])
+AC_DEFINE([HYPRE_PACKAGE_STRING], ["HYPRE_NAME"], [Package name])
+AC_DEFINE([HYPRE_PACKAGE_TARNAME], ["HYPRE_NAME"], [Package name])
+AC_DEFINE([HYPRE_PACKAGE_BUGREPORT], ["HYPRE_BUGS"], [Bug reports])
+
+HYPRE_PACKAGE_DATETIME="HYPRE_DATE HYPRE_TIME"
+AC_SUBST([HYPRE_PACKAGE_DATETIME])
 
 HYPRE_TOP_SRCDIR="HYPRE_TOP_SRC_DIR"
 AC_SUBST([HYPRE_TOP_SRCDIR])
@@ -79,6 +85,19 @@ AC_SUBST([HYPRE_RELEASEVERSION])
 AC_SUBST([HYPRE_RELEASEDATE])
 AC_SUBST([HYPRE_RELEASETIME])
 AC_SUBST([HYPRE_RELEASEDATETIME])
+
+dnl *********************************************************************
+dnl * Clear variables defined by AC_INIT to avoid name conflicts with
+dnl * other packages.
+dnl *********************************************************************
+PACKAGE_DATE=
+PACKAGE_TIME=
+PACKAGE_DATETIME=
+PACKAGE_NAME=
+PACKAGE_VERSION=
+PACKAGE_STRING=
+PACKAGE_TARNAME=
+PACKAGE_BUGREPORT=
 
 dnl *********************************************************************
 dnl * Define optional features
@@ -202,23 +221,14 @@ AC_ARG_WITH(insure,
                    and g++ as the C and C++ compilers unless already set
                    by the user. Nothing is done to verify that insure 
                    is available on the machine]),
-[if test "$casc_user_chose_compilers" = "no"
- then
-   CC="gcc"
-   CXX="g++"
-   F77="g77"
-   casc_user_chose_compilers=yes
- fi
- case "${withval}" in
+[case "${withval}" in
    yes) casc_using_insure=yes
         casc_using_debug=yes
-        casc_using_mpi=no
         casc_insure_flags=""
         ;;
    no)  ;;
     *)  casc_using_insure=yes
         casc_using_debug=yes
-        casc_using_mpi=no
         casc_insure_flags="$withval"
         ;;
  esac]
@@ -230,23 +240,14 @@ AC_ARG_WITH(insure-to-file,
                    gcc and g++ as the C and C++ compilers, unless already set
                    by the user. Nothing is done to verify that insure is
                    available on the machine]),
-[if test "$casc_user_chose_compilers" = "no"
- then
-   CC="gcc"
-   CXX="g++"
-   F77="g77"
-   casc_user_chose_compilers=yes
- fi
- case "${withval}" in
+[case "${withval}" in
    yes) casc_using_insure=yes
         casc_using_debug=yes
-        casc_using_mpi=no
         casc_insure_flags="-log-file=insure.log -append-logfile=yes"
         ;;
     no) ;;
      *) casc_using_insure=yes
         casc_using_debug=yes
-        casc_using_mpi=no
         casc_insure_flags="$withval"
         ;;
  esac]
@@ -821,13 +822,17 @@ else
 fi
 
 dnl *********************************************************************
-dnl * Set INSURE options if needed
+dnl * Set INSURE options
+dnl * Need to reverse order of -lpmpich and -lmpich in FLIBS when using insure
 dnl *********************************************************************
 if test "$casc_using_insure" = "yes"
 then
-   HYPRE_INSURE_PATH="/usr/apps/ParaSoft/default/bin.linux2"
-   CC="${HYPRE_INSURE_PATH}/insure ${casc_insure_flags} $CC"
-   CXX="${HYPRE_INSURE_PATH}/insure ${casc_insure_flags} $CXX"
+   HYPRE_REVERSE_FLIBS
+   LINK_CC="insure ${casc_insure_flags}"
+   LINK_CXX="insure ${casc_insure_flags}"
+else
+   LINK_CC="${CC}"
+   LINK_CXX="${CXX}"
 fi
 
 dnl *********************************************************************
@@ -896,6 +901,9 @@ AC_SUBST(CFLAGS)
 AC_SUBST(CXXFLAGS)
 AC_SUBST(F77FLAGS)
 AC_SUBST(LDFLAGS)
+
+AC_SUBST(LINK_CC)
+AC_SUBST(LINK_CXX)
 
 dnl *********************************************************************
 dnl * Installation Directories

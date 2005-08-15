@@ -90,9 +90,8 @@ esac],[casc_using_openmp=no])
 
 dnl **********************************************************************
 dnl * HYPRE_FIND_G2C
-dnl *
-dnl try to find libg2c.a
-dnl
+dnl *  try to find libg2c.a
+dnl **********************************************************************
 AC_DEFUN([HYPRE_FIND_G2C],
 [
  AC_REQUIRE([AC_F77_LIBRARY_LDFLAGS])
@@ -114,6 +113,38 @@ AC_DEFUN([HYPRE_FIND_G2C],
   else
      LIBS="$hypre_save_LIBS"
   fi
+
+])
+
+
+dnl **********************************************************************
+dnl * HYPRE_REVERSE_FLIBS
+dnl *   reverse the order of -lpmpich and -lmpich ONLY when using insure
+dnl *   Search FLIBS to find -lpmpich, when found reverse the order with
+dnl *      mpich; ignore the -lmpich when found; save all other FLIBS 
+dnl *      values
+dnl **********************************************************************
+AC_DEFUN([HYPRE_REVERSE_FLIBS],
+[
+ AC_REQUIRE([AC_F77_LIBRARY_LDFLAGS])
+
+  hypre_save_FLIBS="$FLIBS"
+  FLIBS=
+
+  for lib_list in $hypre_save_FLIBS; do
+     tmp_list="$lib_list"
+     if test "$lib_list" = "-lpmpich"
+     then
+        tmp_list="-lmpich"
+     fi
+
+     if test "$lib_list" = "-lmpich"
+     then
+        tmp_list="-lpmpich"
+     fi
+
+     FLIBS="$FLIBS $tmp_list"
+  done
 
 ])
 
