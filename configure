@@ -322,7 +322,7 @@ ac_includes_default="\
 #endif"
 
 ac_subdirs_all="$ac_subdirs_all babel-runtime"
-ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS build build_cpu build_vendor build_os host host_cpu host_vendor host_os PACKAGE_DATETIME HYPRE_TOP_SRCDIR HYPRE_RELEASEVERSION HYPRE_RELEASEDATE HYPRE_RELEASETIME HYPRE_RELEASEDATETIME CC CXX F77 RANLIB ac_ct_RANLIB INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA AWK CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT CPP LN_S SET_MAKE CXXFLAGS ac_ct_CXX FFLAGS ac_ct_F77 FLIBS CXXCPP FPP EGREP POW_LIB LIBOBJS MPILIBS subdirs BABELDIR HYPRE_ARCH HOSTNAME F77FLAGS HYPRE_INSTALLDIR HYPRE_LIBINSTALL HYPRE_INCINSTALL INCLUDES LIBDIRS LDLIBS LDLIBDIRS HYPRE_LIBSUFFIX MPIINCLUDE MPILIBDIRS MPIFLAGS TIMERDEFS FEILIBS FEILIBDIRS FEIINCLUDE MLI_DIR MLILIBS MLILIBDIRS MLIINCLUDE BLASLIBDIRS BLASLIBS HYPREBLASFILES HYPREBLASHEADERS LAPACKLIBDIRS LAPACKLIBS HYPRELAPACKFILS1 HYPRELAPACKFILS2 HYPRELAPACKFILS3 HYPRELAPACKHEADERS AR LTLIBOBJS'
+ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS build build_cpu build_vendor build_os host host_cpu host_vendor host_os HYPRE_PACKAGE_DATETIME HYPRE_TOP_SRCDIR HYPRE_RELEASEVERSION HYPRE_RELEASEDATE HYPRE_RELEASETIME HYPRE_RELEASEDATETIME CC CXX F77 RANLIB ac_ct_RANLIB INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA AWK CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT CPP LN_S SET_MAKE CXXFLAGS ac_ct_CXX FFLAGS ac_ct_F77 FLIBS CXXCPP FPP EGREP POW_LIB LIBOBJS MPILIBS subdirs BABELDIR HYPRE_ARCH HOSTNAME F77FLAGS LINK_CC LINK_CXX HYPRE_INSTALLDIR HYPRE_LIBINSTALL HYPRE_INCINSTALL INCLUDES LIBDIRS LDLIBS LDLIBDIRS HYPRE_LIBSUFFIX MPIINCLUDE MPILIBDIRS MPIFLAGS TIMERDEFS FEILIBS FEILIBDIRS FEIINCLUDE MLI_DIR MLILIBS MLILIBDIRS MLIINCLUDE BLASLIBDIRS BLASLIBS HYPREBLASFILES HYPREBLASHEADERS LAPACKLIBDIRS LAPACKLIBS HYPRELAPACKFILS1 HYPRELAPACKFILS2 HYPRELAPACKFILS3 HYPRELAPACKHEADERS AR LTLIBOBJS'
 ac_subst_files=''
 
 # Initialize some variables set by options.
@@ -1555,20 +1555,46 @@ host_os=`echo $ac_cv_host | sed 's/^\([^-]*\)-\([^-]*\)-\(.*\)$/\3/'`
 
 
 cat >>confdefs.h <<\_ACEOF
-#define PACKAGE_DATE "2005/02/09"
+#define HYPRE_PACKAGE_DATE "2005/02/09"
 _ACEOF
 
 
 cat >>confdefs.h <<\_ACEOF
-#define PACKAGE_TIME "09:25:00"
+#define HYPRE_PACKAGE_TIME "09:25:00"
 _ACEOF
 
 
 cat >>confdefs.h <<\_ACEOF
-#define PACKAGE_DATETIME "2005/02/09 09:25:00"
+#define HYPRE_PACKAGE_DATETIME "2005/02/09 09:25:00"
 _ACEOF
 
-PACKAGE_DATETIME="2005/02/09 09:25:00"
+
+cat >>confdefs.h <<\_ACEOF
+#define HYPRE_PACKAGE_NAME "hypre"
+_ACEOF
+
+
+cat >>confdefs.h <<\_ACEOF
+#define HYPRE_PACKAGE_VERSION "1.9.0b"
+_ACEOF
+
+
+cat >>confdefs.h <<\_ACEOF
+#define HYPRE_PACKAGE_STRING "hypre"
+_ACEOF
+
+
+cat >>confdefs.h <<\_ACEOF
+#define HYPRE_PACKAGE_TARNAME "hypre"
+_ACEOF
+
+
+cat >>confdefs.h <<\_ACEOF
+#define HYPRE_PACKAGE_BUGREPORT "http://www-casc.llnl.gov/bugs/enter_bug.cgi?product=HYPRE"
+_ACEOF
+
+
+HYPRE_PACKAGE_DATETIME="2005/02/09 09:25:00"
 
 
 HYPRE_TOP_SRCDIR="`pwd`"
@@ -1582,6 +1608,15 @@ HYPRE_RELEASEDATETIME="2005/02/09 09:25:00"
 
 
 
+
+PACKAGE_DATE=
+PACKAGE_TIME=
+PACKAGE_DATETIME=
+PACKAGE_NAME=
+PACKAGE_VERSION=
+PACKAGE_STRING=
+PACKAGE_TARNAME=
+PACKAGE_BUGREPORT=
 
 # Check whether --enable-debug or --disable-debug was given.
 if test "${enable_debug+set}" = set; then
@@ -1696,23 +1731,14 @@ fi;
 # Check whether --with-insure or --without-insure was given.
 if test "${with_insure+set}" = set; then
   withval="$with_insure"
-  if test "$casc_user_chose_compilers" = "no"
- then
-   CC="gcc"
-   CXX="g++"
-   F77="g77"
-   casc_user_chose_compilers=yes
- fi
- case "${withval}" in
+  case "${withval}" in
    yes) casc_using_insure=yes
         casc_using_debug=yes
-        casc_using_mpi=no
         casc_insure_flags=""
         ;;
    no)  ;;
     *)  casc_using_insure=yes
         casc_using_debug=yes
-        casc_using_mpi=no
         casc_insure_flags="$withval"
         ;;
  esac
@@ -1723,23 +1749,14 @@ fi;
 # Check whether --with-insure-to-file or --without-insure-to-file was given.
 if test "${with_insure_to_file+set}" = set; then
   withval="$with_insure_to_file"
-  if test "$casc_user_chose_compilers" = "no"
- then
-   CC="gcc"
-   CXX="g++"
-   F77="g77"
-   casc_user_chose_compilers=yes
- fi
- case "${withval}" in
+  case "${withval}" in
    yes) casc_using_insure=yes
         casc_using_debug=yes
-        casc_using_mpi=no
         casc_insure_flags="-log-file=insure.log -append-logfile=yes"
         ;;
     no) ;;
      *) casc_using_insure=yes
         casc_using_debug=yes
-        casc_using_mpi=no
         casc_insure_flags="$withval"
         ;;
  esac
@@ -5167,7 +5184,7 @@ fi
 
 
 # Provide some information about the compiler.
-echo "$as_me:5170:" \
+echo "$as_me:5187:" \
      "checking for Fortran 77 compiler version" >&5
 ac_compiler=`set X $ac_compile; echo $2`
 { (eval echo "$as_me:$LINENO: \"$ac_compiler --version </dev/null >&5\"") >&5
@@ -5363,7 +5380,7 @@ _ACEOF
 # flags.
 ac_save_FFLAGS=$FFLAGS
 FFLAGS="$FFLAGS $ac_verb"
-(eval echo $as_me:5366: \"$ac_link\") >&5
+(eval echo $as_me:5383: \"$ac_link\") >&5
 ac_f77_v_output=`eval $ac_link 5>&1 2>&1 | grep -v 'Driving:'`
 echo "$ac_f77_v_output" >&5
 FFLAGS=$ac_save_FFLAGS
@@ -5441,7 +5458,7 @@ _ACEOF
 # flags.
 ac_save_FFLAGS=$FFLAGS
 FFLAGS="$FFLAGS $ac_cv_prog_f77_v"
-(eval echo $as_me:5444: \"$ac_link\") >&5
+(eval echo $as_me:5461: \"$ac_link\") >&5
 ac_f77_v_output=`eval $ac_link 5>&1 2>&1 | grep -v 'Driving:'`
 echo "$ac_f77_v_output" >&5
 FFLAGS=$ac_save_FFLAGS
@@ -9298,9 +9315,33 @@ fi
 
 if test "$casc_using_insure" = "yes"
 then
-   HYPRE_INSURE_PATH="/usr/apps/ParaSoft/default/bin.linux2"
-   CC="${HYPRE_INSURE_PATH}/insure ${casc_insure_flags} $CC"
-   CXX="${HYPRE_INSURE_PATH}/insure ${casc_insure_flags} $CXX"
+
+
+
+  hypre_save_FLIBS="$FLIBS"
+  FLIBS=
+
+  for lib_list in $hypre_save_FLIBS; do
+     tmp_list="$lib_list"
+     if test "$lib_list" = "-lpmpich"
+     then
+        tmp_list="-lmpich"
+     fi
+
+     if test "$lib_list" = "-lmpich"
+     then
+        tmp_list="-lpmpich"
+     fi
+
+     FLIBS="$FLIBS $tmp_list"
+  done
+
+
+   LINK_CC="insure ${casc_insure_flags}"
+   LINK_CXX="insure ${casc_insure_flags}"
+else
+   LINK_CC="${CC}"
+   LINK_CXX="${CXX}"
 fi
 
 if test "$casc_using_purify" = "yes"
@@ -9417,6 +9458,9 @@ _ACEOF
 
        ;;
 esac
+
+
+
 
 
 
@@ -10101,7 +10145,7 @@ s,@host@,$host,;t t
 s,@host_cpu@,$host_cpu,;t t
 s,@host_vendor@,$host_vendor,;t t
 s,@host_os@,$host_os,;t t
-s,@PACKAGE_DATETIME@,$PACKAGE_DATETIME,;t t
+s,@HYPRE_PACKAGE_DATETIME@,$HYPRE_PACKAGE_DATETIME,;t t
 s,@HYPRE_TOP_SRCDIR@,$HYPRE_TOP_SRCDIR,;t t
 s,@HYPRE_RELEASEVERSION@,$HYPRE_RELEASEVERSION,;t t
 s,@HYPRE_RELEASEDATE@,$HYPRE_RELEASEDATE,;t t
@@ -10141,6 +10185,8 @@ s,@BABELDIR@,$BABELDIR,;t t
 s,@HYPRE_ARCH@,$HYPRE_ARCH,;t t
 s,@HOSTNAME@,$HOSTNAME,;t t
 s,@F77FLAGS@,$F77FLAGS,;t t
+s,@LINK_CC@,$LINK_CC,;t t
+s,@LINK_CXX@,$LINK_CXX,;t t
 s,@HYPRE_INSTALLDIR@,$HYPRE_INSTALLDIR,;t t
 s,@HYPRE_LIBINSTALL@,$HYPRE_LIBINSTALL,;t t
 s,@HYPRE_INCINSTALL@,$HYPRE_INCINSTALL,;t t
