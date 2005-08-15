@@ -80,6 +80,7 @@ install: libHYPRE_sstruct_mv.a
 
 clean:
 	rm -f *.o libHYPRE*
+	rm -rf pchdir tca.map *inslog*
 
 distclean: clean
 

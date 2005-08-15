@@ -51,6 +51,7 @@ install: libHYPRE_MatrixMatrix.a
 
 clean:
 	rm -f *.o lib*.a
+	rm -rf pchdir tca.map *inslog*
 
 distclean: clean
 

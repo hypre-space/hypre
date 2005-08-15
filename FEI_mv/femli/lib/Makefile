@@ -143,6 +143,7 @@ install: libHYPRE_mli.a
 
 clean:
 	rm -f *.o *.h *.c *.f *.cxx libHYPRE*
+	rm -rf pchdir tca.map *inslog*
 
 distclean: clean
 

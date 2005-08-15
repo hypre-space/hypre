@@ -161,6 +161,7 @@ clean:
 	    (cd $$i && $(MAKE) $@); \
 	  fi; \
 	done
+	rm -rf tca.map pchdir *inslog*
 
 distclean:
 	@ \

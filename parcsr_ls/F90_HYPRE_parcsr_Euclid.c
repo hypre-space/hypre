@@ -76,7 +76,7 @@ hypre_F90_IFACE(hypre_euclidsetparams, HYPRE_EUCLIDSETPARAMS)
 {
    *ierr = (int) HYPRE_EuclidSetParams( (HYPRE_Solver) *solver, 
                                         (int)          *argc,
-                                        (char *)        argv );
+                                        (char)         *argv );
 }
 
 /*--------------------------------------------------------------------------

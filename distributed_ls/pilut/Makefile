@@ -64,6 +64,7 @@ install: libHYPRE_DistributedMatrixPilutSolver.a
 
 clean:
 	rm -f *.o libHYPRE*
+	rm -rf pchdir tca.map *inslog*
 
 distclean: clean
 

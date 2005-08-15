@@ -54,6 +54,7 @@ install: libHYPRE_DistributedMatrix.a
 	cp -fp libHYPRE* $(HYPRE_LIB_INSTALL)
 clean:
 	rm -f *.o libHYPRE*
+	rm -rf pchdir tca.map *inslog*
 
 distclean: clean
 

@@ -84,6 +84,7 @@ install: libHYPRE_superlu.a
 
 clean:
 	rm -f *.o libHYPRE*
+	rm -rf pchdir tca.dir *inslog*
 
 distclean: clean
 

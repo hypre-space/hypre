@@ -183,6 +183,7 @@ install: libHYPRE_FEI.a
 
 clean:
 	rm -rf *.o libHYPRE*
+	rm -rf pchdir tca.map *inslog*
 
 distclean: clean
 	rm -rf Makefile

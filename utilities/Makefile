@@ -84,6 +84,7 @@ install: libHYPRE_utilities.a
 
 clean:
 	rm -f *.o libHYPRE* f2c.h *blas.h *lapack.h 
+	rm -rf pchdir tca.map *inslog*
 
 distclean: clean
 
