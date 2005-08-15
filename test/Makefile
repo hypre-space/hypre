@@ -256,7 +256,7 @@ distclean: clean
 
 struct: struct.o
 	@echo  "Building" $@ "... "
-	${CC} -o $@ $@.o ${STRUCT_LFLAGS}
+	${LINK_CC} -o $@ $@.o ${STRUCT_LFLAGS}
 
 fij_mv.o: fij_mv.f
 	@echo  "Building" $@ "... "
@@ -288,51 +288,51 @@ fstruct_mv.o: fstruct_mv.f
 
 struct_for: fstruct_mv.o fstruct_ls.o struct_for.o
 	@echo  "Building" $@ "... "
-	${CC} -o $@ fstruct_mv.o fstruct_ls.o $@.o ${FFLAGS} ${STRUCT_LFLAGS}
+	${LINK_CC} -o $@ fstruct_mv.o fstruct_ls.o $@.o ${FFLAGS} ${STRUCT_LFLAGS}
 
 ex1_for: fstruct_mv.o fstruct_ls.o ex1_for.o
 	@echo  "Building" $@ "... "
-	${CC} -o $@ fstruct_mv.o fstruct_ls.o $@.o ${FFLAGS} ${STRUCT_LFLAGS}
+	${LINK_CC} -o $@ fstruct_mv.o fstruct_ls.o $@.o ${FFLAGS} ${STRUCT_LFLAGS}
 
 ex3_for: fstruct_mv.o fstruct_ls.o ex3_for.o
 	@echo  "Building" $@ "... "
-	${CC} -o $@ fstruct_mv.o fstruct_ls.o $@.o ${FFLAGS} ${STRUCT_LFLAGS}
+	${LINK_CC} -o $@ fstruct_mv.o fstruct_ls.o $@.o ${FFLAGS} ${STRUCT_LFLAGS}
 
 ex5_for: fij_mv.o fparcsr_mv.o fparcsr_ls.o ex5_for.o
 	@echo  "Building" $@ "... "
-	${CC} -o $@ fij_mv.o fparcsr_mv.o fparcsr_ls.o $@.o ${FFLAGS} ${LFLAGS}
+	${LINK_CC} -o $@ fij_mv.o fparcsr_mv.o fparcsr_ls.o $@.o ${FFLAGS} ${LFLAGS}
 
 sstruct: sstruct.o
 	@echo  "Building" $@ "... "
-	${CC} -o $@ $@.o ${SSTRUCT_LFLAGS}
+	${LINK_CC} -o $@ $@.o ${SSTRUCT_LFLAGS}
 
 sstruct_fac: sstruct_fac.o
 	@echo  "Building" $@ "... "
-	${CC} -o $@ $@.o ${SSTRUCT_LFLAGS}
+	${LINK_CC} -o $@ $@.o ${SSTRUCT_LFLAGS}
 
 hypre_set_precond: hypre_set_precond.o
 	@echo  "Building" $@ "... "
-	${CC} -o $@ $@.o ${IJ_LFLAGS}
+	${LINK_CC} -o $@ $@.o ${IJ_LFLAGS}
 
 test_ij: hypre_set_precond.o test_ij.o
 	@echo  "Building" $@ "... "
-	${CC} -o $@ hypre_set_precond.o $@.o ${IJ_LFLAGS}
+	${LINK_CC} -o $@ hypre_set_precond.o $@.o ${IJ_LFLAGS}
 
 ij: ij.o
 	@echo  "Building" $@ "... "
-	${CC} -o $@ $@.o ${IJ_LFLAGS}
+	${LINK_CC} -o $@ $@.o ${IJ_LFLAGS}
 
 ij_mv: ij_mv.o
 	@echo  "Building" $@ "... "
-	${CC} -o $@ $@.o ${IJ_MV_LFLAGS}
+	${LINK_CC} -o $@ $@.o ${IJ_LFLAGS}
 
 new_ij: new_ij.o
 	@echo  "Building" $@ "... "
-	${CC} -o $@ $@.o ${IJ_LFLAGS}
+	${LINK_CC} -o $@ $@.o ${IJ_LFLAGS}
 
 fei: fei.o
 	@echo  "Building" $@ "... "
-	${CXX} -o $@ $@.o ${FEICXX_LFLAGS}
+	${LINK_CXX} -o $@ $@.o ${FEICXX_LFLAGS}
 
 f77_struct: f77_struct.o
 	@echo  "Building" $@ "... "
@@ -348,14 +348,14 @@ f77_ij_mv: f77_ij_mv.o
 
 driver_commpkg: driver_commpkg.o
 	@echo  "Building" $@ "... "
-	${CC} -o $@ $@.o ${COMMPKG_LFLAGS}
+	${LINK_CC} -o $@ $@.o ${COMMPKG_LFLAGS}
 
 ##################################################################
 # Babel version of above
 ##################################################################
 ${HYPRE_BABEL_DRIVER_EXECS}: ${HYPRE_BABEL_DRIVER_OBJS}
 	@echo  "Building" $@ "... "
-	${CC} -o $@ $@.o ${BABELLIBFLAGS} ${LFLAGS}
+	${LINK_CC} -o $@ $@.o ${BABELLIBFLAGS} ${LFLAGS}
 
 ${HYPRE_BABEL_DRIVER_F77_EXECS}: ${HYPRE_BABEL_DRIVER_F77_OBJS}
 	@echo  "Building" $@ "... "
