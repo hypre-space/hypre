@@ -21,18 +21,6 @@
 
 
 /*--------------------------------------------------------------------------
- *  HYPRE_StructVectorSetRandomValues
- *--------------------------------------------------------------------------*/
-
-void
-hypre_F90_IFACE(hypre_structvectorsetrandomvalu, HYPRE_STRUCTVECTORSETRANDOMVALU)
-               (long int *vector, int *seed, int *ierr)
-{
-   *ierr = (int) ( hypre_StructVectorSetRandomValues( (hypre_StructVector *) vector,
-                                                      (int)                 *seed ));
-}
-
-/*--------------------------------------------------------------------------
  *  HYPRE_SStructPVectorSetRandomValues
  *--------------------------------------------------------------------------*/
 

@@ -24,10 +24,18 @@ hypre_F90_IFACE(hypre_structvectorsetrandomvalu, HYPRE_STRUCTVECTORSETRANDOMVALU
                                                       (int)                 *seed ));
 }
 
-int
-hypre_StructSetRandomValues( void* v, int seed ) {
 
-  return hypre_StructVectorSetRandomValues( (hypre_StructVector*)v, seed );
+/*--------------------------------------------------------------------------
+ * HYPRE_StructSetRandomValues
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_structsetrandomvalues, HYPRE_STRUCTSETRANDOMVALUES)
+               (long int *vector, int *seed, int *ierr)
+
+{
+   *ierr = (int) ( hypre_StructSetRandomValues( (hypre_StructVector *) vector,
+                                                (int)                 *seed ));
 }
 
 /*--------------------------------------------------------------------------
