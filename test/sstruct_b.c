@@ -1452,10 +1452,10 @@ main( int   argc,
    Index                *refine;
    Index                *distribute;
    Index                *block;
-   int                   solver_id;
+   int                   solver_id, object_type;
    int                   print_system;
    int                   cosine, struct_cosine;
-   /*   double                scale;*/
+   double                scale;
                         
    bHYPRE_SStructGrid     b_grid;
    bHYPRE_SStructStencil *b_stencils;
@@ -1484,7 +1484,7 @@ main( int   argc,
 
    sidl_BaseInterface     b_BI;
 
-   int ierr, matvec_type;
+   int ierr = 0;
 
    Index                 ilower, iupper;
    Index                 index, to_index;
@@ -1742,29 +1742,9 @@ main( int   argc,
    MPI_Barrier(MPI_COMM_WORLD);
 
    /*-----------------------------------------------------------
-    * Identify the matrix and vector storage type
-    *-----------------------------------------------------------*/
-
-   if ( ((solver_id >= 20) && (solver_id < 30)) ||
-        ((solver_id >= 40) && (solver_id < 50)) ||
-        ((solver_id >= 60) && (solver_id < 70)) ||
-        (solver_id == 120))
-   {
-      matvec_type = HYPRE_PARCSR;
-   }
-   else if (solver_id >= 200) 
-   {
-      matvec_type = HYPRE_STRUCT;
-   }
-   else
-   {
-      printf("solver_id=%i\n", solver_id );
-      assert( matvec_type == (int) "UNRECOGNIZED" );
-   }
-
-   /*-----------------------------------------------------------
     * Set up the grid
     *-----------------------------------------------------------*/
+   hypre_assert( ierr == 0 );
 
    time_index = hypre_InitializeTiming("SStruct Interface");
    hypre_BeginTiming(time_index);
@@ -1821,12 +1801,31 @@ main( int   argc,
    }
 
    /*-----------------------------------------------------------
+    * Set object type
+    *-----------------------------------------------------------*/
+
+   object_type = HYPRE_SSTRUCT;
+
+   if ( ((solver_id >= 20) && (solver_id < 30)) ||
+        ((solver_id >= 40) && (solver_id < 50)) ||
+        ((solver_id >= 60) && (solver_id < 70)) ||
+        (solver_id == 120))
+   {
+       object_type = HYPRE_PARCSR;  
+   }
+
+   if (solver_id >= 200)
+   {
+       object_type = HYPRE_STRUCT;
+   }
+
+   /*-----------------------------------------------------------
     * Set up the graph
     *-----------------------------------------------------------*/
 
    b_graph = bHYPRE_SStructGraph_Create( (void *)MPI_COMM_WORLD, b_grid );
 
-   bHYPRE_SStructGraph_SetObjectType( b_graph, matvec_type );
+   bHYPRE_SStructGraph_SetObjectType( b_graph, object_type );
 
    for (part = 0; part < data.nparts; part++)
    {
@@ -1878,10 +1877,14 @@ main( int   argc,
    /*-----------------------------------------------------------
     * Set up the matrix
     *-----------------------------------------------------------*/
+   hypre_assert( ierr == 0 );
 
    values = hypre_TAlloc(double, data.max_boxsize);
 
-   if ( matvec_type == HYPRE_PARCSR )
+   /* Unlike in sstruct.c, SetObjectType need not be called here - the Initialize
+      functions do that job. */
+
+   if ( object_type == HYPRE_PARCSR )
    {
       b_spA = bHYPRE_SStructParCSRMatrix_Create( (void *)MPI_COMM_WORLD, b_graph );
 
@@ -1936,7 +1939,7 @@ main( int   argc,
                GetVariableBox(pdata.ilowers[box], pdata.iuppers[box],
                               pdata.vartypes[var], ilower, iupper);
 
-               if ( matvec_type == HYPRE_PARCSR )
+               if ( object_type == HYPRE_PARCSR )
                {
                bHYPRE_SStructParCSRMatrix_SetBoxValues
                   ( b_spA, part, ilower, iupper, data.ndim, var,
@@ -1967,7 +1970,7 @@ main( int   argc,
                     index[0] <= pdata.graph_iuppers[entry][0];
                     index[0] += pdata.graph_strides[entry][0])
                {
-                  if ( matvec_type == HYPRE_PARCSR )
+                  if ( object_type == HYPRE_PARCSR )
                   {
                      bHYPRE_SStructParCSRMatrix_SetValues
                         ( b_spA, part, index, 3, pdata.graph_vars[entry],
@@ -2009,7 +2012,7 @@ main( int   argc,
                     index[0] <= pdata.matrix_iuppers[entry][0];
                     index[0] += pdata.matrix_strides[entry][0])
                {
-                  if ( matvec_type == HYPRE_PARCSR )
+                  if ( object_type == HYPRE_PARCSR )
                   {
                      bHYPRE_SStructParCSRMatrix_SetValues
                         ( b_spA, part, index, 3, pdata.matrix_vars[entry],
@@ -2027,7 +2030,7 @@ main( int   argc,
       }
    }
 
-   if ( matvec_type == HYPRE_PARCSR )
+   if ( object_type == HYPRE_PARCSR )
    {
       bHYPRE_SStructParCSRMatrix_Assemble( b_spA );
 
@@ -2045,10 +2048,14 @@ main( int   argc,
    /*-----------------------------------------------------------
     * Set up the linear system
     *-----------------------------------------------------------*/
+   hypre_assert( ierr == 0 );
 
    /************* b ***************/
 
-   if ( matvec_type == HYPRE_PARCSR )
+   /* Unlike in sstruct.c, SetObjectType need not be called here - the Initialize
+      functions do that job. */
+
+   if ( object_type == HYPRE_PARCSR )
    {
       b_spb = bHYPRE_SStructParCSRVector_Create( (void *)MPI_COMM_WORLD, b_grid );
 
@@ -2076,7 +2083,7 @@ main( int   argc,
             GetVariableBox(pdata.ilowers[box], pdata.iuppers[box], 
                            pdata.vartypes[var], ilower, iupper);
 
-            if ( matvec_type == HYPRE_PARCSR )
+            if ( object_type == HYPRE_PARCSR )
             {
                bHYPRE_SStructParCSRVector_SetBoxValues
                   ( b_spb, part, ilower, iupper, data.ndim, var, values, pdata.max_boxsize );
@@ -2091,7 +2098,7 @@ main( int   argc,
    }
 
 
-   if ( matvec_type == HYPRE_PARCSR )
+   if ( object_type == HYPRE_PARCSR )
    {
       bHYPRE_SStructParCSRVector_Assemble( b_spb );
 
@@ -2108,7 +2115,7 @@ main( int   argc,
 
    /************* x ***************/
 
-   if ( matvec_type == HYPRE_PARCSR )
+   if ( object_type == HYPRE_PARCSR )
    {
       b_spx = bHYPRE_SStructParCSRVector_Create( (void *)MPI_COMM_WORLD, b_grid );
 
@@ -2135,7 +2142,7 @@ main( int   argc,
             GetVariableBox(pdata.ilowers[box], pdata.iuppers[box], 
                            pdata.vartypes[var], ilower, iupper);
 
-            if ( matvec_type == HYPRE_PARCSR )
+            if ( object_type == HYPRE_PARCSR )
             {
                bHYPRE_SStructParCSRVector_SetBoxValues
                   ( b_spx, part, ilower, iupper, data.ndim, var,
@@ -2151,7 +2158,7 @@ main( int   argc,
       }
    }
 
-   if ( matvec_type == HYPRE_PARCSR )
+   if ( object_type == HYPRE_PARCSR )
    {
       bHYPRE_SStructParCSRVector_Assemble( b_spx );
 
@@ -2178,52 +2185,91 @@ main( int   argc,
     *   u(part,var,i,j,k) = (part+1)*(var+1)*cosine[(i+j+k)/10]
     * 
     *-----------------------------------------------------------*/
-#if DO_THIS_LATER
-   if (solver_id >= 200)
+
+   if ( object_type == HYPRE_STRUCT )
    {
       cosine= struct_cosine;
    }
 
+   hypre_assert( ierr == 0 );
    if (cosine)
    {
-      for (part = 0; part < data.nparts; part++)
+      if ( object_type == HYPRE_PARCSR )
       {
-         pdata = data.pdata[part];
-         for (var = 0; var < pdata.nvars; var++)
+         for (part = 0; part < data.nparts; part++)
          {
-            scale = (part+1.0)*(var+1.0);
-            for (box = 0; box < pdata.nboxes; box++)
+            pdata = data.pdata[part];
+            for (var = 0; var < pdata.nvars; var++)
             {
-               GetVariableBox(pdata.ilowers[box], pdata.iuppers[box], var,
-                              ilower, iupper);
-               SetCosineVector(scale, ilower, iupper, values);
-               HYPRE_SStructVectorSetBoxValues(x, part, ilower, iupper,
-                                               var, values);
+               scale = (part+1.0)*(var+1.0);
+               for (box = 0; box < pdata.nboxes; box++)
+               {
+                  GetVariableBox(pdata.ilowers[box], pdata.iuppers[box], var,
+                                 ilower, iupper);
+                  SetCosineVector(scale, ilower, iupper, values);
+                  bHYPRE_SStructParCSRVector_SetBoxValues(
+                     b_spx, part, ilower, iupper, data.ndim, var, values, 1 );
+                  /* ... last arg should be size of values, 1 may work even if wrong */
+               }
             }
          }
+
+         bHYPRE_SStructParCSRVector_Assemble( b_spx );
+
+         /* Apply A to cosine vector to yield righthand side, b=A*x */
+         bV_b = bHYPRE_Vector__cast( b_spb );
+         bV_x = bHYPRE_Vector__cast( b_spx );
+         ierr += bHYPRE_SStructParCSRMatrix_Apply( b_spA, bV_x, &bV_b );
+         /* Reset initial guess to zero, x=0 */
+         ierr += bHYPRE_SStructParCSRVector_Clear( b_spx );
       }
-      HYPRE_SStructVectorAssemble(x);
+      else
+      {
+         for (part = 0; part < data.nparts; part++)
+         {
+            pdata = data.pdata[part];
+            for (var = 0; var < pdata.nvars; var++)
+            {
+               scale = (part+1.0)*(var+1.0);
+               for (box = 0; box < pdata.nboxes; box++)
+               {
+                  GetVariableBox(pdata.ilowers[box], pdata.iuppers[box], var,
+                                 ilower, iupper);
+                  SetCosineVector(scale, ilower, iupper, values);
+                  bHYPRE_SStructVector_SetBoxValues(
+                     b_x, part, ilower, iupper, data.ndim, var, values, 1);
+                  /* ... last arg should be size of values, 1 may work even if wrong */
+               }
+            }
+         }
+         bHYPRE_SStructVector_Assemble( b_x );
 
-      /* Apply A to cosine vector to yield righthand side */
-      hypre_SStructMatvec(1.0, A, x, 0.0, b);
-      /* Reset initial guess to zero */
-      hypre_SStructMatvec(0.0, A, b, 0.0, x);
-
+         /* Apply A to cosine vector to yield righthand side, b=A*x */
+         bV_b = bHYPRE_Vector__cast( b_b );
+         bV_x = bHYPRE_Vector__cast( b_x );
+         ierr += bHYPRE_SStructMatrix_Apply( b_A, bV_x, &bV_b );
+         /* Reset initial guess to zero, x=0 */
+         ierr += bHYPRE_SStructVector_Clear( b_x );
+      }
+      hypre_assert( ierr == 0 );
    }
-#endif
 
    /*-----------------------------------------------------------
     * Print out the system and initial guess
     *-----------------------------------------------------------*/
 
-#if DO_THIS_LATER
-   if (print_system)
-   {
-      HYPRE_SStructMatrixPrint("sstruct.out.A",  A, 0);
-      HYPRE_SStructVectorPrint("sstruct.out.b",  b, 0);
-      HYPRE_SStructVectorPrint("sstruct.out.x0", x, 0);
-   }
-#endif
+      if ( object_type == HYPRE_PARCSR )
+      {
+         bHYPRE_SStructParCSRMatrix_Print( b_spA, "sstruct_b.out.A", 0 );
+         bHYPRE_SStructParCSRVector_Print( b_spb, "sstruct_b.out.b", 0 );
+         bHYPRE_SStructParCSRVector_Print( b_spx, "sstruct_b.out.x0", 0 );
+      }
+      else
+      {
+         bHYPRE_SStructMatrix_Print( b_A, "sstruct_b.out.A", 0 );
+         bHYPRE_SStructVector_Print( b_b, "sstruct_b.out.b", 0 );
+         bHYPRE_SStructVector_Print( b_x, "sstruct_b.out.x0", 0 );
+      }
 
    /*-----------------------------------------------------------
     * Debugging code
@@ -3636,8 +3682,14 @@ main( int   argc,
     * Gather the solution vector
     *-----------------------------------------------------------*/
 
-#if DO_THIS_LATER
-   HYPRE_SStructVectorGather(x);
+   if ( object_type == HYPRE_PARCSR )
+   {
+      bHYPRE_SStructParCSRVector_Gather( b_spx );
+   }
+   else
+   {
+      bHYPRE_SStructVector_Gather( b_x );
+   }
 
    /*-----------------------------------------------------------
     * Print the solution and other info
@@ -3645,9 +3697,16 @@ main( int   argc,
 
    if (print_system)
    {
-      HYPRE_SStructVectorPrint("sstruct.out.x", x, 0);
+      if ( object_type == HYPRE_PARCSR )
+      {
+         bHYPRE_SStructParCSRVector_Print( b_spx, "sstruct_b.out.x", 0 );
+      }
+      else
+      {
+         bHYPRE_SStructVector_Print( b_x, "sstruct_b.out.x", 0 );
+      }
    }
-#endif
+
    if (myid == 0)
    {
       printf("\n");
@@ -3666,7 +3725,7 @@ main( int   argc,
       bHYPRE_SStructStencil_deleteRef( b_stencils[s] );
    hypre_TFree( b_stencils );
 
-   if ( matvec_type == HYPRE_PARCSR )
+   if ( object_type == HYPRE_PARCSR )
    {
       bHYPRE_IJParCSRMatrix_deleteRef( b_pA );
       bHYPRE_IJParCSRVector_deleteRef( b_pb );
@@ -3675,7 +3734,7 @@ main( int   argc,
       bHYPRE_SStructParCSRVector_deleteRef(  b_spb);
       bHYPRE_SStructParCSRVector_deleteRef(  b_spx);
    }
-   else if ( matvec_type == HYPRE_STRUCT )
+   else if ( object_type == HYPRE_STRUCT )
    {
       bHYPRE_SStructMatrix_deleteRef( b_A );
       bHYPRE_SStructVector_deleteRef( b_b );
