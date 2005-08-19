@@ -100,11 +100,11 @@ hypre_F90_IFACE(hypre_sstructfacsetplevels, HYPRE_SSTRUCTFACSETPLEVELS)
 
 void
 hypre_F90_IFACE(hypre_sstructfacsetprefinements, HYPRE_SSTRUCTFACSETPREFINEMENTS)
-               (long int *solver, int *nparts, int *rfactors[3], int *ierr)
+               (long int *solver, int *nparts, int (*rfactors)[3], int *ierr)
 {
    *ierr = (int) ( HYPRE_SStructFACSetPRefinements( (HYPRE_SStructSolver) *solver,
                                                     (int)                 *nparts,
-                                                    (int)                (*rfactors)[3]));
+                                                    (int)                 (*rfactors)[3] ));
 }
 
 /*--------------------------------------------------------------------------
