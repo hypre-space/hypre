@@ -134,8 +134,7 @@ parse_arguments () {
       e) confbuildtest $OPTARG  "--enable-debug" "debug";;
       f) build $Build "all77"   "all77"         "test";;
       h) usage; exit 2;;
-      i) confbuildtest 1        "--enable-debug" "debug"
-         confbuildtest $OPTARG  "--with-insure" "insure";;
+      i) confbuildtest $OPTARG  "--with-insure" "insure";;
      +i) confbuildtest $OPTARG  "--with-insure-to-file" "insure";;
       l) confbuildtest $OPTARG  "--enable-shared" "shared";;
       m) HYPRE_SEND_MAIL="no"; MailOpt=""; MailCmd="yes";;
@@ -727,12 +726,9 @@ if [ ${BuildOpt} -ne $Skip ] ; then
     fi
     echo "$HYPRE_CONFIGURE_EMAIL" > ${Hdr}.${MessageStr}.configure.err.email
 
-    if [ "$MessageStr" != "insure" ]
-    then			# don't want to delete previous build
-       if [ "$MessageStr" != "babel" ]
-       then
-          $MAKE clean
-       fi
+    if [ "$MessageStr" != "babel" ]
+    then
+       $MAKE clean
     fi
 
     makeit "all" $MessageStr "$HYPRE_DEFAULT_EMAIL"

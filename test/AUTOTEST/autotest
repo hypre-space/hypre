@@ -243,7 +243,6 @@ do
 	HYPRE_MACHINE_COMMANDS="-mnsd -a 1 -cf -i 2"
         HYPRE_MESSAGE='PRIMARY[insure++]'
         HYPRE_MACHINE_COMMANDS="$HYPRE_MACHINE_COMMANDS -v $HYPRE_MESSAGE"
-        COMPILERSELECT="gcc"
    	perform_test
         shift;;
     -mcr)
