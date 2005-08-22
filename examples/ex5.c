@@ -234,6 +234,7 @@ int main (int argc, char *argv[])
          x_values[i] = 0.0;
          rows[i] = ilower + i;
       }
+
       HYPRE_IJVectorSetValues(b, local_size, rows, rhs_values);
       HYPRE_IJVectorSetValues(x, local_size, rows, x_values);
 

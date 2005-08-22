@@ -3,9 +3,9 @@
 
    Interface:    Linear-Algebraic (IJ), Babel-based version
 
-   Compile with: make ex5
+   Compile with: make ex5b
 
-   Sample run:   mpirun -np 4 ex5
+   Sample run:   mpirun -np 4 ex5b
 
    Description:  This example solves the 2-D
                  Laplacian problem with zero boundary conditions
@@ -24,6 +24,8 @@
 #include "krylov.h"
 #include "HYPRE.h"
 #include "HYPRE_parcsr_ls.h"
+
+/* bable interface headers */
 #include "bHYPRE.h"
 #include "bHYPRE_Vector.h"
 #include "bHYPRE_IJParCSRMatrix.h"
@@ -250,6 +252,7 @@ int main (int argc, char *argv[])
       rhs_values = calloc(local_size, sizeof(double));
       x_values = calloc(local_size, sizeof(double));
       rows = calloc(local_size, sizeof(int));
+
       for (i=0; i<local_size; i++)
       {
          rhs_values[i] = h2;
@@ -278,7 +281,6 @@ int main (int argc, char *argv[])
 
       /* Create solver */
       amg_solver = bHYPRE_BoomerAMG_Create( (void *)MPI_COMM_WORLD );
-
       bHYPRE_BoomerAMG_SetOperator( amg_solver, op_A );
 
       /* Set some parameters (See Reference Manual for more parameters) */
@@ -317,7 +319,6 @@ int main (int argc, char *argv[])
 
       /* Create solver */
       pcg_solver = bHYPRE_PCG_Create( (void *)MPI_COMM_WORLD );
-
       bHYPRE_PCG_SetOperator( pcg_solver, op_A );
 
       /* Set some parameters (See Reference Manual for more parameters) */
@@ -457,7 +458,6 @@ int main (int argc, char *argv[])
       bHYPRE_PCG_deleteRef( pcg_solver );
       bHYPRE_Solver_deleteRef( precond );
    }
-
    else
    {
       if (myid ==0) printf("Invalid solver id specified.\n");
