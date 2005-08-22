@@ -25,7 +25,7 @@
 #include "HYPRE.h"
 #include "HYPRE_parcsr_ls.h"
 
-/* bable interface headers */
+/* Babel interface headers */
 #include "bHYPRE.h"
 #include "bHYPRE_Vector.h"
 #include "bHYPRE_IJParCSRMatrix.h"
