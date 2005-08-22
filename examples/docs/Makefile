@@ -5,7 +5,7 @@
 EXAMPLES_DIR = ..
 
 all:
-	@build_doc.sh $(EXAMPLES_DIR)
+	@./build_doc.sh $(EXAMPLES_DIR)
 
 clean:
 	rm -f *.html
