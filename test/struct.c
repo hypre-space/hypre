@@ -175,7 +175,6 @@ main( int   argc,
    HYPRE_InitPthreads(4);
 #endif  
 
- 
    /* Initialize MPI */
    MPI_Init(&argc, &argv);
 
@@ -967,7 +966,7 @@ main( int   argc,
          {
             hypre_SetIndex(diag_index, 0, 0, 0);
             diag_rank = hypre_StructStencilElementRank( stencil, diag_index );
-            assert( stencil_size>=1 );
+            hypre_assert( stencil_size>=1 );
             if ( diag_rank==0 ) stencil_entries[diag_rank]=1;
             else stencil_entries[diag_rank]=0;
             for ( i=0; i<stencil_size; ++i )
@@ -2740,7 +2739,7 @@ AddValuesMatrix(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,
      }
      else
      {
-        assert( constant_coefficient==2 );
+        hypre_assert( constant_coefficient==2 );
 
         /* stencil index for the center equals dim, so it's easy to leave out */
         values   = hypre_CTAlloc(double, stencil_size-1);
@@ -2893,7 +2892,7 @@ AddValuesMatrix(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,
      }
      else
      {
-        assert( constant_coefficient==2 );
+        hypre_assert( constant_coefficient==2 );
         values = hypre_CTAlloc( double, stencil_size-1 );
         switch (dim)
         {  /* no center in stencil_indices and values */

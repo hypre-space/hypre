@@ -1522,7 +1522,7 @@ main( int   argc,
 
       /* Dot, tmp = b.x; at this point all b[i]==1, all x[i]==2 */
       bHYPRE_IJParCSRVector_Dot( bHYPRE_b, bHYPRE_Vector_x, &tmp );
-      assert( tmp==2*N );
+      hypre_assert( tmp==2*N );
 
       /* Axpy, b=b-0.5*x; result is all 0's */
       bHYPRE_IJParCSRVector_Axpy( bHYPRE_b, -0.5, bHYPRE_Vector_x );

@@ -2584,7 +2584,7 @@ main( int   argc,
                          hypre_ParCSRMultiVectorRead(MPI_COMM_WORLD, 
 					             interpreter, 
 					             "vectors" ),1);
-	 assert( eigenvectors != NULL );
+	 hypre_assert( eigenvectors != NULL );
 	 blockSize = mv_MultiVectorWidth( eigenvectors );
        }
        else {
@@ -2602,7 +2602,7 @@ main( int   argc,
                          hypre_ParCSRMultiVectorRead(MPI_COMM_WORLD,
                                                      interpreter,
                                                      "vectors" ),1);
-	 assert( constraints != NULL );
+	 hypre_assert( constraints != NULL );
        }	
 
        eigenvalues = (double*) calloc( blockSize, sizeof(double) );
@@ -2950,7 +2950,7 @@ main( int   argc,
                          hypre_ParCSRMultiVectorRead(MPI_COMM_WORLD,
                                                      interpreter,
                                                      "vectors" ),1);
-	 assert( eigenvectors != NULL );
+	 hypre_assert( eigenvectors != NULL );
 	 blockSize = mv_MultiVectorWidth( eigenvectors );
        }
        else {
@@ -2968,7 +2968,7 @@ main( int   argc,
                          hypre_ParCSRMultiVectorRead(MPI_COMM_WORLD,
                                                      interpreter,
                                                      "vectors" ),1);
-	 assert( constraints != NULL );
+	 hypre_assert( constraints != NULL );
        }	
 
        eigenvalues = (double*) calloc( blockSize, sizeof(double) );

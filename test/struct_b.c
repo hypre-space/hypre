@@ -576,7 +576,7 @@ main( int   argc,
    /* This test code, and probably the present Babel interface, has only
       been tested, and probably only works, with symmetric matrix storage.
       It may not be a big deal to test & support nonsymmetric storage. */
-   assert( symmetric== 1 );
+   hypre_assert( symmetric== 1 );
 
    A_b = bHYPRE_StructMatrix_Create( (void *)comm, grid, stencil );
 
@@ -1595,7 +1595,7 @@ AddValuesMatrix( bHYPRE_StructMatrix A_b,
      }
      else
      {
-        assert( constant_coefficient==2 );
+        hypre_assert( constant_coefficient==2 );
 
         /* stencil index for the center equals dim, so it's easy to leave out */
         values   = hypre_CTAlloc(double, stencil_size-1);
@@ -1760,7 +1760,7 @@ AddValuesMatrix( bHYPRE_StructMatrix A_b,
      }
      else
      {
-        assert( constant_coefficient==2 );
+        hypre_assert( constant_coefficient==2 );
         values = hypre_CTAlloc( double, stencil_size-1 );
         switch (dim)
         {  /* no center in stencil_indices and values */
