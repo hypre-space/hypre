@@ -494,6 +494,27 @@ HYPRE_SStructVectorGetBoxValues(HYPRE_SStructVector  vector,
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
+int 
+HYPRE_SStructVectorSetConstantValues( HYPRE_SStructVector vector,
+                                      double              value )
+{
+   int ierr = 0;
+   hypre_SStructPVector *pvector;
+   int part;
+   int nparts   = hypre_SStructVectorNParts(vector);
+
+   for ( part = 0; part < nparts; part++ )
+   {
+      pvector = hypre_SStructVectorPVector( vector, part );
+      ierr += hypre_SStructPVectorSetConstantValues( pvector, value );
+   };
+
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
 int
 HYPRE_SStructVectorSetObjectType( HYPRE_SStructVector  vector,
                                   int                  type )

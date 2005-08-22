@@ -905,6 +905,7 @@ int HYPRE_SStructVectorAssemble( HYPRE_SStructVector vector );
 int HYPRE_SStructVectorGather( HYPRE_SStructVector vector );
 int HYPRE_SStructVectorGetValues( HYPRE_SStructVector vector , int part , int *index , int var , double *value );
 int HYPRE_SStructVectorGetBoxValues( HYPRE_SStructVector vector , int part , int *ilower , int *iupper , int var , double *values );
+int HYPRE_SStructVectorSetConstantValues( HYPRE_SStructVector vector , double value );
 int HYPRE_SStructVectorSetObjectType( HYPRE_SStructVector vector , int type );
 int HYPRE_SStructVectorGetObject( HYPRE_SStructVector vector , void **object );
 int HYPRE_SStructVectorPrint( const char *filename , HYPRE_SStructVector vector , int all );
