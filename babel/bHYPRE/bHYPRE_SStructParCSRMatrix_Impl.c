@@ -1010,6 +1010,9 @@ impl_bHYPRE_SStructParCSRMatrix_Apply(
    bHYPRE_SStructParCSRVector bHYPREP_b, bHYPREP_x;
    HYPRE_SStructMatrix HA;
    HYPRE_SStructVector Hx, Hb;
+   HYPRE_ParCSRMatrix pA;
+   HYPRE_ParVector pb;
+   HYPRE_ParVector px;
 
    data = bHYPRE_SStructParCSRMatrix__get_data( self );
    HA = data -> matrix;
@@ -1040,7 +1043,11 @@ impl_bHYPRE_SStructParCSRMatrix_Apply(
    data_b = bHYPRE_SStructParCSRVector__get_data( bHYPREP_b );
    Hb = data_b -> vec;
 
-   ierr += HYPRE_SStructMatrixMatvec( 1.0, HA, Hb, 0.0, Hx );
+   HYPRE_SStructMatrixGetObject( HA, (void **) &pA);
+   HYPRE_SStructVectorGetObject( Hb, (void **) &pb);
+   HYPRE_SStructVectorGetObject( Hx, (void **) &px);
+
+   ierr += HYPRE_ParCSRMatrixMatvec( 1.0, pA, pb, 0.0, px );
 
    bHYPRE_SStructParCSRVector_deleteRef( bHYPREP_b ); /* ref was created by queryInt */
    bHYPRE_SStructParCSRVector_deleteRef( bHYPREP_x ); /* ref was created by queryInt */
