@@ -738,7 +738,18 @@ impl_bHYPRE_SStructVector_Print(
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructVector.Print) */
   /* Insert the implementation of the Print method here... */
-   return 1;
+
+   int ierr=0;
+   struct bHYPRE_SStructVector__data * data;
+   HYPRE_SStructVector Hv;
+
+   data = bHYPRE_SStructVector__get_data( self );
+   Hv = data -> vec;
+
+   ierr += HYPRE_SStructVectorPrint( filename, Hv, all );
+
+   return ierr;
+
   /* DO-NOT-DELETE splicer.end(bHYPRE.SStructVector.Print) */
 }
 
@@ -759,7 +770,17 @@ impl_bHYPRE_SStructVector_Clear(
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructVector.Clear) */
   /* Insert the implementation of the Clear method here... */
-   return ( 1 );
+
+   int ierr = 0;
+   struct bHYPRE_SStructVector__data * data;
+   HYPRE_SStructVector Hy;
+   data = bHYPRE_SStructVector__get_data( self );
+   Hy = data -> vec;
+
+   ierr += HYPRE_SStructVectorSetConstantValues( Hy, 0.0);
+
+   return ierr;
+
   /* DO-NOT-DELETE splicer.end(bHYPRE.SStructVector.Clear) */
 }
 

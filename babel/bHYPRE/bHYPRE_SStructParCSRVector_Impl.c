@@ -725,7 +725,20 @@ impl_bHYPRE_SStructParCSRVector_Print(
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructParCSRVector.Print) */
   /* Insert the implementation of the Print method here... */
-   return 1;
+
+   int ierr=0;
+   struct bHYPRE_SStructParCSRVector__data * data;
+   HYPRE_SStructVector Hv;
+
+   data = bHYPRE_SStructParCSRVector__get_data( self );
+   Hv = data -> vec;
+
+   /* If this doesn't work well, try geting a ParCSR vector with GetObject,
+      then ParVectorPrint...*/
+   ierr += HYPRE_SStructVectorPrint( filename, Hv, all );
+
+   return ierr;
+
   /* DO-NOT-DELETE splicer.end(bHYPRE.SStructParCSRVector.Print) */
 }
 
@@ -746,7 +759,21 @@ impl_bHYPRE_SStructParCSRVector_Clear(
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructParCSRVector.Clear) */
   /* Insert the implementation of the Clear method here... */
-   return 1;
+
+   int ierr = 0;
+   struct bHYPRE_SStructParCSRVector__data * data;
+   HYPRE_SStructVector Hy;
+   HYPRE_ParVector py;
+
+   data = bHYPRE_SStructParCSRVector__get_data( self );
+   Hy = data -> vec;
+
+   HYPRE_SStructVectorGetObject( Hy, (void **) &py );
+
+   ierr += HYPRE_ParVectorSetConstantValues( py, 0.0);
+
+   return ierr;
+
   /* DO-NOT-DELETE splicer.end(bHYPRE.SStructParCSRVector.Clear) */
 }
 
