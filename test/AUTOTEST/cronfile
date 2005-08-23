@@ -1,7 +1,7 @@
-0 4 * * 0 cd /usr/casc/hypre/i686-pc-linux-gnu/AUTOTEST/; ./autotest -tuxkai -insure -tux149 | tee autotest.cron.Sun.log
+0 4 * * 0 cd /usr/casc/hypre/i686-pc-linux-gnu/AUTOTEST/; ./autotest -tuxkai -tux149 | tee autotest.cron.Sun.log
 0 1 * * 1 cd /usr/casc/hypre/i686-pc-linux-gnu/AUTOTEST/; ./autotest -tuxpgi -gps -tux149 | tee autotest.cron.Mon.log
-0 1 * * 2 cd /usr/casc/hypre/i686-pc-linux-gnu/AUTOTEST/; ./autotest -insure -mcr -tux149 | tee autotest.cron.Tue.log
+0 1 * * 2 cd /usr/casc/hypre/i686-pc-linux-gnu/AUTOTEST/; ./autotest -mcr -tux149 | tee autotest.cron.Tue.log
 0 1 * * 3 cd /usr/casc/hypre/i686-pc-linux-gnu/AUTOTEST/; ./autotest -tuxlahey -tux149 | tee autotest.cron.Wed.log
 0 1 * * 4 cd /usr/casc/hypre/i686-pc-linux-gnu/AUTOTEST/; ./autotest -gpsmp -tuxgcc -tux149 | tee autotest.cron.Thu.log
-0 1 * * 5 cd /usr/casc/hypre/i686-pc-linux-gnu/AUTOTEST/; ./autotest -insure -tuxintel -tux149 | tee autotest.cron.Fri.log
+0 1 * * 5 cd /usr/casc/hypre/i686-pc-linux-gnu/AUTOTEST/; ./autotest -tuxintel -tux149 | tee autotest.cron.Fri.log
 0 1 * * 6 cd /usr/casc/hypre/i686-pc-linux-gnu/AUTOTEST/; ./autotest -pengra -tuxabsoft -tux149 | tee autotest.cron.Sat.log
