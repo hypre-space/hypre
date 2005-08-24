@@ -24,7 +24,7 @@
 
 int main (int argc, char *argv[])
 {
-   int i, j, myid;
+   int i, j, myid, num_procs;
 
    HYPRE_StructGrid     grid;
    HYPRE_StructStencil  stencil;
@@ -36,6 +36,16 @@ int main (int argc, char *argv[])
    /* Initialize MPI */
    MPI_Init(&argc, &argv);
    MPI_Comm_rank(MPI_COMM_WORLD, &myid);
+   MPI_Comm_size(MPI_COMM_WORLD, &num_procs);
+
+   if (num_procs != 2)
+   {
+      if (myid ==0) printf("Must run with 2 processors!\n");
+      MPI_Finalize();
+      
+      return(0);
+   }
+
 
    /* 1. Set up a grid. Each processor describes the piece
       of the grid that it owns. */
