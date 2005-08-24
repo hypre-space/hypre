@@ -20,17 +20,25 @@ initialize_variables ()
   Hdr="autotest"
   HYPRE_BATCH_MODE="no"
   HYPRE_SEND_MAIL="no"
-  STD_TEST_DIRS='TEST_fac/*.sh TEST_fei/*.sh TEST_ij/*.sh TEST_sstruct/*.sh TEST_struct/*.sh'
+  STD_TEST_DIRS='fac ij sstruct struct'
+  CONFIG_OPTS='babel debug default no_mpi openmp insure strict_checking docs all++ al77'
+  MAKE_OPTS='" " all configure'
   MailOpt=""
   MailCmd="no"
   DEBUG_MODE="no"
   Skip=0
   Build=1
   Run=2
-  InsureSelected=0
   if [ -z "$MAKE" -o "$MAKE" = "" ] ; then
     MAKE="make -i"
   fi
+#
+#               Define set of standard test cases
+  STD_TEST_CASES=""
+  for TestDir in ${STD_TEST_DIRS}
+  do
+     STD_TEST_CASES="${STD_TEST_CASES} TEST_$TestDir/*.sh"
+  done
 #
 # Assume that this script (autotest_test) is executed from the autotest script,
 # which will cd to the directory ${HYPRE_AUTOTEST_DIR}.  This script can be run
@@ -206,112 +214,59 @@ process_filter () {
   fi
 }
 
-multi_line_filter () {
-  if [ "$DEBUG_MODE" = "yes" ] ; then
-    set -xv
-  fi
-  ErrorFile=$1
-  shift
-  Join=$1
-  shift
-  if (egrep "$@" $ErrorFile >/dev/null)
-  then
-    cp $ErrorFile $ErrorFile.tmp
-    while (egrep "$@" $ErrorFile.tmp >/dev/null)
-    do
-      ed $ErrorFile.tmp <<EOF >/dev/null
-/$@/
-.,+${Join}j
-d
-w
-q
-EOF
-    done
-    echo "-- applied multi-line filter:$@" >> $ErrorFile.orig
-    cat $ErrorFile >> $ErrorFile.orig
-    mv $ErrorFile.tmp $ErrorFile 
-  fi
-}
+#====================================================
+#multi_line_delete () {
+#  if [ "$DEBUG_MODE" = "yes" ] ; then
+#    set -xv
+#  fi
+#  ErrorFile=$1
+#  shift
+#  DelLines=$1
+#  shift
+#  if (egrep "$@" $ErrorFile >/dev/null)
+#  then
+#    cp $ErrorFile $ErrorFile.tmp
+#    while (egrep "$@" $ErrorFile.tmp >/dev/null)
+#    do
+#      ed $ErrorFile.tmp <<EOF >/dev/null
+#/$@/
+#.,+${DelLines}d
+#w
+#q
+#EOF
+#    done
+#    echo "-- applied multi-line-delete filter:$@" >> $ErrorFile.orig
+#    cat $ErrorFile >> $ErrorFile.orig
+#    mv $ErrorFile.tmp $ErrorFile 
+#  fi
+#}
 
-multi_line_delete () {
-  if [ "$DEBUG_MODE" = "yes" ] ; then
-    set -xv
-  fi
-  ErrorFile=$1
-  shift
-  DelLines=$1
-  shift
-  if (egrep "$@" $ErrorFile >/dev/null)
-  then
-    cp $ErrorFile $ErrorFile.tmp
-    while (egrep "$@" $ErrorFile.tmp >/dev/null)
-    do
-      ed $ErrorFile.tmp <<EOF >/dev/null
-/$@/
-.,+${DelLines}d
-w
-q
-EOF
-    done
-    echo "-- applied multi-line-delete filter:$@" >> $ErrorFile.orig
-    cat $ErrorFile >> $ErrorFile.orig
-    mv $ErrorFile.tmp $ErrorFile 
-  fi
-}
+#multi_line_bakdelete () {
+#  if [ "$DEBUG_MODE" = "yes" ] ; then
+#    set -xv
+#  fi
+#  ErrorFile=$1
+#  shift
+#  DelLines=$1
+#  shift
+#  if (egrep "$@" $ErrorFile >/dev/null)
+#  then
+#    cp $ErrorFile $ErrorFile.tmp
+#    while (egrep "$@" $ErrorFile.tmp >/dev/null)
+#    do
+#      ed $ErrorFile.tmp <<EOF >/dev/null
+#/$@/
+#-${DelLines},.d
+#w
+#q
+#EOF
+#    done
+#    echo "-- applied multi-line-backwards-delete filter:$@" >> $ErrorFile.orig
+#    cat $ErrorFile >> $ErrorFile.orig
+#    mv $ErrorFile.tmp $ErrorFile 
+#  fi
+#}
 
-multi_line_bakdelete () {
-  if [ "$DEBUG_MODE" = "yes" ] ; then
-    set -xv
-  fi
-  ErrorFile=$1
-  shift
-  DelLines=$1
-  shift
-  if (egrep "$@" $ErrorFile >/dev/null)
-  then
-    cp $ErrorFile $ErrorFile.tmp
-    while (egrep "$@" $ErrorFile.tmp >/dev/null)
-    do
-      ed $ErrorFile.tmp <<EOF >/dev/null
-/$@/
--${DelLines},.d
-w
-q
-EOF
-    done
-    echo "-- applied multi-line-backwards-delete filter:$@" >> $ErrorFile.orig
-    cat $ErrorFile >> $ErrorFile.orig
-    mv $ErrorFile.tmp $ErrorFile 
-  fi
-}
-
-multi_line_range () {
-  if [ "$DEBUG_MODE" = "yes" ] ; then
-    set -xv
-  fi
-  ErrorFile=$1
-  shift
-  BackwardLines=$1
-  shift
-  ForewardLines=$1
-  shift
-  if (egrep "$@" $ErrorFile >/dev/null)
-  then
-    cp $ErrorFile $ErrorFile.tmp
-    while (egrep "$@" $ErrorFile.tmp >/dev/null)
-    do
-      ed $ErrorFile.tmp <<EOF >/dev/null
-/$@/
--${BackwardLines},+${ForewardLines}d
-w
-q
-EOF
-    done
-    echo "-- applied multi-line-backwards-delete filter:$@" >> $ErrorFile.orig
-    cat $ErrorFile >> $ErrorFile.orig
-    mv $ErrorFile.tmp $ErrorFile 
-  fi
-}
 
 apply_error_filters () {
   if [ "$DEBUG_MODE" = "yes" ] ; then
@@ -321,7 +276,7 @@ apply_error_filters () {
   if [ -s "${ErrorFile}" ] ; then
     HOST=`hostname`
     case $HOST in
-      fros*|uv*|whit*)
+      uv*)
         for ii in \
           '===\ End\ of\ Compilation'\
           'Compilation\ successful'\
@@ -336,12 +291,12 @@ apply_error_filters () {
           'configure:\ WARNING:\ '
         do process_filter $ErrorFile "${ii}"
         done
-        for ii in \
-          ':\ error\ \#172:'
-        do multi_line_delete $ErrorFile 4 "${ii}"
-        done
+#       for ii in \
+#          ':\ error\ \#172:'
+#        do multi_line_delete $ErrorFile 4 "${ii}"
+#        done
         ;;
-      peng|emper**)
+      peng*)
         for ii in \
           '[A-Za-z0-9_]*\.[cCf]$'\
           '[A-Za-z0-9_]*\.cxx$'\
@@ -355,7 +310,7 @@ apply_error_filters () {
         do process_filter $ErrorFile "${ii}"
         done
       ;;
-      gps*|sc*)
+      gps*)
         for ii in \
           '^No\ suffix\ list'\
           '^stty:\ tcgetattr:\ Not\ a\ typewriter'\
@@ -363,10 +318,10 @@ apply_error_filters () {
           '^cc:\ Info:\ '
         do process_filter $ErrorFile "${ii}"
         done
-        for ii in \
-          '\-\-\-\-'
-        do multi_line_bakdelete $ErrorFile 1 "${ii}"
-        done
+#        for ii in \
+#          '\-\-\-\-'
+#        do multi_line_bakdelete $ErrorFile 1 "${ii}"
+#        done
       ;;
       tux*)
         for ii in \
@@ -380,10 +335,10 @@ apply_error_filters () {
           'sed:\ Couldn.t\ close\ '
         do process_filter $ErrorFile "${ii}"
         done
-        for ii in \
-          ':\ In\ function\ `f_open'
-        do multi_line_delete $ErrorFile 1 "${ii}"
-        done
+#        for ii in \
+#          ':\ In\ function\ `f_open'
+#        do multi_line_delete $ErrorFile 1 "${ii}"
+#        done
       ;;
       vivid*)
         for ii in \
@@ -398,7 +353,6 @@ apply_error_filters () {
 #=============================================================================
 # Function for mailing error messages
 #=============================================================================
-
 mail_summary () {
   echo "Autotest mailing error summary"
   CTOTCNT=0
@@ -409,12 +363,15 @@ mail_summary () {
   DWRNCNT=0; DERRCNT=0
   cd $HYPRE_AUTOTEST_DIR
   SUMFILE="autotest.$HYPRE_ARCH.`date '+%Y%m%d'`"
+
   if [ -z "$HYPRE_COMPILE_MACHINE" -o "$HYPRE_COMPILE_MACHINE" = "" ] ; then
     HYPRE_COMPILE_MACHINE=`hostname`
   fi
+
   if [ -z "$HYPRE_RUN_MACHINE" -o "$HYPRE_RUN_MACHINE" = "" ] ; then
     HYPRE_RUN_MACHINE=`hostname`
   fi
+
   printf "%s\n" "--------------------------------------------" > $SUMFILE
   printf "Autotest error summary for `date`\n" >> $SUMFILE
   printf "Target architecure: %s\n" $HYPRE_ARCH >> $SUMFILE
@@ -429,13 +386,16 @@ mail_summary () {
   fi
   printf "%s\n" "--------------------------------------------" >> $SUMFILE
   printf "Compile summary: Status: Warnings: Errors\n" >> $SUMFILE
-  for ConfOpt in babel debug default no_mpi openmp \
-           insure strict_checking docs all++ all77
+#
+#               check all configure options
+  for ConfOpt in ${CONFIG_OPTS}
   do
     printf "%-15s: " $ConfOpt >> $SUMFILE
     TestCaseSuccessCount=0; TestCaseFailedCount=0;
     DWRNCNT=0; DERRCNT=0;
-    for MakeOpt in ""  all configure IJ sstruct struct
+#
+#               check all make options
+    for MakeOpt in ${MAKE_OPTS}
     do
       FILE=autotest.$ConfOpt.$MakeOpt
       LFILE=`echo $FILE|sed -e 's/\.$//'`.log
@@ -463,6 +423,7 @@ mail_summary () {
         fi
       done
     done
+#               end of MakeOpt loop
     if [ "$TestCaseFailedCount" != "0" ] ; then
       printf "Failed:    %2d   :   %2d\n" $DWRNCNT $DERRCNT >> $SUMFILE
     elif [ "$TestCaseSuccessCount" != "0" ] ; then
@@ -471,45 +432,57 @@ mail_summary () {
       printf "N/A\n" >> $SUMFILE
     fi
   done
+#               end of ConfOpt loop
+
   if [ "$DEBUG_MODE" = "yes" ] ; then
     printf "%2d test failed\n" $CERRCNT
     printf "%2d test succeeded\n" $CLOGCNT
     printf "%2d test total\n" $CTOTCNT
   fi
+
   printf "\n" >> $SUMFILE
   printf "%2d test failed\n" $CERRCNT  >> $SUMFILE
   printf "%2d test succeeded\n" $CLOGCNT >> $SUMFILE
   printf "%2d test total\n" $CTOTCNT >> $SUMFILE
+  printf "\n" >> $SUMFILE
+
   if [ "$CLIST" != "" ] ; then
     printf "non zero error log file(s):\n" >> $SUMFILE
     printf "${CLIST}" >> $SUMFILE
   fi
   printf "%s\n" "--------------------------------------------" >> $SUMFILE
 #
-# currently only a single instance of opt=2 (configure, make, and run)
-# can be processed (actually earlier information gets overwritten).
-  printf "Execute summary:\n" >> $SUMFILE
+#   check all test execution output files for errors
+#   currently only the last test run with opt=2 (configure, make, and run)
+#   is processed as earlier information gets overwritten.
+
+  printf "\nExecute summary:\n" >> $SUMFILE
   if [ "$HYPRE_BATCH_MODE" = "yes" ] ; then
     printf "Jobs Scheduling via DPCS\n" >> $SUMFILE
   fi
-    TotalTestCount=0
-    TotalSuccessCount=0
-    TotalFailureCount=0
-    for i in fac ij sstruct struct ; do
-      printf "%-15s: " ${i} >> $SUMFILE
-      TestCaseSuccessCount=0; TestCaseFailedCount=0; TestCaseFailedFlag=0
-      for j in ${SRC}/test/TEST_${i}/*.sh ; do
+  TotalTestCount=0
+  TotalSuccessCount=0
+  TotalFailureCount=0
+#
+#               check each TEST_* directory
+  for i in ${STD_TEST_DIRS} ; do
+     printf "%-15s: " ${i} >> $SUMFILE
+     TestCaseSuccessCount=0; TestCaseFailedCount=0; TestCaseFailedFlag=0
+#
+#               check each test case in the given directory
+     for j in ${SRC}/test/${STD_TEST_CASES} ; do
         TotalTestCount=`expr $TotalTestCount + 1`
         TestCaseFailedFlag=0
+#
+#               define error file name
+#               remove non-essential information from file
+#               increment error counts if resulting file has non-zero length
         ErrFile=`echo $j | sed -e 's/\.sh$/.err/'`
-        OutFile=`echo $j | sed -e 's/\.sh$/.out/'`
-# look for non-zero length subtest, TEST_*/test.err.[0-9]+ files
-        if [ "$InsureSelected" = "0" ] ; then
-          for k in "${ErrFile}.[0-9]+"; do
-            apply_error_filters ${k}
-            if [ -s "${k}" ] ; then
+        for k in "${ErrFile}.[0-9]+"; do
+           apply_error_filters ${k}
+           if [ -s "${k}" ] ; then
               if [ "$DEBUG_MODE" = "yes" ] ; then
-                printf "nonzero .err. file = ${k}\n"
+                 printf "nonzero .err. file = ${k}\n"
               fi
               AutotestFailureCount=`expr $AutotestFailureCount + 1`
               TotalFailureCount=`expr $TotalFailureCount + 1`
@@ -518,80 +491,63 @@ mail_summary () {
               TestCaseFailedFlag=1
               break
             fi
-          done
-        fi
+        done
+#               end of k-loop
+
         if [ "$TestCaseFailedFlag" = "0" ] ; then
-# look for all of the TEST_*/test.out.* files
-          for k in ${OutFile}.[0-9]+; do
-# look for non-zero length subtest, TEST_*/test.out.[0-9]+ files
-            apply_error_filters ${k}
-            if [ -s "${OutFile}" ] ; then
-              if [ "$DEBUG_MODE" = "yes" ] ; then
-                printf "nonzero .out. file = ${OutFile}\n"
-              fi
-              AutotestFailureCount=`expr $AutotestFailureCount + 1`
-              TotalFailureCount=`expr $TotalFailureCount + 1`
-              TestCaseFailedCount=`expr $TestCaseFailedCount + 1`
-              ELIST="${ELIST}${k}\n"
-              TestCaseFailedFlag=1
-              break
-            fi
-          done
+           TotalSuccessCount=`expr $TotalSuccessCount + 1`
+           TestCaseSuccessCount=`expr $TestCaseSuccessCount + 1`
         fi
-        if [ "$TestCaseFailedFlag" = "0" ] ; then
-# look for a TEST_*/test.err files
-          apply_error_filters ${ErrFile}
-          if [ -s "${ErrFile}" ] ; then
-            if [ "$DEBUG_MODE" = "yes" ] ; then
-              printf "nonzero .err file = ${ErrFile}\n"
-            fi
-            AutotestFailureCount=`expr $AutotestFailureCount + 1`
-            TotalFailureCount=`expr $TotalFailureCount + 1`
-            TestCaseFailedCount=`expr $TestCaseFailedCount + 1`
-            ELIST="${ELIST}${ErrFile}\n"
-            TestCaseFailedFlag=1
-          fi
-        fi
-        if [ "$TestCaseFailedFlag" = "0" ] ; then
-          TotalSuccessCount=`expr $TotalSuccessCount + 1`
-          TestCaseSuccessCount=`expr $TestCaseSuccessCount + 1`
-        fi
-      done
-      if [ "$TestCaseFailedCount" != "0" ] ; then
+     done
+#               end of j-loop
+#
+#               print execution success/fail numbers for given directory
+     if [ "$TestCaseFailedCount" != "0" ] ; then
         printf "Passed:    %2d  Failed:   %2d\n" $TestCaseSuccessCount $TestCaseFailedCount >> $SUMFILE
-      elif [ "$TestCaseSuccessCount" != "0" ] ; then
+     elif [ "$TestCaseSuccessCount" != "0" ] ; then
         printf "Passed:    %2d\n" $TestCaseSuccessCount >> $SUMFILE
-      else
+     else
         printf "N/A\n" >> $SUMFILE
-      fi
-    done
-    if [ "$DEBUG_MODE" = "yes" ] ; then
-      printf "%2d test failed\n" $TotalFailureCount
-      printf "%2d test succeeded\n" $TotalSuccessCount
-      printf "%2d test total\n" $TotalTestCount
-    fi
-    printf "\n" >> $SUMFILE
-    printf "%2d test failed\n" $TotalFailureCount >> $SUMFILE
-    printf "%2d test succeeded\n" $TotalSuccessCount >> $SUMFILE
-    printf "%2d test total\n" $TotalTestCount >> $SUMFILE
-    if [ "$ELIST" != "" ] ; then
-      printf "non zero error log file(s):\n" >> $SUMFILE
-      printf "${ELIST}" >> $SUMFILE
-    fi
+     fi
+  done
+#               end of i-loop
+  if [ "$DEBUG_MODE" = "yes" ] ; then
+     printf "%2d test failed\n" $TotalFailureCount
+     printf "%2d test succeeded\n" $TotalSuccessCount
+     printf "%2d test total\n" $TotalTestCount
+  fi
+#
+#              print summary success/fail numbers and list of non-zero
+#              error files, if any exist
+  printf "\n" >> $SUMFILE
+  printf "%2d test failed\n" $TotalFailureCount >> $SUMFILE
+  printf "%2d test succeeded\n" $TotalSuccessCount >> $SUMFILE
+  printf "%2d test total\n" $TotalTestCount >> $SUMFILE
+
+  if [ "$ELIST" != "" ] ; then
+     printf "non zero error log file(s):\n" >> $SUMFILE
+     printf "${ELIST}" >> $SUMFILE
+  fi
+
   printf "%s\n" "--------------------------------------------" >> $SUMFILE
+
   chgrp hypre $SUMFILE
   if [ -d "${HYPRE_DST_DIR}" ] ; then
     cp -p $SUMFILE $HYPRE_DST_DIR 
   fi
+#
+#               mail summaries
   MAIL_HEADER="`uname -n` `uname -s`:`uname -r`.`uname -v`"
   if [ "$AutotestFailureCount" = "0" ] ; then
     SUBJECT="Autotest NO Errors ($MAIL_HEADER)"
   else
     SUBJECT="Autotest $AutotestFailureCount Errors ($MAIL_HEADER)"
   fi
+
   if [ -n "${HYPRE_MESSAGE}" ] ; then
     SUBJECT="$HYPRE_MESSAGE $SUBJECT"
   fi
+
   if [ "$HYPRE_ARCH" = "linux" ] ; then
     if (echo ${HYPRE_MAIL}|grep "Mail" > /dev/null) ; then
       if [ "$DEBUG_MODE" = "yes" ] ; then
@@ -674,14 +630,14 @@ makeit ()
 {
 MakeStr=$1	 MessageStr=$2
 MailGroup=$3
-if [ "$MessageStr" = "insure" ]
-then				# don't need extra insure status messages
-  InsureSelected=1
-  $MAKE $MakeStr 1>> ${Hdr}.${MessageStr}.${MakeStr}.log 2>&1
-else
+##if [ "$MessageStr" = "insure" ]
+##then				# don't need extra insure status messages
+##  InsureSelected=1
+##  $MAKE $MakeStr 1>> ${Hdr}.${MessageStr}.${MakeStr}.log 2>&1
+##else
   $MAKE $MakeStr 1>> ${Hdr}.${MessageStr}.${MakeStr}.log \
         2>> ${Hdr}.${MessageStr}.${MakeStr}.err
-fi
+##fi
 echo "$MailGroup" > ${Hdr}.${MessageStr}.${MakeStr}.err.email
 }
 #=============================================================================
@@ -704,13 +660,14 @@ export HYPRE_BUILD_DIR
 if [ ${BuildOpt} -ne $Skip ] ; then
   seconds; TIME=$SECS
   echo "Autotest starting configure and make of $MessageStr"
+
   if [ ${BuildOpt} -eq $Build -o ${BuildOpt} -eq $Run ] ; then
     cd $StdBuildDir
     [ -f config.cache ] && rm config.cache
     if [ "$ConfigOption" != " " ]
     then
       if [ "$ConfigOption" = "--with-babel" ]            ## need to disable Fortran90
-      then                                               ## when ONLY building Babel
+      then                                               ## ONLY when building Babel
          ExtraConfigOption="--disable-fortran90"
          $CONFIGURE "$ConfigOption" "$ExtraConfigOption" 1> ${Hdr}.${MessageStr}.configure.log \
 	   2> ${Hdr}.${MessageStr}.configure.err
@@ -719,6 +676,7 @@ if [ ${BuildOpt} -ne $Skip ] ; then
 	   2> ${Hdr}.${MessageStr}.configure.err
       fi
     fi
+
     if [ "$ConfigOption" = " " ]
     then
       $CONFIGURE 1> ${Hdr}.${MessageStr}.configure.log \
@@ -742,9 +700,9 @@ if [ ${BuildOpt} -ne $Skip ] ; then
   if [ ${BuildOpt} -eq $Run ] ; then
     if [ -z "${HYPRE_RUN_MACHINE}" -o "${HYPRE_RUN_MACHINE}" = "" ] ; then
       if [ "$DEBUG_MODE" = "yes" ] ; then
-        ./runtest.sh -debug $MailOpt $STD_TEST_DIRS
+        ./runtest.sh -debug $MailOpt $STD_TEST_CASES
       else
-        ./runtest.sh $MailOpt $STD_TEST_DIRS
+        ./runtest.sh $MailOpt $STD_TEST_CASES
       fi
     else
       ssh ${HYPRE_RUN_MACHINE} "\
@@ -752,9 +710,9 @@ if [ ${BuildOpt} -ne $Skip ] ; then
         cd ${HYPRE_AUTOTEST_DIR}/${SRC}/test;\
         [ -r ./AUTOTEST/env.${HYPRE_ARCH} ] && . ./AUTOTEST/env.${HYPRE_ARCH};\
         if [ "$DEBUG_MODE" = "yes" ] ; then
-          ./runtest.sh -debug $MailOpt $STD_TEST_DIRS \
+          ./runtest.sh -debug $MailOpt $STD_TEST_CASES \
         else
-          ./runtest.sh $MailOpt $STD_TEST_DIRS \
+          ./runtest.sh $MailOpt $STD_TEST_CASES \
         fi
     )"
     fi
