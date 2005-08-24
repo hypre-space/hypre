@@ -92,12 +92,14 @@ help () {
   printf "options to use.\n"
   printf "\n"
   printf "%s\n" "-nocvs    Do not checkout the latest source code from CVS.\n"
-  printf "                 Use the existing ./linear_solvers/ directory for testing.\n"
-  printf "%s\n" "-rev Rev# Check out the specified revision or tagged source from CVS.\n" 
-  printf "host   Host ID or configuration on which autotest is to be run.\n"
+  printf "                 Use the existing ./linear_solvers/ directory for\n"
+  printf "                 testing.\n"
+  printf "%s\n" "-rev Rev# Check out the specified revision or tagged source\n" 
+  printf "%s\n" "          from CVS.\n" 
+  printf "host   Host ID or configuration on which autotest_test is to be run.\n"
+  printf "\n"
   printf "       Valid host IDs are:\n"
   printf "%s\n" "     -debug    Turn on debug mode."
-  printf "%s\n" "     -emperor  Intel Linux, CHAOS2."
   printf "%s\n" "     -gps      Compaq gps320 system."
   printf "%s\n" "     -gpsmp    Compaq gps320 system executing OpenMP."
   printf "%s\n" "     -ilx      Intel running Linux."
@@ -105,7 +107,6 @@ help () {
   printf "%s\n" "     -mcr      Intel Linux, CHAOS2."
   printf "%s\n" "     -pengra   Intel Linux, CHAOS2."
   printf "%s\n" "     -red      ASCI Red"
-  printf "%s\n" "     -sc       Compaq system."
   printf "%s\n" "     -tux149   CASC running RedHat Enterprise Linux."
   printf "%s\n" "     -tuxgcc   CASC running latest gcc compilers"
   printf "%s\n" "     -tuxpgi   CASC running latest PGI compilers"
@@ -113,7 +114,6 @@ help () {
   printf "%s\n" "     -tuxlahey CASC running Lahey Frotran compiler"
   printf "%s\n" "     -tuxintel CASC running Intel-8.0 compilers"
   printf "%s\n" "     -tuxkai   CASC running latest KAI KCC compiler"
-  printf "%s\n" "     -white    ASCI White."
   printf "\n"
 }
 
@@ -128,15 +128,16 @@ usage ()
 DEBUGMODE=""
 HYPRE_MESSAGE=""
 COMPILERSELECT=""
-StartingDir=`pwd`
 export HYPRE_MESSAGE COMPILERSELECT
 
 # OpenSSH to F-Secure communication for RSA authentication
 SSH_COMMAND="ssh"
 
-##SCP_COMMAND="scp -q -oProtocol=1"
 SCP_COMMAND="cp"
 
+#=============================================================================
+# Parse command line arguments.  If no args, print usage info and exit.
+#=============================================================================
 if [ $# -lt 1 ]
 then
   usage
@@ -152,28 +153,32 @@ case $1 in
         shift;;
 esac
 
+#=============================================================================
+# Define permissions
+#=============================================================================
 OldMask=`umask -S`
 umask u=rwx,g=rx,o=rx
 
+#=============================================================================
+# Set environment info
+#=============================================================================
 if [ -f ./autotest_env ] 
 then
   . ./autotest_env
 fi
 
+#=============================================================================
+# Check out the repository into the HYPRE_AUTOTEST_DIR directory, if requested
+#=============================================================================
 if [ "$1" = "-nocvs" ]
 then
   shift
 else
-#=============================================================================
-# Check out the repository into the HYPRE_AUTOTEST_DIR directory
-#=============================================================================
-
   if [ ! -d "$CVSROOT" ]
   then
     echo "Error: no CVS repository, CVSROOT = $CVSROOT"
     exit
   fi
-
 ##              remove existing linear_solvers directory then checkout
 ##              requested version
   rm -fR linear_solvers
@@ -186,13 +191,14 @@ else
   else
     cvs -q checkout -P linear_solvers 1> $0.checkout.log 2> $0.checkout.err
   fi
-  chmod -fR a+rX,u+w,go-w linear_solvers
-  chgrp -fR hypre linear_solvers
   echo "$HYPRE_CHECKOUT_EMAIL" > $0.checkout.err.email 
   chmod -f a+rX,u+w,go-w $0.checkout.*
   chgrp -f hypre $0.checkout.*
 fi
 
+#==============================================================================
+# set permissions and group for linear_solvers directory
+#==============================================================================
 chmod -fR a+rX,u+w,go-w linear_solvers
 chgrp -fR hypre linear_solvers
 
@@ -239,7 +245,7 @@ do
         HYPRE_ARCH="linux"
         HYPRE_COMPILE_MACHINE="tux149"
         HYPRE_RUN_MACHINE="tux149"
-        HYPRE_DIST_DIR="/usr/casc/hypre/i686-pc-linux-gnu/AUTOTEST"
+        HYPRE_DIST_DIR="/usr/casc/hypre/i686-pc-linux-gnu-insure/AUTOTEST"
 	HYPRE_MACHINE_COMMANDS="-mi 2"
         HYPRE_MESSAGE='PRIMARY[insure++]'
         HYPRE_MACHINE_COMMANDS="$HYPRE_MACHINE_COMMANDS -v $HYPRE_MESSAGE"
@@ -285,7 +291,7 @@ do
         HYPRE_COMPILE_MACHINE="tux149"
         HYPRE_RUN_MACHINE="tux149"
         HYPRE_DIST_DIR="/usr/casc/hypre/i686-pc-linux-gnu/AUTOTEST"
-        HYPRE_MACHINE_COMMANDS="-mb 1 -nsde 1 -a 2 -i 2 -cf"
+        HYPRE_MACHINE_COMMANDS="-mb 1 -nsde 1 -a 2 -cf"
         HYPRE_MESSAGE='PRIMARY[default]'
         COMPILERSELECT="default"
 	perform_test
@@ -295,7 +301,7 @@ do
         HYPRE_COMPILE_MACHINE="tux149"
         HYPRE_RUN_MACHINE="tux149"
         HYPRE_DIST_DIR="/usr/casc/hypre/i686-pc-linux-gnu/AUTOTEST"
-        HYPRE_MACHINE_COMMANDS="-b 1 -de 1"
+        HYPRE_MACHINE_COMMANDS="-b 1 -de 1 -i 2"
         HYPRE_MESSAGE='LOCAL TEST[default]'
         COMPILERSELECT="default"
         ./autotest_test $HYPRE_MACHINE_COMMANDS -v $HYPRE_MESSAGE
@@ -374,7 +380,7 @@ COMPILERSELECT="default"
 ./autotest_test $HYPRE_MACHINE_COMMANDS -v $HYPRE_MESSAGE
 
 #==============================================================================
-# Set permissions
+# Reset permissions
 #==============================================================================
 
 chmod -fR a+rX,ug+w,o-w linear_solvers
