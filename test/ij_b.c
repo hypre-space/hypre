@@ -70,12 +70,6 @@ main( int   argc,
    double              final_res_norm;
    sidl_BaseInterface  bHYPRE_object;
 
-   bHYPRE_IJBuildMatrix bHYPRE_ij_A ;
-   bHYPRE_IJBuildVector bHYPRE_ij_b;
-   bHYPRE_IJBuildVector bHYPRE_ij_x;
-   bHYPRE_IJBuildVector bHYPRE_ij_y;
-   bHYPRE_IJBuildVector bHYPRE_ij_y2;
-
    HYPRE_ParCSRMatrix    parcsr_A;
    bHYPRE_IJParCSRMatrix  bHYPRE_parcsr_A;
    bHYPRE_Operator        bHYPRE_op_A;
@@ -857,14 +851,6 @@ main( int   argc,
                                                       first_local_col,
                                                       last_local_col );
 
-      bHYPRE_ij_A = bHYPRE_IJBuildMatrix__cast( bHYPRE_parcsr_A );
-      /*printf("finished cast\n");*/
-      if ( bHYPRE_ij_A == NULL )
-      {
-         printf("Cast failed\n");
-         return 1;
-      }
-
 /* the following shows how to build an IJMatrix if one has only an
    estimate for the row sizes */
       if (sparsity_known == 1)
@@ -892,11 +878,11 @@ main( int   argc,
             row_sizes[i] = size;
          }
 
-         ierr = bHYPRE_IJBuildMatrix_SetRowSizes( bHYPRE_ij_A, row_sizes, local_num_rows );
+         ierr = bHYPRE_IJParCSRMatrix_SetRowSizes( bHYPRE_parcsr_A, row_sizes, local_num_rows );
 
          hypre_TFree( row_sizes );
 
-         ierr = bHYPRE_IJBuildMatrix_Initialize( bHYPRE_ij_A );
+         ierr = bHYPRE_IJParCSRMatrix_Initialize( bHYPRE_parcsr_A );
 
 
          row_sizes = hypre_CTAlloc( int, 1 );
@@ -910,9 +896,9 @@ main( int   argc,
             ierr += HYPRE_ParCSRMatrixGetRow( parcsr_A, i, &size,
                                               &col_inds, &values );
 
-            ierr += bHYPRE_IJBuildMatrix_SetValues( bHYPRE_ij_A, 1, &size, &i,
-                                                    col_inds, values,
-                                                    size );
+            ierr += bHYPRE_IJParCSRMatrix_SetValues( bHYPRE_parcsr_A, 1, &size, &i,
+                                                     col_inds, values,
+                                                     size );
 
             ierr += HYPRE_ParCSRMatrixRestoreRow( parcsr_A, i, &size,
                                                   &col_inds, &values );
@@ -920,7 +906,7 @@ main( int   argc,
          }
       }
 
-      ierr += bHYPRE_IJBuildMatrix_Assemble( bHYPRE_ij_A );
+      ierr += bHYPRE_IJParCSRMatrix_Assemble( bHYPRE_parcsr_A );
 
    }
 
@@ -960,8 +946,8 @@ main( int   argc,
       values[j] = val;
    }
       
-   ierr += bHYPRE_IJBuildMatrix_AddToValues
-      ( bHYPRE_ij_A, local_num_rows, ncols, rows, col_inds, values, local_num_rows );
+   ierr += bHYPRE_IJParCSRMatrix_AddToValues
+      ( bHYPRE_parcsr_A, local_num_rows, ncols, rows, col_inds, values, local_num_rows );
 
    hypre_TFree(values);
    hypre_TFree(col_inds);
@@ -972,7 +958,7 @@ main( int   argc,
    /* If sparsity pattern is not changed since last IJMatrixAssemble call,
       this should be a no-op */
 
-   ierr += bHYPRE_IJBuildMatrix_Assemble( bHYPRE_ij_A );
+   ierr += bHYPRE_IJParCSRMatrix_Assemble( bHYPRE_parcsr_A );
 
    /*-----------------------------------------------------------
     * Fetch the resulting underlying matrix out
@@ -980,15 +966,6 @@ main( int   argc,
 
    if (build_matrix_type > 1)
       ierr += HYPRE_ParCSRMatrixDestroy(parcsr_A);
-
-   ierr += bHYPRE_IJBuildMatrix_GetObject( bHYPRE_ij_A, &bHYPRE_object );
-   bHYPRE_parcsr_A = bHYPRE_IJParCSRMatrix__cast( bHYPRE_object );
-   if ( bHYPRE_parcsr_A == NULL )
-   {
-      printf("Cast/QI failed\n");
-      return 1;
-   }
-   sidl_BaseInterface_deleteRef( bHYPRE_object );
 
    /*-----------------------------------------------------------
     * Set up the RHS and initial guess
@@ -1050,51 +1027,35 @@ main( int   argc,
       bHYPRE_b = bHYPRE_IJParCSRVector_Create( (void *)comm,
                                                first_local_row,
                                                last_local_row );
-      bHYPRE_ij_b = bHYPRE_IJBuildVector__cast( bHYPRE_b );
 
-      ierr += bHYPRE_IJBuildVector_Initialize( bHYPRE_ij_b );
+      ierr += bHYPRE_IJParCSRVector_Initialize( bHYPRE_b );
 
 
       values = hypre_CTAlloc(double, local_num_cols);
       for (i = 0; i < local_num_cols; i++)
          values[i] = 0.;
-      bHYPRE_IJBuildVector_SetValues( bHYPRE_ij_b, local_num_rows, NULL, values );
+      bHYPRE_IJParCSRVector_SetValues( bHYPRE_b, local_num_rows, NULL, values );
       hypre_TFree(values);
 
-      ierr += bHYPRE_IJBuildVector_Assemble( bHYPRE_ij_b );
+      ierr += bHYPRE_IJParCSRVector_Assemble( bHYPRE_b );
 
-      ierr += bHYPRE_IJBuildVector_GetObject( bHYPRE_ij_b, &bHYPRE_object );
-      bHYPRE_b = bHYPRE_IJParCSRVector__cast( bHYPRE_object );
-      if ( bHYPRE_b == NULL ) {
-         printf("Cast/QI failed\n");
-         return 1;
-      }
-      sidl_BaseInterface_deleteRef( bHYPRE_object );
 
 /* Initial guess */
       bHYPRE_x = bHYPRE_IJParCSRVector_Create( (void *)comm,
                                                first_local_row,
                                                last_local_row );
-      bHYPRE_ij_x = bHYPRE_IJBuildVector__cast( bHYPRE_x );
 
-      ierr += bHYPRE_IJBuildVector_Initialize( bHYPRE_ij_x );
+      ierr += bHYPRE_IJParCSRVector_Initialize( bHYPRE_x );
 
       values = hypre_CTAlloc(double, local_num_cols);
       for ( i=0; i<local_num_cols; ++i )
          values[i] = 0.;
-      bHYPRE_IJBuildVector_SetValues( bHYPRE_ij_x, local_num_cols,
-                                      NULL, values );
+      bHYPRE_IJParCSRVector_SetValues( bHYPRE_x, local_num_cols,
+                                       NULL, values );
       hypre_TFree(values);
 
-      ierr += bHYPRE_IJBuildVector_Assemble( bHYPRE_ij_x );
+      ierr += bHYPRE_IJParCSRVector_Assemble( bHYPRE_x );
 
-      ierr += bHYPRE_IJBuildVector_GetObject( bHYPRE_ij_x, &bHYPRE_object );
-      bHYPRE_x = bHYPRE_IJParCSRVector__cast( bHYPRE_object );
-      if ( bHYPRE_x == NULL ) {
-         printf("Cast/QI failed\n");
-         return 1;
-      }
-      sidl_BaseInterface_deleteRef( bHYPRE_object );
    }
    else if ( build_rhs_type == 3 )
    {
@@ -1468,8 +1429,7 @@ main( int   argc,
       bHYPRE_y = bHYPRE_IJParCSRVector_Create( (void *)comm,
                                                first_local_col,
                                                last_local_col );
-      bHYPRE_ij_y = bHYPRE_IJBuildVector__cast( bHYPRE_y );
-      ierr += bHYPRE_IJBuildVector_Initialize( bHYPRE_ij_y );
+      ierr += bHYPRE_IJParCSRVector_Initialize( bHYPRE_y );
       y = bHYPRE_Vector__cast( bHYPRE_y );
 
       bHYPRE_IJParCSRMatrix_Apply( bHYPRE_parcsr_A,
@@ -1478,7 +1438,6 @@ main( int   argc,
 
       bHYPRE_IJParCSRMatrix_Print( bHYPRE_parcsr_A, "test.A" );
       bHYPRE_IJParCSRVector_Print( bHYPRE_y, "test.apply" );
-      bHYPRE_IJBuildVector_deleteRef( bHYPRE_ij_y );
 
       /* SetValues, x=1; result is all 1's */
       indices = hypre_CTAlloc(int, local_num_cols);
@@ -1488,7 +1447,7 @@ main( int   argc,
          indices[i] = i+first_local_col;
          values[i] = 1.0;
       }
-      bHYPRE_IJBuildVector_SetValues( bHYPRE_ij_x, local_num_cols, indices, values );
+      bHYPRE_IJParCSRVector_SetValues( bHYPRE_x, local_num_cols, indices, values );
       hypre_TFree(indices);
       hypre_TFree(values);
       bHYPRE_IJParCSRVector_Print( bHYPRE_x, "test.setvalues" );
@@ -1508,12 +1467,10 @@ main( int   argc,
       bHYPRE_y2 = bHYPRE_IJParCSRVector_Create( (void *)comm,
                                                 first_local_col,
                                                 last_local_col );
-      bHYPRE_ij_y2 = bHYPRE_IJBuildVector__cast( bHYPRE_y2 );
-      ierr += bHYPRE_IJBuildVector_Initialize( bHYPRE_ij_y2 );
+      ierr += bHYPRE_IJParCSRVector_Initialize( bHYPRE_y2 );
       bHYPRE_IJParCSRVector_Read( bHYPRE_y2, "test.clone", (void *)comm );
       bHYPRE_IJParCSRVector_Print( bHYPRE_y2, "test.read" );
-/*del by Rob, probably because Gary told him the cast shouldn't create a reference:
-  bHYPRE_IJBuildVector_deleteRef( bHYPRE_ij_y2 );*/
+
       bHYPRE_IJParCSRVector_deleteRef( bHYPRE_y2 );
 
       /* Scale, x=2*x; result is all 2's */
@@ -1539,8 +1496,8 @@ main( int   argc,
          values[i] = 1.0;
       }
       bHYPRE_IJParCSRVector_Clear( bHYPRE_b );
-      bHYPRE_IJBuildVector_AddToValues
-         ( bHYPRE_ij_b, local_num_cols, indices, values );
+      bHYPRE_IJParCSRVector_AddToValues
+         ( bHYPRE_b, local_num_cols, indices, values );
       hypre_TFree(indices);
       hypre_TFree(values);
       bHYPRE_IJParCSRVector_Print( bHYPRE_b, "test.addtovalues" );
