@@ -813,6 +813,7 @@ int main (int argc, char *argv[])
       HYPRE_StructSMGSolve(solver, A, b, x);
 
       /* Finalize current timing */
+      hypre_EndTiming(time_index);
       hypre_PrintTiming("Solve phase times", MPI_COMM_WORLD);
       hypre_FinalizeTiming(time_index);
       hypre_ClearTiming();
@@ -857,6 +858,7 @@ int main (int argc, char *argv[])
       HYPRE_StructPFMGSolve(solver, A, b, x);
 
       /* Finalize current timing */
+      hypre_EndTiming(time_index);
       hypre_PrintTiming("Solve phase times", MPI_COMM_WORLD);
       hypre_FinalizeTiming(time_index);
       hypre_ClearTiming();
