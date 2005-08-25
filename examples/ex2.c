@@ -18,6 +18,8 @@
                  example.
 */
 
+#include <stdio.h>
+
 /* Struct linear solvers header */
 #include "HYPRE_struct_ls.h"
 
@@ -44,11 +46,9 @@ int main (int argc, char *argv[])
    {
       if (myid ==0) printf("Must run with 2 processors!\n");
       MPI_Finalize();
-      
+
       return(0);
    }
-
-
 
    /* 1. Set up a grid */
    {
@@ -74,7 +74,8 @@ int main (int argc, char *argv[])
             HYPRE_StructGridSetExtents(grid, ilower, iupper);
          }
       }
-      /* Processor 1 owns one boxes in the grid. */
+
+      /* Processor 1 owns one box in the grid. */
       else if (myid == 1)
       {
          /* Add a new box to the grid */
@@ -205,11 +206,12 @@ int main (int argc, char *argv[])
       {
          int maxnvalues = 6;
          double values[6];
+
          for (i = 0; i < maxnvalues; i++)
             values[i] = 0.0;
 
          {
-            /* values below our first AND second box */
+            /* Values below our first AND second box */
             int ilower[2] = {-3, 1};
             int iupper[2] = { 2, 1};
 
@@ -220,7 +222,7 @@ int main (int argc, char *argv[])
          }
 
          {
-            /* values to the left of our first box */
+            /* Values to the left of our first box */
             int ilower[2] = {-3, 1};
             int iupper[2] = {-3, 2};
 
@@ -231,7 +233,7 @@ int main (int argc, char *argv[])
          }
 
          {
-            /* values above our first box */
+            /* Values above our first box */
             int ilower[2] = {-3, 2};
             int iupper[2] = {-1, 2};
 
@@ -242,7 +244,7 @@ int main (int argc, char *argv[])
          }
 
          {
-            /* values to the left of our second box (that do not border the
+            /* Values to the left of our second box (that do not border the
                first box). */
             int ilower[2] = { 0, 3};
             int iupper[2] = { 0, 4};
@@ -254,7 +256,7 @@ int main (int argc, char *argv[])
          }
 
          {
-            /* values above our second box */
+            /* Values above our second box */
             int ilower[2] = { 0, 4};
             int iupper[2] = { 2, 4};
 
@@ -272,7 +274,7 @@ int main (int argc, char *argv[])
             values[i] = 0.0;
 
          {
-            /* values below our box */
+            /* Values below our box */
             int ilower[2] = { 3, 1};
             int iupper[2] = { 6, 1};
 
@@ -283,7 +285,7 @@ int main (int argc, char *argv[])
          }
 
          {
-            /* values to the right of our box */
+            /* Values to the right of our box */
             int ilower[2] = { 6, 1};
             int iupper[2] = { 6, 4};
 
@@ -294,7 +296,7 @@ int main (int argc, char *argv[])
          }
 
          {
-            /* values above our box */
+            /* Values above our box */
             int ilower[2] = { 3, 4};
             int iupper[2] = { 6, 4};
 
@@ -389,7 +391,7 @@ int main (int argc, char *argv[])
       /* Create an empty PCG Struct solver */
       HYPRE_StructPCGCreate(MPI_COMM_WORLD, &solver);
 
-      /* Set stopping criteria */
+      /* Set PCG parameters */
       HYPRE_StructPCGSetTol(solver, 1.0e-06);
       HYPRE_StructPCGSetPrintLevel(solver, 2);
       HYPRE_StructPCGSetMaxIter(solver, 50);

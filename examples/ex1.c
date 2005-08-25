@@ -19,6 +19,8 @@
                  a nice overview/tutorial of the struct interface.
 */
 
+#include <stdio.h>
+
 /* Struct linear solvers header */
 #include "HYPRE_struct_ls.h"
 
@@ -42,7 +44,7 @@ int main (int argc, char *argv[])
    {
       if (myid ==0) printf("Must run with 2 processors!\n");
       MPI_Finalize();
-      
+
       return(0);
    }
 
