@@ -104,7 +104,7 @@ hypre_F90_IFACE(hypre_sstructfacsetprefinements, HYPRE_SSTRUCTFACSETPREFINEMENTS
 {
    *ierr = (int) ( HYPRE_SStructFACSetPRefinements( (HYPRE_SStructSolver) *solver,
                                                     (int)                 *nparts,
-                                                    (int)                 (*rfactors)[3] ));
+                                                            rfactors ));
 }
 
 /*--------------------------------------------------------------------------
