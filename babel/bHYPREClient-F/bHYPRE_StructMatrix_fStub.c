@@ -13,8 +13,8 @@
 /*
  * Symbol "bHYPRE.StructMatrix" (version 1.0.0)
  * 
- * A single class that implements both a build interface and an
- * operator interface. It returns itself for GetConstructedObject.
+ * A single class that implements both a view interface and an
+ * operator interface.
  * A StructMatrix is a matrix on a structured grid.
  * One function unique to a StructMatrix is SetConstantEntries.
  * This declares that matrix entries corresponding to certain stencil points
@@ -451,42 +451,6 @@ SIDLFortran77Symbol(bhypre_structmatrix_assemble_f,BHYPRE_STRUCTMATRIX_ASSEMBLE_
     (*(_epv->f_Assemble))(
       _proxy_self
     );
-}
-
-/*
- * The problem definition interface is a {\it builder} that
- * creates an object that contains the problem definition
- * information, e.g. a matrix. To perform subsequent operations
- * with that object, it must be returned from the problem
- * definition object. {\tt GetObject} performs this function.
- * At compile time, the type of the returned object is unknown.
- * Thus, the returned type is a sidl.BaseInterface.
- * QueryInterface or Cast must be used on the returned object to
- * convert it into a known type.
- * 
- */
-
-void
-SIDLFortran77Symbol(bhypre_structmatrix_getobject_f,BHYPRE_STRUCTMATRIX_GETOBJECT_F,bHYPRE_StructMatrix_GetObject_f)
-(
-  int64_t *self,
-  int64_t *A,
-  int32_t *retval
-)
-{
-  struct bHYPRE_StructMatrix__epv *_epv = NULL;
-  struct bHYPRE_StructMatrix__object* _proxy_self = NULL;
-  struct sidl_BaseInterface__object* _proxy_A = NULL;
-  _proxy_self =
-    (struct bHYPRE_StructMatrix__object*)
-    (ptrdiff_t)(*self);
-  _epv = _proxy_self->d_epv;
-  *retval = 
-    (*(_epv->f_GetObject))(
-      _proxy_self,
-      &_proxy_A
-    );
-  *A = (ptrdiff_t)_proxy_A;
 }
 
 /*

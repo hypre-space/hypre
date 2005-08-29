@@ -103,9 +103,6 @@ struct bHYPRE_ProblemDefinition__epv {
     /* in */ void* self);
   int32_t (*f_Assemble)(
     /* in */ void* self);
-  int32_t (*f_GetObject)(
-    /* in */ void* self,
-    /* out */ struct sidl_BaseInterface__object** A);
 };
 
 /*
@@ -184,9 +181,6 @@ struct bHYPRE__ProblemDefinition__epv {
     /* in */ struct bHYPRE__ProblemDefinition__object* self);
   int32_t (*f_Assemble)(
     /* in */ struct bHYPRE__ProblemDefinition__object* self);
-  int32_t (*f_GetObject)(
-    /* in */ struct bHYPRE__ProblemDefinition__object* self,
-    /* out */ struct sidl_BaseInterface__object** A);
   /* Methods introduced in bHYPRE._ProblemDefinition-v1.0 */
 };
 

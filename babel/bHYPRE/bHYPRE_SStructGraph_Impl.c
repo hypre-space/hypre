@@ -395,40 +395,6 @@ impl_bHYPRE_SStructGraph_Assemble(
    
   /* DO-NOT-DELETE splicer.end(bHYPRE.SStructGraph.Assemble) */
 }
-
-/*
- * The problem definition interface is a {\it builder} that
- * creates an object that contains the problem definition
- * information, e.g. a matrix. To perform subsequent operations
- * with that object, it must be returned from the problem
- * definition object. {\tt GetObject} performs this function.
- * At compile time, the type of the returned object is unknown.
- * Thus, the returned type is a sidl.BaseInterface.
- * QueryInterface or Cast must be used on the returned object to
- * convert it into a known type.
- * 
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_bHYPRE_SStructGraph_GetObject"
-
-#ifdef __cplusplus
-extern "C"
-#endif
-int32_t
-impl_bHYPRE_SStructGraph_GetObject(
-  /* in */ bHYPRE_SStructGraph self,
-  /* out */ sidl_BaseInterface* A)
-{
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructGraph.GetObject) */
-  /* Insert the implementation of the GetObject method here... */
- 
-   bHYPRE_SStructGraph_addRef( self );
-   *A = sidl_BaseInterface__cast( self );
-   return( 0 );
-
-  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructGraph.GetObject) */
-}
 /* Babel internal methods, Users should not edit below this line. */
 struct bHYPRE_SStructGrid__object* 
   impl_bHYPRE_SStructGraph_fconnect_bHYPRE_SStructGrid(char* url,
@@ -493,3 +459,20 @@ char * impl_bHYPRE_SStructGraph_fgetURL_sidl_BaseClass(struct
   sidl_BaseClass__object* obj) {
   return sidl_BaseClass__getURL(obj);
 }
+
+#error File has unused splicer blocks.
+/**
+ * ================= BEGIN UNREFERENCED METHOD(S) ================
+ * The following code segment(s) belong to unreferenced method(s).
+ * This can result from a method rename/removal in the sidl file.
+ * Move or remove the code in order to compile cleanly.
+ */
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructGraph.GetObject) */
+  /* Insert the implementation of the GetObject method here... */
+ 
+   bHYPRE_SStructGraph_addRef( self );
+   *A = sidl_BaseInterface__cast( self );
+   return( 0 );
+
+  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructGraph.GetObject) */
+/* ================== END UNREFERENCED METHOD(S) ================= */

@@ -379,29 +379,6 @@ bHYPRE_SStructGraph_Assemble(
     self);
 }
 
-/*
- * The problem definition interface is a {\it builder} that
- * creates an object that contains the problem definition
- * information, e.g. a matrix. To perform subsequent operations
- * with that object, it must be returned from the problem
- * definition object. {\tt GetObject} performs this function.
- * At compile time, the type of the returned object is unknown.
- * Thus, the returned type is a sidl.BaseInterface.
- * QueryInterface or Cast must be used on the returned object to
- * convert it into a known type.
- * 
- */
-
-int32_t
-bHYPRE_SStructGraph_GetObject(
-  /* in */ bHYPRE_SStructGraph self,
-  /* out */ sidl_BaseInterface* A)
-{
-  return (*self->d_epv->f_GetObject)(
-    self,
-    A);
-}
-
 void
 bHYPRE_SStructGraph_Create__sexec(
         struct sidl_io_Deserializer__object* inArgs,
@@ -1352,41 +1329,6 @@ remote_bHYPRE_SStructGraph_Assemble(
   return _retval;
 }
 
-/* REMOTE METHOD STUB:GetObject */
-static int32_t
-remote_bHYPRE_SStructGraph_GetObject(
-  /* in */ struct bHYPRE_SStructGraph__object* self /* TLD */,
-  /* out */ struct sidl_BaseInterface__object** A)
-{
-  sidl_BaseInterface _ex = NULL;
-  sidl_BaseInterface *_ex2 =&_ex;
-  /* initialize a new invocation */
-  sidl_rmi_InstanceHandle _conn = (sidl_rmi_InstanceHandle)self->d_data;
-  sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
-    "GetObject", _ex2 );
-  sidl_rmi_Response _rsvp = NULL;
-  char* A_str= NULL;
-  int32_t _retval;
-
-  /* pack in and inout arguments */
-
-  /* send actual RMI request */
-  _rsvp = sidl_rmi_Invocation_invokeMethod(_inv,_ex2);
-
-  /* extract return value */
-  sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval, _ex2);
-
-  /* unpack out and inout arguments */
-  sidl_rmi_Response_unpackString( _rsvp, "A", &A_str, _ex2);
-  sidl_BaseInterface__connect(A_str, _ex2);
-
-  /* cleanup and return */
-  sidl_rmi_Response_done(_rsvp, _ex2);
-  sidl_rmi_Invocation_deleteRef(_inv);
-  sidl_rmi_Response_deleteRef(_rsvp);
-  return _retval;
-}
-
 /* REMOTE EPV: create remote entry point vectors (EPVs). */
 static void bHYPRE_SStructGraph__init_remote_epv(void)
 {
@@ -1416,7 +1358,6 @@ static void bHYPRE_SStructGraph__init_remote_epv(void)
   epv->f_SetCommunicator      = remote_bHYPRE_SStructGraph_SetCommunicator;
   epv->f_Initialize           = remote_bHYPRE_SStructGraph_Initialize;
   epv->f_Assemble             = remote_bHYPRE_SStructGraph_Assemble;
-  epv->f_GetObject            = remote_bHYPRE_SStructGraph_GetObject;
 
   e0->f__cast           = (void* (*)(void*,const char*)) epv->f__cast;
   e0->f__delete         = (void (*)(void*)) epv->f__delete;
@@ -1435,8 +1376,6 @@ static void bHYPRE_SStructGraph__init_remote_epv(void)
   e0->f_SetCommunicator = (int32_t (*)(void*,void*)) epv->f_SetCommunicator;
   e0->f_Initialize      = (int32_t (*)(void*)) epv->f_Initialize;
   e0->f_Assemble        = (int32_t (*)(void*)) epv->f_Assemble;
-  e0->f_GetObject       = (int32_t (*)(void*,
-    struct sidl_BaseInterface__object**)) epv->f_GetObject;
 
   e1->f__cast        = (void* (*)(struct sidl_BaseClass__object*,
     const char*)) epv->f__cast;

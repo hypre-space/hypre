@@ -18,7 +18,7 @@
  * 
  * The IJParCSR vector class.
  * 
- * Objects of this type can be cast to IJBuildVector or Vector
+ * Objects of this type can be cast to IJVectorView or Vector
  * objects using the {\tt \_\_cast} methods.
  * 
  */
@@ -135,23 +135,6 @@ bHYPRE_IJParCSRVector_Initialize(
 int32_t
 bHYPRE_IJParCSRVector_Assemble(
   /* in */ bHYPRE_IJParCSRVector self);
-
-/**
- * The problem definition interface is a {\it builder} that
- * creates an object that contains the problem definition
- * information, e.g. a matrix. To perform subsequent operations
- * with that object, it must be returned from the problem
- * definition object. {\tt GetObject} performs this function.
- * At compile time, the type of the returned object is unknown.
- * Thus, the returned type is a sidl.BaseInterface.
- * QueryInterface or Cast must be used on the returned object to
- * convert it into a known type.
- * 
- */
-int32_t
-bHYPRE_IJParCSRVector_GetObject(
-  /* in */ bHYPRE_IJParCSRVector self,
-  /* out */ sidl_BaseInterface* A);
 
 /**
  * Set the local range for a vector object.  Each process owns

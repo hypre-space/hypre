@@ -416,31 +416,6 @@ bHYPRE_SStructGraph_Assemble__exec(
 
 }
 
-static void
-bHYPRE_SStructGraph_GetObject__exec(
-        struct bHYPRE_SStructGraph__object* self,
-        struct sidl_io_Deserializer__object* inArgs,
-        struct sidl_io_Serializer__object* outArgs) {
-  /* stack space for arguments */
-  struct sidl_BaseInterface__object* A_tmp;
-  struct sidl_BaseInterface__object** A= &A_tmp;
-  int32_t _retval;
-  sidl_BaseInterface _ex   = NULL;
-  sidl_BaseInterface *_ex2 = &_ex;
-  /* unpack in and inout argments */
-
-  /* make the call */
-  _retval = (self->d_epv->f_GetObject)(
-    self,
-    A);
-
-  /* pack return value */
-  sidl_io_Serializer_packInt( outArgs, "_retval", _retval, _ex2);
-
-  /* pack out and inout argments */
-
-}
-
 static void ior_bHYPRE_SStructGraph__ensure_load_called(void) {
   /*
    * assert( HAVE_LOCKED_STATIC_GLOBALS );
@@ -513,7 +488,6 @@ ior_bHYPRE_SStructGraph__exec(
   static const struct bHYPRE_SStructGraph__method  s_methods[] = {
     { "AddEntries", bHYPRE_SStructGraph_AddEntries__exec },
     { "Assemble", bHYPRE_SStructGraph_Assemble__exec },
-    { "GetObject", bHYPRE_SStructGraph_GetObject__exec },
     { "Initialize", bHYPRE_SStructGraph_Initialize__exec },
     { "SetCommGrid", bHYPRE_SStructGraph_SetCommGrid__exec },
     { "SetCommunicator", bHYPRE_SStructGraph_SetCommunicator__exec },
@@ -591,7 +565,6 @@ static void bHYPRE_SStructGraph__init_epv(
   epv->f_SetCommunicator          = NULL;
   epv->f_Initialize               = NULL;
   epv->f_Assemble                 = NULL;
-  epv->f_GetObject                = NULL;
 
   bHYPRE_SStructGraph__set_epv(epv);
 
@@ -612,8 +585,6 @@ static void bHYPRE_SStructGraph__init_epv(
   e0->f_SetCommunicator     = (int32_t (*)(void*,void*)) epv->f_SetCommunicator;
   e0->f_Initialize          = (int32_t (*)(void*)) epv->f_Initialize;
   e0->f_Assemble            = (int32_t (*)(void*)) epv->f_Assemble;
-  e0->f_GetObject           = (int32_t (*)(void*,
-    struct sidl_BaseInterface__object**)) epv->f_GetObject;
 
   e1->f__cast               = (void* (*)(struct sidl_BaseClass__object*,
     const char*)) epv->f__cast;

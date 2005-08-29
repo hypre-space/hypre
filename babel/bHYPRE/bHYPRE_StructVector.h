@@ -133,23 +133,6 @@ bHYPRE_StructVector_Assemble(
   /* in */ bHYPRE_StructVector self);
 
 /**
- * The problem definition interface is a {\it builder} that
- * creates an object that contains the problem definition
- * information, e.g. a matrix. To perform subsequent operations
- * with that object, it must be returned from the problem
- * definition object. {\tt GetObject} performs this function.
- * At compile time, the type of the returned object is unknown.
- * Thus, the returned type is a sidl.BaseInterface.
- * QueryInterface or Cast must be used on the returned object to
- * convert it into a known type.
- * 
- */
-int32_t
-bHYPRE_StructVector_GetObject(
-  /* in */ bHYPRE_StructVector self,
-  /* out */ sidl_BaseInterface* A);
-
-/**
  * Method:  SetGrid[]
  */
 int32_t

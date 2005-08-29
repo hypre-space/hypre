@@ -20,7 +20,7 @@
  * 
  * The IJParCSR vector class.
  * 
- * Objects of this type can be cast to IJBuildVector or Vector
+ * Objects of this type can be cast to IJVectorView or Vector
  * objects using the {\tt \_\_cast} methods.
  * 
  */
@@ -31,7 +31,7 @@
 /* Put additional includes or other arbitrary code here... */
 #include <assert.h>
 #include "parcsr_mv.h"
-#include "bHYPRE_IJBuildVector.h"
+#include "bHYPRE_IJVectorView.h"
 #include "mpi.h"
 /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRVector._includes) */
 
@@ -240,40 +240,6 @@ impl_bHYPRE_IJParCSRVector_Assemble(
    return( ierr );
 
   /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRVector.Assemble) */
-}
-
-/*
- * The problem definition interface is a {\it builder} that
- * creates an object that contains the problem definition
- * information, e.g. a matrix. To perform subsequent operations
- * with that object, it must be returned from the problem
- * definition object. {\tt GetObject} performs this function.
- * At compile time, the type of the returned object is unknown.
- * Thus, the returned type is a sidl.BaseInterface.
- * QueryInterface or Cast must be used on the returned object to
- * convert it into a known type.
- * 
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_bHYPRE_IJParCSRVector_GetObject"
-
-#ifdef __cplusplus
-extern "C"
-#endif
-int32_t
-impl_bHYPRE_IJParCSRVector_GetObject(
-  /* in */ bHYPRE_IJParCSRVector self,
-  /* out */ sidl_BaseInterface* A)
-{
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRVector.GetObject) */
-  /* Insert the implementation of the GetObject method here... */
-
-   bHYPRE_IJParCSRVector_addRef( self );
-   *A = sidl_BaseInterface__cast( self );
-   return( 0 );
-
-  /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRVector.GetObject) */
 }
 
 /*
@@ -681,14 +647,14 @@ impl_bHYPRE_IJParCSRVector_Clone(
    void * objectx, * objecty;
    struct bHYPRE_IJParCSRVector__data * data_y, * data_x;
    HYPRE_IJVector ij_y, ij_x;
-   bHYPRE_IJBuildVector bHYPRE_ij_x;
+   bHYPRE_IJVectorView bHYPRE_ij_x;
    bHYPRE_IJParCSRVector bHYPREP_x;
    HYPRE_ParVector yy, xx;
 
    MPI_Comm_rank(MPI_COMM_WORLD, &my_id );
 
    bHYPREP_x = bHYPRE_IJParCSRVector__create();
-   bHYPRE_ij_x = bHYPRE_IJBuildVector__cast( bHYPREP_x );
+   bHYPRE_ij_x = bHYPRE_IJVectorView__cast( bHYPREP_x );
 
    data_y = bHYPRE_IJParCSRVector__get_data( self );
    data_x = bHYPRE_IJParCSRVector__get_data( bHYPREP_x );
@@ -719,7 +685,7 @@ impl_bHYPRE_IJParCSRVector_Clone(
    /* Copy data in y to x... */
    HYPRE_ParVectorCopy( yy, xx );
 
-   ierr += bHYPRE_IJBuildVector_Initialize( bHYPRE_ij_x );
+   ierr += bHYPRE_IJVectorView_Initialize( bHYPRE_ij_x );
 
    *x = bHYPRE_Vector__cast( bHYPRE_ij_x );
 
@@ -903,15 +869,6 @@ char * impl_bHYPRE_IJParCSRVector_fgetURL_sidl_ClassInfo(struct
   sidl_ClassInfo__object* obj) {
   return sidl_ClassInfo__getURL(obj);
 }
-struct bHYPRE_IJBuildVector__object* 
-  impl_bHYPRE_IJParCSRVector_fconnect_bHYPRE_IJBuildVector(char* url,
-  sidl_BaseInterface *_ex) {
-  return bHYPRE_IJBuildVector__connect(url, _ex);
-}
-char * impl_bHYPRE_IJParCSRVector_fgetURL_bHYPRE_IJBuildVector(struct 
-  bHYPRE_IJBuildVector__object* obj) {
-  return bHYPRE_IJBuildVector__getURL(obj);
-}
 struct bHYPRE_Vector__object* 
   impl_bHYPRE_IJParCSRVector_fconnect_bHYPRE_Vector(char* url,
   sidl_BaseInterface *_ex) {
@@ -920,6 +877,15 @@ struct bHYPRE_Vector__object*
 char * impl_bHYPRE_IJParCSRVector_fgetURL_bHYPRE_Vector(struct 
   bHYPRE_Vector__object* obj) {
   return bHYPRE_Vector__getURL(obj);
+}
+struct bHYPRE_IJVectorView__object* 
+  impl_bHYPRE_IJParCSRVector_fconnect_bHYPRE_IJVectorView(char* url,
+  sidl_BaseInterface *_ex) {
+  return bHYPRE_IJVectorView__connect(url, _ex);
+}
+char * impl_bHYPRE_IJParCSRVector_fgetURL_bHYPRE_IJVectorView(struct 
+  bHYPRE_IJVectorView__object* obj) {
+  return bHYPRE_IJVectorView__getURL(obj);
 }
 struct bHYPRE_ProblemDefinition__object* 
   impl_bHYPRE_IJParCSRVector_fconnect_bHYPRE_ProblemDefinition(char* url,
@@ -939,6 +905,15 @@ char * impl_bHYPRE_IJParCSRVector_fgetURL_sidl_BaseInterface(struct
   sidl_BaseInterface__object* obj) {
   return sidl_BaseInterface__getURL(obj);
 }
+struct bHYPRE_MatrixVectorView__object* 
+  impl_bHYPRE_IJParCSRVector_fconnect_bHYPRE_MatrixVectorView(char* url,
+  sidl_BaseInterface *_ex) {
+  return bHYPRE_MatrixVectorView__connect(url, _ex);
+}
+char * impl_bHYPRE_IJParCSRVector_fgetURL_bHYPRE_MatrixVectorView(struct 
+  bHYPRE_MatrixVectorView__object* obj) {
+  return bHYPRE_MatrixVectorView__getURL(obj);
+}
 struct sidl_BaseClass__object* 
   impl_bHYPRE_IJParCSRVector_fconnect_sidl_BaseClass(char* url,
   sidl_BaseInterface *_ex) {
@@ -948,3 +923,20 @@ char * impl_bHYPRE_IJParCSRVector_fgetURL_sidl_BaseClass(struct
   sidl_BaseClass__object* obj) {
   return sidl_BaseClass__getURL(obj);
 }
+
+#error File has unused splicer blocks.
+/**
+ * ================= BEGIN UNREFERENCED METHOD(S) ================
+ * The following code segment(s) belong to unreferenced method(s).
+ * This can result from a method rename/removal in the sidl file.
+ * Move or remove the code in order to compile cleanly.
+ */
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRVector.GetObject) */
+  /* Insert the implementation of the GetObject method here... */
+
+   bHYPRE_IJParCSRVector_addRef( self );
+   *A = sidl_BaseInterface__cast( self );
+   return( 0 );
+
+  /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRVector.GetObject) */
+/* ================== END UNREFERENCED METHOD(S) ================= */

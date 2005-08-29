@@ -18,8 +18,8 @@
 /*
  * Symbol "bHYPRE.StructMatrix" (version 1.0.0)
  * 
- * A single class that implements both a build interface and an
- * operator interface. It returns itself for GetConstructedObject.
+ * A single class that implements both a view interface and an
+ * operator interface.
  * A StructMatrix is a matrix on a structured grid.
  * One function unique to a StructMatrix is SetConstantEntries.
  * This declares that matrix entries corresponding to certain stencil points
@@ -267,40 +267,6 @@ impl_bHYPRE_StructMatrix_Assemble(
    return( ierr );
 
   /* DO-NOT-DELETE splicer.end(bHYPRE.StructMatrix.Assemble) */
-}
-
-/*
- * The problem definition interface is a {\it builder} that
- * creates an object that contains the problem definition
- * information, e.g. a matrix. To perform subsequent operations
- * with that object, it must be returned from the problem
- * definition object. {\tt GetObject} performs this function.
- * At compile time, the type of the returned object is unknown.
- * Thus, the returned type is a sidl.BaseInterface.
- * QueryInterface or Cast must be used on the returned object to
- * convert it into a known type.
- * 
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_bHYPRE_StructMatrix_GetObject"
-
-#ifdef __cplusplus
-extern "C"
-#endif
-int32_t
-impl_bHYPRE_StructMatrix_GetObject(
-  /* in */ bHYPRE_StructMatrix self,
-  /* out */ sidl_BaseInterface* A)
-{
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructMatrix.GetObject) */
-  /* Insert the implementation of the GetObject method here... */
- 
-   bHYPRE_StructMatrix_addRef( self );
-   *A = sidl_BaseInterface__cast( self );
-   return( 0 );
-
-  /* DO-NOT-DELETE splicer.end(bHYPRE.StructMatrix.GetObject) */
 }
 
 /*
@@ -956,15 +922,6 @@ char * impl_bHYPRE_StructMatrix_fgetURL_bHYPRE_StructGrid(struct
   bHYPRE_StructGrid__object* obj) {
   return bHYPRE_StructGrid__getURL(obj);
 }
-struct bHYPRE_StructBuildMatrix__object* 
-  impl_bHYPRE_StructMatrix_fconnect_bHYPRE_StructBuildMatrix(char* url,
-  sidl_BaseInterface *_ex) {
-  return bHYPRE_StructBuildMatrix__connect(url, _ex);
-}
-char * impl_bHYPRE_StructMatrix_fgetURL_bHYPRE_StructBuildMatrix(struct 
-  bHYPRE_StructBuildMatrix__object* obj) {
-  return bHYPRE_StructBuildMatrix__getURL(obj);
-}
 struct bHYPRE_Operator__object* 
   impl_bHYPRE_StructMatrix_fconnect_bHYPRE_Operator(char* url,
   sidl_BaseInterface *_ex) {
@@ -973,6 +930,15 @@ struct bHYPRE_Operator__object*
 char * impl_bHYPRE_StructMatrix_fgetURL_bHYPRE_Operator(struct 
   bHYPRE_Operator__object* obj) {
   return bHYPRE_Operator__getURL(obj);
+}
+struct bHYPRE_StructMatrixView__object* 
+  impl_bHYPRE_StructMatrix_fconnect_bHYPRE_StructMatrixView(char* url,
+  sidl_BaseInterface *_ex) {
+  return bHYPRE_StructMatrixView__connect(url, _ex);
+}
+char * impl_bHYPRE_StructMatrix_fgetURL_bHYPRE_StructMatrixView(struct 
+  bHYPRE_StructMatrixView__object* obj) {
+  return bHYPRE_StructMatrixView__getURL(obj);
 }
 struct sidl_ClassInfo__object* 
   impl_bHYPRE_StructMatrix_fconnect_sidl_ClassInfo(char* url,
@@ -1019,6 +985,15 @@ char * impl_bHYPRE_StructMatrix_fgetURL_bHYPRE_StructStencil(struct
   bHYPRE_StructStencil__object* obj) {
   return bHYPRE_StructStencil__getURL(obj);
 }
+struct bHYPRE_MatrixVectorView__object* 
+  impl_bHYPRE_StructMatrix_fconnect_bHYPRE_MatrixVectorView(char* url,
+  sidl_BaseInterface *_ex) {
+  return bHYPRE_MatrixVectorView__connect(url, _ex);
+}
+char * impl_bHYPRE_StructMatrix_fgetURL_bHYPRE_MatrixVectorView(struct 
+  bHYPRE_MatrixVectorView__object* obj) {
+  return bHYPRE_MatrixVectorView__getURL(obj);
+}
 struct sidl_BaseClass__object* 
   impl_bHYPRE_StructMatrix_fconnect_sidl_BaseClass(char* url,
   sidl_BaseInterface *_ex) {
@@ -1028,3 +1003,20 @@ char * impl_bHYPRE_StructMatrix_fgetURL_sidl_BaseClass(struct
   sidl_BaseClass__object* obj) {
   return sidl_BaseClass__getURL(obj);
 }
+
+#error File has unused splicer blocks.
+/**
+ * ================= BEGIN UNREFERENCED METHOD(S) ================
+ * The following code segment(s) belong to unreferenced method(s).
+ * This can result from a method rename/removal in the sidl file.
+ * Move or remove the code in order to compile cleanly.
+ */
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructMatrix.GetObject) */
+  /* Insert the implementation of the GetObject method here... */
+ 
+   bHYPRE_StructMatrix_addRef( self );
+   *A = sidl_BaseInterface__cast( self );
+   return( 0 );
+
+  /* DO-NOT-DELETE splicer.end(bHYPRE.StructMatrix.GetObject) */
+/* ================== END UNREFERENCED METHOD(S) ================= */

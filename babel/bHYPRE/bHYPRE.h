@@ -19,11 +19,8 @@
 #ifndef included_bHYPRE_GMRES_h
 #include "bHYPRE_GMRES.h"
 #endif
-#ifndef included_bHYPRE_IJBuildMatrix_h
-#include "bHYPRE_IJBuildMatrix.h"
-#endif
-#ifndef included_bHYPRE_IJBuildVector_h
-#include "bHYPRE_IJBuildVector.h"
+#ifndef included_bHYPRE_IJMatrixView_h
+#include "bHYPRE_IJMatrixView.h"
 #endif
 #ifndef included_bHYPRE_IJParCSRMatrix_h
 #include "bHYPRE_IJParCSRMatrix.h"
@@ -31,8 +28,14 @@
 #ifndef included_bHYPRE_IJParCSRVector_h
 #include "bHYPRE_IJParCSRVector.h"
 #endif
+#ifndef included_bHYPRE_IJVectorView_h
+#include "bHYPRE_IJVectorView.h"
+#endif
 #ifndef included_bHYPRE_IdentitySolver_h
 #include "bHYPRE_IdentitySolver.h"
+#endif
+#ifndef included_bHYPRE_MatrixVectorView_h
+#include "bHYPRE_MatrixVectorView.h"
 #endif
 #ifndef included_bHYPRE_Operator_h
 #include "bHYPRE_Operator.h"
@@ -55,12 +58,6 @@
 #ifndef included_bHYPRE_ProblemDefinition_h
 #include "bHYPRE_ProblemDefinition.h"
 #endif
-#ifndef included_bHYPRE_SStructBuildMatrix_h
-#include "bHYPRE_SStructBuildMatrix.h"
-#endif
-#ifndef included_bHYPRE_SStructBuildVector_h
-#include "bHYPRE_SStructBuildVector.h"
-#endif
 #ifndef included_bHYPRE_SStructGraph_h
 #include "bHYPRE_SStructGraph.h"
 #endif
@@ -69,6 +66,9 @@
 #endif
 #ifndef included_bHYPRE_SStructMatrix_h
 #include "bHYPRE_SStructMatrix.h"
+#endif
+#ifndef included_bHYPRE_SStructMatrixView_h
+#include "bHYPRE_SStructMatrixView.h"
 #endif
 #ifndef included_bHYPRE_SStructParCSRMatrix_h
 #include "bHYPRE_SStructParCSRMatrix.h"
@@ -85,20 +85,23 @@
 #ifndef included_bHYPRE_SStructVector_h
 #include "bHYPRE_SStructVector.h"
 #endif
+#ifndef included_bHYPRE_SStructVectorView_h
+#include "bHYPRE_SStructVectorView.h"
+#endif
+#ifndef included_bHYPRE_SStruct_MatrixVectorView_h
+#include "bHYPRE_SStruct_MatrixVectorView.h"
+#endif
 #ifndef included_bHYPRE_Solver_h
 #include "bHYPRE_Solver.h"
-#endif
-#ifndef included_bHYPRE_StructBuildMatrix_h
-#include "bHYPRE_StructBuildMatrix.h"
-#endif
-#ifndef included_bHYPRE_StructBuildVector_h
-#include "bHYPRE_StructBuildVector.h"
 #endif
 #ifndef included_bHYPRE_StructGrid_h
 #include "bHYPRE_StructGrid.h"
 #endif
 #ifndef included_bHYPRE_StructMatrix_h
 #include "bHYPRE_StructMatrix.h"
+#endif
+#ifndef included_bHYPRE_StructMatrixView_h
+#include "bHYPRE_StructMatrixView.h"
 #endif
 #ifndef included_bHYPRE_StructPFMG_h
 #include "bHYPRE_StructPFMG.h"
@@ -111,6 +114,9 @@
 #endif
 #ifndef included_bHYPRE_StructVector_h
 #include "bHYPRE_StructVector.h"
+#endif
+#ifndef included_bHYPRE_StructVectorView_h
+#include "bHYPRE_StructVectorView.h"
 #endif
 #ifndef included_bHYPRE_Vector_h
 #include "bHYPRE_Vector.h"

@@ -17,7 +17,7 @@ C       Symbol "bHYPRE.SStructParCSRMatrix" (version 1.0.0)
 C       
 C       The SStructParCSR matrix class.
 C       
-C       Objects of this type can be cast to SStructBuildMatrix or
+C       Objects of this type can be cast to SStructMatrixView or
 C       Operator objects using the {\tt \_\_cast} methods.
 C       
 C       
@@ -241,13 +241,9 @@ C       out int retval
 
 
 C       
-C       The problem definition interface is a {\it builder} that
-C       creates an object that contains the problem definition
-C       information, e.g. a matrix. To perform subsequent operations
-C       with that object, it must be returned from the problem
-C       definition object. {\tt GetObject} performs this function.
-C       At compile time, the type of the returned object is unknown.
-C       Thus, the returned type is a sidl.BaseInterface.
+C        A semi-structured matrix or vector contains a Struct or IJ matrix
+C        or vector.  GetObject returns it.
+C       The returned type is a sidl.BaseInterface.
 C       QueryInterface or Cast must be used on the returned object to
 C       convert it into a known type.
 C       

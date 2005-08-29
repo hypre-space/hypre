@@ -18,7 +18,7 @@
  * 
  * The IJParCSR matrix class.
  * 
- * Objects of this type can be cast to IJBuildMatrix, Operator, or
+ * Objects of this type can be cast to IJMatrixView, Operator, or
  * CoefficientAccess objects using the {\tt \_\_cast} methods.
  * 
  */
@@ -158,23 +158,6 @@ bHYPRE_IJParCSRMatrix_Initialize(
 int32_t
 bHYPRE_IJParCSRMatrix_Assemble(
   /* in */ bHYPRE_IJParCSRMatrix self);
-
-/**
- * The problem definition interface is a {\it builder} that
- * creates an object that contains the problem definition
- * information, e.g. a matrix. To perform subsequent operations
- * with that object, it must be returned from the problem
- * definition object. {\tt GetObject} performs this function.
- * At compile time, the type of the returned object is unknown.
- * Thus, the returned type is a sidl.BaseInterface.
- * QueryInterface or Cast must be used on the returned object to
- * convert it into a known type.
- * 
- */
-int32_t
-bHYPRE_IJParCSRMatrix_GetObject(
-  /* in */ bHYPRE_IJParCSRMatrix self,
-  /* out */ sidl_BaseInterface* A);
 
 /**
  * Set the local range for a matrix object.  Each process owns

@@ -247,40 +247,6 @@ impl_bHYPRE_StructVector_Assemble(
 }
 
 /*
- * The problem definition interface is a {\it builder} that
- * creates an object that contains the problem definition
- * information, e.g. a matrix. To perform subsequent operations
- * with that object, it must be returned from the problem
- * definition object. {\tt GetObject} performs this function.
- * At compile time, the type of the returned object is unknown.
- * Thus, the returned type is a sidl.BaseInterface.
- * QueryInterface or Cast must be used on the returned object to
- * convert it into a known type.
- * 
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_bHYPRE_StructVector_GetObject"
-
-#ifdef __cplusplus
-extern "C"
-#endif
-int32_t
-impl_bHYPRE_StructVector_GetObject(
-  /* in */ bHYPRE_StructVector self,
-  /* out */ sidl_BaseInterface* A)
-{
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructVector.GetObject) */
-  /* Insert the implementation of the GetObject method here... */
-
-   bHYPRE_StructVector_addRef( self );
-   *A = sidl_BaseInterface__cast( self );
-   return( 0 );
-
-  /* DO-NOT-DELETE splicer.end(bHYPRE.StructVector.GetObject) */
-}
-
-/*
  * Method:  SetGrid[]
  */
 
@@ -545,7 +511,7 @@ impl_bHYPRE_StructVector_Clone(
    int ierr = 0;
    int my_id;
    struct bHYPRE_StructVector__data * data, * data_x;
-   bHYPRE_StructBuildVector bHYPRE_x;
+   bHYPRE_StructVectorView bHYPRE_x;
    bHYPRE_StructVector bHYPREP_x;
    HYPRE_StructVector yy, xx;
    HYPRE_StructGrid grid;
@@ -554,7 +520,7 @@ impl_bHYPRE_StructVector_Clone(
    MPI_Comm_rank(MPI_COMM_WORLD, &my_id );
 
    bHYPREP_x = bHYPRE_StructVector__create();
-   bHYPRE_x = bHYPRE_StructBuildVector__cast( bHYPREP_x );
+   bHYPRE_x = bHYPRE_StructVectorView__cast( bHYPREP_x );
 
    data = bHYPRE_StructVector__get_data( self );
    data_x = bHYPRE_StructVector__get_data( bHYPREP_x );
@@ -574,7 +540,7 @@ impl_bHYPRE_StructVector_Clone(
    /* Copy data in y to x... */
    HYPRE_StructVectorCopy( yy, xx );
 
-   ierr += bHYPRE_StructBuildVector_Initialize( bHYPRE_x );
+   ierr += bHYPRE_StructVectorView_Initialize( bHYPRE_x );
 
    *x = bHYPRE_Vector__cast( bHYPRE_x );
 
@@ -725,14 +691,14 @@ char * impl_bHYPRE_StructVector_fgetURL_bHYPRE_StructGrid(struct
   bHYPRE_StructGrid__object* obj) {
   return bHYPRE_StructGrid__getURL(obj);
 }
-struct bHYPRE_StructBuildVector__object* 
-  impl_bHYPRE_StructVector_fconnect_bHYPRE_StructBuildVector(char* url,
+struct bHYPRE_StructVectorView__object* 
+  impl_bHYPRE_StructVector_fconnect_bHYPRE_StructVectorView(char* url,
   sidl_BaseInterface *_ex) {
-  return bHYPRE_StructBuildVector__connect(url, _ex);
+  return bHYPRE_StructVectorView__connect(url, _ex);
 }
-char * impl_bHYPRE_StructVector_fgetURL_bHYPRE_StructBuildVector(struct 
-  bHYPRE_StructBuildVector__object* obj) {
-  return bHYPRE_StructBuildVector__getURL(obj);
+char * impl_bHYPRE_StructVector_fgetURL_bHYPRE_StructVectorView(struct 
+  bHYPRE_StructVectorView__object* obj) {
+  return bHYPRE_StructVectorView__getURL(obj);
 }
 struct sidl_ClassInfo__object* 
   impl_bHYPRE_StructVector_fconnect_sidl_ClassInfo(char* url,
@@ -779,6 +745,15 @@ char * impl_bHYPRE_StructVector_fgetURL_sidl_BaseInterface(struct
   sidl_BaseInterface__object* obj) {
   return sidl_BaseInterface__getURL(obj);
 }
+struct bHYPRE_MatrixVectorView__object* 
+  impl_bHYPRE_StructVector_fconnect_bHYPRE_MatrixVectorView(char* url,
+  sidl_BaseInterface *_ex) {
+  return bHYPRE_MatrixVectorView__connect(url, _ex);
+}
+char * impl_bHYPRE_StructVector_fgetURL_bHYPRE_MatrixVectorView(struct 
+  bHYPRE_MatrixVectorView__object* obj) {
+  return bHYPRE_MatrixVectorView__getURL(obj);
+}
 struct sidl_BaseClass__object* 
   impl_bHYPRE_StructVector_fconnect_sidl_BaseClass(char* url,
   sidl_BaseInterface *_ex) {
@@ -788,3 +763,20 @@ char * impl_bHYPRE_StructVector_fgetURL_sidl_BaseClass(struct
   sidl_BaseClass__object* obj) {
   return sidl_BaseClass__getURL(obj);
 }
+
+#error File has unused splicer blocks.
+/**
+ * ================= BEGIN UNREFERENCED METHOD(S) ================
+ * The following code segment(s) belong to unreferenced method(s).
+ * This can result from a method rename/removal in the sidl file.
+ * Move or remove the code in order to compile cleanly.
+ */
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructVector.GetObject) */
+  /* Insert the implementation of the GetObject method here... */
+
+   bHYPRE_StructVector_addRef( self );
+   *A = sidl_BaseInterface__cast( self );
+   return( 0 );
+
+  /* DO-NOT-DELETE splicer.end(bHYPRE.StructVector.GetObject) */
+/* ================== END UNREFERENCED METHOD(S) ================= */

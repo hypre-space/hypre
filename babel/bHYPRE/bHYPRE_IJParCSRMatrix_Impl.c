@@ -20,7 +20,7 @@
  * 
  * The IJParCSR matrix class.
  * 
- * Objects of this type can be cast to IJBuildMatrix, Operator, or
+ * Objects of this type can be cast to IJMatrixView, Operator, or
  * CoefficientAccess objects using the {\tt \_\_cast} methods.
  * 
  */
@@ -317,40 +317,6 @@ impl_bHYPRE_IJParCSRMatrix_Assemble(
 }
 
 /*
- * The problem definition interface is a {\it builder} that
- * creates an object that contains the problem definition
- * information, e.g. a matrix. To perform subsequent operations
- * with that object, it must be returned from the problem
- * definition object. {\tt GetObject} performs this function.
- * At compile time, the type of the returned object is unknown.
- * Thus, the returned type is a sidl.BaseInterface.
- * QueryInterface or Cast must be used on the returned object to
- * convert it into a known type.
- * 
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_bHYPRE_IJParCSRMatrix_GetObject"
-
-#ifdef __cplusplus
-extern "C"
-#endif
-int32_t
-impl_bHYPRE_IJParCSRMatrix_GetObject(
-  /* in */ bHYPRE_IJParCSRMatrix self,
-  /* out */ sidl_BaseInterface* A)
-{
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRMatrix.GetObject) */
-  /* Insert the implementation of the GetObject method here... */
-
-   bHYPRE_IJParCSRMatrix_addRef( self );
-   *A = sidl_BaseInterface__cast( self );
-   return( 0 );
-
-  /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRMatrix.GetObject) */
-}
-
-/*
  * Set the local range for a matrix object.  Each process owns
  * some unique consecutive range of rows, indicated by the
  * global row indices {\tt ilower} and {\tt iupper}.  The row
@@ -404,7 +370,7 @@ impl_bHYPRE_IJParCSRMatrix_SetLocalRange(
    if ( data -> comm == MPI_COMM_NULL )    
    {
 #ifdef HYPRE_DEBUG
-      printf("Set Communicator must be called before Create in IJBuilder\n");
+      printf("Set Communicator must be called before Create in IJParCSRMatrix\n");
 #endif
       return( -1 );
    }
@@ -1161,15 +1127,6 @@ char * impl_bHYPRE_IJParCSRMatrix_fgetURL_bHYPRE_CoefficientAccess(struct
   bHYPRE_CoefficientAccess__object* obj) {
   return bHYPRE_CoefficientAccess__getURL(obj);
 }
-struct bHYPRE_IJBuildMatrix__object* 
-  impl_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_IJBuildMatrix(char* url,
-  sidl_BaseInterface *_ex) {
-  return bHYPRE_IJBuildMatrix__connect(url, _ex);
-}
-char * impl_bHYPRE_IJParCSRMatrix_fgetURL_bHYPRE_IJBuildMatrix(struct 
-  bHYPRE_IJBuildMatrix__object* obj) {
-  return bHYPRE_IJBuildMatrix__getURL(obj);
-}
 struct bHYPRE_Operator__object* 
   impl_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_Operator(char* url,
   sidl_BaseInterface *_ex) {
@@ -1206,6 +1163,15 @@ char * impl_bHYPRE_IJParCSRMatrix_fgetURL_bHYPRE_Vector(struct
   bHYPRE_Vector__object* obj) {
   return bHYPRE_Vector__getURL(obj);
 }
+struct bHYPRE_IJMatrixView__object* 
+  impl_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_IJMatrixView(char* url,
+  sidl_BaseInterface *_ex) {
+  return bHYPRE_IJMatrixView__connect(url, _ex);
+}
+char * impl_bHYPRE_IJParCSRMatrix_fgetURL_bHYPRE_IJMatrixView(struct 
+  bHYPRE_IJMatrixView__object* obj) {
+  return bHYPRE_IJMatrixView__getURL(obj);
+}
 struct bHYPRE_ProblemDefinition__object* 
   impl_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_ProblemDefinition(char* url,
   sidl_BaseInterface *_ex) {
@@ -1224,6 +1190,15 @@ char * impl_bHYPRE_IJParCSRMatrix_fgetURL_sidl_BaseInterface(struct
   sidl_BaseInterface__object* obj) {
   return sidl_BaseInterface__getURL(obj);
 }
+struct bHYPRE_MatrixVectorView__object* 
+  impl_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_MatrixVectorView(char* url,
+  sidl_BaseInterface *_ex) {
+  return bHYPRE_MatrixVectorView__connect(url, _ex);
+}
+char * impl_bHYPRE_IJParCSRMatrix_fgetURL_bHYPRE_MatrixVectorView(struct 
+  bHYPRE_MatrixVectorView__object* obj) {
+  return bHYPRE_MatrixVectorView__getURL(obj);
+}
 struct sidl_BaseClass__object* 
   impl_bHYPRE_IJParCSRMatrix_fconnect_sidl_BaseClass(char* url,
   sidl_BaseInterface *_ex) {
@@ -1233,3 +1208,20 @@ char * impl_bHYPRE_IJParCSRMatrix_fgetURL_sidl_BaseClass(struct
   sidl_BaseClass__object* obj) {
   return sidl_BaseClass__getURL(obj);
 }
+
+#error File has unused splicer blocks.
+/**
+ * ================= BEGIN UNREFERENCED METHOD(S) ================
+ * The following code segment(s) belong to unreferenced method(s).
+ * This can result from a method rename/removal in the sidl file.
+ * Move or remove the code in order to compile cleanly.
+ */
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRMatrix.GetObject) */
+  /* Insert the implementation of the GetObject method here... */
+
+   bHYPRE_IJParCSRMatrix_addRef( self );
+   *A = sidl_BaseInterface__cast( self );
+   return( 0 );
+
+  /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRMatrix.GetObject) */
+/* ================== END UNREFERENCED METHOD(S) ================= */

@@ -61,18 +61,6 @@ package bHYPRE version 1.0.0
        **/
       int Assemble();
 
-      /**
-       * The problem definition interface is a {\it builder} that
-       * creates an object that contains the problem definition
-       * information, e.g. a matrix. To perform subsequent operations
-       * with that object, it must be returned from the problem
-       * definition object. {\tt GetObject} performs this function.
-       * At compile time, the type of the returned object is unknown.
-       * Thus, the returned type is a sidl.BaseInterface.
-       * QueryInterface or Cast must be used on the returned object to
-       * convert it into a known type.
-       **/
-      int GetObject(out sidl.BaseInterface A);
 
       /**
        *  Create function, like the builtin __create() except you must specify
@@ -86,11 +74,23 @@ package bHYPRE version 1.0.0
    /*----------- Interface -------------------------------------------------*/
 
    /**
+    * This interface is defined to express the conceptual structure of the object
+    * system.  Derived interfaces and classes have similar functions such as
+    * SetValues and Print, but the functions are not declared here because the
+    * function argument lists vary
+    **/
+   interface MatrixVectorView extends ProblemDefinition
+   {}
+
+
+   /*----------- Interface -------------------------------------------------*/
+
+   /**
     * This interface represents a linear-algebraic conceptual view of a
     * linear system.  The 'I' and 'J' in the name are meant to be
     * mnemonic for the traditional matrix notation A(I,J).
     **/
-   interface IJBuildMatrix extends ProblemDefinition 
+   interface IJMatrixView extends MatrixVectorView
    {
       /**
        * Set the local range for a matrix object.  Each process owns
@@ -218,7 +218,7 @@ package bHYPRE version 1.0.0
 
    /*----------- Interface -------------------------------------------------*/
 
-   interface IJBuildVector extends ProblemDefinition 
+   interface IJVectorView extends MatrixVectorView
    {
       /**
        * Set the local range for a vector object.  Each process owns
@@ -292,7 +292,19 @@ package bHYPRE version 1.0.0
 
    /*----------- Interface -------------------------------------------------*/
 
-   interface SStructBuildMatrix extends ProblemDefinition 
+   interface SStruct_MatrixVectorView extends MatrixVectorView
+   {
+      /**
+       *  A semi-structured matrix or vector contains a Struct or IJ matrix
+       *  or vector.  GetObject returns it.
+       * The returned type is a sidl.BaseInterface.
+       * QueryInterface or Cast must be used on the returned object to
+       * convert it into a known type.
+       **/
+      int GetObject(out sidl.BaseInterface A);
+   }
+
+   interface SStructMatrixView extends SStruct_MatrixVectorView
    {
       /**
        * Set the matrix graph.
@@ -446,7 +458,7 @@ package bHYPRE version 1.0.0
 
    /*----------- Interface -------------------------------------------------*/
 
-   interface SStructBuildVector extends ProblemDefinition 
+   interface SStructVectorView extends SStruct_MatrixVectorView
    {
       /**
        * Set the vector grid.
@@ -585,7 +597,7 @@ package bHYPRE version 1.0.0
    /*----------- Interface -------------------------------------------------*/
 
    /* RDF: Complete and add comments */
-   interface StructBuildMatrix extends ProblemDefinition 
+   interface StructMatrixView extends MatrixVectorView
    {
       int SetGrid(in StructGrid grid);
 
@@ -622,7 +634,7 @@ package bHYPRE version 1.0.0
    /*----------- Interface -------------------------------------------------*/
 
    /* RDF: Complete and add comments */
-   interface StructBuildVector extends ProblemDefinition 
+   interface StructVectorView extends MatrixVectorView
    {
       int SetGrid(in StructGrid grid);
 
@@ -857,10 +869,10 @@ package bHYPRE version 1.0.0
    /**
     * The IJParCSR matrix class.
     *
-    * Objects of this type can be cast to IJBuildMatrix, Operator, or
+    * Objects of this type can be cast to IJMatrixView, Operator, or
     * CoefficientAccess objects using the {\tt \_\_cast} methods.
     **/
-   class IJParCSRMatrix implements-all IJBuildMatrix, Operator,
+   class IJParCSRMatrix implements-all IJMatrixView, Operator,
       CoefficientAccess
    {
       static IJParCSRMatrix Create( in opaque mpi_comm,
@@ -890,39 +902,13 @@ package bHYPRE version 1.0.0
    /**
     * The IJParCSR vector class.
     *
-    * Objects of this type can be cast to IJBuildVector or Vector
+    * Objects of this type can be cast to IJVectorView or Vector
     * objects using the {\tt \_\_cast} methods.
     **/
-   class IJParCSRVector implements-all IJBuildVector, Vector
+   class IJParCSRVector implements-all IJVectorView, Vector
    {
       static IJParCSRVector Create( in opaque mpi_comm,
                                     in int jlower, in int jupper );
-   }
-
-   /*----------- Classes ---------------------------------------------------*/
-
-   /**
-    * The SStructParCSR matrix class.
-    *
-    * Objects of this type can be cast to SStructBuildMatrix or
-    * Operator objects using the {\tt \_\_cast} methods.
-    **/
-   class SStructParCSRMatrix implements-all SStructBuildMatrix, Operator
-   {
-      static SStructParCSRMatrix Create( in opaque mpi_comm,
-                                         in SStructGraph graph );
-   }
-
-   /**
-    * The SStructParCSR vector class.
-    *
-    * Objects of this type can be cast to SStructBuildVector or Vector
-    * objects using the {\tt \_\_cast} methods.
-    **/
-   class SStructParCSRVector implements-all SStructBuildVector, Vector
-   {
-      static SStructParCSRVector Create( in opaque mpi_comm,
-                                         in SStructGrid grid );
    }
 
    /*----------- Classes ---------------------------------------------------*/
@@ -1170,10 +1156,10 @@ package bHYPRE version 1.0.0
    /**
     * The semi-structured grid matrix class.
     *
-    * Objects of this type can be cast to SStructBuildMatrix or
+    * Objects of this type can be cast to SStructMatrixView or
     * Operator objects using the {\tt \_\_cast} methods.
     **/
-   class SStructMatrix implements-all SStructBuildMatrix, Operator
+   class SStructMatrix implements-all SStructMatrixView, Operator
    {
       static SStructMatrix Create( in opaque mpi_comm,
                                    in SStructGraph graph );
@@ -1184,14 +1170,40 @@ package bHYPRE version 1.0.0
    /**
     * The semi-structured grid vector class.
     *
-    * Objects of this type can be cast to SStructBuildVector or Vector
+    * Objects of this type can be cast to SStructVectorView or Vector
     * objects using the {\tt \_\_cast} methods.
     **/
-   class SStructVector implements-all SStructBuildVector, Vector
+   class SStructVector implements-all SStructVectorView, Vector
    {
       static SStructVector Create( in opaque mpi_comm,
                                    in SStructGrid grid );
       int SetObjectType( in int type );
+   }
+
+   /*----------- Classes ---------------------------------------------------*/
+
+   /**
+    * The SStructParCSR matrix class.
+    *
+    * Objects of this type can be cast to SStructMatrixView or
+    * Operator objects using the {\tt \_\_cast} methods.
+    **/
+   class SStructParCSRMatrix implements-all SStructMatrixView, Operator
+   {
+      static SStructParCSRMatrix Create( in opaque mpi_comm,
+                                         in SStructGraph graph );
+   }
+
+   /**
+    * The SStructParCSR vector class.
+    *
+    * Objects of this type can be cast to SStructVectorView or Vector
+    * objects using the {\tt \_\_cast} methods.
+    **/
+   class SStructParCSRVector implements-all SStructVectorView, Vector
+   {
+      static SStructParCSRVector Create( in opaque mpi_comm,
+                                         in SStructGrid grid );
    }
 
    /*----------- Classes ---------------------------------------------------*/
@@ -1252,14 +1264,14 @@ package bHYPRE version 1.0.0
    /*-----------------------*/
    
    /**
-    * A single class that implements both a build interface and an
-    * operator interface. It returns itself for GetConstructedObject.
+    * A single class that implements both a view interface and an
+    * operator interface.
     * A StructMatrix is a matrix on a structured grid.
     * One function unique to a StructMatrix is SetConstantEntries.
     * This declares that matrix entries corresponding to certain stencil points
     * (supplied as stencil element indices) will be constant throughout the grid.
     **/
-   class StructMatrix implements-all StructBuildMatrix, Operator
+   class StructMatrix implements-all StructMatrixView, Operator
    {
       static StructMatrix Create( in opaque mpi_comm,
                                   in StructGrid grid,
@@ -1268,7 +1280,7 @@ package bHYPRE version 1.0.0
 
    /*-----------------------*/
    
-   class StructVector implements-all StructBuildVector, Vector
+   class StructVector implements-all StructVectorView, Vector
    {
          static StructVector Create( in opaque mpi_comm,
                                      in StructGrid grid );

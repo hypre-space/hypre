@@ -75,7 +75,9 @@ static struct bHYPRE_IJParCSRMatrix__sepv s_stc_epv__bhypre_ijparcsrmatrix;
 
 static struct bHYPRE_CoefficientAccess__epv s_new_epv__bhypre_coefficientaccess;
 
-static struct bHYPRE_IJBuildMatrix__epv s_new_epv__bhypre_ijbuildmatrix;
+static struct bHYPRE_IJMatrixView__epv s_new_epv__bhypre_ijmatrixview;
+
+static struct bHYPRE_MatrixVectorView__epv s_new_epv__bhypre_matrixvectorview;
 
 static struct bHYPRE_Operator__epv s_new_epv__bhypre_operator;
 
@@ -314,31 +316,6 @@ bHYPRE_IJParCSRMatrix_Assemble__exec(
   /* make the call */
   _retval = (self->d_epv->f_Assemble)(
     self);
-
-  /* pack return value */
-  sidl_io_Serializer_packInt( outArgs, "_retval", _retval, _ex2);
-
-  /* pack out and inout argments */
-
-}
-
-static void
-bHYPRE_IJParCSRMatrix_GetObject__exec(
-        struct bHYPRE_IJParCSRMatrix__object* self,
-        struct sidl_io_Deserializer__object* inArgs,
-        struct sidl_io_Serializer__object* outArgs) {
-  /* stack space for arguments */
-  struct sidl_BaseInterface__object* A_tmp;
-  struct sidl_BaseInterface__object** A= &A_tmp;
-  int32_t _retval;
-  sidl_BaseInterface _ex   = NULL;
-  sidl_BaseInterface *_ex2 = &_ex;
-  /* unpack in and inout argments */
-
-  /* make the call */
-  _retval = (self->d_epv->f_GetObject)(
-    self,
-    A);
 
   /* pack return value */
   sidl_io_Serializer_packInt( outArgs, "_retval", _retval, _ex2);
@@ -978,8 +955,10 @@ static void* ior_bHYPRE_IJParCSRMatrix__cast(
     cast = (void*) s0;
   } else if (!strcmp(name, "bHYPRE.CoefficientAccess")) {
     cast = (void*) &s0->d_bhypre_coefficientaccess;
-  } else if (!strcmp(name, "bHYPRE.IJBuildMatrix")) {
-    cast = (void*) &s0->d_bhypre_ijbuildmatrix;
+  } else if (!strcmp(name, "bHYPRE.IJMatrixView")) {
+    cast = (void*) &s0->d_bhypre_ijmatrixview;
+  } else if (!strcmp(name, "bHYPRE.MatrixVectorView")) {
+    cast = (void*) &s0->d_bhypre_matrixvectorview;
   } else if (!strcmp(name, "bHYPRE.Operator")) {
     cast = (void*) &s0->d_bhypre_operator;
   } else if (!strcmp(name, "bHYPRE.ProblemDefinition")) {
@@ -1033,7 +1012,6 @@ ior_bHYPRE_IJParCSRMatrix__exec(
     { "GetDoubleValue", bHYPRE_IJParCSRMatrix_GetDoubleValue__exec },
     { "GetIntValue", bHYPRE_IJParCSRMatrix_GetIntValue__exec },
     { "GetLocalRange", bHYPRE_IJParCSRMatrix_GetLocalRange__exec },
-    { "GetObject", bHYPRE_IJParCSRMatrix_GetObject__exec },
     { "GetRow", bHYPRE_IJParCSRMatrix_GetRow__exec },
     { "GetRowCounts", bHYPRE_IJParCSRMatrix_GetRowCounts__exec },
     { "GetValues", bHYPRE_IJParCSRMatrix_GetValues__exec },
@@ -1098,12 +1076,14 @@ static void bHYPRE_IJParCSRMatrix__init_epv(
     &s_new_epv__bhypre_ijparcsrmatrix;
   struct bHYPRE_CoefficientAccess__epv* e0   = 
     &s_new_epv__bhypre_coefficientaccess;
-  struct bHYPRE_IJBuildMatrix__epv*     e1   = &s_new_epv__bhypre_ijbuildmatrix;
-  struct bHYPRE_Operator__epv*          e2   = &s_new_epv__bhypre_operator;
-  struct bHYPRE_ProblemDefinition__epv* e3   = 
+  struct bHYPRE_IJMatrixView__epv*      e1   = &s_new_epv__bhypre_ijmatrixview;
+  struct bHYPRE_MatrixVectorView__epv*  e2   = 
+    &s_new_epv__bhypre_matrixvectorview;
+  struct bHYPRE_Operator__epv*          e3   = &s_new_epv__bhypre_operator;
+  struct bHYPRE_ProblemDefinition__epv* e4   = 
     &s_new_epv__bhypre_problemdefinition;
-  struct sidl_BaseClass__epv*           e4   = &s_new_epv__sidl_baseclass;
-  struct sidl_BaseInterface__epv*       e5   = &s_new_epv__sidl_baseinterface;
+  struct sidl_BaseClass__epv*           e5   = &s_new_epv__sidl_baseclass;
+  struct sidl_BaseInterface__epv*       e6   = &s_new_epv__sidl_baseinterface;
 
   s_old_epv__sidl_baseinterface = s1->d_sidl_baseinterface.d_epv;
   s_old_epv__sidl_baseclass     = s1->d_epv;
@@ -1132,7 +1112,6 @@ static void bHYPRE_IJParCSRMatrix__init_epv(
   epv->f_SetCommunicator               = NULL;
   epv->f_Initialize                    = NULL;
   epv->f_Assemble                      = NULL;
-  epv->f_GetObject                     = NULL;
   epv->f_SetLocalRange                 = NULL;
   epv->f_SetValues                     = NULL;
   epv->f_AddToValues                   = NULL;
@@ -1191,8 +1170,6 @@ static void bHYPRE_IJParCSRMatrix__init_epv(
   e1->f_SetCommunicator     = (int32_t (*)(void*,void*)) epv->f_SetCommunicator;
   e1->f_Initialize          = (int32_t (*)(void*)) epv->f_Initialize;
   e1->f_Assemble            = (int32_t (*)(void*)) epv->f_Assemble;
-  e1->f_GetObject           = (int32_t (*)(void*,
-    struct sidl_BaseInterface__object**)) epv->f_GetObject;
   e1->f_SetLocalRange       = (int32_t (*)(void*,int32_t,int32_t,int32_t,
     int32_t)) epv->f_SetLocalRange;
   e1->f_SetValues           = (int32_t (*)(void*,struct sidl_int__array*,
@@ -1214,99 +1191,115 @@ static void bHYPRE_IJParCSRMatrix__init_epv(
   e1->f_Read                = (int32_t (*)(void*,const char*,
     void*)) epv->f_Read;
 
-  e2->f__cast                    = (void* (*)(void*,const char*)) epv->f__cast;
-  e2->f__delete                  = (void (*)(void*)) epv->f__delete;
-  e2->f__exec                    = (void (*)(void*,const char*,
+  e2->f__cast               = (void* (*)(void*,const char*)) epv->f__cast;
+  e2->f__delete             = (void (*)(void*)) epv->f__delete;
+  e2->f__exec               = (void (*)(void*,const char*,
     struct sidl_io_Deserializer__object*,
     struct sidl_io_Serializer__object*)) epv->f__exec;
-  e2->f_addRef                   = (void (*)(void*)) epv->f_addRef;
-  e2->f_deleteRef                = (void (*)(void*)) epv->f_deleteRef;
-  e2->f_isSame                   = (sidl_bool (*)(void*,
+  e2->f_addRef              = (void (*)(void*)) epv->f_addRef;
+  e2->f_deleteRef           = (void (*)(void*)) epv->f_deleteRef;
+  e2->f_isSame              = (sidl_bool (*)(void*,
     struct sidl_BaseInterface__object*)) epv->f_isSame;
-  e2->f_queryInt                 = (struct sidl_BaseInterface__object* 
-    (*)(void*,const char*)) epv->f_queryInt;
-  e2->f_isType                   = (sidl_bool (*)(void*,
-    const char*)) epv->f_isType;
-  e2->f_getClassInfo             = (struct sidl_ClassInfo__object* (*)(void*)) 
+  e2->f_queryInt            = (struct sidl_BaseInterface__object* (*)(void*,
+    const char*)) epv->f_queryInt;
+  e2->f_isType              = (sidl_bool (*)(void*,const char*)) epv->f_isType;
+  e2->f_getClassInfo        = (struct sidl_ClassInfo__object* (*)(void*)) 
     epv->f_getClassInfo;
-  e2->f_SetCommunicator          = (int32_t (*)(void*,
+  e2->f_SetCommunicator     = (int32_t (*)(void*,void*)) epv->f_SetCommunicator;
+  e2->f_Initialize          = (int32_t (*)(void*)) epv->f_Initialize;
+  e2->f_Assemble            = (int32_t (*)(void*)) epv->f_Assemble;
+
+  e3->f__cast                    = (void* (*)(void*,const char*)) epv->f__cast;
+  e3->f__delete                  = (void (*)(void*)) epv->f__delete;
+  e3->f__exec                    = (void (*)(void*,const char*,
+    struct sidl_io_Deserializer__object*,
+    struct sidl_io_Serializer__object*)) epv->f__exec;
+  e3->f_addRef                   = (void (*)(void*)) epv->f_addRef;
+  e3->f_deleteRef                = (void (*)(void*)) epv->f_deleteRef;
+  e3->f_isSame                   = (sidl_bool (*)(void*,
+    struct sidl_BaseInterface__object*)) epv->f_isSame;
+  e3->f_queryInt                 = (struct sidl_BaseInterface__object* 
+    (*)(void*,const char*)) epv->f_queryInt;
+  e3->f_isType                   = (sidl_bool (*)(void*,
+    const char*)) epv->f_isType;
+  e3->f_getClassInfo             = (struct sidl_ClassInfo__object* (*)(void*)) 
+    epv->f_getClassInfo;
+  e3->f_SetCommunicator          = (int32_t (*)(void*,
     void*)) epv->f_SetCommunicator;
-  e2->f_SetIntParameter          = (int32_t (*)(void*,const char*,
+  e3->f_SetIntParameter          = (int32_t (*)(void*,const char*,
     int32_t)) epv->f_SetIntParameter;
-  e2->f_SetDoubleParameter       = (int32_t (*)(void*,const char*,
+  e3->f_SetDoubleParameter       = (int32_t (*)(void*,const char*,
     double)) epv->f_SetDoubleParameter;
-  e2->f_SetStringParameter       = (int32_t (*)(void*,const char*,
+  e3->f_SetStringParameter       = (int32_t (*)(void*,const char*,
     const char*)) epv->f_SetStringParameter;
-  e2->f_SetIntArray1Parameter    = (int32_t (*)(void*,const char*,
+  e3->f_SetIntArray1Parameter    = (int32_t (*)(void*,const char*,
     struct sidl_int__array*)) epv->f_SetIntArray1Parameter;
-  e2->f_SetIntArray2Parameter    = (int32_t (*)(void*,const char*,
+  e3->f_SetIntArray2Parameter    = (int32_t (*)(void*,const char*,
     struct sidl_int__array*)) epv->f_SetIntArray2Parameter;
-  e2->f_SetDoubleArray1Parameter = (int32_t (*)(void*,const char*,
+  e3->f_SetDoubleArray1Parameter = (int32_t (*)(void*,const char*,
     struct sidl_double__array*)) epv->f_SetDoubleArray1Parameter;
-  e2->f_SetDoubleArray2Parameter = (int32_t (*)(void*,const char*,
+  e3->f_SetDoubleArray2Parameter = (int32_t (*)(void*,const char*,
     struct sidl_double__array*)) epv->f_SetDoubleArray2Parameter;
-  e2->f_GetIntValue              = (int32_t (*)(void*,const char*,
+  e3->f_GetIntValue              = (int32_t (*)(void*,const char*,
     int32_t*)) epv->f_GetIntValue;
-  e2->f_GetDoubleValue           = (int32_t (*)(void*,const char*,
+  e3->f_GetDoubleValue           = (int32_t (*)(void*,const char*,
     double*)) epv->f_GetDoubleValue;
-  e2->f_Setup                    = (int32_t (*)(void*,
+  e3->f_Setup                    = (int32_t (*)(void*,
     struct bHYPRE_Vector__object*,struct bHYPRE_Vector__object*)) epv->f_Setup;
-  e2->f_Apply                    = (int32_t (*)(void*,
+  e3->f_Apply                    = (int32_t (*)(void*,
     struct bHYPRE_Vector__object*,struct bHYPRE_Vector__object**)) epv->f_Apply;
 
-  e3->f__cast               = (void* (*)(void*,const char*)) epv->f__cast;
-  e3->f__delete             = (void (*)(void*)) epv->f__delete;
-  e3->f__exec               = (void (*)(void*,const char*,
+  e4->f__cast               = (void* (*)(void*,const char*)) epv->f__cast;
+  e4->f__delete             = (void (*)(void*)) epv->f__delete;
+  e4->f__exec               = (void (*)(void*,const char*,
     struct sidl_io_Deserializer__object*,
     struct sidl_io_Serializer__object*)) epv->f__exec;
-  e3->f_addRef              = (void (*)(void*)) epv->f_addRef;
-  e3->f_deleteRef           = (void (*)(void*)) epv->f_deleteRef;
-  e3->f_isSame              = (sidl_bool (*)(void*,
+  e4->f_addRef              = (void (*)(void*)) epv->f_addRef;
+  e4->f_deleteRef           = (void (*)(void*)) epv->f_deleteRef;
+  e4->f_isSame              = (sidl_bool (*)(void*,
     struct sidl_BaseInterface__object*)) epv->f_isSame;
-  e3->f_queryInt            = (struct sidl_BaseInterface__object* (*)(void*,
+  e4->f_queryInt            = (struct sidl_BaseInterface__object* (*)(void*,
     const char*)) epv->f_queryInt;
-  e3->f_isType              = (sidl_bool (*)(void*,const char*)) epv->f_isType;
-  e3->f_getClassInfo        = (struct sidl_ClassInfo__object* (*)(void*)) 
+  e4->f_isType              = (sidl_bool (*)(void*,const char*)) epv->f_isType;
+  e4->f_getClassInfo        = (struct sidl_ClassInfo__object* (*)(void*)) 
     epv->f_getClassInfo;
-  e3->f_SetCommunicator     = (int32_t (*)(void*,void*)) epv->f_SetCommunicator;
-  e3->f_Initialize          = (int32_t (*)(void*)) epv->f_Initialize;
-  e3->f_Assemble            = (int32_t (*)(void*)) epv->f_Assemble;
-  e3->f_GetObject           = (int32_t (*)(void*,
-    struct sidl_BaseInterface__object**)) epv->f_GetObject;
+  e4->f_SetCommunicator     = (int32_t (*)(void*,void*)) epv->f_SetCommunicator;
+  e4->f_Initialize          = (int32_t (*)(void*)) epv->f_Initialize;
+  e4->f_Assemble            = (int32_t (*)(void*)) epv->f_Assemble;
 
-  e4->f__cast               = (void* (*)(struct sidl_BaseClass__object*,
+  e5->f__cast               = (void* (*)(struct sidl_BaseClass__object*,
     const char*)) epv->f__cast;
-  e4->f__delete             = (void (*)(struct sidl_BaseClass__object*)) 
+  e5->f__delete             = (void (*)(struct sidl_BaseClass__object*)) 
     epv->f__delete;
-  e4->f__exec               = (void (*)(struct sidl_BaseClass__object*,
+  e5->f__exec               = (void (*)(struct sidl_BaseClass__object*,
     const char*,struct sidl_io_Deserializer__object*,
     struct sidl_io_Serializer__object*)) epv->f__exec;
-  e4->f_addRef              = (void (*)(struct sidl_BaseClass__object*)) 
+  e5->f_addRef              = (void (*)(struct sidl_BaseClass__object*)) 
     epv->f_addRef;
-  e4->f_deleteRef           = (void (*)(struct sidl_BaseClass__object*)) 
+  e5->f_deleteRef           = (void (*)(struct sidl_BaseClass__object*)) 
     epv->f_deleteRef;
-  e4->f_isSame              = (sidl_bool (*)(struct sidl_BaseClass__object*,
+  e5->f_isSame              = (sidl_bool (*)(struct sidl_BaseClass__object*,
     struct sidl_BaseInterface__object*)) epv->f_isSame;
-  e4->f_queryInt            = (struct sidl_BaseInterface__object* (*)(struct 
+  e5->f_queryInt            = (struct sidl_BaseInterface__object* (*)(struct 
     sidl_BaseClass__object*,const char*)) epv->f_queryInt;
-  e4->f_isType              = (sidl_bool (*)(struct sidl_BaseClass__object*,
+  e5->f_isType              = (sidl_bool (*)(struct sidl_BaseClass__object*,
     const char*)) epv->f_isType;
-  e4->f_getClassInfo        = (struct sidl_ClassInfo__object* (*)(struct 
+  e5->f_getClassInfo        = (struct sidl_ClassInfo__object* (*)(struct 
     sidl_BaseClass__object*)) epv->f_getClassInfo;
 
-  e5->f__cast               = (void* (*)(void*,const char*)) epv->f__cast;
-  e5->f__delete             = (void (*)(void*)) epv->f__delete;
-  e5->f__exec               = (void (*)(void*,const char*,
+  e6->f__cast               = (void* (*)(void*,const char*)) epv->f__cast;
+  e6->f__delete             = (void (*)(void*)) epv->f__delete;
+  e6->f__exec               = (void (*)(void*,const char*,
     struct sidl_io_Deserializer__object*,
     struct sidl_io_Serializer__object*)) epv->f__exec;
-  e5->f_addRef              = (void (*)(void*)) epv->f_addRef;
-  e5->f_deleteRef           = (void (*)(void*)) epv->f_deleteRef;
-  e5->f_isSame              = (sidl_bool (*)(void*,
+  e6->f_addRef              = (void (*)(void*)) epv->f_addRef;
+  e6->f_deleteRef           = (void (*)(void*)) epv->f_deleteRef;
+  e6->f_isSame              = (sidl_bool (*)(void*,
     struct sidl_BaseInterface__object*)) epv->f_isSame;
-  e5->f_queryInt            = (struct sidl_BaseInterface__object* (*)(void*,
+  e6->f_queryInt            = (struct sidl_BaseInterface__object* (*)(void*,
     const char*)) epv->f_queryInt;
-  e5->f_isType              = (sidl_bool (*)(void*,const char*)) epv->f_isType;
-  e5->f_getClassInfo        = (struct sidl_ClassInfo__object* (*)(void*)) 
+  e6->f_isType              = (sidl_bool (*)(void*,const char*)) epv->f_isType;
+  e6->f_getClassInfo        = (struct sidl_ClassInfo__object* (*)(void*)) 
     epv->f_getClassInfo;
 
   s_method_initialized = 1;
@@ -1440,14 +1433,17 @@ void bHYPRE_IJParCSRMatrix__init(
   s1->d_epv                      = &s_new_epv__sidl_baseclass;
 
   s0->d_bhypre_coefficientaccess.d_epv = &s_new_epv__bhypre_coefficientaccess;
-  s0->d_bhypre_ijbuildmatrix.d_epv     = &s_new_epv__bhypre_ijbuildmatrix;
+  s0->d_bhypre_ijmatrixview.d_epv      = &s_new_epv__bhypre_ijmatrixview;
+  s0->d_bhypre_matrixvectorview.d_epv  = &s_new_epv__bhypre_matrixvectorview;
   s0->d_bhypre_operator.d_epv          = &s_new_epv__bhypre_operator;
   s0->d_bhypre_problemdefinition.d_epv = &s_new_epv__bhypre_problemdefinition;
   s0->d_epv                            = &s_new_epv__bhypre_ijparcsrmatrix;
 
   s0->d_bhypre_coefficientaccess.d_object = self;
 
-  s0->d_bhypre_ijbuildmatrix.d_object = self;
+  s0->d_bhypre_ijmatrixview.d_object = self;
+
+  s0->d_bhypre_matrixvectorview.d_object = self;
 
   s0->d_bhypre_operator.d_object = self;
 

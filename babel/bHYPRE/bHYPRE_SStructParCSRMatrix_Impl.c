@@ -20,7 +20,7 @@
  * 
  * The SStructParCSR matrix class.
  * 
- * Objects of this type can be cast to SStructBuildMatrix or
+ * Objects of this type can be cast to SStructMatrixView or
  * Operator objects using the {\tt \_\_cast} methods.
  * 
  */
@@ -259,13 +259,9 @@ impl_bHYPRE_SStructParCSRMatrix_Assemble(
 }
 
 /*
- * The problem definition interface is a {\it builder} that
- * creates an object that contains the problem definition
- * information, e.g. a matrix. To perform subsequent operations
- * with that object, it must be returned from the problem
- * definition object. {\tt GetObject} performs this function.
- * At compile time, the type of the returned object is unknown.
- * Thus, the returned type is a sidl.BaseInterface.
+ *  A semi-structured matrix or vector contains a Struct or IJ matrix
+ *  or vector.  GetObject returns it.
+ * The returned type is a sidl.BaseInterface.
  * QueryInterface or Cast must be used on the returned object to
  * convert it into a known type.
  * 
@@ -1057,6 +1053,25 @@ impl_bHYPRE_SStructParCSRMatrix_Apply(
   /* DO-NOT-DELETE splicer.end(bHYPRE.SStructParCSRMatrix.Apply) */
 }
 /* Babel internal methods, Users should not edit below this line. */
+struct bHYPRE_SStruct_MatrixVectorView__object* 
+  impl_bHYPRE_SStructParCSRMatrix_fconnect_bHYPRE_SStruct_MatrixVectorView(
+  char* url, sidl_BaseInterface *_ex) {
+  return bHYPRE_SStruct_MatrixVectorView__connect(url, _ex);
+}
+char * 
+  impl_bHYPRE_SStructParCSRMatrix_fgetURL_bHYPRE_SStruct_MatrixVectorView(
+  struct bHYPRE_SStruct_MatrixVectorView__object* obj) {
+  return bHYPRE_SStruct_MatrixVectorView__getURL(obj);
+}
+struct bHYPRE_SStructMatrixView__object* 
+  impl_bHYPRE_SStructParCSRMatrix_fconnect_bHYPRE_SStructMatrixView(char* url,
+  sidl_BaseInterface *_ex) {
+  return bHYPRE_SStructMatrixView__connect(url, _ex);
+}
+char * impl_bHYPRE_SStructParCSRMatrix_fgetURL_bHYPRE_SStructMatrixView(struct 
+  bHYPRE_SStructMatrixView__object* obj) {
+  return bHYPRE_SStructMatrixView__getURL(obj);
+}
 struct bHYPRE_SStructParCSRMatrix__object* 
   impl_bHYPRE_SStructParCSRMatrix_fconnect_bHYPRE_SStructParCSRMatrix(char* url,
   sidl_BaseInterface *_ex) {
@@ -1121,6 +1136,15 @@ char * impl_bHYPRE_SStructParCSRMatrix_fgetURL_bHYPRE_SStructGraph(struct
   bHYPRE_SStructGraph__object* obj) {
   return bHYPRE_SStructGraph__getURL(obj);
 }
+struct bHYPRE_MatrixVectorView__object* 
+  impl_bHYPRE_SStructParCSRMatrix_fconnect_bHYPRE_MatrixVectorView(char* url,
+  sidl_BaseInterface *_ex) {
+  return bHYPRE_MatrixVectorView__connect(url, _ex);
+}
+char * impl_bHYPRE_SStructParCSRMatrix_fgetURL_bHYPRE_MatrixVectorView(struct 
+  bHYPRE_MatrixVectorView__object* obj) {
+  return bHYPRE_MatrixVectorView__getURL(obj);
+}
 struct sidl_BaseClass__object* 
   impl_bHYPRE_SStructParCSRMatrix_fconnect_sidl_BaseClass(char* url,
   sidl_BaseInterface *_ex) {
@@ -1129,13 +1153,4 @@ struct sidl_BaseClass__object*
 char * impl_bHYPRE_SStructParCSRMatrix_fgetURL_sidl_BaseClass(struct 
   sidl_BaseClass__object* obj) {
   return sidl_BaseClass__getURL(obj);
-}
-struct bHYPRE_SStructBuildMatrix__object* 
-  impl_bHYPRE_SStructParCSRMatrix_fconnect_bHYPRE_SStructBuildMatrix(char* url,
-  sidl_BaseInterface *_ex) {
-  return bHYPRE_SStructBuildMatrix__connect(url, _ex);
-}
-char * impl_bHYPRE_SStructParCSRMatrix_fgetURL_bHYPRE_SStructBuildMatrix(struct 
-  bHYPRE_SStructBuildMatrix__object* obj) {
-  return bHYPRE_SStructBuildMatrix__getURL(obj);
 }

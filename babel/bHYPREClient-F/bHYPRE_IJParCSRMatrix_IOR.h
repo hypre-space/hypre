@@ -19,8 +19,11 @@
 #ifndef included_bHYPRE_CoefficientAccess_IOR_h
 #include "bHYPRE_CoefficientAccess_IOR.h"
 #endif
-#ifndef included_bHYPRE_IJBuildMatrix_IOR_h
-#include "bHYPRE_IJBuildMatrix_IOR.h"
+#ifndef included_bHYPRE_IJMatrixView_IOR_h
+#include "bHYPRE_IJMatrixView_IOR.h"
+#endif
+#ifndef included_bHYPRE_MatrixVectorView_IOR_h
+#include "bHYPRE_MatrixVectorView_IOR.h"
 #endif
 #ifndef included_bHYPRE_Operator_IOR_h
 #include "bHYPRE_Operator_IOR.h"
@@ -41,7 +44,7 @@ extern "C" {
  * 
  * The IJParCSR matrix class.
  * 
- * Objects of this type can be cast to IJBuildMatrix, Operator, or
+ * Objects of this type can be cast to IJMatrixView, Operator, or
  * CoefficientAccess objects using the {\tt \_\_cast} methods.
  * 
  */
@@ -87,7 +90,8 @@ struct bHYPRE_IJParCSRMatrix__sepv {
   /* Methods introduced in sidl.BaseClass-v0.9.3 */
   /* Methods introduced in bHYPRE.CoefficientAccess-v1.0.0 */
   /* Methods introduced in bHYPRE.ProblemDefinition-v1.0.0 */
-  /* Methods introduced in bHYPRE.IJBuildMatrix-v1.0.0 */
+  /* Methods introduced in bHYPRE.MatrixVectorView-v1.0.0 */
+  /* Methods introduced in bHYPRE.IJMatrixView-v1.0.0 */
   /* Methods introduced in bHYPRE.Operator-v1.0.0 */
   /* Methods introduced in bHYPRE.IJParCSRMatrix-v1.0.0 */
   struct bHYPRE_IJParCSRMatrix__object* (*f_Create)(
@@ -152,10 +156,8 @@ struct bHYPRE_IJParCSRMatrix__epv {
     /* in */ struct bHYPRE_IJParCSRMatrix__object* self);
   int32_t (*f_Assemble)(
     /* in */ struct bHYPRE_IJParCSRMatrix__object* self);
-  int32_t (*f_GetObject)(
-    /* in */ struct bHYPRE_IJParCSRMatrix__object* self,
-    /* out */ struct sidl_BaseInterface__object** A);
-  /* Methods introduced in bHYPRE.IJBuildMatrix-v1.0.0 */
+  /* Methods introduced in bHYPRE.MatrixVectorView-v1.0.0 */
+  /* Methods introduced in bHYPRE.IJMatrixView-v1.0.0 */
   int32_t (*f_SetLocalRange)(
     /* in */ struct bHYPRE_IJParCSRMatrix__object* self,
     /* in */ int32_t ilower,
@@ -259,7 +261,8 @@ struct bHYPRE_IJParCSRMatrix__epv {
 struct bHYPRE_IJParCSRMatrix__object {
   struct sidl_BaseClass__object           d_sidl_baseclass;
   struct bHYPRE_CoefficientAccess__object d_bhypre_coefficientaccess;
-  struct bHYPRE_IJBuildMatrix__object     d_bhypre_ijbuildmatrix;
+  struct bHYPRE_IJMatrixView__object      d_bhypre_ijmatrixview;
+  struct bHYPRE_MatrixVectorView__object  d_bhypre_matrixvectorview;
   struct bHYPRE_Operator__object          d_bhypre_operator;
   struct bHYPRE_ProblemDefinition__object d_bhypre_problemdefinition;
   struct bHYPRE_IJParCSRMatrix__epv*      d_epv;
@@ -290,12 +293,6 @@ struct bHYPRE_CoefficientAccess__object*
 char* skel_bHYPRE_IJParCSRMatrix_fgetURL_bHYPRE_CoefficientAccess(struct 
   bHYPRE_CoefficientAccess__object* obj); 
 
-struct bHYPRE_IJBuildMatrix__object* 
-  skel_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_IJBuildMatrix(char* url,
-  struct sidl_BaseInterface__object **_ex);
-char* skel_bHYPRE_IJParCSRMatrix_fgetURL_bHYPRE_IJBuildMatrix(struct 
-  bHYPRE_IJBuildMatrix__object* obj); 
-
 struct bHYPRE_Operator__object* 
   skel_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_Operator(char* url,
   struct sidl_BaseInterface__object **_ex);
@@ -320,6 +317,12 @@ struct bHYPRE_Vector__object*
 char* skel_bHYPRE_IJParCSRMatrix_fgetURL_bHYPRE_Vector(struct 
   bHYPRE_Vector__object* obj); 
 
+struct bHYPRE_IJMatrixView__object* 
+  skel_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_IJMatrixView(char* url,
+  struct sidl_BaseInterface__object **_ex);
+char* skel_bHYPRE_IJParCSRMatrix_fgetURL_bHYPRE_IJMatrixView(struct 
+  bHYPRE_IJMatrixView__object* obj); 
+
 struct bHYPRE_ProblemDefinition__object* 
   skel_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_ProblemDefinition(char* url,
   struct sidl_BaseInterface__object **_ex);
@@ -331,6 +334,12 @@ struct sidl_BaseInterface__object*
   struct sidl_BaseInterface__object **_ex);
 char* skel_bHYPRE_IJParCSRMatrix_fgetURL_sidl_BaseInterface(struct 
   sidl_BaseInterface__object* obj); 
+
+struct bHYPRE_MatrixVectorView__object* 
+  skel_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_MatrixVectorView(char* url,
+  struct sidl_BaseInterface__object **_ex);
+char* skel_bHYPRE_IJParCSRMatrix_fgetURL_bHYPRE_MatrixVectorView(struct 
+  bHYPRE_MatrixVectorView__object* obj); 
 
 struct sidl_BaseClass__object* 
   skel_bHYPRE_IJParCSRMatrix_fconnect_sidl_BaseClass(char* url,

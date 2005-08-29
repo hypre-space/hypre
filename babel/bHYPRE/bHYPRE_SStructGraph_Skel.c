@@ -119,12 +119,6 @@ int32_t
 impl_bHYPRE_SStructGraph_Assemble(
   /* in */ bHYPRE_SStructGraph self);
 
-extern
-int32_t
-impl_bHYPRE_SStructGraph_GetObject(
-  /* in */ bHYPRE_SStructGraph self,
-  /* out */ sidl_BaseInterface* A);
-
 extern struct bHYPRE_SStructGrid__object* 
   impl_bHYPRE_SStructGraph_fconnect_bHYPRE_SStructGrid(char* url,
   sidl_BaseInterface *_ex);
@@ -207,7 +201,6 @@ bHYPRE_SStructGraph__set_epv(struct bHYPRE_SStructGraph__epv *epv)
   epv->f_SetCommunicator = impl_bHYPRE_SStructGraph_SetCommunicator;
   epv->f_Initialize = impl_bHYPRE_SStructGraph_Initialize;
   epv->f_Assemble = impl_bHYPRE_SStructGraph_Assemble;
-  epv->f_GetObject = impl_bHYPRE_SStructGraph_GetObject;
 
 }
 #ifdef __cplusplus

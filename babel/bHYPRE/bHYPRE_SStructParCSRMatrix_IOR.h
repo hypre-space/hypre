@@ -16,14 +16,20 @@
 #ifndef included_sidl_header_h
 #include "sidl_header.h"
 #endif
+#ifndef included_bHYPRE_MatrixVectorView_IOR_h
+#include "bHYPRE_MatrixVectorView_IOR.h"
+#endif
 #ifndef included_bHYPRE_Operator_IOR_h
 #include "bHYPRE_Operator_IOR.h"
 #endif
 #ifndef included_bHYPRE_ProblemDefinition_IOR_h
 #include "bHYPRE_ProblemDefinition_IOR.h"
 #endif
-#ifndef included_bHYPRE_SStructBuildMatrix_IOR_h
-#include "bHYPRE_SStructBuildMatrix_IOR.h"
+#ifndef included_bHYPRE_SStructMatrixView_IOR_h
+#include "bHYPRE_SStructMatrixView_IOR.h"
+#endif
+#ifndef included_bHYPRE_SStruct_MatrixVectorView_IOR_h
+#include "bHYPRE_SStruct_MatrixVectorView_IOR.h"
 #endif
 #ifndef included_sidl_BaseClass_IOR_h
 #include "sidl_BaseClass_IOR.h"
@@ -38,7 +44,7 @@ extern "C" {
  * 
  * The SStructParCSR matrix class.
  * 
- * Objects of this type can be cast to SStructBuildMatrix or
+ * Objects of this type can be cast to SStructMatrixView or
  * Operator objects using the {\tt \_\_cast} methods.
  * 
  */
@@ -87,7 +93,9 @@ struct bHYPRE_SStructParCSRMatrix__sepv {
   /* Methods introduced in sidl.BaseClass-v0.9.3 */
   /* Methods introduced in bHYPRE.Operator-v1.0.0 */
   /* Methods introduced in bHYPRE.ProblemDefinition-v1.0.0 */
-  /* Methods introduced in bHYPRE.SStructBuildMatrix-v1.0.0 */
+  /* Methods introduced in bHYPRE.MatrixVectorView-v1.0.0 */
+  /* Methods introduced in bHYPRE.SStruct_MatrixVectorView-v1.0.0 */
+  /* Methods introduced in bHYPRE.SStructMatrixView-v1.0.0 */
   /* Methods introduced in bHYPRE.SStructParCSRMatrix-v1.0.0 */
   struct bHYPRE_SStructParCSRMatrix__object* (*f_Create)(
     /* in */ void* mpi_comm,
@@ -186,10 +194,12 @@ struct bHYPRE_SStructParCSRMatrix__epv {
     /* in */ struct bHYPRE_SStructParCSRMatrix__object* self);
   int32_t (*f_Assemble)(
     /* in */ struct bHYPRE_SStructParCSRMatrix__object* self);
+  /* Methods introduced in bHYPRE.MatrixVectorView-v1.0.0 */
+  /* Methods introduced in bHYPRE.SStruct_MatrixVectorView-v1.0.0 */
   int32_t (*f_GetObject)(
     /* in */ struct bHYPRE_SStructParCSRMatrix__object* self,
     /* out */ struct sidl_BaseInterface__object** A);
-  /* Methods introduced in bHYPRE.SStructBuildMatrix-v1.0.0 */
+  /* Methods introduced in bHYPRE.SStructMatrixView-v1.0.0 */
   int32_t (*f_SetGraph)(
     /* in */ struct bHYPRE_SStructParCSRMatrix__object* self,
     /* in */ struct bHYPRE_SStructGraph__object* graph);
@@ -246,12 +256,15 @@ struct bHYPRE_SStructParCSRMatrix__epv {
  */
 
 struct bHYPRE_SStructParCSRMatrix__object {
-  struct sidl_BaseClass__object            d_sidl_baseclass;
-  struct bHYPRE_Operator__object           d_bhypre_operator;
-  struct bHYPRE_ProblemDefinition__object  d_bhypre_problemdefinition;
-  struct bHYPRE_SStructBuildMatrix__object d_bhypre_sstructbuildmatrix;
-  struct bHYPRE_SStructParCSRMatrix__epv*  d_epv;
-  void*                                    d_data;
+  struct sidl_BaseClass__object                  d_sidl_baseclass;
+  struct bHYPRE_MatrixVectorView__object         d_bhypre_matrixvectorview;
+  struct bHYPRE_Operator__object                 d_bhypre_operator;
+  struct bHYPRE_ProblemDefinition__object        d_bhypre_problemdefinition;
+  struct bHYPRE_SStructMatrixView__object        d_bhypre_sstructmatrixview;
+  struct bHYPRE_SStruct_MatrixVectorView__object 
+    d_bhypre_sstruct_matrixvectorview;
+  struct bHYPRE_SStructParCSRMatrix__epv*        d_epv;
+  void*                                          d_data;
 };
 
 struct bHYPRE_SStructParCSRMatrix__external {
@@ -271,6 +284,19 @@ struct bHYPRE_SStructParCSRMatrix__external {
 
 const struct bHYPRE_SStructParCSRMatrix__external*
 bHYPRE_SStructParCSRMatrix__externals(void);
+
+struct bHYPRE_SStruct_MatrixVectorView__object* 
+  skel_bHYPRE_SStructParCSRMatrix_fconnect_bHYPRE_SStruct_MatrixVectorView(
+  char* url, struct sidl_BaseInterface__object **_ex);
+char* 
+  skel_bHYPRE_SStructParCSRMatrix_fgetURL_bHYPRE_SStruct_MatrixVectorView(
+  struct bHYPRE_SStruct_MatrixVectorView__object* obj); 
+
+struct bHYPRE_SStructMatrixView__object* 
+  skel_bHYPRE_SStructParCSRMatrix_fconnect_bHYPRE_SStructMatrixView(char* url,
+  struct sidl_BaseInterface__object **_ex);
+char* skel_bHYPRE_SStructParCSRMatrix_fgetURL_bHYPRE_SStructMatrixView(struct 
+  bHYPRE_SStructMatrixView__object* obj); 
 
 struct bHYPRE_SStructParCSRMatrix__object* 
   skel_bHYPRE_SStructParCSRMatrix_fconnect_bHYPRE_SStructParCSRMatrix(char* url,
@@ -314,17 +340,17 @@ struct bHYPRE_SStructGraph__object*
 char* skel_bHYPRE_SStructParCSRMatrix_fgetURL_bHYPRE_SStructGraph(struct 
   bHYPRE_SStructGraph__object* obj); 
 
+struct bHYPRE_MatrixVectorView__object* 
+  skel_bHYPRE_SStructParCSRMatrix_fconnect_bHYPRE_MatrixVectorView(char* url,
+  struct sidl_BaseInterface__object **_ex);
+char* skel_bHYPRE_SStructParCSRMatrix_fgetURL_bHYPRE_MatrixVectorView(struct 
+  bHYPRE_MatrixVectorView__object* obj); 
+
 struct sidl_BaseClass__object* 
   skel_bHYPRE_SStructParCSRMatrix_fconnect_sidl_BaseClass(char* url,
   struct sidl_BaseInterface__object **_ex);
 char* skel_bHYPRE_SStructParCSRMatrix_fgetURL_sidl_BaseClass(struct 
   sidl_BaseClass__object* obj); 
-
-struct bHYPRE_SStructBuildMatrix__object* 
-  skel_bHYPRE_SStructParCSRMatrix_fconnect_bHYPRE_SStructBuildMatrix(char* url,
-  struct sidl_BaseInterface__object **_ex);
-char* skel_bHYPRE_SStructParCSRMatrix_fgetURL_bHYPRE_SStructBuildMatrix(struct 
-  bHYPRE_SStructBuildMatrix__object* obj); 
 
 #ifdef __cplusplus
 }

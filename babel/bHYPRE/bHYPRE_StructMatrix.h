@@ -16,8 +16,8 @@
 /**
  * Symbol "bHYPRE.StructMatrix" (version 1.0.0)
  * 
- * A single class that implements both a build interface and an
- * operator interface. It returns itself for GetConstructedObject.
+ * A single class that implements both a view interface and an
+ * operator interface.
  * A StructMatrix is a matrix on a structured grid.
  * One function unique to a StructMatrix is SetConstantEntries.
  * This declares that matrix entries corresponding to certain stencil points
@@ -143,23 +143,6 @@ bHYPRE_StructMatrix_Initialize(
 int32_t
 bHYPRE_StructMatrix_Assemble(
   /* in */ bHYPRE_StructMatrix self);
-
-/**
- * The problem definition interface is a {\it builder} that
- * creates an object that contains the problem definition
- * information, e.g. a matrix. To perform subsequent operations
- * with that object, it must be returned from the problem
- * definition object. {\tt GetObject} performs this function.
- * At compile time, the type of the returned object is unknown.
- * Thus, the returned type is a sidl.BaseInterface.
- * QueryInterface or Cast must be used on the returned object to
- * convert it into a known type.
- * 
- */
-int32_t
-bHYPRE_StructMatrix_GetObject(
-  /* in */ bHYPRE_StructMatrix self,
-  /* out */ sidl_BaseInterface* A);
 
 /**
  * Method:  SetGrid[]

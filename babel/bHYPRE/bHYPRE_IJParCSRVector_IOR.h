@@ -16,8 +16,11 @@
 #ifndef included_sidl_header_h
 #include "sidl_header.h"
 #endif
-#ifndef included_bHYPRE_IJBuildVector_IOR_h
-#include "bHYPRE_IJBuildVector_IOR.h"
+#ifndef included_bHYPRE_IJVectorView_IOR_h
+#include "bHYPRE_IJVectorView_IOR.h"
+#endif
+#ifndef included_bHYPRE_MatrixVectorView_IOR_h
+#include "bHYPRE_MatrixVectorView_IOR.h"
 #endif
 #ifndef included_bHYPRE_ProblemDefinition_IOR_h
 #include "bHYPRE_ProblemDefinition_IOR.h"
@@ -38,7 +41,7 @@ extern "C" {
  * 
  * The IJParCSR vector class.
  * 
- * Objects of this type can be cast to IJBuildVector or Vector
+ * Objects of this type can be cast to IJVectorView or Vector
  * objects using the {\tt \_\_cast} methods.
  * 
  */
@@ -81,7 +84,8 @@ struct bHYPRE_IJParCSRVector__sepv {
   /* Methods introduced in sidl.BaseInterface-v0.9.3 */
   /* Methods introduced in sidl.BaseClass-v0.9.3 */
   /* Methods introduced in bHYPRE.ProblemDefinition-v1.0.0 */
-  /* Methods introduced in bHYPRE.IJBuildVector-v1.0.0 */
+  /* Methods introduced in bHYPRE.MatrixVectorView-v1.0.0 */
+  /* Methods introduced in bHYPRE.IJVectorView-v1.0.0 */
   /* Methods introduced in bHYPRE.Vector-v1.0.0 */
   /* Methods introduced in bHYPRE.IJParCSRVector-v1.0.0 */
   struct bHYPRE_IJParCSRVector__object* (*f_Create)(
@@ -137,10 +141,8 @@ struct bHYPRE_IJParCSRVector__epv {
     /* in */ struct bHYPRE_IJParCSRVector__object* self);
   int32_t (*f_Assemble)(
     /* in */ struct bHYPRE_IJParCSRVector__object* self);
-  int32_t (*f_GetObject)(
-    /* in */ struct bHYPRE_IJParCSRVector__object* self,
-    /* out */ struct sidl_BaseInterface__object** A);
-  /* Methods introduced in bHYPRE.IJBuildVector-v1.0.0 */
+  /* Methods introduced in bHYPRE.MatrixVectorView-v1.0.0 */
+  /* Methods introduced in bHYPRE.IJVectorView-v1.0.0 */
   int32_t (*f_SetLocalRange)(
     /* in */ struct bHYPRE_IJParCSRVector__object* self,
     /* in */ int32_t jlower,
@@ -197,7 +199,8 @@ struct bHYPRE_IJParCSRVector__epv {
 
 struct bHYPRE_IJParCSRVector__object {
   struct sidl_BaseClass__object           d_sidl_baseclass;
-  struct bHYPRE_IJBuildVector__object     d_bhypre_ijbuildvector;
+  struct bHYPRE_IJVectorView__object      d_bhypre_ijvectorview;
+  struct bHYPRE_MatrixVectorView__object  d_bhypre_matrixvectorview;
   struct bHYPRE_ProblemDefinition__object d_bhypre_problemdefinition;
   struct bHYPRE_Vector__object            d_bhypre_vector;
   struct bHYPRE_IJParCSRVector__epv*      d_epv;
@@ -234,17 +237,17 @@ struct sidl_ClassInfo__object*
 char* skel_bHYPRE_IJParCSRVector_fgetURL_sidl_ClassInfo(struct 
   sidl_ClassInfo__object* obj); 
 
-struct bHYPRE_IJBuildVector__object* 
-  skel_bHYPRE_IJParCSRVector_fconnect_bHYPRE_IJBuildVector(char* url,
-  struct sidl_BaseInterface__object **_ex);
-char* skel_bHYPRE_IJParCSRVector_fgetURL_bHYPRE_IJBuildVector(struct 
-  bHYPRE_IJBuildVector__object* obj); 
-
 struct bHYPRE_Vector__object* 
   skel_bHYPRE_IJParCSRVector_fconnect_bHYPRE_Vector(char* url,
   struct sidl_BaseInterface__object **_ex);
 char* skel_bHYPRE_IJParCSRVector_fgetURL_bHYPRE_Vector(struct 
   bHYPRE_Vector__object* obj); 
+
+struct bHYPRE_IJVectorView__object* 
+  skel_bHYPRE_IJParCSRVector_fconnect_bHYPRE_IJVectorView(char* url,
+  struct sidl_BaseInterface__object **_ex);
+char* skel_bHYPRE_IJParCSRVector_fgetURL_bHYPRE_IJVectorView(struct 
+  bHYPRE_IJVectorView__object* obj); 
 
 struct bHYPRE_ProblemDefinition__object* 
   skel_bHYPRE_IJParCSRVector_fconnect_bHYPRE_ProblemDefinition(char* url,
@@ -257,6 +260,12 @@ struct sidl_BaseInterface__object*
   struct sidl_BaseInterface__object **_ex);
 char* skel_bHYPRE_IJParCSRVector_fgetURL_sidl_BaseInterface(struct 
   sidl_BaseInterface__object* obj); 
+
+struct bHYPRE_MatrixVectorView__object* 
+  skel_bHYPRE_IJParCSRVector_fconnect_bHYPRE_MatrixVectorView(char* url,
+  struct sidl_BaseInterface__object **_ex);
+char* skel_bHYPRE_IJParCSRVector_fgetURL_bHYPRE_MatrixVectorView(struct 
+  bHYPRE_MatrixVectorView__object* obj); 
 
 struct sidl_BaseClass__object* 
   skel_bHYPRE_IJParCSRVector_fconnect_sidl_BaseClass(char* url,

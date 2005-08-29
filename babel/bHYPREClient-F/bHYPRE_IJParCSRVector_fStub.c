@@ -15,7 +15,7 @@
  * 
  * The IJParCSR vector class.
  * 
- * Objects of this type can be cast to IJBuildVector or Vector
+ * Objects of this type can be cast to IJVectorView or Vector
  * objects using the {\tt \_\_cast} methods.
  * 
  */
@@ -439,42 +439,6 @@ SIDLFortran77Symbol(bhypre_ijparcsrvector_assemble_f,BHYPRE_IJPARCSRVECTOR_ASSEM
     (*(_epv->f_Assemble))(
       _proxy_self
     );
-}
-
-/*
- * The problem definition interface is a {\it builder} that
- * creates an object that contains the problem definition
- * information, e.g. a matrix. To perform subsequent operations
- * with that object, it must be returned from the problem
- * definition object. {\tt GetObject} performs this function.
- * At compile time, the type of the returned object is unknown.
- * Thus, the returned type is a sidl.BaseInterface.
- * QueryInterface or Cast must be used on the returned object to
- * convert it into a known type.
- * 
- */
-
-void
-SIDLFortran77Symbol(bhypre_ijparcsrvector_getobject_f,BHYPRE_IJPARCSRVECTOR_GETOBJECT_F,bHYPRE_IJParCSRVector_GetObject_f)
-(
-  int64_t *self,
-  int64_t *A,
-  int32_t *retval
-)
-{
-  struct bHYPRE_IJParCSRVector__epv *_epv = NULL;
-  struct bHYPRE_IJParCSRVector__object* _proxy_self = NULL;
-  struct sidl_BaseInterface__object* _proxy_A = NULL;
-  _proxy_self =
-    (struct bHYPRE_IJParCSRVector__object*)
-    (ptrdiff_t)(*self);
-  _epv = _proxy_self->d_epv;
-  *retval = 
-    (*(_epv->f_GetObject))(
-      _proxy_self,
-      &_proxy_A
-    );
-  *A = (ptrdiff_t)_proxy_A;
 }
 
 /*

@@ -29,11 +29,8 @@
 #ifndef included_bHYPRE_GMRES_IOR_h
 #include "bHYPRE_GMRES_IOR.h"
 #endif
-#ifndef included_bHYPRE_IJBuildMatrix_IOR_h
-#include "bHYPRE_IJBuildMatrix_IOR.h"
-#endif
-#ifndef included_bHYPRE_IJBuildVector_IOR_h
-#include "bHYPRE_IJBuildVector_IOR.h"
+#ifndef included_bHYPRE_IJMatrixView_IOR_h
+#include "bHYPRE_IJMatrixView_IOR.h"
 #endif
 #ifndef included_bHYPRE_IJParCSRMatrix_IOR_h
 #include "bHYPRE_IJParCSRMatrix_IOR.h"
@@ -41,8 +38,14 @@
 #ifndef included_bHYPRE_IJParCSRVector_IOR_h
 #include "bHYPRE_IJParCSRVector_IOR.h"
 #endif
+#ifndef included_bHYPRE_IJVectorView_IOR_h
+#include "bHYPRE_IJVectorView_IOR.h"
+#endif
 #ifndef included_bHYPRE_IdentitySolver_IOR_h
 #include "bHYPRE_IdentitySolver_IOR.h"
+#endif
+#ifndef included_bHYPRE_MatrixVectorView_IOR_h
+#include "bHYPRE_MatrixVectorView_IOR.h"
 #endif
 #ifndef included_bHYPRE_Operator_IOR_h
 #include "bHYPRE_Operator_IOR.h"
@@ -65,12 +68,6 @@
 #ifndef included_bHYPRE_ProblemDefinition_IOR_h
 #include "bHYPRE_ProblemDefinition_IOR.h"
 #endif
-#ifndef included_bHYPRE_SStructBuildMatrix_IOR_h
-#include "bHYPRE_SStructBuildMatrix_IOR.h"
-#endif
-#ifndef included_bHYPRE_SStructBuildVector_IOR_h
-#include "bHYPRE_SStructBuildVector_IOR.h"
-#endif
 #ifndef included_bHYPRE_SStructGraph_IOR_h
 #include "bHYPRE_SStructGraph_IOR.h"
 #endif
@@ -79,6 +76,9 @@
 #endif
 #ifndef included_bHYPRE_SStructMatrix_IOR_h
 #include "bHYPRE_SStructMatrix_IOR.h"
+#endif
+#ifndef included_bHYPRE_SStructMatrixView_IOR_h
+#include "bHYPRE_SStructMatrixView_IOR.h"
 #endif
 #ifndef included_bHYPRE_SStructParCSRMatrix_IOR_h
 #include "bHYPRE_SStructParCSRMatrix_IOR.h"
@@ -95,20 +95,23 @@
 #ifndef included_bHYPRE_SStructVector_IOR_h
 #include "bHYPRE_SStructVector_IOR.h"
 #endif
+#ifndef included_bHYPRE_SStructVectorView_IOR_h
+#include "bHYPRE_SStructVectorView_IOR.h"
+#endif
+#ifndef included_bHYPRE_SStruct_MatrixVectorView_IOR_h
+#include "bHYPRE_SStruct_MatrixVectorView_IOR.h"
+#endif
 #ifndef included_bHYPRE_Solver_IOR_h
 #include "bHYPRE_Solver_IOR.h"
-#endif
-#ifndef included_bHYPRE_StructBuildMatrix_IOR_h
-#include "bHYPRE_StructBuildMatrix_IOR.h"
-#endif
-#ifndef included_bHYPRE_StructBuildVector_IOR_h
-#include "bHYPRE_StructBuildVector_IOR.h"
 #endif
 #ifndef included_bHYPRE_StructGrid_IOR_h
 #include "bHYPRE_StructGrid_IOR.h"
 #endif
 #ifndef included_bHYPRE_StructMatrix_IOR_h
 #include "bHYPRE_StructMatrix_IOR.h"
+#endif
+#ifndef included_bHYPRE_StructMatrixView_IOR_h
+#include "bHYPRE_StructMatrixView_IOR.h"
 #endif
 #ifndef included_bHYPRE_StructPFMG_IOR_h
 #include "bHYPRE_StructPFMG_IOR.h"
@@ -121,6 +124,9 @@
 #endif
 #ifndef included_bHYPRE_StructVector_IOR_h
 #include "bHYPRE_StructVector_IOR.h"
+#endif
+#ifndef included_bHYPRE_StructVectorView_IOR_h
+#include "bHYPRE_StructVectorView_IOR.h"
 #endif
 #ifndef included_bHYPRE_Vector_IOR_h
 #include "bHYPRE_Vector_IOR.h"

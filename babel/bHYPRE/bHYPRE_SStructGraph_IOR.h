@@ -129,9 +129,6 @@ struct bHYPRE_SStructGraph__epv {
     /* in */ struct bHYPRE_SStructGraph__object* self);
   int32_t (*f_Assemble)(
     /* in */ struct bHYPRE_SStructGraph__object* self);
-  int32_t (*f_GetObject)(
-    /* in */ struct bHYPRE_SStructGraph__object* self,
-    /* out */ struct sidl_BaseInterface__object** A);
   /* Methods introduced in bHYPRE.SStructGraph-v1.0.0 */
   int32_t (*f_SetCommGrid)(
     /* in */ struct bHYPRE_SStructGraph__object* self,
