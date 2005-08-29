@@ -562,8 +562,6 @@ int main (int argc, char *argv[])
    /* 5. Set up SStruct Vectors for b and x */
    {
       int i;
-
-      /* We have one part and one variable. */
       int part;
       int var = 0;
 
