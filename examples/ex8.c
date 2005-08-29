@@ -103,9 +103,7 @@ int main (int argc, char *argv[])
          }
       }
 
-      /* Set the variable type and number of variables on each part.  These need
-         to be set in each part which is neighboring or contains boxes owned by the
-         Processor. */
+      /* Set the variable type and number of variables on each part. */
       {
          int i;
          int nvars = 1;
