@@ -6,9 +6,7 @@
 #include "HYPRE_struct_ls.h"
 #include "struct_mv.h"
  
-#include "bHYPRE_StructBuildMatrix.h"
 #include "bHYPRE_StructMatrix.h"
-#include "bHYPRE_StructBuildVector.h"
 #include "bHYPRE_StructVector.h"
 #include "bHYPRE_Operator.h"
 #include "bHYPRE_Solver.h"

@@ -7,9 +7,7 @@
 #include "krylov.h"
 #include "sstruct_mv.h"
  
-#include "bHYPRE_SStructBuildMatrix.h"
 #include "bHYPRE_SStructMatrix.h"
-#include "bHYPRE_SStructBuildVector.h"
 #include "bHYPRE_SStructVector.h"
 #include "bHYPRE_Operator.h"
 #include "bHYPRE_Solver.h"
