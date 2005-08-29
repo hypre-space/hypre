@@ -53,7 +53,7 @@ int main (int argc, char *argv[])
    }
 
    /* 1. Set up the 2D grid.  This gives the index space in each part.
-      We have one variable in each parts. */
+      We have one variable in each part. */
    {
       int ndim = 2;
       int nparts = 3;
@@ -574,7 +574,7 @@ int main (int argc, char *argv[])
       HYPRE_SStructVectorCreate(MPI_COMM_WORLD, grid, &x);
 
       /* As with the matrix,  set the object type for the vectors
-         to be the struct type */
+         to be the sstruct type */
       object_type = HYPRE_SSTRUCT;
       HYPRE_SStructVectorSetObjectType(b, object_type);
       HYPRE_SStructVectorSetObjectType(x, object_type);
