@@ -1,0 +1,25 @@
+<a href="ex9.c.html"><h2>Example 9</h2></a>
+<p>
+
+This code solves a system corresponding to a discretization
+of the biharmonic problem treated as a system of equations
+on the unit square.  In other words, we solve 
+Laplacian(Laplacian(u))x = f via
+<p>
+<center>  [ Laplacian   -I;   0  Laplacian] [ u ; v] = [ 0 ; f] 
+</center>
+<p>                   
+For boundary conditions, we use u=0 and Laplacian(u) = 0.
+<p>
+The domain is split into an N x N processor grid.
+Thus, the given number of processors should be a
+perfect square.  Each processor's piece of the grid
+has n x n cells with n x n nodes. We use
+cell-centered variables, and, therefore,the nodes
+are not shared. Note that we have two variables, u and v, and 
+need only one part to describe the domain. We use the 
+standard 5-point stencil to discretize the laplace operators. 
+<p>                     
+We incorporate boundary conditions as in Example 3.
+<p>
+We recommend viewing Examples 6 and 7 before this example.
