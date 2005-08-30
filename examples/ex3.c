@@ -121,7 +121,7 @@ int main (int argc, char *argv[])
          printf("\n");
          printf("Usage: %s [<options>]\n", argv[0]);
          printf("\n");
-         printf("  -n <n>              : problem size per procesor (default: 8)\n");
+         printf("  -n <n>              : problem size per processor (default: 33)\n");
          printf("  -solver <ID>        : solver ID\n");
          printf("                        0  - PCG with SMG precond (default)\n");
          printf("                        1  - SMG\n");
@@ -142,12 +142,12 @@ int main (int argc, char *argv[])
       pi and pj indicate position in the processor grid. */
    N  = sqrt(num_procs);
    h  = 1.0 / (N*n+1); /* note that when calculating h we must
-                          remember to count the bounday nodes */
+                          remember to count the boundary nodes */
    h2 = h*h;
    pj = myid / N;
    pi = myid - pj*N;
 
-  /* Figure out the extents of each processor's piece of the grid. */
+   /* Figure out the extents of each processor's piece of the grid. */
    ilower[0] = pi*n;
    ilower[1] = pj*n;
 
@@ -234,7 +234,7 @@ int main (int argc, char *argv[])
       /* Recall: pi and pj describe position in the processor grid */
       if (pj == 0)
       {
-         /* bottom row of grid points */
+         /* Bottom row of grid points */
          bc_ilower[0] = pi*n;
          bc_ilower[1] = pj*n;
 
@@ -264,7 +264,7 @@ int main (int argc, char *argv[])
 
       if (pi == 0)
       {
-         /* left row of grid points */
+         /* Left row of grid points */
          bc_ilower[0] = pi*n;
          bc_ilower[1] = pj*n;
 
@@ -279,7 +279,7 @@ int main (int argc, char *argv[])
 
       if (pi == N-1)
       {
-         /* right row of grid points */
+         /* Right row of grid points */
          bc_ilower[0] = pi*n + n-1;
          bc_ilower[1] = pj*n;
 

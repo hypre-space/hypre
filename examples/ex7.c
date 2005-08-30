@@ -318,7 +318,7 @@ int main (int argc, char *argv[])
          printf("\n");
          printf("Usage: %s [<options>]\n", argv[0]);
          printf("\n");
-         printf("  -n  <n>             : problem size per procesor (default: 8)\n");
+         printf("  -n  <n>             : problem size per processor (default: 8)\n");
          printf("  -K  <K>             : choice for the diffusion coefficient (default: 1.0)\n");
          printf("  -B  <B>             : choice for the convection vector (default: 0.0)\n");
          printf("  -C  <C>             : choice for the reaction coefficient (default: 0.0)\n");
