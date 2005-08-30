@@ -460,19 +460,3 @@ char * impl_bHYPRE_SStructGraph_fgetURL_sidl_BaseClass(struct
   return sidl_BaseClass__getURL(obj);
 }
 
-#error File has unused splicer blocks.
-/**
- * ================= BEGIN UNREFERENCED METHOD(S) ================
- * The following code segment(s) belong to unreferenced method(s).
- * This can result from a method rename/removal in the sidl file.
- * Move or remove the code in order to compile cleanly.
- */
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructGraph.GetObject) */
-  /* Insert the implementation of the GetObject method here... */
- 
-   bHYPRE_SStructGraph_addRef( self );
-   *A = sidl_BaseInterface__cast( self );
-   return( 0 );
-
-  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructGraph.GetObject) */
-/* ================== END UNREFERENCED METHOD(S) ================= */

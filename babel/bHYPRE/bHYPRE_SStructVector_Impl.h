@@ -52,7 +52,6 @@
 #include "HYPRE_sstruct_mv.h"
 #include "HYPRE.h"
 #include "utilities.h"
-#include "bHYPRE_SStructBuildVector.h"
 /* DO-NOT-DELETE splicer.end(bHYPRE.SStructVector._includes) */
 
 /*
