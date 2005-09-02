@@ -160,6 +160,10 @@ int
 hypre_BCSRMatrixDenseBlockMulInv(hypre_BCSRMatrixDenseBlock* A,
 				 hypre_BCSRMatrixDenseBlock* B) {
   /* returns AB^{-1} in A */
+
+
+   /* AHB 9/05: this is actually returning B{^-1} */A
+
   int i, j, k;
   int num_rows = A->num_rows, num_cols = A->num_cols;
   double T[A->num_rows*A->num_cols];
