@@ -400,12 +400,13 @@ mail_summary () {
 #               define error file name
 #               remove non-essential information from file
 #               increment error counts if resulting file has non-zero length
-     for j in ${SRC}/test/TEST_${i}/*.sh
+     cd ${SRC}/test/TEST_${i}
+     for j in *.sh
      do
         TotalTestCount=`expr $TotalTestCount + 1`
         TestCaseFailedFlag=0
         ErrFile=`echo $j | sed -e 's/\.sh$/.err/'`
-#       for k in "${ErrFile}.[0-9]+"; do
+        for k in "${ErrFile}.[0-9]+"; do
            apply_error_filters ${ErrFile}
            if [ -s "${ErrFile}" ] ; then
               if [ "$DEBUG_MODE" = "yes" ] ; then
@@ -416,15 +417,17 @@ mail_summary () {
               TestCaseFailedCount=`expr $TestCaseFailedCount + 1`
               ELIST="${ELIST}${ErrFile}\n"
               TestCaseFailedFlag=1
-#             break
+              break
             fi
-#       done
+        done
 #               end of k-loop
 
         if [ "$TestCaseFailedFlag" = "0" ] ; then
            TotalSuccessCount=`expr $TotalSuccessCount + 1`
            TestCaseSuccessCount=`expr $TestCaseSuccessCount + 1`
         fi
+#               return to test subdirectory
+        cd ${SRC}/test
      done
 #               end of j-loop
 #
