@@ -1208,4 +1208,3 @@ char * impl_bHYPRE_IJParCSRMatrix_fgetURL_sidl_BaseClass(struct
   sidl_BaseClass__object* obj) {
   return sidl_BaseClass__getURL(obj);
 }
-

@@ -2,12 +2,12 @@
  * File:          sidlx_io_OStream.h
  * Symbol:        sidlx.io.OStream-v0.1
  * Symbol Type:   interface
- * Babel Version: 0.10.8
+ * Babel Version: 0.10.10
  * Description:   Client-side glue code for sidlx.io.OStream
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.8
+ * babel-version = 0.10.10
  */
 
 #ifndef included_sidlx_io_OStream_h

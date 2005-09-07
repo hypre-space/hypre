@@ -18,7 +18,10 @@ else
 changequote(, )dnl
 echo "int main() { return 0; }" > conftest.C
 cxx_output=`${CXX} -v -o conftest conftest.C 2>&1`
-
+echo "$cxx_output" >&AS_MESSAGE_LOG_FD
+if echo "$cxx_output" | grep mGLOB_options_string >/dev/null 2>&1; then
+  cxx_output=`echo "$cxx_output" | sed 's/\"-mGLOB[^\"]*\"/ /g'`
+fi
 cxx_libs=
 cxx_flags=
 

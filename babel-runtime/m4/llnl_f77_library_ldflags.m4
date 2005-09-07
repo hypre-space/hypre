@@ -50,12 +50,22 @@ ac_f77_v_output="`echo $ac_f77_v_output |
 	grep 'LPATH is:' |
 	sed 's,.*LPATH is\(: *[[^ ]]*\).*,\1,;s,: */, -L/,g'` $ac_f77_v_output"
 
-# If we are using Cray Fortran then delete quotes.
-# Use "\"" instead of '"' for font-lock-mode.
-# FIXME: a more general fix for quoted arguments with spaces?
-if echo $ac_f77_v_output | grep cft90 >/dev/null 2>&1; then
-  ac_f77_v_output=`echo $ac_f77_v_output | sed "s/\"//g"`
-fi[]dnl
+case $ac_f77_v_output in
+  # If we are using xlf then replace all the commas with spaces.
+  *xlfentry*)
+    ac_f77_v_output=`echo $ac_f77_v_output | sed 's/,/ /g'` ;;
+
+  # With Intel ifc, ignore the quoted -mGLOB_options_string stuff (quoted
+  # $LIBS confuse us, and the libraries appear later in the output anyway).
+  *mGLOB_options_string*)
+    ac_f77_v_output=`echo $ac_f77_v_output | sed 's/\"-mGLOB[[^\"]]*\"/ /g'` ;;
+
+  # If we are using Cray Fortran then delete quotes.
+  # Use "\"" instead of '"' for font-lock-mode.
+  # FIXME: a more general fix for quoted arguments with spaces?
+  *cft90*)
+    ac_f77_v_output=`echo $ac_f77_v_output | sed "s/\"//g"` ;;
+esac
 ])# _LLNL_PROG_F77_V_OUTPUT
 
 

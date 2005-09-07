@@ -2,7 +2,7 @@
  * File:          sidl_rmi_ProtocolFactory_Module.c
  * Symbol:        sidl.rmi.ProtocolFactory-v0.9.3
  * Symbol Type:   class
- * Babel Version: 0.10.8
+ * Babel Version: 0.10.10
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   implement a C extension type for a sidl extendable
@@ -32,7 +32,7 @@
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.8
+ * babel-version = 0.10.10
  */
 
 /*
@@ -698,8 +698,8 @@ and create classes that implement <code>sidl.rmi.InstanceHandle</code>."
   PyDict_SetItemString(dict, "ProtocolFactory",                               \
     (PyObject *)&_sidl_rmi_ProtocolFactoryType);
   sidl_rmi_NetworkException__import();
-  sidl_BaseInterface__import();
   sidl_rmi_InstanceHandle__import();
+  sidl_BaseInterface__import();
   sidl_ClassInfo__import();
   _implEPV = sidl_rmi_ProtocolFactory__externals();
   if (_implEPV) {

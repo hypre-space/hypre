@@ -2,7 +2,7 @@
  * File:          sidl_PostViolation_Module.c
  * Symbol:        sidl.PostViolation-v0.9.3
  * Symbol Type:   class
- * Babel Version: 0.10.8
+ * Babel Version: 0.10.10
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   implement a C extension type for a sidl extendable
@@ -32,7 +32,7 @@
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.8
+ * babel-version = 0.10.10
  */
 
 /*
@@ -415,10 +415,10 @@ a post-condition exception."
   Py_INCREF(&_sidl_PostViolationType);
   PyDict_SetItemString(dict, "PostViolation",                                 \
     (PyObject *)&_sidl_PostViolationType);
-  sidl_BaseClass__import();
   sidl_BaseInterface__import();
-  sidl_ClassInfo__import();
   sidl_BaseException__import();
+  sidl_ClassInfo__import();
+  sidl_BaseClass__import();
   _exceptionBases = PyTuple_New(1);
   Py_INCREF(sidl_SIDLException__type);
   PyTuple_SetItem(_exceptionBases, 0, sidl_SIDLException__type);

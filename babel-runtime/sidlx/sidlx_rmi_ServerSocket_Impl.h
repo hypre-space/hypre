@@ -2,12 +2,12 @@
  * File:          sidlx_rmi_ServerSocket_Impl.h
  * Symbol:        sidlx.rmi.ServerSocket-v0.1
  * Symbol Type:   class
- * Babel Version: 0.10.8
+ * Babel Version: 0.10.10
  * Description:   Server-side implementation for sidlx.rmi.ServerSocket
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.10.8
+ * babel-version = 0.10.10
  */
 
 #ifndef included_sidlx_rmi_ServerSocket_Impl_h

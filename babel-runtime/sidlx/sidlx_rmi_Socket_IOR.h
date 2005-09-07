@@ -2,12 +2,12 @@
  * File:          sidlx_rmi_Socket_IOR.h
  * Symbol:        sidlx.rmi.Socket-v0.1
  * Symbol Type:   interface
- * Babel Version: 0.10.8
+ * Babel Version: 0.10.10
  * Description:   Intermediate Object Representation for sidlx.rmi.Socket
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.8
+ * babel-version = 0.10.10
  */
 
 #ifndef included_sidlx_rmi_Socket_IOR_h

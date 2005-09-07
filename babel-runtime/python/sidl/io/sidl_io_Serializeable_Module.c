@@ -2,7 +2,7 @@
  * File:          sidl_io_Serializeable_Module.c
  * Symbol:        sidl.io.Serializeable-v0.9.3
  * Symbol Type:   interface
- * Babel Version: 0.10.8
+ * Babel Version: 0.10.10
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   implement a C extension type for a sidl extendable
@@ -32,7 +32,7 @@
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.8
+ * babel-version = 0.10.10
  */
 
 /*
@@ -482,7 +482,7 @@ Classes that can pack or unpack themselves should implement this interface "
   Py_INCREF(&_sidl_io_SerializeableType);
   PyDict_SetItemString(dict, "Serializeable",                                 \
     (PyObject *)&_sidl_io_SerializeableType);
-  sidl_io_Deserializer__import();
   sidl_ClassInfo__import();
   sidl_io_Serializer__import();
+  sidl_io_Deserializer__import();
 }

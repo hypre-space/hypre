@@ -43,7 +43,7 @@ msgs="
 #
 # Basic startup stuff
 #
-AC_INIT([babel-runtime],[0.10.8],[babel-bugs@cca-forum.org])
+AC_INIT([babel-runtime],[0.10.10],[babel-bugs@cca-forum.org])
 AC_CONFIG_SRCDIR([sidl/sidlArray.h])
 AC_CONFIG_AUX_DIR([config])
 AC_CONFIG_MACRO_DIR([m4])
@@ -55,15 +55,6 @@ AC_CONFIG_HEADERS([sidl/babel_internal.h])
 LLNL_CHECK_AUTOMAKE(1.9.3)
 LLNL_CHECK_AUTOCONF(2.59)
 
-
-############################################################
-#
-# Additions for hypre
-#
-AC_PREFIX_DEFAULT(`pwd`/../hypre)
-with_fortran90=no
-# ... was with_fortran90=yes    which doesn't work on frost
-enable_shared=no
 
 ############################################################
 #

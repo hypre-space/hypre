@@ -2,12 +2,12 @@
  * File:          sidlx_rmi_Common_IOR.c
  * Symbol:        sidlx.rmi.Common-v0.1
  * Symbol Type:   class
- * Babel Version: 0.10.8
+ * Babel Version: 0.10.10
  * Description:   Intermediate Object Representation for sidlx.rmi.Common
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.8
+ * babel-version = 0.10.10
  */
 
 #include "sidl_rmi_InstanceHandle.h"

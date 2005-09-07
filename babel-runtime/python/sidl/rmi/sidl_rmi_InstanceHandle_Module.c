@@ -2,7 +2,7 @@
  * File:          sidl_rmi_InstanceHandle_Module.c
  * Symbol:        sidl.rmi.InstanceHandle-v0.9.3
  * Symbol Type:   interface
- * Babel Version: 0.10.8
+ * Babel Version: 0.10.10
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   implement a C extension type for a sidl extendable
@@ -32,7 +32,7 @@
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.8
+ * babel-version = 0.10.10
  */
 
 /*
@@ -886,6 +886,6 @@ and <code>sidl.rmi.Response</code>.\n\
   PyDict_SetItemString(dict, "InstanceHandle",                                \
     (PyObject *)&_sidl_rmi_InstanceHandleType);
   sidl_rmi_NetworkException__import();
-  sidl_rmi_Invocation__import();
   sidl_ClassInfo__import();
+  sidl_rmi_Invocation__import();
 }

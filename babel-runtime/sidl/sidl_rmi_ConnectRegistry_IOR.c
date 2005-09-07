@@ -2,7 +2,7 @@
  * File:          sidl_rmi_ConnectRegistry_IOR.c
  * Symbol:        sidl.rmi.ConnectRegistry-v0.9.3
  * Symbol Type:   class
- * Babel Version: 0.10.8
+ * Babel Version: 0.10.10
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Intermediate Object Representation for sidl.rmi.ConnectRegistry
@@ -32,7 +32,7 @@
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.8
+ * babel-version = 0.10.10
  */
 
 #include "sidl_rmi_InstanceHandle.h"

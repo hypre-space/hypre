@@ -2,12 +2,12 @@
  * File:          sidlx_rmi_SimCall_Skel.c
  * Symbol:        sidlx.rmi.SimCall-v0.1
  * Symbol Type:   class
- * Babel Version: 0.10.8
+ * Babel Version: 0.10.10
  * Description:   Server-side glue code for sidlx.rmi.SimCall
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.8
+ * babel-version = 0.10.10
  */
 
 #include "sidlx_rmi_SimCall_IOR.h"

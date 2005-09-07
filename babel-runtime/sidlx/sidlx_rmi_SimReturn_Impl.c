@@ -2,12 +2,12 @@
  * File:          sidlx_rmi_SimReturn_Impl.c
  * Symbol:        sidlx.rmi.SimReturn-v0.1
  * Symbol Type:   class
- * Babel Version: 0.10.8
+ * Babel Version: 0.10.10
  * Description:   Server-side implementation for sidlx.rmi.SimReturn
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.10.8
+ * babel-version = 0.10.10
  */
 
 /*

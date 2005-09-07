@@ -2,12 +2,12 @@
  * File:          sidlx_io_IStream_Stub.c
  * Symbol:        sidlx.io.IStream-v0.1
  * Symbol Type:   interface
- * Babel Version: 0.10.8
+ * Babel Version: 0.10.10
  * Description:   Client-side glue code for sidlx.io.IStream
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.8
+ * babel-version = 0.10.10
  */
 
 #include "sidlx_io_IStream.h"

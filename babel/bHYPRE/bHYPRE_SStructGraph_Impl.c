@@ -459,4 +459,3 @@ char * impl_bHYPRE_SStructGraph_fgetURL_sidl_BaseClass(struct
   sidl_BaseClass__object* obj) {
   return sidl_BaseClass__getURL(obj);
 }
-

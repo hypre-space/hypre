@@ -2,12 +2,12 @@
  * File:          sidlx_rmi_JimEchoServer_Skel.c
  * Symbol:        sidlx.rmi.JimEchoServer-v0.1
  * Symbol Type:   class
- * Babel Version: 0.10.8
+ * Babel Version: 0.10.10
  * Description:   Server-side glue code for sidlx.rmi.JimEchoServer
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.8
+ * babel-version = 0.10.10
  */
 
 #include "sidlx_rmi_JimEchoServer_IOR.h"

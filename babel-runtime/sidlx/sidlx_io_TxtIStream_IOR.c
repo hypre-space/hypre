@@ -2,12 +2,12 @@
  * File:          sidlx_io_TxtIStream_IOR.c
  * Symbol:        sidlx.io.TxtIStream-v0.1
  * Symbol Type:   class
- * Babel Version: 0.10.8
+ * Babel Version: 0.10.10
  * Description:   Intermediate Object Representation for sidlx.io.TxtIStream
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.8
+ * babel-version = 0.10.10
  */
 
 #include "sidl_rmi_InstanceHandle.h"

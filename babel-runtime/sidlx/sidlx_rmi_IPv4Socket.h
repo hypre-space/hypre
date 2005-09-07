@@ -2,12 +2,12 @@
  * File:          sidlx_rmi_IPv4Socket.h
  * Symbol:        sidlx.rmi.IPv4Socket-v0.1
  * Symbol Type:   class
- * Babel Version: 0.10.8
+ * Babel Version: 0.10.10
  * Description:   Client-side glue code for sidlx.rmi.IPv4Socket
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.8
+ * babel-version = 0.10.10
  */
 
 #ifndef included_sidlx_rmi_IPv4Socket_h

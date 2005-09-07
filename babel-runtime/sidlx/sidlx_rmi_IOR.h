@@ -2,12 +2,12 @@
  * File:          sidlx_rmi_IOR.h
  * Symbol:        sidlx.rmi-v0.1
  * Symbol Type:   package
- * Babel Version: 0.10.8
+ * Babel Version: 0.10.10
  * Description:   Intermediate Object Representation for sidlx.rmi
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.8
+ * babel-version = 0.10.10
  */
 
 #ifndef included_sidlx_rmi_IOR_h
