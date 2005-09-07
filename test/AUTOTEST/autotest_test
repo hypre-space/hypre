@@ -400,8 +400,7 @@ mail_summary () {
 #               define error file name
 #               remove non-essential information from file
 #               increment error counts if resulting file has non-zero length
-     cd ${SRC}/test/TEST_${i}
-     for j in *.sh
+     for j in ${SRC}/test/TEST_${i}/*.sh
      do
         TotalTestCount=`expr $TotalTestCount + 1`
         TestCaseFailedFlag=0
@@ -426,8 +425,6 @@ mail_summary () {
            TotalSuccessCount=`expr $TotalSuccessCount + 1`
            TestCaseSuccessCount=`expr $TestCaseSuccessCount + 1`
         fi
-#               return to test subdirectory
-        cd ${SRC}/test
      done
 #               end of j-loop
 #
