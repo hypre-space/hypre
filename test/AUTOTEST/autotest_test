@@ -421,6 +421,20 @@ mail_summary () {
             fi
         done
 #               end of k-loop
+#
+#               check for non-zero error file without numerical suffix; which
+#               typically contains errors from insure runs
+        apply_error_filters ${ErrFile}
+        if [ -s "${ErrFile}" ] ; then
+           if [ "$DEBUG_MODE" = "yes" ] ; then
+              printf "nonzero .err file = ${ErrFile}\n"
+           fi
+           AutotestFailureCount=`expr $AutotestFailureCount + 1`
+           TotalFailureCount=`expr $TotalFailureCount + 1`
+           TestCaseFailedCount=`expr $TestCaseFailedCount + 1`
+           ELIST="${ELIST}${ErrFile}\n"
+           TestCaseFailedFlag=1
+        fi
 
         if [ "$TestCaseFailedFlag" = "0" ] ; then
            TotalSuccessCount=`expr $TotalSuccessCount + 1`
