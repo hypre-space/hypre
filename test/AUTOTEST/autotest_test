@@ -20,6 +20,7 @@ initialize_variables ()
   Hdr="autotest"
   HYPRE_BATCH_MODE="no"
   HYPRE_SEND_MAIL="no"
+  STD_TEST_CASES='TEST_ij/*.sh TEST_fac/*.sh TEST_sstruct/*.sh TEST_struct/*.sh'
   MailOpt=""
   MailCmd="no"
   DEBUG_MODE="no"
