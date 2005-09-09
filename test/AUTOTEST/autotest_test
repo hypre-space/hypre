@@ -407,15 +407,15 @@ mail_summary () {
         TestCaseFailedFlag=0
         ErrFile=`echo $j | sed -e 's/\.sh$/.err/'`
         for k in "${ErrFile}.[0-9]+"; do
-           apply_error_filters ${ErrFile}
-           if [ -s "${ErrFile}" ] ; then
+           apply_error_filters ${k}
+           if [ -s "${k}" ] ; then
               if [ "$DEBUG_MODE" = "yes" ] ; then
                  printf "nonzero .err file = ${ErrFile}\n"
               fi
               AutotestFailureCount=`expr $AutotestFailureCount + 1`
               TotalFailureCount=`expr $TotalFailureCount + 1`
               TestCaseFailedCount=`expr $TestCaseFailedCount + 1`
-              ELIST="${ELIST}${ErrFile}\n"
+              ELIST="${ELIST}${k}\n"
               TestCaseFailedFlag=1
               break
             fi
