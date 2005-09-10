@@ -345,7 +345,7 @@ impl_bHYPRE_PCG_SetIntParameter(
    {
       data -> relchange = value;
    }
-   else if ( strcmp(name,"log")==0 || strcmp(name,"Logging")==0 )
+   else if ( strcmp(name,"Logging")==0 )
    {
       data -> log_level = value;
    }
