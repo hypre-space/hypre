@@ -737,13 +737,13 @@ main( int   argc,
       hypre_BeginTiming(time_index);
 
       solver_SMG = bHYPRE_StructSMG_Create( (void *) comm );
-      bHYPRE_StructSMG_SetIntParameter( solver_SMG, "memory use", 0 );
-      bHYPRE_StructSMG_SetIntParameter( solver_SMG, "max iter", 50 );
-      bHYPRE_StructSMG_SetDoubleParameter( solver_SMG, "tol", 1.0e-6 );
-      bHYPRE_StructSMG_SetIntParameter( solver_SMG, "rel change", 0 );
-      bHYPRE_StructSMG_SetIntParameter( solver_SMG, "num prerelax", n_pre );
-      bHYPRE_StructSMG_SetIntParameter( solver_SMG, "num postrelax", n_post );
-      bHYPRE_StructSMG_SetIntParameter( solver_SMG, "logging", 1 );
+      bHYPRE_StructSMG_SetIntParameter( solver_SMG, "MemoryUse", 0 );
+      bHYPRE_StructSMG_SetIntParameter( solver_SMG, "MaxIter", 50 );
+      bHYPRE_StructSMG_SetDoubleParameter( solver_SMG, "Tol", 1.0e-6 );
+      bHYPRE_StructSMG_SetIntParameter( solver_SMG, "RelChange", 0 );
+      bHYPRE_StructSMG_SetIntParameter( solver_SMG, "NumPrerelax", n_pre );
+      bHYPRE_StructSMG_SetIntParameter( solver_SMG, "NumPostrelax", n_post );
+      bHYPRE_StructSMG_SetIntParameter( solver_SMG, "Logging", 1 );
 
       A_O = bHYPRE_Operator__cast( A_b );
       ierr += bHYPRE_StructSMG_SetOperator( solver_SMG, A_O );
@@ -785,14 +785,14 @@ main( int   argc,
 
       solver_PFMG = bHYPRE_StructPFMG_Create( (void *) comm );
 
-      bHYPRE_StructPFMG_SetIntParameter( solver_PFMG, "max iter", 50 );
-      bHYPRE_StructPFMG_SetDoubleParameter( solver_PFMG, "tol", 1.0e-6 );
-      bHYPRE_StructPFMG_SetIntParameter( solver_PFMG, "rel change", 0 );
+      bHYPRE_StructPFMG_SetIntParameter( solver_PFMG, "MaxIter", 50 );
+      bHYPRE_StructPFMG_SetDoubleParameter( solver_PFMG, "Tol", 1.0e-6 );
+      bHYPRE_StructPFMG_SetIntParameter( solver_PFMG, "RelChange", 0 );
       /* weighted Jacobi = 1; red-black GS = 2 */
-      bHYPRE_StructPFMG_SetIntParameter( solver_PFMG, "relax type", relax );
-      bHYPRE_StructPFMG_SetIntParameter( solver_PFMG, "num prerelax", n_pre );
-      bHYPRE_StructPFMG_SetIntParameter( solver_PFMG, "num postrelax", n_post );
-      bHYPRE_StructPFMG_SetIntParameter( solver_PFMG, "skip relax", skip );
+      bHYPRE_StructPFMG_SetIntParameter( solver_PFMG, "RelaxType", relax );
+      bHYPRE_StructPFMG_SetIntParameter( solver_PFMG, "NumPrerelax", n_pre );
+      bHYPRE_StructPFMG_SetIntParameter( solver_PFMG, "NumPostrelax", n_post );
+      bHYPRE_StructPFMG_SetIntParameter( solver_PFMG, "SkipRelax", skip );
       /*HYPRE_StructPFMGSetDxyz(solver, dxyz);*/
       bHYPRE_StructPFMG_SetIntParameter( solver_PFMG, "Logging", 1 );
       bHYPRE_StructPFMG_SetIntParameter( solver_PFMG, "PrintLevel", 1 );
@@ -889,11 +889,11 @@ main( int   argc,
       x_V = bHYPRE_Vector__cast( x_SV );
       /* obsolete solver_PCG = bHYPRE_PCG_Constructor( comm );*/
 
-      bHYPRE_PCG_SetIntParameter( solver_PCG, "max_iter", 50 );
-      bHYPRE_PCG_SetDoubleParameter( solver_PCG, "tol", 1.0e-06);
-      bHYPRE_PCG_SetIntParameter( solver_PCG, "2-norm", 1);
-      bHYPRE_PCG_SetIntParameter( solver_PCG, "relative change test", 0);
-      bHYPRE_PCG_SetIntParameter( solver_PCG, "log", 1);
+      ierr += bHYPRE_PCG_SetIntParameter( solver_PCG, "MaxIter", 50 );
+      ierr += bHYPRE_PCG_SetDoubleParameter( solver_PCG, "Tol", 1.0e-06);
+      ierr += bHYPRE_PCG_SetIntParameter( solver_PCG, "2-norm", 1);
+      ierr += bHYPRE_PCG_SetIntParameter( solver_PCG, "relative change test", 0);
+      ierr += bHYPRE_PCG_SetIntParameter( solver_PCG, "Logging", 1);
 
       if (solver_id == 10)
       {
@@ -901,17 +901,18 @@ main( int   argc,
          solver_SMG = bHYPRE_StructSMG_Create( (void *)comm );
          ierr += bHYPRE_StructSMG_SetOperator( solver_SMG, A_O );
 
-         bHYPRE_StructSMG_SetIntParameter( solver_SMG, "memory use", 0 );
-         bHYPRE_StructSMG_SetIntParameter( solver_SMG, "max iter", 1 );
-         bHYPRE_StructSMG_SetDoubleParameter( solver_SMG, "tol", 0.0 );
-         bHYPRE_StructSMG_SetIntParameter( solver_SMG, "zero guess", 1 );
-         bHYPRE_StructSMG_SetIntParameter( solver_SMG, "rel change", 0 );
-         bHYPRE_StructSMG_SetIntParameter( solver_SMG, "num prerelax", n_pre );
-         bHYPRE_StructSMG_SetIntParameter( solver_SMG, "num postrelax", n_post );
-         bHYPRE_StructSMG_SetIntParameter( solver_SMG, "logging", 0 );
+         ierr += bHYPRE_StructSMG_SetIntParameter( solver_SMG, "MemoryUse", 0 );
+         ierr += bHYPRE_StructSMG_SetIntParameter( solver_SMG, "MaxIter", 1 );
+         ierr += bHYPRE_StructSMG_SetDoubleParameter( solver_SMG, "Tol", 0.0 );
+         ierr += bHYPRE_StructSMG_SetIntParameter( solver_SMG, "ZeroGuess", 1 );
+         ierr += bHYPRE_StructSMG_SetIntParameter( solver_SMG, "RelChange", 0 );
+         ierr += bHYPRE_StructSMG_SetIntParameter( solver_SMG, "NumPreRelax", n_pre );
+         ierr += bHYPRE_StructSMG_SetIntParameter( solver_SMG, "NumPostRelax", n_post );
+         ierr += bHYPRE_StructSMG_SetIntParameter( solver_SMG, "Logging", 0 );
 
          ierr += bHYPRE_StructSMG_Setup( solver_SMG, b_V, x_V );
          /* obsolete solver_SMG = bHYPRE_StructSMG_Constructor( comm );*/
+         hypre_assert( ierr==0 );
 
          precond = (bHYPRE_Solver) bHYPRE_StructSMG__cast2
             ( solver_SMG, "bHYPRE.Solver" ); 
@@ -924,7 +925,7 @@ main( int   argc,
 
          bHYPRE_StructPFMG_SetIntParameter( solver_PFMG, "MaxIterations", 1 );
          bHYPRE_StructPFMG_SetIntParameter( solver_PFMG, "Tolerance", 0.0 );
-         bHYPRE_StructPFMG_SetIntParameter( solver_PFMG, "zero_guess", 1 );
+         bHYPRE_StructPFMG_SetIntParameter( solver_PFMG, "ZeroGuess", 1 );
          /* weighted Jacobi = 1; red-black GS = 2 */
          bHYPRE_StructPFMG_SetIntParameter( solver_PFMG, "RelaxType", 1 );
          bHYPRE_StructPFMG_SetIntParameter( solver_PFMG, "NumPreRelax", n_pre );
@@ -945,9 +946,9 @@ main( int   argc,
          solver_SJ = bHYPRE_StructJacobi_Constructor( comm );
          precond = (bHYPRE_Solver) bHYPRE_StructJacobi_castTo
             ( solver_SJ, "bHYPRE.Solver" ); 
-         bHYPRE_StructJacobi_SetDoubleParameter( solver_SJ, "tol", 0.0 );
-         bHYPRE_StructJacobi_SetIntParameter( solver_SJ, "max_iter", 2 );
-         bHYPRE_StructJacobi_SetIntParameter( solver_SJ, "zero guess", 0 );
+         bHYPRE_StructJacobi_SetDoubleParameter( solver_SJ, "Tol", 0.0 );
+         bHYPRE_StructJacobi_SetIntParameter( solver_SJ, "MaxIter", 2 );
+         bHYPRE_StructJacobi_SetIntParameter( solver_SJ, "ZeroGuess", 0 );
       
          bHYPRE_StructJacobi_Setup( solver_SJ, A_LO, b_V, x_V );
       }
