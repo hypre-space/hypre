@@ -293,7 +293,7 @@ impl_bHYPRE_GMRES_SetIntParameter(
    {
       data -> max_iter = value;
    }
-   else if ( strcmp(name,"RelChange")==0 )
+   else if ( strcmp(name,"RelChange")==0 || strcmp(name,"relative change test")==0 )
    {
       data -> rel_change = value;
    }

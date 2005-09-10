@@ -428,7 +428,7 @@ impl_bHYPRE_BoomerAMG_SetIntParameter(
    {
       ierr += HYPRE_BoomerAMGSetNumFunctions( solver, value );
    }
-   else if ( strcmp(name,"MaxIterations")==0 )
+   else if ( strcmp(name,"MaxIterations")==0 || strcmp(name,"MaxIter")==0 )
    {
       ierr += HYPRE_BoomerAMGSetMaxIter( solver, value );
    }

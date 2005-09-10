@@ -223,11 +223,11 @@ impl_bHYPRE_StructSMG_SetIntParameter(
    {
       ierr += HYPRE_StructSMGSetMemoryUse( solver, value );      
    }
-   else if ( strcmp(name,"MaxIter")==0 || strcmp(name,"max iter")==0 )
+   else if ( strcmp(name,"MaxIter")==0 || strcmp(name,"MaxIterations")==0 )
    {
       ierr += HYPRE_StructSMGSetMaxIter( solver, value );
    }
-   else if ( strcmp(name,"RelChange")==0 || strcmp(name,"rel change")==0 )
+   else if ( strcmp(name,"RelChange")==0 || strcmp(name,"relative change test")==0 )
    {
       ierr += HYPRE_StructSMGSetRelChange( solver, value );
    }
@@ -247,11 +247,11 @@ impl_bHYPRE_StructSMG_SetIntParameter(
    {
       ierr += HYPRE_StructSMGSetNumPostRelax( solver, value );
    }
-   else if ( strcmp(name,"Logging")==0 || strcmp(name,"logging")==0 )
+   else if ( strcmp(name,"Logging")==0 )
    {
       ierr += HYPRE_StructSMGSetLogging( solver, value );
    }
-   else if ( strcmp(name,"PrintLevel")==0 || strcmp(name,"print level")==0 )
+   else if ( strcmp(name,"PrintLevel")==0 )
    {
       ierr += HYPRE_StructSMGSetPrintLevel( solver, value );
    }
@@ -292,7 +292,7 @@ impl_bHYPRE_StructSMG_SetDoubleParameter(
    data = bHYPRE_StructSMG__get_data( self );
    solver = data->solver;
 
-   if ( strcmp(name,"Tol")==0 || strcmp(name,"tol")==0 )
+   if ( strcmp(name,"Tol")==0 || strcmp(name,"Tolerance")==0 )
    {
       ierr += HYPRE_StructSMGSetTol( solver, value );      
    }
@@ -450,7 +450,7 @@ impl_bHYPRE_StructSMG_GetIntValue(
    data = bHYPRE_StructSMG__get_data( self );
    solver = data->solver;
 
-   if ( strcmp(name,"NumIterations")==0 || strcmp(name,"Num Iterations")==0 )
+   if ( strcmp(name,"NumIterations")==0 )
    {
       ierr = HYPRE_StructSMGGetNumIterations( solver, value );
    }

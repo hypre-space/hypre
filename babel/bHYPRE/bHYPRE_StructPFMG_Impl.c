@@ -212,15 +212,15 @@ impl_bHYPRE_StructPFMG_SetIntParameter(
    data = bHYPRE_StructPFMG__get_data( self );
    solver = data->solver;
 
-   if ( strcmp(name,"MaxIter")==0 || strcmp(name,"max iter")==0 )
+   if ( strcmp(name,"MaxIter")==0 || strcmp(name,"MaxIterations")==0 )
    {
       ierr += HYPRE_StructPFMGSetMaxIter( solver, value );
    }
-   else if ( strcmp(name,"MaxLevels")==0 || strcmp(name,"max levels")==0 )
+   else if ( strcmp(name,"MaxLevels")==0 )
    {
       ierr += HYPRE_StructPFMGSetMaxLevels( solver, value );
    }
-   else if ( strcmp(name,"RelChange")==0 || strcmp(name,"rel change")==0 )
+   else if ( strcmp(name,"RelChange")==0 || strcmp(name,"relative change test")==0 )
    {
       ierr += HYPRE_StructPFMGSetRelChange( solver, value );
    }
@@ -232,7 +232,7 @@ impl_bHYPRE_StructPFMG_SetIntParameter(
    {
       ierr += HYPRE_StructPFMGSetZeroGuess( solver );
    }
-   else if ( strcmp(name,"RelaxType")==0 || strcmp(name,"relax type")==0 )
+   else if ( strcmp(name,"RelaxType")==0 )
    {
       ierr += HYPRE_StructPFMGSetRelaxType( solver, value );
    }
@@ -252,11 +252,11 @@ impl_bHYPRE_StructPFMG_SetIntParameter(
    {
       ierr += HYPRE_StructPFMGSetSkipRelax( solver, value );
    }
-   else if ( strcmp(name,"Logging")==0 || strcmp(name,"logging")==0 )
+   else if ( strcmp(name,"Logging")==0 )
    {
       ierr += HYPRE_StructPFMGSetLogging( solver, value );
    }
-   else if ( strcmp(name,"PrintLevel")==0 || strcmp(name,"print level")==0 )
+   else if ( strcmp(name,"PrintLevel")==0 )
    {
       ierr += HYPRE_StructPFMGSetPrintLevel( solver, value );
    }
@@ -297,7 +297,7 @@ impl_bHYPRE_StructPFMG_SetDoubleParameter(
    data = bHYPRE_StructPFMG__get_data( self );
    solver = data->solver;
 
-   if ( strcmp(name,"Tol")==0 || strcmp(name,"tol")==0 )
+   if ( strcmp(name,"Tol")==0 || strcmp(name,"Tolerance")==0 )
    {
       ierr += HYPRE_StructPFMGSetTol( solver, value );      
    }
@@ -472,7 +472,7 @@ impl_bHYPRE_StructPFMG_GetIntValue(
    data = bHYPRE_StructPFMG__get_data( self );
    solver = data->solver;
 
-   if ( strcmp(name,"NumIterations")==0 || strcmp(name,"Num Iterations")==0 )
+   if ( strcmp(name,"NumIterations")==0 )
    {
       ierr = HYPRE_StructPFMGGetNumIterations( solver, value );
    }

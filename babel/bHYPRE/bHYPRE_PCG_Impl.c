@@ -337,7 +337,7 @@ impl_bHYPRE_PCG_SetIntParameter(
    {
       data -> twonorm = value;
    }
-   else if ( strcmp(name,"MaxIter")==0 || strcmp(name,"max iter")==0 || strcmp(name,"MaxIterations")==0 )
+   else if ( strcmp(name,"MaxIter")==0 || strcmp(name,"MaxIterations")==0 )
    {
       data -> maxiter = value;
    }
@@ -403,7 +403,7 @@ impl_bHYPRE_PCG_SetDoubleParameter(
       /* tolerance for special test for slow convergence */
       data -> cf_tol = value;
    }
-   else if ( strcmp(name,"tol")==0 || strcmp(name,"Tolerance")==0  || strcmp(name,"Tol")==0 )
+   else if ( strcmp(name,"Tolerance")==0  || strcmp(name,"Tol")==0 )
    {
       data -> tol = value;
    }
@@ -572,7 +572,7 @@ impl_bHYPRE_PCG_GetIntValue(
    assert( data->solver != NULL );
    solver = data->solver;
 
-   if ( strcmp(name,"Number of Iterations")==0 || strcmp(name,"NumIterations")==0 )
+   if ( strcmp(name,"NumIterations")==0 )
    {
       ierr += HYPRE_PCGGetNumIterations( solver, value );
    }
