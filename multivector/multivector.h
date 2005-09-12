@@ -2,6 +2,7 @@
 #define MULTIVECTOR_FUNCTION_PROTOTYPES
 
 #include "interpreter.h"
+#include "utilities.h"
 
 /* abstract multivector */
 typedef struct mv_MultiVector* mv_MultiVectorPtr;

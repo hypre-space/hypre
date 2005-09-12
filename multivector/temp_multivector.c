@@ -4,6 +4,7 @@
 
 #include "temp_multivector.h"
 #include "interpreter.h"
+#include "utilities.h"
 
 static void
 mv_collectVectorPtr( int* mask, mv_TempMultiVector* x, void** px ) {

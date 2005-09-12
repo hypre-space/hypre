@@ -4,6 +4,7 @@
 #include <stdio.h>
 
 #include "fortran_matrix.h"
+#include "utilities.h"
 
 utilities_FortranMatrix*
 utilities_FortranMatrixCreate(void) {
