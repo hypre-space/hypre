@@ -59,7 +59,7 @@ hypre_ParCSRMatrixMatvec( double           alpha,
     *  is informational only.
     *--------------------------------------------------------------------*/
  
-   assert( idxstride>0 );
+   hypre_assert( idxstride>0 );
 
     if (num_cols != x_size)
               ierr = 11;
@@ -70,13 +70,13 @@ hypre_ParCSRMatrixMatvec( double           alpha,
     if (num_cols != x_size && num_rows != y_size)
               ierr = 13;
 
-    assert( hypre_VectorNumVectors(y_local)==num_vectors );
+    hypre_assert( hypre_VectorNumVectors(y_local)==num_vectors );
 
     if ( num_vectors==1 )
        x_tmp = hypre_SeqVectorCreate( num_cols_offd );
     else
     {
-       assert( num_vectors>1 );
+       hypre_assert( num_vectors>1 );
        x_tmp = hypre_SeqMultiVectorCreate( num_cols_offd, num_vectors );
     }
    hypre_SeqVectorInitialize(x_tmp);
@@ -130,7 +130,7 @@ hypre_ParCSRMatrixMatvec( double           alpha,
          }
       }
 
-   assert( idxstride==1 );
+   hypre_assert( idxstride==1 );
    /* >>> ... The assert is because the following loop only works for 'column' storage of a multivector <<<
       >>> This needs to be fixed to work more generally, at least for 'row' storage. <<<
       >>> This in turn, means either change CommPkg so num_sends is no.zones*no.vectors (not no.zones)
@@ -256,7 +256,7 @@ hypre_ParCSRMatrixMatvecT( double           alpha,
    y_tmp_data = hypre_VectorData(y_tmp);
    y_local_data = hypre_VectorData(y_local);
 
-   assert( idxstride==1 ); /* >>> only 'column' storage of multivectors implemented so far */
+   hypre_assert( idxstride==1 ); /* >>> only 'column' storage of multivectors implemented so far */
 
    if (num_cols_offd) hypre_CSRMatrixMatvecT(alpha, offd, x_local, 0.0, y_tmp);
 

@@ -82,7 +82,7 @@ void hypre_ParChordMatrix_RowStarts(
    if ( my_id<num_procs-1 )
 	MPI_Waitall( 1, request, status);
    if ( my_id>0 )
-      assert( (*row_starts)[my_id] == (*row_starts)[my_id-1] + lastlens[0] );
+      hypre_assert( (*row_starts)[my_id] == (*row_starts)[my_id-1] + lastlens[0] );
    hypre_TFree( request );
    hypre_TFree( status );
       
@@ -385,7 +385,7 @@ hypre_ParCSRMatrixToParChordMatrix(
    for ( q=0; q<num_inprocessors; ++q ) num_inchords[q] = 0;
    my_q = -1;
    for ( q=0; q<num_inprocessors; ++q ) if ( inprocessor[q]==my_id ) my_q = q;
-   assert( my_q>=0 );
+   hypre_assert( my_q>=0 );
 
    /* diag block: first count chords (from my_id to my_id),
       then set them from diag block's CSR data structure */
@@ -417,7 +417,7 @@ hypre_ParCSRMatrixToParChordMatrix(
          /* This j is local to the processor q - but for diag & offd combined */
          inchord_rdof[my_q][chord[0]] = j;
          inchord_data[my_q][chord[0]] = data;
-         assert( chord[0] < num_inchords[my_q] );
+         hypre_assert( chord[0] < num_inchords[my_q] );
          ++chord[0];
       }
    };
@@ -525,7 +525,7 @@ hypre_ParCSRMatrixToParChordMatrix(
                }
             }  
          }
-         assert( inproc[i]>=0 );
+         hypre_assert( inproc[i]>=0 );
 
          /* Find the processor pto (local index qto) from the toprocessor list,
             which owns the row(idof) which is the  same as this processor's
@@ -535,7 +535,7 @@ hypre_ParCSRMatrixToParChordMatrix(
          for ( qto=0; qto<num_toprocessors; ++qto ) {
             pto = toprocessor[qto];
             if ( j_global >= row_starts[pto] && j_global<row_starts[pto+1] ) {
-               assert( qto < len_num_rdofs_toprocessor );
+               hypre_assert( qto < len_num_rdofs_toprocessor );
                ++num_rdofs_toprocessor[qto];
                /* ... an overestimate, as if two chords share an rdof, that
                   rdof will be counted twice in num_rdofs_toprocessor.
@@ -562,7 +562,7 @@ hypre_ParCSRMatrixToParChordMatrix(
    };
    rdof_toprocessor = hypre_CTAlloc( int*, num_toprocessors );
    for ( qto=0; qto<num_toprocessors; ++qto )  /*if (qto!=my_q)*/ {
-      assert( qto < len_num_rdofs_toprocessor );
+      hypre_assert( qto < len_num_rdofs_toprocessor );
       rdof_toprocessor[qto] = hypre_CTAlloc( int, num_rdofs_toprocessor[qto] );
       chordto[qto] = 0;
    };
@@ -573,8 +573,8 @@ hypre_ParCSRMatrixToParChordMatrix(
          data = hypre_CSRMatrixData(offd)[i];
          qto = toproc[i];
          q = inproc[i];
-         assert( q!=my_q );
-         assert( chord[q] < num_inchords[q] );
+         hypre_assert( q!=my_q );
+         hypre_assert( chord[q] < num_inchords[q] );
          inchord_idof[q][chord[q]] = row;
          j = j_global - first_index_rdof[q];
          /* This j is local to the processor q - but for diag & offd combined */
@@ -584,7 +584,7 @@ hypre_ParCSRMatrixToParChordMatrix(
             inprocessors, the rdof has the local number of a toprocessor -
             the only thing which makes sense and fits with what I've been
             told about chord matrices. */
-         assert( chord[q] < num_inchords[q] );
+         hypre_assert( chord[q] < num_inchords[q] );
          ++chord[q];
          if ( qto>=0 ) {
             /* There is an rdof processor for this chord */

@@ -33,7 +33,7 @@ int hypre_NumbersEnter( hypre_NumbersNode * node, const int n )
    int new = 0;
    int q = n/10;
    int r = n%10;
-   assert( n>=0 );
+   hypre_assert( n>=0 );
    if ( node->digit[r] == NULL ) {
       node->digit[r] = hypre_NumbersNewNode();
       new = 1;
@@ -65,7 +65,7 @@ int hypre_NumbersQuery( hypre_NumbersNode * node, const int n )
 {
    int q = n/10;
    int r = n%10;
-   assert( n>=0 );
+   hypre_assert( n>=0 );
    if ( node->digit[r] == NULL ) { /* low order digit of n not on tree */
       return 0;
    }
@@ -99,6 +99,6 @@ int * hypre_NumbersArray( hypre_NumbersNode * node )
       hypre_TFree(temp);
    }
    if ( node->digit[10] != NULL ) array[k++] = 0;
-   assert( k==N );
+   hypre_assert( k==N );
    return array;
 }

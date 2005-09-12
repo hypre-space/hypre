@@ -472,7 +472,7 @@ int main (int argc, char *argv[])
    bHYPRE_IJParCSRVector_deleteRef( par_b );
    bHYPRE_IJParCSRVector_deleteRef( par_x );
 
-   assert( ierr == 0 );
+   hypre_assert( ierr == 0 );
 
    /* Finalize MPI*/
    MPI_Finalize();
