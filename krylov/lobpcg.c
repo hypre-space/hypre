@@ -479,7 +479,7 @@ es" argument */
   
   /* initializing soft locking mask */
   activeMask = (int*)calloc( sizeX, sizeof(int) );
-  assert( activeMask != NULL );
+  hypre_assert( activeMask != NULL );
   for ( i = 0; i < sizeX; i++ )
     activeMask[i] = 1;
 
