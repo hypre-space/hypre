@@ -114,7 +114,7 @@ impl_bHYPRE_IJParCSRMatrix__dtor(
    ij_A = data -> ij_A;
 
    if ( ij_A && data->owns_matrix ) ierr += HYPRE_IJMatrixDestroy( ij_A );
-   assert( ierr == 0 );
+   hypre_assert( ierr == 0 );
 
    hypre_TFree( data );
 
@@ -153,7 +153,7 @@ impl_bHYPRE_IJParCSRMatrix_Create(
    ierr += HYPRE_IJMatrixCreate( data -> comm,
                                 ilower, iupper, jlower, jupper, Hmat );
    ierr += HYPRE_IJMatrixSetObjectType( *Hmat, HYPRE_PARCSR );
-   assert( ierr == 0 );
+   hypre_assert( ierr == 0 );
    data -> ij_A = *Hmat;
 
    return mat;
@@ -1030,7 +1030,7 @@ impl_bHYPRE_IJParCSRMatrix_Apply(
    }
    else
    {
-      assert( "Unrecognized vector type."==(char *)b );
+      hypre_assert( "Unrecognized vector type."==(char *)b );
    }
 
    if ( bHYPRE_Vector_queryInt( *x, "bHYPRE.IJParCSRVector" ) )
@@ -1039,7 +1039,7 @@ impl_bHYPRE_IJParCSRMatrix_Apply(
    }
    else
    {
-      assert( "Unrecognized vector type."==(char *)x );
+      hypre_assert( "Unrecognized vector type."==(char *)x );
    }
 
    data_x = bHYPRE_IJParCSRVector__get_data( bHYPREP_x );

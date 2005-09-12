@@ -215,7 +215,7 @@ impl_bHYPRE_BoomerAMG__dtor(
    data = bHYPRE_BoomerAMG__get_data( self );
    bHYPRE_IJParCSRMatrix_deleteRef( data->matrix );
    ierr += HYPRE_BoomerAMGDestroy( data->solver );
-   assert( ierr== 0 );
+   hypre_assert( ierr== 0 );
    /* delete any nontrivial data components here */
    hypre_TFree( data );
 
@@ -632,13 +632,13 @@ impl_bHYPRE_BoomerAMG_SetIntArray2Parameter(
    {
       /* *** DEPRECATED ***  There is no substitute because Ulrike Yang
          thinks nobody uses this anyway. */
-      assert( dim==2 );
+      hypre_assert( dim==2 );
       lb0 = sidl_int__array_lower( value, 0 );
       ub0 = sidl_int__array_upper( value, 0 );
       lb1 = sidl_int__array_lower( value, 1 );
       ub1 = sidl_int__array_upper( value, 1 );
-      assert( lb0==0 );
-      assert( lb1==0 );
+      hypre_assert( lb0==0 );
+      hypre_assert( lb1==0 );
       data2_c = hypre_CTAlloc(int *,ub0);
       for ( i=0; i<ub0; ++i )
       {
@@ -858,7 +858,7 @@ impl_bHYPRE_BoomerAMG_Setup(
    }
    else
    {
-      assert( "Unrecognized vector type."==(char *)x );
+      hypre_assert( "Unrecognized vector type."==(char *)x );
    }
 
    datab = bHYPRE_IJParCSRVector__get_data( bHYPREP_b );
@@ -873,7 +873,7 @@ impl_bHYPRE_BoomerAMG_Setup(
    }
    else
    {
-      assert( "Unrecognized vector type."==(char *)(x) );
+      hypre_assert( "Unrecognized vector type."==(char *)(x) );
    }
 
    datax = bHYPRE_IJParCSRVector__get_data( bHYPREP_x );
@@ -936,7 +936,7 @@ impl_bHYPRE_BoomerAMG_Apply(
    }
    else
    {
-      assert( "Unrecognized vector type."==(char *)x );
+      hypre_assert( "Unrecognized vector type."==(char *)x );
    }
 
    datab = bHYPRE_IJParCSRVector__get_data( bHYPREP_b );
@@ -949,7 +949,7 @@ impl_bHYPRE_BoomerAMG_Apply(
    {
       /* If vector not supplied, make one...*/
       /* There's no good way to check the size of x.  It would be good
-       * to do something similar if x had zero length.  Or assert(x
+       * to do something similar if x had zero length.  Or hypre_assert(x
        * has the right size) */
       bHYPRE_Vector_Clone( b, x );
       bHYPRE_Vector_Clear( *x );
@@ -960,7 +960,7 @@ impl_bHYPRE_BoomerAMG_Apply(
    }
    else
    {
-      assert( "Unrecognized vector type."==(char *)(*x) );
+      hypre_assert( "Unrecognized vector type."==(char *)(*x) );
    }
 
    datax = bHYPRE_IJParCSRVector__get_data( bHYPREP_x );
@@ -1006,7 +1006,7 @@ impl_bHYPRE_BoomerAMG_SetOperator(
    }
    else
    {
-      assert( "Unrecognized operator type."==(char *)A );
+      hypre_assert( "Unrecognized operator type."==(char *)A );
    }
 
    data = bHYPRE_BoomerAMG__get_data( self );

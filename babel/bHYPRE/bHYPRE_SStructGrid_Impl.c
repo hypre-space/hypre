@@ -100,7 +100,7 @@ impl_bHYPRE_SStructGrid__dtor(
    data = bHYPRE_SStructGrid__get_data( self );
    Hgrid = data -> grid;
    ierr = HYPRE_SStructGridDestroy( Hgrid );
-   assert( ierr==0 );
+   hypre_assert( ierr==0 );
    hypre_TFree( data );
 
   /* DO-NOT-DELETE splicer.end(bHYPRE.SStructGrid._dtor) */
@@ -170,7 +170,7 @@ impl_bHYPRE_SStructGrid_SetNumDimParts(
    HYPRE_SStructGrid * Hgrid;
    data = bHYPRE_SStructGrid__get_data( self );
    Hgrid = &(data -> grid);
-   assert( *Hgrid==NULL );  /* grid shouldn't have already been created */
+   hypre_assert( *Hgrid==NULL );  /* grid shouldn't have already been created */
 
    ierr += HYPRE_SStructGridCreate( data->comm, ndim, nparts, Hgrid );
 

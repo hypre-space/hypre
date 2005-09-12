@@ -110,7 +110,7 @@ impl_bHYPRE_SStructParCSRMatrix__dtor(
    data = bHYPRE_SStructParCSRMatrix__get_data( self );
    matrix = data -> matrix;
    if ( matrix ) ierr += HYPRE_SStructMatrixDestroy( matrix );
-   assert( ierr==0 );
+   hypre_assert( ierr==0 );
    hypre_TFree( data );
 
   /* DO-NOT-DELETE splicer.end(bHYPRE.SStructParCSRMatrix._dtor) */
@@ -360,7 +360,7 @@ impl_bHYPRE_SStructParCSRMatrix_SetGraph(
 
    data = bHYPRE_SStructParCSRMatrix__get_data( self );
    HA = data->matrix;
-   assert( HA==NULL ); /* shouldn't have already been created */
+   hypre_assert( HA==NULL ); /* shouldn't have already been created */
    comm = data->comm;
 
    gdata = bHYPRE_SStructGraph__get_data( graph );
@@ -1022,7 +1022,7 @@ impl_bHYPRE_SStructParCSRMatrix_Apply(
    }
    else
    {
-      assert( "Unrecognized vector type."==(char *)b );
+      hypre_assert( "Unrecognized vector type."==(char *)b );
    }
 
    if ( bHYPRE_Vector_queryInt( *x, "bHYPRE.SStructParCSRVector" ) )
@@ -1031,7 +1031,7 @@ impl_bHYPRE_SStructParCSRMatrix_Apply(
    }
    else
    {
-      assert( "Unrecognized vector type."==(char *)x );
+      hypre_assert( "Unrecognized vector type."==(char *)x );
    }
 
    data_x = bHYPRE_SStructParCSRVector__get_data( bHYPREP_x );

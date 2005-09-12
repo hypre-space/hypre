@@ -102,7 +102,7 @@ impl_bHYPRE_StructVector__dtor(
    data = bHYPRE_StructVector__get_data( self );
    vec = data -> vec;
    ierr += HYPRE_StructVectorDestroy( vec );
-   assert( ierr==0 );
+   hypre_assert( ierr==0 );
    hypre_TFree( data );
 
   /* DO-NOT-DELETE splicer.end(bHYPRE.StructVector._dtor) */
@@ -282,7 +282,7 @@ impl_bHYPRE_StructVector_SetGrid(
 
    data = bHYPRE_StructVector__get_data( self );
    Hy = data->vec;
-   assert( Hy==NULL ); /* shouldn't have already been created */
+   hypre_assert( Hy==NULL ); /* shouldn't have already been created */
    comm = data->comm;
    gdata = bHYPRE_StructGrid__get_data( grid );
    Hgrid = gdata->grid;
@@ -467,7 +467,7 @@ impl_bHYPRE_StructVector_Copy(
       }
       else
       {
-         assert( "Unrecognized vector type."==(char *)x );
+         hypre_assert( "Unrecognized vector type."==(char *)x );
       }
 
       data_x = bHYPRE_StructVector__get_data( xx );
@@ -618,7 +618,7 @@ impl_bHYPRE_StructVector_Dot(
    }
    else
    {
-      assert( "Unrecognized vector type."==(char *)x );
+      hypre_assert( "Unrecognized vector type."==(char *)x );
    }
    data = bHYPRE_StructVector__get_data( xx );
    vec = data -> vec;
@@ -667,7 +667,7 @@ impl_bHYPRE_StructVector_Axpy(
    }
    else
    {
-      assert( "Unrecognized vector type."==(char *)x );
+      hypre_assert( "Unrecognized vector type."==(char *)x );
    }
 
    data_x = bHYPRE_StructVector__get_data( bHYPREP_x );

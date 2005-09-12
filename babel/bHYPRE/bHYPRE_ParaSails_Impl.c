@@ -107,7 +107,7 @@ impl_bHYPRE_ParaSails__dtor(
    data = bHYPRE_ParaSails__get_data( self );
    bHYPRE_IJParCSRMatrix_deleteRef( data->matrix );
    ierr += HYPRE_ParaSailsDestroy( data->solver );
-   assert( ierr== 0 );
+   hypre_assert( ierr== 0 );
    /* delete any nontrivial data components here */
    hypre_TFree( data );
 
@@ -139,7 +139,7 @@ impl_bHYPRE_ParaSails_Create(
 
    data -> comm = (MPI_Comm) mpi_comm;
    ierr += HYPRE_ParCSRParaSailsCreate( (data->comm), Hsolver );
-   assert( ierr==0 );
+   hypre_assert( ierr==0 );
    data -> solver = *Hsolver;
 
    return solver;
@@ -501,7 +501,7 @@ impl_bHYPRE_ParaSails_Setup(
    }
    else
    {
-      assert( "Unrecognized vector type."==(char *)x );
+      hypre_assert( "Unrecognized vector type."==(char *)x );
    }
 
    datab = bHYPRE_IJParCSRVector__get_data( bHYPREP_b );
@@ -516,7 +516,7 @@ impl_bHYPRE_ParaSails_Setup(
    }
    else
    {
-      assert( "Unrecognized vector type."==(char *)(x) );
+      hypre_assert( "Unrecognized vector type."==(char *)(x) );
    }
 
    datax = bHYPRE_IJParCSRVector__get_data( bHYPREP_x );
@@ -579,7 +579,7 @@ impl_bHYPRE_ParaSails_Apply(
    }
    else
    {
-      assert( "Unrecognized vector type."==(char *)x );
+      hypre_assert( "Unrecognized vector type."==(char *)x );
    }
 
    datab = bHYPRE_IJParCSRVector__get_data( bHYPREP_b );
@@ -592,7 +592,7 @@ impl_bHYPRE_ParaSails_Apply(
    {
       /* If vector not supplied, make one...*/
       /* There's no good way to check the size of x.  It would be good
-       * to do something similar if x had zero length.  Or assert(x
+       * to do something similar if x had zero length.  Or hypre_assert(x
        * has the right size) */
       bHYPRE_Vector_Clone( b, x );
       bHYPRE_Vector_Clear( *x );
@@ -603,7 +603,7 @@ impl_bHYPRE_ParaSails_Apply(
    }
    else
    {
-      assert( "Unrecognized vector type."==(char *)(*x) );
+      hypre_assert( "Unrecognized vector type."==(char *)(*x) );
    }
 
    datax = bHYPRE_IJParCSRVector__get_data( bHYPREP_x );
@@ -649,7 +649,7 @@ impl_bHYPRE_ParaSails_SetOperator(
    }
    else
    {
-      assert( "Unrecognized operator type."==(char *)A );
+      hypre_assert( "Unrecognized operator type."==(char *)A );
    }
 
    data = bHYPRE_ParaSails__get_data( self );

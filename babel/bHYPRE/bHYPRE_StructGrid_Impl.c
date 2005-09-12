@@ -102,7 +102,7 @@ impl_bHYPRE_StructGrid__dtor(
    data = bHYPRE_StructGrid__get_data( self );
    Hgrid = data -> grid;
    ierr = HYPRE_StructGridDestroy( Hgrid );
-   assert( ierr==0 );
+   hypre_assert( ierr==0 );
    hypre_TFree( data );
 
   /* DO-NOT-DELETE splicer.end(bHYPRE.StructGrid._dtor) */
@@ -136,7 +136,7 @@ impl_bHYPRE_StructGrid_Create(
    data->comm = (MPI_Comm) mpi_comm;
 
    ierr += HYPRE_StructGridCreate( data->comm, dim, &Hgrid );
-   assert( ierr==0 );
+   hypre_assert( ierr==0 );
    data->grid = Hgrid;
 
    return grid;
@@ -205,7 +205,7 @@ impl_bHYPRE_StructGrid_SetDimension(
    HYPRE_StructGrid * Hgrid;
    data = bHYPRE_StructGrid__get_data( self );
    Hgrid = &(data -> grid);
-   assert( *Hgrid==NULL );  /* grid shouldn't have already been created */
+   hypre_assert( *Hgrid==NULL );  /* grid shouldn't have already been created */
 
    ierr += HYPRE_StructGridCreate( data->comm, dim, Hgrid );
 

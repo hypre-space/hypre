@@ -62,7 +62,7 @@ int impl_bHYPRE_GMRES_Copy_Parameters_to_HYPRE_struct( bHYPRE_GMRES self )
    struct bHYPRE_GMRES__data * data;
 
    data = bHYPRE_GMRES__get_data( self );
-   assert( data->solver != NULL );
+   hypre_assert( data->solver != NULL );
    solver = data->solver;
 
    /* double parameters: */
@@ -513,7 +513,7 @@ impl_bHYPRE_GMRES_GetIntValue(
    struct bHYPRE_GMRES__data * data;
 
    data = bHYPRE_GMRES__get_data( self );
-   assert( data->solver != NULL );
+   hypre_assert( data->solver != NULL );
    solver = data->solver;
 
    if ( strcmp(name,"NumIterations")==0 )
@@ -564,7 +564,7 @@ impl_bHYPRE_GMRES_GetDoubleValue(
    struct bHYPRE_GMRES__data * data;
 
    data = bHYPRE_GMRES__get_data( self );
-   assert( data->solver != NULL );
+   hypre_assert( data->solver != NULL );
    solver = data->solver;
 
    if ( strcmp(name,"FinalRelativeResidualNorm")==0 ||
@@ -626,10 +626,10 @@ impl_bHYPRE_GMRES_Setup(
    data = bHYPRE_GMRES__get_data( self );
    comm = data->comm;
    /* SetCommunicator should have been called earlier */
-   assert( comm != MPI_COMM_NULL );
+   hypre_assert( comm != MPI_COMM_NULL );
    mat = data->matrix;
    /* SetOperator should have been called earlier */
-   assert( mat != NULL );
+   hypre_assert( mat != NULL );
 
    if ( data -> vector_type == NULL )
    {
@@ -640,20 +640,20 @@ impl_bHYPRE_GMRES_Setup(
          bHYPRE_Vector_deleteRef( b );  /* extra ref created by queryInt */
          data -> vector_type = "ParVector";
          HYPRE_ParCSRGMRESCreate( comm, psolver );
-         assert( solver != NULL );
+         hypre_assert( solver != NULL );
          data -> solver = *psolver;
       }
       /* Add more vector types here */
       else
       {
-         assert( "only IJParCSRVector supported by GMRES"==0 );
+         hypre_assert( "only IJParCSRVector supported by GMRES"==0 );
       }
       bHYPRE_GMRES__set_data( self, data );
    }
    else
    {
       solver = data->solver;
-      assert( solver != NULL );
+      hypre_assert( solver != NULL );
    }
    /* The SetParameter functions set parameters in the local
     * Babel-interface struct, "data".  That is because the HYPRE
@@ -683,7 +683,7 @@ impl_bHYPRE_GMRES_Setup(
 
       bHYPREP_A = bHYPRE_IJParCSRMatrix__cast
          ( bHYPRE_Operator_queryInt( mat, "bHYPRE.IJParCSRMatrix") );
-      assert( bHYPREP_A != NULL );
+      hypre_assert( bHYPREP_A != NULL );
       dataA = bHYPRE_IJParCSRMatrix__get_data( bHYPREP_A );
       ij_A = dataA -> ij_A;
       bHYPRE_IJParCSRMatrix_deleteRef( bHYPREP_A );
@@ -693,7 +693,7 @@ impl_bHYPRE_GMRES_Setup(
    }
    else
    {
-      assert( "only IJParCSRVector supported by GMRES"==0 );
+      hypre_assert( "only IJParCSRVector supported by GMRES"==0 );
    }
       
    ierr += HYPRE_GMRESSetPrecond( solver, data->precond, data->precond_setup,
@@ -753,10 +753,10 @@ impl_bHYPRE_GMRES_Apply(
    data = bHYPRE_GMRES__get_data( self );
    comm = data->comm;
    /* SetCommunicator should have been called earlier */
-   assert( comm != MPI_COMM_NULL );
+   hypre_assert( comm != MPI_COMM_NULL );
    mat = data->matrix;
    /* SetOperator should have been called earlier */
-   assert( mat != NULL );
+   hypre_assert( mat != NULL );
 
    if ( data -> vector_type == NULL )
    {
@@ -767,20 +767,20 @@ impl_bHYPRE_GMRES_Apply(
          bHYPRE_Vector_deleteRef( b ); /* extra ref created by queryInt */
          data -> vector_type = "ParVector";
          HYPRE_ParCSRGMRESCreate( comm, psolver );
-         assert( solver != NULL );
+         hypre_assert( solver != NULL );
          data -> solver = *psolver;
       }
       /* Add more vector types here */
       else
       {
-         assert( "only IJParCSRVector supported by GMRES"==0 );
+         hypre_assert( "only IJParCSRVector supported by GMRES"==0 );
       }
       bHYPRE_GMRES__set_data( self, data );
    }
    else
    {
       solver = data->solver;
-      assert( solver != NULL );
+      hypre_assert( solver != NULL );
    }
    /* The SetParameter functions set parameters in the local
     * Babel-interface struct, "data".  That is because the HYPRE
@@ -810,7 +810,7 @@ impl_bHYPRE_GMRES_Apply(
 
       bHYPREP_A = bHYPRE_IJParCSRMatrix__cast
          ( bHYPRE_Operator_queryInt( mat, "bHYPRE.IJParCSRMatrix") );
-      assert( bHYPREP_A != NULL );
+      hypre_assert( bHYPREP_A != NULL );
       dataA = bHYPRE_IJParCSRMatrix__get_data( bHYPREP_A );
       bHYPRE_IJParCSRMatrix_deleteRef( bHYPREP_A );
       ij_A = dataA -> ij_A;
@@ -820,7 +820,7 @@ impl_bHYPRE_GMRES_Apply(
    }
    else
    {
-      assert( "only IJParCSRVector supported by GMRES"==0 );
+      hypre_assert( "only IJParCSRVector supported by GMRES"==0 );
    }
       
    ierr += HYPRE_GMRESSetPrecond( solver, data->precond, data->precond_setup,
@@ -1024,7 +1024,7 @@ impl_bHYPRE_GMRES_GetNumIterations(
    struct bHYPRE_GMRES__data * data;
 
    data = bHYPRE_GMRES__get_data( self );
-   assert( data->solver != NULL );
+   hypre_assert( data->solver != NULL );
    solver = data->solver;
 
    ierr += HYPRE_GMRESGetNumIterations( solver, num_iterations );
@@ -1058,7 +1058,7 @@ impl_bHYPRE_GMRES_GetRelResidualNorm(
    struct bHYPRE_GMRES__data * data;
 
    data = bHYPRE_GMRES__get_data( self );
-   assert( data->solver != NULL );
+   hypre_assert( data->solver != NULL );
    solver = data->solver;
 
    ierr += HYPRE_GMRESGetFinalRelativeResidualNorm( solver, norm );
@@ -1105,7 +1105,7 @@ impl_bHYPRE_GMRES_SetPreconditioner(
       bHYPRE_BoomerAMG_deleteRef( AMG_s ); /* extra reference from queryInt */
       bHYPRE_BoomerAMG_deleteRef( AMG_s ); /* extra reference from queryInt */
       solverprecond = &AMG_dataprecond->solver;
-      assert( solverprecond != NULL );
+      hypre_assert( solverprecond != NULL );
       precond = (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSolve;
       precond_setup = (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSetup;
    }
@@ -1123,7 +1123,7 @@ impl_bHYPRE_GMRES_SetPreconditioner(
    /* put other preconditioner types here */
    else
    {
-      assert( "GMRES_SetPreconditioner cannot recognize preconditioner"==0 );
+      hypre_assert( "GMRES_SetPreconditioner cannot recognize preconditioner"==0 );
    }
 
    /* We can't actually set the HYPRE preconditioner, because that

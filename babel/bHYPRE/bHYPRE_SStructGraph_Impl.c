@@ -110,7 +110,7 @@ impl_bHYPRE_SStructGraph__dtor(
    data = bHYPRE_SStructGraph__get_data( self );
    Hgraph = data -> graph;
    ierr = HYPRE_SStructGraphDestroy( Hgraph );
-   assert( ierr==0 );
+   hypre_assert( ierr==0 );
    hypre_TFree( data );
 
   /* DO-NOT-DELETE splicer.end(bHYPRE.SStructGraph._dtor) */
@@ -186,7 +186,7 @@ impl_bHYPRE_SStructGraph_SetCommGrid(
 
    data = bHYPRE_SStructGraph__get_data( self );
    Hgraph = &(data -> graph);
-   assert( *Hgraph==NULL );  /* graph shouldn't have already been created */
+   hypre_assert( *Hgraph==NULL );  /* graph shouldn't have already been created */
 
    data_grid = bHYPRE_SStructGrid__get_data( grid );
    Hgrid = data_grid -> grid;

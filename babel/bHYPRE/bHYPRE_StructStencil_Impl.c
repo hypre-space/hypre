@@ -105,7 +105,7 @@ impl_bHYPRE_StructStencil__dtor(
    data = bHYPRE_StructStencil__get_data( self );
    stencil = data -> stencil;
    ierr += HYPRE_StructStencilDestroy( stencil );
-   assert( ierr==0 );
+   hypre_assert( ierr==0 );
    hypre_TFree( data );
 
   /* DO-NOT-DELETE splicer.end(bHYPRE.StructStencil._dtor) */
@@ -136,13 +136,13 @@ impl_bHYPRE_StructStencil_Create(
 
    stencil = bHYPRE_StructStencil__create();
    data = bHYPRE_StructStencil__get_data( stencil );
-   assert( ndim > 0 );
-   assert( size > 0 );
+   hypre_assert( ndim > 0 );
+   hypre_assert( size > 0 );
    data->dim = ndim;
    data->size = size;
 
    ierr += HYPRE_StructStencilCreate( ndim, size, &Hstencil );
-   assert( ierr==0 );
+   hypre_assert( ierr==0 );
    data->stencil = Hstencil;
 
    return stencil;
@@ -177,8 +177,8 @@ impl_bHYPRE_StructStencil_SetDimension(
 
    data = bHYPRE_StructStencil__get_data( self );
    stencil = data -> stencil;
-   assert( stencil == NULL );  /* can't reset dimension */
-   assert( dim > 0 );
+   hypre_assert( stencil == NULL );  /* can't reset dimension */
+   hypre_assert( dim > 0 );
    data -> dim = dim;
    size = data -> size;
 
@@ -220,8 +220,8 @@ impl_bHYPRE_StructStencil_SetSize(
 
    data = bHYPRE_StructStencil__get_data( self );
    stencil = data -> stencil;
-   assert( stencil == NULL );  /* can't reset size */
-   assert( size>0 );
+   hypre_assert( stencil == NULL );  /* can't reset size */
+   hypre_assert( size>0 );
    data -> size = size;
    dim = data -> dim;
 
@@ -262,7 +262,7 @@ impl_bHYPRE_StructStencil_SetElement(
 
    data = bHYPRE_StructStencil__get_data( self );
    stencil = data -> stencil;
-   assert( stencil != NULL );
+   hypre_assert( stencil != NULL );
 
    ierr += HYPRE_StructStencilSetElement( stencil, index,
                                           offset );

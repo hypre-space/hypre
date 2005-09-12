@@ -105,7 +105,7 @@ impl_bHYPRE_IJParCSRVector__dtor(
    data = bHYPRE_IJParCSRVector__get_data( self );
    ij_b = data -> ij_b;
    ierr = HYPRE_IJVectorDestroy( ij_b );
-   assert( ierr==0 );
+   hypre_assert( ierr==0 );
    hypre_TFree( data );
 
   /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRVector._dtor) */
@@ -139,7 +139,7 @@ impl_bHYPRE_IJParCSRVector_Create(
    data = bHYPRE_IJParCSRVector__get_data( vec );
    data -> comm = (MPI_Comm) mpi_comm;
    ierr += HYPRE_IJVectorCreate( data->comm, jlower, jupper, Hvec );
-   assert( ierr == 0 );
+   hypre_assert( ierr == 0 );
    ierr += HYPRE_IJVectorSetObjectType( *Hvec, HYPRE_PARCSR );
    data -> ij_b = *Hvec;
 
@@ -279,7 +279,7 @@ impl_bHYPRE_IJParCSRVector_SetLocalRange(
    data = bHYPRE_IJParCSRVector__get_data( self );
    ij_b = data -> ij_b;
    /* Create or SetCommunicator should have be called by now... */
-   assert( data->comm != MPI_COMM_NULL );
+   hypre_assert( data->comm != MPI_COMM_NULL );
 
    ierr = HYPRE_IJVectorCreate( data->comm, jlower, jupper, &ij_b );
    ierr += HYPRE_IJVectorSetObjectType( ij_b, HYPRE_PARCSR );
@@ -587,7 +587,7 @@ impl_bHYPRE_IJParCSRVector_Copy(
    }
    else
    {
-      assert( "Unrecognized vector type."==(char *)x );
+      hypre_assert( "Unrecognized vector type."==(char *)x );
    }
 
    data_y = bHYPRE_IJParCSRVector__get_data( self );
@@ -601,13 +601,13 @@ impl_bHYPRE_IJParCSRVector_Copy(
 
    ierr += HYPRE_IJVectorGetObjectType( ij_y, type );
    /* ... don't know how to deal with other types */
-   assert( *type == HYPRE_PARCSR );
+   hypre_assert( *type == HYPRE_PARCSR );
    ierr += HYPRE_IJVectorGetObject( ij_y, &objecty );
    yy = (HYPRE_ParVector) objecty;
 
    ierr += HYPRE_IJVectorGetObjectType( ij_x, type );
    /* ... don't know how to deal with other types */
-   assert( *type == HYPRE_PARCSR );
+   hypre_assert( *type == HYPRE_PARCSR );
    ierr += HYPRE_IJVectorGetObject( ij_x, &objectx );
    xx = (HYPRE_ParVector) objectx;
 
@@ -672,13 +672,13 @@ impl_bHYPRE_IJParCSRVector_Clone(
 
    ierr += HYPRE_IJVectorGetObjectType( ij_y, type );
    /* ... don't know how to deal with other types */
-   assert( *type == HYPRE_PARCSR );
+   hypre_assert( *type == HYPRE_PARCSR );
    ierr += HYPRE_IJVectorGetObject( ij_y, &objecty );
    yy = (HYPRE_ParVector) objecty;
 
    ierr += HYPRE_IJVectorGetObjectType( ij_x, type );
    /* ... don't know how to deal with other types */
-   assert( *type == HYPRE_PARCSR );
+   hypre_assert( *type == HYPRE_PARCSR );
    ierr += HYPRE_IJVectorGetObject( ij_x, &objectx );
    xx = (HYPRE_ParVector) objectx;
 
@@ -765,7 +765,7 @@ impl_bHYPRE_IJParCSRVector_Dot(
    }
    else
    {
-      assert( "Unrecognized vector type."==(char *)x );
+      hypre_assert( "Unrecognized vector type."==(char *)x );
    }
 
    data = bHYPRE_IJParCSRVector__get_data( self );
@@ -818,7 +818,7 @@ impl_bHYPRE_IJParCSRVector_Axpy(
 
    ierr += HYPRE_IJVectorGetObjectType( ij_y, type );
    /* ... don't know how to deal with other types */
-   assert( *type == HYPRE_PARCSR );
+   hypre_assert( *type == HYPRE_PARCSR );
    ierr += HYPRE_IJVectorGetObject( ij_y, &object );
    yy = (HYPRE_ParVector) object;
 
@@ -831,7 +831,7 @@ impl_bHYPRE_IJParCSRVector_Axpy(
    }
    else
    {
-      assert( "Unrecognized vector type."==(char *)x );
+      hypre_assert( "Unrecognized vector type."==(char *)x );
    }
 
    data_x = bHYPRE_IJParCSRVector__get_data( bHYPREP_x );
@@ -839,7 +839,7 @@ impl_bHYPRE_IJParCSRVector_Axpy(
    ij_x = data_x->ij_b;
    ierr += HYPRE_IJVectorGetObjectType( ij_x, type );
    /* ... don't know how to deal with other types */
-   assert( *type == HYPRE_PARCSR );
+   hypre_assert( *type == HYPRE_PARCSR );
    ierr += HYPRE_IJVectorGetObject( ij_x, &object );
    xx = (HYPRE_ParVector) object;
 

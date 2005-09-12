@@ -147,7 +147,7 @@ impl_bHYPRE_StructSMG_Create(
 
    data -> comm = (MPI_Comm) mpi_comm;
    ierr += HYPRE_StructSMGCreate( (data->comm), Hsolver );
-   assert( ierr==0 );
+   hypre_assert( ierr==0 );
    data -> solver = *Hsolver;
 
    return solver;
@@ -551,7 +551,7 @@ impl_bHYPRE_StructSMG_Setup(
    }
    else
    {
-      assert( "Unrecognized vector type."==(char *)x );
+      hypre_assert( "Unrecognized vector type."==(char *)x );
    }
    datab = bHYPRE_StructVector__get_data( bHYPREP_b );
    bHYPRE_StructVector_deleteRef( bHYPREP_b );
@@ -563,7 +563,7 @@ impl_bHYPRE_StructSMG_Setup(
    }
    else
    {
-      assert( "Unrecognized vector type."==(char *)(x) );
+      hypre_assert( "Unrecognized vector type."==(char *)(x) );
    }
    datax = bHYPRE_StructVector__get_data( bHYPREP_x );
    bHYPRE_StructVector_deleteRef( bHYPREP_x );
@@ -618,7 +618,7 @@ impl_bHYPRE_StructSMG_Apply(
    }
    else
    {
-      assert( "Unrecognized vector type."==(char *)x );
+      hypre_assert( "Unrecognized vector type."==(char *)x );
    }
    datab = bHYPRE_StructVector__get_data( bHYPREP_b );
    bHYPRE_StructVector_deleteRef( bHYPREP_b );
@@ -628,7 +628,7 @@ impl_bHYPRE_StructSMG_Apply(
    {
       /* If vector not supplied, make one...*/
       /* There's no good way to check the size of x.  It would be good
-       * to do something similar if x had zero length.  Or assert(x
+       * to do something similar if x had zero length.  Or hypre_assert(x
        * has the right size) */
       bHYPRE_Vector_Clone( b, x );
       bHYPRE_Vector_Clear( *x );
@@ -639,7 +639,7 @@ impl_bHYPRE_StructSMG_Apply(
    }
    else
    {
-      assert( "Unrecognized vector type."==(char *)(*x) );
+      hypre_assert( "Unrecognized vector type."==(char *)(*x) );
    }
    datax = bHYPRE_StructVector__get_data( bHYPREP_x );
    bHYPRE_StructVector_deleteRef( bHYPREP_x );
@@ -682,7 +682,7 @@ impl_bHYPRE_StructSMG_SetOperator(
    }
    else
    {
-      assert( "Unrecognized operator type."==(char *)A );
+      hypre_assert( "Unrecognized operator type."==(char *)A );
    }
 
    data = bHYPRE_StructSMG__get_data( self );

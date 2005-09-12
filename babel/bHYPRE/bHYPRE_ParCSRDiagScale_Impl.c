@@ -462,16 +462,16 @@ impl_bHYPRE_ParCSRDiagScale_Apply(
    data = bHYPRE_ParCSRDiagScale__get_data( self );
    comm = data->comm;
    /* SetCommunicator should have been called earlier */
-   assert( comm != NULL );
+   hypre_assert( comm != NULL );
    mat = data->matrix;
    /* SetOperator should have been called earlier */
-   assert( mat != NULL );
+   hypre_assert( mat != NULL );
 
    if ( *x==NULL )
    {  /* If vector not supplied, make one...*/
       /* There's no good way to check the size of x.  It would be good
        * to do something similar if x had zero length.  Or
-       * assert(x-has-the-right-size) */
+       * hypre_assert(x-has-the-right-size) */
       bHYPRE_Vector_Clone( b, x );
       bHYPRE_Vector_Clear( *x );
    }

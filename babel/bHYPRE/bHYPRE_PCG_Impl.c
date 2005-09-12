@@ -70,7 +70,7 @@ int impl_bHYPRE_PCG_Copy_Parameters_from_HYPRE_struct( bHYPRE_PCG self )
    struct bHYPRE_PCG__data * data;
 
    data = bHYPRE_PCG__get_data( self );
-   assert( data->solver != NULL );
+   hypre_assert( data->solver != NULL );
    solver = data->solver;
 
    / * double parameters: * /
@@ -107,7 +107,7 @@ int impl_bHYPRE_PCG_Copy_Parameters_to_HYPRE_struct( bHYPRE_PCG self )
    struct bHYPRE_PCG__data * data;
 
    data = bHYPRE_PCG__get_data( self );
-   assert( data->solver != NULL );
+   hypre_assert( data->solver != NULL );
    solver = data->solver;
 
    /* double parameters: */
@@ -569,7 +569,7 @@ impl_bHYPRE_PCG_GetIntValue(
    struct bHYPRE_PCG__data * data;
 
    data = bHYPRE_PCG__get_data( self );
-   assert( data->solver != NULL );
+   hypre_assert( data->solver != NULL );
    solver = data->solver;
 
    if ( strcmp(name,"NumIterations")==0 )
@@ -619,7 +619,7 @@ impl_bHYPRE_PCG_GetDoubleValue(
    struct bHYPRE_PCG__data * data;
 
    data = bHYPRE_PCG__get_data( self );
-   assert( data->solver != NULL );
+   hypre_assert( data->solver != NULL );
    solver = data->solver;
 
    if ( strcmp(name,"Final Relative Residual Norm")==0 ||
@@ -687,10 +687,10 @@ impl_bHYPRE_PCG_Setup(
    data = bHYPRE_PCG__get_data( self );
    comm = data->comm;
    /* SetCommunicator should have been called earlier */
-   assert( comm != MPI_COMM_NULL );
+   hypre_assert( comm != MPI_COMM_NULL );
    mat = data->matrix;
    /* SetOperator should have been called earlier */
-   assert( mat != NULL );
+   hypre_assert( mat != NULL );
 
    if ( data -> vector_type == NULL )
    {
@@ -701,7 +701,7 @@ impl_bHYPRE_PCG_Setup(
          bHYPRE_Vector_deleteRef( b );  /* extra ref created by queryInt */
          data -> vector_type = "ParVector";
          HYPRE_ParCSRPCGCreate( comm, psolver );
-         assert( solver != NULL );
+         hypre_assert( solver != NULL );
          data -> solver = *psolver;
       }
       else if ( bHYPRE_Vector_queryInt( b, "bHYPRE.StructVector") )
@@ -709,20 +709,20 @@ impl_bHYPRE_PCG_Setup(
          bHYPRE_Vector_deleteRef( b );  /* extra ref created by queryInt */
          data -> vector_type = "StructVector";
          HYPRE_StructPCGCreate( comm, (HYPRE_StructSolver *) psolver );
-         assert( solver != NULL );
+         hypre_assert( solver != NULL );
          data -> solver = *psolver;
       }
       /* Add more vector types here */
       else
       {
-         assert( "only IJParCSRVector supported by PCG"==0 );
+         hypre_assert( "only IJParCSRVector supported by PCG"==0 );
       }
       bHYPRE_PCG__set_data( self, data );
    }
    else
    {
       solver = data->solver;
-      assert( solver != NULL );
+      hypre_assert( solver != NULL );
    }
    /* The SetParameter functions set parameters in the local
     * Babel-interface struct, "data".  That is because the HYPRE
@@ -752,7 +752,7 @@ impl_bHYPRE_PCG_Setup(
 
       bHYPREP_A = bHYPRE_IJParCSRMatrix__cast
          ( bHYPRE_Operator_queryInt( mat, "bHYPRE.IJParCSRMatrix") );
-      assert( bHYPREP_A != NULL );
+      hypre_assert( bHYPREP_A != NULL );
       dataA = bHYPRE_IJParCSRMatrix__get_data( bHYPREP_A );
       bHYPRE_IJParCSRMatrix_deleteRef( bHYPREP_A ); /* extra reference from queryInt */
       ij_A = dataA -> ij_A;
@@ -763,7 +763,7 @@ impl_bHYPRE_PCG_Setup(
    else if ( data->vector_type == "StructVector" )
    {
       if ( data->precond_name=="IdentitySolver" )
-         assert( "IdentitySolver does not yet work with struct vectors"==0 );
+         hypre_assert( "IdentitySolver does not yet work with struct vectors"==0 );
 
       bHYPRES_b = bHYPRE_StructVector__cast
          ( bHYPRE_Vector_queryInt( b, "bHYPRE.StructVector") );
@@ -781,7 +781,7 @@ impl_bHYPRE_PCG_Setup(
 
       bHYPRES_A = bHYPRE_StructMatrix__cast
          ( bHYPRE_Operator_queryInt( mat, "bHYPRE.StructMatrix") );
-      assert( bHYPRES_A != NULL );
+      hypre_assert( bHYPRES_A != NULL );
       dataA_S = bHYPRE_StructMatrix__get_data( bHYPRES_A );
       bHYPRE_StructMatrix_deleteRef( bHYPRES_A ); /* extra reference from queryInt */
       HS_A = dataA_S -> matrix;
@@ -789,7 +789,7 @@ impl_bHYPRE_PCG_Setup(
    }
    else
    {
-      assert( "PCG supports only IJParCSRVector and StructVector"==0 );
+      hypre_assert( "PCG supports only IJParCSRVector and StructVector"==0 );
    }
       
    ierr += HYPRE_PCGSetPrecond( solver, data->precond, data->precond_setup,
@@ -855,10 +855,10 @@ impl_bHYPRE_PCG_Apply(
    data = bHYPRE_PCG__get_data( self );
    comm = data->comm;
    /* SetCommunicator should have been called earlier */
-   assert( comm != MPI_COMM_NULL );
+   hypre_assert( comm != MPI_COMM_NULL );
    mat = data->matrix;
    /* SetOperator should have been called earlier */
-   assert( mat != NULL );
+   hypre_assert( mat != NULL );
 
    if ( data -> vector_type == NULL )
    {
@@ -869,7 +869,7 @@ impl_bHYPRE_PCG_Apply(
          bHYPRE_Vector_deleteRef( b ); /* extra ref created by queryInt */
          data -> vector_type = "ParVector";
          HYPRE_ParCSRPCGCreate( comm, psolver );
-         assert( solver != NULL );
+         hypre_assert( solver != NULL );
          data -> solver = *psolver;
       }
       else if ( bHYPRE_Vector_queryInt( b, "bHYPRE.StructVector") )
@@ -877,20 +877,20 @@ impl_bHYPRE_PCG_Apply(
          bHYPRE_Vector_deleteRef( b ); /* extra ref created by queryInt */
          data -> vector_type = "StructVector";
          HYPRE_StructPCGCreate( comm, (HYPRE_StructSolver *) psolver );
-         assert( solver != NULL );
+         hypre_assert( solver != NULL );
          data -> solver = *psolver;
       }
       /* Add more vector types here */
       else
       {
-         assert( "PCG supports only IJParCSRVector and StructVector"==0 );
+         hypre_assert( "PCG supports only IJParCSRVector and StructVector"==0 );
       }
       bHYPRE_PCG__set_data( self, data );
    }
    else
    {
       solver = data->solver;
-      assert( solver != NULL );
+      hypre_assert( solver != NULL );
    }
    /* The SetParameter functions set parameters in the local
     * Babel-interface struct, "data".  That is because the HYPRE
@@ -920,7 +920,7 @@ impl_bHYPRE_PCG_Apply(
 
       bHYPREP_A = bHYPRE_IJParCSRMatrix__cast
          ( bHYPRE_Operator_queryInt( mat, "bHYPRE.IJParCSRMatrix") );
-      assert( bHYPREP_A != NULL );
+      hypre_assert( bHYPREP_A != NULL );
       dataA = bHYPRE_IJParCSRMatrix__get_data( bHYPREP_A );
       bHYPRE_IJParCSRMatrix_deleteRef( bHYPREP_A ); /* extra ref created by queryInt */
       ij_A = dataA -> ij_A;
@@ -946,7 +946,7 @@ impl_bHYPRE_PCG_Apply(
 
       bHYPRES_A = bHYPRE_StructMatrix__cast
          ( bHYPRE_Operator_queryInt( mat, "bHYPRE.StructMatrix") );
-      assert( bHYPRES_A != NULL );
+      hypre_assert( bHYPRES_A != NULL );
       dataA_S = bHYPRE_StructMatrix__get_data( bHYPRES_A );
       bHYPRE_StructMatrix_deleteRef( bHYPRES_A ); /* extra ref created by queryInt */
       HS_A = dataA_S -> matrix;
@@ -954,7 +954,7 @@ impl_bHYPRE_PCG_Apply(
    }
    else
    {
-      assert( "only IJParCSRVector supported by PCG"==0 );
+      hypre_assert( "only IJParCSRVector supported by PCG"==0 );
    }
       
    ierr += HYPRE_PCGSetPrecond( solver, data->precond, data->precond_setup,
@@ -1170,7 +1170,7 @@ impl_bHYPRE_PCG_GetNumIterations(
    struct bHYPRE_PCG__data * data;
 
    data = bHYPRE_PCG__get_data( self );
-   assert( data->solver != NULL );
+   hypre_assert( data->solver != NULL );
    solver = data->solver;
 
    ierr += HYPRE_PCGGetNumIterations( solver, num_iterations );
@@ -1204,7 +1204,7 @@ impl_bHYPRE_PCG_GetRelResidualNorm(
    struct bHYPRE_PCG__data * data;
 
    data = bHYPRE_PCG__get_data( self );
-   assert( data->solver != NULL );
+   hypre_assert( data->solver != NULL );
    solver = data->solver;
 
    ierr += HYPRE_PCGGetFinalRelativeResidualNorm( solver, norm );
@@ -1256,7 +1256,7 @@ impl_bHYPRE_PCG_SetPreconditioner(
          ( bHYPRE_Solver_queryInt( s, "bHYPRE.BoomerAMG") );
       AMG_dataprecond = bHYPRE_BoomerAMG__get_data( AMG_s );
       solverprecond = &AMG_dataprecond->solver;
-      assert( solverprecond != NULL );
+      hypre_assert( solverprecond != NULL );
       precond = (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSolve;
       precond_setup = (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSetup;
       bHYPRE_BoomerAMG_deleteRef( AMG_s ); /* extra reference from queryInt */
@@ -1269,7 +1269,7 @@ impl_bHYPRE_PCG_SetPreconditioner(
          ( bHYPRE_Solver_queryInt( s, "bHYPRE.ParaSails") );
       PS_dataprecond = bHYPRE_ParaSails__get_data( PS_s );
       solverprecond = &PS_dataprecond->solver;
-      assert( solverprecond != NULL );
+      hypre_assert( solverprecond != NULL );
       precond = (HYPRE_PtrToSolverFcn) HYPRE_ParaSailsSolve;
       precond_setup = (HYPRE_PtrToSolverFcn) HYPRE_ParaSailsSetup;
       bHYPRE_ParaSails_deleteRef( PS_s ); /* extra reference from queryInt */
@@ -1293,7 +1293,7 @@ impl_bHYPRE_PCG_SetPreconditioner(
          ( bHYPRE_Solver_queryInt( s, "bHYPRE.StructSMG") );
       SMG_dataprecond = bHYPRE_StructSMG__get_data( SMG_s );
       solverprecond = (HYPRE_Solver *) &SMG_dataprecond->solver;
-      assert( solverprecond != NULL );
+      hypre_assert( solverprecond != NULL );
       precond = (HYPRE_PtrToSolverFcn) HYPRE_StructSMGSolve;
       precond_setup = (HYPRE_PtrToSolverFcn) HYPRE_StructSMGSetup;
       bHYPRE_StructSMG_deleteRef( SMG_s ); /* extra reference from queryInt */
@@ -1306,7 +1306,7 @@ impl_bHYPRE_PCG_SetPreconditioner(
          ( bHYPRE_Solver_queryInt( s, "bHYPRE.StructPFMG") );
       PFMG_dataprecond = bHYPRE_StructPFMG__get_data( PFMG_s );
       solverprecond = (HYPRE_Solver *) &PFMG_dataprecond->solver;
-      assert( solverprecond != NULL );
+      hypre_assert( solverprecond != NULL );
       precond = (HYPRE_PtrToSolverFcn) HYPRE_StructPFMGSolve;
       precond_setup = (HYPRE_PtrToSolverFcn) HYPRE_StructPFMGSetup;
       bHYPRE_StructPFMG_deleteRef( PFMG_s ); /* extra reference from queryInt */
@@ -1327,7 +1327,7 @@ impl_bHYPRE_PCG_SetPreconditioner(
    /* put other preconditioner types here */
    else
    {
-      assert( "PCG_SetPreconditioner cannot recognize preconditioner"==0 );
+      hypre_assert( "PCG_SetPreconditioner cannot recognize preconditioner"==0 );
    }
 
    /* We can't actually set the HYPRE preconditioner, because that

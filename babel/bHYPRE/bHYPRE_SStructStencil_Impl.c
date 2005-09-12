@@ -97,7 +97,7 @@ impl_bHYPRE_SStructStencil__dtor(
    data = bHYPRE_SStructStencil__get_data( self );
    stencil = data -> stencil;
    ierr += HYPRE_SStructStencilDestroy( stencil );
-   assert( ierr==0 );
+   hypre_assert( ierr==0 );
    hypre_TFree( data );
 
   /* DO-NOT-DELETE splicer.end(bHYPRE.SStructStencil._dtor) */
