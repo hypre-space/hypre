@@ -11,7 +11,7 @@ utilities_FortranMatrixCreate(void) {
   utilities_FortranMatrix* mtx;
 
   mtx = (utilities_FortranMatrix*) malloc( sizeof(utilities_FortranMatrix) );
-  assert( mtx != NULL );
+  hypre_assert( mtx != NULL );
 
   mtx->globalHeight = 0;
   mtx->height = 0;
@@ -26,14 +26,14 @@ void
 utilities_FortranMatrixAllocateData( long  h, long w, 
 				     utilities_FortranMatrix* mtx ) {
 
-  assert( h > 0 && w > 0 );
-  assert( mtx != NULL );
+  hypre_assert( h > 0 && w > 0 );
+  hypre_assert( mtx != NULL );
 
   if ( mtx->value != NULL && mtx->ownsValues )
     free( mtx->value );
 
   mtx->value = (double*) calloc( h*w, sizeof(double) );
-  assert ( mtx->value != NULL );
+  hypre_assert ( mtx->value != NULL );
 
   mtx->globalHeight = h;
   mtx->height = h;
@@ -46,14 +46,14 @@ void
 utilities_FortranMatrixWrap( double* v, long gh, long  h, long w, 
 			     utilities_FortranMatrix* mtx ) {
 
-  assert( h > 0 && w > 0 );
-  assert( mtx != NULL );
+  hypre_assert( h > 0 && w > 0 );
+  hypre_assert( mtx != NULL );
 
   if ( mtx->value != NULL && mtx->ownsValues )
     free( mtx->value );
 
   mtx->value = v;
-  assert ( mtx->value != NULL );
+  hypre_assert ( mtx->value != NULL );
 
   mtx->globalHeight = gh;
   mtx->height = h;
@@ -77,7 +77,7 @@ utilities_FortranMatrixDestroy( utilities_FortranMatrix* mtx ) {
 long
 utilities_FortranMatrixGlobalHeight( utilities_FortranMatrix* mtx ) {
 
-  assert( mtx != NULL );
+  hypre_assert( mtx != NULL );
 
   return mtx->globalHeight;
 }
@@ -85,7 +85,7 @@ utilities_FortranMatrixGlobalHeight( utilities_FortranMatrix* mtx ) {
 long
 utilities_FortranMatrixHeight( utilities_FortranMatrix* mtx ) {
 
-  assert( mtx != NULL );
+  hypre_assert( mtx != NULL );
 
   return mtx->height;
 }
@@ -93,7 +93,7 @@ utilities_FortranMatrixHeight( utilities_FortranMatrix* mtx ) {
 long
 utilities_FortranMatrixWidth( utilities_FortranMatrix* mtx ) {
 
-  assert( mtx != NULL );
+  hypre_assert( mtx != NULL );
 
   return mtx->width;
 }
@@ -101,7 +101,7 @@ utilities_FortranMatrixWidth( utilities_FortranMatrix* mtx ) {
 double*
 utilities_FortranMatrixValues( utilities_FortranMatrix* mtx ) {
 
-  assert( mtx != NULL );
+  hypre_assert( mtx != NULL );
 
   return mtx->value;
 }
@@ -112,7 +112,7 @@ utilities_FortranMatrixClear( utilities_FortranMatrix* mtx ) {
   long i, j, h, w, jump;
   double* p;
 
-  assert( mtx != NULL );
+  hypre_assert( mtx != NULL );
 
   h = mtx->height;
   w = mtx->width;
@@ -132,7 +132,7 @@ utilities_FortranMatrixClearL( utilities_FortranMatrix* mtx ) {
   long i, j, k, h, w, jump;
   double* p;
 
-  assert( mtx != NULL );
+  hypre_assert( mtx != NULL );
 
   h = mtx->height;
   w = mtx->width;
@@ -158,7 +158,7 @@ utilities_FortranMatrixSetToIdentity( utilities_FortranMatrix* mtx ) {
   long j, h, w, jump;
   double* p;
 
-  assert( mtx != NULL );
+  hypre_assert( mtx != NULL );
 
   utilities_FortranMatrixClear( mtx );
 
@@ -180,13 +180,13 @@ utilities_FortranMatrixTransposeSquare( utilities_FortranMatrix* mtx ) {
   double* q;
   double tmp;
 
-  assert( mtx != NULL );
+  hypre_assert( mtx != NULL );
 
   g = mtx->globalHeight;
   h = mtx->height;
   w = mtx->width;
 
-  assert( h == w );
+  hypre_assert( h == w );
 
   jump = mtx->globalHeight - h;
 	
@@ -210,13 +210,13 @@ utilities_FortranMatrixSymmetrize( utilities_FortranMatrix* mtx ) {
   double* p;
   double* q;
 
-  assert( mtx != NULL );
+  hypre_assert( mtx != NULL );
 
   g = mtx->globalHeight;
   h = mtx->height;
   w = mtx->width;
 
-  assert( h == w );
+  hypre_assert( h == w );
 
   jump = mtx->globalHeight - h;
 	
@@ -240,7 +240,7 @@ utilities_FortranMatrixCopy( utilities_FortranMatrix* src, int t,
   double* q;
   double* r;
 
-  assert( src != NULL && dest != NULL );
+  hypre_assert( src != NULL && dest != NULL );
 
   h = dest->height;
   w = dest->width;
@@ -248,12 +248,12 @@ utilities_FortranMatrixCopy( utilities_FortranMatrix* src, int t,
   jp = dest->globalHeight - h;
 
   if ( t == 0 ) {
-    assert( src->height == h && src->width == w );
+    hypre_assert( src->height == h && src->width == w );
     jq = 1;
     jr = src->globalHeight;
   }
   else {
-    assert( src->height == w && src->width == h );
+    hypre_assert( src->height == w && src->width == h );
     jr = 1;
     jq = src->globalHeight;
   }
@@ -274,7 +274,7 @@ utilities_FortranMatrixIndexCopy( int* index,
   double* q;
   double* r;
 
-  assert( src != NULL && dest != NULL );
+  hypre_assert( src != NULL && dest != NULL );
 
   h = dest->height;
   w = dest->width;
@@ -282,12 +282,12 @@ utilities_FortranMatrixIndexCopy( int* index,
   jp = dest->globalHeight - h;
 
   if ( t == 0 ) {
-    assert( src->height == h && src->width == w );
+    hypre_assert( src->height == h && src->width == w );
     jq = 1;
     jr = src->globalHeight;
   }
   else {
-    assert( src->height == w && src->width == h );
+    hypre_assert( src->height == w && src->width == h );
     jr = 1;
     jq = src->globalHeight;
   }
@@ -307,12 +307,12 @@ utilities_FortranMatrixSetDiagonal( utilities_FortranMatrix* mtx,
   double* p;
   double* q;
 
-  assert( mtx != NULL && vec != NULL );
+  hypre_assert( mtx != NULL && vec != NULL );
 
   h = mtx->height;
   w = mtx->width;
 
-  assert( vec->height >= h );
+  hypre_assert( vec->height >= h );
 
   jump = mtx->globalHeight + 1;
 
@@ -330,12 +330,12 @@ utilities_FortranMatrixGetDiagonal( utilities_FortranMatrix* mtx,
   double* p;
   double* q;
   
-  assert( mtx != NULL && vec != NULL );
+  hypre_assert( mtx != NULL && vec != NULL );
 
   h = mtx->height;
   w = mtx->width;
 
-  assert( vec->height >= h );
+  hypre_assert( vec->height >= h );
 
   jump = mtx->globalHeight + 1;
 
@@ -356,13 +356,13 @@ utilities_FortranMatrixAdd( double a,
   double *pB;
   double *pC;
 
-  assert( mtxA != NULL && mtxB != NULL && mtxC != NULL );
+  hypre_assert( mtxA != NULL && mtxB != NULL && mtxC != NULL );
 
   h = mtxA->height;
   w = mtxA->width;
 
-  assert( mtxB->height == h && mtxB->width == w );
-  assert( mtxC->height == h && mtxC->width == w );
+  hypre_assert( mtxB->height == h && mtxB->width == w );
+  hypre_assert( mtxC->height == h && mtxC->width == w );
 
   jA = mtxA->globalHeight - h;
   jB = mtxB->globalHeight - h;
@@ -418,12 +418,12 @@ utilities_FortranMatrixDMultiply( utilities_FortranMatrix* vec,
   double* p;
   double* q;
 
-  assert( mtx != NULL && vec != NULL );
+  hypre_assert( mtx != NULL && vec != NULL );
 
   h = mtx->height;
   w = mtx->width;
 
-  assert( vec->height == h );
+  hypre_assert( vec->height == h );
 
   jump = mtx->globalHeight - h;
 
@@ -443,12 +443,12 @@ utilities_FortranMatrixMultiplyD( utilities_FortranMatrix* mtx,
   double* p;
   double* q;
 
-  assert( mtx != NULL && vec != NULL );
+  hypre_assert( mtx != NULL && vec != NULL );
 
   h = mtx->height;
   w = mtx->width;
 
-  assert( vec->height == w );
+  hypre_assert( vec->height == w );
 
   jump = mtx->globalHeight - h;
 
@@ -479,7 +479,7 @@ utilities_FortranMatrixMultiply( utilities_FortranMatrix* mtxA, int tA,
 
   double s;
 
-  assert( mtxA != NULL && mtxB != NULL && mtxC != NULL );
+  hypre_assert( mtxA != NULL && mtxB != NULL && mtxC != NULL );
 
   h = mtxC->height;
   w = mtxC->width;
@@ -487,27 +487,27 @@ utilities_FortranMatrixMultiply( utilities_FortranMatrix* mtxA, int tA,
   jC = mtxC->globalHeight;
 
   if ( tA == 0 ) {
-    assert( mtxA->height == h );
+    hypre_assert( mtxA->height == h );
     l = mtxA->width;
     iA = 1;
     kA = mtxA->globalHeight;
   }
   else {
     l = mtxA->height;
-    assert( mtxA->width == h );
+    hypre_assert( mtxA->width == h );
     kA = 1;
     iA = mtxA->globalHeight;
   }
 
   if ( tB == 0 ) {
-    assert( mtxB->height == l );
-    assert( mtxB->width == w );
+    hypre_assert( mtxB->height == l );
+    hypre_assert( mtxB->width == w );
     kB = 1;
     jB = mtxB->globalHeight;
   }
   else {
-    assert( mtxB->width == l );
-    assert( mtxB->height == w );
+    hypre_assert( mtxB->width == l );
+    hypre_assert( mtxB->height == w );
     jB = 1;
     kB = mtxB->globalHeight;
   }
@@ -532,7 +532,7 @@ utilities_FortranMatrixFNorm( utilities_FortranMatrix* mtx ) {
 
   double norm;
 
-  assert( mtx != NULL );
+  hypre_assert( mtx != NULL );
 
   h = mtx->height;
   w = mtx->width;
@@ -557,10 +557,10 @@ utilities_FortranMatrixValue( utilities_FortranMatrix* mtx,
 
   long k;
 
-  assert( mtx != NULL );
+  hypre_assert( mtx != NULL );
 
-  assert( 1 <= i && i <= mtx->height );
-  assert( 1 <= j && j <= mtx->width );
+  hypre_assert( 1 <= i && i <= mtx->height );
+  hypre_assert( 1 <= j && j <= mtx->width );
 
   k = i - 1 + (j - 1)*mtx->globalHeight;
   return mtx->value[k];
@@ -572,10 +572,10 @@ utilities_FortranMatrixValuePtr( utilities_FortranMatrix* mtx,
 
   long k;
 
-  assert( mtx != NULL );
+  hypre_assert( mtx != NULL );
 
-  assert( 1 <= i && i <= mtx->height );
-  assert( 1 <= j && j <= mtx->width );
+  hypre_assert( 1 <= i && i <= mtx->height );
+  hypre_assert( 1 <= j && j <= mtx->width );
 
   k = i - 1 + (j - 1)*mtx->globalHeight;
   return mtx->value + k;
@@ -589,7 +589,7 @@ utilities_FortranMatrixMaxValue( utilities_FortranMatrix* mtx ) {
   double* p;
   double maxVal;
 
-  assert( mtx != NULL );
+  hypre_assert( mtx != NULL );
 
   h = mtx->height;
   w = mtx->width;
@@ -645,10 +645,10 @@ utilities_FortranMatrixUpperInv( utilities_FortranMatrix* u ) {
   double* pd;	/* &diag(i) */
 
   n = u->height;
-  assert( u->width == n );
+  hypre_assert( u->width == n );
 
   diag = (double*)calloc( n, sizeof(double) );
-  assert( diag != NULL );
+  hypre_assert( diag != NULL );
 
   jc = u->globalHeight;
   jd = jc + 1;
@@ -688,7 +688,7 @@ utilities_FortranMatrixPrint( utilities_FortranMatrix* mtx, char fileName[] ) {
   double* p;
   FILE* fp;
 
-  assert( mtx != NULL );
+  hypre_assert( mtx != NULL );
 
   if ( !(fp = fopen(fileName,"w")) )
     return 1;

@@ -64,10 +64,10 @@ int HYPRE_InitPthreads( int num_threads )
       for (i=0; i < hypre_NumThreads; i++) {
 #ifdef HYPRE_USE_UMALLOC
          /* Get initial area to start heap */
-         assert ((_uinitial_block[i] = malloc(INITIAL_HEAP_SIZE))!=NULL);
+         hypre_assert ((_uinitial_block[i] = malloc(INITIAL_HEAP_SIZE))!=NULL);
  
          /* Create a user heap */
-         assert ((_uparam[i].myheap = _ucreate(initial_block[i],
+         hypre_assert ((_uparam[i].myheap = _ucreate(initial_block[i],
                                     INITIAL_HEAP_SIZE,
                                     _BLOCK_CLEAN,
                                     _HEAP_REGULAR,
@@ -77,7 +77,7 @@ int HYPRE_InitPthreads( int num_threads )
          err=pthread_create(&hypre_thread[i], NULL, 
                             (void *(*)(void *))hypre_pthread_worker,
                             (void *)i);
-         assert(err == 0);
+         hypre_assert(err == 0);
       }
    }
 
@@ -170,7 +170,7 @@ hypre_work_put( hypre_work_proc_t funcptr, void *argptr )
       /* idle workers to be awakened */
       pthread_cond_signal(&hypre_qptr->work_wait);
    }
-   assert(hypre_qptr->n_queue != MAX_QUEUE);
+   hypre_assert(hypre_qptr->n_queue != MAX_QUEUE);
 
    hypre_qptr->n_queue++;
    hypre_qptr->worker_proc_queue[hypre_qptr->inp] = funcptr;
