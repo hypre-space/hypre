@@ -38,7 +38,7 @@ hypre_ParCSRMultiVectorPrint( void* x_, const char* fileName ) {
   char fullName[128];
   
   x = (mv_TempMultiVector*)x_;
-  assert( x != NULL );
+  hypre_assert( x != NULL );
 
   ierr = 0;
   for ( i = 0; i < x->numVectors; i++ ) {
@@ -73,14 +73,14 @@ hypre_ParCSRMultiVectorRead( MPI_Comm comm, void* ii_, const char* fileName ) {
     return NULL;
 
   x = (mv_TempMultiVector*) malloc(sizeof(mv_TempMultiVector));
-  assert( x != NULL );
+  hypre_assert( x != NULL );
   
   x->interpreter = ii;
 
   x->numVectors = n;
   
   x->vector = (void**) calloc( n, sizeof(void*) );
-  assert( x->vector != NULL );
+  hypre_assert( x->vector != NULL );
 
   x->ownsVectors = 1;
 
