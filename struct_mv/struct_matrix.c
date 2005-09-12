@@ -335,7 +335,7 @@ hypre_StructMatrixInitializeShell( hypre_StructMatrix *matrix )
       }
       else
       {
-         assert( constant_coefficient == 2 );
+         hypre_assert( constant_coefficient == 2 );
          data_size += stencil_size;  /* all constant coefficients at the beginning */
          /* ... this allocates a little more space than is absolutely necessary */
          hypre_ForBoxI(i, data_space)
@@ -1223,6 +1223,7 @@ int  hypre_StructMatrixSetConstantEntries( hypre_StructMatrix *matrix,
    /* ... Stencil doesn't exist yet */
    int stencil_size  = hypre_StructStencilSize(stencil);
    int *offdconst = hypre_CTAlloc(int, stencil_size);
+   /* ... note: CTAlloc initializes to 0 (normally it works by calling calloc) */
    int nconst = 0;
    int constant_coefficient, diag_rank;
    hypre_Index diag_index;
@@ -1419,10 +1420,10 @@ hypre_StructMatrixMigrate( hypre_StructMatrix *from_matrix,
     *------------------------------------------------------*/
 
    constant_coefficient = hypre_StructMatrixConstantCoefficient( from_matrix );
-   assert( constant_coefficient == hypre_StructMatrixConstantCoefficient( to_matrix ) );
+   hypre_assert( constant_coefficient == hypre_StructMatrixConstantCoefficient( to_matrix ) );
 
    mat_num_values = hypre_StructMatrixNumValues(from_matrix);
-   assert( mat_num_values = hypre_StructMatrixNumValues(to_matrix) );
+   hypre_assert( mat_num_values = hypre_StructMatrixNumValues(to_matrix) );
 
    if ( constant_coefficient==0 ) 
    {
@@ -1437,7 +1438,7 @@ hypre_StructMatrixMigrate( hypre_StructMatrix *from_matrix,
       comm_num_values = 1;
       stencil = hypre_StructMatrixStencil(from_matrix);
       stencil_size = hypre_StructStencilSize(stencil);
-      assert(stencil_size ==
+      hypre_assert(stencil_size ==
              hypre_StructStencilSize( hypre_StructMatrixStencil(to_matrix) ) );
       data_initial_offset = stencil_size;
       matrix_data_comm_from = &( matrix_data_from[data_initial_offset] );
@@ -1581,7 +1582,7 @@ hypre_StructMatrixRead( MPI_Comm    comm,
    }
    else
    {
-      assert( constant_coefficient<=2 );
+      hypre_assert( constant_coefficient<=2 );
       hypre_ReadBoxArrayData_CC( file, boxes, data_space,
                                  stencil_size, real_stencil_size,
                                  constant_coefficient,
