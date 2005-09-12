@@ -67,7 +67,7 @@ hypre_CSRMatrixMatvec( double           alpha,
     *  is informational only.
     *--------------------------------------------------------------------*/
  
-    assert( num_vectors == hypre_VectorNumVectors(y) );
+    hypre_assert( num_vectors == hypre_VectorNumVectors(y) );
 
     if (num_cols != x_size)
               ierr = 1;
@@ -244,7 +244,7 @@ hypre_CSRMatrixMatvecT( double           alpha,
     *  is informational only.
     *--------------------------------------------------------------------*/
 
-    assert( num_vectors == hypre_VectorNumVectors(y) );
+    hypre_assert( num_vectors == hypre_VectorNumVectors(y) );
  
     if (num_rows != x_size)
               ierr = 1;
