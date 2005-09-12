@@ -215,7 +215,7 @@ hypre_SeqMultivectorCopy(hypre_Multivector *x, hypre_Multivector *y)
    int    i, size, num_bytes, num_active_vectors, *x_active_ind, * y_active_ind;
    double *x_data, *y_data, *dest, * src;
    
-   assert (x->size == y->size && x->num_active_vectors == y->num_active_vectors);
+   hypre_assert (x->size == y->size && x->num_active_vectors == y->num_active_vectors);
    
    num_active_vectors = x->num_active_vectors;
    size = x->size;
@@ -249,7 +249,7 @@ hypre_SeqMultivectorCopyWithoutMask(hypre_Multivector *x ,
 {
    int byte_count;
    
-   assert (x->size == y->size && x->num_vectors == y->num_vectors);
+   hypre_assert (x->size == y->size && x->num_vectors == y->num_vectors);
    byte_count = sizeof(double) * x->size * x->num_vectors;
    memcpy(y->data,x->data,byte_count);
    return 0;
@@ -266,7 +266,7 @@ hypre_SeqMultivectorAxpy(double alpha, hypre_Multivector *x,
    int    i, j, size, num_active_vectors, *x_active_ind, *y_active_ind;
    double *x_data, *y_data, *src, *dest;
 
-   assert (x->size == y->size && x->num_active_vectors == y->num_active_vectors);
+   hypre_assert (x->size == y->size && x->num_active_vectors == y->num_active_vectors);
    
    x_data = x->data;
    y_data = y->data;
@@ -308,7 +308,7 @@ hypre_SeqMultivectorByDiag(hypre_Multivector *x, int *mask, int n,
    int    *al_active_ind, num_active_als;
    double *x_data, *y_data, *dest, *src, current_alpha;
 
-   assert (x->size == y->size && x->num_active_vectors == y->num_active_vectors);
+   hypre_assert (x->size == y->size && x->num_active_vectors == y->num_active_vectors);
       
    /* build list of active indices in alpha */
    
@@ -325,7 +325,7 @@ hypre_SeqMultivectorByDiag(hypre_Multivector *x, int *mask, int n,
       for (i=0; i<n; i++)
          al_active_ind[num_active_als++]=i;
    
-   assert (num_active_als==x->num_active_vectors);
+   hypre_assert (num_active_als==x->num_active_vectors);
    
    x_data = x->data;
    y_data = y->data;
@@ -362,7 +362,7 @@ int hypre_SeqMultivectorInnerProd(hypre_Multivector *x, hypre_Multivector *y,
    int    x_num_active_vectors, y_num_active_vectors;
    double *x_data, *y_data, *y_ptr, *x_ptr, current_product;
    
-   assert (x->size==y->size);
+   hypre_assert (x->size==y->size);
 
    x_data = x->data;
    y_data = y->data;
@@ -412,7 +412,7 @@ int hypre_SeqMultivectorInnerProdDiag(hypre_Multivector *x,
    double *x_data, *y_data, *y_ptr, *x_ptr, current_product;
    int    i, k, size, num_active_vectors, *x_active_ind, *y_active_ind;  
         
-   assert(x->size==y->size && x->num_active_vectors == y->num_active_vectors);
+   hypre_assert(x->size==y->size && x->num_active_vectors == y->num_active_vectors);
    
    x_data = x->data;
    y_data = y->data;
@@ -447,8 +447,8 @@ hypre_SeqMultivectorByMatrix(hypre_Multivector *x, int rGHeight, int rHeight,
    int    i, j, k, size, gap, *x_active_ind, *y_active_ind;  
    double *x_data, *y_data, *x_ptr, *y_ptr, current_coef;
       
-   assert(rHeight>0);
-   assert (rHeight==x->num_active_vectors && rWidth==y->num_active_vectors);
+   hypre_assert(rHeight>0);
+   hypre_assert (rHeight==x->num_active_vectors && rWidth==y->num_active_vectors);
    
    x_data = x->data;
    y_data = y->data;
@@ -495,7 +495,7 @@ hypre_SeqMultivectorXapy (hypre_Multivector *x, int rGHeight, int rHeight,
    double *x_data, *y_data, *x_ptr, *y_ptr, current_coef;
    int    i, j, k, size, gap, *x_active_ind, *y_active_ind;  
 
-   assert (rHeight==x->num_active_vectors && rWidth==y->num_active_vectors);
+   hypre_assert (rHeight==x->num_active_vectors && rWidth==y->num_active_vectors);
    
    x_data = x->data;
    y_data = y->data;

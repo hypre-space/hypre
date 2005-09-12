@@ -262,7 +262,7 @@ hypre_ParMultiVectorInnerProd(hypre_ParMultiVector *x, hypre_ParMultiVector *y,
            (y->local_vector->num_active_vectors);
    
    ierr = MPI_Allreduce(workspace, results, count, MPI_DOUBLE, MPI_SUM, comm);
-   assert (ierr == MPI_SUCCESS);
+   hypre_assert (ierr == MPI_SUCCESS);
 
 /* debug */
 
@@ -293,7 +293,7 @@ hypre_ParMultiVectorInnerProdDiag(hypre_ParMultiVector *x, hypre_ParMultiVector 
    
    count = x->local_vector->num_active_vectors;
    ierr = MPI_Allreduce(workspace, diagResults, count, MPI_DOUBLE, MPI_SUM, x->comm);
-   assert (ierr == MPI_SUCCESS);
+   hypre_assert (ierr == MPI_SUCCESS);
    
    return 0;
 }
@@ -327,11 +327,11 @@ hypre_ParMultiVectorEval(void (*f)( void*, void*, void* ), void* par,
    double * x_data, *y_data;
    int size;
    
-   assert(x->local_vector->num_active_vectors == y->local_vector->num_active_vectors);
-   assert(x->local_vector->size == y->local_vector->size);
+   hypre_assert(x->local_vector->num_active_vectors == y->local_vector->num_active_vectors);
+   hypre_assert(x->local_vector->size == y->local_vector->size);
    
    temp_x=hypre_ParVectorCreate(x->comm,x->global_size, x->partitioning);
-   assert(temp_x!=NULL);
+   hypre_assert(temp_x!=NULL);
    temp_x->owns_partitioning=0;
    temp_x->local_vector->owns_data=0;
    temp_x->local_vector->vecstride = temp_x->local_vector->size;
@@ -339,7 +339,7 @@ hypre_ParMultiVectorEval(void (*f)( void*, void*, void* ), void* par,
 /* no initialization for temp_x needed! */
   
    temp_y=hypre_ParVectorCreate(y->comm,y->global_size, y->partitioning);
-   assert(temp_y!=NULL);
+   hypre_assert(temp_y!=NULL);
    temp_y->owns_partitioning=0;
    temp_y->local_vector->owns_data=0;
    temp_y->local_vector->vecstride = temp_y->local_vector->size;
@@ -446,10 +446,10 @@ hypre_ParMultiVectorTempPrint(hypre_ParMultiVector *vector, const char *fileName
    char fullName[128];
    hypre_ParVector * temp_vec;
   
-   assert( vector != NULL );
+   hypre_assert( vector != NULL );
   
    temp_vec=hypre_ParVectorCreate(vector->comm,vector->global_size, vector->partitioning);
-   assert(temp_vec!=NULL);
+   hypre_assert(temp_vec!=NULL);
    temp_vec->owns_partitioning=0;
    temp_vec->local_vector->owns_data=0;
   

@@ -63,7 +63,7 @@ hypre_ParCSRMatrixMatMultiVec(double alpha, hypre_ParCSRMatrix *A,
     *--------------------------------------------------------------------*/
 
    num_active_vectors = x->num_active_vectors;
-   assert(num_active_vectors == y->num_active_vectors);
+   hypre_assert(num_active_vectors == y->num_active_vectors);
    if (x_active_ind == NULL) num_vec_sends = num_vectors;
    else                      num_vec_sends = x->num_active_vectors;
 
@@ -189,7 +189,7 @@ hypre_ParCSRMatrixMultiMatVecT(double alpha, hypre_ParCSRMatrix *A,
     *--------------------------------------------------------------------*/
 
    num_active_vectors = x->num_active_vectors;
-   assert(num_active_vectors == y->num_active_vectors);
+   hypre_assert(num_active_vectors == y->num_active_vectors);
    if (x_active_ind == NULL) num_vec_sends = num_vectors;
    else                      num_vec_sends = x->num_active_vectors;
     

@@ -53,7 +53,7 @@ hypre_CSRMatrixMatMultivec(double alpha, hypre_CSRMatrix *A,
     *  is informational only.
     *--------------------------------------------------------------------*/
  
-    assert(num_active_vectors == y->num_active_vectors);
+    hypre_assert(num_active_vectors == y->num_active_vectors);
     if (num_cols != x_size) ierr = 1;
     if (num_rows != y_size) ierr = 2;
     if (num_cols != x_size && num_rows != y_size) ierr = 3;
@@ -209,7 +209,7 @@ hypre_CSRMatrixMatMultivecT(double alpha, hypre_CSRMatrix *A,
     *  is informational only.
     *--------------------------------------------------------------------*/
 
-    assert(num_active_vectors == y->num_active_vectors);
+    hypre_assert(num_active_vectors == y->num_active_vectors);
     if (num_rows != x_size) ierr = 1;
     if (num_cols != y_size) ierr = 2;
     if (num_rows != x_size && num_cols != y_size) ierr = 3;
