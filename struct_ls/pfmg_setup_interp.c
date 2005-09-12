@@ -499,7 +499,7 @@ hypre_PFMGSetupInterpOp_CC2
 
             Ap = hypre_StructMatrixBoxData(A, i, si);
             Astenc = hypre_IndexD(stencil_shape[si], cdir);
-            assert( Astenc==0 );
+            hypre_assert( Astenc==0 );
             center += Ap[Ai];
 #if 0
             if (Astenc == 0)

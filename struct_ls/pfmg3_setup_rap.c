@@ -210,16 +210,16 @@ hypre_PFMG3BuildRAPSym( hypre_StructMatrix *A,
 
    constant_coefficient = hypre_StructMatrixConstantCoefficient(RAP);
    constant_coefficient_A = hypre_StructMatrixConstantCoefficient(A);
-   assert( constant_coefficient==0 || constant_coefficient==1 );
-   assert( hypre_StructMatrixConstantCoefficient(R) == constant_coefficient );
-   assert( hypre_StructMatrixConstantCoefficient(P) == constant_coefficient );
+   hypre_assert( constant_coefficient==0 || constant_coefficient==1 );
+   hypre_assert( hypre_StructMatrixConstantCoefficient(R) == constant_coefficient );
+   hypre_assert( hypre_StructMatrixConstantCoefficient(P) == constant_coefficient );
    if (constant_coefficient==1 )
    {
-      assert( constant_coefficient_A==1 );
+      hypre_assert( constant_coefficient_A==1 );
    }
    else
    {
-      assert( constant_coefficient_A==0 || constant_coefficient_A==2 );
+      hypre_assert( constant_coefficient_A==0 || constant_coefficient_A==2 );
    }
 
    fi = 0;
@@ -3159,16 +3159,16 @@ hypre_PFMG3BuildRAPNoSym( hypre_StructMatrix *A,
 
    constant_coefficient = hypre_StructMatrixConstantCoefficient(RAP);
    constant_coefficient_A = hypre_StructMatrixConstantCoefficient(A);
-   assert( constant_coefficient==0 || constant_coefficient==1 );
-   assert( hypre_StructMatrixConstantCoefficient(R) == constant_coefficient );
-   assert( hypre_StructMatrixConstantCoefficient(P) == constant_coefficient );
+   hypre_assert( constant_coefficient==0 || constant_coefficient==1 );
+   hypre_assert( hypre_StructMatrixConstantCoefficient(R) == constant_coefficient );
+   hypre_assert( hypre_StructMatrixConstantCoefficient(P) == constant_coefficient );
    if (constant_coefficient==1 )
    {
-      assert( constant_coefficient_A==1 );
+      hypre_assert( constant_coefficient_A==1 );
    }
    else
    {
-      assert( constant_coefficient_A==0 || constant_coefficient_A==2 );
+      hypre_assert( constant_coefficient_A==0 || constant_coefficient_A==2 );
    }
 
    fi = 0;
