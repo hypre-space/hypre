@@ -322,7 +322,7 @@ ac_includes_default="\
 #endif"
 
 ac_subdirs_all="$ac_subdirs_all babel-runtime"
-ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS build build_cpu build_vendor build_os host host_cpu host_vendor host_os HYPRE_PACKAGE_DATETIME HYPRE_TOP_SRCDIR HYPRE_RELEASEVERSION HYPRE_RELEASEDATE HYPRE_RELEASETIME HYPRE_RELEASEDATETIME CC CXX F77 RANLIB ac_ct_RANLIB INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA AWK CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT CPP LN_S SET_MAKE CXXFLAGS ac_ct_CXX FFLAGS ac_ct_F77 FLIBS CXXCPP FPP EGREP POW_LIB LIBOBJS MPILIBS subdirs BABELDIR HYPRE_ARCH HOSTNAME F77FLAGS LINK_CC LINK_CXX HYPRE_INSTALLDIR HYPRE_LIBINSTALL HYPRE_INCINSTALL INCLUDES LIBDIRS LDLIBS LDLIBDIRS HYPRE_LIBSUFFIX MPIINCLUDE MPILIBDIRS MPIFLAGS TIMERDEFS FEILIBS FEILIBDIRS FEIINCLUDE MLI_DIR MLILIBS MLILIBDIRS MLIINCLUDE BLASLIBDIRS BLASLIBS HYPREBLASFILES HYPREBLASHEADERS LAPACKLIBDIRS LAPACKLIBS HYPRELAPACKFILS1 HYPRELAPACKFILS2 HYPRELAPACKFILS3 HYPRELAPACKHEADERS AR LTLIBOBJS'
+ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS HYPRE_PACKAGE_DATETIME HYPRE_TOP_SRCDIR HYPRE_RELEASEVERSION HYPRE_RELEASEDATE HYPRE_RELEASETIME HYPRE_RELEASEDATETIME build build_cpu build_vendor build_os host host_cpu host_vendor host_os CC CXX F77 RANLIB ac_ct_RANLIB INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA AWK CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT CPP LN_S SET_MAKE CXXFLAGS ac_ct_CXX FFLAGS ac_ct_F77 FLIBS CXXCPP FPP EGREP POW_LIB LIBOBJS MPILIBS subdirs BABELDIR HYPRE_ARCH HOSTNAME F77FLAGS LINK_CC LINK_CXX HYPRE_INSTALLDIR HYPRE_LIBINSTALL HYPRE_INCINSTALL INCLUDES LIBDIRS LDLIBS LDLIBDIRS HYPRE_LIBSUFFIX MPIINCLUDE MPILIBDIRS MPIFLAGS TIMERDEFS FEILIBS FEILIBDIRS FEIINCLUDE MLI_DIR MLILIBS MLILIBDIRS MLIINCLUDE BLASLIBDIRS BLASLIBS HYPREBLASFILES HYPREBLASHEADERS LAPACKLIBDIRS LAPACKLIBS HYPRELAPACKFILS1 HYPRELAPACKFILS2 HYPRELAPACKFILS3 HYPRELAPACKHEADERS AR LTLIBOBJS'
 ac_subst_files=''
 
 # Initialize some variables set by options.
@@ -1495,61 +1495,6 @@ ac_configure="$SHELL $ac_aux_dir/configure" # This should be Cygnus configure.
 
 
 
-# Make sure we can run config.sub.
-$ac_config_sub sun4 >/dev/null 2>&1 ||
-  { { echo "$as_me:$LINENO: error: cannot run $ac_config_sub" >&5
-echo "$as_me: error: cannot run $ac_config_sub" >&2;}
-   { (exit 1); exit 1; }; }
-
-echo "$as_me:$LINENO: checking build system type" >&5
-echo $ECHO_N "checking build system type... $ECHO_C" >&6
-if test "${ac_cv_build+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
-  ac_cv_build_alias=$build_alias
-test -z "$ac_cv_build_alias" &&
-  ac_cv_build_alias=`$ac_config_guess`
-test -z "$ac_cv_build_alias" &&
-  { { echo "$as_me:$LINENO: error: cannot guess build type; you must specify one" >&5
-echo "$as_me: error: cannot guess build type; you must specify one" >&2;}
-   { (exit 1); exit 1; }; }
-ac_cv_build=`$ac_config_sub $ac_cv_build_alias` ||
-  { { echo "$as_me:$LINENO: error: $ac_config_sub $ac_cv_build_alias failed" >&5
-echo "$as_me: error: $ac_config_sub $ac_cv_build_alias failed" >&2;}
-   { (exit 1); exit 1; }; }
-
-fi
-echo "$as_me:$LINENO: result: $ac_cv_build" >&5
-echo "${ECHO_T}$ac_cv_build" >&6
-build=$ac_cv_build
-build_cpu=`echo $ac_cv_build | sed 's/^\([^-]*\)-\([^-]*\)-\(.*\)$/\1/'`
-build_vendor=`echo $ac_cv_build | sed 's/^\([^-]*\)-\([^-]*\)-\(.*\)$/\2/'`
-build_os=`echo $ac_cv_build | sed 's/^\([^-]*\)-\([^-]*\)-\(.*\)$/\3/'`
-
-
-echo "$as_me:$LINENO: checking host system type" >&5
-echo $ECHO_N "checking host system type... $ECHO_C" >&6
-if test "${ac_cv_host+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
-  ac_cv_host_alias=$host_alias
-test -z "$ac_cv_host_alias" &&
-  ac_cv_host_alias=$ac_cv_build_alias
-ac_cv_host=`$ac_config_sub $ac_cv_host_alias` ||
-  { { echo "$as_me:$LINENO: error: $ac_config_sub $ac_cv_host_alias failed" >&5
-echo "$as_me: error: $ac_config_sub $ac_cv_host_alias failed" >&2;}
-   { (exit 1); exit 1; }; }
-
-fi
-echo "$as_me:$LINENO: result: $ac_cv_host" >&5
-echo "${ECHO_T}$ac_cv_host" >&6
-host=$ac_cv_host
-host_cpu=`echo $ac_cv_host | sed 's/^\([^-]*\)-\([^-]*\)-\(.*\)$/\1/'`
-host_vendor=`echo $ac_cv_host | sed 's/^\([^-]*\)-\([^-]*\)-\(.*\)$/\2/'`
-host_os=`echo $ac_cv_host | sed 's/^\([^-]*\)-\([^-]*\)-\(.*\)$/\3/'`
-
-
-
 
 
 
@@ -1617,6 +1562,73 @@ PACKAGE_VERSION=
 PACKAGE_STRING=
 PACKAGE_TARNAME=
 PACKAGE_BUGREPORT=
+
+if test "x$build_alias" = "x"
+then
+   # Make sure we can run config.sub.
+$ac_config_sub sun4 >/dev/null 2>&1 ||
+  { { echo "$as_me:$LINENO: error: cannot run $ac_config_sub" >&5
+echo "$as_me: error: cannot run $ac_config_sub" >&2;}
+   { (exit 1); exit 1; }; }
+
+echo "$as_me:$LINENO: checking build system type" >&5
+echo $ECHO_N "checking build system type... $ECHO_C" >&6
+if test "${ac_cv_build+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  ac_cv_build_alias=$build_alias
+test -z "$ac_cv_build_alias" &&
+  ac_cv_build_alias=`$ac_config_guess`
+test -z "$ac_cv_build_alias" &&
+  { { echo "$as_me:$LINENO: error: cannot guess build type; you must specify one" >&5
+echo "$as_me: error: cannot guess build type; you must specify one" >&2;}
+   { (exit 1); exit 1; }; }
+ac_cv_build=`$ac_config_sub $ac_cv_build_alias` ||
+  { { echo "$as_me:$LINENO: error: $ac_config_sub $ac_cv_build_alias failed" >&5
+echo "$as_me: error: $ac_config_sub $ac_cv_build_alias failed" >&2;}
+   { (exit 1); exit 1; }; }
+
+fi
+echo "$as_me:$LINENO: result: $ac_cv_build" >&5
+echo "${ECHO_T}$ac_cv_build" >&6
+build=$ac_cv_build
+build_cpu=`echo $ac_cv_build | sed 's/^\([^-]*\)-\([^-]*\)-\(.*\)$/\1/'`
+build_vendor=`echo $ac_cv_build | sed 's/^\([^-]*\)-\([^-]*\)-\(.*\)$/\2/'`
+build_os=`echo $ac_cv_build | sed 's/^\([^-]*\)-\([^-]*\)-\(.*\)$/\3/'`
+
+
+fi
+
+if test "x$host_alias" = "x"
+then
+   echo "$as_me:$LINENO: checking host system type" >&5
+echo $ECHO_N "checking host system type... $ECHO_C" >&6
+if test "${ac_cv_host+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  ac_cv_host_alias=$host_alias
+test -z "$ac_cv_host_alias" &&
+  ac_cv_host_alias=$ac_cv_build_alias
+ac_cv_host=`$ac_config_sub $ac_cv_host_alias` ||
+  { { echo "$as_me:$LINENO: error: $ac_config_sub $ac_cv_host_alias failed" >&5
+echo "$as_me: error: $ac_config_sub $ac_cv_host_alias failed" >&2;}
+   { (exit 1); exit 1; }; }
+
+fi
+echo "$as_me:$LINENO: result: $ac_cv_host" >&5
+echo "${ECHO_T}$ac_cv_host" >&6
+host=$ac_cv_host
+host_cpu=`echo $ac_cv_host | sed 's/^\([^-]*\)-\([^-]*\)-\(.*\)$/\1/'`
+host_vendor=`echo $ac_cv_host | sed 's/^\([^-]*\)-\([^-]*\)-\(.*\)$/\2/'`
+host_os=`echo $ac_cv_host | sed 's/^\([^-]*\)-\([^-]*\)-\(.*\)$/\3/'`
+
+
+fi
+
+if test "x$target_alias" = "x"
+then
+   target_alias=$host_alias
+fi
 
 # Check whether --enable-debug or --disable-debug was given.
 if test "${enable_debug+set}" = set; then
@@ -5184,7 +5196,7 @@ fi
 
 
 # Provide some information about the compiler.
-echo "$as_me:5187:" \
+echo "$as_me:5199:" \
      "checking for Fortran 77 compiler version" >&5
 ac_compiler=`set X $ac_compile; echo $2`
 { (eval echo "$as_me:$LINENO: \"$ac_compiler --version </dev/null >&5\"") >&5
@@ -5380,7 +5392,7 @@ _ACEOF
 # flags.
 ac_save_FFLAGS=$FFLAGS
 FFLAGS="$FFLAGS $ac_verb"
-(eval echo $as_me:5383: \"$ac_link\") >&5
+(eval echo $as_me:5395: \"$ac_link\") >&5
 ac_f77_v_output=`eval $ac_link 5>&1 2>&1 | grep -v 'Driving:'`
 echo "$ac_f77_v_output" >&5
 FFLAGS=$ac_save_FFLAGS
@@ -5458,7 +5470,7 @@ _ACEOF
 # flags.
 ac_save_FFLAGS=$FFLAGS
 FFLAGS="$FFLAGS $ac_cv_prog_f77_v"
-(eval echo $as_me:5461: \"$ac_link\") >&5
+(eval echo $as_me:5473: \"$ac_link\") >&5
 ac_f77_v_output=`eval $ac_link 5>&1 2>&1 | grep -v 'Driving:'`
 echo "$ac_f77_v_output" >&5
 FFLAGS=$ac_save_FFLAGS
@@ -9356,108 +9368,121 @@ HYPRE_LIBINSTALL="${libdir}"
 HYPRE_INCINSTALL="${includedir}"
 
 
-   echo "$as_me:$LINENO: checking the hostname" >&5
-echo $ECHO_N "checking the hostname... $ECHO_C" >&6
-   casc_hostname=hostname
-   HOSTNAME="`$casc_hostname`"
-
-   if test -z "$HOSTNAME"
+   if test $host_alias = $build_alias
    then
+
+      echo "$as_me:$LINENO: checking the hostname" >&5
+echo $ECHO_N "checking the hostname... $ECHO_C" >&6
+      casc_hostname=hostname
+      HOSTNAME="`$casc_hostname`"
+
+            if test -z "$HOSTNAME"
+      then
          HOSTNAME=unknown
-      { echo "$as_me:$LINENO: WARNING: hostname is unknown" >&5
+         { echo "$as_me:$LINENO: WARNING: hostname is unknown" >&5
 echo "$as_me: WARNING: hostname is unknown" >&2;}
-   else
-      echo "$as_me:$LINENO: result: $HOSTNAME" >&5
-echo "${ECHO_T}$HOSTNAME" >&6
-   fi
-
-
-   echo "$as_me:$LINENO: checking the architecture" >&5
-echo $ECHO_N "checking the architecture... $ECHO_C" >&6
-
-         if test -z "$ARCH"; then
-
-                        casc_tarch_dir=
-      for casc_dir in $srcdir $srcdir/.. $srcdir/../.. $srcdir/config; do
-         if test -f $casc_dir/tarch; then
-            casc_tarch_dir=$casc_dir
-            casc_tarch=$casc_tarch_dir/tarch
-            break
-         fi
-      done
-
-                  if test -z "$casc_tarch_dir"; then
-         { echo "$as_me:$LINENO: WARNING: cannot find tarch" >&5
-echo "$as_me: WARNING: cannot find tarch" >&2;}
-         HYPRE_ARCH=$HOSTTYPE
       else
-         HYPRE_ARCH="`$casc_tarch`"
-
-         if test -z "$HYPRE_ARCH" || test "$HYPRE_ARCH" = "unknown"; then
-            HYPRE_ARCH=$HOSTTYPE
-         fi
+         echo "$as_me:$LINENO: result: $HOSTNAME" >&5
+echo "${ECHO_T}$HOSTNAME" >&6
       fi
 
-            if test -z "$HYPRE_ARCH"; then
-         HYPRE_ARCH=unknown
-         { echo "$as_me:$LINENO: WARNING: architecture is unknown" >&5
+      echo "$as_me:$LINENO: checking the architecture" >&5
+echo $ECHO_N "checking the architecture... $ECHO_C" >&6
+
+                  if test -z "$ARCH"; then
+
+                                    casc_tarch_dir=
+         for casc_dir in $srcdir $srcdir/.. $srcdir/../.. $srcdir/config; do
+            if test -f $casc_dir/tarch; then
+               casc_tarch_dir=$casc_dir
+               casc_tarch=$casc_tarch_dir/tarch
+               break
+            fi
+         done
+
+                           if test -z "$casc_tarch_dir"; then
+            { echo "$as_me:$LINENO: WARNING: cannot find tarch" >&5
+echo "$as_me: WARNING: cannot find tarch" >&2;}
+            HYPRE_ARCH=$HOSTTYPE
+         else
+            HYPRE_ARCH="`$casc_tarch`"
+
+            if test -z "$HYPRE_ARCH" || test "$HYPRE_ARCH" = "unknown"; then
+               HYPRE_ARCH=$HOSTTYPE
+            fi
+         fi
+
+                  if test -z "$HYPRE_ARCH"; then
+            HYPRE_ARCH=unknown
+            { echo "$as_me:$LINENO: WARNING: architecture is unknown" >&5
 echo "$as_me: WARNING: architecture is unknown" >&2;}
+         else
+            echo "$as_me:$LINENO: result: $HYPRE_ARCH" >&5
+echo "${ECHO_T}$HYPRE_ARCH" >&6
+         fi
       else
+         HYPRE_ARCH = $ARCH
          echo "$as_me:$LINENO: result: $HYPRE_ARCH" >&5
 echo "${ECHO_T}$HYPRE_ARCH" >&6
       fi
+
    else
-      HYPRE_ARCH = $ARCH
-      echo "$as_me:$LINENO: result: $HYPRE_ARCH" >&5
-echo "${ECHO_T}$HYPRE_ARCH" >&6
+      HYPRE_ARCH=$host_alias
+      HOSTNAME=unknown
    fi
-
-
-
-
-
-case $HYPRE_ARCH in
-  sun* | solaris*)
-       cat >>confdefs.h <<\_ACEOF
-#define HYPRE_SOLARIS 1
-_ACEOF
-
-       ;;
-  LINUX | Linux)
-       case $HOSTNAME in
-          mcr* | thunder* | ilx*)
-            cat >>confdefs.h <<\_ACEOF
-#define HYPRE_LINUX_CHAOS2 1
-_ACEOF
-
-            ;;
-          *)
-            cat >>confdefs.h <<\_ACEOF
-#define HYPRE_LINUX 1
-_ACEOF
-
-            ;;
-       esac
-       ;;
-  alpha)
-       cat >>confdefs.h <<\_ACEOF
+   case $HYPRE_ARCH in
+      alpha)
+         cat >>confdefs.h <<\_ACEOF
 #define HYPRE_ALPHA 1
 _ACEOF
 
-       ;;
-  rs6000)
-       cat >>confdefs.h <<\_ACEOF
+         ;;
+      sun* | solaris*)
+         cat >>confdefs.h <<\_ACEOF
+#define HYPRE_SOLARIS 1
+_ACEOF
+
+         ;;
+      hp* | HP*)
+         cat >>confdefs.h <<\_ACEOF
+#define HYPRE_HPPA 1
+_ACEOF
+
+         ;;
+      rs6000 | RS6000 | *bgl* | *BGL* | ppc64*)
+         cat >>confdefs.h <<\_ACEOF
 #define HYPRE_RS6000 1
 _ACEOF
 
-       ;;
-  IRIX64)
-       cat >>confdefs.h <<\_ACEOF
+         ;;
+      IRIX64)
+         cat >>confdefs.h <<\_ACEOF
 #define HYPRE_IRIX64 1
 _ACEOF
 
-       ;;
-esac
+         ;;
+      Linux | linux | LINUX)
+         case $HOSTNAME in
+            mcr* | thunder* | ilx*)
+               cat >>confdefs.h <<\_ACEOF
+#define HYPRE_LINUX_CHAOS2 1
+_ACEOF
+
+               ;;
+            *)
+               cat >>confdefs.h <<\_ACEOF
+#define HYPRE_LINUX 1
+_ACEOF
+
+               ;;
+         esac
+         ;;
+   esac
+
+
+
+
+
 
 
 
@@ -10137,6 +10162,12 @@ s,@ECHO_C@,$ECHO_C,;t t
 s,@ECHO_N@,$ECHO_N,;t t
 s,@ECHO_T@,$ECHO_T,;t t
 s,@LIBS@,$LIBS,;t t
+s,@HYPRE_PACKAGE_DATETIME@,$HYPRE_PACKAGE_DATETIME,;t t
+s,@HYPRE_TOP_SRCDIR@,$HYPRE_TOP_SRCDIR,;t t
+s,@HYPRE_RELEASEVERSION@,$HYPRE_RELEASEVERSION,;t t
+s,@HYPRE_RELEASEDATE@,$HYPRE_RELEASEDATE,;t t
+s,@HYPRE_RELEASETIME@,$HYPRE_RELEASETIME,;t t
+s,@HYPRE_RELEASEDATETIME@,$HYPRE_RELEASEDATETIME,;t t
 s,@build@,$build,;t t
 s,@build_cpu@,$build_cpu,;t t
 s,@build_vendor@,$build_vendor,;t t
@@ -10145,12 +10176,6 @@ s,@host@,$host,;t t
 s,@host_cpu@,$host_cpu,;t t
 s,@host_vendor@,$host_vendor,;t t
 s,@host_os@,$host_os,;t t
-s,@HYPRE_PACKAGE_DATETIME@,$HYPRE_PACKAGE_DATETIME,;t t
-s,@HYPRE_TOP_SRCDIR@,$HYPRE_TOP_SRCDIR,;t t
-s,@HYPRE_RELEASEVERSION@,$HYPRE_RELEASEVERSION,;t t
-s,@HYPRE_RELEASEDATE@,$HYPRE_RELEASEDATE,;t t
-s,@HYPRE_RELEASETIME@,$HYPRE_RELEASETIME,;t t
-s,@HYPRE_RELEASEDATETIME@,$HYPRE_RELEASEDATETIME,;t t
 s,@CC@,$CC,;t t
 s,@CXX@,$CXX,;t t
 s,@F77@,$F77,;t t
