@@ -9484,6 +9484,9 @@ _ACEOF
 
 
 
+case $HOSTNAME in
+   up* | uP*) LDFLAGS="${LDFLAGS} -blpdata"
+esac
 
 
 

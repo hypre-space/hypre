@@ -871,14 +871,17 @@ dnl *********************************************************************
 HYPRE_SET_ARCH
 
 dnl *********************************************************************
-dnl * AC_SUBST performs the variable substitutions
-dnl * Some macros call AC_SUBST for some variables, but it does no damage
-dnl * to call it again.
+dnl * Set large page load option that is needed by the purple platforms.
 dnl *********************************************************************
-dnl ********************************************************************
-dnl * The following macros are exported and may be used in Makefile.in's
-dnl ********************************************************************
+case $HOSTNAME in
+   up* | uP*) LDFLAGS="${LDFLAGS} -blpdata"
+esac
 
+dnl *********************************************************************
+dnl * AC_SUBST performs the variable substitutions so they may be used in
+dnl * the Makefile.in files. Some macros call AC_SUBST for some of these 
+dnl * variables, but it does no damage to call it again.
+dnl *********************************************************************
 
 dnl *********************************************************************
 dnl * compilers and load flags
