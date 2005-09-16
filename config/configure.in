@@ -49,11 +49,6 @@ AC_CONFIG_AUX_DIR(config)
 AC_CONFIG_SRCDIR([HYPRE.h])
 
 dnl *********************************************************************
-dnl * Determine HOST type
-dnl *********************************************************************
-AC_CANONICAL_HOST
-
-dnl *********************************************************************
 dnl * Change default prefix from /usr/local to ./hypre
 dnl *********************************************************************
 AC_PREFIX_DEFAULT("HYPRE_TOP_SRC_DIR/hypre")
@@ -98,6 +93,24 @@ PACKAGE_VERSION=
 PACKAGE_STRING=
 PACKAGE_TARNAME=
 PACKAGE_BUGREPORT=
+
+dnl *********************************************************************
+dnl * Determine BUILD, HOST, and TARGET types
+dnl *********************************************************************
+if test "x$build_alias" = "x"
+then
+   AC_CANONICAL_BUILD
+fi
+
+if test "x$host_alias" = "x"
+then
+   AC_CANONICAL_HOST
+fi
+
+if test "x$target_alias" = "x"
+then
+   target_alias=$host_alias
+fi
 
 dnl *********************************************************************
 dnl * Define optional features
@@ -853,33 +866,9 @@ HYPRE_LIBINSTALL="${libdir}"
 HYPRE_INCINSTALL="${includedir}"
 
 dnl *********************************************************************
-dnl * Define machine architectures
+dnl * Define machine architecture
 dnl *********************************************************************
-HYPRE_GUESS_ARCH
-case $HYPRE_ARCH in
-  sun* | solaris*)
-       AC_DEFINE(HYPRE_SOLARIS)
-       ;;
-  LINUX | Linux)
-       case $HOSTNAME in
-          mcr* | thunder* | ilx*)
-            AC_DEFINE(HYPRE_LINUX_CHAOS2)
-            ;;
-          *)
-            AC_DEFINE(HYPRE_LINUX)
-            ;;
-       esac
-       ;;
-  alpha)
-       AC_DEFINE(HYPRE_ALPHA)
-       ;;
-  rs6000)
-       AC_DEFINE(HYPRE_RS6000)
-       ;;
-  IRIX64)
-       AC_DEFINE(HYPRE_IRIX64)
-       ;;
-esac
+HYPRE_SET_ARCH
 
 dnl *********************************************************************
 dnl * AC_SUBST performs the variable substitutions
