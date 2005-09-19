@@ -68,7 +68,6 @@ main( int   argc,
    /*double              norm;*/
    double tmp;
    double              final_res_norm;
-   sidl_BaseInterface  bHYPRE_object;
 
    HYPRE_ParCSRMatrix    parcsr_A;
    bHYPRE_IJParCSRMatrix  bHYPRE_parcsr_A;
