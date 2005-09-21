@@ -120,7 +120,7 @@ parse_arguments () {
 # The getopts follows posix.2, if sh is a posix shell (as required by posix.2)
 # then getopts is a built-in.
 # If sh is a non posix.2 or a early Bourne shell (that probably implement the
-# obsolute getopt) then getopts(1) will be used.
+# obsolete getopt) then getopts(1) will be used.
 #
   while getopts :a:b:cDde:fhi:l:mno:p:r:sv: arg
   do
