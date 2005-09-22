@@ -9,8 +9,7 @@
 #EHEADER***********************************************************************
 
 #=============================================================================
-# Create a few temporary variables, and assign default values to any
-# unexported environment variables.
+#    Initialize variables
 #=============================================================================
 initialize_variables ()
 {
@@ -24,18 +23,28 @@ initialize_variables ()
   MailOpt=""
   MailCmd="no"
   DEBUG_MODE="no"
-  Skip=0
   Build=1
   Run=2
   if [ -z "$MAKE" -o "$MAKE" = "" ] ; then
     MAKE="make -i"
   fi
 
+  HYPRE_DEFAULT_EMAIL="hill66@llnl.gov"
+  HYPRE_ALL_EMAIL="abaker@llnl.gov\
+                   rfalgout@llnl.gov\
+                   painter@llnl.gov\
+                   hill66@llnl.gov\
+                   lee123@llnl.gov\
+                   kolev1@llnl.gov\
+                   yang11@llnl.gov\
+                   chtong@llnl.gov\
+                   vhenson@llnl.gov"
+
 #
-# Assume that this script (autotest_test) is executed from the autotest script,
-# which will cd to the directory ${HYPRE_AUTOTEST_DIR}.  This script can be run
-# independently from a directory one level higher than "linear_solvers".
-#
+#    Set current directory if this script (autotest_test) is not being run by the 
+#    autotest script, which will cd to the directory ${HYPRE_AUTOTEST_DIR}.  
+#    This script can be run independently from a directory one level higher 
+#    than "linear_solvers".
   if [ -z "${HYPRE_AUTOTEST_DIR}" -o "${HYPRE_AUTOTEST_DIR}" = "" ] ; then
      HYPRE_AUTOTEST_DIR=`pwd`
      if [ -d ${HYPRE_AUTOTEST_DIR}/linear_solvers/test ] ; then
@@ -48,14 +57,14 @@ initialize_variables ()
   else			# assume we're executing from autotest
      if [ ! -d ${HYPRE_AUTOTEST_DIR} ] ; then
         if [ ! -d ./linear_solvers ] ; then
-           echo "$0: no HYPRE_AUTOTEST_DIR environment variable"
+           echo "$0: HYPRE_AUTOTEST_DIR is not defined"
            exit 2
         fi
      fi
   fi
+ 
 #
 # Define directory that contains the source codes
-#
   if [ -d ${HYPRE_AUTOTEST_DIR}/linear_solvers/test ] ; then
     SRC=linear_solvers
   fi
@@ -63,39 +72,53 @@ initialize_variables ()
   if [ -d ${HYPRE_AUTOTEST_DIR}/src/test ] ; then
     SRC=src
   fi
+
 #
 # Set standard directories
-#
   StdBuildDir=${HYPRE_AUTOTEST_DIR}/${SRC}
   StdTestDir=${HYPRE_AUTOTEST_DIR}/${SRC}/test
+
 #
-# Define HYPRE_ARCH
-#
-  if [ -r $StdTestDir/AUTOTEST/hypre_arch.sh ] ; then
-     . $StdTestDir/AUTOTEST/hypre_arch.sh
-  elif [ -r ./hypre_arch.sh ] ; then
-     . ./hypre_arch.sh
+# Define architecture of current platform
+  if [ -z "$HYPRE_ARCH" ]
+  then
+     if [ -f "/bin/uname" ] 
+     then
+        HYPRE_OS="`/bin/uname -s`"
+     fi
+
+     case "$HYPRE_OS" in
+	OSF1)
+	    HYPRE_ARCH="dec";;
+	AIX)
+	    HYPRE_ARCH="blue";;
+	"TFLOPS O/S")
+	    HYPRE_ARCH="red";;
+	Linux)
+	    HYPRE_ARCH="linux";;
+	IRIX64)
+	    HYPRE_ARCH="sgi";;
+     esac
   fi
+
 #
 # Set some architecture specific configurations
-#
   if [ -r $StdTestDir/AUTOTEST/env.${HYPRE_ARCH} ] ; then
      . $StdTestDir/AUTOTEST/env.${HYPRE_ARCH}
   elif [ -r ./env.${HYPRE_ARCH} ] ; then
      . ./env.${HYPRE_ARCH}
   fi
+
 #
 # Need the nopoe script for AIX platforms to force single task
-#
   if [ "$HYPRE_ARCH" = "blue" ] ; then
      CONFIGURE="./nopoe ./configure"
   else
      CONFIGURE="./configure"
   fi
+
 #
-# If NOT started by autotest (hence no HYPRE_*_EMAIL variables
-# defined) default mail to user only.
-#
+# Define mail program to be used
   if [ -z "$HYPRE_MAIL" -o "$HYPRE_MAIL" = "" ] ; then
      if [ "$HYPRE_ARCH" = "linux" ] ; then
         [ -x /usr/bin/Mail ] && HYPRE_MAIL=/usr/bin/Mail
@@ -106,33 +129,30 @@ initialize_variables ()
         [ -x /usr/sbin/mailx ] && HYPRE_MAIL=/usr/sbin/mailx
      fi
   fi
-  if [ -z "${HYPRE_DEFAULT_EMAIL}" -o "${HYPRE_DEFAULT_EMAIL}" = "" ] ; then
-     HYPRE_DEFAULT_EMAIL=hill66@llnl.gov
-  fi
 }
 
 #=============================================================================
 # Function for parsing of input arguments
-#=============================================================================
-
-parse_arguments () { 
 #
 # The getopts follows posix.2, if sh is a posix shell (as required by posix.2)
 # then getopts is a built-in.
 # If sh is a non posix.2 or a early Bourne shell (that probably implement the
 # obsolete getopt) then getopts(1) will be used.
 #
+#=============================================================================
+
+parse_arguments () { 
   while getopts :a:b:cDde:fhi:l:mno:p:r:sv: arg
   do
     argcur=$arg
     case $arg in
       a) confbuildtest $OPTARG  " "             "default";;
       b) confbuildtest $OPTARG  "--with-babel"  "babel";;
-      c) build $Build "all++"   "all++"         "test";;
-      D) DEBUG_MODE="yes";;
-      d) build $Build "all"     "docs"          "docs";;
+      c) build "all++"   "all++"         "test";;
+      D) DEBUG_MODE="yes"; set -xv;;
+      d) build "all"     "docs"          "docs";;
       e) confbuildtest $OPTARG  "--enable-debug" "debug";;
-      f) build $Build "all77"   "all77"         "test";;
+      f) build "all77"   "all77"         "test";;
       h) usage; exit 2;;
       i) confbuildtest $OPTARG  "--with-insure" "insure";;
      +i) confbuildtest $OPTARG  "--with-insure-to-file" "insure";;
@@ -141,7 +161,6 @@ parse_arguments () {
      +m) HYPRE_SEND_MAIL="yes"; MailOpt="-mail"; MailCmd="yes";;
       n) confbuildtest $Build   "--without-MPI" "no_mpi";;
       o) confbuildtest $OPTARG  "--with-openmp" "openmp";;
-      p) HYPRE_DST_DIR=$OPTARG;;
       r) HYPRE_RUN_MACHINE=$OPTARG;;
       s) confbuildtest $Build   "--with-strict-checking" "strict_checking";;
       v) HYPRE_MESSAGE=$OPTARG;;
@@ -157,13 +176,12 @@ parse_arguments () {
 #=============================================================================
 usage () {
   printf "Usage: %s [-cDdfhmns] [-a opt] [-b opt] [-e opt]\n" $0
-  printf "       [-i opt] [-o opt] [-p path] [-q opt] [-r host] [-v text]\n"
+  printf "          [-i opt] [-o opt] [-r host] [-v text]\n"
   printf "\n"
-  printf "Hypre autotest (Note: all options are sequentially executed in\n"
-  printf " left-to-right order as entered on the command line).\n"
+  printf "All options are sequentially executed in left-to-right order as\n"
+  printf "entered on the command line.\n"
   printf "\n"
-  printf "Options for the "opt" argument are "0", "1", or "2" where:\n"
-  printf "  0=skip (ignore this test)\n"
+  printf "Options for the "opt" argument are "1" or "2" where:\n"
   printf "  1=configure and make\n"
   printf "  2=configure, make and execute.\n"
   printf "\n"
@@ -181,7 +199,6 @@ usage () {
   printf "%s\n" "+m       Mail+; mail error logs to developers."
   printf "%s\n" "-n       NoMPI; configure --without-MPI."
   printf "%s\n" "-o opt   openMP; configure --with-openmp."
-  printf "%s\n" "-p path  Path to test directory (copied from local test)."
   printf "%s\n" "-r host  Remote; remote exection is performed on "host"."
   printf "%s\n" "-s       Strict; configure --with-strict-checking."
   printf "%s\n" "-v text  Additional text to prefix to email subject line."
@@ -192,9 +209,6 @@ usage () {
 #=============================================================================
 
 process_filter () {
-  if [ "$DEBUG_MODE" = "yes" ] ; then
-     set -xv
-  fi
   ErrorFile=$1
   shift
   if (egrep "$@" $ErrorFile >/dev/null) ; then
@@ -207,9 +221,6 @@ process_filter () {
 
 
 apply_error_filters () {
-  if [ "$DEBUG_MODE" = "yes" ] ; then
-    set -xv
-  fi
   ErrorFile=$1
   if [ -s "${ErrorFile}" ] ; then
     HOST=`hostname`
@@ -304,12 +315,7 @@ mail_summary () {
   printf "Compile machine:    %s\n" $HYPRE_COMPILE_MACHINE >> $SUMFILE
   printf "Execute machine:    %s\n" $HYPRE_RUN_MACHINE >> $SUMFILE
   printf "Operating system:   `uname -a`\n" >> $SUMFILE
-  if [ -n "${HYPRE_DST_DIR}" ] ; then
-     printf "Local Directory:    %s\n" $HYPRE_AUTOTEST_DIR >> $SUMFILE
-     printf "Directory:          %s\n" $HYPRE_DST_DIR >> $SUMFILE
-  else
-     printf "Directory:          %s\n" $HYPRE_AUTOTEST_DIR >> $SUMFILE
-  fi
+  printf "Directory:          %s\n" $HYPRE_AUTOTEST_DIR >> $SUMFILE
   printf "%s\n" "--------------------------------------------" >> $SUMFILE
   printf "Compile summary: Status: Warnings: Errors\n" >> $SUMFILE
 #
@@ -474,12 +480,9 @@ mail_summary () {
   printf "%s\n" "--------------------------------------------" >> $SUMFILE
 
   chgrp hypre $SUMFILE
-  if [ -d "${HYPRE_DST_DIR}" ] ; then
-    cp -p $SUMFILE $HYPRE_DST_DIR 
-  fi
 #
 #               mail summaries
-  MAIL_HEADER="`uname -n` `uname -s`:`uname -r`.`uname -v`"
+  MAIL_HEADER="`uname -n` `uname -s`"
   if [ "$AutotestFailureCount" = "0" ] ; then
     SUBJECT="Autotest NO Errors ($MAIL_HEADER)"
   else
@@ -567,20 +570,6 @@ cleanup () {
 
 
 #=============================================================================
-# General purpose make function /w strict_checking error output redirection
-#=============================================================================
-
-makeit ()
-{
-   MakeStr=$1	 MessageStr=$2
-   MailGroup=$3
-   $MAKE $MakeStr 1>> ${Hdr}.${MessageStr}.${MakeStr}.log \
-        2>> ${Hdr}.${MessageStr}.${MakeStr}.err
-   echo "$MailGroup" > ${Hdr}.${MessageStr}.${MakeStr}.err.email
-}
-
-
-#=============================================================================
 # General purpose function for configure, make and execute
 #=============================================================================
 
@@ -590,115 +579,114 @@ confbuildtest ()
 
 #
 # Set directory for storing built files
-#
    HYPRE_BUILD_DIR=${HYPRE_AUTOTEST_DIR}/${SRC}/hypre
    export HYPRE_BUILD_DIR
 
 #
-# Configure and Make Section
-#
-   if [ ${BuildOpt} -ne $Skip ]
-   then
-      seconds; TIME=$SECS
-      echo "Autotest starting configure and make of $MessageStr"
+# Configure Section
+   seconds; TIME=$SECS
+   echo "Autotest starting configure of $MessageStr"
 
-      if [ ${BuildOpt} -eq $Build -o ${BuildOpt} -eq $Run ]
-      then
-         cd $StdBuildDir
-         [ -f config.cache ] && rm config.cache
-         if [ "$ConfigOption" != " " ]
-         then
-               if [ "$ConfigOption" = "--with-babel" ]            ## need to disable Fortran90
-               then                                               ## ONLY when building Babel
-                  ExtraConfigOption="--disable-fortran90"
-                  $CONFIGURE "$ConfigOption" "$ExtraConfigOption"  \
+   cd $StdBuildDir
+   [ -f config.cache ] && rm config.cache
+
+   if [ "$ConfigOption" = " " ]
+   then
+      $CONFIGURE 1> ${Hdr}.${MessageStr}.configure.log \
+                 2> ${Hdr}.${MessageStr}.configure.err
+   elif [ "$ConfigOption" = "--with-babel" ]          ## need to disable Fortran90
+   then                                               ## ONLY when building Babel
+      ExtraConfigOption="--disable-fortran90"
+      $CONFIGURE "$ConfigOption" "$ExtraConfigOption"  \
                               1> ${Hdr}.${MessageStr}.configure.log \
 	                      2> ${Hdr}.${MessageStr}.configure.err
-               else
-                  $CONFIGURE "$ConfigOption" 1> ${Hdr}.${MessageStr}.configure.log \
-	                                     2> ${Hdr}.${MessageStr}.configure.err
-               fi
-         fi
+   else
+      $CONFIGURE "$ConfigOption" 1> ${Hdr}.${MessageStr}.configure.log \
+                                 2> ${Hdr}.${MessageStr}.configure.err
+   fi
 
-         if [ "$ConfigOption" = " " ]
-         then
-            $CONFIGURE 1> ${Hdr}.${MessageStr}.configure.log \
-                       2> ${Hdr}.${MessageStr}.configure.err
-         fi
-         echo "$HYPRE_CONFIGURE_EMAIL" > ${Hdr}.${MessageStr}.configure.err.email
-
-         if [ "$MessageStr" != "babel" ]
-         then
-            $MAKE clean
-         fi
-
-         makeit "all" $MessageStr "$HYPRE_DEFAULT_EMAIL"
-      fi
 #
-# Run test drivers section
+# Make Section
+# Remove all *.o files before building for current options
+   echo "Autotest starting make of $MessageStr"
+   $MAKE clean
+   $MAKE all 1>> ${Hdr}.${MessageStr}.all.log \
+             2>> ${Hdr}.${MessageStr}.all.err
+
 #
+# Run Section
+#    If the run option is set; cd to the test sub-directory; build the driver codes
+#    then execute the test cases on the specified platform
+   if [ ${BuildOpt} -eq $Run ]
+   then
       echo "Autotest starting execution of $MessageStr"
       cd ${HYPRE_AUTOTEST_DIR}/${SRC}/test
-      makeit "all" $MessageStr "$HYPRE_DEFAULT_EMAIL"
+      $MAKE all 1>> ${Hdr}.${MessageStr}.all.log \
+                2>> ${Hdr}.${MessageStr}.all.err
 
-      if [ ${BuildOpt} -eq $Run ]
+      if [ -z "${HYPRE_RUN_MACHINE}" -o "${HYPRE_RUN_MACHINE}" = "" ]
       then
-         if [ -z "${HYPRE_RUN_MACHINE}" -o "${HYPRE_RUN_MACHINE}" = "" ]
+         if [ "$DEBUG_MODE" = "yes" ]
          then
-            if [ "$DEBUG_MODE" = "yes" ]
-            then
-               ./runtest.sh -debug $MailOpt $STD_TEST_CASES
-            else
-               ./runtest.sh $MailOpt $STD_TEST_CASES
-            fi
+            ./runtest.sh -debug $MailOpt $STD_TEST_CASES
          else
-            ssh ${HYPRE_RUN_MACHINE} "\
-            (\
-             cd ${HYPRE_AUTOTEST_DIR}/${SRC}/test;\
-             [ -r ./AUTOTEST/env.${HYPRE_ARCH} ] && . ./AUTOTEST/env.${HYPRE_ARCH};\
-             if [ "$DEBUG_MODE" = "yes" ]
-             then
-                ./runtest.sh -debug $MailOpt $STD_TEST_CASES \
-             else
-                ./runtest.sh $MailOpt $STD_TEST_CASES \
-             fi
-            )"
+            ./runtest.sh $MailOpt $STD_TEST_CASES
          fi
+      else
+         ssh ${HYPRE_RUN_MACHINE} "\
+         (\
+          cd ${HYPRE_AUTOTEST_DIR}/${SRC}/test;\
+          [ -r ./AUTOTEST/env.${HYPRE_ARCH} ] && . ./AUTOTEST/env.${HYPRE_ARCH};\
+          if [ "$DEBUG_MODE" = "yes" ]
+          then
+             ./runtest.sh -debug $MailOpt $STD_TEST_CASES \
+          else
+             ./runtest.sh $MailOpt $STD_TEST_CASES \
+          fi
+         )"
       fi
-      seconds; TIME=`expr $SECS - $TIME`
-      echo "Autotest finished $MessageStr taking $TIME seconds"
    fi
+   seconds; TIME=`expr $SECS - $TIME`
+   echo "Autotest finished $MessageStr taking $TIME seconds"
 }
  
 
 #=============================================================================
 # General purpose make function
+# Used to ONLY build the files located in the directory defined by the
+# MakeDir argument; clean up temporary files after building.
+# The file config/Makefile.config must be available in order to build; if it 
+# is not available; run configure to generate it before building the requested
+# files.
 #=============================================================================
-
 build () 
 {
-   BuildOpt=$1	 MakeOption=$2	 MessageStr=$3	MakeDir=$4
-   if [ $BuildOpt -ne $Skip ]
+   MakeOpt=$1	 MessageStr=$2	 MakeDir=$3
+
+   seconds; TIME=$SECS
+   echo "Autotest starting make of $MessageStr"
+
+   if [ ! -r $StdBuildDir/config/Makefile.config ]
    then
-      seconds; TIME=$SECS
-      echo "Autotest starting make of $MessageStr"
-      cd $StdBuildDir/$MakeDir
-       $MAKE $MakeOption 1> ${Hdr}.${MessageStr}.log \
-        	         2> ${Hdr}.${MessageStr}.err
-      if [ "$MakeDir" = "docs" ]   ## clean up temporary files used in building docs
-      then                                             
-         $MAKE clean
-      fi
-      echo "$HYPRE_ALL_EMAIL" > ${Hdr}.${MessageStr}.err.email
-      seconds; TIME=`expr $SECS - $TIME`
-      echo "Autotest finished $MessageStr taking $TIME seconds"
+      cd $StdBuildDir
+      $CONFIGURE 1> ${Hdr}.${MessageStr}.configure.log \
+                 2> ${Hdr}.${MessageStr}.configure.err
    fi
+
+   cd $StdBuildDir/$MakeDir
+   $MAKE $MakeOpt 1> ${Hdr}.${MessageStr}.log \
+        	  2> ${Hdr}.${MessageStr}.err
+
+   $MAKE clean
+
+   seconds; TIME=`expr $SECS - $TIME`
+   echo "Autotest finished $MessageStr taking $TIME seconds"
 }
+
 
 #==============================================================================
 # return the seconds since midnight in the variable SECS
 #==============================================================================
-
 seconds ()
 {
    HOUR=`date '+%H'`
@@ -710,10 +698,10 @@ seconds ()
    SECS=`expr $SECS + $HOUR`
 }
 
+
 #==============================================================================
 # This script is the implementation script used to regression test hypre.
 #==============================================================================
-
 initialize_variables
 parse_arguments $*
 mail_errors
