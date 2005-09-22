@@ -127,7 +127,7 @@ hypre_PFMGDestroy( void *pfmg_vdata )
 }
 
 /*--------------------------------------------------------------------------
- * hypre_PFMGSetTol
+ * hypre_PFMGSetTol, hypre_PFMGGetTol
  *--------------------------------------------------------------------------*/
 
 int
@@ -142,8 +142,20 @@ hypre_PFMGSetTol( void   *pfmg_vdata,
    return ierr;
 }
 
+int
+hypre_PFMGGetTol( void   *pfmg_vdata,
+                  double *tol       )
+{
+   hypre_PFMGData *pfmg_data = pfmg_vdata;
+   int             ierr = 0;
+ 
+   *tol = (pfmg_data -> tol);
+ 
+   return ierr;
+}
+
 /*--------------------------------------------------------------------------
- * hypre_PFMGSetMaxIter
+ * hypre_PFMGSetMaxIter, hypre_PFMGGetMaxIter
  *--------------------------------------------------------------------------*/
 
 int
@@ -158,8 +170,20 @@ hypre_PFMGSetMaxIter( void *pfmg_vdata,
    return ierr;
 }
 
+int
+hypre_PFMGGetMaxIter( void *pfmg_vdata,
+                      int * max_iter  )
+{
+   hypre_PFMGData *pfmg_data = pfmg_vdata;
+   int             ierr = 0;
+ 
+   *max_iter = (pfmg_data -> max_iter);
+ 
+   return ierr;
+}
+
 /*--------------------------------------------------------------------------
- * hypre_PFMGSetMaxLevels
+ * hypre_PFMGSetMaxLevels, hypre_PFMGGetMaxLevels
  *--------------------------------------------------------------------------*/
 
 int
@@ -174,8 +198,20 @@ hypre_PFMGSetMaxLevels( void *pfmg_vdata,
    return ierr;
 }
 
+int
+hypre_PFMGGetMaxLevels( void *pfmg_vdata,
+                        int * max_levels  )
+{
+   hypre_PFMGData *pfmg_data = pfmg_vdata;
+   int             ierr = 0;
+ 
+   *max_levels = (pfmg_data -> max_levels);
+ 
+   return ierr;
+}
+
 /*--------------------------------------------------------------------------
- * hypre_PFMGSetRelChange
+ * hypre_PFMGSetRelChange, hypre_PFMGGetRelChange
  *--------------------------------------------------------------------------*/
 
 int
@@ -190,8 +226,20 @@ hypre_PFMGSetRelChange( void *pfmg_vdata,
    return ierr;
 }
 
+int
+hypre_PFMGGetRelChange( void *pfmg_vdata,
+                        int * rel_change  )
+{
+   hypre_PFMGData *pfmg_data = pfmg_vdata;
+   int             ierr = 0;
+ 
+   *rel_change = (pfmg_data -> rel_change);
+ 
+   return ierr;
+}
+
 /*--------------------------------------------------------------------------
- * hypre_PFMGSetZeroGuess
+ * hypre_PFMGSetZeroGuess, hypre_PFMGGetZeroGuess
  *--------------------------------------------------------------------------*/
  
 int
@@ -206,8 +254,20 @@ hypre_PFMGSetZeroGuess( void *pfmg_vdata,
    return ierr;
 }
 
+int
+hypre_PFMGGetZeroGuess( void *pfmg_vdata,
+                        int * zero_guess )
+{
+   hypre_PFMGData *pfmg_data = pfmg_vdata;
+   int             ierr = 0;
+ 
+   *zero_guess = (pfmg_data -> zero_guess);
+ 
+   return ierr;
+}
+
 /*--------------------------------------------------------------------------
- * hypre_PFMGSetRelaxType
+ * hypre_PFMGSetRelaxType, hypre_PFMGGetRelaxType
  *--------------------------------------------------------------------------*/
 
 int
@@ -222,8 +282,20 @@ hypre_PFMGSetRelaxType( void *pfmg_vdata,
    return ierr;
 }
 
+int
+hypre_PFMGGetRelaxType( void *pfmg_vdata,
+                        int * relax_type )
+{
+   hypre_PFMGData *pfmg_data = pfmg_vdata;
+   int             ierr = 0;
+ 
+   *relax_type = (pfmg_data -> relax_type);
+ 
+   return ierr;
+}
+
 /*--------------------------------------------------------------------------
- * hypre_PFMGSetRAPType
+ * hypre_PFMGSetRAPType, hypre_PFMGGetRAPType
  *--------------------------------------------------------------------------*/
 
 int
@@ -238,8 +310,20 @@ hypre_PFMGSetRAPType( void *pfmg_vdata,
    return ierr;
 }
 
+int
+hypre_PFMGGetRAPType( void *pfmg_vdata,
+                      int * rap_type )
+{
+   hypre_PFMGData *pfmg_data = pfmg_vdata;
+   int             ierr = 0;
+ 
+   *rap_type = (pfmg_data -> rap_type);
+ 
+   return ierr;
+}
+
 /*--------------------------------------------------------------------------
- * hypre_PFMGSetNumPreRelax
+ * hypre_PFMGSetNumPreRelax, hypre_PFMGGetNumPreRelax
  *--------------------------------------------------------------------------*/
 
 int
@@ -254,8 +338,20 @@ hypre_PFMGSetNumPreRelax( void *pfmg_vdata,
    return ierr;
 }
 
+int
+hypre_PFMGGetNumPreRelax( void *pfmg_vdata,
+                          int * num_pre_relax )
+{
+   hypre_PFMGData *pfmg_data = pfmg_vdata;
+   int             ierr = 0;
+ 
+   *num_pre_relax = (pfmg_data -> num_pre_relax);
+ 
+   return ierr;
+}
+
 /*--------------------------------------------------------------------------
- * hypre_PFMGSetNumPostRelax
+ * hypre_PFMGSetNumPostRelax, hypre_PFMGGetNumPostRelax
  *--------------------------------------------------------------------------*/
 
 int
@@ -270,8 +366,20 @@ hypre_PFMGSetNumPostRelax( void *pfmg_vdata,
    return ierr;
 }
 
+int
+hypre_PFMGGetNumPostRelax( void *pfmg_vdata,
+                           int * num_post_relax )
+{
+   hypre_PFMGData *pfmg_data = pfmg_vdata;
+   int             ierr = 0;
+ 
+   *num_post_relax = (pfmg_data -> num_post_relax);
+ 
+   return ierr;
+}
+
 /*--------------------------------------------------------------------------
- * hypre_PFMGSetNumSkipRelax
+ * hypre_PFMGSetNumSkipRelax, hypre_PFMGGetNumSkipRelax
  *--------------------------------------------------------------------------*/
 
 int
@@ -282,6 +390,18 @@ hypre_PFMGSetSkipRelax( void *pfmg_vdata,
    int             ierr = 0;
  
    (pfmg_data -> skip_relax) = skip_relax;
+ 
+   return ierr;
+}
+
+int
+hypre_PFMGGetSkipRelax( void *pfmg_vdata,
+                        int *skip_relax )
+{
+   hypre_PFMGData *pfmg_data = pfmg_vdata;
+   int             ierr = 0;
+ 
+   *skip_relax = (pfmg_data -> skip_relax);
  
    return ierr;
 }
@@ -305,7 +425,7 @@ hypre_PFMGSetDxyz( void   *pfmg_vdata,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_PFMGSetLogging
+ * hypre_PFMGSetLogging, hypre_PFMGGetLogging
  *--------------------------------------------------------------------------*/
 
 int
@@ -320,8 +440,20 @@ hypre_PFMGSetLogging( void *pfmg_vdata,
    return ierr;
 }
 
+int
+hypre_PFMGGetLogging( void *pfmg_vdata,
+                      int * logging)
+{
+   hypre_PFMGData *pfmg_data = pfmg_vdata;
+   int             ierr = 0;
+ 
+   *logging = (pfmg_data -> logging);
+ 
+   return ierr;
+}
+
 /*--------------------------------------------------------------------------
- * hypre_PFMGSetPrintLevel
+ * hypre_PFMGSetPrintLevel, hypre_PFMGGetPrintLevel
  *--------------------------------------------------------------------------*/
 
 int
@@ -332,6 +464,18 @@ hypre_PFMGSetPrintLevel( void *pfmg_vdata,
    int             ierr = 0;
  
    (pfmg_data -> print_level) = print_level;
+ 
+   return ierr;
+}
+
+int
+hypre_PFMGGetPrintLevel( void *pfmg_vdata,
+                         int * print_level)
+{
+   hypre_PFMGData *pfmg_data = pfmg_vdata;
+   int             ierr = 0;
+ 
+   *print_level = (pfmg_data -> print_level);
  
    return ierr;
 }

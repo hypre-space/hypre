@@ -184,7 +184,8 @@ HYPRE_ParCSRParaSailsSetParams(HYPRE_Solver solver,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_ParCSRParaSailsSetFilter - Set the filter parameter.
+ * HYPRE_ParCSRParaSailsSetFilter - Set the filter parameter,
+ * HYPRE_ParCSRParaSailsGetFilter
  *--------------------------------------------------------------------------*/
 
 int
@@ -194,6 +195,17 @@ HYPRE_ParCSRParaSailsSetFilter(HYPRE_Solver solver,
    Secret *secret = (Secret *) solver;
 
    secret->filter = filter;
+
+   return 0;
+}
+
+int
+HYPRE_ParCSRParaSailsGetFilter(HYPRE_Solver solver, 
+                               double     * filter  )
+{
+   Secret *secret = (Secret *) solver;
+
+   *filter = secret->filter;
 
    return 0;
 }
@@ -215,7 +227,7 @@ HYPRE_ParCSRParaSailsSetSym(HYPRE_Solver solver,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_ParCSRParaSailsSetLoadbal
+ * HYPRE_ParCSRParaSailsSetLoadbal, HYPRE_ParCSRParaSailsGetLoadbal
  *--------------------------------------------------------------------------*/
 
 int
@@ -225,6 +237,17 @@ HYPRE_ParCSRParaSailsSetLoadbal(HYPRE_Solver solver,
    Secret *secret = (Secret *) solver;
 
    secret->loadbal = loadbal;
+
+   return 0;
+}
+
+int
+HYPRE_ParCSRParaSailsGetLoadbal(HYPRE_Solver solver, 
+                                double     * loadbal )
+{
+   Secret *secret = (Secret *) solver;
+
+   *loadbal = secret->loadbal;
 
    return 0;
 }
@@ -400,6 +423,7 @@ HYPRE_ParaSailsSetParams(HYPRE_Solver solver,
 /*--------------------------------------------------------------------------
  * HYPRE_ParaSailsSetThresh - Set the "thresh" parameter only
  * for a ParaSails object.
+ * HYPRE_ParaSailsGetThresh
  *--------------------------------------------------------------------------*/
 
 int
@@ -413,9 +437,21 @@ HYPRE_ParaSailsSetThresh( HYPRE_Solver solver,
    return 0;
 }
 
+int
+HYPRE_ParaSailsGetThresh( HYPRE_Solver solver, 
+                          double     * thresh )
+{
+   Secret *secret = (Secret *) solver;
+
+   *thresh = secret->thresh;
+
+   return 0;
+}
+
 /*--------------------------------------------------------------------------
  * HYPRE_ParaSailsSetNlevels - Set the "nlevels" parameter only
  * for a ParaSails object.
+ * HYPRE_ParaSailsGetNlevels
  *--------------------------------------------------------------------------*/
 
 int
@@ -429,8 +465,20 @@ HYPRE_ParaSailsSetNlevels( HYPRE_Solver solver,
    return 0;
 }
 
+int
+HYPRE_ParaSailsGetNlevels( HYPRE_Solver solver, 
+                           int        * nlevels )
+{
+   Secret *secret = (Secret *) solver;
+
+   *nlevels = secret->nlevels;
+
+   return 0;
+}
+
 /*--------------------------------------------------------------------------
  * HYPRE_ParaSailsSetFilter - Set the filter parameter.
+ * HYPRE_ParaSailsGetFilter
  *--------------------------------------------------------------------------*/
 
 int
@@ -444,9 +492,21 @@ HYPRE_ParaSailsSetFilter(HYPRE_Solver solver,
    return 0;
 }
 
+int
+HYPRE_ParaSailsGetFilter(HYPRE_Solver solver, 
+                         double     * filter  )
+{
+   Secret *secret = (Secret *) solver;
+
+   *filter = secret->filter;
+
+   return 0;
+}
+
 /*--------------------------------------------------------------------------
  * HYPRE_ParaSailsSetSym - Set whether the matrix is symmetric:
  * nonzero = symmetric, 0 = nonsymmetric.
+ * HYPRE_ParaSailsGetSym
  *--------------------------------------------------------------------------*/
 
 int
@@ -460,8 +520,19 @@ HYPRE_ParaSailsSetSym(HYPRE_Solver solver,
    return 0;
 }
 
+int
+HYPRE_ParaSailsGetSym(HYPRE_Solver solver, 
+                      int        * sym     )
+{
+   Secret *secret = (Secret *) solver;
+
+   *sym = secret->sym;
+
+   return 0;
+}
+
 /*--------------------------------------------------------------------------
- * HYPRE_ParaSailsSetLoadbal
+ * HYPRE_ParaSailsSetLoadbal, HYPRE_ParaSailsGetLoadbal
  *--------------------------------------------------------------------------*/
 
 int
@@ -475,8 +546,20 @@ HYPRE_ParaSailsSetLoadbal(HYPRE_Solver solver,
    return 0;
 }
 
+int
+HYPRE_ParaSailsGetLoadbal(HYPRE_Solver solver, 
+                          double     * loadbal )
+{
+   Secret *secret = (Secret *) solver;
+
+   *loadbal = secret->loadbal;
+
+   return 0;
+}
+
 /*--------------------------------------------------------------------------
  * HYPRE_ParaSailsSetReuse - reuse pattern if "reuse" if nonzero
+ * HYPRE_ParaSailsGetReuse
  *--------------------------------------------------------------------------*/
 
 int
@@ -490,8 +573,19 @@ HYPRE_ParaSailsSetReuse(HYPRE_Solver solver,
    return 0;
 }
 
+int
+HYPRE_ParaSailsGetReuse(HYPRE_Solver solver, 
+                        int        * reuse   )
+{
+   Secret *secret = (Secret *) solver;
+
+   *reuse = secret->reuse;
+
+   return 0;
+}
+
 /*--------------------------------------------------------------------------
- * HYPRE_ParaSailsSetLogging -
+ * HYPRE_ParaSailsSetLogging, HYPRE_ParaSailsGetLogging
  *--------------------------------------------------------------------------*/
 
 int
@@ -501,6 +595,17 @@ HYPRE_ParaSailsSetLogging(HYPRE_Solver solver,
    Secret *secret = (Secret *) solver;
 
    secret->logging = logging;
+
+   return 0;
+}
+
+int
+HYPRE_ParaSailsGetLogging(HYPRE_Solver solver, 
+                          int        * logging )
+{
+   Secret *secret = (Secret *) solver;
+
+   *logging = secret->logging;
 
    return 0;
 }

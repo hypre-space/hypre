@@ -1572,6 +1572,18 @@ hypre_BoomerAMGSetSchwarzRlxWeight( void     *data,
 }
 
 int
+hypre_BoomerAMGGetSchwarzRlxWeight( void     *data,
+                            double   * schwarz_rlx_weight)
+{
+   int ierr = 0;
+   hypre_ParAMGData  *amg_data = data;
+ 
+   *schwarz_rlx_weight = hypre_ParAMGDataSchwarzRlxWeight(amg_data);
+
+   return (ierr);
+}
+
+int
 hypre_BoomerAMGSetSym( void     *data,
                             int       sym)
 {
