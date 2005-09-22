@@ -230,10 +230,8 @@ AC_ARG_WITH(insure,
   AS_HELP_STRING([  --with-insure=FLAGS],
                  [ FLAGS are options to pass to insure, e.g.
 		   -log-file=struct_ls.insure -append-logfile=yes
-                   will send output to the specified file.  Defines gcc
-                   and g++ as the C and C++ compilers unless already set
-                   by the user. Nothing is done to verify that insure 
-                   is available on the machine]),
+                   will send output to the specified file. Nothing
+                   is done to verify that insure is available]),
 [case "${withval}" in
    yes) casc_using_insure=yes
         casc_using_debug=yes
@@ -249,14 +247,13 @@ AC_ARG_WITH(insure,
 
 AC_ARG_WITH(insure-to-file,
   AS_HELP_STRING([  --with-insure-to-file],
-                 [ Direct insure output to the file named insure.log. Defines
-                   gcc and g++ as the C and C++ compilers, unless already set
-                   by the user. Nothing is done to verify that insure is
-                   available on the machine]),
+                 [ Direct insure output to the file named insure.log. 
+                   Nothing is done to verify that insure is
+                   available]),
 [case "${withval}" in
    yes) casc_using_insure=yes
         casc_using_debug=yes
-        casc_insure_flags="-log-file=insure.log -append-logfile=yes"
+        casc_insure_flags="-Zoi -log-file=insure.log"
         ;;
     no) ;;
      *) casc_using_insure=yes
