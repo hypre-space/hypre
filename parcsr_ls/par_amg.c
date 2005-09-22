@@ -731,8 +731,7 @@ hypre_BoomerAMGGetCycleNumSweeps( void     *data,
                                   int *    num_sweeps,
                                   int      k )
 {
-   int ierr = 0, i;
-   int *num_grid_sweeps;
+   int ierr = 0;
    hypre_ParAMGData  *amg_data = data;
 
    if (k < 0 || k > 3)
@@ -835,8 +834,7 @@ hypre_BoomerAMGGetCycleRelaxType( void     *data,
                                   int    * relax_type,
                                   int      k )
 {
-   int ierr = 0, i;
-   int *grid_relax_type;
+   int ierr = 0;
    hypre_ParAMGData  *amg_data = data;
 
    if (k < 0 || k > 3)
@@ -929,7 +927,7 @@ int
 hypre_BoomerAMGGetGridRelaxPoints( void     *data,
                                 int    *** grid_relax_points )
 {
-   int i, ierr = 0;
+   int ierr = 0;
    hypre_ParAMGData  *amg_data = data;
 
    *grid_relax_points = hypre_ParAMGDataGridRelaxPoints(amg_data);
@@ -1012,7 +1010,7 @@ hypre_BoomerAMGGetLevelRelaxWt( void    *data,
                                 double * relax_weight,
                                 int      level )
 {
-   int ierr = 0, i, num_levels;
+   int ierr = 0, num_levels;
    hypre_ParAMGData  *amg_data = data;
    num_levels = hypre_ParAMGDataMaxLevels(amg_data);
    if (level > num_levels-1) 
@@ -1106,7 +1104,7 @@ hypre_BoomerAMGGetLevelOuterWt( void    *data,
                                 double * omega,
                                 int      level )
 {
-   int ierr = 0, i, num_levels;
+   int ierr = 0, num_levels;
    hypre_ParAMGData  *amg_data = data;
    num_levels = hypre_ParAMGDataMaxLevels(amg_data);
    if (level > num_levels-1) 
