@@ -72,7 +72,7 @@ HYPRE_PCGSolve( HYPRE_Solver solver,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_PCGSetTol
+ * HYPRE_PCGSetTol, HYPRE_PCGGetTol
  *--------------------------------------------------------------------------*/
 
 int
@@ -82,8 +82,15 @@ HYPRE_PCGSetTol( HYPRE_Solver solver,
    return( hypre_PCGSetTol( (void *) solver, tol ) );
 }
 
+int
+HYPRE_PCGGetTol( HYPRE_Solver solver,
+                 double           * tol    )
+{
+   return( hypre_PCGGetTol( (void *) solver, tol ) );
+}
+
 /*--------------------------------------------------------------------------
- * HYPRE_PCGSetAbsoluteTolFactor
+ * HYPRE_PCGSetAbsoluteTolFactor, HYPRE_PCGGetAbsoluteTolFactor
  *--------------------------------------------------------------------------*/
 
 int
@@ -93,9 +100,17 @@ HYPRE_PCGSetAbsoluteTolFactor( HYPRE_Solver solver,
    return( hypre_PCGSetAbsoluteTolFactor( (void *) solver, abstolf ) );
 }
 
+int
+HYPRE_PCGGetAbsoluteTolFactor( HYPRE_Solver solver,
+                               double * abstolf )
+{
+   return( hypre_PCGGetAbsoluteTolFactor( (void *) solver, abstolf ) );
+}
+
 /*--------------------------------------------------------------------------
- * HYPRE_PCGSetConvergenceFactorTol
+ * HYPRE_PCGSetConvergenceFactorTol, HYPRE_PCGGetConvergenceFactorTol
  *--------------------------------------------------------------------------*/
+
 int
 HYPRE_PCGSetConvergenceFactorTol( HYPRE_Solver solver,
                                   double cf_tol )
@@ -104,8 +119,16 @@ HYPRE_PCGSetConvergenceFactorTol( HYPRE_Solver solver,
                                             cf_tol   );
 }
 
+int
+HYPRE_PCGGetConvergenceFactorTol( HYPRE_Solver solver,
+                                  double * cf_tol )
+{
+   return hypre_PCGGetConvergenceFactorTol( (void *) solver,
+                                            cf_tol   );
+}
+
 /*--------------------------------------------------------------------------
- * HYPRE_PCGSetMaxIter
+ * HYPRE_PCGSetMaxIter, HYPRE_PCGGetMaxIter
  *--------------------------------------------------------------------------*/
 
 int
@@ -115,8 +138,15 @@ HYPRE_PCGSetMaxIter( HYPRE_Solver solver,
    return( hypre_PCGSetMaxIter( (void *) solver, max_iter ) );
 }
 
+int
+HYPRE_PCGGetMaxIter( HYPRE_Solver solver,
+                     int              * max_iter )
+{
+   return( hypre_PCGGetMaxIter( (void *) solver, max_iter ) );
+}
+
 /*--------------------------------------------------------------------------
- * HYPRE_PCGSetStopCrit
+ * HYPRE_PCGSetStopCrit, HYPRE_PCGGetStopCrit
  *--------------------------------------------------------------------------*/
 
 int
@@ -126,8 +156,15 @@ HYPRE_PCGSetStopCrit( HYPRE_Solver solver,
    return( hypre_PCGSetStopCrit( (void *) solver, stop_crit ) );
 }
 
+int
+HYPRE_PCGGetStopCrit( HYPRE_Solver solver,
+                      int        * stop_crit )
+{
+   return( hypre_PCGGetStopCrit( (void *) solver, stop_crit ) );
+}
+
 /*--------------------------------------------------------------------------
- * HYPRE_PCGSetTwoNorm
+ * HYPRE_PCGSetTwoNorm, HYPRE_PCGGetTwoNorm
  *--------------------------------------------------------------------------*/
 
 int
@@ -137,8 +174,15 @@ HYPRE_PCGSetTwoNorm( HYPRE_Solver solver,
    return( hypre_PCGSetTwoNorm( (void *) solver, two_norm ) );
 }
 
+int
+HYPRE_PCGGetTwoNorm( HYPRE_Solver solver,
+                     int              * two_norm )
+{
+   return( hypre_PCGGetTwoNorm( (void *) solver, two_norm ) );
+}
+
 /*--------------------------------------------------------------------------
- * HYPRE_PCGSetRelChange
+ * HYPRE_PCGSetRelChange, HYPRE_PCGGetRelChange
  *--------------------------------------------------------------------------*/
 
 int
@@ -146,6 +190,13 @@ HYPRE_PCGSetRelChange( HYPRE_Solver solver,
                        int                rel_change )
 {
    return( hypre_PCGSetRelChange( (void *) solver, rel_change ) );
+}
+
+int
+HYPRE_PCGGetRelChange( HYPRE_Solver solver,
+                       int              * rel_change )
+{
+   return( hypre_PCGGetRelChange( (void *) solver, rel_change ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -176,8 +227,8 @@ HYPRE_PCGGetPrecond( HYPRE_Solver  solver,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_PCGSetLogging
- * sets both the print and log level, for backwards compatibility.
+ * HYPRE_PCGSetLogging, HYPRE_PCGGetLogging
+ * SetLogging sets both the print and log level, for backwards compatibility.
  * Soon the SetPrintLevel call should be deleted.
  *--------------------------------------------------------------------------*/
 
@@ -188,8 +239,15 @@ HYPRE_PCGSetLogging( HYPRE_Solver solver,
    return ( hypre_PCGSetLogging( (void *) solver, level ) );
 }
 
+int
+HYPRE_PCGGetLogging( HYPRE_Solver solver,
+                     int        * level )
+{
+   return ( hypre_PCGGetLogging( (void *) solver, level ) );
+}
+
 /*--------------------------------------------------------------------------
- * HYPRE_PCGSetPrintLevel
+ * HYPRE_PCGSetPrintLevel, HYPRE_PCGGetPrintLevel
  *--------------------------------------------------------------------------*/
 
 int
@@ -197,6 +255,13 @@ HYPRE_PCGSetPrintLevel( HYPRE_Solver solver,
                         int          level )
 {
    return( hypre_PCGSetPrintLevel( (void *) solver, level ) );
+}
+
+int
+HYPRE_PCGGetPrintLevel( HYPRE_Solver solver,
+                        int        * level )
+{
+   return( hypre_PCGGetPrintLevel( (void *) solver, level ) );
 }
 
 /*--------------------------------------------------------------------------

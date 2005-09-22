@@ -604,7 +604,7 @@ hypre_PCGSolve( void *pcg_vdata,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_PCGSetTol
+ * hypre_PCGSetTol, hypre_PCGGetTol
  *--------------------------------------------------------------------------*/
 
 int
@@ -619,8 +619,20 @@ hypre_PCGSetTol( void   *pcg_vdata,
    return ierr;
 }
 
+int
+hypre_PCGGetTol( void   *pcg_vdata,
+                 double * tol       )
+{
+   hypre_PCGData *pcg_data = pcg_vdata;
+   int            ierr = 0;
+ 
+   *tol = (pcg_data -> tol);
+ 
+   return ierr;
+}
+
 /*--------------------------------------------------------------------------
- * hypre_PCGSetAbsoluteTolFactor
+ * hypre_PCGSetAbsoluteTolFactor, hypre_PCGGetAbsoluteTolFactor
  *--------------------------------------------------------------------------*/
 
 int
@@ -635,8 +647,20 @@ hypre_PCGSetAbsoluteTolFactor( void   *pcg_vdata,
    return ierr;
 }
 
+int
+hypre_PCGGetAbsoluteTolFactor( void   *pcg_vdata,
+                               double  * atolf   )
+{
+   hypre_PCGData *pcg_data = pcg_vdata;
+   int            ierr = 0;
+ 
+   *atolf = (pcg_data -> atolf);
+ 
+   return ierr;
+}
+
 /*--------------------------------------------------------------------------
- * hypre_PCGSetConvergenceTol
+ * hypre_PCGSetConvergenceFactorTol, hypre_PCGGetConvergenceFactorTol
  *--------------------------------------------------------------------------*/
 
 int
@@ -651,8 +675,20 @@ hypre_PCGSetConvergenceFactorTol( void   *pcg_vdata,
    return ierr;
 }
 
+int
+hypre_PCGGetConvergenceFactorTol( void   *pcg_vdata,
+                                  double * cf_tol   )
+{
+   hypre_PCGData *pcg_data = pcg_vdata;
+   int            ierr = 0;
+ 
+   *cf_tol = (pcg_data -> cf_tol);
+ 
+   return ierr;
+}
+
 /*--------------------------------------------------------------------------
- * hypre_PCGSetMaxIter
+ * hypre_PCGSetMaxIter, hypre_PCGGetMaxIter
  *--------------------------------------------------------------------------*/
 
 int
@@ -667,8 +703,20 @@ hypre_PCGSetMaxIter( void *pcg_vdata,
    return ierr;
 }
 
+int
+hypre_PCGGetMaxIter( void *pcg_vdata,
+                     int * max_iter  )
+{
+   hypre_PCGData *pcg_data = pcg_vdata;
+   int            ierr = 0;
+ 
+   *max_iter = (pcg_data -> max_iter);
+ 
+   return ierr;
+}
+
 /*--------------------------------------------------------------------------
- * hypre_PCGSetTwoNorm
+ * hypre_PCGSetTwoNorm, hypre_PCGGetTwoNorm
  *--------------------------------------------------------------------------*/
 
 int
@@ -683,8 +731,20 @@ hypre_PCGSetTwoNorm( void *pcg_vdata,
    return ierr;
 }
 
+int
+hypre_PCGGetTwoNorm( void *pcg_vdata,
+                     int * two_norm  )
+{
+   hypre_PCGData *pcg_data = pcg_vdata;
+   int            ierr = 0;
+ 
+   *two_norm = (pcg_data -> two_norm);
+ 
+   return ierr;
+}
+
 /*--------------------------------------------------------------------------
- * hypre_PCGSetRelChange
+ * hypre_PCGSetRelChange, hypre_PCGGetRelChange
  *--------------------------------------------------------------------------*/
 
 int
@@ -699,8 +759,20 @@ hypre_PCGSetRelChange( void *pcg_vdata,
    return ierr;
 }
 
+int
+hypre_PCGGetRelChange( void *pcg_vdata,
+                       int * rel_change  )
+{
+   hypre_PCGData *pcg_data = pcg_vdata;
+   int            ierr = 0;
+ 
+   *rel_change = (pcg_data -> rel_change);
+ 
+   return ierr;
+}
+
 /*--------------------------------------------------------------------------
- * hypre_PCGSetStopCrit
+ * hypre_PCGSetStopCrit, hypre_PCGGetStopCrit
  *--------------------------------------------------------------------------*/
 
 int
@@ -711,6 +783,18 @@ hypre_PCGSetStopCrit( void *pcg_vdata,
    int            ierr = 0;
  
    (pcg_data -> stop_crit) = stop_crit;
+ 
+   return ierr;
+}
+
+int
+hypre_PCGGetStopCrit( void *pcg_vdata,
+                       int * stop_crit  )
+{
+   hypre_PCGData *pcg_data = pcg_vdata;
+   int            ierr = 0;
+ 
+   *stop_crit = (pcg_data -> stop_crit);
  
    return ierr;
 }
@@ -753,7 +837,7 @@ hypre_PCGSetPrecond( void  *pcg_vdata,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_PCGSetPrintLevel
+ * hypre_PCGSetPrintLevel, hypre_PCGGetPrintLevel
  *--------------------------------------------------------------------------*/
 
 int
@@ -768,8 +852,20 @@ hypre_PCGSetPrintLevel( void *pcg_vdata,
    return ierr;
 }
 
+int
+hypre_PCGGetPrintLevel( void *pcg_vdata,
+                        int * level)
+{
+   hypre_PCGData *pcg_data = pcg_vdata;
+   int            ierr = 0;
+ 
+   *level = (pcg_data -> print_level);
+ 
+   return ierr;
+}
+
 /*--------------------------------------------------------------------------
- * hypre_PCGSetLogging
+ * hypre_PCGSetLogging, hypre_PCGGetLogging
  *--------------------------------------------------------------------------*/
 
 int
@@ -780,6 +876,18 @@ hypre_PCGSetLogging( void *pcg_vdata,
    int            ierr = 0;
  
    (pcg_data -> logging) = level;
+ 
+   return ierr;
+}
+
+int
+hypre_PCGGetLogging( void *pcg_vdata,
+                      int * level)
+{
+   hypre_PCGData *pcg_data = pcg_vdata;
+   int            ierr = 0;
+ 
+   *level = (pcg_data -> logging);
  
    return ierr;
 }

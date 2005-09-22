@@ -602,7 +602,7 @@ hypre_GMRESSolve(void  *gmres_vdata,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_GMRESSetKDim
+ * hypre_GMRESSetKDim, hypre_GMRESGetKDim
  *--------------------------------------------------------------------------*/
  
 int
@@ -617,8 +617,20 @@ hypre_GMRESSetKDim( void   *gmres_vdata,
    return ierr;
 }
 
+int
+hypre_GMRESGetKDim( void   *gmres_vdata,
+                    int * k_dim )
+{
+   hypre_GMRESData *gmres_data = gmres_vdata;
+   int            ierr = 0;
+ 
+   *k_dim = (gmres_data -> k_dim);
+ 
+   return ierr;
+}
+
 /*--------------------------------------------------------------------------
- * hypre_GMRESSetTol
+ * hypre_GMRESSetTol, hypre_GMRESGetTol
  *--------------------------------------------------------------------------*/
  
 int
@@ -633,8 +645,20 @@ hypre_GMRESSetTol( void   *gmres_vdata,
    return ierr;
 }
 
+int
+hypre_GMRESGetTol( void   *gmres_vdata,
+                   double  * tol      )
+{
+   hypre_GMRESData *gmres_data = gmres_vdata;
+   int            ierr = 0;
+ 
+   *tol = (gmres_data -> tol);
+ 
+   return ierr;
+}
+
 /*--------------------------------------------------------------------------
- * hypre_GMRESSetConvergenceFactorTol
+ * hypre_GMRESSetConvergenceFactorTol, hypre_GMRESGetConvergenceFactorTol
  *--------------------------------------------------------------------------*/
  
 int
@@ -649,8 +673,20 @@ hypre_GMRESSetConvergenceFactorTol( void   *gmres_vdata,
    return ierr;
 }
 
+int
+hypre_GMRESGetConvergenceFactorTol( void   *gmres_vdata,
+                   double * cf_tol       )
+{
+   hypre_GMRESData *gmres_data = gmres_vdata;
+   int            ierr = 0;
+ 
+   *cf_tol = (gmres_data -> cf_tol);
+ 
+   return ierr;
+}
+
 /*--------------------------------------------------------------------------
- * hypre_GMRESSetMinIter
+ * hypre_GMRESSetMinIter, hypre_GMRESGetMinIter
  *--------------------------------------------------------------------------*/
  
 int
@@ -665,8 +701,20 @@ hypre_GMRESSetMinIter( void *gmres_vdata,
    return ierr;
 }
 
+int
+hypre_GMRESGetMinIter( void *gmres_vdata,
+                       int * min_iter  )
+{
+   hypre_GMRESData *gmres_data = gmres_vdata;
+   int              ierr = 0;
+ 
+   *min_iter = (gmres_data -> min_iter);
+ 
+   return ierr;
+}
+
 /*--------------------------------------------------------------------------
- * hypre_GMRESSetMaxIter
+ * hypre_GMRESSetMaxIter, hypre_GMRESGetMaxIter
  *--------------------------------------------------------------------------*/
  
 int
@@ -681,8 +729,20 @@ hypre_GMRESSetMaxIter( void *gmres_vdata,
    return ierr;
 }
 
+int
+hypre_GMRESGetMaxIter( void *gmres_vdata,
+                       int * max_iter  )
+{
+   hypre_GMRESData *gmres_data = gmres_vdata;
+   int              ierr = 0;
+ 
+   *max_iter = (gmres_data -> max_iter);
+ 
+   return ierr;
+}
+
 /*--------------------------------------------------------------------------
- * hypre_GMRESSetRelChange
+ * hypre_GMRESSetRelChange, hypre_GMRESGetRelChange
  *--------------------------------------------------------------------------*/
 
 int
@@ -697,8 +757,20 @@ hypre_GMRESSetRelChange( void *gmres_vdata,
    return ierr;
 }
 
+int
+hypre_GMRESGetRelChange( void *gmres_vdata,
+                         int * rel_change  )
+{
+   hypre_GMRESData *gmres_data = gmres_vdata;
+   int            ierr = 0;
+ 
+   *rel_change = (gmres_data -> rel_change);
+ 
+   return ierr;
+}
+
 /*--------------------------------------------------------------------------
- * hypre_GMRESSetStopCrit
+ * hypre_GMRESSetStopCrit, hypre_GMRESGetStopCrit
  *--------------------------------------------------------------------------*/
  
 int
@@ -709,6 +781,18 @@ hypre_GMRESSetStopCrit( void   *gmres_vdata,
    int            ierr = 0;
  
    (gmres_data -> stop_crit) = stop_crit;
+ 
+   return ierr;
+}
+
+int
+hypre_GMRESGetStopCrit( void   *gmres_vdata,
+                        int * stop_crit       )
+{
+   hypre_GMRESData *gmres_data = gmres_vdata;
+   int            ierr = 0;
+ 
+   *stop_crit = (gmres_data -> stop_crit);
  
    return ierr;
 }
@@ -751,7 +835,7 @@ hypre_GMRESGetPrecond( void         *gmres_vdata,
 }
  
 /*--------------------------------------------------------------------------
- * hypre_GMRESSetPrintLevel
+ * hypre_GMRESSetPrintLevel, hypre_GMRESGetPrintLevel
  *--------------------------------------------------------------------------*/
 
 int
@@ -766,8 +850,20 @@ hypre_GMRESSetPrintLevel( void *gmres_vdata,
    return ierr;
 }
 
+int
+hypre_GMRESGetPrintLevel( void *gmres_vdata,
+                        int * level)
+{
+   hypre_GMRESData *gmres_data = gmres_vdata;
+   int            ierr = 0;
+ 
+   *level = (gmres_data -> print_level);
+ 
+   return ierr;
+}
+
 /*--------------------------------------------------------------------------
- * hypre_GMRESSetLogging
+ * hypre_GMRESSetLogging, hypre_GMRESGetLogging
  *--------------------------------------------------------------------------*/
 
 int
@@ -778,6 +874,18 @@ hypre_GMRESSetLogging( void *gmres_vdata,
    int            ierr = 0;
  
    (gmres_data -> logging) = level;
+ 
+   return ierr;
+}
+
+int
+hypre_GMRESGetLogging( void *gmres_vdata,
+                      int * level)
+{
+   hypre_GMRESData *gmres_data = gmres_vdata;
+   int            ierr = 0;
+ 
+   *level = (gmres_data -> logging);
  
    return ierr;
 }
