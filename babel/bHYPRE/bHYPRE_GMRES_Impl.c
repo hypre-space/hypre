@@ -48,15 +48,49 @@
 #include <assert.h>
 #include "mpi.h"
 
-/* >>> To do: impl_bHYPRE_GMRES_Copy_Parameters_from_HYPRE_struct (see
- * comments in bHYPRE_PCG_Impl.c). */
+/* This function should be used to initialize the parameter cache
+ * in the bHYPRE_GMRES__data object. */
+int impl_bHYPRE_GMRES_Copy_Parameters_from_HYPRE_struct( bHYPRE_GMRES self )
+{
+   /* Parameters are copied only if they have nonsense values which tell
+      us that the user has not set them. */
+   int ierr = 0;
+   HYPRE_Solver solver;
+   struct bHYPRE_GMRES__data * data;
+
+   data = bHYPRE_GMRES__get_data( self );
+   hypre_assert( data->solver != NULL );
+   solver = data->solver;
+
+   /* double parameters: */
+   if ( data->tol == -1.234 )
+      ierr += HYPRE_GMRESGetTol( solver, &(data->tol) );
+
+   /* int parameters: */
+   if ( data->k_dim == -1234 )
+      ierr += HYPRE_GMRESGetKDim( solver, &(data->k_dim) );
+   if ( data->max_iter == -1234 )
+      ierr += HYPRE_GMRESGetMaxIter( solver, &(data->max_iter) );
+   if ( data->min_iter == -1234 )
+      ierr += HYPRE_GMRESGetMinIter( solver, &(data->min_iter) );
+   if ( data->rel_change == -1234 )
+      ierr += HYPRE_GMRESGetRelChange( solver, &(data->rel_change) );
+   if ( data->stop_crit == -1234 )
+      ierr += HYPRE_GMRESGetStopCrit( solver, &(data->stop_crit) );
+   if ( data->printlevel == -1234)
+      ierr += HYPRE_GMRESGetPrintLevel( solver, &(data->printlevel) );
+   if ( data->log_level == -1234 )
+      ierr += HYPRE_GMRESGetLogging( solver, &(data->log_level) );
+
+   return ierr;
+}
 
 int impl_bHYPRE_GMRES_Copy_Parameters_to_HYPRE_struct( bHYPRE_GMRES self )
 /* Copy parameter cache from the bHYPRE_GMRES__data object into the
  * HYPRE_Solver object */
-/* >>> Possible BUG if this routine is not called earlier (at
- * initialization).  See comment in bHYPRE_PCG_Impl.c */
 {
+   /* Parameters are left at their HYPRE defaults if they have bHYPRE nonsense
+      values which tell us that the user has not set them. */
    int ierr = 0;
    HYPRE_Solver solver;
    struct bHYPRE_GMRES__data * data;
@@ -69,14 +103,20 @@ int impl_bHYPRE_GMRES_Copy_Parameters_to_HYPRE_struct( bHYPRE_GMRES self )
    ierr += HYPRE_GMRESSetTol( solver, data->tol );
 
    /* int parameters: */
-   ierr += HYPRE_GMRESSetKDim( solver, data->k_dim );
-   ierr += HYPRE_GMRESSetMaxIter( solver, data->max_iter );
-   ierr += HYPRE_GMRESSetMinIter( solver, data->min_iter );
-   ierr += HYPRE_GMRESSetRelChange( solver, data->rel_change );
-   ierr += HYPRE_GMRESSetStopCrit( solver, data->stop_crit );
-
-   ierr += HYPRE_GMRESSetPrintLevel( solver, data->printlevel );
-   ierr += HYPRE_GMRESSetLogging( solver, data->log_level );
+   if ( data->k_dim != -1234 )
+      ierr += HYPRE_GMRESSetKDim( solver, data->k_dim );
+   if ( data->max_iter != -1234 )
+      ierr += HYPRE_GMRESSetMaxIter( solver, data->max_iter );
+   if ( data->min_iter != -1234 )
+      ierr += HYPRE_GMRESSetMinIter( solver, data->min_iter );
+   if ( data->rel_change != -1234 )
+      ierr += HYPRE_GMRESSetRelChange( solver, data->rel_change );
+   if ( data->stop_crit != -1234 )
+      ierr += HYPRE_GMRESSetStopCrit( solver, data->stop_crit );
+   if ( data->printlevel != -1234 )
+      ierr += HYPRE_GMRESSetPrintLevel( solver, data->printlevel );
+   if ( data->log_level != -1234 )
+      ierr += HYPRE_GMRESSetLogging( solver, data->log_level );
 
    return ierr;
 }
@@ -135,12 +175,21 @@ impl_bHYPRE_GMRES__ctor(
 
    /* default values (copied from gmres.c; better to get them by
     * function calls)...*/
+/*
    data -> tol        = 1.0e-06;
    data -> k_dim      = 5;
    data -> min_iter   = 0;
    data -> max_iter   = 1000;
    data -> rel_change = 0;
-   data -> stop_crit  = 0; /* rel. residual norm */
+   data -> stop_crit  = 0;*/ /* rel. residual norm */
+   /* initial nonsense values, later we should get good values
+    * either by user calls or out of the HYPRE object...*/
+   data -> tol        = -1.234;
+   data -> k_dim      = -1234;
+   data -> min_iter   = -1234;
+   data -> max_iter   = -1234;
+   data -> rel_change = -1234;
+   data -> stop_crit  = -1234; /* rel. residual norm */
 
    /* set any other data components here */
 
@@ -276,7 +325,8 @@ impl_bHYPRE_GMRES_SetIntParameter(
     * know the vector type - and that is not known until Apply is
     * first called.  So what we do is save the parameter in a cache
     * belonging to this Babel interface, and copy it into the HYPRE
-    * struct once Apply is called.  */
+    * struct once Apply is called.   (The copy into the HYPRE struct is
+    * also done in Setup) */
    int ierr = 0;
    struct bHYPRE_GMRES__data * data;
    data = bHYPRE_GMRES__get_data( self );
@@ -497,17 +547,11 @@ impl_bHYPRE_GMRES_GetIntValue(
   /* in */ const char* name,
   /* out */ int32_t* value)
 {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.GMRES.GetIntValue) */
-  /* Insert the implementation of the GetIntValue method here... */
+   /* DO-NOT-DELETE splicer.begin(bHYPRE.GMRES.GetIntValue) */
+   /* Insert the implementation of the GetIntValue method here... */
 
-   /* >>> We should add a Get for everything in SetParameter.  There
-    * are two values for each parameter: the bHYPRE cache, and the
-    * HYPRE value.  The cache gets copied to HYPRE when Apply is
-    * called.  What we want to return is the cache value if the
-    * corresponding Set had been called, otherwise the real (HYPRE)
-    * value.  Assuming the HYPRE interface is not used simultaneously
-    * with the Babel interface, it is sufficient to initialize the
-    * cache with whatever HYPRE is using. */
+   /* A return value of -1234 means that the parameter has not been
+      set yet.  In that case an error flag will be returned too. */
    int ierr = 0;
    HYPRE_Solver solver;
    struct bHYPRE_GMRES__data * data;
@@ -516,15 +560,46 @@ impl_bHYPRE_GMRES_GetIntValue(
    hypre_assert( data->solver != NULL );
    solver = data->solver;
 
+   /* The underlying HYPRE PCG object has actually been created if & only if
+      data->vector_type is non-null.  If so, make sure our local parameter cache
+      if up-to-date.  */
+   if ( data -> vector_type != NULL )
+      ierr += impl_bHYPRE_GMRES_Copy_Parameters_from_HYPRE_struct( self );
+
    if ( strcmp(name,"NumIterations")==0 )
    {
       ierr += HYPRE_GMRESGetNumIterations( solver, value );
+   }
+   else if ( strcmp(name,"KDim")==0 )
+   {
+      *value = data -> k_dim;
+   }
+   else if ( strcmp(name,"MinIter")==0 )
+   {
+      *value = data -> min_iter;
+   }
+   else if ( strcmp(name,"MaxIter")==0 || strcmp(name,"MaxIterations")==0 )
+   {
+      *value = data -> max_iter;
+   }
+   else if ( strcmp(name,"RelChange")==0 || strcmp(name,"relative change test")==0 )
+   {
+      *value = data -> rel_change;
+   }
+   else if ( strcmp(name,"Logging")==0 )
+   {
+      *value = data -> log_level;
+   }
+   else if ( strcmp(name,"PrintLevel")==0 )
+   {
+      *value = data -> printlevel;
    }
    else
    {
       ierr = 1;
    }
 
+   if ( *value == -1234 ) ++ierr;
    return ierr;
 
   /* DO-NOT-DELETE splicer.end(bHYPRE.GMRES.GetIntValue) */
@@ -550,15 +625,8 @@ impl_bHYPRE_GMRES_GetDoubleValue(
   /* DO-NOT-DELETE splicer.begin(bHYPRE.GMRES.GetDoubleValue) */
   /* Insert the implementation of the GetDoubleValue method here... */
 
-   /* >>> We should add a Get for everything in SetParameter.  There
-    * are two values for each parameter: the bHYPRE cache, and the
-    * HYPRE value.  The cache gets copied to HYPRE when Apply is
-    * called.  What we want to return is the cache value if the
-    * corresponding Set had been called, otherwise the real (HYPRE)
-    * value.  Assuming the HYPRE interface is not used simultaneously
-    * with the Babel interface, it is sufficient to initialize the
-    * cache with whatever HYPRE is using. */
-
+   /* A return value of -1234 means that the parameter has not been
+      set yet.  In that case an error flag will be returned too. */
    int ierr = 0;
    HYPRE_Solver solver;
    struct bHYPRE_GMRES__data * data;
@@ -567,6 +635,12 @@ impl_bHYPRE_GMRES_GetDoubleValue(
    hypre_assert( data->solver != NULL );
    solver = data->solver;
 
+   /* The underlying HYPRE PCG object has actually been created if & only if
+      data->vector_type is non-null.  If so, make sure our local parameter cache
+      if up-to-date.  */
+   if ( data -> vector_type != NULL )
+      ierr += impl_bHYPRE_GMRES_Copy_Parameters_from_HYPRE_struct( self );
+
    if ( strcmp(name,"FinalRelativeResidualNorm")==0 ||
         strcmp(name,"Final Relative Residual Norm")==0 ||
         strcmp(name,"RelativeResidualNorm")==0 ||
@@ -574,11 +648,16 @@ impl_bHYPRE_GMRES_GetDoubleValue(
    {
       ierr += HYPRE_GMRESGetFinalRelativeResidualNorm( solver, value );
    }
+   else if ( strcmp(name,"Tolerance")==0 || strcmp(name,"Tol")==0 )
+   {
+      *value = data -> tol;
+   }
    else
    {
       ierr = 1;
    }
 
+   if ( *value == -1.234 ) ++ierr;
    return ierr;
 
   /* DO-NOT-DELETE splicer.end(bHYPRE.GMRES.GetDoubleValue) */
@@ -649,6 +728,7 @@ impl_bHYPRE_GMRES_Setup(
          hypre_assert( "only IJParCSRVector supported by GMRES"==0 );
       }
       bHYPRE_GMRES__set_data( self, data );
+      ierr += impl_bHYPRE_GMRES_Copy_Parameters_from_HYPRE_struct( self );
    }
    else
    {
@@ -776,6 +856,7 @@ impl_bHYPRE_GMRES_Apply(
          hypre_assert( "only IJParCSRVector supported by GMRES"==0 );
       }
       bHYPRE_GMRES__set_data( self, data );
+      ierr += impl_bHYPRE_GMRES_Copy_Parameters_from_HYPRE_struct( self );
    }
    else
    {

@@ -755,7 +755,121 @@ impl_bHYPRE_BoomerAMG_GetIntValue(
    {
       ierr += HYPRE_BoomerAMGGetNumIterations( solver, value );
    }
-   else
+   /* everything following appears in SetIntParameter */
+   else if ( strcmp(name,"CoarsenType")==0 )
+   {
+      ierr += HYPRE_BoomerAMGGetCoarsenType( solver, value );      
+   }
+   else if ( strcmp(name,"MeasureType")==0 ) 
+   {
+      ierr += HYPRE_BoomerAMGGetMeasureType( solver, value );
+   }
+   else if ( strcmp(name,"CycleType")==0 )
+   {
+      ierr += HYPRE_BoomerAMGGetCycleType( solver, value );
+   }
+   else if ( strcmp(name,"NumSweeps")==0 )
+   {
+      /* no Get function.  Here's why: Set...NumSweeps uses one input parameter
+         to set an array of parameters.  We can't always return just a single
+         parameter because they may not still be all the same. */
+      ++ierr;
+      return ierr;
+   }
+   else if ( strcmp(name,"Cycle0NumSweeps")==0 )
+   {
+      ierr += HYPRE_BoomerAMGGetCycleNumSweeps( solver, value, 0 );
+   }
+   else if ( strcmp(name,"Cycle1NumSweeps")==0 )
+   {
+      ierr += HYPRE_BoomerAMGGetCycleNumSweeps( solver, value, 1 );
+   }
+   else if ( strcmp(name,"Cycle2NumSweeps")==0 )
+   {
+      ierr += HYPRE_BoomerAMGGetCycleNumSweeps( solver, value, 2 );
+   }
+   else if ( strcmp(name,"Cycle3NumSweeps")==0 )
+   {
+      ierr += HYPRE_BoomerAMGGetCycleNumSweeps( solver, value, 3 );
+   }
+   else if ( strcmp(name,"RelaxType")==0 )
+   {
+      /* no Get function.  Here's why: Set...RelaxType uses one input parameter
+         to set an array of parameters.  We can't always return just a single
+         parameter because they may not still be all the same. */
+      ++ierr;
+   }
+   else if ( strcmp(name,"Cycle0RelaxType")==0 )
+   {
+      ierr += HYPRE_BoomerAMGGetCycleRelaxType( solver, value, 0 );
+   }
+   else if ( strcmp(name,"Cycle1RelaxType")==0 )
+   {
+      ierr += HYPRE_BoomerAMGGetCycleRelaxType( solver, value, 1 );
+   }
+   else if ( strcmp(name,"Cycle2RelaxType")==0 )
+   {
+      ierr += HYPRE_BoomerAMGGetCycleRelaxType( solver, value, 2 );
+   }
+   else if ( strcmp(name,"Cycle3RelaxType")==0 )
+   {
+      ierr += HYPRE_BoomerAMGGetCycleRelaxType( solver, value, 3 );
+   }
+   else if ( strcmp(name,"RelaxWt")==0 )
+   {
+      /* no Get function.  Here's why: Set...RelaxWt uses one input parameter
+         to set an array of parameters.  We can't always return just a single
+         parameter because they may not still be all the same. */
+      ++ierr;
+   }
+   else if ( strcmp(name,"SmoothType")==0 )
+   {
+      ierr += HYPRE_BoomerAMGGetSmoothType( solver, value );
+   }
+   else if ( strcmp(name,"SmoothNumLevels")==0 )
+   {
+      ierr += HYPRE_BoomerAMGGetSmoothNumLevels( solver, value );
+   }
+   else if ( strcmp(name,"SmoothNumSweeps")==0 )
+   {
+      ierr += HYPRE_BoomerAMGGetSmoothNumSweeps( solver, value );
+   }
+   else if ( strcmp(name,"MaxLevels")==0 )
+   {
+      ierr += HYPRE_BoomerAMGGetMaxLevels( solver, value );
+   }
+   else if ( strcmp(name,"DebugFlag")==0 )
+   {
+      ierr += HYPRE_BoomerAMGGetDebugFlag( solver, value );
+   }
+   else if ( strcmp(name,"Variant")==0 )
+   {
+      ierr += HYPRE_BoomerAMGGetVariant( solver, value );
+   }
+   else if ( strcmp(name,"Overlap")==0 )
+   {
+      ierr += HYPRE_BoomerAMGGetOverlap( solver, value );
+   }
+   else if ( strcmp(name,"DomainType")==0 )
+   {
+      ierr += HYPRE_BoomerAMGGetDomainType( solver, value );
+   }
+   else if ( strcmp(name,"NumFunctions")==0 )
+   {
+      ierr += HYPRE_BoomerAMGGetNumFunctions( solver, value );
+   }
+   else if ( strcmp(name,"MaxIterations")==0 || strcmp(name,"MaxIter")==0 )
+   {
+      ierr += HYPRE_BoomerAMGGetMaxIter( solver, value );
+   }
+   else if ( strcmp(name,"Logging")==0 )
+   {
+      ierr += HYPRE_BoomerAMGGetLogging( solver, value );
+   }
+   else if ( strcmp(name,"PrintLevel")==0 )
+   {
+      ierr += HYPRE_BoomerAMGGetPrintLevel( solver, value );
+   }
    {
       ierr = 1;
    }
@@ -798,6 +912,26 @@ impl_bHYPRE_BoomerAMG_GetDoubleValue(
         strcmp(name,"RelResidualNorm")==0 )
    {
       ierr += HYPRE_BoomerAMGGetFinalRelativeResidualNorm( solver, value );
+   }
+   else if ( strcmp(name,"StrongThreshold")==0 )
+   {
+      ierr += HYPRE_BoomerAMGGetStrongThreshold( solver, value );
+   }
+   else if ( strcmp(name,"TruncFactor")==0 )
+   {
+      ierr += HYPRE_BoomerAMGGetTruncFactor( solver, value );
+   }
+   else if ( strcmp(name,"SchwarzRlxWeight")==0 )
+   {
+      ierr += HYPRE_BoomerAMGGetSchwarzRlxWeight( solver, value );
+   }
+   else if ( strcmp(name,"MaxRowSum")==0 )
+   {
+      ierr += HYPRE_BoomerAMGGetMaxRowSum( solver, value );
+   }
+   else if ( strcmp(name,"Tolerance")==0 || strcmp(name,"Tol")==0 )
+   {
+      ierr += HYPRE_BoomerAMGGetTol( solver, value );
    }
    else
    {

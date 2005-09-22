@@ -233,11 +233,35 @@ impl_bHYPRE_StructSMG_SetIntParameter(
    }
    else if ( strcmp(name,"NonZeroGuess")==0 || strcmp(name,"nonzero guess")==0 )
    {
-      ierr += HYPRE_StructSMGSetNonZeroGuess( solver );
+      if ( value==0 )
+      {
+         ierr += HYPRE_StructSMGSetZeroGuess( solver );
+      }
+      else if ( value==1 )
+      {
+         ierr += HYPRE_StructSMGSetNonZeroGuess( solver );
+      }
+      else
+      {
+         ierr += HYPRE_StructSMGSetNonZeroGuess( solver );
+         ++ierr;
+      }
    }
    else if ( strcmp(name,"ZeroGuess")==0 || strcmp(name,"zero guess")==0 )
    {
-      ierr += HYPRE_StructSMGSetZeroGuess( solver );
+      if ( value==0 )
+      {
+         ierr += HYPRE_StructSMGSetNonZeroGuess( solver );
+      }
+      else if ( value==1 )
+      {
+         ierr += HYPRE_StructSMGSetZeroGuess( solver );
+      }
+      else
+      {
+         ierr += HYPRE_StructSMGSetZeroGuess( solver );
+         ++ierr;
+      }
    }
    else if ( strcmp(name,"NumPreRelax")==0 || strcmp(name,"num prerelax")==0 )
    {
@@ -454,6 +478,48 @@ impl_bHYPRE_StructSMG_GetIntValue(
    {
       ierr = HYPRE_StructSMGGetNumIterations( solver, value );
    }
+   else if ( strcmp(name,"MemoryUse")==0 || strcmp(name,"memory use")==0 )
+   {
+      ierr += HYPRE_StructSMGGetMemoryUse( solver, value );      
+   }
+   else if ( strcmp(name,"MaxIter")==0 || strcmp(name,"MaxIterations")==0 )
+   {
+      ierr += HYPRE_StructSMGGetMaxIter( solver, value );
+   }
+   else if ( strcmp(name,"RelChange")==0 || strcmp(name,"relative change test")==0 )
+   {
+      ierr += HYPRE_StructSMGGetRelChange( solver, value );
+   }
+   else if ( strcmp(name,"NonZeroGuess")==0 || strcmp(name,"nonzero guess")==0 )
+   {
+      ierr += HYPRE_StructSMGGetZeroGuess( solver, value );
+      if ( value==0 )
+         value = 1;
+      else if ( value==1 )
+         value = 0;
+      else
+         ++ierr;
+   }
+   else if ( strcmp(name,"ZeroGuess")==0 || strcmp(name,"zero guess")==0 )
+   {
+      ierr += HYPRE_StructSMGGetZeroGuess( solver, value );
+   }
+   else if ( strcmp(name,"NumPreRelax")==0 || strcmp(name,"num prerelax")==0 )
+   {
+      ierr += HYPRE_StructSMGGetNumPreRelax( solver, value );
+   }
+   else if ( strcmp(name,"NumPostRelax")==0 || strcmp(name,"num postrelax")==0 )
+   {
+      ierr += HYPRE_StructSMGGetNumPostRelax( solver, value );
+   }
+   else if ( strcmp(name,"Logging")==0 )
+   {
+      ierr += HYPRE_StructSMGGetLogging( solver, value );
+   }
+   else if ( strcmp(name,"PrintLevel")==0 )
+   {
+      ierr += HYPRE_StructSMGGetPrintLevel( solver, value );
+   }
    else
    {
       ierr = 1;
@@ -497,6 +563,10 @@ impl_bHYPRE_StructSMG_GetDoubleValue(
         strcmp(name,"RelResidualNorm")==0 )
    {
       ierr = HYPRE_StructSMGGetFinalRelativeResidualNorm( solver, value );
+   }
+   else if ( strcmp(name,"Tol")==0 || strcmp(name,"Tolerance")==0 )
+   {
+      ierr += HYPRE_StructSMGGetTol( solver, value );      
    }
    else
    {

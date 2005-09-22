@@ -59,49 +59,12 @@
 #include <assert.h>
 #include "mpi.h"
 
-/* This can't be implemented until the HYPRE_PCG Get functions are implemented.
- * But this function should be used to initialize the parameter cache
- * in the bHYPRE_PCG__data object, so that we can have bHYPRE_PCG Get
- * functions for all settable parameters...
+/* This function should be used to initialize the parameter cache
+ * in the bHYPRE_PCG__data object. */
 int impl_bHYPRE_PCG_Copy_Parameters_from_HYPRE_struct( bHYPRE_PCG self )
 {
-   int ierr = 0;
-   HYPRE_Solver solver;
-   struct bHYPRE_PCG__data * data;
-
-   data = bHYPRE_PCG__get_data( self );
-   hypre_assert( data->solver != NULL );
-   solver = data->solver;
-
-   / * double parameters: * /
-   ierr += HYPRE_PCGGetTol( solver, &(data->tol) );
-   ierr += HYPRE_PCGGetAbsoluteTolFactor( solver, &(data->atolf) );
-   ierr += HYPRE_PCGGetConvergenceFactorTol( solver, &(data->cf_tol) );
-
-   / * int parameters: * /
-   ierr += HYPRE_PCGGetMaxIter( solver, &(data->maxiter) );
-   ierr += HYPRE_PCGGetRelChange( solver, &(data->relchange) );
-   ierr += HYPRE_PCGGetTwoNorm( solver, &(data->twonorm) );
-   ierr += HYPRE_PCGGetStopCrit( solver, &(data->stop_crit) );
-
-   ierr += HYPRE_PCGGetPrintLevel( solver, &(data->printlevel) );
-   ierr += HYPRE_PCGGetLogging( solver, *(data->log_level) );
-
-   return ierr;
-}
-*/
-
-int impl_bHYPRE_PCG_Copy_Parameters_to_HYPRE_struct( bHYPRE_PCG self )
-/* Copy parameter cache from the bHYPRE_PCG__data object into the
- * HYPRE_Solver object */
-/* >>> Possible BUG: If the default (initial) values in the HYPRE code
- * are different from those used in the Babel interface, and the user
- * didn't set everything, calling this function will give the wrong
- * defaults (defining "correct" defaults to be those used in the HYPRE
- * interface).  The solution is to intialize the Babel PCG parameters
- * by calling HYPRE-level Get functions (which haven't been written
- * yet). */
-{
+   /* Parameters are copied only if they have nonsense values which tell
+      us that the user has not set them. */
    int ierr = 0;
    HYPRE_Solver solver;
    struct bHYPRE_PCG__data * data;
@@ -111,20 +74,65 @@ int impl_bHYPRE_PCG_Copy_Parameters_to_HYPRE_struct( bHYPRE_PCG self )
    solver = data->solver;
 
    /* double parameters: */
-   ierr += HYPRE_PCGSetTol( solver, data->tol );
-   ierr += HYPRE_PCGSetAbsoluteTolFactor( solver,
-                                          data->atolf );
-   ierr += HYPRE_PCGSetConvergenceFactorTol( solver,
-                                             data->cf_tol );
+   if ( data->tol == -1.234 )
+      ierr += HYPRE_PCGGetTol( solver, &(data->tol) );
+   if ( data->atolf == -1.234 )
+      ierr += HYPRE_PCGGetAbsoluteTolFactor( solver, &(data->atolf) );
+   if ( data->cf_tol == -1.234 )
+      ierr += HYPRE_PCGGetConvergenceFactorTol( solver, &(data->cf_tol) );
 
    /* int parameters: */
-   ierr += HYPRE_PCGSetMaxIter( solver, data->maxiter );
-   ierr += HYPRE_PCGSetRelChange( solver, data->relchange );
-   ierr += HYPRE_PCGSetTwoNorm( solver, data->twonorm );
-   ierr += HYPRE_PCGSetStopCrit( solver, data->stop_crit );
+   if ( data->maxiter == -1234 )
+      ierr += HYPRE_PCGGetMaxIter( solver, &(data->maxiter) );
+   if ( data->relchange == -1234 )
+      ierr += HYPRE_PCGGetRelChange( solver, &(data->relchange) );
+   if ( data->twonorm == -1234 )
+      ierr += HYPRE_PCGGetTwoNorm( solver, &(data->twonorm) );
+   if ( data->stop_crit == -1234 )
+      ierr += HYPRE_PCGGetStopCrit( solver, &(data->stop_crit) );
+   if ( data->printlevel == -1234)
+      ierr += HYPRE_PCGGetPrintLevel( solver, &(data->printlevel) );
+   if ( data->log_level == -1234 )
+      ierr += HYPRE_PCGGetLogging( solver, &(data->log_level) );
 
-   ierr += HYPRE_PCGSetPrintLevel( solver, data->printlevel );
-   ierr += HYPRE_PCGSetLogging( solver, data->log_level );
+   return ierr;
+}
+
+int impl_bHYPRE_PCG_Copy_Parameters_to_HYPRE_struct( bHYPRE_PCG self )
+/* Copy parameter cache from the bHYPRE_PCG__data object into the
+ * HYPRE_Solver object */
+{
+   /* Parameters are left at their HYPRE defaults if they have bHYPRE nonsense
+      values which tell us that the user has not set them. */
+   int ierr = 0;
+   HYPRE_Solver solver;
+   struct bHYPRE_PCG__data * data;
+
+   data = bHYPRE_PCG__get_data( self );
+   hypre_assert( data->solver != NULL );
+   solver = data->solver;
+
+   /* double parameters: */
+   if ( data->tol != -1.234 )
+      ierr += HYPRE_PCGSetTol( solver, data->tol );
+   if ( data->atolf != -1.234 )
+      ierr += HYPRE_PCGSetAbsoluteTolFactor( solver, data->atolf );
+   if ( data->cf_tol != -1.234 )
+      ierr += HYPRE_PCGSetConvergenceFactorTol( solver, data->cf_tol );
+
+   /* int parameters: */
+   if ( data->maxiter != -1234 )
+      ierr += HYPRE_PCGSetMaxIter( solver, data->maxiter );
+   if ( data->relchange != -1234 )
+      ierr += HYPRE_PCGSetRelChange( solver, data->relchange );
+   if ( data->twonorm != -1234 )
+      ierr += HYPRE_PCGSetTwoNorm( solver, data->twonorm );
+   if ( data->stop_crit != -1234 )
+      ierr += HYPRE_PCGSetStopCrit( solver, data->stop_crit );
+   if ( data->printlevel != -1234 )
+      ierr += HYPRE_PCGSetPrintLevel( solver, data->printlevel );
+   if ( data->log_level != -1234 )
+      ierr += HYPRE_PCGSetLogging( solver, data->log_level );
 
    return ierr;
 }
@@ -182,6 +190,7 @@ impl_bHYPRE_PCG__ctor(
 
    /* default values (copied from pcg.c; better to get them by
     * function calls)...*/
+/*
    data -> tol = 1.0e-6;
    data -> atolf = 0.0;
    data -> cf_tol = 0.0;
@@ -191,6 +200,18 @@ impl_bHYPRE_PCG__ctor(
    data ->log_level = 0;
    data -> printlevel = 0;
    data -> stop_crit = 0;
+*/
+   /* initial nonsense values, later we should get good values
+    * either by user calls or out of the HYPRE object...*/
+   data -> tol        = -1.234;
+   data -> atolf      = -1.234;
+   data -> cf_tol     = -1.234;
+   data -> maxiter    = -1234;
+   data -> relchange  = -1234;
+   data -> twonorm    = -1234;
+   data ->log_level   = -1234;
+   data -> printlevel = -1234;
+   data -> stop_crit  = -1234;
 
    /* set any other data components here */
    bHYPRE_PCG__set_data( self, data );
@@ -328,7 +349,8 @@ impl_bHYPRE_PCG_SetIntParameter(
     * know the vector type - and that is not known until Apply is
     * first called.  So what we do is save the parameter in a cache
     * belonging to this Babel interface, and copy it into the HYPRE
-    * struct once Apply is called.  */
+    * struct once Apply is called. (The copy into the HYPRE struct is
+    * also done in Setup) */
    int ierr = 0;
    struct bHYPRE_PCG__data * data;
    data = bHYPRE_PCG__get_data( self );
@@ -556,14 +578,8 @@ impl_bHYPRE_PCG_GetIntValue(
   /* DO-NOT-DELETE splicer.begin(bHYPRE.PCG.GetIntValue) */
   /* Insert the implementation of the GetIntValue method here... */
 
-   /* >>> We should add a Get for everything in SetParameter.  There
-    * are two values for each parameter: the bHYPRE cache, and the
-    * HYPRE value.  The cache gets copied to HYPRE when Apply is
-    * called.  What we want to return is the cache value if the
-    * corresponding Set had been called, otherwise the real (HYPRE)
-    * value.  Assuming the HYPRE interface is not used simultaneously
-    * with the Babel interface, it is sufficient to initialize the
-    * cache with whatever HYPRE is using. */
+   /* A return value of -1234 means that the parameter has not been
+      set yet.  In that case an error flag will be returned too. */
    int ierr = 0;
    HYPRE_Solver solver;
    struct bHYPRE_PCG__data * data;
@@ -572,15 +588,42 @@ impl_bHYPRE_PCG_GetIntValue(
    hypre_assert( data->solver != NULL );
    solver = data->solver;
 
+   /* The underlying HYPRE PCG object has actually been created if & only if
+      data->vector_type is non-null.  If so, make sure our local parameter cache
+      if up-to-date.  */
+   if ( data -> vector_type != NULL )
+      ierr += impl_bHYPRE_PCG_Copy_Parameters_from_HYPRE_struct( self );
+
    if ( strcmp(name,"NumIterations")==0 )
    {
       ierr += HYPRE_PCGGetNumIterations( solver, value );
+   }
+   else if ( strcmp(name,"TwoNorm")==0 || strcmp(name,"2-norm")==0 )
+   {
+      *value = data -> twonorm;
+   }
+   else if ( strcmp(name,"MaxIter")==0 || strcmp(name,"MaxIterations")==0 )
+   {
+      *value = data -> maxiter;
+   }
+   else if ( strcmp(name,"RelChange")==0 || strcmp(name,"relative change test")==0 )
+   {
+      *value = data -> relchange;
+   }
+   else if ( strcmp(name,"Logging")==0 )
+   {
+      *value = data -> log_level;
+   }
+   else if ( strcmp(name,"PrintLevel")==0 )
+   {
+      *value = data -> printlevel;
    }
    else
    {
       ierr=1;
    }
 
+   if ( *value == -1234 ) ++ierr;
    return ierr;
 
   /* DO-NOT-DELETE splicer.end(bHYPRE.PCG.GetIntValue) */
@@ -606,14 +649,8 @@ impl_bHYPRE_PCG_GetDoubleValue(
   /* DO-NOT-DELETE splicer.begin(bHYPRE.PCG.GetDoubleValue) */
   /* Insert the implementation of the GetDoubleValue method here... */
 
-   /* >>> We should add a Get for everything in SetParameter.  There
-    * are two values for each parameter: the bHYPRE cache, and the
-    * HYPRE value.  The cache gets copied to HYPRE when Apply is
-    * called.  What we want to return is the cache value if the
-    * corresponding Set had been called, otherwise the real (HYPRE)
-    * value.  Assuming the HYPRE interface is not used simultaneously
-    * with the Babel interface, it is sufficient to initialize the
-    * cache with whatever HYPRE is using. */
+   /* A return value of -1234 means that the parameter has not been
+      set yet.  In that case an error flag will be returned too. */
    int ierr = 0;
    HYPRE_Solver solver;
    struct bHYPRE_PCG__data * data;
@@ -622,6 +659,12 @@ impl_bHYPRE_PCG_GetDoubleValue(
    hypre_assert( data->solver != NULL );
    solver = data->solver;
 
+   /* The underlying HYPRE PCG object has actually been created if & only if
+      data->vector_type is non-null.  If so, make sure our local parameter cache
+      if up-to-date.  */
+   if ( data -> vector_type != NULL )
+      ierr += impl_bHYPRE_PCG_Copy_Parameters_from_HYPRE_struct( self );
+
    if ( strcmp(name,"Final Relative Residual Norm")==0 ||
         strcmp(name,"FinalRelativeResidualNorm")==0 ||
         strcmp(name,"RelResidualNorm")==0 ||
@@ -629,11 +672,25 @@ impl_bHYPRE_PCG_GetDoubleValue(
    {
       ierr += HYPRE_PCGGetFinalRelativeResidualNorm( solver, value );
    }
+   else if ( strcmp(name,"AbsoluteTolFactor")==0 )
+   {
+      *value = data -> atolf;
+   }
+   else if ( strcmp(name,"ConvergenceFactorTol")==0 )
+   {
+      /* tolerance for special test for slow convergence */
+      *value = data -> cf_tol;
+   }
+   else if ( strcmp(name,"Tolerance")==0  || strcmp(name,"Tol")==0 )
+   {
+      *value = data -> tol;
+   }
    else
    {
       ierr = 1;
    }
 
+   if ( *value == -1.234 ) ++ierr;
    return ierr;
 
   /* DO-NOT-DELETE splicer.end(bHYPRE.PCG.GetDoubleValue) */
@@ -718,6 +775,7 @@ impl_bHYPRE_PCG_Setup(
          hypre_assert( "only IJParCSRVector supported by PCG"==0 );
       }
       bHYPRE_PCG__set_data( self, data );
+      ierr += impl_bHYPRE_PCG_Copy_Parameters_from_HYPRE_struct( self );
    }
    else
    {
@@ -886,6 +944,7 @@ impl_bHYPRE_PCG_Apply(
          hypre_assert( "PCG supports only IJParCSRVector and StructVector"==0 );
       }
       bHYPRE_PCG__set_data( self, data );
+      ierr += impl_bHYPRE_PCG_Copy_Parameters_from_HYPRE_struct( self );
    }
    else
    {

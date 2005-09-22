@@ -226,11 +226,35 @@ impl_bHYPRE_StructPFMG_SetIntParameter(
    }
    else if ( strcmp(name,"NonZeroGuess")==0 || strcmp(name,"nonzero guess")==0 )
    {
-      ierr += HYPRE_StructPFMGSetNonZeroGuess( solver );
+      if ( value==0 )
+      {
+         ierr += HYPRE_StructPFMGSetZeroGuess( solver );
+      }
+      else if ( value==1 )
+      {
+         ierr += HYPRE_StructPFMGSetNonZeroGuess( solver );
+      }
+      else
+      {
+         ierr += HYPRE_StructPFMGSetNonZeroGuess( solver );
+         ++ierr;
+      }
    }
    else if ( strcmp(name,"ZeroGuess")==0 || strcmp(name,"zero guess")==0 )
    {
-      ierr += HYPRE_StructPFMGSetZeroGuess( solver );
+      if ( value==0 )
+      {
+         ierr += HYPRE_StructPFMGSetNonZeroGuess( solver );
+      }
+      else if ( value==1 )
+      {
+         ierr += HYPRE_StructPFMGSetZeroGuess( solver );
+      }
+      else
+      {
+         ierr += HYPRE_StructPFMGSetZeroGuess( solver );
+         ++ierr;
+      }
    }
    else if ( strcmp(name,"RelaxType")==0 )
    {
@@ -476,6 +500,60 @@ impl_bHYPRE_StructPFMG_GetIntValue(
    {
       ierr = HYPRE_StructPFMGGetNumIterations( solver, value );
    }
+   else if ( strcmp(name,"MaxIter")==0 || strcmp(name,"MaxIterations")==0 )
+   {
+      ierr += HYPRE_StructPFMGGetMaxIter( solver, value );
+   }
+   else if ( strcmp(name,"MaxLevels")==0 )
+   {
+      ierr += HYPRE_StructPFMGGetMaxLevels( solver, value );
+   }
+   else if ( strcmp(name,"RelChange")==0 || strcmp(name,"relative change test")==0 )
+   {
+      ierr += HYPRE_StructPFMGGetRelChange( solver, value );
+   }
+   else if ( strcmp(name,"NonZeroGuess")==0 || strcmp(name,"nonzero guess")==0 )
+   {
+      ierr += HYPRE_StructPFMGGetZeroGuess( solver, value );
+      if ( value==0 )
+         value = 1;
+      else if ( value==1 )
+         value = 0;
+      else
+         ++ierr;
+   }
+   else if ( strcmp(name,"ZeroGuess")==0 || strcmp(name,"zero guess")==0 )
+   {
+      ierr += HYPRE_StructPFMGGetZeroGuess( solver, value );
+   }
+   else if ( strcmp(name,"RelaxType")==0 )
+   {
+      ierr += HYPRE_StructPFMGGetRelaxType( solver, value );
+   }
+   else if ( strcmp(name,"RapType")==0 || strcmp(name,"rap type")==0 )
+   {
+      ierr += HYPRE_StructPFMGGetRAPType( solver, value );
+   }
+   else if ( strcmp(name,"NumPreRelax")==0 || strcmp(name,"num prerelax")==0 )
+   {
+      ierr += HYPRE_StructPFMGGetNumPreRelax( solver, value );
+   }
+   else if ( strcmp(name,"NumPostRelax")==0 || strcmp(name,"num postrelax")==0 )
+   {
+      ierr += HYPRE_StructPFMGGetNumPostRelax( solver, value );
+   }
+   else if ( strcmp(name,"SkipRelax")==0 || strcmp(name,"skip relax")==0 )
+   {
+      ierr += HYPRE_StructPFMGGetSkipRelax( solver, value );
+   }
+   else if ( strcmp(name,"Logging")==0 )
+   {
+      ierr += HYPRE_StructPFMGGetLogging( solver, value );
+   }
+   else if ( strcmp(name,"PrintLevel")==0 )
+   {
+      ierr += HYPRE_StructPFMGGetPrintLevel( solver, value );
+   }
    else
    {
       ierr = 1;
@@ -519,6 +597,10 @@ impl_bHYPRE_StructPFMG_GetDoubleValue(
         strcmp(name,"RelResidualNorm")==0 )
    {
       ierr = HYPRE_StructPFMGGetFinalRelativeResidualNorm( solver, value );
+   }
+   else if ( strcmp(name,"Tol")==0 || strcmp(name,"Tolerance")==0 )
+   {
+      ierr += HYPRE_StructPFMGGetTol( solver, value );      
    }
    else
    {

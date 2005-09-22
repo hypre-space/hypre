@@ -422,7 +422,33 @@ impl_bHYPRE_ParaSails_GetIntValue(
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.ParaSails.GetIntValue) */
   /* Insert the implementation of the GetIntValue method here... */
-   return 1;
+
+   int ierr = 0;
+   HYPRE_Solver solver;
+   struct bHYPRE_ParaSails__data * data;
+
+   data = bHYPRE_ParaSails__get_data( self );
+   solver = data->solver;
+
+   if ( strcmp(name,"Nlevels")==0 )
+   {
+      ierr += HYPRE_ParaSailsGetNlevels( solver, value );
+   }
+   else if ( strcmp(name,"Sym")==0 )
+   {
+      ierr += HYPRE_ParaSailsGetSym( solver, value );
+   }
+   else if ( strcmp(name,"Reuse")==0 )
+   {
+      ierr += HYPRE_ParaSailsGetReuse( solver, value );
+   }
+   else if ( strcmp(name,"Logging")==0 )
+   {
+      ierr += HYPRE_ParaSailsGetLogging( solver, value );
+   }
+
+   return ierr;
+
   /* DO-NOT-DELETE splicer.end(bHYPRE.ParaSails.GetIntValue) */
 }
 
@@ -445,6 +471,33 @@ impl_bHYPRE_ParaSails_GetDoubleValue(
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.ParaSails.GetDoubleValue) */
   /* Insert the implementation of the GetDoubleValue method here... */
+
+   int ierr = 0;
+   HYPRE_Solver solver;
+   struct bHYPRE_ParaSails__data * data;
+
+   data = bHYPRE_ParaSails__get_data( self );
+   solver = data->solver;
+
+   if ( strcmp(name,"Thresh")==0 )
+   {
+      ierr += HYPRE_ParaSailsGetThresh( solver, value );
+   }
+   else if (strcmp(name,"Loadbal")==0 )
+   {
+      ierr += HYPRE_ParaSailsGetLoadbal( solver, value );
+   }
+   else if (strcmp(name,"Filter")==0 )
+   {
+      ierr += HYPRE_ParaSailsGetFilter( solver, value );
+   }
+   else
+   {
+      ierr = 1;
+   }
+
+   return ierr;
+
    return 1;
   /* DO-NOT-DELETE splicer.end(bHYPRE.ParaSails.GetDoubleValue) */
 }
