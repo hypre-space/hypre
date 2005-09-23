@@ -12,7 +12,7 @@ perform_test()
 {
   echo ""
   echo "======================================================================"
-  echo "Running tests on $HYPRE_RUN_MACHINE"
+  echo "Running tests $HYPRE_MACHINE_COMMANDS in directory $HYPRE_REMOTE_DIR"
   echo "======================================================================"
   echo ""
 
@@ -111,8 +111,8 @@ usage ()
 DEBUGMODE=""
 HYPRE_MESSAGE=""
 COMPILERSELECT=""
-HYPRE_AUTOTEST_DIR="`pwd`"
-export HYPRE_MESSAGE COMPILERSELECT HYPRE_AUTOTEST_DIR
+HYPRE_REMOTE_DIR=""
+export HYPRE_MESSAGE COMPILERSELECT HYPRE_REMOTE_DIR
 
 
 #=============================================================================
@@ -143,8 +143,8 @@ umask u=rwx,g=rx,o=rx
 
 
 #=============================================================================
-# Check out the repository into the HYPRE_AUTOTEST_DIR directory, if requested
-# the repository resides on the CASC cluster; before cheking out a new version
+# Check out the repository into the HYPRE_REMOTE_DIR directory, if requested.
+# The repository resides on the CASC cluster; before checking out a new version
 # existing versions are removed.
 #=============================================================================
 if [ "$1" = "-nocvs" ]
@@ -271,14 +271,14 @@ do
         HYPRE_MACHINE_COMMANDS="-mb 1 -nsde 1 -a 2 -cf"
         HYPRE_MESSAGE='PRIMARY[default]'
         COMPILERSELECT="default"
-	perform_test
+        ./autotest_test $HYPRE_MACHINE_COMMANDS -v $HYPRE_MESSAGE
         shift;;
     -tuxlocal)
         HYPRE_ARCH="linux"
         HYPRE_COMPILE_MACHINE="tux149"
         HYPRE_RUN_MACHINE=""
-        HYPRE_REMOTE_DIR="`pwd`/linear_solvers"
-        HYPRE_MACHINE_COMMANDS="-b 1 -di 2"
+        HYPRE_REMOTE_DIR=""
+        HYPRE_MACHINE_COMMANDS="-a 2"
         HYPRE_MESSAGE='LOCAL TEST[default]'
         COMPILERSELECT="default"
         ./autotest_test $HYPRE_MACHINE_COMMANDS -v $HYPRE_MESSAGE

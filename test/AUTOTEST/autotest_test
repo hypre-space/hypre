@@ -42,41 +42,32 @@ initialize_variables ()
 
 #
 #    Set current directory if this script (autotest_test) is not being run by the 
-#    autotest script, which will cd to the directory ${HYPRE_AUTOTEST_DIR}.  
+#    autotest script, which will cd to the directory ${HYPRE_REMOTE_DIR}.  
 #    This script can be run independently from a directory one level higher 
 #    than "linear_solvers".
-  if [ -z "${HYPRE_AUTOTEST_DIR}" -o "${HYPRE_AUTOTEST_DIR}" = "" ] ; then
-     HYPRE_AUTOTEST_DIR=`pwd`
-     if [ -d ${HYPRE_AUTOTEST_DIR}/linear_solvers/test ] ; then
-        HYPRE_AUTOTEST_DIR=${HYPRE_AUTOTEST_DIR}
-     elif [ -d ${HYPRE_AUTOTEST_DIR}/../linear_solvers/test ] ; then
-        HYPRE_AUTOTEST_DIR=${HYPRE_AUTOTEST_DIR}/..
-     elif [ -d ${HYPRE_AUTOTEST_DIR}/../../linear_solvers/test ] ; then
-        HYPRE_AUTOTEST_DIR=${HYPRE_AUTOTEST_DIR}/../..
-     fi
+  if [ -z "${HYPRE_REMOTE_DIR}" -o "${HYPRE_REMOTE_DIR}" = "" ] ; then
+     HYPRE_REMOTE_DIR=`pwd`
   else			# assume we're executing from autotest
-     if [ ! -d ${HYPRE_AUTOTEST_DIR} ] ; then
-        if [ ! -d ./linear_solvers ] ; then
-           echo "$0: HYPRE_AUTOTEST_DIR is not defined"
-           exit 2
-        fi
+     if [ ! -d ${HYPRE_REMOTE_DIR} ] ; then
+        echo "HYPRE_REMOTE_DIR is not defined"
+        exit 2
      fi
   fi
  
 #
 # Define directory that contains the source codes
-  if [ -d ${HYPRE_AUTOTEST_DIR}/linear_solvers/test ] ; then
+  if [ -d ${HYPRE_REMOTE_DIR}/linear_solvers/test ] ; then
     SRC=linear_solvers
   fi
 
-  if [ -d ${HYPRE_AUTOTEST_DIR}/src/test ] ; then
+  if [ -d ${HYPRE_REMOTE_DIR}/src/test ] ; then
     SRC=src
   fi
 
 #
 # Set standard directories
-  StdBuildDir=${HYPRE_AUTOTEST_DIR}/${SRC}
-  StdTestDir=${HYPRE_AUTOTEST_DIR}/${SRC}/test
+  StdBuildDir=${HYPRE_REMOTE_DIR}/${SRC}
+  StdTestDir=${HYPRE_REMOTE_DIR}/${SRC}/test
 
 #
 # Define architecture of current platform
@@ -298,7 +289,7 @@ mail_summary () {
   AutotestFailureCount=0
   CLIST=""; ELIST=""
   DWRNCNT=0; DERRCNT=0
-  cd $HYPRE_AUTOTEST_DIR
+  cd $HYPRE_REMOTE_DIR
   SUMFILE="autotest.$HYPRE_ARCH.`date '+%Y%m%d'`"
 
   if [ -z "$HYPRE_COMPILE_MACHINE" -o "$HYPRE_COMPILE_MACHINE" = "" ] ; then
@@ -315,7 +306,7 @@ mail_summary () {
   printf "Compile machine:    %s\n" $HYPRE_COMPILE_MACHINE >> $SUMFILE
   printf "Execute machine:    %s\n" $HYPRE_RUN_MACHINE >> $SUMFILE
   printf "Operating system:   `uname -a`\n" >> $SUMFILE
-  printf "Directory:          %s\n" $HYPRE_AUTOTEST_DIR >> $SUMFILE
+  printf "Directory:          %s\n" $HYPRE_REMOTE_DIR >> $SUMFILE
   printf "%s\n" "--------------------------------------------" >> $SUMFILE
   printf "Compile summary: Status: Warnings: Errors\n" >> $SUMFILE
 #
@@ -521,7 +512,7 @@ mail_errors () {
   if [ "$MailCmd" = "yes" ] ; then
     if [ "$HYPRE_SEND_MAIL" = "yes" ] ; then
       echo "Autotest mailing error messages"
-      cd $HYPRE_AUTOTEST_DIR
+      cd $HYPRE_REMOTE_DIR
       for i in *.err \
         ${SRC}/*.err \
         ${SRC}/test/*.err \
@@ -578,11 +569,6 @@ confbuildtest ()
    BuildOpt=$1	 ConfigOption=$2  MessageStr=$3
 
 #
-# Set directory for storing built files
-   HYPRE_BUILD_DIR=${HYPRE_AUTOTEST_DIR}/${SRC}/hypre
-   export HYPRE_BUILD_DIR
-
-#
 # Configure Section
    seconds; TIME=$SECS
    echo "Autotest starting configure of $MessageStr"
@@ -620,7 +606,7 @@ confbuildtest ()
    if [ ${BuildOpt} -eq $Run ]
    then
       echo "Autotest starting execution of $MessageStr"
-      cd ${HYPRE_AUTOTEST_DIR}/${SRC}/test
+      cd $StdTestDir
       $MAKE all 1>> ${Hdr}.${MessageStr}.all.log \
                 2>> ${Hdr}.${MessageStr}.all.err
 
@@ -635,7 +621,7 @@ confbuildtest ()
       else
          ssh ${HYPRE_RUN_MACHINE} "\
          (\
-          cd ${HYPRE_AUTOTEST_DIR}/${SRC}/test;\
+          cd $StdTestDir
           [ -r ./AUTOTEST/env.${HYPRE_ARCH} ] && . ./AUTOTEST/env.${HYPRE_ARCH};\
           if [ "$DEBUG_MODE" = "yes" ]
           then
