@@ -57,7 +57,7 @@ UTIL_FILES =\
  timing.c\
  umalloc_local.c
 
-FILES = ${UTIL_FILES} ${HYPRE_BLASFILES} ${HYPRE_LAPACKFILS1} ${HYPRE_LAPACKFILS2} ${HYPRE_LAPACKFILS3}
+FILES = ${UTIL_FILES}
 
 OBJS = ${FILES:.c=.o}
 
@@ -70,17 +70,12 @@ all: libHYPRE_utilities.a
 	cp -fp $(srcdir)/utilities.h $(HYPRE_BUILD_DIR)/include
 	cp -fp $(srcdir)/fortran*.h $(HYPRE_BUILD_DIR)/include
 	cp -fp libHYPRE* $(HYPRE_BUILD_DIR)/lib
-	cp -fp *.o ${HYPRE_SRC_TOP_DIR}/lib
-	cp -fp ${HYPRE_SRC_TOP_DIR}/blas/*.h $(HYPRE_BUILD_DIR)/include
-	cp -fp ${HYPRE_SRC_TOP_DIR}/lapack/*.h $(HYPRE_BUILD_DIR)/include
 
 install: libHYPRE_utilities.a 
 	cp -fp $(srcdir)/HYPRE_*.h $(HYPRE_INC_INSTALL)
 	cp -fp $(srcdir)/utilities.h $(HYPRE_INC_INSTALL)
 	cp -fp $(srcdir)/fortran*.h $(HYPRE_INC_INSTALL)
 	cp -fp libHYPRE* $(HYPRE_LIB_INSTALL)
-	cp -fp ${HYPRE_SRC_TOP_DIR}/blas/*.h $(HYPRE_INC_INSTALL)/include
-	cp -fp ${HYPRE_SRC_TOP_DIR}/lapack/*.h $(HYPRE_INC_INSTALL)/include
 
 clean:
 	rm -f *.o libHYPRE* f2c.h *blas.h *lapack.h 
