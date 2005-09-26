@@ -114,6 +114,9 @@ COMPILERSELECT=""
 HYPRE_REMOTE_DIR=""
 export HYPRE_MESSAGE COMPILERSELECT HYPRE_REMOTE_DIR
 
+CVSROOT=/home/casc/repository
+export CVSROOT
+
 
 #=============================================================================
 # Parse command line arguments.  If no args, print usage info and exit.
