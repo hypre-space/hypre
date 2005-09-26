@@ -52,11 +52,6 @@ all: libHYPRE_krylov.a
 	cp -fp $(srcdir)/HYPRE_MatvecFunctions.h $(HYPRE_BUILD_DIR)/include
 	cp -fp $(srcdir)/*lobpcg*.h $(HYPRE_BUILD_DIR)/include
 	cp -fp libHYPRE* $(HYPRE_BUILD_DIR)/lib
-	@\
-	for file in ${OBJS}; \
-	do \
-	   (cp -fp $$file ${HYPRE_SRC_TOP_DIR}/lib); \
-	done
 
 install: all
 	cp -fp $(srcdir)/krylov.h $(HYPRE_INC_INSTALL)

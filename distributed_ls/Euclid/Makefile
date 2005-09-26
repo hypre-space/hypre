@@ -96,11 +96,6 @@ OBJS = ${FILES:.c=.o}
 
 all: libHYPRE_Euclid.a 
 	cp -fp libHYPRE* $(HYPRE_BUILD_DIR)/lib
-	@\
-	for file in ${OBJS}; \
-	do \
-	  (cp -fp $$file ${HYPRE_SRC_TOP_DIR}/lib); \
-	done
 
 install: libHYPRE_Euclid.a 
 	cp -fp libHYPRE* $(HYPRE_LIB_INSTALL)

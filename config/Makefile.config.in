@@ -84,18 +84,16 @@ HYPRE_BABEL_DIRS = @BABELDIR@
 ##################################################################
 ##  LAPACK Library Flags 
 ##################################################################
+HYPRE_LAPACK_SRC_DIR = @HYPRE_LAPACK_SRC_DIR@
 LAPACKLIBS = @LAPACKLIBS@
 LAPACKLIBDIRS = @LAPACKLIBDIRS@
-HYPRE_LAPACKFILS1 = @HYPRELAPACKFILS1@
-HYPRE_LAPACKFILS2 = @HYPRELAPACKFILS2@
-HYPRE_LAPACKFILS3 = @HYPRELAPACKFILS3@
 
 ##################################################################
 ##  BLAS Library Flags 
 ##################################################################
+HYPRE_BLAS_SRC_DIR = @HYPRE_BLAS_SRC_DIR@
 BLASLIBS = @BLASLIBS@
 BLASLIBDIRS = @BLASLIBDIRS@
-HYPRE_BLASFILES = @HYPREBLASFILES@
 
 ##################################################################
 ##  MPI options

@@ -125,31 +125,3 @@ AC_DEFUN([HYPRE_FIND_BLAS],
   LDFLAGS="$hypre_save_LDFLGS"
 
 ])dnl HYPRE_FIND_BLAS
-
-
-dnl @synopsis HYPRE_SET_BLAS_FILES([ACTION-IF-FOUND[, ACTION-IF-NOT-FOUND]])
-dnl
-dnl This macro defines the BLAS routines needed internally by hypre.  The source
-dnl code is in the blas subdirectory of linear_solvers.
-dnl
-AC_DEFUN([HYPRE_SET_BLAS_FILES],
-[
-
-#*******************************************************
-#   Source files
-#*******************************************************
- FL1="HYPRE_TOP_SRC_DIR/blas/blas_utils.c HYPRE_TOP_SRC_DIR/blas/dasum.c"
- FL2="HYPRE_TOP_SRC_DIR/blas/daxpy.c HYPRE_TOP_SRC_DIR/blas/dcopy.c"
- FL3="HYPRE_TOP_SRC_DIR/blas/ddot.c HYPRE_TOP_SRC_DIR/blas/dgemm.c"
- FL4="HYPRE_TOP_SRC_DIR/blas/dgemv.c HYPRE_TOP_SRC_DIR/blas/dger.c"
- FL5="HYPRE_TOP_SRC_DIR/blas/dnrm2.c HYPRE_TOP_SRC_DIR/blas/drot.c"
- FL6="HYPRE_TOP_SRC_DIR/blas/dscal.c HYPRE_TOP_SRC_DIR/blas/dswap.c"
- FL7="HYPRE_TOP_SRC_DIR/blas/dsymm.c HYPRE_TOP_SRC_DIR/blas/dsymv.c"
- FL8="HYPRE_TOP_SRC_DIR/blas/dsyr2.c HYPRE_TOP_SRC_DIR/blas/dsyr2k.c"
- FL9="HYPRE_TOP_SRC_DIR/blas/dsyrk.c HYPRE_TOP_SRC_DIR/blas/dtrmm.c"
- F10="HYPRE_TOP_SRC_DIR/blas/dtrmv.c HYPRE_TOP_SRC_DIR/blas/dtrsm.c"
- F11="HYPRE_TOP_SRC_DIR/blas/dtrsv.c HYPRE_TOP_SRC_DIR/blas/idamax.c"
-
- HYPREBLASFILES="$FL1 $FL2 $FL3 $FL4 $FL5 $FL6 $FL7 $FL8 $FL9 $F10 $F11"
-
-])dnl HYPRE_SET_BLAS_FILES

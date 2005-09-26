@@ -39,11 +39,6 @@ OBJS = ${FILES:.c=.o}
 all: libHYPRE_MatrixMatrix.a
 	cp -fp $(srcdir)/HYPRE_*.h $(HYPRE_BUILD_DIR)/include
 	cp -fp libHYPRE* $(HYPRE_BUILD_DIR)/lib
-	@\
-	for file in ${OBJS}; \
-	do \
-	  (cp -fp $$file ${HYPRE_SRC_TOP_DIR}/lib); \
-	done
 
 install: libHYPRE_MatrixMatrix.a
 	cp -fp $(srcdir)/HYPRE_*.h $(HYPRE_INC_INSTALL)

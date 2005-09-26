@@ -47,8 +47,11 @@ OBJS = ${BLAS_FILES:.c=.o}
 ##################################################################
 
 all: ${OBJS}
+	cp -fp *.o ${HYPRE_SRC_TOP_DIR}/utilities
+	cp -fp *.h ${HYPRE_BUILD_DIR}/include
 
 install: all
+	cp -fp *.h ${HYPRE_INC_INSTALL}/include
 
 clean:
 	rm -f *.o
