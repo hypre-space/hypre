@@ -12,7 +12,9 @@ include config/Makefile.config
 
 
 # These are the directories for internal blas, lapack and general utilities
-HYPRE_BASIC_DIRS =  utilities
+HYPRE_BASIC_DIRS = ${HYPRE_BLAS_SRC_DIR}\
+ ${HYPRE_LAPACK_SRC_DIR}\
+  utilities
 
 # These are the directories for the generic Krylov solvers
 HYPRE_KRYLOV_DIRS = krylov

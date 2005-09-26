@@ -826,34 +826,6 @@ AC_DEFUN([HYPRE_FIND_BLAS],
 
 ])dnl HYPRE_FIND_BLAS
 
-
-dnl @synopsis HYPRE_SET_BLAS_FILES([ACTION-IF-FOUND[, ACTION-IF-NOT-FOUND]])
-dnl
-dnl This macro defines the BLAS routines needed internally by hypre.  The source
-dnl code is in the blas subdirectory of linear_solvers.
-dnl
-AC_DEFUN([HYPRE_SET_BLAS_FILES],
-[
-
-#*******************************************************
-#   Source files
-#*******************************************************
- FL1="HYPRE_TOP_SRC_DIR/blas/blas_utils.c HYPRE_TOP_SRC_DIR/blas/dasum.c"
- FL2="HYPRE_TOP_SRC_DIR/blas/daxpy.c HYPRE_TOP_SRC_DIR/blas/dcopy.c"
- FL3="HYPRE_TOP_SRC_DIR/blas/ddot.c HYPRE_TOP_SRC_DIR/blas/dgemm.c"
- FL4="HYPRE_TOP_SRC_DIR/blas/dgemv.c HYPRE_TOP_SRC_DIR/blas/dger.c"
- FL5="HYPRE_TOP_SRC_DIR/blas/dnrm2.c HYPRE_TOP_SRC_DIR/blas/drot.c"
- FL6="HYPRE_TOP_SRC_DIR/blas/dscal.c HYPRE_TOP_SRC_DIR/blas/dswap.c"
- FL7="HYPRE_TOP_SRC_DIR/blas/dsymm.c HYPRE_TOP_SRC_DIR/blas/dsymv.c"
- FL8="HYPRE_TOP_SRC_DIR/blas/dsyr2.c HYPRE_TOP_SRC_DIR/blas/dsyr2k.c"
- FL9="HYPRE_TOP_SRC_DIR/blas/dsyrk.c HYPRE_TOP_SRC_DIR/blas/dtrmm.c"
- F10="HYPRE_TOP_SRC_DIR/blas/dtrmv.c HYPRE_TOP_SRC_DIR/blas/dtrsm.c"
- F11="HYPRE_TOP_SRC_DIR/blas/dtrsv.c HYPRE_TOP_SRC_DIR/blas/idamax.c"
-
- HYPREBLASFILES="$FL1 $FL2 $FL3 $FL4 $FL5 $FL6 $FL7 $FL8 $FL9 $F10 $F11"
-
-])dnl HYPRE_SET_BLAS_FILES
-
 dnl @synopsis HYPRE_FIND_LAPACK([ACTION-IF-FOUND[, ACTION-IF-NOT-FOUND]])
 dnl
 dnl This macro looks for a library that implements the LAPACK
@@ -968,65 +940,4 @@ AC_DEFUN([HYPRE_FIND_LAPACK],
   LDFLAGS="$hypre_save_LDFLGS"
 
 ])dnl HYPRE_FIND_LAPACK
-
-
-dnl @synopsis HYPRE_SET_LAPACK_FILES([ACTION-IF-FOUND[, ACTION-IF-NOT-FOUND]])
-dnl
-dnl This macro defines the LAPACK routiens needed internally by hypre.  The
-dnl source code is inthe lapack subdirectory of linear_solvers.
-
-AC_DEFUN([HYPRE_SET_LAPACK_FILES], 
-[
-
-#***************************************************************
-#  Source files 
-#***************************************************************
-  FL1="HYPRE_TOP_SRC_DIR/lapack/dbdsqr.c HYPRE_TOP_SRC_DIR/lapack/dgebd2.c"
-  FL2="HYPRE_TOP_SRC_DIR/lapack/dgebrd.c HYPRE_TOP_SRC_DIR/lapack/dgelq2.c"
-  FL3="HYPRE_TOP_SRC_DIR/lapack/dgelqf.c HYPRE_TOP_SRC_DIR/lapack/dgels.c"
-  FL4="HYPRE_TOP_SRC_DIR/lapack/dgeqr2.c HYPRE_TOP_SRC_DIR/lapack/dgeqrf.c"
-  FL5="HYPRE_TOP_SRC_DIR/lapack/dgesvd.c HYPRE_TOP_SRC_DIR/lapack/dlabad.c"
-  FL6="HYPRE_TOP_SRC_DIR/lapack/dlabrd.c HYPRE_TOP_SRC_DIR/lapack/dlacpy.c"
-  FL7="HYPRE_TOP_SRC_DIR/lapack/dlae2.c HYPRE_TOP_SRC_DIR/lapack/dlaev2.c"
-  FL8="HYPRE_TOP_SRC_DIR/lapack/dlamch.c HYPRE_TOP_SRC_DIR/lapack/dlange.c"
-  FL9="HYPRE_TOP_SRC_DIR/lapack/dlanst.c HYPRE_TOP_SRC_DIR/lapack/dlansy.c"
-  F10="HYPRE_TOP_SRC_DIR/lapack/dlapy2.c HYPRE_TOP_SRC_DIR/lapack/dlarfb.c"
-  F11="HYPRE_TOP_SRC_DIR/lapack/dlarf.c HYPRE_TOP_SRC_DIR/lapack/dlarfg.c"
-  F12="HYPRE_TOP_SRC_DIR/lapack/dlarft.c HYPRE_TOP_SRC_DIR/lapack/dlartg.c"
-  F13="HYPRE_TOP_SRC_DIR/lapack/dlas2.c HYPRE_TOP_SRC_DIR/lapack/dlascl.c"
-  F14="HYPRE_TOP_SRC_DIR/lapack/dlaset.c HYPRE_TOP_SRC_DIR/lapack/dlasq1.c"
-  F15="HYPRE_TOP_SRC_DIR/lapack/dlasq2.c HYPRE_TOP_SRC_DIR/lapack/dlasq3.c"
-
-  F16="HYPRE_TOP_SRC_DIR/lapack/dlasq4.c HYPRE_TOP_SRC_DIR/lapack/dlasq5.c"
-  F17="HYPRE_TOP_SRC_DIR/lapack/dlasq6.c HYPRE_TOP_SRC_DIR/lapack/dlasr.c"
-  F18="HYPRE_TOP_SRC_DIR/lapack/dlasrt.c HYPRE_TOP_SRC_DIR/lapack/dlassq.c"
-  F19="HYPRE_TOP_SRC_DIR/lapack/dlasv2.c HYPRE_TOP_SRC_DIR/lapack/dlatrd.c"
-  F20="HYPRE_TOP_SRC_DIR/lapack/dorg2l.c HYPRE_TOP_SRC_DIR/lapack/dorg2r.c"
-  F21="HYPRE_TOP_SRC_DIR/lapack/dorgbr.c HYPRE_TOP_SRC_DIR/lapack/dorgl2.c"
-  F22="HYPRE_TOP_SRC_DIR/lapack/dorglq.c HYPRE_TOP_SRC_DIR/lapack/dorgql.c"
-  F23="HYPRE_TOP_SRC_DIR/lapack/dorgqr.c HYPRE_TOP_SRC_DIR/lapack/dorgtr.c"
-  F24="HYPRE_TOP_SRC_DIR/lapack/dorm2r.c HYPRE_TOP_SRC_DIR/lapack/dormbr.c"
-  F25="HYPRE_TOP_SRC_DIR/lapack/dorml2.c HYPRE_TOP_SRC_DIR/lapack/dormlq.c"
-  F26="HYPRE_TOP_SRC_DIR/lapack/dormqr.c HYPRE_TOP_SRC_DIR/lapack/dpotf2.c"
-  F27="HYPRE_TOP_SRC_DIR/lapack/dpotrf.c HYPRE_TOP_SRC_DIR/lapack/dpotrs.c"
-  F28="HYPRE_TOP_SRC_DIR/lapack/dsteqr.c HYPRE_TOP_SRC_DIR/lapack/dsterf.c"
-  F29="HYPRE_TOP_SRC_DIR/lapack/dsyev.c HYPRE_TOP_SRC_DIR/lapack/dsygs2.c"
-  F30="HYPRE_TOP_SRC_DIR/lapack/dsygst.c HYPRE_TOP_SRC_DIR/lapack/dsygv.c"
-
-  F31="HYPRE_TOP_SRC_DIR/lapack/dsytd2.c HYPRE_TOP_SRC_DIR/lapack/dsytrd.c"
-  F32="HYPRE_TOP_SRC_DIR/lapack/ieeeck.c HYPRE_TOP_SRC_DIR/lapack/ilaenv.c"
-  F33="HYPRE_TOP_SRC_DIR/lapack/lapack_utils.c"
-  F34="HYPRE_TOP_SRC_DIR/lapack/lsame.c HYPRE_TOP_SRC_DIR/lapack/xerbla.c"
-
-  Fil0="$FL1 $FL2 $FL3 $FL4 $FL5 $FL6 $FL7 $FL8 $FL9 $F10"
-  Fil1="$F11 $F12 $F13 $F14 $F15"
-  Fil2="$F16 $F17 $F18 $F19 $F20 $F21 $F22 $F23 $F24 $F25"
-  Fil3="$F26 $F27 $F28 $F29 $F30"
-  Fil4="$F31 $F32 $F33 $F34"
-
-  HYPRELAPACKFILS1="$Fil0 $Fil1"
-  HYPRELAPACKFILS2="$Fil2 $Fil3"
-  HYPRELAPACKFILS3="$Fil4"
-
-])dnl HYPRE_SET_LAPACK_FILES
 
