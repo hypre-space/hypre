@@ -494,9 +494,9 @@ impl_bHYPRE_StructSMG_GetIntValue(
    {
       ierr += HYPRE_StructSMGGetZeroGuess( solver, value );
       if ( value==0 )
-         value = 1;
+         *value = 1;
       else if ( value==1 )
-         value = 0;
+         *value = 0;
       else
          ++ierr;
    }

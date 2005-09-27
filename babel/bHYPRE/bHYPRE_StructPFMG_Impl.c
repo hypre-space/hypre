@@ -516,9 +516,9 @@ impl_bHYPRE_StructPFMG_GetIntValue(
    {
       ierr += HYPRE_StructPFMGGetZeroGuess( solver, value );
       if ( value==0 )
-         value = 1;
+         *value = 1;
       else if ( value==1 )
-         value = 0;
+         *value = 0;
       else
          ++ierr;
    }
