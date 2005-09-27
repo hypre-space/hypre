@@ -32,7 +32,7 @@ initialize_variables ()
   HYPRE_DEFAULT_EMAIL="hill66@llnl.gov"
   HYPRE_ALL_EMAIL="abaker@llnl.gov\
                    rfalgout@llnl.gov\
-                   painter@llnl.gov\
+                   painter1@llnl.gov\
                    hill66@llnl.gov\
                    lee123@llnl.gov\
                    kolev1@llnl.gov\
