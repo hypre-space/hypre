@@ -1,25 +1,27 @@
 The file configure.ac differs from the normal Babel configure.ac: it
 has a few changes to support hypre.  Search for "hypre" to see them.
+The changes are mostly to disable Fortran90 and Java, because they are
+not available on all platforms with hypre.  You can't override this
+with a configure argument.  I have requested a change in the Babel
+build system which would make all this unnecessary.
 
-The file configure was generated from configure.ac with autoconf
-version 2.59.  Hypre developers may use it as follows:
+If babel-runtime is updated, it is important to regenerate "configure"
+using our nonstandard configure.ac.  To do so, use autoconf
+version 2.59.  Hypre developers with the right permissions may use it as follows:
 /usr/casc/babel/apps/autoconf-2.59/bin/autoconf configure.ac > configure
+If you don't have access to that directory, download and build your
+own copy of autoconf.
 
 The configure script in this directory will be run by the configure
 script in the main hypre directory and should not be run
 independently.  That is to ensure that the two configure scripts use
 the same compiler settings.
 
-On CASC Linux machines, run configure with the arguments
- --with-babel --disable-fortran90
-as the Fortran compiler doesn't support Fortran90.
-Note that Python is also disabled even if you configure hypre with --enable-shared
-because Numerical Python (NumPy) isn't installed!
-
-On CASC Linux machines, make sure you have your Java environment set
-up by doing source /usr/apps/java/default/setup.csh (or setup.sh if
-you run bash)
-
+The "assert" macro is frequently invoked here.  This violates hypre
+policy, which is to use hypre_assert instead (the difference is that
+assert defaults to on, hypre_assert defaults to off; we have customers
+who complain if asserts are on and don't want to have to turn them
+off).  I don't have a solution.
 
 ---- the rest of this file is from an older readme file, not recently
      tested ... 

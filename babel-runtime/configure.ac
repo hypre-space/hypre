@@ -39,6 +39,9 @@ with_java=yes
 msgs="
 	Recap:"
 
+with_fortran90=no
+enable_fortran90=no
+disable-fortran90
 ############################################################
 #
 # Basic startup stuff
@@ -61,8 +64,8 @@ LLNL_CHECK_AUTOCONF(2.59)
 # Additions for hypre
 #
 AC_PREFIX_DEFAULT(`pwd`/../hypre)
-with_fortran90=no
-# ... was with_fortran90=yes    which doesn't work on frost
+enable_fortran90=no
+enable_java=no
 enable_shared=no
 
 ############################################################
