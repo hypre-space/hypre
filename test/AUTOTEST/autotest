@@ -278,7 +278,7 @@ do
         HYPRE_MACHINE_COMMANDS="-mb 1 -nsde 1 -a 2 -cf"
         HYPRE_MESSAGE='PRIMARY[default]'
         COMPILERSELECT="default"
-        ./autotest_test $HYPRE_MACHINE_COMMANDS -v $HYPRE_MESSAGE
+	perform_test
         shift;;
     -tuxlocal)
         HYPRE_ARCH="linux"
