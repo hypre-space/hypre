@@ -23,11 +23,10 @@ perform_test()
 #=============================================================================
   if [ "${HYPRE_COMPILE_MACHINE}" = "`hostname | sed 's/\..*$//'`" ]
   then
-     HYPRE_CURRENT_DIR="`pwd`"
-     if [ "${HYPRE_REMOTE_DIR}" != "${HYPRE_CURRENT_DIR}" ]
+     if [ "${HYPRE_REMOTE_DIR}" != "${HYPRE_AUTOTEST_EXECUTE_DIR}" ]
      then
         rm -fR ${HYPRE_REMOTE_DIR}/linear_solvers
-        cp -fpr linear_solvers ${HYPRE_REMOTE_DIR}
+        cp -fpr ${HYPRE_AUTOTEST_EXECUTE_DIR}/linear_solvers ${HYPRE_REMOTE_DIR}
      fi
      cd ${HYPRE_REMOTE_DIR}
      [ -f linear_solvers/test/AUTOTEST/env.${HYPRE_ARCH} ] && \
@@ -115,8 +114,8 @@ usage ()
 DEBUGMODE=""
 HYPRE_MESSAGE=""
 COMPILERSELECT=""
-HYPRE_REMOTE_DIR=""
-export HYPRE_MESSAGE COMPILERSELECT HYPRE_REMOTE_DIR
+HYPRE_AUTOTEST_EXECUTE_DIR="`pwd`"
+export HYPRE_MESSAGE COMPILERSELECT HYPRE_AUTOTEST_EXECUTE_DIR
 
 CVSROOT=/home/casc/repository
 export CVSROOT
