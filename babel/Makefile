@@ -27,6 +27,7 @@ all:
 	  fi; \
 	done
 	cp -fp ${HYPRE_BABEL_RUNTIME_SIDL_DIR}/*.h ${HYPRE_BUILD_DIR}/include
+	cp -fp ${HYPRE_BABEL_RUNTIME_SIDL_DIR}/.libs/*.a ${HYPRE_BUILD_DIR}/lib
 
 install:
 	@ \
