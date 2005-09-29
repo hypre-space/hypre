@@ -9,10 +9,29 @@
 
 /******************************************************************************
  *
- * Routines for generating random numbers.
+ * This file contains routines that implement a pseudo-random number generator
+ * detailed in the following paper.
+ *
+ * @article{RNG_Park_Miller,
+ *   author = {S. K. Park and K. W. Miller},
+ *   title = {Random number generators: good ones are hard to find},
+ *   journal = {Commun. ACM},
+ *   volume = {31},
+ *   number = {10},
+ *   year = {1988},
+ *   pages = {1192--1201},
+ * }
+ *
+ * This RNG has been shown to appear fairly random, it is a full period
+ * generating function (the sequence uses all of the values available to it up
+ * to 2147483647), and can be implemented on any architecture using 32-bit
+ * integers. The implementation in this file will not overflow for 32-bit
+ * arithmetic, which all modern computers should support.
+ *
+ * @author David Alber
+ * @date March 2005
  *
  *****************************************************************************/
-
 
 /*--------------------------------------------------------------------------
  * Static variables
@@ -20,30 +39,45 @@
 
 static int Seed = 13579;
 
-#define L 1664525
-#define M 1024
+#define a  16807
+#define m  2147483647
+#define q  127773
+#define r  2836
 
 /*--------------------------------------------------------------------------
- * hypre_SeedRand:
- *   The seed must always be positive.
+ * Initializes the pseudo-random number generator to a place in the sequence.
  *
- *   Note: the internal seed must be positive and odd, so it is set
- *   to (2*input_seed - 1);
+ * @param seed an int containing the seed for the RNG.
  *--------------------------------------------------------------------------*/
 
-void  hypre_SeedRand(seed)
-int   seed;
+void  hypre_SeedRand( int seed )
 {
-   Seed = (2*seed - 1) % M;
+   Seed = seed;
 }
 
 /*--------------------------------------------------------------------------
- * hypre_Rand
+ * Computes the next pseudo-random number in the sequence using the global
+ * variable Seed.
+ *
+ * @return a double containing the next number in the sequence divided by
+ * 2147483647 so that the numbers are in (0, 1].
  *--------------------------------------------------------------------------*/
 
 double  hypre_Rand()
 {
-   Seed = (L * Seed) % M;
+   int  low, high, test;
 
-   return ( ((double) Seed) / ((double) M) );
+   high = Seed / q;
+   low = Seed % q;
+   test = a * low - r * high;
+   if(test > 0)
+   {
+      Seed = test;
+   }
+   else
+   {
+      Seed = test + m;
+   }
+
+   return ((double)(Seed) / m);
 }
