@@ -30,7 +30,7 @@
 /* DO-NOT-DELETE splicer.begin(bHYPRE.StructStencil._includes) */
 /* Put additional includes or other arbitrary code here... */
 #include <assert.h>
-#include "mpi.h"
+/*#include "mpi.h"*/
 #include "struct_mv.h"
 /* DO-NOT-DELETE splicer.end(bHYPRE.StructStencil._includes) */
 

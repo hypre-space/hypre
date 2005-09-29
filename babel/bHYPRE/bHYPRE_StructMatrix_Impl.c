@@ -32,7 +32,7 @@
 /* DO-NOT-DELETE splicer.begin(bHYPRE.StructMatrix._includes) */
 /* Put additional includes or other arbitrary code here... */
 #include <assert.h>
-#include "mpi.h"
+/*#include "mpi.h"*/
 #include "struct_mv.h"
 #include "bHYPRE_StructVector_Impl.h"
 #include "bHYPRE_StructGrid_Impl.h"

@@ -27,7 +27,7 @@
 /* DO-NOT-DELETE splicer.begin(bHYPRE.StructGrid._includes) */
 /* Put additional includes or other arbitrary code here... */
 #include <assert.h>
-#include "mpi.h"
+/*#include "mpi.h"*/
 #include "HYPRE_struct_mv.h"
 #include "utilities.h"
 /* DO-NOT-DELETE splicer.end(bHYPRE.StructGrid._includes) */

@@ -57,7 +57,7 @@
 #include "bHYPRE_StructPFMG.h"
 #include "bHYPRE_StructPFMG_Impl.h"
 #include <assert.h>
-#include "mpi.h"
+/*#include "mpi.h"*/
 
 /* This function should be used to initialize the parameter cache
  * in the bHYPRE_PCG__data object. */

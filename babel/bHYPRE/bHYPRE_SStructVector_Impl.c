@@ -30,7 +30,7 @@
 /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructVector._includes) */
 /* Put additional includes or other arbitrary code here... */
 #include <assert.h>
-#include "mpi.h"
+/*#include "mpi.h"*/
 #include "sstruct_mv.h"
 #include "bHYPRE_SStructGrid_Impl.h"
 #include "bHYPRE_StructVector_Impl.h"

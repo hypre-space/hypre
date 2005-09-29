@@ -27,7 +27,7 @@
 /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructStencil._includes) */
 /* Put additional includes or other arbitrary code here... */
 #include <assert.h>
-#include "mpi.h"
+/*#include "mpi.h"*/
 #include "sstruct_mv.h"
 /* DO-NOT-DELETE splicer.end(bHYPRE.SStructStencil._includes) */
 

@@ -37,7 +37,7 @@
 #include "bHYPRE_StructMatrix_Impl.h"
 #include "bHYPRE_StructVector.h"
 #include "bHYPRE_StructVector_Impl.h"
-#include "HYPRE_struct_ls.h"
+#include "struct_ls.h"
 /* DO-NOT-DELETE splicer.end(bHYPRE.StructSMG._includes) */
 
 /*

@@ -46,7 +46,7 @@
 #include "bHYPRE_ParCSRDiagScale_Impl.h"
 #include "bHYPRE_PCG_Impl.h"
 #include <assert.h>
-#include "mpi.h"
+/*#include "mpi.h"*/
 
 /* This function should be used to initialize the parameter cache
  * in the bHYPRE_GMRES__data object. */

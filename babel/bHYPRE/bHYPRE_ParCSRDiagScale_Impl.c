@@ -130,7 +130,6 @@ impl_bHYPRE_ParCSRDiagScale_Create(
   /* DO-NOT-DELETE splicer.begin(bHYPRE.ParCSRDiagScale.Create) */
   /* Insert-Code-Here {bHYPRE.ParCSRDiagScale.Create} (Create method) */
 
-   int ierr = 0;
    bHYPRE_ParCSRDiagScale solver = bHYPRE_ParCSRDiagScale__create();
    struct bHYPRE_ParCSRDiagScale__data * data = bHYPRE_ParCSRDiagScale__get_data( solver );
 

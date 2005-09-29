@@ -32,7 +32,7 @@
 #include <assert.h>
 #include "parcsr_mv.h"
 #include "bHYPRE_IJVectorView.h"
-#include "mpi.h"
+/*#include "mpi.h"*/
 /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRVector._includes) */
 
 /*

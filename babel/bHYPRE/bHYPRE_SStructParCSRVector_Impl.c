@@ -30,7 +30,7 @@
 /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructParCSRVector._includes) */
 /* Put additional includes or other arbitrary code here... */
 #include <assert.h>
-#include "mpi.h"
+/*#include "mpi.h"*/
 #include "sstruct_mv.h"
 #include "bHYPRE_SStructGrid_Impl.h"
 #include "bHYPRE_IJParCSRVector_Impl.h"
