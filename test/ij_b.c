@@ -1437,6 +1437,7 @@ main( int   argc,
 
       bHYPRE_IJParCSRMatrix_Print( bHYPRE_parcsr_A, "test.A" );
       bHYPRE_IJParCSRVector_Print( bHYPRE_y, "test.apply" );
+      bHYPRE_Vector_deleteRef( y );
 
       /* SetValues, x=1; result is all 1's */
       indices = hypre_CTAlloc(int, local_num_cols);
