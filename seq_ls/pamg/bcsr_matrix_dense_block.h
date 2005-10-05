@@ -59,6 +59,11 @@ hypre_BCSRMatrixDenseBlockMulInv(hypre_BCSRMatrixDenseBlock* A,
 			      hypre_BCSRMatrixDenseBlock* B);
 
 int
+hypre_BCSRMatrixDenseBlockMultiplyInverse2(hypre_BCSRMatrixDenseBlock* A,
+			      hypre_BCSRMatrixDenseBlock* B);
+
+
+int
 hypre_BCSRMatrixDenseBlockTranspose(hypre_BCSRMatrixDenseBlock* A);
 
 int
@@ -91,6 +96,7 @@ hypre_BCSRMatrixDenseBlockPrint(hypre_BCSRMatrixDenseBlock* A,
 #define hypre_BCSRMatrixBlockNeg hypre_BCSRMatrixDenseBlockNeg
 #define hypre_BCSRMatrixBlockDiag hypre_BCSRMatrixDenseBlockDiag
 #define hypre_BCSRMatrixBlockMulInv hypre_BCSRMatrixDenseBlockMulInv
+#define hypre_BCSRMatrixBlockMultiplyInverse2 hypre_BCSRMatrixDenseBlockMultiplyInverse2
 #define hypre_BCSRMatrixBlockTranspose hypre_BCSRMatrixDenseBlockTranspose
 #define hypre_BCSRMatrixBlockMatvec hypre_BCSRMatrixDenseBlockMatvec
 #define hypre_BCSRMatrixBlockMatvecT hypre_BCSRMatrixDenseBlockMatvecT

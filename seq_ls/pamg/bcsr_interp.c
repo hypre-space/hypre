@@ -1,6 +1,9 @@
 #include "headers.h"
 #include "bcsr_matrix.h"
 
+
+#define ORDER_TEST 1
+
 /*****************************************************************************
  *
  * Builds an interpolation operator based on all given information.
@@ -253,9 +256,18 @@ hypre_BCSRMatrixBuildInterp(hypre_BCSRMatrix* A, int* CF_marker,
 	    }
 	  }
                
+#if ORDER_TEST
+          /* distribute = A_blocks * (sum)^-1 - this is how it should be - code
+            has not been written well, though...yet...*/  
+          distribute = hypre_BCSRMatrixBlockCopy(A_blocks[jj]);
+          hypre_BCSRMatrixBlockMultiplyInverse2(sum, distribute);
+          distribute = hypre_BCSRMatrixBlockCopy(sum);
+#else         
+          /* distribute = sum^(-1)*A_blocks */             
 	  distribute = hypre_BCSRMatrixBlockCopy(A_blocks[jj]);
 	  hypre_BCSRMatrixBlockMulInv(distribute, sum);
-               
+#endif
+          
 	  /*-----------------------------------------------------------
 	   * Loop over row of A for point i1 and do the distribution.
 	   *-----------------------------------------------------------*/

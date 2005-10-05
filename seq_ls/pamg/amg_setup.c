@@ -10,6 +10,9 @@
 #include "headers.h"
 #include "amg.h"
 
+
+#define DIAG 0
+
 /*****************************************************************************
  *
  * Routine for driving the setup phase of AMG
@@ -35,8 +38,7 @@ hypre_AMGSetup( void            *amg_vdata,
 
    int             **dof_func_array;
    int              *dof_func;
-   int              *coarse_dof_func;
-   int              *domain_i;
+   int              *coarse_dof_func;   int              *domain_i;
    int              *domain_j;
 
    int             **CF_marker_array;   
@@ -207,7 +209,7 @@ hypre_AMGSetup( void            *amg_vdata,
       if(use_block_flag) {
 	A_tilde = hypre_BCSRMatrixCompress(B_array[level]);
 	fine_size = hypre_CSRMatrixNumRows(A_tilde);
-	fake_dof_func = hypre_CTAlloc(int, fine_size);
+	fake_dof_func = hypre_CTAlloc(int, fine_size); 
 	hypre_AMGCreateS(A_tilde, strong_threshold, S_mode, fake_dof_func, &S);
 	/* hypre_AMGCoarsen(A_tilde, strong_threshold, A_tilde,*/
 	hypre_AMGCoarsen(A_tilde, strong_threshold, S,
@@ -217,8 +219,14 @@ hypre_AMGSetup( void            *amg_vdata,
 
 	CF_marker_array[level] = CF_marker;
 
+#if DIAG
 	PB = hypre_BCSRMatrixBuildInterpD(B_array[level], CF_marker,
 					  S, coarse_size);
+#else
+	PB = hypre_BCSRMatrixBuildInterp(B_array[level], CF_marker,
+					  S, coarse_size);
+#endif
+
 	P_array[level] = hypre_BCSRMatrixToCSRMatrix(PB);
 	if(P_trunc_factor > 0 || P_max_elmts > 0) {
 	  hypre_AMGTruncation(P_array[level], P_trunc_factor, P_max_elmts);
@@ -229,12 +237,14 @@ hypre_AMGSetup( void            *amg_vdata,
 							num_functions,
 							num_functions); 
 
+
 	hypre_AMGBuildCoarseOperator(P_array[level], A_array[level],
 				     P_array[level], &A_array[level + 1]);
 	if(A_trunc_factor > 0 || A_max_elmts > 0) {
 	  hypre_AMGOpTruncation(A_array[level + 1], 
 				A_trunc_factor, A_max_elmts);
 	}
+
 
 	B_array[level + 1] = hypre_BCSRMatrixFromCSRMatrix(A_array[level + 1],
 							   num_functions,
@@ -617,6 +627,45 @@ hypre_AMGSetup( void            *amg_vdata,
 
    hypre_AMGDataFArray(amg_data) = F_array;
    hypre_AMGDataUArray(amg_data) = U_array;
+
+
+#if 0
+
+ /*-----------------------------------------------------------------------
+  * Debugging
+  *-----------------------------------------------------------------------*/
+   {
+      hypre_Vector *y1, *y2, *x;
+      int row_size, col_size;
+      
+
+      row_size = hypre_CSRMatrixNumRows(P_array[0]);
+      col_size = hypre_CSRMatrixNumCols(P_array[0]);
+
+      y1 = hypre_SeqVectorCreate(row_size);
+      y2 =  hypre_SeqVectorCreate(row_size);
+      x =  hypre_SeqVectorCreate(col_size);
+
+
+      hypre_SeqVectorInitialize(x);
+      hypre_SeqVectorInitialize(y1);
+      hypre_SeqVectorInitialize(y2);
+
+
+      hypre_SeqVectorSetRandomValues( x, 1);
+      
+
+      hypre_CSRMatrixMatvec( 1.0, P_array[0], x, 1.0, y1);
+      
+      hypre_SeqVectorPrint( y1, "vector.out");
+      
+      hypre_SeqVectorDestroy(x);
+      hypre_SeqVectorDestroy(y1);
+      hypre_SeqVectorDestroy(y2);
+      
+   }
+   
+#endif
 
    /*-----------------------------------------------------------------------
     * Print some stuff

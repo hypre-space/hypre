@@ -700,7 +700,8 @@ int map2( int ix , int iy , int p , int q , int P , int Q , int *nx_part , int *
 hypre_CSRMatrix *hypre_GenerateLaplacian( int nx , int ny , int nz , int P , int Q , int R , double *value );
 int map( int ix , int iy , int iz , int p , int q , int r , int P , int Q , int R , int *nx_part , int *ny_part , int *nz_part , int *global_part );
 hypre_CSRMatrix *hypre_GenerateSysLaplacian( int nx, int ny, int  nz, int P, int Q, int R, int num_fun, double  *mtrx, double  *value );
-   
+hypre_CSRMatrix *hypre_GenerateSysLaplacianVCoef( int nx, int ny, int  nz, int P, int Q, int R, int num_fun, double  *mtrx, double  *mtrx_value );
+      
 /* pcg.c */
 void PCG( hypre_Vector *x , hypre_Vector *b , double tol , void *data );
 void PCGSetup( hypre_CSRMatrix *A , int (*precond )(), void *precond_data , void *data );
