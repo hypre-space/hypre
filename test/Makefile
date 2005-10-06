@@ -249,6 +249,16 @@ distclean: clean
 	rm -f ${HYPRE_BABEL_DRIVER_CXX_EXECS}
 	rm -f ${HYPRE_BABEL_DRIVER_F77_EXECS}
 	rm -f ${HYPRE_FEI_DRIVER_CXX_EXECS}
+	rm -f TEST_fac/*.out*
+	rm -f TEST_fac/*.err*
+	rm -f TEST_ij/*.out*
+	rm -f TEST_ij/*.err*
+	rm -f TEST_ij/*.txt*
+	rm -f TEST_ij/vectors.*
+	rm -f TEST_sstruct/*.out*
+	rm -f TEST_sstruct/*.err*
+	rm -f TEST_struct/*.out*
+	rm -f TEST_struct/*.err*
 	rm -f ex*_for
 
 ##################################################################
