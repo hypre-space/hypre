@@ -94,7 +94,25 @@ $(UTILFILES)
 
 all:
 	@echo  "Building libHYPRE.a ... "
-	cp -fp ${FILES} .
+	cp -fp ${SUPERLUFILES} .
+	cp -fp ${FEIHYPREFILES} .
+	cp -fp ${FEMLIFILES} .
+	cp -fp ${IJMVFILES} .
+	cp -fp ${EUCLIDFILES} .
+	cp -fp ${PARASAILSFILES} .
+	cp -fp ${PILUTFILES} .
+	cp -fp ${DISTMATRIXFILES} .
+	cp -fp ${KRYLOVFILES} .
+	cp -fp ${MATMATFILES} .
+	cp -fp ${MULTIVECFILES} .
+	cp -fp ${PARCSRLSFILES} .
+	cp -fp ${PARCSRMVFILES} .
+	cp -fp ${SEQMVFILES} .
+	cp -fp ${SSTRUCTLSFILES} .
+	cp -fp ${SSTRUCTMVFILES} .
+	cp -fp ${STRUCTLSFILES} .
+	cp -fp ${STRUCTMVFILES} .
+	cp -fp ${UTILITIESFILES} .
 	${AR} libHYPRE.a *.o
 	${RANLIB} libHYPRE.a
 	@echo  "Building libHYPRE_LSI.a ... "
