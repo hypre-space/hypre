@@ -1541,12 +1541,26 @@ main( int   argc,
       bHYPRE_BoomerAMG_SetDoubleParameter( bHYPRE_AMG, "TruncFactor",
                                            trunc_factor);
       bHYPRE_BoomerAMG_SetIntParameter( bHYPRE_AMG, "CycleType", cycle_type);
-      bHYPRE_BoomerAMG_SetIntArray1Parameter( bHYPRE_AMG, "NumGridSweeps",
-                                              num_grid_sweeps, 4 );
-      bHYPRE_BoomerAMG_SetIntArray1Parameter( bHYPRE_AMG, "GridRelaxType",
-                                              grid_relax_type, 4 );
-      bHYPRE_BoomerAMG_SetDoubleArray1Parameter( bHYPRE_AMG, "RelaxWeight",
-                                                 relax_weight, max_levels );
+      bHYPRE_BoomerAMG_SetIntParameter( bHYPRE_AMG, "Cycle0NumSweeps",
+                                        num_grid_sweeps[0] );
+      bHYPRE_BoomerAMG_SetIntParameter( bHYPRE_AMG, "Cycle1NumSweeps",
+                                        num_grid_sweeps[1] );
+      bHYPRE_BoomerAMG_SetIntParameter( bHYPRE_AMG, "Cycle2NumSweeps",
+                                        num_grid_sweeps[2] );
+      bHYPRE_BoomerAMG_SetIntParameter( bHYPRE_AMG, "Cycle3NumSweeps",
+                                        num_grid_sweeps[3] );
+      bHYPRE_BoomerAMG_SetIntParameter( bHYPRE_AMG, "Cycle0RelaxType",
+                                        grid_relax_type[0] );
+      bHYPRE_BoomerAMG_SetIntParameter( bHYPRE_AMG, "Cycle1RelaxType",
+                                        grid_relax_type[1] );
+      bHYPRE_BoomerAMG_SetIntParameter( bHYPRE_AMG, "Cycle2RelaxType",
+                                        grid_relax_type[2] );
+      bHYPRE_BoomerAMG_SetIntParameter( bHYPRE_AMG, "Cycle3RelaxType",
+                                        grid_relax_type[3] );
+      for ( i=0; i<max_levels; ++i )
+      {
+         bHYPRE_BoomerAMG_SetLevelRelaxWt( bHYPRE_AMG, relax_weight[i], i );
+      }
       bHYPRE_BoomerAMG_SetIntParameter( bHYPRE_AMG, "SmoothType",
                                         smooth_type );
       bHYPRE_BoomerAMG_SetIntParameter( bHYPRE_AMG, "SmoothNumSweeps",
@@ -2282,11 +2296,12 @@ main( int   argc,
    bHYPRE_IJParCSRVector_deleteRef( bHYPRE_b );
    bHYPRE_IJParCSRVector_deleteRef( bHYPRE_x );
 
-   if (num_grid_sweeps)
+   /* These can be (and do get) freed by HYPRE programs, but not always.
+      All are obsolete, better to not pass them in. */
+   if ( num_grid_sweeps )
       hypre_TFree(num_grid_sweeps);
-   if (relax_weight)
+   if ( relax_weight )
       hypre_TFree(relax_weight);
-
    if ( grid_relax_points ) {
       for ( i=0; i<4; ++i )
       {
@@ -2299,6 +2314,7 @@ main( int   argc,
    }
    if ( grid_relax_type )
       hypre_TFree( grid_relax_type );
+
 
 /*
   hypre_FinalizeMemoryDebug();
