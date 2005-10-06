@@ -297,7 +297,8 @@ impl_bHYPRE_SStructParCSRVector_GetObject(
       to a HYPRE_IJVector Hijx ... */
 
    ilower = hypre_ParVectorFirstIndex( (hypre_ParVector *) Hpx );
-   iupper = hypre_VectorSize( hypre_ParVectorLocalVector( (hypre_ParVector *) Hpx ) );
+   iupper = ilower - 1 +
+      hypre_VectorSize( hypre_ParVectorLocalVector( (hypre_ParVector *) Hpx ) );
 
    ierr += HYPRE_IJVectorCreate( data->comm, ilower, iupper, &Hijx );
    ierr += HYPRE_IJVectorSetObjectType( Hijx, HYPRE_PARCSR );
