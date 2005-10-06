@@ -94,7 +94,8 @@ $(UTILFILES)
 
 all:
 	@echo  "Building libHYPRE.a ... "
-	${AR} libHYPRE.a ${FILES}
+	cp -fp ${FILES} .
+	${AR} libHYPRE.a *.o
 	${RANLIB} libHYPRE.a
 	@echo  "Building libHYPRE_LSI.a ... "
 	${AR} libHYPRE_LSI.a ${FILES_LSI}
