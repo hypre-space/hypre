@@ -135,7 +135,7 @@ typedef struct
   FactorMatType         *FactorMat;
 
   hypre_PilutSolverGlobals *globals;
-  
+
 } hypre_DistributedMatrixPilutSolver;
 
 /*--------------------------------------------------------------------------
