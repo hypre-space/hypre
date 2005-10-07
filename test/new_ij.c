@@ -94,6 +94,8 @@ main( int   argc,
    int                *col_inds;
    int                *dof_func;
    int		       num_functions = 1;
+   int		       num_paths = 1;
+   int		       agg_num_levels = 0;
 
    int		       time_index;
    MPI_Comm            comm = MPI_COMM_WORLD;
@@ -466,6 +468,16 @@ main( int   argc,
          arg_index++;
          num_functions = atoi(argv[arg_index++]);
       }
+      else if ( strcmp(argv[arg_index], "-agg_nl") == 0 )
+      {
+         arg_index++;
+         agg_num_levels = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-np") == 0 )
+      {
+         arg_index++;
+         num_paths = atoi(argv[arg_index++]);
+      }
       else if ( strcmp(argv[arg_index], "-ns") == 0 )
       {
          arg_index++;
@@ -773,6 +785,8 @@ main( int   argc,
       printf("  -numsamp <val>         : set number of sample vectors for GSMG\n");
       printf("  -interptype <val>      : set to 1 to get LS interpolation\n");
       printf("                         : set to 2 to get interpolation for hyperbolic equations\n");
+      printf("                         : set to 3 to get direct interpolation\n");
+      printf("                         : set to 4 to get multipass interpolation\n");
      
       printf("  -solver_type <val>     : sets solver within Hybrid solver\n");
       printf("                         : 1  PCG  (default)\n");
@@ -783,6 +797,8 @@ main( int   argc,
       printf("  -k   <val>             : dimension Krylov space for GMRES\n");
       printf("  -mxl  <val>            : maximum number of levels (AMG, ParaSAILS)\n");
       printf("  -tol  <val>            : set solver convergence tolerance = val\n");
+      printf("  -agg_nl  <val>         : set number of aggressive coarsening levels (default:0)\n");
+      printf("  -np  <val>             : set number of paths of length 2 for aggr. coarsening\n");
       printf("\n");
       printf("  -sai_th   <val>        : set ParaSAILS threshold = val \n");
       printf("  -sai_filt <val>        : set ParaSAILS filter = val \n");
@@ -1598,6 +1614,8 @@ main( int   argc,
       HYPRE_BoomerAMGSetDomainType(amg_solver, domain_type);
       HYPRE_BoomerAMGSetSchwarzRlxWeight(amg_solver, schwarz_rlx_weight);
       HYPRE_BoomerAMGSetNumFunctions(amg_solver, num_functions);
+      HYPRE_BoomerAMGSetAggNumLevels(amg_solver, agg_num_levels);
+      HYPRE_BoomerAMGSetNumPaths(amg_solver, num_paths);
       HYPRE_BoomerAMGSetNodal(amg_solver, nodal);
       if (num_functions > 1)
 	 HYPRE_BoomerAMGSetDofFunc(amg_solver, dof_func);
@@ -1685,6 +1703,8 @@ main( int   argc,
       HYPRE_BoomerAMGSetDomainType(amg_solver, domain_type);
       HYPRE_BoomerAMGSetSchwarzRlxWeight(amg_solver, schwarz_rlx_weight);
       HYPRE_BoomerAMGSetNumFunctions(amg_solver, num_functions);
+      HYPRE_BoomerAMGSetAggNumLevels(amg_solver, agg_num_levels);
+      HYPRE_BoomerAMGSetNumPaths(amg_solver, num_paths);
       HYPRE_BoomerAMGSetNodal(amg_solver, nodal);
       if (num_functions > 1)
          HYPRE_BoomerAMGSetDofFunc(amg_solver, dof_func);
@@ -1800,6 +1820,8 @@ main( int   argc,
          HYPRE_BoomerAMGSetMaxLevels(pcg_precond, max_levels);
          HYPRE_BoomerAMGSetMaxRowSum(pcg_precond, max_row_sum);
          HYPRE_BoomerAMGSetNumFunctions(pcg_precond, num_functions);
+         HYPRE_BoomerAMGSetAggNumLevels(pcg_precond, agg_num_levels);
+         HYPRE_BoomerAMGSetNumPaths(pcg_precond, num_paths);
          HYPRE_BoomerAMGSetNodal(pcg_precond, nodal);
          HYPRE_BoomerAMGSetVariant(pcg_precond, variant);
          HYPRE_BoomerAMGSetOverlap(pcg_precond, overlap);
@@ -1906,6 +1928,8 @@ main( int   argc,
          HYPRE_BoomerAMGSetMaxLevels(pcg_precond, max_levels);
          HYPRE_BoomerAMGSetMaxRowSum(pcg_precond, max_row_sum);
          HYPRE_BoomerAMGSetNumFunctions(pcg_precond, num_functions);
+         HYPRE_BoomerAMGSetAggNumLevels(pcg_precond, agg_num_levels);
+         HYPRE_BoomerAMGSetNumPaths(pcg_precond, num_paths);
          HYPRE_BoomerAMGSetNodal(pcg_precond, nodal);
          if (num_functions > 1)
             HYPRE_BoomerAMGSetDofFunc(pcg_precond, dof_func);
@@ -2067,6 +2091,8 @@ main( int   argc,
          HYPRE_BoomerAMGSetMaxLevels(pcg_precond, max_levels);
          HYPRE_BoomerAMGSetMaxRowSum(pcg_precond, max_row_sum);
          HYPRE_BoomerAMGSetNumFunctions(pcg_precond, num_functions);
+         HYPRE_BoomerAMGSetAggNumLevels(pcg_precond, agg_num_levels);
+         HYPRE_BoomerAMGSetNumPaths(pcg_precond, num_paths);
          HYPRE_BoomerAMGSetNodal(pcg_precond, nodal);
          HYPRE_BoomerAMGSetVariant(pcg_precond, variant);
          HYPRE_BoomerAMGSetOverlap(pcg_precond, overlap);
@@ -2163,6 +2189,8 @@ main( int   argc,
          HYPRE_BoomerAMGSetMaxLevels(pcg_precond, max_levels);
          HYPRE_BoomerAMGSetMaxRowSum(pcg_precond, max_row_sum);
          HYPRE_BoomerAMGSetNumFunctions(pcg_precond, num_functions);
+         HYPRE_BoomerAMGSetAggNumLevels(pcg_precond, agg_num_levels);
+         HYPRE_BoomerAMGSetNumPaths(pcg_precond, num_paths);
          HYPRE_BoomerAMGSetNodal(pcg_precond, nodal);
          if (num_functions > 1)
             HYPRE_BoomerAMGSetDofFunc(pcg_precond, dof_func);
@@ -2330,6 +2358,8 @@ main( int   argc,
          HYPRE_BoomerAMGSetMaxLevels(pcg_precond, max_levels);
          HYPRE_BoomerAMGSetMaxRowSum(pcg_precond, max_row_sum);
          HYPRE_BoomerAMGSetNumFunctions(pcg_precond, num_functions);
+         HYPRE_BoomerAMGSetAggNumLevels(pcg_precond, agg_num_levels);
+         HYPRE_BoomerAMGSetNumPaths(pcg_precond, num_paths);
          HYPRE_BoomerAMGSetNodal(pcg_precond, nodal);
          HYPRE_BoomerAMGSetVariant(pcg_precond, variant);
          HYPRE_BoomerAMGSetOverlap(pcg_precond, overlap);
@@ -2505,6 +2535,8 @@ main( int   argc,
          HYPRE_BoomerAMGSetMaxLevels(pcg_precond, max_levels);
          HYPRE_BoomerAMGSetMaxRowSum(pcg_precond, max_row_sum);
          HYPRE_BoomerAMGSetNumFunctions(pcg_precond, num_functions);
+         HYPRE_BoomerAMGSetAggNumLevels(pcg_precond, agg_num_levels);
+         HYPRE_BoomerAMGSetNumPaths(pcg_precond, num_paths);
          HYPRE_BoomerAMGSetNodal(pcg_precond, nodal);
          HYPRE_BoomerAMGSetVariant(pcg_precond, variant);
          HYPRE_BoomerAMGSetOverlap(pcg_precond, overlap);
