@@ -1841,6 +1841,11 @@ hypre_ParCSRMatrixCopy( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *B,
 
    hypre_CSRMatrixCopy(A_diag, B_diag, copy_data);
    hypre_CSRMatrixCopy(A_offd, B_offd, copy_data);
+   if (num_cols_offd && col_map_offd_B == NULL)
+   {
+      col_map_offd_B = hypre_CTAlloc(int,num_cols_offd);
+      hypre_ParCSRMatrixColMapOffd(B) = col_map_offd_B;
+   }
    for (i = 0; i < num_cols_offd; i++)
         col_map_offd_B[i] = col_map_offd_A[i];
         
