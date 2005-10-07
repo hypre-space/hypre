@@ -554,6 +554,20 @@ int HYPRE_BoomerAMGSetDofFunc(HYPRE_Solver solver,
                               int         *dof_func);
 
 /**
+ * (Optional) Defines the number of levels of aggressive coarsening.
+ * The default is 0, i.e. no aggressive coarsening.
+ **/
+int HYPRE_BoomerAMGSetAggNumLevels(HYPRE_Solver solver,
+                                int          agg_num_levels);
+
+/**
+ * (Optional) Defines the degree of aggressive coarsening.
+ * The default is 1.
+ **/
+int HYPRE_BoomerAMGSetNumPaths(HYPRE_Solver solver,
+                                int          num_paths);
+
+/**
  * (Optional) Defines which variant of the Schwarz method is used.
  * The following options exist for variant:
  * 

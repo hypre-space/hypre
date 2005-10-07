@@ -83,10 +83,9 @@ hypre_ExchangeRAPData( hypre_CSRMatrix *RAP_int,
    int num_rows;
    int num_nonzeros;
    int i, j;
-   int num_procs, my_id;
+   int num_procs;
 
    MPI_Comm_size(comm,&num_procs);
-   MPI_Comm_rank(comm,&my_id);
 
    RAP_ext_i = hypre_CTAlloc(int, send_map_starts[num_sends]+1);
    jdata_recv_vec_starts = hypre_CTAlloc(int, num_recvs+1);
@@ -249,6 +248,7 @@ hypre_BoomerAMGBuildCoarseOperator( hypre_ParCSRMatrix  *RT,
 
    hypre_ParCSRMatrix *RAP;
    int                *col_map_offd_RAP;
+   int                *new_col_map_offd_RAP;
 
    hypre_CSRMatrix *RAP_int = NULL;
 
@@ -1667,6 +1667,47 @@ hypre_BoomerAMGBuildCoarseOperator( hypre_ParCSRMatrix  *RT,
       hypre_TFree(A_mark_array[ii]);   
    }
 
+   /* check if really all off-diagonal entries occurring in col_map_offd_RAP
+	are represented and eliminate if necessary */
+
+   P_marker = hypre_CTAlloc(int,num_cols_offd_RAP);
+   for (i=0; i < num_cols_offd_RAP; i++)
+      P_marker[i] = -1;
+
+   jj_count_offd = 0;
+   for (i=0; i < RAP_offd_size; i++)
+   {
+      i3 = RAP_offd_j[i];
+      if (P_marker[i3])
+      {
+	 P_marker[i3] = 0;
+	 jj_count_offd++;
+      }
+   }
+
+   if (jj_count_offd < num_cols_offd_RAP)
+   {
+      new_col_map_offd_RAP = hypre_CTAlloc(int,jj_count_offd);
+      jj_counter = 0;
+      for (i=0; i < num_cols_offd_RAP; i++)
+         if (!P_marker[i]) 
+         {
+	    P_marker[i] = jj_counter;
+	    new_col_map_offd_RAP[jj_counter++] = col_map_offd_RAP[i];
+         }
+ 
+      for (i=0; i < RAP_offd_size; i++)
+      {
+	 i3 = RAP_offd_j[i];
+	 RAP_offd_j[i] = P_marker[i3];
+      }
+      
+      num_cols_offd_RAP = jj_count_offd;
+      hypre_TFree(col_map_offd_RAP);
+      col_map_offd_RAP = new_col_map_offd_RAP;
+   }
+   hypre_TFree(P_marker);
+         
    RAP = hypre_ParCSRMatrixCreate(comm, n_coarse, n_coarse, 
         coarse_partitioning, coarse_partitioning,
         num_cols_offd_RAP, RAP_diag_size, RAP_offd_size);

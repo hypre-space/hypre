@@ -951,6 +951,28 @@ HYPRE_BoomerAMGSetDofFunc( HYPRE_Solver  solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetNumPaths
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_BoomerAMGSetNumPaths( HYPRE_Solver  solver,
+                              int          num_paths  )
+{
+   return( hypre_BoomerAMGSetNumPaths( (void *) solver, num_paths ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetAggNumLevels
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_BoomerAMGSetAggNumLevels( HYPRE_Solver  solver,
+                              int          agg_num_levels  )
+{
+   return( hypre_BoomerAMGSetAggNumLevels( (void *) solver, agg_num_levels ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_BoomerAMGSetGSMG
  *--------------------------------------------------------------------------*/
 

@@ -30,6 +30,8 @@ typedef struct
    int      coarsen_type;
    int      interp_type;
    int      restr_par;
+   int      agg_num_levels;
+   int      num_paths;
 
    /* solve params */
    int      max_iter;
@@ -129,6 +131,8 @@ typedef struct
 #define hypre_ParAMGDataCoarsenType(amg_data) ((amg_data)->coarsen_type)
 #define hypre_ParAMGDataMeasureType(amg_data) ((amg_data)->measure_type)
 #define hypre_ParAMGDataSetupType(amg_data) ((amg_data)->setup_type)
+#define hypre_ParAMGDataNumPaths(amg_data) ((amg_data)->num_paths)
+#define hypre_ParAMGDataAggNumLevels(amg_data) ((amg_data)->agg_num_levels)
 
 /* solve params */
 

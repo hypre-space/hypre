@@ -1037,12 +1037,13 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
       f_pnt = Z_PT;
       coarsen_type = 1;
    }
-   if (coarsen_type == 11)
+   if (coarsen_type == 10)
    {
       f_pnt = Z_PT;
+      coarsen_type = 11;
    }
 
-   if ((measure_type || coarsen_type != 1 || coarsen_type != 11) 
+   if ((measure_type || (coarsen_type != 1 && coarsen_type != 11)) 
 		&& num_procs > 1)
    {
       if (use_commpkg_A)
@@ -1882,7 +1883,7 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
       hypre_TFree(ci_array);
    }   
    hypre_TFree(graph_array);
-   if ((measure_type || coarsen_type != 1 || coarsen_type != 11) 
+   if ((measure_type || (coarsen_type != 1 && coarsen_type != 11)) 
 		&& num_procs > 1)
    	hypre_CSRMatrixDestroy(S_ext); 
    
@@ -1927,7 +1928,7 @@ hypre_BoomerAMGCoarsenHMIS( hypre_ParCSRMatrix    *S,
     * Perform Ruge coarsening followed by CLJP coarsening
     *-------------------------------------------------------*/
 
-   ierr += hypre_BoomerAMGCoarsenRuge (S, A, measure_type, 11, debug_flag,
+   ierr += hypre_BoomerAMGCoarsenRuge (S, A, measure_type, 10, debug_flag,
                                 CF_marker_ptr);
 
    ierr += hypre_BoomerAMGCoarsenPMIS (S, A, 1, debug_flag,

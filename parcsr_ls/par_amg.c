@@ -38,6 +38,8 @@ hypre_BoomerAMGCreate()
    int      setup_type;
    int 	    num_functions;
    int 	    nodal;
+   int 	    num_paths;
+   int 	    agg_num_levels;
 
    /* solve params */
    int      min_iter;
@@ -90,6 +92,8 @@ hypre_BoomerAMGCreate()
    setup_type = 1;
    num_functions = 1;
    nodal = 0;
+   num_paths = 1;
+   agg_num_levels = 0;
 
    variant = 0;
    overlap = 1;
@@ -148,6 +152,8 @@ hypre_BoomerAMGCreate()
    hypre_BoomerAMGSetSetupType(amg_data, setup_type);
    hypre_BoomerAMGSetNumFunctions(amg_data, num_functions);
    hypre_BoomerAMGSetNodal(amg_data, nodal);
+   hypre_BoomerAMGSetNumPaths(amg_data, num_functions);
+   hypre_BoomerAMGSetAggNumLevels(amg_data, num_functions);
    hypre_BoomerAMGSetVariant(amg_data, variant);
    hypre_BoomerAMGSetOverlap(amg_data, overlap);
    hypre_BoomerAMGSetSchwarzRlxWeight(amg_data, schwarz_rlx_weight);
@@ -1382,6 +1388,38 @@ hypre_BoomerAMGSetNodal( void     *data,
    hypre_ParAMGData  *amg_data = data;
  
    hypre_ParAMGDataNodal(amg_data) = nodal;
+
+   return (ierr);
+}
+
+/*--------------------------------------------------------------------------
+ * Indicate the degree of aggressive coarsening
+ *--------------------------------------------------------------------------*/
+
+int
+hypre_BoomerAMGSetNumPaths( void     *data,
+                            int       num_paths )
+{
+   int ierr = 0;
+   hypre_ParAMGData  *amg_data = data;
+ 
+   hypre_ParAMGDataNumPaths(amg_data) = num_paths;
+
+   return (ierr);
+}
+
+/*--------------------------------------------------------------------------
+ * Indicates the number of levels of aggressive coarsening
+ *--------------------------------------------------------------------------*/
+
+int
+hypre_BoomerAMGSetAggNumLevels( void     *data,
+                            int       agg_num_levels )
+{
+   int ierr = 0;
+   hypre_ParAMGData  *amg_data = data;
+ 
+   hypre_ParAMGDataAggNumLevels(amg_data) = agg_num_levels;
 
    return (ierr);
 }

@@ -420,6 +420,7 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
                      max_weight = hypre_max(max_weight, P_offd_data[i]);
                rowsum += P_offd_data[i];
            }
+
            min_rowsum = hypre_min(rowsum, min_rowsum);
            max_rowsum = hypre_max(rowsum, max_rowsum);
        }

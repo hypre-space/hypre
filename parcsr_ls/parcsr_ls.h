@@ -164,6 +164,8 @@ int HYPRE_BoomerAMGSetNumFunctions( HYPRE_Solver solver , int num_functions );
 int HYPRE_BoomerAMGGetNumFunctions( HYPRE_Solver solver , int *num_functions );
 int HYPRE_BoomerAMGSetNodal( HYPRE_Solver solver , int nodal );
 int HYPRE_BoomerAMGSetDofFunc( HYPRE_Solver solver , int *dof_func );
+int HYPRE_BoomerAMGSetNumPaths( HYPRE_Solver solver , int num_paths );
+int HYPRE_BoomerAMGSetAggNumLevels( HYPRE_Solver solver , int agg_num_levels );
 int HYPRE_BoomerAMGSetGSMG( HYPRE_Solver solver , int gsmg );
 int HYPRE_BoomerAMGSetNumSamples( HYPRE_Solver solver , int gsmg );
 
@@ -439,6 +441,8 @@ int hypre_BoomerAMGSetNumSamples( void *data , int par );
 int hypre_BoomerAMGSetNumFunctions( void *data , int num_functions );
 int hypre_BoomerAMGGetNumFunctions( void *data , int *num_functions );
 int hypre_BoomerAMGSetNodal( void *data , int nodal );
+int hypre_BoomerAMGSetNumPaths( void *data , int num_paths );
+int hypre_BoomerAMGSetAggNumLevels( void *data , int agg_num_levels );
 int hypre_BoomerAMGSetNumPoints( void *data , int num_points );
 int hypre_BoomerAMGSetDofFunc( void *data , int *dof_func );
 int hypre_BoomerAMGSetPointDofMap( void *data , int *point_dof_map );
@@ -529,6 +533,9 @@ HYPRE_ParCSRMatrix GenerateLaplacian( MPI_Comm comm , int nx , int ny , int nz ,
 int hypre_map( int ix , int iy , int iz , int p , int q , int r , int P , int Q , int R , int *nx_part , int *ny_part , int *nz_part , int *global_part );
 HYPRE_ParCSRMatrix GenerateSysLaplacian( MPI_Comm comm , int nx , int ny , int nz , int P , int Q , int R , int p , int q , int r , int num_fun , double *mtrx , double *value );
 
+/* par_multi_interp.c */
+int hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix *A , int *CF_marker , hypre_ParCSRMatrix *S , int *num_cpts_global , int num_functions , int *dof_func , int debug_flag , double trunc_factor , int *col_offd_S_to_A , hypre_ParCSRMatrix **P_ptr );
+
 /* par_nodal_systems.c */
 int hypre_BoomerAMGCreateNodalA( hypre_ParCSRMatrix *A , int num_functions , int *dof_func , int option , hypre_ParCSRMatrix **AN_ptr );
 int hypre_BoomerAMGCreateScalarCFS( hypre_ParCSRMatrix *SN , int *CFN_marker , int *col_offd_SN_to_AN , int num_functions , int nodal , int data , int **dof_func_ptr , int **CF_marker_ptr , int **col_offd_S_to_A_ptr , hypre_ParCSRMatrix **S_ptr );
@@ -543,7 +550,7 @@ int hypre_GenerateSendMapAndCommPkg( MPI_Comm comm , int num_sends , int num_rec
 
 /* par_relax.c */
 int hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A , hypre_ParVector *f , int *cf_marker , int relax_type , int relax_points , double relax_weight , double omega , hypre_ParVector *u , hypre_ParVector *Vtemp );
-int gselim( double *A , double *x , int n );
+int gselim(double *A , double *x , int n );
 
 /* par_relax_interface.c */
 int hypre_BoomerAMGRelaxIF( hypre_ParCSRMatrix *A , hypre_ParVector *f , int *cf_marker , int relax_type , int relax_order , int cycle_type , double relax_weight , double omega , hypre_ParVector *u , hypre_ParVector *Vtemp );
@@ -577,6 +584,8 @@ int hypre_BoomerAMGWriteSolverParams( void *data );
 int hypre_BoomerAMGCreateS( hypre_ParCSRMatrix *A , double strength_threshold , double max_row_sum , int num_functions , int *dof_func , hypre_ParCSRMatrix **S_ptr );
 int hypre_BoomerAMGCreateSabs( hypre_ParCSRMatrix *A , double strength_threshold , double max_row_sum , int num_functions , int *dof_func , hypre_ParCSRMatrix **S_ptr );
 int hypre_BoomerAMGCreateSCommPkg( hypre_ParCSRMatrix *A , hypre_ParCSRMatrix *S , int **col_offd_S_to_A_ptr );
+int hypre_BoomerAMGCreate2ndS( hypre_ParCSRMatrix *S , int *CF_marker , int num_paths , int *coarse_row_starts , hypre_ParCSRMatrix **C_ptr );
+int hypre_BoomerAMGCorrectCFMarker( int *CF_marker , int num_var , int *new_CF_marker );
 
 /* par_vardifconv.c */
 HYPRE_ParCSRMatrix GenerateVarDifConv( MPI_Comm comm , int nx , int ny , int nz , int P , int Q , int R , int p , int q , int r , double eps , HYPRE_ParVector *rhs_ptr );
