@@ -152,8 +152,8 @@ hypre_BoomerAMGCreate()
    hypre_BoomerAMGSetSetupType(amg_data, setup_type);
    hypre_BoomerAMGSetNumFunctions(amg_data, num_functions);
    hypre_BoomerAMGSetNodal(amg_data, nodal);
-   hypre_BoomerAMGSetNumPaths(amg_data, num_functions);
-   hypre_BoomerAMGSetAggNumLevels(amg_data, num_functions);
+   hypre_BoomerAMGSetNumPaths(amg_data, num_paths);
+   hypre_BoomerAMGSetAggNumLevels(amg_data, agg_num_levels);
    hypre_BoomerAMGSetVariant(amg_data, variant);
    hypre_BoomerAMGSetOverlap(amg_data, overlap);
    hypre_BoomerAMGSetSchwarzRlxWeight(amg_data, schwarz_rlx_weight);
