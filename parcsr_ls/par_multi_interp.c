@@ -86,7 +86,7 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
    int             *P_marker_offd = NULL;
    int             *C_array;
    int             *C_array_offd = NULL;
-   int             *pass_array; /* contains points ordered according to pass */
+   int             *pass_array = NULL; /* contains points ordered according to pass */
    int             *pass_pointer = NULL; /* pass_pointer[j] contains pointer to first
 				point of pass j contained in pass_array */
    int             *P_diag_start;
@@ -124,10 +124,10 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
    int              n_SF = 0;
    int              n_SF_offd = 0;
 
-   int             *fine_to_coarse;
+   int             *fine_to_coarse = NULL;
    int             *fine_to_coarse_offd = NULL;
 
-   int             *assigned;
+   int             *assigned = NULL;
    int             *assigned_offd = NULL;
 
    double          *Pext_send_data = NULL;
@@ -225,7 +225,7 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
     *  Intialize counters and allocate mapping vector.
     *-----------------------------------------------------------------------*/
 
-   fine_to_coarse = hypre_CTAlloc(int, n_fine);
+   if (n_fine) fine_to_coarse = hypre_CTAlloc(int, n_fine);
 
    n_coarse = 0;
    n_SF = 0;
@@ -234,9 +234,9 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
       else if (CF_marker[i] == -3) n_SF++;
 
    pass_array_size = n_fine-n_coarse-n_SF;
-   pass_array = hypre_CTAlloc(int, pass_array_size);
+   if (pass_array_size) pass_array = hypre_CTAlloc(int, pass_array_size);
    pass_pointer = hypre_CTAlloc(int, max_num_passes);
-   assigned = hypre_CTAlloc(int, n_fine);
+   if (n_fine) assigned = hypre_CTAlloc(int, n_fine);
    P_diag_i = hypre_CTAlloc(int, n_fine+1);
    P_offd_i = hypre_CTAlloc(int, n_fine+1);
    if (n_coarse) C_array = hypre_CTAlloc(int, n_coarse);
