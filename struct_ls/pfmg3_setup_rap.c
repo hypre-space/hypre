@@ -2521,6 +2521,12 @@ hypre_PFMG3BuildRAPSym_onebox_FSS27_CC0(
       a_cne_offdm1 = a_cne[iA_offdm1];
       a_cnw_offdm1 = a_cnw[iA_offdm1];
       a_ce_offdm1 = a_ce[iA_offdm1];
+      a_ac_offd = a_ac[iA_offd];
+      a_ac_offdm1 = a_ac[iA_offdm1];
+      a_as_offd = a_as[iA_offd];
+      a_as_offdm1 = a_as[iA_offdm1];
+      a_aw_offd = a_aw[iA_offd];
+      a_aw_offdm1 = a_aw[iA_offdm1];
       a_asw_offd = a_asw[iA_offd];
       a_asw_offdm1 = a_asw[iA_offdm1];
       a_ase_offd = a_ase[iA_offd];
