@@ -428,7 +428,8 @@ hypre_create_summary_file()
    cd ${HYPRE_AUTOTEST_EXECUTE_DIR}
    HYPRE_TEST_SUMMARY_FILE="autotest.summary.`date '+%Y%m%d'`"
 
-   printf "%s\n" "--------------------------------------------" > $HYPRE_TEST_SUMMARY_FILE
+   printf "%s\n" "       Autotest Results for `date '+%D'` " > $HYPRE_TEST_SUMMARY_FILE
+   printf "%s\n" "--------------------------------------------" >> $HYPRE_TEST_SUMMARY_FILE
 
    for test in ${HYPRE_DEFAULT_TESTS}
    do
@@ -447,7 +448,7 @@ hypre_create_summary_file()
             cd ${HYPRE_REMOTE_DIR}/linear_solvers/test
             search_error_files
 
-            for dir in ${STD_TEST_DIRS}
+            for dir in ${HYPRE_STD_TEST_DIRS}
             do
                cd ${HYPRE_REMOTE_DIR}/linear_solvers/test/${dir}
                search_error_files
