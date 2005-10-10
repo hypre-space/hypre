@@ -1055,9 +1055,9 @@ int hypre_BoomerAMGCreate2ndS( hypre_ParCSRMatrix *S, int *CF_marker,
 
    hypre_CSRMatrix *C_diag;
 
-   int          *C_diag_data;
+   int          *C_diag_data = NULL;
    int             *C_diag_i;
-   int             *C_diag_j;
+   int             *C_diag_j = NULL;
 
    hypre_CSRMatrix *C_offd;
 
@@ -1079,11 +1079,11 @@ int hypre_BoomerAMGCreate2ndS( hypre_ParCSRMatrix *S, int *CF_marker,
 
    int		   *CF_marker_offd = NULL;
 
-   int		   *S_marker;
+   int		   *S_marker = NULL;
    int		   *S_marker_offd = NULL;
    int		   *temp = NULL;
 
-   int             *fine_to_coarse;
+   int             *fine_to_coarse = NULL;
    int             *fine_to_coarse_offd = NULL;
    int		   *map_S_to_C = NULL;
 
@@ -1148,7 +1148,7 @@ int hypre_BoomerAMGCreate2ndS( hypre_ParCSRMatrix *S, int *CF_marker,
       fine_to_coarse_offd = hypre_CTAlloc(int, num_cols_offd_S);
    }
 
-   fine_to_coarse = hypre_CTAlloc(int, num_cols_diag_S);
+   if (num_cols_diag_S) fine_to_coarse = hypre_CTAlloc(int, num_cols_diag_S);
 
    num_coarse = 0;
    for (i=0; i < num_cols_diag_S; i++)
@@ -1251,7 +1251,7 @@ int hypre_BoomerAMGCreate2ndS( hypre_ParCSRMatrix *S, int *CF_marker,
          comm_handle = 
 		hypre_ParCSRCommHandleCreate(11,comm_pkg,&S_int_i[1],&S_ext_i[1]);
 
-      S_int_j = hypre_CTAlloc(int, num_nonzeros);
+      if (num_nonzeros) S_int_j = hypre_CTAlloc(int, num_nonzeros);
 
       tmp_send_map_starts = hypre_CTAlloc(int, num_sends+1);
       tmp_recv_vec_starts = hypre_CTAlloc(int, num_recvs+1);
@@ -1300,7 +1300,7 @@ int hypre_BoomerAMGCreate2ndS( hypre_ParCSRMatrix *S, int *CF_marker,
                                                                                 
       num_nonzeros = S_ext_i[recv_vec_starts[num_recvs]];
                                                                                 
-      S_ext_j = hypre_CTAlloc(int, num_nonzeros);
+      if (num_nonzeros) S_ext_j = hypre_CTAlloc(int, num_nonzeros);
 
       tmp_recv_vec_starts[0] = 0;
       for (i=0; i < num_recvs; i++)
@@ -1433,7 +1433,7 @@ int hypre_BoomerAMGCreate2ndS( hypre_ParCSRMatrix *S, int *CF_marker,
     *  Allocate and initialize some stuff.
     *-----------------------------------------------------------------------*/
 
-   S_marker = hypre_CTAlloc(int, num_coarse);
+   if (num_coarse) S_marker = hypre_CTAlloc(int, num_coarse);
 
    for (i1 = 0; i1 < num_coarse; i1++)
       S_marker[i1] = -1;
@@ -1720,7 +1720,7 @@ int hypre_BoomerAMGCreate2ndS( hypre_ParCSRMatrix *S, int *CF_marker,
 
    C_diag = hypre_ParCSRMatrixDiag(S2);
    hypre_CSRMatrixI(C_diag) = C_diag_i; 
-   hypre_CSRMatrixJ(C_diag) = C_diag_j; 
+   if (num_nonzeros_diag) hypre_CSRMatrixJ(C_diag) = C_diag_j; 
 
    C_offd = hypre_ParCSRMatrixOffd(S2);
    hypre_CSRMatrixI(C_offd) = C_offd_i; 
@@ -1728,7 +1728,7 @@ int hypre_BoomerAMGCreate2ndS( hypre_ParCSRMatrix *S, int *CF_marker,
 
    if (num_cols_offd_C)
    {
-      hypre_CSRMatrixJ(C_offd) = C_offd_j; 
+      if (num_nonzeros_offd) hypre_CSRMatrixJ(C_offd) = C_offd_j; 
       hypre_ParCSRMatrixColMapOffd(S2) = col_map_offd_C;
 
    }
