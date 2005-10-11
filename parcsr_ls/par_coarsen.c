@@ -2121,7 +2121,11 @@ hypre_BoomerAMGCoarsenPMIS( hypre_ParCSRMatrix    *S,
 
    /* this augments the measures with a random number between 0 and 1 */
    /* (only for the local part) */
-   hypre_BoomerAMGIndepSetInit(S, measure_array, CF_init);
+   /* this augments the measures */
+   if (CF_init == 2)
+      hypre_BoomerAMGIndepSetInit(S, measure_array, 1);
+   else
+      hypre_BoomerAMGIndepSetInit(S, measure_array, 0);
 
    /*---------------------------------------------------
     * Initialize the graph arrays, and CF_marker arrays
