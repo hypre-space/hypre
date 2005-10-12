@@ -1,7 +1,9 @@
-%==========================================================================
+%=============================================================================
+%=============================================================================
+
 \chapter{Additional Information}
 
-%==========================================================================
+%-----------------------------------------------------------------------------
 
 \section{Building the Library}
 
@@ -10,13 +12,14 @@ by simply typing \kbd{./configure} followed by \kbd{make} in the top-level sourc
 The following sections describe some of the options for confiugring and making the
 \hypre{} library.
 
+%-----------------------------
+
 \subsection{Getting the Library}
 
 The \hypre{} distribution tar file is available from the Software link of the
-\hypre{} web page, \htmladdnormallink{http://www.llnl.gov/CASC/hypre/}
-{http://www.llnl.gov/CASC/hypre/}. 
-The \hypre{} Software distribution page allows access to the tar files of the
-latest and previous general and beta distributions as well as documentation. 
+\hypre{} web page, \url{http://www.llnl.gov/CASC/hypre/}.  The \hypre{}
+Software distribution page allows access to the tar files of the latest and
+previous general and beta distributions as well as documentation.
 
 After unpacking the HYPRE tar file, the distribution will be in a 
 subdirectory named hypre-<VERSION>, where <VERSION> is the current version number
@@ -45,10 +48,10 @@ config         FEI_mv              lapack          parcsr_ls      struct_ls
 \end{mdseries}
 \end{ttfamily}
 
+%-----------------------------
 
-%==========================================================================
 \subsection{Configure and Make}
-\label{Configure and Make}
+\label{sec-Configure}
 
 Now that all of the files are available, \hypre{} is ready to be configured and 
 made for the host platform.  The simplest method is to configure, compile and
@@ -82,9 +85,10 @@ into the directories that the user specified in the options to \file{configure},
 e.g. --prefix=/usr/apps.  If none were specified the default directories are used,
 \file{src/hypre/lib} and \file{src/hypre/include}.
 
-%==========================================================================
+%-----------------------------
+
 \subsection{Configure Options}
-\label{Configure Options}
+\label{sec-Configure-Options}
 
 \file{configure} has many options to allow the user to override and refine the 
 defaults for any system. The best way to find out what options are available is
@@ -125,8 +129,9 @@ Installation Directories:
 By default, 'make install' will install all files in
 /home/hill66/linear_solvers/hypre/lib, /home/hill66/linear_solvers/hypre/bin, etc.
 
-You can specify an installation prefix other than /home/hill/linear_solvers/hypre by using 
-the --prefix option; for instance --prefix=$HOME.
+You can specify an installation prefix other than
+/home/hill/linear_solvers/hypre by using the --prefix option; for instance
+--prefix=\$HOME.
 
 For fine tuning of the installation directories:
    --bindir=DIR          user executables [EPREFIX/bin]
@@ -320,7 +325,8 @@ config.status: HYPRE_config.h is unchanged
 
 \end{verbatim}
 
-%==========================================================================
+%-----------------------------
+
 \subsection{Make Targets}
 \label{Make Targets}
 
@@ -393,8 +399,8 @@ make[3]: Leaving directory '/home/hill66/linear_solvers/krylov
 
 \end{verbatim}
 
+%-----------------------------
 
-%==========================================================================
 \subsection{Testing the Library} 
 
 The \kbd{test} subdirectory contains several codes that can be used to test
@@ -402,8 +408,7 @@ the newly created \hypre{} library.  To create the executable verions, move into
 the \kbd{test} subdirectory, enter \kbd{make test} then execute the codes as described
 by their help packages.
 
-
-%==========================================================================
+%-----------------------------
 
 \subsection{Linking to the Library}
 
@@ -420,10 +425,10 @@ call \hypre{}.  All include and linking flags are defined in the \file{Makefile.
 file by \file{configure}.
 
 
-%==========================================================================
+%-----------------------------------------------------------------------------
 
 \section{Calling HYPRE from Fortran}
-\label{Calling HYPRE from Fortran}
+\label{sec-Fortran}
 
 \hypre{} provides a Fortran interface to enable such applications to call its C
 routines.  Typically, the Fortran subroutine name is the same as the C name, unless 
@@ -447,8 +452,8 @@ C parameter & Fortran argument \\
 \code{int *array} & \code{integer array(*)} \\
 \code{double *array} & \code{double precision array(*)} \\
 \code{char *string} & \code{character string(*)} \\
-\code{HYPRE\_Type object} & \code{integer*8 object} \\
-\code{HYPRE\_Type *object} & \code{integer*8 object} \\
+\code{HYPRE_Type object} & \code{integer*8 object} \\
+\code{HYPRE_Type *object} & \code{integer*8 object} \\
 \hline
 \end{tabular}
 \caption{%
@@ -620,15 +625,13 @@ The corresponding Fortran code for calling this routine is as follows:
 %\noindent Since the C function name has less than 32 characters, Fortran
 %uses the same name in the subroutine call.
 
-%==========================================================================
+%-----------------------------------------------------------------------------
 
 \section{Bug Reporting}
 
-\hypre{} has an automated bug reporting mechanism that may be used for submitting 
-bugs, desired features and documentation problems, as well as querying the status 
-of previous reports.  Access \htmladdnormallink{http://www-casc.llnl.gov/bugs}
-{http://www-casc.llnl.gov/bugs} for full bug tracking details or to submit or query
-a bug report.  When using the site for the first time, click on
-``Open a new Bugzilla account'' under the ``User login account management'' heading.
-
-%==========================================================================
+\hypre{} has an automated bug reporting mechanism that may be used for
+submitting bugs, desired features and documentation problems, as well as
+querying the status of previous reports.  Access
+\url{http://www-casc.llnl.gov/bugs} for full bug tracking details or to submit
+or query a bug report.  When using the site for the first time, click on ``Open
+a new Bugzilla account'' under the ``User login account management'' heading.

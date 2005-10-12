@@ -1,272 +1,423 @@
-%==========================================================================
+%=============================================================================
+%=============================================================================
+
 \chapter{Semi-Structured-Grid System Interface (SStruct)}
-\label{Semi-Structured-Grid System Interface}
+\label{ch-SStruct}
 
-In order to get access to the most efficient and scalable solvers for
-semi-structured-grid applications (applications with grids that are
-mostly structured, but with some unstructured features), users should
-use the \code{SStruct} interface described in this chapter.  This
-interface also provides access to solvers in \hypre{} that were
-designed for unstructured-grid applications and sparse linear systems
-in general.  These additional solvers are usually provided via the
-unstructured-grid interface (\code{FEI}) or the linear-algebraic
-interface (\code{IJ}) described in Chapters
-\ref{Finite Element Interface} and \ref{Linear-Algebraic System Interface}.
+The \code{SStruct} interface is appropriate for applications with grids that
+are mostly---but not entirely---structured, e.g. block-structured grids (see
+Figure~\ref{fig-sstruct-example}), composite grids in structured adaptive mesh
+refinement (AMR) applications (see Figure~\ref{fig-sstruct-samr-grid}), and
+overset grids.  In addition, it supports more general PDEs than the
+\code{Struct} interface by allowing multiple variables (system PDEs) and
+multiple variable types (e.g. cell-centered, face-centered, etc.).  The
+interface provides access to data structures and linear solvers in \hypre{}
+that are designed for semi-structured grid problems, but also to the most
+general data structures and solvers.  These latter solvers are usually provided
+via the \code{FEI} or \code{IJ} interfaces described in Chapters~\ref{ch-FEI}
+and \ref{ch-IJ}.
 
-Figure \ref{fig-block-structured-grid} gives an example of the type of
-grid currently supported by the \code{SStruct} interface.  The grid is
-composed of three ``parts''.  There is a single cell-centered variable
-across the entire grid, except at the grid cell marked with a square,
-which has one additional cell-centered variable.
-\begin{figure}[t]
+The \code{SStruct} grid is composed out of a number of structured grid {\em
+parts}, where the physical inter-relationship between the parts is arbitrary.
+Each part is constructed out of two basic components: boxes (see
+Figure~\ref{fig-struct-boxes}) and {\em variables}.  Variables represent the
+actual unknown quantities in the grid, and are associated with the box indices
+in a variety of ways, depending on their types.  In \hypre{}, variables may be
+cell-centered, node-centered, face-centered, or edge-centered.  Face-centered
+variables are split into x-face, y-face, and z-face, and edge-centered
+variables are split into x-edge, y-edge, and z-edge.  See Figure
+\ref{fig-gridvars} for an illustration in 2D.
+
+\begin{figure}
 \centering
-\includegraphics[width=4in]{block_structured.eps}
+\includegraphics[width=.3\textwidth]{figSStructGridVars}
 \caption{%
-An example 2D block-structured grid, distributed accross three processes.}
-\label{fig-block-structured-grid}
+Grid variables in \hypre{} are referenced by the abstract cell-centered index
+to the left and down in 2D (analogously in 3D).  In the figure, index $(i,j)$
+is used to reference the variables in black.  The variables in grey---although
+contained in the pictured cell---are not referenced by the $(i,j)$ index.}
+\label{fig-gridvars}
 \end{figure}
-There are five basic steps involved in setting up the linear system to
-be solved:
-\begin{enumerate}
+
+The \code{SStruct} interface uses a {\em graph} to allow nearly arbitrary
+relationships between part data.  The graph is constructed from stencils plus
+some additional data-coupling information set by the \code{GraphAddEntries()}
+routine.  Another method for relating part data is the
+\code{GridSetNeighborbox()} routine, which is particularly suited for
+block-structured grid problems.
+
+There are five basic steps involved in setting up the linear system to be
+solved:
+%\begin{enumerate}
+\begin{list}{\arabic{enumi}.}{\usecounter{enumi}\setlength{\itemsep}{0in}}
 \item set up the grid,
 \item set up the stencils,
 \item set up the graph,
 \item set up the matrix,
 \item set up the right-hand-side vector.
-\end{enumerate}
-To describe each of these steps in more detail, consider solving the
-2D Laplacian problem
-\begin{equation}\label{sstruct:eqn-laplacian}
-\left \{
-\begin{array}{ll}
-\nabla^2 u = f , & \mbox{in the domain}, \\
-u = 0,           & \mbox{on the boundary}.
-\end{array}
-\right .
+\end{list}
+%\end{enumerate}
+
+%-----------------------------------------------------------------------------
+
+\section{Block-Structured Grids}
+\label{sec-Block-Structured-Grids}
+
+In this section, we describe how to use the \code{SStruct} interface to
+define block-structured grid problems.  We will do this primarily by
+example, paying particular attention to the construction of stencils
+and the use of the \code{GridSetNeighborbox()} interface routine.
+
+Consider the solution of the diffusion equation
+\begin{equation} \label{eqn-block-diffusion}
+- \nabla \cdot (D \nabla u) + \sigma u = f
 \end{equation}
-Assume (\ref{eqn-laplacian}) is discretized using standard 9-pt
-finite-volumes on the grid pictured in
-\ref{fig-block-structured-grid}, and assume that the problem data is
-distributed across three processes as depicted.  In the figure, each
-grid part is distributed onto a different process, but this need not
-be the case; each grid part may also be distributed across several
-processes.  Assume for simplicity and illustration that there is a
-single coupling between the first and second variables in grid part 0
-at index (1,2).  In general, this variable may also be coupled to
-variables at neighboring indices.
+on the block-structured grid in Figure~\ref{fig-sstruct-example}, where $D$ is
+a scalar diffusion coefficient, and $\sigma \geq 0$.  The discretization
+\cite{JEMorel_RMRoberts_MJShashkov_1998} introduces three different types of
+variables: cell-centered, $x$-face, and $y$-face.  The three discretization
+stencils that couple these variables are also given in the figure.  The
+information in this figure is essentially all that is needed to describe the
+nonzero structure of the linear system we wish to solve.
+\begin{figure}
+\centering
+\includegraphics[width=.4\textwidth]{figSStructExample1a}
+\hfill
+\includegraphics[width=.4\textwidth]{figSStructExample1b}
+\caption{%
+Example of a block-structured grid with five logically-rectangular blocks and
+three variables types: cell-centered, $x$-face, and $y$-face.  Discretization
+stencils for the cell-centered (left), $x$-face (middle), and $y$-face (right)
+variables are also pictured.}
+\label{fig-sstruct-example}
+\end{figure}
 
-%==========================================================================
+The grid in Figure~\ref{fig-sstruct-example} is defined in terms of five
+separate logically-rectangular parts as shown in
+Figure~\ref{fig-sstruct-example-parts}, and each part is given a unique label
+between 0 and 4.  Each part consists of a single box with lower index $(1,1)$
+and upper index $(4,4)$ (see Section~\ref{sec-Struct-Grid}), and the grid data
+is distributed on five processes such that data associated with part~$p$ lives
+on process~$p$.  Note that in general, parts may be composed out of arbitrary
+unions of boxes, and indices may consist of non-positive integers (see
+Figure~\ref{fig-struct-boxes}).  Also note that the \code{SStruct} interface
+expects a domain-based data distribution by boxes, but the actual distribution
+is determined by the user and simply described (in parallel) through the
+interface.
 
-\section{Setting Up the SStruct Grid}
-\label{Setting Up the SStruct Grid}
+\begin{figure}
+\centering
+\includegraphics[width=.4\textwidth]{figSStructExample1c}
+\caption{%
+Test figure.}
+\label{fig-sstruct-example-parts}
+\end{figure}
 
-On process 0, the following code will set up the grid shown in the
-figure (the code for processes 1 and 2 is similar).
-\begin{display}
+As with the \code{Struct} interface, each process describes that portion of the
+grid that it ``owns'', one box at a time.  Figure~\ref{fig-sstruct-grid} shows
+the code for setting up the grid on process~3 (the code for the other processes
+is similar).
+\begin{figure}
+\centering
+\begin{tabular}{@{}c@{}}
+\includegraphics[width=.28\textwidth]{figSStructGrid1} \\ 1
+\end{tabular}
+\hfill
+\begin{tabular}{@{}c@{}}
+\includegraphics[width=.28\textwidth]{figSStructGrid2} \\ 2
+\end{tabular}
+\hfill
+\begin{tabular}{@{}c@{}}
+\includegraphics[width=.28\textwidth]{figSStructGrid3} \\ 3
+\end{tabular}
+\vspace{1em} \\
+\begin{tabular}{@{}c@{}}
+\includegraphics[width=.28\textwidth]{figSStructGrid4} \\ 4
+\end{tabular}
+\hfill
+\begin{tabular}{@{}c@{}}
+\includegraphics[width=.28\textwidth]{figSStructGrid5} \\ 5
+\end{tabular}
+\hfill
+\begin{tabular}{@{}c@{}}
+\includegraphics[width=.28\textwidth]{figSStructGrid6} \\ 6
+\end{tabular}
+\vspace{2em} \\
+\begin{minipage}{0.9\textwidth}
 \begin{verbatim}
+    
+    HYPRE_SStructGrid grid;
+    int ndim = 2, nparts = 5, nvars = 3, part = 3;
+    int extents[][2] = {{1,1}, {4,4}};
+    int vartypes[]   = {HYPRE_SSTRUCT_VARIABLE_CELL,
+                        HYPRE_SSTRUCT_VARIABLE_XFACE,
+                        HYPRE_SSTRUCT_VARIABLE_YFACE};
+    int nb2_n_part      = 2,              nb4_n_part      = 4;
+    int nb2_exts[][2]   = {{1,0}, {4,0}}, nb4_exts[][2]   = {{0,1}, {0,4}};
+    int nb2_n_exts[][2] = {{1,1}, {1,4}}, nb4_n_exts[][2] = {{4,1}, {4,4}};
+    int nb2_map[2]      = {1,0},          nb4_map[2]      = {0,1};
 
-HYPRE_SStructGrid     grid;
-int                   ilower[2][2] = {{-1, 0}, {1, 0}};
-int                   iupper[2][2] = {{ 0, 3}, {2, 3}};
-HYPRE_SStructVariable vars[1]      = {HYPRE_SSTRUCT_VARIABLE_CELL};
+1:  HYPRE_SStructGridCreate(MPI_COMM_WORLD, ndim, nparts, &grid);
+    
+    /* Set grid extents and grid variables for part 3 */
+2:  HYPRE_SStructGridSetExtents(grid, part, extents[0], extents[1]);
+3:  HYPRE_SStructGridSetVariables(grid, part, nvars, vartypes);
+    
+    /* Set spatial relationship between parts 3 and 2, then parts 3 and 4 */
+4:  HYPRE_SStructGridSetNeighborBox(grid, part, nb2_exts[0], nb2_exts[1],
+       nb2_n_part, nb2_n_exts[0], nb2_n_exts[1], nb2_map);
+5:  HYPRE_SStructGridSetNeighborBox(grid, part, nb4_exts[0], nb4_exts[1],
+       nb4_n_part, nb4_n_exts[0], nb4_n_exts[1], nb4_map);
+    
+6:  HYPRE_SStructGridAssemble(grid);
+    
+\end{verbatim}
+\end{minipage}
+\caption{%
+Code on process 3 for setting up the grid in Figure~\ref{fig-sstruct-example}.}
+\label{fig-sstruct-grid}
+\end{figure}
+The ``icons'' at the top of the figure illustrate the result of the numbered
+lines of code.  Process~3 needs to describe the data pictured in the
+bottom-right of the figure.  That is, it needs to describe part~3 plus some
+additional neighbor information that ties part~3 together with the rest of the
+grid.  The \code{Create()} routine creates an empty 2D grid object with five
+parts that lives on the \code{MPI_COMM_WORLD} communicator.  The
+\code{SetExtents()} routine adds a new box to the grid.  The
+\code{SetVariables()} routine associates three variables of type cell-centered,
+$x$-face, and $y$-face with part~3.
 
-int                   addindex[2]  = {1,2};
-HYPRE_SStructVariable addvars[1]   = {HYPRE_SSTRUCT_VARIABLE_CELL};
+At this stage, the description of the data on part~3 is complete.  However, the
+spatial relationship between this data and the data on neighboring parts is not
+yet defined.  To do this, we need to relate the index space for part~3 with the
+index spaces of parts 2 and~4.  More specifically, we need to tell the
+interface that the two grey boxes neighboring part~3 in the bottom-right of
+Figure~\ref{fig-sstruct-grid} also correspond to boxes on parts 2 and~4.  This
+is done through the two calls to the \code{SetNeighborbox()} routine.  We will
+discuss only the first call, which describes the grey box on the right of the
+figure.  Note that this grey box lives outside of the box extents for the grid
+on part~3, but it can still be described using the index-space for part~3
+(recall Figure~\ref{fig-struct-boxes}).  That is, the grey box has extents
+$(1,0)$ and $(4,0)$ on part~3's index-space, which is outside of part~3's grid.
+The arguments for the \code{SetNeighborbox()} call are simply the lower and
+upper indices on part~3 and the corresponding indices on part~2.  The final
+argument to the routine indicates that the $x$-direction on part~3 (i.e., the
+$i$ component of the tuple $(i,j)$) corresponds to the $y$-direction on part~2
+and that the $y$-direction on part~3 corresponds to the $x$-direction on
+part~2.
 
-HYPRE_SStructGridCreate(MPI_COMM_WORLD, 2, 3, &grid);
+The \code{Assemble()} routine is a collective call (i.e., must be called on all
+processes from a common synchronization point), and finalizes the grid
+assembly, making the grid ``ready to use''.
 
-HYPRE_SStructGridSetExtents(grid, 0, ilower[0], iupper[0]);
-HYPRE_SStructGridSetExtents(grid, 0, ilower[1], iupper[1]);
+With the neighbor information, it is now possible to determine where off-part
+stencil entries couple.  Take, for example, any shared part boundary such as
+the boundary between parts 2 and~3.  Along these boundaries, some stencil
+entries reach outside of the part.  If no neighbor information is given, these
+entries are effectively zeroed out, i.e., they don't participate in the
+discretization.  However, with the additional neighbor information, when a
+stencil entry reaches into a neighbor box it is then coupled to the part
+described by that neighbor box information.
 
-HYPRE_SStructGridSetVariables(grid, 0, 1, vars);
-HYPRE_SStructGridAddVariables(grid, 0, addindex, 1, addvars);
+Another important consequence of the use of the \code{SetNeighborbox()} routine
+is that it can declare variables on different parts as being the same.  For
+example, the face variables on the boundary of parts 2 and~3 are recognized as
+being shared by both parts (prior to the \code{SetNeighborbox()} call, there
+were two distinct sets of variables).  Note also that these variables are of
+different types on the two parts; on part~2 they are $x$-face variables, but on
+part~3 they are $y$-face variables.
 
-HYPRE_SStructGridAssemble(grid);
+For brevity, we consider only the description of the $y$-face stencil in
+Figure~\ref{fig-sstruct-example}, i.e. the third stencil in the figure.  To do
+this, the stencil entries are assigned unique labels between 0 and 8 and their
+``offsets'' are described relative to the ``center'' of the stencil.  This
+process is illustrated in Figure \ref{fig-sstruct-stencil}.  Nine calls are
+made to the routine \code{HYPRE_SStructStencilSetEntry()}.  As an example, the
+call that describes stencil entry 5 in the figure is given the entry number~5,
+the offset $(-1,0)$, and the identifier for the $x$-face variable (the variable
+to which this entry couples).  Recall from Figure~\ref{fig-gridvars} the
+convention used for referencing variables of different types.  The geometry
+description uses the same convention, but with indices numbered relative to the
+referencing index $(0,0)$ for the stencil's center.
+Figure~\ref{fig-sstruct-graph} shows the code for setting up the graph .
+\begin{figure}
+\centering
+\mbox{}\hfill
+\includegraphics[width=.3\textwidth]{figSStructStenc0}
+\hfill
+\includegraphics[width=.25\textwidth]{figSStructStenc1}
+\hfill\mbox{}
+\caption{%
+Assignment of labels and geometries to the $y$-face stencil in
+Figure~\ref{fig-sstruct-example}.  Stencil offsets are described relative to
+the $(0,0)$ index for the ``center'' of the stencil.}
+\label{fig-sstruct-stencil}
+\end{figure}
+
+\begin{figure}
+\centering
+\begin{tabular}{@{}c@{}}
+\includegraphics[width=.32\textwidth]{figSStructGraph1}\vspace{-.5em} \\ 1
+\end{tabular}
+\hfill
+\begin{tabular}{@{}c@{}}
+\includegraphics[width=.32\textwidth]{figSStructGraph2}\vspace{-.5em} \\ 2
+\end{tabular}
+\hfill
+\begin{tabular}{@{}c@{}}
+\includegraphics[width=.32\textwidth]{figSStructGraph3}\vspace{-.5em} \\ 3
+\end{tabular}
+\vspace{1em} \\
+\mbox{}\hfill
+\begin{tabular}{@{}c@{}}
+\includegraphics[width=.32\textwidth]{figSStructGraph4}\vspace{-.5em} \\ 4
+\end{tabular}
+\hfill
+\begin{tabular}{@{}c@{}}
+\includegraphics[width=.32\textwidth]{figSStructGraph5}\vspace{-.5em} \\ 5
+\end{tabular}
+\hfill\mbox{}
+\vspace{2em} \\
+\begin{minipage}{0.9\textwidth}
+\begin{verbatim}
+    
+    HYPRE_SStructGraph graph;
+    HYPRE_SStructStencil c_stencil, x_stencil, y_stencil;
+    int c_var = 0, x_var = 1, y_var = 2;
+    int part;
+    
+    /* Create the graph object */
+1:  HYPRE_SStructGraphCreate(MPI_COMM_WORLD, grid, &graph);
+    
+    /* Set the cell-centered, x-face, and y-face stencils for each part */
+    for (part = 0; part < 5; part++)
+    {
+2:     HYPRE_SStructGraphSetStencil(graph, part, c_var, c_stencil);
+3:     HYPRE_SStructGraphSetStencil(graph, part, x_var, x_stencil);
+4:     HYPRE_SStructGraphSetStencil(graph, part, y_var, y_stencil);
+    }
+    
+    /* No need to add non-stencil entries in this example */
+5:  HYPRE_SStructGraphAssemble(graph);
 
 \end{verbatim}
-\end{display}
-The \code{Create()} routine creates an empty 2D grid object that lives
-on the \code{MPI_COMM_WORLD} communicator.  The \code{SetExtents()}
-routine adds a new box to the grid.  The \code{SetVariables()} routine
-sets the variables on a grid part, and the \code{AddVariables()}
-routine adds variables to a grid part index (in the above example,
-there are two cell-centered variables at index (1,2)).  The
-\code{Assemble()} routine is a collective call (i.e., must be called
-on all processes from a common synchronization point), and finalizes
-the grid assembly, making the grid ``ready to use''.
+\end{minipage}
+\caption{%
+Test figure.}
+\label{fig-sstruct-graph}
+\end{figure}
 
-%==========================================================================
+With the above, we now have a complete description of the nonzero structure for
+the matrix.  The matrix coefficients are then easily set in a manner similar to
+what is described in Section~\ref{sec-Struct-Matrix} using routines
+\code{MatrixSetValues()} and \code{MatrixSetBoxValues()} in the \code{SStruct}
+interface.  As before, there are also \code{AddTo} variants of these routines.
+Likewise, setting up the right-hand-side is similar to what is described in
+Section~\ref{sec-Struct-RHS}.  See the \hypre{} reference manual for details.
 
-\section{Setting Up the SStruct Stencil}
-\label{Setting Up the SStruct Stencil}
+An alternative approach for describing the above problem through the interface
+is to use the \code{GraphAddEntries()} routine instead of the
+\code{GridSetNeighborBox()} routine.  In this approach, the five parts would be
+explicitly ``sewn'' together by adding non-stencil couplings to the matrix
+graph.  The main downside to this approach for block-structured grid problems
+is that variables along block boundaries are no longer considered to be the
+same variables on the corresponding parts that share these boundaries.  For
+example, any face variable along the boundary between parts 2 and~3 in
+Figure~\ref{fig-sstruct-example} would represent two different variables that
+live on different parts.  To ``sew'' the parts together correctly, we would
+need to explicitly select one of these variables as the representative that
+participates in the discretization, and make the other variable a dummy
+variable that is decoupled from the discretization by zeroing out appropriate
+entries in the matrix.  All of these complications are avoided by using the
+\code{GridSetNeighborBox()} for this example.
 
-The geometry of the discretization stencil is described by an array of
-integer tuples in 2D (triples in 3D), each representing a relative
-offset (in index space) from some gridpoint on the grid.  For example,
-the geometry of the 9-pt stencil for the example problem being
-considered can be represented in the following way:
-\begin{equation}\label{sstruct:eqn-stencil-description}
-\left [
-\begin{array}{ccc}
-(-1, 1) & ( 0, 1) & ( 1, 1) \\
-(-1, 0) & ( 0, 0) & ( 1, 0) \\
-(-1,-1) & ( 0,-1) & ( 1,-1) 
-\end{array}
-\right ]
-\equiv
-\left [
-\begin{array}{ccc}
-S_7 & S_4 & S_8 \\
-S_1 & S_0 & S_2 \\
-S_5 & S_3 & S_6
-\end{array}
-\right ] .
-\end{equation}
-In (\ref{eqn-stencil-description}), the $(0,0)$ entry represents the
-``center'' coefficient, and is the 0th entry in the array ($S_0$).
-The $(0,-1)$ entry represents the ``south'' coefficient, and is the
-3rd entry in the array ($S_3$).  And so on.
+%-----------------------------------------------------------------------------
 
-On process 0, 1, or 2, the following code will set up the stencil in
-(\ref{eqn-stencil-description}).
-\begin{display}
-\begin{verbatim}
+\section{Structured Adaptive Mesh Refinement}
+\label{sec-Structured-Adaptive-Mesh-Refinement}
 
-HYPRE_SStructStencil stencil;
-int                  s;
-int                  offsets[9][2] = {{0,0},
-                                      {-1, 0}, { 1, 0}, { 0,-1}, { 0, 1}};
-                                      {-1,-1}, { 1,-1}, {-1, 1}, { 1, 1}};
+We now briefly discuss how to use the \code{SStruct} interface in a structured
+AMR application.  Consider Poisson's equation on the simple cell-centered
+example grid illustrated in Figure \ref{fig-sstruct-samr-grid}.  For structured
+AMR applications, each refinement level should be defined as a unique part.
+There are two parts in this example: part~0 is the global coarse grid and
+part~1 is the single refinement patch.  Note that the coarse unknowns
+underneath the refinement patch (gray dots in Figure
+\ref{fig-sstruct-samr-grid}) are not real physical unknowns; the solution in
+this region is given by the values on the refinement patch.  In setting up the
+composite grid matrix \cite{SFMcCormick_1989a} for \hypre{} the equations for
+these ``dummy'' unknowns should be uncoupled from the other unknowns (this can
+easily be done by setting all off-diagonal couplings to zero in this region).
 
-HYPRE_SStructStencilCreate(2, 9, &stencil);
+\begin{figure}
+\centering
+\includegraphics[width=.7\textwidth]{figSStructExample2a}
+\caption{%
+Structured AMR grid example. Shaded regions correspond to process~0, unshaded
+to process~1.  The grey dots are dummy variables.}
+\label{fig-sstruct-samr-grid}
+\end{figure}
 
-for (s = 0; s < 9; s++)
-   HYPRE_SStructStencilSetEntry(stencil, s, offsets[s], 0);
+In the example, parts are distributed across the same two processes with
+process 0 having the ``left'' half of both parts.  The composite grid is then
+set up part-by-part by making calls to \code{GridSetExtents()} just as was done
+in Section~\ref{sec-Block-Structured-Grids} and Figure~\ref{fig-sstruct-grid}
+(no \code{SetNeighborBox} calls are made in this example).  Note that in the
+interface there is no required rule relating the indexing on the refinement
+patch to that on the global coarse grid; they are separate parts and thus each
+has its own index space.  In this example, we have chosen the indexing such
+that refinement cell $(2i,2j)$ lies in the lower left quadrant of coarse cell
+$(i,j)$.  Then the stencil is set up.  In this example we are using a finite
+volume approach resulting in the standard 5-point stencil in
+Figure~\ref{fig-struct-stencil-b} in both parts.
 
-\end{verbatim}
-\end{display}
-The \code{Create()} routine creates an empty 2D, 9-pt stencil object.
-The \code{SetEntry()} routine defines the geometry of the stencil, and
-assigns the array numbers for each of the stencil entries.  None of
-the calls are collective calls.
+The grid and stencil are used to define all intra-part coupling in the graph,
+the non-zero pattern of the composite grid matrix.  The inter-part coupling at
+the coarse-fine interface is described by \code{GraphAddEntries()} calls.  This
+coupling in the composite grid matrix is typically the composition of an
+interpolation rule and a discretization formula.  In this example, we use a
+simple piecewise constant interpolation, i.e. the solution value in a coarse
+cell is equal to the solution value at the cell center.  Then the flux across a
+portion of the coarse-fine interface is approximated by a difference of the
+solution values on each side.  As an example, consider approximating the flux
+across the left interface of cell $(6,6)$ in Figure
+\ref{fig-sstruct-samr-stencil}.  Let $h$ be the coarse grid mesh size, and
+consider a local coordinate system with the origin at the center of cell
+$(6,6)$.  We approximate the flux as follows
+\begin{eqnarray}
+\int_{-h/4}^{h/4}{u_x(-h/4,s)} ds
+& \approx & \frac{h}{2} u_x(-h/4,0)
+  \approx \frac{h}{2} \frac{u(0,0)-u(-3h/4,0)}{3h/4} \\
+& \approx & \frac{2}{3} (u_{6,6}-u_{2,3}) \nonumber .
+\end{eqnarray} 
+The first approximation uses the midpoint rule for the edge integral, the
+second uses a finite difference formula for the derivative, and the third the
+piecewise constant interpolation to the solution in the coarse cell.  This
+means that the equation for the variable at cell $(6,6)$ involves not only the
+stencil couplings to $(6,7)$ and $(7,6)$ on part~1 but also non-stencil
+couplings to $(2,3)$ and $(3,2)$ on part~0.  These non-stencil couplings are
+described by \code{GraphAddEntries()} calls.  The syntax for this call is
+simply the part and index for both the variable whose equation is being defined
+and the variable to which it couples.  After these calls, the non-zero pattern
+of the matrix (and the graph) is complete.  Note that the ``west'' and
+``south'' stencil couplings simply ``drop off'' the part, and are effectively
+zeroed out.
 
-%==========================================================================
+\begin{figure}
+\centering
+\includegraphics[width=.4\textwidth]{figSStructExample2b}
+\caption{%
+Coupling for equation at corner of refinement patch. Black lines
+(solid and broken) are stencil couplings. Gray line are non-stencil
+couplings.}
+\label{fig-sstruct-samr-stencil}
+\end{figure}
 
-\section{Setting Up the SStruct Graph}
-\label{Setting Up the SStruct Graph}
-
-The graph will represent the nonzero structure of the matrix in
-Section \ref{Setting Up the SStruct Matrix} below.  It is defined in
-terms of the grid and stencil objects described in Sections
-\ref{Setting Up the SStruct Grid} and \ref{Setting Up the SStruct
-Stencil} above.
-
-On process 0, the following code will set up the graph for the
-example problem.
-\begin{display}
-\begin{verbatim}
-
-HYPRE_SStructGraph graph;
-int                addindex[9][2]   = {{ 2,0},{2,1},{2,2},{2,3},
-                                       {-1,3},{0,3},{1,3},{2,3},
-                                       { 1,2}};
-int                addentries[9][2] = {{-1,0},{-1,1},{-1,2},{-1,3},
-                                       { 9,9},{10,9},{11,9},{12,9},
-                                       { 1,2}};
-
-HYPRE_SStructGraphCreate(MPI_COMM_WORLD, grid, &graph);
-
-HYPRE_SStructGraphSetStencil(graph, 0, 0, stencil);
-
-/* Add graph edge entries at grid part boundaries */
-HYPRE_SStructGraphAddEntries(graph, 0, addindex[0], 0, 2, addentries[0], 0);
-HYPRE_SStructGraphAddEntries(graph, 0, addindex[0], 0, 2, addentries[1], 0);
-HYPRE_SStructGraphAddEntries(graph, 0, addindex[1], 0, 2, addentries[0], 0);
-...
-
-/* Add graph edge entries at index (1,2) */
-HYPRE_SStructGraphAddEntries(graph, 0, addindex[8], 0, 0, addentries[8], 1);
-HYPRE_SStructGraphAddEntries(graph, 0, addindex[8], 1, 0, addentries[8], 0);
-
-\end{verbatim}
-\end{display}
-
-%==========================================================================
-
-\section{Setting Up the SStruct Matrix}
-\label{Setting Up the SStruct Matrix}
-
-The matrix is set up in terms of the graph object described in Section
-\ref{Setting Up the SStruct Graph} above.  The coefficients associated
-with each graph entry will typically vary from gridpoint to gridpoint,
-but in the example problem being considered, they are as follows over
-the entire grid (except at boundaries; see below):
-\begin{equation}\label{sstruct:eqn-stencil-laplacian}
-\left [
-\begin{array}{ccc}
- -1 & -1 & -1 \\
- -1 &  8 & -1 \\
- -1 & -1 & -1 
-\end{array}
-\right ] .
-\end{equation}
-
-On process 0, the following code will set up matrix values associated
-with the center ($S_0$) and south ($S_3$) stencil entries in
-(\ref{eqn-stencil-description}) / (\ref{eqn-stencil-laplacian}).
-Matrix values associated with the non-stencil graph entries are also
-set up.
-\begin{display}
-\begin{verbatim}
-
-HYPRE_SStructMatrix  A;
-double               values[32];
-int                  sindices[2] = {0,3};
-int                  gindices[4] = {9,10,11,0};
-int                  i;
-
-HYPRE_SStructMatrixCreate(MPI_COMM_WORLD, graph, &A);
-HYPRE_SStructMatrixInitialize(A);
-
-for (i = 0; i < 32; i += 2)
-{
-   values[i]   =  8.0;
-   values[i+1] = -1.0;
-}
-HYPRE_SStructMatrixSetBoxValues(A, 0, ilower[0], iupper[0], 0,
-                                2, sindices, values);
-
-/* set values at non-stencil graph entries */
-for (i = 0; i < 3; i++)
-{
-   values[i] = -1.0;
-}
-HYPRE_SStructMatrixSetValues(A, 0, addindex[0], 0, 2, gindices, values);
-HYPRE_SStructMatrixSetValues(A, 0, addindex[1], 0, 3, gindices, values);
-HYPRE_SStructMatrixSetValues(A, 0, addindex[2], 0, 3, gindices, values);
-...
-HYPRE_SStructMatrixSetValues(A, 0, addindex[7], 0, 1, gindices, values);
-HYPRE_SStructMatrixSetValues(A, 0, addindex[7], 1, 1, &gindices[3], values);
-
-/* zero out coefficients that reach outside of the domain or grid part */
-...
-
-/* set boundary conditions at domain boundaries, */
-...
-
-HYPRE_SStructMatrixAssemble(A);
-
-\end{verbatim}
-\end{display}
-
-%==========================================================================
-
-\section{Setting Up the SStruct Right-Hand-Side Vector}
-\label{Setting Up the SStruct Right-Hand-Side Vector}
-
-The right-hand-side vector is set up similarly to the matrix set up
-described in Section \ref{Setting Up the SStruct Matrix} above.  The
-main difference is that there is no graph.
-
-%==========================================================================
-
+The remaining step is to define the actual numerical values for the composite
+grid matrix.  This can be done by either \code{MatrixSetValues()} calls to set
+entries in a single equation, or by \code{MatrixSetBoxValues()} calls to set
+entries for a box of equations in a single call.  The syntax for the
+\code{MatrixSetValues()} call is a part and index for the variable whose
+equation is being set and an array of entry numbers identifying which entries
+in that equation are being set.  The entry numbers may correspond to stencil
+entries or non-stencil entries.

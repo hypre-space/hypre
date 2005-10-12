@@ -1,13 +1,15 @@
-%==========================================================================
+%=============================================================================
+%=============================================================================
+
 \chapter{Linear-Algebraic System Interface (IJ)}
-\label{Linear-Algebraic System Interface}
+\label{ch-IJ}
 
 The \code{IJ} interface described in this chapter is the lowest common
 denominator for specifying linear systems in \hypre{}.  This interface
 provides access to general sparse-matrix solvers in \hypre{}, not
 to the specialized solvers that require more problem information.
 
-%==========================================================================
+%-----------------------------------------------------------------------------
 
 \section{IJ Matrix Interface}
 
@@ -129,81 +131,7 @@ before, and call the \code{Assemble()} routine to re-assemble before
 using the matrix.  Re-initialization and re-assembly are very cheap,
 essentially a no-op in the current implementation of the code.
 
-%\begin{figure}
-%\begin{center}
-%\newcommand{\qq}{\scriptstyle}
-%\renewcommand{\arraycolsep}{4 pt}
-%\renewcommand{\arraystretch}{0.5}
-%\begin{equation}
-%\left(
-%\begin{array}{ c|c c c c c|c c c c c|c c c c c|c }
-% & & & & & & & &\qq \; & & & & & & & & \\
-% & & & & & & & &\qq \vdots & & & & & & & & \\
-%\hline
-% & & & & & & & &\qq \vdots & & & & & & & & \\
-%\qq .\,.\,.\; &\qq \; &\qq \; &\qq a &\qq \; &\qq \; &
-%\qq \! & \qq a &\qq a &\qq a &\qq \; &
-%\qq \; &\qq a &\qq \; &\qq \; &\qq \; &\qq \; .\,.\,.\\
-% & & & & & & & &\qq \vdots & & & & & & & & \\
-% & & & & & & & &\qq \; & & & & & & & & \\
-%\hline
-% & & & & & & & &\qq \vdots & & & & & & & \\
-% & & & & & & & &\qq \; & & & & & & & & \\
-%\end{array}
-%\right)
-%\left(
-%\begin{array}{c}
-%\qq x \\
-%\qq \vdots \\
-%\\
-%\\
-%\\
-%\\
-%\qq \vdots \\
-%\\
-%\qq x \\
-%\end{array}
-%\right)
-%=
-%\left(
-%\begin{array}{c}
-%\qq \;\\
-%\qq \vdots \\
-%\hline
-%\qq \vdots \\
-%\qq b \\
-%\qq \vdots \\
-%\qq \;\\
-%\hline
-%\hline
-%\hline
-%\qq \vdots \\
-%\qq \; \\
-%\end{array}
-%\right)
-%\end{equation}
-%\caption{Single row of a distributed system of equations.
-%Interprocessor boundaries are marked by horizontal lines.
-%Nonzero matrix coefficients are here indistinguishably
-%expressed as {\it a}'s.  Unknown and right-hand side
-%vectors are similarly expressed.}
-%\end{center}
-%\end{figure}
-%
-%\begin{figure}
-%\label{fig-set-values}
-%\centerline{\epsfig{figure=insert_row.eps,height=2.2in}}
-%\vspace{0.15in}
-%\parbox{6.5in}{\hspace{0.5in}
-%  {\tt int HYPRE\_IJMatrixInsertRow(HYPRE\_IJMatrix *ij\_matrix,
-%   int num\_cols, }}
-%\parbox{6.5in}{\hspace{1.5in}
-%  {\tt int row\_index, int *col\_indices, double *coeffs);}}
-%\vspace{0.in}
-%\caption{Array layout for {\tt HYPRE\_IJMatrixInsertRow}.}
-%\end{figure}
-
-%==========================================================================
+%-----------------------------------------------------------------------------
 
 \section{IJ Vector Interface}
 

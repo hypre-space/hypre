@@ -12,6 +12,7 @@ include ../config/Makefile.config
 .SUFFIXES:
 .SUFFIXES: .c .dxx .html .tex
 
+PDFLATEX = pdflatex
 LATEX = latex -interaction=nonstopmode
 MAKEINDEX = makeindex -q
 DVIPS = dvips -q
@@ -59,7 +60,7 @@ DEV_FILES =\
 # Targets
 ##################################################################
 
-all: html ps pdf
+all: html pdf
 
 install: all
 	@ \
@@ -74,9 +75,9 @@ install: all
 	    done; \
 	  fi; \
 	done; \
-	for file in HYPRE_usr_manual.ps HYPRE_usr_manual.pdf \
-		HYPRE_ref_manual.ps HYPRE_ref_manual.pdf \
-		bHYPRE_ref_manual.ps bHYPRE_ref_manual.pdf; do \
+	for file in HYPRE_usr_manual.pdf \
+		HYPRE_ref_manual.pdf \
+		bHYPRE_ref_manual.pdf; do \
 	  test -f $$file && cp -fp $$file ${HYPRE_INSTALL_DIR}/docs/$$file; \
 	done; \
 	test -f V1.5.0b.IJ_transition_info && \
@@ -86,7 +87,7 @@ install: all
 
 clean:
 	@/bin/rm -f *.aux *.bbl *.blg *.dvi *.log *.dlog *.toc
-	@/bin/rm -f *.idx *.ilg *.ind 
+	@/bin/rm -f *.idx *.ilg *.ind *.brf *.out
 	@/bin/rm -f vref_manual.* vbref_manual.* version.tex
 
 distclean: clean
@@ -103,75 +104,36 @@ distclean: clean
 # Rules
 ##################################################################
 
-html: usr_html dev_html ref_html bref_html
+html: ref_html bref_html
 
-ps: usr_ps dev_ps ref_ps bref_ps
+pdf: usr dev ref_pdf bref_pdf
 
-pdf: usr_pdf dev_pdf ref_pdf bref_pdf
+usr: HYPRE_usr_manual.pdf
+dev: HYPRE_dev_manual.pdf
 
-usr: usr_html usr_ps usr_pdf
-usr_html: HYPRE_usr_manual/usr_manual.html
-usr_ps: HYPRE_usr_manual.ps
-usr_pdf: HYPRE_usr_manual.pdf
-
-dev: dev_html dev_ps dev_pdf
-dev_html: HYPRE_dev_manual/dev_manual.html
-dev_ps: HYPRE_dev_manual.ps
-dev_pdf: HYPRE_dev_manual.pdf
-
-ref: ref_html ref_ps ref_pdf
+ref: ref_html ref_pdf
 ref_html: HYPRE_ref_manual/index.html
-ref_ps: HYPRE_ref_manual.ps
 ref_pdf: HYPRE_ref_manual.pdf
 
 bref: bref_html bref_ps bref_pdf
 bref_html: bHYPRE_ref_manual/index.html
-bref_ps: bHYPRE_ref_manual.ps
 bref_pdf: bHYPRE_ref_manual.pdf
 
 ##########
 
-HYPRE_usr_manual/usr_manual.html: usr_manual.dvi
-	mkdir -p HYPRE_usr_manual
-	latex2html ${ONLINE_OPTS} -dir HYPRE_usr_manual usr_manual.tex 2>&1
-	@cp -f hypre_wiw.gif HYPRE_usr_manual/.
-
-HYPRE_usr_manual.ps: usr_manual.dvi
-	${DVIPS} -o HYPRE_usr_manual.ps usr_manual
-
-HYPRE_usr_manual.pdf: HYPRE_usr_manual.ps
-	${PSPDF} HYPRE_usr_manual.ps
-
-usr_manual.dvi: version.tex usr_manual.idx
-	${LATEX} usr_manual
-	${LATEX} usr_manual
-
-usr_manual.idx: ${USR_FILES} 
-	${LATEX} usr_manual
+HYPRE_usr_manual.pdf: version.tex ${USR_FILES}
+	${PDFLATEX} usr_manual
 	bibtex usr_manual
-	${MAKEINDEX} usr_manual.idx
+	${PDFLATEX} usr_manual
+	${PDFLATEX} usr_manual
+	mv usr_manual.pdf HYPRE_usr_manual.pdf
 
 ##########
 
-HYPRE_dev_manual/dev_manual.html: dev_manual.dvi
-	mkdir -p HYPRE_dev_manual
-	latex2html ${ONLINE_OPTS} -dir HYPRE_dev_manual dev_manual.tex 2>&1
-	@cp -f hypre_wiw.gif HYPRE_dev_manual/.
-
-HYPRE_dev_manual.ps: dev_manual.dvi
-	${DVIPS} -o HYPRE_dev_manual.ps dev_manual
-
-HYPRE_dev_manual.pdf: HYPRE_dev_manual.ps
-	${PSPDF} HYPRE_dev_manual.ps
-
-dev_manual.dvi: version.tex dev_manual.idx
-	${LATEX} dev_manual
-	${LATEX} dev_manual
-
-dev_manual.idx: ${DEV_FILES}
-	${LATEX} dev_manual
-	#bibtex dev_manual
-	${MAKEINDEX} dev_manual.idx
+HYPRE_dev_manual.pdf: version.tex ${DEV_FILES}
+	${PDFLATEX} dev_manual
+	${PDFLATEX} dev_manual
+	mv dev_manual.pdf HYPRE_dev_manual.pdf
 
 ##########
 
@@ -180,15 +142,10 @@ HYPRE_ref_manual/index.html: vref_manual.dxx
 	doc++ -d HYPRE_ref_manual -B hypre_wiw.html vref_manual.dxx 2>&1
 	cp -f hypre_wiw.gif HYPRE_ref_manual
 
-HYPRE_ref_manual.ps: vref_manual.dvi
-	${DVIPS} -o HYPRE_ref_manual.ps vref_manual.dvi 		
-
-HYPRE_ref_manual.pdf: HYPRE_ref_manual.ps
-	${PSPDF} HYPRE_ref_manual.ps
-
-vref_manual.dvi: version.tex vref_manual.tex
-	${LATEX} vref_manual
-	${LATEX} vref_manual
+HYPRE_ref_manual.pdf: version.tex vref_manual.tex
+	${PDFLATEX} vref_manual
+	${PDFLATEX} vref_manual
+	mv vref_manual.pdf HYPRE_ref_manual.pdf
 
 vref_manual.tex: vref_manual.dxx
 	doc++ -t -o vref_manual.tex vref_manual.dxx
@@ -204,15 +161,10 @@ bHYPRE_ref_manual/index.html: vbref_manual.dxx
 	doc++ -d bHYPRE_ref_manual -B hypre_wiw.html vbref_manual.dxx 2>&1
 	cp -f hypre_wiw.gif bHYPRE_ref_manual
 
-bHYPRE_ref_manual.ps: vbref_manual.dvi
-	${DVIPS} -o bHYPRE_ref_manual.ps vbref_manual.dvi 		
-
-bHYPRE_ref_manual.pdf: bHYPRE_ref_manual.ps
-	${PSPDF} bHYPRE_ref_manual.ps
-
-vbref_manual.dvi: version.tex vbref_manual.tex
-	${LATEX} vbref_manual
-	${LATEX} vbref_manual
+bHYPRE_ref_manual.pdf: version.tex vbref_manual.tex
+	${PDFLATEX} vbref_manual
+	${PDFLATEX} vbref_manual
+	mv vbref_manual.pdf bHYPRE_ref_manual.pdf
 
 vbref_manual.tex: vbref_manual.dxx
 	doc++ -t -o vbref_manual.tex vbref_manual.dxx

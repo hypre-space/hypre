@@ -1,120 +1,130 @@
-@String{ijnmf =  "Intl.\ J. Num.\ Meth.\ Fluids"}
 
-@String{ijnme =  "Intl.\ J. Num.\ Meth.\ Engrg."}
-
-@String{ijhsc =  "Intl.\ J. High Speed Computing"}
-
-@String{ijcm =   "Intl.\ J. Comput.\ Math."}
-
-@String{jcam =   "J. Comput.\ Appl.\ Math."}
-
-@String{jcp =    "J. Comput.\ Phys."}
-
-@String{mathcomp = "Math.\ Comp."}
-
-@String{nummath = "Numer.\ Math."}
-
-@String{sisc =   "{SIAM} J. Sci.\ Comput."}
-
-@String{sissc =  "{SIAM} J. Sci.\ Statist.\ Comput."}
-
-@String{sinum =  "{SIAM} J. Numer.\ Anal."}
-
-@String{simax =  "{SIAM} J. Matrix Anal.\ Appl."}
-
-@String{nlaa =   "Num.\ Lin.\ Alg.\ Appl."}
-
-@String{laa =    "Lin.\ Alg.\ Appl."}
-
-@String{toms =   "ACM Trans.\ Math.\ Softw."}
-
-@String{anm = "Applied Numerical Mathematics"}
-
-@TechReport { KK1998,
-  author = "Karpis, G. and Kumar, V.",
-  title = "Parallel Threshold-based {ILU} Factorization",
-  number = "061",
+@techreport {GKarypis_VKumar_1998,
+  author =      "Karypis, G. and Kumar, V.",
+  title =       "Parallel Threshold-based {ILU} Factorization",
+  number =      "061",
   institution = "University of Minnesota, Department of Computer
                  Science/Army HPC Research Center,
                  Minneapolis, MN 5455",
-  year  = "1998"
-}
-@article{Henson_Yang:2000,
-  author =       "V. E. Henson and U. M. Yang",
-  title =        "Boomer{AMG}: a Parallel Algebraic Multigrid Solver and 
+  year =        "1998"
+  }
+
+@article{VEHenson_UMYang_2002,
+  author =      "V. E. Henson and U. M. Yang",
+  title =       "Boomer{AMG}: a Parallel Algebraic Multigrid Solver and 
                  Preconditioner",
-  journal = anm,
-  note =        ", to appear.
-                 Also available as LLNL technical report UCRL-JC-141495",
-}
+  journal =     "Applied Numerical Mathematics",
+  volume =      "41",
+  number =      "5",
+  pages =       "155--177",
+  note =        "Also available as LLNL technical report UCRL-JC-141495",
+  year =        "2002"
+  }
 
-@article{Chow:1999:APS,
-  author =       "E. Chow",
-  title =        "A Priori Sparsity Patterns for Parallel Sparse Approximate
+@article{EChow_2000,
+  author =      "E. Chow",
+  title =       "A Priori Sparsity Patterns for Parallel Sparse Approximate
                  Inverse Preconditioners",
-  journal = sisc,
-  volume = 21,
-  pages = "1804--1822",
-  year = "2000",
-}
+  journal =     "{SIAM} J. Sci. Comput.",
+  volume =      "21",
+  pages =       "1804--1822",
+  year =        "2000",
+  }
 
-@InCollection{chow-cleary-falgout,
-  author =       "E. Chow and A. Cleary and R. Falgout",
-  title =        "Design of the HYPRE Preconditioner Library",
-  booktitle =    "Object Oriented Methods for Interoperable Scientific and
-                        Engineering Computing",
-  editor =       "M. E. Henderson and C. R. Anderson and S. L. Lyons",
-  publisher =    "SIAM",
-  address =      "Philadelphia, PA",
-  year =         "1999",
-}
+@inproceedings{EChow_AJCleary_RDFalgout_1998,
+  author =      "E.~Chow and A.~J.~Cleary and R.~D.~Falgout",
+  title =       "Design of the {\sl hypre} preconditioner library",
+  booktitle =   "Proc. of the {SIAM} Workshop on Object Oriented Methods for
+                 Inter-operable Scientific and Engineering Computing",
+  editor =      "Mike Henderson and Chris Anderson and Steve Lyons",
+  publisher =   "{SIAM}",
+  address =     "Philadelphia, PA",
+  note =        "Held at the IBM T.J. Watson Research Center,
+                 Yorktown Heights, New York, October 21-23, 1998.
+                 Also available as LLNL technical report UCRL-JC-132025",
+  year =        "1998"
+  }
 
-@Article{ilut,
-  author =       "Y. Saad",
-  title =        "{ILUT}: {A} dual threshold incomplete {LU}
+@incollection{RDFalgout_JEJones_UMYang_2004TA,
+  author =      "R.~D.~Falgout and J.~E.~Jones and U.~M.~Yang",
+  title =       "The Design and Implementation of {\sl hypre}, a Library
+                 of Parallel High Performance Preconditioners",
+  booktitle =   "Numerical Solution of Partial Differential Equations
+                 on Parallel Computers",
+  editor =      "A.~M.~Bruaset and P.~Bj{\o}rstad and A.~Tveito",
+  publisher =   "Springer--Verlag",
+  note =        "To appear.
+                 Also available as LLNL technical report UCRL-JRNL-205459",
+  year =        "2004"
+  }
+
+@article{RDFalgout_JEJones_UMYang_2005,
+  author =      "R.~D.~Falgout and J.~E.~Jones and U.~M.~Yang",
+  title =       "Conceptual Interfaces in {\sl hypre}",
+  journal =     "Future Generation Computer Systems",
+  volume =      "22",
+  pages =       "239--251",
+  note =        "Special issue on PDE software.
+                 Also available as LLNL technical report UCRL-JC-148957",
+  year =        "2005"
+  }
+
+@article{RDFalgout_JEJones_UMYang_2005,
+  author =      "R.~D.~Falgout and J.~E.~Jones and U.~M.~Yang",
+  title =       "Pursuing Scalability for {\sl hypre}'s Conceptual Interfaces",
+  journal =     "{ACM} Trans. Math. Softw.",
+  volume =      "31",
+  number =      "3",
+  month =       "September",
+  pages =       "326--350",
+  note =        "Also available as LLNL technical report UCRL-JRNL-205407",
+  year =        "2005"
+  }
+
+@article{YSaad_1994,
+  author =      "Y. Saad",
+  title =       "{ILUT}: {A} dual threshold incomplete {LU}
                  factorization",
-  journal =      nlaa,
-  year =         "1994",
-  volume =       "1",
-  pages =        "387--402",
-}
+  journal =     "Numer. Linear Algebra Appl.",
+  volume =      "1",
+  pages =       "387--402",
+  year =        "1994"
+  }
 
-@Book{Saad-book2,
-  author =       "Yousef Saad",
-  title =        "Iterative Methods for Sparse Linear Systems",
-  publisher =    "PWS Publishing Co.",
-  address =      "Boston, MA",
-  year =         "1996",
-}
+@book{YSaad_1996,
+  author =      "Yousef Saad",
+  title =       "Iterative Methods for Sparse Linear Systems",
+  publisher =   "PWS Publishing Co.",
+  address =     "Boston, MA",
+  year =        "1996"
+  }
 
-@TechReport{FEI-ref,
-  title =        "An annotated reference guide to the {F}inite {E}lement 
-		  {I}nterface {(FEI)} Specification, {V}ersion 1.0",
-  author =       "R. L. Clay et al.",
-  institution =  "Sandia National Laboratories",
-  address =      "Livermore, CA",
-  number =       "SAND99-8229",
-  year =         "1999",
-}
-
-%-----------------------------------------------------------------------------
+@techreport{FEI-ref,
+  title =       "An annotated reference guide to the {F}inite {E}lement 
+		 {I}nterface {(FEI)} Specification, {V}ersion 1.0",
+  author =      "R. L. Clay et al.",
+  institution = "Sandia National Laboratories",
+  address =     "Livermore, CA",
+  number =      "SAND99-8229",
+  year =        "1999"
+  }
 
 @article{SSchaffer_1998a,
   author =      "S.~Schaffer",
   title =       "A semi-coarsening multigrid method for elliptic partial
                  differential equations with highly discontinuous and
                  anisotropic coefficients",
-  journal =     "SIAM J. Sci. Comput.", 
+  journal =     "{SIAM} J. Sci. Comput.", 
   volume =      "20",
   number =      "1",  
-  year =        "1998",
-  pages =       "228--242"
+  pages =       "228--242",
+  year =        "1998"
   }
 
 @article{PNBrown_RDFalgout_JEJones_2000,
   author =      "P.~N.~Brown and R.~D.~Falgout and J.~E.~Jones",
   title =       "Semicoarsening multigrid on distributed memory machines",
-  journal =     "SIAM J. Sci. Comput.",
+  journal =     "{SIAM} J. Sci. Comput.",
   volume =      "21",
   number =      "5",
   pages =       "1823--1834",
@@ -153,31 +163,46 @@
   year =        "2000"
   }
 
-%-----------------------------------------------------------------------------
+@article{JEMorel_RMRoberts_MJShashkov_1998,
+  author =      "J.E.~Morel and Randy~M.~Roberts and Mikhail~J.~Shashkov",
+  title =       "A local support-operators diffusion discretization scheme
+                 for quadrilateral {\it r-z} meshes",
+  journal =     "J. Comp. Physics",
+  volume =      "144",
+  pages =       "17--51",
+  year =        "1998"
+  }
 
+@inproceedings{DHysom_APothen_1999,
+  author =      "Hysom, D. and Pothen, A.",
+  title =       "Efficient Parallel Computation of {ILU}(k) Preconditioners",
+  booktitle =   "Proceedings of Supercomputing '99",
+  month =       "November",
+  publisher =   "ACM",
+  note =        "Published on {CDROM}, {ISBN} \#1-58113-091-0,
+                 {ACM} Order \#415990,
+                 {IEEE} Computer Society Press Order \# RS00197",
+  year =        "1999"
+  }
 
-@inproceedings {
-  hysom:sc99,
-  title = "Efficient Parallel Computation of {ILU}(k) Preconditioners",
-  author = "Hysom, D. and Pothen, A.",
-  organization = "SC99",
-  month = "November",
-  year = "1999",
-  publisher = "ACM",
-  note = "published on {CDROM}, {ISBN} \#1-58113-091-0, {ACM} Order \#415990, 
-          {IEEE} Computer Society Press Order \# RS00197"
-}
+@article {DHysom_APothen_2001,
+  author =      "Hysom, D. and Pothen, A.",
+  title =       "A Scalable Parallel Algorithm for Incomplete Factor
+                 Preconditioning",
+  journal =     "{SIAM} J. Sci. Comput.",
+  volume =      "22",
+  number =      "6",
+  pages =       "2194--2215",
+  year =        "2001"
+  }
 
-@article {
-  hysomSIAM,
-  title = "A Scalable Parallel Algorithm for Incomplete Factor Preconditioning",
-  author =  "Hysom, D. and Pothen, A.",
-  journal =  "SIAM J. Sci. Comput.",
-  year =  2001,
-  volume =  22,
-  number = 6,
-  pages =  "2194--2215"
-}
-
-
-%-----------------------------------------------------------------------------
+@book{SFMcCormick_1989a,
+  author =      "S. F. McCormick",
+  title =       "Multilevel Adaptive Methods for Partial Differential
+                 Equations",
+  series =      "Frontiers in Applied Mathematics",
+  volume =      "6",
+  publisher =   "{SIAM} Books",
+  address =     "Philadelphia",
+  year =        "1989",
+  }

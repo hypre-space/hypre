@@ -1,14 +1,19 @@
 \documentclass[11pt]{book}
 
-\usepackage{epsfig}
-\usepackage{html}
+%\usepackage{epsfig}
+%\usepackage{html}
 \usepackage{hypre}
-\usepackage{makeidx}
+%\usepackage{makeidx}
 \usepackage{graphicx}
-
-%=============================================================================
-% Preamble:
-%=============================================================================
+\usepackage[
+pdftex,
+linktocpage,       % make page numbers be the link on TOC, LOF and LOT
+pagebackref,       % adds backlink to the bibliography
+plainpages=false,  % page anchors are named by their formatted form
+pdfstartview=Fit,  % startup page view
+bookmarksopen,     % show bookmarks with all the subtrees expanded
+bookmarksnumbered  % include section numbers in bookmarks
+]{hyperref}
 
 % set margins
 \setlength{\oddsidemargin}{0in}
@@ -18,13 +23,14 @@
 \setlength{\textheight}{8.0in}
 
 % define various commands and macros
+\def\pilut{{\sl PILUT}}
 
 % define the version number
 % NOTE: this is automatically generated from another file in hypre
 \input{version}
 
 % write out the index entries in the `.idx' file
-\makeindex
+%\makeindex
 
 %=============================================================================
 % Body:
@@ -32,7 +38,7 @@
 
 \begin{document}
 
-%=============== Title Page
+%--------------- Title Page
 
 \begin{TitlePage}
 
@@ -41,7 +47,7 @@
 \SubTitle{Date: \HYPREVersionDate}
 \vfill
 \begin{center}
-\InsertGraphics{hypre_wiw}{width=.7\textwidth}
+\includegraphics[width=.7\textwidth]{hypre_wiw}
 \end{center}
 \vfill
 \Author{%
@@ -51,7 +57,7 @@ Lawrence Livermore National Laboratory
 
 \end{TitlePage}
 
-%=============== Copyright Page
+%--------------- Copyright Page
 
 \begin{CopyrightPage}
 \input{copyright}
@@ -60,14 +66,14 @@ Lawrence Livermore National Laboratory
 UCRL-MA-137155 DR
 \end{CopyrightPage}
 
-%=============== Table of Contents
+%--------------- Table of Contents
 
 \pagenumbering{roman}
 \tableofcontents
 \cleardoublepage
 \pagenumbering{arabic}
 
-%=============== Include Chapters
+%--------------- Include Chapters
 
 \input{usr_intro}
 \input{usr_starting}
@@ -76,26 +82,20 @@ UCRL-MA-137155 DR
 \input{usr_fei}
 \input{usr_ij}
 \input{usr_solvers}
-  \input{usr_smg}
-  \input{usr_pfmg}
-  \input{usr_boomeramg}
-  \input{usr_parasails}
-  \input{usr_euclid}
-  \input{usr_pilut}
 \input{usr_misc}
 
-%=============== Include Other
+%--------------- Include Other
 
 % \input{glossary}
 
-%=============== Print the References here
+%--------------- Print the References here
 
 \bibliographystyle{plain}
 \bibliography{hypre}
 
-%=============== Print the Index here
+%--------------- Print the Index here
 
-\printindex
+%\printindex
 
 \end{document}
 
