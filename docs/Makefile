@@ -35,9 +35,6 @@ USR_FILES =\
  usr_fei.tex\
  usr_ij.tex\
  usr_solvers.tex\
- usr_parasails.tex\
- usr_pilut.tex\
- usr_boomeramg.tex\
  usr_misc.tex\
  usr_manual.tex
 
