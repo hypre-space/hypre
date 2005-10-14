@@ -460,7 +460,7 @@ hypre_create_summary_file()
 
             cd ${HYPRE_REMOTE_DIR}
             archfile=`ls autotest.${HYPRE_ARCH}.*`
-            if [-d ${HYPRE_REMOTE_DIR}/log ]
+            if [ -d ${HYPRE_REMOTE_DIR}/log ]
             then
                resultsfile="${HYPRE_REMOTE_DIR}/log/${archfile}"
             else

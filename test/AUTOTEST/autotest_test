@@ -563,7 +563,7 @@ confbuildtest ()
       $MAKE all 1>> ${Hdr}.${MessageStr}.all.log \
                 2>> ${Hdr}.${MessageStr}.all.err
 
-      if [ "${HYPRE_RUN_MACHINE}" = "`hostname | sed 's/\..*$//'`" ]
+      if [ "${HYPRE_RUN_MACHINE}" = "tux149" ]
       then
          if [ "$DEBUG_MODE" = "yes" ]
          then
