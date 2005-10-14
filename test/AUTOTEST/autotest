@@ -138,15 +138,15 @@ hypre_set_machine_options()
         HYPRE_COMPILE_MACHINE="ilx"
         HYPRE_RUN_MACHINE="ilx"
         HYPRE_REMOTE_DIR="/usr/casc/hypre/chaos_2_ia32/AUTOTEST"
-	HYPRE_MACHINE_COMMANDS="-ne 1 -a 2 -cf"
+	HYPRE_MACHINE_COMMANDS="-r $HYPRE_RUN_MACHINE -ne 1 -a 2 -cf"
         HYPRE_MESSAGE='SECONDARY[ILX]'
         ;;
      -insure)
         HYPRE_ARCH="linux"
         HYPRE_COMPILE_MACHINE="tux149"
-        HYPRE_RUN_MACHINE=""
+        HYPRE_RUN_MACHINE="tux149"
         HYPRE_REMOTE_DIR="/usr/casc/hypre/i686-pc-linux-gnu-insure/AUTOTEST"
-	HYPRE_MACHINE_COMMANDS="-i 2"
+	HYPRE_MACHINE_COMMANDS="-r $HYPRE_RUN_MACHINE -i 2"
         HYPRE_MESSAGE='PRIMARY[insure++]'
         ;;
      -mcr)
@@ -154,7 +154,7 @@ hypre_set_machine_options()
         HYPRE_COMPILE_MACHINE="mcr"
         HYPRE_RUN_MACHINE="mcr"
         HYPRE_REMOTE_DIR="/usr/casc/hypre/chaos_2_ia32_elan3/AUTOTEST"
-        HYPRE_MACHINE_COMMANDS="-nse 1 -a 2 -cf"
+        HYPRE_MACHINE_COMMANDS="-r $HYPRE_RUN_MACHINE -nse 1 -a 2 -cf"
         HYPRE_MESSAGE='SECONDARY[MCR]'
         ;;
      -pengra)
@@ -162,7 +162,7 @@ hypre_set_machine_options()
         HYPRE_COMPILE_MACHINE="pengra"
         HYPRE_RUN_MACHINE="pengra"
         HYPRE_REMOTE_DIR="/usr/casc/hypre/chaos_2_ia32_elan3/AUTOTEST"
-        HYPRE_MACHINE_COMMANDS="-nse 1 -a 2 -cf"
+        HYPRE_MACHINE_COMMANDS="-r $HYPRE_RUN_MACHINE -nse 1 -a 2 -cf"
         HYPRE_MESSAGE='SECONDARY[Pengra]'
         ;;
      -red)
@@ -176,63 +176,63 @@ hypre_set_machine_options()
      -tux149)
         HYPRE_ARCH="linux"
         HYPRE_COMPILE_MACHINE="tux149"
-        HYPRE_RUN_MACHINE=""
+        HYPRE_RUN_MACHINE="tux149"
         HYPRE_REMOTE_DIR="/usr/casc/hypre/i686-pc-linux-gnu/AUTOTEST"
-        HYPRE_MACHINE_COMMANDS="-b 1 -nsde 1 -a 2 -cf"
+        HYPRE_MACHINE_COMMANDS="-r $HYPRE_RUN_MACHINE -b 1 -nsde 1 -a 2 -cf"
         HYPRE_MESSAGE='PRIMARY[default]'
         COMPILERSELECT="default"
         ;;
      -tuxpgi)
         HYPRE_ARCH="linux"
         HYPRE_COMPILE_MACHINE="tux149"
-        HYPRE_RUN_MACHINE=""
+        HYPRE_RUN_MACHINE="tux149"
         HYPRE_REMOTE_DIR="/usr/casc/hypre/i686-pc-linux-gnu-pgi5.x/AUTOTEST"
-        HYPRE_MACHINE_COMMANDS="-ndse 1 -a 2 -cf"
+        HYPRE_MACHINE_COMMANDS="-r $HYPRE_RUN_MACHINE -ndse 1 -a 2 -cf"
         HYPRE_MESSAGE='SECONDARY[pgi]'
         COMPILERSELECT="pgi"
         ;;
      -tuxabsoft)
         HYPRE_ARCH="linux"
         HYPRE_COMPILE_MACHINE="tux149"
-        HYPRE_RUN_MACHINE=""
+        HYPRE_RUN_MACHINE="tux149"
         HYPRE_REMOTE_DIR="/usr/casc/hypre/i686-pc-linux-gnu-gcc3.x/AUTOTEST"
-        HYPRE_MACHINE_COMMANDS="-b 1 -nde 1 -a 2 -cf"
+        HYPRE_MACHINE_COMMANDS="-r $HYPRE_RUN_MACHINE -b 1 -nde 1 -a 2 -cf"
         HYPRE_MESSAGE='SECONDARY[Absoft-Pro8.0]'
         COMPILERSELECT="absoft"
         ;;
      -tuxlahey)
         HYPRE_ARCH="linux"
         HYPRE_COMPILE_MACHINE="tux149"
-        HYPRE_RUN_MACHINE=""
+        HYPRE_RUN_MACHINE="tux149"
         HYPRE_REMOTE_DIR="/usr/casc/hypre/i686-pc-linux-gnu-gcc3.x/AUTOTEST"
-        HYPRE_MACHINE_COMMANDS="-b 1 -nde 1 -a 2 -cf"
+        HYPRE_MACHINE_COMMANDS="-r $HYPRE_RUN_MACHINE -b 1 -nde 1 -a 2 -cf"
         HYPRE_MESSAGE='SECONDARY[lahey]'
         COMPILERSELECT="lahey"
         ;;
      -tuxintel)
         HYPRE_ARCH="linux"
         HYPRE_COMPILE_MACHINE="tux149"
-        HYPRE_RUN_MACHINE=""
+        HYPRE_RUN_MACHINE="tux149"
         HYPRE_REMOTE_DIR="/usr/casc/hypre/i686-pc-linux-gnu-gcc3.x/AUTOTEST"
-        HYPRE_MACHINE_COMMANDS="-b 1 -nde 1 -a 2 -cf"
+        HYPRE_MACHINE_COMMANDS="-r $HYPRE_RUN_MACHINE -b 1 -nde 1 -a 2 -cf"
         HYPRE_MESSAGE='SECONDARY[Intel-8.0]'
         COMPILERSELECT="intel"
         ;;
      -tuxkai)
         HYPRE_ARCH="linux"
         HYPRE_COMPILE_MACHINE="tux149"
-        HYPRE_RUN_MACHINE=""
+        HYPRE_RUN_MACHINE="tux149"
         HYPRE_REMOTE_DIR="/usr/casc/hypre/i686-pc-linux-gnu-kai/AUTOTEST"
-	HYPRE_MACHINE_COMMANDS="-b 1 -nde 1 -a 2 -cf"
+	HYPRE_MACHINE_COMMANDS="-r $HYPRE_RUN_MACHINE -b 1 -nde 1 -a 2 -cf"
         HYPRE_MESSAGE='SECONDARY[KCC]'
         COMPILERSELECT="kai"
         ;;
      -tuxlocal)
         HYPRE_ARCH="linux"
         HYPRE_COMPILE_MACHINE="tux149"
-        HYPRE_RUN_MACHINE=""
+        HYPRE_RUN_MACHINE="tux149"
         HYPRE_REMOTE_DIR="`pwd`"
-        HYPRE_MACHINE_COMMANDS="-e 2"
+        HYPRE_MACHINE_COMMANDS="-r $HYPRE_RUN_MACHINE -e 2"
         HYPRE_MESSAGE='LOCAL-TEST[default]'
         COMPILERSELECT="default"
         ;;
