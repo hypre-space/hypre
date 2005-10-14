@@ -87,20 +87,20 @@ help () {
   printf "\n"
   printf "HostOptions      Host ID or configuration on which autotest_test is to be run.\n"
   printf "                 Valid host IDs are:\n"
-  printf "%s\n" "     -gps      Compaq gps320 system."
-  printf "%s\n" "     -gpsmp    Compaq gps320 system executing OpenMP."
-  printf "%s\n" "     -ilx      Intel running Linux."
-  printf "%s\n" "     -insure   CASC Linux, executing insure++."
-  printf "%s\n" "     -mcr      Intel Linux, CHAOS2."
-  printf "%s\n" "     -pengra   Intel Linux, CHAOS2."
-  printf "%s\n" "     -red      ASCI Red"
-  printf "%s\n" "     -tux149   CASC running RedHat Enterprise Linux."
-  printf "%s\n" "     -tuxgcc   CASC running latest gcc compilers"
-  printf "%s\n" "     -tuxpgi   CASC running latest PGI compilers"
-  printf "%s\n" "     -tuxabsoftCASC running Absoft-Pro8.0 Fortran 90"
-  printf "%s\n" "     -tuxlahey CASC running Lahey Fortran compiler"
-  printf "%s\n" "     -tuxintel CASC running latest Intel compilers"
-  printf "%s\n" "     -tuxkai   CASC running latest KAI KCC compiler"
+  printf "%s\n" "     -gps       Compaq gps320 system."
+  printf "%s\n" "     -gpsmp     Compaq gps320 system executing OpenMP."
+  printf "%s\n" "     -ilx       Intel running Linux."
+  printf "%s\n" "     -insure    CASC Linux, executing insure++."
+  printf "%s\n" "     -mcr       Intel Linux, CHAOS2."
+  printf "%s\n" "     -pengra    Intel Linux, CHAOS2."
+  printf "%s\n" "     -red       ASCI Red"
+  printf "%s\n" "     -tux149    CASC running RedHat Enterprise Linux."
+  printf "%s\n" "     -tuxgcc    CASC running latest gcc compilers"
+  printf "%s\n" "     -tuxpgi    CASC running latest PGI compilers"
+  printf "%s\n" "     -tuxabsoft CASC running Absoft-Pro8.0 Fortran 90"
+  printf "%s\n" "     -tuxlahey  CASC running Lahey Fortran compiler"
+  printf "%s\n" "     -tuxintel  CASC running latest Intel compilers"
+  printf "%s\n" "     -tuxkai    CASC running latest KAI KCC compiler"
   printf "\n"
 }
 
@@ -232,7 +232,7 @@ hypre_set_machine_options()
         HYPRE_COMPILE_MACHINE="tux149"
         HYPRE_RUN_MACHINE=""
         HYPRE_REMOTE_DIR="`pwd`"
-        HYPRE_MACHINE_COMMANDS="-b 1 -e 2"
+        HYPRE_MACHINE_COMMANDS="-e 2"
         HYPRE_MESSAGE='LOCAL-TEST[default]'
         COMPILERSELECT="default"
         ;;
@@ -426,10 +426,14 @@ hypre_create_summary_file()
    HYPRE_STD_TEST_DIRS="TEST_fac TEST_ij TEST_sstruct TEST_struct"
 
    cd ${HYPRE_AUTOTEST_EXECUTE_DIR}
-   HYPRE_TEST_SUMMARY_FILE="autotest.summary.`date '+%Y%m%d'`"
+   HYPRE_TEST_SUMMARY_FILE="autotest.summary.`date '+%Y%m%d'`.html"
 
-   printf "%s\n" "       Autotest Results for `date '+%D'` " > $HYPRE_TEST_SUMMARY_FILE
-   printf "%s\n" "--------------------------------------------" >> $HYPRE_TEST_SUMMARY_FILE
+   printf "<html>\n" > $HYPRE_TEST_SUMMARY_FILE
+   printf "<head> </head>\n" >> $HYPRE_TEST_SUMMARY_FILE
+   printf "<PRE>\n" >> $HYPRE_TEST_SUMMARY_FILE
+   printf "<body>\n" >> $HYPRE_TEST_SUMMARY_FILE
+   printf "%s<br>\n" "       Autotest Results for `date '+%D'` " >> $HYPRE_TEST_SUMMARY_FILE
+   printf "%s<br>\n" "--------------------------------------------" >> $HYPRE_TEST_SUMMARY_FILE
 
    for test in ${HYPRE_DEFAULT_TESTS}
    do
@@ -454,10 +458,13 @@ hypre_create_summary_file()
                search_error_files
             done
 
-            if [ "${TOTERR}" != "0" ]
+            cd ${HYPRE_REMOTE_DIR}
+            archfile=`ls autotest.${HYPRE_ARCH}.*`
+            if [-d ${HYPRE_REMOTE_DIR}/log ]
             then
-               cd ${HYPRE_REMOTE_DIR}
-               errfile="`ls autotest.${HYPRE_ARCH}.*`"
+               resultsfile="${HYPRE_REMOTE_DIR}/log/${archfile}"
+            else
+               resultsfile="${HYPRE_REMOTE_DIR}/${archfile}"
             fi
 
             cd ${HYPRE_AUTOTEST_EXECUTE_DIR}
@@ -465,12 +472,13 @@ hypre_create_summary_file()
             then
                printf "%-25s: " $test >> $HYPRE_TEST_SUMMARY_FILE
                printf "  `date '+%D'`" >> $HYPRE_TEST_SUMMARY_FILE
-               printf "   PASSED\n" >> $HYPRE_TEST_SUMMARY_FILE
+               printf "   PASSED" >> $HYPRE_TEST_SUMMARY_FILE
+               printf "  <a href=\"%s\">%s</a><br>\n" ${resultsfile} ${archfile} >> $HYPRE_TEST_SUMMARY_FILE
             else
                printf "%-25s: " $test >> $HYPRE_TEST_SUMMARY_FILE
                printf "  `date '+%D'`" >> $HYPRE_TEST_SUMMARY_FILE
                printf " %5d Errors" ${TOTERR} >> $HYPRE_TEST_SUMMARY_FILE
-               printf "  (file:%s)\n" ${HYPRE_REMOTE_DIR}/${errfile}  >> $HYPRE_TEST_SUMMARY_FILE
+               printf "  <a href=\"%s\">%s</a><br>\n" ${resultsfile} ${archfile} >> $HYPRE_TEST_SUMMARY_FILE
             fi
          fi
       done
@@ -478,12 +486,14 @@ hypre_create_summary_file()
       if [ "${found_test}" = "0" ]
       then
          printf "%-25s: " $test >> $HYPRE_TEST_SUMMARY_FILE
-         printf "            N/A\n" >> $HYPRE_TEST_SUMMARY_FILE
+         printf "            N/A<br>\n" >> $HYPRE_TEST_SUMMARY_FILE
       fi
 
    done
+   printf "</body>\n" >> $HYPRE_TEST_SUMMARY_FILE
+   printf "</PRE>\n" >> $HYPRE_TEST_SUMMARY_FILE
+   printf "</html>\n" >> $HYPRE_TEST_SUMMARY_FILE
 }
-
 
 #==============================================================================
 # Beginning of 'main program' of script for regression testing hypre.
@@ -492,8 +502,11 @@ hypre_create_summary_file()
 DEBUG_MODE=""
 HYPRE_MESSAGE=""
 COMPILERSELECT=""
+HYPRE_RUN_MACHINE=""
+HYPRE_SUMMARY_DIR="/usr/casc/hypre/AUTOTEST"
 HYPRE_AUTOTEST_EXECUTE_DIR="`pwd`"
-export HYPRE_MESSAGE COMPILERSELECT HYPRE_AUTOTEST_EXECUTE_DIR
+export HYPRE_RUN_MACHINE
+export HYPRE_MESSAGE COMPILERSELECT HYPRE_AUTOTEST_EXECUTE_DIR HYPRE_SUMMARY_DIR
 
 CVSROOT=/home/casc/repository
 export CVSROOT
@@ -574,6 +587,7 @@ do
   HYPRE_RUN_MACHINE=""
   COMPILERSELECT=""
   arg=$1
+  cd ${HYPRE_AUTOTEST_EXECUTE_DIR}
   case ${arg} in
     -d|-debug) 
         DEBUG_MODE="yes"
@@ -604,9 +618,27 @@ hypre_mail_summary
 
 
 #==============================================================================
-# Reset permissions
+#    Reset permissions
 #==============================================================================
-chmod -fR a+rX,ug+w,o-w linear_solvers
-chgrp -fR hypre linear_solvers
+chmod -fR a+rX,ug+w,o-w ${HYPRE_REMOTE_DIR}
+chgrp -fR hypre ${HYPRE_REMOTE_DIR}
 
+chmod -fR a+rX,ug+w,o-w ${HYPRE_SUMMARY_DIR}
+chgrp -fR hypre ${HYPRE_SUMMARY_DIR}
+
+
+#==============================================================================
+#    Store summary files in permanent locations
+#==============================================================================
+if [ -d "${HYPRE_REMOTE_DIR}/log"  ]
+then
+   mv -f ${HYPRE_REMOTE_DIR}/autotest.${HYPRE_ARCH}.* ${HYPRE_REMOTE_DIR}/log
+fi
+
+mv -f autotest.summary* ${HYPRE_SUMMARY_DIR}
+
+
+#==============================================================================
+# Restore original permissions
+#==============================================================================
 umask $OldMask

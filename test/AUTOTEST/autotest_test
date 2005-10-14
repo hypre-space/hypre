@@ -320,25 +320,25 @@ create_summary_files ()
   CLIST=""; ELIST=""
   DWRNCNT=0; DERRCNT=0
   cd $HYPRE_REMOTE_DIR
-  SUMFILE="autotest.$HYPRE_ARCH.`date '+%Y%m%d'`"
+  SUMFILE="autotest.$HYPRE_ARCH.`date '+%Y%m%d'`.html"
 
   if [ -z "$HYPRE_COMPILE_MACHINE" -o "$HYPRE_COMPILE_MACHINE" = "" ] ; then
      HYPRE_COMPILE_MACHINE=`hostname`
   fi
 
-  if [ -z "$HYPRE_RUN_MACHINE" -o "$HYPRE_RUN_MACHINE" = "" ] ; then
-     HYPRE_RUN_MACHINE=`hostname`
-  fi
-
-  printf "%s\n" "--------------------------------------------" > $SUMFILE
-  printf "Autotest error summary for `date`\n" >> $SUMFILE
-  printf "Target architecure: %s\n" $HYPRE_ARCH >> $SUMFILE
-  printf "Compile machine:    %s\n" $HYPRE_COMPILE_MACHINE >> $SUMFILE
-  printf "Execute machine:    %s\n" $HYPRE_RUN_MACHINE >> $SUMFILE
-  printf "Operating system:   `uname -a`\n" >> $SUMFILE
-  printf "Directory:          %s\n" $HYPRE_REMOTE_DIR >> $SUMFILE
-  printf "%s\n" "--------------------------------------------" >> $SUMFILE
-  printf "Compile summary: Status: Warnings: Errors\n" >> $SUMFILE
+  printf "<html>\n" > $SUMFILE
+  printf "<head></head>\n" >> $SUMFILE
+  printf "<PRE>\n" >> $SUMFILE
+  printf "<body>\n" >> $SUMFILE
+  printf "%s<br>\n" "--------------------------------------------" >> $SUMFILE
+  printf "Autotest error summary for `date`<br>\n" >> $SUMFILE
+  printf "Target architecure: %s<br>\n" $HYPRE_ARCH >> $SUMFILE
+  printf "Compile machine:    %s<br>\n" $HYPRE_COMPILE_MACHINE >> $SUMFILE
+  printf "Execute machine:    `hostname`<br>\n"  >> $SUMFILE
+  printf "Operating system:   `uname -a`<br>\n" >> $SUMFILE
+  printf "Directory:          %s<br>\n" $HYPRE_REMOTE_DIR >> $SUMFILE
+  printf "%s<br>\n" "--------------------------------------------" >> $SUMFILE
+  printf "Compile summary: Status: Warnings: Errors<br>\n" >> $SUMFILE
 #
 #               check all configure options
   for ConfOpt in ${STD_CONFIGOPTIONS}
@@ -360,10 +360,11 @@ create_summary_files ()
               EFILE=`echo $i|sed -e 's/log$//'`err
               apply_error_filters ${EFILE}
               if [ -s "${EFILE}" ] ; then
+                 errinfo="<a href=\""${HYPRE_REMOTE_DIR}/${EFILE}"\">"${FILE}"</a><br>"
                  AutotestFailureCount=`expr $AutotestFailureCount + 1`
                  CERRCNT=`expr $CERRCNT + 1`
                  TestCaseFailedCount=`expr $TestCaseFailedCount + 1`
-                 CLIST="${CLIST}${EFILE}\n"
+                 CLIST="${CLIST}${errinfo}\n"
                  DWRNNUM=0; DERRNUM=0;
                  DWRNNUM=`grep -i warning ${EFILE}|wc -l`
                  DERRNUM=`grep -i error ${EFILE}|wc -l`
@@ -378,38 +379,38 @@ create_summary_files ()
      done
 #               end of MakeOpt loop
      if [ "$TestCaseFailedCount" != "0" ] ; then
-        printf "Failed:    %2d   :   %2d\n" $DWRNCNT $DERRCNT >> $SUMFILE
+        printf "Failed:    %2d   :   %2d<br>\n" $DWRNCNT $DERRCNT >> $SUMFILE
      elif [ "$TestCaseSuccessCount" != "0" ] ; then
-        printf "Passed\n" >> $SUMFILE
+        printf "Passed<br>\n" >> $SUMFILE
      else
-        printf "N/A\n" >> $SUMFILE
+        printf "N/A<br>\n" >> $SUMFILE
      fi
   done
 #               end of ConfOpt loop
 
   if [ "$DEBUG_MODE" = "yes" ] ; then
-     printf "%2d test failed\n" $CERRCNT
-     printf "%2d test succeeded\n" $CLOGCNT
-     printf "%2d test total\n" $CTOTCNT
+     printf "%2d test failed<br>\n" $CERRCNT
+     printf "%2d test succeeded<br>\n" $CLOGCNT
+     printf "%2d test total<br>\n" $CTOTCNT
   fi
 
-  printf "\n" >> $SUMFILE
-  printf "%2d test failed\n" $CERRCNT  >> $SUMFILE
-  printf "%2d test succeeded\n" $CLOGCNT >> $SUMFILE
-  printf "%2d test total\n" $CTOTCNT >> $SUMFILE
-  printf "\n" >> $SUMFILE
+  printf "<br>\n" >> $SUMFILE
+  printf "%2d test failed<br>\n" $CERRCNT  >> $SUMFILE
+  printf "%2d test succeeded<br>\n" $CLOGCNT >> $SUMFILE
+  printf "%2d test total<br>\n" $CTOTCNT >> $SUMFILE
+  printf "<br>\n" >> $SUMFILE
 
   if [ "$CLIST" != "" ] ; then
-     printf "non zero error log file(s):\n" >> $SUMFILE
+     printf "non zero error log file(s):<br>\n" >> $SUMFILE
      printf "${CLIST}" >> $SUMFILE
   fi
-  printf "%s\n" "--------------------------------------------" >> $SUMFILE
+  printf "%s<br>\n" "--------------------------------------------" >> $SUMFILE
 #
 #   check all test execution output files for errors
 #   currently only the last test run with opt=2 (configure, make, and run)
 #   is processed as earlier information gets overwritten.
 
-  printf "\nExecute summary:\n" >> $SUMFILE
+  printf "\nExecute summary:<br>\n" >> $SUMFILE
   TotalTestCount=0
   TotalSuccessCount=0
   TotalFailureCount=0
@@ -435,10 +436,11 @@ create_summary_files ()
               if [ "$DEBUG_MODE" = "yes" ] ; then
                  printf "nonzero .err file = ${ErrFile}\n"
               fi
+              errinfo="<a href=\""${k}"\">"${k}"</a><br>"
               AutotestFailureCount=`expr $AutotestFailureCount + 1`
               TotalFailureCount=`expr $TotalFailureCount + 1`
               TestCaseFailedCount=`expr $TestCaseFailedCount + 1`
-              ELIST="${ELIST}${k}\n"
+              ELIST="${ELIST}${errinfo}\n"
               TestCaseFailedFlag=1
               break
             fi
@@ -452,10 +454,11 @@ create_summary_files ()
            if [ "$DEBUG_MODE" = "yes" ] ; then
               printf "nonzero .err file = ${ErrFile}\n"
            fi
+           errinfo="<a href=\""${ErrFile}"\">"${ErrFile}"</a><br>"
            AutotestFailureCount=`expr $AutotestFailureCount + 1`
            TotalFailureCount=`expr $TotalFailureCount + 1`
            TestCaseFailedCount=`expr $TestCaseFailedCount + 1`
-           ELIST="${ELIST}${ErrFile}\n"
+           ELIST="${ELIST}${errinfo}\n"
            TestCaseFailedFlag=1
         fi
 
@@ -468,33 +471,36 @@ create_summary_files ()
 #
 #               print execution success/fail numbers for given directory
      if [ "$TestCaseFailedCount" != "0" ] ; then
-        printf "Passed:    %2d  Failed:   %2d\n" $TestCaseSuccessCount $TestCaseFailedCount >> $SUMFILE
+        printf "Passed:    %2d  Failed:   %2d<br>\n" $TestCaseSuccessCount $TestCaseFailedCount >> $SUMFILE
      elif [ "$TestCaseSuccessCount" != "0" ] ; then
-        printf "Passed:    %2d\n" $TestCaseSuccessCount >> $SUMFILE
+        printf "Passed:    %2d<br>\n" $TestCaseSuccessCount >> $SUMFILE
      else
-        printf "N/A\n" >> $SUMFILE
+        printf "N/A<br>\n" >> $SUMFILE
      fi
   done
 #               end of i-loop
   if [ "$DEBUG_MODE" = "yes" ] ; then
-     printf "%2d test failed\n" $TotalFailureCount
-     printf "%2d test succeeded\n" $TotalSuccessCount
-     printf "%2d test total\n" $TotalTestCount
+     printf "%2d test failed<br>\n" $TotalFailureCount
+     printf "%2d test succeeded<br>\n" $TotalSuccessCount
+     printf "%2d test total<br>\n" $TotalTestCount
   fi
 #
 #              print summary success/fail numbers and list of non-zero
 #              error files, if any exist
   printf "\n" >> $SUMFILE
-  printf "%2d test failed\n" $TotalFailureCount >> $SUMFILE
-  printf "%2d test succeeded\n" $TotalSuccessCount >> $SUMFILE
-  printf "%2d test total\n" $TotalTestCount >> $SUMFILE
+  printf "%2d test failed<br>\n" $TotalFailureCount >> $SUMFILE
+  printf "%2d test succeeded<br>\n" $TotalSuccessCount >> $SUMFILE
+  printf "%2d test total<br>\n" $TotalTestCount >> $SUMFILE
 
   if [ "$ELIST" != "" ] ; then
-     printf "non zero error log file(s):\n" >> $SUMFILE
+     printf "non zero error log file(s):<br>\n" >> $SUMFILE
      printf "${ELIST}" >> $SUMFILE
   fi
 
-  printf "%s\n" "--------------------------------------------" >> $SUMFILE
+  printf "%s<br>\n" "--------------------------------------------" >> $SUMFILE
+  printf "</body>\n" >> $SUMFILE
+  printf "</PRE>\n" >> $SUMFILE
+  printf "</html>\n" >> $SUMFILE
 
   chgrp hypre $SUMFILE
 }
