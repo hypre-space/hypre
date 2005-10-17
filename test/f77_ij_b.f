@@ -1,10 +1,11 @@
+c
+c
 c-----------------------------------------------------------------------
 c     Test driver for unstructured matrix interface (structured storage)
 c-----------------------------------------------------------------------
-c     jfp: Babel code added.  Inputs hardwired in.  Code using other values
-c     of the inputs deleted.  The idea is to narrow this down for simplicity.
-c     Feb 2005: By now Babel has changed.  Babel rarrays would be better 
-c     than normal sidl arrays.
+c     This differs from the C test drivers.  Inputs are hardwired in.
+c     Code using other values of the inputs is deleted.
+c     The idea is to narrow this down for simplicity, just test the Fortran.
       
 c-----------------------------------------------------------------------
 c     Standard 7-point laplacian in 3D with grid and anisotropy determined
@@ -15,6 +16,7 @@ c     Babel-based interface.  Then the data is converted to a form suitable
 c     for the Babel-based interface, which is used to call the solver.
 c-----------------------------------------------------------------------
 
+
       program test
 
       implicit none
@@ -22,13 +24,17 @@ c-----------------------------------------------------------------------
       include 'mpif.h'
 
       integer MAXZONS, MAXBLKS, MAXDIM, MAXLEVELS
-      integer HYPRE_PARCSR
+      integer HYPRE_PARCSR, NNX, NNY, NNZ, VECLEN
 
       parameter (MAXZONS=4194304)
       parameter (MAXBLKS=32)
       parameter (MAXDIM=3)
       parameter (MAXLEVELS=25)
       parameter (HYPRE_PARCSR=5555)
+      parameter ( NNX=10 )
+      parameter ( NNY=10 )
+      parameter ( NNZ=10 )
+      parameter (VECLEN=NNX*NNY*NNZ)
 
       integer             num_procs, myid
 
@@ -39,18 +45,12 @@ c-----------------------------------------------------------------------
       double precision    cx, cy, cz
       integer             n_pre, n_post
       integer             solver_id
-      integer             precond_id
-
-      integer             setup_type
-      integer             debug_flag, ioutdat, k_dim
-      integer             nlevels
+      integer             debug_flag, ioutdat
 
       integer             zero, one
       parameter           (zero = 0, one = 1)
       integer             maxiter, num_iterations
       integer             generate_matrix, generate_rhs
-      character           matfile(32), vecfile(32)
-      character*31        matfile_str, vecfile_str
 
       double precision    tol, pc_tol, convtol
       parameter           (pc_tol = 0.0)
@@ -60,26 +60,19 @@ c     parameters for BoomerAMG
       integer             hybrid, coarsen_type, measure_type
       integer             cycle_type
       integer             smooth_num_sweep
-      integer*8           num_grid_sweeps
-      integer*8           grid_relax_type
-      integer*8           grid_relax_points
-      integer*8           relax_weights
-      double precision    strong_threshold, trunc_factor, drop_tol
+      integer             num_grid_sweeps(4)
+      integer             grid_relax_type(1)
+      integer             lower_ngs(1), lower_grt(1)
+      integer             lower_rw(1)
+      integer             upper_ngs(1), upper_grt(1)
+      integer             upper_rw(1)
+      integer             stride_ngs(1), stride_grt(1)
+      integer             stride_rw(1)
+      integer             refindex_ngs(1), refindex_grt(1)
+      integer             refindex_rw(1)
+      double precision    strong_threshold, trunc_factor
       double precision    max_row_sum
       data                max_row_sum /1.0/
-
-c     parameters for ParaSails
-      double precision    sai_threshold
-      double precision    sai_filter
-
-      integer*8           A, A_storage
-      integer*8           b, b_storage
-      integer*8           x, x_storage
-
-      integer*8           solver
-      integer*8           precond
-      integer*8           precond_gotten
-      integer*8           row_starts
 
       double precision    values(4)
 
@@ -91,44 +84,26 @@ c     parameters for ParaSails
       integer             first_local_row, last_local_row
       integer             first_local_col, last_local_col
       integer             indices(MAXZONS)
-      double precision    vals(MAXZONS)
+      double precision    vals0(MAXZONS)
+      double precision    vals1(MAXZONS)
 
 c     Babel-interface variables
-      integer*8 A_parcsr
       integer*8 bHYPRE_parcsr_A
-      integer*8 bHYPRE_ij_A
       integer*8 bHYPRE_parcsr_x
-      integer*8 bHYPRE_ij_x
       integer*8 bHYPRE_parcsr_b
-      integer*8 bHYPRE_ij_b
-      integer*8 bHYPRE_object
-      integer*8 bHYPRE_object_tmp
       integer ierrtmp
-      integer*8 bHYPRE_values
-      integer*8 bHYPRE_indices
       integer local_num_rows, local_num_cols
-      integer dimsl(2), dimsu(2)
-      integer lower(1), upper(1)
-      integer*8 bHYPRE_row_sizes
-      integer size
-      integer*8 bHYPRE_ncols
-      integer stride(3)
-      integer col_inds(1)
-      integer*8 bHYPRE_col_inds
       integer*8 bHYPRE_AMG
       integer*8 bHYPRE_Vector_x
       integer*8 bHYPRE_Vector_b
       integer*8 bHYPRE_op_A
       integer*8 bHYPRE_num_grid_sweeps
       integer*8 bHYPRE_grid_relax_type
+      integer*8 bHYPRE_grid_relax_points
       integer*8 bHYPRE_relax_weight
       integer max_levels
       data   max_levels /25/
-      double precision relax_weight(25)
-      double precision double_zero
-      data   double_zero /0.0/
-      double precision double_one
-      data   double_one /1.0/
+      double precision relax_weight(MAXLEVELS)
       integer*8 mpi_comm
 
 
@@ -149,9 +124,9 @@ c-----------------------------------------------------------------------
 
       dim = 3
 
-      nx = 10
-      ny = 10
-      nz = 10
+      nx = NNX
+      ny = NNX
+      nz = NNX
 
       Px  = num_procs
       Py  = 1
@@ -171,7 +146,7 @@ c-----------------------------------------------------------------------
       generate_matrix = 1
       generate_rhs = 1
       solver_id = 0
-      tol = 1.0e-6
+      tol = 1.0e-8
 
 c-----------------------------------------------------------------------
 c     Check a few things
@@ -250,263 +225,77 @@ c-----------------------------------------------------------------------
 
 c     Generate a Dirichlet Laplacian
 
-      call HYPRE_GenerateLaplacian(MPI_COMM_WORLD, nx, ny, nz,
-     &     Px, Py, Pz, p, q, r, values,
-     &     A_storage, ierr)
+c     Disadvantage of using this GenerateLaplacian: it does several bHYPRE calls
+c     in C which we'd like to test in Fortran.  But we want to use the underlying
+c     C function GenerateLaplacian, which returns a HYPRE-level matrix. It's
+c     more C function calls to get the data out of it, as double* etc.
 
-      call HYPRE_ParCSRMatrixGetLocalRange(A_storage,
+      call bHYPRE_IJParCSRMatrix_GenerateLaplacian_f(
+     1     MPI_COMM_WORLD, nx, ny, nz, Px, Py, Pz,
+     2     p, q, r, values, 4, 7, bHYPRE_parcsr_A )
+
+      call bHYPRE_IJParCSRMatrix_GetLocalRange_f( bHYPRE_parcsr_A,
      &     first_local_row, last_local_row,
      &     first_local_col, last_local_col, ierr)
-
-      call HYPRE_IJMatrixCreate(MPI_COMM_WORLD,
-     &     first_local_row, last_local_row,
-     &     first_local_col, last_local_col, A, ierr)
-
-      call HYPRE_IJMatrixSetObject(A, A_storage, ierr)
-
-      call HYPRE_IJMatrixSetObjectType(A, HYPRE_PARCSR, ierr)
-
-      matfile(1)  = 'd'
-      matfile(2)  = 'r'
-      matfile(3)  = 'i'
-      matfile(4)  = 'v'
-      matfile(5)  = 'e'
-      matfile(6)  = 'r'
-      matfile(7)  = '.'
-      matfile(8)  = 'o'
-      matfile(9)  = 'u'
-      matfile(10) = 't'
-      matfile(11) = '.'
-      matfile(12) = 'A'
-      matfile(13) = char(0)
-      
-      call HYPRE_IJMatrixPrint(A, matfile, ierr)
-
       local_num_rows = last_local_row - first_local_row + 1
       local_num_cols = last_local_col - first_local_col + 1
-      call hypre_ParCSRMatrixRowStarts(A_storage, row_starts, ierr)
 
-
-      call bHYPRE_IJParCSRMatrix__create_f( bHYPRE_parcsr_A )
-
-      call bHYPRE_IJParCSRMatrix__cast2_f
-     1     ( bHYPRE_parcsr_A, "bHYPRE.IJBuildMatrix", bHYPRE_ij_A )
-      if ( bHYPRE_ij_A .eq. 0 ) then
-         write(6,*) 'Cast failed'
-         stop
-      endif
-
-c     The following will cancel each other out, but it is good practice
-c     to perform them.
-      call bHYPRE_IJBuildMatrix_addref_f( bHYPRE_ij_A )
-      call bHYPRE_IJParCSRMatrix_deleteref_f( bHYPRE_parcsr_A )
-
-      call bHYPRE_IJBuildMatrix_SetCommunicator_f( bHYPRE_ij_A,
-     1     mpi_comm, ierrtmp )
+      call bHYPRE_IJParCSRMatrix_Print_f(
+     1     bHYPRE_parcsr_A, "driver.out", ierrtmp )
       ierr = ierr + ierrtmp
 
-      call bHYPRE_IJBuildMatrix_SetLocalRange_f( bHYPRE_ij_A,
-     1     first_local_row, last_local_row,
-     1     first_local_col, last_local_col, ierrtmp )
+      call bHYPRE_IJParCSRMatrix_Assemble_f( bHYPRE_parcsr_A, ierrtmp )
       ierr = ierr + ierrtmp
-
-      call SIDL_int__array_create1d_f(
-     1     local_num_rows, bHYPRE_row_sizes )
-      size = 7
-
-      do i = 1, local_num_rows
-         call SIDL_int__array_set1_f( bHYPRE_row_sizes, i-1, size )
-      enddo
-      call bHYPRE_IJBuildMatrix_SetRowSizes_f(
-     1     bHYPRE_ij_A, bHYPRE_row_sizes, ierrtmp )
-      ierr = ierr + ierrtmp
-      call SIDL_int__array_deleteref_f( bHYPRE_row_sizes)
-
-      call bHYPRE_IJBuildMatrix_Initialize_f( bHYPRE_ij_A, ierrtmp )
-      ierr = ierr + ierrtmp
-
-      call SIDL_int__array_create1d_f( 1, bHYPRE_row_sizes )
-      call SIDL_int__array_create1d_f( 1, bHYPRE_ncols )
-
-c     Loop through all locally stored rows and insert them into ij_matrix
-      call HYPRE_IJMatrixGetObject( A, A_parcsr, ierrtmp)
-      ierr = ierr + ierrtmp
-
-      stride(1) = 1
-      do i = first_local_row, last_local_row
-         call HYPRE_ParCSRMatrixGetRow(
-     1        A_parcsr, i, size, col_inds, values, ierrtmp )
-         ierr = ierr + ierrtmp
-
-         call SIDL_int__array_set1_f( bHYPRE_row_sizes, 0, size )
-         call SIDL_int__array_set1_f( bHYPRE_ncols, 0, i )
-         upper(1) = size - 1
-         call SIDL_int__array_borrow_deref_f(
-     1        col_inds, 1, lower, upper, stride, bHYPRE_col_inds )
-         call SIDL_double__array_borrow_deref_f(
-     1        values, 1, lower, upper, stride, bHYPRE_values )
-         call bHYPRE_IJBuildMatrix_SetValues_f(
-     1        bHYPRE_ij_A, 1, bHYPRE_row_sizes, bHYPRE_ncols,
-     1        bHYPRE_col_inds, bHYPRE_values, ierrtmp )
-         ierr = ierr + ierrtmp
-         call HYPRE_ParCSRMatrixRestoreRow(
-     1        A_parcsr, i, size, col_inds, values, ierrtmp )
-         ierr = ierr + ierrtmp
-      enddo
-      call SIDL_int__array_deleteref_f( bHYPRE_row_sizes )
-      call SIDL_int__array_deleteref_f( bHYPRE_ncols )
-
-      call bHYPRE_IJBuildMatrix_Assemble_f( bHYPRE_ij_A, ierrtmp )
-      ierr = ierr + ierrtmp
-
-      call SIDL_int__array_deleteref_f( bHYPRE_col_inds )
-      call SIDL_int__array_deleteref_f( bHYPRE_values )
-
-c     
-c     Fetch the resulting underlying matrix out
-c     
-      call bHYPRE_IJBuildMatrix_GetObject_f(
-     1     bHYPRE_ij_A, bHYPRE_object, ierrtmp )
-      ierr = ierr + ierrtmp
-      call bHYPRE_IJBuildMatrix_deleteref_f( bHYPRE_ij_A )
-c     
-c     The Queryint below checks to see if the returned object can
-c     return a bHYPRE.IJParCSRMatrix. The "cast" is necessary because of the
-c     restrictions of the C language, and is merely to please the compiler.
-c     It is the Queryint that actually has semantic meaning.
-c     ( cast removed for Fortran )
-      call SIDL_BaseInterface_queryint_f(
-     1     bHYPRE_object, "bHYPRE.IJParCSRMatrix", bHYPRE_parcsr_A )
-      call SIDL_BaseInterface_deleteref_f( bHYPRE_object )
-      if ( bHYPRE_parcsr_A .eq. 0 ) then
-         write (6,*) 'Matrix cast/QI failed\n'
-         stop
-      endif
 
 
 c-----------------------------------------------------------------------
 c     Set up the rhs and initial guess
 c-----------------------------------------------------------------------
 
-      call HYPRE_IJVectorCreate(MPI_COMM_WORLD, first_local_col,
-     &     last_local_col, x, ierr)
-      call HYPRE_IJVectorSetObjectType(x, HYPRE_PARCSR, ierr)
-      call HYPRE_IJVectorInitialize(x, ierr)
       do i = 1, last_local_col - first_local_col + 1
          indices(i) = first_local_col - 1 + i
-         vals(i) = 0.
+         vals0(i) = 0.
+         vals1(i) = 1.
       enddo
-      call HYPRE_IJVectorSetValues(x,
-     &     last_local_col - first_local_col + 1, indices, vals, ierr)
+
+      call bHYPRE_IJParCSRVector_Create_f(
+     1     mpi_comm, first_local_col, last_local_col, bHYPRE_parcsr_x )
 
       call bHYPRE_IJParCSRVector__create_f( bHYPRE_parcsr_b )
-      call bHYPRE_IJParCSRVector__cast2_f
-     1     ( bHYPRE_parcsr_b, "bHYPRE.IJBuildVector", bHYPRE_ij_b )
-      if ( bHYPRE_ij_b .eq. 0 ) then
-         write(6,*) 'Cast failed'
-         stop
-      endif
-      call bHYPRE_IJBuildVector_addref_f( bHYPRE_ij_b )
-      call bHYPRE_IJParCSRVector_deleteref_f( bHYPRE_parcsr_b )
-      call bHYPRE_IJBuildVector_SetCommunicator_f( bHYPRE_ij_b,
+      call bHYPRE_IJParCSRVector_SetCommunicator_f( bHYPRE_parcsr_b,
      1     mpi_comm, ierrtmp )
       ierr = ierr + ierrtmp
 
-      call bHYPRE_IJBuildVector_SetLocalRange_f( bHYPRE_ij_b,
+      call bHYPRE_IJParCSRVector_SetLocalRange_f( bHYPRE_parcsr_b,
      1      first_local_row, last_local_row, ierrtmp )
       ierr = ierr + ierrtmp
 
-      call bHYPRE_IJBuildVector_Initialize_f( bHYPRE_ij_b, ierrtmp )
+      call bHYPRE_IJParCSRVector_Initialize_f( bHYPRE_parcsr_b,
+     1     ierrtmp )
       ierr = ierr + ierrtmp
 
-      call SIDL_int__array_create1d_f( local_num_cols, bHYPRE_indices )
-      call SIDL_double__array_create1d_f(
-     1     local_num_cols, bHYPRE_values )
-      do i=0, local_num_cols-1
-         call SIDL_int__array_set1_f( bHYPRE_indices, i,
-     1        first_local_col + i )
-         call SIDL_double__array_set1_f( bHYPRE_values, i, double_one )
-      enddo
-      call bHYPRE_IJBuildVector_SetValues_f( bHYPRE_ij_b,
-     1     local_num_cols, bHYPRE_indices, bHYPRE_values, ierrtmp )
+      call bHYPRE_IJParCSRVector_SetValues_f( bHYPRE_parcsr_b,
+     1     local_num_cols, indices, vals1, ierrtmp )
       ierr = ierr + ierrtmp
 
-      call SIDL_int__array_deleteref_f( bHYPRE_indices)
-      call SIDL_double__array_deleteref_f( bHYPRE_values )
-
-      call bHYPRE_IJBuildVector_Assemble_f( bHYPRE_ij_b, ierrtmp )
+      call bHYPRE_IJParCSRVector_Assemble_f( bHYPRE_parcsr_b, ierrtmp )
       ierr = ierr + ierrtmp
-      call bHYPRE_IJBuildVector_GetObject_f(
-     1     bHYPRE_ij_b, bHYPRE_object, ierrtmp )
-      ierr = ierr + ierrtmp
-
-      call bHYPRE_IJBuildVector_deleteref_f( bHYPRE_ij_b )
-      call SIDL_BaseInterface_queryint_f(
-     1     bHYPRE_object, "bHYPRE.IJParCSRVector", bHYPRE_object_tmp )
-      call SIDL_BaseInterface_deleteRef_f( bHYPRE_object );
-      call SIDL_BaseInterface__cast2_f(
-     1     bHYPRE_object_tmp, "bHYPRE.IJParCSRVector", bHYPRE_parcsr_b )
-      if ( bHYPRE_parcsr_b .eq. 0 ) then
-         write (6,*) 'Cast/QI failed\n'
-         stop
-      endif
 
 
       call bHYPRE_IJParCSRVector_print_f(
      1     bHYPRE_parcsr_b, "driver.out.b", ierrtmp )
       ierr = ierr + ierrtmp
 
-      call bHYPRE_IJParCSRVector__create_f( bHYPRE_parcsr_x )
-      call bHYPRE_IJParCSRVector__cast2_f
-     1     ( bHYPRE_parcsr_x, "bHYPRE.IJBuildVector", bHYPRE_ij_x )
-      if ( bHYPRE_ij_x .eq. 0 ) then
-         write(6,*) 'Cast failed'
-         stop
-      endif
-      call bHYPRE_IJBuildVector_addref_f( bHYPRE_ij_x )
-      call bHYPRE_IJParCSRVector_deleteref_f( bHYPRE_parcsr_x );
-      call bHYPRE_IJBuildVector_SetCommunicator_f( bHYPRE_ij_x,
-     1     mpi_comm, ierrtmp )
+      call bHYPRE_IJParCSRVector_Initialize_f( bHYPRE_parcsr_x,
+     1     ierrtmp )
       ierr = ierr + ierrtmp
 
-      call bHYPRE_IJBuildVector_SetLocalRange_f( bHYPRE_ij_x,
-     1     first_local_row, last_local_row, ierrtmp )
+      call bHYPRE_IJParCSRVector_SetValues_f( bHYPRE_parcsr_x,
+     1     local_num_cols, indices, vals0, ierrtmp )
       ierr = ierr + ierrtmp
 
-      call bHYPRE_IJBuildVector_Initialize_f( bHYPRE_ij_x, ierrtmp )
+      call bHYPRE_IJParCSRVector_Assemble_f( bHYPRE_parcsr_x, ierrtmp )
       ierr = ierr + ierrtmp
-
-      call SIDL_int__array_create1d_f( local_num_cols, bHYPRE_indices )
-      call SIDL_double__array_create1d_f(
-     1     local_num_cols, bHYPRE_values )
-      do i=0, local_num_cols-1
-         call SIDL_int__array_set1_f( bHYPRE_indices, i,
-     1        first_local_col + i )
-         call SIDL_double__array_set1_f( bHYPRE_values, i, double_zero )
-      enddo
-      call bHYPRE_IJBuildVector_SetValues_f( bHYPRE_ij_x,
-     1     local_num_cols, bHYPRE_indices, bHYPRE_values, ierrtmp )
-      ierr = ierr + ierrtmp
-
-      call SIDL_int__array_deleteref_f( bHYPRE_indices)
-      call SIDL_double__array_deleteref_f( bHYPRE_values )
-
-      call bHYPRE_IJBuildVector_Assemble_f( bHYPRE_ij_x, ierrtmp )
-      ierr = ierr + ierrtmp
-      call bHYPRE_IJBuildVector_GetObject_f(
-     1     bHYPRE_ij_x, bHYPRE_object, ierrtmp )
-      ierr = ierr + ierrtmp
-
-      call bHYPRE_IJBuildVector_deleteref_f( bHYPRE_ij_x )
-      call SIDL_BaseInterface_queryint_f(
-     1     bHYPRE_object, "bHYPRE.IJParCSRVector", bHYPRE_object_tmp )
-      call SIDL_BaseInterface_deleteref_f( bHYPRE_object );
-      call SIDL_BaseInterface__cast2_f(
-     1     bHYPRE_object_tmp, "bHYPRE.IJParCSRVector", bHYPRE_parcsr_x )
-      if ( bHYPRE_parcsr_x .eq. 0 ) then
-         write (6,*) 'Cast/QI failed\n'
-         stop
-      endif
 
       call bHYPRE_IJParCSRVector_print_f(
      1     bHYPRE_parcsr_x, "driver.out.x0", ierrtmp )
@@ -535,15 +324,9 @@ c     Set defaults for BoomerAMG
       trunc_factor = 0.0
       cycle_type = 1
       smooth_num_sweep = 1
+      ierr = 0
 
 c      print *, 'Solver: AMG'
-
-      call HYPRE_BoomerAMGInitGridRelaxatn(num_grid_sweeps,
-     &     grid_relax_type,
-     &     grid_relax_points,
-     &     coarsen_type,
-     &     relax_weights,
-     &     MAXLEVELS,ierr)
 
       call bHYPRE_BoomerAMG__create_f( bHYPRE_AMG )
       call bHYPRE_IJParCSRVector__cast2_f
@@ -577,46 +360,42 @@ c     /* note: log output not specified ... */
       call bHYPRE_BoomerAMG_SetIntParameter_f(
      1     bHYPRE_AMG, "CycleType", cycle_type, ierrtmp )
       ierr = ierr + ierrtmp
-      dimsl(1) = 1
-      dimsu(1) = 4
-      call SIDL_int__array_create1d_f(
-     1     4, bHYPRE_num_grid_sweeps )
-      do i = 1, 4
-         call SIDL_int__array_set1_deref_f(
-     1        bHYPRE_num_grid_sweeps, i-1, num_grid_sweeps, i-1 )
-      enddo
-      call bHYPRE_BoomerAMG_SetIntArray1Parameter_f( bHYPRE_AMG,
-     1     "NumGridSweeps", bHYPRE_num_grid_sweeps, ierrtmp )
-      ierr = ierr + ierrtmp
-      dimsl(1) = 1
-      dimsu(1) = 4
-      call SIDL_int__array_create1d_f(
-     1     4, bHYPRE_grid_relax_type )
-      do i = 1, 4
-        call SIDL_int__array_set1_deref_f(
-     1        bHYPRE_grid_relax_type, i-1, grid_relax_type, i-1 )
-      enddo
-      call bHYPRE_BoomerAMG_SetIntArray1Parameter_f( bHYPRE_AMG,
-     1     "GridRelaxType", bHYPRE_grid_relax_type, ierrtmp )
+      call bHYPRE_BoomerAMG_SetDoubleParameter_f(
+     1     bHYPRE_AMG, "Tol", tol, ierrtmp )
       ierr = ierr + ierrtmp
 
-      dimsl(1) = 0
-      dimsu(1) = max_levels
-      call SIDL_double__array_create1d_f(
-     1     max_levels+1, bHYPRE_relax_weight )
-      do i=1, max_levels
-c        relax_weight(i)=1.0: simple to set, fine for testing:
-         relax_weight(i) = 1.0
-      enddo
-      do i=1, max_levels
-         call SIDL_double__array_set1_f(
-     1        bHYPRE_relax_weight, i-1, relax_weight(i) )
-      enddo
+      call bHYPRE_BoomerAMG_InitGridRelaxation_f( bHYPRE_AMG,
+     &     bHYPRE_num_grid_sweeps, bHYPRE_grid_relax_type,
+     &     bHYPRE_grid_relax_points, coarsen_type, bHYPRE_relax_weight,
+     &     MAXLEVELS, ierrtmp )
+      ierr = ierr + ierrtmp
+      call sidl_int__array_access_f(
+     &     bHYPRE_num_grid_sweeps, num_grid_sweeps, lower_ngs,
+     &     upper_ngs, stride_ngs, refindex_ngs )
+      call sidl_int__array_access_f(
+     &     bHYPRE_grid_relax_type, grid_relax_type, lower_grt,
+     &     upper_grt, stride_grt, refindex_grt )
+      call sidl_double__array_access_f(
+     &     bHYPRE_relax_weight, relax_weight, lower_rw,
+     &     upper_rw, stride_rw, refindex_rw )
+
+      call bHYPRE_BoomerAMG_SetIntArray1Parameter_f( bHYPRE_AMG,
+     1     "NumGridSweeps", num_grid_sweeps(refindex_ngs(1)),
+     2     upper_ngs(1)-lower_ngs(1), ierrtmp )
+      ierr = ierr + ierrtmp
+      call bHYPRE_BoomerAMG_SetIntArray1Parameter_f( bHYPRE_AMG,
+     1     "GridRelaxType", grid_relax_type(refindex_grt(1)),
+     2     upper_grt(1)-lower_grt(1), ierrtmp )
+      ierr = ierr + ierrtmp
       call bHYPRE_BoomerAMG_SetDoubleArray1Parameter_f(
-     1     bHYPRE_AMG, "RelaxWeight", bHYPRE_relax_weight, ierrtmp )
+     1     bHYPRE_AMG, "RelaxWeight", relax_weight(refindex_rw(1)),
+     2     upper_rw(1)-lower_rw(1), ierrtmp )
+      ierr = ierr + ierrtmp
+      call bHYPRE_BoomerAMG_SetIntArray2Parameter_f(
+     1     bHYPRE_AMG, "GridRelaxPoints", bHYPRE_grid_relax_points,
+     2     ierrtmp )
       ierr = ierr + ierrtmp
 
-c left at default: GridRelaxPoints
       call bHYPRE_BoomerAMG_SetIntParameter_f(
      1     bHYPRE_AMG, "MaxLevels", max_levels, ierrtmp )
       ierr = ierr + ierrtmp
