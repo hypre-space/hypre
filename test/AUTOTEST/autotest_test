@@ -436,7 +436,7 @@ create_summary_files ()
               if [ "$DEBUG_MODE" = "yes" ] ; then
                  printf "nonzero .err file = ${ErrFile}\n"
               fi
-              errinfo="<a href=\""${k}"\">"${k}"</a><br>"
+              errinfo="<a href=\""${HYPRE_REMOTE_DIR}/${k}"\">"${k}"</a><br>"
               AutotestFailureCount=`expr $AutotestFailureCount + 1`
               TotalFailureCount=`expr $TotalFailureCount + 1`
               TestCaseFailedCount=`expr $TestCaseFailedCount + 1`
@@ -574,7 +574,7 @@ confbuildtest ()
       else
          ssh ${HYPRE_RUN_MACHINE} "\
          (\
-          cd $StdTestDir
+          cd $StdTestDir;\
           [ -r ./AUTOTEST/env.${HYPRE_ARCH} ] && . ./AUTOTEST/env.${HYPRE_ARCH};\
           if [ "$DEBUG_MODE" = "yes" ]
           then
