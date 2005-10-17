@@ -100,6 +100,19 @@ struct bHYPRE_IJParCSRMatrix__sepv {
     /* in */ int32_t iupper,
     /* in */ int32_t jlower,
     /* in */ int32_t jupper);
+  struct bHYPRE_IJParCSRMatrix__object* (*f_GenerateLaplacian)(
+    /* in */ void* mpi_comm,
+    /* in */ int32_t nx,
+    /* in */ int32_t ny,
+    /* in */ int32_t nz,
+    /* in */ int32_t Px,
+    /* in */ int32_t Py,
+    /* in */ int32_t Pz,
+    /* in */ int32_t p,
+    /* in */ int32_t q,
+    /* in */ int32_t r,
+    /* in rarray[nvalues] */ struct sidl_double__array* values,
+    /* in */ int32_t discretization);
 };
 
 /*

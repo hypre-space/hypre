@@ -192,6 +192,43 @@ C       out bHYPRE.IJParCSRMatrix retval
 
 
 C       
+C       Method:  GenerateLaplacian[]
+C       
+
+        subroutine bHYPRE_IJParCSRMatrix_GenerateLaplacian_f(mpi_comm,
+     &     nx, ny, nz, Px, Py, Pz, p, q, r, values, discretization,
+     &     retval)
+        implicit none
+C       in opaque mpi_comm
+        integer*8 mpi_comm
+C       in int nx
+        integer*4 nx
+C       in int ny
+        integer*4 ny
+C       in int nz
+        integer*4 nz
+C       in int Px
+        integer*4 Px
+C       in int Py
+        integer*4 Py
+C       in int Pz
+        integer*4 Pz
+C       in int p
+        integer*4 p
+C       in int q
+        integer*4 q
+C       in int r
+        integer*4 r
+C       in int discretization
+        integer*4 discretization
+C       out bHYPRE.IJParCSRMatrix retval
+        integer*8 retval
+C       in rarray<double> values(nvalues)
+        double precision values(0:nvalues-1)
+        end
+
+
+C       
 C       (Optional) Set the max number of nonzeros to expect in each
 C       row of the diagonal and off-diagonal blocks.  The diagonal
 C       block is the submatrix whose column numbers correspond to

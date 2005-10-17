@@ -307,6 +307,33 @@ C       out int retval
 
 
 C       
+C       Method:  InitGridRelaxation[]
+C       
+
+        subroutine bHYPRE_BoomerAMG_InitGridRelaxation_f(self,
+     &     num_grid_sweeps, grid_relax_type, grid_relax_points,
+     &     coarsen_type, relax_weights, max_levels, retval)
+        implicit none
+C       in bHYPRE.BoomerAMG self
+        integer*8 self
+C       out array<int,column-major> num_grid_sweeps
+        integer*8 num_grid_sweeps
+C       out array<int,column-major> grid_relax_type
+        integer*8 grid_relax_type
+C       out array<int,2,column-major> grid_relax_points
+        integer*8 grid_relax_points
+C       in int coarsen_type
+        integer*4 coarsen_type
+C       out array<double,column-major> relax_weights
+        integer*8 relax_weights
+C       in int max_levels
+        integer*4 max_levels
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
 C       Set the MPI Communicator.
 C       DEPRECATED, use Create:
 C       

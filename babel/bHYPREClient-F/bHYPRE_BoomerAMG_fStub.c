@@ -489,6 +489,49 @@ SIDLFortran77Symbol(bhypre_boomeramg_setlevelrelaxwt_f,BHYPRE_BOOMERAMG_SETLEVEL
 }
 
 /*
+ * Method:  InitGridRelaxation[]
+ */
+
+void
+SIDLFortran77Symbol(bhypre_boomeramg_initgridrelaxation_f,BHYPRE_BOOMERAMG_INITGRIDRELAXATION_F,bHYPRE_BoomerAMG_InitGridRelaxation_f)
+(
+  int64_t *self,
+  int64_t *num_grid_sweeps,
+  int64_t *grid_relax_type,
+  int64_t *grid_relax_points,
+  int32_t *coarsen_type,
+  int64_t *relax_weights,
+  int32_t *max_levels,
+  int32_t *retval
+)
+{
+  struct bHYPRE_BoomerAMG__epv *_epv = NULL;
+  struct bHYPRE_BoomerAMG__object* _proxy_self = NULL;
+  struct sidl_int__array* _proxy_num_grid_sweeps = NULL;
+  struct sidl_int__array* _proxy_grid_relax_type = NULL;
+  struct sidl_int__array* _proxy_grid_relax_points = NULL;
+  struct sidl_double__array* _proxy_relax_weights = NULL;
+  _proxy_self =
+    (struct bHYPRE_BoomerAMG__object*)
+    (ptrdiff_t)(*self);
+  _epv = _proxy_self->d_epv;
+  *retval = 
+    (*(_epv->f_InitGridRelaxation))(
+      _proxy_self,
+      &_proxy_num_grid_sweeps,
+      &_proxy_grid_relax_type,
+      &_proxy_grid_relax_points,
+      *coarsen_type,
+      &_proxy_relax_weights,
+      *max_levels
+    );
+  *num_grid_sweeps = (ptrdiff_t)_proxy_num_grid_sweeps;
+  *grid_relax_type = (ptrdiff_t)_proxy_grid_relax_type;
+  *grid_relax_points = (ptrdiff_t)_proxy_grid_relax_points;
+  *relax_weights = (ptrdiff_t)_proxy_relax_weights;
+}
+
+/*
  * Set the MPI Communicator.
  * DEPRECATED, use Create:
  * 

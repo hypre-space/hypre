@@ -363,6 +363,59 @@ SIDLFortran77Symbol(bhypre_ijparcsrmatrix_create_f,BHYPRE_IJPARCSRMATRIX_CREATE_
 }
 
 /*
+ * Method:  GenerateLaplacian[]
+ */
+
+void
+SIDLFortran77Symbol(bhypre_ijparcsrmatrix_generatelaplacian_f,BHYPRE_IJPARCSRMATRIX_GENERATELAPLACIAN_F,bHYPRE_IJParCSRMatrix_GenerateLaplacian_f)
+(
+  int64_t *mpi_comm,
+  int32_t *nx,
+  int32_t *ny,
+  int32_t *nz,
+  int32_t *Px,
+  int32_t *Py,
+  int32_t *Pz,
+  int32_t *p,
+  int32_t *q,
+  int32_t *r,
+  double *values,
+  int32_t *nvalues,
+  int32_t *discretization,
+  int64_t *retval
+)
+{
+  const struct bHYPRE_IJParCSRMatrix__sepv *_epv = _getSEPV();
+  void* _proxy_mpi_comm = NULL;
+  struct sidl_double__array _alt_values;
+  struct sidl_double__array* _proxy_values = &_alt_values;
+  int32_t values_lower[1], values_upper[1], values_stride[1];
+  struct bHYPRE_IJParCSRMatrix__object* _proxy_retval = NULL;
+  _proxy_mpi_comm =
+    (void*)
+    (ptrdiff_t)(*mpi_comm);
+  values_upper[0] = (*nvalues)-1;
+  sidl_double__array_init(values, _proxy_values, 1, values_lower, values_upper,
+    values_stride);
+  _proxy_retval = 
+    (*(_epv->f_GenerateLaplacian))(
+      _proxy_mpi_comm,
+      *nx,
+      *ny,
+      *nz,
+      *Px,
+      *Py,
+      *Pz,
+      *p,
+      *q,
+      *r,
+      _proxy_values,
+      *discretization
+    );
+  *retval = (ptrdiff_t)_proxy_retval;
+}
+
+/*
  * (Optional) Set the max number of nonzeros to expect in each
  * row of the diagonal and off-diagonal blocks.  The diagonal
  * block is the submatrix whose column numbers correspond to
