@@ -308,9 +308,11 @@ HYPRE_StructMatrixSetSymmetric( HYPRE_StructMatrix  matrix,
 
 /*--------------------------------------------------------------------------
  * HYPRE_StructMatrixSetConstantEntries
+ * Call this function to declare that certain stencil points are constant
+ * throughout the mesh.
  * - nentries is the number of array entries
  * - Each int entries[i] is an index into the shape array of the stencil of the
- * matrix
+ * matrix.
  * In the present version, only three possibilites are recognized:
  * - no entries constant                 (constant_coefficient==0)
  * - all entries constant                (constant_coefficient==1)
