@@ -64,10 +64,10 @@ package bHYPRE version 1.0.0
 
       /**
        *  Create function, like the builtin __create() except you must specify
-       *  the MPI communicator in an argument; some classes may have more arguments.
+       *  the MPI communicator in an argument; and most classes have more arguments.
        *  This function is documented here because it will be defined for all
        *  classes.  However, it is declared in the classes, not in this interface.
-       *      static int Create( in opaque mpi_comm );
+       *      static int Create( in opaque mpi_comm,... );
        **/
    }
 
@@ -881,6 +881,14 @@ package bHYPRE version 1.0.0
                                     in int jlower,
                                     in int jupper);
 
+      /* The following function is for convenience in writing test drivers,
+         and subject to change without notice.  nvalues should be 4 */
+      static IJParCSRMatrix GenerateLaplacian(
+         in opaque mpi_comm, in int nx, in int ny, in int nz,
+         in int Px, in int Py, in int Pz, in int p, in int q, in int r,
+         in rarray<double, 1> values(nvalues),  in int nvalues,
+         in int discretization );
+
       /**
        * (Optional) Set the max number of nonzeros to expect in each
        * row of the diagonal and off-diagonal blocks.  The diagonal
@@ -1427,6 +1435,16 @@ package bHYPRE version 1.0.0
    {
       static BoomerAMG Create( in opaque mpi_comm );
       int SetLevelRelaxWt( in double relax_wt, in int level );
+
+      /* The following function is just a tools for test drivers,
+         subject to change without notice... */
+      int InitGridRelaxation(
+         out array<int,1,column-major> num_grid_sweeps,
+         out array<int,1,column-major> grid_relax_type,
+         out array<int,2,column-major> grid_relax_points,
+         in int       coarsen_type,
+         out array<double,1,column-major> relax_weights,
+         in int       max_levels         );
    }
 
    /**
