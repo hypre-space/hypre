@@ -38,6 +38,23 @@ impl_bHYPRE_IJParCSRMatrix_Create(
   /* in */ int32_t jlower,
   /* in */ int32_t jupper);
 
+extern
+bHYPRE_IJParCSRMatrix
+impl_bHYPRE_IJParCSRMatrix_GenerateLaplacian(
+  /* in */ void* mpi_comm,
+  /* in */ int32_t nx,
+  /* in */ int32_t ny,
+  /* in */ int32_t nz,
+  /* in */ int32_t Px,
+  /* in */ int32_t Py,
+  /* in */ int32_t Pz,
+  /* in */ int32_t p,
+  /* in */ int32_t q,
+  /* in */ int32_t r,
+  /* in rarray[nvalues] */ double* values,
+  /* in */ int32_t nvalues,
+  /* in */ int32_t discretization);
+
 extern struct bHYPRE_CoefficientAccess__object* 
   impl_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_CoefficientAccess(char* url,
   sidl_BaseInterface *_ex);
@@ -329,6 +346,44 @@ extern struct sidl_BaseClass__object*
   sidl_BaseInterface *_ex);
 extern char* impl_bHYPRE_IJParCSRMatrix_fgetURL_sidl_BaseClass(struct 
   sidl_BaseClass__object* obj);
+static bHYPRE_IJParCSRMatrix
+skel_bHYPRE_IJParCSRMatrix_GenerateLaplacian(
+  /* in */ void* mpi_comm,
+  /* in */ int32_t nx,
+  /* in */ int32_t ny,
+  /* in */ int32_t nz,
+  /* in */ int32_t Px,
+  /* in */ int32_t Py,
+  /* in */ int32_t Pz,
+  /* in */ int32_t p,
+  /* in */ int32_t q,
+  /* in */ int32_t r,
+  /* in rarray[nvalues] */ struct sidl_double__array* values,
+/* in */ int32_t discretization)
+{
+  bHYPRE_IJParCSRMatrix _return;
+  struct sidl_double__array* values_proxy = sidl_double__array_ensure(values, 1,
+    sidl_column_major_order);
+  double* values_tmp = values_proxy->d_firstElement;
+  int32_t nvalues = sidlLength(values_proxy,0);
+  _return =
+    impl_bHYPRE_IJParCSRMatrix_GenerateLaplacian(
+      mpi_comm,
+      nx,
+      ny,
+      nz,
+      Px,
+      Py,
+      Pz,
+      p,
+      q,
+      r,
+      values_tmp,
+      nvalues,
+      discretization);
+  return _return;
+}
+
 static int32_t
 skel_bHYPRE_IJParCSRMatrix_SetDiagOffdSizes(
   /* in */ bHYPRE_IJParCSRMatrix self,
@@ -657,6 +712,7 @@ void
 bHYPRE_IJParCSRMatrix__set_sepv(struct bHYPRE_IJParCSRMatrix__sepv *sepv)
 {
   sepv->f_Create = impl_bHYPRE_IJParCSRMatrix_Create;
+  sepv->f_GenerateLaplacian = skel_bHYPRE_IJParCSRMatrix_GenerateLaplacian;
 }
 #ifdef __cplusplus
 }

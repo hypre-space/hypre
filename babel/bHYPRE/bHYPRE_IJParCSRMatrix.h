@@ -109,6 +109,25 @@ bHYPRE_IJParCSRMatrix_Create(
   /* in */ int32_t jupper);
 
 /**
+ * Method:  GenerateLaplacian[]
+ */
+bHYPRE_IJParCSRMatrix
+bHYPRE_IJParCSRMatrix_GenerateLaplacian(
+  /* in */ void* mpi_comm,
+  /* in */ int32_t nx,
+  /* in */ int32_t ny,
+  /* in */ int32_t nz,
+  /* in */ int32_t Px,
+  /* in */ int32_t Py,
+  /* in */ int32_t Pz,
+  /* in */ int32_t p,
+  /* in */ int32_t q,
+  /* in */ int32_t r,
+  /* in rarray[nvalues] */ double* values,
+  /* in */ int32_t nvalues,
+  /* in */ int32_t discretization);
+
+/**
  * (Optional) Set the max number of nonzeros to expect in each
  * row of the diagonal and off-diagonal blocks.  The diagonal
  * block is the submatrix whose column numbers correspond to

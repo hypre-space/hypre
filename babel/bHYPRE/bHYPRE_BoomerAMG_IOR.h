@@ -306,6 +306,16 @@ struct bHYPRE_BoomerAMG__epv {
     /* in */ struct bHYPRE_BoomerAMG__object* self,
     /* in */ double relax_wt,
     /* in */ int32_t level);
+  int32_t (*f_InitGridRelaxation)(
+    /* in */ struct bHYPRE_BoomerAMG__object* self,
+    /* out array<int,column-major> */ struct sidl_int__array** num_grid_sweeps,
+    /* out array<int,column-major> */ struct sidl_int__array** grid_relax_type,
+    /* out array<int,2,
+      column-major> */ struct sidl_int__array** grid_relax_points,
+    /* in */ int32_t coarsen_type,
+    /* out array<double,
+      column-major> */ struct sidl_double__array** relax_weights,
+    /* in */ int32_t max_levels);
 };
 
 /*

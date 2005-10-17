@@ -253,6 +253,46 @@ bHYPRE_BoomerAMG_SetLevelRelaxWt__exec(
 }
 
 static void
+bHYPRE_BoomerAMG_InitGridRelaxation__exec(
+        struct bHYPRE_BoomerAMG__object* self,
+        struct sidl_io_Deserializer__object* inArgs,
+        struct sidl_io_Serializer__object* outArgs) {
+  /* stack space for arguments */
+  struct sidl_int__array* num_grid_sweeps_tmp;
+  struct sidl_int__array** num_grid_sweeps= &num_grid_sweeps_tmp;
+  struct sidl_int__array* grid_relax_type_tmp;
+  struct sidl_int__array** grid_relax_type= &grid_relax_type_tmp;
+  struct sidl_int__array* grid_relax_points_tmp;
+  struct sidl_int__array** grid_relax_points= &grid_relax_points_tmp;
+  int32_t coarsen_type;
+  struct sidl_double__array* relax_weights_tmp;
+  struct sidl_double__array** relax_weights= &relax_weights_tmp;
+  int32_t max_levels;
+  int32_t _retval;
+  sidl_BaseInterface _ex   = NULL;
+  sidl_BaseInterface *_ex2 = &_ex;
+  /* unpack in and inout argments */
+  sidl_io_Deserializer_unpackInt( inArgs, "coarsen_type", &coarsen_type, _ex2);
+  sidl_io_Deserializer_unpackInt( inArgs, "max_levels", &max_levels, _ex2);
+
+  /* make the call */
+  _retval = (self->d_epv->f_InitGridRelaxation)(
+    self,
+    num_grid_sweeps,
+    grid_relax_type,
+    grid_relax_points,
+    coarsen_type,
+    relax_weights,
+    max_levels);
+
+  /* pack return value */
+  sidl_io_Serializer_packInt( outArgs, "_retval", _retval, _ex2);
+
+  /* pack out and inout argments */
+
+}
+
+static void
 bHYPRE_BoomerAMG_SetCommunicator__exec(
         struct bHYPRE_BoomerAMG__object* self,
         struct sidl_io_Deserializer__object* inArgs,
@@ -833,6 +873,7 @@ ior_bHYPRE_BoomerAMG__exec(
     { "GetIntValue", bHYPRE_BoomerAMG_GetIntValue__exec },
     { "GetNumIterations", bHYPRE_BoomerAMG_GetNumIterations__exec },
     { "GetRelResidualNorm", bHYPRE_BoomerAMG_GetRelResidualNorm__exec },
+    { "InitGridRelaxation", bHYPRE_BoomerAMG_InitGridRelaxation__exec },
     { "SetCommunicator", bHYPRE_BoomerAMG_SetCommunicator__exec },
     { "SetDoubleArray1Parameter",
       bHYPRE_BoomerAMG_SetDoubleArray1Parameter__exec },
@@ -916,6 +957,7 @@ static void bHYPRE_BoomerAMG__init_epv(
   epv->f_getClassInfo                  = (struct sidl_ClassInfo__object* 
     (*)(struct bHYPRE_BoomerAMG__object*)) s1->d_epv->f_getClassInfo;
   epv->f_SetLevelRelaxWt               = NULL;
+  epv->f_InitGridRelaxation            = NULL;
   epv->f_SetCommunicator               = NULL;
   epv->f_SetIntParameter               = NULL;
   epv->f_SetDoubleParameter            = NULL;

@@ -113,6 +113,23 @@ impl_bHYPRE_IJParCSRMatrix_Create(
   /* in */ int32_t jlower,
   /* in */ int32_t jupper);
 
+extern
+bHYPRE_IJParCSRMatrix
+impl_bHYPRE_IJParCSRMatrix_GenerateLaplacian(
+  /* in */ void* mpi_comm,
+  /* in */ int32_t nx,
+  /* in */ int32_t ny,
+  /* in */ int32_t nz,
+  /* in */ int32_t Px,
+  /* in */ int32_t Py,
+  /* in */ int32_t Pz,
+  /* in */ int32_t p,
+  /* in */ int32_t q,
+  /* in */ int32_t r,
+  /* in rarray[nvalues] */ double* values,
+  /* in */ int32_t nvalues,
+  /* in */ int32_t discretization);
+
 extern struct bHYPRE_CoefficientAccess__object* 
   impl_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_CoefficientAccess(char* url,
   sidl_BaseInterface *_ex);

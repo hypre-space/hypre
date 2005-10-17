@@ -78,6 +78,19 @@ impl_bHYPRE_BoomerAMG_SetLevelRelaxWt(
 
 extern
 int32_t
+impl_bHYPRE_BoomerAMG_InitGridRelaxation(
+  /* in */ bHYPRE_BoomerAMG self,
+  /* out array<int,column-major> */ struct sidl_int__array** num_grid_sweeps,
+  /* out array<int,column-major> */ struct sidl_int__array** grid_relax_type,
+  /* out array<int,2,
+    column-major> */ struct sidl_int__array** grid_relax_points,
+  /* in */ int32_t coarsen_type,
+  /* out array<double,
+    column-major> */ struct sidl_double__array** relax_weights,
+  /* in */ int32_t max_levels);
+
+extern
+int32_t
 impl_bHYPRE_BoomerAMG_SetCommunicator(
   /* in */ bHYPRE_BoomerAMG self,
   /* in */ void* mpi_comm);
@@ -239,6 +252,47 @@ extern struct sidl_BaseClass__object*
 extern char* impl_bHYPRE_BoomerAMG_fgetURL_sidl_BaseClass(struct 
   sidl_BaseClass__object* obj);
 static int32_t
+skel_bHYPRE_BoomerAMG_InitGridRelaxation(
+  /* in */ bHYPRE_BoomerAMG self,
+  /* out array<int,column-major> */ struct sidl_int__array** num_grid_sweeps,
+  /* out array<int,column-major> */ struct sidl_int__array** grid_relax_type,
+  /* out array<int,2,
+    column-major> */ struct sidl_int__array** grid_relax_points,
+  /* in */ int32_t coarsen_type,
+  /* out array<double,
+    column-major> */ struct sidl_double__array** relax_weights,
+/* in */ int32_t max_levels)
+{
+  int32_t _return;
+  struct sidl_int__array* num_grid_sweeps_proxy = NULL;
+  struct sidl_int__array* grid_relax_type_proxy = NULL;
+  struct sidl_int__array* grid_relax_points_proxy = NULL;
+  struct sidl_double__array* relax_weights_proxy = NULL;
+  _return =
+    impl_bHYPRE_BoomerAMG_InitGridRelaxation(
+      self,
+      &num_grid_sweeps_proxy,
+      &grid_relax_type_proxy,
+      &grid_relax_points_proxy,
+      coarsen_type,
+      &relax_weights_proxy,
+      max_levels);
+  *num_grid_sweeps = sidl_int__array_ensure(num_grid_sweeps_proxy, 1,
+    sidl_column_major_order);
+  sidl_int__array_deleteRef(num_grid_sweeps_proxy);
+  *grid_relax_type = sidl_int__array_ensure(grid_relax_type_proxy, 1,
+    sidl_column_major_order);
+  sidl_int__array_deleteRef(grid_relax_type_proxy);
+  *grid_relax_points = sidl_int__array_ensure(grid_relax_points_proxy, 2,
+    sidl_column_major_order);
+  sidl_int__array_deleteRef(grid_relax_points_proxy);
+  *relax_weights = sidl_double__array_ensure(relax_weights_proxy, 1,
+    sidl_column_major_order);
+  sidl_double__array_deleteRef(relax_weights_proxy);
+  return _return;
+}
+
+static int32_t
 skel_bHYPRE_BoomerAMG_SetIntArray1Parameter(
   /* in */ bHYPRE_BoomerAMG self,
   /* in */ const char* name,
@@ -324,6 +378,7 @@ bHYPRE_BoomerAMG__set_epv(struct bHYPRE_BoomerAMG__epv *epv)
   epv->f__ctor = impl_bHYPRE_BoomerAMG__ctor;
   epv->f__dtor = impl_bHYPRE_BoomerAMG__dtor;
   epv->f_SetLevelRelaxWt = impl_bHYPRE_BoomerAMG_SetLevelRelaxWt;
+  epv->f_InitGridRelaxation = skel_bHYPRE_BoomerAMG_InitGridRelaxation;
   epv->f_SetCommunicator = impl_bHYPRE_BoomerAMG_SetCommunicator;
   epv->f_SetIntParameter = impl_bHYPRE_BoomerAMG_SetIntParameter;
   epv->f_SetDoubleParameter = impl_bHYPRE_BoomerAMG_SetDoubleParameter;

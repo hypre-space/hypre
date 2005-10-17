@@ -223,6 +223,21 @@ bHYPRE_BoomerAMG_SetLevelRelaxWt(
   /* in */ int32_t level);
 
 /**
+ * Method:  InitGridRelaxation[]
+ */
+int32_t
+bHYPRE_BoomerAMG_InitGridRelaxation(
+  /* in */ bHYPRE_BoomerAMG self,
+  /* out array<int,column-major> */ struct sidl_int__array** num_grid_sweeps,
+  /* out array<int,column-major> */ struct sidl_int__array** grid_relax_type,
+  /* out array<int,2,
+    column-major> */ struct sidl_int__array** grid_relax_points,
+  /* in */ int32_t coarsen_type,
+  /* out array<double,
+    column-major> */ struct sidl_double__array** relax_weights,
+  /* in */ int32_t max_levels);
+
+/**
  * Set the MPI Communicator.
  * DEPRECATED, use Create:
  * 

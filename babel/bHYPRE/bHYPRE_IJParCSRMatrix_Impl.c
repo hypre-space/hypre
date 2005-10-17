@@ -162,6 +162,94 @@ impl_bHYPRE_IJParCSRMatrix_Create(
 }
 
 /*
+ * Method:  GenerateLaplacian[]
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_IJParCSRMatrix_GenerateLaplacian"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+bHYPRE_IJParCSRMatrix
+impl_bHYPRE_IJParCSRMatrix_GenerateLaplacian(
+  /* in */ void* mpi_comm,
+  /* in */ int32_t nx,
+  /* in */ int32_t ny,
+  /* in */ int32_t nz,
+  /* in */ int32_t Px,
+  /* in */ int32_t Py,
+  /* in */ int32_t Pz,
+  /* in */ int32_t p,
+  /* in */ int32_t q,
+  /* in */ int32_t r,
+  /* in rarray[nvalues] */ double* values,
+  /* in */ int32_t nvalues,
+  /* in */ int32_t discretization)
+{
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRMatrix.GenerateLaplacian) */
+  /* Insert-Code-Here {bHYPRE.IJParCSRMatrix.GenerateLaplacian} (GenerateLaplacian method) */
+
+   /* The returned matrix represents a Laplacian with 7,9,or 27 point discretization
+      as specified.   Initialize but not Assemble is called before returning. */
+
+   int ierr = 0;
+   bHYPRE_IJParCSRMatrix bHA;
+   HYPRE_ParCSRMatrix HA;
+   HYPRE_IJMatrix HIJA;
+   struct bHYPRE_IJParCSRMatrix__data * data;
+   int first_local_row, last_local_row, first_local_col, last_local_col;
+   int local_num_rows, size, i;
+   int * row_sizes;
+   int * col_inds;
+   double * row_values;
+   int stride[1];
+
+   hypre_assert( nvalues == 4 );
+   hypre_assert( discretization==7 || discretization==9 || discretization==27 );
+   hypre_assert( discretization==7 ); /* only 7-point 3D example implemented */
+   HA = (HYPRE_ParCSRMatrix) GenerateLaplacian(
+      (MPI_Comm) mpi_comm, nx, ny, nz, Px, Py, Pz, p, q, r, values );
+
+   /* We need to return a bHYPRE_IJParCSRMatrix.  Make a one and copy HA to it... */
+
+   ierr += HYPRE_ParCSRMatrixGetLocalRange(
+      HA, &first_local_row, &last_local_row , &first_local_col, &last_local_col );
+   local_num_rows = last_local_row - first_local_row + 1;
+
+   bHA = bHYPRE_IJParCSRMatrix_Create(
+      mpi_comm, first_local_row, last_local_row, first_local_col, last_local_col );
+
+   row_sizes = hypre_CTAlloc( int, local_num_rows );
+   size = discretization;
+   for (i=0; i < local_num_rows; i++)
+   {
+      row_sizes[i] = size;
+   }
+   ierr = bHYPRE_IJParCSRMatrix_SetRowSizes( bHA, row_sizes, local_num_rows );
+   hypre_TFree( row_sizes );
+
+   ierr = bHYPRE_IJParCSRMatrix_Initialize( bHA );
+
+   row_sizes = hypre_CTAlloc( int, 1 );
+   stride[0] = 1;
+
+   /* Copy row data to the new matrix... */
+   for (i=first_local_row; i<= last_local_row; i++)
+   {
+      ierr += HYPRE_ParCSRMatrixGetRow( HA, i, &size, &col_inds, &row_values );
+      ierr += bHYPRE_IJParCSRMatrix_SetValues(
+         bHA, 1, &size, &i, col_inds, row_values, size );
+      ierr += HYPRE_ParCSRMatrixRestoreRow( HA, i, &size, &col_inds, &row_values );
+   }
+
+   hypre_assert( ierr == 0 );
+   return bHA;
+
+  /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRMatrix.GenerateLaplacian) */
+}
+
+/*
  * (Optional) Set the max number of nonzeros to expect in each
  * row of the diagonal and off-diagonal blocks.  The diagonal
  * block is the submatrix whose column numbers correspond to

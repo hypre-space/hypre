@@ -1318,7 +1318,8 @@ static void bHYPRE_IJParCSRMatrix__init_sepv(void)
 
   struct bHYPRE_IJParCSRMatrix__sepv*  s = &s_stc_epv__bhypre_ijparcsrmatrix;
 
-  s->f_Create         = NULL;
+  s->f_Create                    = NULL;
+  s->f_GenerateLaplacian         = NULL;
 
   bHYPRE_IJParCSRMatrix__set_sepv(s);
 

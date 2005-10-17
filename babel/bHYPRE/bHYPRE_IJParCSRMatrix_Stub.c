@@ -245,6 +245,47 @@ bHYPRE_IJParCSRMatrix_Create(
 }
 
 /*
+ * Method:  GenerateLaplacian[]
+ */
+
+bHYPRE_IJParCSRMatrix
+bHYPRE_IJParCSRMatrix_GenerateLaplacian(
+  /* in */ void* mpi_comm,
+  /* in */ int32_t nx,
+  /* in */ int32_t ny,
+  /* in */ int32_t nz,
+  /* in */ int32_t Px,
+  /* in */ int32_t Py,
+  /* in */ int32_t Pz,
+  /* in */ int32_t p,
+  /* in */ int32_t q,
+  /* in */ int32_t r,
+  /* in rarray[nvalues] */ double* values,
+  /* in */ int32_t nvalues,
+  /* in */ int32_t discretization)
+{
+  int32_t values_lower[1], values_upper[1], values_stride[1]; 
+  struct sidl_double__array values_real;
+  struct sidl_double__array*values_tmp = &values_real;
+  values_upper[0] = nvalues-1;
+  sidl_double__array_init(values, values_tmp, 1, values_lower, values_upper,
+    values_stride);
+  return (_getSEPV()->f_GenerateLaplacian)(
+    mpi_comm,
+    nx,
+    ny,
+    nz,
+    Px,
+    Py,
+    Pz,
+    p,
+    q,
+    r,
+    values_tmp,
+    discretization);
+}
+
+/*
  * (Optional) Set the max number of nonzeros to expect in each
  * row of the diagonal and off-diagonal blocks.  The diagonal
  * block is the submatrix whose column numbers correspond to
@@ -905,6 +946,70 @@ bHYPRE_IJParCSRMatrix_Create__sexec(
 
 }
 
+void
+bHYPRE_IJParCSRMatrix_GenerateLaplacian__sexec(
+        struct sidl_io_Deserializer__object* inArgs,
+        struct sidl_io_Serializer__object* outArgs) {
+  /* stack space for arguments */
+  void* mpi_comm;
+  int32_t nx;
+  int32_t ny;
+  int32_t nz;
+  int32_t Px;
+  int32_t Py;
+  int32_t Pz;
+  int32_t p;
+  int32_t q;
+  int32_t r;
+  double* values_tmp;
+  int32_t discretization;
+  bHYPRE_IJParCSRMatrix _retval;
+  sidl_BaseInterface _ex   = NULL;
+  sidl_BaseInterface *_ex2 = &_ex;
+
+  /* unpack in and inout argments */
+
+  sidl_io_Deserializer_unpackInt( inArgs, "nx", &nx, _ex2);
+
+  sidl_io_Deserializer_unpackInt( inArgs, "ny", &ny, _ex2);
+
+  sidl_io_Deserializer_unpackInt( inArgs, "nz", &nz, _ex2);
+
+  sidl_io_Deserializer_unpackInt( inArgs, "Px", &Px, _ex2);
+
+  sidl_io_Deserializer_unpackInt( inArgs, "Py", &Py, _ex2);
+
+  sidl_io_Deserializer_unpackInt( inArgs, "Pz", &Pz, _ex2);
+
+  sidl_io_Deserializer_unpackInt( inArgs, "p", &p, _ex2);
+
+  sidl_io_Deserializer_unpackInt( inArgs, "q", &q, _ex2);
+
+  sidl_io_Deserializer_unpackInt( inArgs, "r", &r, _ex2);
+
+  sidl_io_Deserializer_unpackInt( inArgs, "discretization", &discretization,
+    _ex2);
+
+  /* make the call */
+  _retval = (_getSEPV()->f_GenerateLaplacian)(
+    mpi_comm,
+    nx,
+    ny,
+    nz,
+    Px,
+    Py,
+    Pz,
+    p,
+    q,
+    r,
+    values_tmp,
+    discretization);
+
+  /* pack return value */
+  /* pack out and inout argments */
+
+}
+
 /*
  * Cast method for interface and class type conversions.
  */
@@ -978,7 +1083,8 @@ bHYPRE_IJParCSRMatrix__sexec(
         struct sidl_io_Deserializer__object* inArgs,
         struct sidl_io_Serializer__object* outArgs ) { 
   static const struct bHYPRE_IJParCSRMatrix__smethod s_methods[] = {
-    { "Create", bHYPRE_IJParCSRMatrix_Create__sexec }
+    { "Create", bHYPRE_IJParCSRMatrix_Create__sexec },
+    { "GenerateLaplacian", bHYPRE_IJParCSRMatrix_GenerateLaplacian__sexec }
   };
   int i, cmp, l = 0;
   int u = sizeof(s_methods)/sizeof(struct bHYPRE_IJParCSRMatrix__smethod);

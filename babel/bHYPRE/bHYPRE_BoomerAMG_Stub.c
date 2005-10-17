@@ -252,6 +252,32 @@ bHYPRE_BoomerAMG_SetLevelRelaxWt(
 }
 
 /*
+ * Method:  InitGridRelaxation[]
+ */
+
+int32_t
+bHYPRE_BoomerAMG_InitGridRelaxation(
+  /* in */ bHYPRE_BoomerAMG self,
+  /* out array<int,column-major> */ struct sidl_int__array** num_grid_sweeps,
+  /* out array<int,column-major> */ struct sidl_int__array** grid_relax_type,
+  /* out array<int,2,
+    column-major> */ struct sidl_int__array** grid_relax_points,
+  /* in */ int32_t coarsen_type,
+  /* out array<double,
+    column-major> */ struct sidl_double__array** relax_weights,
+  /* in */ int32_t max_levels)
+{
+  return (*self->d_epv->f_InitGridRelaxation)(
+    self,
+    num_grid_sweeps,
+    grid_relax_type,
+    grid_relax_points,
+    coarsen_type,
+    relax_weights,
+    max_levels);
+}
+
+/*
  * Set the MPI Communicator.
  * DEPRECATED, use Create:
  * 
@@ -1329,6 +1355,47 @@ remote_bHYPRE_BoomerAMG_SetLevelRelaxWt(
   return _retval;
 }
 
+/* REMOTE METHOD STUB:InitGridRelaxation */
+static int32_t
+remote_bHYPRE_BoomerAMG_InitGridRelaxation(
+  /* in */ struct bHYPRE_BoomerAMG__object* self /* TLD */,
+  /* out array<int,column-major> */ struct sidl_int__array** num_grid_sweeps,
+  /* out array<int,column-major> */ struct sidl_int__array** grid_relax_type,
+  /* out array<int,2,
+    column-major> */ struct sidl_int__array** grid_relax_points,
+  /* in */ int32_t coarsen_type,
+  /* out array<double,
+    column-major> */ struct sidl_double__array** relax_weights,
+  /* in */ int32_t max_levels)
+{
+  sidl_BaseInterface _ex = NULL;
+  sidl_BaseInterface *_ex2 =&_ex;
+  /* initialize a new invocation */
+  sidl_rmi_InstanceHandle _conn = (sidl_rmi_InstanceHandle)self->d_data;
+  sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
+    "InitGridRelaxation", _ex2 );
+  sidl_rmi_Response _rsvp = NULL;
+  int32_t _retval;
+
+  /* pack in and inout arguments */
+  sidl_rmi_Invocation_packInt( _inv, "coarsen_type", coarsen_type, _ex2);
+  sidl_rmi_Invocation_packInt( _inv, "max_levels", max_levels, _ex2);
+
+  /* send actual RMI request */
+  _rsvp = sidl_rmi_Invocation_invokeMethod(_inv,_ex2);
+
+  /* extract return value */
+  sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval, _ex2);
+
+  /* unpack out and inout arguments */
+
+  /* cleanup and return */
+  sidl_rmi_Response_done(_rsvp, _ex2);
+  sidl_rmi_Invocation_deleteRef(_inv);
+  sidl_rmi_Response_deleteRef(_rsvp);
+  return _retval;
+}
+
 /* REMOTE METHOD STUB:SetCommunicator */
 static int32_t
 remote_bHYPRE_BoomerAMG_SetCommunicator(
@@ -2000,6 +2067,8 @@ static void bHYPRE_BoomerAMG__init_remote_epv(void)
   epv->f_getClassInfo                  = remote_bHYPRE_BoomerAMG_getClassInfo;
   epv->f_SetLevelRelaxWt               = 
     remote_bHYPRE_BoomerAMG_SetLevelRelaxWt;
+  epv->f_InitGridRelaxation            = 
+    remote_bHYPRE_BoomerAMG_InitGridRelaxation;
   epv->f_SetCommunicator               = 
     remote_bHYPRE_BoomerAMG_SetCommunicator;
   epv->f_SetIntParameter               = 

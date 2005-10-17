@@ -280,6 +280,75 @@ impl_bHYPRE_BoomerAMG_SetLevelRelaxWt(
 }
 
 /*
+ * Method:  InitGridRelaxation[]
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_BoomerAMG_InitGridRelaxation"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+int32_t
+impl_bHYPRE_BoomerAMG_InitGridRelaxation(
+  /* in */ bHYPRE_BoomerAMG self,
+  /* out array<int,column-major> */ struct sidl_int__array** num_grid_sweeps,
+  /* out array<int,column-major> */ struct sidl_int__array** grid_relax_type,
+  /* out array<int,2,
+    column-major> */ struct sidl_int__array** grid_relax_points,
+  /* in */ int32_t coarsen_type,
+  /* out array<double,
+    column-major> */ struct sidl_double__array** relax_weights,
+  /* in */ int32_t max_levels)
+{
+   /* DO-NOT-DELETE splicer.begin(bHYPRE.BoomerAMG.InitGridRelaxation) */
+   /* Insert-Code-Here {bHYPRE.BoomerAMG.InitGridRelaxation} (InitGridRelaxation method) */
+
+   /* This function is for convenience in writing test drivers. */
+
+   int ierr = 0;
+   int lower[2], upper[2], stride[2], upper_rw[1];
+   int * dummy_ngsp;
+   int * dummy_grtp;
+   int * dummy_grp1p;
+   int ** dummy_grpp = &dummy_grp1p;
+   double * dummy_rwp;
+   int ** num_grid_sweeps_ptr = &dummy_ngsp;
+   int ** grid_relax_type_ptr = &dummy_grtp;
+   int *** grid_relax_points_ptr = &dummy_grpp;
+   double ** relax_weights_ptr = &dummy_rwp;
+   int i, j;
+
+   lower[0] = 0; lower[1] = 0; upper[0] = 4; upper[1] = 4;
+   stride[0]=1; stride[1] = 1;
+   upper_rw[0] = max_levels;
+
+   ierr += HYPRE_BoomerAMGInitGridRelaxation(
+      num_grid_sweeps_ptr, grid_relax_type_ptr, grid_relax_points_ptr,
+      coarsen_type, relax_weights_ptr, max_levels  );
+
+   *num_grid_sweeps = sidl_int__array_borrow( *num_grid_sweeps_ptr, 1,
+                                              lower, upper, stride );
+   *grid_relax_type = sidl_int__array_borrow( *grid_relax_type_ptr, 1
+                                              , lower, upper, stride );
+   *relax_weights = sidl_double__array_borrow( *relax_weights_ptr, 1,
+                                               lower, upper_rw, stride );
+   *grid_relax_points = sidl_int__array_createCol( 2, lower, upper );
+   for ( i=0; i<4; ++i )
+   {
+      for ( j=0; j<(*num_grid_sweeps_ptr)[i]; ++j )
+      {
+         sidl_int__array_set2( *grid_relax_points, i, j,
+                               (*grid_relax_points_ptr)[i][j] );
+      }
+   }
+
+   return ierr;
+
+   /* DO-NOT-DELETE splicer.end(bHYPRE.BoomerAMG.InitGridRelaxation) */
+}
+
+/*
  * Set the MPI Communicator.
  * DEPRECATED, use Create:
  * 
