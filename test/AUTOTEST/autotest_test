@@ -454,7 +454,7 @@ create_summary_files ()
            if [ "$DEBUG_MODE" = "yes" ] ; then
               printf "nonzero .err file = ${ErrFile}\n"
            fi
-           errinfo="<a href=\""${ErrFile}"\">"${ErrFile}"</a><br>"
+           errinfo="<a href=\""${HYPRE_REMOTE_DIR}/${ErrFile}"\">"${ErrFile}"</a><br>"
            AutotestFailureCount=`expr $AutotestFailureCount + 1`
            TotalFailureCount=`expr $TotalFailureCount + 1`
            TestCaseFailedCount=`expr $TestCaseFailedCount + 1`
