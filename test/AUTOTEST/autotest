@@ -620,8 +620,8 @@ hypre_mail_summary
 #==============================================================================
 #    Reset permissions
 #==============================================================================
-chmod -fR a+rX,ug+w,o-w ${HYPRE_REMOTE_DIR}
-chgrp -fR hypre ${HYPRE_REMOTE_DIR}
+chmod -fR a+rX,ug+w,o-w ${HYPRE_REMOTE_DIR}/linear_solvers
+chgrp -fR hypre ${HYPRE_REMOTE_DIR}/linear_solvers
 
 chmod -fR a+rX,ug+w,o-w ${HYPRE_SUMMARY_DIR}
 chgrp -fR hypre ${HYPRE_SUMMARY_DIR}
