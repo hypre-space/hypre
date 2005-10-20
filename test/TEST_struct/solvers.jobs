@@ -23,7 +23,6 @@ mpirun -np 1 ./struct -P 1 1 1 -solver 19 > solvers.out.4
 # Run default case with all available PCG preconditioners (solvers): 
 #    10: SMG (default)
 #    11: PFMG
-#    12: SparseMSG  
 #    17: 2-step Jacobi
 #    18: Diagonal scaling
 #    19: none
