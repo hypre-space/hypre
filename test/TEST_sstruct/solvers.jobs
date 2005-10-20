@@ -33,7 +33,6 @@ mpirun -np 2 ./sstruct -in sstruct.in.laps -P 2 1 1 -solver 3 > solvers.out.14
 # Run default case with all available PCG preconditioners (solvers): 
 #    10: SMG
 #    11: PFMG
-#    13: SysPFMG  
 #    18: Diagonal scaling
 #    19: none
 #=============================================================================
