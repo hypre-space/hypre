@@ -31,6 +31,8 @@ struct bHYPRE_Solver__object;
  * Forward references for external classes and interfaces.
  */
 
+struct bHYPRE_MPICommunicator__array;
+struct bHYPRE_MPICommunicator__object;
 struct bHYPRE_Operator__array;
 struct bHYPRE_Operator__object;
 struct bHYPRE_Vector__array;
@@ -81,7 +83,7 @@ struct bHYPRE_Solver__epv {
   /* Methods introduced in bHYPRE.Operator-v1.0.0 */
   int32_t (*f_SetCommunicator)(
     /* in */ void* self,
-    /* in */ void* mpi_comm);
+    /* in */ struct bHYPRE_MPICommunicator__object* mpi_comm);
   int32_t (*f_SetIntParameter)(
     /* in */ void* self,
     /* in */ const char* name,
@@ -224,7 +226,7 @@ struct bHYPRE__Solver__epv {
   /* Methods introduced in bHYPRE.Operator-v1.0.0 */
   int32_t (*f_SetCommunicator)(
     /* in */ struct bHYPRE__Solver__object* self,
-    /* in */ void* mpi_comm);
+    /* in */ struct bHYPRE_MPICommunicator__object* mpi_comm);
   int32_t (*f_SetIntParameter)(
     /* in */ struct bHYPRE__Solver__object* self,
     /* in */ const char* name,

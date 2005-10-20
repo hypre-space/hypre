@@ -27,6 +27,9 @@ typedef struct bHYPRE_SStructVectorView__object* bHYPRE_SStructVectorView;
 #ifndef included_sidl_header_h
 #include "sidl_header.h"
 #endif
+#ifndef included_bHYPRE_MPICommunicator_h
+#include "bHYPRE_MPICommunicator.h"
+#endif
 #ifndef included_bHYPRE_SStructGrid_h
 #include "bHYPRE_SStructGrid.h"
 #endif
@@ -82,7 +85,7 @@ bHYPRE_SStructVectorView_getClassInfo(
 int32_t
 bHYPRE_SStructVectorView_SetCommunicator(
   /* in */ bHYPRE_SStructVectorView self,
-  /* in */ void* mpi_comm);
+  /* in */ bHYPRE_MPICommunicator mpi_comm);
 
 int32_t
 bHYPRE_SStructVectorView_Initialize(

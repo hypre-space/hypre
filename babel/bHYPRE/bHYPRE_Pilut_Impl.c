@@ -102,7 +102,7 @@ extern "C"
 #endif
 bHYPRE_Pilut
 impl_bHYPRE_Pilut_Create(
-  /* in */ void* mpi_comm)
+  /* in */ bHYPRE_MPICommunicator mpi_comm)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.Pilut.Create) */
   /* Insert-Code-Here {bHYPRE.Pilut.Create} (Create method) */
@@ -135,7 +135,7 @@ extern "C"
 int32_t
 impl_bHYPRE_Pilut_SetCommunicator(
   /* in */ bHYPRE_Pilut self,
-  /* in */ void* mpi_comm)
+  /* in */ bHYPRE_MPICommunicator mpi_comm)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.Pilut.SetCommunicator) */
   /* Insert the implementation of the SetCommunicator method here... */
@@ -572,6 +572,15 @@ struct bHYPRE_Solver__object* impl_bHYPRE_Pilut_fconnect_bHYPRE_Solver(char*
 char * impl_bHYPRE_Pilut_fgetURL_bHYPRE_Solver(struct bHYPRE_Solver__object* 
   obj) {
   return bHYPRE_Solver__getURL(obj);
+}
+struct bHYPRE_MPICommunicator__object* 
+  impl_bHYPRE_Pilut_fconnect_bHYPRE_MPICommunicator(char* url,
+  sidl_BaseInterface *_ex) {
+  return bHYPRE_MPICommunicator__connect(url, _ex);
+}
+char * impl_bHYPRE_Pilut_fgetURL_bHYPRE_MPICommunicator(struct 
+  bHYPRE_MPICommunicator__object* obj) {
+  return bHYPRE_MPICommunicator__getURL(obj);
 }
 struct bHYPRE_Operator__object* 
   impl_bHYPRE_Pilut_fconnect_bHYPRE_Operator(char* url,

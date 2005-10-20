@@ -32,12 +32,17 @@ impl_bHYPRE_GMRES__dtor(
 extern
 bHYPRE_GMRES
 impl_bHYPRE_GMRES_Create(
-  /* in */ void* mpi_comm);
+  /* in */ bHYPRE_MPICommunicator mpi_comm);
 
 extern struct bHYPRE_Solver__object* 
   impl_bHYPRE_GMRES_fconnect_bHYPRE_Solver(char* url, sidl_BaseInterface *_ex);
 extern char* impl_bHYPRE_GMRES_fgetURL_bHYPRE_Solver(struct 
   bHYPRE_Solver__object* obj);
+extern struct bHYPRE_MPICommunicator__object* 
+  impl_bHYPRE_GMRES_fconnect_bHYPRE_MPICommunicator(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_GMRES_fgetURL_bHYPRE_MPICommunicator(struct 
+  bHYPRE_MPICommunicator__object* obj);
 extern struct bHYPRE_GMRES__object* 
   impl_bHYPRE_GMRES_fconnect_bHYPRE_GMRES(char* url, sidl_BaseInterface *_ex);
 extern char* impl_bHYPRE_GMRES_fgetURL_bHYPRE_GMRES(struct 
@@ -73,7 +78,7 @@ extern
 int32_t
 impl_bHYPRE_GMRES_SetCommunicator(
   /* in */ bHYPRE_GMRES self,
-  /* in */ void* mpi_comm);
+  /* in */ bHYPRE_MPICommunicator mpi_comm);
 
 extern
 int32_t
@@ -206,6 +211,11 @@ extern struct bHYPRE_Solver__object*
   impl_bHYPRE_GMRES_fconnect_bHYPRE_Solver(char* url, sidl_BaseInterface *_ex);
 extern char* impl_bHYPRE_GMRES_fgetURL_bHYPRE_Solver(struct 
   bHYPRE_Solver__object* obj);
+extern struct bHYPRE_MPICommunicator__object* 
+  impl_bHYPRE_GMRES_fconnect_bHYPRE_MPICommunicator(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_GMRES_fgetURL_bHYPRE_MPICommunicator(struct 
+  bHYPRE_MPICommunicator__object* obj);
 extern struct bHYPRE_GMRES__object* 
   impl_bHYPRE_GMRES_fconnect_bHYPRE_GMRES(char* url, sidl_BaseInterface *_ex);
 extern char* impl_bHYPRE_GMRES_fgetURL_bHYPRE_GMRES(struct 
@@ -376,6 +386,17 @@ struct bHYPRE_Solver__object* skel_bHYPRE_GMRES_fconnect_bHYPRE_Solver(char*
 char* skel_bHYPRE_GMRES_fgetURL_bHYPRE_Solver(struct bHYPRE_Solver__object* 
   obj) { 
   return impl_bHYPRE_GMRES_fgetURL_bHYPRE_Solver(obj);
+}
+
+struct bHYPRE_MPICommunicator__object* 
+  skel_bHYPRE_GMRES_fconnect_bHYPRE_MPICommunicator(char* url,
+  sidl_BaseInterface *_ex) { 
+  return impl_bHYPRE_GMRES_fconnect_bHYPRE_MPICommunicator(url, _ex);
+}
+
+char* skel_bHYPRE_GMRES_fgetURL_bHYPRE_MPICommunicator(struct 
+  bHYPRE_MPICommunicator__object* obj) { 
+  return impl_bHYPRE_GMRES_fgetURL_bHYPRE_MPICommunicator(obj);
 }
 
 struct bHYPRE_GMRES__object* skel_bHYPRE_GMRES_fconnect_bHYPRE_GMRES(char* url,

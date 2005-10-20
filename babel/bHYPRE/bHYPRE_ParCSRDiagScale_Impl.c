@@ -36,6 +36,7 @@
 #include "bHYPRE_IJParCSRVector_Impl.h"
 #include "HYPRE_parcsr_ls.h"
 #include "krylov.h"
+#include "bHYPRE_MPICommunicator_Impl.h"
 /* DO-NOT-DELETE splicer.end(bHYPRE.ParCSRDiagScale._includes) */
 
 /*
@@ -77,7 +78,7 @@ impl_bHYPRE_ParCSRDiagScale__ctor(
 
    struct bHYPRE_ParCSRDiagScale__data * data;
    data = hypre_CTAlloc( struct bHYPRE_ParCSRDiagScale__data, 1 );
-   data -> comm = NULL;
+   data -> comm = MPI_COMM_NULL;
    data -> matrix = NULL;
    bHYPRE_ParCSRDiagScale__set_data( self, data );
    /* hypre diagonal scaling requires no constructor or setup. cf
@@ -125,7 +126,7 @@ extern "C"
 #endif
 bHYPRE_ParCSRDiagScale
 impl_bHYPRE_ParCSRDiagScale_Create(
-  /* in */ void* mpi_comm)
+  /* in */ bHYPRE_MPICommunicator mpi_comm)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.ParCSRDiagScale.Create) */
   /* Insert-Code-Here {bHYPRE.ParCSRDiagScale.Create} (Create method) */
@@ -133,7 +134,7 @@ impl_bHYPRE_ParCSRDiagScale_Create(
    bHYPRE_ParCSRDiagScale solver = bHYPRE_ParCSRDiagScale__create();
    struct bHYPRE_ParCSRDiagScale__data * data = bHYPRE_ParCSRDiagScale__get_data( solver );
 
-   data -> comm = (MPI_Comm *) mpi_comm;
+   data->comm = bHYPRE_MPICommunicator__get_data(mpi_comm)->mpi_comm;
 
    return solver;
 
@@ -155,7 +156,7 @@ extern "C"
 int32_t
 impl_bHYPRE_ParCSRDiagScale_SetCommunicator(
   /* in */ bHYPRE_ParCSRDiagScale self,
-  /* in */ void* mpi_comm)
+  /* in */ bHYPRE_MPICommunicator mpi_comm)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.ParCSRDiagScale.SetCommunicator) */
   /* Insert the implementation of the SetCommunicator method here... */
@@ -165,7 +166,7 @@ impl_bHYPRE_ParCSRDiagScale_SetCommunicator(
    int ierr = 0;
    struct bHYPRE_ParCSRDiagScale__data * data;
    data = bHYPRE_ParCSRDiagScale__get_data( self );
-   data -> comm = (MPI_Comm *) mpi_comm;
+   data->comm = bHYPRE_MPICommunicator__get_data(mpi_comm)->mpi_comm;
    bHYPRE_ParCSRDiagScale__set_data( self, data );
 
    return ierr;
@@ -441,7 +442,7 @@ impl_bHYPRE_ParCSRDiagScale_Apply(
   /* Insert the implementation of the Apply method here... */
 
    int ierr = 0;
-   MPI_Comm * comm;
+   MPI_Comm comm;
    HYPRE_Solver dummy;
    HYPRE_Solver * solver = &dummy;
    struct bHYPRE_ParCSRDiagScale__data * data;
@@ -461,7 +462,7 @@ impl_bHYPRE_ParCSRDiagScale_Apply(
    data = bHYPRE_ParCSRDiagScale__get_data( self );
    comm = data->comm;
    /* SetCommunicator should have been called earlier */
-   hypre_assert( comm != NULL );
+   hypre_assert( comm != MPI_COMM_NULL );
    mat = data->matrix;
    /* SetOperator should have been called earlier */
    hypre_assert( mat != NULL );
@@ -716,6 +717,15 @@ struct bHYPRE_Solver__object*
 char * impl_bHYPRE_ParCSRDiagScale_fgetURL_bHYPRE_Solver(struct 
   bHYPRE_Solver__object* obj) {
   return bHYPRE_Solver__getURL(obj);
+}
+struct bHYPRE_MPICommunicator__object* 
+  impl_bHYPRE_ParCSRDiagScale_fconnect_bHYPRE_MPICommunicator(char* url,
+  sidl_BaseInterface *_ex) {
+  return bHYPRE_MPICommunicator__connect(url, _ex);
+}
+char * impl_bHYPRE_ParCSRDiagScale_fgetURL_bHYPRE_MPICommunicator(struct 
+  bHYPRE_MPICommunicator__object* obj) {
+  return bHYPRE_MPICommunicator__getURL(obj);
 }
 struct bHYPRE_Operator__object* 
   impl_bHYPRE_ParCSRDiagScale_fconnect_bHYPRE_Operator(char* url,

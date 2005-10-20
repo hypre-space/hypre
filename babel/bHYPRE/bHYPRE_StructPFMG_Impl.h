@@ -19,6 +19,9 @@
 #ifndef included_bHYPRE_Solver_h
 #include "bHYPRE_Solver.h"
 #endif
+#ifndef included_bHYPRE_MPICommunicator_h
+#include "bHYPRE_MPICommunicator.h"
+#endif
 #ifndef included_bHYPRE_StructPFMG_h
 #include "bHYPRE_StructPFMG.h"
 #endif
@@ -98,13 +101,18 @@ impl_bHYPRE_StructPFMG__dtor(
 extern
 bHYPRE_StructPFMG
 impl_bHYPRE_StructPFMG_Create(
-  /* in */ void* mpi_comm);
+  /* in */ bHYPRE_MPICommunicator mpi_comm);
 
 extern struct bHYPRE_Solver__object* 
   impl_bHYPRE_StructPFMG_fconnect_bHYPRE_Solver(char* url,
   sidl_BaseInterface *_ex);
 extern char* impl_bHYPRE_StructPFMG_fgetURL_bHYPRE_Solver(struct 
   bHYPRE_Solver__object* obj);
+extern struct bHYPRE_MPICommunicator__object* 
+  impl_bHYPRE_StructPFMG_fconnect_bHYPRE_MPICommunicator(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_StructPFMG_fgetURL_bHYPRE_MPICommunicator(struct 
+  bHYPRE_MPICommunicator__object* obj);
 extern struct bHYPRE_StructPFMG__object* 
   impl_bHYPRE_StructPFMG_fconnect_bHYPRE_StructPFMG(char* url,
   sidl_BaseInterface *_ex);
@@ -139,7 +147,7 @@ extern
 int32_t
 impl_bHYPRE_StructPFMG_SetCommunicator(
   /* in */ bHYPRE_StructPFMG self,
-  /* in */ void* mpi_comm);
+  /* in */ bHYPRE_MPICommunicator mpi_comm);
 
 extern
 int32_t
@@ -267,6 +275,11 @@ extern struct bHYPRE_Solver__object*
   sidl_BaseInterface *_ex);
 extern char* impl_bHYPRE_StructPFMG_fgetURL_bHYPRE_Solver(struct 
   bHYPRE_Solver__object* obj);
+extern struct bHYPRE_MPICommunicator__object* 
+  impl_bHYPRE_StructPFMG_fconnect_bHYPRE_MPICommunicator(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_StructPFMG_fgetURL_bHYPRE_MPICommunicator(struct 
+  bHYPRE_MPICommunicator__object* obj);
 extern struct bHYPRE_StructPFMG__object* 
   impl_bHYPRE_StructPFMG_fconnect_bHYPRE_StructPFMG(char* url,
   sidl_BaseInterface *_ex);

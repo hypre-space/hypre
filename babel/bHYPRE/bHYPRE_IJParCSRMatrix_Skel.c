@@ -32,7 +32,7 @@ impl_bHYPRE_IJParCSRMatrix__dtor(
 extern
 bHYPRE_IJParCSRMatrix
 impl_bHYPRE_IJParCSRMatrix_Create(
-  /* in */ void* mpi_comm,
+  /* in */ bHYPRE_MPICommunicator mpi_comm,
   /* in */ int32_t ilower,
   /* in */ int32_t iupper,
   /* in */ int32_t jlower,
@@ -41,7 +41,7 @@ impl_bHYPRE_IJParCSRMatrix_Create(
 extern
 bHYPRE_IJParCSRMatrix
 impl_bHYPRE_IJParCSRMatrix_GenerateLaplacian(
-  /* in */ void* mpi_comm,
+  /* in */ bHYPRE_MPICommunicator mpi_comm,
   /* in */ int32_t nx,
   /* in */ int32_t ny,
   /* in */ int32_t nz,
@@ -60,6 +60,11 @@ extern struct bHYPRE_CoefficientAccess__object*
   sidl_BaseInterface *_ex);
 extern char* impl_bHYPRE_IJParCSRMatrix_fgetURL_bHYPRE_CoefficientAccess(struct 
   bHYPRE_CoefficientAccess__object* obj);
+extern struct bHYPRE_MPICommunicator__object* 
+  impl_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_MPICommunicator(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_IJParCSRMatrix_fgetURL_bHYPRE_MPICommunicator(struct 
+  bHYPRE_MPICommunicator__object* obj);
 extern struct bHYPRE_Operator__object* 
   impl_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_Operator(char* url,
   sidl_BaseInterface *_ex);
@@ -117,7 +122,7 @@ extern
 int32_t
 impl_bHYPRE_IJParCSRMatrix_SetCommunicator(
   /* in */ bHYPRE_IJParCSRMatrix self,
-  /* in */ void* mpi_comm);
+  /* in */ bHYPRE_MPICommunicator mpi_comm);
 
 extern
 int32_t
@@ -206,7 +211,7 @@ int32_t
 impl_bHYPRE_IJParCSRMatrix_Read(
   /* in */ bHYPRE_IJParCSRMatrix self,
   /* in */ const char* filename,
-  /* in */ void* comm);
+  /* in */ bHYPRE_MPICommunicator comm);
 
 extern
 int32_t
@@ -301,6 +306,11 @@ extern struct bHYPRE_CoefficientAccess__object*
   sidl_BaseInterface *_ex);
 extern char* impl_bHYPRE_IJParCSRMatrix_fgetURL_bHYPRE_CoefficientAccess(struct 
   bHYPRE_CoefficientAccess__object* obj);
+extern struct bHYPRE_MPICommunicator__object* 
+  impl_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_MPICommunicator(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_IJParCSRMatrix_fgetURL_bHYPRE_MPICommunicator(struct 
+  bHYPRE_MPICommunicator__object* obj);
 extern struct bHYPRE_Operator__object* 
   impl_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_Operator(char* url,
   sidl_BaseInterface *_ex);
@@ -348,7 +358,7 @@ extern char* impl_bHYPRE_IJParCSRMatrix_fgetURL_sidl_BaseClass(struct
   sidl_BaseClass__object* obj);
 static bHYPRE_IJParCSRMatrix
 skel_bHYPRE_IJParCSRMatrix_GenerateLaplacian(
-  /* in */ void* mpi_comm,
+  /* in */ bHYPRE_MPICommunicator mpi_comm,
   /* in */ int32_t nx,
   /* in */ int32_t ny,
   /* in */ int32_t nz,
@@ -734,6 +744,17 @@ struct bHYPRE_CoefficientAccess__object*
 char* skel_bHYPRE_IJParCSRMatrix_fgetURL_bHYPRE_CoefficientAccess(struct 
   bHYPRE_CoefficientAccess__object* obj) { 
   return impl_bHYPRE_IJParCSRMatrix_fgetURL_bHYPRE_CoefficientAccess(obj);
+}
+
+struct bHYPRE_MPICommunicator__object* 
+  skel_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_MPICommunicator(char* url,
+  sidl_BaseInterface *_ex) { 
+  return impl_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_MPICommunicator(url, _ex);
+}
+
+char* skel_bHYPRE_IJParCSRMatrix_fgetURL_bHYPRE_MPICommunicator(struct 
+  bHYPRE_MPICommunicator__object* obj) { 
+  return impl_bHYPRE_IJParCSRMatrix_fgetURL_bHYPRE_MPICommunicator(obj);
 }
 
 struct bHYPRE_Operator__object* 

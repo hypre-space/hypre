@@ -43,6 +43,7 @@
 #endif
 #include "bHYPRE_PCG_IOR.h"
 #include "bHYPRE_Solver_IOR.h"
+#include "bHYPRE_MPICommunicator_IOR.h"
 #include "bHYPRE_Operator_IOR.h"
 #include "sidl_ClassInfo_IOR.h"
 #include "bHYPRE_Vector_IOR.h"
@@ -352,10 +353,10 @@ SIDLFortran77Symbol(bhypre_pcg_create_f,BHYPRE_PCG_CREATE_F,bHYPRE_PCG_Create_f)
 )
 {
   const struct bHYPRE_PCG__sepv *_epv = _getSEPV();
-  void* _proxy_mpi_comm = NULL;
+  struct bHYPRE_MPICommunicator__object* _proxy_mpi_comm = NULL;
   struct bHYPRE_PCG__object* _proxy_retval = NULL;
   _proxy_mpi_comm =
-    (void*)
+    (struct bHYPRE_MPICommunicator__object*)
     (ptrdiff_t)(*mpi_comm);
   _proxy_retval = 
     (*(_epv->f_Create))(
@@ -380,12 +381,12 @@ SIDLFortran77Symbol(bhypre_pcg_setcommunicator_f,BHYPRE_PCG_SETCOMMUNICATOR_F,bH
 {
   struct bHYPRE_PCG__epv *_epv = NULL;
   struct bHYPRE_PCG__object* _proxy_self = NULL;
-  void* _proxy_mpi_comm = NULL;
+  struct bHYPRE_MPICommunicator__object* _proxy_mpi_comm = NULL;
   _proxy_self =
     (struct bHYPRE_PCG__object*)
     (ptrdiff_t)(*self);
   _proxy_mpi_comm =
-    (void*)
+    (struct bHYPRE_MPICommunicator__object*)
     (ptrdiff_t)(*mpi_comm);
   _epv = _proxy_self->d_epv;
   *retval = 

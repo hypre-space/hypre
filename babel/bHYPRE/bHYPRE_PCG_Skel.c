@@ -32,7 +32,7 @@ impl_bHYPRE_PCG__dtor(
 extern
 bHYPRE_PCG
 impl_bHYPRE_PCG_Create(
-  /* in */ void* mpi_comm);
+  /* in */ bHYPRE_MPICommunicator mpi_comm);
 
 extern struct bHYPRE_PCG__object* impl_bHYPRE_PCG_fconnect_bHYPRE_PCG(char* url,
   sidl_BaseInterface *_ex);
@@ -41,6 +41,11 @@ extern struct bHYPRE_Solver__object*
   impl_bHYPRE_PCG_fconnect_bHYPRE_Solver(char* url, sidl_BaseInterface *_ex);
 extern char* impl_bHYPRE_PCG_fgetURL_bHYPRE_Solver(struct 
   bHYPRE_Solver__object* obj);
+extern struct bHYPRE_MPICommunicator__object* 
+  impl_bHYPRE_PCG_fconnect_bHYPRE_MPICommunicator(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_PCG_fgetURL_bHYPRE_MPICommunicator(struct 
+  bHYPRE_MPICommunicator__object* obj);
 extern struct bHYPRE_Operator__object* 
   impl_bHYPRE_PCG_fconnect_bHYPRE_Operator(char* url, sidl_BaseInterface *_ex);
 extern char* impl_bHYPRE_PCG_fgetURL_bHYPRE_Operator(struct 
@@ -71,7 +76,7 @@ extern
 int32_t
 impl_bHYPRE_PCG_SetCommunicator(
   /* in */ bHYPRE_PCG self,
-  /* in */ void* mpi_comm);
+  /* in */ bHYPRE_MPICommunicator mpi_comm);
 
 extern
 int32_t
@@ -207,6 +212,11 @@ extern struct bHYPRE_Solver__object*
   impl_bHYPRE_PCG_fconnect_bHYPRE_Solver(char* url, sidl_BaseInterface *_ex);
 extern char* impl_bHYPRE_PCG_fgetURL_bHYPRE_Solver(struct 
   bHYPRE_Solver__object* obj);
+extern struct bHYPRE_MPICommunicator__object* 
+  impl_bHYPRE_PCG_fconnect_bHYPRE_MPICommunicator(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_PCG_fgetURL_bHYPRE_MPICommunicator(struct 
+  bHYPRE_MPICommunicator__object* obj);
 extern struct bHYPRE_Operator__object* 
   impl_bHYPRE_PCG_fconnect_bHYPRE_Operator(char* url, sidl_BaseInterface *_ex);
 extern char* impl_bHYPRE_PCG_fgetURL_bHYPRE_Operator(struct 
@@ -381,6 +391,17 @@ struct bHYPRE_Solver__object* skel_bHYPRE_PCG_fconnect_bHYPRE_Solver(char* url,
 char* skel_bHYPRE_PCG_fgetURL_bHYPRE_Solver(struct bHYPRE_Solver__object* obj) 
   { 
   return impl_bHYPRE_PCG_fgetURL_bHYPRE_Solver(obj);
+}
+
+struct bHYPRE_MPICommunicator__object* 
+  skel_bHYPRE_PCG_fconnect_bHYPRE_MPICommunicator(char* url,
+  sidl_BaseInterface *_ex) { 
+  return impl_bHYPRE_PCG_fconnect_bHYPRE_MPICommunicator(url, _ex);
+}
+
+char* skel_bHYPRE_PCG_fgetURL_bHYPRE_MPICommunicator(struct 
+  bHYPRE_MPICommunicator__object* obj) { 
+  return impl_bHYPRE_PCG_fgetURL_bHYPRE_MPICommunicator(obj);
 }
 
 struct bHYPRE_Operator__object* skel_bHYPRE_PCG_fconnect_bHYPRE_Operator(char* 

@@ -44,7 +44,7 @@ package bHYPRE version 1.0.0
       /**
        * Set the MPI Communicator.  DEPRECATED, Use Create()
        **/
-      int SetCommunicator(in opaque mpi_comm);
+      int SetCommunicator(in MPICommunicator mpi_comm);
 
       /**
        * Prepare an object for setting coefficient values, whether for
@@ -67,7 +67,7 @@ package bHYPRE version 1.0.0
        *  the MPI communicator in an argument; and most classes have more arguments.
        *  This function is documented here because it will be defined for all
        *  classes.  However, it is declared in the classes, not in this interface.
-       *      static int Create( in opaque mpi_comm,... );
+       *      static int Create( in MPICommunicator mpi_comm,... );
        **/
    }
 
@@ -213,7 +213,7 @@ package bHYPRE version 1.0.0
        * purposes.
        **/
       int Read(in string filename,
-               in opaque comm);
+               in MPICommunicator comm);
    }
 
    /*----------- Interface -------------------------------------------------*/
@@ -287,7 +287,7 @@ package bHYPRE version 1.0.0
        * purposes.
        **/
       int Read(in string filename,
-               in opaque comm);
+               in MPICommunicator comm);
    }
 
    /*----------- Interface -------------------------------------------------*/
@@ -668,7 +668,7 @@ package bHYPRE version 1.0.0
        * Set the MPI Communicator.
        * DEPRECATED, use Create:
        **/
-      int SetCommunicator(in opaque mpi_comm);
+      int SetCommunicator(in MPICommunicator mpi_comm);
 
       /**
        * Set the int parameter associated with {\tt name}.
@@ -867,6 +867,18 @@ package bHYPRE version 1.0.0
    /*----------- Classes ---------------------------------------------------*/
 
    /**
+    * MPICommunicator class
+    *  two Create functions: use CreateC if called from C code,
+    *  CreateF if called from Fortran code
+    *
+    **/
+   class MPICommunicator
+   {
+      static MPICommunicator CreateC( in opaque mpi_comm );
+      static MPICommunicator CreateF( in opaque mpi_comm );
+   }
+
+   /**
     * The IJParCSR matrix class.
     *
     * Objects of this type can be cast to IJMatrixView, Operator, or
@@ -875,7 +887,7 @@ package bHYPRE version 1.0.0
    class IJParCSRMatrix implements-all IJMatrixView, Operator,
       CoefficientAccess
    {
-      static IJParCSRMatrix Create( in opaque mpi_comm,
+      static IJParCSRMatrix Create( in MPICommunicator mpi_comm,
                                     in int ilower,
                                     in int iupper,
                                     in int jlower,
@@ -884,7 +896,7 @@ package bHYPRE version 1.0.0
       /* The following function is for convenience in writing test drivers,
          and subject to change without notice.  nvalues should be 4 */
       static IJParCSRMatrix GenerateLaplacian(
-         in opaque mpi_comm, in int nx, in int ny, in int nz,
+         in MPICommunicator mpi_comm, in int nx, in int ny, in int nz,
          in int Px, in int Py, in int Pz, in int p, in int q, in int r,
          in rarray<double, 1> values(nvalues),  in int nvalues,
          in int discretization );
@@ -915,7 +927,7 @@ package bHYPRE version 1.0.0
     **/
    class IJParCSRVector implements-all IJVectorView, Vector
    {
-      static IJParCSRVector Create( in opaque mpi_comm,
+      static IJParCSRVector Create( in MPICommunicator mpi_comm,
                                     in int jlower, in int jupper );
    }
 
@@ -988,7 +1000,7 @@ package bHYPRE version 1.0.0
        * Set the number of dimensions {\tt ndim} and the number of
        * structured parts {\tt nparts}.
        **/
-      static SStructGrid Create( in opaque mpi_comm,
+      static SStructGrid Create( in MPICommunicator mpi_comm,
                                  in int ndim,
                                  in int nparts );
 
@@ -997,7 +1009,7 @@ package bHYPRE version 1.0.0
                          in int nparts);
    
       /* DEPRECATED, use Create: */
-      int SetCommunicator(in opaque mpi_comm);
+      int SetCommunicator(in MPICommunicator mpi_comm);
 
       /**
        * Set the extents for a box on a structured part of the grid.
@@ -1123,14 +1135,14 @@ package bHYPRE version 1.0.0
     **/
    class SStructGraph implements-all ProblemDefinition
    {
-      static SStructGraph Create(in opaque mpi_comm,
+      static SStructGraph Create(in MPICommunicator mpi_comm,
                                  in SStructGrid grid);
 
       /**
        * Set the grid and communicator.
        * DEPRECATED, use Create:
        **/
-      int SetCommGrid(in opaque mpi_comm, in SStructGrid grid);
+      int SetCommGrid(in MPICommunicator mpi_comm, in SStructGrid grid);
       
       /**
        * Set the stencil for a variable on a structured part of the
@@ -1169,7 +1181,7 @@ package bHYPRE version 1.0.0
     **/
    class SStructMatrix implements-all SStructMatrixView, Operator
    {
-      static SStructMatrix Create( in opaque mpi_comm,
+      static SStructMatrix Create( in MPICommunicator mpi_comm,
                                    in SStructGraph graph );
    }
 
@@ -1183,7 +1195,7 @@ package bHYPRE version 1.0.0
     **/
    class SStructVector implements-all SStructVectorView, Vector
    {
-      static SStructVector Create( in opaque mpi_comm,
+      static SStructVector Create( in MPICommunicator mpi_comm,
                                    in SStructGrid grid );
       int SetObjectType( in int type );
    }
@@ -1198,7 +1210,7 @@ package bHYPRE version 1.0.0
     **/
    class SStructParCSRMatrix implements-all SStructMatrixView, Operator
    {
-      static SStructParCSRMatrix Create( in opaque mpi_comm,
+      static SStructParCSRMatrix Create( in MPICommunicator mpi_comm,
                                          in SStructGraph graph );
    }
 
@@ -1210,7 +1222,7 @@ package bHYPRE version 1.0.0
     **/
    class SStructParCSRVector implements-all SStructVectorView, Vector
    {
-      static SStructParCSRVector Create( in opaque mpi_comm,
+      static SStructParCSRVector Create( in MPICommunicator mpi_comm,
                                          in SStructGrid grid );
    }
 
@@ -1242,13 +1254,13 @@ package bHYPRE version 1.0.0
     **/
    class StructGrid 
    {
-      static StructGrid Create( in opaque mpi_comm,
+      static StructGrid Create( in MPICommunicator mpi_comm,
                                    in int dim );
       /**
        * Set the MPI Communicator.
        * DEPRECATED, use Create:
        **/
-      int SetCommunicator(in opaque mpi_comm);
+      int SetCommunicator(in MPICommunicator mpi_comm);
 
       /* DEPRECATED, use Create:*/
       int SetDimension(in int dim);
@@ -1281,7 +1293,7 @@ package bHYPRE version 1.0.0
     **/
    class StructMatrix implements-all StructMatrixView, Operator
    {
-      static StructMatrix Create( in opaque mpi_comm,
+      static StructMatrix Create( in MPICommunicator mpi_comm,
                                   in StructGrid grid,
                                   in StructStencil stencil );
    }
@@ -1290,7 +1302,7 @@ package bHYPRE version 1.0.0
    
    class StructVector implements-all StructVectorView, Vector
    {
-         static StructVector Create( in opaque mpi_comm,
+         static StructVector Create( in MPICommunicator mpi_comm,
                                      in StructGrid grid );
    }
 
@@ -1305,7 +1317,7 @@ package bHYPRE version 1.0.0
     **/
    class IdentitySolver implements-all Solver
    {
-      static IdentitySolver Create( in opaque mpi_comm );
+      static IdentitySolver Create( in MPICommunicator mpi_comm );
    }
 
    /**
@@ -1316,7 +1328,7 @@ package bHYPRE version 1.0.0
     **/
    class ParCSRDiagScale implements-all Solver
    {
-      static ParCSRDiagScale Create( in opaque mpi_comm );
+      static ParCSRDiagScale Create( in MPICommunicator mpi_comm );
    }
 
    /**
@@ -1433,7 +1445,7 @@ package bHYPRE version 1.0.0
     **/
    class BoomerAMG implements-all Solver
    {
-      static BoomerAMG Create( in opaque mpi_comm );
+      static BoomerAMG Create( in MPICommunicator mpi_comm );
       int SetLevelRelaxWt( in double relax_wt, in int level );
 
       /* The following function is just a tools for test drivers,
@@ -1458,7 +1470,7 @@ package bHYPRE version 1.0.0
     **/
    class Pilut implements-all Solver
    {
-      static Pilut Create( in opaque mpi_comm );
+      static Pilut Create( in MPICommunicator mpi_comm );
    }
 
    /**
@@ -1472,7 +1484,7 @@ package bHYPRE version 1.0.0
     **/
    class ParaSails implements-all Solver
    {
-      static ParaSails Create( in opaque mpi_comm );
+      static ParaSails Create( in MPICommunicator mpi_comm );
    }
 
    /**
@@ -1492,7 +1504,7 @@ package bHYPRE version 1.0.0
     **/
    class PCG implements-all PreconditionedSolver
    {
-      static PCG Create( in opaque mpi_comm );
+      static PCG Create( in MPICommunicator mpi_comm );
    }
 
    /**
@@ -1510,7 +1522,7 @@ package bHYPRE version 1.0.0
     **/
    class GMRES implements-all PreconditionedSolver
    {
-      static GMRES Create( in opaque mpi_comm );
+      static GMRES Create( in MPICommunicator mpi_comm );
    }
 
    /**
@@ -1524,7 +1536,7 @@ package bHYPRE version 1.0.0
     **/
    class StructSMG implements-all Solver
    {
-      static StructSMG Create( in opaque mpi_comm );
+      static StructSMG Create( in MPICommunicator mpi_comm );
    }
 
    /**
@@ -1538,6 +1550,6 @@ package bHYPRE version 1.0.0
     **/
    class StructPFMG implements-all Solver
    {
-      static StructPFMG Create( in opaque mpi_comm );
+      static StructPFMG Create( in MPICommunicator mpi_comm );
    }
 }

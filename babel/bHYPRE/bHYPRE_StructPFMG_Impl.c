@@ -39,6 +39,7 @@
 #include "bHYPRE_StructVector_Impl.h"
 #include "HYPRE_struct_ls.h"
 #include "struct_ls.h"
+#include "bHYPRE_MPICommunicator_Impl.h"
 /* DO-NOT-DELETE splicer.end(bHYPRE.StructPFMG._includes) */
 
 /*
@@ -125,7 +126,7 @@ extern "C"
 #endif
 bHYPRE_StructPFMG
 impl_bHYPRE_StructPFMG_Create(
-  /* in */ void* mpi_comm)
+  /* in */ bHYPRE_MPICommunicator mpi_comm)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.StructPFMG.Create) */
   /* Insert-Code-Here {bHYPRE.StructPFMG.Create} (Create method) */
@@ -136,7 +137,7 @@ impl_bHYPRE_StructPFMG_Create(
    HYPRE_StructSolver dummy;
    HYPRE_StructSolver * Hsolver = &dummy;
 
-   data -> comm = (MPI_Comm) mpi_comm;
+   data->comm = bHYPRE_MPICommunicator__get_data(mpi_comm)->mpi_comm;
 
    ierr += HYPRE_StructPFMGCreate( (data->comm), Hsolver );
    hypre_assert( ierr==0 );
@@ -162,7 +163,7 @@ extern "C"
 int32_t
 impl_bHYPRE_StructPFMG_SetCommunicator(
   /* in */ bHYPRE_StructPFMG self,
-  /* in */ void* mpi_comm)
+  /* in */ bHYPRE_MPICommunicator mpi_comm)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.StructPFMG.SetCommunicator) */
   /* Insert the implementation of the SetCommunicator method here... */
@@ -172,7 +173,7 @@ impl_bHYPRE_StructPFMG_SetCommunicator(
    HYPRE_StructSolver * solver = &dummy;
    struct bHYPRE_StructPFMG__data * data = bHYPRE_StructPFMG__get_data( self );
 
-   data -> comm = (MPI_Comm) mpi_comm;
+   data->comm = bHYPRE_MPICommunicator__get_data(mpi_comm)->mpi_comm;
 
    if ( data->solver == NULL )
    {
@@ -1016,6 +1017,15 @@ struct bHYPRE_Solver__object*
 char * impl_bHYPRE_StructPFMG_fgetURL_bHYPRE_Solver(struct 
   bHYPRE_Solver__object* obj) {
   return bHYPRE_Solver__getURL(obj);
+}
+struct bHYPRE_MPICommunicator__object* 
+  impl_bHYPRE_StructPFMG_fconnect_bHYPRE_MPICommunicator(char* url,
+  sidl_BaseInterface *_ex) {
+  return bHYPRE_MPICommunicator__connect(url, _ex);
+}
+char * impl_bHYPRE_StructPFMG_fgetURL_bHYPRE_MPICommunicator(struct 
+  bHYPRE_MPICommunicator__object* obj) {
+  return bHYPRE_MPICommunicator__getURL(obj);
 }
 struct bHYPRE_StructPFMG__object* 
   impl_bHYPRE_StructPFMG_fconnect_bHYPRE_StructPFMG(char* url,

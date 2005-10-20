@@ -35,6 +35,7 @@
 #include "bHYPRE_SStructParCSRVector_Impl.h"
 #include "bHYPRE_SStructGraph_Impl.h"
 #include "bHYPRE_IJParCSRMatrix_Impl.h"
+#include "bHYPRE_MPICommunicator_Impl.h"
 /* DO-NOT-DELETE splicer.end(bHYPRE.SStructParCSRMatrix._includes) */
 
 /*
@@ -128,7 +129,7 @@ extern "C"
 #endif
 bHYPRE_SStructParCSRMatrix
 impl_bHYPRE_SStructParCSRMatrix_Create(
-  /* in */ void* mpi_comm,
+  /* in */ bHYPRE_MPICommunicator mpi_comm,
   /* in */ bHYPRE_SStructGraph graph)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructParCSRMatrix.Create) */
@@ -140,6 +141,7 @@ impl_bHYPRE_SStructParCSRMatrix_Create(
    HYPRE_SStructMatrix Hmat;
    struct bHYPRE_SStructGraph__data * gdata;
    HYPRE_SStructGraph Hgraph;
+   MPI_Comm comm = bHYPRE_MPICommunicator__get_data(mpi_comm)->mpi_comm;
 
    mat = bHYPRE_SStructParCSRMatrix__create();
    data = bHYPRE_SStructParCSRMatrix__get_data( mat );
@@ -148,9 +150,9 @@ impl_bHYPRE_SStructParCSRMatrix_Create(
    gdata = bHYPRE_SStructGraph__get_data( graph );
    Hgraph = gdata->graph;
 
-   ierr += HYPRE_SStructMatrixCreate( (MPI_Comm) mpi_comm, Hgraph, &Hmat );
+   ierr += HYPRE_SStructMatrixCreate( comm, Hgraph, &Hmat );
    data->matrix = Hmat;
-   data->comm = (MPI_Comm) mpi_comm;
+   data->comm = comm;
 
    return( mat );
 
@@ -171,7 +173,7 @@ extern "C"
 int32_t
 impl_bHYPRE_SStructParCSRMatrix_SetCommunicator(
   /* in */ bHYPRE_SStructParCSRMatrix self,
-  /* in */ void* mpi_comm)
+  /* in */ bHYPRE_MPICommunicator mpi_comm)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructParCSRMatrix.SetCommunicator) */
   /* Insert the implementation of the SetCommunicator method here... */
@@ -181,7 +183,7 @@ impl_bHYPRE_SStructParCSRMatrix_SetCommunicator(
    int ierr = 0;
    struct bHYPRE_SStructParCSRMatrix__data * data;
    data = bHYPRE_SStructParCSRMatrix__get_data( self );
-   data -> comm = (MPI_Comm) mpi_comm;
+   data->comm = bHYPRE_MPICommunicator__get_data(mpi_comm)->mpi_comm;
 
    return ierr;
 
@@ -1071,6 +1073,15 @@ struct bHYPRE_SStructMatrixView__object*
 char * impl_bHYPRE_SStructParCSRMatrix_fgetURL_bHYPRE_SStructMatrixView(struct 
   bHYPRE_SStructMatrixView__object* obj) {
   return bHYPRE_SStructMatrixView__getURL(obj);
+}
+struct bHYPRE_MPICommunicator__object* 
+  impl_bHYPRE_SStructParCSRMatrix_fconnect_bHYPRE_MPICommunicator(char* url,
+  sidl_BaseInterface *_ex) {
+  return bHYPRE_MPICommunicator__connect(url, _ex);
+}
+char * impl_bHYPRE_SStructParCSRMatrix_fgetURL_bHYPRE_MPICommunicator(struct 
+  bHYPRE_MPICommunicator__object* obj) {
+  return bHYPRE_MPICommunicator__getURL(obj);
 }
 struct bHYPRE_SStructParCSRMatrix__object* 
   impl_bHYPRE_SStructParCSRMatrix_fconnect_bHYPRE_SStructParCSRMatrix(char* url,

@@ -38,6 +38,7 @@
 #include "bHYPRE_StructVector.h"
 #include "bHYPRE_StructVector_Impl.h"
 #include "struct_ls.h"
+#include "bHYPRE_MPICommunicator_Impl.h"
 /* DO-NOT-DELETE splicer.end(bHYPRE.StructSMG._includes) */
 
 /*
@@ -134,7 +135,7 @@ extern "C"
 #endif
 bHYPRE_StructSMG
 impl_bHYPRE_StructSMG_Create(
-  /* in */ void* mpi_comm)
+  /* in */ bHYPRE_MPICommunicator mpi_comm)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.StructSMG.Create) */
   /* Insert-Code-Here {bHYPRE.StructSMG.Create} (Create method) */
@@ -145,7 +146,7 @@ impl_bHYPRE_StructSMG_Create(
    bHYPRE_StructSMG solver = bHYPRE_StructSMG__create();
    struct bHYPRE_StructSMG__data * data = bHYPRE_StructSMG__get_data( solver );
 
-   data -> comm = (MPI_Comm) mpi_comm;
+   data->comm = bHYPRE_MPICommunicator__get_data(mpi_comm)->mpi_comm;
    ierr += HYPRE_StructSMGCreate( (data->comm), Hsolver );
    hypre_assert( ierr==0 );
    data -> solver = *Hsolver;
@@ -170,7 +171,7 @@ extern "C"
 int32_t
 impl_bHYPRE_StructSMG_SetCommunicator(
   /* in */ bHYPRE_StructSMG self,
-  /* in */ void* mpi_comm)
+  /* in */ bHYPRE_MPICommunicator mpi_comm)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.StructSMG.SetCommunicator) */
   /* Insert the implementation of the SetCommunicator method here... */
@@ -182,7 +183,7 @@ impl_bHYPRE_StructSMG_SetCommunicator(
    HYPRE_StructSolver * solver = &dummy;
    struct bHYPRE_StructSMG__data * data = bHYPRE_StructSMG__get_data( self );
 
-   data -> comm = (MPI_Comm) mpi_comm;
+   data->comm = bHYPRE_MPICommunicator__get_data(mpi_comm)->mpi_comm;
 
    ierr += HYPRE_StructSMGCreate( (data->comm), solver );
    data -> solver = *solver;
@@ -982,6 +983,15 @@ struct bHYPRE_Solver__object*
 char * impl_bHYPRE_StructSMG_fgetURL_bHYPRE_Solver(struct 
   bHYPRE_Solver__object* obj) {
   return bHYPRE_Solver__getURL(obj);
+}
+struct bHYPRE_MPICommunicator__object* 
+  impl_bHYPRE_StructSMG_fconnect_bHYPRE_MPICommunicator(char* url,
+  sidl_BaseInterface *_ex) {
+  return bHYPRE_MPICommunicator__connect(url, _ex);
+}
+char * impl_bHYPRE_StructSMG_fgetURL_bHYPRE_MPICommunicator(struct 
+  bHYPRE_MPICommunicator__object* obj) {
+  return bHYPRE_MPICommunicator__getURL(obj);
 }
 struct bHYPRE_StructSMG__object* 
   impl_bHYPRE_StructSMG_fconnect_bHYPRE_StructSMG(char* url,

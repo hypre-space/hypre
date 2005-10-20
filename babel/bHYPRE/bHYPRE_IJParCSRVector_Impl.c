@@ -32,7 +32,7 @@
 #include <assert.h>
 #include "parcsr_mv.h"
 #include "bHYPRE_IJVectorView.h"
-/*#include "mpi.h"*/
+#include "bHYPRE_MPICommunicator_Impl.h"
 /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRVector._includes) */
 
 /*
@@ -123,7 +123,7 @@ extern "C"
 #endif
 bHYPRE_IJParCSRVector
 impl_bHYPRE_IJParCSRVector_Create(
-  /* in */ void* mpi_comm,
+  /* in */ bHYPRE_MPICommunicator mpi_comm,
   /* in */ int32_t jlower,
   /* in */ int32_t jupper)
 {
@@ -137,7 +137,7 @@ impl_bHYPRE_IJParCSRVector_Create(
 
    bHYPRE_IJParCSRVector vec = bHYPRE_IJParCSRVector__create();
    data = bHYPRE_IJParCSRVector__get_data( vec );
-   data -> comm = (MPI_Comm) mpi_comm;
+   data->comm = bHYPRE_MPICommunicator__get_data(mpi_comm)->mpi_comm,
    ierr += HYPRE_IJVectorCreate( data->comm, jlower, jupper, Hvec );
    hypre_assert( ierr == 0 );
    ierr += HYPRE_IJVectorSetObjectType( *Hvec, HYPRE_PARCSR );
@@ -162,7 +162,7 @@ extern "C"
 int32_t
 impl_bHYPRE_IJParCSRVector_SetCommunicator(
   /* in */ bHYPRE_IJParCSRVector self,
-  /* in */ void* mpi_comm)
+  /* in */ bHYPRE_MPICommunicator mpi_comm)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRVector.SetCommunicator) */
   /* Insert the implementation of the SetCommunicator method here... */
@@ -172,7 +172,7 @@ impl_bHYPRE_IJParCSRVector_SetCommunicator(
    int ierr = 0;
    struct bHYPRE_IJParCSRVector__data * data;
    data = bHYPRE_IJParCSRVector__get_data( self );
-   data -> comm = (MPI_Comm) mpi_comm;
+   data->comm = bHYPRE_MPICommunicator__get_data(mpi_comm)->mpi_comm;
    return ierr;
 
   /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRVector.SetCommunicator) */
@@ -490,7 +490,7 @@ int32_t
 impl_bHYPRE_IJParCSRVector_Read(
   /* in */ bHYPRE_IJParCSRVector self,
   /* in */ const char* filename,
-  /* in */ void* comm)
+  /* in */ bHYPRE_MPICommunicator comm)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRVector.Read) */
   /* Insert the implementation of the Read method here... */
@@ -500,11 +500,12 @@ impl_bHYPRE_IJParCSRVector_Read(
    HYPRE_IJVector ij_b;
    data = bHYPRE_IJParCSRVector__get_data( self );
    ij_b = data->ij_b;
+   MPI_Comm mpicomm = bHYPRE_MPICommunicator__get_data(comm)->mpi_comm;
 
    /* HYPRE_IJVectorRead will make a new one */
    ierr = HYPRE_IJVectorDestroy( ij_b );
 
-   ierr = HYPRE_IJVectorRead( filename, data->comm,
+   ierr = HYPRE_IJVectorRead( filename, mpicomm,
                               HYPRE_PARCSR, &ij_b );
    data->ij_b = ij_b;
    bHYPRE_IJParCSRVector__set_data( self, data );
@@ -859,6 +860,15 @@ struct bHYPRE_IJParCSRVector__object*
 char * impl_bHYPRE_IJParCSRVector_fgetURL_bHYPRE_IJParCSRVector(struct 
   bHYPRE_IJParCSRVector__object* obj) {
   return bHYPRE_IJParCSRVector__getURL(obj);
+}
+struct bHYPRE_MPICommunicator__object* 
+  impl_bHYPRE_IJParCSRVector_fconnect_bHYPRE_MPICommunicator(char* url,
+  sidl_BaseInterface *_ex) {
+  return bHYPRE_MPICommunicator__connect(url, _ex);
+}
+char * impl_bHYPRE_IJParCSRVector_fgetURL_bHYPRE_MPICommunicator(struct 
+  bHYPRE_MPICommunicator__object* obj) {
+  return bHYPRE_MPICommunicator__getURL(obj);
 }
 struct sidl_ClassInfo__object* 
   impl_bHYPRE_IJParCSRVector_fconnect_sidl_ClassInfo(char* url,

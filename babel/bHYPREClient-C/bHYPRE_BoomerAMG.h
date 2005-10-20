@@ -139,6 +139,9 @@ typedef struct bHYPRE_BoomerAMG__object* bHYPRE_BoomerAMG;
 #ifndef included_sidl_header_h
 #include "sidl_header.h"
 #endif
+#ifndef included_bHYPRE_MPICommunicator_h
+#include "bHYPRE_MPICommunicator.h"
+#endif
 #ifndef included_bHYPRE_Operator_h
 #include "bHYPRE_Operator.h"
 #endif
@@ -211,7 +214,7 @@ bHYPRE_BoomerAMG_getClassInfo(
  */
 bHYPRE_BoomerAMG
 bHYPRE_BoomerAMG_Create(
-  /* in */ void* mpi_comm);
+  /* in */ bHYPRE_MPICommunicator mpi_comm);
 
 /**
  * Method:  SetLevelRelaxWt[]
@@ -245,7 +248,7 @@ bHYPRE_BoomerAMG_InitGridRelaxation(
 int32_t
 bHYPRE_BoomerAMG_SetCommunicator(
   /* in */ bHYPRE_BoomerAMG self,
-  /* in */ void* mpi_comm);
+  /* in */ bHYPRE_MPICommunicator mpi_comm);
 
 /**
  * Set the int parameter associated with {\tt name}.

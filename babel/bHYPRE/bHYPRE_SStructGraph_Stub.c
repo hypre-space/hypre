@@ -229,7 +229,7 @@ bHYPRE_SStructGraph_getClassInfo(
 
 bHYPRE_SStructGraph
 bHYPRE_SStructGraph_Create(
-  /* in */ void* mpi_comm,
+  /* in */ bHYPRE_MPICommunicator mpi_comm,
   /* in */ bHYPRE_SStructGrid grid)
 {
   return (_getSEPV()->f_Create)(
@@ -246,7 +246,7 @@ bHYPRE_SStructGraph_Create(
 int32_t
 bHYPRE_SStructGraph_SetCommGrid(
   /* in */ bHYPRE_SStructGraph self,
-  /* in */ void* mpi_comm,
+  /* in */ bHYPRE_MPICommunicator mpi_comm,
   /* in */ bHYPRE_SStructGrid grid)
 {
   return (*self->d_epv->f_SetCommGrid)(
@@ -341,7 +341,7 @@ bHYPRE_SStructGraph_SetObjectType(
 int32_t
 bHYPRE_SStructGraph_SetCommunicator(
   /* in */ bHYPRE_SStructGraph self,
-  /* in */ void* mpi_comm)
+  /* in */ bHYPRE_MPICommunicator mpi_comm)
 {
   return (*self->d_epv->f_SetCommunicator)(
     self,
@@ -384,11 +384,9 @@ bHYPRE_SStructGraph_Create__sexec(
         struct sidl_io_Deserializer__object* inArgs,
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
-  void* mpi_comm;
+  bHYPRE_MPICommunicator mpi_comm;
   bHYPRE_SStructGrid grid;
   bHYPRE_SStructGraph _retval;
-  sidl_BaseInterface _ex   = NULL;
-  sidl_BaseInterface *_ex2 = &_ex;
 
   /* unpack in and inout argments */
 
@@ -1092,7 +1090,7 @@ remote_bHYPRE_SStructGraph_getClassInfo(
 static int32_t
 remote_bHYPRE_SStructGraph_SetCommGrid(
   /* in */ struct bHYPRE_SStructGraph__object* self /* TLD */,
-  /* in */ void* mpi_comm,
+  /* in */ struct bHYPRE_MPICommunicator__object* mpi_comm,
   /* in */ struct bHYPRE_SStructGrid__object* grid)
 {
   sidl_BaseInterface _ex = NULL;
@@ -1105,6 +1103,8 @@ remote_bHYPRE_SStructGraph_SetCommGrid(
   int32_t _retval;
 
   /* pack in and inout arguments */
+  sidl_rmi_Invocation_packString( _inv, "mpi_comm",
+    bHYPRE_MPICommunicator__getURL(mpi_comm), _ex2);
   sidl_rmi_Invocation_packString( _inv, "grid",
     bHYPRE_SStructGrid__getURL(grid), _ex2);
 
@@ -1239,7 +1239,7 @@ remote_bHYPRE_SStructGraph_SetObjectType(
 static int32_t
 remote_bHYPRE_SStructGraph_SetCommunicator(
   /* in */ struct bHYPRE_SStructGraph__object* self /* TLD */,
-  /* in */ void* mpi_comm)
+  /* in */ struct bHYPRE_MPICommunicator__object* mpi_comm)
 {
   sidl_BaseInterface _ex = NULL;
   sidl_BaseInterface *_ex2 =&_ex;
@@ -1251,6 +1251,8 @@ remote_bHYPRE_SStructGraph_SetCommunicator(
   int32_t _retval;
 
   /* pack in and inout arguments */
+  sidl_rmi_Invocation_packString( _inv, "mpi_comm",
+    bHYPRE_MPICommunicator__getURL(mpi_comm), _ex2);
 
   /* send actual RMI request */
   _rsvp = sidl_rmi_Invocation_invokeMethod(_inv,_ex2);
@@ -1373,7 +1375,8 @@ static void bHYPRE_SStructGraph__init_remote_epv(void)
   e0->f_isType          = (sidl_bool (*)(void*,const char*)) epv->f_isType;
   e0->f_getClassInfo    = (struct sidl_ClassInfo__object* (*)(void*)) 
     epv->f_getClassInfo;
-  e0->f_SetCommunicator = (int32_t (*)(void*,void*)) epv->f_SetCommunicator;
+  e0->f_SetCommunicator = (int32_t (*)(void*,
+    struct bHYPRE_MPICommunicator__object*)) epv->f_SetCommunicator;
   e0->f_Initialize      = (int32_t (*)(void*)) epv->f_Initialize;
   e0->f_Assemble        = (int32_t (*)(void*)) epv->f_Assemble;
 

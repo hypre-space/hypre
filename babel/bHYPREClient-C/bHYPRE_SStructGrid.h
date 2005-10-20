@@ -30,6 +30,9 @@ typedef struct bHYPRE_SStructGrid__object* bHYPRE_SStructGrid;
 #ifndef included_sidl_header_h
 #include "sidl_header.h"
 #endif
+#ifndef included_bHYPRE_MPICommunicator_h
+#include "bHYPRE_MPICommunicator.h"
+#endif
 #ifndef included_bHYPRE_SStructVariable_h
 #include "bHYPRE_SStructVariable.h"
 #endif
@@ -101,7 +104,7 @@ bHYPRE_SStructGrid_getClassInfo(
  */
 bHYPRE_SStructGrid
 bHYPRE_SStructGrid_Create(
-  /* in */ void* mpi_comm,
+  /* in */ bHYPRE_MPICommunicator mpi_comm,
   /* in */ int32_t ndim,
   /* in */ int32_t nparts);
 
@@ -120,7 +123,7 @@ bHYPRE_SStructGrid_SetNumDimParts(
 int32_t
 bHYPRE_SStructGrid_SetCommunicator(
   /* in */ bHYPRE_SStructGrid self,
-  /* in */ void* mpi_comm);
+  /* in */ bHYPRE_MPICommunicator mpi_comm);
 
 /**
  * Set the extents for a box on a structured part of the grid.

@@ -88,6 +88,7 @@ c     parameters for BoomerAMG
       double precision    vals1(MAXZONS)
 
 c     Babel-interface variables
+      integer*8 bHYPRE_mpicomm
       integer*8 bHYPRE_parcsr_A
       integer*8 bHYPRE_parcsr_x
       integer*8 bHYPRE_parcsr_b
@@ -117,6 +118,7 @@ c-----------------------------------------------------------------------
       mpi_comm = MPI_COMM_WORLD
 c     MPI_COMM_WORLD cannot be directly passed through the Babel interface
 c     because its byte length is unspecified.
+      call bHYPRE_MPICommunicator_CreateF_f( mpi_comm, bHYPRE_mpicomm )
 
 c-----------------------------------------------------------------------
 c     Set the former input parameters
@@ -231,7 +233,7 @@ c     C function GenerateLaplacian, which returns a HYPRE-level matrix. It's
 c     more C function calls to get the data out of it, as double* etc.
 
       call bHYPRE_IJParCSRMatrix_GenerateLaplacian_f(
-     1     MPI_COMM_WORLD, nx, ny, nz, Px, Py, Pz,
+     1     bHYPRE_mpicomm, nx, ny, nz, Px, Py, Pz,
      2     p, q, r, values, 4, 7, bHYPRE_parcsr_A )
 
       call bHYPRE_IJParCSRMatrix_GetLocalRange_f( bHYPRE_parcsr_A,
@@ -259,11 +261,12 @@ c-----------------------------------------------------------------------
       enddo
 
       call bHYPRE_IJParCSRVector_Create_f(
-     1     mpi_comm, first_local_col, last_local_col, bHYPRE_parcsr_x )
+     1     bHYPRE_mpicomm, first_local_col, last_local_col,
+     2     bHYPRE_parcsr_x )
 
       call bHYPRE_IJParCSRVector__create_f( bHYPRE_parcsr_b )
       call bHYPRE_IJParCSRVector_SetCommunicator_f( bHYPRE_parcsr_b,
-     1     mpi_comm, ierrtmp )
+     1     bHYPRE_mpicomm, ierrtmp )
       ierr = ierr + ierrtmp
 
       call bHYPRE_IJParCSRVector_SetLocalRange_f( bHYPRE_parcsr_b,
@@ -336,7 +339,7 @@ c      print *, 'Solver: AMG'
       call bHYPRE_IJParCSRVector__cast2_f
      1     ( bHYPRE_parcsr_A, "bHYPRE.Operator", bHYPRE_op_A )
       call bHYPRE_BoomerAMG_SetCommunicator_f(
-     1     bHYPRE_AMG, mpi_comm, ierrtmp )
+     1     bHYPRE_AMG, bHYPRE_mpicomm, ierrtmp )
       ierr = ierr + ierrtmp
       call bHYPRE_BoomerAMG_SetOperator_f( bHYPRE_AMG, bHYPRE_op_A,
      1     ierrtmp )

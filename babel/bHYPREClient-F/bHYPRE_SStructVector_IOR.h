@@ -69,6 +69,8 @@ extern void bHYPRE_SStructVector__IOR_version(int32_t *major, int32_t *minor);
  * Forward references for external classes and interfaces.
  */
 
+struct bHYPRE_MPICommunicator__array;
+struct bHYPRE_MPICommunicator__object;
 struct bHYPRE_SStructGrid__array;
 struct bHYPRE_SStructGrid__object;
 struct sidl_BaseInterface__array;
@@ -95,7 +97,7 @@ struct bHYPRE_SStructVector__sepv {
   /* Methods introduced in bHYPRE.Vector-v1.0.0 */
   /* Methods introduced in bHYPRE.SStructVector-v1.0.0 */
   struct bHYPRE_SStructVector__object* (*f_Create)(
-    /* in */ void* mpi_comm,
+    /* in */ struct bHYPRE_MPICommunicator__object* mpi_comm,
     /* in */ struct bHYPRE_SStructGrid__object* grid);
 };
 
@@ -141,7 +143,7 @@ struct bHYPRE_SStructVector__epv {
   /* Methods introduced in bHYPRE.ProblemDefinition-v1.0.0 */
   int32_t (*f_SetCommunicator)(
     /* in */ struct bHYPRE_SStructVector__object* self,
-    /* in */ void* mpi_comm);
+    /* in */ struct bHYPRE_MPICommunicator__object* mpi_comm);
   int32_t (*f_Initialize)(
     /* in */ struct bHYPRE_SStructVector__object* self);
   int32_t (*f_Assemble)(
@@ -273,6 +275,12 @@ struct bHYPRE_SStruct_MatrixVectorView__object*
   struct sidl_BaseInterface__object **_ex);
 char* skel_bHYPRE_SStructVector_fgetURL_bHYPRE_SStruct_MatrixVectorView(struct 
   bHYPRE_SStruct_MatrixVectorView__object* obj); 
+
+struct bHYPRE_MPICommunicator__object* 
+  skel_bHYPRE_SStructVector_fconnect_bHYPRE_MPICommunicator(char* url,
+  struct sidl_BaseInterface__object **_ex);
+char* skel_bHYPRE_SStructVector_fgetURL_bHYPRE_MPICommunicator(struct 
+  bHYPRE_MPICommunicator__object* obj); 
 
 struct sidl_ClassInfo__object* 
   skel_bHYPRE_SStructVector_fconnect_sidl_ClassInfo(char* url,

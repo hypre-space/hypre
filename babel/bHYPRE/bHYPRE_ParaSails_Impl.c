@@ -35,6 +35,7 @@
 #include <assert.h>
 #include "bHYPRE_IJParCSRMatrix_Impl.h"
 #include "bHYPRE_IJParCSRVector_Impl.h"
+#include "bHYPRE_MPICommunicator_Impl.h"
 /* DO-NOT-DELETE splicer.end(bHYPRE.ParaSails._includes) */
 
 /*
@@ -126,7 +127,7 @@ extern "C"
 #endif
 bHYPRE_ParaSails
 impl_bHYPRE_ParaSails_Create(
-  /* in */ void* mpi_comm)
+  /* in */ bHYPRE_MPICommunicator mpi_comm)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.ParaSails.Create) */
   /* Insert-Code-Here {bHYPRE.ParaSails.Create} (Create method) */
@@ -137,7 +138,7 @@ impl_bHYPRE_ParaSails_Create(
    bHYPRE_ParaSails solver = bHYPRE_ParaSails__create();
    struct bHYPRE_ParaSails__data * data = bHYPRE_ParaSails__get_data( solver );
 
-   data -> comm = (MPI_Comm) mpi_comm;
+   data->comm = bHYPRE_MPICommunicator__get_data(mpi_comm)->mpi_comm;
    ierr += HYPRE_ParCSRParaSailsCreate( (data->comm), Hsolver );
    hypre_assert( ierr==0 );
    data -> solver = *Hsolver;
@@ -162,7 +163,7 @@ extern "C"
 int32_t
 impl_bHYPRE_ParaSails_SetCommunicator(
   /* in */ bHYPRE_ParaSails self,
-  /* in */ void* mpi_comm)
+  /* in */ bHYPRE_MPICommunicator mpi_comm)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.ParaSails.SetCommunicator) */
   /* Insert the implementation of the SetCommunicator method here... */
@@ -174,7 +175,7 @@ impl_bHYPRE_ParaSails_SetCommunicator(
    HYPRE_Solver * solver = &dummy;
 
    struct bHYPRE_ParaSails__data * data = bHYPRE_ParaSails__get_data( self );
-   data -> comm = (MPI_Comm) mpi_comm;
+   data->comm = bHYPRE_MPICommunicator__get_data(mpi_comm)->mpi_comm;
 
    ierr += HYPRE_ParCSRParaSailsCreate( (data->comm), solver );
    data -> solver = *solver;
@@ -900,6 +901,15 @@ struct bHYPRE_ParaSails__object*
 char * impl_bHYPRE_ParaSails_fgetURL_bHYPRE_ParaSails(struct 
   bHYPRE_ParaSails__object* obj) {
   return bHYPRE_ParaSails__getURL(obj);
+}
+struct bHYPRE_MPICommunicator__object* 
+  impl_bHYPRE_ParaSails_fconnect_bHYPRE_MPICommunicator(char* url,
+  sidl_BaseInterface *_ex) {
+  return bHYPRE_MPICommunicator__connect(url, _ex);
+}
+char * impl_bHYPRE_ParaSails_fgetURL_bHYPRE_MPICommunicator(struct 
+  bHYPRE_MPICommunicator__object* obj) {
+  return bHYPRE_MPICommunicator__getURL(obj);
 }
 struct bHYPRE_Operator__object* 
   impl_bHYPRE_ParaSails_fconnect_bHYPRE_Operator(char* url,

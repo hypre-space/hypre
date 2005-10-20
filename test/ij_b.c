@@ -70,6 +70,7 @@ main( int   argc,
    double              final_res_norm;
 
    HYPRE_ParCSRMatrix    parcsr_A;
+   bHYPRE_MPICommunicator bmpicomm;
    bHYPRE_IJParCSRMatrix  bHYPRE_parcsr_A;
    bHYPRE_Operator        bHYPRE_op_A;
    bHYPRE_IJParCSRVector  bHYPRE_b;
@@ -94,7 +95,7 @@ main( int   argc,
    int		       num_functions = 1;
 
    int		       time_index;
-   MPI_Comm            comm = MPI_COMM_WORLD;
+   MPI_Comm            mpi_comm = MPI_COMM_WORLD;
    int M, N;
    int first_local_row, last_local_row, local_num_rows;
    int first_local_col, last_local_col, local_num_cols;
@@ -150,6 +151,7 @@ main( int   argc,
 
    MPI_Comm_size(MPI_COMM_WORLD, &num_procs );
    MPI_Comm_rank(MPI_COMM_WORLD, &myid );
+   bmpicomm = bHYPRE_MPICommunicator_CreateC( (void *)(&mpi_comm) );
 /*
   hypre_InitMemoryDebug(myid);
 */
@@ -844,7 +846,7 @@ main( int   argc,
 
       ierr += HYPRE_ParCSRMatrixGetDims( parcsr_A, &M, &N );
 
-      bHYPRE_parcsr_A = bHYPRE_IJParCSRMatrix_Create( (void *)comm,
+      bHYPRE_parcsr_A = bHYPRE_IJParCSRMatrix_Create( bmpicomm,
                                                       first_local_row,
                                                       last_local_row,
                                                       first_local_col,
@@ -1023,7 +1025,7 @@ main( int   argc,
       }
 
 /* RHS */
-      bHYPRE_b = bHYPRE_IJParCSRVector_Create( (void *)comm,
+      bHYPRE_b = bHYPRE_IJParCSRVector_Create( bmpicomm,
                                                first_local_row,
                                                last_local_row );
 
@@ -1040,7 +1042,7 @@ main( int   argc,
 
 
 /* Initial guess */
-      bHYPRE_x = bHYPRE_IJParCSRVector_Create( (void *)comm,
+      bHYPRE_x = bHYPRE_IJParCSRVector_Create( bmpicomm,
                                                first_local_row,
                                                last_local_row );
 
@@ -1425,7 +1427,7 @@ main( int   argc,
 /* not used      char  filename[255];*/
                        
       /*  Apply, y=A*b: result is 1's on the interior of the grid */
-      bHYPRE_y = bHYPRE_IJParCSRVector_Create( (void *)comm,
+      bHYPRE_y = bHYPRE_IJParCSRVector_Create( bmpicomm,
                                                first_local_col,
                                                last_local_col );
       ierr += bHYPRE_IJParCSRVector_Initialize( bHYPRE_y );
@@ -1464,11 +1466,11 @@ main( int   argc,
       bHYPRE_Vector_deleteRef( y );
 
       /* Read y2=y; result is all 1's */
-      bHYPRE_y2 = bHYPRE_IJParCSRVector_Create( (void *)comm,
+      bHYPRE_y2 = bHYPRE_IJParCSRVector_Create( bmpicomm,
                                                 first_local_col,
                                                 last_local_col );
       ierr += bHYPRE_IJParCSRVector_Initialize( bHYPRE_y2 );
-      bHYPRE_IJParCSRVector_Read( bHYPRE_y2, "test.clone", (void *)comm );
+      bHYPRE_IJParCSRVector_Read( bHYPRE_y2, "test.clone", bmpicomm );
       bHYPRE_IJParCSRVector_Print( bHYPRE_y2, "test.read" );
 
       bHYPRE_IJParCSRVector_deleteRef( bHYPRE_y2 );
@@ -1523,7 +1525,7 @@ main( int   argc,
       /* To call a bHYPRE solver:
          create, set comm, set operator, set other parameters,
          Setup (noop in this case), Apply */
-      bHYPRE_AMG = bHYPRE_BoomerAMG_Create( (void *)comm );
+      bHYPRE_AMG = bHYPRE_BoomerAMG_Create( bmpicomm );
       bHYPRE_Vector_b = bHYPRE_Vector__cast( bHYPRE_b );
       bHYPRE_Vector_x = bHYPRE_Vector__cast( bHYPRE_x );
       bHYPRE_op_A = bHYPRE_Operator__cast( bHYPRE_parcsr_A );
@@ -1630,7 +1632,7 @@ main( int   argc,
       time_index = hypre_InitializeTiming("PCG Setup");
       hypre_BeginTiming(time_index);
  
-      bHYPRE_PCG = bHYPRE_PCG_Create( (void *)comm );
+      bHYPRE_PCG = bHYPRE_PCG_Create( bmpicomm );
       bHYPRE_Vector_b = bHYPRE_Vector__cast( bHYPRE_b );
       bHYPRE_Vector_x = bHYPRE_Vector__cast( bHYPRE_x );
 
@@ -1691,7 +1693,7 @@ main( int   argc,
          /* To call a bHYPRE solver:
             create, set comm, set operator, set other parameters,
             Setup (noop in this case), Apply */
-         bHYPRE_ParCSRDiagScale = bHYPRE_ParCSRDiagScale_Create( (void *)comm );
+         bHYPRE_ParCSRDiagScale = bHYPRE_ParCSRDiagScale_Create( bmpicomm );
          bHYPRE_ParCSRDiagScale_SetOperator( bHYPRE_ParCSRDiagScale, bHYPRE_op_A );
          ierr += bHYPRE_ParCSRDiagScale_Setup( bHYPRE_ParCSRDiagScale,
                                                bHYPRE_Vector_b, bHYPRE_Vector_x );

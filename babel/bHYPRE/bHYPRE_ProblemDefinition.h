@@ -48,6 +48,9 @@ typedef struct bHYPRE_ProblemDefinition__object* bHYPRE_ProblemDefinition;
 #ifndef included_sidl_header_h
 #include "sidl_header.h"
 #endif
+#ifndef included_bHYPRE_MPICommunicator_h
+#include "bHYPRE_MPICommunicator.h"
+#endif
 #ifndef included_sidl_BaseInterface_h
 #include "sidl_BaseInterface.h"
 #endif
@@ -104,7 +107,7 @@ bHYPRE_ProblemDefinition_getClassInfo(
 int32_t
 bHYPRE_ProblemDefinition_SetCommunicator(
   /* in */ bHYPRE_ProblemDefinition self,
-  /* in */ void* mpi_comm);
+  /* in */ bHYPRE_MPICommunicator mpi_comm);
 
 /**
  * Prepare an object for setting coefficient values, whether for

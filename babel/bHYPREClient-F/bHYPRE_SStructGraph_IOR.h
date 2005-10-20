@@ -54,6 +54,8 @@ extern void bHYPRE_SStructGraph__IOR_version(int32_t *major, int32_t *minor);
  * Forward references for external classes and interfaces.
  */
 
+struct bHYPRE_MPICommunicator__array;
+struct bHYPRE_MPICommunicator__object;
 struct bHYPRE_SStructGrid__array;
 struct bHYPRE_SStructGrid__object;
 struct bHYPRE_SStructStencil__array;
@@ -78,7 +80,7 @@ struct bHYPRE_SStructGraph__sepv {
   /* Methods introduced in bHYPRE.ProblemDefinition-v1.0.0 */
   /* Methods introduced in bHYPRE.SStructGraph-v1.0.0 */
   struct bHYPRE_SStructGraph__object* (*f_Create)(
-    /* in */ void* mpi_comm,
+    /* in */ struct bHYPRE_MPICommunicator__object* mpi_comm,
     /* in */ struct bHYPRE_SStructGrid__object* grid);
 };
 
@@ -124,7 +126,7 @@ struct bHYPRE_SStructGraph__epv {
   /* Methods introduced in bHYPRE.ProblemDefinition-v1.0.0 */
   int32_t (*f_SetCommunicator)(
     /* in */ struct bHYPRE_SStructGraph__object* self,
-    /* in */ void* mpi_comm);
+    /* in */ struct bHYPRE_MPICommunicator__object* mpi_comm);
   int32_t (*f_Initialize)(
     /* in */ struct bHYPRE_SStructGraph__object* self);
   int32_t (*f_Assemble)(
@@ -132,7 +134,7 @@ struct bHYPRE_SStructGraph__epv {
   /* Methods introduced in bHYPRE.SStructGraph-v1.0.0 */
   int32_t (*f_SetCommGrid)(
     /* in */ struct bHYPRE_SStructGraph__object* self,
-    /* in */ void* mpi_comm,
+    /* in */ struct bHYPRE_MPICommunicator__object* mpi_comm,
     /* in */ struct bHYPRE_SStructGrid__object* grid);
   int32_t (*f_SetStencil)(
     /* in */ struct bHYPRE_SStructGraph__object* self,
@@ -192,6 +194,12 @@ struct bHYPRE_SStructStencil__object*
   struct sidl_BaseInterface__object **_ex);
 char* skel_bHYPRE_SStructGraph_fgetURL_bHYPRE_SStructStencil(struct 
   bHYPRE_SStructStencil__object* obj); 
+
+struct bHYPRE_MPICommunicator__object* 
+  skel_bHYPRE_SStructGraph_fconnect_bHYPRE_MPICommunicator(char* url,
+  struct sidl_BaseInterface__object **_ex);
+char* skel_bHYPRE_SStructGraph_fgetURL_bHYPRE_MPICommunicator(struct 
+  bHYPRE_MPICommunicator__object* obj); 
 
 struct sidl_ClassInfo__object* 
   skel_bHYPRE_SStructGraph_fconnect_sidl_ClassInfo(char* url,

@@ -58,6 +58,7 @@ bHYPRE_IOR.h: bHYPRE_IJParCSRMatrix_IOR.h
 bHYPRE_IOR.h: bHYPRE_IJParCSRVector_IOR.h
 bHYPRE_IOR.h: bHYPRE_IJVectorView_IOR.h
 bHYPRE_IOR.h: bHYPRE_IdentitySolver_IOR.h
+bHYPRE_IOR.h: bHYPRE_MPICommunicator_IOR.h
 bHYPRE_IOR.h: bHYPRE_MatrixVectorView_IOR.h
 bHYPRE_IOR.h: bHYPRE_Operator_IOR.h
 bHYPRE_IOR.h: bHYPRE_PCG_IOR.h
@@ -93,6 +94,11 @@ bHYPRE_IdentitySolver_IOR.h: sidl_header.h
 bHYPRE_IdentitySolver_IOR.h: bHYPRE_Operator_IOR.h
 bHYPRE_IdentitySolver_IOR.h: bHYPRE_Solver_IOR.h
 bHYPRE_IdentitySolver_IOR.h: sidl_BaseClass_IOR.h
+
+bHYPRE_MPICommunicator_IOR.h:                                                 \
+  /home/painter/linear_solvers/babel/Interfaces.idl
+bHYPRE_MPICommunicator_IOR.h: sidl_header.h
+bHYPRE_MPICommunicator_IOR.h: sidl_BaseClass_IOR.h
 
 bHYPRE_MatrixVectorView_IOR.h:                                                \
   /home/painter/linear_solvers/babel/Interfaces.idl
@@ -302,6 +308,7 @@ bHYPRE.h: bHYPRE_IJParCSRMatrix.h
 bHYPRE.h: bHYPRE_IJParCSRVector.h
 bHYPRE.h: bHYPRE_IJVectorView.h
 bHYPRE.h: bHYPRE_IdentitySolver.h
+bHYPRE.h: bHYPRE_MPICommunicator.h
 bHYPRE.h: bHYPRE_MatrixVectorView.h
 bHYPRE.h: bHYPRE_Operator.h
 bHYPRE.h: bHYPRE_PCG.h
@@ -334,6 +341,7 @@ bHYPRE.h: bHYPRE_Vector.h
 
 bHYPRE_BoomerAMG.h: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_BoomerAMG.h: sidl_header.h
+bHYPRE_BoomerAMG.h: bHYPRE_MPICommunicator.h
 bHYPRE_BoomerAMG.h: bHYPRE_Operator.h
 bHYPRE_BoomerAMG.h: bHYPRE_Vector.h
 bHYPRE_BoomerAMG.h: sidl_BaseInterface.h
@@ -350,6 +358,7 @@ bHYPRE_CoefficientAccess.h: sidl_io_Deserializer.h
 
 bHYPRE_GMRES.h: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_GMRES.h: sidl_header.h
+bHYPRE_GMRES.h: bHYPRE_MPICommunicator.h
 bHYPRE_GMRES.h: bHYPRE_Operator.h
 bHYPRE_GMRES.h: bHYPRE_Solver.h
 bHYPRE_GMRES.h: bHYPRE_Vector.h
@@ -360,6 +369,7 @@ bHYPRE_GMRES.h: sidl_io_Deserializer.h
 
 bHYPRE_IJMatrixView.h: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_IJMatrixView.h: sidl_header.h
+bHYPRE_IJMatrixView.h: bHYPRE_MPICommunicator.h
 bHYPRE_IJMatrixView.h: sidl_BaseInterface.h
 bHYPRE_IJMatrixView.h: sidl_ClassInfo.h
 bHYPRE_IJMatrixView.h: sidl_io_Serializer.h
@@ -367,6 +377,7 @@ bHYPRE_IJMatrixView.h: sidl_io_Deserializer.h
 
 bHYPRE_IJParCSRMatrix.h: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_IJParCSRMatrix.h: sidl_header.h
+bHYPRE_IJParCSRMatrix.h: bHYPRE_MPICommunicator.h
 bHYPRE_IJParCSRMatrix.h: bHYPRE_Vector.h
 bHYPRE_IJParCSRMatrix.h: sidl_BaseInterface.h
 bHYPRE_IJParCSRMatrix.h: sidl_ClassInfo.h
@@ -375,6 +386,7 @@ bHYPRE_IJParCSRMatrix.h: sidl_io_Deserializer.h
 
 bHYPRE_IJParCSRVector.h: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_IJParCSRVector.h: sidl_header.h
+bHYPRE_IJParCSRVector.h: bHYPRE_MPICommunicator.h
 bHYPRE_IJParCSRVector.h: bHYPRE_Vector.h
 bHYPRE_IJParCSRVector.h: sidl_BaseInterface.h
 bHYPRE_IJParCSRVector.h: sidl_ClassInfo.h
@@ -383,6 +395,7 @@ bHYPRE_IJParCSRVector.h: sidl_io_Deserializer.h
 
 bHYPRE_IJVectorView.h: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_IJVectorView.h: sidl_header.h
+bHYPRE_IJVectorView.h: bHYPRE_MPICommunicator.h
 bHYPRE_IJVectorView.h: sidl_BaseInterface.h
 bHYPRE_IJVectorView.h: sidl_ClassInfo.h
 bHYPRE_IJVectorView.h: sidl_io_Serializer.h
@@ -390,6 +403,7 @@ bHYPRE_IJVectorView.h: sidl_io_Deserializer.h
 
 bHYPRE_IdentitySolver.h: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_IdentitySolver.h: sidl_header.h
+bHYPRE_IdentitySolver.h: bHYPRE_MPICommunicator.h
 bHYPRE_IdentitySolver.h: bHYPRE_Operator.h
 bHYPRE_IdentitySolver.h: bHYPRE_Vector.h
 bHYPRE_IdentitySolver.h: sidl_BaseInterface.h
@@ -397,8 +411,16 @@ bHYPRE_IdentitySolver.h: sidl_ClassInfo.h
 bHYPRE_IdentitySolver.h: sidl_io_Serializer.h
 bHYPRE_IdentitySolver.h: sidl_io_Deserializer.h
 
+bHYPRE_MPICommunicator.h: /home/painter/linear_solvers/babel/Interfaces.idl
+bHYPRE_MPICommunicator.h: sidl_header.h
+bHYPRE_MPICommunicator.h: sidl_BaseInterface.h
+bHYPRE_MPICommunicator.h: sidl_ClassInfo.h
+bHYPRE_MPICommunicator.h: sidl_io_Serializer.h
+bHYPRE_MPICommunicator.h: sidl_io_Deserializer.h
+
 bHYPRE_MatrixVectorView.h: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_MatrixVectorView.h: sidl_header.h
+bHYPRE_MatrixVectorView.h: bHYPRE_MPICommunicator.h
 bHYPRE_MatrixVectorView.h: sidl_BaseInterface.h
 bHYPRE_MatrixVectorView.h: sidl_ClassInfo.h
 bHYPRE_MatrixVectorView.h: sidl_io_Serializer.h
@@ -406,6 +428,7 @@ bHYPRE_MatrixVectorView.h: sidl_io_Deserializer.h
 
 bHYPRE_Operator.h: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_Operator.h: sidl_header.h
+bHYPRE_Operator.h: bHYPRE_MPICommunicator.h
 bHYPRE_Operator.h: bHYPRE_Vector.h
 bHYPRE_Operator.h: sidl_BaseInterface.h
 bHYPRE_Operator.h: sidl_ClassInfo.h
@@ -414,6 +437,7 @@ bHYPRE_Operator.h: sidl_io_Deserializer.h
 
 bHYPRE_PCG.h: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_PCG.h: sidl_header.h
+bHYPRE_PCG.h: bHYPRE_MPICommunicator.h
 bHYPRE_PCG.h: bHYPRE_Operator.h
 bHYPRE_PCG.h: bHYPRE_Solver.h
 bHYPRE_PCG.h: bHYPRE_Vector.h
@@ -424,6 +448,7 @@ bHYPRE_PCG.h: sidl_io_Deserializer.h
 
 bHYPRE_ParCSRDiagScale.h: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_ParCSRDiagScale.h: sidl_header.h
+bHYPRE_ParCSRDiagScale.h: bHYPRE_MPICommunicator.h
 bHYPRE_ParCSRDiagScale.h: bHYPRE_Operator.h
 bHYPRE_ParCSRDiagScale.h: bHYPRE_Vector.h
 bHYPRE_ParCSRDiagScale.h: sidl_BaseInterface.h
@@ -433,6 +458,7 @@ bHYPRE_ParCSRDiagScale.h: sidl_io_Deserializer.h
 
 bHYPRE_ParaSails.h: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_ParaSails.h: sidl_header.h
+bHYPRE_ParaSails.h: bHYPRE_MPICommunicator.h
 bHYPRE_ParaSails.h: bHYPRE_Operator.h
 bHYPRE_ParaSails.h: bHYPRE_Vector.h
 bHYPRE_ParaSails.h: sidl_BaseInterface.h
@@ -442,6 +468,7 @@ bHYPRE_ParaSails.h: sidl_io_Deserializer.h
 
 bHYPRE_Pilut.h: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_Pilut.h: sidl_header.h
+bHYPRE_Pilut.h: bHYPRE_MPICommunicator.h
 bHYPRE_Pilut.h: bHYPRE_Operator.h
 bHYPRE_Pilut.h: bHYPRE_Vector.h
 bHYPRE_Pilut.h: sidl_BaseInterface.h
@@ -452,6 +479,7 @@ bHYPRE_Pilut.h: sidl_io_Deserializer.h
 bHYPRE_PreconditionedSolver.h:                                                \
   /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_PreconditionedSolver.h: sidl_header.h
+bHYPRE_PreconditionedSolver.h: bHYPRE_MPICommunicator.h
 bHYPRE_PreconditionedSolver.h: bHYPRE_Operator.h
 bHYPRE_PreconditionedSolver.h: bHYPRE_Solver.h
 bHYPRE_PreconditionedSolver.h: bHYPRE_Vector.h
@@ -462,6 +490,7 @@ bHYPRE_PreconditionedSolver.h: sidl_io_Deserializer.h
 
 bHYPRE_ProblemDefinition.h: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_ProblemDefinition.h: sidl_header.h
+bHYPRE_ProblemDefinition.h: bHYPRE_MPICommunicator.h
 bHYPRE_ProblemDefinition.h: sidl_BaseInterface.h
 bHYPRE_ProblemDefinition.h: sidl_ClassInfo.h
 bHYPRE_ProblemDefinition.h: sidl_io_Serializer.h
@@ -469,6 +498,7 @@ bHYPRE_ProblemDefinition.h: sidl_io_Deserializer.h
 
 bHYPRE_SStructGraph.h: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_SStructGraph.h: sidl_header.h
+bHYPRE_SStructGraph.h: bHYPRE_MPICommunicator.h
 bHYPRE_SStructGraph.h: bHYPRE_SStructGrid.h
 bHYPRE_SStructGraph.h: bHYPRE_SStructStencil.h
 bHYPRE_SStructGraph.h: sidl_BaseInterface.h
@@ -478,6 +508,7 @@ bHYPRE_SStructGraph.h: sidl_io_Deserializer.h
 
 bHYPRE_SStructGrid.h: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_SStructGrid.h: sidl_header.h
+bHYPRE_SStructGrid.h: bHYPRE_MPICommunicator.h
 bHYPRE_SStructGrid.h: bHYPRE_SStructVariable.h
 bHYPRE_SStructGrid.h: sidl_BaseInterface.h
 bHYPRE_SStructGrid.h: sidl_ClassInfo.h
@@ -486,6 +517,7 @@ bHYPRE_SStructGrid.h: sidl_io_Deserializer.h
 
 bHYPRE_SStructMatrix.h: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_SStructMatrix.h: sidl_header.h
+bHYPRE_SStructMatrix.h: bHYPRE_MPICommunicator.h
 bHYPRE_SStructMatrix.h: bHYPRE_SStructGraph.h
 bHYPRE_SStructMatrix.h: bHYPRE_Vector.h
 bHYPRE_SStructMatrix.h: sidl_BaseInterface.h
@@ -495,6 +527,7 @@ bHYPRE_SStructMatrix.h: sidl_io_Deserializer.h
 
 bHYPRE_SStructMatrixView.h: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_SStructMatrixView.h: sidl_header.h
+bHYPRE_SStructMatrixView.h: bHYPRE_MPICommunicator.h
 bHYPRE_SStructMatrixView.h: bHYPRE_SStructGraph.h
 bHYPRE_SStructMatrixView.h: sidl_BaseInterface.h
 bHYPRE_SStructMatrixView.h: sidl_ClassInfo.h
@@ -504,6 +537,7 @@ bHYPRE_SStructMatrixView.h: sidl_io_Deserializer.h
 bHYPRE_SStructParCSRMatrix.h:                                                 \
   /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_SStructParCSRMatrix.h: sidl_header.h
+bHYPRE_SStructParCSRMatrix.h: bHYPRE_MPICommunicator.h
 bHYPRE_SStructParCSRMatrix.h: bHYPRE_SStructGraph.h
 bHYPRE_SStructParCSRMatrix.h: bHYPRE_Vector.h
 bHYPRE_SStructParCSRMatrix.h: sidl_BaseInterface.h
@@ -514,6 +548,7 @@ bHYPRE_SStructParCSRMatrix.h: sidl_io_Deserializer.h
 bHYPRE_SStructParCSRVector.h:                                                 \
   /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_SStructParCSRVector.h: sidl_header.h
+bHYPRE_SStructParCSRVector.h: bHYPRE_MPICommunicator.h
 bHYPRE_SStructParCSRVector.h: bHYPRE_SStructGrid.h
 bHYPRE_SStructParCSRVector.h: bHYPRE_Vector.h
 bHYPRE_SStructParCSRVector.h: sidl_BaseInterface.h
@@ -533,6 +568,7 @@ bHYPRE_SStructVariable.h: bHYPRE_SStructVariable_IOR.h
 
 bHYPRE_SStructVector.h: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_SStructVector.h: sidl_header.h
+bHYPRE_SStructVector.h: bHYPRE_MPICommunicator.h
 bHYPRE_SStructVector.h: bHYPRE_SStructGrid.h
 bHYPRE_SStructVector.h: bHYPRE_Vector.h
 bHYPRE_SStructVector.h: sidl_BaseInterface.h
@@ -542,6 +578,7 @@ bHYPRE_SStructVector.h: sidl_io_Deserializer.h
 
 bHYPRE_SStructVectorView.h: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_SStructVectorView.h: sidl_header.h
+bHYPRE_SStructVectorView.h: bHYPRE_MPICommunicator.h
 bHYPRE_SStructVectorView.h: bHYPRE_SStructGrid.h
 bHYPRE_SStructVectorView.h: sidl_BaseInterface.h
 bHYPRE_SStructVectorView.h: sidl_ClassInfo.h
@@ -551,6 +588,7 @@ bHYPRE_SStructVectorView.h: sidl_io_Deserializer.h
 bHYPRE_SStruct_MatrixVectorView.h:                                            \
   /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_SStruct_MatrixVectorView.h: sidl_header.h
+bHYPRE_SStruct_MatrixVectorView.h: bHYPRE_MPICommunicator.h
 bHYPRE_SStruct_MatrixVectorView.h: sidl_BaseInterface.h
 bHYPRE_SStruct_MatrixVectorView.h: sidl_ClassInfo.h
 bHYPRE_SStruct_MatrixVectorView.h: sidl_io_Serializer.h
@@ -558,6 +596,7 @@ bHYPRE_SStruct_MatrixVectorView.h: sidl_io_Deserializer.h
 
 bHYPRE_Solver.h: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_Solver.h: sidl_header.h
+bHYPRE_Solver.h: bHYPRE_MPICommunicator.h
 bHYPRE_Solver.h: bHYPRE_Operator.h
 bHYPRE_Solver.h: bHYPRE_Vector.h
 bHYPRE_Solver.h: sidl_BaseInterface.h
@@ -567,6 +606,7 @@ bHYPRE_Solver.h: sidl_io_Deserializer.h
 
 bHYPRE_StructGrid.h: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_StructGrid.h: sidl_header.h
+bHYPRE_StructGrid.h: bHYPRE_MPICommunicator.h
 bHYPRE_StructGrid.h: sidl_BaseInterface.h
 bHYPRE_StructGrid.h: sidl_ClassInfo.h
 bHYPRE_StructGrid.h: sidl_io_Serializer.h
@@ -574,6 +614,7 @@ bHYPRE_StructGrid.h: sidl_io_Deserializer.h
 
 bHYPRE_StructMatrix.h: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_StructMatrix.h: sidl_header.h
+bHYPRE_StructMatrix.h: bHYPRE_MPICommunicator.h
 bHYPRE_StructMatrix.h: bHYPRE_StructGrid.h
 bHYPRE_StructMatrix.h: bHYPRE_StructStencil.h
 bHYPRE_StructMatrix.h: bHYPRE_Vector.h
@@ -584,6 +625,7 @@ bHYPRE_StructMatrix.h: sidl_io_Deserializer.h
 
 bHYPRE_StructMatrixView.h: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_StructMatrixView.h: sidl_header.h
+bHYPRE_StructMatrixView.h: bHYPRE_MPICommunicator.h
 bHYPRE_StructMatrixView.h: bHYPRE_StructGrid.h
 bHYPRE_StructMatrixView.h: bHYPRE_StructStencil.h
 bHYPRE_StructMatrixView.h: sidl_BaseInterface.h
@@ -593,6 +635,7 @@ bHYPRE_StructMatrixView.h: sidl_io_Deserializer.h
 
 bHYPRE_StructPFMG.h: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_StructPFMG.h: sidl_header.h
+bHYPRE_StructPFMG.h: bHYPRE_MPICommunicator.h
 bHYPRE_StructPFMG.h: bHYPRE_Operator.h
 bHYPRE_StructPFMG.h: bHYPRE_Vector.h
 bHYPRE_StructPFMG.h: sidl_BaseInterface.h
@@ -602,6 +645,7 @@ bHYPRE_StructPFMG.h: sidl_io_Deserializer.h
 
 bHYPRE_StructSMG.h: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_StructSMG.h: sidl_header.h
+bHYPRE_StructSMG.h: bHYPRE_MPICommunicator.h
 bHYPRE_StructSMG.h: bHYPRE_Operator.h
 bHYPRE_StructSMG.h: bHYPRE_Vector.h
 bHYPRE_StructSMG.h: sidl_BaseInterface.h
@@ -618,6 +662,7 @@ bHYPRE_StructStencil.h: sidl_io_Deserializer.h
 
 bHYPRE_StructVector.h: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_StructVector.h: sidl_header.h
+bHYPRE_StructVector.h: bHYPRE_MPICommunicator.h
 bHYPRE_StructVector.h: bHYPRE_StructGrid.h
 bHYPRE_StructVector.h: bHYPRE_Vector.h
 bHYPRE_StructVector.h: sidl_BaseInterface.h
@@ -627,6 +672,7 @@ bHYPRE_StructVector.h: sidl_io_Deserializer.h
 
 bHYPRE_StructVectorView.h: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_StructVectorView.h: sidl_header.h
+bHYPRE_StructVectorView.h: bHYPRE_MPICommunicator.h
 bHYPRE_StructVectorView.h: bHYPRE_StructGrid.h
 bHYPRE_StructVectorView.h: sidl_BaseInterface.h
 bHYPRE_StructVectorView.h: sidl_ClassInfo.h
@@ -727,6 +773,18 @@ bHYPRE_IdentitySolver_Stub.c: sidl_interface_IOR.h
 bHYPRE_IdentitySolver_Stub.c: sidl_BaseInterface_IOR.h
 bHYPRE_IdentitySolver_Stub.c: sidl_BaseClass.h
 bHYPRE_IdentitySolver_Stub.c: sidl_ClassInfo.h
+
+bHYPRE_MPICommunicator_Stub.c:                                                \
+  /home/painter/linear_solvers/babel/Interfaces.idl
+bHYPRE_MPICommunicator_Stub.c: bHYPRE_MPICommunicator.h
+bHYPRE_MPICommunicator_Stub.c: bHYPRE_MPICommunicator_IOR.h
+bHYPRE_MPICommunicator_Stub.c: sidl_interface_IOR.h
+bHYPRE_MPICommunicator_Stub.c: sidl_rmi_InstanceHandle.h
+bHYPRE_MPICommunicator_Stub.c: sidl_rmi_ConnectRegistry.h
+bHYPRE_MPICommunicator_Stub.c: sidl_interface_IOR.h
+bHYPRE_MPICommunicator_Stub.c: sidl_BaseInterface_IOR.h
+bHYPRE_MPICommunicator_Stub.c: sidl_BaseClass.h
+bHYPRE_MPICommunicator_Stub.c: sidl_ClassInfo.h
 
 bHYPRE_MatrixVectorView_Stub.c:                                               \
   /home/painter/linear_solvers/babel/Interfaces.idl

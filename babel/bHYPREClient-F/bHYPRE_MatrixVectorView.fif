@@ -169,7 +169,7 @@ C
         implicit none
 C       in bHYPRE.MatrixVectorView self
         integer*8 self
-C       in opaque mpi_comm
+C       in bHYPRE.MPICommunicator mpi_comm
         integer*8 mpi_comm
 C       out int retval
         integer*4 retval

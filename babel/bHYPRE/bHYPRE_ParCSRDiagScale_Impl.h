@@ -22,6 +22,9 @@
 #ifndef included_bHYPRE_Solver_h
 #include "bHYPRE_Solver.h"
 #endif
+#ifndef included_bHYPRE_MPICommunicator_h
+#include "bHYPRE_MPICommunicator.h"
+#endif
 #ifndef included_bHYPRE_Operator_h
 #include "bHYPRE_Operator.h"
 #endif
@@ -52,7 +55,7 @@
 struct bHYPRE_ParCSRDiagScale__data {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.ParCSRDiagScale._data) */
   /* Put private data members here... */
-   MPI_Comm * comm;
+   MPI_Comm comm;
    bHYPRE_Operator matrix;
   /* DO-NOT-DELETE splicer.end(bHYPRE.ParCSRDiagScale._data) */
 };
@@ -96,7 +99,7 @@ impl_bHYPRE_ParCSRDiagScale__dtor(
 extern
 bHYPRE_ParCSRDiagScale
 impl_bHYPRE_ParCSRDiagScale_Create(
-  /* in */ void* mpi_comm);
+  /* in */ bHYPRE_MPICommunicator mpi_comm);
 
 extern struct bHYPRE_ParCSRDiagScale__object* 
   impl_bHYPRE_ParCSRDiagScale_fconnect_bHYPRE_ParCSRDiagScale(char* url,
@@ -108,6 +111,11 @@ extern struct bHYPRE_Solver__object*
   sidl_BaseInterface *_ex);
 extern char* impl_bHYPRE_ParCSRDiagScale_fgetURL_bHYPRE_Solver(struct 
   bHYPRE_Solver__object* obj);
+extern struct bHYPRE_MPICommunicator__object* 
+  impl_bHYPRE_ParCSRDiagScale_fconnect_bHYPRE_MPICommunicator(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_ParCSRDiagScale_fgetURL_bHYPRE_MPICommunicator(struct 
+  bHYPRE_MPICommunicator__object* obj);
 extern struct bHYPRE_Operator__object* 
   impl_bHYPRE_ParCSRDiagScale_fconnect_bHYPRE_Operator(char* url,
   sidl_BaseInterface *_ex);
@@ -137,7 +145,7 @@ extern
 int32_t
 impl_bHYPRE_ParCSRDiagScale_SetCommunicator(
   /* in */ bHYPRE_ParCSRDiagScale self,
-  /* in */ void* mpi_comm);
+  /* in */ bHYPRE_MPICommunicator mpi_comm);
 
 extern
 int32_t
@@ -270,6 +278,11 @@ extern struct bHYPRE_Solver__object*
   sidl_BaseInterface *_ex);
 extern char* impl_bHYPRE_ParCSRDiagScale_fgetURL_bHYPRE_Solver(struct 
   bHYPRE_Solver__object* obj);
+extern struct bHYPRE_MPICommunicator__object* 
+  impl_bHYPRE_ParCSRDiagScale_fconnect_bHYPRE_MPICommunicator(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_ParCSRDiagScale_fgetURL_bHYPRE_MPICommunicator(struct 
+  bHYPRE_MPICommunicator__object* obj);
 extern struct bHYPRE_Operator__object* 
   impl_bHYPRE_ParCSRDiagScale_fconnect_bHYPRE_Operator(char* url,
   sidl_BaseInterface *_ex);

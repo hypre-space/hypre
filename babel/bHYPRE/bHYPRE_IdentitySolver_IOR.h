@@ -61,6 +61,8 @@ extern void bHYPRE_IdentitySolver__IOR_version(int32_t *major, int32_t *minor);
  * Forward references for external classes and interfaces.
  */
 
+struct bHYPRE_MPICommunicator__array;
+struct bHYPRE_MPICommunicator__object;
 struct bHYPRE_Vector__array;
 struct bHYPRE_Vector__object;
 struct sidl_BaseInterface__array;
@@ -84,7 +86,7 @@ struct bHYPRE_IdentitySolver__sepv {
   /* Methods introduced in bHYPRE.Solver-v1.0.0 */
   /* Methods introduced in bHYPRE.IdentitySolver-v1.0.0 */
   struct bHYPRE_IdentitySolver__object* (*f_Create)(
-    /* in */ void* mpi_comm);
+    /* in */ struct bHYPRE_MPICommunicator__object* mpi_comm);
 };
 
 /*
@@ -129,7 +131,7 @@ struct bHYPRE_IdentitySolver__epv {
   /* Methods introduced in bHYPRE.Operator-v1.0.0 */
   int32_t (*f_SetCommunicator)(
     /* in */ struct bHYPRE_IdentitySolver__object* self,
-    /* in */ void* mpi_comm);
+    /* in */ struct bHYPRE_MPICommunicator__object* mpi_comm);
   int32_t (*f_SetIntParameter)(
     /* in */ struct bHYPRE_IdentitySolver__object* self,
     /* in */ const char* name,
@@ -234,6 +236,12 @@ struct bHYPRE_Solver__object*
   struct sidl_BaseInterface__object **_ex);
 char* skel_bHYPRE_IdentitySolver_fgetURL_bHYPRE_Solver(struct 
   bHYPRE_Solver__object* obj); 
+
+struct bHYPRE_MPICommunicator__object* 
+  skel_bHYPRE_IdentitySolver_fconnect_bHYPRE_MPICommunicator(char* url,
+  struct sidl_BaseInterface__object **_ex);
+char* skel_bHYPRE_IdentitySolver_fgetURL_bHYPRE_MPICommunicator(struct 
+  bHYPRE_MPICommunicator__object* obj); 
 
 struct bHYPRE_Operator__object* 
   skel_bHYPRE_IdentitySolver_fconnect_bHYPRE_Operator(char* url,

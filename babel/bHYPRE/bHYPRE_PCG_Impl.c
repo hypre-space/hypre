@@ -57,7 +57,7 @@
 #include "bHYPRE_StructPFMG.h"
 #include "bHYPRE_StructPFMG_Impl.h"
 #include <assert.h>
-/*#include "mpi.h"*/
+#include "bHYPRE_MPICommunicator_Impl.h"
 
 /* This function should be used to initialize the parameter cache
  * in the bHYPRE_PCG__data object. */
@@ -273,7 +273,7 @@ extern "C"
 #endif
 bHYPRE_PCG
 impl_bHYPRE_PCG_Create(
-  /* in */ void* mpi_comm)
+  /* in */ bHYPRE_MPICommunicator mpi_comm)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.PCG.Create) */
   /* Insert-Code-Here {bHYPRE.PCG.Create} (Create method) */
@@ -284,7 +284,7 @@ impl_bHYPRE_PCG_Create(
    bHYPRE_PCG solver = bHYPRE_PCG__create();
    struct bHYPRE_PCG__data * data;
    data = bHYPRE_PCG__get_data( solver );
-   data -> comm = (MPI_Comm) mpi_comm;
+   data->comm = bHYPRE_MPICommunicator__get_data(mpi_comm)->mpi_comm;
 
    return solver;
 
@@ -306,7 +306,7 @@ extern "C"
 int32_t
 impl_bHYPRE_PCG_SetCommunicator(
   /* in */ bHYPRE_PCG self,
-  /* in */ void* mpi_comm)
+  /* in */ bHYPRE_MPICommunicator mpi_comm)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.PCG.SetCommunicator) */
   /* Insert the implementation of the SetCommunicator method here... */
@@ -316,7 +316,7 @@ impl_bHYPRE_PCG_SetCommunicator(
    int ierr = 0;
    struct bHYPRE_PCG__data * data;
    data = bHYPRE_PCG__get_data( self );
-   data -> comm = (MPI_Comm) mpi_comm;
+   data->comm = bHYPRE_MPICommunicator__get_data(mpi_comm)->mpi_comm;
 
    return ierr;
   /* DO-NOT-DELETE splicer.end(bHYPRE.PCG.SetCommunicator) */
@@ -1422,6 +1422,15 @@ struct bHYPRE_Solver__object* impl_bHYPRE_PCG_fconnect_bHYPRE_Solver(char* url,
 char * impl_bHYPRE_PCG_fgetURL_bHYPRE_Solver(struct bHYPRE_Solver__object* obj) 
   {
   return bHYPRE_Solver__getURL(obj);
+}
+struct bHYPRE_MPICommunicator__object* 
+  impl_bHYPRE_PCG_fconnect_bHYPRE_MPICommunicator(char* url,
+  sidl_BaseInterface *_ex) {
+  return bHYPRE_MPICommunicator__connect(url, _ex);
+}
+char * impl_bHYPRE_PCG_fgetURL_bHYPRE_MPICommunicator(struct 
+  bHYPRE_MPICommunicator__object* obj) {
+  return bHYPRE_MPICommunicator__getURL(obj);
 }
 struct bHYPRE_Operator__object* impl_bHYPRE_PCG_fconnect_bHYPRE_Operator(char* 
   url, sidl_BaseInterface *_ex) {

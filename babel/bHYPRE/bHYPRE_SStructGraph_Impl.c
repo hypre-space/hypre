@@ -33,6 +33,7 @@
 #include "utilities.h"
 #include "bHYPRE_SStructGrid_Impl.h"
 #include "bHYPRE_SStructStencil_Impl.h"
+#include "bHYPRE_MPICommunicator_Impl.h"
 /* DO-NOT-DELETE splicer.end(bHYPRE.SStructGraph._includes) */
 
 /*
@@ -128,7 +129,7 @@ extern "C"
 #endif
 bHYPRE_SStructGraph
 impl_bHYPRE_SStructGraph_Create(
-  /* in */ void* mpi_comm,
+  /* in */ bHYPRE_MPICommunicator mpi_comm,
   /* in */ bHYPRE_SStructGrid grid)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructGraph.Create) */
@@ -140,6 +141,7 @@ impl_bHYPRE_SStructGraph_Create(
    HYPRE_SStructGraph Hgraph;
    struct bHYPRE_SStructGrid__data * data_grid;
    HYPRE_SStructGrid Hgrid;
+   MPI_Comm comm = bHYPRE_MPICommunicator__get_data(mpi_comm)->mpi_comm;
 
    graph = bHYPRE_SStructGraph__create();
    data = bHYPRE_SStructGraph__get_data( graph );
@@ -147,7 +149,7 @@ impl_bHYPRE_SStructGraph_Create(
    data_grid = bHYPRE_SStructGrid__get_data( grid );
    Hgrid = data_grid -> grid;
 
-   ierr += HYPRE_SStructGraphCreate( (MPI_Comm) mpi_comm, Hgrid, &Hgraph );
+   ierr += HYPRE_SStructGraphCreate( comm, Hgrid, &Hgraph );
    data->graph = Hgraph;
 
    return graph;
@@ -170,7 +172,7 @@ extern "C"
 int32_t
 impl_bHYPRE_SStructGraph_SetCommGrid(
   /* in */ bHYPRE_SStructGraph self,
-  /* in */ void* mpi_comm,
+  /* in */ bHYPRE_MPICommunicator mpi_comm,
   /* in */ bHYPRE_SStructGrid grid)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructGraph.SetCommGrid) */
@@ -183,6 +185,7 @@ impl_bHYPRE_SStructGraph_SetCommGrid(
    HYPRE_SStructGraph * Hgraph;
    struct bHYPRE_SStructGrid__data * data_grid;
    HYPRE_SStructGrid Hgrid;
+   MPI_Comm comm = bHYPRE_MPICommunicator__get_data(mpi_comm)->mpi_comm;
 
    data = bHYPRE_SStructGraph__get_data( self );
    Hgraph = &(data -> graph);
@@ -191,7 +194,7 @@ impl_bHYPRE_SStructGraph_SetCommGrid(
    data_grid = bHYPRE_SStructGrid__get_data( grid );
    Hgrid = data_grid -> grid;
 
-   ierr += HYPRE_SStructGraphCreate( (MPI_Comm) mpi_comm, Hgrid, Hgraph );
+   ierr += HYPRE_SStructGraphCreate( comm, Hgrid, Hgraph );
 
    return ierr;
 
@@ -328,7 +331,7 @@ extern "C"
 int32_t
 impl_bHYPRE_SStructGraph_SetCommunicator(
   /* in */ bHYPRE_SStructGraph self,
-  /* in */ void* mpi_comm)
+  /* in */ bHYPRE_MPICommunicator mpi_comm)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructGraph.SetCommunicator) */
   /* Insert the implementation of the SetCommunicator method here... */
@@ -413,6 +416,15 @@ struct bHYPRE_SStructStencil__object*
 char * impl_bHYPRE_SStructGraph_fgetURL_bHYPRE_SStructStencil(struct 
   bHYPRE_SStructStencil__object* obj) {
   return bHYPRE_SStructStencil__getURL(obj);
+}
+struct bHYPRE_MPICommunicator__object* 
+  impl_bHYPRE_SStructGraph_fconnect_bHYPRE_MPICommunicator(char* url,
+  sidl_BaseInterface *_ex) {
+  return bHYPRE_MPICommunicator__connect(url, _ex);
+}
+char * impl_bHYPRE_SStructGraph_fgetURL_bHYPRE_MPICommunicator(struct 
+  bHYPRE_MPICommunicator__object* obj) {
+  return bHYPRE_MPICommunicator__getURL(obj);
 }
 struct sidl_ClassInfo__object* 
   impl_bHYPRE_SStructGraph_fconnect_sidl_ClassInfo(char* url,

@@ -33,6 +33,7 @@
 #include "sidl_Loader.h"
 #endif
 #include "bHYPRE_IJParCSRVector_IOR.h"
+#include "bHYPRE_MPICommunicator_IOR.h"
 #include "sidl_ClassInfo_IOR.h"
 #include "bHYPRE_Vector_IOR.h"
 #include "sidl_BaseInterface_IOR.h"
@@ -344,10 +345,10 @@ SIDLFortran77Symbol(bhypre_ijparcsrvector_create_f,BHYPRE_IJPARCSRVECTOR_CREATE_
 )
 {
   const struct bHYPRE_IJParCSRVector__sepv *_epv = _getSEPV();
-  void* _proxy_mpi_comm = NULL;
+  struct bHYPRE_MPICommunicator__object* _proxy_mpi_comm = NULL;
   struct bHYPRE_IJParCSRVector__object* _proxy_retval = NULL;
   _proxy_mpi_comm =
-    (void*)
+    (struct bHYPRE_MPICommunicator__object*)
     (ptrdiff_t)(*mpi_comm);
   _proxy_retval = 
     (*(_epv->f_Create))(
@@ -373,12 +374,12 @@ SIDLFortran77Symbol(bhypre_ijparcsrvector_setcommunicator_f,BHYPRE_IJPARCSRVECTO
 {
   struct bHYPRE_IJParCSRVector__epv *_epv = NULL;
   struct bHYPRE_IJParCSRVector__object* _proxy_self = NULL;
-  void* _proxy_mpi_comm = NULL;
+  struct bHYPRE_MPICommunicator__object* _proxy_mpi_comm = NULL;
   _proxy_self =
     (struct bHYPRE_IJParCSRVector__object*)
     (ptrdiff_t)(*self);
   _proxy_mpi_comm =
-    (void*)
+    (struct bHYPRE_MPICommunicator__object*)
     (ptrdiff_t)(*mpi_comm);
   _epv = _proxy_self->d_epv;
   *retval = 
@@ -696,7 +697,7 @@ SIDLFortran77Symbol(bhypre_ijparcsrvector_read_f,BHYPRE_IJPARCSRVECTOR_READ_F,bH
   struct bHYPRE_IJParCSRVector__epv *_epv = NULL;
   struct bHYPRE_IJParCSRVector__object* _proxy_self = NULL;
   char* _proxy_filename = NULL;
-  void* _proxy_comm = NULL;
+  struct bHYPRE_MPICommunicator__object* _proxy_comm = NULL;
   _proxy_self =
     (struct bHYPRE_IJParCSRVector__object*)
     (ptrdiff_t)(*self);
@@ -704,7 +705,7 @@ SIDLFortran77Symbol(bhypre_ijparcsrvector_read_f,BHYPRE_IJPARCSRVECTOR_READ_F,bH
     sidl_copy_fortran_str(SIDL_F77_STR(filename),
       SIDL_F77_STR_LEN(filename));
   _proxy_comm =
-    (void*)
+    (struct bHYPRE_MPICommunicator__object*)
     (ptrdiff_t)(*comm);
   _epv = _proxy_self->d_epv;
   *retval = 

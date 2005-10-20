@@ -40,6 +40,9 @@ typedef struct bHYPRE_GMRES__object* bHYPRE_GMRES;
 #ifndef included_sidl_header_h
 #include "sidl_header.h"
 #endif
+#ifndef included_bHYPRE_MPICommunicator_h
+#include "bHYPRE_MPICommunicator.h"
+#endif
 #ifndef included_bHYPRE_Operator_h
 #include "bHYPRE_Operator.h"
 #endif
@@ -115,7 +118,7 @@ bHYPRE_GMRES_getClassInfo(
  */
 bHYPRE_GMRES
 bHYPRE_GMRES_Create(
-  /* in */ void* mpi_comm);
+  /* in */ bHYPRE_MPICommunicator mpi_comm);
 
 /**
  * Set the MPI Communicator.
@@ -125,7 +128,7 @@ bHYPRE_GMRES_Create(
 int32_t
 bHYPRE_GMRES_SetCommunicator(
   /* in */ bHYPRE_GMRES self,
-  /* in */ void* mpi_comm);
+  /* in */ bHYPRE_MPICommunicator mpi_comm);
 
 /**
  * Set the int parameter associated with {\tt name}.

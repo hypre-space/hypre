@@ -34,6 +34,9 @@ typedef struct bHYPRE_IdentitySolver__object* bHYPRE_IdentitySolver;
 #ifndef included_sidl_header_h
 #include "sidl_header.h"
 #endif
+#ifndef included_bHYPRE_MPICommunicator_h
+#include "bHYPRE_MPICommunicator.h"
+#endif
 #ifndef included_bHYPRE_Operator_h
 #include "bHYPRE_Operator.h"
 #endif
@@ -106,7 +109,7 @@ bHYPRE_IdentitySolver_getClassInfo(
  */
 bHYPRE_IdentitySolver
 bHYPRE_IdentitySolver_Create(
-  /* in */ void* mpi_comm);
+  /* in */ bHYPRE_MPICommunicator mpi_comm);
 
 /**
  * Set the MPI Communicator.
@@ -116,7 +119,7 @@ bHYPRE_IdentitySolver_Create(
 int32_t
 bHYPRE_IdentitySolver_SetCommunicator(
   /* in */ bHYPRE_IdentitySolver self,
-  /* in */ void* mpi_comm);
+  /* in */ bHYPRE_MPICommunicator mpi_comm);
 
 /**
  * Set the int parameter associated with {\tt name}.

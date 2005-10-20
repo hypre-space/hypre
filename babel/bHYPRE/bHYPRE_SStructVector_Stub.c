@@ -229,7 +229,7 @@ bHYPRE_SStructVector_getClassInfo(
 
 bHYPRE_SStructVector
 bHYPRE_SStructVector_Create(
-  /* in */ void* mpi_comm,
+  /* in */ bHYPRE_MPICommunicator mpi_comm,
   /* in */ bHYPRE_SStructGrid grid)
 {
   return (_getSEPV()->f_Create)(
@@ -259,7 +259,7 @@ bHYPRE_SStructVector_SetObjectType(
 int32_t
 bHYPRE_SStructVector_SetCommunicator(
   /* in */ bHYPRE_SStructVector self,
-  /* in */ void* mpi_comm)
+  /* in */ bHYPRE_MPICommunicator mpi_comm)
 {
   return (*self->d_epv->f_SetCommunicator)(
     self,
@@ -749,11 +749,9 @@ bHYPRE_SStructVector_Create__sexec(
         struct sidl_io_Deserializer__object* inArgs,
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
-  void* mpi_comm;
+  bHYPRE_MPICommunicator mpi_comm;
   bHYPRE_SStructGrid grid;
   bHYPRE_SStructVector _retval;
-  sidl_BaseInterface _ex   = NULL;
-  sidl_BaseInterface *_ex2 = &_ex;
 
   /* unpack in and inout argments */
 
@@ -1507,7 +1505,7 @@ remote_bHYPRE_SStructVector_SetObjectType(
 static int32_t
 remote_bHYPRE_SStructVector_SetCommunicator(
   /* in */ struct bHYPRE_SStructVector__object* self /* TLD */,
-  /* in */ void* mpi_comm)
+  /* in */ struct bHYPRE_MPICommunicator__object* mpi_comm)
 {
   sidl_BaseInterface _ex = NULL;
   sidl_BaseInterface *_ex2 =&_ex;
@@ -1519,6 +1517,8 @@ remote_bHYPRE_SStructVector_SetCommunicator(
   int32_t _retval;
 
   /* pack in and inout arguments */
+  sidl_rmi_Invocation_packString( _inv, "mpi_comm",
+    bHYPRE_MPICommunicator__getURL(mpi_comm), _ex2);
 
   /* send actual RMI request */
   _rsvp = sidl_rmi_Invocation_invokeMethod(_inv,_ex2);
@@ -2258,7 +2258,8 @@ static void bHYPRE_SStructVector__init_remote_epv(void)
   e0->f_isType          = (sidl_bool (*)(void*,const char*)) epv->f_isType;
   e0->f_getClassInfo    = (struct sidl_ClassInfo__object* (*)(void*)) 
     epv->f_getClassInfo;
-  e0->f_SetCommunicator = (int32_t (*)(void*,void*)) epv->f_SetCommunicator;
+  e0->f_SetCommunicator = (int32_t (*)(void*,
+    struct bHYPRE_MPICommunicator__object*)) epv->f_SetCommunicator;
   e0->f_Initialize      = (int32_t (*)(void*)) epv->f_Initialize;
   e0->f_Assemble        = (int32_t (*)(void*)) epv->f_Assemble;
 
@@ -2276,7 +2277,8 @@ static void bHYPRE_SStructVector__init_remote_epv(void)
   e1->f_isType          = (sidl_bool (*)(void*,const char*)) epv->f_isType;
   e1->f_getClassInfo    = (struct sidl_ClassInfo__object* (*)(void*)) 
     epv->f_getClassInfo;
-  e1->f_SetCommunicator = (int32_t (*)(void*,void*)) epv->f_SetCommunicator;
+  e1->f_SetCommunicator = (int32_t (*)(void*,
+    struct bHYPRE_MPICommunicator__object*)) epv->f_SetCommunicator;
   e1->f_Initialize      = (int32_t (*)(void*)) epv->f_Initialize;
   e1->f_Assemble        = (int32_t (*)(void*)) epv->f_Assemble;
 
@@ -2294,7 +2296,8 @@ static void bHYPRE_SStructVector__init_remote_epv(void)
   e2->f_isType          = (sidl_bool (*)(void*,const char*)) epv->f_isType;
   e2->f_getClassInfo    = (struct sidl_ClassInfo__object* (*)(void*)) 
     epv->f_getClassInfo;
-  e2->f_SetCommunicator = (int32_t (*)(void*,void*)) epv->f_SetCommunicator;
+  e2->f_SetCommunicator = (int32_t (*)(void*,
+    struct bHYPRE_MPICommunicator__object*)) epv->f_SetCommunicator;
   e2->f_Initialize      = (int32_t (*)(void*)) epv->f_Initialize;
   e2->f_Assemble        = (int32_t (*)(void*)) epv->f_Assemble;
   e2->f_GetObject       = (int32_t (*)(void*,
@@ -2334,7 +2337,8 @@ static void bHYPRE_SStructVector__init_remote_epv(void)
   e3->f_isType          = (sidl_bool (*)(void*,const char*)) epv->f_isType;
   e3->f_getClassInfo    = (struct sidl_ClassInfo__object* (*)(void*)) 
     epv->f_getClassInfo;
-  e3->f_SetCommunicator = (int32_t (*)(void*,void*)) epv->f_SetCommunicator;
+  e3->f_SetCommunicator = (int32_t (*)(void*,
+    struct bHYPRE_MPICommunicator__object*)) epv->f_SetCommunicator;
   e3->f_Initialize      = (int32_t (*)(void*)) epv->f_Initialize;
   e3->f_Assemble        = (int32_t (*)(void*)) epv->f_Assemble;
   e3->f_GetObject       = (int32_t (*)(void*,

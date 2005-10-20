@@ -27,6 +27,9 @@ typedef struct bHYPRE_Solver__object* bHYPRE_Solver;
 #ifndef included_sidl_header_h
 #include "sidl_header.h"
 #endif
+#ifndef included_bHYPRE_MPICommunicator_h
+#include "bHYPRE_MPICommunicator.h"
+#endif
 #ifndef included_bHYPRE_Operator_h
 #include "bHYPRE_Operator.h"
 #endif
@@ -85,7 +88,7 @@ bHYPRE_Solver_getClassInfo(
 int32_t
 bHYPRE_Solver_SetCommunicator(
   /* in */ bHYPRE_Solver self,
-  /* in */ void* mpi_comm);
+  /* in */ bHYPRE_MPICommunicator mpi_comm);
 
 int32_t
 bHYPRE_Solver_SetIntParameter(

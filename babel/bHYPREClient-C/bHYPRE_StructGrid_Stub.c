@@ -229,7 +229,7 @@ bHYPRE_StructGrid_getClassInfo(
 
 bHYPRE_StructGrid
 bHYPRE_StructGrid_Create(
-  /* in */ void* mpi_comm,
+  /* in */ bHYPRE_MPICommunicator mpi_comm,
   /* in */ int32_t dim)
 {
   return (_getSEPV()->f_Create)(
@@ -246,7 +246,7 @@ bHYPRE_StructGrid_Create(
 int32_t
 bHYPRE_StructGrid_SetCommunicator(
   /* in */ bHYPRE_StructGrid self,
-  /* in */ void* mpi_comm)
+  /* in */ bHYPRE_MPICommunicator mpi_comm)
 {
   return (*self->d_epv->f_SetCommunicator)(
     self,
@@ -355,7 +355,7 @@ bHYPRE_StructGrid_Create__sexec(
         struct sidl_io_Deserializer__object* inArgs,
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
-  void* mpi_comm;
+  bHYPRE_MPICommunicator mpi_comm;
   int32_t dim;
   bHYPRE_StructGrid _retval;
   sidl_BaseInterface _ex   = NULL;
@@ -1060,7 +1060,7 @@ remote_bHYPRE_StructGrid_getClassInfo(
 static int32_t
 remote_bHYPRE_StructGrid_SetCommunicator(
   /* in */ struct bHYPRE_StructGrid__object* self /* TLD */,
-  /* in */ void* mpi_comm)
+  /* in */ struct bHYPRE_MPICommunicator__object* mpi_comm)
 {
   sidl_BaseInterface _ex = NULL;
   sidl_BaseInterface *_ex2 =&_ex;
@@ -1072,6 +1072,8 @@ remote_bHYPRE_StructGrid_SetCommunicator(
   int32_t _retval;
 
   /* pack in and inout arguments */
+  sidl_rmi_Invocation_packString( _inv, "mpi_comm",
+    bHYPRE_MPICommunicator__getURL(mpi_comm), _ex2);
 
   /* send actual RMI request */
   _rsvp = sidl_rmi_Invocation_invokeMethod(_inv,_ex2);

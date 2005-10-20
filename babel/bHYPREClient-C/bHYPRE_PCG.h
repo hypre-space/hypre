@@ -42,6 +42,9 @@ typedef struct bHYPRE_PCG__object* bHYPRE_PCG;
 #ifndef included_sidl_header_h
 #include "sidl_header.h"
 #endif
+#ifndef included_bHYPRE_MPICommunicator_h
+#include "bHYPRE_MPICommunicator.h"
+#endif
 #ifndef included_bHYPRE_Operator_h
 #include "bHYPRE_Operator.h"
 #endif
@@ -117,7 +120,7 @@ bHYPRE_PCG_getClassInfo(
  */
 bHYPRE_PCG
 bHYPRE_PCG_Create(
-  /* in */ void* mpi_comm);
+  /* in */ bHYPRE_MPICommunicator mpi_comm);
 
 /**
  * Set the MPI Communicator.
@@ -127,7 +130,7 @@ bHYPRE_PCG_Create(
 int32_t
 bHYPRE_PCG_SetCommunicator(
   /* in */ bHYPRE_PCG self,
-  /* in */ void* mpi_comm);
+  /* in */ bHYPRE_MPICommunicator mpi_comm);
 
 /**
  * Set the int parameter associated with {\tt name}.

@@ -31,6 +31,8 @@ struct bHYPRE_IJVectorView__object;
  * Forward references for external classes and interfaces.
  */
 
+struct bHYPRE_MPICommunicator__array;
+struct bHYPRE_MPICommunicator__object;
 struct sidl_BaseInterface__array;
 struct sidl_BaseInterface__object;
 struct sidl_ClassInfo__array;
@@ -77,7 +79,7 @@ struct bHYPRE_IJVectorView__epv {
   /* Methods introduced in bHYPRE.ProblemDefinition-v1.0.0 */
   int32_t (*f_SetCommunicator)(
     /* in */ void* self,
-    /* in */ void* mpi_comm);
+    /* in */ struct bHYPRE_MPICommunicator__object* mpi_comm);
   int32_t (*f_Initialize)(
     /* in */ void* self);
   int32_t (*f_Assemble)(
@@ -110,7 +112,7 @@ struct bHYPRE_IJVectorView__epv {
   int32_t (*f_Read)(
     /* in */ void* self,
     /* in */ const char* filename,
-    /* in */ void* comm);
+    /* in */ struct bHYPRE_MPICommunicator__object* comm);
 };
 
 /*
@@ -190,7 +192,7 @@ struct bHYPRE__IJVectorView__epv {
   /* Methods introduced in bHYPRE.ProblemDefinition-v1.0.0 */
   int32_t (*f_SetCommunicator)(
     /* in */ struct bHYPRE__IJVectorView__object* self,
-    /* in */ void* mpi_comm);
+    /* in */ struct bHYPRE_MPICommunicator__object* mpi_comm);
   int32_t (*f_Initialize)(
     /* in */ struct bHYPRE__IJVectorView__object* self);
   int32_t (*f_Assemble)(
@@ -223,7 +225,7 @@ struct bHYPRE__IJVectorView__epv {
   int32_t (*f_Read)(
     /* in */ struct bHYPRE__IJVectorView__object* self,
     /* in */ const char* filename,
-    /* in */ void* comm);
+    /* in */ struct bHYPRE_MPICommunicator__object* comm);
   /* Methods introduced in bHYPRE._IJVectorView-v1.0 */
 };
 

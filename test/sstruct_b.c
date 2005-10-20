@@ -1454,7 +1454,9 @@ main( int   argc,
    int                   print_system;
    int                   cosine, struct_cosine;
    double                scale;
+   MPI_Comm              mpi_comm = MPI_COMM_WORLD;
                         
+   bHYPRE_MPICommunicator bmpicomm;
    bHYPRE_SStructGrid     b_grid;
    bHYPRE_SStructStencil *b_stencils;
    bHYPRE_SStructGraph    b_graph;
@@ -1515,6 +1517,7 @@ main( int   argc,
 
    MPI_Comm_size(MPI_COMM_WORLD, &num_procs);
    MPI_Comm_rank(MPI_COMM_WORLD, &myid);
+   bmpicomm = bHYPRE_MPICommunicator_CreateC( (void *)(&mpi_comm) );
 
    hypre_InitMemoryDebug(myid);
 
@@ -1747,7 +1750,7 @@ main( int   argc,
    time_index = hypre_InitializeTiming("SStruct Interface");
    hypre_BeginTiming(time_index);
 
-   b_grid = bHYPRE_SStructGrid_Create( (void *)MPI_COMM_WORLD, data.ndim, data.nparts );
+   b_grid = bHYPRE_SStructGrid_Create( bmpicomm, data.ndim, data.nparts );
 
    for (part = 0; part < data.nparts; part++)
    {
@@ -1821,7 +1824,7 @@ main( int   argc,
     * Set up the graph
     *-----------------------------------------------------------*/
 
-   b_graph = bHYPRE_SStructGraph_Create( (void *)MPI_COMM_WORLD, b_grid );
+   b_graph = bHYPRE_SStructGraph_Create( bmpicomm, b_grid );
 
    bHYPRE_SStructGraph_SetObjectType( b_graph, object_type );
 
@@ -1884,7 +1887,7 @@ main( int   argc,
 
    if ( object_type == HYPRE_PARCSR )
    {
-      b_spA = bHYPRE_SStructParCSRMatrix_Create( (void *)MPI_COMM_WORLD, b_graph );
+      b_spA = bHYPRE_SStructParCSRMatrix_Create( bmpicomm, b_graph );
 
       /* TODO HYPRE_SStructMatrixSetSymmetric(A, 1); */
       for (entry = 0; entry < data.symmetric_nentries; entry++)
@@ -1902,7 +1905,7 @@ main( int   argc,
 
    else
    {
-      b_A = bHYPRE_SStructMatrix_Create( (void *)MPI_COMM_WORLD, b_graph );
+      b_A = bHYPRE_SStructMatrix_Create( bmpicomm, b_graph );
 
       /* TODO HYPRE_SStructMatrixSetSymmetric(A, 1); */
       for (entry = 0; entry < data.symmetric_nentries; entry++)
@@ -2055,13 +2058,13 @@ main( int   argc,
 
    if ( object_type == HYPRE_PARCSR )
    {
-      b_spb = bHYPRE_SStructParCSRVector_Create( (void *)MPI_COMM_WORLD, b_grid );
+      b_spb = bHYPRE_SStructParCSRVector_Create( bmpicomm, b_grid );
 
       bHYPRE_SStructParCSRVector_Initialize( b_spb );
    }
    else
    {
-      b_b = bHYPRE_SStructVector_Create( (void *)MPI_COMM_WORLD, b_grid );
+      b_b = bHYPRE_SStructVector_Create( bmpicomm, b_grid );
 
       bHYPRE_SStructVector_Initialize( b_b );
    }
@@ -2115,13 +2118,13 @@ main( int   argc,
 
    if ( object_type == HYPRE_PARCSR )
    {
-      b_spx = bHYPRE_SStructParCSRVector_Create( (void *)MPI_COMM_WORLD, b_grid );
+      b_spx = bHYPRE_SStructParCSRVector_Create( bmpicomm, b_grid );
 
       bHYPRE_SStructParCSRVector_Initialize( b_spx );
    }
    else
    {
-      b_x = bHYPRE_SStructVector_Create( (void *)MPI_COMM_WORLD, b_grid );
+      b_x = bHYPRE_SStructVector_Create( bmpicomm, b_grid );
 
       bHYPRE_SStructVector_Initialize( b_x );
    }
@@ -2672,7 +2675,7 @@ main( int   argc,
       time_index = hypre_InitializeTiming("GMRES Setup");
       hypre_BeginTiming(time_index);
 
-      b_solver_GMRES = bHYPRE_GMRES_Create( (void *) MPI_COMM_WORLD );
+      b_solver_GMRES = bHYPRE_GMRES_Create( bmpicomm );
       bHYPRE_GMRES_SetIntParameter( b_solver_GMRES, "KDim", 5 );
       bHYPRE_GMRES_SetIntParameter( b_solver_GMRES, "MaxIter", 100 );
       bHYPRE_GMRES_SetDoubleParameter( b_solver_GMRES, "Tolerance", 1.0e-06 );
@@ -2685,7 +2688,7 @@ main( int   argc,
       if (solver_id == 40)
       {
          /* use BoomerAMG as preconditioner */
-         b_boomeramg = bHYPRE_BoomerAMG_Create( (void *) MPI_COMM_WORLD );
+         b_boomeramg = bHYPRE_BoomerAMG_Create( bmpicomm );
          bHYPRE_BoomerAMG_SetIntParameter( b_boomeramg, "CoarsenType", 6);
          bHYPRE_BoomerAMG_SetIntParameter( b_boomeramg, "StrongThreshold", 0.25);
          bHYPRE_BoomerAMG_SetDoubleParameter( b_boomeramg, "Tolerance", 0.0 );
@@ -2990,7 +2993,7 @@ main( int   argc,
       time_index = hypre_InitializeTiming("SMG Setup");
       hypre_BeginTiming(time_index);
 
-      b_solver_SMG = bHYPRE_StructSMG_Create( (void *) MPI_COMM_WORLD );
+      b_solver_SMG = bHYPRE_StructSMG_Create( bmpicomm );
       bHYPRE_StructSMG_SetIntParameter( b_solver_SMG, "MemoryUse", 0);
       bHYPRE_StructSMG_SetIntParameter( b_solver_SMG, "MaxIter", 50);
       bHYPRE_StructSMG_SetDoubleParameter( b_solver_SMG, "Tol", 1.0e-6);

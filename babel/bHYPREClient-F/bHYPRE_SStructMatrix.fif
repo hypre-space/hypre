@@ -176,7 +176,7 @@ C
         subroutine bHYPRE_SStructMatrix_Create_f(mpi_comm, graph,
      &     retval)
         implicit none
-C       in opaque mpi_comm
+C       in bHYPRE.MPICommunicator mpi_comm
         integer*8 mpi_comm
 C       in bHYPRE.SStructGraph graph
         integer*8 graph
@@ -195,7 +195,7 @@ C
         implicit none
 C       in bHYPRE.SStructMatrix self
         integer*8 self
-C       in opaque mpi_comm
+C       in bHYPRE.MPICommunicator mpi_comm
         integer*8 mpi_comm
 C       out int retval
         integer*4 retval

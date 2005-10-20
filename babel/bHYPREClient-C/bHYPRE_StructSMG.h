@@ -36,6 +36,9 @@ typedef struct bHYPRE_StructSMG__object* bHYPRE_StructSMG;
 #ifndef included_sidl_header_h
 #include "sidl_header.h"
 #endif
+#ifndef included_bHYPRE_MPICommunicator_h
+#include "bHYPRE_MPICommunicator.h"
+#endif
 #ifndef included_bHYPRE_Operator_h
 #include "bHYPRE_Operator.h"
 #endif
@@ -108,7 +111,7 @@ bHYPRE_StructSMG_getClassInfo(
  */
 bHYPRE_StructSMG
 bHYPRE_StructSMG_Create(
-  /* in */ void* mpi_comm);
+  /* in */ bHYPRE_MPICommunicator mpi_comm);
 
 /**
  * Set the MPI Communicator.
@@ -118,7 +121,7 @@ bHYPRE_StructSMG_Create(
 int32_t
 bHYPRE_StructSMG_SetCommunicator(
   /* in */ bHYPRE_StructSMG self,
-  /* in */ void* mpi_comm);
+  /* in */ bHYPRE_MPICommunicator mpi_comm);
 
 /**
  * Set the int parameter associated with {\tt name}.

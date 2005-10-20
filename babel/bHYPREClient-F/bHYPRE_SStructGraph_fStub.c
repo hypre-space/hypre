@@ -32,6 +32,7 @@
 #include "bHYPRE_SStructGraph_IOR.h"
 #include "bHYPRE_SStructStencil_IOR.h"
 #include "bHYPRE_SStructGrid_IOR.h"
+#include "bHYPRE_MPICommunicator_IOR.h"
 #include "sidl_ClassInfo_IOR.h"
 #include "sidl_BaseInterface_IOR.h"
 
@@ -341,11 +342,11 @@ SIDLFortran77Symbol(bhypre_sstructgraph_create_f,BHYPRE_SSTRUCTGRAPH_CREATE_F,bH
 )
 {
   const struct bHYPRE_SStructGraph__sepv *_epv = _getSEPV();
-  void* _proxy_mpi_comm = NULL;
+  struct bHYPRE_MPICommunicator__object* _proxy_mpi_comm = NULL;
   struct bHYPRE_SStructGrid__object* _proxy_grid = NULL;
   struct bHYPRE_SStructGraph__object* _proxy_retval = NULL;
   _proxy_mpi_comm =
-    (void*)
+    (struct bHYPRE_MPICommunicator__object*)
     (ptrdiff_t)(*mpi_comm);
   _proxy_grid =
     (struct bHYPRE_SStructGrid__object*)
@@ -375,13 +376,13 @@ SIDLFortran77Symbol(bhypre_sstructgraph_setcommgrid_f,BHYPRE_SSTRUCTGRAPH_SETCOM
 {
   struct bHYPRE_SStructGraph__epv *_epv = NULL;
   struct bHYPRE_SStructGraph__object* _proxy_self = NULL;
-  void* _proxy_mpi_comm = NULL;
+  struct bHYPRE_MPICommunicator__object* _proxy_mpi_comm = NULL;
   struct bHYPRE_SStructGrid__object* _proxy_grid = NULL;
   _proxy_self =
     (struct bHYPRE_SStructGraph__object*)
     (ptrdiff_t)(*self);
   _proxy_mpi_comm =
-    (void*)
+    (struct bHYPRE_MPICommunicator__object*)
     (ptrdiff_t)(*mpi_comm);
   _proxy_grid =
     (struct bHYPRE_SStructGrid__object*)
@@ -525,12 +526,12 @@ SIDLFortran77Symbol(bhypre_sstructgraph_setcommunicator_f,BHYPRE_SSTRUCTGRAPH_SE
 {
   struct bHYPRE_SStructGraph__epv *_epv = NULL;
   struct bHYPRE_SStructGraph__object* _proxy_self = NULL;
-  void* _proxy_mpi_comm = NULL;
+  struct bHYPRE_MPICommunicator__object* _proxy_mpi_comm = NULL;
   _proxy_self =
     (struct bHYPRE_SStructGraph__object*)
     (ptrdiff_t)(*self);
   _proxy_mpi_comm =
-    (void*)
+    (struct bHYPRE_MPICommunicator__object*)
     (ptrdiff_t)(*mpi_comm);
   _epv = _proxy_self->d_epv;
   *retval = 

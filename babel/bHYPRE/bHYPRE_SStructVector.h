@@ -33,6 +33,9 @@ typedef struct bHYPRE_SStructVector__object* bHYPRE_SStructVector;
 #ifndef included_sidl_header_h
 #include "sidl_header.h"
 #endif
+#ifndef included_bHYPRE_MPICommunicator_h
+#include "bHYPRE_MPICommunicator.h"
+#endif
 #ifndef included_bHYPRE_SStructGrid_h
 #include "bHYPRE_SStructGrid.h"
 #endif
@@ -105,7 +108,7 @@ bHYPRE_SStructVector_getClassInfo(
  */
 bHYPRE_SStructVector
 bHYPRE_SStructVector_Create(
-  /* in */ void* mpi_comm,
+  /* in */ bHYPRE_MPICommunicator mpi_comm,
   /* in */ bHYPRE_SStructGrid grid);
 
 /**
@@ -123,7 +126,7 @@ bHYPRE_SStructVector_SetObjectType(
 int32_t
 bHYPRE_SStructVector_SetCommunicator(
   /* in */ bHYPRE_SStructVector self,
-  /* in */ void* mpi_comm);
+  /* in */ bHYPRE_MPICommunicator mpi_comm);
 
 /**
  * Prepare an object for setting coefficient values, whether for

@@ -34,6 +34,7 @@
 #include "sstruct_mv.h"
 #include "bHYPRE_SStructGrid_Impl.h"
 #include "bHYPRE_IJParCSRVector_Impl.h"
+#include "bHYPRE_MPICommunicator_Impl.h"
 /* DO-NOT-DELETE splicer.end(bHYPRE.SStructParCSRVector._includes) */
 
 /*
@@ -125,7 +126,7 @@ extern "C"
 #endif
 bHYPRE_SStructParCSRVector
 impl_bHYPRE_SStructParCSRVector_Create(
-  /* in */ void* mpi_comm,
+  /* in */ bHYPRE_MPICommunicator mpi_comm,
   /* in */ bHYPRE_SStructGrid grid)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructParCSRVector.Create) */
@@ -137,6 +138,7 @@ impl_bHYPRE_SStructParCSRVector_Create(
    HYPRE_SStructVector Hvec;
    struct bHYPRE_SStructGrid__data * gdata;
    HYPRE_SStructGrid Hgrid;
+   MPI_Comm comm = bHYPRE_MPICommunicator__get_data(mpi_comm)->mpi_comm;
 
    vec = bHYPRE_SStructParCSRVector__create();
    data = bHYPRE_SStructParCSRVector__get_data( vec );
@@ -144,9 +146,9 @@ impl_bHYPRE_SStructParCSRVector_Create(
    gdata = bHYPRE_SStructGrid__get_data( grid );
    Hgrid = gdata->grid;
 
-   ierr += HYPRE_SStructVectorCreate( (MPI_Comm) mpi_comm, Hgrid, &Hvec );
+   ierr += HYPRE_SStructVectorCreate( comm, Hgrid, &Hvec );
    data->vec = Hvec;
-   data -> comm = (MPI_Comm) mpi_comm;
+   data -> comm = comm;
 
    return( vec );
 
@@ -167,7 +169,7 @@ extern "C"
 int32_t
 impl_bHYPRE_SStructParCSRVector_SetCommunicator(
   /* in */ bHYPRE_SStructParCSRVector self,
-  /* in */ void* mpi_comm)
+  /* in */ bHYPRE_MPICommunicator mpi_comm)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructParCSRVector.SetCommunicator) */
   /* Insert the implementation of the SetCommunicator method here... */
@@ -177,7 +179,7 @@ impl_bHYPRE_SStructParCSRVector_SetCommunicator(
    int ierr = 0;
    struct bHYPRE_SStructParCSRVector__data * data;
    data = bHYPRE_SStructParCSRVector__get_data( self );
-   data -> comm = (MPI_Comm) mpi_comm;
+   data->comm = bHYPRE_MPICommunicator__get_data(mpi_comm)->mpi_comm;
 
    return ierr;
 
@@ -908,6 +910,15 @@ char *
   impl_bHYPRE_SStructParCSRVector_fgetURL_bHYPRE_SStruct_MatrixVectorView(
   struct bHYPRE_SStruct_MatrixVectorView__object* obj) {
   return bHYPRE_SStruct_MatrixVectorView__getURL(obj);
+}
+struct bHYPRE_MPICommunicator__object* 
+  impl_bHYPRE_SStructParCSRVector_fconnect_bHYPRE_MPICommunicator(char* url,
+  sidl_BaseInterface *_ex) {
+  return bHYPRE_MPICommunicator__connect(url, _ex);
+}
+char * impl_bHYPRE_SStructParCSRVector_fgetURL_bHYPRE_MPICommunicator(struct 
+  bHYPRE_MPICommunicator__object* obj) {
+  return bHYPRE_MPICommunicator__getURL(obj);
 }
 struct sidl_ClassInfo__object* 
   impl_bHYPRE_SStructParCSRVector_fconnect_sidl_ClassInfo(char* url,

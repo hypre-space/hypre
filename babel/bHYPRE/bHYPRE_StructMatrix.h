@@ -35,6 +35,9 @@ typedef struct bHYPRE_StructMatrix__object* bHYPRE_StructMatrix;
 #ifndef included_sidl_header_h
 #include "sidl_header.h"
 #endif
+#ifndef included_bHYPRE_MPICommunicator_h
+#include "bHYPRE_MPICommunicator.h"
+#endif
 #ifndef included_bHYPRE_StructGrid_h
 #include "bHYPRE_StructGrid.h"
 #endif
@@ -110,7 +113,7 @@ bHYPRE_StructMatrix_getClassInfo(
  */
 bHYPRE_StructMatrix
 bHYPRE_StructMatrix_Create(
-  /* in */ void* mpi_comm,
+  /* in */ bHYPRE_MPICommunicator mpi_comm,
   /* in */ bHYPRE_StructGrid grid,
   /* in */ bHYPRE_StructStencil stencil);
 
@@ -121,7 +124,7 @@ bHYPRE_StructMatrix_Create(
 int32_t
 bHYPRE_StructMatrix_SetCommunicator(
   /* in */ bHYPRE_StructMatrix self,
-  /* in */ void* mpi_comm);
+  /* in */ bHYPRE_MPICommunicator mpi_comm);
 
 /**
  * Prepare an object for setting coefficient values, whether for

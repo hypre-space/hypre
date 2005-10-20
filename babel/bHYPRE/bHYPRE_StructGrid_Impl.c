@@ -30,6 +30,7 @@
 /*#include "mpi.h"*/
 #include "HYPRE_struct_mv.h"
 #include "utilities.h"
+#include "bHYPRE_MPICommunicator_Impl.h"
 /* DO-NOT-DELETE splicer.end(bHYPRE.StructGrid._includes) */
 
 /*
@@ -120,7 +121,7 @@ extern "C"
 #endif
 bHYPRE_StructGrid
 impl_bHYPRE_StructGrid_Create(
-  /* in */ void* mpi_comm,
+  /* in */ bHYPRE_MPICommunicator mpi_comm,
   /* in */ int32_t dim)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.StructGrid.Create) */
@@ -133,7 +134,7 @@ impl_bHYPRE_StructGrid_Create(
 
    grid = bHYPRE_StructGrid__create();
    data = bHYPRE_StructGrid__get_data( grid );
-   data->comm = (MPI_Comm) mpi_comm;
+   data->comm = bHYPRE_MPICommunicator__get_data(mpi_comm)->mpi_comm;
 
    ierr += HYPRE_StructGridCreate( data->comm, dim, &Hgrid );
    hypre_assert( ierr==0 );
@@ -159,7 +160,7 @@ extern "C"
 int32_t
 impl_bHYPRE_StructGrid_SetCommunicator(
   /* in */ bHYPRE_StructGrid self,
-  /* in */ void* mpi_comm)
+  /* in */ bHYPRE_MPICommunicator mpi_comm)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.StructGrid.SetCommunicator) */
   /* Insert the implementation of the SetCommunicator method here... */
@@ -170,7 +171,7 @@ impl_bHYPRE_StructGrid_SetCommunicator(
    int ierr = 0;
    struct bHYPRE_StructGrid__data * data;
    data = bHYPRE_StructGrid__get_data( self );
-   data -> comm = (MPI_Comm) mpi_comm;
+   data->comm = bHYPRE_MPICommunicator__get_data(mpi_comm)->mpi_comm;
 
    return ierr;
 
@@ -360,6 +361,15 @@ struct bHYPRE_StructGrid__object*
 char * impl_bHYPRE_StructGrid_fgetURL_bHYPRE_StructGrid(struct 
   bHYPRE_StructGrid__object* obj) {
   return bHYPRE_StructGrid__getURL(obj);
+}
+struct bHYPRE_MPICommunicator__object* 
+  impl_bHYPRE_StructGrid_fconnect_bHYPRE_MPICommunicator(char* url,
+  sidl_BaseInterface *_ex) {
+  return bHYPRE_MPICommunicator__connect(url, _ex);
+}
+char * impl_bHYPRE_StructGrid_fgetURL_bHYPRE_MPICommunicator(struct 
+  bHYPRE_MPICommunicator__object* obj) {
+  return bHYPRE_MPICommunicator__getURL(obj);
 }
 struct sidl_ClassInfo__object* 
   impl_bHYPRE_StructGrid_fconnect_sidl_ClassInfo(char* url,

@@ -32,13 +32,18 @@ impl_bHYPRE_IdentitySolver__dtor(
 extern
 bHYPRE_IdentitySolver
 impl_bHYPRE_IdentitySolver_Create(
-  /* in */ void* mpi_comm);
+  /* in */ bHYPRE_MPICommunicator mpi_comm);
 
 extern struct bHYPRE_Solver__object* 
   impl_bHYPRE_IdentitySolver_fconnect_bHYPRE_Solver(char* url,
   sidl_BaseInterface *_ex);
 extern char* impl_bHYPRE_IdentitySolver_fgetURL_bHYPRE_Solver(struct 
   bHYPRE_Solver__object* obj);
+extern struct bHYPRE_MPICommunicator__object* 
+  impl_bHYPRE_IdentitySolver_fconnect_bHYPRE_MPICommunicator(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_IdentitySolver_fgetURL_bHYPRE_MPICommunicator(struct 
+  bHYPRE_MPICommunicator__object* obj);
 extern struct bHYPRE_Operator__object* 
   impl_bHYPRE_IdentitySolver_fconnect_bHYPRE_Operator(char* url,
   sidl_BaseInterface *_ex);
@@ -73,7 +78,7 @@ extern
 int32_t
 impl_bHYPRE_IdentitySolver_SetCommunicator(
   /* in */ bHYPRE_IdentitySolver self,
-  /* in */ void* mpi_comm);
+  /* in */ bHYPRE_MPICommunicator mpi_comm);
 
 extern
 int32_t
@@ -201,6 +206,11 @@ extern struct bHYPRE_Solver__object*
   sidl_BaseInterface *_ex);
 extern char* impl_bHYPRE_IdentitySolver_fgetURL_bHYPRE_Solver(struct 
   bHYPRE_Solver__object* obj);
+extern struct bHYPRE_MPICommunicator__object* 
+  impl_bHYPRE_IdentitySolver_fconnect_bHYPRE_MPICommunicator(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_IdentitySolver_fgetURL_bHYPRE_MPICommunicator(struct 
+  bHYPRE_MPICommunicator__object* obj);
 extern struct bHYPRE_Operator__object* 
   impl_bHYPRE_IdentitySolver_fconnect_bHYPRE_Operator(char* url,
   sidl_BaseInterface *_ex);
@@ -374,6 +384,17 @@ struct bHYPRE_Solver__object*
 char* skel_bHYPRE_IdentitySolver_fgetURL_bHYPRE_Solver(struct 
   bHYPRE_Solver__object* obj) { 
   return impl_bHYPRE_IdentitySolver_fgetURL_bHYPRE_Solver(obj);
+}
+
+struct bHYPRE_MPICommunicator__object* 
+  skel_bHYPRE_IdentitySolver_fconnect_bHYPRE_MPICommunicator(char* url,
+  sidl_BaseInterface *_ex) { 
+  return impl_bHYPRE_IdentitySolver_fconnect_bHYPRE_MPICommunicator(url, _ex);
+}
+
+char* skel_bHYPRE_IdentitySolver_fgetURL_bHYPRE_MPICommunicator(struct 
+  bHYPRE_MPICommunicator__object* obj) { 
+  return impl_bHYPRE_IdentitySolver_fgetURL_bHYPRE_MPICommunicator(obj);
 }
 
 struct bHYPRE_Operator__object* 

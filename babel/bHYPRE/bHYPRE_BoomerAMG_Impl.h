@@ -22,6 +22,9 @@
 #ifndef included_bHYPRE_BoomerAMG_h
 #include "bHYPRE_BoomerAMG.h"
 #endif
+#ifndef included_bHYPRE_MPICommunicator_h
+#include "bHYPRE_MPICommunicator.h"
+#endif
 #ifndef included_bHYPRE_Operator_h
 #include "bHYPRE_Operator.h"
 #endif
@@ -54,7 +57,7 @@
 struct bHYPRE_BoomerAMG__data {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.BoomerAMG._data) */
   /* Put private data members here... */
-   MPI_Comm * comm;
+   MPI_Comm comm;
    HYPRE_Solver solver;
    bHYPRE_IJParCSRMatrix matrix;
   /* DO-NOT-DELETE splicer.end(bHYPRE.BoomerAMG._data) */
@@ -99,7 +102,7 @@ impl_bHYPRE_BoomerAMG__dtor(
 extern
 bHYPRE_BoomerAMG
 impl_bHYPRE_BoomerAMG_Create(
-  /* in */ void* mpi_comm);
+  /* in */ bHYPRE_MPICommunicator mpi_comm);
 
 extern struct bHYPRE_Solver__object* 
   impl_bHYPRE_BoomerAMG_fconnect_bHYPRE_Solver(char* url,
@@ -111,6 +114,11 @@ extern struct bHYPRE_BoomerAMG__object*
   sidl_BaseInterface *_ex);
 extern char* impl_bHYPRE_BoomerAMG_fgetURL_bHYPRE_BoomerAMG(struct 
   bHYPRE_BoomerAMG__object* obj);
+extern struct bHYPRE_MPICommunicator__object* 
+  impl_bHYPRE_BoomerAMG_fconnect_bHYPRE_MPICommunicator(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_BoomerAMG_fgetURL_bHYPRE_MPICommunicator(struct 
+  bHYPRE_MPICommunicator__object* obj);
 extern struct bHYPRE_Operator__object* 
   impl_bHYPRE_BoomerAMG_fconnect_bHYPRE_Operator(char* url,
   sidl_BaseInterface *_ex);
@@ -160,7 +168,7 @@ extern
 int32_t
 impl_bHYPRE_BoomerAMG_SetCommunicator(
   /* in */ bHYPRE_BoomerAMG self,
-  /* in */ void* mpi_comm);
+  /* in */ bHYPRE_MPICommunicator mpi_comm);
 
 extern
 int32_t
@@ -293,6 +301,11 @@ extern struct bHYPRE_BoomerAMG__object*
   sidl_BaseInterface *_ex);
 extern char* impl_bHYPRE_BoomerAMG_fgetURL_bHYPRE_BoomerAMG(struct 
   bHYPRE_BoomerAMG__object* obj);
+extern struct bHYPRE_MPICommunicator__object* 
+  impl_bHYPRE_BoomerAMG_fconnect_bHYPRE_MPICommunicator(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_BoomerAMG_fgetURL_bHYPRE_MPICommunicator(struct 
+  bHYPRE_MPICommunicator__object* obj);
 extern struct bHYPRE_Operator__object* 
   impl_bHYPRE_BoomerAMG_fconnect_bHYPRE_Operator(char* url,
   sidl_BaseInterface *_ex);

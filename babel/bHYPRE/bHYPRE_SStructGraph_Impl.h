@@ -22,6 +22,9 @@
 #ifndef included_bHYPRE_SStructStencil_h
 #include "bHYPRE_SStructStencil.h"
 #endif
+#ifndef included_bHYPRE_MPICommunicator_h
+#include "bHYPRE_MPICommunicator.h"
+#endif
 #ifndef included_sidl_ClassInfo_h
 #include "sidl_ClassInfo.h"
 #endif
@@ -93,7 +96,7 @@ impl_bHYPRE_SStructGraph__dtor(
 extern
 bHYPRE_SStructGraph
 impl_bHYPRE_SStructGraph_Create(
-  /* in */ void* mpi_comm,
+  /* in */ bHYPRE_MPICommunicator mpi_comm,
   /* in */ bHYPRE_SStructGrid grid);
 
 extern struct bHYPRE_SStructGrid__object* 
@@ -106,6 +109,11 @@ extern struct bHYPRE_SStructStencil__object*
   sidl_BaseInterface *_ex);
 extern char* impl_bHYPRE_SStructGraph_fgetURL_bHYPRE_SStructStencil(struct 
   bHYPRE_SStructStencil__object* obj);
+extern struct bHYPRE_MPICommunicator__object* 
+  impl_bHYPRE_SStructGraph_fconnect_bHYPRE_MPICommunicator(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_SStructGraph_fgetURL_bHYPRE_MPICommunicator(struct 
+  bHYPRE_MPICommunicator__object* obj);
 extern struct sidl_ClassInfo__object* 
   impl_bHYPRE_SStructGraph_fconnect_sidl_ClassInfo(char* url,
   sidl_BaseInterface *_ex);
@@ -135,7 +143,7 @@ extern
 int32_t
 impl_bHYPRE_SStructGraph_SetCommGrid(
   /* in */ bHYPRE_SStructGraph self,
-  /* in */ void* mpi_comm,
+  /* in */ bHYPRE_MPICommunicator mpi_comm,
   /* in */ bHYPRE_SStructGrid grid);
 
 extern
@@ -168,7 +176,7 @@ extern
 int32_t
 impl_bHYPRE_SStructGraph_SetCommunicator(
   /* in */ bHYPRE_SStructGraph self,
-  /* in */ void* mpi_comm);
+  /* in */ bHYPRE_MPICommunicator mpi_comm);
 
 extern
 int32_t
@@ -190,6 +198,11 @@ extern struct bHYPRE_SStructStencil__object*
   sidl_BaseInterface *_ex);
 extern char* impl_bHYPRE_SStructGraph_fgetURL_bHYPRE_SStructStencil(struct 
   bHYPRE_SStructStencil__object* obj);
+extern struct bHYPRE_MPICommunicator__object* 
+  impl_bHYPRE_SStructGraph_fconnect_bHYPRE_MPICommunicator(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_SStructGraph_fgetURL_bHYPRE_MPICommunicator(struct 
+  bHYPRE_MPICommunicator__object* obj);
 extern struct sidl_ClassInfo__object* 
   impl_bHYPRE_SStructGraph_fconnect_sidl_ClassInfo(char* url,
   sidl_BaseInterface *_ex);

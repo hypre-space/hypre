@@ -33,6 +33,9 @@ typedef struct bHYPRE_IJParCSRVector__object* bHYPRE_IJParCSRVector;
 #ifndef included_sidl_header_h
 #include "sidl_header.h"
 #endif
+#ifndef included_bHYPRE_MPICommunicator_h
+#include "bHYPRE_MPICommunicator.h"
+#endif
 #ifndef included_bHYPRE_Vector_h
 #include "bHYPRE_Vector.h"
 #endif
@@ -102,7 +105,7 @@ bHYPRE_IJParCSRVector_getClassInfo(
  */
 bHYPRE_IJParCSRVector
 bHYPRE_IJParCSRVector_Create(
-  /* in */ void* mpi_comm,
+  /* in */ bHYPRE_MPICommunicator mpi_comm,
   /* in */ int32_t jlower,
   /* in */ int32_t jupper);
 
@@ -113,7 +116,7 @@ bHYPRE_IJParCSRVector_Create(
 int32_t
 bHYPRE_IJParCSRVector_SetCommunicator(
   /* in */ bHYPRE_IJParCSRVector self,
-  /* in */ void* mpi_comm);
+  /* in */ bHYPRE_MPICommunicator mpi_comm);
 
 /**
  * Prepare an object for setting coefficient values, whether for
@@ -230,7 +233,7 @@ int32_t
 bHYPRE_IJParCSRVector_Read(
   /* in */ bHYPRE_IJParCSRVector self,
   /* in */ const char* filename,
-  /* in */ void* comm);
+  /* in */ bHYPRE_MPICommunicator comm);
 
 /**
  * Set {\tt self} to 0.

@@ -70,6 +70,8 @@ extern void bHYPRE_GMRES__IOR_version(int32_t *major, int32_t *minor);
  * Forward references for external classes and interfaces.
  */
 
+struct bHYPRE_MPICommunicator__array;
+struct bHYPRE_MPICommunicator__object;
 struct bHYPRE_Vector__array;
 struct bHYPRE_Vector__object;
 struct sidl_BaseInterface__array;
@@ -94,7 +96,7 @@ struct bHYPRE_GMRES__sepv {
   /* Methods introduced in bHYPRE.PreconditionedSolver-v1.0.0 */
   /* Methods introduced in bHYPRE.GMRES-v1.0.0 */
   struct bHYPRE_GMRES__object* (*f_Create)(
-    /* in */ void* mpi_comm);
+    /* in */ struct bHYPRE_MPICommunicator__object* mpi_comm);
 };
 
 /*
@@ -139,7 +141,7 @@ struct bHYPRE_GMRES__epv {
   /* Methods introduced in bHYPRE.Operator-v1.0.0 */
   int32_t (*f_SetCommunicator)(
     /* in */ struct bHYPRE_GMRES__object* self,
-    /* in */ void* mpi_comm);
+    /* in */ struct bHYPRE_MPICommunicator__object* mpi_comm);
   int32_t (*f_SetIntParameter)(
     /* in */ struct bHYPRE_GMRES__object* self,
     /* in */ const char* name,
@@ -248,6 +250,12 @@ struct bHYPRE_Solver__object* skel_bHYPRE_GMRES_fconnect_bHYPRE_Solver(char*
   url, struct sidl_BaseInterface__object **_ex);
 char* skel_bHYPRE_GMRES_fgetURL_bHYPRE_Solver(struct bHYPRE_Solver__object* 
   obj); 
+
+struct bHYPRE_MPICommunicator__object* 
+  skel_bHYPRE_GMRES_fconnect_bHYPRE_MPICommunicator(char* url,
+  struct sidl_BaseInterface__object **_ex);
+char* skel_bHYPRE_GMRES_fgetURL_bHYPRE_MPICommunicator(struct 
+  bHYPRE_MPICommunicator__object* obj); 
 
 struct bHYPRE_GMRES__object* skel_bHYPRE_GMRES_fconnect_bHYPRE_GMRES(char* url,
   struct sidl_BaseInterface__object **_ex);

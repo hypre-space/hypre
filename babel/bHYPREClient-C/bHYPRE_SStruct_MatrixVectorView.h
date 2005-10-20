@@ -28,6 +28,9 @@ typedef struct bHYPRE_SStruct_MatrixVectorView__object*
 #ifndef included_sidl_header_h
 #include "sidl_header.h"
 #endif
+#ifndef included_bHYPRE_MPICommunicator_h
+#include "bHYPRE_MPICommunicator.h"
+#endif
 #ifndef included_sidl_BaseInterface_h
 #include "sidl_BaseInterface.h"
 #endif
@@ -80,7 +83,7 @@ bHYPRE_SStruct_MatrixVectorView_getClassInfo(
 int32_t
 bHYPRE_SStruct_MatrixVectorView_SetCommunicator(
   /* in */ bHYPRE_SStruct_MatrixVectorView self,
-  /* in */ void* mpi_comm);
+  /* in */ bHYPRE_MPICommunicator mpi_comm);
 
 int32_t
 bHYPRE_SStruct_MatrixVectorView_Initialize(

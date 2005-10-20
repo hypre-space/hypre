@@ -68,6 +68,8 @@ extern void bHYPRE_StructMatrix__IOR_version(int32_t *major, int32_t *minor);
  * Forward references for external classes and interfaces.
  */
 
+struct bHYPRE_MPICommunicator__array;
+struct bHYPRE_MPICommunicator__object;
 struct bHYPRE_StructGrid__array;
 struct bHYPRE_StructGrid__object;
 struct bHYPRE_StructStencil__array;
@@ -97,7 +99,7 @@ struct bHYPRE_StructMatrix__sepv {
   /* Methods introduced in bHYPRE.StructMatrixView-v1.0.0 */
   /* Methods introduced in bHYPRE.StructMatrix-v1.0.0 */
   struct bHYPRE_StructMatrix__object* (*f_Create)(
-    /* in */ void* mpi_comm,
+    /* in */ struct bHYPRE_MPICommunicator__object* mpi_comm,
     /* in */ struct bHYPRE_StructGrid__object* grid,
     /* in */ struct bHYPRE_StructStencil__object* stencil);
 };
@@ -144,7 +146,7 @@ struct bHYPRE_StructMatrix__epv {
   /* Methods introduced in bHYPRE.Operator-v1.0.0 */
   int32_t (*f_SetCommunicator)(
     /* in */ struct bHYPRE_StructMatrix__object* self,
-    /* in */ void* mpi_comm);
+    /* in */ struct bHYPRE_MPICommunicator__object* mpi_comm);
   int32_t (*f_SetIntParameter)(
     /* in */ struct bHYPRE_StructMatrix__object* self,
     /* in */ const char* name,
@@ -276,6 +278,12 @@ struct bHYPRE_StructGrid__object*
   struct sidl_BaseInterface__object **_ex);
 char* skel_bHYPRE_StructMatrix_fgetURL_bHYPRE_StructGrid(struct 
   bHYPRE_StructGrid__object* obj); 
+
+struct bHYPRE_MPICommunicator__object* 
+  skel_bHYPRE_StructMatrix_fconnect_bHYPRE_MPICommunicator(char* url,
+  struct sidl_BaseInterface__object **_ex);
+char* skel_bHYPRE_StructMatrix_fgetURL_bHYPRE_MPICommunicator(struct 
+  bHYPRE_MPICommunicator__object* obj); 
 
 struct bHYPRE_Operator__object* 
   skel_bHYPRE_StructMatrix_fconnect_bHYPRE_Operator(char* url,

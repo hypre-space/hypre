@@ -22,6 +22,9 @@
 #ifndef included_bHYPRE_StructVectorView_h
 #include "bHYPRE_StructVectorView.h"
 #endif
+#ifndef included_bHYPRE_MPICommunicator_h
+#include "bHYPRE_MPICommunicator.h"
+#endif
 #ifndef included_sidl_ClassInfo_h
 #include "sidl_ClassInfo.h"
 #endif
@@ -102,7 +105,7 @@ impl_bHYPRE_StructVector__dtor(
 extern
 bHYPRE_StructVector
 impl_bHYPRE_StructVector_Create(
-  /* in */ void* mpi_comm,
+  /* in */ bHYPRE_MPICommunicator mpi_comm,
   /* in */ bHYPRE_StructGrid grid);
 
 extern struct bHYPRE_StructGrid__object* 
@@ -115,6 +118,11 @@ extern struct bHYPRE_StructVectorView__object*
   sidl_BaseInterface *_ex);
 extern char* impl_bHYPRE_StructVector_fgetURL_bHYPRE_StructVectorView(struct 
   bHYPRE_StructVectorView__object* obj);
+extern struct bHYPRE_MPICommunicator__object* 
+  impl_bHYPRE_StructVector_fconnect_bHYPRE_MPICommunicator(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_StructVector_fgetURL_bHYPRE_MPICommunicator(struct 
+  bHYPRE_MPICommunicator__object* obj);
 extern struct sidl_ClassInfo__object* 
   impl_bHYPRE_StructVector_fconnect_sidl_ClassInfo(char* url,
   sidl_BaseInterface *_ex);
@@ -154,7 +162,7 @@ extern
 int32_t
 impl_bHYPRE_StructVector_SetCommunicator(
   /* in */ bHYPRE_StructVector self,
-  /* in */ void* mpi_comm);
+  /* in */ bHYPRE_MPICommunicator mpi_comm);
 
 extern
 int32_t
@@ -244,6 +252,11 @@ extern struct bHYPRE_StructVectorView__object*
   sidl_BaseInterface *_ex);
 extern char* impl_bHYPRE_StructVector_fgetURL_bHYPRE_StructVectorView(struct 
   bHYPRE_StructVectorView__object* obj);
+extern struct bHYPRE_MPICommunicator__object* 
+  impl_bHYPRE_StructVector_fconnect_bHYPRE_MPICommunicator(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_StructVector_fgetURL_bHYPRE_MPICommunicator(struct 
+  bHYPRE_MPICommunicator__object* obj);
 extern struct sidl_ClassInfo__object* 
   impl_bHYPRE_StructVector_fconnect_sidl_ClassInfo(char* url,
   sidl_BaseInterface *_ex);

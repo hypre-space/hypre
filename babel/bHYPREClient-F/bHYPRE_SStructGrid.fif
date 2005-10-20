@@ -175,7 +175,7 @@ C
         subroutine bHYPRE_SStructGrid_Create_f(mpi_comm, ndim, nparts,
      &     retval)
         implicit none
-C       in opaque mpi_comm
+C       in bHYPRE.MPICommunicator mpi_comm
         integer*8 mpi_comm
 C       in int ndim
         integer*4 ndim
@@ -213,7 +213,7 @@ C
         implicit none
 C       in bHYPRE.SStructGrid self
         integer*8 self
-C       in opaque mpi_comm
+C       in bHYPRE.MPICommunicator mpi_comm
         integer*8 mpi_comm
 C       out int retval
         integer*4 retval

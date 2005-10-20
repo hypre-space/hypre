@@ -262,11 +262,16 @@ bHYPRE_IJParCSRMatrix_SetCommunicator__exec(
         struct sidl_io_Deserializer__object* inArgs,
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
-  void* mpi_comm;
+  char* mpi_comm_str= NULL;
+  struct bHYPRE_MPICommunicator__object* mpi_comm= NULL;
   int32_t _retval;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
+  sidl_io_Deserializer_unpackString( inArgs, "mpi_comm", &mpi_comm_str, _ex2);
+  mpi_comm = 
+    skel_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_MPICommunicator(mpi_comm_str,
+    _ex2);
 
   /* make the call */
   _retval = (self->d_epv->f_SetCommunicator)(
@@ -570,12 +575,16 @@ bHYPRE_IJParCSRMatrix_Read__exec(
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
   char* filename= NULL;
-  void* comm;
+  char* comm_str= NULL;
+  struct bHYPRE_MPICommunicator__object* comm= NULL;
   int32_t _retval;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
   sidl_io_Deserializer_unpackString( inArgs, "filename", &filename, _ex2);
+  sidl_io_Deserializer_unpackString( inArgs, "comm", &comm_str, _ex2);
+  comm = skel_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_MPICommunicator(comm_str,
+    _ex2);
 
   /* make the call */
   _retval = (self->d_epv->f_Read)(
@@ -1167,7 +1176,8 @@ static void bHYPRE_IJParCSRMatrix__init_epv(
   e1->f_isType              = (sidl_bool (*)(void*,const char*)) epv->f_isType;
   e1->f_getClassInfo        = (struct sidl_ClassInfo__object* (*)(void*)) 
     epv->f_getClassInfo;
-  e1->f_SetCommunicator     = (int32_t (*)(void*,void*)) epv->f_SetCommunicator;
+  e1->f_SetCommunicator     = (int32_t (*)(void*,
+    struct bHYPRE_MPICommunicator__object*)) epv->f_SetCommunicator;
   e1->f_Initialize          = (int32_t (*)(void*)) epv->f_Initialize;
   e1->f_Assemble            = (int32_t (*)(void*)) epv->f_Assemble;
   e1->f_SetLocalRange       = (int32_t (*)(void*,int32_t,int32_t,int32_t,
@@ -1189,7 +1199,7 @@ static void bHYPRE_IJParCSRMatrix__init_epv(
     struct sidl_int__array*)) epv->f_SetRowSizes;
   e1->f_Print               = (int32_t (*)(void*,const char*)) epv->f_Print;
   e1->f_Read                = (int32_t (*)(void*,const char*,
-    void*)) epv->f_Read;
+    struct bHYPRE_MPICommunicator__object*)) epv->f_Read;
 
   e2->f__cast               = (void* (*)(void*,const char*)) epv->f__cast;
   e2->f__delete             = (void (*)(void*)) epv->f__delete;
@@ -1205,7 +1215,8 @@ static void bHYPRE_IJParCSRMatrix__init_epv(
   e2->f_isType              = (sidl_bool (*)(void*,const char*)) epv->f_isType;
   e2->f_getClassInfo        = (struct sidl_ClassInfo__object* (*)(void*)) 
     epv->f_getClassInfo;
-  e2->f_SetCommunicator     = (int32_t (*)(void*,void*)) epv->f_SetCommunicator;
+  e2->f_SetCommunicator     = (int32_t (*)(void*,
+    struct bHYPRE_MPICommunicator__object*)) epv->f_SetCommunicator;
   e2->f_Initialize          = (int32_t (*)(void*)) epv->f_Initialize;
   e2->f_Assemble            = (int32_t (*)(void*)) epv->f_Assemble;
 
@@ -1225,7 +1236,7 @@ static void bHYPRE_IJParCSRMatrix__init_epv(
   e3->f_getClassInfo             = (struct sidl_ClassInfo__object* (*)(void*)) 
     epv->f_getClassInfo;
   e3->f_SetCommunicator          = (int32_t (*)(void*,
-    void*)) epv->f_SetCommunicator;
+    struct bHYPRE_MPICommunicator__object*)) epv->f_SetCommunicator;
   e3->f_SetIntParameter          = (int32_t (*)(void*,const char*,
     int32_t)) epv->f_SetIntParameter;
   e3->f_SetDoubleParameter       = (int32_t (*)(void*,const char*,
@@ -1263,7 +1274,8 @@ static void bHYPRE_IJParCSRMatrix__init_epv(
   e4->f_isType              = (sidl_bool (*)(void*,const char*)) epv->f_isType;
   e4->f_getClassInfo        = (struct sidl_ClassInfo__object* (*)(void*)) 
     epv->f_getClassInfo;
-  e4->f_SetCommunicator     = (int32_t (*)(void*,void*)) epv->f_SetCommunicator;
+  e4->f_SetCommunicator     = (int32_t (*)(void*,
+    struct bHYPRE_MPICommunicator__object*)) epv->f_SetCommunicator;
   e4->f_Initialize          = (int32_t (*)(void*)) epv->f_Initialize;
   e4->f_Assemble            = (int32_t (*)(void*)) epv->f_Assemble;
 

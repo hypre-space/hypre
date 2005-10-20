@@ -44,6 +44,9 @@
 #ifndef included_bHYPRE_IdentitySolver_IOR_h
 #include "bHYPRE_IdentitySolver_IOR.h"
 #endif
+#ifndef included_bHYPRE_MPICommunicator_IOR_h
+#include "bHYPRE_MPICommunicator_IOR.h"
+#endif
 #ifndef included_bHYPRE_MatrixVectorView_IOR_h
 #include "bHYPRE_MatrixVectorView_IOR.h"
 #endif

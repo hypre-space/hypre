@@ -226,7 +226,7 @@ bHYPRE_PCG_getClassInfo(
 
 bHYPRE_PCG
 bHYPRE_PCG_Create(
-  /* in */ void* mpi_comm)
+  /* in */ bHYPRE_MPICommunicator mpi_comm)
 {
   return (_getSEPV()->f_Create)(
     mpi_comm);
@@ -241,7 +241,7 @@ bHYPRE_PCG_Create(
 int32_t
 bHYPRE_PCG_SetCommunicator(
   /* in */ bHYPRE_PCG self,
-  /* in */ void* mpi_comm)
+  /* in */ bHYPRE_MPICommunicator mpi_comm)
 {
   return (*self->d_epv->f_SetCommunicator)(
     self,
@@ -587,10 +587,8 @@ bHYPRE_PCG_Create__sexec(
         struct sidl_io_Deserializer__object* inArgs,
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
-  void* mpi_comm;
+  bHYPRE_MPICommunicator mpi_comm;
   bHYPRE_PCG _retval;
-  sidl_BaseInterface _ex   = NULL;
-  sidl_BaseInterface *_ex2 = &_ex;
 
   /* unpack in and inout argments */
 
@@ -1296,7 +1294,7 @@ remote_bHYPRE_PCG_getClassInfo(
 static int32_t
 remote_bHYPRE_PCG_SetCommunicator(
   /* in */ struct bHYPRE_PCG__object* self /* TLD */,
-  /* in */ void* mpi_comm)
+  /* in */ struct bHYPRE_MPICommunicator__object* mpi_comm)
 {
   sidl_BaseInterface _ex = NULL;
   sidl_BaseInterface *_ex2 =&_ex;
@@ -1308,6 +1306,8 @@ remote_bHYPRE_PCG_SetCommunicator(
   int32_t _retval;
 
   /* pack in and inout arguments */
+  sidl_rmi_Invocation_packString( _inv, "mpi_comm",
+    bHYPRE_MPICommunicator__getURL(mpi_comm), _ex2);
 
   /* send actual RMI request */
   _rsvp = sidl_rmi_Invocation_invokeMethod(_inv,_ex2);
@@ -2037,7 +2037,7 @@ static void bHYPRE_PCG__init_remote_epv(void)
   e0->f_getClassInfo             = (struct sidl_ClassInfo__object* (*)(void*)) 
     epv->f_getClassInfo;
   e0->f_SetCommunicator          = (int32_t (*)(void*,
-    void*)) epv->f_SetCommunicator;
+    struct bHYPRE_MPICommunicator__object*)) epv->f_SetCommunicator;
   e0->f_SetIntParameter          = (int32_t (*)(void*,const char*,
     int32_t)) epv->f_SetIntParameter;
   e0->f_SetDoubleParameter       = (int32_t (*)(void*,const char*,
@@ -2077,7 +2077,7 @@ static void bHYPRE_PCG__init_remote_epv(void)
   e1->f_getClassInfo             = (struct sidl_ClassInfo__object* (*)(void*)) 
     epv->f_getClassInfo;
   e1->f_SetCommunicator          = (int32_t (*)(void*,
-    void*)) epv->f_SetCommunicator;
+    struct bHYPRE_MPICommunicator__object*)) epv->f_SetCommunicator;
   e1->f_SetIntParameter          = (int32_t (*)(void*,const char*,
     int32_t)) epv->f_SetIntParameter;
   e1->f_SetDoubleParameter       = (int32_t (*)(void*,const char*,
@@ -2133,7 +2133,7 @@ static void bHYPRE_PCG__init_remote_epv(void)
   e2->f_getClassInfo             = (struct sidl_ClassInfo__object* (*)(void*)) 
     epv->f_getClassInfo;
   e2->f_SetCommunicator          = (int32_t (*)(void*,
-    void*)) epv->f_SetCommunicator;
+    struct bHYPRE_MPICommunicator__object*)) epv->f_SetCommunicator;
   e2->f_SetIntParameter          = (int32_t (*)(void*,const char*,
     int32_t)) epv->f_SetIntParameter;
   e2->f_SetDoubleParameter       = (int32_t (*)(void*,const char*,

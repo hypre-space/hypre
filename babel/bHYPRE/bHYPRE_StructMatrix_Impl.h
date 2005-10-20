@@ -22,6 +22,9 @@
 #ifndef included_bHYPRE_StructGrid_h
 #include "bHYPRE_StructGrid.h"
 #endif
+#ifndef included_bHYPRE_MPICommunicator_h
+#include "bHYPRE_MPICommunicator.h"
+#endif
 #ifndef included_bHYPRE_Operator_h
 #include "bHYPRE_Operator.h"
 #endif
@@ -108,7 +111,7 @@ impl_bHYPRE_StructMatrix__dtor(
 extern
 bHYPRE_StructMatrix
 impl_bHYPRE_StructMatrix_Create(
-  /* in */ void* mpi_comm,
+  /* in */ bHYPRE_MPICommunicator mpi_comm,
   /* in */ bHYPRE_StructGrid grid,
   /* in */ bHYPRE_StructStencil stencil);
 
@@ -122,6 +125,11 @@ extern struct bHYPRE_StructGrid__object*
   sidl_BaseInterface *_ex);
 extern char* impl_bHYPRE_StructMatrix_fgetURL_bHYPRE_StructGrid(struct 
   bHYPRE_StructGrid__object* obj);
+extern struct bHYPRE_MPICommunicator__object* 
+  impl_bHYPRE_StructMatrix_fconnect_bHYPRE_MPICommunicator(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_StructMatrix_fgetURL_bHYPRE_MPICommunicator(struct 
+  bHYPRE_MPICommunicator__object* obj);
 extern struct bHYPRE_Operator__object* 
   impl_bHYPRE_StructMatrix_fconnect_bHYPRE_Operator(char* url,
   sidl_BaseInterface *_ex);
@@ -171,7 +179,7 @@ extern
 int32_t
 impl_bHYPRE_StructMatrix_SetCommunicator(
   /* in */ bHYPRE_StructMatrix self,
-  /* in */ void* mpi_comm);
+  /* in */ bHYPRE_MPICommunicator mpi_comm);
 
 extern
 int32_t
@@ -335,6 +343,11 @@ extern struct bHYPRE_StructGrid__object*
   sidl_BaseInterface *_ex);
 extern char* impl_bHYPRE_StructMatrix_fgetURL_bHYPRE_StructGrid(struct 
   bHYPRE_StructGrid__object* obj);
+extern struct bHYPRE_MPICommunicator__object* 
+  impl_bHYPRE_StructMatrix_fconnect_bHYPRE_MPICommunicator(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_StructMatrix_fgetURL_bHYPRE_MPICommunicator(struct 
+  bHYPRE_MPICommunicator__object* obj);
 extern struct bHYPRE_Operator__object* 
   impl_bHYPRE_StructMatrix_fconnect_bHYPRE_Operator(char* url,
   sidl_BaseInterface *_ex);

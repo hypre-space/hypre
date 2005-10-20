@@ -27,6 +27,9 @@ typedef struct bHYPRE_SStructMatrixView__object* bHYPRE_SStructMatrixView;
 #ifndef included_sidl_header_h
 #include "sidl_header.h"
 #endif
+#ifndef included_bHYPRE_MPICommunicator_h
+#include "bHYPRE_MPICommunicator.h"
+#endif
 #ifndef included_bHYPRE_SStructGraph_h
 #include "bHYPRE_SStructGraph.h"
 #endif
@@ -82,7 +85,7 @@ bHYPRE_SStructMatrixView_getClassInfo(
 int32_t
 bHYPRE_SStructMatrixView_SetCommunicator(
   /* in */ bHYPRE_SStructMatrixView self,
-  /* in */ void* mpi_comm);
+  /* in */ bHYPRE_MPICommunicator mpi_comm);
 
 int32_t
 bHYPRE_SStructMatrixView_Initialize(

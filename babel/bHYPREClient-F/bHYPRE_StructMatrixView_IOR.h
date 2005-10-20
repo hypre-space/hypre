@@ -31,6 +31,8 @@ struct bHYPRE_StructMatrixView__object;
  * Forward references for external classes and interfaces.
  */
 
+struct bHYPRE_MPICommunicator__array;
+struct bHYPRE_MPICommunicator__object;
 struct bHYPRE_StructGrid__array;
 struct bHYPRE_StructGrid__object;
 struct bHYPRE_StructStencil__array;
@@ -81,7 +83,7 @@ struct bHYPRE_StructMatrixView__epv {
   /* Methods introduced in bHYPRE.ProblemDefinition-v1.0.0 */
   int32_t (*f_SetCommunicator)(
     /* in */ void* self,
-    /* in */ void* mpi_comm);
+    /* in */ struct bHYPRE_MPICommunicator__object* mpi_comm);
   int32_t (*f_Initialize)(
     /* in */ void* self);
   int32_t (*f_Assemble)(
@@ -201,7 +203,7 @@ struct bHYPRE__StructMatrixView__epv {
   /* Methods introduced in bHYPRE.ProblemDefinition-v1.0.0 */
   int32_t (*f_SetCommunicator)(
     /* in */ struct bHYPRE__StructMatrixView__object* self,
-    /* in */ void* mpi_comm);
+    /* in */ struct bHYPRE_MPICommunicator__object* mpi_comm);
   int32_t (*f_Initialize)(
     /* in */ struct bHYPRE__StructMatrixView__object* self);
   int32_t (*f_Assemble)(

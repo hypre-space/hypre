@@ -36,6 +36,7 @@
 #endif
 #include "bHYPRE_StructMatrix_IOR.h"
 #include "bHYPRE_StructGrid_IOR.h"
+#include "bHYPRE_MPICommunicator_IOR.h"
 #include "sidl_ClassInfo_IOR.h"
 #include "bHYPRE_Vector_IOR.h"
 #include "bHYPRE_StructStencil_IOR.h"
@@ -348,12 +349,12 @@ SIDLFortran77Symbol(bhypre_structmatrix_create_f,BHYPRE_STRUCTMATRIX_CREATE_F,bH
 )
 {
   const struct bHYPRE_StructMatrix__sepv *_epv = _getSEPV();
-  void* _proxy_mpi_comm = NULL;
+  struct bHYPRE_MPICommunicator__object* _proxy_mpi_comm = NULL;
   struct bHYPRE_StructGrid__object* _proxy_grid = NULL;
   struct bHYPRE_StructStencil__object* _proxy_stencil = NULL;
   struct bHYPRE_StructMatrix__object* _proxy_retval = NULL;
   _proxy_mpi_comm =
-    (void*)
+    (struct bHYPRE_MPICommunicator__object*)
     (ptrdiff_t)(*mpi_comm);
   _proxy_grid =
     (struct bHYPRE_StructGrid__object*)
@@ -385,12 +386,12 @@ SIDLFortran77Symbol(bhypre_structmatrix_setcommunicator_f,BHYPRE_STRUCTMATRIX_SE
 {
   struct bHYPRE_StructMatrix__epv *_epv = NULL;
   struct bHYPRE_StructMatrix__object* _proxy_self = NULL;
-  void* _proxy_mpi_comm = NULL;
+  struct bHYPRE_MPICommunicator__object* _proxy_mpi_comm = NULL;
   _proxy_self =
     (struct bHYPRE_StructMatrix__object*)
     (ptrdiff_t)(*self);
   _proxy_mpi_comm =
-    (void*)
+    (struct bHYPRE_MPICommunicator__object*)
     (ptrdiff_t)(*mpi_comm);
   _epv = _proxy_self->d_epv;
   *retval = 

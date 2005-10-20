@@ -19,6 +19,9 @@
 #ifndef included_bHYPRE_IJParCSRVector_h
 #include "bHYPRE_IJParCSRVector.h"
 #endif
+#ifndef included_bHYPRE_MPICommunicator_h
+#include "bHYPRE_MPICommunicator.h"
+#endif
 #ifndef included_sidl_ClassInfo_h
 #include "sidl_ClassInfo.h"
 #endif
@@ -99,7 +102,7 @@ impl_bHYPRE_IJParCSRVector__dtor(
 extern
 bHYPRE_IJParCSRVector
 impl_bHYPRE_IJParCSRVector_Create(
-  /* in */ void* mpi_comm,
+  /* in */ bHYPRE_MPICommunicator mpi_comm,
   /* in */ int32_t jlower,
   /* in */ int32_t jupper);
 
@@ -108,6 +111,11 @@ extern struct bHYPRE_IJParCSRVector__object*
   sidl_BaseInterface *_ex);
 extern char* impl_bHYPRE_IJParCSRVector_fgetURL_bHYPRE_IJParCSRVector(struct 
   bHYPRE_IJParCSRVector__object* obj);
+extern struct bHYPRE_MPICommunicator__object* 
+  impl_bHYPRE_IJParCSRVector_fconnect_bHYPRE_MPICommunicator(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_IJParCSRVector_fgetURL_bHYPRE_MPICommunicator(struct 
+  bHYPRE_MPICommunicator__object* obj);
 extern struct sidl_ClassInfo__object* 
   impl_bHYPRE_IJParCSRVector_fconnect_sidl_ClassInfo(char* url,
   sidl_BaseInterface *_ex);
@@ -147,7 +155,7 @@ extern
 int32_t
 impl_bHYPRE_IJParCSRVector_SetCommunicator(
   /* in */ bHYPRE_IJParCSRVector self,
-  /* in */ void* mpi_comm);
+  /* in */ bHYPRE_MPICommunicator mpi_comm);
 
 extern
 int32_t
@@ -208,7 +216,7 @@ int32_t
 impl_bHYPRE_IJParCSRVector_Read(
   /* in */ bHYPRE_IJParCSRVector self,
   /* in */ const char* filename,
-  /* in */ void* comm);
+  /* in */ bHYPRE_MPICommunicator comm);
 
 extern
 int32_t
@@ -252,6 +260,11 @@ extern struct bHYPRE_IJParCSRVector__object*
   sidl_BaseInterface *_ex);
 extern char* impl_bHYPRE_IJParCSRVector_fgetURL_bHYPRE_IJParCSRVector(struct 
   bHYPRE_IJParCSRVector__object* obj);
+extern struct bHYPRE_MPICommunicator__object* 
+  impl_bHYPRE_IJParCSRVector_fconnect_bHYPRE_MPICommunicator(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_IJParCSRVector_fgetURL_bHYPRE_MPICommunicator(struct 
+  bHYPRE_MPICommunicator__object* obj);
 extern struct sidl_ClassInfo__object* 
   impl_bHYPRE_IJParCSRVector_fconnect_sidl_ClassInfo(char* url,
   sidl_BaseInterface *_ex);

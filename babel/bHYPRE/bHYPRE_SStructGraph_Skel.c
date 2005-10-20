@@ -32,7 +32,7 @@ impl_bHYPRE_SStructGraph__dtor(
 extern
 bHYPRE_SStructGraph
 impl_bHYPRE_SStructGraph_Create(
-  /* in */ void* mpi_comm,
+  /* in */ bHYPRE_MPICommunicator mpi_comm,
   /* in */ bHYPRE_SStructGrid grid);
 
 extern struct bHYPRE_SStructGrid__object* 
@@ -45,6 +45,11 @@ extern struct bHYPRE_SStructStencil__object*
   sidl_BaseInterface *_ex);
 extern char* impl_bHYPRE_SStructGraph_fgetURL_bHYPRE_SStructStencil(struct 
   bHYPRE_SStructStencil__object* obj);
+extern struct bHYPRE_MPICommunicator__object* 
+  impl_bHYPRE_SStructGraph_fconnect_bHYPRE_MPICommunicator(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_SStructGraph_fgetURL_bHYPRE_MPICommunicator(struct 
+  bHYPRE_MPICommunicator__object* obj);
 extern struct sidl_ClassInfo__object* 
   impl_bHYPRE_SStructGraph_fconnect_sidl_ClassInfo(char* url,
   sidl_BaseInterface *_ex);
@@ -74,7 +79,7 @@ extern
 int32_t
 impl_bHYPRE_SStructGraph_SetCommGrid(
   /* in */ bHYPRE_SStructGraph self,
-  /* in */ void* mpi_comm,
+  /* in */ bHYPRE_MPICommunicator mpi_comm,
   /* in */ bHYPRE_SStructGrid grid);
 
 extern
@@ -107,7 +112,7 @@ extern
 int32_t
 impl_bHYPRE_SStructGraph_SetCommunicator(
   /* in */ bHYPRE_SStructGraph self,
-  /* in */ void* mpi_comm);
+  /* in */ bHYPRE_MPICommunicator mpi_comm);
 
 extern
 int32_t
@@ -129,6 +134,11 @@ extern struct bHYPRE_SStructStencil__object*
   sidl_BaseInterface *_ex);
 extern char* impl_bHYPRE_SStructGraph_fgetURL_bHYPRE_SStructStencil(struct 
   bHYPRE_SStructStencil__object* obj);
+extern struct bHYPRE_MPICommunicator__object* 
+  impl_bHYPRE_SStructGraph_fconnect_bHYPRE_MPICommunicator(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_SStructGraph_fgetURL_bHYPRE_MPICommunicator(struct 
+  bHYPRE_MPICommunicator__object* obj);
 extern struct sidl_ClassInfo__object* 
   impl_bHYPRE_SStructGraph_fconnect_sidl_ClassInfo(char* url,
   sidl_BaseInterface *_ex);
@@ -247,6 +257,17 @@ struct bHYPRE_SStructStencil__object*
 char* skel_bHYPRE_SStructGraph_fgetURL_bHYPRE_SStructStencil(struct 
   bHYPRE_SStructStencil__object* obj) { 
   return impl_bHYPRE_SStructGraph_fgetURL_bHYPRE_SStructStencil(obj);
+}
+
+struct bHYPRE_MPICommunicator__object* 
+  skel_bHYPRE_SStructGraph_fconnect_bHYPRE_MPICommunicator(char* url,
+  sidl_BaseInterface *_ex) { 
+  return impl_bHYPRE_SStructGraph_fconnect_bHYPRE_MPICommunicator(url, _ex);
+}
+
+char* skel_bHYPRE_SStructGraph_fgetURL_bHYPRE_MPICommunicator(struct 
+  bHYPRE_MPICommunicator__object* obj) { 
+  return impl_bHYPRE_SStructGraph_fgetURL_bHYPRE_MPICommunicator(obj);
 }
 
 struct sidl_ClassInfo__object* 

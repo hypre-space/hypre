@@ -27,6 +27,7 @@
 /*#include "mpi.h"*/
 #include "struct_mv.h"
 #include "bHYPRE_StructGrid_Impl.h"
+#include "bHYPRE_MPICommunicator_Impl.h"
 /* DO-NOT-DELETE splicer.end(bHYPRE.StructVector._includes) */
 
 /*
@@ -120,7 +121,7 @@ extern "C"
 #endif
 bHYPRE_StructVector
 impl_bHYPRE_StructVector_Create(
-  /* in */ void* mpi_comm,
+  /* in */ bHYPRE_MPICommunicator mpi_comm,
   /* in */ bHYPRE_StructGrid grid)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.StructVector.Create) */
@@ -132,6 +133,7 @@ impl_bHYPRE_StructVector_Create(
    HYPRE_StructVector Hy;
    struct bHYPRE_StructGrid__data * gdata;
    HYPRE_StructGrid Hgrid;
+   MPI_Comm comm = bHYPRE_MPICommunicator__get_data(mpi_comm)->mpi_comm;
 
    vec = bHYPRE_StructVector__create();
    data = bHYPRE_StructVector__get_data( vec );
@@ -139,9 +141,9 @@ impl_bHYPRE_StructVector_Create(
    gdata = bHYPRE_StructGrid__get_data( grid );
    Hgrid = gdata->grid;
 
-   ierr += HYPRE_StructVectorCreate( (MPI_Comm) mpi_comm, Hgrid, &Hy );
+   ierr += HYPRE_StructVectorCreate( comm, Hgrid, &Hy );
    data->vec = Hy;
-   data->comm = (MPI_Comm) mpi_comm;
+   data->comm = comm;
 
    return( vec );
 
@@ -162,7 +164,7 @@ extern "C"
 int32_t
 impl_bHYPRE_StructVector_SetCommunicator(
   /* in */ bHYPRE_StructVector self,
-  /* in */ void* mpi_comm)
+  /* in */ bHYPRE_MPICommunicator mpi_comm)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.StructVector.SetCommunicator) */
   /* Insert the implementation of the SetCommunicator method here... */
@@ -175,7 +177,7 @@ impl_bHYPRE_StructVector_SetCommunicator(
    int ierr = 0;
    struct bHYPRE_StructVector__data * data;
    data = bHYPRE_StructVector__get_data( self );
-   data -> comm = (MPI_Comm) mpi_comm;
+   data->comm = bHYPRE_MPICommunicator__get_data(mpi_comm)->mpi_comm;
 
    return ierr;
 
@@ -699,6 +701,15 @@ struct bHYPRE_StructVectorView__object*
 char * impl_bHYPRE_StructVector_fgetURL_bHYPRE_StructVectorView(struct 
   bHYPRE_StructVectorView__object* obj) {
   return bHYPRE_StructVectorView__getURL(obj);
+}
+struct bHYPRE_MPICommunicator__object* 
+  impl_bHYPRE_StructVector_fconnect_bHYPRE_MPICommunicator(char* url,
+  sidl_BaseInterface *_ex) {
+  return bHYPRE_MPICommunicator__connect(url, _ex);
+}
+char * impl_bHYPRE_StructVector_fgetURL_bHYPRE_MPICommunicator(struct 
+  bHYPRE_MPICommunicator__object* obj) {
+  return bHYPRE_MPICommunicator__getURL(obj);
 }
 struct sidl_ClassInfo__object* 
   impl_bHYPRE_StructVector_fconnect_sidl_ClassInfo(char* url,

@@ -33,6 +33,7 @@
 #include "sidl_Loader.h"
 #endif
 #include "bHYPRE_IJParCSRMatrix_IOR.h"
+#include "bHYPRE_MPICommunicator_IOR.h"
 #include "sidl_ClassInfo_IOR.h"
 #include "bHYPRE_Vector_IOR.h"
 #include "sidl_BaseInterface_IOR.h"
@@ -346,10 +347,10 @@ SIDLFortran77Symbol(bhypre_ijparcsrmatrix_create_f,BHYPRE_IJPARCSRMATRIX_CREATE_
 )
 {
   const struct bHYPRE_IJParCSRMatrix__sepv *_epv = _getSEPV();
-  void* _proxy_mpi_comm = NULL;
+  struct bHYPRE_MPICommunicator__object* _proxy_mpi_comm = NULL;
   struct bHYPRE_IJParCSRMatrix__object* _proxy_retval = NULL;
   _proxy_mpi_comm =
-    (void*)
+    (struct bHYPRE_MPICommunicator__object*)
     (ptrdiff_t)(*mpi_comm);
   _proxy_retval = 
     (*(_epv->f_Create))(
@@ -386,13 +387,13 @@ SIDLFortran77Symbol(bhypre_ijparcsrmatrix_generatelaplacian_f,BHYPRE_IJPARCSRMAT
 )
 {
   const struct bHYPRE_IJParCSRMatrix__sepv *_epv = _getSEPV();
-  void* _proxy_mpi_comm = NULL;
+  struct bHYPRE_MPICommunicator__object* _proxy_mpi_comm = NULL;
   struct sidl_double__array _alt_values;
   struct sidl_double__array* _proxy_values = &_alt_values;
   int32_t values_lower[1], values_upper[1], values_stride[1];
   struct bHYPRE_IJParCSRMatrix__object* _proxy_retval = NULL;
   _proxy_mpi_comm =
-    (void*)
+    (struct bHYPRE_MPICommunicator__object*)
     (ptrdiff_t)(*mpi_comm);
   values_upper[0] = (*nvalues)-1;
   sidl_double__array_init(values, _proxy_values, 1, values_lower, values_upper,
@@ -482,12 +483,12 @@ SIDLFortran77Symbol(bhypre_ijparcsrmatrix_setcommunicator_f,BHYPRE_IJPARCSRMATRI
 {
   struct bHYPRE_IJParCSRMatrix__epv *_epv = NULL;
   struct bHYPRE_IJParCSRMatrix__object* _proxy_self = NULL;
-  void* _proxy_mpi_comm = NULL;
+  struct bHYPRE_MPICommunicator__object* _proxy_mpi_comm = NULL;
   _proxy_self =
     (struct bHYPRE_IJParCSRMatrix__object*)
     (ptrdiff_t)(*self);
   _proxy_mpi_comm =
-    (void*)
+    (struct bHYPRE_MPICommunicator__object*)
     (ptrdiff_t)(*mpi_comm);
   _epv = _proxy_self->d_epv;
   *retval = 
@@ -964,7 +965,7 @@ SIDLFortran77Symbol(bhypre_ijparcsrmatrix_read_f,BHYPRE_IJPARCSRMATRIX_READ_F,bH
   struct bHYPRE_IJParCSRMatrix__epv *_epv = NULL;
   struct bHYPRE_IJParCSRMatrix__object* _proxy_self = NULL;
   char* _proxy_filename = NULL;
-  void* _proxy_comm = NULL;
+  struct bHYPRE_MPICommunicator__object* _proxy_comm = NULL;
   _proxy_self =
     (struct bHYPRE_IJParCSRMatrix__object*)
     (ptrdiff_t)(*self);
@@ -972,7 +973,7 @@ SIDLFortran77Symbol(bhypre_ijparcsrmatrix_read_f,BHYPRE_IJPARCSRMATRIX_READ_F,bH
     sidl_copy_fortran_str(SIDL_F77_STR(filename),
       SIDL_F77_STR_LEN(filename));
   _proxy_comm =
-    (void*)
+    (struct bHYPRE_MPICommunicator__object*)
     (ptrdiff_t)(*comm);
   _epv = _proxy_self->d_epv;
   *retval = 

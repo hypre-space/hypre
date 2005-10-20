@@ -172,7 +172,7 @@ C
 
         subroutine bHYPRE_SStructGraph_Create_f(mpi_comm, grid, retval)
         implicit none
-C       in opaque mpi_comm
+C       in bHYPRE.MPICommunicator mpi_comm
         integer*8 mpi_comm
 C       in bHYPRE.SStructGrid grid
         integer*8 grid
@@ -192,7 +192,7 @@ C
         implicit none
 C       in bHYPRE.SStructGraph self
         integer*8 self
-C       in opaque mpi_comm
+C       in bHYPRE.MPICommunicator mpi_comm
         integer*8 mpi_comm
 C       in bHYPRE.SStructGrid grid
         integer*8 grid
@@ -282,7 +282,7 @@ C
         implicit none
 C       in bHYPRE.SStructGraph self
         integer*8 self
-C       in opaque mpi_comm
+C       in bHYPRE.MPICommunicator mpi_comm
         integer*8 mpi_comm
 C       out int retval
         integer*4 retval

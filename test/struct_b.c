@@ -60,6 +60,7 @@ main( int   argc,
    int                 A_num_ghost[6] = {0, 0, 0, 0, 0, 0};
                      
 /* not currently used   bHYPRE_Operator lo_test;*/
+   bHYPRE_MPICommunicator bmpicomm;
    bHYPRE_StructMatrix  A_b;
 /* not currently used   bHYPRE_Operator A_LO;*/
    bHYPRE_Operator A_O;
@@ -77,7 +78,7 @@ main( int   argc,
 
    int constant_coefficient = 0;
    int symmetric = 1;
-   MPI_Comm comm = MPI_COMM_WORLD;
+   MPI_Comm mpi_comm = MPI_COMM_WORLD;
 
    int                 num_iterations;
    int                 time_index;
@@ -124,6 +125,7 @@ main( int   argc,
 
    MPI_Comm_size(MPI_COMM_WORLD, &num_procs );
    MPI_Comm_rank(MPI_COMM_WORLD, &myid );
+   bmpicomm = bHYPRE_MPICommunicator_CreateC( (void *)(&mpi_comm) );
 
 #ifdef HYPRE_DEBUG
    cegdb(&argc, &argv, myid);
@@ -543,7 +545,7 @@ main( int   argc,
          break;
    } 
 
-   grid = bHYPRE_StructGrid_Create( (void *)comm, dim );
+   grid = bHYPRE_StructGrid_Create( bmpicomm, dim );
    for (ib = 0; ib < nblocks; ib++)
    {
       bHYPRE_StructGrid_SetExtents( grid, ilower[ib], iupper[ib], dim );
@@ -576,7 +578,7 @@ main( int   argc,
       It may not be a big deal to test & support nonsymmetric storage. */
    hypre_assert( symmetric== 1 );
 
-   A_b = bHYPRE_StructMatrix_Create( (void *)comm, grid, stencil );
+   A_b = bHYPRE_StructMatrix_Create( bmpicomm, grid, stencil );
 
    ierr += bHYPRE_StructMatrix_SetSymmetric( A_b, symmetric );
    ierr += bHYPRE_StructMatrix_SetNumGhost( A_b, A_num_ghost, 2*dim );
@@ -612,7 +614,7 @@ main( int   argc,
 
    values = hypre_CTAlloc(double, volume);
 
-   b_SV = bHYPRE_StructVector_Create( (void *)comm, grid );
+   b_SV = bHYPRE_StructVector_Create( bmpicomm, grid );
 
    ierr += bHYPRE_StructVector_Initialize( b_SV );
 
@@ -653,7 +655,7 @@ main( int   argc,
 /*   HYPRE_StructVectorPrint("driver.out.b", b, 0); */
 #endif
 
-   x_SV = bHYPRE_StructVector_Create( (void *)comm, grid );
+   x_SV = bHYPRE_StructVector_Create( bmpicomm, grid );
 
    ierr += bHYPRE_StructVector_Initialize( x_SV );
 
@@ -736,7 +738,7 @@ main( int   argc,
       time_index = hypre_InitializeTiming("SMG Setup");
       hypre_BeginTiming(time_index);
 
-      solver_SMG = bHYPRE_StructSMG_Create( (void *) comm );
+      solver_SMG = bHYPRE_StructSMG_Create( bmpicomm );
       bHYPRE_StructSMG_SetIntParameter( solver_SMG, "MemoryUse", 0 );
       bHYPRE_StructSMG_SetIntParameter( solver_SMG, "MaxIter", 50 );
       bHYPRE_StructSMG_SetDoubleParameter( solver_SMG, "Tol", 1.0e-6 );
@@ -783,7 +785,7 @@ main( int   argc,
       hypre_BeginTiming(time_index);
 
 
-      solver_PFMG = bHYPRE_StructPFMG_Create( (void *) comm );
+      solver_PFMG = bHYPRE_StructPFMG_Create( bmpicomm );
 
       bHYPRE_StructPFMG_SetIntParameter( solver_PFMG, "MaxIter", 50 );
       bHYPRE_StructPFMG_SetDoubleParameter( solver_PFMG, "Tol", 1.0e-6 );
@@ -882,7 +884,7 @@ main( int   argc,
       hypre_BeginTiming(time_index);
 
 
-      solver_PCG = bHYPRE_PCG_Create( (void *)comm );
+      solver_PCG = bHYPRE_PCG_Create( bmpicomm );
       A_O = bHYPRE_Operator__cast( A_b );
       ierr += bHYPRE_PCG_SetOperator( solver_PCG, A_O );
       b_V = bHYPRE_Vector__cast( b_SV );
@@ -898,7 +900,7 @@ main( int   argc,
       if (solver_id == 10)
       {
          /* use symmetric SMG as preconditioner */
-         solver_SMG = bHYPRE_StructSMG_Create( (void *)comm );
+         solver_SMG = bHYPRE_StructSMG_Create( bmpicomm );
          ierr += bHYPRE_StructSMG_SetOperator( solver_SMG, A_O );
 
          ierr += bHYPRE_StructSMG_SetIntParameter( solver_SMG, "MemoryUse", 0 );
@@ -920,7 +922,7 @@ main( int   argc,
       else if ( solver_id == 11 || solver_id == 13 || solver_id == 14 )
       {
          /* use symmetric PFMG as preconditioner */
-         solver_PFMG = bHYPRE_StructPFMG_Create( (void *)comm );
+         solver_PFMG = bHYPRE_StructPFMG_Create( bmpicomm );
          ierr += bHYPRE_StructPFMG_SetOperator( solver_PFMG, A_O );
 
          bHYPRE_StructPFMG_SetIntParameter( solver_PFMG, "MaxIterations", 1 );

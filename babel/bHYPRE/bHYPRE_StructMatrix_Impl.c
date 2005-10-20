@@ -37,6 +37,7 @@
 #include "bHYPRE_StructVector_Impl.h"
 #include "bHYPRE_StructGrid_Impl.h"
 #include "bHYPRE_StructStencil_Impl.h"
+#include "bHYPRE_MPICommunicator_Impl.h"
 /* DO-NOT-DELETE splicer.end(bHYPRE.StructMatrix._includes) */
 
 /*
@@ -133,7 +134,7 @@ extern "C"
 #endif
 bHYPRE_StructMatrix
 impl_bHYPRE_StructMatrix_Create(
-  /* in */ void* mpi_comm,
+  /* in */ bHYPRE_MPICommunicator mpi_comm,
   /* in */ bHYPRE_StructGrid grid,
   /* in */ bHYPRE_StructStencil stencil)
 {
@@ -148,6 +149,7 @@ impl_bHYPRE_StructMatrix_Create(
    HYPRE_StructGrid Hgrid;
    struct bHYPRE_StructStencil__data * sdata;
    HYPRE_StructStencil Hstencil;
+   MPI_Comm comm = bHYPRE_MPICommunicator__get_data(mpi_comm)->mpi_comm;
 
    mat = bHYPRE_StructMatrix__create();
    data = bHYPRE_StructMatrix__get_data( mat );
@@ -158,9 +160,9 @@ impl_bHYPRE_StructMatrix_Create(
    sdata = bHYPRE_StructStencil__get_data( stencil );
    Hstencil = sdata->stencil;
 
-   ierr += HYPRE_StructMatrixCreate( (MPI_Comm)mpi_comm, Hgrid, Hstencil, &Hmat );
+   ierr += HYPRE_StructMatrixCreate( comm, Hgrid, Hstencil, &Hmat );
    data->matrix = Hmat;
-   data->comm = (MPI_Comm) mpi_comm;
+   data->comm = comm;
 
    return( mat );
 
@@ -181,7 +183,7 @@ extern "C"
 int32_t
 impl_bHYPRE_StructMatrix_SetCommunicator(
   /* in */ bHYPRE_StructMatrix self,
-  /* in */ void* mpi_comm)
+  /* in */ bHYPRE_MPICommunicator mpi_comm)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.StructMatrix.SetCommunicator) */
   /* Insert the implementation of the SetCommunicator method here... */
@@ -191,7 +193,7 @@ impl_bHYPRE_StructMatrix_SetCommunicator(
    int ierr = 0;
    struct bHYPRE_StructMatrix__data * data;
    data = bHYPRE_StructMatrix__get_data( self );
-   data -> comm = (MPI_Comm) mpi_comm;
+   data->comm = bHYPRE_MPICommunicator__get_data(mpi_comm)->mpi_comm;
 
    return ierr;
 
@@ -921,6 +923,15 @@ struct bHYPRE_StructGrid__object*
 char * impl_bHYPRE_StructMatrix_fgetURL_bHYPRE_StructGrid(struct 
   bHYPRE_StructGrid__object* obj) {
   return bHYPRE_StructGrid__getURL(obj);
+}
+struct bHYPRE_MPICommunicator__object* 
+  impl_bHYPRE_StructMatrix_fconnect_bHYPRE_MPICommunicator(char* url,
+  sidl_BaseInterface *_ex) {
+  return bHYPRE_MPICommunicator__connect(url, _ex);
+}
+char * impl_bHYPRE_StructMatrix_fgetURL_bHYPRE_MPICommunicator(struct 
+  bHYPRE_MPICommunicator__object* obj) {
+  return bHYPRE_MPICommunicator__getURL(obj);
 }
 struct bHYPRE_Operator__object* 
   impl_bHYPRE_StructMatrix_fconnect_bHYPRE_Operator(char* url,

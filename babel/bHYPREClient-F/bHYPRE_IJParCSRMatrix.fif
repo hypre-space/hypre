@@ -176,7 +176,7 @@ C
         subroutine bHYPRE_IJParCSRMatrix_Create_f(mpi_comm, ilower,
      &     iupper, jlower, jupper, retval)
         implicit none
-C       in opaque mpi_comm
+C       in bHYPRE.MPICommunicator mpi_comm
         integer*8 mpi_comm
 C       in int ilower
         integer*4 ilower
@@ -199,7 +199,7 @@ C
      &     nx, ny, nz, Px, Py, Pz, p, q, r, values, discretization,
      &     retval)
         implicit none
-C       in opaque mpi_comm
+C       in bHYPRE.MPICommunicator mpi_comm
         integer*8 mpi_comm
 C       in int nx
         integer*4 nx
@@ -267,7 +267,7 @@ C
         implicit none
 C       in bHYPRE.IJParCSRMatrix self
         integer*8 self
-C       in opaque mpi_comm
+C       in bHYPRE.MPICommunicator mpi_comm
         integer*8 mpi_comm
 C       out int retval
         integer*4 retval
@@ -536,7 +536,7 @@ C       in bHYPRE.IJParCSRMatrix self
         integer*8 self
 C       in string filename
         character*(*) filename
-C       in opaque comm
+C       in bHYPRE.MPICommunicator comm
         integer*8 comm
 C       out int retval
         integer*4 retval

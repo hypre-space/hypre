@@ -36,6 +36,9 @@ typedef struct bHYPRE_Pilut__object* bHYPRE_Pilut;
 #ifndef included_sidl_header_h
 #include "sidl_header.h"
 #endif
+#ifndef included_bHYPRE_MPICommunicator_h
+#include "bHYPRE_MPICommunicator.h"
+#endif
 #ifndef included_bHYPRE_Operator_h
 #include "bHYPRE_Operator.h"
 #endif
@@ -108,7 +111,7 @@ bHYPRE_Pilut_getClassInfo(
  */
 bHYPRE_Pilut
 bHYPRE_Pilut_Create(
-  /* in */ void* mpi_comm);
+  /* in */ bHYPRE_MPICommunicator mpi_comm);
 
 /**
  * Set the MPI Communicator.
@@ -118,7 +121,7 @@ bHYPRE_Pilut_Create(
 int32_t
 bHYPRE_Pilut_SetCommunicator(
   /* in */ bHYPRE_Pilut self,
-  /* in */ void* mpi_comm);
+  /* in */ bHYPRE_MPICommunicator mpi_comm);
 
 /**
  * Set the int parameter associated with {\tt name}.

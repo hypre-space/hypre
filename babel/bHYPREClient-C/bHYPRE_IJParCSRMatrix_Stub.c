@@ -230,7 +230,7 @@ bHYPRE_IJParCSRMatrix_getClassInfo(
 
 bHYPRE_IJParCSRMatrix
 bHYPRE_IJParCSRMatrix_Create(
-  /* in */ void* mpi_comm,
+  /* in */ bHYPRE_MPICommunicator mpi_comm,
   /* in */ int32_t ilower,
   /* in */ int32_t iupper,
   /* in */ int32_t jlower,
@@ -250,7 +250,7 @@ bHYPRE_IJParCSRMatrix_Create(
 
 bHYPRE_IJParCSRMatrix
 bHYPRE_IJParCSRMatrix_GenerateLaplacian(
-  /* in */ void* mpi_comm,
+  /* in */ bHYPRE_MPICommunicator mpi_comm,
   /* in */ int32_t nx,
   /* in */ int32_t ny,
   /* in */ int32_t nz,
@@ -334,7 +334,7 @@ bHYPRE_IJParCSRMatrix_SetDiagOffdSizes(
 int32_t
 bHYPRE_IJParCSRMatrix_SetCommunicator(
   /* in */ bHYPRE_IJParCSRMatrix self,
-  /* in */ void* mpi_comm)
+  /* in */ bHYPRE_MPICommunicator mpi_comm)
 {
   return (*self->d_epv->f_SetCommunicator)(
     self,
@@ -674,7 +674,7 @@ int32_t
 bHYPRE_IJParCSRMatrix_Read(
   /* in */ bHYPRE_IJParCSRMatrix self,
   /* in */ const char* filename,
-  /* in */ void* comm)
+  /* in */ bHYPRE_MPICommunicator comm)
 {
   return (*self->d_epv->f_Read)(
     self,
@@ -914,7 +914,7 @@ bHYPRE_IJParCSRMatrix_Create__sexec(
         struct sidl_io_Deserializer__object* inArgs,
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
-  void* mpi_comm;
+  bHYPRE_MPICommunicator mpi_comm;
   int32_t ilower;
   int32_t iupper;
   int32_t jlower;
@@ -951,7 +951,7 @@ bHYPRE_IJParCSRMatrix_GenerateLaplacian__sexec(
         struct sidl_io_Deserializer__object* inArgs,
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
-  void* mpi_comm;
+  bHYPRE_MPICommunicator mpi_comm;
   int32_t nx;
   int32_t ny;
   int32_t nz;
@@ -1750,7 +1750,7 @@ remote_bHYPRE_IJParCSRMatrix_SetDiagOffdSizes(
 static int32_t
 remote_bHYPRE_IJParCSRMatrix_SetCommunicator(
   /* in */ struct bHYPRE_IJParCSRMatrix__object* self /* TLD */,
-  /* in */ void* mpi_comm)
+  /* in */ struct bHYPRE_MPICommunicator__object* mpi_comm)
 {
   sidl_BaseInterface _ex = NULL;
   sidl_BaseInterface *_ex2 =&_ex;
@@ -1762,6 +1762,8 @@ remote_bHYPRE_IJParCSRMatrix_SetCommunicator(
   int32_t _retval;
 
   /* pack in and inout arguments */
+  sidl_rmi_Invocation_packString( _inv, "mpi_comm",
+    bHYPRE_MPICommunicator__getURL(mpi_comm), _ex2);
 
   /* send actual RMI request */
   _rsvp = sidl_rmi_Invocation_invokeMethod(_inv,_ex2);
@@ -2126,7 +2128,7 @@ static int32_t
 remote_bHYPRE_IJParCSRMatrix_Read(
   /* in */ struct bHYPRE_IJParCSRMatrix__object* self /* TLD */,
   /* in */ const char* filename,
-  /* in */ void* comm)
+  /* in */ struct bHYPRE_MPICommunicator__object* comm)
 {
   sidl_BaseInterface _ex = NULL;
   sidl_BaseInterface *_ex2 =&_ex;
@@ -2139,6 +2141,8 @@ remote_bHYPRE_IJParCSRMatrix_Read(
 
   /* pack in and inout arguments */
   sidl_rmi_Invocation_packString( _inv, "filename", filename, _ex2);
+  sidl_rmi_Invocation_packString( _inv, "comm",
+    bHYPRE_MPICommunicator__getURL(comm), _ex2);
 
   /* send actual RMI request */
   _rsvp = sidl_rmi_Invocation_invokeMethod(_inv,_ex2);
@@ -2679,7 +2683,8 @@ static void bHYPRE_IJParCSRMatrix__init_remote_epv(void)
   e1->f_isType          = (sidl_bool (*)(void*,const char*)) epv->f_isType;
   e1->f_getClassInfo    = (struct sidl_ClassInfo__object* (*)(void*)) 
     epv->f_getClassInfo;
-  e1->f_SetCommunicator = (int32_t (*)(void*,void*)) epv->f_SetCommunicator;
+  e1->f_SetCommunicator = (int32_t (*)(void*,
+    struct bHYPRE_MPICommunicator__object*)) epv->f_SetCommunicator;
   e1->f_Initialize      = (int32_t (*)(void*)) epv->f_Initialize;
   e1->f_Assemble        = (int32_t (*)(void*)) epv->f_Assemble;
   e1->f_SetLocalRange   = (int32_t (*)(void*,int32_t,int32_t,int32_t,
@@ -2700,7 +2705,8 @@ static void bHYPRE_IJParCSRMatrix__init_remote_epv(void)
   e1->f_SetRowSizes     = (int32_t (*)(void*,
     struct sidl_int__array*)) epv->f_SetRowSizes;
   e1->f_Print           = (int32_t (*)(void*,const char*)) epv->f_Print;
-  e1->f_Read            = (int32_t (*)(void*,const char*,void*)) epv->f_Read;
+  e1->f_Read            = (int32_t (*)(void*,const char*,
+    struct bHYPRE_MPICommunicator__object*)) epv->f_Read;
 
   e2->f__cast           = (void* (*)(void*,const char*)) epv->f__cast;
   e2->f__delete         = (void (*)(void*)) epv->f__delete;
@@ -2716,7 +2722,8 @@ static void bHYPRE_IJParCSRMatrix__init_remote_epv(void)
   e2->f_isType          = (sidl_bool (*)(void*,const char*)) epv->f_isType;
   e2->f_getClassInfo    = (struct sidl_ClassInfo__object* (*)(void*)) 
     epv->f_getClassInfo;
-  e2->f_SetCommunicator = (int32_t (*)(void*,void*)) epv->f_SetCommunicator;
+  e2->f_SetCommunicator = (int32_t (*)(void*,
+    struct bHYPRE_MPICommunicator__object*)) epv->f_SetCommunicator;
   e2->f_Initialize      = (int32_t (*)(void*)) epv->f_Initialize;
   e2->f_Assemble        = (int32_t (*)(void*)) epv->f_Assemble;
 
@@ -2736,7 +2743,7 @@ static void bHYPRE_IJParCSRMatrix__init_remote_epv(void)
   e3->f_getClassInfo             = (struct sidl_ClassInfo__object* (*)(void*)) 
     epv->f_getClassInfo;
   e3->f_SetCommunicator          = (int32_t (*)(void*,
-    void*)) epv->f_SetCommunicator;
+    struct bHYPRE_MPICommunicator__object*)) epv->f_SetCommunicator;
   e3->f_SetIntParameter          = (int32_t (*)(void*,const char*,
     int32_t)) epv->f_SetIntParameter;
   e3->f_SetDoubleParameter       = (int32_t (*)(void*,const char*,
@@ -2774,7 +2781,8 @@ static void bHYPRE_IJParCSRMatrix__init_remote_epv(void)
   e4->f_isType          = (sidl_bool (*)(void*,const char*)) epv->f_isType;
   e4->f_getClassInfo    = (struct sidl_ClassInfo__object* (*)(void*)) 
     epv->f_getClassInfo;
-  e4->f_SetCommunicator = (int32_t (*)(void*,void*)) epv->f_SetCommunicator;
+  e4->f_SetCommunicator = (int32_t (*)(void*,
+    struct bHYPRE_MPICommunicator__object*)) epv->f_SetCommunicator;
   e4->f_Initialize      = (int32_t (*)(void*)) epv->f_Initialize;
   e4->f_Assemble        = (int32_t (*)(void*)) epv->f_Assemble;
 

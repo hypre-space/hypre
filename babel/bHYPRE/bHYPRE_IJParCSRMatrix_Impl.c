@@ -32,7 +32,7 @@
 #include <assert.h>
 #include "bHYPRE_IJParCSRVector_Impl.h"
 #include "HYPRE_parcsr_mv.h"
-/*#include "mpi.h"*/
+#include "bHYPRE_MPICommunicator_Impl.h"
 /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRMatrix._includes) */
 
 /*
@@ -133,7 +133,7 @@ extern "C"
 #endif
 bHYPRE_IJParCSRMatrix
 impl_bHYPRE_IJParCSRMatrix_Create(
-  /* in */ void* mpi_comm,
+  /* in */ bHYPRE_MPICommunicator mpi_comm,
   /* in */ int32_t ilower,
   /* in */ int32_t iupper,
   /* in */ int32_t jlower,
@@ -149,7 +149,7 @@ impl_bHYPRE_IJParCSRMatrix_Create(
    bHYPRE_IJParCSRMatrix mat = bHYPRE_IJParCSRMatrix__create();
 
    data = bHYPRE_IJParCSRMatrix__get_data( mat );
-   data -> comm = (MPI_Comm) mpi_comm;
+   data->comm = bHYPRE_MPICommunicator__get_data(mpi_comm)->mpi_comm;
    ierr += HYPRE_IJMatrixCreate( data -> comm,
                                 ilower, iupper, jlower, jupper, Hmat );
    ierr += HYPRE_IJMatrixSetObjectType( *Hmat, HYPRE_PARCSR );
@@ -173,7 +173,7 @@ extern "C"
 #endif
 bHYPRE_IJParCSRMatrix
 impl_bHYPRE_IJParCSRMatrix_GenerateLaplacian(
-  /* in */ void* mpi_comm,
+  /* in */ bHYPRE_MPICommunicator mpi_comm,
   /* in */ int32_t nx,
   /* in */ int32_t ny,
   /* in */ int32_t nz,
@@ -204,12 +204,14 @@ impl_bHYPRE_IJParCSRMatrix_GenerateLaplacian(
    int * col_inds;
    double * row_values;
    int stride[1];
+   MPI_Comm comm = bHYPRE_MPICommunicator__get_data(mpi_comm)->mpi_comm;
+;
 
    hypre_assert( nvalues == 4 );
    hypre_assert( discretization==7 || discretization==9 || discretization==27 );
    hypre_assert( discretization==7 ); /* only 7-point 3D example implemented */
    HA = (HYPRE_ParCSRMatrix) GenerateLaplacian(
-      (MPI_Comm) mpi_comm, nx, ny, nz, Px, Py, Pz, p, q, r, values );
+      comm, nx, ny, nz, Px, Py, Pz, p, q, r, values );
 
    /* We need to return a bHYPRE_IJParCSRMatrix.  Make a one and copy HA to it... */
 
@@ -311,7 +313,7 @@ extern "C"
 int32_t
 impl_bHYPRE_IJParCSRMatrix_SetCommunicator(
   /* in */ bHYPRE_IJParCSRMatrix self,
-  /* in */ void* mpi_comm)
+  /* in */ bHYPRE_MPICommunicator mpi_comm)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRMatrix.SetCommunicator) */
   /* Insert the implementation of the SetCommunicator method here... */
@@ -326,7 +328,7 @@ impl_bHYPRE_IJParCSRMatrix_SetCommunicator(
    printf("impl_bHYPRE_IJParCSRMatrix_SetCommunicator\n");
 #endif
    
-   data -> comm = (MPI_Comm) mpi_comm;
+   data->comm = bHYPRE_MPICommunicator__get_data(mpi_comm)->mpi_comm;
 
    return( ierr );
 
@@ -796,7 +798,7 @@ int32_t
 impl_bHYPRE_IJParCSRMatrix_Read(
   /* in */ bHYPRE_IJParCSRMatrix self,
   /* in */ const char* filename,
-  /* in */ void* comm)
+  /* in */ bHYPRE_MPICommunicator comm)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRMatrix.Read) */
   /* Insert the implementation of the Read method here... */
@@ -804,12 +806,13 @@ impl_bHYPRE_IJParCSRMatrix_Read(
    int ierr=0;
    struct bHYPRE_IJParCSRMatrix__data * data;
    HYPRE_IJMatrix ij_A;
+   MPI_Comm mpicomm = bHYPRE_MPICommunicator__get_data(comm)->mpi_comm;
 
    data = bHYPRE_IJParCSRMatrix__get_data( self );
 
    ij_A = data -> ij_A;
 
-   ierr = HYPRE_IJMatrixRead( filename, data -> comm, HYPRE_PARCSR, &ij_A );
+   ierr = HYPRE_IJMatrixRead( filename, mpicomm, HYPRE_PARCSR, &ij_A );
 
    return( ierr );
 
@@ -1214,6 +1217,15 @@ struct bHYPRE_CoefficientAccess__object*
 char * impl_bHYPRE_IJParCSRMatrix_fgetURL_bHYPRE_CoefficientAccess(struct 
   bHYPRE_CoefficientAccess__object* obj) {
   return bHYPRE_CoefficientAccess__getURL(obj);
+}
+struct bHYPRE_MPICommunicator__object* 
+  impl_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_MPICommunicator(char* url,
+  sidl_BaseInterface *_ex) {
+  return bHYPRE_MPICommunicator__connect(url, _ex);
+}
+char * impl_bHYPRE_IJParCSRMatrix_fgetURL_bHYPRE_MPICommunicator(struct 
+  bHYPRE_MPICommunicator__object* obj) {
+  return bHYPRE_MPICommunicator__getURL(obj);
 }
 struct bHYPRE_Operator__object* 
   impl_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_Operator(char* url,

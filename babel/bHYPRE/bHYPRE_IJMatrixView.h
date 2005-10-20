@@ -32,6 +32,9 @@ typedef struct bHYPRE_IJMatrixView__object* bHYPRE_IJMatrixView;
 #ifndef included_sidl_header_h
 #include "sidl_header.h"
 #endif
+#ifndef included_bHYPRE_MPICommunicator_h
+#include "bHYPRE_MPICommunicator.h"
+#endif
 #ifndef included_sidl_BaseInterface_h
 #include "sidl_BaseInterface.h"
 #endif
@@ -84,7 +87,7 @@ bHYPRE_IJMatrixView_getClassInfo(
 int32_t
 bHYPRE_IJMatrixView_SetCommunicator(
   /* in */ bHYPRE_IJMatrixView self,
-  /* in */ void* mpi_comm);
+  /* in */ bHYPRE_MPICommunicator mpi_comm);
 
 int32_t
 bHYPRE_IJMatrixView_Initialize(
@@ -248,7 +251,7 @@ int32_t
 bHYPRE_IJMatrixView_Read(
   /* in */ bHYPRE_IJMatrixView self,
   /* in */ const char* filename,
-  /* in */ void* comm);
+  /* in */ bHYPRE_MPICommunicator comm);
 
 /**
  * Cast method for interface and class type conversions.

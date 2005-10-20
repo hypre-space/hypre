@@ -22,6 +22,9 @@
 #ifndef included_bHYPRE_SStruct_MatrixVectorView_h
 #include "bHYPRE_SStruct_MatrixVectorView.h"
 #endif
+#ifndef included_bHYPRE_MPICommunicator_h
+#include "bHYPRE_MPICommunicator.h"
+#endif
 #ifndef included_sidl_ClassInfo_h
 #include "sidl_ClassInfo.h"
 #endif
@@ -105,7 +108,7 @@ impl_bHYPRE_SStructVector__dtor(
 extern
 bHYPRE_SStructVector
 impl_bHYPRE_SStructVector_Create(
-  /* in */ void* mpi_comm,
+  /* in */ bHYPRE_MPICommunicator mpi_comm,
   /* in */ bHYPRE_SStructGrid grid);
 
 extern struct bHYPRE_SStructGrid__object* 
@@ -119,6 +122,11 @@ extern struct bHYPRE_SStruct_MatrixVectorView__object*
 extern char* 
   impl_bHYPRE_SStructVector_fgetURL_bHYPRE_SStruct_MatrixVectorView(struct 
   bHYPRE_SStruct_MatrixVectorView__object* obj);
+extern struct bHYPRE_MPICommunicator__object* 
+  impl_bHYPRE_SStructVector_fconnect_bHYPRE_MPICommunicator(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_SStructVector_fgetURL_bHYPRE_MPICommunicator(struct 
+  bHYPRE_MPICommunicator__object* obj);
 extern struct sidl_ClassInfo__object* 
   impl_bHYPRE_SStructVector_fconnect_sidl_ClassInfo(char* url,
   sidl_BaseInterface *_ex);
@@ -169,7 +177,7 @@ extern
 int32_t
 impl_bHYPRE_SStructVector_SetCommunicator(
   /* in */ bHYPRE_SStructVector self,
-  /* in */ void* mpi_comm);
+  /* in */ bHYPRE_MPICommunicator mpi_comm);
 
 extern
 int32_t
@@ -326,6 +334,11 @@ extern struct bHYPRE_SStruct_MatrixVectorView__object*
 extern char* 
   impl_bHYPRE_SStructVector_fgetURL_bHYPRE_SStruct_MatrixVectorView(struct 
   bHYPRE_SStruct_MatrixVectorView__object* obj);
+extern struct bHYPRE_MPICommunicator__object* 
+  impl_bHYPRE_SStructVector_fconnect_bHYPRE_MPICommunicator(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_SStructVector_fgetURL_bHYPRE_MPICommunicator(struct 
+  bHYPRE_MPICommunicator__object* obj);
 extern struct sidl_ClassInfo__object* 
   impl_bHYPRE_SStructVector_fconnect_sidl_ClassInfo(char* url,
   sidl_BaseInterface *_ex);

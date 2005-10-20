@@ -176,7 +176,7 @@ C
         subroutine bHYPRE_IJParCSRVector_Create_f(mpi_comm, jlower,
      &     jupper, retval)
         implicit none
-C       in opaque mpi_comm
+C       in bHYPRE.MPICommunicator mpi_comm
         integer*8 mpi_comm
 C       in int jlower
         integer*4 jlower
@@ -197,7 +197,7 @@ C
         implicit none
 C       in bHYPRE.IJParCSRVector self
         integer*8 self
-C       in opaque mpi_comm
+C       in bHYPRE.MPICommunicator mpi_comm
         integer*8 mpi_comm
 C       out int retval
         integer*4 retval
@@ -384,7 +384,7 @@ C       in bHYPRE.IJParCSRVector self
         integer*8 self
 C       in string filename
         character*(*) filename
-C       in opaque comm
+C       in bHYPRE.MPICommunicator comm
         integer*8 comm
 C       out int retval
         integer*4 retval

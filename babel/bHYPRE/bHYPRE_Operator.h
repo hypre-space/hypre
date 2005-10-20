@@ -33,6 +33,9 @@ typedef struct bHYPRE_Operator__object* bHYPRE_Operator;
 #ifndef included_sidl_header_h
 #include "sidl_header.h"
 #endif
+#ifndef included_bHYPRE_MPICommunicator_h
+#include "bHYPRE_MPICommunicator.h"
+#endif
 #ifndef included_bHYPRE_Vector_h
 #include "bHYPRE_Vector.h"
 #endif
@@ -93,7 +96,7 @@ bHYPRE_Operator_getClassInfo(
 int32_t
 bHYPRE_Operator_SetCommunicator(
   /* in */ bHYPRE_Operator self,
-  /* in */ void* mpi_comm);
+  /* in */ bHYPRE_MPICommunicator mpi_comm);
 
 /**
  * Set the int parameter associated with {\tt name}.

@@ -69,6 +69,8 @@ extern void bHYPRE_IJParCSRMatrix__IOR_version(int32_t *major, int32_t *minor);
  * Forward references for external classes and interfaces.
  */
 
+struct bHYPRE_MPICommunicator__array;
+struct bHYPRE_MPICommunicator__object;
 struct bHYPRE_Vector__array;
 struct bHYPRE_Vector__object;
 struct sidl_BaseInterface__array;
@@ -95,13 +97,13 @@ struct bHYPRE_IJParCSRMatrix__sepv {
   /* Methods introduced in bHYPRE.Operator-v1.0.0 */
   /* Methods introduced in bHYPRE.IJParCSRMatrix-v1.0.0 */
   struct bHYPRE_IJParCSRMatrix__object* (*f_Create)(
-    /* in */ void* mpi_comm,
+    /* in */ struct bHYPRE_MPICommunicator__object* mpi_comm,
     /* in */ int32_t ilower,
     /* in */ int32_t iupper,
     /* in */ int32_t jlower,
     /* in */ int32_t jupper);
   struct bHYPRE_IJParCSRMatrix__object* (*f_GenerateLaplacian)(
-    /* in */ void* mpi_comm,
+    /* in */ struct bHYPRE_MPICommunicator__object* mpi_comm,
     /* in */ int32_t nx,
     /* in */ int32_t ny,
     /* in */ int32_t nz,
@@ -164,7 +166,7 @@ struct bHYPRE_IJParCSRMatrix__epv {
   /* Methods introduced in bHYPRE.ProblemDefinition-v1.0.0 */
   int32_t (*f_SetCommunicator)(
     /* in */ struct bHYPRE_IJParCSRMatrix__object* self,
-    /* in */ void* mpi_comm);
+    /* in */ struct bHYPRE_MPICommunicator__object* mpi_comm);
   int32_t (*f_Initialize)(
     /* in */ struct bHYPRE_IJParCSRMatrix__object* self);
   int32_t (*f_Assemble)(
@@ -214,7 +216,7 @@ struct bHYPRE_IJParCSRMatrix__epv {
   int32_t (*f_Read)(
     /* in */ struct bHYPRE_IJParCSRMatrix__object* self,
     /* in */ const char* filename,
-    /* in */ void* comm);
+    /* in */ struct bHYPRE_MPICommunicator__object* comm);
   /* Methods introduced in bHYPRE.Operator-v1.0.0 */
   int32_t (*f_SetIntParameter)(
     /* in */ struct bHYPRE_IJParCSRMatrix__object* self,
@@ -305,6 +307,12 @@ struct bHYPRE_CoefficientAccess__object*
   struct sidl_BaseInterface__object **_ex);
 char* skel_bHYPRE_IJParCSRMatrix_fgetURL_bHYPRE_CoefficientAccess(struct 
   bHYPRE_CoefficientAccess__object* obj); 
+
+struct bHYPRE_MPICommunicator__object* 
+  skel_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_MPICommunicator(char* url,
+  struct sidl_BaseInterface__object **_ex);
+char* skel_bHYPRE_IJParCSRMatrix_fgetURL_bHYPRE_MPICommunicator(struct 
+  bHYPRE_MPICommunicator__object* obj); 
 
 struct bHYPRE_Operator__object* 
   skel_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_Operator(char* url,

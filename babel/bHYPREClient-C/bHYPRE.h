@@ -34,6 +34,9 @@
 #ifndef included_bHYPRE_IdentitySolver_h
 #include "bHYPRE_IdentitySolver.h"
 #endif
+#ifndef included_bHYPRE_MPICommunicator_h
+#include "bHYPRE_MPICommunicator.h"
+#endif
 #ifndef included_bHYPRE_MatrixVectorView_h
 #include "bHYPRE_MatrixVectorView.h"
 #endif

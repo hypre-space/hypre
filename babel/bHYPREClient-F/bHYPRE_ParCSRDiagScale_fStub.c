@@ -33,6 +33,7 @@
 #include "sidl_Loader.h"
 #endif
 #include "bHYPRE_ParCSRDiagScale_IOR.h"
+#include "bHYPRE_MPICommunicator_IOR.h"
 #include "bHYPRE_Operator_IOR.h"
 #include "sidl_ClassInfo_IOR.h"
 #include "bHYPRE_Vector_IOR.h"
@@ -343,10 +344,10 @@ SIDLFortran77Symbol(bhypre_parcsrdiagscale_create_f,BHYPRE_PARCSRDIAGSCALE_CREAT
 )
 {
   const struct bHYPRE_ParCSRDiagScale__sepv *_epv = _getSEPV();
-  void* _proxy_mpi_comm = NULL;
+  struct bHYPRE_MPICommunicator__object* _proxy_mpi_comm = NULL;
   struct bHYPRE_ParCSRDiagScale__object* _proxy_retval = NULL;
   _proxy_mpi_comm =
-    (void*)
+    (struct bHYPRE_MPICommunicator__object*)
     (ptrdiff_t)(*mpi_comm);
   _proxy_retval = 
     (*(_epv->f_Create))(
@@ -371,12 +372,12 @@ SIDLFortran77Symbol(bhypre_parcsrdiagscale_setcommunicator_f,BHYPRE_PARCSRDIAGSC
 {
   struct bHYPRE_ParCSRDiagScale__epv *_epv = NULL;
   struct bHYPRE_ParCSRDiagScale__object* _proxy_self = NULL;
-  void* _proxy_mpi_comm = NULL;
+  struct bHYPRE_MPICommunicator__object* _proxy_mpi_comm = NULL;
   _proxy_self =
     (struct bHYPRE_ParCSRDiagScale__object*)
     (ptrdiff_t)(*self);
   _proxy_mpi_comm =
-    (void*)
+    (struct bHYPRE_MPICommunicator__object*)
     (ptrdiff_t)(*mpi_comm);
   _epv = _proxy_self->d_epv;
   *retval = 

@@ -31,6 +31,7 @@
 #include "HYPRE_sstruct_mv.h"
 #include "sstruct_mv.h"
 #include "utilities.h"
+#include "bHYPRE_MPICommunicator_Impl.h"
 /* DO-NOT-DELETE splicer.end(bHYPRE.SStructGrid._includes) */
 
 /*
@@ -120,7 +121,7 @@ extern "C"
 #endif
 bHYPRE_SStructGrid
 impl_bHYPRE_SStructGrid_Create(
-  /* in */ void* mpi_comm,
+  /* in */ bHYPRE_MPICommunicator mpi_comm,
   /* in */ int32_t ndim,
   /* in */ int32_t nparts)
 {
@@ -131,13 +132,14 @@ impl_bHYPRE_SStructGrid_Create(
    bHYPRE_SStructGrid grid;
    struct bHYPRE_SStructGrid__data * data;
    HYPRE_SStructGrid Hgrid;
+   MPI_Comm comm = bHYPRE_MPICommunicator__get_data(mpi_comm)->mpi_comm;
 
    grid = bHYPRE_SStructGrid__create();
    data = bHYPRE_SStructGrid__get_data( grid );
 
-   ierr += HYPRE_SStructGridCreate( (MPI_Comm) mpi_comm, ndim, nparts, &Hgrid );
+   ierr += HYPRE_SStructGridCreate( comm, ndim, nparts, &Hgrid );
    data->grid = Hgrid;
-   data->comm = (MPI_Comm) mpi_comm;
+   data->comm = comm;
 
    return grid;
 
@@ -192,7 +194,7 @@ extern "C"
 int32_t
 impl_bHYPRE_SStructGrid_SetCommunicator(
   /* in */ bHYPRE_SStructGrid self,
-  /* in */ void* mpi_comm)
+  /* in */ bHYPRE_MPICommunicator mpi_comm)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructGrid.SetCommunicator) */
   /* Insert the implementation of the SetCommunicator method here... */
@@ -202,7 +204,7 @@ impl_bHYPRE_SStructGrid_SetCommunicator(
    int ierr = 0;
    struct bHYPRE_SStructGrid__data * data;
    data = bHYPRE_SStructGrid__get_data( self );
-   data -> comm = (MPI_Comm) mpi_comm;
+   data->comm = bHYPRE_MPICommunicator__get_data(mpi_comm)->mpi_comm;
 
    return ierr;
 
@@ -550,6 +552,15 @@ struct bHYPRE_SStructGrid__object*
 char * impl_bHYPRE_SStructGrid_fgetURL_bHYPRE_SStructGrid(struct 
   bHYPRE_SStructGrid__object* obj) {
   return bHYPRE_SStructGrid__getURL(obj);
+}
+struct bHYPRE_MPICommunicator__object* 
+  impl_bHYPRE_SStructGrid_fconnect_bHYPRE_MPICommunicator(char* url,
+  sidl_BaseInterface *_ex) {
+  return bHYPRE_MPICommunicator__connect(url, _ex);
+}
+char * impl_bHYPRE_SStructGrid_fgetURL_bHYPRE_MPICommunicator(struct 
+  bHYPRE_MPICommunicator__object* obj) {
+  return bHYPRE_MPICommunicator__getURL(obj);
 }
 struct sidl_ClassInfo__object* 
   impl_bHYPRE_SStructGrid_fconnect_sidl_ClassInfo(char* url,

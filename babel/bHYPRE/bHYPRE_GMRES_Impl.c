@@ -45,6 +45,7 @@
 #include "bHYPRE_ParCSRDiagScale.h"
 #include "bHYPRE_ParCSRDiagScale_Impl.h"
 #include "bHYPRE_PCG_Impl.h"
+#include "bHYPRE_MPICommunicator_Impl.h"
 #include <assert.h>
 /*#include "mpi.h"*/
 
@@ -248,7 +249,7 @@ extern "C"
 #endif
 bHYPRE_GMRES
 impl_bHYPRE_GMRES_Create(
-  /* in */ void* mpi_comm)
+  /* in */ bHYPRE_MPICommunicator mpi_comm)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.GMRES.Create) */
   /* Insert-Code-Here {bHYPRE.GMRES.Create} (Create method) */
@@ -259,7 +260,7 @@ impl_bHYPRE_GMRES_Create(
    bHYPRE_GMRES solver = bHYPRE_GMRES__create();
    struct bHYPRE_GMRES__data * data;
    data = bHYPRE_GMRES__get_data( solver );
-   data -> comm = (MPI_Comm) mpi_comm;
+   data->comm = bHYPRE_MPICommunicator__get_data(mpi_comm)->mpi_comm;
 
    return solver;
 
@@ -281,7 +282,7 @@ extern "C"
 int32_t
 impl_bHYPRE_GMRES_SetCommunicator(
   /* in */ bHYPRE_GMRES self,
-  /* in */ void* mpi_comm)
+  /* in */ bHYPRE_MPICommunicator mpi_comm)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.GMRES.SetCommunicator) */
   /* Insert the implementation of the SetCommunicator method here... */
@@ -291,7 +292,7 @@ impl_bHYPRE_GMRES_SetCommunicator(
    int ierr = 0;
    struct bHYPRE_GMRES__data * data;
    data = bHYPRE_GMRES__get_data( self );
-   data -> comm = (MPI_Comm) mpi_comm;
+   data->comm = bHYPRE_MPICommunicator__get_data(mpi_comm)->mpi_comm;
 
    return ierr;
 
@@ -1232,6 +1233,15 @@ struct bHYPRE_Solver__object* impl_bHYPRE_GMRES_fconnect_bHYPRE_Solver(char*
 char * impl_bHYPRE_GMRES_fgetURL_bHYPRE_Solver(struct bHYPRE_Solver__object* 
   obj) {
   return bHYPRE_Solver__getURL(obj);
+}
+struct bHYPRE_MPICommunicator__object* 
+  impl_bHYPRE_GMRES_fconnect_bHYPRE_MPICommunicator(char* url,
+  sidl_BaseInterface *_ex) {
+  return bHYPRE_MPICommunicator__connect(url, _ex);
+}
+char * impl_bHYPRE_GMRES_fgetURL_bHYPRE_MPICommunicator(struct 
+  bHYPRE_MPICommunicator__object* obj) {
+  return bHYPRE_MPICommunicator__getURL(obj);
 }
 struct bHYPRE_GMRES__object* impl_bHYPRE_GMRES_fconnect_bHYPRE_GMRES(char* url,
   sidl_BaseInterface *_ex) {

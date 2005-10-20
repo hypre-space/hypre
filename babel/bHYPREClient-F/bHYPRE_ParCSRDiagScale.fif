@@ -175,7 +175,7 @@ C
 
         subroutine bHYPRE_ParCSRDiagScale_Create_f(mpi_comm, retval)
         implicit none
-C       in opaque mpi_comm
+C       in bHYPRE.MPICommunicator mpi_comm
         integer*8 mpi_comm
 C       out bHYPRE.ParCSRDiagScale retval
         integer*8 retval
@@ -193,7 +193,7 @@ C
         implicit none
 C       in bHYPRE.ParCSRDiagScale self
         integer*8 self
-C       in opaque mpi_comm
+C       in bHYPRE.MPICommunicator mpi_comm
         integer*8 mpi_comm
 C       out int retval
         integer*4 retval

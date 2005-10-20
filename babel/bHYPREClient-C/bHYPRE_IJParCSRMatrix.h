@@ -33,6 +33,9 @@ typedef struct bHYPRE_IJParCSRMatrix__object* bHYPRE_IJParCSRMatrix;
 #ifndef included_sidl_header_h
 #include "sidl_header.h"
 #endif
+#ifndef included_bHYPRE_MPICommunicator_h
+#include "bHYPRE_MPICommunicator.h"
+#endif
 #ifndef included_bHYPRE_Vector_h
 #include "bHYPRE_Vector.h"
 #endif
@@ -102,7 +105,7 @@ bHYPRE_IJParCSRMatrix_getClassInfo(
  */
 bHYPRE_IJParCSRMatrix
 bHYPRE_IJParCSRMatrix_Create(
-  /* in */ void* mpi_comm,
+  /* in */ bHYPRE_MPICommunicator mpi_comm,
   /* in */ int32_t ilower,
   /* in */ int32_t iupper,
   /* in */ int32_t jlower,
@@ -113,7 +116,7 @@ bHYPRE_IJParCSRMatrix_Create(
  */
 bHYPRE_IJParCSRMatrix
 bHYPRE_IJParCSRMatrix_GenerateLaplacian(
-  /* in */ void* mpi_comm,
+  /* in */ bHYPRE_MPICommunicator mpi_comm,
   /* in */ int32_t nx,
   /* in */ int32_t ny,
   /* in */ int32_t nz,
@@ -155,7 +158,7 @@ bHYPRE_IJParCSRMatrix_SetDiagOffdSizes(
 int32_t
 bHYPRE_IJParCSRMatrix_SetCommunicator(
   /* in */ bHYPRE_IJParCSRMatrix self,
-  /* in */ void* mpi_comm);
+  /* in */ bHYPRE_MPICommunicator mpi_comm);
 
 /**
  * Prepare an object for setting coefficient values, whether for
@@ -332,7 +335,7 @@ int32_t
 bHYPRE_IJParCSRMatrix_Read(
   /* in */ bHYPRE_IJParCSRMatrix self,
   /* in */ const char* filename,
-  /* in */ void* comm);
+  /* in */ bHYPRE_MPICommunicator comm);
 
 /**
  * Set the int parameter associated with {\tt name}.

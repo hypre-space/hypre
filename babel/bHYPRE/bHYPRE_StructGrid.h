@@ -30,6 +30,9 @@ typedef struct bHYPRE_StructGrid__object* bHYPRE_StructGrid;
 #ifndef included_sidl_header_h
 #include "sidl_header.h"
 #endif
+#ifndef included_bHYPRE_MPICommunicator_h
+#include "bHYPRE_MPICommunicator.h"
+#endif
 #ifndef included_sidl_BaseInterface_h
 #include "sidl_BaseInterface.h"
 #endif
@@ -96,7 +99,7 @@ bHYPRE_StructGrid_getClassInfo(
  */
 bHYPRE_StructGrid
 bHYPRE_StructGrid_Create(
-  /* in */ void* mpi_comm,
+  /* in */ bHYPRE_MPICommunicator mpi_comm,
   /* in */ int32_t dim);
 
 /**
@@ -107,7 +110,7 @@ bHYPRE_StructGrid_Create(
 int32_t
 bHYPRE_StructGrid_SetCommunicator(
   /* in */ bHYPRE_StructGrid self,
-  /* in */ void* mpi_comm);
+  /* in */ bHYPRE_MPICommunicator mpi_comm);
 
 /**
  * Method:  SetDimension[]

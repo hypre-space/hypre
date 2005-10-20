@@ -27,6 +27,7 @@
 #include "sidl_Loader.h"
 #endif
 #include "bHYPRE_SStruct_MatrixVectorView_IOR.h"
+#include "bHYPRE_MPICommunicator_IOR.h"
 #include "sidl_ClassInfo_IOR.h"
 #include "sidl_BaseInterface_IOR.h"
 
@@ -293,12 +294,12 @@ SIDLFortran77Symbol(bhypre_sstruct_matrixvectorview_setcommunicator_f,BHYPRE_SST
 {
   struct bHYPRE_SStruct_MatrixVectorView__epv *_epv = NULL;
   struct bHYPRE_SStruct_MatrixVectorView__object* _proxy_self = NULL;
-  void* _proxy_mpi_comm = NULL;
+  struct bHYPRE_MPICommunicator__object* _proxy_mpi_comm = NULL;
   _proxy_self =
     (struct bHYPRE_SStruct_MatrixVectorView__object*)
     (ptrdiff_t)(*self);
   _proxy_mpi_comm =
-    (void*)
+    (struct bHYPRE_MPICommunicator__object*)
     (ptrdiff_t)(*mpi_comm);
   _epv = _proxy_self->d_epv;
   *retval = 

@@ -22,6 +22,9 @@
 #ifndef included_bHYPRE_SStructMatrixView_h
 #include "bHYPRE_SStructMatrixView.h"
 #endif
+#ifndef included_bHYPRE_MPICommunicator_h
+#include "bHYPRE_MPICommunicator.h"
+#endif
 #ifndef included_bHYPRE_SStructParCSRMatrix_h
 #include "bHYPRE_SStructParCSRMatrix.h"
 #endif
@@ -106,7 +109,7 @@ impl_bHYPRE_SStructParCSRMatrix__dtor(
 extern
 bHYPRE_SStructParCSRMatrix
 impl_bHYPRE_SStructParCSRMatrix_Create(
-  /* in */ void* mpi_comm,
+  /* in */ bHYPRE_MPICommunicator mpi_comm,
   /* in */ bHYPRE_SStructGraph graph);
 
 extern struct bHYPRE_SStruct_MatrixVectorView__object* 
@@ -121,6 +124,12 @@ extern struct bHYPRE_SStructMatrixView__object*
 extern char* 
   impl_bHYPRE_SStructParCSRMatrix_fgetURL_bHYPRE_SStructMatrixView(struct 
   bHYPRE_SStructMatrixView__object* obj);
+extern struct bHYPRE_MPICommunicator__object* 
+  impl_bHYPRE_SStructParCSRMatrix_fconnect_bHYPRE_MPICommunicator(char* url,
+  sidl_BaseInterface *_ex);
+extern char* 
+  impl_bHYPRE_SStructParCSRMatrix_fgetURL_bHYPRE_MPICommunicator(struct 
+  bHYPRE_MPICommunicator__object* obj);
 extern struct bHYPRE_SStructParCSRMatrix__object* 
   impl_bHYPRE_SStructParCSRMatrix_fconnect_bHYPRE_SStructParCSRMatrix(char* url,
   sidl_BaseInterface *_ex);
@@ -173,7 +182,7 @@ extern
 int32_t
 impl_bHYPRE_SStructParCSRMatrix_SetCommunicator(
   /* in */ bHYPRE_SStructParCSRMatrix self,
-  /* in */ void* mpi_comm);
+  /* in */ bHYPRE_MPICommunicator mpi_comm);
 
 extern
 int32_t
@@ -367,6 +376,12 @@ extern struct bHYPRE_SStructMatrixView__object*
 extern char* 
   impl_bHYPRE_SStructParCSRMatrix_fgetURL_bHYPRE_SStructMatrixView(struct 
   bHYPRE_SStructMatrixView__object* obj);
+extern struct bHYPRE_MPICommunicator__object* 
+  impl_bHYPRE_SStructParCSRMatrix_fconnect_bHYPRE_MPICommunicator(char* url,
+  sidl_BaseInterface *_ex);
+extern char* 
+  impl_bHYPRE_SStructParCSRMatrix_fgetURL_bHYPRE_MPICommunicator(struct 
+  bHYPRE_MPICommunicator__object* obj);
 extern struct bHYPRE_SStructParCSRMatrix__object* 
   impl_bHYPRE_SStructParCSRMatrix_fconnect_bHYPRE_SStructParCSRMatrix(char* url,
   sidl_BaseInterface *_ex);

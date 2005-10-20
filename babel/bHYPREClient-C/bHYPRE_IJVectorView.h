@@ -27,6 +27,9 @@ typedef struct bHYPRE_IJVectorView__object* bHYPRE_IJVectorView;
 #ifndef included_sidl_header_h
 #include "sidl_header.h"
 #endif
+#ifndef included_bHYPRE_MPICommunicator_h
+#include "bHYPRE_MPICommunicator.h"
+#endif
 #ifndef included_sidl_BaseInterface_h
 #include "sidl_BaseInterface.h"
 #endif
@@ -79,7 +82,7 @@ bHYPRE_IJVectorView_getClassInfo(
 int32_t
 bHYPRE_IJVectorView_SetCommunicator(
   /* in */ bHYPRE_IJVectorView self,
-  /* in */ void* mpi_comm);
+  /* in */ bHYPRE_MPICommunicator mpi_comm);
 
 int32_t
 bHYPRE_IJVectorView_Initialize(
@@ -183,7 +186,7 @@ int32_t
 bHYPRE_IJVectorView_Read(
   /* in */ bHYPRE_IJVectorView self,
   /* in */ const char* filename,
-  /* in */ void* comm);
+  /* in */ bHYPRE_MPICommunicator comm);
 
 /**
  * Cast method for interface and class type conversions.
