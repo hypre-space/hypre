@@ -19,3 +19,11 @@ mpirun -np 1 ./sstruct -in sstruct.in.amr.2Db -solver 20 -r 2 1 1 \
  > amr2d.out.2
 mpirun -np 2 ./sstruct -in sstruct.in.amr.2Db -solver 20 -P 2 1 1 \
  > amr2d.out.3
+mpirun -np 1 ./sstruct -in sstruct.in.amr.2Dc -solver 18 -r 2 1 1 \
+ > amr2d.out.4
+mpirun -np 2 ./sstruct -in sstruct.in.amr.2Dc -solver 18 -P 2 1 1 \
+ > amr2d.out.5
+mpirun -np 1 ./sstruct -in sstruct.in.amr.2Dc -solver 20 -r 2 1 1 \
+ > amr2d.out.6
+mpirun -np 2 ./sstruct -in sstruct.in.amr.2Dc -solver 20 -P 2 1 1 \
+ > amr2d.out.7
