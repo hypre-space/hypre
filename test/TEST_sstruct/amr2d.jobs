@@ -11,11 +11,11 @@
 #=============================================================================
 #=============================================================================
 
-mpirun -np 1 sstruct -in sstruct.in.amr.2D -solver 18 -r 2 1 1 \
+mpirun -np 1 ./sstruct -in sstruct.in.amr.2Db -solver 18 -r 2 1 1 \
  > amr2d.out.0
-mpirun -np 2 sstruct -in sstruct.in.amr.2D -solver 18 -P 2 1 1 \
+mpirun -np 2 ./sstruct -in sstruct.in.amr.2Db -solver 18 -P 2 1 1 \
  > amr2d.out.1
-mpirun -np 1 sstruct -in sstruct.in.amr.2D -solver 20 -r 2 1 1 \
+mpirun -np 1 ./sstruct -in sstruct.in.amr.2Db -solver 20 -r 2 1 1 \
  > amr2d.out.2
-mpirun -np 2 sstruct -in sstruct.in.amr.2D -solver 20 -P 2 1 1 \
+mpirun -np 2 ./sstruct -in sstruct.in.amr.2Db -solver 20 -P 2 1 1 \
  > amr2d.out.3
