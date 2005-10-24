@@ -1417,7 +1417,7 @@ hypre_ParCSRMatrixToCSRMatrixAll(hypre_ParCSRMatrix *par_matrix)
    
    int *send_info = NULL;
    MPI_Status  status1;
-   int count, tag1 = 1, tag2 = 2;
+   int count, tag1 = 11112, tag2 = 22223, tag3 = 33334;
    int start;
    
 #endif
@@ -1433,7 +1433,7 @@ hypre_ParCSRMatrixToCSRMatrixAll(hypre_ParCSRMatrix *par_matrix)
                     hypre_ParCSRMatrixFirstRowIndex(par_matrix) + 1;
    
 
-   local_matrix = hypre_MergeDiagAndOffd(par_matrix);
+   local_matrix = hypre_MergeDiagAndOffd(par_matrix); /* creates matrix */
    local_matrix_i = hypre_CSRMatrixI(local_matrix);
    local_matrix_j = hypre_CSRMatrixJ(local_matrix);
    local_matrix_data = hypre_CSRMatrixData(local_matrix);
@@ -1520,6 +1520,14 @@ hypre_ParCSRMatrixToCSRMatrixAll(hypre_ParCSRMatrix *par_matrix)
          hypre_TFree(send_proc_obj.elements);
          if(response_recv_buf)        hypre_TFree(response_recv_buf);
          if(response_recv_buf_starts) hypre_TFree(response_recv_buf_starts);
+
+
+         if (hypre_CSRMatrixOwnsData(local_matrix))
+            hypre_CSRMatrixDestroy(local_matrix);
+         else
+            hypre_TFree(local_matrix);
+
+
          return NULL;
       }
    }
@@ -1580,7 +1588,15 @@ hypre_ParCSRMatrixToCSRMatrixAll(hypre_ParCSRMatrix *par_matrix)
    if(response_recv_buf_starts) hypre_TFree(response_recv_buf_starts);
 
    /* now proc 0 can exit if it has no rows */
-   if (!local_num_rows) return NULL;
+   if (!local_num_rows) 
+   { 
+      if (hypre_CSRMatrixOwnsData(local_matrix))
+         hypre_CSRMatrixDestroy(local_matrix);
+      else
+         hypre_TFree(local_matrix);
+
+      return NULL;
+   }
    
 
    /* everyone left has rows and knows: new_vec_starts, num_types, and used_procs */
@@ -1643,17 +1659,17 @@ hypre_ParCSRMatrixToCSRMatrixAll(hypre_ParCSRMatrix *par_matrix)
         start_index = matrix_i[new_vec_starts[i]];
         num_data = matrix_i[new_vec_starts[i+1]] - start_index; 
         MPI_Irecv(&matrix_data[start_index], num_data, MPI_DOUBLE,
-                        used_procs[i], 0, comm, &requests[j++]);
+                        used_procs[i], tag1, comm, &requests[j++]);
         MPI_Irecv(&matrix_j[start_index], num_data, MPI_INT,
-                        used_procs[i], 0, comm, &requests[j++]);
+                        used_procs[i], tag3, comm, &requests[j++]);
    }
    local_num_nonzeros = local_matrix_i[local_num_rows];
    for (i=0; i < num_types; i++)
    {
         MPI_Isend(local_matrix_data, local_num_nonzeros, MPI_DOUBLE,
-                        used_procs[i], 0, comm, &requests[j++]);
+                        used_procs[i], tag1, comm, &requests[j++]);
         MPI_Isend(local_matrix_j, local_num_nonzeros, MPI_INT,
-                        used_procs[i], 0, comm, &requests[j++]);
+                        used_procs[i], tag3, comm, &requests[j++]);
    }
 
 

@@ -526,7 +526,7 @@ hypre_ParVectorToVectorAll (hypre_ParVector *par_v)
    
    int *send_info = NULL;
    MPI_Status  status1;
-   int count, tag1 = 1, tag2 = 2;
+   int count, tag1 = 112, tag2 = 223;
    int start;
    
 #endif

@@ -439,11 +439,30 @@ hypre_NewCommPkgCreate( hypre_ParCSRMatrix *parcsr_A)
    hypre_ParCSRCommPkgComm(comm_pkg) = comm;
 
    hypre_ParCSRCommPkgNumRecvs(comm_pkg) = num_recvs;
-   hypre_ParCSRCommPkgRecvProcs(comm_pkg) = recv_procs;
+
+   if (num_recvs)
+   {
+      hypre_ParCSRCommPkgRecvProcs(comm_pkg) = recv_procs;
+   }
+   else
+   {
+      hypre_TFree(recv_procs);
+      hypre_ParCSRCommPkgRecvProcs(comm_pkg) = NULL;
+   }
    hypre_ParCSRCommPkgRecvVecStarts(comm_pkg) = recv_vec_starts;
 
    hypre_ParCSRCommPkgNumSends(comm_pkg) = num_sends;
-   hypre_ParCSRCommPkgSendProcs(comm_pkg) = send_proc_obj.id;
+   if (num_sends) 
+   {
+      hypre_ParCSRCommPkgSendProcs(comm_pkg) = send_proc_obj.id;
+   }
+   else 
+   {
+      hypre_TFree(send_proc_obj.id);
+      hypre_ParCSRCommPkgSendProcs(comm_pkg) = NULL;
+   }
+   
+
    hypre_ParCSRCommPkgSendMapStarts(comm_pkg) = send_proc_obj.vec_starts;
 
    /*send map elements have global index - need local instead*/
@@ -477,9 +496,14 @@ hypre_NewCommPkgCreate( hypre_ParCSRMatrix *parcsr_A)
   
    if(ex_contact_procs)      hypre_TFree(ex_contact_procs);
    if(ex_contact_vec_starts) hypre_TFree(ex_contact_vec_starts);
+   hypre_TFree(ex_contact_buf);
+   
 
    if(response_buf)        hypre_TFree(response_buf);
    if(response_buf_starts) hypre_TFree(response_buf_starts);
+
+    
+   
 
 
 #if timeparts
@@ -858,6 +882,11 @@ hypre_LocateAssummedPartition(int row_start, int row_end, int global_num_rows,
   /*free the requests */
    ierr = MPI_Waitall(contact_list_length, requests, 
                     statuses);
+
+   
+   hypre_TFree(statuses);
+   hypre_TFree(requests);
+   
 
    hypre_TFree(sortme);
    hypre_TFree(contact_list);
