@@ -2331,6 +2331,17 @@ int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
             f_vector = NULL;
          
          }
+#ifdef HYPRE_NO_GLOBAL_PARTITION
+         else
+         {
+            
+            hypre_CSRMatrixDestroy(A_CSR);
+            A_CSR = NULL;
+            hypre_SeqVectorDestroy(f_vector);
+            f_vector = NULL;
+         }
+#endif
+
       }
       break;   
    }
