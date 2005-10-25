@@ -19,7 +19,8 @@ perform_test()
 #=============================================================================
 #   Running tests on same machine as that executing this script
 #   Destroy old directory; copy newly checked out version; cd to
-#   HYPRE_REMOTE_DIR and execute tests.
+#   HYPRE_REMOTE_DIR, create a temporary file indicating tests have started,
+#   execute tests and create another temporary file to indicate tests completed.
 #=============================================================================
   if [ "${HYPRE_COMPILE_MACHINE}" = "`hostname | sed 's/\..*$//'`" ]
   then
@@ -29,16 +30,20 @@ perform_test()
         cp -fpr ${HYPRE_AUTOTEST_EXECUTE_DIR}/linear_solvers ${HYPRE_REMOTE_DIR}
      fi
      cd ${HYPRE_REMOTE_DIR}
+     echo "Autotest Started" > "autotest_start"
      [ -f linear_solvers/test/AUTOTEST/env.${HYPRE_ARCH} ] && \
         . linear_solvers/test/AUTOTEST/env.${HYPRE_ARCH} ${COMPILERSELECT}
      linear_solvers/test/AUTOTEST/autotest_test \
          ${HYPRE_MACHINE_COMMANDS} -v ${HYPRE_MESSAGE}
+     echo "Autotest Done" > "autotest_done"
 
 #=============================================================================
 #   Running tests on remote machine
 #     ssh to compile machine and remove existing linear_solvers directory
 #     copy source code from the current directory to defined remote directory
-#     ssh to remote machine and execute tests
+#     ssh to remote machine, create a temporary file indicating tests have 
+#     started, execute tests and create another temporary file to indicate tests
+#     completed.
 #=============================================================================
   else
     echo "deleting old AUTOTEST directory...."
@@ -54,10 +59,12 @@ perform_test()
     ssh -f ${HYPRE_COMPILE_MACHINE} "\
     (/bin/sh -c \"\
       cd ${HYPRE_REMOTE_DIR##*:};\
+      echo "Autotest Started" > "autotest_start";\
       [ -f linear_solvers/test/AUTOTEST/env.${HYPRE_ARCH} ] && \
         . linear_solvers/test/AUTOTEST/env.${HYPRE_ARCH} ${COMPILERSELECT};\
       linear_solvers/test/AUTOTEST/autotest_test \
             ${HYPRE_MACHINE_COMMANDS} -v ${HYPRE_MESSAGE};\
+      echo "Autotest Done" > "autotest_done";\
       chmod -fR a+rX,ug+w,o-w linear_solvers;\
       chgrp -fR hypre linear_solvers\"\
     )" 
@@ -239,263 +246,6 @@ hypre_set_machine_options()
   esac
 }
 
-
-#==============================================================================
-#    Mail error summary file 
-#       Define mail recipients and mail program to be used
-#       Send messages
-#==============================================================================
-hypre_mail_summary()
-{
-
-  HYPRE_DEFAULT_EMAIL="hill66@llnl.gov"
-  HYPRE_ALL_EMAIL="hill66@llnl.gov\
-                   rfalgout@llnl.gov\
-                   abaker@llnl.gov\
-                   painter1@llnl.gov\
-                   lee123@llnl.gov\
-                   kolev1@llnl.gov\
-                   yang11@llnl.gov\
-                   chtong@llnl.gov\
-                   vhenson@llnl.gov"
-
-#
-# Define mail program to be used
-   if [ "$HYPRE_ARCH" = "linux" ] ; then
-      [ -x /usr/bin/Mail ] && HYPRE_MAIL=/usr/bin/Mail
-      [ -x /usr/bin/mhmail ] && HYPRE_MAIL=/usr/bin/mhmail
-   else
-      [ -x /usr/bin/Mail ] && HYPRE_MAIL=/usr/bin/Mail
-      [ -x /usr/bin/mailx ] && HYPRE_MAIL=/usr/bin/mailx
-      [ -x /usr/sbin/mailx ] && HYPRE_MAIL=/usr/sbin/mailx
-   fi
-#
-#               mail summaries
-   SUBJECT="Autotest Error Summary `date '+%D'`"
-
-   if [ "$DEBUG_MODE" = "yes" ] ; then
-      ${HYPRE_MAIL} -s "$SUBJECT" $HYPRE_DEFAULT_EMAIL < $HYPRE_TEST_SUMMARY_FILE
-   else
-      ${HYPRE_MAIL} -s "$SUBJECT" $HYPRE_ALL_EMAIL < $HYPRE_TEST_SUMMARY_FILE
-   fi
-
-   echo "Autotest mail sent"
-}
-
-
-#=============================================================================
-# Functions for filtering misleading error messages
-#    Removes specified messages from error files that do not reflect actual
-#    errors
-#=============================================================================
-process_filter ()
-{
-  ErrorFile=$1
-  shift
-  if (egrep "$@" $ErrorFile >/dev/null) ; then
-     mv $ErrorFile $ErrorFile.tmp
-     egrep -v "$@" $ErrorFile.tmp > $ErrorFile
-     echo "-- applied filter:$@" >> $ErrorFile.orig
-     cat $ErrorFile.tmp >> $ErrorFile.orig
-  fi
-}
-
-
-apply_error_filters ()
-{
-  ErrorFile=$1
-  if [ -s "${ErrorFile}" ] ; then
-    HOST=`hostname`
-    case $HOST in
-      uv*)
-        for ii in \
-          '===\ End\ of\ Compilation'\
-          'Compilation\ successful'\
-          '^\ Guide\ \ \ '\
-          ':\ 0\ errors\ in\ file'\
-          '1500-030:\ \(I\)\ INFORMATION:'\
-          '1500-010:\ \(W\)\ WARNING\ in'\
-          ':\ 1506-068\ \(W\)\ Operation\ between\ types'\
-          '^No\ begin\ line'\
-          'autoconf\ has\ been\ disabled'\
-          'babel_config.h.in:\ No\ such\ file\ or\ directory'\
-          'configure:\ WARNING:\ '
-        do process_filter $ErrorFile "${ii}"
-        done
-        ;;
-      peng*)
-        for ii in \
-          '[A-Za-z0-9_]*\.[cCf]$'\
-          '[A-Za-z0-9_]*\.cxx$'\
-          '^[ \t]*$'\
-          '^[0-9]*\ Lines\ Compiled$'\
-          'external\ (subroutine|function)'\
-          'EXTERNAL\ (SUBROUTINE|FUNCTION)'\
-          'remark:\ LOOP\ WAS\ VECTORIZED'\
-          '^icc:\ Command\ line\ warning:\ overriding'\
-          '\ remark:\ '
-        do process_filter $ErrorFile "${ii}"
-        done
-      ;;
-      gps*)
-        for ii in \
-          '^No\ suffix\ list'\
-          '^stty:\ tcgetattr:\ Not\ a\ typewriter'\
-          'WARNING:\ \ guidef77\ has\ implied\ '\
-          '^cc:\ Info:\ '
-        do process_filter $ErrorFile "${ii}"
-        done
-      ;;
-      tux*)
-        for ii in \
-          'autoconf\ has\ been\ disabled'\
-          'automake\ has\ been\ disabled'\
-          'autoheader\ has\ been\ disabled'\
-          'configure:\ WARNING:\ Configuration\ for'\
-          'configure:\ WARNING:\ Skipping\ Java'\
-          'babel_config.h.in:\ No\ such\ file\ or\ directory'\
-          'Insure\ messages\ will\ be\ written\ to\ insure'\
-          'TCA\ log\ data\ will\ be\ merged\ with\ tca'\
-          'PGC/x86\ Linux/x86\ 3.3-1:\ compilation\ completed\ with\ warnings'\
-          'sed:\ Couldn.t\ close\ '
-        do process_filter $ErrorFile "${ii}"
-        done
-      ;;
-      vivid*)
-        for ii in \
-          'xauth:\ \ error\ in\ locking\ authority\ file\ '
-        do process_filter $ErrorFile "${ii}"
-        done
-      ;;
-    esac
-  fi
-}
-
-
-#==============================================================================
-#    Search given directory for non-zero length error files
-#       directory is set just before calling this routine
-#       run ls to get a list of error files
-#       for each file in the list; if it exists and is readable;
-#       apply the error filters then check to see if it still exists
-#       with a non-zero length; if so, increment the error counter
-#==============================================================================
-search_error_files()
-{
-   errlist="`ls *.err`"
-   for errfile in ${errlist}
-   do
-      if [ -r ${errfile} ]
-      then
-         apply_error_filters ${errfile}
-         if [ -s ${errfile} ]
-         then
-            TOTERR=`expr $TOTERR + 1`
-         fi
-      fi
-   done
-}
-
-
-#==============================================================================
-#    Create summary file of test errors
-#       Set list of default tests and driver code directories
-#       In the directory in which this script is running, create the output file
-#       For each test in the default list, search the list of tests run for it
-#       if the test was run, search the linear_solvers, test and driver directories
-#       for error files of non-zero length.  If there are some error files; get the
-#       name of the individual summary error file in the REMOTE_DIR.  
-#       All printing is done in the directory in which this script is running.
-#==============================================================================
-hypre_create_summary_file()
-{
-   HYPRE_DEFAULT_TESTS="PRIMARY[default]\
-                        PRIMARY[insure++]\
-                        LOCAL-TEST[default]\
-                        SECONDARY[GPS]\
-                        SECONDARY[OpenMP-GPS]\
-                        SECONDARY[MCR]\
-                        SECONDARY[ILX]\
-                        SECONDARY[Pengra]\
-                        SECONDARY[pgi]\
-                        SECONDARY[lahey]\
-                        SECONDARY[KCC]\
-                        SECONDARY[Intel-8.0]\
-                        SECONDARY[Absoft-Pro8.0]"
-
-   HYPRE_STD_TEST_DIRS="TEST_fac TEST_ij TEST_sstruct TEST_struct"
-
-   cd ${HYPRE_AUTOTEST_EXECUTE_DIR}
-   HYPRE_TEST_SUMMARY_FILE="autotest.summary.`date '+%Y%m%d'`.html"
-
-   printf "<html>\n" > $HYPRE_TEST_SUMMARY_FILE
-   printf "<head> </head>\n" >> $HYPRE_TEST_SUMMARY_FILE
-   printf "<PRE>\n" >> $HYPRE_TEST_SUMMARY_FILE
-   printf "<body>\n" >> $HYPRE_TEST_SUMMARY_FILE
-   printf "%s<br>\n" "       Autotest Results for `date '+%D'` " >> $HYPRE_TEST_SUMMARY_FILE
-   printf "%s<br>\n" "--------------------------------------------" >> $HYPRE_TEST_SUMMARY_FILE
-
-   for test in ${HYPRE_DEFAULT_TESTS}
-   do
-      TOTERR=0
-      found_test=0
-
-      for runtest in ${HYPRE_TESTS_RUN}
-      do
-         hypre_set_machine_options ${runtest}
-         if [ "${test}" = "${HYPRE_MESSAGE}" ]
-         then
-            found_test=1
-            cd ${HYPRE_REMOTE_DIR}/linear_solvers
-            search_error_files
-
-            cd ${HYPRE_REMOTE_DIR}/linear_solvers/test
-            search_error_files
-
-            for dir in ${HYPRE_STD_TEST_DIRS}
-            do
-               cd ${HYPRE_REMOTE_DIR}/linear_solvers/test/${dir}
-               search_error_files
-            done
-
-            cd ${HYPRE_REMOTE_DIR}
-            archfile=`ls autotest.${HYPRE_ARCH}.*`
-            if [ -d ${HYPRE_REMOTE_DIR}/log ]
-            then
-               resultsfile="${HYPRE_REMOTE_DIR}/log/${archfile}"
-               mv -f ${archfile} ${HYPRE_REMOTE_DIR}/log
-            else
-               resultsfile="${HYPRE_REMOTE_DIR}/${archfile}"
-            fi
-
-            cd ${HYPRE_AUTOTEST_EXECUTE_DIR}
-            if [ "${TOTERR}" = "0" ]
-            then
-               printf "%-25s: " $test >> $HYPRE_TEST_SUMMARY_FILE
-               printf "  `date '+%D'`" >> $HYPRE_TEST_SUMMARY_FILE
-               printf "   PASSED" >> $HYPRE_TEST_SUMMARY_FILE
-               printf "  <a href=\"%s\">%s</a><br>\n" ${resultsfile} ${archfile} >> $HYPRE_TEST_SUMMARY_FILE
-            else
-               printf "%-25s: " $test >> $HYPRE_TEST_SUMMARY_FILE
-               printf "  `date '+%D'`" >> $HYPRE_TEST_SUMMARY_FILE
-               printf " %5d Errors" ${TOTERR} >> $HYPRE_TEST_SUMMARY_FILE
-               printf "  <a href=\"%s\">%s</a><br>\n" ${resultsfile} ${archfile} >> $HYPRE_TEST_SUMMARY_FILE
-            fi
-         fi
-      done
-
-      if [ "${found_test}" = "0" ]
-      then
-         printf "%-25s: " $test >> $HYPRE_TEST_SUMMARY_FILE
-         printf "            N/A<br>\n" >> $HYPRE_TEST_SUMMARY_FILE
-      fi
-
-   done
-   printf "</body>\n" >> $HYPRE_TEST_SUMMARY_FILE
-   printf "</PRE>\n" >> $HYPRE_TEST_SUMMARY_FILE
-   printf "</html>\n" >> $HYPRE_TEST_SUMMARY_FILE
-}
-
 #==============================================================================
 # Beginning of 'main program' of script for regression testing hypre.
 # Initialize variables
@@ -504,10 +254,9 @@ DEBUG_MODE=""
 HYPRE_MESSAGE=""
 COMPILERSELECT=""
 HYPRE_RUN_MACHINE=""
-HYPRE_SUMMARY_DIR="/usr/casc/hypre/AUTOTEST"
 HYPRE_AUTOTEST_EXECUTE_DIR="`pwd`"
 export HYPRE_RUN_MACHINE
-export HYPRE_MESSAGE COMPILERSELECT HYPRE_AUTOTEST_EXECUTE_DIR HYPRE_SUMMARY_DIR
+export HYPRE_MESSAGE COMPILERSELECT HYPRE_AUTOTEST_EXECUTE_DIR
 
 CVSROOT=/home/casc/repository
 export CVSROOT
@@ -525,11 +274,13 @@ fi
 case $1 in
     -h|-help) 
         help
-        exit;;
+        exit
+        ;;
     -d|-debug) 
         DEBUG_MODE="yes"
         set -xv
-        shift;;
+        shift
+        ;;
 esac
 
 
@@ -582,7 +333,6 @@ chgrp -fR hypre linear_solvers
 #       allowances are made in this loop for other options to be interspersed
 #==============================================================================
 
-HYPRE_TESTS_RUN=""
 while [ "$*" != "" ]
 do
   HYPRE_RUN_MACHINE=""
@@ -602,7 +352,6 @@ do
         help
         exit;;
     *)
-        HYPRE_TESTS_RUN="${HYPRE_TESTS_RUN} ${arg}"
         hypre_set_machine_options ${arg}
         perform_test
         shift;;
@@ -612,26 +361,10 @@ done
 
 
 #==============================================================================
-#    Create and email error summary
-#==============================================================================
-hypre_create_summary_file
-hypre_mail_summary
-
-
-#==============================================================================
 #    Reset permissions
 #==============================================================================
 chmod -fR a+rX,ug+w,o-w ${HYPRE_REMOTE_DIR}/linear_solvers
 chgrp -fR hypre ${HYPRE_REMOTE_DIR}/linear_solvers
-
-chmod -fR a+rX,ug+w,o-w ${HYPRE_SUMMARY_DIR}
-chgrp -fR hypre ${HYPRE_SUMMARY_DIR}
-
-
-#==============================================================================
-#    Store summary file in permanent location
-#==============================================================================
-mv -f autotest.summary* ${HYPRE_SUMMARY_DIR}
 
 
 #==============================================================================
