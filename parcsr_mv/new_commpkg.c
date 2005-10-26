@@ -42,20 +42,10 @@ hypre_NewCommPkgCreate_core(
 
 {
    int        num_procs, myid;
-#if 0
-   int        global_num_rows;
-#endif
    int        j, i, ierr=0;
-#if 0
-   int        row_start=0, row_end=0, col_start = 0, col_end = 0;
-#endif
    int        range_start, range_end; 
 
    int        size;
- #if 0
-   int        num_cols_off_d; 
-   int       *col_map_off_d; 
-#endif
    int        count;  
 
    int        num_recvs, *recv_procs = NULL, *recv_vec_starts=NULL;
@@ -70,18 +60,12 @@ hypre_NewCommPkgCreate_core(
    
 
    int        *response_buf = NULL, *response_buf_starts=NULL;
-#if 0
-   int        first_col_diag;
-#endif
+
    int        max_response_size;
    
    hypre_IJAssumedPart               apart;
    hypre_DataExchangeResponse        response_obj1, response_obj2;
    hypre_ProcListElements            send_proc_obj; 
-#if 0
-   MPI_Comm              comm = hypre_ParCSRMatrixComm(parcsr_A);
-   hypre_ParCSRCommPkg	 *comm_pkg;
-#endif
 
 #if mydebug
    int tmp_int, index;
@@ -109,21 +93,6 @@ hypre_NewCommPkgCreate_core(
     starttime = MPI_Wtime();
 #endif
 
-
-#if 0
-   /*-----------------------------------------------------------
-    * Actual partitioning and off_d information 
-    *----------------------------------------------------------*/
-
-      ierr = hypre_ParCSRMatrixGetLocalRange( parcsr_A,
-               &row_start, &row_end ,
-               &col_start, &col_end );
-
-      col_map_off_d =  hypre_ParCSRMatrixColMapOffd(parcsr_A);
-      num_cols_off_d = hypre_CSRMatrixNumCols(hypre_ParCSRMatrixOffd(parcsr_A));
-     
-      global_num_rows = hypre_ParCSRMatrixGlobalNumRows(parcsr_A); 
-#endif
 
 
 
@@ -446,37 +415,7 @@ hypre_NewCommPkgCreate_core(
     starttime = MPI_Wtime();
 #endif
 
-#if 0
-   comm_pkg = hypre_CTAlloc(hypre_ParCSRCommPkg, 1);
-   hypre_ParCSRCommPkgComm(comm_pkg) = comm;
 
-   hypre_ParCSRCommPkgNumRecvs(comm_pkg) = num_recvs;
-
-   if (num_recvs)
-   {
-      hypre_ParCSRCommPkgRecvProcs(comm_pkg) = recv_procs;
-   }
-   else
-   {
-      hypre_TFree(recv_procs);
-      hypre_ParCSRCommPkgRecvProcs(comm_pkg) = NULL;
-   }
-   hypre_ParCSRCommPkgRecvVecStarts(comm_pkg) = recv_vec_starts;
-
-   hypre_ParCSRCommPkgNumSends(comm_pkg) = num_sends;
-   if (num_sends) 
-   {
-      hypre_ParCSRCommPkgSendProcs(comm_pkg) = send_proc_obj.id;
-   }
-   else 
-   {
-      hypre_TFree(send_proc_obj.id);
-      hypre_ParCSRCommPkgSendProcs(comm_pkg) = NULL;
-   }
-   
-
-   hypre_ParCSRCommPkgSendMapStarts(comm_pkg) = send_proc_obj.vec_starts;
-#endif
 
    *p_num_recvs = num_recvs;
    *p_recv_procs = recv_procs;
@@ -487,9 +426,7 @@ hypre_NewCommPkgCreate_core(
 
 
    /*send map elements have global index - need local instead*/
-#if 0
-   first_col_diag = hypre_ParCSRMatrixFirstColDiag(parcsr_A);
-#endif
+
    if (num_sends)
    {
       for (i=0; i<send_proc_obj.vec_starts[num_sends]; i++)
@@ -499,10 +436,7 @@ hypre_NewCommPkgCreate_core(
    }
    *p_send_map_elements =  send_proc_obj.elements;
 
-#if 0
-   hypre_ParCSRCommPkgSendMapElmts(comm_pkg) = send_proc_obj.elements;
-   hypre_ParCSRMatrixCommPkg(parcsr_A) = comm_pkg;
-#endif
+
 
    /*-----------------------------------------------------------
     *  Clean up
