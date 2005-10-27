@@ -334,7 +334,7 @@ create_summary_files ()
   printf "Autotest error summary for `date`<br>\n" >> $SUMFILE
   printf "Target architecure: %s<br>\n" $HYPRE_ARCH >> $SUMFILE
   printf "Compile machine:    %s<br>\n" $HYPRE_COMPILE_MACHINE >> $SUMFILE
-  printf "Execute machine:    `hostname`<br>\n"  >> $SUMFILE
+  printf "Execute machine:    %s<br>\n" $HYPRE_RUN_MACHINE  >> $SUMFILE
   printf "Operating system:   `uname -a`<br>\n" >> $SUMFILE
   printf "Directory:          %s<br>\n" $HYPRE_REMOTE_DIR >> $SUMFILE
   printf "%s<br>\n" "--------------------------------------------" >> $SUMFILE
@@ -360,7 +360,7 @@ create_summary_files ()
               EFILE=`echo $i|sed -e 's/log$//'`err
               apply_error_filters ${EFILE}
               if [ -s "${EFILE}" ] ; then
-                 errinfo="<a href=\""${HYPRE_REMOTE_DIR}/${EFILE}"\">"${FILE}"</a><br>"
+                 errinfo="<a href=\""${HYPRE_REMOTE_DIR}/${EFILE}"\">"${FILE}.err"</a><br>"
                  AutotestFailureCount=`expr $AutotestFailureCount + 1`
                  CERRCNT=`expr $CERRCNT + 1`
                  TestCaseFailedCount=`expr $TestCaseFailedCount + 1`
