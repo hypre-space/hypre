@@ -241,8 +241,7 @@ HYPRE_DEFAULT_REMOTE_DIRS="/usr/casc/hypre/i686-pc-linux-gnu/AUTOTEST\
                            /usr/casc/hypre/tru64_5/AUTOTEST\
                            /usr/casc/hypre/i686-pc-linux-gnu-pgi5.x/AUTOTEST\
                            /usr/casc/hypre/i686-pc-linux-gnu-kai/AUTOTEST\
-                           /usr/casc/hypre/i686-pc-linux-gnu-gcc3.x/AUTOTEST\
-                           `pwd`"
+                           /usr/casc/hypre/i686-pc-linux-gnu-gcc3.x/AUTOTEST"
 
 HYPRE_STD_TEST_DIRS="TEST_fac TEST_ij TEST_sstruct TEST_struct"
 
