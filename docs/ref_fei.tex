@@ -1,0 +1,190 @@
+%=============================================================================
+%=============================================================================
+
+\chapter{Finite Element Interface (FEI)}
+\label{ch-FEI}
+
+The finite element interface (FEI) defines a linear solver interface 
+for finite element applications.  For information on how to use this
+interface, see \cite{FEI-ref}.  
+This chapter describes the iterative methods and 
+preconditioners in the \hypre{} implementation
+of this interface.
+
+Solving a linear system from a finite element problem consists of
+four steps in the FEI:
+\begin{enumerate}
+\item Initialize the structure of the finite-element data,
+      including loading the element connectivity data
+\item Load the element or super-element stiffness matrices and forcing terms
+\item Set solver parameters and solve the linear system
+\item Retrieve the solution to the linear system
+\end{enumerate}
+
+Parameters to the \hypre{} solvers are specified by calling
+\begin{display}
+\begin{verbatim}
+void FEI_parameters(int sysHandle, int numParams, char **paramStrings);
+\end{verbatim}
+\end{display}
+where \code{sysHandle} is an identifier for the linear system being solved,
+\code{numParams} is the number of parameter strings, and \code{paramStrings} is
+an array of null-terminated strings with the format: 
+``{\em parameter\_name value}''.
+For example, setting the preconditioner can be accomplished by:
+\begin{display}
+\begin{verbatim}
+char **paramStrings[1];
+paramStrings[0] = (char *) malloc(64*sizeof(char));
+strcpy(paramStrings[0], "preconditioner parasails");
+FEI_parameters(sysHandle, 1, paramStrings);
+\end{verbatim}
+\end{display}
+All possible parameters are listed in Table \ref{table-fei-param}.
+
+
+A linear system is then solved by calling 
+\begin{display}
+\begin{verbatim}
+void FEI_iterateToSolve(int sysHandle);
+\end{verbatim}
+\end{display}
+
+%-----------------------------------------------------------------------------
+
+\section{Iterative methods and preconditioners available}
+
+%-----------------------------
+
+\subsection{Iterative methods}
+
+\begin{enumerate}
+\item Krylov solvers (conjugate gradient, GMRES, TFQMR, BiCGSTAB)
+\item BoomerAMG (a parallel algebraic multigrid solver)
+\item SuperLU direct solver (sequential)
+\item SuperLU direct solver with iterative refinement (sequential)
+%\item Y12M direct solver
+\end{enumerate}
+
+%-----------------------------
+
+\subsection{Preconditioners}
+
+\begin{enumerate}
+\item diagonal
+\item parallel incomplete LU with threshold (PILUT)
+\item another parallel incomplete LU (Euclid)
+\item parallel algebraic multigrid (BoomerAMG)
+\item parallel sparse approximate inverse (ParaSails)
+\end{enumerate}
+
+%Capabilities under development are :
+%\begin{enumerate}
+%\item to form and solve a reduced linear system (in view of constraints), and
+%\item a link to the ML's parallel smoothed aggregation method.
+%\end{enumerate}
+
+\begin{table}[h]
+\center
+\begin{tabular}{|l|p{4.5in}|}
+\hline
+Parameter Name & Parameter Values \\
+\hline\hline
+solver &
+\code{cg}, \code{gmres} (default), \code{bicgstab}, \code{tfqmr}, \code{boomeramg}, \code{superlu}, \code{superlux}
+\\
+preconditioner &
+\code{diagonal} (default), \code{pilut}, \code{parasails}, \code{boomeramg}, \code{euclid}
+\\
+gmresDim &
+an integer specifying the value of \code{m} in restarted GMRES(m).
+The default value is 50.
+\\
+maxIterations &
+an integer specifying the maximum number of iterations permitted for
+CG or GMRES.  The default value is 1000.
+\\
+tolerance &
+a floating point number specifying the termination criterion for CG or
+GMRES.  The default value is 1.0E-10.
+\\
+pilutFillin &
+an integer specifying the maximum number of nonzeros kept in the
+formation of incomplete L and U.  If this is not called, a value will
+be selected based on the sparsity of the matrix.
+\\
+pilutDropTol &
+a floating point number specifying the threshold to drop small entries
+in L and U.  The default value is 0.0.
+\\
+euclidNlevels &
+a non-negative integer specifying the desired sparsity of the incomplete
+factors. The default value is 0.
+\\
+euclidThreshold &
+a floating point number specifying the threshold used to sparsify the 
+incomplete factors. The default value is 0.0.
+\\
+superluOrdering &
+\code{natural} (default) or \code{mmd} (minimum degree ordering).  This
+ordering is used to minimize the number of nonzeros generated in the
+LU decomposition.  The default is natural ordering.
+\\
+superluScale &
+\code{y} (yes; perform row and column scalings before decomposition) or
+\code{n} (no; default).
+\\
+amgCoarsenType &
+\code{falgout}, \code{ruge}, or \code{default} (CLJP) coarsening for BoomerAMG.
+\\
+amgNumSweeps &
+an integer specifying the number of pre- and post-smoothing at each
+level of BoomerAMG.  The default is one pre- and one post-smoothings.
+\\
+amgRelaxType &
+\code{jacobi} (Damped Jacobi), \code{gs-slow} (sequential Gauss-Seidel),
+\code{gs-fast} (Gauss-Seidel on interior nodes), \code{hybrid}, or
+\code{direct}. The default is \code{hybrid}.
+\\
+amgRelaxWeight &
+a floating point number between 0 and 1 specifying the damping factor
+for BoomerAMG's damped Jacobi smoother.  The default value is 0.5.
+\\
+amgStrongThreshold &
+a floating point number between 0 and 1 specifying the threshold used
+to determine strong coupling in BoomerAMG's coasening.  The default
+value is 0.25.
+\\
+parasailsThreshold &
+a floating point number between 0 and 1 specifying the threshold used
+to prune small entries in setting up the sparse approximate inverse.
+The default value is 0.0.
+\\
+parasailsNlevels &
+an integer larger than 0 specifying the desired sparsity of the
+approximate inverse.  The default value is 1.
+\\
+parasailsFilter &
+a floating point number between 0 and 1 defining the threshold used to
+prune small entries in A. The default is 0.0.
+\\
+parasailsLoadbal &
+a floating point number between 0 and 1 specifying how load balancing has 
+to be done. The default is 0.0.
+\\
+parasailsSymmetric &
+set ParaSails to take A as symmetric.
+\\
+parasailsUnSymmetric &
+set ParaSails to take A as nonsymmetric (default).
+\\
+parasailsReuse &
+set ParaSails to reuse the sparsity pattern of A.
+\\
+\hline
+\end{tabular}
+\caption{%
+Parameters.
+}
+\label{table-fei-param}
+\end{table}
