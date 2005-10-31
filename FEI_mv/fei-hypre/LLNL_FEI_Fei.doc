@@ -1,0 +1,239 @@
+/***************************************************************************
+  Module:  LLNL_FEI_Fei.h
+  Purpose: custom implementation of the FEI
+ ***************************************************************************/
+
+/* ************************************************************************
+ definition of the class to capture the FEI information 
+ -------------------------------------------------------------------------*/
+/**
+ * @name Finite Element Interface
+ *
+ * @memo A finite element-based conceptual interface
+ **/
+/*@{*/
+
+/**
+ * @name FEI functions 
+ **/
+/*@{*/
+
+/**
+  * Finite element interface constructor: this function creates an 
+  * instantiation or object of the fei class.
+  * @param comm - an MPI communicator
+ **/
+LLNL_FEI_Fei(MPI_Comm comm);
+
+/**
+  * Finite element interface destructor: this function destroys
+  * the object as well as its internal memory allocations.
+  * @param - no parameter needed
+ **/
+~LLNL_FEI_Fei();
+
+/**
+  * The parameter function is the single most important function
+  * to pass solver information (which solver, which preconditioner,
+  * tolerance, other solver parameters) to HYPRE.
+  * @param numParams - number of command strings
+  * @param paramStrings - the command strings
+ **/
+int  parameters(int numParams, char **paramStrings);
+
+/**
+  * Each node or element variable has one or more fields. The field
+  * information can be set up using this function.
+  * @param numFields - total number of fields for all variable types 
+  * @param fieldSizes - degree of freedom for each field type
+  * @param fieldIDs - a list of field identifiers
+ **/
+   int  initFields(int numFields, int *fieldSizes, int *fieldIDs);
+
+/**
+  * The whole finite element mesh can be broken down into a number of
+  * element blocks. The attributes for each element block are: an
+  * identifier, number of elements, number of nodes per elements, 
+  * the number of fields in each element node, etc.
+  * @param elemblockID - element block identifier
+  * @param numElements - number of element in this block 
+  * @param numNodesPerElement - number of nodes per element in this block 
+  * @param numFieldsPerNode - number of fields for each node 
+  * @param nodalFieldIDs - field identifiers for the nodal unknowns
+  * @param numElemDOFFieldsPerElement - number of fields for the element
+  * @param elemDOFFieldIDs - field identifier for the element unknowns
+  * @param interleaveStratety - indicates how unknowns are ordered
+  */
+   int  initElemBlock(int elemBlockID, int numElements, 
+                      int numNodesPerElement, int *numFieldsPerNode, 
+                      int **nodalFieldIDs, int numElemDOFFieldsPerElement, 
+                      int *elemDOFFieldIDs, int interleaveStrategy);
+
+/**
+  * This function initializes element connectivity (that is, the node
+  * identifiers associated with the current element) given an element 
+  * block identifier and the element identifier with the element block.  
+  * @param elemblockID - element block identifier
+  * @param elemID - element identifier
+  * @param elemConn - a list of node identifiers for this element
+ **/
+   int  initElem(int elemBlockID, int elemID, int *elemConn);
+
+/**
+  * This function initializes the nodes that are shared between the
+  * current processor and its neighbors. The FEI will decide a unique
+  * processor each shared node will be assigned to. 
+  * @param nShared - number of shared nodes
+  * @param sharedIDs - shared node identifiers
+  * @param sharedLengs - the number of processors each node shares with
+  * @param sharedProcs - the processor identifiers each node shares with
+ **/
+   int  initSharedNodes(int nShared, int *sharedIDs, int *sharedLengs, 
+                        int **sharedProcs);
+
+/**
+  * This function initializes the Lagrange multiplier constraints
+  * @param CRListLen - the number of constraints
+  * @param CRNodeList - node identifiers where constraints are applied
+  * @param CRFieldList - field identifiers within nodes where constraints are applied
+  * @param CRID - the constraint identifier
+ **/
+   int  initCRMult(int CRListLen,int *CRNodeList,int *CRFieldList,int *CRID);
+
+/**
+  * This function signals to the FEI that the initialization step has
+  * been completed. The loading step will follow.
+  * @param - no parameter needed
+ **/
+   int  initComplete();
+
+/**
+  * This function resets the global matrix to be of the same sparsity
+  * pattern as before but with every entry set to s. The right hand
+  * side is set to 0.
+  * @param s - the value each matrix entry is set to.
+ **/
+   int  resetSystem(double s);
+
+/**
+  * This function resets the global matrix to be of the same sparsity
+  * pattern as before but with every entry set to s.
+  * @param s - the value each matrix entry is set to.
+ **/
+   int  resetMatrix(double s);
+
+/**
+  * This function resets the right hand side vector to s.
+  * @param s - the value each right hand side vector entry is set to.
+ **/
+   int  resetRHSVector(double s);
+
+/**
+  * This function resets the solution vector to s.
+  * @param s - the value each solution vector entry is set to.
+ **/
+   int  resetInitialGuess(double s);
+
+/**
+  * This function loads the nodal boundary conditions. The boundary conditions
+  * allowed are of the robin type. 
+  * @param nNodes - number of nodes boundary conditions are imposed
+  * @param nodeIDs - nodal identifiers
+  * @param fieldID - field identifier with nodes where BC are imposed
+  * @param alpha - the multipliers for the field
+  * @param beta - the multipliers for the normal derivative of the field
+  * @param gamma - the boundary values on the right hand side of the equations
+ **/
+   int  loadNodeBCs(int nNodes, int *nodeIDs, int fieldID, double **alpha, 
+                    double **beta, double **gamma);
+
+/**
+  * This function adds the element contribution to the global stiffness matrix
+  * and also the element load to the right hand side vector
+  * @param elemBlockID - element block identifier
+  * @param elemID - element identifier
+  * @param elemConn - a list of node identifiers for this element
+  * @param elemStiff - element stiffness matrix
+  * @param elemLoad - right hand side (load) for this element
+  * @param elemFormat - the format the unknowns are passed in
+ **/
+   int  sumInElem(int elemBlockID, int elemID, int *elemConn, 
+                  double **elemStiff, double *elemLoad, int elemFormat);
+
+/**
+  * This function differs from the sumInElem function in that the right hand
+  * load vector is not passed.
+  * @param elemBlockID - element block identifier
+  * @param elemID - element identifier
+  * @param elemConn - a list of node identifiers for this element
+  * @param elemStiff - element stiffness matrix
+  * @param elemFormat - the format the unknowns are passed in
+ **/
+   int  sumInElemMatrix(int elemBlock, int elemID, int* elemConn, 
+                        double **elemStiffness, int elemFormat);
+
+/**
+  * This function adds the element load to the right hand side vector
+  * @param elemBlockID - element block identifier
+  * @param elemID - element identifier
+  * @param elemConn - a list of node identifiers for this element
+  * @param elemLoad - right hand side (load) for this element
+ **/
+   int  sumInElemRHS(int elemBlock, int elemID, int *elemConn,
+                     double *elemLoad);
+
+/**
+  * This function signals to the FEI that the loading phase has
+  * been completed. 
+  * @param - no parameter needed
+ **/
+   int  loadComplete();
+
+/**
+  * This function returns the number of nodes given the element block.
+  * @param elemBlockID - element block identifier
+  * @param nNodes - the number of nodes to be returned
+ **/
+   int  getNumBlockActNodes(int elemBlockID, int *nNodes);
+
+/**
+  * This function returns the number of unknowns given the element block.
+  * @param elemBlockID - element block identifier
+  * @param nEqns - the number of unknowns to be returned
+ **/
+   int  getNumBlockActEqns(int elemBlockID, int *nEqns);
+
+/**
+  * This function returns the node identifiers given the element block.
+  * @param elemBlockID - element block identifier
+  * @param numNodes - the number of nodes
+  * @param nodeIDList - the node identifiers
+ **/
+   int  getBlockNodeIDList(int elemBlockID, int numNodes, int *nodeIDList);
+
+/**
+  * This function returns the nodal solutions given the element block number.
+  * @param elemBlockID - element block identifier
+  * @param numNodes - the number of nodes
+  * @param nodeIDList - the node identifiers
+  * @param solnOffsets - the equation number for each nodal solution
+  * @param solnValues - the nodal solution values
+ **/
+   int  getBlockNodeSolution(int elemBlockID, int numNodes, int *nodeIDList,
+                             int *solnOffsets, double *solnValues);
+
+/**
+  * This function loads the Lagrange multiplier constraints
+  * @param CRID - the constraint identifier
+  * @param CRListLen - the number of constraints
+  * @param CRNodeList - node identifiers where constraints are applied
+  * @param CRFieldList - field identifiers within nodes where constraints are applied
+  * @param CRWeightList - a list of weights applied to each specified field
+  * @param CRValue - the constraint value (right hand side of the constraint)
+ **/
+   int  loadCRMult(int CRID, int CRListLen, int *CRNodeList, int *CRFieldList,
+                   double *CRWeightList, double CRValue);
+
+/*@}*/
+/*@}*/
+
