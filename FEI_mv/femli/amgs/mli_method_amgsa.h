@@ -133,6 +133,7 @@ public :
    int    setupSFEIBasedNullSpaces(MLI *);
    int    setupSFEIBasedAggregates(MLI *);
    int    setupExtendedDomainDecomp(MLI *);
+   int    setupExtendedDomainDecomp2(MLI *);
    int    setupSFEIBasedSuperLUSmoother(MLI *, int);
    int    print();
    int    printStatistics(MLI *);
@@ -151,8 +152,12 @@ private :
    int    formGlobalGraph(hypre_ParCSRMatrix *, hypre_ParCSRMatrix **);
    int    coarsenLocal( hypre_ParCSRMatrix *, int *, int **);
    int    coarsenGlobal(hypre_ParCSRMatrix *, int *, int **);
-   double genP_DD( MLI_Matrix *, MLI_Matrix **);
-   int    coarsenGraded(hypre_ParCSRMatrix *graph, int *, int **);
+   double genP_DD(MLI_Matrix *, MLI_Matrix **, int **, int **);
+   double genP_Selective(MLI_Matrix *, MLI_Matrix **, int, int *);
+   int    coarsenGraded(hypre_ParCSRMatrix *graph, int *, int **, int **);
+   int    coarsenSelective(hypre_ParCSRMatrix *graph, int *, int **, int *);
+   double genP_AExt(MLI_Matrix *, MLI_Matrix **, int);
+   int    coarsenAExt(hypre_ParCSRMatrix *graph, int *, int **, int);
 };
 
 #endif

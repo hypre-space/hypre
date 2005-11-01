@@ -210,6 +210,11 @@ int MLI_Method_AMGSA::setParams(char *in_name, int argc, char *argv[])
       useSAMGDDFlag_ = 2;
       return 0;
    }
+   else if ( !strcmp(param1, "useSAMGDDExt2" ))
+   {
+      useSAMGDDFlag_ = 3;
+      return 0;
+   }
    else if ( !strcmp(param1, "setCoarsenScheme" ))
    {
       sscanf(in_name,"%s %s", param1, param2);
@@ -553,6 +558,10 @@ int MLI_Method_AMGSA::setup( MLI *mli )
    if (useSAMGDDFlag_ == 2) 
    {
       return(setupExtendedDomainDecomp(mli));
+   }
+   if (useSAMGDDFlag_ == 3) 
+   {
+      return(setupExtendedDomainDecomp2(mli));
    }
 #endif
 
