@@ -130,7 +130,7 @@ apply_error_filters ()
           'configure:\ WARNING:\ Configuration\ for'\
           'configure:\ WARNING:\ Skipping\ Java'\
           'babel_config.h.in:\ No\ such\ file\ or\ directory'\
-          'Insure\ messages\ will\ be\ written\ to\ insure'\
+          'Insure\ messages\ will\ be\ written\ to'\
           'TCA\ log\ data\ will\ be\ merged\ with\ tca'\
           'PGC/x86\ Linux/x86\ 3.3-1:\ compilation\ completed\ with\ warnings'\
           'sed:\ Couldn.t\ close\ '
