@@ -1,280 +1,78 @@
 %=============================================================================
 %=============================================================================
 
-\chapter{Additional Information}
+\chapter{Building the HYPRE Library}
 
 %-----------------------------------------------------------------------------
 
-\section{Building the Library}
-
-Once the user has obtained and unpacked the distribution tar file, \hypre{} can be built
-by simply typing \kbd{./configure} followed by \kbd{make} in the top-level source directory.
-The following sections describe some of the options for configuring and making the
-\hypre{} library.
-
-%-----------------------------
-
-\subsection{Getting the Library}
+\section{Getting the Source Code}
 
 The \hypre{} distribution tar file is available from the Software link of the
 \hypre{} web page, \url{http://www.llnl.gov/CASC/hypre/}.  The \hypre{}
 Software distribution page allows access to the tar files of the latest and
 previous general and beta distributions as well as documentation.
 
-After unpacking the HYPRE tar file, the distribution will be in a 
-subdirectory named hypre-VERSION, where VERSION is the current version number
-(e.g., hypre-1.8.4, with a "b" appended if the release is a beta).
-The following example shows how to unpack the tar file, move into the \hypre{}
-directory and a sample directory listing.
-\begin{ttfamily}
-\begin{mdseries}
-\linebreak
-\$ \textbf{gzip -cd hypre-1.8.4b.tar.gz | tar -xf -}\linebreak
-\$ \textbf{cd hypre-1.8.4b}\linebreak
-\$ \textbf{ls}\linebreak
-\begin{verbatim}
-CHANGELOG                 INSTALL                   docs
-COPYRIGHT_and_DISCLAIMER  README                    src
-\end{verbatim}
-\$ \textbf{cd src}\linebreak
-\$ \textbf{ls}\linebreak
-\begin{verbatim}
-aclocal.m4     configure           HYPRE_config.h  lib            parcsr_mv   struct_mv
-babel          distributed_ls      HYPRE.h         Makefile       seq_mv      tarch
-babel-runtime  distributed_matrix  IJ_mv           matrix_matrix  sstruct_ls  test
-blas           eigensolvers        krylov          nopoe          sstruct_mv  utilities
-config         FEI_mv              lapack          parcsr_ls      struct_ls
-\end{verbatim}
-\end{mdseries}
-\end{ttfamily}
-
 %-----------------------------
 
-\subsection{Configure and Make}
-\label{sec-Configure}
+\section{Configure and Make}
 
-Now that all of the files are available, \hypre{} is ready to be configured and 
-made for the host platform.  The simplest method is to configure, compile and
-install the libraries in \file{hypre/lib} and \file{hypre/include} directories, which is
-accomplished by:
+After unpacking the HYPRE tar file, the source code will be in the "src" 
+sub-directory of a directory named hypre-VERSION, where VERSION is the current 
+version number (e.g., hypre-1.8.4, with a "b" appended for a beta release).
+
+Now that all of the files are available, move to the "src" sub-directory to build
+\hypre{} for the host platform.  The simplest method is to configure, compile and
+install the libraries in \file{./hypre/lib} and \file{./hypre/include} directories,
+which is accomplished by:
 \begin{verbatim}
    ./configure
    make
 \end{verbatim}
 
-Of course there are many options to \file{configure} and \file{make} targets to 
-customize such things as installation directories, compilers used, compile and
-load flags, etc.  
+There are many options to \file{configure} and \file{make} to customize such 
+things as installation directories, compilers used, compile and load flags, etc.
 
-\file{configure} searches for and reports the system type being used for building 
-and executing, compilers being used, libraries being searched, option flags being set,
-etc.  When all of the searching is done a file named \file{config.status} is created 
-in the \file{src} directory.  If there were errors while configuring a file named 
-\file{config.log} is left in the \file{src} directory when \file{configure} terminates. 
-Upon successful completion of \file{configure} the file \file{Makefile.config} 
-is created from its template \file{Makefile.config.in} and \hypre{} is ready to be made.
+Executing \file{configure} results in the creation of platform specific files 
+that are used when building the library. The information may include such things
+as the system type being used for building and executing, compilers being used, 
+libraries being searched, option flags being set, etc.  When all of the searching
+is done two files are left in the \file{src} directory; \file{config.status} 
+contains information to recreate the current configuration and \file{config.log}
+contains compiler messages which may help in debugging \file{configure} errors. 
 
-Executing \file{make}, with or without targets being specified, in the \file{src} directory 
-initiates compiling of all of the source code and building of the \hypre{} library. 
+Upon successful completion of \file{configure} the file \file{config/Makefile.config} 
+is created from its template \file{config/Makefile.config.in} and \hypre{} is 
+ready to be built.
 
-When building HYPRE without the install target, the libraries and include files will be copied
-into the default directories, \file{src/hypre/lib} and \file{src/hypre/include}, respectively.
+Executing \file{make}, with or without targets being specified, in the \file{src}
+directory initiates compiling of all of the source code and building of the \hypre{} 
+library. 
 
-When building HYPRE using the install target, the libraries and include files will be copied
-into the directories that the user specified in the options to \file{configure},
-e.g. --prefix=/usr/apps.  If none were specified the default directories are used,
-\file{src/hypre/lib} and \file{src/hypre/include}.
+When building HYPRE without the install target, the libraries and include files 
+will be copied into the default directories, \file{src/hypre/lib} and 
+\file{src/hypre/include}, respectively.
+
+When building HYPRE using the install target, the libraries and include files 
+will be copied into the directories that the user specified in the options to 
+\file{configure}, e.g. --prefix=/usr/apps.  If none were specified the default 
+directories are used, \file{src/hypre/lib} and \file{src/hypre/include}.
 
 %-----------------------------
 
 \subsection{Configure Options}
-\label{sec-Configure-Options}
 
-\file{configure} has many options to allow the user to override and refine the 
-defaults for any system. The best way to find out what options are available is
-to display the help package which also includes the usage information.
+There are many options to \file{configure} to allow the user to override and 
+refine the defaults for any system. The best way to find out what options are 
+available is to display the help package, by executing \file{./configure --help}, which 
+also includes the usage information.
 
 NOTE: when executing on an IBM platform \file{configure} must be executed under 
 the nopoe script (\file{./nopoe ./configure <option> ...<option>}) to force a single 
 task to be run on the log-in node.
 
-The results of \file{./configure --help} when run on a local Linux platform are:
-\begin{verbatim}
-'configure' configures hypre 1.9.xx to adapt to many kinds of systems.
-
-Usage: ./configure [OPTION] ... [VAR=VALUE]...
-
-To assign environment variables (e.g. CC, CFLAGS ...), specify them as
-VAR=VALUE.  See below for descriptions of some of the useful variables.
-
-Defaults for the options are specified in brackets.
-
-Configuration:
-   -h, --help		   display this help and exit
-       --help=short	   display options specific to this package
-       --help=recursive	   display the short help of all the included packages
-   -V, --version	   display version information and exit
-   -q, --quiet, --silent   do not print 'checking ...' messages
-       --cache-file=FILE   cache test results in FILE [disabled]
-   -C, --config-cache      alias for '--cache-file=config.cache'
-   -n  --no-create         do not create output files
-       --srcdir=DIR        find the sources in DIR [configure dir or '..']
-
-Installation Directories:
-   --prefix=PREFIX         install architecture-independent files in PREFIX
-                           [/home/hill66/linear_solvers/hypre]
-   --exec-prefix=EPREFIX   install architecture-dependent files in EPREFIX 
-                           [PREFIX]
-
-By default, 'make install' will install all files in
-/home/hill66/linear_solvers/hypre/lib, /home/hill66/linear_solvers/hypre/bin, etc.
-
-You can specify an installation prefix other than
-/home/hill/linear_solvers/hypre by using the --prefix option; for instance
---prefix=\$HOME.
-
-For fine tuning of the installation directories:
-   --bindir=DIR          user executables [EPREFIX/bin]
-   --sbindir=DIR         system admin executables [EPREFIX/sbin]
-   --libexecdir=DIR      program executables [EPREFIX/libexec]
-   --datadir=DIR         read-only architecture independent data [PREFIX/share]
-   --sysconfdir=DIR      read-only single machine data [PREFIX/etc]
-   --sharedstatedir=DIR  modifiable architecture independent data [PREFIX/com]
-   --localstatedir=DIR   modifiable architecture dependent data [PREFIX/var]
-   --libdir=DIR          object code libraries [EPREFIX/lib]
-   --includedir=DIR      C header files [PREFIX/include]
-   --oldincludedir=DIR   C header files for non GCC [/usr/include]
-   --infodir=DIR         info documentation [PREFIX/info]
-   --mandir=DIR          man documentation [PREFIX/man]
-
-System Types:
-   --build=BUILD  configure for building on BUILD [guessed]
-   --host=HOST    cross-compile to build programs to run on HOST [BUILD]
-
-Optional Features:
-   --disable-FEATURE             do not include FEATURE (same as --enable-FEATURE=no)
-   --enable-FEATURE[=ARGS]       include FEATURE [ARG=yes]
-     --enable-debug              compile for debugging
-     --enable-shared             build shared libraries [default=NO]  (NOT Implemented)
-
-Optional Packages:
-   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
-   --without-PACKAGE       do not use PACKAGE (same as --with-PACKAGE=no)
-     --with-LD=ARG         Set linker to ARG. Environment variable 'LD' is overridden.
-     --with-LDFLAGS=ARG    Set linker flags to ARG. 
-                           Environment variable 'LDFLAGS' is overridden.
-     --with-extra-incpath=PATH
-                           Define extra include path, PATH is space delimited list of
-                           directories.
-     --with-extra-ldpath=PATH
-                           Define extra LD path, PATH is space delimited list of
-                           directories.
-     --with-insure=FLAGS   FLAGS are options to pass to insure,
-                           e.g. -log-file=struct.insure -append-logfile=yes will send
-                           output to the specified file.  Defines gcc and g++ as the 
-                           C and C++ compilers unless they are already set by the user.
-                           There is NO guarantee that insure exists on the machine.
-     --with-insure-to-file Forces insure output to a file named insure.log
-                           Defines gcc and g++ as the C and C++ compilers unless they are
-                           already set by the user.
-                           There is NO guarantee that insure exists on the machine.
-     --with-purify=FLAGS   FLAGS are options to pass to purify,
-                           e.g. -log-file=struct.purify -append-logfile=yes will send
-                           output to the specified file.  Defines gcc and g++ as the 
-                           C and C++ compilers unless they are already set by the user.
-                           There is NO guarantee that purify exists on the machine.
-     --with-purify-to-file Forces purify output to a file named purify.log
-                           Defines gcc and g++ as the C and C++ compilers unless they are
-                           already set by the user.
-                           There is NO guarantee that purify exists on the machine.
-     --with-strict-checking 
-                           Compiles without MPI and tries to find a compiler that warns
-                           of as many non-ANSI features as possible.
-     --with-MPI-include=DIR 
-                           User specifies that mpi.h is in DIR.  The options
-                           --with-MPI-include, --with-MPI-libs and 
-                           --with-MPI-lib-dirs MUST be used together.
-     --with-MPI-libs=LIBS  LIBS is a space delimited list of library names needed 
-                           for MPI, e.g. <nsl socket mpi>.  The options
-                           --with-MPI-include, --with-MPI-libs and 
-                           --with-MPI-lib-dirs MUST be used together.
-     --with-MPI-lib-dirs=DIRS
-                           DIRS is a space delimited list of directories containing 
-                           the libraries specified by --with-MPI-libs, e.g.
-                           </usr/lib /usr/local/mpi/lib>.  The options
-                           --with-MPI-include, --with-MPI-libs and 
-                           --with-MPI-lib-dirs MUST be used together.
-     --with-MPI-flags=FLAGS
-                           FLAGS is a space delimited list of whatever flags other 
-                           than -l and -L are needed to link with MPI libraries. 
-                           This option does NOT deactivate the auto-search for other
-                           MPI information.  It MAY be used with the other MPI options 
-                           or alone in conjunction with the automatic MPI search.
-     --with-blas-libs=LIBS LIBS is a space delimited list of library names needed 
-                           for blas.  The options --with-blas-libs and 
-                           --with-blas-lib-dirs MUST be used together.
-     --with-blas-lib-dirs=DIRS
-                           DIRS is a space delimited list of directories containing 
-                           the libraries specified by --with-blas-libs, e.g.
-                           </usr/lib /usr/local/blas/lib>.  The options --with-blas-libs
-                           and --with-blas-lib-dirs MUST be used together.
-     --with-lapack-libs=LIBS
-                           LIBS is a space delimited list of library names needed 
-                           for lapack.  The options --with-lapack-libs and 
-                           --with-lapack-lib-dirs MUST be used together.
-     --with-lapack-lib-dirs=DIRS
-                           DIRS is a space delimited list of directories containing 
-                           the libraries specified by --with-lapack-libs, e.g.
-                           </usr/lib /usr/local/lapack/lib>.  The options --with-lapack-libs
-                           and --with-lapack-lib-dirs MUST be used together.
-     --with-fei-libs=LIBS
-                           LIBS is a space delimited list of library names needed 
-                           for FEI.  The options --with-fei-libs, --with-fei-lib-dirs and 
-                           --with-fei-inc-dirs MUST be used together.
-     --with-fei-lib-dirs=DIRS
-                           DIRS is a space delimited list of directories containing 
-                           the libraries specified by --with-fei-libs, e.g.
-                           </usr/lib /usr/local/fei/lib>.  The options --with-fei-libs
-                           --with-fei-lib-dirs and --with-fei-inc-dirs MUST be used together.
-     --with-fei-inc-dirs=DIRS
-                           DIRS is a space delimited list of directories containing 
-                           the include files specified by --with-fei-libs, e.g.
-                           </usr/include /usr/local/include>.  The options --with-fei-libs
-                           --with-fei-lib-dirs and --with-fei-inc-dirs MUST be used together.
-     --with-COMM_SIMPLE    Do NOT use MPI derived data types.  This option is automatically
-                           selected for IBM platforms, it may be user-selected for others.
-     --with-timing         use HYPRE timing routines
-     --with-openmp         use OpenMP; may affect compiler choice; supported using guidec on
-                           IBM and Compaq
-     --with-babel          use babel
-     --with-mli            use MLI
-     --with-MPI            DEFAULT: compiles with MPI
-     --with-blas           Find a system-provided BLAS library
-     --with-lapack         Find a system-provided LAPACK library
-
-Some influential environment variables:
-   CC        C compiler command
-   CFLAGS    C compiler flags
-   LDFLAGS   linker flags, e.g. -L<lib dir> for libraries in non-standard directory 
-             <lib dir>
-   CPPFLAGS  C/C++ preprocessor flags, e.g. -I<include dir> for header files in
-             non-standard directory <include dir>
-   CPP       C preprocessor
-   CXX       C++ compiler command
-   CXXFLAGS  C++ compiler flags
-   F77       Fortran 77 compiler command
-   FFLAGS    Fortran 77 compiler flags
-   CXXCPP    C++ preprocessor
-
-Use these variables to override the choices made by 'configure' or to help
-it find libraries and programs with non-standard names/locations.
-
-Report bugs to <http://www-casc.llnl.gov/bugs/enter_bug.cgi?product=HYPRE>.
-\end{verbatim}
 
 %==========================================================================
-\subsubsection{Configure Execution and Sample Output}
-\label{Configure Execution and Sample Output}
+\subsection{Configure Execution and Sample Output}
 
 \begin{verbatim}
 Usage: ./configure [OPTION] ... [VAR=VALUE]...
@@ -295,40 +93,9 @@ The output from \file{configure} is several pages long.  It reports the system t
 being used for building and executing, compilers being used, libraries being searched,
 option flags being set, etc.  
 
-The following is a very short sample of \file{configure} output.
-\begin{verbatim}
-./configure
-
-checking build system type. . . i686-pc-linux-gnu
-checking host system type. . . i686-pc-linux-gnu
-checking for mpcc. . . no
-checking for mpikcc. . . no
-checking for mpicc. . . mpicc
-checking for mpCC. . . no
-checking for mpiKCC. . . no
-checking for mpiCC. . . mpiCC
-checking for mpxlf. . . no
-checking for mpikf77. . . no
-checking for mpif77. . . mpif77
-checking whether the C compiler works. . . yes
-checking for egrep. . . grep -E
-checking for sys/types.h. . . yes
-checking for float.h. . . yes
-checking for dgemm_ in -lessl. . .  no
-                 .
-                 .
-                 .
-configure: creating ./config.status
-config.status: creating Makefile.config
-config.status: creating HYPRE_config.h
-config.status: HYPRE_config.h is unchanged
-
-\end{verbatim}
-
 %-----------------------------
 
 \subsection{Make Targets}
-\label{Make Targets}
 
 The make step in building \hypre{} is where the compiling, loading and creation 
 of libraries occurs.  Make has several options that are called targets.  These include:
@@ -363,14 +130,14 @@ of libraries occurs.  Make has several options that are called targets.  These i
 
 
 %==========================================================================
-\subsubsection{Make Execution and Sample Output}
-\label{Make Execution and Sample Output}
+\subsection{Make Execution and Sample Output}
 
 \begin{verbatim}
 Usage: make [TARGET]
 \end{verbatim}
 
-Examples of using \file{make} with different targets.  Only ONE target can be specified at a time. 
+Examples of using \file{make} with different targets.  Note that only ONE target 
+can be specified at a time. The output from \file{make} is several pages long.
 \begin{verbatim}
 make
 
@@ -379,38 +146,19 @@ make install
 make test
 \end{verbatim}
 
-The execution of \file{make} creates several pages of output.  The following is a brief 
-sample of the command \file{make}.
-\begin{verbatim}
-
-Output from make:
-make[3]: Entering directory '/home/hill66/linear_solvers/krylov
-mpicc -O2 -I.. -I./.. -I./../multivector -I./../utilities -DHAVE_CONFIG_H -c cgnr.c
-mpicc -O2 -I.. -I./.. -I./../multivector -I./../utilities -DHAVE_CONFIG_H -c gmres.c
-mpicc -O2 -I.. -I./.. -I./../multivector -I./../utilities -DHAVE_CONFIG_H -c pcg.c
-mpicc -O2 -I.. -I./.. -I./../multivector -I./../utilities -DHAVE_CONFIG_H -c HYPRE_lobpcg.c
-Building libHYPRE_krylov.a ...
-ar -rcu libHYPRE_krylov.a cngr.o gmres.o pcg.o HYPRE_lobpcg.o
-ranlib libHYPRE_krylov.a
-cp -fp ./krylov.h /home/hill66/linear_solvers/hypre/include
-cp -fp ./*lobpcg*.h /home/hill66/linear_solvers/hypre/include
-cp -fp libHYPRE* /home/hill66/linear_solvers/hypre/lib
-make[3]: Leaving directory '/home/hill66/linear_solvers/krylov
-
-\end{verbatim}
 
 %-----------------------------
 
-\subsection{Testing the Library} 
+\section{Testing the Library} 
 
 The \kbd{test} subdirectory contains several codes that can be used to test
-the newly created \hypre{} library.  To create the executable verions, move into
+the newly created \hypre{} library.  To create the executable versions, move into
 the \kbd{test} subdirectory, enter \kbd{make test} then execute the codes as described
 by their help packages.
 
 %-----------------------------
 
-\subsection{Linking to the Library}
+\section{Linking to the Library}
 
 An application code linking with \hypre{} must be compiled with \kbd{-I\$PREFIX/include} 
 and linked with \kbd{-L\$PREFIX/lib -l}{\it hypre library name}... 
@@ -428,14 +176,14 @@ file by \file{configure}.
 %-----------------------------------------------------------------------------
 
 \section{Calling HYPRE from Fortran}
-\label{sec-Fortran}
 
-\hypre{} provides a Fortran interface to enable such applications to call its C
+A Fortran interface is provided in \hypre{} to enable such applications to call its C
 routines.  Typically, the Fortran subroutine name is the same as the C name, unless 
 it is longer than 31 characters.  In these situations, the name is condensed to 31
 characters, usually by simple truncation.  For now, users should look at the Fortran 
-test drivers in the \code{test} directory for the correct condensed names.  In the future,
-this aspect of the interface conversion will be made consistent and straightforward.
+test drivers (*.f codes) in the \code{test} directory for the correct condensed 
+names.  In the future, this aspect of the interface conversion will be made 
+consistent and straightforward.
 
 The Fortran subroutine argument list is always the same as the corresponding C routine, 
 except that the error return code \code{ierr} is always last.  Conversion from C parameter
@@ -452,8 +200,8 @@ C parameter & Fortran argument \\
 \code{int *array} & \code{integer array(*)} \\
 \code{double *array} & \code{double precision array(*)} \\
 \code{char *string} & \code{character string(*)} \\
-\code{HYPRE_Type object} & \code{integer*8 object} \\
-\code{HYPRE_Type *object} & \code{integer*8 object} \\
+\code{HYPRE\_Type object} & \code{integer*8 object} \\
+\code{HYPRE\_Type *object} & \code{integer*8 object} \\
 \hline
 \end{tabular}
 \caption{%
@@ -482,7 +230,7 @@ the appropriate length.
 
 This simple example illustrates the above information: 
 
-\hypre{} prototype:
+C prototype:
 \begin{display}
 \begin{verbatim}
 int HYPRE_IJMatrixSetValues(HYPRE_IJMatrix  matrix,
@@ -629,7 +377,7 @@ The corresponding Fortran code for calling this routine is as follows:
 
 \section{Bug Reporting}
 
-\hypre{} has an automated bug reporting mechanism that may be used for
+An automated bug reporting mechanism has been set up for \hypre{} to be used for
 submitting bugs, desired features and documentation problems, as well as
 querying the status of previous reports.  Access
 \url{http://www-casc.llnl.gov/bugs} for full bug tracking details or to submit
