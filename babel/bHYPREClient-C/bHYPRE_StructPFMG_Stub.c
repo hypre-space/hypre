@@ -2,12 +2,12 @@
  * File:          bHYPRE_StructPFMG_Stub.c
  * Symbol:        bHYPRE.StructPFMG-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.10.8
+ * Babel Version: 0.10.10
  * Description:   Client-side glue code for bHYPRE.StructPFMG
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.8
+ * babel-version = 0.10.10
  */
 
 #include "bHYPRE_StructPFMG.h"
@@ -570,25 +570,6 @@ bHYPRE_StructPFMG_GetRelResidualNorm(
     norm);
 }
 
-void
-bHYPRE_StructPFMG_Create__sexec(
-        struct sidl_io_Deserializer__object* inArgs,
-        struct sidl_io_Serializer__object* outArgs) {
-  /* stack space for arguments */
-  bHYPRE_MPICommunicator mpi_comm;
-  bHYPRE_StructPFMG _retval;
-
-  /* unpack in and inout argments */
-
-  /* make the call */
-  _retval = (_getSEPV()->f_Create)(
-    mpi_comm);
-
-  /* pack return value */
-  /* pack out and inout argments */
-
-}
-
 /*
  * Cast method for interface and class type conversions.
  */
@@ -650,36 +631,6 @@ bHYPRE_StructPFMG__exec(
   outArgs);
 }
 
-struct bHYPRE_StructPFMG__smethod {
-  const char *d_name;
-  void (*d_func)(struct sidl_io_Deserializer__object *,
-    struct sidl_io_Serializer__object *);
-};
-
-void
-bHYPRE_StructPFMG__sexec(
-        const char* methodName,
-        struct sidl_io_Deserializer__object* inArgs,
-        struct sidl_io_Serializer__object* outArgs ) { 
-  static const struct bHYPRE_StructPFMG__smethod s_methods[] = {
-    { "Create", bHYPRE_StructPFMG_Create__sexec }
-  };
-  int i, cmp, l = 0;
-  int u = sizeof(s_methods)/sizeof(struct bHYPRE_StructPFMG__smethod);
-  if (methodName) {
-    /* Use binary search to locate method */
-    while (l < u) {
-      i = (l + u) >> 1;
-      if (!(cmp=strcmp(methodName, s_methods[i].d_name))) {
-        (s_methods[i].d_func)(inArgs, outArgs);
-        return;
-      }
-      else if (cmp < 0) u = i;
-      else l = i + 1;
-    }
-  }
-  /* TODO: add code for method not found */
-}
 /*
  * Get the URL of the Implementation of this object (for RMI)
  */

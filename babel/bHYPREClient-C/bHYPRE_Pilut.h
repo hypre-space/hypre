@@ -2,12 +2,12 @@
  * File:          bHYPRE_Pilut.h
  * Symbol:        bHYPRE.Pilut-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.10.8
+ * Babel Version: 0.10.10
  * Description:   Client-side glue code for bHYPRE.Pilut
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.8
+ * babel-version = 0.10.10
  */
 
 #ifndef included_bHYPRE_Pilut_h
@@ -332,14 +332,6 @@ bHYPRE_Pilut__cast2(
 void
 bHYPRE_Pilut__exec(
   /* in */ bHYPRE_Pilut self,
-  /* in */ const char* methodName,
-  /* in */ sidl_io_Deserializer inArgs,
-  /* in */ sidl_io_Serializer outArgs);
-/**
- * static Exec method for reflexity.
- */
-void
-bHYPRE_Pilut__sexec(
   /* in */ const char* methodName,
   /* in */ sidl_io_Deserializer inArgs,
   /* in */ sidl_io_Serializer outArgs);

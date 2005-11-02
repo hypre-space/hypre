@@ -2,12 +2,12 @@
  * File:          bHYPRE_StructVectorView.h
  * Symbol:        bHYPRE.StructVectorView-v1.0.0
  * Symbol Type:   interface
- * Babel Version: 0.10.8
+ * Babel Version: 0.10.10
  * Description:   Client-side glue code for bHYPRE.StructVectorView
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.8
+ * babel-version = 0.10.10
  */
 
 #ifndef included_bHYPRE_StructVectorView_h
@@ -155,14 +155,6 @@ bHYPRE_StructVectorView__cast2(
 void
 bHYPRE_StructVectorView__exec(
   /* in */ bHYPRE_StructVectorView self,
-  /* in */ const char* methodName,
-  /* in */ sidl_io_Deserializer inArgs,
-  /* in */ sidl_io_Serializer outArgs);
-/**
- * static Exec method for reflexity.
- */
-void
-bHYPRE_StructVectorView__sexec(
   /* in */ const char* methodName,
   /* in */ sidl_io_Deserializer inArgs,
   /* in */ sidl_io_Serializer outArgs);

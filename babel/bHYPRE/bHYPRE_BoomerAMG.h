@@ -2,12 +2,12 @@
  * File:          bHYPRE_BoomerAMG.h
  * Symbol:        bHYPRE.BoomerAMG-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.10.8
+ * Babel Version: 0.10.10
  * Description:   Client-side glue code for bHYPRE.BoomerAMG
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.8
+ * babel-version = 0.10.10
  */
 
 #ifndef included_bHYPRE_BoomerAMG_h
@@ -459,14 +459,6 @@ bHYPRE_BoomerAMG__cast2(
 void
 bHYPRE_BoomerAMG__exec(
   /* in */ bHYPRE_BoomerAMG self,
-  /* in */ const char* methodName,
-  /* in */ sidl_io_Deserializer inArgs,
-  /* in */ sidl_io_Serializer outArgs);
-/**
- * static Exec method for reflexity.
- */
-void
-bHYPRE_BoomerAMG__sexec(
   /* in */ const char* methodName,
   /* in */ sidl_io_Deserializer inArgs,
   /* in */ sidl_io_Serializer outArgs);

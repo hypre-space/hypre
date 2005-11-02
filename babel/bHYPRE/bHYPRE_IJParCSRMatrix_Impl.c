@@ -2,12 +2,12 @@
  * File:          bHYPRE_IJParCSRMatrix_Impl.c
  * Symbol:        bHYPRE.IJParCSRMatrix-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.10.8
+ * Babel Version: 0.10.10
  * Description:   Server-side implementation for bHYPRE.IJParCSRMatrix
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.10.8
+ * babel-version = 0.10.10
  */
 
 /*
@@ -196,8 +196,6 @@ impl_bHYPRE_IJParCSRMatrix_GenerateLaplacian(
    int ierr = 0;
    bHYPRE_IJParCSRMatrix bHA;
    HYPRE_ParCSRMatrix HA;
-   HYPRE_IJMatrix HIJA;
-   struct bHYPRE_IJParCSRMatrix__data * data;
    int first_local_row, last_local_row, first_local_col, last_local_col;
    int local_num_rows, size, i;
    int * row_sizes;
@@ -1008,7 +1006,35 @@ impl_bHYPRE_IJParCSRMatrix_GetIntValue(
   /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRMatrix.GetIntValue) */
   /* Insert the implementation of the GetIntValue method here... */
 
-   return 1;
+
+   int ierr = 0;
+   int M, N;
+   void * object;
+   HYPRE_IJMatrix HijA;
+   struct bHYPRE_IJParCSRMatrix__data * data;
+   data = bHYPRE_IJParCSRMatrix__get_data( self );
+   HijA = data->ij_A;
+   HYPRE_ParCSRMatrix HA ;
+
+   ierr += HYPRE_IJMatrixGetObject( HijA, &object );
+   HA = (HYPRE_ParCSRMatrix) object;
+
+   if ( strcmp(name,"GlobalNumRows")==0 )
+   {
+      ierr += HYPRE_ParCSRMatrixGetDims( HA, &M, &N );
+      *value = M;
+   }
+   else if ( strcmp(name,"GlobalNumCols")==0 )
+   {
+      ierr += HYPRE_ParCSRMatrixGetDims( HA, &M, &N );
+      *value = N;
+   }
+   else
+   {
+      ierr = 1;
+   }
+
+   return ierr;
 
   /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRMatrix.GetIntValue) */
 }

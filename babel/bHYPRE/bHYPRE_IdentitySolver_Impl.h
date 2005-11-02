@@ -2,12 +2,12 @@
  * File:          bHYPRE_IdentitySolver_Impl.h
  * Symbol:        bHYPRE.IdentitySolver-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.10.8
+ * Babel Version: 0.10.10
  * Description:   Server-side implementation for bHYPRE.IdentitySolver
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.10.8
+ * babel-version = 0.10.10
  */
 
 #ifndef included_bHYPRE_IdentitySolver_Impl_h
@@ -52,7 +52,7 @@
 struct bHYPRE_IdentitySolver__data {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.IdentitySolver._data) */
   /* Put private data members here... */
-  int ignore; /* dummy to force non-empty struct; remove if you add data */
+   char * vector_type;
   /* DO-NOT-DELETE splicer.end(bHYPRE.IdentitySolver._data) */
 };
 

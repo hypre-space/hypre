@@ -2,12 +2,12 @@
  * File:          bHYPRE_MPICommunicator_Impl.c
  * Symbol:        bHYPRE.MPICommunicator-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.10.8
+ * Babel Version: 0.10.10
  * Description:   Server-side implementation for bHYPRE.MPICommunicator
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.10.8
+ * babel-version = 0.10.10
  */
 
 /*
@@ -69,7 +69,6 @@ impl_bHYPRE_MPICommunicator__ctor(
   /* DO-NOT-DELETE splicer.begin(bHYPRE.MPICommunicator._ctor) */
   /* Insert-Code-Here {bHYPRE.MPICommunicator._ctor} (constructor method) */
 
-   int ierr=0;
    struct bHYPRE_MPICommunicator__data * data;
    data = hypre_CTAlloc( struct bHYPRE_MPICommunicator__data, 1 );
 

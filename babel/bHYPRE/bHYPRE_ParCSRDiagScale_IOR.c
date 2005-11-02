@@ -2,12 +2,12 @@
  * File:          bHYPRE_ParCSRDiagScale_IOR.c
  * Symbol:        bHYPRE.ParCSRDiagScale-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.10.8
+ * Babel Version: 0.10.10
  * Description:   Intermediate Object Representation for bHYPRE.ParCSRDiagScale
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.8
+ * babel-version = 0.10.10
  */
 
 #include "sidl_rmi_InstanceHandle.h"

@@ -2,12 +2,12 @@ C
 C       File:          bHYPRE_BoomerAMG_Impl.f
 C       Symbol:        bHYPRE.BoomerAMG-v1.0.0
 C       Symbol Type:   class
-C       Babel Version: 0.10.8
+C       Babel Version: 0.10.10
 C       Description:   Client-side documentation text for bHYPRE.BoomerAMG
 C       
 C       WARNING: Automatically generated; changes will be lost
 C       
-C       babel-version = 0.10.8
+C       babel-version = 0.10.10
 C       
 
         THIS FILE IS DOCUMENTATION - DO NOT COMPILE IT!

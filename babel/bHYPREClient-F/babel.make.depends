@@ -79,6 +79,7 @@ bHYPRE_IOR.h: bHYPRE_SStructVector_IOR.h
 bHYPRE_IOR.h: bHYPRE_SStructVectorView_IOR.h
 bHYPRE_IOR.h: bHYPRE_SStruct_MatrixVectorView_IOR.h
 bHYPRE_IOR.h: bHYPRE_Solver_IOR.h
+bHYPRE_IOR.h: bHYPRE_StructDiagScale_IOR.h
 bHYPRE_IOR.h: bHYPRE_StructGrid_IOR.h
 bHYPRE_IOR.h: bHYPRE_StructMatrix_IOR.h
 bHYPRE_IOR.h: bHYPRE_StructMatrixView_IOR.h
@@ -240,6 +241,13 @@ bHYPRE_Solver_IOR.h: bHYPRE_Operator_IOR.h
 bHYPRE_Solver_IOR.h: bHYPRE_Solver_IOR.h
 bHYPRE_Solver_IOR.h: sidl_BaseInterface_IOR.h
 
+bHYPRE_StructDiagScale_IOR.h:                                                 \
+  /home/painter/linear_solvers/babel/Interfaces.idl
+bHYPRE_StructDiagScale_IOR.h: sidl_header.h
+bHYPRE_StructDiagScale_IOR.h: bHYPRE_Operator_IOR.h
+bHYPRE_StructDiagScale_IOR.h: bHYPRE_Solver_IOR.h
+bHYPRE_StructDiagScale_IOR.h: sidl_BaseClass_IOR.h
+
 bHYPRE_StructGrid_IOR.h: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_StructGrid_IOR.h: sidl_header.h
 bHYPRE_StructGrid_IOR.h: sidl_BaseClass_IOR.h
@@ -362,6 +370,8 @@ bHYPRE_SStruct_MatrixVectorView.fif:                                          \
   /home/painter/linear_solvers/babel/Interfaces.idl
 
 bHYPRE_Solver.fif: /home/painter/linear_solvers/babel/Interfaces.idl
+
+bHYPRE_StructDiagScale.fif: /home/painter/linear_solvers/babel/Interfaces.idl
 
 bHYPRE_StructGrid.fif: /home/painter/linear_solvers/babel/Interfaces.idl
 
@@ -750,6 +760,20 @@ bHYPRE_Solver_fStub.c: bHYPRE_Operator_IOR.h
 bHYPRE_Solver_fStub.c: sidl_ClassInfo_IOR.h
 bHYPRE_Solver_fStub.c: bHYPRE_Vector_IOR.h
 bHYPRE_Solver_fStub.c: sidl_BaseInterface_IOR.h
+
+bHYPRE_StructDiagScale_fStub.c:                                               \
+  /home/painter/linear_solvers/babel/Interfaces.idl
+bHYPRE_StructDiagScale_fStub.c: sidlfortran.h
+bHYPRE_StructDiagScale_fStub.c: sidl_header.h
+bHYPRE_StructDiagScale_fStub.c: sidl_interface_IOR.h
+bHYPRE_StructDiagScale_fStub.c: babel_config.h
+bHYPRE_StructDiagScale_fStub.c: sidl_Loader.h
+bHYPRE_StructDiagScale_fStub.c: bHYPRE_StructDiagScale_IOR.h
+bHYPRE_StructDiagScale_fStub.c: bHYPRE_MPICommunicator_IOR.h
+bHYPRE_StructDiagScale_fStub.c: bHYPRE_Operator_IOR.h
+bHYPRE_StructDiagScale_fStub.c: sidl_ClassInfo_IOR.h
+bHYPRE_StructDiagScale_fStub.c: bHYPRE_Vector_IOR.h
+bHYPRE_StructDiagScale_fStub.c: sidl_BaseInterface_IOR.h
 
 bHYPRE_StructGrid_fStub.c: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_StructGrid_fStub.c: sidlfortran.h

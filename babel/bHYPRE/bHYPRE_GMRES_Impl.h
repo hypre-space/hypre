@@ -2,12 +2,12 @@
  * File:          bHYPRE_GMRES_Impl.h
  * Symbol:        bHYPRE.GMRES-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.10.8
+ * Babel Version: 0.10.10
  * Description:   Server-side implementation for bHYPRE.GMRES
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.10.8
+ * babel-version = 0.10.10
  */
 
 #ifndef included_bHYPRE_GMRES_Impl_h
@@ -76,6 +76,7 @@ struct bHYPRE_GMRES__data {
    int printlevel;
 
    /* preconditioner cache, to save in SetPreconditioner and apply in Apply:*/
+   char * precond_name;
    HYPRE_Solver * solverprecond;
    HYPRE_PtrToSolverFcn precond; /* function */
    HYPRE_PtrToSolverFcn precond_setup; /* function */

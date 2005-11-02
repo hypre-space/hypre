@@ -2,7 +2,7 @@ C
 C       File:          sidl_Scope.inc
 C       Symbol:        sidl.Scope-v0.9.3
 C       Symbol Type:   enumeration
-C       Babel Version: 0.10.8
+C       Babel Version: 0.10.10
 C       Release:       $Name$
 C       Revision:      @(#) $Id$
 C       Description:   Client-side glue code for sidl.Scope
@@ -32,8 +32,8 @@ C       Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 C       
 C       WARNING: Automatically generated; changes will be lost
 C       
-C       babel-version = 0.10.8
-C       xml-url       = /home/painter/babel/share/babel-0.10.8/repository/sidl.Scope-v0.9.3.xml
+C       babel-version = 0.10.10
+C       xml-url       = /home/painter/babel/share/babel-0.10.10/repository/sidl.Scope-v0.9.3.xml
 C       
 
 

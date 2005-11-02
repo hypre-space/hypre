@@ -2,12 +2,12 @@
  * File:          bHYPRE_IJVectorView.h
  * Symbol:        bHYPRE.IJVectorView-v1.0.0
  * Symbol Type:   interface
- * Babel Version: 0.10.8
+ * Babel Version: 0.10.10
  * Description:   Client-side glue code for bHYPRE.IJVectorView
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.8
+ * babel-version = 0.10.10
  */
 
 #ifndef included_bHYPRE_IJVectorView_h
@@ -209,14 +209,6 @@ bHYPRE_IJVectorView__cast2(
 void
 bHYPRE_IJVectorView__exec(
   /* in */ bHYPRE_IJVectorView self,
-  /* in */ const char* methodName,
-  /* in */ sidl_io_Deserializer inArgs,
-  /* in */ sidl_io_Serializer outArgs);
-/**
- * static Exec method for reflexity.
- */
-void
-bHYPRE_IJVectorView__sexec(
   /* in */ const char* methodName,
   /* in */ sidl_io_Deserializer inArgs,
   /* in */ sidl_io_Serializer outArgs);

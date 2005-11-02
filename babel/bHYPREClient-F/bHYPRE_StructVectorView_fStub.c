@@ -2,12 +2,12 @@
  * File:          bHYPRE_StructVectorView_fStub.c
  * Symbol:        bHYPRE.StructVectorView-v1.0.0
  * Symbol Type:   interface
- * Babel Version: 0.10.8
+ * Babel Version: 0.10.10
  * Description:   Client-side glue code for bHYPRE.StructVectorView
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.8
+ * babel-version = 0.10.10
  */
 
 /*

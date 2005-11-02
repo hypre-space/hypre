@@ -2,12 +2,12 @@
  * File:          bHYPRE_IJParCSRMatrix_Stub.c
  * Symbol:        bHYPRE.IJParCSRMatrix-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.10.8
+ * Babel Version: 0.10.10
  * Description:   Client-side glue code for bHYPRE.IJParCSRMatrix
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.8
+ * babel-version = 0.10.10
  */
 
 #include "bHYPRE_IJParCSRMatrix.h"
@@ -909,107 +909,6 @@ bHYPRE_IJParCSRMatrix_GetRow(
     values);
 }
 
-void
-bHYPRE_IJParCSRMatrix_Create__sexec(
-        struct sidl_io_Deserializer__object* inArgs,
-        struct sidl_io_Serializer__object* outArgs) {
-  /* stack space for arguments */
-  bHYPRE_MPICommunicator mpi_comm;
-  int32_t ilower;
-  int32_t iupper;
-  int32_t jlower;
-  int32_t jupper;
-  bHYPRE_IJParCSRMatrix _retval;
-  sidl_BaseInterface _ex   = NULL;
-  sidl_BaseInterface *_ex2 = &_ex;
-
-  /* unpack in and inout argments */
-
-  sidl_io_Deserializer_unpackInt( inArgs, "ilower", &ilower, _ex2);
-
-  sidl_io_Deserializer_unpackInt( inArgs, "iupper", &iupper, _ex2);
-
-  sidl_io_Deserializer_unpackInt( inArgs, "jlower", &jlower, _ex2);
-
-  sidl_io_Deserializer_unpackInt( inArgs, "jupper", &jupper, _ex2);
-
-  /* make the call */
-  _retval = (_getSEPV()->f_Create)(
-    mpi_comm,
-    ilower,
-    iupper,
-    jlower,
-    jupper);
-
-  /* pack return value */
-  /* pack out and inout argments */
-
-}
-
-void
-bHYPRE_IJParCSRMatrix_GenerateLaplacian__sexec(
-        struct sidl_io_Deserializer__object* inArgs,
-        struct sidl_io_Serializer__object* outArgs) {
-  /* stack space for arguments */
-  bHYPRE_MPICommunicator mpi_comm;
-  int32_t nx;
-  int32_t ny;
-  int32_t nz;
-  int32_t Px;
-  int32_t Py;
-  int32_t Pz;
-  int32_t p;
-  int32_t q;
-  int32_t r;
-  double* values_tmp;
-  int32_t discretization;
-  bHYPRE_IJParCSRMatrix _retval;
-  sidl_BaseInterface _ex   = NULL;
-  sidl_BaseInterface *_ex2 = &_ex;
-
-  /* unpack in and inout argments */
-
-  sidl_io_Deserializer_unpackInt( inArgs, "nx", &nx, _ex2);
-
-  sidl_io_Deserializer_unpackInt( inArgs, "ny", &ny, _ex2);
-
-  sidl_io_Deserializer_unpackInt( inArgs, "nz", &nz, _ex2);
-
-  sidl_io_Deserializer_unpackInt( inArgs, "Px", &Px, _ex2);
-
-  sidl_io_Deserializer_unpackInt( inArgs, "Py", &Py, _ex2);
-
-  sidl_io_Deserializer_unpackInt( inArgs, "Pz", &Pz, _ex2);
-
-  sidl_io_Deserializer_unpackInt( inArgs, "p", &p, _ex2);
-
-  sidl_io_Deserializer_unpackInt( inArgs, "q", &q, _ex2);
-
-  sidl_io_Deserializer_unpackInt( inArgs, "r", &r, _ex2);
-
-  sidl_io_Deserializer_unpackInt( inArgs, "discretization", &discretization,
-    _ex2);
-
-  /* make the call */
-  _retval = (_getSEPV()->f_GenerateLaplacian)(
-    mpi_comm,
-    nx,
-    ny,
-    nz,
-    Px,
-    Py,
-    Pz,
-    p,
-    q,
-    r,
-    values_tmp,
-    discretization);
-
-  /* pack return value */
-  /* pack out and inout argments */
-
-}
-
 /*
  * Cast method for interface and class type conversions.
  */
@@ -1071,37 +970,6 @@ bHYPRE_IJParCSRMatrix__exec(
   outArgs);
 }
 
-struct bHYPRE_IJParCSRMatrix__smethod {
-  const char *d_name;
-  void (*d_func)(struct sidl_io_Deserializer__object *,
-    struct sidl_io_Serializer__object *);
-};
-
-void
-bHYPRE_IJParCSRMatrix__sexec(
-        const char* methodName,
-        struct sidl_io_Deserializer__object* inArgs,
-        struct sidl_io_Serializer__object* outArgs ) { 
-  static const struct bHYPRE_IJParCSRMatrix__smethod s_methods[] = {
-    { "Create", bHYPRE_IJParCSRMatrix_Create__sexec },
-    { "GenerateLaplacian", bHYPRE_IJParCSRMatrix_GenerateLaplacian__sexec }
-  };
-  int i, cmp, l = 0;
-  int u = sizeof(s_methods)/sizeof(struct bHYPRE_IJParCSRMatrix__smethod);
-  if (methodName) {
-    /* Use binary search to locate method */
-    while (l < u) {
-      i = (l + u) >> 1;
-      if (!(cmp=strcmp(methodName, s_methods[i].d_name))) {
-        (s_methods[i].d_func)(inArgs, outArgs);
-        return;
-      }
-      else if (cmp < 0) u = i;
-      else l = i + 1;
-    }
-  }
-  /* TODO: add code for method not found */
-}
 /*
  * Get the URL of the Implementation of this object (for RMI)
  */

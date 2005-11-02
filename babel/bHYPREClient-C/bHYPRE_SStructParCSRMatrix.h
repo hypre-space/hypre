@@ -2,12 +2,12 @@
  * File:          bHYPRE_SStructParCSRMatrix.h
  * Symbol:        bHYPRE.SStructParCSRMatrix-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.10.8
+ * Babel Version: 0.10.10
  * Description:   Client-side glue code for bHYPRE.SStructParCSRMatrix
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.8
+ * babel-version = 0.10.10
  */
 
 #ifndef included_bHYPRE_SStructParCSRMatrix_h
@@ -469,14 +469,6 @@ bHYPRE_SStructParCSRMatrix__cast2(
 void
 bHYPRE_SStructParCSRMatrix__exec(
   /* in */ bHYPRE_SStructParCSRMatrix self,
-  /* in */ const char* methodName,
-  /* in */ sidl_io_Deserializer inArgs,
-  /* in */ sidl_io_Serializer outArgs);
-/**
- * static Exec method for reflexity.
- */
-void
-bHYPRE_SStructParCSRMatrix__sexec(
   /* in */ const char* methodName,
   /* in */ sidl_io_Deserializer inArgs,
   /* in */ sidl_io_Serializer outArgs);

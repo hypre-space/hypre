@@ -2,12 +2,12 @@
  * File:          bHYPRE_IOR.h
  * Symbol:        bHYPRE-v1.0.0
  * Symbol Type:   package
- * Babel Version: 0.10.8
+ * Babel Version: 0.10.10
  * Description:   Intermediate Object Representation for bHYPRE
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.8
+ * babel-version = 0.10.10
  */
 
 #ifndef included_bHYPRE_IOR_h
@@ -106,6 +106,9 @@
 #endif
 #ifndef included_bHYPRE_Solver_IOR_h
 #include "bHYPRE_Solver_IOR.h"
+#endif
+#ifndef included_bHYPRE_StructDiagScale_IOR_h
+#include "bHYPRE_StructDiagScale_IOR.h"
 #endif
 #ifndef included_bHYPRE_StructGrid_IOR_h
 #include "bHYPRE_StructGrid_IOR.h"

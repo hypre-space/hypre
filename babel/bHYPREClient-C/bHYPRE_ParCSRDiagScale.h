@@ -2,12 +2,12 @@
  * File:          bHYPRE_ParCSRDiagScale.h
  * Symbol:        bHYPRE.ParCSRDiagScale-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.10.8
+ * Babel Version: 0.10.10
  * Description:   Client-side glue code for bHYPRE.ParCSRDiagScale
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.8
+ * babel-version = 0.10.10
  */
 
 #ifndef included_bHYPRE_ParCSRDiagScale_h
@@ -329,14 +329,6 @@ bHYPRE_ParCSRDiagScale__cast2(
 void
 bHYPRE_ParCSRDiagScale__exec(
   /* in */ bHYPRE_ParCSRDiagScale self,
-  /* in */ const char* methodName,
-  /* in */ sidl_io_Deserializer inArgs,
-  /* in */ sidl_io_Serializer outArgs);
-/**
- * static Exec method for reflexity.
- */
-void
-bHYPRE_ParCSRDiagScale__sexec(
   /* in */ const char* methodName,
   /* in */ sidl_io_Deserializer inArgs,
   /* in */ sidl_io_Serializer outArgs);

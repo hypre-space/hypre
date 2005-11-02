@@ -2,12 +2,12 @@
  * File:          bHYPRE_StructSMG_Skel.c
  * Symbol:        bHYPRE.StructSMG-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.10.8
+ * Babel Version: 0.10.10
  * Description:   Server-side glue code for bHYPRE.StructSMG
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.8
+ * babel-version = 0.10.10
  */
 
 #include "bHYPRE_StructSMG_IOR.h"

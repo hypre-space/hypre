@@ -1332,6 +1332,17 @@ package bHYPRE version 1.0.0
    }
 
    /**
+    * Diagonal scaling preconditioner for STruct matrix class.
+    *
+    * Objects of this type can be cast to Solver objects using the
+    * {\tt \_\_cast} methods.
+    **/
+   class StructDiagScale implements-all Solver
+   {
+      static StructDiagScale Create( in MPICommunicator mpi_comm );
+   }
+
+   /**
     * Algebraic multigrid solver, based on classical Ruge-Stueben.
     *
     * BoomerAMG requires an IJParCSR matrix

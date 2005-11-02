@@ -2,12 +2,12 @@
  * File:          bHYPRE_PCG_Impl.c
  * Symbol:        bHYPRE.PCG-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.10.8
+ * Babel Version: 0.10.10
  * Description:   Server-side implementation for bHYPRE.PCG
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.10.8
+ * babel-version = 0.10.10
  */
 
 /*
@@ -56,6 +56,8 @@
 #include "bHYPRE_StructSMG_Impl.h"
 #include "bHYPRE_StructPFMG.h"
 #include "bHYPRE_StructPFMG_Impl.h"
+#include "bHYPRE_IdentitySolver_Impl.h"
+#include "struct_ls.h"
 #include <assert.h>
 #include "bHYPRE_MPICommunicator_Impl.h"
 
@@ -772,7 +774,7 @@ impl_bHYPRE_PCG_Setup(
       /* Add more vector types here */
       else
       {
-         hypre_assert( "only IJParCSRVector supported by PCG"==0 );
+         hypre_assert( "only IJParCSRVector and StructVector supported by PCG"==0 );
       }
       bHYPRE_PCG__set_data( self, data );
       ierr += impl_bHYPRE_PCG_Copy_Parameters_from_HYPRE_struct( self );
@@ -820,9 +822,6 @@ impl_bHYPRE_PCG_Setup(
    }
    else if ( data->vector_type == "StructVector" )
    {
-      if ( data->precond_name=="IdentitySolver" )
-         hypre_assert( "IdentitySolver does not yet work with struct vectors"==0 );
-
       bHYPRES_b = bHYPRE_StructVector__cast
          ( bHYPRE_Vector_queryInt( b, "bHYPRE.StructVector") );
       datab_S = bHYPRE_StructVector__get_data( bHYPRES_b );
@@ -1292,6 +1291,10 @@ impl_bHYPRE_PCG_SetPreconditioner(
   /* DO-NOT-DELETE splicer.begin(bHYPRE.PCG.SetPreconditioner) */
   /* Insert the implementation of the SetPreconditioner method here... */
 
+   /* PCG_Setup will not be called until _after_ this function is called,
+      but the new preconditioner's setup function should have been called
+      _before_ this point. */
+
    int ierr = 0;
    char * precond_name;
    HYPRE_Solver * solverprecond;
@@ -1304,6 +1307,8 @@ impl_bHYPRE_PCG_SetPreconditioner(
    bHYPRE_StructSMG SMG_s;
    struct bHYPRE_StructPFMG__data * PFMG_dataprecond;
    bHYPRE_StructPFMG PFMG_s;
+   struct bHYPRE_IdentitySolver__data * Id_dataprecond;
+   bHYPRE_IdentitySolver Id_s;
    HYPRE_PtrToSolverFcn precond, precond_setup; /* functions */
 
    dataself = bHYPRE_PCG__get_data( self );
@@ -1345,6 +1350,17 @@ impl_bHYPRE_PCG_SetPreconditioner(
       precond = (HYPRE_PtrToSolverFcn) HYPRE_ParCSRDiagScale;
       precond_setup = (HYPRE_PtrToSolverFcn) HYPRE_ParCSRDiagScaleSetup;
    }
+   else if ( bHYPRE_Solver_queryInt( s, "bHYPRE.StructDiagScale" ) )
+   {
+      precond_name = "StructDiagScale";
+      bHYPRE_Solver_deleteRef( s ); /* extra reference from queryInt */
+      solverprecond = (HYPRE_Solver *) hypre_CTAlloc( double, 1 );
+      /* ... HYPRE diagonal scaling needs no solver object, but we
+       * must provide a HYPRE_Solver object.  It will be totally
+       * ignored. */
+      precond = (HYPRE_PtrToSolverFcn) HYPRE_StructDiagScale;
+      precond_setup = (HYPRE_PtrToSolverFcn) HYPRE_StructDiagScaleSetup;
+   }
    else if ( bHYPRE_Solver_queryInt( s, "bHYPRE.StructSMG" ) )
    {
       precond_name = "StructSMG";
@@ -1376,12 +1392,30 @@ impl_bHYPRE_PCG_SetPreconditioner(
       /* s is an IdentitySolver, a dummy which just "solves" the identity matrix */
       precond_name = "IdentitySolver";
       bHYPRE_Solver_deleteRef( s ); /* extra ref from queryInt */
+      Id_s = bHYPRE_IdentitySolver__cast
+         ( bHYPRE_Solver_queryInt( s, "bHYPRE.IdentitySolver") );
+      bHYPRE_Solver_deleteRef( s ); /* extra ref from queryInt */
+      Id_dataprecond = bHYPRE_IdentitySolver__get_data( Id_s );
+
       /* The right thing at this point is to check for vector type, then specify
          the right hypre identity solver (_really_ the right thing is to use the
          babel-level identity solver, but that requires PCG to be implemented at the
          babel level). */
-      precond = (HYPRE_PtrToSolverFcn) hypre_ParKrylovIdentity;
-      precond_setup = (HYPRE_PtrToSolverFcn) hypre_ParKrylovIdentitySetup;
+
+      if ( strcmp(Id_dataprecond->vector_type,"ParVector")==0 )
+      {
+         precond = (HYPRE_PtrToSolverFcn) hypre_ParKrylovIdentity;
+         precond_setup = (HYPRE_PtrToSolverFcn) hypre_ParKrylovIdentitySetup;
+      }
+      else if ( strcmp(Id_dataprecond->vector_type,"StructVector")==0 )
+      {
+         precond = (HYPRE_PtrToSolverFcn) hypre_StructKrylovIdentity;
+         precond_setup = (HYPRE_PtrToSolverFcn) hypre_StructKrylovIdentitySetup;
+      }
+      else
+      {
+         hypre_assert( "unrecognized vector type, can't set up PCG as CG\n"==0 );
+      }
    }
    /* put other preconditioner types here */
    else

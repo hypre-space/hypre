@@ -2,12 +2,12 @@
  * File:          bHYPRE_IdentitySolver.h
  * Symbol:        bHYPRE.IdentitySolver-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.10.8
+ * Babel Version: 0.10.10
  * Description:   Client-side glue code for bHYPRE.IdentitySolver
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.8
+ * babel-version = 0.10.10
  */
 
 #ifndef included_bHYPRE_IdentitySolver_h
@@ -330,14 +330,6 @@ bHYPRE_IdentitySolver__cast2(
 void
 bHYPRE_IdentitySolver__exec(
   /* in */ bHYPRE_IdentitySolver self,
-  /* in */ const char* methodName,
-  /* in */ sidl_io_Deserializer inArgs,
-  /* in */ sidl_io_Serializer outArgs);
-/**
- * static Exec method for reflexity.
- */
-void
-bHYPRE_IdentitySolver__sexec(
   /* in */ const char* methodName,
   /* in */ sidl_io_Deserializer inArgs,
   /* in */ sidl_io_Serializer outArgs);

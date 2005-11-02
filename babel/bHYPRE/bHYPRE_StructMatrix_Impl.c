@@ -2,12 +2,12 @@
  * File:          bHYPRE_StructMatrix_Impl.c
  * Symbol:        bHYPRE.StructMatrix-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.10.8
+ * Babel Version: 0.10.10
  * Description:   Server-side implementation for bHYPRE.StructMatrix
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.10.8
+ * babel-version = 0.10.10
  */
 
 /*
@@ -774,7 +774,25 @@ impl_bHYPRE_StructMatrix_GetIntValue(
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.StructMatrix.GetIntValue) */
   /* Insert the implementation of the GetIntValue method here... */
-   return 1;
+
+   int ierr = 0;
+   struct bHYPRE_StructMatrix__data * data;
+   HYPRE_StructMatrix HA;
+
+   data = bHYPRE_StructMatrix__get_data( self );
+   HA = data -> matrix;
+
+   if ( strcmp(name,"ConstantCoefficient")==0 )
+   {
+      *value = hypre_StructMatrixConstantCoefficient( (hypre_StructMatrix *)HA );
+   }
+   else
+   {
+      ierr = 1;
+   }
+
+   return ierr;
+
   /* DO-NOT-DELETE splicer.end(bHYPRE.StructMatrix.GetIntValue) */
 }
 

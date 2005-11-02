@@ -2,12 +2,12 @@
  * File:          bHYPRE_SStructParCSRMatrix_Stub.c
  * Symbol:        bHYPRE.SStructParCSRMatrix-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.10.8
+ * Babel Version: 0.10.10
  * Description:   Client-side glue code for bHYPRE.SStructParCSRMatrix
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.8
+ * babel-version = 0.10.10
  */
 
 #include "bHYPRE_SStructParCSRMatrix.h"
@@ -846,27 +846,6 @@ bHYPRE_SStructParCSRMatrix_Apply(
     x);
 }
 
-void
-bHYPRE_SStructParCSRMatrix_Create__sexec(
-        struct sidl_io_Deserializer__object* inArgs,
-        struct sidl_io_Serializer__object* outArgs) {
-  /* stack space for arguments */
-  bHYPRE_MPICommunicator mpi_comm;
-  bHYPRE_SStructGraph graph;
-  bHYPRE_SStructParCSRMatrix _retval;
-
-  /* unpack in and inout argments */
-
-  /* make the call */
-  _retval = (_getSEPV()->f_Create)(
-    mpi_comm,
-    graph);
-
-  /* pack return value */
-  /* pack out and inout argments */
-
-}
-
 /*
  * Cast method for interface and class type conversions.
  */
@@ -928,36 +907,6 @@ bHYPRE_SStructParCSRMatrix__exec(
   outArgs);
 }
 
-struct bHYPRE_SStructParCSRMatrix__smethod {
-  const char *d_name;
-  void (*d_func)(struct sidl_io_Deserializer__object *,
-    struct sidl_io_Serializer__object *);
-};
-
-void
-bHYPRE_SStructParCSRMatrix__sexec(
-        const char* methodName,
-        struct sidl_io_Deserializer__object* inArgs,
-        struct sidl_io_Serializer__object* outArgs ) { 
-  static const struct bHYPRE_SStructParCSRMatrix__smethod s_methods[] = {
-    { "Create", bHYPRE_SStructParCSRMatrix_Create__sexec }
-  };
-  int i, cmp, l = 0;
-  int u = sizeof(s_methods)/sizeof(struct bHYPRE_SStructParCSRMatrix__smethod);
-  if (methodName) {
-    /* Use binary search to locate method */
-    while (l < u) {
-      i = (l + u) >> 1;
-      if (!(cmp=strcmp(methodName, s_methods[i].d_name))) {
-        (s_methods[i].d_func)(inArgs, outArgs);
-        return;
-      }
-      else if (cmp < 0) u = i;
-      else l = i + 1;
-    }
-  }
-  /* TODO: add code for method not found */
-}
 /*
  * Get the URL of the Implementation of this object (for RMI)
  */

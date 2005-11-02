@@ -2,12 +2,12 @@
  * File:          bHYPRE_ParCSRDiagScale_Impl.c
  * Symbol:        bHYPRE.ParCSRDiagScale-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.10.8
+ * Babel Version: 0.10.10
  * Description:   Server-side implementation for bHYPRE.ParCSRDiagScale
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.10.8
+ * babel-version = 0.10.10
  */
 
 /*
@@ -562,7 +562,7 @@ impl_bHYPRE_ParCSRDiagScale_SetTolerance(
   /* DO-NOT-DELETE splicer.begin(bHYPRE.ParCSRDiagScale.SetTolerance) */
   /* Insert the implementation of the SetTolerance method here... */
 
-   return 0;
+   return 1;
 
   /* DO-NOT-DELETE splicer.end(bHYPRE.ParCSRDiagScale.SetTolerance) */
 }
@@ -587,7 +587,7 @@ impl_bHYPRE_ParCSRDiagScale_SetMaxIterations(
   /* DO-NOT-DELETE splicer.begin(bHYPRE.ParCSRDiagScale.SetMaxIterations) */
   /* Insert the implementation of the SetMaxIterations method here... */
 
-   return 0;
+   return 1;
 
   /* DO-NOT-DELETE splicer.end(bHYPRE.ParCSRDiagScale.SetMaxIterations) */
 }

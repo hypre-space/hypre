@@ -2,12 +2,12 @@
  * File:          bHYPRE_IdentitySolver_Impl.c
  * Symbol:        bHYPRE.IdentitySolver-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.10.8
+ * Babel Version: 0.10.10
  * Description:   Server-side implementation for bHYPRE.IdentitySolver
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.10.8
+ * babel-version = 0.10.10
  */
 
 /*
@@ -30,6 +30,10 @@
 
 /* DO-NOT-DELETE splicer.begin(bHYPRE.IdentitySolver._includes) */
 /* Put additional includes or other arbitrary code here... */
+
+#include "utilities.h"
+#include <assert.h>
+
 /* DO-NOT-DELETE splicer.end(bHYPRE.IdentitySolver._includes) */
 
 /*
@@ -66,6 +70,15 @@ impl_bHYPRE_IdentitySolver__ctor(
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.IdentitySolver._ctor) */
   /* Insert the implementation of the constructor method here... */
+
+   struct bHYPRE_IdentitySolver__data * data;
+
+   data = hypre_CTAlloc( struct bHYPRE_IdentitySolver__data, 1 );
+
+   data -> vector_type = NULL;
+
+   bHYPRE_IdentitySolver__set_data( self, data );
+
   /* DO-NOT-DELETE splicer.end(bHYPRE.IdentitySolver._ctor) */
 }
 
@@ -129,7 +142,7 @@ impl_bHYPRE_IdentitySolver_SetCommunicator(
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.IdentitySolver.SetCommunicator) */
   /* Insert the implementation of the SetCommunicator method here... */
-   return 1;
+   return 0;
   /* DO-NOT-DELETE splicer.end(bHYPRE.IdentitySolver.SetCommunicator) */
 }
 
@@ -362,7 +375,29 @@ impl_bHYPRE_IdentitySolver_Setup(
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.IdentitySolver.Setup) */
   /* Insert the implementation of the Setup method here... */
-   return 0;
+
+   int ierr = 0;
+   struct bHYPRE_IdentitySolver__data * data = bHYPRE_IdentitySolver__get_data( self );
+
+   if ( bHYPRE_Vector_queryInt( b, "bHYPRE.IJParCSRVector") )
+   {
+      bHYPRE_Vector_deleteRef( b );  /* extra ref created by queryInt */
+      data -> vector_type = "ParVector";
+   }
+   else if ( bHYPRE_Vector_queryInt( b, "bHYPRE.StructVector") )
+   {
+      bHYPRE_Vector_deleteRef( b );  /* extra ref created by queryInt */
+      data -> vector_type = "StructVector";
+   }
+   else
+   {
+      ++ierr;
+      hypre_assert( "IdentitySolver recognizes only IJParCSRVector and StructVector"==0 );
+   }
+
+   bHYPRE_PCG__set_data( self, data );
+
+   return ierr;
   /* DO-NOT-DELETE splicer.end(bHYPRE.IdentitySolver.Setup) */
 }
 
@@ -407,7 +442,7 @@ impl_bHYPRE_IdentitySolver_SetOperator(
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.IdentitySolver.SetOperator) */
   /* Insert the implementation of the SetOperator method here... */
-   return 1;
+   return 0;
   /* DO-NOT-DELETE splicer.end(bHYPRE.IdentitySolver.SetOperator) */
 }
 
@@ -430,7 +465,7 @@ impl_bHYPRE_IdentitySolver_SetTolerance(
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.IdentitySolver.SetTolerance) */
   /* Insert the implementation of the SetTolerance method here... */
-   return 1;
+   return 0;
   /* DO-NOT-DELETE splicer.end(bHYPRE.IdentitySolver.SetTolerance) */
 }
 
@@ -453,7 +488,7 @@ impl_bHYPRE_IdentitySolver_SetMaxIterations(
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.IdentitySolver.SetMaxIterations) */
   /* Insert the implementation of the SetMaxIterations method here... */
-   return 1;
+   return 0;
   /* DO-NOT-DELETE splicer.end(bHYPRE.IdentitySolver.SetMaxIterations) */
 }
 
@@ -480,7 +515,7 @@ impl_bHYPRE_IdentitySolver_SetLogging(
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.IdentitySolver.SetLogging) */
   /* Insert the implementation of the SetLogging method here... */
-   return 1;
+   return 0;
   /* DO-NOT-DELETE splicer.end(bHYPRE.IdentitySolver.SetLogging) */
 }
 
@@ -507,7 +542,7 @@ impl_bHYPRE_IdentitySolver_SetPrintLevel(
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.IdentitySolver.SetPrintLevel) */
   /* Insert the implementation of the SetPrintLevel method here... */
-   return 1;
+   return 0;
   /* DO-NOT-DELETE splicer.end(bHYPRE.IdentitySolver.SetPrintLevel) */
 }
 

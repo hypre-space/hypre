@@ -2,7 +2,7 @@
  * File:          sidl_BaseClass_fStub.c
  * Symbol:        sidl.BaseClass-v0.9.3
  * Symbol Type:   class
- * Babel Version: 0.10.8
+ * Babel Version: 0.10.10
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Client-side glue code for sidl.BaseClass
@@ -32,8 +32,8 @@
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.8
- * xml-url       = /home/painter/babel/share/babel-0.10.8/repository/sidl.BaseClass-v0.9.3.xml
+ * babel-version = 0.10.10
+ * xml-url       = /home/painter/babel/share/babel-0.10.10/repository/sidl.BaseClass-v0.9.3.xml
  */
 
 /*

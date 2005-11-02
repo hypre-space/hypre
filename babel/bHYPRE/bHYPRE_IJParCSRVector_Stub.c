@@ -2,12 +2,12 @@
  * File:          bHYPRE_IJParCSRVector_Stub.c
  * Symbol:        bHYPRE.IJParCSRVector-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.10.8
+ * Babel Version: 0.10.10
  * Description:   Client-side glue code for bHYPRE.IJParCSRVector
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.8
+ * babel-version = 0.10.10
  */
 
 #include "bHYPRE_IJParCSRVector.h"
@@ -562,35 +562,6 @@ bHYPRE_IJParCSRVector_Axpy(
     x);
 }
 
-void
-bHYPRE_IJParCSRVector_Create__sexec(
-        struct sidl_io_Deserializer__object* inArgs,
-        struct sidl_io_Serializer__object* outArgs) {
-  /* stack space for arguments */
-  bHYPRE_MPICommunicator mpi_comm;
-  int32_t jlower;
-  int32_t jupper;
-  bHYPRE_IJParCSRVector _retval;
-  sidl_BaseInterface _ex   = NULL;
-  sidl_BaseInterface *_ex2 = &_ex;
-
-  /* unpack in and inout argments */
-
-  sidl_io_Deserializer_unpackInt( inArgs, "jlower", &jlower, _ex2);
-
-  sidl_io_Deserializer_unpackInt( inArgs, "jupper", &jupper, _ex2);
-
-  /* make the call */
-  _retval = (_getSEPV()->f_Create)(
-    mpi_comm,
-    jlower,
-    jupper);
-
-  /* pack return value */
-  /* pack out and inout argments */
-
-}
-
 /*
  * Cast method for interface and class type conversions.
  */
@@ -652,36 +623,6 @@ bHYPRE_IJParCSRVector__exec(
   outArgs);
 }
 
-struct bHYPRE_IJParCSRVector__smethod {
-  const char *d_name;
-  void (*d_func)(struct sidl_io_Deserializer__object *,
-    struct sidl_io_Serializer__object *);
-};
-
-void
-bHYPRE_IJParCSRVector__sexec(
-        const char* methodName,
-        struct sidl_io_Deserializer__object* inArgs,
-        struct sidl_io_Serializer__object* outArgs ) { 
-  static const struct bHYPRE_IJParCSRVector__smethod s_methods[] = {
-    { "Create", bHYPRE_IJParCSRVector_Create__sexec }
-  };
-  int i, cmp, l = 0;
-  int u = sizeof(s_methods)/sizeof(struct bHYPRE_IJParCSRVector__smethod);
-  if (methodName) {
-    /* Use binary search to locate method */
-    while (l < u) {
-      i = (l + u) >> 1;
-      if (!(cmp=strcmp(methodName, s_methods[i].d_name))) {
-        (s_methods[i].d_func)(inArgs, outArgs);
-        return;
-      }
-      else if (cmp < 0) u = i;
-      else l = i + 1;
-    }
-  }
-  /* TODO: add code for method not found */
-}
 /*
  * Get the URL of the Implementation of this object (for RMI)
  */

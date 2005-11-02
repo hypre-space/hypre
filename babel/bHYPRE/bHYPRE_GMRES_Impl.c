@@ -2,12 +2,12 @@
  * File:          bHYPRE_GMRES_Impl.c
  * Symbol:        bHYPRE.GMRES-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.10.8
+ * Babel Version: 0.10.10
  * Description:   Server-side implementation for bHYPRE.GMRES
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.10.8
+ * babel-version = 0.10.10
  */
 
 /*
@@ -42,6 +42,8 @@
 #include "bHYPRE_IJParCSRVector_Impl.h"
 #include "bHYPRE_BoomerAMG.h"
 #include "bHYPRE_BoomerAMG_Impl.h"
+#include "bHYPRE_ParaSails.h"
+#include "bHYPRE_ParaSails_Impl.h"
 #include "bHYPRE_ParCSRDiagScale.h"
 #include "bHYPRE_ParCSRDiagScale_Impl.h"
 #include "bHYPRE_PCG_Impl.h"
@@ -1170,17 +1172,20 @@ impl_bHYPRE_GMRES_SetPreconditioner(
   /* Insert the implementation of the SetPreconditioner method here... */
 
    int ierr = 0;
+   char * precond_name;
    HYPRE_Solver * solverprecond;
    struct bHYPRE_GMRES__data * dataself;
    struct bHYPRE_BoomerAMG__data * AMG_dataprecond;
    bHYPRE_BoomerAMG AMG_s;
+   struct bHYPRE_ParaSails__data * PS_dataprecond;
+   bHYPRE_ParaSails PS_s;
    HYPRE_PtrToSolverFcn precond, precond_setup; /* functions */
 
    dataself = bHYPRE_GMRES__get_data( self );
 
    if ( bHYPRE_Solver_queryInt( s, "bHYPRE.BoomerAMG" ) )
    {
-      /* s is a bHYPRE_BoomerAMG */
+      precond_name = "BoomerAMG";
       AMG_s = bHYPRE_BoomerAMG__cast
          ( bHYPRE_Solver_queryInt( s, "bHYPRE.BoomerAMG") );
       AMG_dataprecond = bHYPRE_BoomerAMG__get_data( AMG_s );
@@ -1191,8 +1196,22 @@ impl_bHYPRE_GMRES_SetPreconditioner(
       precond = (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSolve;
       precond_setup = (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSetup;
    }
+   else if ( bHYPRE_Solver_queryInt( s, "bHYPRE.ParaSails" ) )
+   {
+      precond_name = "ParaSails";
+      PS_s = bHYPRE_ParaSails__cast
+         ( bHYPRE_Solver_queryInt( s, "bHYPRE.ParaSails") );
+      PS_dataprecond = bHYPRE_ParaSails__get_data( PS_s );
+      bHYPRE_ParaSails_deleteRef( PS_s ); /* extra reference from queryInt */
+      bHYPRE_ParaSails_deleteRef( PS_s ); /* extra reference from queryInt */
+      solverprecond = &PS_dataprecond->solver;
+      hypre_assert( solverprecond != NULL );
+      precond = (HYPRE_PtrToSolverFcn) HYPRE_ParaSailsSolve;
+      precond_setup = (HYPRE_PtrToSolverFcn) HYPRE_ParaSailsSetup;
+   }
    else if ( bHYPRE_Solver_queryInt( s, "bHYPRE.ParCSRDiagScale" ) )
    {
+      precond_name = "ParCSRDiagScale";
       bHYPRE_Solver_deleteRef( s ); /* extra reference from queryInt */
       bHYPRE_Solver_deleteRef( s ); /* extra reference from queryInt */
       solverprecond = (HYPRE_Solver *) hypre_CTAlloc( double, 1 );
@@ -1201,6 +1220,18 @@ impl_bHYPRE_GMRES_SetPreconditioner(
        * ignored. */
       precond = (HYPRE_PtrToSolverFcn) HYPRE_ParCSRDiagScale;
       precond_setup = (HYPRE_PtrToSolverFcn) HYPRE_ParCSRDiagScaleSetup;
+   }
+   else if ( bHYPRE_Solver_queryInt( s, "bHYPRE.IdentitySolver" ) )
+   {
+      /* s is an IdentitySolver, a dummy which just "solves" the identity matrix */
+      precond_name = "IdentitySolver";
+      bHYPRE_Solver_deleteRef( s ); /* extra ref from queryInt */
+      /* The right thing at this point is to check for vector type, then specify
+         the right hypre identity solver (_really_ the right thing is to use the
+         babel-level identity solver, but that requires PCG to be implemented at the
+         babel level). */
+      precond = (HYPRE_PtrToSolverFcn) hypre_ParKrylovIdentity;
+      precond_setup = (HYPRE_PtrToSolverFcn) hypre_ParKrylovIdentitySetup;
    }
    /* put other preconditioner types here */
    else
@@ -1214,6 +1245,7 @@ impl_bHYPRE_GMRES_SetPreconditioner(
     * matrix and vectors we'll need; not known until Apply is called.
     * So save the information in the bHYPRE data structure, and stick
     * it in HYPRE later... */
+   dataself->precond_name = precond_name;
    dataself->precond = precond;
    dataself->precond_setup = precond_setup;
    dataself->solverprecond = solverprecond;
