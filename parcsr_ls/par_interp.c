@@ -128,10 +128,8 @@ hypre_BoomerAMGBuildInterp( hypre_ParCSRMatrix   *A,
 
 #ifdef HYPRE_NO_GLOBAL_PARTITION
    my_first_cpt = num_cpts_global[0];
-   total_global_cpts = 0; /* we will set this later for the matrix in the setup */
-
-   /* if (myid == (num_procs -1)) total_global_cpts = coarse_pts_global[1];
-      MPI_Bcast(&total_global_cpts, 1, MPI_INT, num_procs-1, comm);*/
+   if (my_id == (num_procs -1)) total_global_cpts = num_cpts_global[1];
+   MPI_Bcast(&total_global_cpts, 1, MPI_INT, num_procs-1, comm);
 #else
    my_first_cpt = num_cpts_global[my_id];
    total_global_cpts = num_cpts_global[num_procs];
@@ -1106,10 +1104,8 @@ hypre_BoomerAMGBuildInterpHE( hypre_ParCSRMatrix   *A,
 
 #ifdef HYPRE_NO_GLOBAL_PARTITION
    my_first_cpt = num_cpts_global[0];
-
-   total_global_cpts = 0; /* we will set this later for the matrix in the setup */
-   /* if (myid == (num_procs -1)) total_global_cpts = coarse_pts_global[1];
-      MPI_Bcast(&total_global_cpts, 1, MPI_INT, num_procs-1, comm); */
+   if (my_id == (num_procs -1)) total_global_cpts = num_cpts_global[1];
+   MPI_Bcast(&total_global_cpts, 1, MPI_INT, num_procs-1, comm);
 #else
    my_first_cpt = num_cpts_global[my_id];
    total_global_cpts = num_cpts_global[num_procs];
@@ -2006,10 +2002,8 @@ hypre_BoomerAMGBuildDirInterp( hypre_ParCSRMatrix   *A,
 
 #ifdef HYPRE_NO_GLOBAL_PARTITION
    my_first_cpt = num_cpts_global[0];
-
-    total_global_cpts = 0; /* we will set this later for the matrix in the setup */
-   /* if (myid == (num_procs -1)) total_global_cpts = coarse_pts_global[1];
-      MPI_Bcast(&total_global_cpts, 1, MPI_INT, num_procs-1, comm);*/
+   if (my_id == (num_procs -1)) total_global_cpts = num_cpts_global[1];
+   MPI_Bcast(&total_global_cpts, 1, MPI_INT, num_procs-1, comm);
 #else
    my_first_cpt = num_cpts_global[my_id];
    total_global_cpts = num_cpts_global[num_procs];
@@ -2597,7 +2591,7 @@ hypre_BoomerAMGBuildDirInterp( hypre_ParCSRMatrix   *A,
         hypre_CSRMatrixNumCols(P_offd) = num_cols_P_offd;
    } 
 
-   hypre_GetCommPkgRTFromCommPkgA(P,A,fine_to_coarse_offd);
+   hypre_GetCommPkgRTFromCommPkgA(P,A,fine_to_coarse_offd); 
 
    *P_ptr = P;
 

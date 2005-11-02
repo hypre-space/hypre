@@ -921,11 +921,6 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 		 debug_flag, trunc_factor, &P);
       }
 
-#ifdef HYPRE_NO_GLOBAL_PARTITION 
-/* we need to set the global nuumber of cols in P, as this was not done in the interp
-   (which calls the matrix create) since we didn't have the global partition */
-      hypre_ParCSRMatrixGlobalNumCols(P) = coarse_size;
-#endif
 
       if (debug_flag==1)
       {
@@ -948,8 +943,10 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
       if (debug_flag==1) wall_time = time_getWallclockSeconds();
 
+
       hypre_BoomerAMGBuildCoarseOperator(P_array[level], A_array[level] , 
                                       P_array[level], &A_H);
+
 
       if (debug_flag==1)
       {
@@ -1058,6 +1055,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
    if (amg_print_level == 1 || amg_print_level == 3)
       hypre_BoomerAMGSetupStats(amg_data,A);
+
 
    return(Setup_err_flag);
 }  
