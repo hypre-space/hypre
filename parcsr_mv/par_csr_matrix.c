@@ -1595,6 +1595,9 @@ hypre_ParCSRMatrixToCSRMatrixAll(hypre_ParCSRMatrix *par_matrix)
       else
          hypre_TFree(local_matrix);
 
+      hypre_TFree(new_vec_starts);
+      hypre_TFree(used_procs);
+
       return NULL;
    }
    

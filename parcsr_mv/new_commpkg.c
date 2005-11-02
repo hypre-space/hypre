@@ -7,7 +7,6 @@
 
 /* some debugging tools*/
 #define mydebug 0
-#define timeparts 0
 
 int hypre_LocateAssummedPartition(int, int, int, hypre_IJAssumedPart*, int);
 int hypre_GetAssumedPartitionProcFromRow( int, int, int* );
@@ -32,9 +31,9 @@ int hypre_RangeFillResponseIJDetermineRecvProcs(void*, int, int, void*, MPI_Comm
 int 
 hypre_NewCommPkgCreate_core(
 /* input args: */
-   MPI_Comm comm, int *col_map_off_d, int first_col_diag, int row_start, 
-   int row_end, int col_start, int col_end, 
-   int num_cols_off_d, int global_num_rows,
+   MPI_Comm comm, int *col_map_off_d, int first_col_diag,
+   int col_start, int col_end, 
+   int num_cols_off_d, int global_num_cols,
 /* pointers to output args: */
    int *p_num_recvs, int **p_recv_procs, int **p_recv_vec_starts,
    int *p_num_sends, int **p_send_procs, int ** p_send_map_starts,
@@ -71,29 +70,8 @@ hypre_NewCommPkgCreate_core(
    int tmp_int, index;
 #endif
 
-#if timeparts
-   double  starttime, endtime, t1, t2, t3, t_misc, t1_max, t2_max; 
-   double  t3_max, t_misc_max;
-#endif
-  
-#if timeparts
-    starttime = MPI_Wtime();
-#endif
-
    MPI_Comm_size(comm, &num_procs );
    MPI_Comm_rank(comm, &myid );
-
-
-#if timeparts
-    endtime = MPI_Wtime();
-    t_misc = endtime - starttime;
-#endif
-
-#if timeparts
-    starttime = MPI_Wtime();
-#endif
-
-
 
 
    /*-----------------------------------------------------------
@@ -103,9 +81,11 @@ hypre_NewCommPkgCreate_core(
     *-----------------------------------------------------------*/
   
   
-   /* get my assumed partitioning */
-   ierr = hypre_GetAssumedPartitionRowRange( myid, global_num_rows, &apart.row_start, 
-                                       &apart.row_end);
+   /* get my assumed partitioning  - we want partitioning of the vector that the
+      matrix multiplies - so we use the col start and end */
+
+   ierr = hypre_GetAssumedPartitionRowRange( myid, global_num_cols, &apart.row_start, 
+                                        &apart.row_end);
 
 #if mydebug
     printf("myid = %i, my assumed local range: [%i, %i]\n", myid, 
@@ -121,13 +101,7 @@ hypre_NewCommPkgCreate_core(
     apart.row_start_list =   hypre_TAlloc(int, apart.storage_length);
     apart.row_end_list =   hypre_TAlloc(int, apart.storage_length);
 
-    hypre_LocateAssummedPartition(row_start, row_end, global_num_rows, &apart, myid);
-
-
-#if timeparts
-    endtime = MPI_Wtime();
-    t1 = endtime - starttime;
-#endif
+    hypre_LocateAssummedPartition(col_start, col_end, global_num_cols, &apart, myid);
 
 #if mydebug
       for (i=0; i<apart.length; i++)
@@ -161,10 +135,6 @@ hypre_NewCommPkgCreate_core(
     *  data from another processor. 
     *
     *------------------------------------------------------------*/
-
-#if timeparts
-    starttime = MPI_Wtime();
-#endif
 
     /*calculate the assumed receive processors*/
 
@@ -203,8 +173,10 @@ hypre_NewCommPkgCreate_core(
    { 
       if (col_map_off_d[i] > range_end)
       {
+
+
          hypre_GetAssumedPartitionProcFromRow(col_map_off_d[i], 
-					global_num_rows, &tmp_id);
+                                              global_num_cols, &tmp_id);
 
          if (ex_num_contacts == size) /*need more space? */ 
          {
@@ -224,8 +196,10 @@ hypre_NewCommPkgCreate_core(
          
          
          ex_num_contacts++;
-         hypre_GetAssumedPartitionRowRange(tmp_id, global_num_rows, 
-				     &range_start, &range_end); 
+
+         hypre_GetAssumedPartitionRowRange(tmp_id, global_num_cols, 
+                                           &range_start, &range_end); 
+
       }
    }
 
@@ -322,10 +296,6 @@ hypre_NewCommPkgCreate_core(
  
 
 
-#if timeparts
-    endtime = MPI_Wtime();
-    t2 = endtime - starttime;
-#endif
 
 #if mydebug
       for (i=0; i < num_recvs; i++) 
@@ -346,9 +316,6 @@ hypre_NewCommPkgCreate_core(
    /* the contact information is the recv_processor infomation - so
       nothing more to do to generate contact info*/
 
-#if timeparts
-    starttime = MPI_Wtime();
-#endif
 
    /* the response we expect is just a confirmation*/
    hypre_TFree(response_buf);
@@ -401,20 +368,9 @@ hypre_NewCommPkgCreate_core(
       }
 #endif
 
-#if timeparts
-    endtime = MPI_Wtime();
-    t3 = endtime - starttime;
-#endif 
-
-
    /*-----------------------------------------------------------
     *  Return output info for setting up the comm package
     *-----------------------------------------------------------*/
-
-#if timeparts
-    starttime = MPI_Wtime();
-#endif
-
 
 
    *p_num_recvs = num_recvs;
@@ -459,45 +415,11 @@ hypre_NewCommPkgCreate_core(
    if(response_buf)        hypre_TFree(response_buf);
    if(response_buf_starts) hypre_TFree(response_buf_starts);
 
-    
    
-
-
-#if timeparts
-    endtime = MPI_Wtime();
-    t_misc += (endtime - starttime);
-#endif
-
-
    /* don't free send_proc_obj.id,send_proc_obj.vec_starts,send_proc_obj.elements;
       recv_procs, recv_vec_starts.  These are aliased to the comm package and
       will be destroyed there */
   
-
-#if timeparts
-
- MPI_Reduce(&t1, &t1_max, 1,
-                          MPI_DOUBLE, MPI_MAX, 0, MPI_COMM_WORLD);
- MPI_Reduce(&t2, &t2_max, 1,
-               MPI_DOUBLE, MPI_MAX, 0, MPI_COMM_WORLD);
- 
- MPI_Reduce(&t3, &t3_max, 1,
-               MPI_DOUBLE, MPI_MAX, 0, MPI_COMM_WORLD);
- 
- MPI_Reduce(&t_misc, &t_misc_max, 1,
-               MPI_DOUBLE, MPI_MAX, 0, MPI_COMM_WORLD);
- 
- if (!myid) 
- {
-     printf("TIMES: t1 (assumed part.)= %f sec.\n", t1_max);
-     printf("       t2 (recv. procs)= %f sec.\n", t2_max);
-     printf("       t3 (send procs) = %f sec.\n", t3_max);
-     printf("       t_misc = %f sec.\n", t_misc_max);
-  
- }
- 
-
-#endif
 
    return(ierr);
 
@@ -524,7 +446,7 @@ hypre_NewCommPkgCreate( hypre_ParCSRMatrix *parcsr_A)
    int       *col_map_off_d; 
 
    int        first_col_diag;
-   int        global_num_rows;
+   int        global_num_cols;
 
    int        ierr = 0;
 
@@ -544,8 +466,8 @@ hypre_NewCommPkgCreate( hypre_ParCSRMatrix *parcsr_A)
    col_map_off_d =  hypre_ParCSRMatrixColMapOffd(parcsr_A);
    num_cols_off_d = hypre_CSRMatrixNumCols(hypre_ParCSRMatrixOffd(parcsr_A));
    
-   global_num_rows = hypre_ParCSRMatrixGlobalNumRows(parcsr_A); 
-   
+   global_num_cols = hypre_ParCSRMatrixGlobalNumCols(parcsr_A); 
+
    comm = hypre_ParCSRMatrixComm(parcsr_A);
 
    first_col_diag = hypre_ParCSRMatrixFirstColDiag(parcsr_A);
@@ -555,12 +477,25 @@ hypre_NewCommPkgCreate( hypre_ParCSRMatrix *parcsr_A)
     *----------------------------------------------------------*/
 
    hypre_NewCommPkgCreate_core( comm, col_map_off_d, first_col_diag, 
-                                row_start, 
-                                row_end, col_start, col_end, 
-                                num_cols_off_d, global_num_rows,
+                                col_start, col_end, 
+                                num_cols_off_d, global_num_cols,
                                 &num_recvs, &recv_procs, &recv_vec_starts,
                                 &num_sends, &send_procs, &send_map_starts, 
                                 &send_map_elements);
+   
+
+   if (!num_recvs)
+   {
+      hypre_TFree(recv_procs);
+      recv_procs = NULL;
+   }
+   if (!num_sends)
+   {
+      hypre_TFree(send_procs);
+      hypre_TFree(send_map_elements);
+      send_procs = NULL;
+      send_map_elements = NULL;
+   }
    
 
   /*-----------------------------------------------------------

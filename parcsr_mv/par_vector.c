@@ -680,8 +680,12 @@ hypre_ParVectorToVectorAll (hypre_ParVector *par_v)
    if(response_recv_buf_starts) hypre_TFree(response_recv_buf_starts);
 
    /* now proc 0 can exit if it has no rows */
-   if (!local_size) return NULL;
-
+   if (!local_size) {
+      hypre_TFree(used_procs);
+      hypre_TFree(new_vec_starts);
+      return NULL;
+   }
+   
    /* everyone left has rows and knows: new_vec_starts, num_types, and used_procs */
 
   /* this vector should be rather small */
