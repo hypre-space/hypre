@@ -12,6 +12,8 @@
 #include "bHYPRE_Solver.h"
 #include "bHYPRE_StructSMG.h"
 #include "bHYPRE_StructPFMG.h"
+#include "bHYPRE_IdentitySolver.h"
+#include "bHYPRE_StructDiagScale.h"
 #include "bHYPRE_PCG.h"
 #include "bHYPRE_StructGrid.h"
 #include "bHYPRE_StructStencil.h"
@@ -74,7 +76,9 @@ main( int   argc,
 /*   bHYPRE_StructJacobi  solver_SJ;*/
    bHYPRE_StructSMG solver_SMG;
    bHYPRE_StructPFMG solver_PFMG;
+   bHYPRE_IdentitySolver solver_Id;
    bHYPRE_PCG  solver_PCG;
+   bHYPRE_StructDiagScale  solver_DS;
 
    int constant_coefficient = 0;
    int symmetric = 1;
@@ -284,18 +288,22 @@ main( int   argc,
       printf("  -solver <ID>         : solver ID (default = 0)\n");
       printf("                         0  - SMG\n");
       printf("                         1  - PFMG\n");
-      printf("                         2  - SparseMSG\n");
+      printf("                         2 *- SparseMSG\n");
       printf("                         3  - PFMG constant coefficients\n");
       printf("                         4  - PFMG constant coefficients variable diagonal\n");
       printf("                         10 - CG with SMG precond\n");
       printf("                         11 - CG with PFMG precond\n");
-      printf("                         12 - CG with SparseMSG precond\n");
-      printf("                         17 - CG with 2-step Jacobi\n");
+      printf("                         12*- CG with SparseMSG precond\n");
+      printf("                         13 - CG with PFMG precond, constant coefficients\n");
+      printf("                         14 - CG with PFMG precond, const.coeff.,variable diagonal\n");
+      printf("                         17*- CG with 2-step Jacobi\n");
       printf("                         18 - CG with diagonal scaling\n");
       printf("                         19 - CG\n");
-      printf("                         20 - Hybrid with SMG precond\n");
-      printf("                         21 - Hybrid with PFMG precond\n");
-      printf("                         22 - Hybrid with SparseMSG precond\n");
+      printf("                         20*- Hybrid with SMG precond\n");
+      printf("                         21*- Hybrid with PFMG precond\n");
+      printf("                         22*- Hybrid with SparseMSG precond\n");
+      printf("Solvers marked with '*' have not yet been implemented.\n");
+      /* >>> TO DO SOON: solvers 18,19 <<< */
       printf("\n");
 
       exit(1);
@@ -365,7 +373,7 @@ main( int   argc,
    }
 
    /*-----------------------------------------------------------
-    * Set up dxyz for PFMG solver
+    * Set up dxyz for PFMG solver  >>> NOT IMPLEMENTED <<<
     *-----------------------------------------------------------*/
 
 #if 0
@@ -652,7 +660,6 @@ main( int   argc,
 
 #if 0
    bHYPRE_StructVector_Print( b_SV );
-/*   HYPRE_StructVectorPrint("driver.out.b", b, 0); */
 #endif
 
    x_SV = bHYPRE_StructVector_Create( bmpicomm, grid );
@@ -673,7 +680,6 @@ main( int   argc,
 
 #if 0
    bHYPRE_StructVector_Print( x_SV );
-/*   HYPRE_StructVectorPrint("driver.out.x0", x, 0); */
 #endif
  
    hypre_TFree(values);
@@ -684,6 +690,7 @@ main( int   argc,
    hypre_ClearTiming();
 
 
+/* >>> The following commented-out section is ANCIENT; revisit still later... >>> */
 /* JfP: temporarily, call Jacobi iteration, using as a model the
    code which calls multigrid ... */
 #if 0
@@ -834,8 +841,8 @@ main( int   argc,
 
    else if (solver_id == 2)
    {
+      hypre_assert( "solver 2 not implemented"==0 );
 #if 0
-/* most solvers not implemented yet (JfP jan2000) ... */
       time_index = hypre_InitializeTiming("SparseMSG Setup");
       hypre_BeginTiming(time_index);
 
@@ -889,7 +896,6 @@ main( int   argc,
       ierr += bHYPRE_PCG_SetOperator( solver_PCG, A_O );
       b_V = bHYPRE_Vector__cast( b_SV );
       x_V = bHYPRE_Vector__cast( x_SV );
-      /* obsolete solver_PCG = bHYPRE_PCG_Constructor( comm );*/
 
       ierr += bHYPRE_PCG_SetIntParameter( solver_PCG, "MaxIter", 50 );
       ierr += bHYPRE_PCG_SetDoubleParameter( solver_PCG, "Tol", 1.0e-06);
@@ -913,7 +919,6 @@ main( int   argc,
          ierr += bHYPRE_StructSMG_SetIntParameter( solver_SMG, "Logging", 0 );
 
          ierr += bHYPRE_StructSMG_Setup( solver_SMG, b_V, x_V );
-         /* obsolete solver_SMG = bHYPRE_StructSMG_Constructor( comm );*/
          hypre_assert( ierr==0 );
 
          precond = (bHYPRE_Solver) bHYPRE_StructSMG__cast2
@@ -941,9 +946,48 @@ main( int   argc,
             ( solver_PFMG, "bHYPRE.Solver" ); 
 
       }
+/* not implemented yet (JfP jan2000) ... */
+      else if (solver_id == 12)
+      {
+         hypre_assert( "solver 12 not implemented"==0 );
+         /* use symmetric SparseMSG as preconditioner */
 #if 0
+         HYPRE_StructSparseMSGCreate(MPI_COMM_WORLD, &precond);
+         HYPRE_StructSparseMSGSetMaxIter(precond, 1);
+         HYPRE_StructSparseMSGSetJump(precond, jump);
+         HYPRE_StructSparseMSGSetTol(precond, 0.0);
+         HYPRE_StructSparseMSGSetZeroGuess(precond);
+         /* weighted Jacobi = 1; red-black GS = 2 */
+         HYPRE_StructSparseMSGSetRelaxType(precond, 1);
+         HYPRE_StructSparseMSGSetNumPreRelax(precond, n_pre);
+         HYPRE_StructSparseMSGSetNumPostRelax(precond, n_post);
+         HYPRE_StructSparseMSGSetLogging(precond, 0);
+         HYPRE_StructPCGSetPrecond(solver,
+                                   HYPRE_StructSparseMSGSolve,
+                                   HYPRE_StructSparseMSGSetup,
+                                   precond);
+#endif
+      }
+/* not implemented yet (JfP jan2000) ... */
       else if (solver_id == 17)
       {
+         hypre_assert( "solver not implemented"==0 );
+#if 0
+         /* use two-step Jacobi as preconditioner */
+         HYPRE_StructJacobiCreate(MPI_COMM_WORLD, &precond);
+         HYPRE_StructJacobiSetMaxIter(precond, 2);
+         HYPRE_StructJacobiSetTol(precond, 0.0);
+         HYPRE_StructJacobiSetZeroGuess(precond);
+         HYPRE_StructPCGSetPrecond(solver,
+                                   HYPRE_StructJacobiSolve,
+                                   HYPRE_StructJacobiSetup,
+                                   precond);
+#endif
+      }
+      else if (solver_id == 17)
+      {
+         hypre_assert( "solver 17 not implemented"==0 );
+#if 0
          /* use two-step Jacobi as preconditioner */
          solver_SJ = bHYPRE_StructJacobi_Constructor( comm );
          precond = (bHYPRE_Solver) bHYPRE_StructJacobi_castTo
@@ -953,8 +997,31 @@ main( int   argc,
          bHYPRE_StructJacobi_SetIntParameter( solver_SJ, "ZeroGuess", 0 );
       
          bHYPRE_StructJacobi_Setup( solver_SJ, A_LO, b_V, x_V );
-      }
 #endif
+      }
+      else if ( solver_id == 18 )
+      {
+         /* use diagonal scaling as preconditioner */
+         solver_DS = bHYPRE_StructDiagScale_Create( bmpicomm );
+         ierr += bHYPRE_StructDiagScale_SetOperator( solver_DS, A_O );
+         ierr += bHYPRE_StructDiagScale_Setup( solver_DS, b_V, x_V );
+         hypre_assert( ierr==0 );
+
+         precond = (bHYPRE_Solver) bHYPRE_StructDiagScale__cast2
+            ( solver_DS, "bHYPRE.Solver" ); 
+      }
+      else if ( solver_id == 19 )
+      {
+         /* no preconditioner; with PCG we use the "identity preconditioner" */
+         solver_Id = bHYPRE_IdentitySolver_Create( bmpicomm );
+         ierr += bHYPRE_IdentitySolver_SetOperator( solver_Id, A_O );
+         ierr += bHYPRE_IdentitySolver_Setup( solver_Id, b_V, x_V );
+         hypre_assert( ierr==0 );
+
+         precond = (bHYPRE_Solver) bHYPRE_IdentitySolver__cast2
+            ( solver_Id, "bHYPRE.Solver" ); 
+
+      }
       else {
          printf( "Preconditioner not supported! Solver_id=%i\n", solver_id );
       }
@@ -962,7 +1029,6 @@ main( int   argc,
       bHYPRE_PCG_SetPreconditioner( solver_PCG, precond );
 
       ierr += bHYPRE_PCG_Setup( solver_PCG, b_V, x_V );
-      /* obsolete bHYPRE_PCG_Setup( solver_PCG, A_LO, b_V, x_V );*/
 
       hypre_EndTiming(time_index);
       hypre_PrintTiming("Setup phase times", MPI_COMM_WORLD);
@@ -981,198 +1047,39 @@ main( int   argc,
 
       ierr += bHYPRE_PCG_GetIntValue( solver_PCG, "NumIterations", &num_iterations );
       ierr += bHYPRE_PCG_GetDoubleValue( solver_PCG, "RelResidualNorm", &final_res_norm );
-      /* obsolete bHYPRE_PCG_GetConvergenceInfo( solver_PCG, "number of iterations",
-         &doubtemp );
-         num_iterations = floor(doubtemp*1.001);  i.e. round(doubtemp)
-      bHYPRE_PCG_GetConvergenceInfo( solver_PCG, "residual norm",
-      &final_res_norm);*/
-
-/* not available yet      bHYPRE_PCG_PrintLogging( solver_PCG ); */
 
       bHYPRE_PCG_deleteRef( solver_PCG );
-   /* obsolete bHYPRE_PCG_destructor( solver_PCG );*/
 
       if (solver_id == 10)
       {
-         /* obsolete bHYPRE_StructSMG_destructor( solver_SMG );*/
          bHYPRE_StructSMG_deleteRef( solver_SMG );
       }
       else if ( solver_id == 11 || solver_id == 13 || solver_id == 14 )
       {
          bHYPRE_StructPFMG_deleteRef( solver_PFMG );
-/*         HYPRE_StructPFMGDestroy(precond);*/
       }
-/*
       else if (solver_id == 12)
       {
-         HYPRE_StructSparseMSGDestroy(precond);
+      hypre_assert( "solver not implemented"==0 );
+         /*HYPRE_StructSparseMSGDestroy(precond);*/
       }
       else if (solver_id == 17)
       {
-         bHYPRE_StructJacobi_destructor( solver_SJ );
+         hypre_assert( "solver not implemented"==0 );
+         /*bHYPRE_StructJacobi_destructor( solver_SJ );*/
       }
-*/
 
    }
 
-/* duplicate of the above, I don't know how or when it happened...
-   if ( (solver_id > 9) && (solver_id < 20) )
-   {
-      time_index = hypre_InitializeTiming("PCG Setup");
-      hypre_BeginTiming(time_index);
 
-      HYPRE_StructPCGCreate(MPI_COMM_WORLD, &solver);
-      HYPRE_StructPCGSetMaxIter(solver, 50);
-      HYPRE_StructPCGSetTol(solver, 1.0e-06);
-      HYPRE_StructPCGSetTwoNorm(solver, 1);
-      HYPRE_StructPCGSetRelChange(solver, 0);
-      HYPRE_StructPCGSetLogging(solver, 1);
-      if (solver_id == 10)
-      {
-         / * use symmetric SMG as preconditioner * /
-         HYPRE_StructSMGCreate(MPI_COMM_WORLD, &precond);
-         HYPRE_StructSMGSetMemoryUse(precond, 0);
-         HYPRE_StructSMGSetMaxIter(precond, 1);
-         HYPRE_StructSMGSetTol(precond, 0.0);
-         HYPRE_StructSMGSetZeroGuess(precond);
-         HYPRE_StructSMGSetNumPreRelax(precond, n_pre);
-         HYPRE_StructSMGSetNumPostRelax(precond, n_post);
-         HYPRE_StructSMGSetLogging(precond, 0);
-
-         HYPRE_StructPCGSetPrecond(solver,
-                                   HYPRE_StructSMGSolve,
-                                   HYPRE_StructSMGSetup,
-                                   precond);
-      }
-
-*/
-#if 0
-/* not implemented yet (JfP jan2000) ... */
-      else if ( solver_id == 11 || solver_id == 13 || solver_id == 14 )
-      {
-         /* use symmetric PFMG as preconditioner */
-         HYPRE_StructPFMGCreate(MPI_COMM_WORLD, &precond);
-         HYPRE_StructPFMGSetMaxIter(precond, 1);
-         HYPRE_StructPFMGSetTol(precond, 0.0);
-         HYPRE_StructPFMGSetZeroGuess(precond);
-         /* weighted Jacobi = 1; red-black GS = 2 */
-         HYPRE_StructPFMGSetRelaxType(precond, 1);
-         HYPRE_StructPFMGSetNumPreRelax(precond, n_pre);
-         HYPRE_StructPFMGSetNumPostRelax(precond, n_post);
-         HYPRE_StructPFMGSetSkipRelax(precond, skip);
-         /*HYPRE_StructPFMGSetDxyz(precond, dxyz);*/
-         HYPRE_StructPFMGSetLogging(precond, 0);
-         HYPRE_StructPCGSetPrecond(solver,
-                                   HYPRE_StructPFMGSolve,
-                                   HYPRE_StructPFMGSetup,
-                                   precond);
-      }
-#endif
-
-#if 0
-/* not implemented yet (JfP jan2000) ... */
-      else if (solver_id == 12)
-      {
-         /* use symmetric SparseMSG as preconditioner */
-         HYPRE_StructSparseMSGCreate(MPI_COMM_WORLD, &precond);
-         HYPRE_StructSparseMSGSetMaxIter(precond, 1);
-         HYPRE_StructSparseMSGSetJump(precond, jump);
-         HYPRE_StructSparseMSGSetTol(precond, 0.0);
-         HYPRE_StructSparseMSGSetZeroGuess(precond);
-         /* weighted Jacobi = 1; red-black GS = 2 */
-         HYPRE_StructSparseMSGSetRelaxType(precond, 1);
-         HYPRE_StructSparseMSGSetNumPreRelax(precond, n_pre);
-         HYPRE_StructSparseMSGSetNumPostRelax(precond, n_post);
-         HYPRE_StructSparseMSGSetLogging(precond, 0);
-         HYPRE_StructPCGSetPrecond(solver,
-                                   HYPRE_StructSparseMSGSolve,
-                                   HYPRE_StructSparseMSGSetup,
-                                   precond);
-      }
-#endif
-#if 0
-/* not implemented yet (JfP jan2000) ... */
-      else if (solver_id == 17)
-      {
-         /* use two-step Jacobi as preconditioner */
-         HYPRE_StructJacobiCreate(MPI_COMM_WORLD, &precond);
-         HYPRE_StructJacobiSetMaxIter(precond, 2);
-         HYPRE_StructJacobiSetTol(precond, 0.0);
-         HYPRE_StructJacobiSetZeroGuess(precond);
-         HYPRE_StructPCGSetPrecond(solver,
-                                   HYPRE_StructJacobiSolve,
-                                   HYPRE_StructJacobiSetup,
-                                   precond);
-      }
-#endif
-#if 0
-/* not implemented yet (JfP jan2000) ... */
-      else if (solver_id == 18)
-      {
-         /* use diagonal scaling as preconditioner */
-#ifdef HYPRE_USE_PTHREADS
-         for (i = 0; i < hypre_NumThreads; i++)
-         {
-            precond[i] = NULL;
-         }
-#else
-         precond = NULL;
-#endif
-         HYPRE_StructPCGSetPrecond(solver,
-                                   HYPRE_StructDiagScale,
-                                   HYPRE_StructDiagScaleSetup,
-                                   precond);
-      }
-#endif
-/* duplicate of the above, I don't know how or when it happened...
-      HYPRE_StructPCGSetup(solver, A, b, x);
-
-      hypre_EndTiming(time_index);
-      hypre_PrintTiming("Setup phase times", MPI_COMM_WORLD);
-      hypre_FinalizeTiming(time_index);
-      hypre_ClearTiming();
-   
-      time_index = hypre_InitializeTiming("PCG Solve");
-      hypre_BeginTiming(time_index);
-
-      HYPRE_StructPCGSolve(solver, A, b, x);
-
-      hypre_EndTiming(time_index);
-      hypre_PrintTiming("Solve phase times", MPI_COMM_WORLD);
-      hypre_FinalizeTiming(time_index);
-      hypre_ClearTiming();
-
-      HYPRE_StructPCGGetNumIterations(solver, &num_iterations);
-      HYPRE_StructPCGGetFinalRelativeResidualNorm(solver, &final_res_norm);
-      HYPRE_StructPCGDestroy(solver);
-
-      if (solver_id == 10)
-      {
-         HYPRE_StructSMGDestroy(precond);
-      }
-      else if (solver_id == 11)
-      {
-         HYPRE_StructPFMGDestroy(precond);
-      }
-      else if (solver_id == 12)
-      {
-         HYPRE_StructSparseMSGDestroy(precond);
-      }
-      else if (solver_id == 17)
-      {
-         HYPRE_StructJacobiDestroy(precond);
-      }
-#endif
-   }
-*/
 
    /*-----------------------------------------------------------
     * Solve the system using Hybrid
     *-----------------------------------------------------------*/
    if ((solver_id > 19) && (solver_id < 30))
    {
+         hypre_assert( "solver >=20 not implemented"==0 );
 #if 0
-/* most solvers not implemented yet (JfP jan2000) ... */
       time_index = hypre_InitializeTiming("Hybrid Setup");
       hypre_BeginTiming(time_index);
 
@@ -1284,7 +1191,6 @@ main( int   argc,
 
 #if 0
    bHYPRE_StructVector_Print( x );
-/*   HYPRE_StructVectorPrint("driver.out.x", x, 0); */
 #endif
 
    if (myid == 0)
@@ -1304,21 +1210,6 @@ main( int   argc,
    bHYPRE_StructMatrix_deleteRef( A_b );
    bHYPRE_StructVector_deleteRef( b_SV );
    bHYPRE_StructVector_deleteRef( x_SV );
-   /* obsolete bHYPRE_MPI_Com_destructor(comm);
-   bHYPRE_StructStencil_destructor(stencil);
-   bHYPRE_StructGrid_destructor(grid);
-   for (ib = 0; ib < nblocks; ib++)
-      bHYPRE_Box_destructor(box[ib]);
-   bHYPRE_StructMatrix_destructor(A_b);
-   bHYPRE_StructVector_destructor(b_SV);
-   bHYPRE_StructVector_destructor(x_SV);
-   */
-            
-/*    HYPRE_StructGridDestroy(grid); */
-/*    HYPRE_StructStencilDestroy(stencil); */
-/*    HYPRE_StructMatrixDestroy(A); */
-/*    HYPRE_StructVectorDestroy(b); */
-/*    HYPRE_StructVectorDestroy(x); */
 
    for (i = 0; i < nblocks; i++)
    {
@@ -1328,7 +1219,6 @@ main( int   argc,
    hypre_TFree(ilower);
    hypre_TFree(iupper);
    hypre_TFree(stencil_indices);
-   /* obsolete hypre_TFree(box);*/
 
    for ( i = 0; i < (dim + 1); i++)
       hypre_TFree(offsets[i]);
@@ -1339,10 +1229,6 @@ main( int   argc,
 
    /* Finalize MPI */
    MPI_Finalize();
-
-#ifdef HYPRE_USE_PTHREADS
-   HYPRE_DestroyPthreads();
-#endif  
 
    return (0);
 }
@@ -1385,9 +1271,8 @@ int SetStencilBndry
   dim             = hypre_StructGridDim(gridmatrix);
   stencil_indices = hypre_CTAlloc(int, 1);
 
-/* >>> must be changed when constant_coefficient is babelized ... >>> */
-  /*  constant_coefficient = hypre_StructMatrixConstantCoefficient(A);*/
-  constant_coefficient = 0; /* Babel interface doesn't support c.c. yet */
+  bHYPRE_StructMatrix_GetIntValue( A_b, "ConstantCoefficient",
+                                   &constant_coefficient );
   if ( constant_coefficient>0 ) return 1;
   /*...no space dependence if constant_coefficient==1,
     and space dependence only for diagonal if constant_coefficient==2 --
