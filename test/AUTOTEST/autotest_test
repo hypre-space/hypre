@@ -20,8 +20,8 @@ initialize_variables ()
   HYPRE_BATCH_MODE="no"
   HYPRE_SEND_MAIL="no"
   STD_TEST_CASES='TEST_ij/*.sh TEST_fac/*.sh TEST_sstruct/*.sh TEST_struct/*.sh'
-  STD_CONFIGOPTIONS="babel debug default no_mpi openmp insure strict_checking docs all++ all77"
-  STD_MAKEOPTIONS="all configure all++ all77"
+  STD_CONFIGOPTIONS="babel debug default no_mpi openmp insure strict_checking"
+  STD_MAKEOPTIONS="all configure docs all++ all77"
   DEBUG_MODE="no"
   Build=1
   Run=2
