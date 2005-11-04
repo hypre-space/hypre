@@ -38,7 +38,6 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
    double          *A_offd_data;
    int             *A_offd_i;
 
-#ifndef HYPRE_NO_GLOBAL_PARTITION
    hypre_CSRMatrix *P_diag;
    double          *P_diag_data;
    int             *P_diag_i;
@@ -48,7 +47,7 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
    int             *P_offd_i;
 
    int	    numrows;
-#endif
+
    int		   *row_starts;
 
  
@@ -76,7 +75,7 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
    double    max_rowsum;
    double    sparse;
 
-#ifndef HYPRE_NO_GLOBAL_PARTITION
+
    int       i;
    
 
@@ -95,7 +94,7 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
    double    global_max_rsum;
    double    global_min_wt;
    double    global_max_wt;
-#endif
+
    double  *num_coeffs;
    double  *num_variables;
    double   total_variables; 
@@ -144,10 +143,14 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
    relax_order = hypre_ParAMGDataRelaxOrder(amg_data); 
    omega = hypre_ParAMGDataOmega(amg_data); 
    tol = hypre_ParAMGDataTol(amg_data);
- 
+
    send_buff     = hypre_CTAlloc(double, 6);
+#ifdef HYPRE_NO_GLOBAL_PARTITION
+   gather_buff = hypre_CTAlloc(double,6);    
+#else
    gather_buff = hypre_CTAlloc(double,6*num_procs);    
- 
+#endif
+
    if (my_id==0)
    {
       printf("\nBoomerAMG SETUP PARAMETERS:\n\n");
@@ -219,9 +222,9 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
                   (measure_type ? "globally" : "locally"));
 
 #ifdef HYPRE_NO_GLOBAL_PARTITION
-      printf( "\nCannot print Operator and Interpolation Matrix Information\n due to 'no global partition' option.\n\n");
-
-#else
+      printf( "\n No global partition option chosen.\n\n");
+#endif
+      
       printf( "\nOperator Matrix Information:\n\n");
 
       printf("            nonzero         entries p");
@@ -230,7 +233,7 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
       printf("avg       min         max\n");
       printf("=======================================");
       printf("============================\n");
-#endif
+
    }
   
    /*-----------------------------------------------------
@@ -250,7 +253,7 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
        A_offd = hypre_ParCSRMatrixOffd(A_array[level]);   
        A_offd_data = hypre_CSRMatrixData(A_offd);
        A_offd_i = hypre_CSRMatrixI(A_offd);
-
+       
        row_starts = hypre_ParCSRMatrixRowStarts(A_array[level]);
 
        fine_size = hypre_ParCSRMatrixGlobalNumRows(A_array[level]);
@@ -265,73 +268,106 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
        max_entries = 0;
        min_rowsum = 0.0;
        max_rowsum = 0.0;
-#ifndef HYPRE_NO_GLOBAL_PARTITION
-  if (hypre_CSRMatrixNumRows(A_diag))
-  {
-       min_entries = (A_diag_i[1]-A_diag_i[0])+(A_offd_i[1]-A_offd_i[0]);
-       for (j = A_diag_i[0]; j < A_diag_i[1]; j++)
-                    min_rowsum += A_diag_data[j];
-       for (j = A_offd_i[0]; j < A_offd_i[1]; j++)
-                    min_rowsum += A_offd_data[j];
 
-       max_rowsum = min_rowsum;
-
-       for (j = 0; j < hypre_CSRMatrixNumRows(A_diag); j++)
+       if (hypre_CSRMatrixNumRows(A_diag))
        {
-           entries = (A_diag_i[j+1]-A_diag_i[j])+(A_offd_i[j+1]-A_offd_i[j]);
-           min_entries = hypre_min(entries, min_entries);
-           max_entries = hypre_max(entries, max_entries);
-
-           rowsum = 0.0;
-           for (i = A_diag_i[j]; i < A_diag_i[j+1]; i++)
-               rowsum += A_diag_data[i];
-
-           for (i = A_offd_i[j]; i < A_offd_i[j+1]; i++)
-               rowsum += A_offd_data[i];
-
-           min_rowsum = hypre_min(rowsum, min_rowsum);
-           max_rowsum = hypre_max(rowsum, max_rowsum);
+          min_entries = (A_diag_i[1]-A_diag_i[0])+(A_offd_i[1]-A_offd_i[0]);
+          for (j = A_diag_i[0]; j < A_diag_i[1]; j++)
+             min_rowsum += A_diag_data[j];
+          for (j = A_offd_i[0]; j < A_offd_i[1]; j++)
+             min_rowsum += A_offd_data[j];
+          
+          max_rowsum = min_rowsum;
+          
+          for (j = 0; j < hypre_CSRMatrixNumRows(A_diag); j++)
+          {
+             entries = (A_diag_i[j+1]-A_diag_i[j])+(A_offd_i[j+1]-A_offd_i[j]);
+             min_entries = hypre_min(entries, min_entries);
+             max_entries = hypre_max(entries, max_entries);
+             
+             rowsum = 0.0;
+             for (i = A_diag_i[j]; i < A_diag_i[j+1]; i++)
+                rowsum += A_diag_data[i];
+             
+             for (i = A_offd_i[j]; i < A_offd_i[j+1]; i++)
+                rowsum += A_offd_data[i];
+             
+             min_rowsum = hypre_min(rowsum, min_rowsum);
+             max_rowsum = hypre_max(rowsum, max_rowsum);
+          }
        }
-  }
-  avg_entries = global_nonzeros / ((double) fine_size);
+       avg_entries = global_nonzeros / ((double) fine_size);
 
-  send_buff[0] = (double) min_entries;
-  send_buff[1] = (double) max_entries;
-  send_buff[2] = min_rowsum;
-  send_buff[3] = max_rowsum;
-  
-  MPI_Gather(send_buff,4,MPI_DOUBLE,gather_buff,4,MPI_DOUBLE,0,comm);
-  
-  if (my_id == 0)
-  {
-     global_min_e = 1000;
-     global_max_e = 0;
-     global_min_rsum = 1000.0;
-     global_max_rsum = 0.0;
-     
-     for (j = 0; j < num_procs; j++)
-     {
-        numrows = row_starts[j+1]-row_starts[j];
-        if (numrows)
-        {
-           global_min_e = hypre_min(global_min_e, (int) gather_buff[j*4]);
-           global_min_rsum = hypre_min(global_min_rsum, gather_buff[j*4 +2]);
-        }
-        global_max_e = hypre_max(global_max_e, (int) gather_buff[j*4 +1]);
-        global_max_rsum = hypre_max(global_max_rsum, gather_buff[j*4 +3]);
-     }
-     
-     printf( "%2d %7d %8.0f  %0.3f  %4d %4d",
-             level, fine_size, global_nonzeros, sparse, global_min_e, 
-             global_max_e);
-     printf("  %4.1f  %10.3e  %10.3e\n", avg_entries,
-            global_min_rsum, global_max_rsum);
-  }
-#endif  
+#ifdef HYPRE_NO_GLOBAL_PARTITION       
 
+       numrows = row_starts[1]-row_starts[0];
+       if (!numrows) /* if we don't have any rows, then don't have this count toward
+                         min row sum or min num entries */
+       {
+          min_entries = 1000000;
+          min_rowsum =  1.0e10;
+       }
+       
+       send_buff[0] = - (double) min_entries;
+       send_buff[1] = (double) max_entries;
+       send_buff[2] = - min_rowsum;
+       send_buff[3] = max_rowsum;
+
+       MPI_Reduce(send_buff, gather_buff, 4, MPI_DOUBLE, MPI_MAX, 0, comm);
+       
+       if (my_id ==0)
+       {
+          global_min_e = - gather_buff[0];
+          global_max_e = gather_buff[1];
+          global_min_rsum = - gather_buff[2];
+          global_max_rsum = gather_buff[3];
+          
+          printf( "%2d %7d %8.0f  %0.3f  %4d %4d",
+                  level, fine_size, global_nonzeros, sparse, global_min_e, 
+                  global_max_e);
+          printf("  %4.1f  %10.3e  %10.3e\n", avg_entries,
+                 global_min_rsum, global_max_rsum);
+       }
+       
+#else
+
+       send_buff[0] = (double) min_entries;
+       send_buff[1] = (double) max_entries;
+       send_buff[2] = min_rowsum;
+       send_buff[3] = max_rowsum;
+       
+       MPI_Gather(send_buff,4,MPI_DOUBLE,gather_buff,4,MPI_DOUBLE,0,comm);
+
+       if (my_id == 0)
+       {
+          global_min_e = 1000;
+          global_max_e = 0;
+          global_min_rsum = 1000.0;
+          global_max_rsum = 0.0;
+          for (j = 0; j < num_procs; j++)
+          {
+             numrows = row_starts[j+1]-row_starts[j];
+             if (numrows)
+             {
+                global_min_e = hypre_min(global_min_e, (int) gather_buff[j*4]);
+                global_min_rsum = hypre_min(global_min_rsum, gather_buff[j*4 +2]);
+             }
+             global_max_e = hypre_max(global_max_e, (int) gather_buff[j*4 +1]);
+             global_max_rsum = hypre_max(global_max_rsum, gather_buff[j*4 +3]);
+          }
+
+          printf( "%2d %7d %8.0f  %0.3f  %4d %4d",
+                  level, fine_size, global_nonzeros, sparse, global_min_e, 
+                  global_max_e);
+          printf("  %4.1f  %10.3e  %10.3e\n", avg_entries,
+                 global_min_rsum, global_max_rsum);
+       }
+
+#endif
+
+        
    }
 
-#ifndef HYPRE_NO_GLOBAL_PARTITION
        
    if (my_id == 0)
    {
@@ -352,122 +388,164 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
 
    for (level = 0; level < num_levels-1; level++)
    {
-
-       P_diag = hypre_ParCSRMatrixDiag(P_array[level]);
-       P_diag_data = hypre_CSRMatrixData(P_diag);
-       P_diag_i = hypre_CSRMatrixI(P_diag);
-
-       P_offd = hypre_ParCSRMatrixOffd(P_array[level]);   
-       P_offd_data = hypre_CSRMatrixData(P_offd);
-       P_offd_i = hypre_CSRMatrixI(P_offd);
-
-       row_starts = hypre_ParCSRMatrixRowStarts(P_array[level]);
-
-       fine_size = hypre_ParCSRMatrixGlobalNumRows(P_array[level]);
-       coarse_size = hypre_ParCSRMatrixGlobalNumCols(P_array[level]);
-       global_nonzeros = hypre_ParCSRMatrixNumNonzeros(P_array[level]);
-
-       min_weight = 1.0;
-       max_weight = 0.0;
-       max_rowsum = 0.0;
-       min_rowsum = 0.0;
-       min_entries = 0;
-       max_entries = 0;
- 
-  if (hypre_CSRMatrixNumRows(P_diag))
-  {
-       if (hypre_CSRMatrixNumCols(P_diag)) min_weight = P_diag_data[0];
-       for (j = P_diag_i[0]; j < P_diag_i[1]; j++)
-       {
+      
+      P_diag = hypre_ParCSRMatrixDiag(P_array[level]);
+      P_diag_data = hypre_CSRMatrixData(P_diag);
+      P_diag_i = hypre_CSRMatrixI(P_diag);
+      
+      P_offd = hypre_ParCSRMatrixOffd(P_array[level]);   
+      P_offd_data = hypre_CSRMatrixData(P_offd);
+      P_offd_i = hypre_CSRMatrixI(P_offd);
+      
+      row_starts = hypre_ParCSRMatrixRowStarts(P_array[level]);
+      
+      fine_size = hypre_ParCSRMatrixGlobalNumRows(P_array[level]);
+      coarse_size = hypre_ParCSRMatrixGlobalNumCols(P_array[level]);
+      global_nonzeros = hypre_ParCSRMatrixNumNonzeros(P_array[level]);
+      
+      min_weight = 1.0;
+      max_weight = 0.0;
+      max_rowsum = 0.0;
+      min_rowsum = 0.0;
+      min_entries = 0;
+      max_entries = 0;
+      
+      if (hypre_CSRMatrixNumRows(P_diag))
+      {
+         if (hypre_CSRMatrixNumCols(P_diag)) min_weight = P_diag_data[0];
+         for (j = P_diag_i[0]; j < P_diag_i[1]; j++)
+         {
             min_weight = hypre_min(min_weight, P_diag_data[j]);
             if (P_diag_data[j] != 1.0)
-                max_weight = hypre_max(max_weight, P_diag_data[j]);
+               max_weight = hypre_max(max_weight, P_diag_data[j]);
             min_rowsum += P_diag_data[j];
-       }
-       for (j = P_offd_i[0]; j < P_offd_i[1]; j++)
-       {        
-             min_weight = hypre_min(min_weight, P_offd_data[j]); 
-             if (P_offd_data[j] != 1.0)
-                  max_weight = hypre_max(max_weight, P_offd_data[j]);     
-             min_rowsum += P_offd_data[j];
-       }
-
-       max_rowsum = min_rowsum;
-
-       min_entries = (P_diag_i[1]-P_diag_i[0])+(P_offd_i[1]-P_offd_i[0]); 
-/*       min_entries = 2; */
-       max_entries = 0;
-
-       for (j = 0; j < hypre_CSRMatrixNumRows(P_diag); j++)
-       {
-           entries = (P_diag_i[j+1]-P_diag_i[j])+(P_offd_i[j+1]-P_offd_i[j]);
-           min_entries = hypre_min(entries, min_entries);
-           max_entries = hypre_max(entries, max_entries);
-
-           rowsum = 0.0;
-           for (i = P_diag_i[j]; i < P_diag_i[j+1]; i++)
-           {
+         }
+         for (j = P_offd_i[0]; j < P_offd_i[1]; j++)
+         {        
+            min_weight = hypre_min(min_weight, P_offd_data[j]); 
+            if (P_offd_data[j] != 1.0)
+               max_weight = hypre_max(max_weight, P_offd_data[j]);     
+            min_rowsum += P_offd_data[j];
+         }
+         
+         max_rowsum = min_rowsum;
+         
+         min_entries = (P_diag_i[1]-P_diag_i[0])+(P_offd_i[1]-P_offd_i[0]); 
+         max_entries = 0;
+         
+         for (j = 0; j < hypre_CSRMatrixNumRows(P_diag); j++)
+         {
+            entries = (P_diag_i[j+1]-P_diag_i[j])+(P_offd_i[j+1]-P_offd_i[j]);
+            min_entries = hypre_min(entries, min_entries);
+            max_entries = hypre_max(entries, max_entries);
+            
+            rowsum = 0.0;
+            for (i = P_diag_i[j]; i < P_diag_i[j+1]; i++)
+            {
                min_weight = hypre_min(min_weight, P_diag_data[i]);
                if (P_diag_data[i] != 1.0)
-                     max_weight = hypre_max(max_weight, P_diag_data[i]);
+                  max_weight = hypre_max(max_weight, P_diag_data[i]);
                rowsum += P_diag_data[i];
-           }
-
-           for (i = P_offd_i[j]; i < P_offd_i[j+1]; i++)
-           {
+            }
+            
+            for (i = P_offd_i[j]; i < P_offd_i[j+1]; i++)
+            {
                min_weight = hypre_min(min_weight, P_offd_data[i]);
                if (P_offd_data[i] != 1.0) 
-                     max_weight = hypre_max(max_weight, P_offd_data[i]);
+                  max_weight = hypre_max(max_weight, P_offd_data[i]);
                rowsum += P_offd_data[i];
-           }
+            }
+            
+            min_rowsum = hypre_min(rowsum, min_rowsum);
+            max_rowsum = hypre_max(rowsum, max_rowsum);
+         }
+         
+      }
+      avg_entries = ((double) global_nonzeros) / ((double) fine_size);
 
-           min_rowsum = hypre_min(rowsum, min_rowsum);
-           max_rowsum = hypre_max(rowsum, max_rowsum);
+
+#ifdef HYPRE_NO_GLOBAL_PARTITION
+
+      numrows = row_starts[1]-row_starts[0];
+      if (!numrows) /* if we don't have any rows, then don't have this count toward
+                       min row sum or min num entries */
+      {
+         min_entries = 1000000;
+         min_rowsum =  1.0e10;
+         min_weight = 1.0e10;
        }
+       
+      send_buff[0] = - (double) min_entries;
+      send_buff[1] = (double) max_entries;
+      send_buff[2] = - min_rowsum;
+      send_buff[3] = max_rowsum;
+      send_buff[4] = - min_weight;
+      send_buff[5] = max_weight;
 
-  }
-       avg_entries = ((double) global_nonzeros) / ((double) fine_size);
+      MPI_Reduce(send_buff, gather_buff, 6, MPI_DOUBLE, MPI_MAX, 0, comm);
 
-       send_buff[0] = (double) min_entries;
-       send_buff[1] = (double) max_entries;
-       send_buff[2] = min_rowsum;
-       send_buff[3] = max_rowsum;
-       send_buff[4] = min_weight;
-       send_buff[5] = max_weight;
-
-       MPI_Gather(send_buff,6,MPI_DOUBLE,gather_buff,6,MPI_DOUBLE,0,comm);
-
-       if (my_id == 0)
-       {
-          global_min_e = 1000;
-          global_max_e = 0;
-          global_min_rsum = 1000.0;
-          global_max_rsum = 0.0;
-          global_min_wt = 1000.0;
-          global_max_wt = 0.0;
-          
-          for (j = 0; j < num_procs; j++)
-          {
-	      numrows = row_starts[j+1] - row_starts[j];
-              if (numrows)
-	      {
-		 global_min_e = hypre_min(global_min_e, (int) gather_buff[j*6]);
-                 global_min_rsum = hypre_min(global_min_rsum, gather_buff[j*6+2]);
-                 global_min_wt = hypre_min(global_min_wt, gather_buff[j*6+4]);
-	      }
-              global_max_e = hypre_max(global_max_e, (int) gather_buff[j*6+1]);
-              global_max_rsum = hypre_max(global_max_rsum, gather_buff[j*6+3]);
-              global_max_wt = hypre_max(global_max_wt, gather_buff[j*6+5]);
-          }
+      if (my_id == 0)
+      {
+         global_min_e = - gather_buff[0];
+         global_max_e = gather_buff[1];
+         global_min_rsum = -gather_buff[2];
+         global_max_rsum = gather_buff[3];
+         global_min_wt = -gather_buff[4];
+         global_max_wt = gather_buff[5];
 
           printf( "%2d %5d x %-5d %3d %3d",
-                level, fine_size, coarse_size,  global_min_e, global_max_e);
-          printf("  %10.3e %9.3e %9.3e %9.3e\n",
-                    global_min_wt, global_max_wt, 
-                    global_min_rsum, global_max_rsum);
-       }
-   }
+                 level, fine_size, coarse_size,  global_min_e, global_max_e);
+         printf("  %10.3e %9.3e %9.3e %9.3e\n",
+                global_min_wt, global_max_wt, 
+                global_min_rsum, global_max_rsum);
+      }
+
+
+#else
+      
+      send_buff[0] = (double) min_entries;
+      send_buff[1] = (double) max_entries;
+      send_buff[2] = min_rowsum;
+      send_buff[3] = max_rowsum;
+      send_buff[4] = min_weight;
+      send_buff[5] = max_weight;
+      
+      MPI_Gather(send_buff,6,MPI_DOUBLE,gather_buff,6,MPI_DOUBLE,0,comm);
+      
+      if (my_id == 0)
+      {
+         global_min_e = 1000;
+         global_max_e = 0;
+         global_min_rsum = 1000.0;
+         global_max_rsum = 0.0;
+         global_min_wt = 1000.0;
+         global_max_wt = 0.0;
+         
+         for (j = 0; j < num_procs; j++)
+         {
+            numrows = row_starts[j+1] - row_starts[j];
+            if (numrows)
+            {
+               global_min_e = hypre_min(global_min_e, (int) gather_buff[j*6]);
+               global_min_rsum = hypre_min(global_min_rsum, gather_buff[j*6+2]);
+               global_min_wt = hypre_min(global_min_wt, gather_buff[j*6+4]);
+            }
+            global_max_e = hypre_max(global_max_e, (int) gather_buff[j*6+1]);
+            global_max_rsum = hypre_max(global_max_rsum, gather_buff[j*6+3]);
+            global_max_wt = hypre_max(global_max_wt, gather_buff[j*6+5]);
+         }
+         
+         printf( "%2d %5d x %-5d %3d %3d",
+                 level, fine_size, coarse_size,  global_min_e, global_max_e);
+         printf("  %10.3e %9.3e %9.3e %9.3e\n",
+                global_min_wt, global_max_wt, 
+                global_min_rsum, global_max_rsum);
+      }
+
 #endif
+
+   }
+
 
    total_variables = 0;
    operat_cmplxty = 0;
