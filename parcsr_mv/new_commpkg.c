@@ -316,7 +316,6 @@ hypre_NewCommPkgCreate_core(
    /* the contact information is the recv_processor infomation - so
       nothing more to do to generate contact info*/
 
-
    /* the response we expect is just a confirmation*/
    hypre_TFree(response_buf);
    hypre_TFree(response_buf_starts);
@@ -589,8 +588,6 @@ hypre_LocateAssummedPartition(int row_start, int row_end, int global_num_rows,
    int        tmp_row_start, tmp_row_end, complete;
 
    int        locate_row_start[2], locate_ranges;
-/*   int        locate_row_end[2]; */
-   
 
    int        locate_row_count, rows_found;  
  
@@ -621,12 +618,12 @@ hypre_LocateAssummedPartition(int row_start, int row_end, int global_num_rows,
    if (row_start <= row_end ) { /*must own at least one row*/
 
       if ( part->row_end < row_start  || row_end < part->row_start  )   
-      {  /*no overlap - so all of my rows */
+      {  /*no overlap - so all of my rows and only one range*/
          contact_row_start[0] = row_start;
          contact_row_end[0] = row_end;
          contact_ranges++;
       }
-      else /* the two regions overlap */
+      else /* the two regions overlap - so one or two ranges */
       {  
          /* check for contact rows on the low end of the local range */
 	 if (row_start < part->row_start) 
@@ -637,7 +634,7 @@ hypre_LocateAssummedPartition(int row_start, int row_end, int global_num_rows,
 	 } 
 	 if (part->row_end < row_end) /* check the high end */
          {
-            if (contact_row_start[0]) 
+            if (contact_ranges) /* already found one range */ 
             {
 	       contact_row_start[1] = part->row_end +1;
 	       contact_row_end[1] = row_end;
@@ -725,7 +722,7 @@ hypre_LocateAssummedPartition(int row_start, int row_end, int global_num_rows,
    requests = hypre_CTAlloc(MPI_Request, contact_list_length);
    statuses = hypre_CTAlloc(MPI_Status, contact_list_length);
 
-   /*send out messages */ /*don't need to track whether these are received */
+   /*send out messages */
    for (i=0; i< contact_list_length; i++) 
    {
       MPI_Isend(&CONTACT(i,1) ,2, MPI_INT, CONTACT(i,0), flag1 , 
@@ -743,16 +740,14 @@ hypre_LocateAssummedPartition(int row_start, int row_end, int global_num_rows,
    locate_row_count = 0;
  
    locate_row_start[0]=0;
-   /* locate_row_end[0]=0; */
    locate_row_start[1]=0;
-   /* locate_row_end[1]=0; */
+
    locate_ranges = 0;
 
    if (part->row_end < row_start  || row_end < part->row_start  ) 
    /*no overlap - so all of my assumed rows */ 
    {
       locate_row_start[0] = part->row_start;
-      /* locate_row_end[0] = part->row_end; */
       locate_ranges++;
       locate_row_count += part->row_end - part->row_start + 1; 
    }
@@ -761,21 +756,18 @@ hypre_LocateAssummedPartition(int row_start, int row_end, int global_num_rows,
       if (part->row_start < row_start) 
       {/* check for locate rows on the low end of the local range */
          locate_row_start[0] = part->row_start;
-         /* locate_row_end[0] = row_start - 1; */
          locate_ranges++;
          locate_row_count += (row_start-1) - part->row_start + 1;
       } 
       if (row_end < part->row_end) /* check the high end */
       {
-         if (locate_row_start[0]) 
+         if (locate_ranges) /* already have one range */ 
          {
 	    locate_row_start[1] = row_end +1;
-            /* locate_row_end[1] = part->row_end; */
 	 }
          else
          {
 	    locate_row_start[0] = row_end +1;
-            /* locate_row_end[0] = part->row_end; */
          } 
          locate_ranges++;
          locate_row_count += part->row_end - (row_end + 1) + 1;
@@ -832,8 +824,6 @@ hypre_LocateAssummedPartition(int row_start, int row_end, int global_num_rows,
       
       part->length++;
    } 
-
-
 
    /*In case the partition of the assumed partition is longish, 
      we would like to know the sorted order */
