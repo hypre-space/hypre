@@ -47,7 +47,7 @@ hypre_F90_IFACE(hypre_sstructpcgdestroy, HYPRE_SSTRUCTPCGDESTROY)
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_sstructpcgsetup, HYPRE_SSTRUCTPCGDESTROY)
+hypre_F90_IFACE(hypre_sstructpcgsetup, HYPRE_SSTRUCTPCGSETUP)
                                                      (long int *solver,
                                                       long int *A,
                                                       long int *b,
