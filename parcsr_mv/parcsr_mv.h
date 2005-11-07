@@ -557,6 +557,8 @@ int HYPRE_ParVectorInnerProd( HYPRE_ParVector x , HYPRE_ParVector y , double *pr
 int HYPRE_VectorToParVector( MPI_Comm comm , HYPRE_Vector b , int *partitioning , HYPRE_ParVector *vector );
 
 /* new_commpkg.c */
+int PrintCommpkg(hypre_ParCSRMatrix *A, const char *file_name);
+
 int hypre_NewCommPkgCreate_core( MPI_Comm comm, int *col_map_off_d, int first_col_diag, int col_start, int col_end, int num_cols_off_d, int global_num_cols, int *p_num_recvs, int **p_recv_procs, int **p_recv_vec_starts, int *p_num_sends, int **p_send_procs, int ** p_send_map_starts, int **p_send_map_elements);
 int hypre_NewCommPkgCreate( hypre_ParCSRMatrix *parcsr_A );
 int hypre_NewCommPkgDestroy( hypre_ParCSRMatrix *parcsr_A );
