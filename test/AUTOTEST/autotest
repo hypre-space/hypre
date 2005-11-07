@@ -33,6 +33,8 @@ perform_test()
      echo "Autotest Started" > "autotest_start"
      [ -f linear_solvers/test/AUTOTEST/env.${HYPRE_ARCH} ] && \
         . linear_solvers/test/AUTOTEST/env.${HYPRE_ARCH} ${COMPILERSELECT}
+     rm -fR ${HYPRE_REMOTE_DIR}/linear_solvers/autotest.*
+     rm -fR ${HYPRE_REMOTE_DIR}/linear_solvers/test/autotest.*
      linear_solvers/test/AUTOTEST/autotest_test \
          ${HYPRE_MACHINE_COMMANDS} -v ${HYPRE_MESSAGE}
      echo "Autotest Done" > "autotest_done"
@@ -62,6 +64,8 @@ perform_test()
       echo "Autotest Started" > "autotest_start";\
       [ -f linear_solvers/test/AUTOTEST/env.${HYPRE_ARCH} ] && \
         . linear_solvers/test/AUTOTEST/env.${HYPRE_ARCH} ${COMPILERSELECT};\
+      rm -fR ${HYPRE_REMOTE_DIR}/linear_solvers/autotest.*;\
+      rm -fR ${HYPRE_REMOTE_DIR}/linear_solvers/test/autotest.*;\
       linear_solvers/test/AUTOTEST/autotest_test \
             ${HYPRE_MACHINE_COMMANDS} -v ${HYPRE_MESSAGE};\
       echo "Autotest Done" > "autotest_done";\
