@@ -20,6 +20,69 @@ int hypre_RangeFillResponseIJDetermineRecvProcs(void*, int, int, void*, MPI_Comm
 
 
 
+int PrintCommpkg(hypre_ParCSRMatrix *A, const char *file_name)
+{
+   
+   int num_sends, num_recvs;
+   
+   int *recv_vec_starts, *recv_procs;
+   int *send_map_starts, *send_map_elements, *send_procs;
+
+   int i;
+   int ierr = 0;
+   int my_id;
+   
+   MPI_Comm comm;
+   
+   hypre_ParCSRCommPkg *comm_pkg;
+   
+
+   char   new_file[80];
+   FILE *fp;
+
+   comm_pkg =  hypre_ParCSRMatrixCommPkg(A);
+   
+
+   comm =  hypre_ParCSRCommPkgComm(comm_pkg);
+   
+   num_recvs = hypre_ParCSRCommPkgNumRecvs(comm_pkg);
+   recv_procs = hypre_ParCSRCommPkgRecvProcs(comm_pkg);
+   recv_vec_starts = hypre_ParCSRCommPkgRecvVecStarts(comm_pkg);
+   num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
+   send_procs = hypre_ParCSRCommPkgSendProcs(comm_pkg);
+   send_map_starts = hypre_ParCSRCommPkgSendMapStarts(comm_pkg);
+   send_map_elements = hypre_ParCSRCommPkgSendMapElmts(comm_pkg);
+
+   
+   MPI_Comm_rank(comm, &my_id);
+
+   sprintf(new_file,"%s.%d",file_name,my_id);
+
+   fp = fopen(new_file, "w");
+   fprintf(fp, "num_recvs = %d\n", num_recvs);
+   for (i=0; i < num_recvs; i++)
+   {
+      fprintf(fp, "recv_proc [start, end] = %d [%d, %d] \n", recv_procs[i], recv_vec_starts[i], recv_vec_starts[i+1]-1);
+   }
+
+   fprintf(fp, "num_sends = %d\n", num_sends);
+   for (i=0; i < num_sends; i++)
+   {
+      fprintf(fp, "send_proc [start, end] = %d [%d, %d] \n", send_procs[i], send_map_starts[i], send_map_starts[i+1]-1);
+   }
+
+   for (i = 0; i< send_map_starts[num_sends]; i++)
+   {
+      fprintf(fp, "send_map_elements (%d) = %d\n", i, send_map_elements[i]);
+   }
+
+   fclose(fp);
+
+   return ierr;
+
+
+}
+
 
 /*------------------------------------------------------------------
  * hypre_NewCommPkgCreate_core
@@ -354,23 +417,74 @@ hypre_NewCommPkgCreate_core(
    /*send proc starts are in send_proc_obj.vec_starts */
 
 #if mydebug
-      printf("myid = %d, num_sends = %d\n", myid, num_sends);   
-      for (i=0; i < num_sends; i++) 
+   printf("myid = %d, num_sends = %d\n", myid, num_sends);   
+   for (i=0; i < num_sends; i++) 
+   {
+      tmp_int = send_proc_obj.vec_starts[i+1] - send_proc_obj.vec_starts[i];
+      index = send_proc_obj.vec_starts[i];
+      for (j=0; j< tmp_int; j++) 
       {
-        tmp_int = send_proc_obj.vec_starts[i+1] - send_proc_obj.vec_starts[i];
-        index = send_proc_obj.vec_starts[i];
-        for (j=0; j< tmp_int; j++) 
-	{
-	  printf("myid = %d, send proc = %d, send element = %d\n",myid,  
-                  send_proc_obj.id[i],send_proc_obj.elements[index+j]); 
-	 }   
-      }
+         printf("myid = %d, send proc = %d, send element = %d\n",myid,  
+                send_proc_obj.id[i],send_proc_obj.elements[index+j]); 
+      }   
+   }
 #endif
+
+   /*-----------------------------------------------------------
+    *  We need to sort the send procs and send elements (to produce
+    *  the same result as with the standard comm package)
+    *   11/07
+    *-----------------------------------------------------------*/
+   
+   {
+      
+      int *orig_order;
+      int *orig_send_map_starts;
+      int *orig_send_elements;
+      int  ct, sz, pos;
+      
+      orig_order = hypre_CTAlloc(int, num_sends);
+      orig_send_map_starts = hypre_CTAlloc(int, num_sends+1);
+      orig_send_elements = hypre_CTAlloc(int, send_proc_obj.vec_starts[num_sends]);
+      
+      orig_send_map_starts[0] = 0;
+      /* copy send map starts and elements */ 
+      for (i=0; i< num_sends; i++)
+      {
+         orig_order[i] = i;
+         orig_send_map_starts[i+1] = send_proc_obj.vec_starts[i+1];
+      }
+      for (i=0; i< send_proc_obj.vec_starts[num_sends]; i++)
+      {
+         orig_send_elements[i] = send_proc_obj.elements[i];
+      }
+      /* sort processor ids - keep track of original order */
+      hypre_qsort2i( send_proc_obj.id, orig_order, 0, num_sends-1 );
+      
+      /* now rearrange vec starts and send elements to correspond to proc ids */ 
+      ct = 0;
+      for (i=0; i< num_sends; i++)
+      {
+         pos = orig_order[i];
+         sz = orig_send_map_starts[pos + 1] - orig_send_map_starts[pos];
+         send_proc_obj.vec_starts[i+1] =  ct + sz;
+         for (j = 0; j< sz; j++)
+         {
+            send_proc_obj.elements[ct +j] = orig_send_elements[orig_send_map_starts[pos]+j];
+         }
+         ct += sz;
+      }
+      /* clean up */
+      hypre_TFree(orig_order);
+      hypre_TFree(orig_send_elements);
+      hypre_TFree(orig_send_map_starts);
+   }
+      
 
    /*-----------------------------------------------------------
     *  Return output info for setting up the comm package
     *-----------------------------------------------------------*/
-
+   
 
    *p_num_recvs = num_recvs;
    *p_recv_procs = recv_procs;
