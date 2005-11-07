@@ -15,7 +15,7 @@
 #ifdef MLI_SUPERLU
 
 #include <string.h>
-#include <malloc.h>
+#include <stdlib.h>
 #include <assert.h>
 #include "mli_solver_seqsuperlu.h"
 #include "HYPRE.h"
