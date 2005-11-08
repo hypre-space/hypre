@@ -305,7 +305,7 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
                          min row sum or min num entries */
        {
           min_entries = 1000000;
-          min_rowsum =  1.0e10;
+          min_rowsum =  1.0e7;
        }
        
        send_buff[0] = - (double) min_entries;
@@ -340,9 +340,9 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
 
        if (my_id == 0)
        {
-          global_min_e = 1000;
+          global_min_e = 1000000;
           global_max_e = 0;
-          global_min_rsum = 1000.0;
+          global_min_rsum = 1.0e7;
           global_max_rsum = 0.0;
           for (j = 0; j < num_procs; j++)
           {
@@ -471,8 +471,8 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
                        min row sum or min num entries */
       {
          min_entries = 1000000;
-         min_rowsum =  1.0e10;
-         min_weight = 1.0e10;
+         min_rowsum =  1.0e7;
+         min_weight = 1.0e7;
        }
        
       send_buff[0] = - (double) min_entries;
@@ -514,11 +514,11 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
       
       if (my_id == 0)
       {
-         global_min_e = 1000;
+         global_min_e = 1000000;
          global_max_e = 0;
-         global_min_rsum = 1000.0;
+         global_min_rsum = 1.0e7;
          global_max_rsum = 0.0;
-         global_min_wt = 1000.0;
+         global_min_wt = 1.0e7;
          global_max_wt = 0.0;
          
          for (j = 0; j < num_procs; j++)
