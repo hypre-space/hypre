@@ -8,8 +8,7 @@ if test -x config/configure.in ; then
 else
   ln -s config/configure.in .
 fi
-rm -rf INSTALL aclocal.m4 configure autom4te.cache config/acinclude.m4
-cp /usr/apps/autoconf/2.59/share/autoconf/INSTALL INSTALL
+rm -rf aclocal.m4 configure autom4te.cache config/acinclude.m4
 
 aclocal -I config
 autoconf --include=config
