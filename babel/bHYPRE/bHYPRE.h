@@ -61,6 +61,9 @@
 #ifndef included_bHYPRE_ProblemDefinition_h
 #include "bHYPRE_ProblemDefinition.h"
 #endif
+#ifndef included_bHYPRE_SStructDiagScale_h
+#include "bHYPRE_SStructDiagScale.h"
+#endif
 #ifndef included_bHYPRE_SStructGraph_h
 #include "bHYPRE_SStructGraph.h"
 #endif

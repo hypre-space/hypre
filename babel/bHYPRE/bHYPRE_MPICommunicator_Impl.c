@@ -144,7 +144,7 @@ impl_bHYPRE_MPICommunicator_CreateF(
   /* Insert-Code-Here {bHYPRE.MPICommunicator.CreateF} (CreateF method) */
 
    ptrdiff_t mpi_int = (ptrdiff_t) mpi_comm;   /* void* to integer of same length */
-   MPI_Fint mpi_Fint = mpi_int;    /* pointer-length integer to MPI handle-length */
+   /* not used MPI_Fint mpi_Fint = mpi_int;*/    /* pointer-length integer to MPI handle-length */
    MPI_Comm mpicomm_C = MPI_Comm_f2c( mpi_int );
    /* ... convert the MPI communicator from Fortran form (an integer handle)
       to C form (MPI_Comm).

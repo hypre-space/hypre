@@ -98,6 +98,12 @@ impl_bHYPRE_IdentitySolver__dtor(
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.IdentitySolver._dtor) */
   /* Insert the implementation of the destructor method here... */
+
+
+   struct bHYPRE_IdentitySolver__data * data =
+      bHYPRE_IdentitySolver__get_data( self );
+   hypre_TFree( data );
+
   /* DO-NOT-DELETE splicer.end(bHYPRE.IdentitySolver._dtor) */
 }
 
@@ -389,13 +395,18 @@ impl_bHYPRE_IdentitySolver_Setup(
       bHYPRE_Vector_deleteRef( b );  /* extra ref created by queryInt */
       data -> vector_type = "StructVector";
    }
+   else if ( bHYPRE_Vector_queryInt( b, "bHYPRE.SStructVector") )
+   {
+      bHYPRE_Vector_deleteRef( b );  /* extra ref created by queryInt */
+      data -> vector_type = "SStructVector";
+   }
    else
    {
       ++ierr;
       hypre_assert( "IdentitySolver recognizes only IJParCSRVector and StructVector"==0 );
    }
 
-   bHYPRE_PCG__set_data( self, data );
+   bHYPRE_IdentitySolver__set_data( self, data );
 
    return ierr;
   /* DO-NOT-DELETE splicer.end(bHYPRE.IdentitySolver.Setup) */

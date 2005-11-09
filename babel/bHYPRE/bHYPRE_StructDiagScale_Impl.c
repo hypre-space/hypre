@@ -128,7 +128,8 @@ impl_bHYPRE_StructDiagScale_Create(
   /* Insert-Code-Here {bHYPRE.StructDiagScale.Create} (Create method) */
 
    bHYPRE_StructDiagScale solver = bHYPRE_StructDiagScale__create();
-   struct bHYPRE_StructDiagScale__data * data = bHYPRE_StructDiagScale__get_data( solver );
+   struct bHYPRE_StructDiagScale__data * data =
+      bHYPRE_StructDiagScale__get_data( solver );
 
    data->comm = bHYPRE_MPICommunicator__get_data(mpi_comm)->mpi_comm;
 
@@ -445,7 +446,7 @@ impl_bHYPRE_StructDiagScale_Apply(
 
    int ierr = 0;
    MPI_Comm comm;
-   HYPRE_StructSolver HSSdummy; /* requires arg, not used */
+   HYPRE_StructSolver HSSdummy; /* required arg, not used */
    struct bHYPRE_StructDiagScale__data * data;
    bHYPRE_Operator mat;
    bHYPRE_StructMatrix bA;
@@ -454,7 +455,6 @@ impl_bHYPRE_StructDiagScale_Apply(
    HYPRE_StructVector Hb, Hx;
    struct bHYPRE_StructMatrix__data * dataA;
    struct bHYPRE_StructVector__data * datab, * datax;
-   void * objectA, * objectb, * objectx;
 
    data = bHYPRE_StructDiagScale__get_data( self );
    comm = data->comm;

@@ -116,6 +116,18 @@ bHYPRE_Pilut_Impl.h: bHYPRE_Vector.h
 bHYPRE_Pilut_Impl.h: sidl_BaseInterface.h
 bHYPRE_Pilut_Impl.h: sidl_BaseClass.h
 
+bHYPRE_SStructDiagScale_Impl.h:                                               \
+  /home/painter/linear_solvers/babel/Interfaces.idl
+bHYPRE_SStructDiagScale_Impl.h: sidl_header.h
+bHYPRE_SStructDiagScale_Impl.h: bHYPRE_Solver.h
+bHYPRE_SStructDiagScale_Impl.h: bHYPRE_MPICommunicator.h
+bHYPRE_SStructDiagScale_Impl.h: bHYPRE_Operator.h
+bHYPRE_SStructDiagScale_Impl.h: sidl_ClassInfo.h
+bHYPRE_SStructDiagScale_Impl.h: bHYPRE_Vector.h
+bHYPRE_SStructDiagScale_Impl.h: sidl_BaseInterface.h
+bHYPRE_SStructDiagScale_Impl.h: bHYPRE_SStructDiagScale.h
+bHYPRE_SStructDiagScale_Impl.h: sidl_BaseClass.h
+
 bHYPRE_SStructGraph_Impl.h: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_SStructGraph_Impl.h: sidl_header.h
 bHYPRE_SStructGraph_Impl.h: bHYPRE_SStructGrid.h
@@ -317,6 +329,10 @@ bHYPRE_ParaSails_Impl.c: bHYPRE_ParaSails_Impl.h
 bHYPRE_Pilut_Impl.c: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_Pilut_Impl.c: bHYPRE_Pilut_Impl.h
 
+bHYPRE_SStructDiagScale_Impl.c:                                               \
+  /home/painter/linear_solvers/babel/Interfaces.idl
+bHYPRE_SStructDiagScale_Impl.c: bHYPRE_SStructDiagScale_Impl.h
+
 bHYPRE_SStructGraph_Impl.c: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_SStructGraph_Impl.c: bHYPRE_SStructGraph_Impl.h
 
@@ -433,6 +449,7 @@ bHYPRE_IOR.h: bHYPRE_ParaSails_IOR.h
 bHYPRE_IOR.h: bHYPRE_Pilut_IOR.h
 bHYPRE_IOR.h: bHYPRE_PreconditionedSolver_IOR.h
 bHYPRE_IOR.h: bHYPRE_ProblemDefinition_IOR.h
+bHYPRE_IOR.h: bHYPRE_SStructDiagScale_IOR.h
 bHYPRE_IOR.h: bHYPRE_SStructGraph_IOR.h
 bHYPRE_IOR.h: bHYPRE_SStructGrid_IOR.h
 bHYPRE_IOR.h: bHYPRE_SStructMatrix_IOR.h
@@ -518,6 +535,13 @@ bHYPRE_ProblemDefinition_IOR.h:                                               \
 bHYPRE_ProblemDefinition_IOR.h: sidl_header.h
 bHYPRE_ProblemDefinition_IOR.h: bHYPRE_ProblemDefinition_IOR.h
 bHYPRE_ProblemDefinition_IOR.h: sidl_BaseInterface_IOR.h
+
+bHYPRE_SStructDiagScale_IOR.h:                                                \
+  /home/painter/linear_solvers/babel/Interfaces.idl
+bHYPRE_SStructDiagScale_IOR.h: sidl_header.h
+bHYPRE_SStructDiagScale_IOR.h: bHYPRE_Operator_IOR.h
+bHYPRE_SStructDiagScale_IOR.h: bHYPRE_Solver_IOR.h
+bHYPRE_SStructDiagScale_IOR.h: sidl_BaseClass_IOR.h
 
 bHYPRE_SStructGraph_IOR.h: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_SStructGraph_IOR.h: sidl_header.h
@@ -745,6 +769,14 @@ bHYPRE_Pilut_IOR.c: sidl_BaseClass.h
 bHYPRE_Pilut_IOR.c: sidl_ClassInfo.h
 bHYPRE_Pilut_IOR.c: sidl_ClassInfoI.h
 
+bHYPRE_SStructDiagScale_IOR.c:                                                \
+  /home/painter/linear_solvers/babel/Interfaces.idl
+bHYPRE_SStructDiagScale_IOR.c: bHYPRE_SStructDiagScale_IOR.h
+bHYPRE_SStructDiagScale_IOR.c: sidl_BaseClass_Impl.h
+bHYPRE_SStructDiagScale_IOR.c: sidl_BaseClass.h
+bHYPRE_SStructDiagScale_IOR.c: sidl_ClassInfo.h
+bHYPRE_SStructDiagScale_IOR.c: sidl_ClassInfoI.h
+
 bHYPRE_SStructGraph_IOR.c: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_SStructGraph_IOR.c: bHYPRE_SStructGraph_IOR.h
 bHYPRE_SStructGraph_IOR.c: sidl_BaseClass_Impl.h
@@ -893,6 +925,11 @@ bHYPRE_Pilut_Skel.c: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_Pilut_Skel.c: bHYPRE_Pilut_IOR.h
 bHYPRE_Pilut_Skel.c: bHYPRE_Pilut.h
 
+bHYPRE_SStructDiagScale_Skel.c:                                               \
+  /home/painter/linear_solvers/babel/Interfaces.idl
+bHYPRE_SStructDiagScale_Skel.c: bHYPRE_SStructDiagScale_IOR.h
+bHYPRE_SStructDiagScale_Skel.c: bHYPRE_SStructDiagScale.h
+
 bHYPRE_SStructGraph_Skel.c: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_SStructGraph_Skel.c: bHYPRE_SStructGraph_IOR.h
 bHYPRE_SStructGraph_Skel.c: bHYPRE_SStructGraph.h
@@ -973,6 +1010,7 @@ bHYPRE.h: bHYPRE_ParaSails.h
 bHYPRE.h: bHYPRE_Pilut.h
 bHYPRE.h: bHYPRE_PreconditionedSolver.h
 bHYPRE.h: bHYPRE_ProblemDefinition.h
+bHYPRE.h: bHYPRE_SStructDiagScale.h
 bHYPRE.h: bHYPRE_SStructGraph.h
 bHYPRE.h: bHYPRE_SStructGrid.h
 bHYPRE.h: bHYPRE_SStructMatrix.h
@@ -1152,6 +1190,16 @@ bHYPRE_ProblemDefinition.h: sidl_BaseInterface.h
 bHYPRE_ProblemDefinition.h: sidl_ClassInfo.h
 bHYPRE_ProblemDefinition.h: sidl_io_Serializer.h
 bHYPRE_ProblemDefinition.h: sidl_io_Deserializer.h
+
+bHYPRE_SStructDiagScale.h: /home/painter/linear_solvers/babel/Interfaces.idl
+bHYPRE_SStructDiagScale.h: sidl_header.h
+bHYPRE_SStructDiagScale.h: bHYPRE_MPICommunicator.h
+bHYPRE_SStructDiagScale.h: bHYPRE_Operator.h
+bHYPRE_SStructDiagScale.h: bHYPRE_Vector.h
+bHYPRE_SStructDiagScale.h: sidl_BaseInterface.h
+bHYPRE_SStructDiagScale.h: sidl_ClassInfo.h
+bHYPRE_SStructDiagScale.h: sidl_io_Serializer.h
+bHYPRE_SStructDiagScale.h: sidl_io_Deserializer.h
 
 bHYPRE_SStructGraph.h: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_SStructGraph.h: sidl_header.h
@@ -1536,6 +1584,18 @@ bHYPRE_ProblemDefinition_Stub.c: sidl_rmi_InstanceHandle.h
 bHYPRE_ProblemDefinition_Stub.c: sidl_rmi_ConnectRegistry.h
 bHYPRE_ProblemDefinition_Stub.c: sidl_interface_IOR.h
 bHYPRE_ProblemDefinition_Stub.c: sidl_BaseInterface_IOR.h
+
+bHYPRE_SStructDiagScale_Stub.c:                                               \
+  /home/painter/linear_solvers/babel/Interfaces.idl
+bHYPRE_SStructDiagScale_Stub.c: bHYPRE_SStructDiagScale.h
+bHYPRE_SStructDiagScale_Stub.c: bHYPRE_SStructDiagScale_IOR.h
+bHYPRE_SStructDiagScale_Stub.c: sidl_interface_IOR.h
+bHYPRE_SStructDiagScale_Stub.c: sidl_rmi_InstanceHandle.h
+bHYPRE_SStructDiagScale_Stub.c: sidl_rmi_ConnectRegistry.h
+bHYPRE_SStructDiagScale_Stub.c: sidl_interface_IOR.h
+bHYPRE_SStructDiagScale_Stub.c: sidl_BaseInterface_IOR.h
+bHYPRE_SStructDiagScale_Stub.c: sidl_BaseClass.h
+bHYPRE_SStructDiagScale_Stub.c: sidl_ClassInfo.h
 
 bHYPRE_SStructGraph_Stub.c: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_SStructGraph_Stub.c: bHYPRE_SStructGraph.h
