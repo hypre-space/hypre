@@ -1342,6 +1342,11 @@ package bHYPRE version 1.0.0
       static StructDiagScale Create( in MPICommunicator mpi_comm );
    }
 
+   class SStructDiagScale implements-all Solver
+   {
+      static SStructDiagScale Create( in MPICommunicator mpi_comm );
+   }
+
    /**
     * Algebraic multigrid solver, based on classical Ruge-Stueben.
     *

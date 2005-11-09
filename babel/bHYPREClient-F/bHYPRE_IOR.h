@@ -71,6 +71,9 @@
 #ifndef included_bHYPRE_ProblemDefinition_IOR_h
 #include "bHYPRE_ProblemDefinition_IOR.h"
 #endif
+#ifndef included_bHYPRE_SStructDiagScale_IOR_h
+#include "bHYPRE_SStructDiagScale_IOR.h"
+#endif
 #ifndef included_bHYPRE_SStructGraph_IOR_h
 #include "bHYPRE_SStructGraph_IOR.h"
 #endif
