@@ -3,8 +3,6 @@
 #include <math.h>
 
 #include "utilities.h"
-#include "HYPRE_sstruct_ls.h"
-#include "krylov.h"
 #include "sstruct_mv.h"
  
 #include "bHYPRE_SStructMatrix.h"
@@ -25,6 +23,9 @@
 #include "bHYPRE_StructVector.h"
 #include "bHYPRE_IJParCSRMatrix.h"
 #include "bHYPRE_IJParCSRVector.h"
+#include "bHYPRE_SStructVariable.h"
+#include "bHYPRE_SStructDiagScale.h"
+#include "bHYPRE_IdentitySolver.h"
 
 #define DEBUG 0
 #define DO_THIS_LATER 0
@@ -100,12 +101,12 @@ typedef struct
 
    /* for GridSetVariables */
    int                    nvars;
-   HYPRE_SStructVariable *vartypes;
+   enum bHYPRE_SStructVariable__enum *vartypes;
 
    /* for GridAddVariables */
    int                    add_nvars;
    ProblemIndex          *add_indexes;
-   HYPRE_SStructVariable *add_vartypes;
+   enum bHYPRE_SStructVariable__enum *add_vartypes;
 
    /* for GridSetNeighborBox */
    int                    glue_nboxes;
@@ -186,7 +187,7 @@ GetVariableBox( Index  cell_ilower,
                 Index  var_iupper )
 {
    int ierr = 0;
-   HYPRE_SStructVariable  vartype = (HYPRE_SStructVariable) int_vartype;
+   enum bHYPRE_SStructVariable__enum vartype = (enum bHYPRE_SStructVariable__enum) int_vartype;
 
    var_ilower[0] = cell_ilower[0];
    var_ilower[1] = cell_ilower[1];
@@ -463,7 +464,7 @@ ReadData( char         *filename,
             part = strtol(sdata_ptr, &sdata_ptr, 10);
             pdata = data.pdata[part];
             pdata.nvars = strtol(sdata_ptr, &sdata_ptr, 10);
-            pdata.vartypes = hypre_CTAlloc(HYPRE_SStructVariable, pdata.nvars);
+            pdata.vartypes = hypre_CTAlloc(enum bHYPRE_SStructVariable__enum, pdata.nvars);
             SScanIntArray(sdata_ptr, &sdata_ptr,
                           pdata.nvars, (int *) pdata.vartypes);
             data.pdata[part] = pdata;
@@ -1405,6 +1406,7 @@ PrintUsage( char *progname,
       printf("                        247- Struct BiCGSTAB with 2-step Jacobi\n");
       printf("                        248- Struct BiCGSTAB with diagonal scaling\n");
       printf("                        249- Struct BiCGSTAB\n");
+      printf(">>> The only implemented solvers are 18,19, 40 and 200.<<<\n");
       printf("  -print             : print out the system\n");
       printf("  -rhsfromcosine     : solution is cosine function (default)\n");
       printf("  -rhsone            : rhs is vector with unit components\n");
@@ -1475,8 +1477,11 @@ main( int   argc,
    bHYPRE_Solver          b_precond;
 
    bHYPRE_StructSMG       b_solver_SMG;
+   bHYPRE_PCG             b_solver_PCG;
    bHYPRE_GMRES           b_solver_GMRES;
    bHYPRE_BoomerAMG       b_boomeramg;
+   bHYPRE_SStructDiagScale solver_DS;
+   bHYPRE_IdentitySolver  solver_Id;
 
    bHYPRE_StructMatrix    b_sA;
    bHYPRE_StructVector    b_sb;
@@ -1699,6 +1704,8 @@ main( int   argc,
       else if ( strcmp(argv[arg_index], "-help") == 0 )
       {
          PrintUsage(argv[0], myid);
+         bHYPRE_MPICommunicator_deleteRef( bmpicomm );
+         MPI_Finalize();
          exit(1);
          break;
       }
@@ -1728,10 +1735,22 @@ main( int   argc,
     *-----------------------------------------------------------*/
    if (solver_id >= 200)
    {
+      if ( nparts>1 )
+      {
+         printf(
+            "Error: Invalid number of parts %i for Struct solvers\n",
+            nparts );
+      }
       pdata = data.pdata[0];
+      if ( pdata.nvars>1 )
+      {
+         printf(
+            "Error: Invalid nvars %i for Struct solvers\n",
+            pdata.nvars );
+      }
       if (nparts > 1 || pdata.nvars > 1)
       {
-         printf("Error: Invalid number of parts or nvars for Struct Solver \n");
+         printf( "Try a different file with your -in parameter.\n" );
          exit(1);
       }
    }
@@ -2038,12 +2057,16 @@ main( int   argc,
       bHYPRE_SStructParCSRMatrix_GetObject( b_spA, &b_BI );
       b_pA = bHYPRE_IJParCSRMatrix__cast( b_BI );
    }
-   else
+   else if ( object_type == HYPRE_STRUCT )
    {
       bHYPRE_SStructMatrix_Assemble( b_A );
 
       bHYPRE_SStructMatrix_GetObject( b_A, &b_BI );
       b_sA = bHYPRE_StructMatrix__cast( b_BI );
+   }
+   else if ( object_type == HYPRE_SSTRUCT )
+   {
+      bHYPRE_SStructMatrix_Assemble( b_A );
    }
 
    /*-----------------------------------------------------------
@@ -2106,12 +2129,16 @@ main( int   argc,
       bHYPRE_SStructParCSRVector_GetObject( b_spb, &b_BI );
       b_pb = bHYPRE_IJParCSRVector__cast( b_BI );
    }
-   else
+   else if ( object_type == HYPRE_STRUCT )
    {
       bHYPRE_SStructVector_Assemble( b_b );
 
       bHYPRE_SStructVector_GetObject( b_b, &b_BI );
       b_sb = bHYPRE_StructVector__cast( b_BI );
+   }
+   else if ( object_type == HYPRE_SSTRUCT )
+   {
+      bHYPRE_SStructVector_Assemble( b_b );
    }
 
    /************* x ***************/
@@ -2166,12 +2193,16 @@ main( int   argc,
       bHYPRE_SStructParCSRVector_GetObject( b_spx, &b_BI );
       b_px = bHYPRE_IJParCSRVector__cast( b_BI );
    }
-   else
+   else if ( object_type == HYPRE_STRUCT )
    {
       bHYPRE_SStructVector_Assemble( b_x );
 
       bHYPRE_SStructVector_GetObject( b_x, &b_BI );
       b_sx = bHYPRE_StructVector__cast( b_BI );
+   }
+   else if ( object_type == HYPRE_SSTRUCT )
+   {
+      bHYPRE_SStructVector_Assemble( b_x );
    }
 
    hypre_EndTiming(time_index);
@@ -2350,8 +2381,8 @@ main( int   argc,
       /* re-initializes x to 0 */
       hypre_SStructAxpy(-1.0, b, x);
    }
-#endif
-#endif
+#endif /* DEBUG */
+#endif /* DO_THIS_LATER */
 
    hypre_TFree(values);
 
@@ -2399,27 +2430,35 @@ main( int   argc,
                                            solver, &final_res_norm);
       HYPRE_SStructSysPFMGDestroy(solver);
    }
-#endif
+#endif /* DO_THIS_LATER */
 
    /*-----------------------------------------------------------
     * Solve the system using PCG
     *-----------------------------------------------------------*/
 
-#if DO_THIS_LATER
    if ((solver_id >= 10) && (solver_id < 20))
    {
       time_index = hypre_InitializeTiming("PCG Setup");
       hypre_BeginTiming(time_index);
 
-      HYPRE_SStructPCGCreate(MPI_COMM_WORLD, &solver);
-      HYPRE_PCGSetMaxIter( (HYPRE_Solver) solver, 100 );
-      HYPRE_PCGSetTol( (HYPRE_Solver) solver, 1.0e-06 );
-      HYPRE_PCGSetTwoNorm( (HYPRE_Solver) solver, 1 );
-      HYPRE_PCGSetRelChange( (HYPRE_Solver) solver, 0 );
-      HYPRE_PCGSetPrintLevel( (HYPRE_Solver) solver, 1 );
+      b_solver_PCG = bHYPRE_PCG_Create( bmpicomm );
+      ierr += bHYPRE_PCG_SetIntParameter( b_solver_PCG, "MaxIter", 100 );
+      ierr += bHYPRE_PCG_SetDoubleParameter( b_solver_PCG, "Tolerance", 1.0e-06 );
+      ierr += bHYPRE_PCG_SetIntParameter( b_solver_PCG, "TwoNorm", 1 );
+      ierr += bHYPRE_PCG_SetIntParameter( b_solver_PCG, "RelChange", 0 );
+      ierr += bHYPRE_PCG_SetIntParameter( b_solver_PCG, "PrintLevel", 1 );
+      hypre_assert( ierr==0 );
+
+      b_A_O = bHYPRE_Operator__cast( b_A );
+      ierr += bHYPRE_PCG_SetOperator( b_solver_PCG, b_A_O );
+
+      bV_b = bHYPRE_Vector__cast( b_b );
+      bV_x = bHYPRE_Vector__cast( b_x );
 
       if ((solver_id == 10) || (solver_id == 11))
       {
+         hypre_assert( "solvers 10,11 not implemented"==0 );
+#if DO_THIS_LATER
          /* use Split solver as preconditioner */
          HYPRE_SStructSplitCreate(MPI_COMM_WORLD, &precond);
          HYPRE_SStructSplitSetMaxIter(precond, 1);
@@ -2437,10 +2476,13 @@ main( int   argc,
                               (HYPRE_PtrToSolverFcn) HYPRE_SStructSplitSolve,
                               (HYPRE_PtrToSolverFcn) HYPRE_SStructSplitSetup,
                               (HYPRE_Solver) precond);
+#endif /* DO_THIS_LATER */
       }
 
       else if (solver_id == 13)
       {
+         hypre_assert( "solver 13 not implemented"==0 );
+#if DO_THIS_LATER
          /* use SysPFMG solver as preconditioner */
          HYPRE_SStructSysPFMGCreate(MPI_COMM_WORLD, &precond);
          HYPRE_SStructSysPFMGSetMaxIter(precond, 1);
@@ -2457,19 +2499,33 @@ main( int   argc,
                               (HYPRE_PtrToSolverFcn) HYPRE_SStructSysPFMGSetup,
                               (HYPRE_Solver) precond);
 
+#endif /* DO_THIS_LATER */
       }
       else if (solver_id == 18)
       {
          /* use diagonal scaling as preconditioner */
-         precond = NULL;
-         HYPRE_PCGSetPrecond( (HYPRE_Solver) solver,
-                              (HYPRE_PtrToSolverFcn) HYPRE_SStructDiagScale,
-                              (HYPRE_PtrToSolverFcn) HYPRE_SStructDiagScaleSetup,
-                              (HYPRE_Solver) precond);
+         solver_DS = bHYPRE_SStructDiagScale_Create( bmpicomm );
+         ierr += bHYPRE_SStructDiagScale_SetOperator( solver_DS, b_A_O );
+         ierr += bHYPRE_SStructDiagScale_Setup( solver_DS, bV_b, bV_x );
+         b_precond = (bHYPRE_Solver) bHYPRE_SStructDiagScale__cast2
+            ( solver_DS, "bHYPRE.Solver" ); 
+         ierr += bHYPRE_PCG_SetPreconditioner( b_solver_PCG, b_precond );
+         hypre_assert( ierr==0 );
       }
+      else if (solver_id == 19)
+      {
+         /* no preconditioner */
+         solver_Id = bHYPRE_IdentitySolver_Create( bmpicomm );
+         ierr += bHYPRE_IdentitySolver_Setup( solver_Id, bV_b, bV_x );
+         b_precond = (bHYPRE_Solver) bHYPRE_SStructDiagScale__cast2
+            ( solver_Id, "bHYPRE.Solver" ); 
+         ierr += bHYPRE_PCG_SetPreconditioner( b_solver_PCG, b_precond );
+         hypre_assert( ierr==0 );
+      }
+      else
+         hypre_assert( "unknown solver"==0 );
 
-      HYPRE_PCGSetup( (HYPRE_Solver) solver, (HYPRE_Matrix) A,
-                      (HYPRE_Vector) b, (HYPRE_Vector) x);
+      ierr += bHYPRE_PCG_Setup( b_solver_PCG, bV_b, bV_x );
 
       hypre_EndTiming(time_index);
       hypre_PrintTiming("Setup phase times", MPI_COMM_WORLD);
@@ -2479,28 +2535,36 @@ main( int   argc,
       time_index = hypre_InitializeTiming("PCG Solve");
       hypre_BeginTiming(time_index);
 
-      HYPRE_PCGSolve( (HYPRE_Solver) solver, (HYPRE_Matrix) A,
-                      (HYPRE_Vector) b, (HYPRE_Vector) x);
+      ierr += bHYPRE_PCG_Apply( b_solver_PCG, bV_b, &bV_x );
 
       hypre_EndTiming(time_index);
       hypre_PrintTiming("Solve phase times", MPI_COMM_WORLD);
       hypre_FinalizeTiming(time_index);
       hypre_ClearTiming();
 
-      HYPRE_PCGGetNumIterations( (HYPRE_Solver) solver, &num_iterations );
-      HYPRE_PCGGetFinalRelativeResidualNorm( (HYPRE_Solver) solver, &final_res_norm );
-      HYPRE_SStructPCGDestroy(solver);
+      ierr += bHYPRE_PCG_GetIntValue( b_solver_PCG, "NumIterations", &num_iterations );
+      ierr += bHYPRE_PCG_GetDoubleValue( b_solver_PCG, "RelResidualNorm", &final_res_norm );
 
       if ((solver_id == 10) || (solver_id == 11))
       {
-         HYPRE_SStructSplitDestroy(precond);
+         /*HYPRE_SStructSplitDestroy(precond);*/
       }
       else if (solver_id == 13)
       {
-         HYPRE_SStructSysPFMGDestroy(precond);
+         /*HYPRE_SStructSysPFMGDestroy(precond);*/
       }
+      else if (solver_id == 18)
+      {
+         bHYPRE_SStructDiagScale_deleteRef( solver_DS );
+      }
+      else if (solver_id == 19)
+      {
+         bHYPRE_IdentitySolver_deleteRef( solver_Id );
+      }
+
+      bHYPRE_PCG_deleteRef( b_solver_PCG );
+
    }
-#endif
 
    /*-----------------------------------------------------------
     * Solve the system using ParCSR version of PCG
@@ -2586,7 +2650,7 @@ main( int   argc,
          HYPRE_ParCSRParaSailsDestroy(par_precond);
       }
    }
-#endif
+#endif /* DO_THIS_LATER */
 
    /*-----------------------------------------------------------
     * Solve the system using GMRES  (struct matrix and vector type)
@@ -2664,7 +2728,7 @@ main( int   argc,
          HYPRE_SStructSplitDestroy(precond);
       }
    }
-#endif
+#endif /* DO_THIS_LATER */
 
    /*-----------------------------------------------------------
     * Solve the system using ParCSR version of GMRES
@@ -2730,7 +2794,7 @@ main( int   argc,
                                 (HYPRE_PtrToSolverFcn) HYPRE_ParCSRParaSailsSetup,
                                 par_precond);
       }
-#endif
+#endif /* DO_THIS_LATER */
 
       bV_b = bHYPRE_Vector__cast( b_pb );
       bV_x = bHYPRE_Vector__cast( b_px );
@@ -2767,7 +2831,7 @@ main( int   argc,
       {
          HYPRE_ParCSRParaSailsDestroy(par_precond);
       }
-#endif
+#endif /* DO_THIS_LATER */
 
       bHYPRE_GMRES_deleteRef( b_solver_GMRES );
    }
@@ -2847,7 +2911,7 @@ main( int   argc,
          HYPRE_SStructSplitDestroy(precond);
       }
    }
-#endif
+#endif /* DO_THIS_LATER */
 
    /*-----------------------------------------------------------
     * Solve the system using ParCSR version of BiCGSTAB
@@ -2941,7 +3005,7 @@ main( int   argc,
          HYPRE_ParCSRParaSailsDestroy(par_precond);
       }
    }
-#endif
+#endif /* DO_THIS_LATER */
 
    /*-----------------------------------------------------------
     * Solve the system using ParCSR hybrid DSCG/BoomerAMG
@@ -2982,7 +3046,7 @@ main( int   argc,
 
       HYPRE_ParCSRHybridDestroy(par_solver);
    }
-#endif
+#endif /* DO_THIS_LATER */
 
    /*-----------------------------------------------------------
     * Solve the system using Struct solvers
@@ -3111,7 +3175,7 @@ main( int   argc,
                                                         &final_res_norm);
       HYPRE_StructSparseMSGDestroy(struct_solver);
    }
-#endif
+#endif /* DO_THIS_LATER */
 
    /*-----------------------------------------------------------
     * Solve the system using CG
@@ -3211,7 +3275,7 @@ main( int   argc,
          }
 #else
          struct_precond = NULL;
-#endif
+#endif /* HYPRE_USE_PTHREADS */
          HYPRE_PCGSetPrecond( (HYPRE_Solver) struct_solver,
                               (HYPRE_PtrToSolverFcn) HYPRE_StructDiagScale,
                               (HYPRE_PtrToSolverFcn) HYPRE_StructDiagScaleSetup,
@@ -3260,7 +3324,7 @@ main( int   argc,
          HYPRE_StructJacobiDestroy(struct_precond);
       }
    }
-#endif
+#endif /* DO_THIS_LATER */
 
    /*-----------------------------------------------------------
     * Solve the system using Hybrid
@@ -3381,7 +3445,7 @@ main( int   argc,
          HYPRE_StructSparseMSGDestroy(struct_precond);
       }
    }
-#endif
+#endif /* DO_THIS_LATER */
 
    /*-----------------------------------------------------------
     * Solve the system using GMRES
@@ -3480,7 +3544,7 @@ main( int   argc,
          }
 #else
          struct_precond = NULL;
-#endif
+#endif /* HYPRE_USE_PTHREADS */
          HYPRE_GMRESSetPrecond( (HYPRE_Solver)struct_solver,
                                 (HYPRE_PtrToSolverFcn) HYPRE_StructDiagScale,
                                 (HYPRE_PtrToSolverFcn) HYPRE_StructDiagScaleSetup,
@@ -3529,7 +3593,7 @@ main( int   argc,
          HYPRE_StructJacobiDestroy(struct_precond);
       }
    }
-#endif
+#endif /* DO_THIS_LATER */
 
    /*-----------------------------------------------------------
     * Solve the system using BiCGTAB
@@ -3628,7 +3692,7 @@ main( int   argc,
          }
 #else
          struct_precond = NULL;
-#endif
+#endif /* HYPRE_USE_PTHREADS */
          HYPRE_BiCGSTABSetPrecond( (HYPRE_Solver)struct_solver,
                                 (HYPRE_PtrToSolverFcn) HYPRE_StructDiagScale,
                                 (HYPRE_PtrToSolverFcn) HYPRE_StructDiagScaleSetup,
@@ -3677,7 +3741,7 @@ main( int   argc,
          HYPRE_StructJacobiDestroy(struct_precond);
       }
    }
-#endif
+#endif /* DO_THIS_LATER */
 
    /*-----------------------------------------------------------
     * Gather the solution vector
@@ -3744,6 +3808,12 @@ main( int   argc,
       bHYPRE_StructVector_deleteRef( b_sb );
       bHYPRE_StructVector_deleteRef( b_sx );
    }
+   else if ( object_type == HYPRE_SSTRUCT )
+   {
+      bHYPRE_SStructMatrix_deleteRef( b_A );
+      bHYPRE_SStructVector_deleteRef( b_b );
+      bHYPRE_SStructVector_deleteRef( b_x );
+   }
 
    DestroyData(data);
 
@@ -3755,6 +3825,7 @@ main( int   argc,
    hypre_FinalizeMemoryDebug();
 
    /* Finalize MPI */
+   bHYPRE_MPICommunicator_deleteRef( bmpicomm );
    MPI_Finalize();
 
    return (0);

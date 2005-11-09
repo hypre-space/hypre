@@ -700,7 +700,7 @@ main( int   argc,
       printf("        2=DS-PCG             3=AMG-GMRES      \n");
       printf("        4=DS-GMRES           5*=AMG-CGNR       \n");     
       printf("        6*=DS-CGNR           7*=PILUT-GMRES    \n");     
-      printf("        8*=ParaSails-PCG     9*=AMG-BiCGSTAB   \n");
+      printf("        8=ParaSails-PCG     9*=AMG-BiCGSTAB   \n");
       printf("       10*=DS-BiCGSTAB      11*=PILUT-BiCGSTAB \n");
       printf("       12*=Schwarz-PCG      18=ParaSails-GMRES\n");     
       printf("       43*=Euclid-PCG       44*=Euclid-GMRES   \n");
@@ -747,6 +747,9 @@ main( int   argc,
       printf("\n");  
       printf("  -dbg <val>             : set debug flag\n");
       printf("       0=no debugging\n       1=internal timing\n       2=interpolation truncation\n       3=more detailed timing in coarsening routine\n");
+
+      bHYPRE_MPICommunicator_deleteRef( bmpicomm );
+      MPI_Finalize();
       exit(1);
    }
 
@@ -2366,6 +2369,7 @@ main( int   argc,
    if ( grid_relax_type )
       hypre_TFree( grid_relax_type );
 
+   bHYPRE_MPICommunicator_deleteRef( bmpicomm );
    MPI_Finalize();
 
    return (0);

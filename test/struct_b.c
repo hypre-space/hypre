@@ -306,6 +306,8 @@ main( int   argc,
       /* >>> TO DO SOON: solvers 18,19 <<< */
       printf("\n");
 
+      bHYPRE_MPICommunicator_deleteRef( bmpicomm );
+      MPI_Finalize();
       exit(1);
    }
 
@@ -1068,6 +1070,14 @@ main( int   argc,
          hypre_assert( "solver not implemented"==0 );
          /*bHYPRE_StructJacobi_destructor( solver_SJ );*/
       }
+      else if ( solver_id == 18 )
+      {
+         bHYPRE_StructDiagScale_deleteRef( solver_DS );
+      }
+      else if ( solver_id == 19 )
+      {
+         bHYPRE_IdentitySolver_deleteRef( solver_Id );
+      }
 
    }
 
@@ -1228,6 +1238,7 @@ main( int   argc,
    hypre_FinalizeMemoryDebug();
 
    /* Finalize MPI */
+   bHYPRE_MPICommunicator_deleteRef( bmpicomm );
    MPI_Finalize();
 
    return (0);
