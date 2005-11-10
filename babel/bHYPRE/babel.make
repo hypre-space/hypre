@@ -9,7 +9,7 @@ IMPLHDRS = bHYPRE_BoomerAMG_Impl.h bHYPRE_GMRES_Impl.h                        \
   bHYPRE_SStructVector_Impl.h bHYPRE_StructDiagScale_Impl.h                   \
   bHYPRE_StructGrid_Impl.h bHYPRE_StructMatrix_Impl.h                         \
   bHYPRE_StructPFMG_Impl.h bHYPRE_StructSMG_Impl.h                            \
-  bHYPRE_StructStencil_Impl.h bHYPRE_StructVector_Impl.h bHYPRE_nPCG_Impl.h
+  bHYPRE_StructStencil_Impl.h bHYPRE_StructVector_Impl.h
 IMPLSRCS = bHYPRE_BoomerAMG_Impl.c bHYPRE_GMRES_Impl.c                        \
   bHYPRE_IJParCSRMatrix_Impl.c bHYPRE_IJParCSRVector_Impl.c                   \
   bHYPRE_IdentitySolver_Impl.c bHYPRE_MPICommunicator_Impl.c                  \
@@ -21,7 +21,7 @@ IMPLSRCS = bHYPRE_BoomerAMG_Impl.c bHYPRE_GMRES_Impl.c                        \
   bHYPRE_SStructVector_Impl.c bHYPRE_StructDiagScale_Impl.c                   \
   bHYPRE_StructGrid_Impl.c bHYPRE_StructMatrix_Impl.c                         \
   bHYPRE_StructPFMG_Impl.c bHYPRE_StructSMG_Impl.c                            \
-  bHYPRE_StructStencil_Impl.c bHYPRE_StructVector_Impl.c bHYPRE_nPCG_Impl.c
+  bHYPRE_StructStencil_Impl.c bHYPRE_StructVector_Impl.c
 IORHDRS = bHYPRE_BoomerAMG_IOR.h bHYPRE_CoefficientAccess_IOR.h               \
   bHYPRE_GMRES_IOR.h bHYPRE_IJMatrixView_IOR.h bHYPRE_IJParCSRMatrix_IOR.h    \
   bHYPRE_IJParCSRVector_IOR.h bHYPRE_IJVectorView_IOR.h bHYPRE_IOR.h          \
@@ -38,8 +38,7 @@ IORHDRS = bHYPRE_BoomerAMG_IOR.h bHYPRE_CoefficientAccess_IOR.h               \
   bHYPRE_Solver_IOR.h bHYPRE_StructDiagScale_IOR.h bHYPRE_StructGrid_IOR.h    \
   bHYPRE_StructMatrixView_IOR.h bHYPRE_StructMatrix_IOR.h                     \
   bHYPRE_StructPFMG_IOR.h bHYPRE_StructSMG_IOR.h bHYPRE_StructStencil_IOR.h   \
-  bHYPRE_StructVectorView_IOR.h bHYPRE_StructVector_IOR.h bHYPRE_Vector_IOR.h \
-  bHYPRE_nPCG_IOR.h
+  bHYPRE_StructVectorView_IOR.h bHYPRE_StructVector_IOR.h bHYPRE_Vector_IOR.h
 IORSRCS = bHYPRE_BoomerAMG_IOR.c bHYPRE_GMRES_IOR.c                           \
   bHYPRE_IJParCSRMatrix_IOR.c bHYPRE_IJParCSRVector_IOR.c                     \
   bHYPRE_IdentitySolver_IOR.c bHYPRE_MPICommunicator_IOR.c bHYPRE_PCG_IOR.c   \
@@ -50,7 +49,7 @@ IORSRCS = bHYPRE_BoomerAMG_IOR.c bHYPRE_GMRES_IOR.c                           \
   bHYPRE_SStructStencil_IOR.c bHYPRE_SStructVector_IOR.c                      \
   bHYPRE_StructDiagScale_IOR.c bHYPRE_StructGrid_IOR.c                        \
   bHYPRE_StructMatrix_IOR.c bHYPRE_StructPFMG_IOR.c bHYPRE_StructSMG_IOR.c    \
-  bHYPRE_StructStencil_IOR.c bHYPRE_StructVector_IOR.c bHYPRE_nPCG_IOR.c
+  bHYPRE_StructStencil_IOR.c bHYPRE_StructVector_IOR.c
 SKELSRCS = bHYPRE_BoomerAMG_Skel.c bHYPRE_GMRES_Skel.c                        \
   bHYPRE_IJParCSRMatrix_Skel.c bHYPRE_IJParCSRVector_Skel.c                   \
   bHYPRE_IdentitySolver_Skel.c bHYPRE_MPICommunicator_Skel.c                  \
@@ -62,7 +61,7 @@ SKELSRCS = bHYPRE_BoomerAMG_Skel.c bHYPRE_GMRES_Skel.c                        \
   bHYPRE_SStructVector_Skel.c bHYPRE_StructDiagScale_Skel.c                   \
   bHYPRE_StructGrid_Skel.c bHYPRE_StructMatrix_Skel.c                         \
   bHYPRE_StructPFMG_Skel.c bHYPRE_StructSMG_Skel.c                            \
-  bHYPRE_StructStencil_Skel.c bHYPRE_StructVector_Skel.c bHYPRE_nPCG_Skel.c
+  bHYPRE_StructStencil_Skel.c bHYPRE_StructVector_Skel.c
 STUBHDRS = bHYPRE.h bHYPRE_BoomerAMG.h bHYPRE_CoefficientAccess.h             \
   bHYPRE_GMRES.h bHYPRE_IJMatrixView.h bHYPRE_IJParCSRMatrix.h                \
   bHYPRE_IJParCSRVector.h bHYPRE_IJVectorView.h bHYPRE_IdentitySolver.h       \
@@ -77,7 +76,7 @@ STUBHDRS = bHYPRE.h bHYPRE_BoomerAMG.h bHYPRE_CoefficientAccess.h             \
   bHYPRE_Solver.h bHYPRE_StructDiagScale.h bHYPRE_StructGrid.h                \
   bHYPRE_StructMatrix.h bHYPRE_StructMatrixView.h bHYPRE_StructPFMG.h         \
   bHYPRE_StructSMG.h bHYPRE_StructStencil.h bHYPRE_StructVector.h             \
-  bHYPRE_StructVectorView.h bHYPRE_Vector.h bHYPRE_nPCG.h
+  bHYPRE_StructVectorView.h bHYPRE_Vector.h
 STUBSRCS = bHYPRE_BoomerAMG_Stub.c bHYPRE_CoefficientAccess_Stub.c            \
   bHYPRE_GMRES_Stub.c bHYPRE_IJMatrixView_Stub.c bHYPRE_IJParCSRMatrix_Stub.c \
   bHYPRE_IJParCSRVector_Stub.c bHYPRE_IJVectorView_Stub.c                     \
@@ -95,4 +94,4 @@ STUBSRCS = bHYPRE_BoomerAMG_Stub.c bHYPRE_CoefficientAccess_Stub.c            \
   bHYPRE_StructMatrixView_Stub.c bHYPRE_StructMatrix_Stub.c                   \
   bHYPRE_StructPFMG_Stub.c bHYPRE_StructSMG_Stub.c                            \
   bHYPRE_StructStencil_Stub.c bHYPRE_StructVectorView_Stub.c                  \
-  bHYPRE_StructVector_Stub.c bHYPRE_Vector_Stub.c bHYPRE_nPCG_Stub.c
+  bHYPRE_StructVector_Stub.c bHYPRE_Vector_Stub.c
