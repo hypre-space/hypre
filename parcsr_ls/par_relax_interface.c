@@ -45,7 +45,7 @@ int  hypre_BoomerAMGRelaxIF( hypre_ParCSRMatrix *A,
 	 relax_points[0] = -1;
 	 relax_points[1] = 1;
       }
-      if (relax_type == 6)
+/*      if (relax_type == 6)
       {
          Solve_err_flag = hypre_BoomerAMGRelax(A,
                                             f,
@@ -84,7 +84,7 @@ int  hypre_BoomerAMGRelaxIF( hypre_ParCSRMatrix *A,
                                             u,
                                             Vtemp); 
       }
-      else
+      else */
       {
          for (i=0; i < 2; i++)
             Solve_err_flag = hypre_BoomerAMGRelax(A,
