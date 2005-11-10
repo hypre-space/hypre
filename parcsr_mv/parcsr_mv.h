@@ -210,6 +210,7 @@ typedef struct
    int      owns_col_starts;
 
    int      num_nonzeros;
+   double   d_num_nonzeros;
 
    /* Buffers used by GetRow to hold row currently being accessed. AJC, 4/99 */
    int     *rowindices;
@@ -244,6 +245,7 @@ hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(matrix))
 #define hypre_ParCSRMatrixNumCols(matrix) \
 hypre_CSRMatrixNumCols(hypre_ParCSRMatrixDiag(matrix))
 #define hypre_ParCSRMatrixNumNonzeros(matrix)     ((matrix) -> num_nonzeros)
+#define hypre_ParCSRMatrixDNumNonzeros(matrix)    ((matrix) -> d_num_nonzeros)
 #define hypre_ParCSRMatrixRowindices(matrix)      ((matrix) -> rowindices)
 #define hypre_ParCSRMatrixRowvalues(matrix)       ((matrix) -> rowvalues)
 #define hypre_ParCSRMatrixGetrowactive(matrix)    ((matrix) -> getrowactive)
@@ -646,6 +648,7 @@ hypre_ParCSRMatrix *hypre_ParCSRMatrixCreate( MPI_Comm comm , int global_num_row
 int hypre_ParCSRMatrixDestroy( hypre_ParCSRMatrix *matrix );
 int hypre_ParCSRMatrixInitialize( hypre_ParCSRMatrix *matrix );
 int hypre_ParCSRMatrixSetNumNonzeros( hypre_ParCSRMatrix *matrix );
+int hypre_ParCSRMatrixSetDNumNonzeros( hypre_ParCSRMatrix *matrix );
 int hypre_ParCSRMatrixSetDataOwner( hypre_ParCSRMatrix *matrix , int owns_data );
 int hypre_ParCSRMatrixSetRowStartsOwner( hypre_ParCSRMatrix *matrix , int owns_row_starts );
 int hypre_ParCSRMatrixSetColStartsOwner( hypre_ParCSRMatrix *matrix , int owns_col_starts );

@@ -212,6 +212,31 @@ hypre_ParCSRMatrixSetNumNonzeros( hypre_ParCSRMatrix *matrix)
 }
 
 /*--------------------------------------------------------------------------
+ * hypre_ParCSRMatrixSetDNumNonzeros
+ *--------------------------------------------------------------------------*/
+
+int 
+hypre_ParCSRMatrixSetDNumNonzeros( hypre_ParCSRMatrix *matrix)
+{
+   MPI_Comm comm = hypre_ParCSRMatrixComm(matrix);
+   hypre_CSRMatrix *diag = hypre_ParCSRMatrixDiag(matrix);
+   int *diag_i = hypre_CSRMatrixI(diag);
+   hypre_CSRMatrix *offd = hypre_ParCSRMatrixOffd(matrix);
+   int *offd_i = hypre_CSRMatrixI(offd);
+   int local_num_rows = hypre_CSRMatrixNumRows(diag);
+   double total_num_nonzeros;
+   double local_num_nonzeros;
+   int ierr = 0;
+
+   local_num_nonzeros = (double) diag_i[local_num_rows] 
+		+ (double) offd_i[local_num_rows];
+   MPI_Allreduce(&local_num_nonzeros, &total_num_nonzeros, 1, MPI_DOUBLE,
+        MPI_SUM, comm);
+   hypre_ParCSRMatrixDNumNonzeros(matrix) = total_num_nonzeros;
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
  * hypre_ParCSRMatrixSetDataOwner
  *--------------------------------------------------------------------------*/
 
