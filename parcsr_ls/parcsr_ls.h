@@ -534,7 +534,7 @@ int hypre_map( int ix , int iy , int iz , int p , int q , int r , int P , int Q 
 HYPRE_ParCSRMatrix GenerateSysLaplacian( MPI_Comm comm , int nx , int ny , int nz , int P , int Q , int R , int p , int q , int r , int num_fun , double *mtrx , double *value );
 
 /* par_multi_interp.c */
-int hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix *A , int *CF_marker , hypre_ParCSRMatrix *S , int *num_cpts_global , int num_functions , int *dof_func , int debug_flag , double trunc_factor , int *col_offd_S_to_A , hypre_ParCSRMatrix **P_ptr );
+int hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix *A , int *CF_marker , hypre_ParCSRMatrix *S , int *num_cpts_global , int num_functions , int *dof_func , int debug_flag , double trunc_factor , int weight_option , int *col_offd_S_to_A , hypre_ParCSRMatrix **P_ptr );
 
 /* par_nodal_systems.c */
 int hypre_BoomerAMGCreateNodalA( hypre_ParCSRMatrix *A , int num_functions , int *dof_func , int option , hypre_ParCSRMatrix **AN_ptr );

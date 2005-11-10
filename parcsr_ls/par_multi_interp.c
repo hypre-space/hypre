@@ -22,6 +22,7 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
                    int                 *dof_func,
                    int                  debug_flag,
                    double               trunc_factor,
+                   int                  weight_option,
                    int                 *col_offd_S_to_A,
                    hypre_ParCSRMatrix **P_ptr )
 {
@@ -82,6 +83,7 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
    int             *P_ncols = NULL;
    
    int             *CF_marker_offd = NULL;
+   int             *dof_func_offd = NULL;
    int             *P_marker;
    int             *P_marker_offd = NULL;
    int             *C_array;
@@ -133,9 +135,12 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
    double          *Pext_send_data = NULL;
    double          *Pext_data = NULL;
 
-   double           sum_C;
-   double           sum_N;
-   double           alfa;
+   double           sum_C, sum_N;
+   double           sum_C_pos, sum_C_neg;
+   double           sum_N_pos, sum_N_neg;
+   double           diagonal;
+   double           alfa = 1.0;
+   double           beta = 1.0;
    int              j_start;
    int              j_end;
 
@@ -241,7 +246,10 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
    if (n_coarse) C_array = hypre_CTAlloc(int, n_coarse);
 
    if (num_cols_offd)
+   {
       CF_marker_offd = hypre_CTAlloc(int, num_cols_offd);
+      if (num_functions > 1) dof_func_offd = hypre_CTAlloc(int, num_cols_offd);
+   }
 
    if (num_procs > 1)
    {
@@ -268,6 +276,23 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
       comm_handle = hypre_ParCSRCommHandleCreate(11, comm_pkg, int_buf_data,
 	 CF_marker_offd);
       hypre_ParCSRCommHandleDestroy(comm_handle);
+   }
+
+   if (num_functions > 1)
+   {
+      index = 0;
+      for (i=0; i < num_sends; i++)
+      {
+         start = send_map_start[i];
+         for (j = start; j < send_map_start[i+1]; j++)
+	    int_buf_data[index++] = dof_func[send_map_elmt[j]];
+      }
+      if (num_procs > 1)
+      {
+         comm_handle = hypre_ParCSRCommHandleCreate(11, comm_pkg, int_buf_data,
+	    dof_func_offd);
+         hypre_ParCSRCommHandleDestroy(comm_handle);
+      }
    }
 
    n_coarse_offd = 0;
@@ -694,7 +719,8 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
 	       j_end = j_start+P_diag_i[j1+1];
 	       for (k=j_start; k < j_end; k++)
 	       {
-		  Pext_send_buffer[cnt_offd++] = my_first_cpt+P_diag_pass[pass-1][k];
+		  Pext_send_buffer[cnt_offd++] = my_first_cpt
+			+P_diag_pass[pass-1][k];
 	       }
 	       j_start = P_offd_start[j1];
 	       j_end = j_start+P_offd_i[j1+1];
@@ -739,10 +765,12 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
          hypre_ParCSRCommPkgComm(tmp_comm_pkg) = comm;
          hypre_ParCSRCommPkgNumSends(tmp_comm_pkg) = num_sends;
          hypre_ParCSRCommPkgSendProcs(tmp_comm_pkg) = send_procs;
-         hypre_ParCSRCommPkgSendMapStarts(tmp_comm_pkg) = Pext_send_map_start[pass];
+         hypre_ParCSRCommPkgSendMapStarts(tmp_comm_pkg) = 
+		Pext_send_map_start[pass];
          hypre_ParCSRCommPkgNumRecvs(tmp_comm_pkg) = num_recvs;
          hypre_ParCSRCommPkgRecvProcs(tmp_comm_pkg) = recv_procs;
-         hypre_ParCSRCommPkgRecvVecStarts(tmp_comm_pkg) = Pext_recv_vec_start[pass];
+         hypre_ParCSRCommPkgRecvVecStarts(tmp_comm_pkg) = 
+		Pext_recv_vec_start[pass];
 
          if (Pext_recv_size)
          {
@@ -1033,242 +1061,578 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
          P_marker_offd[i] = -1;
    }
 
-/* determine P for points of pass 1, i.e. neighbors of coarse points */ 
-   for (i=pass_pointer[1]; i < pass_pointer[2]; i++) 
+   if (weight_option) /*if this is set, weights are separated into
+		negative and positive offdiagonals and accumulated
+		accordingly */
    {
-      i1 = pass_array[i];
-      sum_C = 0;
-      sum_N = 0;
-      j_start = P_diag_start[i1];
-      j_end = j_start+P_diag_i[i1+1]-P_diag_i[i1];
-      for (j=j_start; j < j_end; j++)
+   /* determine P for points of pass 1, i.e. neighbors of coarse points */ 
+      for (i=pass_pointer[1]; i < pass_pointer[2]; i++) 
       {
-         k1 = P_diag_pass[1][j];
-	 P_marker[C_array[k1]] = i1;
-      }
-      cnt = P_diag_i[i1];
-      for (j=A_diag_i[i1]+1; j < A_diag_i[i1+1]; j++)
-      {
-         j1 = A_diag_j[j];
-	 if (CF_marker[j1] != -3) sum_N += A_diag_data[j];
-	 if (j1 != -1 && P_marker[j1] == i1)
-	 {
-	    P_diag_data[cnt] = -A_diag_data[j];
-	    P_diag_j[cnt++] = fine_to_coarse[j1];
-            sum_C += A_diag_data[j];
-         }
-      }
-      j_start = P_offd_start[i1];
-      j_end = j_start+P_offd_i[i1+1]-P_offd_i[i1];
-      for (j=j_start; j < j_end; j++)
-      {
-         k1 = P_offd_pass[1][j];
-	 P_marker_offd[C_array_offd[k1]] = i1;
-      }
-      cnt_offd = P_offd_i[i1];
-      for (j=A_offd_i[i1]; j < A_offd_i[i1+1]; j++)
-      {
-	 if (col_offd_S_to_A)
-            j1 = map_A_to_S[A_offd_j[j]];
-	 else
-            j1 = A_offd_j[j];
-         sum_N += A_offd_data[j];
-	 if (j1 != -1 && P_marker_offd[j1] == i1)
-	 {
-	    P_offd_data[cnt_offd] = -A_offd_data[j];
-	    P_offd_j[cnt_offd++] = map_S_to_new[j1];
-            sum_C += A_offd_data[j];
-         }
-      }
-      alfa = sum_N/sum_C/A_diag_data[A_diag_i[i1]];
-      for (j=P_diag_i[i1]; j < cnt; j++)
-	 P_diag_data[j] *= alfa;
-      for (j=P_offd_i[i1]; j < cnt_offd; j++)
-	 P_offd_data[j] *= alfa;
-   }
-
-   old_Pext_send_size = 0;
-   old_Pext_recv_size = 0;
-
-   /*if (!col_offd_S_to_A) hypre_TFree(map_A_to_new);*/
-   hypre_TFree(P_diag_pass[1]);
-   if (num_procs > 1) hypre_TFree(P_offd_pass[1]);
-	  
-   if (new_num_cols_offd > n_coarse_offd)
-   {
-      hypre_TFree(C_array_offd);
-      C_array_offd = hypre_CTAlloc(int, new_num_cols_offd);
-   }
-
-   for (pass = 2; pass < num_passes; pass++)
-   {
-
-      if (num_procs > 1)
-      {
-         Pext_send_size = Pext_send_map_start[pass][num_sends];
-         if (Pext_send_size > old_Pext_send_size)
+         i1 = pass_array[i];
+         sum_C_pos = 0;
+         sum_C_neg = 0;
+         sum_N_pos = 0;
+         sum_N_neg = 0;
+         j_start = P_diag_start[i1];
+         j_end = j_start+P_diag_i[i1+1]-P_diag_i[i1];
+         for (j=j_start; j < j_end; j++)
          {
-            hypre_TFree(Pext_send_data);
-            Pext_send_data = hypre_CTAlloc(double, Pext_send_size);
+            k1 = P_diag_pass[1][j];
+	    P_marker[C_array[k1]] = i1;
          }
-         old_Pext_send_size = Pext_send_size;
-
-         cnt_offd = 0;
-         for (i=0; i < num_sends; i++)
+         cnt = P_diag_i[i1];
+         for (j=A_diag_i[i1]+1; j < A_diag_i[i1+1]; j++)
          {
-            for (j=send_map_start[i]; j < send_map_start[i+1]; j++)
-            {
-               j1 = send_map_elmt[j];
-	       if (assigned[j1] == pass-1)
-	       {
-	          j_start = P_diag_i[j1];
-	          j_end = P_diag_i[j1+1];
-	          for (k=j_start; k < j_end; k++)
-	          {
-		     Pext_send_data[cnt_offd++] = P_diag_data[k];
-	          }
-	          j_start = P_offd_i[j1];
-	          j_end = P_offd_i[j1+1];
-	          for (k=j_start; k < j_end; k++)
-	          {
-		     Pext_send_data[cnt_offd++] = P_offd_data[k];
-	          }
-               }
+            j1 = A_diag_j[j];
+	    if (CF_marker[j1] != -3 &&
+	       (num_functions == 1 || dof_func[i1] == dof_func[j1]))
+	    {
+	       if (A_diag_data[j] < 0)
+	          sum_N_neg += A_diag_data[j];
+	       else
+	          sum_N_pos += A_diag_data[j];
+	    }
+	    if (j1 != -1 && P_marker[j1] == i1)
+	    {
+	       P_diag_data[cnt] = A_diag_data[j];
+	       P_diag_j[cnt++] = fine_to_coarse[j1];
+	       if (A_diag_data[j] < 0)
+	          sum_C_neg += A_diag_data[j];
+	       else
+	          sum_C_pos += A_diag_data[j];
             }
          }
- 
-         hypre_ParCSRCommPkgNumSends(tmp_comm_pkg) = num_sends;
-         hypre_ParCSRCommPkgSendMapStarts(tmp_comm_pkg) = Pext_send_map_start[pass];
-         hypre_ParCSRCommPkgNumRecvs(tmp_comm_pkg) = num_recvs;
-         hypre_ParCSRCommPkgRecvVecStarts(tmp_comm_pkg) = Pext_recv_vec_start[pass];
-
-         Pext_recv_size = Pext_recv_vec_start[pass][num_recvs];
-
-         if (Pext_recv_size > old_Pext_recv_size)
+         j_start = P_offd_start[i1];
+         j_end = j_start+P_offd_i[i1+1]-P_offd_i[i1];
+         for (j=j_start; j < j_end; j++)
          {
-            hypre_TFree(Pext_data);
-            Pext_data = hypre_CTAlloc(double, Pext_recv_size);
+            k1 = P_offd_pass[1][j];
+	    P_marker_offd[C_array_offd[k1]] = i1;
          }
-         old_Pext_recv_size = Pext_recv_size;
-
-         comm_handle = hypre_ParCSRCommHandleCreate (1, tmp_comm_pkg,
-		Pext_send_data, Pext_data);
-         hypre_ParCSRCommHandleDestroy(comm_handle);
-
-         hypre_TFree(Pext_send_map_start[pass]);
-         hypre_TFree(Pext_recv_vec_start[pass]);
+         cnt_offd = P_offd_i[i1];
+         for (j=A_offd_i[i1]; j < A_offd_i[i1+1]; j++)
+         {
+	    if (col_offd_S_to_A)
+               j1 = map_A_to_S[A_offd_j[j]];
+	    else
+               j1 = A_offd_j[j];
+            if (CF_marker_offd[j1] != -3 &&
+	       (num_functions == 1 || dof_func[i1] == dof_func_offd[j1]))
+	    {
+	       if (A_offd_data[j] < 0)
+	          sum_N_neg += A_offd_data[j];
+	       else
+	          sum_N_pos += A_offd_data[j];
+	    }
+	    if (j1 != -1 && P_marker_offd[j1] == i1)
+	    {
+	       P_offd_data[cnt_offd] = A_offd_data[j];
+	       P_offd_j[cnt_offd++] = map_S_to_new[j1];
+	       if (A_offd_data[j] < 0)
+	          sum_C_neg += A_offd_data[j];
+	       else
+	          sum_C_pos += A_offd_data[j];
+            }
+         }
+         diagonal = A_diag_data[A_diag_i[i1]];
+         if (sum_C_neg*diagonal) alfa = -sum_N_neg/(sum_C_neg*diagonal);
+         if (sum_C_pos*diagonal) beta = -sum_N_pos/(sum_C_pos*diagonal);
+         for (j=P_diag_i[i1]; j < cnt; j++)
+            if (P_diag_data[j] < 0)
+	       P_diag_data[j] *= alfa;
+            else
+	       P_diag_data[j] *= beta;
+         for (j=P_offd_i[i1]; j < cnt_offd; j++)
+            if (P_offd_data[j] < 0)
+	       P_offd_data[j] *= alfa;
+            else
+	       P_offd_data[j] *= beta;
       }
 
-      for (i=pass_pointer[pass]; i < pass_pointer[pass+1]; i++)
+      old_Pext_send_size = 0;
+      old_Pext_recv_size = 0;
+
+      /*if (!col_offd_S_to_A) hypre_TFree(map_A_to_new);*/
+      hypre_TFree(P_diag_pass[1]);
+      if (num_procs > 1) hypre_TFree(P_offd_pass[1]);
+	  
+      if (new_num_cols_offd > n_coarse_offd)
+      {
+         hypre_TFree(C_array_offd);
+         C_array_offd = hypre_CTAlloc(int, new_num_cols_offd);
+      }
+
+      for (pass = 2; pass < num_passes; pass++)
+      {
+
+         if (num_procs > 1)
+         {
+            Pext_send_size = Pext_send_map_start[pass][num_sends];
+            if (Pext_send_size > old_Pext_send_size)
+            {
+               hypre_TFree(Pext_send_data);
+               Pext_send_data = hypre_CTAlloc(double, Pext_send_size);
+            }
+            old_Pext_send_size = Pext_send_size;
+
+            cnt_offd = 0;
+            for (i=0; i < num_sends; i++)
+            {
+               for (j=send_map_start[i]; j < send_map_start[i+1]; j++)
+               {
+                  j1 = send_map_elmt[j];
+	          if (assigned[j1] == pass-1)
+	          {
+	             j_start = P_diag_i[j1];
+	             j_end = P_diag_i[j1+1];
+	             for (k=j_start; k < j_end; k++)
+	             {
+		        Pext_send_data[cnt_offd++] = P_diag_data[k];
+	             }
+	             j_start = P_offd_i[j1];
+	             j_end = P_offd_i[j1+1];
+	             for (k=j_start; k < j_end; k++)
+	             {
+		        Pext_send_data[cnt_offd++] = P_offd_data[k];
+	             }
+                  }
+               }
+            }
+ 
+            hypre_ParCSRCommPkgNumSends(tmp_comm_pkg) = num_sends;
+            hypre_ParCSRCommPkgSendMapStarts(tmp_comm_pkg) = 
+		Pext_send_map_start[pass];
+            hypre_ParCSRCommPkgNumRecvs(tmp_comm_pkg) = num_recvs;
+            hypre_ParCSRCommPkgRecvVecStarts(tmp_comm_pkg) = 
+		Pext_recv_vec_start[pass];
+
+            Pext_recv_size = Pext_recv_vec_start[pass][num_recvs];
+
+            if (Pext_recv_size > old_Pext_recv_size)
+            {
+               hypre_TFree(Pext_data);
+               Pext_data = hypre_CTAlloc(double, Pext_recv_size);
+            }
+            old_Pext_recv_size = Pext_recv_size;
+
+            comm_handle = hypre_ParCSRCommHandleCreate (1, tmp_comm_pkg,
+		Pext_send_data, Pext_data);
+            hypre_ParCSRCommHandleDestroy(comm_handle);
+
+            hypre_TFree(Pext_send_map_start[pass]);
+            hypre_TFree(Pext_recv_vec_start[pass]);
+         }
+
+         for (i=pass_pointer[pass]; i < pass_pointer[pass+1]; i++)
+         {
+            i1 = pass_array[i];
+            sum_C_neg = 0;
+            sum_C_pos = 0;
+            sum_N_neg = 0;
+            sum_N_pos = 0;
+            j_start = P_diag_start[i1];
+            j_end = j_start+P_diag_i[i1+1]-P_diag_i[i1];
+            cnt = P_diag_i[i1];
+            for (j=j_start; j < j_end; j++)
+            {
+               k1 = P_diag_pass[pass][j];
+	       C_array[k1] = cnt;
+	       P_diag_data[cnt] = 0;
+	       P_diag_j[cnt++] = k1;
+            }
+            j_start = P_offd_start[i1];
+            j_end = j_start+P_offd_i[i1+1]-P_offd_i[i1];
+            cnt_offd = P_offd_i[i1];
+            for (j=j_start; j < j_end; j++)
+            {
+               k1 = P_offd_pass[pass][j];
+	       C_array_offd[k1] = cnt_offd;
+	       P_offd_data[cnt_offd] = 0;
+	       P_offd_j[cnt_offd++] = k1;
+            }
+            for (j=S_diag_i[i1]; j < S_diag_i[i1+1]; j++)
+            {
+	       j1 = S_diag_j[j];
+	       if (assigned[j1] == pass-1)
+	          P_marker[j1] = i1;
+            }
+            for (j=S_offd_i[i1]; j < S_offd_i[i1+1]; j++)
+            {
+	       j1 = S_offd_j[j];
+	       if (assigned_offd[j1] == pass-1)
+	          P_marker_offd[j1] = i1; 
+            }
+            for (j=A_diag_i[i1]+1; j < A_diag_i[i1+1]; j++)
+            {
+	       j1 = A_diag_j[j];
+	       if (P_marker[j1] == i1)
+	       {
+	          for (k=P_diag_i[j1]; k < P_diag_i[j1+1]; k++)
+	          {
+		     k1 = P_diag_j[k];
+	             alfa = A_diag_data[j]*P_diag_data[k];
+	             P_diag_data[C_array[k1]] += alfa;
+	             if (alfa < 0)
+	             {
+	                sum_C_neg += alfa;
+	                sum_N_neg += alfa;
+	             }
+	             else
+	             {
+	                sum_C_pos += alfa;
+	                sum_N_pos += alfa;
+	             }
+                  }
+	          for (k=P_offd_i[j1]; k < P_offd_i[j1+1]; k++)
+	          {
+		     k1 = P_offd_j[k];
+	             alfa = A_diag_data[j]*P_offd_data[k];
+	             P_offd_data[C_array_offd[k1]] += alfa;
+	             if (alfa < 0)
+	             {
+	                sum_C_neg += alfa;
+	                sum_N_neg += alfa;
+	             }
+	             else
+	             {
+	                sum_C_pos += alfa;
+	                sum_N_pos += alfa;
+	             }
+                  }
+               }
+               else
+               {
+                  if (CF_marker[j1] != -3 &&
+		     (num_functions == 1 || dof_func[i1] == dof_func[j1]))
+                  {
+		     if (A_diag_data[j] < 0)
+		        sum_N_neg += A_diag_data[j];
+		     else
+		        sum_N_pos += A_diag_data[j];
+                  }
+               }
+            }
+            for (j=A_offd_i[i1]; j < A_offd_i[i1+1]; j++)
+            {
+	       if (col_offd_S_to_A)
+	          j1 = map_A_to_S[A_offd_j[j]];
+	       else
+	          j1 = A_offd_j[j];
+ 
+	       if (j1 > -1 && P_marker_offd[j1] == i1)
+	       {
+	          j_start = Pext_start[j1];
+	          j_end = j_start+Pext_i[j1+1];
+	          for (k=j_start; k < j_end; k++)
+	          {
+		     k1 = Pext_pass[pass][k];
+	             alfa = A_offd_data[j]*Pext_data[k];
+		     if (k1 < 0) 
+	                P_diag_data[C_array[-k1-1]] += alfa;
+		     else
+	                P_offd_data[C_array_offd[k1]] += alfa;
+	             if (alfa < 0)
+		     {
+	                sum_C_neg += alfa;
+	                sum_N_neg += alfa;
+                     }
+	             else
+		     {
+	                sum_C_pos += alfa;
+	                sum_N_pos += alfa;
+                     }
+                  }
+               }
+               else
+               {
+                  if (CF_marker_offd[j1] != -3 && 
+		(num_functions == 1 || dof_func_offd[j1] == dof_func[i1])) 
+                  {
+		     if ( A_offd_data[j] < 0)
+		        sum_N_neg += A_offd_data[j];
+		     else
+		        sum_N_pos += A_offd_data[j];
+                  }
+               }
+            }
+            diagonal = A_diag_data[A_diag_i[i1]];
+            if (sum_C_neg*diagonal) alfa = -sum_N_neg/(sum_C_neg*diagonal);
+            if (sum_C_pos*diagonal) beta = -sum_N_pos/(sum_C_pos*diagonal);
+
+            for (j=P_diag_i[i1]; j < P_diag_i[i1+1]; j++)
+	       if (P_diag_data[j] < 0)
+	          P_diag_data[j] *= alfa;
+	       else
+	          P_diag_data[j] *= beta;
+            for (j=P_offd_i[i1]; j < P_offd_i[i1+1]; j++)
+	       if (P_offd_data[j] < 0)
+	          P_offd_data[j] *= alfa;
+	       else
+	          P_offd_data[j] *= beta;
+         }
+         hypre_TFree(P_diag_pass[pass]);
+         if (num_procs > 1)
+         {
+            hypre_TFree(P_offd_pass[pass]);
+            hypre_TFree(Pext_pass[pass]);
+         }
+      }
+   }
+   else /* no distinction between positive and negative offdiagonal element */
+   {
+   /* determine P for points of pass 1, i.e. neighbors of coarse points */ 
+      for (i=pass_pointer[1]; i < pass_pointer[2]; i++) 
       {
          i1 = pass_array[i];
          sum_C = 0;
          sum_N = 0;
          j_start = P_diag_start[i1];
          j_end = j_start+P_diag_i[i1+1]-P_diag_i[i1];
-         cnt = P_diag_i[i1];
          for (j=j_start; j < j_end; j++)
          {
-            k1 = P_diag_pass[pass][j];
-	    C_array[k1] = cnt;
-	    P_diag_data[cnt] = 0;
-	    P_diag_j[cnt++] = k1;
+            k1 = P_diag_pass[1][j];
+	    P_marker[C_array[k1]] = i1;
+         }
+         cnt = P_diag_i[i1];
+         for (j=A_diag_i[i1]+1; j < A_diag_i[i1+1]; j++)
+         {
+            j1 = A_diag_j[j];
+	    if (CF_marker[j1] != -3 && 
+		(num_functions == 1 || dof_func[i1] == dof_func[j1]))
+	       sum_N += A_diag_data[j];
+	    if (j1 != -1 && P_marker[j1] == i1)
+	    {
+	       P_diag_data[cnt] = A_diag_data[j];
+	       P_diag_j[cnt++] = fine_to_coarse[j1];
+	       sum_C += A_diag_data[j];
+            }
          }
          j_start = P_offd_start[i1];
          j_end = j_start+P_offd_i[i1+1]-P_offd_i[i1];
-         cnt_offd = P_offd_i[i1];
          for (j=j_start; j < j_end; j++)
          {
-            k1 = P_offd_pass[pass][j];
-	    C_array_offd[k1] = cnt_offd;
-	    P_offd_data[cnt_offd] = 0;
-	    P_offd_j[cnt_offd++] = k1;
+            k1 = P_offd_pass[1][j];
+	    P_marker_offd[C_array_offd[k1]] = i1;
          }
-         for (j=S_diag_i[i1]; j < S_diag_i[i1+1]; j++)
-         {
-	    j1 = S_diag_j[j];
-	    if (assigned[j1] == pass-1)
-	       P_marker[j1] = i1;
-         }
-         for (j=S_offd_i[i1]; j < S_offd_i[i1+1]; j++)
-         {
-	    j1 = S_offd_j[j];
-	    if (assigned_offd[j1] == pass-1)
-	       P_marker_offd[j1] = i1; 
-         }
-         for (j=A_diag_i[i1]+1; j < A_diag_i[i1+1]; j++)
-         {
-	    j1 = A_diag_j[j];
-	    if (P_marker[j1] == i1)
-	    {
-	       for (k=P_diag_i[j1]; k < P_diag_i[j1+1]; k++)
-	       {
-		  k1 = P_diag_j[k];
-	          alfa = A_diag_data[j]*P_diag_data[k];
-	          P_diag_data[C_array[k1]] -= alfa;
-	          sum_C += alfa;
-	          sum_N += alfa;
-               }
-	       for (k=P_offd_i[j1]; k < P_offd_i[j1+1]; k++)
-	       {
-		  k1 = P_offd_j[k];
-	          alfa = A_diag_data[j]*P_offd_data[k];
-	          P_offd_data[C_array_offd[k1]] -= alfa;
-	          sum_C += alfa;
-	          sum_N += alfa;
-               }
-            }
-            else
-            {
-               if (CF_marker[j1] != -3) sum_N += A_diag_data[j];
-            }
-         }
+         cnt_offd = P_offd_i[i1];
          for (j=A_offd_i[i1]; j < A_offd_i[i1+1]; j++)
          {
 	    if (col_offd_S_to_A)
-	       j1 = map_A_to_S[A_offd_j[j]];
+               j1 = map_A_to_S[A_offd_j[j]];
 	    else
-	       j1 = A_offd_j[j];
- 
-	    if (j1 > -1 && P_marker_offd[j1] == i1)
+               j1 = A_offd_j[j];
+            if (CF_marker_offd[j1] != -3 && 
+		(num_functions == 1 || dof_func[i1] == dof_func_offd[j1]))
+	       sum_N += A_offd_data[j];
+	    if (j1 != -1 && P_marker_offd[j1] == i1)
 	    {
-	       j_start = Pext_start[j1];
-	       j_end = j_start+Pext_i[j1+1];
-	       for (k=j_start; k < j_end; k++)
-	       {
-		  k1 = Pext_pass[pass][k];
-	          alfa = A_offd_data[j]*Pext_data[k];
-		  if (k1 < 0) 
-	             P_diag_data[C_array[-k1-1]] -= alfa;
-		  else
-	             P_offd_data[C_array_offd[k1]] -= alfa;
-	          sum_C += alfa;
-	          sum_N += alfa;
-               }
-            }
-            else
-            {
-               if (CF_marker_offd[j1] != -3) sum_N += A_offd_data[j];
+	       P_offd_data[cnt_offd] = A_offd_data[j];
+	       P_offd_j[cnt_offd++] = map_S_to_new[j1];
+	       sum_C += A_offd_data[j];
             }
          }
-         alfa = sum_N/sum_C/A_diag_data[A_diag_i[i1]];
-         for (j=P_diag_i[i1]; j < P_diag_i[i1+1]; j++)
+         diagonal = A_diag_data[A_diag_i[i1]];
+         if (sum_C*diagonal) alfa = -sum_N/(sum_C*diagonal);
+         for (j=P_diag_i[i1]; j < cnt; j++)
 	    P_diag_data[j] *= alfa;
-         for (j=P_offd_i[i1]; j < P_offd_i[i1+1]; j++)
+         for (j=P_offd_i[i1]; j < cnt_offd; j++)
 	    P_offd_data[j] *= alfa;
       }
-      hypre_TFree(P_diag_pass[pass]);
-      if (num_procs > 1)
+
+      old_Pext_send_size = 0;
+      old_Pext_recv_size = 0;
+
+      /*if (!col_offd_S_to_A) hypre_TFree(map_A_to_new);*/
+      hypre_TFree(P_diag_pass[1]);
+      if (num_procs > 1) hypre_TFree(P_offd_pass[1]);
+	  
+      if (new_num_cols_offd > n_coarse_offd)
       {
-         hypre_TFree(P_offd_pass[pass]);
-         hypre_TFree(Pext_pass[pass]);
+         hypre_TFree(C_array_offd);
+         C_array_offd = hypre_CTAlloc(int, new_num_cols_offd);
+      }
+
+      for (pass = 2; pass < num_passes; pass++)
+      {
+
+         if (num_procs > 1)
+         {
+            Pext_send_size = Pext_send_map_start[pass][num_sends];
+            if (Pext_send_size > old_Pext_send_size)
+            {
+               hypre_TFree(Pext_send_data);
+               Pext_send_data = hypre_CTAlloc(double, Pext_send_size);
+            }
+            old_Pext_send_size = Pext_send_size;
+
+            cnt_offd = 0;
+            for (i=0; i < num_sends; i++)
+            {
+               for (j=send_map_start[i]; j < send_map_start[i+1]; j++)
+               {
+                  j1 = send_map_elmt[j];
+	          if (assigned[j1] == pass-1)
+	          {
+	             j_start = P_diag_i[j1];
+	             j_end = P_diag_i[j1+1];
+	             for (k=j_start; k < j_end; k++)
+	             {
+		        Pext_send_data[cnt_offd++] = P_diag_data[k];
+	             }
+	             j_start = P_offd_i[j1];
+	             j_end = P_offd_i[j1+1];
+	             for (k=j_start; k < j_end; k++)
+	             {
+		        Pext_send_data[cnt_offd++] = P_offd_data[k];
+	             }
+                  }
+               }
+            }
+ 
+            hypre_ParCSRCommPkgNumSends(tmp_comm_pkg) = num_sends;
+            hypre_ParCSRCommPkgSendMapStarts(tmp_comm_pkg) = 
+		Pext_send_map_start[pass];
+            hypre_ParCSRCommPkgNumRecvs(tmp_comm_pkg) = num_recvs;
+            hypre_ParCSRCommPkgRecvVecStarts(tmp_comm_pkg) = 
+		Pext_recv_vec_start[pass];
+
+            Pext_recv_size = Pext_recv_vec_start[pass][num_recvs];
+
+            if (Pext_recv_size > old_Pext_recv_size)
+            {
+               hypre_TFree(Pext_data);
+               Pext_data = hypre_CTAlloc(double, Pext_recv_size);
+            }
+            old_Pext_recv_size = Pext_recv_size;
+
+            comm_handle = hypre_ParCSRCommHandleCreate (1, tmp_comm_pkg,
+		Pext_send_data, Pext_data);
+            hypre_ParCSRCommHandleDestroy(comm_handle);
+
+            hypre_TFree(Pext_send_map_start[pass]);
+            hypre_TFree(Pext_recv_vec_start[pass]);
+         }
+
+         for (i=pass_pointer[pass]; i < pass_pointer[pass+1]; i++)
+         {
+            i1 = pass_array[i];
+            sum_C = 0;
+            sum_N = 0;
+            j_start = P_diag_start[i1];
+            j_end = j_start+P_diag_i[i1+1]-P_diag_i[i1];
+            cnt = P_diag_i[i1];
+            for (j=j_start; j < j_end; j++)
+            {
+               k1 = P_diag_pass[pass][j];
+	       C_array[k1] = cnt;
+	       P_diag_data[cnt] = 0;
+	       P_diag_j[cnt++] = k1;
+            }
+            j_start = P_offd_start[i1];
+            j_end = j_start+P_offd_i[i1+1]-P_offd_i[i1];
+            cnt_offd = P_offd_i[i1];
+            for (j=j_start; j < j_end; j++)
+            {
+               k1 = P_offd_pass[pass][j];
+	       C_array_offd[k1] = cnt_offd;
+	       P_offd_data[cnt_offd] = 0;
+	       P_offd_j[cnt_offd++] = k1;
+            }
+            for (j=S_diag_i[i1]; j < S_diag_i[i1+1]; j++)
+            {
+	       j1 = S_diag_j[j];
+	       if (assigned[j1] == pass-1)
+	          P_marker[j1] = i1;
+            }
+            for (j=S_offd_i[i1]; j < S_offd_i[i1+1]; j++)
+            {
+	       j1 = S_offd_j[j];
+	       if (assigned_offd[j1] == pass-1)
+	          P_marker_offd[j1] = i1; 
+            }
+            for (j=A_diag_i[i1]+1; j < A_diag_i[i1+1]; j++)
+            {
+	       j1 = A_diag_j[j];
+	       if (P_marker[j1] == i1)
+	       {
+	          for (k=P_diag_i[j1]; k < P_diag_i[j1+1]; k++)
+	          {
+		     k1 = P_diag_j[k];
+	             alfa = A_diag_data[j]*P_diag_data[k];
+	             P_diag_data[C_array[k1]] += alfa;
+	             sum_C += alfa;
+	             sum_N += alfa;
+                  }
+	          for (k=P_offd_i[j1]; k < P_offd_i[j1+1]; k++)
+	          {
+		     k1 = P_offd_j[k];
+	             alfa = A_diag_data[j]*P_offd_data[k];
+	             P_offd_data[C_array_offd[k1]] += alfa;
+	             sum_C += alfa;
+	             sum_N += alfa;
+                  }
+               }
+               else
+               {
+                  if (CF_marker[j1] != -3 && 
+			(num_functions == 1 || dof_func[i1] == dof_func[j1]))
+		     sum_N += A_diag_data[j];
+               }
+            }
+            for (j=A_offd_i[i1]; j < A_offd_i[i1+1]; j++)
+            {
+	       if (col_offd_S_to_A)
+	          j1 = map_A_to_S[A_offd_j[j]];
+	       else
+	          j1 = A_offd_j[j];
+ 
+	       if (j1 > -1 && P_marker_offd[j1] == i1)
+	       {
+	          j_start = Pext_start[j1];
+	          j_end = j_start+Pext_i[j1+1];
+	          for (k=j_start; k < j_end; k++)
+	          {
+		     k1 = Pext_pass[pass][k];
+	             alfa = A_offd_data[j]*Pext_data[k];
+		     if (k1 < 0) 
+	                P_diag_data[C_array[-k1-1]] += alfa;
+		     else
+	                P_offd_data[C_array_offd[k1]] += alfa;
+	             sum_C += alfa;
+	             sum_N += alfa;
+                  }
+               }
+               else
+               {
+                  if (CF_marker_offd[j1] != -3 && 
+		    (num_functions == 1 || dof_func_offd[j1] == dof_func[i1])) 
+		     sum_N += A_offd_data[j];
+               }
+            }
+            diagonal = A_diag_data[A_diag_i[i1]];
+            if (sum_C*diagonal) alfa = -sum_N/(sum_C*diagonal);
+
+            for (j=P_diag_i[i1]; j < P_diag_i[i1+1]; j++)
+	       P_diag_data[j] *= alfa;
+            for (j=P_offd_i[i1]; j < P_offd_i[i1+1]; j++)
+	       P_offd_data[j] *= alfa;
+         }
+         
+         hypre_TFree(P_diag_pass[pass]);
+         if (num_procs > 1)
+         {
+            hypre_TFree(P_offd_pass[pass]);
+            hypre_TFree(Pext_pass[pass]);
+         }
       }
    }
+
    hypre_TFree(CF_marker_offd);
    hypre_TFree(Pext_send_map_start);
    hypre_TFree(Pext_recv_vec_start);
    if (n_coarse) hypre_TFree(C_array);
    hypre_TFree(C_array_offd);
+   hypre_TFree(dof_func_offd);
    hypre_TFree(Pext_send_data);
    hypre_TFree(Pext_data);
    hypre_TFree(P_diag_pass);
@@ -1389,16 +1753,19 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
    hypre_TFree(new_elmts);
    hypre_TFree(new_counter);
 
-   for (i=0; i < n_fine; i++)
-      if (CF_marker[i] == -3) CF_marker[i] = -1;
- 
    if (num_cols_offd_P)
    {
         hypre_ParCSRMatrixColMapOffd(P) = col_map_offd_P;
         hypre_CSRMatrixNumCols(P_offd) = num_cols_offd_P;
    }
 
-  if (num_procs > 1)
+   if (n_SF)
+   {
+      for (i=0; i < n_fine; i++)
+	 if (CF_marker[i] == -3) CF_marker[i] = -1;
+   }
+
+   if (num_procs > 1)
    {
 #ifdef HYPRE_NO_GLOBAL_PARTITION
         hypre_NewCommPkgCreate(P);
@@ -1406,7 +1773,6 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
         hypre_MatvecCommPkgCreate(P);
 #endif
    }
-
 
    *P_ptr = P;
 

@@ -49,12 +49,12 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
    int     **point_map_array;
    int     **v_at_point_array; */
 
-   int       cycle_op_count;   
+   double    cycle_op_count;   
    int       cycle_type;
    int       num_levels;
    int       max_levels;
 
-   int      *num_coeffs;
+   double   *num_coeffs;
    int      *num_grid_sweeps;   
    int      *grid_relax_type;   
    int     **grid_relax_points;  
@@ -125,12 +125,12 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
 
    if (grid_relax_points) old_version = 1;
 
-   num_coeffs = hypre_CTAlloc(int, num_levels);
-   num_coeffs[0]    = hypre_ParCSRMatrixNumNonzeros(A_array[0]);
+   num_coeffs = hypre_CTAlloc(double, num_levels);
+   num_coeffs[0]    = hypre_ParCSRMatrixDNumNonzeros(A_array[0]);
    comm = hypre_ParCSRMatrixComm(A_array[0]);
 
    for (j = 1; j < num_levels; j++)
-      num_coeffs[j] = hypre_ParCSRMatrixNumNonzeros(A_array[j]);
+      num_coeffs[j] = hypre_ParCSRMatrixDNumNonzeros(A_array[j]);
 
    /*---------------------------------------------------------------------
     *    Initialize cycling control counter

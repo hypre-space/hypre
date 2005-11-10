@@ -257,7 +257,7 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
        row_starts = hypre_ParCSRMatrixRowStarts(A_array[level]);
 
        fine_size = hypre_ParCSRMatrixGlobalNumRows(A_array[level]);
-       global_nonzeros = (double) hypre_ParCSRMatrixNumNonzeros(A_array[level]);
+       global_nonzeros = hypre_ParCSRMatrixDNumNonzeros(A_array[level]);
        num_coeffs[level] = global_nonzeros;
        num_variables[level] = (double) fine_size;
 
@@ -388,33 +388,33 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
 
    for (level = 0; level < num_levels-1; level++)
    {
-      
-      P_diag = hypre_ParCSRMatrixDiag(P_array[level]);
-      P_diag_data = hypre_CSRMatrixData(P_diag);
-      P_diag_i = hypre_CSRMatrixI(P_diag);
-      
-      P_offd = hypre_ParCSRMatrixOffd(P_array[level]);   
-      P_offd_data = hypre_CSRMatrixData(P_offd);
-      P_offd_i = hypre_CSRMatrixI(P_offd);
-      
-      row_starts = hypre_ParCSRMatrixRowStarts(P_array[level]);
-      
-      fine_size = hypre_ParCSRMatrixGlobalNumRows(P_array[level]);
-      coarse_size = hypre_ParCSRMatrixGlobalNumCols(P_array[level]);
-      global_nonzeros = hypre_ParCSRMatrixNumNonzeros(P_array[level]);
-      
-      min_weight = 1.0;
-      max_weight = 0.0;
-      max_rowsum = 0.0;
-      min_rowsum = 0.0;
-      min_entries = 0;
-      max_entries = 0;
-      
-      if (hypre_CSRMatrixNumRows(P_diag))
-      {
-         if (hypre_CSRMatrixNumCols(P_diag)) min_weight = P_diag_data[0];
-         for (j = P_diag_i[0]; j < P_diag_i[1]; j++)
-         {
+
+       P_diag = hypre_ParCSRMatrixDiag(P_array[level]);
+       P_diag_data = hypre_CSRMatrixData(P_diag);
+       P_diag_i = hypre_CSRMatrixI(P_diag);
+
+       P_offd = hypre_ParCSRMatrixOffd(P_array[level]);   
+       P_offd_data = hypre_CSRMatrixData(P_offd);
+       P_offd_i = hypre_CSRMatrixI(P_offd);
+
+       row_starts = hypre_ParCSRMatrixRowStarts(P_array[level]);
+
+       fine_size = hypre_ParCSRMatrixGlobalNumRows(P_array[level]);
+       coarse_size = hypre_ParCSRMatrixGlobalNumCols(P_array[level]);
+       global_nonzeros = hypre_ParCSRMatrixDNumNonzeros(P_array[level]);
+
+       min_weight = 1.0;
+       max_weight = 0.0;
+       max_rowsum = 0.0;
+       min_rowsum = 0.0;
+       min_entries = 0;
+       max_entries = 0;
+ 
+  if (hypre_CSRMatrixNumRows(P_diag))
+  {
+       if (hypre_CSRMatrixNumCols(P_diag)) min_weight = P_diag_data[0];
+       for (j = P_diag_i[0]; j < P_diag_i[1]; j++)
+       {
             min_weight = hypre_min(min_weight, P_diag_data[j]);
             if (P_diag_data[j] != 1.0)
                max_weight = hypre_max(max_weight, P_diag_data[j]);

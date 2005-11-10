@@ -139,6 +139,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    euclidfile = hypre_ParAMGDataEuclidFile(amg_data);
    
    hypre_ParCSRMatrixSetNumNonzeros(A);
+   hypre_ParCSRMatrixSetDNumNonzeros(A);
    hypre_ParAMGDataNumVariables(amg_data) = hypre_ParCSRMatrixNumRows(A);
 
    if (setup_type == 0) return Setup_err_flag;
@@ -454,8 +455,10 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                                     debug_flag, &CF_marker);
              if (level < agg_num_levels)
 	     {
+	        /* set num_functions 1 in CoarseParms, since coarse_dof_func
+		 is not needed here */
                 hypre_BoomerAMGCoarseParms(comm, local_num_vars,
-                        num_functions, dof_func_array[level], CF_marker,
+                        1, dof_func_array[level], CF_marker,
                         &coarse_dof_func,&coarse_pnts_global1);
                 hypre_BoomerAMGCreate2ndS (S, CF_marker, num_paths,
 				coarse_pnts_global1, &S2);
@@ -474,8 +477,10 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                              debug_flag, &CF_marker);
             if (level < agg_num_levels)
 	    {
+	        /* set num_functions 1 in CoarseParms, since coarse_dof_func
+		 is not needed here */
                 hypre_BoomerAMGCoarseParms(comm, local_num_vars,
-                        num_functions, dof_func_array[level], CF_marker,
+                        1, dof_func_array[level], CF_marker,
                         &coarse_dof_func,&coarse_pnts_global1);
                 hypre_BoomerAMGCreate2ndS (S, CF_marker, num_paths,
 				coarse_pnts_global1, &S2);
@@ -516,8 +521,10 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                                     debug_flag, &CF_marker);
              if (level < agg_num_levels)
 	     {
+	        /* set num_functions 1 in CoarseParms, since coarse_dof_func
+		 is not needed here */
                 hypre_BoomerAMGCoarseParms(comm, local_num_vars,
-                        num_functions, dof_func_array[level], CF_marker,
+                        1, dof_func_array[level], CF_marker,
                         &coarse_dof_func,&coarse_pnts_global1);
                 hypre_BoomerAMGCreate2ndS (S, CF_marker, num_paths,
 				coarse_pnts_global1, &S2);
@@ -536,8 +543,10 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                              debug_flag, &CF_marker);
             if (level < agg_num_levels)
 	    {
+	        /* set num_functions 1 in CoarseParms, since coarse_dof_func
+		 is not needed here */
                 hypre_BoomerAMGCoarseParms(comm, local_num_vars,
-                        num_functions, dof_func_array[level], CF_marker,
+                        1, dof_func_array[level], CF_marker,
                         &coarse_dof_func,&coarse_pnts_global1);
                 hypre_BoomerAMGCreate2ndS (S, CF_marker, num_paths,
 				coarse_pnts_global1, &S2);
@@ -579,8 +588,10 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                                     debug_flag, &CF_marker);
              if (level < agg_num_levels)
 	     {
+	        /* set num_functions 1 in CoarseParms, since coarse_dof_func
+		 is not needed here */
                 hypre_BoomerAMGCoarseParms(comm, local_num_vars,
-                        num_functions, dof_func_array[level], CF_marker,
+                        1, dof_func_array[level], CF_marker,
                         &coarse_dof_func,&coarse_pnts_global1);
                 hypre_BoomerAMGCreate2ndS (S, CF_marker, num_paths,
 				coarse_pnts_global1, &S2);
@@ -628,8 +639,10 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                                  &CF_marker);
              if (level < agg_num_levels)
 	     {
+	        /* set num_functions 1 in CoarseParms, since coarse_dof_func
+		 is not needed here */
                 hypre_BoomerAMGCoarseParms(comm, local_num_vars,
-                        num_functions, dof_func_array[level], CF_marker,
+                        1, dof_func_array[level], CF_marker,
                         &coarse_dof_func,&coarse_pnts_global1);
                 hypre_BoomerAMGCreate2ndS (S, CF_marker, num_paths,
 				coarse_pnts_global1, &S2);
@@ -674,8 +687,10 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                              debug_flag, &CF_marker);
              if (level < agg_num_levels)
 	     {
+	        /* set num_functions 1 in CoarseParms, since coarse_dof_func
+		 is not needed here */
                 hypre_BoomerAMGCoarseParms(comm, local_num_vars,
-                        num_functions, dof_func_array[level], CF_marker,
+                        1, dof_func_array[level], CF_marker,
                         &coarse_dof_func,&coarse_pnts_global1);
                 hypre_BoomerAMGCreate2ndS (S, CF_marker, num_paths,
 				coarse_pnts_global1, &S2);
@@ -805,13 +820,14 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
       if (debug_flag==1) wall_time = time_getWallclockSeconds();
 
-      if (hypre_ParAMGDataInterpType(amg_data) == 4 || level < agg_num_levels)
+      if (hypre_ParAMGDataInterpType(amg_data) == 4 || (level < agg_num_levels
+	 && hypre_ParAMGDataInterpType(amg_data) != 5))
       {
 	 if (nodal > -1)
 	 {
             hypre_BoomerAMGBuildMultipass(A_array[level], CF_marker_array[level], 
                  S, coarse_pnts_global, num_functions, dof_func_array[level], 
-		 debug_flag, trunc_factor, col_offd_S_to_A, &P);
+		 debug_flag, trunc_factor, 0, col_offd_S_to_A, &P);
 	    hypre_TFree(col_offd_S_to_A);
          }
          else
@@ -819,7 +835,34 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
             CFN_marker = CF_marker_array[level];
             hypre_BoomerAMGBuildMultipass(AN, CFN_marker,
                  SN, coarse_pnts_global, 1, NULL,
-		 debug_flag, trunc_factor, col_offd_SN_to_AN, &PN);
+		 debug_flag, trunc_factor, 0, col_offd_SN_to_AN, &PN);
+	    hypre_TFree(col_offd_SN_to_AN);
+            hypre_BoomerAMGCreateScalarCFS(PN, CFN_marker, NULL,
+                num_functions, nodal, 1, &dof_func1,
+                &CF_marker, NULL, &P);
+            dof_func_array[level+1] = dof_func1;
+            CF_marker_array[level] = CF_marker;
+            hypre_TFree (CFN_marker);
+            hypre_ParCSRMatrixDestroy(AN);
+            hypre_ParCSRMatrixDestroy(PN);
+            hypre_ParCSRMatrixDestroy(SN);
+         }
+      }
+      else if (hypre_ParAMGDataInterpType(amg_data) == 5)
+      {
+	 if (nodal > -1)
+	 {
+            hypre_BoomerAMGBuildMultipass(A_array[level], CF_marker_array[level], 
+                 S, coarse_pnts_global, num_functions, dof_func_array[level], 
+		 debug_flag, trunc_factor, 1, col_offd_S_to_A, &P);
+	    hypre_TFree(col_offd_S_to_A);
+         }
+         else
+         {
+            CFN_marker = CF_marker_array[level];
+            hypre_BoomerAMGBuildMultipass(AN, CFN_marker,
+                 SN, coarse_pnts_global, 1, NULL,
+		 debug_flag, trunc_factor, 1, col_offd_SN_to_AN, &PN);
 	    hypre_TFree(col_offd_SN_to_AN);
             hypre_BoomerAMGCreateScalarCFS(PN, CFN_marker, NULL,
                 num_functions, nodal, 1, &dof_func1,
@@ -958,6 +1001,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
       ++level;
       hypre_ParCSRMatrixSetNumNonzeros(A_H);
+      hypre_ParCSRMatrixSetDNumNonzeros(A_H);
       A_array[level] = A_H;
 
       size = ((double) fine_size )*.75;

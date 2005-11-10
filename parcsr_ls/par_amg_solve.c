@@ -92,7 +92,7 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
 
    num_coeffs       = hypre_CTAlloc(double, num_levels);
    num_variables    = hypre_CTAlloc(double, num_levels);
-   num_coeffs[0]    = hypre_ParCSRMatrixNumNonzeros(A);
+   num_coeffs[0]    = hypre_ParCSRMatrixDNumNonzeros(A);
    num_variables[0] = hypre_ParCSRMatrixGlobalNumRows(A);
  
    A_array[0] = A;
@@ -109,7 +109,7 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
    Vtemp = hypre_ParAMGDataVtemp(amg_data);
    for (j = 1; j < num_levels; j++)
    {
-      num_coeffs[j]    = (double) hypre_ParCSRMatrixNumNonzeros(A_array[j]);
+      num_coeffs[j]    = hypre_ParCSRMatrixDNumNonzeros(A_array[j]);
       num_variables[j] = (double) hypre_ParCSRMatrixGlobalNumRows(A_array[j]);
    }
 

@@ -89,7 +89,7 @@ typedef struct
    hypre_ParVector   *Vtemp;
    hypre_Vector      *Vtemp_local;
    double            *Vtemp_local_data;
-   int                cycle_op_count;
+   double             cycle_op_count;
    hypre_ParVector   *Rtemp;
    hypre_ParVector   *Ptemp;
    hypre_ParVector   *Ztemp;
