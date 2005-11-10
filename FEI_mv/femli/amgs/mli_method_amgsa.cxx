@@ -13,6 +13,7 @@
 #include <string.h>
 #include <assert.h>
 #include "HYPRE.h"
+#include "../../IJ_mv/HYPRE_IJ_mv.h"
 #include "util/mli_utils.h"
 #include "matrix/mli_matrix.h"
 #include "matrix/mli_matrix_misc.h"
@@ -545,6 +546,52 @@ int MLI_Method_AMGSA::setup( MLI *mli )
    hypre_ParCSRMatrix *hypreRT;
    MLI_FEData      *fedata;
    MLI_SFEI        *sfei;
+
+#define DEBUG
+#ifdef DEBUG
+   int                *partition, ANRows, AStart, AEnd, *rowSizes; 
+   double             *XData, rnorm;
+   HYPRE_IJVector     IJX, IJY;
+   hypre_ParCSRMatrix *hypreA;
+   hypre_ParVector    *hypreX, *hypreY;
+
+   if (nullspaceVec_ != NULL)
+   {
+      mli_Amat = mli->getSystemMatrix(0);
+      hypreA = (hypre_ParCSRMatrix *) mli_Amat->getMatrix();
+      comm = hypre_ParCSRMatrixComm(hypreA);
+      MPI_Comm_rank(comm,&mypid);
+      HYPRE_ParCSRMatrixGetRowPartitioning((HYPRE_ParCSRMatrix) hypreA,&partition);
+      AStart = partition[mypid];
+      AEnd = partition[mypid+1];
+      ANRows = AEnd - AStart;
+      free(partition);
+      HYPRE_IJVectorCreate(comm, AStart, AEnd-1,&IJX);
+      HYPRE_IJVectorSetObjectType(IJX, HYPRE_PARCSR);
+      HYPRE_IJVectorInitialize(IJX);
+      HYPRE_IJVectorAssemble(IJX);
+      HYPRE_IJVectorGetObject(IJX, (void **) &hypreX);
+      HYPRE_IJVectorCreate(comm, AStart, AEnd-1,&IJY);
+      HYPRE_IJVectorSetObjectType(IJY, HYPRE_PARCSR);
+      HYPRE_IJVectorInitialize(IJY);
+      HYPRE_IJVectorAssemble(IJY);
+      HYPRE_IJVectorGetObject(IJY, (void **) &hypreY);
+      XData = (double *) hypre_VectorData(hypre_ParVectorLocalVector(hypreX));
+      for (ii = 0; ii < nullspaceDim_; ii++)
+      {
+         for (jj = 0; jj < ANRows; jj++) XData[jj] = nullspaceVec_[ii*ANRows+jj];
+         hypre_ParCSRMatrixMatvec(1.0, hypreA, hypreX, 0.0, hypreY);
+         rnorm = sqrt(hypre_ParVectorInnerProd(hypreY, hypreY));
+         if (mypid == 0) printf("HYPRE FEI: check null space = %e\n", rnorm);
+      }
+      HYPRE_IJVectorDestroy(IJX);
+      HYPRE_IJVectorDestroy(IJY);
+   }
+   else
+   {
+      printf("MLI::setup - no nullspace vector.\n");
+   }
+#endif
 
 #ifdef MLI_DEBUG_DETAILED
    printf("MLI_Method_AMGSA::setup begins...\n");
