@@ -79,6 +79,7 @@ impl_bHYPRE_ParaSails__ctor(
    data = hypre_CTAlloc( struct bHYPRE_ParaSails__data, 1 );
    data -> comm = (MPI_Comm) NULL;
    data -> solver = (HYPRE_Solver) NULL;
+   data -> matrix = (bHYPRE_IJParCSRMatrix) NULL;
    /* set any other data components here */
    bHYPRE_ParaSails__set_data( self, data );
 
@@ -106,7 +107,8 @@ impl_bHYPRE_ParaSails__dtor(
    struct bHYPRE_ParaSails__data * data;
 
    data = bHYPRE_ParaSails__get_data( self );
-   bHYPRE_IJParCSRMatrix_deleteRef( data->matrix );
+   if ( data->matrix != (bHYPRE_IJParCSRMatrix) NULL )
+      bHYPRE_IJParCSRMatrix_deleteRef( data->matrix );
    ierr += HYPRE_ParaSailsDestroy( data->solver );
    hypre_assert( ierr== 0 );
    /* delete any nontrivial data components here */

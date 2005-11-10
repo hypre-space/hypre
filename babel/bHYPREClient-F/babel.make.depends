@@ -90,6 +90,7 @@ bHYPRE_IOR.h: bHYPRE_StructStencil_IOR.h
 bHYPRE_IOR.h: bHYPRE_StructVector_IOR.h
 bHYPRE_IOR.h: bHYPRE_StructVectorView_IOR.h
 bHYPRE_IOR.h: bHYPRE_Vector_IOR.h
+bHYPRE_IOR.h: bHYPRE_nPCG_IOR.h
 
 bHYPRE_IdentitySolver_IOR.h: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_IdentitySolver_IOR.h: sidl_header.h
@@ -313,6 +314,13 @@ bHYPRE_Vector_IOR.h: sidl_header.h
 bHYPRE_Vector_IOR.h: bHYPRE_Vector_IOR.h
 bHYPRE_Vector_IOR.h: sidl_BaseInterface_IOR.h
 
+bHYPRE_nPCG_IOR.h: /home/painter/linear_solvers/babel/Interfaces.idl
+bHYPRE_nPCG_IOR.h: sidl_header.h
+bHYPRE_nPCG_IOR.h: bHYPRE_Operator_IOR.h
+bHYPRE_nPCG_IOR.h: bHYPRE_PreconditionedSolver_IOR.h
+bHYPRE_nPCG_IOR.h: bHYPRE_Solver_IOR.h
+bHYPRE_nPCG_IOR.h: sidl_BaseClass_IOR.h
+
 
 # STUBDOCS dependencies.
 bHYPRE_BoomerAMG.fif: /home/painter/linear_solvers/babel/Interfaces.idl
@@ -400,6 +408,8 @@ bHYPRE_StructVector.fif: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_StructVectorView.fif: /home/painter/linear_solvers/babel/Interfaces.idl
 
 bHYPRE_Vector.fif: /home/painter/linear_solvers/babel/Interfaces.idl
+
+bHYPRE_nPCG.fif: /home/painter/linear_solvers/babel/Interfaces.idl
 
 
 # STUBFORTRANINC dependencies.
@@ -910,6 +920,20 @@ bHYPRE_Vector_fStub.c: sidl_Loader.h
 bHYPRE_Vector_fStub.c: bHYPRE_Vector_IOR.h
 bHYPRE_Vector_fStub.c: sidl_ClassInfo_IOR.h
 bHYPRE_Vector_fStub.c: sidl_BaseInterface_IOR.h
+
+bHYPRE_nPCG_fStub.c: /home/painter/linear_solvers/babel/Interfaces.idl
+bHYPRE_nPCG_fStub.c: sidlfortran.h
+bHYPRE_nPCG_fStub.c: sidl_header.h
+bHYPRE_nPCG_fStub.c: sidl_interface_IOR.h
+bHYPRE_nPCG_fStub.c: babel_config.h
+bHYPRE_nPCG_fStub.c: sidl_Loader.h
+bHYPRE_nPCG_fStub.c: bHYPRE_nPCG_IOR.h
+bHYPRE_nPCG_fStub.c: bHYPRE_Solver_IOR.h
+bHYPRE_nPCG_fStub.c: bHYPRE_MPICommunicator_IOR.h
+bHYPRE_nPCG_fStub.c: bHYPRE_Operator_IOR.h
+bHYPRE_nPCG_fStub.c: sidl_ClassInfo_IOR.h
+bHYPRE_nPCG_fStub.c: bHYPRE_Vector_IOR.h
+bHYPRE_nPCG_fStub.c: sidl_BaseInterface_IOR.h
 
 sidl_BaseClass_fStub.c: sidlfortran.h
 sidl_BaseClass_fStub.c: sidl_header.h

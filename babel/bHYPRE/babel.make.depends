@@ -292,6 +292,18 @@ bHYPRE_StructVector_Impl.h: sidl_BaseInterface.h
 bHYPRE_StructVector_Impl.h: bHYPRE_MatrixVectorView.h
 bHYPRE_StructVector_Impl.h: sidl_BaseClass.h
 
+bHYPRE_nPCG_Impl.h: /home/painter/linear_solvers/babel/Interfaces.idl
+bHYPRE_nPCG_Impl.h: sidl_header.h
+bHYPRE_nPCG_Impl.h: bHYPRE_Solver.h
+bHYPRE_nPCG_Impl.h: bHYPRE_MPICommunicator.h
+bHYPRE_nPCG_Impl.h: bHYPRE_Operator.h
+bHYPRE_nPCG_Impl.h: sidl_ClassInfo.h
+bHYPRE_nPCG_Impl.h: bHYPRE_Vector.h
+bHYPRE_nPCG_Impl.h: sidl_BaseInterface.h
+bHYPRE_nPCG_Impl.h: bHYPRE_nPCG.h
+bHYPRE_nPCG_Impl.h: sidl_BaseClass.h
+bHYPRE_nPCG_Impl.h: bHYPRE_PreconditionedSolver.h
+
 
 # IMPLSRCS dependencies.
 bHYPRE_BoomerAMG_Impl.c: /home/painter/linear_solvers/babel/Interfaces.idl
@@ -378,6 +390,9 @@ bHYPRE_StructStencil_Impl.c: bHYPRE_StructStencil_Impl.h
 
 bHYPRE_StructVector_Impl.c: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_StructVector_Impl.c: bHYPRE_StructVector_Impl.h
+
+bHYPRE_nPCG_Impl.c: /home/painter/linear_solvers/babel/Interfaces.idl
+bHYPRE_nPCG_Impl.c: bHYPRE_nPCG_Impl.h
 
 
 # IORHDRS dependencies.
@@ -472,6 +487,7 @@ bHYPRE_IOR.h: bHYPRE_StructStencil_IOR.h
 bHYPRE_IOR.h: bHYPRE_StructVector_IOR.h
 bHYPRE_IOR.h: bHYPRE_StructVectorView_IOR.h
 bHYPRE_IOR.h: bHYPRE_Vector_IOR.h
+bHYPRE_IOR.h: bHYPRE_nPCG_IOR.h
 
 bHYPRE_IdentitySolver_IOR.h: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_IdentitySolver_IOR.h: sidl_header.h
@@ -695,6 +711,13 @@ bHYPRE_Vector_IOR.h: sidl_header.h
 bHYPRE_Vector_IOR.h: bHYPRE_Vector_IOR.h
 bHYPRE_Vector_IOR.h: sidl_BaseInterface_IOR.h
 
+bHYPRE_nPCG_IOR.h: /home/painter/linear_solvers/babel/Interfaces.idl
+bHYPRE_nPCG_IOR.h: sidl_header.h
+bHYPRE_nPCG_IOR.h: bHYPRE_Operator_IOR.h
+bHYPRE_nPCG_IOR.h: bHYPRE_PreconditionedSolver_IOR.h
+bHYPRE_nPCG_IOR.h: bHYPRE_Solver_IOR.h
+bHYPRE_nPCG_IOR.h: sidl_BaseClass_IOR.h
+
 
 # IORSRCS dependencies.
 bHYPRE_BoomerAMG_IOR.c: /home/painter/linear_solvers/babel/Interfaces.idl
@@ -878,6 +901,13 @@ bHYPRE_StructVector_IOR.c: sidl_BaseClass.h
 bHYPRE_StructVector_IOR.c: sidl_ClassInfo.h
 bHYPRE_StructVector_IOR.c: sidl_ClassInfoI.h
 
+bHYPRE_nPCG_IOR.c: /home/painter/linear_solvers/babel/Interfaces.idl
+bHYPRE_nPCG_IOR.c: bHYPRE_nPCG_IOR.h
+bHYPRE_nPCG_IOR.c: sidl_BaseClass_Impl.h
+bHYPRE_nPCG_IOR.c: sidl_BaseClass.h
+bHYPRE_nPCG_IOR.c: sidl_ClassInfo.h
+bHYPRE_nPCG_IOR.c: sidl_ClassInfoI.h
+
 
 # SKELSRCS dependencies.
 bHYPRE_BoomerAMG_Skel.c: /home/painter/linear_solvers/babel/Interfaces.idl
@@ -990,6 +1020,10 @@ bHYPRE_StructVector_Skel.c: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_StructVector_Skel.c: bHYPRE_StructVector_IOR.h
 bHYPRE_StructVector_Skel.c: bHYPRE_StructVector.h
 
+bHYPRE_nPCG_Skel.c: /home/painter/linear_solvers/babel/Interfaces.idl
+bHYPRE_nPCG_Skel.c: bHYPRE_nPCG_IOR.h
+bHYPRE_nPCG_Skel.c: bHYPRE_nPCG.h
+
 
 # STUBHDRS dependencies.
 bHYPRE.h: /home/painter/linear_solvers/babel/Interfaces.idl
@@ -1033,6 +1067,7 @@ bHYPRE.h: bHYPRE_StructStencil.h
 bHYPRE.h: bHYPRE_StructVector.h
 bHYPRE.h: bHYPRE_StructVectorView.h
 bHYPRE.h: bHYPRE_Vector.h
+bHYPRE.h: bHYPRE_nPCG.h
 
 bHYPRE_BoomerAMG.h: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_BoomerAMG.h: sidl_header.h
@@ -1400,6 +1435,17 @@ bHYPRE_Vector.h: sidl_BaseInterface.h
 bHYPRE_Vector.h: sidl_ClassInfo.h
 bHYPRE_Vector.h: sidl_io_Serializer.h
 bHYPRE_Vector.h: sidl_io_Deserializer.h
+
+bHYPRE_nPCG.h: /home/painter/linear_solvers/babel/Interfaces.idl
+bHYPRE_nPCG.h: sidl_header.h
+bHYPRE_nPCG.h: bHYPRE_MPICommunicator.h
+bHYPRE_nPCG.h: bHYPRE_Operator.h
+bHYPRE_nPCG.h: bHYPRE_Solver.h
+bHYPRE_nPCG.h: bHYPRE_Vector.h
+bHYPRE_nPCG.h: sidl_BaseInterface.h
+bHYPRE_nPCG.h: sidl_ClassInfo.h
+bHYPRE_nPCG.h: sidl_io_Serializer.h
+bHYPRE_nPCG.h: sidl_io_Deserializer.h
 
 
 # STUBSRCS dependencies.
@@ -1827,5 +1873,16 @@ bHYPRE_Vector_Stub.c: sidl_rmi_InstanceHandle.h
 bHYPRE_Vector_Stub.c: sidl_rmi_ConnectRegistry.h
 bHYPRE_Vector_Stub.c: sidl_interface_IOR.h
 bHYPRE_Vector_Stub.c: sidl_BaseInterface_IOR.h
+
+bHYPRE_nPCG_Stub.c: /home/painter/linear_solvers/babel/Interfaces.idl
+bHYPRE_nPCG_Stub.c: bHYPRE_nPCG.h
+bHYPRE_nPCG_Stub.c: bHYPRE_nPCG_IOR.h
+bHYPRE_nPCG_Stub.c: sidl_interface_IOR.h
+bHYPRE_nPCG_Stub.c: sidl_rmi_InstanceHandle.h
+bHYPRE_nPCG_Stub.c: sidl_rmi_ConnectRegistry.h
+bHYPRE_nPCG_Stub.c: sidl_interface_IOR.h
+bHYPRE_nPCG_Stub.c: sidl_BaseInterface_IOR.h
+bHYPRE_nPCG_Stub.c: sidl_BaseClass.h
+bHYPRE_nPCG_Stub.c: sidl_ClassInfo.h
 
 

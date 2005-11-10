@@ -130,4 +130,7 @@
 #ifndef included_bHYPRE_Vector_h
 #include "bHYPRE_Vector.h"
 #endif
+#ifndef included_bHYPRE_nPCG_h
+#include "bHYPRE_nPCG.h"
+#endif
 

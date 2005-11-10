@@ -140,5 +140,8 @@
 #ifndef included_bHYPRE_Vector_IOR_h
 #include "bHYPRE_Vector_IOR.h"
 #endif
+#ifndef included_bHYPRE_nPCG_IOR_h
+#include "bHYPRE_nPCG_IOR.h"
+#endif
 
 #endif
