@@ -2527,6 +2527,7 @@ int MLI_Method_AMGSA::setupExtendedDomainDecomp2(MLI *mli)
    recvProcs = hypre_ParCSRCommPkgRecvProcs(commPkg);
    nSends    = hypre_ParCSRCommPkgNumSends(commPkg);
    sendProcs = hypre_ParCSRCommPkgSendProcs(commPkg);
+   if (nRecvs > 0) recvLengs = new int[nRecvs];
 
    /* --------------------------------------------------------------- */
    /* calculate the size of my expanded matrix AExt which is the sum  */
@@ -2535,7 +2536,10 @@ int MLI_Method_AMGSA::setupExtendedDomainDecomp2(MLI *mli)
 
    AExtNRows = 0;
    for (iP = 0; iP < nRecvs; iP++)
-      AExtNRows += Apartition[recvProcs[iP]+1] - Apartition[recvProcs[iP]];
+   {
+      recvLengs[iP] = Apartition[recvProcs[iP]+1] - Apartition[recvProcs[iP]];
+      AExtNRows += recvLengs[iP];
+   }
 
    /* --------------------------------------------------------------- */
    /* communicate processor offsets for AExt (needed to create        */
@@ -2798,6 +2802,7 @@ int MLI_Method_AMGSA::setupExtendedDomainDecomp2(MLI *mli)
    targv[6] = (char *) &comm;
    smootherPtr->setParams(paramString, 7, targv);
    if (nSends > 0) delete [] sendLengs;
+   if (nRecvs > 0) delete [] recvLengs;
 
    smootherPtr->setup(mli_ACExt);
    mli->setSmoother(level, MLI_SMOOTHER_PRE, smootherPtr);
