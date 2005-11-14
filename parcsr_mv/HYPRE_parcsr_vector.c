@@ -146,6 +146,17 @@ HYPRE_ParVectorScale( double value, HYPRE_ParVector x)
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_ParVectorAxpy
+ *--------------------------------------------------------------------------*/
+int
+HYPRE_ParVectorAxpy( double        alpha,
+                     HYPRE_ParVector x,
+                     HYPRE_ParVector y     )
+{
+   return hypre_ParVectorAxpy( alpha, (hypre_ParVector *)x, (hypre_ParVector *)y );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_ParVectorInnerProd
  *--------------------------------------------------------------------------*/
 
