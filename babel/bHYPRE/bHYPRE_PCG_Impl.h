@@ -46,10 +46,6 @@
 
 /* DO-NOT-DELETE splicer.begin(bHYPRE.PCG._includes) */
 /* Put additional include files here... */
-#include "HYPRE.h"
-#include "utilities.h"
-#include "krylov.h"
-#include "HYPRE_parcsr_ls.h"
 /* DO-NOT-DELETE splicer.end(bHYPRE.PCG._includes) */
 
 /*
@@ -60,27 +56,26 @@ struct bHYPRE_PCG__data {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.PCG._data) */
   /* Put private data members here... */
 
-   MPI_Comm comm;
-   HYPRE_Solver solver;
+   bHYPRE_MPICommunicator mpicomm;
    bHYPRE_Operator matrix;
-   char * vector_type;
-
-   /* parameter cache, to save in Set*Parameter functions and copy in Apply: */
    double tol;
    double atolf;
    double cf_tol;
-   int maxiter;
-   int relchange;
-   int twonorm;
-   int log_level;
-   int printlevel;
+   int max_iter;
+   int two_norm;
+   int rel_change;
    int stop_crit;
-
-   /* preconditioner cache, to save in SetPreconditioner and apply in Apply:*/
-   char * precond_name;
-   HYPRE_Solver * solverprecond;
-   HYPRE_PtrToSolverFcn precond; /* function */
-   HYPRE_PtrToSolverFcn precond_setup; /* function */
+   int converged;
+   bHYPRE_Solver precond;
+   int print_level;
+   int logging;
+   double * norms;
+   double * rel_norms;
+   bHYPRE_Vector p;
+   bHYPRE_Vector s;
+   bHYPRE_Vector r;
+   int num_iterations;
+   double rel_residual_norm;
 
   /* DO-NOT-DELETE splicer.end(bHYPRE.PCG._data) */
 };
@@ -124,7 +119,8 @@ impl_bHYPRE_PCG__dtor(
 extern
 bHYPRE_PCG
 impl_bHYPRE_PCG_Create(
-  /* in */ bHYPRE_MPICommunicator mpi_comm);
+  /* in */ bHYPRE_MPICommunicator mpi_comm,
+  /* in */ bHYPRE_Operator A);
 
 extern struct bHYPRE_PCG__object* impl_bHYPRE_PCG_fconnect_bHYPRE_PCG(char* url,
   sidl_BaseInterface *_ex);

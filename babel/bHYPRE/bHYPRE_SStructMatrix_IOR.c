@@ -232,6 +232,31 @@ bHYPRE_SStructMatrix_getClassInfo__exec(
 }
 
 static void
+bHYPRE_SStructMatrix_SetObjectType__exec(
+        struct bHYPRE_SStructMatrix__object* self,
+        struct sidl_io_Deserializer__object* inArgs,
+        struct sidl_io_Serializer__object* outArgs) {
+  /* stack space for arguments */
+  int32_t type;
+  int32_t _retval;
+  sidl_BaseInterface _ex   = NULL;
+  sidl_BaseInterface *_ex2 = &_ex;
+  /* unpack in and inout argments */
+  sidl_io_Deserializer_unpackInt( inArgs, "type", &type, _ex2);
+
+  /* make the call */
+  _retval = (self->d_epv->f_SetObjectType)(
+    self,
+    type);
+
+  /* pack return value */
+  sidl_io_Serializer_packInt( outArgs, "_retval", _retval, _ex2);
+
+  /* pack out and inout argments */
+
+}
+
+static void
 bHYPRE_SStructMatrix_SetCommunicator__exec(
         struct bHYPRE_SStructMatrix__object* self,
         struct sidl_io_Deserializer__object* inArgs,
@@ -1011,6 +1036,7 @@ ior_bHYPRE_SStructMatrix__exec(
       bHYPRE_SStructMatrix_SetIntArray2Parameter__exec },
     { "SetIntParameter", bHYPRE_SStructMatrix_SetIntParameter__exec },
     { "SetNSSymmetric", bHYPRE_SStructMatrix_SetNSSymmetric__exec },
+    { "SetObjectType", bHYPRE_SStructMatrix_SetObjectType__exec },
     { "SetStringParameter", bHYPRE_SStructMatrix_SetStringParameter__exec },
     { "SetSymmetric", bHYPRE_SStructMatrix_SetSymmetric__exec },
     { "SetValues", bHYPRE_SStructMatrix_SetValues__exec },
@@ -1092,6 +1118,7 @@ static void bHYPRE_SStructMatrix__init_epv(
     bHYPRE_SStructMatrix__object*,const char*)) s1->d_epv->f_isType;
   epv->f_getClassInfo                  = (struct sidl_ClassInfo__object* 
     (*)(struct bHYPRE_SStructMatrix__object*)) s1->d_epv->f_getClassInfo;
+  epv->f_SetObjectType                 = NULL;
   epv->f_SetCommunicator               = NULL;
   epv->f_Initialize                    = NULL;
   epv->f_Assemble                      = NULL;

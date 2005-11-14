@@ -485,7 +485,7 @@ impl_bHYPRE_SStructDiagScale_Apply(
    HA = dataA -> matrix;
 
    /* does x = y/diagA as approximation to solving Ax=y for x ... */
-   ierr += HYPRE_SStructDiagScale( HSSdummy, HA, Hx, Hb );
+   ierr += HYPRE_SStructDiagScale( HSSdummy, HA, Hb, Hx );
 
    return ierr;
 

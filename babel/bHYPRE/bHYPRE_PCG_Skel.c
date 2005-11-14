@@ -32,7 +32,8 @@ impl_bHYPRE_PCG__dtor(
 extern
 bHYPRE_PCG
 impl_bHYPRE_PCG_Create(
-  /* in */ bHYPRE_MPICommunicator mpi_comm);
+  /* in */ bHYPRE_MPICommunicator mpi_comm,
+  /* in */ bHYPRE_Operator A);
 
 extern struct bHYPRE_PCG__object* impl_bHYPRE_PCG_fconnect_bHYPRE_PCG(char* url,
   sidl_BaseInterface *_ex);

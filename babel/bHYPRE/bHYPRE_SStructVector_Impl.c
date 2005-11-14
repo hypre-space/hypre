@@ -35,6 +35,7 @@
 #include "bHYPRE_SStructGrid_Impl.h"
 #include "bHYPRE_StructVector_Impl.h"
 #include "bHYPRE_MPICommunicator_Impl.h"
+#include "sstruct_mv.h"
 /* DO-NOT-DELETE splicer.end(bHYPRE.SStructVector._includes) */
 
 /*
@@ -237,6 +238,7 @@ impl_bHYPRE_SStructVector_Initialize(
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructVector.Initialize) */
   /* Insert the implementation of the Initialize method here... */
+   /* Create and SetObjectType should be called before Initialize */
 
    int ierr = 0;
    struct bHYPRE_SStructVector__data * data;
@@ -245,7 +247,6 @@ impl_bHYPRE_SStructVector_Initialize(
    Hy = data -> vec;
 
    ierr = HYPRE_SStructVectorInitialize( Hy );
-   HYPRE_SStructVectorSetObjectType( Hy, HYPRE_STRUCT );
 
    return( ierr );
 
@@ -351,10 +352,7 @@ impl_bHYPRE_SStructVector_SetGrid(
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructVector.SetGrid) */
   /* Insert the implementation of the SetGrid method here... */
-   /* N.B. This is the only grid-setting function defined in the interface.
-    So this is the only place to call HYPRE_SStructVectorCreate, which requires a grid.
-    Note that SetGrid cannot be called twice on the same vector.  The grid cannot be changed.
-
+   /* The grid cannot be changed.  It is used only for the creation process.
     SetCommunicator should have been called before the time SetGrid is called.
     Initialize, value-setting functions, and Assemble should be called afterwards.
    */
@@ -800,7 +798,33 @@ impl_bHYPRE_SStructVector_Copy(
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructVector.Copy) */
   /* Insert the implementation of the Copy method here... */
-   return 1;
+   /* copy x into self, x should be the same size */
+
+   int ierr = 0;
+   struct bHYPRE_SStructVector__data * data;
+   struct bHYPRE_SStructVector__data * datax;
+   bHYPRE_SStructVector bSSx;
+   HYPRE_SStructVector Hx;
+   HYPRE_SStructVector Hself;
+
+   if ( bHYPRE_Vector_queryInt( x, "bHYPRE.SStructVector" ) )
+   {
+      bSSx = bHYPRE_SStructVector__cast( x );
+   }
+   else
+   {
+      hypre_assert( "Unrecognized vector type."==(char *)x );
+   }
+
+   data = bHYPRE_SStructVector__get_data( self );
+   datax = bHYPRE_SStructVector__get_data( bSSx );
+   Hself = data->vec;
+   Hx = datax->vec;
+
+   ierr += HYPRE_SStructVectorCopy( Hx, Hself );
+
+   return ierr;
+
   /* DO-NOT-DELETE splicer.end(bHYPRE.SStructVector.Copy) */
 }
 
@@ -826,7 +850,47 @@ impl_bHYPRE_SStructVector_Clone(
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructVector.Clone) */
   /* Insert the implementation of the Clone method here... */
-   return 1;
+   /* This is a deep copy in terms of the data array,
+      shallow in terms of the grid.
+      Initialize is called on the new vector, but not Assemble. */
+
+   int ierr = 0;
+   struct bHYPRE_SStructVector__data * data, * data_x;
+   bHYPRE_SStructVectorView bHYPRE_x;
+   bHYPRE_SStructVector bHYPREP_x;
+   HYPRE_SStructVector Hself, Hx;
+   HYPRE_SStructGrid grid;
+   MPI_Comm comm;
+   int my_id;
+
+   data = bHYPRE_SStructVector__get_data( self );
+   Hself = data->vec;
+   comm = data->comm;
+   MPI_Comm_rank(comm, &my_id );
+
+   bHYPREP_x = bHYPRE_SStructVector__create();
+   bHYPRE_x = bHYPRE_SStructVectorView__cast( bHYPREP_x );
+
+   data_x = bHYPRE_SStructVector__get_data( bHYPREP_x );
+   data_x->comm = comm;
+
+   grid = hypre_SStructVectorGrid(Hself);
+   ierr += HYPRE_SStructVectorCreate( comm, grid, &Hx );
+   ierr += HYPRE_SStructVectorInitialize( Hx );
+   data_x -> vec = Hx;
+
+   /* Copy data in self to x... */
+   HYPRE_SStructVectorCopy( Hself, Hx );
+
+   ierr += HYPRE_SStructVectorSetObjectType(
+      Hx,
+      hypre_SStructVectorObjectType((hypre_SStructVector *)Hself) );
+   ierr += bHYPRE_SStructVectorView_Initialize( bHYPRE_x );
+
+   *x = bHYPRE_Vector__cast( bHYPRE_x );
+
+   return( ierr );
+
   /* DO-NOT-DELETE splicer.end(bHYPRE.SStructVector.Clone) */
 }
 
@@ -848,7 +912,17 @@ impl_bHYPRE_SStructVector_Scale(
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructVector.Scale) */
   /* Insert the implementation of the Scale method here... */
-   return 1;
+
+   int ierr = 0;
+   struct bHYPRE_SStructVector__data * data;
+   HYPRE_SStructVector Hy;
+   data = bHYPRE_SStructVector__get_data( self );
+   Hy = data -> vec;
+
+   ierr += HYPRE_SStructVectorScale( a, Hy );
+
+   return ierr;
+
   /* DO-NOT-DELETE splicer.end(bHYPRE.SStructVector.Scale) */
 }
 
@@ -871,7 +945,32 @@ impl_bHYPRE_SStructVector_Dot(
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructVector.Dot) */
   /* Insert the implementation of the Dot method here... */
-   return 1;
+
+   int ierr = 0;
+   struct bHYPRE_SStructVector__data * data;
+   struct bHYPRE_SStructVector__data * datax;
+   bHYPRE_SStructVector bSSx;
+   HYPRE_SStructVector Hself;
+   HYPRE_SStructVector Hx;
+
+   if ( bHYPRE_Vector_queryInt( x, "bHYPRE.SStructVector" ) )
+   {
+      bSSx = bHYPRE_SStructVector__cast( x );
+   }
+   else
+   {
+      hypre_assert( "Unrecognized vector type."==(char *)x );
+   }
+
+   data = bHYPRE_SStructVector__get_data( self );
+   datax = bHYPRE_SStructVector__get_data( bSSx );
+   Hself = data->vec;
+   Hx = datax->vec;
+
+   ierr += HYPRE_SStructInnerProd( Hself, Hx, d );
+
+   return ierr;
+
   /* DO-NOT-DELETE splicer.end(bHYPRE.SStructVector.Dot) */
 }
 
@@ -894,9 +993,38 @@ impl_bHYPRE_SStructVector_Axpy(
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructVector.Axpy) */
   /* Insert the implementation of the Axpy method here... */
-   return 1;
+   /* self = self + a*x */
+
+   int ierr = 0;
+   struct bHYPRE_SStructVector__data * data;
+   struct bHYPRE_SStructVector__data * datax;
+   bHYPRE_SStructVector bSSx;
+   HYPRE_SStructVector Hself;
+   HYPRE_SStructVector Hx;
+
+   if ( bHYPRE_Vector_queryInt( x, "bHYPRE.SStructVector" ) )
+   {
+      bSSx = bHYPRE_SStructVector__cast( x );
+   }
+   else
+   {
+      hypre_assert( "Unrecognized vector type."==(char *)x );
+   }
+
+   data = bHYPRE_SStructVector__get_data( self );
+   datax = bHYPRE_SStructVector__get_data( bSSx );
+   Hself = data->vec;
+   Hx = datax->vec;
+
+   ierr += HYPRE_SStructAxpy( a, Hx, Hself );
+
+   return ierr;
+
+
   /* DO-NOT-DELETE splicer.end(bHYPRE.SStructVector.Axpy) */
 }
+
+
 /* Babel internal methods, Users should not edit below this line. */
 struct bHYPRE_SStructGrid__object* 
   impl_bHYPRE_SStructVector_fconnect_bHYPRE_SStructGrid(char* url,

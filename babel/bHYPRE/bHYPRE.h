@@ -19,6 +19,9 @@
 #ifndef included_bHYPRE_GMRES_h
 #include "bHYPRE_GMRES.h"
 #endif
+#ifndef included_bHYPRE_HPCG_h
+#include "bHYPRE_HPCG.h"
+#endif
 #ifndef included_bHYPRE_IJMatrixView_h
 #include "bHYPRE_IJMatrixView.h"
 #endif
@@ -130,5 +133,4 @@
 #ifndef included_bHYPRE_Vector_h
 #include "bHYPRE_Vector.h"
 #endif
-
 

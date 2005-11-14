@@ -29,6 +29,9 @@
 #ifndef included_bHYPRE_GMRES_IOR_h
 #include "bHYPRE_GMRES_IOR.h"
 #endif
+#ifndef included_bHYPRE_HPCG_IOR_h
+#include "bHYPRE_HPCG_IOR.h"
+#endif
 #ifndef included_bHYPRE_IJMatrixView_IOR_h
 #include "bHYPRE_IJMatrixView_IOR.h"
 #endif

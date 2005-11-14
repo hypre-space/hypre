@@ -15,21 +15,6 @@
 
 /**
  * Symbol "bHYPRE.PCG" (version 1.0.0)
- * 
- * Objects of this type can be cast to PreconditionedSolver objects
- * using the {\tt \_\_cast} methods.
- * 
- * RDF: Documentation goes here.
- * 
- * This PCG solver checks whether the matrix, vectors, and preconditioner
- * are of known types, and will not work with any other types.
- * Presently, the recognized data types are:
- * matrix, vector: IJParCSRMatrix, IJParCSRVector
- * matrix, vector: StructMatrix, StructVector
- * preconditioner: BoomerAMG, ParaSails, ParCSRDiagScale, IdentitySolver
- * preconditioner: StructSMG, StructPFMG
- * 
- * 
  */
 struct bHYPRE_PCG__object;
 struct bHYPRE_PCG__array;
@@ -120,7 +105,8 @@ bHYPRE_PCG_getClassInfo(
  */
 bHYPRE_PCG
 bHYPRE_PCG_Create(
-  /* in */ bHYPRE_MPICommunicator mpi_comm);
+  /* in */ bHYPRE_MPICommunicator mpi_comm,
+  /* in */ bHYPRE_Operator A);
 
 /**
  * Set the MPI Communicator.

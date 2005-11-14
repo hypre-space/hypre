@@ -12,21 +12,6 @@
 
 /*
  * Symbol "bHYPRE.PCG" (version 1.0.0)
- * 
- * Objects of this type can be cast to PreconditionedSolver objects
- * using the {\tt \_\_cast} methods.
- * 
- * RDF: Documentation goes here.
- * 
- * This PCG solver checks whether the matrix, vectors, and preconditioner
- * are of known types, and will not work with any other types.
- * Presently, the recognized data types are:
- * matrix, vector: IJParCSRMatrix, IJParCSRVector
- * matrix, vector: StructMatrix, StructVector
- * preconditioner: BoomerAMG, ParaSails, ParCSRDiagScale, IdentitySolver
- * preconditioner: StructSMG, StructPFMG
- * 
- * 
  */
 
 #include <stddef.h>
@@ -349,18 +334,24 @@ void
 SIDLFortran77Symbol(bhypre_pcg_create_f,BHYPRE_PCG_CREATE_F,bHYPRE_PCG_Create_f)
 (
   int64_t *mpi_comm,
+  int64_t *A,
   int64_t *retval
 )
 {
   const struct bHYPRE_PCG__sepv *_epv = _getSEPV();
   struct bHYPRE_MPICommunicator__object* _proxy_mpi_comm = NULL;
+  struct bHYPRE_Operator__object* _proxy_A = NULL;
   struct bHYPRE_PCG__object* _proxy_retval = NULL;
   _proxy_mpi_comm =
     (struct bHYPRE_MPICommunicator__object*)
     (ptrdiff_t)(*mpi_comm);
+  _proxy_A =
+    (struct bHYPRE_Operator__object*)
+    (ptrdiff_t)(*A);
   _proxy_retval = 
     (*(_epv->f_Create))(
-      _proxy_mpi_comm
+      _proxy_mpi_comm,
+      _proxy_A
     );
   *retval = (ptrdiff_t)_proxy_retval;
 }

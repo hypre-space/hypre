@@ -504,7 +504,7 @@ impl_bHYPRE_ParCSRDiagScale_Apply(
    /* not used HYPRE_A = (HYPRE_Matrix) AA;*/
 
    /* does x = y/diagA as approximation to solving Ax=y for x ... */
-   ierr += HYPRE_ParCSRDiagScale( *solver, AA, xx, bb );
+   ierr += HYPRE_ParCSRDiagScale( *solver, AA, bb, xx );
 
    return ierr;
 

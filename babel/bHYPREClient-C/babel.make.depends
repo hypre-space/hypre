@@ -18,6 +18,13 @@ bHYPRE_GMRES_IOR.h: bHYPRE_PreconditionedSolver_IOR.h
 bHYPRE_GMRES_IOR.h: bHYPRE_Solver_IOR.h
 bHYPRE_GMRES_IOR.h: sidl_BaseClass_IOR.h
 
+bHYPRE_HPCG_IOR.h: /home/painter/linear_solvers/babel/Interfaces.idl
+bHYPRE_HPCG_IOR.h: sidl_header.h
+bHYPRE_HPCG_IOR.h: bHYPRE_Operator_IOR.h
+bHYPRE_HPCG_IOR.h: bHYPRE_PreconditionedSolver_IOR.h
+bHYPRE_HPCG_IOR.h: bHYPRE_Solver_IOR.h
+bHYPRE_HPCG_IOR.h: sidl_BaseClass_IOR.h
+
 bHYPRE_IJMatrixView_IOR.h: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_IJMatrixView_IOR.h: sidl_header.h
 bHYPRE_IJMatrixView_IOR.h: bHYPRE_IJMatrixView_IOR.h
@@ -53,6 +60,7 @@ bHYPRE_IOR.h: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_IOR.h: bHYPRE_BoomerAMG_IOR.h
 bHYPRE_IOR.h: bHYPRE_CoefficientAccess_IOR.h
 bHYPRE_IOR.h: bHYPRE_GMRES_IOR.h
+bHYPRE_IOR.h: bHYPRE_HPCG_IOR.h
 bHYPRE_IOR.h: bHYPRE_IJMatrixView_IOR.h
 bHYPRE_IOR.h: bHYPRE_IJParCSRMatrix_IOR.h
 bHYPRE_IOR.h: bHYPRE_IJParCSRVector_IOR.h
@@ -319,6 +327,7 @@ bHYPRE.h: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE.h: bHYPRE_BoomerAMG.h
 bHYPRE.h: bHYPRE_CoefficientAccess.h
 bHYPRE.h: bHYPRE_GMRES.h
+bHYPRE.h: bHYPRE_HPCG.h
 bHYPRE.h: bHYPRE_IJMatrixView.h
 bHYPRE.h: bHYPRE_IJParCSRMatrix.h
 bHYPRE.h: bHYPRE_IJParCSRVector.h
@@ -384,6 +393,17 @@ bHYPRE_GMRES.h: sidl_BaseInterface.h
 bHYPRE_GMRES.h: sidl_ClassInfo.h
 bHYPRE_GMRES.h: sidl_io_Serializer.h
 bHYPRE_GMRES.h: sidl_io_Deserializer.h
+
+bHYPRE_HPCG.h: /home/painter/linear_solvers/babel/Interfaces.idl
+bHYPRE_HPCG.h: sidl_header.h
+bHYPRE_HPCG.h: bHYPRE_MPICommunicator.h
+bHYPRE_HPCG.h: bHYPRE_Operator.h
+bHYPRE_HPCG.h: bHYPRE_Solver.h
+bHYPRE_HPCG.h: bHYPRE_Vector.h
+bHYPRE_HPCG.h: sidl_BaseInterface.h
+bHYPRE_HPCG.h: sidl_ClassInfo.h
+bHYPRE_HPCG.h: sidl_io_Serializer.h
+bHYPRE_HPCG.h: sidl_io_Deserializer.h
 
 bHYPRE_IJMatrixView.h: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_IJMatrixView.h: sidl_header.h
@@ -725,7 +745,6 @@ bHYPRE_Vector.h: sidl_io_Serializer.h
 bHYPRE_Vector.h: sidl_io_Deserializer.h
 
 
-
 # STUBSRCS dependencies.
 bHYPRE_BoomerAMG_Stub.c: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_BoomerAMG_Stub.c: bHYPRE_BoomerAMG.h
@@ -758,6 +777,17 @@ bHYPRE_GMRES_Stub.c: sidl_interface_IOR.h
 bHYPRE_GMRES_Stub.c: sidl_BaseInterface_IOR.h
 bHYPRE_GMRES_Stub.c: sidl_BaseClass.h
 bHYPRE_GMRES_Stub.c: sidl_ClassInfo.h
+
+bHYPRE_HPCG_Stub.c: /home/painter/linear_solvers/babel/Interfaces.idl
+bHYPRE_HPCG_Stub.c: bHYPRE_HPCG.h
+bHYPRE_HPCG_Stub.c: bHYPRE_HPCG_IOR.h
+bHYPRE_HPCG_Stub.c: sidl_interface_IOR.h
+bHYPRE_HPCG_Stub.c: sidl_rmi_InstanceHandle.h
+bHYPRE_HPCG_Stub.c: sidl_rmi_ConnectRegistry.h
+bHYPRE_HPCG_Stub.c: sidl_interface_IOR.h
+bHYPRE_HPCG_Stub.c: sidl_BaseInterface_IOR.h
+bHYPRE_HPCG_Stub.c: sidl_BaseClass.h
+bHYPRE_HPCG_Stub.c: sidl_ClassInfo.h
 
 bHYPRE_IJMatrixView_Stub.c: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_IJMatrixView_Stub.c: bHYPRE_IJMatrixView.h

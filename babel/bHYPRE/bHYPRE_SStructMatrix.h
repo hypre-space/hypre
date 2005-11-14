@@ -112,6 +112,14 @@ bHYPRE_SStructMatrix_Create(
   /* in */ bHYPRE_SStructGraph graph);
 
 /**
+ * Method:  SetObjectType[]
+ */
+int32_t
+bHYPRE_SStructMatrix_SetObjectType(
+  /* in */ bHYPRE_SStructMatrix self,
+  /* in */ int32_t type);
+
+/**
  * Set the MPI Communicator.  DEPRECATED, Use Create()
  * 
  */

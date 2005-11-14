@@ -186,6 +186,22 @@ C       out bHYPRE.SStructMatrix retval
 
 
 C       
+C       Method:  SetObjectType[]
+C       
+
+        subroutine bHYPRE_SStructMatrix_SetObjectType_f(self, type,
+     &     retval)
+        implicit none
+C       in bHYPRE.SStructMatrix self
+        integer*8 self
+C       in int type
+        integer*4 type
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
 C       Set the MPI Communicator.  DEPRECATED, Use Create()
 C       
 C       

@@ -159,6 +159,37 @@ impl_bHYPRE_SStructMatrix_Create(
 }
 
 /*
+ * Method:  SetObjectType[]
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_SStructMatrix_SetObjectType"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+int32_t
+impl_bHYPRE_SStructMatrix_SetObjectType(
+  /* in */ bHYPRE_SStructMatrix self,
+  /* in */ int32_t type)
+{
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructMatrix.SetObjectType) */
+  /* Insert-Code-Here {bHYPRE.SStructMatrix.SetObjectType} (SetObjectType method) */
+
+   int ierr = 0;
+   struct bHYPRE_SStructMatrix__data * data;
+   HYPRE_SStructMatrix HA;
+   data = bHYPRE_SStructMatrix__get_data( self );
+   HA = data -> matrix;
+
+   ierr = HYPRE_SStructMatrixSetObjectType( HA, type );
+
+   return( ierr );
+
+  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructMatrix.SetObjectType) */
+}
+
+/*
  * Set the MPI Communicator.  DEPRECATED, Use Create()
  * 
  */
@@ -207,6 +238,7 @@ impl_bHYPRE_SStructMatrix_Initialize(
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructMatrix.Initialize) */
   /* Insert the implementation of the Initialize method here... */
+   /* SetObjectType should be called beforehand */
 
    int ierr=0;
    struct bHYPRE_SStructMatrix__data * data;
@@ -216,7 +248,6 @@ impl_bHYPRE_SStructMatrix_Initialize(
    HA = data -> matrix;
 
    ierr = HYPRE_SStructMatrixInitialize( HA );
-   HYPRE_SStructMatrixSetObjectType( HA, HYPRE_STRUCT );
 
    return( ierr );
 

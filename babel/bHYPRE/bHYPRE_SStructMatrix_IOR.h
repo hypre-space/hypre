@@ -250,6 +250,9 @@ struct bHYPRE_SStructMatrix__epv {
     /* in */ const char* filename,
     /* in */ int32_t all);
   /* Methods introduced in bHYPRE.SStructMatrix-v1.0.0 */
+  int32_t (*f_SetObjectType)(
+    /* in */ struct bHYPRE_SStructMatrix__object* self,
+    /* in */ int32_t type);
 };
 
 /*

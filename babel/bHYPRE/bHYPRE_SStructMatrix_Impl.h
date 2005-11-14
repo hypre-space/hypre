@@ -175,6 +175,12 @@ extern char* impl_bHYPRE_SStructMatrix_fgetURL_sidl_BaseClass(struct
   sidl_BaseClass__object* obj);
 extern
 int32_t
+impl_bHYPRE_SStructMatrix_SetObjectType(
+  /* in */ bHYPRE_SStructMatrix self,
+  /* in */ int32_t type);
+
+extern
+int32_t
 impl_bHYPRE_SStructMatrix_SetCommunicator(
   /* in */ bHYPRE_SStructMatrix self,
   /* in */ bHYPRE_MPICommunicator mpi_comm);

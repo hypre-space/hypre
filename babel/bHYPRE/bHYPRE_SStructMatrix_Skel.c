@@ -98,6 +98,12 @@ extern char* impl_bHYPRE_SStructMatrix_fgetURL_sidl_BaseClass(struct
   sidl_BaseClass__object* obj);
 extern
 int32_t
+impl_bHYPRE_SStructMatrix_SetObjectType(
+  /* in */ bHYPRE_SStructMatrix self,
+  /* in */ int32_t type);
+
+extern
+int32_t
 impl_bHYPRE_SStructMatrix_SetCommunicator(
   /* in */ bHYPRE_SStructMatrix self,
   /* in */ bHYPRE_MPICommunicator mpi_comm);
@@ -578,6 +584,7 @@ bHYPRE_SStructMatrix__set_epv(struct bHYPRE_SStructMatrix__epv *epv)
 {
   epv->f__ctor = impl_bHYPRE_SStructMatrix__ctor;
   epv->f__dtor = impl_bHYPRE_SStructMatrix__dtor;
+  epv->f_SetObjectType = impl_bHYPRE_SStructMatrix_SetObjectType;
   epv->f_SetCommunicator = impl_bHYPRE_SStructMatrix_SetCommunicator;
   epv->f_Initialize = impl_bHYPRE_SStructMatrix_Initialize;
   epv->f_Assemble = impl_bHYPRE_SStructMatrix_Assemble;

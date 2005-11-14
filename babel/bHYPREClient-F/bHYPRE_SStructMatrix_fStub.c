@@ -363,6 +363,31 @@ SIDLFortran77Symbol(bhypre_sstructmatrix_create_f,BHYPRE_SSTRUCTMATRIX_CREATE_F,
 }
 
 /*
+ * Method:  SetObjectType[]
+ */
+
+void
+SIDLFortran77Symbol(bhypre_sstructmatrix_setobjecttype_f,BHYPRE_SSTRUCTMATRIX_SETOBJECTTYPE_F,bHYPRE_SStructMatrix_SetObjectType_f)
+(
+  int64_t *self,
+  int32_t *type,
+  int32_t *retval
+)
+{
+  struct bHYPRE_SStructMatrix__epv *_epv = NULL;
+  struct bHYPRE_SStructMatrix__object* _proxy_self = NULL;
+  _proxy_self =
+    (struct bHYPRE_SStructMatrix__object*)
+    (ptrdiff_t)(*self);
+  _epv = _proxy_self->d_epv;
+  *retval = 
+    (*(_epv->f_SetObjectType))(
+      _proxy_self,
+      *type
+    );
+}
+
+/*
  * Set the MPI Communicator.  DEPRECATED, Use Create()
  * 
  */

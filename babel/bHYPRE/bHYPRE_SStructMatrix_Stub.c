@@ -238,6 +238,20 @@ bHYPRE_SStructMatrix_Create(
 }
 
 /*
+ * Method:  SetObjectType[]
+ */
+
+int32_t
+bHYPRE_SStructMatrix_SetObjectType(
+  /* in */ bHYPRE_SStructMatrix self,
+  /* in */ int32_t type)
+{
+  return (*self->d_epv->f_SetObjectType)(
+    self,
+    type);
+}
+
+/*
  * Set the MPI Communicator.  DEPRECATED, Use Create()
  * 
  */
@@ -1517,6 +1531,39 @@ remote_bHYPRE_SStructMatrix_getClassInfo(
   return 0;
 }
 
+/* REMOTE METHOD STUB:SetObjectType */
+static int32_t
+remote_bHYPRE_SStructMatrix_SetObjectType(
+  /* in */ struct bHYPRE_SStructMatrix__object* self /* TLD */,
+  /* in */ int32_t type)
+{
+  sidl_BaseInterface _ex = NULL;
+  sidl_BaseInterface *_ex2 =&_ex;
+  /* initialize a new invocation */
+  sidl_rmi_InstanceHandle _conn = (sidl_rmi_InstanceHandle)self->d_data;
+  sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
+    "SetObjectType", _ex2 );
+  sidl_rmi_Response _rsvp = NULL;
+  int32_t _retval;
+
+  /* pack in and inout arguments */
+  sidl_rmi_Invocation_packInt( _inv, "type", type, _ex2);
+
+  /* send actual RMI request */
+  _rsvp = sidl_rmi_Invocation_invokeMethod(_inv,_ex2);
+
+  /* extract return value */
+  sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval, _ex2);
+
+  /* unpack out and inout arguments */
+
+  /* cleanup and return */
+  sidl_rmi_Response_done(_rsvp, _ex2);
+  sidl_rmi_Invocation_deleteRef(_inv);
+  sidl_rmi_Response_deleteRef(_rsvp);
+  return _retval;
+}
+
 /* REMOTE METHOD STUB:SetCommunicator */
 static int32_t
 remote_bHYPRE_SStructMatrix_SetCommunicator(
@@ -2391,6 +2438,8 @@ static void bHYPRE_SStructMatrix__init_remote_epv(void)
   epv->f_isType                        = remote_bHYPRE_SStructMatrix_isType;
   epv->f_getClassInfo                  = 
     remote_bHYPRE_SStructMatrix_getClassInfo;
+  epv->f_SetObjectType                 = 
+    remote_bHYPRE_SStructMatrix_SetObjectType;
   epv->f_SetCommunicator               = 
     remote_bHYPRE_SStructMatrix_SetCommunicator;
   epv->f_Initialize                    = remote_bHYPRE_SStructMatrix_Initialize;

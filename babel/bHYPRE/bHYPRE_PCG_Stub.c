@@ -226,10 +226,12 @@ bHYPRE_PCG_getClassInfo(
 
 bHYPRE_PCG
 bHYPRE_PCG_Create(
-  /* in */ bHYPRE_MPICommunicator mpi_comm)
+  /* in */ bHYPRE_MPICommunicator mpi_comm,
+  /* in */ bHYPRE_Operator A)
 {
   return (_getSEPV()->f_Create)(
-    mpi_comm);
+    mpi_comm,
+    A);
 }
 
 /*
