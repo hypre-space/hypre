@@ -549,7 +549,7 @@ int MLI_Method_AMGSA::setup( MLI *mli )
 
 #define DEBUG
 #ifdef DEBUG
-   int                *partition, ANRows, AStart, AEnd, *rowSizes; 
+   int                *partition, ANRows, AStart, AEnd; 
    double             *XData, rnorm;
    HYPRE_IJVector     IJX, IJY;
    hypre_ParCSRMatrix *hypreA;
