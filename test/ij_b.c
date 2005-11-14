@@ -58,6 +58,7 @@ main( int   argc,
    int                 build_funcs_type;
    int                 build_funcs_arg_index;
    int                 solver_id;
+   int                 hpcg = 0;
    int                 ioutdat;
    int                 poutdat;
    int                 log_level;
@@ -83,6 +84,7 @@ main( int   argc,
 
    bHYPRE_BoomerAMG        bHYPRE_AMG;
    bHYPRE_PCG           bHYPRE_PCG;
+   bHYPRE_HPCG          bHYPRE_HPCG;
    bHYPRE_GMRES         bHYPRE_GMRES;
    bHYPRE_ParCSRDiagScale  bHYPRE_ParCSRDiagScale;
    bHYPRE_ParaSails     bHYPRE_ParaSails;
@@ -259,6 +261,11 @@ main( int   argc,
       {
          arg_index++;
          solver_id = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-hpcg") == 0 )
+      {
+         arg_index++;
+         hpcg = atoi(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-rhsfromfile") == 0 )
       {
@@ -706,6 +713,7 @@ main( int   argc,
       printf("       43*=Euclid-PCG       44*=Euclid-GMRES   \n");
       printf("       45*=Euclid-BICGSTAB\n");
       printf("Solvers marked with '*' have not yet been implemented.\n");
+      printf("   -hpcg 1               : for HYPRE-interface PCG solver\n");
       printf("\n");
       printf("   -cljp                 : CLJP coarsening \n");
       printf("   -ruge                 : Ruge coarsening (local)\n");
@@ -1572,17 +1580,22 @@ main( int   argc,
 
    if (solver_id == 1 || solver_id == 2 || solver_id == 8 || 
        solver_id == 12 || solver_id == 43)
+      if ( hpcg==0 )
    {
 
+      ioutdat = 2;
       time_index = hypre_InitializeTiming("PCG Setup");
       hypre_BeginTiming(time_index);
  
-      bHYPRE_PCG = bHYPRE_PCG_Create( bmpicomm );
+      bHYPRE_op_A = bHYPRE_Operator__cast( bHYPRE_parcsr_A );
+      bHYPRE_PCG = bHYPRE_PCG_Create( bmpicomm, bHYPRE_op_A );
       bHYPRE_Vector_b = bHYPRE_Vector__cast( bHYPRE_b );
       bHYPRE_Vector_x = bHYPRE_Vector__cast( bHYPRE_x );
+      bHYPRE_Vector_Dot( bHYPRE_Vector_b, bHYPRE_Vector_b, &tmp );
+      printf( "b.b=%f\n", tmp );
+      bHYPRE_Vector_Dot( bHYPRE_Vector_x, bHYPRE_Vector_x, &tmp );
+      printf( "x.x=%f\n", tmp );
 
-      bHYPRE_op_A = bHYPRE_Operator__cast( bHYPRE_parcsr_A );
-      bHYPRE_PCG_SetOperator( bHYPRE_PCG, bHYPRE_op_A );
       bHYPRE_PCG_SetIntParameter( bHYPRE_PCG, "MaxIterations", 500);
       bHYPRE_PCG_SetDoubleParameter( bHYPRE_PCG, "Tolerance", tol);
       bHYPRE_PCG_SetIntParameter( bHYPRE_PCG, "TwoNorm", 1 );
@@ -1773,6 +1786,250 @@ main( int   argc,
                                          &final_res_norm );
 
       bHYPRE_PCG_deleteRef( bHYPRE_PCG );
+      if ( solver_id == 1 )
+      {
+         bHYPRE_BoomerAMG_deleteRef( bHYPRE_AMG );
+      }
+      else if ( solver_id == 2 )
+      {
+         bHYPRE_ParCSRDiagScale_deleteRef( bHYPRE_ParCSRDiagScale );
+      }
+      else if (solver_id == 8)
+      {
+         bHYPRE_ParaSails_deleteRef( bHYPRE_ParaSails );
+      }
+#ifdef DO_THIS_LATER
+   else if (solver_id == 12)
+   {
+   HYPRE_SchwarzDestroy(pcg_precond);
+   }
+   else if (solver_id == 43)
+   {
+   / * HYPRE_EuclidPrintParams(pcg_precond); * /
+   HYPRE_EuclidDestroy(pcg_precond);
+   }
+#endif  /*DO_THIS_LATER*/
+
+      if (myid == 0)
+      {
+         printf("\n");
+         printf("Iterations = %d\n", num_iterations);
+         printf("Final Relative Residual Norm = %e\n", final_res_norm);
+         printf("\n");
+      }
+ 
+   }
+
+   /*-----------------------------------------------------------
+    * Solve the system using original PCG 
+    *-----------------------------------------------------------*/
+
+   if (solver_id == 1 || solver_id == 2 || solver_id == 8 || 
+       solver_id == 12 || solver_id == 43)
+      if ( hpcg!=0 )
+   {
+
+      time_index = hypre_InitializeTiming("HPCG Setup");
+      hypre_BeginTiming(time_index);
+ 
+      bHYPRE_HPCG = bHYPRE_HPCG_Create( bmpicomm );
+      bHYPRE_Vector_b = bHYPRE_Vector__cast( bHYPRE_b );
+      bHYPRE_Vector_x = bHYPRE_Vector__cast( bHYPRE_x );
+      bHYPRE_Vector_Dot( bHYPRE_Vector_b, bHYPRE_Vector_b, &tmp );
+      bHYPRE_Vector_Dot( bHYPRE_Vector_x, bHYPRE_Vector_x, &tmp );
+
+      bHYPRE_op_A = bHYPRE_Operator__cast( bHYPRE_parcsr_A );
+      bHYPRE_HPCG_SetOperator( bHYPRE_HPCG, bHYPRE_op_A );
+      bHYPRE_HPCG_SetIntParameter( bHYPRE_HPCG, "MaxIterations", 500);
+      bHYPRE_HPCG_SetDoubleParameter( bHYPRE_HPCG, "Tolerance", tol);
+      bHYPRE_HPCG_SetIntParameter( bHYPRE_HPCG, "TwoNorm", 1 );
+      bHYPRE_HPCG_SetIntParameter( bHYPRE_HPCG, "RelChange", 0 );
+      bHYPRE_HPCG_SetIntParameter( bHYPRE_HPCG, "PrintLevel", ioutdat );
+
+      if (solver_id == 1)
+      {
+         /* use BoomerAMG as preconditioner */
+	 ioutdat = 1;
+         if (myid == 0) printf("Solver: AMG-HPCG\n");
+         bHYPRE_AMG = bHYPRE_BoomerAMG_Create( bmpicomm );
+         bHYPRE_BoomerAMG_SetOperator( bHYPRE_AMG, bHYPRE_op_A );
+         bHYPRE_BoomerAMG_SetDoubleParameter( bHYPRE_AMG, "Tolerance", pc_tol);
+         bHYPRE_BoomerAMG_SetIntParameter( bHYPRE_AMG, "CoarsenType",
+                                        (hybrid*coarsen_type));
+         bHYPRE_BoomerAMG_SetIntParameter( bHYPRE_AMG, "MeasureType",
+                                           measure_type);
+         bHYPRE_BoomerAMG_SetDoubleParameter( bHYPRE_AMG, "StrongThreshold",
+                                              strong_threshold);
+         bHYPRE_BoomerAMG_SetDoubleParameter( bHYPRE_AMG, "TruncFactor",
+                                              trunc_factor);
+         bHYPRE_BoomerAMG_SetIntParameter( bHYPRE_AMG, "PrintLevel", poutdat );
+         bHYPRE_BoomerAMG_SetStringParameter( bHYPRE_AMG, "PrintFileName",
+                                              "driver.out.log" );
+         bHYPRE_BoomerAMG_SetIntParameter( bHYPRE_AMG, "MaxIter", 1 );
+         bHYPRE_BoomerAMG_SetIntParameter( bHYPRE_AMG, "CycleType", cycle_type );
+         bHYPRE_BoomerAMG_SetIntParameter( bHYPRE_AMG, "Cycle0NumSweeps",
+                                           num_grid_sweeps[0] );
+         bHYPRE_BoomerAMG_SetIntParameter( bHYPRE_AMG, "Cycle1NumSweeps",
+                                           num_grid_sweeps[1] );
+         bHYPRE_BoomerAMG_SetIntParameter( bHYPRE_AMG, "Cycle2NumSweeps",
+                                           num_grid_sweeps[2] );
+         bHYPRE_BoomerAMG_SetIntParameter( bHYPRE_AMG, "Cycle3NumSweeps",
+                                           num_grid_sweeps[3] );
+         bHYPRE_BoomerAMG_SetIntParameter( bHYPRE_AMG, "Cycle0RelaxType",
+                                           grid_relax_type[0] );
+         bHYPRE_BoomerAMG_SetIntParameter( bHYPRE_AMG, "Cycle1RelaxType",
+                                           grid_relax_type[1] );
+         bHYPRE_BoomerAMG_SetIntParameter( bHYPRE_AMG, "Cycle2RelaxType",
+                                           grid_relax_type[2] );
+         bHYPRE_BoomerAMG_SetIntParameter( bHYPRE_AMG, "Cycle3RelaxType",
+                                           grid_relax_type[3] );
+         for ( i=0; i<max_levels; ++i )
+         {
+            bHYPRE_BoomerAMG_SetLevelRelaxWt( bHYPRE_AMG, relax_weight[i], i );
+         }
+         bHYPRE_BoomerAMG_SetIntParameter( bHYPRE_AMG, "SmoothType",
+                                           smooth_type );
+         bHYPRE_BoomerAMG_SetIntParameter( bHYPRE_AMG, "SmoothNumSweeps",
+                                           smooth_num_sweep);
+
+         dimsl[0] = 0;   dimsl[1] = 0;   dimsu[0] = 4;   dimsu[1] = 4;
+         bHYPRE_grid_relax_points = sidl_int__array_createCol( 2, dimsl, dimsu );
+         for ( i=0; i<4; ++i )
+         {
+            for ( j=0; j<num_grid_sweeps[i]; ++j )
+            {
+               sidl_int__array_set2( bHYPRE_grid_relax_points, i, j,
+                                     grid_relax_points[i][j] );
+            }
+         }
+         bHYPRE_BoomerAMG_SetIntArray2Parameter( bHYPRE_AMG, "GridRelaxPoints",
+                                                 bHYPRE_grid_relax_points );
+         sidl_int__array_deleteRef( bHYPRE_grid_relax_points );
+
+         bHYPRE_BoomerAMG_SetIntParameter( bHYPRE_AMG, "MaxLevels", max_levels);
+         bHYPRE_BoomerAMG_SetDoubleParameter( bHYPRE_AMG, "MaxRowSum",
+                                              max_row_sum);
+         bHYPRE_BoomerAMG_SetIntParameter( bHYPRE_AMG, "NumFunctions",
+                                           num_functions);
+         if (num_functions > 1)
+         {
+            bHYPRE_BoomerAMG_SetIntArray1Parameter( bHYPRE_AMG, "DOFFunc",
+                                                    dof_func, num_functions );
+         }
+         bHYPRE_BoomerAMG_SetIntParameter( bHYPRE_AMG, "Variant", variant);
+         bHYPRE_BoomerAMG_SetIntParameter( bHYPRE_AMG, "Overlap", overlap);
+         bHYPRE_BoomerAMG_SetIntParameter( bHYPRE_AMG, "DomainType", domain_type);
+         bHYPRE_BoomerAMG_SetDoubleParameter( bHYPRE_AMG,
+                                              "SchwarzRlxWeight",
+                                              schwarz_rlx_weight);
+
+         bHYPRE_SolverPC = bHYPRE_Solver__cast( bHYPRE_AMG );
+         ierr += bHYPRE_HPCG_SetPreconditioner( bHYPRE_HPCG, bHYPRE_SolverPC );
+         ierr += bHYPRE_HPCG_Setup( bHYPRE_HPCG, bHYPRE_Vector_b, bHYPRE_Vector_x );
+
+      }
+
+      else if (solver_id == 2)
+      {
+         /* use diagonal scaling as preconditioner */
+
+         /* To call a bHYPRE solver:
+            create, set comm, set operator, set other parameters,
+            Setup (noop in this case), Apply */
+         bHYPRE_ParCSRDiagScale = bHYPRE_ParCSRDiagScale_Create( bmpicomm );
+         bHYPRE_ParCSRDiagScale_SetOperator( bHYPRE_ParCSRDiagScale, bHYPRE_op_A );
+         ierr += bHYPRE_ParCSRDiagScale_Setup( bHYPRE_ParCSRDiagScale,
+                                               bHYPRE_Vector_b, bHYPRE_Vector_x );
+         bHYPRE_SolverPC =
+            bHYPRE_Solver__cast( bHYPRE_ParCSRDiagScale );
+         ierr += bHYPRE_HPCG_SetPreconditioner( bHYPRE_HPCG, bHYPRE_SolverPC );
+         ierr += bHYPRE_HPCG_Setup( bHYPRE_HPCG, bHYPRE_Vector_b, bHYPRE_Vector_x );
+
+      }
+      else if (solver_id == 8)
+      {
+         /* use ParaSails preconditioner */
+         if (myid == 0) printf("Solver: ParaSails-HPCG\n");
+
+         bHYPRE_ParaSails = bHYPRE_ParaSails_Create( bmpicomm );
+         ierr += bHYPRE_ParaSails_SetOperator(
+            bHYPRE_ParaSails, bHYPRE_op_A );
+         ierr += bHYPRE_ParaSails_SetDoubleParameter( bHYPRE_ParaSails, "Thresh",
+                                                      sai_threshold );
+         ierr += bHYPRE_ParaSails_SetIntParameter( bHYPRE_ParaSails, "Nlevels",
+                                                   max_levels );
+         ierr += bHYPRE_ParaSails_SetDoubleParameter( bHYPRE_ParaSails, "Filter",
+                                                      sai_filter );
+         ierr += bHYPRE_ParaSails_SetIntParameter( bHYPRE_ParaSails, "Logging",
+                                                   ioutdat );
+         hypre_assert( ierr==0 );
+         bHYPRE_SolverPC = bHYPRE_Solver__cast( bHYPRE_ParaSails );
+         ierr += bHYPRE_HPCG_SetPreconditioner( bHYPRE_HPCG, bHYPRE_SolverPC );
+         ierr += bHYPRE_HPCG_Setup( bHYPRE_HPCG, bHYPRE_Vector_b, bHYPRE_Vector_x );
+
+      }
+      else if (solver_id == 12)
+      {
+#ifdef DO_THIS_LATER
+         /* use Schwarz preconditioner */
+         if (myid == 0) printf("Solver: Schwarz-HPCG\n");
+
+	 HYPRE_SchwarzCreate(&pcg_precond);
+	 HYPRE_SchwarzSetVariant(pcg_precond, variant);
+	 HYPRE_SchwarzSetOverlap(pcg_precond, overlap);
+	 HYPRE_SchwarzSetDomainType(pcg_precond, domain_type);
+         HYPRE_SchwarzSetRelaxWeight(pcg_precond, schwarz_rlx_weight);
+
+         HYPRE_HPCGSetPrecond(pcg_solver,
+                             (HYPRE_PtrToSolverFcn) HYPRE_SchwarzSolve,
+                             (HYPRE_PtrToSolverFcn) HYPRE_SchwarzSetup,
+                             pcg_precond);
+#endif  /*DO_THIS_LATER*/
+      }
+      else if (solver_id == 43)
+      {
+#ifdef DO_THIS_LATER
+         /* use Euclid preconditioning */
+         if (myid == 0) printf("Solver: Euclid-HPCG\n");
+
+         HYPRE_EuclidCreate(mpi_comm, &pcg_precond);
+
+         /* note: There are three three methods of setting run-time 
+            parameters for Euclid: (see HYPRE_parcsr_ls.h); here
+            we'll use what I think is simplest: let Euclid internally 
+            parse the command line.
+         */   
+         HYPRE_EuclidSetParams(pcg_precond, argc, argv);
+
+         HYPRE_HPCGSetPrecond(pcg_solver,
+                             (HYPRE_PtrToSolverFcn) HYPRE_EuclidSolve,
+                             (HYPRE_PtrToSolverFcn) HYPRE_EuclidSetup,
+                             pcg_precond);
+#endif  /*DO_THIS_LATER*/
+      }
+ 
+
+      hypre_EndTiming(time_index);
+      hypre_PrintTiming("Setup phase times", mpi_comm);
+      hypre_FinalizeTiming(time_index);
+      hypre_ClearTiming();
+ 
+      time_index = hypre_InitializeTiming("HPCG Solve");
+      hypre_BeginTiming(time_index);
+
+      ierr += bHYPRE_HPCG_Apply( bHYPRE_HPCG, bHYPRE_Vector_b, &bHYPRE_Vector_x );
+
+      hypre_EndTiming(time_index);
+      hypre_PrintTiming("Solve phase times", mpi_comm);
+      hypre_FinalizeTiming(time_index);
+      hypre_ClearTiming();
+
+      ierr += bHYPRE_HPCG_GetIntValue( bHYPRE_HPCG, "NumIterations",
+                                      &num_iterations );
+      ierr += bHYPRE_HPCG_GetDoubleValue( bHYPRE_HPCG, "Final Relative Residual Norm",
+                                         &final_res_norm );
+
+      bHYPRE_HPCG_deleteRef( bHYPRE_HPCG );
       if ( solver_id == 1 )
       {
          bHYPRE_BoomerAMG_deleteRef( bHYPRE_AMG );

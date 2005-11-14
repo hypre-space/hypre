@@ -893,9 +893,8 @@ main( int   argc,
       hypre_BeginTiming(time_index);
 
 
-      solver_PCG = bHYPRE_PCG_Create( bmpicomm );
       A_O = bHYPRE_Operator__cast( A_b );
-      ierr += bHYPRE_PCG_SetOperator( solver_PCG, A_O );
+      solver_PCG = bHYPRE_PCG_Create( bmpicomm, A_O );
       b_V = bHYPRE_Vector__cast( b_SV );
       x_V = bHYPRE_Vector__cast( x_SV );
 
