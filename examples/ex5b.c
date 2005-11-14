@@ -321,8 +321,7 @@ int main (int argc, char *argv[])
       double final_res_norm;
 
       /* Create solver */
-      pcg_solver = bHYPRE_PCG_Create( mpi_comm );
-      bHYPRE_PCG_SetOperator( pcg_solver, op_A );
+      pcg_solver = bHYPRE_PCG_Create( mpi_comm, op_A );
 
       /* Set some parameters (See Reference Manual for more parameters) */
       bHYPRE_PCG_SetIntParameter( pcg_solver, "MaxIter", 1000 ); /* max iterations */
@@ -361,8 +360,7 @@ int main (int argc, char *argv[])
       double final_res_norm;
 
       /* Create solver */
-      pcg_solver = bHYPRE_PCG_Create( mpi_comm );
-      bHYPRE_PCG_SetOperator( pcg_solver, op_A );
+      pcg_solver = bHYPRE_PCG_Create( mpi_comm, op_A );
 
       /* Set some parameters (See Reference Manual for more parameters) */
       bHYPRE_PCG_SetIntParameter( pcg_solver, "MaxIter", 1000 ); /* max iterations */
@@ -416,8 +414,7 @@ int main (int argc, char *argv[])
       int      sai_sym = 1;
 
       /* Create solver */
-      pcg_solver = bHYPRE_PCG_Create( mpi_comm );
-      bHYPRE_PCG_SetOperator( pcg_solver, op_A );
+      pcg_solver = bHYPRE_PCG_Create( mpi_comm, op_A );
 
       /* Set some parameters (See Reference Manual for more parameters) */
       bHYPRE_PCG_SetIntParameter( pcg_solver, "MaxIter", 1000 ); /* max iterations */
