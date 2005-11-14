@@ -2,12 +2,12 @@
  * File:          sidlx_io_TxtIStream.h
  * Symbol:        sidlx.io.TxtIStream-v0.1
  * Symbol Type:   class
- * Babel Version: 0.10.10
+ * Babel Version: 0.10.12
  * Description:   Client-side glue code for sidlx.io.TxtIStream
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.10
+ * babel-version = 0.10.12
  */
 
 #ifndef included_sidlx_io_TxtIStream_h
@@ -280,14 +280,6 @@ sidlx_io_TxtIStream__cast2(
 void
 sidlx_io_TxtIStream__exec(
   /* in */ sidlx_io_TxtIStream self,
-  /* in */ const char* methodName,
-  /* in */ sidl_io_Deserializer inArgs,
-  /* in */ sidl_io_Serializer outArgs);
-/**
- * static Exec method for reflexity.
- */
-void
-sidlx_io_TxtIStream__sexec(
   /* in */ const char* methodName,
   /* in */ sidl_io_Deserializer inArgs,
   /* in */ sidl_io_Serializer outArgs);

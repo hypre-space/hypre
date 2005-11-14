@@ -2,12 +2,12 @@
  * File:          sidlx_rmi_SimReturn_Impl.c
  * Symbol:        sidlx.rmi.SimReturn-v0.1
  * Symbol Type:   class
- * Babel Version: 0.10.10
+ * Babel Version: 0.10.12
  * Description:   Server-side implementation for sidlx.rmi.SimReturn
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.10.10
+ * babel-version = 0.10.12
  */
 
 /*
@@ -30,6 +30,7 @@
 #include <stdlib.h>
 #include "sidl_String.h"
 #include "sidl_Exception.h"
+#include <string.h>
 
 #include "sidlx_rmi_GenNetworkException.h"
 /* Copies n elements from data into the vector we maintain as part of this 
@@ -69,7 +70,7 @@ static void flip32(int32_t* in) {
 	 (((x) & 0x0000ff00) <<  8) | (((x) & 0x000000ff) << 24));
 }
 /* DO-NOT-DELETE splicer.end(sidlx.rmi.SimReturn._includes) */
-#line 72 "sidlx_rmi_SimReturn_Impl.c"
+#line 73 "sidlx_rmi_SimReturn_Impl.c"
 
 /*
  * Static class initializer called exactly once before any user-defined method is dispatched
@@ -85,11 +86,11 @@ void
 impl_sidlx_rmi_SimReturn__load(
   void)
 {
-#line 86 "../../../babel/runtime/sidlx/sidlx_rmi_SimReturn_Impl.c"
+#line 87 "../../../babel/runtime/sidlx/sidlx_rmi_SimReturn_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.SimReturn._load) */
   /* insert implementation here: sidlx.rmi.SimReturn._load (static class initializer method) */
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.SimReturn._load) */
-#line 92 "sidlx_rmi_SimReturn_Impl.c"
+#line 93 "sidlx_rmi_SimReturn_Impl.c"
 }
 /*
  * Class constructor called when the class is created.
@@ -105,11 +106,11 @@ void
 impl_sidlx_rmi_SimReturn__ctor(
   /* in */ sidlx_rmi_SimReturn self)
 {
-#line 104 "../../../babel/runtime/sidlx/sidlx_rmi_SimReturn_Impl.c"
+#line 105 "../../../babel/runtime/sidlx/sidlx_rmi_SimReturn_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.SimReturn._ctor) */
   /* insert implementation here: sidlx.rmi.SimReturn._ctor (constructor method) */
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.SimReturn._ctor) */
-#line 112 "sidlx_rmi_SimReturn_Impl.c"
+#line 113 "sidlx_rmi_SimReturn_Impl.c"
 }
 
 /*
@@ -126,7 +127,7 @@ void
 impl_sidlx_rmi_SimReturn__dtor(
   /* in */ sidlx_rmi_SimReturn self)
 {
-#line 123 "../../../babel/runtime/sidlx/sidlx_rmi_SimReturn_Impl.c"
+#line 124 "../../../babel/runtime/sidlx/sidlx_rmi_SimReturn_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.SimReturn._dtor) */
   struct sidlx_rmi_SimReturn__data *dptr =
     sidlx_rmi_SimReturn__get_data(self);
@@ -138,7 +139,7 @@ impl_sidlx_rmi_SimReturn__dtor(
     sidlx_rmi_SimReturn__set_data(self, NULL);
   }
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.SimReturn._dtor) */
-#line 141 "sidlx_rmi_SimReturn_Impl.c"
+#line 142 "sidlx_rmi_SimReturn_Impl.c"
 }
 
 /*
@@ -160,7 +161,7 @@ impl_sidlx_rmi_SimReturn_init(
   /* in */ sidlx_rmi_Socket sock,
   /* out */ sidl_BaseInterface *_ex)
 {
-#line 155 "../../../babel/runtime/sidlx/sidlx_rmi_SimReturn_Impl.c"
+#line 156 "../../../babel/runtime/sidlx/sidlx_rmi_SimReturn_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.SimReturn.init) */
     struct sidlx_rmi_SimReturn__data *dptr =
     sidlx_rmi_SimReturn__get_data(self);
@@ -202,7 +203,7 @@ impl_sidlx_rmi_SimReturn_init(
   /*Not really anything to clean up...*/
   return;
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.SimReturn.init) */
-#line 205 "sidlx_rmi_SimReturn_Impl.c"
+#line 206 "sidlx_rmi_SimReturn_Impl.c"
 }
 
 /*
@@ -220,7 +221,7 @@ impl_sidlx_rmi_SimReturn_getMethodName(
   /* in */ sidlx_rmi_SimReturn self,
   /* out */ sidl_BaseInterface *_ex)
 {
-#line 213 "../../../babel/runtime/sidlx/sidlx_rmi_SimReturn_Impl.c"
+#line 214 "../../../babel/runtime/sidlx/sidlx_rmi_SimReturn_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.SimReturn.getMethodName) */
   struct sidlx_rmi_SimReturn__data *dptr =
     sidlx_rmi_SimReturn__get_data(self);
@@ -231,7 +232,7 @@ impl_sidlx_rmi_SimReturn_getMethodName(
  EXIT:
   return NULL;
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.SimReturn.getMethodName) */
-#line 234 "sidlx_rmi_SimReturn_Impl.c"
+#line 235 "sidlx_rmi_SimReturn_Impl.c"
 }
 
 /*
@@ -249,7 +250,7 @@ impl_sidlx_rmi_SimReturn_SendReturn(
   /* in */ sidlx_rmi_SimReturn self,
   /* out */ sidl_BaseInterface *_ex)
 {
-#line 240 "../../../babel/runtime/sidlx/sidlx_rmi_SimReturn_Impl.c"
+#line 241 "../../../babel/runtime/sidlx/sidlx_rmi_SimReturn_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.SimReturn.SendReturn) */
   struct sidlx_rmi_SimReturn__data *dptr =
     sidlx_rmi_SimReturn__get_data(self);
@@ -263,7 +264,7 @@ impl_sidlx_rmi_SimReturn_SendReturn(
   sidlx_rmi_Socket_writestring(dptr->d_sock, dptr->d_len, carray, _ex);
   
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.SimReturn.SendReturn) */
-#line 266 "sidlx_rmi_SimReturn_Impl.c"
+#line 267 "sidlx_rmi_SimReturn_Impl.c"
 }
 
 /*
@@ -283,7 +284,7 @@ impl_sidlx_rmi_SimReturn_packBool(
   /* in */ sidl_bool value,
   /* out */ sidl_BaseInterface *_ex)
 {
-#line 272 "../../../babel/runtime/sidlx/sidlx_rmi_SimReturn_Impl.c"
+#line 273 "../../../babel/runtime/sidlx/sidlx_rmi_SimReturn_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.SimReturn.packBool) */
   if(value) {
     char x = 0xFF;
@@ -293,7 +294,7 @@ impl_sidlx_rmi_SimReturn_packBool(
     serialize(self, &x, 1, _ex); 
   }
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.SimReturn.packBool) */
-#line 296 "sidlx_rmi_SimReturn_Impl.c"
+#line 297 "sidlx_rmi_SimReturn_Impl.c"
 }
 
 /*
@@ -313,11 +314,11 @@ impl_sidlx_rmi_SimReturn_packChar(
   /* in */ char value,
   /* out */ sidl_BaseInterface *_ex)
 {
-#line 300 "../../../babel/runtime/sidlx/sidlx_rmi_SimReturn_Impl.c"
+#line 301 "../../../babel/runtime/sidlx/sidlx_rmi_SimReturn_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.SimReturn.packChar) */
   serialize(self, &value, 1, _ex); 
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.SimReturn.packChar) */
-#line 320 "sidlx_rmi_SimReturn_Impl.c"
+#line 321 "sidlx_rmi_SimReturn_Impl.c"
 }
 
 /*
@@ -337,12 +338,12 @@ impl_sidlx_rmi_SimReturn_packInt(
   /* in */ int32_t value,
   /* out */ sidl_BaseInterface *_ex)
 {
-#line 322 "../../../babel/runtime/sidlx/sidlx_rmi_SimReturn_Impl.c"
+#line 323 "../../../babel/runtime/sidlx/sidlx_rmi_SimReturn_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.SimReturn.packInt) */
   int32_t x = htonl(value);
   serialize(self, (char*)&x, 4, _ex); 
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.SimReturn.packInt) */
-#line 345 "sidlx_rmi_SimReturn_Impl.c"
+#line 346 "sidlx_rmi_SimReturn_Impl.c"
 }
 
 /*
@@ -362,7 +363,7 @@ impl_sidlx_rmi_SimReturn_packLong(
   /* in */ int64_t value,
   /* out */ sidl_BaseInterface *_ex)
 {
-#line 345 "../../../babel/runtime/sidlx/sidlx_rmi_SimReturn_Impl.c"
+#line 346 "../../../babel/runtime/sidlx/sidlx_rmi_SimReturn_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.SimReturn.packLong) */
   short host = 1;
   short net = htons(host);
@@ -373,7 +374,7 @@ impl_sidlx_rmi_SimReturn_packLong(
     serialize(self, (char*)&value, 8, _ex); 
   }
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.SimReturn.packLong) */
-#line 376 "sidlx_rmi_SimReturn_Impl.c"
+#line 377 "sidlx_rmi_SimReturn_Impl.c"
 }
 
 /*
@@ -393,7 +394,7 @@ impl_sidlx_rmi_SimReturn_packFloat(
   /* in */ float value,
   /* out */ sidl_BaseInterface *_ex)
 {
-#line 374 "../../../babel/runtime/sidlx/sidlx_rmi_SimReturn_Impl.c"
+#line 375 "../../../babel/runtime/sidlx/sidlx_rmi_SimReturn_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.SimReturn.packFloat) */
   short host = 1;
   short net = htons(host);
@@ -404,7 +405,7 @@ impl_sidlx_rmi_SimReturn_packFloat(
     serialize(self, (char*)&value, 4, _ex); 
   }
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.SimReturn.packFloat) */
-#line 407 "sidlx_rmi_SimReturn_Impl.c"
+#line 408 "sidlx_rmi_SimReturn_Impl.c"
 }
 
 /*
@@ -424,7 +425,7 @@ impl_sidlx_rmi_SimReturn_packDouble(
   /* in */ double value,
   /* out */ sidl_BaseInterface *_ex)
 {
-#line 403 "../../../babel/runtime/sidlx/sidlx_rmi_SimReturn_Impl.c"
+#line 404 "../../../babel/runtime/sidlx/sidlx_rmi_SimReturn_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.SimReturn.packDouble) */
   short host = 1;
   short net = htons(host);
@@ -435,7 +436,7 @@ impl_sidlx_rmi_SimReturn_packDouble(
     serialize(self, (char*)&value, 8, _ex); 
   }
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.SimReturn.packDouble) */
-#line 438 "sidlx_rmi_SimReturn_Impl.c"
+#line 439 "sidlx_rmi_SimReturn_Impl.c"
 }
 
 /*
@@ -455,7 +456,7 @@ impl_sidlx_rmi_SimReturn_packFcomplex(
   /* in */ struct sidl_fcomplex value,
   /* out */ sidl_BaseInterface *_ex)
 {
-#line 432 "../../../babel/runtime/sidlx/sidlx_rmi_SimReturn_Impl.c"
+#line 433 "../../../babel/runtime/sidlx/sidlx_rmi_SimReturn_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.SimReturn.packFcomplex) */
   short host = 1;
   short net = htons(host);
@@ -469,7 +470,7 @@ impl_sidlx_rmi_SimReturn_packFcomplex(
     serialize(self, (char*)&(value.imaginary), 4, _ex); 
   }
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.SimReturn.packFcomplex) */
-#line 472 "sidlx_rmi_SimReturn_Impl.c"
+#line 473 "sidlx_rmi_SimReturn_Impl.c"
 }
 
 /*
@@ -489,7 +490,7 @@ impl_sidlx_rmi_SimReturn_packDcomplex(
   /* in */ struct sidl_dcomplex value,
   /* out */ sidl_BaseInterface *_ex)
 {
-#line 464 "../../../babel/runtime/sidlx/sidlx_rmi_SimReturn_Impl.c"
+#line 465 "../../../babel/runtime/sidlx/sidlx_rmi_SimReturn_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.SimReturn.packDcomplex) */
   short host = 1;
   short net = htons(host);
@@ -503,7 +504,7 @@ impl_sidlx_rmi_SimReturn_packDcomplex(
     serialize(self, (char*)&(value.imaginary), 8, _ex); 
   }
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.SimReturn.packDcomplex) */
-#line 506 "sidlx_rmi_SimReturn_Impl.c"
+#line 507 "sidlx_rmi_SimReturn_Impl.c"
 }
 
 /*
@@ -523,14 +524,14 @@ impl_sidlx_rmi_SimReturn_packString(
   /* in */ const char* value,
   /* out */ sidl_BaseInterface *_ex)
 {
-#line 496 "../../../babel/runtime/sidlx/sidlx_rmi_SimReturn_Impl.c"
+#line 497 "../../../babel/runtime/sidlx/sidlx_rmi_SimReturn_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.SimReturn.packString) */
   int32_t len = sidl_String_strlen(value);
   int32_t f_len = htonl(len);
   serialize(self, (char*)&f_len, 4, _ex);
   serialize(self, value, len, _ex);
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.SimReturn.packString) */
-#line 533 "sidlx_rmi_SimReturn_Impl.c"
+#line 534 "sidlx_rmi_SimReturn_Impl.c"
 }
 /* Babel internal methods, Users should not edit below this line. */
 struct sidl_ClassInfo__object* 

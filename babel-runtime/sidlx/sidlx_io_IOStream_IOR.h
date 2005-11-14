@@ -2,12 +2,12 @@
  * File:          sidlx_io_IOStream_IOR.h
  * Symbol:        sidlx.io.IOStream-v0.1
  * Symbol Type:   interface
- * Babel Version: 0.10.10
+ * Babel Version: 0.10.12
  * Description:   Intermediate Object Representation for sidlx.io.IOStream
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.10
+ * babel-version = 0.10.12
  */
 
 #ifndef included_sidlx_io_IOStream_IOR_h

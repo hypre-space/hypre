@@ -1,14 +1,11 @@
-The file configure.ac differs from the normal Babel configure.ac: it
-has a few changes to support hypre.  Search for "hypre" to see them.
-The changes are mostly to disable Fortran90 and Java, because they are
-not available on all platforms with hypre.  You can't override this
-with a configure argument.  I have requested a change in the Babel
-build system which would make all this unnecessary.
+As of November 14, 2005 (for the first time), this file is the only
+part of the babel-runtime directory which differs from the Babel
+group's runtime distribution.
 
-If babel-runtime is updated, it is important to regenerate "configure"
-using our nonstandard configure.ac.  To do so, use autoconf
-version 2.59.  Hypre developers with the right permissions may use it as follows:
-/usr/casc/babel/apps/autoconf-2.59/bin/autoconf configure.ac > configure
+If you need to generate a new "configure" file, use autoconf version
+2.59 (along with associated programs which come with autoconf).  Hypre
+developers with the right permissions may use it as follows:
+  /usr/casc/babel/apps/autoconf-2.59/bin/autoconf configure.ac > configure
 If you don't have access to that directory, download and build your
 own copy of autoconf.
 

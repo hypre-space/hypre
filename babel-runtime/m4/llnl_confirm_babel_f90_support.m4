@@ -43,8 +43,12 @@ AC_DEFUN([LLNL_CONFIRM_BABEL_F90_SUPPORT], [
   if test "X$enable_fortran90" != "Xno"; then
     AC_PROG_FC(,1990)dnl was AC_PROG_F90
     AC_LANG_PUSH(Fortran) dnl gkk Do I need this?
-    AC_FC_SRCEXT([f90],[])
-    LLNL_LIB_CHASM
+    if test -n "$FC"; then
+      AC_FC_SRCEXT([f90],[])
+      LLNL_LIB_CHASM
+    else
+      enable_fortran90=broken
+    fi
     AC_LANG_POP(Fortran) dnl gkk Do I need this?
   else
     FC=
@@ -64,19 +68,24 @@ AC_DEFUN([LLNL_CONFIRM_BABEL_F90_SUPPORT2],[
         AC_TRY_COMPILE([],[       write (*,*) 'Hello world'
 ],AC_MSG_RESULT([yes]),[
         AC_MSG_RESULT([no])
-        AC_MSG_ERROR([The F90 compiler $FC fails to compile a trivial program (see config.log)])])
+	AC_MSG_WARN([The F90 compiler $FC fails to compile a trivial program (see config.log).])
+	AC_MSG_WARN([Disabling F90 Support])
+	enable_fortran90="broken"
+        ])
         AC_LANG_POP([])
-        # 5.a. Libraries (existence)
-	dnl LLNL_F90_LIBRARY_LDFLAGS dnl slight mod to AC_FC_LIBRARY_LDFLAGS
-	LLNL_FC_MAIN dnl changed to requie LLNL_FC_LIBRARY_LDFLAGS
-	LLNL_LIB_FCMAIN dnl needed to define the lib to include
-        AC_FC_DUMMY_MAIN 
-        LLNL_SORT_FCLIBS
-	AC_FC_WRAPPERS dnl        LLNL_F90_NAME_MANGLING
-	LLNL_F90_NAME_MANGLING dnl required for LLNL_F90_C_CONFIG
-        LLNL_F90_C_CONFIG
-	LLNL_F90_POINTER_SIZE
-	LLNL_F90_VOLATILE
+	if test "X$enable_fortran90" != "Xbroken"; then
+           # 5.a. Libraries (existence)
+	   dnl LLNL_F90_LIBRARY_LDFLAGS dnl slight mod to AC_FC_LIBRARY_LDFLAGS
+	   LLNL_FC_MAIN dnl changed to requie LLNL_FC_LIBRARY_LDFLAGS
+	   LLNL_LIB_FCMAIN dnl needed to define the lib to include
+           AC_FC_DUMMY_MAIN 
+           LLNL_SORT_FCLIBS
+	   AC_FC_WRAPPERS dnl        LLNL_F90_NAME_MANGLING
+	   LLNL_F90_NAME_MANGLING dnl required for LLNL_F90_C_CONFIG
+           LLNL_F90_C_CONFIG
+	   LLNL_F90_POINTER_SIZE
+	   LLNL_F90_VOLATILE
+        fi
     else
 	AC_MSG_WARN([Disabling F90 Support])
 	if test \( -n "$FC" \); then

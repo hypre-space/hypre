@@ -38,7 +38,7 @@ void* sidl_dynamicLoadIOR(char* objName, char* extName) {
   if (!_locExternals) {
     fputs("Babel: unable to load the implementation for ", stderr);
     fputs(objName, stderr);
-    fputs(" please set sidl_DLL_PATH\n", stderr);
+    fputs(" please set SIDL_DLL_PATH\n", stderr);
     exit(-1);
   }
   return _locExternals;

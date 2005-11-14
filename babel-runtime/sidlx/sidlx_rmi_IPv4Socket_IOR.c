@@ -2,12 +2,12 @@
  * File:          sidlx_rmi_IPv4Socket_IOR.c
  * Symbol:        sidlx.rmi.IPv4Socket-v0.1
  * Symbol Type:   class
- * Babel Version: 0.10.10
+ * Babel Version: 0.10.12
  * Description:   Intermediate Object Representation for sidlx.rmi.IPv4Socket
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.10
+ * babel-version = 0.10.12
  */
 
 #include "sidl_rmi_InstanceHandle.h"
@@ -134,8 +134,8 @@ sidlx_rmi_IPv4Socket_isSame__exec(
         struct sidl_io_Deserializer__object* inArgs,
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
-  struct sidl_BaseInterface__object* iobj;
-  sidl_bool _retval;
+  struct sidl_BaseInterface__object* iobj = 0;
+  sidl_bool _retval = FALSE;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
@@ -159,7 +159,7 @@ sidlx_rmi_IPv4Socket_queryInt__exec(
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
   char* name= NULL;
-  struct sidl_BaseInterface__object* _retval;
+  struct sidl_BaseInterface__object* _retval = 0;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
@@ -182,7 +182,7 @@ sidlx_rmi_IPv4Socket_isType__exec(
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
   char* name= NULL;
-  sidl_bool _retval;
+  sidl_bool _retval = FALSE;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
@@ -206,7 +206,7 @@ sidlx_rmi_IPv4Socket_getClassInfo__exec(
         struct sidl_io_Deserializer__object* inArgs,
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
-  struct sidl_ClassInfo__object* _retval;
+  struct sidl_ClassInfo__object* _retval = 0;
   /* unpack in and inout argments */
 
   /* make the call */
@@ -224,11 +224,11 @@ sidlx_rmi_IPv4Socket_getsockname__exec(
         struct sidl_io_Deserializer__object* inArgs,
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
-  int32_t address_tmp;
+  int32_t address_tmp = 0;
   int32_t* address= &address_tmp;
-  int32_t port_tmp;
+  int32_t port_tmp = 0;
   int32_t* port= &port_tmp;
-  int32_t _retval;
+  int32_t _retval = 0;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
@@ -260,11 +260,11 @@ sidlx_rmi_IPv4Socket_getpeername__exec(
         struct sidl_io_Deserializer__object* inArgs,
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
-  int32_t address_tmp;
+  int32_t address_tmp = 0;
   int32_t* address= &address_tmp;
-  int32_t port_tmp;
+  int32_t port_tmp = 0;
   int32_t* port= &port_tmp;
-  int32_t _retval;
+  int32_t _retval = 0;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
@@ -296,7 +296,7 @@ sidlx_rmi_IPv4Socket_close__exec(
         struct sidl_io_Deserializer__object* inArgs,
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
-  int32_t _retval;
+  int32_t _retval = 0;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
@@ -322,10 +322,10 @@ sidlx_rmi_IPv4Socket_readn__exec(
         struct sidl_io_Deserializer__object* inArgs,
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
-  int32_t nbytes;
-  struct sidl_char__array* data_tmp;
+  int32_t nbytes = 0;
+  struct sidl_char__array* data_tmp = 0;
   struct sidl_char__array** data= &data_tmp;
-  int32_t _retval;
+  int32_t _retval = 0;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
@@ -354,10 +354,10 @@ sidlx_rmi_IPv4Socket_readline__exec(
         struct sidl_io_Deserializer__object* inArgs,
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
-  int32_t nbytes;
-  struct sidl_char__array* data_tmp;
+  int32_t nbytes = 0;
+  struct sidl_char__array* data_tmp = 0;
   struct sidl_char__array** data= &data_tmp;
-  int32_t _retval;
+  int32_t _retval = 0;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
@@ -386,10 +386,10 @@ sidlx_rmi_IPv4Socket_readstring__exec(
         struct sidl_io_Deserializer__object* inArgs,
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
-  int32_t nbytes;
-  struct sidl_char__array* data_tmp;
+  int32_t nbytes = 0;
+  struct sidl_char__array* data_tmp = 0;
   struct sidl_char__array** data= &data_tmp;
-  int32_t _retval;
+  int32_t _retval = 0;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
@@ -418,9 +418,9 @@ sidlx_rmi_IPv4Socket_readstring_alloc__exec(
         struct sidl_io_Deserializer__object* inArgs,
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
-  struct sidl_char__array* data_tmp;
+  struct sidl_char__array* data_tmp = 0;
   struct sidl_char__array** data= &data_tmp;
-  int32_t _retval;
+  int32_t _retval = 0;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
@@ -447,9 +447,9 @@ sidlx_rmi_IPv4Socket_readint__exec(
         struct sidl_io_Deserializer__object* inArgs,
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
-  int32_t data_tmp;
+  int32_t data_tmp = 0;
   int32_t* data= &data_tmp;
-  int32_t _retval;
+  int32_t _retval = 0;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
@@ -478,9 +478,9 @@ sidlx_rmi_IPv4Socket_writen__exec(
         struct sidl_io_Deserializer__object* inArgs,
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
-  int32_t nbytes;
-  struct sidl_char__array* data;
-  int32_t _retval;
+  int32_t nbytes = 0;
+  struct sidl_char__array* data = 0;
+  int32_t _retval = 0;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
@@ -509,9 +509,9 @@ sidlx_rmi_IPv4Socket_writestring__exec(
         struct sidl_io_Deserializer__object* inArgs,
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
-  int32_t nbytes;
-  struct sidl_char__array* data;
-  int32_t _retval;
+  int32_t nbytes = 0;
+  struct sidl_char__array* data = 0;
+  int32_t _retval = 0;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
@@ -540,8 +540,8 @@ sidlx_rmi_IPv4Socket_writeint__exec(
         struct sidl_io_Deserializer__object* inArgs,
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
-  int32_t data;
-  int32_t _retval;
+  int32_t data = 0;
+  int32_t _retval = 0;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
@@ -569,7 +569,7 @@ sidlx_rmi_IPv4Socket_setFileDescriptor__exec(
         struct sidl_io_Deserializer__object* inArgs,
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
-  int32_t fd;
+  int32_t fd = 0;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
@@ -595,7 +595,7 @@ sidlx_rmi_IPv4Socket_getFileDescriptor__exec(
         struct sidl_io_Deserializer__object* inArgs,
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
-  int32_t _retval;
+  int32_t _retval = 0;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
@@ -666,8 +666,6 @@ static void ior_sidlx_rmi_IPv4Socket__delete(
 static char*
 ior_sidlx_rmi_IPv4Socket__getURL(
     struct sidlx_rmi_IPv4Socket__object* self) {
-  sidl_rmi_InstanceHandle conn = (sidl_rmi_InstanceHandle)self->d_data;
-  sidl_BaseInterface _ex = NULL;
   /* TODO: Make this work for local object! */
   return NULL;
 }
@@ -868,6 +866,15 @@ static struct sidl_BaseClass__epv* sidlx_rmi_IPv4Socket__super(void) {
   return s_old_epv__sidl_baseclass;
 }
 
+static void
+cleanupClassInfo(void) {
+  if (s_classInfo) {
+    sidl_ClassInfo_deleteRef(s_classInfo);
+  }
+  s_classInfo_init = 1;
+  s_classInfo = NULL;
+}
+
 /*
  * initClassInfo: create a ClassInfo interface if necessary.
  */
@@ -885,6 +892,7 @@ initClassInfo(sidl_ClassInfo *info)
       sidl_ClassInfoI_setName(impl, "sidlx.rmi.IPv4Socket");
       sidl_ClassInfoI_setIORVersion(impl, s_IOR_MAJOR_VERSION,
         s_IOR_MINOR_VERSION);
+      atexit(cleanupClassInfo);
     }
   }
   if (s_classInfo) {

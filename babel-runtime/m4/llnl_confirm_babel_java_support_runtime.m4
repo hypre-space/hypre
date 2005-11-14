@@ -89,30 +89,37 @@ else
   LLNL_CHECK_CLASSPATH
   test -z "$JAVAC" && JAVAC=javac
   AC_PROG_JAVAC
-  LLNL_PROG_JAVA
-  LLNL_CHECK_JAVA_ADDCLASSPATH_FLAG
+  if test "X$ac_cv_prog_javac_works" != "Xyes"; then
+    AC_MSG_WARN([Disabling Java support.])
+    enable_java=no
+    msgs="$msgs
+  	  Java support disabled against request (no java compiler found!)"
+  else
+    LLNL_PROG_JAVA
+    LLNL_CHECK_JAVA_ADDCLASSPATH_FLAG
 
-  test -z "$JAR" && JAR=jar
-  LLNL_PROG_JAR
+    test -z "$JAR" && JAR=jar
+    LLNL_PROG_JAR
   
-  AC_TRY_COMPILE_JAVA
-  test -z "$JAVADOC" && JAVADOC=javadoc
-  AC_PROG_JAVADOC
-  test -z "$JAVAH" && JAVAH=javah
-  LLNL_PROG_JAVAH
-  if test "X$llnl_cv_header_jni_h" = "Xno"; then
-    AC_MSG_WARN([Cannot find jni.h, Java support will be disabled])
-    AC_MSG_WARN([Try setting JNI_INCLUDES and rerunning configure])
-    enable_java=no
-    msgs="$msgs
-	  Java support disabled against request (no jni.h found!)"
-  fi
-  if test -z "$llnl_cv_lib_jvm"; then
-    AC_MSG_WARN([Cannot find JVM shared library, Java support will be disabled])
-    enable_java=no
-    msgs="$msgs
+    AC_TRY_COMPILE_JAVA
+    test -z "$JAVADOC" && JAVADOC=javadoc
+    AC_PROG_JAVADOC
+    test -z "$JAVAH" && JAVAH=javah
+    LLNL_PROG_JAVAH
+    if test "X$llnl_cv_header_jni_h" = "Xno"; then
+      AC_MSG_WARN([Cannot find jni.h, Java support will be disabled])
+      AC_MSG_WARN([Try setting JNI_INCLUDES and rerunning configure])
+      enable_java=no
+      msgs="$msgs
+  	  Java support disabled against request (no jni.h found!)"
+    fi
+    if test -z "$llnl_cv_lib_jvm"; then
+      AC_MSG_WARN([Cannot find JVM shared library, Java support will be disabled])
+      enable_java=no
+      msgs="$msgs
 	  Java support disabled against request 
             (no jvm.dll/libjvm.so/libjvm.a found!)"
+    fi
   fi
 fi
 if test "X$enable_java" = "Xno"; then

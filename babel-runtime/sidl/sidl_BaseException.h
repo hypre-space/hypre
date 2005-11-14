@@ -2,7 +2,7 @@
  * File:          sidl_BaseException.h
  * Symbol:        sidl.BaseException-v0.9.3
  * Symbol Type:   interface
- * Babel Version: 0.10.10
+ * Babel Version: 0.10.12
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Client-side glue code for sidl.BaseException
@@ -32,7 +32,7 @@
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.10
+ * babel-version = 0.10.12
  */
 
 #ifndef included_sidl_BaseException_h
@@ -211,14 +211,6 @@ sidl_BaseException__cast2(
 void
 sidl_BaseException__exec(
   /* in */ sidl_BaseException self,
-  /* in */ const char* methodName,
-  /* in */ sidl_io_Deserializer inArgs,
-  /* in */ sidl_io_Serializer outArgs);
-/**
- * static Exec method for reflexity.
- */
-void
-sidl_BaseException__sexec(
   /* in */ const char* methodName,
   /* in */ sidl_io_Deserializer inArgs,
   /* in */ sidl_io_Serializer outArgs);

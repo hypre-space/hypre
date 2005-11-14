@@ -2,12 +2,12 @@
  * File:          sidlx_rmi_ChildSocket_Impl.c
  * Symbol:        sidlx.rmi.ChildSocket-v0.1
  * Symbol Type:   class
- * Babel Version: 0.10.10
+ * Babel Version: 0.10.12
  * Description:   Server-side implementation for sidlx.rmi.ChildSocket
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.10.10
+ * babel-version = 0.10.12
  */
 
 /*

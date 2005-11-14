@@ -2,12 +2,12 @@
  * File:          sidlx_rmi_SimHandle_Impl.c
  * Symbol:        sidlx.rmi.SimHandle-v0.1
  * Symbol Type:   class
- * Babel Version: 0.10.10
+ * Babel Version: 0.10.12
  * Description:   Server-side implementation for sidlx.rmi.SimHandle
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.10.10
+ * babel-version = 0.10.12
  */
 
 /*
@@ -27,6 +27,9 @@
 #line 27 "../../../babel/runtime/sidlx/sidlx_rmi_SimHandle_Impl.c"
 /* DO-NOT-DELETE splicer.begin(sidlx.rmi.SimHandle._includes) */
 #include "sidl_String.h"
+#include <string.h>
+#include <stdlib.h>
+#include <stdio.h>
 
 /* This function parses a url into the pointers provided (they are all out parameters)
    url, protocol, and server are required, and the method will throw an if they are
@@ -141,7 +144,7 @@ static void parseURL(char* url, char** protocol, char** server, int* port,
 
 
 /* DO-NOT-DELETE splicer.end(sidlx.rmi.SimHandle._includes) */
-#line 144 "sidlx_rmi_SimHandle_Impl.c"
+#line 147 "sidlx_rmi_SimHandle_Impl.c"
 
 /*
  * Static class initializer called exactly once before any user-defined method is dispatched
@@ -157,11 +160,11 @@ void
 impl_sidlx_rmi_SimHandle__load(
   void)
 {
-#line 158 "../../../babel/runtime/sidlx/sidlx_rmi_SimHandle_Impl.c"
+#line 161 "../../../babel/runtime/sidlx/sidlx_rmi_SimHandle_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.SimHandle._load) */
   /* insert implementation here: sidlx.rmi.SimHandle._load (static class initializer method) */
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.SimHandle._load) */
-#line 164 "sidlx_rmi_SimHandle_Impl.c"
+#line 167 "sidlx_rmi_SimHandle_Impl.c"
 }
 /*
  * Class constructor called when the class is created.
@@ -177,11 +180,11 @@ void
 impl_sidlx_rmi_SimHandle__ctor(
   /* in */ sidlx_rmi_SimHandle self)
 {
-#line 176 "../../../babel/runtime/sidlx/sidlx_rmi_SimHandle_Impl.c"
+#line 179 "../../../babel/runtime/sidlx/sidlx_rmi_SimHandle_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.SimHandle._ctor) */
   /* insert implementation here: sidlx.rmi.SimHandle._ctor (constructor method) */
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.SimHandle._ctor) */
-#line 184 "sidlx_rmi_SimHandle_Impl.c"
+#line 187 "sidlx_rmi_SimHandle_Impl.c"
 }
 
 /*
@@ -198,7 +201,7 @@ void
 impl_sidlx_rmi_SimHandle__dtor(
   /* in */ sidlx_rmi_SimHandle self)
 {
-#line 195 "../../../babel/runtime/sidlx/sidlx_rmi_SimHandle_Impl.c"
+#line 198 "../../../babel/runtime/sidlx/sidlx_rmi_SimHandle_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.SimHandle._dtor) */
   
   struct sidlx_rmi_SimHandle__data *dptr =
@@ -211,7 +214,7 @@ impl_sidlx_rmi_SimHandle__dtor(
     sidlx_rmi_SimHandle__set_data(self, NULL);
   }
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.SimHandle._dtor) */
-#line 214 "sidlx_rmi_SimHandle_Impl.c"
+#line 217 "sidlx_rmi_SimHandle_Impl.c"
 }
 
 /*
@@ -231,7 +234,7 @@ impl_sidlx_rmi_SimHandle_initCreate(
   /* in */ const char* typeName,
   /* out */ sidl_BaseInterface *_ex)
 {
-#line 226 "../../../babel/runtime/sidlx/sidlx_rmi_SimHandle_Impl.c"
+#line 229 "../../../babel/runtime/sidlx/sidlx_rmi_SimHandle_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.SimHandle.initCreate) */
   struct sidlx_rmi_SimHandle__data *dptr =
     sidlx_rmi_SimHandle__get_data(self);
@@ -305,7 +308,7 @@ impl_sidlx_rmi_SimHandle_initCreate(
   return 0; /*false*/
 
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.SimHandle.initCreate) */
-#line 308 "sidlx_rmi_SimHandle_Impl.c"
+#line 311 "sidlx_rmi_SimHandle_Impl.c"
 }
 
 /*
@@ -324,7 +327,7 @@ impl_sidlx_rmi_SimHandle_initConnect(
   /* in */ const char* url,
   /* out */ sidl_BaseInterface *_ex)
 {
-#line 317 "../../../babel/runtime/sidlx/sidlx_rmi_SimHandle_Impl.c"
+#line 320 "../../../babel/runtime/sidlx/sidlx_rmi_SimHandle_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.SimHandle.initConnect) */
   struct sidlx_rmi_SimHandle__data *dptr =
     sidlx_rmi_SimHandle__get_data(self);
@@ -379,7 +382,7 @@ impl_sidlx_rmi_SimHandle_initConnect(
   if(objectID) {sidl_String_free(objectID); }
   return 0; /*false*/
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.SimHandle.initConnect) */
-#line 382 "sidlx_rmi_SimHandle_Impl.c"
+#line 385 "sidlx_rmi_SimHandle_Impl.c"
 }
 
 /*
@@ -397,7 +400,7 @@ impl_sidlx_rmi_SimHandle_getProtocol(
   /* in */ sidlx_rmi_SimHandle self,
   /* out */ sidl_BaseInterface *_ex)
 {
-#line 388 "../../../babel/runtime/sidlx/sidlx_rmi_SimHandle_Impl.c"
+#line 391 "../../../babel/runtime/sidlx/sidlx_rmi_SimHandle_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.SimHandle.getProtocol) */
   struct sidlx_rmi_SimHandle__data *dptr =
     sidlx_rmi_SimHandle__get_data(self);
@@ -408,7 +411,7 @@ impl_sidlx_rmi_SimHandle_getProtocol(
  EXIT:
   return NULL;
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.SimHandle.getProtocol) */
-#line 411 "sidlx_rmi_SimHandle_Impl.c"
+#line 414 "sidlx_rmi_SimHandle_Impl.c"
 }
 
 /*
@@ -426,7 +429,7 @@ impl_sidlx_rmi_SimHandle_getObjectID(
   /* in */ sidlx_rmi_SimHandle self,
   /* out */ sidl_BaseInterface *_ex)
 {
-#line 415 "../../../babel/runtime/sidlx/sidlx_rmi_SimHandle_Impl.c"
+#line 418 "../../../babel/runtime/sidlx/sidlx_rmi_SimHandle_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.SimHandle.getObjectID) */
   struct sidlx_rmi_SimHandle__data *dptr =
     sidlx_rmi_SimHandle__get_data(self);
@@ -437,7 +440,7 @@ impl_sidlx_rmi_SimHandle_getObjectID(
  EXIT:
   return NULL;
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.SimHandle.getObjectID) */
-#line 440 "sidlx_rmi_SimHandle_Impl.c"
+#line 443 "sidlx_rmi_SimHandle_Impl.c"
 }
 
 /*
@@ -456,7 +459,7 @@ impl_sidlx_rmi_SimHandle_getURL(
   /* in */ sidlx_rmi_SimHandle self,
   /* out */ sidl_BaseInterface *_ex)
 {
-#line 443 "../../../babel/runtime/sidlx/sidlx_rmi_SimHandle_Impl.c"
+#line 446 "../../../babel/runtime/sidlx/sidlx_rmi_SimHandle_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.SimHandle.getURL) */
   int len = 0;
   char * url = NULL;
@@ -485,7 +488,7 @@ impl_sidlx_rmi_SimHandle_getURL(
   
 
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.SimHandle.getURL) */
-#line 488 "sidlx_rmi_SimHandle_Impl.c"
+#line 491 "sidlx_rmi_SimHandle_Impl.c"
 }
 
 /*
@@ -504,7 +507,7 @@ impl_sidlx_rmi_SimHandle_createInvocation(
   /* in */ const char* methodName,
   /* out */ sidl_BaseInterface *_ex)
 {
-#line 489 "../../../babel/runtime/sidlx/sidlx_rmi_SimHandle_Impl.c"
+#line 492 "../../../babel/runtime/sidlx/sidlx_rmi_SimHandle_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.SimHandle.createInvocation) */
   struct sidlx_rmi_SimHandle__data *dptr =
     sidlx_rmi_SimHandle__get_data(self);
@@ -530,7 +533,7 @@ impl_sidlx_rmi_SimHandle_createInvocation(
   return NULL;
 
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.SimHandle.createInvocation) */
-#line 533 "sidlx_rmi_SimHandle_Impl.c"
+#line 536 "sidlx_rmi_SimHandle_Impl.c"
 }
 
 /*
@@ -549,13 +552,13 @@ impl_sidlx_rmi_SimHandle_close(
   /* in */ sidlx_rmi_SimHandle self,
   /* out */ sidl_BaseInterface *_ex)
 {
-#line 532 "../../../babel/runtime/sidlx/sidlx_rmi_SimHandle_Impl.c"
+#line 535 "../../../babel/runtime/sidlx/sidlx_rmi_SimHandle_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.SimHandle.close) */
   /*
    * TODO: In the future I think this will deleteref.
    */
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.SimHandle.close) */
-#line 558 "sidlx_rmi_SimHandle_Impl.c"
+#line 561 "sidlx_rmi_SimHandle_Impl.c"
 }
 /* Babel internal methods, Users should not edit below this line. */
 struct sidl_rmi_InstanceHandle__object* 

@@ -39,14 +39,11 @@ with_java=yes
 msgs="
 	Recap:"
 
-with_fortran90=no
-enable_fortran90=no
-disable-fortran90
 ############################################################
 #
 # Basic startup stuff
 #
-AC_INIT([babel-runtime],[0.10.10],[babel-bugs@cca-forum.org])
+AC_INIT([babel-runtime],[0.10.12],[babel-bugs@cca-forum.org])
 AC_CONFIG_SRCDIR([sidl/sidlArray.h])
 AC_CONFIG_AUX_DIR([config])
 AC_CONFIG_MACRO_DIR([m4])
@@ -58,15 +55,6 @@ AC_CONFIG_HEADERS([sidl/babel_internal.h])
 LLNL_CHECK_AUTOMAKE(1.9.3)
 LLNL_CHECK_AUTOCONF(2.59)
 
-
-############################################################
-#
-# Additions for hypre
-#
-AC_PREFIX_DEFAULT(`pwd`/../hypre)
-enable_fortran90=no
-enable_java=no
-enable_shared=no
 
 ############################################################
 #
@@ -225,6 +213,23 @@ AH_BOTTOM([
 
 #endif
 ])
+
+############################################################
+# 
+# Increase warning level for libraries.  We cannot do this earlier in the
+# configure, since it may cause problems with the autoconf tests.
+#
+
+if test "X$GCC" = "Xyes"; then
+  CFLAGS="$CFLAGS -Wall -Wstrict-prototypes"
+fi
+if test "X$GXX" = "Xyes"; then
+  CXXFLAGS="$CXXFLAGS -Wall"
+fi
+# Always use the PTHREAD flags if any
+CFLAGS="$CFLAGS $PTHREAD_CFLAGS"
+LIBS="$PTHREAD_LIBS $LIBS"
+CXXFLAGS="$CXXFLAGS $PTHREAD_CFLAGS"
 
 ############################################################
 #

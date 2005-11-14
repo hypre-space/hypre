@@ -2,12 +2,12 @@
  * File:          sidlx_rmi_CallType_Stub.c
  * Symbol:        sidlx.rmi.CallType-v0.1
  * Symbol Type:   enumeration
- * Babel Version: 0.10.10
+ * Babel Version: 0.10.12
  * Description:   Client-side glue code for sidlx.rmi.CallType
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.10
+ * babel-version = 0.10.12
  */
 
 #include "sidlx_rmi_CallType.h"

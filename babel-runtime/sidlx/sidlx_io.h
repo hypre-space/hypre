@@ -2,12 +2,12 @@
  * File:          sidlx_io.h
  * Symbol:        sidlx.io-v0.1
  * Symbol Type:   package
- * Babel Version: 0.10.10
+ * Babel Version: 0.10.12
  * Description:   Client-side glue code for sidlx.io
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.10
+ * babel-version = 0.10.12
  */
 
 #ifndef included_sidlx_io_IOException_h

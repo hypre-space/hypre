@@ -2,7 +2,7 @@
  * File:          sidl_rmi_ConnectRegistry_Impl.h
  * Symbol:        sidl.rmi.ConnectRegistry-v0.9.3
  * Symbol Type:   class
- * Babel Version: 0.10.10
+ * Babel Version: 0.10.12
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Server-side implementation for sidl.rmi.ConnectRegistry
@@ -32,7 +32,7 @@
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.10.10
+ * babel-version = 0.10.12
  */
 
 #ifndef included_sidl_rmi_ConnectRegistry_Impl_h

@@ -2,12 +2,12 @@
  * File:          sidlx_rmi_Common_Stub.c
  * Symbol:        sidlx.rmi.Common-v0.1
  * Symbol Type:   class
- * Babel Version: 0.10.10
+ * Babel Version: 0.10.12
  * Description:   Client-side glue code for sidlx.rmi.Common
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.10
+ * babel-version = 0.10.12
  */
 
 #include "sidlx_rmi_Common.h"
@@ -249,60 +249,6 @@ sidlx_rmi_Common_gethostbyname(
     _ex);
 }
 
-void
-sidlx_rmi_Common_fork__sexec(
-        struct sidl_io_Deserializer__object* inArgs,
-        struct sidl_io_Serializer__object* outArgs) {
-  /* stack space for arguments */
-  int32_t _retval;
-  sidl_BaseInterface _ex   = NULL;
-  sidl_BaseInterface *_ex2 = &_ex;
-
-  /* unpack in and inout argments */
-
-  /* make the call */
-  _retval = (_getSEPV()->f_fork)(
-    _ex2);
-
-  /* check if exception thrown */
-  /* FIXME */
-
-  /* pack return value */
-  sidl_io_Serializer_packInt( outArgs, "_retval", _retval, _ex2);
-
-  /* pack out and inout argments */
-
-}
-
-void
-sidlx_rmi_Common_gethostbyname__sexec(
-        struct sidl_io_Deserializer__object* inArgs,
-        struct sidl_io_Serializer__object* outArgs) {
-  /* stack space for arguments */
-  char* hostname;
-  int32_t _retval;
-  sidl_BaseInterface _ex   = NULL;
-  sidl_BaseInterface *_ex2 = &_ex;
-
-  /* unpack in and inout argments */
-
-  sidl_io_Deserializer_unpackString( inArgs, "hostname", &hostname, _ex2);
-
-  /* make the call */
-  _retval = (_getSEPV()->f_gethostbyname)(
-    hostname,
-    _ex2);
-
-  /* check if exception thrown */
-  /* FIXME */
-
-  /* pack return value */
-  sidl_io_Serializer_packInt( outArgs, "_retval", _retval, _ex2);
-
-  /* pack out and inout argments */
-
-}
-
 /*
  * Cast method for interface and class type conversions.
  */
@@ -364,37 +310,6 @@ sidlx_rmi_Common__exec(
   outArgs);
 }
 
-struct sidlx_rmi_Common__smethod {
-  const char *d_name;
-  void (*d_func)(struct sidl_io_Deserializer__object *,
-    struct sidl_io_Serializer__object *);
-};
-
-void
-sidlx_rmi_Common__sexec(
-        const char* methodName,
-        struct sidl_io_Deserializer__object* inArgs,
-        struct sidl_io_Serializer__object* outArgs ) { 
-  static const struct sidlx_rmi_Common__smethod s_methods[] = {
-    { "fork", sidlx_rmi_Common_fork__sexec },
-    { "gethostbyname", sidlx_rmi_Common_gethostbyname__sexec }
-  };
-  int i, cmp, l = 0;
-  int u = sizeof(s_methods)/sizeof(struct sidlx_rmi_Common__smethod);
-  if (methodName) {
-    /* Use binary search to locate method */
-    while (l < u) {
-      i = (l + u) >> 1;
-      if (!(cmp=strcmp(methodName, s_methods[i].d_name))) {
-        (s_methods[i].d_func)(inArgs, outArgs);
-        return;
-      }
-      else if (cmp < 0) u = i;
-      else l = i + 1;
-    }
-  }
-  /* TODO: add code for method not found */
-}
 /*
  * Get the URL of the Implementation of this object (for RMI)
  */

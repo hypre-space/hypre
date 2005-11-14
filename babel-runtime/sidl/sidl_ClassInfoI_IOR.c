@@ -2,7 +2,7 @@
  * File:          sidl_ClassInfoI_IOR.c
  * Symbol:        sidl.ClassInfoI-v0.9.3
  * Symbol Type:   class
- * Babel Version: 0.10.10
+ * Babel Version: 0.10.12
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Intermediate Object Representation for sidl.ClassInfoI
@@ -32,7 +32,7 @@
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.10
+ * babel-version = 0.10.12
  */
 
 #include "sidl_rmi_InstanceHandle.h"
@@ -159,8 +159,8 @@ sidl_ClassInfoI_isSame__exec(
         struct sidl_io_Deserializer__object* inArgs,
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
-  struct sidl_BaseInterface__object* iobj;
-  sidl_bool _retval;
+  struct sidl_BaseInterface__object* iobj = 0;
+  sidl_bool _retval = FALSE;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
@@ -184,7 +184,7 @@ sidl_ClassInfoI_queryInt__exec(
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
   char* name= NULL;
-  struct sidl_BaseInterface__object* _retval;
+  struct sidl_BaseInterface__object* _retval = 0;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
@@ -207,7 +207,7 @@ sidl_ClassInfoI_isType__exec(
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
   char* name= NULL;
-  sidl_bool _retval;
+  sidl_bool _retval = FALSE;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
@@ -231,7 +231,7 @@ sidl_ClassInfoI_getClassInfo__exec(
         struct sidl_io_Deserializer__object* inArgs,
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
-  struct sidl_ClassInfo__object* _retval;
+  struct sidl_ClassInfo__object* _retval = 0;
   /* unpack in and inout argments */
 
   /* make the call */
@@ -271,8 +271,8 @@ sidl_ClassInfoI_setIORVersion__exec(
         struct sidl_io_Deserializer__object* inArgs,
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
-  int32_t major;
-  int32_t minor;
+  int32_t major = 0;
+  int32_t minor = 0;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
@@ -296,7 +296,7 @@ sidl_ClassInfoI_getName__exec(
         struct sidl_io_Deserializer__object* inArgs,
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
-  char* _retval;
+  char* _retval = 0;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
@@ -318,7 +318,7 @@ sidl_ClassInfoI_getIORVersion__exec(
         struct sidl_io_Deserializer__object* inArgs,
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
-  char* _retval;
+  char* _retval = 0;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
@@ -385,8 +385,6 @@ static void ior_sidl_ClassInfoI__delete(
 static char*
 ior_sidl_ClassInfoI__getURL(
     struct sidl_ClassInfoI__object* self) {
-  sidl_rmi_InstanceHandle conn = (sidl_rmi_InstanceHandle)self->d_data;
-  sidl_BaseInterface _ex = NULL;
   /* TODO: Make this work for local object! */
   return NULL;
 }
@@ -543,6 +541,22 @@ static struct sidl_BaseClass__epv* sidl_ClassInfoI__super(void) {
   return s_old_epv__sidl_baseclass;
 }
 
+static void
+cleanupClassInfo(void) {
+  if (s_classInfo) {
+    struct sidl_BaseClass__data *data = 
+      sidl_BaseClass__get_data(sidl_BaseClass__cast(s_classInfo));
+    if (data && data->d_classinfo) {
+      struct sidl_ClassInfo__object* ci = data->d_classinfo;
+      data->d_classinfo = NULL;
+      sidl_ClassInfo_deleteRef(ci);
+    }
+    sidl_ClassInfo_deleteRef(s_classInfo);
+  }
+  s_classInfo_init = 1;
+  s_classInfo = NULL;
+}
+
 static void initMetadata(struct sidl_ClassInfoI__object*);
 
 /*
@@ -564,6 +578,7 @@ initClassInfo(sidl_ClassInfo *info)
       sidl_ClassInfoI_setIORVersion(impl, s_IOR_MAJOR_VERSION,
         s_IOR_MINOR_VERSION);
       initMetadata(impl);
+      atexit(cleanupClassInfo);
     }
   }
   if (s_classInfo) {

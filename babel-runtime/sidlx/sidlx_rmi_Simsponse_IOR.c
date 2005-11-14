@@ -2,12 +2,12 @@
  * File:          sidlx_rmi_Simsponse_IOR.c
  * Symbol:        sidlx.rmi.Simsponse-v0.1
  * Symbol Type:   class
- * Babel Version: 0.10.10
+ * Babel Version: 0.10.12
  * Description:   Intermediate Object Representation for sidlx.rmi.Simsponse
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.10
+ * babel-version = 0.10.12
  */
 
 #include "sidl_rmi_InstanceHandle.h"
@@ -136,8 +136,8 @@ sidlx_rmi_Simsponse_isSame__exec(
         struct sidl_io_Deserializer__object* inArgs,
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
-  struct sidl_BaseInterface__object* iobj;
-  sidl_bool _retval;
+  struct sidl_BaseInterface__object* iobj = 0;
+  sidl_bool _retval = FALSE;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
@@ -161,7 +161,7 @@ sidlx_rmi_Simsponse_queryInt__exec(
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
   char* name= NULL;
-  struct sidl_BaseInterface__object* _retval;
+  struct sidl_BaseInterface__object* _retval = 0;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
@@ -184,7 +184,7 @@ sidlx_rmi_Simsponse_isType__exec(
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
   char* name= NULL;
-  sidl_bool _retval;
+  sidl_bool _retval = FALSE;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
@@ -208,7 +208,7 @@ sidlx_rmi_Simsponse_getClassInfo__exec(
         struct sidl_io_Deserializer__object* inArgs,
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
-  struct sidl_ClassInfo__object* _retval;
+  struct sidl_ClassInfo__object* _retval = 0;
   /* unpack in and inout argments */
 
   /* make the call */
@@ -229,7 +229,7 @@ sidlx_rmi_Simsponse_init__exec(
   char* methodName= NULL;
   char* className= NULL;
   char* objectid= NULL;
-  struct sidlx_rmi_Socket__object* sock;
+  struct sidlx_rmi_Socket__object* sock = 0;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
@@ -260,7 +260,7 @@ sidlx_rmi_Simsponse_getMethodName__exec(
         struct sidl_io_Deserializer__object* inArgs,
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
-  char* _retval;
+  char* _retval = 0;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
@@ -286,7 +286,7 @@ sidlx_rmi_Simsponse_getClassName__exec(
         struct sidl_io_Deserializer__object* inArgs,
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
-  char* _retval;
+  char* _retval = 0;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
@@ -312,7 +312,7 @@ sidlx_rmi_Simsponse_getObjectID__exec(
         struct sidl_io_Deserializer__object* inArgs,
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
-  char* _retval;
+  char* _retval = 0;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
@@ -339,7 +339,7 @@ sidlx_rmi_Simsponse_unpackBool__exec(
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
   char* key= NULL;
-  sidl_bool value_tmp;
+  sidl_bool value_tmp = FALSE;
   sidl_bool* value= &value_tmp;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
@@ -369,7 +369,7 @@ sidlx_rmi_Simsponse_unpackChar__exec(
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
   char* key= NULL;
-  char value_tmp;
+  char value_tmp = 0;
   char* value= &value_tmp;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
@@ -399,7 +399,7 @@ sidlx_rmi_Simsponse_unpackInt__exec(
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
   char* key= NULL;
-  int32_t value_tmp;
+  int32_t value_tmp = 0;
   int32_t* value= &value_tmp;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
@@ -429,7 +429,7 @@ sidlx_rmi_Simsponse_unpackLong__exec(
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
   char* key= NULL;
-  int64_t value_tmp;
+  int64_t value_tmp = 0;
   int64_t* value= &value_tmp;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
@@ -459,7 +459,7 @@ sidlx_rmi_Simsponse_unpackFloat__exec(
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
   char* key= NULL;
-  float value_tmp;
+  float value_tmp = 0;
   float* value= &value_tmp;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
@@ -489,7 +489,7 @@ sidlx_rmi_Simsponse_unpackDouble__exec(
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
   char* key= NULL;
-  double value_tmp;
+  double value_tmp = 0;
   double* value= &value_tmp;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
@@ -519,7 +519,7 @@ sidlx_rmi_Simsponse_unpackFcomplex__exec(
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
   char* key= NULL;
-  struct sidl_fcomplex value_tmp;
+  struct sidl_fcomplex value_tmp = { 0, 0 };
   struct sidl_fcomplex* value= &value_tmp;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
@@ -549,7 +549,7 @@ sidlx_rmi_Simsponse_unpackDcomplex__exec(
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
   char* key= NULL;
-  struct sidl_dcomplex value_tmp;
+  struct sidl_dcomplex value_tmp = { 0, 0 };
   struct sidl_dcomplex* value= &value_tmp;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
@@ -579,7 +579,7 @@ sidlx_rmi_Simsponse_unpackString__exec(
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
   char* key= NULL;
-  char* value_tmp;
+  char* value_tmp = 0;
   char** value= &value_tmp;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
@@ -608,7 +608,7 @@ sidlx_rmi_Simsponse_getExceptionThrown__exec(
         struct sidl_io_Deserializer__object* inArgs,
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
-  struct sidl_BaseException__object* _retval;
+  struct sidl_BaseException__object* _retval = 0;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
@@ -632,7 +632,7 @@ sidlx_rmi_Simsponse_done__exec(
         struct sidl_io_Deserializer__object* inArgs,
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
-  sidl_bool _retval;
+  sidl_bool _retval = FALSE;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
@@ -705,8 +705,6 @@ static void ior_sidlx_rmi_Simsponse__delete(
 static char*
 ior_sidlx_rmi_Simsponse__getURL(
     struct sidlx_rmi_Simsponse__object* self) {
-  sidl_rmi_InstanceHandle conn = (sidl_rmi_InstanceHandle)self->d_data;
-  sidl_BaseInterface _ex = NULL;
   /* TODO: Make this work for local object! */
   return NULL;
 }
@@ -939,6 +937,15 @@ static struct sidl_BaseClass__epv* sidlx_rmi_Simsponse__super(void) {
   return s_old_epv__sidl_baseclass;
 }
 
+static void
+cleanupClassInfo(void) {
+  if (s_classInfo) {
+    sidl_ClassInfo_deleteRef(s_classInfo);
+  }
+  s_classInfo_init = 1;
+  s_classInfo = NULL;
+}
+
 /*
  * initClassInfo: create a ClassInfo interface if necessary.
  */
@@ -956,6 +963,7 @@ initClassInfo(sidl_ClassInfo *info)
       sidl_ClassInfoI_setName(impl, "sidlx.rmi.Simsponse");
       sidl_ClassInfoI_setIORVersion(impl, s_IOR_MAJOR_VERSION,
         s_IOR_MINOR_VERSION);
+      atexit(cleanupClassInfo);
     }
   }
   if (s_classInfo) {

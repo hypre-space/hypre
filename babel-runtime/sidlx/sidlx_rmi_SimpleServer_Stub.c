@@ -2,12 +2,12 @@
  * File:          sidlx_rmi_SimpleServer_Stub.c
  * Symbol:        sidlx.rmi.SimpleServer-v0.1
  * Symbol Type:   class
- * Babel Version: 0.10.10
+ * Babel Version: 0.10.12
  * Description:   Client-side glue code for sidlx.rmi.SimpleServer
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.10
+ * babel-version = 0.10.12
  */
 
 #include "sidlx_rmi_SimpleServer.h"
@@ -39,33 +39,6 @@
  */
 
 static int connect_loaded = 0;
-
-/*
- * Hold pointer to IOR functions.
- */
-
-static const struct sidlx_rmi_SimpleServer__external *_externals = NULL;
-/*
- * Lookup the symbol to get the IOR functions.
- */
-
-static const struct sidlx_rmi_SimpleServer__external* _loadIOR(void)
-/*
- * Return pointer to internal IOR functions.
- */
-
-{
-#ifdef SIDL_STATIC_LIBRARY
-  _externals = sidlx_rmi_SimpleServer__externals();
-#else
-  _externals = (struct 
-    sidlx_rmi_SimpleServer__external*)sidl_dynamicLoadIOR(
-    "sidlx.rmi.SimpleServer","sidlx_rmi_SimpleServer__externals") ;
-#endif
-  return _externals;
-}
-
-#define _getExternals() (_externals ? _externals : _loadIOR())
 
 static struct sidlx_rmi_SimpleServer__object* 
   sidlx_rmi_SimpleServer__remoteConnect(const char* url,

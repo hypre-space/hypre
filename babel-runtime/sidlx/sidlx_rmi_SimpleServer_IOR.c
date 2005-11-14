@@ -2,12 +2,12 @@
  * File:          sidlx_rmi_SimpleServer_IOR.c
  * Symbol:        sidlx.rmi.SimpleServer-v0.1
  * Symbol Type:   class
- * Babel Version: 0.10.10
+ * Babel Version: 0.10.12
  * Description:   Intermediate Object Representation for sidlx.rmi.SimpleServer
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.10
+ * babel-version = 0.10.12
  */
 
 #include "sidl_rmi_InstanceHandle.h"
@@ -125,8 +125,8 @@ sidlx_rmi_SimpleServer_isSame__exec(
         struct sidl_io_Deserializer__object* inArgs,
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
-  struct sidl_BaseInterface__object* iobj;
-  sidl_bool _retval;
+  struct sidl_BaseInterface__object* iobj = 0;
+  sidl_bool _retval = FALSE;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
@@ -150,7 +150,7 @@ sidlx_rmi_SimpleServer_queryInt__exec(
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
   char* name= NULL;
-  struct sidl_BaseInterface__object* _retval;
+  struct sidl_BaseInterface__object* _retval = 0;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
@@ -173,7 +173,7 @@ sidlx_rmi_SimpleServer_isType__exec(
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
   char* name= NULL;
-  sidl_bool _retval;
+  sidl_bool _retval = FALSE;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
@@ -197,7 +197,7 @@ sidlx_rmi_SimpleServer_getClassInfo__exec(
         struct sidl_io_Deserializer__object* inArgs,
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
-  struct sidl_ClassInfo__object* _retval;
+  struct sidl_ClassInfo__object* _retval = 0;
   /* unpack in and inout argments */
 
   /* make the call */
@@ -215,7 +215,7 @@ sidlx_rmi_SimpleServer_setPort__exec(
         struct sidl_io_Deserializer__object* inArgs,
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
-  int32_t port;
+  int32_t port = 0;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
@@ -264,7 +264,7 @@ sidlx_rmi_SimpleServer_serviceRequest__exec(
         struct sidl_io_Deserializer__object* inArgs,
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
-  struct sidlx_rmi_Socket__object* sock;
+  struct sidlx_rmi_Socket__object* sock = 0;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
@@ -332,8 +332,6 @@ static void ior_sidlx_rmi_SimpleServer__delete(
 static char*
 ior_sidlx_rmi_SimpleServer__getURL(
     struct sidlx_rmi_SimpleServer__object* self) {
-  sidl_rmi_InstanceHandle conn = (sidl_rmi_InstanceHandle)self->d_data;
-  sidl_BaseInterface _ex = NULL;
   /* TODO: Make this work for local object! */
   return NULL;
 }

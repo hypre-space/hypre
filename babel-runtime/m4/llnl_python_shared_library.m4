@@ -24,7 +24,15 @@ AC_DEFUN([LLNL_PYTHON_SHARED_LIBRARY],[
   esac
 
   llnl_python_shared_lib_path=`env | grep "^${libltdl_cv_shlibpath_var}=" | sed "s/^${libltdl_cv_shlibpath_var}=//"`
-  for f in `echo $llnl_python_shared_lib_path | tr ';:' '  '` $llnl_cv_python_library/config /bin /lib /usr/lib `test -f /etc/ld.so.conf && cat /etc/ld.so.conf` ; do
+  llnl_ld_extra=
+  if test -f /etc/ld.so.conf; then
+    llnl_ld_extra = `$SED -e 's/[:,\t]/ /g;s/=[^=]*$//;s/=[^= ]* / /g' /etc/ld.so.conf | tr '\n' ' '`
+  fi
+  llnl_ld_extra_dir=
+  if test -d /etc/ld.so.conf.d; then
+    llnl_ld_extra_dir = `cat /etc/ld.so.conf.d/* 2>/dev/null | $SED -e 's/[:,\t]/ /g;s/=[^=]*$//;s/=[^= ]* / /g' | tr '\n' ' '`
+  fi
+  for f in `echo $llnl_python_shared_lib_path | tr ';:' '  '` $llnl_cv_python_library/config /bin /lib /usr/lib /usr/lib64 $llnl_ld_extra $llnl_ld_extra_dir ; do
     if test -f "$f/$llnl_python_shared_library"; then
       llnl_python_shared_library_found=yes
       llnl_python_shared_library="$f/$llnl_python_shared_library"
@@ -37,7 +45,15 @@ AC_DEFUN([LLNL_PYTHON_SHARED_LIBRARY],[
     case "$target_os" in
       darwin*)
         llnl_python_shared_library="libpython$llnl_cv_python_version.dylib"
-        for f in `echo $llnl_python_shared_lib_path | tr ';:' '  '` $llnl_cv_python_library/config /bin /lib /usr/lib `test -f /etc/ld.so.conf && cat /etc/ld.so.conf` ; do
+	llnl_ld_extra=
+	if test -f /etc/ld.so.conf; then
+	  llnl_ld_extra = `$SED -e 's/[:,\t]/ /g;s/=[^=]*$//;s/=[^= ]* / /g' /etc/ld.so.conf | tr '\n' ' '`
+	fi
+	llnl_ld_extra_dir=
+	if test -d /etc/ld.so.conf.d; then
+	  llnl_ld_extra_dir = `cat /etc/ld.so.conf.d/* 2>/dev/null | $SED -e 's/[:,\t]/ /g;s/=[^=]*$//;s/=[^= ]* / /g' | tr '\n' ' '`
+	fi
+        for f in `echo $llnl_python_shared_lib_path | tr ';:' '  '` $llnl_cv_python_library/config /bin /lib /usr/lib /usr/lib64 $llnl_ld_extra $llnl_ld_extra_dir ; do
           if test -f "$f/$llnl_python_shared_library"; then
             llnl_python_shared_library_found=yes
             llnl_python_shared_library="$f/$llnl_python_shared_library"

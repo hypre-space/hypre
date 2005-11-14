@@ -2,12 +2,12 @@
  * File:          sidlx_io_TxtIStream_Impl.c
  * Symbol:        sidlx.io.TxtIStream-v0.1
  * Symbol Type:   class
- * Babel Version: 0.10.10
+ * Babel Version: 0.10.12
  * Description:   Server-side implementation for sidlx.io.TxtIStream
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.10.10
+ * babel-version = 0.10.12
  */
 
 /*

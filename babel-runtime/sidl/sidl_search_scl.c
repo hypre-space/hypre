@@ -192,7 +192,7 @@ storeLibraryAttributes(struct sidl_scl_entry *ent,
     while (*attrs && *(attrs+1)) {
       if (!xmlStrcmp(*attrs, (const xmlChar *)"uri")) {
         if (ent->d_uri) free((void *)ent->d_uri);
-        ent->d_uri = sidl_String_strdup(*(attrs+1));
+        ent->d_uri = sidl_String_strdup((const char *)(*(attrs+1)));
       }
       else if (!xmlStrcmp(*attrs, (const xmlChar *) "scope")) {
         if (!xmlStrcmp(*(attrs+1), (const xmlChar *) "global")) {
@@ -212,11 +212,11 @@ storeLibraryAttributes(struct sidl_scl_entry *ent,
       }
       else if (!xmlStrcmp(*attrs, (const xmlChar *) "md5")) {
         if (ent->d_md5) free((void *)ent->d_md5);
-        ent->d_md5 = sidl_String_strdup(*(attrs+1));
+        ent->d_md5 = sidl_String_strdup((const char *)(*(attrs+1)));
       }
       else if (!xmlStrcmp(*attrs, (const xmlChar *) "sha1")) {
         if (ent->d_sha1) free((void *)ent->d_sha1);
-        ent->d_sha1 = sidl_String_strdup(*(attrs+1));
+        ent->d_sha1 = sidl_String_strdup((const char *)(*(attrs+1)));
       }
       attrs += 2;
     }

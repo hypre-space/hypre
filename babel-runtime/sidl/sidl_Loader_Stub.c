@@ -2,7 +2,7 @@
  * File:          sidl_Loader_Stub.c
  * Symbol:        sidl.Loader-v0.9.3
  * Symbol Type:   class
- * Babel Version: 0.10.10
+ * Babel Version: 0.10.12
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Client-side glue code for sidl.Loader
@@ -32,7 +32,7 @@
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.10
+ * babel-version = 0.10.12
  */
 
 #include "sidl_Loader.h"
@@ -425,206 +425,6 @@ sidl_Loader_getFinder(
     );
 }
 
-void
-sidl_Loader_loadLibrary__sexec(
-        struct sidl_io_Deserializer__object* inArgs,
-        struct sidl_io_Serializer__object* outArgs) {
-  /* stack space for arguments */
-  char* uri;
-  sidl_bool loadGlobally;
-  sidl_bool loadLazy;
-  sidl_DLL _retval;
-  sidl_BaseInterface _ex   = NULL;
-  sidl_BaseInterface *_ex2 = &_ex;
-
-  /* unpack in and inout argments */
-
-  sidl_io_Deserializer_unpackString( inArgs, "uri", &uri, _ex2);
-
-  sidl_io_Deserializer_unpackBool( inArgs, "loadGlobally", &loadGlobally, _ex2);
-
-  sidl_io_Deserializer_unpackBool( inArgs, "loadLazy", &loadLazy, _ex2);
-
-  /* make the call */
-  _retval = (_getSEPV()->f_loadLibrary)(
-    uri,
-    loadGlobally,
-    loadLazy);
-
-  /* pack return value */
-  /* pack out and inout argments */
-
-}
-
-void
-sidl_Loader_addDLL__sexec(
-        struct sidl_io_Deserializer__object* inArgs,
-        struct sidl_io_Serializer__object* outArgs) {
-  /* stack space for arguments */
-  sidl_DLL dll;
-
-  /* unpack in and inout argments */
-
-  /* make the call */
-  (_getSEPV()->f_addDLL)(
-    dll);
-
-  /* pack return value */
-  /* pack out and inout argments */
-
-}
-
-void
-sidl_Loader_unloadLibraries__sexec(
-        struct sidl_io_Deserializer__object* inArgs,
-        struct sidl_io_Serializer__object* outArgs) {
-  /* stack space for arguments */
-
-  /* unpack in and inout argments */
-
-  /* make the call */
-  (_getSEPV()->f_unloadLibraries)(
-    );
-
-  /* pack return value */
-  /* pack out and inout argments */
-
-}
-
-void
-sidl_Loader_findLibrary__sexec(
-        struct sidl_io_Deserializer__object* inArgs,
-        struct sidl_io_Serializer__object* outArgs) {
-  /* stack space for arguments */
-  char* sidl_name;
-  char* target;
-  enum sidl_Scope__enum lScope;
-  enum sidl_Resolve__enum lResolve;
-  sidl_DLL _retval;
-  sidl_BaseInterface _ex   = NULL;
-  sidl_BaseInterface *_ex2 = &_ex;
-
-  /* unpack in and inout argments */
-
-  sidl_io_Deserializer_unpackString( inArgs, "sidl_name", &sidl_name, _ex2);
-
-  sidl_io_Deserializer_unpackString( inArgs, "target", &target, _ex2);
-
-  /* make the call */
-  _retval = (_getSEPV()->f_findLibrary)(
-    sidl_name,
-    target,
-    lScope,
-    lResolve);
-
-  /* pack return value */
-  /* pack out and inout argments */
-
-}
-
-void
-sidl_Loader_setSearchPath__sexec(
-        struct sidl_io_Deserializer__object* inArgs,
-        struct sidl_io_Serializer__object* outArgs) {
-  /* stack space for arguments */
-  char* path_name;
-  sidl_BaseInterface _ex   = NULL;
-  sidl_BaseInterface *_ex2 = &_ex;
-
-  /* unpack in and inout argments */
-
-  sidl_io_Deserializer_unpackString( inArgs, "path_name", &path_name, _ex2);
-
-  /* make the call */
-  (_getSEPV()->f_setSearchPath)(
-    path_name);
-
-  /* pack return value */
-  /* pack out and inout argments */
-
-}
-
-void
-sidl_Loader_getSearchPath__sexec(
-        struct sidl_io_Deserializer__object* inArgs,
-        struct sidl_io_Serializer__object* outArgs) {
-  /* stack space for arguments */
-  char* _retval;
-  sidl_BaseInterface _ex   = NULL;
-  sidl_BaseInterface *_ex2 = &_ex;
-
-  /* unpack in and inout argments */
-
-  /* make the call */
-  _retval = (_getSEPV()->f_getSearchPath)(
-    );
-
-  /* pack return value */
-  sidl_io_Serializer_packString( outArgs, "_retval", _retval, _ex2);
-
-  /* pack out and inout argments */
-
-}
-
-void
-sidl_Loader_addSearchPath__sexec(
-        struct sidl_io_Deserializer__object* inArgs,
-        struct sidl_io_Serializer__object* outArgs) {
-  /* stack space for arguments */
-  char* path_fragment;
-  sidl_BaseInterface _ex   = NULL;
-  sidl_BaseInterface *_ex2 = &_ex;
-
-  /* unpack in and inout argments */
-
-  sidl_io_Deserializer_unpackString( inArgs, "path_fragment", &path_fragment,
-    _ex2);
-
-  /* make the call */
-  (_getSEPV()->f_addSearchPath)(
-    path_fragment);
-
-  /* pack return value */
-  /* pack out and inout argments */
-
-}
-
-void
-sidl_Loader_setFinder__sexec(
-        struct sidl_io_Deserializer__object* inArgs,
-        struct sidl_io_Serializer__object* outArgs) {
-  /* stack space for arguments */
-  sidl_Finder f;
-
-  /* unpack in and inout argments */
-
-  /* make the call */
-  (_getSEPV()->f_setFinder)(
-    f);
-
-  /* pack return value */
-  /* pack out and inout argments */
-
-}
-
-void
-sidl_Loader_getFinder__sexec(
-        struct sidl_io_Deserializer__object* inArgs,
-        struct sidl_io_Serializer__object* outArgs) {
-  /* stack space for arguments */
-  sidl_Finder _retval;
-
-  /* unpack in and inout argments */
-
-  /* make the call */
-  _retval = (_getSEPV()->f_getFinder)(
-    );
-
-  /* pack return value */
-  /* pack out and inout argments */
-
-}
-
 /*
  * Cast method for interface and class type conversions.
  */
@@ -686,44 +486,6 @@ sidl_Loader__exec(
   outArgs);
 }
 
-struct sidl_Loader__smethod {
-  const char *d_name;
-  void (*d_func)(struct sidl_io_Deserializer__object *,
-    struct sidl_io_Serializer__object *);
-};
-
-void
-sidl_Loader__sexec(
-        const char* methodName,
-        struct sidl_io_Deserializer__object* inArgs,
-        struct sidl_io_Serializer__object* outArgs ) { 
-  static const struct sidl_Loader__smethod s_methods[] = {
-    { "addDLL", sidl_Loader_addDLL__sexec },
-    { "addSearchPath", sidl_Loader_addSearchPath__sexec },
-    { "findLibrary", sidl_Loader_findLibrary__sexec },
-    { "getFinder", sidl_Loader_getFinder__sexec },
-    { "getSearchPath", sidl_Loader_getSearchPath__sexec },
-    { "loadLibrary", sidl_Loader_loadLibrary__sexec },
-    { "setFinder", sidl_Loader_setFinder__sexec },
-    { "setSearchPath", sidl_Loader_setSearchPath__sexec },
-    { "unloadLibraries", sidl_Loader_unloadLibraries__sexec }
-  };
-  int i, cmp, l = 0;
-  int u = sizeof(s_methods)/sizeof(struct sidl_Loader__smethod);
-  if (methodName) {
-    /* Use binary search to locate method */
-    while (l < u) {
-      i = (l + u) >> 1;
-      if (!(cmp=strcmp(methodName, s_methods[i].d_name))) {
-        (s_methods[i].d_func)(inArgs, outArgs);
-        return;
-      }
-      else if (cmp < 0) u = i;
-      else l = i + 1;
-    }
-  }
-  /* TODO: add code for method not found */
-}
 /*
  * Get the URL of the Implementation of this object (for RMI)
  */

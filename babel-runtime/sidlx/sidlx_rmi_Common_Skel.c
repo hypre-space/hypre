@@ -2,12 +2,12 @@
  * File:          sidlx_rmi_Common_Skel.c
  * Symbol:        sidlx.rmi.Common-v0.1
  * Symbol Type:   class
- * Babel Version: 0.10.10
+ * Babel Version: 0.10.12
  * Description:   Server-side glue code for sidlx.rmi.Common
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.10
+ * babel-version = 0.10.12
  */
 
 #include "sidlx_rmi_Common_IOR.h"

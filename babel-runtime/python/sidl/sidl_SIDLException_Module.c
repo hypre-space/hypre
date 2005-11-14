@@ -2,7 +2,7 @@
  * File:          sidl_SIDLException_Module.c
  * Symbol:        sidl.SIDLException-v0.9.3
  * Symbol Type:   class
- * Babel Version: 0.10.10
+ * Babel Version: 0.10.12
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   implement a C extension type for a sidl extendable
@@ -32,7 +32,7 @@
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.10
+ * babel-version = 0.10.12
  */
 
 /*
@@ -70,10 +70,10 @@
 #ifndef included_sidl_interface_IOR_h
 #include "sidl_interface_IOR.h"
 #endif
-#include "sidl_ClassInfo_Module.h"
-#include "sidl_BaseInterface_Module.h"
-#include "sidl_BaseException_Module.h"
 #include "sidl_BaseClass_Module.h"
+#include "sidl_BaseException_Module.h"
+#include "sidl_BaseInterface_Module.h"
+#include "sidl_ClassInfo_Module.h"
 #include <stdlib.h>
 #include <string.h>
 
@@ -420,8 +420,8 @@ messages and stack traces."
   Py_INCREF(&_sidl_SIDLExceptionType);
   PyDict_SetItemString(dict, "SIDLException",                                 \
     (PyObject *)&_sidl_SIDLExceptionType);
-  sidl_BaseInterface__import();
   sidl_ClassInfo__import();
+  sidl_BaseInterface__import();
   _exceptionBases = PyTuple_New(1);
   Py_INCREF(sidl_BaseException__type);
   PyTuple_SetItem(_exceptionBases, 0, sidl_BaseException__type);

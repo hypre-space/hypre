@@ -2,12 +2,12 @@
  * File:          sidlx_rmi_SimpleServer.h
  * Symbol:        sidlx.rmi.SimpleServer-v0.1
  * Symbol Type:   class
- * Babel Version: 0.10.10
+ * Babel Version: 0.10.12
  * Description:   Client-side glue code for sidlx.rmi.SimpleServer
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.10
+ * babel-version = 0.10.12
  */
 
 #ifndef included_sidlx_rmi_SimpleServer_h
@@ -178,14 +178,6 @@ sidlx_rmi_SimpleServer__cast2(
 void
 sidlx_rmi_SimpleServer__exec(
   /* in */ sidlx_rmi_SimpleServer self,
-  /* in */ const char* methodName,
-  /* in */ sidl_io_Deserializer inArgs,
-  /* in */ sidl_io_Serializer outArgs);
-/**
- * static Exec method for reflexity.
- */
-void
-sidlx_rmi_SimpleServer__sexec(
   /* in */ const char* methodName,
   /* in */ sidl_io_Deserializer inArgs,
   /* in */ sidl_io_Serializer outArgs);

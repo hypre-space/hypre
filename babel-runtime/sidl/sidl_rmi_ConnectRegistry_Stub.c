@@ -2,7 +2,7 @@
  * File:          sidl_rmi_ConnectRegistry_Stub.c
  * Symbol:        sidl.rmi.ConnectRegistry-v0.9.3
  * Symbol Type:   class
- * Babel Version: 0.10.10
+ * Babel Version: 0.10.12
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Client-side glue code for sidl.rmi.ConnectRegistry
@@ -32,7 +32,7 @@
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.10
+ * babel-version = 0.10.12
  */
 
 #include "sidl_rmi_ConnectRegistry.h"
@@ -278,76 +278,6 @@ sidl_rmi_ConnectRegistry_removeConnect(
     key);
 }
 
-void
-sidl_rmi_ConnectRegistry_registerConnect__sexec(
-        struct sidl_io_Deserializer__object* inArgs,
-        struct sidl_io_Serializer__object* outArgs) {
-  /* stack space for arguments */
-  char* key;
-  void* func;
-  sidl_BaseInterface _ex   = NULL;
-  sidl_BaseInterface *_ex2 = &_ex;
-
-  /* unpack in and inout argments */
-
-  sidl_io_Deserializer_unpackString( inArgs, "key", &key, _ex2);
-
-  /* make the call */
-  (_getSEPV()->f_registerConnect)(
-    key,
-    func);
-
-  /* pack return value */
-  /* pack out and inout argments */
-
-}
-
-void
-sidl_rmi_ConnectRegistry_getConnect__sexec(
-        struct sidl_io_Deserializer__object* inArgs,
-        struct sidl_io_Serializer__object* outArgs) {
-  /* stack space for arguments */
-  char* key;
-  void* _retval;
-  sidl_BaseInterface _ex   = NULL;
-  sidl_BaseInterface *_ex2 = &_ex;
-
-  /* unpack in and inout argments */
-
-  sidl_io_Deserializer_unpackString( inArgs, "key", &key, _ex2);
-
-  /* make the call */
-  _retval = (_getSEPV()->f_getConnect)(
-    key);
-
-  /* pack return value */
-  /* pack out and inout argments */
-
-}
-
-void
-sidl_rmi_ConnectRegistry_removeConnect__sexec(
-        struct sidl_io_Deserializer__object* inArgs,
-        struct sidl_io_Serializer__object* outArgs) {
-  /* stack space for arguments */
-  char* key;
-  void* _retval;
-  sidl_BaseInterface _ex   = NULL;
-  sidl_BaseInterface *_ex2 = &_ex;
-
-  /* unpack in and inout argments */
-
-  sidl_io_Deserializer_unpackString( inArgs, "key", &key, _ex2);
-
-  /* make the call */
-  _retval = (_getSEPV()->f_removeConnect)(
-    key);
-
-  /* pack return value */
-  /* pack out and inout argments */
-
-}
-
 /*
  * Cast method for interface and class type conversions.
  */
@@ -409,38 +339,6 @@ sidl_rmi_ConnectRegistry__exec(
   outArgs);
 }
 
-struct sidl_rmi_ConnectRegistry__smethod {
-  const char *d_name;
-  void (*d_func)(struct sidl_io_Deserializer__object *,
-    struct sidl_io_Serializer__object *);
-};
-
-void
-sidl_rmi_ConnectRegistry__sexec(
-        const char* methodName,
-        struct sidl_io_Deserializer__object* inArgs,
-        struct sidl_io_Serializer__object* outArgs ) { 
-  static const struct sidl_rmi_ConnectRegistry__smethod s_methods[] = {
-    { "getConnect", sidl_rmi_ConnectRegistry_getConnect__sexec },
-    { "registerConnect", sidl_rmi_ConnectRegistry_registerConnect__sexec },
-    { "removeConnect", sidl_rmi_ConnectRegistry_removeConnect__sexec }
-  };
-  int i, cmp, l = 0;
-  int u = sizeof(s_methods)/sizeof(struct sidl_rmi_ConnectRegistry__smethod);
-  if (methodName) {
-    /* Use binary search to locate method */
-    while (l < u) {
-      i = (l + u) >> 1;
-      if (!(cmp=strcmp(methodName, s_methods[i].d_name))) {
-        (s_methods[i].d_func)(inArgs, outArgs);
-        return;
-      }
-      else if (cmp < 0) u = i;
-      else l = i + 1;
-    }
-  }
-  /* TODO: add code for method not found */
-}
 /*
  * Get the URL of the Implementation of this object (for RMI)
  */

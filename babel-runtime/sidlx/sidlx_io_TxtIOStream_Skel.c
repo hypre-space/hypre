@@ -2,12 +2,12 @@
  * File:          sidlx_io_TxtIOStream_Skel.c
  * Symbol:        sidlx.io.TxtIOStream-v0.1
  * Symbol Type:   class
- * Babel Version: 0.10.10
+ * Babel Version: 0.10.12
  * Description:   Server-side glue code for sidlx.io.TxtIOStream
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.10
+ * babel-version = 0.10.12
  */
 
 #include "sidlx_io_TxtIOStream_IOR.h"

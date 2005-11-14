@@ -2,12 +2,12 @@
  * File:          sidlx_io_TxtIStream_IOR.c
  * Symbol:        sidlx.io.TxtIStream-v0.1
  * Symbol Type:   class
- * Babel Version: 0.10.10
+ * Babel Version: 0.10.12
  * Description:   Intermediate Object Representation for sidlx.io.TxtIStream
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.10
+ * babel-version = 0.10.12
  */
 
 #include "sidl_rmi_InstanceHandle.h"
@@ -134,8 +134,8 @@ sidlx_io_TxtIStream_isSame__exec(
         struct sidl_io_Deserializer__object* inArgs,
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
-  struct sidl_BaseInterface__object* iobj;
-  sidl_bool _retval;
+  struct sidl_BaseInterface__object* iobj = 0;
+  sidl_bool _retval = FALSE;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
@@ -159,7 +159,7 @@ sidlx_io_TxtIStream_queryInt__exec(
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
   char* name= NULL;
-  struct sidl_BaseInterface__object* _retval;
+  struct sidl_BaseInterface__object* _retval = 0;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
@@ -182,7 +182,7 @@ sidlx_io_TxtIStream_isType__exec(
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
   char* name= NULL;
-  sidl_bool _retval;
+  sidl_bool _retval = FALSE;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
@@ -206,7 +206,7 @@ sidlx_io_TxtIStream_getClassInfo__exec(
         struct sidl_io_Deserializer__object* inArgs,
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
-  struct sidl_ClassInfo__object* _retval;
+  struct sidl_ClassInfo__object* _retval = 0;
   /* unpack in and inout argments */
 
   /* make the call */
@@ -224,7 +224,7 @@ sidlx_io_TxtIStream_setFD__exec(
         struct sidl_io_Deserializer__object* inArgs,
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
-  int32_t fd;
+  int32_t fd = 0;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
@@ -246,7 +246,7 @@ sidlx_io_TxtIStream_atEnd__exec(
         struct sidl_io_Deserializer__object* inArgs,
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
-  sidl_bool _retval;
+  sidl_bool _retval = FALSE;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
@@ -268,10 +268,10 @@ sidlx_io_TxtIStream_read__exec(
         struct sidl_io_Deserializer__object* inArgs,
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
-  int32_t nbytes;
-  struct sidl_char__array* data_tmp;
+  int32_t nbytes = 0;
+  struct sidl_char__array* data_tmp = 0;
   struct sidl_char__array** data= &data_tmp;
-  int32_t _retval;
+  int32_t _retval = 0;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
@@ -300,9 +300,9 @@ sidlx_io_TxtIStream_readline__exec(
         struct sidl_io_Deserializer__object* inArgs,
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
-  struct sidl_char__array* data_tmp;
+  struct sidl_char__array* data_tmp = 0;
   struct sidl_char__array** data= &data_tmp;
-  int32_t _retval;
+  int32_t _retval = 0;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
@@ -329,7 +329,7 @@ sidlx_io_TxtIStream_getBool__exec(
         struct sidl_io_Deserializer__object* inArgs,
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
-  sidl_bool item_tmp;
+  sidl_bool item_tmp = FALSE;
   sidl_bool* item= &item_tmp;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
@@ -356,7 +356,7 @@ sidlx_io_TxtIStream_getChar__exec(
         struct sidl_io_Deserializer__object* inArgs,
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
-  char item_tmp;
+  char item_tmp = 0;
   char* item= &item_tmp;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
@@ -383,7 +383,7 @@ sidlx_io_TxtIStream_getInt__exec(
         struct sidl_io_Deserializer__object* inArgs,
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
-  int32_t item_tmp;
+  int32_t item_tmp = 0;
   int32_t* item= &item_tmp;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
@@ -410,7 +410,7 @@ sidlx_io_TxtIStream_getLong__exec(
         struct sidl_io_Deserializer__object* inArgs,
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
-  int64_t item_tmp;
+  int64_t item_tmp = 0;
   int64_t* item= &item_tmp;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
@@ -437,7 +437,7 @@ sidlx_io_TxtIStream_getFloat__exec(
         struct sidl_io_Deserializer__object* inArgs,
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
-  float item_tmp;
+  float item_tmp = 0;
   float* item= &item_tmp;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
@@ -464,7 +464,7 @@ sidlx_io_TxtIStream_getDouble__exec(
         struct sidl_io_Deserializer__object* inArgs,
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
-  double item_tmp;
+  double item_tmp = 0;
   double* item= &item_tmp;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
@@ -491,7 +491,7 @@ sidlx_io_TxtIStream_getFcomplex__exec(
         struct sidl_io_Deserializer__object* inArgs,
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
-  struct sidl_fcomplex item_tmp;
+  struct sidl_fcomplex item_tmp = { 0, 0 };
   struct sidl_fcomplex* item= &item_tmp;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
@@ -518,7 +518,7 @@ sidlx_io_TxtIStream_getDcomplex__exec(
         struct sidl_io_Deserializer__object* inArgs,
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
-  struct sidl_dcomplex item_tmp;
+  struct sidl_dcomplex item_tmp = { 0, 0 };
   struct sidl_dcomplex* item= &item_tmp;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
@@ -545,7 +545,7 @@ sidlx_io_TxtIStream_getString__exec(
         struct sidl_io_Deserializer__object* inArgs,
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
-  char* item_tmp;
+  char* item_tmp = 0;
   char** item= &item_tmp;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
@@ -617,8 +617,6 @@ static void ior_sidlx_io_TxtIStream__delete(
 static char*
 ior_sidlx_io_TxtIStream__getURL(
     struct sidlx_io_TxtIStream__object* self) {
-  sidl_rmi_InstanceHandle conn = (sidl_rmi_InstanceHandle)self->d_data;
-  sidl_BaseInterface _ex = NULL;
   /* TODO: Make this work for local object! */
   return NULL;
 }
@@ -815,6 +813,15 @@ static struct sidl_BaseClass__epv* sidlx_io_TxtIStream__super(void) {
   return s_old_epv__sidl_baseclass;
 }
 
+static void
+cleanupClassInfo(void) {
+  if (s_classInfo) {
+    sidl_ClassInfo_deleteRef(s_classInfo);
+  }
+  s_classInfo_init = 1;
+  s_classInfo = NULL;
+}
+
 /*
  * initClassInfo: create a ClassInfo interface if necessary.
  */
@@ -832,6 +839,7 @@ initClassInfo(sidl_ClassInfo *info)
       sidl_ClassInfoI_setName(impl, "sidlx.io.TxtIStream");
       sidl_ClassInfoI_setIORVersion(impl, s_IOR_MAJOR_VERSION,
         s_IOR_MINOR_VERSION);
+      atexit(cleanupClassInfo);
     }
   }
   if (s_classInfo) {

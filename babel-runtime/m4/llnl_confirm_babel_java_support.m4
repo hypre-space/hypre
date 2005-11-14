@@ -82,6 +82,9 @@ AC_DEFUN([LLNL_CONFIRM_BABEL_JAVA_SUPPORT], [
   LLNL_CHECK_CLASSPATH
   test -z "$JAVAC" && JAVAC=javac
   AC_PROG_JAVAC
+  if test "X$ac_cv_prog_javac_works" != "Xyes"; then
+    AC_MSG_ERROR([Babel development kit requires working java compiler.])
+  fi
   LLNL_PROG_JAVA
   LLNL_CHECK_JAVA_ADDCLASSPATH_FLAG
 

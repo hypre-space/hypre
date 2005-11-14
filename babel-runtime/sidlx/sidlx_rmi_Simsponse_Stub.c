@@ -2,12 +2,12 @@
  * File:          sidlx_rmi_Simsponse_Stub.c
  * Symbol:        sidlx.rmi.Simsponse-v0.1
  * Symbol Type:   class
- * Babel Version: 0.10.10
+ * Babel Version: 0.10.12
  * Description:   Client-side glue code for sidlx.rmi.Simsponse
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.10
+ * babel-version = 0.10.12
  */
 
 #include "sidlx_rmi_Simsponse.h"

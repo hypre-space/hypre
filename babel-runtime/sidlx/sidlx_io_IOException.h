@@ -2,12 +2,12 @@
  * File:          sidlx_io_IOException.h
  * Symbol:        sidlx.io.IOException-v0.1
  * Symbol Type:   class
- * Babel Version: 0.10.10
+ * Babel Version: 0.10.12
  * Description:   Client-side glue code for sidlx.io.IOException
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.10
+ * babel-version = 0.10.12
  */
 
 #ifndef included_sidlx_io_IOException_h
@@ -194,14 +194,6 @@ sidlx_io_IOException__cast2(
 void
 sidlx_io_IOException__exec(
   /* in */ sidlx_io_IOException self,
-  /* in */ const char* methodName,
-  /* in */ sidl_io_Deserializer inArgs,
-  /* in */ sidl_io_Serializer outArgs);
-/**
- * static Exec method for reflexity.
- */
-void
-sidlx_io_IOException__sexec(
   /* in */ const char* methodName,
   /* in */ sidl_io_Deserializer inArgs,
   /* in */ sidl_io_Serializer outArgs);

@@ -2,12 +2,12 @@
  * File:          sidlx_rmi_GenNetworkException_IOR.c
  * Symbol:        sidlx.rmi.GenNetworkException-v0.1
  * Symbol Type:   class
- * Babel Version: 0.10.10
+ * Babel Version: 0.10.12
  * Description:   Intermediate Object Representation for sidlx.rmi.GenNetworkException
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.10
+ * babel-version = 0.10.12
  */
 
 #include "sidl_rmi_InstanceHandle.h"
@@ -147,8 +147,8 @@ sidlx_rmi_GenNetworkException_isSame__exec(
         struct sidl_io_Deserializer__object* inArgs,
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
-  struct sidl_BaseInterface__object* iobj;
-  sidl_bool _retval;
+  struct sidl_BaseInterface__object* iobj = 0;
+  sidl_bool _retval = FALSE;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
@@ -172,7 +172,7 @@ sidlx_rmi_GenNetworkException_queryInt__exec(
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
   char* name= NULL;
-  struct sidl_BaseInterface__object* _retval;
+  struct sidl_BaseInterface__object* _retval = 0;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
@@ -195,7 +195,7 @@ sidlx_rmi_GenNetworkException_isType__exec(
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
   char* name= NULL;
-  sidl_bool _retval;
+  sidl_bool _retval = FALSE;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
@@ -219,7 +219,7 @@ sidlx_rmi_GenNetworkException_getClassInfo__exec(
         struct sidl_io_Deserializer__object* inArgs,
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
-  struct sidl_ClassInfo__object* _retval;
+  struct sidl_ClassInfo__object* _retval = 0;
   /* unpack in and inout argments */
 
   /* make the call */
@@ -237,7 +237,7 @@ sidlx_rmi_GenNetworkException_getNote__exec(
         struct sidl_io_Deserializer__object* inArgs,
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
-  char* _retval;
+  char* _retval = 0;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
@@ -281,7 +281,7 @@ sidlx_rmi_GenNetworkException_getTrace__exec(
         struct sidl_io_Deserializer__object* inArgs,
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
-  char* _retval;
+  char* _retval = 0;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
@@ -326,7 +326,7 @@ sidlx_rmi_GenNetworkException_add__exec(
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
   char* filename= NULL;
-  int32_t lineno;
+  int32_t lineno = 0;
   char* methodname= NULL;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
@@ -408,8 +408,6 @@ static void ior_sidlx_rmi_GenNetworkException__delete(
 static char*
 ior_sidlx_rmi_GenNetworkException__getURL(
     struct sidlx_rmi_GenNetworkException__object* self) {
-  sidl_rmi_InstanceHandle conn = (sidl_rmi_InstanceHandle)self->d_data;
-  sidl_BaseInterface _ex = NULL;
   /* TODO: Make this work for local object! */
   return NULL;
 }
@@ -695,6 +693,15 @@ static struct sidl_rmi_NetworkException__epv*
   return s_old_epv__sidl_rmi_networkexception;
 }
 
+static void
+cleanupClassInfo(void) {
+  if (s_classInfo) {
+    sidl_ClassInfo_deleteRef(s_classInfo);
+  }
+  s_classInfo_init = 1;
+  s_classInfo = NULL;
+}
+
 /*
  * initClassInfo: create a ClassInfo interface if necessary.
  */
@@ -712,6 +719,7 @@ initClassInfo(sidl_ClassInfo *info)
       sidl_ClassInfoI_setName(impl, "sidlx.rmi.GenNetworkException");
       sidl_ClassInfoI_setIORVersion(impl, s_IOR_MAJOR_VERSION,
         s_IOR_MINOR_VERSION);
+      atexit(cleanupClassInfo);
     }
   }
   if (s_classInfo) {

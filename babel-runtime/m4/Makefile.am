@@ -32,6 +32,7 @@ LLNL_M4_FILES=\
 	llnl_check_long_long.m4\
 	llnl_confirm_babel_c_support.m4\
 	llnl_confirm_babel_cxx_support.m4\
+	llnl_enable_regression.m4\
 	llnl_confirm_babel_f77_support.m4\
 	llnl_confirm_babel_f90_support.m4\
 	llnl_confirm_babel_java_support.m4\
@@ -72,7 +73,7 @@ LLNL_M4_FILES=\
 	llnl_which_prog.m4
 
 MISC_M4_FILES=libtool.m4 ltdl.m4 cca_bundle_tag.m4
-EXTRA_DIST=llnl_confirm_babel_java_support.m4
+EXTRA_DIST=llnl_confirm_babel_java_support.m4 llnl_enable_regression.m4
 
 aclocaldir=$(datadir)/aclocal
 

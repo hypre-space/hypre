@@ -231,7 +231,6 @@ public class DoubleComplex implements java.io.Serializable, Cloneable {
 
   /** 
    *  Returns the imaginary part of a DoubleComplex object. 
-   *  @param  z  A DoubleComplex object.
    *  @return  The imaginary part of z.
    */
   public double imag() {
@@ -393,7 +392,7 @@ public class DoubleComplex implements java.io.Serializable, Cloneable {
 
   /** 
    *  Returns the difference of this DoubleComplex object and a double, this-y.
-   *  @param  y  A double value.
+   *  @param  x  A double value.
    *  @return A newly constructed DoubleComplex initialized to x-this.
    */
   public DoubleComplex minusReverse(double x) {
@@ -524,7 +523,7 @@ public class DoubleComplex implements java.io.Serializable, Cloneable {
 
   /** 
    *  Returns the product of a double and this DoubleComplex, x*this. 
-   *  @param  y  A double value.
+   *  @param  x  A double value.
    *  @return A newly constructed DoubleComplex initialized to x*this.
    */
   public DoubleComplex timesReverse(double x) {

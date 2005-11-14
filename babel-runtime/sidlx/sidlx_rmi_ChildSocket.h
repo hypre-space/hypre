@@ -2,12 +2,12 @@
  * File:          sidlx_rmi_ChildSocket.h
  * Symbol:        sidlx.rmi.ChildSocket-v0.1
  * Symbol Type:   class
- * Babel Version: 0.10.10
+ * Babel Version: 0.10.12
  * Description:   Client-side glue code for sidlx.rmi.ChildSocket
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.10
+ * babel-version = 0.10.12
  */
 
 #ifndef included_sidlx_rmi_ChildSocket_h
@@ -294,14 +294,6 @@ sidlx_rmi_ChildSocket__cast2(
 void
 sidlx_rmi_ChildSocket__exec(
   /* in */ sidlx_rmi_ChildSocket self,
-  /* in */ const char* methodName,
-  /* in */ sidl_io_Deserializer inArgs,
-  /* in */ sidl_io_Serializer outArgs);
-/**
- * static Exec method for reflexity.
- */
-void
-sidlx_rmi_ChildSocket__sexec(
   /* in */ const char* methodName,
   /* in */ sidl_io_Deserializer inArgs,
   /* in */ sidl_io_Serializer outArgs);

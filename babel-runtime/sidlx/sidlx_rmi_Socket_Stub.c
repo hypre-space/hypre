@@ -2,12 +2,12 @@
  * File:          sidlx_rmi_Socket_Stub.c
  * Symbol:        sidlx.rmi.Socket-v0.1
  * Symbol Type:   interface
- * Babel Version: 0.10.10
+ * Babel Version: 0.10.12
  * Description:   Client-side glue code for sidlx.rmi.Socket
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.10
+ * babel-version = 0.10.12
  */
 
 #include "sidlx_rmi_Socket.h"

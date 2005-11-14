@@ -2,7 +2,7 @@
  * File:          sidl_io_Serializeable_Stub.c
  * Symbol:        sidl.io.Serializeable-v0.9.3
  * Symbol Type:   interface
- * Babel Version: 0.10.10
+ * Babel Version: 0.10.12
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Client-side glue code for sidl.io.Serializeable
@@ -32,7 +32,7 @@
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.10
+ * babel-version = 0.10.12
  */
 
 #include "sidl_io_Serializeable.h"

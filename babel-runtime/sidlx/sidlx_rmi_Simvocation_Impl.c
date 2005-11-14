@@ -2,12 +2,12 @@
  * File:          sidlx_rmi_Simvocation_Impl.c
  * Symbol:        sidlx.rmi.Simvocation-v0.1
  * Symbol Type:   class
- * Babel Version: 0.10.10
+ * Babel Version: 0.10.12
  * Description:   Server-side implementation for sidlx.rmi.Simvocation
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.10.10
+ * babel-version = 0.10.12
  */
 
 /*
@@ -32,6 +32,7 @@
 #include "sidl_Exception.h"
 #include "sidlx_rmi_Simsponse.h"
 #include "sidlx_rmi_GenNetworkException.h"
+#include <string.h>
 /* Copies n elements from data into the vector we maintain as part of this 
    Simvocation object.  This function will realloc as nessecary */
 static void serialize(sidlx_rmi_Simvocation self, const char* data, int n, sidl_BaseInterface* _ex) {
@@ -70,7 +71,7 @@ static void flip32(int32_t* in) {
 }
 
 /* DO-NOT-DELETE splicer.end(sidlx.rmi.Simvocation._includes) */
-#line 73 "sidlx_rmi_Simvocation_Impl.c"
+#line 74 "sidlx_rmi_Simvocation_Impl.c"
 
 /*
  * Static class initializer called exactly once before any user-defined method is dispatched
@@ -86,11 +87,11 @@ void
 impl_sidlx_rmi_Simvocation__load(
   void)
 {
-#line 87 "../../../babel/runtime/sidlx/sidlx_rmi_Simvocation_Impl.c"
+#line 88 "../../../babel/runtime/sidlx/sidlx_rmi_Simvocation_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.Simvocation._load) */
   /* insert implementation here: sidlx.rmi.Simvocation._load (static class initializer method) */
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.Simvocation._load) */
-#line 93 "sidlx_rmi_Simvocation_Impl.c"
+#line 94 "sidlx_rmi_Simvocation_Impl.c"
 }
 /*
  * Class constructor called when the class is created.
@@ -106,11 +107,11 @@ void
 impl_sidlx_rmi_Simvocation__ctor(
   /* in */ sidlx_rmi_Simvocation self)
 {
-#line 105 "../../../babel/runtime/sidlx/sidlx_rmi_Simvocation_Impl.c"
+#line 106 "../../../babel/runtime/sidlx/sidlx_rmi_Simvocation_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.Simvocation._ctor) */
   /* insert implementation here: sidlx.rmi.Simvocation._ctor (constructor method) */
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.Simvocation._ctor) */
-#line 113 "sidlx_rmi_Simvocation_Impl.c"
+#line 114 "sidlx_rmi_Simvocation_Impl.c"
 }
 
 /*
@@ -127,7 +128,7 @@ void
 impl_sidlx_rmi_Simvocation__dtor(
   /* in */ sidlx_rmi_Simvocation self)
 {
-#line 124 "../../../babel/runtime/sidlx/sidlx_rmi_Simvocation_Impl.c"
+#line 125 "../../../babel/runtime/sidlx/sidlx_rmi_Simvocation_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.Simvocation._dtor) */
   struct sidlx_rmi_Simvocation__data *dptr =
     sidlx_rmi_Simvocation__get_data(self);
@@ -141,7 +142,7 @@ impl_sidlx_rmi_Simvocation__dtor(
     sidlx_rmi_Simvocation__set_data(self, NULL);
   }
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.Simvocation._dtor) */
-#line 144 "sidlx_rmi_Simvocation_Impl.c"
+#line 145 "sidlx_rmi_Simvocation_Impl.c"
 }
 
 /*
@@ -163,7 +164,7 @@ impl_sidlx_rmi_Simvocation_init(
   /* in */ sidlx_rmi_Socket sock,
   /* out */ sidl_BaseInterface *_ex)
 {
-#line 158 "../../../babel/runtime/sidlx/sidlx_rmi_Simvocation_Impl.c"
+#line 159 "../../../babel/runtime/sidlx/sidlx_rmi_Simvocation_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.Simvocation.init) */
   struct sidlx_rmi_Simvocation__data *dptr =
     sidlx_rmi_Simvocation__get_data(self);
@@ -208,7 +209,7 @@ impl_sidlx_rmi_Simvocation_init(
   /*Not really anything to clean up...*/
   return;
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.Simvocation.init) */
-#line 211 "sidlx_rmi_Simvocation_Impl.c"
+#line 212 "sidlx_rmi_Simvocation_Impl.c"
 }
 
 /*
@@ -226,7 +227,7 @@ impl_sidlx_rmi_Simvocation_getMethodName(
   /* in */ sidlx_rmi_Simvocation self,
   /* out */ sidl_BaseInterface *_ex)
 {
-#line 219 "../../../babel/runtime/sidlx/sidlx_rmi_Simvocation_Impl.c"
+#line 220 "../../../babel/runtime/sidlx/sidlx_rmi_Simvocation_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.Simvocation.getMethodName) */
   struct sidlx_rmi_Simvocation__data *dptr =
     sidlx_rmi_Simvocation__get_data(self);
@@ -237,7 +238,7 @@ impl_sidlx_rmi_Simvocation_getMethodName(
  EXIT:
   return NULL;
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.Simvocation.getMethodName) */
-#line 240 "sidlx_rmi_Simvocation_Impl.c"
+#line 241 "sidlx_rmi_Simvocation_Impl.c"
 }
 
 /*
@@ -257,7 +258,7 @@ impl_sidlx_rmi_Simvocation_packBool(
   /* in */ sidl_bool value,
   /* out */ sidl_BaseInterface *_ex)
 {
-#line 248 "../../../babel/runtime/sidlx/sidlx_rmi_Simvocation_Impl.c"
+#line 249 "../../../babel/runtime/sidlx/sidlx_rmi_Simvocation_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.Simvocation.packBool) */
   if(value) {
     char x = 0xFF;
@@ -267,7 +268,7 @@ impl_sidlx_rmi_Simvocation_packBool(
     serialize(self, &x, 1, _ex); 
   }
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.Simvocation.packBool) */
-#line 270 "sidlx_rmi_Simvocation_Impl.c"
+#line 271 "sidlx_rmi_Simvocation_Impl.c"
 }
 
 /*
@@ -287,11 +288,11 @@ impl_sidlx_rmi_Simvocation_packChar(
   /* in */ char value,
   /* out */ sidl_BaseInterface *_ex)
 {
-#line 276 "../../../babel/runtime/sidlx/sidlx_rmi_Simvocation_Impl.c"
+#line 277 "../../../babel/runtime/sidlx/sidlx_rmi_Simvocation_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.Simvocation.packChar) */
   serialize(self, &value, 1, _ex); 
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.Simvocation.packChar) */
-#line 294 "sidlx_rmi_Simvocation_Impl.c"
+#line 295 "sidlx_rmi_Simvocation_Impl.c"
 }
 
 /*
@@ -311,12 +312,12 @@ impl_sidlx_rmi_Simvocation_packInt(
   /* in */ int32_t value,
   /* out */ sidl_BaseInterface *_ex)
 {
-#line 298 "../../../babel/runtime/sidlx/sidlx_rmi_Simvocation_Impl.c"
+#line 299 "../../../babel/runtime/sidlx/sidlx_rmi_Simvocation_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.Simvocation.packInt) */
   int32_t x = htonl(value);
   serialize(self, (char*)&x, 4, _ex); 
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.Simvocation.packInt) */
-#line 319 "sidlx_rmi_Simvocation_Impl.c"
+#line 320 "sidlx_rmi_Simvocation_Impl.c"
 }
 
 /*
@@ -336,7 +337,7 @@ impl_sidlx_rmi_Simvocation_packLong(
   /* in */ int64_t value,
   /* out */ sidl_BaseInterface *_ex)
 {
-#line 321 "../../../babel/runtime/sidlx/sidlx_rmi_Simvocation_Impl.c"
+#line 322 "../../../babel/runtime/sidlx/sidlx_rmi_Simvocation_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.Simvocation.packLong) */
   short host = 1;
   short net = htons(host);
@@ -348,7 +349,7 @@ impl_sidlx_rmi_Simvocation_packLong(
   }
 
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.Simvocation.packLong) */
-#line 351 "sidlx_rmi_Simvocation_Impl.c"
+#line 352 "sidlx_rmi_Simvocation_Impl.c"
 }
 
 /*
@@ -368,7 +369,7 @@ impl_sidlx_rmi_Simvocation_packFloat(
   /* in */ float value,
   /* out */ sidl_BaseInterface *_ex)
 {
-#line 351 "../../../babel/runtime/sidlx/sidlx_rmi_Simvocation_Impl.c"
+#line 352 "../../../babel/runtime/sidlx/sidlx_rmi_Simvocation_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.Simvocation.packFloat) */
   /*TODO: Find out if this will work transfering to other platforms*/
   short host = 1;
@@ -381,7 +382,7 @@ impl_sidlx_rmi_Simvocation_packFloat(
   }
 
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.Simvocation.packFloat) */
-#line 384 "sidlx_rmi_Simvocation_Impl.c"
+#line 385 "sidlx_rmi_Simvocation_Impl.c"
 }
 
 /*
@@ -401,7 +402,7 @@ impl_sidlx_rmi_Simvocation_packDouble(
   /* in */ double value,
   /* out */ sidl_BaseInterface *_ex)
 {
-#line 382 "../../../babel/runtime/sidlx/sidlx_rmi_Simvocation_Impl.c"
+#line 383 "../../../babel/runtime/sidlx/sidlx_rmi_Simvocation_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.Simvocation.packDouble) */
   /*TODO: Find out if this will work transfering to other platforms*/
   short host = 1;
@@ -414,7 +415,7 @@ impl_sidlx_rmi_Simvocation_packDouble(
   }
 
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.Simvocation.packDouble) */
-#line 417 "sidlx_rmi_Simvocation_Impl.c"
+#line 418 "sidlx_rmi_Simvocation_Impl.c"
 }
 
 /*
@@ -434,7 +435,7 @@ impl_sidlx_rmi_Simvocation_packFcomplex(
   /* in */ struct sidl_fcomplex value,
   /* out */ sidl_BaseInterface *_ex)
 {
-#line 413 "../../../babel/runtime/sidlx/sidlx_rmi_Simvocation_Impl.c"
+#line 414 "../../../babel/runtime/sidlx/sidlx_rmi_Simvocation_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.Simvocation.packFcomplex) */
   /*TODO: Find out if this will work transfering to other platforms*/
   short host = 1;
@@ -450,7 +451,7 @@ impl_sidlx_rmi_Simvocation_packFcomplex(
   }
 
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.Simvocation.packFcomplex) */
-#line 453 "sidlx_rmi_Simvocation_Impl.c"
+#line 454 "sidlx_rmi_Simvocation_Impl.c"
 }
 
 /*
@@ -470,7 +471,7 @@ impl_sidlx_rmi_Simvocation_packDcomplex(
   /* in */ struct sidl_dcomplex value,
   /* out */ sidl_BaseInterface *_ex)
 {
-#line 447 "../../../babel/runtime/sidlx/sidlx_rmi_Simvocation_Impl.c"
+#line 448 "../../../babel/runtime/sidlx/sidlx_rmi_Simvocation_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.Simvocation.packDcomplex) */
   /*TODO: Find out if this will work transfering to other platforms*/
   short host = 1;
@@ -487,7 +488,7 @@ impl_sidlx_rmi_Simvocation_packDcomplex(
 
 
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.Simvocation.packDcomplex) */
-#line 490 "sidlx_rmi_Simvocation_Impl.c"
+#line 491 "sidlx_rmi_Simvocation_Impl.c"
 }
 
 /*
@@ -507,14 +508,14 @@ impl_sidlx_rmi_Simvocation_packString(
   /* in */ const char* value,
   /* out */ sidl_BaseInterface *_ex)
 {
-#line 482 "../../../babel/runtime/sidlx/sidlx_rmi_Simvocation_Impl.c"
+#line 483 "../../../babel/runtime/sidlx/sidlx_rmi_Simvocation_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.Simvocation.packString) */
   int32_t len = sidl_String_strlen(value);
   int32_t f_len = htonl(len);
   serialize(self, (char*)&f_len, 4, _ex);
   serialize(self, value, len, _ex);
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.Simvocation.packString) */
-#line 517 "sidlx_rmi_Simvocation_Impl.c"
+#line 518 "sidlx_rmi_Simvocation_Impl.c"
 }
 
 /*
@@ -532,7 +533,7 @@ impl_sidlx_rmi_Simvocation_invokeMethod(
   /* in */ sidlx_rmi_Simvocation self,
   /* out */ sidl_BaseInterface *_ex)
 {
-#line 505 "../../../babel/runtime/sidlx/sidlx_rmi_Simvocation_Impl.c"
+#line 506 "../../../babel/runtime/sidlx/sidlx_rmi_Simvocation_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.Simvocation.invokeMethod) */
 
   struct sidlx_rmi_Simvocation__data *dptr =
@@ -559,7 +560,7 @@ impl_sidlx_rmi_Simvocation_invokeMethod(
  EXIT:
   return NULL;
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.Simvocation.invokeMethod) */
-#line 562 "sidlx_rmi_Simvocation_Impl.c"
+#line 563 "sidlx_rmi_Simvocation_Impl.c"
 }
 /* Babel internal methods, Users should not edit below this line. */
 struct sidl_rmi_Response__object* 

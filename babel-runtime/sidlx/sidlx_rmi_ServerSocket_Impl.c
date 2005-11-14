@@ -2,12 +2,12 @@
  * File:          sidlx_rmi_ServerSocket_Impl.c
  * Symbol:        sidlx.rmi.ServerSocket-v0.1
  * Symbol Type:   class
- * Babel Version: 0.10.10
+ * Babel Version: 0.10.12
  * Description:   Server-side implementation for sidlx.rmi.ServerSocket
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.10.10
+ * babel-version = 0.10.12
  */
 
 /*
@@ -31,8 +31,10 @@
 #include "sidlx_rmi_ChildSocket.h"
 #define LISTENQ 1024
 #define MAXLINE 1023
+#include <sys/types.h>
+#include <sys/socket.h>
 /* DO-NOT-DELETE splicer.end(sidlx.rmi.ServerSocket._includes) */
-#line 35 "sidlx_rmi_ServerSocket_Impl.c"
+#line 37 "sidlx_rmi_ServerSocket_Impl.c"
 
 /*
  * Static class initializer called exactly once before any user-defined method is dispatched
@@ -48,11 +50,11 @@ void
 impl_sidlx_rmi_ServerSocket__load(
   void)
 {
-#line 49 "../../../babel/runtime/sidlx/sidlx_rmi_ServerSocket_Impl.c"
+#line 51 "../../../babel/runtime/sidlx/sidlx_rmi_ServerSocket_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.ServerSocket._load) */
   /* insert implementation here: sidlx.rmi.ServerSocket._load (static class initializer method) */
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.ServerSocket._load) */
-#line 55 "sidlx_rmi_ServerSocket_Impl.c"
+#line 57 "sidlx_rmi_ServerSocket_Impl.c"
 }
 /*
  * Class constructor called when the class is created.
@@ -68,11 +70,11 @@ void
 impl_sidlx_rmi_ServerSocket__ctor(
   /* in */ sidlx_rmi_ServerSocket self)
 {
-#line 67 "../../../babel/runtime/sidlx/sidlx_rmi_ServerSocket_Impl.c"
+#line 69 "../../../babel/runtime/sidlx/sidlx_rmi_ServerSocket_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.ServerSocket._ctor) */
   /* insert implementation here: sidlx.rmi.ServerSocket._ctor (constructor method) */
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.ServerSocket._ctor) */
-#line 75 "sidlx_rmi_ServerSocket_Impl.c"
+#line 77 "sidlx_rmi_ServerSocket_Impl.c"
 }
 
 /*
@@ -89,11 +91,11 @@ void
 impl_sidlx_rmi_ServerSocket__dtor(
   /* in */ sidlx_rmi_ServerSocket self)
 {
-#line 86 "../../../babel/runtime/sidlx/sidlx_rmi_ServerSocket_Impl.c"
+#line 88 "../../../babel/runtime/sidlx/sidlx_rmi_ServerSocket_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.ServerSocket._dtor) */
   /* insert implementation here: sidlx.rmi.ServerSocket._dtor (destructor method) */
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.ServerSocket._dtor) */
-#line 96 "sidlx_rmi_ServerSocket_Impl.c"
+#line 98 "sidlx_rmi_ServerSocket_Impl.c"
 }
 
 /*
@@ -112,7 +114,7 @@ impl_sidlx_rmi_ServerSocket_init(
   /* in */ int32_t port,
   /* out */ sidl_BaseInterface *_ex)
 {
-#line 107 "../../../babel/runtime/sidlx/sidlx_rmi_ServerSocket_Impl.c"
+#line 109 "../../../babel/runtime/sidlx/sidlx_rmi_ServerSocket_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.ServerSocket.init) */
   int n = -1;
   int addrlen;
@@ -142,7 +144,7 @@ impl_sidlx_rmi_ServerSocket_init(
  EXIT:
   return n;
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.ServerSocket.init) */
-#line 145 "sidlx_rmi_ServerSocket_Impl.c"
+#line 147 "sidlx_rmi_ServerSocket_Impl.c"
 }
 
 /*
@@ -160,12 +162,12 @@ impl_sidlx_rmi_ServerSocket_accept(
   /* in */ sidlx_rmi_ServerSocket self,
   /* out */ sidl_BaseInterface *_ex)
 {
-#line 153 "../../../babel/runtime/sidlx/sidlx_rmi_ServerSocket_Impl.c"
+#line 155 "../../../babel/runtime/sidlx/sidlx_rmi_ServerSocket_Impl.c"
   /* DO-NOT-DELETE splicer.begin(sidlx.rmi.ServerSocket.accept) */
   sidlx_rmi_ChildSocket cSock = NULL;
   sidlx_rmi_Socket retSock = NULL;
   struct sockaddr_in cliaddr;
-  int clilen = sizeof(struct sockaddr_in);
+  socklen_t clilen = sizeof(struct sockaddr_in);
   int cfd;
   int n = -1;
   struct sidlx_rmi_ServerSocket__data *dptr = sidlx_rmi_ServerSocket__get_data( self );
@@ -192,7 +194,7 @@ impl_sidlx_rmi_ServerSocket_accept(
  EXIT:
   return NULL;
   /* DO-NOT-DELETE splicer.end(sidlx.rmi.ServerSocket.accept) */
-#line 195 "sidlx_rmi_ServerSocket_Impl.c"
+#line 197 "sidlx_rmi_ServerSocket_Impl.c"
 }
 /* Babel internal methods, Users should not edit below this line. */
 struct sidlx_rmi_ServerSocket__object* 

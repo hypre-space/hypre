@@ -2,12 +2,12 @@
  * File:          sidlx_IOR.h
  * Symbol:        sidlx-v0.1
  * Symbol Type:   package
- * Babel Version: 0.10.10
+ * Babel Version: 0.10.12
  * Description:   Intermediate Object Representation for sidlx
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.10
+ * babel-version = 0.10.12
  */
 
 #ifndef included_sidlx_IOR_h

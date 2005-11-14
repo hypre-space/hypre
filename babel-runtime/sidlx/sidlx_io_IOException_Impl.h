@@ -2,12 +2,12 @@
  * File:          sidlx_io_IOException_Impl.h
  * Symbol:        sidlx.io.IOException-v0.1
  * Symbol Type:   class
- * Babel Version: 0.10.10
+ * Babel Version: 0.10.12
  * Description:   Server-side implementation for sidlx.io.IOException
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.10.10
+ * babel-version = 0.10.12
  */
 
 #ifndef included_sidlx_io_IOException_Impl_h

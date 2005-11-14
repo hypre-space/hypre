@@ -2,7 +2,7 @@
  * File:          sidl_rmi_ProtocolFactory_Stub.c
  * Symbol:        sidl.rmi.ProtocolFactory-v0.9.3
  * Symbol Type:   class
- * Babel Version: 0.10.10
+ * Babel Version: 0.10.12
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Client-side glue code for sidl.rmi.ProtocolFactory
@@ -32,7 +32,7 @@
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.10
+ * babel-version = 0.10.12
  */
 
 #include "sidl_rmi_ProtocolFactory.h"
@@ -319,155 +319,6 @@ sidl_rmi_ProtocolFactory_connectInstance(
     _ex);
 }
 
-void
-sidl_rmi_ProtocolFactory_addProtocol__sexec(
-        struct sidl_io_Deserializer__object* inArgs,
-        struct sidl_io_Serializer__object* outArgs) {
-  /* stack space for arguments */
-  char* prefix;
-  char* typeName;
-  sidl_bool _retval;
-  sidl_BaseInterface _ex   = NULL;
-  sidl_BaseInterface *_ex2 = &_ex;
-
-  /* unpack in and inout argments */
-
-  sidl_io_Deserializer_unpackString( inArgs, "prefix", &prefix, _ex2);
-
-  sidl_io_Deserializer_unpackString( inArgs, "typeName", &typeName, _ex2);
-
-  /* make the call */
-  _retval = (_getSEPV()->f_addProtocol)(
-    prefix,
-    typeName,
-    _ex2);
-
-  /* check if exception thrown */
-  /* FIXME */
-
-  /* pack return value */
-  sidl_io_Serializer_packBool( outArgs, "_retval", _retval, _ex2);
-
-  /* pack out and inout argments */
-
-}
-
-void
-sidl_rmi_ProtocolFactory_getProtocol__sexec(
-        struct sidl_io_Deserializer__object* inArgs,
-        struct sidl_io_Serializer__object* outArgs) {
-  /* stack space for arguments */
-  char* prefix;
-  char* _retval;
-  sidl_BaseInterface _ex   = NULL;
-  sidl_BaseInterface *_ex2 = &_ex;
-
-  /* unpack in and inout argments */
-
-  sidl_io_Deserializer_unpackString( inArgs, "prefix", &prefix, _ex2);
-
-  /* make the call */
-  _retval = (_getSEPV()->f_getProtocol)(
-    prefix,
-    _ex2);
-
-  /* check if exception thrown */
-  /* FIXME */
-
-  /* pack return value */
-  sidl_io_Serializer_packString( outArgs, "_retval", _retval, _ex2);
-
-  /* pack out and inout argments */
-
-}
-
-void
-sidl_rmi_ProtocolFactory_deleteProtocol__sexec(
-        struct sidl_io_Deserializer__object* inArgs,
-        struct sidl_io_Serializer__object* outArgs) {
-  /* stack space for arguments */
-  char* prefix;
-  sidl_bool _retval;
-  sidl_BaseInterface _ex   = NULL;
-  sidl_BaseInterface *_ex2 = &_ex;
-
-  /* unpack in and inout argments */
-
-  sidl_io_Deserializer_unpackString( inArgs, "prefix", &prefix, _ex2);
-
-  /* make the call */
-  _retval = (_getSEPV()->f_deleteProtocol)(
-    prefix,
-    _ex2);
-
-  /* check if exception thrown */
-  /* FIXME */
-
-  /* pack return value */
-  sidl_io_Serializer_packBool( outArgs, "_retval", _retval, _ex2);
-
-  /* pack out and inout argments */
-
-}
-
-void
-sidl_rmi_ProtocolFactory_createInstance__sexec(
-        struct sidl_io_Deserializer__object* inArgs,
-        struct sidl_io_Serializer__object* outArgs) {
-  /* stack space for arguments */
-  char* url;
-  char* typeName;
-  sidl_rmi_InstanceHandle _retval;
-  sidl_BaseInterface _ex   = NULL;
-  sidl_BaseInterface *_ex2 = &_ex;
-
-  /* unpack in and inout argments */
-
-  sidl_io_Deserializer_unpackString( inArgs, "url", &url, _ex2);
-
-  sidl_io_Deserializer_unpackString( inArgs, "typeName", &typeName, _ex2);
-
-  /* make the call */
-  _retval = (_getSEPV()->f_createInstance)(
-    url,
-    typeName,
-    _ex2);
-
-  /* check if exception thrown */
-  /* FIXME */
-
-  /* pack return value */
-  /* pack out and inout argments */
-
-}
-
-void
-sidl_rmi_ProtocolFactory_connectInstance__sexec(
-        struct sidl_io_Deserializer__object* inArgs,
-        struct sidl_io_Serializer__object* outArgs) {
-  /* stack space for arguments */
-  char* url;
-  sidl_rmi_InstanceHandle _retval;
-  sidl_BaseInterface _ex   = NULL;
-  sidl_BaseInterface *_ex2 = &_ex;
-
-  /* unpack in and inout argments */
-
-  sidl_io_Deserializer_unpackString( inArgs, "url", &url, _ex2);
-
-  /* make the call */
-  _retval = (_getSEPV()->f_connectInstance)(
-    url,
-    _ex2);
-
-  /* check if exception thrown */
-  /* FIXME */
-
-  /* pack return value */
-  /* pack out and inout argments */
-
-}
-
 /*
  * Cast method for interface and class type conversions.
  */
@@ -529,40 +380,6 @@ sidl_rmi_ProtocolFactory__exec(
   outArgs);
 }
 
-struct sidl_rmi_ProtocolFactory__smethod {
-  const char *d_name;
-  void (*d_func)(struct sidl_io_Deserializer__object *,
-    struct sidl_io_Serializer__object *);
-};
-
-void
-sidl_rmi_ProtocolFactory__sexec(
-        const char* methodName,
-        struct sidl_io_Deserializer__object* inArgs,
-        struct sidl_io_Serializer__object* outArgs ) { 
-  static const struct sidl_rmi_ProtocolFactory__smethod s_methods[] = {
-    { "addProtocol", sidl_rmi_ProtocolFactory_addProtocol__sexec },
-    { "connectInstance", sidl_rmi_ProtocolFactory_connectInstance__sexec },
-    { "createInstance", sidl_rmi_ProtocolFactory_createInstance__sexec },
-    { "deleteProtocol", sidl_rmi_ProtocolFactory_deleteProtocol__sexec },
-    { "getProtocol", sidl_rmi_ProtocolFactory_getProtocol__sexec }
-  };
-  int i, cmp, l = 0;
-  int u = sizeof(s_methods)/sizeof(struct sidl_rmi_ProtocolFactory__smethod);
-  if (methodName) {
-    /* Use binary search to locate method */
-    while (l < u) {
-      i = (l + u) >> 1;
-      if (!(cmp=strcmp(methodName, s_methods[i].d_name))) {
-        (s_methods[i].d_func)(inArgs, outArgs);
-        return;
-      }
-      else if (cmp < 0) u = i;
-      else l = i + 1;
-    }
-  }
-  /* TODO: add code for method not found */
-}
 /*
  * Get the URL of the Implementation of this object (for RMI)
  */

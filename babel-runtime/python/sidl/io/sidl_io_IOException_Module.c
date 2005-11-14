@@ -2,7 +2,7 @@
  * File:          sidl_io_IOException_Module.c
  * Symbol:        sidl.io.IOException-v0.9.3
  * Symbol Type:   class
- * Babel Version: 0.10.10
+ * Babel Version: 0.10.12
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   implement a C extension type for a sidl extendable
@@ -32,7 +32,7 @@
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.10
+ * babel-version = 0.10.12
  */
 
 /*
@@ -68,11 +68,11 @@
 #ifndef included_sidl_interface_IOR_h
 #include "sidl_interface_IOR.h"
 #endif
-#include "sidl_SIDLException_Module.h"
-#include "sidl_ClassInfo_Module.h"
-#include "sidl_BaseInterface_Module.h"
-#include "sidl_BaseException_Module.h"
 #include "sidl_BaseClass_Module.h"
+#include "sidl_BaseException_Module.h"
+#include "sidl_BaseInterface_Module.h"
+#include "sidl_ClassInfo_Module.h"
+#include "sidl_SIDLException_Module.h"
 #include <stdlib.h>
 #include <string.h>
 
@@ -414,9 +414,9 @@ generic exception for I/O issues "
   Py_INCREF(&_sidl_io_IOExceptionType);
   PyDict_SetItemString(dict, "IOException",                                   \
     (PyObject *)&_sidl_io_IOExceptionType);
+  sidl_ClassInfo__import();
   sidl_BaseInterface__import();
   sidl_BaseException__import();
-  sidl_ClassInfo__import();
   sidl_BaseClass__import();
   _exceptionBases = PyTuple_New(1);
   Py_INCREF(sidl_SIDLException__type);

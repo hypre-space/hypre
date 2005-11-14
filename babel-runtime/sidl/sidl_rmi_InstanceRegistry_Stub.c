@@ -2,7 +2,7 @@
  * File:          sidl_rmi_InstanceRegistry_Stub.c
  * Symbol:        sidl.rmi.InstanceRegistry-v0.9.3
  * Symbol Type:   class
- * Babel Version: 0.10.10
+ * Babel Version: 0.10.12
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Client-side glue code for sidl.rmi.InstanceRegistry
@@ -32,7 +32,7 @@
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.10
+ * babel-version = 0.10.12
  */
 
 #include "sidl_rmi_InstanceRegistry.h"
@@ -283,87 +283,6 @@ sidl_rmi_InstanceRegistry_removeInstance(
     _ex);
 }
 
-void
-sidl_rmi_InstanceRegistry_registerInstance__sexec(
-        struct sidl_io_Deserializer__object* inArgs,
-        struct sidl_io_Serializer__object* outArgs) {
-  /* stack space for arguments */
-  sidl_BaseClass instance;
-  char* _retval;
-  sidl_BaseInterface _ex   = NULL;
-  sidl_BaseInterface *_ex2 = &_ex;
-
-  /* unpack in and inout argments */
-
-  /* make the call */
-  _retval = (_getSEPV()->f_registerInstance)(
-    instance,
-    _ex2);
-
-  /* check if exception thrown */
-  /* FIXME */
-
-  /* pack return value */
-  sidl_io_Serializer_packString( outArgs, "_retval", _retval, _ex2);
-
-  /* pack out and inout argments */
-
-}
-
-void
-sidl_rmi_InstanceRegistry_getInstance__sexec(
-        struct sidl_io_Deserializer__object* inArgs,
-        struct sidl_io_Serializer__object* outArgs) {
-  /* stack space for arguments */
-  char* instanceID;
-  sidl_BaseClass _retval;
-  sidl_BaseInterface _ex   = NULL;
-  sidl_BaseInterface *_ex2 = &_ex;
-
-  /* unpack in and inout argments */
-
-  sidl_io_Deserializer_unpackString( inArgs, "instanceID", &instanceID, _ex2);
-
-  /* make the call */
-  _retval = (_getSEPV()->f_getInstance)(
-    instanceID,
-    _ex2);
-
-  /* check if exception thrown */
-  /* FIXME */
-
-  /* pack return value */
-  /* pack out and inout argments */
-
-}
-
-void
-sidl_rmi_InstanceRegistry_removeInstance__sexec(
-        struct sidl_io_Deserializer__object* inArgs,
-        struct sidl_io_Serializer__object* outArgs) {
-  /* stack space for arguments */
-  char* instanceID;
-  sidl_BaseClass _retval;
-  sidl_BaseInterface _ex   = NULL;
-  sidl_BaseInterface *_ex2 = &_ex;
-
-  /* unpack in and inout argments */
-
-  sidl_io_Deserializer_unpackString( inArgs, "instanceID", &instanceID, _ex2);
-
-  /* make the call */
-  _retval = (_getSEPV()->f_removeInstance)(
-    instanceID,
-    _ex2);
-
-  /* check if exception thrown */
-  /* FIXME */
-
-  /* pack return value */
-  /* pack out and inout argments */
-
-}
-
 /*
  * Cast method for interface and class type conversions.
  */
@@ -425,38 +344,6 @@ sidl_rmi_InstanceRegistry__exec(
   outArgs);
 }
 
-struct sidl_rmi_InstanceRegistry__smethod {
-  const char *d_name;
-  void (*d_func)(struct sidl_io_Deserializer__object *,
-    struct sidl_io_Serializer__object *);
-};
-
-void
-sidl_rmi_InstanceRegistry__sexec(
-        const char* methodName,
-        struct sidl_io_Deserializer__object* inArgs,
-        struct sidl_io_Serializer__object* outArgs ) { 
-  static const struct sidl_rmi_InstanceRegistry__smethod s_methods[] = {
-    { "getInstance", sidl_rmi_InstanceRegistry_getInstance__sexec },
-    { "registerInstance", sidl_rmi_InstanceRegistry_registerInstance__sexec },
-    { "removeInstance", sidl_rmi_InstanceRegistry_removeInstance__sexec }
-  };
-  int i, cmp, l = 0;
-  int u = sizeof(s_methods)/sizeof(struct sidl_rmi_InstanceRegistry__smethod);
-  if (methodName) {
-    /* Use binary search to locate method */
-    while (l < u) {
-      i = (l + u) >> 1;
-      if (!(cmp=strcmp(methodName, s_methods[i].d_name))) {
-        (s_methods[i].d_func)(inArgs, outArgs);
-        return;
-      }
-      else if (cmp < 0) u = i;
-      else l = i + 1;
-    }
-  }
-  /* TODO: add code for method not found */
-}
 /*
  * Get the URL of the Implementation of this object (for RMI)
  */

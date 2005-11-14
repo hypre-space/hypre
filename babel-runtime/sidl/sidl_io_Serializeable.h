@@ -2,7 +2,7 @@
  * File:          sidl_io_Serializeable.h
  * Symbol:        sidl.io.Serializeable-v0.9.3
  * Symbol Type:   interface
- * Babel Version: 0.10.10
+ * Babel Version: 0.10.12
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Client-side glue code for sidl.io.Serializeable
@@ -32,7 +32,7 @@
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.10
+ * babel-version = 0.10.12
  */
 
 #ifndef included_sidl_io_Serializeable_h
@@ -189,14 +189,6 @@ sidl_io_Serializeable__cast2(
 void
 sidl_io_Serializeable__exec(
   /* in */ sidl_io_Serializeable self,
-  /* in */ const char* methodName,
-  /* in */ sidl_io_Deserializer inArgs,
-  /* in */ sidl_io_Serializer outArgs);
-/**
- * static Exec method for reflexity.
- */
-void
-sidl_io_Serializeable__sexec(
   /* in */ const char* methodName,
   /* in */ sidl_io_Deserializer inArgs,
   /* in */ sidl_io_Serializer outArgs);

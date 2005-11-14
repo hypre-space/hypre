@@ -2,12 +2,12 @@
  * File:          sidlx_rmi_IPv4Socket_Impl.h
  * Symbol:        sidlx.rmi.IPv4Socket-v0.1
  * Symbol Type:   class
- * Babel Version: 0.10.10
+ * Babel Version: 0.10.12
  * Description:   Server-side implementation for sidlx.rmi.IPv4Socket
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.10.10
+ * babel-version = 0.10.12
  */
 
 #ifndef included_sidlx_rmi_IPv4Socket_Impl_h

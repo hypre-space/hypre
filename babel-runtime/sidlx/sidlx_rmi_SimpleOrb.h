@@ -2,12 +2,12 @@
  * File:          sidlx_rmi_SimpleOrb.h
  * Symbol:        sidlx.rmi.SimpleOrb-v0.1
  * Symbol Type:   class
- * Babel Version: 0.10.10
+ * Babel Version: 0.10.12
  * Description:   Client-side glue code for sidlx.rmi.SimpleOrb
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.10
+ * babel-version = 0.10.12
  */
 
 #ifndef included_sidlx_rmi_SimpleOrb_h
@@ -189,14 +189,6 @@ sidlx_rmi_SimpleOrb__cast2(
 void
 sidlx_rmi_SimpleOrb__exec(
   /* in */ sidlx_rmi_SimpleOrb self,
-  /* in */ const char* methodName,
-  /* in */ sidl_io_Deserializer inArgs,
-  /* in */ sidl_io_Serializer outArgs);
-/**
- * static Exec method for reflexity.
- */
-void
-sidlx_rmi_SimpleOrb__sexec(
   /* in */ const char* methodName,
   /* in */ sidl_io_Deserializer inArgs,
   /* in */ sidl_io_Serializer outArgs);

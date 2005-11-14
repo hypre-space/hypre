@@ -2,7 +2,7 @@
 # File:          __init__.py
 # Symbol:        sidl.io-v0.9.3
 # Symbol Type:   package
-# Babel Version: 0.10.10
+# Babel Version: 0.10.12
 # Release:       $Name$
 # Revision:      @(#) $Id$
 # Description:   package initialization code
@@ -32,7 +32,7 @@
 # 
 # WARNING: Automatically generated; changes will be lost
 # 
-# babel-version = 0.10.10
+# babel-version = 0.10.12
 #
 
 

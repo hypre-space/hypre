@@ -2,7 +2,7 @@
  * File:          sidl_rmi_NetworkException_IOR.h
  * Symbol:        sidl.rmi.NetworkException-v0.9.3
  * Symbol Type:   class
- * Babel Version: 0.10.10
+ * Babel Version: 0.10.12
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Intermediate Object Representation for sidl.rmi.NetworkException
@@ -32,7 +32,7 @@
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.10
+ * babel-version = 0.10.12
  */
 
 #ifndef included_sidl_rmi_NetworkException_IOR_h

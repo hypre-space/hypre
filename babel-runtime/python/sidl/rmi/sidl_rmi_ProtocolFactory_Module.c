@@ -2,7 +2,7 @@
  * File:          sidl_rmi_ProtocolFactory_Module.c
  * Symbol:        sidl.rmi.ProtocolFactory-v0.9.3
  * Symbol Type:   class
- * Babel Version: 0.10.10
+ * Babel Version: 0.10.12
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   implement a C extension type for a sidl extendable
@@ -32,7 +32,7 @@
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.10
+ * babel-version = 0.10.12
  */
 
 /*
@@ -70,11 +70,11 @@
 #ifndef included_sidl_interface_IOR_h
 #include "sidl_interface_IOR.h"
 #endif
-#include "sidl_rmi_InstanceHandle_Module.h"
-#include "sidl_ClassInfo_Module.h"
-#include "sidl_rmi_NetworkException_Module.h"
-#include "sidl_BaseInterface_Module.h"
 #include "sidl_BaseClass_Module.h"
+#include "sidl_BaseInterface_Module.h"
+#include "sidl_ClassInfo_Module.h"
+#include "sidl_rmi_InstanceHandle_Module.h"
+#include "sidl_rmi_NetworkException_Module.h"
 #include <stdlib.h>
 #include <string.h>
 
@@ -697,10 +697,10 @@ and create classes that implement <code>sidl.rmi.InstanceHandle</code>."
   Py_INCREF(&_sidl_rmi_ProtocolFactoryType);
   PyDict_SetItemString(dict, "ProtocolFactory",                               \
     (PyObject *)&_sidl_rmi_ProtocolFactoryType);
-  sidl_rmi_NetworkException__import();
-  sidl_rmi_InstanceHandle__import();
-  sidl_BaseInterface__import();
   sidl_ClassInfo__import();
+  sidl_BaseInterface__import();
+  sidl_rmi_InstanceHandle__import();
+  sidl_rmi_NetworkException__import();
   _implEPV = sidl_rmi_ProtocolFactory__externals();
   if (_implEPV) {
     _sepv = (*_implEPV->getStaticEPV)();
