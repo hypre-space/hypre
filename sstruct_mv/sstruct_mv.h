@@ -909,6 +909,10 @@ int HYPRE_SStructVectorSetConstantValues( HYPRE_SStructVector vector , double va
 int HYPRE_SStructVectorSetObjectType( HYPRE_SStructVector vector , int type );
 int HYPRE_SStructVectorGetObject( HYPRE_SStructVector vector , void **object );
 int HYPRE_SStructVectorPrint( const char *filename , HYPRE_SStructVector vector , int all );
+int HYPRE_SStructVectorCopy( HYPRE_SStructVector x , HYPRE_SStructVector y );
+int HYPRE_SStructVectorScale( double alpha , HYPRE_SStructVector y );
+int HYPRE_SStructInnerProd( HYPRE_SStructVector x , HYPRE_SStructVector y , double *result );
+int HYPRE_SStructAxpy( double alpha , HYPRE_SStructVector x , HYPRE_SStructVector y );
 
 /* sstruct_axpy.c */
 int hypre_SStructPAxpy( double alpha , hypre_SStructPVector *px , hypre_SStructPVector *py );

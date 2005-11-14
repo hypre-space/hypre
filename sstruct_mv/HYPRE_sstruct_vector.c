@@ -588,3 +588,48 @@ HYPRE_SStructVectorPrint( const char          *filename,
    return ierr;
 }
 
+/******************************************************************************
+ * copy x to y, y should already exist and be the same size
+ *****************************************************************************/
+int
+HYPRE_SStructVectorCopy( HYPRE_SStructVector x,
+                         HYPRE_SStructVector y )
+{
+   return hypre_SStructCopy( (hypre_SStructVector *)x,
+                             (hypre_SStructVector *)y );
+}
+
+/******************************************************************************
+ * y = a*y, for vector y and scalar a
+ *****************************************************************************/
+int
+HYPRE_SStructVectorScale( double alpha, HYPRE_SStructVector y )
+{
+   return hypre_SStructScale( alpha, (hypre_SStructVector *)y );
+}
+
+/******************************************************************************
+ * inner or dot product, result = < x, y >
+ *****************************************************************************/
+int
+HYPRE_SStructInnerProd( HYPRE_SStructVector x,
+                        HYPRE_SStructVector y,
+                        double *result )
+{
+   return hypre_SStructInnerProd( (hypre_SStructVector *)x,
+                                  (hypre_SStructVector *)y,
+                                  result );
+}
+
+/******************************************************************************
+ * y = y + alpha*x for vectors y, x and scalar alpha
+ *****************************************************************************/
+int
+HYPRE_SStructAxpy( double alpha,
+                        HYPRE_SStructVector x,
+                        HYPRE_SStructVector y )
+{
+   return hypre_SStructAxpy( alpha,
+                             (hypre_SStructVector *)x,
+                             (hypre_SStructVector *)y );
+}
