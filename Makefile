@@ -33,6 +33,7 @@ HYPRE_SSTRUCT_DIRS =\
 HYPRE_IJ_DIRS =\
  seq_mv\
  parcsr_mv\
+ parcsr_block_mv\
  distributed_matrix\
  matrix_matrix\
  IJ_mv\
