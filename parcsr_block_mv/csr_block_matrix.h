@@ -17,12 +17,11 @@
  *
  *****************************************************************************/
 
-#include <HYPRE_config.h>
 
 #ifndef hypre_CSR_BLOCK_MATRIX_HEADER
 #define hypre_CSR_BLOCK_MATRIX_HEADER
 
-#include "../seq_mv/seq_mv.h"
+#include "seq_mv.h"
 #include "utilities.h"
                                                                                                                
 #ifdef __cplusplus
@@ -79,8 +78,40 @@ hypre_CSRBlockMatrix
 int hypre_CSRBlockMatrixBlockAdd(double *, double *, double*, int);
 int hypre_CSRBlockMatrixBlockMultAdd(double *, double *, double, double *, int);
 int hypre_CSRBlockMatrixBlockInvMult(double *, double *, double *, int);
+int hypre_CSRBlockMatrixBlockMultInv(double *, double *, double *, int);
+int hypre_CSRBlockMatrixBlockTranspose(double *, double *, int);
+
 int hypre_CSRBlockMatrixTranspose(hypre_CSRBlockMatrix *A,
                                   hypre_CSRBlockMatrix **AT, int data);
+
+int hypre_CSRBlockMatrixBlockCopyData(double*, double*, double, int);
+   
+int hypre_CSRBlockMatrixBlockAddAccumulate(double*, double*, int);
+   
+
+
+int
+hypre_CSRBlockMatrixMatvec(double alpha, hypre_CSRBlockMatrix *A,
+                           hypre_Vector *x, double beta, hypre_Vector *y);
+   
+
+int
+hypre_CSRBlockMatrixMatvecT( double alpha, hypre_CSRBlockMatrix *A, hypre_Vector  *x,
+                             double beta, hypre_Vector *y );
+
+int
+hypre_CSRBlockMatrixBlockInvMatvec(double* mat, double* v, 
+                                   double* ov, int block_size);
+   
+int 
+hypre_CSRBlockMatrixBlockMatvec(double alpha, double* mat, double* v, double beta, 
+                                double* ov, int block_size);
+   
+
+int hypre_CSRBlockMatrixBlockNorm(int norm_type, double* data, double* out, int block_size);
+   
+int hypre_CSRBlockMatrixBlockSetScalar(double* o, double beta, int block_size);
+   
 
 #ifdef __cplusplus
 }

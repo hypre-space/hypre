@@ -7,11 +7,10 @@
  * $Revision$
 *********************************************************************EHEADER*/
 
-#include <HYPRE_config.h>
 #include "utilities.h"
 #include "../parcsr_mv/parcsr_mv.h"
                                                                                                                
-/* This forward reference seems necessary to prevent a problem with the
+/* reference seems necessary to prevent a problem with the
    "headers" script... */
 
 void hypre_ParCSRMatrixExtractBExt_Arrays
@@ -1244,6 +1243,25 @@ hypre_ParCSRMatrixTranspose( hypre_ParCSRMatrix *A,
    hypre_CSRMatrixJ(AT_offd) = AT_offd_j;
    hypre_CSRMatrixData(AT_offd) = AT_offd_data;
 
+
+
+
+#ifdef HYPRE_NO_GLOBAL_PARTITION
+   row_starts_AT = hypre_CTAlloc(int, 2);
+   for (i=0; i < 2; i++)
+      row_starts_AT[i] = col_starts[i];
+
+   if (row_starts != col_starts)
+   {
+      col_starts_AT = hypre_CTAlloc(int,2);
+      for (i=0; i < 2; i++)
+         col_starts_AT[i] = row_starts[i];
+   }
+   else
+   {
+      col_starts_AT = row_starts_AT;
+   }
+#else
    row_starts_AT = hypre_CTAlloc(int,num_procs+1);
    for (i=0; i < num_procs+1; i++)
       row_starts_AT[i] = col_starts[i];
@@ -1258,6 +1276,10 @@ hypre_ParCSRMatrixTranspose( hypre_ParCSRMatrix *A,
    {
       col_starts_AT = row_starts_AT;
    }
+#endif
+
+
+
 
    AT = hypre_CTAlloc(hypre_ParCSRMatrix,1);
    hypre_ParCSRMatrixComm(AT) = comm;

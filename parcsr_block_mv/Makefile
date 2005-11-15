@@ -16,6 +16,7 @@ C_COMPILE_FLAGS = \
  -I$(srcdir)\
  -I$(srcdir)/..\
  -I$(srcdir)/../utilities\
+ -I$(srcdir)/../multivector\
  -I$(srcdir)/../seq_mv\
  -I$(srcdir)/../parcsr_mv\
  -I$(srcdir)/../parcsr_ls\
@@ -43,7 +44,11 @@ FILES =\
  par_csr_block_comm.c\
  par_csr_block_comm.c\
  par_csr_block_matop.c\
- par_csr_block_rap.c
+ par_csr_block_rap.c\
+ par_csr_block_rap_communication.c\
+ par_csr_block_interp.c\
+ par_csr_block_relax.c\
+ par_block_nodal_systems.c
 
 EXTRA_FILES =
 
@@ -56,10 +61,16 @@ DRIVER_OBJS = ${DRIVER_FILES:.c=.o}
 # Targets
 ##################################################################
 
-all: libHYPRE_parcsr_block_mv.a driver_matvec
-	cp -fp $(srcdir)/HYPRE_*.h $(HYPRE_BUILD_DIR)/include/.
+all: libHYPRE_parcsr_block_mv.a 
+	cp -fp $(srcdir)/par_csr_block_matrix.h $(HYPRE_BUILD_DIR)/include	
+	cp -fp $(srcdir)/csr_block_matrix.h $(HYPRE_BUILD_DIR)/include
 	cp -fp libHYPRE_*.a $(HYPRE_BUILD_DIR)/lib/.
  
+mytest: mytest.o libHYPRE_parcsr_block_mv.a 
+	@echo  "Linking" $@ "... "
+	${CC} -o mytest mytest.o ${LFLAGS} 
+ 
+
 driver: driver.o libHYPRE_parcsr_block_mv.a 
 	@echo  "Linking" $@ "... "
 	${CC} -o driver driver.o ${LFLAGS} 
@@ -84,9 +95,9 @@ driver_boolaat: driver_boolaat.o libHYPRE_parcsr_mv.a
 	@echo  "Linking" $@ "... "
 	${CC} -o driver_boolaat driver_boolaat.o ${LFLAGS} 
 
-install: libHYPRE_parcsr_mv.a
-	cp -fp $(srcdir)/HYPRE_*.h $(HYPRE_INC_INSTALL)/.
-	cp -fp $(srcdir)/parcsr_mv.h $(HYPRE_INC_INSTALL)/.
+install: libHYPRE_parcsr_block_mv.a
+	cp -fp $(srcdir)/par_csr_block_matrix.h $(HYPRE_INC_INSTALL)/.
+	cp -fp $(srcdir)/csr_block_matrix.h $(HYPRE_INC_INSTALL)/.
 	cp -fp libHYPRE_*.a $(HYPRE_LIB_INSTALL)/.
  
 clean:

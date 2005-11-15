@@ -12,17 +12,15 @@
 #include "par_csr_block_matrix.h"
 #include "../parcsr_mv/parcsr_mv.h"
 
-extern 
-hypre_ParCSRCommHandle *hypre_ParCSRBlockCommHandleCreate(int, 
-                               hypre_ParCSRCommPkg *, void *, void *);
 
 /*--------------------------------------------------------------------------
- * used in RAP function
+ * used in RAP function - block size must be an argument because RAP_int may
+ * by NULL
  *--------------------------------------------------------------------------*/
          
 hypre_CSRBlockMatrix *
 hypre_ExchangeRAPBlockData(hypre_CSRBlockMatrix *RAP_int,
-                           hypre_ParCSRCommPkg *comm_pkg_RT)
+                           hypre_ParCSRCommPkg *comm_pkg_RT, int block_size)
 {
    int     *RAP_int_i;
    int     *RAP_int_j = NULL;
@@ -36,8 +34,10 @@ hypre_ExchangeRAPBlockData(hypre_CSRBlockMatrix *RAP_int,
    int num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg_RT);
    int *send_procs = hypre_ParCSRCommPkgSendProcs(comm_pkg_RT);
    int *send_map_starts = hypre_ParCSRCommPkgSendMapStarts(comm_pkg_RT);
-   int block_size = hypre_CSRBlockMatrixBlockSize(RAP_int);
 
+/*   int block_size = hypre_CSRBlockMatrixBlockSize(RAP_int); */
+
+      
    hypre_CSRBlockMatrix *RAP_ext;
 
    int     *RAP_ext_i;
@@ -57,12 +57,16 @@ hypre_ExchangeRAPBlockData(hypre_CSRBlockMatrix *RAP_int,
 
    MPI_Comm_size(comm,&num_procs);
    MPI_Comm_rank(comm,&my_id);
+
    bnnz = block_size * block_size;
 
    RAP_ext_i = hypre_CTAlloc(int, send_map_starts[num_sends]+1);
    jdata_recv_vec_starts = hypre_CTAlloc(int, num_recvs+1);
    jdata_send_map_starts = hypre_CTAlloc(int, num_sends+1);
  
+
+
+
 /*--------------------------------------------------------------------------
  * recompute RAP_int_i so that RAP_int_i[j+1] contains the number of
  * elements of row j (to be determined through send_map_elmnts on the
@@ -132,7 +136,7 @@ hypre_ExchangeRAPBlockData(hypre_CSRBlockMatrix *RAP_int,
    hypre_ParCSRCommPkgRecvVecStarts(tmp_comm_pkg) = jdata_send_map_starts;      
    hypre_ParCSRCommPkgSendMapStarts(tmp_comm_pkg) = jdata_recv_vec_starts;      
 
-   comm_handle = hypre_ParCSRBlockCommHandleCreate(bnnz, tmp_comm_pkg, 
+   comm_handle = hypre_ParCSRBlockCommHandleCreate(1, bnnz, tmp_comm_pkg, 
                            (void *) RAP_int_data, (void *) RAP_ext_data);
    hypre_ParCSRBlockCommHandleDestroy(comm_handle);
    comm_handle = NULL;
@@ -308,7 +312,7 @@ hypre_ParCSRBlockMatrixRAP(hypre_ParCSRBlockMatrix  *RT,
    int              num_procs;
    int              num_threads, ind;
 
-   double           r_entry, *r_entries;
+   double           *r_entries;
    double           *r_a_products;
    double           *r_a_p_products;
    
@@ -1003,7 +1007,7 @@ hypre_ParCSRBlockMatrixRAP(hypre_ParCSRBlockMatrix  *RT,
   RAP_ext_size = 0;
   if (num_sends_RT || num_recvs_RT)
   {
-     RAP_ext = hypre_ExchangeRAPBlockData(RAP_int,comm_pkg_RT);
+     RAP_ext = hypre_ExchangeRAPBlockData(RAP_int,comm_pkg_RT, block_size);
      RAP_ext_i = hypre_CSRBlockMatrixI(RAP_ext);
      RAP_ext_j = hypre_CSRBlockMatrixJ(RAP_ext);
      RAP_ext_data = hypre_CSRBlockMatrixData(RAP_ext);
@@ -1743,10 +1747,18 @@ hypre_ParCSRBlockMatrixRAP(hypre_ParCSRBlockMatrix  *RT,
     hypre_TFree(A_mark_array[ii]);   
   }
 
+
+#ifdef HYPRE_NO_GLOBAL_PARTITION
+  row_starts = hypre_CTAlloc(int, 2);
+  col_starts = hypre_CTAlloc(int, 2);
+  for (i = 0; i <= 1; i++) 
+     row_starts[i] = col_starts[i] = coarse_partitioning[i];
+#else
   row_starts = hypre_CTAlloc(int, num_procs+1);
   col_starts = hypre_CTAlloc(int, num_procs+1);
   for (i = 0; i <= num_procs; i++) 
      row_starts[i] = col_starts[i] = coarse_partitioning[i];
+#endif
 
   RAP = hypre_ParCSRBlockMatrixCreate(comm, block_size, n_coarse, n_coarse, 
                                row_starts, col_starts,
@@ -1770,8 +1782,11 @@ hypre_ParCSRBlockMatrixRAP(hypre_ParCSRBlockMatrix  *RT,
   }
   if (num_procs > 1)
   {
-        /* hypre_GenerateRAPCommPkg(RAP, A); */
+#ifdef HYPRE_NO_GLOBAL_PARTITION
+     hypre_BlockNewCommPkgCreate(RAP); 
+#else
      hypre_BlockMatvecCommPkgCreate(RAP); 
+#endif
   }
 
   *RAP_ptr = RAP;
