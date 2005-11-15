@@ -46,6 +46,7 @@ LFLAGS =\
  -lHYPRE_sstruct_mv\
  -lHYPRE_struct_ls\
  -lHYPRE_struct_mv\
+ -lHYPRE_parcsr_block_mv\
  -lHYPRE_parcsr_ls\
  -lHYPRE_DistributedMatrixPilutSolver \
  -lHYPRE_ParaSails \
@@ -123,6 +124,7 @@ SSTRUCT_LFLAGS =\
  -lHYPRE_MatrixMatrix \
  -lHYPRE_DistributedMatrix \
  -lHYPRE_IJ_mv\
+ -lHYPRE_parcsr_block_mv\
  -lHYPRE_parcsr_mv\
  -lHYPRE_seq_mv\
  -lHYPRE_krylov\
@@ -144,6 +146,7 @@ IJ_LFLAGS =\
  -lHYPRE_MatrixMatrix \
  -lHYPRE_DistributedMatrix \
  -lHYPRE_IJ_mv\
+ -lHYPRE_parcsr_block_mv\
  -lHYPRE_parcsr_mv\
  -lHYPRE_seq_mv\
  -lHYPRE_krylov\

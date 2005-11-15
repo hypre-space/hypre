@@ -33,6 +33,11 @@ int BuildParVarDifConv (int argc , char *argv [], int arg_index , HYPRE_ParCSRMa
 HYPRE_ParCSRMatrix GenerateSysLaplacian (MPI_Comm comm, int nx, int ny, int nz, 
                                          int P, int Q, int R, int p, int q, int r,
                                          int num_fun, double *mtrx, double *value);
+HYPRE_ParCSRMatrix GenerateSysLaplacianVCoef (MPI_Comm comm, int nx, int ny, int nz, 
+                                         int P, int Q, int R, int p, int q, int r,
+                                         int num_fun, double *mtrx, double *value);
+int SetSysVcoefValues(int num_fun, int nx, int ny, int nz, double vcx, double vcy, double vcz, int mtx_entry, double *values);
+
 
 #define SECOND_TIME 0
  
@@ -706,6 +711,7 @@ main( int   argc,
       printf("matrix read from a single file (CSR format)\n");
       printf("\n");
       printf("  -laplacian [<options>] : build 5pt 2D laplacian problem (default) \n");
+      printf("  -sysL <num functions>  : build SYSTEMS laplacian 7pt operator\n");
       printf("  -9pt [<opts>]          : build 9pt 2D laplacian problem\n");
       printf("  -27pt [<opts>]         : build 27pt 3D laplacian problem\n");
       printf("  -difconv [<opts>]      : build convection-diffusion problem\n");
@@ -758,7 +764,7 @@ main( int   argc,
       printf("  -cljp                 : CLJP coarsening \n");
       printf("  -cljp1                : CLJP coarsening, fixed random \n");
       printf("  -pmis                 : PMIS coarsening \n");
-      printf("  -pmis1                : PMIS coarsening, fixed random \n");
+       printf("  -pmis1                : PMIS coarsening, fixed random \n");
       printf("  -hmis                 : HMIS coarsening \n");
       printf("  -ruge                 : Ruge coarsening (local)\n");
       printf("  -ruge1p               : Ruge coarsening 1st pass only(local)\n");
@@ -773,6 +779,15 @@ main( int   argc,
       printf("       0=Weighted Jacobi  \n");
       printf("       1=Gauss-Seidel (very slow!)  \n");
       printf("       3=Hybrid Jacobi/Gauss-Seidel  \n");
+      printf("       20= Nodal Weighted Jacobi  \n");
+      printf("       23= Nodal Hybrid Jacobi/Gauss-Seidel  \n");
+      printf("  -nodal  <val>            : nodal system type\n");
+      printf("       0 = Unknown approach \n");
+      printf("       1 = Frobenius norm  \n");
+      printf("       2 = Sum of Abs.value of elements  \n");
+      printf("       3 = Largest element  \n");
+      printf("       4 = Inf. norm  \n");
+      printf("       5 = One norm  \n");
       printf("  -ns <val>              : Use <val> sweeps on each level\n");
       printf("                           (default C/F down, F/C up, F/C fine\n");
       printf("\n"); 
@@ -787,7 +802,9 @@ main( int   argc,
       printf("                         : set to 2 to get interpolation for hyperbolic equations\n");
       printf("                         : set to 3 to get direct interpolation\n");
       printf("                         : set to 4 to get multipass interpolation\n");
-     
+      printf("                         : set to 10 for nodal standard interpolation (for systems only) \n");
+      printf("                         : set to 11 for diagonal nodal standard interpolation (for systems only) \n");
+      printf("                         : set to 200 for standard interpolation (default)\n");
       printf("  -solver_type <val>     : sets solver within Hybrid solver\n");
       printf("                         : 1  PCG  (default)\n");
       printf("                         : 2  GMRES\n");
@@ -958,6 +975,7 @@ main( int   argc,
 
        for (i=first_local_row; i<= last_local_row; i++)
        {
+          
          ierr += HYPRE_ParCSRMatrixGetRow( parcsr_A, i, &size,
                                            &col_inds, &values );
 
@@ -996,6 +1014,7 @@ main( int   argc,
        /* Loop through all locally stored rows and insert them into ij_matrix */
        for (i=first_local_row; i<= last_local_row; i++)
        {
+
          ierr += HYPRE_ParCSRMatrixGetRow( parcsr_A, i, &size,
                                            &col_inds, &values );
 
@@ -1484,6 +1503,11 @@ main( int   argc,
       HYPRE_IJMatrixPrint(ij_A, "IJ.out.A");
       HYPRE_IJVectorPrint(ij_b, "IJ.out.b");
       HYPRE_IJVectorPrint(ij_x, "IJ.out.x0");
+
+/*      HYPRE_ParCSRMatrixPrint(parcsr_A, "parcsr.A.out");  */
+      
+
+
    }
 
    /*-----------------------------------------------------------
@@ -2622,8 +2646,8 @@ main( int   argc,
     *-----------------------------------------------------------*/
 
    HYPRE_IJVectorGetObjectType(ij_b, &j);
-   /* HYPRE_IJVectorPrint(ij_b, "driver.out.b");
-   HYPRE_IJVectorPrint(ij_x, "driver.out.x"); */
+   /* HYPRE_IJVectorPrint(ij_b, "driver.out.b"); */
+   /* HYPRE_IJVectorPrint(ij_x, "driver.out.x");  */
 
    /*-----------------------------------------------------------
     * Finalize things
@@ -2726,6 +2750,8 @@ BuildParLaplacian( int                  argc,
    double             *values;
    double             *mtrx;
 
+   int                 system_vcoef = 0;
+
    /*-----------------------------------------------------------
     * Initialize some stuff
     *-----------------------------------------------------------*/
@@ -2780,6 +2806,11 @@ BuildParLaplacian( int                  argc,
       {
          arg_index++;
          num_fun = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-sys_vcoef") == 0 )
+      {
+         arg_index++;
+         system_vcoef = 1;
       }
       else
       {
@@ -2867,10 +2898,167 @@ BuildParLaplacian( int                  argc,
          mtrx[6] = 0.0;
          mtrx[7] = 1;
          mtrx[8] = 1.01;
-      }
+      } 
 
-      A = (HYPRE_ParCSRMatrix) GenerateSysLaplacian(MPI_COMM_WORLD, 
-		nx, ny, nz, P, Q, R, p, q, r, num_fun, mtrx, values);
+      if (!system_vcoef)
+      {
+         A = (HYPRE_ParCSRMatrix) GenerateSysLaplacian(MPI_COMM_WORLD, 
+                                                       nx, ny, nz, P, Q, 
+                                                       R, p, q, r, num_fun, mtrx, values);
+      }
+      else
+      {
+       
+    
+         double *mtrx_values;
+
+         mtrx_values = hypre_CTAlloc(double, num_fun*num_fun*4);
+
+         if (num_fun == 2)
+         {
+
+#if 1            
+            mtrx[0] =  1;
+            SetSysVcoefValues(num_fun, nx, ny, nz, 30.0, 0.01, 1.0, 0, mtrx_values);
+            
+            mtrx[1] = 200;
+            SetSysVcoefValues(num_fun, nx, ny, nz, 1.01, 1.0, 1.0, 1, mtrx_values);
+            
+            mtrx[2] = 200;
+            SetSysVcoefValues(num_fun, nx, ny, nz, 1.01, 1.0, 1.0, 2, mtrx_values);
+            
+            mtrx[3] = .03;
+            SetSysVcoefValues(num_fun, nx, ny, nz, 2.0, 0.02, 1.0, 3, mtrx_values);
+#endif
+#if 0
+            mtrx[0] = 1;
+            SetSysVcoefValues(num_fun, nx, ny, nz, 1.0,.01, 1.0, 0, mtrx_values);
+            
+            mtrx[1] = 1;
+            SetSysVcoefValues(num_fun, nx, ny, nz, .01, 1.0, 1.0, 1, mtrx_values);
+            
+            mtrx[2] = 1;
+            SetSysVcoefValues(num_fun, nx, ny, nz, .01, 1.0, 1.0, 2, mtrx_values);
+            
+            mtrx[3] = 1;
+            SetSysVcoefValues(num_fun, nx, ny, nz, 2.0, .02, 1.0, 3, mtrx_values);
+     
+#endif       
+#if 0
+            mtrx[0] = 2;
+            SetSysVcoefValues(num_fun, nx, ny, nz, 1.0,1.0, 1.0, 0, mtrx_values);
+            
+            mtrx[1] = 1;
+            SetSysVcoefValues(num_fun, nx, ny, nz, 1.0, 1.0, 1.0, 1, mtrx_values);
+            
+            mtrx[2] = 1;
+            SetSysVcoefValues(num_fun, nx, ny, nz, 1.0, 1.0, 1.0, 2, mtrx_values);
+            
+            mtrx[3] = 2;
+            SetSysVcoefValues(num_fun, nx, ny, nz, 1.0, 1.0, 1.0, 3, mtrx_values);
+
+#endif
+         }
+         else if (num_fun == 3)
+         {
+
+#if 1
+            mtrx[0] = 1.01;
+            SetSysVcoefValues(num_fun, nx, ny, nz, cx, cy, cz, 0, mtrx_values);
+
+            mtrx[1] = 1;
+            SetSysVcoefValues(num_fun, nx, ny, nz, cx, cy, cz, 1, mtrx_values);
+
+            mtrx[2] = 0.0;
+            SetSysVcoefValues(num_fun, nx, ny, nz, cx, cy, cz, 2, mtrx_values);
+
+            mtrx[3] = 1;
+            SetSysVcoefValues(num_fun, nx, ny, nz, cx, cy, cz, 3, mtrx_values);
+
+            mtrx[4] = 2;
+            SetSysVcoefValues(num_fun, nx, ny, nz, cx, cy, cz, 4, mtrx_values);
+
+            mtrx[5] = 1;
+            SetSysVcoefValues(num_fun, nx, ny, nz, cx, cy, cz, 5, mtrx_values);
+
+            mtrx[6] = 0.0;
+            SetSysVcoefValues(num_fun, nx, ny, nz, cx, cy, cz, 6, mtrx_values);
+
+            mtrx[7] = 1;
+            SetSysVcoefValues(num_fun, nx, ny, nz, cx, cy, cz, 7, mtrx_values);
+
+            mtrx[8] = 1.01;
+            SetSysVcoefValues(num_fun, nx, ny, nz, cx, cy, cz, 8, mtrx_values);
+#endif
+#if 0       
+            mtrx[0] = 3;
+            SetSysVcoefValues(num_fun, nx, ny, nz, cx, cy, cz, 0, mtrx_values);
+
+            mtrx[1] = 1;
+            SetSysVcoefValues(num_fun, nx, ny, nz, cx, cy, cz, 1, mtrx_values);
+
+            mtrx[2] = 0.0;
+            SetSysVcoefValues(num_fun, nx, ny, nz, cx, cy, cz, 2, mtrx_values);
+
+            mtrx[3] = 1;
+            SetSysVcoefValues(num_fun, nx, ny, nz, cx, cy, cz, 3, mtrx_values);
+
+            mtrx[4] = 4;
+            SetSysVcoefValues(num_fun, nx, ny, nz, cx, cy, cz, 4, mtrx_values);
+
+            mtrx[5] = 2;
+            SetSysVcoefValues(num_fun, nx, ny, nz, cx, cy, cz, 5, mtrx_values);
+
+            mtrx[6] = 0.0;
+            SetSysVcoefValues(num_fun, nx, ny, nz, cx, cy, cz, 6, mtrx_values);
+
+            mtrx[7] = 2;
+            SetSysVcoefValues(num_fun, nx, ny, nz, cx, cy, cz, 7, mtrx_values);
+
+            mtrx[8] = 0.25;
+            SetSysVcoefValues(num_fun, nx, ny, nz, cx, cy, cz, 8, mtrx_values);
+#endif
+
+#if 0      
+            mtrx[0] = 1.0;
+            SetSysVcoefValues(num_fun, nx, ny, nz, 1.0, .01, 1.0, 0, mtrx_values);
+
+            mtrx[1] = 1.0;
+            SetSysVcoefValues(num_fun, nx, ny, nz,1.0, 1.0, 1.0, 1, mtrx_values);
+
+            mtrx[2] = 0.0;
+            SetSysVcoefValues(num_fun, nx, ny, nz, 1.0, 1.0, 1.0, 2, mtrx_values);
+
+            mtrx[3] = 1;
+            SetSysVcoefValues(num_fun, nx, ny, nz, 1.0, 1.0, 1.0, 3, mtrx_values);
+
+            mtrx[4] = 1;
+            SetSysVcoefValues(num_fun, nx, ny, nz, 2.0, .02, 1.0, 4, mtrx_values);
+
+            mtrx[5] = 2;
+            SetSysVcoefValues(num_fun, nx, ny, nz, 1.0,1.0, 1.0, 5, mtrx_values);
+
+            mtrx[6] = 0.0;
+            SetSysVcoefValues(num_fun, nx, ny, nz, 1.0, 1.0, 1.0, 6, mtrx_values);
+
+            mtrx[7] = 2;
+            SetSysVcoefValues(num_fun, nx, ny, nz, 1.0, 1.0, 1.0, 7, mtrx_values);
+
+            mtrx[8] = 1.0;
+            SetSysVcoefValues(num_fun, nx, ny, nz, 1.5, .04, 1.0, 8, mtrx_values);
+#endif
+         }
+
+         A = (HYPRE_ParCSRMatrix) GenerateSysLaplacianVCoef(MPI_COMM_WORLD, 
+                                                       nx, ny, nz, P, Q, 
+                                                       R, p, q, r, num_fun, mtrx, mtrx_values);
+
+
+
+
+
+         hypre_TFree(mtrx_values);
+      }
 
       hypre_TFree(mtrx);
    }
@@ -3795,5 +3983,37 @@ BuildParVarDifConv( int                  argc,
    *rhs_ptr = rhs;
 
    return (0);
+}
+
+/**************************************************************************/
+
+
+int SetSysVcoefValues(int num_fun, int nx, int ny, int nz, double vcx, 
+                      double vcy, double vcz, int mtx_entry, double *values)
+{
+
+
+   int sz = num_fun*num_fun;
+
+   values[1*sz + mtx_entry] = -vcx;
+   values[2*sz + mtx_entry] = -vcy;
+   values[3*sz + mtx_entry] = -vcz;
+   values[0*sz + mtx_entry] = 0.0;
+
+   if (nx > 1)
+   {
+      values[0*sz + mtx_entry] += 2.0*vcx;
+   }
+   if (ny > 1)
+   {
+      values[0*sz + mtx_entry] += 2.0*vcy;
+   }
+   if (nz > 1)
+   {
+      values[0*sz + mtx_entry] += 2.0*vcz;
+   }
+
+   return 0;
+   
 }
 
