@@ -185,7 +185,8 @@ hypre_BCSRMatrixDenseBlockMulInv(hypre_BCSRMatrixDenseBlock* A,
   for(i = 0; i < num_rows; i++) {
     d = T[i*num_cols + i];
     if(fabs(d) < 1.0e-6) {
-      for(j = i + 1; j < num_rows; j++) {
+       /* pivoting needed? */
+       for(j = i + 1; j < num_rows; j++) {
 	if(fabs(T[j*num_cols + i]) >= 1.0e-12) {
 	  for(k = 0; k < num_cols; k++) {
 	    d = T[j*num_cols + k];
@@ -205,6 +206,7 @@ hypre_BCSRMatrixDenseBlockMulInv(hypre_BCSRMatrixDenseBlock* A,
 	return -2;
       }
     }
+   /* gauss-jordan method */
     for(j = 0; j < num_cols; j++) {
       T[i*num_cols + j] = T[i*num_cols + j]/d;
       Bi[i*num_cols + j] = Bi[i*num_cols + j]/d;
@@ -224,6 +226,9 @@ hypre_BCSRMatrixDenseBlockMulInv(hypre_BCSRMatrixDenseBlock* A,
       }
     }
   }
+
+
+  /* inv(B)*A */
 
   for(i = 0; i < A->num_rows; i++) {
     for(j = 0; j < A->num_cols; j++) {

@@ -386,7 +386,11 @@ hypre_BCSRMatrixToCSRMatrix(hypre_BCSRMatrix* B) {
     }
   }
 
-  A_no_zeros = hypre_CSRMatrixDeleteZeros(A, 0.0);
+
+/*  A_no_zeros = hypre_CSRMatrixDeleteZeros(A, 0.0);*/
+    A_no_zeros = hypre_CSRMatrixDeleteZeros(A, 1e-14);
+  
+
 
   if(A_no_zeros) {
     hypre_CSRMatrixDestroy(A);
