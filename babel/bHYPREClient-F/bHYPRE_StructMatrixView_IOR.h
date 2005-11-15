@@ -2,12 +2,12 @@
  * File:          bHYPRE_StructMatrixView_IOR.h
  * Symbol:        bHYPRE.StructMatrixView-v1.0.0
  * Symbol Type:   interface
- * Babel Version: 0.10.10
+ * Babel Version: 0.10.4
  * Description:   Intermediate Object Representation for bHYPRE.StructMatrixView
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.10
+ * babel-version = 0.10.4
  */
 
 #ifndef included_bHYPRE_StructMatrixView_IOR_h
@@ -98,32 +98,28 @@ struct bHYPRE_StructMatrixView__epv {
     /* in */ struct bHYPRE_StructStencil__object* stencil);
   int32_t (*f_SetValues)(
     /* in */ void* self,
-    /* in rarray[dim] */ struct sidl_int__array* index,
-    /* in rarray[num_stencil_indices] */ struct sidl_int__array* 
-      stencil_indices,
-    /* in rarray[num_stencil_indices] */ struct sidl_double__array* values);
+    /* in */ struct sidl_int__array* index,
+    /* in */ struct sidl_int__array* stencil_indices,
+    /* in */ struct sidl_double__array* values);
   int32_t (*f_SetBoxValues)(
     /* in */ void* self,
-    /* in rarray[dim] */ struct sidl_int__array* ilower,
-    /* in rarray[dim] */ struct sidl_int__array* iupper,
-    /* in rarray[num_stencil_indices] */ struct sidl_int__array* 
-      stencil_indices,
-    /* in rarray[nvalues] */ struct sidl_double__array* values);
+    /* in */ struct sidl_int__array* ilower,
+    /* in */ struct sidl_int__array* iupper,
+    /* in */ struct sidl_int__array* stencil_indices,
+    /* in */ struct sidl_double__array* values);
   int32_t (*f_SetNumGhost)(
     /* in */ void* self,
-    /* in rarray[dim2] */ struct sidl_int__array* num_ghost);
+    /* in */ struct sidl_int__array* num_ghost);
   int32_t (*f_SetSymmetric)(
     /* in */ void* self,
     /* in */ int32_t symmetric);
   int32_t (*f_SetConstantEntries)(
     /* in */ void* self,
-    /* in rarray[num_stencil_constant_points] */ struct sidl_int__array* 
-      stencil_constant_points);
+    /* in */ struct sidl_int__array* stencil_constant_points);
   int32_t (*f_SetConstantValues)(
     /* in */ void* self,
-    /* in rarray[num_stencil_indices] */ struct sidl_int__array* 
-      stencil_indices,
-    /* in rarray[num_stencil_indices] */ struct sidl_double__array* values);
+    /* in */ struct sidl_int__array* stencil_indices,
+    /* in */ struct sidl_double__array* values);
 };
 
 /*
@@ -218,32 +214,28 @@ struct bHYPRE__StructMatrixView__epv {
     /* in */ struct bHYPRE_StructStencil__object* stencil);
   int32_t (*f_SetValues)(
     /* in */ struct bHYPRE__StructMatrixView__object* self,
-    /* in rarray[dim] */ struct sidl_int__array* index,
-    /* in rarray[num_stencil_indices] */ struct sidl_int__array* 
-      stencil_indices,
-    /* in rarray[num_stencil_indices] */ struct sidl_double__array* values);
+    /* in */ struct sidl_int__array* index,
+    /* in */ struct sidl_int__array* stencil_indices,
+    /* in */ struct sidl_double__array* values);
   int32_t (*f_SetBoxValues)(
     /* in */ struct bHYPRE__StructMatrixView__object* self,
-    /* in rarray[dim] */ struct sidl_int__array* ilower,
-    /* in rarray[dim] */ struct sidl_int__array* iupper,
-    /* in rarray[num_stencil_indices] */ struct sidl_int__array* 
-      stencil_indices,
-    /* in rarray[nvalues] */ struct sidl_double__array* values);
+    /* in */ struct sidl_int__array* ilower,
+    /* in */ struct sidl_int__array* iupper,
+    /* in */ struct sidl_int__array* stencil_indices,
+    /* in */ struct sidl_double__array* values);
   int32_t (*f_SetNumGhost)(
     /* in */ struct bHYPRE__StructMatrixView__object* self,
-    /* in rarray[dim2] */ struct sidl_int__array* num_ghost);
+    /* in */ struct sidl_int__array* num_ghost);
   int32_t (*f_SetSymmetric)(
     /* in */ struct bHYPRE__StructMatrixView__object* self,
     /* in */ int32_t symmetric);
   int32_t (*f_SetConstantEntries)(
     /* in */ struct bHYPRE__StructMatrixView__object* self,
-    /* in rarray[num_stencil_constant_points] */ struct sidl_int__array* 
-      stencil_constant_points);
+    /* in */ struct sidl_int__array* stencil_constant_points);
   int32_t (*f_SetConstantValues)(
     /* in */ struct bHYPRE__StructMatrixView__object* self,
-    /* in rarray[num_stencil_indices] */ struct sidl_int__array* 
-      stencil_indices,
-    /* in rarray[num_stencil_indices] */ struct sidl_double__array* values);
+    /* in */ struct sidl_int__array* stencil_indices,
+    /* in */ struct sidl_double__array* values);
   /* Methods introduced in bHYPRE._StructMatrixView-v1.0 */
 };
 

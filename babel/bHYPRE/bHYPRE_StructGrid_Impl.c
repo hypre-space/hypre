@@ -2,12 +2,12 @@
  * File:          bHYPRE_StructGrid_Impl.c
  * Symbol:        bHYPRE.StructGrid-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.10.10
+ * Babel Version: 0.10.4
  * Description:   Server-side implementation for bHYPRE.StructGrid
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.10.10
+ * babel-version = 0.10.4
  */
 
 /*
@@ -228,8 +228,8 @@ extern "C"
 int32_t
 impl_bHYPRE_StructGrid_SetExtents(
   /* in */ bHYPRE_StructGrid self,
-  /* in rarray[dim] */ int32_t* ilower,
-  /* in rarray[dim] */ int32_t* iupper,
+  /* in */ int32_t* ilower,
+  /* in */ int32_t* iupper,
   /* in */ int32_t dim)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.StructGrid.SetExtents) */
@@ -268,7 +268,7 @@ extern "C"
 int32_t
 impl_bHYPRE_StructGrid_SetPeriodic(
   /* in */ bHYPRE_StructGrid self,
-  /* in rarray[dim] */ int32_t* periodic,
+  /* in */ int32_t* periodic,
   /* in */ int32_t dim)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.StructGrid.SetPeriodic) */
@@ -300,7 +300,7 @@ extern "C"
 int32_t
 impl_bHYPRE_StructGrid_SetNumGhost(
   /* in */ bHYPRE_StructGrid self,
-  /* in rarray[dim2] */ int32_t* num_ghost,
+  /* in */ int32_t* num_ghost,
   /* in */ int32_t dim2)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.StructGrid.SetNumGhost) */

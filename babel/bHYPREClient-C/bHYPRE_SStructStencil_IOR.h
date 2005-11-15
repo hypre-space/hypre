@@ -2,12 +2,12 @@
  * File:          bHYPRE_SStructStencil_IOR.h
  * Symbol:        bHYPRE.SStructStencil-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.10.10
+ * Babel Version: 0.10.4
  * Description:   Intermediate Object Representation for bHYPRE.SStructStencil
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.10
+ * babel-version = 0.10.4
  */
 
 #ifndef included_bHYPRE_SStructStencil_IOR_h
@@ -121,7 +121,7 @@ struct bHYPRE_SStructStencil__epv {
   int32_t (*f_SetEntry)(
     /* in */ struct bHYPRE_SStructStencil__object* self,
     /* in */ int32_t entry,
-    /* in rarray[dim] */ struct sidl_int__array* offset,
+    /* in */ struct sidl_int__array* offset,
     /* in */ int32_t var);
 };
 

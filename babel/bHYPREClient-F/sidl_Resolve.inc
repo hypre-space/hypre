@@ -2,7 +2,7 @@ C
 C       File:          sidl_Resolve.inc
 C       Symbol:        sidl.Resolve-v0.9.3
 C       Symbol Type:   enumeration
-C       Babel Version: 0.10.10
+C       Babel Version: 0.10.4
 C       Release:       $Name$
 C       Revision:      @(#) $Id$
 C       Description:   Client-side glue code for sidl.Resolve
@@ -32,8 +32,8 @@ C       Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 C       
 C       WARNING: Automatically generated; changes will be lost
 C       
-C       babel-version = 0.10.10
-C       xml-url       = /home/painter/babel/share/babel-0.10.10/repository/sidl.Resolve-v0.9.3.xml
+C       babel-version = 0.10.4
+C       xml-url       = /home/painter/babel-0.10.4/bin/.././share/repository/sidl.Resolve-v0.9.3.xml
 C       
 
 

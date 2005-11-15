@@ -2,12 +2,12 @@
  * File:          bHYPRE_IdentitySolver_Impl.h
  * Symbol:        bHYPRE.IdentitySolver-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.10.10
+ * Babel Version: 0.10.4
  * Description:   Server-side implementation for bHYPRE.IdentitySolver
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.10.10
+ * babel-version = 0.10.4
  */
 
 #ifndef included_bHYPRE_IdentitySolver_Impl_h
@@ -169,7 +169,7 @@ int32_t
 impl_bHYPRE_IdentitySolver_SetIntArray1Parameter(
   /* in */ bHYPRE_IdentitySolver self,
   /* in */ const char* name,
-  /* in rarray[nvalues] */ int32_t* value,
+  /* in */ int32_t* value,
   /* in */ int32_t nvalues);
 
 extern
@@ -177,14 +177,14 @@ int32_t
 impl_bHYPRE_IdentitySolver_SetIntArray2Parameter(
   /* in */ bHYPRE_IdentitySolver self,
   /* in */ const char* name,
-  /* in array<int,2,column-major> */ struct sidl_int__array* value);
+  /* in */ struct sidl_int__array* value);
 
 extern
 int32_t
 impl_bHYPRE_IdentitySolver_SetDoubleArray1Parameter(
   /* in */ bHYPRE_IdentitySolver self,
   /* in */ const char* name,
-  /* in rarray[nvalues] */ double* value,
+  /* in */ double* value,
   /* in */ int32_t nvalues);
 
 extern
@@ -192,7 +192,7 @@ int32_t
 impl_bHYPRE_IdentitySolver_SetDoubleArray2Parameter(
   /* in */ bHYPRE_IdentitySolver self,
   /* in */ const char* name,
-  /* in array<double,2,column-major> */ struct sidl_double__array* value);
+  /* in */ struct sidl_double__array* value);
 
 extern
 int32_t

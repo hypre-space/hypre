@@ -2,12 +2,12 @@
  * File:          bHYPRE_StructVector_Stub.c
  * Symbol:        bHYPRE.StructVector-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.10.10
+ * Babel Version: 0.10.4
  * Description:   Client-side glue code for bHYPRE.StructVector
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.10
+ * babel-version = 0.10.4
  */
 
 #include "bHYPRE_StructVector.h"
@@ -238,148 +238,6 @@ bHYPRE_StructVector_Create(
 }
 
 /*
- * Set the MPI Communicator.  DEPRECATED, Use Create()
- * 
- */
-
-int32_t
-bHYPRE_StructVector_SetCommunicator(
-  /* in */ bHYPRE_StructVector self,
-  /* in */ bHYPRE_MPICommunicator mpi_comm)
-{
-  return (*self->d_epv->f_SetCommunicator)(
-    self,
-    mpi_comm);
-}
-
-/*
- * Prepare an object for setting coefficient values, whether for
- * the first time or subsequently.
- * 
- */
-
-int32_t
-bHYPRE_StructVector_Initialize(
-  /* in */ bHYPRE_StructVector self)
-{
-  return (*self->d_epv->f_Initialize)(
-    self);
-}
-
-/*
- * Finalize the construction of an object before using, either
- * for the first time or on subsequent uses. {\tt Initialize}
- * and {\tt Assemble} always appear in a matched set, with
- * Initialize preceding Assemble. Values can only be set in
- * between a call to Initialize and Assemble.
- * 
- */
-
-int32_t
-bHYPRE_StructVector_Assemble(
-  /* in */ bHYPRE_StructVector self)
-{
-  return (*self->d_epv->f_Assemble)(
-    self);
-}
-
-/*
- * Method:  SetGrid[]
- */
-
-int32_t
-bHYPRE_StructVector_SetGrid(
-  /* in */ bHYPRE_StructVector self,
-  /* in */ bHYPRE_StructGrid grid)
-{
-  return (*self->d_epv->f_SetGrid)(
-    self,
-    grid);
-}
-
-/*
- * Method:  SetNumGhost[]
- */
-
-int32_t
-bHYPRE_StructVector_SetNumGhost(
-  /* in */ bHYPRE_StructVector self,
-  /* in rarray[dim2] */ int32_t* num_ghost,
-  /* in */ int32_t dim2)
-{
-  int32_t num_ghost_lower[1], num_ghost_upper[1], num_ghost_stride[1]; 
-  struct sidl_int__array num_ghost_real;
-  struct sidl_int__array*num_ghost_tmp = &num_ghost_real;
-  num_ghost_upper[0] = dim2-1;
-  sidl_int__array_init(num_ghost, num_ghost_tmp, 1, num_ghost_lower,
-    num_ghost_upper, num_ghost_stride);
-  return (*self->d_epv->f_SetNumGhost)(
-    self,
-    num_ghost_tmp);
-}
-
-/*
- * Method:  SetValue[]
- */
-
-int32_t
-bHYPRE_StructVector_SetValue(
-  /* in */ bHYPRE_StructVector self,
-  /* in rarray[dim] */ int32_t* grid_index,
-  /* in */ int32_t dim,
-  /* in */ double value)
-{
-  int32_t grid_index_lower[1], grid_index_upper[1], grid_index_stride[1]; 
-  struct sidl_int__array grid_index_real;
-  struct sidl_int__array*grid_index_tmp = &grid_index_real;
-  grid_index_upper[0] = dim-1;
-  sidl_int__array_init(grid_index, grid_index_tmp, 1, grid_index_lower,
-    grid_index_upper, grid_index_stride);
-  return (*self->d_epv->f_SetValue)(
-    self,
-    grid_index_tmp,
-    value);
-}
-
-/*
- * Method:  SetBoxValues[]
- */
-
-int32_t
-bHYPRE_StructVector_SetBoxValues(
-  /* in */ bHYPRE_StructVector self,
-  /* in rarray[dim] */ int32_t* ilower,
-  /* in rarray[dim] */ int32_t* iupper,
-  /* in */ int32_t dim,
-  /* in rarray[nvalues] */ double* values,
-  /* in */ int32_t nvalues)
-{
-  int32_t ilower_lower[1], ilower_upper[1], ilower_stride[1]; 
-  struct sidl_int__array ilower_real;
-  struct sidl_int__array*ilower_tmp = &ilower_real;
-  int32_t iupper_lower[1], iupper_upper[1], iupper_stride[1]; 
-  struct sidl_int__array iupper_real;
-  struct sidl_int__array*iupper_tmp = &iupper_real;
-  int32_t values_lower[1], values_upper[1], values_stride[1]; 
-  struct sidl_double__array values_real;
-  struct sidl_double__array*values_tmp = &values_real;
-  ilower_upper[0] = dim-1;
-  sidl_int__array_init(ilower, ilower_tmp, 1, ilower_lower, ilower_upper,
-    ilower_stride);
-  iupper_upper[0] = dim-1;
-  sidl_int__array_init(iupper, iupper_tmp, 1, iupper_lower, iupper_upper,
-    iupper_stride);
-  values_upper[0] = nvalues-1;
-  sidl_double__array_init(values, values_tmp, 1, values_lower, values_upper,
-    values_stride);
-  return (*self->d_epv->f_SetBoxValues)(
-    self,
-    ilower_tmp,
-    iupper_tmp,
-    values_tmp);
-}
-
-/*
  * Set {\tt self} to 0.
  * 
  */
@@ -476,6 +334,169 @@ bHYPRE_StructVector_Axpy(
 }
 
 /*
+ * Set the MPI Communicator.  DEPRECATED, Use Create()
+ * 
+ */
+
+int32_t
+bHYPRE_StructVector_SetCommunicator(
+  /* in */ bHYPRE_StructVector self,
+  /* in */ bHYPRE_MPICommunicator mpi_comm)
+{
+  return (*self->d_epv->f_SetCommunicator)(
+    self,
+    mpi_comm);
+}
+
+/*
+ * Prepare an object for setting coefficient values, whether for
+ * the first time or subsequently.
+ * 
+ */
+
+int32_t
+bHYPRE_StructVector_Initialize(
+  /* in */ bHYPRE_StructVector self)
+{
+  return (*self->d_epv->f_Initialize)(
+    self);
+}
+
+/*
+ * Finalize the construction of an object before using, either
+ * for the first time or on subsequent uses. {\tt Initialize}
+ * and {\tt Assemble} always appear in a matched set, with
+ * Initialize preceding Assemble. Values can only be set in
+ * between a call to Initialize and Assemble.
+ * 
+ */
+
+int32_t
+bHYPRE_StructVector_Assemble(
+  /* in */ bHYPRE_StructVector self)
+{
+  return (*self->d_epv->f_Assemble)(
+    self);
+}
+
+/*
+ * Method:  SetGrid[]
+ */
+
+int32_t
+bHYPRE_StructVector_SetGrid(
+  /* in */ bHYPRE_StructVector self,
+  /* in */ bHYPRE_StructGrid grid)
+{
+  return (*self->d_epv->f_SetGrid)(
+    self,
+    grid);
+}
+
+/*
+ * Method:  SetNumGhost[]
+ */
+
+int32_t
+bHYPRE_StructVector_SetNumGhost(
+  /* in */ bHYPRE_StructVector self,
+  /* in */ int32_t* num_ghost,
+  /* in */ int32_t dim2)
+{
+  int32_t num_ghost_lower[1], num_ghost_upper[1], num_ghost_stride[1]; 
+  struct sidl_int__array num_ghost_real;
+  struct sidl_int__array*num_ghost_tmp = &num_ghost_real;
+  num_ghost_upper[0] = dim2-1;
+  sidl_int__array_init(num_ghost, num_ghost_tmp, 1, num_ghost_lower,
+    num_ghost_upper, num_ghost_stride);
+  return (*self->d_epv->f_SetNumGhost)(
+    self,
+    num_ghost_tmp);
+}
+
+/*
+ * Method:  SetValue[]
+ */
+
+int32_t
+bHYPRE_StructVector_SetValue(
+  /* in */ bHYPRE_StructVector self,
+  /* in */ int32_t* grid_index,
+  /* in */ int32_t dim,
+  /* in */ double value)
+{
+  int32_t grid_index_lower[1], grid_index_upper[1], grid_index_stride[1]; 
+  struct sidl_int__array grid_index_real;
+  struct sidl_int__array*grid_index_tmp = &grid_index_real;
+  grid_index_upper[0] = dim-1;
+  sidl_int__array_init(grid_index, grid_index_tmp, 1, grid_index_lower,
+    grid_index_upper, grid_index_stride);
+  return (*self->d_epv->f_SetValue)(
+    self,
+    grid_index_tmp,
+    value);
+}
+
+/*
+ * Method:  SetBoxValues[]
+ */
+
+int32_t
+bHYPRE_StructVector_SetBoxValues(
+  /* in */ bHYPRE_StructVector self,
+  /* in */ int32_t* ilower,
+  /* in */ int32_t* iupper,
+  /* in */ int32_t dim,
+  /* in */ double* values,
+  /* in */ int32_t nvalues)
+{
+  int32_t ilower_lower[1], ilower_upper[1], ilower_stride[1]; 
+  struct sidl_int__array ilower_real;
+  struct sidl_int__array*ilower_tmp = &ilower_real;
+  int32_t iupper_lower[1], iupper_upper[1], iupper_stride[1]; 
+  struct sidl_int__array iupper_real;
+  struct sidl_int__array*iupper_tmp = &iupper_real;
+  int32_t values_lower[1], values_upper[1], values_stride[1]; 
+  struct sidl_double__array values_real;
+  struct sidl_double__array*values_tmp = &values_real;
+  ilower_upper[0] = dim-1;
+  sidl_int__array_init(ilower, ilower_tmp, 1, ilower_lower, ilower_upper,
+    ilower_stride);
+  iupper_upper[0] = dim-1;
+  sidl_int__array_init(iupper, iupper_tmp, 1, iupper_lower, iupper_upper,
+    iupper_stride);
+  values_upper[0] = nvalues-1;
+  sidl_double__array_init(values, values_tmp, 1, values_lower, values_upper,
+    values_stride);
+  return (*self->d_epv->f_SetBoxValues)(
+    self,
+    ilower_tmp,
+    iupper_tmp,
+    values_tmp);
+}
+
+void
+bHYPRE_StructVector_Create__sexec(
+        struct sidl_io_Deserializer__object* inArgs,
+        struct sidl_io_Serializer__object* outArgs) {
+  /* stack space for arguments */
+  bHYPRE_MPICommunicator mpi_comm;
+  bHYPRE_StructGrid grid;
+  bHYPRE_StructVector _retval;
+
+  /* unpack in and inout argments */
+
+  /* make the call */
+  _retval = (_getSEPV()->f_Create)(
+    mpi_comm,
+    grid);
+
+  /* pack return value */
+  /* pack out and inout argments */
+
+}
+
+/*
  * Cast method for interface and class type conversions.
  */
 
@@ -536,6 +557,36 @@ bHYPRE_StructVector__exec(
   outArgs);
 }
 
+struct bHYPRE_StructVector__smethod {
+  const char *d_name;
+  void (*d_func)(struct sidl_io_Deserializer__object *,
+    struct sidl_io_Serializer__object *);
+};
+
+void
+bHYPRE_StructVector__sexec(
+        const char* methodName,
+        struct sidl_io_Deserializer__object* inArgs,
+        struct sidl_io_Serializer__object* outArgs ) { 
+  static const struct bHYPRE_StructVector__smethod s_methods[] = {
+    { "Create", bHYPRE_StructVector_Create__sexec }
+  };
+  int i, cmp, l = 0;
+  int u = sizeof(s_methods)/sizeof(struct bHYPRE_StructVector__smethod);
+  if (methodName) {
+    /* Use binary search to locate method */
+    while (l < u) {
+      i = (l + u) >> 1;
+      if (!(cmp=strcmp(methodName, s_methods[i].d_name))) {
+        (s_methods[i].d_func)(inArgs, outArgs);
+        return;
+      }
+      else if (cmp < 0) u = i;
+      else l = i + 1;
+    }
+  }
+  /* TODO: add code for method not found */
+}
 /*
  * Get the URL of the Implementation of this object (for RMI)
  */
@@ -1143,6 +1194,203 @@ remote_bHYPRE_StructVector_getClassInfo(
   return 0;
 }
 
+/* REMOTE METHOD STUB:Clear */
+static int32_t
+remote_bHYPRE_StructVector_Clear(
+  /* in */ struct bHYPRE_StructVector__object* self /* TLD */)
+{
+  sidl_BaseInterface _ex = NULL;
+  sidl_BaseInterface *_ex2 =&_ex;
+  /* initialize a new invocation */
+  sidl_rmi_InstanceHandle _conn = (sidl_rmi_InstanceHandle)self->d_data;
+  sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
+    "Clear", _ex2 );
+  sidl_rmi_Response _rsvp = NULL;
+  int32_t _retval;
+
+  /* pack in and inout arguments */
+
+  /* send actual RMI request */
+  _rsvp = sidl_rmi_Invocation_invokeMethod(_inv,_ex2);
+
+  /* extract return value */
+  sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval, _ex2);
+
+  /* unpack out and inout arguments */
+
+  /* cleanup and return */
+  sidl_rmi_Response_done(_rsvp, _ex2);
+  sidl_rmi_Invocation_deleteRef(_inv);
+  sidl_rmi_Response_deleteRef(_rsvp);
+  return _retval;
+}
+
+/* REMOTE METHOD STUB:Copy */
+static int32_t
+remote_bHYPRE_StructVector_Copy(
+  /* in */ struct bHYPRE_StructVector__object* self /* TLD */,
+  /* in */ struct bHYPRE_Vector__object* x)
+{
+  sidl_BaseInterface _ex = NULL;
+  sidl_BaseInterface *_ex2 =&_ex;
+  /* initialize a new invocation */
+  sidl_rmi_InstanceHandle _conn = (sidl_rmi_InstanceHandle)self->d_data;
+  sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
+    "Copy", _ex2 );
+  sidl_rmi_Response _rsvp = NULL;
+  int32_t _retval;
+
+  /* pack in and inout arguments */
+
+  /* send actual RMI request */
+  _rsvp = sidl_rmi_Invocation_invokeMethod(_inv,_ex2);
+
+  /* extract return value */
+  sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval, _ex2);
+
+  /* unpack out and inout arguments */
+
+  /* cleanup and return */
+  sidl_rmi_Response_done(_rsvp, _ex2);
+  sidl_rmi_Invocation_deleteRef(_inv);
+  sidl_rmi_Response_deleteRef(_rsvp);
+  return _retval;
+}
+
+/* REMOTE METHOD STUB:Clone */
+static int32_t
+remote_bHYPRE_StructVector_Clone(
+  /* in */ struct bHYPRE_StructVector__object* self /* TLD */,
+  /* out */ struct bHYPRE_Vector__object** x)
+{
+  sidl_BaseInterface _ex = NULL;
+  sidl_BaseInterface *_ex2 =&_ex;
+  /* initialize a new invocation */
+  sidl_rmi_InstanceHandle _conn = (sidl_rmi_InstanceHandle)self->d_data;
+  sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
+    "Clone", _ex2 );
+  sidl_rmi_Response _rsvp = NULL;
+  int32_t _retval;
+
+  /* pack in and inout arguments */
+
+  /* send actual RMI request */
+  _rsvp = sidl_rmi_Invocation_invokeMethod(_inv,_ex2);
+
+  /* extract return value */
+  sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval, _ex2);
+
+  /* unpack out and inout arguments */
+  sidl_rmi_Response_unpackString( _rsvp, "x", x, _ex2);
+
+  /* cleanup and return */
+  sidl_rmi_Response_done(_rsvp, _ex2);
+  sidl_rmi_Invocation_deleteRef(_inv);
+  sidl_rmi_Response_deleteRef(_rsvp);
+  return _retval;
+}
+
+/* REMOTE METHOD STUB:Scale */
+static int32_t
+remote_bHYPRE_StructVector_Scale(
+  /* in */ struct bHYPRE_StructVector__object* self /* TLD */,
+  /* in */ double a)
+{
+  sidl_BaseInterface _ex = NULL;
+  sidl_BaseInterface *_ex2 =&_ex;
+  /* initialize a new invocation */
+  sidl_rmi_InstanceHandle _conn = (sidl_rmi_InstanceHandle)self->d_data;
+  sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
+    "Scale", _ex2 );
+  sidl_rmi_Response _rsvp = NULL;
+  int32_t _retval;
+
+  /* pack in and inout arguments */
+  sidl_rmi_Invocation_packDouble( _inv, "a", a, _ex2);
+
+  /* send actual RMI request */
+  _rsvp = sidl_rmi_Invocation_invokeMethod(_inv,_ex2);
+
+  /* extract return value */
+  sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval, _ex2);
+
+  /* unpack out and inout arguments */
+
+  /* cleanup and return */
+  sidl_rmi_Response_done(_rsvp, _ex2);
+  sidl_rmi_Invocation_deleteRef(_inv);
+  sidl_rmi_Response_deleteRef(_rsvp);
+  return _retval;
+}
+
+/* REMOTE METHOD STUB:Dot */
+static int32_t
+remote_bHYPRE_StructVector_Dot(
+  /* in */ struct bHYPRE_StructVector__object* self /* TLD */,
+  /* in */ struct bHYPRE_Vector__object* x,
+  /* out */ double* d)
+{
+  sidl_BaseInterface _ex = NULL;
+  sidl_BaseInterface *_ex2 =&_ex;
+  /* initialize a new invocation */
+  sidl_rmi_InstanceHandle _conn = (sidl_rmi_InstanceHandle)self->d_data;
+  sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
+    "Dot", _ex2 );
+  sidl_rmi_Response _rsvp = NULL;
+  int32_t _retval;
+
+  /* pack in and inout arguments */
+
+  /* send actual RMI request */
+  _rsvp = sidl_rmi_Invocation_invokeMethod(_inv,_ex2);
+
+  /* extract return value */
+  sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval, _ex2);
+
+  /* unpack out and inout arguments */
+  sidl_rmi_Response_unpackDouble( _rsvp, "d", d, _ex2);
+
+  /* cleanup and return */
+  sidl_rmi_Response_done(_rsvp, _ex2);
+  sidl_rmi_Invocation_deleteRef(_inv);
+  sidl_rmi_Response_deleteRef(_rsvp);
+  return _retval;
+}
+
+/* REMOTE METHOD STUB:Axpy */
+static int32_t
+remote_bHYPRE_StructVector_Axpy(
+  /* in */ struct bHYPRE_StructVector__object* self /* TLD */,
+  /* in */ double a,
+  /* in */ struct bHYPRE_Vector__object* x)
+{
+  sidl_BaseInterface _ex = NULL;
+  sidl_BaseInterface *_ex2 =&_ex;
+  /* initialize a new invocation */
+  sidl_rmi_InstanceHandle _conn = (sidl_rmi_InstanceHandle)self->d_data;
+  sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
+    "Axpy", _ex2 );
+  sidl_rmi_Response _rsvp = NULL;
+  int32_t _retval;
+
+  /* pack in and inout arguments */
+  sidl_rmi_Invocation_packDouble( _inv, "a", a, _ex2);
+
+  /* send actual RMI request */
+  _rsvp = sidl_rmi_Invocation_invokeMethod(_inv,_ex2);
+
+  /* extract return value */
+  sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval, _ex2);
+
+  /* unpack out and inout arguments */
+
+  /* cleanup and return */
+  sidl_rmi_Response_done(_rsvp, _ex2);
+  sidl_rmi_Invocation_deleteRef(_inv);
+  sidl_rmi_Response_deleteRef(_rsvp);
+  return _retval;
+}
+
 /* REMOTE METHOD STUB:SetCommunicator */
 static int32_t
 remote_bHYPRE_StructVector_SetCommunicator(
@@ -1277,7 +1525,7 @@ remote_bHYPRE_StructVector_SetGrid(
 static int32_t
 remote_bHYPRE_StructVector_SetNumGhost(
   /* in */ struct bHYPRE_StructVector__object* self /* TLD */,
-  /* in rarray[dim2] */ struct sidl_int__array* num_ghost)
+  /* in */ struct sidl_int__array* num_ghost)
 {
   sidl_BaseInterface _ex = NULL;
   sidl_BaseInterface *_ex2 =&_ex;
@@ -1309,7 +1557,7 @@ remote_bHYPRE_StructVector_SetNumGhost(
 static int32_t
 remote_bHYPRE_StructVector_SetValue(
   /* in */ struct bHYPRE_StructVector__object* self /* TLD */,
-  /* in rarray[dim] */ struct sidl_int__array* grid_index,
+  /* in */ struct sidl_int__array* grid_index,
   /* in */ double value)
 {
   sidl_BaseInterface _ex = NULL;
@@ -1343,9 +1591,9 @@ remote_bHYPRE_StructVector_SetValue(
 static int32_t
 remote_bHYPRE_StructVector_SetBoxValues(
   /* in */ struct bHYPRE_StructVector__object* self /* TLD */,
-  /* in rarray[dim] */ struct sidl_int__array* ilower,
-  /* in rarray[dim] */ struct sidl_int__array* iupper,
-  /* in rarray[nvalues] */ struct sidl_double__array* values)
+  /* in */ struct sidl_int__array* ilower,
+  /* in */ struct sidl_int__array* iupper,
+  /* in */ struct sidl_double__array* values)
 {
   sidl_BaseInterface _ex = NULL;
   sidl_BaseInterface *_ex2 =&_ex;
@@ -1357,208 +1605,6 @@ remote_bHYPRE_StructVector_SetBoxValues(
   int32_t _retval;
 
   /* pack in and inout arguments */
-
-  /* send actual RMI request */
-  _rsvp = sidl_rmi_Invocation_invokeMethod(_inv,_ex2);
-
-  /* extract return value */
-  sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval, _ex2);
-
-  /* unpack out and inout arguments */
-
-  /* cleanup and return */
-  sidl_rmi_Response_done(_rsvp, _ex2);
-  sidl_rmi_Invocation_deleteRef(_inv);
-  sidl_rmi_Response_deleteRef(_rsvp);
-  return _retval;
-}
-
-/* REMOTE METHOD STUB:Clear */
-static int32_t
-remote_bHYPRE_StructVector_Clear(
-  /* in */ struct bHYPRE_StructVector__object* self /* TLD */)
-{
-  sidl_BaseInterface _ex = NULL;
-  sidl_BaseInterface *_ex2 =&_ex;
-  /* initialize a new invocation */
-  sidl_rmi_InstanceHandle _conn = (sidl_rmi_InstanceHandle)self->d_data;
-  sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
-    "Clear", _ex2 );
-  sidl_rmi_Response _rsvp = NULL;
-  int32_t _retval;
-
-  /* pack in and inout arguments */
-
-  /* send actual RMI request */
-  _rsvp = sidl_rmi_Invocation_invokeMethod(_inv,_ex2);
-
-  /* extract return value */
-  sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval, _ex2);
-
-  /* unpack out and inout arguments */
-
-  /* cleanup and return */
-  sidl_rmi_Response_done(_rsvp, _ex2);
-  sidl_rmi_Invocation_deleteRef(_inv);
-  sidl_rmi_Response_deleteRef(_rsvp);
-  return _retval;
-}
-
-/* REMOTE METHOD STUB:Copy */
-static int32_t
-remote_bHYPRE_StructVector_Copy(
-  /* in */ struct bHYPRE_StructVector__object* self /* TLD */,
-  /* in */ struct bHYPRE_Vector__object* x)
-{
-  sidl_BaseInterface _ex = NULL;
-  sidl_BaseInterface *_ex2 =&_ex;
-  /* initialize a new invocation */
-  sidl_rmi_InstanceHandle _conn = (sidl_rmi_InstanceHandle)self->d_data;
-  sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
-    "Copy", _ex2 );
-  sidl_rmi_Response _rsvp = NULL;
-  int32_t _retval;
-
-  /* pack in and inout arguments */
-  sidl_rmi_Invocation_packString( _inv, "x", bHYPRE_Vector__getURL(x), _ex2);
-
-  /* send actual RMI request */
-  _rsvp = sidl_rmi_Invocation_invokeMethod(_inv,_ex2);
-
-  /* extract return value */
-  sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval, _ex2);
-
-  /* unpack out and inout arguments */
-
-  /* cleanup and return */
-  sidl_rmi_Response_done(_rsvp, _ex2);
-  sidl_rmi_Invocation_deleteRef(_inv);
-  sidl_rmi_Response_deleteRef(_rsvp);
-  return _retval;
-}
-
-/* REMOTE METHOD STUB:Clone */
-static int32_t
-remote_bHYPRE_StructVector_Clone(
-  /* in */ struct bHYPRE_StructVector__object* self /* TLD */,
-  /* out */ struct bHYPRE_Vector__object** x)
-{
-  sidl_BaseInterface _ex = NULL;
-  sidl_BaseInterface *_ex2 =&_ex;
-  /* initialize a new invocation */
-  sidl_rmi_InstanceHandle _conn = (sidl_rmi_InstanceHandle)self->d_data;
-  sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
-    "Clone", _ex2 );
-  sidl_rmi_Response _rsvp = NULL;
-  char* x_str= NULL;
-  int32_t _retval;
-
-  /* pack in and inout arguments */
-
-  /* send actual RMI request */
-  _rsvp = sidl_rmi_Invocation_invokeMethod(_inv,_ex2);
-
-  /* extract return value */
-  sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval, _ex2);
-
-  /* unpack out and inout arguments */
-  sidl_rmi_Response_unpackString( _rsvp, "x", &x_str, _ex2);
-  bHYPRE_Vector__connect(x_str, _ex2);
-
-  /* cleanup and return */
-  sidl_rmi_Response_done(_rsvp, _ex2);
-  sidl_rmi_Invocation_deleteRef(_inv);
-  sidl_rmi_Response_deleteRef(_rsvp);
-  return _retval;
-}
-
-/* REMOTE METHOD STUB:Scale */
-static int32_t
-remote_bHYPRE_StructVector_Scale(
-  /* in */ struct bHYPRE_StructVector__object* self /* TLD */,
-  /* in */ double a)
-{
-  sidl_BaseInterface _ex = NULL;
-  sidl_BaseInterface *_ex2 =&_ex;
-  /* initialize a new invocation */
-  sidl_rmi_InstanceHandle _conn = (sidl_rmi_InstanceHandle)self->d_data;
-  sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
-    "Scale", _ex2 );
-  sidl_rmi_Response _rsvp = NULL;
-  int32_t _retval;
-
-  /* pack in and inout arguments */
-  sidl_rmi_Invocation_packDouble( _inv, "a", a, _ex2);
-
-  /* send actual RMI request */
-  _rsvp = sidl_rmi_Invocation_invokeMethod(_inv,_ex2);
-
-  /* extract return value */
-  sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval, _ex2);
-
-  /* unpack out and inout arguments */
-
-  /* cleanup and return */
-  sidl_rmi_Response_done(_rsvp, _ex2);
-  sidl_rmi_Invocation_deleteRef(_inv);
-  sidl_rmi_Response_deleteRef(_rsvp);
-  return _retval;
-}
-
-/* REMOTE METHOD STUB:Dot */
-static int32_t
-remote_bHYPRE_StructVector_Dot(
-  /* in */ struct bHYPRE_StructVector__object* self /* TLD */,
-  /* in */ struct bHYPRE_Vector__object* x,
-  /* out */ double* d)
-{
-  sidl_BaseInterface _ex = NULL;
-  sidl_BaseInterface *_ex2 =&_ex;
-  /* initialize a new invocation */
-  sidl_rmi_InstanceHandle _conn = (sidl_rmi_InstanceHandle)self->d_data;
-  sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
-    "Dot", _ex2 );
-  sidl_rmi_Response _rsvp = NULL;
-  int32_t _retval;
-
-  /* pack in and inout arguments */
-  sidl_rmi_Invocation_packString( _inv, "x", bHYPRE_Vector__getURL(x), _ex2);
-
-  /* send actual RMI request */
-  _rsvp = sidl_rmi_Invocation_invokeMethod(_inv,_ex2);
-
-  /* extract return value */
-  sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval, _ex2);
-
-  /* unpack out and inout arguments */
-  sidl_rmi_Response_unpackDouble( _rsvp, "d", d, _ex2);
-
-  /* cleanup and return */
-  sidl_rmi_Response_done(_rsvp, _ex2);
-  sidl_rmi_Invocation_deleteRef(_inv);
-  sidl_rmi_Response_deleteRef(_rsvp);
-  return _retval;
-}
-
-/* REMOTE METHOD STUB:Axpy */
-static int32_t
-remote_bHYPRE_StructVector_Axpy(
-  /* in */ struct bHYPRE_StructVector__object* self /* TLD */,
-  /* in */ double a,
-  /* in */ struct bHYPRE_Vector__object* x)
-{
-  sidl_BaseInterface _ex = NULL;
-  sidl_BaseInterface *_ex2 =&_ex;
-  /* initialize a new invocation */
-  sidl_rmi_InstanceHandle _conn = (sidl_rmi_InstanceHandle)self->d_data;
-  sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
-    "Axpy", _ex2 );
-  sidl_rmi_Response _rsvp = NULL;
-  int32_t _retval;
-
-  /* pack in and inout arguments */
-  sidl_rmi_Invocation_packDouble( _inv, "a", a, _ex2);
-  sidl_rmi_Invocation_packString( _inv, "x", bHYPRE_Vector__getURL(x), _ex2);
 
   /* send actual RMI request */
   _rsvp = sidl_rmi_Invocation_invokeMethod(_inv,_ex2);
@@ -1602,6 +1648,12 @@ static void bHYPRE_StructVector__init_remote_epv(void)
   epv->f_queryInt             = remote_bHYPRE_StructVector_queryInt;
   epv->f_isType               = remote_bHYPRE_StructVector_isType;
   epv->f_getClassInfo         = remote_bHYPRE_StructVector_getClassInfo;
+  epv->f_Clear                = remote_bHYPRE_StructVector_Clear;
+  epv->f_Copy                 = remote_bHYPRE_StructVector_Copy;
+  epv->f_Clone                = remote_bHYPRE_StructVector_Clone;
+  epv->f_Scale                = remote_bHYPRE_StructVector_Scale;
+  epv->f_Dot                  = remote_bHYPRE_StructVector_Dot;
+  epv->f_Axpy                 = remote_bHYPRE_StructVector_Axpy;
   epv->f_SetCommunicator      = remote_bHYPRE_StructVector_SetCommunicator;
   epv->f_Initialize           = remote_bHYPRE_StructVector_Initialize;
   epv->f_Assemble             = remote_bHYPRE_StructVector_Assemble;
@@ -1609,12 +1661,6 @@ static void bHYPRE_StructVector__init_remote_epv(void)
   epv->f_SetNumGhost          = remote_bHYPRE_StructVector_SetNumGhost;
   epv->f_SetValue             = remote_bHYPRE_StructVector_SetValue;
   epv->f_SetBoxValues         = remote_bHYPRE_StructVector_SetBoxValues;
-  epv->f_Clear                = remote_bHYPRE_StructVector_Clear;
-  epv->f_Copy                 = remote_bHYPRE_StructVector_Copy;
-  epv->f_Clone                = remote_bHYPRE_StructVector_Clone;
-  epv->f_Scale                = remote_bHYPRE_StructVector_Scale;
-  epv->f_Dot                  = remote_bHYPRE_StructVector_Dot;
-  epv->f_Axpy                 = remote_bHYPRE_StructVector_Axpy;
 
   e0->f__cast           = (void* (*)(void*,const char*)) epv->f__cast;
   e0->f__delete         = (void (*)(void*)) epv->f__delete;

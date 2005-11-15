@@ -2,12 +2,12 @@
  * File:          bHYPRE_SStructMatrix.h
  * Symbol:        bHYPRE.SStructMatrix-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.10.10
+ * Babel Version: 0.10.4
  * Description:   Client-side glue code for bHYPRE.SStructMatrix
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.10
+ * babel-version = 0.10.4
  */
 
 #ifndef included_bHYPRE_SStructMatrix_h
@@ -195,12 +195,12 @@ int32_t
 bHYPRE_SStructMatrix_SetValues(
   /* in */ bHYPRE_SStructMatrix self,
   /* in */ int32_t part,
-  /* in rarray[dim] */ int32_t* index,
+  /* in */ int32_t* index,
   /* in */ int32_t dim,
   /* in */ int32_t var,
   /* in */ int32_t nentries,
-  /* in rarray[nentries] */ int32_t* entries,
-  /* in rarray[nentries] */ double* values);
+  /* in */ int32_t* entries,
+  /* in */ double* values);
 
 /**
  * Set matrix coefficients a box at a time.
@@ -224,13 +224,13 @@ int32_t
 bHYPRE_SStructMatrix_SetBoxValues(
   /* in */ bHYPRE_SStructMatrix self,
   /* in */ int32_t part,
-  /* in rarray[dim] */ int32_t* ilower,
-  /* in rarray[dim] */ int32_t* iupper,
+  /* in */ int32_t* ilower,
+  /* in */ int32_t* iupper,
   /* in */ int32_t dim,
   /* in */ int32_t var,
   /* in */ int32_t nentries,
-  /* in rarray[nentries] */ int32_t* entries,
-  /* in rarray[nvalues] */ double* values,
+  /* in */ int32_t* entries,
+  /* in */ double* values,
   /* in */ int32_t nvalues);
 
 /**
@@ -254,12 +254,12 @@ int32_t
 bHYPRE_SStructMatrix_AddToValues(
   /* in */ bHYPRE_SStructMatrix self,
   /* in */ int32_t part,
-  /* in rarray[dim] */ int32_t* index,
+  /* in */ int32_t* index,
   /* in */ int32_t dim,
   /* in */ int32_t var,
   /* in */ int32_t nentries,
-  /* in rarray[nentries] */ int32_t* entries,
-  /* in rarray[nentries] */ double* values);
+  /* in */ int32_t* entries,
+  /* in */ double* values);
 
 /**
  * Add to matrix coefficients a box at a time.
@@ -281,13 +281,13 @@ int32_t
 bHYPRE_SStructMatrix_AddToBoxValues(
   /* in */ bHYPRE_SStructMatrix self,
   /* in */ int32_t part,
-  /* in rarray[dim] */ int32_t* ilower,
-  /* in rarray[dim] */ int32_t* iupper,
+  /* in */ int32_t* ilower,
+  /* in */ int32_t* iupper,
   /* in */ int32_t dim,
   /* in */ int32_t var,
   /* in */ int32_t nentries,
-  /* in rarray[nentries] */ int32_t* entries,
-  /* in rarray[nvalues] */ double* values,
+  /* in */ int32_t* entries,
+  /* in */ double* values,
   /* in */ int32_t nvalues);
 
 /**
@@ -381,7 +381,7 @@ int32_t
 bHYPRE_SStructMatrix_SetIntArray1Parameter(
   /* in */ bHYPRE_SStructMatrix self,
   /* in */ const char* name,
-  /* in rarray[nvalues] */ int32_t* value,
+  /* in */ int32_t* value,
   /* in */ int32_t nvalues);
 
 /**
@@ -392,7 +392,7 @@ int32_t
 bHYPRE_SStructMatrix_SetIntArray2Parameter(
   /* in */ bHYPRE_SStructMatrix self,
   /* in */ const char* name,
-  /* in array<int,2,column-major> */ struct sidl_int__array* value);
+  /* in */ struct sidl_int__array* value);
 
 /**
  * Set the double 1-D array parameter associated with {\tt name}.
@@ -402,7 +402,7 @@ int32_t
 bHYPRE_SStructMatrix_SetDoubleArray1Parameter(
   /* in */ bHYPRE_SStructMatrix self,
   /* in */ const char* name,
-  /* in rarray[nvalues] */ double* value,
+  /* in */ double* value,
   /* in */ int32_t nvalues);
 
 /**
@@ -413,7 +413,7 @@ int32_t
 bHYPRE_SStructMatrix_SetDoubleArray2Parameter(
   /* in */ bHYPRE_SStructMatrix self,
   /* in */ const char* name,
-  /* in array<double,2,column-major> */ struct sidl_double__array* value);
+  /* in */ struct sidl_double__array* value);
 
 /**
  * Set the int parameter associated with {\tt name}.
@@ -477,6 +477,14 @@ bHYPRE_SStructMatrix__cast2(
 void
 bHYPRE_SStructMatrix__exec(
   /* in */ bHYPRE_SStructMatrix self,
+  /* in */ const char* methodName,
+  /* in */ sidl_io_Deserializer inArgs,
+  /* in */ sidl_io_Serializer outArgs);
+/**
+ * static Exec method for reflexity.
+ */
+void
+bHYPRE_SStructMatrix__sexec(
   /* in */ const char* methodName,
   /* in */ sidl_io_Deserializer inArgs,
   /* in */ sidl_io_Serializer outArgs);

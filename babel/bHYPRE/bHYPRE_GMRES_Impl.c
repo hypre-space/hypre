@@ -2,12 +2,12 @@
  * File:          bHYPRE_GMRES_Impl.c
  * Symbol:        bHYPRE.GMRES-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.10.10
+ * Babel Version: 0.10.4
  * Description:   Server-side implementation for bHYPRE.GMRES
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.10.10
+ * babel-version = 0.10.4
  */
 
 /*
@@ -454,7 +454,7 @@ int32_t
 impl_bHYPRE_GMRES_SetIntArray1Parameter(
   /* in */ bHYPRE_GMRES self,
   /* in */ const char* name,
-  /* in rarray[nvalues] */ int32_t* value,
+  /* in */ int32_t* value,
   /* in */ int32_t nvalues)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.GMRES.SetIntArray1Parameter) */
@@ -478,7 +478,7 @@ int32_t
 impl_bHYPRE_GMRES_SetIntArray2Parameter(
   /* in */ bHYPRE_GMRES self,
   /* in */ const char* name,
-  /* in array<int,2,column-major> */ struct sidl_int__array* value)
+  /* in */ struct sidl_int__array* value)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.GMRES.SetIntArray2Parameter) */
   /* Insert the implementation of the SetIntArray2Parameter method here... */
@@ -501,7 +501,7 @@ int32_t
 impl_bHYPRE_GMRES_SetDoubleArray1Parameter(
   /* in */ bHYPRE_GMRES self,
   /* in */ const char* name,
-  /* in rarray[nvalues] */ double* value,
+  /* in */ double* value,
   /* in */ int32_t nvalues)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.GMRES.SetDoubleArray1Parameter) */
@@ -525,7 +525,7 @@ int32_t
 impl_bHYPRE_GMRES_SetDoubleArray2Parameter(
   /* in */ bHYPRE_GMRES self,
   /* in */ const char* name,
-  /* in array<double,2,column-major> */ struct sidl_double__array* value)
+  /* in */ struct sidl_double__array* value)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.GMRES.SetDoubleArray2Parameter) */
   /* Insert the implementation of the SetDoubleArray2Parameter method here... */

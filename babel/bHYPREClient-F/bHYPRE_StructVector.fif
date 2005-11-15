@@ -2,12 +2,12 @@ C
 C       File:          bHYPRE_StructVector_Impl.f
 C       Symbol:        bHYPRE.StructVector-v1.0.0
 C       Symbol Type:   class
-C       Babel Version: 0.10.10
+C       Babel Version: 0.10.4
 C       Description:   Client-side documentation text for bHYPRE.StructVector
 C       
 C       WARNING: Automatically generated; changes will be lost
 C       
-C       babel-version = 0.10.10
+C       babel-version = 0.10.4
 C       
 
         THIS FILE IS DOCUMENTATION - DO NOT COMPILE IT!
@@ -179,6 +179,108 @@ C       out bHYPRE.StructVector retval
 
 
 C       
+C       Set {\tt self} to 0.
+C       
+C       
+
+        subroutine bHYPRE_StructVector_Clear_f(self, retval)
+        implicit none
+C       in bHYPRE.StructVector self
+        integer*8 self
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Copy x into {\tt self}.
+C       
+C       
+
+        subroutine bHYPRE_StructVector_Copy_f(self, x, retval)
+        implicit none
+C       in bHYPRE.StructVector self
+        integer*8 self
+C       in bHYPRE.Vector x
+        integer*8 x
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Create an {\tt x} compatible with {\tt self}.
+C       
+C       NOTE: When this method is used in an inherited class, the
+C       cloned {\tt Vector} object can be cast to an object with the
+C       inherited class type.
+C       
+C       
+
+        subroutine bHYPRE_StructVector_Clone_f(self, x, retval)
+        implicit none
+C       in bHYPRE.StructVector self
+        integer*8 self
+C       out bHYPRE.Vector x
+        integer*8 x
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Scale {\tt self} by {\tt a}.
+C       
+C       
+
+        subroutine bHYPRE_StructVector_Scale_f(self, a, retval)
+        implicit none
+C       in bHYPRE.StructVector self
+        integer*8 self
+C       in double a
+        double precision a
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Compute {\tt d}, the inner-product of {\tt self} and {\tt x}.
+C       
+C       
+
+        subroutine bHYPRE_StructVector_Dot_f(self, x, d, retval)
+        implicit none
+C       in bHYPRE.StructVector self
+        integer*8 self
+C       in bHYPRE.Vector x
+        integer*8 x
+C       out double d
+        double precision d
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Add {\tt a}*{\tt x} to {\tt self}.
+C       
+C       
+
+        subroutine bHYPRE_StructVector_Axpy_f(self, a, x, retval)
+        implicit none
+C       in bHYPRE.StructVector self
+        integer*8 self
+C       in double a
+        double precision a
+C       in bHYPRE.Vector x
+        integer*8 x
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
 C       Set the MPI Communicator.  DEPRECATED, Use Create()
 C       
 C       
@@ -294,106 +396,4 @@ C       in rarray<int> iupper(dim)
         integer*4 iupper(0:dim-1)
 C       in rarray<double> values(nvalues)
         double precision values(0:nvalues-1)
-        end
-
-
-C       
-C       Set {\tt self} to 0.
-C       
-C       
-
-        subroutine bHYPRE_StructVector_Clear_f(self, retval)
-        implicit none
-C       in bHYPRE.StructVector self
-        integer*8 self
-C       out int retval
-        integer*4 retval
-        end
-
-
-C       
-C       Copy x into {\tt self}.
-C       
-C       
-
-        subroutine bHYPRE_StructVector_Copy_f(self, x, retval)
-        implicit none
-C       in bHYPRE.StructVector self
-        integer*8 self
-C       in bHYPRE.Vector x
-        integer*8 x
-C       out int retval
-        integer*4 retval
-        end
-
-
-C       
-C       Create an {\tt x} compatible with {\tt self}.
-C       
-C       NOTE: When this method is used in an inherited class, the
-C       cloned {\tt Vector} object can be cast to an object with the
-C       inherited class type.
-C       
-C       
-
-        subroutine bHYPRE_StructVector_Clone_f(self, x, retval)
-        implicit none
-C       in bHYPRE.StructVector self
-        integer*8 self
-C       out bHYPRE.Vector x
-        integer*8 x
-C       out int retval
-        integer*4 retval
-        end
-
-
-C       
-C       Scale {\tt self} by {\tt a}.
-C       
-C       
-
-        subroutine bHYPRE_StructVector_Scale_f(self, a, retval)
-        implicit none
-C       in bHYPRE.StructVector self
-        integer*8 self
-C       in double a
-        double precision a
-C       out int retval
-        integer*4 retval
-        end
-
-
-C       
-C       Compute {\tt d}, the inner-product of {\tt self} and {\tt x}.
-C       
-C       
-
-        subroutine bHYPRE_StructVector_Dot_f(self, x, d, retval)
-        implicit none
-C       in bHYPRE.StructVector self
-        integer*8 self
-C       in bHYPRE.Vector x
-        integer*8 x
-C       out double d
-        double precision d
-C       out int retval
-        integer*4 retval
-        end
-
-
-C       
-C       Add {\tt a}*{\tt x} to {\tt self}.
-C       
-C       
-
-        subroutine bHYPRE_StructVector_Axpy_f(self, a, x, retval)
-        implicit none
-C       in bHYPRE.StructVector self
-        integer*8 self
-C       in double a
-        double precision a
-C       in bHYPRE.Vector x
-        integer*8 x
-C       out int retval
-        integer*4 retval
         end

@@ -2,12 +2,12 @@
  * File:          bHYPRE_StructVectorView.h
  * Symbol:        bHYPRE.StructVectorView-v1.0.0
  * Symbol Type:   interface
- * Babel Version: 0.10.10
+ * Babel Version: 0.10.4
  * Description:   Client-side glue code for bHYPRE.StructVectorView
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.10
+ * babel-version = 0.10.4
  */
 
 #ifndef included_bHYPRE_StructVectorView_h
@@ -109,7 +109,7 @@ bHYPRE_StructVectorView_SetGrid(
 int32_t
 bHYPRE_StructVectorView_SetNumGhost(
   /* in */ bHYPRE_StructVectorView self,
-  /* in rarray[dim2] */ int32_t* num_ghost,
+  /* in */ int32_t* num_ghost,
   /* in */ int32_t dim2);
 
 /**
@@ -118,7 +118,7 @@ bHYPRE_StructVectorView_SetNumGhost(
 int32_t
 bHYPRE_StructVectorView_SetValue(
   /* in */ bHYPRE_StructVectorView self,
-  /* in rarray[dim] */ int32_t* grid_index,
+  /* in */ int32_t* grid_index,
   /* in */ int32_t dim,
   /* in */ double value);
 
@@ -128,10 +128,10 @@ bHYPRE_StructVectorView_SetValue(
 int32_t
 bHYPRE_StructVectorView_SetBoxValues(
   /* in */ bHYPRE_StructVectorView self,
-  /* in rarray[dim] */ int32_t* ilower,
-  /* in rarray[dim] */ int32_t* iupper,
+  /* in */ int32_t* ilower,
+  /* in */ int32_t* iupper,
   /* in */ int32_t dim,
-  /* in rarray[nvalues] */ double* values,
+  /* in */ double* values,
   /* in */ int32_t nvalues);
 
 /**
@@ -155,6 +155,14 @@ bHYPRE_StructVectorView__cast2(
 void
 bHYPRE_StructVectorView__exec(
   /* in */ bHYPRE_StructVectorView self,
+  /* in */ const char* methodName,
+  /* in */ sidl_io_Deserializer inArgs,
+  /* in */ sidl_io_Serializer outArgs);
+/**
+ * static Exec method for reflexity.
+ */
+void
+bHYPRE_StructVectorView__sexec(
   /* in */ const char* methodName,
   /* in */ sidl_io_Deserializer inArgs,
   /* in */ sidl_io_Serializer outArgs);

@@ -2,12 +2,12 @@
  * File:          bHYPRE_SStructParCSRVector_Impl.c
  * Symbol:        bHYPRE.SStructParCSRVector-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.10.10
+ * Babel Version: 0.10.4
  * Description:   Server-side implementation for bHYPRE.SStructParCSRVector
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.10.10
+ * babel-version = 0.10.4
  */
 
 /*
@@ -393,10 +393,10 @@ int32_t
 impl_bHYPRE_SStructParCSRVector_SetValues(
   /* in */ bHYPRE_SStructParCSRVector self,
   /* in */ int32_t part,
-  /* in rarray[dim] */ int32_t* index,
+  /* in */ int32_t* index,
   /* in */ int32_t dim,
   /* in */ int32_t var,
-  /* in rarray[one] */ double* values,
+  /* in */ double* values,
   /* in */ int32_t one)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructParCSRVector.SetValues) */
@@ -440,11 +440,11 @@ int32_t
 impl_bHYPRE_SStructParCSRVector_SetBoxValues(
   /* in */ bHYPRE_SStructParCSRVector self,
   /* in */ int32_t part,
-  /* in rarray[dim] */ int32_t* ilower,
-  /* in rarray[dim] */ int32_t* iupper,
+  /* in */ int32_t* ilower,
+  /* in */ int32_t* iupper,
   /* in */ int32_t dim,
   /* in */ int32_t var,
-  /* in rarray[nvalues] */ double* values,
+  /* in */ double* values,
   /* in */ int32_t nvalues)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructParCSRVector.SetBoxValues) */
@@ -488,10 +488,10 @@ int32_t
 impl_bHYPRE_SStructParCSRVector_AddToValues(
   /* in */ bHYPRE_SStructParCSRVector self,
   /* in */ int32_t part,
-  /* in rarray[dim] */ int32_t* index,
+  /* in */ int32_t* index,
   /* in */ int32_t dim,
   /* in */ int32_t var,
-  /* in rarray[one] */ double* values,
+  /* in */ double* values,
   /* in */ int32_t one)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructParCSRVector.AddToValues) */
@@ -535,11 +535,11 @@ int32_t
 impl_bHYPRE_SStructParCSRVector_AddToBoxValues(
   /* in */ bHYPRE_SStructParCSRVector self,
   /* in */ int32_t part,
-  /* in rarray[dim] */ int32_t* ilower,
-  /* in rarray[dim] */ int32_t* iupper,
+  /* in */ int32_t* ilower,
+  /* in */ int32_t* iupper,
   /* in */ int32_t dim,
   /* in */ int32_t var,
-  /* in rarray[nvalues] */ double* values,
+  /* in */ double* values,
   /* in */ int32_t nvalues)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructParCSRVector.AddToBoxValues) */
@@ -613,7 +613,7 @@ int32_t
 impl_bHYPRE_SStructParCSRVector_GetValues(
   /* in */ bHYPRE_SStructParCSRVector self,
   /* in */ int32_t part,
-  /* in rarray[dim] */ int32_t* index,
+  /* in */ int32_t* index,
   /* in */ int32_t dim,
   /* in */ int32_t var,
   /* out */ double* value)
@@ -658,11 +658,11 @@ int32_t
 impl_bHYPRE_SStructParCSRVector_GetBoxValues(
   /* in */ bHYPRE_SStructParCSRVector self,
   /* in */ int32_t part,
-  /* in rarray[dim] */ int32_t* ilower,
-  /* in rarray[dim] */ int32_t* iupper,
+  /* in */ int32_t* ilower,
+  /* in */ int32_t* iupper,
   /* in */ int32_t dim,
   /* in */ int32_t var,
-  /* inout rarray[nvalues] */ double* values,
+  /* inout */ double* values,
   /* in */ int32_t nvalues)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructParCSRVector.GetBoxValues) */
@@ -1032,7 +1032,6 @@ impl_bHYPRE_SStructParCSRVector_Axpy(
 
   /* DO-NOT-DELETE splicer.end(bHYPRE.SStructParCSRVector.Axpy) */
 }
-
 /* Babel internal methods, Users should not edit below this line. */
 struct bHYPRE_SStructGrid__object* 
   impl_bHYPRE_SStructParCSRVector_fconnect_bHYPRE_SStructGrid(char* url,

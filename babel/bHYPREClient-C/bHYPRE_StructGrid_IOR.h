@@ -2,12 +2,12 @@
  * File:          bHYPRE_StructGrid_IOR.h
  * Symbol:        bHYPRE.StructGrid-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.10.10
+ * Babel Version: 0.10.4
  * Description:   Intermediate Object Representation for bHYPRE.StructGrid
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.10
+ * babel-version = 0.10.4
  */
 
 #ifndef included_bHYPRE_StructGrid_IOR_h
@@ -124,14 +124,14 @@ struct bHYPRE_StructGrid__epv {
     /* in */ int32_t dim);
   int32_t (*f_SetExtents)(
     /* in */ struct bHYPRE_StructGrid__object* self,
-    /* in rarray[dim] */ struct sidl_int__array* ilower,
-    /* in rarray[dim] */ struct sidl_int__array* iupper);
+    /* in */ struct sidl_int__array* ilower,
+    /* in */ struct sidl_int__array* iupper);
   int32_t (*f_SetPeriodic)(
     /* in */ struct bHYPRE_StructGrid__object* self,
-    /* in rarray[dim] */ struct sidl_int__array* periodic);
+    /* in */ struct sidl_int__array* periodic);
   int32_t (*f_SetNumGhost)(
     /* in */ struct bHYPRE_StructGrid__object* self,
-    /* in rarray[dim2] */ struct sidl_int__array* num_ghost);
+    /* in */ struct sidl_int__array* num_ghost);
   int32_t (*f_Assemble)(
     /* in */ struct bHYPRE_StructGrid__object* self);
 };

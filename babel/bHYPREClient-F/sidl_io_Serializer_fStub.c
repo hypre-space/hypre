@@ -2,7 +2,7 @@
  * File:          sidl_io_Serializer_fStub.c
  * Symbol:        sidl.io.Serializer-v0.9.3
  * Symbol Type:   interface
- * Babel Version: 0.10.10
+ * Babel Version: 0.10.4
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Client-side glue code for sidl.io.Serializer
@@ -32,8 +32,8 @@
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.10
- * xml-url       = /home/painter/babel/share/babel-0.10.10/repository/sidl.io.Serializer-v0.9.3.xml
+ * babel-version = 0.10.4
+ * xml-url       = /home/painter/babel-0.10.4/bin/.././share/repository/sidl.io.Serializer-v0.9.3.xml
  */
 
 /*

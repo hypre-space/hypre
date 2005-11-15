@@ -2,12 +2,12 @@
  * File:          bHYPRE_SStructMatrixView_fStub.c
  * Symbol:        bHYPRE.SStructMatrixView-v1.0.0
  * Symbol Type:   interface
- * Babel Version: 0.10.10
+ * Babel Version: 0.10.4
  * Description:   Client-side glue code for bHYPRE.SStructMatrixView
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.10
+ * babel-version = 0.10.4
  */
 
 /*

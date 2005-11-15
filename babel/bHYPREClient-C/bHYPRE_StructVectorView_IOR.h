@@ -2,12 +2,12 @@
  * File:          bHYPRE_StructVectorView_IOR.h
  * Symbol:        bHYPRE.StructVectorView-v1.0.0
  * Symbol Type:   interface
- * Babel Version: 0.10.10
+ * Babel Version: 0.10.4
  * Description:   Intermediate Object Representation for bHYPRE.StructVectorView
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.10
+ * babel-version = 0.10.4
  */
 
 #ifndef included_bHYPRE_StructVectorView_IOR_h
@@ -93,16 +93,16 @@ struct bHYPRE_StructVectorView__epv {
     /* in */ struct bHYPRE_StructGrid__object* grid);
   int32_t (*f_SetNumGhost)(
     /* in */ void* self,
-    /* in rarray[dim2] */ struct sidl_int__array* num_ghost);
+    /* in */ struct sidl_int__array* num_ghost);
   int32_t (*f_SetValue)(
     /* in */ void* self,
-    /* in rarray[dim] */ struct sidl_int__array* grid_index,
+    /* in */ struct sidl_int__array* grid_index,
     /* in */ double value);
   int32_t (*f_SetBoxValues)(
     /* in */ void* self,
-    /* in rarray[dim] */ struct sidl_int__array* ilower,
-    /* in rarray[dim] */ struct sidl_int__array* iupper,
-    /* in rarray[nvalues] */ struct sidl_double__array* values);
+    /* in */ struct sidl_int__array* ilower,
+    /* in */ struct sidl_int__array* iupper,
+    /* in */ struct sidl_double__array* values);
 };
 
 /*
@@ -194,16 +194,16 @@ struct bHYPRE__StructVectorView__epv {
     /* in */ struct bHYPRE_StructGrid__object* grid);
   int32_t (*f_SetNumGhost)(
     /* in */ struct bHYPRE__StructVectorView__object* self,
-    /* in rarray[dim2] */ struct sidl_int__array* num_ghost);
+    /* in */ struct sidl_int__array* num_ghost);
   int32_t (*f_SetValue)(
     /* in */ struct bHYPRE__StructVectorView__object* self,
-    /* in rarray[dim] */ struct sidl_int__array* grid_index,
+    /* in */ struct sidl_int__array* grid_index,
     /* in */ double value);
   int32_t (*f_SetBoxValues)(
     /* in */ struct bHYPRE__StructVectorView__object* self,
-    /* in rarray[dim] */ struct sidl_int__array* ilower,
-    /* in rarray[dim] */ struct sidl_int__array* iupper,
-    /* in rarray[nvalues] */ struct sidl_double__array* values);
+    /* in */ struct sidl_int__array* ilower,
+    /* in */ struct sidl_int__array* iupper,
+    /* in */ struct sidl_double__array* values);
   /* Methods introduced in bHYPRE._StructVectorView-v1.0 */
 };
 

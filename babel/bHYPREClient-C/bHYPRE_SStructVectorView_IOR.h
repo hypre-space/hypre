@@ -2,12 +2,12 @@
  * File:          bHYPRE_SStructVectorView_IOR.h
  * Symbol:        bHYPRE.SStructVectorView-v1.0.0
  * Symbol Type:   interface
- * Babel Version: 0.10.10
+ * Babel Version: 0.10.4
  * Description:   Intermediate Object Representation for bHYPRE.SStructVectorView
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.10
+ * babel-version = 0.10.4
  */
 
 #ifndef included_bHYPRE_SStructVectorView_IOR_h
@@ -98,44 +98,44 @@ struct bHYPRE_SStructVectorView__epv {
   int32_t (*f_SetValues)(
     /* in */ void* self,
     /* in */ int32_t part,
-    /* in rarray[dim] */ struct sidl_int__array* index,
+    /* in */ struct sidl_int__array* index,
     /* in */ int32_t var,
-    /* in rarray[one] */ struct sidl_double__array* values);
+    /* in */ struct sidl_double__array* values);
   int32_t (*f_SetBoxValues)(
     /* in */ void* self,
     /* in */ int32_t part,
-    /* in rarray[dim] */ struct sidl_int__array* ilower,
-    /* in rarray[dim] */ struct sidl_int__array* iupper,
+    /* in */ struct sidl_int__array* ilower,
+    /* in */ struct sidl_int__array* iupper,
     /* in */ int32_t var,
-    /* in rarray[nvalues] */ struct sidl_double__array* values);
+    /* in */ struct sidl_double__array* values);
   int32_t (*f_AddToValues)(
     /* in */ void* self,
     /* in */ int32_t part,
-    /* in rarray[dim] */ struct sidl_int__array* index,
+    /* in */ struct sidl_int__array* index,
     /* in */ int32_t var,
-    /* in rarray[one] */ struct sidl_double__array* values);
+    /* in */ struct sidl_double__array* values);
   int32_t (*f_AddToBoxValues)(
     /* in */ void* self,
     /* in */ int32_t part,
-    /* in rarray[dim] */ struct sidl_int__array* ilower,
-    /* in rarray[dim] */ struct sidl_int__array* iupper,
+    /* in */ struct sidl_int__array* ilower,
+    /* in */ struct sidl_int__array* iupper,
     /* in */ int32_t var,
-    /* in rarray[nvalues] */ struct sidl_double__array* values);
+    /* in */ struct sidl_double__array* values);
   int32_t (*f_Gather)(
     /* in */ void* self);
   int32_t (*f_GetValues)(
     /* in */ void* self,
     /* in */ int32_t part,
-    /* in rarray[dim] */ struct sidl_int__array* index,
+    /* in */ struct sidl_int__array* index,
     /* in */ int32_t var,
     /* out */ double* value);
   int32_t (*f_GetBoxValues)(
     /* in */ void* self,
     /* in */ int32_t part,
-    /* in rarray[dim] */ struct sidl_int__array* ilower,
-    /* in rarray[dim] */ struct sidl_int__array* iupper,
+    /* in */ struct sidl_int__array* ilower,
+    /* in */ struct sidl_int__array* iupper,
     /* in */ int32_t var,
-    /* inout rarray[nvalues] */ struct sidl_double__array** values);
+    /* inout */ struct sidl_double__array** values);
   int32_t (*f_SetComplex)(
     /* in */ void* self);
   int32_t (*f_Print)(
@@ -241,44 +241,44 @@ struct bHYPRE__SStructVectorView__epv {
   int32_t (*f_SetValues)(
     /* in */ struct bHYPRE__SStructVectorView__object* self,
     /* in */ int32_t part,
-    /* in rarray[dim] */ struct sidl_int__array* index,
+    /* in */ struct sidl_int__array* index,
     /* in */ int32_t var,
-    /* in rarray[one] */ struct sidl_double__array* values);
+    /* in */ struct sidl_double__array* values);
   int32_t (*f_SetBoxValues)(
     /* in */ struct bHYPRE__SStructVectorView__object* self,
     /* in */ int32_t part,
-    /* in rarray[dim] */ struct sidl_int__array* ilower,
-    /* in rarray[dim] */ struct sidl_int__array* iupper,
+    /* in */ struct sidl_int__array* ilower,
+    /* in */ struct sidl_int__array* iupper,
     /* in */ int32_t var,
-    /* in rarray[nvalues] */ struct sidl_double__array* values);
+    /* in */ struct sidl_double__array* values);
   int32_t (*f_AddToValues)(
     /* in */ struct bHYPRE__SStructVectorView__object* self,
     /* in */ int32_t part,
-    /* in rarray[dim] */ struct sidl_int__array* index,
+    /* in */ struct sidl_int__array* index,
     /* in */ int32_t var,
-    /* in rarray[one] */ struct sidl_double__array* values);
+    /* in */ struct sidl_double__array* values);
   int32_t (*f_AddToBoxValues)(
     /* in */ struct bHYPRE__SStructVectorView__object* self,
     /* in */ int32_t part,
-    /* in rarray[dim] */ struct sidl_int__array* ilower,
-    /* in rarray[dim] */ struct sidl_int__array* iupper,
+    /* in */ struct sidl_int__array* ilower,
+    /* in */ struct sidl_int__array* iupper,
     /* in */ int32_t var,
-    /* in rarray[nvalues] */ struct sidl_double__array* values);
+    /* in */ struct sidl_double__array* values);
   int32_t (*f_Gather)(
     /* in */ struct bHYPRE__SStructVectorView__object* self);
   int32_t (*f_GetValues)(
     /* in */ struct bHYPRE__SStructVectorView__object* self,
     /* in */ int32_t part,
-    /* in rarray[dim] */ struct sidl_int__array* index,
+    /* in */ struct sidl_int__array* index,
     /* in */ int32_t var,
     /* out */ double* value);
   int32_t (*f_GetBoxValues)(
     /* in */ struct bHYPRE__SStructVectorView__object* self,
     /* in */ int32_t part,
-    /* in rarray[dim] */ struct sidl_int__array* ilower,
-    /* in rarray[dim] */ struct sidl_int__array* iupper,
+    /* in */ struct sidl_int__array* ilower,
+    /* in */ struct sidl_int__array* iupper,
     /* in */ int32_t var,
-    /* inout rarray[nvalues] */ struct sidl_double__array** values);
+    /* inout */ struct sidl_double__array** values);
   int32_t (*f_SetComplex)(
     /* in */ struct bHYPRE__SStructVectorView__object* self);
   int32_t (*f_Print)(

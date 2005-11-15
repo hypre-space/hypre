@@ -2,12 +2,12 @@
  * File:          bHYPRE_StructMatrixView_Stub.c
  * Symbol:        bHYPRE.StructMatrixView-v1.0.0
  * Symbol Type:   interface
- * Babel Version: 0.10.10
+ * Babel Version: 0.10.4
  * Description:   Client-side glue code for bHYPRE.StructMatrixView
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.10
+ * babel-version = 0.10.4
  */
 
 #include "bHYPRE_StructMatrixView.h"
@@ -240,11 +240,11 @@ bHYPRE_StructMatrixView_SetStencil(
 int32_t
 bHYPRE_StructMatrixView_SetValues(
   /* in */ bHYPRE_StructMatrixView self,
-  /* in rarray[dim] */ int32_t* index,
+  /* in */ int32_t* index,
   /* in */ int32_t dim,
   /* in */ int32_t num_stencil_indices,
-  /* in rarray[num_stencil_indices] */ int32_t* stencil_indices,
-  /* in rarray[num_stencil_indices] */ double* values)
+  /* in */ int32_t* stencil_indices,
+  /* in */ double* values)
 {
   int32_t index_lower[1], index_upper[1], index_stride[1]; 
   struct sidl_int__array index_real;
@@ -279,12 +279,12 @@ bHYPRE_StructMatrixView_SetValues(
 int32_t
 bHYPRE_StructMatrixView_SetBoxValues(
   /* in */ bHYPRE_StructMatrixView self,
-  /* in rarray[dim] */ int32_t* ilower,
-  /* in rarray[dim] */ int32_t* iupper,
+  /* in */ int32_t* ilower,
+  /* in */ int32_t* iupper,
   /* in */ int32_t dim,
   /* in */ int32_t num_stencil_indices,
-  /* in rarray[num_stencil_indices] */ int32_t* stencil_indices,
-  /* in rarray[nvalues] */ double* values,
+  /* in */ int32_t* stencil_indices,
+  /* in */ double* values,
   /* in */ int32_t nvalues)
 {
   int32_t ilower_lower[1], ilower_upper[1], ilower_stride[1]; 
@@ -327,7 +327,7 @@ bHYPRE_StructMatrixView_SetBoxValues(
 int32_t
 bHYPRE_StructMatrixView_SetNumGhost(
   /* in */ bHYPRE_StructMatrixView self,
-  /* in rarray[dim2] */ int32_t* num_ghost,
+  /* in */ int32_t* num_ghost,
   /* in */ int32_t dim2)
 {
   int32_t num_ghost_lower[1], num_ghost_upper[1], num_ghost_stride[1]; 
@@ -363,7 +363,7 @@ int32_t
 bHYPRE_StructMatrixView_SetConstantEntries(
   /* in */ bHYPRE_StructMatrixView self,
   /* in */ int32_t num_stencil_constant_points,
-  /* in rarray[num_stencil_constant_points] */ int32_t* stencil_constant_points)
+  /* in */ int32_t* stencil_constant_points)
 {
   int32_t stencil_constant_points_lower[1], stencil_constant_points_upper[1],
     stencil_constant_points_stride[1]; 
@@ -387,8 +387,8 @@ int32_t
 bHYPRE_StructMatrixView_SetConstantValues(
   /* in */ bHYPRE_StructMatrixView self,
   /* in */ int32_t num_stencil_indices,
-  /* in rarray[num_stencil_indices] */ int32_t* stencil_indices,
-  /* in rarray[num_stencil_indices] */ double* values)
+  /* in */ int32_t* stencil_indices,
+  /* in */ double* values)
 {
   int32_t stencil_indices_lower[1], stencil_indices_upper[1],
     stencil_indices_stride[1]; 
@@ -1230,9 +1230,9 @@ remote_bHYPRE__StructMatrixView_SetStencil(
 static int32_t
 remote_bHYPRE__StructMatrixView_SetValues(
   /* in */ struct bHYPRE__StructMatrixView__object* self /* TLD */,
-  /* in rarray[dim] */ struct sidl_int__array* index,
-  /* in rarray[num_stencil_indices] */ struct sidl_int__array* stencil_indices,
-  /* in rarray[num_stencil_indices] */ struct sidl_double__array* values)
+  /* in */ struct sidl_int__array* index,
+  /* in */ struct sidl_int__array* stencil_indices,
+  /* in */ struct sidl_double__array* values)
 {
   sidl_BaseInterface _ex = NULL;
   sidl_BaseInterface *_ex2 =&_ex;
@@ -1264,10 +1264,10 @@ remote_bHYPRE__StructMatrixView_SetValues(
 static int32_t
 remote_bHYPRE__StructMatrixView_SetBoxValues(
   /* in */ struct bHYPRE__StructMatrixView__object* self /* TLD */,
-  /* in rarray[dim] */ struct sidl_int__array* ilower,
-  /* in rarray[dim] */ struct sidl_int__array* iupper,
-  /* in rarray[num_stencil_indices] */ struct sidl_int__array* stencil_indices,
-  /* in rarray[nvalues] */ struct sidl_double__array* values)
+  /* in */ struct sidl_int__array* ilower,
+  /* in */ struct sidl_int__array* iupper,
+  /* in */ struct sidl_int__array* stencil_indices,
+  /* in */ struct sidl_double__array* values)
 {
   sidl_BaseInterface _ex = NULL;
   sidl_BaseInterface *_ex2 =&_ex;
@@ -1299,7 +1299,7 @@ remote_bHYPRE__StructMatrixView_SetBoxValues(
 static int32_t
 remote_bHYPRE__StructMatrixView_SetNumGhost(
   /* in */ struct bHYPRE__StructMatrixView__object* self /* TLD */,
-  /* in rarray[dim2] */ struct sidl_int__array* num_ghost)
+  /* in */ struct sidl_int__array* num_ghost)
 {
   sidl_BaseInterface _ex = NULL;
   sidl_BaseInterface *_ex2 =&_ex;
@@ -1364,8 +1364,7 @@ remote_bHYPRE__StructMatrixView_SetSymmetric(
 static int32_t
 remote_bHYPRE__StructMatrixView_SetConstantEntries(
   /* in */ struct bHYPRE__StructMatrixView__object* self /* TLD */,
-  /* in rarray[num_stencil_constant_points] */ struct sidl_int__array* 
-    stencil_constant_points)
+  /* in */ struct sidl_int__array* stencil_constant_points)
 {
   sidl_BaseInterface _ex = NULL;
   sidl_BaseInterface *_ex2 =&_ex;
@@ -1397,8 +1396,8 @@ remote_bHYPRE__StructMatrixView_SetConstantEntries(
 static int32_t
 remote_bHYPRE__StructMatrixView_SetConstantValues(
   /* in */ struct bHYPRE__StructMatrixView__object* self /* TLD */,
-  /* in rarray[num_stencil_indices] */ struct sidl_int__array* stencil_indices,
-  /* in rarray[num_stencil_indices] */ struct sidl_double__array* values)
+  /* in */ struct sidl_int__array* stencil_indices,
+  /* in */ struct sidl_double__array* values)
 {
   sidl_BaseInterface _ex = NULL;
   sidl_BaseInterface *_ex2 =&_ex;

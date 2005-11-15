@@ -2,12 +2,12 @@
  * File:          bHYPRE_StructVector.h
  * Symbol:        bHYPRE.StructVector-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.10.10
+ * Babel Version: 0.10.4
  * Description:   Client-side glue code for bHYPRE.StructVector
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.10
+ * babel-version = 0.10.4
  */
 
 #ifndef included_bHYPRE_StructVector_h
@@ -106,75 +106,6 @@ bHYPRE_StructVector_Create(
   /* in */ bHYPRE_StructGrid grid);
 
 /**
- * Set the MPI Communicator.  DEPRECATED, Use Create()
- * 
- */
-int32_t
-bHYPRE_StructVector_SetCommunicator(
-  /* in */ bHYPRE_StructVector self,
-  /* in */ bHYPRE_MPICommunicator mpi_comm);
-
-/**
- * Prepare an object for setting coefficient values, whether for
- * the first time or subsequently.
- * 
- */
-int32_t
-bHYPRE_StructVector_Initialize(
-  /* in */ bHYPRE_StructVector self);
-
-/**
- * Finalize the construction of an object before using, either
- * for the first time or on subsequent uses. {\tt Initialize}
- * and {\tt Assemble} always appear in a matched set, with
- * Initialize preceding Assemble. Values can only be set in
- * between a call to Initialize and Assemble.
- * 
- */
-int32_t
-bHYPRE_StructVector_Assemble(
-  /* in */ bHYPRE_StructVector self);
-
-/**
- * Method:  SetGrid[]
- */
-int32_t
-bHYPRE_StructVector_SetGrid(
-  /* in */ bHYPRE_StructVector self,
-  /* in */ bHYPRE_StructGrid grid);
-
-/**
- * Method:  SetNumGhost[]
- */
-int32_t
-bHYPRE_StructVector_SetNumGhost(
-  /* in */ bHYPRE_StructVector self,
-  /* in rarray[dim2] */ int32_t* num_ghost,
-  /* in */ int32_t dim2);
-
-/**
- * Method:  SetValue[]
- */
-int32_t
-bHYPRE_StructVector_SetValue(
-  /* in */ bHYPRE_StructVector self,
-  /* in rarray[dim] */ int32_t* grid_index,
-  /* in */ int32_t dim,
-  /* in */ double value);
-
-/**
- * Method:  SetBoxValues[]
- */
-int32_t
-bHYPRE_StructVector_SetBoxValues(
-  /* in */ bHYPRE_StructVector self,
-  /* in rarray[dim] */ int32_t* ilower,
-  /* in rarray[dim] */ int32_t* iupper,
-  /* in */ int32_t dim,
-  /* in rarray[nvalues] */ double* values,
-  /* in */ int32_t nvalues);
-
-/**
  * Set {\tt self} to 0.
  * 
  */
@@ -234,6 +165,75 @@ bHYPRE_StructVector_Axpy(
   /* in */ bHYPRE_Vector x);
 
 /**
+ * Set the MPI Communicator.  DEPRECATED, Use Create()
+ * 
+ */
+int32_t
+bHYPRE_StructVector_SetCommunicator(
+  /* in */ bHYPRE_StructVector self,
+  /* in */ bHYPRE_MPICommunicator mpi_comm);
+
+/**
+ * Prepare an object for setting coefficient values, whether for
+ * the first time or subsequently.
+ * 
+ */
+int32_t
+bHYPRE_StructVector_Initialize(
+  /* in */ bHYPRE_StructVector self);
+
+/**
+ * Finalize the construction of an object before using, either
+ * for the first time or on subsequent uses. {\tt Initialize}
+ * and {\tt Assemble} always appear in a matched set, with
+ * Initialize preceding Assemble. Values can only be set in
+ * between a call to Initialize and Assemble.
+ * 
+ */
+int32_t
+bHYPRE_StructVector_Assemble(
+  /* in */ bHYPRE_StructVector self);
+
+/**
+ * Method:  SetGrid[]
+ */
+int32_t
+bHYPRE_StructVector_SetGrid(
+  /* in */ bHYPRE_StructVector self,
+  /* in */ bHYPRE_StructGrid grid);
+
+/**
+ * Method:  SetNumGhost[]
+ */
+int32_t
+bHYPRE_StructVector_SetNumGhost(
+  /* in */ bHYPRE_StructVector self,
+  /* in */ int32_t* num_ghost,
+  /* in */ int32_t dim2);
+
+/**
+ * Method:  SetValue[]
+ */
+int32_t
+bHYPRE_StructVector_SetValue(
+  /* in */ bHYPRE_StructVector self,
+  /* in */ int32_t* grid_index,
+  /* in */ int32_t dim,
+  /* in */ double value);
+
+/**
+ * Method:  SetBoxValues[]
+ */
+int32_t
+bHYPRE_StructVector_SetBoxValues(
+  /* in */ bHYPRE_StructVector self,
+  /* in */ int32_t* ilower,
+  /* in */ int32_t* iupper,
+  /* in */ int32_t dim,
+  /* in */ double* values,
+  /* in */ int32_t nvalues);
+
+/**
  * Cast method for interface and class type conversions.
  */
 struct bHYPRE_StructVector__object*
@@ -254,6 +254,14 @@ bHYPRE_StructVector__cast2(
 void
 bHYPRE_StructVector__exec(
   /* in */ bHYPRE_StructVector self,
+  /* in */ const char* methodName,
+  /* in */ sidl_io_Deserializer inArgs,
+  /* in */ sidl_io_Serializer outArgs);
+/**
+ * static Exec method for reflexity.
+ */
+void
+bHYPRE_StructVector__sexec(
   /* in */ const char* methodName,
   /* in */ sidl_io_Deserializer inArgs,
   /* in */ sidl_io_Serializer outArgs);

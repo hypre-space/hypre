@@ -2,12 +2,12 @@
  * File:          bHYPRE_StructGrid_Stub.c
  * Symbol:        bHYPRE.StructGrid-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.10.10
+ * Babel Version: 0.10.4
  * Description:   Client-side glue code for bHYPRE.StructGrid
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.10
+ * babel-version = 0.10.4
  */
 
 #include "bHYPRE_StructGrid.h"
@@ -274,8 +274,8 @@ bHYPRE_StructGrid_SetDimension(
 int32_t
 bHYPRE_StructGrid_SetExtents(
   /* in */ bHYPRE_StructGrid self,
-  /* in rarray[dim] */ int32_t* ilower,
-  /* in rarray[dim] */ int32_t* iupper,
+  /* in */ int32_t* ilower,
+  /* in */ int32_t* iupper,
   /* in */ int32_t dim)
 {
   int32_t ilower_lower[1], ilower_upper[1], ilower_stride[1]; 
@@ -303,7 +303,7 @@ bHYPRE_StructGrid_SetExtents(
 int32_t
 bHYPRE_StructGrid_SetPeriodic(
   /* in */ bHYPRE_StructGrid self,
-  /* in rarray[dim] */ int32_t* periodic,
+  /* in */ int32_t* periodic,
   /* in */ int32_t dim)
 {
   int32_t periodic_lower[1], periodic_upper[1], periodic_stride[1]; 
@@ -324,7 +324,7 @@ bHYPRE_StructGrid_SetPeriodic(
 int32_t
 bHYPRE_StructGrid_SetNumGhost(
   /* in */ bHYPRE_StructGrid self,
-  /* in rarray[dim2] */ int32_t* num_ghost,
+  /* in */ int32_t* num_ghost,
   /* in */ int32_t dim2)
 {
   int32_t num_ghost_lower[1], num_ghost_upper[1], num_ghost_stride[1]; 
@@ -348,6 +348,31 @@ bHYPRE_StructGrid_Assemble(
 {
   return (*self->d_epv->f_Assemble)(
     self);
+}
+
+void
+bHYPRE_StructGrid_Create__sexec(
+        struct sidl_io_Deserializer__object* inArgs,
+        struct sidl_io_Serializer__object* outArgs) {
+  /* stack space for arguments */
+  bHYPRE_MPICommunicator mpi_comm;
+  int32_t dim;
+  bHYPRE_StructGrid _retval;
+  sidl_BaseInterface _ex   = NULL;
+  sidl_BaseInterface *_ex2 = &_ex;
+
+  /* unpack in and inout argments */
+
+  sidl_io_Deserializer_unpackInt( inArgs, "dim", &dim, _ex2);
+
+  /* make the call */
+  _retval = (_getSEPV()->f_Create)(
+    mpi_comm,
+    dim);
+
+  /* pack return value */
+  /* pack out and inout argments */
+
 }
 
 /*
@@ -411,6 +436,36 @@ bHYPRE_StructGrid__exec(
   outArgs);
 }
 
+struct bHYPRE_StructGrid__smethod {
+  const char *d_name;
+  void (*d_func)(struct sidl_io_Deserializer__object *,
+    struct sidl_io_Serializer__object *);
+};
+
+void
+bHYPRE_StructGrid__sexec(
+        const char* methodName,
+        struct sidl_io_Deserializer__object* inArgs,
+        struct sidl_io_Serializer__object* outArgs ) { 
+  static const struct bHYPRE_StructGrid__smethod s_methods[] = {
+    { "Create", bHYPRE_StructGrid_Create__sexec }
+  };
+  int i, cmp, l = 0;
+  int u = sizeof(s_methods)/sizeof(struct bHYPRE_StructGrid__smethod);
+  if (methodName) {
+    /* Use binary search to locate method */
+    while (l < u) {
+      i = (l + u) >> 1;
+      if (!(cmp=strcmp(methodName, s_methods[i].d_name))) {
+        (s_methods[i].d_func)(inArgs, outArgs);
+        return;
+      }
+      else if (cmp < 0) u = i;
+      else l = i + 1;
+    }
+  }
+  /* TODO: add code for method not found */
+}
 /*
  * Get the URL of the Implementation of this object (for RMI)
  */
@@ -1072,8 +1127,8 @@ remote_bHYPRE_StructGrid_SetDimension(
 static int32_t
 remote_bHYPRE_StructGrid_SetExtents(
   /* in */ struct bHYPRE_StructGrid__object* self /* TLD */,
-  /* in rarray[dim] */ struct sidl_int__array* ilower,
-  /* in rarray[dim] */ struct sidl_int__array* iupper)
+  /* in */ struct sidl_int__array* ilower,
+  /* in */ struct sidl_int__array* iupper)
 {
   sidl_BaseInterface _ex = NULL;
   sidl_BaseInterface *_ex2 =&_ex;
@@ -1105,7 +1160,7 @@ remote_bHYPRE_StructGrid_SetExtents(
 static int32_t
 remote_bHYPRE_StructGrid_SetPeriodic(
   /* in */ struct bHYPRE_StructGrid__object* self /* TLD */,
-  /* in rarray[dim] */ struct sidl_int__array* periodic)
+  /* in */ struct sidl_int__array* periodic)
 {
   sidl_BaseInterface _ex = NULL;
   sidl_BaseInterface *_ex2 =&_ex;
@@ -1137,7 +1192,7 @@ remote_bHYPRE_StructGrid_SetPeriodic(
 static int32_t
 remote_bHYPRE_StructGrid_SetNumGhost(
   /* in */ struct bHYPRE_StructGrid__object* self /* TLD */,
-  /* in rarray[dim2] */ struct sidl_int__array* num_ghost)
+  /* in */ struct sidl_int__array* num_ghost)
 {
   sidl_BaseInterface _ex = NULL;
   sidl_BaseInterface *_ex2 =&_ex;

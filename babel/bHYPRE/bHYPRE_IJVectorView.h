@@ -2,12 +2,12 @@
  * File:          bHYPRE_IJVectorView.h
  * Symbol:        bHYPRE.IJVectorView-v1.0.0
  * Symbol Type:   interface
- * Babel Version: 0.10.10
+ * Babel Version: 0.10.4
  * Description:   Client-side glue code for bHYPRE.IJVectorView
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.10
+ * babel-version = 0.10.4
  */
 
 #ifndef included_bHYPRE_IJVectorView_h
@@ -125,8 +125,8 @@ int32_t
 bHYPRE_IJVectorView_SetValues(
   /* in */ bHYPRE_IJVectorView self,
   /* in */ int32_t nvalues,
-  /* in rarray[nvalues] */ int32_t* indices,
-  /* in rarray[nvalues] */ double* values);
+  /* in */ int32_t* indices,
+  /* in */ double* values);
 
 /**
  * Adds to values in vector.  Usage details are analogous to
@@ -139,8 +139,8 @@ int32_t
 bHYPRE_IJVectorView_AddToValues(
   /* in */ bHYPRE_IJVectorView self,
   /* in */ int32_t nvalues,
-  /* in rarray[nvalues] */ int32_t* indices,
-  /* in rarray[nvalues] */ double* values);
+  /* in */ int32_t* indices,
+  /* in */ double* values);
 
 /**
  * Returns range of the part of the vector owned by this
@@ -164,8 +164,8 @@ int32_t
 bHYPRE_IJVectorView_GetValues(
   /* in */ bHYPRE_IJVectorView self,
   /* in */ int32_t nvalues,
-  /* in rarray[nvalues] */ int32_t* indices,
-  /* inout rarray[nvalues] */ double* values);
+  /* in */ int32_t* indices,
+  /* inout */ double* values);
 
 /**
  * Print the vector to file.  This is mainly for debugging
@@ -209,6 +209,14 @@ bHYPRE_IJVectorView__cast2(
 void
 bHYPRE_IJVectorView__exec(
   /* in */ bHYPRE_IJVectorView self,
+  /* in */ const char* methodName,
+  /* in */ sidl_io_Deserializer inArgs,
+  /* in */ sidl_io_Serializer outArgs);
+/**
+ * static Exec method for reflexity.
+ */
+void
+bHYPRE_IJVectorView__sexec(
   /* in */ const char* methodName,
   /* in */ sidl_io_Deserializer inArgs,
   /* in */ sidl_io_Serializer outArgs);

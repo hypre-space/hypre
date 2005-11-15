@@ -2,12 +2,12 @@
  * File:          bHYPRE_HPCG_Impl.c
  * Symbol:        bHYPRE.HPCG-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.10.10
+ * Babel Version: 0.10.4
  * Description:   Server-side implementation for bHYPRE.HPCG
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.10.10
+ * babel-version = 0.10.4
  */
 
 /*
@@ -496,7 +496,7 @@ int32_t
 impl_bHYPRE_HPCG_SetIntArray1Parameter(
   /* in */ bHYPRE_HPCG self,
   /* in */ const char* name,
-  /* in rarray[nvalues] */ int32_t* value,
+  /* in */ int32_t* value,
   /* in */ int32_t nvalues)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.HPCG.SetIntArray1Parameter) */
@@ -522,7 +522,7 @@ int32_t
 impl_bHYPRE_HPCG_SetIntArray2Parameter(
   /* in */ bHYPRE_HPCG self,
   /* in */ const char* name,
-  /* in array<int,2,column-major> */ struct sidl_int__array* value)
+  /* in */ struct sidl_int__array* value)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.HPCG.SetIntArray2Parameter) */
   /* Insert-Code-Here {bHYPRE.HPCG.SetIntArray2Parameter} (SetIntArray2Parameter method) */
@@ -547,7 +547,7 @@ int32_t
 impl_bHYPRE_HPCG_SetDoubleArray1Parameter(
   /* in */ bHYPRE_HPCG self,
   /* in */ const char* name,
-  /* in rarray[nvalues] */ double* value,
+  /* in */ double* value,
   /* in */ int32_t nvalues)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.HPCG.SetDoubleArray1Parameter) */
@@ -573,7 +573,7 @@ int32_t
 impl_bHYPRE_HPCG_SetDoubleArray2Parameter(
   /* in */ bHYPRE_HPCG self,
   /* in */ const char* name,
-  /* in array<double,2,column-major> */ struct sidl_double__array* value)
+  /* in */ struct sidl_double__array* value)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.HPCG.SetDoubleArray2Parameter) */
   /* Insert-Code-Here {bHYPRE.HPCG.SetDoubleArray2Parameter} (SetDoubleArray2Parameter method) */

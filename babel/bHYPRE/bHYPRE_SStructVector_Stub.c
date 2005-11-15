@@ -2,12 +2,12 @@
  * File:          bHYPRE_SStructVector_Stub.c
  * Symbol:        bHYPRE.SStructVector-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.10.10
+ * Babel Version: 0.10.4
  * Description:   Client-side glue code for bHYPRE.SStructVector
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.10
+ * babel-version = 0.10.4
  */
 
 #include "bHYPRE_SStructVector.h"
@@ -348,10 +348,10 @@ int32_t
 bHYPRE_SStructVector_SetValues(
   /* in */ bHYPRE_SStructVector self,
   /* in */ int32_t part,
-  /* in rarray[dim] */ int32_t* index,
+  /* in */ int32_t* index,
   /* in */ int32_t dim,
   /* in */ int32_t var,
-  /* in rarray[one] */ double* values,
+  /* in */ double* values,
   /* in */ int32_t one)
 {
   int32_t index_lower[1], index_upper[1], index_stride[1]; 
@@ -391,11 +391,11 @@ int32_t
 bHYPRE_SStructVector_SetBoxValues(
   /* in */ bHYPRE_SStructVector self,
   /* in */ int32_t part,
-  /* in rarray[dim] */ int32_t* ilower,
-  /* in rarray[dim] */ int32_t* iupper,
+  /* in */ int32_t* ilower,
+  /* in */ int32_t* iupper,
   /* in */ int32_t dim,
   /* in */ int32_t var,
-  /* in rarray[nvalues] */ double* values,
+  /* in */ double* values,
   /* in */ int32_t nvalues)
 {
   int32_t ilower_lower[1], ilower_upper[1], ilower_stride[1]; 
@@ -442,10 +442,10 @@ int32_t
 bHYPRE_SStructVector_AddToValues(
   /* in */ bHYPRE_SStructVector self,
   /* in */ int32_t part,
-  /* in rarray[dim] */ int32_t* index,
+  /* in */ int32_t* index,
   /* in */ int32_t dim,
   /* in */ int32_t var,
-  /* in rarray[one] */ double* values,
+  /* in */ double* values,
   /* in */ int32_t one)
 {
   int32_t index_lower[1], index_upper[1], index_stride[1]; 
@@ -485,11 +485,11 @@ int32_t
 bHYPRE_SStructVector_AddToBoxValues(
   /* in */ bHYPRE_SStructVector self,
   /* in */ int32_t part,
-  /* in rarray[dim] */ int32_t* ilower,
-  /* in rarray[dim] */ int32_t* iupper,
+  /* in */ int32_t* ilower,
+  /* in */ int32_t* iupper,
   /* in */ int32_t dim,
   /* in */ int32_t var,
-  /* in rarray[nvalues] */ double* values,
+  /* in */ double* values,
   /* in */ int32_t nvalues)
 {
   int32_t ilower_lower[1], ilower_upper[1], ilower_stride[1]; 
@@ -548,7 +548,7 @@ int32_t
 bHYPRE_SStructVector_GetValues(
   /* in */ bHYPRE_SStructVector self,
   /* in */ int32_t part,
-  /* in rarray[dim] */ int32_t* index,
+  /* in */ int32_t* index,
   /* in */ int32_t dim,
   /* in */ int32_t var,
   /* out */ double* value)
@@ -583,11 +583,11 @@ int32_t
 bHYPRE_SStructVector_GetBoxValues(
   /* in */ bHYPRE_SStructVector self,
   /* in */ int32_t part,
-  /* in rarray[dim] */ int32_t* ilower,
-  /* in rarray[dim] */ int32_t* iupper,
+  /* in */ int32_t* ilower,
+  /* in */ int32_t* iupper,
   /* in */ int32_t dim,
   /* in */ int32_t var,
-  /* inout rarray[nvalues] */ double* values,
+  /* inout */ double* values,
   /* in */ int32_t nvalues)
 {
   int32_t ilower_lower[1], ilower_upper[1], ilower_stride[1]; 
@@ -744,6 +744,27 @@ bHYPRE_SStructVector_Axpy(
     x);
 }
 
+void
+bHYPRE_SStructVector_Create__sexec(
+        struct sidl_io_Deserializer__object* inArgs,
+        struct sidl_io_Serializer__object* outArgs) {
+  /* stack space for arguments */
+  bHYPRE_MPICommunicator mpi_comm;
+  bHYPRE_SStructGrid grid;
+  bHYPRE_SStructVector _retval;
+
+  /* unpack in and inout argments */
+
+  /* make the call */
+  _retval = (_getSEPV()->f_Create)(
+    mpi_comm,
+    grid);
+
+  /* pack return value */
+  /* pack out and inout argments */
+
+}
+
 /*
  * Cast method for interface and class type conversions.
  */
@@ -805,6 +826,36 @@ bHYPRE_SStructVector__exec(
   outArgs);
 }
 
+struct bHYPRE_SStructVector__smethod {
+  const char *d_name;
+  void (*d_func)(struct sidl_io_Deserializer__object *,
+    struct sidl_io_Serializer__object *);
+};
+
+void
+bHYPRE_SStructVector__sexec(
+        const char* methodName,
+        struct sidl_io_Deserializer__object* inArgs,
+        struct sidl_io_Serializer__object* outArgs ) { 
+  static const struct bHYPRE_SStructVector__smethod s_methods[] = {
+    { "Create", bHYPRE_SStructVector_Create__sexec }
+  };
+  int i, cmp, l = 0;
+  int u = sizeof(s_methods)/sizeof(struct bHYPRE_SStructVector__smethod);
+  if (methodName) {
+    /* Use binary search to locate method */
+    while (l < u) {
+      i = (l + u) >> 1;
+      if (!(cmp=strcmp(methodName, s_methods[i].d_name))) {
+        (s_methods[i].d_func)(inArgs, outArgs);
+        return;
+      }
+      else if (cmp < 0) u = i;
+      else l = i + 1;
+    }
+  }
+  /* TODO: add code for method not found */
+}
 /*
  * Get the URL of the Implementation of this object (for RMI)
  */
@@ -1559,7 +1610,6 @@ remote_bHYPRE_SStructVector_GetObject(
   sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
     "GetObject", _ex2 );
   sidl_rmi_Response _rsvp = NULL;
-  char* A_str= NULL;
   int32_t _retval;
 
   /* pack in and inout arguments */
@@ -1571,8 +1621,7 @@ remote_bHYPRE_SStructVector_GetObject(
   sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval, _ex2);
 
   /* unpack out and inout arguments */
-  sidl_rmi_Response_unpackString( _rsvp, "A", &A_str, _ex2);
-  sidl_BaseInterface__connect(A_str, _ex2);
+  sidl_rmi_Response_unpackString( _rsvp, "A", A, _ex2);
 
   /* cleanup and return */
   sidl_rmi_Response_done(_rsvp, _ex2);
@@ -1620,9 +1669,9 @@ static int32_t
 remote_bHYPRE_SStructVector_SetValues(
   /* in */ struct bHYPRE_SStructVector__object* self /* TLD */,
   /* in */ int32_t part,
-  /* in rarray[dim] */ struct sidl_int__array* index,
+  /* in */ struct sidl_int__array* index,
   /* in */ int32_t var,
-  /* in rarray[one] */ struct sidl_double__array* values)
+  /* in */ struct sidl_double__array* values)
 {
   sidl_BaseInterface _ex = NULL;
   sidl_BaseInterface *_ex2 =&_ex;
@@ -1657,10 +1706,10 @@ static int32_t
 remote_bHYPRE_SStructVector_SetBoxValues(
   /* in */ struct bHYPRE_SStructVector__object* self /* TLD */,
   /* in */ int32_t part,
-  /* in rarray[dim] */ struct sidl_int__array* ilower,
-  /* in rarray[dim] */ struct sidl_int__array* iupper,
+  /* in */ struct sidl_int__array* ilower,
+  /* in */ struct sidl_int__array* iupper,
   /* in */ int32_t var,
-  /* in rarray[nvalues] */ struct sidl_double__array* values)
+  /* in */ struct sidl_double__array* values)
 {
   sidl_BaseInterface _ex = NULL;
   sidl_BaseInterface *_ex2 =&_ex;
@@ -1695,9 +1744,9 @@ static int32_t
 remote_bHYPRE_SStructVector_AddToValues(
   /* in */ struct bHYPRE_SStructVector__object* self /* TLD */,
   /* in */ int32_t part,
-  /* in rarray[dim] */ struct sidl_int__array* index,
+  /* in */ struct sidl_int__array* index,
   /* in */ int32_t var,
-  /* in rarray[one] */ struct sidl_double__array* values)
+  /* in */ struct sidl_double__array* values)
 {
   sidl_BaseInterface _ex = NULL;
   sidl_BaseInterface *_ex2 =&_ex;
@@ -1732,10 +1781,10 @@ static int32_t
 remote_bHYPRE_SStructVector_AddToBoxValues(
   /* in */ struct bHYPRE_SStructVector__object* self /* TLD */,
   /* in */ int32_t part,
-  /* in rarray[dim] */ struct sidl_int__array* ilower,
-  /* in rarray[dim] */ struct sidl_int__array* iupper,
+  /* in */ struct sidl_int__array* ilower,
+  /* in */ struct sidl_int__array* iupper,
   /* in */ int32_t var,
-  /* in rarray[nvalues] */ struct sidl_double__array* values)
+  /* in */ struct sidl_double__array* values)
 {
   sidl_BaseInterface _ex = NULL;
   sidl_BaseInterface *_ex2 =&_ex;
@@ -1801,7 +1850,7 @@ static int32_t
 remote_bHYPRE_SStructVector_GetValues(
   /* in */ struct bHYPRE_SStructVector__object* self /* TLD */,
   /* in */ int32_t part,
-  /* in rarray[dim] */ struct sidl_int__array* index,
+  /* in */ struct sidl_int__array* index,
   /* in */ int32_t var,
   /* out */ double* value)
 {
@@ -1839,10 +1888,10 @@ static int32_t
 remote_bHYPRE_SStructVector_GetBoxValues(
   /* in */ struct bHYPRE_SStructVector__object* self /* TLD */,
   /* in */ int32_t part,
-  /* in rarray[dim] */ struct sidl_int__array* ilower,
-  /* in rarray[dim] */ struct sidl_int__array* iupper,
+  /* in */ struct sidl_int__array* ilower,
+  /* in */ struct sidl_int__array* iupper,
   /* in */ int32_t var,
-  /* inout rarray[nvalues] */ struct sidl_double__array** values)
+  /* inout */ struct sidl_double__array** values)
 {
   sidl_BaseInterface _ex = NULL;
   sidl_BaseInterface *_ex2 =&_ex;
@@ -1985,7 +2034,6 @@ remote_bHYPRE_SStructVector_Copy(
   int32_t _retval;
 
   /* pack in and inout arguments */
-  sidl_rmi_Invocation_packString( _inv, "x", bHYPRE_Vector__getURL(x), _ex2);
 
   /* send actual RMI request */
   _rsvp = sidl_rmi_Invocation_invokeMethod(_inv,_ex2);
@@ -2015,7 +2063,6 @@ remote_bHYPRE_SStructVector_Clone(
   sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
     "Clone", _ex2 );
   sidl_rmi_Response _rsvp = NULL;
-  char* x_str= NULL;
   int32_t _retval;
 
   /* pack in and inout arguments */
@@ -2027,8 +2074,7 @@ remote_bHYPRE_SStructVector_Clone(
   sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval, _ex2);
 
   /* unpack out and inout arguments */
-  sidl_rmi_Response_unpackString( _rsvp, "x", &x_str, _ex2);
-  bHYPRE_Vector__connect(x_str, _ex2);
+  sidl_rmi_Response_unpackString( _rsvp, "x", x, _ex2);
 
   /* cleanup and return */
   sidl_rmi_Response_done(_rsvp, _ex2);
@@ -2087,7 +2133,6 @@ remote_bHYPRE_SStructVector_Dot(
   int32_t _retval;
 
   /* pack in and inout arguments */
-  sidl_rmi_Invocation_packString( _inv, "x", bHYPRE_Vector__getURL(x), _ex2);
 
   /* send actual RMI request */
   _rsvp = sidl_rmi_Invocation_invokeMethod(_inv,_ex2);
@@ -2123,7 +2168,6 @@ remote_bHYPRE_SStructVector_Axpy(
 
   /* pack in and inout arguments */
   sidl_rmi_Invocation_packDouble( _inv, "a", a, _ex2);
-  sidl_rmi_Invocation_packString( _inv, "x", bHYPRE_Vector__getURL(x), _ex2);
 
   /* send actual RMI request */
   _rsvp = sidl_rmi_Invocation_invokeMethod(_inv,_ex2);

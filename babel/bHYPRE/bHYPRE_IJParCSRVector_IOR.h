@@ -2,12 +2,12 @@
  * File:          bHYPRE_IJParCSRVector_IOR.h
  * Symbol:        bHYPRE.IJParCSRVector-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.10.10
+ * Babel Version: 0.10.4
  * Description:   Intermediate Object Representation for bHYPRE.IJParCSRVector
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.10
+ * babel-version = 0.10.4
  */
 
 #ifndef included_bHYPRE_IJParCSRVector_IOR_h
@@ -151,20 +151,20 @@ struct bHYPRE_IJParCSRVector__epv {
     /* in */ int32_t jupper);
   int32_t (*f_SetValues)(
     /* in */ struct bHYPRE_IJParCSRVector__object* self,
-    /* in rarray[nvalues] */ struct sidl_int__array* indices,
-    /* in rarray[nvalues] */ struct sidl_double__array* values);
+    /* in */ struct sidl_int__array* indices,
+    /* in */ struct sidl_double__array* values);
   int32_t (*f_AddToValues)(
     /* in */ struct bHYPRE_IJParCSRVector__object* self,
-    /* in rarray[nvalues] */ struct sidl_int__array* indices,
-    /* in rarray[nvalues] */ struct sidl_double__array* values);
+    /* in */ struct sidl_int__array* indices,
+    /* in */ struct sidl_double__array* values);
   int32_t (*f_GetLocalRange)(
     /* in */ struct bHYPRE_IJParCSRVector__object* self,
     /* out */ int32_t* jlower,
     /* out */ int32_t* jupper);
   int32_t (*f_GetValues)(
     /* in */ struct bHYPRE_IJParCSRVector__object* self,
-    /* in rarray[nvalues] */ struct sidl_int__array* indices,
-    /* inout rarray[nvalues] */ struct sidl_double__array** values);
+    /* in */ struct sidl_int__array* indices,
+    /* inout */ struct sidl_double__array** values);
   int32_t (*f_Print)(
     /* in */ struct bHYPRE_IJParCSRVector__object* self,
     /* in */ const char* filename);

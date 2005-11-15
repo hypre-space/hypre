@@ -2,12 +2,12 @@
  * File:          bHYPRE_IJParCSRMatrix_Impl.c
  * Symbol:        bHYPRE.IJParCSRMatrix-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.10.10
+ * Babel Version: 0.10.4
  * Description:   Server-side implementation for bHYPRE.IJParCSRMatrix
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.10.10
+ * babel-version = 0.10.4
  */
 
 /*
@@ -183,7 +183,7 @@ impl_bHYPRE_IJParCSRMatrix_GenerateLaplacian(
   /* in */ int32_t p,
   /* in */ int32_t q,
   /* in */ int32_t r,
-  /* in rarray[nvalues] */ double* values,
+  /* in */ double* values,
   /* in */ int32_t nvalues,
   /* in */ int32_t discretization)
 {
@@ -273,8 +273,8 @@ extern "C"
 int32_t
 impl_bHYPRE_IJParCSRMatrix_SetDiagOffdSizes(
   /* in */ bHYPRE_IJParCSRMatrix self,
-  /* in rarray[local_nrows] */ int32_t* diag_sizes,
-  /* in rarray[local_nrows] */ int32_t* offdiag_sizes,
+  /* in */ int32_t* diag_sizes,
+  /* in */ int32_t* offdiag_sizes,
   /* in */ int32_t local_nrows)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRMatrix.SetDiagOffdSizes) */
@@ -505,10 +505,10 @@ int32_t
 impl_bHYPRE_IJParCSRMatrix_SetValues(
   /* in */ bHYPRE_IJParCSRMatrix self,
   /* in */ int32_t nrows,
-  /* in rarray[nrows] */ int32_t* ncols,
-  /* in rarray[nrows] */ int32_t* rows,
-  /* in rarray[nnonzeros] */ int32_t* cols,
-  /* in rarray[nnonzeros] */ double* values,
+  /* in */ int32_t* ncols,
+  /* in */ int32_t* rows,
+  /* in */ int32_t* cols,
+  /* in */ double* values,
   /* in */ int32_t nnonzeros)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRMatrix.SetValues) */
@@ -553,10 +553,10 @@ int32_t
 impl_bHYPRE_IJParCSRMatrix_AddToValues(
   /* in */ bHYPRE_IJParCSRMatrix self,
   /* in */ int32_t nrows,
-  /* in rarray[nrows] */ int32_t* ncols,
-  /* in rarray[nrows] */ int32_t* rows,
-  /* in rarray[nnonzeros] */ int32_t* cols,
-  /* in rarray[nnonzeros] */ double* values,
+  /* in */ int32_t* ncols,
+  /* in */ int32_t* rows,
+  /* in */ int32_t* cols,
+  /* in */ double* values,
   /* in */ int32_t nnonzeros)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRMatrix.AddToValues) */
@@ -636,8 +636,8 @@ int32_t
 impl_bHYPRE_IJParCSRMatrix_GetRowCounts(
   /* in */ bHYPRE_IJParCSRMatrix self,
   /* in */ int32_t nrows,
-  /* in rarray[nrows] */ int32_t* rows,
-  /* inout rarray[nrows] */ int32_t* ncols)
+  /* in */ int32_t* rows,
+  /* inout */ int32_t* ncols)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRMatrix.GetRowCounts) */
   /* Insert the implementation of the GetRowCounts method here... */
@@ -675,10 +675,10 @@ int32_t
 impl_bHYPRE_IJParCSRMatrix_GetValues(
   /* in */ bHYPRE_IJParCSRMatrix self,
   /* in */ int32_t nrows,
-  /* in rarray[nrows] */ int32_t* ncols,
-  /* in rarray[nrows] */ int32_t* rows,
-  /* in rarray[nnonzeros] */ int32_t* cols,
-  /* inout rarray[nnonzeros] */ double* values,
+  /* in */ int32_t* ncols,
+  /* in */ int32_t* rows,
+  /* in */ int32_t* cols,
+  /* inout */ double* values,
   /* in */ int32_t nnonzeros)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRMatrix.GetValues) */
@@ -724,7 +724,7 @@ extern "C"
 int32_t
 impl_bHYPRE_IJParCSRMatrix_SetRowSizes(
   /* in */ bHYPRE_IJParCSRMatrix self,
-  /* in rarray[nrows] */ int32_t* sizes,
+  /* in */ int32_t* sizes,
   /* in */ int32_t nrows)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRMatrix.SetRowSizes) */
@@ -907,7 +907,7 @@ int32_t
 impl_bHYPRE_IJParCSRMatrix_SetIntArray1Parameter(
   /* in */ bHYPRE_IJParCSRMatrix self,
   /* in */ const char* name,
-  /* in rarray[nvalues] */ int32_t* value,
+  /* in */ int32_t* value,
   /* in */ int32_t nvalues)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRMatrix.SetIntArray1Parameter) */
@@ -931,7 +931,7 @@ int32_t
 impl_bHYPRE_IJParCSRMatrix_SetIntArray2Parameter(
   /* in */ bHYPRE_IJParCSRMatrix self,
   /* in */ const char* name,
-  /* in array<int,2,column-major> */ struct sidl_int__array* value)
+  /* in */ struct sidl_int__array* value)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRMatrix.SetIntArray2Parameter) */
   /* Insert the implementation of the SetIntArray2Parameter method here... */
@@ -954,7 +954,7 @@ int32_t
 impl_bHYPRE_IJParCSRMatrix_SetDoubleArray1Parameter(
   /* in */ bHYPRE_IJParCSRMatrix self,
   /* in */ const char* name,
-  /* in rarray[nvalues] */ double* value,
+  /* in */ double* value,
   /* in */ int32_t nvalues)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRMatrix.SetDoubleArray1Parameter) */
@@ -978,7 +978,7 @@ int32_t
 impl_bHYPRE_IJParCSRMatrix_SetDoubleArray2Parameter(
   /* in */ bHYPRE_IJParCSRMatrix self,
   /* in */ const char* name,
-  /* in array<double,2,column-major> */ struct sidl_double__array* value)
+  /* in */ struct sidl_double__array* value)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRMatrix.SetDoubleArray2Parameter) */
   /* Insert the implementation of the SetDoubleArray2Parameter method here... */
@@ -1198,8 +1198,8 @@ impl_bHYPRE_IJParCSRMatrix_GetRow(
   /* in */ bHYPRE_IJParCSRMatrix self,
   /* in */ int32_t row,
   /* out */ int32_t* size,
-  /* out array<int,column-major> */ struct sidl_int__array** col_ind,
-  /* out array<double,column-major> */ struct sidl_double__array** values)
+  /* out */ struct sidl_int__array** col_ind,
+  /* out */ struct sidl_double__array** values)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRMatrix.GetRow) */
   /* Insert the implementation of the GetRow method here... */

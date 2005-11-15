@@ -2,12 +2,12 @@
  * File:          bHYPRE_IJMatrixView.h
  * Symbol:        bHYPRE.IJMatrixView-v1.0.0
  * Symbol Type:   interface
- * Babel Version: 0.10.10
+ * Babel Version: 0.10.4
  * Description:   Client-side glue code for bHYPRE.IJMatrixView
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.10
+ * babel-version = 0.10.4
  */
 
 #ifndef included_bHYPRE_IJMatrixView_h
@@ -149,10 +149,10 @@ int32_t
 bHYPRE_IJMatrixView_SetValues(
   /* in */ bHYPRE_IJMatrixView self,
   /* in */ int32_t nrows,
-  /* in rarray[nrows] */ int32_t* ncols,
-  /* in rarray[nrows] */ int32_t* rows,
-  /* in rarray[nnonzeros] */ int32_t* cols,
-  /* in rarray[nnonzeros] */ double* values,
+  /* in */ int32_t* ncols,
+  /* in */ int32_t* rows,
+  /* in */ int32_t* cols,
+  /* in */ double* values,
   /* in */ int32_t nnonzeros);
 
 /**
@@ -168,10 +168,10 @@ int32_t
 bHYPRE_IJMatrixView_AddToValues(
   /* in */ bHYPRE_IJMatrixView self,
   /* in */ int32_t nrows,
-  /* in rarray[nrows] */ int32_t* ncols,
-  /* in rarray[nrows] */ int32_t* rows,
-  /* in rarray[nnonzeros] */ int32_t* cols,
-  /* in rarray[nnonzeros] */ double* values,
+  /* in */ int32_t* ncols,
+  /* in */ int32_t* rows,
+  /* in */ int32_t* cols,
+  /* in */ double* values,
   /* in */ int32_t nnonzeros);
 
 /**
@@ -197,8 +197,8 @@ int32_t
 bHYPRE_IJMatrixView_GetRowCounts(
   /* in */ bHYPRE_IJMatrixView self,
   /* in */ int32_t nrows,
-  /* in rarray[nrows] */ int32_t* rows,
-  /* inout rarray[nrows] */ int32_t* ncols);
+  /* in */ int32_t* rows,
+  /* inout */ int32_t* ncols);
 
 /**
  * Gets values for {\tt nrows} rows or partial rows of the
@@ -209,10 +209,10 @@ int32_t
 bHYPRE_IJMatrixView_GetValues(
   /* in */ bHYPRE_IJMatrixView self,
   /* in */ int32_t nrows,
-  /* in rarray[nrows] */ int32_t* ncols,
-  /* in rarray[nrows] */ int32_t* rows,
-  /* in rarray[nnonzeros] */ int32_t* cols,
-  /* inout rarray[nnonzeros] */ double* values,
+  /* in */ int32_t* ncols,
+  /* in */ int32_t* rows,
+  /* in */ int32_t* cols,
+  /* inout */ double* values,
   /* in */ int32_t nnonzeros);
 
 /**
@@ -229,7 +229,7 @@ bHYPRE_IJMatrixView_GetValues(
 int32_t
 bHYPRE_IJMatrixView_SetRowSizes(
   /* in */ bHYPRE_IJMatrixView self,
-  /* in rarray[nrows] */ int32_t* sizes,
+  /* in */ int32_t* sizes,
   /* in */ int32_t nrows);
 
 /**
@@ -274,6 +274,14 @@ bHYPRE_IJMatrixView__cast2(
 void
 bHYPRE_IJMatrixView__exec(
   /* in */ bHYPRE_IJMatrixView self,
+  /* in */ const char* methodName,
+  /* in */ sidl_io_Deserializer inArgs,
+  /* in */ sidl_io_Serializer outArgs);
+/**
+ * static Exec method for reflexity.
+ */
+void
+bHYPRE_IJMatrixView__sexec(
   /* in */ const char* methodName,
   /* in */ sidl_io_Deserializer inArgs,
   /* in */ sidl_io_Serializer outArgs);

@@ -2,12 +2,12 @@
  * File:          bHYPRE_IJParCSRVector_Skel.c
  * Symbol:        bHYPRE.IJParCSRVector-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.10.10
+ * Babel Version: 0.10.4
  * Description:   Server-side glue code for bHYPRE.IJParCSRVector
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.10
+ * babel-version = 0.10.4
  */
 
 #include "bHYPRE_IJParCSRVector_IOR.h"
@@ -109,16 +109,16 @@ int32_t
 impl_bHYPRE_IJParCSRVector_SetValues(
   /* in */ bHYPRE_IJParCSRVector self,
   /* in */ int32_t nvalues,
-  /* in rarray[nvalues] */ int32_t* indices,
-  /* in rarray[nvalues] */ double* values);
+  /* in */ int32_t* indices,
+  /* in */ double* values);
 
 extern
 int32_t
 impl_bHYPRE_IJParCSRVector_AddToValues(
   /* in */ bHYPRE_IJParCSRVector self,
   /* in */ int32_t nvalues,
-  /* in rarray[nvalues] */ int32_t* indices,
-  /* in rarray[nvalues] */ double* values);
+  /* in */ int32_t* indices,
+  /* in */ double* values);
 
 extern
 int32_t
@@ -132,8 +132,8 @@ int32_t
 impl_bHYPRE_IJParCSRVector_GetValues(
   /* in */ bHYPRE_IJParCSRVector self,
   /* in */ int32_t nvalues,
-  /* in rarray[nvalues] */ int32_t* indices,
-  /* inout rarray[nvalues] */ double* values);
+  /* in */ int32_t* indices,
+  /* inout */ double* values);
 
 extern
 int32_t
@@ -233,8 +233,8 @@ extern char* impl_bHYPRE_IJParCSRVector_fgetURL_sidl_BaseClass(struct
 static int32_t
 skel_bHYPRE_IJParCSRVector_SetValues(
   /* in */ bHYPRE_IJParCSRVector self,
-  /* in rarray[nvalues] */ struct sidl_int__array* indices,
-/* in rarray[nvalues] */ struct sidl_double__array* values)
+  /* in */ struct sidl_int__array* indices,
+/* in */ struct sidl_double__array* values)
 {
   int32_t _return;
   struct sidl_int__array* indices_proxy = sidl_int__array_ensure(indices, 1,
@@ -256,8 +256,8 @@ skel_bHYPRE_IJParCSRVector_SetValues(
 static int32_t
 skel_bHYPRE_IJParCSRVector_AddToValues(
   /* in */ bHYPRE_IJParCSRVector self,
-  /* in rarray[nvalues] */ struct sidl_int__array* indices,
-/* in rarray[nvalues] */ struct sidl_double__array* values)
+  /* in */ struct sidl_int__array* indices,
+/* in */ struct sidl_double__array* values)
 {
   int32_t _return;
   struct sidl_int__array* indices_proxy = sidl_int__array_ensure(indices, 1,
@@ -279,8 +279,8 @@ skel_bHYPRE_IJParCSRVector_AddToValues(
 static int32_t
 skel_bHYPRE_IJParCSRVector_GetValues(
   /* in */ bHYPRE_IJParCSRVector self,
-  /* in rarray[nvalues] */ struct sidl_int__array* indices,
-/* inout rarray[nvalues] */ struct sidl_double__array** values)
+  /* in */ struct sidl_int__array* indices,
+/* inout */ struct sidl_double__array** values)
 {
   int32_t _return;
   struct sidl_int__array* indices_proxy = sidl_int__array_ensure(indices, 1,

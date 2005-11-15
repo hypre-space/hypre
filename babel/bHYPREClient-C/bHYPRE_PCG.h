@@ -2,12 +2,12 @@
  * File:          bHYPRE_PCG.h
  * Symbol:        bHYPRE.PCG-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.10.10
+ * Babel Version: 0.10.4
  * Description:   Client-side glue code for bHYPRE.PCG
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.10
+ * babel-version = 0.10.4
  */
 
 #ifndef included_bHYPRE_PCG_h
@@ -156,7 +156,7 @@ int32_t
 bHYPRE_PCG_SetIntArray1Parameter(
   /* in */ bHYPRE_PCG self,
   /* in */ const char* name,
-  /* in rarray[nvalues] */ int32_t* value,
+  /* in */ int32_t* value,
   /* in */ int32_t nvalues);
 
 /**
@@ -167,7 +167,7 @@ int32_t
 bHYPRE_PCG_SetIntArray2Parameter(
   /* in */ bHYPRE_PCG self,
   /* in */ const char* name,
-  /* in array<int,2,column-major> */ struct sidl_int__array* value);
+  /* in */ struct sidl_int__array* value);
 
 /**
  * Set the double 1-D array parameter associated with {\tt name}.
@@ -177,7 +177,7 @@ int32_t
 bHYPRE_PCG_SetDoubleArray1Parameter(
   /* in */ bHYPRE_PCG self,
   /* in */ const char* name,
-  /* in rarray[nvalues] */ double* value,
+  /* in */ double* value,
   /* in */ int32_t nvalues);
 
 /**
@@ -188,7 +188,7 @@ int32_t
 bHYPRE_PCG_SetDoubleArray2Parameter(
   /* in */ bHYPRE_PCG self,
   /* in */ const char* name,
-  /* in array<double,2,column-major> */ struct sidl_double__array* value);
+  /* in */ struct sidl_double__array* value);
 
 /**
  * Set the int parameter associated with {\tt name}.
@@ -336,6 +336,14 @@ bHYPRE_PCG__cast2(
 void
 bHYPRE_PCG__exec(
   /* in */ bHYPRE_PCG self,
+  /* in */ const char* methodName,
+  /* in */ sidl_io_Deserializer inArgs,
+  /* in */ sidl_io_Serializer outArgs);
+/**
+ * static Exec method for reflexity.
+ */
+void
+bHYPRE_PCG__sexec(
   /* in */ const char* methodName,
   /* in */ sidl_io_Deserializer inArgs,
   /* in */ sidl_io_Serializer outArgs);

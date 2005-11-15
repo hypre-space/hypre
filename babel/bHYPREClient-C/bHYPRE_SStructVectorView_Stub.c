@@ -2,12 +2,12 @@
  * File:          bHYPRE_SStructVectorView_Stub.c
  * Symbol:        bHYPRE.SStructVectorView-v1.0.0
  * Symbol Type:   interface
- * Babel Version: 0.10.10
+ * Babel Version: 0.10.4
  * Description:   Client-side glue code for bHYPRE.SStructVectorView
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.10
+ * babel-version = 0.10.4
  */
 
 #include "bHYPRE_SStructVectorView.h"
@@ -256,10 +256,10 @@ int32_t
 bHYPRE_SStructVectorView_SetValues(
   /* in */ bHYPRE_SStructVectorView self,
   /* in */ int32_t part,
-  /* in rarray[dim] */ int32_t* index,
+  /* in */ int32_t* index,
   /* in */ int32_t dim,
   /* in */ int32_t var,
-  /* in rarray[one] */ double* values,
+  /* in */ double* values,
   /* in */ int32_t one)
 {
   int32_t index_lower[1], index_upper[1], index_stride[1]; 
@@ -299,11 +299,11 @@ int32_t
 bHYPRE_SStructVectorView_SetBoxValues(
   /* in */ bHYPRE_SStructVectorView self,
   /* in */ int32_t part,
-  /* in rarray[dim] */ int32_t* ilower,
-  /* in rarray[dim] */ int32_t* iupper,
+  /* in */ int32_t* ilower,
+  /* in */ int32_t* iupper,
   /* in */ int32_t dim,
   /* in */ int32_t var,
-  /* in rarray[nvalues] */ double* values,
+  /* in */ double* values,
   /* in */ int32_t nvalues)
 {
   int32_t ilower_lower[1], ilower_upper[1], ilower_stride[1]; 
@@ -350,10 +350,10 @@ int32_t
 bHYPRE_SStructVectorView_AddToValues(
   /* in */ bHYPRE_SStructVectorView self,
   /* in */ int32_t part,
-  /* in rarray[dim] */ int32_t* index,
+  /* in */ int32_t* index,
   /* in */ int32_t dim,
   /* in */ int32_t var,
-  /* in rarray[one] */ double* values,
+  /* in */ double* values,
   /* in */ int32_t one)
 {
   int32_t index_lower[1], index_upper[1], index_stride[1]; 
@@ -393,11 +393,11 @@ int32_t
 bHYPRE_SStructVectorView_AddToBoxValues(
   /* in */ bHYPRE_SStructVectorView self,
   /* in */ int32_t part,
-  /* in rarray[dim] */ int32_t* ilower,
-  /* in rarray[dim] */ int32_t* iupper,
+  /* in */ int32_t* ilower,
+  /* in */ int32_t* iupper,
   /* in */ int32_t dim,
   /* in */ int32_t var,
-  /* in rarray[nvalues] */ double* values,
+  /* in */ double* values,
   /* in */ int32_t nvalues)
 {
   int32_t ilower_lower[1], ilower_upper[1], ilower_stride[1]; 
@@ -456,7 +456,7 @@ int32_t
 bHYPRE_SStructVectorView_GetValues(
   /* in */ bHYPRE_SStructVectorView self,
   /* in */ int32_t part,
-  /* in rarray[dim] */ int32_t* index,
+  /* in */ int32_t* index,
   /* in */ int32_t dim,
   /* in */ int32_t var,
   /* out */ double* value)
@@ -491,11 +491,11 @@ int32_t
 bHYPRE_SStructVectorView_GetBoxValues(
   /* in */ bHYPRE_SStructVectorView self,
   /* in */ int32_t part,
-  /* in rarray[dim] */ int32_t* ilower,
-  /* in rarray[dim] */ int32_t* iupper,
+  /* in */ int32_t* ilower,
+  /* in */ int32_t* iupper,
   /* in */ int32_t dim,
   /* in */ int32_t var,
-  /* inout rarray[nvalues] */ double* values,
+  /* inout */ double* values,
   /* in */ int32_t nvalues)
 {
   int32_t ilower_lower[1], ilower_upper[1], ilower_stride[1]; 
@@ -1324,7 +1324,6 @@ remote_bHYPRE__SStructVectorView_GetObject(
   sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
     "GetObject", _ex2 );
   sidl_rmi_Response _rsvp = NULL;
-  char* A_str= NULL;
   int32_t _retval;
 
   /* pack in and inout arguments */
@@ -1336,8 +1335,7 @@ remote_bHYPRE__SStructVectorView_GetObject(
   sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval, _ex2);
 
   /* unpack out and inout arguments */
-  sidl_rmi_Response_unpackString( _rsvp, "A", &A_str, _ex2);
-  sidl_BaseInterface__connect(A_str, _ex2);
+  sidl_rmi_Response_unpackString( _rsvp, "A", A, _ex2);
 
   /* cleanup and return */
   sidl_rmi_Response_done(_rsvp, _ex2);
@@ -1385,9 +1383,9 @@ static int32_t
 remote_bHYPRE__SStructVectorView_SetValues(
   /* in */ struct bHYPRE__SStructVectorView__object* self /* TLD */,
   /* in */ int32_t part,
-  /* in rarray[dim] */ struct sidl_int__array* index,
+  /* in */ struct sidl_int__array* index,
   /* in */ int32_t var,
-  /* in rarray[one] */ struct sidl_double__array* values)
+  /* in */ struct sidl_double__array* values)
 {
   sidl_BaseInterface _ex = NULL;
   sidl_BaseInterface *_ex2 =&_ex;
@@ -1422,10 +1420,10 @@ static int32_t
 remote_bHYPRE__SStructVectorView_SetBoxValues(
   /* in */ struct bHYPRE__SStructVectorView__object* self /* TLD */,
   /* in */ int32_t part,
-  /* in rarray[dim] */ struct sidl_int__array* ilower,
-  /* in rarray[dim] */ struct sidl_int__array* iupper,
+  /* in */ struct sidl_int__array* ilower,
+  /* in */ struct sidl_int__array* iupper,
   /* in */ int32_t var,
-  /* in rarray[nvalues] */ struct sidl_double__array* values)
+  /* in */ struct sidl_double__array* values)
 {
   sidl_BaseInterface _ex = NULL;
   sidl_BaseInterface *_ex2 =&_ex;
@@ -1460,9 +1458,9 @@ static int32_t
 remote_bHYPRE__SStructVectorView_AddToValues(
   /* in */ struct bHYPRE__SStructVectorView__object* self /* TLD */,
   /* in */ int32_t part,
-  /* in rarray[dim] */ struct sidl_int__array* index,
+  /* in */ struct sidl_int__array* index,
   /* in */ int32_t var,
-  /* in rarray[one] */ struct sidl_double__array* values)
+  /* in */ struct sidl_double__array* values)
 {
   sidl_BaseInterface _ex = NULL;
   sidl_BaseInterface *_ex2 =&_ex;
@@ -1497,10 +1495,10 @@ static int32_t
 remote_bHYPRE__SStructVectorView_AddToBoxValues(
   /* in */ struct bHYPRE__SStructVectorView__object* self /* TLD */,
   /* in */ int32_t part,
-  /* in rarray[dim] */ struct sidl_int__array* ilower,
-  /* in rarray[dim] */ struct sidl_int__array* iupper,
+  /* in */ struct sidl_int__array* ilower,
+  /* in */ struct sidl_int__array* iupper,
   /* in */ int32_t var,
-  /* in rarray[nvalues] */ struct sidl_double__array* values)
+  /* in */ struct sidl_double__array* values)
 {
   sidl_BaseInterface _ex = NULL;
   sidl_BaseInterface *_ex2 =&_ex;
@@ -1566,7 +1564,7 @@ static int32_t
 remote_bHYPRE__SStructVectorView_GetValues(
   /* in */ struct bHYPRE__SStructVectorView__object* self /* TLD */,
   /* in */ int32_t part,
-  /* in rarray[dim] */ struct sidl_int__array* index,
+  /* in */ struct sidl_int__array* index,
   /* in */ int32_t var,
   /* out */ double* value)
 {
@@ -1604,10 +1602,10 @@ static int32_t
 remote_bHYPRE__SStructVectorView_GetBoxValues(
   /* in */ struct bHYPRE__SStructVectorView__object* self /* TLD */,
   /* in */ int32_t part,
-  /* in rarray[dim] */ struct sidl_int__array* ilower,
-  /* in rarray[dim] */ struct sidl_int__array* iupper,
+  /* in */ struct sidl_int__array* ilower,
+  /* in */ struct sidl_int__array* iupper,
   /* in */ int32_t var,
-  /* inout rarray[nvalues] */ struct sidl_double__array** values)
+  /* inout */ struct sidl_double__array** values)
 {
   sidl_BaseInterface _ex = NULL;
   sidl_BaseInterface *_ex2 =&_ex;

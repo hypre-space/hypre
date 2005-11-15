@@ -2,12 +2,12 @@
  * File:          bHYPRE_StructMatrixView.h
  * Symbol:        bHYPRE.StructMatrixView-v1.0.0
  * Symbol Type:   interface
- * Babel Version: 0.10.10
+ * Babel Version: 0.10.4
  * Description:   Client-side glue code for bHYPRE.StructMatrixView
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.10
+ * babel-version = 0.10.4
  */
 
 #ifndef included_bHYPRE_StructMatrixView_h
@@ -120,11 +120,11 @@ bHYPRE_StructMatrixView_SetStencil(
 int32_t
 bHYPRE_StructMatrixView_SetValues(
   /* in */ bHYPRE_StructMatrixView self,
-  /* in rarray[dim] */ int32_t* index,
+  /* in */ int32_t* index,
   /* in */ int32_t dim,
   /* in */ int32_t num_stencil_indices,
-  /* in rarray[num_stencil_indices] */ int32_t* stencil_indices,
-  /* in rarray[num_stencil_indices] */ double* values);
+  /* in */ int32_t* stencil_indices,
+  /* in */ double* values);
 
 /**
  * Method:  SetBoxValues[]
@@ -132,12 +132,12 @@ bHYPRE_StructMatrixView_SetValues(
 int32_t
 bHYPRE_StructMatrixView_SetBoxValues(
   /* in */ bHYPRE_StructMatrixView self,
-  /* in rarray[dim] */ int32_t* ilower,
-  /* in rarray[dim] */ int32_t* iupper,
+  /* in */ int32_t* ilower,
+  /* in */ int32_t* iupper,
   /* in */ int32_t dim,
   /* in */ int32_t num_stencil_indices,
-  /* in rarray[num_stencil_indices] */ int32_t* stencil_indices,
-  /* in rarray[nvalues] */ double* values,
+  /* in */ int32_t* stencil_indices,
+  /* in */ double* values,
   /* in */ int32_t nvalues);
 
 /**
@@ -146,7 +146,7 @@ bHYPRE_StructMatrixView_SetBoxValues(
 int32_t
 bHYPRE_StructMatrixView_SetNumGhost(
   /* in */ bHYPRE_StructMatrixView self,
-  /* in rarray[dim2] */ int32_t* num_ghost,
+  /* in */ int32_t* num_ghost,
   /* in */ int32_t dim2);
 
 /**
@@ -164,8 +164,7 @@ int32_t
 bHYPRE_StructMatrixView_SetConstantEntries(
   /* in */ bHYPRE_StructMatrixView self,
   /* in */ int32_t num_stencil_constant_points,
-  /* in rarray[num_stencil_constant_points] */ int32_t* 
-    stencil_constant_points);
+  /* in */ int32_t* stencil_constant_points);
 
 /**
  * Method:  SetConstantValues[]
@@ -174,8 +173,8 @@ int32_t
 bHYPRE_StructMatrixView_SetConstantValues(
   /* in */ bHYPRE_StructMatrixView self,
   /* in */ int32_t num_stencil_indices,
-  /* in rarray[num_stencil_indices] */ int32_t* stencil_indices,
-  /* in rarray[num_stencil_indices] */ double* values);
+  /* in */ int32_t* stencil_indices,
+  /* in */ double* values);
 
 /**
  * Cast method for interface and class type conversions.
@@ -198,6 +197,14 @@ bHYPRE_StructMatrixView__cast2(
 void
 bHYPRE_StructMatrixView__exec(
   /* in */ bHYPRE_StructMatrixView self,
+  /* in */ const char* methodName,
+  /* in */ sidl_io_Deserializer inArgs,
+  /* in */ sidl_io_Serializer outArgs);
+/**
+ * static Exec method for reflexity.
+ */
+void
+bHYPRE_StructMatrixView__sexec(
   /* in */ const char* methodName,
   /* in */ sidl_io_Deserializer inArgs,
   /* in */ sidl_io_Serializer outArgs);

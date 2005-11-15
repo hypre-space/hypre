@@ -2,12 +2,12 @@
  * File:          bHYPRE_Operator.h
  * Symbol:        bHYPRE.Operator-v1.0.0
  * Symbol Type:   interface
- * Babel Version: 0.10.10
+ * Babel Version: 0.10.4
  * Description:   Client-side glue code for bHYPRE.Operator
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.10
+ * babel-version = 0.10.4
  */
 
 #ifndef included_bHYPRE_Operator_h
@@ -136,7 +136,7 @@ int32_t
 bHYPRE_Operator_SetIntArray1Parameter(
   /* in */ bHYPRE_Operator self,
   /* in */ const char* name,
-  /* in rarray[nvalues] */ int32_t* value,
+  /* in */ int32_t* value,
   /* in */ int32_t nvalues);
 
 /**
@@ -147,7 +147,7 @@ int32_t
 bHYPRE_Operator_SetIntArray2Parameter(
   /* in */ bHYPRE_Operator self,
   /* in */ const char* name,
-  /* in array<int,2,column-major> */ struct sidl_int__array* value);
+  /* in */ struct sidl_int__array* value);
 
 /**
  * Set the double 1-D array parameter associated with {\tt name}.
@@ -157,7 +157,7 @@ int32_t
 bHYPRE_Operator_SetDoubleArray1Parameter(
   /* in */ bHYPRE_Operator self,
   /* in */ const char* name,
-  /* in rarray[nvalues] */ double* value,
+  /* in */ double* value,
   /* in */ int32_t nvalues);
 
 /**
@@ -168,7 +168,7 @@ int32_t
 bHYPRE_Operator_SetDoubleArray2Parameter(
   /* in */ bHYPRE_Operator self,
   /* in */ const char* name,
-  /* in array<double,2,column-major> */ struct sidl_double__array* value);
+  /* in */ struct sidl_double__array* value);
 
 /**
  * Set the int parameter associated with {\tt name}.
@@ -232,6 +232,14 @@ bHYPRE_Operator__cast2(
 void
 bHYPRE_Operator__exec(
   /* in */ bHYPRE_Operator self,
+  /* in */ const char* methodName,
+  /* in */ sidl_io_Deserializer inArgs,
+  /* in */ sidl_io_Serializer outArgs);
+/**
+ * static Exec method for reflexity.
+ */
+void
+bHYPRE_Operator__sexec(
   /* in */ const char* methodName,
   /* in */ sidl_io_Deserializer inArgs,
   /* in */ sidl_io_Serializer outArgs);

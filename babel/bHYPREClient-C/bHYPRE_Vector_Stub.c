@@ -2,12 +2,12 @@
  * File:          bHYPRE_Vector_Stub.c
  * Symbol:        bHYPRE.Vector-v1.0.0
  * Symbol Type:   interface
- * Babel Version: 0.10.10
+ * Babel Version: 0.10.4
  * Description:   Client-side glue code for bHYPRE.Vector
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.10
+ * babel-version = 0.10.4
  */
 
 #include "bHYPRE_Vector.h"
@@ -940,7 +940,6 @@ remote_bHYPRE__Vector_Copy(
   int32_t _retval;
 
   /* pack in and inout arguments */
-  sidl_rmi_Invocation_packString( _inv, "x", bHYPRE_Vector__getURL(x), _ex2);
 
   /* send actual RMI request */
   _rsvp = sidl_rmi_Invocation_invokeMethod(_inv,_ex2);
@@ -970,7 +969,6 @@ remote_bHYPRE__Vector_Clone(
   sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
     "Clone", _ex2 );
   sidl_rmi_Response _rsvp = NULL;
-  char* x_str= NULL;
   int32_t _retval;
 
   /* pack in and inout arguments */
@@ -982,8 +980,7 @@ remote_bHYPRE__Vector_Clone(
   sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval, _ex2);
 
   /* unpack out and inout arguments */
-  sidl_rmi_Response_unpackString( _rsvp, "x", &x_str, _ex2);
-  bHYPRE_Vector__connect(x_str, _ex2);
+  sidl_rmi_Response_unpackString( _rsvp, "x", x, _ex2);
 
   /* cleanup and return */
   sidl_rmi_Response_done(_rsvp, _ex2);
@@ -1042,7 +1039,6 @@ remote_bHYPRE__Vector_Dot(
   int32_t _retval;
 
   /* pack in and inout arguments */
-  sidl_rmi_Invocation_packString( _inv, "x", bHYPRE_Vector__getURL(x), _ex2);
 
   /* send actual RMI request */
   _rsvp = sidl_rmi_Invocation_invokeMethod(_inv,_ex2);
@@ -1078,7 +1074,6 @@ remote_bHYPRE__Vector_Axpy(
 
   /* pack in and inout arguments */
   sidl_rmi_Invocation_packDouble( _inv, "a", a, _ex2);
-  sidl_rmi_Invocation_packString( _inv, "x", bHYPRE_Vector__getURL(x), _ex2);
 
   /* send actual RMI request */
   _rsvp = sidl_rmi_Invocation_invokeMethod(_inv,_ex2);

@@ -2,12 +2,12 @@
  * File:          bHYPRE_SStructGraph_Impl.h
  * Symbol:        bHYPRE.SStructGraph-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.10.10
+ * Babel Version: 0.10.4
  * Description:   Server-side implementation for bHYPRE.SStructGraph
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.10.10
+ * babel-version = 0.10.4
  */
 
 #ifndef included_bHYPRE_SStructGraph_Impl_h
@@ -159,11 +159,11 @@ int32_t
 impl_bHYPRE_SStructGraph_AddEntries(
   /* in */ bHYPRE_SStructGraph self,
   /* in */ int32_t part,
-  /* in rarray[dim] */ int32_t* index,
+  /* in */ int32_t* index,
   /* in */ int32_t dim,
   /* in */ int32_t var,
   /* in */ int32_t to_part,
-  /* in rarray[dim] */ int32_t* to_index,
+  /* in */ int32_t* to_index,
   /* in */ int32_t to_var);
 
 extern

@@ -2,12 +2,12 @@
  * File:          bHYPRE_SStructParCSRVector_IOR.h
  * Symbol:        bHYPRE.SStructParCSRVector-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.10.10
+ * Babel Version: 0.10.4
  * Description:   Intermediate Object Representation for bHYPRE.SStructParCSRVector
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.10
+ * babel-version = 0.10.4
  */
 
 #ifndef included_bHYPRE_SStructParCSRVector_IOR_h
@@ -161,44 +161,44 @@ struct bHYPRE_SStructParCSRVector__epv {
   int32_t (*f_SetValues)(
     /* in */ struct bHYPRE_SStructParCSRVector__object* self,
     /* in */ int32_t part,
-    /* in rarray[dim] */ struct sidl_int__array* index,
+    /* in */ struct sidl_int__array* index,
     /* in */ int32_t var,
-    /* in rarray[one] */ struct sidl_double__array* values);
+    /* in */ struct sidl_double__array* values);
   int32_t (*f_SetBoxValues)(
     /* in */ struct bHYPRE_SStructParCSRVector__object* self,
     /* in */ int32_t part,
-    /* in rarray[dim] */ struct sidl_int__array* ilower,
-    /* in rarray[dim] */ struct sidl_int__array* iupper,
+    /* in */ struct sidl_int__array* ilower,
+    /* in */ struct sidl_int__array* iupper,
     /* in */ int32_t var,
-    /* in rarray[nvalues] */ struct sidl_double__array* values);
+    /* in */ struct sidl_double__array* values);
   int32_t (*f_AddToValues)(
     /* in */ struct bHYPRE_SStructParCSRVector__object* self,
     /* in */ int32_t part,
-    /* in rarray[dim] */ struct sidl_int__array* index,
+    /* in */ struct sidl_int__array* index,
     /* in */ int32_t var,
-    /* in rarray[one] */ struct sidl_double__array* values);
+    /* in */ struct sidl_double__array* values);
   int32_t (*f_AddToBoxValues)(
     /* in */ struct bHYPRE_SStructParCSRVector__object* self,
     /* in */ int32_t part,
-    /* in rarray[dim] */ struct sidl_int__array* ilower,
-    /* in rarray[dim] */ struct sidl_int__array* iupper,
+    /* in */ struct sidl_int__array* ilower,
+    /* in */ struct sidl_int__array* iupper,
     /* in */ int32_t var,
-    /* in rarray[nvalues] */ struct sidl_double__array* values);
+    /* in */ struct sidl_double__array* values);
   int32_t (*f_Gather)(
     /* in */ struct bHYPRE_SStructParCSRVector__object* self);
   int32_t (*f_GetValues)(
     /* in */ struct bHYPRE_SStructParCSRVector__object* self,
     /* in */ int32_t part,
-    /* in rarray[dim] */ struct sidl_int__array* index,
+    /* in */ struct sidl_int__array* index,
     /* in */ int32_t var,
     /* out */ double* value);
   int32_t (*f_GetBoxValues)(
     /* in */ struct bHYPRE_SStructParCSRVector__object* self,
     /* in */ int32_t part,
-    /* in rarray[dim] */ struct sidl_int__array* ilower,
-    /* in rarray[dim] */ struct sidl_int__array* iupper,
+    /* in */ struct sidl_int__array* ilower,
+    /* in */ struct sidl_int__array* iupper,
     /* in */ int32_t var,
-    /* inout rarray[nvalues] */ struct sidl_double__array** values);
+    /* inout */ struct sidl_double__array** values);
   int32_t (*f_SetComplex)(
     /* in */ struct bHYPRE_SStructParCSRVector__object* self);
   int32_t (*f_Print)(

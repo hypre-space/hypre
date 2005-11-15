@@ -2,12 +2,12 @@
  * File:          bHYPRE_CoefficientAccess_Stub.c
  * Symbol:        bHYPRE.CoefficientAccess-v1.0.0
  * Symbol Type:   interface
- * Babel Version: 0.10.10
+ * Babel Version: 0.10.4
  * Description:   Client-side glue code for bHYPRE.CoefficientAccess
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.10
+ * babel-version = 0.10.4
  */
 
 #include "bHYPRE_CoefficientAccess.h"
@@ -173,8 +173,8 @@ bHYPRE_CoefficientAccess_GetRow(
   /* in */ bHYPRE_CoefficientAccess self,
   /* in */ int32_t row,
   /* out */ int32_t* size,
-  /* out array<int,column-major> */ struct sidl_int__array** col_ind,
-  /* out array<double,column-major> */ struct sidl_double__array** values)
+  /* out */ struct sidl_int__array** col_ind,
+  /* out */ struct sidl_double__array** values)
 {
   return (*self->d_epv->f_GetRow)(
     self->d_object,
@@ -836,8 +836,8 @@ remote_bHYPRE__CoefficientAccess_GetRow(
   /* in */ struct bHYPRE__CoefficientAccess__object* self /* TLD */,
   /* in */ int32_t row,
   /* out */ int32_t* size,
-  /* out array<int,column-major> */ struct sidl_int__array** col_ind,
-  /* out array<double,column-major> */ struct sidl_double__array** values)
+  /* out */ struct sidl_int__array** col_ind,
+  /* out */ struct sidl_double__array** values)
 {
   sidl_BaseInterface _ex = NULL;
   sidl_BaseInterface *_ex2 =&_ex;

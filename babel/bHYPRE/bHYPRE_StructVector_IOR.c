@@ -2,12 +2,12 @@
  * File:          bHYPRE_StructVector_IOR.c
  * Symbol:        bHYPRE.StructVector-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.10.10
+ * Babel Version: 0.10.4
  * Description:   Intermediate Object Representation for bHYPRE.StructVector
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.10
+ * babel-version = 0.10.4
  */
 
 #include "sidl_rmi_InstanceHandle.h"
@@ -229,6 +229,157 @@ bHYPRE_StructVector_getClassInfo__exec(
 }
 
 static void
+bHYPRE_StructVector_Clear__exec(
+        struct bHYPRE_StructVector__object* self,
+        struct sidl_io_Deserializer__object* inArgs,
+        struct sidl_io_Serializer__object* outArgs) {
+  /* stack space for arguments */
+  int32_t _retval;
+  sidl_BaseInterface _ex   = NULL;
+  sidl_BaseInterface *_ex2 = &_ex;
+  /* unpack in and inout argments */
+
+  /* make the call */
+  _retval = (self->d_epv->f_Clear)(
+    self);
+
+  /* pack return value */
+  sidl_io_Serializer_packInt( outArgs, "_retval", _retval, _ex2);
+
+  /* pack out and inout argments */
+
+}
+
+static void
+bHYPRE_StructVector_Copy__exec(
+        struct bHYPRE_StructVector__object* self,
+        struct sidl_io_Deserializer__object* inArgs,
+        struct sidl_io_Serializer__object* outArgs) {
+  /* stack space for arguments */
+  struct bHYPRE_Vector__object* x;
+  int32_t _retval;
+  sidl_BaseInterface _ex   = NULL;
+  sidl_BaseInterface *_ex2 = &_ex;
+  /* unpack in and inout argments */
+
+  /* make the call */
+  _retval = (self->d_epv->f_Copy)(
+    self,
+    x);
+
+  /* pack return value */
+  sidl_io_Serializer_packInt( outArgs, "_retval", _retval, _ex2);
+
+  /* pack out and inout argments */
+
+}
+
+static void
+bHYPRE_StructVector_Clone__exec(
+        struct bHYPRE_StructVector__object* self,
+        struct sidl_io_Deserializer__object* inArgs,
+        struct sidl_io_Serializer__object* outArgs) {
+  /* stack space for arguments */
+  struct bHYPRE_Vector__object* x_tmp;
+  struct bHYPRE_Vector__object** x= &x_tmp;
+  int32_t _retval;
+  sidl_BaseInterface _ex   = NULL;
+  sidl_BaseInterface *_ex2 = &_ex;
+  /* unpack in and inout argments */
+
+  /* make the call */
+  _retval = (self->d_epv->f_Clone)(
+    self,
+    x);
+
+  /* pack return value */
+  sidl_io_Serializer_packInt( outArgs, "_retval", _retval, _ex2);
+
+  /* pack out and inout argments */
+
+}
+
+static void
+bHYPRE_StructVector_Scale__exec(
+        struct bHYPRE_StructVector__object* self,
+        struct sidl_io_Deserializer__object* inArgs,
+        struct sidl_io_Serializer__object* outArgs) {
+  /* stack space for arguments */
+  double a;
+  int32_t _retval;
+  sidl_BaseInterface _ex   = NULL;
+  sidl_BaseInterface *_ex2 = &_ex;
+  /* unpack in and inout argments */
+  sidl_io_Deserializer_unpackDouble( inArgs, "a", &a, _ex2);
+
+  /* make the call */
+  _retval = (self->d_epv->f_Scale)(
+    self,
+    a);
+
+  /* pack return value */
+  sidl_io_Serializer_packInt( outArgs, "_retval", _retval, _ex2);
+
+  /* pack out and inout argments */
+
+}
+
+static void
+bHYPRE_StructVector_Dot__exec(
+        struct bHYPRE_StructVector__object* self,
+        struct sidl_io_Deserializer__object* inArgs,
+        struct sidl_io_Serializer__object* outArgs) {
+  /* stack space for arguments */
+  struct bHYPRE_Vector__object* x;
+  double d_tmp;
+  double* d= &d_tmp;
+  int32_t _retval;
+  sidl_BaseInterface _ex   = NULL;
+  sidl_BaseInterface *_ex2 = &_ex;
+  /* unpack in and inout argments */
+
+  /* make the call */
+  _retval = (self->d_epv->f_Dot)(
+    self,
+    x,
+    d);
+
+  /* pack return value */
+  sidl_io_Serializer_packInt( outArgs, "_retval", _retval, _ex2);
+
+  /* pack out and inout argments */
+  sidl_io_Serializer_packDouble( outArgs, "d", *d, _ex2);
+
+}
+
+static void
+bHYPRE_StructVector_Axpy__exec(
+        struct bHYPRE_StructVector__object* self,
+        struct sidl_io_Deserializer__object* inArgs,
+        struct sidl_io_Serializer__object* outArgs) {
+  /* stack space for arguments */
+  double a;
+  struct bHYPRE_Vector__object* x;
+  int32_t _retval;
+  sidl_BaseInterface _ex   = NULL;
+  sidl_BaseInterface *_ex2 = &_ex;
+  /* unpack in and inout argments */
+  sidl_io_Deserializer_unpackDouble( inArgs, "a", &a, _ex2);
+
+  /* make the call */
+  _retval = (self->d_epv->f_Axpy)(
+    self,
+    a,
+    x);
+
+  /* pack return value */
+  sidl_io_Serializer_packInt( outArgs, "_retval", _retval, _ex2);
+
+  /* pack out and inout argments */
+
+}
+
+static void
 bHYPRE_StructVector_SetCommunicator__exec(
         struct bHYPRE_StructVector__object* self,
         struct sidl_io_Deserializer__object* inArgs,
@@ -407,157 +558,6 @@ bHYPRE_StructVector_SetBoxValues__exec(
 
 }
 
-static void
-bHYPRE_StructVector_Clear__exec(
-        struct bHYPRE_StructVector__object* self,
-        struct sidl_io_Deserializer__object* inArgs,
-        struct sidl_io_Serializer__object* outArgs) {
-  /* stack space for arguments */
-  int32_t _retval;
-  sidl_BaseInterface _ex   = NULL;
-  sidl_BaseInterface *_ex2 = &_ex;
-  /* unpack in and inout argments */
-
-  /* make the call */
-  _retval = (self->d_epv->f_Clear)(
-    self);
-
-  /* pack return value */
-  sidl_io_Serializer_packInt( outArgs, "_retval", _retval, _ex2);
-
-  /* pack out and inout argments */
-
-}
-
-static void
-bHYPRE_StructVector_Copy__exec(
-        struct bHYPRE_StructVector__object* self,
-        struct sidl_io_Deserializer__object* inArgs,
-        struct sidl_io_Serializer__object* outArgs) {
-  /* stack space for arguments */
-  struct bHYPRE_Vector__object* x;
-  int32_t _retval;
-  sidl_BaseInterface _ex   = NULL;
-  sidl_BaseInterface *_ex2 = &_ex;
-  /* unpack in and inout argments */
-
-  /* make the call */
-  _retval = (self->d_epv->f_Copy)(
-    self,
-    x);
-
-  /* pack return value */
-  sidl_io_Serializer_packInt( outArgs, "_retval", _retval, _ex2);
-
-  /* pack out and inout argments */
-
-}
-
-static void
-bHYPRE_StructVector_Clone__exec(
-        struct bHYPRE_StructVector__object* self,
-        struct sidl_io_Deserializer__object* inArgs,
-        struct sidl_io_Serializer__object* outArgs) {
-  /* stack space for arguments */
-  struct bHYPRE_Vector__object* x_tmp;
-  struct bHYPRE_Vector__object** x= &x_tmp;
-  int32_t _retval;
-  sidl_BaseInterface _ex   = NULL;
-  sidl_BaseInterface *_ex2 = &_ex;
-  /* unpack in and inout argments */
-
-  /* make the call */
-  _retval = (self->d_epv->f_Clone)(
-    self,
-    x);
-
-  /* pack return value */
-  sidl_io_Serializer_packInt( outArgs, "_retval", _retval, _ex2);
-
-  /* pack out and inout argments */
-
-}
-
-static void
-bHYPRE_StructVector_Scale__exec(
-        struct bHYPRE_StructVector__object* self,
-        struct sidl_io_Deserializer__object* inArgs,
-        struct sidl_io_Serializer__object* outArgs) {
-  /* stack space for arguments */
-  double a;
-  int32_t _retval;
-  sidl_BaseInterface _ex   = NULL;
-  sidl_BaseInterface *_ex2 = &_ex;
-  /* unpack in and inout argments */
-  sidl_io_Deserializer_unpackDouble( inArgs, "a", &a, _ex2);
-
-  /* make the call */
-  _retval = (self->d_epv->f_Scale)(
-    self,
-    a);
-
-  /* pack return value */
-  sidl_io_Serializer_packInt( outArgs, "_retval", _retval, _ex2);
-
-  /* pack out and inout argments */
-
-}
-
-static void
-bHYPRE_StructVector_Dot__exec(
-        struct bHYPRE_StructVector__object* self,
-        struct sidl_io_Deserializer__object* inArgs,
-        struct sidl_io_Serializer__object* outArgs) {
-  /* stack space for arguments */
-  struct bHYPRE_Vector__object* x;
-  double d_tmp;
-  double* d= &d_tmp;
-  int32_t _retval;
-  sidl_BaseInterface _ex   = NULL;
-  sidl_BaseInterface *_ex2 = &_ex;
-  /* unpack in and inout argments */
-
-  /* make the call */
-  _retval = (self->d_epv->f_Dot)(
-    self,
-    x,
-    d);
-
-  /* pack return value */
-  sidl_io_Serializer_packInt( outArgs, "_retval", _retval, _ex2);
-
-  /* pack out and inout argments */
-  sidl_io_Serializer_packDouble( outArgs, "d", *d, _ex2);
-
-}
-
-static void
-bHYPRE_StructVector_Axpy__exec(
-        struct bHYPRE_StructVector__object* self,
-        struct sidl_io_Deserializer__object* inArgs,
-        struct sidl_io_Serializer__object* outArgs) {
-  /* stack space for arguments */
-  double a;
-  struct bHYPRE_Vector__object* x;
-  int32_t _retval;
-  sidl_BaseInterface _ex   = NULL;
-  sidl_BaseInterface *_ex2 = &_ex;
-  /* unpack in and inout argments */
-  sidl_io_Deserializer_unpackDouble( inArgs, "a", &a, _ex2);
-
-  /* make the call */
-  _retval = (self->d_epv->f_Axpy)(
-    self,
-    a,
-    x);
-
-  /* pack return value */
-  sidl_io_Serializer_packInt( outArgs, "_retval", _retval, _ex2);
-
-  /* pack out and inout argments */
-
-}
-
 static void ior_bHYPRE_StructVector__ensure_load_called(void) {
   /*
    * assert( HAVE_LOCKED_STATIC_GLOBALS );
@@ -717,6 +717,12 @@ static void bHYPRE_StructVector__init_epv(
     bHYPRE_StructVector__object*,const char*)) s1->d_epv->f_isType;
   epv->f_getClassInfo             = (struct sidl_ClassInfo__object* (*)(struct 
     bHYPRE_StructVector__object*)) s1->d_epv->f_getClassInfo;
+  epv->f_Clear                    = NULL;
+  epv->f_Copy                     = NULL;
+  epv->f_Clone                    = NULL;
+  epv->f_Scale                    = NULL;
+  epv->f_Dot                      = NULL;
+  epv->f_Axpy                     = NULL;
   epv->f_SetCommunicator          = NULL;
   epv->f_Initialize               = NULL;
   epv->f_Assemble                 = NULL;
@@ -724,12 +730,6 @@ static void bHYPRE_StructVector__init_epv(
   epv->f_SetNumGhost              = NULL;
   epv->f_SetValue                 = NULL;
   epv->f_SetBoxValues             = NULL;
-  epv->f_Clear                    = NULL;
-  epv->f_Copy                     = NULL;
-  epv->f_Clone                    = NULL;
-  epv->f_Scale                    = NULL;
-  epv->f_Dot                      = NULL;
-  epv->f_Axpy                     = NULL;
 
   bHYPRE_StructVector__set_epv(epv);
 

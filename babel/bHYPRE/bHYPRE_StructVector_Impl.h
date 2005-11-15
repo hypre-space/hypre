@@ -2,12 +2,12 @@
  * File:          bHYPRE_StructVector_Impl.h
  * Symbol:        bHYPRE.StructVector-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.10.10
+ * Babel Version: 0.10.4
  * Description:   Server-side implementation for bHYPRE.StructVector
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.10.10
+ * babel-version = 0.10.4
  */
 
 #ifndef included_bHYPRE_StructVector_Impl_h
@@ -160,53 +160,6 @@ extern char* impl_bHYPRE_StructVector_fgetURL_sidl_BaseClass(struct
   sidl_BaseClass__object* obj);
 extern
 int32_t
-impl_bHYPRE_StructVector_SetCommunicator(
-  /* in */ bHYPRE_StructVector self,
-  /* in */ bHYPRE_MPICommunicator mpi_comm);
-
-extern
-int32_t
-impl_bHYPRE_StructVector_Initialize(
-  /* in */ bHYPRE_StructVector self);
-
-extern
-int32_t
-impl_bHYPRE_StructVector_Assemble(
-  /* in */ bHYPRE_StructVector self);
-
-extern
-int32_t
-impl_bHYPRE_StructVector_SetGrid(
-  /* in */ bHYPRE_StructVector self,
-  /* in */ bHYPRE_StructGrid grid);
-
-extern
-int32_t
-impl_bHYPRE_StructVector_SetNumGhost(
-  /* in */ bHYPRE_StructVector self,
-  /* in rarray[dim2] */ int32_t* num_ghost,
-  /* in */ int32_t dim2);
-
-extern
-int32_t
-impl_bHYPRE_StructVector_SetValue(
-  /* in */ bHYPRE_StructVector self,
-  /* in rarray[dim] */ int32_t* grid_index,
-  /* in */ int32_t dim,
-  /* in */ double value);
-
-extern
-int32_t
-impl_bHYPRE_StructVector_SetBoxValues(
-  /* in */ bHYPRE_StructVector self,
-  /* in rarray[dim] */ int32_t* ilower,
-  /* in rarray[dim] */ int32_t* iupper,
-  /* in */ int32_t dim,
-  /* in rarray[nvalues] */ double* values,
-  /* in */ int32_t nvalues);
-
-extern
-int32_t
 impl_bHYPRE_StructVector_Clear(
   /* in */ bHYPRE_StructVector self);
 
@@ -241,6 +194,53 @@ impl_bHYPRE_StructVector_Axpy(
   /* in */ bHYPRE_StructVector self,
   /* in */ double a,
   /* in */ bHYPRE_Vector x);
+
+extern
+int32_t
+impl_bHYPRE_StructVector_SetCommunicator(
+  /* in */ bHYPRE_StructVector self,
+  /* in */ bHYPRE_MPICommunicator mpi_comm);
+
+extern
+int32_t
+impl_bHYPRE_StructVector_Initialize(
+  /* in */ bHYPRE_StructVector self);
+
+extern
+int32_t
+impl_bHYPRE_StructVector_Assemble(
+  /* in */ bHYPRE_StructVector self);
+
+extern
+int32_t
+impl_bHYPRE_StructVector_SetGrid(
+  /* in */ bHYPRE_StructVector self,
+  /* in */ bHYPRE_StructGrid grid);
+
+extern
+int32_t
+impl_bHYPRE_StructVector_SetNumGhost(
+  /* in */ bHYPRE_StructVector self,
+  /* in */ int32_t* num_ghost,
+  /* in */ int32_t dim2);
+
+extern
+int32_t
+impl_bHYPRE_StructVector_SetValue(
+  /* in */ bHYPRE_StructVector self,
+  /* in */ int32_t* grid_index,
+  /* in */ int32_t dim,
+  /* in */ double value);
+
+extern
+int32_t
+impl_bHYPRE_StructVector_SetBoxValues(
+  /* in */ bHYPRE_StructVector self,
+  /* in */ int32_t* ilower,
+  /* in */ int32_t* iupper,
+  /* in */ int32_t dim,
+  /* in */ double* values,
+  /* in */ int32_t nvalues);
 
 extern struct bHYPRE_StructGrid__object* 
   impl_bHYPRE_StructVector_fconnect_bHYPRE_StructGrid(char* url,

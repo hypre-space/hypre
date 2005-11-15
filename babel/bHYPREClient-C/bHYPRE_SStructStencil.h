@@ -2,12 +2,12 @@
  * File:          bHYPRE_SStructStencil.h
  * Symbol:        bHYPRE.SStructStencil-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.10.10
+ * Babel Version: 0.10.4
  * Description:   Client-side glue code for bHYPRE.SStructStencil
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.10
+ * babel-version = 0.10.4
  */
 
 #ifndef included_bHYPRE_SStructStencil_h
@@ -118,7 +118,7 @@ int32_t
 bHYPRE_SStructStencil_SetEntry(
   /* in */ bHYPRE_SStructStencil self,
   /* in */ int32_t entry,
-  /* in rarray[dim] */ int32_t* offset,
+  /* in */ int32_t* offset,
   /* in */ int32_t dim,
   /* in */ int32_t var);
 
@@ -143,6 +143,14 @@ bHYPRE_SStructStencil__cast2(
 void
 bHYPRE_SStructStencil__exec(
   /* in */ bHYPRE_SStructStencil self,
+  /* in */ const char* methodName,
+  /* in */ sidl_io_Deserializer inArgs,
+  /* in */ sidl_io_Serializer outArgs);
+/**
+ * static Exec method for reflexity.
+ */
+void
+bHYPRE_SStructStencil__sexec(
   /* in */ const char* methodName,
   /* in */ sidl_io_Deserializer inArgs,
   /* in */ sidl_io_Serializer outArgs);

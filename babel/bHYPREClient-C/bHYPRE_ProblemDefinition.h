@@ -2,12 +2,12 @@
  * File:          bHYPRE_ProblemDefinition.h
  * Symbol:        bHYPRE.ProblemDefinition-v1.0.0
  * Symbol Type:   interface
- * Babel Version: 0.10.10
+ * Babel Version: 0.10.4
  * Description:   Client-side glue code for bHYPRE.ProblemDefinition
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.10
+ * babel-version = 0.10.4
  */
 
 #ifndef included_bHYPRE_ProblemDefinition_h
@@ -151,6 +151,14 @@ bHYPRE_ProblemDefinition__cast2(
 void
 bHYPRE_ProblemDefinition__exec(
   /* in */ bHYPRE_ProblemDefinition self,
+  /* in */ const char* methodName,
+  /* in */ sidl_io_Deserializer inArgs,
+  /* in */ sidl_io_Serializer outArgs);
+/**
+ * static Exec method for reflexity.
+ */
+void
+bHYPRE_ProblemDefinition__sexec(
   /* in */ const char* methodName,
   /* in */ sidl_io_Deserializer inArgs,
   /* in */ sidl_io_Serializer outArgs);

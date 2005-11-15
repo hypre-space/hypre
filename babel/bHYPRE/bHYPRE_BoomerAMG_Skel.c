@@ -2,12 +2,12 @@
  * File:          bHYPRE_BoomerAMG_Skel.c
  * Symbol:        bHYPRE.BoomerAMG-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.10.10
+ * Babel Version: 0.10.4
  * Description:   Server-side glue code for bHYPRE.BoomerAMG
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.10
+ * babel-version = 0.10.4
  */
 
 #include "bHYPRE_BoomerAMG_IOR.h"
@@ -85,13 +85,11 @@ extern
 int32_t
 impl_bHYPRE_BoomerAMG_InitGridRelaxation(
   /* in */ bHYPRE_BoomerAMG self,
-  /* out array<int,column-major> */ struct sidl_int__array** num_grid_sweeps,
-  /* out array<int,column-major> */ struct sidl_int__array** grid_relax_type,
-  /* out array<int,2,
-    column-major> */ struct sidl_int__array** grid_relax_points,
+  /* out */ struct sidl_int__array** num_grid_sweeps,
+  /* out */ struct sidl_int__array** grid_relax_type,
+  /* out */ struct sidl_int__array** grid_relax_points,
   /* in */ int32_t coarsen_type,
-  /* out array<double,
-    column-major> */ struct sidl_double__array** relax_weights,
+  /* out */ struct sidl_double__array** relax_weights,
   /* in */ int32_t max_levels);
 
 extern
@@ -126,7 +124,7 @@ int32_t
 impl_bHYPRE_BoomerAMG_SetIntArray1Parameter(
   /* in */ bHYPRE_BoomerAMG self,
   /* in */ const char* name,
-  /* in rarray[nvalues] */ int32_t* value,
+  /* in */ int32_t* value,
   /* in */ int32_t nvalues);
 
 extern
@@ -134,14 +132,14 @@ int32_t
 impl_bHYPRE_BoomerAMG_SetIntArray2Parameter(
   /* in */ bHYPRE_BoomerAMG self,
   /* in */ const char* name,
-  /* in array<int,2,column-major> */ struct sidl_int__array* value);
+  /* in */ struct sidl_int__array* value);
 
 extern
 int32_t
 impl_bHYPRE_BoomerAMG_SetDoubleArray1Parameter(
   /* in */ bHYPRE_BoomerAMG self,
   /* in */ const char* name,
-  /* in rarray[nvalues] */ double* value,
+  /* in */ double* value,
   /* in */ int32_t nvalues);
 
 extern
@@ -149,7 +147,7 @@ int32_t
 impl_bHYPRE_BoomerAMG_SetDoubleArray2Parameter(
   /* in */ bHYPRE_BoomerAMG self,
   /* in */ const char* name,
-  /* in array<double,2,column-major> */ struct sidl_double__array* value);
+  /* in */ struct sidl_double__array* value);
 
 extern
 int32_t
@@ -264,13 +262,11 @@ extern char* impl_bHYPRE_BoomerAMG_fgetURL_sidl_BaseClass(struct
 static int32_t
 skel_bHYPRE_BoomerAMG_InitGridRelaxation(
   /* in */ bHYPRE_BoomerAMG self,
-  /* out array<int,column-major> */ struct sidl_int__array** num_grid_sweeps,
-  /* out array<int,column-major> */ struct sidl_int__array** grid_relax_type,
-  /* out array<int,2,
-    column-major> */ struct sidl_int__array** grid_relax_points,
+  /* out */ struct sidl_int__array** num_grid_sweeps,
+  /* out */ struct sidl_int__array** grid_relax_type,
+  /* out */ struct sidl_int__array** grid_relax_points,
   /* in */ int32_t coarsen_type,
-  /* out array<double,
-    column-major> */ struct sidl_double__array** relax_weights,
+  /* out */ struct sidl_double__array** relax_weights,
 /* in */ int32_t max_levels)
 {
   int32_t _return;
@@ -306,7 +302,7 @@ static int32_t
 skel_bHYPRE_BoomerAMG_SetIntArray1Parameter(
   /* in */ bHYPRE_BoomerAMG self,
   /* in */ const char* name,
-/* in rarray[nvalues] */ struct sidl_int__array* value)
+/* in */ struct sidl_int__array* value)
 {
   int32_t _return;
   struct sidl_int__array* value_proxy = sidl_int__array_ensure(value, 1,
@@ -326,7 +322,7 @@ static int32_t
 skel_bHYPRE_BoomerAMG_SetIntArray2Parameter(
   /* in */ bHYPRE_BoomerAMG self,
   /* in */ const char* name,
-/* in array<int,2,column-major> */ struct sidl_int__array* value)
+/* in */ struct sidl_int__array* value)
 {
   int32_t _return;
   struct sidl_int__array* value_proxy = sidl_int__array_ensure(value, 2,
@@ -344,7 +340,7 @@ static int32_t
 skel_bHYPRE_BoomerAMG_SetDoubleArray1Parameter(
   /* in */ bHYPRE_BoomerAMG self,
   /* in */ const char* name,
-/* in rarray[nvalues] */ struct sidl_double__array* value)
+/* in */ struct sidl_double__array* value)
 {
   int32_t _return;
   struct sidl_double__array* value_proxy = sidl_double__array_ensure(value, 1,
@@ -364,7 +360,7 @@ static int32_t
 skel_bHYPRE_BoomerAMG_SetDoubleArray2Parameter(
   /* in */ bHYPRE_BoomerAMG self,
   /* in */ const char* name,
-/* in array<double,2,column-major> */ struct sidl_double__array* value)
+/* in */ struct sidl_double__array* value)
 {
   int32_t _return;
   struct sidl_double__array* value_proxy = sidl_double__array_ensure(value, 2,
