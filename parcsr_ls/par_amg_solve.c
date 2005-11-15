@@ -40,9 +40,15 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
    /* int      num_unknowns; */
    double   tol;
 
+   int block_mode;
+   
+
    hypre_ParCSRMatrix **A_array;
    hypre_ParVector    **F_array;
    hypre_ParVector    **U_array;
+
+   hypre_ParCSRBlockMatrix **A_block_array;
+
 
    /*  Local variables  */
 
@@ -99,6 +105,11 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
    F_array[0] = f;
    U_array[0] = u;
 
+   block_mode = hypre_ParAMGDataBlockMode(amg_data);
+
+   A_block_array          = hypre_ParAMGDataABlockArray(amg_data);
+
+
 /*   Vtemp = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A_array[0]),
                                  hypre_ParCSRMatrixGlobalNumRows(A_array[0]),
                                  hypre_ParCSRMatrixRowStarts(A_array[0]));
@@ -107,11 +118,28 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
    hypre_ParAMGDataVtemp(amg_data) = Vtemp;
 */
    Vtemp = hypre_ParAMGDataVtemp(amg_data);
-   for (j = 1; j < num_levels; j++)
+
+
+   if (block_mode)
    {
-      num_coeffs[j]    = hypre_ParCSRMatrixDNumNonzeros(A_array[j]);
-      num_variables[j] = (double) hypre_ParCSRMatrixGlobalNumRows(A_array[j]);
+      for (j = 1; j < num_levels; j++)
+      {
+         num_coeffs[j]    = (double) hypre_ParCSRBlockMatrixNumNonzeros(A_block_array[j]);
+         num_variables[j] = (double) hypre_ParCSRBlockMatrixGlobalNumRows(A_block_array[j]);
+      }
+      num_coeffs[0]    = hypre_ParCSRBlockMatrixDNumNonzeros(A_block_array[0]);
+      num_variables[0] = hypre_ParCSRBlockMatrixGlobalNumRows(A_block_array[0]);
+
    }
+   else
+   {
+      for (j = 1; j < num_levels; j++)
+      {
+         num_coeffs[j]    = (double) hypre_ParCSRMatrixNumNonzeros(A_array[j]);
+         num_variables[j] = (double) hypre_ParCSRMatrixGlobalNumRows(A_array[j]);
+      }
+   }
+   
 
    /*-----------------------------------------------------------------------
     *    Write the solver parameters

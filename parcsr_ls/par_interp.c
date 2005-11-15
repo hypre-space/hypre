@@ -246,6 +246,7 @@ hypre_BoomerAMGBuildInterp( hypre_ParCSRMatrix   *A,
       fflush(NULL);
    }
 
+
    /*-----------------------------------------------------------------------
     *  First Pass: Determine size of P and fill in fine_to_coarse mapping.
     *-----------------------------------------------------------------------*/

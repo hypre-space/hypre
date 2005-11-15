@@ -29,6 +29,7 @@ C_COMPILE_FLAGS =\
  -I$(srcdir)/../distributed_matrix\
  -I$(srcdir)/../matrix_matrix\
  -I$(srcdir)/../IJ_mv\
+ -I$(srcdir)/../parcsr_block_mv\
  ${CINCLUDES}
  
  

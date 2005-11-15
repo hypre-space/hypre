@@ -65,6 +65,9 @@ hypre_BoomerAMGCreate()
    int	    max_nz_per_row;
    char    *euclidfile;
 
+   int block_mode;
+   
+
    /* log info */
    int      num_iterations;
    int      cum_num_iterations;
@@ -122,6 +125,8 @@ hypre_BoomerAMGCreate()
    relax_order = 1;
    relax_wt = 1.0;
    outer_wt = 1.0;
+
+   block_mode = 0;
 
    /* log info */
    num_iterations = 0;
@@ -209,6 +214,13 @@ hypre_BoomerAMGCreate()
    hypre_ParAMGDataDofPointArray(amg_data) = NULL;
    hypre_ParAMGDataPointDofMapArray(amg_data) = NULL;
    hypre_ParAMGDataSmoother(amg_data) = NULL;
+  
+   hypre_ParAMGDataABlockArray(amg_data) = NULL;
+   hypre_ParAMGDataPBlockArray(amg_data) = NULL;
+   hypre_ParAMGDataRBlockArray(amg_data) = NULL;
+
+   /* this can not be set by the user currently */
+   hypre_ParAMGDataBlockMode(amg_data) = block_mode;
 
    return (void *) amg_data;
 }
@@ -263,10 +275,29 @@ hypre_BoomerAMGDestroy( void *data )
    {
 	hypre_ParVectorDestroy(hypre_ParAMGDataFArray(amg_data)[i]);
 	hypre_ParVectorDestroy(hypre_ParAMGDataUArray(amg_data)[i]);
-	hypre_ParCSRMatrixDestroy(hypre_ParAMGDataAArray(amg_data)[i]);
-	hypre_ParCSRMatrixDestroy(hypre_ParAMGDataPArray(amg_data)[i-1]);
+
+        if (hypre_ParAMGDataAArray(amg_data)[i])
+           hypre_ParCSRMatrixDestroy(hypre_ParAMGDataAArray(amg_data)[i]);
+
+        if (hypre_ParAMGDataAArray(amg_data)[i-1])
+           hypre_ParCSRMatrixDestroy(hypre_ParAMGDataPArray(amg_data)[i-1]);
+
 	hypre_TFree(hypre_ParAMGDataCFMarkerArray(amg_data)[i-1]);
+
+        /* get rid of any block structures */ 
+        if (hypre_ParAMGDataABlockArray(amg_data)[i])
+           hypre_ParCSRBlockMatrixDestroy(hypre_ParAMGDataABlockArray(amg_data)[i]);
+    
+        if (hypre_ParAMGDataPBlockArray(amg_data)[i-1])
+           hypre_ParCSRBlockMatrixDestroy(hypre_ParAMGDataPBlockArray(amg_data)[i-1]);
+
    }
+
+   /* get rid of a fine level block matrix */
+   if (hypre_ParAMGDataABlockArray(amg_data)[0])
+           hypre_ParCSRBlockMatrixDestroy(hypre_ParAMGDataABlockArray(amg_data)[0]);
+
+
    /* see comments in par_coarsen.c regarding special case for CF_marker */
    if (num_levels == 1)
    {
@@ -276,6 +307,8 @@ hypre_BoomerAMGDestroy( void *data )
    hypre_TFree(hypre_ParAMGDataFArray(amg_data));
    hypre_TFree(hypre_ParAMGDataUArray(amg_data));
    hypre_TFree(hypre_ParAMGDataAArray(amg_data));
+   hypre_TFree(hypre_ParAMGDataABlockArray(amg_data));
+   hypre_TFree(hypre_ParAMGDataPBlockArray(amg_data));
    hypre_TFree(hypre_ParAMGDataPArray(amg_data));
    hypre_TFree(hypre_ParAMGDataCFMarkerArray(amg_data));
    if (hypre_ParAMGDataRtemp(amg_data))

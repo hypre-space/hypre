@@ -11,7 +11,7 @@
 #include "krylov.h"
 #include "seq_mv.h"
 #include "parcsr_mv.h"
-#include "temp_multivector.h"
+#include "temp_multivector.h" 
  /* ... needed to make sense of functions in HYPRE_parcsr_int.c */
 
 #ifdef __cplusplus
@@ -532,6 +532,8 @@ int hypre_map2( int ix , int iy , int p , int q , int P , int Q , int *nx_part ,
 HYPRE_ParCSRMatrix GenerateLaplacian( MPI_Comm comm , int nx , int ny , int nz , int P , int Q , int R , int p , int q , int r , double *value );
 int hypre_map( int ix , int iy , int iz , int p , int q , int r , int P , int Q , int R , int *nx_part , int *ny_part , int *nz_part , int *global_part );
 HYPRE_ParCSRMatrix GenerateSysLaplacian( MPI_Comm comm , int nx , int ny , int nz , int P , int Q , int R , int p , int q , int r , int num_fun , double *mtrx , double *value );
+HYPRE_ParCSRMatrix GenerateSysLaplacianVCoef (MPI_Comm comm, int nx, int ny, int nz,  int P, int Q, int R, int p, int q, int r, int num_fun, double *mtrx, double *value);
+
 
 /* par_multi_interp.c */
 int hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix *A , int *CF_marker , hypre_ParCSRMatrix *S , int *num_cpts_global , int num_functions , int *dof_func , int debug_flag , double trunc_factor , int weight_option , int *col_offd_S_to_A , hypre_ParCSRMatrix **P_ptr );
@@ -539,6 +541,8 @@ int hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix *A , int *CF_marker , hypr
 /* par_nodal_systems.c */
 int hypre_BoomerAMGCreateNodalA( hypre_ParCSRMatrix *A , int num_functions , int *dof_func , int option , hypre_ParCSRMatrix **AN_ptr );
 int hypre_BoomerAMGCreateScalarCFS( hypre_ParCSRMatrix *SN , int *CFN_marker , int *col_offd_SN_to_AN , int num_functions , int nodal , int data , int **dof_func_ptr , int **CF_marker_ptr , int **col_offd_S_to_A_ptr , hypre_ParCSRMatrix **S_ptr );
+   int hypre_BoomerAMGCreateScalarCF(int *CFN_marker, int num_functions, int num_nodes,  int **dof_func_ptr,  int  **CF_marker_ptr);
+   
 
 /* par_rap.c */
 hypre_CSRMatrix *hypre_ExchangeRAPData( hypre_CSRMatrix *RAP_int , hypre_ParCSRCommPkg *comm_pkg_RT );

@@ -213,7 +213,7 @@ hypre_BoomerAMGCreateNodalA(hypre_ParCSRMatrix    *A,
 
    switch (mode)
    {
-      case 1:
+      case 1:  /* frobenius norm */
       {
          for (i=0; i < num_nodes; i++)
          {
@@ -242,10 +242,22 @@ hypre_BoomerAMGCreateNodalA(hypre_ParCSRMatrix    *A,
          for (i=0; i < AN_num_nonzeros_diag; i++)
             AN_diag_data[i] = sqrt(AN_diag_data[i]);
 
+#if 0
+         /* temp for testing - make all diagonal entries negative */
+         /* the diagonal is the first element listed in each row -
+            this is the same as serial code */
+
+         for (i=0; i < num_nodes; i++)
+         {
+            index = AN_diag_i[i];
+            AN_diag_data[index] = - AN_diag_data[index];
+         }
+#endif         
+
       }
       break;
       
-      case 2:
+      case 2:  /* sum of abs. value of all elements in each block */
       {
          for (i=0; i < num_nodes; i++)
          {
@@ -275,7 +287,7 @@ hypre_BoomerAMGCreateNodalA(hypre_ParCSRMatrix    *A,
       }
       break;
 
-      case 3:
+      case 3:  /* largest element of each block (sets true value - not abs. value) */
       {
 
          for (i=0; i < num_nodes; i++)
@@ -451,7 +463,7 @@ hypre_BoomerAMGCreateNodalA(hypre_ParCSRMatrix    *A,
       start_index = 0;
       switch (mode)
       {
-         case 1:
+         case 1: /* frobenius norm */
          {
             for (i=0; i < num_nodes; i++)
             {
@@ -482,7 +494,7 @@ hypre_BoomerAMGCreateNodalA(hypre_ParCSRMatrix    *A,
          }
          break;
       
-         case 2:
+         case 2:  /* sum of abs. value of all elements in block */
          {
             for (i=0; i < num_nodes; i++)
             {
@@ -512,7 +524,7 @@ hypre_BoomerAMGCreateNodalA(hypre_ParCSRMatrix    *A,
          }
          break;
 
-         case 3:
+         case 3: /* largest element in each block (not abs. value ) */
          {
             for (i=0; i < num_nodes; i++)
             {
@@ -544,12 +556,20 @@ hypre_BoomerAMGCreateNodalA(hypre_ParCSRMatrix    *A,
       }
       hypre_TFree(map_to_map);
    }
-
+   
+    
    AN = hypre_ParCSRMatrixCreate(comm, global_num_nodes, global_num_nodes,
 		row_starts_AN, row_starts_AN, num_cols_offd_AN,
 		AN_num_nonzeros_diag, AN_num_nonzeros_offd);
+
+   /* we already created the diag and offd matrices - so we don't need the ones
+      created above */
+   hypre_CSRMatrixDestroy(hypre_ParCSRMatrixDiag(AN));
+   hypre_CSRMatrixDestroy(hypre_ParCSRMatrixOffd(AN));
    hypre_ParCSRMatrixDiag(AN) = AN_diag;
    hypre_ParCSRMatrixOffd(AN) = AN_offd;
+
+
    hypre_ParCSRMatrixColMapOffd(AN) = col_map_offd_AN;
    hypre_ParCSRMatrixCommPkg(AN) = comm_pkg_AN;
 
@@ -615,6 +635,9 @@ hypre_BoomerAMGCreateNodalA(hypre_ParCSRMatrix    *A,
 
    return (ierr);
 }
+
+
+/* This creates a scalar version of the CF_marker, dof_array and strength matrix (SN) */
 
 int
 hypre_BoomerAMGCreateScalarCFS(hypre_ParCSRMatrix    *SN,
@@ -936,6 +959,57 @@ hypre_BoomerAMGCreateScalarCFS(hypre_ParCSRMatrix    *SN,
    } 
 
    *S_ptr = S; 
+
+   return (ierr);
+}
+
+
+/* This function just finds the scalaer CF_marker and dof_func */
+
+int
+hypre_BoomerAMGCreateScalarCF(int                   *CFN_marker,
+                              int                    num_functions,
+                              int                    num_nodes,
+                              int                  **dof_func_ptr,
+                              int                  **CF_marker_ptr)
+
+{
+   int		      *CF_marker;
+   int		      *dof_func;
+   int		       num_variables;
+   int		       num_coarse_nodes;
+   int		       i,j,k,cnt;
+   int		       ierr = 0;
+ 
+ 
+   num_variables = num_functions*num_nodes;
+   CF_marker = hypre_CTAlloc(int, num_variables);
+
+   cnt = 0;
+   num_coarse_nodes = 0;
+   for (i=0; i < num_nodes; i++)
+   {
+      if (CFN_marker[i] == 1) num_coarse_nodes++;
+      for (j=0; j < num_functions; j++)
+         CF_marker[cnt++] = CFN_marker[i];
+   }
+
+   
+   dof_func = hypre_CTAlloc(int,num_coarse_nodes*num_functions);
+   cnt = 0;
+   for (i=0; i < num_nodes; i++)
+   {
+      if (CFN_marker[i] == 1)
+      {
+         for (k=0; k < num_functions; k++)
+            dof_func[cnt++] = k;
+      }
+   }
+   
+
+   *dof_func_ptr = dof_func;
+   *CF_marker_ptr = CF_marker;
+
 
    return (ierr);
 }

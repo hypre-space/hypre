@@ -12,6 +12,9 @@
 
 #define CUMNUMIT
 
+#include "../parcsr_block_mv/par_csr_block_matrix.h"
+
+
 /*--------------------------------------------------------------------------
  * hypre_ParAMGData
  *--------------------------------------------------------------------------*/
@@ -67,6 +70,14 @@ typedef struct
    int                **dof_point_array;
    int                **point_dof_map_array;
    int                  num_levels;
+
+
+   /* Block data */
+   hypre_ParCSRBlockMatrix **A_block_array;
+   hypre_ParCSRBlockMatrix **P_block_array;
+   hypre_ParCSRBlockMatrix **R_block_array;
+
+   int block_mode;
 
    /* data for more complex smoothers */
    int                  smooth_num_levels;
@@ -188,6 +199,14 @@ typedef struct
 #define hypre_ParAMGDataFilter(amg_data) ((amg_data)->filter)	
 #define hypre_ParAMGDataDropTol(amg_data) ((amg_data)->drop_tol)	
 #define hypre_ParAMGDataEuclidFile(amg_data) ((amg_data)->euclidfile)	
+
+/* block */
+#define hypre_ParAMGDataABlockArray(amg_data) ((amg_data)->A_block_array)
+#define hypre_ParAMGDataPBlockArray(amg_data) ((amg_data)->P_block_array)
+#define hypre_ParAMGDataRBlockArray(amg_data) ((amg_data)->R_block_array)
+
+#define hypre_ParAMGDataBlockMode(amg_data) ((amg_data)->block_mode)
+
 
 /* data generated in the solve phase */
 #define hypre_ParAMGDataVtemp(amg_data) ((amg_data)->Vtemp)
