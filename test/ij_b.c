@@ -40,8 +40,6 @@ int BuildRhsParFromOneFile_ (int argc , char *argv [], int arg_index , int *part
 int BuildParLaplacian9pt (int argc , char *argv [], int arg_index , HYPRE_ParCSRMatrix *A_ptr );
 int BuildParLaplacian27pt (int argc , char *argv [], int arg_index , HYPRE_ParCSRMatrix *A_ptr );
 
-#define SECOND_TIME 0
- 
 int
 main( int   argc,
       char *argv[] )
@@ -86,13 +84,13 @@ main( int   argc,
    bHYPRE_PCG           bHYPRE_PCG;
    bHYPRE_HPCG          bHYPRE_HPCG;
    bHYPRE_GMRES         bHYPRE_GMRES;
+   bHYPRE_CGNR          bHYPRE_CGNR;
    bHYPRE_ParCSRDiagScale  bHYPRE_ParCSRDiagScale;
    bHYPRE_ParaSails     bHYPRE_ParaSails;
    bHYPRE_Solver        bHYPRE_SolverPC;
 
    int                 num_procs, myid;
    int                *rows;
-   int                 size;
    int                *ncols;
    int                *col_inds;
    int                *dof_func;
@@ -131,6 +129,7 @@ main( int   argc,
    int      smooth_num_sweep = 1;
    int      num_sweep = 1;
    double  *relax_weight = NULL; 
+   double  *omega;
    double   tol = 1.e-8;
    double   pc_tol = 0.;
    double   max_row_sum = 1.;
@@ -440,10 +439,6 @@ main( int   argc,
       }
    }
 
-   /* for CGNR preconditioned with Boomeramg, only relaxation scheme 2 is
-      implemented, i.e. Jacobi relaxation with Matvec */
-   if (solver_id == 5) relax_default = 2;
-
    if (solver_id == 8 || solver_id == 18)
    {
       max_levels = 1;
@@ -451,7 +446,8 @@ main( int   argc,
 
    /* defaults for BoomerAMG */
    if (solver_id == 0 || solver_id == 1 || solver_id == 3 || solver_id == 5
-       || solver_id == 9)
+	|| solver_id == 9 || solver_id == 13 || solver_id == 14
+ 	|| solver_id == 15 || solver_id == 20)
    {
       strong_threshold = 0.25;
       trunc_factor = 0.;
@@ -461,13 +457,45 @@ main( int   argc,
       grid_relax_type   = hypre_CTAlloc(int,4);
       grid_relax_points = hypre_CTAlloc(int *,4);
       relax_weight      = hypre_CTAlloc(double, max_levels);
+      omega      = hypre_CTAlloc(double, max_levels);
 
       for (i=0; i < max_levels; i++)
       {
          relax_weight[i] = 1.;
+         omega[i] = 1.;
       }
 
-      if (coarsen_type == 5)
+         /* for CGNR preconditioned with Boomeramg, only relaxation scheme 0 is
+      implemented, i.e. Jacobi relaxation */
+      if (solver_id == 5) 
+      {
+         /* fine grid */
+         relax_default = 7;
+         grid_relax_type[0] = relax_default; 
+         num_grid_sweeps[0] = num_sweep;
+         grid_relax_points[0] = hypre_CTAlloc(int, num_sweep); 
+         for (i=0; i<num_sweep; i++)
+         {
+            grid_relax_points[0][i] = 0;
+         } 
+         /* down cycle */
+         grid_relax_type[1] = relax_default; 
+         num_grid_sweeps[1] = num_sweep;
+         grid_relax_points[1] = hypre_CTAlloc(int, num_sweep); 
+         for (i=0; i<num_sweep; i++)
+         {
+            grid_relax_points[1][i] = 0;
+         } 
+         /* up cycle */
+         grid_relax_type[2] = relax_default; 
+         num_grid_sweeps[2] = num_sweep;
+         grid_relax_points[2] = hypre_CTAlloc(int, num_sweep); 
+         for (i=0; i<num_sweep; i++)
+         {
+            grid_relax_points[2][i] = 0;
+         } 
+      }
+      else if (coarsen_type == 5)
       {
          /* fine grid */
          num_grid_sweeps[0] = 3;
@@ -705,8 +733,8 @@ main( int   argc,
       printf("  -solver <ID>           : solver ID\n");
       printf("        0=AMG                1=AMG-PCG        \n");
       printf("        2=DS-PCG             3=AMG-GMRES      \n");
-      printf("        4=DS-GMRES           5*=AMG-CGNR       \n");     
-      printf("        6*=DS-CGNR           7*=PILUT-GMRES    \n");     
+      printf("        4=DS-GMRES           5=AMG-CGNR       \n");     
+      printf("        6=DS-CGNR           7*=PILUT-GMRES    \n");     
       printf("        8=ParaSails-PCG     9*=AMG-BiCGSTAB   \n");
       printf("       10*=DS-BiCGSTAB      11*=PILUT-BiCGSTAB \n");
       printf("       12*=Schwarz-PCG      18=ParaSails-GMRES\n");     
@@ -1591,10 +1619,6 @@ main( int   argc,
       bHYPRE_PCG = bHYPRE_PCG_Create( bmpicomm, bHYPRE_op_A );
       bHYPRE_Vector_b = bHYPRE_Vector__cast( bHYPRE_b );
       bHYPRE_Vector_x = bHYPRE_Vector__cast( bHYPRE_x );
-      bHYPRE_Vector_Dot( bHYPRE_Vector_b, bHYPRE_Vector_b, &tmp );
-      printf( "b.b=%f\n", tmp );
-      bHYPRE_Vector_Dot( bHYPRE_Vector_x, bHYPRE_Vector_x, &tmp );
-      printf( "x.x=%f\n", tmp );
 
       bHYPRE_PCG_SetIntParameter( bHYPRE_PCG, "MaxIterations", 500);
       bHYPRE_PCG_SetDoubleParameter( bHYPRE_PCG, "Tolerance", tol);
@@ -2271,13 +2295,6 @@ main( int   argc,
       ierr += bHYPRE_GMRES_GetDoubleValue( bHYPRE_GMRES, "Final Relative Residual Norm",
                                            &final_res_norm );
  
-#if SECOND_TIME
-      /* run a second time to check for memory leaks */
-      HYPRE_ParVectorSetRandomValues(x, 775);
-      HYPRE_GMRESSetup(pcg_solver, (HYPRE_Matrix)parcsr_A, (HYPRE_Vector)b, (HYPRE_Vector)x);
-      HYPRE_GMRESSolve(pcg_solver, (HYPRE_Matrix)parcsr_A, (HYPRE_Vector)b, (HYPRE_Vector)x);
-#endif
-
       bHYPRE_GMRES_deleteRef( bHYPRE_GMRES );
  
       if (solver_id == 3)
@@ -2437,12 +2454,6 @@ main( int   argc,
  
       HYPRE_BiCGSTABGetNumIterations(pcg_solver, &num_iterations);
       HYPRE_BiCGSTABGetFinalRelativeResidualNorm(pcg_solver,&final_res_norm);
-#if SECOND_TIME
-      /* run a second time to check for memory leaks */
-      HYPRE_ParVectorSetRandomValues(x, 775);
-      HYPRE_BiCGSTABSetup(pcg_solver, (HYPRE_Matrix)parcsr_A, (HYPRE_Vector)b, (HYPRE_Vector)x);
-      HYPRE_BiCGSTABSolve(pcg_solver, (HYPRE_Matrix)parcsr_A, (HYPRE_Vector)b, (HYPRE_Vector)x);
-#endif
 
       HYPRE_ParCSRBiCGSTABDestroy(pcg_solver);
  
@@ -2476,73 +2487,114 @@ main( int   argc,
 
    if (solver_id == 5 || solver_id == 6)
    {
-#ifdef DO_THIS_LATER
       time_index = hypre_InitializeTiming("CGNR Setup");
       hypre_BeginTiming(time_index);
- 
-      HYPRE_ParCSRCGNRCreate(mpi_comm, &pcg_solver);
-      HYPRE_CGNRSetMaxIter(pcg_solver, 1000);
-      HYPRE_CGNRSetTol(pcg_solver, tol);
-      HYPRE_CGNRSetLogging(pcg_solver, 1);
+
+      bHYPRE_op_A = bHYPRE_Operator__cast( bHYPRE_parcsr_A );
+      bHYPRE_CGNR = bHYPRE_CGNR_Create( bmpicomm, bHYPRE_op_A );
+      bHYPRE_Vector_b = bHYPRE_Vector__cast( bHYPRE_b );
+      bHYPRE_Vector_x = bHYPRE_Vector__cast( bHYPRE_x );
+
+      bHYPRE_CGNR_SetIntParameter( bHYPRE_CGNR, "MaxIterations", 1000 );
+      bHYPRE_CGNR_SetDoubleParameter( bHYPRE_CGNR, "Tolerance", tol );
+      bHYPRE_CGNR_SetLogging( bHYPRE_CGNR, 2 );
+      bHYPRE_CGNR_SetIntParameter( bHYPRE_CGNR, "PrintLevel", ioutdat );
  
       if (solver_id == 5)
       {
          /* use BoomerAMG as preconditioner */
          if (myid == 0) printf("Solver: AMG-CGNR\n");
 
-         HYPRE_BoomerAMGCreate(&pcg_precond); 
-         HYPRE_BoomerAMGSetTol(pcg_precond, pc_tol);
-         HYPRE_BoomerAMGSetCoarsenType(pcg_precond, (hybrid*coarsen_type));
-         HYPRE_BoomerAMGSetMeasureType(pcg_precond, measure_type);
-         HYPRE_BoomerAMGSetStrongThreshold(pcg_precond, strong_threshold);
-         HYPRE_BoomerAMGSetTruncFactor(pcg_precond, trunc_factor);
-         HYPRE_BoomerAMGSetPrintLevel(pcg_precond, ioutdat);
-         HYPRE_BoomerAMGSetPrintFileName(pcg_precond, "driver.out.log");
-         HYPRE_BoomerAMGSetMaxIter(pcg_precond, 1);
-         HYPRE_BoomerAMGSetCycleType(pcg_precond, cycle_type);
-         HYPRE_BoomerAMGSetNumGridSweeps(pcg_precond, num_grid_sweeps);
-         HYPRE_BoomerAMGSetGridRelaxType(pcg_precond, grid_relax_type);
-         HYPRE_BoomerAMGSetRelaxWeight(pcg_precond, relax_weight);
-         HYPRE_BoomerAMGSetSmoothType(pcg_precond, smooth_type);
-         HYPRE_BoomerAMGSetSmoothNumSweeps(pcg_precond, smooth_num_sweep);
-         HYPRE_BoomerAMGSetGridRelaxPoints(pcg_precond, grid_relax_points);
-         HYPRE_BoomerAMGSetMaxLevels(pcg_precond, max_levels);
-         HYPRE_BoomerAMGSetMaxRowSum(pcg_precond, max_row_sum);
-         HYPRE_BoomerAMGSetNumFunctions(pcg_precond, num_functions);
-         HYPRE_BoomerAMGSetVariant(pcg_precond, variant);
-         HYPRE_BoomerAMGSetOverlap(pcg_precond, overlap);
-         HYPRE_BoomerAMGSetDomainType(pcg_precond, domain_type);
+         bHYPRE_AMG = bHYPRE_BoomerAMG_Create( bmpicomm );
+         bHYPRE_BoomerAMG_SetOperator( bHYPRE_AMG, bHYPRE_op_A );
+
+         bHYPRE_BoomerAMG_SetDoubleParameter( bHYPRE_AMG, "Tolerance", pc_tol);
+         bHYPRE_BoomerAMG_SetIntParameter( bHYPRE_AMG, "CoarsenType",
+                                        (hybrid*coarsen_type));
+         bHYPRE_BoomerAMG_SetIntParameter( bHYPRE_AMG, "MeasureType",
+                                           measure_type);
+         bHYPRE_BoomerAMG_SetDoubleParameter( bHYPRE_AMG, "StrongThreshold",
+                                              strong_threshold);
+         bHYPRE_BoomerAMG_SetDoubleParameter( bHYPRE_AMG, "TruncFactor",
+                                              trunc_factor);
+         bHYPRE_BoomerAMG_SetIntParameter( bHYPRE_AMG, "PrintLevel", poutdat );
+         bHYPRE_BoomerAMG_SetStringParameter( bHYPRE_AMG, "PrintFileName",
+                                              "driver.out.log" );
+         bHYPRE_BoomerAMG_SetIntParameter( bHYPRE_AMG, "MaxIter", 1 );
+         bHYPRE_BoomerAMG_SetIntParameter( bHYPRE_AMG, "CycleType", cycle_type );
+         bHYPRE_BoomerAMG_SetIntParameter( bHYPRE_AMG, "Cycle0NumSweeps",
+                                           num_grid_sweeps[0] );
+         bHYPRE_BoomerAMG_SetIntParameter( bHYPRE_AMG, "Cycle1NumSweeps",
+                                           num_grid_sweeps[1] );
+         bHYPRE_BoomerAMG_SetIntParameter( bHYPRE_AMG, "Cycle2NumSweeps",
+                                           num_grid_sweeps[2] );
+         bHYPRE_BoomerAMG_SetIntParameter( bHYPRE_AMG, "Cycle3NumSweeps",
+                                           num_grid_sweeps[3] );
+         bHYPRE_BoomerAMG_SetIntParameter( bHYPRE_AMG, "Cycle0RelaxType",
+                                           grid_relax_type[0] );
+         bHYPRE_BoomerAMG_SetIntParameter( bHYPRE_AMG, "Cycle1RelaxType",
+                                           grid_relax_type[1] );
+         bHYPRE_BoomerAMG_SetIntParameter( bHYPRE_AMG, "Cycle2RelaxType",
+                                           grid_relax_type[2] );
+         bHYPRE_BoomerAMG_SetIntParameter( bHYPRE_AMG, "Cycle3RelaxType",
+                                           grid_relax_type[3] );
+         for ( i=0; i<max_levels; ++i )
+         {
+            bHYPRE_BoomerAMG_SetLevelRelaxWt( bHYPRE_AMG, relax_weight[i], i );
+         }
+         bHYPRE_BoomerAMG_SetIntParameter( bHYPRE_AMG, "SmoothType",
+                                           smooth_type );
+         bHYPRE_BoomerAMG_SetIntParameter( bHYPRE_AMG, "SmoothNumSweeps",
+                                           smooth_num_sweep);
+
+         dimsl[0] = 0;   dimsl[1] = 0;   dimsu[0] = 4;   dimsu[1] = 4;
+         bHYPRE_grid_relax_points = sidl_int__array_createCol( 2, dimsl, dimsu );
+         for ( i=0; i<4; ++i )
+         {
+            for ( j=0; j<num_grid_sweeps[i]; ++j )
+            {
+               sidl_int__array_set2( bHYPRE_grid_relax_points, i, j,
+                                     grid_relax_points[i][j] );
+            }
+         }
+         bHYPRE_BoomerAMG_SetIntArray2Parameter( bHYPRE_AMG, "GridRelaxPoints",
+                                                 bHYPRE_grid_relax_points );
+         sidl_int__array_deleteRef( bHYPRE_grid_relax_points );
+
+         bHYPRE_BoomerAMG_SetIntParameter( bHYPRE_AMG, "MaxLevels", max_levels);
+         bHYPRE_BoomerAMG_SetDoubleParameter( bHYPRE_AMG, "MaxRowSum",
+                                              max_row_sum);
+         bHYPRE_BoomerAMG_SetIntParameter( bHYPRE_AMG, "NumFunctions",
+                                           num_functions);
          if (num_functions > 1)
-            HYPRE_BoomerAMGSetDofFunc(pcg_precond, dof_func);
-         HYPRE_CGNRSetPrecond(pcg_solver,
-                              (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSolve,
-                              (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSolveT,
-                              (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSetup,
-                              pcg_precond);
+         {
+            bHYPRE_BoomerAMG_SetIntArray1Parameter( bHYPRE_AMG, "DOFFunc",
+                                                    dof_func, num_functions );
+         }
+         bHYPRE_BoomerAMG_SetIntParameter( bHYPRE_AMG, "Variant", variant);
+         bHYPRE_BoomerAMG_SetIntParameter( bHYPRE_AMG, "Overlap", overlap);
+         bHYPRE_BoomerAMG_SetIntParameter( bHYPRE_AMG, "DomainType", domain_type);
+
+
+         bHYPRE_SolverPC = bHYPRE_Solver__cast( bHYPRE_AMG );
+         ierr += bHYPRE_CGNR_SetPreconditioner( bHYPRE_CGNR, bHYPRE_SolverPC );
+         ierr += bHYPRE_CGNR_Setup( bHYPRE_CGNR, bHYPRE_Vector_b, bHYPRE_Vector_x );
+
       }
       else if (solver_id == 6)
       {
          /* use diagonal scaling as preconditioner */
          if (myid == 0) printf("Solver: DS-CGNR\n");
-         pcg_precond = NULL;
+         bHYPRE_ParCSRDiagScale = bHYPRE_ParCSRDiagScale_Create( bmpicomm );
+         bHYPRE_ParCSRDiagScale_SetOperator( bHYPRE_ParCSRDiagScale, bHYPRE_op_A );
+         ierr += bHYPRE_ParCSRDiagScale_Setup( bHYPRE_ParCSRDiagScale,
+                                               bHYPRE_Vector_b, bHYPRE_Vector_x );
+         bHYPRE_SolverPC =
+            bHYPRE_Solver__cast( bHYPRE_ParCSRDiagScale );
+         ierr += bHYPRE_CGNR_SetPreconditioner( bHYPRE_CGNR, bHYPRE_SolverPC );
+         ierr += bHYPRE_CGNR_Setup( bHYPRE_CGNR, bHYPRE_Vector_b, bHYPRE_Vector_x );
 
-         HYPRE_CGNRSetPrecond(pcg_solver,
-                              (HYPRE_PtrToSolverFcn) HYPRE_ParCSRDiagScale,
-                              (HYPRE_PtrToSolverFcn) HYPRE_ParCSRDiagScale,
-                              (HYPRE_PtrToSolverFcn) HYPRE_ParCSRDiagScaleSetup,
-                              pcg_precond);
       }
- 
-      HYPRE_CGNRGetPrecond(pcg_solver, &pcg_precond_gotten);
-      if (pcg_precond_gotten != pcg_precond)
-      {
-         printf("HYPRE_ParCSRCGNRGetPrecond got bad precond\n");
-         return(-1);
-      }
-      else
-         if (myid == 0)
-            printf("HYPRE_ParCSRCGNRGetPrecond got good precond\n");
-      HYPRE_CGNRSetup(pcg_solver, (HYPRE_Matrix)parcsr_A, (HYPRE_Vector)b, (HYPRE_Vector)x);
  
       hypre_EndTiming(time_index);
       hypre_PrintTiming("Setup phase times", mpi_comm);
@@ -2552,28 +2604,27 @@ main( int   argc,
       time_index = hypre_InitializeTiming("CGNR Solve");
       hypre_BeginTiming(time_index);
  
-      HYPRE_CGNRSolve(pcg_solver, (HYPRE_Matrix)parcsr_A, (HYPRE_Vector)b, (HYPRE_Vector)x);
+      ierr += bHYPRE_CGNR_Apply( bHYPRE_CGNR, bHYPRE_Vector_b, &bHYPRE_Vector_x );
  
       hypre_EndTiming(time_index);
       hypre_PrintTiming("Solve phase times", mpi_comm);
       hypre_FinalizeTiming(time_index);
       hypre_ClearTiming();
  
-      HYPRE_CGNRGetNumIterations(pcg_solver, &num_iterations);
-      HYPRE_CGNRGetFinalRelativeResidualNorm(pcg_solver,&final_res_norm);
+      ierr += bHYPRE_CGNR_GetIntValue( bHYPRE_CGNR, "NumIterations",
+                                       &num_iterations );
+      ierr += bHYPRE_CGNR_GetDoubleValue( bHYPRE_CGNR, "Final Relative Residual Norm",
+                                          &final_res_norm );
 
-#if SECOND_TIME
-      /* run a second time to check for memory leaks */
-      HYPRE_ParVectorSetRandomValues(x, 775);
-      HYPRE_CGNRSetup(pcg_solver, (HYPRE_Matrix)parcsr_A, (HYPRE_Vector)b, (HYPRE_Vector)x);
-      HYPRE_CGNRSolve(pcg_solver, (HYPRE_Matrix)parcsr_A, (HYPRE_Vector)b, (HYPRE_Vector)x);
-#endif
-
-      HYPRE_ParCSRCGNRDestroy(pcg_solver);
+      bHYPRE_CGNR_deleteRef( bHYPRE_CGNR );
  
       if (solver_id == 5)
       {
-         HYPRE_BoomerAMGDestroy(pcg_precond);
+         bHYPRE_BoomerAMG_deleteRef( bHYPRE_AMG );
+      }
+      else if ( solver_id == 6 )
+      {
+         bHYPRE_ParCSRDiagScale_deleteRef( bHYPRE_ParCSRDiagScale );
       }
       if (myid == 0)
       {
@@ -2582,7 +2633,6 @@ main( int   argc,
          printf("Final Relative Residual Norm = %e\n", final_res_norm);
          printf("\n");
       }
-#endif  /*DO_THIS_LATER*/
    }
 
    /*-----------------------------------------------------------
