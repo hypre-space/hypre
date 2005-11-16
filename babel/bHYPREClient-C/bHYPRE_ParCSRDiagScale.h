@@ -234,6 +234,16 @@ bHYPRE_ParCSRDiagScale_Apply(
   /* inout */ bHYPRE_Vector* x);
 
 /**
+ * Apply the adjoint of the operator to {\tt b}, returning {\tt x}.
+ * 
+ */
+int32_t
+bHYPRE_ParCSRDiagScale_ApplyAdjoint(
+  /* in */ bHYPRE_ParCSRDiagScale self,
+  /* in */ bHYPRE_Vector b,
+  /* inout */ bHYPRE_Vector* x);
+
+/**
  * Set the operator for the linear system being solved.
  * 
  */

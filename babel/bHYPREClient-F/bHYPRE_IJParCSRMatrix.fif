@@ -754,6 +754,25 @@ C       out int retval
 
 
 C       
+C       Apply the adjoint of the operator to {\tt b}, returning {\tt x}.
+C       
+C       
+
+        subroutine bHYPRE_IJParCSRMatrix_ApplyAdjoint_f(self, b, x,
+     &     retval)
+        implicit none
+C       in bHYPRE.IJParCSRMatrix self
+        integer*8 self
+C       in bHYPRE.Vector b
+        integer*8 b
+C       inout bHYPRE.Vector x
+        integer*8 x
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
 C       The GetRow method will allocate space for its two output
 C       arrays on the first call.  The space will be reused on
 C       subsequent calls.  Thus the user must not delete them, yet

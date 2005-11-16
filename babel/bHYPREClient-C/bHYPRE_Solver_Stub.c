@@ -377,6 +377,23 @@ bHYPRE_Solver_Apply(
 }
 
 /*
+ * Apply the adjoint of the operator to {\tt b}, returning {\tt x}.
+ * 
+ */
+
+int32_t
+bHYPRE_Solver_ApplyAdjoint(
+  /* in */ bHYPRE_Solver self,
+  /* in */ bHYPRE_Vector b,
+  /* inout */ bHYPRE_Vector* x)
+{
+  return (*self->d_epv->f_ApplyAdjoint)(
+    self->d_object,
+    b,
+    x);
+}
+
+/*
  * Set the operator for the linear system being solved.
  * 
  */
@@ -1548,6 +1565,40 @@ remote_bHYPRE__Solver_Apply(
   return _retval;
 }
 
+/* REMOTE METHOD STUB:ApplyAdjoint */
+static int32_t
+remote_bHYPRE__Solver_ApplyAdjoint(
+  /* in */ struct bHYPRE__Solver__object* self /* TLD */,
+  /* in */ struct bHYPRE_Vector__object* b,
+  /* inout */ struct bHYPRE_Vector__object** x)
+{
+  sidl_BaseInterface _ex = NULL;
+  sidl_BaseInterface *_ex2 =&_ex;
+  /* initialize a new invocation */
+  sidl_rmi_InstanceHandle _conn = (sidl_rmi_InstanceHandle)self->d_data;
+  sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
+    "ApplyAdjoint", _ex2 );
+  sidl_rmi_Response _rsvp = NULL;
+  int32_t _retval;
+
+  /* pack in and inout arguments */
+
+  /* send actual RMI request */
+  _rsvp = sidl_rmi_Invocation_invokeMethod(_inv,_ex2);
+
+  /* extract return value */
+  sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval, _ex2);
+
+  /* unpack out and inout arguments */
+  sidl_rmi_Response_unpackString( _rsvp, "x", x, _ex2);
+
+  /* cleanup and return */
+  sidl_rmi_Response_done(_rsvp, _ex2);
+  sidl_rmi_Invocation_deleteRef(_inv);
+  sidl_rmi_Response_deleteRef(_rsvp);
+  return _retval;
+}
+
 /* REMOTE METHOD STUB:SetOperator */
 static int32_t
 remote_bHYPRE__Solver_SetOperator(
@@ -1817,6 +1868,7 @@ static void bHYPRE__Solver__init_remote_epv(void)
   epv->f_GetDoubleValue                = remote_bHYPRE__Solver_GetDoubleValue;
   epv->f_Setup                         = remote_bHYPRE__Solver_Setup;
   epv->f_Apply                         = remote_bHYPRE__Solver_Apply;
+  epv->f_ApplyAdjoint                  = remote_bHYPRE__Solver_ApplyAdjoint;
   epv->f_SetOperator                   = remote_bHYPRE__Solver_SetOperator;
   epv->f_SetTolerance                  = remote_bHYPRE__Solver_SetTolerance;
   epv->f_SetMaxIterations              = remote_bHYPRE__Solver_SetMaxIterations;
@@ -1865,6 +1917,9 @@ static void bHYPRE__Solver__init_remote_epv(void)
     struct bHYPRE_Vector__object*,struct bHYPRE_Vector__object*)) epv->f_Setup;
   e0->f_Apply                    = (int32_t (*)(void*,
     struct bHYPRE_Vector__object*,struct bHYPRE_Vector__object**)) epv->f_Apply;
+  e0->f_ApplyAdjoint             = (int32_t (*)(void*,
+    struct bHYPRE_Vector__object*,
+    struct bHYPRE_Vector__object**)) epv->f_ApplyAdjoint;
 
   e1->f__cast                    = (void* (*)(void*,const char*)) epv->f__cast;
   e1->f__delete                  = (void (*)(void*)) epv->f__delete;
@@ -1905,6 +1960,9 @@ static void bHYPRE__Solver__init_remote_epv(void)
     struct bHYPRE_Vector__object*,struct bHYPRE_Vector__object*)) epv->f_Setup;
   e1->f_Apply                    = (int32_t (*)(void*,
     struct bHYPRE_Vector__object*,struct bHYPRE_Vector__object**)) epv->f_Apply;
+  e1->f_ApplyAdjoint             = (int32_t (*)(void*,
+    struct bHYPRE_Vector__object*,
+    struct bHYPRE_Vector__object**)) epv->f_ApplyAdjoint;
   e1->f_SetOperator              = (int32_t (*)(void*,
     struct bHYPRE_Operator__object*)) epv->f_SetOperator;
   e1->f_SetTolerance             = (int32_t (*)(void*,

@@ -885,6 +885,23 @@ bHYPRE_IJParCSRMatrix_Apply(
 }
 
 /*
+ * Apply the adjoint of the operator to {\tt b}, returning {\tt x}.
+ * 
+ */
+
+int32_t
+bHYPRE_IJParCSRMatrix_ApplyAdjoint(
+  /* in */ bHYPRE_IJParCSRMatrix self,
+  /* in */ bHYPRE_Vector b,
+  /* inout */ bHYPRE_Vector* x)
+{
+  return (*self->d_epv->f_ApplyAdjoint)(
+    self,
+    b,
+    x);
+}
+
+/*
  * The GetRow method will allocate space for its two output
  * arrays on the first call.  The space will be reused on
  * subsequent calls.  Thus the user must not delete them, yet
@@ -2537,6 +2554,40 @@ remote_bHYPRE_IJParCSRMatrix_Apply(
   return _retval;
 }
 
+/* REMOTE METHOD STUB:ApplyAdjoint */
+static int32_t
+remote_bHYPRE_IJParCSRMatrix_ApplyAdjoint(
+  /* in */ struct bHYPRE_IJParCSRMatrix__object* self /* TLD */,
+  /* in */ struct bHYPRE_Vector__object* b,
+  /* inout */ struct bHYPRE_Vector__object** x)
+{
+  sidl_BaseInterface _ex = NULL;
+  sidl_BaseInterface *_ex2 =&_ex;
+  /* initialize a new invocation */
+  sidl_rmi_InstanceHandle _conn = (sidl_rmi_InstanceHandle)self->d_data;
+  sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
+    "ApplyAdjoint", _ex2 );
+  sidl_rmi_Response _rsvp = NULL;
+  int32_t _retval;
+
+  /* pack in and inout arguments */
+
+  /* send actual RMI request */
+  _rsvp = sidl_rmi_Invocation_invokeMethod(_inv,_ex2);
+
+  /* extract return value */
+  sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval, _ex2);
+
+  /* unpack out and inout arguments */
+  sidl_rmi_Response_unpackString( _rsvp, "x", x, _ex2);
+
+  /* cleanup and return */
+  sidl_rmi_Response_done(_rsvp, _ex2);
+  sidl_rmi_Invocation_deleteRef(_inv);
+  sidl_rmi_Response_deleteRef(_rsvp);
+  return _retval;
+}
+
 /* REMOTE METHOD STUB:GetRow */
 static int32_t
 remote_bHYPRE_IJParCSRMatrix_GetRow(
@@ -2644,6 +2695,8 @@ static void bHYPRE_IJParCSRMatrix__init_remote_epv(void)
     remote_bHYPRE_IJParCSRMatrix_GetDoubleValue;
   epv->f_Setup                         = remote_bHYPRE_IJParCSRMatrix_Setup;
   epv->f_Apply                         = remote_bHYPRE_IJParCSRMatrix_Apply;
+  epv->f_ApplyAdjoint                  = 
+    remote_bHYPRE_IJParCSRMatrix_ApplyAdjoint;
   epv->f_GetRow                        = remote_bHYPRE_IJParCSRMatrix_GetRow;
 
   e0->f__cast        = (void* (*)(void*,const char*)) epv->f__cast;
@@ -2760,6 +2813,9 @@ static void bHYPRE_IJParCSRMatrix__init_remote_epv(void)
     struct bHYPRE_Vector__object*,struct bHYPRE_Vector__object*)) epv->f_Setup;
   e3->f_Apply                    = (int32_t (*)(void*,
     struct bHYPRE_Vector__object*,struct bHYPRE_Vector__object**)) epv->f_Apply;
+  e3->f_ApplyAdjoint             = (int32_t (*)(void*,
+    struct bHYPRE_Vector__object*,
+    struct bHYPRE_Vector__object**)) epv->f_ApplyAdjoint;
 
   e4->f__cast           = (void* (*)(void*,const char*)) epv->f__cast;
   e4->f__delete         = (void (*)(void*)) epv->f__delete;

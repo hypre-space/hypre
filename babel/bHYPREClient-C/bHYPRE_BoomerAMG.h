@@ -362,6 +362,16 @@ bHYPRE_BoomerAMG_Apply(
   /* inout */ bHYPRE_Vector* x);
 
 /**
+ * Apply the adjoint of the operator to {\tt b}, returning {\tt x}.
+ * 
+ */
+int32_t
+bHYPRE_BoomerAMG_ApplyAdjoint(
+  /* in */ bHYPRE_BoomerAMG self,
+  /* in */ bHYPRE_Vector b,
+  /* inout */ bHYPRE_Vector* x);
+
+/**
  * Set the operator for the linear system being solved.
  * 
  */

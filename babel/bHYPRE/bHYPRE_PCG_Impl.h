@@ -247,6 +247,13 @@ impl_bHYPRE_PCG_Apply(
 
 extern
 int32_t
+impl_bHYPRE_PCG_ApplyAdjoint(
+  /* in */ bHYPRE_PCG self,
+  /* in */ bHYPRE_Vector b,
+  /* inout */ bHYPRE_Vector* x);
+
+extern
+int32_t
 impl_bHYPRE_PCG_SetOperator(
   /* in */ bHYPRE_PCG self,
   /* in */ bHYPRE_Operator A);

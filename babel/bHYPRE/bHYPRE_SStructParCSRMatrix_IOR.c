@@ -912,6 +912,33 @@ bHYPRE_SStructParCSRMatrix_Apply__exec(
 
 }
 
+static void
+bHYPRE_SStructParCSRMatrix_ApplyAdjoint__exec(
+        struct bHYPRE_SStructParCSRMatrix__object* self,
+        struct sidl_io_Deserializer__object* inArgs,
+        struct sidl_io_Serializer__object* outArgs) {
+  /* stack space for arguments */
+  struct bHYPRE_Vector__object* b;
+  struct bHYPRE_Vector__object* x_tmp;
+  struct bHYPRE_Vector__object** x= &x_tmp;
+  int32_t _retval;
+  sidl_BaseInterface _ex   = NULL;
+  sidl_BaseInterface *_ex2 = &_ex;
+  /* unpack in and inout argments */
+
+  /* make the call */
+  _retval = (self->d_epv->f_ApplyAdjoint)(
+    self,
+    b,
+    x);
+
+  /* pack return value */
+  sidl_io_Serializer_packInt( outArgs, "_retval", _retval, _ex2);
+
+  /* pack out and inout argments */
+
+}
+
 static void ior_bHYPRE_SStructParCSRMatrix__ensure_load_called(void) {
   /*
    * assert( HAVE_LOCKED_STATIC_GLOBALS );
@@ -993,6 +1020,7 @@ ior_bHYPRE_SStructParCSRMatrix__exec(
     { "AddToBoxValues", bHYPRE_SStructParCSRMatrix_AddToBoxValues__exec },
     { "AddToValues", bHYPRE_SStructParCSRMatrix_AddToValues__exec },
     { "Apply", bHYPRE_SStructParCSRMatrix_Apply__exec },
+    { "ApplyAdjoint", bHYPRE_SStructParCSRMatrix_ApplyAdjoint__exec },
     { "Assemble", bHYPRE_SStructParCSRMatrix_Assemble__exec },
     { "GetDoubleValue", bHYPRE_SStructParCSRMatrix_GetDoubleValue__exec },
     { "GetIntValue", bHYPRE_SStructParCSRMatrix_GetIntValue__exec },
@@ -1121,6 +1149,7 @@ static void bHYPRE_SStructParCSRMatrix__init_epv(
   epv->f_GetDoubleValue                = NULL;
   epv->f_Setup                         = NULL;
   epv->f_Apply                         = NULL;
+  epv->f_ApplyAdjoint                  = NULL;
 
   bHYPRE_SStructParCSRMatrix__set_epv(epv);
 
@@ -1182,6 +1211,9 @@ static void bHYPRE_SStructParCSRMatrix__init_epv(
     struct bHYPRE_Vector__object*,struct bHYPRE_Vector__object*)) epv->f_Setup;
   e1->f_Apply                    = (int32_t (*)(void*,
     struct bHYPRE_Vector__object*,struct bHYPRE_Vector__object**)) epv->f_Apply;
+  e1->f_ApplyAdjoint             = (int32_t (*)(void*,
+    struct bHYPRE_Vector__object*,
+    struct bHYPRE_Vector__object**)) epv->f_ApplyAdjoint;
 
   e2->f__cast               = (void* (*)(void*,const char*)) epv->f__cast;
   e2->f__delete             = (void (*)(void*)) epv->f__delete;

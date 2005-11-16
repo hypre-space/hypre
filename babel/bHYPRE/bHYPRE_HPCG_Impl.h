@@ -252,6 +252,13 @@ impl_bHYPRE_HPCG_Apply(
 
 extern
 int32_t
+impl_bHYPRE_HPCG_ApplyAdjoint(
+  /* in */ bHYPRE_HPCG self,
+  /* in */ bHYPRE_Vector b,
+  /* inout */ bHYPRE_Vector* x);
+
+extern
+int32_t
 impl_bHYPRE_HPCG_SetOperator(
   /* in */ bHYPRE_HPCG self,
   /* in */ bHYPRE_Operator A);

@@ -740,6 +740,11 @@ package bHYPRE version 1.0.0
        **/
       int Apply(in Vector b,
                 inout Vector x);
+      /**
+       * Apply the adjoint of the operator to {\tt b}, returning {\tt x}.
+       **/
+      int ApplyAdjoint(in Vector b,
+                       inout Vector x);
    }
 
    /*----------- Interface -------------------------------------------------*/
@@ -1512,7 +1517,13 @@ package bHYPRE version 1.0.0
     *
     * RDF: Documentation goes here.
     *
-    * This PCG solver checks whether the matrix, vectors, and preconditioner
+    * The regular PCG solver calls Babel-interface matrix and vector functions.
+    * The HPCG solver calls HYPRE interface functions.
+    * The regular solver will work with any consistent matrix, vector, and
+    * preconditioner classes.  The HPCG solver will work with the more common
+    * combinations.
+    *
+    * The HPCG solver checks whether the matrix, vectors, and preconditioner
     * are of known types, and will not work with any other types.
     * Presently, the recognized data types are:
     * matrix, vector: IJParCSRMatrix, IJParCSRVector
@@ -1520,11 +1531,6 @@ package bHYPRE version 1.0.0
     * preconditioner: BoomerAMG, ParaSails, ParCSRDiagScale, IdentitySolver
     * preconditioner: StructSMG, StructPFMG
     *
-    * The regular PCG solver calls Babel-interface matrix and vector functions.
-    * The HPCG solver calls HYPRE interface functions.
-    * The regular solver will work with any consistent matrix, vector, and
-    * preconditioner classes.  The HPCG solver will work with the more common
-    * combinations.
     *
     **/
    class HPCG implements-all PreconditionedSolver
@@ -1553,6 +1559,20 @@ package bHYPRE version 1.0.0
    class GMRES implements-all PreconditionedSolver
    {
       static GMRES Create( in MPICommunicator mpi_comm );
+   }
+
+   /**
+    * Objects of this type can be cast to PreconditionedSolver objects
+    * using the {\tt \_\_cast} methods.
+    *
+    * RDF: Documentation goes here.
+    *
+    * CGNR solver calls Babel-interface functions
+    *
+    **/
+   class CGNR implements-all PreconditionedSolver
+   {
+      static CGNR Create( in MPICommunicator mpi_comm, in Operator A );
    }
 
    /**

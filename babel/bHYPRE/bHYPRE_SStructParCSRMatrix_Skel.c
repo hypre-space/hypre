@@ -287,6 +287,13 @@ impl_bHYPRE_SStructParCSRMatrix_Apply(
   /* in */ bHYPRE_Vector b,
   /* inout */ bHYPRE_Vector* x);
 
+extern
+int32_t
+impl_bHYPRE_SStructParCSRMatrix_ApplyAdjoint(
+  /* in */ bHYPRE_SStructParCSRMatrix self,
+  /* in */ bHYPRE_Vector b,
+  /* inout */ bHYPRE_Vector* x);
+
 extern struct bHYPRE_SStruct_MatrixVectorView__object* 
   impl_bHYPRE_SStructParCSRMatrix_fconnect_bHYPRE_SStruct_MatrixVectorView(
   char* url, sidl_BaseInterface *_ex);
@@ -618,6 +625,7 @@ bHYPRE_SStructParCSRMatrix__set_epv(struct bHYPRE_SStructParCSRMatrix__epv *epv)
   epv->f_GetDoubleValue = impl_bHYPRE_SStructParCSRMatrix_GetDoubleValue;
   epv->f_Setup = impl_bHYPRE_SStructParCSRMatrix_Setup;
   epv->f_Apply = impl_bHYPRE_SStructParCSRMatrix_Apply;
+  epv->f_ApplyAdjoint = impl_bHYPRE_SStructParCSRMatrix_ApplyAdjoint;
 
 }
 #ifdef __cplusplus

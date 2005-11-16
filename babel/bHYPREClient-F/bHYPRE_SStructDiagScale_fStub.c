@@ -800,6 +800,43 @@ SIDLFortran77Symbol(bhypre_sstructdiagscale_apply_f,BHYPRE_SSTRUCTDIAGSCALE_APPL
 }
 
 /*
+ * Apply the adjoint of the operator to {\tt b}, returning {\tt x}.
+ * 
+ */
+
+void
+SIDLFortran77Symbol(bhypre_sstructdiagscale_applyadjoint_f,BHYPRE_SSTRUCTDIAGSCALE_APPLYADJOINT_F,bHYPRE_SStructDiagScale_ApplyAdjoint_f)
+(
+  int64_t *self,
+  int64_t *b,
+  int64_t *x,
+  int32_t *retval
+)
+{
+  struct bHYPRE_SStructDiagScale__epv *_epv = NULL;
+  struct bHYPRE_SStructDiagScale__object* _proxy_self = NULL;
+  struct bHYPRE_Vector__object* _proxy_b = NULL;
+  struct bHYPRE_Vector__object* _proxy_x = NULL;
+  _proxy_self =
+    (struct bHYPRE_SStructDiagScale__object*)
+    (ptrdiff_t)(*self);
+  _proxy_b =
+    (struct bHYPRE_Vector__object*)
+    (ptrdiff_t)(*b);
+  _proxy_x =
+    (struct bHYPRE_Vector__object*)
+    (ptrdiff_t)(*x);
+  _epv = _proxy_self->d_epv;
+  *retval = 
+    (*(_epv->f_ApplyAdjoint))(
+      _proxy_self,
+      _proxy_b,
+      &_proxy_x
+    );
+  *x = (ptrdiff_t)_proxy_x;
+}
+
+/*
  * Set the operator for the linear system being solved.
  * 
  */

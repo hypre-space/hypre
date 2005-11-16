@@ -161,6 +161,13 @@ impl_bHYPRE_GMRES_Apply(
 
 extern
 int32_t
+impl_bHYPRE_GMRES_ApplyAdjoint(
+  /* in */ bHYPRE_GMRES self,
+  /* in */ bHYPRE_Vector b,
+  /* inout */ bHYPRE_Vector* x);
+
+extern
+int32_t
 impl_bHYPRE_GMRES_SetOperator(
   /* in */ bHYPRE_GMRES self,
   /* in */ bHYPRE_Operator A);
@@ -344,6 +351,7 @@ bHYPRE_GMRES__set_epv(struct bHYPRE_GMRES__epv *epv)
   epv->f_GetDoubleValue = impl_bHYPRE_GMRES_GetDoubleValue;
   epv->f_Setup = impl_bHYPRE_GMRES_Setup;
   epv->f_Apply = impl_bHYPRE_GMRES_Apply;
+  epv->f_ApplyAdjoint = impl_bHYPRE_GMRES_ApplyAdjoint;
   epv->f_SetOperator = impl_bHYPRE_GMRES_SetOperator;
   epv->f_SetTolerance = impl_bHYPRE_GMRES_SetTolerance;
   epv->f_SetMaxIterations = impl_bHYPRE_GMRES_SetMaxIterations;

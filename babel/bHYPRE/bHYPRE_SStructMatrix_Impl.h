@@ -365,6 +365,13 @@ impl_bHYPRE_SStructMatrix_Apply(
   /* in */ bHYPRE_Vector b,
   /* inout */ bHYPRE_Vector* x);
 
+extern
+int32_t
+impl_bHYPRE_SStructMatrix_ApplyAdjoint(
+  /* in */ bHYPRE_SStructMatrix self,
+  /* in */ bHYPRE_Vector b,
+  /* inout */ bHYPRE_Vector* x);
+
 extern struct bHYPRE_SStruct_MatrixVectorView__object* 
   impl_bHYPRE_SStructMatrix_fconnect_bHYPRE_SStruct_MatrixVectorView(char* url,
   sidl_BaseInterface *_ex);

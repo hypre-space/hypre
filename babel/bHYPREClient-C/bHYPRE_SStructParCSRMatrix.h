@@ -449,6 +449,16 @@ bHYPRE_SStructParCSRMatrix_Apply(
   /* inout */ bHYPRE_Vector* x);
 
 /**
+ * Apply the adjoint of the operator to {\tt b}, returning {\tt x}.
+ * 
+ */
+int32_t
+bHYPRE_SStructParCSRMatrix_ApplyAdjoint(
+  /* in */ bHYPRE_SStructParCSRMatrix self,
+  /* in */ bHYPRE_Vector b,
+  /* inout */ bHYPRE_Vector* x);
+
+/**
  * Cast method for interface and class type conversions.
  */
 struct bHYPRE_SStructParCSRMatrix__object*

@@ -493,6 +493,32 @@ impl_bHYPRE_SStructDiagScale_Apply(
 }
 
 /*
+ * Apply the adjoint of the operator to {\tt b}, returning {\tt x}.
+ * 
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_SStructDiagScale_ApplyAdjoint"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+int32_t
+impl_bHYPRE_SStructDiagScale_ApplyAdjoint(
+  /* in */ bHYPRE_SStructDiagScale self,
+  /* in */ bHYPRE_Vector b,
+  /* inout */ bHYPRE_Vector* x)
+{
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructDiagScale.ApplyAdjoint) */
+  /* Insert-Code-Here {bHYPRE.SStructDiagScale.ApplyAdjoint} (ApplyAdjoint method) */
+
+   /* The adjoint of a (real) diagonal matrix is itself, so just call Apply: */
+      return impl_bHYPRE_SStructDiagScale_Apply( self, b, x );
+
+  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructDiagScale.ApplyAdjoint) */
+}
+
+/*
  * Set the operator for the linear system being solved.
  * 
  */

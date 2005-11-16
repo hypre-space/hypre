@@ -249,6 +249,13 @@ impl_bHYPRE_BoomerAMG_Apply(
 
 extern
 int32_t
+impl_bHYPRE_BoomerAMG_ApplyAdjoint(
+  /* in */ bHYPRE_BoomerAMG self,
+  /* in */ bHYPRE_Vector b,
+  /* inout */ bHYPRE_Vector* x);
+
+extern
+int32_t
 impl_bHYPRE_BoomerAMG_SetOperator(
   /* in */ bHYPRE_BoomerAMG self,
   /* in */ bHYPRE_Operator A);

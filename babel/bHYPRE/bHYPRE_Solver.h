@@ -158,6 +158,12 @@ bHYPRE_Solver_Apply(
   /* in */ bHYPRE_Vector b,
   /* inout */ bHYPRE_Vector* x);
 
+int32_t
+bHYPRE_Solver_ApplyAdjoint(
+  /* in */ bHYPRE_Solver self,
+  /* in */ bHYPRE_Vector b,
+  /* inout */ bHYPRE_Vector* x);
+
 /**
  * Set the operator for the linear system being solved.
  * 

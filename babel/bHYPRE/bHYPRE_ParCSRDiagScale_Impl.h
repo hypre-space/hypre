@@ -228,6 +228,13 @@ impl_bHYPRE_ParCSRDiagScale_Apply(
 
 extern
 int32_t
+impl_bHYPRE_ParCSRDiagScale_ApplyAdjoint(
+  /* in */ bHYPRE_ParCSRDiagScale self,
+  /* in */ bHYPRE_Vector b,
+  /* inout */ bHYPRE_Vector* x);
+
+extern
+int32_t
 impl_bHYPRE_ParCSRDiagScale_SetOperator(
   /* in */ bHYPRE_ParCSRDiagScale self,
   /* in */ bHYPRE_Operator A);

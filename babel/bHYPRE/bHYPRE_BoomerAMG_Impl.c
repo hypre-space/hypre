@@ -1182,6 +1182,94 @@ impl_bHYPRE_BoomerAMG_Apply(
 }
 
 /*
+ * Apply the adjoint of the operator to {\tt b}, returning {\tt x}.
+ * 
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_BoomerAMG_ApplyAdjoint"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+int32_t
+impl_bHYPRE_BoomerAMG_ApplyAdjoint(
+  /* in */ bHYPRE_BoomerAMG self,
+  /* in */ bHYPRE_Vector b,
+  /* inout */ bHYPRE_Vector* x)
+{
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.BoomerAMG.ApplyAdjoint) */
+  /* Insert-Code-Here {bHYPRE.BoomerAMG.ApplyAdjoint} (ApplyAdjoint method) */
+
+   int ierr = 0;
+   void * objectA, * objectb, * objectx;
+   HYPRE_Solver solver;
+   struct bHYPRE_BoomerAMG__data * data;
+   struct bHYPRE_IJParCSRMatrix__data * dataA;
+   struct bHYPRE_IJParCSRVector__data * datab, * datax;
+   bHYPRE_IJParCSRMatrix A;
+   HYPRE_IJMatrix ij_A;
+   HYPRE_ParCSRMatrix bHYPREP_A;
+   bHYPRE_IJParCSRVector bHYPREP_b, bHYPREP_x;
+   HYPRE_ParVector bb, xx;
+   HYPRE_IJVector ij_b, ij_x;
+
+   data = bHYPRE_BoomerAMG__get_data( self );
+   solver = data->solver;
+   A = data->matrix;
+
+   dataA = bHYPRE_IJParCSRMatrix__get_data( A );
+   ij_A = dataA -> ij_A;
+   ierr += HYPRE_IJMatrixGetObject( ij_A, &objectA );
+   bHYPREP_A = (HYPRE_ParCSRMatrix) objectA;
+
+   if ( bHYPRE_Vector_queryInt(b, "bHYPRE.IJParCSRVector" ) )
+   {
+      bHYPREP_b = bHYPRE_IJParCSRVector__cast( b );
+   }
+   else
+   {
+      hypre_assert( "Unrecognized vector type."==(char *)x );
+   }
+
+   datab = bHYPRE_IJParCSRVector__get_data( bHYPREP_b );
+   bHYPRE_IJParCSRVector_deleteRef( bHYPREP_b );
+   ij_b = datab -> ij_b;
+   ierr += HYPRE_IJVectorGetObject( ij_b, &objectb );
+   bb = (HYPRE_ParVector) objectb;
+
+   if ( *x==NULL )
+   {
+      /* If vector not supplied, make one...*/
+      /* There's no good way to check the size of x.  It would be good
+       * to do something similar if x had zero length.  Or hypre_assert(x
+       * has the right size) */
+      bHYPRE_Vector_Clone( b, x );
+      bHYPRE_Vector_Clear( *x );
+   }
+   if ( bHYPRE_Vector_queryInt( *x, "bHYPRE.IJParCSRVector" ) )
+   {
+      bHYPREP_x = bHYPRE_IJParCSRVector__cast( *x );
+   }
+   else
+   {
+      hypre_assert( "Unrecognized vector type."==(char *)(*x) );
+   }
+
+   datax = bHYPRE_IJParCSRVector__get_data( bHYPREP_x );
+   bHYPRE_IJParCSRVector_deleteRef( bHYPREP_x );
+   ij_x = datax -> ij_b;
+   ierr += HYPRE_IJVectorGetObject( ij_x, &objectx );
+   xx = (HYPRE_ParVector) objectx;
+
+   ierr += HYPRE_BoomerAMGSolveT( solver, bHYPREP_A, bb, xx );
+
+   return ierr;
+
+  /* DO-NOT-DELETE splicer.end(bHYPRE.BoomerAMG.ApplyAdjoint) */
+}
+
+/*
  * Set the operator for the linear system being solved.
  * 
  */

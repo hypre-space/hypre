@@ -161,6 +161,13 @@ impl_bHYPRE_StructSMG_Apply(
 
 extern
 int32_t
+impl_bHYPRE_StructSMG_ApplyAdjoint(
+  /* in */ bHYPRE_StructSMG self,
+  /* in */ bHYPRE_Vector b,
+  /* inout */ bHYPRE_Vector* x);
+
+extern
+int32_t
 impl_bHYPRE_StructSMG_SetOperator(
   /* in */ bHYPRE_StructSMG self,
   /* in */ bHYPRE_Operator A);
@@ -340,6 +347,7 @@ bHYPRE_StructSMG__set_epv(struct bHYPRE_StructSMG__epv *epv)
   epv->f_GetDoubleValue = impl_bHYPRE_StructSMG_GetDoubleValue;
   epv->f_Setup = impl_bHYPRE_StructSMG_Setup;
   epv->f_Apply = impl_bHYPRE_StructSMG_Apply;
+  epv->f_ApplyAdjoint = impl_bHYPRE_StructSMG_ApplyAdjoint;
   epv->f_SetOperator = impl_bHYPRE_StructSMG_SetOperator;
   epv->f_SetTolerance = impl_bHYPRE_StructSMG_SetTolerance;
   epv->f_SetMaxIterations = impl_bHYPRE_StructSMG_SetMaxIterations;

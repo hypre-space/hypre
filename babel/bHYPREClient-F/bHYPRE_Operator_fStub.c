@@ -735,6 +735,43 @@ SIDLFortran77Symbol(bhypre_operator_apply_f,BHYPRE_OPERATOR_APPLY_F,bHYPRE_Opera
   *x = (ptrdiff_t)_proxy_x;
 }
 
+/*
+ * Apply the adjoint of the operator to {\tt b}, returning {\tt x}.
+ * 
+ */
+
+void
+SIDLFortran77Symbol(bhypre_operator_applyadjoint_f,BHYPRE_OPERATOR_APPLYADJOINT_F,bHYPRE_Operator_ApplyAdjoint_f)
+(
+  int64_t *self,
+  int64_t *b,
+  int64_t *x,
+  int32_t *retval
+)
+{
+  struct bHYPRE_Operator__epv *_epv = NULL;
+  struct bHYPRE_Operator__object* _proxy_self = NULL;
+  struct bHYPRE_Vector__object* _proxy_b = NULL;
+  struct bHYPRE_Vector__object* _proxy_x = NULL;
+  _proxy_self =
+    (struct bHYPRE_Operator__object*)
+    (ptrdiff_t)(*self);
+  _proxy_b =
+    (struct bHYPRE_Vector__object*)
+    (ptrdiff_t)(*b);
+  _proxy_x =
+    (struct bHYPRE_Vector__object*)
+    (ptrdiff_t)(*x);
+  _epv = _proxy_self->d_epv;
+  *retval = 
+    (*(_epv->f_ApplyAdjoint))(
+      _proxy_self->d_object,
+      _proxy_b,
+      &_proxy_x
+    );
+  *x = (ptrdiff_t)_proxy_x;
+}
+
 void
 SIDLFortran77Symbol(bhypre_operator__array_createcol_f,
                   BHYPRE_OPERATOR__ARRAY_CREATECOL_F,

@@ -160,6 +160,13 @@ impl_bHYPRE_HPCG_Apply(
 
 extern
 int32_t
+impl_bHYPRE_HPCG_ApplyAdjoint(
+  /* in */ bHYPRE_HPCG self,
+  /* in */ bHYPRE_Vector b,
+  /* inout */ bHYPRE_Vector* x);
+
+extern
+int32_t
 impl_bHYPRE_HPCG_SetOperator(
   /* in */ bHYPRE_HPCG self,
   /* in */ bHYPRE_Operator A);
@@ -342,6 +349,7 @@ bHYPRE_HPCG__set_epv(struct bHYPRE_HPCG__epv *epv)
   epv->f_GetDoubleValue = impl_bHYPRE_HPCG_GetDoubleValue;
   epv->f_Setup = impl_bHYPRE_HPCG_Setup;
   epv->f_Apply = impl_bHYPRE_HPCG_Apply;
+  epv->f_ApplyAdjoint = impl_bHYPRE_HPCG_ApplyAdjoint;
   epv->f_SetOperator = impl_bHYPRE_HPCG_SetOperator;
   epv->f_SetTolerance = impl_bHYPRE_HPCG_SetTolerance;
   epv->f_SetMaxIterations = impl_bHYPRE_HPCG_SetMaxIterations;

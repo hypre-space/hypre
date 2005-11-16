@@ -451,6 +451,16 @@ bHYPRE_IJParCSRMatrix_Apply(
   /* inout */ bHYPRE_Vector* x);
 
 /**
+ * Apply the adjoint of the operator to {\tt b}, returning {\tt x}.
+ * 
+ */
+int32_t
+bHYPRE_IJParCSRMatrix_ApplyAdjoint(
+  /* in */ bHYPRE_IJParCSRMatrix self,
+  /* in */ bHYPRE_Vector b,
+  /* inout */ bHYPRE_Vector* x);
+
+/**
  * The GetRow method will allocate space for its two output
  * arrays on the first call.  The space will be reused on
  * subsequent calls.  Thus the user must not delete them, yet

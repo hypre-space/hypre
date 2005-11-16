@@ -923,6 +923,31 @@ impl_bHYPRE_StructMatrix_Apply(
 
   /* DO-NOT-DELETE splicer.end(bHYPRE.StructMatrix.Apply) */
 }
+
+/*
+ * Apply the adjoint of the operator to {\tt b}, returning {\tt x}.
+ * 
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_StructMatrix_ApplyAdjoint"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+int32_t
+impl_bHYPRE_StructMatrix_ApplyAdjoint(
+  /* in */ bHYPRE_StructMatrix self,
+  /* in */ bHYPRE_Vector b,
+  /* inout */ bHYPRE_Vector* x)
+{
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructMatrix.ApplyAdjoint) */
+  /* Insert-Code-Here {bHYPRE.StructMatrix.ApplyAdjoint} (ApplyAdjoint method) */
+
+   return 1; /* not implemented */
+
+  /* DO-NOT-DELETE splicer.end(bHYPRE.StructMatrix.ApplyAdjoint) */
+}
 /* Babel internal methods, Users should not edit below this line. */
 struct bHYPRE_StructMatrix__object* 
   impl_bHYPRE_StructMatrix_fconnect_bHYPRE_StructMatrix(char* url,

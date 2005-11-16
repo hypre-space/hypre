@@ -234,6 +234,16 @@ bHYPRE_StructDiagScale_Apply(
   /* inout */ bHYPRE_Vector* x);
 
 /**
+ * Apply the adjoint of the operator to {\tt b}, returning {\tt x}.
+ * 
+ */
+int32_t
+bHYPRE_StructDiagScale_ApplyAdjoint(
+  /* in */ bHYPRE_StructDiagScale self,
+  /* in */ bHYPRE_Vector b,
+  /* inout */ bHYPRE_Vector* x);
+
+/**
  * Set the operator for the linear system being solved.
  * 
  */

@@ -18,7 +18,13 @@
  * 
  * RDF: Documentation goes here.
  * 
- * This PCG solver checks whether the matrix, vectors, and preconditioner
+ * The regular PCG solver calls Babel-interface matrix and vector functions.
+ * The HPCG solver calls HYPRE interface functions.
+ * The regular solver will work with any consistent matrix, vector, and
+ * preconditioner classes.  The HPCG solver will work with the more common
+ * combinations.
+ * 
+ * The HPCG solver checks whether the matrix, vectors, and preconditioner
  * are of known types, and will not work with any other types.
  * Presently, the recognized data types are:
  * matrix, vector: IJParCSRMatrix, IJParCSRVector
@@ -26,11 +32,6 @@
  * preconditioner: BoomerAMG, ParaSails, ParCSRDiagScale, IdentitySolver
  * preconditioner: StructSMG, StructPFMG
  * 
- * The regular PCG solver calls Babel-interface matrix and vector functions.
- * The HPCG solver calls HYPRE interface functions.
- * The regular solver will work with any consistent matrix, vector, and
- * preconditioner classes.  The HPCG solver will work with the more common
- * combinations.
  * 
  * 
  */
@@ -813,6 +814,43 @@ SIDLFortran77Symbol(bhypre_hpcg_apply_f,BHYPRE_HPCG_APPLY_F,bHYPRE_HPCG_Apply_f)
   _epv = _proxy_self->d_epv;
   *retval = 
     (*(_epv->f_Apply))(
+      _proxy_self,
+      _proxy_b,
+      &_proxy_x
+    );
+  *x = (ptrdiff_t)_proxy_x;
+}
+
+/*
+ * Apply the adjoint of the operator to {\tt b}, returning {\tt x}.
+ * 
+ */
+
+void
+SIDLFortran77Symbol(bhypre_hpcg_applyadjoint_f,BHYPRE_HPCG_APPLYADJOINT_F,bHYPRE_HPCG_ApplyAdjoint_f)
+(
+  int64_t *self,
+  int64_t *b,
+  int64_t *x,
+  int32_t *retval
+)
+{
+  struct bHYPRE_HPCG__epv *_epv = NULL;
+  struct bHYPRE_HPCG__object* _proxy_self = NULL;
+  struct bHYPRE_Vector__object* _proxy_b = NULL;
+  struct bHYPRE_Vector__object* _proxy_x = NULL;
+  _proxy_self =
+    (struct bHYPRE_HPCG__object*)
+    (ptrdiff_t)(*self);
+  _proxy_b =
+    (struct bHYPRE_Vector__object*)
+    (ptrdiff_t)(*b);
+  _proxy_x =
+    (struct bHYPRE_Vector__object*)
+    (ptrdiff_t)(*x);
+  _epv = _proxy_self->d_epv;
+  *retval = 
+    (*(_epv->f_ApplyAdjoint))(
       _proxy_self,
       _proxy_b,
       &_proxy_x

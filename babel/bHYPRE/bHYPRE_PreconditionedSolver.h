@@ -162,6 +162,12 @@ bHYPRE_PreconditionedSolver_Apply(
   /* inout */ bHYPRE_Vector* x);
 
 int32_t
+bHYPRE_PreconditionedSolver_ApplyAdjoint(
+  /* in */ bHYPRE_PreconditionedSolver self,
+  /* in */ bHYPRE_Vector b,
+  /* inout */ bHYPRE_Vector* x);
+
+int32_t
 bHYPRE_PreconditionedSolver_SetOperator(
   /* in */ bHYPRE_PreconditionedSolver self,
   /* in */ bHYPRE_Operator A);

@@ -20,7 +20,13 @@ C       using the {\tt \_\_cast} methods.
 C       
 C       RDF: Documentation goes here.
 C       
-C       This PCG solver checks whether the matrix, vectors, and preconditioner
+C       The regular PCG solver calls Babel-interface matrix and vector functions.
+C       The HPCG solver calls HYPRE interface functions.
+C       The regular solver will work with any consistent matrix, vector, and
+C       preconditioner classes.  The HPCG solver will work with the more common
+C       combinations.
+C       
+C       The HPCG solver checks whether the matrix, vectors, and preconditioner
 C       are of known types, and will not work with any other types.
 C       Presently, the recognized data types are:
 C       matrix, vector: IJParCSRMatrix, IJParCSRVector
@@ -28,11 +34,6 @@ C       matrix, vector: StructMatrix, StructVector
 C       preconditioner: BoomerAMG, ParaSails, ParCSRDiagScale, IdentitySolver
 C       preconditioner: StructSMG, StructPFMG
 C       
-C       The regular PCG solver calls Babel-interface matrix and vector functions.
-C       The HPCG solver calls HYPRE interface functions.
-C       The regular solver will work with any consistent matrix, vector, and
-C       preconditioner classes.  The HPCG solver will work with the more common
-C       combinations.
 C       
 C       
 C       
@@ -409,6 +410,24 @@ C
 C       
 
         subroutine bHYPRE_HPCG_Apply_f(self, b, x, retval)
+        implicit none
+C       in bHYPRE.HPCG self
+        integer*8 self
+C       in bHYPRE.Vector b
+        integer*8 b
+C       inout bHYPRE.Vector x
+        integer*8 x
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Apply the adjoint of the operator to {\tt b}, returning {\tt x}.
+C       
+C       
+
+        subroutine bHYPRE_HPCG_ApplyAdjoint_f(self, b, x, retval)
         implicit none
 C       in bHYPRE.HPCG self
         integer*8 self

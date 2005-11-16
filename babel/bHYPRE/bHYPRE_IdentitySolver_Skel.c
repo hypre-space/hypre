@@ -161,6 +161,13 @@ impl_bHYPRE_IdentitySolver_Apply(
 
 extern
 int32_t
+impl_bHYPRE_IdentitySolver_ApplyAdjoint(
+  /* in */ bHYPRE_IdentitySolver self,
+  /* in */ bHYPRE_Vector b,
+  /* inout */ bHYPRE_Vector* x);
+
+extern
+int32_t
 impl_bHYPRE_IdentitySolver_SetOperator(
   /* in */ bHYPRE_IdentitySolver self,
   /* in */ bHYPRE_Operator A);
@@ -342,6 +349,7 @@ bHYPRE_IdentitySolver__set_epv(struct bHYPRE_IdentitySolver__epv *epv)
   epv->f_GetDoubleValue = impl_bHYPRE_IdentitySolver_GetDoubleValue;
   epv->f_Setup = impl_bHYPRE_IdentitySolver_Setup;
   epv->f_Apply = impl_bHYPRE_IdentitySolver_Apply;
+  epv->f_ApplyAdjoint = impl_bHYPRE_IdentitySolver_ApplyAdjoint;
   epv->f_SetOperator = impl_bHYPRE_IdentitySolver_SetOperator;
   epv->f_SetTolerance = impl_bHYPRE_IdentitySolver_SetTolerance;
   epv->f_SetMaxIterations = impl_bHYPRE_IdentitySolver_SetMaxIterations;

@@ -253,6 +253,13 @@ impl_bHYPRE_StructMatrix_Apply(
   /* in */ bHYPRE_Vector b,
   /* inout */ bHYPRE_Vector* x);
 
+extern
+int32_t
+impl_bHYPRE_StructMatrix_ApplyAdjoint(
+  /* in */ bHYPRE_StructMatrix self,
+  /* in */ bHYPRE_Vector b,
+  /* inout */ bHYPRE_Vector* x);
+
 extern struct bHYPRE_StructMatrix__object* 
   impl_bHYPRE_StructMatrix_fconnect_bHYPRE_StructMatrix(char* url,
   sidl_BaseInterface *_ex);
@@ -550,6 +557,7 @@ bHYPRE_StructMatrix__set_epv(struct bHYPRE_StructMatrix__epv *epv)
   epv->f_GetDoubleValue = impl_bHYPRE_StructMatrix_GetDoubleValue;
   epv->f_Setup = impl_bHYPRE_StructMatrix_Setup;
   epv->f_Apply = impl_bHYPRE_StructMatrix_Apply;
+  epv->f_ApplyAdjoint = impl_bHYPRE_StructMatrix_ApplyAdjoint;
 
 }
 #ifdef __cplusplus

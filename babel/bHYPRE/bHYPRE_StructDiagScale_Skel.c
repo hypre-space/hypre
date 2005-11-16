@@ -161,6 +161,13 @@ impl_bHYPRE_StructDiagScale_Apply(
 
 extern
 int32_t
+impl_bHYPRE_StructDiagScale_ApplyAdjoint(
+  /* in */ bHYPRE_StructDiagScale self,
+  /* in */ bHYPRE_Vector b,
+  /* inout */ bHYPRE_Vector* x);
+
+extern
+int32_t
 impl_bHYPRE_StructDiagScale_SetOperator(
   /* in */ bHYPRE_StructDiagScale self,
   /* in */ bHYPRE_Operator A);
@@ -342,6 +349,7 @@ bHYPRE_StructDiagScale__set_epv(struct bHYPRE_StructDiagScale__epv *epv)
   epv->f_GetDoubleValue = impl_bHYPRE_StructDiagScale_GetDoubleValue;
   epv->f_Setup = impl_bHYPRE_StructDiagScale_Setup;
   epv->f_Apply = impl_bHYPRE_StructDiagScale_Apply;
+  epv->f_ApplyAdjoint = impl_bHYPRE_StructDiagScale_ApplyAdjoint;
   epv->f_SetOperator = impl_bHYPRE_StructDiagScale_SetOperator;
   epv->f_SetTolerance = impl_bHYPRE_StructDiagScale_SetTolerance;
   epv->f_SetMaxIterations = impl_bHYPRE_StructDiagScale_SetMaxIterations;

@@ -132,6 +132,10 @@ struct bHYPRE_Operator__epv {
     /* in */ void* self,
     /* in */ struct bHYPRE_Vector__object* b,
     /* inout */ struct bHYPRE_Vector__object** x);
+  int32_t (*f_ApplyAdjoint)(
+    /* in */ void* self,
+    /* in */ struct bHYPRE_Vector__object* b,
+    /* inout */ struct bHYPRE_Vector__object** x);
 };
 
 /*
@@ -247,6 +251,10 @@ struct bHYPRE__Operator__epv {
     /* in */ struct bHYPRE_Vector__object* b,
     /* in */ struct bHYPRE_Vector__object* x);
   int32_t (*f_Apply)(
+    /* in */ struct bHYPRE__Operator__object* self,
+    /* in */ struct bHYPRE_Vector__object* b,
+    /* inout */ struct bHYPRE_Vector__object** x);
+  int32_t (*f_ApplyAdjoint)(
     /* in */ struct bHYPRE__Operator__object* self,
     /* in */ struct bHYPRE_Vector__object* b,
     /* inout */ struct bHYPRE_Vector__object** x);

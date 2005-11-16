@@ -294,6 +294,13 @@ impl_bHYPRE_IJParCSRMatrix_Apply(
 
 extern
 int32_t
+impl_bHYPRE_IJParCSRMatrix_ApplyAdjoint(
+  /* in */ bHYPRE_IJParCSRMatrix self,
+  /* in */ bHYPRE_Vector b,
+  /* inout */ bHYPRE_Vector* x);
+
+extern
+int32_t
 impl_bHYPRE_IJParCSRMatrix_GetRow(
   /* in */ bHYPRE_IJParCSRMatrix self,
   /* in */ int32_t row,
@@ -707,6 +714,7 @@ bHYPRE_IJParCSRMatrix__set_epv(struct bHYPRE_IJParCSRMatrix__epv *epv)
   epv->f_GetDoubleValue = impl_bHYPRE_IJParCSRMatrix_GetDoubleValue;
   epv->f_Setup = impl_bHYPRE_IJParCSRMatrix_Setup;
   epv->f_Apply = impl_bHYPRE_IJParCSRMatrix_Apply;
+  epv->f_ApplyAdjoint = impl_bHYPRE_IJParCSRMatrix_ApplyAdjoint;
   epv->f_GetRow = skel_bHYPRE_IJParCSRMatrix_GetRow;
 
 }

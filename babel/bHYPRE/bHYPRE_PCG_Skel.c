@@ -160,6 +160,13 @@ impl_bHYPRE_PCG_Apply(
 
 extern
 int32_t
+impl_bHYPRE_PCG_ApplyAdjoint(
+  /* in */ bHYPRE_PCG self,
+  /* in */ bHYPRE_Vector b,
+  /* inout */ bHYPRE_Vector* x);
+
+extern
+int32_t
 impl_bHYPRE_PCG_SetOperator(
   /* in */ bHYPRE_PCG self,
   /* in */ bHYPRE_Operator A);
@@ -341,6 +348,7 @@ bHYPRE_PCG__set_epv(struct bHYPRE_PCG__epv *epv)
   epv->f_GetDoubleValue = impl_bHYPRE_PCG_GetDoubleValue;
   epv->f_Setup = impl_bHYPRE_PCG_Setup;
   epv->f_Apply = impl_bHYPRE_PCG_Apply;
+  epv->f_ApplyAdjoint = impl_bHYPRE_PCG_ApplyAdjoint;
   epv->f_SetOperator = impl_bHYPRE_PCG_SetOperator;
   epv->f_SetTolerance = impl_bHYPRE_PCG_SetTolerance;
   epv->f_SetMaxIterations = impl_bHYPRE_PCG_SetMaxIterations;

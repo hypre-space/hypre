@@ -231,6 +231,13 @@ impl_bHYPRE_StructSMG_Apply(
 
 extern
 int32_t
+impl_bHYPRE_StructSMG_ApplyAdjoint(
+  /* in */ bHYPRE_StructSMG self,
+  /* in */ bHYPRE_Vector b,
+  /* inout */ bHYPRE_Vector* x);
+
+extern
+int32_t
 impl_bHYPRE_StructSMG_SetOperator(
   /* in */ bHYPRE_StructSMG self,
   /* in */ bHYPRE_Operator A);

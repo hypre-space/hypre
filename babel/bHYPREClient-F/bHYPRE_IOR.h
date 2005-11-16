@@ -23,6 +23,9 @@
 #ifndef included_bHYPRE_BoomerAMG_IOR_h
 #include "bHYPRE_BoomerAMG_IOR.h"
 #endif
+#ifndef included_bHYPRE_CGNR_IOR_h
+#include "bHYPRE_CGNR_IOR.h"
+#endif
 #ifndef included_bHYPRE_CoefficientAccess_IOR_h
 #include "bHYPRE_CoefficientAccess_IOR.h"
 #endif

@@ -918,6 +918,31 @@ impl_bHYPRE_GMRES_Apply(
 }
 
 /*
+ * Apply the adjoint of the operator to {\tt b}, returning {\tt x}.
+ * 
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_GMRES_ApplyAdjoint"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+int32_t
+impl_bHYPRE_GMRES_ApplyAdjoint(
+  /* in */ bHYPRE_GMRES self,
+  /* in */ bHYPRE_Vector b,
+  /* inout */ bHYPRE_Vector* x)
+{
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.GMRES.ApplyAdjoint) */
+  /* Insert-Code-Here {bHYPRE.GMRES.ApplyAdjoint} (ApplyAdjoint method) */
+
+   return 1; /* not implemented */
+
+  /* DO-NOT-DELETE splicer.end(bHYPRE.GMRES.ApplyAdjoint) */
+}
+
+/*
  * Set the operator for the linear system being solved.
  * 
  */

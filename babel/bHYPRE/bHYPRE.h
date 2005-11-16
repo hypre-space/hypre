@@ -13,6 +13,9 @@
 #ifndef included_bHYPRE_BoomerAMG_h
 #include "bHYPRE_BoomerAMG.h"
 #endif
+#ifndef included_bHYPRE_CGNR_h
+#include "bHYPRE_CGNR.h"
+#endif
 #ifndef included_bHYPRE_CoefficientAccess_h
 #include "bHYPRE_CoefficientAccess.h"
 #endif

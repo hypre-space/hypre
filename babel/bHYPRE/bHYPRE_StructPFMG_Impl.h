@@ -230,6 +230,13 @@ impl_bHYPRE_StructPFMG_Apply(
 
 extern
 int32_t
+impl_bHYPRE_StructPFMG_ApplyAdjoint(
+  /* in */ bHYPRE_StructPFMG self,
+  /* in */ bHYPRE_Vector b,
+  /* inout */ bHYPRE_Vector* x);
+
+extern
+int32_t
 impl_bHYPRE_StructPFMG_SetOperator(
   /* in */ bHYPRE_StructPFMG self,
   /* in */ bHYPRE_Operator A);

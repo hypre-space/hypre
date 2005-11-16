@@ -1054,6 +1054,31 @@ impl_bHYPRE_SStructParCSRMatrix_Apply(
 
   /* DO-NOT-DELETE splicer.end(bHYPRE.SStructParCSRMatrix.Apply) */
 }
+
+/*
+ * Apply the adjoint of the operator to {\tt b}, returning {\tt x}.
+ * 
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_SStructParCSRMatrix_ApplyAdjoint"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+int32_t
+impl_bHYPRE_SStructParCSRMatrix_ApplyAdjoint(
+  /* in */ bHYPRE_SStructParCSRMatrix self,
+  /* in */ bHYPRE_Vector b,
+  /* inout */ bHYPRE_Vector* x)
+{
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructParCSRMatrix.ApplyAdjoint) */
+  /* Insert-Code-Here {bHYPRE.SStructParCSRMatrix.ApplyAdjoint} (ApplyAdjoint method) */
+
+   return 1; /* not implemented */
+
+  /* DO-NOT-DELETE splicer.end(bHYPRE.SStructParCSRMatrix.ApplyAdjoint) */
+}
 /* Babel internal methods, Users should not edit below this line. */
 struct bHYPRE_SStruct_MatrixVectorView__object* 
   impl_bHYPRE_SStructParCSRMatrix_fconnect_bHYPRE_SStruct_MatrixVectorView(

@@ -179,6 +179,13 @@ impl_bHYPRE_BoomerAMG_Apply(
 
 extern
 int32_t
+impl_bHYPRE_BoomerAMG_ApplyAdjoint(
+  /* in */ bHYPRE_BoomerAMG self,
+  /* in */ bHYPRE_Vector b,
+  /* inout */ bHYPRE_Vector* x);
+
+extern
+int32_t
 impl_bHYPRE_BoomerAMG_SetOperator(
   /* in */ bHYPRE_BoomerAMG self,
   /* in */ bHYPRE_Operator A);
@@ -399,6 +406,7 @@ bHYPRE_BoomerAMG__set_epv(struct bHYPRE_BoomerAMG__epv *epv)
   epv->f_GetDoubleValue = impl_bHYPRE_BoomerAMG_GetDoubleValue;
   epv->f_Setup = impl_bHYPRE_BoomerAMG_Setup;
   epv->f_Apply = impl_bHYPRE_BoomerAMG_Apply;
+  epv->f_ApplyAdjoint = impl_bHYPRE_BoomerAMG_ApplyAdjoint;
   epv->f_SetOperator = impl_bHYPRE_BoomerAMG_SetOperator;
   epv->f_SetTolerance = impl_bHYPRE_BoomerAMG_SetTolerance;
   epv->f_SetMaxIterations = impl_bHYPRE_BoomerAMG_SetMaxIterations;

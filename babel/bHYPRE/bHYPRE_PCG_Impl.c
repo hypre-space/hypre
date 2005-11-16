@@ -141,8 +141,6 @@ impl_bHYPRE_PCG__dtor(
       hypre_TFree( data );
    }
 
-   hypre_assert( ierr==0 );
-
   /* DO-NOT-DELETE splicer.end(bHYPRE.PCG._dtor) */
 }
 
@@ -999,6 +997,31 @@ impl_bHYPRE_PCG_Apply(
    return ierr;
 
   /* DO-NOT-DELETE splicer.end(bHYPRE.PCG.Apply) */
+}
+
+/*
+ * Apply the adjoint of the operator to {\tt b}, returning {\tt x}.
+ * 
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_PCG_ApplyAdjoint"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+int32_t
+impl_bHYPRE_PCG_ApplyAdjoint(
+  /* in */ bHYPRE_PCG self,
+  /* in */ bHYPRE_Vector b,
+  /* inout */ bHYPRE_Vector* x)
+{
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.PCG.ApplyAdjoint) */
+  /* Insert-Code-Here {bHYPRE.PCG.ApplyAdjoint} (ApplyAdjoint method) */
+
+   return 1; /* not implemented */
+
+  /* DO-NOT-DELETE splicer.end(bHYPRE.PCG.ApplyAdjoint) */
 }
 
 /*

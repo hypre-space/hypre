@@ -252,6 +252,13 @@ impl_bHYPRE_GMRES_Apply(
 
 extern
 int32_t
+impl_bHYPRE_GMRES_ApplyAdjoint(
+  /* in */ bHYPRE_GMRES self,
+  /* in */ bHYPRE_Vector b,
+  /* inout */ bHYPRE_Vector* x);
+
+extern
+int32_t
 impl_bHYPRE_GMRES_SetOperator(
   /* in */ bHYPRE_GMRES self,
   /* in */ bHYPRE_Operator A);

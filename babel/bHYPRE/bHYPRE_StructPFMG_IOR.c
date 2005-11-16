@@ -556,6 +556,33 @@ bHYPRE_StructPFMG_Apply__exec(
 }
 
 static void
+bHYPRE_StructPFMG_ApplyAdjoint__exec(
+        struct bHYPRE_StructPFMG__object* self,
+        struct sidl_io_Deserializer__object* inArgs,
+        struct sidl_io_Serializer__object* outArgs) {
+  /* stack space for arguments */
+  struct bHYPRE_Vector__object* b;
+  struct bHYPRE_Vector__object* x_tmp;
+  struct bHYPRE_Vector__object** x= &x_tmp;
+  int32_t _retval;
+  sidl_BaseInterface _ex   = NULL;
+  sidl_BaseInterface *_ex2 = &_ex;
+  /* unpack in and inout argments */
+
+  /* make the call */
+  _retval = (self->d_epv->f_ApplyAdjoint)(
+    self,
+    b,
+    x);
+
+  /* pack return value */
+  sidl_io_Serializer_packInt( outArgs, "_retval", _retval, _ex2);
+
+  /* pack out and inout argments */
+
+}
+
+static void
 bHYPRE_StructPFMG_SetOperator__exec(
         struct bHYPRE_StructPFMG__object* self,
         struct sidl_io_Deserializer__object* inArgs,
@@ -805,6 +832,7 @@ ior_bHYPRE_StructPFMG__exec(
     struct sidl_io_Serializer__object* outArgs ) { 
   static const struct bHYPRE_StructPFMG__method  s_methods[] = {
     { "Apply", bHYPRE_StructPFMG_Apply__exec },
+    { "ApplyAdjoint", bHYPRE_StructPFMG_ApplyAdjoint__exec },
     { "GetDoubleValue", bHYPRE_StructPFMG_GetDoubleValue__exec },
     { "GetIntValue", bHYPRE_StructPFMG_GetIntValue__exec },
     { "GetNumIterations", bHYPRE_StructPFMG_GetNumIterations__exec },
@@ -902,6 +930,7 @@ static void bHYPRE_StructPFMG__init_epv(
   epv->f_GetDoubleValue                = NULL;
   epv->f_Setup                         = NULL;
   epv->f_Apply                         = NULL;
+  epv->f_ApplyAdjoint                  = NULL;
   epv->f_SetOperator                   = NULL;
   epv->f_SetTolerance                  = NULL;
   epv->f_SetMaxIterations              = NULL;
@@ -951,6 +980,9 @@ static void bHYPRE_StructPFMG__init_epv(
     struct bHYPRE_Vector__object*,struct bHYPRE_Vector__object*)) epv->f_Setup;
   e0->f_Apply                    = (int32_t (*)(void*,
     struct bHYPRE_Vector__object*,struct bHYPRE_Vector__object**)) epv->f_Apply;
+  e0->f_ApplyAdjoint             = (int32_t (*)(void*,
+    struct bHYPRE_Vector__object*,
+    struct bHYPRE_Vector__object**)) epv->f_ApplyAdjoint;
 
   e1->f__cast                    = (void* (*)(void*,const char*)) epv->f__cast;
   e1->f__delete                  = (void (*)(void*)) epv->f__delete;
@@ -991,6 +1023,9 @@ static void bHYPRE_StructPFMG__init_epv(
     struct bHYPRE_Vector__object*,struct bHYPRE_Vector__object*)) epv->f_Setup;
   e1->f_Apply                    = (int32_t (*)(void*,
     struct bHYPRE_Vector__object*,struct bHYPRE_Vector__object**)) epv->f_Apply;
+  e1->f_ApplyAdjoint             = (int32_t (*)(void*,
+    struct bHYPRE_Vector__object*,
+    struct bHYPRE_Vector__object**)) epv->f_ApplyAdjoint;
   e1->f_SetOperator              = (int32_t (*)(void*,
     struct bHYPRE_Operator__object*)) epv->f_SetOperator;
   e1->f_SetTolerance             = (int32_t (*)(void*,

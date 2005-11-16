@@ -233,6 +233,13 @@ impl_bHYPRE_SStructDiagScale_Apply(
 
 extern
 int32_t
+impl_bHYPRE_SStructDiagScale_ApplyAdjoint(
+  /* in */ bHYPRE_SStructDiagScale self,
+  /* in */ bHYPRE_Vector b,
+  /* inout */ bHYPRE_Vector* x);
+
+extern
+int32_t
 impl_bHYPRE_SStructDiagScale_SetOperator(
   /* in */ bHYPRE_SStructDiagScale self,
   /* in */ bHYPRE_Operator A);

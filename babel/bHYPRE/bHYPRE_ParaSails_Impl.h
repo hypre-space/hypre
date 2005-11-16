@@ -231,6 +231,13 @@ impl_bHYPRE_ParaSails_Apply(
 
 extern
 int32_t
+impl_bHYPRE_ParaSails_ApplyAdjoint(
+  /* in */ bHYPRE_ParaSails self,
+  /* in */ bHYPRE_Vector b,
+  /* inout */ bHYPRE_Vector* x);
+
+extern
+int32_t
 impl_bHYPRE_ParaSails_SetOperator(
   /* in */ bHYPRE_ParaSails self,
   /* in */ bHYPRE_Operator A);

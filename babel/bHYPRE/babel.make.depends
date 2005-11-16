@@ -10,6 +10,18 @@ bHYPRE_BoomerAMG_Impl.h: bHYPRE_Vector.h
 bHYPRE_BoomerAMG_Impl.h: sidl_BaseInterface.h
 bHYPRE_BoomerAMG_Impl.h: sidl_BaseClass.h
 
+bHYPRE_CGNR_Impl.h: /home/painter/linear_solvers/babel/Interfaces.idl
+bHYPRE_CGNR_Impl.h: sidl_header.h
+bHYPRE_CGNR_Impl.h: bHYPRE_Solver.h
+bHYPRE_CGNR_Impl.h: bHYPRE_CGNR.h
+bHYPRE_CGNR_Impl.h: bHYPRE_MPICommunicator.h
+bHYPRE_CGNR_Impl.h: bHYPRE_Operator.h
+bHYPRE_CGNR_Impl.h: sidl_ClassInfo.h
+bHYPRE_CGNR_Impl.h: bHYPRE_Vector.h
+bHYPRE_CGNR_Impl.h: sidl_BaseInterface.h
+bHYPRE_CGNR_Impl.h: sidl_BaseClass.h
+bHYPRE_CGNR_Impl.h: bHYPRE_PreconditionedSolver.h
+
 bHYPRE_GMRES_Impl.h: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_GMRES_Impl.h: sidl_header.h
 bHYPRE_GMRES_Impl.h: bHYPRE_Solver.h
@@ -309,6 +321,9 @@ bHYPRE_StructVector_Impl.h: sidl_BaseClass.h
 bHYPRE_BoomerAMG_Impl.c: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_BoomerAMG_Impl.c: bHYPRE_BoomerAMG_Impl.h
 
+bHYPRE_CGNR_Impl.c: /home/painter/linear_solvers/babel/Interfaces.idl
+bHYPRE_CGNR_Impl.c: bHYPRE_CGNR_Impl.h
+
 bHYPRE_GMRES_Impl.c: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_GMRES_Impl.c: bHYPRE_GMRES_Impl.h
 
@@ -402,6 +417,13 @@ bHYPRE_BoomerAMG_IOR.h: bHYPRE_Operator_IOR.h
 bHYPRE_BoomerAMG_IOR.h: bHYPRE_Solver_IOR.h
 bHYPRE_BoomerAMG_IOR.h: sidl_BaseClass_IOR.h
 
+bHYPRE_CGNR_IOR.h: /home/painter/linear_solvers/babel/Interfaces.idl
+bHYPRE_CGNR_IOR.h: sidl_header.h
+bHYPRE_CGNR_IOR.h: bHYPRE_Operator_IOR.h
+bHYPRE_CGNR_IOR.h: bHYPRE_PreconditionedSolver_IOR.h
+bHYPRE_CGNR_IOR.h: bHYPRE_Solver_IOR.h
+bHYPRE_CGNR_IOR.h: sidl_BaseClass_IOR.h
+
 bHYPRE_CoefficientAccess_IOR.h:                                               \
   /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_CoefficientAccess_IOR.h: sidl_header.h
@@ -455,6 +477,7 @@ bHYPRE_IJVectorView_IOR.h: sidl_BaseInterface_IOR.h
 
 bHYPRE_IOR.h: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_IOR.h: bHYPRE_BoomerAMG_IOR.h
+bHYPRE_IOR.h: bHYPRE_CGNR_IOR.h
 bHYPRE_IOR.h: bHYPRE_CoefficientAccess_IOR.h
 bHYPRE_IOR.h: bHYPRE_GMRES_IOR.h
 bHYPRE_IOR.h: bHYPRE_HPCG_IOR.h
@@ -727,6 +750,13 @@ bHYPRE_BoomerAMG_IOR.c: sidl_BaseClass.h
 bHYPRE_BoomerAMG_IOR.c: sidl_ClassInfo.h
 bHYPRE_BoomerAMG_IOR.c: sidl_ClassInfoI.h
 
+bHYPRE_CGNR_IOR.c: /home/painter/linear_solvers/babel/Interfaces.idl
+bHYPRE_CGNR_IOR.c: bHYPRE_CGNR_IOR.h
+bHYPRE_CGNR_IOR.c: sidl_BaseClass_Impl.h
+bHYPRE_CGNR_IOR.c: sidl_BaseClass.h
+bHYPRE_CGNR_IOR.c: sidl_ClassInfo.h
+bHYPRE_CGNR_IOR.c: sidl_ClassInfoI.h
+
 bHYPRE_GMRES_IOR.c: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_GMRES_IOR.c: bHYPRE_GMRES_IOR.h
 bHYPRE_GMRES_IOR.c: sidl_BaseClass_Impl.h
@@ -914,6 +944,10 @@ bHYPRE_BoomerAMG_Skel.c: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_BoomerAMG_Skel.c: bHYPRE_BoomerAMG_IOR.h
 bHYPRE_BoomerAMG_Skel.c: bHYPRE_BoomerAMG.h
 
+bHYPRE_CGNR_Skel.c: /home/painter/linear_solvers/babel/Interfaces.idl
+bHYPRE_CGNR_Skel.c: bHYPRE_CGNR_IOR.h
+bHYPRE_CGNR_Skel.c: bHYPRE_CGNR.h
+
 bHYPRE_GMRES_Skel.c: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_GMRES_Skel.c: bHYPRE_GMRES_IOR.h
 bHYPRE_GMRES_Skel.c: bHYPRE_GMRES.h
@@ -1028,6 +1062,7 @@ bHYPRE_StructVector_Skel.c: bHYPRE_StructVector.h
 # STUBHDRS dependencies.
 bHYPRE.h: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE.h: bHYPRE_BoomerAMG.h
+bHYPRE.h: bHYPRE_CGNR.h
 bHYPRE.h: bHYPRE_CoefficientAccess.h
 bHYPRE.h: bHYPRE_GMRES.h
 bHYPRE.h: bHYPRE_HPCG.h
@@ -1078,6 +1113,17 @@ bHYPRE_BoomerAMG.h: sidl_BaseInterface.h
 bHYPRE_BoomerAMG.h: sidl_ClassInfo.h
 bHYPRE_BoomerAMG.h: sidl_io_Serializer.h
 bHYPRE_BoomerAMG.h: sidl_io_Deserializer.h
+
+bHYPRE_CGNR.h: /home/painter/linear_solvers/babel/Interfaces.idl
+bHYPRE_CGNR.h: sidl_header.h
+bHYPRE_CGNR.h: bHYPRE_MPICommunicator.h
+bHYPRE_CGNR.h: bHYPRE_Operator.h
+bHYPRE_CGNR.h: bHYPRE_Solver.h
+bHYPRE_CGNR.h: bHYPRE_Vector.h
+bHYPRE_CGNR.h: sidl_BaseInterface.h
+bHYPRE_CGNR.h: sidl_ClassInfo.h
+bHYPRE_CGNR.h: sidl_io_Serializer.h
+bHYPRE_CGNR.h: sidl_io_Deserializer.h
 
 bHYPRE_CoefficientAccess.h: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_CoefficientAccess.h: sidl_header.h
@@ -1459,6 +1505,17 @@ bHYPRE_BoomerAMG_Stub.c: sidl_interface_IOR.h
 bHYPRE_BoomerAMG_Stub.c: sidl_BaseInterface_IOR.h
 bHYPRE_BoomerAMG_Stub.c: sidl_BaseClass.h
 bHYPRE_BoomerAMG_Stub.c: sidl_ClassInfo.h
+
+bHYPRE_CGNR_Stub.c: /home/painter/linear_solvers/babel/Interfaces.idl
+bHYPRE_CGNR_Stub.c: bHYPRE_CGNR.h
+bHYPRE_CGNR_Stub.c: bHYPRE_CGNR_IOR.h
+bHYPRE_CGNR_Stub.c: sidl_interface_IOR.h
+bHYPRE_CGNR_Stub.c: sidl_rmi_InstanceHandle.h
+bHYPRE_CGNR_Stub.c: sidl_rmi_ConnectRegistry.h
+bHYPRE_CGNR_Stub.c: sidl_interface_IOR.h
+bHYPRE_CGNR_Stub.c: sidl_BaseInterface_IOR.h
+bHYPRE_CGNR_Stub.c: sidl_BaseClass.h
+bHYPRE_CGNR_Stub.c: sidl_ClassInfo.h
 
 bHYPRE_CoefficientAccess_Stub.c:                                              \
   /home/painter/linear_solvers/babel/Interfaces.idl

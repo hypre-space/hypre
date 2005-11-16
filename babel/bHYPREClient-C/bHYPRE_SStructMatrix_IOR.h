@@ -190,6 +190,10 @@ struct bHYPRE_SStructMatrix__epv {
     /* in */ struct bHYPRE_SStructMatrix__object* self,
     /* in */ struct bHYPRE_Vector__object* b,
     /* inout */ struct bHYPRE_Vector__object** x);
+  int32_t (*f_ApplyAdjoint)(
+    /* in */ struct bHYPRE_SStructMatrix__object* self,
+    /* in */ struct bHYPRE_Vector__object* b,
+    /* inout */ struct bHYPRE_Vector__object** x);
   /* Methods introduced in bHYPRE.ProblemDefinition-v1.0.0 */
   int32_t (*f_Initialize)(
     /* in */ struct bHYPRE_SStructMatrix__object* self);

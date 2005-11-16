@@ -219,6 +219,13 @@ impl_bHYPRE_Pilut_Apply(
 
 extern
 int32_t
+impl_bHYPRE_Pilut_ApplyAdjoint(
+  /* in */ bHYPRE_Pilut self,
+  /* in */ bHYPRE_Vector b,
+  /* inout */ bHYPRE_Vector* x);
+
+extern
+int32_t
 impl_bHYPRE_Pilut_SetOperator(
   /* in */ bHYPRE_Pilut self,
   /* in */ bHYPRE_Operator A);

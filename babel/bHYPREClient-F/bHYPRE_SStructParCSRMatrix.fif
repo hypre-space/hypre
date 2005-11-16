@@ -736,3 +736,22 @@ C       inout bHYPRE.Vector x
 C       out int retval
         integer*4 retval
         end
+
+
+C       
+C       Apply the adjoint of the operator to {\tt b}, returning {\tt x}.
+C       
+C       
+
+        subroutine bHYPRE_SStructParCSRMatrix_ApplyAdjoint_f(self, b, x,
+     &     retval)
+        implicit none
+C       in bHYPRE.SStructParCSRMatrix self
+        integer*8 self
+C       in bHYPRE.Vector b
+        integer*8 b
+C       inout bHYPRE.Vector x
+        integer*8 x
+C       out int retval
+        integer*4 retval
+        end

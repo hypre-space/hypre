@@ -161,6 +161,13 @@ impl_bHYPRE_ParaSails_Apply(
 
 extern
 int32_t
+impl_bHYPRE_ParaSails_ApplyAdjoint(
+  /* in */ bHYPRE_ParaSails self,
+  /* in */ bHYPRE_Vector b,
+  /* inout */ bHYPRE_Vector* x);
+
+extern
+int32_t
 impl_bHYPRE_ParaSails_SetOperator(
   /* in */ bHYPRE_ParaSails self,
   /* in */ bHYPRE_Operator A);
@@ -340,6 +347,7 @@ bHYPRE_ParaSails__set_epv(struct bHYPRE_ParaSails__epv *epv)
   epv->f_GetDoubleValue = impl_bHYPRE_ParaSails_GetDoubleValue;
   epv->f_Setup = impl_bHYPRE_ParaSails_Setup;
   epv->f_Apply = impl_bHYPRE_ParaSails_Apply;
+  epv->f_ApplyAdjoint = impl_bHYPRE_ParaSails_ApplyAdjoint;
   epv->f_SetOperator = impl_bHYPRE_ParaSails_SetOperator;
   epv->f_SetTolerance = impl_bHYPRE_ParaSails_SetTolerance;
   epv->f_SetMaxIterations = impl_bHYPRE_ParaSails_SetMaxIterations;

@@ -130,6 +130,10 @@ struct bHYPRE_PreconditionedSolver__epv {
     /* in */ void* self,
     /* in */ struct bHYPRE_Vector__object* b,
     /* inout */ struct bHYPRE_Vector__object** x);
+  int32_t (*f_ApplyAdjoint)(
+    /* in */ void* self,
+    /* in */ struct bHYPRE_Vector__object* b,
+    /* inout */ struct bHYPRE_Vector__object** x);
   /* Methods introduced in bHYPRE.Solver-v1.0.0 */
   int32_t (*f_SetOperator)(
     /* in */ void* self,
@@ -277,6 +281,10 @@ struct bHYPRE__PreconditionedSolver__epv {
     /* in */ struct bHYPRE_Vector__object* b,
     /* in */ struct bHYPRE_Vector__object* x);
   int32_t (*f_Apply)(
+    /* in */ struct bHYPRE__PreconditionedSolver__object* self,
+    /* in */ struct bHYPRE_Vector__object* b,
+    /* inout */ struct bHYPRE_Vector__object** x);
+  int32_t (*f_ApplyAdjoint)(
     /* in */ struct bHYPRE__PreconditionedSolver__object* self,
     /* in */ struct bHYPRE_Vector__object* b,
     /* inout */ struct bHYPRE_Vector__object** x);

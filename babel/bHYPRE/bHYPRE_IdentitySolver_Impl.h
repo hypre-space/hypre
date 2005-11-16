@@ -224,6 +224,13 @@ impl_bHYPRE_IdentitySolver_Apply(
 
 extern
 int32_t
+impl_bHYPRE_IdentitySolver_ApplyAdjoint(
+  /* in */ bHYPRE_IdentitySolver self,
+  /* in */ bHYPRE_Vector b,
+  /* inout */ bHYPRE_Vector* x);
+
+extern
+int32_t
 impl_bHYPRE_IdentitySolver_SetOperator(
   /* in */ bHYPRE_IdentitySolver self,
   /* in */ bHYPRE_Operator A);

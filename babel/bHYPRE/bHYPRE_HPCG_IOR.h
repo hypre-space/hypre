@@ -41,7 +41,13 @@ extern "C" {
  * 
  * RDF: Documentation goes here.
  * 
- * This PCG solver checks whether the matrix, vectors, and preconditioner
+ * The regular PCG solver calls Babel-interface matrix and vector functions.
+ * The HPCG solver calls HYPRE interface functions.
+ * The regular solver will work with any consistent matrix, vector, and
+ * preconditioner classes.  The HPCG solver will work with the more common
+ * combinations.
+ * 
+ * The HPCG solver checks whether the matrix, vectors, and preconditioner
  * are of known types, and will not work with any other types.
  * Presently, the recognized data types are:
  * matrix, vector: IJParCSRMatrix, IJParCSRVector
@@ -49,11 +55,6 @@ extern "C" {
  * preconditioner: BoomerAMG, ParaSails, ParCSRDiagScale, IdentitySolver
  * preconditioner: StructSMG, StructPFMG
  * 
- * The regular PCG solver calls Babel-interface matrix and vector functions.
- * The HPCG solver calls HYPRE interface functions.
- * The regular solver will work with any consistent matrix, vector, and
- * preconditioner classes.  The HPCG solver will work with the more common
- * combinations.
  * 
  * 
  */
@@ -191,6 +192,10 @@ struct bHYPRE_HPCG__epv {
     /* in */ struct bHYPRE_Vector__object* b,
     /* in */ struct bHYPRE_Vector__object* x);
   int32_t (*f_Apply)(
+    /* in */ struct bHYPRE_HPCG__object* self,
+    /* in */ struct bHYPRE_Vector__object* b,
+    /* inout */ struct bHYPRE_Vector__object** x);
+  int32_t (*f_ApplyAdjoint)(
     /* in */ struct bHYPRE_HPCG__object* self,
     /* in */ struct bHYPRE_Vector__object* b,
     /* inout */ struct bHYPRE_Vector__object** x);

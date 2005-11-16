@@ -436,6 +436,29 @@ impl_bHYPRE_IdentitySolver_Apply(
 }
 
 /*
+ * Apply the adjoint of the operator to {\tt b}, returning {\tt x}.
+ * 
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_IdentitySolver_ApplyAdjoint"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+int32_t
+impl_bHYPRE_IdentitySolver_ApplyAdjoint(
+  /* in */ bHYPRE_IdentitySolver self,
+  /* in */ bHYPRE_Vector b,
+  /* inout */ bHYPRE_Vector* x)
+{
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.IdentitySolver.ApplyAdjoint) */
+  /* Insert-Code-Here {bHYPRE.IdentitySolver.ApplyAdjoint} (ApplyAdjoint method) */
+   return bHYPRE_Vector_Copy( *x, b );  /* copies data of b to x */
+  /* DO-NOT-DELETE splicer.end(bHYPRE.IdentitySolver.ApplyAdjoint) */
+}
+
+/*
  * Set the operator for the linear system being solved.
  * 
  */

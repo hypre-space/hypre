@@ -1179,6 +1179,85 @@ impl_bHYPRE_IJParCSRMatrix_Apply(
 }
 
 /*
+ * Apply the adjoint of the operator to {\tt b}, returning {\tt x}.
+ * 
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_IJParCSRMatrix_ApplyAdjoint"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+int32_t
+impl_bHYPRE_IJParCSRMatrix_ApplyAdjoint(
+  /* in */ bHYPRE_IJParCSRMatrix self,
+  /* in */ bHYPRE_Vector b,
+  /* inout */ bHYPRE_Vector* x)
+{
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRMatrix.ApplyAdjoint) */
+  /* Insert-Code-Here {bHYPRE.IJParCSRMatrix.ApplyAdjoint} (ApplyAdjoint method) */
+
+   /* ApplyAdjoing means to multiply by a vector, y = A'*x , where A' is the
+    * adjoint of A (=transpose, this is a real matrix).  Here, we call
+    * the HYPRE Matvec function which performs y = a*A*x + b*y (we set
+    * a=1 and b=0).  */
+   int ierr=0;
+   void * object;
+   struct bHYPRE_IJParCSRMatrix__data * data;
+   struct bHYPRE_IJParCSRVector__data * data_x, * data_b;
+   bHYPRE_IJParCSRVector bHYPREP_b, bHYPREP_x;
+   HYPRE_IJMatrix ij_A;
+   HYPRE_IJVector ij_x, ij_b;
+   HYPRE_ParVector xx, bb;
+   HYPRE_ParCSRMatrix A;
+
+   data = bHYPRE_IJParCSRMatrix__get_data( self );
+   ij_A = data -> ij_A;
+   ierr += HYPRE_IJMatrixGetObject( ij_A, &object );
+   A = (HYPRE_ParCSRMatrix) object;
+
+   /* A bHYPRE_Vector is just an interface, we have no knowledge of its
+    * contents.  Check whether it's something we know how to handle.
+    * If not, die. */
+   if ( bHYPRE_Vector_queryInt(b, "bHYPRE.IJParCSRVector" ) )
+   {
+      bHYPREP_b = bHYPRE_IJParCSRVector__cast( b );
+   }
+   else
+   {
+      hypre_assert( "Unrecognized vector type."==(char *)b );
+   }
+
+   if ( bHYPRE_Vector_queryInt( *x, "bHYPRE.IJParCSRVector" ) )
+   {
+      bHYPREP_x = bHYPRE_IJParCSRVector__cast( *x );
+   }
+   else
+   {
+      hypre_assert( "Unrecognized vector type."==(char *)x );
+   }
+
+   data_x = bHYPRE_IJParCSRVector__get_data( bHYPREP_x );
+   ij_x = data_x -> ij_b;
+   ierr += HYPRE_IJVectorGetObject( ij_x, &object );
+   xx = (HYPRE_ParVector) object;
+   data_b = bHYPRE_IJParCSRVector__get_data( bHYPREP_b );
+   ij_b = data_b -> ij_b;
+   ierr += HYPRE_IJVectorGetObject( ij_b, &object );
+   bb = (HYPRE_ParVector) object;
+
+   ierr += HYPRE_ParCSRMatrixMatvecT( 1.0, A, bb, 0.0, xx );
+
+   bHYPRE_IJParCSRVector_deleteRef( bHYPREP_b ); /* ref was created by queryInt */
+   bHYPRE_IJParCSRVector_deleteRef( bHYPREP_x ); /* ref was created by queryInt */
+
+   return( ierr );
+
+  /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRMatrix.ApplyAdjoint) */
+}
+
+/*
  * The GetRow method will allocate space for its two output
  * arrays on the first call.  The space will be reused on
  * subsequent calls.  Thus the user must not delete them, yet

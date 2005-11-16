@@ -372,6 +372,13 @@ impl_bHYPRE_IJParCSRMatrix_Apply(
 
 extern
 int32_t
+impl_bHYPRE_IJParCSRMatrix_ApplyAdjoint(
+  /* in */ bHYPRE_IJParCSRMatrix self,
+  /* in */ bHYPRE_Vector b,
+  /* inout */ bHYPRE_Vector* x);
+
+extern
+int32_t
 impl_bHYPRE_IJParCSRMatrix_GetRow(
   /* in */ bHYPRE_IJParCSRMatrix self,
   /* in */ int32_t row,
