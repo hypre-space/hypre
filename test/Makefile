@@ -46,8 +46,8 @@ LFLAGS =\
  -lHYPRE_sstruct_mv\
  -lHYPRE_struct_ls\
  -lHYPRE_struct_mv\
- -lHYPRE_parcsr_block_mv\
  -lHYPRE_parcsr_ls\
+ -lHYPRE_parcsr_block_mv\
  -lHYPRE_DistributedMatrixPilutSolver \
  -lHYPRE_ParaSails \
  -lHYPRE_Euclid \

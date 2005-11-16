@@ -316,7 +316,8 @@ c     will break the interface.
       convtol = 0.9
       debug_flag = 0
 c      ioutdat = 1
-      ioutdat = 3
+c      ioutdat = 3
+      ioutdat = 0
 
 c     Set defaults for BoomerAMG
       maxiter = 500
