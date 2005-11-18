@@ -87,6 +87,7 @@ main( int   argc,
    bHYPRE_CGNR          bHYPRE_CGNR;
    bHYPRE_ParCSRDiagScale  bHYPRE_ParCSRDiagScale;
    bHYPRE_ParaSails     bHYPRE_ParaSails;
+   bHYPRE_Euclid        bHYPRE_Euclid;
    bHYPRE_Solver        bHYPRE_SolverPC;
 
    int                 num_procs, myid;
@@ -738,7 +739,7 @@ main( int   argc,
       printf("        8=ParaSails-PCG     9*=AMG-BiCGSTAB   \n");
       printf("       10*=DS-BiCGSTAB      11*=PILUT-BiCGSTAB \n");
       printf("       12*=Schwarz-PCG      18=ParaSails-GMRES\n");     
-      printf("       43*=Euclid-PCG       44*=Euclid-GMRES   \n");
+      printf("        43=Euclid-PCG       44*=Euclid-GMRES   \n");
       printf("       45*=Euclid-BICGSTAB\n");
       printf("Solvers marked with '*' have not yet been implemented.\n");
       printf("   -hpcg 1               : for HYPRE-interface PCG solver\n");
@@ -1768,24 +1769,22 @@ main( int   argc,
       }
       else if (solver_id == 43)
       {
-#ifdef DO_THIS_LATER
          /* use Euclid preconditioning */
          if (myid == 0) printf("Solver: Euclid-PCG\n");
 
-         HYPRE_EuclidCreate(mpi_comm, &pcg_precond);
+         bHYPRE_Euclid = bHYPRE_Euclid_Create( bmpicomm, bHYPRE_op_A );
 
          /* note: There are three three methods of setting run-time 
             parameters for Euclid: (see HYPRE_parcsr_ls.h); here
             we'll use what I think is simplest: let Euclid internally 
             parse the command line.
-         */   
-         HYPRE_EuclidSetParams(pcg_precond, argc, argv);
+         */
+         /*ierr += bHYPRE_Euclid_SetIntParameter( bHYPRE_Euclid, "-eu_stats", 1 );*/
+         ierr += bHYPRE_Euclid_SetParameters( bHYPRE_Euclid, argc, argv );
 
-         HYPRE_PCGSetPrecond(pcg_solver,
-                             (HYPRE_PtrToSolverFcn) HYPRE_EuclidSolve,
-                             (HYPRE_PtrToSolverFcn) HYPRE_EuclidSetup,
-                             pcg_precond);
-#endif  /*DO_THIS_LATER*/
+         bHYPRE_SolverPC = bHYPRE_Solver__cast( bHYPRE_Euclid );
+         ierr += bHYPRE_PCG_SetPreconditioner( bHYPRE_PCG, bHYPRE_SolverPC );
+         ierr += bHYPRE_PCG_Setup( bHYPRE_PCG, bHYPRE_Vector_b, bHYPRE_Vector_x );
       }
  
 
@@ -1827,12 +1826,11 @@ main( int   argc,
    {
    HYPRE_SchwarzDestroy(pcg_precond);
    }
+#endif  /*DO_THIS_LATER*/
    else if (solver_id == 43)
    {
-   / * HYPRE_EuclidPrintParams(pcg_precond); * /
-   HYPRE_EuclidDestroy(pcg_precond);
+      bHYPRE_Euclid_deleteRef( bHYPRE_Euclid );
    }
-#endif  /*DO_THIS_LATER*/
 
       if (myid == 0)
       {
