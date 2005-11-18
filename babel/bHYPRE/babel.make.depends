@@ -22,6 +22,17 @@ bHYPRE_CGNR_Impl.h: sidl_BaseInterface.h
 bHYPRE_CGNR_Impl.h: sidl_BaseClass.h
 bHYPRE_CGNR_Impl.h: bHYPRE_PreconditionedSolver.h
 
+bHYPRE_Euclid_Impl.h: /home/painter/linear_solvers/babel/Interfaces.idl
+bHYPRE_Euclid_Impl.h: sidl_header.h
+bHYPRE_Euclid_Impl.h: bHYPRE_Solver.h
+bHYPRE_Euclid_Impl.h: bHYPRE_MPICommunicator.h
+bHYPRE_Euclid_Impl.h: bHYPRE_Operator.h
+bHYPRE_Euclid_Impl.h: sidl_ClassInfo.h
+bHYPRE_Euclid_Impl.h: bHYPRE_Vector.h
+bHYPRE_Euclid_Impl.h: bHYPRE_Euclid.h
+bHYPRE_Euclid_Impl.h: sidl_BaseInterface.h
+bHYPRE_Euclid_Impl.h: sidl_BaseClass.h
+
 bHYPRE_GMRES_Impl.h: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_GMRES_Impl.h: sidl_header.h
 bHYPRE_GMRES_Impl.h: bHYPRE_Solver.h
@@ -324,6 +335,9 @@ bHYPRE_BoomerAMG_Impl.c: bHYPRE_BoomerAMG_Impl.h
 bHYPRE_CGNR_Impl.c: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_CGNR_Impl.c: bHYPRE_CGNR_Impl.h
 
+bHYPRE_Euclid_Impl.c: /home/painter/linear_solvers/babel/Interfaces.idl
+bHYPRE_Euclid_Impl.c: bHYPRE_Euclid_Impl.h
+
 bHYPRE_GMRES_Impl.c: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_GMRES_Impl.c: bHYPRE_GMRES_Impl.h
 
@@ -430,6 +444,12 @@ bHYPRE_CoefficientAccess_IOR.h: sidl_header.h
 bHYPRE_CoefficientAccess_IOR.h: bHYPRE_CoefficientAccess_IOR.h
 bHYPRE_CoefficientAccess_IOR.h: sidl_BaseInterface_IOR.h
 
+bHYPRE_Euclid_IOR.h: /home/painter/linear_solvers/babel/Interfaces.idl
+bHYPRE_Euclid_IOR.h: sidl_header.h
+bHYPRE_Euclid_IOR.h: bHYPRE_Operator_IOR.h
+bHYPRE_Euclid_IOR.h: bHYPRE_Solver_IOR.h
+bHYPRE_Euclid_IOR.h: sidl_BaseClass_IOR.h
+
 bHYPRE_GMRES_IOR.h: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_GMRES_IOR.h: sidl_header.h
 bHYPRE_GMRES_IOR.h: bHYPRE_Operator_IOR.h
@@ -479,6 +499,7 @@ bHYPRE_IOR.h: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_IOR.h: bHYPRE_BoomerAMG_IOR.h
 bHYPRE_IOR.h: bHYPRE_CGNR_IOR.h
 bHYPRE_IOR.h: bHYPRE_CoefficientAccess_IOR.h
+bHYPRE_IOR.h: bHYPRE_Euclid_IOR.h
 bHYPRE_IOR.h: bHYPRE_GMRES_IOR.h
 bHYPRE_IOR.h: bHYPRE_HPCG_IOR.h
 bHYPRE_IOR.h: bHYPRE_IJMatrixView_IOR.h
@@ -757,6 +778,13 @@ bHYPRE_CGNR_IOR.c: sidl_BaseClass.h
 bHYPRE_CGNR_IOR.c: sidl_ClassInfo.h
 bHYPRE_CGNR_IOR.c: sidl_ClassInfoI.h
 
+bHYPRE_Euclid_IOR.c: /home/painter/linear_solvers/babel/Interfaces.idl
+bHYPRE_Euclid_IOR.c: bHYPRE_Euclid_IOR.h
+bHYPRE_Euclid_IOR.c: sidl_BaseClass_Impl.h
+bHYPRE_Euclid_IOR.c: sidl_BaseClass.h
+bHYPRE_Euclid_IOR.c: sidl_ClassInfo.h
+bHYPRE_Euclid_IOR.c: sidl_ClassInfoI.h
+
 bHYPRE_GMRES_IOR.c: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_GMRES_IOR.c: bHYPRE_GMRES_IOR.h
 bHYPRE_GMRES_IOR.c: sidl_BaseClass_Impl.h
@@ -948,6 +976,10 @@ bHYPRE_CGNR_Skel.c: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_CGNR_Skel.c: bHYPRE_CGNR_IOR.h
 bHYPRE_CGNR_Skel.c: bHYPRE_CGNR.h
 
+bHYPRE_Euclid_Skel.c: /home/painter/linear_solvers/babel/Interfaces.idl
+bHYPRE_Euclid_Skel.c: bHYPRE_Euclid_IOR.h
+bHYPRE_Euclid_Skel.c: bHYPRE_Euclid.h
+
 bHYPRE_GMRES_Skel.c: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_GMRES_Skel.c: bHYPRE_GMRES_IOR.h
 bHYPRE_GMRES_Skel.c: bHYPRE_GMRES.h
@@ -1064,6 +1096,7 @@ bHYPRE.h: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE.h: bHYPRE_BoomerAMG.h
 bHYPRE.h: bHYPRE_CGNR.h
 bHYPRE.h: bHYPRE_CoefficientAccess.h
+bHYPRE.h: bHYPRE_Euclid.h
 bHYPRE.h: bHYPRE_GMRES.h
 bHYPRE.h: bHYPRE_HPCG.h
 bHYPRE.h: bHYPRE_IJMatrixView.h
@@ -1131,6 +1164,16 @@ bHYPRE_CoefficientAccess.h: sidl_BaseInterface.h
 bHYPRE_CoefficientAccess.h: sidl_ClassInfo.h
 bHYPRE_CoefficientAccess.h: sidl_io_Serializer.h
 bHYPRE_CoefficientAccess.h: sidl_io_Deserializer.h
+
+bHYPRE_Euclid.h: /home/painter/linear_solvers/babel/Interfaces.idl
+bHYPRE_Euclid.h: sidl_header.h
+bHYPRE_Euclid.h: bHYPRE_MPICommunicator.h
+bHYPRE_Euclid.h: bHYPRE_Operator.h
+bHYPRE_Euclid.h: bHYPRE_Vector.h
+bHYPRE_Euclid.h: sidl_BaseInterface.h
+bHYPRE_Euclid.h: sidl_ClassInfo.h
+bHYPRE_Euclid.h: sidl_io_Serializer.h
+bHYPRE_Euclid.h: sidl_io_Deserializer.h
 
 bHYPRE_GMRES.h: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_GMRES.h: sidl_header.h
@@ -1526,6 +1569,17 @@ bHYPRE_CoefficientAccess_Stub.c: sidl_rmi_InstanceHandle.h
 bHYPRE_CoefficientAccess_Stub.c: sidl_rmi_ConnectRegistry.h
 bHYPRE_CoefficientAccess_Stub.c: sidl_interface_IOR.h
 bHYPRE_CoefficientAccess_Stub.c: sidl_BaseInterface_IOR.h
+
+bHYPRE_Euclid_Stub.c: /home/painter/linear_solvers/babel/Interfaces.idl
+bHYPRE_Euclid_Stub.c: bHYPRE_Euclid.h
+bHYPRE_Euclid_Stub.c: bHYPRE_Euclid_IOR.h
+bHYPRE_Euclid_Stub.c: sidl_interface_IOR.h
+bHYPRE_Euclid_Stub.c: sidl_rmi_InstanceHandle.h
+bHYPRE_Euclid_Stub.c: sidl_rmi_ConnectRegistry.h
+bHYPRE_Euclid_Stub.c: sidl_interface_IOR.h
+bHYPRE_Euclid_Stub.c: sidl_BaseInterface_IOR.h
+bHYPRE_Euclid_Stub.c: sidl_BaseClass.h
+bHYPRE_Euclid_Stub.c: sidl_ClassInfo.h
 
 bHYPRE_GMRES_Stub.c: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_GMRES_Stub.c: bHYPRE_GMRES.h

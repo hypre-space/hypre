@@ -1,6 +1,6 @@
 IORHDRS = bHYPRE_BoomerAMG_IOR.h bHYPRE_CGNR_IOR.h                            \
-  bHYPRE_CoefficientAccess_IOR.h bHYPRE_GMRES_IOR.h bHYPRE_HPCG_IOR.h         \
-  bHYPRE_IJMatrixView_IOR.h bHYPRE_IJParCSRMatrix_IOR.h                       \
+  bHYPRE_CoefficientAccess_IOR.h bHYPRE_Euclid_IOR.h bHYPRE_GMRES_IOR.h       \
+  bHYPRE_HPCG_IOR.h bHYPRE_IJMatrixView_IOR.h bHYPRE_IJParCSRMatrix_IOR.h     \
   bHYPRE_IJParCSRVector_IOR.h bHYPRE_IJVectorView_IOR.h bHYPRE_IOR.h          \
   bHYPRE_IdentitySolver_IOR.h bHYPRE_MPICommunicator_IOR.h                    \
   bHYPRE_MatrixVectorView_IOR.h bHYPRE_Operator_IOR.h bHYPRE_PCG_IOR.h        \
@@ -17,7 +17,7 @@ IORHDRS = bHYPRE_BoomerAMG_IOR.h bHYPRE_CGNR_IOR.h                            \
   bHYPRE_StructPFMG_IOR.h bHYPRE_StructSMG_IOR.h bHYPRE_StructStencil_IOR.h   \
   bHYPRE_StructVectorView_IOR.h bHYPRE_StructVector_IOR.h bHYPRE_Vector_IOR.h
 STUBHDRS = bHYPRE.h bHYPRE_BoomerAMG.h bHYPRE_CGNR.h                          \
-  bHYPRE_CoefficientAccess.h bHYPRE_GMRES.h bHYPRE_HPCG.h                     \
+  bHYPRE_CoefficientAccess.h bHYPRE_Euclid.h bHYPRE_GMRES.h bHYPRE_HPCG.h     \
   bHYPRE_IJMatrixView.h bHYPRE_IJParCSRMatrix.h bHYPRE_IJParCSRVector.h       \
   bHYPRE_IJVectorView.h bHYPRE_IdentitySolver.h bHYPRE_MPICommunicator.h      \
   bHYPRE_MatrixVectorView.h bHYPRE_Operator.h bHYPRE_PCG.h                    \
@@ -33,8 +33,8 @@ STUBHDRS = bHYPRE.h bHYPRE_BoomerAMG.h bHYPRE_CGNR.h                          \
   bHYPRE_StructSMG.h bHYPRE_StructStencil.h bHYPRE_StructVector.h             \
   bHYPRE_StructVectorView.h bHYPRE_Vector.h
 STUBSRCS = bHYPRE_BoomerAMG_Stub.c bHYPRE_CGNR_Stub.c                         \
-  bHYPRE_CoefficientAccess_Stub.c bHYPRE_GMRES_Stub.c bHYPRE_HPCG_Stub.c      \
-  bHYPRE_IJMatrixView_Stub.c bHYPRE_IJParCSRMatrix_Stub.c                     \
+  bHYPRE_CoefficientAccess_Stub.c bHYPRE_Euclid_Stub.c bHYPRE_GMRES_Stub.c    \
+  bHYPRE_HPCG_Stub.c bHYPRE_IJMatrixView_Stub.c bHYPRE_IJParCSRMatrix_Stub.c  \
   bHYPRE_IJParCSRVector_Stub.c bHYPRE_IJVectorView_Stub.c                     \
   bHYPRE_IdentitySolver_Stub.c bHYPRE_MPICommunicator_Stub.c                  \
   bHYPRE_MatrixVectorView_Stub.c bHYPRE_Operator_Stub.c bHYPRE_PCG_Stub.c     \

@@ -19,6 +19,9 @@
 #ifndef included_bHYPRE_CoefficientAccess_h
 #include "bHYPRE_CoefficientAccess.h"
 #endif
+#ifndef included_bHYPRE_Euclid_h
+#include "bHYPRE_Euclid.h"
+#endif
 #ifndef included_bHYPRE_GMRES_h
 #include "bHYPRE_GMRES.h"
 #endif
