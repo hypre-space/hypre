@@ -84,6 +84,7 @@ main( int   argc,
    bHYPRE_PCG           bHYPRE_PCG;
    bHYPRE_HPCG          bHYPRE_HPCG;
    bHYPRE_GMRES         bHYPRE_GMRES;
+   bHYPRE_BiCGSTAB      bHYPRE_BiCGSTAB;
    bHYPRE_CGNR          bHYPRE_CGNR;
    bHYPRE_ParCSRDiagScale  bHYPRE_ParCSRDiagScale;
    bHYPRE_ParaSails     bHYPRE_ParaSails;
@@ -735,9 +736,9 @@ main( int   argc,
       printf("        0=AMG                1=AMG-PCG        \n");
       printf("        2=DS-PCG             3=AMG-GMRES      \n");
       printf("        4=DS-GMRES           5=AMG-CGNR       \n");     
-      printf("        6=DS-CGNR           7*=PILUT-GMRES    \n");     
-      printf("        8=ParaSails-PCG     9*=AMG-BiCGSTAB   \n");
-      printf("       10*=DS-BiCGSTAB      11*=PILUT-BiCGSTAB \n");
+      printf("        6=DS-CGNR            7*=PILUT-GMRES    \n");     
+      printf("        8=ParaSails-PCG      9*=AMG-BiCGSTAB   \n");
+      printf("       10=DS-BiCGSTAB       11*=PILUT-BiCGSTAB \n");
       printf("       12*=Schwarz-PCG      18=ParaSails-GMRES\n");     
       printf("        43=Euclid-PCG       44*=Euclid-GMRES   \n");
       printf("       45*=Euclid-BICGSTAB\n");
@@ -2328,7 +2329,6 @@ main( int   argc,
          printf("Final GMRES Relative Residual Norm = %e\n", final_res_norm);
          printf("\n");
       }
-/* <<< NOT FINISHED YET */
    }
    /*-----------------------------------------------------------
     * Solve the system using BiCGSTAB 
@@ -2336,17 +2336,22 @@ main( int   argc,
 
    if (solver_id == 9 || solver_id == 10 || solver_id == 11 || solver_id == 45)
    {
-#ifdef DO_THIS_LATER
       time_index = hypre_InitializeTiming("BiCGSTAB Setup");
       hypre_BeginTiming(time_index);
  
-      HYPRE_ParCSRBiCGSTABCreate(mpi_comm, &pcg_solver);
-      HYPRE_BiCGSTABSetMaxIter(pcg_solver, 1000);
-      HYPRE_BiCGSTABSetTol(pcg_solver, tol);
-      HYPRE_BiCGSTABSetLogging(pcg_solver, 1);
+      bHYPRE_op_A = bHYPRE_Operator__cast( bHYPRE_parcsr_A );
+      bHYPRE_BiCGSTAB = bHYPRE_BiCGSTAB_Create( bmpicomm, bHYPRE_op_A );
+      bHYPRE_Vector_b = bHYPRE_Vector__cast( bHYPRE_b );
+      bHYPRE_Vector_x = bHYPRE_Vector__cast( bHYPRE_x );
+
+      bHYPRE_BiCGSTAB_SetIntParameter( bHYPRE_BiCGSTAB, "MaxIterations", 500 );
+      bHYPRE_BiCGSTAB_SetDoubleParameter( bHYPRE_BiCGSTAB, "Tolerance", tol );
+      bHYPRE_BiCGSTAB_SetIntParameter( bHYPRE_BiCGSTAB, "Logging", 1 );
  
       if (solver_id == 9)
       {
+         hypre_assert( "solver 9 not implemented"==0 );
+#ifdef DO_THIS_LATER
          /* use BoomerAMG as preconditioner */
          if (myid == 0) printf("Solver: AMG-BiCGSTAB\n");
 
@@ -2378,20 +2383,29 @@ main( int   argc,
                                   (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSolve,
                                   (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSetup,
                                   pcg_precond);
+#endif  /*DO_THIS_LATER*/
       }
       else if (solver_id == 10)
       {
          /* use diagonal scaling as preconditioner */
          if (myid == 0) printf("Solver: DS-BiCGSTAB\n");
-         pcg_precond = NULL;
 
-         HYPRE_BiCGSTABSetPrecond(pcg_solver,
-                                  (HYPRE_PtrToSolverFcn) HYPRE_ParCSRDiagScale,
-                                  (HYPRE_PtrToSolverFcn) HYPRE_ParCSRDiagScaleSetup,
-                                  pcg_precond);
+         bHYPRE_ParCSRDiagScale = bHYPRE_ParCSRDiagScale_Create( bmpicomm );
+         bHYPRE_ParCSRDiagScale_SetOperator( bHYPRE_ParCSRDiagScale, bHYPRE_op_A );
+         ierr += bHYPRE_ParCSRDiagScale_Setup( bHYPRE_ParCSRDiagScale,
+                                               bHYPRE_Vector_b, bHYPRE_Vector_x );
+         bHYPRE_SolverPC =
+            bHYPRE_Solver__cast( bHYPRE_ParCSRDiagScale );
+         ierr += bHYPRE_BiCGSTAB_SetPreconditioner(
+            bHYPRE_BiCGSTAB, bHYPRE_SolverPC );
+         ierr += bHYPRE_BiCGSTAB_Setup(
+            bHYPRE_BiCGSTAB, bHYPRE_Vector_b, bHYPRE_Vector_x );
+
       }
       else if (solver_id == 11)
       {
+         hypre_assert( "solver 11 not implemented"==0 );
+#ifdef DO_THIS_LATER
          /* use PILUT as preconditioner */
          if (myid == 0) printf("Solver: PILUT-BiCGSTAB\n");
 
@@ -2412,9 +2426,12 @@ main( int   argc,
          if (nonzeros_to_keep >= 0 )
             HYPRE_ParCSRPilutSetFactorRowSize( pcg_precond,
                                                nonzeros_to_keep );
+#endif  /*DO_THIS_LATER*/
       }
       else if (solver_id == 45)
       {
+         hypre_assert( "solver 45 not implemented"==0 );
+#ifdef DO_THIS_LATER
          /* use Euclid preconditioning */
          if (myid == 0) printf("Solver: Euclid-BICGSTAB\n");
 
@@ -2431,9 +2448,8 @@ main( int   argc,
                                   (HYPRE_PtrToSolverFcn) HYPRE_EuclidSolve,
                                   (HYPRE_PtrToSolverFcn) HYPRE_EuclidSetup,
                                   pcg_precond);
+#endif  /*DO_THIS_LATER*/
       }
- 
-      HYPRE_BiCGSTABSetup(pcg_solver, (HYPRE_Matrix)parcsr_A, (HYPRE_Vector)b, (HYPRE_Vector)x);
  
       hypre_EndTiming(time_index);
       hypre_PrintTiming("Setup phase times", mpi_comm);
@@ -2443,31 +2459,43 @@ main( int   argc,
       time_index = hypre_InitializeTiming("BiCGSTAB Solve");
       hypre_BeginTiming(time_index);
  
-      HYPRE_BiCGSTABSolve(pcg_solver, (HYPRE_Matrix)parcsr_A, (HYPRE_Vector)b, (HYPRE_Vector)x);
+      ierr += bHYPRE_BiCGSTAB_Apply(
+         bHYPRE_BiCGSTAB, bHYPRE_Vector_b, &bHYPRE_Vector_x );
  
       hypre_EndTiming(time_index);
       hypre_PrintTiming("Solve phase times", mpi_comm);
       hypre_FinalizeTiming(time_index);
       hypre_ClearTiming();
  
-      HYPRE_BiCGSTABGetNumIterations(pcg_solver, &num_iterations);
-      HYPRE_BiCGSTABGetFinalRelativeResidualNorm(pcg_solver,&final_res_norm);
+      ierr += bHYPRE_BiCGSTAB_GetIntValue( bHYPRE_BiCGSTAB, "NumIterations",
+                                           &num_iterations );
+      ierr += bHYPRE_BiCGSTAB_GetDoubleValue(
+         bHYPRE_BiCGSTAB, "Final Relative Residual Norm", &final_res_norm );
 
-      HYPRE_ParCSRBiCGSTABDestroy(pcg_solver);
+      bHYPRE_BiCGSTAB_deleteRef( bHYPRE_BiCGSTAB );
  
       if (solver_id == 9)
       {
+#ifdef DO_THIS_LATER
          HYPRE_BoomerAMGDestroy(pcg_precond);
+#endif  /*DO_THIS_LATER*/
       }
-
-      if (solver_id == 11)
+      else if (solver_id == 10)
       {
+         bHYPRE_ParCSRDiagScale_deleteRef( bHYPRE_ParCSRDiagScale );
+      }
+      else if (solver_id == 11)
+      {
+#ifdef DO_THIS_LATER
          HYPRE_ParCSRPilutDestroy(pcg_precond);
+#endif  /*DO_THIS_LATER*/
       }
       else if (solver_id == 45)
       {
+#ifdef DO_THIS_LATER
          /* HYPRE_EuclidPrintParams(pcg_precond); */
          HYPRE_EuclidDestroy(pcg_precond);
+#endif  /*DO_THIS_LATER*/
       }
 
       if (myid == 0)
@@ -2477,7 +2505,6 @@ main( int   argc,
          printf("Final BiCGSTAB Relative Residual Norm = %e\n", final_res_norm);
          printf("\n");
       }
-#endif  /*DO_THIS_LATER*/
    }
    /*-----------------------------------------------------------
     * Solve the system using CGNR 
