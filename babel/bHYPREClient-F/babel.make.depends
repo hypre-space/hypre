@@ -1,4 +1,11 @@
 # IORHDRS dependencies.
+bHYPRE_BiCGSTAB_IOR.h: /home/painter/linear_solvers/babel/Interfaces.idl
+bHYPRE_BiCGSTAB_IOR.h: sidl_header.h
+bHYPRE_BiCGSTAB_IOR.h: bHYPRE_Operator_IOR.h
+bHYPRE_BiCGSTAB_IOR.h: bHYPRE_PreconditionedSolver_IOR.h
+bHYPRE_BiCGSTAB_IOR.h: bHYPRE_Solver_IOR.h
+bHYPRE_BiCGSTAB_IOR.h: sidl_BaseClass_IOR.h
+
 bHYPRE_BoomerAMG_IOR.h: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_BoomerAMG_IOR.h: sidl_header.h
 bHYPRE_BoomerAMG_IOR.h: bHYPRE_Operator_IOR.h
@@ -70,6 +77,7 @@ bHYPRE_IJVectorView_IOR.h: bHYPRE_ProblemDefinition_IOR.h
 bHYPRE_IJVectorView_IOR.h: sidl_BaseInterface_IOR.h
 
 bHYPRE_IOR.h: /home/painter/linear_solvers/babel/Interfaces.idl
+bHYPRE_IOR.h: bHYPRE_BiCGSTAB_IOR.h
 bHYPRE_IOR.h: bHYPRE_BoomerAMG_IOR.h
 bHYPRE_IOR.h: bHYPRE_CGNR_IOR.h
 bHYPRE_IOR.h: bHYPRE_CoefficientAccess_IOR.h
@@ -338,6 +346,8 @@ bHYPRE_Vector_IOR.h: sidl_BaseInterface_IOR.h
 
 
 # STUBDOCS dependencies.
+bHYPRE_BiCGSTAB.fif: /home/painter/linear_solvers/babel/Interfaces.idl
+
 bHYPRE_BoomerAMG.fif: /home/painter/linear_solvers/babel/Interfaces.idl
 
 bHYPRE_CGNR.fif: /home/painter/linear_solvers/babel/Interfaces.idl
@@ -436,6 +446,20 @@ bHYPRE_SStructVariable.inc: /home/painter/linear_solvers/babel/Interfaces.idl
 
 
 # STUBSRCS dependencies.
+bHYPRE_BiCGSTAB_fStub.c: /home/painter/linear_solvers/babel/Interfaces.idl
+bHYPRE_BiCGSTAB_fStub.c: sidlfortran.h
+bHYPRE_BiCGSTAB_fStub.c: sidl_header.h
+bHYPRE_BiCGSTAB_fStub.c: sidl_interface_IOR.h
+bHYPRE_BiCGSTAB_fStub.c: babel_config.h
+bHYPRE_BiCGSTAB_fStub.c: sidl_Loader.h
+bHYPRE_BiCGSTAB_fStub.c: bHYPRE_BiCGSTAB_IOR.h
+bHYPRE_BiCGSTAB_fStub.c: bHYPRE_Solver_IOR.h
+bHYPRE_BiCGSTAB_fStub.c: bHYPRE_MPICommunicator_IOR.h
+bHYPRE_BiCGSTAB_fStub.c: bHYPRE_Operator_IOR.h
+bHYPRE_BiCGSTAB_fStub.c: sidl_ClassInfo_IOR.h
+bHYPRE_BiCGSTAB_fStub.c: bHYPRE_Vector_IOR.h
+bHYPRE_BiCGSTAB_fStub.c: sidl_BaseInterface_IOR.h
+
 bHYPRE_BoomerAMG_fStub.c: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_BoomerAMG_fStub.c: sidlfortran.h
 bHYPRE_BoomerAMG_fStub.c: sidl_header.h

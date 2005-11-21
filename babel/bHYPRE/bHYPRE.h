@@ -10,6 +10,9 @@
  * babel-version = 0.10.4
  */
 
+#ifndef included_bHYPRE_BiCGSTAB_h
+#include "bHYPRE_BiCGSTAB.h"
+#endif
 #ifndef included_bHYPRE_BoomerAMG_h
 #include "bHYPRE_BoomerAMG.h"
 #endif

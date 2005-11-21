@@ -1,4 +1,4 @@
-IORHDRS = bHYPRE_BoomerAMG_IOR.h bHYPRE_CGNR_IOR.h                            \
+IORHDRS = bHYPRE_BiCGSTAB_IOR.h bHYPRE_BoomerAMG_IOR.h bHYPRE_CGNR_IOR.h      \
   bHYPRE_CoefficientAccess_IOR.h bHYPRE_Euclid_IOR.h bHYPRE_GMRES_IOR.h       \
   bHYPRE_HPCG_IOR.h bHYPRE_IJMatrixView_IOR.h bHYPRE_IJParCSRMatrix_IOR.h     \
   bHYPRE_IJParCSRVector_IOR.h bHYPRE_IJVectorView_IOR.h bHYPRE_IOR.h          \
@@ -16,7 +16,7 @@ IORHDRS = bHYPRE_BoomerAMG_IOR.h bHYPRE_CGNR_IOR.h                            \
   bHYPRE_StructMatrixView_IOR.h bHYPRE_StructMatrix_IOR.h                     \
   bHYPRE_StructPFMG_IOR.h bHYPRE_StructSMG_IOR.h bHYPRE_StructStencil_IOR.h   \
   bHYPRE_StructVectorView_IOR.h bHYPRE_StructVector_IOR.h bHYPRE_Vector_IOR.h
-STUBHDRS = bHYPRE.h bHYPRE_BoomerAMG.h bHYPRE_CGNR.h                          \
+STUBHDRS = bHYPRE.h bHYPRE_BiCGSTAB.h bHYPRE_BoomerAMG.h bHYPRE_CGNR.h        \
   bHYPRE_CoefficientAccess.h bHYPRE_Euclid.h bHYPRE_GMRES.h bHYPRE_HPCG.h     \
   bHYPRE_IJMatrixView.h bHYPRE_IJParCSRMatrix.h bHYPRE_IJParCSRVector.h       \
   bHYPRE_IJVectorView.h bHYPRE_IdentitySolver.h bHYPRE_MPICommunicator.h      \
@@ -32,7 +32,7 @@ STUBHDRS = bHYPRE.h bHYPRE_BoomerAMG.h bHYPRE_CGNR.h                          \
   bHYPRE_StructMatrix.h bHYPRE_StructMatrixView.h bHYPRE_StructPFMG.h         \
   bHYPRE_StructSMG.h bHYPRE_StructStencil.h bHYPRE_StructVector.h             \
   bHYPRE_StructVectorView.h bHYPRE_Vector.h
-STUBSRCS = bHYPRE_BoomerAMG_Stub.c bHYPRE_CGNR_Stub.c                         \
+STUBSRCS = bHYPRE_BiCGSTAB_Stub.c bHYPRE_BoomerAMG_Stub.c bHYPRE_CGNR_Stub.c  \
   bHYPRE_CoefficientAccess_Stub.c bHYPRE_Euclid_Stub.c bHYPRE_GMRES_Stub.c    \
   bHYPRE_HPCG_Stub.c bHYPRE_IJMatrixView_Stub.c bHYPRE_IJParCSRMatrix_Stub.c  \
   bHYPRE_IJParCSRVector_Stub.c bHYPRE_IJVectorView_Stub.c                     \

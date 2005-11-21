@@ -1,4 +1,16 @@
 # IMPLHDRS dependencies.
+bHYPRE_BiCGSTAB_Impl.h: /home/painter/linear_solvers/babel/Interfaces.idl
+bHYPRE_BiCGSTAB_Impl.h: sidl_header.h
+bHYPRE_BiCGSTAB_Impl.h: bHYPRE_Solver.h
+bHYPRE_BiCGSTAB_Impl.h: bHYPRE_MPICommunicator.h
+bHYPRE_BiCGSTAB_Impl.h: bHYPRE_Operator.h
+bHYPRE_BiCGSTAB_Impl.h: sidl_ClassInfo.h
+bHYPRE_BiCGSTAB_Impl.h: bHYPRE_Vector.h
+bHYPRE_BiCGSTAB_Impl.h: bHYPRE_BiCGSTAB.h
+bHYPRE_BiCGSTAB_Impl.h: sidl_BaseInterface.h
+bHYPRE_BiCGSTAB_Impl.h: sidl_BaseClass.h
+bHYPRE_BiCGSTAB_Impl.h: bHYPRE_PreconditionedSolver.h
+
 bHYPRE_BoomerAMG_Impl.h: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_BoomerAMG_Impl.h: sidl_header.h
 bHYPRE_BoomerAMG_Impl.h: bHYPRE_Solver.h
@@ -329,6 +341,9 @@ bHYPRE_StructVector_Impl.h: sidl_BaseClass.h
 
 
 # IMPLSRCS dependencies.
+bHYPRE_BiCGSTAB_Impl.c: /home/painter/linear_solvers/babel/Interfaces.idl
+bHYPRE_BiCGSTAB_Impl.c: bHYPRE_BiCGSTAB_Impl.h
+
 bHYPRE_BoomerAMG_Impl.c: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_BoomerAMG_Impl.c: bHYPRE_BoomerAMG_Impl.h
 
@@ -425,6 +440,13 @@ bHYPRE_StructVector_Impl.c: bHYPRE_StructVector_Impl.h
 
 
 # IORHDRS dependencies.
+bHYPRE_BiCGSTAB_IOR.h: /home/painter/linear_solvers/babel/Interfaces.idl
+bHYPRE_BiCGSTAB_IOR.h: sidl_header.h
+bHYPRE_BiCGSTAB_IOR.h: bHYPRE_Operator_IOR.h
+bHYPRE_BiCGSTAB_IOR.h: bHYPRE_PreconditionedSolver_IOR.h
+bHYPRE_BiCGSTAB_IOR.h: bHYPRE_Solver_IOR.h
+bHYPRE_BiCGSTAB_IOR.h: sidl_BaseClass_IOR.h
+
 bHYPRE_BoomerAMG_IOR.h: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_BoomerAMG_IOR.h: sidl_header.h
 bHYPRE_BoomerAMG_IOR.h: bHYPRE_Operator_IOR.h
@@ -496,6 +518,7 @@ bHYPRE_IJVectorView_IOR.h: bHYPRE_ProblemDefinition_IOR.h
 bHYPRE_IJVectorView_IOR.h: sidl_BaseInterface_IOR.h
 
 bHYPRE_IOR.h: /home/painter/linear_solvers/babel/Interfaces.idl
+bHYPRE_IOR.h: bHYPRE_BiCGSTAB_IOR.h
 bHYPRE_IOR.h: bHYPRE_BoomerAMG_IOR.h
 bHYPRE_IOR.h: bHYPRE_CGNR_IOR.h
 bHYPRE_IOR.h: bHYPRE_CoefficientAccess_IOR.h
@@ -764,6 +787,13 @@ bHYPRE_Vector_IOR.h: sidl_BaseInterface_IOR.h
 
 
 # IORSRCS dependencies.
+bHYPRE_BiCGSTAB_IOR.c: /home/painter/linear_solvers/babel/Interfaces.idl
+bHYPRE_BiCGSTAB_IOR.c: bHYPRE_BiCGSTAB_IOR.h
+bHYPRE_BiCGSTAB_IOR.c: sidl_BaseClass_Impl.h
+bHYPRE_BiCGSTAB_IOR.c: sidl_BaseClass.h
+bHYPRE_BiCGSTAB_IOR.c: sidl_ClassInfo.h
+bHYPRE_BiCGSTAB_IOR.c: sidl_ClassInfoI.h
+
 bHYPRE_BoomerAMG_IOR.c: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_BoomerAMG_IOR.c: bHYPRE_BoomerAMG_IOR.h
 bHYPRE_BoomerAMG_IOR.c: sidl_BaseClass_Impl.h
@@ -968,6 +998,10 @@ bHYPRE_StructVector_IOR.c: sidl_ClassInfoI.h
 
 
 # SKELSRCS dependencies.
+bHYPRE_BiCGSTAB_Skel.c: /home/painter/linear_solvers/babel/Interfaces.idl
+bHYPRE_BiCGSTAB_Skel.c: bHYPRE_BiCGSTAB_IOR.h
+bHYPRE_BiCGSTAB_Skel.c: bHYPRE_BiCGSTAB.h
+
 bHYPRE_BoomerAMG_Skel.c: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_BoomerAMG_Skel.c: bHYPRE_BoomerAMG_IOR.h
 bHYPRE_BoomerAMG_Skel.c: bHYPRE_BoomerAMG.h
@@ -1093,6 +1127,7 @@ bHYPRE_StructVector_Skel.c: bHYPRE_StructVector.h
 
 # STUBHDRS dependencies.
 bHYPRE.h: /home/painter/linear_solvers/babel/Interfaces.idl
+bHYPRE.h: bHYPRE_BiCGSTAB.h
 bHYPRE.h: bHYPRE_BoomerAMG.h
 bHYPRE.h: bHYPRE_CGNR.h
 bHYPRE.h: bHYPRE_CoefficientAccess.h
@@ -1136,6 +1171,17 @@ bHYPRE.h: bHYPRE_StructStencil.h
 bHYPRE.h: bHYPRE_StructVector.h
 bHYPRE.h: bHYPRE_StructVectorView.h
 bHYPRE.h: bHYPRE_Vector.h
+
+bHYPRE_BiCGSTAB.h: /home/painter/linear_solvers/babel/Interfaces.idl
+bHYPRE_BiCGSTAB.h: sidl_header.h
+bHYPRE_BiCGSTAB.h: bHYPRE_MPICommunicator.h
+bHYPRE_BiCGSTAB.h: bHYPRE_Operator.h
+bHYPRE_BiCGSTAB.h: bHYPRE_Solver.h
+bHYPRE_BiCGSTAB.h: bHYPRE_Vector.h
+bHYPRE_BiCGSTAB.h: sidl_BaseInterface.h
+bHYPRE_BiCGSTAB.h: sidl_ClassInfo.h
+bHYPRE_BiCGSTAB.h: sidl_io_Serializer.h
+bHYPRE_BiCGSTAB.h: sidl_io_Deserializer.h
 
 bHYPRE_BoomerAMG.h: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_BoomerAMG.h: sidl_header.h
@@ -1538,6 +1584,17 @@ bHYPRE_Vector.h: sidl_io_Deserializer.h
 
 
 # STUBSRCS dependencies.
+bHYPRE_BiCGSTAB_Stub.c: /home/painter/linear_solvers/babel/Interfaces.idl
+bHYPRE_BiCGSTAB_Stub.c: bHYPRE_BiCGSTAB.h
+bHYPRE_BiCGSTAB_Stub.c: bHYPRE_BiCGSTAB_IOR.h
+bHYPRE_BiCGSTAB_Stub.c: sidl_interface_IOR.h
+bHYPRE_BiCGSTAB_Stub.c: sidl_rmi_InstanceHandle.h
+bHYPRE_BiCGSTAB_Stub.c: sidl_rmi_ConnectRegistry.h
+bHYPRE_BiCGSTAB_Stub.c: sidl_interface_IOR.h
+bHYPRE_BiCGSTAB_Stub.c: sidl_BaseInterface_IOR.h
+bHYPRE_BiCGSTAB_Stub.c: sidl_BaseClass.h
+bHYPRE_BiCGSTAB_Stub.c: sidl_ClassInfo.h
+
 bHYPRE_BoomerAMG_Stub.c: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_BoomerAMG_Stub.c: bHYPRE_BoomerAMG.h
 bHYPRE_BoomerAMG_Stub.c: bHYPRE_BoomerAMG_IOR.h

@@ -1,4 +1,4 @@
-IORHDRS = bHYPRE_BoomerAMG_IOR.h bHYPRE_CGNR_IOR.h                            \
+IORHDRS = bHYPRE_BiCGSTAB_IOR.h bHYPRE_BoomerAMG_IOR.h bHYPRE_CGNR_IOR.h      \
   bHYPRE_CoefficientAccess_IOR.h bHYPRE_Euclid_IOR.h bHYPRE_GMRES_IOR.h       \
   bHYPRE_HPCG_IOR.h bHYPRE_IJMatrixView_IOR.h bHYPRE_IJParCSRMatrix_IOR.h     \
   bHYPRE_IJParCSRVector_IOR.h bHYPRE_IJVectorView_IOR.h bHYPRE_IOR.h          \
@@ -16,21 +16,22 @@ IORHDRS = bHYPRE_BoomerAMG_IOR.h bHYPRE_CGNR_IOR.h                            \
   bHYPRE_StructMatrixView_IOR.h bHYPRE_StructMatrix_IOR.h                     \
   bHYPRE_StructPFMG_IOR.h bHYPRE_StructSMG_IOR.h bHYPRE_StructStencil_IOR.h   \
   bHYPRE_StructVectorView_IOR.h bHYPRE_StructVector_IOR.h bHYPRE_Vector_IOR.h
-STUBDOCS = bHYPRE_BoomerAMG.fif bHYPRE_CGNR.fif bHYPRE_CoefficientAccess.fif  \
-  bHYPRE_Euclid.fif bHYPRE_GMRES.fif bHYPRE_HPCG.fif bHYPRE_IJMatrixView.fif  \
-  bHYPRE_IJParCSRMatrix.fif bHYPRE_IJParCSRVector.fif bHYPRE_IJVectorView.fif \
-  bHYPRE_IdentitySolver.fif bHYPRE_MPICommunicator.fif                        \
-  bHYPRE_MatrixVectorView.fif bHYPRE_Operator.fif bHYPRE_PCG.fif              \
-  bHYPRE_ParCSRDiagScale.fif bHYPRE_ParaSails.fif bHYPRE_Pilut.fif            \
-  bHYPRE_PreconditionedSolver.fif bHYPRE_ProblemDefinition.fif                \
-  bHYPRE_SStructDiagScale.fif bHYPRE_SStructGraph.fif bHYPRE_SStructGrid.fif  \
-  bHYPRE_SStructMatrix.fif bHYPRE_SStructMatrixView.fif                       \
-  bHYPRE_SStructParCSRMatrix.fif bHYPRE_SStructParCSRVector.fif               \
-  bHYPRE_SStructStencil.fif bHYPRE_SStructVector.fif                          \
-  bHYPRE_SStructVectorView.fif bHYPRE_SStruct_MatrixVectorView.fif            \
-  bHYPRE_Solver.fif bHYPRE_StructDiagScale.fif bHYPRE_StructGrid.fif          \
-  bHYPRE_StructMatrix.fif bHYPRE_StructMatrixView.fif bHYPRE_StructPFMG.fif   \
-  bHYPRE_StructSMG.fif bHYPRE_StructStencil.fif bHYPRE_StructVector.fif       \
+STUBDOCS = bHYPRE_BiCGSTAB.fif bHYPRE_BoomerAMG.fif bHYPRE_CGNR.fif           \
+  bHYPRE_CoefficientAccess.fif bHYPRE_Euclid.fif bHYPRE_GMRES.fif             \
+  bHYPRE_HPCG.fif bHYPRE_IJMatrixView.fif bHYPRE_IJParCSRMatrix.fif           \
+  bHYPRE_IJParCSRVector.fif bHYPRE_IJVectorView.fif bHYPRE_IdentitySolver.fif \
+  bHYPRE_MPICommunicator.fif bHYPRE_MatrixVectorView.fif bHYPRE_Operator.fif  \
+  bHYPRE_PCG.fif bHYPRE_ParCSRDiagScale.fif bHYPRE_ParaSails.fif              \
+  bHYPRE_Pilut.fif bHYPRE_PreconditionedSolver.fif                            \
+  bHYPRE_ProblemDefinition.fif bHYPRE_SStructDiagScale.fif                    \
+  bHYPRE_SStructGraph.fif bHYPRE_SStructGrid.fif bHYPRE_SStructMatrix.fif     \
+  bHYPRE_SStructMatrixView.fif bHYPRE_SStructParCSRMatrix.fif                 \
+  bHYPRE_SStructParCSRVector.fif bHYPRE_SStructStencil.fif                    \
+  bHYPRE_SStructVector.fif bHYPRE_SStructVectorView.fif                       \
+  bHYPRE_SStruct_MatrixVectorView.fif bHYPRE_Solver.fif                       \
+  bHYPRE_StructDiagScale.fif bHYPRE_StructGrid.fif bHYPRE_StructMatrix.fif    \
+  bHYPRE_StructMatrixView.fif bHYPRE_StructPFMG.fif bHYPRE_StructSMG.fif      \
+  bHYPRE_StructStencil.fif bHYPRE_StructVector.fif                            \
   bHYPRE_StructVectorView.fif bHYPRE_Vector.fif sidl_BaseClass.fif            \
   sidl_BaseException.fif sidl_BaseInterface.fif sidl_ClassInfo.fif            \
   sidl_ClassInfoI.fif sidl_DFinder.fif sidl_DLL.fif sidl_Finder.fif           \
@@ -42,9 +43,9 @@ STUBDOCS = bHYPRE_BoomerAMG.fif bHYPRE_CGNR.fif bHYPRE_CoefficientAccess.fif  \
   sidl_rmi_NetworkException.fif sidl_rmi_ProtocolFactory.fif                  \
   sidl_rmi_Response.fif
 STUBFORTRANINC = bHYPRE_SStructVariable.inc sidl_Resolve.inc sidl_Scope.inc
-STUBSRCS = bHYPRE_BoomerAMG_fStub.c bHYPRE_CGNR_fStub.c                       \
-  bHYPRE_CoefficientAccess_fStub.c bHYPRE_Euclid_fStub.c bHYPRE_GMRES_fStub.c \
-  bHYPRE_HPCG_fStub.c bHYPRE_IJMatrixView_fStub.c                             \
+STUBSRCS = bHYPRE_BiCGSTAB_fStub.c bHYPRE_BoomerAMG_fStub.c                   \
+  bHYPRE_CGNR_fStub.c bHYPRE_CoefficientAccess_fStub.c bHYPRE_Euclid_fStub.c  \
+  bHYPRE_GMRES_fStub.c bHYPRE_HPCG_fStub.c bHYPRE_IJMatrixView_fStub.c        \
   bHYPRE_IJParCSRMatrix_fStub.c bHYPRE_IJParCSRVector_fStub.c                 \
   bHYPRE_IJVectorView_fStub.c bHYPRE_IdentitySolver_fStub.c                   \
   bHYPRE_MPICommunicator_fStub.c bHYPRE_MatrixVectorView_fStub.c              \

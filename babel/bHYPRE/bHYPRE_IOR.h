@@ -20,6 +20,9 @@
  * 
  */
 
+#ifndef included_bHYPRE_BiCGSTAB_IOR_h
+#include "bHYPRE_BiCGSTAB_IOR.h"
+#endif
 #ifndef included_bHYPRE_BoomerAMG_IOR_h
 #include "bHYPRE_BoomerAMG_IOR.h"
 #endif

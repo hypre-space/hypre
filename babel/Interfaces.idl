@@ -1598,6 +1598,20 @@ package bHYPRE version 1.0.0
     *
     * RDF: Documentation goes here.
     *
+    * BiCGSTAB solver calls Babel-interface functions
+    *
+    **/
+   class BiCGSTAB implements-all PreconditionedSolver
+   {
+      static BiCGSTAB Create( in MPICommunicator mpi_comm, in Operator A );
+   }
+
+   /**
+    * Objects of this type can be cast to PreconditionedSolver objects
+    * using the {\tt \_\_cast} methods.
+    *
+    * RDF: Documentation goes here.
+    *
     * The StructSMG solver requires a Struct matrix.
     *
     **/
