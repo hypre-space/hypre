@@ -41,7 +41,13 @@ extern "C" {
  * 
  * RDF: Documentation goes here.
  * 
- * This GMRES solver checks whether the matrix, vectors, and preconditioner
+ * The regular GMRES solver calls Babel-interface matrix and vector functions.
+ * The HGMRES solver calls HYPRE interface functions.
+ * The regular solver will work with any consistent matrix, vector, and
+ * preconditioner classes.  The HGMRES solver will work with the more common
+ * combinations.
+ * 
+ * The HGMRES solver checks whether the matrix, vectors, and preconditioner
  * are of known types, and will not work with any other types.
  * Presently, the recognized data types are:
  * matrix, vector: IJParCSRMatrix, IJParCSRVector
@@ -96,7 +102,8 @@ struct bHYPRE_GMRES__sepv {
   /* Methods introduced in bHYPRE.PreconditionedSolver-v1.0.0 */
   /* Methods introduced in bHYPRE.GMRES-v1.0.0 */
   struct bHYPRE_GMRES__object* (*f_Create)(
-    /* in */ struct bHYPRE_MPICommunicator__object* mpi_comm);
+    /* in */ struct bHYPRE_MPICommunicator__object* mpi_comm,
+    /* in */ struct bHYPRE_Operator__object* A);
 };
 
 /*

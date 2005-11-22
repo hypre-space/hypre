@@ -23,7 +23,13 @@
  * 
  * RDF: Documentation goes here.
  * 
- * This GMRES solver checks whether the matrix, vectors, and preconditioner
+ * The regular GMRES solver calls Babel-interface matrix and vector functions.
+ * The HGMRES solver calls HYPRE interface functions.
+ * The regular solver will work with any consistent matrix, vector, and
+ * preconditioner classes.  The HGMRES solver will work with the more common
+ * combinations.
+ * 
+ * The HGMRES solver checks whether the matrix, vectors, and preconditioner
  * are of known types, and will not work with any other types.
  * Presently, the recognized data types are:
  * matrix, vector: IJParCSRMatrix, IJParCSRVector
@@ -35,95 +41,12 @@
 #include "bHYPRE_GMRES_Impl.h"
 
 /* DO-NOT-DELETE splicer.begin(bHYPRE.GMRES._includes) */
-/* Put additional includes or other arbitrary code here... */
-#include "bHYPRE_IJParCSRMatrix.h"
-#include "bHYPRE_IJParCSRMatrix_Impl.h"
-#include "bHYPRE_IJParCSRVector.h"
-#include "bHYPRE_IJParCSRVector_Impl.h"
-#include "bHYPRE_BoomerAMG.h"
-#include "bHYPRE_BoomerAMG_Impl.h"
-#include "bHYPRE_ParaSails.h"
-#include "bHYPRE_ParaSails_Impl.h"
-#include "bHYPRE_ParCSRDiagScale.h"
-#include "bHYPRE_ParCSRDiagScale_Impl.h"
-#include "bHYPRE_PCG_Impl.h"
+/* Insert-Code-Here {bHYPRE.GMRES._includes} (includes and arbitrary code) */
 #include "bHYPRE_MPICommunicator_Impl.h"
+#include "bHYPRE_IdentitySolver_Impl.h"
+#include "bHYPRE_MatrixVectorView.h"
+#include <math.h>
 #include <assert.h>
-/*#include "mpi.h"*/
-
-/* This function should be used to initialize the parameter cache
- * in the bHYPRE_GMRES__data object. */
-int impl_bHYPRE_GMRES_Copy_Parameters_from_HYPRE_struct( bHYPRE_GMRES self )
-{
-   /* Parameters are copied only if they have nonsense values which tell
-      us that the user has not set them. */
-   int ierr = 0;
-   HYPRE_Solver solver;
-   struct bHYPRE_GMRES__data * data;
-
-   data = bHYPRE_GMRES__get_data( self );
-   hypre_assert( data->solver != NULL );
-   solver = data->solver;
-
-   /* double parameters: */
-   if ( data->tol == -1.234 )
-      ierr += HYPRE_GMRESGetTol( solver, &(data->tol) );
-
-   /* int parameters: */
-   if ( data->k_dim == -1234 )
-      ierr += HYPRE_GMRESGetKDim( solver, &(data->k_dim) );
-   if ( data->max_iter == -1234 )
-      ierr += HYPRE_GMRESGetMaxIter( solver, &(data->max_iter) );
-   if ( data->min_iter == -1234 )
-      ierr += HYPRE_GMRESGetMinIter( solver, &(data->min_iter) );
-   if ( data->rel_change == -1234 )
-      ierr += HYPRE_GMRESGetRelChange( solver, &(data->rel_change) );
-   if ( data->stop_crit == -1234 )
-      ierr += HYPRE_GMRESGetStopCrit( solver, &(data->stop_crit) );
-   if ( data->printlevel == -1234)
-      ierr += HYPRE_GMRESGetPrintLevel( solver, &(data->printlevel) );
-   if ( data->log_level == -1234 )
-      ierr += HYPRE_GMRESGetLogging( solver, &(data->log_level) );
-
-   return ierr;
-}
-
-int impl_bHYPRE_GMRES_Copy_Parameters_to_HYPRE_struct( bHYPRE_GMRES self )
-/* Copy parameter cache from the bHYPRE_GMRES__data object into the
- * HYPRE_Solver object */
-{
-   /* Parameters are left at their HYPRE defaults if they have bHYPRE nonsense
-      values which tell us that the user has not set them. */
-   int ierr = 0;
-   HYPRE_Solver solver;
-   struct bHYPRE_GMRES__data * data;
-
-   data = bHYPRE_GMRES__get_data( self );
-   hypre_assert( data->solver != NULL );
-   solver = data->solver;
-
-   /* double parameters: */
-   ierr += HYPRE_GMRESSetTol( solver, data->tol );
-
-   /* int parameters: */
-   if ( data->k_dim != -1234 )
-      ierr += HYPRE_GMRESSetKDim( solver, data->k_dim );
-   if ( data->max_iter != -1234 )
-      ierr += HYPRE_GMRESSetMaxIter( solver, data->max_iter );
-   if ( data->min_iter != -1234 )
-      ierr += HYPRE_GMRESSetMinIter( solver, data->min_iter );
-   if ( data->rel_change != -1234 )
-      ierr += HYPRE_GMRESSetRelChange( solver, data->rel_change );
-   if ( data->stop_crit != -1234 )
-      ierr += HYPRE_GMRESSetStopCrit( solver, data->stop_crit );
-   if ( data->printlevel != -1234 )
-      ierr += HYPRE_GMRESSetPrintLevel( solver, data->printlevel );
-   if ( data->log_level != -1234 )
-      ierr += HYPRE_GMRESSetLogging( solver, data->log_level );
-
-   return ierr;
-}
-
 /* DO-NOT-DELETE splicer.end(bHYPRE.GMRES._includes) */
 
 /*
@@ -159,42 +82,31 @@ impl_bHYPRE_GMRES__ctor(
   /* in */ bHYPRE_GMRES self)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.GMRES._ctor) */
-  /* Insert the implementation of the constructor method here... */
-
-   /* Note: user calls of __create() are DEPRECATED, _Create also calls this function */
+  /* Insert-Code-Here {bHYPRE.GMRES._ctor} (constructor method) */
 
    struct bHYPRE_GMRES__data * data;
    data = hypre_CTAlloc( struct bHYPRE_GMRES__data, 1 );
-   data -> comm = MPI_COMM_NULL;
-   data -> solver = NULL;
-   data -> matrix = NULL;
-   data -> vector_type = NULL;
-   /* We would like to call HYPRE_<vector type>GMRESCreate at this
-    * point, but it's impossible until we know the vector type.
-    * That's needed because the C-language Krylov solvers need to be
-    * told exactly what functions to call.  If we were to switch to a
-    * Babel-based GMRES solver, we would be able to use generic
-    * function names; hence we could really initialize GMRES here. */
 
-   /* default values (copied from gmres.c; better to get them by
-    * function calls)...*/
-/*
-   data -> tol        = 1.0e-06;
-   data -> k_dim      = 5;
-   data -> min_iter   = 0;
-   data -> max_iter   = 1000;
-   data -> rel_change = 0;
-   data -> stop_crit  = 0;*/ /* rel. residual norm */
-   /* initial nonsense values, later we should get good values
-    * either by user calls or out of the HYPRE object...*/
-   data -> tol        = -1.234;
-   data -> k_dim      = -1234;
-   data -> min_iter   = -1234;
-   data -> max_iter   = -1234;
-   data -> rel_change = -1234;
-   data -> stop_crit  = -1234; /* rel. residual norm */
-
-   /* set any other data components here */
+   /* set defaults */
+   data -> bmpicomm = MPI_COMM_NULL;
+   data -> matrix = (bHYPRE_Operator)NULL;
+   data -> precond = (bHYPRE_Solver)NULL;
+   data -> k_dim          = 5;
+   data -> min_iter       = 0;
+   data -> max_iter       = 1000;
+   data -> rel_change     = 0;
+   data -> stop_crit      = 0; /* rel. residual norm */
+   data -> converged      = 0;
+   data -> tol            = 1.0e-06;
+   data -> cf_tol         = 0.0;
+   data -> rel_residual_norm = 0.0;
+   data -> r              = (bHYPRE_Vector)NULL;
+   data -> w              = (bHYPRE_Vector)NULL;
+   data -> p              = (bHYPRE_Vector *)NULL;
+   data -> print_level    = 0;
+   data -> logging        = 0;
+   data -> norms          = NULL;
+   data -> log_file_name  = NULL;
 
    bHYPRE_GMRES__set_data( self, data );
 
@@ -216,25 +128,38 @@ impl_bHYPRE_GMRES__dtor(
   /* in */ bHYPRE_GMRES self)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.GMRES._dtor) */
-  /* Insert the implementation of the destructor method here... */
+  /* Insert-Code-Here {bHYPRE.GMRES._dtor} (destructor method) */
 
-   int ierr = 0;
+   int i;
    struct bHYPRE_GMRES__data * data;
    data = bHYPRE_GMRES__get_data( self );
 
-   if ( data->vector_type == "ParVector" )
+   if (data)
    {
-      ierr += HYPRE_ParCSRGMRESDestroy( data->solver );
+      if ( (data -> norms) != NULL )
+      {
+         hypre_TFree( data -> norms );
+         data -> norms = NULL;
+      } 
+
+      if ( data -> r != (bHYPRE_Vector)NULL )
+         bHYPRE_Vector_deleteRef( data->r );
+      if ( data -> w != (bHYPRE_Vector)NULL )
+         bHYPRE_Vector_deleteRef( data->w );
+      if ( data -> p != (bHYPRE_Vector *)NULL )
+      {
+         for ( i=0; i<(data->k_dim + 1); ++i )
+            bHYPRE_Vector_deleteRef( (data->p)[i] );
+         hypre_TFree( data -> p );
+      }
+
+      if ( data -> matrix != (bHYPRE_Operator)NULL )
+         bHYPRE_Operator_deleteRef( data->matrix );
+      if ( data -> precond != (bHYPRE_Solver)NULL )
+         bHYPRE_Solver_deleteRef( data->precond );
+
+      hypre_TFree( data );
    }
-   /* To Do: support more vector types */
-   else
-   {
-      /* Unsupported vector type.  We're unlikely to reach this point. */
-      ierr++;
-   }
-   bHYPRE_Operator_deleteRef( data->matrix );
-   /* delete any nontrivial data components here */
-   hypre_TFree( data );
 
   /* DO-NOT-DELETE splicer.end(bHYPRE.GMRES._dtor) */
 }
@@ -251,18 +176,25 @@ extern "C"
 #endif
 bHYPRE_GMRES
 impl_bHYPRE_GMRES_Create(
-  /* in */ bHYPRE_MPICommunicator mpi_comm)
+  /* in */ bHYPRE_MPICommunicator mpi_comm,
+  /* in */ bHYPRE_Operator A)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.GMRES.Create) */
   /* Insert-Code-Here {bHYPRE.GMRES.Create} (Create method) */
 
-   /* HYPRE_ParCSRGMRESCreate or HYPRE_StructGMRESCreate or ... cannot be
-      called until later because we don't know the vector type yet */
-
    bHYPRE_GMRES solver = bHYPRE_GMRES__create();
-   struct bHYPRE_GMRES__data * data;
-   data = bHYPRE_GMRES__get_data( solver );
-   data->comm = bHYPRE_MPICommunicator__get_data(mpi_comm)->mpi_comm;
+   struct bHYPRE_GMRES__data * data = bHYPRE_GMRES__get_data( solver );;
+   bHYPRE_IdentitySolver Id  = bHYPRE_IdentitySolver_Create( mpi_comm );
+   bHYPRE_Solver IdS = bHYPRE_Solver__cast( Id );
+
+   data->bmpicomm = mpi_comm;
+   if( data->matrix != (bHYPRE_Operator)NULL )
+      bHYPRE_Operator_deleteRef( data->matrix );
+
+   data->matrix = A;
+   bHYPRE_Operator_addRef( data->matrix );
+
+   data->precond = IdS;
 
    return solver;
 
@@ -287,17 +219,8 @@ impl_bHYPRE_GMRES_SetCommunicator(
   /* in */ bHYPRE_MPICommunicator mpi_comm)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.GMRES.SetCommunicator) */
-  /* Insert the implementation of the SetCommunicator method here... */
-
-   /* DEPRECATED  Use Create */
-
-   int ierr = 0;
-   struct bHYPRE_GMRES__data * data;
-   data = bHYPRE_GMRES__get_data( self );
-   data->comm = bHYPRE_MPICommunicator__get_data(mpi_comm)->mpi_comm;
-
-   return ierr;
-
+  /* Insert-Code-Here {bHYPRE.GMRES.SetCommunicator} (SetCommunicator method) */
+   return 1;  /* DEPRECATED and will never be implemented */
   /* DO-NOT-DELETE splicer.end(bHYPRE.GMRES.SetCommunicator) */
 }
 
@@ -319,44 +242,38 @@ impl_bHYPRE_GMRES_SetIntParameter(
   /* in */ int32_t value)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.GMRES.SetIntParameter) */
-  /* Insert the implementation of the SetIntParameter method here... */
+  /* Insert-Code-Here {bHYPRE.GMRES.SetIntParameter} (SetIntParameter method) */
 
-   /* The normal way to implement this function would be to call the
-    * corresponding HYPRE function to set the parameter.  That can't
-    * always be done because the HYPRE struct may not exist.  The
-    * HYPRE struct may not exist because it can't be created until we
-    * know the vector type - and that is not known until Apply is
-    * first called.  So what we do is save the parameter in a cache
-    * belonging to this Babel interface, and copy it into the HYPRE
-    * struct once Apply is called.   (The copy into the HYPRE struct is
-    * also done in Setup) */
    int ierr = 0;
-   struct bHYPRE_GMRES__data * data;
-   data = bHYPRE_GMRES__get_data( self );
+   struct bHYPRE_GMRES__data * data = bHYPRE_GMRES__get_data( self );
 
    if ( strcmp(name,"KDim")==0 )
    {
       data -> k_dim = value;
    }
-   else if ( strcmp(name,"MinIter")==0 )
-   {
-      data -> min_iter = value;
-   }
    else if ( strcmp(name,"MaxIter")==0 || strcmp(name,"MaxIterations")==0 )
    {
       data -> max_iter = value;
+   }
+   else if ( strcmp(name,"MinIter")==0 || strcmp(name,"MinIterations")==0 )
+   {
+      data -> min_iter = value;
    }
    else if ( strcmp(name,"RelChange")==0 || strcmp(name,"relative change test")==0 )
    {
       data -> rel_change = value;
    }
+   else if ( strcmp(name,"StopCrit")==0 )
+   {
+      data -> stop_crit = value;
+   }
    else if ( strcmp(name,"Logging")==0 )
    {
-      data -> log_level = value;
+      data -> logging = value;
    }
    else if ( strcmp(name,"PrintLevel")==0 )
    {
-      data -> printlevel = value;
+      data -> print_level = value;
    }
    else
    {
@@ -386,27 +303,22 @@ impl_bHYPRE_GMRES_SetDoubleParameter(
   /* in */ double value)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.GMRES.SetDoubleParameter) */
-  /* Insert the implementation of the SetDoubleParameter method here... */
+  /* Insert-Code-Here {bHYPRE.GMRES.SetDoubleParameter} (SetDoubleParameter method) */
 
-   /* The normal way to implement this function would be to call the
-    * corresponding HYPRE function to set the parameter.  That can't
-    * always be done because the HYPRE struct may not exist.  The
-    * HYPRE struct may not exist because it can't be created until we
-    * know the vector type - and that is not known until Apply is
-    * first called.  So what we do is save the parameter in a cache
-    * belonging to this Babel interface, and copy it into the HYPRE
-    * struct once Apply is called.  */
    int ierr = 0;
-   struct bHYPRE_GMRES__data * data;
-   data = bHYPRE_GMRES__get_data( self );
+   struct bHYPRE_GMRES__data * data = bHYPRE_GMRES__get_data( self );
 
-   if ( strcmp(name,"Tolerance")==0 || strcmp(name,"Tol")==0 )
+   if ( strcmp(name,"Tolerance")==0  || strcmp(name,"Tol")==0 )
    {
       data -> tol = value;
    }
+   else if ( strcmp(name,"CF_Tol")==0 )
+   {
+      data -> cf_tol = value;
+   }
    else
    {
-      ierr = 1;
+      ierr=1;
    }
 
    return ierr;
@@ -432,7 +344,7 @@ impl_bHYPRE_GMRES_SetStringParameter(
   /* in */ const char* value)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.GMRES.SetStringParameter) */
-  /* Insert the implementation of the SetStringParameter method here... */
+  /* Insert-Code-Here {bHYPRE.GMRES.SetStringParameter} (SetStringParameter method) */
 
    return 1;
 
@@ -458,8 +370,10 @@ impl_bHYPRE_GMRES_SetIntArray1Parameter(
   /* in */ int32_t nvalues)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.GMRES.SetIntArray1Parameter) */
-  /* Insert the implementation of the SetIntArray1Parameter method here... */
+  /* Insert-Code-Here {bHYPRE.GMRES.SetIntArray1Parameter} (SetIntArray1Parameter method) */
+
    return 1;
+
   /* DO-NOT-DELETE splicer.end(bHYPRE.GMRES.SetIntArray1Parameter) */
 }
 
@@ -481,8 +395,10 @@ impl_bHYPRE_GMRES_SetIntArray2Parameter(
   /* in */ struct sidl_int__array* value)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.GMRES.SetIntArray2Parameter) */
-  /* Insert the implementation of the SetIntArray2Parameter method here... */
+  /* Insert-Code-Here {bHYPRE.GMRES.SetIntArray2Parameter} (SetIntArray2Parameter method) */
+
    return 1;
+
   /* DO-NOT-DELETE splicer.end(bHYPRE.GMRES.SetIntArray2Parameter) */
 }
 
@@ -505,8 +421,10 @@ impl_bHYPRE_GMRES_SetDoubleArray1Parameter(
   /* in */ int32_t nvalues)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.GMRES.SetDoubleArray1Parameter) */
-  /* Insert the implementation of the SetDoubleArray1Parameter method here... */
+  /* Insert-Code-Here {bHYPRE.GMRES.SetDoubleArray1Parameter} (SetDoubleArray1Parameter method) */
+
    return 1;
+
   /* DO-NOT-DELETE splicer.end(bHYPRE.GMRES.SetDoubleArray1Parameter) */
 }
 
@@ -528,8 +446,10 @@ impl_bHYPRE_GMRES_SetDoubleArray2Parameter(
   /* in */ struct sidl_double__array* value)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.GMRES.SetDoubleArray2Parameter) */
-  /* Insert the implementation of the SetDoubleArray2Parameter method here... */
+  /* Insert-Code-Here {bHYPRE.GMRES.SetDoubleArray2Parameter} (SetDoubleArray2Parameter method) */
+
    return 1;
+
   /* DO-NOT-DELETE splicer.end(bHYPRE.GMRES.SetDoubleArray2Parameter) */
 }
 
@@ -550,59 +470,49 @@ impl_bHYPRE_GMRES_GetIntValue(
   /* in */ const char* name,
   /* out */ int32_t* value)
 {
-   /* DO-NOT-DELETE splicer.begin(bHYPRE.GMRES.GetIntValue) */
-   /* Insert the implementation of the GetIntValue method here... */
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.GMRES.GetIntValue) */
+  /* Insert-Code-Here {bHYPRE.GMRES.GetIntValue} (GetIntValue method) */
 
-   /* A return value of -1234 means that the parameter has not been
-      set yet.  In that case an error flag will be returned too. */
    int ierr = 0;
-   HYPRE_Solver solver;
-   struct bHYPRE_GMRES__data * data;
-
-   data = bHYPRE_GMRES__get_data( self );
-   hypre_assert( data->solver != NULL );
-   solver = data->solver;
-
-   /* The underlying HYPRE PCG object has actually been created if & only if
-      data->vector_type is non-null.  If so, make sure our local parameter cache
-      if up-to-date.  */
-   if ( data -> vector_type != NULL )
-      ierr += impl_bHYPRE_GMRES_Copy_Parameters_from_HYPRE_struct( self );
+   struct bHYPRE_GMRES__data * data = bHYPRE_GMRES__get_data( self );
 
    if ( strcmp(name,"NumIterations")==0 )
    {
-      ierr += HYPRE_GMRESGetNumIterations( solver, value );
+      *value = data -> num_iterations;
    }
    else if ( strcmp(name,"KDim")==0 )
    {
       *value = data -> k_dim;
    }
-   else if ( strcmp(name,"MinIter")==0 )
-   {
-      *value = data -> min_iter;
-   }
    else if ( strcmp(name,"MaxIter")==0 || strcmp(name,"MaxIterations")==0 )
    {
       *value = data -> max_iter;
+   }
+   else if ( strcmp(name,"MinIter")==0 || strcmp(name,"MinIterations")==0 )
+   {
+      *value = data -> min_iter;
    }
    else if ( strcmp(name,"RelChange")==0 || strcmp(name,"relative change test")==0 )
    {
       *value = data -> rel_change;
    }
+   else if ( strcmp(name,"StopCrit")==0 )
+   {
+      *value = data -> stop_crit;
+   }
    else if ( strcmp(name,"Logging")==0 )
    {
-      *value = data -> log_level;
+      *value = data -> logging;
    }
    else if ( strcmp(name,"PrintLevel")==0 )
    {
-      *value = data -> printlevel;
+      *value = data -> print_level;
    }
    else
    {
-      ierr = 1;
+      ierr=1;
    }
 
-   if ( *value == -1234 ) ++ierr;
    return ierr;
 
   /* DO-NOT-DELETE splicer.end(bHYPRE.GMRES.GetIntValue) */
@@ -626,41 +536,31 @@ impl_bHYPRE_GMRES_GetDoubleValue(
   /* out */ double* value)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.GMRES.GetDoubleValue) */
-  /* Insert the implementation of the GetDoubleValue method here... */
+  /* Insert-Code-Here {bHYPRE.GMRES.GetDoubleValue} (GetDoubleValue method) */
 
-   /* A return value of -1234 means that the parameter has not been
-      set yet.  In that case an error flag will be returned too. */
    int ierr = 0;
-   HYPRE_Solver solver;
-   struct bHYPRE_GMRES__data * data;
+   struct bHYPRE_GMRES__data * data = bHYPRE_GMRES__get_data( self );
 
-   data = bHYPRE_GMRES__get_data( self );
-   hypre_assert( data->solver != NULL );
-   solver = data->solver;
-
-   /* The underlying HYPRE PCG object has actually been created if & only if
-      data->vector_type is non-null.  If so, make sure our local parameter cache
-      if up-to-date.  */
-   if ( data -> vector_type != NULL )
-      ierr += impl_bHYPRE_GMRES_Copy_Parameters_from_HYPRE_struct( self );
-
-   if ( strcmp(name,"FinalRelativeResidualNorm")==0 ||
-        strcmp(name,"Final Relative Residual Norm")==0 ||
-        strcmp(name,"RelativeResidualNorm")==0 ||
-        strcmp(name,"RelResidualNorm")==0 )
+   if ( strcmp(name,"Final Relative Residual Norm")==0 ||
+        strcmp(name,"FinalRelativeResidualNorm")==0 ||
+        strcmp(name,"RelResidualNorm")==0 ||
+        strcmp(name,"RelativeResidualNorm")==0 )
    {
-      ierr += HYPRE_GMRESGetFinalRelativeResidualNorm( solver, value );
+      *value = data -> rel_residual_norm;
    }
-   else if ( strcmp(name,"Tolerance")==0 || strcmp(name,"Tol")==0 )
+   else if ( strcmp(name,"Tolerance")==0  || strcmp(name,"Tol")==0 )
    {
       *value = data -> tol;
    }
+   else if ( strcmp(name,"CF_Tol")==0 )
+   {
+      *value = data -> cf_tol;
+   }
    else
    {
-      ierr = 1;
+      ierr=1;
    }
 
-   if ( *value == -1.234 ) ++ierr;
    return ierr;
 
   /* DO-NOT-DELETE splicer.end(bHYPRE.GMRES.GetDoubleValue) */
@@ -685,104 +585,68 @@ impl_bHYPRE_GMRES_Setup(
   /* in */ bHYPRE_Vector x)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.GMRES.Setup) */
-  /* Insert the implementation of the Setup method here... */
+  /* Insert-Code-Here {bHYPRE.GMRES.Setup} (Setup method) */
 
-   int ierr=0;
-   MPI_Comm comm;
-   HYPRE_Solver solver;
-   HYPRE_Solver * psolver = &solver; /* will get a real value later */
-   struct bHYPRE_GMRES__data * data;
-   bHYPRE_Operator mat;
-   HYPRE_Matrix HYPRE_A;
-   bHYPRE_IJParCSRMatrix bHYPREP_A;
-   HYPRE_ParCSRMatrix AA;
-   HYPRE_IJMatrix ij_A;
-   HYPRE_Vector HYPRE_x, HYPRE_b;
-   bHYPRE_IJParCSRVector bHYPREP_b, bHYPREP_x;
-   HYPRE_ParVector bb, xx;
-   HYPRE_IJVector ij_b, ij_x;
-   struct bHYPRE_IJParCSRMatrix__data * dataA;
-   struct bHYPRE_IJParCSRVector__data * datab, * datax;
-   void * objectA, * objectb, * objectx;
+   int ierr = 0;
+   int i;
+   struct bHYPRE_GMRES__data * data = bHYPRE_GMRES__get_data( self );
+   bHYPRE_MatrixVectorView Vp, Vr, Vw;
 
-   data = bHYPRE_GMRES__get_data( self );
-   comm = data->comm;
-   /* SetCommunicator should have been called earlier */
-   hypre_assert( comm != MPI_COMM_NULL );
-   mat = data->matrix;
-   /* SetOperator should have been called earlier */
-   hypre_assert( mat != NULL );
+   int            k_dim            = data -> k_dim;
+   int            max_iter         = data -> max_iter;
+ 
+   /* Setup should not be called more than once. */
+   hypre_assert( data->p == (bHYPRE_Vector)NULL );
+   hypre_assert( data->r == (bHYPRE_Vector)NULL );
+   hypre_assert( data->w == (bHYPRE_Vector)NULL );
 
-   if ( data -> vector_type == NULL )
+   /*--------------------------------------------------
+    * The arguments for NewVector are important to
+    * maintain consistency between the setup and
+    * compute phases of matvec and the preconditioner.
+    *--------------------------------------------------*/
+ 
+   data -> p = hypre_CTAlloc( bHYPRE_Vector, k_dim + 1 );
+   for ( i=0; i<(k_dim+1); ++i )
    {
-      /* This is the first time this Babel GMRES object has seen a
-       * vector.  So we are ready to create the bHYPRE GMRES object. */
-      if ( bHYPRE_Vector_queryInt( b, "bHYPRE.IJParCSRVector") )
+      ierr += bHYPRE_Vector_Clone( x, &((data->p)[i]) );
+      if ( bHYPRE_Vector_queryInt( (data->p)[i], "bHYPRE.MatrixVectorView" ) )
       {
-         bHYPRE_Vector_deleteRef( b );  /* extra ref created by queryInt */
-         data -> vector_type = "ParVector";
-         HYPRE_ParCSRGMRESCreate( comm, psolver );
-         hypre_assert( solver != NULL );
-         data -> solver = *psolver;
+         Vp = bHYPRE_MatrixVectorView__cast( (data->p)[i] );
+         ierr += bHYPRE_MatrixVectorView_Assemble( Vp );
       }
-      /* Add more vector types here */
-      else
-      {
-         hypre_assert( "only IJParCSRVector supported by GMRES"==0 );
-      }
-      bHYPRE_GMRES__set_data( self, data );
-      ierr += impl_bHYPRE_GMRES_Copy_Parameters_from_HYPRE_struct( self );
    }
-   else
+   ierr += bHYPRE_Vector_Clone( b, &(data->r) );
+   ierr += bHYPRE_Vector_Clone( b, &(data->w) );
+    if ( bHYPRE_Vector_queryInt( data->r, "bHYPRE.MatrixVectorView" ) )
    {
-      solver = data->solver;
-      hypre_assert( solver != NULL );
+      Vr = bHYPRE_MatrixVectorView__cast( data->r );
+      ierr += bHYPRE_MatrixVectorView_Assemble( Vr );
    }
-   /* The SetParameter functions set parameters in the local
-    * Babel-interface struct, "data".  That is because the HYPRE
-    * struct (where they are actually used) may not exist yet when the
-    * functions are called.  At this point we finally know the HYPRE
-    * struct exists, so we copy the parameters to it. */
-   ierr += impl_bHYPRE_GMRES_Copy_Parameters_to_HYPRE_struct( self );
-   if ( data->vector_type == "ParVector" )
+   if ( bHYPRE_Vector_queryInt( data->w, "bHYPRE.MatrixVectorView" ) )
    {
-      bHYPREP_b = bHYPRE_IJParCSRVector__cast
-         ( bHYPRE_Vector_queryInt( b, "bHYPRE.IJParCSRVector") );
-      datab = bHYPRE_IJParCSRVector__get_data( bHYPREP_b );
-      bHYPRE_IJParCSRVector_deleteRef( bHYPREP_b );
-      ij_b = datab -> ij_b;
-      ierr += HYPRE_IJVectorGetObject( ij_b, &objectb );
-      bb = (HYPRE_ParVector) objectb;
-      HYPRE_b = (HYPRE_Vector) bb;
-
-      bHYPREP_x = bHYPRE_IJParCSRVector__cast
-         ( bHYPRE_Vector_queryInt( x, "bHYPRE.IJParCSRVector") );
-      datax = bHYPRE_IJParCSRVector__get_data( bHYPREP_x );
-      bHYPRE_IJParCSRVector_deleteRef( bHYPREP_x );
-      ij_x = datax -> ij_b;
-      ierr += HYPRE_IJVectorGetObject( ij_x, &objectx );
-      xx = (HYPRE_ParVector) objectx;
-      HYPRE_x = (HYPRE_Vector) xx;
-
-      bHYPREP_A = bHYPRE_IJParCSRMatrix__cast
-         ( bHYPRE_Operator_queryInt( mat, "bHYPRE.IJParCSRMatrix") );
-      hypre_assert( bHYPREP_A != NULL );
-      dataA = bHYPRE_IJParCSRMatrix__get_data( bHYPREP_A );
-      ij_A = dataA -> ij_A;
-      bHYPRE_IJParCSRMatrix_deleteRef( bHYPREP_A );
-      ierr += HYPRE_IJMatrixGetObject( ij_A, &objectA );
-      AA = (HYPRE_ParCSRMatrix) objectA;
-      HYPRE_A = (HYPRE_Matrix) AA;
+      Vw = bHYPRE_MatrixVectorView__cast( data->w );
+      ierr += bHYPRE_MatrixVectorView_Assemble( Vw );
    }
-   else
-   {
-      hypre_assert( "only IJParCSRVector supported by GMRES"==0 );
-   }
-      
-   ierr += HYPRE_GMRESSetPrecond( solver, data->precond, data->precond_setup,
-                                  *(data->solverprecond) );
-   HYPRE_GMRESSetup( solver, HYPRE_A, HYPRE_b, HYPRE_x );
 
+
+   ierr += bHYPRE_Solver_Setup( data->precond, b, x );
+
+   /*-----------------------------------------------------
+    * Allocate space for log info
+    *-----------------------------------------------------*/
+ 
+   if ( data->logging>0  || data->print_level>0 ) 
+   {  /* arrays needed for logging */
+      if ( data->norms != NULL )
+         hypre_TFree( data->norms );
+      data->norms = hypre_CTAlloc( double, max_iter + 1 );
+   }
+   if ( data->print_level > 0 ) {
+      if ( data -> log_file_name == NULL )
+         data -> log_file_name = "gmres.out.log";
+   }
+ 
    return ierr;
 
   /* DO-NOT-DELETE splicer.end(bHYPRE.GMRES.Setup) */
@@ -805,116 +669,413 @@ impl_bHYPRE_GMRES_Apply(
   /* in */ bHYPRE_Vector b,
   /* inout */ bHYPRE_Vector* x)
 {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.GMRES.Apply) */
-  /* Insert the implementation of the Apply method here... */
+   /* DO-NOT-DELETE splicer.begin(bHYPRE.GMRES.Apply) */
+   /* Insert-Code-Here {bHYPRE.GMRES.Apply} (Apply method) */
 
-   /* In the long run, the solver should be implemented right here,
-    * calling the appropriate bHYPRE functions.  But for now we are
-    * calling the existing HYPRE solver.  Advantages: don't want to
-    * have two versions of the same GMRES solver lying around.
-    * Disadvantage: we have to cache user-supplied parameters until
-    * the Apply call, where we make the GMRES object and really set
-    * the parameters - messy and unnatural. */
-   int ierr=0;
-   MPI_Comm comm;
-   HYPRE_Solver solver;
-   HYPRE_Solver * psolver = &solver; /* will get a real value later */
-   struct bHYPRE_GMRES__data * data;
-   bHYPRE_Operator mat;
-   HYPRE_Matrix HYPRE_A;
-   bHYPRE_IJParCSRMatrix bHYPREP_A;
-   HYPRE_ParCSRMatrix AA;
-   HYPRE_IJMatrix ij_A;
-   HYPRE_Vector HYPRE_x, HYPRE_b;
-   bHYPRE_IJParCSRVector bHYPREP_b, bHYPREP_x;
-   HYPRE_ParVector bb, xx;
-   HYPRE_IJVector ij_b, ij_x;
-   struct bHYPRE_IJParCSRMatrix__data * dataA;
-   struct bHYPRE_IJParCSRVector__data * datab, * datax;
-   void * objectA, * objectb, * objectx;
+   int ierr = 0;
+   struct bHYPRE_GMRES__data * data = bHYPRE_GMRES__get_data( self );
+   bHYPRE_Operator A = data->matrix;
+   bHYPRE_Solver   precond      = data -> precond;
 
-   data = bHYPRE_GMRES__get_data( self );
-   comm = data->comm;
-   /* SetCommunicator should have been called earlier */
-   hypre_assert( comm != MPI_COMM_NULL );
-   mat = data->matrix;
-   /* SetOperator should have been called earlier */
-   hypre_assert( mat != NULL );
+   int 		     k_dim        = data -> k_dim;
+   int               min_iter     = data -> min_iter;
+   int 		     max_iter     = data -> max_iter;
+   int               rel_change   = data -> rel_change;
+   int 		     stop_crit    = data -> stop_crit;
+   double 	     accuracy     = data -> tol;
+   double 	     cf_tol       = data -> cf_tol;
 
-   if ( data -> vector_type == NULL )
+   bHYPRE_Vector     r            = data -> r;
+   bHYPRE_Vector     w            = data -> w;
+   bHYPRE_Vector   * p            = data -> p;
+
+   int             print_level    = data -> print_level;
+   int             logging        = data -> logging;
+
+   double         *norms          = data -> norms;
+/* not used yet   char           *log_file_name  = data -> log_file_name);*/
+/*   FILE           *fp; */
+   
+   int        break_value = 0;
+   int	      i, j, k;
+   double     *rs, **hh, *c, *s;
+   int        iter; 
+   double     epsilon, gamma, t, r_norm, b_norm, x_norm;
+   double     epsmac = 1.e-16; 
+   double     ieee_check = 0.;
+
+   double     guard_zero_residual; 
+   double     cf_ave_0 = 0.0;
+   double     cf_ave_1 = 0.0;
+   double     weight;
+   double     r_norm_0;
+
+   bHYPRE_MPICommunicator  bmpicomm = data -> bmpicomm;
+   MPI_Comm        comm;
+   int        my_id, num_procs;
+
+   comm = bHYPRE_MPICommunicator__get_data(bmpicomm)->mpi_comm;
+   MPI_Comm_size( comm, &num_procs );
+   MPI_Comm_rank( comm, &my_id );
+
+   /*-----------------------------------------------------------------------
+    * With relative change convergence test on, it is possible to attempt
+    * another iteration with a zero residual. This causes the parameter
+    * alpha to go NaN. The guard_zero_residual parameter is to circumvent
+    * this. Perhaps it should be set to something non-zero (but small).
+    *-----------------------------------------------------------------------*/
+   guard_zero_residual = 0.0;
+
+   if ( logging>0 || print_level>0 )
    {
-      /* This is the first time this Babel GMRES object has seen a
-       * vector.  So we are ready to create the bHYPRE GMRES object. */
-      if ( bHYPRE_Vector_queryInt( b, "bHYPRE.IJParCSRVector") )
+      norms          = data -> norms;
+      /* not used yet      log_file_name  = data -> log_file_name;*/
+      /* fp = fopen(log_file_name,"w"); */
+   }
+
+   /* initialize work arrays */
+   rs = hypre_CTAlloc(double,k_dim+1); 
+   c = hypre_CTAlloc(double,k_dim); 
+   s = hypre_CTAlloc(double,k_dim); 
+
+   hh = hypre_CTAlloc(double*,k_dim+1); 
+   for (i=0; i < k_dim+1; i++)
+   {	
+      hh[i] = hypre_CTAlloc(double,k_dim); 
+   }
+
+   /* compute initial residual,  p[0] = b - Ax */
+   ierr += bHYPRE_Operator_Apply( A, *x, &(p[0]) );/* p[0] = Ax */
+   ierr += bHYPRE_Vector_Axpy( p[0], -1.0, b );    /* p[0] = p[0] - b = Ax - b */
+   ierr += bHYPRE_Vector_Scale( p[0], -1.0 );      /* p[0] = -p[0] = b - Ax */
+
+   ierr += bHYPRE_Vector_Dot( b, b, &b_norm );  /* b_norm = <b,b > */
+   b_norm = sqrt( b_norm );                     /* b_norm = L2 norm of b */
+
+   /* Since it is does not diminish performance, attempt to return an error flag
+      and notify users when they supply bad input. */
+   if (b_norm != 0.) ieee_check = b_norm/b_norm; /* INF -> NaN conversion */
+   if (ieee_check != ieee_check)
+   {
+      /* ...INFs or NaNs in input can make ieee_check a NaN.  This test
+         for ieee_check self-equality works on all IEEE-compliant compilers/
+         machines, c.f. page 8 of "Lecture Notes on the Status of IEEE 754"
+         by W. Kahan, May 31, 1996.  Currently (July 2002) this paper may be
+         found at http://HTTP.CS.Berkeley.EDU/~wkahan/ieee754status/IEEE754.PDF */
+      if (logging > 0 || print_level > 0)
       {
-         bHYPRE_Vector_deleteRef( b ); /* extra ref created by queryInt */
-         data -> vector_type = "ParVector";
-         HYPRE_ParCSRGMRESCreate( comm, psolver );
-         hypre_assert( solver != NULL );
-         data -> solver = *psolver;
+         printf("\n\nERROR detected by Hypre ... BEGIN\n");
+         printf("ERROR -- hypre_GMRESSolve: INFs and/or NaNs detected in input.\n");
+         printf("User probably placed non-numerics in supplied b.\n");
+         printf("Returning error flag += 101.  Program not terminated.\n");
+         printf("ERROR detected by Hypre ... END\n\n\n");
       }
-      /* Add more vector types here */
-      else
+      ierr += 101;
+      return ierr;
+   }
+
+   ierr += bHYPRE_Vector_Dot( p[0], p[0], &r_norm ); /* r_norm = <p[0],p[0]> */
+   r_norm = sqrt( r_norm );                   /* r_norm = L2 norm of p[0] */
+   r_norm_0 = r_norm;
+
+   /* Since it is does not diminish performance, attempt to return an error flag
+      and notify users when they supply bad input. */
+   if (r_norm != 0.) ieee_check = r_norm/r_norm; /* INF -> NaN conversion */
+   if (ieee_check != ieee_check)
+   {
+      /* ...INFs or NaNs in input can make ieee_check a NaN.  This test
+         for ieee_check self-equality works on all IEEE-compliant compilers/
+         machines, c.f. page 8 of "Lecture Notes on the Status of IEEE 754"
+         by W. Kahan, May 31, 1996.  Currently (July 2002) this paper may be
+         found at http://HTTP.CS.Berkeley.EDU/~wkahan/ieee754status/IEEE754.PDF */
+      if (logging > 0 || print_level > 0)
       {
-         hypre_assert( "only IJParCSRVector supported by GMRES"==0 );
+         printf("\n\nERROR detected by Hypre ... BEGIN\n");
+         printf("ERROR -- hypre_GMRESSolve: INFs and/or NaNs detected in input.\n");
+         printf("User probably placed non-numerics in supplied A or x_0.\n");
+         printf("Returning error flag += 101.  Program not terminated.\n");
+         printf("ERROR detected by Hypre ... END\n\n\n");
       }
-      bHYPRE_GMRES__set_data( self, data );
-      ierr += impl_bHYPRE_GMRES_Copy_Parameters_from_HYPRE_struct( self );
+      ierr += 101;
+      return ierr;
    }
-   else
-   {
-      solver = data->solver;
-      hypre_assert( solver != NULL );
-   }
-   /* The SetParameter functions set parameters in the local
-    * Babel-interface struct, "data".  That is because the HYPRE
-    * struct (where they are actually used) may not exist yet when the
-    * functions are called.  At this point we finally know the HYPRE
-    * struct exists, so we copy the parameters to it. */
-   ierr += impl_bHYPRE_GMRES_Copy_Parameters_to_HYPRE_struct( self );
-   if ( data->vector_type == "ParVector" )
-   {
-      bHYPREP_b = bHYPRE_IJParCSRVector__cast
-         ( bHYPRE_Vector_queryInt( b, "bHYPRE.IJParCSRVector") );
-      datab = bHYPRE_IJParCSRVector__get_data( bHYPREP_b );
-      bHYPRE_IJParCSRVector_deleteRef( bHYPREP_b );
-      ij_b = datab -> ij_b;
-      ierr += HYPRE_IJVectorGetObject( ij_b, &objectb );
-      bb = (HYPRE_ParVector) objectb;
-      HYPRE_b = (HYPRE_Vector) bb;
 
-      bHYPREP_x = bHYPRE_IJParCSRVector__cast
-         ( bHYPRE_Vector_queryInt( *x, "bHYPRE.IJParCSRVector") );
-      datax = bHYPRE_IJParCSRVector__get_data( bHYPREP_x );
-      bHYPRE_IJParCSRVector_deleteRef( bHYPREP_x );
-      ij_x = datax -> ij_b;
-      ierr += HYPRE_IJVectorGetObject( ij_x, &objectx );
-      xx = (HYPRE_ParVector) objectx;
-      HYPRE_x = (HYPRE_Vector) xx;
-
-      bHYPREP_A = bHYPRE_IJParCSRMatrix__cast
-         ( bHYPRE_Operator_queryInt( mat, "bHYPRE.IJParCSRMatrix") );
-      hypre_assert( bHYPREP_A != NULL );
-      dataA = bHYPRE_IJParCSRMatrix__get_data( bHYPREP_A );
-      bHYPRE_IJParCSRMatrix_deleteRef( bHYPREP_A );
-      ij_A = dataA -> ij_A;
-      ierr += HYPRE_IJMatrixGetObject( ij_A, &objectA );
-      AA = (HYPRE_ParCSRMatrix) objectA;
-      HYPRE_A = (HYPRE_Matrix) AA;
-   }
-   else
+   if ( logging>0 || print_level > 0)
    {
-      hypre_assert( "only IJParCSRVector supported by GMRES"==0 );
-   }
+      norms[0] = r_norm;
+      if ( print_level>1 && my_id == 0 )
+      {
+  	 printf("L2 norm of b: %e\n", b_norm);
+         if (b_norm == 0.0)
+            printf("Rel_resid_norm actually contains the residual norm\n");
+         printf("Initial L2 norm of residual: %e\n", r_norm);
       
-   ierr += HYPRE_GMRESSetPrecond( solver, data->precond, data->precond_setup,
-                                  *(data->solverprecond) );
+      }
+   }
+   iter = 0;
 
-   HYPRE_GMRESSolve( solver, HYPRE_A, HYPRE_b, HYPRE_x );
+   if (b_norm > 0.0)
+   {
+/* convergence criterion |r_i| <= accuracy*|b| if |b| > 0 */
+      epsilon = accuracy * b_norm;
+   }
+   else
+   {
+/* convergence criterion |r_i| <= accuracy*|r0| if |b| = 0 */
+      epsilon = accuracy * r_norm;
+   };
+
+/* convergence criterion |r_i| <= accuracy , absolute residual norm*/
+   if ( stop_crit && !rel_change )
+      epsilon = accuracy;
+
+   if ( print_level>1 && my_id == 0 )
+   {
+      if (b_norm > 0.0)
+      {printf("=============================================\n\n");
+         printf("Iters     resid.norm     conv.rate  rel.res.norm\n");
+         printf("-----    ------------    ---------- ------------\n");
+      
+      }
+
+      else
+      {printf("=============================================\n\n");
+         printf("Iters     resid.norm     conv.rate\n");
+         printf("-----    ------------    ----------\n");
+      
+      };
+   }
+
+   /* *******************************************************
+    *
+    *  main iteration loop
+    *
+    * ******************************************************* */
+
+   while (iter < max_iter)
+   {
+      /* initialize first term of hessenberg system */
+
+      rs[0] = r_norm;
+      if (r_norm == 0.0)
+      {
+         hypre_TFree(c); 
+         hypre_TFree(s); 
+         hypre_TFree(rs);
+         for (i=0; i < k_dim+1; i++) hypre_TFree(hh[i]);
+         hypre_TFree(hh); 
+         ierr = 0;
+         return ierr;
+      }
+
+      if (r_norm <= epsilon && iter >= min_iter) 
+      {
+         /* r = r - Ax = b - Ax */
+         ierr += bHYPRE_Operator_Apply( A, *x, &r ); /* r = Ax */
+         ierr += bHYPRE_Vector_Axpy( r, -1.0, b );   /* r = r - b = Ax - b */
+         ierr += bHYPRE_Vector_Scale( r, -1.0 );     /* r = -r = b - Ax */
+         ierr += bHYPRE_Vector_Dot( r, r, &r_norm ); /* r_norm = <r,r> */
+         r_norm = sqrt( r_norm );                    /* r_norm = L2 norm of r */
+         if (r_norm <= epsilon)
+         {
+            if ( print_level>1 && my_id == 0)
+            {
+               printf("\n\n");
+               printf("Final L2 norm of residual: %e\n\n", r_norm);
+            }
+            break;
+         }
+         else
+            if ( print_level>0 && my_id == 0)
+               printf("false convergence 1\n");
+      }
+
+      t = 1.0 / r_norm;
+      ierr += bHYPRE_Vector_Scale( p[0], t );
+      i = 0;
+      while (i < k_dim && (r_norm > epsilon || iter < min_iter)
+             && iter < max_iter)
+      {
+         i++;
+         iter++;
+         ierr += bHYPRE_Vector_Clear( r );
+         ierr += bHYPRE_Solver_Apply( precond, p[i-1], &r );
+         ierr += bHYPRE_Operator_Apply( A, r, &(p[i]) );  /* p[i] = Ar */
+
+         /* modified Gram_Schmidt */
+         for (j=0; j < i; j++)
+         {
+            /* hh[j][i-1] = < p[j], p[i] >
+               p[i] = p[i] - hh[j][i-1] * p[j] */
+            ierr += bHYPRE_Vector_Dot( p[j], p[i], &( hh[j][i-1] ) );
+            ierr += bHYPRE_Vector_Axpy( p[i], -hh[j][i-1], p[j] );
+         }
+         ierr += bHYPRE_Vector_Dot( p[i], p[i], &t );
+         t = sqrt(t);            /* t = L2 norm of p[i] */
+         hh[i][i-1] = t;	
+         if (t != 0.0)
+         {
+            t = 1.0/t;
+            ierr += bHYPRE_Vector_Scale( p[i], t );
+         }
+         /* done with modified Gram_schmidt and Arnoldi step.
+            update factorization of hh */
+         for (j = 1; j < i; j++)
+         {
+            t = hh[j-1][i-1];
+            hh[j-1][i-1] = c[j-1]*t + s[j-1]*hh[j][i-1];		
+            hh[j][i-1] = -s[j-1]*t + c[j-1]*hh[j][i-1];
+         }
+         gamma = sqrt(hh[i-1][i-1]*hh[i-1][i-1] + hh[i][i-1]*hh[i][i-1]);
+         if (gamma == 0.0) gamma = epsmac;
+         c[i-1] = hh[i-1][i-1]/gamma;
+         s[i-1] = hh[i][i-1]/gamma;
+         rs[i] = -s[i-1]*rs[i-1];
+         rs[i-1] = c[i-1]*rs[i-1];
+         /* determine residual norm */
+         hh[i-1][i-1] = c[i-1]*hh[i-1][i-1] + s[i-1]*hh[i][i-1];
+         r_norm = fabs(rs[i]);
+         if ( print_level>0 )
+         {
+            norms[iter] = r_norm;
+            if ( print_level>1 && my_id == 0 )
+            {
+               if (b_norm > 0.0)
+                  printf("% 5d    %e    %f   %e\n", iter, 
+                         norms[iter],norms[iter]/norms[iter-1],
+                         norms[iter]/b_norm);
+               else
+                  printf("% 5d    %e    %f\n", iter, norms[iter],
+                         norms[iter]/norms[iter-1]);
+            }
+         }
+         if (cf_tol > 0.0)
+         {
+            cf_ave_0 = cf_ave_1;
+            cf_ave_1 = pow( r_norm / r_norm_0, 1.0/(2.0*iter));
+
+            weight   = fabs(cf_ave_1 - cf_ave_0);
+            weight   = weight / hypre_max(cf_ave_1, cf_ave_0);
+            weight   = 1.0 - weight;
+#if 0
+            printf("I = %d: cf_new = %e, cf_old = %e, weight = %e\n",
+                   i, cf_ave_1, cf_ave_0, weight );
+#endif
+            if (weight * cf_ave_1 > cf_tol) 
+            {
+               break_value = 1;
+               break;
+            }
+         }
+
+      }
+      /* now compute solution, first solve upper triangular system */
+
+      if (break_value) break;
+	
+      rs[i-1] = rs[i-1]/hh[i-1][i-1];
+      for (k = i-2; k >= 0; k--)
+      {
+         t = rs[k];
+         for (j = k+1; j < i; j++)
+         {
+            t -= hh[k][j]*rs[j];
+         }
+         rs[k] = t/hh[k][k];
+      }
+      /* form linear combination of p's to get solution */
+      /* w = sum( rs[j]*p[j], 0<=j<i ) */
+      ierr += bHYPRE_Vector_Copy( w, p[0] );
+      ierr += bHYPRE_Vector_Scale( w, rs[0] );
+      for (j = 1; j < i; j++)
+         ierr += bHYPRE_Vector_Axpy( w, rs[j], p[j] );
+
+      ierr += bHYPRE_Vector_Clear( r );  /* maybe not needed */
+      ierr += bHYPRE_Solver_Apply( precond, w, &r );  /* r = Cw */
+
+      ierr += bHYPRE_Vector_Axpy( *x, 1.0, r ); /* x = x + r = x + Cw */
+      /* note: w isn't used outside this section, except for workspace */
+
+      /* check for convergence, evaluate actual residual */
+      if (r_norm <= epsilon && iter >= min_iter) 
+      {
+         ierr += bHYPRE_Vector_Copy( r, b );
+         /* r = r - Ax */
+         ierr += bHYPRE_Operator_Apply( A, *x, &w ); /* w = Ax */
+         ierr += bHYPRE_Vector_Axpy( r, -1.0, w );   /* r = r - w = r - Ax */
+         ierr += bHYPRE_Vector_Dot( r, r, &r_norm );
+         r_norm = sqrt( r_norm );    /* r_norm = L2 norm of r */
+         if (r_norm <= epsilon)
+         {
+            if ( print_level>1 && my_id == 0 )
+            {
+               printf("\n\n");
+               printf("Final L2 norm of residual: %e\n\n", r_norm);
+            }
+            if (rel_change && r_norm > guard_zero_residual)
+               /* Also test on relative change of iterates, x_i - x_(i-1) */
+            {  /* At this point r = x_i - x_(i-1) */
+               ierr += bHYPRE_Vector_Dot( *x, *x, &x_norm );
+               x_norm = sqrt( x_norm );    /* x_norm = L2 norm of x */
+               if ( x_norm<=guard_zero_residual ) break; /* don't divide by 0 */
+               if ( r_norm/x_norm < epsilon )
+               {
+                  data -> converged = 1;
+                  break;
+               }
+            }
+            else
+            {
+               data -> converged = 1;
+               break;
+            }
+         }
+         else 
+         {
+            if ( print_level>0 && my_id == 0)
+               printf("false convergence 2\n");
+            ierr += bHYPRE_Vector_Copy( p[0], r );
+            i = 0;
+         }
+      }
+
+/* compute residual vector and continue loop */
+
+      for (j=i ; j > 0; j--)
+      {
+         rs[j-1] = -s[j-1]*rs[j];
+         rs[j] = c[j-1]*rs[j];
+      }
+
+      if ( i )
+         ierr += bHYPRE_Vector_Scale( p[0], rs[0] );
+      for (j=1; j < i+1; j++)
+         ierr += bHYPRE_Vector_Axpy( p[0], rs[j], p[j] );
+   }
+
+   if ( print_level>1 && my_id == 0 )
+      printf("\n\n"); 
+
+   data -> num_iterations = iter;
+   if (b_norm > 0.0)
+      data -> rel_residual_norm = r_norm/b_norm;
+   if (b_norm == 0.0)
+      data -> rel_residual_norm = r_norm;
+
+   if (iter >= max_iter && r_norm > epsilon) ierr = 1;
+
+   hypre_TFree(c); 
+   hypre_TFree(s); 
+   hypre_TFree(rs);
+ 
+   for (i=0; i < k_dim+1; i++)
+   {	
+      hypre_TFree(hh[i]);
+   }
+   hypre_TFree(hh); 
 
    return ierr;
-
-  /* DO-NOT-DELETE splicer.end(bHYPRE.GMRES.Apply) */
+   /* DO-NOT-DELETE splicer.end(bHYPRE.GMRES.Apply) */
 }
 
 /*
@@ -959,15 +1120,22 @@ impl_bHYPRE_GMRES_SetOperator(
   /* in */ bHYPRE_Operator A)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.GMRES.SetOperator) */
-  /* Insert the implementation of the SetOperator method here... */
+  /* Insert-Code-Here {bHYPRE.GMRES.SetOperator} (SetOperator method) */
+
+   /* DEPRECATED  the second argument in Create does the same thing */
+
    int ierr = 0;
    struct bHYPRE_GMRES__data * data;
 
    data = bHYPRE_GMRES__get_data( self );
+   if( data->matrix != (bHYPRE_Operator)NULL )
+      bHYPRE_Operator_deleteRef( data->matrix );
+
    data->matrix = A;
    bHYPRE_Operator_addRef( data->matrix );
 
    return ierr;
+
   /* DO-NOT-DELETE splicer.end(bHYPRE.GMRES.SetOperator) */
 }
 
@@ -989,11 +1157,10 @@ impl_bHYPRE_GMRES_SetTolerance(
   /* in */ double tolerance)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.GMRES.SetTolerance) */
-  /* Insert the implementation of the SetTolerance method here... */
+  /* Insert-Code-Here {bHYPRE.GMRES.SetTolerance} (SetTolerance method) */
 
    int ierr = 0;
-   struct bHYPRE_GMRES__data * data;
-   data = bHYPRE_GMRES__get_data( self );
+   struct bHYPRE_GMRES__data * data = bHYPRE_GMRES__get_data( self );
 
    data -> tol = tolerance;
 
@@ -1020,11 +1187,10 @@ impl_bHYPRE_GMRES_SetMaxIterations(
   /* in */ int32_t max_iterations)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.GMRES.SetMaxIterations) */
-  /* Insert the implementation of the SetMaxIterations method here... */
+  /* Insert-Code-Here {bHYPRE.GMRES.SetMaxIterations} (SetMaxIterations method) */
 
    int ierr = 0;
-   struct bHYPRE_GMRES__data * data;
-   data = bHYPRE_GMRES__get_data( self );
+   struct bHYPRE_GMRES__data * data = bHYPRE_GMRES__get_data( self );
 
    data -> max_iter = max_iterations;
 
@@ -1055,15 +1221,16 @@ impl_bHYPRE_GMRES_SetLogging(
   /* in */ int32_t level)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.GMRES.SetLogging) */
-  /* Insert the implementation of the SetLogging method here... */
+  /* Insert-Code-Here {bHYPRE.GMRES.SetLogging} (SetLogging method) */
+ 
    int ierr = 0;
-   struct bHYPRE_GMRES__data * data;
-   data = bHYPRE_GMRES__get_data( self );
+   struct bHYPRE_GMRES__data * data = bHYPRE_GMRES__get_data( self );
 
-   data -> log_level = level;
+   data -> logging = level;
 
    return ierr;
-  /* DO-NOT-DELETE splicer.end(bHYPRE.GMRES.SetLogging) */
+
+ /* DO-NOT-DELETE splicer.end(bHYPRE.GMRES.SetLogging) */
 }
 
 /*
@@ -1088,21 +1255,12 @@ impl_bHYPRE_GMRES_SetPrintLevel(
   /* in */ int32_t level)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.GMRES.SetPrintLevel) */
-  /* Insert the implementation of the SetPrintLevel method here... */
+  /* Insert-Code-Here {bHYPRE.GMRES.SetPrintLevel} (SetPrintLevel method) */
 
-   /* The normal way to implement this function would be to call the
-    * corresponding HYPRE function to set the print level.  That can't
-    * always be done because the HYPRE struct may not exist.  The
-    * HYPRE struct may not exist because it can't be created until we
-    * know the vector type - and that is not known until Apply is
-    * first called.  So what we do is save the print level in a cache
-    * belonging to this Babel interface, and copy it into the HYPRE
-    * struct once Apply is called.  */
    int ierr = 0;
-   struct bHYPRE_GMRES__data * data;
-   data = bHYPRE_GMRES__get_data( self );
+   struct bHYPRE_GMRES__data * data = bHYPRE_GMRES__get_data( self );
 
-   data -> printlevel = level;
+   data -> print_level = level;
 
    return ierr;
 
@@ -1126,17 +1284,12 @@ impl_bHYPRE_GMRES_GetNumIterations(
   /* out */ int32_t* num_iterations)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.GMRES.GetNumIterations) */
-  /* Insert the implementation of the GetNumIterations method here... */
+  /* Insert-Code-Here {bHYPRE.GMRES.GetNumIterations} (GetNumIterations method) */
 
    int ierr = 0;
-   HYPRE_Solver solver;
-   struct bHYPRE_GMRES__data * data;
+   struct bHYPRE_GMRES__data * data = bHYPRE_GMRES__get_data( self );
 
-   data = bHYPRE_GMRES__get_data( self );
-   hypre_assert( data->solver != NULL );
-   solver = data->solver;
-
-   ierr += HYPRE_GMRESGetNumIterations( solver, num_iterations );
+   *num_iterations = data->num_iterations;
 
    return ierr;
 
@@ -1160,17 +1313,12 @@ impl_bHYPRE_GMRES_GetRelResidualNorm(
   /* out */ double* norm)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.GMRES.GetRelResidualNorm) */
-  /* Insert the implementation of the GetRelResidualNorm method here... */
+  /* Insert-Code-Here {bHYPRE.GMRES.GetRelResidualNorm} (GetRelResidualNorm method) */
 
    int ierr = 0;
-   HYPRE_Solver solver;
-   struct bHYPRE_GMRES__data * data;
+   struct bHYPRE_GMRES__data * data = bHYPRE_GMRES__get_data( self );
 
-   data = bHYPRE_GMRES__get_data( self );
-   hypre_assert( data->solver != NULL );
-   solver = data->solver;
-
-   ierr += HYPRE_GMRESGetFinalRelativeResidualNorm( solver, norm );
+   *norm = data->rel_residual_norm;
 
    return ierr;
 
@@ -1194,89 +1342,15 @@ impl_bHYPRE_GMRES_SetPreconditioner(
   /* in */ bHYPRE_Solver s)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.GMRES.SetPreconditioner) */
-  /* Insert the implementation of the SetPreconditioner method here... */
+  /* Insert-Code-Here {bHYPRE.GMRES.SetPreconditioner} (SetPreconditioner method) */
 
    int ierr = 0;
-   char * precond_name;
-   HYPRE_Solver * solverprecond;
-   struct bHYPRE_GMRES__data * dataself;
-   struct bHYPRE_BoomerAMG__data * AMG_dataprecond;
-   bHYPRE_BoomerAMG AMG_s;
-   struct bHYPRE_ParaSails__data * PS_dataprecond;
-   bHYPRE_ParaSails PS_s;
-   HYPRE_PtrToSolverFcn precond, precond_setup; /* functions */
+   struct bHYPRE_GMRES__data * data = bHYPRE_GMRES__get_data( self );
+   if( data->precond != (bHYPRE_Solver)NULL )
+      bHYPRE_Solver_deleteRef( data->precond );
 
-   dataself = bHYPRE_GMRES__get_data( self );
-
-   if ( bHYPRE_Solver_queryInt( s, "bHYPRE.BoomerAMG" ) )
-   {
-      precond_name = "BoomerAMG";
-      AMG_s = bHYPRE_BoomerAMG__cast
-         ( bHYPRE_Solver_queryInt( s, "bHYPRE.BoomerAMG") );
-      AMG_dataprecond = bHYPRE_BoomerAMG__get_data( AMG_s );
-      bHYPRE_BoomerAMG_deleteRef( AMG_s ); /* extra reference from queryInt */
-      bHYPRE_BoomerAMG_deleteRef( AMG_s ); /* extra reference from queryInt */
-      solverprecond = &AMG_dataprecond->solver;
-      hypre_assert( solverprecond != NULL );
-      precond = (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSolve;
-      precond_setup = (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSetup;
-   }
-   else if ( bHYPRE_Solver_queryInt( s, "bHYPRE.ParaSails" ) )
-   {
-      precond_name = "ParaSails";
-      PS_s = bHYPRE_ParaSails__cast
-         ( bHYPRE_Solver_queryInt( s, "bHYPRE.ParaSails") );
-      PS_dataprecond = bHYPRE_ParaSails__get_data( PS_s );
-      bHYPRE_ParaSails_deleteRef( PS_s ); /* extra reference from queryInt */
-      bHYPRE_ParaSails_deleteRef( PS_s ); /* extra reference from queryInt */
-      solverprecond = &PS_dataprecond->solver;
-      hypre_assert( solverprecond != NULL );
-      precond = (HYPRE_PtrToSolverFcn) HYPRE_ParaSailsSolve;
-      precond_setup = (HYPRE_PtrToSolverFcn) HYPRE_ParaSailsSetup;
-   }
-   else if ( bHYPRE_Solver_queryInt( s, "bHYPRE.ParCSRDiagScale" ) )
-   {
-      precond_name = "ParCSRDiagScale";
-      bHYPRE_Solver_deleteRef( s ); /* extra reference from queryInt */
-      bHYPRE_Solver_deleteRef( s ); /* extra reference from queryInt */
-      solverprecond = (HYPRE_Solver *) hypre_CTAlloc( double, 1 );
-      /* ... HYPRE diagonal scaling needs no solver object, but we
-       * must provide a HYPRE_Solver object.  It will be totally
-       * ignored. */
-      precond = (HYPRE_PtrToSolverFcn) HYPRE_ParCSRDiagScale;
-      precond_setup = (HYPRE_PtrToSolverFcn) HYPRE_ParCSRDiagScaleSetup;
-   }
-   else if ( bHYPRE_Solver_queryInt( s, "bHYPRE.IdentitySolver" ) )
-   {
-      /* s is an IdentitySolver, a dummy which just "solves" the identity matrix */
-      precond_name = "IdentitySolver";
-      bHYPRE_Solver_deleteRef( s ); /* extra ref from queryInt */
-      /* The right thing at this point is to check for vector type, then specify
-         the right hypre identity solver (_really_ the right thing is to use the
-         babel-level identity solver, but that requires PCG to be implemented at the
-         babel level). */
-      precond = (HYPRE_PtrToSolverFcn) hypre_ParKrylovIdentity;
-      precond_setup = (HYPRE_PtrToSolverFcn) hypre_ParKrylovIdentitySetup;
-   }
-   /* put other preconditioner types here */
-   else
-   {
-      hypre_assert( "GMRES_SetPreconditioner cannot recognize preconditioner"==0 );
-   }
-
-   /* We can't actually set the HYPRE preconditioner, because that
-    * requires knowing what the solver object is - but that requires
-    * knowing its data type but _that_ requires knowing the kind of
-    * matrix and vectors we'll need; not known until Apply is called.
-    * So save the information in the bHYPRE data structure, and stick
-    * it in HYPRE later... */
-   dataself->precond_name = precond_name;
-   dataself->precond = precond;
-   dataself->precond_setup = precond_setup;
-   dataself->solverprecond = solverprecond;
-   /* For an example call, see test/IJ_linear_solvers.c, line 1686.
-    * The four arguments are: self's (solver) data; and, for the
-    * preconditioner: solver function, setup function, data */
+   data->precond = s;
+   bHYPRE_Solver_addRef( data->precond );
 
    return ierr;
 

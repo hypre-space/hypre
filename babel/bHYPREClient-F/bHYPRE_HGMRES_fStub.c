@@ -1,9 +1,9 @@
 /*
- * File:          bHYPRE_GMRES_fStub.c
- * Symbol:        bHYPRE.GMRES-v1.0.0
+ * File:          bHYPRE_HGMRES_fStub.c
+ * Symbol:        bHYPRE.HGMRES-v1.0.0
  * Symbol Type:   class
  * Babel Version: 0.10.4
- * Description:   Client-side glue code for bHYPRE.GMRES
+ * Description:   Client-side glue code for bHYPRE.HGMRES
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
@@ -11,26 +11,7 @@
  */
 
 /*
- * Symbol "bHYPRE.GMRES" (version 1.0.0)
- * 
- * Objects of this type can be cast to PreconditionedSolver objects
- * using the {\tt \_\_cast} methods.
- * 
- * RDF: Documentation goes here.
- * 
- * The regular GMRES solver calls Babel-interface matrix and vector functions.
- * The HGMRES solver calls HYPRE interface functions.
- * The regular solver will work with any consistent matrix, vector, and
- * preconditioner classes.  The HGMRES solver will work with the more common
- * combinations.
- * 
- * The HGMRES solver checks whether the matrix, vectors, and preconditioner
- * are of known types, and will not work with any other types.
- * Presently, the recognized data types are:
- * matrix, vector: IJParCSRMatrix, IJParCSRVector
- * preconditioner: BoomerAMG, ParCSRDiagScale
- * 
- * 
+ * Symbol "bHYPRE.HGMRES" (version 1.0.0)
  */
 
 #include <stddef.h>
@@ -45,7 +26,7 @@
 #ifdef SIDL_DYNAMIC_LIBRARY
 #include "sidl_Loader.h"
 #endif
-#include "bHYPRE_GMRES_IOR.h"
+#include "bHYPRE_HGMRES_IOR.h"
 #include "bHYPRE_Solver_IOR.h"
 #include "bHYPRE_MPICommunicator_IOR.h"
 #include "bHYPRE_Operator_IOR.h"
@@ -57,15 +38,15 @@
  * Return pointer to internal IOR functions.
  */
 
-static const struct bHYPRE_GMRES__external* _getIOR(void)
+static const struct bHYPRE_HGMRES__external* _getIOR(void)
 {
-  static const struct bHYPRE_GMRES__external *_ior = NULL;
+  static const struct bHYPRE_HGMRES__external *_ior = NULL;
   if (!_ior) {
 #ifdef SIDL_STATIC_LIBRARY
-    _ior = bHYPRE_GMRES__externals();
+    _ior = bHYPRE_HGMRES__externals();
 #else
-    _ior = (struct bHYPRE_GMRES__external*)sidl_dynamicLoadIOR("bHYPRE.GMRES",
-      "bHYPRE_GMRES__externals") ;
+    _ior = (struct bHYPRE_HGMRES__external*)sidl_dynamicLoadIOR("bHYPRE.HGMRES",
+      "bHYPRE_HGMRES__externals") ;
 #endif
   }
   return _ior;
@@ -75,9 +56,9 @@ static const struct bHYPRE_GMRES__external* _getIOR(void)
  * Return pointer to static functions.
  */
 
-static const struct bHYPRE_GMRES__sepv* _getSEPV(void)
+static const struct bHYPRE_HGMRES__sepv* _getSEPV(void)
 {
-  static const struct bHYPRE_GMRES__sepv *_sepv = NULL;
+  static const struct bHYPRE_HGMRES__sepv *_sepv = NULL;
   if (!_sepv) {
     _sepv = (*(_getIOR()->getStaticEPV))();
   }
@@ -89,7 +70,7 @@ static const struct bHYPRE_GMRES__sepv* _getSEPV(void)
  */
 
 void
-SIDLFortran77Symbol(bhypre_gmres__create_f,BHYPRE_GMRES__CREATE_F,bHYPRE_GMRES__create_f)
+SIDLFortran77Symbol(bhypre_hgmres__create_f,BHYPRE_HGMRES__CREATE_F,bHYPRE_HGMRES__create_f)
 (
   int64_t *self
 )
@@ -102,7 +83,7 @@ SIDLFortran77Symbol(bhypre_gmres__create_f,BHYPRE_GMRES__CREATE_F,bHYPRE_GMRES__
  */
 
 void
-SIDLFortran77Symbol(bhypre_gmres__cast_f,BHYPRE_GMRES__CAST_F,bHYPRE_GMRES__cast_f)
+SIDLFortran77Symbol(bhypre_hgmres__cast_f,BHYPRE_HGMRES__CAST_F,bHYPRE_HGMRES__cast_f)
 (
   int64_t *ref,
   int64_t *retval
@@ -114,7 +95,7 @@ SIDLFortran77Symbol(bhypre_gmres__cast_f,BHYPRE_GMRES__CAST_F,bHYPRE_GMRES__cast
     *retval = (ptrdiff_t)(
       *_base->d_epv->f__cast)(
       _base->d_object,
-      "bHYPRE.GMRES");
+      "bHYPRE.HGMRES");
   } else {
     *retval = 0;
   }
@@ -125,7 +106,7 @@ SIDLFortran77Symbol(bhypre_gmres__cast_f,BHYPRE_GMRES__CAST_F,bHYPRE_GMRES__cast
  */
 
 void
-SIDLFortran77Symbol(bhypre_gmres__cast2_f,BHYPRE_GMRES__CAST2_F,bHYPRE_GMRES__cast2_f)
+SIDLFortran77Symbol(bhypre_hgmres__cast2_f,BHYPRE_HGMRES__CAST2_F,bHYPRE_HGMRES__cast2_f)
 (
   int64_t *self,
   SIDL_F77_String name
@@ -134,12 +115,12 @@ SIDLFortran77Symbol(bhypre_gmres__cast2_f,BHYPRE_GMRES__CAST2_F,bHYPRE_GMRES__ca
   SIDL_F77_STR_FAR_LEN_DECL(name)
 )
 {
-  struct bHYPRE_GMRES__epv *_epv = NULL;
-  struct bHYPRE_GMRES__object* _proxy_self = NULL;
+  struct bHYPRE_HGMRES__epv *_epv = NULL;
+  struct bHYPRE_HGMRES__object* _proxy_self = NULL;
   char* _proxy_name = NULL;
   void* _proxy_retval = NULL;
   _proxy_self =
-    (struct bHYPRE_GMRES__object*)
+    (struct bHYPRE_HGMRES__object*)
     (ptrdiff_t)(*self);
   _proxy_name =
     sidl_copy_fortran_str(SIDL_F77_STR(name),
@@ -170,15 +151,15 @@ SIDLFortran77Symbol(bhypre_gmres__cast2_f,BHYPRE_GMRES__CAST2_F,bHYPRE_GMRES__ca
  */
 
 void
-SIDLFortran77Symbol(bhypre_gmres_addref_f,BHYPRE_GMRES_ADDREF_F,bHYPRE_GMRES_addRef_f)
+SIDLFortran77Symbol(bhypre_hgmres_addref_f,BHYPRE_HGMRES_ADDREF_F,bHYPRE_HGMRES_addRef_f)
 (
   int64_t *self
 )
 {
-  struct bHYPRE_GMRES__epv *_epv = NULL;
-  struct bHYPRE_GMRES__object* _proxy_self = NULL;
+  struct bHYPRE_HGMRES__epv *_epv = NULL;
+  struct bHYPRE_HGMRES__object* _proxy_self = NULL;
   _proxy_self =
-    (struct bHYPRE_GMRES__object*)
+    (struct bHYPRE_HGMRES__object*)
     (ptrdiff_t)(*self);
   _epv = _proxy_self->d_epv;
   (*(_epv->f_addRef))(
@@ -195,15 +176,15 @@ SIDLFortran77Symbol(bhypre_gmres_addref_f,BHYPRE_GMRES_ADDREF_F,bHYPRE_GMRES_add
  */
 
 void
-SIDLFortran77Symbol(bhypre_gmres_deleteref_f,BHYPRE_GMRES_DELETEREF_F,bHYPRE_GMRES_deleteRef_f)
+SIDLFortran77Symbol(bhypre_hgmres_deleteref_f,BHYPRE_HGMRES_DELETEREF_F,bHYPRE_HGMRES_deleteRef_f)
 (
   int64_t *self
 )
 {
-  struct bHYPRE_GMRES__epv *_epv = NULL;
-  struct bHYPRE_GMRES__object* _proxy_self = NULL;
+  struct bHYPRE_HGMRES__epv *_epv = NULL;
+  struct bHYPRE_HGMRES__object* _proxy_self = NULL;
   _proxy_self =
-    (struct bHYPRE_GMRES__object*)
+    (struct bHYPRE_HGMRES__object*)
     (ptrdiff_t)(*self);
   _epv = _proxy_self->d_epv;
   (*(_epv->f_deleteRef))(
@@ -217,19 +198,19 @@ SIDLFortran77Symbol(bhypre_gmres_deleteref_f,BHYPRE_GMRES_DELETEREF_F,bHYPRE_GMR
  */
 
 void
-SIDLFortran77Symbol(bhypre_gmres_issame_f,BHYPRE_GMRES_ISSAME_F,bHYPRE_GMRES_isSame_f)
+SIDLFortran77Symbol(bhypre_hgmres_issame_f,BHYPRE_HGMRES_ISSAME_F,bHYPRE_HGMRES_isSame_f)
 (
   int64_t *self,
   int64_t *iobj,
   SIDL_F77_Bool *retval
 )
 {
-  struct bHYPRE_GMRES__epv *_epv = NULL;
-  struct bHYPRE_GMRES__object* _proxy_self = NULL;
+  struct bHYPRE_HGMRES__epv *_epv = NULL;
+  struct bHYPRE_HGMRES__object* _proxy_self = NULL;
   struct sidl_BaseInterface__object* _proxy_iobj = NULL;
   sidl_bool _proxy_retval;
   _proxy_self =
-    (struct bHYPRE_GMRES__object*)
+    (struct bHYPRE_HGMRES__object*)
     (ptrdiff_t)(*self);
   _proxy_iobj =
     (struct sidl_BaseInterface__object*)
@@ -254,7 +235,7 @@ SIDLFortran77Symbol(bhypre_gmres_issame_f,BHYPRE_GMRES_ISSAME_F,bHYPRE_GMRES_isS
  */
 
 void
-SIDLFortran77Symbol(bhypre_gmres_queryint_f,BHYPRE_GMRES_QUERYINT_F,bHYPRE_GMRES_queryInt_f)
+SIDLFortran77Symbol(bhypre_hgmres_queryint_f,BHYPRE_HGMRES_QUERYINT_F,bHYPRE_HGMRES_queryInt_f)
 (
   int64_t *self,
   SIDL_F77_String name
@@ -263,12 +244,12 @@ SIDLFortran77Symbol(bhypre_gmres_queryint_f,BHYPRE_GMRES_QUERYINT_F,bHYPRE_GMRES
   SIDL_F77_STR_FAR_LEN_DECL(name)
 )
 {
-  struct bHYPRE_GMRES__epv *_epv = NULL;
-  struct bHYPRE_GMRES__object* _proxy_self = NULL;
+  struct bHYPRE_HGMRES__epv *_epv = NULL;
+  struct bHYPRE_HGMRES__object* _proxy_self = NULL;
   char* _proxy_name = NULL;
   struct sidl_BaseInterface__object* _proxy_retval = NULL;
   _proxy_self =
-    (struct bHYPRE_GMRES__object*)
+    (struct bHYPRE_HGMRES__object*)
     (ptrdiff_t)(*self);
   _proxy_name =
     sidl_copy_fortran_str(SIDL_F77_STR(name),
@@ -291,7 +272,7 @@ SIDLFortran77Symbol(bhypre_gmres_queryint_f,BHYPRE_GMRES_QUERYINT_F,bHYPRE_GMRES
  */
 
 void
-SIDLFortran77Symbol(bhypre_gmres_istype_f,BHYPRE_GMRES_ISTYPE_F,bHYPRE_GMRES_isType_f)
+SIDLFortran77Symbol(bhypre_hgmres_istype_f,BHYPRE_HGMRES_ISTYPE_F,bHYPRE_HGMRES_isType_f)
 (
   int64_t *self,
   SIDL_F77_String name
@@ -300,12 +281,12 @@ SIDLFortran77Symbol(bhypre_gmres_istype_f,BHYPRE_GMRES_ISTYPE_F,bHYPRE_GMRES_isT
   SIDL_F77_STR_FAR_LEN_DECL(name)
 )
 {
-  struct bHYPRE_GMRES__epv *_epv = NULL;
-  struct bHYPRE_GMRES__object* _proxy_self = NULL;
+  struct bHYPRE_HGMRES__epv *_epv = NULL;
+  struct bHYPRE_HGMRES__object* _proxy_self = NULL;
   char* _proxy_name = NULL;
   sidl_bool _proxy_retval;
   _proxy_self =
-    (struct bHYPRE_GMRES__object*)
+    (struct bHYPRE_HGMRES__object*)
     (ptrdiff_t)(*self);
   _proxy_name =
     sidl_copy_fortran_str(SIDL_F77_STR(name),
@@ -325,17 +306,17 @@ SIDLFortran77Symbol(bhypre_gmres_istype_f,BHYPRE_GMRES_ISTYPE_F,bHYPRE_GMRES_isT
  */
 
 void
-SIDLFortran77Symbol(bhypre_gmres_getclassinfo_f,BHYPRE_GMRES_GETCLASSINFO_F,bHYPRE_GMRES_getClassInfo_f)
+SIDLFortran77Symbol(bhypre_hgmres_getclassinfo_f,BHYPRE_HGMRES_GETCLASSINFO_F,bHYPRE_HGMRES_getClassInfo_f)
 (
   int64_t *self,
   int64_t *retval
 )
 {
-  struct bHYPRE_GMRES__epv *_epv = NULL;
-  struct bHYPRE_GMRES__object* _proxy_self = NULL;
+  struct bHYPRE_HGMRES__epv *_epv = NULL;
+  struct bHYPRE_HGMRES__object* _proxy_self = NULL;
   struct sidl_ClassInfo__object* _proxy_retval = NULL;
   _proxy_self =
-    (struct bHYPRE_GMRES__object*)
+    (struct bHYPRE_HGMRES__object*)
     (ptrdiff_t)(*self);
   _epv = _proxy_self->d_epv;
   _proxy_retval = 
@@ -350,27 +331,21 @@ SIDLFortran77Symbol(bhypre_gmres_getclassinfo_f,BHYPRE_GMRES_GETCLASSINFO_F,bHYP
  */
 
 void
-SIDLFortran77Symbol(bhypre_gmres_create_f,BHYPRE_GMRES_CREATE_F,bHYPRE_GMRES_Create_f)
+SIDLFortran77Symbol(bhypre_hgmres_create_f,BHYPRE_HGMRES_CREATE_F,bHYPRE_HGMRES_Create_f)
 (
   int64_t *mpi_comm,
-  int64_t *A,
   int64_t *retval
 )
 {
-  const struct bHYPRE_GMRES__sepv *_epv = _getSEPV();
+  const struct bHYPRE_HGMRES__sepv *_epv = _getSEPV();
   struct bHYPRE_MPICommunicator__object* _proxy_mpi_comm = NULL;
-  struct bHYPRE_Operator__object* _proxy_A = NULL;
-  struct bHYPRE_GMRES__object* _proxy_retval = NULL;
+  struct bHYPRE_HGMRES__object* _proxy_retval = NULL;
   _proxy_mpi_comm =
     (struct bHYPRE_MPICommunicator__object*)
     (ptrdiff_t)(*mpi_comm);
-  _proxy_A =
-    (struct bHYPRE_Operator__object*)
-    (ptrdiff_t)(*A);
   _proxy_retval = 
     (*(_epv->f_Create))(
-      _proxy_mpi_comm,
-      _proxy_A
+      _proxy_mpi_comm
     );
   *retval = (ptrdiff_t)_proxy_retval;
 }
@@ -382,18 +357,18 @@ SIDLFortran77Symbol(bhypre_gmres_create_f,BHYPRE_GMRES_CREATE_F,bHYPRE_GMRES_Cre
  */
 
 void
-SIDLFortran77Symbol(bhypre_gmres_setcommunicator_f,BHYPRE_GMRES_SETCOMMUNICATOR_F,bHYPRE_GMRES_SetCommunicator_f)
+SIDLFortran77Symbol(bhypre_hgmres_setcommunicator_f,BHYPRE_HGMRES_SETCOMMUNICATOR_F,bHYPRE_HGMRES_SetCommunicator_f)
 (
   int64_t *self,
   int64_t *mpi_comm,
   int32_t *retval
 )
 {
-  struct bHYPRE_GMRES__epv *_epv = NULL;
-  struct bHYPRE_GMRES__object* _proxy_self = NULL;
+  struct bHYPRE_HGMRES__epv *_epv = NULL;
+  struct bHYPRE_HGMRES__object* _proxy_self = NULL;
   struct bHYPRE_MPICommunicator__object* _proxy_mpi_comm = NULL;
   _proxy_self =
-    (struct bHYPRE_GMRES__object*)
+    (struct bHYPRE_HGMRES__object*)
     (ptrdiff_t)(*self);
   _proxy_mpi_comm =
     (struct bHYPRE_MPICommunicator__object*)
@@ -412,7 +387,7 @@ SIDLFortran77Symbol(bhypre_gmres_setcommunicator_f,BHYPRE_GMRES_SETCOMMUNICATOR_
  */
 
 void
-SIDLFortran77Symbol(bhypre_gmres_setintparameter_f,BHYPRE_GMRES_SETINTPARAMETER_F,bHYPRE_GMRES_SetIntParameter_f)
+SIDLFortran77Symbol(bhypre_hgmres_setintparameter_f,BHYPRE_HGMRES_SETINTPARAMETER_F,bHYPRE_HGMRES_SetIntParameter_f)
 (
   int64_t *self,
   SIDL_F77_String name
@@ -422,11 +397,11 @@ SIDLFortran77Symbol(bhypre_gmres_setintparameter_f,BHYPRE_GMRES_SETINTPARAMETER_
   SIDL_F77_STR_FAR_LEN_DECL(name)
 )
 {
-  struct bHYPRE_GMRES__epv *_epv = NULL;
-  struct bHYPRE_GMRES__object* _proxy_self = NULL;
+  struct bHYPRE_HGMRES__epv *_epv = NULL;
+  struct bHYPRE_HGMRES__object* _proxy_self = NULL;
   char* _proxy_name = NULL;
   _proxy_self =
-    (struct bHYPRE_GMRES__object*)
+    (struct bHYPRE_HGMRES__object*)
     (ptrdiff_t)(*self);
   _proxy_name =
     sidl_copy_fortran_str(SIDL_F77_STR(name),
@@ -447,7 +422,7 @@ SIDLFortran77Symbol(bhypre_gmres_setintparameter_f,BHYPRE_GMRES_SETINTPARAMETER_
  */
 
 void
-SIDLFortran77Symbol(bhypre_gmres_setdoubleparameter_f,BHYPRE_GMRES_SETDOUBLEPARAMETER_F,bHYPRE_GMRES_SetDoubleParameter_f)
+SIDLFortran77Symbol(bhypre_hgmres_setdoubleparameter_f,BHYPRE_HGMRES_SETDOUBLEPARAMETER_F,bHYPRE_HGMRES_SetDoubleParameter_f)
 (
   int64_t *self,
   SIDL_F77_String name
@@ -457,11 +432,11 @@ SIDLFortran77Symbol(bhypre_gmres_setdoubleparameter_f,BHYPRE_GMRES_SETDOUBLEPARA
   SIDL_F77_STR_FAR_LEN_DECL(name)
 )
 {
-  struct bHYPRE_GMRES__epv *_epv = NULL;
-  struct bHYPRE_GMRES__object* _proxy_self = NULL;
+  struct bHYPRE_HGMRES__epv *_epv = NULL;
+  struct bHYPRE_HGMRES__object* _proxy_self = NULL;
   char* _proxy_name = NULL;
   _proxy_self =
-    (struct bHYPRE_GMRES__object*)
+    (struct bHYPRE_HGMRES__object*)
     (ptrdiff_t)(*self);
   _proxy_name =
     sidl_copy_fortran_str(SIDL_F77_STR(name),
@@ -482,7 +457,7 @@ SIDLFortran77Symbol(bhypre_gmres_setdoubleparameter_f,BHYPRE_GMRES_SETDOUBLEPARA
  */
 
 void
-SIDLFortran77Symbol(bhypre_gmres_setstringparameter_f,BHYPRE_GMRES_SETSTRINGPARAMETER_F,bHYPRE_GMRES_SetStringParameter_f)
+SIDLFortran77Symbol(bhypre_hgmres_setstringparameter_f,BHYPRE_HGMRES_SETSTRINGPARAMETER_F,bHYPRE_HGMRES_SetStringParameter_f)
 (
   int64_t *self,
   SIDL_F77_String name
@@ -494,12 +469,12 @@ SIDLFortran77Symbol(bhypre_gmres_setstringparameter_f,BHYPRE_GMRES_SETSTRINGPARA
   SIDL_F77_STR_FAR_LEN_DECL(value)
 )
 {
-  struct bHYPRE_GMRES__epv *_epv = NULL;
-  struct bHYPRE_GMRES__object* _proxy_self = NULL;
+  struct bHYPRE_HGMRES__epv *_epv = NULL;
+  struct bHYPRE_HGMRES__object* _proxy_self = NULL;
   char* _proxy_name = NULL;
   char* _proxy_value = NULL;
   _proxy_self =
-    (struct bHYPRE_GMRES__object*)
+    (struct bHYPRE_HGMRES__object*)
     (ptrdiff_t)(*self);
   _proxy_name =
     sidl_copy_fortran_str(SIDL_F77_STR(name),
@@ -524,7 +499,7 @@ SIDLFortran77Symbol(bhypre_gmres_setstringparameter_f,BHYPRE_GMRES_SETSTRINGPARA
  */
 
 void
-SIDLFortran77Symbol(bhypre_gmres_setintarray1parameter_f,BHYPRE_GMRES_SETINTARRAY1PARAMETER_F,bHYPRE_GMRES_SetIntArray1Parameter_f)
+SIDLFortran77Symbol(bhypre_hgmres_setintarray1parameter_f,BHYPRE_HGMRES_SETINTARRAY1PARAMETER_F,bHYPRE_HGMRES_SetIntArray1Parameter_f)
 (
   int64_t *self,
   SIDL_F77_String name
@@ -535,14 +510,14 @@ SIDLFortran77Symbol(bhypre_gmres_setintarray1parameter_f,BHYPRE_GMRES_SETINTARRA
   SIDL_F77_STR_FAR_LEN_DECL(name)
 )
 {
-  struct bHYPRE_GMRES__epv *_epv = NULL;
-  struct bHYPRE_GMRES__object* _proxy_self = NULL;
+  struct bHYPRE_HGMRES__epv *_epv = NULL;
+  struct bHYPRE_HGMRES__object* _proxy_self = NULL;
   char* _proxy_name = NULL;
   struct sidl_int__array _alt_value;
   struct sidl_int__array* _proxy_value = &_alt_value;
   int32_t value_lower[1], value_upper[1], value_stride[1];
   _proxy_self =
-    (struct bHYPRE_GMRES__object*)
+    (struct bHYPRE_HGMRES__object*)
     (ptrdiff_t)(*self);
   _proxy_name =
     sidl_copy_fortran_str(SIDL_F77_STR(name),
@@ -566,7 +541,7 @@ SIDLFortran77Symbol(bhypre_gmres_setintarray1parameter_f,BHYPRE_GMRES_SETINTARRA
  */
 
 void
-SIDLFortran77Symbol(bhypre_gmres_setintarray2parameter_f,BHYPRE_GMRES_SETINTARRAY2PARAMETER_F,bHYPRE_GMRES_SetIntArray2Parameter_f)
+SIDLFortran77Symbol(bhypre_hgmres_setintarray2parameter_f,BHYPRE_HGMRES_SETINTARRAY2PARAMETER_F,bHYPRE_HGMRES_SetIntArray2Parameter_f)
 (
   int64_t *self,
   SIDL_F77_String name
@@ -576,12 +551,12 @@ SIDLFortran77Symbol(bhypre_gmres_setintarray2parameter_f,BHYPRE_GMRES_SETINTARRA
   SIDL_F77_STR_FAR_LEN_DECL(name)
 )
 {
-  struct bHYPRE_GMRES__epv *_epv = NULL;
-  struct bHYPRE_GMRES__object* _proxy_self = NULL;
+  struct bHYPRE_HGMRES__epv *_epv = NULL;
+  struct bHYPRE_HGMRES__object* _proxy_self = NULL;
   char* _proxy_name = NULL;
   struct sidl_int__array* _proxy_value = NULL;
   _proxy_self =
-    (struct bHYPRE_GMRES__object*)
+    (struct bHYPRE_HGMRES__object*)
     (ptrdiff_t)(*self);
   _proxy_name =
     sidl_copy_fortran_str(SIDL_F77_STR(name),
@@ -605,7 +580,7 @@ SIDLFortran77Symbol(bhypre_gmres_setintarray2parameter_f,BHYPRE_GMRES_SETINTARRA
  */
 
 void
-SIDLFortran77Symbol(bhypre_gmres_setdoublearray1parameter_f,BHYPRE_GMRES_SETDOUBLEARRAY1PARAMETER_F,bHYPRE_GMRES_SetDoubleArray1Parameter_f)
+SIDLFortran77Symbol(bhypre_hgmres_setdoublearray1parameter_f,BHYPRE_HGMRES_SETDOUBLEARRAY1PARAMETER_F,bHYPRE_HGMRES_SetDoubleArray1Parameter_f)
 (
   int64_t *self,
   SIDL_F77_String name
@@ -616,14 +591,14 @@ SIDLFortran77Symbol(bhypre_gmres_setdoublearray1parameter_f,BHYPRE_GMRES_SETDOUB
   SIDL_F77_STR_FAR_LEN_DECL(name)
 )
 {
-  struct bHYPRE_GMRES__epv *_epv = NULL;
-  struct bHYPRE_GMRES__object* _proxy_self = NULL;
+  struct bHYPRE_HGMRES__epv *_epv = NULL;
+  struct bHYPRE_HGMRES__object* _proxy_self = NULL;
   char* _proxy_name = NULL;
   struct sidl_double__array _alt_value;
   struct sidl_double__array* _proxy_value = &_alt_value;
   int32_t value_lower[1], value_upper[1], value_stride[1];
   _proxy_self =
-    (struct bHYPRE_GMRES__object*)
+    (struct bHYPRE_HGMRES__object*)
     (ptrdiff_t)(*self);
   _proxy_name =
     sidl_copy_fortran_str(SIDL_F77_STR(name),
@@ -647,7 +622,7 @@ SIDLFortran77Symbol(bhypre_gmres_setdoublearray1parameter_f,BHYPRE_GMRES_SETDOUB
  */
 
 void
-SIDLFortran77Symbol(bhypre_gmres_setdoublearray2parameter_f,BHYPRE_GMRES_SETDOUBLEARRAY2PARAMETER_F,bHYPRE_GMRES_SetDoubleArray2Parameter_f)
+SIDLFortran77Symbol(bhypre_hgmres_setdoublearray2parameter_f,BHYPRE_HGMRES_SETDOUBLEARRAY2PARAMETER_F,bHYPRE_HGMRES_SetDoubleArray2Parameter_f)
 (
   int64_t *self,
   SIDL_F77_String name
@@ -657,12 +632,12 @@ SIDLFortran77Symbol(bhypre_gmres_setdoublearray2parameter_f,BHYPRE_GMRES_SETDOUB
   SIDL_F77_STR_FAR_LEN_DECL(name)
 )
 {
-  struct bHYPRE_GMRES__epv *_epv = NULL;
-  struct bHYPRE_GMRES__object* _proxy_self = NULL;
+  struct bHYPRE_HGMRES__epv *_epv = NULL;
+  struct bHYPRE_HGMRES__object* _proxy_self = NULL;
   char* _proxy_name = NULL;
   struct sidl_double__array* _proxy_value = NULL;
   _proxy_self =
-    (struct bHYPRE_GMRES__object*)
+    (struct bHYPRE_HGMRES__object*)
     (ptrdiff_t)(*self);
   _proxy_name =
     sidl_copy_fortran_str(SIDL_F77_STR(name),
@@ -686,7 +661,7 @@ SIDLFortran77Symbol(bhypre_gmres_setdoublearray2parameter_f,BHYPRE_GMRES_SETDOUB
  */
 
 void
-SIDLFortran77Symbol(bhypre_gmres_getintvalue_f,BHYPRE_GMRES_GETINTVALUE_F,bHYPRE_GMRES_GetIntValue_f)
+SIDLFortran77Symbol(bhypre_hgmres_getintvalue_f,BHYPRE_HGMRES_GETINTVALUE_F,bHYPRE_HGMRES_GetIntValue_f)
 (
   int64_t *self,
   SIDL_F77_String name
@@ -696,11 +671,11 @@ SIDLFortran77Symbol(bhypre_gmres_getintvalue_f,BHYPRE_GMRES_GETINTVALUE_F,bHYPRE
   SIDL_F77_STR_FAR_LEN_DECL(name)
 )
 {
-  struct bHYPRE_GMRES__epv *_epv = NULL;
-  struct bHYPRE_GMRES__object* _proxy_self = NULL;
+  struct bHYPRE_HGMRES__epv *_epv = NULL;
+  struct bHYPRE_HGMRES__object* _proxy_self = NULL;
   char* _proxy_name = NULL;
   _proxy_self =
-    (struct bHYPRE_GMRES__object*)
+    (struct bHYPRE_HGMRES__object*)
     (ptrdiff_t)(*self);
   _proxy_name =
     sidl_copy_fortran_str(SIDL_F77_STR(name),
@@ -721,7 +696,7 @@ SIDLFortran77Symbol(bhypre_gmres_getintvalue_f,BHYPRE_GMRES_GETINTVALUE_F,bHYPRE
  */
 
 void
-SIDLFortran77Symbol(bhypre_gmres_getdoublevalue_f,BHYPRE_GMRES_GETDOUBLEVALUE_F,bHYPRE_GMRES_GetDoubleValue_f)
+SIDLFortran77Symbol(bhypre_hgmres_getdoublevalue_f,BHYPRE_HGMRES_GETDOUBLEVALUE_F,bHYPRE_HGMRES_GetDoubleValue_f)
 (
   int64_t *self,
   SIDL_F77_String name
@@ -731,11 +706,11 @@ SIDLFortran77Symbol(bhypre_gmres_getdoublevalue_f,BHYPRE_GMRES_GETDOUBLEVALUE_F,
   SIDL_F77_STR_FAR_LEN_DECL(name)
 )
 {
-  struct bHYPRE_GMRES__epv *_epv = NULL;
-  struct bHYPRE_GMRES__object* _proxy_self = NULL;
+  struct bHYPRE_HGMRES__epv *_epv = NULL;
+  struct bHYPRE_HGMRES__object* _proxy_self = NULL;
   char* _proxy_name = NULL;
   _proxy_self =
-    (struct bHYPRE_GMRES__object*)
+    (struct bHYPRE_HGMRES__object*)
     (ptrdiff_t)(*self);
   _proxy_name =
     sidl_copy_fortran_str(SIDL_F77_STR(name),
@@ -757,7 +732,7 @@ SIDLFortran77Symbol(bhypre_gmres_getdoublevalue_f,BHYPRE_GMRES_GETDOUBLEVALUE_F,
  */
 
 void
-SIDLFortran77Symbol(bhypre_gmres_setup_f,BHYPRE_GMRES_SETUP_F,bHYPRE_GMRES_Setup_f)
+SIDLFortran77Symbol(bhypre_hgmres_setup_f,BHYPRE_HGMRES_SETUP_F,bHYPRE_HGMRES_Setup_f)
 (
   int64_t *self,
   int64_t *b,
@@ -765,12 +740,12 @@ SIDLFortran77Symbol(bhypre_gmres_setup_f,BHYPRE_GMRES_SETUP_F,bHYPRE_GMRES_Setup
   int32_t *retval
 )
 {
-  struct bHYPRE_GMRES__epv *_epv = NULL;
-  struct bHYPRE_GMRES__object* _proxy_self = NULL;
+  struct bHYPRE_HGMRES__epv *_epv = NULL;
+  struct bHYPRE_HGMRES__object* _proxy_self = NULL;
   struct bHYPRE_Vector__object* _proxy_b = NULL;
   struct bHYPRE_Vector__object* _proxy_x = NULL;
   _proxy_self =
-    (struct bHYPRE_GMRES__object*)
+    (struct bHYPRE_HGMRES__object*)
     (ptrdiff_t)(*self);
   _proxy_b =
     (struct bHYPRE_Vector__object*)
@@ -793,7 +768,7 @@ SIDLFortran77Symbol(bhypre_gmres_setup_f,BHYPRE_GMRES_SETUP_F,bHYPRE_GMRES_Setup
  */
 
 void
-SIDLFortran77Symbol(bhypre_gmres_apply_f,BHYPRE_GMRES_APPLY_F,bHYPRE_GMRES_Apply_f)
+SIDLFortran77Symbol(bhypre_hgmres_apply_f,BHYPRE_HGMRES_APPLY_F,bHYPRE_HGMRES_Apply_f)
 (
   int64_t *self,
   int64_t *b,
@@ -801,12 +776,12 @@ SIDLFortran77Symbol(bhypre_gmres_apply_f,BHYPRE_GMRES_APPLY_F,bHYPRE_GMRES_Apply
   int32_t *retval
 )
 {
-  struct bHYPRE_GMRES__epv *_epv = NULL;
-  struct bHYPRE_GMRES__object* _proxy_self = NULL;
+  struct bHYPRE_HGMRES__epv *_epv = NULL;
+  struct bHYPRE_HGMRES__object* _proxy_self = NULL;
   struct bHYPRE_Vector__object* _proxy_b = NULL;
   struct bHYPRE_Vector__object* _proxy_x = NULL;
   _proxy_self =
-    (struct bHYPRE_GMRES__object*)
+    (struct bHYPRE_HGMRES__object*)
     (ptrdiff_t)(*self);
   _proxy_b =
     (struct bHYPRE_Vector__object*)
@@ -830,7 +805,7 @@ SIDLFortran77Symbol(bhypre_gmres_apply_f,BHYPRE_GMRES_APPLY_F,bHYPRE_GMRES_Apply
  */
 
 void
-SIDLFortran77Symbol(bhypre_gmres_applyadjoint_f,BHYPRE_GMRES_APPLYADJOINT_F,bHYPRE_GMRES_ApplyAdjoint_f)
+SIDLFortran77Symbol(bhypre_hgmres_applyadjoint_f,BHYPRE_HGMRES_APPLYADJOINT_F,bHYPRE_HGMRES_ApplyAdjoint_f)
 (
   int64_t *self,
   int64_t *b,
@@ -838,12 +813,12 @@ SIDLFortran77Symbol(bhypre_gmres_applyadjoint_f,BHYPRE_GMRES_APPLYADJOINT_F,bHYP
   int32_t *retval
 )
 {
-  struct bHYPRE_GMRES__epv *_epv = NULL;
-  struct bHYPRE_GMRES__object* _proxy_self = NULL;
+  struct bHYPRE_HGMRES__epv *_epv = NULL;
+  struct bHYPRE_HGMRES__object* _proxy_self = NULL;
   struct bHYPRE_Vector__object* _proxy_b = NULL;
   struct bHYPRE_Vector__object* _proxy_x = NULL;
   _proxy_self =
-    (struct bHYPRE_GMRES__object*)
+    (struct bHYPRE_HGMRES__object*)
     (ptrdiff_t)(*self);
   _proxy_b =
     (struct bHYPRE_Vector__object*)
@@ -867,18 +842,18 @@ SIDLFortran77Symbol(bhypre_gmres_applyadjoint_f,BHYPRE_GMRES_APPLYADJOINT_F,bHYP
  */
 
 void
-SIDLFortran77Symbol(bhypre_gmres_setoperator_f,BHYPRE_GMRES_SETOPERATOR_F,bHYPRE_GMRES_SetOperator_f)
+SIDLFortran77Symbol(bhypre_hgmres_setoperator_f,BHYPRE_HGMRES_SETOPERATOR_F,bHYPRE_HGMRES_SetOperator_f)
 (
   int64_t *self,
   int64_t *A,
   int32_t *retval
 )
 {
-  struct bHYPRE_GMRES__epv *_epv = NULL;
-  struct bHYPRE_GMRES__object* _proxy_self = NULL;
+  struct bHYPRE_HGMRES__epv *_epv = NULL;
+  struct bHYPRE_HGMRES__object* _proxy_self = NULL;
   struct bHYPRE_Operator__object* _proxy_A = NULL;
   _proxy_self =
-    (struct bHYPRE_GMRES__object*)
+    (struct bHYPRE_HGMRES__object*)
     (ptrdiff_t)(*self);
   _proxy_A =
     (struct bHYPRE_Operator__object*)
@@ -898,17 +873,17 @@ SIDLFortran77Symbol(bhypre_gmres_setoperator_f,BHYPRE_GMRES_SETOPERATOR_F,bHYPRE
  */
 
 void
-SIDLFortran77Symbol(bhypre_gmres_settolerance_f,BHYPRE_GMRES_SETTOLERANCE_F,bHYPRE_GMRES_SetTolerance_f)
+SIDLFortran77Symbol(bhypre_hgmres_settolerance_f,BHYPRE_HGMRES_SETTOLERANCE_F,bHYPRE_HGMRES_SetTolerance_f)
 (
   int64_t *self,
   double *tolerance,
   int32_t *retval
 )
 {
-  struct bHYPRE_GMRES__epv *_epv = NULL;
-  struct bHYPRE_GMRES__object* _proxy_self = NULL;
+  struct bHYPRE_HGMRES__epv *_epv = NULL;
+  struct bHYPRE_HGMRES__object* _proxy_self = NULL;
   _proxy_self =
-    (struct bHYPRE_GMRES__object*)
+    (struct bHYPRE_HGMRES__object*)
     (ptrdiff_t)(*self);
   _epv = _proxy_self->d_epv;
   *retval = 
@@ -925,17 +900,17 @@ SIDLFortran77Symbol(bhypre_gmres_settolerance_f,BHYPRE_GMRES_SETTOLERANCE_F,bHYP
  */
 
 void
-SIDLFortran77Symbol(bhypre_gmres_setmaxiterations_f,BHYPRE_GMRES_SETMAXITERATIONS_F,bHYPRE_GMRES_SetMaxIterations_f)
+SIDLFortran77Symbol(bhypre_hgmres_setmaxiterations_f,BHYPRE_HGMRES_SETMAXITERATIONS_F,bHYPRE_HGMRES_SetMaxIterations_f)
 (
   int64_t *self,
   int32_t *max_iterations,
   int32_t *retval
 )
 {
-  struct bHYPRE_GMRES__epv *_epv = NULL;
-  struct bHYPRE_GMRES__object* _proxy_self = NULL;
+  struct bHYPRE_HGMRES__epv *_epv = NULL;
+  struct bHYPRE_HGMRES__object* _proxy_self = NULL;
   _proxy_self =
-    (struct bHYPRE_GMRES__object*)
+    (struct bHYPRE_HGMRES__object*)
     (ptrdiff_t)(*self);
   _epv = _proxy_self->d_epv;
   *retval = 
@@ -956,17 +931,17 @@ SIDLFortran77Symbol(bhypre_gmres_setmaxiterations_f,BHYPRE_GMRES_SETMAXITERATION
  */
 
 void
-SIDLFortran77Symbol(bhypre_gmres_setlogging_f,BHYPRE_GMRES_SETLOGGING_F,bHYPRE_GMRES_SetLogging_f)
+SIDLFortran77Symbol(bhypre_hgmres_setlogging_f,BHYPRE_HGMRES_SETLOGGING_F,bHYPRE_HGMRES_SetLogging_f)
 (
   int64_t *self,
   int32_t *level,
   int32_t *retval
 )
 {
-  struct bHYPRE_GMRES__epv *_epv = NULL;
-  struct bHYPRE_GMRES__object* _proxy_self = NULL;
+  struct bHYPRE_HGMRES__epv *_epv = NULL;
+  struct bHYPRE_HGMRES__object* _proxy_self = NULL;
   _proxy_self =
-    (struct bHYPRE_GMRES__object*)
+    (struct bHYPRE_HGMRES__object*)
     (ptrdiff_t)(*self);
   _epv = _proxy_self->d_epv;
   *retval = 
@@ -987,17 +962,17 @@ SIDLFortran77Symbol(bhypre_gmres_setlogging_f,BHYPRE_GMRES_SETLOGGING_F,bHYPRE_G
  */
 
 void
-SIDLFortran77Symbol(bhypre_gmres_setprintlevel_f,BHYPRE_GMRES_SETPRINTLEVEL_F,bHYPRE_GMRES_SetPrintLevel_f)
+SIDLFortran77Symbol(bhypre_hgmres_setprintlevel_f,BHYPRE_HGMRES_SETPRINTLEVEL_F,bHYPRE_HGMRES_SetPrintLevel_f)
 (
   int64_t *self,
   int32_t *level,
   int32_t *retval
 )
 {
-  struct bHYPRE_GMRES__epv *_epv = NULL;
-  struct bHYPRE_GMRES__object* _proxy_self = NULL;
+  struct bHYPRE_HGMRES__epv *_epv = NULL;
+  struct bHYPRE_HGMRES__object* _proxy_self = NULL;
   _proxy_self =
-    (struct bHYPRE_GMRES__object*)
+    (struct bHYPRE_HGMRES__object*)
     (ptrdiff_t)(*self);
   _epv = _proxy_self->d_epv;
   *retval = 
@@ -1013,17 +988,17 @@ SIDLFortran77Symbol(bhypre_gmres_setprintlevel_f,BHYPRE_GMRES_SETPRINTLEVEL_F,bH
  */
 
 void
-SIDLFortran77Symbol(bhypre_gmres_getnumiterations_f,BHYPRE_GMRES_GETNUMITERATIONS_F,bHYPRE_GMRES_GetNumIterations_f)
+SIDLFortran77Symbol(bhypre_hgmres_getnumiterations_f,BHYPRE_HGMRES_GETNUMITERATIONS_F,bHYPRE_HGMRES_GetNumIterations_f)
 (
   int64_t *self,
   int32_t *num_iterations,
   int32_t *retval
 )
 {
-  struct bHYPRE_GMRES__epv *_epv = NULL;
-  struct bHYPRE_GMRES__object* _proxy_self = NULL;
+  struct bHYPRE_HGMRES__epv *_epv = NULL;
+  struct bHYPRE_HGMRES__object* _proxy_self = NULL;
   _proxy_self =
-    (struct bHYPRE_GMRES__object*)
+    (struct bHYPRE_HGMRES__object*)
     (ptrdiff_t)(*self);
   _epv = _proxy_self->d_epv;
   *retval = 
@@ -1039,17 +1014,17 @@ SIDLFortran77Symbol(bhypre_gmres_getnumiterations_f,BHYPRE_GMRES_GETNUMITERATION
  */
 
 void
-SIDLFortran77Symbol(bhypre_gmres_getrelresidualnorm_f,BHYPRE_GMRES_GETRELRESIDUALNORM_F,bHYPRE_GMRES_GetRelResidualNorm_f)
+SIDLFortran77Symbol(bhypre_hgmres_getrelresidualnorm_f,BHYPRE_HGMRES_GETRELRESIDUALNORM_F,bHYPRE_HGMRES_GetRelResidualNorm_f)
 (
   int64_t *self,
   double *norm,
   int32_t *retval
 )
 {
-  struct bHYPRE_GMRES__epv *_epv = NULL;
-  struct bHYPRE_GMRES__object* _proxy_self = NULL;
+  struct bHYPRE_HGMRES__epv *_epv = NULL;
+  struct bHYPRE_HGMRES__object* _proxy_self = NULL;
   _proxy_self =
-    (struct bHYPRE_GMRES__object*)
+    (struct bHYPRE_HGMRES__object*)
     (ptrdiff_t)(*self);
   _epv = _proxy_self->d_epv;
   *retval = 
@@ -1065,18 +1040,18 @@ SIDLFortran77Symbol(bhypre_gmres_getrelresidualnorm_f,BHYPRE_GMRES_GETRELRESIDUA
  */
 
 void
-SIDLFortran77Symbol(bhypre_gmres_setpreconditioner_f,BHYPRE_GMRES_SETPRECONDITIONER_F,bHYPRE_GMRES_SetPreconditioner_f)
+SIDLFortran77Symbol(bhypre_hgmres_setpreconditioner_f,BHYPRE_HGMRES_SETPRECONDITIONER_F,bHYPRE_HGMRES_SetPreconditioner_f)
 (
   int64_t *self,
   int64_t *s,
   int32_t *retval
 )
 {
-  struct bHYPRE_GMRES__epv *_epv = NULL;
-  struct bHYPRE_GMRES__object* _proxy_self = NULL;
+  struct bHYPRE_HGMRES__epv *_epv = NULL;
+  struct bHYPRE_HGMRES__object* _proxy_self = NULL;
   struct bHYPRE_Solver__object* _proxy_s = NULL;
   _proxy_self =
-    (struct bHYPRE_GMRES__object*)
+    (struct bHYPRE_HGMRES__object*)
     (ptrdiff_t)(*self);
   _proxy_s =
     (struct bHYPRE_Solver__object*)
@@ -1090,9 +1065,9 @@ SIDLFortran77Symbol(bhypre_gmres_setpreconditioner_f,BHYPRE_GMRES_SETPRECONDITIO
 }
 
 void
-SIDLFortran77Symbol(bhypre_gmres__array_createcol_f,
-                  BHYPRE_GMRES__ARRAY_CREATECOL_F,
-                  bHYPRE_GMRES__array_createCol_f)
+SIDLFortran77Symbol(bhypre_hgmres__array_createcol_f,
+                  BHYPRE_HGMRES__ARRAY_CREATECOL_F,
+                  bHYPRE_HGMRES__array_createCol_f)
   (int32_t *dimen,
    int32_t lower[],
    int32_t upper[],
@@ -1103,9 +1078,9 @@ SIDLFortran77Symbol(bhypre_gmres__array_createcol_f,
 }
 
 void
-SIDLFortran77Symbol(bhypre_gmres__array_createrow_f,
-                  BHYPRE_GMRES__ARRAY_CREATEROW_F,
-                  bHYPRE_GMRES__array_createRow_f)
+SIDLFortran77Symbol(bhypre_hgmres__array_createrow_f,
+                  BHYPRE_HGMRES__ARRAY_CREATEROW_F,
+                  bHYPRE_HGMRES__array_createRow_f)
   (int32_t *dimen,
    int32_t lower[],
    int32_t upper[],
@@ -1116,36 +1091,36 @@ SIDLFortran77Symbol(bhypre_gmres__array_createrow_f,
 }
 
 void
-SIDLFortran77Symbol(bhypre_gmres__array_create1d_f,
-                  BHYPRE_GMRES__ARRAY_CREATE1D_F,
-                  bHYPRE_GMRES__array_create1d_f)
+SIDLFortran77Symbol(bhypre_hgmres__array_create1d_f,
+                  BHYPRE_HGMRES__ARRAY_CREATE1D_F,
+                  bHYPRE_HGMRES__array_create1d_f)
   (int32_t *len, int64_t *result)
 {
   *result = (ptrdiff_t)sidl_interface__array_create1d(*len);
 }
 
 void
-SIDLFortran77Symbol(bhypre_gmres__array_create2dcol_f,
-                  BHYPRE_GMRES__ARRAY_CREATE2DCOL_F,
-                  bHYPRE_GMRES__array_create2dCol_f)
+SIDLFortran77Symbol(bhypre_hgmres__array_create2dcol_f,
+                  BHYPRE_HGMRES__ARRAY_CREATE2DCOL_F,
+                  bHYPRE_HGMRES__array_create2dCol_f)
   (int32_t *m, int32_t *n, int64_t *result)
 {
   *result = (ptrdiff_t)sidl_interface__array_create2dCol(*m, *n);
 }
 
 void
-SIDLFortran77Symbol(bhypre_gmres__array_create2drow_f,
-                  BHYPRE_GMRES__ARRAY_CREATE2DROW_F,
-                  bHYPRE_GMRES__array_create2dRow_f)
+SIDLFortran77Symbol(bhypre_hgmres__array_create2drow_f,
+                  BHYPRE_HGMRES__ARRAY_CREATE2DROW_F,
+                  bHYPRE_HGMRES__array_create2dRow_f)
   (int32_t *m, int32_t *n, int64_t *result)
 {
   *result = (ptrdiff_t)sidl_interface__array_create2dRow(*m, *n);
 }
 
 void
-SIDLFortran77Symbol(bhypre_gmres__array_addref_f,
-                  BHYPRE_GMRES__ARRAY_ADDREF_F,
-                  bHYPRE_GMRES__array_addRef_f)
+SIDLFortran77Symbol(bhypre_hgmres__array_addref_f,
+                  BHYPRE_HGMRES__ARRAY_ADDREF_F,
+                  bHYPRE_HGMRES__array_addRef_f)
   (int64_t *array)
 {
   sidl_interface__array_addRef((struct sidl_interface__array 
@@ -1153,9 +1128,9 @@ SIDLFortran77Symbol(bhypre_gmres__array_addref_f,
 }
 
 void
-SIDLFortran77Symbol(bhypre_gmres__array_deleteref_f,
-                  BHYPRE_GMRES__ARRAY_DELETEREF_F,
-                  bHYPRE_GMRES__array_deleteRef_f)
+SIDLFortran77Symbol(bhypre_hgmres__array_deleteref_f,
+                  BHYPRE_HGMRES__ARRAY_DELETEREF_F,
+                  bHYPRE_HGMRES__array_deleteRef_f)
   (int64_t *array)
 {
   sidl_interface__array_deleteRef((struct sidl_interface__array 
@@ -1163,9 +1138,9 @@ SIDLFortran77Symbol(bhypre_gmres__array_deleteref_f,
 }
 
 void
-SIDLFortran77Symbol(bhypre_gmres__array_get1_f,
-                  BHYPRE_GMRES__ARRAY_GET1_F,
-                  bHYPRE_GMRES__array_get1_f)
+SIDLFortran77Symbol(bhypre_hgmres__array_get1_f,
+                  BHYPRE_HGMRES__ARRAY_GET1_F,
+                  bHYPRE_HGMRES__array_get1_f)
   (int64_t *array, 
    int32_t *i1, 
    int64_t *result)
@@ -1177,9 +1152,9 @@ SIDLFortran77Symbol(bhypre_gmres__array_get1_f,
 }
 
 void
-SIDLFortran77Symbol(bhypre_gmres__array_get2_f,
-                  BHYPRE_GMRES__ARRAY_GET2_F,
-                  bHYPRE_GMRES__array_get2_f)
+SIDLFortran77Symbol(bhypre_hgmres__array_get2_f,
+                  BHYPRE_HGMRES__ARRAY_GET2_F,
+                  bHYPRE_HGMRES__array_get2_f)
   (int64_t *array, 
    int32_t *i1, 
    int32_t *i2, 
@@ -1192,9 +1167,9 @@ SIDLFortran77Symbol(bhypre_gmres__array_get2_f,
 }
 
 void
-SIDLFortran77Symbol(bhypre_gmres__array_get3_f,
-                  BHYPRE_GMRES__ARRAY_GET3_F,
-                  bHYPRE_GMRES__array_get3_f)
+SIDLFortran77Symbol(bhypre_hgmres__array_get3_f,
+                  BHYPRE_HGMRES__ARRAY_GET3_F,
+                  bHYPRE_HGMRES__array_get3_f)
   (int64_t *array, 
    int32_t *i1, 
    int32_t *i2, 
@@ -1208,9 +1183,9 @@ SIDLFortran77Symbol(bhypre_gmres__array_get3_f,
 }
 
 void
-SIDLFortran77Symbol(bhypre_gmres__array_get4_f,
-                  BHYPRE_GMRES__ARRAY_GET4_F,
-                  bHYPRE_GMRES__array_get4_f)
+SIDLFortran77Symbol(bhypre_hgmres__array_get4_f,
+                  BHYPRE_HGMRES__ARRAY_GET4_F,
+                  bHYPRE_HGMRES__array_get4_f)
   (int64_t *array, 
    int32_t *i1, 
    int32_t *i2, 
@@ -1225,9 +1200,9 @@ SIDLFortran77Symbol(bhypre_gmres__array_get4_f,
 }
 
 void
-SIDLFortran77Symbol(bhypre_gmres__array_get5_f,
-                  BHYPRE_GMRES__ARRAY_GET5_F,
-                  bHYPRE_GMRES__array_get5_f)
+SIDLFortran77Symbol(bhypre_hgmres__array_get5_f,
+                  BHYPRE_HGMRES__ARRAY_GET5_F,
+                  bHYPRE_HGMRES__array_get5_f)
   (int64_t *array, 
    int32_t *i1, 
    int32_t *i2, 
@@ -1243,9 +1218,9 @@ SIDLFortran77Symbol(bhypre_gmres__array_get5_f,
 }
 
 void
-SIDLFortran77Symbol(bhypre_gmres__array_get6_f,
-                  BHYPRE_GMRES__ARRAY_GET6_F,
-                  bHYPRE_GMRES__array_get6_f)
+SIDLFortran77Symbol(bhypre_hgmres__array_get6_f,
+                  BHYPRE_HGMRES__ARRAY_GET6_F,
+                  bHYPRE_HGMRES__array_get6_f)
   (int64_t *array, 
    int32_t *i1, 
    int32_t *i2, 
@@ -1262,9 +1237,9 @@ SIDLFortran77Symbol(bhypre_gmres__array_get6_f,
 }
 
 void
-SIDLFortran77Symbol(bhypre_gmres__array_get7_f,
-                  BHYPRE_GMRES__ARRAY_GET7_F,
-                  bHYPRE_GMRES__array_get7_f)
+SIDLFortran77Symbol(bhypre_hgmres__array_get7_f,
+                  BHYPRE_HGMRES__ARRAY_GET7_F,
+                  bHYPRE_HGMRES__array_get7_f)
   (int64_t *array, 
    int32_t *i1, 
    int32_t *i2, 
@@ -1282,9 +1257,9 @@ SIDLFortran77Symbol(bhypre_gmres__array_get7_f,
 }
 
 void
-SIDLFortran77Symbol(bhypre_gmres__array_get_f,
-                  BHYPRE_GMRES__ARRAY_GET_F,
-                  bHYPRE_GMRES__array_get_f)
+SIDLFortran77Symbol(bhypre_hgmres__array_get_f,
+                  BHYPRE_HGMRES__ARRAY_GET_F,
+                  bHYPRE_HGMRES__array_get_f)
   (int64_t *array,
    int32_t indices[],
    int64_t *result)
@@ -1295,9 +1270,9 @@ SIDLFortran77Symbol(bhypre_gmres__array_get_f,
 }
 
 void
-SIDLFortran77Symbol(bhypre_gmres__array_set1_f,
-                  BHYPRE_GMRES__ARRAY_SET1_F,
-                  bHYPRE_GMRES__array_set1_f)
+SIDLFortran77Symbol(bhypre_hgmres__array_set1_f,
+                  BHYPRE_HGMRES__ARRAY_SET1_F,
+                  bHYPRE_HGMRES__array_set1_f)
   (int64_t *array,
    int32_t *i1,
    int64_t *value)
@@ -1307,9 +1282,9 @@ SIDLFortran77Symbol(bhypre_gmres__array_set1_f,
 }
 
 void
-SIDLFortran77Symbol(bhypre_gmres__array_set2_f,
-                  BHYPRE_GMRES__ARRAY_SET2_F,
-                  bHYPRE_GMRES__array_set2_f)
+SIDLFortran77Symbol(bhypre_hgmres__array_set2_f,
+                  BHYPRE_HGMRES__ARRAY_SET2_F,
+                  bHYPRE_HGMRES__array_set2_f)
   (int64_t *array,
    int32_t *i1,
    int32_t *i2,
@@ -1320,9 +1295,9 @@ SIDLFortran77Symbol(bhypre_gmres__array_set2_f,
 }
 
 void
-SIDLFortran77Symbol(bhypre_gmres__array_set3_f,
-                  BHYPRE_GMRES__ARRAY_SET3_F,
-                  bHYPRE_GMRES__array_set3_f)
+SIDLFortran77Symbol(bhypre_hgmres__array_set3_f,
+                  BHYPRE_HGMRES__ARRAY_SET3_F,
+                  bHYPRE_HGMRES__array_set3_f)
   (int64_t *array,
    int32_t *i1,
    int32_t *i2,
@@ -1334,9 +1309,9 @@ SIDLFortran77Symbol(bhypre_gmres__array_set3_f,
 }
 
 void
-SIDLFortran77Symbol(bhypre_gmres__array_set4_f,
-                  BHYPRE_GMRES__ARRAY_SET4_F,
-                  bHYPRE_GMRES__array_set4_f)
+SIDLFortran77Symbol(bhypre_hgmres__array_set4_f,
+                  BHYPRE_HGMRES__ARRAY_SET4_F,
+                  bHYPRE_HGMRES__array_set4_f)
   (int64_t *array,
    int32_t *i1,
    int32_t *i2,
@@ -1349,9 +1324,9 @@ SIDLFortran77Symbol(bhypre_gmres__array_set4_f,
 }
 
 void
-SIDLFortran77Symbol(bhypre_gmres__array_set5_f,
-                  BHYPRE_GMRES__ARRAY_SET5_F,
-                  bHYPRE_GMRES__array_set5_f)
+SIDLFortran77Symbol(bhypre_hgmres__array_set5_f,
+                  BHYPRE_HGMRES__ARRAY_SET5_F,
+                  bHYPRE_HGMRES__array_set5_f)
   (int64_t *array,
    int32_t *i1,
    int32_t *i2,
@@ -1366,9 +1341,9 @@ SIDLFortran77Symbol(bhypre_gmres__array_set5_f,
 }
 
 void
-SIDLFortran77Symbol(bhypre_gmres__array_set6_f,
-                  BHYPRE_GMRES__ARRAY_SET6_F,
-                  bHYPRE_GMRES__array_set6_f)
+SIDLFortran77Symbol(bhypre_hgmres__array_set6_f,
+                  BHYPRE_HGMRES__ARRAY_SET6_F,
+                  bHYPRE_HGMRES__array_set6_f)
   (int64_t *array,
    int32_t *i1,
    int32_t *i2,
@@ -1384,9 +1359,9 @@ SIDLFortran77Symbol(bhypre_gmres__array_set6_f,
 }
 
 void
-SIDLFortran77Symbol(bhypre_gmres__array_set7_f,
-                  BHYPRE_GMRES__ARRAY_SET7_F,
-                  bHYPRE_GMRES__array_set7_f)
+SIDLFortran77Symbol(bhypre_hgmres__array_set7_f,
+                  BHYPRE_HGMRES__ARRAY_SET7_F,
+                  bHYPRE_HGMRES__array_set7_f)
   (int64_t *array,
    int32_t *i1,
    int32_t *i2,
@@ -1403,9 +1378,9 @@ SIDLFortran77Symbol(bhypre_gmres__array_set7_f,
 }
 
 void
-SIDLFortran77Symbol(bhypre_gmres__array_set_f,
-                  BHYPRE_GMRES__ARRAY_SET_F,
-                  bHYPRE_GMRES__array_set_f)
+SIDLFortran77Symbol(bhypre_hgmres__array_set_f,
+                  BHYPRE_HGMRES__ARRAY_SET_F,
+                  bHYPRE_HGMRES__array_set_f)
   (int64_t *array,
   int32_t indices[],
   int64_t *value)
@@ -1415,9 +1390,9 @@ SIDLFortran77Symbol(bhypre_gmres__array_set_f,
 }
 
 void
-SIDLFortran77Symbol(bhypre_gmres__array_dimen_f,
-                  BHYPRE_GMRES__ARRAY_DIMEN_F,
-                  bHYPRE_GMRES__array_dimen_f)
+SIDLFortran77Symbol(bhypre_hgmres__array_dimen_f,
+                  BHYPRE_HGMRES__ARRAY_DIMEN_F,
+                  bHYPRE_HGMRES__array_dimen_f)
   (int64_t *array, int32_t *result)
 {
   *result =
@@ -1426,9 +1401,9 @@ SIDLFortran77Symbol(bhypre_gmres__array_dimen_f,
 }
 
 void
-SIDLFortran77Symbol(bhypre_gmres__array_lower_f,
-                  BHYPRE_GMRES__ARRAY_LOWER_F,
-                  bHYPRE_GMRES__array_lower_f)
+SIDLFortran77Symbol(bhypre_hgmres__array_lower_f,
+                  BHYPRE_HGMRES__ARRAY_LOWER_F,
+                  bHYPRE_HGMRES__array_lower_f)
   (int64_t *array,
    int32_t *ind,
    int32_t *result)
@@ -1439,9 +1414,9 @@ SIDLFortran77Symbol(bhypre_gmres__array_lower_f,
 }
 
 void
-SIDLFortran77Symbol(bhypre_gmres__array_upper_f,
-                  BHYPRE_GMRES__ARRAY_UPPER_F,
-                  bHYPRE_GMRES__array_upper_f)
+SIDLFortran77Symbol(bhypre_hgmres__array_upper_f,
+                  BHYPRE_HGMRES__ARRAY_UPPER_F,
+                  bHYPRE_HGMRES__array_upper_f)
   (int64_t *array,
    int32_t *ind,
    int32_t *result)
@@ -1452,9 +1427,9 @@ SIDLFortran77Symbol(bhypre_gmres__array_upper_f,
 }
 
 void
-SIDLFortran77Symbol(bhypre_gmres__array_length_f,
-                  BHYPRE_GMRES__ARRAY_LENGTH_F,
-                  bHYPRE_GMRES__array_length_f)
+SIDLFortran77Symbol(bhypre_hgmres__array_length_f,
+                  BHYPRE_HGMRES__ARRAY_LENGTH_F,
+                  bHYPRE_HGMRES__array_length_f)
   (int64_t *array,
    int32_t *ind,
    int32_t *result)
@@ -1465,9 +1440,9 @@ SIDLFortran77Symbol(bhypre_gmres__array_length_f,
 }
 
 void
-SIDLFortran77Symbol(bhypre_gmres__array_stride_f,
-                  BHYPRE_GMRES__ARRAY_STRIDE_F,
-                  bHYPRE_GMRES__array_stride_f)
+SIDLFortran77Symbol(bhypre_hgmres__array_stride_f,
+                  BHYPRE_HGMRES__ARRAY_STRIDE_F,
+                  bHYPRE_HGMRES__array_stride_f)
   (int64_t *array,
    int32_t *ind,
    int32_t *result)
@@ -1478,9 +1453,9 @@ SIDLFortran77Symbol(bhypre_gmres__array_stride_f,
 }
 
 void
-SIDLFortran77Symbol(bhypre_gmres__array_iscolumnorder_f,
-                  BHYPRE_GMRES__ARRAY_ISCOLUMNORDER_F,
-                  bHYPRE_GMRES__array_isColumnOrder_f)
+SIDLFortran77Symbol(bhypre_hgmres__array_iscolumnorder_f,
+                  BHYPRE_HGMRES__ARRAY_ISCOLUMNORDER_F,
+                  bHYPRE_HGMRES__array_isColumnOrder_f)
   (int64_t *array,
    SIDL_F77_Bool *result)
 {
@@ -1489,9 +1464,9 @@ SIDLFortran77Symbol(bhypre_gmres__array_iscolumnorder_f,
 }
 
 void
-SIDLFortran77Symbol(bhypre_gmres__array_isroworder_f,
-                  BHYPRE_GMRES__ARRAY_ISROWORDER_F,
-                  bHYPRE_GMRES__array_isRowOrder_f)
+SIDLFortran77Symbol(bhypre_hgmres__array_isroworder_f,
+                  BHYPRE_HGMRES__ARRAY_ISROWORDER_F,
+                  bHYPRE_HGMRES__array_isRowOrder_f)
   (int64_t *array,
    SIDL_F77_Bool *result)
 {
@@ -1500,9 +1475,9 @@ SIDLFortran77Symbol(bhypre_gmres__array_isroworder_f,
 }
 
 void
-SIDLFortran77Symbol(bhypre_gmres__array_copy_f,
-                  BHYPRE_GMRES__ARRAY_COPY_F,
-                  bHYPRE_GMRES__array_copy_f)
+SIDLFortran77Symbol(bhypre_hgmres__array_copy_f,
+                  BHYPRE_HGMRES__ARRAY_COPY_F,
+                  bHYPRE_HGMRES__array_copy_f)
   (int64_t *src,
    int64_t *dest)
 {
@@ -1512,9 +1487,9 @@ SIDLFortran77Symbol(bhypre_gmres__array_copy_f,
 }
 
 void
-SIDLFortran77Symbol(bhypre_gmres__array_smartcopy_f,
-                  BHYPRE_GMRES__ARRAY_SMARTCOPY_F,
-                  bHYPRE_GMRES__array_smartCopy_f)
+SIDLFortran77Symbol(bhypre_hgmres__array_smartcopy_f,
+                  BHYPRE_HGMRES__ARRAY_SMARTCOPY_F,
+                  bHYPRE_HGMRES__array_smartCopy_f)
   (int64_t *src)
 {
   sidl_interface__array_smartCopy((struct sidl_interface__array 
@@ -1522,9 +1497,9 @@ SIDLFortran77Symbol(bhypre_gmres__array_smartcopy_f,
 }
 
 void
-SIDLFortran77Symbol(bhypre_gmres__array_slice_f,
-                  BHYPRE_GMRES__ARRAY_SLICE_F,
-                  bHYPRE_GMRES__array_slice_f)
+SIDLFortran77Symbol(bhypre_hgmres__array_slice_f,
+                  BHYPRE_HGMRES__ARRAY_SLICE_F,
+                  bHYPRE_HGMRES__array_slice_f)
   (int64_t *src,
    int32_t *dimen,
    int32_t numElem[],
@@ -1539,9 +1514,9 @@ SIDLFortran77Symbol(bhypre_gmres__array_slice_f,
 }
 
 void
-SIDLFortran77Symbol(bhypre_gmres__array_ensure_f,
-                  BHYPRE_GMRES__ARRAY_ENSURE_F,
-                  bHYPRE_GMRES__array_ensure_f)
+SIDLFortran77Symbol(bhypre_hgmres__array_ensure_f,
+                  BHYPRE_HGMRES__ARRAY_ENSURE_F,
+                  bHYPRE_HGMRES__array_ensure_f)
   (int64_t *src,
    int32_t *dimen,
    int     *ordering,

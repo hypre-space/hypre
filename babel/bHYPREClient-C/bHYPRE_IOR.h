@@ -38,6 +38,9 @@
 #ifndef included_bHYPRE_GMRES_IOR_h
 #include "bHYPRE_GMRES_IOR.h"
 #endif
+#ifndef included_bHYPRE_HGMRES_IOR_h
+#include "bHYPRE_HGMRES_IOR.h"
+#endif
 #ifndef included_bHYPRE_HPCG_IOR_h
 #include "bHYPRE_HPCG_IOR.h"
 #endif

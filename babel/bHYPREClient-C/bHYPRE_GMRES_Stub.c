@@ -229,10 +229,12 @@ bHYPRE_GMRES_getClassInfo(
 
 bHYPRE_GMRES
 bHYPRE_GMRES_Create(
-  /* in */ bHYPRE_MPICommunicator mpi_comm)
+  /* in */ bHYPRE_MPICommunicator mpi_comm,
+  /* in */ bHYPRE_Operator A)
 {
   return (_getSEPV()->f_Create)(
-    mpi_comm);
+    mpi_comm,
+    A);
 }
 
 /*
@@ -608,13 +610,15 @@ bHYPRE_GMRES_Create__sexec(
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
   bHYPRE_MPICommunicator mpi_comm;
+  bHYPRE_Operator A;
   bHYPRE_GMRES _retval;
 
   /* unpack in and inout argments */
 
   /* make the call */
   _retval = (_getSEPV()->f_Create)(
-    mpi_comm);
+    mpi_comm,
+    A);
 
   /* pack return value */
   /* pack out and inout argments */

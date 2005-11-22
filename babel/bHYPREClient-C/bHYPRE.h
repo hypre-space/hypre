@@ -28,6 +28,9 @@
 #ifndef included_bHYPRE_GMRES_h
 #include "bHYPRE_GMRES.h"
 #endif
+#ifndef included_bHYPRE_HGMRES_h
+#include "bHYPRE_HGMRES.h"
+#endif
 #ifndef included_bHYPRE_HPCG_h
 #include "bHYPRE_HPCG.h"
 #endif

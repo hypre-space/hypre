@@ -1,17 +1,17 @@
 /*
- * File:          bHYPRE_GMRES_Stub.c
- * Symbol:        bHYPRE.GMRES-v1.0.0
+ * File:          bHYPRE_HGMRES_Stub.c
+ * Symbol:        bHYPRE.HGMRES-v1.0.0
  * Symbol Type:   class
  * Babel Version: 0.10.4
- * Description:   Client-side glue code for bHYPRE.GMRES
+ * Description:   Client-side glue code for bHYPRE.HGMRES
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
  * babel-version = 0.10.4
  */
 
-#include "bHYPRE_GMRES.h"
-#include "bHYPRE_GMRES_IOR.h"
+#include "bHYPRE_HGMRES.h"
+#include "bHYPRE_HGMRES_IOR.h"
 #ifndef included_sidl_interface_IOR_h
 #include "sidl_interface_IOR.h"
 #endif
@@ -44,23 +44,23 @@ static int connect_loaded = 0;
  * Hold pointer to IOR functions.
  */
 
-static const struct bHYPRE_GMRES__external *_externals = NULL;
+static const struct bHYPRE_HGMRES__external *_externals = NULL;
 /*
  * Lookup the symbol to get the IOR functions.
  */
 
-static const struct bHYPRE_GMRES__external* _loadIOR(void)
+static const struct bHYPRE_HGMRES__external* _loadIOR(void)
 /*
  * Return pointer to internal IOR functions.
  */
 
 {
 #ifdef SIDL_STATIC_LIBRARY
-  _externals = bHYPRE_GMRES__externals();
+  _externals = bHYPRE_HGMRES__externals();
 #else
   _externals = (struct 
-    bHYPRE_GMRES__external*)sidl_dynamicLoadIOR("bHYPRE.GMRES",
-    "bHYPRE_GMRES__externals") ;
+    bHYPRE_HGMRES__external*)sidl_dynamicLoadIOR("bHYPRE.HGMRES",
+    "bHYPRE_HGMRES__externals") ;
 #endif
   return _externals;
 }
@@ -71,7 +71,7 @@ static const struct bHYPRE_GMRES__external* _loadIOR(void)
  * Hold pointer to static entry point vector
  */
 
-static const struct bHYPRE_GMRES__sepv *_sepv = NULL;
+static const struct bHYPRE_HGMRES__sepv *_sepv = NULL;
 /*
  * Return pointer to static functions.
  */
@@ -87,37 +87,37 @@ static const struct bHYPRE_GMRES__sepv *_sepv = NULL;
  * Constructor function for the class.
  */
 
-bHYPRE_GMRES
-bHYPRE_GMRES__create()
+bHYPRE_HGMRES
+bHYPRE_HGMRES__create()
 {
   return (*(_getExternals()->createObject))();
 }
 
-static bHYPRE_GMRES bHYPRE_GMRES__remote(const char* url,
+static bHYPRE_HGMRES bHYPRE_HGMRES__remote(const char* url,
   sidl_BaseInterface *_ex);
 /*
  * RMI constructor function for the class.
  */
 
-bHYPRE_GMRES
-bHYPRE_GMRES__createRemote(const char* url, sidl_BaseInterface *_ex)
+bHYPRE_HGMRES
+bHYPRE_HGMRES__createRemote(const char* url, sidl_BaseInterface *_ex)
 {
-  return bHYPRE_GMRES__remote(url, _ex);
+  return bHYPRE_HGMRES__remote(url, _ex);
 }
 
-static struct bHYPRE_GMRES__object* bHYPRE_GMRES__remoteConnect(const char* url,
-  sidl_BaseInterface *_ex);
-static struct bHYPRE_GMRES__object* 
-  bHYPRE_GMRES__IHConnect(sidl_rmi_InstanceHandle instance,
+static struct bHYPRE_HGMRES__object* bHYPRE_HGMRES__remoteConnect(const char* 
+  url, sidl_BaseInterface *_ex);
+static struct bHYPRE_HGMRES__object* 
+  bHYPRE_HGMRES__IHConnect(sidl_rmi_InstanceHandle instance,
   sidl_BaseInterface *_ex);
 /*
  * RMI connector function for the class.
  */
 
-bHYPRE_GMRES
-bHYPRE_GMRES__connect(const char* url, sidl_BaseInterface *_ex)
+bHYPRE_HGMRES
+bHYPRE_HGMRES__connect(const char* url, sidl_BaseInterface *_ex)
 {
-  return bHYPRE_GMRES__remoteConnect(url, _ex);
+  return bHYPRE_HGMRES__remoteConnect(url, _ex);
 }
 
 /*
@@ -136,8 +136,8 @@ bHYPRE_GMRES__connect(const char* url, sidl_BaseInterface *_ex)
  */
 
 void
-bHYPRE_GMRES_addRef(
-  /* in */ bHYPRE_GMRES self)
+bHYPRE_HGMRES_addRef(
+  /* in */ bHYPRE_HGMRES self)
 {
   (*self->d_epv->f_addRef)(
     self);
@@ -152,8 +152,8 @@ bHYPRE_GMRES_addRef(
  */
 
 void
-bHYPRE_GMRES_deleteRef(
-  /* in */ bHYPRE_GMRES self)
+bHYPRE_HGMRES_deleteRef(
+  /* in */ bHYPRE_HGMRES self)
 {
   (*self->d_epv->f_deleteRef)(
     self);
@@ -165,8 +165,8 @@ bHYPRE_GMRES_deleteRef(
  */
 
 sidl_bool
-bHYPRE_GMRES_isSame(
-  /* in */ bHYPRE_GMRES self,
+bHYPRE_HGMRES_isSame(
+  /* in */ bHYPRE_HGMRES self,
   /* in */ sidl_BaseInterface iobj)
 {
   return (*self->d_epv->f_isSame)(
@@ -185,8 +185,8 @@ bHYPRE_GMRES_isSame(
  */
 
 sidl_BaseInterface
-bHYPRE_GMRES_queryInt(
-  /* in */ bHYPRE_GMRES self,
+bHYPRE_HGMRES_queryInt(
+  /* in */ bHYPRE_HGMRES self,
   /* in */ const char* name)
 {
   return (*self->d_epv->f_queryInt)(
@@ -202,8 +202,8 @@ bHYPRE_GMRES_queryInt(
  */
 
 sidl_bool
-bHYPRE_GMRES_isType(
-  /* in */ bHYPRE_GMRES self,
+bHYPRE_HGMRES_isType(
+  /* in */ bHYPRE_HGMRES self,
   /* in */ const char* name)
 {
   return (*self->d_epv->f_isType)(
@@ -216,8 +216,8 @@ bHYPRE_GMRES_isType(
  */
 
 sidl_ClassInfo
-bHYPRE_GMRES_getClassInfo(
-  /* in */ bHYPRE_GMRES self)
+bHYPRE_HGMRES_getClassInfo(
+  /* in */ bHYPRE_HGMRES self)
 {
   return (*self->d_epv->f_getClassInfo)(
     self);
@@ -227,14 +227,12 @@ bHYPRE_GMRES_getClassInfo(
  * Method:  Create[]
  */
 
-bHYPRE_GMRES
-bHYPRE_GMRES_Create(
-  /* in */ bHYPRE_MPICommunicator mpi_comm,
-  /* in */ bHYPRE_Operator A)
+bHYPRE_HGMRES
+bHYPRE_HGMRES_Create(
+  /* in */ bHYPRE_MPICommunicator mpi_comm)
 {
   return (_getSEPV()->f_Create)(
-    mpi_comm,
-    A);
+    mpi_comm);
 }
 
 /*
@@ -244,8 +242,8 @@ bHYPRE_GMRES_Create(
  */
 
 int32_t
-bHYPRE_GMRES_SetCommunicator(
-  /* in */ bHYPRE_GMRES self,
+bHYPRE_HGMRES_SetCommunicator(
+  /* in */ bHYPRE_HGMRES self,
   /* in */ bHYPRE_MPICommunicator mpi_comm)
 {
   return (*self->d_epv->f_SetCommunicator)(
@@ -259,8 +257,8 @@ bHYPRE_GMRES_SetCommunicator(
  */
 
 int32_t
-bHYPRE_GMRES_SetIntParameter(
-  /* in */ bHYPRE_GMRES self,
+bHYPRE_HGMRES_SetIntParameter(
+  /* in */ bHYPRE_HGMRES self,
   /* in */ const char* name,
   /* in */ int32_t value)
 {
@@ -276,8 +274,8 @@ bHYPRE_GMRES_SetIntParameter(
  */
 
 int32_t
-bHYPRE_GMRES_SetDoubleParameter(
-  /* in */ bHYPRE_GMRES self,
+bHYPRE_HGMRES_SetDoubleParameter(
+  /* in */ bHYPRE_HGMRES self,
   /* in */ const char* name,
   /* in */ double value)
 {
@@ -293,8 +291,8 @@ bHYPRE_GMRES_SetDoubleParameter(
  */
 
 int32_t
-bHYPRE_GMRES_SetStringParameter(
-  /* in */ bHYPRE_GMRES self,
+bHYPRE_HGMRES_SetStringParameter(
+  /* in */ bHYPRE_HGMRES self,
   /* in */ const char* name,
   /* in */ const char* value)
 {
@@ -310,8 +308,8 @@ bHYPRE_GMRES_SetStringParameter(
  */
 
 int32_t
-bHYPRE_GMRES_SetIntArray1Parameter(
-  /* in */ bHYPRE_GMRES self,
+bHYPRE_HGMRES_SetIntArray1Parameter(
+  /* in */ bHYPRE_HGMRES self,
   /* in */ const char* name,
   /* in */ int32_t* value,
   /* in */ int32_t nvalues)
@@ -334,8 +332,8 @@ bHYPRE_GMRES_SetIntArray1Parameter(
  */
 
 int32_t
-bHYPRE_GMRES_SetIntArray2Parameter(
-  /* in */ bHYPRE_GMRES self,
+bHYPRE_HGMRES_SetIntArray2Parameter(
+  /* in */ bHYPRE_HGMRES self,
   /* in */ const char* name,
   /* in */ struct sidl_int__array* value)
 {
@@ -351,8 +349,8 @@ bHYPRE_GMRES_SetIntArray2Parameter(
  */
 
 int32_t
-bHYPRE_GMRES_SetDoubleArray1Parameter(
-  /* in */ bHYPRE_GMRES self,
+bHYPRE_HGMRES_SetDoubleArray1Parameter(
+  /* in */ bHYPRE_HGMRES self,
   /* in */ const char* name,
   /* in */ double* value,
   /* in */ int32_t nvalues)
@@ -375,8 +373,8 @@ bHYPRE_GMRES_SetDoubleArray1Parameter(
  */
 
 int32_t
-bHYPRE_GMRES_SetDoubleArray2Parameter(
-  /* in */ bHYPRE_GMRES self,
+bHYPRE_HGMRES_SetDoubleArray2Parameter(
+  /* in */ bHYPRE_HGMRES self,
   /* in */ const char* name,
   /* in */ struct sidl_double__array* value)
 {
@@ -392,8 +390,8 @@ bHYPRE_GMRES_SetDoubleArray2Parameter(
  */
 
 int32_t
-bHYPRE_GMRES_GetIntValue(
-  /* in */ bHYPRE_GMRES self,
+bHYPRE_HGMRES_GetIntValue(
+  /* in */ bHYPRE_HGMRES self,
   /* in */ const char* name,
   /* out */ int32_t* value)
 {
@@ -409,8 +407,8 @@ bHYPRE_GMRES_GetIntValue(
  */
 
 int32_t
-bHYPRE_GMRES_GetDoubleValue(
-  /* in */ bHYPRE_GMRES self,
+bHYPRE_HGMRES_GetDoubleValue(
+  /* in */ bHYPRE_HGMRES self,
   /* in */ const char* name,
   /* out */ double* value)
 {
@@ -427,8 +425,8 @@ bHYPRE_GMRES_GetDoubleValue(
  */
 
 int32_t
-bHYPRE_GMRES_Setup(
-  /* in */ bHYPRE_GMRES self,
+bHYPRE_HGMRES_Setup(
+  /* in */ bHYPRE_HGMRES self,
   /* in */ bHYPRE_Vector b,
   /* in */ bHYPRE_Vector x)
 {
@@ -444,8 +442,8 @@ bHYPRE_GMRES_Setup(
  */
 
 int32_t
-bHYPRE_GMRES_Apply(
-  /* in */ bHYPRE_GMRES self,
+bHYPRE_HGMRES_Apply(
+  /* in */ bHYPRE_HGMRES self,
   /* in */ bHYPRE_Vector b,
   /* inout */ bHYPRE_Vector* x)
 {
@@ -461,8 +459,8 @@ bHYPRE_GMRES_Apply(
  */
 
 int32_t
-bHYPRE_GMRES_ApplyAdjoint(
-  /* in */ bHYPRE_GMRES self,
+bHYPRE_HGMRES_ApplyAdjoint(
+  /* in */ bHYPRE_HGMRES self,
   /* in */ bHYPRE_Vector b,
   /* inout */ bHYPRE_Vector* x)
 {
@@ -478,8 +476,8 @@ bHYPRE_GMRES_ApplyAdjoint(
  */
 
 int32_t
-bHYPRE_GMRES_SetOperator(
-  /* in */ bHYPRE_GMRES self,
+bHYPRE_HGMRES_SetOperator(
+  /* in */ bHYPRE_HGMRES self,
   /* in */ bHYPRE_Operator A)
 {
   return (*self->d_epv->f_SetOperator)(
@@ -494,8 +492,8 @@ bHYPRE_GMRES_SetOperator(
  */
 
 int32_t
-bHYPRE_GMRES_SetTolerance(
-  /* in */ bHYPRE_GMRES self,
+bHYPRE_HGMRES_SetTolerance(
+  /* in */ bHYPRE_HGMRES self,
   /* in */ double tolerance)
 {
   return (*self->d_epv->f_SetTolerance)(
@@ -510,8 +508,8 @@ bHYPRE_GMRES_SetTolerance(
  */
 
 int32_t
-bHYPRE_GMRES_SetMaxIterations(
-  /* in */ bHYPRE_GMRES self,
+bHYPRE_HGMRES_SetMaxIterations(
+  /* in */ bHYPRE_HGMRES self,
   /* in */ int32_t max_iterations)
 {
   return (*self->d_epv->f_SetMaxIterations)(
@@ -530,8 +528,8 @@ bHYPRE_GMRES_SetMaxIterations(
  */
 
 int32_t
-bHYPRE_GMRES_SetLogging(
-  /* in */ bHYPRE_GMRES self,
+bHYPRE_HGMRES_SetLogging(
+  /* in */ bHYPRE_HGMRES self,
   /* in */ int32_t level)
 {
   return (*self->d_epv->f_SetLogging)(
@@ -550,8 +548,8 @@ bHYPRE_GMRES_SetLogging(
  */
 
 int32_t
-bHYPRE_GMRES_SetPrintLevel(
-  /* in */ bHYPRE_GMRES self,
+bHYPRE_HGMRES_SetPrintLevel(
+  /* in */ bHYPRE_HGMRES self,
   /* in */ int32_t level)
 {
   return (*self->d_epv->f_SetPrintLevel)(
@@ -565,8 +563,8 @@ bHYPRE_GMRES_SetPrintLevel(
  */
 
 int32_t
-bHYPRE_GMRES_GetNumIterations(
-  /* in */ bHYPRE_GMRES self,
+bHYPRE_HGMRES_GetNumIterations(
+  /* in */ bHYPRE_HGMRES self,
   /* out */ int32_t* num_iterations)
 {
   return (*self->d_epv->f_GetNumIterations)(
@@ -580,8 +578,8 @@ bHYPRE_GMRES_GetNumIterations(
  */
 
 int32_t
-bHYPRE_GMRES_GetRelResidualNorm(
-  /* in */ bHYPRE_GMRES self,
+bHYPRE_HGMRES_GetRelResidualNorm(
+  /* in */ bHYPRE_HGMRES self,
   /* out */ double* norm)
 {
   return (*self->d_epv->f_GetRelResidualNorm)(
@@ -595,8 +593,8 @@ bHYPRE_GMRES_GetRelResidualNorm(
  */
 
 int32_t
-bHYPRE_GMRES_SetPreconditioner(
-  /* in */ bHYPRE_GMRES self,
+bHYPRE_HGMRES_SetPreconditioner(
+  /* in */ bHYPRE_HGMRES self,
   /* in */ bHYPRE_Solver s)
 {
   return (*self->d_epv->f_SetPreconditioner)(
@@ -605,20 +603,18 @@ bHYPRE_GMRES_SetPreconditioner(
 }
 
 void
-bHYPRE_GMRES_Create__sexec(
+bHYPRE_HGMRES_Create__sexec(
         struct sidl_io_Deserializer__object* inArgs,
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
   bHYPRE_MPICommunicator mpi_comm;
-  bHYPRE_Operator A;
-  bHYPRE_GMRES _retval;
+  bHYPRE_HGMRES _retval;
 
   /* unpack in and inout argments */
 
   /* make the call */
   _retval = (_getSEPV()->f_Create)(
-    mpi_comm,
-    A);
+    mpi_comm);
 
   /* pack return value */
   /* pack out and inout argments */
@@ -629,22 +625,22 @@ bHYPRE_GMRES_Create__sexec(
  * Cast method for interface and class type conversions.
  */
 
-bHYPRE_GMRES
-bHYPRE_GMRES__cast(
+bHYPRE_HGMRES
+bHYPRE_HGMRES__cast(
   void* obj)
 {
-  bHYPRE_GMRES cast = NULL;
+  bHYPRE_HGMRES cast = NULL;
 
   if(!connect_loaded) {
-    sidl_rmi_ConnectRegistry_registerConnect("bHYPRE.GMRES",
-      (void*)bHYPRE_GMRES__IHConnect);
+    sidl_rmi_ConnectRegistry_registerConnect("bHYPRE.HGMRES",
+      (void*)bHYPRE_HGMRES__IHConnect);
     connect_loaded = 1;
   }
   if (obj != NULL) {
     sidl_BaseInterface base = (sidl_BaseInterface) obj;
-    cast = (bHYPRE_GMRES) (*base->d_epv->f__cast)(
+    cast = (bHYPRE_HGMRES) (*base->d_epv->f__cast)(
       base->d_object,
-      "bHYPRE.GMRES");
+      "bHYPRE.HGMRES");
   }
 
   return cast;
@@ -655,7 +651,7 @@ bHYPRE_GMRES__cast(
  */
 
 void*
-bHYPRE_GMRES__cast2(
+bHYPRE_HGMRES__cast2(
   void* obj,
   const char* type)
 {
@@ -673,8 +669,8 @@ bHYPRE_GMRES__cast2(
  */
 
 void
-bHYPRE_GMRES__exec(
-  /* in */ bHYPRE_GMRES self,
+bHYPRE_HGMRES__exec(
+  /* in */ bHYPRE_HGMRES self,
   /* in */ const char* methodName,
   /* in */ sidl_io_Deserializer inArgs,
   /* in */ sidl_io_Serializer outArgs)
@@ -686,22 +682,22 @@ bHYPRE_GMRES__exec(
   outArgs);
 }
 
-struct bHYPRE_GMRES__smethod {
+struct bHYPRE_HGMRES__smethod {
   const char *d_name;
   void (*d_func)(struct sidl_io_Deserializer__object *,
     struct sidl_io_Serializer__object *);
 };
 
 void
-bHYPRE_GMRES__sexec(
+bHYPRE_HGMRES__sexec(
         const char* methodName,
         struct sidl_io_Deserializer__object* inArgs,
         struct sidl_io_Serializer__object* outArgs ) { 
-  static const struct bHYPRE_GMRES__smethod s_methods[] = {
-    { "Create", bHYPRE_GMRES_Create__sexec }
+  static const struct bHYPRE_HGMRES__smethod s_methods[] = {
+    { "Create", bHYPRE_HGMRES_Create__sexec }
   };
   int i, cmp, l = 0;
-  int u = sizeof(s_methods)/sizeof(struct bHYPRE_GMRES__smethod);
+  int u = sizeof(s_methods)/sizeof(struct bHYPRE_HGMRES__smethod);
   if (methodName) {
     /* Use binary search to locate method */
     while (l < u) {
@@ -721,158 +717,158 @@ bHYPRE_GMRES__sexec(
  */
 
 char*
-bHYPRE_GMRES__getURL(
-  /* in */ bHYPRE_GMRES self)
+bHYPRE_HGMRES__getURL(
+  /* in */ bHYPRE_HGMRES self)
 {
   return (*self->d_epv->f__getURL)(
   self);
 }
 
-struct bHYPRE_GMRES__array*
-bHYPRE_GMRES__array_createCol(
+struct bHYPRE_HGMRES__array*
+bHYPRE_HGMRES__array_createCol(
   int32_t       dimen,
   const int32_t lower[],
   const int32_t upper[])
 {
-  return (struct bHYPRE_GMRES__array*)sidl_interface__array_createCol(dimen,
+  return (struct bHYPRE_HGMRES__array*)sidl_interface__array_createCol(dimen,
     lower, upper);
 }
 
-struct bHYPRE_GMRES__array*
-bHYPRE_GMRES__array_createRow(
+struct bHYPRE_HGMRES__array*
+bHYPRE_HGMRES__array_createRow(
   int32_t       dimen,
   const int32_t lower[],
   const int32_t upper[])
 {
-  return (struct bHYPRE_GMRES__array*)sidl_interface__array_createRow(dimen,
+  return (struct bHYPRE_HGMRES__array*)sidl_interface__array_createRow(dimen,
     lower, upper);
 }
 
-struct bHYPRE_GMRES__array*
-bHYPRE_GMRES__array_create1d(int32_t len)
+struct bHYPRE_HGMRES__array*
+bHYPRE_HGMRES__array_create1d(int32_t len)
 {
-  return (struct bHYPRE_GMRES__array*)sidl_interface__array_create1d(len);
+  return (struct bHYPRE_HGMRES__array*)sidl_interface__array_create1d(len);
 }
 
-struct bHYPRE_GMRES__array*
-bHYPRE_GMRES__array_create1dInit(
+struct bHYPRE_HGMRES__array*
+bHYPRE_HGMRES__array_create1dInit(
   int32_t len, 
-  bHYPRE_GMRES* data)
+  bHYPRE_HGMRES* data)
 {
-  return (struct bHYPRE_GMRES__array*)sidl_interface__array_create1dInit(len,
+  return (struct bHYPRE_HGMRES__array*)sidl_interface__array_create1dInit(len,
     (struct sidl_BaseInterface__object **)data);
 }
 
-struct bHYPRE_GMRES__array*
-bHYPRE_GMRES__array_create2dCol(int32_t m, int32_t n)
+struct bHYPRE_HGMRES__array*
+bHYPRE_HGMRES__array_create2dCol(int32_t m, int32_t n)
 {
-  return (struct bHYPRE_GMRES__array*)sidl_interface__array_create2dCol(m, n);
+  return (struct bHYPRE_HGMRES__array*)sidl_interface__array_create2dCol(m, n);
 }
 
-struct bHYPRE_GMRES__array*
-bHYPRE_GMRES__array_create2dRow(int32_t m, int32_t n)
+struct bHYPRE_HGMRES__array*
+bHYPRE_HGMRES__array_create2dRow(int32_t m, int32_t n)
 {
-  return (struct bHYPRE_GMRES__array*)sidl_interface__array_create2dRow(m, n);
+  return (struct bHYPRE_HGMRES__array*)sidl_interface__array_create2dRow(m, n);
 }
 
-struct bHYPRE_GMRES__array*
-bHYPRE_GMRES__array_borrow(
-  bHYPRE_GMRES* firstElement,
+struct bHYPRE_HGMRES__array*
+bHYPRE_HGMRES__array_borrow(
+  bHYPRE_HGMRES* firstElement,
   int32_t       dimen,
   const int32_t lower[],
   const int32_t upper[],
   const int32_t stride[])
 {
-  return (struct bHYPRE_GMRES__array*)sidl_interface__array_borrow(
+  return (struct bHYPRE_HGMRES__array*)sidl_interface__array_borrow(
     (struct sidl_BaseInterface__object **)
     firstElement, dimen, lower, upper, stride);
 }
 
-struct bHYPRE_GMRES__array*
-bHYPRE_GMRES__array_smartCopy(
-  struct bHYPRE_GMRES__array *array)
+struct bHYPRE_HGMRES__array*
+bHYPRE_HGMRES__array_smartCopy(
+  struct bHYPRE_HGMRES__array *array)
 {
-  return (struct bHYPRE_GMRES__array*)
+  return (struct bHYPRE_HGMRES__array*)
     sidl_interface__array_smartCopy((struct sidl_interface__array *)array);
 }
 
 void
-bHYPRE_GMRES__array_addRef(
-  struct bHYPRE_GMRES__array* array)
+bHYPRE_HGMRES__array_addRef(
+  struct bHYPRE_HGMRES__array* array)
 {
   sidl_interface__array_addRef((struct sidl_interface__array *)array);
 }
 
 void
-bHYPRE_GMRES__array_deleteRef(
-  struct bHYPRE_GMRES__array* array)
+bHYPRE_HGMRES__array_deleteRef(
+  struct bHYPRE_HGMRES__array* array)
 {
   sidl_interface__array_deleteRef((struct sidl_interface__array *)array);
 }
 
-bHYPRE_GMRES
-bHYPRE_GMRES__array_get1(
-  const struct bHYPRE_GMRES__array* array,
+bHYPRE_HGMRES
+bHYPRE_HGMRES__array_get1(
+  const struct bHYPRE_HGMRES__array* array,
   const int32_t i1)
 {
-  return (bHYPRE_GMRES)
+  return (bHYPRE_HGMRES)
     sidl_interface__array_get1((const struct sidl_interface__array *)array
     , i1);
 }
 
-bHYPRE_GMRES
-bHYPRE_GMRES__array_get2(
-  const struct bHYPRE_GMRES__array* array,
+bHYPRE_HGMRES
+bHYPRE_HGMRES__array_get2(
+  const struct bHYPRE_HGMRES__array* array,
   const int32_t i1,
   const int32_t i2)
 {
-  return (bHYPRE_GMRES)
+  return (bHYPRE_HGMRES)
     sidl_interface__array_get2((const struct sidl_interface__array *)array
     , i1, i2);
 }
 
-bHYPRE_GMRES
-bHYPRE_GMRES__array_get3(
-  const struct bHYPRE_GMRES__array* array,
+bHYPRE_HGMRES
+bHYPRE_HGMRES__array_get3(
+  const struct bHYPRE_HGMRES__array* array,
   const int32_t i1,
   const int32_t i2,
   const int32_t i3)
 {
-  return (bHYPRE_GMRES)
+  return (bHYPRE_HGMRES)
     sidl_interface__array_get3((const struct sidl_interface__array *)array
     , i1, i2, i3);
 }
 
-bHYPRE_GMRES
-bHYPRE_GMRES__array_get4(
-  const struct bHYPRE_GMRES__array* array,
+bHYPRE_HGMRES
+bHYPRE_HGMRES__array_get4(
+  const struct bHYPRE_HGMRES__array* array,
   const int32_t i1,
   const int32_t i2,
   const int32_t i3,
   const int32_t i4)
 {
-  return (bHYPRE_GMRES)
+  return (bHYPRE_HGMRES)
     sidl_interface__array_get4((const struct sidl_interface__array *)array
     , i1, i2, i3, i4);
 }
 
-bHYPRE_GMRES
-bHYPRE_GMRES__array_get5(
-  const struct bHYPRE_GMRES__array* array,
+bHYPRE_HGMRES
+bHYPRE_HGMRES__array_get5(
+  const struct bHYPRE_HGMRES__array* array,
   const int32_t i1,
   const int32_t i2,
   const int32_t i3,
   const int32_t i4,
   const int32_t i5)
 {
-  return (bHYPRE_GMRES)
+  return (bHYPRE_HGMRES)
     sidl_interface__array_get5((const struct sidl_interface__array *)array
     , i1, i2, i3, i4, i5);
 }
 
-bHYPRE_GMRES
-bHYPRE_GMRES__array_get6(
-  const struct bHYPRE_GMRES__array* array,
+bHYPRE_HGMRES
+bHYPRE_HGMRES__array_get6(
+  const struct bHYPRE_HGMRES__array* array,
   const int32_t i1,
   const int32_t i2,
   const int32_t i3,
@@ -880,14 +876,14 @@ bHYPRE_GMRES__array_get6(
   const int32_t i5,
   const int32_t i6)
 {
-  return (bHYPRE_GMRES)
+  return (bHYPRE_HGMRES)
     sidl_interface__array_get6((const struct sidl_interface__array *)array
     , i1, i2, i3, i4, i5, i6);
 }
 
-bHYPRE_GMRES
-bHYPRE_GMRES__array_get7(
-  const struct bHYPRE_GMRES__array* array,
+bHYPRE_HGMRES
+bHYPRE_HGMRES__array_get7(
+  const struct bHYPRE_HGMRES__array* array,
   const int32_t i1,
   const int32_t i2,
   const int32_t i3,
@@ -896,99 +892,99 @@ bHYPRE_GMRES__array_get7(
   const int32_t i6,
   const int32_t i7)
 {
-  return (bHYPRE_GMRES)
+  return (bHYPRE_HGMRES)
     sidl_interface__array_get7((const struct sidl_interface__array *)array
     , i1, i2, i3, i4, i5, i6, i7);
 }
 
-bHYPRE_GMRES
-bHYPRE_GMRES__array_get(
-  const struct bHYPRE_GMRES__array* array,
+bHYPRE_HGMRES
+bHYPRE_HGMRES__array_get(
+  const struct bHYPRE_HGMRES__array* array,
   const int32_t indices[])
 {
-  return (bHYPRE_GMRES)
+  return (bHYPRE_HGMRES)
     sidl_interface__array_get((const struct sidl_interface__array *)array,
       indices);
 }
 
 void
-bHYPRE_GMRES__array_set1(
-  struct bHYPRE_GMRES__array* array,
+bHYPRE_HGMRES__array_set1(
+  struct bHYPRE_HGMRES__array* array,
   const int32_t i1,
-  bHYPRE_GMRES const value)
+  bHYPRE_HGMRES const value)
 {
   sidl_interface__array_set1((struct sidl_interface__array *)array
   , i1, (struct sidl_BaseInterface__object *)value);
 }
 
 void
-bHYPRE_GMRES__array_set2(
-  struct bHYPRE_GMRES__array* array,
+bHYPRE_HGMRES__array_set2(
+  struct bHYPRE_HGMRES__array* array,
   const int32_t i1,
   const int32_t i2,
-  bHYPRE_GMRES const value)
+  bHYPRE_HGMRES const value)
 {
   sidl_interface__array_set2((struct sidl_interface__array *)array
   , i1, i2, (struct sidl_BaseInterface__object *)value);
 }
 
 void
-bHYPRE_GMRES__array_set3(
-  struct bHYPRE_GMRES__array* array,
+bHYPRE_HGMRES__array_set3(
+  struct bHYPRE_HGMRES__array* array,
   const int32_t i1,
   const int32_t i2,
   const int32_t i3,
-  bHYPRE_GMRES const value)
+  bHYPRE_HGMRES const value)
 {
   sidl_interface__array_set3((struct sidl_interface__array *)array
   , i1, i2, i3, (struct sidl_BaseInterface__object *)value);
 }
 
 void
-bHYPRE_GMRES__array_set4(
-  struct bHYPRE_GMRES__array* array,
+bHYPRE_HGMRES__array_set4(
+  struct bHYPRE_HGMRES__array* array,
   const int32_t i1,
   const int32_t i2,
   const int32_t i3,
   const int32_t i4,
-  bHYPRE_GMRES const value)
+  bHYPRE_HGMRES const value)
 {
   sidl_interface__array_set4((struct sidl_interface__array *)array
   , i1, i2, i3, i4, (struct sidl_BaseInterface__object *)value);
 }
 
 void
-bHYPRE_GMRES__array_set5(
-  struct bHYPRE_GMRES__array* array,
+bHYPRE_HGMRES__array_set5(
+  struct bHYPRE_HGMRES__array* array,
   const int32_t i1,
   const int32_t i2,
   const int32_t i3,
   const int32_t i4,
   const int32_t i5,
-  bHYPRE_GMRES const value)
+  bHYPRE_HGMRES const value)
 {
   sidl_interface__array_set5((struct sidl_interface__array *)array
   , i1, i2, i3, i4, i5, (struct sidl_BaseInterface__object *)value);
 }
 
 void
-bHYPRE_GMRES__array_set6(
-  struct bHYPRE_GMRES__array* array,
+bHYPRE_HGMRES__array_set6(
+  struct bHYPRE_HGMRES__array* array,
   const int32_t i1,
   const int32_t i2,
   const int32_t i3,
   const int32_t i4,
   const int32_t i5,
   const int32_t i6,
-  bHYPRE_GMRES const value)
+  bHYPRE_HGMRES const value)
 {
   sidl_interface__array_set6((struct sidl_interface__array *)array
   , i1, i2, i3, i4, i5, i6, (struct sidl_BaseInterface__object *)value);
 }
 
 void
-bHYPRE_GMRES__array_set7(
-  struct bHYPRE_GMRES__array* array,
+bHYPRE_HGMRES__array_set7(
+  struct bHYPRE_HGMRES__array* array,
   const int32_t i1,
   const int32_t i2,
   const int32_t i3,
@@ -996,32 +992,32 @@ bHYPRE_GMRES__array_set7(
   const int32_t i5,
   const int32_t i6,
   const int32_t i7,
-  bHYPRE_GMRES const value)
+  bHYPRE_HGMRES const value)
 {
   sidl_interface__array_set7((struct sidl_interface__array *)array
   , i1, i2, i3, i4, i5, i6, i7, (struct sidl_BaseInterface__object *)value);
 }
 
 void
-bHYPRE_GMRES__array_set(
-  struct bHYPRE_GMRES__array* array,
+bHYPRE_HGMRES__array_set(
+  struct bHYPRE_HGMRES__array* array,
   const int32_t indices[],
-  bHYPRE_GMRES const value)
+  bHYPRE_HGMRES const value)
 {
   sidl_interface__array_set((struct sidl_interface__array *)array, indices,
     (struct sidl_BaseInterface__object *)value);
 }
 
 int32_t
-bHYPRE_GMRES__array_dimen(
-  const struct bHYPRE_GMRES__array* array)
+bHYPRE_HGMRES__array_dimen(
+  const struct bHYPRE_HGMRES__array* array)
 {
   return sidl_interface__array_dimen((struct sidl_interface__array *)array);
 }
 
 int32_t
-bHYPRE_GMRES__array_lower(
-  const struct bHYPRE_GMRES__array* array,
+bHYPRE_HGMRES__array_lower(
+  const struct bHYPRE_HGMRES__array* array,
   const int32_t ind)
 {
   return sidl_interface__array_lower((struct sidl_interface__array *)array,
@@ -1029,8 +1025,8 @@ bHYPRE_GMRES__array_lower(
 }
 
 int32_t
-bHYPRE_GMRES__array_upper(
-  const struct bHYPRE_GMRES__array* array,
+bHYPRE_HGMRES__array_upper(
+  const struct bHYPRE_HGMRES__array* array,
   const int32_t ind)
 {
   return sidl_interface__array_upper((struct sidl_interface__array *)array,
@@ -1038,8 +1034,8 @@ bHYPRE_GMRES__array_upper(
 }
 
 int32_t
-bHYPRE_GMRES__array_length(
-  const struct bHYPRE_GMRES__array* array,
+bHYPRE_HGMRES__array_length(
+  const struct bHYPRE_HGMRES__array* array,
   const int32_t ind)
 {
   return sidl_interface__array_length((struct sidl_interface__array *)array,
@@ -1047,8 +1043,8 @@ bHYPRE_GMRES__array_length(
 }
 
 int32_t
-bHYPRE_GMRES__array_stride(
-  const struct bHYPRE_GMRES__array* array,
+bHYPRE_HGMRES__array_stride(
+  const struct bHYPRE_HGMRES__array* array,
   const int32_t ind)
 {
   return sidl_interface__array_stride((struct sidl_interface__array *)array,
@@ -1056,51 +1052,51 @@ bHYPRE_GMRES__array_stride(
 }
 
 int
-bHYPRE_GMRES__array_isColumnOrder(
-  const struct bHYPRE_GMRES__array* array)
+bHYPRE_HGMRES__array_isColumnOrder(
+  const struct bHYPRE_HGMRES__array* array)
 {
   return sidl_interface__array_isColumnOrder((struct sidl_interface__array 
     *)array);
 }
 
 int
-bHYPRE_GMRES__array_isRowOrder(
-  const struct bHYPRE_GMRES__array* array)
+bHYPRE_HGMRES__array_isRowOrder(
+  const struct bHYPRE_HGMRES__array* array)
 {
   return sidl_interface__array_isRowOrder((struct sidl_interface__array 
     *)array);
 }
 
 void
-bHYPRE_GMRES__array_copy(
-  const struct bHYPRE_GMRES__array* src,
-  struct bHYPRE_GMRES__array* dest)
+bHYPRE_HGMRES__array_copy(
+  const struct bHYPRE_HGMRES__array* src,
+  struct bHYPRE_HGMRES__array* dest)
 {
   sidl_interface__array_copy((const struct sidl_interface__array *)src,
                              (struct sidl_interface__array *)dest);
 }
 
-struct bHYPRE_GMRES__array*
-bHYPRE_GMRES__array_slice(
-  struct bHYPRE_GMRES__array* src,
+struct bHYPRE_HGMRES__array*
+bHYPRE_HGMRES__array_slice(
+  struct bHYPRE_HGMRES__array* src,
   int32_t        dimen,
   const int32_t  numElem[],
   const int32_t  *srcStart,
   const int32_t  *srcStride,
   const int32_t  *newStart)
 {
-  return (struct bHYPRE_GMRES__array*)
+  return (struct bHYPRE_HGMRES__array*)
     sidl_interface__array_slice((struct sidl_interface__array *)src,
                                 dimen, numElem, srcStart, srcStride, newStart);
 }
 
-struct bHYPRE_GMRES__array*
-bHYPRE_GMRES__array_ensure(
-  struct bHYPRE_GMRES__array* src,
+struct bHYPRE_HGMRES__array*
+bHYPRE_HGMRES__array_ensure(
+  struct bHYPRE_HGMRES__array* src,
   int32_t dimen,
   int     ordering)
 {
-  return (struct bHYPRE_GMRES__array*)
+  return (struct bHYPRE_HGMRES__array*)
     sidl_interface__array_ensure((struct sidl_interface__array *)src, dimen,
       ordering);
 }
@@ -1123,10 +1119,10 @@ bHYPRE_GMRES__array_ensure(
 
 #include "sidl_thread.h"
 #ifdef HAVE_PTHREAD
-static struct sidl_recursive_mutex_t bHYPRE_GMRES__mutex= SIDL_RECURSIVE_MUTEX_INITIALIZER;
-#define LOCK_STATIC_GLOBALS sidl_recursive_mutex_lock( &bHYPRE_GMRES__mutex )
-#define UNLOCK_STATIC_GLOBALS sidl_recursive_mutex_unlock( &bHYPRE_GMRES__mutex )
-/* #define HAVE_LOCKED_STATIC_GLOBALS (sidl_recursive_mutex_trylock( &bHYPRE_GMRES__mutex )==EDEADLOCK) */
+static struct sidl_recursive_mutex_t bHYPRE_HGMRES__mutex= SIDL_RECURSIVE_MUTEX_INITIALIZER;
+#define LOCK_STATIC_GLOBALS sidl_recursive_mutex_lock( &bHYPRE_HGMRES__mutex )
+#define UNLOCK_STATIC_GLOBALS sidl_recursive_mutex_unlock( &bHYPRE_HGMRES__mutex )
+/* #define HAVE_LOCKED_STATIC_GLOBALS (sidl_recursive_mutex_trylock( &bHYPRE_HGMRES__mutex )==EDEADLOCK) */
 #else
 #define LOCK_STATIC_GLOBALS
 #define UNLOCK_STATIC_GLOBALS
@@ -1140,7 +1136,7 @@ static const int32_t s_IOR_MINOR_VERSION = 9;
 /* Static variables for managing EPV initialization. */
 static int s_remote_initialized = 0;
 
-static struct bHYPRE_GMRES__epv s_rem_epv__bhypre_gmres;
+static struct bHYPRE_HGMRES__epv s_rem_epv__bhypre_hgmres;
 
 static struct bHYPRE_Operator__epv s_rem_epv__bhypre_operator;
 
@@ -1154,18 +1150,18 @@ static struct sidl_BaseClass__epv  s_rem_epv__sidl_baseclass;
 static struct sidl_BaseInterface__epv  s_rem_epv__sidl_baseinterface;
 
 /* REMOTE CAST: dynamic type casting for remote objects. */
-static void* remote_bHYPRE_GMRES__cast(
-struct bHYPRE_GMRES__object* self,
+static void* remote_bHYPRE_HGMRES__cast(
+struct bHYPRE_HGMRES__object* self,
 const char* name)
 {
   void* cast = NULL;
 
-  struct bHYPRE_GMRES__object* s0;
+  struct bHYPRE_HGMRES__object* s0;
   struct sidl_BaseClass__object* s1;
    s0 =                         self;
    s1 =                         &s0->d_sidl_baseclass;
 
-  if (!strcmp(name, "bHYPRE.GMRES")) {
+  if (!strcmp(name, "bHYPRE.HGMRES")) {
     cast = (void*) s0;
   } else if (!strcmp(name, "bHYPRE.Operator")) {
     cast = (void*) &s0->d_bhypre_operator;
@@ -1178,7 +1174,7 @@ const char* name)
   } else if (!strcmp(name, "sidl.BaseInterface")) {
     cast = (void*) &s1->d_sidl_baseinterface;
   }
-  else if(bHYPRE_GMRES_isType(self, name)) {
+  else if(bHYPRE_HGMRES_isType(self, name)) {
     void* (*func)(sidl_rmi_InstanceHandle) = 
       (void* (*)(sidl_rmi_InstanceHandle)) 
       sidl_rmi_ConnectRegistry_getConnect(name);
@@ -1189,15 +1185,15 @@ const char* name)
 }
 
 /* REMOTE DELETE: call the remote destructor for the object. */
-static void remote_bHYPRE_GMRES__delete(
-  struct bHYPRE_GMRES__object* self)
+static void remote_bHYPRE_HGMRES__delete(
+  struct bHYPRE_HGMRES__object* self)
 {
   free((void*) self);
 }
 
 /* REMOTE GETURL: call the getURL function for the object. */
-static char* remote_bHYPRE_GMRES__getURL(
-  struct bHYPRE_GMRES__object* self)
+static char* remote_bHYPRE_HGMRES__getURL(
+  struct bHYPRE_HGMRES__object* self)
 {
   sidl_rmi_InstanceHandle conn = (sidl_rmi_InstanceHandle)self->d_data;
   sidl_BaseInterface _ex = NULL;
@@ -1208,8 +1204,8 @@ static char* remote_bHYPRE_GMRES__getURL(
 }
 
 /* REMOTE EXEC: call the exec function for the object. */
-static void remote_bHYPRE_GMRES__exec(
-  struct bHYPRE_GMRES__object* self,
+static void remote_bHYPRE_HGMRES__exec(
+  struct bHYPRE_HGMRES__object* self,
   const char* methodName,
   sidl_io_Deserializer inArgs,
   sidl_io_Serializer outArgs)
@@ -1218,16 +1214,16 @@ static void remote_bHYPRE_GMRES__exec(
 
 /* REMOTE METHOD STUB:addRef */
 static void
-remote_bHYPRE_GMRES_addRef(
-  /* in */ struct bHYPRE_GMRES__object* self /* TLD */)
+remote_bHYPRE_HGMRES_addRef(
+  /* in */ struct bHYPRE_HGMRES__object* self /* TLD */)
 {
   /* FIXME  need to think through all of these special cases */
 }
 
 /* REMOTE METHOD STUB:deleteRef */
 static void
-remote_bHYPRE_GMRES_deleteRef(
-  /* in */ struct bHYPRE_GMRES__object* self /* TLD */)
+remote_bHYPRE_HGMRES_deleteRef(
+  /* in */ struct bHYPRE_HGMRES__object* self /* TLD */)
 {
   sidl_BaseInterface _ex = NULL;
   sidl_BaseInterface *_ex2 =&_ex;
@@ -1254,8 +1250,8 @@ remote_bHYPRE_GMRES_deleteRef(
 
 /* REMOTE METHOD STUB:isSame */
 static sidl_bool
-remote_bHYPRE_GMRES_isSame(
-  /* in */ struct bHYPRE_GMRES__object* self /* TLD */,
+remote_bHYPRE_HGMRES_isSame(
+  /* in */ struct bHYPRE_HGMRES__object* self /* TLD */,
   /* in */ struct sidl_BaseInterface__object* iobj)
 {
   /* FIXME  need to think through all of these special cases */
@@ -1264,8 +1260,8 @@ remote_bHYPRE_GMRES_isSame(
 
 /* REMOTE METHOD STUB:queryInt */
 static struct sidl_BaseInterface__object*
-remote_bHYPRE_GMRES_queryInt(
-  /* in */ struct bHYPRE_GMRES__object* self /* TLD */,
+remote_bHYPRE_HGMRES_queryInt(
+  /* in */ struct bHYPRE_HGMRES__object* self /* TLD */,
   /* in */ const char* name)
 {
   /* FIXME  need to think through all of these special cases */
@@ -1274,8 +1270,8 @@ remote_bHYPRE_GMRES_queryInt(
 
 /* REMOTE METHOD STUB:isType */
 static sidl_bool
-remote_bHYPRE_GMRES_isType(
-  /* in */ struct bHYPRE_GMRES__object* self /* TLD */,
+remote_bHYPRE_HGMRES_isType(
+  /* in */ struct bHYPRE_HGMRES__object* self /* TLD */,
   /* in */ const char* name)
 {
   sidl_BaseInterface _ex = NULL;
@@ -1307,8 +1303,8 @@ remote_bHYPRE_GMRES_isType(
 
 /* REMOTE METHOD STUB:getClassInfo */
 static struct sidl_ClassInfo__object*
-remote_bHYPRE_GMRES_getClassInfo(
-  /* in */ struct bHYPRE_GMRES__object* self /* TLD */)
+remote_bHYPRE_HGMRES_getClassInfo(
+  /* in */ struct bHYPRE_HGMRES__object* self /* TLD */)
 {
   /* FIXME  need to think through all of these special cases */
   return 0;
@@ -1316,8 +1312,8 @@ remote_bHYPRE_GMRES_getClassInfo(
 
 /* REMOTE METHOD STUB:SetCommunicator */
 static int32_t
-remote_bHYPRE_GMRES_SetCommunicator(
-  /* in */ struct bHYPRE_GMRES__object* self /* TLD */,
+remote_bHYPRE_HGMRES_SetCommunicator(
+  /* in */ struct bHYPRE_HGMRES__object* self /* TLD */,
   /* in */ struct bHYPRE_MPICommunicator__object* mpi_comm)
 {
   sidl_BaseInterface _ex = NULL;
@@ -1350,8 +1346,8 @@ remote_bHYPRE_GMRES_SetCommunicator(
 
 /* REMOTE METHOD STUB:SetIntParameter */
 static int32_t
-remote_bHYPRE_GMRES_SetIntParameter(
-  /* in */ struct bHYPRE_GMRES__object* self /* TLD */,
+remote_bHYPRE_HGMRES_SetIntParameter(
+  /* in */ struct bHYPRE_HGMRES__object* self /* TLD */,
   /* in */ const char* name,
   /* in */ int32_t value)
 {
@@ -1385,8 +1381,8 @@ remote_bHYPRE_GMRES_SetIntParameter(
 
 /* REMOTE METHOD STUB:SetDoubleParameter */
 static int32_t
-remote_bHYPRE_GMRES_SetDoubleParameter(
-  /* in */ struct bHYPRE_GMRES__object* self /* TLD */,
+remote_bHYPRE_HGMRES_SetDoubleParameter(
+  /* in */ struct bHYPRE_HGMRES__object* self /* TLD */,
   /* in */ const char* name,
   /* in */ double value)
 {
@@ -1420,8 +1416,8 @@ remote_bHYPRE_GMRES_SetDoubleParameter(
 
 /* REMOTE METHOD STUB:SetStringParameter */
 static int32_t
-remote_bHYPRE_GMRES_SetStringParameter(
-  /* in */ struct bHYPRE_GMRES__object* self /* TLD */,
+remote_bHYPRE_HGMRES_SetStringParameter(
+  /* in */ struct bHYPRE_HGMRES__object* self /* TLD */,
   /* in */ const char* name,
   /* in */ const char* value)
 {
@@ -1455,8 +1451,8 @@ remote_bHYPRE_GMRES_SetStringParameter(
 
 /* REMOTE METHOD STUB:SetIntArray1Parameter */
 static int32_t
-remote_bHYPRE_GMRES_SetIntArray1Parameter(
-  /* in */ struct bHYPRE_GMRES__object* self /* TLD */,
+remote_bHYPRE_HGMRES_SetIntArray1Parameter(
+  /* in */ struct bHYPRE_HGMRES__object* self /* TLD */,
   /* in */ const char* name,
   /* in */ struct sidl_int__array* value)
 {
@@ -1489,8 +1485,8 @@ remote_bHYPRE_GMRES_SetIntArray1Parameter(
 
 /* REMOTE METHOD STUB:SetIntArray2Parameter */
 static int32_t
-remote_bHYPRE_GMRES_SetIntArray2Parameter(
-  /* in */ struct bHYPRE_GMRES__object* self /* TLD */,
+remote_bHYPRE_HGMRES_SetIntArray2Parameter(
+  /* in */ struct bHYPRE_HGMRES__object* self /* TLD */,
   /* in */ const char* name,
   /* in */ struct sidl_int__array* value)
 {
@@ -1523,8 +1519,8 @@ remote_bHYPRE_GMRES_SetIntArray2Parameter(
 
 /* REMOTE METHOD STUB:SetDoubleArray1Parameter */
 static int32_t
-remote_bHYPRE_GMRES_SetDoubleArray1Parameter(
-  /* in */ struct bHYPRE_GMRES__object* self /* TLD */,
+remote_bHYPRE_HGMRES_SetDoubleArray1Parameter(
+  /* in */ struct bHYPRE_HGMRES__object* self /* TLD */,
   /* in */ const char* name,
   /* in */ struct sidl_double__array* value)
 {
@@ -1557,8 +1553,8 @@ remote_bHYPRE_GMRES_SetDoubleArray1Parameter(
 
 /* REMOTE METHOD STUB:SetDoubleArray2Parameter */
 static int32_t
-remote_bHYPRE_GMRES_SetDoubleArray2Parameter(
-  /* in */ struct bHYPRE_GMRES__object* self /* TLD */,
+remote_bHYPRE_HGMRES_SetDoubleArray2Parameter(
+  /* in */ struct bHYPRE_HGMRES__object* self /* TLD */,
   /* in */ const char* name,
   /* in */ struct sidl_double__array* value)
 {
@@ -1591,8 +1587,8 @@ remote_bHYPRE_GMRES_SetDoubleArray2Parameter(
 
 /* REMOTE METHOD STUB:GetIntValue */
 static int32_t
-remote_bHYPRE_GMRES_GetIntValue(
-  /* in */ struct bHYPRE_GMRES__object* self /* TLD */,
+remote_bHYPRE_HGMRES_GetIntValue(
+  /* in */ struct bHYPRE_HGMRES__object* self /* TLD */,
   /* in */ const char* name,
   /* out */ int32_t* value)
 {
@@ -1626,8 +1622,8 @@ remote_bHYPRE_GMRES_GetIntValue(
 
 /* REMOTE METHOD STUB:GetDoubleValue */
 static int32_t
-remote_bHYPRE_GMRES_GetDoubleValue(
-  /* in */ struct bHYPRE_GMRES__object* self /* TLD */,
+remote_bHYPRE_HGMRES_GetDoubleValue(
+  /* in */ struct bHYPRE_HGMRES__object* self /* TLD */,
   /* in */ const char* name,
   /* out */ double* value)
 {
@@ -1661,8 +1657,8 @@ remote_bHYPRE_GMRES_GetDoubleValue(
 
 /* REMOTE METHOD STUB:Setup */
 static int32_t
-remote_bHYPRE_GMRES_Setup(
-  /* in */ struct bHYPRE_GMRES__object* self /* TLD */,
+remote_bHYPRE_HGMRES_Setup(
+  /* in */ struct bHYPRE_HGMRES__object* self /* TLD */,
   /* in */ struct bHYPRE_Vector__object* b,
   /* in */ struct bHYPRE_Vector__object* x)
 {
@@ -1694,8 +1690,8 @@ remote_bHYPRE_GMRES_Setup(
 
 /* REMOTE METHOD STUB:Apply */
 static int32_t
-remote_bHYPRE_GMRES_Apply(
-  /* in */ struct bHYPRE_GMRES__object* self /* TLD */,
+remote_bHYPRE_HGMRES_Apply(
+  /* in */ struct bHYPRE_HGMRES__object* self /* TLD */,
   /* in */ struct bHYPRE_Vector__object* b,
   /* inout */ struct bHYPRE_Vector__object** x)
 {
@@ -1728,8 +1724,8 @@ remote_bHYPRE_GMRES_Apply(
 
 /* REMOTE METHOD STUB:ApplyAdjoint */
 static int32_t
-remote_bHYPRE_GMRES_ApplyAdjoint(
-  /* in */ struct bHYPRE_GMRES__object* self /* TLD */,
+remote_bHYPRE_HGMRES_ApplyAdjoint(
+  /* in */ struct bHYPRE_HGMRES__object* self /* TLD */,
   /* in */ struct bHYPRE_Vector__object* b,
   /* inout */ struct bHYPRE_Vector__object** x)
 {
@@ -1762,8 +1758,8 @@ remote_bHYPRE_GMRES_ApplyAdjoint(
 
 /* REMOTE METHOD STUB:SetOperator */
 static int32_t
-remote_bHYPRE_GMRES_SetOperator(
-  /* in */ struct bHYPRE_GMRES__object* self /* TLD */,
+remote_bHYPRE_HGMRES_SetOperator(
+  /* in */ struct bHYPRE_HGMRES__object* self /* TLD */,
   /* in */ struct bHYPRE_Operator__object* A)
 {
   sidl_BaseInterface _ex = NULL;
@@ -1794,8 +1790,8 @@ remote_bHYPRE_GMRES_SetOperator(
 
 /* REMOTE METHOD STUB:SetTolerance */
 static int32_t
-remote_bHYPRE_GMRES_SetTolerance(
-  /* in */ struct bHYPRE_GMRES__object* self /* TLD */,
+remote_bHYPRE_HGMRES_SetTolerance(
+  /* in */ struct bHYPRE_HGMRES__object* self /* TLD */,
   /* in */ double tolerance)
 {
   sidl_BaseInterface _ex = NULL;
@@ -1827,8 +1823,8 @@ remote_bHYPRE_GMRES_SetTolerance(
 
 /* REMOTE METHOD STUB:SetMaxIterations */
 static int32_t
-remote_bHYPRE_GMRES_SetMaxIterations(
-  /* in */ struct bHYPRE_GMRES__object* self /* TLD */,
+remote_bHYPRE_HGMRES_SetMaxIterations(
+  /* in */ struct bHYPRE_HGMRES__object* self /* TLD */,
   /* in */ int32_t max_iterations)
 {
   sidl_BaseInterface _ex = NULL;
@@ -1860,8 +1856,8 @@ remote_bHYPRE_GMRES_SetMaxIterations(
 
 /* REMOTE METHOD STUB:SetLogging */
 static int32_t
-remote_bHYPRE_GMRES_SetLogging(
-  /* in */ struct bHYPRE_GMRES__object* self /* TLD */,
+remote_bHYPRE_HGMRES_SetLogging(
+  /* in */ struct bHYPRE_HGMRES__object* self /* TLD */,
   /* in */ int32_t level)
 {
   sidl_BaseInterface _ex = NULL;
@@ -1893,8 +1889,8 @@ remote_bHYPRE_GMRES_SetLogging(
 
 /* REMOTE METHOD STUB:SetPrintLevel */
 static int32_t
-remote_bHYPRE_GMRES_SetPrintLevel(
-  /* in */ struct bHYPRE_GMRES__object* self /* TLD */,
+remote_bHYPRE_HGMRES_SetPrintLevel(
+  /* in */ struct bHYPRE_HGMRES__object* self /* TLD */,
   /* in */ int32_t level)
 {
   sidl_BaseInterface _ex = NULL;
@@ -1926,8 +1922,8 @@ remote_bHYPRE_GMRES_SetPrintLevel(
 
 /* REMOTE METHOD STUB:GetNumIterations */
 static int32_t
-remote_bHYPRE_GMRES_GetNumIterations(
-  /* in */ struct bHYPRE_GMRES__object* self /* TLD */,
+remote_bHYPRE_HGMRES_GetNumIterations(
+  /* in */ struct bHYPRE_HGMRES__object* self /* TLD */,
   /* out */ int32_t* num_iterations)
 {
   sidl_BaseInterface _ex = NULL;
@@ -1959,8 +1955,8 @@ remote_bHYPRE_GMRES_GetNumIterations(
 
 /* REMOTE METHOD STUB:GetRelResidualNorm */
 static int32_t
-remote_bHYPRE_GMRES_GetRelResidualNorm(
-  /* in */ struct bHYPRE_GMRES__object* self /* TLD */,
+remote_bHYPRE_HGMRES_GetRelResidualNorm(
+  /* in */ struct bHYPRE_HGMRES__object* self /* TLD */,
   /* out */ double* norm)
 {
   sidl_BaseInterface _ex = NULL;
@@ -1992,8 +1988,8 @@ remote_bHYPRE_GMRES_GetRelResidualNorm(
 
 /* REMOTE METHOD STUB:SetPreconditioner */
 static int32_t
-remote_bHYPRE_GMRES_SetPreconditioner(
-  /* in */ struct bHYPRE_GMRES__object* self /* TLD */,
+remote_bHYPRE_HGMRES_SetPreconditioner(
+  /* in */ struct bHYPRE_HGMRES__object* self /* TLD */,
   /* in */ struct bHYPRE_Solver__object* s)
 {
   sidl_BaseInterface _ex = NULL;
@@ -2023,10 +2019,10 @@ remote_bHYPRE_GMRES_SetPreconditioner(
 }
 
 /* REMOTE EPV: create remote entry point vectors (EPVs). */
-static void bHYPRE_GMRES__init_remote_epv(void)
+static void bHYPRE_HGMRES__init_remote_epv(void)
 {
   /* assert( HAVE_LOCKED_STATIC_GLOBALS ); */
-  struct bHYPRE_GMRES__epv*                epv = &s_rem_epv__bhypre_gmres;
+  struct bHYPRE_HGMRES__epv*               epv = &s_rem_epv__bhypre_hgmres;
   struct bHYPRE_Operator__epv*             e0  = &s_rem_epv__bhypre_operator;
   struct bHYPRE_PreconditionedSolver__epv* e1  = 
     &s_rem_epv__bhypre_preconditionedsolver;
@@ -2034,43 +2030,46 @@ static void bHYPRE_GMRES__init_remote_epv(void)
   struct sidl_BaseClass__epv*              e3  = &s_rem_epv__sidl_baseclass;
   struct sidl_BaseInterface__epv*          e4  = &s_rem_epv__sidl_baseinterface;
 
-  epv->f__cast                         = remote_bHYPRE_GMRES__cast;
-  epv->f__delete                       = remote_bHYPRE_GMRES__delete;
-  epv->f__exec                         = remote_bHYPRE_GMRES__exec;
-  epv->f__getURL                       = remote_bHYPRE_GMRES__getURL;
+  epv->f__cast                         = remote_bHYPRE_HGMRES__cast;
+  epv->f__delete                       = remote_bHYPRE_HGMRES__delete;
+  epv->f__exec                         = remote_bHYPRE_HGMRES__exec;
+  epv->f__getURL                       = remote_bHYPRE_HGMRES__getURL;
   epv->f__ctor                         = NULL;
   epv->f__dtor                         = NULL;
-  epv->f_addRef                        = remote_bHYPRE_GMRES_addRef;
-  epv->f_deleteRef                     = remote_bHYPRE_GMRES_deleteRef;
-  epv->f_isSame                        = remote_bHYPRE_GMRES_isSame;
-  epv->f_queryInt                      = remote_bHYPRE_GMRES_queryInt;
-  epv->f_isType                        = remote_bHYPRE_GMRES_isType;
-  epv->f_getClassInfo                  = remote_bHYPRE_GMRES_getClassInfo;
-  epv->f_SetCommunicator               = remote_bHYPRE_GMRES_SetCommunicator;
-  epv->f_SetIntParameter               = remote_bHYPRE_GMRES_SetIntParameter;
-  epv->f_SetDoubleParameter            = remote_bHYPRE_GMRES_SetDoubleParameter;
-  epv->f_SetStringParameter            = remote_bHYPRE_GMRES_SetStringParameter;
+  epv->f_addRef                        = remote_bHYPRE_HGMRES_addRef;
+  epv->f_deleteRef                     = remote_bHYPRE_HGMRES_deleteRef;
+  epv->f_isSame                        = remote_bHYPRE_HGMRES_isSame;
+  epv->f_queryInt                      = remote_bHYPRE_HGMRES_queryInt;
+  epv->f_isType                        = remote_bHYPRE_HGMRES_isType;
+  epv->f_getClassInfo                  = remote_bHYPRE_HGMRES_getClassInfo;
+  epv->f_SetCommunicator               = remote_bHYPRE_HGMRES_SetCommunicator;
+  epv->f_SetIntParameter               = remote_bHYPRE_HGMRES_SetIntParameter;
+  epv->f_SetDoubleParameter            = 
+    remote_bHYPRE_HGMRES_SetDoubleParameter;
+  epv->f_SetStringParameter            = 
+    remote_bHYPRE_HGMRES_SetStringParameter;
   epv->f_SetIntArray1Parameter         = 
-    remote_bHYPRE_GMRES_SetIntArray1Parameter;
+    remote_bHYPRE_HGMRES_SetIntArray1Parameter;
   epv->f_SetIntArray2Parameter         = 
-    remote_bHYPRE_GMRES_SetIntArray2Parameter;
+    remote_bHYPRE_HGMRES_SetIntArray2Parameter;
   epv->f_SetDoubleArray1Parameter      = 
-    remote_bHYPRE_GMRES_SetDoubleArray1Parameter;
+    remote_bHYPRE_HGMRES_SetDoubleArray1Parameter;
   epv->f_SetDoubleArray2Parameter      = 
-    remote_bHYPRE_GMRES_SetDoubleArray2Parameter;
-  epv->f_GetIntValue                   = remote_bHYPRE_GMRES_GetIntValue;
-  epv->f_GetDoubleValue                = remote_bHYPRE_GMRES_GetDoubleValue;
-  epv->f_Setup                         = remote_bHYPRE_GMRES_Setup;
-  epv->f_Apply                         = remote_bHYPRE_GMRES_Apply;
-  epv->f_ApplyAdjoint                  = remote_bHYPRE_GMRES_ApplyAdjoint;
-  epv->f_SetOperator                   = remote_bHYPRE_GMRES_SetOperator;
-  epv->f_SetTolerance                  = remote_bHYPRE_GMRES_SetTolerance;
-  epv->f_SetMaxIterations              = remote_bHYPRE_GMRES_SetMaxIterations;
-  epv->f_SetLogging                    = remote_bHYPRE_GMRES_SetLogging;
-  epv->f_SetPrintLevel                 = remote_bHYPRE_GMRES_SetPrintLevel;
-  epv->f_GetNumIterations              = remote_bHYPRE_GMRES_GetNumIterations;
-  epv->f_GetRelResidualNorm            = remote_bHYPRE_GMRES_GetRelResidualNorm;
-  epv->f_SetPreconditioner             = remote_bHYPRE_GMRES_SetPreconditioner;
+    remote_bHYPRE_HGMRES_SetDoubleArray2Parameter;
+  epv->f_GetIntValue                   = remote_bHYPRE_HGMRES_GetIntValue;
+  epv->f_GetDoubleValue                = remote_bHYPRE_HGMRES_GetDoubleValue;
+  epv->f_Setup                         = remote_bHYPRE_HGMRES_Setup;
+  epv->f_Apply                         = remote_bHYPRE_HGMRES_Apply;
+  epv->f_ApplyAdjoint                  = remote_bHYPRE_HGMRES_ApplyAdjoint;
+  epv->f_SetOperator                   = remote_bHYPRE_HGMRES_SetOperator;
+  epv->f_SetTolerance                  = remote_bHYPRE_HGMRES_SetTolerance;
+  epv->f_SetMaxIterations              = remote_bHYPRE_HGMRES_SetMaxIterations;
+  epv->f_SetLogging                    = remote_bHYPRE_HGMRES_SetLogging;
+  epv->f_SetPrintLevel                 = remote_bHYPRE_HGMRES_SetPrintLevel;
+  epv->f_GetNumIterations              = remote_bHYPRE_HGMRES_GetNumIterations;
+  epv->f_GetRelResidualNorm            = 
+    remote_bHYPRE_HGMRES_GetRelResidualNorm;
+  epv->f_SetPreconditioner             = remote_bHYPRE_HGMRES_SetPreconditioner;
 
   e0->f__cast                    = (void* (*)(void*,const char*)) epv->f__cast;
   e0->f__delete                  = (void (*)(void*)) epv->f__delete;
@@ -2269,27 +2268,27 @@ static void bHYPRE_GMRES__init_remote_epv(void)
 }
 
 /* Create an instance that connects to an existing remote object. */
-static struct bHYPRE_GMRES__object*
-bHYPRE_GMRES__remoteConnect(const char *url, sidl_BaseInterface *_ex)
+static struct bHYPRE_HGMRES__object*
+bHYPRE_HGMRES__remoteConnect(const char *url, sidl_BaseInterface *_ex)
 {
-  struct bHYPRE_GMRES__object* self;
+  struct bHYPRE_HGMRES__object* self;
 
-  struct bHYPRE_GMRES__object* s0;
+  struct bHYPRE_HGMRES__object* s0;
   struct sidl_BaseClass__object* s1;
 
   sidl_rmi_InstanceHandle instance = 
     sidl_rmi_ProtocolFactory_connectInstance(url, _ex );
   if ( instance == NULL) { return NULL; }
   self =
-    (struct bHYPRE_GMRES__object*) malloc(
-      sizeof(struct bHYPRE_GMRES__object));
+    (struct bHYPRE_HGMRES__object*) malloc(
+      sizeof(struct bHYPRE_HGMRES__object));
 
    s0 =                         self;
    s1 =                         &s0->d_sidl_baseclass;
 
   LOCK_STATIC_GLOBALS;
   if (!s_remote_initialized) {
-    bHYPRE_GMRES__init_remote_epv();
+    bHYPRE_HGMRES__init_remote_epv();
   }
   UNLOCK_STATIC_GLOBALS;
 
@@ -2310,12 +2309,12 @@ bHYPRE_GMRES__remoteConnect(const char *url, sidl_BaseInterface *_ex)
   s0->d_bhypre_solver.d_object = (void*) self;
 
   s0->d_data = (void*) instance;
-  s0->d_epv  = &s_rem_epv__bhypre_gmres;
+  s0->d_epv  = &s_rem_epv__bhypre_hgmres;
 
   self->d_data = (void*) instance;
   LOCK_STATIC_GLOBALS;
   if (!s_remote_initialized) {
-    bHYPRE_GMRES__init_remote_epv();
+    bHYPRE_HGMRES__init_remote_epv();
   }
   UNLOCK_STATIC_GLOBALS;
 
@@ -2324,25 +2323,25 @@ bHYPRE_GMRES__remoteConnect(const char *url, sidl_BaseInterface *_ex)
 }
 /* Create an instance that uses an already existing InstanceHandel to connect 
   to an existing remote object. */
-static struct bHYPRE_GMRES__object*
-bHYPRE_GMRES__IHConnect(sidl_rmi_InstanceHandle instance,
+static struct bHYPRE_HGMRES__object*
+bHYPRE_HGMRES__IHConnect(sidl_rmi_InstanceHandle instance,
   sidl_BaseInterface *_ex)
 {
-  struct bHYPRE_GMRES__object* self;
+  struct bHYPRE_HGMRES__object* self;
 
-  struct bHYPRE_GMRES__object* s0;
+  struct bHYPRE_HGMRES__object* s0;
   struct sidl_BaseClass__object* s1;
 
   self =
-    (struct bHYPRE_GMRES__object*) malloc(
-      sizeof(struct bHYPRE_GMRES__object));
+    (struct bHYPRE_HGMRES__object*) malloc(
+      sizeof(struct bHYPRE_HGMRES__object));
 
    s0 =                         self;
    s1 =                         &s0->d_sidl_baseclass;
 
   LOCK_STATIC_GLOBALS;
   if (!s_remote_initialized) {
-    bHYPRE_GMRES__init_remote_epv();
+    bHYPRE_HGMRES__init_remote_epv();
   }
   UNLOCK_STATIC_GLOBALS;
 
@@ -2363,7 +2362,7 @@ bHYPRE_GMRES__IHConnect(sidl_rmi_InstanceHandle instance,
   s0->d_bhypre_solver.d_object = (void*) self;
 
   s0->d_data = (void*) instance;
-  s0->d_epv  = &s_rem_epv__bhypre_gmres;
+  s0->d_epv  = &s_rem_epv__bhypre_hgmres;
 
   self->d_data = (void*) instance;
 
@@ -2371,27 +2370,27 @@ bHYPRE_GMRES__IHConnect(sidl_rmi_InstanceHandle instance,
   return self;
 }
 /* REMOTE: generate remote instance given URL string. */
-static struct bHYPRE_GMRES__object*
-bHYPRE_GMRES__remote(const char *url, sidl_BaseInterface *_ex)
+static struct bHYPRE_HGMRES__object*
+bHYPRE_HGMRES__remote(const char *url, sidl_BaseInterface *_ex)
 {
-  struct bHYPRE_GMRES__object* self;
+  struct bHYPRE_HGMRES__object* self;
 
-  struct bHYPRE_GMRES__object* s0;
+  struct bHYPRE_HGMRES__object* s0;
   struct sidl_BaseClass__object* s1;
 
   sidl_rmi_InstanceHandle instance = 
-    sidl_rmi_ProtocolFactory_createInstance(url, "bHYPRE.GMRES", _ex );
+    sidl_rmi_ProtocolFactory_createInstance(url, "bHYPRE.HGMRES", _ex );
   if ( instance == NULL) { return NULL; }
   self =
-    (struct bHYPRE_GMRES__object*) malloc(
-      sizeof(struct bHYPRE_GMRES__object));
+    (struct bHYPRE_HGMRES__object*) malloc(
+      sizeof(struct bHYPRE_HGMRES__object));
 
    s0 =                         self;
    s1 =                         &s0->d_sidl_baseclass;
 
   LOCK_STATIC_GLOBALS;
   if (!s_remote_initialized) {
-    bHYPRE_GMRES__init_remote_epv();
+    bHYPRE_HGMRES__init_remote_epv();
   }
   UNLOCK_STATIC_GLOBALS;
 
@@ -2412,7 +2411,7 @@ bHYPRE_GMRES__remote(const char *url, sidl_BaseInterface *_ex)
   s0->d_bhypre_solver.d_object = (void*) self;
 
   s0->d_data = (void*) instance;
-  s0->d_epv  = &s_rem_epv__bhypre_gmres;
+  s0->d_epv  = &s_rem_epv__bhypre_hgmres;
 
   self->d_data = (void*) instance;
 

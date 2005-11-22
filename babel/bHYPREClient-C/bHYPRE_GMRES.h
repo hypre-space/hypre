@@ -21,7 +21,13 @@
  * 
  * RDF: Documentation goes here.
  * 
- * This GMRES solver checks whether the matrix, vectors, and preconditioner
+ * The regular GMRES solver calls Babel-interface matrix and vector functions.
+ * The HGMRES solver calls HYPRE interface functions.
+ * The regular solver will work with any consistent matrix, vector, and
+ * preconditioner classes.  The HGMRES solver will work with the more common
+ * combinations.
+ * 
+ * The HGMRES solver checks whether the matrix, vectors, and preconditioner
  * are of known types, and will not work with any other types.
  * Presently, the recognized data types are:
  * matrix, vector: IJParCSRMatrix, IJParCSRVector
@@ -118,7 +124,8 @@ bHYPRE_GMRES_getClassInfo(
  */
 bHYPRE_GMRES
 bHYPRE_GMRES_Create(
-  /* in */ bHYPRE_MPICommunicator mpi_comm);
+  /* in */ bHYPRE_MPICommunicator mpi_comm,
+  /* in */ bHYPRE_Operator A);
 
 /**
  * Set the MPI Communicator.

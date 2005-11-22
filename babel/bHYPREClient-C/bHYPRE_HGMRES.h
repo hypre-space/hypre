@@ -1,43 +1,24 @@
 /*
- * File:          bHYPRE_GMRES.h
- * Symbol:        bHYPRE.GMRES-v1.0.0
+ * File:          bHYPRE_HGMRES.h
+ * Symbol:        bHYPRE.HGMRES-v1.0.0
  * Symbol Type:   class
  * Babel Version: 0.10.4
- * Description:   Client-side glue code for bHYPRE.GMRES
+ * Description:   Client-side glue code for bHYPRE.HGMRES
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
  * babel-version = 0.10.4
  */
 
-#ifndef included_bHYPRE_GMRES_h
-#define included_bHYPRE_GMRES_h
+#ifndef included_bHYPRE_HGMRES_h
+#define included_bHYPRE_HGMRES_h
 
 /**
- * Symbol "bHYPRE.GMRES" (version 1.0.0)
- * 
- * Objects of this type can be cast to PreconditionedSolver objects
- * using the {\tt \_\_cast} methods.
- * 
- * RDF: Documentation goes here.
- * 
- * The regular GMRES solver calls Babel-interface matrix and vector functions.
- * The HGMRES solver calls HYPRE interface functions.
- * The regular solver will work with any consistent matrix, vector, and
- * preconditioner classes.  The HGMRES solver will work with the more common
- * combinations.
- * 
- * The HGMRES solver checks whether the matrix, vectors, and preconditioner
- * are of known types, and will not work with any other types.
- * Presently, the recognized data types are:
- * matrix, vector: IJParCSRMatrix, IJParCSRVector
- * preconditioner: BoomerAMG, ParCSRDiagScale
- * 
- * 
+ * Symbol "bHYPRE.HGMRES" (version 1.0.0)
  */
-struct bHYPRE_GMRES__object;
-struct bHYPRE_GMRES__array;
-typedef struct bHYPRE_GMRES__object* bHYPRE_GMRES;
+struct bHYPRE_HGMRES__object;
+struct bHYPRE_HGMRES__array;
+typedef struct bHYPRE_HGMRES__object* bHYPRE_HGMRES;
 
 /*
  * Includes for all header dependencies.
@@ -78,54 +59,53 @@ extern "C" {
 /**
  * Constructor function for the class.
  */
-struct bHYPRE_GMRES__object*
-bHYPRE_GMRES__create(void);
+struct bHYPRE_HGMRES__object*
+bHYPRE_HGMRES__create(void);
 
 /**
  * RMI constructor function for the class.
  */
-bHYPRE_GMRES
-bHYPRE_GMRES__createRemote(const char *, sidl_BaseInterface *_ex);
+bHYPRE_HGMRES
+bHYPRE_HGMRES__createRemote(const char *, sidl_BaseInterface *_ex);
 
 /**
  * RMI connector function for the class.
  */
-bHYPRE_GMRES
-bHYPRE_GMRES__connect(const char *, sidl_BaseInterface *_ex);
+bHYPRE_HGMRES
+bHYPRE_HGMRES__connect(const char *, sidl_BaseInterface *_ex);
 void
-bHYPRE_GMRES_addRef(
-  /* in */ bHYPRE_GMRES self);
+bHYPRE_HGMRES_addRef(
+  /* in */ bHYPRE_HGMRES self);
 
 void
-bHYPRE_GMRES_deleteRef(
-  /* in */ bHYPRE_GMRES self);
+bHYPRE_HGMRES_deleteRef(
+  /* in */ bHYPRE_HGMRES self);
 
 sidl_bool
-bHYPRE_GMRES_isSame(
-  /* in */ bHYPRE_GMRES self,
+bHYPRE_HGMRES_isSame(
+  /* in */ bHYPRE_HGMRES self,
   /* in */ sidl_BaseInterface iobj);
 
 sidl_BaseInterface
-bHYPRE_GMRES_queryInt(
-  /* in */ bHYPRE_GMRES self,
+bHYPRE_HGMRES_queryInt(
+  /* in */ bHYPRE_HGMRES self,
   /* in */ const char* name);
 
 sidl_bool
-bHYPRE_GMRES_isType(
-  /* in */ bHYPRE_GMRES self,
+bHYPRE_HGMRES_isType(
+  /* in */ bHYPRE_HGMRES self,
   /* in */ const char* name);
 
 sidl_ClassInfo
-bHYPRE_GMRES_getClassInfo(
-  /* in */ bHYPRE_GMRES self);
+bHYPRE_HGMRES_getClassInfo(
+  /* in */ bHYPRE_HGMRES self);
 
 /**
  * Method:  Create[]
  */
-bHYPRE_GMRES
-bHYPRE_GMRES_Create(
-  /* in */ bHYPRE_MPICommunicator mpi_comm,
-  /* in */ bHYPRE_Operator A);
+bHYPRE_HGMRES
+bHYPRE_HGMRES_Create(
+  /* in */ bHYPRE_MPICommunicator mpi_comm);
 
 /**
  * Set the MPI Communicator.
@@ -133,8 +113,8 @@ bHYPRE_GMRES_Create(
  * 
  */
 int32_t
-bHYPRE_GMRES_SetCommunicator(
-  /* in */ bHYPRE_GMRES self,
+bHYPRE_HGMRES_SetCommunicator(
+  /* in */ bHYPRE_HGMRES self,
   /* in */ bHYPRE_MPICommunicator mpi_comm);
 
 /**
@@ -142,8 +122,8 @@ bHYPRE_GMRES_SetCommunicator(
  * 
  */
 int32_t
-bHYPRE_GMRES_SetIntParameter(
-  /* in */ bHYPRE_GMRES self,
+bHYPRE_HGMRES_SetIntParameter(
+  /* in */ bHYPRE_HGMRES self,
   /* in */ const char* name,
   /* in */ int32_t value);
 
@@ -152,8 +132,8 @@ bHYPRE_GMRES_SetIntParameter(
  * 
  */
 int32_t
-bHYPRE_GMRES_SetDoubleParameter(
-  /* in */ bHYPRE_GMRES self,
+bHYPRE_HGMRES_SetDoubleParameter(
+  /* in */ bHYPRE_HGMRES self,
   /* in */ const char* name,
   /* in */ double value);
 
@@ -162,8 +142,8 @@ bHYPRE_GMRES_SetDoubleParameter(
  * 
  */
 int32_t
-bHYPRE_GMRES_SetStringParameter(
-  /* in */ bHYPRE_GMRES self,
+bHYPRE_HGMRES_SetStringParameter(
+  /* in */ bHYPRE_HGMRES self,
   /* in */ const char* name,
   /* in */ const char* value);
 
@@ -172,8 +152,8 @@ bHYPRE_GMRES_SetStringParameter(
  * 
  */
 int32_t
-bHYPRE_GMRES_SetIntArray1Parameter(
-  /* in */ bHYPRE_GMRES self,
+bHYPRE_HGMRES_SetIntArray1Parameter(
+  /* in */ bHYPRE_HGMRES self,
   /* in */ const char* name,
   /* in */ int32_t* value,
   /* in */ int32_t nvalues);
@@ -183,8 +163,8 @@ bHYPRE_GMRES_SetIntArray1Parameter(
  * 
  */
 int32_t
-bHYPRE_GMRES_SetIntArray2Parameter(
-  /* in */ bHYPRE_GMRES self,
+bHYPRE_HGMRES_SetIntArray2Parameter(
+  /* in */ bHYPRE_HGMRES self,
   /* in */ const char* name,
   /* in */ struct sidl_int__array* value);
 
@@ -193,8 +173,8 @@ bHYPRE_GMRES_SetIntArray2Parameter(
  * 
  */
 int32_t
-bHYPRE_GMRES_SetDoubleArray1Parameter(
-  /* in */ bHYPRE_GMRES self,
+bHYPRE_HGMRES_SetDoubleArray1Parameter(
+  /* in */ bHYPRE_HGMRES self,
   /* in */ const char* name,
   /* in */ double* value,
   /* in */ int32_t nvalues);
@@ -204,8 +184,8 @@ bHYPRE_GMRES_SetDoubleArray1Parameter(
  * 
  */
 int32_t
-bHYPRE_GMRES_SetDoubleArray2Parameter(
-  /* in */ bHYPRE_GMRES self,
+bHYPRE_HGMRES_SetDoubleArray2Parameter(
+  /* in */ bHYPRE_HGMRES self,
   /* in */ const char* name,
   /* in */ struct sidl_double__array* value);
 
@@ -214,8 +194,8 @@ bHYPRE_GMRES_SetDoubleArray2Parameter(
  * 
  */
 int32_t
-bHYPRE_GMRES_GetIntValue(
-  /* in */ bHYPRE_GMRES self,
+bHYPRE_HGMRES_GetIntValue(
+  /* in */ bHYPRE_HGMRES self,
   /* in */ const char* name,
   /* out */ int32_t* value);
 
@@ -224,8 +204,8 @@ bHYPRE_GMRES_GetIntValue(
  * 
  */
 int32_t
-bHYPRE_GMRES_GetDoubleValue(
-  /* in */ bHYPRE_GMRES self,
+bHYPRE_HGMRES_GetDoubleValue(
+  /* in */ bHYPRE_HGMRES self,
   /* in */ const char* name,
   /* out */ double* value);
 
@@ -235,8 +215,8 @@ bHYPRE_GMRES_GetDoubleValue(
  * 
  */
 int32_t
-bHYPRE_GMRES_Setup(
-  /* in */ bHYPRE_GMRES self,
+bHYPRE_HGMRES_Setup(
+  /* in */ bHYPRE_HGMRES self,
   /* in */ bHYPRE_Vector b,
   /* in */ bHYPRE_Vector x);
 
@@ -245,8 +225,8 @@ bHYPRE_GMRES_Setup(
  * 
  */
 int32_t
-bHYPRE_GMRES_Apply(
-  /* in */ bHYPRE_GMRES self,
+bHYPRE_HGMRES_Apply(
+  /* in */ bHYPRE_HGMRES self,
   /* in */ bHYPRE_Vector b,
   /* inout */ bHYPRE_Vector* x);
 
@@ -255,8 +235,8 @@ bHYPRE_GMRES_Apply(
  * 
  */
 int32_t
-bHYPRE_GMRES_ApplyAdjoint(
-  /* in */ bHYPRE_GMRES self,
+bHYPRE_HGMRES_ApplyAdjoint(
+  /* in */ bHYPRE_HGMRES self,
   /* in */ bHYPRE_Vector b,
   /* inout */ bHYPRE_Vector* x);
 
@@ -265,8 +245,8 @@ bHYPRE_GMRES_ApplyAdjoint(
  * 
  */
 int32_t
-bHYPRE_GMRES_SetOperator(
-  /* in */ bHYPRE_GMRES self,
+bHYPRE_HGMRES_SetOperator(
+  /* in */ bHYPRE_HGMRES self,
   /* in */ bHYPRE_Operator A);
 
 /**
@@ -275,8 +255,8 @@ bHYPRE_GMRES_SetOperator(
  * 
  */
 int32_t
-bHYPRE_GMRES_SetTolerance(
-  /* in */ bHYPRE_GMRES self,
+bHYPRE_HGMRES_SetTolerance(
+  /* in */ bHYPRE_HGMRES self,
   /* in */ double tolerance);
 
 /**
@@ -285,8 +265,8 @@ bHYPRE_GMRES_SetTolerance(
  * 
  */
 int32_t
-bHYPRE_GMRES_SetMaxIterations(
-  /* in */ bHYPRE_GMRES self,
+bHYPRE_HGMRES_SetMaxIterations(
+  /* in */ bHYPRE_HGMRES self,
   /* in */ int32_t max_iterations);
 
 /**
@@ -299,8 +279,8 @@ bHYPRE_GMRES_SetMaxIterations(
  * 
  */
 int32_t
-bHYPRE_GMRES_SetLogging(
-  /* in */ bHYPRE_GMRES self,
+bHYPRE_HGMRES_SetLogging(
+  /* in */ bHYPRE_HGMRES self,
   /* in */ int32_t level);
 
 /**
@@ -313,8 +293,8 @@ bHYPRE_GMRES_SetLogging(
  * 
  */
 int32_t
-bHYPRE_GMRES_SetPrintLevel(
-  /* in */ bHYPRE_GMRES self,
+bHYPRE_HGMRES_SetPrintLevel(
+  /* in */ bHYPRE_HGMRES self,
   /* in */ int32_t level);
 
 /**
@@ -322,8 +302,8 @@ bHYPRE_GMRES_SetPrintLevel(
  * 
  */
 int32_t
-bHYPRE_GMRES_GetNumIterations(
-  /* in */ bHYPRE_GMRES self,
+bHYPRE_HGMRES_GetNumIterations(
+  /* in */ bHYPRE_HGMRES self,
   /* out */ int32_t* num_iterations);
 
 /**
@@ -331,8 +311,8 @@ bHYPRE_GMRES_GetNumIterations(
  * 
  */
 int32_t
-bHYPRE_GMRES_GetRelResidualNorm(
-  /* in */ bHYPRE_GMRES self,
+bHYPRE_HGMRES_GetRelResidualNorm(
+  /* in */ bHYPRE_HGMRES self,
   /* out */ double* norm);
 
 /**
@@ -340,22 +320,22 @@ bHYPRE_GMRES_GetRelResidualNorm(
  * 
  */
 int32_t
-bHYPRE_GMRES_SetPreconditioner(
-  /* in */ bHYPRE_GMRES self,
+bHYPRE_HGMRES_SetPreconditioner(
+  /* in */ bHYPRE_HGMRES self,
   /* in */ bHYPRE_Solver s);
 
 /**
  * Cast method for interface and class type conversions.
  */
-struct bHYPRE_GMRES__object*
-bHYPRE_GMRES__cast(
+struct bHYPRE_HGMRES__object*
+bHYPRE_HGMRES__cast(
   void* obj);
 
 /**
  * String cast method for interface and class type conversions.
  */
 void*
-bHYPRE_GMRES__cast2(
+bHYPRE_HGMRES__cast2(
   void* obj,
   const char* type);
 
@@ -363,8 +343,8 @@ bHYPRE_GMRES__cast2(
  * Select and execute a method by name
  */
 void
-bHYPRE_GMRES__exec(
-  /* in */ bHYPRE_GMRES self,
+bHYPRE_HGMRES__exec(
+  /* in */ bHYPRE_HGMRES self,
   /* in */ const char* methodName,
   /* in */ sidl_io_Deserializer inArgs,
   /* in */ sidl_io_Serializer outArgs);
@@ -372,7 +352,7 @@ bHYPRE_GMRES__exec(
  * static Exec method for reflexity.
  */
 void
-bHYPRE_GMRES__sexec(
+bHYPRE_HGMRES__sexec(
   /* in */ const char* methodName,
   /* in */ sidl_io_Deserializer inArgs,
   /* in */ sidl_io_Serializer outArgs);
@@ -380,92 +360,92 @@ bHYPRE_GMRES__sexec(
  * Get the URL of the Implementation of this object (for RMI)
  */
 char*
-bHYPRE_GMRES__getURL(
-  /* in */ bHYPRE_GMRES self);
-struct bHYPRE_GMRES__array*
-bHYPRE_GMRES__array_createCol(
+bHYPRE_HGMRES__getURL(
+  /* in */ bHYPRE_HGMRES self);
+struct bHYPRE_HGMRES__array*
+bHYPRE_HGMRES__array_createCol(
   int32_t       dimen,
   const int32_t lower[],
   const int32_t upper[]);
 
-struct bHYPRE_GMRES__array*
-bHYPRE_GMRES__array_createRow(
+struct bHYPRE_HGMRES__array*
+bHYPRE_HGMRES__array_createRow(
   int32_t       dimen,
   const int32_t lower[],
   const int32_t upper[]);
 
-struct bHYPRE_GMRES__array*
-bHYPRE_GMRES__array_create1d(int32_t len);
+struct bHYPRE_HGMRES__array*
+bHYPRE_HGMRES__array_create1d(int32_t len);
 
-struct bHYPRE_GMRES__array*
-bHYPRE_GMRES__array_create1dInit(
+struct bHYPRE_HGMRES__array*
+bHYPRE_HGMRES__array_create1dInit(
   int32_t len, 
-  bHYPRE_GMRES* data);
+  bHYPRE_HGMRES* data);
 
-struct bHYPRE_GMRES__array*
-bHYPRE_GMRES__array_create2dCol(int32_t m, int32_t n);
+struct bHYPRE_HGMRES__array*
+bHYPRE_HGMRES__array_create2dCol(int32_t m, int32_t n);
 
-struct bHYPRE_GMRES__array*
-bHYPRE_GMRES__array_create2dRow(int32_t m, int32_t n);
+struct bHYPRE_HGMRES__array*
+bHYPRE_HGMRES__array_create2dRow(int32_t m, int32_t n);
 
-struct bHYPRE_GMRES__array*
-bHYPRE_GMRES__array_borrow(
-  bHYPRE_GMRES* firstElement,
+struct bHYPRE_HGMRES__array*
+bHYPRE_HGMRES__array_borrow(
+  bHYPRE_HGMRES* firstElement,
   int32_t       dimen,
   const int32_t lower[],
   const int32_t upper[],
   const int32_t stride[]);
 
-struct bHYPRE_GMRES__array*
-bHYPRE_GMRES__array_smartCopy(
-  struct bHYPRE_GMRES__array *array);
+struct bHYPRE_HGMRES__array*
+bHYPRE_HGMRES__array_smartCopy(
+  struct bHYPRE_HGMRES__array *array);
 
 void
-bHYPRE_GMRES__array_addRef(
-  struct bHYPRE_GMRES__array* array);
+bHYPRE_HGMRES__array_addRef(
+  struct bHYPRE_HGMRES__array* array);
 
 void
-bHYPRE_GMRES__array_deleteRef(
-  struct bHYPRE_GMRES__array* array);
+bHYPRE_HGMRES__array_deleteRef(
+  struct bHYPRE_HGMRES__array* array);
 
-bHYPRE_GMRES
-bHYPRE_GMRES__array_get1(
-  const struct bHYPRE_GMRES__array* array,
+bHYPRE_HGMRES
+bHYPRE_HGMRES__array_get1(
+  const struct bHYPRE_HGMRES__array* array,
   const int32_t i1);
 
-bHYPRE_GMRES
-bHYPRE_GMRES__array_get2(
-  const struct bHYPRE_GMRES__array* array,
+bHYPRE_HGMRES
+bHYPRE_HGMRES__array_get2(
+  const struct bHYPRE_HGMRES__array* array,
   const int32_t i1,
   const int32_t i2);
 
-bHYPRE_GMRES
-bHYPRE_GMRES__array_get3(
-  const struct bHYPRE_GMRES__array* array,
+bHYPRE_HGMRES
+bHYPRE_HGMRES__array_get3(
+  const struct bHYPRE_HGMRES__array* array,
   const int32_t i1,
   const int32_t i2,
   const int32_t i3);
 
-bHYPRE_GMRES
-bHYPRE_GMRES__array_get4(
-  const struct bHYPRE_GMRES__array* array,
+bHYPRE_HGMRES
+bHYPRE_HGMRES__array_get4(
+  const struct bHYPRE_HGMRES__array* array,
   const int32_t i1,
   const int32_t i2,
   const int32_t i3,
   const int32_t i4);
 
-bHYPRE_GMRES
-bHYPRE_GMRES__array_get5(
-  const struct bHYPRE_GMRES__array* array,
+bHYPRE_HGMRES
+bHYPRE_HGMRES__array_get5(
+  const struct bHYPRE_HGMRES__array* array,
   const int32_t i1,
   const int32_t i2,
   const int32_t i3,
   const int32_t i4,
   const int32_t i5);
 
-bHYPRE_GMRES
-bHYPRE_GMRES__array_get6(
-  const struct bHYPRE_GMRES__array* array,
+bHYPRE_HGMRES
+bHYPRE_HGMRES__array_get6(
+  const struct bHYPRE_HGMRES__array* array,
   const int32_t i1,
   const int32_t i2,
   const int32_t i3,
@@ -473,9 +453,9 @@ bHYPRE_GMRES__array_get6(
   const int32_t i5,
   const int32_t i6);
 
-bHYPRE_GMRES
-bHYPRE_GMRES__array_get7(
-  const struct bHYPRE_GMRES__array* array,
+bHYPRE_HGMRES
+bHYPRE_HGMRES__array_get7(
+  const struct bHYPRE_HGMRES__array* array,
   const int32_t i1,
   const int32_t i2,
   const int32_t i3,
@@ -484,65 +464,65 @@ bHYPRE_GMRES__array_get7(
   const int32_t i6,
   const int32_t i7);
 
-bHYPRE_GMRES
-bHYPRE_GMRES__array_get(
-  const struct bHYPRE_GMRES__array* array,
+bHYPRE_HGMRES
+bHYPRE_HGMRES__array_get(
+  const struct bHYPRE_HGMRES__array* array,
   const int32_t indices[]);
 
 void
-bHYPRE_GMRES__array_set1(
-  struct bHYPRE_GMRES__array* array,
+bHYPRE_HGMRES__array_set1(
+  struct bHYPRE_HGMRES__array* array,
   const int32_t i1,
-  bHYPRE_GMRES const value);
+  bHYPRE_HGMRES const value);
 
 void
-bHYPRE_GMRES__array_set2(
-  struct bHYPRE_GMRES__array* array,
+bHYPRE_HGMRES__array_set2(
+  struct bHYPRE_HGMRES__array* array,
   const int32_t i1,
   const int32_t i2,
-  bHYPRE_GMRES const value);
+  bHYPRE_HGMRES const value);
 
 void
-bHYPRE_GMRES__array_set3(
-  struct bHYPRE_GMRES__array* array,
+bHYPRE_HGMRES__array_set3(
+  struct bHYPRE_HGMRES__array* array,
   const int32_t i1,
   const int32_t i2,
   const int32_t i3,
-  bHYPRE_GMRES const value);
+  bHYPRE_HGMRES const value);
 
 void
-bHYPRE_GMRES__array_set4(
-  struct bHYPRE_GMRES__array* array,
+bHYPRE_HGMRES__array_set4(
+  struct bHYPRE_HGMRES__array* array,
   const int32_t i1,
   const int32_t i2,
   const int32_t i3,
   const int32_t i4,
-  bHYPRE_GMRES const value);
+  bHYPRE_HGMRES const value);
 
 void
-bHYPRE_GMRES__array_set5(
-  struct bHYPRE_GMRES__array* array,
+bHYPRE_HGMRES__array_set5(
+  struct bHYPRE_HGMRES__array* array,
   const int32_t i1,
   const int32_t i2,
   const int32_t i3,
   const int32_t i4,
   const int32_t i5,
-  bHYPRE_GMRES const value);
+  bHYPRE_HGMRES const value);
 
 void
-bHYPRE_GMRES__array_set6(
-  struct bHYPRE_GMRES__array* array,
+bHYPRE_HGMRES__array_set6(
+  struct bHYPRE_HGMRES__array* array,
   const int32_t i1,
   const int32_t i2,
   const int32_t i3,
   const int32_t i4,
   const int32_t i5,
   const int32_t i6,
-  bHYPRE_GMRES const value);
+  bHYPRE_HGMRES const value);
 
 void
-bHYPRE_GMRES__array_set7(
-  struct bHYPRE_GMRES__array* array,
+bHYPRE_HGMRES__array_set7(
+  struct bHYPRE_HGMRES__array* array,
   const int32_t i1,
   const int32_t i2,
   const int32_t i3,
@@ -550,49 +530,49 @@ bHYPRE_GMRES__array_set7(
   const int32_t i5,
   const int32_t i6,
   const int32_t i7,
-  bHYPRE_GMRES const value);
+  bHYPRE_HGMRES const value);
 
 void
-bHYPRE_GMRES__array_set(
-  struct bHYPRE_GMRES__array* array,
+bHYPRE_HGMRES__array_set(
+  struct bHYPRE_HGMRES__array* array,
   const int32_t indices[],
-  bHYPRE_GMRES const value);
+  bHYPRE_HGMRES const value);
 
 int32_t
-bHYPRE_GMRES__array_dimen(
-  const struct bHYPRE_GMRES__array* array);
+bHYPRE_HGMRES__array_dimen(
+  const struct bHYPRE_HGMRES__array* array);
 
 int32_t
-bHYPRE_GMRES__array_lower(
-  const struct bHYPRE_GMRES__array* array,
+bHYPRE_HGMRES__array_lower(
+  const struct bHYPRE_HGMRES__array* array,
   const int32_t ind);
 
 int32_t
-bHYPRE_GMRES__array_upper(
-  const struct bHYPRE_GMRES__array* array,
+bHYPRE_HGMRES__array_upper(
+  const struct bHYPRE_HGMRES__array* array,
   const int32_t ind);
 
 int32_t
-bHYPRE_GMRES__array_length(
-  const struct bHYPRE_GMRES__array* array,
+bHYPRE_HGMRES__array_length(
+  const struct bHYPRE_HGMRES__array* array,
   const int32_t ind);
 
 int32_t
-bHYPRE_GMRES__array_stride(
-  const struct bHYPRE_GMRES__array* array,
+bHYPRE_HGMRES__array_stride(
+  const struct bHYPRE_HGMRES__array* array,
   const int32_t ind);
 
 int
-bHYPRE_GMRES__array_isColumnOrder(
-  const struct bHYPRE_GMRES__array* array);
+bHYPRE_HGMRES__array_isColumnOrder(
+  const struct bHYPRE_HGMRES__array* array);
 
 int
-bHYPRE_GMRES__array_isRowOrder(
-  const struct bHYPRE_GMRES__array* array);
+bHYPRE_HGMRES__array_isRowOrder(
+  const struct bHYPRE_HGMRES__array* array);
 
-struct bHYPRE_GMRES__array*
-bHYPRE_GMRES__array_slice(
-  struct bHYPRE_GMRES__array* src,
+struct bHYPRE_HGMRES__array*
+bHYPRE_HGMRES__array_slice(
+  struct bHYPRE_HGMRES__array* src,
   int32_t        dimen,
   const int32_t  numElem[],
   const int32_t  *srcStart,
@@ -600,13 +580,13 @@ bHYPRE_GMRES__array_slice(
   const int32_t  *newStart);
 
 void
-bHYPRE_GMRES__array_copy(
-  const struct bHYPRE_GMRES__array* src,
-  struct bHYPRE_GMRES__array* dest);
+bHYPRE_HGMRES__array_copy(
+  const struct bHYPRE_HGMRES__array* src,
+  struct bHYPRE_HGMRES__array* dest);
 
-struct bHYPRE_GMRES__array*
-bHYPRE_GMRES__array_ensure(
-  struct bHYPRE_GMRES__array* src,
+struct bHYPRE_HGMRES__array*
+bHYPRE_HGMRES__array_ensure(
+  struct bHYPRE_HGMRES__array* src,
   int32_t dimen,
   int     ordering);
 

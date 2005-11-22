@@ -32,7 +32,8 @@ impl_bHYPRE_GMRES__dtor(
 extern
 bHYPRE_GMRES
 impl_bHYPRE_GMRES_Create(
-  /* in */ bHYPRE_MPICommunicator mpi_comm);
+  /* in */ bHYPRE_MPICommunicator mpi_comm,
+  /* in */ bHYPRE_Operator A);
 
 extern struct bHYPRE_Solver__object* 
   impl_bHYPRE_GMRES_fconnect_bHYPRE_Solver(char* url, sidl_BaseInterface *_ex);

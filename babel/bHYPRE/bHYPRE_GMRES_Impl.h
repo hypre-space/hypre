@@ -45,11 +45,7 @@
 #endif
 
 /* DO-NOT-DELETE splicer.begin(bHYPRE.GMRES._includes) */
-/* Put additional include files here... */
-#include "HYPRE.h"
-#include "utilities.h"
-#include "krylov.h"
-#include "HYPRE_parcsr_ls.h"
+/* Insert-Code-Here {bHYPRE.GMRES._includes} (include files) */
 /* DO-NOT-DELETE splicer.end(bHYPRE.GMRES._includes) */
 
 /*
@@ -58,28 +54,32 @@
 
 struct bHYPRE_GMRES__data {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.GMRES._data) */
-  /* Put private data members here... */
+  /* Insert-Code-Here {bHYPRE.GMRES._data} (private data members) */
 
-   MPI_Comm comm;
-   HYPRE_Solver solver;
+   bHYPRE_MPICommunicator bmpicomm;
    bHYPRE_Operator matrix;
-   char * vector_type;
+   bHYPRE_Solver precond;
+   int      k_dim;
+   int      min_iter;
+   int      max_iter;
+   int      rel_change;
+   int      stop_crit;
+   int      converged;
+   double   tol;
+   double   cf_tol;
+   double   rel_residual_norm;
 
-   /* parameter cache, to save in Set*Parameter functions and copy in Apply: */
-   double tol;
-   int k_dim;
-   int min_iter;
-   int max_iter;
-   int rel_change;
-   int stop_crit;
-   int log_level;
-   int printlevel;
+   bHYPRE_Vector r;
+   bHYPRE_Vector w;
+   bHYPRE_Vector * p;
 
-   /* preconditioner cache, to save in SetPreconditioner and apply in Apply:*/
-   char * precond_name;
-   HYPRE_Solver * solverprecond;
-   HYPRE_PtrToSolverFcn precond; /* function */
-   HYPRE_PtrToSolverFcn precond_setup; /* function */
+   /* log info (always logged) */
+   int      num_iterations;
+ 
+   int     print_level; /* printing when print_level>0 */
+   int     logging;  /* extra computations for logging when logging>0 */
+   double  *norms;
+   char    *log_file_name;
 
   /* DO-NOT-DELETE splicer.end(bHYPRE.GMRES._data) */
 };
@@ -123,7 +123,8 @@ impl_bHYPRE_GMRES__dtor(
 extern
 bHYPRE_GMRES
 impl_bHYPRE_GMRES_Create(
-  /* in */ bHYPRE_MPICommunicator mpi_comm);
+  /* in */ bHYPRE_MPICommunicator mpi_comm,
+  /* in */ bHYPRE_Operator A);
 
 extern struct bHYPRE_Solver__object* 
   impl_bHYPRE_GMRES_fconnect_bHYPRE_Solver(char* url, sidl_BaseInterface *_ex);
