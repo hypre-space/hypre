@@ -279,7 +279,7 @@ hypre_BoomerAMGDestroy( void *data )
         if (hypre_ParAMGDataAArray(amg_data)[i])
            hypre_ParCSRMatrixDestroy(hypre_ParAMGDataAArray(amg_data)[i]);
 
-        if (hypre_ParAMGDataAArray(amg_data)[i-1])
+        if (hypre_ParAMGDataPArray(amg_data)[i-1])
            hypre_ParCSRMatrixDestroy(hypre_ParAMGDataPArray(amg_data)[i-1]);
 
 	hypre_TFree(hypre_ParAMGDataCFMarkerArray(amg_data)[i-1]);
