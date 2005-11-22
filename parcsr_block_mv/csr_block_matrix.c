@@ -14,6 +14,8 @@
 
 #include "headers.h"
 
+
+
 /*--------------------------------------------------------------------------
  * hypre_CSRBlockMatrixCreate
  *--------------------------------------------------------------------------*/
@@ -317,6 +319,19 @@ hypre_CSRBlockMatrixBlockAddAccumulate(double* i1, double* o, int block_size)
    return 0;
 }
 
+/*--------------------------------------------------------------------------
+ * hypre_CSRBlockMatrixBlockAddAccumulateDiag
+ * (diag(o) = diag(i1) + diag(o)) 
+ *--------------------------------------------------------------------------*/
+int
+hypre_CSRBlockMatrixBlockAddAccumulateDiag(double* i1, double* o, int block_size)
+{
+   int i;
+
+   for (i = 0; i < block_size; i++)
+         o[i*block_size+i] += i1[i*block_size+i];
+   return 0;
+}
 
 /*--------------------------------------------------------------------------
  * hypre_CSRBlockMatrixBlockSetScalar
@@ -346,6 +361,27 @@ hypre_CSRBlockMatrixBlockCopyData(double* i1, double* o, double beta, int block_
    for (i = 0; i < block_size; i++)
       for (j = 0; j < block_size; j++)
          o[i*block_size+j] = beta*i1[i*block_size+j];
+   return 0;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_CSRBlockMatrixBlockCopyDataDiag
+ * (o = beta*diag(i1)) 
+ *--------------------------------------------------------------------------*/
+int
+hypre_CSRBlockMatrixBlockCopyDataDiag(double* i1, double* o, double beta, int block_size)
+{
+   int i, j;
+
+   for (i = 0; i < block_size; i++)
+   {
+      for (j = 0; j < block_size; j++)
+      {
+         o[i*block_size+j] = 0.0;
+      }
+   }
+   for (i = 0; i < block_size; i++)
+         o[i*block_size+i] = beta*i1[i*block_size+i];
    return 0;
 }
 
@@ -540,6 +576,45 @@ hypre_CSRBlockMatrixBlockMultAdd(double* i1, double* i2, double beta,
    return 0;
 }
 
+
+/*--------------------------------------------------------------------------
+ * hypre_CSRBlockMatrixBlockMultAddDiag
+ * (diag(o) = diag(i1) * diag(i2) + beta * diag(o)) 
+ *--------------------------------------------------------------------------*/
+int
+hypre_CSRBlockMatrixBlockMultAddDiag(double* i1, double* i2, double beta, 
+                                 double* o, int block_size)
+{
+   int    i;
+   double ddata;
+
+   if (beta == 0.0)
+   {
+      for (i = 0; i < block_size; i++)
+      {
+         ddata = i1[i*block_size + i] * i2[i*block_size + i];
+         o[i*block_size + i] = ddata;
+      }
+   }
+   else if (beta == 1.0)
+   {
+      for(i = 0; i < block_size; i++)
+      {
+            ddata = o[i*block_size + i] + i1[i*block_size + i] * i2[i*block_size + i];
+            o[i*block_size + i] = ddata;
+      }
+   }
+   else
+   {
+      for(i = 0; i < block_size; i++)
+      {
+            ddata = beta* o[i*block_size + i] + i1[i*block_size + i] * i2[i*block_size + i];
+            o[i*block_size + i] = ddata;
+      }
+   }
+   return 0;
+}
+
 /*--------------------------------------------------------------------------
  * hypre_CSRBlockMatrixBlockMatvec
  * (ov = alpha* mat * v + beta * ov)
@@ -613,7 +688,8 @@ hypre_CSRBlockMatrixBlockMatvec(double alpha, double* mat, double* v, double bet
 /*--------------------------------------------------------------------------
  * hypre_CSRBlockMatrixBlockInvMatvec
  * (ov = mat^{-1} * v) 
-* mat is the matrix - size is block_size^2 
+ * o and v are vectors
+ * mat is the matrix - size is block_size^2 
  *--------------------------------------------------------------------------*/
 int
 hypre_CSRBlockMatrixBlockInvMatvec(double* mat, double* v, 
@@ -633,7 +709,7 @@ hypre_CSRBlockMatrixBlockInvMatvec(double* mat, double* v,
 
    if (block_size ==1 )
    {
-      if (fabs(mat[0]) > 1e-12)
+      if (fabs(mat[0]) > 1e-10)
       {
          ov[0] = v[0]/mat[0];
          return(ierr);
@@ -683,10 +759,6 @@ hypre_CSRBlockMatrixBlockInvMatvec(double* mat, double* v,
                tmp = mat_i[k*block_size + j];
                mat_i[k*block_size + j] = mat_i[piv_row*block_size + j];
                mat_i[piv_row*block_size + j] = tmp;
-
-               tmp = ov[k*block_size + j];
-               ov[k*block_size + j] = ov[piv_row*block_size + j];
-               ov[piv_row*block_size + j] = tmp;
             }
             tmp = ov[k];
             ov[k] = ov[piv_row];
@@ -710,13 +782,22 @@ hypre_CSRBlockMatrixBlockInvMatvec(double* mat, double* v,
          }
          else
          {
-            /* printf("Block of matrix is nearly singular: zero pivot error\n"); */
+            /* printf("Block of matrix is nearly singular: zero pivot error\n");  */
             hypre_TFree(mat_i);
             return(-1);
          }
       }
+
+      /* we also need to check the pivot in the last row to see if it is zero */  
+      k = block_size - 1; /* last row */
+      if ( fabs(mat_i[k*block_size+k]) < eps)
+      {
+         /* printf("Block of matrix is nearly singular: zero pivot error\n");  */
+         hypre_TFree(mat_i);
+         return(-1);
+      }
          
-      /* Back Substitution  - do for each "rhs" (U is now in m_i1)*/
+      /* Back Substitution  - do rhs (U is now in m_i1)*/
          for (k = block_size-1; k > 0; --k)
          {
             ov[k] /= mat_i[k*block_size+k];
@@ -761,7 +842,7 @@ hypre_CSRBlockMatrixBlockInvMult(double* i1, double* i2, double* o, int block_si
 
    if (block_size ==1 )
    {
-      if (fabs(m_i1[0]) > 1e-12)
+      if (fabs(m_i1[0]) > 1e-10)
       {
          o[0] = i2[0]/i1[0];
          return(ierr);
@@ -841,10 +922,22 @@ hypre_CSRBlockMatrixBlockInvMult(double* i1, double* i2, double* o, int block_si
          else
          {
             /* printf("Block of matrix is nearly singular: zero pivot error\n"); */
+            hypre_TFree(m_i1);
             return(-1);
          }
       }
-         
+
+
+      /* we also need to check the pivot in the last row to see if it is zero */  
+      k = block_size - 1; /* last row */
+      if ( fabs(m_i1[k*block_size+k]) < eps)
+      {
+         /* printf("Block of matrix is nearly singular: zero pivot error\n"); */
+         hypre_TFree(m_i1);
+         return(-1);
+      }
+
+
       /* Back Substitution  - do for each "rhs" (U is now in m_i1)*/
       for (i=0; i < block_size; i++)
       {
@@ -920,6 +1013,48 @@ hypre_CSRBlockMatrixBlockMultInv(double* i1, double* i2, double* o, int block_si
    
    return (ierr);
 }
+
+
+
+/*--------------------------------------------------------------------------
+ * hypre_CSRBlockMatrixBlockInvMultDiag
+ * (o = diag(i1)^{-1} * diag(i2)) 
+ *--------------------------------------------------------------------------*/
+int
+hypre_CSRBlockMatrixBlockInvMultDiag(double* i1, double* i2, double* o, int block_size)
+{
+
+   int ierr = 0;
+   int i, j;
+   
+   double eps;
+      
+   eps = 1.0e-8;
+   
+   for (i = 0; i < block_size; i++)
+   {
+      for (j = 0; j < block_size; j++)
+      {
+         o[i*block_size+j] = 0.0;
+      }
+   }
+   
+   for (i = 0; i < block_size; i++)
+   {
+      if (fabs(i1[i*block_size + i]) > eps)
+      {
+         o[i*block_size + i] = i2[i*block_size + i] / i1[i*block_size + i];
+      }
+      else
+      {
+         /* printf("GE zero pivot error\n"); */
+         return(-1);
+      }
+   }
+   
+   return (ierr);
+}
+
 
 
 /*--------------------------------------------------------------------------
