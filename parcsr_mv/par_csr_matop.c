@@ -318,7 +318,7 @@ hypre_ParCSRMatrix *hypre_ParMatmul( hypre_ParCSRMatrix  *A,
 	printf(" Error! Incompatible matrix dimensions!\n");
 	return NULL;
    }
-   if ( num_rows_diag_A==num_cols_diag_B) allsquare = 1;
+   /* if (num_rows_A==num_cols_B) allsquare = 1; */
 
    /*-----------------------------------------------------------------------
     *  Extract B_ext, i.e. portion of B that is stored on neighbor procs
