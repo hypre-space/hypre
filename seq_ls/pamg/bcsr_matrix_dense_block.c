@@ -159,9 +159,9 @@ hypre_BCSRMatrixDenseBlockDiag(hypre_BCSRMatrixDenseBlock* A) {
 int
 hypre_BCSRMatrixDenseBlockMulInv(hypre_BCSRMatrixDenseBlock* A,
 				 hypre_BCSRMatrixDenseBlock* B) {
-  /* returns AB^{-1} in A */
 
- /* AHB 9/05: this is actually returning B{^-1}A in A*/
+ /* AHB 9/05: this is actually returning B{^-1}A in A*.  If B cannot be 
+    inverted, returns A = A */
 
   int i, j, k;
   int num_rows = A->num_rows, num_cols = A->num_cols;
@@ -255,10 +255,12 @@ hypre_BCSRMatrixDenseBlockMultiplyInverse2(hypre_BCSRMatrixDenseBlock* A,
 				 hypre_BCSRMatrixDenseBlock* B) 
 {
 
-  /* AHB:  here we return BA^{-1} in A*/
+  /* AHB:  here we return BA^{-1} in A.  If A cannot be inverted, returns
+     A = B*/
 
    hypre_BCSRMatrixBlock *A_t, *B_t;
    double *out_data;
+   int ierr = 0;
    
    
    /* this is the lazy way - for testing */
@@ -268,24 +270,23 @@ hypre_BCSRMatrixDenseBlockMultiplyInverse2(hypre_BCSRMatrixDenseBlock* A,
    B_t = hypre_BCSRMatrixBlockCopy(B);
    hypre_BCSRMatrixBlockTranspose(B_t);
 
-   /* A = B^(-1)A */
-   hypre_BCSRMatrixDenseBlockMulInv(B_t, A_t);
+   /* now B_t = inv(A_t)*B_t */
+   ierr = hypre_BCSRMatrixDenseBlockMulInv(B_t, A_t);
    
    /*result in B_t -copy to A and then take transpose */
    out_data = hypre_CTAlloc(double, A->num_rows*A->num_cols);
 
    hypre_BCSRMatrixDenseBlockGetData(B_t, out_data);
    hypre_BCSRMatrixDenseBlockFillData(A, out_data);   
-
    hypre_BCSRMatrixDenseBlockTranspose(A);
-
+   
    hypre_BCSRMatrixDenseBlockDestroy(A_t);
    hypre_BCSRMatrixDenseBlockDestroy(B_t);
    
    hypre_TFree(out_data);
    
 
-   return 0;
+   return ierr;
    
    
 }

@@ -1199,9 +1199,13 @@ BuildLaplacian( int               argc,
          mtrx[2] = 1;
          mtrx[3] = 2;
 
-         /*  mtrx[2] = 10;
-             mtrx[3] = 100; */
-         
+#if 0         
+         mtrx[0] = .01;
+         mtrx[1] = 200; 
+         mtrx[2] = 200;
+         mtrx[3] = .01; 
+#endif
+    
 
       }
       else if (num_fun == 3)
@@ -1216,9 +1220,17 @@ BuildLaplacian( int               argc,
          mtrx[7] = 1;
          mtrx[8] = 1.01;
 
-         /* mtrx[6] = 2000;  */
-         
-
+#if 0
+         mtrx[0] = 3.0;
+         mtrx[1] = 1;
+         mtrx[2] = 0.0;
+         mtrx[3] = 1;
+         mtrx[4] = 4;
+         mtrx[5] = 2;
+         mtrx[6] = 0.0;
+         mtrx[7] = 2;
+         mtrx[8] = .25;
+#endif
 
       }
 
@@ -1237,149 +1249,54 @@ BuildLaplacian( int               argc,
          if (num_fun == 2)
          {
 
-#if 1            
-            mtrx[0] =  1;
-            SetSysVcoefValues(num_fun, nx, ny, nz, 1.0, 0.01, 1.0, 0, mtrx_values);
-            
-            mtrx[1] = 200;
-            SetSysVcoefValues(num_fun, nx, ny, nz, 1.01, 1.0, 1.0, 1, mtrx_values);
-            
-            mtrx[2] = 200;
-            SetSysVcoefValues(num_fun, nx, ny, nz, 1.01, 1.0, 1.0, 2, mtrx_values);
-            
-            mtrx[3] = .03;
-            SetSysVcoefValues(num_fun, nx, ny, nz, 2.0, 0.02, 1.0, 3, mtrx_values);
-#endif
-#if 0
-            mtrx[0] = 1;
-            SetSysVcoefValues(num_fun, nx, ny, nz, 1.0,.01, 1.0, 0, mtrx_values);
-            
-            mtrx[1] = 1;
-            SetSysVcoefValues(num_fun, nx, ny, nz, .01, 1.0, 1.0, 1, mtrx_values);
-            
-            mtrx[2] = 1;
-            SetSysVcoefValues(num_fun, nx, ny, nz, .01, 1.0, 1.0, 2, mtrx_values);
-            
-            mtrx[3] = 1;
-            SetSysVcoefValues(num_fun, nx, ny, nz, 2.0, .02, 1.0, 3, mtrx_values);
-     
-#endif       
-#if 0
+
             mtrx[0] = 2;
-            SetSysVcoefValues(num_fun, nx, ny, nz, 1.0,1.0, 1.0, 0, mtrx_values);
+            SetSysVcoefValues(num_fun, nx, ny, nz, 1.0, 1.0, 1.0, 0, mtrx_values);
             
             mtrx[1] = 1;
-            SetSysVcoefValues(num_fun, nx, ny, nz, 1.0, 1.0, 1.0, 1, mtrx_values);
+            SetSysVcoefValues(num_fun, nx, ny, nz, 1.0, 2.0, 1.0, 1, mtrx_values);
             
             mtrx[2] = 1;
-            SetSysVcoefValues(num_fun, nx, ny, nz, 1.0, 1.0, 1.0, 2, mtrx_values);
+            SetSysVcoefValues(num_fun, nx, ny, nz, 2.0, 1.0, 0.0, 2, mtrx_values);
             
             mtrx[3] = 2;
-            SetSysVcoefValues(num_fun, nx, ny, nz, 1.0, 1.0, 1.0, 3, mtrx_values);
-
-#endif
-
-
-
-
-
+            SetSysVcoefValues(num_fun, nx, ny, nz, 1.0, 3.0, 1.0, 3, mtrx_values);
 
                      
          }
          else if (num_fun == 3)
          {
 
-#if 1
-            mtrx[0] = 1.01;
-            SetSysVcoefValues(num_fun, nx, ny, nz, cx, cy, cz, 0, mtrx_values);
+            mtrx[0] = 1;
+            SetSysVcoefValues(num_fun, nx, ny, nz, 1, .01, 1, 0, mtrx_values);
 
             mtrx[1] = 1;
-            SetSysVcoefValues(num_fun, nx, ny, nz, cx, cy, cz, 1, mtrx_values);
+            SetSysVcoefValues(num_fun, nx, ny, nz, 1, 1, 1, 1, mtrx_values);
 
             mtrx[2] = 0.0;
-            SetSysVcoefValues(num_fun, nx, ny, nz, cx, cy, cz, 2, mtrx_values);
+            SetSysVcoefValues(num_fun, nx, ny, nz, 1, 1, 1, 2, mtrx_values);
 
             mtrx[3] = 1;
-            SetSysVcoefValues(num_fun, nx, ny, nz, cx, cy, cz, 3, mtrx_values);
-
-            mtrx[4] = 2;
-            SetSysVcoefValues(num_fun, nx, ny, nz, cx, cy, cz, 4, mtrx_values);
-
-            mtrx[5] = 1;
-            SetSysVcoefValues(num_fun, nx, ny, nz, cx, cy, cz, 5, mtrx_values);
-
-            mtrx[6] = 0.0;
-            SetSysVcoefValues(num_fun, nx, ny, nz, cx, cy, cz, 6, mtrx_values);
-
-            mtrx[7] = 1;
-            SetSysVcoefValues(num_fun, nx, ny, nz, cx, cy, cz, 7, mtrx_values);
-
-            mtrx[8] = 1.01;
-            SetSysVcoefValues(num_fun, nx, ny, nz, cx, cy, cz, 8, mtrx_values);
-#endif
-#if 0       
-            mtrx[0] = 3;
-            SetSysVcoefValues(num_fun, nx, ny, nz, cx, cy, cz, 0, mtrx_values);
-
-            mtrx[1] = 1;
-            SetSysVcoefValues(num_fun, nx, ny, nz, cx, cy, cz, 1, mtrx_values);
-
-            mtrx[2] = 0.0;
-            SetSysVcoefValues(num_fun, nx, ny, nz, cx, cy, cz, 2, mtrx_values);
-
-            mtrx[3] = 1;
-            SetSysVcoefValues(num_fun, nx, ny, nz, cx, cy, cz, 3, mtrx_values);
-
-            mtrx[4] = 4;
-            SetSysVcoefValues(num_fun, nx, ny, nz, cx, cy, cz, 4, mtrx_values);
-
-            mtrx[5] = 2;
-            SetSysVcoefValues(num_fun, nx, ny, nz, cx, cy, cz, 5, mtrx_values);
-
-            mtrx[6] = 0.0;
-            SetSysVcoefValues(num_fun, nx, ny, nz, cx, cy, cz, 6, mtrx_values);
-
-            mtrx[7] = 2;
-            SetSysVcoefValues(num_fun, nx, ny, nz, cx, cy, cz, 7, mtrx_values);
-
-            mtrx[8] = 0.25;
-            SetSysVcoefValues(num_fun, nx, ny, nz, cx, cy, cz, 8, mtrx_values);
-#endif
-
-#if 0      
-            mtrx[0] = 1.0;
-            SetSysVcoefValues(num_fun, nx, ny, nz, 1.0, .01, 1.0, 0, mtrx_values);
-
-            mtrx[1] = 1.0;
-            SetSysVcoefValues(num_fun, nx, ny, nz,1.0, 1.0, 1.0, 1, mtrx_values);
-
-            mtrx[2] = 0.0;
-            SetSysVcoefValues(num_fun, nx, ny, nz, 1.0, 1.0, 1.0, 2, mtrx_values);
-
-            mtrx[3] = 1;
-            SetSysVcoefValues(num_fun, nx, ny, nz, 1.0, 1.0, 1.0, 3, mtrx_values);
+            SetSysVcoefValues(num_fun, nx, ny, nz, 1, 1, 1, 3, mtrx_values);
 
             mtrx[4] = 1;
-            SetSysVcoefValues(num_fun, nx, ny, nz, 2.0, .02, 1.0, 4, mtrx_values);
+            SetSysVcoefValues(num_fun, nx, ny, nz, 2, .02, 1, 4, mtrx_values);
 
             mtrx[5] = 2;
-            SetSysVcoefValues(num_fun, nx, ny, nz, 1.0,1.0, 1.0, 5, mtrx_values);
+            SetSysVcoefValues(num_fun, nx, ny, nz, 1, 1, 1, 5, mtrx_values);
 
             mtrx[6] = 0.0;
-            SetSysVcoefValues(num_fun, nx, ny, nz, 1.0, 1.0, 1.0, 6, mtrx_values);
+            SetSysVcoefValues(num_fun, nx, ny, nz, 1, 1, 1, 6, mtrx_values);
 
             mtrx[7] = 2;
-            SetSysVcoefValues(num_fun, nx, ny, nz, 1.0, 1.0, 1.0, 7, mtrx_values);
+            SetSysVcoefValues(num_fun, nx, ny, nz, 1, 1, 1, 7, mtrx_values);
 
-            mtrx[8] = 1.0;
-            SetSysVcoefValues(num_fun, nx, ny, nz, 1.5, .04, 1.0, 8, mtrx_values);
-#endif
-
-
+            mtrx[8] = 1;
+            SetSysVcoefValues(num_fun, nx, ny, nz, 1.5, .04, 1, 8, mtrx_values);
+            
 
 
 
-             
          }
 
          A = hypre_GenerateSysLaplacianVCoef(nx, ny, nz, P, Q, R, num_fun, mtrx, mtrx_values);

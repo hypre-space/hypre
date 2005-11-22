@@ -228,6 +228,15 @@ hypre_AMGSetup( void            *amg_vdata,
 #endif
 
 	P_array[level] = hypre_BCSRMatrixToCSRMatrix(PB);
+
+#if 0 /* for debugging */
+        {  
+           char new_file[80];
+           sprintf(new_file,"%s.level.%d","P.out" ,level);
+           hypre_CSRMatrixPrint(P_array[level],  new_file);
+        }
+#endif
+
 	if(P_trunc_factor > 0 || P_max_elmts > 0) {
 	  hypre_AMGTruncation(P_array[level], P_trunc_factor, P_max_elmts);
 	}
@@ -240,6 +249,29 @@ hypre_AMGSetup( void            *amg_vdata,
 
 	hypre_AMGBuildCoarseOperator(P_array[level], A_array[level],
 				     P_array[level], &A_array[level + 1]);
+
+
+#if 0 /* for debugging - to compare with parallel */
+        {
+           hypre_CSRMatrix *A_no_zeros = NULL;
+           char new_file[80];
+           sprintf(new_file,"%s.level.%d","RAP.out" ,level+1);
+           A_no_zeros = hypre_CSRMatrixDeleteZeros(A_array[level+1], 1e-14);
+           if (A_no_zeros)
+           {
+              hypre_CSRMatrixPrint(A_no_zeros,  new_file);
+              hypre_CSRMatrixDestroy(A_no_zeros);
+           }
+           
+           else
+           {
+               hypre_CSRMatrixPrint(A_array[level+1],  new_file);
+           }
+        }
+        
+#endif
+
+
 	if(A_trunc_factor > 0 || A_max_elmts > 0) {
 	  hypre_AMGOpTruncation(A_array[level + 1], 
 				A_trunc_factor, A_max_elmts);
