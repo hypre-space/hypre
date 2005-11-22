@@ -398,4 +398,56 @@ int hypre_CSRMatrixTranspose(hypre_CSRMatrix   *A, hypre_CSRMatrix   **AT,
 }
 
 
+/*--------------------------------------------------------------------------
+ * hypre_CSRMatrixReorder:
+ * Reorders the column and data arrays of a square CSR matrix, such that the
+ * first entry in each row is the diagonal one.
+ *--------------------------------------------------------------------------*/
 
+int hypre_CSRMatrixReorder(hypre_CSRMatrix *A)
+{
+   int i, j, tempi, row_size;
+   double tempd;
+
+   double *A_data = hypre_CSRMatrixData(A);
+   int    *A_i = hypre_CSRMatrixI(A);
+   int    *A_j = hypre_CSRMatrixJ(A);
+   int     num_rowsA = hypre_CSRMatrixNumRows(A);
+   int     num_colsA = hypre_CSRMatrixNumCols(A);
+
+   /* the matrix should be square */
+   if (num_rowsA != num_colsA)
+      return -1;
+
+   for (i = 0; i < num_rowsA; i++)
+   {
+      row_size = A_i[i+1]-A_i[i];
+
+      for (j = 0; j < row_size; j++)
+      {
+         if (A_j[j] == i)
+         {
+            if (j != 0)
+            {
+               tempi = A_j[0];
+               A_j[0] = A_j[j];
+               A_j[j] = tempi;
+
+               tempd = A_data[0];
+               A_data[0] = A_data[j];
+               A_data[j] = tempd;
+            }
+            break;
+         }
+
+         /* diagonal element is missing */
+         if (j == row_size-1)
+            return -2;
+      }
+
+      A_j    += row_size;
+      A_data += row_size;
+   }
+
+   return 0;
+}

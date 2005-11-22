@@ -245,6 +245,7 @@ hypre_CSRMatrix *hypre_CSRMatrixAdd( hypre_CSRMatrix *A , hypre_CSRMatrix *B );
 hypre_CSRMatrix *hypre_CSRMatrixMultiply( hypre_CSRMatrix *A , hypre_CSRMatrix *B );
 hypre_CSRMatrix *hypre_CSRMatrixDeleteZeros( hypre_CSRMatrix *A , double tol );
 int hypre_CSRMatrixTranspose( hypre_CSRMatrix *A , hypre_CSRMatrix **AT , int data );
+int hypre_CSRMatrixReorder( hypre_CSRMatrix *A );
 
 /* csr_matrix.c */
 hypre_CSRMatrix *hypre_CSRMatrixCreate( int num_rows , int num_cols , int num_nonzeros );
@@ -262,7 +263,7 @@ int hypre_CSRMatrixMatvecT( double alpha , hypre_CSRMatrix *A , hypre_Vector *x 
 
 /* genpart.c */
 int hypre_GeneratePartitioning( int length , int num_procs , int **part_ptr );
-int hypre_GenerateLocalPartitioning( int length , int num_procs , int myid, int **part_ptr );
+int hypre_GenerateLocalPartitioning( int length , int num_procs , int myid , int **part_ptr );
 
 /* HYPRE_csr_matrix.c */
 HYPRE_CSRMatrix HYPRE_CSRMatrixCreate( int num_rows , int num_cols , int *row_sizes );
