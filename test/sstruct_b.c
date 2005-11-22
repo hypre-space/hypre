@@ -2758,15 +2758,14 @@ main( int   argc,
       time_index = hypre_InitializeTiming("GMRES Setup");
       hypre_BeginTiming(time_index);
 
-      b_solver_GMRES = bHYPRE_GMRES_Create( bmpicomm );
+      b_A_O = bHYPRE_Operator__cast( b_pA );
+      b_solver_GMRES = bHYPRE_GMRES_Create( bmpicomm, b_A_O );
       bHYPRE_GMRES_SetIntParameter( b_solver_GMRES, "KDim", 5 );
       bHYPRE_GMRES_SetIntParameter( b_solver_GMRES, "MaxIter", 100 );
       bHYPRE_GMRES_SetDoubleParameter( b_solver_GMRES, "Tolerance", 1.0e-06 );
       bHYPRE_GMRES_SetIntParameter( b_solver_GMRES, "PrintLevel", 1 );
       bHYPRE_GMRES_SetIntParameter( b_solver_GMRES, "Logging", 1 );
 
-      b_A_O = bHYPRE_Operator__cast( b_pA );
-      ierr += bHYPRE_GMRES_SetOperator( b_solver_GMRES, b_A_O );
       hypre_assert( ierr==0 );
 
       if (solver_id == 40)
