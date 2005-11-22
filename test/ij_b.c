@@ -84,6 +84,7 @@ main( int   argc,
    bHYPRE_PCG           bHYPRE_PCG;
    bHYPRE_HPCG          bHYPRE_HPCG;
    bHYPRE_GMRES         bHYPRE_GMRES;
+   bHYPRE_HGMRES        bHYPRE_HGMRES;
    bHYPRE_BiCGSTAB      bHYPRE_BiCGSTAB;
    bHYPRE_CGNR          bHYPRE_CGNR;
    bHYPRE_ParCSRDiagScale  bHYPRE_ParCSRDiagScale;
@@ -743,7 +744,7 @@ main( int   argc,
       printf("        43=Euclid-PCG       44*=Euclid-GMRES   \n");
       printf("       45*=Euclid-BICGSTAB\n");
       printf("Solvers marked with '*' have not yet been implemented.\n");
-      printf("   -hpcg 1               : for HYPRE-interface PCG solver\n");
+      printf("   -hpcg 1               : for HYPRE-interface version of PCG or GMRES solver\n");
       printf("\n");
       printf("   -cljp                 : CLJP coarsening \n");
       printf("   -ruge                 : Ruge coarsening (local)\n");
@@ -2088,20 +2089,20 @@ main( int   argc,
    }
 
    /*-----------------------------------------------------------
-    * Solve the system using GMRES 
+    * Solve the system using GMRES, pure Babel-interface version
     *-----------------------------------------------------------*/
 
    if (solver_id == 3 || solver_id == 4 || solver_id == 7 
        || solver_id == 18 || solver_id == 44)
+      if ( hpcg==0 )
    {
       time_index = hypre_InitializeTiming("GMRES Setup");
       hypre_BeginTiming(time_index);
 
-      bHYPRE_GMRES = bHYPRE_GMRES_Create( bmpicomm );
+      bHYPRE_op_A = bHYPRE_Operator__cast( bHYPRE_parcsr_A );
+      bHYPRE_GMRES = bHYPRE_GMRES_Create( bmpicomm, bHYPRE_op_A );
       bHYPRE_Vector_b = bHYPRE_Vector__cast( bHYPRE_b );
       bHYPRE_Vector_x = bHYPRE_Vector__cast( bHYPRE_x );
-      bHYPRE_op_A = bHYPRE_Operator__cast( bHYPRE_parcsr_A );
-      bHYPRE_GMRES_SetOperator( bHYPRE_GMRES, bHYPRE_op_A );
 
       ierr += bHYPRE_GMRES_SetIntParameter( bHYPRE_GMRES, "KDim", k_dim );
       ierr += bHYPRE_GMRES_SetIntParameter( bHYPRE_GMRES, "MaxIter", 1000 );
@@ -2330,6 +2331,252 @@ main( int   argc,
          printf("\n");
       }
    }
+
+   /*-----------------------------------------------------------
+    * Solve the system using GMRES, Babel interface working through the HYPRE interface
+    *-----------------------------------------------------------*/
+
+   if (solver_id == 3 || solver_id == 4 || solver_id == 7 
+       || solver_id == 18 || solver_id == 44)
+      if ( hpcg!=0 )
+   {
+      time_index = hypre_InitializeTiming("GMRES Setup");
+      hypre_BeginTiming(time_index);
+
+      bHYPRE_HGMRES = bHYPRE_HGMRES_Create( bmpicomm );
+      bHYPRE_Vector_b = bHYPRE_Vector__cast( bHYPRE_b );
+      bHYPRE_Vector_x = bHYPRE_Vector__cast( bHYPRE_x );
+      bHYPRE_op_A = bHYPRE_Operator__cast( bHYPRE_parcsr_A );
+      bHYPRE_HGMRES_SetOperator( bHYPRE_HGMRES, bHYPRE_op_A );
+
+      ierr += bHYPRE_HGMRES_SetIntParameter( bHYPRE_HGMRES, "KDim", k_dim );
+      ierr += bHYPRE_HGMRES_SetIntParameter( bHYPRE_HGMRES, "MaxIter", 1000 );
+      ierr += bHYPRE_HGMRES_SetDoubleParameter( bHYPRE_HGMRES, "Tol", tol );
+      ierr += bHYPRE_HGMRES_SetIntParameter( bHYPRE_HGMRES, "Logging", 1 );
+
+      if (solver_id == 3)
+      {
+         /* use BoomerAMG as preconditioner */
+         if (myid == 0) printf("Solver: AMG-GMRES\n");
+
+         bHYPRE_AMG = bHYPRE_BoomerAMG_Create( bmpicomm );
+         bHYPRE_BoomerAMG_SetOperator( bHYPRE_AMG, bHYPRE_op_A );
+         bHYPRE_BoomerAMG_SetDoubleParameter( bHYPRE_AMG, "Tolerance", pc_tol);
+         bHYPRE_BoomerAMG_SetIntParameter( bHYPRE_AMG, "CoarsenType",
+                                        (hybrid*coarsen_type));
+         bHYPRE_BoomerAMG_SetIntParameter( bHYPRE_AMG, "MeasureType",
+                                           measure_type);
+         bHYPRE_BoomerAMG_SetDoubleParameter( bHYPRE_AMG, "StrongThreshold",
+                                              strong_threshold);
+         bHYPRE_BoomerAMG_SetDoubleParameter( bHYPRE_AMG, "TruncFactor",
+                                              trunc_factor);
+         bHYPRE_BoomerAMG_SetIntParameter( bHYPRE_AMG, "PrintLevel", poutdat );
+         bHYPRE_BoomerAMG_SetStringParameter( bHYPRE_AMG, "PrintFileName",
+                                              "driver.out.log" );
+         bHYPRE_BoomerAMG_SetIntParameter( bHYPRE_AMG, "MaxIter", 1 );
+         bHYPRE_BoomerAMG_SetIntParameter( bHYPRE_AMG, "CycleType", cycle_type );
+         bHYPRE_BoomerAMG_SetIntParameter( bHYPRE_AMG, "Cycle0NumSweeps",
+                                           num_grid_sweeps[0] );
+         bHYPRE_BoomerAMG_SetIntParameter( bHYPRE_AMG, "Cycle1NumSweeps",
+                                           num_grid_sweeps[1] );
+         bHYPRE_BoomerAMG_SetIntParameter( bHYPRE_AMG, "Cycle2NumSweeps",
+                                           num_grid_sweeps[2] );
+         bHYPRE_BoomerAMG_SetIntParameter( bHYPRE_AMG, "Cycle3NumSweeps",
+                                           num_grid_sweeps[3] );
+         bHYPRE_BoomerAMG_SetIntParameter( bHYPRE_AMG, "Cycle0RelaxType",
+                                           grid_relax_type[0] );
+         bHYPRE_BoomerAMG_SetIntParameter( bHYPRE_AMG, "Cycle1RelaxType",
+                                           grid_relax_type[1] );
+         bHYPRE_BoomerAMG_SetIntParameter( bHYPRE_AMG, "Cycle2RelaxType",
+                                           grid_relax_type[2] );
+         bHYPRE_BoomerAMG_SetIntParameter( bHYPRE_AMG, "Cycle3RelaxType",
+                                           grid_relax_type[3] );
+         for ( i=0; i<max_levels; ++i )
+         {
+            bHYPRE_BoomerAMG_SetLevelRelaxWt( bHYPRE_AMG, relax_weight[i], i );
+         }
+         bHYPRE_BoomerAMG_SetIntParameter( bHYPRE_AMG, "SmoothType",
+                                           smooth_type );
+         bHYPRE_BoomerAMG_SetIntParameter( bHYPRE_AMG, "SmoothNumSweeps",
+                                           smooth_num_sweep);
+
+         dimsl[0] = 0;   dimsl[1] = 0;   dimsu[0] = 4;   dimsu[1] = 4;
+         bHYPRE_grid_relax_points = sidl_int__array_createCol( 2, dimsl, dimsu );
+         for ( i=0; i<4; ++i )
+         {
+            for ( j=0; j<num_grid_sweeps[i]; ++j )
+            {
+               sidl_int__array_set2( bHYPRE_grid_relax_points, i, j,
+                                     grid_relax_points[i][j] );
+            }
+         }
+         bHYPRE_BoomerAMG_SetIntArray2Parameter( bHYPRE_AMG, "GridRelaxPoints",
+                                                 bHYPRE_grid_relax_points );
+         sidl_int__array_deleteRef( bHYPRE_grid_relax_points );
+
+         bHYPRE_BoomerAMG_SetIntParameter( bHYPRE_AMG, "MaxLevels", max_levels);
+         bHYPRE_BoomerAMG_SetDoubleParameter( bHYPRE_AMG, "MaxRowSum",
+                                              max_row_sum);
+         bHYPRE_BoomerAMG_SetIntParameter( bHYPRE_AMG, "NumFunctions",
+                                           num_functions);
+         if (num_functions > 1)
+         {
+            bHYPRE_BoomerAMG_SetIntArray1Parameter( bHYPRE_AMG, "DOFFunc",
+                                                    dof_func, num_functions );
+         }
+         bHYPRE_BoomerAMG_SetIntParameter( bHYPRE_AMG, "Variant", variant);
+         bHYPRE_BoomerAMG_SetIntParameter( bHYPRE_AMG, "Overlap", overlap);
+         bHYPRE_BoomerAMG_SetIntParameter( bHYPRE_AMG, "DomainType", domain_type);
+
+         bHYPRE_SolverPC = bHYPRE_Solver__cast( bHYPRE_AMG );
+         ierr += bHYPRE_HGMRES_SetPreconditioner( bHYPRE_HGMRES, bHYPRE_SolverPC );
+         ierr += bHYPRE_HGMRES_Setup( bHYPRE_HGMRES, bHYPRE_Vector_b,
+                                     bHYPRE_Vector_x );
+      }
+      else if (solver_id == 4)
+      {
+         /* use diagonal scaling as preconditioner */
+         if (myid == 0) printf("Solver: DS-GMRES\n");
+
+         bHYPRE_ParCSRDiagScale = bHYPRE_ParCSRDiagScale_Create( bmpicomm );
+         bHYPRE_ParCSRDiagScale_SetOperator( bHYPRE_ParCSRDiagScale, bHYPRE_op_A );
+         ierr += bHYPRE_ParCSRDiagScale_Setup( bHYPRE_ParCSRDiagScale,
+                                               bHYPRE_Vector_b, bHYPRE_Vector_x );
+         bHYPRE_SolverPC =
+            bHYPRE_Solver__cast( bHYPRE_ParCSRDiagScale );
+         ierr += bHYPRE_HGMRES_SetPreconditioner( bHYPRE_HGMRES, bHYPRE_SolverPC );
+         ierr += bHYPRE_HGMRES_Setup( bHYPRE_HGMRES, bHYPRE_Vector_b,
+                                     bHYPRE_Vector_x );
+
+      }
+#ifdef DO_THIS_LATER
+      else if (solver_id == 7)
+      {
+         /* use PILUT as preconditioner */
+         if (myid == 0) printf("Solver: PILUT-GMRES\n");
+
+         ierr = HYPRE_ParCSRPilutCreate( mpi_comm, &pcg_precond ); 
+         if (ierr) {
+            printf("Error in ParPilutCreate\n");
+         }
+
+         HYPRE_GMRESSetPrecond(pcg_solver,
+                               (HYPRE_PtrToSolverFcn) HYPRE_ParCSRPilutSolve,
+                               (HYPRE_PtrToSolverFcn) HYPRE_ParCSRPilutSetup,
+                               pcg_precond);
+
+         if (drop_tol >= 0 )
+            HYPRE_ParCSRPilutSetDropTolerance( pcg_precond,
+                                               drop_tol );
+
+         if (nonzeros_to_keep >= 0 )
+            HYPRE_ParCSRPilutSetFactorRowSize( pcg_precond,
+                                               nonzeros_to_keep );
+      }
+#endif  /*DO_THIS_LATER*/
+      else if (solver_id == 18)
+      {
+         /* use ParaSails preconditioner */
+         if (myid == 0) printf("Solver: ParaSails-GMRES\n");
+
+         bHYPRE_ParaSails = bHYPRE_ParaSails_Create( bmpicomm );
+         ierr += bHYPRE_ParaSails_SetOperator(
+            bHYPRE_ParaSails, bHYPRE_op_A );
+         ierr += bHYPRE_ParaSails_SetDoubleParameter( bHYPRE_ParaSails, "Thresh",
+                                                      sai_threshold );
+         ierr += bHYPRE_ParaSails_SetIntParameter( bHYPRE_ParaSails, "Nlevels",
+                                                   max_levels );
+         ierr += bHYPRE_ParaSails_SetDoubleParameter( bHYPRE_ParaSails, "Filter",
+                                                      sai_filter );
+         ierr += bHYPRE_ParaSails_SetIntParameter( bHYPRE_ParaSails, "Logging",
+                                                   ioutdat );
+         ierr += bHYPRE_ParaSails_SetIntParameter( bHYPRE_ParaSails, "Sym", 0 );
+         hypre_assert( ierr==0 );
+         bHYPRE_SolverPC = bHYPRE_Solver__cast( bHYPRE_ParaSails );
+         ierr += bHYPRE_HGMRES_SetPreconditioner( bHYPRE_HGMRES, bHYPRE_SolverPC );
+         ierr += bHYPRE_HGMRES_Setup( bHYPRE_HGMRES, bHYPRE_Vector_b,
+                                     bHYPRE_Vector_x );
+
+      }
+#ifdef DO_THIS_LATER
+      else if (solver_id == 44)
+      {
+         /* use Euclid preconditioning */
+         if (myid == 0) printf("Solver: Euclid-GMRES\n");
+
+         HYPRE_EuclidCreate(mpi_comm, &pcg_precond);
+
+         /* note: There are three three methods of setting run-time 
+            parameters for Euclid: (see HYPRE_parcsr_ls.h); here
+            we'll use what I think is simplest: let Euclid internally 
+            parse the command line.
+         */   
+         HYPRE_EuclidSetParams(pcg_precond, argc, argv);
+
+         HYPRE_GMRESSetPrecond (pcg_solver,
+                                (HYPRE_PtrToSolverFcn) HYPRE_EuclidSolve,
+                                (HYPRE_PtrToSolverFcn) HYPRE_EuclidSetup,
+                                pcg_precond);
+      }
+#endif  /*DO_THIS_LATER*/
+ 
+      hypre_EndTiming(time_index);
+      hypre_PrintTiming("Setup phase times", mpi_comm);
+      hypre_FinalizeTiming(time_index);
+      hypre_ClearTiming();
+   
+      time_index = hypre_InitializeTiming("GMRES Solve");
+      hypre_BeginTiming(time_index);
+
+      ierr += bHYPRE_HGMRES_Apply( bHYPRE_HGMRES, bHYPRE_Vector_b, &bHYPRE_Vector_x );
+ 
+      hypre_EndTiming(time_index);
+      hypre_PrintTiming("Solve phase times", mpi_comm);
+      hypre_FinalizeTiming(time_index);
+      hypre_ClearTiming();
+
+      ierr += bHYPRE_HGMRES_GetIntValue( bHYPRE_HGMRES, "NumIterations",
+                                        &num_iterations );
+      ierr += bHYPRE_HGMRES_GetDoubleValue( bHYPRE_HGMRES, "Final Relative Residual Norm",
+                                           &final_res_norm );
+ 
+      bHYPRE_HGMRES_deleteRef( bHYPRE_HGMRES );
+ 
+      if (solver_id == 3)
+      {
+         bHYPRE_BoomerAMG_deleteRef( bHYPRE_AMG );
+      }
+      else if ( solver_id == 2 )
+      {
+         bHYPRE_ParCSRDiagScale_deleteRef( bHYPRE_ParCSRDiagScale );
+      }
+#ifdef DO_THIS_LATER
+      if (solver_id == 7)
+      {
+         HYPRE_ParCSRPilutDestroy(pcg_precond);
+      }
+#endif  /*DO_THIS_LATER*/
+      else if (solver_id == 18)
+      {
+	 bHYPRE_ParaSails_deleteRef ( bHYPRE_ParaSails );
+      }
+#ifdef DO_THIS_LATER
+      else if (solver_id == 44)
+      {
+         /* HYPRE_EuclidPrintParams(pcg_precond); */
+         HYPRE_EuclidDestroy(pcg_precond);
+      }
+#endif  /*DO_THIS_LATER*/
+
+      if (myid == 0)
+      {
+         printf("\n");
+         printf("GMRES Iterations = %d\n", num_iterations);
+         printf("Final GMRES Relative Residual Norm = %e\n", final_res_norm);
+         printf("\n");
+      }
+   }
+
    /*-----------------------------------------------------------
     * Solve the system using BiCGSTAB 
     *-----------------------------------------------------------*/
