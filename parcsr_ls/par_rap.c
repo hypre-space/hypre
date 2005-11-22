@@ -204,6 +204,7 @@ hypre_BoomerAMGBuildCoarseOperator( hypre_ParCSRMatrix  *RT,
 
    hypre_CSRMatrix *RT_diag = hypre_ParCSRMatrixDiag(RT);
    hypre_CSRMatrix *RT_offd = hypre_ParCSRMatrixOffd(RT);
+   int             num_cols_diag_RT = hypre_CSRMatrixNumCols(RT_diag);
    int             num_cols_offd_RT = hypre_CSRMatrixNumCols(RT_offd);
    int             num_rows_offd_RT = hypre_CSRMatrixNumRows(RT_offd);
    hypre_ParCSRCommPkg   *comm_pkg_RT = hypre_ParCSRMatrixCommPkg(RT);
@@ -245,6 +246,7 @@ hypre_BoomerAMGBuildCoarseOperator( hypre_ParCSRMatrix  *RT,
    int  num_cols_diag_P = hypre_CSRMatrixNumCols(P_diag);
    int  num_cols_offd_P = hypre_CSRMatrixNumCols(P_offd);
    int *coarse_partitioning = hypre_ParCSRMatrixColStarts(P);
+   int *RT_partitioning = hypre_ParCSRMatrixColStarts(RT);
 
    hypre_ParCSRMatrix *RAP;
    int                *col_map_offd_RAP;
@@ -321,7 +323,8 @@ hypre_BoomerAMGBuildCoarseOperator( hypre_ParCSRMatrix  *RT,
    int             *A_marker;
    int             *temp;
 
-   int              n_coarse;
+   int              n_coarse, n_coarse_RT;
+   int              square = 1;
    int              num_cols_offd_Pext = 0;
    
    int              ic, i, j, k;
@@ -379,6 +382,10 @@ hypre_BoomerAMGBuildCoarseOperator( hypre_ParCSRMatrix  *RT,
 
    n_coarse = hypre_ParCSRMatrixGlobalNumCols(P);
    num_nz_cols_A = num_cols_diag_A + num_cols_offd_A;
+
+   n_coarse_RT = hypre_ParCSRMatrixGlobalNumCols(RT);
+   if (n_coarse != n_coarse_RT)
+      square = 0;
 
    /*-----------------------------------------------------------------------
     *  Generate Ps_ext, i.e. portion of P that is stored on neighbor procs
@@ -994,8 +1001,8 @@ hypre_BoomerAMGBuildCoarseOperator( hypre_ParCSRMatrix  *RT,
       RAP_int = NULL;
    }
  
-   RAP_diag_i = hypre_CTAlloc(int, num_cols_diag_P+1);
-   RAP_offd_i = hypre_CTAlloc(int, num_cols_diag_P+1);
+   RAP_diag_i = hypre_CTAlloc(int, num_cols_diag_RT+1);
+   RAP_offd_i = hypre_CTAlloc(int, num_cols_diag_RT+1);
 
    first_col_diag_RAP = first_col_diag_P;
    last_col_diag_RAP = first_col_diag_P + num_cols_diag_P - 1;
@@ -1091,8 +1098,8 @@ hypre_BoomerAMGBuildCoarseOperator( hypre_ParCSRMatrix  *RT,
 #include "../utilities/hypre_smp_forloop.h"
    for (ii = 0; ii < num_threads; ii++)
    {
-     size = num_cols_diag_P/num_threads;
-     rest = num_cols_diag_P - size*num_threads;
+     size = num_cols_diag_RT/num_threads;
+     rest = num_cols_diag_RT - size*num_threads;
      if (ii < rest)
      {
         ns = ii*size+ii;
@@ -1131,11 +1138,12 @@ hypre_BoomerAMGBuildCoarseOperator( hypre_ParCSRMatrix  *RT,
        *  Set marker for diagonal entry, RAP_{ic,ic}. and for all points
        *  being added to row ic of RAP_diag and RAP_offd through RAP_ext
        *--------------------------------------------------------------------*/
- 
-      P_marker[ic] = jj_count_diag;
+
       jj_row_begin_diag = jj_count_diag;
       jj_row_begin_offd = jj_count_offd;
-      jj_count_diag++;
+
+      if (square)
+         P_marker[ic] = jj_count_diag++;
 
       for (i=0; i < num_sends_RT; i++)
         for (j = send_map_starts_RT[i]; j < send_map_starts_RT[i+1]; j++)
@@ -1325,8 +1333,8 @@ hypre_BoomerAMGBuildCoarseOperator( hypre_ParCSRMatrix  *RT,
    jj_count_diag = jj_cnt_diag[num_threads-1];
    jj_count_offd = jj_cnt_offd[num_threads-1];
 
-   RAP_diag_i[num_cols_diag_P] = jj_count_diag;
-   RAP_offd_i[num_cols_diag_P] = jj_count_offd;
+   RAP_diag_i[num_cols_diag_RT] = jj_count_diag;
+   RAP_offd_i[num_cols_diag_RT] = jj_count_offd;
  
    /*-----------------------------------------------------------------------
     *  Allocate RAP_diag_data and RAP_diag_j arrays.
@@ -1361,8 +1369,8 @@ hypre_BoomerAMGBuildCoarseOperator( hypre_ParCSRMatrix  *RT,
 #include "../utilities/hypre_smp_forloop.h"
    for (ii = 0; ii < num_threads; ii++)
    {
-     size = num_cols_diag_P/num_threads;
-     rest = num_cols_diag_P - size*num_threads;
+     size = num_cols_diag_RT/num_threads;
+     rest = num_cols_diag_RT - size*num_threads;
      if (ii < rest)
      {
         ns = ii*size+ii;
@@ -1408,14 +1416,18 @@ hypre_BoomerAMGBuildCoarseOperator( hypre_ParCSRMatrix  *RT,
        *  Create diagonal entry, RAP_{ic,ic} and add entries of RAP_ext 
        *--------------------------------------------------------------------*/
 
-      P_marker[ic] = jj_count_diag;
       jj_row_begin_diag = jj_count_diag;
       jj_row_begin_offd = jj_count_offd;
       RAP_diag_i[ic] = jj_row_begin_diag;
       RAP_offd_i[ic] = jj_row_begin_offd;
-      RAP_diag_data[jj_count_diag] = zero;
-      RAP_diag_j[jj_count_diag] = ic;
-      jj_count_diag++;
+
+      if (square)
+      {
+         P_marker[ic] = jj_count_diag;
+         RAP_diag_data[jj_count_diag] = zero;
+         RAP_diag_j[jj_count_diag] = ic;
+         jj_count_diag++;
+      }
 
       for (i=0; i < num_sends_RT; i++)
         for (j = send_map_starts_RT[i]; j < send_map_starts_RT[i+1]; j++)
@@ -1707,13 +1719,15 @@ hypre_BoomerAMGBuildCoarseOperator( hypre_ParCSRMatrix  *RT,
       col_map_offd_RAP = new_col_map_offd_RAP;
    }
    hypre_TFree(P_marker);
-         
-   RAP = hypre_ParCSRMatrixCreate(comm, n_coarse, n_coarse, 
-        coarse_partitioning, coarse_partitioning,
-        num_cols_offd_RAP, RAP_diag_size, RAP_offd_size);
+
+   RAP = hypre_ParCSRMatrixCreate(comm, n_coarse_RT, n_coarse,
+                                  RT_partitioning, coarse_partitioning,
+                                  num_cols_offd_RAP, RAP_diag_size,
+                                  RAP_offd_size);
 
 /* Have RAP own coarse_partitioning instead of P */
    hypre_ParCSRMatrixSetColStartsOwner(P,0);
+   hypre_ParCSRMatrixSetColStartsOwner(RT,0);
 
    RAP_diag = hypre_ParCSRMatrixDiag(RAP);
    hypre_CSRMatrixI(RAP_diag) = RAP_diag_i; 
