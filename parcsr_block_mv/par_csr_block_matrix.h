@@ -138,6 +138,17 @@ hypre_BoomerAMGBuildBlockInterp( hypre_ParCSRBlockMatrix   *A,
                                  int 		      *col_offd_S_to_A,
                                  hypre_ParCSRBlockMatrix  **P_ptr);
    
+int
+hypre_BoomerAMGBuildBlockInterpDiag( hypre_ParCSRBlockMatrix   *A,
+                                     int                  *CF_marker,
+                                     hypre_ParCSRMatrix   *S,
+                                     int                  *num_cpts_global,
+                                     int                   num_functions,
+                                     int                  *dof_func,
+                                     int                   debug_flag,
+                                     double                trunc_factor,
+                                     int 		      *col_offd_S_to_A,
+                                     hypre_ParCSRBlockMatrix  **P_ptr);
 
 int hypre_BoomerAMGBlockInterpTruncation( hypre_ParCSRBlockMatrix *P,
                                       double trunc_factor);

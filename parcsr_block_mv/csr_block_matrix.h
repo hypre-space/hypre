@@ -76,8 +76,13 @@ hypre_CSRMatrix
 hypre_CSRBlockMatrix
       *hypre_CSRBlockMatrixConvertFromCSRMatrix(hypre_CSRMatrix *, int);
 int hypre_CSRBlockMatrixBlockAdd(double *, double *, double*, int);
+
 int hypre_CSRBlockMatrixBlockMultAdd(double *, double *, double, double *, int);
+int hypre_CSRBlockMatrixBlockMultAddDiag(double *, double *, double, double *, int);
+
 int hypre_CSRBlockMatrixBlockInvMult(double *, double *, double *, int);
+int hypre_CSRBlockMatrixBlockInvMultDiag(double *, double *, double *, int);
+
 int hypre_CSRBlockMatrixBlockMultInv(double *, double *, double *, int);
 int hypre_CSRBlockMatrixBlockTranspose(double *, double *, int);
 
@@ -85,8 +90,10 @@ int hypre_CSRBlockMatrixTranspose(hypre_CSRBlockMatrix *A,
                                   hypre_CSRBlockMatrix **AT, int data);
 
 int hypre_CSRBlockMatrixBlockCopyData(double*, double*, double, int);
-   
+int hypre_CSRBlockMatrixBlockCopyDataDiag(double*, double*, double, int);
+
 int hypre_CSRBlockMatrixBlockAddAccumulate(double*, double*, int);
+int hypre_CSRBlockMatrixBlockAddAccumulateDiag(double* i1, double* o, int block_size);
    
 
 
@@ -112,6 +119,10 @@ int hypre_CSRBlockMatrixBlockNorm(int norm_type, double* data, double* out, int 
    
 int hypre_CSRBlockMatrixBlockSetScalar(double* o, double beta, int block_size);
    
+
+
+
+
 
 #ifdef __cplusplus
 }
