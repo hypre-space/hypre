@@ -145,7 +145,16 @@ hypre_BoomerAMGBlockCreateNodalA(hypre_ParCSRBlockMatrix    *A,
       AN_diag_data[i] = tmp;
    }
    
-  
+#if 0
+/* to compare with serial - make diag entries negative*/
+
+   for (i=0; i < num_nodes; i++)
+   {
+      AN_diag_data[AN_diag_i[i]] = - AN_diag_data[AN_diag_i[i]];
+   }
+   
+#endif
+
    /* copy the commpkg */
    if (comm_pkg)
    {
