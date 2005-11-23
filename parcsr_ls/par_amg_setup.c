@@ -180,8 +180,13 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
    if (grid_relax_type[0] >= 20) /* block relaxation choosen */
    {
-      hypre_ParAMGDataInterpType(amg_data) = 10;
-      interp_type = 10;
+
+      if (!(interp_type ==10 || interp_type == 11) )
+      {
+         hypre_ParAMGDataInterpType(amg_data) = 10;
+         interp_type = 10;
+      }
+      
       for (i=1; i < 3; i++)
       {
          if (grid_relax_type[i] < 20)
@@ -558,7 +563,6 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                                               dof_func_array[level], abs(nodal), &AN);
                }
 
-
                /* dof array not needed for creating S because we pass in that 
                   the number of functions is 1 */
                if (nodal == 3 || nodal == -3)  /* option 3 may have negative entries in AN - 
@@ -568,7 +572,12 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                else
 		  hypre_BoomerAMGCreateSabs(AN, strong_threshold, max_row_sum,
                                    1, NULL,&SN);
-                 
+#if 0
+/* TEMP - to compare with serial */
+               hypre_BoomerAMGCreateS(AN, strong_threshold, max_row_sum,
+                                      1, NULL,&SN);
+#endif
+            
 
                col_offd_S_to_A = NULL;
 	       col_offd_SN_to_AN = NULL;
@@ -1203,16 +1212,46 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
             /* note that the current CF_marker is nodal */
             CFN_marker = CF_marker_array[level];
 
-            /* for now, for interptype  = 10 or 11, so the same one */
-            hypre_BoomerAMGBuildBlockInterp( A_block_array[level], CFN_marker, 
-                                             SN,
-                                             coarse_pnts_global, 1,
-                                             NULL,
-                                             debug_flag,
-                                             trunc_factor,
-                                             col_offd_S_to_A,
-                                             &P_block_array[level]);
-             
+            if (interp_type == 11)
+            {
+               hypre_BoomerAMGBuildBlockInterpDiag( A_block_array[level], CFN_marker, 
+                                                    SN,
+                                                    coarse_pnts_global, 1,
+                                                    NULL,
+                                                    debug_flag,
+                                                    trunc_factor,
+                                                    col_offd_S_to_A,
+                                                    &P_block_array[level]);
+            }
+            else /* interp_type ==10 */
+            {
+               
+               hypre_BoomerAMGBuildBlockInterp( A_block_array[level], CFN_marker, 
+                                               SN,
+                                               coarse_pnts_global, 1,
+                                               NULL,
+                                               debug_flag,
+                                               trunc_factor,
+                                               col_offd_S_to_A,
+                                               &P_block_array[level]);
+
+#if 0
+               /* for debugging */          
+               {
+                  hypre_ParCSRMatrix *temp_P;
+                  char new_file[80];
+                  sprintf(new_file,"%s.level.%d","parcsr.P.out" ,level);
+                  temp_P =  hypre_ParCSRBlockMatrixConvertToParCSRMatrix(
+                     P_block_array[level]);
+                  hypre_ParCSRMatrixPrint(temp_P, new_file); 
+                  hypre_ParCSRMatrixDestroy(temp_P);
+               }
+#endif
+
+
+
+            }
+            
 #ifdef HYPRE_NO_GLOBAL_PARTITION 
              /* we need to set the global number of cols in P, as this was 
                 not done in the interp
@@ -1223,7 +1262,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 #endif
 
             /* if we don't do nodal relaxation, we need a CF_array that is 
-               not nodal - right now we don't allow this to hapen though*/
+               not nodal - right now we don't allow this to happen though*/
            /*
             if (grid_relax_type[0] < 20  )
             {
@@ -1252,7 +1291,6 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                                           dof_func_array[level], 
                                           debug_flag, trunc_factor, col_offd_S_to_A, &P);
   
-
                hypre_TFree(col_offd_S_to_A);
             }
             else /* -1, -2, -3:  here we build interp using the nodal matrix and then convert 
@@ -1320,6 +1358,20 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
          hypre_ParCSRBlockMatrixSetDNumNonzeros(A_H_block);
          A_block_array[level+1] = A_H_block;
 
+
+
+#if 0
+         /* for debugging */          
+               {
+                  hypre_ParCSRMatrix *temp_A;
+                  char new_file[80];
+                  sprintf(new_file,"%s.level.%d","parcsr.RAP.out" ,level+1);
+                  temp_A =  hypre_ParCSRBlockMatrixConvertToParCSRMatrix(
+                     A_H_block);
+                  hypre_ParCSRMatrixPrint(temp_A, new_file); 
+                  hypre_ParCSRMatrixDestroy(temp_A);
+               }
+#endif
       }
       else
       {
@@ -1327,8 +1379,6 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
          hypre_BoomerAMGBuildCoarseOperator(P_array[level], A_array[level] , 
                                             P_array[level], &A_H);
       }
-
-
  
       if (debug_flag==1)
       {
