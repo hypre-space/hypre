@@ -619,8 +619,8 @@ build ()
    fi
 
    cd $StdBuildDir/$MakeDir
-   $MAKE $MakeOpt 1> ${Hdr}.${MessageStr}.log \
-        	  2> ${Hdr}.${MessageStr}.err
+   $MAKE $MakeOpt 1> ${Hdr}.${MessageStr}.all.log \
+        	  2> ${Hdr}.${MessageStr}.all.err
 
    $MAKE clean
 
