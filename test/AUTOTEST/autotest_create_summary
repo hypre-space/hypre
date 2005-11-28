@@ -276,6 +276,9 @@ do
          cd ${remote_dir}/linear_solvers
          search_error_files
 
+         cd ${remote_dir}/linear_solvers/docs
+         search_error_files
+
          cd ${remote_dir}/linear_solvers/test
          search_error_files
 

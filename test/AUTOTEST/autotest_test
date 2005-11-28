@@ -359,7 +359,7 @@ create_summary_files ()
         FILE=autotest.$ConfOpt.$MakeOpt
         EFILE=`echo $FILE`.err
         for i in $EFILE ${SRC}/${EFILE} \
-                 ${SRC}/test/${EFILE} ${SRC}/docs/${EFILE} 
+                 ${SRC}/docs/${EFILE} ${SRC}/test/${EFILE} 
         do
            if [ -r "${i}" ] ; then
               CTOTCNT=`expr $CTOTCNT + 1`
