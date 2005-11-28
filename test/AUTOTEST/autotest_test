@@ -357,23 +357,22 @@ create_summary_files ()
      for MakeOpt in ${STD_MAKEOPTIONS}
      do
         FILE=autotest.$ConfOpt.$MakeOpt
-        LFILE=`echo $FILE|sed -e 's/\.$//'`.log
-        for i in $LFILE ${SRC}/${LFILE} \
-                 ${SRC}/test/${LFILE} ${SRC}/docs/${LFILE} 
+        EFILE=`echo $FILE`.err
+        for i in $EFILE ${SRC}/${EFILE} \
+                 ${SRC}/test/${EFILE} ${SRC}/docs/${EFILE} 
         do
            if [ -r "${i}" ] ; then
               CTOTCNT=`expr $CTOTCNT + 1`
-              EFILE=`echo $i|sed -e 's/log$//'`err
-              apply_error_filters ${EFILE}
-              if [ -s "${EFILE}" ] ; then
-                 errinfo="<a href=\""${HYPRE_REMOTE_DIR}/${EFILE}"\">"${FILE}.err"</a><br>"
+              apply_error_filters ${i}
+              if [ -s "${i}" ] ; then
+                 errinfo="<a href=\""${HYPRE_REMOTE_DIR}/${i}"\">"${EFILE}"</a><br>"
                  AutotestFailureCount=`expr $AutotestFailureCount + 1`
                  CERRCNT=`expr $CERRCNT + 1`
                  TestCaseFailedCount=`expr $TestCaseFailedCount + 1`
                  CLIST="${CLIST}${errinfo}\n"
                  DWRNNUM=0; DERRNUM=0;
-                 DWRNNUM=`grep -i warning ${EFILE}|wc -l`
-                 DERRNUM=`grep -i error ${EFILE}|wc -l`
+                 DWRNNUM=`grep -i warning ${i}|wc -l`
+                 DERRNUM=`grep -i error ${i}|wc -l`
                  DWRNCNT=`expr $DWRNCNT + $DWRNNUM`
                  DERRCNT=`expr $DERRCNT + $DERRNUM`
               else
