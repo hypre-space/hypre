@@ -1102,7 +1102,6 @@ int hypre_BoomerAMGCreate2ndS( hypre_ParCSRMatrix *S, int *CF_marker,
    
    int              jj_count_diag, jj_count_offd;
    int              jj_row_begin_diag, jj_row_begin_offd;
-   int		    n_rows_S;
    int              cnt, cnt_offd, cnt_diag;
    int 		    num_procs, my_id;
    int 		    value, index;
@@ -1118,8 +1117,6 @@ int hypre_BoomerAMGCreate2ndS( hypre_ParCSRMatrix *S, int *CF_marker,
    int *S_int_j = NULL;
    int *S_ext_i = NULL;
    int *S_ext_j = NULL;
-
-   n_rows_S = hypre_ParCSRMatrixGlobalNumRows(S);
 
    /*-----------------------------------------------------------------------
     *  Extract S_ext, i.e. portion of B that is stored on neighbor procs

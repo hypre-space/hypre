@@ -57,7 +57,6 @@ hypre_BoomerAMGCreateNodalA(hypre_ParCSRMatrix    *A,
    int 		      *row_starts      = hypre_ParCSRMatrixRowStarts(A);
    int 		      *col_map_offd    = hypre_ParCSRMatrixColMapOffd(A);
    int                 num_variables   = hypre_CSRMatrixNumRows(A_diag);
-   int 		       num_nonzeros_diag;
    int 		       num_nonzeros_offd = 0;
    int 		       num_cols_offd = 0;
                   
@@ -167,7 +166,6 @@ hypre_BoomerAMGCreateNodalA(hypre_ParCSRMatrix    *A,
    num_nodes =  num_variables/num_functions;
    num_fun2 = num_functions*num_functions;
 
-   num_nonzeros_diag = A_diag_i[num_variables];
    map_to_node = hypre_CTAlloc(int, num_variables);
    AN_diag_i = hypre_CTAlloc(int, num_nodes+1);
    counter = hypre_CTAlloc(int, num_nodes);

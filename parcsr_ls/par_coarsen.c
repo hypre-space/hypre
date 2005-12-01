@@ -1997,7 +1997,6 @@ hypre_BoomerAMGCoarsenPMIS( hypre_ParCSRMatrix    *S,
    int		       index, start, my_id, num_procs, jrow, cnt, elmt;
                       
    int                 ierr = 0;
-   int                 use_commpkg_A = 0;
 
    double	    wall_time;
    int   iter = 0;
@@ -2039,7 +2038,6 @@ hypre_BoomerAMGCoarsenPMIS( hypre_ParCSRMatrix    *S,
 
    if (!comm_pkg)
    {
-        use_commpkg_A = 1;
         comm_pkg = hypre_ParCSRMatrixCommPkg(A); 
    }
 

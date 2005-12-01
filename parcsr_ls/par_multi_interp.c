@@ -150,7 +150,7 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
    int              pass_array_size;
    int              global_pass_array_size;
    int              local_pass_array_size;
-   int              my_id, num_procs, num_threads;
+   int              my_id, num_procs;
    int              index, start;
    int              my_first_cpt;
    int              total_global_cpts;
@@ -164,7 +164,6 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
    int              Pext_recv_size;
    int              old_Pext_send_size;
    int              old_Pext_recv_size;
-   int              P_diag_size = 0;
    int              P_offd_size = 0;
    int              local_index = -1;
    int              new_num_cols_offd = 0;
@@ -176,7 +175,6 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
 
    MPI_Comm_size(comm,&num_procs);
    MPI_Comm_rank(comm,&my_id);
-   num_threads = hypre_NumThreads();
 
 #ifdef HYPRE_NO_GLOBAL_PARTITION
    my_first_cpt = num_cpts_global[0];
@@ -390,13 +388,6 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
 
    new_recv_vec_start = hypre_CTAlloc(int,num_recvs+1);
 
-   /*if (col_offd_S_to_A)
-   {
-      map_A_to_new = hypre_CTAlloc(int,num_cols_offd_A);
-      for(i=0; i < num_cols_offd_A; i++)
-	 map_A_to_new[i] = -1;
-   }*/
-
    if (n_coarse_offd)
       C_array_offd = hypre_CTAlloc(int,n_coarse_offd);
 
@@ -409,7 +400,6 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
          if (CF_marker_offd[i] == 1)
          {
 	    map_S_to_new[i] = cnt;
-	    /*if (col_offd_S_to_A) map_A_to_new[col_offd_S_to_A[i]] = cnt;*/
 	    C_array_offd[cnt] = i;
 	    new_col_map_offd[cnt++] = fine_to_coarse_offd[i];
             assigned_offd[i] = 0; 
@@ -437,8 +427,6 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
 	   map_A_to_S[i] = -1;
       }
    }
-   /*else
-      map_A_to_new = map_S_to_new;*/
 
    /*-----------------------------------------------------------------------
     *  Mark all local neighbors of C points as 'assigned'.
@@ -607,8 +595,6 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
 
       new_elmts = hypre_CTAlloc(int*,num_passes);
 
-      /*proc_ids = hypre_CTAlloc(int*,num_passes); */
-
       new_counter = hypre_CTAlloc(int, num_passes+1);
 
       new_counter[0] = 0;
@@ -616,12 +602,6 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
       new_num_cols_offd = n_coarse_offd;
 
       new_elmts[0] = new_col_map_offd;
-
-      /*proc_ids[0] = hypre_CTAlloc(int,n_coarse_offd);
-
-      for (i=0; i < num_recvs; i++)
-         for (j = new_recv_vec_start[i]; j < new_recv_vec_start[i+1]; j++)
-	    proc_ids[0][j] = recv_procs[i]; */
    }
 
    /*-----------------------------------------------------------------------
@@ -702,7 +682,6 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
          {
             hypre_TFree(Pext_send_buffer);
             Pext_send_buffer = hypre_CTAlloc(int, Pext_send_size);
-            /*Pext_send_id = hypre_CTAlloc(int, Pext_send_size);*/
          }
          old_Pext_send_size = Pext_send_size;
       }
@@ -782,14 +761,10 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
             Pext_pass[pass] = NULL;
             new_elmts[pass-1] = NULL;
          }
-         /*Pext_recv_id = hypre_CTAlloc(int, Pext_recv_size);*/
 
          comm_handle = hypre_ParCSRCommHandleCreate (11, tmp_comm_pkg,
 		Pext_send_buffer, Pext_pass[pass]);
          hypre_ParCSRCommHandleDestroy(comm_handle);
-         /*comm_handle = hypre_ParCSRCommHandleCreate (11, tmp_comm_pkg,
-		Pext_send_id, Pext_recv_id);
-         hypre_ParCSRCommHandleDestroy(comm_handle);*/
 
          if (Pext_recv_size > old_Pext_recv_size)
          {
@@ -1442,7 +1417,6 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
       old_Pext_send_size = 0;
       old_Pext_recv_size = 0;
 
-      /*if (!col_offd_S_to_A) hypre_TFree(map_A_to_new);*/
       hypre_TFree(P_diag_pass[1]);
       if (num_procs > 1) hypre_TFree(P_offd_pass[1]);
 	  
@@ -1682,7 +1656,6 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
       P_offd_i = hypre_CSRMatrixI(P_offd);
       P_offd_j = hypre_CSRMatrixJ(P_offd);
    }
-   P_diag_size = P_diag_i[n_fine];
    P_offd_size = P_offd_i[n_fine];
 
    num_cols_offd_P = 0;

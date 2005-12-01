@@ -2661,7 +2661,6 @@ hypre_ParAMGCreateDomainDof(hypre_ParCSRMatrix   *A,
   /* int *row_starts = hypre_ParCSRMatrixRowStarts(A);*/
   hypre_ParCSRCommPkg *comm_pkg = hypre_ParCSRMatrixCommPkg(A);
   int num_recvs = 0;
-  int *recv_procs = NULL;
   int *recv_vec_starts = NULL;
 
   int ierr = 0;
@@ -2767,7 +2766,6 @@ hypre_ParAMGCreateDomainDof(hypre_ParCSRMatrix   *A,
      if (comm_pkg)
      {
 	num_recvs = hypre_ParCSRCommPkgNumRecvs(comm_pkg);    
-	recv_procs = hypre_ParCSRCommPkgRecvProcs(comm_pkg);    
 	recv_vec_starts = hypre_ParCSRCommPkgRecvVecStarts(comm_pkg);    
      }
      else if (num_procs > 1)
@@ -2779,7 +2777,6 @@ hypre_ParAMGCreateDomainDof(hypre_ParCSRMatrix   *A,
         hypre_MatvecCommPkgCreate(A);
 #endif
 	num_recvs = hypre_ParCSRCommPkgNumRecvs(comm_pkg);    
-	recv_procs = hypre_ParCSRCommPkgRecvProcs(comm_pkg);    
 	recv_vec_starts = hypre_ParCSRCommPkgRecvVecStarts(comm_pkg);    
      }
 

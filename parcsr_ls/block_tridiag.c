@@ -143,8 +143,8 @@ int hypre_BlockTridiagSetup(void *data, hypre_ParCSRMatrix *A,
    count = 1;
    for (i = 0; i < index_set1[1]; i++) index_set2[count++] = i;
    for (i = 1; i < nrows1; i++) 
-      for (j = index_set1[i]+1; i < index_set1[i+1]; i++) 
-         index_set2[count++] = i;
+      for (j = index_set1[i]+1; j < index_set1[i+1]; j++) 
+         index_set2[count++] = j;
    for (i = index_set1[nrows1]+1; i < nrows; i++) index_set2[count++] = i;
 
    submatrices = hypre_CTAlloc(hypre_ParCSRMatrix *, 4);
