@@ -130,6 +130,9 @@ apply_error_filters ()
           'configure:\ WARNING:\ Configuration\ for'\
           'configure:\ WARNING:\ Skipping\ Java'\
           'babel_config.h.in:\ No\ such\ file\ or\ directory'\
+          '../../../babel/runtime'\
+          'ltdl.c:'\
+          'sidl'\
           'Insure\ messages\ will\ be\ written\ to'\
           'Timeout\ in\ waiting\ for\ processes\ to'\
           'rsh\ program'\
