@@ -283,8 +283,7 @@ int main (int argc, char *argv[])
       double final_res_norm;
 
       /* Create solver */
-      amg_solver = bHYPRE_BoomerAMG_Create( mpi_comm );
-      bHYPRE_BoomerAMG_SetOperator( amg_solver, op_A );
+      amg_solver = bHYPRE_BoomerAMG_Create( mpi_comm, op_A );
 
       /* Set some parameters (See Reference Manual for more parameters) */
       bHYPRE_BoomerAMG_SetIntParameter( amg_solver, "PrintLevel", 3 );  /* print solve info + parameters */
@@ -370,8 +369,7 @@ int main (int argc, char *argv[])
       bHYPRE_PCG_SetIntParameter( pcg_solver, "Logging", 1 ); /* needed to get run info later */
 
       /* Now set up the AMG preconditioner and specify any parameters */
-      amg_solver = bHYPRE_BoomerAMG_Create( mpi_comm );
-      bHYPRE_BoomerAMG_SetOperator( amg_solver, op_A );
+      amg_solver = bHYPRE_BoomerAMG_Create( mpi_comm, op_A );
       bHYPRE_BoomerAMG_SetIntParameter( amg_solver, "PrintLevel", 1 ); /* print amg solution info*/
       bHYPRE_BoomerAMG_SetIntParameter( amg_solver, "CoarsenType", 6); /* Falgout coarsening */
       bHYPRE_BoomerAMG_SetIntParameter( amg_solver, "RelaxType", 3);   /* G-S/Jacobi hybrid relaxation */
@@ -424,8 +422,7 @@ int main (int argc, char *argv[])
       bHYPRE_PCG_SetIntParameter( pcg_solver, "Logging", 1 ); /* needed to get run info later */
 
       /* Now set up the ParaSails preconditioner and specify any parameters */
-      ps_solver = bHYPRE_ParaSails_Create( mpi_comm );
-      bHYPRE_ParaSails_SetOperator( ps_solver, op_A );
+      ps_solver = bHYPRE_ParaSails_Create( mpi_comm, op_A );
 
       /* Set some parameters (See Reference Manual for more parameters) */
       bHYPRE_ParaSails_SetDoubleParameter( ps_solver, "Thresh", sai_threshold );
