@@ -230,10 +230,12 @@ bHYPRE_StructDiagScale_getClassInfo(
 
 bHYPRE_StructDiagScale
 bHYPRE_StructDiagScale_Create(
-  /* in */ bHYPRE_MPICommunicator mpi_comm)
+  /* in */ bHYPRE_MPICommunicator mpi_comm,
+  /* in */ bHYPRE_Operator A)
 {
   return (_getSEPV()->f_Create)(
-    mpi_comm);
+    mpi_comm,
+    A);
 }
 
 /*
@@ -473,6 +475,7 @@ bHYPRE_StructDiagScale_ApplyAdjoint(
 
 /*
  * Set the operator for the linear system being solved.
+ * DEPRECATED.  use Create
  * 
  */
 
@@ -594,13 +597,15 @@ bHYPRE_StructDiagScale_Create__sexec(
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
   bHYPRE_MPICommunicator mpi_comm;
+  bHYPRE_Operator A;
   bHYPRE_StructDiagScale _retval;
 
   /* unpack in and inout argments */
 
   /* make the call */
   _retval = (_getSEPV()->f_Create)(
-    mpi_comm);
+    mpi_comm,
+    A);
 
   /* pack return value */
   /* pack out and inout argments */

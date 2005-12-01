@@ -135,7 +135,8 @@ extern "C"
 #endif
 bHYPRE_StructSMG
 impl_bHYPRE_StructSMG_Create(
-  /* in */ bHYPRE_MPICommunicator mpi_comm)
+  /* in */ bHYPRE_MPICommunicator mpi_comm,
+  /* in */ bHYPRE_Operator A)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.StructSMG.Create) */
   /* Insert-Code-Here {bHYPRE.StructSMG.Create} (Create method) */
@@ -145,11 +146,24 @@ impl_bHYPRE_StructSMG_Create(
    HYPRE_StructSolver * Hsolver = &dummy;
    bHYPRE_StructSMG solver = bHYPRE_StructSMG__create();
    struct bHYPRE_StructSMG__data * data = bHYPRE_StructSMG__get_data( solver );
+   bHYPRE_StructMatrix Amat;
 
    data->comm = bHYPRE_MPICommunicator__get_data(mpi_comm)->mpi_comm;
    ierr += HYPRE_StructSMGCreate( (data->comm), Hsolver );
    hypre_assert( ierr==0 );
    data -> solver = *Hsolver;
+
+   if ( bHYPRE_Operator_queryInt( A, "bHYPRE.StructMatrix" ) )
+   {
+      Amat = bHYPRE_StructMatrix__cast( A );
+      bHYPRE_StructMatrix_deleteRef( Amat ); /* extra ref from queryInt */
+   }
+   else
+   {
+      hypre_assert( "Unrecognized operator type."==(char *)A );
+   }
+   data->matrix = Amat;
+   bHYPRE_StructMatrix_addRef( data->matrix );
 
    return solver;
 
@@ -750,6 +764,7 @@ impl_bHYPRE_StructSMG_ApplyAdjoint(
 
 /*
  * Set the operator for the linear system being solved.
+ * DEPRECATED.  use Create
  * 
  */
 
@@ -767,6 +782,7 @@ impl_bHYPRE_StructSMG_SetOperator(
   /* DO-NOT-DELETE splicer.begin(bHYPRE.StructSMG.SetOperator) */
   /* Insert the implementation of the SetOperator method here... */
 
+   /* not normally needed, as an operator is provided in Create */
    int ierr = 0;
    struct bHYPRE_StructSMG__data * data;
    bHYPRE_StructMatrix Amat;

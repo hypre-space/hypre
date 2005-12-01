@@ -227,6 +227,8 @@ impl_bHYPRE_HPCG__ctor(
    data -> printlevel = -1234;
    data -> stop_crit  = -1234;
 
+   data -> bprecond = (bHYPRE_Solver)NULL;
+
    /* set any other data components here */
    bHYPRE_HPCG__set_data( self, data );
 
@@ -623,6 +625,10 @@ impl_bHYPRE_HPCG_GetIntValue(
    if ( strcmp(name,"NumIterations")==0 )
    {
       ierr += HYPRE_PCGGetNumIterations( solver, value );
+   }
+   if ( strcmp(name,"Converged")==0 )
+   {
+      ierr += HYPRE_PCGGetConverged( solver, value );
    }
    else if ( strcmp(name,"TwoNorm")==0 || strcmp(name,"2-norm")==0 )
    {
@@ -1152,6 +1158,7 @@ impl_bHYPRE_HPCG_ApplyAdjoint(
 
 /*
  * Set the operator for the linear system being solved.
+ * DEPRECATED.  use Create
  * 
  */
 
@@ -1437,6 +1444,7 @@ impl_bHYPRE_HPCG_SetPreconditioner(
    HYPRE_PtrToSolverFcn precond, precond_setup; /* functions */
 
    dataself = bHYPRE_HPCG__get_data( self );
+   dataself -> bprecond = s;
 
    if ( bHYPRE_Solver_queryInt( s, "bHYPRE.BoomerAMG" ) )
    {
@@ -1583,6 +1591,53 @@ impl_bHYPRE_HPCG_SetPreconditioner(
    return ierr;
 
   /* DO-NOT-DELETE splicer.end(bHYPRE.HPCG.SetPreconditioner) */
+}
+
+/*
+ * Method:  GetPreconditioner[]
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_HPCG_GetPreconditioner"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+int32_t
+impl_bHYPRE_HPCG_GetPreconditioner(
+  /* in */ bHYPRE_HPCG self,
+  /* out */ bHYPRE_Solver* s)
+{
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.HPCG.GetPreconditioner) */
+  /* Insert-Code-Here {bHYPRE.HPCG.GetPreconditioner} (GetPreconditioner method) */
+
+   int ierr = 0;
+   struct bHYPRE_HPCG__data * dataself = bHYPRE_HPCG__get_data( self );
+   *s = dataself -> bprecond ;
+
+   return ierr;
+
+  /* DO-NOT-DELETE splicer.end(bHYPRE.HPCG.GetPreconditioner) */
+}
+
+/*
+ * Method:  Clone[]
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_HPCG_Clone"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+int32_t
+impl_bHYPRE_HPCG_Clone(
+  /* in */ bHYPRE_HPCG self,
+  /* out */ bHYPRE_PreconditionedSolver* x)
+{
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.HPCG.Clone) */
+  /* Insert-Code-Here {bHYPRE.HPCG.Clone} (Clone method) */
+  /* DO-NOT-DELETE splicer.end(bHYPRE.HPCG.Clone) */
 }
 /* Babel internal methods, Users should not edit below this line. */
 struct bHYPRE_Solver__object* impl_bHYPRE_HPCG_fconnect_bHYPRE_Solver(char* url,

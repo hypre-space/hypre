@@ -95,7 +95,8 @@ impl_bHYPRE_Pilut__dtor(
 extern
 bHYPRE_Pilut
 impl_bHYPRE_Pilut_Create(
-  /* in */ bHYPRE_MPICommunicator mpi_comm);
+  /* in */ bHYPRE_MPICommunicator mpi_comm,
+  /* in */ bHYPRE_Operator A);
 
 extern struct bHYPRE_Solver__object* 
   impl_bHYPRE_Pilut_fconnect_bHYPRE_Solver(char* url, sidl_BaseInterface *_ex);

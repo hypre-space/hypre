@@ -215,6 +215,15 @@ impl_bHYPRE_IJParCSRMatrix_Read(
 
 extern
 int32_t
+impl_bHYPRE_IJParCSRMatrix_GetRow(
+  /* in */ bHYPRE_IJParCSRMatrix self,
+  /* in */ int32_t row,
+  /* out */ int32_t* size,
+  /* out */ struct sidl_int__array** col_ind,
+  /* out */ struct sidl_double__array** values);
+
+extern
+int32_t
 impl_bHYPRE_IJParCSRMatrix_SetIntParameter(
   /* in */ bHYPRE_IJParCSRMatrix self,
   /* in */ const char* name,
@@ -298,15 +307,6 @@ impl_bHYPRE_IJParCSRMatrix_ApplyAdjoint(
   /* in */ bHYPRE_IJParCSRMatrix self,
   /* in */ bHYPRE_Vector b,
   /* inout */ bHYPRE_Vector* x);
-
-extern
-int32_t
-impl_bHYPRE_IJParCSRMatrix_GetRow(
-  /* in */ bHYPRE_IJParCSRMatrix self,
-  /* in */ int32_t row,
-  /* out */ int32_t* size,
-  /* out */ struct sidl_int__array** col_ind,
-  /* out */ struct sidl_double__array** values);
 
 extern struct bHYPRE_CoefficientAccess__object* 
   impl_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_CoefficientAccess(char* url,
@@ -577,6 +577,31 @@ skel_bHYPRE_IJParCSRMatrix_SetRowSizes(
 }
 
 static int32_t
+skel_bHYPRE_IJParCSRMatrix_GetRow(
+  /* in */ bHYPRE_IJParCSRMatrix self,
+  /* in */ int32_t row,
+  /* out */ int32_t* size,
+  /* out */ struct sidl_int__array** col_ind,
+/* out */ struct sidl_double__array** values)
+{
+  int32_t _return;
+  struct sidl_int__array* col_ind_proxy = NULL;
+  struct sidl_double__array* values_proxy = NULL;
+  _return =
+    impl_bHYPRE_IJParCSRMatrix_GetRow(
+      self,
+      row,
+      size,
+      &col_ind_proxy,
+      &values_proxy);
+  *col_ind = sidl_int__array_ensure(col_ind_proxy, 1, sidl_column_major_order);
+  sidl_int__array_deleteRef(col_ind_proxy);
+  *values = sidl_double__array_ensure(values_proxy, 1, sidl_column_major_order);
+  sidl_double__array_deleteRef(values_proxy);
+  return _return;
+}
+
+static int32_t
 skel_bHYPRE_IJParCSRMatrix_SetIntArray1Parameter(
   /* in */ bHYPRE_IJParCSRMatrix self,
   /* in */ const char* name,
@@ -652,31 +677,6 @@ skel_bHYPRE_IJParCSRMatrix_SetDoubleArray2Parameter(
   return _return;
 }
 
-static int32_t
-skel_bHYPRE_IJParCSRMatrix_GetRow(
-  /* in */ bHYPRE_IJParCSRMatrix self,
-  /* in */ int32_t row,
-  /* out */ int32_t* size,
-  /* out */ struct sidl_int__array** col_ind,
-/* out */ struct sidl_double__array** values)
-{
-  int32_t _return;
-  struct sidl_int__array* col_ind_proxy = NULL;
-  struct sidl_double__array* values_proxy = NULL;
-  _return =
-    impl_bHYPRE_IJParCSRMatrix_GetRow(
-      self,
-      row,
-      size,
-      &col_ind_proxy,
-      &values_proxy);
-  *col_ind = sidl_int__array_ensure(col_ind_proxy, 1, sidl_column_major_order);
-  sidl_int__array_deleteRef(col_ind_proxy);
-  *values = sidl_double__array_ensure(values_proxy, 1, sidl_column_major_order);
-  sidl_double__array_deleteRef(values_proxy);
-  return _return;
-}
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -699,6 +699,7 @@ bHYPRE_IJParCSRMatrix__set_epv(struct bHYPRE_IJParCSRMatrix__epv *epv)
   epv->f_SetRowSizes = skel_bHYPRE_IJParCSRMatrix_SetRowSizes;
   epv->f_Print = impl_bHYPRE_IJParCSRMatrix_Print;
   epv->f_Read = impl_bHYPRE_IJParCSRMatrix_Read;
+  epv->f_GetRow = skel_bHYPRE_IJParCSRMatrix_GetRow;
   epv->f_SetIntParameter = impl_bHYPRE_IJParCSRMatrix_SetIntParameter;
   epv->f_SetDoubleParameter = impl_bHYPRE_IJParCSRMatrix_SetDoubleParameter;
   epv->f_SetStringParameter = impl_bHYPRE_IJParCSRMatrix_SetStringParameter;
@@ -715,7 +716,6 @@ bHYPRE_IJParCSRMatrix__set_epv(struct bHYPRE_IJParCSRMatrix__epv *epv)
   epv->f_Setup = impl_bHYPRE_IJParCSRMatrix_Setup;
   epv->f_Apply = impl_bHYPRE_IJParCSRMatrix_Apply;
   epv->f_ApplyAdjoint = impl_bHYPRE_IJParCSRMatrix_ApplyAdjoint;
-  epv->f_GetRow = skel_bHYPRE_IJParCSRMatrix_GetRow;
 
 }
 #ifdef __cplusplus

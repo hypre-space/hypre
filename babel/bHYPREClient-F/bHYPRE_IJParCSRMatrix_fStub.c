@@ -986,6 +986,46 @@ SIDLFortran77Symbol(bhypre_ijparcsrmatrix_read_f,BHYPRE_IJPARCSRMATRIX_READ_F,bH
 }
 
 /*
+ * The GetRow method will allocate space for its two output
+ * arrays on the first call.  The space will be reused on
+ * subsequent calls.  Thus the user must not delete them, yet
+ * must not depend on the data from GetRow to persist beyond the
+ * next GetRow call.
+ * 
+ */
+
+void
+SIDLFortran77Symbol(bhypre_ijparcsrmatrix_getrow_f,BHYPRE_IJPARCSRMATRIX_GETROW_F,bHYPRE_IJParCSRMatrix_GetRow_f)
+(
+  int64_t *self,
+  int32_t *row,
+  int32_t *size,
+  int64_t *col_ind,
+  int64_t *values,
+  int32_t *retval
+)
+{
+  struct bHYPRE_IJParCSRMatrix__epv *_epv = NULL;
+  struct bHYPRE_IJParCSRMatrix__object* _proxy_self = NULL;
+  struct sidl_int__array* _proxy_col_ind = NULL;
+  struct sidl_double__array* _proxy_values = NULL;
+  _proxy_self =
+    (struct bHYPRE_IJParCSRMatrix__object*)
+    (ptrdiff_t)(*self);
+  _epv = _proxy_self->d_epv;
+  *retval = 
+    (*(_epv->f_GetRow))(
+      _proxy_self,
+      *row,
+      size,
+      &_proxy_col_ind,
+      &_proxy_values
+    );
+  *col_ind = (ptrdiff_t)_proxy_col_ind;
+  *values = (ptrdiff_t)_proxy_values;
+}
+
+/*
  * Set the int parameter associated with {\tt name}.
  * 
  */
@@ -1438,46 +1478,6 @@ SIDLFortran77Symbol(bhypre_ijparcsrmatrix_applyadjoint_f,BHYPRE_IJPARCSRMATRIX_A
       &_proxy_x
     );
   *x = (ptrdiff_t)_proxy_x;
-}
-
-/*
- * The GetRow method will allocate space for its two output
- * arrays on the first call.  The space will be reused on
- * subsequent calls.  Thus the user must not delete them, yet
- * must not depend on the data from GetRow to persist beyond the
- * next GetRow call.
- * 
- */
-
-void
-SIDLFortran77Symbol(bhypre_ijparcsrmatrix_getrow_f,BHYPRE_IJPARCSRMATRIX_GETROW_F,bHYPRE_IJParCSRMatrix_GetRow_f)
-(
-  int64_t *self,
-  int32_t *row,
-  int32_t *size,
-  int64_t *col_ind,
-  int64_t *values,
-  int32_t *retval
-)
-{
-  struct bHYPRE_IJParCSRMatrix__epv *_epv = NULL;
-  struct bHYPRE_IJParCSRMatrix__object* _proxy_self = NULL;
-  struct sidl_int__array* _proxy_col_ind = NULL;
-  struct sidl_double__array* _proxy_values = NULL;
-  _proxy_self =
-    (struct bHYPRE_IJParCSRMatrix__object*)
-    (ptrdiff_t)(*self);
-  _epv = _proxy_self->d_epv;
-  *retval = 
-    (*(_epv->f_GetRow))(
-      _proxy_self,
-      *row,
-      size,
-      &_proxy_col_ind,
-      &_proxy_values
-    );
-  *col_ind = (ptrdiff_t)_proxy_col_ind;
-  *values = (ptrdiff_t)_proxy_values;
 }
 
 void

@@ -235,7 +235,8 @@ extern "C"
 #endif
 bHYPRE_BoomerAMG
 impl_bHYPRE_BoomerAMG_Create(
-  /* in */ bHYPRE_MPICommunicator mpi_comm)
+  /* in */ bHYPRE_MPICommunicator mpi_comm,
+  /* in */ bHYPRE_Operator A)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.BoomerAMG.Create) */
   /* Insert-Code-Here {bHYPRE.BoomerAMG.Create} (Create method) */
@@ -244,8 +245,21 @@ impl_bHYPRE_BoomerAMG_Create(
    struct bHYPRE_BoomerAMG__data * data = bHYPRE_BoomerAMG__get_data( solver );
    struct bHYPRE_MPICommunicator__data * mpi_data =
       bHYPRE_MPICommunicator__get_data(mpi_comm);
+   bHYPRE_IJParCSRMatrix Amat;
 
    data->comm = mpi_data->mpi_comm;
+
+   if ( bHYPRE_Operator_queryInt( A, "bHYPRE.IJParCSRMatrix" ) )
+   {
+      Amat = bHYPRE_IJParCSRMatrix__cast( A );
+      bHYPRE_IJParCSRMatrix_deleteRef( Amat ); /* extra ref from queryInt */
+   }
+   else
+   {
+      hypre_assert( "Unrecognized operator type."==(char *)A );
+   }
+   data->matrix = Amat;
+   bHYPRE_IJParCSRMatrix_addRef( data->matrix );
 
    return solver;
 
@@ -1271,6 +1285,7 @@ impl_bHYPRE_BoomerAMG_ApplyAdjoint(
 
 /*
  * Set the operator for the linear system being solved.
+ * DEPRECATED.  use Create
  * 
  */
 

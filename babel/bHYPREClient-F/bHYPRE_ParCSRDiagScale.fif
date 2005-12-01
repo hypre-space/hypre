@@ -173,10 +173,12 @@ C
 C       Method:  Create[]
 C       
 
-        subroutine bHYPRE_ParCSRDiagScale_Create_f(mpi_comm, retval)
+        subroutine bHYPRE_ParCSRDiagScale_Create_f(mpi_comm, A, retval)
         implicit none
 C       in bHYPRE.MPICommunicator mpi_comm
         integer*8 mpi_comm
+C       in bHYPRE.Operator A
+        integer*8 A
 C       out bHYPRE.ParCSRDiagScale retval
         integer*8 retval
         end
@@ -431,6 +433,7 @@ C       out int retval
 
 C       
 C       Set the operator for the linear system being solved.
+C       DEPRECATED.  use Create
 C       
 C       
 

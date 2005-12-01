@@ -126,7 +126,8 @@ extern "C"
 #endif
 bHYPRE_StructPFMG
 impl_bHYPRE_StructPFMG_Create(
-  /* in */ bHYPRE_MPICommunicator mpi_comm)
+  /* in */ bHYPRE_MPICommunicator mpi_comm,
+  /* in */ bHYPRE_Operator A)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.StructPFMG.Create) */
   /* Insert-Code-Here {bHYPRE.StructPFMG.Create} (Create method) */
@@ -136,12 +137,25 @@ impl_bHYPRE_StructPFMG_Create(
    struct bHYPRE_StructPFMG__data * data = bHYPRE_StructPFMG__get_data( solver );
    HYPRE_StructSolver dummy;
    HYPRE_StructSolver * Hsolver = &dummy;
+   bHYPRE_StructMatrix Amat;
 
    data->comm = bHYPRE_MPICommunicator__get_data(mpi_comm)->mpi_comm;
 
    ierr += HYPRE_StructPFMGCreate( (data->comm), Hsolver );
    hypre_assert( ierr==0 );
    data -> solver = *Hsolver;
+
+   if ( bHYPRE_Operator_queryInt( A, "bHYPRE.StructMatrix" ) )
+   {
+      Amat = bHYPRE_StructMatrix__cast( A );
+      bHYPRE_StructMatrix_deleteRef( Amat ); /* extra ref from queryInt */
+   }
+   else
+   {
+      hypre_assert( "Unrecognized operator type."==(char *)A );
+   }
+   data->matrix = Amat;
+   bHYPRE_StructMatrix_addRef( data->matrix );
 
    return solver;
 
@@ -784,6 +798,7 @@ impl_bHYPRE_StructPFMG_ApplyAdjoint(
 
 /*
  * Set the operator for the linear system being solved.
+ * DEPRECATED.  use Create
  * 
  */
 

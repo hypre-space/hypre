@@ -786,6 +786,56 @@ bHYPRE_PCG_SetPreconditioner__exec(
 
 }
 
+static void
+bHYPRE_PCG_GetPreconditioner__exec(
+        struct bHYPRE_PCG__object* self,
+        struct sidl_io_Deserializer__object* inArgs,
+        struct sidl_io_Serializer__object* outArgs) {
+  /* stack space for arguments */
+  struct bHYPRE_Solver__object* s_tmp;
+  struct bHYPRE_Solver__object** s= &s_tmp;
+  int32_t _retval;
+  sidl_BaseInterface _ex   = NULL;
+  sidl_BaseInterface *_ex2 = &_ex;
+  /* unpack in and inout argments */
+
+  /* make the call */
+  _retval = (self->d_epv->f_GetPreconditioner)(
+    self,
+    s);
+
+  /* pack return value */
+  sidl_io_Serializer_packInt( outArgs, "_retval", _retval, _ex2);
+
+  /* pack out and inout argments */
+
+}
+
+static void
+bHYPRE_PCG_Clone__exec(
+        struct bHYPRE_PCG__object* self,
+        struct sidl_io_Deserializer__object* inArgs,
+        struct sidl_io_Serializer__object* outArgs) {
+  /* stack space for arguments */
+  struct bHYPRE_PreconditionedSolver__object* x_tmp;
+  struct bHYPRE_PreconditionedSolver__object** x= &x_tmp;
+  int32_t _retval;
+  sidl_BaseInterface _ex   = NULL;
+  sidl_BaseInterface *_ex2 = &_ex;
+  /* unpack in and inout argments */
+
+  /* make the call */
+  _retval = (self->d_epv->f_Clone)(
+    self,
+    x);
+
+  /* pack return value */
+  sidl_io_Serializer_packInt( outArgs, "_retval", _retval, _ex2);
+
+  /* pack out and inout argments */
+
+}
+
 static void ior_bHYPRE_PCG__ensure_load_called(void) {
   /*
    * assert( HAVE_LOCKED_STATIC_GLOBALS );
@@ -862,9 +912,11 @@ ior_bHYPRE_PCG__exec(
   static const struct bHYPRE_PCG__method  s_methods[] = {
     { "Apply", bHYPRE_PCG_Apply__exec },
     { "ApplyAdjoint", bHYPRE_PCG_ApplyAdjoint__exec },
+    { "Clone", bHYPRE_PCG_Clone__exec },
     { "GetDoubleValue", bHYPRE_PCG_GetDoubleValue__exec },
     { "GetIntValue", bHYPRE_PCG_GetIntValue__exec },
     { "GetNumIterations", bHYPRE_PCG_GetNumIterations__exec },
+    { "GetPreconditioner", bHYPRE_PCG_GetPreconditioner__exec },
     { "GetRelResidualNorm", bHYPRE_PCG_GetRelResidualNorm__exec },
     { "SetCommunicator", bHYPRE_PCG_SetCommunicator__exec },
     { "SetDoubleArray1Parameter", bHYPRE_PCG_SetDoubleArray1Parameter__exec },
@@ -970,6 +1022,8 @@ static void bHYPRE_PCG__init_epv(
   epv->f_GetNumIterations              = NULL;
   epv->f_GetRelResidualNorm            = NULL;
   epv->f_SetPreconditioner             = NULL;
+  epv->f_GetPreconditioner             = NULL;
+  epv->f_Clone                         = NULL;
 
   bHYPRE_PCG__set_epv(epv);
 
@@ -1074,6 +1128,10 @@ static void bHYPRE_PCG__init_epv(
     double*)) epv->f_GetRelResidualNorm;
   e1->f_SetPreconditioner        = (int32_t (*)(void*,
     struct bHYPRE_Solver__object*)) epv->f_SetPreconditioner;
+  e1->f_GetPreconditioner        = (int32_t (*)(void*,
+    struct bHYPRE_Solver__object**)) epv->f_GetPreconditioner;
+  e1->f_Clone                    = (int32_t (*)(void*,
+    struct bHYPRE_PreconditionedSolver__object**)) epv->f_Clone;
 
   e2->f__cast                    = (void* (*)(void*,const char*)) epv->f__cast;
   e2->f__delete                  = (void (*)(void*)) epv->f__delete;

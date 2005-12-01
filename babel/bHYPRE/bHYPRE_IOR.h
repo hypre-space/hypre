@@ -44,6 +44,9 @@
 #ifndef included_bHYPRE_HPCG_IOR_h
 #include "bHYPRE_HPCG_IOR.h"
 #endif
+#ifndef included_bHYPRE_Hybrid_IOR_h
+#include "bHYPRE_Hybrid_IOR.h"
+#endif
 #ifndef included_bHYPRE_IJMatrixView_IOR_h
 #include "bHYPRE_IJMatrixView_IOR.h"
 #endif

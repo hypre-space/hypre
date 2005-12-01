@@ -214,7 +214,8 @@ bHYPRE_BoomerAMG_getClassInfo(
  */
 bHYPRE_BoomerAMG
 bHYPRE_BoomerAMG_Create(
-  /* in */ bHYPRE_MPICommunicator mpi_comm);
+  /* in */ bHYPRE_MPICommunicator mpi_comm,
+  /* in */ bHYPRE_Operator A);
 
 /**
  * Method:  SetLevelRelaxWt[]
@@ -373,6 +374,7 @@ bHYPRE_BoomerAMG_ApplyAdjoint(
 
 /**
  * Set the operator for the linear system being solved.
+ * DEPRECATED.  use Create
  * 
  */
 int32_t

@@ -480,6 +480,10 @@ impl_bHYPRE_GMRES_GetIntValue(
    {
       *value = data -> num_iterations;
    }
+   else if ( strcmp(name,"Converged")==0 )
+   {
+      *value = data -> converged;
+   }
    else if ( strcmp(name,"KDim")==0 )
    {
       *value = data -> k_dim;
@@ -864,6 +868,7 @@ impl_bHYPRE_GMRES_Apply(
          hypre_TFree(rs);
          for (i=0; i < k_dim+1; i++) hypre_TFree(hh[i]);
          hypre_TFree(hh); 
+         data -> converged = 1;
          ierr = 0;
          return ierr;
       }
@@ -883,6 +888,7 @@ impl_bHYPRE_GMRES_Apply(
                printf("\n\n");
                printf("Final L2 norm of residual: %e\n\n", r_norm);
             }
+            data -> converged = 1;
             break;
          }
          else
@@ -1105,6 +1111,7 @@ impl_bHYPRE_GMRES_ApplyAdjoint(
 
 /*
  * Set the operator for the linear system being solved.
+ * DEPRECATED.  use Create
  * 
  */
 
@@ -1355,6 +1362,87 @@ impl_bHYPRE_GMRES_SetPreconditioner(
    return ierr;
 
   /* DO-NOT-DELETE splicer.end(bHYPRE.GMRES.SetPreconditioner) */
+}
+
+/*
+ * Method:  GetPreconditioner[]
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_GMRES_GetPreconditioner"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+int32_t
+impl_bHYPRE_GMRES_GetPreconditioner(
+  /* in */ bHYPRE_GMRES self,
+  /* out */ bHYPRE_Solver* s)
+{
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.GMRES.GetPreconditioner) */
+  /* Insert-Code-Here {bHYPRE.GMRES.GetPreconditioner} (GetPreconditioner method) */
+
+   int ierr = 0;
+   struct bHYPRE_GMRES__data * data = bHYPRE_GMRES__get_data( self );
+
+   *s = data->precond;
+
+   return ierr;
+
+  /* DO-NOT-DELETE splicer.end(bHYPRE.GMRES.GetPreconditioner) */
+}
+
+/*
+ * Method:  Clone[]
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_GMRES_Clone"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+int32_t
+impl_bHYPRE_GMRES_Clone(
+  /* in */ bHYPRE_GMRES self,
+  /* out */ bHYPRE_PreconditionedSolver* x)
+{
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.GMRES.Clone) */
+  /* Insert-Code-Here {bHYPRE.GMRES.Clone} (Clone method) */
+
+   int ierr = 0;
+   struct bHYPRE_GMRES__data * data = bHYPRE_GMRES__get_data( self );
+   struct bHYPRE_GMRES__data * datax;
+   bHYPRE_GMRES GMRES_x;
+
+   GMRES_x = bHYPRE_GMRES_Create( data->bmpicomm, data->matrix );
+
+   /* Copy most data members.
+      The preconditioner copy will be a shallow copy (just the pointer);
+      it is likely to be replaced later.
+      But don't copy anything created in Setup (r,w,p,norms,log_file_name).
+      The user will call Setup on x, later.
+      Also don't copy the end-of-solve diagnostics (converged,num_iterations,
+      rel_residual_norm) */
+
+   datax = bHYPRE_GMRES__get_data( GMRES_x );
+   datax->tol               = data->tol;
+   datax->cf_tol            = data->cf_tol;
+   datax->max_iter          = data->max_iter;
+   datax->min_iter          = data->min_iter;
+   datax->k_dim             = data->k_dim;
+   datax->rel_change        = data->rel_change;
+   datax->stop_crit         = data->stop_crit;
+   datax->print_level       = data->print_level;
+   datax->logging           = data->logging;
+
+   datax->precond           = data->precond;
+   bHYPRE_Solver_addRef( datax->precond );
+
+   *x = bHYPRE_PreconditionedSolver__cast( GMRES_x );
+   return ierr;
+
+  /* DO-NOT-DELETE splicer.end(bHYPRE.GMRES.Clone) */
 }
 /* Babel internal methods, Users should not edit below this line. */
 struct bHYPRE_Solver__object* impl_bHYPRE_GMRES_fconnect_bHYPRE_Solver(char* 

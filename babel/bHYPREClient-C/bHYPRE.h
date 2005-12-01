@@ -34,6 +34,9 @@
 #ifndef included_bHYPRE_HPCG_h
 #include "bHYPRE_HPCG.h"
 #endif
+#ifndef included_bHYPRE_Hybrid_h
+#include "bHYPRE_Hybrid.h"
+#endif
 #ifndef included_bHYPRE_IJMatrixView_h
 #include "bHYPRE_IJMatrixView.h"
 #endif

@@ -52,6 +52,12 @@ bHYPRE_HPCG_IOR.h: bHYPRE_PreconditionedSolver_IOR.h
 bHYPRE_HPCG_IOR.h: bHYPRE_Solver_IOR.h
 bHYPRE_HPCG_IOR.h: sidl_BaseClass_IOR.h
 
+bHYPRE_Hybrid_IOR.h: /home/painter/linear_solvers/babel/Interfaces.idl
+bHYPRE_Hybrid_IOR.h: sidl_header.h
+bHYPRE_Hybrid_IOR.h: bHYPRE_Operator_IOR.h
+bHYPRE_Hybrid_IOR.h: bHYPRE_Solver_IOR.h
+bHYPRE_Hybrid_IOR.h: sidl_BaseClass_IOR.h
+
 bHYPRE_IJMatrixView_IOR.h: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_IJMatrixView_IOR.h: sidl_header.h
 bHYPRE_IJMatrixView_IOR.h: bHYPRE_IJMatrixView_IOR.h
@@ -92,6 +98,7 @@ bHYPRE_IOR.h: bHYPRE_Euclid_IOR.h
 bHYPRE_IOR.h: bHYPRE_GMRES_IOR.h
 bHYPRE_IOR.h: bHYPRE_HGMRES_IOR.h
 bHYPRE_IOR.h: bHYPRE_HPCG_IOR.h
+bHYPRE_IOR.h: bHYPRE_Hybrid_IOR.h
 bHYPRE_IOR.h: bHYPRE_IJMatrixView_IOR.h
 bHYPRE_IOR.h: bHYPRE_IJParCSRMatrix_IOR.h
 bHYPRE_IOR.h: bHYPRE_IJParCSRVector_IOR.h
@@ -371,6 +378,8 @@ bHYPRE_HGMRES.fif: /home/painter/linear_solvers/babel/Interfaces.idl
 
 bHYPRE_HPCG.fif: /home/painter/linear_solvers/babel/Interfaces.idl
 
+bHYPRE_Hybrid.fif: /home/painter/linear_solvers/babel/Interfaces.idl
+
 bHYPRE_IJMatrixView.fif: /home/painter/linear_solvers/babel/Interfaces.idl
 
 bHYPRE_IJParCSRMatrix.fif: /home/painter/linear_solvers/babel/Interfaces.idl
@@ -469,6 +478,7 @@ bHYPRE_BiCGSTAB_fStub.c: bHYPRE_Operator_IOR.h
 bHYPRE_BiCGSTAB_fStub.c: sidl_ClassInfo_IOR.h
 bHYPRE_BiCGSTAB_fStub.c: bHYPRE_Vector_IOR.h
 bHYPRE_BiCGSTAB_fStub.c: sidl_BaseInterface_IOR.h
+bHYPRE_BiCGSTAB_fStub.c: bHYPRE_PreconditionedSolver_IOR.h
 
 bHYPRE_BoomerAMG_fStub.c: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_BoomerAMG_fStub.c: sidlfortran.h
@@ -496,6 +506,7 @@ bHYPRE_CGNR_fStub.c: bHYPRE_Operator_IOR.h
 bHYPRE_CGNR_fStub.c: sidl_ClassInfo_IOR.h
 bHYPRE_CGNR_fStub.c: bHYPRE_Vector_IOR.h
 bHYPRE_CGNR_fStub.c: sidl_BaseInterface_IOR.h
+bHYPRE_CGNR_fStub.c: bHYPRE_PreconditionedSolver_IOR.h
 
 bHYPRE_CoefficientAccess_fStub.c:                                             \
   /home/painter/linear_solvers/babel/Interfaces.idl
@@ -534,6 +545,7 @@ bHYPRE_GMRES_fStub.c: bHYPRE_Operator_IOR.h
 bHYPRE_GMRES_fStub.c: sidl_ClassInfo_IOR.h
 bHYPRE_GMRES_fStub.c: bHYPRE_Vector_IOR.h
 bHYPRE_GMRES_fStub.c: sidl_BaseInterface_IOR.h
+bHYPRE_GMRES_fStub.c: bHYPRE_PreconditionedSolver_IOR.h
 
 bHYPRE_HGMRES_fStub.c: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_HGMRES_fStub.c: sidlfortran.h
@@ -548,6 +560,7 @@ bHYPRE_HGMRES_fStub.c: bHYPRE_Operator_IOR.h
 bHYPRE_HGMRES_fStub.c: sidl_ClassInfo_IOR.h
 bHYPRE_HGMRES_fStub.c: bHYPRE_Vector_IOR.h
 bHYPRE_HGMRES_fStub.c: sidl_BaseInterface_IOR.h
+bHYPRE_HGMRES_fStub.c: bHYPRE_PreconditionedSolver_IOR.h
 
 bHYPRE_HPCG_fStub.c: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_HPCG_fStub.c: sidlfortran.h
@@ -562,6 +575,21 @@ bHYPRE_HPCG_fStub.c: bHYPRE_Operator_IOR.h
 bHYPRE_HPCG_fStub.c: sidl_ClassInfo_IOR.h
 bHYPRE_HPCG_fStub.c: bHYPRE_Vector_IOR.h
 bHYPRE_HPCG_fStub.c: sidl_BaseInterface_IOR.h
+bHYPRE_HPCG_fStub.c: bHYPRE_PreconditionedSolver_IOR.h
+
+bHYPRE_Hybrid_fStub.c: /home/painter/linear_solvers/babel/Interfaces.idl
+bHYPRE_Hybrid_fStub.c: sidlfortran.h
+bHYPRE_Hybrid_fStub.c: sidl_header.h
+bHYPRE_Hybrid_fStub.c: sidl_interface_IOR.h
+bHYPRE_Hybrid_fStub.c: babel_config.h
+bHYPRE_Hybrid_fStub.c: sidl_Loader.h
+bHYPRE_Hybrid_fStub.c: bHYPRE_Hybrid_IOR.h
+bHYPRE_Hybrid_fStub.c: bHYPRE_MPICommunicator_IOR.h
+bHYPRE_Hybrid_fStub.c: bHYPRE_Operator_IOR.h
+bHYPRE_Hybrid_fStub.c: sidl_ClassInfo_IOR.h
+bHYPRE_Hybrid_fStub.c: bHYPRE_Vector_IOR.h
+bHYPRE_Hybrid_fStub.c: sidl_BaseInterface_IOR.h
+bHYPRE_Hybrid_fStub.c: bHYPRE_PreconditionedSolver_IOR.h
 
 bHYPRE_IJMatrixView_fStub.c: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_IJMatrixView_fStub.c: sidlfortran.h
@@ -673,6 +701,7 @@ bHYPRE_PCG_fStub.c: bHYPRE_Operator_IOR.h
 bHYPRE_PCG_fStub.c: sidl_ClassInfo_IOR.h
 bHYPRE_PCG_fStub.c: bHYPRE_Vector_IOR.h
 bHYPRE_PCG_fStub.c: sidl_BaseInterface_IOR.h
+bHYPRE_PCG_fStub.c: bHYPRE_PreconditionedSolver_IOR.h
 
 bHYPRE_ParCSRDiagScale_fStub.c:                                               \
   /home/painter/linear_solvers/babel/Interfaces.idl

@@ -412,6 +412,7 @@ C       out int retval
 
 C       
 C       Set the operator for the linear system being solved.
+C       DEPRECATED.  use Create
 C       
 C       
 
@@ -554,6 +555,37 @@ C       in bHYPRE.PreconditionedSolver self
         integer*8 self
 C       in bHYPRE.Solver s
         integer*8 s
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Method:  GetPreconditioner[]
+C       
+
+        subroutine bHYPRE_PreconditionedSolver_GetPreconditioner_f(self,
+     &     s, retval)
+        implicit none
+C       in bHYPRE.PreconditionedSolver self
+        integer*8 self
+C       out bHYPRE.Solver s
+        integer*8 s
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Method:  Clone[]
+C       
+
+        subroutine bHYPRE_PreconditionedSolver_Clone_f(self, x, retval)
+        implicit none
+C       in bHYPRE.PreconditionedSolver self
+        integer*8 self
+C       out bHYPRE.PreconditionedSolver x
+        integer*8 x
 C       out int retval
         integer*4 retval
         end

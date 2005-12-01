@@ -102,7 +102,8 @@ extern "C"
 #endif
 bHYPRE_Pilut
 impl_bHYPRE_Pilut_Create(
-  /* in */ bHYPRE_MPICommunicator mpi_comm)
+  /* in */ bHYPRE_MPICommunicator mpi_comm,
+  /* in */ bHYPRE_Operator A)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.Pilut.Create) */
   /* Insert-Code-Here {bHYPRE.Pilut.Create} (Create method) */
@@ -426,6 +427,7 @@ impl_bHYPRE_Pilut_ApplyAdjoint(
 
 /*
  * Set the operator for the linear system being solved.
+ * DEPRECATED.  use Create
  * 
  */
 

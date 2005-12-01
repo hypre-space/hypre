@@ -229,10 +229,12 @@ bHYPRE_StructPFMG_getClassInfo(
 
 bHYPRE_StructPFMG
 bHYPRE_StructPFMG_Create(
-  /* in */ bHYPRE_MPICommunicator mpi_comm)
+  /* in */ bHYPRE_MPICommunicator mpi_comm,
+  /* in */ bHYPRE_Operator A)
 {
   return (_getSEPV()->f_Create)(
-    mpi_comm);
+    mpi_comm,
+    A);
 }
 
 /*
@@ -472,6 +474,7 @@ bHYPRE_StructPFMG_ApplyAdjoint(
 
 /*
  * Set the operator for the linear system being solved.
+ * DEPRECATED.  use Create
  * 
  */
 
@@ -593,13 +596,15 @@ bHYPRE_StructPFMG_Create__sexec(
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
   bHYPRE_MPICommunicator mpi_comm;
+  bHYPRE_Operator A;
   bHYPRE_StructPFMG _retval;
 
   /* unpack in and inout argments */
 
   /* make the call */
   _retval = (_getSEPV()->f_Create)(
-    mpi_comm);
+    mpi_comm,
+    A);
 
   /* pack return value */
   /* pack out and inout argments */

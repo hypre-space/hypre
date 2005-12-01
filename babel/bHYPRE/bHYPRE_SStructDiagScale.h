@@ -102,7 +102,8 @@ bHYPRE_SStructDiagScale_getClassInfo(
  */
 bHYPRE_SStructDiagScale
 bHYPRE_SStructDiagScale_Create(
-  /* in */ bHYPRE_MPICommunicator mpi_comm);
+  /* in */ bHYPRE_MPICommunicator mpi_comm,
+  /* in */ bHYPRE_Operator A);
 
 /**
  * Set the MPI Communicator.
@@ -239,6 +240,7 @@ bHYPRE_SStructDiagScale_ApplyAdjoint(
 
 /**
  * Set the operator for the linear system being solved.
+ * DEPRECATED.  use Create
  * 
  */
 int32_t

@@ -794,6 +794,7 @@ package bHYPRE version 1.0.0
    {
       /**
        * Set the operator for the linear system being solved.
+       * DEPRECATED.  use Create
        **/
       int SetOperator(in Operator A);
 
@@ -848,6 +849,8 @@ package bHYPRE version 1.0.0
        * Set the preconditioner.
        **/
       int SetPreconditioner(in Solver s);
+      int GetPreconditioner(out Solver s);
+      int Clone(out PreconditionedSolver x); /* used in Hybrid solver */
    }
 
    /*----------- Interface -------------------------------------------------*/
@@ -1336,7 +1339,8 @@ package bHYPRE version 1.0.0
     **/
    class ParCSRDiagScale implements-all Solver
    {
-      static ParCSRDiagScale Create( in MPICommunicator mpi_comm );
+      static ParCSRDiagScale Create( in MPICommunicator mpi_comm,
+                                     in Operator A  );
    }
 
    /**
@@ -1347,12 +1351,14 @@ package bHYPRE version 1.0.0
     **/
    class StructDiagScale implements-all Solver
    {
-      static StructDiagScale Create( in MPICommunicator mpi_comm );
+      static StructDiagScale Create( in MPICommunicator mpi_comm,
+                                     in Operator A  );
    }
 
    class SStructDiagScale implements-all Solver
    {
-      static SStructDiagScale Create( in MPICommunicator mpi_comm );
+      static SStructDiagScale Create( in MPICommunicator mpi_comm,
+                                      in Operator A  );
    }
 
    /**
@@ -1469,7 +1475,8 @@ package bHYPRE version 1.0.0
     **/
    class BoomerAMG implements-all Solver
    {
-      static BoomerAMG Create( in MPICommunicator mpi_comm );
+      static BoomerAMG Create( in MPICommunicator mpi_comm,
+                               in Operator A );
       int SetLevelRelaxWt( in double relax_wt, in int level );
 
       /* The following function is just a tools for test drivers,
@@ -1511,7 +1518,8 @@ package bHYPRE version 1.0.0
     **/
    class Pilut implements-all Solver
    {
-      static Pilut Create( in MPICommunicator mpi_comm );
+      static Pilut Create( in MPICommunicator mpi_comm,
+                            in Operator A );
    }
 
    /**
@@ -1525,7 +1533,8 @@ package bHYPRE version 1.0.0
     **/
    class ParaSails implements-all Solver
    {
-      static ParaSails Create( in MPICommunicator mpi_comm );
+      static ParaSails Create( in MPICommunicator mpi_comm,
+                               in Operator A );
    }
 
    /**
@@ -1628,7 +1637,7 @@ package bHYPRE version 1.0.0
     **/
    class StructSMG implements-all Solver
    {
-      static StructSMG Create( in MPICommunicator mpi_comm );
+      static StructSMG Create( in MPICommunicator mpi_comm, in Operator A );
    }
 
    /**
@@ -1642,6 +1651,34 @@ package bHYPRE version 1.0.0
     **/
    class StructPFMG implements-all Solver
    {
-      static StructPFMG Create( in MPICommunicator mpi_comm );
+      static StructPFMG Create( in MPICommunicator mpi_comm,
+                                in Operator A );
    }
+
+   /**
+    * Hybrid solver
+    * first tries to solve with the specified Krylov solver, preconditioned by
+    * diagonal scaling (this combination is the "first solver")
+    * If that fails to converge, it will try again with the user-specified
+    * preconditioner (this combination is the "second solver").
+    *
+    * Specify the preconditioner  by calling SecondSolver's SetPreconditioner
+    * method.  If no preconditioner is specified (equivalently, if the
+    * preconditioner for SecondSolver is IdentitySolver), the preconditioner for
+    * the second try will be one of the following defaults.
+    * StructMatrix: SMG.  other matrix types: not implemented
+    *
+    * The Hybrid solver's Setup method will call Setup on KrylovSolver, so the
+    * user should not call Setup on KrylovSolver.
+    *
+    **/
+   class Hybrid implements-all Solver
+   {
+      static Hybrid Create( in MPICommunicator mpi_comm,
+                            in PreconditionedSolver SecondSolver,
+                            in Operator A );
+      int GetFirstSolver( out PreconditionedSolver FirstSolver );
+      int GetSecondSolver( out PreconditionedSolver SecondSolver );
+   }
+
 }

@@ -212,6 +212,22 @@ bHYPRE_PreconditionedSolver_SetPreconditioner(
   /* in */ bHYPRE_Solver s);
 
 /**
+ * Method:  GetPreconditioner[]
+ */
+int32_t
+bHYPRE_PreconditionedSolver_GetPreconditioner(
+  /* in */ bHYPRE_PreconditionedSolver self,
+  /* out */ bHYPRE_Solver* s);
+
+/**
+ * Method:  Clone[]
+ */
+int32_t
+bHYPRE_PreconditionedSolver_Clone(
+  /* in */ bHYPRE_PreconditionedSolver self,
+  /* out */ bHYPRE_PreconditionedSolver* x);
+
+/**
  * Cast method for interface and class type conversions.
  */
 struct bHYPRE_PreconditionedSolver__object*

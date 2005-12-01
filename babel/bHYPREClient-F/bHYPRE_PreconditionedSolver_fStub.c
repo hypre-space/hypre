@@ -770,6 +770,7 @@ SIDLFortran77Symbol(bhypre_preconditionedsolver_applyadjoint_f,BHYPRE_PRECONDITI
 
 /*
  * Set the operator for the linear system being solved.
+ * DEPRECATED.  use Create
  * 
  */
 
@@ -994,6 +995,60 @@ SIDLFortran77Symbol(bhypre_preconditionedsolver_setpreconditioner_f,BHYPRE_PRECO
       _proxy_self->d_object,
       _proxy_s
     );
+}
+
+/*
+ * Method:  GetPreconditioner[]
+ */
+
+void
+SIDLFortran77Symbol(bhypre_preconditionedsolver_getpreconditioner_f,BHYPRE_PRECONDITIONEDSOLVER_GETPRECONDITIONER_F,bHYPRE_PreconditionedSolver_GetPreconditioner_f)
+(
+  int64_t *self,
+  int64_t *s,
+  int32_t *retval
+)
+{
+  struct bHYPRE_PreconditionedSolver__epv *_epv = NULL;
+  struct bHYPRE_PreconditionedSolver__object* _proxy_self = NULL;
+  struct bHYPRE_Solver__object* _proxy_s = NULL;
+  _proxy_self =
+    (struct bHYPRE_PreconditionedSolver__object*)
+    (ptrdiff_t)(*self);
+  _epv = _proxy_self->d_epv;
+  *retval = 
+    (*(_epv->f_GetPreconditioner))(
+      _proxy_self->d_object,
+      &_proxy_s
+    );
+  *s = (ptrdiff_t)_proxy_s;
+}
+
+/*
+ * Method:  Clone[]
+ */
+
+void
+SIDLFortran77Symbol(bhypre_preconditionedsolver_clone_f,BHYPRE_PRECONDITIONEDSOLVER_CLONE_F,bHYPRE_PreconditionedSolver_Clone_f)
+(
+  int64_t *self,
+  int64_t *x,
+  int32_t *retval
+)
+{
+  struct bHYPRE_PreconditionedSolver__epv *_epv = NULL;
+  struct bHYPRE_PreconditionedSolver__object* _proxy_self = NULL;
+  struct bHYPRE_PreconditionedSolver__object* _proxy_x = NULL;
+  _proxy_self =
+    (struct bHYPRE_PreconditionedSolver__object*)
+    (ptrdiff_t)(*self);
+  _epv = _proxy_self->d_epv;
+  *retval = 
+    (*(_epv->f_Clone))(
+      _proxy_self->d_object,
+      &_proxy_x
+    );
+  *x = (ptrdiff_t)_proxy_x;
 }
 
 void

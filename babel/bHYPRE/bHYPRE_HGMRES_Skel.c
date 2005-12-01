@@ -216,6 +216,18 @@ impl_bHYPRE_HGMRES_SetPreconditioner(
   /* in */ bHYPRE_HGMRES self,
   /* in */ bHYPRE_Solver s);
 
+extern
+int32_t
+impl_bHYPRE_HGMRES_GetPreconditioner(
+  /* in */ bHYPRE_HGMRES self,
+  /* out */ bHYPRE_Solver* s);
+
+extern
+int32_t
+impl_bHYPRE_HGMRES_Clone(
+  /* in */ bHYPRE_HGMRES self,
+  /* out */ bHYPRE_PreconditionedSolver* x);
+
 extern struct bHYPRE_Solver__object* 
   impl_bHYPRE_HGMRES_fconnect_bHYPRE_Solver(char* url, sidl_BaseInterface *_ex);
 extern char* impl_bHYPRE_HGMRES_fgetURL_bHYPRE_Solver(struct 
@@ -364,6 +376,8 @@ bHYPRE_HGMRES__set_epv(struct bHYPRE_HGMRES__epv *epv)
   epv->f_GetNumIterations = impl_bHYPRE_HGMRES_GetNumIterations;
   epv->f_GetRelResidualNorm = impl_bHYPRE_HGMRES_GetRelResidualNorm;
   epv->f_SetPreconditioner = impl_bHYPRE_HGMRES_SetPreconditioner;
+  epv->f_GetPreconditioner = impl_bHYPRE_HGMRES_GetPreconditioner;
+  epv->f_Clone = impl_bHYPRE_HGMRES_Clone;
 
 }
 #ifdef __cplusplus

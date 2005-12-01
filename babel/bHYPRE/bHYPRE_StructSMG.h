@@ -111,7 +111,8 @@ bHYPRE_StructSMG_getClassInfo(
  */
 bHYPRE_StructSMG
 bHYPRE_StructSMG_Create(
-  /* in */ bHYPRE_MPICommunicator mpi_comm);
+  /* in */ bHYPRE_MPICommunicator mpi_comm,
+  /* in */ bHYPRE_Operator A);
 
 /**
  * Set the MPI Communicator.
@@ -248,6 +249,7 @@ bHYPRE_StructSMG_ApplyAdjoint(
 
 /**
  * Set the operator for the linear system being solved.
+ * DEPRECATED.  use Create
  * 
  */
 int32_t

@@ -66,6 +66,7 @@ struct bHYPRE_CGNR__data {
    int      max_iter;
    int      stop_crit;
    int      num_iterations;
+   int      converged;
 
    bHYPRE_Vector p;
    bHYPRE_Vector q;
@@ -301,6 +302,18 @@ int32_t
 impl_bHYPRE_CGNR_SetPreconditioner(
   /* in */ bHYPRE_CGNR self,
   /* in */ bHYPRE_Solver s);
+
+extern
+int32_t
+impl_bHYPRE_CGNR_GetPreconditioner(
+  /* in */ bHYPRE_CGNR self,
+  /* out */ bHYPRE_Solver* s);
+
+extern
+int32_t
+impl_bHYPRE_CGNR_Clone(
+  /* in */ bHYPRE_CGNR self,
+  /* out */ bHYPRE_PreconditionedSolver* x);
 
 extern struct bHYPRE_Solver__object* 
   impl_bHYPRE_CGNR_fconnect_bHYPRE_Solver(char* url, sidl_BaseInterface *_ex);

@@ -338,6 +338,22 @@ bHYPRE_IJParCSRMatrix_Read(
   /* in */ bHYPRE_MPICommunicator comm);
 
 /**
+ * The GetRow method will allocate space for its two output
+ * arrays on the first call.  The space will be reused on
+ * subsequent calls.  Thus the user must not delete them, yet
+ * must not depend on the data from GetRow to persist beyond the
+ * next GetRow call.
+ * 
+ */
+int32_t
+bHYPRE_IJParCSRMatrix_GetRow(
+  /* in */ bHYPRE_IJParCSRMatrix self,
+  /* in */ int32_t row,
+  /* out */ int32_t* size,
+  /* out */ struct sidl_int__array** col_ind,
+  /* out */ struct sidl_double__array** values);
+
+/**
  * Set the int parameter associated with {\tt name}.
  * 
  */
@@ -459,22 +475,6 @@ bHYPRE_IJParCSRMatrix_ApplyAdjoint(
   /* in */ bHYPRE_IJParCSRMatrix self,
   /* in */ bHYPRE_Vector b,
   /* inout */ bHYPRE_Vector* x);
-
-/**
- * The GetRow method will allocate space for its two output
- * arrays on the first call.  The space will be reused on
- * subsequent calls.  Thus the user must not delete them, yet
- * must not depend on the data from GetRow to persist beyond the
- * next GetRow call.
- * 
- */
-int32_t
-bHYPRE_IJParCSRMatrix_GetRow(
-  /* in */ bHYPRE_IJParCSRMatrix self,
-  /* in */ int32_t row,
-  /* out */ int32_t* size,
-  /* out */ struct sidl_int__array** col_ind,
-  /* out */ struct sidl_double__array** values);
 
 /**
  * Cast method for interface and class type conversions.

@@ -82,6 +82,8 @@ struct bHYPRE_HPCG__data {
    HYPRE_PtrToSolverFcn precond; /* function */
    HYPRE_PtrToSolverFcn precond_setup; /* function */
 
+   bHYPRE_Solver bprecond;  /* just used in GetPreconditioner */
+
   /* DO-NOT-DELETE splicer.end(bHYPRE.HPCG._data) */
 };
 
@@ -304,6 +306,18 @@ int32_t
 impl_bHYPRE_HPCG_SetPreconditioner(
   /* in */ bHYPRE_HPCG self,
   /* in */ bHYPRE_Solver s);
+
+extern
+int32_t
+impl_bHYPRE_HPCG_GetPreconditioner(
+  /* in */ bHYPRE_HPCG self,
+  /* out */ bHYPRE_Solver* s);
+
+extern
+int32_t
+impl_bHYPRE_HPCG_Clone(
+  /* in */ bHYPRE_HPCG self,
+  /* out */ bHYPRE_PreconditionedSolver* x);
 
 extern struct bHYPRE_Solver__object* 
   impl_bHYPRE_HPCG_fconnect_bHYPRE_Solver(char* url, sidl_BaseInterface *_ex);

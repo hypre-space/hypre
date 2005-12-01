@@ -312,6 +312,18 @@ impl_bHYPRE_BiCGSTAB_SetPreconditioner(
   /* in */ bHYPRE_BiCGSTAB self,
   /* in */ bHYPRE_Solver s);
 
+extern
+int32_t
+impl_bHYPRE_BiCGSTAB_GetPreconditioner(
+  /* in */ bHYPRE_BiCGSTAB self,
+  /* out */ bHYPRE_Solver* s);
+
+extern
+int32_t
+impl_bHYPRE_BiCGSTAB_Clone(
+  /* in */ bHYPRE_BiCGSTAB self,
+  /* out */ bHYPRE_PreconditionedSolver* x);
+
 extern struct bHYPRE_Solver__object* 
   impl_bHYPRE_BiCGSTAB_fconnect_bHYPRE_Solver(char* url,
   sidl_BaseInterface *_ex);

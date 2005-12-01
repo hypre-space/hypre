@@ -32,7 +32,8 @@ impl_bHYPRE_BoomerAMG__dtor(
 extern
 bHYPRE_BoomerAMG
 impl_bHYPRE_BoomerAMG_Create(
-  /* in */ bHYPRE_MPICommunicator mpi_comm);
+  /* in */ bHYPRE_MPICommunicator mpi_comm,
+  /* in */ bHYPRE_Operator A);
 
 extern struct bHYPRE_Solver__object* 
   impl_bHYPRE_BoomerAMG_fconnect_bHYPRE_Solver(char* url,

@@ -293,6 +293,15 @@ impl_bHYPRE_IJParCSRMatrix_Read(
 
 extern
 int32_t
+impl_bHYPRE_IJParCSRMatrix_GetRow(
+  /* in */ bHYPRE_IJParCSRMatrix self,
+  /* in */ int32_t row,
+  /* out */ int32_t* size,
+  /* out */ struct sidl_int__array** col_ind,
+  /* out */ struct sidl_double__array** values);
+
+extern
+int32_t
 impl_bHYPRE_IJParCSRMatrix_SetIntParameter(
   /* in */ bHYPRE_IJParCSRMatrix self,
   /* in */ const char* name,
@@ -376,15 +385,6 @@ impl_bHYPRE_IJParCSRMatrix_ApplyAdjoint(
   /* in */ bHYPRE_IJParCSRMatrix self,
   /* in */ bHYPRE_Vector b,
   /* inout */ bHYPRE_Vector* x);
-
-extern
-int32_t
-impl_bHYPRE_IJParCSRMatrix_GetRow(
-  /* in */ bHYPRE_IJParCSRMatrix self,
-  /* in */ int32_t row,
-  /* out */ int32_t* size,
-  /* out */ struct sidl_int__array** col_ind,
-  /* out */ struct sidl_double__array** values);
 
 extern struct bHYPRE_CoefficientAccess__object* 
   impl_bHYPRE_IJParCSRMatrix_fconnect_bHYPRE_CoefficientAccess(char* url,

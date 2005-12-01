@@ -544,6 +544,33 @@ C       out int retval
 
 
 C       
+C       The GetRow method will allocate space for its two output
+C       arrays on the first call.  The space will be reused on
+C       subsequent calls.  Thus the user must not delete them, yet
+C       must not depend on the data from GetRow to persist beyond the
+C       next GetRow call.
+C       
+C       
+
+        subroutine bHYPRE_IJParCSRMatrix_GetRow_f(self, row, size,
+     &     col_ind, values, retval)
+        implicit none
+C       in bHYPRE.IJParCSRMatrix self
+        integer*8 self
+C       in int row
+        integer*4 row
+C       out int size
+        integer*4 size
+C       out array<int,column-major> col_ind
+        integer*8 col_ind
+C       out array<double,column-major> values
+        integer*8 values
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
 C       Set the int parameter associated with {\tt name}.
 C       
 C       
@@ -767,33 +794,6 @@ C       in bHYPRE.Vector b
         integer*8 b
 C       inout bHYPRE.Vector x
         integer*8 x
-C       out int retval
-        integer*4 retval
-        end
-
-
-C       
-C       The GetRow method will allocate space for its two output
-C       arrays on the first call.  The space will be reused on
-C       subsequent calls.  Thus the user must not delete them, yet
-C       must not depend on the data from GetRow to persist beyond the
-C       next GetRow call.
-C       
-C       
-
-        subroutine bHYPRE_IJParCSRMatrix_GetRow_f(self, row, size,
-     &     col_ind, values, retval)
-        implicit none
-C       in bHYPRE.IJParCSRMatrix self
-        integer*8 self
-C       in int row
-        integer*4 row
-C       out int size
-        integer*4 size
-C       out array<int,column-major> col_ind
-        integer*8 col_ind
-C       out array<double,column-major> values
-        integer*8 values
 C       out int retval
         integer*4 retval
         end

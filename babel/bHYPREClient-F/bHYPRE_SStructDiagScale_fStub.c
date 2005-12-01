@@ -334,18 +334,24 @@ void
 SIDLFortran77Symbol(bhypre_sstructdiagscale_create_f,BHYPRE_SSTRUCTDIAGSCALE_CREATE_F,bHYPRE_SStructDiagScale_Create_f)
 (
   int64_t *mpi_comm,
+  int64_t *A,
   int64_t *retval
 )
 {
   const struct bHYPRE_SStructDiagScale__sepv *_epv = _getSEPV();
   struct bHYPRE_MPICommunicator__object* _proxy_mpi_comm = NULL;
+  struct bHYPRE_Operator__object* _proxy_A = NULL;
   struct bHYPRE_SStructDiagScale__object* _proxy_retval = NULL;
   _proxy_mpi_comm =
     (struct bHYPRE_MPICommunicator__object*)
     (ptrdiff_t)(*mpi_comm);
+  _proxy_A =
+    (struct bHYPRE_Operator__object*)
+    (ptrdiff_t)(*A);
   _proxy_retval = 
     (*(_epv->f_Create))(
-      _proxy_mpi_comm
+      _proxy_mpi_comm,
+      _proxy_A
     );
   *retval = (ptrdiff_t)_proxy_retval;
 }
@@ -838,6 +844,7 @@ SIDLFortran77Symbol(bhypre_sstructdiagscale_applyadjoint_f,BHYPRE_SSTRUCTDIAGSCA
 
 /*
  * Set the operator for the linear system being solved.
+ * DEPRECATED.  use Create
  * 
  */
 

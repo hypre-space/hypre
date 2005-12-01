@@ -398,6 +398,7 @@ C       out int retval
 
 C       
 C       Set the operator for the linear system being solved.
+C       DEPRECATED.  use Create
 C       
 C       
 

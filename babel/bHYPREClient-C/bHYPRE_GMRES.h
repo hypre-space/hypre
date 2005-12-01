@@ -52,6 +52,9 @@ typedef struct bHYPRE_GMRES__object* bHYPRE_GMRES;
 #ifndef included_bHYPRE_Operator_h
 #include "bHYPRE_Operator.h"
 #endif
+#ifndef included_bHYPRE_PreconditionedSolver_h
+#include "bHYPRE_PreconditionedSolver.h"
+#endif
 #ifndef included_bHYPRE_Solver_h
 #include "bHYPRE_Solver.h"
 #endif
@@ -262,6 +265,7 @@ bHYPRE_GMRES_ApplyAdjoint(
 
 /**
  * Set the operator for the linear system being solved.
+ * DEPRECATED.  use Create
  * 
  */
 int32_t
@@ -343,6 +347,22 @@ int32_t
 bHYPRE_GMRES_SetPreconditioner(
   /* in */ bHYPRE_GMRES self,
   /* in */ bHYPRE_Solver s);
+
+/**
+ * Method:  GetPreconditioner[]
+ */
+int32_t
+bHYPRE_GMRES_GetPreconditioner(
+  /* in */ bHYPRE_GMRES self,
+  /* out */ bHYPRE_Solver* s);
+
+/**
+ * Method:  Clone[]
+ */
+int32_t
+bHYPRE_GMRES_Clone(
+  /* in */ bHYPRE_GMRES self,
+  /* out */ bHYPRE_PreconditionedSolver* x);
 
 /**
  * Cast method for interface and class type conversions.

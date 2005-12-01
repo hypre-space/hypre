@@ -182,6 +182,8 @@ impl_bHYPRE_HGMRES__ctor(
    data -> rel_change = -1234;
    data -> stop_crit  = -1234; /* rel. residual norm */
 
+   data -> bprecond = (bHYPRE_Solver)NULL;
+
    /* set any other data components here */
 
    bHYPRE_HGMRES__set_data( self, data );
@@ -569,6 +571,10 @@ impl_bHYPRE_HGMRES_GetIntValue(
    {
       ierr += HYPRE_GMRESGetNumIterations( solver, value );
    }
+   if ( strcmp(name,"Converged")==0 )
+   {
+      ierr += HYPRE_GMRESGetConverged( solver, value );
+   }
    else if ( strcmp(name,"KDim")==0 )
    {
       *value = data -> k_dim;
@@ -940,6 +946,7 @@ impl_bHYPRE_HGMRES_ApplyAdjoint(
 
 /*
  * Set the operator for the linear system being solved.
+ * DEPRECATED.  use Create
  * 
  */
 
@@ -1207,6 +1214,7 @@ impl_bHYPRE_HGMRES_SetPreconditioner(
    HYPRE_PtrToSolverFcn precond, precond_setup; /* functions */
 
    dataself = bHYPRE_HGMRES__get_data( self );
+   dataself -> bprecond = s;
 
    if ( bHYPRE_Solver_queryInt( s, "bHYPRE.BoomerAMG" ) )
    {
@@ -1281,6 +1289,53 @@ impl_bHYPRE_HGMRES_SetPreconditioner(
    return ierr;
 
   /* DO-NOT-DELETE splicer.end(bHYPRE.HGMRES.SetPreconditioner) */
+}
+
+/*
+ * Method:  GetPreconditioner[]
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_HGMRES_GetPreconditioner"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+int32_t
+impl_bHYPRE_HGMRES_GetPreconditioner(
+  /* in */ bHYPRE_HGMRES self,
+  /* out */ bHYPRE_Solver* s)
+{
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.HGMRES.GetPreconditioner) */
+  /* Insert-Code-Here {bHYPRE.HGMRES.GetPreconditioner} (GetPreconditioner method) */
+
+   int ierr = 0;
+   struct bHYPRE_HGMRES__data * dataself = bHYPRE_HGMRES__get_data( self );
+   *s = dataself -> bprecond ;
+
+   return ierr;
+
+  /* DO-NOT-DELETE splicer.end(bHYPRE.HGMRES.GetPreconditioner) */
+}
+
+/*
+ * Method:  Clone[]
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_HGMRES_Clone"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+int32_t
+impl_bHYPRE_HGMRES_Clone(
+  /* in */ bHYPRE_HGMRES self,
+  /* out */ bHYPRE_PreconditionedSolver* x)
+{
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.HGMRES.Clone) */
+  /* Insert-Code-Here {bHYPRE.HGMRES.Clone} (Clone method) */
+  /* DO-NOT-DELETE splicer.end(bHYPRE.HGMRES.Clone) */
 }
 /* Babel internal methods, Users should not edit below this line. */
 struct bHYPRE_Solver__object* impl_bHYPRE_HGMRES_fconnect_bHYPRE_Solver(char* 

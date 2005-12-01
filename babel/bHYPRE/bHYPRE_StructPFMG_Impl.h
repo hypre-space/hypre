@@ -101,7 +101,8 @@ impl_bHYPRE_StructPFMG__dtor(
 extern
 bHYPRE_StructPFMG
 impl_bHYPRE_StructPFMG_Create(
-  /* in */ bHYPRE_MPICommunicator mpi_comm);
+  /* in */ bHYPRE_MPICommunicator mpi_comm,
+  /* in */ bHYPRE_Operator A);
 
 extern struct bHYPRE_Solver__object* 
   impl_bHYPRE_StructPFMG_fconnect_bHYPRE_Solver(char* url,

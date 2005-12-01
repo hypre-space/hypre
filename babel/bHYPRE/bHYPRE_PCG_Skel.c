@@ -213,6 +213,18 @@ impl_bHYPRE_PCG_SetPreconditioner(
   /* in */ bHYPRE_PCG self,
   /* in */ bHYPRE_Solver s);
 
+extern
+int32_t
+impl_bHYPRE_PCG_GetPreconditioner(
+  /* in */ bHYPRE_PCG self,
+  /* out */ bHYPRE_Solver* s);
+
+extern
+int32_t
+impl_bHYPRE_PCG_Clone(
+  /* in */ bHYPRE_PCG self,
+  /* out */ bHYPRE_PreconditionedSolver* x);
+
 extern struct bHYPRE_PCG__object* impl_bHYPRE_PCG_fconnect_bHYPRE_PCG(char* url,
   sidl_BaseInterface *_ex);
 extern char* impl_bHYPRE_PCG_fgetURL_bHYPRE_PCG(struct bHYPRE_PCG__object* obj);
@@ -357,6 +369,8 @@ bHYPRE_PCG__set_epv(struct bHYPRE_PCG__epv *epv)
   epv->f_GetNumIterations = impl_bHYPRE_PCG_GetNumIterations;
   epv->f_GetRelResidualNorm = impl_bHYPRE_PCG_GetRelResidualNorm;
   epv->f_SetPreconditioner = impl_bHYPRE_PCG_SetPreconditioner;
+  epv->f_GetPreconditioner = impl_bHYPRE_PCG_GetPreconditioner;
+  epv->f_Clone = impl_bHYPRE_PCG_Clone;
 
 }
 #ifdef __cplusplus

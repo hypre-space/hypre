@@ -122,7 +122,8 @@ extern "C"
 #endif
 bHYPRE_StructDiagScale
 impl_bHYPRE_StructDiagScale_Create(
-  /* in */ bHYPRE_MPICommunicator mpi_comm)
+  /* in */ bHYPRE_MPICommunicator mpi_comm,
+  /* in */ bHYPRE_Operator A)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.StructDiagScale.Create) */
   /* Insert-Code-Here {bHYPRE.StructDiagScale.Create} (Create method) */
@@ -132,6 +133,8 @@ impl_bHYPRE_StructDiagScale_Create(
       bHYPRE_StructDiagScale__get_data( solver );
 
    data->comm = bHYPRE_MPICommunicator__get_data(mpi_comm)->mpi_comm;
+   data->matrix = A;
+   bHYPRE_Operator_addRef( data->matrix );
 
    return solver;
 
@@ -526,6 +529,7 @@ impl_bHYPRE_StructDiagScale_ApplyAdjoint(
 
 /*
  * Set the operator for the linear system being solved.
+ * DEPRECATED.  use Create
  * 
  */
 

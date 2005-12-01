@@ -460,6 +460,7 @@ impl_bHYPRE_IdentitySolver_ApplyAdjoint(
 
 /*
  * Set the operator for the linear system being solved.
+ * DEPRECATED.  use Create
  * 
  */
 

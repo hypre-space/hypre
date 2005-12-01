@@ -845,6 +845,7 @@ SIDLFortran77Symbol(bhypre_identitysolver_applyadjoint_f,BHYPRE_IDENTITYSOLVER_A
 
 /*
  * Set the operator for the linear system being solved.
+ * DEPRECATED.  use Create
  * 
  */
 

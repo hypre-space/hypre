@@ -88,7 +88,8 @@ struct bHYPRE_ParaSails__sepv {
   /* Methods introduced in bHYPRE.Solver-v1.0.0 */
   /* Methods introduced in bHYPRE.ParaSails-v1.0.0 */
   struct bHYPRE_ParaSails__object* (*f_Create)(
-    /* in */ struct bHYPRE_MPICommunicator__object* mpi_comm);
+    /* in */ struct bHYPRE_MPICommunicator__object* mpi_comm,
+    /* in */ struct bHYPRE_Operator__object* A);
 };
 
 /*

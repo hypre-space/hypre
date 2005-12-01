@@ -42,6 +42,9 @@ typedef struct bHYPRE_BiCGSTAB__object* bHYPRE_BiCGSTAB;
 #ifndef included_bHYPRE_Operator_h
 #include "bHYPRE_Operator.h"
 #endif
+#ifndef included_bHYPRE_PreconditionedSolver_h
+#include "bHYPRE_PreconditionedSolver.h"
+#endif
 #ifndef included_bHYPRE_Solver_h
 #include "bHYPRE_Solver.h"
 #endif
@@ -252,6 +255,7 @@ bHYPRE_BiCGSTAB_ApplyAdjoint(
 
 /**
  * Set the operator for the linear system being solved.
+ * DEPRECATED.  use Create
  * 
  */
 int32_t
@@ -333,6 +337,22 @@ int32_t
 bHYPRE_BiCGSTAB_SetPreconditioner(
   /* in */ bHYPRE_BiCGSTAB self,
   /* in */ bHYPRE_Solver s);
+
+/**
+ * Method:  GetPreconditioner[]
+ */
+int32_t
+bHYPRE_BiCGSTAB_GetPreconditioner(
+  /* in */ bHYPRE_BiCGSTAB self,
+  /* out */ bHYPRE_Solver* s);
+
+/**
+ * Method:  Clone[]
+ */
+int32_t
+bHYPRE_BiCGSTAB_Clone(
+  /* in */ bHYPRE_BiCGSTAB self,
+  /* out */ bHYPRE_PreconditionedSolver* x);
 
 /**
  * Cast method for interface and class type conversions.

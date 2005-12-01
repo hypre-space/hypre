@@ -32,7 +32,8 @@ impl_bHYPRE_StructSMG__dtor(
 extern
 bHYPRE_StructSMG
 impl_bHYPRE_StructSMG_Create(
-  /* in */ bHYPRE_MPICommunicator mpi_comm);
+  /* in */ bHYPRE_MPICommunicator mpi_comm,
+  /* in */ bHYPRE_Operator A);
 
 extern struct bHYPRE_Solver__object* 
   impl_bHYPRE_StructSMG_fconnect_bHYPRE_Solver(char* url,

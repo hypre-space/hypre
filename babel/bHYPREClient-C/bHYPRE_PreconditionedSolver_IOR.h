@@ -160,6 +160,12 @@ struct bHYPRE_PreconditionedSolver__epv {
   int32_t (*f_SetPreconditioner)(
     /* in */ void* self,
     /* in */ struct bHYPRE_Solver__object* s);
+  int32_t (*f_GetPreconditioner)(
+    /* in */ void* self,
+    /* out */ struct bHYPRE_Solver__object** s);
+  int32_t (*f_Clone)(
+    /* in */ void* self,
+    /* out */ struct bHYPRE_PreconditionedSolver__object** x);
 };
 
 /*
@@ -314,6 +320,12 @@ struct bHYPRE__PreconditionedSolver__epv {
   int32_t (*f_SetPreconditioner)(
     /* in */ struct bHYPRE__PreconditionedSolver__object* self,
     /* in */ struct bHYPRE_Solver__object* s);
+  int32_t (*f_GetPreconditioner)(
+    /* in */ struct bHYPRE__PreconditionedSolver__object* self,
+    /* out */ struct bHYPRE_Solver__object** s);
+  int32_t (*f_Clone)(
+    /* in */ struct bHYPRE__PreconditionedSolver__object* self,
+    /* out */ struct bHYPRE_PreconditionedSolver__object** x);
   /* Methods introduced in bHYPRE._PreconditionedSolver-v1.0 */
 };
 

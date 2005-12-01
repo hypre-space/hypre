@@ -457,6 +457,10 @@ impl_bHYPRE_PCG_GetIntValue(
    {
       *value = data -> num_iterations;
    }
+   else if ( strcmp(name,"Converged")==0 )
+   {
+      *value = data -> converged;
+   }
    else if ( strcmp(name,"TwoNorm")==0 || strcmp(name,"2-norm")==0 )
    {
       *value = data -> two_norm;
@@ -758,6 +762,7 @@ impl_bHYPRE_PCG_Apply(
          norms[0]     = 0.0;
          rel_norms[i] = 0.0;
       }
+      data -> converged = 1;
       ierr = 0;
       return ierr;
       /* In this case, for the original parcsr pcg, the code would take special
@@ -765,7 +770,7 @@ impl_bHYPRE_PCG_Apply(
    };
 
    /* r = b - Ax */
-   /* >>> It would be better define a matvec operation which directly calls the
+   /* It would be better define a matvec operation which directly calls the
       HYPRE matvec, so we can do this in fewer primitive operations.
       However, the cost savings would be negligible. */
    ierr += bHYPRE_Operator_Apply( A, *x, &r );  /* r = Ax */
@@ -1026,6 +1031,7 @@ impl_bHYPRE_PCG_ApplyAdjoint(
 
 /*
  * Set the operator for the linear system being solved.
+ * DEPRECATED.  use Create
  * 
  */
 
@@ -1276,6 +1282,87 @@ impl_bHYPRE_PCG_SetPreconditioner(
    return ierr;
 
   /* DO-NOT-DELETE splicer.end(bHYPRE.PCG.SetPreconditioner) */
+}
+
+/*
+ * Method:  GetPreconditioner[]
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_PCG_GetPreconditioner"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+int32_t
+impl_bHYPRE_PCG_GetPreconditioner(
+  /* in */ bHYPRE_PCG self,
+  /* out */ bHYPRE_Solver* s)
+{
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.PCG.GetPreconditioner) */
+  /* Insert-Code-Here {bHYPRE.PCG.GetPreconditioner} (GetPreconditioner method) */
+
+   int ierr = 0;
+   struct bHYPRE_PCG__data * data = bHYPRE_PCG__get_data( self );
+
+   *s = data->precond;
+
+   return ierr;
+
+  /* DO-NOT-DELETE splicer.end(bHYPRE.PCG.GetPreconditioner) */
+}
+
+/*
+ * Method:  Clone[]
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_PCG_Clone"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+int32_t
+impl_bHYPRE_PCG_Clone(
+  /* in */ bHYPRE_PCG self,
+  /* out */ bHYPRE_PreconditionedSolver* x)
+{
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.PCG.Clone) */
+  /* Insert-Code-Here {bHYPRE.PCG.Clone} (Clone method) */
+
+   int ierr = 0;
+   struct bHYPRE_PCG__data * data = bHYPRE_PCG__get_data( self );
+   struct bHYPRE_PCG__data * datax;
+   bHYPRE_PCG PCG_x;
+
+   PCG_x = bHYPRE_PCG_Create( data->mpicomm, data->matrix );
+
+   /* Copy most data members.
+      The preconditioner copy will be a shallow copy (just the pointer);
+      it is likely to be replaced later.
+      But don't copy anything created in Setup (p,s,r,norms,rel_norms).
+      The user will call Setup on x, later
+      Also don't copy the end-of-solve diagnostics (converged,num_iterations,
+      rel_residual_norm) */
+
+   datax = bHYPRE_PCG__get_data( PCG_x );
+   datax->tol               = data->tol;
+   datax->atolf             = data->atolf;
+   datax->cf_tol            = data->cf_tol;
+   datax->max_iter          = data->max_iter;
+   datax->two_norm          = data->two_norm;
+   datax->rel_change        = data->rel_change;
+   datax->stop_crit         = data->stop_crit;
+   datax->print_level       = data->print_level;
+   datax->logging           = data->logging;
+
+   datax->precond           = data->precond;
+   bHYPRE_Solver_addRef( datax->precond );
+
+   *x = bHYPRE_PreconditionedSolver__cast( PCG_x );
+   return ierr;
+
+  /* DO-NOT-DELETE splicer.end(bHYPRE.PCG.Clone) */
 }
 /* Babel internal methods, Users should not edit below this line. */
 struct bHYPRE_PCG__object* impl_bHYPRE_PCG_fconnect_bHYPRE_PCG(char* url,

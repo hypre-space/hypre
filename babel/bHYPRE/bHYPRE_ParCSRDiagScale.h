@@ -108,7 +108,8 @@ bHYPRE_ParCSRDiagScale_getClassInfo(
  */
 bHYPRE_ParCSRDiagScale
 bHYPRE_ParCSRDiagScale_Create(
-  /* in */ bHYPRE_MPICommunicator mpi_comm);
+  /* in */ bHYPRE_MPICommunicator mpi_comm,
+  /* in */ bHYPRE_Operator A);
 
 /**
  * Set the MPI Communicator.
@@ -245,6 +246,7 @@ bHYPRE_ParCSRDiagScale_ApplyAdjoint(
 
 /**
  * Set the operator for the linear system being solved.
+ * DEPRECATED.  use Create
  * 
  */
 int32_t

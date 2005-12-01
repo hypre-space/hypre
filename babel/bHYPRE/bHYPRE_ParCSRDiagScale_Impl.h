@@ -99,7 +99,8 @@ impl_bHYPRE_ParCSRDiagScale__dtor(
 extern
 bHYPRE_ParCSRDiagScale
 impl_bHYPRE_ParCSRDiagScale_Create(
-  /* in */ bHYPRE_MPICommunicator mpi_comm);
+  /* in */ bHYPRE_MPICommunicator mpi_comm,
+  /* in */ bHYPRE_Operator A);
 
 extern struct bHYPRE_ParCSRDiagScale__object* 
   impl_bHYPRE_ParCSRDiagScale_fconnect_bHYPRE_ParCSRDiagScale(char* url,

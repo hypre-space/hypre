@@ -52,6 +52,7 @@
 #include "sidl_ClassInfo_IOR.h"
 #include "bHYPRE_Vector_IOR.h"
 #include "sidl_BaseInterface_IOR.h"
+#include "bHYPRE_PreconditionedSolver_IOR.h"
 
 /*
  * Return pointer to internal IOR functions.
@@ -863,6 +864,7 @@ SIDLFortran77Symbol(bhypre_gmres_applyadjoint_f,BHYPRE_GMRES_APPLYADJOINT_F,bHYP
 
 /*
  * Set the operator for the linear system being solved.
+ * DEPRECATED.  use Create
  * 
  */
 
@@ -1087,6 +1089,60 @@ SIDLFortran77Symbol(bhypre_gmres_setpreconditioner_f,BHYPRE_GMRES_SETPRECONDITIO
       _proxy_self,
       _proxy_s
     );
+}
+
+/*
+ * Method:  GetPreconditioner[]
+ */
+
+void
+SIDLFortran77Symbol(bhypre_gmres_getpreconditioner_f,BHYPRE_GMRES_GETPRECONDITIONER_F,bHYPRE_GMRES_GetPreconditioner_f)
+(
+  int64_t *self,
+  int64_t *s,
+  int32_t *retval
+)
+{
+  struct bHYPRE_GMRES__epv *_epv = NULL;
+  struct bHYPRE_GMRES__object* _proxy_self = NULL;
+  struct bHYPRE_Solver__object* _proxy_s = NULL;
+  _proxy_self =
+    (struct bHYPRE_GMRES__object*)
+    (ptrdiff_t)(*self);
+  _epv = _proxy_self->d_epv;
+  *retval = 
+    (*(_epv->f_GetPreconditioner))(
+      _proxy_self,
+      &_proxy_s
+    );
+  *s = (ptrdiff_t)_proxy_s;
+}
+
+/*
+ * Method:  Clone[]
+ */
+
+void
+SIDLFortran77Symbol(bhypre_gmres_clone_f,BHYPRE_GMRES_CLONE_F,bHYPRE_GMRES_Clone_f)
+(
+  int64_t *self,
+  int64_t *x,
+  int32_t *retval
+)
+{
+  struct bHYPRE_GMRES__epv *_epv = NULL;
+  struct bHYPRE_GMRES__object* _proxy_self = NULL;
+  struct bHYPRE_PreconditionedSolver__object* _proxy_x = NULL;
+  _proxy_self =
+    (struct bHYPRE_GMRES__object*)
+    (ptrdiff_t)(*self);
+  _epv = _proxy_self->d_epv;
+  *retval = 
+    (*(_epv->f_Clone))(
+      _proxy_self,
+      &_proxy_x
+    );
+  *x = (ptrdiff_t)_proxy_x;
 }
 
 void

@@ -818,6 +818,63 @@ impl_bHYPRE_IJParCSRMatrix_Read(
 }
 
 /*
+ * The GetRow method will allocate space for its two output
+ * arrays on the first call.  The space will be reused on
+ * subsequent calls.  Thus the user must not delete them, yet
+ * must not depend on the data from GetRow to persist beyond the
+ * next GetRow call.
+ * 
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_IJParCSRMatrix_GetRow"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+int32_t
+impl_bHYPRE_IJParCSRMatrix_GetRow(
+  /* in */ bHYPRE_IJParCSRMatrix self,
+  /* in */ int32_t row,
+  /* out */ int32_t* size,
+  /* out */ struct sidl_int__array** col_ind,
+  /* out */ struct sidl_double__array** values)
+{
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRMatrix.GetRow) */
+  /* Insert the implementation of the GetRow method here... */
+
+   int ierr=0;
+   void * object;
+   struct bHYPRE_IJParCSRMatrix__data * data;
+   HYPRE_IJMatrix ij_A;
+   HYPRE_ParCSRMatrix bHYPREP_A;
+   int * iindices[1];
+   double * dvalues[1];
+
+   data = bHYPRE_IJParCSRMatrix__get_data( self );
+
+   ij_A = data -> ij_A;
+   ierr += HYPRE_IJMatrixGetObject( ij_A, &object );
+   bHYPREP_A = (HYPRE_ParCSRMatrix) object;
+
+   *col_ind = sidl_int__array_create1d( size[0] );
+   *values = sidl_double__array_create1d( size[0] );
+
+   *iindices = sidlArrayAddr1( *col_ind, 0 );
+   *dvalues = sidlArrayAddr1( *values, 0 );
+
+   /* RestoreRow doesn't do anything but reset a parameter.  Its
+    * function is to make sure the user who calls GetRow is aware that
+    * the data in the output arrays will be changed. */
+   HYPRE_ParCSRMatrixRestoreRow( bHYPREP_A, row, size, iindices, dvalues );
+   ierr += HYPRE_ParCSRMatrixGetRow( bHYPREP_A, row, size, iindices, dvalues );
+
+   return( ierr );
+
+  /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRMatrix.GetRow) */
+}
+
+/*
  * Set the int parameter associated with {\tt name}.
  * 
  */
@@ -1255,63 +1312,6 @@ impl_bHYPRE_IJParCSRMatrix_ApplyAdjoint(
    return( ierr );
 
   /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRMatrix.ApplyAdjoint) */
-}
-
-/*
- * The GetRow method will allocate space for its two output
- * arrays on the first call.  The space will be reused on
- * subsequent calls.  Thus the user must not delete them, yet
- * must not depend on the data from GetRow to persist beyond the
- * next GetRow call.
- * 
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_bHYPRE_IJParCSRMatrix_GetRow"
-
-#ifdef __cplusplus
-extern "C"
-#endif
-int32_t
-impl_bHYPRE_IJParCSRMatrix_GetRow(
-  /* in */ bHYPRE_IJParCSRMatrix self,
-  /* in */ int32_t row,
-  /* out */ int32_t* size,
-  /* out */ struct sidl_int__array** col_ind,
-  /* out */ struct sidl_double__array** values)
-{
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRMatrix.GetRow) */
-  /* Insert the implementation of the GetRow method here... */
-
-   int ierr=0;
-   void * object;
-   struct bHYPRE_IJParCSRMatrix__data * data;
-   HYPRE_IJMatrix ij_A;
-   HYPRE_ParCSRMatrix bHYPREP_A;
-   int * iindices[1];
-   double * dvalues[1];
-
-   data = bHYPRE_IJParCSRMatrix__get_data( self );
-
-   ij_A = data -> ij_A;
-   ierr += HYPRE_IJMatrixGetObject( ij_A, &object );
-   bHYPREP_A = (HYPRE_ParCSRMatrix) object;
-
-   *col_ind = sidl_int__array_create1d( size[0] );
-   *values = sidl_double__array_create1d( size[0] );
-
-   *iindices = sidlArrayAddr1( *col_ind, 0 );
-   *dvalues = sidlArrayAddr1( *values, 0 );
-
-   /* RestoreRow doesn't do anything but reset a parameter.  Its
-    * function is to make sure the user who calls GetRow is aware that
-    * the data in the output arrays will be changed. */
-   HYPRE_ParCSRMatrixRestoreRow( bHYPREP_A, row, size, iindices, dvalues );
-   ierr += HYPRE_ParCSRMatrixGetRow( bHYPREP_A, row, size, iindices, dvalues );
-
-   return( ierr );
-
-  /* DO-NOT-DELETE splicer.end(bHYPRE.IJParCSRMatrix.GetRow) */
 }
 /* Babel internal methods, Users should not edit below this line. */
 struct bHYPRE_CoefficientAccess__object* 

@@ -481,6 +481,10 @@ impl_bHYPRE_BiCGSTAB_GetIntValue(
    {
       *value = data -> num_iterations;
    }
+   else if ( strcmp(name,"Converged")==0 )
+   {
+      *value = data -> converged;
+   }
    else if ( strcmp(name,"MinIter")==0 || strcmp(name,"MinIterations")==0 )
    {
       *value = data -> max_iter;
@@ -492,10 +496,6 @@ impl_bHYPRE_BiCGSTAB_GetIntValue(
    else if ( strcmp(name,"StopCrit")==0 || strcmp(name,"stopping criterion")==0 )
    {
       *value = data -> stop_crit;
-   }
-   else if ( strcmp(name,"Converged")==0 )
-   {
-      *value = data -> converged;
    }
    else if ( strcmp(name,"Logging")==0 )
    {
@@ -825,6 +825,7 @@ impl_bHYPRE_BiCGSTAB_Apply(
 
         if (r_norm == 0.0)
         {
+           data -> converged = 1;
 	   ierr = 0;
 	   return ierr;
 	}
@@ -977,6 +978,7 @@ impl_bHYPRE_BiCGSTAB_ApplyAdjoint(
 
 /*
  * Set the operator for the linear system being solved.
+ * DEPRECATED.  use Create
  * 
  */
 
@@ -1227,6 +1229,85 @@ impl_bHYPRE_BiCGSTAB_SetPreconditioner(
    return ierr;
 
   /* DO-NOT-DELETE splicer.end(bHYPRE.BiCGSTAB.SetPreconditioner) */
+}
+
+/*
+ * Method:  GetPreconditioner[]
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_BiCGSTAB_GetPreconditioner"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+int32_t
+impl_bHYPRE_BiCGSTAB_GetPreconditioner(
+  /* in */ bHYPRE_BiCGSTAB self,
+  /* out */ bHYPRE_Solver* s)
+{
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.BiCGSTAB.GetPreconditioner) */
+  /* Insert-Code-Here {bHYPRE.BiCGSTAB.GetPreconditioner} (GetPreconditioner method) */
+
+   int ierr = 0;
+   struct bHYPRE_BiCGSTAB__data * data = bHYPRE_BiCGSTAB__get_data( self );
+
+   *s = data->precond;
+
+   return ierr;
+
+  /* DO-NOT-DELETE splicer.end(bHYPRE.BiCGSTAB.GetPreconditioner) */
+}
+
+/*
+ * Method:  Clone[]
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_BiCGSTAB_Clone"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+int32_t
+impl_bHYPRE_BiCGSTAB_Clone(
+  /* in */ bHYPRE_BiCGSTAB self,
+  /* out */ bHYPRE_PreconditionedSolver* x)
+{
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.BiCGSTAB.Clone) */
+  /* Insert-Code-Here {bHYPRE.BiCGSTAB.Clone} (Clone method) */
+
+   int ierr = 0;
+   struct bHYPRE_BiCGSTAB__data * data = bHYPRE_BiCGSTAB__get_data( self );
+   struct bHYPRE_BiCGSTAB__data * datax;
+   bHYPRE_BiCGSTAB BiCGSTAB_x;
+
+   BiCGSTAB_x = bHYPRE_BiCGSTAB_Create( data->mpicomm, data->matrix );
+
+   /* Copy most data members.
+      The preconditioner copy will be a shallow copy (just the pointer);
+      it is likely to be replaced later.
+      But don't copy anything created in Setup (p,q,r,r0,s,v,norms,log_file_name).
+      The user will call Setup on x, later
+      Also don't copy the end-of-solve diagnostics (converged,num_iterations,
+      rel_residual_norm) */
+
+   datax = bHYPRE_BiCGSTAB__get_data( BiCGSTAB_x );
+   datax->tol               = data->tol;
+   datax->tol               = data->cf_tol;
+   datax->min_iter          = data->min_iter;
+   datax->max_iter          = data->max_iter;
+   datax->stop_crit         = data->stop_crit;
+   datax->print_level       = data->print_level;
+   datax->logging           = data->logging;
+
+   datax->precond           = data->precond;
+   bHYPRE_Solver_addRef( datax->precond );
+
+   *x = bHYPRE_PreconditionedSolver__cast( BiCGSTAB_x );
+   return ierr;
+
+  /* DO-NOT-DELETE splicer.end(bHYPRE.BiCGSTAB.Clone) */
 }
 /* Babel internal methods, Users should not edit below this line. */
 struct bHYPRE_Solver__object* impl_bHYPRE_BiCGSTAB_fconnect_bHYPRE_Solver(char* 

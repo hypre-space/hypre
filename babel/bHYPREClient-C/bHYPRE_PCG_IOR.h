@@ -204,6 +204,12 @@ struct bHYPRE_PCG__epv {
   int32_t (*f_SetPreconditioner)(
     /* in */ struct bHYPRE_PCG__object* self,
     /* in */ struct bHYPRE_Solver__object* s);
+  int32_t (*f_GetPreconditioner)(
+    /* in */ struct bHYPRE_PCG__object* self,
+    /* out */ struct bHYPRE_Solver__object** s);
+  int32_t (*f_Clone)(
+    /* in */ struct bHYPRE_PCG__object* self,
+    /* out */ struct bHYPRE_PreconditionedSolver__object** x);
   /* Methods introduced in bHYPRE.PCG-v1.0.0 */
 };
 

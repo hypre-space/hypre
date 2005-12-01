@@ -683,6 +683,31 @@ bHYPRE_IJParCSRMatrix_Read(
 }
 
 /*
+ * The GetRow method will allocate space for its two output
+ * arrays on the first call.  The space will be reused on
+ * subsequent calls.  Thus the user must not delete them, yet
+ * must not depend on the data from GetRow to persist beyond the
+ * next GetRow call.
+ * 
+ */
+
+int32_t
+bHYPRE_IJParCSRMatrix_GetRow(
+  /* in */ bHYPRE_IJParCSRMatrix self,
+  /* in */ int32_t row,
+  /* out */ int32_t* size,
+  /* out */ struct sidl_int__array** col_ind,
+  /* out */ struct sidl_double__array** values)
+{
+  return (*self->d_epv->f_GetRow)(
+    self,
+    row,
+    size,
+    col_ind,
+    values);
+}
+
+/*
  * Set the int parameter associated with {\tt name}.
  * 
  */
@@ -899,31 +924,6 @@ bHYPRE_IJParCSRMatrix_ApplyAdjoint(
     self,
     b,
     x);
-}
-
-/*
- * The GetRow method will allocate space for its two output
- * arrays on the first call.  The space will be reused on
- * subsequent calls.  Thus the user must not delete them, yet
- * must not depend on the data from GetRow to persist beyond the
- * next GetRow call.
- * 
- */
-
-int32_t
-bHYPRE_IJParCSRMatrix_GetRow(
-  /* in */ bHYPRE_IJParCSRMatrix self,
-  /* in */ int32_t row,
-  /* out */ int32_t* size,
-  /* out */ struct sidl_int__array** col_ind,
-  /* out */ struct sidl_double__array** values)
-{
-  return (*self->d_epv->f_GetRow)(
-    self,
-    row,
-    size,
-    col_ind,
-    values);
 }
 
 void
@@ -2176,6 +2176,43 @@ remote_bHYPRE_IJParCSRMatrix_Read(
   return _retval;
 }
 
+/* REMOTE METHOD STUB:GetRow */
+static int32_t
+remote_bHYPRE_IJParCSRMatrix_GetRow(
+  /* in */ struct bHYPRE_IJParCSRMatrix__object* self /* TLD */,
+  /* in */ int32_t row,
+  /* out */ int32_t* size,
+  /* out */ struct sidl_int__array** col_ind,
+  /* out */ struct sidl_double__array** values)
+{
+  sidl_BaseInterface _ex = NULL;
+  sidl_BaseInterface *_ex2 =&_ex;
+  /* initialize a new invocation */
+  sidl_rmi_InstanceHandle _conn = (sidl_rmi_InstanceHandle)self->d_data;
+  sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
+    "GetRow", _ex2 );
+  sidl_rmi_Response _rsvp = NULL;
+  int32_t _retval;
+
+  /* pack in and inout arguments */
+  sidl_rmi_Invocation_packInt( _inv, "row", row, _ex2);
+
+  /* send actual RMI request */
+  _rsvp = sidl_rmi_Invocation_invokeMethod(_inv,_ex2);
+
+  /* extract return value */
+  sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval, _ex2);
+
+  /* unpack out and inout arguments */
+  sidl_rmi_Response_unpackInt( _rsvp, "size", size, _ex2);
+
+  /* cleanup and return */
+  sidl_rmi_Response_done(_rsvp, _ex2);
+  sidl_rmi_Invocation_deleteRef(_inv);
+  sidl_rmi_Response_deleteRef(_rsvp);
+  return _retval;
+}
+
 /* REMOTE METHOD STUB:SetIntParameter */
 static int32_t
 remote_bHYPRE_IJParCSRMatrix_SetIntParameter(
@@ -2588,43 +2625,6 @@ remote_bHYPRE_IJParCSRMatrix_ApplyAdjoint(
   return _retval;
 }
 
-/* REMOTE METHOD STUB:GetRow */
-static int32_t
-remote_bHYPRE_IJParCSRMatrix_GetRow(
-  /* in */ struct bHYPRE_IJParCSRMatrix__object* self /* TLD */,
-  /* in */ int32_t row,
-  /* out */ int32_t* size,
-  /* out */ struct sidl_int__array** col_ind,
-  /* out */ struct sidl_double__array** values)
-{
-  sidl_BaseInterface _ex = NULL;
-  sidl_BaseInterface *_ex2 =&_ex;
-  /* initialize a new invocation */
-  sidl_rmi_InstanceHandle _conn = (sidl_rmi_InstanceHandle)self->d_data;
-  sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
-    "GetRow", _ex2 );
-  sidl_rmi_Response _rsvp = NULL;
-  int32_t _retval;
-
-  /* pack in and inout arguments */
-  sidl_rmi_Invocation_packInt( _inv, "row", row, _ex2);
-
-  /* send actual RMI request */
-  _rsvp = sidl_rmi_Invocation_invokeMethod(_inv,_ex2);
-
-  /* extract return value */
-  sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval, _ex2);
-
-  /* unpack out and inout arguments */
-  sidl_rmi_Response_unpackInt( _rsvp, "size", size, _ex2);
-
-  /* cleanup and return */
-  sidl_rmi_Response_done(_rsvp, _ex2);
-  sidl_rmi_Invocation_deleteRef(_inv);
-  sidl_rmi_Response_deleteRef(_rsvp);
-  return _retval;
-}
-
 /* REMOTE EPV: create remote entry point vectors (EPVs). */
 static void bHYPRE_IJParCSRMatrix__init_remote_epv(void)
 {
@@ -2675,6 +2675,7 @@ static void bHYPRE_IJParCSRMatrix__init_remote_epv(void)
     remote_bHYPRE_IJParCSRMatrix_SetRowSizes;
   epv->f_Print                         = remote_bHYPRE_IJParCSRMatrix_Print;
   epv->f_Read                          = remote_bHYPRE_IJParCSRMatrix_Read;
+  epv->f_GetRow                        = remote_bHYPRE_IJParCSRMatrix_GetRow;
   epv->f_SetIntParameter               = 
     remote_bHYPRE_IJParCSRMatrix_SetIntParameter;
   epv->f_SetDoubleParameter            = 
@@ -2697,7 +2698,6 @@ static void bHYPRE_IJParCSRMatrix__init_remote_epv(void)
   epv->f_Apply                         = remote_bHYPRE_IJParCSRMatrix_Apply;
   epv->f_ApplyAdjoint                  = 
     remote_bHYPRE_IJParCSRMatrix_ApplyAdjoint;
-  epv->f_GetRow                        = remote_bHYPRE_IJParCSRMatrix_GetRow;
 
   e0->f__cast        = (void* (*)(void*,const char*)) epv->f__cast;
   e0->f__delete      = (void (*)(void*)) epv->f__delete;

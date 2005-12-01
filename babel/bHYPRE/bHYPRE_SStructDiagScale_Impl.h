@@ -103,7 +103,8 @@ impl_bHYPRE_SStructDiagScale__dtor(
 extern
 bHYPRE_SStructDiagScale
 impl_bHYPRE_SStructDiagScale_Create(
-  /* in */ bHYPRE_MPICommunicator mpi_comm);
+  /* in */ bHYPRE_MPICommunicator mpi_comm,
+  /* in */ bHYPRE_Operator A);
 
 extern struct bHYPRE_Solver__object* 
   impl_bHYPRE_SStructDiagScale_fconnect_bHYPRE_Solver(char* url,

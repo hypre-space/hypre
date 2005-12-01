@@ -471,6 +471,7 @@ bHYPRE_PCG_ApplyAdjoint(
 
 /*
  * Set the operator for the linear system being solved.
+ * DEPRECATED.  use Create
  * 
  */
 
@@ -599,6 +600,34 @@ bHYPRE_PCG_SetPreconditioner(
   return (*self->d_epv->f_SetPreconditioner)(
     self,
     s);
+}
+
+/*
+ * Method:  GetPreconditioner[]
+ */
+
+int32_t
+bHYPRE_PCG_GetPreconditioner(
+  /* in */ bHYPRE_PCG self,
+  /* out */ bHYPRE_Solver* s)
+{
+  return (*self->d_epv->f_GetPreconditioner)(
+    self,
+    s);
+}
+
+/*
+ * Method:  Clone[]
+ */
+
+int32_t
+bHYPRE_PCG_Clone(
+  /* in */ bHYPRE_PCG self,
+  /* out */ bHYPRE_PreconditionedSolver* x)
+{
+  return (*self->d_epv->f_Clone)(
+    self,
+    x);
 }
 
 void
@@ -2019,6 +2048,72 @@ remote_bHYPRE_PCG_SetPreconditioner(
   return _retval;
 }
 
+/* REMOTE METHOD STUB:GetPreconditioner */
+static int32_t
+remote_bHYPRE_PCG_GetPreconditioner(
+  /* in */ struct bHYPRE_PCG__object* self /* TLD */,
+  /* out */ struct bHYPRE_Solver__object** s)
+{
+  sidl_BaseInterface _ex = NULL;
+  sidl_BaseInterface *_ex2 =&_ex;
+  /* initialize a new invocation */
+  sidl_rmi_InstanceHandle _conn = (sidl_rmi_InstanceHandle)self->d_data;
+  sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
+    "GetPreconditioner", _ex2 );
+  sidl_rmi_Response _rsvp = NULL;
+  int32_t _retval;
+
+  /* pack in and inout arguments */
+
+  /* send actual RMI request */
+  _rsvp = sidl_rmi_Invocation_invokeMethod(_inv,_ex2);
+
+  /* extract return value */
+  sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval, _ex2);
+
+  /* unpack out and inout arguments */
+  sidl_rmi_Response_unpackString( _rsvp, "s", s, _ex2);
+
+  /* cleanup and return */
+  sidl_rmi_Response_done(_rsvp, _ex2);
+  sidl_rmi_Invocation_deleteRef(_inv);
+  sidl_rmi_Response_deleteRef(_rsvp);
+  return _retval;
+}
+
+/* REMOTE METHOD STUB:Clone */
+static int32_t
+remote_bHYPRE_PCG_Clone(
+  /* in */ struct bHYPRE_PCG__object* self /* TLD */,
+  /* out */ struct bHYPRE_PreconditionedSolver__object** x)
+{
+  sidl_BaseInterface _ex = NULL;
+  sidl_BaseInterface *_ex2 =&_ex;
+  /* initialize a new invocation */
+  sidl_rmi_InstanceHandle _conn = (sidl_rmi_InstanceHandle)self->d_data;
+  sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
+    "Clone", _ex2 );
+  sidl_rmi_Response _rsvp = NULL;
+  int32_t _retval;
+
+  /* pack in and inout arguments */
+
+  /* send actual RMI request */
+  _rsvp = sidl_rmi_Invocation_invokeMethod(_inv,_ex2);
+
+  /* extract return value */
+  sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval, _ex2);
+
+  /* unpack out and inout arguments */
+  sidl_rmi_Response_unpackString( _rsvp, "x", x, _ex2);
+
+  /* cleanup and return */
+  sidl_rmi_Response_done(_rsvp, _ex2);
+  sidl_rmi_Invocation_deleteRef(_inv);
+  sidl_rmi_Response_deleteRef(_rsvp);
+  return _retval;
+}
+
 /* REMOTE EPV: create remote entry point vectors (EPVs). */
 static void bHYPRE_PCG__init_remote_epv(void)
 {
@@ -2068,6 +2163,8 @@ static void bHYPRE_PCG__init_remote_epv(void)
   epv->f_GetNumIterations              = remote_bHYPRE_PCG_GetNumIterations;
   epv->f_GetRelResidualNorm            = remote_bHYPRE_PCG_GetRelResidualNorm;
   epv->f_SetPreconditioner             = remote_bHYPRE_PCG_SetPreconditioner;
+  epv->f_GetPreconditioner             = remote_bHYPRE_PCG_GetPreconditioner;
+  epv->f_Clone                         = remote_bHYPRE_PCG_Clone;
 
   e0->f__cast                    = (void* (*)(void*,const char*)) epv->f__cast;
   e0->f__delete                  = (void (*)(void*)) epv->f__delete;
@@ -2170,6 +2267,10 @@ static void bHYPRE_PCG__init_remote_epv(void)
     double*)) epv->f_GetRelResidualNorm;
   e1->f_SetPreconditioner        = (int32_t (*)(void*,
     struct bHYPRE_Solver__object*)) epv->f_SetPreconditioner;
+  e1->f_GetPreconditioner        = (int32_t (*)(void*,
+    struct bHYPRE_Solver__object**)) epv->f_GetPreconditioner;
+  e1->f_Clone                    = (int32_t (*)(void*,
+    struct bHYPRE_PreconditionedSolver__object**)) epv->f_Clone;
 
   e2->f__cast                    = (void* (*)(void*,const char*)) epv->f__cast;
   e2->f__delete                  = (void (*)(void*)) epv->f__delete;

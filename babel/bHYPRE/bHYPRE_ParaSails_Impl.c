@@ -129,7 +129,8 @@ extern "C"
 #endif
 bHYPRE_ParaSails
 impl_bHYPRE_ParaSails_Create(
-  /* in */ bHYPRE_MPICommunicator mpi_comm)
+  /* in */ bHYPRE_MPICommunicator mpi_comm,
+  /* in */ bHYPRE_Operator A)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.ParaSails.Create) */
   /* Insert-Code-Here {bHYPRE.ParaSails.Create} (Create method) */
@@ -139,11 +140,25 @@ impl_bHYPRE_ParaSails_Create(
    HYPRE_Solver * Hsolver = &dummy;
    bHYPRE_ParaSails solver = bHYPRE_ParaSails__create();
    struct bHYPRE_ParaSails__data * data = bHYPRE_ParaSails__get_data( solver );
+   bHYPRE_IJParCSRMatrix Amat;
 
    data->comm = bHYPRE_MPICommunicator__get_data(mpi_comm)->mpi_comm;
    ierr += HYPRE_ParCSRParaSailsCreate( (data->comm), Hsolver );
    hypre_assert( ierr==0 );
    data -> solver = *Hsolver;
+
+   if ( bHYPRE_Operator_queryInt( A, "bHYPRE.IJParCSRMatrix" ) )
+   {
+      Amat = bHYPRE_IJParCSRMatrix__cast( A );
+      bHYPRE_IJParCSRMatrix_deleteRef( Amat ); /* extra ref from queryInt */
+   }
+   else
+   {
+      hypre_assert( "Unrecognized operator type."==(char *)A );
+   }
+
+   data->matrix = Amat;
+   bHYPRE_IJParCSRMatrix_addRef( data->matrix );
 
    return solver;
 
@@ -702,6 +717,7 @@ impl_bHYPRE_ParaSails_ApplyAdjoint(
 
 /*
  * Set the operator for the linear system being solved.
+ * DEPRECATED.  use Create
  * 
  */
 

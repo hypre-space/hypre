@@ -90,6 +90,7 @@ impl_bHYPRE_CGNR__ctor(
    data -> max_iter      = 1000;
    data -> stop_crit     = 0;
    data -> num_iterations = 0;
+   data -> converged     = 0;
 
    data -> p            = (bHYPRE_Vector)NULL;
    data -> q            = (bHYPRE_Vector)NULL;
@@ -469,6 +470,10 @@ impl_bHYPRE_CGNR_GetIntValue(
    {
       *value = data -> num_iterations;
    }
+   else if ( strcmp(name,"Converged")==0 )
+   {
+      *value = data -> converged;
+   }
    else if ( strcmp(name,"MinIter")==0 || strcmp(name,"MinIterations")==0 )
    {
       *value = data -> max_iter;
@@ -714,6 +719,7 @@ impl_bHYPRE_CGNR_Apply(
       {
          norms[0]     = 0.0;
       }
+      data -> converged = 1;
       ierr = 0;
       return ierr;
    }
@@ -849,6 +855,7 @@ impl_bHYPRE_CGNR_Apply(
          ierr += bHYPRE_Vector_Dot( r, r, &i_prod ); /* i_prod = <r,r> */
          if (i_prod < eps) 
          {
+            data -> converged = 1;
             ierr += bHYPRE_Vector_Copy( *x, q ); /* x = q */
 	    x_not_set = 0;
 	    break;
@@ -922,6 +929,7 @@ impl_bHYPRE_CGNR_ApplyAdjoint(
 
 /*
  * Set the operator for the linear system being solved.
+ * DEPRECATED.  use Create
  * 
  */
 
@@ -1174,6 +1182,84 @@ impl_bHYPRE_CGNR_SetPreconditioner(
    return ierr;
 
   /* DO-NOT-DELETE splicer.end(bHYPRE.CGNR.SetPreconditioner) */
+}
+
+/*
+ * Method:  GetPreconditioner[]
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_CGNR_GetPreconditioner"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+int32_t
+impl_bHYPRE_CGNR_GetPreconditioner(
+  /* in */ bHYPRE_CGNR self,
+  /* out */ bHYPRE_Solver* s)
+{
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.CGNR.GetPreconditioner) */
+  /* Insert-Code-Here {bHYPRE.CGNR.GetPreconditioner} (GetPreconditioner method) */
+
+   int ierr = 0;
+   struct bHYPRE_CGNR__data * data = bHYPRE_CGNR__get_data( self );
+
+   *s = data->precond;
+
+   return ierr;
+
+  /* DO-NOT-DELETE splicer.end(bHYPRE.CGNR.GetPreconditioner) */
+}
+
+/*
+ * Method:  Clone[]
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_CGNR_Clone"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+int32_t
+impl_bHYPRE_CGNR_Clone(
+  /* in */ bHYPRE_CGNR self,
+  /* out */ bHYPRE_PreconditionedSolver* x)
+{
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.CGNR.Clone) */
+  /* Insert-Code-Here {bHYPRE.CGNR.Clone} (Clone method) */
+
+   int ierr = 0;
+   struct bHYPRE_CGNR__data * data = bHYPRE_CGNR__get_data( self );
+   struct bHYPRE_CGNR__data * datax;
+   bHYPRE_CGNR CGNR_x;
+
+   CGNR_x = bHYPRE_CGNR_Create( data->mpicomm, data->matrix );
+
+   /* Copy most data members.
+      The preconditioner copy will be a shallow copy (just the pointer);
+      it is likely to be replaced later.
+      But don't copy anything created in Setup (p,q,r,t,norms,log_file_name).
+      The user will call Setup on x, later
+      Also don't copy the end-of-solve diagnostics (converged,num_iterations,
+      rel_residual_norm) */
+
+   datax = bHYPRE_CGNR__get_data( CGNR_x );
+   datax->tol               = data->tol;
+   datax->min_iter          = data->min_iter;
+   datax->max_iter          = data->max_iter;
+   datax->stop_crit         = data->stop_crit;
+   datax->print_level       = data->print_level;
+   datax->logging           = data->logging;
+
+   datax->precond           = data->precond;
+   bHYPRE_Solver_addRef( datax->precond );
+
+   *x = bHYPRE_PreconditionedSolver__cast( CGNR_x );
+   return ierr;
+
+  /* DO-NOT-DELETE splicer.end(bHYPRE.CGNR.Clone) */
 }
 /* Babel internal methods, Users should not edit below this line. */
 struct bHYPRE_Solver__object* impl_bHYPRE_CGNR_fconnect_bHYPRE_Solver(char* url,

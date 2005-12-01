@@ -81,6 +81,8 @@ struct bHYPRE_HGMRES__data {
    HYPRE_PtrToSolverFcn precond; /* function */
    HYPRE_PtrToSolverFcn precond_setup; /* function */
 
+   bHYPRE_Solver bprecond;  /* just used in GetPreconditioner */
+
   /* DO-NOT-DELETE splicer.end(bHYPRE.HGMRES._data) */
 };
 
@@ -306,6 +308,18 @@ int32_t
 impl_bHYPRE_HGMRES_SetPreconditioner(
   /* in */ bHYPRE_HGMRES self,
   /* in */ bHYPRE_Solver s);
+
+extern
+int32_t
+impl_bHYPRE_HGMRES_GetPreconditioner(
+  /* in */ bHYPRE_HGMRES self,
+  /* out */ bHYPRE_Solver* s);
+
+extern
+int32_t
+impl_bHYPRE_HGMRES_Clone(
+  /* in */ bHYPRE_HGMRES self,
+  /* out */ bHYPRE_PreconditionedSolver* x);
 
 extern struct bHYPRE_Solver__object* 
   impl_bHYPRE_HGMRES_fconnect_bHYPRE_Solver(char* url, sidl_BaseInterface *_ex);
