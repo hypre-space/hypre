@@ -338,11 +338,12 @@ int main (int argc, char *argv[])
 
       /* Now set up the AMG preconditioner and specify any parameters */
       HYPRE_BoomerAMGCreate(&precond);
-      HYPRE_BoomerAMGSetPrintLevel(precond, 1); /* print amg solution info*/
+      HYPRE_BoomerAMGSetPrintLevel(precond, 1); /* print amg solution info */
       HYPRE_BoomerAMGSetCoarsenType(precond, 6);
       HYPRE_BoomerAMGSetRelaxType(precond, 6); /* Sym G.S./Jacobi hybrid */ 
       HYPRE_BoomerAMGSetNumSweeps(precond, 1);
-      HYPRE_BoomerAMGSetTol(precond, 1e-3);
+      HYPRE_BoomerAMGSetTol(precond, 1e-3); /* conv. tolerance (if needed) */
+      HYPRE_BoomerAMGSetMaxIter(precond, 1); /* do only one iteration! */
 
       /* Set the PCG preconditioner */
       HYPRE_PCGSetPrecond(solver, (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSolve,
