@@ -2504,8 +2504,7 @@ main( int   argc,
       else if (solver_id == 18)
       {
          /* use diagonal scaling as preconditioner */
-         solver_DS = bHYPRE_SStructDiagScale_Create( bmpicomm );
-         ierr += bHYPRE_SStructDiagScale_SetOperator( solver_DS, b_A_O );
+         solver_DS = bHYPRE_SStructDiagScale_Create( bmpicomm, b_A_O );
          ierr += bHYPRE_SStructDiagScale_Setup( solver_DS, bV_b, bV_x );
          b_precond = (bHYPRE_Solver) bHYPRE_SStructDiagScale__cast2
             ( solver_DS, "bHYPRE.Solver" ); 
@@ -2588,7 +2587,7 @@ main( int   argc,
       if (solver_id == 20)
       {
          /* use BoomerAMG as preconditioner */
-         b_boomeramg = bHYPRE_BoomerAMG_Create( bmpicomm );
+         b_boomeramg = bHYPRE_BoomerAMG_Create( bmpicomm, b_A_O );
          ierr += bHYPRE_BoomerAMG_SetIntParameter( b_boomeramg, "CoarsenType", 6 );
          ierr += bHYPRE_BoomerAMG_SetIntParameter( b_boomeramg, "PrintLevel", 1 );
          ierr += bHYPRE_BoomerAMG_SetDoubleParameter(
@@ -2598,7 +2597,6 @@ main( int   argc,
             b_boomeramg, "Tol", 0.0 );
          ierr += bHYPRE_BoomerAMG_SetStringParameter(
             b_boomeramg, "PrintFileName", "sstruct.out.log");
-         ierr += bHYPRE_BoomerAMG_SetOperator( b_boomeramg, b_A_O );
 
          b_precond = (bHYPRE_Solver) bHYPRE_BoomerAMG__cast2(
             b_boomeramg, "bHYPRE.Solver" );
@@ -2608,10 +2606,9 @@ main( int   argc,
       else if (solver_id == 22)
       {
          /* use ParaSails as preconditioner */
-         b_parasails = bHYPRE_ParaSails_Create( bmpicomm );
+         b_parasails = bHYPRE_ParaSails_Create( bmpicomm, b_A_O );
          ierr += bHYPRE_ParaSails_SetDoubleParameter( b_parasails, "Thresh", 0.1 );
          ierr += bHYPRE_ParaSails_SetIntParameter( b_parasails, "Nlevels", 1 );
-         ierr += bHYPRE_ParaSails_SetOperator( b_parasails, b_A_O );
 
          b_precond = (bHYPRE_Solver) bHYPRE_ParaSails__cast2(
             b_parasails, "bHYPRE.Solver" );
@@ -2771,7 +2768,7 @@ main( int   argc,
       if (solver_id == 40)
       {
          /* use BoomerAMG as preconditioner */
-         b_boomeramg = bHYPRE_BoomerAMG_Create( bmpicomm );
+         b_boomeramg = bHYPRE_BoomerAMG_Create( bmpicomm, b_A_O );
          bHYPRE_BoomerAMG_SetIntParameter( b_boomeramg, "CoarsenType", 6);
          bHYPRE_BoomerAMG_SetIntParameter( b_boomeramg, "StrongThreshold", 0.25);
          bHYPRE_BoomerAMG_SetDoubleParameter( b_boomeramg, "Tolerance", 0.0 );
@@ -2779,11 +2776,6 @@ main( int   argc,
          bHYPRE_BoomerAMG_SetStringParameter( b_boomeramg,
                                               "PrintFileName", "sstruct.out.log");
          bHYPRE_BoomerAMG_SetIntParameter( b_boomeramg, "MaxIterations", 1 );
-         ierr += bHYPRE_BoomerAMG_SetOperator( b_boomeramg, b_A_O );
-         /* ... Note regarding the translation from HYPRE to babel (bHYPRE) interface:
-            Although HYPRE_*Setup* does (among other things) the same job as SetOperator,
-            HYPRE_*Setup* of GMRES calls the preconditioner's Setup, but SetOperator
-            does not  */
 
          b_precond = (bHYPRE_Solver) bHYPRE_BoomerAMG__cast2
             ( b_boomeramg, "bHYPRE.Solver" ); 
@@ -3076,7 +3068,8 @@ main( int   argc,
       time_index = hypre_InitializeTiming("SMG Setup");
       hypre_BeginTiming(time_index);
 
-      b_solver_SMG = bHYPRE_StructSMG_Create( bmpicomm );
+      b_A_O = bHYPRE_Operator__cast( b_sA );
+      b_solver_SMG = bHYPRE_StructSMG_Create( bmpicomm, b_A_O );
       bHYPRE_StructSMG_SetIntParameter( b_solver_SMG, "MemoryUse", 0);
       bHYPRE_StructSMG_SetIntParameter( b_solver_SMG, "MaxIter", 50);
       bHYPRE_StructSMG_SetDoubleParameter( b_solver_SMG, "Tol", 1.0e-6);
@@ -3086,8 +3079,6 @@ main( int   argc,
       bHYPRE_StructSMG_SetIntParameter( b_solver_SMG, "PrintLevel", 1);
       bHYPRE_StructSMG_SetIntParameter( b_solver_SMG, "Logging", 1);
 
-      b_A_O = bHYPRE_Operator__cast( b_sA );
-      ierr += bHYPRE_StructSMG_SetOperator( b_solver_SMG, b_A_O );
       bV_b = bHYPRE_Vector__cast( b_sb );
       bV_x = bHYPRE_Vector__cast( b_sx );
       ierr += bHYPRE_StructSMG_Setup( b_solver_SMG, bV_b, bV_x );

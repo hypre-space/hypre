@@ -15,6 +15,7 @@
 #include "bHYPRE_IdentitySolver.h"
 #include "bHYPRE_StructDiagScale.h"
 #include "bHYPRE_PCG.h"
+#include "bHYPRE_Hybrid.h"
 #include "bHYPRE_StructGrid.h"
 #include "bHYPRE_StructStencil.h"
 #include "bHYPRE_StructGrid_Impl.h"
@@ -73,12 +74,15 @@ main( int   argc,
 
 /* not currently used   bHYPRE_Solver  solver;*/
    bHYPRE_Solver  precond;
+   bHYPRE_PreconditionedSolver  krylov_solver;
 /*   bHYPRE_StructJacobi  solver_SJ;*/
    bHYPRE_StructSMG solver_SMG;
    bHYPRE_StructPFMG solver_PFMG;
    bHYPRE_IdentitySolver solver_Id;
    bHYPRE_PCG  solver_PCG;
+   bHYPRE_PCG  solver_PCG_1;
    bHYPRE_StructDiagScale  solver_DS;
+   bHYPRE_Hybrid solver_Hybrid;
 
    int constant_coefficient = 0;
    int symmetric = 1;
@@ -299,7 +303,7 @@ main( int   argc,
       printf("                         17*- CG with 2-step Jacobi\n");
       printf("                         18 - CG with diagonal scaling\n");
       printf("                         19 - CG\n");
-      printf("                         20*- Hybrid with SMG precond\n");
+      printf("                         20 - Hybrid with SMG precond\n");
       printf("                         21*- Hybrid with PFMG precond\n");
       printf("                         22*- Hybrid with SparseMSG precond\n");
       printf("Solvers marked with '*' have not yet been implemented.\n");
@@ -747,7 +751,8 @@ main( int   argc,
       time_index = hypre_InitializeTiming("SMG Setup");
       hypre_BeginTiming(time_index);
 
-      solver_SMG = bHYPRE_StructSMG_Create( bmpicomm );
+      A_O = bHYPRE_Operator__cast( A_b );
+      solver_SMG = bHYPRE_StructSMG_Create( bmpicomm, A_O );
       bHYPRE_StructSMG_SetIntParameter( solver_SMG, "MemoryUse", 0 );
       bHYPRE_StructSMG_SetIntParameter( solver_SMG, "MaxIter", 50 );
       bHYPRE_StructSMG_SetDoubleParameter( solver_SMG, "Tol", 1.0e-6 );
@@ -756,8 +761,6 @@ main( int   argc,
       bHYPRE_StructSMG_SetIntParameter( solver_SMG, "NumPostrelax", n_post );
       bHYPRE_StructSMG_SetIntParameter( solver_SMG, "Logging", 1 );
 
-      A_O = bHYPRE_Operator__cast( A_b );
-      ierr += bHYPRE_StructSMG_SetOperator( solver_SMG, A_O );
       b_V = bHYPRE_Vector__cast( b_SV );
       x_V = bHYPRE_Vector__cast( x_SV );
       ierr += bHYPRE_StructSMG_Setup( solver_SMG, b_V, x_V );
@@ -794,7 +797,8 @@ main( int   argc,
       hypre_BeginTiming(time_index);
 
 
-      solver_PFMG = bHYPRE_StructPFMG_Create( bmpicomm );
+      A_O = bHYPRE_Operator__cast( A_b );
+      solver_PFMG = bHYPRE_StructPFMG_Create( bmpicomm, A_O );
 
       bHYPRE_StructPFMG_SetIntParameter( solver_PFMG, "MaxIter", 50 );
       bHYPRE_StructPFMG_SetDoubleParameter( solver_PFMG, "Tol", 1.0e-6 );
@@ -810,8 +814,6 @@ main( int   argc,
 
       bHYPRE_StructPFMG_SetIntParameter( solver_PFMG, "rap type", rap );
 
-      A_O = bHYPRE_Operator__cast( A_b );
-      ierr += bHYPRE_StructPFMG_SetOperator( solver_PFMG, A_O );
       b_V = bHYPRE_Vector__cast( b_SV );
       x_V = bHYPRE_Vector__cast( x_SV );
       ierr += bHYPRE_StructPFMG_Setup( solver_PFMG, b_V, x_V );
@@ -907,8 +909,7 @@ main( int   argc,
       if (solver_id == 10)
       {
          /* use symmetric SMG as preconditioner */
-         solver_SMG = bHYPRE_StructSMG_Create( bmpicomm );
-         ierr += bHYPRE_StructSMG_SetOperator( solver_SMG, A_O );
+         solver_SMG = bHYPRE_StructSMG_Create( bmpicomm, A_O );
 
          ierr += bHYPRE_StructSMG_SetIntParameter( solver_SMG, "MemoryUse", 0 );
          ierr += bHYPRE_StructSMG_SetIntParameter( solver_SMG, "MaxIter", 1 );
@@ -928,8 +929,7 @@ main( int   argc,
       else if ( solver_id == 11 || solver_id == 13 || solver_id == 14 )
       {
          /* use symmetric PFMG as preconditioner */
-         solver_PFMG = bHYPRE_StructPFMG_Create( bmpicomm );
-         ierr += bHYPRE_StructPFMG_SetOperator( solver_PFMG, A_O );
+         solver_PFMG = bHYPRE_StructPFMG_Create( bmpicomm, A_O );
 
          bHYPRE_StructPFMG_SetIntParameter( solver_PFMG, "MaxIterations", 1 );
          bHYPRE_StructPFMG_SetIntParameter( solver_PFMG, "Tolerance", 0.0 );
@@ -1003,8 +1003,7 @@ main( int   argc,
       else if ( solver_id == 18 )
       {
          /* use diagonal scaling as preconditioner */
-         solver_DS = bHYPRE_StructDiagScale_Create( bmpicomm );
-         ierr += bHYPRE_StructDiagScale_SetOperator( solver_DS, A_O );
+         solver_DS = bHYPRE_StructDiagScale_Create( bmpicomm, A_O );
          ierr += bHYPRE_StructDiagScale_Setup( solver_DS, b_V, x_V );
          hypre_assert( ierr==0 );
 
@@ -1015,7 +1014,6 @@ main( int   argc,
       {
          /* no preconditioner; with PCG we use the "identity preconditioner" */
          solver_Id = bHYPRE_IdentitySolver_Create( bmpicomm );
-         ierr += bHYPRE_IdentitySolver_SetOperator( solver_Id, A_O );
          ierr += bHYPRE_IdentitySolver_Setup( solver_Id, b_V, x_V );
          hypre_assert( ierr==0 );
 
@@ -1087,39 +1085,48 @@ main( int   argc,
     *-----------------------------------------------------------*/
    if ((solver_id > 19) && (solver_id < 30))
    {
-         hypre_assert( "solver >=20 not implemented"==0 );
-#if 0
       time_index = hypre_InitializeTiming("Hybrid Setup");
       hypre_BeginTiming(time_index);
 
-      HYPRE_StructHybridCreate(MPI_COMM_WORLD, &solver);
-      HYPRE_StructHybridSetDSCGMaxIter(solver, 100);
-      HYPRE_StructHybridSetPCGMaxIter(solver, 50);
-      HYPRE_StructHybridSetTol(solver, 1.0e-06);
-      HYPRE_StructHybridSetConvergenceTol(solver, 0.90);
-      HYPRE_StructHybridSetTwoNorm(solver, 1);
-      HYPRE_StructHybridSetRelChange(solver, 0);
-      HYPRE_StructHybridSetLogging(solver, 1);
+      /* The Hybrid scheme is built on top of a PCG solver; so
+         make the PCG solver first */
+
+      A_O = bHYPRE_Operator__cast( A_b );
+      solver_PCG = bHYPRE_PCG_Create( bmpicomm, A_O );
+      b_V = bHYPRE_Vector__cast( b_SV );
+      x_V = bHYPRE_Vector__cast( x_SV );
+
+      ierr += bHYPRE_PCG_SetIntParameter( solver_PCG, "MaxIter", 50 );
+      ierr += bHYPRE_PCG_SetDoubleParameter( solver_PCG, "Tol", 1.0e-06);
+      ierr += bHYPRE_PCG_SetDoubleParameter( solver_PCG, "ConvergenceFactorTol", 0.90 );
+      ierr += bHYPRE_PCG_SetIntParameter( solver_PCG, "2-norm", 1);
+      ierr += bHYPRE_PCG_SetIntParameter( solver_PCG, "relative change test", 0);
+      ierr += bHYPRE_PCG_SetIntParameter( solver_PCG, "Logging", 1);
 
       if (solver_id == 20)
       {
          /* use symmetric SMG as preconditioner */
-         HYPRE_StructSMGCreate(MPI_COMM_WORLD, &precond);
-         HYPRE_StructSMGSetMemoryUse(precond, 0);
-         HYPRE_StructSMGSetMaxIter(precond, 1);
-         HYPRE_StructSMGSetTol(precond, 0.0);
-         HYPRE_StructSMGSetZeroGuess(precond);
-         HYPRE_StructSMGSetNumPreRelax(precond, n_pre);
-         HYPRE_StructSMGSetNumPostRelax(precond, n_post);
-         HYPRE_StructSMGSetLogging(precond, 0);
-         HYPRE_StructHybridSetPrecond(solver,
-                                      HYPRE_StructSMGSolve,
-                                      HYPRE_StructSMGSetup,
-                                      precond);
+         solver_SMG = bHYPRE_StructSMG_Create( bmpicomm, A_O );
+         ierr += bHYPRE_StructSMG_SetIntParameter( solver_SMG, "MemoryUse", 0 );
+         ierr += bHYPRE_StructSMG_SetIntParameter( solver_SMG, "MaxIter", 1 );
+         ierr += bHYPRE_StructSMG_SetDoubleParameter(
+            solver_SMG, "Tolerance", 0.0 );
+         ierr += bHYPRE_StructSMG_SetIntParameter( solver_SMG, "ZeroGuess", 1 );
+         ierr += bHYPRE_StructSMG_SetIntParameter(
+            solver_SMG, "NumPreRelax", n_pre );
+         ierr += bHYPRE_StructSMG_SetIntParameter(
+            solver_SMG, "NumPostRelax", n_post );
+         ierr += bHYPRE_StructSMG_SetIntParameter( solver_SMG, "Loggin", 0 );
+
+         precond = (bHYPRE_Solver) bHYPRE_StructSMG__cast2(
+            solver_SMG, "bHYPRE.Solver" );
+         ierr += bHYPRE_PCG_SetPreconditioner( solver_PCG, precond );
       }
 
       else if (solver_id == 21)
       {
+         hypre_assert( "solver 21 not implemented"==0 );
+#if 0
          /* use symmetric PFMG as preconditioner */
          HYPRE_StructPFMGCreate(MPI_COMM_WORLD, &precond);
          HYPRE_StructPFMGSetMaxIter(precond, 1);
@@ -1136,10 +1143,13 @@ main( int   argc,
                                       HYPRE_StructPFMGSolve,
                                       HYPRE_StructPFMGSetup,
                                       precond);
+#endif
       }
 
       else if (solver_id == 22)
       {
+         hypre_assert( "solver 22 not implemented"==0 );
+#if 0
          /* use symmetric SparseMSG as preconditioner */
          HYPRE_StructSparseMSGCreate(MPI_COMM_WORLD, &precond);
          HYPRE_StructSparseMSGSetJump(precond, jump);
@@ -1155,9 +1165,27 @@ main( int   argc,
                                       HYPRE_StructSparseMSGSolve,
                                       HYPRE_StructSparseMSGSetup,
                                       precond);
+#endif
       }
+      else
+         hypre_assert( "solver not implemented"==0 );
 
-      HYPRE_StructHybridSetup(solver, A, b, x);
+      /* Now make the Hybrid solver, and adjust the first
+         (diagonal-scaling-preconditioned) solver */
+
+      krylov_solver = (bHYPRE_PreconditionedSolver) bHYPRE_PCG__cast2(
+         solver_PCG, "bHYPRE.PreconditionedSolver" );
+      solver_Hybrid = bHYPRE_Hybrid_Create( bmpicomm, krylov_solver, A_O );
+
+      /* This Setup call does Setup on the PCG solvers as well. */
+      ierr += bHYPRE_Hybrid_Setup( solver_Hybrid, b_V, x_V );
+
+      ierr += bHYPRE_Hybrid_GetFirstSolver( solver_Hybrid, &krylov_solver );
+      bHYPRE_PreconditionedSolver_addRef( krylov_solver );
+      solver_PCG_1 = (bHYPRE_PCG) bHYPRE_PCG__cast( krylov_solver );
+      ierr += bHYPRE_PCG_SetIntParameter( solver_PCG_1, "MaxIter", 100 );
+
+      hypre_assert( ierr==0 );
 
       hypre_EndTiming(time_index);
       hypre_PrintTiming("Setup phase times", MPI_COMM_WORLD);
@@ -1167,21 +1195,23 @@ main( int   argc,
       time_index = hypre_InitializeTiming("Hybrid Solve");
       hypre_BeginTiming(time_index);
 
-      HYPRE_StructHybridSolve(solver, A, b, x);
+      ierr += bHYPRE_Hybrid_Apply( solver_Hybrid, b_V, &x_V );
 
       hypre_EndTiming(time_index);
       hypre_PrintTiming("Solve phase times", MPI_COMM_WORLD);
       hypre_FinalizeTiming(time_index);
       hypre_ClearTiming();
 
-      HYPRE_StructHybridGetNumIterations(solver, &num_iterations);
-      HYPRE_StructHybridGetFinalRelativeResidualNorm(solver, &final_res_norm);
-      HYPRE_StructHybridDestroy(solver);
+      ierr += bHYPRE_Hybrid_GetNumIterations( solver_Hybrid, &num_iterations);
+      ierr += bHYPRE_Hybrid_GetRelResidualNorm( solver_Hybrid, &final_res_norm);
 
+      bHYPRE_Hybrid_deleteRef( solver_Hybrid );
       if (solver_id == 20)
       {
-         HYPRE_StructSMGDestroy(precond);
+         bHYPRE_PCG_deleteRef( solver_PCG );
+         bHYPRE_PCG_deleteRef( solver_PCG_1 );
       }
+#if 0
       else if (solver_id == 21)
       {
          HYPRE_StructPFMGDestroy(precond);
