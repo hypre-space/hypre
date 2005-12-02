@@ -259,6 +259,17 @@ HYPRE_GMRESGetNumIterations( HYPRE_Solver  solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_GMRESGetConverged
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_GMRESGetConverged( HYPRE_Solver  solver,
+                         int                *converged )
+{
+   return( hypre_GMRESGetConverged( (void *) solver, converged ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_GMRESGetFinalRelativeResidualNorm
  *--------------------------------------------------------------------------*/
 

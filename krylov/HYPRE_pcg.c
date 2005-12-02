@@ -276,6 +276,17 @@ HYPRE_PCGGetNumIterations( HYPRE_Solver  solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_PCGGetConverged
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_PCGGetConverged( HYPRE_Solver  solver,
+                       int                *converged )
+{
+   return( hypre_PCGGetConverged( (void *) solver, converged ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_PCGGetFinalRelativeResidualNorm
  *--------------------------------------------------------------------------*/
 
