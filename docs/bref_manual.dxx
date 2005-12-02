@@ -17,14 +17,14 @@
  * @name IJ Matrix Builder
  **/
 //@{
-//@Include: ../babel/bHYPREClient-C/bHYPRE_IJBuildMatrix.h
+//@Include: ../babel/bHYPREClient-C/bHYPRE_IJMatrixView.h
 //@}
 
 /**
  * @name IJ Vector Builder
  **/
 //@{
-//@Include: ../babel/bHYPREClient-C/bHYPRE_IJBuildVector.h
+//@Include: ../babel/bHYPREClient-C/bHYPRE_IJVectorView.h
 //@}
 
 /*@}*/
