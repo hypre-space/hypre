@@ -63,14 +63,6 @@ function MpirunString
       gps*) MPIRUN=`type mpirun|sed -e 's/^.* //'`
          RunString="$MPIRUN $*"
          ;;
-      fros*) CPUS_PER_NODE=16
-         POE_NUM_PROCS=$2
-         POE_NUM_NODES=`expr $POE_NUM_PROCS + $CPUS_PER_NODE - 1`
-         POE_NUM_NODES=`expr $POE_NUM_NODES / $CPUS_PER_NODE`
-         shift
-         shift
-         RunString="poe $* -procs $POE_NUM_PROCS -nodes $POE_NUM_NODES"
-         ;;
       uv*) CPUS_PER_NODE=8
          POE_NUM_PROCS=$2
          POE_NUM_NODES=`expr $POE_NUM_PROCS + $CPUS_PER_NODE - 1`
@@ -119,8 +111,6 @@ function CheckBatch
    case $HOST in
       gps*) BATCH_MODE=1
          ;;
-      fros*) BATCH_MODE=1
-         ;;
       uv*) BATCH_MODE=1
          ;;
       peng*) BATCH_MODE=1
@@ -166,8 +156,6 @@ function CalcNodes
    HOST=`hostname|cut -c1-4`
    case $HOST in
       gps*) CPUS_PER_NODE=4
-         ;;
-      fros*) CPUS_PER_NODE=16
          ;;
       uv*) CPUS_PER_NODE=8
          ;;
@@ -264,9 +252,6 @@ function PsubCmdStub
    HOST=`hostname|cut -c1-4`
    case $HOST in
       gps*) PsubCmd="psub -c gps320 -b casc -r $RunName -cpn $NumProcs"
-         ;;
-      fros*) PsubCmd="psub -c frost,pbatch -b a_casc -nettype css0 -r $RunName"
-         PsubCmd="$PsubCmd -ln $NumNodes -g $NumProcs"
          ;;
       uv*) PsubCmd="psub -c uv,pbatch -b a_casc -nettype css0 -r $RunName"
          PsubCmd="$PsubCmd -ln $NumNodes -g $NumProcs"
