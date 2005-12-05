@@ -148,7 +148,7 @@ hypre_set_machine_options()
         HYPRE_ARCH="linux"
         HYPRE_COMPILE_MACHINE="ilx"
         HYPRE_RUN_MACHINE="ilx"
-        HYPRE_REMOTE_DIR="/usr/casc/hypre/chaos_2_ia32/AUTOTEST"
+        HYPRE_REMOTE_DIR="/usr/casc/hypre/chaos_3_x86/AUTOTEST"
 	HYPRE_MACHINE_COMMANDS="-r $HYPRE_RUN_MACHINE -ne 1 -a 2 -cf"
         HYPRE_MESSAGE='SECONDARY[ILX]'
         ;;
@@ -172,7 +172,7 @@ hypre_set_machine_options()
         HYPRE_ARCH="linux"
         HYPRE_COMPILE_MACHINE="pengra"
         HYPRE_RUN_MACHINE="pengra"
-        HYPRE_REMOTE_DIR="/usr/casc/hypre/chaos_2_ia32_elan3/AUTOTEST"
+        HYPRE_REMOTE_DIR="/usr/casc/hypre/chaos_3_x86_elan3/AUTOTEST"
         HYPRE_MACHINE_COMMANDS="-r $HYPRE_RUN_MACHINE -nse 1 -a 2 -cf"
         HYPRE_MESSAGE='SECONDARY[Pengra]'
         ;;

@@ -191,11 +191,14 @@ get_hypre_test_name()
       *tru64_5*)
          hypre_test_name="SECONDARY[GPS/OpenMP-GPS]"
          ;;
-      *chaos_2_ia32/AUTOTEST)
+      *chaos_3_x86/AUTOTEST)
          hypre_test_name="SECONDARY[ILX]"
          ;;
+      *chaos_3_x86_elan3/AUTOTEST)
+         hypre_test_name="SECONDARY[Pengra]"
+         ;;
       *chaos_2_ia32_elan3/AUTOTEST)
-         hypre_test_name="SECONDARY[MCR/Pengra]"
+         hypre_test_name="SECONDARY[MCR]"
          ;;
       *i686-pc-linux-gnu/AUTOTEST)
          hypre_test_name="PRIMARY[default]"
@@ -247,6 +250,8 @@ HYPRE_DEFAULT_REMOTE_DIRS="/usr/casc/hypre/i686-pc-linux-gnu/AUTOTEST\
                            /usr/casc/hypre/i686-pc-linux-gnu-insure/AUTOTEST\
                            /usr/casc/hypre/chaos_2_ia32_elan3/AUTOTEST\
                            /usr/casc/hypre/chaos_2_ia32/AUTOTEST\
+                           /usr/casc/hypre/chaos_3_x86_elan3/AUTOTEST\
+                           /usr/casc/hypre/chaos_3_x86/AUTOTEST\
                            /usr/casc/hypre/tru64_5/AUTOTEST\
                            /usr/casc/hypre/i686-pc-linux-gnu-pgi5.x/AUTOTEST\
                            /usr/casc/hypre/i686-pc-linux-gnu-kai/AUTOTEST\
