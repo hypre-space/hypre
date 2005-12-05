@@ -20,7 +20,7 @@ TestDirNames=""          #string of names of TEST_* directories used
 function usage ()
 {
    printf "\n"
-   printf "$0 [-n|-norun] [-h|-help] {test_path}/{test_name}.sh\n"
+   printf "$0 [-n|-norun] [-h|-help] [-t|-trace] {test_path}/{test_name}.sh\n"
    printf "\n"
    printf " where: {test_path} is the directory path to the test script;\n"
    printf "        {test_name} is a user defined name for the test script\n"
@@ -46,7 +46,7 @@ function usage ()
    printf " and will automatically use the Livermore Computing Resource\n" 
    printf " Management (LCRM) batch system if required.\n"
    printf "\n"
-   printf " Example usage: ./runtest.sh -d TEST_sstruct/*.sh\n"
+   printf " Example usage: ./runtest.sh -t TEST_sstruct/*.sh\n"
    printf "\n"
 }
 
