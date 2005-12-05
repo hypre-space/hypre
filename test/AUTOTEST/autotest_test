@@ -575,7 +575,7 @@ confbuildtest ()
       then
          if [ "$DEBUG_MODE" = "yes" ]
          then
-            ./runtest.sh -debug $STD_TEST_CASES
+            ./runtest.sh -trace $STD_TEST_CASES
          else
             ./runtest.sh $STD_TEST_CASES
          fi
@@ -586,7 +586,7 @@ confbuildtest ()
           [ -r ./AUTOTEST/env.${HYPRE_ARCH} ] && . ./AUTOTEST/env.${HYPRE_ARCH};\
           if [ "$DEBUG_MODE" = "yes" ]
           then
-             ./runtest.sh -debug $STD_TEST_CASES \
+             ./runtest.sh -trace $STD_TEST_CASES \
           else
              ./runtest.sh $STD_TEST_CASES \
           fi
