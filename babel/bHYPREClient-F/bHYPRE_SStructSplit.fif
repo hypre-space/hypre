@@ -1,9 +1,9 @@
 C       
-C       File:          bHYPRE_StructSMG_Impl.f
-C       Symbol:        bHYPRE.StructSMG-v1.0.0
+C       File:          bHYPRE_SStructSplit_Impl.f
+C       Symbol:        bHYPRE.SStructSplit-v1.0.0
 C       Symbol Type:   class
 C       Babel Version: 0.10.4
-C       Description:   Client-side documentation text for bHYPRE.StructSMG
+C       Description:   Client-side documentation text for bHYPRE.SStructSplit
 C       
 C       WARNING: Automatically generated; changes will be lost
 C       
@@ -13,14 +13,12 @@ C
         THIS FILE IS DOCUMENTATION - DO NOT COMPILE IT!
 
 C       
-C       Symbol "bHYPRE.StructSMG" (version 1.0.0)
+C       Symbol "bHYPRE.SStructSplit" (version 1.0.0)
 C       
-C       Objects of this type can be cast to Solver objects
-C       using the {\tt \_\_cast} methods.
 C       
-C       RDF: Documentation goes here.
+C       Documentation goes here.
 C       
-C       The StructSMG solver requires a Struct matrix.
+C       The SStructSplit solver requires a SStruct matrix.
 C       
 C       
 C       
@@ -29,12 +27,12 @@ C
 
 
 C       
-C       Create an instance of class bHYPRE.StructSMG
+C       Create an instance of class bHYPRE.SStructSplit
 C       
 
-        subroutine bHYPRE_StructSMG__create_f(retval)
+        subroutine bHYPRE_SStructSplit__create_f(retval)
         implicit none
-C       out bHYPRE.StructSMG retval
+C       out bHYPRE.SStructSplit retval
         integer*8 retval
         end
 
@@ -43,11 +41,11 @@ C
 C       Cast method for interface and type conversions.
 C       
 
-        subroutine bHYPRE_StructSMG__cast_f(ref, retval)
+        subroutine bHYPRE_SStructSplit__cast_f(ref, retval)
         implicit none
 C       in opaque ref
         integer*8 ref
-C       out bHYPRE.StructSMG retval
+C       out bHYPRE.SStructSplit retval
         integer*8 retval
         end
 
@@ -56,9 +54,9 @@ C
 C       Cast method for interface and class type conversions.
 C       
 
-        subroutine bHYPRE_StructSMG__cast2_f(self, name, retval)
+        subroutine bHYPRE_SStructSplit__cast2_f(self, name, retval)
         implicit none
-C       in bHYPRE.StructSMG self
+C       in bHYPRE.SStructSplit self
         integer*8 self
 C       in string name
         character*(*) name
@@ -82,9 +80,9 @@ C       class.
 C       </p>
 C       
 
-        subroutine bHYPRE_StructSMG_addRef_f(self)
+        subroutine bHYPRE_SStructSplit_addRef_f(self)
         implicit none
-C       in bHYPRE.StructSMG self
+C       in bHYPRE.SStructSplit self
         integer*8 self
         end
 
@@ -97,9 +95,9 @@ C       Clients should call this method whenever they remove a
 C       reference to an object or interface.
 C       
 
-        subroutine bHYPRE_StructSMG_deleteRef_f(self)
+        subroutine bHYPRE_SStructSplit_deleteRef_f(self)
         implicit none
-C       in bHYPRE.StructSMG self
+C       in bHYPRE.SStructSplit self
         integer*8 self
         end
 
@@ -109,9 +107,9 @@ C       Return true if and only if <code>obj</code> refers to the same
 C       object as this object.
 C       
 
-        subroutine bHYPRE_StructSMG_isSame_f(self, iobj, retval)
+        subroutine bHYPRE_SStructSplit_isSame_f(self, iobj, retval)
         implicit none
-C       in bHYPRE.StructSMG self
+C       in bHYPRE.SStructSplit self
         integer*8 self
 C       in sidl.BaseInterface iobj
         integer*8 iobj
@@ -130,9 +128,9 @@ C       the specified type is not supported, then a null reference is
 C       returned.
 C       
 
-        subroutine bHYPRE_StructSMG_queryInt_f(self, name, retval)
+        subroutine bHYPRE_SStructSplit_queryInt_f(self, name, retval)
         implicit none
-C       in bHYPRE.StructSMG self
+C       in bHYPRE.SStructSplit self
         integer*8 self
 C       in string name
         character*(*) name
@@ -148,9 +146,9 @@ C       routine will return <code>true</code> if and only if a cast to
 C       the string type name would succeed.
 C       
 
-        subroutine bHYPRE_StructSMG_isType_f(self, name, retval)
+        subroutine bHYPRE_SStructSplit_isType_f(self, name, retval)
         implicit none
-C       in bHYPRE.StructSMG self
+C       in bHYPRE.SStructSplit self
         integer*8 self
 C       in string name
         character*(*) name
@@ -163,9 +161,9 @@ C
 C       Return the meta-data about the class implementing this interface.
 C       
 
-        subroutine bHYPRE_StructSMG_getClassInfo_f(self, retval)
+        subroutine bHYPRE_SStructSplit_getClassInfo_f(self, retval)
         implicit none
-C       in bHYPRE.StructSMG self
+C       in bHYPRE.SStructSplit self
         integer*8 self
 C       out sidl.ClassInfo retval
         integer*8 retval
@@ -176,13 +174,13 @@ C
 C       Method:  Create[]
 C       
 
-        subroutine bHYPRE_StructSMG_Create_f(mpi_comm, A, retval)
+        subroutine bHYPRE_SStructSplit_Create_f(mpi_comm, A, retval)
         implicit none
 C       in bHYPRE.MPICommunicator mpi_comm
         integer*8 mpi_comm
 C       in bHYPRE.Operator A
         integer*8 A
-C       out bHYPRE.StructSMG retval
+C       out bHYPRE.SStructSplit retval
         integer*8 retval
         end
 
@@ -193,10 +191,10 @@ C       DEPRECATED, use Create:
 C       
 C       
 
-        subroutine bHYPRE_StructSMG_SetCommunicator_f(self, mpi_comm,
+        subroutine bHYPRE_SStructSplit_SetCommunicator_f(self, mpi_comm,
      &     retval)
         implicit none
-C       in bHYPRE.StructSMG self
+C       in bHYPRE.SStructSplit self
         integer*8 self
 C       in bHYPRE.MPICommunicator mpi_comm
         integer*8 mpi_comm
@@ -210,10 +208,10 @@ C       Set the int parameter associated with {\tt name}.
 C       
 C       
 
-        subroutine bHYPRE_StructSMG_SetIntParameter_f(self, name, value,
-     &     retval)
+        subroutine bHYPRE_SStructSplit_SetIntParameter_f(self, name,
+     &     value, retval)
         implicit none
-C       in bHYPRE.StructSMG self
+C       in bHYPRE.SStructSplit self
         integer*8 self
 C       in string name
         character*(*) name
@@ -229,10 +227,10 @@ C       Set the double parameter associated with {\tt name}.
 C       
 C       
 
-        subroutine bHYPRE_StructSMG_SetDoubleParameter_f(self, name,
+        subroutine bHYPRE_SStructSplit_SetDoubleParameter_f(self, name,
      &     value, retval)
         implicit none
-C       in bHYPRE.StructSMG self
+C       in bHYPRE.SStructSplit self
         integer*8 self
 C       in string name
         character*(*) name
@@ -248,10 +246,10 @@ C       Set the string parameter associated with {\tt name}.
 C       
 C       
 
-        subroutine bHYPRE_StructSMG_SetStringParameter_f(self, name,
+        subroutine bHYPRE_SStructSplit_SetStringParameter_f(self, name,
      &     value, retval)
         implicit none
-C       in bHYPRE.StructSMG self
+C       in bHYPRE.SStructSplit self
         integer*8 self
 C       in string name
         character*(*) name
@@ -267,10 +265,10 @@ C       Set the int 1-D array parameter associated with {\tt name}.
 C       
 C       
 
-        subroutine bHYPRE_StructSMG_SetIntArray1Parameter_f(self, name,
-     &     value, retval)
+        subroutine bHYPRE_SStructSplit_SetIntArray1Parameter_f(self,
+     &     name, value, retval)
         implicit none
-C       in bHYPRE.StructSMG self
+C       in bHYPRE.SStructSplit self
         integer*8 self
 C       in string name
         character*(*) name
@@ -286,10 +284,10 @@ C       Set the int 2-D array parameter associated with {\tt name}.
 C       
 C       
 
-        subroutine bHYPRE_StructSMG_SetIntArray2Parameter_f(self, name,
-     &     value, retval)
+        subroutine bHYPRE_SStructSplit_SetIntArray2Parameter_f(self,
+     &     name, value, retval)
         implicit none
-C       in bHYPRE.StructSMG self
+C       in bHYPRE.SStructSplit self
         integer*8 self
 C       in string name
         character*(*) name
@@ -305,10 +303,10 @@ C       Set the double 1-D array parameter associated with {\tt name}.
 C       
 C       
 
-        subroutine bHYPRE_StructSMG_SetDoubleArray1Parameter_f(self,
+        subroutine bHYPRE_SStructSplit_SetDoubleArray1Parameter_f(self,
      &     name, value, retval)
         implicit none
-C       in bHYPRE.StructSMG self
+C       in bHYPRE.SStructSplit self
         integer*8 self
 C       in string name
         character*(*) name
@@ -324,10 +322,10 @@ C       Set the double 2-D array parameter associated with {\tt name}.
 C       
 C       
 
-        subroutine bHYPRE_StructSMG_SetDoubleArray2Parameter_f(self,
+        subroutine bHYPRE_SStructSplit_SetDoubleArray2Parameter_f(self,
      &     name, value, retval)
         implicit none
-C       in bHYPRE.StructSMG self
+C       in bHYPRE.SStructSplit self
         integer*8 self
 C       in string name
         character*(*) name
@@ -343,10 +341,10 @@ C       Set the int parameter associated with {\tt name}.
 C       
 C       
 
-        subroutine bHYPRE_StructSMG_GetIntValue_f(self, name, value,
+        subroutine bHYPRE_SStructSplit_GetIntValue_f(self, name, value,
      &     retval)
         implicit none
-C       in bHYPRE.StructSMG self
+C       in bHYPRE.SStructSplit self
         integer*8 self
 C       in string name
         character*(*) name
@@ -362,10 +360,10 @@ C       Get the double parameter associated with {\tt name}.
 C       
 C       
 
-        subroutine bHYPRE_StructSMG_GetDoubleValue_f(self, name, value,
-     &     retval)
+        subroutine bHYPRE_SStructSplit_GetDoubleValue_f(self, name,
+     &     value, retval)
         implicit none
-C       in bHYPRE.StructSMG self
+C       in bHYPRE.SStructSplit self
         integer*8 self
 C       in string name
         character*(*) name
@@ -382,9 +380,9 @@ C       order to execute {\tt Apply}.
 C       
 C       
 
-        subroutine bHYPRE_StructSMG_Setup_f(self, b, x, retval)
+        subroutine bHYPRE_SStructSplit_Setup_f(self, b, x, retval)
         implicit none
-C       in bHYPRE.StructSMG self
+C       in bHYPRE.SStructSplit self
         integer*8 self
 C       in bHYPRE.Vector b
         integer*8 b
@@ -400,9 +398,9 @@ C       Apply the operator to {\tt b}, returning {\tt x}.
 C       
 C       
 
-        subroutine bHYPRE_StructSMG_Apply_f(self, b, x, retval)
+        subroutine bHYPRE_SStructSplit_Apply_f(self, b, x, retval)
         implicit none
-C       in bHYPRE.StructSMG self
+C       in bHYPRE.SStructSplit self
         integer*8 self
 C       in bHYPRE.Vector b
         integer*8 b
@@ -418,9 +416,10 @@ C       Apply the adjoint of the operator to {\tt b}, returning {\tt x}.
 C       
 C       
 
-        subroutine bHYPRE_StructSMG_ApplyAdjoint_f(self, b, x, retval)
+        subroutine bHYPRE_SStructSplit_ApplyAdjoint_f(self, b, x,
+     &     retval)
         implicit none
-C       in bHYPRE.StructSMG self
+C       in bHYPRE.SStructSplit self
         integer*8 self
 C       in bHYPRE.Vector b
         integer*8 b
@@ -437,9 +436,9 @@ C       DEPRECATED.  use Create
 C       
 C       
 
-        subroutine bHYPRE_StructSMG_SetOperator_f(self, A, retval)
+        subroutine bHYPRE_SStructSplit_SetOperator_f(self, A, retval)
         implicit none
-C       in bHYPRE.StructSMG self
+C       in bHYPRE.SStructSplit self
         integer*8 self
 C       in bHYPRE.Operator A
         integer*8 A
@@ -454,10 +453,10 @@ C       DEPRECATED.  use SetDoubleParameter
 C       
 C       
 
-        subroutine bHYPRE_StructSMG_SetTolerance_f(self, tolerance,
+        subroutine bHYPRE_SStructSplit_SetTolerance_f(self, tolerance,
      &     retval)
         implicit none
-C       in bHYPRE.StructSMG self
+C       in bHYPRE.SStructSplit self
         integer*8 self
 C       in double tolerance
         double precision tolerance
@@ -472,10 +471,10 @@ C       DEPRECATED   use SetIntParameter
 C       
 C       
 
-        subroutine bHYPRE_StructSMG_SetMaxIterations_f(self,
+        subroutine bHYPRE_SStructSplit_SetMaxIterations_f(self,
      &     max_iterations, retval)
         implicit none
-C       in bHYPRE.StructSMG self
+C       in bHYPRE.SStructSplit self
         integer*8 self
 C       in int max_iterations
         integer*4 max_iterations
@@ -494,9 +493,9 @@ C       DEPRECATED   use SetIntParameter
 C       
 C       
 
-        subroutine bHYPRE_StructSMG_SetLogging_f(self, level, retval)
+        subroutine bHYPRE_SStructSplit_SetLogging_f(self, level, retval)
         implicit none
-C       in bHYPRE.StructSMG self
+C       in bHYPRE.SStructSplit self
         integer*8 self
 C       in int level
         integer*4 level
@@ -515,9 +514,10 @@ C       DEPRECATED   use SetIntParameter
 C       
 C       
 
-        subroutine bHYPRE_StructSMG_SetPrintLevel_f(self, level, retval)
+        subroutine bHYPRE_SStructSplit_SetPrintLevel_f(self, level,
+     &     retval)
         implicit none
-C       in bHYPRE.StructSMG self
+C       in bHYPRE.SStructSplit self
         integer*8 self
 C       in int level
         integer*4 level
@@ -531,10 +531,10 @@ C       (Optional) Return the number of iterations taken.
 C       
 C       
 
-        subroutine bHYPRE_StructSMG_GetNumIterations_f(self,
+        subroutine bHYPRE_SStructSplit_GetNumIterations_f(self,
      &     num_iterations, retval)
         implicit none
-C       in bHYPRE.StructSMG self
+C       in bHYPRE.SStructSplit self
         integer*8 self
 C       out int num_iterations
         integer*4 num_iterations
@@ -548,10 +548,10 @@ C       (Optional) Return the norm of the relative residual.
 C       
 C       
 
-        subroutine bHYPRE_StructSMG_GetRelResidualNorm_f(self, norm,
+        subroutine bHYPRE_SStructSplit_GetRelResidualNorm_f(self, norm,
      &     retval)
         implicit none
-C       in bHYPRE.StructSMG self
+C       in bHYPRE.SStructSplit self
         integer*8 self
 C       out double norm
         double precision norm

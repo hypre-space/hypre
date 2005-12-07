@@ -110,6 +110,9 @@
 #ifndef included_bHYPRE_SStructParCSRVector_IOR_h
 #include "bHYPRE_SStructParCSRVector_IOR.h"
 #endif
+#ifndef included_bHYPRE_SStructSplit_IOR_h
+#include "bHYPRE_SStructSplit_IOR.h"
+#endif
 #ifndef included_bHYPRE_SStructStencil_IOR_h
 #include "bHYPRE_SStructStencil_IOR.h"
 #endif

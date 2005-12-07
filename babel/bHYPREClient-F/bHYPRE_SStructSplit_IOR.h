@@ -1,17 +1,17 @@
 /*
- * File:          bHYPRE_StructPFMG_IOR.h
- * Symbol:        bHYPRE.StructPFMG-v1.0.0
+ * File:          bHYPRE_SStructSplit_IOR.h
+ * Symbol:        bHYPRE.SStructSplit-v1.0.0
  * Symbol Type:   class
  * Babel Version: 0.10.4
- * Description:   Intermediate Object Representation for bHYPRE.StructPFMG
+ * Description:   Intermediate Object Representation for bHYPRE.SStructSplit
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
  * babel-version = 0.10.4
  */
 
-#ifndef included_bHYPRE_StructPFMG_IOR_h
-#define included_bHYPRE_StructPFMG_IOR_h
+#ifndef included_bHYPRE_SStructSplit_IOR_h
+#define included_bHYPRE_SStructSplit_IOR_h
 
 #ifndef included_sidl_header_h
 #include "sidl_header.h"
@@ -31,33 +31,31 @@ extern "C" {
 #endif
 
 /*
- * Symbol "bHYPRE.StructPFMG" (version 1.0.0)
+ * Symbol "bHYPRE.SStructSplit" (version 1.0.0)
  * 
- * Objects of this type can be cast to Solver objects
- * using the {\tt \_\_cast} methods.
  * 
- * RDF: Documentation goes here.
+ * Documentation goes here.
  * 
- * The StructPFMG solver requires a Struct matrix.
+ * The SStructSplit solver requires a SStruct matrix.
  * 
  * 
  */
 
-struct bHYPRE_StructPFMG__array;
-struct bHYPRE_StructPFMG__object;
-struct bHYPRE_StructPFMG__sepv;
+struct bHYPRE_SStructSplit__array;
+struct bHYPRE_SStructSplit__object;
+struct bHYPRE_SStructSplit__sepv;
 
-extern struct bHYPRE_StructPFMG__object*
-bHYPRE_StructPFMG__new(void);
+extern struct bHYPRE_SStructSplit__object*
+bHYPRE_SStructSplit__new(void);
 
-extern struct bHYPRE_StructPFMG__sepv*
-bHYPRE_StructPFMG__statics(void);
+extern struct bHYPRE_SStructSplit__sepv*
+bHYPRE_SStructSplit__statics(void);
 
-extern void bHYPRE_StructPFMG__init(
-  struct bHYPRE_StructPFMG__object* self);
-extern void bHYPRE_StructPFMG__fini(
-  struct bHYPRE_StructPFMG__object* self);
-extern void bHYPRE_StructPFMG__IOR_version(int32_t *major, int32_t *minor);
+extern void bHYPRE_SStructSplit__init(
+  struct bHYPRE_SStructSplit__object* self);
+extern void bHYPRE_SStructSplit__fini(
+  struct bHYPRE_SStructSplit__object* self);
+extern void bHYPRE_SStructSplit__IOR_version(int32_t *major, int32_t *minor);
 
 /*
  * Forward references for external classes and interfaces.
@@ -80,14 +78,14 @@ struct sidl_io_Serializer__object;
  * Declare the static method entry point vector.
  */
 
-struct bHYPRE_StructPFMG__sepv {
+struct bHYPRE_SStructSplit__sepv {
   /* Implicit builtin methods */
   /* Methods introduced in sidl.BaseInterface-v0.9.3 */
   /* Methods introduced in sidl.BaseClass-v0.9.3 */
   /* Methods introduced in bHYPRE.Operator-v1.0.0 */
   /* Methods introduced in bHYPRE.Solver-v1.0.0 */
-  /* Methods introduced in bHYPRE.StructPFMG-v1.0.0 */
-  struct bHYPRE_StructPFMG__object* (*f_Create)(
+  /* Methods introduced in bHYPRE.SStructSplit-v1.0.0 */
+  struct bHYPRE_SStructSplit__object* (*f_Create)(
     /* in */ struct bHYPRE_MPICommunicator__object* mpi_comm,
     /* in */ struct bHYPRE_Operator__object* A);
 };
@@ -96,135 +94,135 @@ struct bHYPRE_StructPFMG__sepv {
  * Declare the method entry point vector.
  */
 
-struct bHYPRE_StructPFMG__epv {
+struct bHYPRE_SStructSplit__epv {
   /* Implicit builtin methods */
   void* (*f__cast)(
-    /* in */ struct bHYPRE_StructPFMG__object* self,
+    /* in */ struct bHYPRE_SStructSplit__object* self,
     /* in */ const char* name);
   void (*f__delete)(
-    /* in */ struct bHYPRE_StructPFMG__object* self);
+    /* in */ struct bHYPRE_SStructSplit__object* self);
   void (*f__exec)(
-    /* in */ struct bHYPRE_StructPFMG__object* self,
+    /* in */ struct bHYPRE_SStructSplit__object* self,
     /* in */ const char* methodName,
     /* in */ struct sidl_io_Deserializer__object* inArgs,
     /* in */ struct sidl_io_Serializer__object* outArgs);
   char* (*f__getURL)(
-    /* in */ struct bHYPRE_StructPFMG__object* self);
+    /* in */ struct bHYPRE_SStructSplit__object* self);
   void (*f__ctor)(
-    /* in */ struct bHYPRE_StructPFMG__object* self);
+    /* in */ struct bHYPRE_SStructSplit__object* self);
   void (*f__dtor)(
-    /* in */ struct bHYPRE_StructPFMG__object* self);
+    /* in */ struct bHYPRE_SStructSplit__object* self);
   /* Methods introduced in sidl.BaseInterface-v0.9.3 */
   void (*f_addRef)(
-    /* in */ struct bHYPRE_StructPFMG__object* self);
+    /* in */ struct bHYPRE_SStructSplit__object* self);
   void (*f_deleteRef)(
-    /* in */ struct bHYPRE_StructPFMG__object* self);
+    /* in */ struct bHYPRE_SStructSplit__object* self);
   sidl_bool (*f_isSame)(
-    /* in */ struct bHYPRE_StructPFMG__object* self,
+    /* in */ struct bHYPRE_SStructSplit__object* self,
     /* in */ struct sidl_BaseInterface__object* iobj);
   struct sidl_BaseInterface__object* (*f_queryInt)(
-    /* in */ struct bHYPRE_StructPFMG__object* self,
+    /* in */ struct bHYPRE_SStructSplit__object* self,
     /* in */ const char* name);
   sidl_bool (*f_isType)(
-    /* in */ struct bHYPRE_StructPFMG__object* self,
+    /* in */ struct bHYPRE_SStructSplit__object* self,
     /* in */ const char* name);
   struct sidl_ClassInfo__object* (*f_getClassInfo)(
-    /* in */ struct bHYPRE_StructPFMG__object* self);
+    /* in */ struct bHYPRE_SStructSplit__object* self);
   /* Methods introduced in sidl.BaseClass-v0.9.3 */
   /* Methods introduced in bHYPRE.Operator-v1.0.0 */
   int32_t (*f_SetCommunicator)(
-    /* in */ struct bHYPRE_StructPFMG__object* self,
+    /* in */ struct bHYPRE_SStructSplit__object* self,
     /* in */ struct bHYPRE_MPICommunicator__object* mpi_comm);
   int32_t (*f_SetIntParameter)(
-    /* in */ struct bHYPRE_StructPFMG__object* self,
+    /* in */ struct bHYPRE_SStructSplit__object* self,
     /* in */ const char* name,
     /* in */ int32_t value);
   int32_t (*f_SetDoubleParameter)(
-    /* in */ struct bHYPRE_StructPFMG__object* self,
+    /* in */ struct bHYPRE_SStructSplit__object* self,
     /* in */ const char* name,
     /* in */ double value);
   int32_t (*f_SetStringParameter)(
-    /* in */ struct bHYPRE_StructPFMG__object* self,
+    /* in */ struct bHYPRE_SStructSplit__object* self,
     /* in */ const char* name,
     /* in */ const char* value);
   int32_t (*f_SetIntArray1Parameter)(
-    /* in */ struct bHYPRE_StructPFMG__object* self,
+    /* in */ struct bHYPRE_SStructSplit__object* self,
     /* in */ const char* name,
     /* in */ struct sidl_int__array* value);
   int32_t (*f_SetIntArray2Parameter)(
-    /* in */ struct bHYPRE_StructPFMG__object* self,
+    /* in */ struct bHYPRE_SStructSplit__object* self,
     /* in */ const char* name,
     /* in */ struct sidl_int__array* value);
   int32_t (*f_SetDoubleArray1Parameter)(
-    /* in */ struct bHYPRE_StructPFMG__object* self,
+    /* in */ struct bHYPRE_SStructSplit__object* self,
     /* in */ const char* name,
     /* in */ struct sidl_double__array* value);
   int32_t (*f_SetDoubleArray2Parameter)(
-    /* in */ struct bHYPRE_StructPFMG__object* self,
+    /* in */ struct bHYPRE_SStructSplit__object* self,
     /* in */ const char* name,
     /* in */ struct sidl_double__array* value);
   int32_t (*f_GetIntValue)(
-    /* in */ struct bHYPRE_StructPFMG__object* self,
+    /* in */ struct bHYPRE_SStructSplit__object* self,
     /* in */ const char* name,
     /* out */ int32_t* value);
   int32_t (*f_GetDoubleValue)(
-    /* in */ struct bHYPRE_StructPFMG__object* self,
+    /* in */ struct bHYPRE_SStructSplit__object* self,
     /* in */ const char* name,
     /* out */ double* value);
   int32_t (*f_Setup)(
-    /* in */ struct bHYPRE_StructPFMG__object* self,
+    /* in */ struct bHYPRE_SStructSplit__object* self,
     /* in */ struct bHYPRE_Vector__object* b,
     /* in */ struct bHYPRE_Vector__object* x);
   int32_t (*f_Apply)(
-    /* in */ struct bHYPRE_StructPFMG__object* self,
+    /* in */ struct bHYPRE_SStructSplit__object* self,
     /* in */ struct bHYPRE_Vector__object* b,
     /* inout */ struct bHYPRE_Vector__object** x);
   int32_t (*f_ApplyAdjoint)(
-    /* in */ struct bHYPRE_StructPFMG__object* self,
+    /* in */ struct bHYPRE_SStructSplit__object* self,
     /* in */ struct bHYPRE_Vector__object* b,
     /* inout */ struct bHYPRE_Vector__object** x);
   /* Methods introduced in bHYPRE.Solver-v1.0.0 */
   int32_t (*f_SetOperator)(
-    /* in */ struct bHYPRE_StructPFMG__object* self,
+    /* in */ struct bHYPRE_SStructSplit__object* self,
     /* in */ struct bHYPRE_Operator__object* A);
   int32_t (*f_SetTolerance)(
-    /* in */ struct bHYPRE_StructPFMG__object* self,
+    /* in */ struct bHYPRE_SStructSplit__object* self,
     /* in */ double tolerance);
   int32_t (*f_SetMaxIterations)(
-    /* in */ struct bHYPRE_StructPFMG__object* self,
+    /* in */ struct bHYPRE_SStructSplit__object* self,
     /* in */ int32_t max_iterations);
   int32_t (*f_SetLogging)(
-    /* in */ struct bHYPRE_StructPFMG__object* self,
+    /* in */ struct bHYPRE_SStructSplit__object* self,
     /* in */ int32_t level);
   int32_t (*f_SetPrintLevel)(
-    /* in */ struct bHYPRE_StructPFMG__object* self,
+    /* in */ struct bHYPRE_SStructSplit__object* self,
     /* in */ int32_t level);
   int32_t (*f_GetNumIterations)(
-    /* in */ struct bHYPRE_StructPFMG__object* self,
+    /* in */ struct bHYPRE_SStructSplit__object* self,
     /* out */ int32_t* num_iterations);
   int32_t (*f_GetRelResidualNorm)(
-    /* in */ struct bHYPRE_StructPFMG__object* self,
+    /* in */ struct bHYPRE_SStructSplit__object* self,
     /* out */ double* norm);
-  /* Methods introduced in bHYPRE.StructPFMG-v1.0.0 */
+  /* Methods introduced in bHYPRE.SStructSplit-v1.0.0 */
 };
 
 /*
  * Define the class object structure.
  */
 
-struct bHYPRE_StructPFMG__object {
-  struct sidl_BaseClass__object  d_sidl_baseclass;
-  struct bHYPRE_Operator__object d_bhypre_operator;
-  struct bHYPRE_Solver__object   d_bhypre_solver;
-  struct bHYPRE_StructPFMG__epv* d_epv;
-  void*                          d_data;
+struct bHYPRE_SStructSplit__object {
+  struct sidl_BaseClass__object    d_sidl_baseclass;
+  struct bHYPRE_Operator__object   d_bhypre_operator;
+  struct bHYPRE_Solver__object     d_bhypre_solver;
+  struct bHYPRE_SStructSplit__epv* d_epv;
+  void*                            d_data;
 };
 
-struct bHYPRE_StructPFMG__external {
-  struct bHYPRE_StructPFMG__object*
+struct bHYPRE_SStructSplit__external {
+  struct bHYPRE_SStructSplit__object*
   (*createObject)(void);
 
-  struct bHYPRE_StructPFMG__sepv*
+  struct bHYPRE_SStructSplit__sepv*
   (*getStaticEPV)(void);
   struct sidl_BaseClass__epv*(*getSuperEPV)(void);
 };
@@ -235,55 +233,55 @@ struct bHYPRE_StructPFMG__external {
  * one-stop shopping for loading DLLs.
  */
 
-const struct bHYPRE_StructPFMG__external*
-bHYPRE_StructPFMG__externals(void);
+const struct bHYPRE_SStructSplit__external*
+bHYPRE_SStructSplit__externals(void);
 
 struct bHYPRE_Solver__object* 
-  skel_bHYPRE_StructPFMG_fconnect_bHYPRE_Solver(char* url,
+  skel_bHYPRE_SStructSplit_fconnect_bHYPRE_Solver(char* url,
   struct sidl_BaseInterface__object **_ex);
-char* skel_bHYPRE_StructPFMG_fgetURL_bHYPRE_Solver(struct 
+char* skel_bHYPRE_SStructSplit_fgetURL_bHYPRE_Solver(struct 
   bHYPRE_Solver__object* obj); 
 
 struct bHYPRE_MPICommunicator__object* 
-  skel_bHYPRE_StructPFMG_fconnect_bHYPRE_MPICommunicator(char* url,
+  skel_bHYPRE_SStructSplit_fconnect_bHYPRE_MPICommunicator(char* url,
   struct sidl_BaseInterface__object **_ex);
-char* skel_bHYPRE_StructPFMG_fgetURL_bHYPRE_MPICommunicator(struct 
+char* skel_bHYPRE_SStructSplit_fgetURL_bHYPRE_MPICommunicator(struct 
   bHYPRE_MPICommunicator__object* obj); 
 
-struct bHYPRE_StructPFMG__object* 
-  skel_bHYPRE_StructPFMG_fconnect_bHYPRE_StructPFMG(char* url,
-  struct sidl_BaseInterface__object **_ex);
-char* skel_bHYPRE_StructPFMG_fgetURL_bHYPRE_StructPFMG(struct 
-  bHYPRE_StructPFMG__object* obj); 
-
 struct bHYPRE_Operator__object* 
-  skel_bHYPRE_StructPFMG_fconnect_bHYPRE_Operator(char* url,
+  skel_bHYPRE_SStructSplit_fconnect_bHYPRE_Operator(char* url,
   struct sidl_BaseInterface__object **_ex);
-char* skel_bHYPRE_StructPFMG_fgetURL_bHYPRE_Operator(struct 
+char* skel_bHYPRE_SStructSplit_fgetURL_bHYPRE_Operator(struct 
   bHYPRE_Operator__object* obj); 
 
 struct sidl_ClassInfo__object* 
-  skel_bHYPRE_StructPFMG_fconnect_sidl_ClassInfo(char* url,
+  skel_bHYPRE_SStructSplit_fconnect_sidl_ClassInfo(char* url,
   struct sidl_BaseInterface__object **_ex);
-char* skel_bHYPRE_StructPFMG_fgetURL_sidl_ClassInfo(struct 
+char* skel_bHYPRE_SStructSplit_fgetURL_sidl_ClassInfo(struct 
   sidl_ClassInfo__object* obj); 
 
 struct bHYPRE_Vector__object* 
-  skel_bHYPRE_StructPFMG_fconnect_bHYPRE_Vector(char* url,
+  skel_bHYPRE_SStructSplit_fconnect_bHYPRE_Vector(char* url,
   struct sidl_BaseInterface__object **_ex);
-char* skel_bHYPRE_StructPFMG_fgetURL_bHYPRE_Vector(struct 
+char* skel_bHYPRE_SStructSplit_fgetURL_bHYPRE_Vector(struct 
   bHYPRE_Vector__object* obj); 
 
-struct sidl_BaseInterface__object* 
-  skel_bHYPRE_StructPFMG_fconnect_sidl_BaseInterface(char* url,
+struct bHYPRE_SStructSplit__object* 
+  skel_bHYPRE_SStructSplit_fconnect_bHYPRE_SStructSplit(char* url,
   struct sidl_BaseInterface__object **_ex);
-char* skel_bHYPRE_StructPFMG_fgetURL_sidl_BaseInterface(struct 
+char* skel_bHYPRE_SStructSplit_fgetURL_bHYPRE_SStructSplit(struct 
+  bHYPRE_SStructSplit__object* obj); 
+
+struct sidl_BaseInterface__object* 
+  skel_bHYPRE_SStructSplit_fconnect_sidl_BaseInterface(char* url,
+  struct sidl_BaseInterface__object **_ex);
+char* skel_bHYPRE_SStructSplit_fgetURL_sidl_BaseInterface(struct 
   sidl_BaseInterface__object* obj); 
 
 struct sidl_BaseClass__object* 
-  skel_bHYPRE_StructPFMG_fconnect_sidl_BaseClass(char* url,
+  skel_bHYPRE_SStructSplit_fconnect_sidl_BaseClass(char* url,
   struct sidl_BaseInterface__object **_ex);
-char* skel_bHYPRE_StructPFMG_fgetURL_sidl_BaseClass(struct 
+char* skel_bHYPRE_SStructSplit_fgetURL_sidl_BaseClass(struct 
   sidl_BaseClass__object* obj); 
 
 #ifdef __cplusplus

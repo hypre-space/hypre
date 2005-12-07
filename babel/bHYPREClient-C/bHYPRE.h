@@ -100,6 +100,9 @@
 #ifndef included_bHYPRE_SStructParCSRVector_h
 #include "bHYPRE_SStructParCSRVector.h"
 #endif
+#ifndef included_bHYPRE_SStructSplit_h
+#include "bHYPRE_SStructSplit.h"
+#endif
 #ifndef included_bHYPRE_SStructStencil_h
 #include "bHYPRE_SStructStencil.h"
 #endif

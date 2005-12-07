@@ -1335,6 +1335,7 @@ impl_bHYPRE_HGMRES_Clone(
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.HGMRES.Clone) */
   /* Insert-Code-Here {bHYPRE.HGMRES.Clone} (Clone method) */
+   return 1;
   /* DO-NOT-DELETE splicer.end(bHYPRE.HGMRES.Clone) */
 }
 /* Babel internal methods, Users should not edit below this line. */

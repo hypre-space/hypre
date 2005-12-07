@@ -1637,6 +1637,7 @@ impl_bHYPRE_HPCG_Clone(
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.HPCG.Clone) */
   /* Insert-Code-Here {bHYPRE.HPCG.Clone} (Clone method) */
+   return 1;
   /* DO-NOT-DELETE splicer.end(bHYPRE.HPCG.Clone) */
 }
 /* Babel internal methods, Users should not edit below this line. */

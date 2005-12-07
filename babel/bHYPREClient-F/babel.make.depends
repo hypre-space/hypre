@@ -120,6 +120,7 @@ bHYPRE_IOR.h: bHYPRE_SStructMatrix_IOR.h
 bHYPRE_IOR.h: bHYPRE_SStructMatrixView_IOR.h
 bHYPRE_IOR.h: bHYPRE_SStructParCSRMatrix_IOR.h
 bHYPRE_IOR.h: bHYPRE_SStructParCSRVector_IOR.h
+bHYPRE_IOR.h: bHYPRE_SStructSplit_IOR.h
 bHYPRE_IOR.h: bHYPRE_SStructStencil_IOR.h
 bHYPRE_IOR.h: bHYPRE_SStructVariable_IOR.h
 bHYPRE_IOR.h: bHYPRE_SStructVector_IOR.h
@@ -254,6 +255,12 @@ bHYPRE_SStructParCSRVector_IOR.h: bHYPRE_SStructVectorView_IOR.h
 bHYPRE_SStructParCSRVector_IOR.h: bHYPRE_SStruct_MatrixVectorView_IOR.h
 bHYPRE_SStructParCSRVector_IOR.h: bHYPRE_Vector_IOR.h
 bHYPRE_SStructParCSRVector_IOR.h: sidl_BaseClass_IOR.h
+
+bHYPRE_SStructSplit_IOR.h: /home/painter/linear_solvers/babel/Interfaces.idl
+bHYPRE_SStructSplit_IOR.h: sidl_header.h
+bHYPRE_SStructSplit_IOR.h: bHYPRE_Operator_IOR.h
+bHYPRE_SStructSplit_IOR.h: bHYPRE_Solver_IOR.h
+bHYPRE_SStructSplit_IOR.h: sidl_BaseClass_IOR.h
 
 bHYPRE_SStructStencil_IOR.h: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_SStructStencil_IOR.h: sidl_header.h
@@ -426,6 +433,8 @@ bHYPRE_SStructParCSRMatrix.fif:                                               \
 
 bHYPRE_SStructParCSRVector.fif:                                               \
   /home/painter/linear_solvers/babel/Interfaces.idl
+
+bHYPRE_SStructSplit.fif: /home/painter/linear_solvers/babel/Interfaces.idl
 
 bHYPRE_SStructStencil.fif: /home/painter/linear_solvers/babel/Interfaces.idl
 
@@ -863,6 +872,19 @@ bHYPRE_SStructParCSRVector_fStub.c: bHYPRE_MPICommunicator_IOR.h
 bHYPRE_SStructParCSRVector_fStub.c: sidl_ClassInfo_IOR.h
 bHYPRE_SStructParCSRVector_fStub.c: bHYPRE_Vector_IOR.h
 bHYPRE_SStructParCSRVector_fStub.c: sidl_BaseInterface_IOR.h
+
+bHYPRE_SStructSplit_fStub.c: /home/painter/linear_solvers/babel/Interfaces.idl
+bHYPRE_SStructSplit_fStub.c: sidlfortran.h
+bHYPRE_SStructSplit_fStub.c: sidl_header.h
+bHYPRE_SStructSplit_fStub.c: sidl_interface_IOR.h
+bHYPRE_SStructSplit_fStub.c: babel_config.h
+bHYPRE_SStructSplit_fStub.c: sidl_Loader.h
+bHYPRE_SStructSplit_fStub.c: bHYPRE_SStructSplit_IOR.h
+bHYPRE_SStructSplit_fStub.c: bHYPRE_MPICommunicator_IOR.h
+bHYPRE_SStructSplit_fStub.c: bHYPRE_Operator_IOR.h
+bHYPRE_SStructSplit_fStub.c: sidl_ClassInfo_IOR.h
+bHYPRE_SStructSplit_fStub.c: bHYPRE_Vector_IOR.h
+bHYPRE_SStructSplit_fStub.c: sidl_BaseInterface_IOR.h
 
 bHYPRE_SStructStencil_fStub.c:                                                \
   /home/painter/linear_solvers/babel/Interfaces.idl

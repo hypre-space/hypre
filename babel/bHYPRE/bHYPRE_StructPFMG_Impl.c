@@ -18,7 +18,7 @@
 /*
  * Symbol "bHYPRE.StructPFMG" (version 1.0.0)
  * 
- * Objects of this type can be cast to PreconditionedSolver objects
+ * Objects of this type can be cast to Solver objects
  * using the {\tt \_\_cast} methods.
  * 
  * RDF: Documentation goes here.

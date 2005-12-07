@@ -15,7 +15,7 @@ C
 C       
 C       Symbol "bHYPRE.StructPFMG" (version 1.0.0)
 C       
-C       Objects of this type can be cast to PreconditionedSolver objects
+C       Objects of this type can be cast to Solver objects
 C       using the {\tt \_\_cast} methods.
 C       
 C       RDF: Documentation goes here.
