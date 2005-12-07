@@ -1627,7 +1627,7 @@ package bHYPRE version 1.0.0
    }
 
    /**
-    * Objects of this type can be cast to PreconditionedSolver objects
+    * Objects of this type can be cast to Solver objects
     * using the {\tt \_\_cast} methods.
     *
     * RDF: Documentation goes here.
@@ -1641,7 +1641,7 @@ package bHYPRE version 1.0.0
    }
 
    /**
-    * Objects of this type can be cast to PreconditionedSolver objects
+    * Objects of this type can be cast to Solver objects
     * using the {\tt \_\_cast} methods.
     *
     * RDF: Documentation goes here.
@@ -1653,6 +1653,20 @@ package bHYPRE version 1.0.0
    {
       static StructPFMG Create( in MPICommunicator mpi_comm,
                                 in Operator A );
+   }
+
+
+   /**
+    *
+    * Documentation goes here.
+    *
+    * The SStructSplit solver requires a SStruct matrix.
+    *
+    **/
+   class SStructSplit implements-all Solver
+   {
+      static SStructSplit Create( in MPICommunicator mpi_comm,
+                                 in Operator A );
    }
 
    /**
