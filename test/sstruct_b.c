@@ -25,6 +25,7 @@
 #include "bHYPRE_IJParCSRMatrix.h"
 #include "bHYPRE_IJParCSRVector.h"
 #include "bHYPRE_SStructVariable.h"
+#include "bHYPRE_SStructSplit.h"
 #include "bHYPRE_SStructDiagScale.h"
 #include "bHYPRE_IdentitySolver.h"
 
@@ -1407,7 +1408,7 @@ PrintUsage( char *progname,
       printf("                        247- Struct BiCGSTAB with 2-step Jacobi\n");
       printf("                        248- Struct BiCGSTAB with diagonal scaling\n");
       printf("                        249- Struct BiCGSTAB\n");
-      printf(">>> The only implemented solvers are 18,19,20,22,40 and 200.<<<\n");
+      printf(">>> The only implemented solvers are 10,11,18,19,20,22,40 and 200.<<<\n");
       printf("  -print             : print out the system\n");
       printf("  -rhsfromcosine     : solution is cosine function (default)\n");
       printf("  -rhsone            : rhs is vector with unit components\n");
@@ -1482,6 +1483,7 @@ main( int   argc,
    bHYPRE_GMRES           b_solver_GMRES;
    bHYPRE_BoomerAMG       b_boomeramg;
    bHYPRE_ParaSails       b_parasails;
+   bHYPRE_SStructSplit    solver_Split;
    bHYPRE_SStructDiagScale solver_DS;
    bHYPRE_IdentitySolver  solver_Id;
 
@@ -2457,26 +2459,27 @@ main( int   argc,
 
       if ((solver_id == 10) || (solver_id == 11))
       {
-         hypre_assert( "solvers 10,11 not implemented"==0 );
-#if DO_THIS_LATER
          /* use Split solver as preconditioner */
-         HYPRE_SStructSplitCreate(MPI_COMM_WORLD, &precond);
-         HYPRE_SStructSplitSetMaxIter(precond, 1);
-         HYPRE_SStructSplitSetTol(precond, 0.0);
-         HYPRE_SStructSplitSetZeroGuess(precond);
+         solver_Split = bHYPRE_SStructSplit_Create( bmpicomm, b_A_O );
+         ierr += bHYPRE_SStructSplit_SetIntParameter( solver_Split, "MaxIter", 1 );
+         ierr += bHYPRE_SStructSplit_SetDoubleParameter(
+            solver_Split, "Tolerance", 0 );
+         ierr += bHYPRE_SStructSplit_SetIntParameter(
+            solver_Split, "ZeroGuess", 1 );
          if (solver_id == 10)
          {
-            HYPRE_SStructSplitSetStructSolver(precond, HYPRE_SMG);
+            ierr += bHYPRE_SStructSplit_SetStringParameter(
+               solver_Split, "StructSolver", "SMG" );
          }
          else if (solver_id == 11)
          {
-            HYPRE_SStructSplitSetStructSolver(precond, HYPRE_PFMG);
+            ierr += bHYPRE_SStructSplit_SetStringParameter(
+               solver_Split, "StructSolver", "PFMG" );
          }
-         HYPRE_PCGSetPrecond( (HYPRE_Solver) solver,
-                              (HYPRE_PtrToSolverFcn) HYPRE_SStructSplitSolve,
-                              (HYPRE_PtrToSolverFcn) HYPRE_SStructSplitSetup,
-                              (HYPRE_Solver) precond);
-#endif /* DO_THIS_LATER */
+         b_precond = (bHYPRE_Solver) bHYPRE_SStructDiagScale__cast2
+            ( solver_Split, "bHYPRE.Solver" ); 
+         ierr += bHYPRE_PCG_SetPreconditioner( b_solver_PCG, b_precond );
+         hypre_assert( ierr==0 );
       }
 
       else if (solver_id == 13)
@@ -2546,7 +2549,7 @@ main( int   argc,
 
       if ((solver_id == 10) || (solver_id == 11))
       {
-         /*HYPRE_SStructSplitDestroy(precond);*/
+         bHYPRE_SStructSplit_deleteRef( solver_Split );
       }
       else if (solver_id == 13)
       {
