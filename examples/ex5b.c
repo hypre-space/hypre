@@ -283,7 +283,7 @@ int main (int argc, char *argv[])
       double final_res_norm;
 
       /* Create solver */
-      amg_solver = bHYPRE_BoomerAMG_Create( mpi_comm, op_A );
+      amg_solver = bHYPRE_BoomerAMG_Create( mpi_comm, parcsr_A );
 
       /* Set some parameters (See Reference Manual for more parameters) */
       bHYPRE_BoomerAMG_SetIntParameter( amg_solver, "PrintLevel", 3 );  /* print solve info + parameters */
@@ -298,7 +298,7 @@ int main (int argc, char *argv[])
       bHYPRE_BoomerAMG_Apply( amg_solver, vec_b, &vec_x );
 
       /* Run info - needed logging turned on */
-      bHYPRE_BoomerAMG_GetIntValue( amg_solver, "NumIterations", &num_iterations );
+      ierr += bHYPRE_BoomerAMG_GetIntValue( amg_solver, "NumIterations", &num_iterations );
       bHYPRE_BoomerAMG_GetDoubleValue( amg_solver, "RelResidualNorm", &final_res_norm );
 
       if (myid == 0)
@@ -369,12 +369,13 @@ int main (int argc, char *argv[])
       bHYPRE_PCG_SetIntParameter( pcg_solver, "Logging", 1 ); /* needed to get run info later */
 
       /* Now set up the AMG preconditioner and specify any parameters */
-      amg_solver = bHYPRE_BoomerAMG_Create( mpi_comm, op_A );
+      amg_solver = bHYPRE_BoomerAMG_Create( mpi_comm, parcsr_A );
       bHYPRE_BoomerAMG_SetIntParameter( amg_solver, "PrintLevel", 1 ); /* print amg solution info*/
       bHYPRE_BoomerAMG_SetIntParameter( amg_solver, "CoarsenType", 6); /* Falgout coarsening */
       bHYPRE_BoomerAMG_SetIntParameter( amg_solver, "RelaxType", 3);   /* G-S/Jacobi hybrid relaxation */
       bHYPRE_BoomerAMG_SetIntParameter( amg_solver, "NumSweeps", 1);   /* Sweeeps on each level */
       bHYPRE_BoomerAMG_SetDoubleParameter( amg_solver, "Tolerance", 1e-3);      /* conv. tolerance */
+      bHYPRE_BoomerAMG_SetIntParameter( amg_solver, "MaxIter", 1 ); /* do only one iteration! */
 
       /* Set the PCG preconditioner */
       precond = bHYPRE_Solver__cast( amg_solver );
@@ -422,7 +423,7 @@ int main (int argc, char *argv[])
       bHYPRE_PCG_SetIntParameter( pcg_solver, "Logging", 1 ); /* needed to get run info later */
 
       /* Now set up the ParaSails preconditioner and specify any parameters */
-      ps_solver = bHYPRE_ParaSails_Create( mpi_comm, op_A );
+      ps_solver = bHYPRE_ParaSails_Create( mpi_comm, parcsr_A );
 
       /* Set some parameters (See Reference Manual for more parameters) */
       bHYPRE_ParaSails_SetDoubleParameter( ps_solver, "Thresh", sai_threshold );
