@@ -36,6 +36,7 @@
 #include "bHYPRE_IJParCSRMatrix_Impl.h"
 #include "bHYPRE_IJParCSRVector_Impl.h"
 #include "bHYPRE_MPICommunicator_Impl.h"
+#include <assert.h>
 /* DO-NOT-DELETE splicer.end(bHYPRE.Euclid._includes) */
 
 /*
