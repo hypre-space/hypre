@@ -1114,7 +1114,7 @@ main( int   argc,
             solver_SMG, "NumPreRelax", n_pre );
          ierr += bHYPRE_StructSMG_SetIntParameter(
             solver_SMG, "NumPostRelax", n_post );
-         ierr += bHYPRE_StructSMG_SetIntParameter( solver_SMG, "Loggin", 0 );
+         ierr += bHYPRE_StructSMG_SetIntParameter( solver_SMG, "Logging", 0 );
 
          precond = (bHYPRE_Solver) bHYPRE_StructSMG__cast2(
             solver_SMG, "bHYPRE.Solver" );
