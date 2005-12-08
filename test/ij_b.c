@@ -1508,7 +1508,7 @@ main( int   argc,
          create, set comm, set operator, set other parameters,
          Setup (noop in this case), Apply */
       bHYPRE_op_A = bHYPRE_Operator__cast( bHYPRE_parcsr_A );
-      bHYPRE_AMG = bHYPRE_BoomerAMG_Create( bmpicomm, bHYPRE_op_A );
+      bHYPRE_AMG = bHYPRE_BoomerAMG_Create( bmpicomm, bHYPRE_parcsr_A );
       bHYPRE_Vector_b = bHYPRE_Vector__cast( bHYPRE_b );
       bHYPRE_Vector_x = bHYPRE_Vector__cast( bHYPRE_x );
 
@@ -1633,7 +1633,7 @@ main( int   argc,
          /* use BoomerAMG as preconditioner */
 	 ioutdat = 1;
          if (myid == 0) printf("Solver: AMG-PCG\n");
-         bHYPRE_AMG = bHYPRE_BoomerAMG_Create( bmpicomm, bHYPRE_op_A );
+         bHYPRE_AMG = bHYPRE_BoomerAMG_Create( bmpicomm, bHYPRE_parcsr_A );
          bHYPRE_BoomerAMG_SetDoubleParameter( bHYPRE_AMG, "Tolerance", pc_tol);
          bHYPRE_BoomerAMG_SetIntParameter( bHYPRE_AMG, "CoarsenType",
                                         (hybrid*coarsen_type));
@@ -1717,7 +1717,8 @@ main( int   argc,
          /* To call a bHYPRE solver:
             create, set comm, set operator, set other parameters,
             Setup (noop in this case), Apply */
-         bHYPRE_ParCSRDiagScale = bHYPRE_ParCSRDiagScale_Create( bmpicomm, bHYPRE_op_A );
+         bHYPRE_ParCSRDiagScale = bHYPRE_ParCSRDiagScale_Create(
+            bmpicomm, bHYPRE_parcsr_A );
          ierr += bHYPRE_ParCSRDiagScale_Setup( bHYPRE_ParCSRDiagScale,
                                                bHYPRE_Vector_b, bHYPRE_Vector_x );
          bHYPRE_SolverPC =
@@ -1731,7 +1732,7 @@ main( int   argc,
          /* use ParaSails preconditioner */
          if (myid == 0) printf("Solver: ParaSails-PCG\n");
 
-         bHYPRE_ParaSails = bHYPRE_ParaSails_Create( bmpicomm, bHYPRE_op_A );
+         bHYPRE_ParaSails = bHYPRE_ParaSails_Create( bmpicomm, bHYPRE_parcsr_A );
          ierr += bHYPRE_ParaSails_SetDoubleParameter( bHYPRE_ParaSails, "Thresh",
                                                       sai_threshold );
          ierr += bHYPRE_ParaSails_SetIntParameter( bHYPRE_ParaSails, "Nlevels",
@@ -1769,7 +1770,7 @@ main( int   argc,
          /* use Euclid preconditioning */
          if (myid == 0) printf("Solver: Euclid-PCG\n");
 
-         bHYPRE_Euclid = bHYPRE_Euclid_Create( bmpicomm, bHYPRE_op_A );
+         bHYPRE_Euclid = bHYPRE_Euclid_Create( bmpicomm, bHYPRE_parcsr_A );
 
          /* note: There are three three methods of setting run-time 
             parameters for Euclid: (see HYPRE_parcsr_ls.h); here
@@ -1870,7 +1871,7 @@ main( int   argc,
          /* use BoomerAMG as preconditioner */
 	 ioutdat = 1;
          if (myid == 0) printf("Solver: AMG-HPCG\n");
-         bHYPRE_AMG = bHYPRE_BoomerAMG_Create( bmpicomm, bHYPRE_op_A );
+         bHYPRE_AMG = bHYPRE_BoomerAMG_Create( bmpicomm, bHYPRE_parcsr_A );
          bHYPRE_BoomerAMG_SetOperator( bHYPRE_AMG, bHYPRE_op_A );
          bHYPRE_BoomerAMG_SetDoubleParameter( bHYPRE_AMG, "Tolerance", pc_tol);
          bHYPRE_BoomerAMG_SetIntParameter( bHYPRE_AMG, "CoarsenType",
@@ -1956,7 +1957,7 @@ main( int   argc,
             create, set comm, set operator, set other parameters,
             Setup (noop in this case), Apply */
          bHYPRE_ParCSRDiagScale = bHYPRE_ParCSRDiagScale_Create(
-            bmpicomm, bHYPRE_op_A );
+            bmpicomm, bHYPRE_parcsr_A );
          ierr += bHYPRE_ParCSRDiagScale_Setup( bHYPRE_ParCSRDiagScale,
                                                bHYPRE_Vector_b, bHYPRE_Vector_x );
          bHYPRE_SolverPC =
@@ -1970,7 +1971,7 @@ main( int   argc,
          /* use ParaSails preconditioner */
          if (myid == 0) printf("Solver: ParaSails-HPCG\n");
 
-         bHYPRE_ParaSails = bHYPRE_ParaSails_Create( bmpicomm, bHYPRE_op_A );
+         bHYPRE_ParaSails = bHYPRE_ParaSails_Create( bmpicomm, bHYPRE_parcsr_A );
          ierr += bHYPRE_ParaSails_SetDoubleParameter( bHYPRE_ParaSails, "Thresh",
                                                       sai_threshold );
          ierr += bHYPRE_ParaSails_SetIntParameter( bHYPRE_ParaSails, "Nlevels",
@@ -2107,7 +2108,7 @@ main( int   argc,
          /* use BoomerAMG as preconditioner */
          if (myid == 0) printf("Solver: AMG-GMRES\n");
 
-         bHYPRE_AMG = bHYPRE_BoomerAMG_Create( bmpicomm, bHYPRE_op_A );
+         bHYPRE_AMG = bHYPRE_BoomerAMG_Create( bmpicomm, bHYPRE_parcsr_A );
          bHYPRE_BoomerAMG_SetDoubleParameter( bHYPRE_AMG, "Tolerance", pc_tol);
          bHYPRE_BoomerAMG_SetIntParameter( bHYPRE_AMG, "CoarsenType",
                                         (hybrid*coarsen_type));
@@ -2186,7 +2187,7 @@ main( int   argc,
          if (myid == 0) printf("Solver: DS-GMRES\n");
 
          bHYPRE_ParCSRDiagScale = bHYPRE_ParCSRDiagScale_Create(
-            bmpicomm, bHYPRE_op_A );
+            bmpicomm, bHYPRE_parcsr_A );
          ierr += bHYPRE_ParCSRDiagScale_Setup( bHYPRE_ParCSRDiagScale,
                                                bHYPRE_Vector_b, bHYPRE_Vector_x );
          bHYPRE_SolverPC =
@@ -2226,7 +2227,7 @@ main( int   argc,
          /* use ParaSails preconditioner */
          if (myid == 0) printf("Solver: ParaSails-GMRES\n");
 
-         bHYPRE_ParaSails = bHYPRE_ParaSails_Create( bmpicomm, bHYPRE_op_A );
+         bHYPRE_ParaSails = bHYPRE_ParaSails_Create( bmpicomm, bHYPRE_parcsr_A );
          ierr += bHYPRE_ParaSails_SetDoubleParameter( bHYPRE_ParaSails, "Thresh",
                                                       sai_threshold );
          ierr += bHYPRE_ParaSails_SetIntParameter( bHYPRE_ParaSails, "Nlevels",
@@ -2349,7 +2350,7 @@ main( int   argc,
          /* use BoomerAMG as preconditioner */
          if (myid == 0) printf("Solver: AMG-GMRES\n");
 
-         bHYPRE_AMG = bHYPRE_BoomerAMG_Create( bmpicomm, bHYPRE_op_A );
+         bHYPRE_AMG = bHYPRE_BoomerAMG_Create( bmpicomm, bHYPRE_parcsr_A );
          bHYPRE_BoomerAMG_SetDoubleParameter( bHYPRE_AMG, "Tolerance", pc_tol);
          bHYPRE_BoomerAMG_SetIntParameter( bHYPRE_AMG, "CoarsenType",
                                         (hybrid*coarsen_type));
@@ -2428,7 +2429,7 @@ main( int   argc,
          if (myid == 0) printf("Solver: DS-GMRES\n");
 
          bHYPRE_ParCSRDiagScale = bHYPRE_ParCSRDiagScale_Create(
-            bmpicomm, bHYPRE_op_A );
+            bmpicomm, bHYPRE_parcsr_A );
          ierr += bHYPRE_ParCSRDiagScale_Setup( bHYPRE_ParCSRDiagScale,
                                                bHYPRE_Vector_b, bHYPRE_Vector_x );
          bHYPRE_SolverPC =
@@ -2468,7 +2469,7 @@ main( int   argc,
          /* use ParaSails preconditioner */
          if (myid == 0) printf("Solver: ParaSails-GMRES\n");
 
-         bHYPRE_ParaSails = bHYPRE_ParaSails_Create( bmpicomm, bHYPRE_op_A );
+         bHYPRE_ParaSails = bHYPRE_ParaSails_Create( bmpicomm, bHYPRE_parcsr_A );
          ierr += bHYPRE_ParaSails_SetDoubleParameter( bHYPRE_ParaSails, "Thresh",
                                                       sai_threshold );
          ierr += bHYPRE_ParaSails_SetIntParameter( bHYPRE_ParaSails, "Nlevels",
@@ -2625,7 +2626,7 @@ main( int   argc,
          if (myid == 0) printf("Solver: DS-BiCGSTAB\n");
 
          bHYPRE_ParCSRDiagScale = bHYPRE_ParCSRDiagScale_Create(
-            bmpicomm, bHYPRE_op_A );
+            bmpicomm, bHYPRE_parcsr_A );
          ierr += bHYPRE_ParCSRDiagScale_Setup( bHYPRE_ParCSRDiagScale,
                                                bHYPRE_Vector_b, bHYPRE_Vector_x );
          bHYPRE_SolverPC =
@@ -2764,7 +2765,7 @@ main( int   argc,
          /* use BoomerAMG as preconditioner */
          if (myid == 0) printf("Solver: AMG-CGNR\n");
 
-         bHYPRE_AMG = bHYPRE_BoomerAMG_Create( bmpicomm, bHYPRE_op_A );
+         bHYPRE_AMG = bHYPRE_BoomerAMG_Create( bmpicomm, bHYPRE_parcsr_A );
 
          bHYPRE_BoomerAMG_SetDoubleParameter( bHYPRE_AMG, "Tolerance", pc_tol);
          bHYPRE_BoomerAMG_SetIntParameter( bHYPRE_AMG, "CoarsenType",
@@ -2843,7 +2844,7 @@ main( int   argc,
       {
          /* use diagonal scaling as preconditioner */
          if (myid == 0) printf("Solver: DS-CGNR\n");
-         bHYPRE_ParCSRDiagScale = bHYPRE_ParCSRDiagScale_Create( bmpicomm, bHYPRE_op_A );
+         bHYPRE_ParCSRDiagScale = bHYPRE_ParCSRDiagScale_Create( bmpicomm, bHYPRE_parcsr_A );
          ierr += bHYPRE_ParCSRDiagScale_Setup( bHYPRE_ParCSRDiagScale,
                                                bHYPRE_Vector_b, bHYPRE_Vector_x );
          bHYPRE_SolverPC =

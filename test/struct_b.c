@@ -751,8 +751,7 @@ main( int   argc,
       time_index = hypre_InitializeTiming("SMG Setup");
       hypre_BeginTiming(time_index);
 
-      A_O = bHYPRE_Operator__cast( A_b );
-      solver_SMG = bHYPRE_StructSMG_Create( bmpicomm, A_O );
+      solver_SMG = bHYPRE_StructSMG_Create( bmpicomm, A_b );
       bHYPRE_StructSMG_SetIntParameter( solver_SMG, "MemoryUse", 0 );
       bHYPRE_StructSMG_SetIntParameter( solver_SMG, "MaxIter", 50 );
       bHYPRE_StructSMG_SetDoubleParameter( solver_SMG, "Tol", 1.0e-6 );
@@ -797,8 +796,7 @@ main( int   argc,
       hypre_BeginTiming(time_index);
 
 
-      A_O = bHYPRE_Operator__cast( A_b );
-      solver_PFMG = bHYPRE_StructPFMG_Create( bmpicomm, A_O );
+      solver_PFMG = bHYPRE_StructPFMG_Create( bmpicomm, A_b );
 
       bHYPRE_StructPFMG_SetIntParameter( solver_PFMG, "MaxIter", 50 );
       bHYPRE_StructPFMG_SetDoubleParameter( solver_PFMG, "Tol", 1.0e-6 );
@@ -909,7 +907,7 @@ main( int   argc,
       if (solver_id == 10)
       {
          /* use symmetric SMG as preconditioner */
-         solver_SMG = bHYPRE_StructSMG_Create( bmpicomm, A_O );
+         solver_SMG = bHYPRE_StructSMG_Create( bmpicomm, A_b );
 
          ierr += bHYPRE_StructSMG_SetIntParameter( solver_SMG, "MemoryUse", 0 );
          ierr += bHYPRE_StructSMG_SetIntParameter( solver_SMG, "MaxIter", 1 );
@@ -929,7 +927,7 @@ main( int   argc,
       else if ( solver_id == 11 || solver_id == 13 || solver_id == 14 )
       {
          /* use symmetric PFMG as preconditioner */
-         solver_PFMG = bHYPRE_StructPFMG_Create( bmpicomm, A_O );
+         solver_PFMG = bHYPRE_StructPFMG_Create( bmpicomm, A_b );
 
          bHYPRE_StructPFMG_SetIntParameter( solver_PFMG, "MaxIterations", 1 );
          bHYPRE_StructPFMG_SetIntParameter( solver_PFMG, "Tolerance", 0.0 );
@@ -1003,7 +1001,7 @@ main( int   argc,
       else if ( solver_id == 18 )
       {
          /* use diagonal scaling as preconditioner */
-         solver_DS = bHYPRE_StructDiagScale_Create( bmpicomm, A_O );
+         solver_DS = bHYPRE_StructDiagScale_Create( bmpicomm, A_b );
          ierr += bHYPRE_StructDiagScale_Setup( solver_DS, b_V, x_V );
          hypre_assert( ierr==0 );
 
@@ -1106,7 +1104,7 @@ main( int   argc,
       if (solver_id == 20)
       {
          /* use symmetric SMG as preconditioner */
-         solver_SMG = bHYPRE_StructSMG_Create( bmpicomm, A_O );
+         solver_SMG = bHYPRE_StructSMG_Create( bmpicomm, A_b );
          ierr += bHYPRE_StructSMG_SetIntParameter( solver_SMG, "MemoryUse", 0 );
          ierr += bHYPRE_StructSMG_SetIntParameter( solver_SMG, "MaxIter", 1 );
          ierr += bHYPRE_StructSMG_SetDoubleParameter(

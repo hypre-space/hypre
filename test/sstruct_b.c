@@ -2590,7 +2590,7 @@ main( int   argc,
       if (solver_id == 20)
       {
          /* use BoomerAMG as preconditioner */
-         b_boomeramg = bHYPRE_BoomerAMG_Create( bmpicomm, b_A_O );
+         b_boomeramg = bHYPRE_BoomerAMG_Create( bmpicomm, b_pA );
          ierr += bHYPRE_BoomerAMG_SetIntParameter( b_boomeramg, "CoarsenType", 6 );
          ierr += bHYPRE_BoomerAMG_SetIntParameter( b_boomeramg, "PrintLevel", 1 );
          ierr += bHYPRE_BoomerAMG_SetDoubleParameter(
@@ -2609,7 +2609,7 @@ main( int   argc,
       else if (solver_id == 22)
       {
          /* use ParaSails as preconditioner */
-         b_parasails = bHYPRE_ParaSails_Create( bmpicomm, b_A_O );
+         b_parasails = bHYPRE_ParaSails_Create( bmpicomm, b_pA );
          ierr += bHYPRE_ParaSails_SetDoubleParameter( b_parasails, "Thresh", 0.1 );
          ierr += bHYPRE_ParaSails_SetIntParameter( b_parasails, "Nlevels", 1 );
 
@@ -2771,7 +2771,7 @@ main( int   argc,
       if (solver_id == 40)
       {
          /* use BoomerAMG as preconditioner */
-         b_boomeramg = bHYPRE_BoomerAMG_Create( bmpicomm, b_A_O );
+         b_boomeramg = bHYPRE_BoomerAMG_Create( bmpicomm, b_pA );
          bHYPRE_BoomerAMG_SetIntParameter( b_boomeramg, "CoarsenType", 6);
          bHYPRE_BoomerAMG_SetIntParameter( b_boomeramg, "StrongThreshold", 0.25);
          bHYPRE_BoomerAMG_SetDoubleParameter( b_boomeramg, "Tolerance", 0.0 );
@@ -3071,8 +3071,7 @@ main( int   argc,
       time_index = hypre_InitializeTiming("SMG Setup");
       hypre_BeginTiming(time_index);
 
-      b_A_O = bHYPRE_Operator__cast( b_sA );
-      b_solver_SMG = bHYPRE_StructSMG_Create( bmpicomm, b_A_O );
+      b_solver_SMG = bHYPRE_StructSMG_Create( bmpicomm, b_sA );
       bHYPRE_StructSMG_SetIntParameter( b_solver_SMG, "MemoryUse", 0);
       bHYPRE_StructSMG_SetIntParameter( b_solver_SMG, "MaxIter", 50);
       bHYPRE_StructSMG_SetDoubleParameter( b_solver_SMG, "Tol", 1.0e-6);
