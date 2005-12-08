@@ -180,7 +180,7 @@ C
         implicit none
 C       in bHYPRE.MPICommunicator mpi_comm
         integer*8 mpi_comm
-C       in bHYPRE.Operator A
+C       in bHYPRE.StructMatrix A
         integer*8 A
 C       out bHYPRE.StructPFMG retval
         integer*8 retval

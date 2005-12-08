@@ -130,7 +130,7 @@ extern "C"
 bHYPRE_ParaSails
 impl_bHYPRE_ParaSails_Create(
   /* in */ bHYPRE_MPICommunicator mpi_comm,
-  /* in */ bHYPRE_Operator A)
+  /* in */ bHYPRE_IJParCSRMatrix A)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.ParaSails.Create) */
   /* Insert-Code-Here {bHYPRE.ParaSails.Create} (Create method) */
@@ -140,24 +140,13 @@ impl_bHYPRE_ParaSails_Create(
    HYPRE_Solver * Hsolver = &dummy;
    bHYPRE_ParaSails solver = bHYPRE_ParaSails__create();
    struct bHYPRE_ParaSails__data * data = bHYPRE_ParaSails__get_data( solver );
-   bHYPRE_IJParCSRMatrix Amat;
 
    data->comm = bHYPRE_MPICommunicator__get_data(mpi_comm)->mpi_comm;
    ierr += HYPRE_ParCSRParaSailsCreate( (data->comm), Hsolver );
    hypre_assert( ierr==0 );
    data -> solver = *Hsolver;
 
-   if ( bHYPRE_Operator_queryInt( A, "bHYPRE.IJParCSRMatrix" ) )
-   {
-      Amat = bHYPRE_IJParCSRMatrix__cast( A );
-      bHYPRE_IJParCSRMatrix_deleteRef( Amat ); /* extra ref from queryInt */
-   }
-   else
-   {
-      hypre_assert( "Unrecognized operator type."==(char *)A );
-   }
-
-   data->matrix = Amat;
+   data->matrix = A;
    bHYPRE_IJParCSRMatrix_addRef( data->matrix );
 
    return solver;
@@ -962,6 +951,15 @@ struct bHYPRE_Operator__object*
 char * impl_bHYPRE_ParaSails_fgetURL_bHYPRE_Operator(struct 
   bHYPRE_Operator__object* obj) {
   return bHYPRE_Operator__getURL(obj);
+}
+struct bHYPRE_IJParCSRMatrix__object* 
+  impl_bHYPRE_ParaSails_fconnect_bHYPRE_IJParCSRMatrix(char* url,
+  sidl_BaseInterface *_ex) {
+  return bHYPRE_IJParCSRMatrix__connect(url, _ex);
+}
+char * impl_bHYPRE_ParaSails_fgetURL_bHYPRE_IJParCSRMatrix(struct 
+  bHYPRE_IJParCSRMatrix__object* obj) {
+  return bHYPRE_IJParCSRMatrix__getURL(obj);
 }
 struct sidl_ClassInfo__object* 
   impl_bHYPRE_ParaSails_fconnect_sidl_ClassInfo(char* url,

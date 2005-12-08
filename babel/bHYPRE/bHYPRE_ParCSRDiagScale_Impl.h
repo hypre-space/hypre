@@ -28,6 +28,9 @@
 #ifndef included_bHYPRE_Operator_h
 #include "bHYPRE_Operator.h"
 #endif
+#ifndef included_bHYPRE_IJParCSRMatrix_h
+#include "bHYPRE_IJParCSRMatrix.h"
+#endif
 #ifndef included_sidl_ClassInfo_h
 #include "sidl_ClassInfo.h"
 #endif
@@ -56,7 +59,7 @@ struct bHYPRE_ParCSRDiagScale__data {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.ParCSRDiagScale._data) */
   /* Put private data members here... */
    MPI_Comm comm;
-   bHYPRE_Operator matrix;
+   bHYPRE_IJParCSRMatrix matrix;
   /* DO-NOT-DELETE splicer.end(bHYPRE.ParCSRDiagScale._data) */
 };
 
@@ -100,7 +103,7 @@ extern
 bHYPRE_ParCSRDiagScale
 impl_bHYPRE_ParCSRDiagScale_Create(
   /* in */ bHYPRE_MPICommunicator mpi_comm,
-  /* in */ bHYPRE_Operator A);
+  /* in */ bHYPRE_IJParCSRMatrix A);
 
 extern struct bHYPRE_ParCSRDiagScale__object* 
   impl_bHYPRE_ParCSRDiagScale_fconnect_bHYPRE_ParCSRDiagScale(char* url,
@@ -122,6 +125,11 @@ extern struct bHYPRE_Operator__object*
   sidl_BaseInterface *_ex);
 extern char* impl_bHYPRE_ParCSRDiagScale_fgetURL_bHYPRE_Operator(struct 
   bHYPRE_Operator__object* obj);
+extern struct bHYPRE_IJParCSRMatrix__object* 
+  impl_bHYPRE_ParCSRDiagScale_fconnect_bHYPRE_IJParCSRMatrix(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_ParCSRDiagScale_fgetURL_bHYPRE_IJParCSRMatrix(struct 
+  bHYPRE_IJParCSRMatrix__object* obj);
 extern struct sidl_ClassInfo__object* 
   impl_bHYPRE_ParCSRDiagScale_fconnect_sidl_ClassInfo(char* url,
   sidl_BaseInterface *_ex);
@@ -296,6 +304,11 @@ extern struct bHYPRE_Operator__object*
   sidl_BaseInterface *_ex);
 extern char* impl_bHYPRE_ParCSRDiagScale_fgetURL_bHYPRE_Operator(struct 
   bHYPRE_Operator__object* obj);
+extern struct bHYPRE_IJParCSRMatrix__object* 
+  impl_bHYPRE_ParCSRDiagScale_fconnect_bHYPRE_IJParCSRMatrix(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_ParCSRDiagScale_fgetURL_bHYPRE_IJParCSRMatrix(struct 
+  bHYPRE_IJParCSRMatrix__object* obj);
 extern struct sidl_ClassInfo__object* 
   impl_bHYPRE_ParCSRDiagScale_fconnect_sidl_ClassInfo(char* url,
   sidl_BaseInterface *_ex);

@@ -19,6 +19,9 @@
 #ifndef included_bHYPRE_Solver_h
 #include "bHYPRE_Solver.h"
 #endif
+#ifndef included_bHYPRE_StructMatrix_h
+#include "bHYPRE_StructMatrix.h"
+#endif
 #ifndef included_bHYPRE_MPICommunicator_h
 #include "bHYPRE_MPICommunicator.h"
 #endif
@@ -59,7 +62,7 @@ struct bHYPRE_StructDiagScale__data {
   /* Insert-Code-Here {bHYPRE.StructDiagScale._data} (private data members) */
 
    MPI_Comm comm;
-   bHYPRE_Operator matrix;
+   bHYPRE_StructMatrix matrix;
 
   /* DO-NOT-DELETE splicer.end(bHYPRE.StructDiagScale._data) */
 };
@@ -104,13 +107,18 @@ extern
 bHYPRE_StructDiagScale
 impl_bHYPRE_StructDiagScale_Create(
   /* in */ bHYPRE_MPICommunicator mpi_comm,
-  /* in */ bHYPRE_Operator A);
+  /* in */ bHYPRE_StructMatrix A);
 
 extern struct bHYPRE_Solver__object* 
   impl_bHYPRE_StructDiagScale_fconnect_bHYPRE_Solver(char* url,
   sidl_BaseInterface *_ex);
 extern char* impl_bHYPRE_StructDiagScale_fgetURL_bHYPRE_Solver(struct 
   bHYPRE_Solver__object* obj);
+extern struct bHYPRE_StructMatrix__object* 
+  impl_bHYPRE_StructDiagScale_fconnect_bHYPRE_StructMatrix(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_StructDiagScale_fgetURL_bHYPRE_StructMatrix(struct 
+  bHYPRE_StructMatrix__object* obj);
 extern struct bHYPRE_MPICommunicator__object* 
   impl_bHYPRE_StructDiagScale_fconnect_bHYPRE_MPICommunicator(char* url,
   sidl_BaseInterface *_ex);
@@ -285,6 +293,11 @@ extern struct bHYPRE_Solver__object*
   sidl_BaseInterface *_ex);
 extern char* impl_bHYPRE_StructDiagScale_fgetURL_bHYPRE_Solver(struct 
   bHYPRE_Solver__object* obj);
+extern struct bHYPRE_StructMatrix__object* 
+  impl_bHYPRE_StructDiagScale_fconnect_bHYPRE_StructMatrix(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_StructDiagScale_fgetURL_bHYPRE_StructMatrix(struct 
+  bHYPRE_StructMatrix__object* obj);
 extern struct bHYPRE_MPICommunicator__object* 
   impl_bHYPRE_StructDiagScale_fconnect_bHYPRE_MPICommunicator(char* url,
   sidl_BaseInterface *_ex);

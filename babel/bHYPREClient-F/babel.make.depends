@@ -498,6 +498,7 @@ bHYPRE_BoomerAMG_fStub.c: sidl_Loader.h
 bHYPRE_BoomerAMG_fStub.c: bHYPRE_BoomerAMG_IOR.h
 bHYPRE_BoomerAMG_fStub.c: bHYPRE_MPICommunicator_IOR.h
 bHYPRE_BoomerAMG_fStub.c: bHYPRE_Operator_IOR.h
+bHYPRE_BoomerAMG_fStub.c: bHYPRE_IJParCSRMatrix_IOR.h
 bHYPRE_BoomerAMG_fStub.c: sidl_ClassInfo_IOR.h
 bHYPRE_BoomerAMG_fStub.c: bHYPRE_Vector_IOR.h
 bHYPRE_BoomerAMG_fStub.c: sidl_BaseInterface_IOR.h
@@ -537,6 +538,7 @@ bHYPRE_Euclid_fStub.c: sidl_Loader.h
 bHYPRE_Euclid_fStub.c: bHYPRE_Euclid_IOR.h
 bHYPRE_Euclid_fStub.c: bHYPRE_MPICommunicator_IOR.h
 bHYPRE_Euclid_fStub.c: bHYPRE_Operator_IOR.h
+bHYPRE_Euclid_fStub.c: bHYPRE_IJParCSRMatrix_IOR.h
 bHYPRE_Euclid_fStub.c: sidl_ClassInfo_IOR.h
 bHYPRE_Euclid_fStub.c: bHYPRE_Vector_IOR.h
 bHYPRE_Euclid_fStub.c: sidl_BaseInterface_IOR.h
@@ -722,6 +724,7 @@ bHYPRE_ParCSRDiagScale_fStub.c: sidl_Loader.h
 bHYPRE_ParCSRDiagScale_fStub.c: bHYPRE_ParCSRDiagScale_IOR.h
 bHYPRE_ParCSRDiagScale_fStub.c: bHYPRE_MPICommunicator_IOR.h
 bHYPRE_ParCSRDiagScale_fStub.c: bHYPRE_Operator_IOR.h
+bHYPRE_ParCSRDiagScale_fStub.c: bHYPRE_IJParCSRMatrix_IOR.h
 bHYPRE_ParCSRDiagScale_fStub.c: sidl_ClassInfo_IOR.h
 bHYPRE_ParCSRDiagScale_fStub.c: bHYPRE_Vector_IOR.h
 bHYPRE_ParCSRDiagScale_fStub.c: sidl_BaseInterface_IOR.h
@@ -735,6 +738,7 @@ bHYPRE_ParaSails_fStub.c: sidl_Loader.h
 bHYPRE_ParaSails_fStub.c: bHYPRE_ParaSails_IOR.h
 bHYPRE_ParaSails_fStub.c: bHYPRE_MPICommunicator_IOR.h
 bHYPRE_ParaSails_fStub.c: bHYPRE_Operator_IOR.h
+bHYPRE_ParaSails_fStub.c: bHYPRE_IJParCSRMatrix_IOR.h
 bHYPRE_ParaSails_fStub.c: sidl_ClassInfo_IOR.h
 bHYPRE_ParaSails_fStub.c: bHYPRE_Vector_IOR.h
 bHYPRE_ParaSails_fStub.c: sidl_BaseInterface_IOR.h
@@ -962,6 +966,7 @@ bHYPRE_StructDiagScale_fStub.c: sidl_interface_IOR.h
 bHYPRE_StructDiagScale_fStub.c: babel_config.h
 bHYPRE_StructDiagScale_fStub.c: sidl_Loader.h
 bHYPRE_StructDiagScale_fStub.c: bHYPRE_StructDiagScale_IOR.h
+bHYPRE_StructDiagScale_fStub.c: bHYPRE_StructMatrix_IOR.h
 bHYPRE_StructDiagScale_fStub.c: bHYPRE_MPICommunicator_IOR.h
 bHYPRE_StructDiagScale_fStub.c: bHYPRE_Operator_IOR.h
 bHYPRE_StructDiagScale_fStub.c: sidl_ClassInfo_IOR.h
@@ -1014,6 +1019,7 @@ bHYPRE_StructPFMG_fStub.c: sidl_interface_IOR.h
 bHYPRE_StructPFMG_fStub.c: babel_config.h
 bHYPRE_StructPFMG_fStub.c: sidl_Loader.h
 bHYPRE_StructPFMG_fStub.c: bHYPRE_StructPFMG_IOR.h
+bHYPRE_StructPFMG_fStub.c: bHYPRE_StructMatrix_IOR.h
 bHYPRE_StructPFMG_fStub.c: bHYPRE_MPICommunicator_IOR.h
 bHYPRE_StructPFMG_fStub.c: bHYPRE_Operator_IOR.h
 bHYPRE_StructPFMG_fStub.c: sidl_ClassInfo_IOR.h
@@ -1027,6 +1033,7 @@ bHYPRE_StructSMG_fStub.c: sidl_interface_IOR.h
 bHYPRE_StructSMG_fStub.c: babel_config.h
 bHYPRE_StructSMG_fStub.c: sidl_Loader.h
 bHYPRE_StructSMG_fStub.c: bHYPRE_StructSMG_IOR.h
+bHYPRE_StructSMG_fStub.c: bHYPRE_StructMatrix_IOR.h
 bHYPRE_StructSMG_fStub.c: bHYPRE_MPICommunicator_IOR.h
 bHYPRE_StructSMG_fStub.c: bHYPRE_Operator_IOR.h
 bHYPRE_StructSMG_fStub.c: sidl_ClassInfo_IOR.h

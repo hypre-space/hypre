@@ -36,6 +36,7 @@
 #include "sidl_Loader.h"
 #endif
 #include "bHYPRE_StructPFMG_IOR.h"
+#include "bHYPRE_StructMatrix_IOR.h"
 #include "bHYPRE_MPICommunicator_IOR.h"
 #include "bHYPRE_Operator_IOR.h"
 #include "sidl_ClassInfo_IOR.h"
@@ -349,13 +350,13 @@ SIDLFortran77Symbol(bhypre_structpfmg_create_f,BHYPRE_STRUCTPFMG_CREATE_F,bHYPRE
 {
   const struct bHYPRE_StructPFMG__sepv *_epv = _getSEPV();
   struct bHYPRE_MPICommunicator__object* _proxy_mpi_comm = NULL;
-  struct bHYPRE_Operator__object* _proxy_A = NULL;
+  struct bHYPRE_StructMatrix__object* _proxy_A = NULL;
   struct bHYPRE_StructPFMG__object* _proxy_retval = NULL;
   _proxy_mpi_comm =
     (struct bHYPRE_MPICommunicator__object*)
     (ptrdiff_t)(*mpi_comm);
   _proxy_A =
-    (struct bHYPRE_Operator__object*)
+    (struct bHYPRE_StructMatrix__object*)
     (ptrdiff_t)(*A);
   _proxy_retval = 
     (*(_epv->f_Create))(

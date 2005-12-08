@@ -60,6 +60,8 @@ extern void bHYPRE_ParCSRDiagScale__IOR_version(int32_t *major, int32_t *minor);
  * Forward references for external classes and interfaces.
  */
 
+struct bHYPRE_IJParCSRMatrix__array;
+struct bHYPRE_IJParCSRMatrix__object;
 struct bHYPRE_MPICommunicator__array;
 struct bHYPRE_MPICommunicator__object;
 struct bHYPRE_Vector__array;
@@ -86,7 +88,7 @@ struct bHYPRE_ParCSRDiagScale__sepv {
   /* Methods introduced in bHYPRE.ParCSRDiagScale-v1.0.0 */
   struct bHYPRE_ParCSRDiagScale__object* (*f_Create)(
     /* in */ struct bHYPRE_MPICommunicator__object* mpi_comm,
-    /* in */ struct bHYPRE_Operator__object* A);
+    /* in */ struct bHYPRE_IJParCSRMatrix__object* A);
 };
 
 /*
@@ -258,6 +260,12 @@ struct bHYPRE_Operator__object*
   struct sidl_BaseInterface__object **_ex);
 char* skel_bHYPRE_ParCSRDiagScale_fgetURL_bHYPRE_Operator(struct 
   bHYPRE_Operator__object* obj); 
+
+struct bHYPRE_IJParCSRMatrix__object* 
+  skel_bHYPRE_ParCSRDiagScale_fconnect_bHYPRE_IJParCSRMatrix(char* url,
+  struct sidl_BaseInterface__object **_ex);
+char* skel_bHYPRE_ParCSRDiagScale_fgetURL_bHYPRE_IJParCSRMatrix(struct 
+  bHYPRE_IJParCSRMatrix__object* obj); 
 
 struct sidl_ClassInfo__object* 
   skel_bHYPRE_ParCSRDiagScale_fconnect_sidl_ClassInfo(char* url,

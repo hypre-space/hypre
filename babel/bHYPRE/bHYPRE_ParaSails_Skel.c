@@ -33,7 +33,7 @@ extern
 bHYPRE_ParaSails
 impl_bHYPRE_ParaSails_Create(
   /* in */ bHYPRE_MPICommunicator mpi_comm,
-  /* in */ bHYPRE_Operator A);
+  /* in */ bHYPRE_IJParCSRMatrix A);
 
 extern struct bHYPRE_Solver__object* 
   impl_bHYPRE_ParaSails_fconnect_bHYPRE_Solver(char* url,
@@ -55,6 +55,11 @@ extern struct bHYPRE_Operator__object*
   sidl_BaseInterface *_ex);
 extern char* impl_bHYPRE_ParaSails_fgetURL_bHYPRE_Operator(struct 
   bHYPRE_Operator__object* obj);
+extern struct bHYPRE_IJParCSRMatrix__object* 
+  impl_bHYPRE_ParaSails_fconnect_bHYPRE_IJParCSRMatrix(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_ParaSails_fgetURL_bHYPRE_IJParCSRMatrix(struct 
+  bHYPRE_IJParCSRMatrix__object* obj);
 extern struct sidl_ClassInfo__object* 
   impl_bHYPRE_ParaSails_fconnect_sidl_ClassInfo(char* url,
   sidl_BaseInterface *_ex);
@@ -229,6 +234,11 @@ extern struct bHYPRE_Operator__object*
   sidl_BaseInterface *_ex);
 extern char* impl_bHYPRE_ParaSails_fgetURL_bHYPRE_Operator(struct 
   bHYPRE_Operator__object* obj);
+extern struct bHYPRE_IJParCSRMatrix__object* 
+  impl_bHYPRE_ParaSails_fconnect_bHYPRE_IJParCSRMatrix(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_ParaSails_fgetURL_bHYPRE_IJParCSRMatrix(struct 
+  bHYPRE_IJParCSRMatrix__object* obj);
 extern struct sidl_ClassInfo__object* 
   impl_bHYPRE_ParaSails_fconnect_sidl_ClassInfo(char* url,
   sidl_BaseInterface *_ex);
@@ -424,6 +434,17 @@ struct bHYPRE_Operator__object*
 char* skel_bHYPRE_ParaSails_fgetURL_bHYPRE_Operator(struct 
   bHYPRE_Operator__object* obj) { 
   return impl_bHYPRE_ParaSails_fgetURL_bHYPRE_Operator(obj);
+}
+
+struct bHYPRE_IJParCSRMatrix__object* 
+  skel_bHYPRE_ParaSails_fconnect_bHYPRE_IJParCSRMatrix(char* url,
+  sidl_BaseInterface *_ex) { 
+  return impl_bHYPRE_ParaSails_fconnect_bHYPRE_IJParCSRMatrix(url, _ex);
+}
+
+char* skel_bHYPRE_ParaSails_fgetURL_bHYPRE_IJParCSRMatrix(struct 
+  bHYPRE_IJParCSRMatrix__object* obj) { 
+  return impl_bHYPRE_ParaSails_fgetURL_bHYPRE_IJParCSRMatrix(obj);
 }
 
 struct sidl_ClassInfo__object* 

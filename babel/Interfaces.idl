@@ -1340,7 +1340,7 @@ package bHYPRE version 1.0.0
    class ParCSRDiagScale implements-all Solver
    {
       static ParCSRDiagScale Create( in MPICommunicator mpi_comm,
-                                     in Operator A  );
+                                     in IJParCSRMatrix A  );
    }
 
    /**
@@ -1352,13 +1352,14 @@ package bHYPRE version 1.0.0
    class StructDiagScale implements-all Solver
    {
       static StructDiagScale Create( in MPICommunicator mpi_comm,
-                                     in Operator A  );
+                                     in StructMatrix A  );
    }
 
    class SStructDiagScale implements-all Solver
    {
       static SStructDiagScale Create( in MPICommunicator mpi_comm,
                                       in Operator A  );
+      /* ... A should also be a SStructMatrixView */
    }
 
    /**
@@ -1476,10 +1477,10 @@ package bHYPRE version 1.0.0
    class BoomerAMG implements-all Solver
    {
       static BoomerAMG Create( in MPICommunicator mpi_comm,
-                               in Operator A );
+                               in IJParCSRMatrix A );
       int SetLevelRelaxWt( in double relax_wt, in int level );
 
-      /* The following function is just a tools for test drivers,
+      /* The following function is just a tool for test drivers,
          subject to change without notice... */
       int InitGridRelaxation(
          out array<int,1,column-major> num_grid_sweeps,
@@ -1502,7 +1503,7 @@ package bHYPRE version 1.0.0
     **/
    class Euclid implements-all Solver
    {
-      static Euclid Create( in MPICommunicator mpi_comm, in Operator A );
+      static Euclid Create( in MPICommunicator mpi_comm, in IJParCSRMatrix A );
       int SetParameters( in int argc, inout string argv );
       /* ... argv is really in, but inout makes implementation simpler */
    }
@@ -1534,7 +1535,7 @@ package bHYPRE version 1.0.0
    class ParaSails implements-all Solver
    {
       static ParaSails Create( in MPICommunicator mpi_comm,
-                               in Operator A );
+                               in IJParCSRMatrix A );
    }
 
    /**
@@ -1637,7 +1638,7 @@ package bHYPRE version 1.0.0
     **/
    class StructSMG implements-all Solver
    {
-      static StructSMG Create( in MPICommunicator mpi_comm, in Operator A );
+      static StructSMG Create( in MPICommunicator mpi_comm, in StructMatrix A );
    }
 
    /**
@@ -1652,7 +1653,7 @@ package bHYPRE version 1.0.0
    class StructPFMG implements-all Solver
    {
       static StructPFMG Create( in MPICommunicator mpi_comm,
-                                in Operator A );
+                                in StructMatrix A );
    }
 
 

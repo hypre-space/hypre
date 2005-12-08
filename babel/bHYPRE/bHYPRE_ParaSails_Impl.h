@@ -28,6 +28,9 @@
 #ifndef included_bHYPRE_Operator_h
 #include "bHYPRE_Operator.h"
 #endif
+#ifndef included_bHYPRE_IJParCSRMatrix_h
+#include "bHYPRE_IJParCSRMatrix.h"
+#endif
 #ifndef included_sidl_ClassInfo_h
 #include "sidl_ClassInfo.h"
 #endif
@@ -103,7 +106,7 @@ extern
 bHYPRE_ParaSails
 impl_bHYPRE_ParaSails_Create(
   /* in */ bHYPRE_MPICommunicator mpi_comm,
-  /* in */ bHYPRE_Operator A);
+  /* in */ bHYPRE_IJParCSRMatrix A);
 
 extern struct bHYPRE_Solver__object* 
   impl_bHYPRE_ParaSails_fconnect_bHYPRE_Solver(char* url,
@@ -125,6 +128,11 @@ extern struct bHYPRE_Operator__object*
   sidl_BaseInterface *_ex);
 extern char* impl_bHYPRE_ParaSails_fgetURL_bHYPRE_Operator(struct 
   bHYPRE_Operator__object* obj);
+extern struct bHYPRE_IJParCSRMatrix__object* 
+  impl_bHYPRE_ParaSails_fconnect_bHYPRE_IJParCSRMatrix(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_ParaSails_fgetURL_bHYPRE_IJParCSRMatrix(struct 
+  bHYPRE_IJParCSRMatrix__object* obj);
 extern struct sidl_ClassInfo__object* 
   impl_bHYPRE_ParaSails_fconnect_sidl_ClassInfo(char* url,
   sidl_BaseInterface *_ex);
@@ -299,6 +307,11 @@ extern struct bHYPRE_Operator__object*
   sidl_BaseInterface *_ex);
 extern char* impl_bHYPRE_ParaSails_fgetURL_bHYPRE_Operator(struct 
   bHYPRE_Operator__object* obj);
+extern struct bHYPRE_IJParCSRMatrix__object* 
+  impl_bHYPRE_ParaSails_fconnect_bHYPRE_IJParCSRMatrix(char* url,
+  sidl_BaseInterface *_ex);
+extern char* impl_bHYPRE_ParaSails_fgetURL_bHYPRE_IJParCSRMatrix(struct 
+  bHYPRE_IJParCSRMatrix__object* obj);
 extern struct sidl_ClassInfo__object* 
   impl_bHYPRE_ParaSails_fconnect_sidl_ClassInfo(char* url,
   sidl_BaseInterface *_ex);

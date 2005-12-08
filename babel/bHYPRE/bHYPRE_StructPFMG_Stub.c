@@ -230,7 +230,7 @@ bHYPRE_StructPFMG_getClassInfo(
 bHYPRE_StructPFMG
 bHYPRE_StructPFMG_Create(
   /* in */ bHYPRE_MPICommunicator mpi_comm,
-  /* in */ bHYPRE_Operator A)
+  /* in */ bHYPRE_StructMatrix A)
 {
   return (_getSEPV()->f_Create)(
     mpi_comm,
@@ -596,7 +596,7 @@ bHYPRE_StructPFMG_Create__sexec(
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
   bHYPRE_MPICommunicator mpi_comm;
-  bHYPRE_Operator A;
+  bHYPRE_StructMatrix A;
   bHYPRE_StructPFMG _retval;
 
   /* unpack in and inout argments */

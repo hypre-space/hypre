@@ -103,7 +103,7 @@ impl_bHYPRE_StructDiagScale__dtor(
    struct bHYPRE_StructDiagScale__data * data;
    data = bHYPRE_StructDiagScale__get_data( self );
 
-   bHYPRE_Operator_deleteRef( data->matrix );
+   bHYPRE_StructMatrix_deleteRef( data->matrix );
    /* delete any nontrivial data components here */
    hypre_TFree( data );
 
@@ -123,7 +123,7 @@ extern "C"
 bHYPRE_StructDiagScale
 impl_bHYPRE_StructDiagScale_Create(
   /* in */ bHYPRE_MPICommunicator mpi_comm,
-  /* in */ bHYPRE_Operator A)
+  /* in */ bHYPRE_StructMatrix A)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.StructDiagScale.Create) */
   /* Insert-Code-Here {bHYPRE.StructDiagScale.Create} (Create method) */
@@ -134,7 +134,7 @@ impl_bHYPRE_StructDiagScale_Create(
 
    data->comm = bHYPRE_MPICommunicator__get_data(mpi_comm)->mpi_comm;
    data->matrix = A;
-   bHYPRE_Operator_addRef( data->matrix );
+   bHYPRE_StructMatrix_addRef( data->matrix );
 
    return solver;
 
@@ -451,7 +451,6 @@ impl_bHYPRE_StructDiagScale_Apply(
    MPI_Comm comm;
    HYPRE_StructSolver HSSdummy; /* required arg, not used */
    struct bHYPRE_StructDiagScale__data * data;
-   bHYPRE_Operator mat;
    bHYPRE_StructMatrix bA;
    HYPRE_StructMatrix HA;
    bHYPRE_StructVector b_b, b_x;
@@ -462,9 +461,8 @@ impl_bHYPRE_StructDiagScale_Apply(
    data = bHYPRE_StructDiagScale__get_data( self );
    comm = data->comm;
    hypre_assert( comm != MPI_COMM_NULL );
-   mat = data->matrix;
-   /* SetOperator should have been called earlier */
-   hypre_assert( mat != NULL );
+   bA = data->matrix;
+   hypre_assert( bA != NULL );
 
    if ( *x==NULL )
    {  /* If vector not supplied, make one...*/
@@ -487,9 +485,6 @@ impl_bHYPRE_StructDiagScale_Apply(
    datax = bHYPRE_StructVector__get_data( b_x );
    Hx = datax -> vec;
 
-   bA = bHYPRE_StructMatrix__cast
-      ( bHYPRE_Operator_queryInt( mat, "bHYPRE.StructMatrix") );
-   bHYPRE_StructMatrix_deleteRef( bA ); /* extra reference from queryInt */
    dataA = bHYPRE_StructMatrix__get_data( bA );
    HA = dataA -> matrix;
 
@@ -549,10 +544,16 @@ impl_bHYPRE_StructDiagScale_SetOperator(
 
    int ierr = 0;
    struct bHYPRE_StructDiagScale__data * data;
+   bHYPRE_StructMatrix bH_A;
+
+   bH_A = bHYPRE_StructMatrix__cast
+      ( bHYPRE_Operator_queryInt( A, "bHYPRE.IJParCSRMatrix") );
+   bHYPRE_Operator_deleteRef( A ); /* extra ref created by queryInt */
+   hypre_assert( bH_A!=NULL );
 
    data = bHYPRE_StructDiagScale__get_data( self );
-   data->matrix = A;
-   bHYPRE_Operator_addRef( data->matrix );
+   data->matrix = bH_A;
+   bHYPRE_StructMatrix_addRef( data->matrix );
 
    return ierr;
 
@@ -725,6 +726,15 @@ struct bHYPRE_Solver__object*
 char * impl_bHYPRE_StructDiagScale_fgetURL_bHYPRE_Solver(struct 
   bHYPRE_Solver__object* obj) {
   return bHYPRE_Solver__getURL(obj);
+}
+struct bHYPRE_StructMatrix__object* 
+  impl_bHYPRE_StructDiagScale_fconnect_bHYPRE_StructMatrix(char* url,
+  sidl_BaseInterface *_ex) {
+  return bHYPRE_StructMatrix__connect(url, _ex);
+}
+char * impl_bHYPRE_StructDiagScale_fgetURL_bHYPRE_StructMatrix(struct 
+  bHYPRE_StructMatrix__object* obj) {
+  return bHYPRE_StructMatrix__getURL(obj);
 }
 struct bHYPRE_MPICommunicator__object* 
   impl_bHYPRE_StructDiagScale_fconnect_bHYPRE_MPICommunicator(char* url,

@@ -33,6 +33,9 @@ typedef struct bHYPRE_ParCSRDiagScale__object* bHYPRE_ParCSRDiagScale;
 #ifndef included_sidl_header_h
 #include "sidl_header.h"
 #endif
+#ifndef included_bHYPRE_IJParCSRMatrix_h
+#include "bHYPRE_IJParCSRMatrix.h"
+#endif
 #ifndef included_bHYPRE_MPICommunicator_h
 #include "bHYPRE_MPICommunicator.h"
 #endif
@@ -109,7 +112,7 @@ bHYPRE_ParCSRDiagScale_getClassInfo(
 bHYPRE_ParCSRDiagScale
 bHYPRE_ParCSRDiagScale_Create(
   /* in */ bHYPRE_MPICommunicator mpi_comm,
-  /* in */ bHYPRE_Operator A);
+  /* in */ bHYPRE_IJParCSRMatrix A);
 
 /**
  * Set the MPI Communicator.

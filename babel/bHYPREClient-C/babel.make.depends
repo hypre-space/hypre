@@ -431,6 +431,7 @@ bHYPRE_BiCGSTAB.h: sidl_io_Deserializer.h
 
 bHYPRE_BoomerAMG.h: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_BoomerAMG.h: sidl_header.h
+bHYPRE_BoomerAMG.h: bHYPRE_IJParCSRMatrix.h
 bHYPRE_BoomerAMG.h: bHYPRE_MPICommunicator.h
 bHYPRE_BoomerAMG.h: bHYPRE_Operator.h
 bHYPRE_BoomerAMG.h: bHYPRE_Vector.h
@@ -460,6 +461,7 @@ bHYPRE_CoefficientAccess.h: sidl_io_Deserializer.h
 
 bHYPRE_Euclid.h: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_Euclid.h: sidl_header.h
+bHYPRE_Euclid.h: bHYPRE_IJParCSRMatrix.h
 bHYPRE_Euclid.h: bHYPRE_MPICommunicator.h
 bHYPRE_Euclid.h: bHYPRE_Operator.h
 bHYPRE_Euclid.h: bHYPRE_Vector.h
@@ -597,6 +599,7 @@ bHYPRE_PCG.h: sidl_io_Deserializer.h
 
 bHYPRE_ParCSRDiagScale.h: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_ParCSRDiagScale.h: sidl_header.h
+bHYPRE_ParCSRDiagScale.h: bHYPRE_IJParCSRMatrix.h
 bHYPRE_ParCSRDiagScale.h: bHYPRE_MPICommunicator.h
 bHYPRE_ParCSRDiagScale.h: bHYPRE_Operator.h
 bHYPRE_ParCSRDiagScale.h: bHYPRE_Vector.h
@@ -607,6 +610,7 @@ bHYPRE_ParCSRDiagScale.h: sidl_io_Deserializer.h
 
 bHYPRE_ParaSails.h: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_ParaSails.h: sidl_header.h
+bHYPRE_ParaSails.h: bHYPRE_IJParCSRMatrix.h
 bHYPRE_ParaSails.h: bHYPRE_MPICommunicator.h
 bHYPRE_ParaSails.h: bHYPRE_Operator.h
 bHYPRE_ParaSails.h: bHYPRE_Vector.h
@@ -777,6 +781,7 @@ bHYPRE_StructDiagScale.h: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_StructDiagScale.h: sidl_header.h
 bHYPRE_StructDiagScale.h: bHYPRE_MPICommunicator.h
 bHYPRE_StructDiagScale.h: bHYPRE_Operator.h
+bHYPRE_StructDiagScale.h: bHYPRE_StructMatrix.h
 bHYPRE_StructDiagScale.h: bHYPRE_Vector.h
 bHYPRE_StructDiagScale.h: sidl_BaseInterface.h
 bHYPRE_StructDiagScale.h: sidl_ClassInfo.h
@@ -816,6 +821,7 @@ bHYPRE_StructPFMG.h: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_StructPFMG.h: sidl_header.h
 bHYPRE_StructPFMG.h: bHYPRE_MPICommunicator.h
 bHYPRE_StructPFMG.h: bHYPRE_Operator.h
+bHYPRE_StructPFMG.h: bHYPRE_StructMatrix.h
 bHYPRE_StructPFMG.h: bHYPRE_Vector.h
 bHYPRE_StructPFMG.h: sidl_BaseInterface.h
 bHYPRE_StructPFMG.h: sidl_ClassInfo.h
@@ -826,6 +832,7 @@ bHYPRE_StructSMG.h: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_StructSMG.h: sidl_header.h
 bHYPRE_StructSMG.h: bHYPRE_MPICommunicator.h
 bHYPRE_StructSMG.h: bHYPRE_Operator.h
+bHYPRE_StructSMG.h: bHYPRE_StructMatrix.h
 bHYPRE_StructSMG.h: bHYPRE_Vector.h
 bHYPRE_StructSMG.h: sidl_BaseInterface.h
 bHYPRE_StructSMG.h: sidl_ClassInfo.h

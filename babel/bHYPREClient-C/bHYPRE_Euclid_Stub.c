@@ -230,7 +230,7 @@ bHYPRE_Euclid_getClassInfo(
 bHYPRE_Euclid
 bHYPRE_Euclid_Create(
   /* in */ bHYPRE_MPICommunicator mpi_comm,
-  /* in */ bHYPRE_Operator A)
+  /* in */ bHYPRE_IJParCSRMatrix A)
 {
   return (_getSEPV()->f_Create)(
     mpi_comm,
@@ -612,7 +612,7 @@ bHYPRE_Euclid_Create__sexec(
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
   bHYPRE_MPICommunicator mpi_comm;
-  bHYPRE_Operator A;
+  bHYPRE_IJParCSRMatrix A;
   bHYPRE_Euclid _retval;
 
   /* unpack in and inout argments */

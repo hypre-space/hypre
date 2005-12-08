@@ -39,6 +39,9 @@ typedef struct bHYPRE_StructDiagScale__object* bHYPRE_StructDiagScale;
 #ifndef included_bHYPRE_Operator_h
 #include "bHYPRE_Operator.h"
 #endif
+#ifndef included_bHYPRE_StructMatrix_h
+#include "bHYPRE_StructMatrix.h"
+#endif
 #ifndef included_bHYPRE_Vector_h
 #include "bHYPRE_Vector.h"
 #endif
@@ -109,7 +112,7 @@ bHYPRE_StructDiagScale_getClassInfo(
 bHYPRE_StructDiagScale
 bHYPRE_StructDiagScale_Create(
   /* in */ bHYPRE_MPICommunicator mpi_comm,
-  /* in */ bHYPRE_Operator A);
+  /* in */ bHYPRE_StructMatrix A);
 
 /**
  * Set the MPI Communicator.

@@ -37,6 +37,9 @@ typedef struct bHYPRE_Euclid__object* bHYPRE_Euclid;
 #ifndef included_sidl_header_h
 #include "sidl_header.h"
 #endif
+#ifndef included_bHYPRE_IJParCSRMatrix_h
+#include "bHYPRE_IJParCSRMatrix.h"
+#endif
 #ifndef included_bHYPRE_MPICommunicator_h
 #include "bHYPRE_MPICommunicator.h"
 #endif
@@ -113,7 +116,7 @@ bHYPRE_Euclid_getClassInfo(
 bHYPRE_Euclid
 bHYPRE_Euclid_Create(
   /* in */ bHYPRE_MPICommunicator mpi_comm,
-  /* in */ bHYPRE_Operator A);
+  /* in */ bHYPRE_IJParCSRMatrix A);
 
 /**
  * Method:  SetParameters[]

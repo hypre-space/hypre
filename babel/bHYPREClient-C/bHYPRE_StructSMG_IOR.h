@@ -65,6 +65,8 @@ extern void bHYPRE_StructSMG__IOR_version(int32_t *major, int32_t *minor);
 
 struct bHYPRE_MPICommunicator__array;
 struct bHYPRE_MPICommunicator__object;
+struct bHYPRE_StructMatrix__array;
+struct bHYPRE_StructMatrix__object;
 struct bHYPRE_Vector__array;
 struct bHYPRE_Vector__object;
 struct sidl_BaseInterface__array;
@@ -89,7 +91,7 @@ struct bHYPRE_StructSMG__sepv {
   /* Methods introduced in bHYPRE.StructSMG-v1.0.0 */
   struct bHYPRE_StructSMG__object* (*f_Create)(
     /* in */ struct bHYPRE_MPICommunicator__object* mpi_comm,
-    /* in */ struct bHYPRE_Operator__object* A);
+    /* in */ struct bHYPRE_StructMatrix__object* A);
 };
 
 /*
@@ -243,6 +245,12 @@ struct bHYPRE_Solver__object*
   struct sidl_BaseInterface__object **_ex);
 char* skel_bHYPRE_StructSMG_fgetURL_bHYPRE_Solver(struct bHYPRE_Solver__object* 
   obj); 
+
+struct bHYPRE_StructMatrix__object* 
+  skel_bHYPRE_StructSMG_fconnect_bHYPRE_StructMatrix(char* url,
+  struct sidl_BaseInterface__object **_ex);
+char* skel_bHYPRE_StructSMG_fgetURL_bHYPRE_StructMatrix(struct 
+  bHYPRE_StructMatrix__object* obj); 
 
 struct bHYPRE_MPICommunicator__object* 
   skel_bHYPRE_StructSMG_fconnect_bHYPRE_MPICommunicator(char* url,

@@ -136,7 +136,7 @@ extern "C"
 bHYPRE_StructSMG
 impl_bHYPRE_StructSMG_Create(
   /* in */ bHYPRE_MPICommunicator mpi_comm,
-  /* in */ bHYPRE_Operator A)
+  /* in */ bHYPRE_StructMatrix A)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.StructSMG.Create) */
   /* Insert-Code-Here {bHYPRE.StructSMG.Create} (Create method) */
@@ -146,23 +146,13 @@ impl_bHYPRE_StructSMG_Create(
    HYPRE_StructSolver * Hsolver = &dummy;
    bHYPRE_StructSMG solver = bHYPRE_StructSMG__create();
    struct bHYPRE_StructSMG__data * data = bHYPRE_StructSMG__get_data( solver );
-   bHYPRE_StructMatrix Amat;
 
    data->comm = bHYPRE_MPICommunicator__get_data(mpi_comm)->mpi_comm;
    ierr += HYPRE_StructSMGCreate( (data->comm), Hsolver );
    hypre_assert( ierr==0 );
    data -> solver = *Hsolver;
 
-   if ( bHYPRE_Operator_queryInt( A, "bHYPRE.StructMatrix" ) )
-   {
-      Amat = bHYPRE_StructMatrix__cast( A );
-      bHYPRE_StructMatrix_deleteRef( Amat ); /* extra ref from queryInt */
-   }
-   else
-   {
-      hypre_assert( "Unrecognized operator type."==(char *)A );
-   }
-   data->matrix = Amat;
+   data->matrix = A;
    bHYPRE_StructMatrix_addRef( data->matrix );
 
    return solver;
@@ -1024,6 +1014,15 @@ struct bHYPRE_Solver__object*
 char * impl_bHYPRE_StructSMG_fgetURL_bHYPRE_Solver(struct 
   bHYPRE_Solver__object* obj) {
   return bHYPRE_Solver__getURL(obj);
+}
+struct bHYPRE_StructMatrix__object* 
+  impl_bHYPRE_StructSMG_fconnect_bHYPRE_StructMatrix(char* url,
+  sidl_BaseInterface *_ex) {
+  return bHYPRE_StructMatrix__connect(url, _ex);
+}
+char * impl_bHYPRE_StructSMG_fgetURL_bHYPRE_StructMatrix(struct 
+  bHYPRE_StructMatrix__object* obj) {
+  return bHYPRE_StructMatrix__getURL(obj);
 }
 struct bHYPRE_MPICommunicator__object* 
   impl_bHYPRE_StructSMG_fconnect_bHYPRE_MPICommunicator(char* url,

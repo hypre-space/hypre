@@ -39,6 +39,7 @@
 #include "bHYPRE_Euclid_IOR.h"
 #include "bHYPRE_MPICommunicator_IOR.h"
 #include "bHYPRE_Operator_IOR.h"
+#include "bHYPRE_IJParCSRMatrix_IOR.h"
 #include "sidl_ClassInfo_IOR.h"
 #include "bHYPRE_Vector_IOR.h"
 #include "sidl_BaseInterface_IOR.h"
@@ -349,13 +350,13 @@ SIDLFortran77Symbol(bhypre_euclid_create_f,BHYPRE_EUCLID_CREATE_F,bHYPRE_Euclid_
 {
   const struct bHYPRE_Euclid__sepv *_epv = _getSEPV();
   struct bHYPRE_MPICommunicator__object* _proxy_mpi_comm = NULL;
-  struct bHYPRE_Operator__object* _proxy_A = NULL;
+  struct bHYPRE_IJParCSRMatrix__object* _proxy_A = NULL;
   struct bHYPRE_Euclid__object* _proxy_retval = NULL;
   _proxy_mpi_comm =
     (struct bHYPRE_MPICommunicator__object*)
     (ptrdiff_t)(*mpi_comm);
   _proxy_A =
-    (struct bHYPRE_Operator__object*)
+    (struct bHYPRE_IJParCSRMatrix__object*)
     (ptrdiff_t)(*A);
   _proxy_retval = 
     (*(_epv->f_Create))(

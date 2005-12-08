@@ -530,6 +530,8 @@ impl_bHYPRE_Hybrid_Setup(
    bHYPRE_StructDiagScale StructDiagScale;
    bHYPRE_ParCSRDiagScale ParCSRDiagScale;
    bHYPRE_SStructDiagScale SStructDiagScale;
+   bHYPRE_IJParCSRMatrix bHIJ_A;
+   bHYPRE_StructMatrix bHS_A;
 
    ierr += bHYPRE_PreconditionedSolver_GetPreconditioner(
       data->krylov_solver_2, &precond_2 );
@@ -559,8 +561,13 @@ impl_bHYPRE_Hybrid_Setup(
    if ( bHYPRE_Vector_queryInt( b, "bHYPRE.StructVector" ) )
    {
       bHYPRE_Vector_deleteRef( b );  /* extra ref created by queryInt */
+
+      bHS_A = bHYPRE_StructMatrix__cast
+         ( bHYPRE_Operator_queryInt( data->operator, "bHYPRE.StructMatrix") );
+      bHYPRE_Operator_deleteRef( data->operator ); /* extra ref created by queryInt */
+
       StructDiagScale = bHYPRE_StructDiagScale_Create(
-         data->mpicomm, data->operator );
+         data->mpicomm, bHS_A );
       precond_1 = bHYPRE_Solver__cast( StructDiagScale );
       ierr += bHYPRE_PreconditionedSolver_SetPreconditioner(
          data->krylov_solver_1, precond_1 );
@@ -568,8 +575,13 @@ impl_bHYPRE_Hybrid_Setup(
    if ( bHYPRE_Vector_queryInt( b, "bHYPRE.IJParCSRVector" ) )
    {
       bHYPRE_Vector_deleteRef( b );  /* extra ref created by queryInt */
+
+      bHIJ_A = bHYPRE_IJParCSRMatrix__cast
+         ( bHYPRE_Operator_queryInt( data->operator, "bHYPRE.IJParCSRMatrix") );
+      bHYPRE_Operator_deleteRef( data->operator ); /* extra ref created by queryInt */
+
       ParCSRDiagScale = bHYPRE_ParCSRDiagScale_Create(
-         data->mpicomm, data->operator );
+         data->mpicomm, bHIJ_A );
       precond_1 = bHYPRE_Solver__cast( ParCSRDiagScale );
       ierr += bHYPRE_PreconditionedSolver_SetPreconditioner(
          data->krylov_solver_1, precond_1 );

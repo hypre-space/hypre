@@ -42,6 +42,9 @@ typedef struct bHYPRE_StructSMG__object* bHYPRE_StructSMG;
 #ifndef included_bHYPRE_Operator_h
 #include "bHYPRE_Operator.h"
 #endif
+#ifndef included_bHYPRE_StructMatrix_h
+#include "bHYPRE_StructMatrix.h"
+#endif
 #ifndef included_bHYPRE_Vector_h
 #include "bHYPRE_Vector.h"
 #endif
@@ -112,7 +115,7 @@ bHYPRE_StructSMG_getClassInfo(
 bHYPRE_StructSMG
 bHYPRE_StructSMG_Create(
   /* in */ bHYPRE_MPICommunicator mpi_comm,
-  /* in */ bHYPRE_Operator A);
+  /* in */ bHYPRE_StructMatrix A);
 
 /**
  * Set the MPI Communicator.

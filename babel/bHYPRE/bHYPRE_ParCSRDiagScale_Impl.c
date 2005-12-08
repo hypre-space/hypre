@@ -107,7 +107,7 @@ impl_bHYPRE_ParCSRDiagScale__dtor(
    struct bHYPRE_ParCSRDiagScale__data * data;
    data = bHYPRE_ParCSRDiagScale__get_data( self );
 
-   bHYPRE_Operator_deleteRef( data->matrix );
+   bHYPRE_IJParCSRMatrix_deleteRef( data->matrix );
    /* delete any nontrivial data components here */
    hypre_TFree( data );
 
@@ -127,7 +127,7 @@ extern "C"
 bHYPRE_ParCSRDiagScale
 impl_bHYPRE_ParCSRDiagScale_Create(
   /* in */ bHYPRE_MPICommunicator mpi_comm,
-  /* in */ bHYPRE_Operator A)
+  /* in */ bHYPRE_IJParCSRMatrix A)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.ParCSRDiagScale.Create) */
   /* Insert-Code-Here {bHYPRE.ParCSRDiagScale.Create} (Create method) */
@@ -137,7 +137,7 @@ impl_bHYPRE_ParCSRDiagScale_Create(
 
    data->comm = bHYPRE_MPICommunicator__get_data(mpi_comm)->mpi_comm;
    data->matrix = A;
-   bHYPRE_Operator_addRef( data->matrix );
+   bHYPRE_IJParCSRMatrix_addRef( data->matrix );
 
    return solver;
 
@@ -449,13 +449,12 @@ impl_bHYPRE_ParCSRDiagScale_Apply(
    HYPRE_Solver dummy;
    HYPRE_Solver * solver = &dummy;
    struct bHYPRE_ParCSRDiagScale__data * data;
-   bHYPRE_Operator mat;
    /* not used HYPRE_Matrix HYPRE_A;*/
-   bHYPRE_IJParCSRMatrix bHYPREP_A;
+   bHYPRE_IJParCSRMatrix bH_A;
    HYPRE_ParCSRMatrix AA;
    HYPRE_IJMatrix ij_A;
    /* not used HYPRE_Vector HYPRE_x, HYPRE_b;*/
-   bHYPRE_IJParCSRVector bHYPREP_b, bHYPREP_x;
+   bHYPRE_IJParCSRVector bH_b, bH_x;
    HYPRE_ParVector bb, xx;
    HYPRE_IJVector ij_b, ij_x;
    struct bHYPRE_IJParCSRMatrix__data * dataA;
@@ -466,9 +465,8 @@ impl_bHYPRE_ParCSRDiagScale_Apply(
    comm = data->comm;
    /* SetCommunicator should have been called earlier */
    hypre_assert( comm != MPI_COMM_NULL );
-   mat = data->matrix;
-   /* SetOperator should have been called earlier */
-   hypre_assert( mat != NULL );
+   bH_A = data->matrix;
+   hypre_assert( bH_A != NULL );
 
    if ( *x==NULL )
    {  /* If vector not supplied, make one...*/
@@ -479,28 +477,25 @@ impl_bHYPRE_ParCSRDiagScale_Apply(
       bHYPRE_Vector_Clear( *x );
    }
 
-   bHYPREP_b = bHYPRE_IJParCSRVector__cast
+   bH_b = bHYPRE_IJParCSRVector__cast
       ( bHYPRE_Vector_queryInt( b, "bHYPRE.IJParCSRVector") );
-   datab = bHYPRE_IJParCSRVector__get_data( bHYPREP_b );
-   bHYPRE_IJParCSRVector_deleteRef( bHYPREP_b ); /* extra reference from queryInt */
+   datab = bHYPRE_IJParCSRVector__get_data( bH_b );
+   bHYPRE_IJParCSRVector_deleteRef( bH_b ); /* extra reference from queryInt */
    ij_b = datab -> ij_b;
    ierr += HYPRE_IJVectorGetObject( ij_b, &objectb );
    bb = (HYPRE_ParVector) objectb;
    /* not used HYPRE_b = (HYPRE_Vector) bb;*/
 
-   bHYPREP_x = bHYPRE_IJParCSRVector__cast
+   bH_x = bHYPRE_IJParCSRVector__cast
       ( bHYPRE_Vector_queryInt( *x, "bHYPRE.IJParCSRVector") );
-   datax = bHYPRE_IJParCSRVector__get_data( bHYPREP_x );
+   datax = bHYPRE_IJParCSRVector__get_data( bH_x );
    ij_x = datax -> ij_b;
-   bHYPRE_IJParCSRVector_deleteRef( bHYPREP_x ); /* extra reference from queryInt */
+   bHYPRE_IJParCSRVector_deleteRef( bH_x ); /* extra reference from queryInt */
    ierr += HYPRE_IJVectorGetObject( ij_x, &objectx );
    xx = (HYPRE_ParVector) objectx;
    /* not used HYPRE_b = (HYPRE_Vector) xx;*/
 
-   bHYPREP_A = bHYPRE_IJParCSRMatrix__cast
-      ( bHYPRE_Operator_queryInt( mat, "bHYPRE.IJParCSRMatrix") );
-   dataA = bHYPRE_IJParCSRMatrix__get_data( bHYPREP_A );
-   bHYPRE_IJParCSRMatrix_deleteRef( bHYPREP_A ); /* extra reference from queryInt */
+   dataA = bHYPRE_IJParCSRMatrix__get_data( bH_A );
    ij_A = dataA -> ij_A;
    ierr += HYPRE_IJMatrixGetObject( ij_A, &objectA );
    AA = (HYPRE_ParCSRMatrix) objectA;
@@ -562,10 +557,16 @@ impl_bHYPRE_ParCSRDiagScale_SetOperator(
 
    int ierr = 0;
    struct bHYPRE_ParCSRDiagScale__data * data;
+   bHYPRE_IJParCSRMatrix bH_A;
+
+   bH_A = bHYPRE_IJParCSRMatrix__cast
+      ( bHYPRE_Operator_queryInt( A, "bHYPRE.IJParCSRMatrix") );
+   bHYPRE_Operator_deleteRef( A ); /* extra ref created by queryInt */
+   hypre_assert( bH_A!=NULL );
 
    data = bHYPRE_ParCSRDiagScale__get_data( self );
-   data->matrix = A;
-   bHYPRE_Operator_addRef( data->matrix );
+   data->matrix = bH_A;
+   bHYPRE_IJParCSRMatrix_addRef( data->matrix );
 
    return ierr;
 
@@ -765,6 +766,15 @@ struct bHYPRE_Operator__object*
 char * impl_bHYPRE_ParCSRDiagScale_fgetURL_bHYPRE_Operator(struct 
   bHYPRE_Operator__object* obj) {
   return bHYPRE_Operator__getURL(obj);
+}
+struct bHYPRE_IJParCSRMatrix__object* 
+  impl_bHYPRE_ParCSRDiagScale_fconnect_bHYPRE_IJParCSRMatrix(char* url,
+  sidl_BaseInterface *_ex) {
+  return bHYPRE_IJParCSRMatrix__connect(url, _ex);
+}
+char * impl_bHYPRE_ParCSRDiagScale_fgetURL_bHYPRE_IJParCSRMatrix(struct 
+  bHYPRE_IJParCSRMatrix__object* obj) {
+  return bHYPRE_IJParCSRMatrix__getURL(obj);
 }
 struct sidl_ClassInfo__object* 
   impl_bHYPRE_ParCSRDiagScale_fconnect_sidl_ClassInfo(char* url,

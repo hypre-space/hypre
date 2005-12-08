@@ -231,7 +231,7 @@ bHYPRE_ParCSRDiagScale_getClassInfo(
 bHYPRE_ParCSRDiagScale
 bHYPRE_ParCSRDiagScale_Create(
   /* in */ bHYPRE_MPICommunicator mpi_comm,
-  /* in */ bHYPRE_Operator A)
+  /* in */ bHYPRE_IJParCSRMatrix A)
 {
   return (_getSEPV()->f_Create)(
     mpi_comm,
@@ -597,7 +597,7 @@ bHYPRE_ParCSRDiagScale_Create__sexec(
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
   bHYPRE_MPICommunicator mpi_comm;
-  bHYPRE_Operator A;
+  bHYPRE_IJParCSRMatrix A;
   bHYPRE_ParCSRDiagScale _retval;
 
   /* unpack in and inout argments */
