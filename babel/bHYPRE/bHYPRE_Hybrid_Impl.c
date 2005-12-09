@@ -542,7 +542,10 @@ impl_bHYPRE_Hybrid_Setup(
       if ( bHYPRE_Vector_queryInt( b, "bHYPRE_StructVector" ) )
       {
          bHYPRE_Vector_deleteRef( b );  /* extra ref created by queryInt */
-         SMG = bHYPRE_StructSMG_Create( data->mpicomm, data->operator );
+         bHS_A = bHYPRE_StructMatrix__cast
+            ( bHYPRE_Operator_queryInt( data->operator, "bHYPRE.StructMatrix") );
+         bHYPRE_Operator_deleteRef( data->operator ); /* extra ref created by queryInt */
+         SMG = bHYPRE_StructSMG_Create( data->mpicomm, bHS_A );
          precond_2 = bHYPRE_Solver__cast( SMG );
          ierr += bHYPRE_PreconditionedSolver_SetPreconditioner(
             data->krylov_solver_2, precond_2 );
