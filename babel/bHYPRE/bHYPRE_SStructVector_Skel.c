@@ -133,8 +133,7 @@ impl_bHYPRE_SStructVector_SetValues(
   /* in */ int32_t* index,
   /* in */ int32_t dim,
   /* in */ int32_t var,
-  /* in */ double* values,
-  /* in */ int32_t one);
+  /* in */ double value);
 
 extern
 int32_t
@@ -156,8 +155,7 @@ impl_bHYPRE_SStructVector_AddToValues(
   /* in */ int32_t* index,
   /* in */ int32_t dim,
   /* in */ int32_t var,
-  /* in */ double* values,
-  /* in */ int32_t one);
+  /* in */ double value);
 
 extern
 int32_t
@@ -309,16 +307,12 @@ skel_bHYPRE_SStructVector_SetValues(
   /* in */ int32_t part,
   /* in */ struct sidl_int__array* index,
   /* in */ int32_t var,
-/* in */ struct sidl_double__array* values)
+/* in */ double value)
 {
   int32_t _return;
   struct sidl_int__array* index_proxy = sidl_int__array_ensure(index, 1,
     sidl_column_major_order);
   int32_t* index_tmp = index_proxy->d_firstElement;
-  struct sidl_double__array* values_proxy = sidl_double__array_ensure(values, 1,
-    sidl_column_major_order);
-  double* values_tmp = values_proxy->d_firstElement;
-  int32_t one = sidlLength(values_proxy,0);
   int32_t dim = sidlLength(index_proxy,0);
   _return =
     impl_bHYPRE_SStructVector_SetValues(
@@ -327,8 +321,7 @@ skel_bHYPRE_SStructVector_SetValues(
       index_tmp,
       dim,
       var,
-      values_tmp,
-      one);
+      value);
   return _return;
 }
 
@@ -372,16 +365,12 @@ skel_bHYPRE_SStructVector_AddToValues(
   /* in */ int32_t part,
   /* in */ struct sidl_int__array* index,
   /* in */ int32_t var,
-/* in */ struct sidl_double__array* values)
+/* in */ double value)
 {
   int32_t _return;
   struct sidl_int__array* index_proxy = sidl_int__array_ensure(index, 1,
     sidl_column_major_order);
   int32_t* index_tmp = index_proxy->d_firstElement;
-  struct sidl_double__array* values_proxy = sidl_double__array_ensure(values, 1,
-    sidl_column_major_order);
-  double* values_tmp = values_proxy->d_firstElement;
-  int32_t one = sidlLength(values_proxy,0);
   int32_t dim = sidlLength(index_proxy,0);
   _return =
     impl_bHYPRE_SStructVector_AddToValues(
@@ -390,8 +379,7 @@ skel_bHYPRE_SStructVector_AddToValues(
       index_tmp,
       dim,
       var,
-      values_tmp,
-      one);
+      value);
   return _return;
 }
 

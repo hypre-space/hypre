@@ -339,27 +339,20 @@ bHYPRE_SStructParCSRVector_SetValues(
   /* in */ int32_t* index,
   /* in */ int32_t dim,
   /* in */ int32_t var,
-  /* in */ double* values,
-  /* in */ int32_t one)
+  /* in */ double value)
 {
   int32_t index_lower[1], index_upper[1], index_stride[1]; 
   struct sidl_int__array index_real;
   struct sidl_int__array*index_tmp = &index_real;
-  int32_t values_lower[1], values_upper[1], values_stride[1]; 
-  struct sidl_double__array values_real;
-  struct sidl_double__array*values_tmp = &values_real;
   index_upper[0] = dim-1;
   sidl_int__array_init(index, index_tmp, 1, index_lower, index_upper,
     index_stride);
-  values_upper[0] = one-1;
-  sidl_double__array_init(values, values_tmp, 1, values_lower, values_upper,
-    values_stride);
   return (*self->d_epv->f_SetValues)(
     self,
     part,
     index_tmp,
     var,
-    values_tmp);
+    value);
 }
 
 /*
@@ -433,27 +426,20 @@ bHYPRE_SStructParCSRVector_AddToValues(
   /* in */ int32_t* index,
   /* in */ int32_t dim,
   /* in */ int32_t var,
-  /* in */ double* values,
-  /* in */ int32_t one)
+  /* in */ double value)
 {
   int32_t index_lower[1], index_upper[1], index_stride[1]; 
   struct sidl_int__array index_real;
   struct sidl_int__array*index_tmp = &index_real;
-  int32_t values_lower[1], values_upper[1], values_stride[1]; 
-  struct sidl_double__array values_real;
-  struct sidl_double__array*values_tmp = &values_real;
   index_upper[0] = dim-1;
   sidl_int__array_init(index, index_tmp, 1, index_lower, index_upper,
     index_stride);
-  values_upper[0] = one-1;
-  sidl_double__array_init(values, values_tmp, 1, values_lower, values_upper,
-    values_stride);
   return (*self->d_epv->f_AddToValues)(
     self,
     part,
     index_tmp,
     var,
-    values_tmp);
+    value);
 }
 
 /*
@@ -1628,7 +1614,7 @@ remote_bHYPRE_SStructParCSRVector_SetValues(
   /* in */ int32_t part,
   /* in */ struct sidl_int__array* index,
   /* in */ int32_t var,
-  /* in */ struct sidl_double__array* values)
+  /* in */ double value)
 {
   sidl_BaseInterface _ex = NULL;
   sidl_BaseInterface *_ex2 =&_ex;
@@ -1642,6 +1628,7 @@ remote_bHYPRE_SStructParCSRVector_SetValues(
   /* pack in and inout arguments */
   sidl_rmi_Invocation_packInt( _inv, "part", part, _ex2);
   sidl_rmi_Invocation_packInt( _inv, "var", var, _ex2);
+  sidl_rmi_Invocation_packDouble( _inv, "value", value, _ex2);
 
   /* send actual RMI request */
   _rsvp = sidl_rmi_Invocation_invokeMethod(_inv,_ex2);
@@ -1703,7 +1690,7 @@ remote_bHYPRE_SStructParCSRVector_AddToValues(
   /* in */ int32_t part,
   /* in */ struct sidl_int__array* index,
   /* in */ int32_t var,
-  /* in */ struct sidl_double__array* values)
+  /* in */ double value)
 {
   sidl_BaseInterface _ex = NULL;
   sidl_BaseInterface *_ex2 =&_ex;
@@ -1717,6 +1704,7 @@ remote_bHYPRE_SStructParCSRVector_AddToValues(
   /* pack in and inout arguments */
   sidl_rmi_Invocation_packInt( _inv, "part", part, _ex2);
   sidl_rmi_Invocation_packInt( _inv, "var", var, _ex2);
+  sidl_rmi_Invocation_packDouble( _inv, "value", value, _ex2);
 
   /* send actual RMI request */
   _rsvp = sidl_rmi_Invocation_invokeMethod(_inv,_ex2);
@@ -2256,12 +2244,12 @@ static void bHYPRE_SStructParCSRVector__init_remote_epv(void)
   e2->f_SetGrid         = (int32_t (*)(void*,
     struct bHYPRE_SStructGrid__object*)) epv->f_SetGrid;
   e2->f_SetValues       = (int32_t (*)(void*,int32_t,struct sidl_int__array*,
-    int32_t,struct sidl_double__array*)) epv->f_SetValues;
+    int32_t,double)) epv->f_SetValues;
   e2->f_SetBoxValues    = (int32_t (*)(void*,int32_t,struct sidl_int__array*,
     struct sidl_int__array*,int32_t,
     struct sidl_double__array*)) epv->f_SetBoxValues;
   e2->f_AddToValues     = (int32_t (*)(void*,int32_t,struct sidl_int__array*,
-    int32_t,struct sidl_double__array*)) epv->f_AddToValues;
+    int32_t,double)) epv->f_AddToValues;
   e2->f_AddToBoxValues  = (int32_t (*)(void*,int32_t,struct sidl_int__array*,
     struct sidl_int__array*,int32_t,
     struct sidl_double__array*)) epv->f_AddToBoxValues;

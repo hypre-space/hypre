@@ -300,7 +300,7 @@ C
 C       
 
         subroutine bHYPRE_SStructVector_SetValues_f(self, part, index,
-     &     var, values, retval)
+     &     var, value, retval)
         implicit none
 C       in bHYPRE.SStructVector self
         integer*8 self
@@ -308,12 +308,12 @@ C       in int part
         integer*4 part
 C       in int var
         integer*4 var
+C       in double value
+        double precision value
 C       out int retval
         integer*4 retval
 C       in rarray<int> index(dim)
         integer*4 index(0:dim-1)
-C       in rarray<double> values(one)
-        double precision values(0:one-1)
         end
 
 
@@ -364,7 +364,7 @@ C
 C       
 
         subroutine bHYPRE_SStructVector_AddToValues_f(self, part, index,
-     &     var, values, retval)
+     &     var, value, retval)
         implicit none
 C       in bHYPRE.SStructVector self
         integer*8 self
@@ -372,12 +372,12 @@ C       in int part
         integer*4 part
 C       in int var
         integer*4 var
+C       in double value
+        double precision value
 C       out int retval
         integer*4 retval
 C       in rarray<int> index(dim)
         integer*4 index(0:dim-1)
-C       in rarray<double> values(one)
-        double precision values(0:one-1)
         end
 
 

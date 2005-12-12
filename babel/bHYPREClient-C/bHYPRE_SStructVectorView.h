@@ -128,8 +128,7 @@ bHYPRE_SStructVectorView_SetValues(
   /* in */ int32_t* index,
   /* in */ int32_t dim,
   /* in */ int32_t var,
-  /* in */ double* values,
-  /* in */ int32_t one);
+  /* in */ double value);
 
 /**
  * Set vector coefficients a box at a time.
@@ -173,8 +172,7 @@ bHYPRE_SStructVectorView_AddToValues(
   /* in */ int32_t* index,
   /* in */ int32_t dim,
   /* in */ int32_t var,
-  /* in */ double* values,
-  /* in */ int32_t one);
+  /* in */ double value);
 
 /**
  * Set vector coefficients a box at a time.

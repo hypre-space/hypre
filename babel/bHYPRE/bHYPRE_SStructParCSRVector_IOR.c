@@ -368,13 +368,14 @@ bHYPRE_SStructParCSRVector_SetValues__exec(
   int32_t part;
   struct sidl_int__array* index;
   int32_t var;
-  struct sidl_double__array* values;
+  double value;
   int32_t _retval;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
   sidl_io_Deserializer_unpackInt( inArgs, "part", &part, _ex2);
   sidl_io_Deserializer_unpackInt( inArgs, "var", &var, _ex2);
+  sidl_io_Deserializer_unpackDouble( inArgs, "value", &value, _ex2);
 
   /* make the call */
   _retval = (self->d_epv->f_SetValues)(
@@ -382,7 +383,7 @@ bHYPRE_SStructParCSRVector_SetValues__exec(
     part,
     index,
     var,
-    values);
+    value);
 
   /* pack return value */
   sidl_io_Serializer_packInt( outArgs, "_retval", _retval, _ex2);
@@ -434,13 +435,14 @@ bHYPRE_SStructParCSRVector_AddToValues__exec(
   int32_t part;
   struct sidl_int__array* index;
   int32_t var;
-  struct sidl_double__array* values;
+  double value;
   int32_t _retval;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
   sidl_io_Deserializer_unpackInt( inArgs, "part", &part, _ex2);
   sidl_io_Deserializer_unpackInt( inArgs, "var", &var, _ex2);
+  sidl_io_Deserializer_unpackDouble( inArgs, "value", &value, _ex2);
 
   /* make the call */
   _retval = (self->d_epv->f_AddToValues)(
@@ -448,7 +450,7 @@ bHYPRE_SStructParCSRVector_AddToValues__exec(
     part,
     index,
     var,
-    values);
+    value);
 
   /* pack return value */
   sidl_io_Serializer_packInt( outArgs, "_retval", _retval, _ex2);
@@ -1041,14 +1043,12 @@ static void bHYPRE_SStructParCSRVector__init_epv(
   e2->f_SetGrid             = (int32_t (*)(void*,
     struct bHYPRE_SStructGrid__object*)) epv->f_SetGrid;
   e2->f_SetValues           = (int32_t (*)(void*,int32_t,
-    struct sidl_int__array*,int32_t,
-    struct sidl_double__array*)) epv->f_SetValues;
+    struct sidl_int__array*,int32_t,double)) epv->f_SetValues;
   e2->f_SetBoxValues        = (int32_t (*)(void*,int32_t,
     struct sidl_int__array*,struct sidl_int__array*,int32_t,
     struct sidl_double__array*)) epv->f_SetBoxValues;
   e2->f_AddToValues         = (int32_t (*)(void*,int32_t,
-    struct sidl_int__array*,int32_t,
-    struct sidl_double__array*)) epv->f_AddToValues;
+    struct sidl_int__array*,int32_t,double)) epv->f_AddToValues;
   e2->f_AddToBoxValues      = (int32_t (*)(void*,int32_t,
     struct sidl_int__array*,struct sidl_int__array*,int32_t,
     struct sidl_double__array*)) epv->f_AddToBoxValues;

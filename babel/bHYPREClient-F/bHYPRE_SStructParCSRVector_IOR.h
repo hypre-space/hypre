@@ -163,7 +163,7 @@ struct bHYPRE_SStructParCSRVector__epv {
     /* in */ int32_t part,
     /* in */ struct sidl_int__array* index,
     /* in */ int32_t var,
-    /* in */ struct sidl_double__array* values);
+    /* in */ double value);
   int32_t (*f_SetBoxValues)(
     /* in */ struct bHYPRE_SStructParCSRVector__object* self,
     /* in */ int32_t part,
@@ -176,7 +176,7 @@ struct bHYPRE_SStructParCSRVector__epv {
     /* in */ int32_t part,
     /* in */ struct sidl_int__array* index,
     /* in */ int32_t var,
-    /* in */ struct sidl_double__array* values);
+    /* in */ double value);
   int32_t (*f_AddToBoxValues)(
     /* in */ struct bHYPRE_SStructParCSRVector__object* self,
     /* in */ int32_t part,

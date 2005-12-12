@@ -100,7 +100,7 @@ struct bHYPRE_SStructVectorView__epv {
     /* in */ int32_t part,
     /* in */ struct sidl_int__array* index,
     /* in */ int32_t var,
-    /* in */ struct sidl_double__array* values);
+    /* in */ double value);
   int32_t (*f_SetBoxValues)(
     /* in */ void* self,
     /* in */ int32_t part,
@@ -113,7 +113,7 @@ struct bHYPRE_SStructVectorView__epv {
     /* in */ int32_t part,
     /* in */ struct sidl_int__array* index,
     /* in */ int32_t var,
-    /* in */ struct sidl_double__array* values);
+    /* in */ double value);
   int32_t (*f_AddToBoxValues)(
     /* in */ void* self,
     /* in */ int32_t part,
@@ -243,7 +243,7 @@ struct bHYPRE__SStructVectorView__epv {
     /* in */ int32_t part,
     /* in */ struct sidl_int__array* index,
     /* in */ int32_t var,
-    /* in */ struct sidl_double__array* values);
+    /* in */ double value);
   int32_t (*f_SetBoxValues)(
     /* in */ struct bHYPRE__SStructVectorView__object* self,
     /* in */ int32_t part,
@@ -256,7 +256,7 @@ struct bHYPRE__SStructVectorView__epv {
     /* in */ int32_t part,
     /* in */ struct sidl_int__array* index,
     /* in */ int32_t var,
-    /* in */ struct sidl_double__array* values);
+    /* in */ double value);
   int32_t (*f_AddToBoxValues)(
     /* in */ struct bHYPRE__SStructVectorView__object* self,
     /* in */ int32_t part,

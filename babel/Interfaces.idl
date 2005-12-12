@@ -480,8 +480,7 @@ package bHYPRE version 1.0.0
                      in rarray<int,1> index(dim),
                      in int dim,
                      in int var,
-                     in rarray<double,1> values(one),
-                     in int one /* =1, look for a way to avoid this <<< */ );
+                     in double value );
       
       /**
        * Set vector coefficients a box at a time.
@@ -517,8 +516,7 @@ package bHYPRE version 1.0.0
                        in rarray<int,1> index(dim),
                        in int dim,
                        in int var,
-                       in rarray<double,1> values(one),
-                       in int one /* =1, look for a way to avoid this <<< */ );
+                       in double value );
       
       /**
        * Set vector coefficients a box at a time.

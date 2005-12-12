@@ -407,8 +407,7 @@ impl_bHYPRE_SStructVector_SetValues(
   /* in */ int32_t* index,
   /* in */ int32_t dim,
   /* in */ int32_t var,
-  /* in */ double* values,
-  /* in */ int32_t one)
+  /* in */ double value)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructVector.SetValues) */
   /* Insert the implementation of the SetValues method here... */
@@ -421,7 +420,7 @@ impl_bHYPRE_SStructVector_SetValues(
 
    ierr += HYPRE_SStructVectorSetValues
       ( Hy, part, index, var,
-        values );
+        &value );
 
    return ierr;
 
@@ -502,8 +501,7 @@ impl_bHYPRE_SStructVector_AddToValues(
   /* in */ int32_t* index,
   /* in */ int32_t dim,
   /* in */ int32_t var,
-  /* in */ double* values,
-  /* in */ int32_t one)
+  /* in */ double value)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructVector.AddToValues) */
   /* Insert the implementation of the AddToValues method here... */
@@ -515,7 +513,7 @@ impl_bHYPRE_SStructVector_AddToValues(
    Hy = data -> vec;
 
    ierr += HYPRE_SStructVectorAddToValues
-      ( Hy, part, index, var, values );
+      ( Hy, part, index, var, &value );
 
    return ierr;
 
