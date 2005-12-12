@@ -210,6 +210,10 @@ hypre_CSRBlockMatrixConvertToCSRMatrix( hypre_CSRBlockMatrix *matrix )
 
 /*--------------------------------------------------------------------------
  * hypre_CSRBlockMatrixConvertFromCSRMatrix
+
+ * this doesn't properly convert the parcsr off_diag matrices - AB 12/7/05
+   (because here we assume the matrix is square - we don't check what the
+    number of columns should be ) - it can only be used for the diag part
  *--------------------------------------------------------------------------*/
 
 hypre_CSRBlockMatrix *
