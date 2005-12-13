@@ -14,6 +14,7 @@
 #include "bHYPRE_StructPFMG.h"
 #include "bHYPRE_IdentitySolver.h"
 #include "bHYPRE_StructDiagScale.h"
+#include "bHYPRE_StructJacobi.h"
 #include "bHYPRE_PCG.h"
 #include "bHYPRE_Hybrid.h"
 #include "bHYPRE_StructGrid.h"
@@ -75,7 +76,7 @@ main( int   argc,
 /* not currently used   bHYPRE_Solver  solver;*/
    bHYPRE_Solver  precond;
    bHYPRE_PreconditionedSolver  krylov_solver;
-/*   bHYPRE_StructJacobi  solver_SJ;*/
+   bHYPRE_StructJacobi  solver_SJ;
    bHYPRE_StructSMG solver_SMG;
    bHYPRE_StructPFMG solver_PFMG;
    bHYPRE_IdentitySolver solver_Id;
@@ -300,7 +301,7 @@ main( int   argc,
       printf("                         12*- CG with SparseMSG precond\n");
       printf("                         13 - CG with PFMG precond, constant coefficients\n");
       printf("                         14 - CG with PFMG precond, const.coeff.,variable diagonal\n");
-      printf("                         17*- CG with 2-step Jacobi\n");
+      printf("                         17 - CG with 2-step Jacobi\n");
       printf("                         18 - CG with diagonal scaling\n");
       printf("                         19 - CG\n");
       printf("                         20 - Hybrid with SMG precond\n");
@@ -967,36 +968,16 @@ main( int   argc,
                                    precond);
 #endif
       }
-/* not implemented yet (JfP jan2000) ... */
       else if (solver_id == 17)
       {
-         hypre_assert( "solver not implemented"==0 );
-#if 0
          /* use two-step Jacobi as preconditioner */
-         HYPRE_StructJacobiCreate(MPI_COMM_WORLD, &precond);
-         HYPRE_StructJacobiSetMaxIter(precond, 2);
-         HYPRE_StructJacobiSetTol(precond, 0.0);
-         HYPRE_StructJacobiSetZeroGuess(precond);
-         HYPRE_StructPCGSetPrecond(solver,
-                                   HYPRE_StructJacobiSolve,
-                                   HYPRE_StructJacobiSetup,
-                                   precond);
-#endif
-      }
-      else if (solver_id == 17)
-      {
-         hypre_assert( "solver 17 not implemented"==0 );
-#if 0
-         /* use two-step Jacobi as preconditioner */
-         solver_SJ = bHYPRE_StructJacobi_Constructor( comm );
-         precond = (bHYPRE_Solver) bHYPRE_StructJacobi_castTo
-            ( solver_SJ, "bHYPRE.Solver" ); 
-         bHYPRE_StructJacobi_SetDoubleParameter( solver_SJ, "Tol", 0.0 );
-         bHYPRE_StructJacobi_SetIntParameter( solver_SJ, "MaxIter", 2 );
-         bHYPRE_StructJacobi_SetIntParameter( solver_SJ, "ZeroGuess", 0 );
-      
-         bHYPRE_StructJacobi_Setup( solver_SJ, A_LO, b_V, x_V );
-#endif
+         solver_SJ = bHYPRE_StructJacobi_Create( bmpicomm, A_b );
+         ierr += bHYPRE_StructJacobi_SetIntParameter( solver_SJ, "MaxIter", 2 );
+         ierr += bHYPRE_StructJacobi_SetDoubleParameter( solver_SJ, "Tol", 0.0 );
+         ierr += bHYPRE_StructJacobi_SetIntParameter( solver_SJ, "ZeroGuess", 1 );
+         hypre_assert( ierr==0 );
+         precond = (bHYPRE_Solver) bHYPRE_StructJacobi__cast2
+            ( solver_SJ, "bHYPRE.Solver" );
       }
       else if ( solver_id == 18 )
       {
@@ -1062,8 +1043,7 @@ main( int   argc,
       }
       else if (solver_id == 17)
       {
-         hypre_assert( "solver not implemented"==0 );
-         /*bHYPRE_StructJacobi_destructor( solver_SJ );*/
+         bHYPRE_StructJacobi_deleteRef( solver_SJ );
       }
       else if ( solver_id == 18 )
       {
