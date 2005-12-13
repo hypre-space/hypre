@@ -1505,10 +1505,6 @@ main( int   argc,
       HYPRE_IJVectorPrint(ij_b, "IJ.out.b");
       HYPRE_IJVectorPrint(ij_x, "IJ.out.x0");
 
-      HYPRE_ParCSRMatrixPrint(parcsr_A, "parcsr.A.out");  
-      
-
-
    }
 
    /*-----------------------------------------------------------
