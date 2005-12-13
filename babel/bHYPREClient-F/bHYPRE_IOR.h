@@ -137,6 +137,9 @@
 #ifndef included_bHYPRE_StructGrid_IOR_h
 #include "bHYPRE_StructGrid_IOR.h"
 #endif
+#ifndef included_bHYPRE_StructJacobi_IOR_h
+#include "bHYPRE_StructJacobi_IOR.h"
+#endif
 #ifndef included_bHYPRE_StructMatrix_IOR_h
 #include "bHYPRE_StructMatrix_IOR.h"
 #endif

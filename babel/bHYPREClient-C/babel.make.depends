@@ -129,6 +129,7 @@ bHYPRE_IOR.h: bHYPRE_SStruct_MatrixVectorView_IOR.h
 bHYPRE_IOR.h: bHYPRE_Solver_IOR.h
 bHYPRE_IOR.h: bHYPRE_StructDiagScale_IOR.h
 bHYPRE_IOR.h: bHYPRE_StructGrid_IOR.h
+bHYPRE_IOR.h: bHYPRE_StructJacobi_IOR.h
 bHYPRE_IOR.h: bHYPRE_StructMatrix_IOR.h
 bHYPRE_IOR.h: bHYPRE_StructMatrixView_IOR.h
 bHYPRE_IOR.h: bHYPRE_StructPFMG_IOR.h
@@ -313,6 +314,12 @@ bHYPRE_StructGrid_IOR.h: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_StructGrid_IOR.h: sidl_header.h
 bHYPRE_StructGrid_IOR.h: sidl_BaseClass_IOR.h
 
+bHYPRE_StructJacobi_IOR.h: /home/painter/linear_solvers/babel/Interfaces.idl
+bHYPRE_StructJacobi_IOR.h: sidl_header.h
+bHYPRE_StructJacobi_IOR.h: bHYPRE_Operator_IOR.h
+bHYPRE_StructJacobi_IOR.h: bHYPRE_Solver_IOR.h
+bHYPRE_StructJacobi_IOR.h: sidl_BaseClass_IOR.h
+
 bHYPRE_StructMatrixView_IOR.h:                                                \
   /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_StructMatrixView_IOR.h: sidl_header.h
@@ -408,6 +415,7 @@ bHYPRE.h: bHYPRE_SStruct_MatrixVectorView.h
 bHYPRE.h: bHYPRE_Solver.h
 bHYPRE.h: bHYPRE_StructDiagScale.h
 bHYPRE.h: bHYPRE_StructGrid.h
+bHYPRE.h: bHYPRE_StructJacobi.h
 bHYPRE.h: bHYPRE_StructMatrix.h
 bHYPRE.h: bHYPRE_StructMatrixView.h
 bHYPRE.h: bHYPRE_StructPFMG.h
@@ -795,6 +803,17 @@ bHYPRE_StructGrid.h: sidl_BaseInterface.h
 bHYPRE_StructGrid.h: sidl_ClassInfo.h
 bHYPRE_StructGrid.h: sidl_io_Serializer.h
 bHYPRE_StructGrid.h: sidl_io_Deserializer.h
+
+bHYPRE_StructJacobi.h: /home/painter/linear_solvers/babel/Interfaces.idl
+bHYPRE_StructJacobi.h: sidl_header.h
+bHYPRE_StructJacobi.h: bHYPRE_MPICommunicator.h
+bHYPRE_StructJacobi.h: bHYPRE_Operator.h
+bHYPRE_StructJacobi.h: bHYPRE_StructMatrix.h
+bHYPRE_StructJacobi.h: bHYPRE_Vector.h
+bHYPRE_StructJacobi.h: sidl_BaseInterface.h
+bHYPRE_StructJacobi.h: sidl_ClassInfo.h
+bHYPRE_StructJacobi.h: sidl_io_Serializer.h
+bHYPRE_StructJacobi.h: sidl_io_Deserializer.h
 
 bHYPRE_StructMatrix.h: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_StructMatrix.h: sidl_header.h
@@ -1291,6 +1310,17 @@ bHYPRE_StructGrid_Stub.c: sidl_interface_IOR.h
 bHYPRE_StructGrid_Stub.c: sidl_BaseInterface_IOR.h
 bHYPRE_StructGrid_Stub.c: sidl_BaseClass.h
 bHYPRE_StructGrid_Stub.c: sidl_ClassInfo.h
+
+bHYPRE_StructJacobi_Stub.c: /home/painter/linear_solvers/babel/Interfaces.idl
+bHYPRE_StructJacobi_Stub.c: bHYPRE_StructJacobi.h
+bHYPRE_StructJacobi_Stub.c: bHYPRE_StructJacobi_IOR.h
+bHYPRE_StructJacobi_Stub.c: sidl_interface_IOR.h
+bHYPRE_StructJacobi_Stub.c: sidl_rmi_InstanceHandle.h
+bHYPRE_StructJacobi_Stub.c: sidl_rmi_ConnectRegistry.h
+bHYPRE_StructJacobi_Stub.c: sidl_interface_IOR.h
+bHYPRE_StructJacobi_Stub.c: sidl_BaseInterface_IOR.h
+bHYPRE_StructJacobi_Stub.c: sidl_BaseClass.h
+bHYPRE_StructJacobi_Stub.c: sidl_ClassInfo.h
 
 bHYPRE_StructMatrixView_Stub.c:                                               \
   /home/painter/linear_solvers/babel/Interfaces.idl

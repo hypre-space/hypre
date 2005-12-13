@@ -127,6 +127,9 @@
 #ifndef included_bHYPRE_StructGrid_h
 #include "bHYPRE_StructGrid.h"
 #endif
+#ifndef included_bHYPRE_StructJacobi_h
+#include "bHYPRE_StructJacobi.h"
+#endif
 #ifndef included_bHYPRE_StructMatrix_h
 #include "bHYPRE_StructMatrix.h"
 #endif

@@ -1656,6 +1656,22 @@ package bHYPRE version 1.0.0
 
 
    /**
+    * Objects of this type can be cast to Solver objects
+    * using the {\tt \_\_cast} methods.
+    *
+    * RDF: Documentation goes here.
+    *
+    * The StructJacobi solver requires a Struct matrix.
+    *
+    **/
+   class StructJacobi implements-all Solver
+   {
+      static StructJacobi Create( in MPICommunicator mpi_comm,
+                                  in StructMatrix A );
+   }
+
+
+   /**
     *
     * Documentation goes here.
     *
