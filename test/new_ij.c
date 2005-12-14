@@ -19,6 +19,8 @@
 #include "krylov.h"
 
 int BuildParFromFile (int argc , char *argv [], int arg_index , HYPRE_ParCSRMatrix *A_ptr );
+int BuildParRhsFromFile (int argc , char *argv [], int arg_index , HYPRE_ParVector *b_ptr );
+
 int BuildParLaplacian (int argc , char *argv [], int arg_index , HYPRE_ParCSRMatrix *A_ptr );
 int BuildParSysLaplacian (int argc , char *argv [], int arg_index , HYPRE_ParCSRMatrix *A_ptr );
 int BuildParDifConv (int argc , char *argv [], int arg_index , HYPRE_ParCSRMatrix *A_ptr );
@@ -297,6 +299,12 @@ main( int   argc,
       {
          arg_index++;
          build_rhs_type      = 1;
+         build_rhs_arg_index = arg_index;
+      }      
+      else if ( strcmp(argv[arg_index], "-rhsparcsrfile") == 0 )
+      {
+         arg_index++;
+         build_rhs_type      = 7;
          build_rhs_arg_index = arg_index;
       }      
       else if ( strcmp(argv[arg_index], "-rhsisone") == 0 )
@@ -728,6 +736,8 @@ main( int   argc,
       printf("rhs read from multiple files (IJ format)\n");
       printf("  -rhsfromonefile        : ");
       printf("rhs read from a single file (CSR format)\n");
+      printf("  -rhsparcsrfile        :  ");
+      printf("rhs read from multiple files (ParCSR format)\n");
       printf("  -rhsrand               : rhs is random vector\n");
       printf("  -rhsisone              : rhs is vector with unit components (default)\n");
       printf("  -xisone                : solution of all ones\n");
@@ -1132,14 +1142,61 @@ main( int   argc,
    }
    else if ( build_rhs_type == 1 )
    {
-      printf("build_rhs_type == 1 not currently implemented\n");
-      return(-1);
 
 #if 0
-/* RHS */
-      BuildRhsParFromOneFile(argc, argv, build_rhs_arg_index, part_b, &b);
+      printf("build_rhs_type == 1 not currently implemented\n");
+      return(-1);
+#else
+/* RHS - this has not been tested for multiple processors*/
+      BuildRhsParFromOneFile(argc, argv, build_rhs_arg_index, NULL, &b);
+
+      printf("  Initial guess is 0\n");
+
+      ij_b = NULL;
+
+      /* initial guess */ 
+
+      HYPRE_IJVectorCreate(MPI_COMM_WORLD, first_local_col, last_local_col, &ij_x);
+      HYPRE_IJVectorSetObjectType(ij_x, HYPRE_PARCSR);
+      HYPRE_IJVectorInitialize(ij_x);
+      
+      values = hypre_CTAlloc(double, local_num_cols);
+      for (i = 0; i < local_num_cols; i++)
+         values[i] = 0.;
+      HYPRE_IJVectorSetValues(ij_x, local_num_cols, NULL, values);
+      hypre_TFree(values);
+      
+      ierr = HYPRE_IJVectorGetObject( ij_x, &object );
+      x = (HYPRE_ParVector) object;
+
 #endif
    }
+ else if ( build_rhs_type == 7 )
+   {
+
+      /* rhs */ 
+      BuildParRhsFromFile(argc, argv, build_rhs_arg_index, &b);
+
+      printf("  Initial guess is 0\n");
+
+      ij_b = NULL;
+
+      /* initial guess */ 
+
+      HYPRE_IJVectorCreate(MPI_COMM_WORLD, first_local_col, last_local_col, &ij_x);
+      HYPRE_IJVectorSetObjectType(ij_x, HYPRE_PARCSR);
+      HYPRE_IJVectorInitialize(ij_x);
+      
+      values = hypre_CTAlloc(double, local_num_cols);
+      for (i = 0; i < local_num_cols; i++)
+         values[i] = 0.;
+      HYPRE_IJVectorSetValues(ij_x, local_num_cols, NULL, values);
+      hypre_TFree(values);
+      
+      ierr = HYPRE_IJVectorGetObject( ij_x, &object );
+      x = (HYPRE_ParVector) object;
+   }
+
    else if ( build_rhs_type == 2 )
    {
       if (myid == 0)
@@ -1495,6 +1552,8 @@ main( int   argc,
       }
    }
  
+
+ 
    /*-----------------------------------------------------------
     * Print out the system and initial guess
     *-----------------------------------------------------------*/
@@ -1502,7 +1561,7 @@ main( int   argc,
    if (print_system)
    {
       HYPRE_IJMatrixPrint(ij_A, "IJ.out.A");
-      HYPRE_IJVectorPrint(ij_b, "IJ.out.b");
+      if (!(build_rhs_type ==1 || build_rhs_type ==7)) HYPRE_IJVectorPrint(ij_b, "IJ.out.b");
       HYPRE_IJVectorPrint(ij_x, "IJ.out.x0");
 
    }
@@ -2641,8 +2700,8 @@ main( int   argc,
    /*-----------------------------------------------------------
     * Print the solution and other info
     *-----------------------------------------------------------*/
-
-   HYPRE_IJVectorGetObjectType(ij_b, &j);
+   if (!(build_rhs_type ==1 || build_rhs_type ==7))
+      HYPRE_IJVectorGetObjectType(ij_b, &j);
    /* HYPRE_IJVectorPrint(ij_b, "driver.out.b"); */
    /* HYPRE_IJVectorPrint(ij_x, "driver.out.x");  */
 
@@ -2651,7 +2710,13 @@ main( int   argc,
     *-----------------------------------------------------------*/
 
    HYPRE_IJMatrixDestroy(ij_A);
-   HYPRE_IJVectorDestroy(ij_b);
+
+   /* for build_rhs_type = 1 or 7, we did not create ij_b  - just b*/
+   if (build_rhs_type ==1 || build_rhs_type ==7)
+      HYPRE_ParVectorDestroy(b);
+   else
+      HYPRE_IJVectorDestroy(ij_b);
+
    HYPRE_IJVectorDestroy(ij_x);
 
 /*
@@ -2723,6 +2788,69 @@ BuildParFromFile( int                  argc,
 
    return (0);
 }
+
+
+/*----------------------------------------------------------------------
+ * Build rhs from file. Expects two files on each processor.
+ * filename.n contains the data and
+ * and filename.INFO.n contains global row
+ * numbers
+ *----------------------------------------------------------------------*/
+
+int
+BuildParRhsFromFile( int                  argc,
+                  char                *argv[],
+                  int                  arg_index,
+                  HYPRE_ParVector      *b_ptr     )
+{
+   char               *filename;
+
+   HYPRE_ParVector b;
+
+   int                 myid;
+
+   /*-----------------------------------------------------------
+    * Initialize some stuff
+    *-----------------------------------------------------------*/
+
+   MPI_Comm_rank(MPI_COMM_WORLD, &myid );
+
+   /*-----------------------------------------------------------
+    * Parse command line
+    *-----------------------------------------------------------*/
+
+   if (arg_index < argc)
+   {
+      filename = argv[arg_index];
+   }
+   else
+   {
+      printf("Error: No filename specified \n");
+      exit(1);
+   }
+
+   /*-----------------------------------------------------------
+    * Print driver parameters
+    *-----------------------------------------------------------*/
+ 
+   if (myid == 0)
+   {
+      printf("  RhsFromParFile: %s\n", filename);
+   }
+
+   /*-----------------------------------------------------------
+    * Generate the matrix 
+    *-----------------------------------------------------------*/
+ 
+   HYPRE_ParVectorRead(MPI_COMM_WORLD, filename,&b);
+
+   *b_ptr = b;
+
+   return (0);
+}
+
+
+
 
 /*----------------------------------------------------------------------
  * Build standard 7-point laplacian in 3D with grid and anisotropy.
