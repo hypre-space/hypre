@@ -8,12 +8,9 @@ c     Code using other values of the inputs is deleted.
 c     The idea is to narrow this down for simplicity, just test the Fortran.
       
 c-----------------------------------------------------------------------
-c     Standard 7-point laplacian in 3D with grid and anisotropy determined
-c     as user settings (now hardwired early in the code).
-c     The problem is first set up with some calls of special-purpose
-c     functions in the older hypre interface, which don't exist in the
-c     Babel-based interface.  Then the data is converted to a form suitable
-c     for the Babel-based interface, which is used to call the solver.
+c     Standard 7-point laplacian in 3D with grid and anisotropy hardwired
+c     into the code (formerly determined as user settings).
+c     The problem is set up with a call of an external function.
 c-----------------------------------------------------------------------
 
 
@@ -130,8 +127,8 @@ c-----------------------------------------------------------------------
       ny = NNX
       nz = NNX
 
-      Px  = num_procs
-      Py  = 1
+      Px  = 1
+      Py  = num_procs
       Pz  = 1
 
       bx = 1
