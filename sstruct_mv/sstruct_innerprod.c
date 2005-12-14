@@ -57,14 +57,38 @@ hypre_SStructInnerProd( hypre_SStructVector *x,
    double presult;
    int    part;
 
-   result = 0.0;
-   for (part = 0; part < nparts; part++)
+   int    x_object_type= hypre_SStructVectorObjectType(x);
+   int    y_object_type= hypre_SStructVectorObjectType(y);
+   
+   if (x_object_type != y_object_type)
    {
-      hypre_SStructPInnerProd(hypre_SStructVectorPVector(x, part),
-                              hypre_SStructVectorPVector(y, part), &presult);
-      result += presult;
+       printf("vector object types different- cannot compute inner product\n");
+       return ierr;
    }
 
+   result = 0.0;
+
+   if (x_object_type == HYPRE_SSTRUCT)
+   {
+      for (part = 0; part < nparts; part++)
+      {
+         hypre_SStructPInnerProd(hypre_SStructVectorPVector(x, part),
+                                 hypre_SStructVectorPVector(y, part), &presult);
+         result += presult;
+      }
+   }
+
+   else if (x_object_type == HYPRE_PARCSR)
+   {
+      hypre_ParVector  *x_par;
+      hypre_ParVector  *y_par;
+
+      hypre_SStructVectorConvert(x, &x_par);
+      hypre_SStructVectorConvert(y, &y_par);
+
+      result= hypre_ParVectorInnerProd(x_par, y_par);
+   }
+                                                                                                                
    *result_ptr = result;
 
    return ierr;

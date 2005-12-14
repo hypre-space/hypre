@@ -45,10 +45,22 @@ hypre_SStructScale( double               alpha,
    int ierr = 0;
    int nparts = hypre_SStructVectorNParts(y);
    int part;
+   int y_object_type= hypre_SStructVectorObjectType(y);
 
-   for (part = 0; part < nparts; part++)
+   if (y_object_type == HYPRE_SSTRUCT)
    {
-      hypre_SStructPScale(alpha, hypre_SStructVectorPVector(y, part));
+      for (part = 0; part < nparts; part++)
+      {
+         hypre_SStructPScale(alpha, hypre_SStructVectorPVector(y, part));
+      }
+   }
+
+   else if (y_object_type == HYPRE_PARCSR)
+   {
+      hypre_ParVector  *y_par;
+  
+      hypre_SStructVectorConvert(y, &y_par);
+      hypre_ParVectorScale(alpha, y_par);
    }
 
    return ierr;

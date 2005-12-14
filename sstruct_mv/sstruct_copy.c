@@ -74,10 +74,34 @@ hypre_SStructCopy( hypre_SStructVector *x,
    int nparts = hypre_SStructVectorNParts(x);
    int part;
 
-   for (part = 0; part < nparts; part++)
+   int x_object_type= hypre_SStructVectorObjectType(x);
+   int y_object_type= hypre_SStructVectorObjectType(y);
+
+   if (x_object_type != y_object_type)
    {
-      hypre_SStructPCopy(hypre_SStructVectorPVector(x, part),
-                         hypre_SStructVectorPVector(y, part));
+       printf("vector object types different- cannot perform SStructCopy\n");
+       return ierr;
+   }
+
+
+   if (x_object_type == HYPRE_SSTRUCT)
+   {
+      for (part = 0; part < nparts; part++)
+      {
+         hypre_SStructPCopy(hypre_SStructVectorPVector(x, part),
+                            hypre_SStructVectorPVector(y, part));
+      }
+   }
+
+   else if (x_object_type == HYPRE_PARCSR)
+   {
+      hypre_ParVector  *x_par;
+      hypre_ParVector  *y_par;
+
+      hypre_SStructVectorConvert(x, &x_par);
+      hypre_SStructVectorConvert(y, &y_par);
+
+      hypre_ParVectorCopy(x_par, y_par);
    }
 
    return ierr;
