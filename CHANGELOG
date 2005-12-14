@@ -20,7 +20,7 @@ Version 1.10.0b released, ??????.
    -- config.guess and config.sub updated on 9/16/2005
    -- always runs --without-blas --without-lapack unless the user specifies otherwise
    -- cross-compiling enabled
-   -- added --with-no-global-partitioning option
+   -- added --with-no-global-partition option
    -- updated insure options for compatibility with current version on CASC cluster
 
 - makefile updates
@@ -30,6 +30,14 @@ Version 1.10.0b released, ??????.
 
 - Added a set of simple example codes covering the Struct, SStruct and IJ
   interfaces. See README.html in the examples subdirectory for more details.
+
+- The --with-no-global-partition option was added to reduce storage
+  and improve run times on very large numbers of processors (such as
+  BlueGene/L). Currently only the IJ interface solvers have been
+  optimized.  For small or modest numbers of processors ( typically <
+  1000-5000 depending on the machine), this option is not needed 
+  (and will likely be slower).
+  
 
 ********************************************************************
 
