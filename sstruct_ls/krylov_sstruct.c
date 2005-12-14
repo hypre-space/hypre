@@ -49,10 +49,14 @@ hypre_SStructKrylovCreateVector( void *vvector )
 {
    hypre_SStructVector *vector = vvector;
    hypre_SStructVector *new_vector;
+   int                  object_type;
+
+   object_type= hypre_SStructVectorObjectType(vector);
 
    HYPRE_SStructVectorCreate(hypre_SStructVectorComm(vector),
                              hypre_SStructVectorGrid(vector),
                              &new_vector);
+   HYPRE_SStructVectorSetObjectType(new_vector, object_type);
    HYPRE_SStructVectorInitialize(new_vector);
    HYPRE_SStructVectorAssemble(new_vector);
 
@@ -68,7 +72,10 @@ hypre_SStructKrylovCreateVectorArray(int n, void *vvector )
 {
    hypre_SStructVector *vector = vvector;
    hypre_SStructVector **new_vector;
+   int                  object_type;
    int i;
+
+   object_type= hypre_SStructVectorObjectType(vector);
 
    new_vector = hypre_CTAlloc(hypre_SStructVector*,n);
    for (i=0; i < n; i++)
@@ -76,6 +83,7 @@ hypre_SStructKrylovCreateVectorArray(int n, void *vvector )
       HYPRE_SStructVectorCreate(hypre_SStructVectorComm(vector),
                                 hypre_SStructVectorGrid(vector),
                                 &new_vector[i]);
+      HYPRE_SStructVectorSetObjectType(new_vector[i], object_type);
       HYPRE_SStructVectorInitialize(new_vector[i]);
       HYPRE_SStructVectorAssemble(new_vector[i]);
    }
