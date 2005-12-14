@@ -372,7 +372,7 @@ int main (int argc, char *argv[])
       amg_solver = bHYPRE_BoomerAMG_Create( mpi_comm, parcsr_A );
       bHYPRE_BoomerAMG_SetIntParameter( amg_solver, "PrintLevel", 1 ); /* print amg solution info*/
       bHYPRE_BoomerAMG_SetIntParameter( amg_solver, "CoarsenType", 6); /* Falgout coarsening */
-      bHYPRE_BoomerAMG_SetIntParameter( amg_solver, "RelaxType", 3);   /* G-S/Jacobi hybrid relaxation */
+      bHYPRE_BoomerAMG_SetIntParameter( amg_solver, "RelaxType", 6);   /* Sym G-S/Jacobi hybrid relaxation */
       bHYPRE_BoomerAMG_SetIntParameter( amg_solver, "NumSweeps", 1);   /* Sweeeps on each level */
       bHYPRE_BoomerAMG_SetDoubleParameter( amg_solver, "Tolerance", 1e-3);      /* conv. tolerance */
       bHYPRE_BoomerAMG_SetIntParameter( amg_solver, "MaxIter", 1 ); /* do only one iteration! */
