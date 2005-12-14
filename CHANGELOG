@@ -14,6 +14,21 @@
 #
 #=============================================================================
 
+Version 1.10.0b released, ??????.
+
+- configure updates
+   -- config.guess and config.sub updated on 9/16/2005
+   -- always runs --without-blas --without-lapack unless the user specifies otherwise
+   -- cross-compiling enabled
+   -- added --with-no-global-partitioning option
+   -- updated insure options for compatibility with current version on CASC cluster
+
+- makefile updates
+   -- included BABEL
+   -- changed eigensolvers subdirectory to multivector
+   -- included insure related files to clean target
+********************************************************************
+
 Version 1.9.0b released, 2005/02/10.
 
 - NOTE: Soft links NOT changed until 2/17/05 due to vacation.
