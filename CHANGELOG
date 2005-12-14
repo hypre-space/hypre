@@ -27,6 +27,10 @@ Version 1.10.0b released, ??????.
    -- included BABEL
    -- changed eigensolvers subdirectory to multivector
    -- included insure related files to clean target
+
+- Added a set of simple example codes covering the Struct, SStruct and IJ
+  interfaces. See README.html in the examples subdirectory for more details.
+
 ********************************************************************
 
 Version 1.9.0b released, 2005/02/10.
