@@ -104,6 +104,9 @@
 /* Define to 1 if you have the <unistd.h> header file. */
 #undef HAVE_UNISTD_H
 
+/* Define to 1 if the routine MPI_Comm_f2c is found. */
+#undef HYPRE_HAVE_MPI_COMM_F2C
+
 /* Define to 1 for Solaris. */
 #undef HYPRE_SOLARIS
 
