@@ -26,6 +26,7 @@
 #include "bHYPRE_IJParCSRMatrix_Impl.h"
 #include "bHYPRE_IJParCSRVector_Impl.h"
 #include "bHYPRE_ParCSRDiagScale_Impl.h"
+#include "bHYPRE_Schwarz_Impl.h"
 #include "bHYPRE_MPICommunicator_Impl.h"
 
 int BuildParFromFile (int argc , char *argv [], int arg_index , HYPRE_ParCSRMatrix *A_ptr );
@@ -91,6 +92,7 @@ main( int   argc,
    bHYPRE_ParaSails     bHYPRE_ParaSails;
    bHYPRE_Euclid        bHYPRE_Euclid;
    bHYPRE_Solver        bHYPRE_SolverPC;
+   bHYPRE_Schwarz bHYPRE_Schwarz;
 
    int                 num_procs, myid;
    int                *rows;
@@ -740,7 +742,7 @@ main( int   argc,
       printf("        6=DS-CGNR            7*=PILUT-GMRES    \n");     
       printf("        8=ParaSails-PCG      9*=AMG-BiCGSTAB   \n");
       printf("       10=DS-BiCGSTAB       11*=PILUT-BiCGSTAB \n");
-      printf("       12*=Schwarz-PCG      18=ParaSails-GMRES\n");     
+      printf("       12=Schwarz-PCG      18=ParaSails-GMRES\n");     
       printf("        43=Euclid-PCG       44*=Euclid-GMRES   \n");
       printf("       45*=Euclid-BICGSTAB\n");
       printf("Solvers marked with '*' have not yet been implemented.\n");
@@ -1749,21 +1751,21 @@ main( int   argc,
       }
       else if (solver_id == 12)
       {
-#ifdef DO_THIS_LATER
          /* use Schwarz preconditioner */
          if (myid == 0) printf("Solver: Schwarz-PCG\n");
-
-	 HYPRE_SchwarzCreate(&pcg_precond);
-	 HYPRE_SchwarzSetVariant(pcg_precond, variant);
-	 HYPRE_SchwarzSetOverlap(pcg_precond, overlap);
-	 HYPRE_SchwarzSetDomainType(pcg_precond, domain_type);
-         HYPRE_SchwarzSetRelaxWeight(pcg_precond, schwarz_rlx_weight);
-
-         HYPRE_PCGSetPrecond(pcg_solver,
-                             (HYPRE_PtrToSolverFcn) HYPRE_SchwarzSolve,
-                             (HYPRE_PtrToSolverFcn) HYPRE_SchwarzSetup,
-                             pcg_precond);
-#endif  /*DO_THIS_LATER*/
+         bHYPRE_Schwarz = bHYPRE_Schwarz_Create( bHYPRE_parcsr_A );
+         ierr += bHYPRE_Schwarz_SetIntParameter(
+            bHYPRE_Schwarz, "Variant", variant );
+         ierr += bHYPRE_Schwarz_SetIntParameter(
+            bHYPRE_Schwarz, "Overlap", overlap );
+         ierr += bHYPRE_Schwarz_SetIntParameter(
+            bHYPRE_Schwarz, "DomainType", domain_type );
+         ierr += bHYPRE_Schwarz_SetDoubleParameter(
+            bHYPRE_Schwarz, "RelaxWeight", schwarz_rlx_weight );
+         hypre_assert( ierr==0 );
+         bHYPRE_SolverPC = bHYPRE_Solver__cast( bHYPRE_Schwarz );
+         ierr += bHYPRE_PCG_SetPreconditioner( bHYPRE_PCG, bHYPRE_SolverPC );
+         ierr += bHYPRE_PCG_Setup( bHYPRE_PCG, bHYPRE_Vector_b, bHYPRE_Vector_x );
       }
       else if (solver_id == 43)
       {
@@ -1819,16 +1821,14 @@ main( int   argc,
       {
          bHYPRE_ParaSails_deleteRef( bHYPRE_ParaSails );
       }
-#ifdef DO_THIS_LATER
-   else if (solver_id == 12)
-   {
-   HYPRE_SchwarzDestroy(pcg_precond);
-   }
-#endif  /*DO_THIS_LATER*/
-   else if (solver_id == 43)
-   {
-      bHYPRE_Euclid_deleteRef( bHYPRE_Euclid );
-   }
+      else if (solver_id == 12)
+      {
+         bHYPRE_Schwarz_deleteRef( bHYPRE_Schwarz );
+      }
+      else if (solver_id == 43)
+      {
+         bHYPRE_Euclid_deleteRef( bHYPRE_Euclid );
+      }
 
       if (myid == 0)
       {
