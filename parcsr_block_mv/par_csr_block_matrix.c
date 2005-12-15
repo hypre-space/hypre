@@ -322,18 +322,14 @@ hypre_ParCSRBlockMatrixConvertToParCSRMatrix(hypre_ParCSRBlockMatrix *matrix)
    int *matrix_C_row_starts;
    int *matrix_C_col_starts;
 
+   int *counter, *new_j_map;
+   int size_j, size_map, index, new_num_cols, removed = 0;
+   int *offd_j, *col_map_offd, *new_col_map_offd;
+   
+
    int num_procs, i, j;
 
    hypre_CSRMatrix *diag_nozeros, *offd_nozeros;
-/*
-   hypre_ParCSRCommPkg *comm_pkg = hypre_ParCSRBlockMatrixCommPkg(matrix);
-   hypre_ParCSRCommPkg *new_comm_pkg;
- 
-   int *send_procs, *recv_procs, *recv_vec_starts;
-   int *send_map_starts, *send_map_elmts;
-*/
-
-   /* int bnnz = block_size*block_size; */
 
    MPI_Comm_size(comm,&num_procs);
 
@@ -380,90 +376,84 @@ hypre_ParCSRBlockMatrixConvertToParCSRMatrix(hypre_ParCSRBlockMatrix *matrix)
     hypre_CSRMatrixDestroy(hypre_ParCSRMatrixOffd(matrix_C));
     hypre_ParCSRMatrixOffd(matrix_C) = 
        hypre_CSRBlockMatrixConvertToCSRMatrix(offd);
-    /* AB - added to delete zeros */
 
+    /* AB - added to delete zeros - this just deletes from data and j arrays */
     offd_nozeros = hypre_CSRMatrixDeleteZeros( 
        hypre_ParCSRMatrixOffd(matrix_C), 1e-14);
     if(offd_nozeros) 
     {
        hypre_CSRMatrixDestroy(hypre_ParCSRMatrixOffd(matrix_C));
        hypre_ParCSRMatrixOffd(matrix_C) = offd_nozeros;
+       removed = 1;
+       
     }
 
+    /* now convert the col_map_offd */
    for (i = 0; i < num_cols_offd; i++)
       for (j = 0; j < block_size; j++)
          hypre_ParCSRMatrixColMapOffd(matrix_C)[i*block_size + j] = 
               hypre_ParCSRBlockMatrixColMapOffd(matrix)[i]*block_size + j;
  
+   /* if we deleted zeros, then it is possible that col_map_offd can be
+      compressed as well - this requires some amount of work that could be skipped... */
 
-
-   hypre_ParCSRMatrixNumNonzeros(matrix_C) = hypre_ParCSRBlockMatrixNumNonzeros(matrix) *
-      (block_size*block_size);
-
-#if 0
-   /* This is not right if we delete zeros */
-   /* we should also copy the comm. package if it has been created */
-   if (comm_pkg)
+   if (removed)
    {
-      new_comm_pkg = hypre_CTAlloc(hypre_ParCSRCommPkg,1);
+      size_map =   num_cols_offd*block_size;
+      counter = hypre_CTAlloc(int, size_map);
+      new_j_map = hypre_CTAlloc(int, size_map);
 
-      /* copy scalars */ 
-      hypre_ParCSRCommPkgNumSends(new_comm_pkg) = hypre_ParCSRCommPkgNumSends(comm_pkg);
-      hypre_ParCSRCommPkgNumRecvs(new_comm_pkg) =  hypre_ParCSRCommPkgNumRecvs(comm_pkg) ;
-      hypre_ParCSRCommPkgComm(new_comm_pkg)  = comm;
+      offd_j = hypre_CSRMatrixJ(hypre_ParCSRMatrixOffd(matrix_C));
+      col_map_offd = hypre_ParCSRMatrixColMapOffd(matrix_C);
       
-      /* copy vectors */
-      count = hypre_ParCSRCommPkgNumSends(new_comm_pkg);
-      send_procs = hypre_CTAlloc(int,  count);
-      for (i=0; i<count; i++)
+      size_j = hypre_CSRMatrixNumNonzeros(hypre_ParCSRMatrixOffd(matrix_C));
+      /* mark which off_d entries are found in j */
+      for (i=0; i < size_j; i++)
       {
-         send_procs[i] =  hypre_ParCSRCommPkgSendProcs(comm_pkg)[i];
+         counter[offd_j[i]] = 1;
       }
-      send_map_starts =  hypre_CTAlloc(int,  count+1);
-      for (i=0; i<count+1; i++)
+      /*now find new numbering for columns (we will delete the 
+        cols where counter = 0*/
+      index = 0;
+      for (i=0; i < size_map; i++)
       {
-         send_map_starts[i] =  block_size*hypre_ParCSRCommPkgSendMapStarts(comm_pkg)[i];
+         if (counter[i]) new_j_map[i] = index++;
       }
-
-      count =  hypre_ParCSRCommPkgSendMapStarts(comm_pkg)[count];
-      send_map_elmts =  hypre_CTAlloc(int,  count*block_size);
-      for (i=0; i<count; i++)
+      new_num_cols = index;
+      /* if there are some col entries to remove: */ 
+      if (!(index == size_map))
       {
-         for (j=0; j< block_size; j++)
+         /* go thru j and adjust entries */         
+         for (i=0; i < size_j; i++)
          {
-            send_map_elmts[i*block_size+j] =  j + block_size*hypre_ParCSRCommPkgSendMapElmts(comm_pkg)[i];
+            offd_j[i] = new_j_map[offd_j[i]];
          }
-         
+         /*now go thru col map and get rid of non-needed entries */ 
+         new_col_map_offd = hypre_CTAlloc(int, new_num_cols);
+         index = 0;
+         for (i=0; i < size_map; i++)  
+         {
+            if (counter[i]) 
+            {
+               new_col_map_offd[index++] = col_map_offd[i];
+            }
+         }
+         /* set the new col map */ 
+         hypre_TFree(col_map_offd);
+         hypre_ParCSRMatrixColMapOffd(matrix_C) = new_col_map_offd;
+         /* modify the number of cols */
+         hypre_CSRMatrixNumCols(hypre_ParCSRMatrixOffd(matrix_C)) = new_num_cols;
       }
-
-      count = hypre_ParCSRCommPkgNumRecvs(new_comm_pkg);
-      recv_procs = hypre_CTAlloc(int,  count);
-      for (i=0; i<count; i++)
-      {
-         recv_procs[i] =  hypre_ParCSRCommPkgRecvProcs(comm_pkg)[i];
-      }
-      recv_vec_starts =  hypre_CTAlloc(int,  count+1);
-      for (i=0; i<count+1; i++)
-      {
-         recv_vec_starts[i] =  block_size*hypre_ParCSRCommPkgRecvVecStarts(comm_pkg)[i];
-      }
-
-      hypre_ParCSRCommPkgSendProcs(new_comm_pkg) = send_procs;
-      hypre_ParCSRCommPkgRecvProcs(new_comm_pkg) = recv_procs;
-      hypre_ParCSRCommPkgRecvVecStarts(new_comm_pkg) = recv_vec_starts;
-      hypre_ParCSRCommPkgSendMapStarts(new_comm_pkg) = send_map_starts;
-      hypre_ParCSRCommPkgSendMapElmts(new_comm_pkg) = send_map_elmts;
-
-
-
-      hypre_ParCSRMatrixCommPkg(matrix_C) = new_comm_pkg;
+      hypre_TFree(new_j_map);
+      hypre_TFree(counter);
+      
    }
-
-#else
    
+   hypre_ParCSRMatrixSetNumNonzeros( matrix_C );
+   hypre_ParCSRMatrixSetDNumNonzeros( matrix_C );
    
-      hypre_ParCSRMatrixCommPkg(matrix_C) = NULL;
-#endif         
+   /* we will not copy the comm package */  
+   hypre_ParCSRMatrixCommPkg(matrix_C) = NULL;
 
   return matrix_C;
 }
