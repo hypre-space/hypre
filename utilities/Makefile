@@ -55,7 +55,8 @@ UTIL_FILES =\
  thread_mpistubs.c\
  timer.c\
  timing.c\
- umalloc_local.c
+ umalloc_local.c\
+ hypre_mpi_comm_f2c.c
 
 FILES = ${UTIL_FILES}
 

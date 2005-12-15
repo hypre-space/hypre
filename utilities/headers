@@ -56,6 +56,8 @@ cat exchange_data.h            >> $INTERNAL_HEADER
 		          
 ./protos hypre_qsort.c         >> $INTERNAL_HEADER
 		          
+./protos hypre_mpi_comm_f2c.c  >> $INTERNAL_HEADER
+		          
 #===========================================================================
 # Include guards
 #===========================================================================

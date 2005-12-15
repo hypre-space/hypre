@@ -46,7 +46,8 @@ UTILFILES = \
  ${HYPRE_SRC_TOP_DIR}/utilities/threading.o\
  ${HYPRE_SRC_TOP_DIR}/utilities/timer.o\
  ${HYPRE_SRC_TOP_DIR}/utilities/timing.o\
- ${HYPRE_SRC_TOP_DIR}/utilities/umalloc_local.o
+ ${HYPRE_SRC_TOP_DIR}/utilities/umalloc_local.o\
+ ${HYPRE_SRC_TOP_DIR}/utilities/hypre_mpi_comm_f2c.o
 
 FILES = \
 $(SUPERLUFILES)\
