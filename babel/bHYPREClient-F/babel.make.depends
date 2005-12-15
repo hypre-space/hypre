@@ -126,6 +126,7 @@ bHYPRE_IOR.h: bHYPRE_SStructVariable_IOR.h
 bHYPRE_IOR.h: bHYPRE_SStructVector_IOR.h
 bHYPRE_IOR.h: bHYPRE_SStructVectorView_IOR.h
 bHYPRE_IOR.h: bHYPRE_SStruct_MatrixVectorView_IOR.h
+bHYPRE_IOR.h: bHYPRE_Schwarz_IOR.h
 bHYPRE_IOR.h: bHYPRE_Solver_IOR.h
 bHYPRE_IOR.h: bHYPRE_StructDiagScale_IOR.h
 bHYPRE_IOR.h: bHYPRE_StructGrid_IOR.h
@@ -297,6 +298,12 @@ bHYPRE_SStruct_MatrixVectorView_IOR.h: bHYPRE_ProblemDefinition_IOR.h
 bHYPRE_SStruct_MatrixVectorView_IOR.h: bHYPRE_SStruct_MatrixVectorView_IOR.h
 bHYPRE_SStruct_MatrixVectorView_IOR.h: sidl_BaseInterface_IOR.h
 
+bHYPRE_Schwarz_IOR.h: /home/painter/linear_solvers/babel/Interfaces.idl
+bHYPRE_Schwarz_IOR.h: sidl_header.h
+bHYPRE_Schwarz_IOR.h: bHYPRE_Operator_IOR.h
+bHYPRE_Schwarz_IOR.h: bHYPRE_Solver_IOR.h
+bHYPRE_Schwarz_IOR.h: sidl_BaseClass_IOR.h
+
 bHYPRE_Solver_IOR.h: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_Solver_IOR.h: sidl_header.h
 bHYPRE_Solver_IOR.h: bHYPRE_Operator_IOR.h
@@ -452,6 +459,8 @@ bHYPRE_SStructVectorView.fif:                                                 \
 
 bHYPRE_SStruct_MatrixVectorView.fif:                                          \
   /home/painter/linear_solvers/babel/Interfaces.idl
+
+bHYPRE_Schwarz.fif: /home/painter/linear_solvers/babel/Interfaces.idl
 
 bHYPRE_Solver.fif: /home/painter/linear_solvers/babel/Interfaces.idl
 
@@ -953,6 +962,20 @@ bHYPRE_SStruct_MatrixVectorView_fStub.c: bHYPRE_SStruct_MatrixVectorView_IOR.h
 bHYPRE_SStruct_MatrixVectorView_fStub.c: bHYPRE_MPICommunicator_IOR.h
 bHYPRE_SStruct_MatrixVectorView_fStub.c: sidl_ClassInfo_IOR.h
 bHYPRE_SStruct_MatrixVectorView_fStub.c: sidl_BaseInterface_IOR.h
+
+bHYPRE_Schwarz_fStub.c: /home/painter/linear_solvers/babel/Interfaces.idl
+bHYPRE_Schwarz_fStub.c: sidlfortran.h
+bHYPRE_Schwarz_fStub.c: sidl_header.h
+bHYPRE_Schwarz_fStub.c: sidl_interface_IOR.h
+bHYPRE_Schwarz_fStub.c: babel_config.h
+bHYPRE_Schwarz_fStub.c: sidl_Loader.h
+bHYPRE_Schwarz_fStub.c: bHYPRE_Schwarz_IOR.h
+bHYPRE_Schwarz_fStub.c: bHYPRE_MPICommunicator_IOR.h
+bHYPRE_Schwarz_fStub.c: bHYPRE_Operator_IOR.h
+bHYPRE_Schwarz_fStub.c: bHYPRE_IJParCSRMatrix_IOR.h
+bHYPRE_Schwarz_fStub.c: sidl_ClassInfo_IOR.h
+bHYPRE_Schwarz_fStub.c: bHYPRE_Vector_IOR.h
+bHYPRE_Schwarz_fStub.c: sidl_BaseInterface_IOR.h
 
 bHYPRE_Solver_fStub.c: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_Solver_fStub.c: sidlfortran.h

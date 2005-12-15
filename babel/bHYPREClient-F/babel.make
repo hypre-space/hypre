@@ -13,8 +13,8 @@ IORHDRS = bHYPRE_BiCGSTAB_IOR.h bHYPRE_BoomerAMG_IOR.h bHYPRE_CGNR_IOR.h      \
   bHYPRE_SStructParCSRVector_IOR.h bHYPRE_SStructSplit_IOR.h                  \
   bHYPRE_SStructStencil_IOR.h bHYPRE_SStructVariable_IOR.h                    \
   bHYPRE_SStructVectorView_IOR.h bHYPRE_SStructVector_IOR.h                   \
-  bHYPRE_SStruct_MatrixVectorView_IOR.h bHYPRE_Solver_IOR.h                   \
-  bHYPRE_StructDiagScale_IOR.h bHYPRE_StructGrid_IOR.h                        \
+  bHYPRE_SStruct_MatrixVectorView_IOR.h bHYPRE_Schwarz_IOR.h                  \
+  bHYPRE_Solver_IOR.h bHYPRE_StructDiagScale_IOR.h bHYPRE_StructGrid_IOR.h    \
   bHYPRE_StructJacobi_IOR.h bHYPRE_StructMatrixView_IOR.h                     \
   bHYPRE_StructMatrix_IOR.h bHYPRE_StructPFMG_IOR.h bHYPRE_StructSMG_IOR.h    \
   bHYPRE_StructStencil_IOR.h bHYPRE_StructVectorView_IOR.h                    \
@@ -32,19 +32,20 @@ STUBDOCS = bHYPRE_BiCGSTAB.fif bHYPRE_BoomerAMG.fif bHYPRE_CGNR.fif           \
   bHYPRE_SStructParCSRMatrix.fif bHYPRE_SStructParCSRVector.fif               \
   bHYPRE_SStructSplit.fif bHYPRE_SStructStencil.fif bHYPRE_SStructVector.fif  \
   bHYPRE_SStructVectorView.fif bHYPRE_SStruct_MatrixVectorView.fif            \
-  bHYPRE_Solver.fif bHYPRE_StructDiagScale.fif bHYPRE_StructGrid.fif          \
-  bHYPRE_StructJacobi.fif bHYPRE_StructMatrix.fif bHYPRE_StructMatrixView.fif \
-  bHYPRE_StructPFMG.fif bHYPRE_StructSMG.fif bHYPRE_StructStencil.fif         \
-  bHYPRE_StructVector.fif bHYPRE_StructVectorView.fif bHYPRE_Vector.fif       \
-  sidl_BaseClass.fif sidl_BaseException.fif sidl_BaseInterface.fif            \
-  sidl_ClassInfo.fif sidl_ClassInfoI.fif sidl_DFinder.fif sidl_DLL.fif        \
-  sidl_Finder.fif sidl_InvViolation.fif sidl_Loader.fif                       \
-  sidl_PostViolation.fif sidl_PreViolation.fif sidl_SIDLException.fif         \
-  sidl_io_Deserializer.fif sidl_io_IOException.fif sidl_io_Serializeable.fif  \
-  sidl_io_Serializer.fif sidl_rmi_ConnectRegistry.fif                         \
-  sidl_rmi_InstanceHandle.fif sidl_rmi_InstanceRegistry.fif                   \
-  sidl_rmi_Invocation.fif sidl_rmi_NetworkException.fif                       \
-  sidl_rmi_ProtocolFactory.fif sidl_rmi_Response.fif
+  bHYPRE_Schwarz.fif bHYPRE_Solver.fif bHYPRE_StructDiagScale.fif             \
+  bHYPRE_StructGrid.fif bHYPRE_StructJacobi.fif bHYPRE_StructMatrix.fif       \
+  bHYPRE_StructMatrixView.fif bHYPRE_StructPFMG.fif bHYPRE_StructSMG.fif      \
+  bHYPRE_StructStencil.fif bHYPRE_StructVector.fif                            \
+  bHYPRE_StructVectorView.fif bHYPRE_Vector.fif sidl_BaseClass.fif            \
+  sidl_BaseException.fif sidl_BaseInterface.fif sidl_ClassInfo.fif            \
+  sidl_ClassInfoI.fif sidl_DFinder.fif sidl_DLL.fif sidl_Finder.fif           \
+  sidl_InvViolation.fif sidl_Loader.fif sidl_PostViolation.fif                \
+  sidl_PreViolation.fif sidl_SIDLException.fif sidl_io_Deserializer.fif       \
+  sidl_io_IOException.fif sidl_io_Serializeable.fif sidl_io_Serializer.fif    \
+  sidl_rmi_ConnectRegistry.fif sidl_rmi_InstanceHandle.fif                    \
+  sidl_rmi_InstanceRegistry.fif sidl_rmi_Invocation.fif                       \
+  sidl_rmi_NetworkException.fif sidl_rmi_ProtocolFactory.fif                  \
+  sidl_rmi_Response.fif
 STUBFORTRANINC = bHYPRE_SStructVariable.inc sidl_Resolve.inc sidl_Scope.inc
 STUBSRCS = bHYPRE_BiCGSTAB_fStub.c bHYPRE_BoomerAMG_fStub.c                   \
   bHYPRE_CGNR_fStub.c bHYPRE_CoefficientAccess_fStub.c bHYPRE_Euclid_fStub.c  \
@@ -62,18 +63,19 @@ STUBSRCS = bHYPRE_BiCGSTAB_fStub.c bHYPRE_BoomerAMG_fStub.c                   \
   bHYPRE_SStructParCSRVector_fStub.c bHYPRE_SStructSplit_fStub.c              \
   bHYPRE_SStructStencil_fStub.c bHYPRE_SStructVariable_fStub.c                \
   bHYPRE_SStructVectorView_fStub.c bHYPRE_SStructVector_fStub.c               \
-  bHYPRE_SStruct_MatrixVectorView_fStub.c bHYPRE_Solver_fStub.c               \
-  bHYPRE_StructDiagScale_fStub.c bHYPRE_StructGrid_fStub.c                    \
-  bHYPRE_StructJacobi_fStub.c bHYPRE_StructMatrixView_fStub.c                 \
-  bHYPRE_StructMatrix_fStub.c bHYPRE_StructPFMG_fStub.c                       \
-  bHYPRE_StructSMG_fStub.c bHYPRE_StructStencil_fStub.c                       \
-  bHYPRE_StructVectorView_fStub.c bHYPRE_StructVector_fStub.c                 \
-  bHYPRE_Vector_fStub.c sidl_BaseClass_fStub.c sidl_BaseException_fStub.c     \
-  sidl_BaseInterface_fStub.c sidl_ClassInfoI_fStub.c sidl_ClassInfo_fStub.c   \
-  sidl_DFinder_fStub.c sidl_DLL_fStub.c sidl_Finder_fStub.c                   \
-  sidl_InvViolation_fStub.c sidl_Loader_fStub.c sidl_PostViolation_fStub.c    \
-  sidl_PreViolation_fStub.c sidl_Resolve_fStub.c sidl_SIDLException_fStub.c   \
-  sidl_Scope_fStub.c sidl_array_fStub.c sidl_bool_fStub.c sidl_char_fStub.c   \
+  bHYPRE_SStruct_MatrixVectorView_fStub.c bHYPRE_Schwarz_fStub.c              \
+  bHYPRE_Solver_fStub.c bHYPRE_StructDiagScale_fStub.c                        \
+  bHYPRE_StructGrid_fStub.c bHYPRE_StructJacobi_fStub.c                       \
+  bHYPRE_StructMatrixView_fStub.c bHYPRE_StructMatrix_fStub.c                 \
+  bHYPRE_StructPFMG_fStub.c bHYPRE_StructSMG_fStub.c                          \
+  bHYPRE_StructStencil_fStub.c bHYPRE_StructVectorView_fStub.c                \
+  bHYPRE_StructVector_fStub.c bHYPRE_Vector_fStub.c sidl_BaseClass_fStub.c    \
+  sidl_BaseException_fStub.c sidl_BaseInterface_fStub.c                       \
+  sidl_ClassInfoI_fStub.c sidl_ClassInfo_fStub.c sidl_DFinder_fStub.c         \
+  sidl_DLL_fStub.c sidl_Finder_fStub.c sidl_InvViolation_fStub.c              \
+  sidl_Loader_fStub.c sidl_PostViolation_fStub.c sidl_PreViolation_fStub.c    \
+  sidl_Resolve_fStub.c sidl_SIDLException_fStub.c sidl_Scope_fStub.c          \
+  sidl_array_fStub.c sidl_bool_fStub.c sidl_char_fStub.c                      \
   sidl_dcomplex_fStub.c sidl_double_fStub.c sidl_fcomplex_fStub.c             \
   sidl_float_fStub.c sidl_int_fStub.c sidl_io_Deserializer_fStub.c            \
   sidl_io_IOException_fStub.c sidl_io_Serializeable_fStub.c                   \

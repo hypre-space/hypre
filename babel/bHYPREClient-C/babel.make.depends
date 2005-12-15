@@ -126,6 +126,7 @@ bHYPRE_IOR.h: bHYPRE_SStructVariable_IOR.h
 bHYPRE_IOR.h: bHYPRE_SStructVector_IOR.h
 bHYPRE_IOR.h: bHYPRE_SStructVectorView_IOR.h
 bHYPRE_IOR.h: bHYPRE_SStruct_MatrixVectorView_IOR.h
+bHYPRE_IOR.h: bHYPRE_Schwarz_IOR.h
 bHYPRE_IOR.h: bHYPRE_Solver_IOR.h
 bHYPRE_IOR.h: bHYPRE_StructDiagScale_IOR.h
 bHYPRE_IOR.h: bHYPRE_StructGrid_IOR.h
@@ -297,6 +298,12 @@ bHYPRE_SStruct_MatrixVectorView_IOR.h: bHYPRE_ProblemDefinition_IOR.h
 bHYPRE_SStruct_MatrixVectorView_IOR.h: bHYPRE_SStruct_MatrixVectorView_IOR.h
 bHYPRE_SStruct_MatrixVectorView_IOR.h: sidl_BaseInterface_IOR.h
 
+bHYPRE_Schwarz_IOR.h: /home/painter/linear_solvers/babel/Interfaces.idl
+bHYPRE_Schwarz_IOR.h: sidl_header.h
+bHYPRE_Schwarz_IOR.h: bHYPRE_Operator_IOR.h
+bHYPRE_Schwarz_IOR.h: bHYPRE_Solver_IOR.h
+bHYPRE_Schwarz_IOR.h: sidl_BaseClass_IOR.h
+
 bHYPRE_Solver_IOR.h: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_Solver_IOR.h: sidl_header.h
 bHYPRE_Solver_IOR.h: bHYPRE_Operator_IOR.h
@@ -412,6 +419,7 @@ bHYPRE.h: bHYPRE_SStructVariable.h
 bHYPRE.h: bHYPRE_SStructVector.h
 bHYPRE.h: bHYPRE_SStructVectorView.h
 bHYPRE.h: bHYPRE_SStruct_MatrixVectorView.h
+bHYPRE.h: bHYPRE_Schwarz.h
 bHYPRE.h: bHYPRE_Solver.h
 bHYPRE.h: bHYPRE_StructDiagScale.h
 bHYPRE.h: bHYPRE_StructGrid.h
@@ -774,6 +782,17 @@ bHYPRE_SStruct_MatrixVectorView.h: sidl_BaseInterface.h
 bHYPRE_SStruct_MatrixVectorView.h: sidl_ClassInfo.h
 bHYPRE_SStruct_MatrixVectorView.h: sidl_io_Serializer.h
 bHYPRE_SStruct_MatrixVectorView.h: sidl_io_Deserializer.h
+
+bHYPRE_Schwarz.h: /home/painter/linear_solvers/babel/Interfaces.idl
+bHYPRE_Schwarz.h: sidl_header.h
+bHYPRE_Schwarz.h: bHYPRE_IJParCSRMatrix.h
+bHYPRE_Schwarz.h: bHYPRE_MPICommunicator.h
+bHYPRE_Schwarz.h: bHYPRE_Operator.h
+bHYPRE_Schwarz.h: bHYPRE_Vector.h
+bHYPRE_Schwarz.h: sidl_BaseInterface.h
+bHYPRE_Schwarz.h: sidl_ClassInfo.h
+bHYPRE_Schwarz.h: sidl_io_Serializer.h
+bHYPRE_Schwarz.h: sidl_io_Deserializer.h
 
 bHYPRE_Solver.h: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_Solver.h: sidl_header.h
@@ -1278,6 +1297,17 @@ bHYPRE_SStruct_MatrixVectorView_Stub.c: sidl_rmi_InstanceHandle.h
 bHYPRE_SStruct_MatrixVectorView_Stub.c: sidl_rmi_ConnectRegistry.h
 bHYPRE_SStruct_MatrixVectorView_Stub.c: sidl_interface_IOR.h
 bHYPRE_SStruct_MatrixVectorView_Stub.c: sidl_BaseInterface_IOR.h
+
+bHYPRE_Schwarz_Stub.c: /home/painter/linear_solvers/babel/Interfaces.idl
+bHYPRE_Schwarz_Stub.c: bHYPRE_Schwarz.h
+bHYPRE_Schwarz_Stub.c: bHYPRE_Schwarz_IOR.h
+bHYPRE_Schwarz_Stub.c: sidl_interface_IOR.h
+bHYPRE_Schwarz_Stub.c: sidl_rmi_InstanceHandle.h
+bHYPRE_Schwarz_Stub.c: sidl_rmi_ConnectRegistry.h
+bHYPRE_Schwarz_Stub.c: sidl_interface_IOR.h
+bHYPRE_Schwarz_Stub.c: sidl_BaseInterface_IOR.h
+bHYPRE_Schwarz_Stub.c: sidl_BaseClass.h
+bHYPRE_Schwarz_Stub.c: sidl_ClassInfo.h
 
 bHYPRE_Solver_Stub.c: /home/painter/linear_solvers/babel/Interfaces.idl
 bHYPRE_Solver_Stub.c: bHYPRE_Solver.h

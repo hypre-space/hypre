@@ -118,6 +118,9 @@
 #ifndef included_bHYPRE_SStruct_MatrixVectorView_h
 #include "bHYPRE_SStruct_MatrixVectorView.h"
 #endif
+#ifndef included_bHYPRE_Schwarz_h
+#include "bHYPRE_Schwarz.h"
+#endif
 #ifndef included_bHYPRE_Solver_h
 #include "bHYPRE_Solver.h"
 #endif

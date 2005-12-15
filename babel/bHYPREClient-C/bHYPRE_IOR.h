@@ -128,6 +128,9 @@
 #ifndef included_bHYPRE_SStruct_MatrixVectorView_IOR_h
 #include "bHYPRE_SStruct_MatrixVectorView_IOR.h"
 #endif
+#ifndef included_bHYPRE_Schwarz_IOR_h
+#include "bHYPRE_Schwarz_IOR.h"
+#endif
 #ifndef included_bHYPRE_Solver_IOR_h
 #include "bHYPRE_Solver_IOR.h"
 #endif
