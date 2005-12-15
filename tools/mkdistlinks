@@ -12,8 +12,6 @@ DIR="\
  aix_5_64_fed\
  tru64_5\
  sles_9_ppc64\
- chaos_2_ia32\
- chaos_2_ia32_elan3\
  chaos_2_ia64_elan4\
  chaos_3_x86\
  chaos_3_x86_elan3"

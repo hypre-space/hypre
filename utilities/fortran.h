@@ -40,7 +40,7 @@
 #  define hypre_NAME_C_CALLING_FORT(name,NAME) name##__
 #  define hypre_NAME_FORT_CALLING_C(name,NAME) name##__
 
-#elif defined(HYPRE_LINUX_CHAOS2)
+#elif defined(HYPRE_LINUX_CHAOS)
 
 #  define hypre_NAME_C_CALLING_FORT(name,NAME) name##_
 #  define hypre_NAME_FORT_CALLING_C(name,NAME) name##_

@@ -102,8 +102,8 @@ help () {
   printf "%s\n" "     -gpsmp     Compaq gps320 system executing OpenMP."
   printf "%s\n" "     -ilx       Intel running Linux."
   printf "%s\n" "     -insure    CASC Linux, executing insure++."
-  printf "%s\n" "     -mcr       Intel Linux, CHAOS2."
-  printf "%s\n" "     -pengra    Intel Linux, CHAOS2."
+  printf "%s\n" "     -mcr       Intel Linux, CHAOS."
+  printf "%s\n" "     -pengra    Intel Linux, CHAOS."
   printf "%s\n" "     -red       ASCI Red"
   printf "%s\n" "     -tux149    CASC running RedHat Enterprise Linux."
   printf "%s\n" "     -tuxgcc    CASC running latest gcc compilers"
@@ -164,7 +164,7 @@ hypre_set_machine_options()
         HYPRE_ARCH="linux"
         HYPRE_COMPILE_MACHINE="mcr"
         HYPRE_RUN_MACHINE="mcr"
-        HYPRE_REMOTE_DIR="/usr/casc/hypre/chaos_2_ia32_elan3/AUTOTEST"
+        HYPRE_REMOTE_DIR="/usr/casc/hypre/chaos_3_x86_elan3/AUTOTEST"
         HYPRE_MACHINE_COMMANDS="-r $HYPRE_RUN_MACHINE -nse 1 -a 2 -cf"
         HYPRE_MESSAGE='SECONDARY[MCR]'
         ;;
