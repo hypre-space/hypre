@@ -677,7 +677,7 @@ then
    AC_DEFINE(HYPRE_SEQUENTIAL, 1, [Disable MPI, enable serial codes.])
 else
    ACX_CHECK_MPI([LIBS="$LIBS $MPILIBS"])
-   AC_CHECK_FUNCS([MPI_Comm_f2c])
+   AC_CHECK_FUNCS([MPI_Comm_f2c],[AC_DEFINE(HYPRE_HAVE_MPI_COMM_F2C)])
 fi
 
 dnl *********************************************************************

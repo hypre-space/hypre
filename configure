@@ -8172,6 +8172,9 @@ if test `eval echo '${'$as_ac_var'}'` = yes; then
   cat >>confdefs.h <<_ACEOF
 #define `echo "HAVE_$ac_func" | $as_tr_cpp` 1
 _ACEOF
+ cat >>confdefs.h <<\_ACEOF
+#define HYPRE_HAVE_MPI_COMM_F2C 1
+_ACEOF
 
 fi
 done
