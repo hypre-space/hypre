@@ -9317,9 +9317,9 @@ _ACEOF
          ;;
       Linux | linux | LINUX)
          case $HOSTNAME in
-            mcr* | thunder* | ilx*)
+            mcr* | thunder* | ilx* | peng*)
                cat >>confdefs.h <<\_ACEOF
-#define HYPRE_LINUX_CHAOS2 1
+#define HYPRE_LINUX_CHAOS 1
 _ACEOF
 
                ;;

@@ -107,8 +107,8 @@
 /* Define to 1 for Solaris. */
 #undef HYPRE_SOLARIS
 
-/* Define to 1 for Linux on platforms running Chaos2 with Elan. */
-#undef HYPRE_LINUX_CHAOS2
+/* Define to 1 for Linux on platforms running any version of CHAOS. */
+#undef HYPRE_LINUX_CHAOS
 
 /* Define to 1 for Linux platforms. */
 #undef HYPRE_LINUX

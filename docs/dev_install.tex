@@ -210,10 +210,10 @@ aix_5_ll                        frost               white, ice
 aix_5_64_fed                   newberg                 uv, um
 tru64_5                          gps                    sc
 sles_9_ppc64                     bgl                    ---
-chaos_2_ia32                     ilx                    ace
-chaos_2_ia32_elan3        pengra, alc, mcr,       adelie, emperor,
+chaos_3_x86                     ilx                    ace
+chaos_3_x86_elan3        pengra, alc, mcr,       adelie, emperor,
                              pvc, bigdev            lilac, gviz
-chaos_2_ia32_elan4             thunder                  cub
+chaos_3_x64_elan4             thunder                  cub
 \end{verbatim}
 
 To relieve the user of needing to know the SYS\_TYPE on each platform, the path
@@ -260,7 +260,7 @@ to be installed.
 \end{verbatim}
 \item Move to the subdirectory for this platform, identified by SYS\_TYPE
 \begin{verbatim}
-      Example: cd chaos_2_ia32_elan3
+      Example: cd chaos_3_ia32_elan3
 \end{verbatim}
 \item Build and install the library by runnning the \file{mklibs} script; which is
          located in the \file{/usr/gapps/hypre} directory.
@@ -320,7 +320,7 @@ to be installed.
 \end{verbatim}
 \item Move to the subdirectory for this platform, identified by SYS\_TYPE
 \begin{verbatim}
-      Example: cd chaos_2_ia32_elan3
+      Example: cd chaos_3_ia32_elan3
 \end{verbatim}
 \item Build and install the library by runnning the \file{mklibs} script; which is
          located in the \file{/usr/gapps/hypre} directory.
@@ -383,7 +383,7 @@ On a local CASC platform:
      lrwxrwxrwx   1 hil66 hypre  22 Apr 13 07:32 alphaev68-dec-osf5.1/hypre-1.9.0b.tar.gz -> ../hypre-1.9.0b.tar.gz
      lrwxrwxrwx   1 hil66 hypre  22 Apr 13 07:32 i686-pc-linux-gnu/hypre-1.9.0b.tar.gz -> ../hypre-1.9.0b.tar.gz
      lrwxrwxrwx   1 hil66 hypre  22 Apr 13 07:32 powerpc-ibm-aix5.2.0.0/hypre-1.9.0b.tar.gz -> ../hypre-1.9.0b.tar.gz
-     lrwxrwxrwx   1 hil66 hypre  22 Apr 13 07:32 chaos_2_ia32_elan3/hypre-1.9.0b.tar.gz -> ../hypre-1.9.0b.tar.gz
+     lrwxrwxrwx   1 hil66 hypre  22 Apr 13 07:32 chaos_3_ia32_elan3/hypre-1.9.0b.tar.gz -> ../hypre-1.9.0b.tar.gz
 
 12.  cd i686-pc-linux-gnu
 
@@ -412,9 +412,9 @@ install \hypre{}.
 17.  ./mkdistlinks hypre-1.9.0b.tar.gz
      lrwxrwxrwx   1 hil66 hypre  22 Apr 13 07:32 alphaev68-dec-osf5.1/hypre-1.9.0b.tar.gz -> ../hypre-1.9.0b.tar.gz
      lrwxrwxrwx   1 hil66 hypre  22 Apr 13 07:32 powerpc-ibm-aix5.2.0.0/hypre-1.9.0b.tar.gz -> ../hypre-1.9.0b.tar.gz
-     lrwxrwxrwx   1 hil66 hypre  22 Apr 13 07:32 chaos_2_ia32_elan3/hypre-1.9.0b.tar.gz -> ../hypre-1.9.0b.tar.gz
+     lrwxrwxrwx   1 hil66 hypre  22 Apr 13 07:32 chaos_3_ia32_elan3/hypre-1.9.0b.tar.gz -> ../hypre-1.9.0b.tar.gz
 
-18.  cd chaos_2_ia32_elan3
+18.  cd chaos_3_ia32_elan3
 
 19.  ../mklibs -b hypre-1.9.0b.tar.gz install
      checking the hostname... blue
@@ -456,9 +456,9 @@ Now build and install \hypre{} on the SCF platform (adelie in this example).
 24.  ./mkdistlinks hypre-1.9.0b.tar.gz
      lrwxrwxrwx   1 hil66 hypre  22 Apr 13 07:32 alphaev68-dec-osf5.1/hypre-1.9.0b.tar.gz -> ../hypre-1.9.0b.tar.gz
      lrwxrwxrwx   1 hil66 hypre  22 Apr 13 07:32 powerpc-ibm-aix5.2.0.0/hypre-1.9.0b.tar.gz -> ../hypre-1.9.0b.tar.gz
-     lrwxrwxrwx   1 hil66 hypre  22 Apr 13 07:32 chaos_2_ia32_elan3/hypre-1.9.0b.tar.gz -> ../hypre-1.9.0b.tar.gz
+     lrwxrwxrwx   1 hil66 hypre  22 Apr 13 07:32 chaos_3_ia32_elan3/hypre-1.9.0b.tar.gz -> ../hypre-1.9.0b.tar.gz
 
-25.  cd chaos_2_ia32_elan3
+25.  cd chaos_3_ia32_elan3
 
 26.  ../mklibs -b hypre-1.9.0b.tar.gz install
      checking the hostname... blue

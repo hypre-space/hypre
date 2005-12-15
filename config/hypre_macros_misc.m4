@@ -668,8 +668,8 @@ dnl *    define type of architecture
          ;;
       Linux | linux | LINUX)
          case $HOSTNAME in
-            mcr* | thunder* | ilx*)
-               AC_DEFINE(HYPRE_LINUX_CHAOS2)
+            mcr* | thunder* | ilx* | peng*)
+               AC_DEFINE(HYPRE_LINUX_CHAOS)
                ;;
             *)
                AC_DEFINE(HYPRE_LINUX)
