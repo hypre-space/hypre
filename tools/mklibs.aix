@@ -145,7 +145,7 @@ DIST_DIR=`pwd`/${TAR_FILE%.tar.gz}
 SYS_TYPE=`uname -s`
 PLATFORM_NAME=`uname -n`
 MAKE="make -i"
-CONFIGURE="./nopoe ./configure --without-blas --without-lapack"
+CONFIGURE="./nopoe ./configure"
 . ../env.blue
 
 #===========================================================================

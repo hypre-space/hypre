@@ -144,7 +144,7 @@ fi
 DIST_DIR=`pwd`/${TAR_FILE%.tar.gz}
 SYS_TYPE=`uname -s`
 PLATFORM_NAME=`uname -n`
-CONFIGURE="./configure --without-blas --without-lapack"
+CONFIGURE="./configure"
 MAKE="make -i"
 
 #===========================================================================
