@@ -583,22 +583,26 @@ impl_bHYPRE_CGNR_Setup(
    if ( bHYPRE_Vector_queryInt( data->p, "bHYPRE.MatrixVectorView" ) )
    {
       Vp = bHYPRE_MatrixVectorView__cast( data->p );
+      bHYPRE_MatrixVectorView_deleteRef( Vp ); /* extra ref from queryInt */
       ierr += bHYPRE_MatrixVectorView_Assemble( Vp );
    }
    if ( bHYPRE_Vector_queryInt( data->q, "bHYPRE.MatrixVectorView" ) )
    {
       Vq = bHYPRE_MatrixVectorView__cast( data->q );
       ierr += bHYPRE_MatrixVectorView_Assemble( Vq );
+      bHYPRE_MatrixVectorView_deleteRef( Vq ); /* extra ref from queryInt */
    }
    if ( bHYPRE_Vector_queryInt( data->r, "bHYPRE.MatrixVectorView" ) )
    {
       Vr = bHYPRE_MatrixVectorView__cast( data->r );
       ierr += bHYPRE_MatrixVectorView_Assemble( Vr );
+      bHYPRE_MatrixVectorView_deleteRef( Vr ); /* extra ref from queryInt */
    }
    if ( bHYPRE_Vector_queryInt( data->t, "bHYPRE.MatrixVectorView" ) )
    {
       Vt = bHYPRE_MatrixVectorView__cast( data->t );
       ierr += bHYPRE_MatrixVectorView_Assemble( Vt );
+      bHYPRE_MatrixVectorView_deleteRef( Vt ); /* extra ref from queryInt */
    }
 
    ierr += bHYPRE_Solver_Setup( data->precond, b, x );

@@ -618,6 +618,7 @@ impl_bHYPRE_GMRES_Setup(
       {
          Vp = bHYPRE_MatrixVectorView__cast( (data->p)[i] );
          ierr += bHYPRE_MatrixVectorView_Assemble( Vp );
+         bHYPRE_MatrixVectorView_deleteRef( Vp ); /* extra ref from queryInt */
       }
    }
    ierr += bHYPRE_Vector_Clone( b, &(data->r) );
@@ -626,11 +627,13 @@ impl_bHYPRE_GMRES_Setup(
    {
       Vr = bHYPRE_MatrixVectorView__cast( data->r );
       ierr += bHYPRE_MatrixVectorView_Assemble( Vr );
+      bHYPRE_MatrixVectorView_deleteRef( Vr ); /* extra ref from queryInt */
    }
    if ( bHYPRE_Vector_queryInt( data->w, "bHYPRE.MatrixVectorView" ) )
    {
       Vw = bHYPRE_MatrixVectorView__cast( data->w );
       ierr += bHYPRE_MatrixVectorView_Assemble( Vw );
+      bHYPRE_MatrixVectorView_deleteRef( Vw ); /* extra ref from queryInt */
    }
 
 

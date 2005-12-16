@@ -607,31 +607,37 @@ impl_bHYPRE_BiCGSTAB_Setup(
    {
       Vp = bHYPRE_MatrixVectorView__cast( data->p );
       ierr += bHYPRE_MatrixVectorView_Assemble( Vp );
+      bHYPRE_MatrixVectorView_deleteRef( Vp ); /* extra ref from queryInt */
    }
    if ( bHYPRE_Vector_queryInt( data->q, "bHYPRE.MatrixVectorView" ) )
    {
       Vq = bHYPRE_MatrixVectorView__cast( data->q );
       ierr += bHYPRE_MatrixVectorView_Assemble( Vq );
+      bHYPRE_MatrixVectorView_deleteRef( Vq ); /* extra ref from queryInt */
    }
    if ( bHYPRE_Vector_queryInt( data->r, "bHYPRE.MatrixVectorView" ) )
    {
       Vr = bHYPRE_MatrixVectorView__cast( data->r );
       ierr += bHYPRE_MatrixVectorView_Assemble( Vr );
+      bHYPRE_MatrixVectorView_deleteRef( Vr ); /* extra ref from queryInt */
    }
    if ( bHYPRE_Vector_queryInt( data->r0, "bHYPRE.MatrixVectorView" ) )
    {
       Vr0 = bHYPRE_MatrixVectorView__cast( data->r0 );
       ierr += bHYPRE_MatrixVectorView_Assemble( Vr0 );
+      bHYPRE_MatrixVectorView_deleteRef( Vr0 ); /* extra ref from queryInt */
    }
    if ( bHYPRE_Vector_queryInt( data->s, "bHYPRE.MatrixVectorView" ) )
    {
       Vs = bHYPRE_MatrixVectorView__cast( data->s );
       ierr += bHYPRE_MatrixVectorView_Assemble( Vs );
+      bHYPRE_MatrixVectorView_deleteRef( Vs ); /* extra ref from queryInt */
    }
    if ( bHYPRE_Vector_queryInt( data->v, "bHYPRE.MatrixVectorView" ) )
    {
       Vv = bHYPRE_MatrixVectorView__cast( data->v );
       ierr += bHYPRE_MatrixVectorView_Assemble( Vv );
+      bHYPRE_MatrixVectorView_deleteRef( Vv ); /* extra ref from queryInt */
    }
 
    ierr += bHYPRE_Solver_Setup( data->precond, b, x );

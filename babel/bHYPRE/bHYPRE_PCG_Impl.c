@@ -582,16 +582,19 @@ impl_bHYPRE_PCG_Setup(
    {
       Vp = bHYPRE_MatrixVectorView__cast( data->p );
       ierr += bHYPRE_MatrixVectorView_Assemble( Vp );
+      bHYPRE_MatrixVectorView_deleteRef( Vp ); /* extra ref from queryInt */
    }
    if ( bHYPRE_Vector_queryInt( data->s, "bHYPRE.MatrixVectorView" ) )
    {
       Vs = bHYPRE_MatrixVectorView__cast( data->s );
       ierr += bHYPRE_MatrixVectorView_Assemble( Vs );
+      bHYPRE_MatrixVectorView_deleteRef( Vs ); /* extra ref from queryInt */
    }
    if ( bHYPRE_Vector_queryInt( data->r, "bHYPRE.MatrixVectorView" ) )
    {
       Vr = bHYPRE_MatrixVectorView__cast( data->r );
       ierr += bHYPRE_MatrixVectorView_Assemble( Vr );
+      bHYPRE_MatrixVectorView_deleteRef( Vr ); /* extra ref from queryInt */
    }
 
    ierr += bHYPRE_Solver_Setup( data->precond, b, x );
