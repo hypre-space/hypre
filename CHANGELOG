@@ -38,6 +38,13 @@ Version 1.10.0b released, 2005/12/19.
   1000-5000 depending on the machine), this option is not needed 
   (and will likely be slower).
   
+- Added aggressive coarsening, which can be applied to all available 
+  coarsening schemes (via HYPRE_BoomerAMGSetNumAggLevels and 
+  HYPRE_BoomerAMGSetNumPaths) 
+
+- Added multipass interpolation and direct interpolation.
+
+- Added the capability of nodal coarsening for systems AMG.
 
 ********************************************************************
 
