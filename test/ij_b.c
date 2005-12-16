@@ -1705,7 +1705,6 @@ main( int   argc,
          bHYPRE_BoomerAMG_SetDoubleParameter( bHYPRE_AMG,
                                               "SchwarzRlxWeight",
                                               schwarz_rlx_weight);
-
          bHYPRE_SolverPC = bHYPRE_Solver__cast( bHYPRE_AMG );
          ierr += bHYPRE_PCG_SetPreconditioner( bHYPRE_PCG, bHYPRE_SolverPC );
          ierr += bHYPRE_PCG_Setup( bHYPRE_PCG, bHYPRE_Vector_b, bHYPRE_Vector_x );
@@ -2292,7 +2291,7 @@ main( int   argc,
       {
          bHYPRE_BoomerAMG_deleteRef( bHYPRE_AMG );
       }
-      else if ( solver_id == 2 )
+      else if ( solver_id == 4 )
       {
          bHYPRE_ParCSRDiagScale_deleteRef( bHYPRE_ParCSRDiagScale );
       }
