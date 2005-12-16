@@ -829,10 +829,6 @@ void hypre_qsort2( int *v , double *w , int left , int right );
 void hypre_qsort3i( int *v , int *w , int *z , int left , int right );
 
 
-/* hypre_mpi_comm_f2c.c */
-void hypre_F90_IFACE( int hypre_mpi_comm_f2c , int HYPRE_MPI_COMM_F2C );
-
-
 #ifdef __cplusplus
 }
 #endif
