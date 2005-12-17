@@ -805,6 +805,7 @@ impl_bHYPRE_SStructParCSRVector_Copy(
    if ( bHYPRE_Vector_queryInt( x, "bHYPRE.SStructParCSRVector" ) )
    {
       bSSx = bHYPRE_SStructParCSRVector__cast( x );
+      bHYPRE_SStructParCSRVector_deleteRef( bSSx ); /* extra ref from queryInt */
    }
    else
    {
@@ -959,6 +960,7 @@ impl_bHYPRE_SStructParCSRVector_Dot(
    if ( bHYPRE_Vector_queryInt( x, "bHYPRE.SStructParCSRVector" ) )
    {
       bSSx = bHYPRE_SStructParCSRVector__cast( x );
+      bHYPRE_SStructParCSRVector_deleteRef( bSSx ); /* extra ref from queryInt */
    }
    else
    {

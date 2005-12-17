@@ -585,6 +585,7 @@ impl_bHYPRE_IJParCSRVector_Copy(
    if ( bHYPRE_Vector_queryInt(x, "bHYPRE.IJParCSRVector" ) )
    {
       bHYPREP_x = bHYPRE_IJParCSRVector__cast( x );
+      bHYPRE_IJParCSRVector_deleteRef( bHYPREP_x ); /* extra ref from queryInt */
    }
    else
    {
@@ -763,6 +764,7 @@ impl_bHYPRE_IJParCSRVector_Dot(
    if ( bHYPRE_Vector_queryInt(x, "bHYPRE.IJParCSRVector" ) )
    {
       bHYPREP_x = bHYPRE_IJParCSRVector__cast( x );
+      bHYPRE_StructVector_deleteRef( bHYPREP_x ); /* extra ref from queryInt */
    }
    else
    {

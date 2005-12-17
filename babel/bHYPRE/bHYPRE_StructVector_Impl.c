@@ -217,6 +217,7 @@ impl_bHYPRE_StructVector_Copy(
       if ( bHYPRE_Vector_queryInt(x, "bHYPRE.StructVector" ) )
       {
          xx = bHYPRE_StructVector__cast( x );
+         bHYPRE_StructVector_deleteRef( xx ); /* extra ref from queryInt */
       }
       else
       {
@@ -368,6 +369,7 @@ impl_bHYPRE_StructVector_Dot(
    if ( bHYPRE_Vector_queryInt(x, "bHYPRE.StructVector" ) )
    {
       xx = bHYPRE_StructVector__cast( x );
+      bHYPRE_StructVector_deleteRef( xx ); /* extra ref from queryInt */
    }
    else
    {

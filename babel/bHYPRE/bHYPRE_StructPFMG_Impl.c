@@ -724,6 +724,7 @@ impl_bHYPRE_StructPFMG_Apply(
    if ( bHYPRE_Vector_queryInt(b, "bHYPRE.StructVector" ) )
    {
       bHYPREP_b = bHYPRE_StructVector__cast( b );
+      bHYPRE_StructVector_deleteRef( bHYPREP_b ); /* extra ref from queryInt */
    }
    else
    {
@@ -745,6 +746,7 @@ impl_bHYPRE_StructPFMG_Apply(
    if ( bHYPRE_Vector_queryInt( *x, "bHYPRE.StructVector" ) )
    {
       bHYPREP_x = bHYPRE_StructVector__cast( *x );
+      bHYPRE_StructVector_deleteRef( bHYPREP_x ); /* extra ref from queryInt */
    }
    else
    {
