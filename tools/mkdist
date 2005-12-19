@@ -114,6 +114,12 @@ mv $HYPRE_DIR "hypre-${Version}"
 HYPRE_DIR="hypre-${Version}"
 HYPRE_DIST_INSTALL_DIR=`pwd`"/$HYPRE_DIR"
     
+# build documentation for examples sub-directory
+(
+  cd $HYPRE_DIST_INSTALL_DIR/src/linear_solvers/examples/docs
+  make
+)
+    
 # build documentation and install in the distribution directory
 (
   cd $HYPRE_DIST_INSTALL_DIR/src/linear_solvers
