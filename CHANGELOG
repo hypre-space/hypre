@@ -46,6 +46,8 @@ Version 1.10.0b released, 2005/12/19.
 
 - Added the capability of nodal coarsening for systems AMG.
 
+- expanded coverage of Babel-based interface
+
 ********************************************************************
 
 Version 1.9.0b released, 2005/02/10.
