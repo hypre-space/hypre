@@ -796,8 +796,8 @@ main( int   argc,
       printf("       0 = Unknown approach \n");
       printf("       1 = Frobenius norm  \n");
       printf("       2 = Sum of Abs.value of elements  \n");
-      printf("       3 = Largest element  \n");
-      printf("       4 = Inf. norm  \n");
+      printf("       3 = Largest magnitude element (includes its sign)  \n");
+      printf("       4 = Inf. norm \n");
       printf("       5 = One norm  \n");
       printf("  -ns <val>              : Use <val> sweeps on each level\n");
       printf("                           (default C/F down, F/C up, F/C fine\n");
