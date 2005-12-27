@@ -25,12 +25,17 @@ considerations for other usage patterns.
 Jacobi     & X &   &   &   \\
 SMG        & X &   &   &   \\
 PFMG       & X &   &   &   \\
+SysPFMG    & X &   &   &   \\
+Split      &   & X &   &   \\
 BoomerAMG  &   & X & X & X \\
+MLI        &   & X & X & X \\
 ParaSails  &   & X & X & X \\
 Euclid     &   & X & X & X \\
 PILUT      &   & X & X & X \\
 PCG        & X & X & X & X \\
 GMRES      & X & X & X & X \\
+BiCGSTAB   & X & X & X & X \\
+Hybrid     & X & X & X & X \\
 \hline
 \end{tabular}
 \caption{%
@@ -58,19 +63,30 @@ multiplication.  Most preconditioners, on the other hand, have
 additional requirements such as access to the matrix coefficients.
 
 \item
+{\bf Create the solver/preconditioner} via the \code{Create()} routine.
+
+\item
 {\bf Choose parameters for the preconditioner and/or solver.}
 Parameters are chosen through the \code{Set()} calls provided by the
-solver.  As is true throughout \hypre{}, all parameters have
-reasonable defaults if not chosen.  Note that in \hypre{}, convergence
+solver.  Throughout \hypre{}, we have made our best effort to
+give all parameters reasonable defaults if not chosen.  However, 
+for some preconditioners/solvers the best choices for parameters
+depend on the problem to be solved. We give recommendations in the
+individual sections on how to choose these parameters.
+Note that in \hypre{}, convergence
 criteria can be chosen after the preconditioner/solver has been setup.
+For a complete set of all available parameters see the Reference Manual.
 
 \item
 {\bf Pass the preconditioner to the solver.} For solvers that are not
 preconditioned, this step is omitted.  The preconditioner is passed
-through the \code{SetPreconditioner()} call.
+through the \code{SetPrecond()} call.
 
 \item
 {\bf Set up the solver.} This is just the \code{Setup()} routine.
+At this point the matrix and right hand side is passed into the solver
+or preconditioner. Note that the actual right hand side is not used
+until the actual solve is performed.
 
 \end{enumerate}
 
@@ -94,6 +110,18 @@ usually required.
 
 \item
 {\bf Solve the system.}  This is just the \code{Solve()} routine.
+
+\end{enumerate}
+
+%-----------------------------------------------------------------------------
+
+\section*{Finalize:}
+
+\begin{enumerate}
+
+\item
+{\bf Free the solver or preconditioner.} This is done using the
+\code{Destroy()} routine.
 
 \end{enumerate}
 
@@ -134,25 +162,43 @@ as SMG, but is much more efficient per V-cycle.
 
 \section{BoomerAMG}
 
-BoomerAMG is a parallel implementation of algebraic multigrid.  It can be used
+BoomerAMG is a parallel implementation of the algebraic multigrid 
+method \cite{Ruge_Stueben_1987}. 
+It can be used
 both as a solver or as a preconditioner.  The user can choose between various
-different parallel coarsening techniques and relaxation schemes.  See
-\cite{VEHenson_UMYang_2002} for a detailed description of the coarsening
-algorithms, the interpolation and nueemerical results.  The following
+different parallel coarsening techniques, interpolation and relaxation schemes.
+See
+\cite{VEHenson_UMYang_2002,UMYang_2005} for a detailed description of the 
+coarsening
+algorithms, interpolation and relaxation schemes as well as numerical results.  The following
 coarsening techniques are available:
 \begin{itemize}
 \item the Cleary-Luby-Jones-Plassman (CLJP) coarsening,
-\item various variants of the classical Ruge-Stueben (RS) coarsening algorithm, and
 \item the Falgout coarsening which is a combination of CLJP and the
-classical RS coarsening algorithm.
+classical RS coarsening algorithm,
+\item PMIS and HMIS coarsening algorithms which lead to coarsenings with lower complexities \cite{DeSterck_Yang_Heys_2004}
+and 
+\item aggressive coarsening, which can be applied to any of the coarsening techniques mentioned above and thus achieving much lower complexities and lower memory use \cite{Stueben_1999}.
 \end{itemize}
+The following interpolation techniques are available:
+\begin{itemize}
+\item the ``classical" interpolation as defined in \cite{Ruge_Stueben_1987},
+\item direct interpolation \cite{Stueben_1999},
+\item multipass interpolation \cite{Stueben_1999}.
+\item the ``classical" interpolation modified for hyperbolic PDEs.
+\end{itemize}
+
 The following relaxation techniques are available:
 \begin{itemize}
 \item weighted Jacobi relaxation,
 \item a hybrid Gauss-Seidel / Jacobi relaxation scheme, 
 \item a symmetric hybrid Gauss-Seidel / Jacobi relaxation scheme, and
-\item sequential Gauss-Seidel relaxation.
+\item hybrid block smoothers \cite{UMYang_2004}.
 \end{itemize}
+
+If the users wants to solve systems of PDEs and can provide information on
+which variables belong to which function, BoomerAMG's systems AMG version
+can also be used.
 
 %-----------------------------
 
@@ -180,169 +226,19 @@ int HYPRE_BoomerAMGDestroy(HYPRE_Solver solver);
 
 %-----------------------------
 
-\subsection{Interface functions}
-
-Parameters for setting up the code are specified using the following routines:
-
-\subsubsection*{HYPRE\_BoomerAMGSetMaxLevels}
-\begin{display}
-\begin{verbatim}
-int HYPRE_BoomerAMGSetMaxLevels( HYPRE_Solver solver, int max_levels);
-\end{verbatim}
-\end{display}
-max\_levels defines the maximal number of multigrid levels allowed.
-The default is 25.
-
-\subsubsection*{HYPRE\_BoomerAMGSetMaxIter}
-\begin{display}
-\begin{verbatim}
-int HYPRE_BoomerAMGSetMaxIter( HYPRE_Solver solver, int max_iter);
-\end{verbatim}
-\end{display}
-max\_iter defines the maximal number of iterations allowed.
-The default is 20.
-
-\subsubsection*{HYPRE\_BoomerAMGSetTol}
-\begin{display}
-\begin{verbatim}
-int HYPRE_BoomerAMGSetTol( HYPRE_Solver solver, double tol);
-\end{verbatim}
-\end{display}
-tol defines the tolerance needed for the stopping criterion
-$\| b ~ - ~ Ax^{(n)} \|_2 / \| b \|_2 \leq $ tol.
-The default for tol is $10 ^{-7}$.
-
-\subsubsection*{HYPRE\_BoomerAMGSetStrongThreshold}
-\begin{display}
-\begin{verbatim}
-int HYPRE_BoomerAMGSetStrongThreshold( HYPRE_Solver solver,
-	double strong_threshold);
-\end{verbatim}
-\end{display}
-A point $i$ is strongly connected to $j$, if $-a_{i,j} \geq \theta 
-\max_{j \neq i} \-a_{ij}$, where the strong threshold $\theta$ is a value
-between 0 and 1. Weak connections are usually ignored when determining
-the next lower level. Consequently, choosing a larger strong threshold
-leads in general to smaller coarse grids, but worse convergence rates.
-The default value for $\theta$
-is 0.25, which appears to be a good choice for 2-dimensional
+For best performance, it might be necessary to set certain parameters.
+One important parameter is the strong threshold, which can be set
+using the function HYPRE$\_$BoomerAMGSetStrongThreshold.
+The default value is 0.25, which appears to be a good choice for 2-dimensional
 problems. A better choice for 3-dimensional problems appears to be 0.5. However,
 the choice of the strength threshold is problem dependent and therefore
 there could be better choices than the two suggested ones.
+In some cases (such as a 3D 7-point Laplace problem) good performance
+could be obtained by setting the strength threshold to 0 and additionally
+setting the interpolation truncation factor to 0.3 
+via HYPRE$\_$BoomerAMGSetTruncFactor.
 
-\subsubsection*{HYPRE\_BoomerAMGSetMaxRowSum}
-\begin{display}
-\begin{verbatim}
-int HYPRE_BoomerAMGSetMaxRowSum( HYPRE_Solver solver, double max_row_sum);
-\end{verbatim}
-\end{display}
-This feature leads to a more efficient treatment of very
-diagonally dominant portions of the matrix.
-If the absolute row sum of row i weighted by the diagonal
-is greater than max\_row\_sum all dependencies of variable i are set
-to be weak. 
-This feature can be switched off by setting max\_row\_sum to 1.0.
-The default is 0.9.
-
-\subsubsection*{HYPRE\_BoomerAMGSetCoarsenType}
-\begin{display}
-\begin{verbatim}
-int HYPRE_BoomerAMGSetCoarsenType( HYPRE_Solver solver, int coarsen_type  );
-\end{verbatim}
-\end{display}
-coarsen\_type defines the coarsening used. The following options 
-are possible:
-
-\begin{tabular}{l l}
-  0 & CLJP-coarsening \\
-  1& 	Ruge-Stueben coarsening without boundary treatment \\
-  3& 	Ruge-Stueben coarsening with a 3rd 'second' pass on the boundaries \\
- 6 & 	Falgout coarsening (default) \\
-\end{tabular}
-
-\subsubsection*{HYPRE\_BoomerAMGSetMeasureType}
-\begin{display}
-\begin{verbatim}
-int HYPRE_BoomerAMGSetMeasureType( HYPRE_Solver solver, int measure_type  );
-\end{verbatim}
-\end{display}
-measure\_type defines 
-whether local (measure\_type = 0, default) or global measures 
-(measure\_type = 1) are used within the coarsening 
-algorithm. This feature is ignored for the CLJP and the Falgout coarsening.
-
-\subsubsection*{HYPRE\_BoomerAMGSetNumGridSweeps}
-\begin{display}
-\begin{verbatim}
-int HYPRE_BoomerAMGSetNumGridSweeps( HYPRE_Solver solver, int* num_grid_sweeps );
-\end{verbatim}
-\end{display}
-num\_grid\_sweeps[k] defines the number of sweeps over the grid on the fine 
-grid (k=0), the down cycle (k=1), the up cycle (k=2) and the coarse grid (k=3).
-
-\subsubsection*{HYPRE\_BoomerAMGSetGridRelaxType}
-\begin{display}
-\begin{verbatim}
-int HYPRE_BoomerAMGSetGridRelaxType( HYPRE_Solver solver, int* grid_relax_type );
-\end{verbatim}
-\end{display}
-grid\_relax\_type[k] defines the relaxation used on the fine 
-grid (k=0), the down cycle (k=1), the up cycle (k=2) and the coarse grid (k=3).
-The following options are possible for grid\_relax\_type[k]:
-
-\begin{tabular}{l l}
- 0 & weighted Jacobi \\
- 1 & sequential Gauss-Seidel (very slow!) \\
- 3 & Gauss-Seidel / Jacobi hybrid method (default) \\
- 6 & symmetric Gauss-Seidel / Jacobi hybrid method \\
- 9 & Gaussian elimination (only for the coarsest level (k=3), not recommended\\ 
- & if the system on the coarsest level is large)\\
-\end{tabular}
-
-\subsubsection*{HYPRE\_BoomerAMGSetGridRelaxPoints}
-\begin{display}
-\begin{verbatim}
-int HYPRE_BoomerAMGSetGridRelaxPoints( HYPRE_Solver solver, 
-	int** grid_relax_points);
-\end{verbatim}
-\end{display}
-grid\_relax\_points[i][j] defines which points are to be relaxed during
-the (j+1)-th sweep on the fine 
-grid (i=0), the down cycle (i=1), the up cycle (i=2) and the coarse grid (i=3),
-e.g. if grid\_relax\_points[1][0] is -1, all points marked -1 (which are in
-general fine points) are relaxed on the first sweep of the down cycle.
-Note: grid\_relax\_points[3][j] needs to be 0 always, since the concept of 
-coarse and fine points does not exist on the coarsest grid. If the user
-sets it to another value, it will be automatically set to 0 and a warning
-printed, unless the direct solver is used.
-
-\subsubsection*{HYPRE\_BoomerAMGSetRelaxWeight}
-\begin{display}
-\begin{verbatim}
-int HYPRE_BoomerAMGSetRelaxWeight( HYPRE_Solver solver, double* relax_weight);
-\end{verbatim}
-\end{display}
-defines the relaxation weights used on each level, if weighted Jacobi is used
-as relaxation method. The default relaxation weight is 1.0 on each level.
-
-\subsubsection*{HYPRE\_BoomerAMGSetPrintLevel}
-\begin{display}
-\begin{verbatim}
-int HYPRE_BoomerAMGSetPrintLevel( HYPRE_Solver solver, int print_level);
-\end{verbatim}
-\end{display}
-where ioutdat determines whether statistics information is generated and 
-printed. The information is printed to standard output.
-The following options are possible:
-
-\begin{tabular}{l l}
- 0 & no output (default) \\
- 1 & matrix statistics (includes information on interpolation operators and \\
- & matrices generated on each level) \\
- 2 & cycle statistics (includes residuals generated during solve phase) \\
- 3 & matrix and cycle statistics \\
-\end{tabular}
-
+For a complete listing of all parameters see the reference manual.
 %-----------------------------------------------------------------------------
 
 \section{ParaSails}
