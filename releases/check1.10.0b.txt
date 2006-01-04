@@ -62,20 +62,20 @@ made available to users.
     Otherwise, untag the repository, make necessary corrections, return
        to step 10; iterating until all tests run correctly.
 
-    --->> _________________________________________
+    --->> _____N/A______________________
 
 14. Create tar file of checked out version by running the mkdist script
 
-    --->> _________________________________________
+    --->> ____________OK 12/20/05 emh_____
 
 15. Manually untar the file that was created in step 14
 
-    --->> _________________________________________
+    --->> ____________OK 12/20/05 emh_____
 
 16. Manually run the autotest script with the following options on the checked
-        out version: -tux149 -insure -frost -gpsmp -pengra
+        out version: -tux149 -insure -gpsmp -pengra
 
-    --->> _________________________________________
+    --->> ____________OK 12/20/05 emh_____
 
 17. If the tests run properly, proceed to step 18
     Otherwise, untag the repository, make necessary corrections, return
@@ -85,59 +85,59 @@ made available to users.
 
 18. Copy tar file to any closed (SCF) computer system, using FIS 
 
-    --->> _________________________________________
+    --->> ____________OK 12/20/05 emh_____
 
 19. Copy tar file to /usr/casc/hypre/i686-pc-linux-gnu directory
 
-    --->> _________________________________________
+    --->> ____________OK 12/20/05 emh_____
 
 20. Run the mkdistlinks script to create symbolic links to the tar file 
 
-    --->> _________________________________________
+    --->> ____________OK 12/20/05 emh_____
 
 21. Run the mklibs script with the '-b install' option to create
        and install the release
 
-    --->> _________________________________________
+    --->> ____________OK 12/20/05 emh_____
 
 22. Log onto any closed (SCF) computer system
 
-    --->> _________________________________________
+    --->> ____________OK 12/20/05 emh_____
 
 23. Retrieve the tar file from the FIS system
 
-    --->> _________________________________________
+    --->> ____________OK 12/20/05 emh_____
 
 24. Manually untar the file that was retrieved in step 23
 
-    --->> _________________________________________
+    --->> ____________OK 12/21/05 emh_____
 
 25. Manually run the autotest script with the following options on the checked
-        out version: -sc -white -emperor
+        out version: -sc -white
 
-    --->> _________________________________________
+    --->> ____________OK 12/21/05 emh_____
 
 26. Copy tar file to the appropriate sub-directory (based on SYS_TYPE) of
        /usr/gapps/hypre and /usr/casc/hypre
 
-    --->> _________________________________________
+    --->> ____________OK 12/21/05 emh_____
 
 27. Run the mkdistlinks script to create symbolic links to the tar file 
 
-    --->> _________________________________________
+    --->> ____________OK 12/21/05 emh_____
 
 28. Run the mklibs script with the '-b install' option to create
        and install the release
 
-    --->> _________________________________________
+    --->> ____________OK 12/22/05 emh_____
 
 29. If there are no errors in steps 16-30; inform project team and other
        appropriate users of availability
 
-    --->> _________________________________________
+    --->> ____________OK 12/21/05 emh_____
 
 30. FINAL SIGN-OFF
     Verify that all steps have been signed off and commit this file to
        the repository
 
-    --->> _________________________________________
+    --->> ____________finalized on 01/03/06 emh_____
