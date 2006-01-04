@@ -72,6 +72,7 @@ the release is made available to users.
     --->> _________________________________________
 
 16. Create tar file of checked out version by running the mkdist script
+    ./mkdist [VersionId]  (run in local directory above linear_solvers)
 
     --->> _________________________________________
 
@@ -80,7 +81,7 @@ the release is made available to users.
     --->> _________________________________________
 
 18. Manually run the autotest script with the following options on the checked
-        out version: -tux149 -insure -frost -gpsmp -pengra
+        out version: -tux149 -insure -gpsmp -pengra
 
     --->> _________________________________________
 
@@ -94,16 +95,20 @@ the release is made available to users.
 
     --->> _________________________________________
 
-21. Copy tar file to /usr/casc/hypre/i686-pc-linux-gnu directory
+21. On the CASC cluster, copy tar file to /usr/casc/hypre/i686-pc-linux-gnu directory
 
     --->> _________________________________________
 
 22. Run the mkdistlinks script to create symbolic links to the tar file 
+    ./mkdistlinks <HypreArchiveFileName> 
+    (run in /usr/casc/hypre and OCF directory /usr/gapps/hypre)
 
     --->> _________________________________________
 
-23. Run the mklibs script with the '-g install' option to create
-       and install the release
+23. On each OCF SYS_TYPE platform, including the CASC cluster, run the mklibs 
+       script in the /usr/casc/hypre and/or /usr/gapps/hypre directories to 
+       create and install the release
+    ./mklibs -g <HypreArchiveFileName> install
 
     --->> _________________________________________
 
@@ -120,21 +125,24 @@ the release is made available to users.
     --->> _________________________________________
 
 27. Manually run the autotest script with the following options on the checked
-        out version: -sc -white -emperor
+        out version: -sc -lilac
 
     --->> _________________________________________
 
 28. Copy tar file to the appropriate sub-directory (based on SYS_TYPE) of
-       /usr/gapps/hypre and /usr/casc/hypre
+       /usr/gapps/hypre
 
     --->> _________________________________________
 
 29. Run the mkdistlinks script to create symbolic links to the tar file 
+    ./mkdistlinks <HypreArchiveFileName> 
+    (run in /usr/gapps/hypre)
 
     --->> _________________________________________
 
-30. Run the mklibs script with the '-g install' option to create
-       and install the release
+30. On each SCF SYS_TYPE platform run the mklibs script in the /usr/gapps/hypre
+       directory to create and install the release
+    ./mklibs -g <HypreArchiveFileName> install
 
     --->> _________________________________________
 

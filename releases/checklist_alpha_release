@@ -47,6 +47,7 @@ available to users.
     --->> _________________________________________
 
 10. Create tar file of checked out version by running the mkdist script
+    ./mkdist [VersionID]  (run in local directory above linear_solvers)
 
     --->> _________________________________________
 
@@ -70,11 +71,13 @@ available to users.
     --->> _________________________________________
 
 15. Run the mkdistlinks script to create symbolic links to the tar file 
+    ./mkdistlinks <HypreArchiveFileName>
 
     --->> _________________________________________
 
 16. Run the mklibs script with the '-a install' option to create 
        and install the release
+    ./mklibs -a <HypreArchiveFileName> install
 
     --->> _________________________________________
 
