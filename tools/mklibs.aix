@@ -142,7 +142,7 @@ fi
 fi
 
 DIST_DIR=`pwd`/${TAR_FILE%.tar.gz}
-SYS_TYPE=`uname -s`
+SYSTEMTYPE=`uname -s`
 PLATFORM_NAME=`uname -n`
 MAKE="make -i"
 CONFIGURE="./nopoe ./configure"
@@ -344,9 +344,9 @@ fi
 # MPI + threads version. (Do this only once)
 if [ ! -d threads/lib ]
 then
-  if [[ "$SYS_TYPE" != "SunOS" && 
-	"$SYS_TYPE" != "Linux" && 
-	"$SYS_TYPE" != "IRIX64" ]]
+  if [[ "$SYSTEMTYPE" != "SunOS" && 
+	"$SYSTEMTYPE" != "Linux" && 
+	"$SYSTEMTYPE" != "IRIX64" ]]
   then
     (
         HYPRE_INSTALL_DIR=$DIST_DIR/threads
