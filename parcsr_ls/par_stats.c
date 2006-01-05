@@ -294,7 +294,7 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
          row_starts = hypre_ParCSRBlockMatrixRowStarts(A_block_array[level]);
          
          fine_size = hypre_ParCSRBlockMatrixGlobalNumRows(A_block_array[level]);
-         global_nonzeros = (double) hypre_ParCSRBlockMatrixNumNonzeros(A_block_array[level]);
+         global_nonzeros = hypre_ParCSRBlockMatrixDNumNonzeros(A_block_array[level]);
          num_coeffs[level] = global_nonzeros;
          num_variables[level] = (double) fine_size;
   
@@ -358,7 +358,7 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
          row_starts = hypre_ParCSRMatrixRowStarts(A_array[level]);
          
          fine_size = hypre_ParCSRMatrixGlobalNumRows(A_array[level]);
-         global_nonzeros = (double) hypre_ParCSRMatrixNumNonzeros(A_array[level]);
+         global_nonzeros = hypre_ParCSRMatrixDNumNonzeros(A_array[level]);
          num_coeffs[level] = global_nonzeros;
          num_variables[level] = (double) fine_size;
          

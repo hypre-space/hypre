@@ -152,7 +152,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
    else 
    {
        for (j = 1; j < num_levels; j++)
-         num_coeffs[j] = hypre_ParCSRMatrixNumNonzeros(A_array[j]);
+         num_coeffs[j] = hypre_ParCSRMatrixDNumNonzeros(A_array[j]);
    }
    
    
