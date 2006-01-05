@@ -65,7 +65,7 @@ available to users.
     --->> _________________________________________
 
 14. Create tar file of checked out version by running the mkdist script
-    ./mkdist [VersionID]  (run in directory above linear_solvers)
+    ./mkdist [VersionID]  (run in local directory above linear_solvers)
 
     --->> _________________________________________
 
@@ -95,7 +95,7 @@ available to users.
 
 20. Run the mkdistlinks script to create symbolic links to the tar file 
     ./mkdistlinks <HypreArchiveFileName> 
-         (run in /usr/casc/hypre and /usr/gapps/hypre)
+         (run in /usr/casc/hypre and OCF directory /usr/gapps/hypre)
 
     --->> _________________________________________
 
