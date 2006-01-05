@@ -469,6 +469,7 @@ int main (int argc, char *argv[])
    bHYPRE_IJParCSRMatrix_deleteRef( parcsr_A );
    bHYPRE_IJParCSRVector_deleteRef( par_b );
    bHYPRE_IJParCSRVector_deleteRef( par_x );
+   bHYPRE_MPICommunicator_deleteRef( mpi_comm );
 
    hypre_assert( ierr == 0 );
 

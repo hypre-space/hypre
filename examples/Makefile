@@ -2,6 +2,7 @@
 # Compiler and external dependences
 ########################################################################
 CC        = mpicc
+F77       = mpif77
 HYPRE_DIR = ../hypre
 
 ########################################################################
@@ -11,6 +12,10 @@ COPTS     = -g -ansi -pedantic -Wall
 CINCLUDES = -I$(HYPRE_DIR)/include
 CDEFS     = -DHAVE_CONFIG_H -DHYPRE_TIMING
 CFLAGS    = $(COPTS) $(CINCLUDES) $(CDEFS)
+FOPTS     = -g
+FINCLUDES = $(CINCLUDES)
+FDEFS     = $(CDEFS)
+FFLAGS    = $(FOPTS) $(FINCLUDES) $(FDEFS)
 
 LINKOPTS  = $(COPTS)
 LIBS      = -L$(HYPRE_DIR)/lib -lHYPRE -llapack -lblas -lg2c -lm
@@ -27,14 +32,16 @@ LFLAGS_B =\
 ########################################################################
 # Rules for compiling the source files
 ########################################################################
-.SUFFIXES: .c
+.SUFFIXES: .c .f
 .c.o:
 	$(CC) $(CFLAGS) -c $<
+.f.o:
+	$(F77) $(FFLAGS) -c $<
 
 ########################################################################
 # List of all programs to be compiled
 ########################################################################
-ALLPROGS = ex1 ex2 ex3 ex4 ex5 ex6 ex7 ex8 ex9
+ALLPROGS = ex1 ex2 ex3 ex4 ex5 ex6 ex7 ex8 ex9 ex5b ex5b77
 all: $(ALLPROGS)
 
 ########################################################################
@@ -68,10 +75,16 @@ ex5: ex5.o
 	$(CC) -o $@ $^ $(LFLAGS)
 
 ########################################################################
-# Example 5 Babel
+# Example 5 Babel C
 ########################################################################
 ex5b: ex5b.o
 	$(CC) -o $@ $^ $(LFLAGS_B) $(LFLAGS)
+
+########################################################################
+# Example 5 Babel Fortran 77
+########################################################################
+ex5b77: ex5b77.o
+	$(F77) -o $@ $^ $(LFLAGS_B) $(LFLAGS)
 
 ########################################################################
 # Example 6
