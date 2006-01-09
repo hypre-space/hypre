@@ -2245,7 +2245,7 @@ if test "$casc_user_chose_compilers" != "yes"
 then
    if test "$casc_using_openmp" = "yes"
    then
-      for ac_prog in mpguidec guidec icc pgcc xlc cc
+      for ac_prog in mpguidec guidec icc xlc
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
@@ -2285,7 +2285,7 @@ fi
   test -n "$CC" && break
 done
 
-      for ac_prog in mpguidec++ guidec++ icc pgCC xlC CC
+      for ac_prog in mpguidec++ guidec++ icc xlC
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
@@ -2325,7 +2325,7 @@ fi
   test -n "$CXX" && break
 done
 
-      for ac_prog in mpguidef77 guidef77 ifort pgf77 xlf f77
+      for ac_prog in mpguidef77 guidef77 ifort xlf
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
@@ -2367,7 +2367,7 @@ done
 
    elif test "$casc_using_mpi" = "no"
    then
-      for ac_prog in gcc icc pgcc xlc cc kcc
+      for ac_prog in xlc icc gcc cc pgcc
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
@@ -2407,7 +2407,7 @@ fi
   test -n "$CC" && break
 done
 
-      for ac_prog in g++ gcc icc pgCC xlC cxx CC c++ KCC cl
+      for ac_prog in xlC c++ g++ icc cxx KCC pgCC
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
@@ -2447,7 +2447,7 @@ fi
   test -n "$CXX" && break
 done
 
-      for ac_prog in g77 ifort pgf77 xlf f77 kf77 fort77 fort
+      for ac_prog in xlf ifort g77 f77 pgf77
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
@@ -2488,7 +2488,7 @@ fi
 done
 
    else
-      for ac_prog in mpcc mpikcc mpicc hcc icc pgcc xlc cc kcc c89 gcc
+      for ac_prog in mpxlc mpiicc mpicc mpcc mpipgcc
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
@@ -2528,7 +2528,7 @@ fi
   test -n "$CC" && break
 done
 
-      for ac_prog in mpCC mpiKCC mpicxx mpiCC hcp icc pgCC xlC cxx CC c++ KCC g++
+      for ac_prog in mpxlC mpiicc mpiCC mpCC mpipgCC
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
@@ -2568,7 +2568,7 @@ fi
   test -n "$CXX" && break
 done
 
-      for ac_prog in mpxlf mpf77 mpikf77 mpif77 ifort pgf77 xlf f77 kf77 fort77 f90 g77
+      for ac_prog in mpxlf mpiifort mpif77 mpf77 mpipgf77
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
@@ -8892,16 +8892,12 @@ fi
 
 if test "$casc_using_debug" = "yes"
 then
-   if test "x${casc_user_chose_cflags}" = "xno"
+
+if test "x${casc_user_chose_cflags}" = "xno"
 then
-  if test "x${GCC}" = "xyes"
-  then
-        CFLAGS="-g"
-    CFLAGS="$CFLAGS -Wall"
-  else
-    case "${CC}" in
-      kcc|mpikcc)
-        CFLAGS="-g +K3"
+   case "${CC}" in
+      gcc|mpicc)
+        CFLAGS="-g -Wall"
         ;;
       KCC|mpiKCC)
         CFLAGS="--c -g +K3"
@@ -8918,7 +8914,7 @@ then
           CFLAGS="$CFLAGS -mp"
         fi
         ;;
-      cc|c89|mpcc|mpiicc|xlc|ccc)
+      cc|mpcc|mpiicc|xlc)
         case "${host}" in
           alpha*-dec-osf4.*)
             CFLAGS="-std1 -w0 -g"
@@ -8958,16 +8954,15 @@ then
       *)
         CFLAGS="-g"
         ;;
-    esac
-  fi
+   esac
 fi
+
 if test "x${casc_user_chose_cxxflags}" = "xno"
 then
-  if test "x${GXX}" = "xyes"
-  then
+   case "${CXX}" in
+      g++|mpig++)
         CXXFLAGS="-g -Wall"
-  else
-    case "${CXX}" in
+        ;;
       KCC|mpiKCC)
         CXXFLAGS="-g +K3"
         ;;
@@ -8983,7 +8978,7 @@ then
           CXXFLAGS="$CXXFLAGS -mp"
         fi
         ;;
-      CC|aCC|mpCC|mpiicc|xlC|cxx)
+      CC|mpCC|mpiicc|xlC|cxx)
         case "${host}" in
           alpha*-dec-osf4.*)
             CXXFLAGS="-std1 -w0 -g"
@@ -9023,20 +9018,19 @@ then
       *)
         CXXFLAGS="-g"
         ;;
-    esac
-  fi
+   esac
 fi
+
 if test "x${casc_user_chose_fflags}" = "xno"
 then
-  if test "x${G77}" = "xyes"
-  then
-    FFLAGS="-g -Wall"
-  else
-    case "${F77}" in
+   case "${F77}" in
+      g77|mpig77)
+        FFLAGS="-g -Wall"
+        ;;
       kf77|mpikf77)
         FFLAGS="-g +K3"
         ;;
-      ifc)
+      ifort)
         FFLAGS="-g -xW -tpp7"
         if test "$casc_using_openmp" = "yes" ; then
           FFLAGS="$FFLAGS -openmp"
@@ -9048,7 +9042,7 @@ then
           FFLAGS="$FFLAGS -mp"
         fi
         ;;
-      f77|f90|mpxlf|mpif77|mpiifc|xlf|cxx)
+      f77|f90|mpxlf|mpif77|mpiifort|xlf)
         case "${host}" in
           alpha*-dec-osf4.*)
             FFLAGS="-std1 -w0 -g"
@@ -9088,22 +9082,15 @@ then
       *)
         FFLAGS="-g"
         ;;
-    esac
-  fi
+   esac
 fi
 else
-   if test "x${casc_user_chose_cflags}" = "xno"
+
+if test "x${casc_user_chose_cflags}" = "xno"
 then
-  if test "x${GCC}" = "xyes"
-  then
+   case "${CC}" in
+      gcc|mpicc)
         CFLAGS="-O2"
-  else
-    case "${CC}" in
-      kcc|mpikcc)
-        CFLAGS="-fast +K3"
-        ;;
-      KCC|mpiKCC)
-        CFLAGS="--c -fast +K3"
         ;;
       icc)
         CFLAGS="-O3 -xW -tpp7"
@@ -9117,7 +9104,10 @@ then
           CFLAGS="$CFLAGS -mp"
         fi
         ;;
-      cc|c89|mpcc|mpiicc|xlc|ccc)
+      KCC|mpiKCC)
+        CFLAGS="-fast +K3"
+        ;;
+      cc|mpcc|mpiicc|xlc)
         case "${host}" in
           alpha*-dec-osf4.*)
             CFLAGS="-std1 -w0 -O2"
@@ -9157,18 +9147,14 @@ then
       *)
         CFLAGS="-O"
         ;;
-    esac
-  fi
+   esac
 fi
+
 if test "x${casc_user_chose_cxxflags}" = "xno"
 then
-  if test "x${GXX}" = "xyes"
-  then
+   case "${CXX}" in
+      gCC|mpiCC)
         CXXFLAGS="-O2"
-  else
-    case "${CXX}" in
-      KCC|mpiKCC)
-        CXXFLAGS="-fast +K3"
         ;;
       icc)
         CXXFLAGS="-O3 -xW -tpp7"
@@ -9182,7 +9168,10 @@ then
           CXXFLAGS="$CXXFLAGS -mp"
         fi
         ;;
-      CC|aCC|mpCC|mpiicc|xlC|cxx)
+      KCC|mpiKCC)
+        CXXFLAGS="-fast +K3"
+        ;;
+      CC|mpCC|mpiicc|xlC|cxx)
         case "${host}" in
           alpha*-dec-osf4.*)
             CXXFLAGS="-std1 -w0 -O2"
@@ -9222,20 +9211,16 @@ then
       *)
         CXXFLAGS="-O"
         ;;
-    esac
-  fi
+   esac
 fi
+
 if test "x${casc_user_chose_fflags}" = "xno"
 then
-  if test "x${G77}" = "xyes"
-  then
-    FFLAGS="-O"
-  else
-    case "${F77}" in
-      kf77|mpikf77)
-        FFLAGS="-fast +K3"
+   case "${F77}" in
+      g77)
+        FFLAGS="-O"
         ;;
-      ifc)
+      ifort)
         FFLAGS="-O3 -xW -tpp7"
         if test "$casc_using_openmp" = "yes" ; then
           FFLAGS="$FFLAGS -openmp"
@@ -9247,7 +9232,10 @@ then
           FFLAGS="$FFLAGS -mp"
         fi
         ;;
-      f77|f90|mpxlf|mpif77|mpiifc|xlf|cxx)
+      kf77|mpikf77)
+        FFLAGS="-fast +K3"
+        ;;
+      f77|f90|mpxlf|mpif77|mpiifort|xlf)
         case "${host}" in
           alpha*-dec-osf4.*)
             FFLAGS="-std1 -w0 -O2"
@@ -9287,8 +9275,7 @@ then
       *)
         FFLAGS="-O"
         ;;
-    esac
-  fi
+   esac
 fi
 fi
 
@@ -9429,20 +9416,29 @@ _ACEOF
 
          ;;
       Linux | linux | LINUX)
-         case $HOSTNAME in
-            mcr* | thunder* | ilx* | peng*)
-               cat >>confdefs.h <<\_ACEOF
+         if test -r /etc/home.config
+         then
+            systemtype=`grep ^SYS_TYPE /etc/home.config | cut -d" " -f2`
+            case $systemtype in
+               chaos*)
+                  cat >>confdefs.h <<\_ACEOF
 #define HYPRE_LINUX_CHAOS 1
 _ACEOF
 
-               ;;
-            *)
-               cat >>confdefs.h <<\_ACEOF
+                  ;;
+               *)
+                  cat >>confdefs.h <<\_ACEOF
 #define HYPRE_LINUX 1
 _ACEOF
 
-               ;;
-         esac
+                  ;;
+            esac
+         else
+            cat >>confdefs.h <<\_ACEOF
+#define HYPRE_LINUX 1
+_ACEOF
+
+         fi
          ;;
    esac
 

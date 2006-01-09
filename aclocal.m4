@@ -18,10 +18,10 @@ dnl try to determine what the MPI flags should be
 dnl ACX_CHECK_MPI([ACTION-IF-FOUND[, ACTION-IF-NOT-FOUND]])
 dnl ACTION-IF-FOUND is a list of shell commands to run 
 dnl   if an MPI library is found, and
-dnl ACTION-IF-NOT-FOUND is a list of commands to run it 
-dnl   if it is not found. If ACTION-IF-FOUND is not specified, 
-dnl   the default action will define HAVE_MPI. 
-dnl
+dnl ACTION-IF-NOT-FOUND is a list of commands to run it
+dnl   if it is not found. If ACTION-IF-FOUND is not specified,
+dnl   the default action will define HAVE_MPI.
+dnl **********************************************************************
 AC_DEFUN([ACX_CHECK_MPI],
 [AC_PREREQ(2.57)dnl
 AC_PREREQ(2.50) dnl for AC_LANG_CASE
@@ -69,39 +69,6 @@ fi
 ])
 
 dnl **********************************************************************
-dnl * ACX_TIMING
-dnl *
-dnl determine timing routines to use
-dnl
-AC_DEFUN([ACX_TIMING],
-[AC_PREREQ(2.57)dnl
-AC_ARG_WITH(timing,
-AC_HELP_STRING([--with-timing],[use HYPRE timing routines]),
-[if test "$withval" = "yes"; then
-  AC_DEFINE(HYPRE_TIMING,1,[HYPRE timing routines are being used])
-fi])
-])
-
-dnl **********************************************************************
-dnl * ACX_OPENMP
-dnl *
-dnl compile with OpenMP
-dnl
-AC_DEFUN([ACX_OPENMP],
-[AC_PREREQ(2.57)dnl
-AC_ARG_WITH(openmp,
-AC_HELP_STRING([--with-openmp],
-[use openMP--this may affect which compiler is chosen.
-Supported using guidec on IBM and Compaq.]),
-[case "${withval}" in
-  yes) casc_using_openmp=yes
-    AC_DEFINE([HYPRE_USING_OPENMP], 1, [Enable OpenMP support]) ;;
-  no)  casc_using_openmp=no;;
-  *) AC_MSG_ERROR(bad value ${withval} for --with-openmp) ;;
-esac],[casc_using_openmp=no])
-])
-
-dnl **********************************************************************
 dnl * HYPRE_FIND_G2C
 dnl *  try to find libg2c.a
 dnl **********************************************************************
@@ -134,7 +101,7 @@ dnl **********************************************************************
 dnl * HYPRE_REVERSE_FLIBS
 dnl *   reverse the order of -lpmpich and -lmpich ONLY when using insure
 dnl *   Search FLIBS to find -lpmpich, when found reverse the order with
-dnl *      mpich; ignore the -lmpich when found; save all other FLIBS 
+dnl *      mpich; ignore the -lmpich when found; save all other FLIBS
 dnl *      values
 dnl **********************************************************************
 AC_DEFUN([HYPRE_REVERSE_FLIBS],
@@ -164,23 +131,16 @@ AC_DEFUN([HYPRE_REVERSE_FLIBS],
 dnl **********************************************************************
 dnl * ACX_OPTIMIZATION_FLAGS
 dnl *
-dnl try and determine what the optimized compile FLAGS
-dnl
+dnl * Set compile FLAGS for optimization
+dnl **********************************************************************
 AC_DEFUN([ACX_OPTIMIZATION_FLAGS],
 [AC_PREREQ(2.57)dnl
+
 if test "x${casc_user_chose_cflags}" = "xno"
 then
-  if test "x${GCC}" = "xyes"
-  then
-    dnl **** default settings for gcc
-    CFLAGS="-O2"
-  else
-    case "${CC}" in
-      kcc|mpikcc)
-        CFLAGS="-fast +K3"
-        ;;
-      KCC|mpiKCC)
-        CFLAGS="--c -fast +K3"
+   case "${CC}" in
+      gcc|mpicc)
+        CFLAGS="-O2"
         ;;
       icc)
         CFLAGS="-O3 -xW -tpp7"
@@ -194,7 +154,10 @@ then
           CFLAGS="$CFLAGS -mp"
         fi
         ;;
-      cc|c89|mpcc|mpiicc|xlc|ccc)
+      KCC|mpiKCC)
+        CFLAGS="-fast +K3"
+        ;;
+      cc|mpcc|mpiicc|xlc)
         case "${host}" in
           alpha*-dec-osf4.*)
             CFLAGS="-std1 -w0 -O2"
@@ -234,19 +197,14 @@ then
       *)
         CFLAGS="-O"
         ;;
-    esac
-  fi
+   esac
 fi
+
 if test "x${casc_user_chose_cxxflags}" = "xno"
 then
-  if test "x${GXX}" = "xyes"
-  then
-    dnl **** default settings for gcc
-    CXXFLAGS="-O2"
-  else
-    case "${CXX}" in
-      KCC|mpiKCC)
-        CXXFLAGS="-fast +K3"
+   case "${CXX}" in
+      gCC|mpiCC)
+        CXXFLAGS="-O2"
         ;;
       icc)
         CXXFLAGS="-O3 -xW -tpp7"
@@ -260,7 +218,10 @@ then
           CXXFLAGS="$CXXFLAGS -mp"
         fi
         ;;
-      CC|aCC|mpCC|mpiicc|xlC|cxx)
+      KCC|mpiKCC)
+        CXXFLAGS="-fast +K3"
+        ;;
+      CC|mpCC|mpiicc|xlC|cxx)
         case "${host}" in
           alpha*-dec-osf4.*)
             CXXFLAGS="-std1 -w0 -O2"
@@ -300,20 +261,16 @@ then
       *)
         CXXFLAGS="-O"
         ;;
-    esac
-  fi
+   esac
 fi
+
 if test "x${casc_user_chose_fflags}" = "xno"
 then
-  if test "x${G77}" = "xyes"
-  then
-    FFLAGS="-O"
-  else
-    case "${F77}" in
-      kf77|mpikf77)
-        FFLAGS="-fast +K3"
+   case "${F77}" in
+      g77)
+        FFLAGS="-O"
         ;;
-      ifc)
+      ifort)
         FFLAGS="-O3 -xW -tpp7"
         if test "$casc_using_openmp" = "yes" ; then
           FFLAGS="$FFLAGS -openmp"
@@ -325,7 +282,10 @@ then
           FFLAGS="$FFLAGS -mp"
         fi
         ;;
-      f77|f90|mpxlf|mpif77|mpiifc|xlf|cxx)
+      kf77|mpikf77)
+        FFLAGS="-fast +K3"
+        ;;
+      f77|f90|mpxlf|mpif77|mpiifort|xlf)
         case "${host}" in
           alpha*-dec-osf4.*)
             FFLAGS="-std1 -w0 -O2"
@@ -365,28 +325,22 @@ then
       *)
         FFLAGS="-O"
         ;;
-    esac
-  fi
+   esac
 fi])
-      
+
 dnl **********************************************************************
 dnl * ACX_DEBUG_FLAGS
 dnl *
-dnl try and determine what the debuging compile FLAGS
-dnl
+dnl * Set compile FLAGS for debug
+dnl **********************************************************************
 AC_DEFUN([ACX_DEBUG_FLAGS],
 [AC_PREREQ(2.57)dnl
+
 if test "x${casc_user_chose_cflags}" = "xno"
 then
-  if test "x${GCC}" = "xyes"
-  then
-    dnl **** default settings for gcc
-    CFLAGS="-g"
-    CFLAGS="$CFLAGS -Wall"
-  else
-    case "${CC}" in
-      kcc|mpikcc)
-        CFLAGS="-g +K3"
+   case "${CC}" in
+      gcc|mpicc)
+        CFLAGS="-g -Wall"
         ;;
       KCC|mpiKCC)
         CFLAGS="--c -g +K3"
@@ -403,7 +357,7 @@ then
           CFLAGS="$CFLAGS -mp"
         fi
         ;;
-      cc|c89|mpcc|mpiicc|xlc|ccc)
+      cc|mpcc|mpiicc|xlc)
         case "${host}" in
           alpha*-dec-osf4.*)
             CFLAGS="-std1 -w0 -g"
@@ -443,17 +397,15 @@ then
       *)
         CFLAGS="-g"
         ;;
-    esac
-  fi
+   esac
 fi
+
 if test "x${casc_user_chose_cxxflags}" = "xno"
 then
-  if test "x${GXX}" = "xyes"
-  then
-    dnl **** default settings for gcc
-    CXXFLAGS="-g -Wall"
-  else
-    case "${CXX}" in
+   case "${CXX}" in
+      g++|mpig++)
+        CXXFLAGS="-g -Wall"
+        ;;
       KCC|mpiKCC)
         CXXFLAGS="-g +K3"
         ;;
@@ -469,7 +421,7 @@ then
           CXXFLAGS="$CXXFLAGS -mp"
         fi
         ;;
-      CC|aCC|mpCC|mpiicc|xlC|cxx)
+      CC|mpCC|mpiicc|xlC|cxx)
         case "${host}" in
           alpha*-dec-osf4.*)
             CXXFLAGS="-std1 -w0 -g"
@@ -509,20 +461,19 @@ then
       *)
         CXXFLAGS="-g"
         ;;
-    esac
-  fi
+   esac
 fi
+
 if test "x${casc_user_chose_fflags}" = "xno"
 then
-  if test "x${G77}" = "xyes"
-  then
-    FFLAGS="-g -Wall"
-  else
-    case "${F77}" in
+   case "${F77}" in
+      g77|mpig77)
+        FFLAGS="-g -Wall"
+        ;;
       kf77|mpikf77)
         FFLAGS="-g +K3"
         ;;
-      ifc)
+      ifort)
         FFLAGS="-g -xW -tpp7"
         if test "$casc_using_openmp" = "yes" ; then
           FFLAGS="$FFLAGS -openmp"
@@ -534,7 +485,7 @@ then
           FFLAGS="$FFLAGS -mp"
         fi
         ;;
-      f77|f90|mpxlf|mpif77|mpiifc|xlf|cxx)
+      f77|f90|mpxlf|mpif77|mpiifort|xlf)
         case "${host}" in
           alpha*-dec-osf4.*)
             FFLAGS="-std1 -w0 -g"
@@ -574,14 +525,13 @@ then
       *)
         FFLAGS="-g"
         ;;
-    esac
-  fi
+   esac
 fi]) dnl
 
 dnl **********************************************************************
 dnl * HYPRE_SET_ARCH
 dnl * Defines the architecture of the platform on which the code is to run.
-dnl * Cross-compiling is indicated by the host and build platforms being 
+dnl * Cross-compiling is indicated by the host and build platforms being
 dnl * different values, which are usually user supplied on the command line.
 dnl * When cross-compiling is detected the values supplied will be used
 dnl * directly otherwise the needed values will be determined as follows:
@@ -590,7 +540,7 @@ dnl * Find the hostname and assign it to an exported macro $HOSTNAME.
 dnl * Guesses a one-word name for the current architecture, unless ARCH
 dnl * has been preset.  This is an alternative to the built-in macro
 dnl * AC_CANONICAL_HOST, which gives a three-word name.  Uses the utility
-dnl * 'tarch', which is a Bourne shell script that should be in the same  
+dnl * 'tarch', which is a Bourne shell script that should be in the same 
 dnl * directory as the configure script.  If tarch is not present or if it
 dnl * fails, ARCH is set to the value, if any, of shell variable HOSTTYPE,
 dnl * otherwise ARCH is set to "unknown".
@@ -620,7 +570,7 @@ AC_DEFUN([HYPRE_SET_ARCH],
       dnl * value, otherwise go through this procedure
       if test -z "$ARCH"; then
 
-         dnl * search for the tool "tarch".  It should be in the same 
+         dnl * search for the tool "tarch".  It should be in the same
          dnl * directory as configure.in, but a couple of other places will
          dnl * be checked.  casc_tarch stores a relative path for "tarch".
          casc_tarch_dir=
@@ -651,7 +601,7 @@ AC_DEFUN([HYPRE_SET_ARCH],
             AC_MSG_WARN(architecture is unknown)
          else
             AC_MSG_RESULT($HYPRE_ARCH)
-         fi    
+         fi
       else
          HYPRE_ARCH = $ARCH
          AC_MSG_RESULT($HYPRE_ARCH)
@@ -680,14 +630,20 @@ dnl *    define type of architecture
          AC_DEFINE(HYPRE_IRIX64)
          ;;
       Linux | linux | LINUX)
-         case $HOSTNAME in
-            mcr* | thunder* | ilx* | peng*)
-               AC_DEFINE(HYPRE_LINUX_CHAOS)
-               ;;
-            *)
-               AC_DEFINE(HYPRE_LINUX)
-               ;;
-         esac
+         if test -r /etc/home.config
+         then
+            systemtype=`grep ^SYS_TYPE /etc/home.config | cut -d" " -f2`
+            case $systemtype in 
+               chaos*)
+                  AC_DEFINE(HYPRE_LINUX_CHAOS)
+                  ;;
+               *)
+                  AC_DEFINE(HYPRE_LINUX)
+                  ;;
+            esac
+         else
+            AC_DEFINE(HYPRE_LINUX)
+         fi
          ;;
    esac
      
