@@ -37,7 +37,6 @@ HEADERS =\
  par_csr_block_matrix.h
 
 FILES =\
- csr_block_matop.c\
  csr_block_matrix.c\
  csr_block_matvec.c\
  par_csr_block_matrix.c\
