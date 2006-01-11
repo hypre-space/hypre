@@ -30,6 +30,25 @@ HEADERS =\
  parcsr_mv.h\
  par_vector.h
 
+#FILES =\
+# communicationT.c\
+# F90_HYPRE_parcsr_matrix.c\
+# F90_HYPRE_parcsr_vector.c\
+# F90_parcsr_matrix.c\
+# F90_par_vector.c\
+# HYPRE_parcsr_matrix.c\
+# HYPRE_parcsr_vector.c\
+# new_commpkg.c\
+# numbers.c\
+# par_csr_aat.c\
+# par_csr_bool_matop.c\
+# par_csr_bool_matrix.c\
+# par_csr_communication.c\
+# par_csr_matop.c\
+# par_csr_matrix.c\
+# par_csr_matvec.c\
+# par_vector.c
+
 FILES =\
  communicationT.c\
  F90_HYPRE_parcsr_matrix.c\
@@ -44,7 +63,6 @@ FILES =\
  par_csr_bool_matop.c\
  par_csr_bool_matrix.c\
  par_csr_communication.c\
- par_csr_matop.c\
  par_csr_matrix.c\
  par_csr_matvec.c\
  par_vector.c
