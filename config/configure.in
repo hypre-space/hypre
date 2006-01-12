@@ -621,7 +621,7 @@ then
       AC_CHECK_PROGS(F77, g77 ifort xlf pgf77 f77 kf77)
    else
       AC_CHECK_PROGS(CC, mpcc mpicc mpxlc mpiicc mpipgcc)
-      AC_CHECK_PROGS(CXX, mpCC mpiCC mpxlC mpiicc mpipgCC)
+      AC_CHECK_PROGS(CXX, mpCC mpicxx mpiCC mpxlC mpiicc mpipgCC)
       AC_CHECK_PROGS(F77, mpf77 mpif77 mpxlf mpiifort mpipgf77)
    fi
 fi
