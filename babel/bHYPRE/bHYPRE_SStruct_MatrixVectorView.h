@@ -2,12 +2,12 @@
  * File:          bHYPRE_SStruct_MatrixVectorView.h
  * Symbol:        bHYPRE.SStruct_MatrixVectorView-v1.0.0
  * Symbol Type:   interface
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.12
  * Description:   Client-side glue code for bHYPRE.SStruct_MatrixVectorView
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.12
  */
 
 #ifndef included_bHYPRE_SStruct_MatrixVectorView_h
@@ -127,14 +127,6 @@ bHYPRE_SStruct_MatrixVectorView__cast2(
 void
 bHYPRE_SStruct_MatrixVectorView__exec(
   /* in */ bHYPRE_SStruct_MatrixVectorView self,
-  /* in */ const char* methodName,
-  /* in */ sidl_io_Deserializer inArgs,
-  /* in */ sidl_io_Serializer outArgs);
-/**
- * static Exec method for reflexity.
- */
-void
-bHYPRE_SStruct_MatrixVectorView__sexec(
   /* in */ const char* methodName,
   /* in */ sidl_io_Deserializer inArgs,
   /* in */ sidl_io_Serializer outArgs);

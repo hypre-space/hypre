@@ -2,12 +2,12 @@
  * File:          bHYPRE_SStructParCSRVector_IOR.c
  * Symbol:        bHYPRE.SStructParCSRVector-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.12
  * Description:   Intermediate Object Representation for bHYPRE.SStructParCSRVector
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.12
  */
 
 #include "sidl_rmi_InstanceHandle.h"
@@ -149,8 +149,8 @@ bHYPRE_SStructParCSRVector_isSame__exec(
         struct sidl_io_Deserializer__object* inArgs,
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
-  struct sidl_BaseInterface__object* iobj;
-  sidl_bool _retval;
+  struct sidl_BaseInterface__object* iobj = 0;
+  sidl_bool _retval = FALSE;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
@@ -174,7 +174,7 @@ bHYPRE_SStructParCSRVector_queryInt__exec(
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
   char* name= NULL;
-  struct sidl_BaseInterface__object* _retval;
+  struct sidl_BaseInterface__object* _retval = 0;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
@@ -197,7 +197,7 @@ bHYPRE_SStructParCSRVector_isType__exec(
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
   char* name= NULL;
-  sidl_bool _retval;
+  sidl_bool _retval = FALSE;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
@@ -221,7 +221,7 @@ bHYPRE_SStructParCSRVector_getClassInfo__exec(
         struct sidl_io_Deserializer__object* inArgs,
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
-  struct sidl_ClassInfo__object* _retval;
+  struct sidl_ClassInfo__object* _retval = 0;
   /* unpack in and inout argments */
 
   /* make the call */
@@ -241,7 +241,7 @@ bHYPRE_SStructParCSRVector_SetCommunicator__exec(
   /* stack space for arguments */
   char* mpi_comm_str= NULL;
   struct bHYPRE_MPICommunicator__object* mpi_comm= NULL;
-  int32_t _retval;
+  int32_t _retval = 0;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
@@ -268,7 +268,7 @@ bHYPRE_SStructParCSRVector_Initialize__exec(
         struct sidl_io_Deserializer__object* inArgs,
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
-  int32_t _retval;
+  int32_t _retval = 0;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
@@ -290,7 +290,7 @@ bHYPRE_SStructParCSRVector_Assemble__exec(
         struct sidl_io_Deserializer__object* inArgs,
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
-  int32_t _retval;
+  int32_t _retval = 0;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
@@ -312,9 +312,9 @@ bHYPRE_SStructParCSRVector_GetObject__exec(
         struct sidl_io_Deserializer__object* inArgs,
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
-  struct sidl_BaseInterface__object* A_tmp;
+  struct sidl_BaseInterface__object* A_tmp = 0;
   struct sidl_BaseInterface__object** A= &A_tmp;
-  int32_t _retval;
+  int32_t _retval = 0;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
@@ -339,7 +339,7 @@ bHYPRE_SStructParCSRVector_SetGrid__exec(
   /* stack space for arguments */
   char* grid_str= NULL;
   struct bHYPRE_SStructGrid__object* grid= NULL;
-  int32_t _retval;
+  int32_t _retval = 0;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
@@ -365,11 +365,11 @@ bHYPRE_SStructParCSRVector_SetValues__exec(
         struct sidl_io_Deserializer__object* inArgs,
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
-  int32_t part;
-  struct sidl_int__array* index;
-  int32_t var;
-  double value;
-  int32_t _retval;
+  int32_t part = 0;
+  struct sidl_int__array* index = 0;
+  int32_t var = 0;
+  double value = 0;
+  int32_t _retval = 0;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
@@ -398,12 +398,12 @@ bHYPRE_SStructParCSRVector_SetBoxValues__exec(
         struct sidl_io_Deserializer__object* inArgs,
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
-  int32_t part;
-  struct sidl_int__array* ilower;
-  struct sidl_int__array* iupper;
-  int32_t var;
-  struct sidl_double__array* values;
-  int32_t _retval;
+  int32_t part = 0;
+  struct sidl_int__array* ilower = 0;
+  struct sidl_int__array* iupper = 0;
+  int32_t var = 0;
+  struct sidl_double__array* values = 0;
+  int32_t _retval = 0;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
@@ -432,11 +432,11 @@ bHYPRE_SStructParCSRVector_AddToValues__exec(
         struct sidl_io_Deserializer__object* inArgs,
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
-  int32_t part;
-  struct sidl_int__array* index;
-  int32_t var;
-  double value;
-  int32_t _retval;
+  int32_t part = 0;
+  struct sidl_int__array* index = 0;
+  int32_t var = 0;
+  double value = 0;
+  int32_t _retval = 0;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
@@ -465,12 +465,12 @@ bHYPRE_SStructParCSRVector_AddToBoxValues__exec(
         struct sidl_io_Deserializer__object* inArgs,
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
-  int32_t part;
-  struct sidl_int__array* ilower;
-  struct sidl_int__array* iupper;
-  int32_t var;
-  struct sidl_double__array* values;
-  int32_t _retval;
+  int32_t part = 0;
+  struct sidl_int__array* ilower = 0;
+  struct sidl_int__array* iupper = 0;
+  int32_t var = 0;
+  struct sidl_double__array* values = 0;
+  int32_t _retval = 0;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
@@ -499,7 +499,7 @@ bHYPRE_SStructParCSRVector_Gather__exec(
         struct sidl_io_Deserializer__object* inArgs,
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
-  int32_t _retval;
+  int32_t _retval = 0;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
@@ -521,12 +521,12 @@ bHYPRE_SStructParCSRVector_GetValues__exec(
         struct sidl_io_Deserializer__object* inArgs,
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
-  int32_t part;
-  struct sidl_int__array* index;
-  int32_t var;
-  double value_tmp;
+  int32_t part = 0;
+  struct sidl_int__array* index = 0;
+  int32_t var = 0;
+  double value_tmp = 0;
   double* value= &value_tmp;
-  int32_t _retval;
+  int32_t _retval = 0;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
@@ -555,13 +555,13 @@ bHYPRE_SStructParCSRVector_GetBoxValues__exec(
         struct sidl_io_Deserializer__object* inArgs,
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
-  int32_t part;
-  struct sidl_int__array* ilower;
-  struct sidl_int__array* iupper;
-  int32_t var;
-  struct sidl_double__array* values_tmp;
+  int32_t part = 0;
+  struct sidl_int__array* ilower = 0;
+  struct sidl_int__array* iupper = 0;
+  int32_t var = 0;
+  struct sidl_double__array* values_tmp = 0;
   struct sidl_double__array** values= &values_tmp;
-  int32_t _retval;
+  int32_t _retval = 0;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
@@ -590,7 +590,7 @@ bHYPRE_SStructParCSRVector_SetComplex__exec(
         struct sidl_io_Deserializer__object* inArgs,
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
-  int32_t _retval;
+  int32_t _retval = 0;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
@@ -613,8 +613,8 @@ bHYPRE_SStructParCSRVector_Print__exec(
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
   char* filename= NULL;
-  int32_t all;
-  int32_t _retval;
+  int32_t all = 0;
+  int32_t _retval = 0;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
@@ -640,7 +640,7 @@ bHYPRE_SStructParCSRVector_Clear__exec(
         struct sidl_io_Deserializer__object* inArgs,
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
-  int32_t _retval;
+  int32_t _retval = 0;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
@@ -662,8 +662,8 @@ bHYPRE_SStructParCSRVector_Copy__exec(
         struct sidl_io_Deserializer__object* inArgs,
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
-  struct bHYPRE_Vector__object* x;
-  int32_t _retval;
+  struct bHYPRE_Vector__object* x = 0;
+  int32_t _retval = 0;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
@@ -686,9 +686,9 @@ bHYPRE_SStructParCSRVector_Clone__exec(
         struct sidl_io_Deserializer__object* inArgs,
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
-  struct bHYPRE_Vector__object* x_tmp;
+  struct bHYPRE_Vector__object* x_tmp = 0;
   struct bHYPRE_Vector__object** x= &x_tmp;
-  int32_t _retval;
+  int32_t _retval = 0;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
@@ -711,8 +711,8 @@ bHYPRE_SStructParCSRVector_Scale__exec(
         struct sidl_io_Deserializer__object* inArgs,
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
-  double a;
-  int32_t _retval;
+  double a = 0;
+  int32_t _retval = 0;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
@@ -736,10 +736,10 @@ bHYPRE_SStructParCSRVector_Dot__exec(
         struct sidl_io_Deserializer__object* inArgs,
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
-  struct bHYPRE_Vector__object* x;
-  double d_tmp;
+  struct bHYPRE_Vector__object* x = 0;
+  double d_tmp = 0;
   double* d= &d_tmp;
-  int32_t _retval;
+  int32_t _retval = 0;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
@@ -764,9 +764,9 @@ bHYPRE_SStructParCSRVector_Axpy__exec(
         struct sidl_io_Deserializer__object* inArgs,
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
-  double a;
-  struct bHYPRE_Vector__object* x;
-  int32_t _retval;
+  double a = 0;
+  struct bHYPRE_Vector__object* x = 0;
+  int32_t _retval = 0;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
@@ -844,8 +844,6 @@ static void ior_bHYPRE_SStructParCSRVector__delete(
 static char*
 ior_bHYPRE_SStructParCSRVector__getURL(
     struct bHYPRE_SStructParCSRVector__object* self) {
-  sidl_rmi_InstanceHandle conn = (sidl_rmi_InstanceHandle)self->d_data;
-  sidl_BaseInterface _ex = NULL;
   /* TODO: Make this work for local object! */
   return NULL;
 }
@@ -1191,6 +1189,15 @@ static struct sidl_BaseClass__epv* bHYPRE_SStructParCSRVector__super(void) {
   return s_old_epv__sidl_baseclass;
 }
 
+static void
+cleanupClassInfo(void) {
+  if (s_classInfo) {
+    sidl_ClassInfo_deleteRef(s_classInfo);
+  }
+  s_classInfo_init = 1;
+  s_classInfo = NULL;
+}
+
 /*
  * initClassInfo: create a ClassInfo interface if necessary.
  */
@@ -1208,6 +1215,7 @@ initClassInfo(sidl_ClassInfo *info)
       sidl_ClassInfoI_setName(impl, "bHYPRE.SStructParCSRVector");
       sidl_ClassInfoI_setIORVersion(impl, s_IOR_MAJOR_VERSION,
         s_IOR_MINOR_VERSION);
+      atexit(cleanupClassInfo);
     }
   }
   if (s_classInfo) {

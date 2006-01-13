@@ -2,12 +2,12 @@
  * File:          bHYPRE_StructGrid_Skel.c
  * Symbol:        bHYPRE.StructGrid-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.12
  * Description:   Server-side glue code for bHYPRE.StructGrid
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.12
  */
 
 #include "bHYPRE_StructGrid_IOR.h"
@@ -76,22 +76,22 @@ extern
 int32_t
 impl_bHYPRE_StructGrid_SetExtents(
   /* in */ bHYPRE_StructGrid self,
-  /* in */ int32_t* ilower,
-  /* in */ int32_t* iupper,
+  /* in rarray[dim] */ int32_t* ilower,
+  /* in rarray[dim] */ int32_t* iupper,
   /* in */ int32_t dim);
 
 extern
 int32_t
 impl_bHYPRE_StructGrid_SetPeriodic(
   /* in */ bHYPRE_StructGrid self,
-  /* in */ int32_t* periodic,
+  /* in rarray[dim] */ int32_t* periodic,
   /* in */ int32_t dim);
 
 extern
 int32_t
 impl_bHYPRE_StructGrid_SetNumGhost(
   /* in */ bHYPRE_StructGrid self,
-  /* in */ int32_t* num_ghost,
+  /* in rarray[dim2] */ int32_t* num_ghost,
   /* in */ int32_t dim2);
 
 extern
@@ -127,8 +127,8 @@ extern char* impl_bHYPRE_StructGrid_fgetURL_sidl_BaseClass(struct
 static int32_t
 skel_bHYPRE_StructGrid_SetExtents(
   /* in */ bHYPRE_StructGrid self,
-  /* in */ struct sidl_int__array* ilower,
-/* in */ struct sidl_int__array* iupper)
+  /* in rarray[dim] */ struct sidl_int__array* ilower,
+/* in rarray[dim] */ struct sidl_int__array* iupper)
 {
   int32_t _return;
   struct sidl_int__array* ilower_proxy = sidl_int__array_ensure(ilower, 1,
@@ -150,7 +150,7 @@ skel_bHYPRE_StructGrid_SetExtents(
 static int32_t
 skel_bHYPRE_StructGrid_SetPeriodic(
   /* in */ bHYPRE_StructGrid self,
-/* in */ struct sidl_int__array* periodic)
+/* in rarray[dim] */ struct sidl_int__array* periodic)
 {
   int32_t _return;
   struct sidl_int__array* periodic_proxy = sidl_int__array_ensure(periodic, 1,
@@ -168,7 +168,7 @@ skel_bHYPRE_StructGrid_SetPeriodic(
 static int32_t
 skel_bHYPRE_StructGrid_SetNumGhost(
   /* in */ bHYPRE_StructGrid self,
-/* in */ struct sidl_int__array* num_ghost)
+/* in rarray[dim2] */ struct sidl_int__array* num_ghost)
 {
   int32_t _return;
   struct sidl_int__array* num_ghost_proxy = sidl_int__array_ensure(num_ghost, 1,

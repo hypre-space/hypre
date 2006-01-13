@@ -2,12 +2,12 @@
  * File:          bHYPRE_SStructGrid_IOR.h
  * Symbol:        bHYPRE.SStructGrid-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.12
  * Description:   Intermediate Object Representation for bHYPRE.SStructGrid
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.12
  */
 
 #ifndef included_bHYPRE_SStructGrid_IOR_h
@@ -130,8 +130,8 @@ struct bHYPRE_SStructGrid__epv {
   int32_t (*f_SetExtents)(
     /* in */ struct bHYPRE_SStructGrid__object* self,
     /* in */ int32_t part,
-    /* in */ struct sidl_int__array* ilower,
-    /* in */ struct sidl_int__array* iupper);
+    /* in rarray[dim] */ struct sidl_int__array* ilower,
+    /* in rarray[dim] */ struct sidl_int__array* iupper);
   int32_t (*f_SetVariable)(
     /* in */ struct bHYPRE_SStructGrid__object* self,
     /* in */ int32_t part,
@@ -141,18 +141,18 @@ struct bHYPRE_SStructGrid__epv {
   int32_t (*f_AddVariable)(
     /* in */ struct bHYPRE_SStructGrid__object* self,
     /* in */ int32_t part,
-    /* in */ struct sidl_int__array* index,
+    /* in rarray[dim] */ struct sidl_int__array* index,
     /* in */ int32_t var,
     /* in */ enum bHYPRE_SStructVariable__enum vartype);
   int32_t (*f_SetNeighborBox)(
     /* in */ struct bHYPRE_SStructGrid__object* self,
     /* in */ int32_t part,
-    /* in */ struct sidl_int__array* ilower,
-    /* in */ struct sidl_int__array* iupper,
+    /* in rarray[dim] */ struct sidl_int__array* ilower,
+    /* in rarray[dim] */ struct sidl_int__array* iupper,
     /* in */ int32_t nbor_part,
-    /* in */ struct sidl_int__array* nbor_ilower,
-    /* in */ struct sidl_int__array* nbor_iupper,
-    /* in */ struct sidl_int__array* index_map);
+    /* in rarray[dim] */ struct sidl_int__array* nbor_ilower,
+    /* in rarray[dim] */ struct sidl_int__array* nbor_iupper,
+    /* in rarray[dim] */ struct sidl_int__array* index_map);
   int32_t (*f_AddUnstructuredPart)(
     /* in */ struct bHYPRE_SStructGrid__object* self,
     /* in */ int32_t ilower,
@@ -160,10 +160,10 @@ struct bHYPRE_SStructGrid__epv {
   int32_t (*f_SetPeriodic)(
     /* in */ struct bHYPRE_SStructGrid__object* self,
     /* in */ int32_t part,
-    /* in */ struct sidl_int__array* periodic);
+    /* in rarray[dim] */ struct sidl_int__array* periodic);
   int32_t (*f_SetNumGhost)(
     /* in */ struct bHYPRE_SStructGrid__object* self,
-    /* in */ struct sidl_int__array* num_ghost);
+    /* in rarray[dim2] */ struct sidl_int__array* num_ghost);
   int32_t (*f_Assemble)(
     /* in */ struct bHYPRE_SStructGrid__object* self);
 };

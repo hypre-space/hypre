@@ -2,12 +2,12 @@
  * File:          bHYPRE_StructDiagScale_Impl.c
  * Symbol:        bHYPRE.StructDiagScale-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.12
  * Description:   Server-side implementation for bHYPRE.StructDiagScale
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.12
  */
 
 /*
@@ -264,7 +264,7 @@ int32_t
 impl_bHYPRE_StructDiagScale_SetIntArray1Parameter(
   /* in */ bHYPRE_StructDiagScale self,
   /* in */ const char* name,
-  /* in */ int32_t* value,
+  /* in rarray[nvalues] */ int32_t* value,
   /* in */ int32_t nvalues)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.StructDiagScale.SetIntArray1Parameter) */
@@ -290,7 +290,7 @@ int32_t
 impl_bHYPRE_StructDiagScale_SetIntArray2Parameter(
   /* in */ bHYPRE_StructDiagScale self,
   /* in */ const char* name,
-  /* in */ struct sidl_int__array* value)
+  /* in array<int,2,column-major> */ struct sidl_int__array* value)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.StructDiagScale.SetIntArray2Parameter) */
   /* Insert-Code-Here {bHYPRE.StructDiagScale.SetIntArray2Parameter} (SetIntArray2Parameter method) */
@@ -315,7 +315,7 @@ int32_t
 impl_bHYPRE_StructDiagScale_SetDoubleArray1Parameter(
   /* in */ bHYPRE_StructDiagScale self,
   /* in */ const char* name,
-  /* in */ double* value,
+  /* in rarray[nvalues] */ double* value,
   /* in */ int32_t nvalues)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.StructDiagScale.SetDoubleArray1Parameter) */
@@ -341,7 +341,7 @@ int32_t
 impl_bHYPRE_StructDiagScale_SetDoubleArray2Parameter(
   /* in */ bHYPRE_StructDiagScale self,
   /* in */ const char* name,
-  /* in */ struct sidl_double__array* value)
+  /* in array<double,2,column-major> */ struct sidl_double__array* value)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.StructDiagScale.SetDoubleArray2Parameter) */
   /* Insert-Code-Here {bHYPRE.StructDiagScale.SetDoubleArray2Parameter} (SetDoubleArray2Parameter method) */

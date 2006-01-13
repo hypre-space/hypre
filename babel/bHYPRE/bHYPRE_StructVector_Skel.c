@@ -2,12 +2,12 @@
  * File:          bHYPRE_StructVector_Skel.c
  * Symbol:        bHYPRE.StructVector-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.12
  * Description:   Server-side glue code for bHYPRE.StructVector
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.12
  */
 
 #include "bHYPRE_StructVector_IOR.h"
@@ -87,6 +87,53 @@ extern char* impl_bHYPRE_StructVector_fgetURL_sidl_BaseClass(struct
   sidl_BaseClass__object* obj);
 extern
 int32_t
+impl_bHYPRE_StructVector_SetCommunicator(
+  /* in */ bHYPRE_StructVector self,
+  /* in */ bHYPRE_MPICommunicator mpi_comm);
+
+extern
+int32_t
+impl_bHYPRE_StructVector_Initialize(
+  /* in */ bHYPRE_StructVector self);
+
+extern
+int32_t
+impl_bHYPRE_StructVector_Assemble(
+  /* in */ bHYPRE_StructVector self);
+
+extern
+int32_t
+impl_bHYPRE_StructVector_SetGrid(
+  /* in */ bHYPRE_StructVector self,
+  /* in */ bHYPRE_StructGrid grid);
+
+extern
+int32_t
+impl_bHYPRE_StructVector_SetNumGhost(
+  /* in */ bHYPRE_StructVector self,
+  /* in rarray[dim2] */ int32_t* num_ghost,
+  /* in */ int32_t dim2);
+
+extern
+int32_t
+impl_bHYPRE_StructVector_SetValue(
+  /* in */ bHYPRE_StructVector self,
+  /* in rarray[dim] */ int32_t* grid_index,
+  /* in */ int32_t dim,
+  /* in */ double value);
+
+extern
+int32_t
+impl_bHYPRE_StructVector_SetBoxValues(
+  /* in */ bHYPRE_StructVector self,
+  /* in rarray[dim] */ int32_t* ilower,
+  /* in rarray[dim] */ int32_t* iupper,
+  /* in */ int32_t dim,
+  /* in rarray[nvalues] */ double* values,
+  /* in */ int32_t nvalues);
+
+extern
+int32_t
 impl_bHYPRE_StructVector_Clear(
   /* in */ bHYPRE_StructVector self);
 
@@ -121,53 +168,6 @@ impl_bHYPRE_StructVector_Axpy(
   /* in */ bHYPRE_StructVector self,
   /* in */ double a,
   /* in */ bHYPRE_Vector x);
-
-extern
-int32_t
-impl_bHYPRE_StructVector_SetCommunicator(
-  /* in */ bHYPRE_StructVector self,
-  /* in */ bHYPRE_MPICommunicator mpi_comm);
-
-extern
-int32_t
-impl_bHYPRE_StructVector_Initialize(
-  /* in */ bHYPRE_StructVector self);
-
-extern
-int32_t
-impl_bHYPRE_StructVector_Assemble(
-  /* in */ bHYPRE_StructVector self);
-
-extern
-int32_t
-impl_bHYPRE_StructVector_SetGrid(
-  /* in */ bHYPRE_StructVector self,
-  /* in */ bHYPRE_StructGrid grid);
-
-extern
-int32_t
-impl_bHYPRE_StructVector_SetNumGhost(
-  /* in */ bHYPRE_StructVector self,
-  /* in */ int32_t* num_ghost,
-  /* in */ int32_t dim2);
-
-extern
-int32_t
-impl_bHYPRE_StructVector_SetValue(
-  /* in */ bHYPRE_StructVector self,
-  /* in */ int32_t* grid_index,
-  /* in */ int32_t dim,
-  /* in */ double value);
-
-extern
-int32_t
-impl_bHYPRE_StructVector_SetBoxValues(
-  /* in */ bHYPRE_StructVector self,
-  /* in */ int32_t* ilower,
-  /* in */ int32_t* iupper,
-  /* in */ int32_t dim,
-  /* in */ double* values,
-  /* in */ int32_t nvalues);
 
 extern struct bHYPRE_StructGrid__object* 
   impl_bHYPRE_StructVector_fconnect_bHYPRE_StructGrid(char* url,
@@ -222,7 +222,7 @@ extern char* impl_bHYPRE_StructVector_fgetURL_sidl_BaseClass(struct
 static int32_t
 skel_bHYPRE_StructVector_SetNumGhost(
   /* in */ bHYPRE_StructVector self,
-/* in */ struct sidl_int__array* num_ghost)
+/* in rarray[dim2] */ struct sidl_int__array* num_ghost)
 {
   int32_t _return;
   struct sidl_int__array* num_ghost_proxy = sidl_int__array_ensure(num_ghost, 1,
@@ -240,7 +240,7 @@ skel_bHYPRE_StructVector_SetNumGhost(
 static int32_t
 skel_bHYPRE_StructVector_SetValue(
   /* in */ bHYPRE_StructVector self,
-  /* in */ struct sidl_int__array* grid_index,
+  /* in rarray[dim] */ struct sidl_int__array* grid_index,
 /* in */ double value)
 {
   int32_t _return;
@@ -260,9 +260,9 @@ skel_bHYPRE_StructVector_SetValue(
 static int32_t
 skel_bHYPRE_StructVector_SetBoxValues(
   /* in */ bHYPRE_StructVector self,
-  /* in */ struct sidl_int__array* ilower,
-  /* in */ struct sidl_int__array* iupper,
-/* in */ struct sidl_double__array* values)
+  /* in rarray[dim] */ struct sidl_int__array* ilower,
+  /* in rarray[dim] */ struct sidl_int__array* iupper,
+/* in rarray[nvalues] */ struct sidl_double__array* values)
 {
   int32_t _return;
   struct sidl_int__array* ilower_proxy = sidl_int__array_ensure(ilower, 1,
@@ -296,12 +296,6 @@ bHYPRE_StructVector__set_epv(struct bHYPRE_StructVector__epv *epv)
 {
   epv->f__ctor = impl_bHYPRE_StructVector__ctor;
   epv->f__dtor = impl_bHYPRE_StructVector__dtor;
-  epv->f_Clear = impl_bHYPRE_StructVector_Clear;
-  epv->f_Copy = impl_bHYPRE_StructVector_Copy;
-  epv->f_Clone = impl_bHYPRE_StructVector_Clone;
-  epv->f_Scale = impl_bHYPRE_StructVector_Scale;
-  epv->f_Dot = impl_bHYPRE_StructVector_Dot;
-  epv->f_Axpy = impl_bHYPRE_StructVector_Axpy;
   epv->f_SetCommunicator = impl_bHYPRE_StructVector_SetCommunicator;
   epv->f_Initialize = impl_bHYPRE_StructVector_Initialize;
   epv->f_Assemble = impl_bHYPRE_StructVector_Assemble;
@@ -309,6 +303,12 @@ bHYPRE_StructVector__set_epv(struct bHYPRE_StructVector__epv *epv)
   epv->f_SetNumGhost = skel_bHYPRE_StructVector_SetNumGhost;
   epv->f_SetValue = skel_bHYPRE_StructVector_SetValue;
   epv->f_SetBoxValues = skel_bHYPRE_StructVector_SetBoxValues;
+  epv->f_Clear = impl_bHYPRE_StructVector_Clear;
+  epv->f_Copy = impl_bHYPRE_StructVector_Copy;
+  epv->f_Clone = impl_bHYPRE_StructVector_Clone;
+  epv->f_Scale = impl_bHYPRE_StructVector_Scale;
+  epv->f_Dot = impl_bHYPRE_StructVector_Dot;
+  epv->f_Axpy = impl_bHYPRE_StructVector_Axpy;
 
 }
 #ifdef __cplusplus

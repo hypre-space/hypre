@@ -2,12 +2,12 @@
  * File:          bHYPRE_SStructSplit_Impl.c
  * Symbol:        bHYPRE.SStructSplit-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.12
  * Description:   Server-side implementation for bHYPRE.SStructSplit
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.12
  */
 
 /*
@@ -371,7 +371,7 @@ int32_t
 impl_bHYPRE_SStructSplit_SetIntArray1Parameter(
   /* in */ bHYPRE_SStructSplit self,
   /* in */ const char* name,
-  /* in */ int32_t* value,
+  /* in rarray[nvalues] */ int32_t* value,
   /* in */ int32_t nvalues)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructSplit.SetIntArray1Parameter) */
@@ -397,7 +397,7 @@ int32_t
 impl_bHYPRE_SStructSplit_SetIntArray2Parameter(
   /* in */ bHYPRE_SStructSplit self,
   /* in */ const char* name,
-  /* in */ struct sidl_int__array* value)
+  /* in array<int,2,column-major> */ struct sidl_int__array* value)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructSplit.SetIntArray2Parameter) */
   /* Insert-Code-Here {bHYPRE.SStructSplit.SetIntArray2Parameter} (SetIntArray2Parameter method) */
@@ -422,7 +422,7 @@ int32_t
 impl_bHYPRE_SStructSplit_SetDoubleArray1Parameter(
   /* in */ bHYPRE_SStructSplit self,
   /* in */ const char* name,
-  /* in */ double* value,
+  /* in rarray[nvalues] */ double* value,
   /* in */ int32_t nvalues)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructSplit.SetDoubleArray1Parameter) */
@@ -448,7 +448,7 @@ int32_t
 impl_bHYPRE_SStructSplit_SetDoubleArray2Parameter(
   /* in */ bHYPRE_SStructSplit self,
   /* in */ const char* name,
-  /* in */ struct sidl_double__array* value)
+  /* in array<double,2,column-major> */ struct sidl_double__array* value)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.SStructSplit.SetDoubleArray2Parameter) */
   /* Insert-Code-Here {bHYPRE.SStructSplit.SetDoubleArray2Parameter} (SetDoubleArray2Parameter method) */

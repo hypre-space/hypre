@@ -2,12 +2,12 @@
  * File:          bHYPRE_BoomerAMG_Impl.c
  * Symbol:        bHYPRE.BoomerAMG-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.12
  * Description:   Server-side implementation for bHYPRE.BoomerAMG
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.12
  */
 
 /*
@@ -299,11 +299,13 @@ extern "C"
 int32_t
 impl_bHYPRE_BoomerAMG_InitGridRelaxation(
   /* in */ bHYPRE_BoomerAMG self,
-  /* out */ struct sidl_int__array** num_grid_sweeps,
-  /* out */ struct sidl_int__array** grid_relax_type,
-  /* out */ struct sidl_int__array** grid_relax_points,
+  /* out array<int,column-major> */ struct sidl_int__array** num_grid_sweeps,
+  /* out array<int,column-major> */ struct sidl_int__array** grid_relax_type,
+  /* out array<int,2,
+    column-major> */ struct sidl_int__array** grid_relax_points,
   /* in */ int32_t coarsen_type,
-  /* out */ struct sidl_double__array** relax_weights,
+  /* out array<double,
+    column-major> */ struct sidl_double__array** relax_weights,
   /* in */ int32_t max_levels)
 {
    /* DO-NOT-DELETE splicer.begin(bHYPRE.BoomerAMG.InitGridRelaxation) */
@@ -637,7 +639,7 @@ int32_t
 impl_bHYPRE_BoomerAMG_SetIntArray1Parameter(
   /* in */ bHYPRE_BoomerAMG self,
   /* in */ const char* name,
-  /* in */ int32_t* value,
+  /* in rarray[nvalues] */ int32_t* value,
   /* in */ int32_t nvalues)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.BoomerAMG.SetIntArray1Parameter) */
@@ -687,7 +689,7 @@ int32_t
 impl_bHYPRE_BoomerAMG_SetIntArray2Parameter(
   /* in */ bHYPRE_BoomerAMG self,
   /* in */ const char* name,
-  /* in */ struct sidl_int__array* value)
+  /* in array<int,2,column-major> */ struct sidl_int__array* value)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.BoomerAMG.SetIntArray2Parameter) */
   /* Insert the implementation of the SetIntArray2Parameter method here... */
@@ -748,7 +750,7 @@ int32_t
 impl_bHYPRE_BoomerAMG_SetDoubleArray1Parameter(
   /* in */ bHYPRE_BoomerAMG self,
   /* in */ const char* name,
-  /* in */ double* value,
+  /* in rarray[nvalues] */ double* value,
   /* in */ int32_t nvalues)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.BoomerAMG.SetDoubleArray1Parameter) */
@@ -791,7 +793,7 @@ int32_t
 impl_bHYPRE_BoomerAMG_SetDoubleArray2Parameter(
   /* in */ bHYPRE_BoomerAMG self,
   /* in */ const char* name,
-  /* in */ struct sidl_double__array* value)
+  /* in array<double,2,column-major> */ struct sidl_double__array* value)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.BoomerAMG.SetDoubleArray2Parameter) */
   /* Insert the implementation of the SetDoubleArray2Parameter method here... */

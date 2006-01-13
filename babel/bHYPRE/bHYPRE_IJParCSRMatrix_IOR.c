@@ -2,12 +2,12 @@
  * File:          bHYPRE_IJParCSRMatrix_IOR.c
  * Symbol:        bHYPRE.IJParCSRMatrix-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.12
  * Description:   Intermediate Object Representation for bHYPRE.IJParCSRMatrix
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.12
  */
 
 #include "sidl_rmi_InstanceHandle.h"
@@ -146,8 +146,8 @@ bHYPRE_IJParCSRMatrix_isSame__exec(
         struct sidl_io_Deserializer__object* inArgs,
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
-  struct sidl_BaseInterface__object* iobj;
-  sidl_bool _retval;
+  struct sidl_BaseInterface__object* iobj = 0;
+  sidl_bool _retval = FALSE;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
@@ -171,7 +171,7 @@ bHYPRE_IJParCSRMatrix_queryInt__exec(
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
   char* name= NULL;
-  struct sidl_BaseInterface__object* _retval;
+  struct sidl_BaseInterface__object* _retval = 0;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
@@ -194,7 +194,7 @@ bHYPRE_IJParCSRMatrix_isType__exec(
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
   char* name= NULL;
-  sidl_bool _retval;
+  sidl_bool _retval = FALSE;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
@@ -218,7 +218,7 @@ bHYPRE_IJParCSRMatrix_getClassInfo__exec(
         struct sidl_io_Deserializer__object* inArgs,
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
-  struct sidl_ClassInfo__object* _retval;
+  struct sidl_ClassInfo__object* _retval = 0;
   /* unpack in and inout argments */
 
   /* make the call */
@@ -236,9 +236,9 @@ bHYPRE_IJParCSRMatrix_SetDiagOffdSizes__exec(
         struct sidl_io_Deserializer__object* inArgs,
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
-  struct sidl_int__array* diag_sizes;
-  struct sidl_int__array* offdiag_sizes;
-  int32_t _retval;
+  struct sidl_int__array* diag_sizes = 0;
+  struct sidl_int__array* offdiag_sizes = 0;
+  int32_t _retval = 0;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
@@ -264,7 +264,7 @@ bHYPRE_IJParCSRMatrix_SetCommunicator__exec(
   /* stack space for arguments */
   char* mpi_comm_str= NULL;
   struct bHYPRE_MPICommunicator__object* mpi_comm= NULL;
-  int32_t _retval;
+  int32_t _retval = 0;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
@@ -291,7 +291,7 @@ bHYPRE_IJParCSRMatrix_Initialize__exec(
         struct sidl_io_Deserializer__object* inArgs,
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
-  int32_t _retval;
+  int32_t _retval = 0;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
@@ -313,7 +313,7 @@ bHYPRE_IJParCSRMatrix_Assemble__exec(
         struct sidl_io_Deserializer__object* inArgs,
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
-  int32_t _retval;
+  int32_t _retval = 0;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
@@ -335,11 +335,11 @@ bHYPRE_IJParCSRMatrix_SetLocalRange__exec(
         struct sidl_io_Deserializer__object* inArgs,
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
-  int32_t ilower;
-  int32_t iupper;
-  int32_t jlower;
-  int32_t jupper;
-  int32_t _retval;
+  int32_t ilower = 0;
+  int32_t iupper = 0;
+  int32_t jlower = 0;
+  int32_t jupper = 0;
+  int32_t _retval = 0;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
@@ -369,11 +369,11 @@ bHYPRE_IJParCSRMatrix_SetValues__exec(
         struct sidl_io_Deserializer__object* inArgs,
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
-  struct sidl_int__array* ncols;
-  struct sidl_int__array* rows;
-  struct sidl_int__array* cols;
-  struct sidl_double__array* values;
-  int32_t _retval;
+  struct sidl_int__array* ncols = 0;
+  struct sidl_int__array* rows = 0;
+  struct sidl_int__array* cols = 0;
+  struct sidl_double__array* values = 0;
+  int32_t _retval = 0;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
@@ -399,11 +399,11 @@ bHYPRE_IJParCSRMatrix_AddToValues__exec(
         struct sidl_io_Deserializer__object* inArgs,
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
-  struct sidl_int__array* ncols;
-  struct sidl_int__array* rows;
-  struct sidl_int__array* cols;
-  struct sidl_double__array* values;
-  int32_t _retval;
+  struct sidl_int__array* ncols = 0;
+  struct sidl_int__array* rows = 0;
+  struct sidl_int__array* cols = 0;
+  struct sidl_double__array* values = 0;
+  int32_t _retval = 0;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
@@ -429,15 +429,15 @@ bHYPRE_IJParCSRMatrix_GetLocalRange__exec(
         struct sidl_io_Deserializer__object* inArgs,
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
-  int32_t ilower_tmp;
+  int32_t ilower_tmp = 0;
   int32_t* ilower= &ilower_tmp;
-  int32_t iupper_tmp;
+  int32_t iupper_tmp = 0;
   int32_t* iupper= &iupper_tmp;
-  int32_t jlower_tmp;
+  int32_t jlower_tmp = 0;
   int32_t* jlower= &jlower_tmp;
-  int32_t jupper_tmp;
+  int32_t jupper_tmp = 0;
   int32_t* jupper= &jupper_tmp;
-  int32_t _retval;
+  int32_t _retval = 0;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
@@ -467,10 +467,10 @@ bHYPRE_IJParCSRMatrix_GetRowCounts__exec(
         struct sidl_io_Deserializer__object* inArgs,
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
-  struct sidl_int__array* rows;
-  struct sidl_int__array* ncols_tmp;
+  struct sidl_int__array* rows = 0;
+  struct sidl_int__array* ncols_tmp = 0;
   struct sidl_int__array** ncols= &ncols_tmp;
-  int32_t _retval;
+  int32_t _retval = 0;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
@@ -494,12 +494,12 @@ bHYPRE_IJParCSRMatrix_GetValues__exec(
         struct sidl_io_Deserializer__object* inArgs,
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
-  struct sidl_int__array* ncols;
-  struct sidl_int__array* rows;
-  struct sidl_int__array* cols;
-  struct sidl_double__array* values_tmp;
+  struct sidl_int__array* ncols = 0;
+  struct sidl_int__array* rows = 0;
+  struct sidl_int__array* cols = 0;
+  struct sidl_double__array* values_tmp = 0;
   struct sidl_double__array** values= &values_tmp;
-  int32_t _retval;
+  int32_t _retval = 0;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
@@ -525,8 +525,8 @@ bHYPRE_IJParCSRMatrix_SetRowSizes__exec(
         struct sidl_io_Deserializer__object* inArgs,
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
-  struct sidl_int__array* sizes;
-  int32_t _retval;
+  struct sidl_int__array* sizes = 0;
+  int32_t _retval = 0;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
@@ -550,7 +550,7 @@ bHYPRE_IJParCSRMatrix_Print__exec(
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
   char* filename= NULL;
-  int32_t _retval;
+  int32_t _retval = 0;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
@@ -577,7 +577,7 @@ bHYPRE_IJParCSRMatrix_Read__exec(
   char* filename= NULL;
   char* comm_str= NULL;
   struct bHYPRE_MPICommunicator__object* comm= NULL;
-  int32_t _retval;
+  int32_t _retval = 0;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
@@ -600,49 +600,14 @@ bHYPRE_IJParCSRMatrix_Read__exec(
 }
 
 static void
-bHYPRE_IJParCSRMatrix_GetRow__exec(
-        struct bHYPRE_IJParCSRMatrix__object* self,
-        struct sidl_io_Deserializer__object* inArgs,
-        struct sidl_io_Serializer__object* outArgs) {
-  /* stack space for arguments */
-  int32_t row;
-  int32_t size_tmp;
-  int32_t* size= &size_tmp;
-  struct sidl_int__array* col_ind_tmp;
-  struct sidl_int__array** col_ind= &col_ind_tmp;
-  struct sidl_double__array* values_tmp;
-  struct sidl_double__array** values= &values_tmp;
-  int32_t _retval;
-  sidl_BaseInterface _ex   = NULL;
-  sidl_BaseInterface *_ex2 = &_ex;
-  /* unpack in and inout argments */
-  sidl_io_Deserializer_unpackInt( inArgs, "row", &row, _ex2);
-
-  /* make the call */
-  _retval = (self->d_epv->f_GetRow)(
-    self,
-    row,
-    size,
-    col_ind,
-    values);
-
-  /* pack return value */
-  sidl_io_Serializer_packInt( outArgs, "_retval", _retval, _ex2);
-
-  /* pack out and inout argments */
-  sidl_io_Serializer_packInt( outArgs, "size", *size, _ex2);
-
-}
-
-static void
 bHYPRE_IJParCSRMatrix_SetIntParameter__exec(
         struct bHYPRE_IJParCSRMatrix__object* self,
         struct sidl_io_Deserializer__object* inArgs,
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
   char* name= NULL;
-  int32_t value;
-  int32_t _retval;
+  int32_t value = 0;
+  int32_t _retval = 0;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
@@ -669,8 +634,8 @@ bHYPRE_IJParCSRMatrix_SetDoubleParameter__exec(
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
   char* name= NULL;
-  double value;
-  int32_t _retval;
+  double value = 0;
+  int32_t _retval = 0;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
@@ -698,7 +663,7 @@ bHYPRE_IJParCSRMatrix_SetStringParameter__exec(
   /* stack space for arguments */
   char* name= NULL;
   char* value= NULL;
-  int32_t _retval;
+  int32_t _retval = 0;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
@@ -725,8 +690,8 @@ bHYPRE_IJParCSRMatrix_SetIntArray1Parameter__exec(
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
   char* name= NULL;
-  struct sidl_int__array* value;
-  int32_t _retval;
+  struct sidl_int__array* value = 0;
+  int32_t _retval = 0;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
@@ -752,8 +717,8 @@ bHYPRE_IJParCSRMatrix_SetIntArray2Parameter__exec(
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
   char* name= NULL;
-  struct sidl_int__array* value;
-  int32_t _retval;
+  struct sidl_int__array* value = 0;
+  int32_t _retval = 0;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
@@ -779,8 +744,8 @@ bHYPRE_IJParCSRMatrix_SetDoubleArray1Parameter__exec(
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
   char* name= NULL;
-  struct sidl_double__array* value;
-  int32_t _retval;
+  struct sidl_double__array* value = 0;
+  int32_t _retval = 0;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
@@ -806,8 +771,8 @@ bHYPRE_IJParCSRMatrix_SetDoubleArray2Parameter__exec(
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
   char* name= NULL;
-  struct sidl_double__array* value;
-  int32_t _retval;
+  struct sidl_double__array* value = 0;
+  int32_t _retval = 0;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
@@ -833,9 +798,9 @@ bHYPRE_IJParCSRMatrix_GetIntValue__exec(
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
   char* name= NULL;
-  int32_t value_tmp;
+  int32_t value_tmp = 0;
   int32_t* value= &value_tmp;
-  int32_t _retval;
+  int32_t _retval = 0;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
@@ -862,9 +827,9 @@ bHYPRE_IJParCSRMatrix_GetDoubleValue__exec(
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
   char* name= NULL;
-  double value_tmp;
+  double value_tmp = 0;
   double* value= &value_tmp;
-  int32_t _retval;
+  int32_t _retval = 0;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
@@ -890,9 +855,9 @@ bHYPRE_IJParCSRMatrix_Setup__exec(
         struct sidl_io_Deserializer__object* inArgs,
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
-  struct bHYPRE_Vector__object* b;
-  struct bHYPRE_Vector__object* x;
-  int32_t _retval;
+  struct bHYPRE_Vector__object* b = 0;
+  struct bHYPRE_Vector__object* x = 0;
+  int32_t _retval = 0;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
@@ -916,10 +881,10 @@ bHYPRE_IJParCSRMatrix_Apply__exec(
         struct sidl_io_Deserializer__object* inArgs,
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
-  struct bHYPRE_Vector__object* b;
-  struct bHYPRE_Vector__object* x_tmp;
+  struct bHYPRE_Vector__object* b = 0;
+  struct bHYPRE_Vector__object* x_tmp = 0;
   struct bHYPRE_Vector__object** x= &x_tmp;
-  int32_t _retval;
+  int32_t _retval = 0;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
@@ -943,10 +908,10 @@ bHYPRE_IJParCSRMatrix_ApplyAdjoint__exec(
         struct sidl_io_Deserializer__object* inArgs,
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
-  struct bHYPRE_Vector__object* b;
-  struct bHYPRE_Vector__object* x_tmp;
+  struct bHYPRE_Vector__object* b = 0;
+  struct bHYPRE_Vector__object* x_tmp = 0;
   struct bHYPRE_Vector__object** x= &x_tmp;
-  int32_t _retval;
+  int32_t _retval = 0;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
@@ -961,6 +926,41 @@ bHYPRE_IJParCSRMatrix_ApplyAdjoint__exec(
   sidl_io_Serializer_packInt( outArgs, "_retval", _retval, _ex2);
 
   /* pack out and inout argments */
+
+}
+
+static void
+bHYPRE_IJParCSRMatrix_GetRow__exec(
+        struct bHYPRE_IJParCSRMatrix__object* self,
+        struct sidl_io_Deserializer__object* inArgs,
+        struct sidl_io_Serializer__object* outArgs) {
+  /* stack space for arguments */
+  int32_t row = 0;
+  int32_t size_tmp = 0;
+  int32_t* size= &size_tmp;
+  struct sidl_int__array* col_ind_tmp = 0;
+  struct sidl_int__array** col_ind= &col_ind_tmp;
+  struct sidl_double__array* values_tmp = 0;
+  struct sidl_double__array** values= &values_tmp;
+  int32_t _retval = 0;
+  sidl_BaseInterface _ex   = NULL;
+  sidl_BaseInterface *_ex2 = &_ex;
+  /* unpack in and inout argments */
+  sidl_io_Deserializer_unpackInt( inArgs, "row", &row, _ex2);
+
+  /* make the call */
+  _retval = (self->d_epv->f_GetRow)(
+    self,
+    row,
+    size,
+    col_ind,
+    values);
+
+  /* pack return value */
+  sidl_io_Serializer_packInt( outArgs, "_retval", _retval, _ex2);
+
+  /* pack out and inout argments */
+  sidl_io_Serializer_packInt( outArgs, "size", *size, _ex2);
 
 }
 
@@ -1023,8 +1023,6 @@ static void ior_bHYPRE_IJParCSRMatrix__delete(
 static char*
 ior_bHYPRE_IJParCSRMatrix__getURL(
     struct bHYPRE_IJParCSRMatrix__object* self) {
-  sidl_rmi_InstanceHandle conn = (sidl_rmi_InstanceHandle)self->d_data;
-  sidl_BaseInterface _ex = NULL;
   /* TODO: Make this work for local object! */
   return NULL;
 }
@@ -1158,7 +1156,6 @@ static void bHYPRE_IJParCSRMatrix__init_epv(
   epv->f_SetRowSizes                   = NULL;
   epv->f_Print                         = NULL;
   epv->f_Read                          = NULL;
-  epv->f_GetRow                        = NULL;
   epv->f_SetIntParameter               = NULL;
   epv->f_SetDoubleParameter            = NULL;
   epv->f_SetStringParameter            = NULL;
@@ -1171,6 +1168,7 @@ static void bHYPRE_IJParCSRMatrix__init_epv(
   epv->f_Setup                         = NULL;
   epv->f_Apply                         = NULL;
   epv->f_ApplyAdjoint                  = NULL;
+  epv->f_GetRow                        = NULL;
 
   bHYPRE_IJParCSRMatrix__set_epv(epv);
 
@@ -1394,6 +1392,15 @@ static struct sidl_BaseClass__epv* bHYPRE_IJParCSRMatrix__super(void) {
   return s_old_epv__sidl_baseclass;
 }
 
+static void
+cleanupClassInfo(void) {
+  if (s_classInfo) {
+    sidl_ClassInfo_deleteRef(s_classInfo);
+  }
+  s_classInfo_init = 1;
+  s_classInfo = NULL;
+}
+
 /*
  * initClassInfo: create a ClassInfo interface if necessary.
  */
@@ -1411,6 +1418,7 @@ initClassInfo(sidl_ClassInfo *info)
       sidl_ClassInfoI_setName(impl, "bHYPRE.IJParCSRMatrix");
       sidl_ClassInfoI_setIORVersion(impl, s_IOR_MAJOR_VERSION,
         s_IOR_MINOR_VERSION);
+      atexit(cleanupClassInfo);
     }
   }
   if (s_classInfo) {

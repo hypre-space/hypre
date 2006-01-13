@@ -2,12 +2,12 @@
  * File:          bHYPRE_SStructGrid_IOR.c
  * Symbol:        bHYPRE.SStructGrid-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.12
  * Description:   Intermediate Object Representation for bHYPRE.SStructGrid
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.12
  */
 
 #include "sidl_rmi_InstanceHandle.h"
@@ -136,8 +136,8 @@ bHYPRE_SStructGrid_isSame__exec(
         struct sidl_io_Deserializer__object* inArgs,
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
-  struct sidl_BaseInterface__object* iobj;
-  sidl_bool _retval;
+  struct sidl_BaseInterface__object* iobj = 0;
+  sidl_bool _retval = FALSE;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
@@ -161,7 +161,7 @@ bHYPRE_SStructGrid_queryInt__exec(
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
   char* name= NULL;
-  struct sidl_BaseInterface__object* _retval;
+  struct sidl_BaseInterface__object* _retval = 0;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
@@ -184,7 +184,7 @@ bHYPRE_SStructGrid_isType__exec(
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
   char* name= NULL;
-  sidl_bool _retval;
+  sidl_bool _retval = FALSE;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
@@ -208,7 +208,7 @@ bHYPRE_SStructGrid_getClassInfo__exec(
         struct sidl_io_Deserializer__object* inArgs,
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
-  struct sidl_ClassInfo__object* _retval;
+  struct sidl_ClassInfo__object* _retval = 0;
   /* unpack in and inout argments */
 
   /* make the call */
@@ -226,9 +226,9 @@ bHYPRE_SStructGrid_SetNumDimParts__exec(
         struct sidl_io_Deserializer__object* inArgs,
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
-  int32_t ndim;
-  int32_t nparts;
-  int32_t _retval;
+  int32_t ndim = 0;
+  int32_t nparts = 0;
+  int32_t _retval = 0;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
@@ -256,7 +256,7 @@ bHYPRE_SStructGrid_SetCommunicator__exec(
   /* stack space for arguments */
   char* mpi_comm_str= NULL;
   struct bHYPRE_MPICommunicator__object* mpi_comm= NULL;
-  int32_t _retval;
+  int32_t _retval = 0;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
@@ -282,10 +282,10 @@ bHYPRE_SStructGrid_SetExtents__exec(
         struct sidl_io_Deserializer__object* inArgs,
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
-  int32_t part;
-  struct sidl_int__array* ilower;
-  struct sidl_int__array* iupper;
-  int32_t _retval;
+  int32_t part = 0;
+  struct sidl_int__array* ilower = 0;
+  struct sidl_int__array* iupper = 0;
+  int32_t _retval = 0;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
@@ -311,11 +311,11 @@ bHYPRE_SStructGrid_SetVariable__exec(
         struct sidl_io_Deserializer__object* inArgs,
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
-  int32_t part;
-  int32_t var;
-  int32_t nvars;
-  enum bHYPRE_SStructVariable__enum vartype;
-  int32_t _retval;
+  int32_t part = 0;
+  int32_t var = 0;
+  int32_t nvars = 0;
+  enum bHYPRE_SStructVariable__enum vartype = bHYPRE_SStructVariable_UNDEFINED;
+  int32_t _retval = 0;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
@@ -344,11 +344,11 @@ bHYPRE_SStructGrid_AddVariable__exec(
         struct sidl_io_Deserializer__object* inArgs,
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
-  int32_t part;
-  struct sidl_int__array* index;
-  int32_t var;
-  enum bHYPRE_SStructVariable__enum vartype;
-  int32_t _retval;
+  int32_t part = 0;
+  struct sidl_int__array* index = 0;
+  int32_t var = 0;
+  enum bHYPRE_SStructVariable__enum vartype = bHYPRE_SStructVariable_UNDEFINED;
+  int32_t _retval = 0;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
@@ -376,14 +376,14 @@ bHYPRE_SStructGrid_SetNeighborBox__exec(
         struct sidl_io_Deserializer__object* inArgs,
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
-  int32_t part;
-  struct sidl_int__array* ilower;
-  struct sidl_int__array* iupper;
-  int32_t nbor_part;
-  struct sidl_int__array* nbor_ilower;
-  struct sidl_int__array* nbor_iupper;
-  struct sidl_int__array* index_map;
-  int32_t _retval;
+  int32_t part = 0;
+  struct sidl_int__array* ilower = 0;
+  struct sidl_int__array* iupper = 0;
+  int32_t nbor_part = 0;
+  struct sidl_int__array* nbor_ilower = 0;
+  struct sidl_int__array* nbor_iupper = 0;
+  struct sidl_int__array* index_map = 0;
+  int32_t _retval = 0;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
@@ -414,9 +414,9 @@ bHYPRE_SStructGrid_AddUnstructuredPart__exec(
         struct sidl_io_Deserializer__object* inArgs,
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
-  int32_t ilower;
-  int32_t iupper;
-  int32_t _retval;
+  int32_t ilower = 0;
+  int32_t iupper = 0;
+  int32_t _retval = 0;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
@@ -442,9 +442,9 @@ bHYPRE_SStructGrid_SetPeriodic__exec(
         struct sidl_io_Deserializer__object* inArgs,
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
-  int32_t part;
-  struct sidl_int__array* periodic;
-  int32_t _retval;
+  int32_t part = 0;
+  struct sidl_int__array* periodic = 0;
+  int32_t _retval = 0;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
@@ -469,8 +469,8 @@ bHYPRE_SStructGrid_SetNumGhost__exec(
         struct sidl_io_Deserializer__object* inArgs,
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
-  struct sidl_int__array* num_ghost;
-  int32_t _retval;
+  struct sidl_int__array* num_ghost = 0;
+  int32_t _retval = 0;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
@@ -493,7 +493,7 @@ bHYPRE_SStructGrid_Assemble__exec(
         struct sidl_io_Deserializer__object* inArgs,
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
-  int32_t _retval;
+  int32_t _retval = 0;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
@@ -558,8 +558,6 @@ static void ior_bHYPRE_SStructGrid__delete(
 static char*
 ior_bHYPRE_SStructGrid__getURL(
     struct bHYPRE_SStructGrid__object* self) {
-  sidl_rmi_InstanceHandle conn = (sidl_rmi_InstanceHandle)self->d_data;
-  sidl_BaseInterface _ex = NULL;
   /* TODO: Make this work for local object! */
   return NULL;
 }
@@ -745,6 +743,15 @@ static struct sidl_BaseClass__epv* bHYPRE_SStructGrid__super(void) {
   return s_old_epv__sidl_baseclass;
 }
 
+static void
+cleanupClassInfo(void) {
+  if (s_classInfo) {
+    sidl_ClassInfo_deleteRef(s_classInfo);
+  }
+  s_classInfo_init = 1;
+  s_classInfo = NULL;
+}
+
 /*
  * initClassInfo: create a ClassInfo interface if necessary.
  */
@@ -762,6 +769,7 @@ initClassInfo(sidl_ClassInfo *info)
       sidl_ClassInfoI_setName(impl, "bHYPRE.SStructGrid");
       sidl_ClassInfoI_setIORVersion(impl, s_IOR_MAJOR_VERSION,
         s_IOR_MINOR_VERSION);
+      atexit(cleanupClassInfo);
     }
   }
   if (s_classInfo) {

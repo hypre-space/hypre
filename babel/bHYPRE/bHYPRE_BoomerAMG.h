@@ -2,12 +2,12 @@
  * File:          bHYPRE_BoomerAMG.h
  * Symbol:        bHYPRE.BoomerAMG-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.12
  * Description:   Client-side glue code for bHYPRE.BoomerAMG
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.12
  */
 
 #ifndef included_bHYPRE_BoomerAMG_h
@@ -235,11 +235,13 @@ bHYPRE_BoomerAMG_SetLevelRelaxWt(
 int32_t
 bHYPRE_BoomerAMG_InitGridRelaxation(
   /* in */ bHYPRE_BoomerAMG self,
-  /* out */ struct sidl_int__array** num_grid_sweeps,
-  /* out */ struct sidl_int__array** grid_relax_type,
-  /* out */ struct sidl_int__array** grid_relax_points,
+  /* out array<int,column-major> */ struct sidl_int__array** num_grid_sweeps,
+  /* out array<int,column-major> */ struct sidl_int__array** grid_relax_type,
+  /* out array<int,2,
+    column-major> */ struct sidl_int__array** grid_relax_points,
   /* in */ int32_t coarsen_type,
-  /* out */ struct sidl_double__array** relax_weights,
+  /* out array<double,
+    column-major> */ struct sidl_double__array** relax_weights,
   /* in */ int32_t max_levels);
 
 /**
@@ -290,7 +292,7 @@ int32_t
 bHYPRE_BoomerAMG_SetIntArray1Parameter(
   /* in */ bHYPRE_BoomerAMG self,
   /* in */ const char* name,
-  /* in */ int32_t* value,
+  /* in rarray[nvalues] */ int32_t* value,
   /* in */ int32_t nvalues);
 
 /**
@@ -301,7 +303,7 @@ int32_t
 bHYPRE_BoomerAMG_SetIntArray2Parameter(
   /* in */ bHYPRE_BoomerAMG self,
   /* in */ const char* name,
-  /* in */ struct sidl_int__array* value);
+  /* in array<int,2,column-major> */ struct sidl_int__array* value);
 
 /**
  * Set the double 1-D array parameter associated with {\tt name}.
@@ -311,7 +313,7 @@ int32_t
 bHYPRE_BoomerAMG_SetDoubleArray1Parameter(
   /* in */ bHYPRE_BoomerAMG self,
   /* in */ const char* name,
-  /* in */ double* value,
+  /* in rarray[nvalues] */ double* value,
   /* in */ int32_t nvalues);
 
 /**
@@ -322,7 +324,7 @@ int32_t
 bHYPRE_BoomerAMG_SetDoubleArray2Parameter(
   /* in */ bHYPRE_BoomerAMG self,
   /* in */ const char* name,
-  /* in */ struct sidl_double__array* value);
+  /* in array<double,2,column-major> */ struct sidl_double__array* value);
 
 /**
  * Set the int parameter associated with {\tt name}.
@@ -472,14 +474,6 @@ bHYPRE_BoomerAMG__cast2(
 void
 bHYPRE_BoomerAMG__exec(
   /* in */ bHYPRE_BoomerAMG self,
-  /* in */ const char* methodName,
-  /* in */ sidl_io_Deserializer inArgs,
-  /* in */ sidl_io_Serializer outArgs);
-/**
- * static Exec method for reflexity.
- */
-void
-bHYPRE_BoomerAMG__sexec(
   /* in */ const char* methodName,
   /* in */ sidl_io_Deserializer inArgs,
   /* in */ sidl_io_Serializer outArgs);

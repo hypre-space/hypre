@@ -2,12 +2,12 @@
  * File:          bHYPRE_IJParCSRVector_Impl.c
  * Symbol:        bHYPRE.IJParCSRVector-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.12
  * Description:   Server-side implementation for bHYPRE.IJParCSRVector
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.12
  */
 
 /*
@@ -311,8 +311,8 @@ int32_t
 impl_bHYPRE_IJParCSRVector_SetValues(
   /* in */ bHYPRE_IJParCSRVector self,
   /* in */ int32_t nvalues,
-  /* in */ int32_t* indices,
-  /* in */ double* values)
+  /* in rarray[nvalues] */ int32_t* indices,
+  /* in rarray[nvalues] */ double* values)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRVector.SetValues) */
   /* Insert the implementation of the SetValues method here... */
@@ -322,6 +322,9 @@ impl_bHYPRE_IJParCSRVector_SetValues(
    HYPRE_IJVector ij_b;
    data = bHYPRE_IJParCSRVector__get_data( self );
    ij_b = data -> ij_b;
+   printf("nvalues=%i values[0,1,2]= %16.12e, %16.12e, %16.12e\n", nvalues, values[0], values[1], values[2] );
+   printf("nvalues=%i values[3,4,5]= %16.12e, %16.12e, %16.12e\n", nvalues, values[3], values[4], values[5] );
+   printf("nvalues=%i values[6,7,8]= %16.12e, %16.12e, %16.12e\n", nvalues, values[6], values[7], values[8] );
 
    ierr = HYPRE_IJVectorSetValues( ij_b, nvalues,
                                    indices,
@@ -349,8 +352,8 @@ int32_t
 impl_bHYPRE_IJParCSRVector_AddToValues(
   /* in */ bHYPRE_IJParCSRVector self,
   /* in */ int32_t nvalues,
-  /* in */ int32_t* indices,
-  /* in */ double* values)
+  /* in rarray[nvalues] */ int32_t* indices,
+  /* in rarray[nvalues] */ double* values)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRVector.AddToValues) */
   /* Insert the implementation of the AddToValues method here... */
@@ -421,8 +424,8 @@ int32_t
 impl_bHYPRE_IJParCSRVector_GetValues(
   /* in */ bHYPRE_IJParCSRVector self,
   /* in */ int32_t nvalues,
-  /* in */ int32_t* indices,
-  /* inout */ double* values)
+  /* in rarray[nvalues] */ int32_t* indices,
+  /* inout rarray[nvalues] */ double* values)
 {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.IJParCSRVector.GetValues) */
   /* Insert the implementation of the GetValues method here... */
@@ -594,7 +597,6 @@ impl_bHYPRE_IJParCSRVector_Copy(
 
    data_y = bHYPRE_IJParCSRVector__get_data( self );
    data_x = bHYPRE_IJParCSRVector__get_data( bHYPREP_x );
-   bHYPRE_IJParCSRVector_deleteRef( bHYPREP_x ); /* extra reference from queryInt */
 
    data_y->comm = data_x->comm;
 
@@ -774,7 +776,6 @@ impl_bHYPRE_IJParCSRVector_Dot(
    data = bHYPRE_IJParCSRVector__get_data( self );
    ij_y = data -> ij_b;
    data = bHYPRE_IJParCSRVector__get_data( bHYPREP_x );
-   bHYPRE_IJParCSRVector_deleteRef( bHYPREP_x );
    ij_x = data -> ij_b;
 
    ierr += HYPRE_IJVectorGetObject( ij_x, &object );
@@ -831,6 +832,7 @@ impl_bHYPRE_IJParCSRVector_Axpy(
    if ( bHYPRE_Vector_queryInt(x, "bHYPRE.IJParCSRVector" ) )
    {
       bHYPREP_x = bHYPRE_IJParCSRVector__cast( x );
+      bHYPRE_IJParCSRVector_deleteRef( bHYPREP_x ); /* extra ref from query Int */
    }
    else
    {
@@ -838,7 +840,6 @@ impl_bHYPRE_IJParCSRVector_Axpy(
    }
 
    data_x = bHYPRE_IJParCSRVector__get_data( bHYPREP_x );
-   bHYPRE_IJParCSRVector_deleteRef( bHYPREP_x );
    ij_x = data_x->ij_b;
    ierr += HYPRE_IJVectorGetObjectType( ij_x, type );
    /* ... don't know how to deal with other types */

@@ -2,12 +2,12 @@
  * File:          bHYPRE_SStructMatrix_IOR.c
  * Symbol:        bHYPRE.SStructMatrix-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.12
  * Description:   Intermediate Object Representation for bHYPRE.SStructMatrix
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.12
  */
 
 #include "sidl_rmi_InstanceHandle.h"
@@ -147,8 +147,8 @@ bHYPRE_SStructMatrix_isSame__exec(
         struct sidl_io_Deserializer__object* inArgs,
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
-  struct sidl_BaseInterface__object* iobj;
-  sidl_bool _retval;
+  struct sidl_BaseInterface__object* iobj = 0;
+  sidl_bool _retval = FALSE;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
@@ -172,7 +172,7 @@ bHYPRE_SStructMatrix_queryInt__exec(
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
   char* name= NULL;
-  struct sidl_BaseInterface__object* _retval;
+  struct sidl_BaseInterface__object* _retval = 0;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
@@ -195,7 +195,7 @@ bHYPRE_SStructMatrix_isType__exec(
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
   char* name= NULL;
-  sidl_bool _retval;
+  sidl_bool _retval = FALSE;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
@@ -219,7 +219,7 @@ bHYPRE_SStructMatrix_getClassInfo__exec(
         struct sidl_io_Deserializer__object* inArgs,
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
-  struct sidl_ClassInfo__object* _retval;
+  struct sidl_ClassInfo__object* _retval = 0;
   /* unpack in and inout argments */
 
   /* make the call */
@@ -237,8 +237,8 @@ bHYPRE_SStructMatrix_SetObjectType__exec(
         struct sidl_io_Deserializer__object* inArgs,
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
-  int32_t type;
-  int32_t _retval;
+  int32_t type = 0;
+  int32_t _retval = 0;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
@@ -264,7 +264,7 @@ bHYPRE_SStructMatrix_SetCommunicator__exec(
   /* stack space for arguments */
   char* mpi_comm_str= NULL;
   struct bHYPRE_MPICommunicator__object* mpi_comm= NULL;
-  int32_t _retval;
+  int32_t _retval = 0;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
@@ -291,7 +291,7 @@ bHYPRE_SStructMatrix_Initialize__exec(
         struct sidl_io_Deserializer__object* inArgs,
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
-  int32_t _retval;
+  int32_t _retval = 0;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
@@ -313,7 +313,7 @@ bHYPRE_SStructMatrix_Assemble__exec(
         struct sidl_io_Deserializer__object* inArgs,
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
-  int32_t _retval;
+  int32_t _retval = 0;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
@@ -335,9 +335,9 @@ bHYPRE_SStructMatrix_GetObject__exec(
         struct sidl_io_Deserializer__object* inArgs,
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
-  struct sidl_BaseInterface__object* A_tmp;
+  struct sidl_BaseInterface__object* A_tmp = 0;
   struct sidl_BaseInterface__object** A= &A_tmp;
-  int32_t _retval;
+  int32_t _retval = 0;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
@@ -362,7 +362,7 @@ bHYPRE_SStructMatrix_SetGraph__exec(
   /* stack space for arguments */
   char* graph_str= NULL;
   struct bHYPRE_SStructGraph__object* graph= NULL;
-  int32_t _retval;
+  int32_t _retval = 0;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
@@ -388,12 +388,12 @@ bHYPRE_SStructMatrix_SetValues__exec(
         struct sidl_io_Deserializer__object* inArgs,
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
-  int32_t part;
-  struct sidl_int__array* index;
-  int32_t var;
-  struct sidl_int__array* entries;
-  struct sidl_double__array* values;
-  int32_t _retval;
+  int32_t part = 0;
+  struct sidl_int__array* index = 0;
+  int32_t var = 0;
+  struct sidl_int__array* entries = 0;
+  struct sidl_double__array* values = 0;
+  int32_t _retval = 0;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
@@ -422,13 +422,13 @@ bHYPRE_SStructMatrix_SetBoxValues__exec(
         struct sidl_io_Deserializer__object* inArgs,
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
-  int32_t part;
-  struct sidl_int__array* ilower;
-  struct sidl_int__array* iupper;
-  int32_t var;
-  struct sidl_int__array* entries;
-  struct sidl_double__array* values;
-  int32_t _retval;
+  int32_t part = 0;
+  struct sidl_int__array* ilower = 0;
+  struct sidl_int__array* iupper = 0;
+  int32_t var = 0;
+  struct sidl_int__array* entries = 0;
+  struct sidl_double__array* values = 0;
+  int32_t _retval = 0;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
@@ -458,12 +458,12 @@ bHYPRE_SStructMatrix_AddToValues__exec(
         struct sidl_io_Deserializer__object* inArgs,
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
-  int32_t part;
-  struct sidl_int__array* index;
-  int32_t var;
-  struct sidl_int__array* entries;
-  struct sidl_double__array* values;
-  int32_t _retval;
+  int32_t part = 0;
+  struct sidl_int__array* index = 0;
+  int32_t var = 0;
+  struct sidl_int__array* entries = 0;
+  struct sidl_double__array* values = 0;
+  int32_t _retval = 0;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
@@ -492,13 +492,13 @@ bHYPRE_SStructMatrix_AddToBoxValues__exec(
         struct sidl_io_Deserializer__object* inArgs,
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
-  int32_t part;
-  struct sidl_int__array* ilower;
-  struct sidl_int__array* iupper;
-  int32_t var;
-  struct sidl_int__array* entries;
-  struct sidl_double__array* values;
-  int32_t _retval;
+  int32_t part = 0;
+  struct sidl_int__array* ilower = 0;
+  struct sidl_int__array* iupper = 0;
+  int32_t var = 0;
+  struct sidl_int__array* entries = 0;
+  struct sidl_double__array* values = 0;
+  int32_t _retval = 0;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
@@ -528,11 +528,11 @@ bHYPRE_SStructMatrix_SetSymmetric__exec(
         struct sidl_io_Deserializer__object* inArgs,
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
-  int32_t part;
-  int32_t var;
-  int32_t to_var;
-  int32_t symmetric;
-  int32_t _retval;
+  int32_t part = 0;
+  int32_t var = 0;
+  int32_t to_var = 0;
+  int32_t symmetric = 0;
+  int32_t _retval = 0;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
@@ -562,8 +562,8 @@ bHYPRE_SStructMatrix_SetNSSymmetric__exec(
         struct sidl_io_Deserializer__object* inArgs,
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
-  int32_t symmetric;
-  int32_t _retval;
+  int32_t symmetric = 0;
+  int32_t _retval = 0;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
@@ -587,7 +587,7 @@ bHYPRE_SStructMatrix_SetComplex__exec(
         struct sidl_io_Deserializer__object* inArgs,
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
-  int32_t _retval;
+  int32_t _retval = 0;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
@@ -610,8 +610,8 @@ bHYPRE_SStructMatrix_Print__exec(
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
   char* filename= NULL;
-  int32_t all;
-  int32_t _retval;
+  int32_t all = 0;
+  int32_t _retval = 0;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
@@ -638,8 +638,8 @@ bHYPRE_SStructMatrix_SetIntParameter__exec(
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
   char* name= NULL;
-  int32_t value;
-  int32_t _retval;
+  int32_t value = 0;
+  int32_t _retval = 0;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
@@ -666,8 +666,8 @@ bHYPRE_SStructMatrix_SetDoubleParameter__exec(
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
   char* name= NULL;
-  double value;
-  int32_t _retval;
+  double value = 0;
+  int32_t _retval = 0;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
@@ -695,7 +695,7 @@ bHYPRE_SStructMatrix_SetStringParameter__exec(
   /* stack space for arguments */
   char* name= NULL;
   char* value= NULL;
-  int32_t _retval;
+  int32_t _retval = 0;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
@@ -722,8 +722,8 @@ bHYPRE_SStructMatrix_SetIntArray1Parameter__exec(
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
   char* name= NULL;
-  struct sidl_int__array* value;
-  int32_t _retval;
+  struct sidl_int__array* value = 0;
+  int32_t _retval = 0;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
@@ -749,8 +749,8 @@ bHYPRE_SStructMatrix_SetIntArray2Parameter__exec(
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
   char* name= NULL;
-  struct sidl_int__array* value;
-  int32_t _retval;
+  struct sidl_int__array* value = 0;
+  int32_t _retval = 0;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
@@ -776,8 +776,8 @@ bHYPRE_SStructMatrix_SetDoubleArray1Parameter__exec(
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
   char* name= NULL;
-  struct sidl_double__array* value;
-  int32_t _retval;
+  struct sidl_double__array* value = 0;
+  int32_t _retval = 0;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
@@ -803,8 +803,8 @@ bHYPRE_SStructMatrix_SetDoubleArray2Parameter__exec(
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
   char* name= NULL;
-  struct sidl_double__array* value;
-  int32_t _retval;
+  struct sidl_double__array* value = 0;
+  int32_t _retval = 0;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
@@ -830,9 +830,9 @@ bHYPRE_SStructMatrix_GetIntValue__exec(
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
   char* name= NULL;
-  int32_t value_tmp;
+  int32_t value_tmp = 0;
   int32_t* value= &value_tmp;
-  int32_t _retval;
+  int32_t _retval = 0;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
@@ -859,9 +859,9 @@ bHYPRE_SStructMatrix_GetDoubleValue__exec(
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
   char* name= NULL;
-  double value_tmp;
+  double value_tmp = 0;
   double* value= &value_tmp;
-  int32_t _retval;
+  int32_t _retval = 0;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
@@ -887,9 +887,9 @@ bHYPRE_SStructMatrix_Setup__exec(
         struct sidl_io_Deserializer__object* inArgs,
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
-  struct bHYPRE_Vector__object* b;
-  struct bHYPRE_Vector__object* x;
-  int32_t _retval;
+  struct bHYPRE_Vector__object* b = 0;
+  struct bHYPRE_Vector__object* x = 0;
+  int32_t _retval = 0;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
@@ -913,10 +913,10 @@ bHYPRE_SStructMatrix_Apply__exec(
         struct sidl_io_Deserializer__object* inArgs,
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
-  struct bHYPRE_Vector__object* b;
-  struct bHYPRE_Vector__object* x_tmp;
+  struct bHYPRE_Vector__object* b = 0;
+  struct bHYPRE_Vector__object* x_tmp = 0;
   struct bHYPRE_Vector__object** x= &x_tmp;
-  int32_t _retval;
+  int32_t _retval = 0;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
@@ -940,10 +940,10 @@ bHYPRE_SStructMatrix_ApplyAdjoint__exec(
         struct sidl_io_Deserializer__object* inArgs,
         struct sidl_io_Serializer__object* outArgs) {
   /* stack space for arguments */
-  struct bHYPRE_Vector__object* b;
-  struct bHYPRE_Vector__object* x_tmp;
+  struct bHYPRE_Vector__object* b = 0;
+  struct bHYPRE_Vector__object* x_tmp = 0;
   struct bHYPRE_Vector__object** x= &x_tmp;
-  int32_t _retval;
+  int32_t _retval = 0;
   sidl_BaseInterface _ex   = NULL;
   sidl_BaseInterface *_ex2 = &_ex;
   /* unpack in and inout argments */
@@ -1020,8 +1020,6 @@ static void ior_bHYPRE_SStructMatrix__delete(
 static char*
 ior_bHYPRE_SStructMatrix__getURL(
     struct bHYPRE_SStructMatrix__object* self) {
-  sidl_rmi_InstanceHandle conn = (sidl_rmi_InstanceHandle)self->d_data;
-  sidl_BaseInterface _ex = NULL;
   /* TODO: Make this work for local object! */
   return NULL;
 }
@@ -1401,6 +1399,15 @@ static struct sidl_BaseClass__epv* bHYPRE_SStructMatrix__super(void) {
   return s_old_epv__sidl_baseclass;
 }
 
+static void
+cleanupClassInfo(void) {
+  if (s_classInfo) {
+    sidl_ClassInfo_deleteRef(s_classInfo);
+  }
+  s_classInfo_init = 1;
+  s_classInfo = NULL;
+}
+
 /*
  * initClassInfo: create a ClassInfo interface if necessary.
  */
@@ -1418,6 +1425,7 @@ initClassInfo(sidl_ClassInfo *info)
       sidl_ClassInfoI_setName(impl, "bHYPRE.SStructMatrix");
       sidl_ClassInfoI_setIORVersion(impl, s_IOR_MAJOR_VERSION,
         s_IOR_MINOR_VERSION);
+      atexit(cleanupClassInfo);
     }
   }
   if (s_classInfo) {

@@ -2,12 +2,12 @@
  * File:          bHYPRE_ParaSails_Skel.c
  * Symbol:        bHYPRE.ParaSails-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.12
  * Description:   Server-side glue code for bHYPRE.ParaSails
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.12
  */
 
 #include "bHYPRE_ParaSails_IOR.h"
@@ -112,7 +112,7 @@ int32_t
 impl_bHYPRE_ParaSails_SetIntArray1Parameter(
   /* in */ bHYPRE_ParaSails self,
   /* in */ const char* name,
-  /* in */ int32_t* value,
+  /* in rarray[nvalues] */ int32_t* value,
   /* in */ int32_t nvalues);
 
 extern
@@ -120,14 +120,14 @@ int32_t
 impl_bHYPRE_ParaSails_SetIntArray2Parameter(
   /* in */ bHYPRE_ParaSails self,
   /* in */ const char* name,
-  /* in */ struct sidl_int__array* value);
+  /* in array<int,2,column-major> */ struct sidl_int__array* value);
 
 extern
 int32_t
 impl_bHYPRE_ParaSails_SetDoubleArray1Parameter(
   /* in */ bHYPRE_ParaSails self,
   /* in */ const char* name,
-  /* in */ double* value,
+  /* in rarray[nvalues] */ double* value,
   /* in */ int32_t nvalues);
 
 extern
@@ -135,7 +135,7 @@ int32_t
 impl_bHYPRE_ParaSails_SetDoubleArray2Parameter(
   /* in */ bHYPRE_ParaSails self,
   /* in */ const char* name,
-  /* in */ struct sidl_double__array* value);
+  /* in array<double,2,column-major> */ struct sidl_double__array* value);
 
 extern
 int32_t
@@ -263,7 +263,7 @@ static int32_t
 skel_bHYPRE_ParaSails_SetIntArray1Parameter(
   /* in */ bHYPRE_ParaSails self,
   /* in */ const char* name,
-/* in */ struct sidl_int__array* value)
+/* in rarray[nvalues] */ struct sidl_int__array* value)
 {
   int32_t _return;
   struct sidl_int__array* value_proxy = sidl_int__array_ensure(value, 1,
@@ -283,7 +283,7 @@ static int32_t
 skel_bHYPRE_ParaSails_SetIntArray2Parameter(
   /* in */ bHYPRE_ParaSails self,
   /* in */ const char* name,
-/* in */ struct sidl_int__array* value)
+/* in array<int,2,column-major> */ struct sidl_int__array* value)
 {
   int32_t _return;
   struct sidl_int__array* value_proxy = sidl_int__array_ensure(value, 2,
@@ -301,7 +301,7 @@ static int32_t
 skel_bHYPRE_ParaSails_SetDoubleArray1Parameter(
   /* in */ bHYPRE_ParaSails self,
   /* in */ const char* name,
-/* in */ struct sidl_double__array* value)
+/* in rarray[nvalues] */ struct sidl_double__array* value)
 {
   int32_t _return;
   struct sidl_double__array* value_proxy = sidl_double__array_ensure(value, 1,
@@ -321,7 +321,7 @@ static int32_t
 skel_bHYPRE_ParaSails_SetDoubleArray2Parameter(
   /* in */ bHYPRE_ParaSails self,
   /* in */ const char* name,
-/* in */ struct sidl_double__array* value)
+/* in array<double,2,column-major> */ struct sidl_double__array* value)
 {
   int32_t _return;
   struct sidl_double__array* value_proxy = sidl_double__array_ensure(value, 2,

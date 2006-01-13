@@ -2,12 +2,12 @@
  * File:          bHYPRE_IJVectorView_Stub.c
  * Symbol:        bHYPRE.IJVectorView-v1.0.0
  * Symbol Type:   interface
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.12
  * Description:   Client-side glue code for bHYPRE.IJVectorView
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.12
  */
 
 #include "bHYPRE_IJVectorView.h"
@@ -245,8 +245,8 @@ int32_t
 bHYPRE_IJVectorView_SetValues(
   /* in */ bHYPRE_IJVectorView self,
   /* in */ int32_t nvalues,
-  /* in */ int32_t* indices,
-  /* in */ double* values)
+  /* in rarray[nvalues] */ int32_t* indices,
+  /* in rarray[nvalues] */ double* values)
 {
   int32_t indices_lower[1], indices_upper[1], indices_stride[1]; 
   struct sidl_int__array indices_real;
@@ -278,8 +278,8 @@ int32_t
 bHYPRE_IJVectorView_AddToValues(
   /* in */ bHYPRE_IJVectorView self,
   /* in */ int32_t nvalues,
-  /* in */ int32_t* indices,
-  /* in */ double* values)
+  /* in rarray[nvalues] */ int32_t* indices,
+  /* in rarray[nvalues] */ double* values)
 {
   int32_t indices_lower[1], indices_upper[1], indices_stride[1]; 
   struct sidl_int__array indices_real;
@@ -329,8 +329,8 @@ int32_t
 bHYPRE_IJVectorView_GetValues(
   /* in */ bHYPRE_IJVectorView self,
   /* in */ int32_t nvalues,
-  /* in */ int32_t* indices,
-  /* inout */ double* values)
+  /* in rarray[nvalues] */ int32_t* indices,
+  /* inout rarray[nvalues] */ double* values)
 {
   int32_t indices_lower[1], indices_upper[1], indices_stride[1]; 
   struct sidl_int__array indices_real;
@@ -1172,8 +1172,8 @@ remote_bHYPRE__IJVectorView_SetLocalRange(
 static int32_t
 remote_bHYPRE__IJVectorView_SetValues(
   /* in */ struct bHYPRE__IJVectorView__object* self /* TLD */,
-  /* in */ struct sidl_int__array* indices,
-  /* in */ struct sidl_double__array* values)
+  /* in rarray[nvalues] */ struct sidl_int__array* indices,
+  /* in rarray[nvalues] */ struct sidl_double__array* values)
 {
   sidl_BaseInterface _ex = NULL;
   sidl_BaseInterface *_ex2 =&_ex;
@@ -1205,8 +1205,8 @@ remote_bHYPRE__IJVectorView_SetValues(
 static int32_t
 remote_bHYPRE__IJVectorView_AddToValues(
   /* in */ struct bHYPRE__IJVectorView__object* self /* TLD */,
-  /* in */ struct sidl_int__array* indices,
-  /* in */ struct sidl_double__array* values)
+  /* in rarray[nvalues] */ struct sidl_int__array* indices,
+  /* in rarray[nvalues] */ struct sidl_double__array* values)
 {
   sidl_BaseInterface _ex = NULL;
   sidl_BaseInterface *_ex2 =&_ex;
@@ -1273,8 +1273,8 @@ remote_bHYPRE__IJVectorView_GetLocalRange(
 static int32_t
 remote_bHYPRE__IJVectorView_GetValues(
   /* in */ struct bHYPRE__IJVectorView__object* self /* TLD */,
-  /* in */ struct sidl_int__array* indices,
-  /* inout */ struct sidl_double__array** values)
+  /* in rarray[nvalues] */ struct sidl_int__array* indices,
+  /* inout rarray[nvalues] */ struct sidl_double__array** values)
 {
   sidl_BaseInterface _ex = NULL;
   sidl_BaseInterface *_ex2 =&_ex;

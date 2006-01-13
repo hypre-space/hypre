@@ -2,12 +2,12 @@
  * File:          bHYPRE_SStructGrid_Stub.c
  * Symbol:        bHYPRE.SStructGrid-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.12
  * Description:   Client-side glue code for bHYPRE.SStructGrid
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.12
  */
 
 #include "bHYPRE_SStructGrid.h"
@@ -280,8 +280,8 @@ int32_t
 bHYPRE_SStructGrid_SetExtents(
   /* in */ bHYPRE_SStructGrid self,
   /* in */ int32_t part,
-  /* in */ int32_t* ilower,
-  /* in */ int32_t* iupper,
+  /* in rarray[dim] */ int32_t* ilower,
+  /* in rarray[dim] */ int32_t* iupper,
   /* in */ int32_t dim)
 {
   int32_t ilower_lower[1], ilower_upper[1], ilower_stride[1]; 
@@ -339,7 +339,7 @@ int32_t
 bHYPRE_SStructGrid_AddVariable(
   /* in */ bHYPRE_SStructGrid self,
   /* in */ int32_t part,
-  /* in */ int32_t* index,
+  /* in rarray[dim] */ int32_t* index,
   /* in */ int32_t dim,
   /* in */ int32_t var,
   /* in */ enum bHYPRE_SStructVariable__enum vartype)
@@ -388,12 +388,12 @@ int32_t
 bHYPRE_SStructGrid_SetNeighborBox(
   /* in */ bHYPRE_SStructGrid self,
   /* in */ int32_t part,
-  /* in */ int32_t* ilower,
-  /* in */ int32_t* iupper,
+  /* in rarray[dim] */ int32_t* ilower,
+  /* in rarray[dim] */ int32_t* iupper,
   /* in */ int32_t nbor_part,
-  /* in */ int32_t* nbor_ilower,
-  /* in */ int32_t* nbor_iupper,
-  /* in */ int32_t* index_map,
+  /* in rarray[dim] */ int32_t* nbor_ilower,
+  /* in rarray[dim] */ int32_t* nbor_iupper,
+  /* in rarray[dim] */ int32_t* index_map,
   /* in */ int32_t dim)
 {
   int32_t ilower_lower[1], ilower_upper[1], ilower_stride[1]; 
@@ -470,7 +470,7 @@ int32_t
 bHYPRE_SStructGrid_SetPeriodic(
   /* in */ bHYPRE_SStructGrid self,
   /* in */ int32_t part,
-  /* in */ int32_t* periodic,
+  /* in rarray[dim] */ int32_t* periodic,
   /* in */ int32_t dim)
 {
   int32_t periodic_lower[1], periodic_upper[1], periodic_stride[1]; 
@@ -493,7 +493,7 @@ bHYPRE_SStructGrid_SetPeriodic(
 int32_t
 bHYPRE_SStructGrid_SetNumGhost(
   /* in */ bHYPRE_SStructGrid self,
-  /* in */ int32_t* num_ghost,
+  /* in rarray[dim2] */ int32_t* num_ghost,
   /* in */ int32_t dim2)
 {
   int32_t num_ghost_lower[1], num_ghost_upper[1], num_ghost_stride[1]; 
@@ -517,35 +517,6 @@ bHYPRE_SStructGrid_Assemble(
 {
   return (*self->d_epv->f_Assemble)(
     self);
-}
-
-void
-bHYPRE_SStructGrid_Create__sexec(
-        struct sidl_io_Deserializer__object* inArgs,
-        struct sidl_io_Serializer__object* outArgs) {
-  /* stack space for arguments */
-  bHYPRE_MPICommunicator mpi_comm;
-  int32_t ndim;
-  int32_t nparts;
-  bHYPRE_SStructGrid _retval;
-  sidl_BaseInterface _ex   = NULL;
-  sidl_BaseInterface *_ex2 = &_ex;
-
-  /* unpack in and inout argments */
-
-  sidl_io_Deserializer_unpackInt( inArgs, "ndim", &ndim, _ex2);
-
-  sidl_io_Deserializer_unpackInt( inArgs, "nparts", &nparts, _ex2);
-
-  /* make the call */
-  _retval = (_getSEPV()->f_Create)(
-    mpi_comm,
-    ndim,
-    nparts);
-
-  /* pack return value */
-  /* pack out and inout argments */
-
 }
 
 /*
@@ -609,36 +580,6 @@ bHYPRE_SStructGrid__exec(
   outArgs);
 }
 
-struct bHYPRE_SStructGrid__smethod {
-  const char *d_name;
-  void (*d_func)(struct sidl_io_Deserializer__object *,
-    struct sidl_io_Serializer__object *);
-};
-
-void
-bHYPRE_SStructGrid__sexec(
-        const char* methodName,
-        struct sidl_io_Deserializer__object* inArgs,
-        struct sidl_io_Serializer__object* outArgs ) { 
-  static const struct bHYPRE_SStructGrid__smethod s_methods[] = {
-    { "Create", bHYPRE_SStructGrid_Create__sexec }
-  };
-  int i, cmp, l = 0;
-  int u = sizeof(s_methods)/sizeof(struct bHYPRE_SStructGrid__smethod);
-  if (methodName) {
-    /* Use binary search to locate method */
-    while (l < u) {
-      i = (l + u) >> 1;
-      if (!(cmp=strcmp(methodName, s_methods[i].d_name))) {
-        (s_methods[i].d_func)(inArgs, outArgs);
-        return;
-      }
-      else if (cmp < 0) u = i;
-      else l = i + 1;
-    }
-  }
-  /* TODO: add code for method not found */
-}
 /*
  * Get the URL of the Implementation of this object (for RMI)
  */
@@ -1303,8 +1244,8 @@ static int32_t
 remote_bHYPRE_SStructGrid_SetExtents(
   /* in */ struct bHYPRE_SStructGrid__object* self /* TLD */,
   /* in */ int32_t part,
-  /* in */ struct sidl_int__array* ilower,
-  /* in */ struct sidl_int__array* iupper)
+  /* in rarray[dim] */ struct sidl_int__array* ilower,
+  /* in rarray[dim] */ struct sidl_int__array* iupper)
 {
   sidl_BaseInterface _ex = NULL;
   sidl_BaseInterface *_ex2 =&_ex;
@@ -1376,7 +1317,7 @@ static int32_t
 remote_bHYPRE_SStructGrid_AddVariable(
   /* in */ struct bHYPRE_SStructGrid__object* self /* TLD */,
   /* in */ int32_t part,
-  /* in */ struct sidl_int__array* index,
+  /* in rarray[dim] */ struct sidl_int__array* index,
   /* in */ int32_t var,
   /* in */ enum bHYPRE_SStructVariable__enum vartype)
 {
@@ -1413,12 +1354,12 @@ static int32_t
 remote_bHYPRE_SStructGrid_SetNeighborBox(
   /* in */ struct bHYPRE_SStructGrid__object* self /* TLD */,
   /* in */ int32_t part,
-  /* in */ struct sidl_int__array* ilower,
-  /* in */ struct sidl_int__array* iupper,
+  /* in rarray[dim] */ struct sidl_int__array* ilower,
+  /* in rarray[dim] */ struct sidl_int__array* iupper,
   /* in */ int32_t nbor_part,
-  /* in */ struct sidl_int__array* nbor_ilower,
-  /* in */ struct sidl_int__array* nbor_iupper,
-  /* in */ struct sidl_int__array* index_map)
+  /* in rarray[dim] */ struct sidl_int__array* nbor_ilower,
+  /* in rarray[dim] */ struct sidl_int__array* nbor_iupper,
+  /* in rarray[dim] */ struct sidl_int__array* index_map)
 {
   sidl_BaseInterface _ex = NULL;
   sidl_BaseInterface *_ex2 =&_ex;
@@ -1488,7 +1429,7 @@ static int32_t
 remote_bHYPRE_SStructGrid_SetPeriodic(
   /* in */ struct bHYPRE_SStructGrid__object* self /* TLD */,
   /* in */ int32_t part,
-  /* in */ struct sidl_int__array* periodic)
+  /* in rarray[dim] */ struct sidl_int__array* periodic)
 {
   sidl_BaseInterface _ex = NULL;
   sidl_BaseInterface *_ex2 =&_ex;
@@ -1521,7 +1462,7 @@ remote_bHYPRE_SStructGrid_SetPeriodic(
 static int32_t
 remote_bHYPRE_SStructGrid_SetNumGhost(
   /* in */ struct bHYPRE_SStructGrid__object* self /* TLD */,
-  /* in */ struct sidl_int__array* num_ghost)
+  /* in rarray[dim2] */ struct sidl_int__array* num_ghost)
 {
   sidl_BaseInterface _ex = NULL;
   sidl_BaseInterface *_ex2 =&_ex;

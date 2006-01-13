@@ -2,12 +2,12 @@
  * File:          bHYPRE_SStructParCSRVector_Skel.c
  * Symbol:        bHYPRE.SStructParCSRVector-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.12
  * Description:   Server-side glue code for bHYPRE.SStructParCSRVector
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.12
  */
 
 #include "bHYPRE_SStructParCSRVector_IOR.h"
@@ -129,7 +129,7 @@ int32_t
 impl_bHYPRE_SStructParCSRVector_SetValues(
   /* in */ bHYPRE_SStructParCSRVector self,
   /* in */ int32_t part,
-  /* in */ int32_t* index,
+  /* in rarray[dim] */ int32_t* index,
   /* in */ int32_t dim,
   /* in */ int32_t var,
   /* in */ double value);
@@ -139,11 +139,11 @@ int32_t
 impl_bHYPRE_SStructParCSRVector_SetBoxValues(
   /* in */ bHYPRE_SStructParCSRVector self,
   /* in */ int32_t part,
-  /* in */ int32_t* ilower,
-  /* in */ int32_t* iupper,
+  /* in rarray[dim] */ int32_t* ilower,
+  /* in rarray[dim] */ int32_t* iupper,
   /* in */ int32_t dim,
   /* in */ int32_t var,
-  /* in */ double* values,
+  /* in rarray[nvalues] */ double* values,
   /* in */ int32_t nvalues);
 
 extern
@@ -151,7 +151,7 @@ int32_t
 impl_bHYPRE_SStructParCSRVector_AddToValues(
   /* in */ bHYPRE_SStructParCSRVector self,
   /* in */ int32_t part,
-  /* in */ int32_t* index,
+  /* in rarray[dim] */ int32_t* index,
   /* in */ int32_t dim,
   /* in */ int32_t var,
   /* in */ double value);
@@ -161,11 +161,11 @@ int32_t
 impl_bHYPRE_SStructParCSRVector_AddToBoxValues(
   /* in */ bHYPRE_SStructParCSRVector self,
   /* in */ int32_t part,
-  /* in */ int32_t* ilower,
-  /* in */ int32_t* iupper,
+  /* in rarray[dim] */ int32_t* ilower,
+  /* in rarray[dim] */ int32_t* iupper,
   /* in */ int32_t dim,
   /* in */ int32_t var,
-  /* in */ double* values,
+  /* in rarray[nvalues] */ double* values,
   /* in */ int32_t nvalues);
 
 extern
@@ -178,7 +178,7 @@ int32_t
 impl_bHYPRE_SStructParCSRVector_GetValues(
   /* in */ bHYPRE_SStructParCSRVector self,
   /* in */ int32_t part,
-  /* in */ int32_t* index,
+  /* in rarray[dim] */ int32_t* index,
   /* in */ int32_t dim,
   /* in */ int32_t var,
   /* out */ double* value);
@@ -188,11 +188,11 @@ int32_t
 impl_bHYPRE_SStructParCSRVector_GetBoxValues(
   /* in */ bHYPRE_SStructParCSRVector self,
   /* in */ int32_t part,
-  /* in */ int32_t* ilower,
-  /* in */ int32_t* iupper,
+  /* in rarray[dim] */ int32_t* ilower,
+  /* in rarray[dim] */ int32_t* iupper,
   /* in */ int32_t dim,
   /* in */ int32_t var,
-  /* inout */ double* values,
+  /* inout rarray[nvalues] */ double* values,
   /* in */ int32_t nvalues);
 
 extern
@@ -309,7 +309,7 @@ static int32_t
 skel_bHYPRE_SStructParCSRVector_SetValues(
   /* in */ bHYPRE_SStructParCSRVector self,
   /* in */ int32_t part,
-  /* in */ struct sidl_int__array* index,
+  /* in rarray[dim] */ struct sidl_int__array* index,
   /* in */ int32_t var,
 /* in */ double value)
 {
@@ -333,10 +333,10 @@ static int32_t
 skel_bHYPRE_SStructParCSRVector_SetBoxValues(
   /* in */ bHYPRE_SStructParCSRVector self,
   /* in */ int32_t part,
-  /* in */ struct sidl_int__array* ilower,
-  /* in */ struct sidl_int__array* iupper,
+  /* in rarray[dim] */ struct sidl_int__array* ilower,
+  /* in rarray[dim] */ struct sidl_int__array* iupper,
   /* in */ int32_t var,
-/* in */ struct sidl_double__array* values)
+/* in rarray[nvalues] */ struct sidl_double__array* values)
 {
   int32_t _return;
   struct sidl_int__array* ilower_proxy = sidl_int__array_ensure(ilower, 1,
@@ -367,7 +367,7 @@ static int32_t
 skel_bHYPRE_SStructParCSRVector_AddToValues(
   /* in */ bHYPRE_SStructParCSRVector self,
   /* in */ int32_t part,
-  /* in */ struct sidl_int__array* index,
+  /* in rarray[dim] */ struct sidl_int__array* index,
   /* in */ int32_t var,
 /* in */ double value)
 {
@@ -391,10 +391,10 @@ static int32_t
 skel_bHYPRE_SStructParCSRVector_AddToBoxValues(
   /* in */ bHYPRE_SStructParCSRVector self,
   /* in */ int32_t part,
-  /* in */ struct sidl_int__array* ilower,
-  /* in */ struct sidl_int__array* iupper,
+  /* in rarray[dim] */ struct sidl_int__array* ilower,
+  /* in rarray[dim] */ struct sidl_int__array* iupper,
   /* in */ int32_t var,
-/* in */ struct sidl_double__array* values)
+/* in rarray[nvalues] */ struct sidl_double__array* values)
 {
   int32_t _return;
   struct sidl_int__array* ilower_proxy = sidl_int__array_ensure(ilower, 1,
@@ -425,7 +425,7 @@ static int32_t
 skel_bHYPRE_SStructParCSRVector_GetValues(
   /* in */ bHYPRE_SStructParCSRVector self,
   /* in */ int32_t part,
-  /* in */ struct sidl_int__array* index,
+  /* in rarray[dim] */ struct sidl_int__array* index,
   /* in */ int32_t var,
 /* out */ double* value)
 {
@@ -449,10 +449,10 @@ static int32_t
 skel_bHYPRE_SStructParCSRVector_GetBoxValues(
   /* in */ bHYPRE_SStructParCSRVector self,
   /* in */ int32_t part,
-  /* in */ struct sidl_int__array* ilower,
-  /* in */ struct sidl_int__array* iupper,
+  /* in rarray[dim] */ struct sidl_int__array* ilower,
+  /* in rarray[dim] */ struct sidl_int__array* iupper,
   /* in */ int32_t var,
-/* inout */ struct sidl_double__array** values)
+/* inout rarray[nvalues] */ struct sidl_double__array** values)
 {
   int32_t _return;
   struct sidl_int__array* ilower_proxy = sidl_int__array_ensure(ilower, 1,

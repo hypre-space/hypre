@@ -2,12 +2,12 @@
  * File:          bHYPRE_PreconditionedSolver.h
  * Symbol:        bHYPRE.PreconditionedSolver-v1.0.0
  * Symbol Type:   interface
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.12
  * Description:   Client-side glue code for bHYPRE.PreconditionedSolver
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.12
  */
 
 #ifndef included_bHYPRE_PreconditionedSolver_h
@@ -115,27 +115,27 @@ int32_t
 bHYPRE_PreconditionedSolver_SetIntArray1Parameter(
   /* in */ bHYPRE_PreconditionedSolver self,
   /* in */ const char* name,
-  /* in */ int32_t* value,
+  /* in rarray[nvalues] */ int32_t* value,
   /* in */ int32_t nvalues);
 
 int32_t
 bHYPRE_PreconditionedSolver_SetIntArray2Parameter(
   /* in */ bHYPRE_PreconditionedSolver self,
   /* in */ const char* name,
-  /* in */ struct sidl_int__array* value);
+  /* in array<int,2,column-major> */ struct sidl_int__array* value);
 
 int32_t
 bHYPRE_PreconditionedSolver_SetDoubleArray1Parameter(
   /* in */ bHYPRE_PreconditionedSolver self,
   /* in */ const char* name,
-  /* in */ double* value,
+  /* in rarray[nvalues] */ double* value,
   /* in */ int32_t nvalues);
 
 int32_t
 bHYPRE_PreconditionedSolver_SetDoubleArray2Parameter(
   /* in */ bHYPRE_PreconditionedSolver self,
   /* in */ const char* name,
-  /* in */ struct sidl_double__array* value);
+  /* in array<double,2,column-major> */ struct sidl_double__array* value);
 
 int32_t
 bHYPRE_PreconditionedSolver_GetIntValue(
@@ -248,14 +248,6 @@ bHYPRE_PreconditionedSolver__cast2(
 void
 bHYPRE_PreconditionedSolver__exec(
   /* in */ bHYPRE_PreconditionedSolver self,
-  /* in */ const char* methodName,
-  /* in */ sidl_io_Deserializer inArgs,
-  /* in */ sidl_io_Serializer outArgs);
-/**
- * static Exec method for reflexity.
- */
-void
-bHYPRE_PreconditionedSolver__sexec(
   /* in */ const char* methodName,
   /* in */ sidl_io_Deserializer inArgs,
   /* in */ sidl_io_Serializer outArgs);

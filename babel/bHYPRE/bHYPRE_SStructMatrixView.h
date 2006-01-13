@@ -2,12 +2,12 @@
  * File:          bHYPRE_SStructMatrixView.h
  * Symbol:        bHYPRE.SStructMatrixView-v1.0.0
  * Symbol Type:   interface
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.12
  * Description:   Client-side glue code for bHYPRE.SStructMatrixView
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.12
  */
 
 #ifndef included_bHYPRE_SStructMatrixView_h
@@ -133,12 +133,12 @@ int32_t
 bHYPRE_SStructMatrixView_SetValues(
   /* in */ bHYPRE_SStructMatrixView self,
   /* in */ int32_t part,
-  /* in */ int32_t* index,
+  /* in rarray[dim] */ int32_t* index,
   /* in */ int32_t dim,
   /* in */ int32_t var,
   /* in */ int32_t nentries,
-  /* in */ int32_t* entries,
-  /* in */ double* values);
+  /* in rarray[nentries] */ int32_t* entries,
+  /* in rarray[nentries] */ double* values);
 
 /**
  * Set matrix coefficients a box at a time.
@@ -162,13 +162,13 @@ int32_t
 bHYPRE_SStructMatrixView_SetBoxValues(
   /* in */ bHYPRE_SStructMatrixView self,
   /* in */ int32_t part,
-  /* in */ int32_t* ilower,
-  /* in */ int32_t* iupper,
+  /* in rarray[dim] */ int32_t* ilower,
+  /* in rarray[dim] */ int32_t* iupper,
   /* in */ int32_t dim,
   /* in */ int32_t var,
   /* in */ int32_t nentries,
-  /* in */ int32_t* entries,
-  /* in */ double* values,
+  /* in rarray[nentries] */ int32_t* entries,
+  /* in rarray[nvalues] */ double* values,
   /* in */ int32_t nvalues);
 
 /**
@@ -192,12 +192,12 @@ int32_t
 bHYPRE_SStructMatrixView_AddToValues(
   /* in */ bHYPRE_SStructMatrixView self,
   /* in */ int32_t part,
-  /* in */ int32_t* index,
+  /* in rarray[dim] */ int32_t* index,
   /* in */ int32_t dim,
   /* in */ int32_t var,
   /* in */ int32_t nentries,
-  /* in */ int32_t* entries,
-  /* in */ double* values);
+  /* in rarray[nentries] */ int32_t* entries,
+  /* in rarray[nentries] */ double* values);
 
 /**
  * Add to matrix coefficients a box at a time.
@@ -219,13 +219,13 @@ int32_t
 bHYPRE_SStructMatrixView_AddToBoxValues(
   /* in */ bHYPRE_SStructMatrixView self,
   /* in */ int32_t part,
-  /* in */ int32_t* ilower,
-  /* in */ int32_t* iupper,
+  /* in rarray[dim] */ int32_t* ilower,
+  /* in rarray[dim] */ int32_t* iupper,
   /* in */ int32_t dim,
   /* in */ int32_t var,
   /* in */ int32_t nentries,
-  /* in */ int32_t* entries,
-  /* in */ double* values,
+  /* in rarray[nentries] */ int32_t* entries,
+  /* in rarray[nvalues] */ double* values,
   /* in */ int32_t nvalues);
 
 /**
@@ -302,14 +302,6 @@ bHYPRE_SStructMatrixView__cast2(
 void
 bHYPRE_SStructMatrixView__exec(
   /* in */ bHYPRE_SStructMatrixView self,
-  /* in */ const char* methodName,
-  /* in */ sidl_io_Deserializer inArgs,
-  /* in */ sidl_io_Serializer outArgs);
-/**
- * static Exec method for reflexity.
- */
-void
-bHYPRE_SStructMatrixView__sexec(
   /* in */ const char* methodName,
   /* in */ sidl_io_Deserializer inArgs,
   /* in */ sidl_io_Serializer outArgs);

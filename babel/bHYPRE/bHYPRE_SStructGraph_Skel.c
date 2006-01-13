@@ -2,12 +2,12 @@
  * File:          bHYPRE_SStructGraph_Skel.c
  * Symbol:        bHYPRE.SStructGraph-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.12
  * Description:   Server-side glue code for bHYPRE.SStructGraph
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.12
  */
 
 #include "bHYPRE_SStructGraph_IOR.h"
@@ -95,11 +95,11 @@ int32_t
 impl_bHYPRE_SStructGraph_AddEntries(
   /* in */ bHYPRE_SStructGraph self,
   /* in */ int32_t part,
-  /* in */ int32_t* index,
+  /* in rarray[dim] */ int32_t* index,
   /* in */ int32_t dim,
   /* in */ int32_t var,
   /* in */ int32_t to_part,
-  /* in */ int32_t* to_index,
+  /* in rarray[dim] */ int32_t* to_index,
   /* in */ int32_t to_var);
 
 extern
@@ -168,10 +168,10 @@ static int32_t
 skel_bHYPRE_SStructGraph_AddEntries(
   /* in */ bHYPRE_SStructGraph self,
   /* in */ int32_t part,
-  /* in */ struct sidl_int__array* index,
+  /* in rarray[dim] */ struct sidl_int__array* index,
   /* in */ int32_t var,
   /* in */ int32_t to_part,
-  /* in */ struct sidl_int__array* to_index,
+  /* in rarray[dim] */ struct sidl_int__array* to_index,
 /* in */ int32_t to_var)
 {
   int32_t _return;
