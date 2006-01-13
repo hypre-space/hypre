@@ -1410,6 +1410,22 @@ hypre_PointRelaxSetTol( void   *relax_vdata,
 }
 
 /*--------------------------------------------------------------------------
+ * hypre_PointRelaxGetTol
+ *--------------------------------------------------------------------------*/
+
+int
+hypre_PointRelaxGetTol( void   *relax_vdata,
+                        double *tol         )
+{
+   hypre_PointRelaxData *relax_data = relax_vdata;
+   int                   ierr = 0;
+
+   *tol = (relax_data -> tol);
+
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
  * hypre_PointRelaxSetMaxIter
  *--------------------------------------------------------------------------*/
 
@@ -1426,6 +1442,22 @@ hypre_PointRelaxSetMaxIter( void *relax_vdata,
 }
 
 /*--------------------------------------------------------------------------
+ * hypre_PointRelaxGetMaxIter
+ *--------------------------------------------------------------------------*/
+
+int
+hypre_PointRelaxGetMaxIter( void *relax_vdata,
+                            int * max_iter    )
+{
+   hypre_PointRelaxData *relax_data = relax_vdata;
+   int                   ierr = 0;
+
+   *max_iter = (relax_data -> max_iter);
+
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
  * hypre_PointRelaxSetZeroGuess
  *--------------------------------------------------------------------------*/
 
@@ -1437,6 +1469,38 @@ hypre_PointRelaxSetZeroGuess( void *relax_vdata,
    int                   ierr = 0;
 
    (relax_data -> zero_guess) = zero_guess;
+
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_PointRelaxGetZeroGuess
+ *--------------------------------------------------------------------------*/
+
+int
+hypre_PointRelaxGetZeroGuess( void *relax_vdata,
+                              int * zero_guess  )
+{
+   hypre_PointRelaxData *relax_data = relax_vdata;
+   int                   ierr = 0;
+
+   *zero_guess = (relax_data -> zero_guess);
+
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_PointRelaxGetNumIterations
+ *--------------------------------------------------------------------------*/
+
+int
+hypre_PointRelaxGetNumIterations( void *relax_vdata,
+                                  int * num_iterations  )
+{
+   hypre_PointRelaxData *relax_data = relax_vdata;
+   int                   ierr = 0;
+
+   *num_iterations = (relax_data -> num_iterations);
 
    return ierr;
 }

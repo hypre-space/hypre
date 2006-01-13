@@ -81,6 +81,17 @@ HYPRE_StructJacobiSetTol( HYPRE_StructSolver solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_StructJacobiGetTol
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_StructJacobiGetTol( HYPRE_StructSolver solver,
+                          double           * tol    )
+{
+   return( hypre_JacobiGetTol( (void *) solver, tol ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_StructJacobiSetMaxIter
  *--------------------------------------------------------------------------*/
 
@@ -92,6 +103,17 @@ HYPRE_StructJacobiSetMaxIter( HYPRE_StructSolver solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_StructJacobiGetMaxIter
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_StructJacobiGetMaxIter( HYPRE_StructSolver solver,
+                              int              * max_iter  )
+{
+   return( hypre_JacobiGetMaxIter( (void *) solver, max_iter ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_StructJacobiSetZeroGuess
  *--------------------------------------------------------------------------*/
  
@@ -99,6 +121,17 @@ int
 HYPRE_StructJacobiSetZeroGuess( HYPRE_StructSolver solver )
 {
    return( hypre_JacobiSetZeroGuess( (void *) solver, 1 ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_StructJacobiGetZeroGuess
+ *--------------------------------------------------------------------------*/
+ 
+int
+HYPRE_StructJacobiGetZeroGuess( HYPRE_StructSolver solver,
+                                int * zeroguess )
+{
+   return( hypre_JacobiGetZeroGuess( (void *) solver, zeroguess ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -125,10 +158,7 @@ int
 HYPRE_StructJacobiGetNumIterations( HYPRE_StructSolver  solver,
                                     int                *num_iterations )
 {
-#if 0
    return( hypre_JacobiGetNumIterations( (void *) solver, num_iterations ) );
-#endif
-   return 0;
 }
 
 /*--------------------------------------------------------------------------

@@ -118,6 +118,22 @@ hypre_JacobiSetTol( void   *jacobi_vdata,
 }
 
 /*--------------------------------------------------------------------------
+ * hypre_JacobiGetTol
+ *--------------------------------------------------------------------------*/
+
+int
+hypre_JacobiGetTol( void   *jacobi_vdata,
+                    double *tol          )
+{
+   hypre_JacobiData *jacobi_data = jacobi_vdata;
+   int               ierr = 0;
+
+   ierr = hypre_PointRelaxGetTol((jacobi_data -> relax_data), tol);
+
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
  * hypre_JacobiSetMaxIter
  *--------------------------------------------------------------------------*/
 
@@ -129,6 +145,23 @@ hypre_JacobiSetMaxIter( void  *jacobi_vdata,
    int               ierr = 0;
 
    ierr = hypre_PointRelaxSetMaxIter((jacobi_data -> relax_data),
+                                     max_iter);
+
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_JacobiGetMaxIter
+ *--------------------------------------------------------------------------*/
+
+int
+hypre_JacobiGetMaxIter( void  *jacobi_vdata,
+                        int  * max_iter     )
+{
+   hypre_JacobiData *jacobi_data = jacobi_vdata;
+   int               ierr = 0;
+
+   ierr = hypre_PointRelaxGetMaxIter((jacobi_data -> relax_data),
                                      max_iter);
 
    return ierr;
@@ -147,6 +180,40 @@ hypre_JacobiSetZeroGuess( void  *jacobi_vdata,
 
    ierr = hypre_PointRelaxSetZeroGuess((jacobi_data -> relax_data),
                                        zero_guess);
+
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_JacobiGetZeroGuess
+ *--------------------------------------------------------------------------*/
+
+int
+hypre_JacobiGetZeroGuess( void  *jacobi_vdata,
+                          int  * zero_guess   )
+{
+   hypre_JacobiData *jacobi_data = jacobi_vdata;
+   int               ierr = 0;
+
+   ierr = hypre_PointRelaxGetZeroGuess((jacobi_data -> relax_data),
+                                       zero_guess);
+
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_JacobiGetNumIterations
+ *--------------------------------------------------------------------------*/
+
+int
+hypre_JacobiGetNumIterations( void  *jacobi_vdata,
+                              int  * num_iterations   )
+{
+   hypre_JacobiData *jacobi_data = jacobi_vdata;
+   int               ierr = 0;
+
+   ierr = hypre_PointRelaxGetNumIterations((jacobi_data -> relax_data),
+                                           num_iterations );
 
    return ierr;
 }

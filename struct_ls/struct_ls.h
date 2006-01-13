@@ -112,8 +112,11 @@ int HYPRE_StructJacobiDestroy( HYPRE_StructSolver solver );
 int HYPRE_StructJacobiSetup( HYPRE_StructSolver solver , HYPRE_StructMatrix A , HYPRE_StructVector b , HYPRE_StructVector x );
 int HYPRE_StructJacobiSolve( HYPRE_StructSolver solver , HYPRE_StructMatrix A , HYPRE_StructVector b , HYPRE_StructVector x );
 int HYPRE_StructJacobiSetTol( HYPRE_StructSolver solver , double tol );
+int HYPRE_StructJacobiGetTol( HYPRE_StructSolver solver , double *tol );
 int HYPRE_StructJacobiSetMaxIter( HYPRE_StructSolver solver , int max_iter );
+int HYPRE_StructJacobiGetMaxIter( HYPRE_StructSolver solver , int *max_iter );
 int HYPRE_StructJacobiSetZeroGuess( HYPRE_StructSolver solver );
+int HYPRE_StructJacobiGetZeroGuess( HYPRE_StructSolver solver , int *zeroguess );
 int HYPRE_StructJacobiSetNonZeroGuess( HYPRE_StructSolver solver );
 int HYPRE_StructJacobiGetNumIterations( HYPRE_StructSolver solver , int *num_iterations );
 int HYPRE_StructJacobiGetFinalRelativeResidualNorm( HYPRE_StructSolver solver , double *norm );
@@ -222,8 +225,12 @@ int hypre_JacobiDestroy( void *jacobi_vdata );
 int hypre_JacobiSetup( void *jacobi_vdata , hypre_StructMatrix *A , hypre_StructVector *b , hypre_StructVector *x );
 int hypre_JacobiSolve( void *jacobi_vdata , hypre_StructMatrix *A , hypre_StructVector *b , hypre_StructVector *x );
 int hypre_JacobiSetTol( void *jacobi_vdata , double tol );
+int hypre_JacobiGetTol( void *jacobi_vdata , double *tol );
 int hypre_JacobiSetMaxIter( void *jacobi_vdata , int max_iter );
+int hypre_JacobiGetMaxIter( void *jacobi_vdata , int *max_iter );
 int hypre_JacobiSetZeroGuess( void *jacobi_vdata , int zero_guess );
+int hypre_JacobiGetZeroGuess( void *jacobi_vdata , int *zero_guess );
+int hypre_JacobiGetNumIterations( void *jacobi_vdata , int *num_iterations );
 int hypre_JacobiSetTempVec( void *jacobi_vdata , hypre_StructVector *t );
 
 /* pcg_struct.c */
@@ -357,8 +364,12 @@ int hypre_PointRelax( void *relax_vdata , hypre_StructMatrix *A , hypre_StructVe
 int hypre_PointRelax_core0( void *relax_vdata , hypre_StructMatrix *A , int constant_coefficient , hypre_Box *compute_box , double *bp , double *xp , double *tp , int boxarray_id , hypre_Box *A_data_box , hypre_Box *b_data_box , hypre_Box *x_data_box , hypre_Box *t_data_box , hypre_IndexRef stride );
 int hypre_PointRelax_core12( void *relax_vdata , hypre_StructMatrix *A , int constant_coefficient , hypre_Box *compute_box , double *bp , double *xp , double *tp , int boxarray_id , hypre_Box *A_data_box , hypre_Box *b_data_box , hypre_Box *x_data_box , hypre_Box *t_data_box , hypre_IndexRef stride );
 int hypre_PointRelaxSetTol( void *relax_vdata , double tol );
+int hypre_PointRelaxGetTol( void *relax_vdata , double *tol );
 int hypre_PointRelaxSetMaxIter( void *relax_vdata , int max_iter );
+int hypre_PointRelaxGetMaxIter( void *relax_vdata , int *max_iter );
 int hypre_PointRelaxSetZeroGuess( void *relax_vdata , int zero_guess );
+int hypre_PointRelaxGetZeroGuess( void *relax_vdata , int *zero_guess );
+int hypre_PointRelaxGetNumIterations( void *relax_vdata , int *num_iterations );
 int hypre_PointRelaxSetWeight( void *relax_vdata , double weight );
 int hypre_PointRelaxSetNumPointsets( void *relax_vdata , int num_pointsets );
 int hypre_PointRelaxSetPointset( void *relax_vdata , int pointset , int pointset_size , hypre_Index pointset_stride , hypre_Index *pointset_indices );
