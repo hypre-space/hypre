@@ -697,7 +697,6 @@ impl_bHYPRE_StructSMG_Apply(
       hypre_assert( "Unrecognized vector type."==(char *)x );
    }
    datab = bHYPRE_StructVector__get_data( bHYPREP_b );
-   bHYPRE_StructVector_deleteRef( bHYPREP_b );
    Hb = datab -> vec;
 
    if ( *x==NULL )
@@ -719,7 +718,6 @@ impl_bHYPRE_StructSMG_Apply(
       hypre_assert( "Unrecognized vector type."==(char *)(*x) );
    }
    datax = bHYPRE_StructVector__get_data( bHYPREP_x );
-   bHYPRE_StructVector_deleteRef( bHYPREP_x );
    Hx = datax -> vec;
 
    ierr += HYPRE_StructSMGSolve( solver, HA, Hb, Hx );
