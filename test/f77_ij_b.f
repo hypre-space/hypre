@@ -442,7 +442,7 @@ c-----------------------------------------------------------------------
 c     Finalize things
 c-----------------------------------------------------------------------
 
-      call bHYPRE_BoomerAMG_deleteref_f( bHYPRE_AMG );
+      call bHYPRE_BoomerAMG_deleteref_f( bHYPRE_AMG )
       call bHYPRE_IJParCSRVector_deleteref_f( bHYPRE_parcsr_x )
       call bHYPRE_IJParCSRVector_deleteref_f( bHYPRE_parcsr_b )
       call bHYPRE_IJParCSRMatrix_deleteref_f( bHYPRE_parcsr_A )
