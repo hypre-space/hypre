@@ -851,16 +851,12 @@ impl_bHYPRE_PCG_Apply(
    while ((i+1) <= max_iter)
    {
       i++;
-      printf("      iteration %i\n", i );
 
       /* s = A*p */
-      printf("     matrix Apply coming\n");
       ierr += bHYPRE_Operator_Apply( A, p, &s );
-      printf("     matrix Apply done\n");
 
       /* alpha = gamma / <s,p> */
       ierr += bHYPRE_Vector_Dot( s, p, &sdotp );
-      printf("     <s,p> done\n");
       if ( sdotp==0.0 )
       {
          ++ierr;
@@ -873,17 +869,13 @@ impl_bHYPRE_PCG_Apply(
 
       /* x = x + alpha*p */
       ierr += bHYPRE_Vector_Axpy( *x, alpha, p );
-      printf("     x+=ap done\n");
 
       /* r = r - alpha*s */
       ierr += bHYPRE_Vector_Axpy( r, -alpha, s );
-      printf("     r-=as done\n");
          
       /* s = C*r */
       ierr += bHYPRE_Vector_Clear( s ); /* is this needed ? */
-      printf("     precond Apply coming\n");
       ierr += bHYPRE_Solver_Apply( precond, r, &s ); /* A`s = r */
-      printf("     precond Apply done\n");
 
       /* gamma = <r,s> */
       ierr += bHYPRE_Vector_Dot( r, s, &gamma );
