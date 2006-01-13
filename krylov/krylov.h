@@ -877,6 +877,7 @@ int HYPRE_GMRESGetPrintLevel( HYPRE_Solver solver , int *level );
 int HYPRE_GMRESSetLogging( HYPRE_Solver solver , int level );
 int HYPRE_GMRESGetLogging( HYPRE_Solver solver , int *level );
 int HYPRE_GMRESGetNumIterations( HYPRE_Solver solver , int *num_iterations );
+int HYPRE_GMRESGetConverged( HYPRE_Solver solver , int *converged );
 int HYPRE_GMRESGetFinalRelativeResidualNorm( HYPRE_Solver solver , double *norm );
 int HYPRE_GMRESGetResidual( HYPRE_Solver solver , void **residual );
 
@@ -904,6 +905,7 @@ int HYPRE_PCGGetLogging( HYPRE_Solver solver , int *level );
 int HYPRE_PCGSetPrintLevel( HYPRE_Solver solver , int level );
 int HYPRE_PCGGetPrintLevel( HYPRE_Solver solver , int *level );
 int HYPRE_PCGGetNumIterations( HYPRE_Solver solver , int *num_iterations );
+int HYPRE_PCGGetConverged( HYPRE_Solver solver , int *converged );
 int HYPRE_PCGGetFinalRelativeResidualNorm( HYPRE_Solver solver , double *norm );
 int HYPRE_PCGGetResidual( HYPRE_Solver solver , void **residual );
 
