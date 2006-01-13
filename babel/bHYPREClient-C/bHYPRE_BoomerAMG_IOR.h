@@ -2,12 +2,12 @@
  * File:          bHYPRE_BoomerAMG_IOR.h
  * Symbol:        bHYPRE.BoomerAMG-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.12
  * Description:   Intermediate Object Representation for bHYPRE.BoomerAMG
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.12
  */
 
 #ifndef included_bHYPRE_BoomerAMG_IOR_h
@@ -255,19 +255,19 @@ struct bHYPRE_BoomerAMG__epv {
   int32_t (*f_SetIntArray1Parameter)(
     /* in */ struct bHYPRE_BoomerAMG__object* self,
     /* in */ const char* name,
-    /* in */ struct sidl_int__array* value);
+    /* in rarray[nvalues] */ struct sidl_int__array* value);
   int32_t (*f_SetIntArray2Parameter)(
     /* in */ struct bHYPRE_BoomerAMG__object* self,
     /* in */ const char* name,
-    /* in */ struct sidl_int__array* value);
+    /* in array<int,2,column-major> */ struct sidl_int__array* value);
   int32_t (*f_SetDoubleArray1Parameter)(
     /* in */ struct bHYPRE_BoomerAMG__object* self,
     /* in */ const char* name,
-    /* in */ struct sidl_double__array* value);
+    /* in rarray[nvalues] */ struct sidl_double__array* value);
   int32_t (*f_SetDoubleArray2Parameter)(
     /* in */ struct bHYPRE_BoomerAMG__object* self,
     /* in */ const char* name,
-    /* in */ struct sidl_double__array* value);
+    /* in array<double,2,column-major> */ struct sidl_double__array* value);
   int32_t (*f_GetIntValue)(
     /* in */ struct bHYPRE_BoomerAMG__object* self,
     /* in */ const char* name,
@@ -317,11 +317,13 @@ struct bHYPRE_BoomerAMG__epv {
     /* in */ int32_t level);
   int32_t (*f_InitGridRelaxation)(
     /* in */ struct bHYPRE_BoomerAMG__object* self,
-    /* out */ struct sidl_int__array** num_grid_sweeps,
-    /* out */ struct sidl_int__array** grid_relax_type,
-    /* out */ struct sidl_int__array** grid_relax_points,
+    /* out array<int,column-major> */ struct sidl_int__array** num_grid_sweeps,
+    /* out array<int,column-major> */ struct sidl_int__array** grid_relax_type,
+    /* out array<int,2,
+      column-major> */ struct sidl_int__array** grid_relax_points,
     /* in */ int32_t coarsen_type,
-    /* out */ struct sidl_double__array** relax_weights,
+    /* out array<double,
+      column-major> */ struct sidl_double__array** relax_weights,
     /* in */ int32_t max_levels);
 };
 

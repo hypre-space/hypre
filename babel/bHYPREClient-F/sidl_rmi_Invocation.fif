@@ -2,7 +2,7 @@ C
 C       File:          sidl_rmi_Invocation_Impl.f
 C       Symbol:        sidl.rmi.Invocation-v0.9.3
 C       Symbol Type:   interface
-C       Babel Version: 0.10.4
+C       Babel Version: 0.10.12
 C       Release:       $Name$
 C       Revision:      @(#) $Id$
 C       Description:   Client-side documentation text for sidl.rmi.Invocation
@@ -32,8 +32,8 @@ C       Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 C       
 C       WARNING: Automatically generated; changes will be lost
 C       
-C       babel-version = 0.10.4
-C       xml-url       = /home/painter/babel-0.10.4/bin/.././share/repository/sidl.rmi.Invocation-v0.9.3.xml
+C       babel-version = 0.10.12
+C       xml-url       = /home/painter/babel/share/babel-0.10.12/repository/sidl.rmi.Invocation-v0.9.3.xml
 C       
 
         THIS FILE IS DOCUMENTATION - DO NOT COMPILE IT!
@@ -49,6 +49,7 @@ C
 
 
 C       
+C       Method:  _cast[]
 C       Cast method for interface and type conversions.
 C       
 
@@ -62,6 +63,7 @@ C       out sidl.rmi.Invocation retval
 
 
 C       
+C       Method:  _cast2[]
 C       Cast method for interface and class type conversions.
 C       
 
@@ -77,6 +79,7 @@ C       out opaque retval
 
 
 C       
+C       Method:  addRef[]
 C       <p>
 C       Add one to the intrinsic reference count in the underlying object.
 C       Object in <code>sidl</code> have an intrinsic reference count.
@@ -99,6 +102,7 @@ C       in sidl.rmi.Invocation self
 
 
 C       
+C       Method:  deleteRef[]
 C       Decrease by one the intrinsic reference count in the underlying
 C       object, and delete the object if the reference is non-positive.
 C       Objects in <code>sidl</code> have an intrinsic reference count.
@@ -114,6 +118,7 @@ C       in sidl.rmi.Invocation self
 
 
 C       
+C       Method:  isSame[]
 C       Return true if and only if <code>obj</code> refers to the same
 C       object as this object.
 C       
@@ -130,6 +135,7 @@ C       out bool retval
 
 
 C       
+C       Method:  queryInt[]
 C       Check whether the object can support the specified interface or
 C       class.  If the <code>sidl</code> type name in <code>name</code>
 C       is supported, then a reference to that object is returned with the
@@ -151,6 +157,7 @@ C       out sidl.BaseInterface retval
 
 
 C       
+C       Method:  isType[]
 C       Return whether this object is an instance of the specified type.
 C       The string name must be the <code>sidl</code> type name.  This
 C       routine will return <code>true</code> if and only if a cast to
@@ -169,6 +176,7 @@ C       out bool retval
 
 
 C       
+C       Method:  getClassInfo[]
 C       Return the meta-data about the class implementing this interface.
 C       
 
@@ -344,6 +352,7 @@ C       out sidl.BaseInterface exception
 
 
 C       
+C       Method:  invokeMethod[]
 C       this method may be called only once at the end of the object's lifetime 
 C       
 

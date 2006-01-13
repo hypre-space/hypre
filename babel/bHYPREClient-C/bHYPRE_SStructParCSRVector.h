@@ -2,12 +2,12 @@
  * File:          bHYPRE_SStructParCSRVector.h
  * Symbol:        bHYPRE.SStructParCSRVector-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.12
  * Description:   Client-side glue code for bHYPRE.SStructParCSRVector
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.12
  */
 
 #ifndef included_bHYPRE_SStructParCSRVector_h
@@ -179,7 +179,7 @@ int32_t
 bHYPRE_SStructParCSRVector_SetValues(
   /* in */ bHYPRE_SStructParCSRVector self,
   /* in */ int32_t part,
-  /* in */ int32_t* index,
+  /* in rarray[dim] */ int32_t* index,
   /* in */ int32_t dim,
   /* in */ int32_t var,
   /* in */ double value);
@@ -200,11 +200,11 @@ int32_t
 bHYPRE_SStructParCSRVector_SetBoxValues(
   /* in */ bHYPRE_SStructParCSRVector self,
   /* in */ int32_t part,
-  /* in */ int32_t* ilower,
-  /* in */ int32_t* iupper,
+  /* in rarray[dim] */ int32_t* ilower,
+  /* in rarray[dim] */ int32_t* iupper,
   /* in */ int32_t dim,
   /* in */ int32_t var,
-  /* in */ double* values,
+  /* in rarray[nvalues] */ double* values,
   /* in */ int32_t nvalues);
 
 /**
@@ -223,7 +223,7 @@ int32_t
 bHYPRE_SStructParCSRVector_AddToValues(
   /* in */ bHYPRE_SStructParCSRVector self,
   /* in */ int32_t part,
-  /* in */ int32_t* index,
+  /* in rarray[dim] */ int32_t* index,
   /* in */ int32_t dim,
   /* in */ int32_t var,
   /* in */ double value);
@@ -244,11 +244,11 @@ int32_t
 bHYPRE_SStructParCSRVector_AddToBoxValues(
   /* in */ bHYPRE_SStructParCSRVector self,
   /* in */ int32_t part,
-  /* in */ int32_t* ilower,
-  /* in */ int32_t* iupper,
+  /* in rarray[dim] */ int32_t* ilower,
+  /* in rarray[dim] */ int32_t* iupper,
   /* in */ int32_t dim,
   /* in */ int32_t var,
-  /* in */ double* values,
+  /* in rarray[nvalues] */ double* values,
   /* in */ int32_t nvalues);
 
 /**
@@ -274,7 +274,7 @@ int32_t
 bHYPRE_SStructParCSRVector_GetValues(
   /* in */ bHYPRE_SStructParCSRVector self,
   /* in */ int32_t part,
-  /* in */ int32_t* index,
+  /* in rarray[dim] */ int32_t* index,
   /* in */ int32_t dim,
   /* in */ int32_t var,
   /* out */ double* value);
@@ -294,11 +294,11 @@ int32_t
 bHYPRE_SStructParCSRVector_GetBoxValues(
   /* in */ bHYPRE_SStructParCSRVector self,
   /* in */ int32_t part,
-  /* in */ int32_t* ilower,
-  /* in */ int32_t* iupper,
+  /* in rarray[dim] */ int32_t* ilower,
+  /* in rarray[dim] */ int32_t* iupper,
   /* in */ int32_t dim,
   /* in */ int32_t var,
-  /* inout */ double* values,
+  /* inout rarray[nvalues] */ double* values,
   /* in */ int32_t nvalues);
 
 /**
@@ -400,14 +400,6 @@ bHYPRE_SStructParCSRVector__cast2(
 void
 bHYPRE_SStructParCSRVector__exec(
   /* in */ bHYPRE_SStructParCSRVector self,
-  /* in */ const char* methodName,
-  /* in */ sidl_io_Deserializer inArgs,
-  /* in */ sidl_io_Serializer outArgs);
-/**
- * static Exec method for reflexity.
- */
-void
-bHYPRE_SStructParCSRVector__sexec(
   /* in */ const char* methodName,
   /* in */ sidl_io_Deserializer inArgs,
   /* in */ sidl_io_Serializer outArgs);

@@ -2,7 +2,7 @@ C
 C       File:          sidl_rmi_ProtocolFactory_Impl.f
 C       Symbol:        sidl.rmi.ProtocolFactory-v0.9.3
 C       Symbol Type:   class
-C       Babel Version: 0.10.4
+C       Babel Version: 0.10.12
 C       Release:       $Name$
 C       Revision:      @(#) $Id$
 C       Description:   Client-side documentation text for sidl.rmi.ProtocolFactory
@@ -32,8 +32,8 @@ C       Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 C       
 C       WARNING: Automatically generated; changes will be lost
 C       
-C       babel-version = 0.10.4
-C       xml-url       = /home/painter/babel-0.10.4/bin/.././share/repository/sidl.rmi.ProtocolFactory-v0.9.3.xml
+C       babel-version = 0.10.12
+C       xml-url       = /home/painter/babel/share/babel-0.10.12/repository/sidl.rmi.ProtocolFactory-v0.9.3.xml
 C       
 
         THIS FILE IS DOCUMENTATION - DO NOT COMPILE IT!
@@ -50,6 +50,7 @@ C
 
 
 C       
+C       Method:  _create[]
 C       Create an instance of class sidl.rmi.ProtocolFactory
 C       
 
@@ -61,6 +62,7 @@ C       out sidl.rmi.ProtocolFactory retval
 
 
 C       
+C       Method:  _cast[]
 C       Cast method for interface and type conversions.
 C       
 
@@ -74,6 +76,7 @@ C       out sidl.rmi.ProtocolFactory retval
 
 
 C       
+C       Method:  _cast2[]
 C       Cast method for interface and class type conversions.
 C       
 
@@ -89,6 +92,7 @@ C       out opaque retval
 
 
 C       
+C       Method:  addRef[]
 C       <p>
 C       Add one to the intrinsic reference count in the underlying object.
 C       Object in <code>sidl</code> have an intrinsic reference count.
@@ -111,6 +115,7 @@ C       in sidl.rmi.ProtocolFactory self
 
 
 C       
+C       Method:  deleteRef[]
 C       Decrease by one the intrinsic reference count in the underlying
 C       object, and delete the object if the reference is non-positive.
 C       Objects in <code>sidl</code> have an intrinsic reference count.
@@ -126,6 +131,7 @@ C       in sidl.rmi.ProtocolFactory self
 
 
 C       
+C       Method:  isSame[]
 C       Return true if and only if <code>obj</code> refers to the same
 C       object as this object.
 C       
@@ -142,6 +148,7 @@ C       out bool retval
 
 
 C       
+C       Method:  queryInt[]
 C       Check whether the object can support the specified interface or
 C       class.  If the <code>sidl</code> type name in <code>name</code>
 C       is supported, then a reference to that object is returned with the
@@ -164,6 +171,7 @@ C       out sidl.BaseInterface retval
 
 
 C       
+C       Method:  isType[]
 C       Return whether this object is an instance of the specified type.
 C       The string name must be the <code>sidl</code> type name.  This
 C       routine will return <code>true</code> if and only if a cast to
@@ -182,6 +190,7 @@ C       out bool retval
 
 
 C       
+C       Method:  getClassInfo[]
 C       Return the meta-data about the class implementing this interface.
 C       
 
@@ -195,6 +204,7 @@ C       out sidl.ClassInfo retval
 
 
 C       
+C       Method:  addProtocol[]
 C       Associate a particular prefix in the URL to a typeName <code>sidl.Loader</code> can find.
 C       The actual type is expected to implement <code>sidl.rmi.InstanceHandle</code>
 C       Return true iff the addition is successful.  (no collisions allowed)
@@ -215,6 +225,7 @@ C       out sidl.BaseInterface exception
 
 
 C       
+C       Method:  getProtocol[]
 C       Return the typeName associated with a particular prefix.
 C       Return empty string if the prefix
 C       
@@ -232,6 +243,7 @@ C       out sidl.BaseInterface exception
 
 
 C       
+C       Method:  deleteProtocol[]
 C       Remove a protocol from the active list.
 C       
 
@@ -248,6 +260,7 @@ C       out sidl.BaseInterface exception
 
 
 C       
+C       Method:  createInstance[]
 C       Create a new remote object and a return an instance handle for that object. 
 C       The server and port number are in the url.  Return nil 
 C       if protocol unknown or InstanceHandle.init() failed.
@@ -268,6 +281,7 @@ C       out sidl.BaseInterface exception
 
 
 C       
+C       Method:  connectInstance[]
 C       Create an new connection linked to an already existing object on a remote 
 C       server.  The server and port number are in the url, the objectID is the unique ID
 C       of the remote object in the remote instance registry. 

@@ -2,12 +2,12 @@
  * File:          bHYPRE_StructGrid.h
  * Symbol:        bHYPRE.StructGrid-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.12
  * Description:   Client-side glue code for bHYPRE.StructGrid
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.12
  */
 
 #ifndef included_bHYPRE_StructGrid_h
@@ -126,8 +126,8 @@ bHYPRE_StructGrid_SetDimension(
 int32_t
 bHYPRE_StructGrid_SetExtents(
   /* in */ bHYPRE_StructGrid self,
-  /* in */ int32_t* ilower,
-  /* in */ int32_t* iupper,
+  /* in rarray[dim] */ int32_t* ilower,
+  /* in rarray[dim] */ int32_t* iupper,
   /* in */ int32_t dim);
 
 /**
@@ -136,7 +136,7 @@ bHYPRE_StructGrid_SetExtents(
 int32_t
 bHYPRE_StructGrid_SetPeriodic(
   /* in */ bHYPRE_StructGrid self,
-  /* in */ int32_t* periodic,
+  /* in rarray[dim] */ int32_t* periodic,
   /* in */ int32_t dim);
 
 /**
@@ -145,7 +145,7 @@ bHYPRE_StructGrid_SetPeriodic(
 int32_t
 bHYPRE_StructGrid_SetNumGhost(
   /* in */ bHYPRE_StructGrid self,
-  /* in */ int32_t* num_ghost,
+  /* in rarray[dim2] */ int32_t* num_ghost,
   /* in */ int32_t dim2);
 
 /**
@@ -176,14 +176,6 @@ bHYPRE_StructGrid__cast2(
 void
 bHYPRE_StructGrid__exec(
   /* in */ bHYPRE_StructGrid self,
-  /* in */ const char* methodName,
-  /* in */ sidl_io_Deserializer inArgs,
-  /* in */ sidl_io_Serializer outArgs);
-/**
- * static Exec method for reflexity.
- */
-void
-bHYPRE_StructGrid__sexec(
   /* in */ const char* methodName,
   /* in */ sidl_io_Deserializer inArgs,
   /* in */ sidl_io_Serializer outArgs);

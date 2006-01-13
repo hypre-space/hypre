@@ -2,12 +2,12 @@
  * File:          bHYPRE_IJParCSRMatrix_Stub.c
  * Symbol:        bHYPRE.IJParCSRMatrix-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.12
  * Description:   Client-side glue code for bHYPRE.IJParCSRMatrix
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.12
  */
 
 #include "bHYPRE_IJParCSRMatrix.h"
@@ -260,7 +260,7 @@ bHYPRE_IJParCSRMatrix_GenerateLaplacian(
   /* in */ int32_t p,
   /* in */ int32_t q,
   /* in */ int32_t r,
-  /* in */ double* values,
+  /* in rarray[nvalues] */ double* values,
   /* in */ int32_t nvalues,
   /* in */ int32_t discretization)
 {
@@ -303,8 +303,8 @@ bHYPRE_IJParCSRMatrix_GenerateLaplacian(
 int32_t
 bHYPRE_IJParCSRMatrix_SetDiagOffdSizes(
   /* in */ bHYPRE_IJParCSRMatrix self,
-  /* in */ int32_t* diag_sizes,
-  /* in */ int32_t* offdiag_sizes,
+  /* in rarray[local_nrows] */ int32_t* diag_sizes,
+  /* in rarray[local_nrows] */ int32_t* offdiag_sizes,
   /* in */ int32_t local_nrows)
 {
   int32_t diag_sizes_lower[1], diag_sizes_upper[1], diag_sizes_stride[1]; 
@@ -434,10 +434,10 @@ int32_t
 bHYPRE_IJParCSRMatrix_SetValues(
   /* in */ bHYPRE_IJParCSRMatrix self,
   /* in */ int32_t nrows,
-  /* in */ int32_t* ncols,
-  /* in */ int32_t* rows,
-  /* in */ int32_t* cols,
-  /* in */ double* values,
+  /* in rarray[nrows] */ int32_t* ncols,
+  /* in rarray[nrows] */ int32_t* rows,
+  /* in rarray[nnonzeros] */ int32_t* cols,
+  /* in rarray[nnonzeros] */ double* values,
   /* in */ int32_t nnonzeros)
 {
   int32_t ncols_lower[1], ncols_upper[1], ncols_stride[1]; 
@@ -484,10 +484,10 @@ int32_t
 bHYPRE_IJParCSRMatrix_AddToValues(
   /* in */ bHYPRE_IJParCSRMatrix self,
   /* in */ int32_t nrows,
-  /* in */ int32_t* ncols,
-  /* in */ int32_t* rows,
-  /* in */ int32_t* cols,
-  /* in */ double* values,
+  /* in rarray[nrows] */ int32_t* ncols,
+  /* in rarray[nrows] */ int32_t* rows,
+  /* in rarray[nnonzeros] */ int32_t* cols,
+  /* in rarray[nnonzeros] */ double* values,
   /* in */ int32_t nnonzeros)
 {
   int32_t ncols_lower[1], ncols_upper[1], ncols_stride[1]; 
@@ -553,8 +553,8 @@ int32_t
 bHYPRE_IJParCSRMatrix_GetRowCounts(
   /* in */ bHYPRE_IJParCSRMatrix self,
   /* in */ int32_t nrows,
-  /* in */ int32_t* rows,
-  /* inout */ int32_t* ncols)
+  /* in rarray[nrows] */ int32_t* rows,
+  /* inout rarray[nrows] */ int32_t* ncols)
 {
   int32_t rows_lower[1], rows_upper[1], rows_stride[1]; 
   struct sidl_int__array rows_real;
@@ -583,10 +583,10 @@ int32_t
 bHYPRE_IJParCSRMatrix_GetValues(
   /* in */ bHYPRE_IJParCSRMatrix self,
   /* in */ int32_t nrows,
-  /* in */ int32_t* ncols,
-  /* in */ int32_t* rows,
-  /* in */ int32_t* cols,
-  /* inout */ double* values,
+  /* in rarray[nrows] */ int32_t* ncols,
+  /* in rarray[nrows] */ int32_t* rows,
+  /* in rarray[nnonzeros] */ int32_t* cols,
+  /* inout rarray[nnonzeros] */ double* values,
   /* in */ int32_t nnonzeros)
 {
   int32_t ncols_lower[1], ncols_upper[1], ncols_stride[1]; 
@@ -634,7 +634,7 @@ bHYPRE_IJParCSRMatrix_GetValues(
 int32_t
 bHYPRE_IJParCSRMatrix_SetRowSizes(
   /* in */ bHYPRE_IJParCSRMatrix self,
-  /* in */ int32_t* sizes,
+  /* in rarray[nrows] */ int32_t* sizes,
   /* in */ int32_t nrows)
 {
   int32_t sizes_lower[1], sizes_upper[1], sizes_stride[1]; 
@@ -680,31 +680,6 @@ bHYPRE_IJParCSRMatrix_Read(
     self,
     filename,
     comm);
-}
-
-/*
- * The GetRow method will allocate space for its two output
- * arrays on the first call.  The space will be reused on
- * subsequent calls.  Thus the user must not delete them, yet
- * must not depend on the data from GetRow to persist beyond the
- * next GetRow call.
- * 
- */
-
-int32_t
-bHYPRE_IJParCSRMatrix_GetRow(
-  /* in */ bHYPRE_IJParCSRMatrix self,
-  /* in */ int32_t row,
-  /* out */ int32_t* size,
-  /* out */ struct sidl_int__array** col_ind,
-  /* out */ struct sidl_double__array** values)
-{
-  return (*self->d_epv->f_GetRow)(
-    self,
-    row,
-    size,
-    col_ind,
-    values);
 }
 
 /*
@@ -767,7 +742,7 @@ int32_t
 bHYPRE_IJParCSRMatrix_SetIntArray1Parameter(
   /* in */ bHYPRE_IJParCSRMatrix self,
   /* in */ const char* name,
-  /* in */ int32_t* value,
+  /* in rarray[nvalues] */ int32_t* value,
   /* in */ int32_t nvalues)
 {
   int32_t value_lower[1], value_upper[1], value_stride[1]; 
@@ -791,7 +766,7 @@ int32_t
 bHYPRE_IJParCSRMatrix_SetIntArray2Parameter(
   /* in */ bHYPRE_IJParCSRMatrix self,
   /* in */ const char* name,
-  /* in */ struct sidl_int__array* value)
+  /* in array<int,2,column-major> */ struct sidl_int__array* value)
 {
   return (*self->d_epv->f_SetIntArray2Parameter)(
     self,
@@ -808,7 +783,7 @@ int32_t
 bHYPRE_IJParCSRMatrix_SetDoubleArray1Parameter(
   /* in */ bHYPRE_IJParCSRMatrix self,
   /* in */ const char* name,
-  /* in */ double* value,
+  /* in rarray[nvalues] */ double* value,
   /* in */ int32_t nvalues)
 {
   int32_t value_lower[1], value_upper[1], value_stride[1]; 
@@ -832,7 +807,7 @@ int32_t
 bHYPRE_IJParCSRMatrix_SetDoubleArray2Parameter(
   /* in */ bHYPRE_IJParCSRMatrix self,
   /* in */ const char* name,
-  /* in */ struct sidl_double__array* value)
+  /* in array<double,2,column-major> */ struct sidl_double__array* value)
 {
   return (*self->d_epv->f_SetDoubleArray2Parameter)(
     self,
@@ -926,105 +901,29 @@ bHYPRE_IJParCSRMatrix_ApplyAdjoint(
     x);
 }
 
-void
-bHYPRE_IJParCSRMatrix_Create__sexec(
-        struct sidl_io_Deserializer__object* inArgs,
-        struct sidl_io_Serializer__object* outArgs) {
-  /* stack space for arguments */
-  bHYPRE_MPICommunicator mpi_comm;
-  int32_t ilower;
-  int32_t iupper;
-  int32_t jlower;
-  int32_t jupper;
-  bHYPRE_IJParCSRMatrix _retval;
-  sidl_BaseInterface _ex   = NULL;
-  sidl_BaseInterface *_ex2 = &_ex;
+/*
+ * The GetRow method will allocate space for its two output
+ * arrays on the first call.  The space will be reused on
+ * subsequent calls.  Thus the user must not delete them, yet
+ * must not depend on the data from GetRow to persist beyond the
+ * next GetRow call.
+ * 
+ */
 
-  /* unpack in and inout argments */
-
-  sidl_io_Deserializer_unpackInt( inArgs, "ilower", &ilower, _ex2);
-
-  sidl_io_Deserializer_unpackInt( inArgs, "iupper", &iupper, _ex2);
-
-  sidl_io_Deserializer_unpackInt( inArgs, "jlower", &jlower, _ex2);
-
-  sidl_io_Deserializer_unpackInt( inArgs, "jupper", &jupper, _ex2);
-
-  /* make the call */
-  _retval = (_getSEPV()->f_Create)(
-    mpi_comm,
-    ilower,
-    iupper,
-    jlower,
-    jupper);
-
-  /* pack return value */
-  /* pack out and inout argments */
-
-}
-
-void
-bHYPRE_IJParCSRMatrix_GenerateLaplacian__sexec(
-        struct sidl_io_Deserializer__object* inArgs,
-        struct sidl_io_Serializer__object* outArgs) {
-  /* stack space for arguments */
-  bHYPRE_MPICommunicator mpi_comm;
-  int32_t nx;
-  int32_t ny;
-  int32_t nz;
-  int32_t Px;
-  int32_t Py;
-  int32_t Pz;
-  int32_t p;
-  int32_t q;
-  int32_t r;
-  double* values_tmp;
-  int32_t discretization;
-  bHYPRE_IJParCSRMatrix _retval;
-  sidl_BaseInterface _ex   = NULL;
-  sidl_BaseInterface *_ex2 = &_ex;
-
-  /* unpack in and inout argments */
-
-  sidl_io_Deserializer_unpackInt( inArgs, "nx", &nx, _ex2);
-
-  sidl_io_Deserializer_unpackInt( inArgs, "ny", &ny, _ex2);
-
-  sidl_io_Deserializer_unpackInt( inArgs, "nz", &nz, _ex2);
-
-  sidl_io_Deserializer_unpackInt( inArgs, "Px", &Px, _ex2);
-
-  sidl_io_Deserializer_unpackInt( inArgs, "Py", &Py, _ex2);
-
-  sidl_io_Deserializer_unpackInt( inArgs, "Pz", &Pz, _ex2);
-
-  sidl_io_Deserializer_unpackInt( inArgs, "p", &p, _ex2);
-
-  sidl_io_Deserializer_unpackInt( inArgs, "q", &q, _ex2);
-
-  sidl_io_Deserializer_unpackInt( inArgs, "r", &r, _ex2);
-
-  sidl_io_Deserializer_unpackInt( inArgs, "discretization", &discretization,
-    _ex2);
-
-  /* make the call */
-  _retval = (_getSEPV()->f_GenerateLaplacian)(
-    mpi_comm,
-    nx,
-    ny,
-    nz,
-    Px,
-    Py,
-    Pz,
-    p,
-    q,
-    r,
-    values_tmp,
-    discretization);
-
-  /* pack return value */
-  /* pack out and inout argments */
-
+int32_t
+bHYPRE_IJParCSRMatrix_GetRow(
+  /* in */ bHYPRE_IJParCSRMatrix self,
+  /* in */ int32_t row,
+  /* out */ int32_t* size,
+  /* out array<int,column-major> */ struct sidl_int__array** col_ind,
+  /* out array<double,column-major> */ struct sidl_double__array** values)
+{
+  return (*self->d_epv->f_GetRow)(
+    self,
+    row,
+    size,
+    col_ind,
+    values);
 }
 
 /*
@@ -1088,37 +987,6 @@ bHYPRE_IJParCSRMatrix__exec(
   outArgs);
 }
 
-struct bHYPRE_IJParCSRMatrix__smethod {
-  const char *d_name;
-  void (*d_func)(struct sidl_io_Deserializer__object *,
-    struct sidl_io_Serializer__object *);
-};
-
-void
-bHYPRE_IJParCSRMatrix__sexec(
-        const char* methodName,
-        struct sidl_io_Deserializer__object* inArgs,
-        struct sidl_io_Serializer__object* outArgs ) { 
-  static const struct bHYPRE_IJParCSRMatrix__smethod s_methods[] = {
-    { "Create", bHYPRE_IJParCSRMatrix_Create__sexec },
-    { "GenerateLaplacian", bHYPRE_IJParCSRMatrix_GenerateLaplacian__sexec }
-  };
-  int i, cmp, l = 0;
-  int u = sizeof(s_methods)/sizeof(struct bHYPRE_IJParCSRMatrix__smethod);
-  if (methodName) {
-    /* Use binary search to locate method */
-    while (l < u) {
-      i = (l + u) >> 1;
-      if (!(cmp=strcmp(methodName, s_methods[i].d_name))) {
-        (s_methods[i].d_func)(inArgs, outArgs);
-        return;
-      }
-      else if (cmp < 0) u = i;
-      else l = i + 1;
-    }
-  }
-  /* TODO: add code for method not found */
-}
 /*
  * Get the URL of the Implementation of this object (for RMI)
  */
@@ -1734,8 +1602,8 @@ remote_bHYPRE_IJParCSRMatrix_getClassInfo(
 static int32_t
 remote_bHYPRE_IJParCSRMatrix_SetDiagOffdSizes(
   /* in */ struct bHYPRE_IJParCSRMatrix__object* self /* TLD */,
-  /* in */ struct sidl_int__array* diag_sizes,
-  /* in */ struct sidl_int__array* offdiag_sizes)
+  /* in rarray[local_nrows] */ struct sidl_int__array* diag_sizes,
+  /* in rarray[local_nrows] */ struct sidl_int__array* offdiag_sizes)
 {
   sidl_BaseInterface _ex = NULL;
   sidl_BaseInterface *_ex2 =&_ex;
@@ -1902,10 +1770,10 @@ remote_bHYPRE_IJParCSRMatrix_SetLocalRange(
 static int32_t
 remote_bHYPRE_IJParCSRMatrix_SetValues(
   /* in */ struct bHYPRE_IJParCSRMatrix__object* self /* TLD */,
-  /* in */ struct sidl_int__array* ncols,
-  /* in */ struct sidl_int__array* rows,
-  /* in */ struct sidl_int__array* cols,
-  /* in */ struct sidl_double__array* values)
+  /* in rarray[nrows] */ struct sidl_int__array* ncols,
+  /* in rarray[nrows] */ struct sidl_int__array* rows,
+  /* in rarray[nnonzeros] */ struct sidl_int__array* cols,
+  /* in rarray[nnonzeros] */ struct sidl_double__array* values)
 {
   sidl_BaseInterface _ex = NULL;
   sidl_BaseInterface *_ex2 =&_ex;
@@ -1937,10 +1805,10 @@ remote_bHYPRE_IJParCSRMatrix_SetValues(
 static int32_t
 remote_bHYPRE_IJParCSRMatrix_AddToValues(
   /* in */ struct bHYPRE_IJParCSRMatrix__object* self /* TLD */,
-  /* in */ struct sidl_int__array* ncols,
-  /* in */ struct sidl_int__array* rows,
-  /* in */ struct sidl_int__array* cols,
-  /* in */ struct sidl_double__array* values)
+  /* in rarray[nrows] */ struct sidl_int__array* ncols,
+  /* in rarray[nrows] */ struct sidl_int__array* rows,
+  /* in rarray[nnonzeros] */ struct sidl_int__array* cols,
+  /* in rarray[nnonzeros] */ struct sidl_double__array* values)
 {
   sidl_BaseInterface _ex = NULL;
   sidl_BaseInterface *_ex2 =&_ex;
@@ -2011,8 +1879,8 @@ remote_bHYPRE_IJParCSRMatrix_GetLocalRange(
 static int32_t
 remote_bHYPRE_IJParCSRMatrix_GetRowCounts(
   /* in */ struct bHYPRE_IJParCSRMatrix__object* self /* TLD */,
-  /* in */ struct sidl_int__array* rows,
-  /* inout */ struct sidl_int__array** ncols)
+  /* in rarray[nrows] */ struct sidl_int__array* rows,
+  /* inout rarray[nrows] */ struct sidl_int__array** ncols)
 {
   sidl_BaseInterface _ex = NULL;
   sidl_BaseInterface *_ex2 =&_ex;
@@ -2044,10 +1912,10 @@ remote_bHYPRE_IJParCSRMatrix_GetRowCounts(
 static int32_t
 remote_bHYPRE_IJParCSRMatrix_GetValues(
   /* in */ struct bHYPRE_IJParCSRMatrix__object* self /* TLD */,
-  /* in */ struct sidl_int__array* ncols,
-  /* in */ struct sidl_int__array* rows,
-  /* in */ struct sidl_int__array* cols,
-  /* inout */ struct sidl_double__array** values)
+  /* in rarray[nrows] */ struct sidl_int__array* ncols,
+  /* in rarray[nrows] */ struct sidl_int__array* rows,
+  /* in rarray[nnonzeros] */ struct sidl_int__array* cols,
+  /* inout rarray[nnonzeros] */ struct sidl_double__array** values)
 {
   sidl_BaseInterface _ex = NULL;
   sidl_BaseInterface *_ex2 =&_ex;
@@ -2079,7 +1947,7 @@ remote_bHYPRE_IJParCSRMatrix_GetValues(
 static int32_t
 remote_bHYPRE_IJParCSRMatrix_SetRowSizes(
   /* in */ struct bHYPRE_IJParCSRMatrix__object* self /* TLD */,
-  /* in */ struct sidl_int__array* sizes)
+  /* in rarray[nrows] */ struct sidl_int__array* sizes)
 {
   sidl_BaseInterface _ex = NULL;
   sidl_BaseInterface *_ex2 =&_ex;
@@ -2168,43 +2036,6 @@ remote_bHYPRE_IJParCSRMatrix_Read(
   sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval, _ex2);
 
   /* unpack out and inout arguments */
-
-  /* cleanup and return */
-  sidl_rmi_Response_done(_rsvp, _ex2);
-  sidl_rmi_Invocation_deleteRef(_inv);
-  sidl_rmi_Response_deleteRef(_rsvp);
-  return _retval;
-}
-
-/* REMOTE METHOD STUB:GetRow */
-static int32_t
-remote_bHYPRE_IJParCSRMatrix_GetRow(
-  /* in */ struct bHYPRE_IJParCSRMatrix__object* self /* TLD */,
-  /* in */ int32_t row,
-  /* out */ int32_t* size,
-  /* out */ struct sidl_int__array** col_ind,
-  /* out */ struct sidl_double__array** values)
-{
-  sidl_BaseInterface _ex = NULL;
-  sidl_BaseInterface *_ex2 =&_ex;
-  /* initialize a new invocation */
-  sidl_rmi_InstanceHandle _conn = (sidl_rmi_InstanceHandle)self->d_data;
-  sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
-    "GetRow", _ex2 );
-  sidl_rmi_Response _rsvp = NULL;
-  int32_t _retval;
-
-  /* pack in and inout arguments */
-  sidl_rmi_Invocation_packInt( _inv, "row", row, _ex2);
-
-  /* send actual RMI request */
-  _rsvp = sidl_rmi_Invocation_invokeMethod(_inv,_ex2);
-
-  /* extract return value */
-  sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval, _ex2);
-
-  /* unpack out and inout arguments */
-  sidl_rmi_Response_unpackInt( _rsvp, "size", size, _ex2);
 
   /* cleanup and return */
   sidl_rmi_Response_done(_rsvp, _ex2);
@@ -2323,7 +2154,7 @@ static int32_t
 remote_bHYPRE_IJParCSRMatrix_SetIntArray1Parameter(
   /* in */ struct bHYPRE_IJParCSRMatrix__object* self /* TLD */,
   /* in */ const char* name,
-  /* in */ struct sidl_int__array* value)
+  /* in rarray[nvalues] */ struct sidl_int__array* value)
 {
   sidl_BaseInterface _ex = NULL;
   sidl_BaseInterface *_ex2 =&_ex;
@@ -2357,7 +2188,7 @@ static int32_t
 remote_bHYPRE_IJParCSRMatrix_SetIntArray2Parameter(
   /* in */ struct bHYPRE_IJParCSRMatrix__object* self /* TLD */,
   /* in */ const char* name,
-  /* in */ struct sidl_int__array* value)
+  /* in array<int,2,column-major> */ struct sidl_int__array* value)
 {
   sidl_BaseInterface _ex = NULL;
   sidl_BaseInterface *_ex2 =&_ex;
@@ -2391,7 +2222,7 @@ static int32_t
 remote_bHYPRE_IJParCSRMatrix_SetDoubleArray1Parameter(
   /* in */ struct bHYPRE_IJParCSRMatrix__object* self /* TLD */,
   /* in */ const char* name,
-  /* in */ struct sidl_double__array* value)
+  /* in rarray[nvalues] */ struct sidl_double__array* value)
 {
   sidl_BaseInterface _ex = NULL;
   sidl_BaseInterface *_ex2 =&_ex;
@@ -2425,7 +2256,7 @@ static int32_t
 remote_bHYPRE_IJParCSRMatrix_SetDoubleArray2Parameter(
   /* in */ struct bHYPRE_IJParCSRMatrix__object* self /* TLD */,
   /* in */ const char* name,
-  /* in */ struct sidl_double__array* value)
+  /* in array<double,2,column-major> */ struct sidl_double__array* value)
 {
   sidl_BaseInterface _ex = NULL;
   sidl_BaseInterface *_ex2 =&_ex;
@@ -2541,6 +2372,8 @@ remote_bHYPRE_IJParCSRMatrix_Setup(
   int32_t _retval;
 
   /* pack in and inout arguments */
+  sidl_rmi_Invocation_packString( _inv, "b", bHYPRE_Vector__getURL(b), _ex2);
+  sidl_rmi_Invocation_packString( _inv, "x", bHYPRE_Vector__getURL(x), _ex2);
 
   /* send actual RMI request */
   _rsvp = sidl_rmi_Invocation_invokeMethod(_inv,_ex2);
@@ -2571,9 +2404,12 @@ remote_bHYPRE_IJParCSRMatrix_Apply(
   sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
     "Apply", _ex2 );
   sidl_rmi_Response _rsvp = NULL;
+  char* x_str= NULL;
   int32_t _retval;
 
   /* pack in and inout arguments */
+  sidl_rmi_Invocation_packString( _inv, "b", bHYPRE_Vector__getURL(b), _ex2);
+  sidl_rmi_Invocation_packString( _inv, "x", bHYPRE_Vector__getURL(*x), _ex2);
 
   /* send actual RMI request */
   _rsvp = sidl_rmi_Invocation_invokeMethod(_inv,_ex2);
@@ -2582,7 +2418,8 @@ remote_bHYPRE_IJParCSRMatrix_Apply(
   sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval, _ex2);
 
   /* unpack out and inout arguments */
-  sidl_rmi_Response_unpackString( _rsvp, "x", x, _ex2);
+  sidl_rmi_Response_unpackString( _rsvp, "x", &x_str, _ex2);
+  bHYPRE_Vector__connect(x_str, _ex2);
 
   /* cleanup and return */
   sidl_rmi_Response_done(_rsvp, _ex2);
@@ -2605,9 +2442,12 @@ remote_bHYPRE_IJParCSRMatrix_ApplyAdjoint(
   sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
     "ApplyAdjoint", _ex2 );
   sidl_rmi_Response _rsvp = NULL;
+  char* x_str= NULL;
   int32_t _retval;
 
   /* pack in and inout arguments */
+  sidl_rmi_Invocation_packString( _inv, "b", bHYPRE_Vector__getURL(b), _ex2);
+  sidl_rmi_Invocation_packString( _inv, "x", bHYPRE_Vector__getURL(*x), _ex2);
 
   /* send actual RMI request */
   _rsvp = sidl_rmi_Invocation_invokeMethod(_inv,_ex2);
@@ -2616,7 +2456,45 @@ remote_bHYPRE_IJParCSRMatrix_ApplyAdjoint(
   sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval, _ex2);
 
   /* unpack out and inout arguments */
-  sidl_rmi_Response_unpackString( _rsvp, "x", x, _ex2);
+  sidl_rmi_Response_unpackString( _rsvp, "x", &x_str, _ex2);
+  bHYPRE_Vector__connect(x_str, _ex2);
+
+  /* cleanup and return */
+  sidl_rmi_Response_done(_rsvp, _ex2);
+  sidl_rmi_Invocation_deleteRef(_inv);
+  sidl_rmi_Response_deleteRef(_rsvp);
+  return _retval;
+}
+
+/* REMOTE METHOD STUB:GetRow */
+static int32_t
+remote_bHYPRE_IJParCSRMatrix_GetRow(
+  /* in */ struct bHYPRE_IJParCSRMatrix__object* self /* TLD */,
+  /* in */ int32_t row,
+  /* out */ int32_t* size,
+  /* out array<int,column-major> */ struct sidl_int__array** col_ind,
+  /* out array<double,column-major> */ struct sidl_double__array** values)
+{
+  sidl_BaseInterface _ex = NULL;
+  sidl_BaseInterface *_ex2 =&_ex;
+  /* initialize a new invocation */
+  sidl_rmi_InstanceHandle _conn = (sidl_rmi_InstanceHandle)self->d_data;
+  sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
+    "GetRow", _ex2 );
+  sidl_rmi_Response _rsvp = NULL;
+  int32_t _retval;
+
+  /* pack in and inout arguments */
+  sidl_rmi_Invocation_packInt( _inv, "row", row, _ex2);
+
+  /* send actual RMI request */
+  _rsvp = sidl_rmi_Invocation_invokeMethod(_inv,_ex2);
+
+  /* extract return value */
+  sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval, _ex2);
+
+  /* unpack out and inout arguments */
+  sidl_rmi_Response_unpackInt( _rsvp, "size", size, _ex2);
 
   /* cleanup and return */
   sidl_rmi_Response_done(_rsvp, _ex2);
@@ -2675,7 +2553,6 @@ static void bHYPRE_IJParCSRMatrix__init_remote_epv(void)
     remote_bHYPRE_IJParCSRMatrix_SetRowSizes;
   epv->f_Print                         = remote_bHYPRE_IJParCSRMatrix_Print;
   epv->f_Read                          = remote_bHYPRE_IJParCSRMatrix_Read;
-  epv->f_GetRow                        = remote_bHYPRE_IJParCSRMatrix_GetRow;
   epv->f_SetIntParameter               = 
     remote_bHYPRE_IJParCSRMatrix_SetIntParameter;
   epv->f_SetDoubleParameter            = 
@@ -2698,6 +2575,7 @@ static void bHYPRE_IJParCSRMatrix__init_remote_epv(void)
   epv->f_Apply                         = remote_bHYPRE_IJParCSRMatrix_Apply;
   epv->f_ApplyAdjoint                  = 
     remote_bHYPRE_IJParCSRMatrix_ApplyAdjoint;
+  epv->f_GetRow                        = remote_bHYPRE_IJParCSRMatrix_GetRow;
 
   e0->f__cast        = (void* (*)(void*,const char*)) epv->f__cast;
   e0->f__delete      = (void (*)(void*)) epv->f__delete;

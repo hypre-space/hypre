@@ -2,12 +2,12 @@
  * File:          bHYPRE_SStruct_MatrixVectorView_Stub.c
  * Symbol:        bHYPRE.SStruct_MatrixVectorView-v1.0.0
  * Symbol Type:   interface
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.12
  * Description:   Client-side glue code for bHYPRE.SStruct_MatrixVectorView
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.12
  */
 
 #include "bHYPRE_SStruct_MatrixVectorView.h"
@@ -992,6 +992,7 @@ remote_bHYPRE__SStruct_MatrixVectorView_GetObject(
   sidl_rmi_Invocation _inv = sidl_rmi_InstanceHandle_createInvocation( _conn,
     "GetObject", _ex2 );
   sidl_rmi_Response _rsvp = NULL;
+  char* A_str= NULL;
   int32_t _retval;
 
   /* pack in and inout arguments */
@@ -1003,7 +1004,8 @@ remote_bHYPRE__SStruct_MatrixVectorView_GetObject(
   sidl_rmi_Response_unpackInt( _rsvp, "_retval", &_retval, _ex2);
 
   /* unpack out and inout arguments */
-  sidl_rmi_Response_unpackString( _rsvp, "A", A, _ex2);
+  sidl_rmi_Response_unpackString( _rsvp, "A", &A_str, _ex2);
+  sidl_BaseInterface__connect(A_str, _ex2);
 
   /* cleanup and return */
   sidl_rmi_Response_done(_rsvp, _ex2);

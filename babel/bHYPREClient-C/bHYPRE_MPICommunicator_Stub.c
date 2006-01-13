@@ -2,12 +2,12 @@
  * File:          bHYPRE_MPICommunicator_Stub.c
  * Symbol:        bHYPRE.MPICommunicator-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.12
  * Description:   Client-side glue code for bHYPRE.MPICommunicator
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.12
  */
 
 #include "bHYPRE_MPICommunicator.h"
@@ -248,48 +248,6 @@ bHYPRE_MPICommunicator_CreateF(
     mpi_comm);
 }
 
-void
-bHYPRE_MPICommunicator_CreateC__sexec(
-        struct sidl_io_Deserializer__object* inArgs,
-        struct sidl_io_Serializer__object* outArgs) {
-  /* stack space for arguments */
-  void* mpi_comm;
-  bHYPRE_MPICommunicator _retval;
-  sidl_BaseInterface _ex   = NULL;
-  sidl_BaseInterface *_ex2 = &_ex;
-
-  /* unpack in and inout argments */
-
-  /* make the call */
-  _retval = (_getSEPV()->f_CreateC)(
-    mpi_comm);
-
-  /* pack return value */
-  /* pack out and inout argments */
-
-}
-
-void
-bHYPRE_MPICommunicator_CreateF__sexec(
-        struct sidl_io_Deserializer__object* inArgs,
-        struct sidl_io_Serializer__object* outArgs) {
-  /* stack space for arguments */
-  void* mpi_comm;
-  bHYPRE_MPICommunicator _retval;
-  sidl_BaseInterface _ex   = NULL;
-  sidl_BaseInterface *_ex2 = &_ex;
-
-  /* unpack in and inout argments */
-
-  /* make the call */
-  _retval = (_getSEPV()->f_CreateF)(
-    mpi_comm);
-
-  /* pack return value */
-  /* pack out and inout argments */
-
-}
-
 /*
  * Cast method for interface and class type conversions.
  */
@@ -351,37 +309,6 @@ bHYPRE_MPICommunicator__exec(
   outArgs);
 }
 
-struct bHYPRE_MPICommunicator__smethod {
-  const char *d_name;
-  void (*d_func)(struct sidl_io_Deserializer__object *,
-    struct sidl_io_Serializer__object *);
-};
-
-void
-bHYPRE_MPICommunicator__sexec(
-        const char* methodName,
-        struct sidl_io_Deserializer__object* inArgs,
-        struct sidl_io_Serializer__object* outArgs ) { 
-  static const struct bHYPRE_MPICommunicator__smethod s_methods[] = {
-    { "CreateC", bHYPRE_MPICommunicator_CreateC__sexec },
-    { "CreateF", bHYPRE_MPICommunicator_CreateF__sexec }
-  };
-  int i, cmp, l = 0;
-  int u = sizeof(s_methods)/sizeof(struct bHYPRE_MPICommunicator__smethod);
-  if (methodName) {
-    /* Use binary search to locate method */
-    while (l < u) {
-      i = (l + u) >> 1;
-      if (!(cmp=strcmp(methodName, s_methods[i].d_name))) {
-        (s_methods[i].d_func)(inArgs, outArgs);
-        return;
-      }
-      else if (cmp < 0) u = i;
-      else l = i + 1;
-    }
-  }
-  /* TODO: add code for method not found */
-}
 /*
  * Get the URL of the Implementation of this object (for RMI)
  */

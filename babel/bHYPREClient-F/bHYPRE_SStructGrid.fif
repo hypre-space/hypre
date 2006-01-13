@@ -2,12 +2,12 @@ C
 C       File:          bHYPRE_SStructGrid_Impl.f
 C       Symbol:        bHYPRE.SStructGrid-v1.0.0
 C       Symbol Type:   class
-C       Babel Version: 0.10.4
+C       Babel Version: 0.10.12
 C       Description:   Client-side documentation text for bHYPRE.SStructGrid
 C       
 C       WARNING: Automatically generated; changes will be lost
 C       
-C       babel-version = 0.10.4
+C       babel-version = 0.10.12
 C       
 
         THIS FILE IS DOCUMENTATION - DO NOT COMPILE IT!
@@ -23,6 +23,7 @@ C
 
 
 C       
+C       Method:  _create[]
 C       Create an instance of class bHYPRE.SStructGrid
 C       
 
@@ -34,6 +35,7 @@ C       out bHYPRE.SStructGrid retval
 
 
 C       
+C       Method:  _cast[]
 C       Cast method for interface and type conversions.
 C       
 
@@ -47,6 +49,7 @@ C       out bHYPRE.SStructGrid retval
 
 
 C       
+C       Method:  _cast2[]
 C       Cast method for interface and class type conversions.
 C       
 
@@ -62,6 +65,7 @@ C       out opaque retval
 
 
 C       
+C       Method:  addRef[]
 C       <p>
 C       Add one to the intrinsic reference count in the underlying object.
 C       Object in <code>sidl</code> have an intrinsic reference count.
@@ -84,6 +88,7 @@ C       in bHYPRE.SStructGrid self
 
 
 C       
+C       Method:  deleteRef[]
 C       Decrease by one the intrinsic reference count in the underlying
 C       object, and delete the object if the reference is non-positive.
 C       Objects in <code>sidl</code> have an intrinsic reference count.
@@ -99,6 +104,7 @@ C       in bHYPRE.SStructGrid self
 
 
 C       
+C       Method:  isSame[]
 C       Return true if and only if <code>obj</code> refers to the same
 C       object as this object.
 C       
@@ -115,6 +121,7 @@ C       out bool retval
 
 
 C       
+C       Method:  queryInt[]
 C       Check whether the object can support the specified interface or
 C       class.  If the <code>sidl</code> type name in <code>name</code>
 C       is supported, then a reference to that object is returned with the
@@ -136,6 +143,7 @@ C       out sidl.BaseInterface retval
 
 
 C       
+C       Method:  isType[]
 C       Return whether this object is an instance of the specified type.
 C       The string name must be the <code>sidl</code> type name.  This
 C       routine will return <code>true</code> if and only if a cast to
@@ -154,6 +162,7 @@ C       out bool retval
 
 
 C       
+C       Method:  getClassInfo[]
 C       Return the meta-data about the class implementing this interface.
 C       
 
@@ -167,6 +176,7 @@ C       out sidl.ClassInfo retval
 
 
 C       
+C       Method:  Create[]
 C       Set the number of dimensions {\tt ndim} and the number of
 C       structured parts {\tt nparts}.
 C       
@@ -221,6 +231,7 @@ C       out int retval
 
 
 C       
+C       Method:  SetExtents[]
 C       Set the extents for a box on a structured part of the grid.
 C       
 C       
@@ -242,6 +253,7 @@ C       in rarray<int> iupper(dim)
 
 
 C       
+C       Method:  SetVariable[]
 C       Describe the variables that live on a structured part of the
 C       grid.  Input: part number, variable number, total number of
 C       variables on that part (needed for memory allocation),
@@ -268,6 +280,7 @@ C       out int retval
 
 
 C       
+C       Method:  AddVariable[]
 C       Describe additional variables that live at a particular
 C       index.  These variables are appended to the array of
 C       variables set in {\tt SetVariables}, and are referenced as
@@ -294,6 +307,7 @@ C       in rarray<int> index(dim)
 
 
 C       
+C       Method:  SetNeighborBox[]
 C       Describe how regions just outside of a part relate to other
 C       parts.  This is done a box at a time.
 C       
@@ -345,6 +359,7 @@ C       in rarray<int> index_map(dim)
 
 
 C       
+C       Method:  AddUnstructuredPart[]
 C       Add an unstructured part to the grid.  The variables in the
 C       unstructured part of the grid are referenced by a global rank
 C       between 0 and the total number of unstructured variables
@@ -371,6 +386,7 @@ C       out int retval
 
 
 C       
+C       Method:  SetPeriodic[]
 C       (Optional) Set periodic for a particular part.
 C       
 C       
@@ -390,6 +406,7 @@ C       in rarray<int> periodic(dim)
 
 
 C       
+C       Method:  SetNumGhost[]
 C       Setting ghost in the sgrids.
 C       
 C       

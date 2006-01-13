@@ -2,12 +2,12 @@
  * File:          bHYPRE_Pilut_IOR.h
  * Symbol:        bHYPRE.Pilut-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.12
  * Description:   Intermediate Object Representation for bHYPRE.Pilut
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.12
  */
 
 #ifndef included_bHYPRE_Pilut_IOR_h
@@ -150,19 +150,19 @@ struct bHYPRE_Pilut__epv {
   int32_t (*f_SetIntArray1Parameter)(
     /* in */ struct bHYPRE_Pilut__object* self,
     /* in */ const char* name,
-    /* in */ struct sidl_int__array* value);
+    /* in rarray[nvalues] */ struct sidl_int__array* value);
   int32_t (*f_SetIntArray2Parameter)(
     /* in */ struct bHYPRE_Pilut__object* self,
     /* in */ const char* name,
-    /* in */ struct sidl_int__array* value);
+    /* in array<int,2,column-major> */ struct sidl_int__array* value);
   int32_t (*f_SetDoubleArray1Parameter)(
     /* in */ struct bHYPRE_Pilut__object* self,
     /* in */ const char* name,
-    /* in */ struct sidl_double__array* value);
+    /* in rarray[nvalues] */ struct sidl_double__array* value);
   int32_t (*f_SetDoubleArray2Parameter)(
     /* in */ struct bHYPRE_Pilut__object* self,
     /* in */ const char* name,
-    /* in */ struct sidl_double__array* value);
+    /* in array<double,2,column-major> */ struct sidl_double__array* value);
   int32_t (*f_GetIntValue)(
     /* in */ struct bHYPRE_Pilut__object* self,
     /* in */ const char* name,

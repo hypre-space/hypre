@@ -266,7 +266,7 @@ SIDLFortran77Symbol(sidl_fcomplex__array_access_f,
    int32_t * restrict lower,
    int32_t * restrict upper,
    int32_t * restrict stride,
-   int32_t * restrict index)
+   int64_t * restrict index)
 {
   struct sidl_fcomplex__array *ary = (struct sidl_fcomplex__array *)
     (ptrdiff_t)*array;

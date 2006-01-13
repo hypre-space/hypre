@@ -2,7 +2,7 @@ C
 C       File:          sidl_Finder_Impl.f
 C       Symbol:        sidl.Finder-v0.9.3
 C       Symbol Type:   interface
-C       Babel Version: 0.10.4
+C       Babel Version: 0.10.12
 C       Release:       $Name$
 C       Revision:      @(#) $Id$
 C       Description:   Client-side documentation text for sidl.Finder
@@ -32,8 +32,8 @@ C       Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 C       
 C       WARNING: Automatically generated; changes will be lost
 C       
-C       babel-version = 0.10.4
-C       xml-url       = /home/painter/babel-0.10.4/bin/.././share/repository/sidl.Finder-v0.9.3.xml
+C       babel-version = 0.10.12
+C       xml-url       = /home/painter/babel/share/babel-0.10.12/repository/sidl.Finder-v0.9.3.xml
 C       
 
         THIS FILE IS DOCUMENTATION - DO NOT COMPILE IT!
@@ -52,6 +52,7 @@ C
 
 
 C       
+C       Method:  _cast[]
 C       Cast method for interface and type conversions.
 C       
 
@@ -65,6 +66,7 @@ C       out sidl.Finder retval
 
 
 C       
+C       Method:  _cast2[]
 C       Cast method for interface and class type conversions.
 C       
 
@@ -80,6 +82,7 @@ C       out opaque retval
 
 
 C       
+C       Method:  addRef[]
 C       <p>
 C       Add one to the intrinsic reference count in the underlying object.
 C       Object in <code>sidl</code> have an intrinsic reference count.
@@ -102,6 +105,7 @@ C       in sidl.Finder self
 
 
 C       
+C       Method:  deleteRef[]
 C       Decrease by one the intrinsic reference count in the underlying
 C       object, and delete the object if the reference is non-positive.
 C       Objects in <code>sidl</code> have an intrinsic reference count.
@@ -117,6 +121,7 @@ C       in sidl.Finder self
 
 
 C       
+C       Method:  isSame[]
 C       Return true if and only if <code>obj</code> refers to the same
 C       object as this object.
 C       
@@ -133,6 +138,7 @@ C       out bool retval
 
 
 C       
+C       Method:  queryInt[]
 C       Check whether the object can support the specified interface or
 C       class.  If the <code>sidl</code> type name in <code>name</code>
 C       is supported, then a reference to that object is returned with the
@@ -154,6 +160,7 @@ C       out sidl.BaseInterface retval
 
 
 C       
+C       Method:  isType[]
 C       Return whether this object is an instance of the specified type.
 C       The string name must be the <code>sidl</code> type name.  This
 C       routine will return <code>true</code> if and only if a cast to
@@ -172,6 +179,7 @@ C       out bool retval
 
 
 C       
+C       Method:  getClassInfo[]
 C       Return the meta-data about the class implementing this interface.
 C       
 
@@ -185,6 +193,7 @@ C       out sidl.ClassInfo retval
 
 
 C       
+C       Method:  findLibrary[]
 C       Find a DLL containing the specified information for a sidl
 C       class. This method searches through the files in set set path
 C       looking for a shared library that contains the client-side or IOR
@@ -229,6 +238,7 @@ C       out sidl.DLL retval
 
 
 C       
+C       Method:  setSearchPath[]
 C       Set the search path, which is a semi-colon separated sequence of
 C       URIs as described in class <code>DLL</code>.  This method will
 C       invalidate any existing search path.
@@ -244,6 +254,7 @@ C       in string path_name
 
 
 C       
+C       Method:  getSearchPath[]
 C       Return the current search path.  If the search path has not been
 C       set, then the search path will be taken from environment variable
 C       SIDL_DLL_PATH.
@@ -259,6 +270,7 @@ C       out string retval
 
 
 C       
+C       Method:  addSearchPath[]
 C       Append the specified path fragment to the beginning of the
 C       current search path.  If the search path has not yet been set
 C       by a call to <code>setSearchPath</code>, then this fragment will

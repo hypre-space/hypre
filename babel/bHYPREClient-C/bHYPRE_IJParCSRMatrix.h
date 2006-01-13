@@ -2,12 +2,12 @@
  * File:          bHYPRE_IJParCSRMatrix.h
  * Symbol:        bHYPRE.IJParCSRMatrix-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.12
  * Description:   Client-side glue code for bHYPRE.IJParCSRMatrix
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.12
  */
 
 #ifndef included_bHYPRE_IJParCSRMatrix_h
@@ -126,7 +126,7 @@ bHYPRE_IJParCSRMatrix_GenerateLaplacian(
   /* in */ int32_t p,
   /* in */ int32_t q,
   /* in */ int32_t r,
-  /* in */ double* values,
+  /* in rarray[nvalues] */ double* values,
   /* in */ int32_t nvalues,
   /* in */ int32_t discretization);
 
@@ -147,8 +147,8 @@ bHYPRE_IJParCSRMatrix_GenerateLaplacian(
 int32_t
 bHYPRE_IJParCSRMatrix_SetDiagOffdSizes(
   /* in */ bHYPRE_IJParCSRMatrix self,
-  /* in */ int32_t* diag_sizes,
-  /* in */ int32_t* offdiag_sizes,
+  /* in rarray[local_nrows] */ int32_t* diag_sizes,
+  /* in rarray[local_nrows] */ int32_t* offdiag_sizes,
   /* in */ int32_t local_nrows);
 
 /**
@@ -233,10 +233,10 @@ int32_t
 bHYPRE_IJParCSRMatrix_SetValues(
   /* in */ bHYPRE_IJParCSRMatrix self,
   /* in */ int32_t nrows,
-  /* in */ int32_t* ncols,
-  /* in */ int32_t* rows,
-  /* in */ int32_t* cols,
-  /* in */ double* values,
+  /* in rarray[nrows] */ int32_t* ncols,
+  /* in rarray[nrows] */ int32_t* rows,
+  /* in rarray[nnonzeros] */ int32_t* cols,
+  /* in rarray[nnonzeros] */ double* values,
   /* in */ int32_t nnonzeros);
 
 /**
@@ -252,10 +252,10 @@ int32_t
 bHYPRE_IJParCSRMatrix_AddToValues(
   /* in */ bHYPRE_IJParCSRMatrix self,
   /* in */ int32_t nrows,
-  /* in */ int32_t* ncols,
-  /* in */ int32_t* rows,
-  /* in */ int32_t* cols,
-  /* in */ double* values,
+  /* in rarray[nrows] */ int32_t* ncols,
+  /* in rarray[nrows] */ int32_t* rows,
+  /* in rarray[nnonzeros] */ int32_t* cols,
+  /* in rarray[nnonzeros] */ double* values,
   /* in */ int32_t nnonzeros);
 
 /**
@@ -281,8 +281,8 @@ int32_t
 bHYPRE_IJParCSRMatrix_GetRowCounts(
   /* in */ bHYPRE_IJParCSRMatrix self,
   /* in */ int32_t nrows,
-  /* in */ int32_t* rows,
-  /* inout */ int32_t* ncols);
+  /* in rarray[nrows] */ int32_t* rows,
+  /* inout rarray[nrows] */ int32_t* ncols);
 
 /**
  * Gets values for {\tt nrows} rows or partial rows of the
@@ -293,10 +293,10 @@ int32_t
 bHYPRE_IJParCSRMatrix_GetValues(
   /* in */ bHYPRE_IJParCSRMatrix self,
   /* in */ int32_t nrows,
-  /* in */ int32_t* ncols,
-  /* in */ int32_t* rows,
-  /* in */ int32_t* cols,
-  /* inout */ double* values,
+  /* in rarray[nrows] */ int32_t* ncols,
+  /* in rarray[nrows] */ int32_t* rows,
+  /* in rarray[nnonzeros] */ int32_t* cols,
+  /* inout rarray[nnonzeros] */ double* values,
   /* in */ int32_t nnonzeros);
 
 /**
@@ -313,7 +313,7 @@ bHYPRE_IJParCSRMatrix_GetValues(
 int32_t
 bHYPRE_IJParCSRMatrix_SetRowSizes(
   /* in */ bHYPRE_IJParCSRMatrix self,
-  /* in */ int32_t* sizes,
+  /* in rarray[nrows] */ int32_t* sizes,
   /* in */ int32_t nrows);
 
 /**
@@ -336,22 +336,6 @@ bHYPRE_IJParCSRMatrix_Read(
   /* in */ bHYPRE_IJParCSRMatrix self,
   /* in */ const char* filename,
   /* in */ bHYPRE_MPICommunicator comm);
-
-/**
- * The GetRow method will allocate space for its two output
- * arrays on the first call.  The space will be reused on
- * subsequent calls.  Thus the user must not delete them, yet
- * must not depend on the data from GetRow to persist beyond the
- * next GetRow call.
- * 
- */
-int32_t
-bHYPRE_IJParCSRMatrix_GetRow(
-  /* in */ bHYPRE_IJParCSRMatrix self,
-  /* in */ int32_t row,
-  /* out */ int32_t* size,
-  /* out */ struct sidl_int__array** col_ind,
-  /* out */ struct sidl_double__array** values);
 
 /**
  * Set the int parameter associated with {\tt name}.
@@ -391,7 +375,7 @@ int32_t
 bHYPRE_IJParCSRMatrix_SetIntArray1Parameter(
   /* in */ bHYPRE_IJParCSRMatrix self,
   /* in */ const char* name,
-  /* in */ int32_t* value,
+  /* in rarray[nvalues] */ int32_t* value,
   /* in */ int32_t nvalues);
 
 /**
@@ -402,7 +386,7 @@ int32_t
 bHYPRE_IJParCSRMatrix_SetIntArray2Parameter(
   /* in */ bHYPRE_IJParCSRMatrix self,
   /* in */ const char* name,
-  /* in */ struct sidl_int__array* value);
+  /* in array<int,2,column-major> */ struct sidl_int__array* value);
 
 /**
  * Set the double 1-D array parameter associated with {\tt name}.
@@ -412,7 +396,7 @@ int32_t
 bHYPRE_IJParCSRMatrix_SetDoubleArray1Parameter(
   /* in */ bHYPRE_IJParCSRMatrix self,
   /* in */ const char* name,
-  /* in */ double* value,
+  /* in rarray[nvalues] */ double* value,
   /* in */ int32_t nvalues);
 
 /**
@@ -423,7 +407,7 @@ int32_t
 bHYPRE_IJParCSRMatrix_SetDoubleArray2Parameter(
   /* in */ bHYPRE_IJParCSRMatrix self,
   /* in */ const char* name,
-  /* in */ struct sidl_double__array* value);
+  /* in array<double,2,column-major> */ struct sidl_double__array* value);
 
 /**
  * Set the int parameter associated with {\tt name}.
@@ -477,6 +461,22 @@ bHYPRE_IJParCSRMatrix_ApplyAdjoint(
   /* inout */ bHYPRE_Vector* x);
 
 /**
+ * The GetRow method will allocate space for its two output
+ * arrays on the first call.  The space will be reused on
+ * subsequent calls.  Thus the user must not delete them, yet
+ * must not depend on the data from GetRow to persist beyond the
+ * next GetRow call.
+ * 
+ */
+int32_t
+bHYPRE_IJParCSRMatrix_GetRow(
+  /* in */ bHYPRE_IJParCSRMatrix self,
+  /* in */ int32_t row,
+  /* out */ int32_t* size,
+  /* out array<int,column-major> */ struct sidl_int__array** col_ind,
+  /* out array<double,column-major> */ struct sidl_double__array** values);
+
+/**
  * Cast method for interface and class type conversions.
  */
 struct bHYPRE_IJParCSRMatrix__object*
@@ -497,14 +497,6 @@ bHYPRE_IJParCSRMatrix__cast2(
 void
 bHYPRE_IJParCSRMatrix__exec(
   /* in */ bHYPRE_IJParCSRMatrix self,
-  /* in */ const char* methodName,
-  /* in */ sidl_io_Deserializer inArgs,
-  /* in */ sidl_io_Serializer outArgs);
-/**
- * static Exec method for reflexity.
- */
-void
-bHYPRE_IJParCSRMatrix__sexec(
   /* in */ const char* methodName,
   /* in */ sidl_io_Deserializer inArgs,
   /* in */ sidl_io_Serializer outArgs);

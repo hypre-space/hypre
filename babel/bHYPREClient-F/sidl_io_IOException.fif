@@ -2,7 +2,7 @@ C
 C       File:          sidl_io_IOException_Impl.f
 C       Symbol:        sidl.io.IOException-v0.9.3
 C       Symbol Type:   class
-C       Babel Version: 0.10.4
+C       Babel Version: 0.10.12
 C       Release:       $Name$
 C       Revision:      @(#) $Id$
 C       Description:   Client-side documentation text for sidl.io.IOException
@@ -32,8 +32,8 @@ C       Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 C       
 C       WARNING: Automatically generated; changes will be lost
 C       
-C       babel-version = 0.10.4
-C       xml-url       = /home/painter/babel-0.10.4/bin/.././share/repository/sidl.io.IOException-v0.9.3.xml
+C       babel-version = 0.10.12
+C       xml-url       = /home/painter/babel/share/babel-0.10.12/repository/sidl.io.IOException-v0.9.3.xml
 C       
 
         THIS FILE IS DOCUMENTATION - DO NOT COMPILE IT!
@@ -48,6 +48,7 @@ C
 
 
 C       
+C       Method:  _create[]
 C       Create an instance of class sidl.io.IOException
 C       
 
@@ -59,6 +60,7 @@ C       out sidl.io.IOException retval
 
 
 C       
+C       Method:  _cast[]
 C       Cast method for interface and type conversions.
 C       
 
@@ -72,6 +74,7 @@ C       out sidl.io.IOException retval
 
 
 C       
+C       Method:  _cast2[]
 C       Cast method for interface and class type conversions.
 C       
 
@@ -87,6 +90,7 @@ C       out opaque retval
 
 
 C       
+C       Method:  addRef[]
 C       <p>
 C       Add one to the intrinsic reference count in the underlying object.
 C       Object in <code>sidl</code> have an intrinsic reference count.
@@ -109,6 +113,7 @@ C       in sidl.io.IOException self
 
 
 C       
+C       Method:  deleteRef[]
 C       Decrease by one the intrinsic reference count in the underlying
 C       object, and delete the object if the reference is non-positive.
 C       Objects in <code>sidl</code> have an intrinsic reference count.
@@ -124,6 +129,7 @@ C       in sidl.io.IOException self
 
 
 C       
+C       Method:  isSame[]
 C       Return true if and only if <code>obj</code> refers to the same
 C       object as this object.
 C       
@@ -140,6 +146,7 @@ C       out bool retval
 
 
 C       
+C       Method:  queryInt[]
 C       Check whether the object can support the specified interface or
 C       class.  If the <code>sidl</code> type name in <code>name</code>
 C       is supported, then a reference to that object is returned with the
@@ -161,6 +168,7 @@ C       out sidl.BaseInterface retval
 
 
 C       
+C       Method:  isType[]
 C       Return whether this object is an instance of the specified type.
 C       The string name must be the <code>sidl</code> type name.  This
 C       routine will return <code>true</code> if and only if a cast to
@@ -179,6 +187,7 @@ C       out bool retval
 
 
 C       
+C       Method:  getClassInfo[]
 C       Return the meta-data about the class implementing this interface.
 C       
 
@@ -192,6 +201,7 @@ C       out sidl.ClassInfo retval
 
 
 C       
+C       Method:  getNote[]
 C       Return the message associated with the exception.
 C       
 
@@ -205,6 +215,7 @@ C       out string retval
 
 
 C       
+C       Method:  setNote[]
 C       Set the message associated with the exception.
 C       
 
@@ -218,6 +229,7 @@ C       in string message
 
 
 C       
+C       Method:  getTrace[]
 C       Returns formatted string containing the concatenation of all 
 C       tracelines.
 C       
@@ -232,6 +244,7 @@ C       out string retval
 
 
 C       
+C       Method:  add[Line]
 C       Adds a stringified entry/line to the stack trace.
 C       
 
@@ -245,6 +258,7 @@ C       in string traceline
 
 
 C       
+C       Method:  add[]
 C       Formats and adds an entry to the stack trace based on the 
 C       file name, line number, and method name.
 C       

@@ -2,12 +2,12 @@ C
 C       File:          bHYPRE_IJParCSRMatrix_Impl.f
 C       Symbol:        bHYPRE.IJParCSRMatrix-v1.0.0
 C       Symbol Type:   class
-C       Babel Version: 0.10.4
+C       Babel Version: 0.10.12
 C       Description:   Client-side documentation text for bHYPRE.IJParCSRMatrix
 C       
 C       WARNING: Automatically generated; changes will be lost
 C       
-C       babel-version = 0.10.4
+C       babel-version = 0.10.12
 C       
 
         THIS FILE IS DOCUMENTATION - DO NOT COMPILE IT!
@@ -26,6 +26,7 @@ C
 
 
 C       
+C       Method:  _create[]
 C       Create an instance of class bHYPRE.IJParCSRMatrix
 C       
 
@@ -37,6 +38,7 @@ C       out bHYPRE.IJParCSRMatrix retval
 
 
 C       
+C       Method:  _cast[]
 C       Cast method for interface and type conversions.
 C       
 
@@ -50,6 +52,7 @@ C       out bHYPRE.IJParCSRMatrix retval
 
 
 C       
+C       Method:  _cast2[]
 C       Cast method for interface and class type conversions.
 C       
 
@@ -65,6 +68,7 @@ C       out opaque retval
 
 
 C       
+C       Method:  addRef[]
 C       <p>
 C       Add one to the intrinsic reference count in the underlying object.
 C       Object in <code>sidl</code> have an intrinsic reference count.
@@ -87,6 +91,7 @@ C       in bHYPRE.IJParCSRMatrix self
 
 
 C       
+C       Method:  deleteRef[]
 C       Decrease by one the intrinsic reference count in the underlying
 C       object, and delete the object if the reference is non-positive.
 C       Objects in <code>sidl</code> have an intrinsic reference count.
@@ -102,6 +107,7 @@ C       in bHYPRE.IJParCSRMatrix self
 
 
 C       
+C       Method:  isSame[]
 C       Return true if and only if <code>obj</code> refers to the same
 C       object as this object.
 C       
@@ -118,6 +124,7 @@ C       out bool retval
 
 
 C       
+C       Method:  queryInt[]
 C       Check whether the object can support the specified interface or
 C       class.  If the <code>sidl</code> type name in <code>name</code>
 C       is supported, then a reference to that object is returned with the
@@ -139,6 +146,7 @@ C       out sidl.BaseInterface retval
 
 
 C       
+C       Method:  isType[]
 C       Return whether this object is an instance of the specified type.
 C       The string name must be the <code>sidl</code> type name.  This
 C       routine will return <code>true</code> if and only if a cast to
@@ -157,6 +165,7 @@ C       out bool retval
 
 
 C       
+C       Method:  getClassInfo[]
 C       Return the meta-data about the class implementing this interface.
 C       
 
@@ -229,6 +238,7 @@ C       in rarray<double> values(nvalues)
 
 
 C       
+C       Method:  SetDiagOffdSizes[]
 C       (Optional) Set the max number of nonzeros to expect in each
 C       row of the diagonal and off-diagonal blocks.  The diagonal
 C       block is the submatrix whose column numbers correspond to
@@ -258,6 +268,7 @@ C       in rarray<int> offdiag_sizes(local_nrows)
 
 
 C       
+C       Method:  SetCommunicator[]
 C       Set the MPI Communicator.  DEPRECATED, Use Create()
 C       
 C       
@@ -275,6 +286,7 @@ C       out int retval
 
 
 C       
+C       Method:  Initialize[]
 C       Prepare an object for setting coefficient values, whether for
 C       the first time or subsequently.
 C       
@@ -290,6 +302,7 @@ C       out int retval
 
 
 C       
+C       Method:  Assemble[]
 C       Finalize the construction of an object before using, either
 C       for the first time or on subsequent uses. {\tt Initialize}
 C       and {\tt Assemble} always appear in a matched set, with
@@ -308,6 +321,7 @@ C       out int retval
 
 
 C       
+C       Method:  SetLocalRange[]
 C       Set the local range for a matrix object.  Each process owns
 C       some unique consecutive range of rows, indicated by the
 C       global row indices {\tt ilower} and {\tt iupper}.  The row
@@ -350,6 +364,7 @@ C       out int retval
 
 
 C       
+C       Method:  SetValues[]
 C       Sets values for {\tt nrows} of the matrix.  The arrays {\tt
 C       ncols} and {\tt rows} are of dimension {\tt nrows} and
 C       contain the number of columns in each row and the row
@@ -386,6 +401,7 @@ C       in rarray<double> values(nnonzeros)
 
 
 C       
+C       Method:  AddToValues[]
 C       Adds to values for {\tt nrows} of the matrix.  Usage details
 C       are analogous to {\tt SetValues}.  Adds to any previous
 C       values at the specified locations, or, if there was no value
@@ -414,6 +430,7 @@ C       in rarray<double> values(nnonzeros)
 
 
 C       
+C       Method:  GetLocalRange[]
 C       Gets range of rows owned by this processor and range of
 C       column partitioning for this processor.
 C       
@@ -438,6 +455,7 @@ C       out int retval
 
 
 C       
+C       Method:  GetRowCounts[]
 C       Gets number of nonzeros elements for {\tt nrows} rows
 C       specified in {\tt rows} and returns them in {\tt ncols},
 C       which needs to be allocated by the user.
@@ -459,6 +477,7 @@ C       inout rarray<int> ncols(nrows)
 
 
 C       
+C       Method:  GetValues[]
 C       Gets values for {\tt nrows} rows or partial rows of the
 C       matrix.  Usage details are analogous to {\tt SetValues}.
 C       
@@ -483,6 +502,7 @@ C       inout rarray<double> values(nnonzeros)
 
 
 C       
+C       Method:  SetRowSizes[]
 C       (Optional) Set the max number of nonzeros to expect in each
 C       row.  The array {\tt sizes} contains estimated sizes for each
 C       row on this process.  The integer nrows is the number of rows in
@@ -507,6 +527,7 @@ C       in rarray<int> sizes(nrows)
 
 
 C       
+C       Method:  Print[]
 C       Print the matrix to file.  This is mainly for debugging
 C       purposes.
 C       
@@ -524,6 +545,7 @@ C       out int retval
 
 
 C       
+C       Method:  Read[]
 C       Read the matrix from file.  This is mainly for debugging
 C       purposes.
 C       
@@ -544,6 +566,248 @@ C       out int retval
 
 
 C       
+C       Method:  SetIntParameter[]
+C       Set the int parameter associated with {\tt name}.
+C       
+C       
+
+        subroutine bHYPRE_IJParCSRMatrix_SetIntParameter_f(self, name,
+     &     value, retval)
+        implicit none
+C       in bHYPRE.IJParCSRMatrix self
+        integer*8 self
+C       in string name
+        character*(*) name
+C       in int value
+        integer*4 value
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Method:  SetDoubleParameter[]
+C       Set the double parameter associated with {\tt name}.
+C       
+C       
+
+        subroutine bHYPRE_IJParCSRMatrix_SetDoubleParameter_f(self,
+     &     name, value, retval)
+        implicit none
+C       in bHYPRE.IJParCSRMatrix self
+        integer*8 self
+C       in string name
+        character*(*) name
+C       in double value
+        double precision value
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Method:  SetStringParameter[]
+C       Set the string parameter associated with {\tt name}.
+C       
+C       
+
+        subroutine bHYPRE_IJParCSRMatrix_SetStringParameter_f(self,
+     &     name, value, retval)
+        implicit none
+C       in bHYPRE.IJParCSRMatrix self
+        integer*8 self
+C       in string name
+        character*(*) name
+C       in string value
+        character*(*) value
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Method:  SetIntArray1Parameter[]
+C       Set the int 1-D array parameter associated with {\tt name}.
+C       
+C       
+
+        subroutine bHYPRE_IJParCSRMatrix_SetIntArray1Parameter_f(self,
+     &     name, value, retval)
+        implicit none
+C       in bHYPRE.IJParCSRMatrix self
+        integer*8 self
+C       in string name
+        character*(*) name
+C       out int retval
+        integer*4 retval
+C       in rarray<int> value(nvalues)
+        integer*4 value(0:nvalues-1)
+        end
+
+
+C       
+C       Method:  SetIntArray2Parameter[]
+C       Set the int 2-D array parameter associated with {\tt name}.
+C       
+C       
+
+        subroutine bHYPRE_IJParCSRMatrix_SetIntArray2Parameter_f(self,
+     &     name, value, retval)
+        implicit none
+C       in bHYPRE.IJParCSRMatrix self
+        integer*8 self
+C       in string name
+        character*(*) name
+C       in array<int,2,column-major> value
+        integer*8 value
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Method:  SetDoubleArray1Parameter[]
+C       Set the double 1-D array parameter associated with {\tt name}.
+C       
+C       
+
+        subroutine 
+     &     bHYPRE_IJParCSRMatrix_SetDoubleArray1Parameter_f(self, name,
+     &     value, retval)
+        implicit none
+C       in bHYPRE.IJParCSRMatrix self
+        integer*8 self
+C       in string name
+        character*(*) name
+C       out int retval
+        integer*4 retval
+C       in rarray<double> value(nvalues)
+        double precision value(0:nvalues-1)
+        end
+
+
+C       
+C       Method:  SetDoubleArray2Parameter[]
+C       Set the double 2-D array parameter associated with {\tt name}.
+C       
+C       
+
+        subroutine 
+     &     bHYPRE_IJParCSRMatrix_SetDoubleArray2Parameter_f(self, name,
+     &     value, retval)
+        implicit none
+C       in bHYPRE.IJParCSRMatrix self
+        integer*8 self
+C       in string name
+        character*(*) name
+C       in array<double,2,column-major> value
+        integer*8 value
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Method:  GetIntValue[]
+C       Set the int parameter associated with {\tt name}.
+C       
+C       
+
+        subroutine bHYPRE_IJParCSRMatrix_GetIntValue_f(self, name,
+     &     value, retval)
+        implicit none
+C       in bHYPRE.IJParCSRMatrix self
+        integer*8 self
+C       in string name
+        character*(*) name
+C       out int value
+        integer*4 value
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Method:  GetDoubleValue[]
+C       Get the double parameter associated with {\tt name}.
+C       
+C       
+
+        subroutine bHYPRE_IJParCSRMatrix_GetDoubleValue_f(self, name,
+     &     value, retval)
+        implicit none
+C       in bHYPRE.IJParCSRMatrix self
+        integer*8 self
+C       in string name
+        character*(*) name
+C       out double value
+        double precision value
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Method:  Setup[]
+C       (Optional) Do any preprocessing that may be necessary in
+C       order to execute {\tt Apply}.
+C       
+C       
+
+        subroutine bHYPRE_IJParCSRMatrix_Setup_f(self, b, x, retval)
+        implicit none
+C       in bHYPRE.IJParCSRMatrix self
+        integer*8 self
+C       in bHYPRE.Vector b
+        integer*8 b
+C       in bHYPRE.Vector x
+        integer*8 x
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Method:  Apply[]
+C       Apply the operator to {\tt b}, returning {\tt x}.
+C       
+C       
+
+        subroutine bHYPRE_IJParCSRMatrix_Apply_f(self, b, x, retval)
+        implicit none
+C       in bHYPRE.IJParCSRMatrix self
+        integer*8 self
+C       in bHYPRE.Vector b
+        integer*8 b
+C       inout bHYPRE.Vector x
+        integer*8 x
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Method:  ApplyAdjoint[]
+C       Apply the adjoint of the operator to {\tt b}, returning {\tt x}.
+C       
+C       
+
+        subroutine bHYPRE_IJParCSRMatrix_ApplyAdjoint_f(self, b, x,
+     &     retval)
+        implicit none
+C       in bHYPRE.IJParCSRMatrix self
+        integer*8 self
+C       in bHYPRE.Vector b
+        integer*8 b
+C       inout bHYPRE.Vector x
+        integer*8 x
+C       out int retval
+        integer*4 retval
+        end
+
+
+C       
+C       Method:  GetRow[]
 C       The GetRow method will allocate space for its two output
 C       arrays on the first call.  The space will be reused on
 C       subsequent calls.  Thus the user must not delete them, yet
@@ -565,235 +829,6 @@ C       out array<int,column-major> col_ind
         integer*8 col_ind
 C       out array<double,column-major> values
         integer*8 values
-C       out int retval
-        integer*4 retval
-        end
-
-
-C       
-C       Set the int parameter associated with {\tt name}.
-C       
-C       
-
-        subroutine bHYPRE_IJParCSRMatrix_SetIntParameter_f(self, name,
-     &     value, retval)
-        implicit none
-C       in bHYPRE.IJParCSRMatrix self
-        integer*8 self
-C       in string name
-        character*(*) name
-C       in int value
-        integer*4 value
-C       out int retval
-        integer*4 retval
-        end
-
-
-C       
-C       Set the double parameter associated with {\tt name}.
-C       
-C       
-
-        subroutine bHYPRE_IJParCSRMatrix_SetDoubleParameter_f(self,
-     &     name, value, retval)
-        implicit none
-C       in bHYPRE.IJParCSRMatrix self
-        integer*8 self
-C       in string name
-        character*(*) name
-C       in double value
-        double precision value
-C       out int retval
-        integer*4 retval
-        end
-
-
-C       
-C       Set the string parameter associated with {\tt name}.
-C       
-C       
-
-        subroutine bHYPRE_IJParCSRMatrix_SetStringParameter_f(self,
-     &     name, value, retval)
-        implicit none
-C       in bHYPRE.IJParCSRMatrix self
-        integer*8 self
-C       in string name
-        character*(*) name
-C       in string value
-        character*(*) value
-C       out int retval
-        integer*4 retval
-        end
-
-
-C       
-C       Set the int 1-D array parameter associated with {\tt name}.
-C       
-C       
-
-        subroutine bHYPRE_IJParCSRMatrix_SetIntArray1Parameter_f(self,
-     &     name, value, retval)
-        implicit none
-C       in bHYPRE.IJParCSRMatrix self
-        integer*8 self
-C       in string name
-        character*(*) name
-C       out int retval
-        integer*4 retval
-C       in rarray<int> value(nvalues)
-        integer*4 value(0:nvalues-1)
-        end
-
-
-C       
-C       Set the int 2-D array parameter associated with {\tt name}.
-C       
-C       
-
-        subroutine bHYPRE_IJParCSRMatrix_SetIntArray2Parameter_f(self,
-     &     name, value, retval)
-        implicit none
-C       in bHYPRE.IJParCSRMatrix self
-        integer*8 self
-C       in string name
-        character*(*) name
-C       in array<int,2,column-major> value
-        integer*8 value
-C       out int retval
-        integer*4 retval
-        end
-
-
-C       
-C       Set the double 1-D array parameter associated with {\tt name}.
-C       
-C       
-
-        subroutine 
-     &     bHYPRE_IJParCSRMatrix_SetDoubleArray1Parameter_f(self, name,
-     &     value, retval)
-        implicit none
-C       in bHYPRE.IJParCSRMatrix self
-        integer*8 self
-C       in string name
-        character*(*) name
-C       out int retval
-        integer*4 retval
-C       in rarray<double> value(nvalues)
-        double precision value(0:nvalues-1)
-        end
-
-
-C       
-C       Set the double 2-D array parameter associated with {\tt name}.
-C       
-C       
-
-        subroutine 
-     &     bHYPRE_IJParCSRMatrix_SetDoubleArray2Parameter_f(self, name,
-     &     value, retval)
-        implicit none
-C       in bHYPRE.IJParCSRMatrix self
-        integer*8 self
-C       in string name
-        character*(*) name
-C       in array<double,2,column-major> value
-        integer*8 value
-C       out int retval
-        integer*4 retval
-        end
-
-
-C       
-C       Set the int parameter associated with {\tt name}.
-C       
-C       
-
-        subroutine bHYPRE_IJParCSRMatrix_GetIntValue_f(self, name,
-     &     value, retval)
-        implicit none
-C       in bHYPRE.IJParCSRMatrix self
-        integer*8 self
-C       in string name
-        character*(*) name
-C       out int value
-        integer*4 value
-C       out int retval
-        integer*4 retval
-        end
-
-
-C       
-C       Get the double parameter associated with {\tt name}.
-C       
-C       
-
-        subroutine bHYPRE_IJParCSRMatrix_GetDoubleValue_f(self, name,
-     &     value, retval)
-        implicit none
-C       in bHYPRE.IJParCSRMatrix self
-        integer*8 self
-C       in string name
-        character*(*) name
-C       out double value
-        double precision value
-C       out int retval
-        integer*4 retval
-        end
-
-
-C       
-C       (Optional) Do any preprocessing that may be necessary in
-C       order to execute {\tt Apply}.
-C       
-C       
-
-        subroutine bHYPRE_IJParCSRMatrix_Setup_f(self, b, x, retval)
-        implicit none
-C       in bHYPRE.IJParCSRMatrix self
-        integer*8 self
-C       in bHYPRE.Vector b
-        integer*8 b
-C       in bHYPRE.Vector x
-        integer*8 x
-C       out int retval
-        integer*4 retval
-        end
-
-
-C       
-C       Apply the operator to {\tt b}, returning {\tt x}.
-C       
-C       
-
-        subroutine bHYPRE_IJParCSRMatrix_Apply_f(self, b, x, retval)
-        implicit none
-C       in bHYPRE.IJParCSRMatrix self
-        integer*8 self
-C       in bHYPRE.Vector b
-        integer*8 b
-C       inout bHYPRE.Vector x
-        integer*8 x
-C       out int retval
-        integer*4 retval
-        end
-
-
-C       
-C       Apply the adjoint of the operator to {\tt b}, returning {\tt x}.
-C       
-C       
-
-        subroutine bHYPRE_IJParCSRMatrix_ApplyAdjoint_f(self, b, x,
-     &     retval)
-        implicit none
-C       in bHYPRE.IJParCSRMatrix self
-        integer*8 self
-C       in bHYPRE.Vector b
-        integer*8 b
-C       inout bHYPRE.Vector x
-        integer*8 x
 C       out int retval
         integer*4 retval
         end

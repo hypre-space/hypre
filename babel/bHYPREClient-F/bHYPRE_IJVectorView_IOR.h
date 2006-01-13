@@ -2,12 +2,12 @@
  * File:          bHYPRE_IJVectorView_IOR.h
  * Symbol:        bHYPRE.IJVectorView-v1.0.0
  * Symbol Type:   interface
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.12
  * Description:   Intermediate Object Representation for bHYPRE.IJVectorView
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.12
  */
 
 #ifndef included_bHYPRE_IJVectorView_IOR_h
@@ -92,20 +92,20 @@ struct bHYPRE_IJVectorView__epv {
     /* in */ int32_t jupper);
   int32_t (*f_SetValues)(
     /* in */ void* self,
-    /* in */ struct sidl_int__array* indices,
-    /* in */ struct sidl_double__array* values);
+    /* in rarray[nvalues] */ struct sidl_int__array* indices,
+    /* in rarray[nvalues] */ struct sidl_double__array* values);
   int32_t (*f_AddToValues)(
     /* in */ void* self,
-    /* in */ struct sidl_int__array* indices,
-    /* in */ struct sidl_double__array* values);
+    /* in rarray[nvalues] */ struct sidl_int__array* indices,
+    /* in rarray[nvalues] */ struct sidl_double__array* values);
   int32_t (*f_GetLocalRange)(
     /* in */ void* self,
     /* out */ int32_t* jlower,
     /* out */ int32_t* jupper);
   int32_t (*f_GetValues)(
     /* in */ void* self,
-    /* in */ struct sidl_int__array* indices,
-    /* inout */ struct sidl_double__array** values);
+    /* in rarray[nvalues] */ struct sidl_int__array* indices,
+    /* inout rarray[nvalues] */ struct sidl_double__array** values);
   int32_t (*f_Print)(
     /* in */ void* self,
     /* in */ const char* filename);
@@ -205,20 +205,20 @@ struct bHYPRE__IJVectorView__epv {
     /* in */ int32_t jupper);
   int32_t (*f_SetValues)(
     /* in */ struct bHYPRE__IJVectorView__object* self,
-    /* in */ struct sidl_int__array* indices,
-    /* in */ struct sidl_double__array* values);
+    /* in rarray[nvalues] */ struct sidl_int__array* indices,
+    /* in rarray[nvalues] */ struct sidl_double__array* values);
   int32_t (*f_AddToValues)(
     /* in */ struct bHYPRE__IJVectorView__object* self,
-    /* in */ struct sidl_int__array* indices,
-    /* in */ struct sidl_double__array* values);
+    /* in rarray[nvalues] */ struct sidl_int__array* indices,
+    /* in rarray[nvalues] */ struct sidl_double__array* values);
   int32_t (*f_GetLocalRange)(
     /* in */ struct bHYPRE__IJVectorView__object* self,
     /* out */ int32_t* jlower,
     /* out */ int32_t* jupper);
   int32_t (*f_GetValues)(
     /* in */ struct bHYPRE__IJVectorView__object* self,
-    /* in */ struct sidl_int__array* indices,
-    /* inout */ struct sidl_double__array** values);
+    /* in rarray[nvalues] */ struct sidl_int__array* indices,
+    /* inout rarray[nvalues] */ struct sidl_double__array** values);
   int32_t (*f_Print)(
     /* in */ struct bHYPRE__IJVectorView__object* self,
     /* in */ const char* filename);

@@ -2,12 +2,12 @@
  * File:          bHYPRE_IJMatrixView_Stub.c
  * Symbol:        bHYPRE.IJMatrixView-v1.0.0
  * Symbol Type:   interface
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.12
  * Description:   Client-side glue code for bHYPRE.IJMatrixView
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.12
  */
 
 #include "bHYPRE_IJMatrixView.h"
@@ -266,10 +266,10 @@ int32_t
 bHYPRE_IJMatrixView_SetValues(
   /* in */ bHYPRE_IJMatrixView self,
   /* in */ int32_t nrows,
-  /* in */ int32_t* ncols,
-  /* in */ int32_t* rows,
-  /* in */ int32_t* cols,
-  /* in */ double* values,
+  /* in rarray[nrows] */ int32_t* ncols,
+  /* in rarray[nrows] */ int32_t* rows,
+  /* in rarray[nnonzeros] */ int32_t* cols,
+  /* in rarray[nnonzeros] */ double* values,
   /* in */ int32_t nnonzeros)
 {
   int32_t ncols_lower[1], ncols_upper[1], ncols_stride[1]; 
@@ -316,10 +316,10 @@ int32_t
 bHYPRE_IJMatrixView_AddToValues(
   /* in */ bHYPRE_IJMatrixView self,
   /* in */ int32_t nrows,
-  /* in */ int32_t* ncols,
-  /* in */ int32_t* rows,
-  /* in */ int32_t* cols,
-  /* in */ double* values,
+  /* in rarray[nrows] */ int32_t* ncols,
+  /* in rarray[nrows] */ int32_t* rows,
+  /* in rarray[nnonzeros] */ int32_t* cols,
+  /* in rarray[nnonzeros] */ double* values,
   /* in */ int32_t nnonzeros)
 {
   int32_t ncols_lower[1], ncols_upper[1], ncols_stride[1]; 
@@ -385,8 +385,8 @@ int32_t
 bHYPRE_IJMatrixView_GetRowCounts(
   /* in */ bHYPRE_IJMatrixView self,
   /* in */ int32_t nrows,
-  /* in */ int32_t* rows,
-  /* inout */ int32_t* ncols)
+  /* in rarray[nrows] */ int32_t* rows,
+  /* inout rarray[nrows] */ int32_t* ncols)
 {
   int32_t rows_lower[1], rows_upper[1], rows_stride[1]; 
   struct sidl_int__array rows_real;
@@ -415,10 +415,10 @@ int32_t
 bHYPRE_IJMatrixView_GetValues(
   /* in */ bHYPRE_IJMatrixView self,
   /* in */ int32_t nrows,
-  /* in */ int32_t* ncols,
-  /* in */ int32_t* rows,
-  /* in */ int32_t* cols,
-  /* inout */ double* values,
+  /* in rarray[nrows] */ int32_t* ncols,
+  /* in rarray[nrows] */ int32_t* rows,
+  /* in rarray[nnonzeros] */ int32_t* cols,
+  /* inout rarray[nnonzeros] */ double* values,
   /* in */ int32_t nnonzeros)
 {
   int32_t ncols_lower[1], ncols_upper[1], ncols_stride[1]; 
@@ -466,7 +466,7 @@ bHYPRE_IJMatrixView_GetValues(
 int32_t
 bHYPRE_IJMatrixView_SetRowSizes(
   /* in */ bHYPRE_IJMatrixView self,
-  /* in */ int32_t* sizes,
+  /* in rarray[nrows] */ int32_t* sizes,
   /* in */ int32_t nrows)
 {
   int32_t sizes_lower[1], sizes_upper[1], sizes_stride[1]; 
@@ -1306,10 +1306,10 @@ remote_bHYPRE__IJMatrixView_SetLocalRange(
 static int32_t
 remote_bHYPRE__IJMatrixView_SetValues(
   /* in */ struct bHYPRE__IJMatrixView__object* self /* TLD */,
-  /* in */ struct sidl_int__array* ncols,
-  /* in */ struct sidl_int__array* rows,
-  /* in */ struct sidl_int__array* cols,
-  /* in */ struct sidl_double__array* values)
+  /* in rarray[nrows] */ struct sidl_int__array* ncols,
+  /* in rarray[nrows] */ struct sidl_int__array* rows,
+  /* in rarray[nnonzeros] */ struct sidl_int__array* cols,
+  /* in rarray[nnonzeros] */ struct sidl_double__array* values)
 {
   sidl_BaseInterface _ex = NULL;
   sidl_BaseInterface *_ex2 =&_ex;
@@ -1341,10 +1341,10 @@ remote_bHYPRE__IJMatrixView_SetValues(
 static int32_t
 remote_bHYPRE__IJMatrixView_AddToValues(
   /* in */ struct bHYPRE__IJMatrixView__object* self /* TLD */,
-  /* in */ struct sidl_int__array* ncols,
-  /* in */ struct sidl_int__array* rows,
-  /* in */ struct sidl_int__array* cols,
-  /* in */ struct sidl_double__array* values)
+  /* in rarray[nrows] */ struct sidl_int__array* ncols,
+  /* in rarray[nrows] */ struct sidl_int__array* rows,
+  /* in rarray[nnonzeros] */ struct sidl_int__array* cols,
+  /* in rarray[nnonzeros] */ struct sidl_double__array* values)
 {
   sidl_BaseInterface _ex = NULL;
   sidl_BaseInterface *_ex2 =&_ex;
@@ -1415,8 +1415,8 @@ remote_bHYPRE__IJMatrixView_GetLocalRange(
 static int32_t
 remote_bHYPRE__IJMatrixView_GetRowCounts(
   /* in */ struct bHYPRE__IJMatrixView__object* self /* TLD */,
-  /* in */ struct sidl_int__array* rows,
-  /* inout */ struct sidl_int__array** ncols)
+  /* in rarray[nrows] */ struct sidl_int__array* rows,
+  /* inout rarray[nrows] */ struct sidl_int__array** ncols)
 {
   sidl_BaseInterface _ex = NULL;
   sidl_BaseInterface *_ex2 =&_ex;
@@ -1448,10 +1448,10 @@ remote_bHYPRE__IJMatrixView_GetRowCounts(
 static int32_t
 remote_bHYPRE__IJMatrixView_GetValues(
   /* in */ struct bHYPRE__IJMatrixView__object* self /* TLD */,
-  /* in */ struct sidl_int__array* ncols,
-  /* in */ struct sidl_int__array* rows,
-  /* in */ struct sidl_int__array* cols,
-  /* inout */ struct sidl_double__array** values)
+  /* in rarray[nrows] */ struct sidl_int__array* ncols,
+  /* in rarray[nrows] */ struct sidl_int__array* rows,
+  /* in rarray[nnonzeros] */ struct sidl_int__array* cols,
+  /* inout rarray[nnonzeros] */ struct sidl_double__array** values)
 {
   sidl_BaseInterface _ex = NULL;
   sidl_BaseInterface *_ex2 =&_ex;
@@ -1483,7 +1483,7 @@ remote_bHYPRE__IJMatrixView_GetValues(
 static int32_t
 remote_bHYPRE__IJMatrixView_SetRowSizes(
   /* in */ struct bHYPRE__IJMatrixView__object* self /* TLD */,
-  /* in */ struct sidl_int__array* sizes)
+  /* in rarray[nrows] */ struct sidl_int__array* sizes)
 {
   sidl_BaseInterface _ex = NULL;
   sidl_BaseInterface *_ex2 =&_ex;

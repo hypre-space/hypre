@@ -2,12 +2,12 @@ C
 C       File:          bHYPRE_PCG_Impl.f
 C       Symbol:        bHYPRE.PCG-v1.0.0
 C       Symbol Type:   class
-C       Babel Version: 0.10.4
+C       Babel Version: 0.10.12
 C       Description:   Client-side documentation text for bHYPRE.PCG
 C       
 C       WARNING: Automatically generated; changes will be lost
 C       
-C       babel-version = 0.10.4
+C       babel-version = 0.10.12
 C       
 
         THIS FILE IS DOCUMENTATION - DO NOT COMPILE IT!
@@ -20,6 +20,7 @@ C
 
 
 C       
+C       Method:  _create[]
 C       Create an instance of class bHYPRE.PCG
 C       
 
@@ -31,6 +32,7 @@ C       out bHYPRE.PCG retval
 
 
 C       
+C       Method:  _cast[]
 C       Cast method for interface and type conversions.
 C       
 
@@ -44,6 +46,7 @@ C       out bHYPRE.PCG retval
 
 
 C       
+C       Method:  _cast2[]
 C       Cast method for interface and class type conversions.
 C       
 
@@ -59,6 +62,7 @@ C       out opaque retval
 
 
 C       
+C       Method:  addRef[]
 C       <p>
 C       Add one to the intrinsic reference count in the underlying object.
 C       Object in <code>sidl</code> have an intrinsic reference count.
@@ -81,6 +85,7 @@ C       in bHYPRE.PCG self
 
 
 C       
+C       Method:  deleteRef[]
 C       Decrease by one the intrinsic reference count in the underlying
 C       object, and delete the object if the reference is non-positive.
 C       Objects in <code>sidl</code> have an intrinsic reference count.
@@ -96,6 +101,7 @@ C       in bHYPRE.PCG self
 
 
 C       
+C       Method:  isSame[]
 C       Return true if and only if <code>obj</code> refers to the same
 C       object as this object.
 C       
@@ -112,6 +118,7 @@ C       out bool retval
 
 
 C       
+C       Method:  queryInt[]
 C       Check whether the object can support the specified interface or
 C       class.  If the <code>sidl</code> type name in <code>name</code>
 C       is supported, then a reference to that object is returned with the
@@ -133,6 +140,7 @@ C       out sidl.BaseInterface retval
 
 
 C       
+C       Method:  isType[]
 C       Return whether this object is an instance of the specified type.
 C       The string name must be the <code>sidl</code> type name.  This
 C       routine will return <code>true</code> if and only if a cast to
@@ -151,6 +159,7 @@ C       out bool retval
 
 
 C       
+C       Method:  getClassInfo[]
 C       Return the meta-data about the class implementing this interface.
 C       
 
@@ -179,6 +188,7 @@ C       out bHYPRE.PCG retval
 
 
 C       
+C       Method:  SetCommunicator[]
 C       Set the MPI Communicator.
 C       DEPRECATED, use Create:
 C       
@@ -196,6 +206,7 @@ C       out int retval
 
 
 C       
+C       Method:  SetIntParameter[]
 C       Set the int parameter associated with {\tt name}.
 C       
 C       
@@ -215,6 +226,7 @@ C       out int retval
 
 
 C       
+C       Method:  SetDoubleParameter[]
 C       Set the double parameter associated with {\tt name}.
 C       
 C       
@@ -234,6 +246,7 @@ C       out int retval
 
 
 C       
+C       Method:  SetStringParameter[]
 C       Set the string parameter associated with {\tt name}.
 C       
 C       
@@ -253,6 +266,7 @@ C       out int retval
 
 
 C       
+C       Method:  SetIntArray1Parameter[]
 C       Set the int 1-D array parameter associated with {\tt name}.
 C       
 C       
@@ -272,6 +286,7 @@ C       in rarray<int> value(nvalues)
 
 
 C       
+C       Method:  SetIntArray2Parameter[]
 C       Set the int 2-D array parameter associated with {\tt name}.
 C       
 C       
@@ -291,6 +306,7 @@ C       out int retval
 
 
 C       
+C       Method:  SetDoubleArray1Parameter[]
 C       Set the double 1-D array parameter associated with {\tt name}.
 C       
 C       
@@ -310,6 +326,7 @@ C       in rarray<double> value(nvalues)
 
 
 C       
+C       Method:  SetDoubleArray2Parameter[]
 C       Set the double 2-D array parameter associated with {\tt name}.
 C       
 C       
@@ -329,6 +346,7 @@ C       out int retval
 
 
 C       
+C       Method:  GetIntValue[]
 C       Set the int parameter associated with {\tt name}.
 C       
 C       
@@ -347,6 +365,7 @@ C       out int retval
 
 
 C       
+C       Method:  GetDoubleValue[]
 C       Get the double parameter associated with {\tt name}.
 C       
 C       
@@ -366,6 +385,7 @@ C       out int retval
 
 
 C       
+C       Method:  Setup[]
 C       (Optional) Do any preprocessing that may be necessary in
 C       order to execute {\tt Apply}.
 C       
@@ -385,6 +405,7 @@ C       out int retval
 
 
 C       
+C       Method:  Apply[]
 C       Apply the operator to {\tt b}, returning {\tt x}.
 C       
 C       
@@ -403,6 +424,7 @@ C       out int retval
 
 
 C       
+C       Method:  ApplyAdjoint[]
 C       Apply the adjoint of the operator to {\tt b}, returning {\tt x}.
 C       
 C       
@@ -421,6 +443,7 @@ C       out int retval
 
 
 C       
+C       Method:  SetOperator[]
 C       Set the operator for the linear system being solved.
 C       DEPRECATED.  use Create
 C       
@@ -438,6 +461,7 @@ C       out int retval
 
 
 C       
+C       Method:  SetTolerance[]
 C       (Optional) Set the convergence tolerance.
 C       DEPRECATED.  use SetDoubleParameter
 C       
@@ -455,6 +479,7 @@ C       out int retval
 
 
 C       
+C       Method:  SetMaxIterations[]
 C       (Optional) Set maximum number of iterations.
 C       DEPRECATED   use SetIntParameter
 C       
@@ -473,6 +498,7 @@ C       out int retval
 
 
 C       
+C       Method:  SetLogging[]
 C       (Optional) Set the {\it logging level}, specifying the degree
 C       of additional informational data to be accumulated.  Does
 C       nothing by default (level = 0).  Other levels (if any) are
@@ -494,6 +520,7 @@ C       out int retval
 
 
 C       
+C       Method:  SetPrintLevel[]
 C       (Optional) Set the {\it print level}, specifying the degree
 C       of informational data to be printed either to the screen or
 C       to a file.  Does nothing by default (level=0).  Other levels
@@ -515,6 +542,7 @@ C       out int retval
 
 
 C       
+C       Method:  GetNumIterations[]
 C       (Optional) Return the number of iterations taken.
 C       
 C       
@@ -532,6 +560,7 @@ C       out int retval
 
 
 C       
+C       Method:  GetRelResidualNorm[]
 C       (Optional) Return the norm of the relative residual.
 C       
 C       
@@ -548,6 +577,7 @@ C       out int retval
 
 
 C       
+C       Method:  SetPreconditioner[]
 C       Set the preconditioner.
 C       
 C       

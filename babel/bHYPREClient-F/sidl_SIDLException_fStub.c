@@ -2,7 +2,7 @@
  * File:          sidl_SIDLException_fStub.c
  * Symbol:        sidl.SIDLException-v0.9.3
  * Symbol Type:   class
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.12
  * Release:       $Name$
  * Revision:      @(#) $Id$
  * Description:   Client-side glue code for sidl.SIDLException
@@ -32,8 +32,8 @@
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.4
- * xml-url       = /home/painter/babel-0.10.4/bin/.././share/repository/sidl.SIDLException-v0.9.3.xml
+ * babel-version = 0.10.12
+ * xml-url       = /home/painter/babel/share/babel-0.10.12/repository/sidl.SIDLException-v0.9.3.xml
  */
 
 /*

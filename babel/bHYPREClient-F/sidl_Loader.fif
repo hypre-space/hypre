@@ -2,7 +2,7 @@ C
 C       File:          sidl_Loader_Impl.f
 C       Symbol:        sidl.Loader-v0.9.3
 C       Symbol Type:   class
-C       Babel Version: 0.10.4
+C       Babel Version: 0.10.12
 C       Release:       $Name$
 C       Revision:      @(#) $Id$
 C       Description:   Client-side documentation text for sidl.Loader
@@ -32,8 +32,8 @@ C       Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 C       
 C       WARNING: Automatically generated; changes will be lost
 C       
-C       babel-version = 0.10.4
-C       xml-url       = /home/painter/babel-0.10.4/bin/.././share/repository/sidl.Loader-v0.9.3.xml
+C       babel-version = 0.10.12
+C       xml-url       = /home/painter/babel/share/babel-0.10.12/repository/sidl.Loader-v0.9.3.xml
 C       
 
         THIS FILE IS DOCUMENTATION - DO NOT COMPILE IT!
@@ -59,6 +59,7 @@ C
 
 
 C       
+C       Method:  _create[]
 C       Create an instance of class sidl.Loader
 C       
 
@@ -70,6 +71,7 @@ C       out sidl.Loader retval
 
 
 C       
+C       Method:  _cast[]
 C       Cast method for interface and type conversions.
 C       
 
@@ -83,6 +85,7 @@ C       out sidl.Loader retval
 
 
 C       
+C       Method:  _cast2[]
 C       Cast method for interface and class type conversions.
 C       
 
@@ -98,6 +101,7 @@ C       out opaque retval
 
 
 C       
+C       Method:  addRef[]
 C       <p>
 C       Add one to the intrinsic reference count in the underlying object.
 C       Object in <code>sidl</code> have an intrinsic reference count.
@@ -120,6 +124,7 @@ C       in sidl.Loader self
 
 
 C       
+C       Method:  deleteRef[]
 C       Decrease by one the intrinsic reference count in the underlying
 C       object, and delete the object if the reference is non-positive.
 C       Objects in <code>sidl</code> have an intrinsic reference count.
@@ -135,6 +140,7 @@ C       in sidl.Loader self
 
 
 C       
+C       Method:  isSame[]
 C       Return true if and only if <code>obj</code> refers to the same
 C       object as this object.
 C       
@@ -151,6 +157,7 @@ C       out bool retval
 
 
 C       
+C       Method:  queryInt[]
 C       Check whether the object can support the specified interface or
 C       class.  If the <code>sidl</code> type name in <code>name</code>
 C       is supported, then a reference to that object is returned with the
@@ -172,6 +179,7 @@ C       out sidl.BaseInterface retval
 
 
 C       
+C       Method:  isType[]
 C       Return whether this object is an instance of the specified type.
 C       The string name must be the <code>sidl</code> type name.  This
 C       routine will return <code>true</code> if and only if a cast to
@@ -190,6 +198,7 @@ C       out bool retval
 
 
 C       
+C       Method:  getClassInfo[]
 C       Return the meta-data about the class implementing this interface.
 C       
 
@@ -203,6 +212,7 @@ C       out sidl.ClassInfo retval
 
 
 C       
+C       Method:  loadLibrary[]
 C       Load the specified library if it has not already been loaded.
 C       The URI format is defined in class <code>DLL</code>.  The search
 C       path is not searched to resolve the library name.
@@ -241,6 +251,7 @@ C       out sidl.DLL retval
 
 
 C       
+C       Method:  addDLL[]
 C       Append the specified DLL to the beginning of the list of already
 C       loaded DLLs.
 C       
@@ -253,6 +264,7 @@ C       in sidl.DLL dll
 
 
 C       
+C       Method:  unloadLibraries[]
 C       Unload all dynamic link libraries.  The library may no longer
 C       be used to access symbol names.  When the library is actually
 C       unloaded from the memory image depends on details of the operating
@@ -265,6 +277,7 @@ C
 
 
 C       
+C       Method:  findLibrary[]
 C       Find a DLL containing the specified information for a sidl
 C       class. This method searches SCL files in the search path looking
 C       for a shared library that contains the client-side or IOR
@@ -312,6 +325,7 @@ C       out sidl.DLL retval
 
 
 C       
+C       Method:  setSearchPath[]
 C       Set the search path, which is a semi-colon separated sequence of
 C       URIs as described in class <code>DLL</code>.  This method will
 C       invalidate any existing search path.
@@ -327,6 +341,7 @@ C       in string path_name
 
 
 C       
+C       Method:  getSearchPath[]
 C       Return the current search path.  The default
 C       <code>Finder</code> initializes the search path
 C       from environment variable SIDL_DLL_PATH.
@@ -341,6 +356,7 @@ C       out string retval
 
 
 C       
+C       Method:  addSearchPath[]
 C       Append the specified path fragment to the beginning of the
 C       current search path.  This method operates on the Loader's
 C       current <code>Finder</code>. This will add a path to the
@@ -356,6 +372,7 @@ C       in string path_fragment
 
 
 C       
+C       Method:  setFinder[]
 C       This method sets the <code>Finder</code> that
 C       <code>Loader</code> will use to find DLLs.  If no
 C       <code>Finder</code> is set or if NULL is passed in, the Default
@@ -375,6 +392,7 @@ C       in sidl.Finder f
 
 
 C       
+C       Method:  getFinder[]
 C       This method gets the <code>Finder</code> that <code>Loader</code>
 C       uses to find DLLs.  
 C       

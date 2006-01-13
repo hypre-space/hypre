@@ -2,12 +2,12 @@
  * File:          bHYPRE_StructDiagScale_fStub.c
  * Symbol:        bHYPRE.StructDiagScale-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.12
  * Description:   Client-side glue code for bHYPRE.StructDiagScale
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.12
  */
 
 /*

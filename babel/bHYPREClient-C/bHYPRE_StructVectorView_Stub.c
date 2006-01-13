@@ -2,12 +2,12 @@
  * File:          bHYPRE_StructVectorView_Stub.c
  * Symbol:        bHYPRE.StructVectorView-v1.0.0
  * Symbol Type:   interface
- * Babel Version: 0.10.4
+ * Babel Version: 0.10.12
  * Description:   Client-side glue code for bHYPRE.StructVectorView
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.10.4
+ * babel-version = 0.10.12
  */
 
 #include "bHYPRE_StructVectorView.h"
@@ -226,7 +226,7 @@ bHYPRE_StructVectorView_SetGrid(
 int32_t
 bHYPRE_StructVectorView_SetNumGhost(
   /* in */ bHYPRE_StructVectorView self,
-  /* in */ int32_t* num_ghost,
+  /* in rarray[dim2] */ int32_t* num_ghost,
   /* in */ int32_t dim2)
 {
   int32_t num_ghost_lower[1], num_ghost_upper[1], num_ghost_stride[1]; 
@@ -247,7 +247,7 @@ bHYPRE_StructVectorView_SetNumGhost(
 int32_t
 bHYPRE_StructVectorView_SetValue(
   /* in */ bHYPRE_StructVectorView self,
-  /* in */ int32_t* grid_index,
+  /* in rarray[dim] */ int32_t* grid_index,
   /* in */ int32_t dim,
   /* in */ double value)
 {
@@ -270,10 +270,10 @@ bHYPRE_StructVectorView_SetValue(
 int32_t
 bHYPRE_StructVectorView_SetBoxValues(
   /* in */ bHYPRE_StructVectorView self,
-  /* in */ int32_t* ilower,
-  /* in */ int32_t* iupper,
+  /* in rarray[dim] */ int32_t* ilower,
+  /* in rarray[dim] */ int32_t* iupper,
   /* in */ int32_t dim,
-  /* in */ double* values,
+  /* in rarray[nvalues] */ double* values,
   /* in */ int32_t nvalues)
 {
   int32_t ilower_lower[1], ilower_upper[1], ilower_stride[1]; 
@@ -1088,7 +1088,7 @@ remote_bHYPRE__StructVectorView_SetGrid(
 static int32_t
 remote_bHYPRE__StructVectorView_SetNumGhost(
   /* in */ struct bHYPRE__StructVectorView__object* self /* TLD */,
-  /* in */ struct sidl_int__array* num_ghost)
+  /* in rarray[dim2] */ struct sidl_int__array* num_ghost)
 {
   sidl_BaseInterface _ex = NULL;
   sidl_BaseInterface *_ex2 =&_ex;
@@ -1120,7 +1120,7 @@ remote_bHYPRE__StructVectorView_SetNumGhost(
 static int32_t
 remote_bHYPRE__StructVectorView_SetValue(
   /* in */ struct bHYPRE__StructVectorView__object* self /* TLD */,
-  /* in */ struct sidl_int__array* grid_index,
+  /* in rarray[dim] */ struct sidl_int__array* grid_index,
   /* in */ double value)
 {
   sidl_BaseInterface _ex = NULL;
@@ -1154,9 +1154,9 @@ remote_bHYPRE__StructVectorView_SetValue(
 static int32_t
 remote_bHYPRE__StructVectorView_SetBoxValues(
   /* in */ struct bHYPRE__StructVectorView__object* self /* TLD */,
-  /* in */ struct sidl_int__array* ilower,
-  /* in */ struct sidl_int__array* iupper,
-  /* in */ struct sidl_double__array* values)
+  /* in rarray[dim] */ struct sidl_int__array* ilower,
+  /* in rarray[dim] */ struct sidl_int__array* iupper,
+  /* in rarray[nvalues] */ struct sidl_double__array* values)
 {
   sidl_BaseInterface _ex = NULL;
   sidl_BaseInterface *_ex2 =&_ex;
