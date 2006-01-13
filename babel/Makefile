@@ -12,7 +12,10 @@ include ../config/Makefile.config
 BHYPRE_BABEL_DIRS =\
  bHYPRE \
  bHYPREClient-C\
- bHYPREClient-F
+ bHYPREClient-F\
+ bHYPREClient-CX
+
+# bHYPREClient-P
 
 HYPRE_BABEL_RUNTIME_SIDL_DIR = ${HYPRE_SRC_TOP_DIR}/babel-runtime/sidl
 

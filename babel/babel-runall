@@ -7,20 +7,16 @@
 
 # Note that the version of Babel run here should be consistent with
 # the version of the runtime Babel which is used in compiled bHYPRE
-# code.  Here is how I get to the public version of Babel on the Casc
-# network.  As of December 2002, it is consistent with runtime version
-# 0.7.5, which is packaged with bHYPRE.  alias babel
-# /usr/casc/babel/babel-0.7.4/casc-linux-gcc2.96/bin/babel setenv
-# BABEL /usr/casc/babel/babel-0.7.4/casc-linux-gcc2.96/ setenv
-# BABEL_EXEC ${BABEL} setenv LD_LIBRARY_PATH
-# /usr/casc/babel/babel-0.7.4/casc-linux-gcc2.96/lib:${LD_LIBRARY_PATH}
-# As of January 2002, I have switched to babel-0.8.0, which is not yet
-# in /usr/casc/babel.
-# As of January 2005, I have switched to babel-0.9.8, which is not yet
-# in /usr/casc/babel.
+# code.
+
+# To use this, hypre should be configured --with-babel
+# For Python, hypre should be configured --enable-shared
 
 babel --version
 
 babel --output-directory=bHYPRE --comment-local-only --suppress-timestamp -sC Interfaces.idl
 babel --output-directory=bHYPREClient-C --comment-local-only --suppress-timestamp -cC Interfaces.idl
 babel --output-directory=bHYPREClient-F --comment-local-only --suppress-timestamp -cF77 Interfaces.idl
+
+babel --output-directory=bHYPREClient-CX --comment-local-only --suppress-timestamp -cUC++ Interfaces.idl
+# babel --output-directory=bHYPREClient-P --comment-local-only --suppress-timestamp -cPython Interfaces.idl
