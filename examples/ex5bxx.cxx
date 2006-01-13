@@ -27,7 +27,6 @@
 #include "HYPRE_parcsr_ls.h"
 
 /* Babel interface headers */
-#include "bHYPRE.h"
 #include "bHYPRE.hh"
 #include "bHYPRE_Vector.h"
 #include "bHYPRE_IJParCSRMatrix.h"
@@ -61,8 +60,6 @@ int main (int argc, char *argv[])
    Operator  op_A;
    IJParCSRVector par_b;
    IJParCSRVector par_x;
-   Vector vec_b;
-   Vector vec_x;
 
    BoomerAMG amg_solver;
    ParaSails ps_solver;
@@ -239,13 +236,9 @@ int main (int argc, char *argv[])
    /* Create the rhs and solution */
    par_b = IJParCSRVector::Create( mpi_comm, ilower, iupper );
 
-   vec_b = par_b; /* we can eliminate vec_b later, it's really needed only in C */
-
    par_b.Initialize();
 
    par_x = IJParCSRVector::Create( mpi_comm, ilower, iupper );
-
-   vec_x = par_x; /* we can eliminate vec_x later, it's really needed only in C */
 
    par_x.Initialize();
 
@@ -296,8 +289,8 @@ int main (int argc, char *argv[])
       amg_solver.SetDoubleParameter( "Tolerance", 1e-7);      /* conv. tolerance */
 
       /* Now setup and solve! */
-      amg_solver.Setup( vec_b, vec_x );
-      amg_solver.Apply( vec_b, vec_x );
+      amg_solver.Setup( par_b, par_x );
+      amg_solver.Apply( par_b, par_x );
 
       /* Run info - needed logging turned on */
 
@@ -337,8 +330,8 @@ int main (int argc, char *argv[])
       pcg_solver.SetPreconditioner( identity );
 
       /* Now setup and solve! */
-      pcg_solver.Setup( vec_b, vec_x );
-      pcg_solver.Apply( vec_b, vec_x );
+      pcg_solver.Setup( par_b, par_x );
+      pcg_solver.Apply( par_b, par_x );
 
       /* Run info - needed logging turned on */
       pcg_solver.GetIntValue( "NumIterations", num_iterations );
@@ -384,8 +377,8 @@ int main (int argc, char *argv[])
       pcg_solver.SetPreconditioner( amg_solver );
 
       /* Now setup and solve! */
-      pcg_solver.Setup( vec_b, vec_x );
-      pcg_solver.Apply( vec_b, vec_x );
+      pcg_solver.Setup( par_b, par_x );
+      pcg_solver.Apply( par_b, par_x );
 
       /* Run info - needed logging turned on */
       pcg_solver.GetIntValue( "NumIterations", num_iterations );
@@ -438,8 +431,8 @@ int main (int argc, char *argv[])
       pcg_solver.SetPreconditioner( ps_solver );
 
       /* Now setup and solve! */
-      pcg_solver.Setup( vec_b, vec_x);
-      pcg_solver.Apply( vec_b, vec_x);
+      pcg_solver.Setup( par_b, par_x);
+      pcg_solver.Apply( par_b, par_x);
 
 
       /* Run info - needed logging turned on */
