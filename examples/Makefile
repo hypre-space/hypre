@@ -3,6 +3,7 @@
 ########################################################################
 CC        = mpicc
 F77       = mpif77
+CXX       = mpiCC
 HYPRE_DIR = ../hypre
 
 ########################################################################
@@ -16,6 +17,10 @@ FOPTS     = -g
 FINCLUDES = $(CINCLUDES)
 FDEFS     = $(CDEFS)
 FFLAGS    = $(FOPTS) $(FINCLUDES) $(FDEFS)
+CXXOPTS   = $(COPTS)
+CXXINCLUDES = $(CINCLUDES)
+CXXDEFS   = $(CDEFS)
+CXXFLAGS  = $(CXXOPTS) $(CXXINCLUDES) $(CXXDEFS)
 
 LINKOPTS  = $(COPTS)
 LIBS      = -L$(HYPRE_DIR)/lib -lHYPRE -llapack -lblas -lg2c -lm
@@ -25,6 +30,7 @@ LFLAGS_B =\
  -L${HYPRE_DIR}/../babel-runtime/sidl/.libs\
  -lbHYPRE\
  -lbHYPREClient-C\
+ -lbHYPREClient-CX\
  -lbHYPREClient-F\
  -lbHYPRE\
  -lsidl -ldl -lxml2
@@ -32,11 +38,14 @@ LFLAGS_B =\
 ########################################################################
 # Rules for compiling the source files
 ########################################################################
-.SUFFIXES: .c .f
+.SUFFIXES: .c .f .cxx
 .c.o:
 	$(CC) $(CFLAGS) -c $<
 .f.o:
 	$(F77) $(FFLAGS) -c $<
+
+.cxx.o:
+	$(CXX) $(CXXFLAGS) -c $<
 
 ########################################################################
 # List of all programs to be compiled
@@ -85,6 +94,12 @@ ex5b: ex5b.o
 ########################################################################
 ex5b77: ex5b77.o
 	$(F77) -o $@ $^ $(LFLAGS_B) $(LFLAGS)
+
+########################################################################
+# Example 5 Babel C++
+########################################################################
+ex5bxx: ex5bxx.o
+	$(CXX) -o $@ $^ $(LFLAGS_B) $(LFLAGS)
 
 ########################################################################
 # Example 6
