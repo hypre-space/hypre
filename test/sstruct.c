@@ -1358,14 +1358,14 @@ PrintUsage( char *progname,
       printf("                        38 - GMRES with diagonal scaling\n");
       printf("                        39 - GMRES\n");
       printf("                        40 - GMRES with BoomerAMG precond\n");
-      printf("                        41 - GMRES with PILUT precond\n");
+      printf("                        41 - GMRES with EUCLID precond\n");
       printf("                        42 - GMRES with ParaSails precond\n");
       printf("                        50 - BiCGSTAB with SMG split precond\n");
       printf("                        51 - BiCGSTAB with PFMG split precond\n");
       printf("                        58 - BiCGSTAB with diagonal scaling\n");
       printf("                        59 - BiCGSTAB\n");
       printf("                        60 - BiCGSTAB with BoomerAMG precond\n");
-      printf("                        61 - BiCGSTAB with PILUT precond\n");
+      printf("                        61 - BiCGSTAB with EUCLID precond\n");
       printf("                        62 - BiCGSTAB with ParaSails precond\n");
       printf("                        120- PCG with hybrid precond\n");
       printf("                        200- Struct SMG (default)\n");
@@ -1853,9 +1853,20 @@ main( int   argc,
    if (solver_id >= 200)
    {
       pdata = data.pdata[0];
-      if (nparts > 1 || pdata.nvars > 1)
+      if (nparts > 1)
       {
-         printf("Error: Invalid number of parts or nvars for Struct Solver \n");
+         if (!myid)
+         {
+            printf("Warning: Invalid number of parts for Struct Solver. Part 0 taken. \n");
+         }
+      }
+
+      if (pdata.nvars > 1)
+      {
+         if (!myid)
+         {
+            printf("Error: Invalid number of nvars for Struct Solver \n");
+         }
          exit(1);
       }
    }
@@ -2927,6 +2938,17 @@ main( int   argc,
                               (HYPRE_PtrToSolverFcn) HYPRE_ParCSRParaSailsSetup,
                               par_precond );
       }
+      else if (solver_id == 23)
+      {
+         /* use Euclid as preconditioner */
+         HYPRE_EuclidCreate(MPI_COMM_WORLD, &par_precond);
+         HYPRE_EuclidSetParams(par_precond, argc, argv);
+         HYPRE_PCGSetPrecond(par_solver,
+                            (HYPRE_PtrToSolverFcn) HYPRE_EuclidSolve,
+                            (HYPRE_PtrToSolverFcn) HYPRE_EuclidSetup,
+                             par_precond);
+      }
+
       else if (solver_id == 28)
       {
          /* use diagonal scaling as preconditioner */
@@ -2968,6 +2990,11 @@ main( int   argc,
       {
          HYPRE_ParCSRParaSailsDestroy(par_precond);
       }
+      else if (solver_id == 23)
+      {
+         HYPRE_EuclidDestroy(par_precond);
+      }
+
    }
 
    /*-----------------------------------------------------------
@@ -3079,14 +3106,13 @@ main( int   argc,
       }
       else if (solver_id == 41)
       {
-         /* use PILUT as preconditioner */
-         HYPRE_ParCSRPilutCreate(MPI_COMM_WORLD, &par_precond ); 
-         /*HYPRE_ParCSRPilutSetDropTolerance(par_precond, drop_tol);*/
-         /*HYPRE_ParCSRPilutSetFactorRowSize(par_precond, nonzeros_to_keep);*/
-         HYPRE_GMRESSetPrecond( par_solver,
-                                (HYPRE_PtrToSolverFcn) HYPRE_ParCSRPilutSolve,
-                                (HYPRE_PtrToSolverFcn) HYPRE_ParCSRPilutSetup,
-                                par_precond);
+         /* use Euclid as preconditioner */
+         HYPRE_EuclidCreate(MPI_COMM_WORLD, &par_precond);
+         HYPRE_EuclidSetParams(par_precond, argc, argv);
+         HYPRE_GMRESSetPrecond(par_solver,
+                            (HYPRE_PtrToSolverFcn) HYPRE_EuclidSolve,
+                            (HYPRE_PtrToSolverFcn) HYPRE_EuclidSetup,
+                             par_precond);
       }
 
       else if (solver_id == 42)
@@ -3131,7 +3157,7 @@ main( int   argc,
       }
       else if (solver_id == 41)
       {
-         HYPRE_ParCSRPilutDestroy(par_precond);
+         HYPRE_EuclidDestroy(par_precond);
       }
       else if (solver_id == 42)
       {
@@ -3246,14 +3272,13 @@ main( int   argc,
       }
       else if (solver_id == 61)
       {
-         /* use PILUT as preconditioner */
-         HYPRE_ParCSRPilutCreate(MPI_COMM_WORLD, &par_precond ); 
-         /*HYPRE_ParCSRPilutSetDropTolerance(par_precond, drop_tol);*/
-         /*HYPRE_ParCSRPilutSetFactorRowSize(par_precond, nonzeros_to_keep);*/
-         HYPRE_BiCGSTABSetPrecond( par_solver,
-                                (HYPRE_PtrToSolverFcn) HYPRE_ParCSRPilutSolve,
-                                (HYPRE_PtrToSolverFcn) HYPRE_ParCSRPilutSetup,
-                                par_precond);
+         /* use Euclid as preconditioner */
+         HYPRE_EuclidCreate(MPI_COMM_WORLD, &par_precond);
+         HYPRE_EuclidSetParams(par_precond, argc, argv);
+         HYPRE_BiCGSTABSetPrecond(par_solver,
+                                 (HYPRE_PtrToSolverFcn) HYPRE_EuclidSolve,
+                                 (HYPRE_PtrToSolverFcn) HYPRE_EuclidSetup,
+                                  par_precond);
       }
 
       else if (solver_id == 62)
@@ -3298,7 +3323,7 @@ main( int   argc,
       }
       else if (solver_id == 61)
       {
-         HYPRE_ParCSRPilutDestroy(par_precond);
+         HYPRE_EuclidDestroy(par_precond);
       }
       else if (solver_id == 62)
       {
