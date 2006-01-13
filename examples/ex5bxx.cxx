@@ -17,8 +17,6 @@
                  Available solvers are AMG, PCG, and PCG with AMG or
                  Parasails preconditioners.
 
-                 >>> NOT DONE <<<
-                 If I go through with this, this will be a C++ equivalent to ex5b
 */
 
 #include <math.h>
