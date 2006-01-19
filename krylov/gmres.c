@@ -252,7 +252,7 @@ hypre_GMRESSolve(void  *gmres_vdata,
    double     *rs, **hh, *c, *s;
    int        iter; 
    int        my_id, num_procs;
-   double     epsilon, gamma, t, r_norm, b_norm, x_norm;
+   double     epsilon, gamma, t, r_norm, b_norm, den_norm, x_norm;
    double     epsmac = 1.e-16; 
    double     ieee_check = 0.;
 
@@ -261,6 +261,7 @@ hypre_GMRESSolve(void  *gmres_vdata,
    double     cf_ave_1 = 0.0;
    double     weight;
    double     r_norm_0;
+   double     relative_error;
 
    /*-----------------------------------------------------------------------
     * With relative change convergence test on, it is possible to attempt
@@ -359,14 +360,16 @@ hypre_GMRESSolve(void  *gmres_vdata,
 
    if (b_norm > 0.0)
    {
-/* convergence criterion |r_i| <= accuracy*|b| if |b| > 0 */
-     epsilon = accuracy * b_norm;
+/* convergence criterion |r_i|/|b| <= accuracy if |b| > 0 */
+     den_norm= b_norm;
    }
    else
    {
-/* convergence criterion |r_i| <= accuracy*|r0| if |b| = 0 */
-     epsilon = accuracy * r_norm;
+/* convergence criterion |r_i|/|r0| <= accuracy if |b| = 0 */
+     den_norm= r_norm;
    };
+
+   epsilon= accuracy;
 
 /* convergence criterion |r_i| <= accuracy , absolute residual norm*/
    if ( stop_crit && !rel_change )
@@ -389,6 +392,12 @@ hypre_GMRESSolve(void  *gmres_vdata,
           };
    }
 
+  /* set the relative_error to initially bypass the stopping criterion */
+   if (rel_change)
+   {
+      relative_error= epsilon + 1.;
+   }
+
    while (iter < max_iter)
    {
    /* initialize first term of hessenberg system */
@@ -405,29 +414,55 @@ hypre_GMRESSolve(void  *gmres_vdata,
 	   return ierr;
 	}
 
-	if (r_norm <= epsilon && iter >= min_iter) 
+	if (r_norm/den_norm <= epsilon && iter >= min_iter) 
         {
-		(*(gmres_functions->CopyVector))(b,r);
-          	(*(gmres_functions->Matvec))(matvec_data,-1.0,A,x,1.0,r);
-		r_norm = sqrt((*(gmres_functions->InnerProd))(r,r));
-		if (r_norm <= epsilon)
+                if (rel_change)
                 {
-                  if ( print_level>1 && my_id == 0)
-                  {
-                     printf("\n\n");
-                     printf("Final L2 norm of residual: %e\n\n", r_norm);
-                  }
-                  break;
+                   if (relative_error <= epsilon)
+                   {
+		      (*(gmres_functions->CopyVector))(b,r);
+          	      (*(gmres_functions->Matvec))(matvec_data,-1.0,A,x,1.0,r);
+		      r_norm = sqrt((*(gmres_functions->InnerProd))(r,r));
+		      if (r_norm/den_norm <= epsilon)
+                      {
+                         if ( print_level>1 && my_id == 0)
+                         {
+                            printf("\n\n");
+                            printf("Final L2 norm of residual: %e\n\n", r_norm);
+                         }
+                         break;
+                      }
+                      else
+                      if ( print_level>0 && my_id == 0)
+                           printf("false convergence 1\n");
+                   }
                 }
                 else
-                  if ( print_level>0 && my_id == 0)
-                      printf("false convergence 1\n");
+                {
+                   (*(gmres_functions->CopyVector))(b,r);
+                   (*(gmres_functions->Matvec))(matvec_data,-1.0,A,x,1.0,r);
+                   r_norm = sqrt((*(gmres_functions->InnerProd))(r,r));
+                   if (r_norm/den_norm <= epsilon)
+                   {
+                       if ( print_level>1 && my_id == 0)
+                       {
+                            printf("\n\n");
+                            printf("Final L2 norm of residual: %e\n\n", r_norm);
+                       }
+                       break;
+                   }
+                   else
+                      if ( print_level>0 && my_id == 0)
+                           printf("false convergence 1\n");
+                }
+
 	}
 
       	t = 1.0 / r_norm;
 	(*(gmres_functions->ScaleVector))(t,p[0]);
 	i = 0;
-	while (i < k_dim && (r_norm > epsilon || iter < min_iter)
+	while (i < k_dim && ( (r_norm/den_norm > epsilon || iter < min_iter)
+                         || ((rel_change) && relative_error > epsilon) )
                          && iter < max_iter)
 	{
 		i++;
@@ -526,12 +561,20 @@ hypre_GMRESSolve(void  *gmres_vdata,
 	(*(gmres_functions->Axpy))(1.0,r,x);
 
 /* check for convergence, evaluate actual residual */
-	if (r_norm <= epsilon && iter >= min_iter) 
+	if (r_norm/den_norm <= epsilon && iter >= min_iter) 
         {
+                if (rel_change)
+                {
+                   x_norm = sqrt( (*(gmres_functions->InnerProd))(x,x) );
+                   if ( x_norm<=guard_zero_residual ) break; /* don't divide by 0 */
+		   r_norm = sqrt( (*(gmres_functions->InnerProd))(r,r) );
+                   relative_error= r_norm/x_norm;
+                }
+
 		(*(gmres_functions->CopyVector))(b,r);
           	(*(gmres_functions->Matvec))(matvec_data,-1.0,A,x,1.0,r);
 		r_norm = sqrt( (*(gmres_functions->InnerProd))(r,r) );
-		if (r_norm <= epsilon)
+		if (r_norm/den_norm <= epsilon)
                 {
                    if ( print_level>1 && my_id == 0 )
                    {
@@ -543,7 +586,7 @@ hypre_GMRESSolve(void  *gmres_vdata,
                    {  /* At this point r = x_i - x_(i-1) */
                       x_norm = sqrt( (*(gmres_functions->InnerProd))(x,x) );
                       if ( x_norm<=guard_zero_residual ) break; /* don't divide by 0 */
-                      if ( r_norm/x_norm < epsilon )
+                      if ( relative_error < epsilon )
                       {
                          (gmres_data -> converged) = 1;
                          break;
@@ -586,7 +629,7 @@ hypre_GMRESSolve(void  *gmres_vdata,
    if (b_norm == 0.0)
       (gmres_data -> rel_residual_norm) = r_norm;
 
-   if (iter >= max_iter && r_norm > epsilon) ierr = 1;
+   if (iter >= max_iter && r_norm/den_norm > epsilon) ierr = 1;
 
    hypre_TFreeF(c,gmres_functions); 
    hypre_TFreeF(s,gmres_functions); 
