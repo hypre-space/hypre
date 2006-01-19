@@ -5,6 +5,27 @@
 # other solvers: switch the empty proc, run 1= proc 2 empty
 #                                       run 2= proc 1 empty
 #=============================================================================
+#####
+## temporary removal of following tests to isolate possible insure problems
+mpirun -np 2 ./sstruct -in sstruct.in.emptyProc1  -solver 23 \
+ > emptyProc.out.7
+##
+mpirun -np 2 ./sstruct -in sstruct.in.emptyProc1  -solver 41 \
+ > emptyProc.out.13
+##
+mpirun -np 2 ./sstruct -in sstruct.in.emptyProc1  -solver 61 \
+ > emptyProc.out.19
+##
+mpirun -np 2 ./sstruct -in sstruct.in.emptyProc3  -solver 23 \
+ > emptyProc.out.107
+##
+mpirun -np 2 ./sstruct -in sstruct.in.emptyProc3  -solver 41 \
+ > emptyProc.out.113
+##
+mpirun -np 2 ./sstruct -in sstruct.in.emptyProc3  -solver 61 \
+ > emptyProc.out.119
+##
+#####
 mpirun -np 2 ./sstruct -in sstruct.in.emptyProc1 -r 1 1 1  -solver 3 \
  > emptyProc.out.0
 mpirun -np 2 ./sstruct -in sstruct.in.emptyProc1  -solver 10 \
@@ -19,8 +40,6 @@ mpirun -np 2 ./sstruct -in sstruct.in.emptyProc1  -solver 20 \
  > emptyProc.out.5
 mpirun -np 2 ./sstruct -in sstruct.in.emptyProc1  -solver 22 \
  > emptyProc.out.6
-mpirun -np 2 ./sstruct -in sstruct.in.emptyProc1  -solver 23 \
- > emptyProc.out.7
 mpirun -np 2 ./sstruct -in sstruct.in.emptyProc1  -solver 28 \
  > emptyProc.out.8
 mpirun -np 2 ./sstruct -in sstruct.in.emptyProc1  -solver 30 \
@@ -31,8 +50,6 @@ mpirun -np 2 ./sstruct -in sstruct.in.emptyProc1  -solver 38 \
  > emptyProc.out.11
 mpirun -np 2 ./sstruct -in sstruct.in.emptyProc1  -solver 40 \
  > emptyProc.out.12
-mpirun -np 2 ./sstruct -in sstruct.in.emptyProc1  -solver 41 \
- > emptyProc.out.13
 mpirun -np 2 ./sstruct -in sstruct.in.emptyProc1  -solver 42 \
  > emptyProc.out.14
 mpirun -np 2 ./sstruct -in sstruct.in.emptyProc1  -solver 50 \
@@ -43,8 +60,6 @@ mpirun -np 2 ./sstruct -in sstruct.in.emptyProc1  -solver 58 \
  > emptyProc.out.17
 mpirun -np 2 ./sstruct -in sstruct.in.emptyProc1  -solver 60 \
  > emptyProc.out.18
-mpirun -np 2 ./sstruct -in sstruct.in.emptyProc1  -solver 61 \
- > emptyProc.out.19
 mpirun -np 2 ./sstruct -in sstruct.in.emptyProc1  -solver 62 \
  > emptyProc.out.20
 mpirun -np 2 ./sstruct -in sstruct.in.emptyProc1  -solver 120 \
@@ -102,8 +117,6 @@ mpirun -np 2 ./sstruct -in sstruct.in.emptyProc3  -solver 20 \
  > emptyProc.out.105
 mpirun -np 2 ./sstruct -in sstruct.in.emptyProc3  -solver 22 \
  > emptyProc.out.106
-mpirun -np 2 ./sstruct -in sstruct.in.emptyProc3  -solver 23 \
- > emptyProc.out.107
 mpirun -np 2 ./sstruct -in sstruct.in.emptyProc3  -solver 28 \
  > emptyProc.out.108
 mpirun -np 2 ./sstruct -in sstruct.in.emptyProc3  -solver 30 \
@@ -114,8 +127,6 @@ mpirun -np 2 ./sstruct -in sstruct.in.emptyProc3  -solver 38 \
  > emptyProc.out.111
 mpirun -np 2 ./sstruct -in sstruct.in.emptyProc3  -solver 40 \
  > emptyProc.out.112
-mpirun -np 2 ./sstruct -in sstruct.in.emptyProc3  -solver 41 \
- > emptyProc.out.113
 mpirun -np 2 ./sstruct -in sstruct.in.emptyProc3  -solver 42 \
  > emptyProc.out.114
 mpirun -np 2 ./sstruct -in sstruct.in.emptyProc3  -solver 50 \
@@ -126,8 +137,6 @@ mpirun -np 2 ./sstruct -in sstruct.in.emptyProc3  -solver 58 \
  > emptyProc.out.117
 mpirun -np 2 ./sstruct -in sstruct.in.emptyProc3  -solver 60 \
  > emptyProc.out.118
-mpirun -np 2 ./sstruct -in sstruct.in.emptyProc3  -solver 61 \
- > emptyProc.out.119
 mpirun -np 2 ./sstruct -in sstruct.in.emptyProc3  -solver 62 \
  > emptyProc.out.120
 mpirun -np 2 ./sstruct -in sstruct.in.emptyProc3  -solver 120 \
@@ -166,6 +175,3 @@ mpirun -np 2 ./sstruct -in sstruct.in.emptyProc2  -r 2 2 2 -solver 247 \
  > emptyProc.out.137
 mpirun -np 2 ./sstruct -in sstruct.in.emptyProc2  -r 2 2 2 -solver 248 \
  > emptyProc.out.138
-
-
-
