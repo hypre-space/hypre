@@ -408,6 +408,12 @@ int HYPRE_BoomerAMGSetDebugFlag(HYPRE_Solver solver,
                                 int          debug_flag);
 
 /**
+ * Returns the residual.
+ **/
+int HYPRE_BoomerAMGGetResidual(HYPRE_Solver  solver,
+                               HYPRE_ParVector * residual);
+
+/**
  * Returns the number of iterations taken.
  **/
 int HYPRE_BoomerAMGGetNumIterations(HYPRE_Solver  solver,
