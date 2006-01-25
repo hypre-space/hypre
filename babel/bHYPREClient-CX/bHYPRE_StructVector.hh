@@ -388,7 +388,7 @@ namespace ucxx {
 
 
     /**
-     * Copy x into {\tt self}.
+     * Copy data from x into {\tt self}.
      * 
      */
     int32_t
@@ -402,6 +402,7 @@ namespace ucxx {
 
     /**
      * Create an {\tt x} compatible with {\tt self}.
+     * The new vector's data is not specified.
      * 
      * NOTE: When this method is used in an inherited class, the
      * cloned {\tt Vector} object can be cast to an object with the

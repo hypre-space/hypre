@@ -326,7 +326,7 @@ C       out int retval
 
 C       
 C       Method:  Copy[]
-C       Copy x into {\tt self}.
+C       Copy data from x into {\tt self}.
 C       
 C       
 
@@ -344,6 +344,7 @@ C       out int retval
 C       
 C       Method:  Clone[]
 C       Create an {\tt x} compatible with {\tt self}.
+C       The new vector's data is not specified.
 C       
 C       NOTE: When this method is used in an inherited class, the
 C       cloned {\tt Vector} object can be cast to an object with the

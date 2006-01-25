@@ -941,7 +941,7 @@ SIDLFortran77Symbol(bhypre_sstructparcsrvector_clear_f,BHYPRE_SSTRUCTPARCSRVECTO
 }
 
 /*
- * Copy x into {\tt self}.
+ * Copy data from x into {\tt self}.
  * 
  */
 
@@ -972,6 +972,7 @@ SIDLFortran77Symbol(bhypre_sstructparcsrvector_copy_f,BHYPRE_SSTRUCTPARCSRVECTOR
 
 /*
  * Create an {\tt x} compatible with {\tt self}.
+ * The new vector's data is not specified.
  * 
  * NOTE: When this method is used in an inherited class, the
  * cloned {\tt Vector} object can be cast to an object with the

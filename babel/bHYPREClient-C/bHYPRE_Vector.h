@@ -85,7 +85,7 @@ bHYPRE_Vector_Clear(
   /* in */ bHYPRE_Vector self);
 
 /**
- * Copy x into {\tt self}.
+ * Copy data from x into {\tt self}.
  * 
  */
 int32_t
@@ -95,6 +95,7 @@ bHYPRE_Vector_Copy(
 
 /**
  * Create an {\tt x} compatible with {\tt self}.
+ * The new vector's data is not specified.
  * 
  * NOTE: When this method is used in an inherited class, the
  * cloned {\tt Vector} object can be cast to an object with the
