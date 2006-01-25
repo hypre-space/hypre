@@ -1188,6 +1188,7 @@ main( int   argc,
       {
          bHYPRE_PCG_deleteRef( solver_PCG );
          bHYPRE_PCG_deleteRef( solver_PCG_1 );
+         bHYPRE_StructSMG_deleteRef( solver_SMG );
       }
 #if 0
       else if (solver_id == 21)
