@@ -779,7 +779,7 @@ impl_bHYPRE_SStructVector_Clear(
 }
 
 /*
- * Copy x into {\tt self}.
+ * Copy data from x into {\tt self}.
  * 
  */
 
@@ -829,6 +829,7 @@ impl_bHYPRE_SStructVector_Copy(
 
 /*
  * Create an {\tt x} compatible with {\tt self}.
+ * The new vector's data is not specified.
  * 
  * NOTE: When this method is used in an inherited class, the
  * cloned {\tt Vector} object can be cast to an object with the
@@ -877,9 +878,6 @@ impl_bHYPRE_SStructVector_Clone(
    ierr += HYPRE_SStructVectorCreate( comm, grid, &Hx );
    ierr += HYPRE_SStructVectorInitialize( Hx );
    data_x -> vec = Hx;
-
-   /* Copy data in self to x... */
-   HYPRE_SStructVectorCopy( Hself, Hx );
 
    ierr += HYPRE_SStructVectorSetObjectType(
       Hx,
@@ -1005,6 +1003,7 @@ impl_bHYPRE_SStructVector_Axpy(
    if ( bHYPRE_Vector_queryInt( x, "bHYPRE.SStructVector" ) )
    {
       bSSx = bHYPRE_SStructVector__cast( x );
+      bHYPRE_SStructVector_deleteRef( bSSx ); /* extra ref from queryInt */
    }
    else
    {

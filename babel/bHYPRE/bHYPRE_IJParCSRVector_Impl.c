@@ -322,9 +322,6 @@ impl_bHYPRE_IJParCSRVector_SetValues(
    HYPRE_IJVector ij_b;
    data = bHYPRE_IJParCSRVector__get_data( self );
    ij_b = data -> ij_b;
-   printf("nvalues=%i values[0,1,2]= %16.12e, %16.12e, %16.12e\n", nvalues, values[0], values[1], values[2] );
-   printf("nvalues=%i values[3,4,5]= %16.12e, %16.12e, %16.12e\n", nvalues, values[3], values[4], values[5] );
-   printf("nvalues=%i values[6,7,8]= %16.12e, %16.12e, %16.12e\n", nvalues, values[6], values[7], values[8] );
 
    ierr = HYPRE_IJVectorSetValues( ij_b, nvalues,
                                    indices,
@@ -554,7 +551,7 @@ impl_bHYPRE_IJParCSRVector_Clear(
 }
 
 /*
- * Copy x into {\tt self}.
+ * Copy data from x into {\tt self}.
  * 
  */
 
@@ -624,6 +621,7 @@ impl_bHYPRE_IJParCSRVector_Copy(
 
 /*
  * Create an {\tt x} compatible with {\tt self}.
+ * The new vector's data is not specified.
  * 
  * NOTE: When this method is used in an inherited class, the
  * cloned {\tt Vector} object can be cast to an object with the
@@ -648,12 +646,10 @@ impl_bHYPRE_IJParCSRVector_Clone(
    int ierr = 0;
    int type[1];  /* type[0] produces silly error messages on Sun */
    int jlower, jupper, my_id;
-   void * objectx, * objecty;
    struct bHYPRE_IJParCSRVector__data * data_y, * data_x;
    HYPRE_IJVector ij_y, ij_x;
    bHYPRE_IJVectorView bHYPRE_ij_x;
    bHYPRE_IJParCSRVector bHYPREP_x;
-   HYPRE_ParVector yy, xx;
 
    MPI_Comm_rank(MPI_COMM_WORLD, &my_id );
 
@@ -677,17 +673,10 @@ impl_bHYPRE_IJParCSRVector_Clone(
    ierr += HYPRE_IJVectorGetObjectType( ij_y, type );
    /* ... don't know how to deal with other types */
    hypre_assert( *type == HYPRE_PARCSR );
-   ierr += HYPRE_IJVectorGetObject( ij_y, &objecty );
-   yy = (HYPRE_ParVector) objecty;
 
    ierr += HYPRE_IJVectorGetObjectType( ij_x, type );
    /* ... don't know how to deal with other types */
    hypre_assert( *type == HYPRE_PARCSR );
-   ierr += HYPRE_IJVectorGetObject( ij_x, &objectx );
-   xx = (HYPRE_ParVector) objectx;
-
-   /* Copy data in y to x... */
-   HYPRE_ParVectorCopy( yy, xx );
 
    ierr += bHYPRE_IJVectorView_Initialize( bHYPRE_ij_x );
 
@@ -766,7 +755,7 @@ impl_bHYPRE_IJParCSRVector_Dot(
    if ( bHYPRE_Vector_queryInt(x, "bHYPRE.IJParCSRVector" ) )
    {
       bHYPREP_x = bHYPRE_IJParCSRVector__cast( x );
-      bHYPRE_StructVector_deleteRef( bHYPREP_x ); /* extra ref from queryInt */
+      bHYPRE_IJParCSRVector_deleteRef( bHYPREP_x ); /* extra ref from queryInt */
    }
    else
    {

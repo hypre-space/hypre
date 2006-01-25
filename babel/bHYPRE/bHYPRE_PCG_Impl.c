@@ -1359,8 +1359,7 @@ impl_bHYPRE_PCG_Clone(
    datax->print_level       = data->print_level;
    datax->logging           = data->logging;
 
-   datax->precond           = data->precond;
-   bHYPRE_Solver_addRef( datax->precond );
+   bHYPRE_PCG_SetPreconditioner( PCG_x, data->precond );
 
    *x = bHYPRE_PreconditionedSolver__cast( PCG_x );
    return ierr;

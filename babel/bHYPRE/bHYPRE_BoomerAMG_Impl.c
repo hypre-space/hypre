@@ -488,6 +488,14 @@ impl_bHYPRE_BoomerAMG_SetIntParameter(
    {
       ierr += HYPRE_BoomerAMGSetDebugFlag( solver, value );
    }
+   else if ( strcmp(name,"InterpType")==0 )
+   {
+      ierr += HYPRE_BoomerAMGSetInterpType( solver, value );
+   }
+   else if ( strcmp(name,"NumSamples")==0 )
+   {
+      ierr += HYPRE_BoomerAMGSetNumSamples( solver, value );
+   }
    else if ( strcmp(name,"Variant")==0 )
    {
       ierr += HYPRE_BoomerAMGSetVariant( solver, value );

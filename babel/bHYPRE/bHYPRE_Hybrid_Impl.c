@@ -49,6 +49,7 @@
 #include <assert.h>
 #include "bHYPRE_StructSMG.h"
 #include "bHYPRE_StructDiagScale.h"
+#include "bHYPRE_StructDiagScale_Impl.h"
 #include "bHYPRE_ParCSRDiagScale.h"
 #include "bHYPRE_SStructDiagScale.h"
 /* DO-NOT-DELETE splicer.end(bHYPRE.Hybrid._includes) */
@@ -127,6 +128,8 @@ impl_bHYPRE_Hybrid__dtor(
          bHYPRE_PreconditionedSolver_deleteRef( data->krylov_solver_1 );
       if ( data -> krylov_solver_2 != (bHYPRE_PreconditionedSolver)NULL )
          bHYPRE_PreconditionedSolver_deleteRef( data->krylov_solver_2 );
+      if ( data->operator != (bHYPRE_Operator)NULL )
+         bHYPRE_Operator_deleteRef( data->operator );
 
       hypre_TFree( data );
    }
@@ -574,6 +577,7 @@ impl_bHYPRE_Hybrid_Setup(
       precond_1 = bHYPRE_Solver__cast( StructDiagScale );
       ierr += bHYPRE_PreconditionedSolver_SetPreconditioner(
          data->krylov_solver_1, precond_1 );
+      bHYPRE_StructDiagScale_deleteRef(StructDiagScale);
    }
    if ( bHYPRE_Vector_queryInt( b, "bHYPRE.IJParCSRVector" ) )
    {
@@ -588,6 +592,7 @@ impl_bHYPRE_Hybrid_Setup(
       precond_1 = bHYPRE_Solver__cast( ParCSRDiagScale );
       ierr += bHYPRE_PreconditionedSolver_SetPreconditioner(
          data->krylov_solver_1, precond_1 );
+      bHYPRE_StructDiagScale_deleteRef(ParCSRDiagScale);
    }
    if ( bHYPRE_Vector_queryInt( b, "bHYPRE.SStructVector" ) )
    {
@@ -597,6 +602,7 @@ impl_bHYPRE_Hybrid_Setup(
       precond_1 = bHYPRE_Solver__cast( SStructDiagScale );
       ierr += bHYPRE_PreconditionedSolver_SetPreconditioner(
          data->krylov_solver_1, precond_1 );
+      bHYPRE_StructDiagScale_deleteRef(SStructDiagScale);
    }
 
    /*  The user should not have called Setup on Krylov solver. */

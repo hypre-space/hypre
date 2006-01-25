@@ -1307,8 +1307,7 @@ impl_bHYPRE_BiCGSTAB_Clone(
    datax->print_level       = data->print_level;
    datax->logging           = data->logging;
 
-   datax->precond           = data->precond;
-   bHYPRE_Solver_addRef( datax->precond );
+   bHYPRE_BiCGSTAB_SetPreconditioner( BiCGSTAB_x, data->precond );
 
    *x = bHYPRE_PreconditionedSolver__cast( BiCGSTAB_x );
    return ierr;

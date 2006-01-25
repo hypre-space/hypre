@@ -775,7 +775,7 @@ impl_bHYPRE_SStructParCSRVector_Clear(
 }
 
 /*
- * Copy x into {\tt self}.
+ * Copy data from x into {\tt self}.
  * 
  */
 
@@ -828,6 +828,7 @@ impl_bHYPRE_SStructParCSRVector_Copy(
 
 /*
  * Create an {\tt x} compatible with {\tt self}.
+ * The new vector's data is not specified.
  * 
  * NOTE: When this method is used in an inherited class, the
  * cloned {\tt Vector} object can be cast to an object with the
@@ -855,7 +856,6 @@ impl_bHYPRE_SStructParCSRVector_Clone(
    bHYPRE_SStructVectorView bHYPRE_x;
    bHYPRE_SStructParCSRVector bHYPREP_x;
    HYPRE_SStructVector Hself, Hx;
-   HYPRE_ParVector pself, px;
    HYPRE_SStructGrid grid;
    MPI_Comm comm;
    int my_id;
@@ -875,12 +875,6 @@ impl_bHYPRE_SStructParCSRVector_Clone(
    ierr += HYPRE_SStructVectorCreate( comm, grid, &Hx );
    ierr += HYPRE_SStructVectorInitialize( Hx );
    data_x -> vec = Hx;
-   HYPRE_SStructVectorGetObject( Hself, (void **) &pself );
-   HYPRE_SStructVectorGetObject( Hx, (void **) &px );
-
-
-   /* Copy data in self to x... */
-   ierr += HYPRE_ParVectorCopy( px, pself );
 
    ierr += HYPRE_SStructVectorSetObjectType(
       Hx,
@@ -1013,6 +1007,7 @@ impl_bHYPRE_SStructParCSRVector_Axpy(
    if ( bHYPRE_Vector_queryInt( x, "bHYPRE.SStructParCSRVector" ) )
    {
       bSSx = bHYPRE_SStructParCSRVector__cast( x );
+      bHYPRE_SStructParCSRVector_deleteRef( bSSx ); /* extra ref from queryInt */
    }
    else
    {

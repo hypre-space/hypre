@@ -1439,8 +1439,7 @@ impl_bHYPRE_GMRES_Clone(
    datax->print_level       = data->print_level;
    datax->logging           = data->logging;
 
-   datax->precond           = data->precond;
-   bHYPRE_Solver_addRef( datax->precond );
+   bHYPRE_GMRES_SetPreconditioner( GMRES_x, data->precond );
 
    *x = bHYPRE_PreconditionedSolver__cast( GMRES_x );
    return ierr;

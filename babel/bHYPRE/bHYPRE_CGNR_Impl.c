@@ -1257,8 +1257,7 @@ impl_bHYPRE_CGNR_Clone(
    datax->print_level       = data->print_level;
    datax->logging           = data->logging;
 
-   datax->precond           = data->precond;
-   bHYPRE_Solver_addRef( datax->precond );
+   bHYPRE_CGNR_SetPreconditioner( CGNR_x, data->precond );
 
    *x = bHYPRE_PreconditionedSolver__cast( CGNR_x );
    return ierr;
