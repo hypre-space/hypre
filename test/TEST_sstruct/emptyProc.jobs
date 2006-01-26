@@ -6,25 +6,6 @@
 #                                       run 2= proc 1 empty
 #=============================================================================
 #####
-## temporary removal of following tests to isolate possible insure problems
-mpirun -np 2 ./sstruct -in sstruct.in.emptyProc1  -solver 23 \
- > emptyProc.out.7
-##
-mpirun -np 2 ./sstruct -in sstruct.in.emptyProc1  -solver 41 \
- > emptyProc.out.13
-##
-mpirun -np 2 ./sstruct -in sstruct.in.emptyProc1  -solver 61 \
- > emptyProc.out.19
-##
-mpirun -np 2 ./sstruct -in sstruct.in.emptyProc3  -solver 23 \
- > emptyProc.out.107
-##
-mpirun -np 2 ./sstruct -in sstruct.in.emptyProc3  -solver 41 \
- > emptyProc.out.113
-##
-mpirun -np 2 ./sstruct -in sstruct.in.emptyProc3  -solver 61 \
- > emptyProc.out.119
-##
 #####
 mpirun -np 2 ./sstruct -in sstruct.in.emptyProc1 -r 1 1 1  -solver 3 \
  > emptyProc.out.0
