@@ -1498,6 +1498,9 @@ int  hypre_BoomerAMGBlockRelax( hypre_ParCSRBlockMatrix *A,
            /*-----------------------------------------------------------------
             * relax weight and omega do not = 1
             *-----------------------------------------------------------------*/
+           prod = (1.0-relax_weight*omega);
+           res0_vec = hypre_CTAlloc(double, block_size);
+           res2_vec = hypre_CTAlloc(double, block_size);
 #define HYPRE_SMP_PRIVATE i
 #include "../utilities/hypre_smp_forloop.h"
            for (i = 0; i < n; i++)
