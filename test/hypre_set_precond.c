@@ -5,7 +5,6 @@
 #include "hypre_test.h"
 
 
-
 int hypre_set_precond(int matrix_id, int solver_id, int precond_id, void *solver,
                       void *precond)
 {

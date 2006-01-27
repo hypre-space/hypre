@@ -303,10 +303,6 @@ fstruct_mv.o: fstruct_mv.f
 	@echo  "Building" $@ "... "
 	${F77} -c fstruct_mv.f ${FFLAGS}
 
-struct_for: fstruct_mv.o fstruct_ls.o struct_for.o
-	@echo  "Building" $@ "... "
-	${LINK_CC} -o $@ fstruct_mv.o fstruct_ls.o $@.o ${FFLAGS} ${STRUCT_LFLAGS}
-
 ex1_for: fstruct_mv.o fstruct_ls.o ex1_for.o
 	@echo  "Building" $@ "... "
 	${LINK_CC} -o $@ fstruct_mv.o fstruct_ls.o $@.o ${FFLAGS} ${STRUCT_LFLAGS}
