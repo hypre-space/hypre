@@ -30,10 +30,6 @@ tail -3 emptyProc.out.6 > emptyProc.testdata
 tail -3 emptyProc.out.106 > emptyProc.testdata.temp
 diff emptyProc.testdata emptyProc.testdata.temp >&2
 
-tail -3 emptyProc.out.7 > emptyProc.testdata
-tail -3 emptyProc.out.107 > emptyProc.testdata.temp
-diff emptyProc.testdata emptyProc.testdata.temp >&2
-
 tail -3 emptyProc.out.8 > emptyProc.testdata
 tail -3 emptyProc.out.108 > emptyProc.testdata.temp
 diff emptyProc.testdata emptyProc.testdata.temp >&2
@@ -54,10 +50,6 @@ tail -3 emptyProc.out.12 > emptyProc.testdata
 tail -3 emptyProc.out.112 > emptyProc.testdata.temp
 diff emptyProc.testdata emptyProc.testdata.temp >&2
 
-tail -3 emptyProc.out.13 > emptyProc.testdata
-tail -3 emptyProc.out.113 > emptyProc.testdata.temp
-diff emptyProc.testdata emptyProc.testdata.temp >&2
-
 tail -3 emptyProc.out.14 > emptyProc.testdata
 tail -3 emptyProc.out.114 > emptyProc.testdata.temp
 diff emptyProc.testdata emptyProc.testdata.temp >&2
@@ -76,10 +68,6 @@ diff emptyProc.testdata emptyProc.testdata.temp >&2
 
 tail -3 emptyProc.out.18 > emptyProc.testdata
 tail -3 emptyProc.out.118 > emptyProc.testdata.temp
-diff emptyProc.testdata emptyProc.testdata.temp >&2
-
-tail -3 emptyProc.out.19 > emptyProc.testdata
-tail -3 emptyProc.out.119 > emptyProc.testdata.temp
 diff emptyProc.testdata emptyProc.testdata.temp >&2
 
 tail -3 emptyProc.out.20 > emptyProc.testdata
