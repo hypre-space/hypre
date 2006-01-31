@@ -828,12 +828,17 @@ hypre_F90_IFACE(hypre_boomeramggetcumnumiterations, HYPRE_BOOMERAMGGETCUMNUMITER
 
 
 /*--------------------------------------------------------------------------
- * HYPRE_BoomerAMGGetResidual  (??)
+ * HYPRE_BoomerAMGGetResidual
  *--------------------------------------------------------------------------*/
 
-
-
-
+void
+hypre_F90_IFACE(hypre_boomeramggetresidual, HYPRE_BOOMERAMGGETRESIDUAL)( long int *solver,
+                                                  long int   *residual,
+                                                  int      *ierr     )
+{
+   *ierr = (int) (HYPRE_BoomerAMGGetResidual((HYPRE_Solver) *solver,
+                                            (HYPRE_ParVector *) residual));
+}
 
 
 
