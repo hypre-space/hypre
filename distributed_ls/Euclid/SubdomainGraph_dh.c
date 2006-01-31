@@ -8,6 +8,10 @@
 #include "SortedSet_dh.h"
 #include "shellSort_dh.h"
 
+
+/* for debugging only! */
+#include <unistd.h>
+
 static void init_seq_private(SubdomainGraph_dh s, int blocks, bool bj, void *A); 
 static void init_mpi_private(SubdomainGraph_dh s, int blocks, bool bj, void *A); 
 /*
@@ -468,9 +472,6 @@ void init_mpi_private(SubdomainGraph_dh s, int blocks, bool bj, void *A)
   s->m = m;
 
 
-/* fprintf(stderr, "\n@@@ [%i] m= %i  n= %i  beg_row= %i\n\n", myid_dh, m,n,beg_row);
-*/
-
   /*-------------------------------------------------------
    * allocate storage for all data structures 
    * EXCEPT s->adj and hash tables.
@@ -920,9 +921,9 @@ void find_all_neighbors_unsym_private(SubdomainGraph_dh s, int m, void *A)
   int *cval, len, idx = 0;
   int nz, *nabors = s->allNabors, *myNabors;
 
-  myNabors = (int*)MALLOC_DH(m*sizeof(int)); CHECK_V_ERROR;
-  marker = (int*)MALLOC_DH(m*sizeof(int)); CHECK_V_ERROR;
-  for (i=0; i<m; ++i) marker[i] = 0;
+  myNabors = (int*)MALLOC_DH(np_dh*sizeof(int)); CHECK_V_ERROR;
+  marker = (int*)MALLOC_DH(np_dh*sizeof(int)); CHECK_V_ERROR;
+  for (i=0; i<np_dh; ++i) marker[i] = 0;
 
   SET_INFO("finding nabors in subdomain graph for structurally unsymmetric matrix");
 
@@ -932,20 +933,21 @@ void find_all_neighbors_unsym_private(SubdomainGraph_dh s, int m, void *A)
   beg_row = s->beg_row[myid_dh];
   end_row = beg_row + s->row_count[myid_dh];
 
-/*
-fprintf(stderr, "[%i] find_all_neighbors_unsym_private: beg_row= %i  end_row= %i\n",
-myid_dh, beg_row, end_row);
-*/
 
 
+  //for each locally owned row ...
   for (row=beg_row; row<end_row; ++row) {
     EuclidGetRow(A, row, &len, &cval, NULL); CHECK_V_ERROR;
     for (j=0; j<len; ++j) {
       int col = cval[j];
+      //for each column that corresponds to a non-locally owned row ...
       if (col < beg_row  ||  col >= end_row) {
         int owner = SubdomainGraph_dhFindOwner(s, col, false); CHECK_V_ERROR;
+        //if I've not yet done so ...
         if (! marker[owner]) {
           marker[owner] = 1;
+          //append the non-local row's owner in to the list of my nabors
+          //in the subdomain graph
           myNabors[idx++] = owner; 
         }
       }
@@ -953,6 +955,27 @@ myid_dh, beg_row, end_row);
     EuclidRestoreRow(A, row, &len, &cval, NULL); CHECK_V_ERROR;
   }
 
+  /*
+  at this point, idx = the number of my neighbors in the subdomain
+  graph; equivalently, idx is the number of meaningfull slots in
+  the myNabors array.  -dah 1/31/06
+  */
+
+  /*
+  at this point: marker[j] = 0 indicates that processor j is NOT my nabor
+                 marker[j] = 1 indicates that processor j IS my nabor
+  however, there may be some nabors that can't be discovered in the above loop
+  "//for each locally owned row;" this can happen if the matrix is 
+  structurally unsymmetric.
+  -dah 1/31/06
+  */
+
+/* fprintf(stderr, "[%i] marker: ", myid_dh);
+for (j=0; j<np_dh; j++) {
+  fprintf(stderr, "[%i] (j=%d) %d\n", myid_dh, j,  marker[j]);
+}
+fprintf(stderr, "\n");
+*/
 
   /* find out who my neighbors are that I cannot discern locally */
   MPI_Alltoall(marker, 1, MPI_INT, nabors, 1, MPI_INT, comm_dh); CHECK_V_ERROR;
@@ -962,6 +985,12 @@ myid_dh, beg_row, end_row);
   
   /* remove self from the adjacency list */
   nabors[myid_dh] = 0;
+
+  /*
+  at this point: marker[j] = 0 indicates that processor j is NOT my nabor
+                 marker[j] = 1 indicates that processor j IS my nabor
+  and this is guaranteed to be complete.
+  */
 
   /* form final list of neighboring processors */
   nz = 0;
