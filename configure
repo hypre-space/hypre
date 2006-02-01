@@ -322,7 +322,7 @@ ac_includes_default="\
 #endif"
 
 ac_subdirs_all="$ac_subdirs_all babel-runtime"
-ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS HYPRE_PACKAGE_DATETIME HYPRE_TOP_SRCDIR HYPRE_RELEASEVERSION HYPRE_RELEASEDATE HYPRE_RELEASETIME HYPRE_RELEASEDATETIME build build_cpu build_vendor build_os host host_cpu host_vendor host_os CC CXX F77 RANLIB ac_ct_RANLIB INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA AWK CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT CPP LN_S SET_MAKE CXXFLAGS ac_ct_CXX FFLAGS ac_ct_F77 FLIBS CXXCPP FPP EGREP POW_LIB LIBOBJS MPILIBS subdirs BABELDIR HYPRE_ARCH HOSTNAME F77FLAGS LINK_CC LINK_CXX HYPRE_INSTALLDIR HYPRE_LIBINSTALL HYPRE_INCINSTALL INCLUDES LIBDIRS LDLIBS LDLIBDIRS HYPRE_LIBSUFFIX MPIINCLUDE MPILIBDIRS MPIFLAGS TIMERDEFS FEILIBS FEILIBDIRS FEIINCLUDE MLI_DIR MLILIBS MLILIBDIRS MLIINCLUDE HYPRE_BLAS_SRC_DIR BLASLIBDIRS BLASLIBS HYPRE_LAPACK_SRC_DIR LAPACKLIBDIRS LAPACKLIBS AR LTLIBOBJS'
+ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS HYPRE_PACKAGE_DATETIME HYPRE_TOP_SRCDIR HYPRE_RELEASEVERSION HYPRE_RELEASEDATE HYPRE_RELEASETIME HYPRE_RELEASEDATETIME build build_cpu build_vendor build_os host host_cpu host_vendor host_os CC CXX F77 RANLIB ac_ct_RANLIB INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA AWK CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT CPP LN_S SET_MAKE CXXFLAGS ac_ct_CXX FFLAGS ac_ct_F77 FLIBS CXXCPP FPP EGREP POW_LIB LIBOBJS MPILIBS subdirs BABELDIR HYPRE_ARCH HOSTNAME F77FLAGS LINK_CC LINK_CXX HYPRE_INSTALLDIR HYPRE_LIBINSTALL HYPRE_INCINSTALL INCLUDES LIBDIRS LDLIBS LDLIBDIRS HYPRE_LINKDIR HYPRE_LIBSUFFIX MPIINCLUDE MPILIBDIRS MPIFLAGS TIMERDEFS FEILIBS FEILIBDIRS FEIINCLUDE MLI_DIR MLILIBS MLILIBDIRS MLIINCLUDE HYPRE_BLAS_SRC_DIR BLASLIBDIRS BLASLIBS HYPRE_LAPACK_SRC_DIR LAPACKLIBDIRS LAPACKLIBS AR LTLIBOBJS'
 ac_subst_files=''
 
 # Initialize some variables set by options.
@@ -989,6 +989,9 @@ Optional Packages:
                           may affect which compiler is chosen.
     --with-blas           Find a system-provided BLAS library
     --with-lapack         Find a system-provided LAPACK library
+    --with-test-alpha     Test alpha version of HYPRE. NOTE: ONLY exists on
+                          the CASC cluster.
+    --with-test-beta      Test 'public' beta version of HYPRE
 
 Some influential environment variables:
   CC          C compiler command
@@ -1701,6 +1704,9 @@ casc_using_babel=no
 casc_using_openmp=no
 casc_using_insure=no
 casc_using_purify=no
+
+casc_testing_alpha=no
+casc_testing_beta=no
 
 
 
@@ -5192,7 +5198,7 @@ fi
 
 
 # Provide some information about the compiler.
-echo "$as_me:5195:" \
+echo "$as_me:5201:" \
      "checking for Fortran 77 compiler version" >&5
 ac_compiler=`set X $ac_compile; echo $2`
 { (eval echo "$as_me:$LINENO: \"$ac_compiler --version </dev/null >&5\"") >&5
@@ -5388,7 +5394,7 @@ _ACEOF
 # flags.
 ac_save_FFLAGS=$FFLAGS
 FFLAGS="$FFLAGS $ac_verb"
-(eval echo $as_me:5391: \"$ac_link\") >&5
+(eval echo $as_me:5397: \"$ac_link\") >&5
 ac_f77_v_output=`eval $ac_link 5>&1 2>&1 | grep -v 'Driving:'`
 echo "$ac_f77_v_output" >&5
 FFLAGS=$ac_save_FFLAGS
@@ -5466,7 +5472,7 @@ _ACEOF
 # flags.
 ac_save_FFLAGS=$FFLAGS
 FFLAGS="$FFLAGS $ac_cv_prog_f77_v"
-(eval echo $as_me:5469: \"$ac_link\") >&5
+(eval echo $as_me:5475: \"$ac_link\") >&5
 ac_f77_v_output=`eval $ac_link 5>&1 2>&1 | grep -v 'Driving:'`
 echo "$ac_f77_v_output" >&5
 FFLAGS=$ac_save_FFLAGS
@@ -9449,7 +9455,80 @@ _ACEOF
 
 case $HOSTNAME in
    up* | uP*) LDFLAGS="${LDFLAGS} -blpdata"
+   ;;
 esac
+
+
+
+
+# Check whether --with-test-alpha or --without-test-alpha was given.
+if test "${with_test_alpha+set}" = set; then
+  withval="$with_test_alpha"
+  case "${withval}" in
+   yes) casc_testing_alpha=yes ;;
+    no) casc_testing_alpha=no ;;
+ esac
+else
+  casc_testing_alpha=no
+
+fi;
+
+
+# Check whether --with-test-beta or --without-test-beta was given.
+if test "${with_test_beta+set}" = set; then
+  withval="$with_test_beta"
+  case "${withval}" in
+   yes) casc_testing_beta=yes ;;
+    no) casc_testing_beta=no ;;
+ esac
+else
+  casc_testing_beta=no
+
+fi;
+
+
+
+if test "$casc_testing_alpha" = "yes"
+then
+   case $HOSTNAME in
+      tux*) HYPRE_LINKDIR="/usr/casc/hypre/i686-pc-linux-gnu/alpha"
+            ;;
+         *) HYPRE_LINKDIR=""
+            ;;
+   esac
+   if test "${LAPACKLIBS}" = "-lHYPRE_utilities"
+   then
+      LAPACKLIBS=""
+      LAPACKLIBDIRS=""
+   fi
+   if test "${BLASLIBS}" = "-lHYPRE_utilities"
+   then
+      BLASLIBS=""
+      BLASLIBDIRS=""
+   fi
+elif test "$casc_testing_beta" = "yes"
+then
+   case $HOSTNAME in
+      tux*) HYPRE_LINKDIR="/usr/casc/hypre/i686-pc-linux-gnu/beta"
+            ;;
+         *) HYPRE_LINKDIR="/usr/apps/hypre/beta"
+            ;;
+   esac
+   if test "${LAPACKLIBS}" = "-lHYPRE_utilities"
+   then
+      LAPACKLIBS=""
+      LAPACKLIBDIRS=""
+   fi
+   if test "${BLASLIBS}" = "-lHYPRE_utilities"
+   then
+      BLASLIBS=""
+      BLASLIBDIRS=""
+   fi
+else
+   HYPRE_LINKDIR="`pwd`/hypre"
+fi
+
+
 
 
 
@@ -10181,6 +10260,7 @@ s,@INCLUDES@,$INCLUDES,;t t
 s,@LIBDIRS@,$LIBDIRS,;t t
 s,@LDLIBS@,$LDLIBS,;t t
 s,@LDLIBDIRS@,$LDLIBDIRS,;t t
+s,@HYPRE_LINKDIR@,$HYPRE_LINKDIR,;t t
 s,@HYPRE_LIBSUFFIX@,$HYPRE_LIBSUFFIX,;t t
 s,@MPIINCLUDE@,$MPIINCLUDE,;t t
 s,@MPILIBDIRS@,$MPILIBDIRS,;t t
