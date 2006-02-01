@@ -2,12 +2,15 @@
 #set -x
 PATH=/usr/apps/autoconf/2.59/bin
 PATH=$PATH:/usr/bin:/bin
-if test -x config/configure.in ; then
-  echo "must be in the same directory as ./configure to run this script"
-  exit 1
-else
-  ln -s config/configure.in .
-fi
+##if test -x config/configure.in ; then
+##  echo "must be in the same directory as ./configure to run this script"
+##  exit 1
+##else
+##  ln -s config/configure.in .
+##fi
+
+ln -s config/configure.in .
+
 rm -rf aclocal.m4 configure autom4te.cache config/acinclude.m4
 
 aclocal -I config

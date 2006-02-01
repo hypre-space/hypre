@@ -197,6 +197,9 @@ casc_using_openmp=no
 casc_using_insure=no
 casc_using_purify=no
 
+casc_testing_alpha=no
+casc_testing_beta=no
+
 
 AC_ARG_WITH(LD,
   AS_HELP_STRING([  --with-LD=ARG],
@@ -873,7 +876,77 @@ dnl * Set large page load option that is needed by the purple platforms.
 dnl *********************************************************************
 case $HOSTNAME in
    up* | uP*) LDFLAGS="${LDFLAGS} -blpdata"
+   ;;
 esac
+
+
+dnl *********************************************************************
+dnl * Check if user set test option.
+dnl *********************************************************************
+
+AC_ARG_WITH(test-alpha,
+  AS_HELP_STRING([  --with-test-alpha], [ Test alpha version of HYPRE.
+                                          NOTE: ONLY exists on the CASC cluster.]),
+[case "${withval}" in
+   yes) casc_testing_alpha=yes ;;
+    no) casc_testing_alpha=no ;;
+ esac],
+[casc_testing_alpha=no]
+)
+
+AC_ARG_WITH(test-beta,
+  AS_HELP_STRING([  --with-test-beta], [ Test 'public' beta version of HYPRE]),
+[case "${withval}" in
+   yes) casc_testing_beta=yes ;;
+    no) casc_testing_beta=no ;;
+ esac],
+[casc_testing_beta=no]
+)
+
+
+dnl *********************************************************************
+dnl * Set link path for test codes.
+dnl *********************************************************************
+
+if test "$casc_testing_alpha" = "yes"
+then
+   case $HOSTNAME in
+      tux*) HYPRE_LINKDIR="/usr/casc/hypre/i686-pc-linux-gnu/alpha"
+            ;;
+         *) HYPRE_LINKDIR=""
+            ;;
+   esac
+   if test "${LAPACKLIBS}" = "-lHYPRE_utilities"
+   then
+      LAPACKLIBS=""
+      LAPACKLIBDIRS=""
+   fi
+   if test "${BLASLIBS}" = "-lHYPRE_utilities"
+   then
+      BLASLIBS=""
+      BLASLIBDIRS=""
+   fi
+elif test "$casc_testing_beta" = "yes"
+then
+   case $HOSTNAME in
+      tux*) HYPRE_LINKDIR="/usr/casc/hypre/i686-pc-linux-gnu/beta"
+            ;;
+         *) HYPRE_LINKDIR="/usr/apps/hypre/beta"
+            ;;
+   esac
+   if test "${LAPACKLIBS}" = "-lHYPRE_utilities"
+   then
+      LAPACKLIBS=""
+      LAPACKLIBDIRS=""
+   fi
+   if test "${BLASLIBS}" = "-lHYPRE_utilities"
+   then
+      BLASLIBS=""
+      BLASLIBDIRS=""
+   fi
+else
+   HYPRE_LINKDIR="HYPRE_TOP_SRC_DIR/hypre"
+fi
 
 dnl *********************************************************************
 dnl * AC_SUBST performs the variable substitutions so they may be used in
@@ -911,6 +984,8 @@ AC_SUBST(FLIBS)
 AC_SUBST(LIBDIRS)
 AC_SUBST(LDLIBS)
 AC_SUBST(LDLIBDIRS)
+
+AC_SUBST(HYPRE_LINKDIR)
 
 dnl *********************************************************************
 dnl * suffix for hypre libraries
