@@ -20,7 +20,8 @@ initialize_variables ()
   HYPRE_BATCH_MODE="no"
   HYPRE_SEND_MAIL="no"
   STD_TEST_CASES='TEST_ij/*.sh TEST_fac/*.sh TEST_sstruct/*.sh TEST_struct/*.sh'
-  STD_CONFIGOPTIONS="all++ all77 babel debug default docs insure no_mpi openmp strict_checking"
+  STD_CONFIGOPTIONS="all++ all77 babel debug default docs insure \
+                     no_mpi openmp strict_checking test_alpha test_beta"
   STD_MAKEOPTIONS="all configure"
   DEBUG_MODE="no"
   Build=1
@@ -108,11 +109,13 @@ initialize_variables ()
 #=============================================================================
 parse_arguments () 
 { 
-  while getopts :a:b:cDde:fhi:l:mno:p:r:sv: arg
+  while getopts :Aa:Bb:cDde:fhi:l:mno:r:sv: arg
   do
     argcur=$arg
     case $arg in
+      A) confbuildtest $Run     "--with-test-alpha" "test_alpha";;
       a) confbuildtest $OPTARG  " "             "default";;
+      B) confbuildtest $Run     "--with-test-beta" "test_beta";;
       b) confbuildtest $OPTARG  "--with-babel"  "babel";;
       c) build "all++"   "all++"         "test";;
       D) DEBUG_MODE="yes"; set -xv;;
@@ -141,7 +144,7 @@ parse_arguments ()
 #=============================================================================
 usage () 
 {
-  printf "Usage: %s [-cDdfhmns] [-a opt] [-b opt] [-e opt]\n" $0
+  printf "Usage: %s [-ABcDdfhmns] [-a opt] [-b opt] [-e opt]\n" $0
   printf "          [-i opt] [-o opt] [-r host] [-v text]\n"
   printf "\n"
   printf "All options are sequentially executed in left-to-right order as\n"
@@ -151,7 +154,11 @@ usage ()
   printf "  1=configure and make\n"
   printf "  2=configure, make and execute.\n"
   printf "\n"
+  printf "%s\n" "-A       test-alpha; configure, build and run test codes with"
+  printf "                current alpha release.\n"
   printf "%s\n" "-a opt   All; (default)."
+  printf "%s\n" "-B       test-beta; configure, build and run test codes with"
+  printf "                current beta release.\n"
   printf "%s\n" "-b opt   Babel; configure --with-babel."
   printf "%s\n" "-c       C++; make all++."
   printf "%s\n" "-D       Turn on debug messages."
@@ -556,10 +563,13 @@ confbuildtest ()
 #
 # Make Section
 # Remove all *.o files before building for current options
-   echo "Autotest starting make of $MessageStr"
-   $MAKE clean
-   $MAKE all 1>> ${Hdr}.${MessageStr}.all.log \
-             2>> ${Hdr}.${MessageStr}.all.err
+   if [ "${MessageStr}" != "test_alpha" -a "${MessageStr}" != "test_beta" ]
+   then
+      echo "Autotest starting make of $MessageStr"
+      $MAKE clean
+      $MAKE all 1>> ${Hdr}.${MessageStr}.all.log \
+                2>> ${Hdr}.${MessageStr}.all.err
+   fi
 
 #
 # Run Section
@@ -571,6 +581,11 @@ confbuildtest ()
       cd $StdTestDir
       $MAKE all 1>> ${Hdr}.${MessageStr}.all.log \
                 2>> ${Hdr}.${MessageStr}.all.err
+
+      if [ "${HYPRE_RUN_MACHINE}" = "" -o "${HYPRE_RUN_MACHINE}" = " " ]
+      then
+         HYPRE_RUN_MACHINE=$HOSTNAME
+      fi
 
       if [ "${HYPRE_RUN_MACHINE}" = "tux149" ]
       then
