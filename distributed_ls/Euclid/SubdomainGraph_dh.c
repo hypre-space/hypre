@@ -12,8 +12,8 @@
 /* for debugging only! */
 #include <unistd.h>
 
-static void init_seq_private(SubdomainGraph_dh s, int blocks, bool bj, void *A); 
-static void init_mpi_private(SubdomainGraph_dh s, int blocks, bool bj, void *A); 
+static void init_seq_private(SubdomainGraph_dh s, int blocks, bool bj, void *A);
+static void init_mpi_private(SubdomainGraph_dh s, int blocks, bool bj, void *A);
 /*
 static void partition_metis_private(SubdomainGraph_dh s, void *A);
 
@@ -24,11 +24,11 @@ static void form_subdomaingraph_mpi_private(SubdomainGraph_dh s);
 static void form_subdomaingraph_seq_private(SubdomainGraph_dh s, int m, void *A);
 static void find_all_neighbors_sym_private(SubdomainGraph_dh s, int m, void *A);
 static void find_all_neighbors_unsym_private(SubdomainGraph_dh s, int m, void *A);
-static void find_bdry_nodes_sym_private(SubdomainGraph_dh s, int m, void* A, 
-                     int *interiorNodes, int *bdryNodes, 
+static void find_bdry_nodes_sym_private(SubdomainGraph_dh s, int m, void* A,
+                     int *interiorNodes, int *bdryNodes,
                      int *interiorCount, int *bdryCount);
-static void find_bdry_nodes_unsym_private(SubdomainGraph_dh s, int m, void* A, 
-                     int *interiorNodes, int *bdryNodes, 
+static void find_bdry_nodes_unsym_private(SubdomainGraph_dh s, int m, void* A,
+                     int *interiorNodes, int *bdryNodes,
                      int *interiorCount, int *bdryCount);
 
 static void find_bdry_nodes_seq_private(SubdomainGraph_dh s, int m, void* A);
@@ -36,7 +36,7 @@ static void find_bdry_nodes_seq_private(SubdomainGraph_dh s, int m, void* A);
 
 static void find_ordered_neighbors_private(SubdomainGraph_dh s);
 static void color_subdomain_graph_private(SubdomainGraph_dh s);
-static void adjust_matrix_perms_private(SubdomainGraph_dh s, int m); 
+static void adjust_matrix_perms_private(SubdomainGraph_dh s, int m);
 
 #undef __FUNC__
 #define __FUNC__ "SubdomainGraph_dhCreate"
@@ -166,7 +166,7 @@ void SubdomainGraph_dhPrintStatsLong(SubdomainGraph_dh s, FILE *fp)
     fprintf(fp, "\ninterior/boundary node ratios:\n");
 
     for (i=0; i<s->blocks; ++i) {
-      int inNodes = s->row_count[i] - s->bdry_count[i]; 
+      int inNodes = s->row_count[i] - s->bdry_count[i];
       int bdNodes = s->bdry_count[i];
       double ratio;
 
@@ -178,8 +178,8 @@ void SubdomainGraph_dhPrintStatsLong(SubdomainGraph_dh s, FILE *fp)
 
       max = MAX(max, ratio);
       min = MIN(min, ratio);
-      fprintf(fp, "   P_%i: first= %3i  rowCount= %3i  interior= %3i  bdry= %3i  ratio= %0.1f\n", 
-                   i, 1+s->beg_row[i], s->row_count[i], inNodes, 
+      fprintf(fp, "   P_%i: first= %3i  rowCount= %3i  interior= %3i  bdry= %3i  ratio= %0.1f\n",
+                   i, 1+s->beg_row[i], s->row_count[i], inNodes,
                    bdNodes, ratio);
     }
 
@@ -215,7 +215,7 @@ void SubdomainGraph_dhPrintStatsLong(SubdomainGraph_dh s, FILE *fp)
    if (np_dh > 1) {
 
     /*-----------------------------------------
-     * local n2o_row permutation 
+     * local n2o_row permutation
      *-----------------------------------------*/
     fprintf(fp, "\nlocal n2o_row permutation:\n   ");
     for (i=0; i<s->row_count[myid_dh]; ++i) {
@@ -224,7 +224,7 @@ void SubdomainGraph_dhPrintStatsLong(SubdomainGraph_dh s, FILE *fp)
     fprintf(fp, "\n");
 
     /*-----------------------------------------
-     * local n2o permutation 
+     * local n2o permutation
      *-----------------------------------------*/
     fprintf(fp, "\nlocal o2n_col permutation:\n   ");
     for (i=0; i<s->row_count[myid_dh]; ++i) {
@@ -249,7 +249,7 @@ void SubdomainGraph_dhPrintStatsLong(SubdomainGraph_dh s, FILE *fp)
     }
 
     /*-----------------------------------------
-     * local n2o permutation 
+     * local n2o permutation
      *-----------------------------------------*/
     fprintf(fp, "\nlocal o2n_col permutation:\n");
     fprintf(fp, "--------------------------\n");
@@ -274,19 +274,19 @@ void SubdomainGraph_dhPrintStatsLong(SubdomainGraph_dh s, FILE *fp)
 void init_seq_private(SubdomainGraph_dh s, int blocks, bool bj, void *A)
 {
   START_FUNC_DH
-  int m, n, beg_row; 
+  int m, n, beg_row;
   double t1;
 
   /*-------------------------------------------------------
    * get number of local rows (m), global rows (n), and
    * global numbering of first locally owned row
-   * (for sequential, beg_row=0 and m == n 
+   * (for sequential, beg_row=0 and m == n
    *-------------------------------------------------------*/
   EuclidGetDimensions(A, &beg_row, &m, &n); CHECK_V_ERROR;
   s->m = n;
 
   /*-------------------------------------------------------
-   * allocate storage for all data structures 
+   * allocate storage for all data structures
    * EXCEPT s->adj and hash tables.
    * (but note that hash tables aren't used for sequential)
    *-------------------------------------------------------*/
@@ -320,7 +320,7 @@ void init_seq_private(SubdomainGraph_dh s, int blocks, bool bj, void *A)
 
   /*-------------------------------------------------------
    * Count number of interior nodes for each subdomain;
-   * also, form permutation vector to order boundary 
+   * also, form permutation vector to order boundary
    * nodes last in each subdomain.
    * This block fills in: bdry_count[]
    *                      n2o_col[]
@@ -350,7 +350,7 @@ void init_seq_private(SubdomainGraph_dh s, int blocks, bool bj, void *A)
    *-------------------------------------------------------*/
   t1 = MPI_Wtime();
   if (! bj) {
-    form_subdomaingraph_seq_private(s, m, A); CHECK_V_ERROR; 
+    form_subdomaingraph_seq_private(s, m, A); CHECK_V_ERROR;
     if (s->doNotColor) {
       int i;
       printf_dh("subdomain coloring and reordering is OFF\n");
@@ -473,7 +473,7 @@ void init_mpi_private(SubdomainGraph_dh s, int blocks, bool bj, void *A)
 
 
   /*-------------------------------------------------------
-   * allocate storage for all data structures 
+   * allocate storage for all data structures
    * EXCEPT s->adj and hash tables.
    *-------------------------------------------------------*/
   allocate_storage_private(s, blocks, m, bj); CHECK_V_ERROR;
@@ -485,8 +485,8 @@ void init_mpi_private(SubdomainGraph_dh s, int blocks, bool bj, void *A)
    * At this point, beg_rowP[] is a copy of beg_row[])
    *-------------------------------------------------------------*/
   if (!bj) {
-    MPI_Allgather(&beg_row, 1, MPI_INT, s->beg_row, 1, MPI_INT, comm_dh); 
-    MPI_Allgather(&m, 1, MPI_INT, s->row_count, 1, MPI_INT, comm_dh); 
+    MPI_Allgather(&beg_row, 1, MPI_INT, s->beg_row, 1, MPI_INT, comm_dh);
+    MPI_Allgather(&m, 1, MPI_INT, s->row_count, 1, MPI_INT, comm_dh);
     memcpy(s->beg_rowP, s->beg_row, np_dh*sizeof(int));
   } else {
     s->beg_row[myid_dh] = beg_row;
@@ -527,19 +527,19 @@ void init_mpi_private(SubdomainGraph_dh s, int blocks, bool bj, void *A)
       interiorNodes = (int*)MALLOC_DH(m*sizeof(int)); CHECK_V_ERROR;
       bdryNodes     = (int*)MALLOC_DH(m*sizeof(int)); CHECK_V_ERROR;
 
-      /* divide this subdomain's rows into interior and boundary rows; 
+      /* divide this subdomain's rows into interior and boundary rows;
          the returned lists are with respect to local numbering.
       */
       if (symmetric) {
-        find_bdry_nodes_sym_private(s, m, A, 
+        find_bdry_nodes_sym_private(s, m, A,
              interiorNodes, bdryNodes, &interiorCount, &bdryCount); CHECK_V_ERROR;
       } else {
-        find_bdry_nodes_unsym_private(s, m, A, 
+        find_bdry_nodes_unsym_private(s, m, A,
              interiorNodes, bdryNodes, &interiorCount, &bdryCount); CHECK_V_ERROR;
       }
 
       /* exchange number of boundary rows with all neighbors */
-      MPI_Allgather(&bdryCount, 1, MPI_INT, s->bdry_count, 1, MPI_INT, comm_dh); 
+      MPI_Allgather(&bdryCount, 1, MPI_INT, s->bdry_count, 1, MPI_INT, comm_dh);
 
       /* form local permutation */
       idx = 0;
@@ -561,7 +561,7 @@ void init_mpi_private(SubdomainGraph_dh s, int blocks, bool bj, void *A)
   else {
     int *o2n = s->o2n_col, *n2o = s->n2o_row;
     int i, m = s->m;
-  
+
     for (i=0; i<m; ++i) {
       o2n[i] = i;
       n2o[i] = i;
@@ -570,7 +570,7 @@ void init_mpi_private(SubdomainGraph_dh s, int blocks, bool bj, void *A)
   s->timing[ORDER_BDRY_SGT] += (MPI_Wtime() - t1);
 
   /*-------------------------------------------------------
-   * Form subdomain graph, 
+   * Form subdomain graph,
    * then color and reorder subdomain graph.
    * This block fills in: ptr[]
    *                      adj[]
@@ -580,7 +580,7 @@ void init_mpi_private(SubdomainGraph_dh s, int blocks, bool bj, void *A)
    *-------------------------------------------------------*/
   if (!bj) {
     t1 = MPI_Wtime();
-    form_subdomaingraph_mpi_private(s); CHECK_V_ERROR; 
+    form_subdomaingraph_mpi_private(s); CHECK_V_ERROR;
     if (s->doNotColor) {
       int i;
       printf_dh("subdomain coloring and reordering is OFF\n");
@@ -631,7 +631,7 @@ void SubdomainGraph_dhExchangePerms(SubdomainGraph_dh s)
   MPI_Status *status = NULL;
   int *nabors = s->allNabors, naborCount = s->allCount;
   int i, j, *sendBuf = NULL, *recvBuf = NULL, *naborIdx = NULL, nz;
-  int m = s->row_count[myid_dh]; 
+  int m = s->row_count[myid_dh];
   int beg_row = s->beg_row[myid_dh];
   int beg_rowP = s->beg_rowP[myid_dh];
   int *bdryNodeCounts = s->bdry_count;
@@ -725,7 +725,7 @@ void SubdomainGraph_dhExchangePerms(SubdomainGraph_dh s)
     int new = recvBuf[i+1];
 
     if (debug) {
-      fprintf(logFile, "SUBG  i= %i  old= %i  new= %i\n", i, old+1, new+1); 
+      fprintf(logFile, "SUBG  i= %i  old= %i  new= %i\n", i, old+1, new+1);
       fflush(logFile);
     }
 
@@ -826,7 +826,7 @@ void form_subdomaingraph_seq_private(SubdomainGraph_dh s, int m, void *A)
 
   /* allocate storage for adj[]; since this function is intended
      for debugging/testing, and the number of blocks should be
-     relatively small, we'll punt and allocate the maximum 
+     relatively small, we'll punt and allocate the maximum
      possibly needed.
   */
   adj = s->adj = (int*)MALLOC_DH(blocks*blocks*sizeof(int)); CHECK_V_ERROR;
@@ -853,7 +853,7 @@ void form_subdomaingraph_seq_private(SubdomainGraph_dh s, int m, void *A)
     }
   }
 
-  /* form sparse csr representation of subdomain graph 
+  /* form sparse csr representation of subdomain graph
      from dense representation
    */
   ptrs[0] = 0;
@@ -948,7 +948,7 @@ void find_all_neighbors_unsym_private(SubdomainGraph_dh s, int m, void *A)
           marker[owner] = 1;
           //append the non-local row's owner in to the list of my nabors
           //in the subdomain graph
-          myNabors[idx++] = owner; 
+          myNabors[idx++] = owner;
         }
       }
     }
@@ -965,7 +965,7 @@ void find_all_neighbors_unsym_private(SubdomainGraph_dh s, int m, void *A)
   at this point: marker[j] = 0 indicates that processor j is NOT my nabor
                  marker[j] = 1 indicates that processor j IS my nabor
   however, there may be some nabors that can't be discovered in the above loop
-  "//for each locally owned row;" this can happen if the matrix is 
+  "//for each locally owned row;" this can happen if the matrix is
   structurally unsymmetric.
   -dah 1/31/06
   */
@@ -982,7 +982,7 @@ fprintf(stderr, "\n");
 
   /* add in neighbors that I know about from scanning my adjacency lists */
   for (i=0; i<idx; ++i) nabors[myNabors[i]] = 1;
-  
+
   /* remove self from the adjacency list */
   nabors[myid_dh] = 0;
 
@@ -1009,18 +1009,18 @@ fprintf(stderr, "\n");
 
 #undef __FUNC__
 #define __FUNC__ "find_bdry_nodes_sym_private"
-void find_bdry_nodes_sym_private(SubdomainGraph_dh s, int m, void* A, 
-                     int *interiorNodes, int *bdryNodes, 
+void find_bdry_nodes_sym_private(SubdomainGraph_dh s, int m, void* A,
+                     int *interiorNodes, int *bdryNodes,
                      int *interiorCount, int *bdryCount)
 {
   START_FUNC_DH
-  int beg_row = s->beg_row[myid_dh]; 
+  int beg_row = s->beg_row[myid_dh];
   int end_row = beg_row + s->row_count[myid_dh];
   int row, inCt = 0, bdCt = 0;
 
   int j;
   int *cval;
-  
+
   /* determine if the row is a boundary row */
   for (row=beg_row; row<end_row; ++row) { /* for each row in the subdomain */
     bool isBdry = false;
@@ -1042,7 +1042,7 @@ void find_bdry_nodes_sym_private(SubdomainGraph_dh s, int m, void* A,
       interiorNodes[inCt++] = row-beg_row;
     }
   }
-  
+
   *interiorCount = inCt;
   *bdryCount = bdCt;
 
@@ -1053,12 +1053,12 @@ void find_bdry_nodes_sym_private(SubdomainGraph_dh s, int m, void* A,
 
 #undef __FUNC__
 #define __FUNC__ "find_bdry_nodes_unsym_private"
-void find_bdry_nodes_unsym_private(SubdomainGraph_dh s, int m, void* A, 
-                     int *interiorNodes, int *boundaryNodes, 
+void find_bdry_nodes_unsym_private(SubdomainGraph_dh s, int m, void* A,
+                     int *interiorNodes, int *boundaryNodes,
                      int *interiorCount, int *bdryCount)
 {
   START_FUNC_DH
-  int beg_row = s->beg_row[myid_dh]; 
+  int beg_row = s->beg_row[myid_dh];
   int end_row = beg_row + s->row_count[myid_dh];
   int i, j, row, max;
   int *cval;
@@ -1078,12 +1078,12 @@ void find_bdry_nodes_unsym_private(SubdomainGraph_dh s, int m, void* A,
    * identify all boundary nodes possible using locally
    * owned adjacency lists
    *-----------------------------------------------------*/
-  for (row=beg_row; row<end_row; ++row) { 
+  for (row=beg_row; row<end_row; ++row) {
     bool isBdry = false;
     int len;
     EuclidGetRow(A, row, &len, &cval, NULL); CHECK_V_ERROR;
 
-    for (j=0; j<len; ++j) { 
+    for (j=0; j<len; ++j) {
       int col = cval[j];
       if (col < beg_row  ||  col >= end_row) {
         isBdry = true;           /* this row is a boundary node */
@@ -1160,7 +1160,7 @@ void find_bdry_nodes_unsym_private(SubdomainGraph_dh s, int m, void* A,
   j = 0;
   for (i=0; i<np_dh; ++i) {
     if (recvBuf[i]) {
-      MPI_Irecv(bdryNodes+rpIN[j], recvBuf[i], MPI_INT, 
+      MPI_Irecv(bdryNodes+rpIN[j], recvBuf[i], MPI_INT,
                 i, BDRY_NODE_TAG, comm_dh, recvReq+j);
       ++j;
     }
@@ -1170,7 +1170,7 @@ void find_bdry_nodes_unsym_private(SubdomainGraph_dh s, int m, void* A,
   j = 0;
   for (i=0; i<np_dh; ++i) {
     if (sendBuf[i]) {
-      MPI_Isend(list+rpOUT[j], sendBuf[i], MPI_INT, 
+      MPI_Isend(list+rpOUT[j], sendBuf[i], MPI_INT,
                 i, BDRY_NODE_TAG, comm_dh, sendReq+j);
       ++j;
     }
@@ -1184,8 +1184,8 @@ void find_bdry_nodes_unsym_private(SubdomainGraph_dh s, int m, void* A,
   for (i=0; i<nz; ++i) bdryNodes[i] -= beg_row;
 
   /*-----------------------------------------------------
-   * consolidate information from all processors to 
-   * identify all local boundary nodes 
+   * consolidate information from all processors to
+   * identify all local boundary nodes
    *-----------------------------------------------------*/
   marker = (int*)MALLOC_DH(m*sizeof(int)); CHECK_V_ERROR;
   for (i=0; i<m; ++i) marker[i] = 0;
@@ -1267,7 +1267,7 @@ void color_subdomain_graph_private(SubdomainGraph_dh s)
   }
 
   /*------------------------------------------------------------------
-   * color the nodes 
+   * color the nodes
    *------------------------------------------------------------------*/
   for (i=0; i<n; ++i) {  /* color node "i" */
     /* mark colors of "i"s nabors as unavailable;
@@ -1276,7 +1276,7 @@ void color_subdomain_graph_private(SubdomainGraph_dh s)
      */
     for (j=rp[i]; j<rp[i+1]; ++j) {
       int nabor = cval[j];
-      if (nabor < i) { 
+      if (nabor < i) {
         int naborsColor = color[nabor];
         marker[naborsColor] = i;
       }
@@ -1505,7 +1505,7 @@ note: this won't match the parallel case, since
 
     /* write n2o_row */
     for (pe=0; pe<np_dh; ++pe) {
-      MPI_Barrier(comm_dh); 
+      MPI_Barrier(comm_dh);
       if (id == pe) {
         fp=openFile_dh(filename, "a"); CHECK_V_ERROR;
         if (id == 0) fprintf(fp, "----- n2o_row\n");
@@ -1522,7 +1522,7 @@ note: this won't match the parallel case, since
 
     /* write o2n_col */
     for (pe=0; pe<np_dh; ++pe) {
-      MPI_Barrier(comm_dh); 
+      MPI_Barrier(comm_dh);
       if (myid_dh == pe) {
         fp=openFile_dh(filename, "a"); CHECK_V_ERROR;
         if (myid_dh == 0) fprintf(fp, "----- o2n_col\n");
@@ -1562,10 +1562,10 @@ void find_bdry_nodes_seq_private(SubdomainGraph_dh s, int m, void* A)
      * mark all boundary nodes
      *------------------------------------------ */
     for (i=0; i<blocks; ++i) {
-      int beg_row = s->beg_row[i]; 
+      int beg_row = s->beg_row[i];
       int end_row = beg_row + s->row_count[i];
 
-      for (row=beg_row; row<end_row; ++row) { 
+      for (row=beg_row; row<end_row; ++row) {
         bool isBdry = false;
         int len;
         EuclidGetRow(A, row, &len, &cval, NULL); CHECK_V_ERROR;
@@ -1583,29 +1583,29 @@ void find_bdry_nodes_seq_private(SubdomainGraph_dh s, int m, void* A)
       }
     }
 
-    /*------------------------------------------ 
+    /*------------------------------------------
      * fill in the bdry_count[] array
      *------------------------------------------ */
     for (i=0; i<blocks; ++i) {
-      int beg_row = s->beg_row[i]; 
+      int beg_row = s->beg_row[i];
       int end_row = beg_row + s->row_count[i];
       int ct = 0;
-      for (row=beg_row; row<end_row; ++row) { 
+      for (row=beg_row; row<end_row; ++row) {
         if (tmp[row]) ++ct;
       }
       s->bdry_count[i] = ct;
     }
 
-    /*------------------------------------------ 
+    /*------------------------------------------
      * form the o2n_col[] permutation
      *------------------------------------------ */
     for (i=0; i<blocks; ++i) {
-      int beg_row = s->beg_row[i]; 
+      int beg_row = s->beg_row[i];
       int end_row = beg_row + s->row_count[i];
       int interiorIDX = beg_row;
       int bdryIDX = end_row - s->bdry_count[i];
 
-      for (row=beg_row; row<end_row; ++row) { 
+      for (row=beg_row; row<end_row; ++row) {
         if (tmp[row]) {
           s->o2n_col[row] = bdryIDX++;
         } else {
@@ -1617,7 +1617,7 @@ void find_bdry_nodes_seq_private(SubdomainGraph_dh s, int m, void* A)
     /* invert permutation */
     invert_perm(m, s->o2n_col, s->n2o_row); CHECK_V_ERROR;
     FREE_DH(tmp); CHECK_V_ERROR;
-  
+
   END_FUNC_DH
 }
 
@@ -1649,7 +1649,7 @@ void SubdomainGraph_dhPrintSubdomainGraph(SubdomainGraph_dh s, FILE *fp)
         fprintf(fp, "%i ", s->adj[j]);
       }
       fprintf(fp, "\n");
-    } 
+    }
     fprintf(fp, "-----------------------------------------------------\n");
   }
   END_FUNC_DH
@@ -1665,7 +1665,7 @@ void adjust_matrix_perms_private(SubdomainGraph_dh s, int m)
   int *o2n = s->o2n_col;
 
   for (i=0; i<blocks; ++i) {
-    int beg_row = s->beg_row[i]; 
+    int beg_row = s->beg_row[i];
     int end_row = beg_row + s->row_count[i];
     int adjust = s->beg_rowP[i] - s->beg_row[i];
     for (j=beg_row; j<end_row; ++j) o2n[j] += adjust;
@@ -1713,7 +1713,7 @@ void SubdomainGraph_dhPrintRatios(SubdomainGraph_dh s, FILE *fp)
         if (j == 10) { fprintf(fp, "\n"); }
       }
       fprintf(fp, "\n");
-    } 
+    }
     else {  /* print 10 largest and 10 smallest ratios */
       fprintf(fp, "10 smallest ratios: ");
       for (i=0; i<10; ++i) {
