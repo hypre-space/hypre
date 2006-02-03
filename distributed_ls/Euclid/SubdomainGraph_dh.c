@@ -935,19 +935,19 @@ void find_all_neighbors_unsym_private(SubdomainGraph_dh s, int m, void *A)
 
 
 
-  //for each locally owned row ...
+  /*for each locally owned row ...   */
   for (row=beg_row; row<end_row; ++row) {
     EuclidGetRow(A, row, &len, &cval, NULL); CHECK_V_ERROR;
     for (j=0; j<len; ++j) {
       int col = cval[j];
-      //for each column that corresponds to a non-locally owned row ...
+      /*for each column that corresponds to a non-locally owned row ...  */
       if (col < beg_row  ||  col >= end_row) {
         int owner = SubdomainGraph_dhFindOwner(s, col, false); CHECK_V_ERROR;
-        //if I've not yet done so ...
+        /*if I've not yet done so ...   */
         if (! marker[owner]) {
           marker[owner] = 1;
-          //append the non-local row's owner in to the list of my nabors
-          //in the subdomain graph
+          /*append the non-local row's owner in to the list of my nabors
+            in the subdomain graph     */
           myNabors[idx++] = owner;
         }
       }
