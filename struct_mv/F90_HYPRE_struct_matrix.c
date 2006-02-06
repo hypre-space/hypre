@@ -100,6 +100,46 @@ hypre_F90_IFACE(hypre_structmatrixsetboxvalues, HYPRE_STRUCTMATRIXSETBOXVALUES)(
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_StructMatrixGetBoxValues
+ *--------------------------------------------------------------------------*/
+
+void 
+hypre_F90_IFACE(hypre_structmatrixgetboxvalues, HYPRE_STRUCTMATRIXGETBOXVALUES)( long int *matrix,
+                                                 int      *ilower,
+                                                 int      *iupper,
+                                                 int      *num_stencil_indices,
+                                                 int      *stencil_indices,
+                                                 double   *values,
+                                                 int      *ierr              )
+{
+   *ierr = (int)
+      ( HYPRE_StructMatrixGetBoxValues( (HYPRE_StructMatrix) *matrix,
+                                        (int *)              ilower,
+                                        (int *)              iupper,
+                                        (int)                *num_stencil_indices,
+                                        (int *)              stencil_indices,
+                                        (double *)           values        ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_StructMatrixSetConstantValues
+ *--------------------------------------------------------------------------*/
+
+void 
+hypre_F90_IFACE(hypre_structmatrixsetconstantva, HYPRE_STRUCTMATRIXSETCONSTANTVA)( long int *matrix,
+                                                int      *num_stencil_indices,
+                                                int      *stencil_indices,
+                                                double   *values,
+                                                int      *ierr                )
+{
+   *ierr = (int)
+      ( HYPRE_StructMatrixSetConstantValues( (HYPRE_StructMatrix) *matrix,
+                                             (int)       *num_stencil_indices,
+                                             (int *)     stencil_indices,
+                                             (double *)  values           ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_StructMatrixAddToValues
  *--------------------------------------------------------------------------*/
 
@@ -139,6 +179,24 @@ hypre_F90_IFACE(hypre_structmatrixaddtoboxvalues, HYPRE_STRUCTMATRIXADDTOBOXVALU
                                           (int)       *num_stencil_indices,
                                           (int *)     stencil_indices,
                                           (double *)  values        ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_StructMatrixAddToConstantValues
+ *--------------------------------------------------------------------------*/
+
+void 
+hypre_F90_IFACE(hypre_structmatrixaddtoconstant, HYPRE_STRUCTMATRIXADDTOCONSTANT)( long int *matrix,
+                                                   int    *num_stencil_indices,
+                                                   int    *stencil_indices,
+                                                   double *values,
+                                                   int    *ierr              )
+{
+   *ierr = (int)
+      ( HYPRE_StructMatrixSetConstantValues( (HYPRE_StructMatrix) *matrix,
+                                             (int)       *num_stencil_indices,
+                                             (int *)     stencil_indices,
+                                             (double *)  values        ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -193,6 +251,22 @@ hypre_F90_IFACE(hypre_structmatrixsetsymmetric, HYPRE_STRUCTMATRIXSETSYMMETRIC)(
    *ierr = (int)
       ( HYPRE_StructMatrixSetSymmetric( (HYPRE_StructMatrix) *matrix,
                                         (int)                *symmetric ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_StructMatrixSetConstantEntries
+ *--------------------------------------------------------------------------*/
+
+void 
+hypre_F90_IFACE(hypre_structmatrixsetconstanten, HYPRE_STRUCTMATRIXSETCONSTANTEN)( long int *matrix,
+                                                int      *nentries,
+                                                int      *entries,
+                                                int      *ierr                )
+{
+   *ierr = (int)
+      ( HYPRE_StructMatrixSetConstantEntries( (HYPRE_StructMatrix) *matrix,
+                                              (int)       *nentries,
+                                              (int *)     entries           ) );
 }
 
 /*--------------------------------------------------------------------------

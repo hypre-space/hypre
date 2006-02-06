@@ -109,7 +109,7 @@ hypre_F90_IFACE(hypre_structvectoraddtovalues, HYPRE_STRUCTVECTORADDTOVALUES)( l
  *--------------------------------------------------------------------------*/
 
 void 
-hypre_F90_IFACE(hypre_structvectoraddtoboxvalues, HYPRE_STRUCTVECTORADDTOBOXVALUES)( long int *vector,
+hypre_F90_IFACE(hypre_structvectoraddtoboxvalue, HYPRE_STRUCTVECTORADDTOBOXVALUE)( long int *vector,
                                                    int      *ilower,
                                                    int      *iupper,
                                                    double   *values,
@@ -120,6 +120,21 @@ hypre_F90_IFACE(hypre_structvectoraddtoboxvalues, HYPRE_STRUCTVECTORADDTOBOXVALU
                                           (int *)              ilower,
                                           (int *)              iupper,
                                           (double *)           values  ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_StructVectorScaleValues
+ *--------------------------------------------------------------------------*/
+
+void 
+hypre_F90_IFACE(hypre_structvectorscalevalues, HYPRE_STRUCTVECTORSCALEVALUES)
+                                             ( long int *vector,
+                                               double   *factor,
+                                               int      *ierr       )
+{
+   *ierr = (int)
+      ( HYPRE_StructVectorScaleValues( (HYPRE_StructVector) *vector,
+                                       (double)             *factor ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -187,7 +202,8 @@ hypre_F90_IFACE(hypre_structvectorsetnumghost, HYPRE_STRUCTVECTORSETNUMGHOST)( l
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_structvectorsetconstantva, HYPRE_STRUCTVECTORSETCONSTANTVA)( long int *vector,
+hypre_F90_IFACE(hypre_structvectorsetconstantva, HYPRE_STRUCTVECTORSETCONSTANTVA)
+                                               ( long int *vector,
                                                   double   *values,
                                                   int      *ierr   )
 {

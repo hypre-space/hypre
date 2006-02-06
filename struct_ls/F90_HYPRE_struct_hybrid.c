@@ -124,6 +124,22 @@ hypre_F90_IFACE(hypre_structhybridsetpcgmaxiter, HYPRE_STRUCTHYBRIDSETPCGMAXITER
                                          (int)                *pcg_max_its ) );
 }
 
+
+/*--------------------------------------------------------------------------
+ * HYPRE_StructHybridSetPCGAbsoluteTolFactor
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_structhybridsetpcgabsolut, HYPRE_STRUCTHYBRIDSETPCGABSOLUT)
+                                                ( long int *solver,
+                                                  double   *pcg_atolf,
+                                                  int      *ierr        )
+{
+   *ierr = (int)
+      ( HYPRE_StructHybridSetPCGAbsoluteTolFactor( (HYPRE_StructSolver) *solver,
+                                                   (double)             *pcg_atolf ) );
+}
+
 /*--------------------------------------------------------------------------
  * HYPRE_StructHybridSetTwoNorm
  *--------------------------------------------------------------------------*/
@@ -139,18 +155,62 @@ hypre_F90_IFACE(hypre_structhybridsettwonorm, HYPRE_STRUCTHYBRIDSETTWONORM)( lon
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_StructHybridSetStopCrit
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_structhybridsetstopcrit, HYPRE_STRUCTHYBRIDSETSTOPCRIT)
+                                             ( long int *solver,
+                                               int      *stop_crit,
+                                               int      *ierr     )
+{
+   *ierr = (int)
+      ( HYPRE_StructHybridSetStopCrit( (HYPRE_StructSolver) *solver,
+                                       (int)                *stop_crit   ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_StructHybridSetRelChange
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_structhybridsetrelchange, HYPRE_STRUCTHYBRIDSETRELCHANGE)( long int *solver,
+hypre_F90_IFACE(hypre_structhybridsetrelchange, HYPRE_STRUCTHYBRIDSETRELCHANGE)
+                                               ( long int *solver,
                                                  int      *rel_change,
                                                  int      *ierr       )
 {
+   *ierr = (int) 
+           ( HYPRE_StructHybridSetRelChange( (HYPRE_StructSolver) *solver,
+                                             (int)                *rel_change  ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_StructHybridSetSolverType
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_structhybridsetsolvertype, HYPRE_STRUCTHYBRIDSETSOLVERTYPE)
+                                             ( long int *solver,
+                                               int      *solver_type,
+                                               int      *ierr     )
+{
    *ierr = (int)
-      ( HYPRE_StructHybridSetRelChange(
-         (HYPRE_StructSolver) *solver,
-         (int)                *rel_change    ) );
+      ( HYPRE_StructHybridSetSolverType( (HYPRE_StructSolver) *solver,
+                                         (int)                *solver_type ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_StructHybridSetKDim
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_structhybridsetkdim, HYPRE_STRUCTHYBRIDSETKDIM)
+                                               ( long int *solver,
+                                                 int      *k_dim,
+                                                 int      *ierr    )
+{
+   *ierr = (int) (HYPRE_StructHybridSetKDim( (HYPRE_StructSolver) *solver,
+                                             (int)                *k_dim ) );
 }
 
 /*--------------------------------------------------------------------------
