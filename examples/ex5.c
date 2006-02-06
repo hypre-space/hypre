@@ -342,7 +342,7 @@ int main (int argc, char *argv[])
       HYPRE_BoomerAMGSetCoarsenType(precond, 6);
       HYPRE_BoomerAMGSetRelaxType(precond, 6); /* Sym G.S./Jacobi hybrid */ 
       HYPRE_BoomerAMGSetNumSweeps(precond, 1);
-      HYPRE_BoomerAMGSetTol(precond, 1e-3); /* conv. tolerance (if needed) */
+      HYPRE_BoomerAMGSetTol(precond, 0.0); /* conv. tolerance zero */
       HYPRE_BoomerAMGSetMaxIter(precond, 1); /* do only one iteration! */
 
       /* Set the PCG preconditioner */
