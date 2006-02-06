@@ -88,7 +88,7 @@ hypre_F90_IFACE(hypre_structpfmggettol, HYPRE_STRUCTPFMGGETTOL)( long int *solve
                                          int      *ierr   )
 {
    *ierr = (int) ( HYPRE_StructPFMGGetTol( (HYPRE_StructSolver) *solver,
-                                           (double)             *tol    ) );
+                                           (double *)            tol    ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -112,7 +112,7 @@ hypre_F90_IFACE(hypre_structpfmggetmaxiter, HYPRE_STRUCTPFMGGETMAXITER)( long in
 {
    *ierr = (int)
       ( HYPRE_StructPFMGGetMaxIter( (HYPRE_StructSolver) *solver,
-                                    (int)                *max_iter  ) );
+                                    (int *)               max_iter  ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -137,7 +137,7 @@ hypre_F90_IFACE(hypre_structpfmggetmaxlevels, HYPRE_STRUCTPFMGGETMAXLEVELS)( lon
 {
    *ierr = (int)
       ( HYPRE_StructPFMGGetMaxLevels( (HYPRE_StructSolver) *solver,
-                                      (int)                *max_levels  ) );
+                                      (int *)               max_levels  ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -161,7 +161,7 @@ hypre_F90_IFACE(hypre_structpfmggetrelchange, HYPRE_STRUCTPFMGGETRELCHANGE)( lon
 {
    *ierr = (int)
       ( HYPRE_StructPFMGGetRelChange( (HYPRE_StructSolver) *solver,
-                                      (int)                *rel_change  ) );
+                                      (int *)               rel_change  ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -183,7 +183,7 @@ hypre_F90_IFACE(hypre_structpfmggetzeroguess, HYPRE_STRUCTPFMGGETZEROGUESS)( lon
 {
    *ierr = (int)
       ( HYPRE_StructPFMGGetZeroGuess( (HYPRE_StructSolver) *solver,
-                                      (int)                *zeroguess ) );
+                                      (int *)               zeroguess ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -219,7 +219,7 @@ hypre_F90_IFACE(hypre_structpfmggetrelaxtype, HYPRE_STRUCTPFMGGETRELAXTYPE)( lon
 {
    *ierr = (int)
       ( HYPRE_StructPFMGGetRelaxType( (HYPRE_StructSolver) *solver,
-                                      (int)                *relax_type ) );
+                                      (int *)               relax_type ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -243,7 +243,7 @@ hypre_F90_IFACE(hypre_structpfmggetraptype, HYPRE_STRUCTPFMGGETRAPTYPE)( long in
 {
    *ierr = (int)
       ( HYPRE_StructPFMGGetRAPType( (HYPRE_StructSolver) *solver,
-                                      (int)              *rap_type ) );
+                                    (int *)               rap_type ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -268,7 +268,7 @@ hypre_F90_IFACE(hypre_structpfmggetnumprerelax, HYPRE_STRUCTPFMGGETNUMPRERELAX)
 {
    *ierr = (int)
       ( HYPRE_StructPFMGGetNumPreRelax( (HYPRE_StructSolver) *solver,
-                                        (int)                *num_pre_relax ) );
+                                        (int *)               num_pre_relax ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -292,7 +292,7 @@ hypre_F90_IFACE(hypre_structpfmggetnumpostrelax, HYPRE_STRUCTPFMGGETNUMPOSTRELAX
 {
    *ierr = (int)
       ( HYPRE_StructPFMGGetNumPostRelax( (HYPRE_StructSolver) *solver,
-                                         (int)                *num_post_relax ) );
+                                         (int *)               num_post_relax ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -316,11 +316,11 @@ hypre_F90_IFACE(hypre_structpfmggetskiprelax, HYPRE_STRUCTPFMGGETSKIPRELAX)( lon
 {
    *ierr = (int)
       ( HYPRE_StructPFMGGetSkipRelax( (HYPRE_StructSolver) *solver,
-                                         (int)                *skip_relax ) );
+                                       (int *)              skip_relax ) );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_StructPFMGSetDxyz, HYPRE_StructPFMGGetDxyz
+ * HYPRE_StructPFMGSetDxyz
  *--------------------------------------------------------------------------*/
 
 void
@@ -329,15 +329,6 @@ hypre_F90_IFACE(hypre_structpfmgsetdxyz, HYPRE_STRUCTPFMGSETDXYZ)( long int *sol
                                           int      *ierr   )
 {
    *ierr = (int) ( HYPRE_StructPFMGSetDxyz( (HYPRE_StructSolver) *solver,
-                                            (double *)           dxyz   ) );
-}
-
-void
-hypre_F90_IFACE(hypre_structpfmggetdxyz, HYPRE_STRUCTPFMGGETDXYZ)( long int *solver,
-                                          double   *dxyz,
-                                          int      *ierr   )
-{
-   *ierr = (int) ( HYPRE_StructPFMGGetDxyz( (HYPRE_StructSolver) *solver,
                                             (double *)           dxyz   ) );
 }
 
@@ -362,7 +353,7 @@ hypre_F90_IFACE(hypre_structpfmggetlogging, HYPRE_STRUCTPFMGGETLOGGING)( long in
 {
    *ierr = (int)
       ( HYPRE_StructPFMGGetLogging( (HYPRE_StructSolver) *solver,
-                                    (int)                *logging ) );
+                                    (int *)               logging ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -386,7 +377,7 @@ hypre_F90_IFACE(hypre_structpfmggetprintlevel, HYPRE_STRUCTPFMGGETPRINTLEVEL)( l
 {
    *ierr = (int)
       ( HYPRE_StructPFMGGetPrintLevel( (HYPRE_StructSolver) *solver,
-                                        (int)             *print_level ) );
+                                        (int *)              print_level ) );
 }
 
 /*--------------------------------------------------------------------------
