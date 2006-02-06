@@ -146,6 +146,9 @@
 /* No global partitioning being used */
 #undef HYPRE_NO_GLOBAL_PARTITION
 
+/* Print HYPRE errors */
+#undef HYPRE_PRINT_ERRORS
+
 /* Enable OpenMP support */
 #undef HYPRE_USING_OPENMP
 

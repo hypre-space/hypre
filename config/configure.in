@@ -199,6 +199,7 @@ casc_using_purify=no
 
 casc_testing_alpha=no
 casc_testing_beta=no
+casc_testing_general=no
 
 
 AC_ARG_WITH(LD,
@@ -560,6 +561,15 @@ AC_ARG_WITH(no-global-partition,
  fi]
 )
 
+AC_ARG_WITH(print-errors,
+  AS_HELP_STRING([  --with-print-errors],
+                 [ Print HYPRE errors.]),
+[if test "$withval" = "yes"
+ then
+   AC_DEFINE(HYPRE_PRINT_ERRORS,1,[Print HYPRE errors.])
+ fi]
+)
+
 AC_ARG_WITH(COMM_SIMPLE,
   AS_HELP_STRING([  --with-COMM_SIMPLE],
                  [ Do not use MPI derived data types.  This option is
@@ -916,6 +926,15 @@ AC_ARG_WITH(test-beta,
 [casc_testing_beta=no]
 )
 
+AC_ARG_WITH(test-general,
+  AS_HELP_STRING([  --with-test-general], [ Test 'public' general version of HYPRE]),
+[case "${withval}" in
+   yes) casc_testing_general=yes ;;
+    no) casc_testing_general=no ;;
+ esac],
+[casc_testing_general=no]
+)
+
 
 dnl *********************************************************************
 dnl * Set link path for test codes.
@@ -945,6 +964,24 @@ then
       tux*) HYPRE_LINKDIR="/usr/casc/hypre/i686-pc-linux-gnu/beta"
             ;;
          *) HYPRE_LINKDIR="/usr/apps/hypre/beta"
+            ;;
+   esac
+   if test "${LAPACKLIBS}" = "-lHYPRE_utilities"
+   then
+      LAPACKLIBS=""
+      LAPACKLIBDIRS=""
+   fi
+   if test "${BLASLIBS}" = "-lHYPRE_utilities"
+   then
+      BLASLIBS=""
+      BLASLIBDIRS=""
+   fi
+elif test "$casc_testing_general" = "yes"
+then
+   case $HOSTNAME in
+      tux*) HYPRE_LINKDIR="/usr/casc/hypre/i686-pc-linux-gnu"
+            ;;
+         *) HYPRE_LINKDIR="/usr/apps/hypre/"
             ;;
    esac
    if test "${LAPACKLIBS}" = "-lHYPRE_utilities"

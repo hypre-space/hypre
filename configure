@@ -977,6 +977,7 @@ Optional Packages:
                           used together.
     --with-no-global-partition
                           Do not use global partitioning.
+    --with-print-errors   Print HYPRE errors.
     --with-COMM_SIMPLE    Do not use MPI derived data types. This option is
                           automatically chosen for IBM, may also be selected
                           for other platforms as well.
@@ -992,6 +993,7 @@ Optional Packages:
     --with-test-alpha     Test alpha version of HYPRE. NOTE: ONLY exists on
                           the CASC cluster.
     --with-test-beta      Test 'public' beta version of HYPRE
+    --with-test-general   Test 'public' general version of HYPRE
 
 Some influential environment variables:
   CC          C compiler command
@@ -1707,6 +1709,7 @@ casc_using_purify=no
 
 casc_testing_alpha=no
 casc_testing_beta=no
+casc_testing_general=no
 
 
 
@@ -2171,6 +2174,21 @@ if test "${with_no_global_partition+set}" = set; then
 
 cat >>confdefs.h <<\_ACEOF
 #define HYPRE_NO_GLOBAL_PARTITION 1
+_ACEOF
+
+ fi
+
+fi;
+
+
+# Check whether --with-print-errors or --without-print-errors was given.
+if test "${with_print_errors+set}" = set; then
+  withval="$with_print_errors"
+  if test "$withval" = "yes"
+ then
+
+cat >>confdefs.h <<\_ACEOF
+#define HYPRE_PRINT_ERRORS 1
 _ACEOF
 
  fi
@@ -5211,7 +5229,7 @@ fi
 
 
 # Provide some information about the compiler.
-echo "$as_me:5214:" \
+echo "$as_me:5232:" \
      "checking for Fortran 77 compiler version" >&5
 ac_compiler=`set X $ac_compile; echo $2`
 { (eval echo "$as_me:$LINENO: \"$ac_compiler --version </dev/null >&5\"") >&5
@@ -5407,7 +5425,7 @@ _ACEOF
 # flags.
 ac_save_FFLAGS=$FFLAGS
 FFLAGS="$FFLAGS $ac_verb"
-(eval echo $as_me:5410: \"$ac_link\") >&5
+(eval echo $as_me:5428: \"$ac_link\") >&5
 ac_f77_v_output=`eval $ac_link 5>&1 2>&1 | grep -v 'Driving:'`
 echo "$ac_f77_v_output" >&5
 FFLAGS=$ac_save_FFLAGS
@@ -5485,7 +5503,7 @@ _ACEOF
 # flags.
 ac_save_FFLAGS=$FFLAGS
 FFLAGS="$FFLAGS $ac_cv_prog_f77_v"
-(eval echo $as_me:5488: \"$ac_link\") >&5
+(eval echo $as_me:5506: \"$ac_link\") >&5
 ac_f77_v_output=`eval $ac_link 5>&1 2>&1 | grep -v 'Driving:'`
 echo "$ac_f77_v_output" >&5
 FFLAGS=$ac_save_FFLAGS
@@ -9500,6 +9518,19 @@ else
 fi;
 
 
+# Check whether --with-test-general or --without-test-general was given.
+if test "${with_test_general+set}" = set; then
+  withval="$with_test_general"
+  case "${withval}" in
+   yes) casc_testing_general=yes ;;
+    no) casc_testing_general=no ;;
+ esac
+else
+  casc_testing_general=no
+
+fi;
+
+
 
 if test "$casc_testing_alpha" = "yes"
 then
@@ -9525,6 +9556,24 @@ then
       tux*) HYPRE_LINKDIR="/usr/casc/hypre/i686-pc-linux-gnu/beta"
             ;;
          *) HYPRE_LINKDIR="/usr/apps/hypre/beta"
+            ;;
+   esac
+   if test "${LAPACKLIBS}" = "-lHYPRE_utilities"
+   then
+      LAPACKLIBS=""
+      LAPACKLIBDIRS=""
+   fi
+   if test "${BLASLIBS}" = "-lHYPRE_utilities"
+   then
+      BLASLIBS=""
+      BLASLIBDIRS=""
+   fi
+elif test "$casc_testing_general" = "yes"
+then
+   case $HOSTNAME in
+      tux*) HYPRE_LINKDIR="/usr/casc/hypre/i686-pc-linux-gnu"
+            ;;
+         *) HYPRE_LINKDIR="/usr/apps/hypre/"
             ;;
    esac
    if test "${LAPACKLIBS}" = "-lHYPRE_utilities"

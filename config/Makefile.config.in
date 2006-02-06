@@ -42,7 +42,7 @@ HYPRE_INC_INSTALL = @HYPRE_INCINSTALL@
 .SUFFIXES: .o .f .c .C .cxx .cc
 
 .f.o:
-	$(F77) $(FFLAGS) -c $< 
+	$(F77) $(FFLAGS) $(FDEFS) -c $< 
 .c.o:
 	$(CC) $(CFLAGS) $(CPPFLAGS) -c $< 
 .C.o:
@@ -55,6 +55,7 @@ HYPRE_INC_INSTALL = @HYPRE_INCINSTALL@
 
 F77       = @F77@
 FFLAGS    = @FFLAGS@ @F77FLAGS@ $(F77_COMPILE_FLAGS)
+FDEFS     = @DEFS@
 
 CC        = @CC@
 CFLAGS    = @CFLAGS@ $(C_COMPILE_FLAGS)
