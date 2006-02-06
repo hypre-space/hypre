@@ -57,6 +57,8 @@ hypre_OutOfMemory( int size )
    printf("Out of memory trying to allocate %d bytes\n", size);
    fflush(stdout);
 
+   hypre_error(HYPRE_ERROR_MEMORY);
+
    return 0;
 }
 

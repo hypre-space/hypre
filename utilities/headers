@@ -56,6 +56,8 @@ cat exchange_data.h            >> $INTERNAL_HEADER
 		          
 ./protos hypre_qsort.c         >> $INTERNAL_HEADER
 		          
+cat hypre_error.h              >> $INTERNAL_HEADER
+		          
 #===========================================================================
 # Include guards
 #===========================================================================

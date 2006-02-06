@@ -56,7 +56,8 @@ UTIL_FILES =\
  timer.c\
  timing.c\
  umalloc_local.c\
- hypre_mpi_comm_f2c.c
+ hypre_mpi_comm_f2c.c\
+ hypre_error.c
 
 FILES = ${UTIL_FILES}
 

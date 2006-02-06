@@ -292,7 +292,11 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
       }
    }
 
-   if (cycle_count == max_iter && tol > 0.) Solve_err_flag = 1;
+   if (cycle_count == max_iter && tol > 0.)
+   {
+      Solve_err_flag = 1;
+      hypre_error(HYPRE_ERROR_CONV);
+   }
 
    /*-----------------------------------------------------------------------
     *    Compute closing statistics

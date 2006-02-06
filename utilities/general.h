@@ -30,12 +30,4 @@
 #define hypre_round(x)  ( ((x) < 0.0) ? ((int)(x - 0.5)) : ((int)(x + 0.5)) )
 #endif
 
-#ifndef hypre_assert
-#ifndef enable_hypre_assert
-#define hypre_assert(x)
-#else
-#define hypre_assert(x) assert(x)
-#endif
-#endif
-
 #endif

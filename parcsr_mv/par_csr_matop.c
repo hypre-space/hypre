@@ -315,6 +315,7 @@ hypre_ParCSRMatrix *hypre_ParMatmul( hypre_ParCSRMatrix  *A,
 
    if (n_cols_A != n_rows_B || num_cols_diag_A != num_rows_diag_B)
    {
+        hypre_error_in_arg(1);
 	printf(" Error! Incompatible matrix dimensions!\n");
 	return NULL;
    }

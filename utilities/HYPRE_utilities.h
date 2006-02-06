@@ -50,8 +50,17 @@ typedef int MPI_Comm;
 #endif
 
 /*--------------------------------------------------------------------------
- * Prototypes
+ * HYPRE error user functions
  *--------------------------------------------------------------------------*/
+
+#include <stdio.h>
+
+/* Return the current hypre error flag */
+int HYPRE_GetError();
+/* Print information about ierr in the given file stream */
+void HYPRE_DescribeError(int ierr, FILE *stream);
+/* Return the index of the argument error if HYPRE_ERROR_ARG was raised */
+int HYPRE_GetErrorArg();
 
 #ifdef __cplusplus
 }
