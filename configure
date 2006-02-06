@@ -1836,7 +1836,7 @@ fi;
 if test "${with_strict_checking+set}" = set; then
   withval="$with_strict_checking"
 
-  for ac_prog in icc pgcc xlc gcc kcc KCC
+  for ac_prog in gcc icc pgcc xlc kcc KCC
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
@@ -1876,7 +1876,7 @@ fi
   test -n "$CC" && break
 done
 
-  for ac_prog in icc pgCC xlC g++ gcc KCC
+  for ac_prog in g++ gcc icc pgCC xlC KCC
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
@@ -1916,7 +1916,7 @@ fi
   test -n "$CXX" && break
 done
 
-  for ac_prog in ifort pgf77 xlf g77
+  for ac_prog in g77 ifort pgf77 xlf
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
@@ -1957,40 +1957,50 @@ fi
 done
 
   if test "x$GCC" = "xyes"; then
+    FFLAGS="-g -Wall"
     CFLAGS="-g -Wall -pedantic"
     CXXFLAGS="-g -Wall -Wshadow -fno-implicit-templates"
     CXXFLAGS="$CXXFLAGS -Woverloaded-virtual -ansi -pedantic"
+    casc_user_chose_fflags=yes
     casc_user_chose_cflags=yes
     casc_user_chose_cxxflags=yes
     casc_using_debug=yes
     casc_using_mpi=no
   elif test "x$CC" = "xicc"; then
+    FFLAGS="-g -Wall"
     CFLAGS="-g -Xc -Wall -x c"
     CXXFLAGS="-g -Xc -Wall -x c++"
+    casc_user_chose_fflags=yes
     casc_user_chose_cflags=yes
     casc_user_chose_cxxflags=yes
     casc_using_debug=yes
     casc_using_mpi=no
   elif test "x$CC" = "xpgcc"; then
+    FFLAGS="-g -Wall"
     CFLAGS="-g -Xa -Minform,inform"
     CXXFLAGS="-g -A --display_error_number -Minform,inform"
+    casc_user_chose_fflags=yes
     casc_user_chose_cflags=yes
     casc_user_chose_cxxflags=yes
     casc_using_debug=yes
     casc_using_mpi=no
   elif test "x$CC" = "xxlc"; then
+    FFLAGS="-g -Wall"
     CFLAGS="-g -qinfo=dcl:eff:pro:rea:ret:use"
     CXXFLAGS="-g  -qinfo=dcl:eff:obs:pro:rea:ret:use"
+    casc_user_chose_fflags=yes
     casc_user_chose_cflags=yes
     casc_user_chose_cxxflags=yes
     casc_using_debug=yes
     casc_using_mpi=no
   elif test "x$CC" = "xKCC" || test "x$CC" = "xkcc"; then
+    FFLAGS="-g -Wall"
     CFLAGS="-g --c --strict --lint --display_error_number"
     CFLAGS="$CFLAGS --diag_suppress 45,236,450,826"
     CFLAGS="$CFLAGS,1018,1021,1022,1023,1024,1030,1041"
     CXXFLAGS="-g --strict --lint --display_error_number"
     CXXFLAGS="$CXXFLAGS --diag_suppress 381,450,1023,1024"
+    casc_user_chose_fflags=yes
     casc_user_chose_cflags=yes
     casc_user_chose_cxxflags=yes
     casc_using_debug=yes
@@ -1998,9 +2008,12 @@ done
   else
     CC=gcc
     CXX=g++
+    F77=g77
+    FFLAGS="-g -Wall"
     CFLAGS="-g -Wall -pedantic"
     CXXFLAGS="-g -Wall -Wshadow -fno-implicit-templates"
     CXXFLAGS="$CXXFLAGS -Woverloaded-virtual -ansi -pedantic"
+    casc_user_chose_fflags=yes
     casc_user_chose_cflags=yes
     casc_user_chose_cxxflags=yes
     casc_user_chose_compilers=yes
@@ -5198,7 +5211,7 @@ fi
 
 
 # Provide some information about the compiler.
-echo "$as_me:5201:" \
+echo "$as_me:5214:" \
      "checking for Fortran 77 compiler version" >&5
 ac_compiler=`set X $ac_compile; echo $2`
 { (eval echo "$as_me:$LINENO: \"$ac_compiler --version </dev/null >&5\"") >&5
@@ -5394,7 +5407,7 @@ _ACEOF
 # flags.
 ac_save_FFLAGS=$FFLAGS
 FFLAGS="$FFLAGS $ac_verb"
-(eval echo $as_me:5397: \"$ac_link\") >&5
+(eval echo $as_me:5410: \"$ac_link\") >&5
 ac_f77_v_output=`eval $ac_link 5>&1 2>&1 | grep -v 'Driving:'`
 echo "$ac_f77_v_output" >&5
 FFLAGS=$ac_save_FFLAGS
@@ -5472,7 +5485,7 @@ _ACEOF
 # flags.
 ac_save_FFLAGS=$FFLAGS
 FFLAGS="$FFLAGS $ac_cv_prog_f77_v"
-(eval echo $as_me:5475: \"$ac_link\") >&5
+(eval echo $as_me:5488: \"$ac_link\") >&5
 ac_f77_v_output=`eval $ac_link 5>&1 2>&1 | grep -v 'Driving:'`
 echo "$ac_f77_v_output" >&5
 FFLAGS=$ac_save_FFLAGS

@@ -332,44 +332,54 @@ AC_ARG_WITH(strict-checking,
                    of warnings can be suppressed using --diag_suppress
                    and the error numbers provided by --display_error_number]),
 [ 
-  AC_CHECK_PROGS(CC, icc pgcc xlc gcc kcc KCC)
-  AC_CHECK_PROGS(CXX, icc pgCC xlC g++ gcc KCC)
-  AC_CHECK_PROGS(F77, ifort pgf77 xlf g77)
+  AC_CHECK_PROGS(CC, gcc icc pgcc xlc kcc KCC)
+  AC_CHECK_PROGS(CXX, g++ gcc icc pgCC xlC KCC)
+  AC_CHECK_PROGS(F77, g77 ifort pgf77 xlf )
   if test "x$GCC" = "xyes"; then
+    FFLAGS="-g -Wall"
     CFLAGS="-g -Wall -pedantic"
     CXXFLAGS="-g -Wall -Wshadow -fno-implicit-templates"
     CXXFLAGS="$CXXFLAGS -Woverloaded-virtual -ansi -pedantic"
+    casc_user_chose_fflags=yes
     casc_user_chose_cflags=yes
     casc_user_chose_cxxflags=yes
     casc_using_debug=yes
     casc_using_mpi=no
   elif test "x$CC" = "xicc"; then
+    FFLAGS="-g -Wall"
     CFLAGS="-g -Xc -Wall -x c"
     CXXFLAGS="-g -Xc -Wall -x c++"
+    casc_user_chose_fflags=yes
     casc_user_chose_cflags=yes
     casc_user_chose_cxxflags=yes
     casc_using_debug=yes
     casc_using_mpi=no
   elif test "x$CC" = "xpgcc"; then
+    FFLAGS="-g -Wall"
     CFLAGS="-g -Xa -Minform,inform"
     CXXFLAGS="-g -A --display_error_number -Minform,inform"
+    casc_user_chose_fflags=yes
     casc_user_chose_cflags=yes
     casc_user_chose_cxxflags=yes
     casc_using_debug=yes
     casc_using_mpi=no
   elif test "x$CC" = "xxlc"; then
+    FFLAGS="-g -Wall"
     CFLAGS="-g -qinfo=dcl:eff:pro:rea:ret:use"
     CXXFLAGS="-g  -qinfo=dcl:eff:obs:pro:rea:ret:use"
+    casc_user_chose_fflags=yes
     casc_user_chose_cflags=yes
     casc_user_chose_cxxflags=yes
     casc_using_debug=yes
     casc_using_mpi=no
   elif test "x$CC" = "xKCC" || test "x$CC" = "xkcc"; then
+    FFLAGS="-g -Wall"
     CFLAGS="-g --c --strict --lint --display_error_number"
     CFLAGS="$CFLAGS --diag_suppress 45,236,450,826"
     CFLAGS="$CFLAGS,1018,1021,1022,1023,1024,1030,1041"
     CXXFLAGS="-g --strict --lint --display_error_number"
     CXXFLAGS="$CXXFLAGS --diag_suppress 381,450,1023,1024"
+    casc_user_chose_fflags=yes
     casc_user_chose_cflags=yes
     casc_user_chose_cxxflags=yes
     casc_using_debug=yes
@@ -377,9 +387,12 @@ AC_ARG_WITH(strict-checking,
   else
     CC=gcc
     CXX=g++
+    F77=g77
+    FFLAGS="-g -Wall"
     CFLAGS="-g -Wall -pedantic"
     CXXFLAGS="-g -Wall -Wshadow -fno-implicit-templates"
     CXXFLAGS="$CXXFLAGS -Woverloaded-virtual -ansi -pedantic"
+    casc_user_chose_fflags=yes
     casc_user_chose_cflags=yes
     casc_user_chose_cxxflags=yes
     casc_user_chose_compilers=yes
