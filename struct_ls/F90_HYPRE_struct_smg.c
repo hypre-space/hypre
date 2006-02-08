@@ -255,7 +255,7 @@ hypre_F90_IFACE(hypre_structsmggetnumpostrelax, HYPRE_STRUCTSMGGETNUMPOSTRELAX)
                                                  int      *ierr           )
 {
    *ierr = (int)
-      ( HYPRE_StructSMGSetNumPostRelax( (HYPRE_StructSolver) *solver,
+      ( HYPRE_StructSMGGetNumPostRelax( (HYPRE_StructSolver) *solver,
                                         (int *)               num_post_relax) );
 }
 

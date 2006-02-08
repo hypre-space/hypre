@@ -201,21 +201,21 @@ hypre_F90_IFACE(hypre_parasailsgetsym, HYPRE_PARASAILSGETSYM)(
 void
 hypre_F90_IFACE(hypre_parasailssetloadbal, HYPRE_PARASAILSSETLOADBAL)(
                                               long int *solver,
-                                              int      *loadbal,
+                                              double   *loadbal,
                                               int      *ierr    )
 {
    *ierr = (int) ( HYPRE_ParaSailsSetLoadbal( (HYPRE_Solver) *solver, 
-                                              (int)          *loadbal ) );
+                                              (double)       *loadbal ) );
 }
 
 void
 hypre_F90_IFACE(hypre_parasailsgetloadbal, HYPRE_PARASAILSGETLOADBAL)(
                                               long int *solver,
-                                              int      *loadbal,
+                                              double   *loadbal,
                                               int      *ierr    )
 {
    *ierr = (int) ( HYPRE_ParaSailsGetLoadbal( (HYPRE_Solver) *solver, 
-                                              (int *)         loadbal ) );
+                                              (double *)      loadbal ) );
 }
 
 /*--------------------------------------------------------------------------

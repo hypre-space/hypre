@@ -134,7 +134,7 @@ hypre_F90_IFACE(hypre_ijmatrixgetrowcounts, HYPRE_IJMATRIXGETROWCOUNTS)
    *ierr = (int) ( HYPRE_IJMatrixGetRowCounts((HYPRE_IJMatrix) *matrix,
                                               (int)            *nrows,
                                               (int *)           rows,
-                                              (int)            *ncols ) );
+                                              (int *)           ncols ) );
 }
 
 /*--------------------------------------------------------------------------

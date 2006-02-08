@@ -261,7 +261,7 @@ hypre_F90_IFACE(hypre_csrmatrixtoparcsrmatrix, HYPRE_CSRMATRIXTOPARCSRMATRIX)
                                              (HYPRE_CSRMatrix) *A_CSR,
                                              (int *)            row_partitioning,
                                              (int *)            col_partitioning,
-                                             (HYPRE_ParCSRMatrix) *matrix ) );
+                                             (HYPRE_ParCSRMatrix *) matrix ) );
 }
 
 /*--------------------------------------------------------------------------
