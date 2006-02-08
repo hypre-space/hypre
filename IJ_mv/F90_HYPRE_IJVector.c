@@ -124,6 +124,21 @@ hypre_F90_IFACE(hypre_ijvectorgetvalues, HYPRE_IJVECTORGETVALUES)(
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_IJVectorSetMaxOffProcElmts
+ *--------------------------------------------------------------------------*/
+
+void 
+hypre_F90_IFACE(hypre_ijvectorsetmaxoffprocelmt, HYPRE_IJVECTORSETMAXOFFPROCELMT)
+                                              ( long int  *vector,
+                                                int       *max_off_proc_elmts,
+                                                int       *ierr    )
+{
+   *ierr = (int) 
+          ( HYPRE_IJVectorSetMaxOffProcElmts( (HYPRE_IJVector) *vector,
+                                              (int)            *max_off_proc_elmts ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_IJVectorSetObjectType
  *--------------------------------------------------------------------------*/
 
@@ -149,6 +164,22 @@ hypre_F90_IFACE(hypre_ijvectorgetobjecttype, HYPRE_IJVECTORGETOBJECTTYPE)(
 {
    *ierr = (int) (HYPRE_IJVectorGetObjectType( (HYPRE_IJVector) *vector,
                                                (int *)           type    ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_IJVectorGetLocalRange
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_ijvectorgetlocalrange, HYPRE_IJVECTORGETLOCALRANGE)
+                                           ( long int *vector,
+                                             int      *jlower,
+                                             int      *jupper,
+                                             int      *ierr    )
+{
+   *ierr = (int) (HYPRE_IJVectorGetLocalRange( (HYPRE_IJVector) *vector,
+                                                    (int *)           jlower,
+                                                    (int *)           jupper  ) );
 }
 
 /*--------------------------------------------------------------------------

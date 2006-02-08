@@ -88,6 +88,19 @@ hypre_F90_IFACE(hypre_parcsrcgnrsettol, HYPRE_PARCSRCGNRSETTOL)( long int *solve
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_ParCSRCGNRSetMinIter
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_parcsrcgnrsetminiter, HYPRE_PARCSRCGNRSETMINITER)( long int *solver,
+                                             int      *min_iter,
+                                             int      *ierr      )
+{
+   *ierr = (int) ( HYPRE_ParCSRCGNRSetMinIter( (HYPRE_Solver) *solver,
+                                               (int)          *min_iter ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_ParCSRCGNRSetMaxIter
  *--------------------------------------------------------------------------*/
 
@@ -98,6 +111,20 @@ hypre_F90_IFACE(hypre_parcsrcgnrsetmaxiter, HYPRE_PARCSRCGNRSETMAXITER)( long in
 {
    *ierr = (int) ( HYPRE_ParCSRCGNRSetMaxIter( (HYPRE_Solver) *solver,
                                                (int)          *max_iter ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_ParCSRCGNRSetStopCrit
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_parcsrcgnrsetstopcrit, HYPRE_PARCSRCGNRSETSTOPCRIT)
+                                           ( long int *solver,
+                                             int      *stop_crit,
+                                             int      *ierr      )
+{
+   *ierr = (int) ( HYPRE_ParCSRCGNRSetStopCrit( (HYPRE_Solver) *solver,
+                                               (int)          *stop_crit ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -194,7 +221,7 @@ hypre_F90_IFACE(hypre_parcsrcgnrgetnumiteration, HYPRE_PARCSRCGNRGETNUMITERATION
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_ParCSRCGNRGetFinalRelativ
+ * HYPRE_ParCSRCGNRGetFinalRelativeResidualNorm
  *--------------------------------------------------------------------------*/
 
 void

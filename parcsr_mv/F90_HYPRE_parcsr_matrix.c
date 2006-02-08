@@ -136,6 +136,44 @@ hypre_F90_IFACE(hypre_parcsrmatrixgetdims, HYPRE_PARCSRMATRIXGETDIMS)( long int 
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_ParCSRMatrixGetRowPartitioning
+ *--------------------------------------------------------------------------*/
+ 
+void
+hypre_F90_IFACE(hypre_parcsrmatrixgetrowpartiti, HYPRE_PARCSRMATRIXGETROWPARTITI)
+                                         ( long int *matrix,
+                                           long int *row_partitioning_ptr,
+                                           int      *ierr )
+{
+   int    *row_partitioning;
+
+   *ierr = (int) 
+         ( HYPRE_ParCSRMatrixGetRowPartitioning( (HYPRE_ParCSRMatrix) *matrix,
+                                                 (int **)    &row_partitioning  ) );
+
+   *row_partitioning_ptr = (long int) row_partitioning;
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_ParCSRMatrixGetColPartitioning
+ *--------------------------------------------------------------------------*/
+ 
+void
+hypre_F90_IFACE(hypre_parcsrmatrixgetcolpartiti, HYPRE_PARCSRMATRIXGETCOLPARTITI)
+                                         ( long int *matrix,
+                                           long int *col_partitioning_ptr,
+                                           int      *ierr )
+{
+   int    *col_partitioning;
+
+   *ierr = (int) 
+         ( HYPRE_ParCSRMatrixGetRowPartitioning( (HYPRE_ParCSRMatrix) *matrix,
+                                                 (int **)    &col_partitioning  ) );
+
+   *col_partitioning_ptr = (long int) col_partitioning;
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_ParCSRMatrixGetLocalRange
  *--------------------------------------------------------------------------*/
 
@@ -206,6 +244,27 @@ hypre_F90_IFACE(hypre_parcsrmatrixrestorerow, HYPRE_PARCSRMATRIXRESTOREROW)( lon
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_CSRMatrixToParCSRMatrix
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_csrmatrixtoparcsrmatrix, HYPRE_CSRMATRIXTOPARCSRMATRIX)
+                                          (int      *comm,
+                                           long int *A_CSR,
+                                           int      *row_partitioning,  
+                                           int      *col_partitioning,  
+                                           long int *matrix,
+                                           int      *ierr   )
+{
+
+   *ierr = (int) ( HYPRE_CSRMatrixToParCSRMatrix( (MPI_Comm)  *comm,
+                                             (HYPRE_CSRMatrix) *A_CSR,
+                                             (int *)            row_partitioning,
+                                             (int *)            col_partitioning,
+                                             (HYPRE_ParCSRMatrix) *matrix ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_ParCSRMatrixMatvec
  *--------------------------------------------------------------------------*/
 
@@ -244,4 +303,3 @@ hypre_F90_IFACE(hypre_parcsrmatrixmatvect, HYPRE_PARCSRMATRIXMATVECT)( double   
                                               (double)             *beta,
                                               (HYPRE_ParVector)    *y      ) );
 }
-

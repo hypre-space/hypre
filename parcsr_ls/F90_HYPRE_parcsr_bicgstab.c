@@ -114,6 +114,20 @@ hypre_F90_IFACE(hypre_parcsrbicgstabsetmaxiter, HYPRE_PARCSRBICGSTABSETMAXITER)(
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_ParCSRBiCGSTABSeStopCritt
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_parcsrbicgstabsetstopcrit, HYPRE_PARCSRBICGSTABSETSTOP)
+                                            ( long int *solver,
+                                              int      *stop_crit,
+                                              int      *ierr      )
+{
+   *ierr = (int) ( HYPRE_ParCSRBiCGSTABSetStopCrit( (HYPRE_Solver) *solver,
+                                                    (int)          *stop_crit ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_ParCSRBiCGSTABSetPrecond
  *--------------------------------------------------------------------------*/
 
@@ -203,6 +217,20 @@ hypre_F90_IFACE(hypre_parcsrbicgstabsetlogging, HYPRE_PARCSRBICGSTABSETLOGGING)(
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_ParCSRBiCGSTABSetPrintLevel
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_parcsrbicgstabsetprintlev, HYPRE_PARCSRBICGSTABSETPRINTLEV)
+                                            ( long int *solver,
+                                              int      *print_level,
+                                              int      *ierr     )
+{
+   *ierr = (int) ( HYPRE_ParCSRBiCGSTABSetPrintLevel( (HYPRE_Solver) *solver,
+                                                      (int)          *print_level ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_ParCSRBiCGSTABGetNumIter
  *--------------------------------------------------------------------------*/
 
@@ -217,7 +245,7 @@ hypre_F90_IFACE(hypre_parcsrbicgstabgetnumiter, HYPRE_PARCSRBICGSTABGETNUMITER)(
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_ParCSRBiCGSTABGetFinalRel
+ * HYPRE_ParCSRBiCGSTABGetFinalRelativeResidualNorm
  *--------------------------------------------------------------------------*/
 
 void

@@ -20,14 +20,14 @@
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_ijmatrixcreate, HYPRE_IJMATRIXCREATE)(
-                                                     long int *comm,
-                                                     int      *ilower,
-                                                     int      *iupper,
-                                                     int      *jlower,
-                                                     int      *jupper,
-                                                     long int *matrix,
-                                                     int      *ierr    )
+hypre_F90_IFACE(hypre_ijmatrixcreate, HYPRE_IJMATRIXCREATE)
+                                    ( long int *comm,
+                                      int      *ilower,
+                                      int      *iupper,
+                                      int      *jlower,
+                                      int      *jupper,
+                                      long int *matrix,
+                                      int      *ierr    )
 {
    *ierr = (int) ( HYPRE_IJMatrixCreate( (MPI_Comm)         *comm,
                                          (int)              *ilower,
@@ -42,9 +42,9 @@ hypre_F90_IFACE(hypre_ijmatrixcreate, HYPRE_IJMATRIXCREATE)(
  *--------------------------------------------------------------------------*/
 
 void 
-hypre_F90_IFACE(hypre_ijmatrixdestroy, HYPRE_IJMATRIXDESTROY)(
-                                                     long int *matrix,
-                                                     int      *ierr    )
+hypre_F90_IFACE(hypre_ijmatrixdestroy, HYPRE_IJMATRIXDESTROY)
+                                     ( long int *matrix,
+                                       int      *ierr    )
 {
    *ierr = (int) ( HYPRE_IJMatrixDestroy( (HYPRE_IJMatrix) *matrix ) );
 }
@@ -54,54 +54,11 @@ hypre_F90_IFACE(hypre_ijmatrixdestroy, HYPRE_IJMATRIXDESTROY)(
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_ijmatrixinitialize, HYPRE_IJMATRIXINITIALIZE)(
-                                                     long int *matrix,
-                                                     int      *ierr    )
+hypre_F90_IFACE(hypre_ijmatrixinitialize, HYPRE_IJMATRIXINITIALIZE)
+                                        ( long int *matrix,
+                                          int      *ierr    )
 {
    *ierr = (int) ( HYPRE_IJMatrixInitialize( (HYPRE_IJMatrix) *matrix ) );
-}
-
-/*--------------------------------------------------------------------------
- * HYPRE_IJMatrixAssemble
- *--------------------------------------------------------------------------*/
-
-void 
-hypre_F90_IFACE(hypre_ijmatrixassemble, HYPRE_IJMATRIXASSEMBLE)(
-                                                     long int *matrix,
-                                                     int      *ierr    )
-{
-   *ierr = (int) ( HYPRE_IJMatrixAssemble( (HYPRE_IJMatrix) *matrix ) );
-}
-
-/*--------------------------------------------------------------------------
- * HYPRE_IJMatrixSetRowSizes
- *--------------------------------------------------------------------------*/
- 
-void
-hypre_F90_IFACE(hypre_ijmatrixsetrowsizes, HYPRE_IJMATRIXSETROWSIZES)(
-                                                     long int  *matrix,
-                                                     const int *sizes,
-                                                     int       *ierr    )
-{
-   *ierr = (int) ( HYPRE_IJMatrixSetRowSizes( (HYPRE_IJMatrix) *matrix,
-                                              (const int *)     sizes   ) );
-
-}
-
-/*--------------------------------------------------------------------------
- * HYPRE_IJMatrixSetDiagOffdSizes
- *--------------------------------------------------------------------------*/
- 
-void
-hypre_F90_IFACE(hypre_ijmatrixsetdiagoffdsizes, HYPRE_IJMATRIXSETDIAGOFFDSIZES)(
-                                                     long int  *matrix,
-                                                     const int *diag_sizes,
-                                                     const int *offd_sizes,
-                                                     int       *ierr        )
-{
-   *ierr = (int) ( HYPRE_IJMatrixSetDiagOffdSizes( (HYPRE_IJMatrix) *matrix,
-                                                   (const int *)     diag_sizes,
-                                                   (const int *)     offd_sizes ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -151,6 +108,59 @@ hypre_F90_IFACE(hypre_ijmatrixaddtovalues, HYPRE_IJMATRIXADDTOVALUES)(
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_IJMatrixAssemble
+ *--------------------------------------------------------------------------*/
+
+void 
+hypre_F90_IFACE(hypre_ijmatrixassemble, HYPRE_IJMATRIXASSEMBLE)
+                                      ( long int *matrix,
+                                        int      *ierr    )
+{
+   *ierr = (int) ( HYPRE_IJMatrixAssemble( (HYPRE_IJMatrix) *matrix ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_IJMatrixGetRowCounts
+ *--------------------------------------------------------------------------*/
+ 
+void
+hypre_F90_IFACE(hypre_ijmatrixgetrowcounts, HYPRE_IJMATRIXGETROWCOUNTS)
+                                          ( long int  *matrix,
+                                            int       *nrows,
+                                            int       *rows,
+                                            int       *ncols,
+                                            int       *ierr    )
+{
+   *ierr = (int) ( HYPRE_IJMatrixGetRowCounts((HYPRE_IJMatrix) *matrix,
+                                              (int)            *nrows,
+                                              (int *)           rows,
+                                              (int)            *ncols ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_IJMatrixGetValues
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_ijmatrixgetvalues, HYPRE_IJMATRIXGETVALUES)
+                                       ( long int     *matrix,
+                                         int          *nrows,
+                                         int          *ncols,
+                                         int    *rows,
+                                         int    *cols,
+                                         double *values,
+                                         int          *ierr    )
+{
+   *ierr = (int) ( HYPRE_IJMatrixGetValues( (HYPRE_IJMatrix) *matrix,
+                                            (int)            *nrows,
+                                            (int *)           ncols,
+                                            (int *)           rows,
+                                            (int *)           cols,
+                                            (double *)        values  ) );
+
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_IJMatrixSetObjectType
  *--------------------------------------------------------------------------*/
 
@@ -179,6 +189,26 @@ hypre_F90_IFACE(hypre_ijmatrixgetobjecttype, HYPRE_IJMATRIXGETOBJECTTYPE)(
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_IJMatrixGetLocalRange
+ *--------------------------------------------------------------------------*/
+
+void 
+hypre_F90_IFACE(hypre_ijmatrixgetlocalrange, HYPRE_IJMATRIXGETLOCALRANGE)
+                                           ( long int *matrix,
+                                             int      *ilower,
+                                             int      *iupper,
+                                             int      *jlower,
+                                             int      *jupper,
+                                             int      *ierr    )
+{
+   *ierr = (int) ( HYPRE_IJMatrixGetLocalRange( (HYPRE_IJMatrix) *matrix,
+                                                (int *)           ilower,
+                                                (int *)           iupper,
+                                                (int *)           jlower,
+                                                (int *)           jupper ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_IJMatrixGetObject
  *--------------------------------------------------------------------------*/
 
@@ -190,6 +220,52 @@ hypre_F90_IFACE(hypre_ijmatrixgetobject, HYPRE_IJMATRIXGETOBJECT)(
 {
    *ierr = (int) ( HYPRE_IJMatrixGetObject( (HYPRE_IJMatrix) *matrix,
                                             (void **)         object  ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_IJMatrixSetRowSizes
+ *--------------------------------------------------------------------------*/
+ 
+void
+hypre_F90_IFACE(hypre_ijmatrixsetrowsizes, HYPRE_IJMATRIXSETROWSIZES)
+                                         ( long int  *matrix,
+                                           const int *sizes,
+                                           int       *ierr    )
+{
+   *ierr = (int) ( HYPRE_IJMatrixSetRowSizes( (HYPRE_IJMatrix) *matrix,
+                                              (const int *)     sizes   ) );
+
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_IJMatrixSetDiagOffdSizes
+ *--------------------------------------------------------------------------*/
+ 
+void
+hypre_F90_IFACE(hypre_ijmatrixsetdiagoffdsizes, HYPRE_IJMATRIXSETDIAGOFFDSIZES)
+                                              ( long int  *matrix,
+                                                const int *diag_sizes,
+                                                const int *offd_sizes,
+                                                int       *ierr        )
+{
+   *ierr = (int) ( HYPRE_IJMatrixSetDiagOffdSizes( (HYPRE_IJMatrix) *matrix,
+                                                   (const int *)     diag_sizes,
+                                                   (const int *)     offd_sizes ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_IJMatrixSetMaxOffProcElmts
+ *--------------------------------------------------------------------------*/
+ 
+void
+hypre_F90_IFACE(hypre_ijmatrixsetmaxoffprocelmt, HYPRE_IJMATRIXSETMAXOFFPROCELMT)
+                                              ( long int  *matrix,
+                                                int       *max_off_proc_elmts,
+                                                int       *ierr        )
+{
+   *ierr = (int) 
+         ( HYPRE_IJMatrixSetMaxOffProcElmts( (HYPRE_IJMatrix) *matrix,
+                                             (int)            *max_off_proc_elmts ) );
 }
 
 /*--------------------------------------------------------------------------

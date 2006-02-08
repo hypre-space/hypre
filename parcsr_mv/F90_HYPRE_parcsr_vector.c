@@ -35,6 +35,28 @@ hypre_F90_IFACE(hypre_parvectorcreate, HYPRE_PARVECTORCREATE)( int      *comm,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_ParMultiVectorCreate
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_parmultivectorcreate, HYPRE_PARMULTIVECTORCREATE)
+                                   ( int      *comm,
+                                     int      *global_size,
+                                     long int *partitioning,
+                                     int      *number_vectors,
+                                     long int *vector,
+                                     int      *ierr          )
+{
+   *ierr = (long int)
+             ( HYPRE_ParMultiVectorCreate( (MPI_Comm) *comm,
+                                      (int)      *global_size,
+                                      (int *)    *partitioning,
+                                      (int)      *number_vectors,
+                                      (HYPRE_ParVector *)  vector ) );
+
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_ParVectorDestroy
  *--------------------------------------------------------------------------*/
 
@@ -95,4 +117,122 @@ hypre_F90_IFACE(hypre_parvectorprint, HYPRE_PARVECTORPRINT)( long int *vector,
 
    hypre_TFree(c_file_name);
 
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_ParVectorSetConstantValues
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_parvectorsetconstantvalue, HYPRE_PARVECTORSETCONSTANTVALUE)
+                                          ( long int *vector,
+                                            double   *value,
+                                            int      *ierr    )
+{
+   *ierr = (int) ( HYPRE_ParVectorSetConstantValues( (HYPRE_ParVector) *vector,
+                                                     (double)          *value) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_ParVectorSetRandomValues
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_parvectorsetrandomvalues, HYPRE_PARVECTORSETRANDOMVALUES)
+                                          ( long int *vector,
+                                            int      *seed,
+                                            int      *ierr    )
+{
+   *ierr = (int) ( HYPRE_ParVectorSetRandomValues( (HYPRE_ParVector) *vector,
+                                                   (int)             *seed) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_ParVectorCopy
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_parvectorcopy, HYPRE_PARVECTORCOPY)
+                                          ( long int *x,
+                                            long int *y,
+                                            int      *ierr    )
+{
+   *ierr = (int) ( HYPRE_ParVectorCopy( (HYPRE_ParVector) *x,
+                                        (HYPRE_ParVector) *y) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_ParVectorCloneShallow
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_parvectorcloneshallow, HYPRE_PARVECTORCLONESHALLOW)
+                                          ( long int *x,
+                                            int      *ierr    )
+{
+   *ierr = (long int) ( HYPRE_ParVectorCloneShallow( (HYPRE_ParVector) *x ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_ParVectorScale
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_parvectorscale, HYPRE_PARVECTORSCALE)
+                                          ( double   *value,
+                                            long int *x,
+                                            int      *ierr    )
+{
+   *ierr = (int) ( HYPRE_ParVectorScale( (double)          *value,
+                                         (HYPRE_ParVector) *x ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_ParVectorAxpy
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_parvectoraxpy, HYPRE_PARVECTORAXPY)
+                                          ( double   *value,
+                                            long int *x,
+                                            long int *y,
+                                            int      *ierr    )
+{
+   *ierr = (int) ( HYPRE_ParVectorAxpy( (double)          *value,
+                                        (HYPRE_ParVector) *x,
+                                        (HYPRE_ParVector) *y ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_ParVectorInnerProd
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_parvectorinnerprod, HYPRE_PARVECTORINNERPROD)
+                                           (long int *x,
+                                            long int *y,
+                                            double   *prod,
+                                            int      *ierr    )
+{
+   *ierr = (int) ( HYPRE_ParVectorInnerProd( (HYPRE_ParVector) *x,
+                                             (HYPRE_ParVector) *y,
+                                             (double *)         prod ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_VectorToParVector
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_vectortoparvector, HYPRE_VECTORTOPARVECTOR)
+                                           (int      *comm,
+                                            long int *b,
+                                            int      *partitioning,
+                                            long int *vector,
+                                            int      *ierr    )
+{
+   *ierr = (int) ( HYPRE_VectorToParVector( (MPI_Comm)          comm,
+                                            (HYPRE_Vector)     *b,
+                                            (int *)             partitioning,
+                                            (HYPRE_ParVector *) vector ) );
 }

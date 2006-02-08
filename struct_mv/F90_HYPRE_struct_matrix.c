@@ -284,3 +284,23 @@ hypre_F90_IFACE(hypre_structmatrixprint, HYPRE_STRUCTMATRIXPRINT)(
                                 (HYPRE_StructMatrix) *matrix,
                                 (int)                *all) );
 }
+
+/*--------------------------------------------------------------------------
+ * HYPRE_StructMatrixMatvec
+ *--------------------------------------------------------------------------*/
+
+void 
+hypre_F90_IFACE(hypre_structmatrixmatvec, HYPRE_STRUCTMATRIXMATVEC)
+                                              ( double   *alpha,
+                                                long int *A,
+                                                long int *x,
+                                                double   *beta,
+                                                long int *y,
+                                                int      *ierr    )
+{
+   *ierr = (int) ( HYPRE_StructMatrixMatvec( (double)             *alpha,
+                                             (HYPRE_StructMatrix) *A,
+                                             (HYPRE_StructVector) *x,
+                                             (double)             *beta,
+                                             (HYPRE_StructVector) *y  ) );
+}

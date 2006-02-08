@@ -82,6 +82,28 @@ hypre_F90_IFACE(hypre_sstructgridsetvariables, HYPRE_SSTRUCTGRIDSETVARIABLES)
 }
 
 /*--------------------------------------------------------------------------
+ *  HYPRE_SStructGridSetVariable
+ *     Like HYPRE_SStructGridSetVariables; except only one variable is done
+ *     at a time; nvars is needed for memory allocation.
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_sstructgridsetvariable, HYPRE_SSTRUCTGRIDSETVARIABLE)
+                                                          (long int   *grid,
+                                                           int        *part,
+                                                           int        *var,
+                                                           int        *nvars,
+                                                           long int   *vartype,
+                                                           int        *ierr)
+{
+   *ierr = (int) (HYPRE_SStructGridSetVariable( (HYPRE_SStructGrid)      *grid,
+                                                (int)                    *part,
+                                                (int)                    *var,
+                                                (int)                    *nvars,
+                                                (HYPRE_SStructVariable)  *vartype ) );
+}
+
+/*--------------------------------------------------------------------------
  *  HYPRE_SStructGridAddVariables
  *--------------------------------------------------------------------------*/
 
@@ -99,6 +121,28 @@ hypre_F90_IFACE(hypre_sstructgridaddvariables, HYPRE_SSTRUCTGRIDADDVARIABLES)
                                                  (int *)                   index,
                                                  (int)                    *nvars,
                                                  (HYPRE_SStructVariable *) vartypes ));
+}
+
+/*--------------------------------------------------------------------------
+ *  HYPRE_SStructGridAddVariable
+ *     Like HYPRE_SStructGridAddVariables; except only one variable is done
+ *     at a time.
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_sstructgridaddvariable, HYPRE_SSTRUCTGRIDADDVARIABLE)
+                                                          (long int   *grid,
+                                                           int        *part,
+                                                           int        *index,
+                                                           int        *var,
+                                                           long int   *vartype,
+                                                           int        *ierr)
+{
+   *ierr = (int) (HYPRE_SStructGridAddVariable( (HYPRE_SStructGrid)      *grid,
+                                                (int)                    *part,
+                                                (int *)                   index,
+                                                (int)                    *var,
+                                                (HYPRE_SStructVariable)  *vartype ));
 }
 
 /*--------------------------------------------------------------------------

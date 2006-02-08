@@ -280,6 +280,20 @@ hypre_F90_IFACE(hypre_sstructmatrixgetobject, HYPRE_SSTRUCTMATRIXGETOBJECT)
 }
 
 /*--------------------------------------------------------------------------
+ *  HYPRE_SStructMatrixGetObject2
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_sstructmatrixgetobject2, HYPRE_SSTRUCTMATRIXGETOBJECT2)
+                                                        (long int   *matrix,
+                                                         long int   *object,
+                                                         int        *ierr)
+{
+   *ierr = (int) (HYPRE_SStructMatrixGetObject2( (HYPRE_SStructMatrix) *matrix,
+                                                (void *)              *object )) ;
+}
+
+/*--------------------------------------------------------------------------
  *  HYPRE_SStructMatrixPrint
  *--------------------------------------------------------------------------*/
 
@@ -293,4 +307,24 @@ hypre_F90_IFACE(hypre_sstructmatrixprint, HYPRE_SSTRUCTMATRIXPRINT)
    *ierr = (int) (HYPRE_SStructMatrixPrint( (const char *)           filename,
                                             (HYPRE_SStructMatrix)   *matrix,
                                             (int)                   *all ) );
+}
+
+/*--------------------------------------------------------------------------
+ *  HYPRE_SStructMatrixMatvec
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_sstructmatrixmatvec, HYPRE_SSTRUCTMATRIXMATVEC)
+                                                        (double     *alpha,
+                                                         long int   *A,
+                                                         long int   *x,
+                                                         double     *beta,
+                                                         long int   *y,
+                                                         int        *ierr)
+{
+   *ierr = (int) (HYPRE_SStructMatrixMatvec( (double)              *alpha,
+                                             (HYPRE_SStructMatrix) *A,
+                                             (HYPRE_SStructVector) *x,
+                                             (double)              *beta,
+                                             (HYPRE_SStructVector) *y )) ;
 }

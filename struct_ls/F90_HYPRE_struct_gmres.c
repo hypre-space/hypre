@@ -181,7 +181,7 @@ hypre_F90_IFACE(hypre_structgmressetlogging, HYPRE_STRUCTGMRESSETLOGGING)( long 
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_StructGMRESSetLogging
+ * HYPRE_StructGMRESSetPrintLevel
  *--------------------------------------------------------------------------*/
 
 void

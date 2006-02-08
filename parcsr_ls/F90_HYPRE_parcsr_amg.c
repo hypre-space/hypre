@@ -249,7 +249,7 @@ hypre_F90_IFACE(hypre_boomeramgsetminiter, HYPRE_BOOMERAMGSETMINITER)( long int 
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_BoomerAMGSetMaxIter
+ * HYPRE_BoomerAMGSetMaxIter, HYPRE_BoomerAMGGetMaxIter
  *--------------------------------------------------------------------------*/
 
 void
@@ -272,7 +272,7 @@ hypre_F90_IFACE(hypre_boomeramggetmaxiter, HYPRE_BOOMERAMGGETMAXITER)( long int 
 
 
 /*--------------------------------------------------------------------------
- * HYPRE_BoomerAMGSetCoarsenType
+ * HYPRE_BoomerAMGSetCoarsenType, HYPRE_BoomerAMGGetCoarsenType
  *--------------------------------------------------------------------------*/
 
 void
@@ -294,7 +294,7 @@ hypre_F90_IFACE(hypre_boomeramggetcoarsentype, HYPRE_BOOMERAMGGETCOARSENTYPE)( l
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_BoomerAMGSetMeasureType
+ * HYPRE_BoomerAMGSetMeasureType, HYPRE_BoomerAMGGetMeasureType
  *--------------------------------------------------------------------------*/
 
 void
@@ -330,7 +330,7 @@ hypre_F90_IFACE(hypre_boomeramgsetsetuptype, HYPRE_BOOMERAMGSETSETUPTYPE)( long 
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_BoomerAMGSetCycleType
+ * HYPRE_BoomerAMGSetCycleType, HYPRE_BoomerAMGGetCycleType
  *--------------------------------------------------------------------------*/
 
 void
@@ -353,7 +353,7 @@ hypre_F90_IFACE(hypre_boomeramggetcycletype, HYPRE_BOOMERAMGGETCYCLETYPE)( long 
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_BoomerAMGSetTol
+ * HYPRE_BoomerAMGSetTol, HYPRE_BoomerAMGGetTol
  *--------------------------------------------------------------------------*/
 
 void
@@ -407,7 +407,7 @@ hypre_F90_IFACE(hypre_boomeramgsetnumsweeps, HYPRE_BOOMERAMGSETNUMSWEEPS)( long 
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_BoomerAMGSetCycleNumSweeps
+ * HYPRE_BoomerAMGSetCycleNumSweeps, HYPRE_BoomerAMGGetCycleNumSweeps
  *--------------------------------------------------------------------------*/
 
 void
@@ -514,7 +514,7 @@ hypre_F90_IFACE(hypre_boomeramgsetrelaxtype, HYPRE_BOOMERAMGSETRELAXTYPE)( long 
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_BoomerAMGSetCycleRelaxType
+ * HYPRE_BoomerAMGSetCycleRelaxType, HYPRE_BoomerAMGGetCycleRelaxType
  *--------------------------------------------------------------------------*/
 
 void
@@ -758,7 +758,7 @@ hypre_F90_IFACE(hypre_boomeramggetlogging, HYPRE_BOOMERAMGGETLOGGING)( long int 
 
 
 /*--------------------------------------------------------------------------
- * HYPRE_BoomerAMGSetPrintLevel
+ * HYPRE_BoomerAMGSetPrintLevel, HYPRE_BoomerAMGGetPrintLevel
  *--------------------------------------------------------------------------*/
 
 void
@@ -768,6 +768,16 @@ hypre_F90_IFACE(hypre_boomeramgsetprintlevel, HYPRE_BOOMERAMGSETPRINTLEVEL)( lon
 {
    *ierr = (int) ( HYPRE_BoomerAMGSetPrintLevel( (HYPRE_Solver) *solver,
                                            (int)          *print_level ) );
+}
+
+void
+hypre_F90_IFACE(hypre_boomeramggetprintlevel, HYPRE_BOOMERAMGGETPRINTLEVEL)
+                                       ( long int *solver,
+                                         int      *print_level,
+                                         int      *ierr     )
+{
+   *ierr = (int) ( HYPRE_BoomerAMGGetPrintLevel( (HYPRE_Solver) *solver,
+                                           (int *)               print_level ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -784,16 +794,27 @@ hypre_F90_IFACE(hypre_boomeramgsetprintfilename, HYPRE_BOOMERAMGSETPRINTFILENAME
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_BoomerAMGSetDebugFlag
+ * HYPRE_BoomerAMGSetDebugFlag, HYPRE_BoomerAMGGetDebugFlag
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_boomeramgsetdebugflag, HYPRE_BOOMERAMGSETDEBUGFLAG)( long int *solver,
+hypre_F90_IFACE(hypre_boomeramgsetdebugflag, HYPRE_BOOMERAMGSETDEBUGFLAG)
+                                         ( long int *solver,
                                            int      *debug_flag,
                                            int      *ierr     )
 {
    *ierr = (int) ( HYPRE_BoomerAMGSetDebugFlag( (HYPRE_Solver) *solver,
                                              (int)          *debug_flag ) );
+}
+
+void
+hypre_F90_IFACE(hypre_boomeramggetdebugflag, HYPRE_BOOMERAMGGETDEBUGFLAG)
+                                         ( long int *solver,
+                                           int      *debug_flag,
+                                           int      *ierr     )
+{
+   *ierr = (int) ( HYPRE_BoomerAMGGetDebugFlag( (HYPRE_Solver) *solver,
+                                                (int *)         debug_flag ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -843,7 +864,7 @@ hypre_F90_IFACE(hypre_boomeramggetresidual, HYPRE_BOOMERAMGGETRESIDUAL)( long in
 
 
 /*--------------------------------------------------------------------------
- * HYPRE_ParAMGGetFinalRelativeResNorm
+ * HYPRE_BoomerAMGGetFinalRelativeResNorm
  *--------------------------------------------------------------------------*/
 
 void

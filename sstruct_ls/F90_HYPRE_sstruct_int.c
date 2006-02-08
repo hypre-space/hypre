@@ -56,7 +56,7 @@ hypre_F90_IFACE(hypre_sstructsetrandomvalues, HYPRE_SSTRUCTSETRANDOMVALUES)
 }
 
 /*--------------------------------------------------------------------------
- *  HYPRE_SStructVectorSetRandomValues
+ *  HYPRE_SStructVectorSetupInterpreter
  *--------------------------------------------------------------------------*/
 
 void

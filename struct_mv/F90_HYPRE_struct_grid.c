@@ -78,3 +78,17 @@ hypre_F90_IFACE(hypre_structgridassemble, HYPRE_STRUCTGRIDASSEMBLE)( long int *g
 {
    *ierr = (int) ( HYPRE_StructGridAssemble( (HYPRE_StructGrid) *grid) );
 }
+
+/*--------------------------------------------------------------------------
+ * HYPRE_StructGridSetNumGhost
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_structgridsetnumghost, HYPRE_STRUCTGRIDSETNUMGHOST)
+                                         ( long int *grid,
+                                           int      *num_ghost,
+                                           int      *ierr )
+{
+   *ierr = (int) ( HYPRE_StructGridSetNumGhost( (HYPRE_StructGrid) *grid,
+                                                (int *)            num_ghost) );
+}

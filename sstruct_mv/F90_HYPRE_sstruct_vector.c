@@ -207,6 +207,20 @@ hypre_F90_IFACE(hypre_sstructvectorgetboxvalues, HYPRE_SSTRUCTVECTORGETBOXVALUES
 }
 
 /*--------------------------------------------------------------------------
+ *  HYPRE_SStructVectorSetConstantValues
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_sstructvectorsetconstantv, HYPRE_SSTRUCTVECTORSETCONSTANTV)
+                                                              (long int *vector,
+                                                               double   *value,
+                                                               int      *ierr)
+{
+   *ierr = (int) (HYPRE_SStructVectorSetConstantValues( (HYPRE_SStructVector) *vector,
+                                                        (double)              *value));
+}
+
+/*--------------------------------------------------------------------------
  *  HYPRE_SStructVectorSetObjectType
  *--------------------------------------------------------------------------*/
 
@@ -248,4 +262,64 @@ hypre_F90_IFACE(hypre_sstructvectorprint, HYPRE_SSTRUCTVECTORPRINT)
    *ierr = (int) (HYPRE_SStructVectorPrint( (const char * )        filename,
                                             (HYPRE_SStructVector) *vector,
                                             (int)                 *all ) );
+}
+
+/*--------------------------------------------------------------------------
+ *  HYPRE_SStructVectorCopy
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_sstructvectorcopy, HYPRE_SSTRUCTVECTORCOPY)
+                                                         (long int   *x,
+                                                          long int   *y,
+                                                          int        *ierr)
+{
+   *ierr = (int) (HYPRE_SStructVectorCopy( (HYPRE_SStructVector) *x,
+                                           (HYPRE_SStructVector) *y ) );
+}
+
+/*--------------------------------------------------------------------------
+ *  HYPRE_SStructVectorScale
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_sstructvectorscale, HYPRE_SSTRUCTVECTORSCALE)
+                                                         (double   *alpha,
+                                                          long int *y,
+                                                          int      *ierr)
+{
+   *ierr = (int) (HYPRE_SStructVectorScale( (double)              *alpha,
+                                            (HYPRE_SStructVector) *y ) );
+}
+
+/*--------------------------------------------------------------------------
+ *  HYPRE_SStructInnerProd
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_sstructinnerprod, HYPRE_SSTRUCTINNERPROD)
+                                                         (long int   *x,
+                                                          long int   *y,
+                                                          double     *result,
+                                                          int        *ierr)
+{
+   *ierr = (int) (HYPRE_SStructInnerProd( (HYPRE_SStructVector) *x,
+                                          (HYPRE_SStructVector) *y,
+                                          (double *)             result ) );
+}
+
+/*--------------------------------------------------------------------------
+ *  HYPRE_SStructAxpy
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_sstructaxpy, HYPRE_SSTRUCTAXPY)
+                                                 (double   *alpha,
+                                                  long int *x,
+                                                  long int *y,
+                                                  int      *ierr)
+{
+   *ierr = (int) (HYPRE_SStructAxpy( (double)              *alpha,
+                                     (HYPRE_SStructVector) *x,
+                                     (HYPRE_SStructVector) *y ) );
 }

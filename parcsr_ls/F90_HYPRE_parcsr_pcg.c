@@ -101,6 +101,20 @@ hypre_F90_IFACE(hypre_parcsrpcgsetmaxiter, HYPRE_PARCSRPCGSETMAXITER)( long int 
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_ParCSRPCGSetStopCrit
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_parcsrpcgsetstopcrit, HYPRE_PARCSRPCGSETSTOPCRIT)
+                                          ( long int *solver,
+                                            int      *stop_crit,
+                                            int      *ierr      )
+{
+   *ierr = (int) ( HYPRE_ParCSRPCGSetStopCrit( (HYPRE_Solver) *solver,
+                                              (int)          *stop_crit ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_ParCSRPCGSetTwoNorm
  *--------------------------------------------------------------------------*/
 
@@ -277,4 +291,3 @@ hypre_F90_IFACE(hypre_parcsrdiagscale, HYPRE_PARCSRDIAGSCALE)( long int *solver,
                                           (HYPRE_ParVector)    *Hy,
                                           (HYPRE_ParVector)    *Hx      ) );
 }
-
