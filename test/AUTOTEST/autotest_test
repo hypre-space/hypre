@@ -21,7 +21,7 @@ initialize_variables ()
   HYPRE_SEND_MAIL="no"
   STD_TEST_CASES='TEST_ij/*.sh TEST_fac/*.sh TEST_sstruct/*.sh TEST_struct/*.sh'
   STD_CONFIGOPTIONS="all++ all77 babel debug default docs insure \
-                     no_mpi openmp strict_checking test_alpha test_beta"
+                     no_mpi openmp strict_checking test_alpha test_beta test_general"
   STD_MAKEOPTIONS="all configure"
   DEBUG_MODE="no"
   Build=1
@@ -122,6 +122,7 @@ parse_arguments ()
       d) build "all"     "docs"          "docs";;
       e) confbuildtest $OPTARG  "--enable-debug" "debug";;
       f) build "all77"   "all77"         "test";;
+      G) confbuildtest $Run     "--with-test-general" "test_general";;
       h) usage; exit 2;;
       i) confbuildtest $OPTARG  "--with-insure" "insure";;
      +i) confbuildtest $OPTARG  "--with-insure-to-file" "insure";;
@@ -563,7 +564,8 @@ confbuildtest ()
 #
 # Make Section
 # Remove all *.o files before building for current options
-   if [ "${MessageStr}" != "test_alpha" -a "${MessageStr}" != "test_beta" ]
+   if [ "${MessageStr}" != "test_alpha" -a "${MessageStr}" != "test_beta"  -a \
+        "${MessageStr}" != "test_general" ]
    then
       echo "Autotest starting make of $MessageStr"
       $MAKE clean

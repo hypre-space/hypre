@@ -981,7 +981,7 @@ then
    case $HOSTNAME in
       tux*) HYPRE_LINKDIR="/usr/casc/hypre/i686-pc-linux-gnu"
             ;;
-         *) HYPRE_LINKDIR="/usr/apps/hypre/"
+         *) HYPRE_LINKDIR="/usr/apps/hypre"
             ;;
    esac
    if test "${LAPACKLIBS}" = "-lHYPRE_utilities"
