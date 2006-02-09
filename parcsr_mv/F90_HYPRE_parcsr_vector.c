@@ -218,21 +218,3 @@ hypre_F90_IFACE(hypre_parvectorinnerprod, HYPRE_PARVECTORINNERPROD)
                                              (HYPRE_ParVector) *y,
                                              (double *)         prod ) );
 }
-
-/*--------------------------------------------------------------------------
- * HYPRE_VectorToParVector
- *--------------------------------------------------------------------------*/
-
-void
-hypre_F90_IFACE(hypre_vectortoparvector, HYPRE_VECTORTOPARVECTOR)
-                                           (int      *comm,
-                                            long int *b,
-                                            int      *partitioning,
-                                            long int *vector,
-                                            int      *ierr    )
-{
-   *ierr = (int) ( HYPRE_VectorToParVector( (MPI_Comm)          comm,
-                                            (HYPRE_Vector)     *b,
-                                            (int *)             partitioning,
-                                            (HYPRE_ParVector *) vector ) );
-}
