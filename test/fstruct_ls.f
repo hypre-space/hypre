@@ -2,6 +2,11 @@ c***********************************************************************
 c     Routines to test struct_ls fortran interfaces
 c***********************************************************************
 
+
+c***********************************************************************
+c             HYPRE_StructBiCGSTAB routines
+c***********************************************************************
+
 c***********************************************************************
 c     fhypre_structbicgstabcreate
 c***********************************************************************
@@ -75,7 +80,7 @@ c***********************************************************************
       subroutine fhypre_structbicgstabsettol(fsolver, ftol)
       integer ierr
       integer*8 fsolver
-      real ftol
+      double precision ftol
 
       call HYPRE_StructBiCGSTABSetTol(fsolver, ftol, ierr)
       if (ierr .ne. 0) then
@@ -174,7 +179,7 @@ c***********************************************************************
       subroutine fhypre_structbicgstabgetresidua(fsolver, fresidual)
       integer ierr
       integer*8 fsolver
-      real fresidual
+      double precision fresidual
 
       call HYPRE_StructBiCGSTABGetResidual(fsolver, fresidual, ierr)
       if (ierr .ne. 0) then
@@ -190,7 +195,7 @@ c***********************************************************************
       subroutine fhypre_structbicgstabgetfinalre(fsolver, fnorm)
       integer ierr
       integer*8 fsolver
-      real fnorm
+      double precision fnorm
 
       call HYPRE_StructBiCGSTABGetFinalRel(fsolver, fnorm)
       if (ierr .ne. 0) then
@@ -201,6 +206,12 @@ c***********************************************************************
       end
 
 
+
+
+
+c***********************************************************************
+c             HYPRE_StructGMRES routines
+c***********************************************************************
 
 c***********************************************************************
 c     fhypre_structgmrescreate
@@ -275,7 +286,7 @@ c***********************************************************************
       subroutine fhypre_structgmressettol(fsolver, ftol)
       integer ierr
       integer*8 fsolver
-      real ftol
+      double precision ftol
 
       call HYPRE_StructGMRESSetTol(fsolver, ftol, ierr)
       if (ierr .ne. 0) then
@@ -374,7 +385,7 @@ c***********************************************************************
       subroutine fhypre_structgmresgetfinalrelat(fsolver, fnorm)
       integer ierr
       integer*8 fsolver
-      real fnorm
+      double precision fnorm
 
       call HYPRE_StructGMRESGetFinalRelati(fsolver, fnorm, ierr)
       if (ierr .ne. 0) then
@@ -385,6 +396,12 @@ c***********************************************************************
       end
 
 
+
+
+
+c***********************************************************************
+c             HYPRE_StructHybrid routines
+c***********************************************************************
 
 c***********************************************************************
 c     fhypre_structhybridcreate
@@ -507,7 +524,7 @@ c***********************************************************************
       subroutine fhypre_structhybridsettol(fsolver, ftol)
       integer ierr
       integer*8 fsolver
-      real ftol
+      double precision ftol
 
       call HYPRE_StructHybridSetTol(fsolver, ftol, ierr)
       if (ierr .ne. 0) then
@@ -523,7 +540,7 @@ c***********************************************************************
       subroutine fhypre_structhybridsetconvergen(fsolver, fcftol)
       integer ierr
       integer*8 fsolver
-      real fcftol
+      double precision fcftol
 
       call HYPRE_StructHybridSetConvergenc(fsolver, fcftol, ierr)
       if (ierr .ne. 0) then
@@ -539,7 +556,7 @@ c***********************************************************************
       subroutine fhypre_structhybridsetpcgabsolu(fsolver, fpcgtol)
       integer ierr
       integer*8 fsolver
-      real fpcgtol
+      double precision fpcgtol
 
       call HYPRE_StructHybridSetPCGAbsolut(fsolver, fpcgtol, ierr)
       if (ierr .ne. 0) then
@@ -718,7 +735,7 @@ c***********************************************************************
       subroutine fhypre_structhybridgetfinalrela(fsolver, fnorm)
       integer ierr
       integer*8 fsolver
-      real fnorm
+      double precision fnorm
 
       call HYPRE_StructHybridGetFinalRelat(fsolver, fnorm, ierr)
       if (ierr .ne. 0) then
@@ -729,6 +746,84 @@ c***********************************************************************
       end
 
 
+
+
+
+c***********************************************************************
+c             HYPRE_StructInterpreter routines
+c***********************************************************************
+
+c***********************************************************************
+c     fhypre_structvectorsetrandomvalues
+c***********************************************************************
+      subroutine fhypre_structvectorsetrandomvalu(fvector, fseed)
+      integer ierr
+      integer fseed
+      integer*8 fvector
+
+      call hypre_StructVectorSetRandomValues(fvector, fseed, ierr)
+      if (ierr .ne. 0) then
+         print *, 'fhypre_structvectorsetrandomvalues: err = ', ierr
+      endif
+
+      return
+      end
+
+
+c***********************************************************************
+c     fhypre_structsetrandomvalues
+c***********************************************************************
+      subroutine fhypre_structsetrandomvalues(fvector, fseed)
+      integer ierr
+      integer fseed
+      integer*8 fvector
+
+      call hypre_StructSetRandomValues(fvector, fseed, ierr)
+      if (ierr .ne. 0) then
+         print *, 'fhypre_structsetrandomvalues: err = ', ierr
+      endif
+
+      return
+      end
+
+
+c***********************************************************************
+c     fhypre_structsetupinterpreter
+c***********************************************************************
+      subroutine fhypre_structsetupinterpreter(fi)
+      integer ierr
+      integer*8 fi
+
+      call HYPRE_StructSetupInterpreter(fi, ierr)
+      if (ierr .ne. 0) then
+         print *, 'fhypre_structsetupinterpreter: err = ', ierr
+      endif
+
+      return
+      end
+
+
+c***********************************************************************
+c     fhypre_structsetupmatvec
+c***********************************************************************
+      subroutine fhypre_structsetupmatvec(fmv)
+      integer ierr
+      integer*8 fmv
+
+      call HYPRE_StructSetupMatvec(fmv, ierr)
+      if (ierr .ne. 0) then
+         print *, 'fhypre_structsetupmatvec: err = ', ierr
+      endif
+
+      return
+      end
+
+
+
+
+c***********************************************************************
+c             HYPRE_StructJacobi routines
+c***********************************************************************
 
 c***********************************************************************
 c     fhypre_structjacobicreate
@@ -803,11 +898,27 @@ c***********************************************************************
       subroutine fhypre_structjacobisettol(fsolver, ftol)
       integer ierr
       integer*8 fsolver
-      real ftol
+      double precision ftol
 
       call HYPRE_StructJacobiSetTol(fsolver, ftol, ierr)
       if (ierr .ne. 0) then
          print *, 'fhypre_structjacobisettol: err = ', ierr
+      endif
+
+      return
+      end
+
+c***********************************************************************
+c     fhypre_structjacobigettol
+c***********************************************************************
+      subroutine fhypre_structjacobigettol(fsolver, ftol)
+      integer ierr
+      integer*8 fsolver
+      double precision ftol
+
+      call HYPRE_StructJacobiGetTol(fsolver, ftol, ierr)
+      if (ierr .ne. 0) then
+         print *, 'fhypre_structjacobigettol: err = ', ierr
       endif
 
       return
@@ -830,6 +941,22 @@ c***********************************************************************
       end
 
 c***********************************************************************
+c     fhypre_structjacobigetmaxiter
+c***********************************************************************
+      subroutine fhypre_structjacobigetmaxiter(fsolver, fmaxiter)
+      integer ierr
+      integer fmaxiter
+      integer*8 fsolver
+
+      call HYPRE_StructJacobiGetMaxIter(fsolver, fmaxiter, ierr)
+      if (ierr .ne. 0) then
+         print *, 'fhypre_structjacobigetmaxiter: err = ', ierr
+      endif
+
+      return
+      end
+
+c***********************************************************************
 c     fhypre_structjacobisetzeroguess
 c***********************************************************************
       subroutine fhypre_structjacobisetzeroguess(fsolver)
@@ -839,6 +966,21 @@ c***********************************************************************
       call HYPRE_StructJacobiSetZeroGuess(fsolver, ierr)
       if (ierr .ne. 0) then
          print *, 'fhypre_structjacobisetzeroguess: err = ', ierr
+      endif
+
+      return
+      end
+
+c***********************************************************************
+c     fhypre_structjacobigetzeroguess
+c***********************************************************************
+      subroutine fhypre_structjacobigetzeroguess(fsolver)
+      integer ierr
+      integer*8 fsolver
+
+      call HYPRE_StructJacobiGetZeroGuess(fsolver, ierr)
+      if (ierr .ne. 0) then
+         print *, 'fhypre_structjacobigetzeroguess: err = ', ierr
       endif
 
       return
@@ -881,7 +1023,7 @@ c***********************************************************************
       subroutine fhypre_structjacobigetfinalrela(fsolver, fnorm)
       integer ierr
       integer*8 fsolver
-      real fnorm
+      double precision fnorm
 
       call HYPRE_StructJacobiGetFinalRelat(fsolver, fnorm, ierr)
       if (ierr .ne. 0) then
@@ -892,6 +1034,12 @@ c***********************************************************************
       end
 
 
+
+
+
+c***********************************************************************
+c             HYPRE_StructPCG routines
+c***********************************************************************
 
 c***********************************************************************
 c     fhypre_structpcgcreate
@@ -966,7 +1114,7 @@ c***********************************************************************
       subroutine fhypre_structpcgsettol(fsolver, ftol)
       integer ierr
       integer*8 fsolver
-      real ftol
+      double precision ftol
 
       call HYPRE_StructPCGSetTol(fsolver, ftol, ierr)
       if (ierr .ne. 0) then
@@ -1097,7 +1245,7 @@ c***********************************************************************
       subroutine fhypre_structpcggetfinalrelativ(fsolver, fnorm)
       integer ierr
       integer*8 fsolver
-      real fnorm
+      double precision fnorm
 
       call HYPRE_StructPCGGetFinalRelative(fsolver, fnorm, ierr)
       if (ierr .ne. 0) then
@@ -1128,9 +1276,9 @@ c***********************************************************************
       end
 
 c***********************************************************************
-c     fhypre_structdiagscalesolve
+c     fhypre_structdiagscale
 c***********************************************************************
-      subroutine fhypre_structdiagscalesolve(fsolver, fA, fb, fx)
+      subroutine fhypre_structdiagscale(fsolver, fA, fb, fx)
       integer ierr
       integer*8 fsolver
       integer*8 fA
@@ -1139,13 +1287,19 @@ c***********************************************************************
 
       call HYPRE_StructDiagScale(fsolver, fA, fb, fx, ierr)
       if (ierr .ne. 0) then
-         print *, 'fhypre_structdiagscalesolve: err = ', ierr
+         print *, 'fhypre_structdiagscale: err = ', ierr
       endif
 
       return
       end
 
 
+
+
+
+c***********************************************************************
+c             HYPRE_StructPFMG routines
+c***********************************************************************
 
 c***********************************************************************
 c     fhypre_structpfmgcreate
@@ -1220,11 +1374,27 @@ c***********************************************************************
       subroutine fhypre_structpfmgsettol(fsolver, ftol)
       integer ierr
       integer*8 fsolver
-      real ftol
+      double precision ftol
 
       call HYPRE_StructPFMGSetTol(fsolver, ftol, ierr)
       if (ierr .ne. 0) then
          print *, 'fhypre_structpfmgsettol: err = ', ierr
+      endif
+
+      return
+      end
+
+c***********************************************************************
+c     fhypre_structpfmggettol
+c***********************************************************************
+      subroutine fhypre_structpfmggettol(fsolver, ftol)
+      integer ierr
+      integer*8 fsolver
+      double precision ftol
+
+      call HYPRE_StructPFMGGetTol(fsolver, ftol, ierr)
+      if (ierr .ne. 0) then
+         print *, 'fhypre_structpfmggettol: err = ', ierr
       endif
 
       return
@@ -1247,6 +1417,54 @@ c***********************************************************************
       end
 
 c***********************************************************************
+c     fhypre_structpfmggetmaxiter
+c***********************************************************************
+      subroutine fhypre_structpfmggetmaxiter(fsolver, fmaxiter)
+      integer ierr
+      integer fmaxiter
+      integer*8 fsolver
+
+      call HYPRE_StructPFMGGetMaxIter(fsolver, fmaxiter, ierr)
+      if (ierr .ne. 0) then
+         print *, 'fhypre_structpfmggetmaxiter: err = ', ierr
+      endif
+
+      return
+      end
+
+c***********************************************************************
+c     fhypre_structpfmgsetmaxlevels
+c***********************************************************************
+      subroutine fhypre_structpfmgsetmaxlevels(fsolver, fmaxlevels)
+      integer ierr
+      integer fmaxlevels
+      integer*8 fsolver
+
+      call HYPRE_StructPFMGSetMaxLevels(fsolver, fmaxlevels, ierr)
+      if (ierr .ne. 0) then
+         print *, 'fhypre_structpfmgsetmaxlevels: err = ', ierr
+      endif
+
+      return
+      end
+
+c***********************************************************************
+c     fhypre_structpfmggetmaxlevels
+c***********************************************************************
+      subroutine fhypre_structpfmggetmaxlevels(fsolver, fmaxlevels)
+      integer ierr
+      integer fmaxlevels
+      integer*8 fsolver
+
+      call HYPRE_StructPFMGGetMaxLevels(fsolver, fmaxlevels, ierr)
+      if (ierr .ne. 0) then
+         print *, 'fhypre_structpfmggetmaxlevels: err = ', ierr
+      endif
+
+      return
+      end
+
+c***********************************************************************
 c     fhypre_structpfmgsetrelchange
 c***********************************************************************
       subroutine fhypre_structpfmgsetrelchange(fsolver, frelchange)
@@ -1263,6 +1481,22 @@ c***********************************************************************
       end
 
 c***********************************************************************
+c     fhypre_structpfmggetrelchange
+c***********************************************************************
+      subroutine fhypre_structpfmggetrelchange(fsolver, frelchange)
+      integer ierr
+      integer frelchange
+      integer*8 fsolver
+
+      call HYPRE_StructPFMGGetRelChange(fsolver, frelchange, ierr)
+      if (ierr .ne. 0) then
+         print *, 'fhypre_structpfmggetrelchange: err = ', ierr
+      endif
+
+      return
+      end
+
+c***********************************************************************
 c     fhypre_structpfmgsetzeroguess
 c***********************************************************************
       subroutine fhypre_structpfmgsetzeroguess(fsolver)
@@ -1272,6 +1506,21 @@ c***********************************************************************
       call HYPRE_StructPFMGSetZeroGuess(fsolver, ierr)
       if (ierr .ne. 0) then
          print *, 'fhypre_structpfmgsetzeroguess: err = ', ierr
+      endif
+
+      return
+      end
+
+c***********************************************************************
+c     fhypre_structpfmggetzeroguess
+c***********************************************************************
+      subroutine fhypre_structpfmggetzeroguess(fsolver)
+      integer ierr
+      integer*8 fsolver
+
+      call HYPRE_StructPFMGGetZeroGuess(fsolver, ierr)
+      if (ierr .ne. 0) then
+         print *, 'fhypre_structpfmggetzeroguess: err = ', ierr
       endif
 
       return
@@ -1314,7 +1563,7 @@ c***********************************************************************
       subroutine fhypre_structpfmggetfinalrelati(fsolver, fnorm)
       integer ierr
       integer*8 fsolver
-      real fnorm
+      double precision fnorm
 
       call HYPRE_StructPFMGGetFinalRelativ(fsolver, fnorm, ierr)
       if (ierr .ne. 0) then
@@ -1341,6 +1590,22 @@ c***********************************************************************
       end
 
 c***********************************************************************
+c     fhypre_structpfmggetskiprelax
+c***********************************************************************
+      subroutine fhypre_structpfmggetskiprelax(fsolver, fskiprelax)
+      integer ierr
+      integer fskiprelax
+      integer*8 fsolver
+
+      call HYPRE_StructPFMGGetSkipRelax(fsolver, fskiprelax, ierr)
+      if (ierr .ne. 0) then
+         print *, 'fhypre_structpfmggetskiprelax: err = ', ierr
+      endif
+
+      return
+      end
+
+c***********************************************************************
 c     fhypre_structpfmgsetrelaxtype
 c***********************************************************************
       subroutine fhypre_structpfmgsetrelaxtype(fsolver, frelaxtype)
@@ -1357,6 +1622,22 @@ c***********************************************************************
       end
 
 c***********************************************************************
+c     fhypre_structpfmggetrelaxtype
+c***********************************************************************
+      subroutine fhypre_structpfmggetrelaxtype(fsolver, frelaxtype)
+      integer ierr
+      integer frelaxtype
+      integer*8 fsolver
+
+      call HYPRE_StructPFMGGetRelaxType(fsolver, frelaxtype, ierr)
+      if (ierr .ne. 0) then
+         print *, 'fhypre_structpfmggetrelaxtype: err = ', ierr
+      endif
+
+      return
+      end
+
+c***********************************************************************
 c     fhypre_structpfmgsetraptype
 c***********************************************************************
       subroutine fhypre_structpfmgsetraptype(fsolver, fraptype)
@@ -1367,6 +1648,22 @@ c***********************************************************************
       call HYPRE_StructPFMGSetRAPType(fsolver, fraptype, ierr)
       if (ierr .ne. 0) then
          print *, 'fhypre_structpfmgsetraptype: err = ', ierr
+      endif
+
+      return
+      end
+
+c***********************************************************************
+c     fhypre_structpfmggetraptype
+c***********************************************************************
+      subroutine fhypre_structpfmggetraptype(fsolver, fraptype)
+      integer ierr
+      integer fraptype
+      integer*8 fsolver
+
+      call HYPRE_StructPFMGGetRAPType(fsolver, fraptype, ierr)
+      if (ierr .ne. 0) then
+         print *, 'fhypre_structpfmggetraptype: err = ', ierr
       endif
 
       return
@@ -1390,6 +1687,23 @@ c***********************************************************************
       end
 
 c***********************************************************************
+c     fhypre_structpfmggetnumprerelax
+c***********************************************************************
+      subroutine fhypre_structpfmggetnumprerelax(fsolver,
+     1                                             fnumprerelax)
+      integer ierr
+      integer fnumprerelax
+      integer*8 fsolver
+
+      call HYPRE_StructPFMGGetNumPreRelax(fsolver, fnumprerelax, ierr)
+      if (ierr .ne. 0) then
+         print *, 'fhypre_structpfmggetnumprerelax: err = ', ierr
+      endif
+
+      return
+      end
+
+c***********************************************************************
 c     fhypre_structpfmgsetnumpostrelax
 c***********************************************************************
       subroutine fhypre_structpfmgsetnumpostrela(fsolver,
@@ -1407,12 +1721,29 @@ c***********************************************************************
       end
 
 c***********************************************************************
+c     fhypre_structpfmggetnumpostrelax
+c***********************************************************************
+      subroutine fhypre_structpfmggetnumpostrela(fsolver,
+     1                                             fnumpostrelax)
+      integer ierr
+      integer fnumpostrelax
+      integer*8 fsolver
+
+      call HYPRE_StructPFMGGetNumPostRelax(fsolver, fnumpostrelax, ierr)
+      if (ierr .ne. 0) then
+         print *, 'fhypre_structpfmggetnumpostrela: err = ', ierr
+      endif
+
+      return
+      end
+
+c***********************************************************************
 c     fhypre_structpfmgsetdxyz
 c***********************************************************************
       subroutine fhypre_structpfmgsetdxyz(fsolver, fdxyz)
       integer ierr
       integer*8 fsolver
-      real fdxyz
+      double precision fdxyz
 
       call HYPRE_StructPFMGSetDxyz(fsolver, fdxyz, ierr)
       if (ierr .ne. 0) then
@@ -1439,6 +1770,22 @@ c***********************************************************************
       end
 
 c***********************************************************************
+c     fhypre_structpfmggetlogging
+c***********************************************************************
+      subroutine fhypre_structpfmggetlogging(fsolver, flogging)
+      integer ierr
+      integer flogging
+      integer*8 fsolver
+
+      call HYPRE_StructPFMGGetLogging(fsolver, flogging, ierr)
+      if (ierr .ne. 0) then
+         print *, 'fhypre_structpfmggetlogging: err = ', ierr
+      endif
+
+      return
+      end
+
+c***********************************************************************
 c     fhypre_structpfmgsetprintlevel
 c***********************************************************************
       subroutine fhypre_structpfmgsetprintlevel(fsolver, fprintlevel)
@@ -1454,7 +1801,29 @@ c***********************************************************************
       return
       end
 
+c***********************************************************************
+c     fhypre_structpfmggetprintlevel
+c***********************************************************************
+      subroutine fhypre_structpfmggetprintlevel(fsolver, fprintlevel)
+      integer ierr
+      integer fprintlevel
+      integer*8 fsolver
 
+      call HYPRE_StructPFMGGetPrintLevel(fsolver, fprintlevel, ierr)
+      if (ierr .ne. 0) then
+         print *, 'fhypre_structpfmggetprintlevel: err = ', ierr
+      endif
+
+      return
+      end
+
+
+
+
+
+c***********************************************************************
+c             HYPRE_StructSMG routines
+c***********************************************************************
 
 c***********************************************************************
 c     fhypre_structsmgcreate
@@ -1540,16 +1909,48 @@ c***********************************************************************
       end
 
 c***********************************************************************
+c     fhypre_structsmggetmemoryuse
+c***********************************************************************
+      subroutine fhypre_structsmggetmemoryuse(fsolver, fmemuse)
+      integer ierr
+      integer fmemuse
+      integer*8 fsolver
+
+      call HYPRE_StructSMGGetMemoryUse(fsolver, fmemuse, ierr)
+      if (ierr .ne. 0) then
+         print *, 'fhypre_structsmggetmemoryuse: err = ', ierr
+      endif
+
+      return
+      end
+
+c***********************************************************************
 c     fhypre_structsmgsettol
 c***********************************************************************
       subroutine fhypre_structsmgsettol(fsolver, ftol)
       integer ierr
       integer*8 fsolver
-      real ftol
+      double precision ftol
 
       call HYPRE_StructSMGSetTol(fsolver, ftol, ierr)
       if (ierr .ne. 0) then
          print *, 'fhypre_structsmgsettol: err = ', ierr
+      endif
+
+      return
+      end
+
+c***********************************************************************
+c     fhypre_structsmggettol
+c***********************************************************************
+      subroutine fhypre_structsmggettol(fsolver, ftol)
+      integer ierr
+      integer*8 fsolver
+      double precision ftol
+
+      call HYPRE_StructSMGGetTol(fsolver, ftol, ierr)
+      if (ierr .ne. 0) then
+         print *, 'fhypre_structsmggettol: err = ', ierr
       endif
 
       return
@@ -1572,6 +1973,22 @@ c***********************************************************************
       end
 
 c***********************************************************************
+c     fhypre_structsmggetmaxiter
+c***********************************************************************
+      subroutine fhypre_structsmggetmaxiter(fsolver, fmaxiter)
+      integer ierr
+      integer fmaxiter
+      integer*8 fsolver
+
+      call HYPRE_StructSMGGetMaxIter(fsolver, fmaxiter, ierr)
+      if (ierr .ne. 0) then
+         print *, 'fhypre_structsmggetmaxiter: err = ', ierr
+      endif
+
+      return
+      end
+
+c***********************************************************************
 c     fhypre_structsmgsetrelchange
 c***********************************************************************
       subroutine fhypre_structsmgsetrelchange(fsolver, frelchange)
@@ -1588,6 +2005,22 @@ c***********************************************************************
       end
 
 c***********************************************************************
+c     fhypre_structsmggetrelchange
+c***********************************************************************
+      subroutine fhypre_structsmggetrelchange(fsolver, frelchange)
+      integer ierr
+      integer frelchange
+      integer*8 fsolver
+
+      call HYPRE_StructSMGGetRelChange(fsolver, frelchange, ierr)
+      if (ierr .ne. 0) then
+         print *, 'fhypre_structsmggetrelchange: err = ', ierr
+      endif
+
+      return
+      end
+
+c***********************************************************************
 c     fhypre_structsmgsetzeroguess
 c***********************************************************************
       subroutine fhypre_structsmgsetzeroguess(fsolver)
@@ -1597,6 +2030,21 @@ c***********************************************************************
       call HYPRE_StructSMGSetZeroGuess(fsolver, ierr)
       if (ierr .ne. 0) then
          print *, 'fhypre_structsmgsetzeroguess: err = ', ierr
+      endif
+
+      return
+      end
+
+c***********************************************************************
+c     fhypre_structsmggetzeroguess
+c***********************************************************************
+      subroutine fhypre_structsmggetzeroguess(fsolver)
+      integer ierr
+      integer*8 fsolver
+
+      call HYPRE_StructSMGGetZeroGuess(fsolver, ierr)
+      if (ierr .ne. 0) then
+         print *, 'fhypre_structsmggetzeroguess: err = ', ierr
       endif
 
       return
@@ -1639,7 +2087,7 @@ c***********************************************************************
       subroutine fhypre_structsmggetfinalrelativ(fsolver, fnorm)
       integer ierr
       integer*8 fsolver
-      real fnorm
+      double precision fnorm
 
       call HYPRE_StructSMGGetFinalRelative(fsolver, fnorm, ierr)
       if (ierr .ne. 0) then
@@ -1666,6 +2114,22 @@ c***********************************************************************
       end
 
 c***********************************************************************
+c     fhypre_structsmggetnumprerelax
+c***********************************************************************
+      subroutine fhypre_structsmggetnumprerelax(fsolver, fnumprerelax)
+      integer ierr
+      integer fnumprerelax
+      integer*8 fsolver
+
+      call HYPRE_StructSMGGetNumPreRelax(fsolver, fnumprerelax, ierr)
+      if (ierr .ne. 0) then
+         print *, 'fhypre_structsmggetnumprerelax: err = ', ierr
+      endif
+
+      return
+      end
+
+c***********************************************************************
 c     fhypre_structsmgsetnumpostrelax
 c***********************************************************************
       subroutine fhypre_structsmgsetnumpostrelax(fsolver, fnumpstrlx)
@@ -1676,6 +2140,22 @@ c***********************************************************************
       call HYPRE_StructSMGSetNumPostRelax(fsolver, fnumpstrlx, ierr)
       if (ierr .ne. 0) then
          print *, 'fhypre_structsmgsetnumpostrelax: err = ', ierr
+      endif
+
+      return
+      end
+
+c***********************************************************************
+c     fhypre_structsmggetnumpostrelax
+c***********************************************************************
+      subroutine fhypre_structsmggetnumpostrelax(fsolver, fnumpstrlx)
+      integer ierr
+      integer fnumpstrlx
+      integer*8 fsolver
+
+      call HYPRE_StructSMGGetNumPostRelax(fsolver, fnumpstrlx, ierr)
+      if (ierr .ne. 0) then
+         print *, 'fhypre_structsmggetnumpostrelax: err = ', ierr
       endif
 
       return
@@ -1698,6 +2178,22 @@ c***********************************************************************
       end
 
 c***********************************************************************
+c     fhypre_structsmggetlogging
+c***********************************************************************
+      subroutine fhypre_structsmggetlogging(fsolver, flogging)
+      integer ierr
+      integer flogging
+      integer*8 fsolver
+
+      call HYPRE_StructSMGGetLogging(fsolver, flogging, ierr)
+      if (ierr .ne. 0) then
+         print *, 'fhypre_structsmggetlogging: err = ', ierr
+      endif
+
+      return
+      end
+
+c***********************************************************************
 c     fhypre_structsmgsetprintlevel
 c***********************************************************************
       subroutine fhypre_structsmgsetprintlevel(fsolver, fprintlevel)
@@ -1713,7 +2209,29 @@ c***********************************************************************
       return
       end
 
+c***********************************************************************
+c     fhypre_structsmggetprintlevel
+c***********************************************************************
+      subroutine fhypre_structsmggetprintlevel(fsolver, fprintlevel)
+      integer ierr
+      integer fprintlevel
+      integer*8 fsolver
 
+      call HYPRE_StructSMGGetPrintLevel(fsolver, fprintlevel, ierr)
+      if (ierr .ne. 0) then
+         print *, 'fhypre_structsmggetprintlevel: err = ', ierr
+      endif
+
+      return
+      end
+
+
+
+
+
+c***********************************************************************
+c             HYPRE_StructSparseMSG routines
+c***********************************************************************
 
 c***********************************************************************
 c     fhypre_structsparsemsgcreate
@@ -1804,7 +2322,7 @@ c***********************************************************************
       subroutine fhypre_structsparsemsgsettol(fsolver, ftol)
       integer ierr
       integer*8 fsolver
-      real ftol
+      double precision ftol
 
       call HYPRE_StructSparseMSGSetTol(fsolver, ftol, ierr)
       if (ierr .ne. 0) then
@@ -1898,7 +2416,7 @@ c***********************************************************************
       subroutine fhypre_structsparsemsggetfinalr(fsolver, fnorm)
       integer ierr
       integer*8 fsolver
-      real fnorm
+      double precision fnorm
 
       call HYPRE_StructSparseMSGGetFinalRe(fsolver, fnorm, ierr)
       if (ierr .ne. 0) then

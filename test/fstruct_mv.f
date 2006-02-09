@@ -2,6 +2,11 @@ c**************************************************
 c      Routines to test struct_mv fortran interface
 c**************************************************
 
+
+c**************************************************
+c           HYPRE_StructStencil routines
+c**************************************************
+
 c******************************************
 c      fhypre_structstencilcreate
 c******************************************
@@ -52,6 +57,12 @@ c******************************************
 
       return
       end
+
+
+
+c**************************************************
+c           HYPRE_StructGrid routines
+c**************************************************
 
 c******************************************
 c      fhypre_structgridcreate
@@ -134,6 +145,28 @@ c******************************************
       end
 
 c******************************************
+c      fhypre_structgridsetnumghost
+c******************************************
+      subroutine fhypre_structgridsetnumghost(fgrid, fnumghost)
+      integer ierr
+      integer fnumghost
+      integer*8 fgrid
+
+      call HYPRE_StructGridSetNumGhost(fgrid, fnumghost, ierr)
+      if (ierr .ne. 0) then
+         print *, 'fhypre_structgridsetnumghost: error = ', ierr
+      endif
+
+      return
+      end
+
+
+
+c**************************************************
+c           HYPRE_StructMatrix routines
+c**************************************************
+
+c******************************************
 c      fhypre_structmatrixcreate
 c******************************************
       subroutine fhypre_structmatrixcreate(fcomm, fgrid, fstencil, 
@@ -192,7 +225,7 @@ c******************************************
       integer fgridindx(*)
       integer fnumsindx(*)
       integer fsindx(*)
-      real fvals(*)
+      double precision fvals(*)
       integer*8 fmatrix
 
       call HYPRE_StructMatrixSetValues(fmatrix, fgridindx, fnumsindx, 
@@ -215,7 +248,7 @@ c******************************************
       integer fupper(*)
       integer fnumsindx(*)
       integer fsindx(*)
-      real fvals(*)
+      double precision fvals(*)
       integer*8 fmatrix
 
       call HYPRE_StructMatrixSetBoxValues(fmatrix, flower, fupper,
@@ -229,17 +262,41 @@ c******************************************
       end
 
 c******************************************
+c      fhypre_structmatrixgetboxvalues
+c******************************************
+      subroutine fhypre_structmatrixgetboxvalues(fmatrix, flower,
+     1                                           fupper, fnumsindx,
+     2                                           fsindx, fvals)
+      integer ierr
+      integer flower(*)
+      integer fupper(*)
+      integer fnumsindx(*)
+      integer fsindx(*)
+      double precision fvals(*)
+      integer*8 fmatrix
+
+      call HYPRE_StructMatrixGetBoxValues(fmatrix, flower, fupper,
+     1                                    fnumsindx, fsindx, fvals,
+     2                                    ierr)
+      if (ierr .ne. 0) then
+         print *, 'fhypre_structmatrixgetboxvalues: error = ', ierr
+      endif
+
+      return
+      end
+
+c******************************************
 c      fhypre_structmatrixsetconstantentries
 c******************************************
       subroutine fhypre_structmatrixsetconstante(fmatrix, fnument,
-     1                                                 fentries)
+     1                                           fentries)
       integer ierr
       integer fnument(*)
       integer fentries(*)
       integer*8 fmatrix
 
       call HYPRE_StructMatrixSetConstantEn(fmatrix, fnument,
-     1                                          fentries, ierr)
+     1                                     fentries, ierr)
       if (ierr .ne. 0) then
          print *, 'fhypre_structmatrixsetconstantentries: error =', ierr
       endif
@@ -251,12 +308,12 @@ c******************************************
 c      fhypre_structmatrixsetconstantvalues
 c******************************************
       subroutine fhypre_structmatrixsetconstantv(fmatrix,
-     1                                                fnumsindx, fsindx,
-     2                                                fvals)
+     1                                           fnumsindx, fsindx,
+     2                                           fvals)
       integer ierr
       integer fnumsindx(*)
       integer fsindx(*)
-      real fvals(*)
+      double precision fvals(*)
       integer*8 fmatrix
 
       call HYPRE_StructMatrixSetConstantVa(fmatrix, fnumsindx, 
@@ -278,7 +335,7 @@ c******************************************
       integer fgrdindx(*)
       integer fnumsindx(*)
       integer fsindx(*)
-      real fvals(*)
+      double precision fvals(*)
       integer*8 fmatrix
 
       call HYPRE_StructMatrixAddToValues(fmatrix, fgrdindx,
@@ -286,6 +343,51 @@ c******************************************
      2                                   ierr)
       if (ierr .ne. 0) then
          print *, 'fhypre_structmatrixaddtovalues: error = ', ierr
+      endif
+
+      return
+      end
+
+c******************************************
+c      fhypre_structmatrixaddtoboxvalues
+c******************************************
+      subroutine fhypre_structmatrixaddtoboxvalues(fmatrix, filower,
+     1                                             fiupper, fnumsindx,
+     2                                             fsindx, fvals)
+      integer ierr
+      integer filower(*)
+      integer fiupper(*)
+      integer fnumsindx
+      integer fsindx(*)
+      double precision fvals(*)
+      integer*8 fmatrix
+
+      call HYPRE_StructMatrixAddToBoxValues(fmatrix, filower, fiupper,
+     1                                      fnumsindx, fsindx, fvals,
+     2                                      ierr)
+      if (ierr .ne. 0) then
+         print *, 'fhypre_structmatrixaddtovalues: error = ', ierr
+      endif
+
+      return
+      end
+
+c******************************************
+c      fhypre_structmatrixaddtoconstantvalues
+c******************************************
+      subroutine fhypre_structmatrixaddtoconstant(fmatrix, fnumsindx,
+     2                                            fsindx, fvals)
+      integer ierr
+      integer fnumsindx
+      integer fsindx(*)
+      double precision fvals(*)
+      integer*8 fmatrix
+
+      call HYPRE_StructMatrixSetConstantValues(fmatrix, fnumsindx, 
+     1                                         fsindx, fvals, ierr)
+      if (ierr .ne. 0) then
+         print *, 'fhypre_structmatrixaddtoconstantvalues: error = ',
+     1                             ierr
       endif
 
       return
@@ -371,6 +473,31 @@ c******************************************
       end
 
 c******************************************
+c      fhypre_structmatrixmatvec
+c******************************************
+      subroutine fhypre_structmatrixmatvec(falpha, fA, fx, fbeta, fy)
+      integer ierr
+      integer falpha
+      integer fbeta
+      integer*8 fA
+      integer*8 fx
+      integer*8 fy
+
+      call HYPRE_StructMatrixMatvec(falplah, fA, fx, fbeta, fy, ierr)
+      if (ierr .ne. 0) then
+         print *, 'fhypre_structmatrixmatvec: error = ', ierr
+      endif
+
+      return
+      end
+
+
+
+c**************************************************
+c           HYPRE_StructVector routines
+c**************************************************
+
+c******************************************
 c      fhypre_structvectorcreate
 c******************************************
       subroutine fhypre_structvectorcreate(fcomm, fgrid, fvector)
@@ -424,7 +551,7 @@ c******************************************
      1                                          fvals)
       integer ierr
       integer fgridindx(*)
-      real fvals(*)
+      double precision fvals(*)
       integer*8 fvector
 
       call HYPRE_StructVectorSetValues(fvector, fgridindx, fvals, ierr)
@@ -443,7 +570,7 @@ c******************************************
       integer ierr
       integer flower(*)
       integer fupper(*)
-      real fvals(*)
+      double precision fvals(*)
       integer*8 fvector
 
       call HYPRE_StructVectorSetBoxValues(fvector, flower, fupper,
@@ -460,7 +587,7 @@ c      fhypre_structvectorsetconstantvalues
 c******************************************
       subroutine fhypre_structvectorsetconstantv(fvector, fvals)
       integer ierr
-      real fvals(*)
+      double precision fvals(*)
       integer*8 fvector
 
       call HYPRE_StructVectorSetConstantVa(fvector, fvals, ierr)
@@ -478,7 +605,7 @@ c******************************************
      1                                          fvals)
       integer ierr
       integer fgrdindx(*)
-      real fvals(*)
+      double precision fvals(*)
       integer*8 fvector
 
       call HYPRE_StructVectorAddToValues(fvector, fgrdindx, fvals, ierr)
@@ -497,7 +624,7 @@ c******************************************
       integer ierr
       integer flower(*)
       integer fupper(*)
-      real fvals(*)
+      double precision fvals(*)
       integer*8 fvector
 
       call HYPRE_StructVectorAddToBoxValue(fvector, flower, fupper,
@@ -516,7 +643,7 @@ c******************************************
      1                                          fvals)
       integer ierr
       integer fgrdindx(*)
-      real fvals(*)
+      double precision fvals(*)
       integer*8 fvector
 
       call HYPRE_StructVectorGetValues(fvector, fgrdindx, fvals, ierr)
@@ -535,7 +662,7 @@ c******************************************
       integer ierr
       integer flower(*)
       integer fupper(*)
-      real fvals(*)
+      double precision fvals(*)
       integer*8 fvector
 
       call HYPRE_StructVectorGetBoxValues(fvector, flower, fupper,

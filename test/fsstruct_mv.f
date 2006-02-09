@@ -2,6 +2,11 @@ c***************************************************************************
 c HYPRE_SStruct fortran interface
 c***************************************************************************
 
+
+c***************************************************************************
+c              HYPRE_SStructGraph routines
+c***************************************************************************
+
 c-------------------------------------------------------------------------
 c HYPRE_SStructGraphCreate
 c-------------------------------------------------------------------------
@@ -129,6 +134,12 @@ c--------------------------------------------------------------------------
       end
 
 
+
+
+c***************************************************************************
+c              HYPRE_SStructGrid routines
+c***************************************************************************
+
 c--------------------------------------------------------------------------
 c  HYPRE_SStructGridCreate
 c--------------------------------------------------------------------------
@@ -217,10 +228,34 @@ c--------------------------------------------------------------------------
 
 
 c--------------------------------------------------------------------------
+c   HYPRE_SStructGridSetVariable
+c          Like HYPRE_SStructGridSetVariables except only one variable
+c          is done at a time; fnvars needed for memory allocation.
+c--------------------------------------------------------------------------
+      subroutine fhypre_sstructgridsetvariable(fgrid, fpart, fvar, 
+     1                                         fnvars, fvartype)
+
+      integer ierr
+      integer fpart
+      integer fvar
+      integer fnvars
+      integer*8 fgrid
+      integer*8 fvartype
+
+      call HYPRE_SStructGridSetVariable(fgrid, fpart, fvar, fnvars, 
+     1                                   fvartype, ierr)
+
+      if (ierr .ne. 0) then
+         print *, ' fhypre_sstructgridsetvariable error = ', ierr
+      endif
+
+      return
+      end
+
+
+c--------------------------------------------------------------------------
 c   HYPRE_SStructGridAddVariables
 c--------------------------------------------------------------------------
-
-
       subroutine fhypre_sstructgridaddvariables(fgrid, fpart, findex,
      1                                          fnvars, fvartypes)
 
@@ -229,13 +264,39 @@ c--------------------------------------------------------------------------
       integer findex
       integer fnvars
       integer*8 fgrid
-      integer88 fvartypes
+      integer*8 fvartypes
 
       call HYPRE_SStructGridAddVariables(fgrid, fpart, findex, fnvars,
      1                                   fvartypes, ierr)
 
       if (ierr .ne. 0) then
          print *, ' fhypre_sstructgridaddvariables error = ', ierr
+      endif
+
+      return
+      end
+
+
+c--------------------------------------------------------------------------
+c   HYPRE_SStructGridAddVariable
+c          Like HYPRE_SStructGridAddVariables except only one variable
+c          is done at a time.
+c--------------------------------------------------------------------------
+      subroutine fhypre_sstructgridaddvariable(fgrid, fpart, findex,
+     1                                         fvar,  fvartype)
+
+      integer ierr
+      integer fpart
+      integer findex
+      integer fvar
+      integer*8 fgrid
+      integer*8 fvartype
+
+      call HYPRE_SStructGridAddVariable(fgrid, fpart, findex, fvar,
+     1                                   fvartype, ierr)
+
+      if (ierr .ne. 0) then
+         print *, ' fhypre_sstructgridaddvariable error = ', ierr
       endif
 
       return
@@ -353,6 +414,12 @@ c--------------------------------------------------------------------------
       return
       end
 
+
+
+
+c***************************************************************************
+c              HYPRE_SStructMatrix routines
+c***************************************************************************
 
 c--------------------------------------------------------------------------
 c   HYPRE_SStructMatrixCreate
@@ -682,6 +749,25 @@ c--------------------------------------------------------------------------
 
 
 c--------------------------------------------------------------------------
+c   HYPRE_SStructMatrixGetObject2
+c--------------------------------------------------------------------------
+      subroutine fhypre_sstructmatrixgetobject2(fmatrix, fobject)
+
+      integer ierr
+      integer*8 fobject
+      integer*8 fmatrix
+
+      call HYPRE_SStructMatrixGetObject2(fmatrix, fobject, ierr)
+
+      if (ierr .ne. 0) then
+         print *, ' fhypre_sstructmatrixgetobject2 error = ', ierr
+      endif
+
+      return
+      end
+
+
+c--------------------------------------------------------------------------
 c   HYPRE_SStructMatrixPrint
 c--------------------------------------------------------------------------
       subroutine fhypre_sstructmatrixprint(ffilename, fmatrix, fall)
@@ -700,6 +786,34 @@ c--------------------------------------------------------------------------
       return
       end
 
+
+c--------------------------------------------------------------------------
+c   HYPRE_SStructMatrixMatvec
+c--------------------------------------------------------------------------
+      subroutine fhypre_sstructmatrixmatvec(falpha, fA, fx, fbeta, fy)
+
+      integer ierr
+      integer*8 fA
+      integer*8 fx
+      integer*8 fy
+      double precision falpha
+      double precision fbeta
+
+      call HYPRE_SStructMatrixMatvec(falpha, fA, fx, fbeta, fy, ierr)
+
+      if (ierr .ne. 0) then
+         print *, ' fhypre_sstructmatrixmatvec error = ', ierr
+      endif
+
+      return
+      end
+
+
+
+
+c***************************************************************************
+c              HYPRE_SStructStencil routines
+c***************************************************************************
 
 c--------------------------------------------------------------------------
 c  HYPRE_SStructStencilCreate
@@ -761,6 +875,12 @@ c--------------------------------------------------------------------------
       return
       end
 
+
+
+
+c***************************************************************************
+c              HYPRE_SStructVector routines
+c***************************************************************************
 
 c--------------------------------------------------------------------------
 c   HYPRE_SStructVectorCreate
@@ -1005,6 +1125,26 @@ c--------------------------------------------------------------------------
 
 
 c--------------------------------------------------------------------------
+c   HYPRE_SStructVectorSetConstantValues
+c--------------------------------------------------------------------------
+      subroutine fhypre_sstructvectorsetconstantv(fvector, fvalue)
+
+      integer ierr
+      integer*8 fvector
+      double precision fvalue
+
+      call HYPRE_SStructVectorSetConstantValues(fvector, fvalue, ierr)
+
+      if (ierr .ne. 0) then
+         print *, ' fhypre_sstructvectorsetconstantvalues error = ',
+     1                                       ierr
+      endif
+
+      return
+      end
+
+
+c--------------------------------------------------------------------------
 c   HYPRE_SStructVectorSetObjectType
 c--------------------------------------------------------------------------
       subroutine fhypre_sstructvectorsetobjecttyp(fvector, ftype)
@@ -1056,6 +1196,84 @@ c--------------------------------------------------------------------------
 
       if (ierr .ne. 0) then
          print *, ' fhypre_sstructvectorprint error = ', ierr
+      endif
+
+      return
+      end
+
+
+c--------------------------------------------------------------------------
+c   HYPRE_SStructVectorCopy
+c--------------------------------------------------------------------------
+      subroutine fhypre_sstructvectorcopy(fx, fy)
+
+      integer ierr
+      integer*8 fx
+      integer*8 fy
+
+      call HYPRE_SStructVectorCopy(fx, fy, ierr)
+
+      if (ierr .ne. 0) then
+         print *, ' fhypre_sstructvectorcopy error = ', ierr
+      endif
+
+      return
+      end
+
+
+c--------------------------------------------------------------------------
+c   HYPRE_SStructVectorScale
+c--------------------------------------------------------------------------
+      subroutine fhypre_sstructvectorscale(falpha, fy)
+
+      integer ierr
+      integer*8 fy
+      double precision falpha
+
+      call HYPRE_SStructVectorScale(falpha, fy, ierr)
+
+      if (ierr .ne. 0) then
+         print *, ' fhypre_sstructvectorscale error = ', ierr
+      endif
+
+      return
+      end
+
+
+c--------------------------------------------------------------------------
+c   HYPRE_SStructInnerProd
+c--------------------------------------------------------------------------
+      subroutine fhypre_sstructinnerprod(fx, fy, fresult)
+
+      integer ierr
+      integer*8 fx
+      integer*8 fy
+      double precision fresult
+
+      call HYPRE_SStructInnerProd(fx, fy, fresult, ierr)
+
+      if (ierr .ne. 0) then
+         print *, ' fhypre_sstructinnerprod error = ', ierr
+      endif
+
+      return
+      end
+
+
+c--------------------------------------------------------------------------
+c   HYPRE_SStructAxpy
+c--------------------------------------------------------------------------
+      subroutine fhypre_sstructaxpy(falpha, fx, fy)
+
+      integer ierr
+      integer*8 fx
+      integer*8 fy
+      double precision falpha
+
+      call HYPRE_SStructAxpy(falpha, fx, fy, ierr)
+
+      if (ierr .ne. 0) then
+         print *, ' fhypre_sstructaxpy error = ', ierr
       endif
 
       return

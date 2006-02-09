@@ -2,6 +2,11 @@ c****************************************************************************
 c HYPRE_SStruct fortran interface routines
 c****************************************************************************
 
+
+c****************************************************************************
+c                HYPRE_SStructBiCGSTAB routines
+c****************************************************************************
+
 c--------------------------------------------------------------------------
 c HYPRE_SStructBiCGSTABCreate
 c--------------------------------------------------------------------------
@@ -278,6 +283,12 @@ c--------------------------------------------------------------------------
       end
 
 
+
+
+
+c****************************************************************************
+c                HYPRE_SStructGMRES routines
+c****************************************************************************
 
 c--------------------------------------------------------------------------
 c HYPRE_SStructGMRESCreate
@@ -572,11 +583,494 @@ c--------------------------------------------------------------------------
 
 
 
+
+
+c****************************************************************************
+c                HYPRE_SStructInterpreter routines
+c****************************************************************************
+
+c--------------------------------------------------------------------------
+c HYPRE_SStructPVectorSetRandomValues
+c--------------------------------------------------------------------------
+      subroutine fhypre_sstructpvectorsetrandomva(fsolver, fseed)
+
+      integer ierr
+      integer*8 fsolver
+      integer*8 fseed
+
+      call HYPRE_SStructPVectorSetRandomValues(fsolver, fseed, ierr)
+
+      if(ierr .ne. 0) then
+         print *, 'fhypre_sstructpvectorsetrandomvalues error = ', ierr
+      endif
+
+      return
+      end
+
+
+c--------------------------------------------------------------------------
+c HYPRE_SStructVectorSetRandomValues
+c--------------------------------------------------------------------------
+      subroutine fhypre_sstructvectorsetrandomval(fsolver, fseed)
+
+      integer ierr
+      integer*8 fsolver
+      integer*8 fseed
+
+      call HYPRE_SStructVectorSetRandomValues(fsolver, fseed, ierr)
+
+      if(ierr .ne. 0) then
+         print *, 'fhypre_sstructvectorsetrandomvalues error = ', ierr
+      endif
+
+      return
+      end
+
+
+c--------------------------------------------------------------------------
+c HYPRE_SStructSetRandomValues
+c--------------------------------------------------------------------------
+      subroutine fhypre_sstructsetrandomvalues(fsolver, fseed)
+
+      integer ierr
+      integer*8 fsolver
+      integer*8 fseed
+
+      call HYPRE_SStructSetRandomValues(fsolver, fseed, ierr)
+
+      if(ierr .ne. 0) then
+         print *, 'fhypre_sstructsetrandomvalues error = ', ierr
+      endif
+
+      return
+      end
+
+
+c--------------------------------------------------------------------------
+c HYPRE_SStructSetupInterpreter
+c--------------------------------------------------------------------------
+      subroutine fhypre_sstructsetupinterpreter(fsolver)
+
+      integer ierr
+      integer*8 fsolver
+
+      call HYPRE_SStructSetupInterpreter(fsolver, ierr)
+
+      if(ierr .ne. 0) then
+         print *, 'fhypre_sstructsetupinterpreter error = ', ierr
+      endif
+
+      return
+      end
+
+
+c--------------------------------------------------------------------------
+c HYPRE_SStructSetupMatvec
+c--------------------------------------------------------------------------
+      subroutine fhypre_sstructsetupmatvec(fsolver)
+
+      integer ierr
+      integer*8 fsolver
+
+      call HYPRE_SStructSetupMatvec(fsolver, ierr)
+
+      if(ierr .ne. 0) then
+         print *, 'fhypre_sstructsetupmatvec error = ', ierr
+      endif
+
+      return
+      end
+
+
+
+
+
+c****************************************************************************
+c                HYPRE_SStructFAC routines
+c****************************************************************************
+
+c--------------------------------------------------------------------------
+c HYPRE_SStructFACCreate
+c--------------------------------------------------------------------------
+      subroutine fhypre_sstructfaccreate(fcomm, fsolver)
+
+      integer ierr
+      integer*8 fcomm
+      integer*8 fsolver
+
+      call HYPRE_SStructFACCreate(fcomm, fsolver, ierr)
+
+      if(ierr .ne. 0) then
+         print *, 'fhypre_sstructfaccreate error = ', ierr
+      endif
+
+      return
+      end
+
+
+c--------------------------------------------------------------------------
+c HYPRE_SStructFACDestroy2
+c--------------------------------------------------------------------------
+      subroutine fhypre_sstructfacdestroy2(fsolver)
+
+      integer ierr
+      integer*8 fsolver
+
+      call HYPRE_SStructFACDestroy2(fsolver, ierr)
+
+      if(ierr .ne. 0) then
+         print *, 'fhypre_sstructfacdestroy2 error = ', ierr
+      endif
+
+      return
+      end
+
+
+c--------------------------------------------------------------------------
+c HYPRE_SStructFACSetup2
+c--------------------------------------------------------------------------
+      subroutine fhypre_sstructfacsetup2(fsolver, fA, fb, fx)
+
+      integer ierr
+      integer*8 fsolver
+      integer*8 fA
+      integer*8 fb
+      integer*8 fx
+
+      call HYPRE_SStructFACSetup2(fsolver, fA, fb, fx, ierr)
+
+      if(ierr .ne. 0) then
+         print *, 'fhypre_sstructfacsetup2 error = ', ierr
+      endif
+
+      return
+      end
+
+
+c--------------------------------------------------------------------------
+c HYPRE_SStructFACSolve3
+c--------------------------------------------------------------------------
+      subroutine fhypre_sstructfacsolve3(fsolver, fA, fb, fx)
+
+      integer ierr
+      integer*8 fsolver
+      integer*8 fA
+      integer*8 fb
+      integer*8 fx
+
+      call HYPRE_SStructFACSolve3(fsolver, fA, fb, fx, ierr)
+
+      if(ierr .ne. 0) then
+         print *, 'fhypre_sstructfacsolve3 error = ', ierr
+      endif
+
+      return
+      end
+
+
+c--------------------------------------------------------------------------
+c HYPRE_SStructFACSetTol
+c--------------------------------------------------------------------------
+      subroutine fhypre_sstructfacsettol(fsolver, ftol)
+
+      integer ierr
+      integer*8 fsolver
+      integer*8 ftol
+
+      call HYPRE_SStructFACSetTol(fsolver, ftol, ierr)
+
+      if(ierr .ne. 0) then
+         print *, 'fhypre_sstructfacsettol error = ', ierr
+      endif
+
+      return
+      end
+
+
+c--------------------------------------------------------------------------
+c HYPRE_SStructFACSetPLevels
+c--------------------------------------------------------------------------
+      subroutine fhypre_sstructfacsetplevels(fsolver, fnparts, fplevels)
+
+      integer ierr
+      integer*8 fsolver
+      integer*8 fnparts
+      integer*8 fplevels
+
+      call HYPRE_SStructFACSetPLevels(fsolver, fnparts, fplevels, ierr)
+
+      if(ierr .ne. 0) then
+         print *, 'fhypre_sstructfacsetplevels error = ', ierr
+      endif
+
+      return
+      end
+
+
+c--------------------------------------------------------------------------
+c HYPRE_SStructFACSetPRefinements
+c--------------------------------------------------------------------------
+      subroutine fhypre_sstructfacsetprefinements(fsolver, fnparts,
+     1                                            frfactors)
+
+      integer ierr
+      integer*8 fsolver
+      integer*8 fnparts
+      integer*8 frfactors(3)
+
+      call HYPRE_SStructFACSetPRefinements(fsolver, fnparts, frfactors,
+     1                                     ierr)
+
+      if(ierr .ne. 0) then
+         print *, 'fhypre_sstructfacsetprefinements error = ', ierr
+      endif
+
+      return
+      end
+
+
+c--------------------------------------------------------------------------
+c HYPRE_SStructFACSetMaxLevels
+c--------------------------------------------------------------------------
+      subroutine fhypre_sstructfacsetmaxlevels(fsolver, fmaxlevels) 
+
+      integer ierr
+      integer*8 fsolver
+      integer*8 fmaxlevels
+
+      call HYPRE_SStructFACSetMaxLevels(fsolver, fmaxlevels, ierr)
+
+      if(ierr .ne. 0) then
+         print *, 'fhypre_sstructfacsetmaxlevels error = ', ierr
+      endif
+
+      return
+      end
+
+
+c--------------------------------------------------------------------------
+c HYPRE_SStructFACSetMaxIter
+c--------------------------------------------------------------------------
+      subroutine fhypre_sstructfacsetmaxiter(fsolver, fmaxiter) 
+
+      integer ierr
+      integer*8 fsolver
+      integer*8 fmaxiter
+
+      call HYPRE_SStructFACSetMaxIter(fsolver, fmaxiter, ierr)
+
+      if(ierr .ne. 0) then
+         print *, 'fhypre_sstructfacsetmaxiter error = ', ierr
+      endif
+
+      return
+      end
+
+
+c--------------------------------------------------------------------------
+c HYPRE_SStructFACSetRelChange
+c--------------------------------------------------------------------------
+      subroutine fhypre_sstructfacsetrelchange(fsolver, frelchange) 
+
+      integer ierr
+      integer*8 fsolver
+      integer*8 frelchange
+
+      call HYPRE_SStructFACSetRelChange(fsolver, frelchange, ierr)
+
+      if(ierr .ne. 0) then
+         print *, 'fhypre_sstructfacsetrelchange error = ', ierr
+      endif
+
+      return
+      end
+
+
+c--------------------------------------------------------------------------
+c HYPRE_SStructFACSetZeroGuess
+c--------------------------------------------------------------------------
+      subroutine fhypre_sstructfacsetzeroguess(fsolver) 
+
+      integer ierr
+      integer*8 fsolver
+
+      call HYPRE_SStructFACSetZeroGuess(fsolver, ierr)
+
+      if(ierr .ne. 0) then
+         print *, 'fhypre_sstructfacsetzeroguess error = ', ierr
+      endif
+
+      return
+      end
+
+
+c--------------------------------------------------------------------------
+c HYPRE_SStructFACSetNonZeroGuess
+c--------------------------------------------------------------------------
+      subroutine fhypre_sstructfacsetnonzeroguess(fsolver) 
+
+      integer ierr
+      integer*8 fsolver
+
+      call HYPRE_SStructFACSetNonZeroGuess(fsolver, ierr)
+
+      if(ierr .ne. 0) then
+         print *, 'fhypre_sstructfacsetnonzeroguess error = ', ierr
+      endif
+
+      return
+      end
+
+
+c--------------------------------------------------------------------------
+c HYPRE_SStructFACSetRelaxType
+c--------------------------------------------------------------------------
+      subroutine fhypre_sstructfacsetrelaxtype(fsolver, frelaxtype) 
+
+      integer ierr
+      integer*8 fsolver
+      integer*8 frelaxtype
+
+      call HYPRE_SStructFACSetRelaxType(fsolver, frelaxtype, ierr)
+
+      if(ierr .ne. 0) then
+         print *, 'fhypre_sstructfacsetrelaxtype error = ', ierr
+      endif
+
+      return
+      end
+
+
+c--------------------------------------------------------------------------
+c HYPRE_SStructFACSetNumPreRelax
+c--------------------------------------------------------------------------
+      subroutine fhypre_sstructfacsetnumprerelax(fsolver, fnumprerelax) 
+
+      integer ierr
+      integer*8 fsolver
+      integer*8 fnumprerelax
+
+      call HYPRE_SStructFACSetNumPreRelax(fsolver, fnumprerelax, ierr)
+
+      if(ierr .ne. 0) then
+         print *, 'fhypre_sstructfacsetnumprerelax error = ', ierr
+      endif
+
+      return
+      end
+
+
+c--------------------------------------------------------------------------
+c HYPRE_SStructFACSetNumPostRelax
+c--------------------------------------------------------------------------
+      subroutine fhypre_sstructfacsetnumpostrelax(fsolver,
+     1                                            fnumpostrelax) 
+
+      integer ierr
+      integer*8 fsolver
+      integer*8 fnumpostrelax
+
+      call HYPRE_SStructFACSetNumPostRelax(fsolver, fnumpostrelax, ierr)
+
+      if(ierr .ne. 0) then
+         print *, 'fhypre_sstructfacsetnumpostrelax error = ', ierr
+      endif
+
+      return
+      end
+
+
+c--------------------------------------------------------------------------
+c HYPRE_SStructFACSetCoarseSolverType
+c--------------------------------------------------------------------------
+      subroutine fhypre_sstructfacsetcoarsesolver(fsolver,
+     1                                            fcsolvertype) 
+
+      integer ierr
+      integer*8 fsolver
+      integer*8 fcsolvertype
+
+      call HYPRE_SStructFACSetCoarseSolverType(fsolver, fcsolvertype,
+     1                                         ierr)
+
+      if(ierr .ne. 0) then
+         print *, 'fhypre_sstructfacsetcoarsesolvertype error = ', ierr
+      endif
+
+      return
+      end
+
+
+c--------------------------------------------------------------------------
+c HYPRE_SStructFACSetLogging
+c--------------------------------------------------------------------------
+      subroutine fhypre_sstructfacsetlogging(fsolver, flog)
+
+      integer ierr
+      integer flog
+      integer*8 fsolver
+
+      call HYPRE_SStructFACSetLogging(fsolver, flog, ierr)
+
+      if(ierr .ne. 0) then
+         print *, 'fhypre_sstructfacsetlogging error = ', ierr
+      endif
+
+      return
+      end
+
+
+c--------------------------------------------------------------------------
+c HYPRE_SStructFACGetNumIterations
+c--------------------------------------------------------------------------
+      subroutine fhypre_sstructfacgetnumiteration(fsolver, fnumiter)
+
+      integer ierr
+      integer fnumiter
+      integer*8 fsolver
+
+      call HYPRE_SStructFACGetNumIterations(fsolver, fnumiter, ierr)
+
+      if(ierr .ne. 0) then
+         print *, 'fhypre_sstructfacgetnumiteration error = ', ierr
+      endif
+
+      return
+      end
+
+
+c--------------------------------------------------------------------------
+c HYPRE_SStructFACGetFinalRelativeResidualNorm
+c--------------------------------------------------------------------------
+      subroutine fhypre_sstructfacgetfinalrelativ(fsolver, fnorm)
+
+      integer ierr
+      integer*8 fsolver
+      double precision fnorm
+
+      call HYPRE_SStructFACGetFinalRelativeResidualNorm(fsolver, fnorm,
+     1                                                  ierr)
+
+      if(ierr .ne. 0) then
+         print *, 'fhypre_sstructfacgetfinalrelative error = ', ierr
+      endif
+
+      return
+      end
+
+
+
+
+
+c****************************************************************************
+c                HYPRE_SStructPCG routines
+c****************************************************************************
+
 c--------------------------------------------------------------------------
 c HYPRE_SStructPCGCreate
 c--------------------------------------------------------------------------
       subroutine fhypre_sstructpcgcreate(fcomm, fsolver)
-{
+
       integer ierr
       integer*8 fcomm
       integer*8 fsolver
@@ -888,6 +1382,12 @@ c--------------------------------------------------------------------------
 
 
 
+
+
+c****************************************************************************
+c                HYPRE_SStructSplit routines
+c****************************************************************************
+
 c--------------------------------------------------------------------------
 c HYPRE_SStructSplitCreate
 c--------------------------------------------------------------------------
@@ -1099,6 +1599,12 @@ c--------------------------------------------------------------------------
       end
 
 
+
+
+
+c****************************************************************************
+c                HYPRE_SStructSYSPFMG routines
+c****************************************************************************
 
 c--------------------------------------------------------------------------
 c HYPRE_SStructSysPFMGCreate
