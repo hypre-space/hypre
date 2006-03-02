@@ -113,25 +113,25 @@ parse_arguments ()
   do
     argcur=$arg
     case $arg in
-      A) confbuildtest $Run     "--with-test-alpha" "test_alpha";;
-      a) confbuildtest $OPTARG  " "             "default";;
-      B) confbuildtest $Run     "--with-test-beta" "test_beta";;
-      b) confbuildtest $OPTARG  "--with-babel"  "babel";;
-      c) build "all++"   "all++"         "test";;
+      A) confbuildtest $Run    "--with-test-alpha"      "all"   " "    "test_alpha";;
+      a) confbuildtest $OPTARG " "                      "all"   " "    "default";;
+      B) confbuildtest $Run    "--with-test-beta"       "all"   " "    "test_beta";;
+      b) confbuildtest $OPTARG "--with-babel"           "all"   " "    "babel";;
+      c) confbuildtest $Build  " "                      "all++" "test" "all++";;
       D) DEBUG_MODE="yes"; set -xv;;
-      d) build "all"     "docs"          "docs";;
-      e) confbuildtest $OPTARG  "--enable-debug" "debug";;
-      f) build "all77"   "all77"         "test";;
-      G) confbuildtest $Run     "--with-test-general" "test_general";;
+      d) confbuildtest $Build  " "                      "all"   "docs" "docs";;
+      e) confbuildtest $OPTARG "--enable-debug"         "all"   " "    "debug";;
+      f) confbuildtest $Build  " "                      "all77" "test" "all77";;
+      G) confbuildtest $Run    "--with-test-general"    "all"   " "    "test_general";;
       h) usage; exit 2;;
-      i) confbuildtest $OPTARG  "--with-insure" "insure";;
-     +i) confbuildtest $OPTARG  "--with-insure-to-file" "insure";;
-      l) confbuildtest $OPTARG  "--enable-shared" "shared";;
+      i) confbuildtest $OPTARG "--with-insure"          "all"   " "    "insure";;
+     +i) confbuildtest $OPTARG "--with-insure-to-file"  "all"   " "    "insure";;
+      l) confbuildtest $OPTARG "--enable-shared"        "all"   " "    "shared";;
       m) HYPRE_SEND_MAIL="yes";;
-      n) confbuildtest $Build   "--without-MPI" "no_mpi";;
-      o) confbuildtest $OPTARG  "--with-openmp" "openmp";;
+      n) confbuildtest $Build  "--without-MPI"          "all"   " "    "no_mpi";;
+      o) confbuildtest $OPTARG "--with-openmp"          "all"   " "    "openmp";;
       r) HYPRE_RUN_MACHINE=$OPTARG;;
-      s) confbuildtest $Build   "--with-strict-checking" "strict_checking";;
+      s) confbuildtest $Build  "--with-strict-checking" "all"   " "    "strict_checking";;
       v) HYPRE_MESSAGE=$OPTARG;;
       :) echo "$0: \"$argcur\" requires a value"; exit 2;;
      \?) echo "$0: INVALID option \"$argcur\" at $OPTIND"; exit 2;;
@@ -536,7 +536,7 @@ cleanup () {
 
 confbuildtest () 
 {
-   BuildOpt=$1	 ConfigOption=$2  MessageStr=$3
+   TestOpt=$1  ConfigOpt=$2  MakeOpt=$3  MakeDir=$4  MessageStr=$5
 
 #
 # Configure Section
@@ -546,38 +546,43 @@ confbuildtest ()
    cd $StdBuildDir
    [ -f config.cache ] && rm config.cache
 
-   if [ "$ConfigOption" = " " ]
+   if [ "$ConfigOpt" = " " ]
    then
       $CONFIGURE 1> ${Hdr}.${MessageStr}.configure.log \
                  2> ${Hdr}.${MessageStr}.configure.err
-   elif [ "$ConfigOption" = "--with-babel" ]          ## need to disable Fortran90
+   elif [ "$ConfigOpt" = "--with-babel" ]          ## need to disable Fortran90
    then                                               ## ONLY when building Babel
-      ExtraConfigOption="--disable-fortran90"
-      $CONFIGURE "$ConfigOption" "$ExtraConfigOption"  \
+      ExtraConfigOpt="--disable-fortran90"
+      $CONFIGURE "$ConfigOpt" "$ExtraConfigOpt"  \
                               1> ${Hdr}.${MessageStr}.configure.log \
 	                      2> ${Hdr}.${MessageStr}.configure.err
    else
-      $CONFIGURE "$ConfigOption" 1> ${Hdr}.${MessageStr}.configure.log \
-                                 2> ${Hdr}.${MessageStr}.configure.err
+      $CONFIGURE "$ConfigOpt" 1> ${Hdr}.${MessageStr}.configure.log \
+                              2> ${Hdr}.${MessageStr}.configure.err
    fi
 
 #
 # Make Section
-# Remove all *.o files before building for current options
+# Remove all *.o files before building for current options unless testing
+# public versions
    if [ "${MessageStr}" != "test_alpha" -a "${MessageStr}" != "test_beta"  -a \
         "${MessageStr}" != "test_general" ]
    then
       echo "Autotest starting make of $MessageStr"
+      if [ "${MakeDir}" != "" -a "${MakeDir}" != " " ]
+      then
+         cd $MakeDir
+      fi
       $MAKE clean
-      $MAKE all 1>> ${Hdr}.${MessageStr}.all.log \
-                2>> ${Hdr}.${MessageStr}.all.err
+      $MAKE ${MakeOpt} 1>> ${Hdr}.${MessageStr}.all.log \
+                       2>> ${Hdr}.${MessageStr}.all.err
    fi
 
 #
 # Run Section
 #    If the run option is set; cd to the test sub-directory; build the driver codes
 #    then execute the test cases on the specified platform
-   if [ ${BuildOpt} -eq $Run ]
+   if [ ${TestOpt} -eq $Run ]
    then
       echo "Autotest starting execution of $MessageStr"
       cd $StdTestDir
@@ -611,39 +616,6 @@ confbuildtest ()
          )"
       fi
    fi
-   seconds; TIME=`expr $SECS - $TIME`
-   echo "Autotest finished $MessageStr taking $TIME seconds"
-}
- 
-
-#=============================================================================
-# General purpose make function
-# Used to ONLY build the files located in the directory defined by the
-# MakeDir argument; clean up temporary files after building.
-# The file config/Makefile.config must be available in order to build; if it 
-# is not available; run configure to generate it before building the requested
-# files.
-#=============================================================================
-build () 
-{
-   MakeOpt=$1	 MessageStr=$2	 MakeDir=$3
-
-   seconds; TIME=$SECS
-   echo "Autotest starting make of $MessageStr"
-
-   if [ ! -r $StdBuildDir/config/Makefile.config ]
-   then
-      cd $StdBuildDir
-      $CONFIGURE 1> ${Hdr}.${MessageStr}.configure.log \
-                 2> ${Hdr}.${MessageStr}.configure.err
-   fi
-
-   cd $StdBuildDir/$MakeDir
-   $MAKE $MakeOpt 1> ${Hdr}.${MessageStr}.all.log \
-        	  2> ${Hdr}.${MessageStr}.all.err
-
-   $MAKE clean
-
    seconds; TIME=`expr $SECS - $TIME`
    echo "Autotest finished $MessageStr taking $TIME seconds"
 }
