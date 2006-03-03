@@ -280,10 +280,6 @@ fij_mv: fij_mv.f
 	@echo  "Building" $@ "... "
 	${F77} -c $@  ${FFLAGS}
 
-fkrylov: fkrylov.f
-	@echo  "Building" $@ "... "
-	${F77} -c $@  ${FFLAGS}
-
 fparcsr_ls: fparcsr_ls.f
 	@echo  "Building" $@ "... "
 	${F77} -c $@  ${FFLAGS}
@@ -325,6 +321,10 @@ ex5_for: fij_mv.o fparcsr_mv.o fparcsr_ls.o ex5_for.o
 	${LINK_CC} -o $@ fij_mv.o fparcsr_mv.o fparcsr_ls.o $@.o ${FFLAGS} ${LFLAGS}
 
 ex6_for: fstruct_mv.o fstruct_ls.o fsstruct_mv.o fsstruct_ls.o ex6_for.o
+	@echo  "Building" $@ "... "
+	${LINK_CC} -o $@ fstruct_mv.o fstruct_ls.o fsstruct_mv.o fsstruct_ls.o $@.o ${FFLAGS} ${LFLAGS}
+
+ex7_for: fstruct_mv.o fstruct_ls.o fsstruct_mv.o fsstruct_ls.o ex7_for.o
 	@echo  "Building" $@ "... "
 	${LINK_CC} -o $@ fstruct_mv.o fstruct_ls.o fsstruct_mv.o fsstruct_ls.o $@.o ${FFLAGS} ${LFLAGS}
 
