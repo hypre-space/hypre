@@ -167,7 +167,7 @@ hypre_F90_IFACE(hypre_parcsrmatrixgetcolpartiti, HYPRE_PARCSRMATRIXGETCOLPARTITI
    int    *col_partitioning;
 
    *ierr = (int) 
-         ( HYPRE_ParCSRMatrixGetRowPartitioning( (HYPRE_ParCSRMatrix) *matrix,
+         ( HYPRE_ParCSRMatrixGetColPartitioning( (HYPRE_ParCSRMatrix) *matrix,
                                                  (int **)    &col_partitioning  ) );
 
    *col_partitioning_ptr = (long int) col_partitioning;

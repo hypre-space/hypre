@@ -278,31 +278,35 @@ struct: struct.o
 
 fij_mv: fij_mv.f
 	@echo  "Building" $@ "... "
-	${F77} -c fij_mv.f  ${FFLAGS}
+	${F77} -c $@  ${FFLAGS}
+
+fkrylov: fkrylov.f
+	@echo  "Building" $@ "... "
+	${F77} -c $@  ${FFLAGS}
 
 fparcsr_ls: fparcsr_ls.f
 	@echo  "Building" $@ "... "
-	${F77} -c fparcsr_ls.f  ${FFLAGS}
+	${F77} -c $@  ${FFLAGS}
 
 fparcsr_mv: fparcsr_mv.f
 	@echo  "Building" $@ "... "
-	${F77} -c fparcsr_mv.f ${FFLAGS}
+	${F77} -c $@  ${FFLAGS}
 
 fsstruct_ls: fsstruct_ls.f
 	@echo  "Building" $@ "... "
-	${F77} -c fsstruct_ls.f  ${FFLAGS}
+	${F77} -c $@  ${FFLAGS}
 
 fsstruct_mv: fsstruct_mv.f
 	@echo  "Building" $@ "... "
-	${F77} -c fsstruct_mv.f ${FFLAGS}
+	${F77} -c $@  ${FFLAGS}
 
 fstruct_ls: fstruct_ls.f
 	@echo  "Building" $@ "... "
-	${F77} -c fstruct_ls.f  ${FFLAGS}
+	${F77} -c $@  ${FFLAGS}
 
 fstruct_mv: fstruct_mv.f
 	@echo  "Building" $@ "... "
-	${F77} -c fstruct_mv.f ${FFLAGS}
+	${F77} -c $@  ${FFLAGS}
 
 struct_for: fstruct_mv.o fstruct_ls.o struct_for.o
 	@echo  "Building" $@ "... "
@@ -321,10 +325,6 @@ ex5_for: fij_mv.o fparcsr_mv.o fparcsr_ls.o ex5_for.o
 	${LINK_CC} -o $@ fij_mv.o fparcsr_mv.o fparcsr_ls.o $@.o ${FFLAGS} ${LFLAGS}
 
 ex6_for: fstruct_mv.o fstruct_ls.o fsstruct_mv.o fsstruct_ls.o ex6_for.o
-	@echo  "Building" $@ "... "
-	${LINK_CC} -o $@ fstruct_mv.o fstruct_ls.o fsstruct_mv.o fsstruct_ls.o $@.o ${FFLAGS} ${LFLAGS}
-
-ex7_for: fstruct_mv.o fstruct_ls.o fsstruct_mv.o fsstruct_ls.o ex7_for.o
 	@echo  "Building" $@ "... "
 	${LINK_CC} -o $@ fstruct_mv.o fstruct_ls.o fsstruct_mv.o fsstruct_ls.o $@.o ${FFLAGS} ${LFLAGS}
 

@@ -140,6 +140,46 @@ c--------------------------------------------------------------------------
       end
 
 c--------------------------------------------------------------------------
+c HYPRE_ParCSRMatrixGetRowPartitioning
+c--------------------------------------------------------------------------
+      subroutine fhypre_parcsrmatrixgetrowpartit (fmatrix, frow_ptr) 
+
+      integer ierr
+      integer*8 fmatrix
+      integer*8 frow_ptr
+
+      call HYPRE_ParCSRMatrixGetRowPartiti(fmatrix, frow_ptr, 
+     1                                          ierr)
+
+      if (ierr .ne. 0) then
+         print *, 'fhypre_parcsrmatrixgetrowpartitioning: error = ',
+     1                                                     ierr
+      endif
+  
+      return
+      end
+
+c--------------------------------------------------------------------------
+c HYPRE_ParCSRMatrixGetColPartitioning
+c--------------------------------------------------------------------------
+      subroutine fhypre_parcsrmatrixgetcolpartit (fmatrix, fcol_ptr) 
+
+      integer ierr
+      integer*8 fmatrix
+      integer*8 fcol_ptr
+
+      call HYPRE_ParCSRMatrixGetColPartiti(fmatrix, fcol_ptr, 
+     1                                          ierr)
+
+      if (ierr .ne. 0) then
+         print *, 'fhypre_parcsrmatrixgetcolpartitioning: error = ',
+     1                                                     ierr
+      endif
+  
+      return
+      end
+
+c--------------------------------------------------------------------------
 c HYPRE_ParCSRMatrixGetLocalRange
 c--------------------------------------------------------------------------
       subroutine fhypre_parcsrmatrixgetlocalrange (fmatrix, frow_start, 
@@ -211,6 +251,30 @@ c--------------------------------------------------------------------------
       end
 
 c--------------------------------------------------------------------------
+c HYPRE_CSRMatrixtoParCSRMatrix
+c--------------------------------------------------------------------------
+      subroutine fhypre_csrmatrixtoparcsrmatrix (fcomm, fA_CSR, 
+     1                                           frow_part, fcol_part,
+     2                                           fmatrix)
+
+      integer ierr
+      integer fcomm
+      integer frow_part
+      integer fcol_part
+      integer*8 fA_CSR
+      integer*8 fmatrix
+
+      call HYPRE_CSRMatriXToParCSRMatrix(fcomm, fA_CSR, frow_part, 
+     1                                   fcol_part, fmatrix, ierr)
+
+      if (ierr .ne. 0) then
+         print *, 'fhypre_csrmatrixtoparcsrmatrix: error = ', ierr
+      endif
+  
+      return
+      end
+
+c--------------------------------------------------------------------------
 c HYPRE_ParCSRMatrixMatvec
 c--------------------------------------------------------------------------
       subroutine fhypre_parcsrmatrixmatvec (falpha, fA, fx, fbeta, fy)
@@ -269,6 +333,29 @@ c--------------------------------------------------------------------------
 
       if (ierr .ne. 0) then
          print *, 'fhypre_parvectorcreate: error = ', ierr
+      endif
+  
+      return
+      end
+
+c--------------------------------------------------------------------------
+c HYPRE_ParMultiVectorCreate
+c--------------------------------------------------------------------------
+      subroutine fhypre_parmultivectorcreate(fcomm, fsize, fpartion, 
+     1                                       fnumvecs, fvector)
+
+      integer ierr
+      integer fcomm
+      integer fsize
+      integer fnumvecs
+      integer*8 fvector
+      integer*8 fpartion
+
+      call HYPRE_ParMultiVectorCreate(fcomm, fsize, fpartion, fnumvecs,
+     1                                fvector, ierr)
+
+      if (ierr .ne. 0) then
+         print *, 'fhypre_parmultivectorcreate: error = ', ierr
       endif
   
       return
@@ -341,6 +428,191 @@ c--------------------------------------------------------------------------
 
       if (ierr .ne. 0) then
          print *, 'fhypre_parvectorprint: error = ', ierr
+      endif
+
+      return
+      end
+
+c--------------------------------------------------------------------------
+c HYPRE_ParVectorSetConstantValues
+c--------------------------------------------------------------------------
+      subroutine fhypre_parvectorsetconstantvalue (fvector, fvalue)
+
+      integer ierr
+      double precision fvalue
+      integer*8 fvector
+
+      call HYPRE_ParVectorSetConstantValue (fvector, fvalue, ierr)
+
+      if (ierr .ne. 0) then
+         print *, 'fhypre_parvectorconstantvalues: error = ', ierr
+      endif
+
+      return
+      end
+
+c--------------------------------------------------------------------------
+c HYPRE_ParVectorSetRandomValues
+c--------------------------------------------------------------------------
+      subroutine fhypre_parvectorsetrandomvalues (fvector, fseed)
+
+      integer ierr
+      integer fseed
+      integer*8 fvector
+
+      call HYPRE_ParVectorSetRandomValues (fvector, fvalue, ierr)
+
+      if (ierr .ne. 0) then
+         print *, 'fhypre_parvectorrandomvalues: error = ', ierr
+      endif
+
+      return
+      end
+
+c--------------------------------------------------------------------------
+c HYPRE_ParVectorCopy
+c--------------------------------------------------------------------------
+      subroutine fhypre_parvectorcopy (fx, fy)
+
+      integer ierr
+      integer*8 fx
+      integer*8 fy
+
+      call HYPRE_ParVectorCopy (fx, fy, ierr)
+
+      if (ierr .ne. 0) then
+         print *, 'fhypre_parvectorcopy: error = ', ierr
+      endif
+
+      return
+      end
+
+c--------------------------------------------------------------------------
+c HYPRE_ParVectorCloneShallow
+c--------------------------------------------------------------------------
+      subroutine fhypre_parvectorcloneshallow (fx)
+
+      integer ierr
+      integer*8 fx
+
+      call HYPRE_ParVectorCloneShallow (fx, ierr)
+
+      if (ierr .ne. 0) then
+         print *, 'fhypre_parvectorcloneshallow: error = ', ierr
+      endif
+
+      return
+      end
+
+c--------------------------------------------------------------------------
+c HYPRE_ParVectorScale
+c--------------------------------------------------------------------------
+      subroutine fhypre_parvectorscale (fvalue, fx)
+
+      integer ierr
+      double precision fvalue
+      integer*8 fx
+
+      call HYPRE_ParVectorScale (fvalue, fx, ierr)
+
+      if (ierr .ne. 0) then
+         print *, 'fhypre_parvectorscale: error = ', ierr
+      endif
+
+      return
+      end
+
+c--------------------------------------------------------------------------
+c HYPRE_ParVectorAxpy
+c--------------------------------------------------------------------------
+      subroutine fhypre_parvectoraxpy (fvalue, fx, fy)
+
+      integer ierr
+      double precision fvalue
+      integer*8 fx
+      integer*8 fy
+
+      call HYPRE_ParVectorAxpy (fvalue, fx, fy, ierr)
+
+      if (ierr .ne. 0) then
+         print *, 'fhypre_parvectoraxpy: error = ', ierr
+      endif
+
+      return
+      end
+
+c--------------------------------------------------------------------------
+c HYPRE_ParVectorInnerProd
+c--------------------------------------------------------------------------
+      subroutine fhypre_parvectorinnerprod (fx, fy, fprod)
+
+      integer ierr
+      double precision fprod
+      integer*8 fx
+      integer*8 fy
+
+      call HYPRE_ParVectorInnerProd (fx, fy, fprod, ierr)
+
+      if (ierr .ne. 0) then
+         print *, 'fhypre_parvectorinnerprod: error = ', ierr
+      endif
+
+      return
+      end
+
+
+
+c--------------------------------------------------------------------------
+c hypre_ParCSRMatrixGlobalNumRows
+c--------------------------------------------------------------------------
+      subroutine fhypre_parcsrmatrixglobalnumrow (fmatrix, fnrows)
+
+      integer ierr
+      integer fnrows
+      integer*8 fmatrix
+
+      call hypre_ParCSRMatrixGlobalNumRows (fmatrix, fnrows, ierr)
+
+      if (ierr .ne. 0) then
+         print *, 'fhypre_parcsrmatrixglobalnumrows: error = ', ierr
+      endif
+
+      return
+      end
+
+c--------------------------------------------------------------------------
+c hypre_ParCSRMatrixRowStarts
+c--------------------------------------------------------------------------
+      subroutine fhypre_parcsrmatrixrowstarts (fmatrix, frows)
+
+      integer ierr
+      integer*8 frows
+      integer*8 fmatrix
+
+      call hypre_ParCSRMatrixRowStarts (fmatrix, frows, ierr)
+
+      if (ierr .ne. 0) then
+         print *, 'fhypre_parcsrmatrixrowstarts: error = ', ierr
+      endif
+
+      return
+      end
+
+
+
+c--------------------------------------------------------------------------
+c hypre_ParVectorSetDataOwner
+c--------------------------------------------------------------------------
+      subroutine fhypre_parvectorsetdataowner (fv, fown)
+
+      integer ierr
+      integer fown
+      integer*8 fv
+
+      call hypre_SetParVectorDataOwner (fv, fown, ierr)
+
+      if (ierr .ne. 0) then
+         print *, 'fhypre_parvectorsetdataowner: error = ', ierr
       endif
 
       return

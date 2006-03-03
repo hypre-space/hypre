@@ -114,7 +114,7 @@ hypre_F90_IFACE(hypre_parcsrbicgstabsetmaxiter, HYPRE_PARCSRBICGSTABSETMAXITER)(
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_ParCSRBiCGSTABSeStopCritt
+ * HYPRE_ParCSRBiCGSTABSeStopCrit
  *--------------------------------------------------------------------------*/
 
 void

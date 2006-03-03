@@ -108,7 +108,7 @@ c--------------------------------------------------------------------------
 c--------------------------------------------------------------------------
 c HYPRE_SStructBiCGSTABSetMinIter
 c--------------------------------------------------------------------------
-      subroutine fhypre_sstructbicgstabsetminiter(fsolver, fmin_iter)
+      subroutine fhypre_sstructbicgstabsetminite(fsolver, fmin_iter)
 
       integer ierr
       integer fmin_iter
@@ -127,7 +127,7 @@ c--------------------------------------------------------------------------
 c--------------------------------------------------------------------------
 c HYPRE_SStructBiCGSTABSetMaxIter
 c--------------------------------------------------------------------------
-      subroutine fhypre_sstructbicgstabsetmaxiter(fsolver, fmax_iter)
+      subroutine fhypre_sstructbicgstabsetmaxite(fsolver, fmax_iter)
 
       integer ierr
       integer fmax_iter
@@ -146,13 +146,13 @@ c--------------------------------------------------------------------------
 c--------------------------------------------------------------------------
 c HYPRE_SStructBiCGSTABSetStopCrit
 c--------------------------------------------------------------------------
-      subroutine fhypre_sstructbicgstabsetstopcri(fsolver, fstop_crit)
+      subroutine fhypre_sstructbicgstabsetstopcr(fsolver, fstop_crit)
 
       integer ierr
       integer fstop_crit
       integer*8 fsolver
 
-      call HYPRE_SStructBiCGSTABSetStopCrit(fsolver, fstop_crit, ierr)
+      call HYPRE_SStructBiCGSTABSetStopCri(fsolver, fstop_crit, ierr)
 
       if(ierr .ne. 0) then
          print *, 'fhypre_sstructbicgstabsetstopcrit error = ', ierr
@@ -165,7 +165,7 @@ c--------------------------------------------------------------------------
 c--------------------------------------------------------------------------
 c HYPRE_SStructBiCGSTABSetPrecond
 c--------------------------------------------------------------------------
-      subroutine fhypre_sstructbicgstabsetprecond(fsolver, fprecond_id,
+      subroutine fhypre_sstructbicgstabsetprecon(fsolver, fprecond_id,
      1                                            fprecond)
 
       integer ierr
@@ -187,7 +187,7 @@ c--------------------------------------------------------------------------
 c--------------------------------------------------------------------------
 c HYPRE_SStructBiCGSTABSetLogging
 c--------------------------------------------------------------------------
-      subroutine fhypre_sstructbicgstabsetlogging(fsolver, flog)
+      subroutine fhypre_sstructbicgstabsetloggin(fsolver, flog)
 
       integer ierr
       integer flog
@@ -206,13 +206,13 @@ c--------------------------------------------------------------------------
 c--------------------------------------------------------------------------
 c HYPRE_SStructBiCGSTABSetPrintLevel
 c--------------------------------------------------------------------------
-      subroutine fhypre_sstructbicgstabsetprintle(fsolver, fprint)
+      subroutine fhypre_sstructbicgstabsetprintl(fsolver, fprint)
 
       integer ierr
       integer fprint
       integer*8 fsolver
 
-      call HYPRE_SStructBiCGSTABSetPrintLevel(fsolver, fprint, ierr)
+      call HYPRE_SStructBiCGSTABSetPrintLe(fsolver, fprint, ierr)
 
       if(ierr .ne. 0) then
          print *, 'fhypre_sstructbicgstabsetprintlevel error = ', ierr
@@ -225,14 +225,14 @@ c--------------------------------------------------------------------------
 c--------------------------------------------------------------------------
 c HYPRE_SStructBiCGSTABGetNumIterations
 c--------------------------------------------------------------------------
-      subroutine fhypre_sstructbicgstabgetnumiter(fsolver, fnumiter)
+      subroutine fhypre_sstructbicgstabgetnumite(fsolver, fnumiter)
 
       integer ierr
       integer fnumiter
       integer*8 fsolver
 
-      call HYPRE_SStructBiCGSTABGetNumIterations(fsolver, fnumiter, 
-     1                                           ierr)
+      call HYPRE_SStructBiCGSTABGetNumIter(fsolver, fnumiter, 
+     1                                     ierr)
 
       if(ierr .ne. 0) then
          print *, 'fhypre_sstructbicgstabgetnumiterations error = ', 
@@ -246,14 +246,13 @@ c--------------------------------------------------------------------------
 c--------------------------------------------------------------------------
 c HYPRE_SStructBiCGSTABGetFinalRelativeResidualNorm
 c--------------------------------------------------------------------------
-      subroutine fhypre_sstructbicgstabgetfinalre(fsolver, fnorm)
+      subroutine fhypre_sstructbicgstabgetfinalr(fsolver, fnorm)
 
       integer ierr
       integer*8 fsolver
       double precision fnorm
 
-      call HYPRE_SStructBiCGSTABGetFinalRelativeResidualNorm(fsolver,
-     1                                                      fnorm, ierr)
+      call HYPRE_SStructBiCGSTABGetFinalRe(fsolver, fnorm, ierr)
 
       if(ierr .ne. 0) then
          print *, 'fhypre_sstructbicgstabgetfinalrelative error = ',
@@ -267,13 +266,13 @@ c--------------------------------------------------------------------------
 c--------------------------------------------------------------------------
 c HYPRE_SStructBiCGSTABGetResidual
 c--------------------------------------------------------------------------
-      subroutine fhypre_sstructbicgstabgetresidua(fsolver, fresidual)
+      subroutine fhypre_sstructbicgstabgetresidu(fsolver, fresidual)
 
       integer ierr
       integer*8 fsolver
       integer*8 fresidual
 
-      call HYPRE_SStructBiCGSTABGetResidual(fsolver, fresidual, ierr)
+      call HYPRE_SStructBiCGSTABGetResidua(fsolver, fresidual, ierr)
 
       if(ierr .ne. 0) then
          print *, 'fhypre_sstructbicgstabgetresidual error = ', ierr
@@ -508,7 +507,7 @@ c--------------------------------------------------------------------------
 c--------------------------------------------------------------------------
 c HYPRE_SStructGMRESSetPrintLevel
 c--------------------------------------------------------------------------
-      subroutine fhypre_sstructgmressetprintlevel(fsolver, flevel)
+      subroutine fhypre_sstructgmressetprintleve(fsolver, flevel)
 
       integer ierr
       integer flevel
@@ -527,13 +526,13 @@ c--------------------------------------------------------------------------
 c--------------------------------------------------------------------------
 c HYPRE_SStructGMRESGetNumIterations
 c--------------------------------------------------------------------------
-      subroutine fhypre_sstructgmresgetnumiterati(fsolver, fnumiter)
+      subroutine fhypre_sstructgmresgetnumiterat(fsolver, fnumiter)
 
       integer ierr
       integer fnumiter
       integer*8 fsolver
 
-      call HYPRE_SStructGMRESGetNumIterations(fsolver, fnumiter, ierr)
+      call HYPRE_SStructGMRESGetNumIterati(fsolver, fnumiter, ierr)
 
       if(ierr .ne. 0) then
          print *, 'fhypre_sstructgmresgetnumiteration error = ', ierr
@@ -546,14 +545,13 @@ c--------------------------------------------------------------------------
 c--------------------------------------------------------------------------
 c HYPRE_SStructGMRESGetFinalRelativeResidualNorm
 c--------------------------------------------------------------------------
-      subroutine fhypre_sstructgmresgetfinalrelat(fsolver, fnorm)
+      subroutine fhypre_sstructgmresgetfinalrela(fsolver, fnorm)
 
       integer ierr
       integer*8 fsolver
       double precision fnorm
 
-      call HYPRE_SStructGMRESGetFinalRelativeResidualNorm(fsolver, 
-     1                                                    fnorm, ierr)
+      call HYPRE_SStructGMRESGetFinalRelat(fsolver, fnorm, ierr)
 
       if(ierr .ne. 0) then
          print *, 'fhypre_sstructgmresgetfinalrelative error = ', ierr
@@ -592,13 +590,13 @@ c****************************************************************************
 c--------------------------------------------------------------------------
 c HYPRE_SStructPVectorSetRandomValues
 c--------------------------------------------------------------------------
-      subroutine fhypre_sstructpvectorsetrandomva(fsolver, fseed)
+      subroutine fhypre_sstructpvectorsetrandomv(fsolver, fseed)
 
       integer ierr
       integer*8 fsolver
       integer*8 fseed
 
-      call HYPRE_SStructPVectorSetRandomValues(fsolver, fseed, ierr)
+      call HYPRE_SStructPVectorSetRandomVa(fsolver, fseed, ierr)
 
       if(ierr .ne. 0) then
          print *, 'fhypre_sstructpvectorsetrandomvalues error = ', ierr
@@ -611,13 +609,13 @@ c--------------------------------------------------------------------------
 c--------------------------------------------------------------------------
 c HYPRE_SStructVectorSetRandomValues
 c--------------------------------------------------------------------------
-      subroutine fhypre_sstructvectorsetrandomval(fsolver, fseed)
+      subroutine fhypre_sstructvectorsetrandomva(fsolver, fseed)
 
       integer ierr
       integer*8 fsolver
       integer*8 fseed
 
-      call HYPRE_SStructVectorSetRandomValues(fsolver, fseed, ierr)
+      call HYPRE_SStructVectorSetRandomVal(fsolver, fseed, ierr)
 
       if(ierr .ne. 0) then
          print *, 'fhypre_sstructvectorsetrandomvalues error = ', ierr
@@ -810,7 +808,7 @@ c--------------------------------------------------------------------------
 c--------------------------------------------------------------------------
 c HYPRE_SStructFACSetPRefinements
 c--------------------------------------------------------------------------
-      subroutine fhypre_sstructfacsetprefinements(fsolver, fnparts,
+      subroutine fhypre_sstructfacsetprefinement(fsolver, fnparts,
      1                                            frfactors)
 
       integer ierr
@@ -907,7 +905,7 @@ c--------------------------------------------------------------------------
 c--------------------------------------------------------------------------
 c HYPRE_SStructFACSetNonZeroGuess
 c--------------------------------------------------------------------------
-      subroutine fhypre_sstructfacsetnonzeroguess(fsolver) 
+      subroutine fhypre_sstructfacsetnonzerogues(fsolver) 
 
       integer ierr
       integer*8 fsolver
@@ -963,7 +961,7 @@ c--------------------------------------------------------------------------
 c--------------------------------------------------------------------------
 c HYPRE_SStructFACSetNumPostRelax
 c--------------------------------------------------------------------------
-      subroutine fhypre_sstructfacsetnumpostrelax(fsolver,
+      subroutine fhypre_sstructfacsetnumpostrela(fsolver,
      1                                            fnumpostrelax) 
 
       integer ierr
@@ -983,15 +981,15 @@ c--------------------------------------------------------------------------
 c--------------------------------------------------------------------------
 c HYPRE_SStructFACSetCoarseSolverType
 c--------------------------------------------------------------------------
-      subroutine fhypre_sstructfacsetcoarsesolver(fsolver,
+      subroutine fhypre_sstructfacsetcoarsesolve(fsolver,
      1                                            fcsolvertype) 
 
       integer ierr
       integer*8 fsolver
       integer*8 fcsolvertype
 
-      call HYPRE_SStructFACSetCoarseSolverType(fsolver, fcsolvertype,
-     1                                         ierr)
+      call HYPRE_SStructFACSetCoarseSolver(fsolver, fcsolvertype,
+     1                                      ierr)
 
       if(ierr .ne. 0) then
          print *, 'fhypre_sstructfacsetcoarsesolvertype error = ', ierr
@@ -1023,13 +1021,13 @@ c--------------------------------------------------------------------------
 c--------------------------------------------------------------------------
 c HYPRE_SStructFACGetNumIterations
 c--------------------------------------------------------------------------
-      subroutine fhypre_sstructfacgetnumiteration(fsolver, fnumiter)
+      subroutine fhypre_sstructfacgetnumiteratio(fsolver, fnumiter)
 
       integer ierr
       integer fnumiter
       integer*8 fsolver
 
-      call HYPRE_SStructFACGetNumIterations(fsolver, fnumiter, ierr)
+      call HYPRE_SStructFACGetNumIteration(fsolver, fnumiter, ierr)
 
       if(ierr .ne. 0) then
          print *, 'fhypre_sstructfacgetnumiteration error = ', ierr
@@ -1042,14 +1040,13 @@ c--------------------------------------------------------------------------
 c--------------------------------------------------------------------------
 c HYPRE_SStructFACGetFinalRelativeResidualNorm
 c--------------------------------------------------------------------------
-      subroutine fhypre_sstructfacgetfinalrelativ(fsolver, fnorm)
+      subroutine fhypre_sstructfacgetfinalrelati(fsolver, fnorm)
 
       integer ierr
       integer*8 fsolver
       double precision fnorm
 
-      call HYPRE_SStructFACGetFinalRelativeResidualNorm(fsolver, fnorm,
-     1                                                  ierr)
+      call HYPRE_SStructFACGetFinalRelativ(fsolver, fnorm, ierr)
 
       if(ierr .ne. 0) then
          print *, 'fhypre_sstructfacgetfinalrelative error = ', ierr
@@ -1284,13 +1281,13 @@ c--------------------------------------------------------------------------
 c--------------------------------------------------------------------------
 c HYPRE_SStructPCGGetNumIterations
 c--------------------------------------------------------------------------
-      subroutine fhypre_sstructpcggetnumiteration(fsolver, fnumiter)
+      subroutine fhypre_sstructpcggetnumiteratio(fsolver, fnumiter)
 
       integer ierr
       integer fnumiter
       integer*8 fsolver
 
-      call HYPRE_SStructPCGGetNumIterations(fsolver, fnumiter, ierr)
+      call HYPRE_SStructPCGGetNumIteration(fsolver, fnumiter, ierr)
 
       if(ierr .ne. 0) then
          print *, 'fhypre_sstructpcggetnumiteration error = ', ierr
@@ -1303,14 +1300,13 @@ c--------------------------------------------------------------------------
 c--------------------------------------------------------------------------
 c HYPRE_SStructPCGGetFinalRelativeResidualNorm
 c--------------------------------------------------------------------------
-      subroutine fhypre_sstructpcggetfinalrelativ(fsolver, fnorm)
+      subroutine fhypre_sstructpcggetfinalrelati(fsolver, fnorm)
 
       integer ierr
       integer*8 fsolver
       double precision fnorm
 
-      call HYPRE_SStructPCGGetFinalRelativeResidualNorm(fsolver, fnorm,
-     1                                                  ierr)
+      call HYPRE_SStructPCGGetFinalRelativ(fsolver, fnorm, ierr)
 
       if(ierr .ne. 0) then
          print *, 'fhypre_sstructpcggetfinalrelative error = ', ierr
@@ -1526,12 +1522,12 @@ c--------------------------------------------------------------------------
 c--------------------------------------------------------------------------
 c HYPRE_SStructSplitSetNonZeroGuess
 c--------------------------------------------------------------------------
-      subroutine fhypre_sstructsplitsetnonzerogue(fsolver)
+      subroutine fhypre_sstructsplitsetnonzerogu(fsolver)
 
       integer ierr
       integer*8 fsolver
 
-      call HYPRE_SStructSplitSetNonZeroGuess(fsolver, ierr)
+      call HYPRE_SStructSplitSetNonZeroGue(fsolver, ierr)
 
       if(ierr .ne. 0) then
          print *, 'fhypre_sstructsplitsetnonzeroguess error = ', ierr
@@ -1544,13 +1540,13 @@ c--------------------------------------------------------------------------
 c--------------------------------------------------------------------------
 c HYPRE_SStructSplitSetStructSolver
 c--------------------------------------------------------------------------
-      subroutine fhypre_sstructsplitsetstructsolv(fsolver, fssolver)
+      subroutine fhypre_sstructsplitsetstructsol(fsolver, fssolver)
 
       integer ierr
       integer fssolver
       integer*8 fsolver
 
-      call HYPRE_SStructSplitSetStructSolver(fsolver, fssolver, ierr)
+      call HYPRE_SStructSplitSetStructSolv(fsolver, fssolver, ierr)
 
       if(ierr .ne. 0) then
          print *, 'fhypre_sstructsplitsetstructsolve error = ', ierr
@@ -1563,13 +1559,13 @@ c--------------------------------------------------------------------------
 c--------------------------------------------------------------------------
 c HYPRE_SStructSplitGetNumIterations
 c--------------------------------------------------------------------------
-      subroutine fhypre_sstructsplitgetnumiterati(fsolver, fnumiter)
+      subroutine fhypre_sstructsplitgetnumiterat(fsolver, fnumiter)
 
       integer ierr
       integer fnumiter
       integer*8 fsolver
 
-      call HYPRE_SStructSplitGetNumIterations(fsolver, fnumiter, ierr)
+      call HYPRE_SStructSplitGetNumIterati(fsolver, fnumiter, ierr)
 
       if(ierr .ne. 0) then
          print *, 'fhypre_sstructsplitgetnumiteration error = ', ierr
@@ -1582,14 +1578,13 @@ c--------------------------------------------------------------------------
 c--------------------------------------------------------------------------
 c HYPRE_SStructSplitGetFinalRelativeResidualNorm
 c--------------------------------------------------------------------------
-      subroutine fhypre_sstructsplitgetfinalrelat(fsolver, fnorm)
+      subroutine fhypre_sstructsplitgetfinalrela(fsolver, fnorm)
 
       integer ierr
       integer*8 fsolver
       double precision fnorm
 
-      call HYPRE_SStructSplitGetFinalRelativeResidualNorm(fsolver, 
-     1                                                    fnorm, ierr)
+      call HYPRE_SStructSplitGetFinalRelat(fsolver, fnorm, ierr)
 
       if(ierr .ne. 0) then
          print *, 'fhypre_sstructsplitgetfinalrelative error = ', ierr
@@ -1732,7 +1727,7 @@ c--------------------------------------------------------------------------
       integer frel_change
       integer*8 fsolver
 
-      call HYPRE_SStructSysPFMGSetRelChange(fsolver, frel_change, ierr)
+      call HYPRE_SStructSysPFMGSetRelChang(fsolver, frel_change, ierr)
 
       if(ierr .ne. 0) then
          print *, 'fhypre_sstructsyspfmgsetrelchange error = ', ierr
@@ -1745,12 +1740,12 @@ c--------------------------------------------------------------------------
 c--------------------------------------------------------------------------
 c HYPRE_SStructSysPFMGSetZeroGuess
 c--------------------------------------------------------------------------
-      subroutine fhypre_sstructsyspfmgsetzerogues(fsolver)
+      subroutine fhypre_sstructsyspfmgsetzerogue(fsolver)
 
       integer ierr
       integer*8 fsolver
 
-      call HYPRE_SStructSysPFMGSetZeroGuess(fsolver, ierr)
+      call HYPRE_SStructSysPFMGSetZeroGues(fsolver, ierr)
 
       if(ierr .ne. 0) then
          print *, 'fhypre_sstructsyspfmgsetzeroguess error = ', ierr
@@ -1763,12 +1758,12 @@ c--------------------------------------------------------------------------
 c--------------------------------------------------------------------------
 c HYPRE_SStructSysPFMGSetNonZeroGuess
 c--------------------------------------------------------------------------
-      subroutine fhypre_sstructsyspfmgsetnonzerog(fsolver)
+      subroutine fhypre_sstructsyspfmgsetnonzero(fsolver)
 
       integer ierr
       integer*8 fsolver
 
-      call HYPRE_SStructSysPFMGSetNonZeroGuess(fsolver, ierr)
+      call HYPRE_SStructSysPFMGSetNonZeroG(fsolver, ierr)
 
       if(ierr .ne. 0) then
          print *, 'fhypre_sstructsyspfmgsetnonzeroguess error = ', ierr
@@ -1781,13 +1776,13 @@ c--------------------------------------------------------------------------
 c--------------------------------------------------------------------------
 c HYPRE_SStructSysPFMGSetRelaxType
 c--------------------------------------------------------------------------
-      subroutine fhypre_sstructsyspfmgsetrelaxtyp(fsolver, frelax_type)
+      subroutine fhypre_sstructsyspfmgsetrelaxty(fsolver, frelax_type)
 
       integer ierr
       integer frelax_type
       integer*8 fsolver
 
-      call HYPRE_SStructSysPFMGSetRelaxType(fsolver, frelax_type, ierr)
+      call HYPRE_SStructSysPFMGSetRelaxTyp(fsolver, frelax_type, ierr)
 
       if(ierr .ne. 0) then
          print *, 'fhypre_sstructsyspfmgsetrelaxtype error = ', ierr
@@ -1800,14 +1795,14 @@ c--------------------------------------------------------------------------
 c--------------------------------------------------------------------------
 c HYPRE_SStructSysPFMGSetNumPreRelax
 c--------------------------------------------------------------------------
-      subroutine fhypre_sstructsyspfmgsetnumprere(fsolver, 
+      subroutine fhypre_sstructsyspfmgsetnumprer(fsolver, 
      1                                            fnum_pre_relax)
 
       integer ierr
       integer fnum_pre_relax
       integer*8 fsolver
 
-      call HYPRE_SStructSysPFMGSetNumPreRelax(fsolver, fnum_pre_relax,
+      call HYPRE_SStructSysPFMGSetNumPreRe(fsolver, fnum_pre_relax,
      1                                        ierr)
 
       if(ierr .ne. 0) then
@@ -1821,14 +1816,14 @@ c--------------------------------------------------------------------------
 c--------------------------------------------------------------------------
 c HYPRE_SStructSysPFMGSetNumPostRelax
 c--------------------------------------------------------------------------
-      subroutine fhypre_sstructsyspfmgsetnumpostr(fsolver, 
+      subroutine fhypre_sstructsyspfmgsetnumpost(fsolver, 
      1                                            fnum_post_relax)
 
       integer ierr
       integer fnum_post_relax
       integer*8 fsolver
 
-      call HYPRE_SStructSysPFMGSetNumPostRelax(fsolver, fnum_post_relax,
+      call HYPRE_SStructSysPFMGSetNumPostR(fsolver, fnum_post_relax,
      1                                        ierr)
 
       if(ierr .ne. 0) then
@@ -1842,13 +1837,13 @@ c--------------------------------------------------------------------------
 c--------------------------------------------------------------------------
 c HYPRE_SStructSysPFMGSetSkipRelax
 c--------------------------------------------------------------------------
-      subroutine fhypre_sstructsyspfmgsetskiprela(fsolver, fskip_relax)
+      subroutine fhypre_sstructsyspfmgsetskiprel(fsolver, fskip_relax)
 
       integer ierr
       integer fskip_relax
       integer*8 fsolver
 
-      call HYPRE_SStructSysPFMGSetSkipRelax(fsolver, fskip_relax, ierr)
+      call HYPRE_SStructSysPFMGSetSkipRela(fsolver, fskip_relax, ierr)
 
       if(ierr .ne. 0) then
          print *, 'fhypre_sstructsyspfmgsetskiprelax error = ', ierr
@@ -1899,13 +1894,13 @@ c--------------------------------------------------------------------------
 c--------------------------------------------------------------------------
 c HYPRE_SStructSysPFMGSetPrintLevel
 c--------------------------------------------------------------------------
-      subroutine fhypre_sstructsyspfmgsetprintlev(fsolver, fprint_level)
+      subroutine fhypre_sstructsyspfmgsetprintle(fsolver, fprint_level)
 
       integer ierr
       integer fprint_level
       integer*8 fsolver
 
-      call HYPRE_SStructSysPFMGSetPrintLevel(fsolver, fprint_level,
+      call HYPRE_SStructSysPFMGSetPrintLev(fsolver, fprint_level,
      1                                       ierr)
 
       if(ierr .ne. 0) then
@@ -1919,13 +1914,13 @@ c--------------------------------------------------------------------------
 c--------------------------------------------------------------------------
 c HYPRE_SStructSysPFMGGetNumIterations
 c--------------------------------------------------------------------------
-      subroutine fhypre_sstructsyspfmggetnumitera(fsolver, fnumiter)
+      subroutine fhypre_sstructsyspfmggetnumiter(fsolver, fnumiter)
 
       integer ierr
       integer fnumiter
       integer*8 fsolver
 
-      call HYPRE_SStructSysPFMGGetNumIterations(fsolver, fnumiter, ierr)
+      call HYPRE_SStructSysPFMGGetNumItera(fsolver, fnumiter, ierr)
 
       if(ierr .ne. 0) then
          print *, 'fhypre_sstructsyspfmggetnumiteration error = ', ierr
@@ -1938,14 +1933,13 @@ c--------------------------------------------------------------------------
 c--------------------------------------------------------------------------
 c HYPRE_SStructSysPFMGGetFinalRelativeResidualNorm
 c--------------------------------------------------------------------------
-      subroutine fhypre_sstructsyspfmggetfinalrel(fsolver, fnorm)
+      subroutine fhypre_sstructsyspfmggetfinalre(fsolver, fnorm)
 
       integer ierr
       integer*8 fsolver
       double precision fnorm
 
-      call HYPRE_SStructSysPFMGGetFinalRelativeResidualNorm(fsolver, 
-     1                                                      fnorm, ierr)
+      call HYPRE_SStructSysPFMGGetFinalRel(fsolver, fnorm, ierr)
 
       if(ierr .ne. 0) then
          print *, 'fhypre_sstructsyspfmggetfinalrelative error = ', ierr

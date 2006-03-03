@@ -140,6 +140,7 @@ hypre_F90_IFACE(hypre_structpcgsetprecond, HYPRE_STRUCTPCGSETPRECOND)( long int 
     * The precond_id flags mean :
     * 0 - setup a smg preconditioner
     * 1 - setup a pfmg preconditioner
+    * 7 - setup a jacobi preconditioner
     * 8 - setup a ds preconditioner
     * 9 - dont setup a preconditioner
     *------------------------------------------------------------*/
@@ -158,6 +159,14 @@ hypre_F90_IFACE(hypre_structpcgsetprecond, HYPRE_STRUCTPCGSETPRECOND)( long int 
          ( HYPRE_StructPCGSetPrecond( (HYPRE_StructSolver) *solver,
                                       HYPRE_StructPFMGSolve,
                                       HYPRE_StructPFMGSetup,
+                                      (HYPRE_StructSolver) *precond_solver) );
+   }
+   else if (*precond_id == 7)
+   {
+      *ierr = (int)
+         ( HYPRE_StructPCGSetPrecond( (HYPRE_StructSolver) *solver,
+                                      HYPRE_StructJacobiSolve,
+                                      HYPRE_StructJacobiSetup,
                                       (HYPRE_StructSolver) *precond_solver) );
    }
    else if (*precond_id == 8)

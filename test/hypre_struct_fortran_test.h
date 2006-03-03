@@ -43,6 +43,11 @@ extern void hypre_F90_NAME(fhypre_structgridsetperiodic, fhypre_structsetgridper
         hypre_F90_NAME(fhypre_structgridassemble, FHYPRE_STRUCTGRIDASSEMBLE)
 extern void hypre_F90_NAME(fhypre_structgridassemble, FHYPRE_STRUCTGRIDASSEMBLE)
                           (long int *);
+
+#define HYPRE_StructGridSetNumGhost \
+        hypre_F90_NAME(fhypre_structgridsetnumghost, FHYPRE_STRUCTGRIDSETNUMGHOST)
+extern void hypre_F90_NAME(fhypre_structgridsetnumghost, fhypre_structsetgridnumghost)
+                          (long int *, int *);
         
 
 
@@ -71,6 +76,11 @@ extern void hypre_F90_NAME(fhypre_structmatrixsetvalues, FHYPRE_STRUCTMATRIXSETV
 extern void hypre_F90_NAME(fhypre_structmatrixsetboxvalues, FHYPRE_STRUCTMATRIXSETBOXVALUES)
                           (long int *, int *, int *, int *, int *, double *);
 
+#define HYPRE_StructMatrixGetBoxValues \
+        hypre_F90_NAME(fhypre_structmatrixgetboxvalues, FHYPRE_STRUCTMATRIXGETBOXVALUES)
+extern void hypre_F90_NAME(fhypre_structmatrixgetboxvalues, FHYPRE_STRUCTMATRIXGETBOXVALUES)
+                          (long int *, int *, int *, int *, int *, double *);
+
 #define HYPRE_StructMatrixSetConstantEntries \
         hypre_F90_NAME(fhypre_structmatrixsetconstante, FHYPRE_STRUCTMATRIXSETCONSTANTE)
 extern void hypre_F90_NAME(fhypre_structmatrixsetconstante, FHYPRE_STRUCTMATRIXSETCONSTANTE)
@@ -85,6 +95,16 @@ extern void hypre_F90_NAME(fhypre_structmatrixsetconstantv, FHYPRE_STRUCTMATRIXS
         hypre_F90_NAME(fhypre_structmatrixaddtovalues, FHYPRE_STRUCTMATRIXADDTOVALUES)
 extern void hypre_F90_NAME(fhypre_structmatrixaddtovalues, FHYPRE_STRUCTMATRIXADDTOVALUES)
                           (long int *, int *, int *, int *, double *);
+
+#define HYPRE_StructMatrixAddToBoxValues \
+        hypre_F90_NAME(fhypre_structmatrixaddtoboxvalues, FHYPRE_STRUCTMATRIXADDTOBOXVALUES)
+extern void hypre_F90_NAME(fhypre_structmatrixaddtoboxvalues, FHYPRE_STRUCTMATRIXADDTOBOXVALUES)
+                          (long int *, int *, int *, int *, int *, double *);
+
+#define HYPRE_StructMatrixAddToConstantValues \
+        hypre_F90_NAME(fhypre_structmatrixaddtoconstant, FHYPRE_STRUCTMATRIXADDTOCONSTANT)
+extern void hypre_F90_NAME(fhypre_structmatrixaddtoconstant, FHYPRE_STRUCTMATRIXADDTOCONSTANT)
+                          (long int *, int *, int *, double *);
 
 #define HYPRE_StructMatrixAssemble \
         hypre_F90_NAME(fhypre_structmatrixassemble, FHYPRE_STRUCTMATRIXASSEMBLE)
@@ -110,6 +130,11 @@ extern void hypre_F90_NAME(fhypre_structmatrixsetsymmetric, FHYPRE_STRUCTMATRIXS
 hypre_F90_NAME(fhypre_structmatrixprint, FHYPRE_STRUCTMATRIXPRINT)
 extern void hypre_F90_NAME(fhypre_structmatrixprint, FHYPRE_STRUCTMATRIXPRINT)
                           (long int *, int *);
+
+#define HYPRE_StructMatrixMatvec \
+hypre_F90_NAME(fhypre_structmatrixmatvec, FHYPRE_STRUCTMATRIXMATVEC)
+extern void hypre_F90_NAME(fhypre_structmatrixmatvec, FHYPRE_STRUCTMATRIXMATVEC)
+                          (int *, long int *, long int *, int *, long int *);
  
 
 
@@ -153,6 +178,11 @@ extern void hypre_F90_NAME(fhypre_structvectoraddtovalues, FHYPRE_STRUCTVECTORAD
 extern void hypre_F90_NAME(fhypre_structvectoraddtoboxvalu, FHYPRE_STRUCTVECTORADDTOBOXVALU)
                           (long int *, int *, int *, double *);
 
+#define HYPRE_StructVectorScaleValues \
+        hypre_F90_NAME(fhypre_structvectorscalevalues, FHYPRE_STRUCTVECTORSCALEVALUES)
+extern void hypre_F90_NAME(fhypre_structvectorscalevalues, FHYPRE_STRUCTVECTORSCALEVALUES)
+                          (long int *, double *);
+
 #define HYPRE_StructVectorGetValues \
         hypre_F90_NAME(fhypre_structvectorgetvalues, FHYPRE_STRUCTVECTORGETVALUES)
 extern void hypre_F90_NAME(fhypre_structvectorgetvalues, FHYPRE_STRUCTVECTORGETVALUES)
@@ -173,6 +203,11 @@ extern void hypre_F90_NAME(fhypre_structvectorassemble, FHYPRE_STRUCTVECTORASSEM
 extern void hypre_F90_NAME(fhypre_structvectorsetnumghost, FHYPRE_STRUCTVECTORSETNUMGHOST)
                           (long int *, int *);
 
+#define HYPRE_StructVectorCopy \
+        hypre_F90_NAME(fhypre_structvectorcopy, FHYPRE_STRUCTVECTORCOPY)
+extern void hypre_F90_NAME(fhypre_structvectorcopy, FHYPRE_STRUCTVECTORCOPY)
+                          (long int *, long int *);
+
 #define HYPRE_StructVectorGetMigrateCommPkg \
         hypre_F90_NAME(fhypre_structvectorgetmigrateco, FHYPRE_STRUCTVECTORGETMIGRATECO)
 extern void hypre_F90_NAME(fhypre_structvectorgetmigrateco, FHYPRE_STRUCTVECTORGETMIGRATECO)
@@ -183,9 +218,9 @@ extern void hypre_F90_NAME(fhypre_structvectorgetmigrateco, FHYPRE_STRUCTVECTORG
 extern void hypre_F90_NAME(fhypre_structvectormigrate, FHYPRE_STRUCTVECTORMIGRATE)
                           (long int *, long int *, long int *);
 
-#define HYPRE_StructCommPkgDestroy \
-        hypre_F90_NAME(fhypre_structcommpkgdestroy, FHYPRE_STRUCTCOMMPKGDESTROY)
-extern void hypre_F90_NAME(fhypre_structcommpkgdestroy, FHYPRE_STRUCTCOMMPKGDESTROY)
+#define HYPRE_CommPkgDestroy \
+        hypre_F90_NAME(fhypre_commpkgdestroy, FHYPRE_COMMPKGDESTROY)
+extern void hypre_F90_NAME(fhypre_commpkgdestroy, FHYPRE_COMMPKGDESTROY)
                           (long int *);
 
 #define HYPRE_StructVectorPrint \
@@ -425,6 +460,28 @@ extern void hypre_F90_NAME(fhypre_structhybridgetfinalrela, FHYPRE_STRUCTHYBRIDG
 
 
 
+#define HYPRE_StructVectorSetRandomValues \
+        hypre_F90_NAME(fhypre_structvectorsetrandomvalu, FHYPRE_STRUCTVECTORSETRANDOMVALU)
+extern void hypre_F90_NAME(fhypre_structvectorsetrandomvalu, FHYPRE_STRUCTVECTORSETRANDOMVALU)
+                          (long int *, int *);
+
+#define HYPRE_StructSetRandomValues \
+        hypre_F90_NAME(fhypre_structsetrandomvalues, FHYPRE_STRUCTSETRANDOMVALUES)
+extern void hypre_F90_NAME(fhypre_structsetrandomvalues, FHYPRE_STRUCTSETRANDOMVALUES)
+                          (long int *, int *);
+
+#define HYPRE_StructSetupInterpreter \
+        hypre_F90_NAME(fhypre_structsetupinterpreter, FHYPRE_STRUCTSETUPINTERPRETER)
+extern void hypre_F90_NAME(fhypre_structsetupinterpreter, FHYPRE_STRUCTSETUPINTERPRETER)
+                          (long int *);
+
+#define HYPRE_StructSetupMatvec \
+        hypre_F90_NAME(fhypre_structsetupmatvec, FHYPRE_STRUCTSETUPMATVEC)
+extern void hypre_F90_NAME(fhypre_structsetupmatvec, FHYPRE_STRUCTSETUPMATVEC)
+                          (long int *);
+
+
+
 #define HYPRE_StructJacobiCreate \
         hypre_F90_NAME(fhypre_structjacobicreate, FHYPRE_STRUCTJACOBICREATE)
 extern void hypre_F90_NAME(fhypre_structjacobicreate, FHYPRE_STRUCTJACOBICREATE)
@@ -450,14 +507,29 @@ extern void hypre_F90_NAME(fhypre_structjacobisolve, FHYPRE_STRUCTJACOBISOLVE)
 extern void hypre_F90_NAME(fhypre_structjacobisettol, FHYPRE_STRUCTJACOBISETTOL)
                           (long int *, double *);
 
+#define HYPRE_StructJacobiGetTol \
+        hypre_F90_NAME(fhypre_structjacobigettol, FHYPRE_STRUCTJACOBIGETTOL)
+extern void hypre_F90_NAME(fhypre_structjacobigettol, FHYPRE_STRUCTJACOBIGETTOL)
+                          (long int *, double *);
+
 #define HYPRE_StructJacobiSetMaxIter \
         hypre_F90_NAME(fhypre_structjacobisetmaxiter, FHYPRE_STRUCTJACOBISETTOL)
 extern void hypre_F90_NAME(fhypre_structjacobisetmaxiter, FHYPRE_STRUCTJACOBISETTOL)
                           (long int *, int *);
 
+#define HYPRE_StructJacobiGetMaxIter \
+        hypre_F90_NAME(fhypre_structjacobigetmaxiter, FHYPRE_STRUCTJACOBIGETTOL)
+extern void hypre_F90_NAME(fhypre_structjacobigetmaxiter, FHYPRE_STRUCTJACOBIGETTOL)
+                          (long int *, int *);
+
 #define HYPRE_StructJacobiSetZeroGuess \
         hypre_F90_NAME(fhypre_structjacobisetzeroguess, FHYPRE_STRUCTJACOBISETZEROGUESS)
 extern void hypre_F90_NAME(fhypre_structjacobisetzeroguess, FHYPRE_STRUCTJACOBISETZEROGUESS)
+                          (long int *);
+
+#define HYPRE_StructJacobiGetZeroGuess \
+        hypre_F90_NAME(fhypre_structjacobigetzeroguess, FHYPRE_STRUCTJACOBIGETZEROGUESS)
+extern void hypre_F90_NAME(fhypre_structjacobigetzeroguess, FHYPRE_STRUCTJACOBIGETZEROGUESS)
                           (long int *);
 
 #define HYPRE_StructJacobiSetNonZeroGuess \
@@ -581,9 +653,29 @@ extern void hypre_F90_NAME(fhypre_structpfmgsolve, FHYPRE_STRUCTPFMGSOLVE)
 extern void hypre_F90_NAME(fhypre_structpfmgsettol, FHYPRE_STRUCTPFMGSETTOL)
                           (long int *, double *);
 
+#define HYPRE_StructPFMGGetTol \
+        hypre_F90_NAME(fhypre_structpfmggettol, FHYPRE_STRUCTPFMGGETTOL)
+extern void hypre_F90_NAME(fhypre_structpfmggettol, FHYPRE_STRUCTPFMGGETTOL)
+                          (long int *, double *);
+
 #define HYPRE_StructPFMGSetMaxIter \
         hypre_F90_NAME(fhypre_structpfmgsetmaxiter, FHYPRE_STRUCTPFMGSETMAXITER)
 extern void hypre_F90_NAME(fhypre_structpfmgsetmaxiter, FHYPRE_STRUCTPFMGSETMAXITER)
+                          (long int *, int *);
+
+#define HYPRE_StructPFMGGetMaxIter \
+        hypre_F90_NAME(fhypre_structpfmggetmaxiter, FHYPRE_STRUCTPFMGGETMAXITER)
+extern void hypre_F90_NAME(fhypre_structpfmggetmaxiter, FHYPRE_STRUCTPFMGGETMAXITER)
+                          (long int *, int *);
+
+#define HYPRE_StructPFMGSetMaxLevels \
+        hypre_F90_NAME(fhypre_structpfmgsetmaxlevels, FHYPRE_STRUCTPFMGSETMAXLEVELS)
+extern void hypre_F90_NAME(fhypre_structpfmgsetmaxlevels, FHYPRE_STRUCTPFMGSETMAXLEVELS)
+                          (long int *, int *);
+
+#define HYPRE_StructPFMGGetMaxLevels \
+        hypre_F90_NAME(fhypre_structpfmggetmaxlevels, FHYPRE_STRUCTPFMGGETMAXLEVELS)
+extern void hypre_F90_NAME(fhypre_structpfmggetmaxlevels, FHYPRE_STRUCTPFMGGETMAXLEVELS)
                           (long int *, int *);
 
 #define HYPRE_StructPFMGSetRelChange \
@@ -591,9 +683,19 @@ extern void hypre_F90_NAME(fhypre_structpfmgsetmaxiter, FHYPRE_STRUCTPFMGSETMAXI
 extern void hypre_F90_NAME(fhypre_structpfmgsetrelchange, FHYPRE_STRUCTPFMGSETRELCHANGE)
                           (long int *, int *);
 
+#define HYPRE_StructPFMGGetRelChange \
+        hypre_F90_NAME(fhypre_structpfmggetrelchange, FHYPRE_STRUCTPFMGGETRELCHANGE)
+extern void hypre_F90_NAME(fhypre_structpfmggetrelchange, FHYPRE_STRUCTPFMGGETRELCHANGE)
+                          (long int *, int *);
+
 #define HYPRE_StructPFMGSetZeroGuess \
         hypre_F90_NAME(fhypre_structpfmgsetzeroguess, FHYPRE_STRUCTPFMGSETZEROGUESS)
 extern void hypre_F90_NAME(fhypre_structpfmgsetzeroguess, FHYPRE_STRUCTPFMGSETZEROGUESS)
+                          (long int *);
+
+#define HYPRE_StructPFMGGetZeroGuess \
+        hypre_F90_NAME(fhypre_structpfmggetzeroguess, FHYPRE_STRUCTPFMGGETZEROGUESS)
+extern void hypre_F90_NAME(fhypre_structpfmggetzeroguess, FHYPRE_STRUCTPFMGGETZEROGUESS)
                           (long int *);
 
 #define HYPRE_StructPFMGSetNonZeroGuess \
@@ -606,9 +708,19 @@ extern void hypre_F90_NAME(fhypre_structpfmgsetnonzerogues, FHYPRES_TRUCTPFMGSET
 extern void hypre_F90_NAME(fhypre_structpfmgsetskiprelax, FHYPRE_STRUCTPFMGSETSKIPRELAX)
                           (long int *, int *);
 
+#define HYPRE_StructPFMGGetSkipRelax \
+        hypre_F90_NAME(fhypre_structpfmggetskiprelax, FHYPRE_STRUCTPFMGGETSKIPRELAX)
+extern void hypre_F90_NAME(fhypre_structpfmggetskiprelax, FHYPRE_STRUCTPFMGGETSKIPRELAX)
+                          (long int *, int *);
+
 #define HYPRE_StructPFMGSetRelaxType \
         hypre_F90_NAME(fhypre_structpfmgsetrelaxtype, FHYPRE_STRUCTPFMGSETRELAXTYPE)
 extern void hypre_F90_NAME(fhypre_structpfmgsetrelaxtype, FHYPRE_STRUCTPFMGSETRELAXTYPE)
+                          (long int *, int *);
+
+#define HYPRE_StructPFMGGetRelaxType \
+        hypre_F90_NAME(fhypre_structpfmggetrelaxtype, FHYPRE_STRUCTPFMGGETRELAXTYPE)
+extern void hypre_F90_NAME(fhypre_structpfmggetrelaxtype, FHYPRE_STRUCTPFMGGETRELAXTYPE)
                           (long int *, int *);
 
 #define HYPRE_StructPFMGSetRAPType \
@@ -616,14 +728,29 @@ extern void hypre_F90_NAME(fhypre_structpfmgsetrelaxtype, FHYPRE_STRUCTPFMGSETRE
 extern void hypre_F90_NAME(fhypre_structpfmgsetraptype, FHYPRE_STRUCTPFMGSETRAPTYPE)
                           (long int *, int *);
 
+#define HYPRE_StructPFMGGetRAPType \
+        hypre_F90_NAME(fhypre_structpfmggetraptype, FHYPRE_STRUCTPFMGGETRAPTYPE)
+extern void hypre_F90_NAME(fhypre_structpfmggetraptype, FHYPRE_STRUCTPFMGGETRAPTYPE)
+                          (long int *, int *);
+
 #define HYPRE_StructPFMGSetNumPreRelax \
         hypre_F90_NAME(fhypre_structpfmgsetnumprerelax, FHYPRE_STRUCTPFMGSETNUMPRERELAX)
 extern void hypre_F90_NAME(fhypre_structpfmgsetnumprerelax, FHYPRE_STRUCTPFMGSETNUMPRERELAX)
                           (long int *, int *);
 
+#define HYPRE_StructPFMGGetNumPreRelax \
+        hypre_F90_NAME(fhypre_structpfmggetnumprerelax, FHYPRE_STRUCTPFMGGETNUMPRERELAX)
+extern void hypre_F90_NAME(fhypre_structpfmggetnumprerelax, FHYPRE_STRUCTPFMGGETNUMPRERELAX)
+                          (long int *, int *);
+
 #define HYPRE_StructPFMGSetNumPostRelax \
         hypre_F90_NAME(fhypre_structpfmgsetnumpostrela, FHYPRE_STRUCTPFMGSETNUMPOSTRELA)
 extern void hypre_F90_NAME(fhypre_structpfmgsetnumpostrela, FHYPRE_STRUCTPFMGSETNUMPOSTRELA)
+                          (long int *, int *);
+
+#define HYPRE_StructPFMGGetNumPostRelax \
+        hypre_F90_NAME(fhypre_structpfmggetnumpostrela, FHYPRE_STRUCTPFMGGETNUMPOSTRELA)
+extern void hypre_F90_NAME(fhypre_structpfmggetnumpostrela, FHYPRE_STRUCTPFMGGETNUMPOSTRELA)
                           (long int *, int *);
 
 #define HYPRE_StructPFMGSetDxyz \
@@ -636,9 +763,19 @@ extern void hypre_F90_NAME(fhypre_structpfmgsetdxyz, FHYPRE_STRUCTPFMGSETDXYZ)
 extern void hypre_F90_NAME(fhypre_structpfmgsetlogging, FHYPRE_STRUCTPFMGSETLOGGING)
                           (long int *, int *);
 
+#define HYPRE_StructPFMGGetLogging \
+        hypre_F90_NAME(fhypre_structpfmggetlogging, FHYPRE_STRUCTPFMGGETLOGGING)
+extern void hypre_F90_NAME(fhypre_structpfmggetlogging, FHYPRE_STRUCTPFMGGETLOGGING)
+                          (long int *, int *);
+
 #define HYPRE_StructPFMGSetPrintLevel \
         hypre_F90_NAME(fhypre_structpfmgsetprintlevel, FHYPRE_STRUCTPFMGSETPRINTLEVEL)
 extern void hypre_F90_NAME(fhypre_structpfmgsetprintlevel, FHYPRE_STRUCTPFMGSETPRINTLEVEL)
+                          (long int *, int *);
+
+#define HYPRE_StructPFMGGetPrintLevel \
+        hypre_F90_NAME(fhypre_structpfmggetprintlevel, FHYPRE_STRUCTPFMGGETPRINTLEVEL)
+extern void hypre_F90_NAME(fhypre_structpfmggetprintlevel, FHYPRE_STRUCTPFMGGETPRINTLEVEL)
                           (long int *, int *);
 
 #define HYPRE_StructPFMGGetNumIterations \
@@ -678,9 +815,19 @@ extern void hypre_F90_NAME(fhypre_structsmgsolve, FHYPRE_STRUCTSMGSOLVE)
 extern void hypre_F90_NAME(fhypre_structsmgsetmemoryuse, FHYPRE_STRUCTSMGSETMEMORYUSE)
                           (long int *, int *);
 
+#define HYPRE_StructSMGGetMemoryUse \
+        hypre_F90_NAME(fhypre_structsmggetmemoryuse, FHYPRE_STRUCTSMGGETMEMORYUSE)
+extern void hypre_F90_NAME(fhypre_structsmggetmemoryuse, FHYPRE_STRUCTSMGGETMEMORYUSE)
+                          (long int *, int *);
+
 #define HYPRE_StructSMGSetTol \
         hypre_F90_NAME(fhypre_structsmgsettol, FHYPRE_STRUCTSMGSETTOL)
 extern void hypre_F90_NAME(fhypre_structsmgsettol, FHYPRE_STRUCTSMGSETTOL)
+                          (long int *, double *);
+
+#define HYPRE_StructSMGGetTol \
+        hypre_F90_NAME(fhypre_structsmggettol, FHYPRE_STRUCTSMGGETTOL)
+extern void hypre_F90_NAME(fhypre_structsmggettol, FHYPRE_STRUCTSMGGETTOL)
                           (long int *, double *);
 
 #define HYPRE_StructSMGSetMaxIter \
@@ -688,14 +835,29 @@ extern void hypre_F90_NAME(fhypre_structsmgsettol, FHYPRE_STRUCTSMGSETTOL)
 extern void hypre_F90_NAME(fhypre_structsmgsetmaxiter, FHYPRE_STRUCTSMGSETMAXTITER)
                           (long int *, int *);
 
+#define HYPRE_StructSMGGetMaxIter \
+        hypre_F90_NAME(fhypre_structsmggetmaxiter, FHYPRE_STRUCTSMGGETMAXTITER)
+extern void hypre_F90_NAME(fhypre_structsmggetmaxiter, FHYPRE_STRUCTSMGGETMAXTITER)
+                          (long int *, int *);
+
 #define HYPRE_StructSMGSetRelChange \
         hypre_F90_NAME(fhypre_structsmgsetrelchange, FHYPRE_STRUCTSMGSETRELCHANGE)
 extern void hypre_F90_NAME(fhypre_structsmgsetrelchange, FHYPRE_STRUCTSMGSETRELCHANGE)
                           (long int *, int *);
 
+#define HYPRE_StructSMGGetRelChange \
+        hypre_F90_NAME(fhypre_structsmggetrelchange, FHYPRE_STRUCTSMGGETRELCHANGE)
+extern void hypre_F90_NAME(fhypre_structsmggetrelchange, FHYPRE_STRUCTSMGGETRELCHANGE)
+                          (long int *, int *);
+
 #define HYPRE_StructSMGSetZeroGuess \
         hypre_F90_NAME(fhypre_structsmgsetzeroguess, FHYPRE_STRUCTSMGSETZEROGUESS)
 extern void hypre_F90_NAME(fhypre_structsmgsetzeroguess, FHYPRE_STRUCTSMGSETZEROGUESS)
+                          (long int *);
+
+#define HYPRE_StructSMGGetZeroGuess \
+        hypre_F90_NAME(fhypre_structsmggetzeroguess, FHYPRE_STRUCTSMGGETZEROGUESS)
+extern void hypre_F90_NAME(fhypre_structsmggetzeroguess, FHYPRE_STRUCTSMGGETZEROGUESS)
                           (long int *);
 
 #define HYPRE_StructSMGSetNonZeroGuess \
@@ -713,24 +875,14 @@ extern void hypre_F90_NAME(fhypre_structsmggetnumiteration, FHYPRE_STRUCTSMGGETN
 extern void hypre_F90_NAME(fhypre_structsmggetfinalrelativ, FHYPRE_STRUCTSMGGETFINALRELATIV)
                           (long int *, double *);
 
-#define HYPRE_StructSMGSetSkipRelax \
-        hypre_F90_NAME(fhypre_structsmgsetskiprelax, FHYPRE_STRUCTSMGSETSKIPRELAX)
-extern void hypre_F90_NAME(fhypre_structsmgsetskiprelax, FHYPRE_STRUCTSMGSETSKIPRELAX)
-                          (long int *, int *);
-
-#define HYPRE_StructSMGSetRelaxType \
-        hypre_F90_NAME(fhypre_structsmgsetrelaxtype, FHYPRE_STRUCTSMGSETRELAXTYPE)
-extern void hypre_F90_NAME(fhypre_structsmgsetrelaxtype, FHYPRE_STRUCTSMGSETRELAXTYPE)
-                          (long int *, int *);
-
-#define HYPRE_StructSMGSetRAPType \
-        hypre_F90_NAME(fhypre_structsmgsetraptype, FHYPRE_STRUCTSMGSETRAPTYPE)
-extern void hypre_F90_NAME(fhypre_structsmgsetraptype, FHYPRE_STRUCTSMGSETRAPTYPE)
-                          (long int *, int *);
-
 #define HYPRE_StructSMGSetNumPreRelax \
         hypre_F90_NAME(fhypre_structsmgsetnumprerelax, FHYPRE_STRUCTSMGSETNUMPRERELAX)
 extern void hypre_F90_NAME(fhypre_structsmgsetnumprerelax, FHYPRE_STRUCTSMGSETNUMPRERELAX)
+                          (long int *, int *);
+
+#define HYPRE_StructSMGGetNumPreRelax \
+        hypre_F90_NAME(fhypre_structsmggetnumprerelax, FHYPRE_STRUCTSMGGETNUMPRERELAX)
+extern void hypre_F90_NAME(fhypre_structsmggetnumprerelax, FHYPRE_STRUCTSMGGETNUMPRERELAX)
                           (long int *, int *);
 
 #define HYPRE_StructSMGSetNumPostRelax \
@@ -738,19 +890,29 @@ extern void hypre_F90_NAME(fhypre_structsmgsetnumprerelax, FHYPRE_STRUCTSMGSETNU
 extern void hypre_F90_NAME(fhypre_structsmgsetnumpostrelax, FHYPRE_STRUCTSMGSETNUMPOSTRELAX)
                           (long int *, int *);
 
-#define HYPRE_StructSMGSetDxyz \
-        hypre_F90_NAME(fhypre_structsmgsetdxyz, FHYPRE_STRUCTSMGSETDXYZ)
-extern void hypre_F90_NAME(fhypre_structsmgsetdxyz, FHYPRE_STRUCTSMGSETDXYZ)
-                          (long int *, double *);
+#define HYPRE_StructSMGGetNumPostRelax \
+        hypre_F90_NAME(fhypre_structsmggetnumpostrelax, FHYPRE_STRUCTSMGGETNUMPOSTRELAX)
+extern void hypre_F90_NAME(fhypre_structsmggetnumpostrelax, FHYPRE_STRUCTSMGGETNUMPOSTRELAX)
+                          (long int *, int *);
 
 #define HYPRE_StructSMGSetLogging \
         hypre_F90_NAME(fhypre_structsmgsetlogging, FHYPRE_STRUCTSMGSETLOGGING)
 extern void hypre_F90_NAME(fhypre_structsmgsetlogging, FHYPRE_STRUCTSMGSETLOGGING)
                           (long int *, int *);
 
+#define HYPRE_StructSMGGetLogging \
+        hypre_F90_NAME(fhypre_structsmggetlogging, FHYPRE_STRUCTSMGGETLOGGING)
+extern void hypre_F90_NAME(fhypre_structsmggetlogging, FHYPRE_STRUCTSMGGETLOGGING)
+                          (long int *, int *);
+
 #define HYPRE_StructSMGSetPrintLevel \
         hypre_F90_NAME(fhypre_structsmgsetprintlevel, FHYPRE_STRUCTSMGSETPRINTLEVEL)
 extern void hypre_F90_NAME(fhypre_structsmgsetprintlevel, FHYPRE_STRUCTSMGSETPRINTLEVEL)
+                          (long int *, int *);
+
+#define HYPRE_StructSMGGetPrintLevel \
+        hypre_F90_NAME(fhypre_structsmggetprintlevel, FHYPRE_STRUCTSMGGETPRINTLEVEL)
+extern void hypre_F90_NAME(fhypre_structsmggetprintlevel, FHYPRE_STRUCTSMGGETPRINTLEVEL)
                           (long int *, int *);
 
 
@@ -814,11 +976,6 @@ extern void hypre_F90_NAME(fhypre_structsparsemsggetnumite, FHYPRE_STRUCTSPARSEM
         hypre_F90_NAME(fhypre_structsparsemsggetfinalr, FHYRPE_STRUCTSPARSEMSGGETFINALR)
 extern void hypre_F90_NAME(fhypre_structsparsemsggetfinalr, FHYRPE_STRUCTSPARSEMSGGETFINALR)
                           (long int *, double *);
-
-#define HYPRE_StructSparseMSGSetSkipRelax \
-        hypre_F90_NAME(fhypre_structsparsemsgsetskipre, FHYPRE_STRUCTSPARSEMSGSETSKIPRE)
-extern void hypre_F90_NAME(fhypre_structsparsemsgsetskipre, FHYPRE_STRUCTSPARSEMSGSETSKIPRE)
-                          (long int *, int *);
 
 #define HYPRE_StructSparseMSGSetRelaxType \
         hypre_F90_NAME(fhypre_structsparsemsgsetrelaxt, FHYPRE_STRUCTSPARSEMSGSETRELAXT)

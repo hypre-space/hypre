@@ -383,7 +383,7 @@ c******************************************
       double precision fvals(*)
       integer*8 fmatrix
 
-      call HYPRE_StructMatrixSetConstantValues(fmatrix, fnumsindx, 
+      call HYPRE_StructMatrixSetConstantVa(fmatrix, fnumsindx, 
      1                                         fsindx, fvals, ierr)
       if (ierr .ne. 0) then
          print *, 'fhypre_structmatrixaddtoconstantvalues: error = ',
@@ -637,6 +637,22 @@ c******************************************
       end
 
 c******************************************
+c      fhypre_structvectorscalevalues
+c******************************************
+      subroutine fhypre_structvectorscalevalues(fvector, ffactor)
+      integer ierr
+      double precision ffactor
+      integer*8 fvector
+
+      call HYPRE_StructVectorScaleValues(fvector, ffactor, ierr)
+      if (ierr .ne. 0) then
+         print *, 'fhypre_structvectorscalevalues: error = ', ierr
+      endif
+
+      return
+      end
+
+c******************************************
 c      fhypre_structvectorgetvalues
 c******************************************
       subroutine fhypre_structvectorgetvalues(fvector, fgrdindx,
@@ -700,6 +716,22 @@ c******************************************
       call HYPRE_StructVectorSetNumGhost(fvector, fnumghost, ierr)
       if (ierr .ne. 0) then
          print *, 'fhypre_structvectorsetnumghost: error = ', ierr
+      endif
+
+      return
+      end
+
+c******************************************
+c      fhypre_structvectorcopy
+c******************************************
+      subroutine fhypre_structvectorcopy(fx, fy)
+      integer ierr
+      integer*8 fx
+      integer*8 fy
+
+      call HYPRE_StructVectorCopy(fx, fy, ierr)
+      if (ierr .ne. 0) then
+         print *, 'fhypre_structvectorcopy: error = ', ierr
       endif
 
       return

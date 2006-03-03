@@ -761,7 +761,7 @@ c***********************************************************************
       integer fseed
       integer*8 fvector
 
-      call hypre_StructVectorSetRandomValues(fvector, fseed, ierr)
+      call hypre_StructVectorSetRandomValu(fvector, fseed, ierr)
       if (ierr .ne. 0) then
          print *, 'fhypre_structvectorsetrandomvalues: err = ', ierr
       endif

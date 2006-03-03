@@ -74,7 +74,7 @@ c    THIS IS FOR A NON-OVERLAPPING GRID GRAPH.
 c--------------------------------------------------------------------------
       subroutine fhypre_sstructgraphaddentries(fgraph, fpart, findex, 
      1                                         fvar, fto_part,
-     1                                          fto_index, fto_var)
+     1                                         fto_index, fto_var)
 
       integer ierr
       integer fpart
@@ -118,7 +118,7 @@ c--------------------------------------------------------------------------
 c--------------------------------------------------------------------------
 c  HYPRE_SStructGraphSetObjectType
 c--------------------------------------------------------------------------
-      subroutine fhypre_sstructgraphsetobjecttype(fgraph, ftype)
+      subroutine fhypre_sstructgraphsetobjecttyp(fgraph, ftype)
                                                  
       integer ierr
       integer ftype
@@ -306,7 +306,7 @@ c--------------------------------------------------------------------------
 c--------------------------------------------------------------------------
 c   HYPRE_SStructGridSetNeighborBox
 c--------------------------------------------------------------------------
-      subroutine fhypre_sstructgridsetneighborbox(fgrid, fpart, filower,
+      subroutine fhypre_sstructgridsetneighborbo(fgrid, fpart, filower,
      1                                            fiupper, fnbor_part,
      2                                            fnbor_ilower,
      3                                            fnbor_iupper,
@@ -329,29 +329,6 @@ c--------------------------------------------------------------------------
 
       if (ierr .ne. 0) then
          print *, ' fhypre_sstructgridsetneighborbox error = ', ierr
-      endif
-
-      return
-      end
-
-
-c--------------------------------------------------------------------------
-c   HYPRE_SStructGridAddUnstructuredPart
-c--------------------------------------------------------------------------
-      subroutine fhypre_sstructgridaddunstructure(fgrid, filower, 
-     1                                            fiupper)
-
-      integer ierr
-      integer filower
-      integer fiupper
-      integer*8 fgrid
-
-      call HYPRE_SStructGridAddUnstructuredPart(fgrid, filower, fiupper,
-     1                                          ierr)
-
-      if (ierr .ne. 0) then
-         print *, ' fhypre_sstructgridaddunstructuredpart error = ', 
-     1                                          ierr
       endif
 
       return
@@ -508,7 +485,7 @@ c--------------------------------------------------------------------------
 c--------------------------------------------------------------------------
 c   HYPRE_SStructMatrixSetBoxValues
 c--------------------------------------------------------------------------
-      subroutine fhypre_sstructmatrixsetboxvalues(fmatrix, fpart, 
+      subroutine fhypre_sstructmatrixsetboxvalue(fmatrix, fpart, 
      1                                            filower, fiupper, 
      2                                            fvar, fnentries, 
      3                                            fentries, fvalues)
@@ -566,7 +543,7 @@ c--------------------------------------------------------------------------
 c--------------------------------------------------------------------------
 c   HYPRE_SStructMatrixGetBoxValues
 c--------------------------------------------------------------------------
-      subroutine fhypre_sstructmatrixgetboxvalues(fmatrix, fpart, 
+      subroutine fhypre_sstructmatrixgetboxvalue(fmatrix, fpart, 
      1                                            filower, fiupper, 
      2                                            fvar, fnentries,
      3                                            fentries, fvalues)
@@ -623,7 +600,7 @@ c--------------------------------------------------------------------------
 c--------------------------------------------------------------------------
 c   HYPRE_SStructMatrixAddToBoxValues
 c--------------------------------------------------------------------------
-      subroutine fhypre_sstructmatrixaddtoboxvalue(fmatrix, fpart, 
+      subroutine fhypre_sstructmatrixaddtoboxval(fmatrix, fpart, 
      1                                             filower, fiupper,
      2                                             fvar, fnentries, 
      3                                             fentries, fvalues)
@@ -637,7 +614,7 @@ c--------------------------------------------------------------------------
       integer*8 fmatrix
       double precision fvalues
 
-      call HYPRE_SStructMatrixAddToBoxValues(fmatrix, fpart, filower, 
+      call HYPRE_SStructMatrixAddToBoxValu(fmatrix, fpart, filower, 
      1                                       fiupper, fvar, fnentries, 
      2                                       fentries, fvalues, ierr)
 
@@ -670,7 +647,7 @@ c--------------------------------------------------------------------------
 c--------------------------------------------------------------------------
 c   HYPRE_SStructMatrixSetSymmetric
 c--------------------------------------------------------------------------
-      subroutine fhypre_sstructmatrixsetsymmetric(fmatrix, fpart, fvar,
+      subroutine fhypre_sstructmatrixsetsymmetri(fmatrix, fpart, fvar,
      1                                            fto_var, fsymmetric)
 
       integer ierr
@@ -694,13 +671,13 @@ c--------------------------------------------------------------------------
 c--------------------------------------------------------------------------
 c   HYPRE_SStructMatrixSetNSSymmetric
 c--------------------------------------------------------------------------
-      subroutine fhypre_sstructmatrixsetnssymmetr(fmatrix, fsymmetric)
+      subroutine fhypre_sstructmatrixsetnssymmet(fmatrix, fsymmetric)
 
       integer ierr
       integer fsymmetric
       integer*8 fmatrix
 
-      call HYPRE_SStructMatrixSetNSSymmetric(fmatrix, fsymmetric, ierr)
+      call HYPRE_SStructMatrixSetNSSymmetr(fmatrix, fsymmetric, ierr)
 
       if (ierr .ne. 0) then
          print *, ' fhypre_sstructmatrixsetnssymmetric error = ', ierr
@@ -713,13 +690,13 @@ c--------------------------------------------------------------------------
 c--------------------------------------------------------------------------
 c   HYPRE_SStructMatrixSetObjectType
 c--------------------------------------------------------------------------
-      subroutine fhypre_sstructmatrixsetobjecttyp(fmatrix, ftype)
+      subroutine fhypre_sstructmatrixsetobjectty(fmatrix, ftype)
 
       integer ierr
       integer ftype
       integer*8 fmatrix
 
-      call HYPRE_SStructMatrixSetObjectType(fmatrix, ftype, ierr)
+      call HYPRE_SStructMatrixSetObjectTyp(fmatrix, ftype, ierr)
 
       if (ierr .ne. 0) then
          print *, ' fhypre_sstructmatrixsetobjecttype error = ', ierr
@@ -965,7 +942,7 @@ c--------------------------------------------------------------------------
 c--------------------------------------------------------------------------
 c   HYPRE_SStructVectorSetBoxValues
 c--------------------------------------------------------------------------
-      subroutine fhypre_sstructvectorsetboxvalues(fvector, fpart,
+      subroutine fhypre_sstructvectorsetboxvalue(fvector, fpart,
      1                                            filower, fiupper, 
      2                                            fvar, fvalues)
 
@@ -1015,7 +992,7 @@ c--------------------------------------------------------------------------
 c--------------------------------------------------------------------------
 c   HYPRE_SStructVectorAddToBoxValues
 c--------------------------------------------------------------------------
-      subroutine fhypre_sstructvectoraddtoboxvalu(fvector, fpart,
+      subroutine fhypre_sstructvectoraddtoboxval(fvector, fpart,
      1                                            filower, fiupper, 
      2                                            fvar, fvalues)
       integer ierr
@@ -1026,7 +1003,7 @@ c--------------------------------------------------------------------------
       integer*8 fvector
       double precision fvalues
 
-      call HYPRE_SStructVectorAddToBoxValues(fvector, fpart, filower,
+      call HYPRE_SStructVectorAddToBoxValu(fvector, fpart, filower,
      1                                       fiupper, fvar, fvalues,
      2                                       ierr)
 
@@ -1101,7 +1078,7 @@ c--------------------------------------------------------------------------
 c--------------------------------------------------------------------------
 c   HYPRE_SStructVectorGetBoxValues
 c--------------------------------------------------------------------------
-      subroutine fhypre_sstructvectorgetboxvalues(fvector, fpart, 
+      subroutine fhypre_sstructvectorgetboxvalue(fvector, fpart, 
      1                                            filower, fiupper, 
      2                                            fvar, fvalues)
 
@@ -1127,13 +1104,13 @@ c--------------------------------------------------------------------------
 c--------------------------------------------------------------------------
 c   HYPRE_SStructVectorSetConstantValues
 c--------------------------------------------------------------------------
-      subroutine fhypre_sstructvectorsetconstantv(fvector, fvalue)
+      subroutine fhypre_sstructvectorsetconstant(fvector, fvalue)
 
       integer ierr
       integer*8 fvector
       double precision fvalue
 
-      call HYPRE_SStructVectorSetConstantValues(fvector, fvalue, ierr)
+      call HYPRE_SStructVectorSetConstantV(fvector, fvalue, ierr)
 
       if (ierr .ne. 0) then
          print *, ' fhypre_sstructvectorsetconstantvalues error = ',
@@ -1147,13 +1124,13 @@ c--------------------------------------------------------------------------
 c--------------------------------------------------------------------------
 c   HYPRE_SStructVectorSetObjectType
 c--------------------------------------------------------------------------
-      subroutine fhypre_sstructvectorsetobjecttyp(fvector, ftype)
+      subroutine fhypre_sstructvectorsetobjectty(fvector, ftype)
 
       integer ierr
       integer ftype
       integer*8 fvector
 
-      call HYPRE_SStructVectorSetObjectType(fvector, ftype, ierr)
+      call HYPRE_SStructVectorSetObjectTyp(fvector, ftype, ierr)
 
       if (ierr .ne. 0) then
          print *, ' fhypre_sstructvectorsetobjecttype error = ', ierr

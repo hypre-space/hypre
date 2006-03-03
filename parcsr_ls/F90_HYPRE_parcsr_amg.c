@@ -210,7 +210,7 @@ hypre_F90_IFACE(hypre_boomeramggettruncfactor, HYPRE_BOOMERAMGGETTRUNCFACTOR)( l
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_boomeramgsetscommpkgswitch, HYPRE_BOOMERAMGSETSCOMMPKGSWITCH)
+hypre_F90_IFACE(hypre_boomeramgsetscommpkgswitc, HYPRE_BOOMERAMGSETSCOMMPKGSWITC)
                                             ( long int *solver,
                                             double      *S_commpkg_switch,
                                             int         *ierr         )
@@ -838,7 +838,7 @@ hypre_F90_IFACE(hypre_boomeramggetnumiterations, HYPRE_BOOMERAMGGETNUMITERATIONS
 
 
 void
-hypre_F90_IFACE(hypre_boomeramggetcumnumiterations, HYPRE_BOOMERAMGGETCUMNUMITERATIONS)( long int *solver,
+hypre_F90_IFACE(hypre_boomeramggetcumnumiterati, HYPRE_BOOMERAMGGETCUMNUMITERATI)( long int *solver,
                                                int      *cum_num_iterations,
                                                int      *ierr     )
 {

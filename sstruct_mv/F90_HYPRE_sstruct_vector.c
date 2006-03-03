@@ -241,11 +241,11 @@ hypre_F90_IFACE(hypre_sstructvectorsetobjecttyp, HYPRE_SSTRUCTVECTORSETOBJECTTYP
 void
 hypre_F90_IFACE(hypre_sstructvectorgetobject, HYPRE_SSTRUCTVECTORGETOBJECT)
                                                               (long int *vector,
-                                                               void    **object,
+                                                               long int *object,
                                                                int      *ierr)
 {
    *ierr = (int) (HYPRE_SStructVectorGetObject( (HYPRE_SStructVector) *vector,
-                                                (void *)              *object ));
+                                                (void **)              object ));
 }
 
 /*--------------------------------------------------------------------------

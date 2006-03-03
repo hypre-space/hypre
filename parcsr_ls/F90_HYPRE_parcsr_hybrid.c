@@ -524,7 +524,7 @@ hypre_F90_IFACE(hypre_parcsrhybridgetnumiterati, HYPRE_PARCSRHYBRIDGETNUMITERATI
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_parcsrhybridgetnumdscgnumite, HYPRE_PARCSRHYBRIDGETNUMDSCGITE)
+hypre_F90_IFACE(hypre_parcsrhybridgetdscgnumite, HYPRE_PARCSRHYBRIDGETDSCGNUMITE)
                (long int *solver, int *dscg_num_its, int *ierr)
 {
    *ierr = (int) (HYPRE_ParCSRHybridGetDSCGNumIterations( (HYPRE_Solver) *solver,
