@@ -117,7 +117,6 @@ FILES =\
  mli_solver_superlu.cxx\
  mli_solver_seqsuperlu.cxx\
  mli_solver_arpacksuperlu.cxx\
- mli_utils_fortran.f\
  mli_vector.cxx
 
 OBJSC = ${FILES:.c=.o}
