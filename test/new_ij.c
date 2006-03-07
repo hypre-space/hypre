@@ -386,6 +386,11 @@ main( int   argc,
          arg_index++;
          coarsen_type      = 9;
       }    
+      else if ( strcmp(argv[arg_index], "-cr") == 0 )
+      {
+         arg_index++;
+         coarsen_type      = 99;
+      }    
       else if ( strcmp(argv[arg_index], "-hmis") == 0 )
       {
          arg_index++;
