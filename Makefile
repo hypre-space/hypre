@@ -44,7 +44,7 @@ HYPRE_IJ_DIRS =\
 HYPRE_MULTIVEC_DIRS = multivector
 
 #These are the directories for the FEI
-HYPRE_FEI_DIRS = FEI_mv
+HYPRE_FEI_DIRS = ${HYPRE_FEI_SRC_DIR}
 
 #This is the lib directory
 HYPRE_LIBS_DIRS = lib

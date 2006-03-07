@@ -74,7 +74,7 @@ dnl *  try to find libg2c.a
 dnl **********************************************************************
 AC_DEFUN([HYPRE_FIND_G2C],
 [
- AC_REQUIRE([AC_F77_LIBRARY_LDFLAGS])
+dnl AC_REQUIRE([AC_F77_LIBRARY_LDFLAGS])
 
   hypre_save_LIBS="$LIBS"
   LIBS="$LIBS $FLIBS"
