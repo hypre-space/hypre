@@ -16,8 +16,7 @@
 
 include ../../config/Makefile.config
 
-BASE_DIR = ${FEIINCLUDE}
-${FEIINTERNAL}BASE_DIR = $(srcdir)/../fei-base
+BASE_DIR = ${HYPRE_FEI_BASE_DIR}
 
 SUPERLU_INCLUDE = -I$(srcdir)/../SuperLU
 SUPERLU_LIB     = -L$(srcdir)/../SuperLU
@@ -180,7 +179,6 @@ clean:
 	rm -rf pchdir tca.map *inslog*
 
 distclean: clean
-	rm -rf Makefile
 
 ##################################################################
 # Rules
