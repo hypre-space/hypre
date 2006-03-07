@@ -10,9 +10,9 @@
 include ../config/Makefile.config
 
  
-SUPERLUFILES = ${HYPRE_SRC_TOP_DIR}/FEI_mv/SuperLU/*.o
-FEIHYPREFILES = ${HYPRE_SRC_TOP_DIR}/FEI_mv/fei-hypre/*.o
-FEMLIFILES = ${HYPRE_SRC_TOP_DIR}/FEI_mv/femli/lib/*.o
+SUPERLUFILES = ${HYPRE_FEI_SUPERLU_FILES}
+FEIHYPREFILES = ${HYPRE_FEI_HYPRE_FILES}
+FEMLIFILES = ${HYPRE_FEI_FEMLI_FILES}
 IJMVFILES = ${HYPRE_SRC_TOP_DIR}/IJ_mv/*.o
 EUCLIDFILES = ${HYPRE_SRC_TOP_DIR}/distributed_ls/Euclid/*.o
 PARASAILSFILES = ${HYPRE_SRC_TOP_DIR}/distributed_ls/ParaSails/*.o
@@ -99,26 +99,7 @@ $(UTILFILES)
 
 all:
 	@echo  "Building libHYPRE.a ... "
-	cp -fp ${SUPERLUFILES} .
-	cp -fp ${FEIHYPREFILES} .
-	cp -fp ${FEMLIFILES} .
-	cp -fp ${IJMVFILES} .
-	cp -fp ${EUCLIDFILES} .
-	cp -fp ${PARASAILSFILES} .
-	cp -fp ${PILUTFILES} .
-	cp -fp ${DISTMATRIXFILES} .
-	cp -fp ${KRYLOVFILES} .
-	cp -fp ${MATMATFILES} .
-	cp -fp ${MULTIVECFILES} .
-	cp -fp ${PARCSRLSFILES} .
-	cp -fp ${PARCSRMVFILES} .
-	cp -fp ${PARCSRBLOCKMVFILES} .	
-	cp -fp ${SEQMVFILES} .
-	cp -fp ${SSTRUCTLSFILES} .
-	cp -fp ${SSTRUCTMVFILES} .
-	cp -fp ${STRUCTLSFILES} .
-	cp -fp ${STRUCTMVFILES} .
-	cp -fp ${UTILITIESFILES} .
+	cp -fp ${FILES} .
 	${AR} libHYPRE.a *.o
 	${RANLIB} libHYPRE.a
 	@echo  "Building libHYPRE_LSI.a ... "
