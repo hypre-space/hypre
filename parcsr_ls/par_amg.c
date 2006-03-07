@@ -40,6 +40,8 @@ hypre_BoomerAMGCreate()
    int 	    nodal;
    int 	    num_paths;
    int 	    agg_num_levels;
+   int 	    num_CR_relax_steps;
+   int 	    IS_type;
 
    /* solve params */
    int      min_iter;
@@ -97,6 +99,8 @@ hypre_BoomerAMGCreate()
    nodal = 0;
    num_paths = 1;
    agg_num_levels = 0;
+   num_CR_relax_steps = 2;
+   IS_type = 1;
 
    variant = 0;
    overlap = 1;
@@ -159,6 +163,8 @@ hypre_BoomerAMGCreate()
    hypre_BoomerAMGSetNodal(amg_data, nodal);
    hypre_BoomerAMGSetNumPaths(amg_data, num_paths);
    hypre_BoomerAMGSetAggNumLevels(amg_data, agg_num_levels);
+   hypre_BoomerAMGSetNumCRRelaxSteps(amg_data, num_CR_relax_steps);
+   hypre_BoomerAMGSetISType(amg_data, IS_type);
    hypre_BoomerAMGSetVariant(amg_data, variant);
    hypre_BoomerAMGSetOverlap(amg_data, overlap);
    hypre_BoomerAMGSetSchwarzRlxWeight(amg_data, schwarz_rlx_weight);
@@ -1453,6 +1459,38 @@ hypre_BoomerAMGSetAggNumLevels( void     *data,
    hypre_ParAMGData  *amg_data = data;
  
    hypre_ParAMGDataAggNumLevels(amg_data) = agg_num_levels;
+
+   return (ierr);
+}
+
+/*--------------------------------------------------------------------------
+ * Indicates the number of relaxation steps for Compatible relaxation
+ *--------------------------------------------------------------------------*/
+
+int
+hypre_BoomerAMGSetNumCRRelaxSteps( void     *data,
+                            int       num_CR_relax_steps )
+{
+   int ierr = 0;
+   hypre_ParAMGData  *amg_data = data;
+ 
+   hypre_ParAMGDataNumCRRelaxSteps(amg_data) = num_CR_relax_steps;
+
+   return (ierr);
+}
+
+/*--------------------------------------------------------------------------
+ * Indicates which independent set algorithm is used for CR
+ *--------------------------------------------------------------------------*/
+
+int
+hypre_BoomerAMGSetISType( void     *data,
+                            int      IS_type )
+{
+   int ierr = 0;
+   hypre_ParAMGData  *amg_data = data;
+ 
+   hypre_ParAMGDataISType(amg_data) = IS_type;
 
    return (ierr);
 }

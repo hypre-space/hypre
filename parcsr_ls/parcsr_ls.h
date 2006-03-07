@@ -18,6 +18,7 @@
 extern "C" {
 #endif
 
+typedef struct { int prev; int next; } Link;
 
 /* amg_hybrid.c */
 void *hypre_AMGHybridCreate( void );
@@ -166,6 +167,8 @@ int HYPRE_BoomerAMGSetNodal( HYPRE_Solver solver , int nodal );
 int HYPRE_BoomerAMGSetDofFunc( HYPRE_Solver solver , int *dof_func );
 int HYPRE_BoomerAMGSetNumPaths( HYPRE_Solver solver , int num_paths );
 int HYPRE_BoomerAMGSetAggNumLevels( HYPRE_Solver solver , int agg_num_levels );
+int HYPRE_BoomerAMGSetNumCRRelaxSteps( HYPRE_Solver solver , int num_CR_relax_steps );
+int HYPRE_BoomerAMGSetISType( HYPRE_Solver solver , int IS_type );
 int HYPRE_BoomerAMGSetGSMG( HYPRE_Solver solver , int gsmg );
 int HYPRE_BoomerAMGSetNumSamples( HYPRE_Solver solver , int gsmg );
 
@@ -443,6 +446,8 @@ int hypre_BoomerAMGGetNumFunctions( void *data , int *num_functions );
 int hypre_BoomerAMGSetNodal( void *data , int nodal );
 int hypre_BoomerAMGSetNumPaths( void *data , int num_paths );
 int hypre_BoomerAMGSetAggNumLevels( void *data , int agg_num_levels );
+int hypre_BoomerAMGSetNumCRRelaxSteps( void *data , int num_CR_relax_steps );
+int hypre_BoomerAMGSetISType( void *data , int IS_type );
 int hypre_BoomerAMGSetNumPoints( void *data , int num_points );
 int hypre_BoomerAMGSetDofFunc( void *data , int *dof_func );
 int hypre_BoomerAMGSetPointDofMap( void *data , int *point_dof_map );
@@ -491,6 +496,16 @@ int hypre_BoomerAMGCoarsenPMIS( hypre_ParCSRMatrix *S , hypre_ParCSRMatrix *A , 
 
 /* par_coarse_parms.c */
 int hypre_BoomerAMGCoarseParms( MPI_Comm comm , int local_num_variables , int num_functions , int *dof_func , int *CF_marker , int **coarse_dof_func_ptr , int **coarse_pnts_global_ptr );
+
+/* par_cr.c */
+int hypre_BoomerAMGCoarsenCR( hypre_ParCSRMatrix *A , int **CF_marker_ptr , hypre_ParCSRMatrix *S , int *coarse_size_ptr , int num_CR_relax_steps , int IS_type , int CRaddCpoints );
+int cr( int *A_i , int *A_j , double *A_data , int n , int *cf , int rlx , double omega , double tg , int mu );
+int GraphAdd( Link *list , int *head , int *tail , int index , int istack );
+int GraphRemove( Link *list , int *head , int *tail , int index );
+int IndepSetGreedy( int *A_i , int *A_j , int n , int *cf );
+int fptjaccr( int *cf , int *A_i , int *A_j , double *A_data , int n , double *e0 , double omega , double *e1 );
+int fptgscr( int *cf , int *A_i , int *A_j , double *A_data , int n , double *e0 , double *e1 );
+int formu( int *cf , int n , double *e1 , int *A_i , double rho );
 
 /* par_cycle.c */
 int hypre_BoomerAMGCycle( void *amg_vdata , hypre_ParVector **F_array , hypre_ParVector **U_array );

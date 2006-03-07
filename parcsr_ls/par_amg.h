@@ -35,6 +35,8 @@ typedef struct
    int      restr_par;
    int      agg_num_levels;
    int      num_paths;
+   int      num_CR_relax_steps;
+   int      IS_type;
 
    /* solve params */
    int      max_iter;
@@ -144,6 +146,8 @@ typedef struct
 #define hypre_ParAMGDataSetupType(amg_data) ((amg_data)->setup_type)
 #define hypre_ParAMGDataNumPaths(amg_data) ((amg_data)->num_paths)
 #define hypre_ParAMGDataAggNumLevels(amg_data) ((amg_data)->agg_num_levels)
+#define hypre_ParAMGDataNumCRRelaxSteps(amg_data) ((amg_data)->num_CR_relax_steps)
+#define hypre_ParAMGDataISType(amg_data) ((amg_data)->IS_type)
 
 /* solve params */
 

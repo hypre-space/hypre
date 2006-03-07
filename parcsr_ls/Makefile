@@ -77,6 +77,7 @@ FILES =\
  par_cg_relax_wt.c\
  par_coarsen.c\
  par_coarse_parms.c\
+ par_cr.c\
  par_cycle.c\
  par_difconv.c\
  par_gsmg.c\

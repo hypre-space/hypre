@@ -973,6 +973,28 @@ HYPRE_BoomerAMGSetAggNumLevels( HYPRE_Solver  solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetNumCRRelaxSteps
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_BoomerAMGSetNumCRRelaxSteps( HYPRE_Solver  solver,
+                              int          num_CR_relax_steps  )
+{
+   return( hypre_BoomerAMGSetNumCRRelaxSteps( (void *) solver, num_CR_relax_steps ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetISType
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_BoomerAMGSetISType( HYPRE_Solver  solver,
+                              int          IS_type  )
+{
+   return( hypre_BoomerAMGSetISType( (void *) solver, IS_type ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_BoomerAMGSetGSMG
  *--------------------------------------------------------------------------*/
 

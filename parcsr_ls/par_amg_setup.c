@@ -64,6 +64,8 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    int      amg_print_level;
    int      debug_flag;
    int      local_num_vars;
+   int      IS_type;
+   int      num_CR_relax_steps;
 
    hypre_ParCSRBlockMatrix **A_block_array, **P_block_array;
  
@@ -146,6 +148,8 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    max_nz_per_row = hypre_ParAMGDataMaxNzPerRow(amg_data);
    euclidfile = hypre_ParAMGDataEuclidFile(amg_data);
    interp_type = hypre_ParAMGDataInterpType(amg_data);
+   IS_type = hypre_ParAMGDataISType(amg_data);
+   num_CR_relax_steps = hypre_ParAMGDataNumCRRelaxSteps(amg_data);
 
    hypre_ParCSRMatrixSetNumNonzeros(A);
    hypre_ParCSRMatrixSetDNumNonzeros(A);
@@ -866,6 +870,13 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
          }
          
+         else if (coarsen_type == 99) /* CR */
+         {
+             hypre_BoomerAMGCoarsenCR(A_array[level], &CF_marker,
+                        S, &coarse_size,
+                        num_CR_relax_steps, IS_type, 0);
+         }
+
          else if (coarsen_type) /* ruge, ruge1p, ruge2b, ruge3, ruge3c, ruge1x */
          {
             if (nodal == 0) /* nonsystems or unknown approach for systems*/

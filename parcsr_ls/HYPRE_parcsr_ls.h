@@ -567,6 +567,19 @@ int HYPRE_BoomerAMGSetAggNumLevels(HYPRE_Solver solver,
                                 int          agg_num_levels);
 
 /**
+ * (Optional) Defines the number of relaxation steps for CR
+ * The default is 2.
+ **/
+int HYPRE_BoomerAMGSetNumCRRelaxSteps(HYPRE_Solver solver,
+                                int          num_CR_relax_steps);
+
+/**
+ * (Optional) Defines the Type of independent set algorithm used for CR
+ **/
+int HYPRE_BoomerAMGSetISType(HYPRE_Solver solver,
+                                int          IS_type);
+
+/**
  * (Optional) Defines the degree of aggressive coarsening.
  * The default is 1.
  **/
