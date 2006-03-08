@@ -948,6 +948,7 @@ else
    if test "$casc_using_fei" = "no"
    then
       HYPRE_FEI_SRC_DIR=""
+      HYPRE_FEI_BASE_DIR=""
       HYPRE_FEI_SUPERLU_FILES=""
       HYPRE_FEI_HYPRE_FILES=""
       HYPRE_FEI_FEMLI_FILES=""
