@@ -232,7 +232,8 @@ HYPRE_LinSysCore::HYPRE_LinSysCore(MPI_Comm comm) :
    amgSmoothNumSweeps_ = 1;    // no. of sweeps for non point smoothers
    amgCGSmoothNumSweeps_ = 0;  // no. of sweeps for preconditioned CG smoother
    amgSchwarzRelaxWt_  = 1.0;  // relaxation weight for Schwarz smoother
-   amgSchwarzVariant_  = 0;    // hybrid multiplicative Schwarz no overlap across processor boundaries
+   amgSchwarzVariant_  = 0;    // hybrid multiplicative Schwarz with
+                               // no overlap across processor boundaries
    amgSchwarzOverlap_  = 1;    // minimal overlap
    amgSchwarzDomainType_ = 2;  // domain through agglomeration
    amgUseGSMG_         = 0;
@@ -302,6 +303,13 @@ HYPRE_LinSysCore::HYPRE_LinSysCore(MPI_Comm comm) :
    MLI_Hybrid_MaxIter_  = 100;
    MLI_Hybrid_ConvRate_ = 0.95;
    MLI_Hybrid_NTrials_  = 5;
+
+   //-------------------------------------------------------------------
+   // parameters ML Maxwell solver
+   //-------------------------------------------------------------------
+
+   maxwellANN_ = NULL;
+   maxwellGEN_ = NULL;
 }
 
 //***************************************************************************
@@ -497,6 +505,17 @@ HYPRE_LinSysCore::~HYPRE_LinSysCore()
    if ( MLI_NodalCoord_ != NULL ) delete [] MLI_NodalCoord_;
    if ( MLI_EqnNumbers_ != NULL ) delete [] MLI_EqnNumbers_;
 #endif
+
+   if (maxwellANN_ != NULL)
+   {
+      HYPRE_IJMatrixDestroy(maxwellANN_);
+      maxwellANN_ = NULL;
+   }
+   if (maxwellGEN_ != NULL)
+   {
+      HYPRE_IJMatrixDestroy(maxwellGEN_);
+      maxwellGEN_ = NULL;
+   }
 
    //-------------------------------------------------------------------
    // diagnostic message
@@ -2592,10 +2611,24 @@ int HYPRE_LinSysCore::getMatrixPtr(Data& data)
 #ifndef NOFEI
 int HYPRE_LinSysCore::copyInMatrix(double scalar, const Data& data) 
 {
+   char *name;
+
    (void) scalar;
-   (void) data;
-   printf("%4d : HYPRE_LSC::copyInMatrix ERROR - not implemented.\n",mypid_);
-   exit(1);
+
+   name  = data.getTypeName();
+   if (!strcmp(name, "ANN"))
+   {
+      maxwellANN_ = (HYPRE_IJMatrix) data.getDataPtr();
+   }
+   else if (!strcmp(name, "GEN"))
+   {
+      maxwellGEN_ = (HYPRE_IJMatrix) data.getDataPtr();
+   }
+   else
+   {
+      printf("%4d : HYPRE_LSC::copyInMatrix ERROR - invalid data.\n",mypid_);
+      exit(1);
+   }
    return (0);
 }
 #endif

@@ -671,6 +671,13 @@ class HYPRE_LinSysCore
    int             MLI_Hybrid_NTrials_;
 
    // ----------------------------------------------------------------------
+   // ML Maxwell variables
+   // ----------------------------------------------------------------------
+
+   HYPRE_IJMatrix  maxwellANN_;           // Maxwell nodal matrix 
+   HYPRE_IJMatrix  maxwellGEN_;           // Maxwell gradient matrix 
+
+   // ----------------------------------------------------------------------
    // temporary functions for testing purposes
    // ----------------------------------------------------------------------
 
