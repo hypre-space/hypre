@@ -47,9 +47,8 @@ typedef struct
 
 #endif
     MLMaxwell_Context *Aee_contxt;
-    MLMaxwell_Context *Amm_contxt;
+    MLMaxwell_Context *G_contxt;
     MLMaxwell_Context *Ann_contxt;
-    user_Gmat_data    *Gmat_data;
     void              **node_args;
     void              **edge_args;
 } 
