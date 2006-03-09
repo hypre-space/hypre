@@ -123,19 +123,16 @@ int ML_ExchBdry(double *vec, void *obj)
    return 0;
 #else
    int         i, j, msgid, leng, src, dest, offset, *tempList;
+   int         sendProcCnt, *sendProc, *sendLeng, **sendList;
+   int         recvProcCnt, *recvProc, *recvLeng, nRows;
    double      *dbuf;
-   ML_Context  *context;
-   ML_Matrix   *Amat;
+   HYPRE_ML_Matrix   *Amat;
    MPI_Comm    comm;
    MPI_Request *requests; 
+   MLMaxwell_Context *context;
 
-   int sendProcCnt, recvProcCnt;
-   int *sendProc, *recvProc;
-   int *sendLeng, *recvLeng;
-   int **sendList, nRows;
-
-   context     = (ML_Context *) obj;
-   Amat        = (ML_Matrix  *) context->Amat;
+   context     = (MLMaxwell_Context *) obj;
+   Amat        = (HYPRE_ML_Matrix  *) context->Amat;
    comm        = context->comm;
    sendProcCnt = Amat->sendProcCnt;
    recvProcCnt = Amat->recvProcCnt;
@@ -154,7 +151,7 @@ int ML_ExchBdry(double *vec, void *obj)
    {
       leng = recvLeng[i] * sizeof(double);
       src  = recvProc[i];
-      ML_Irecv((void*) &(vec[offset]),leng,&src,&msgid,comm,&request[i]);
+      ML_Irecv((void*) &(vec[offset]),leng,&src,&msgid,comm,&requests[i]);
       offset += recvLeng[i];
    }
    msgid = 234;
@@ -173,30 +170,27 @@ int ML_ExchBdry(double *vec, void *obj)
    {
       leng = recvLeng[i] * sizeof(double);
       src  = recvProc[i];
-      ML_Wait((void*) &(vec[offset]), leng, &src, &msgid, comm, &request[i]);
+      ML_Wait((void*) &(vec[offset]), leng, &src, &msgid, comm, &requests[i]);
       offset += recvLeng[i];
    }
-   if (recvProcCnt > 0) free (request);
+   if (recvProcCnt > 0) free (requests);
    return 1;
 #endif
 }
 
 /****************************************************************************/ 
-/* matvec function for local matrix structure ML_Matrix                     */
+/* matvec function for local matrix structure HYPRE_ML_Matrix               */
 /*--------------------------------------------------------------------------*/
 
 int ML_MatVec(void *obj, int leng1, double p[], int leng2, double ap[])
 {
-    ML_Context *context;
-    ML_Matrix  *Amat;
+    int               i, j, length, nRows, ibeg, iend, k, *rowptr, *colnum;
+    double            *dbuf, sum, *values;
+    HYPRE_ML_Matrix   *Amat;
+    MLMaxwell_Context *context;
 
-    int    i, j, length, nRows, ibeg, iend, k;
-    double *dbuf, sum;
-    int    *rowptr, *colnum;
-    double *values;
-
-    context = (ML_Context *) obj;
-    Amat    = (ML_Matrix*) context->Amat;
+    context = (MLMaxwell_Context *) obj;
+    Amat    = (HYPRE_ML_Matrix*) context->Amat;
     nRows   = Amat->Nrows;
     rowptr  = Amat->rowptr;
     colnum  = Amat->colnum;
@@ -224,15 +218,15 @@ int ML_MatVec(void *obj, int leng1, double p[], int leng2, double ap[])
 }
 
 /****************************************************************************/
-/* getrow function for local matrix structure ML_Matrix (ML compatible)     */
+/* getrow function for local matrix structure HYPRE_ML_Matrix(ML compatible)*/
 /*--------------------------------------------------------------------------*/
 
 int ML_GetRow(void *obj, int N_requested_rows, int requested_rows[],
    int allocated_space, int columns[], double values[], int row_lengths[])
 {
     int        i, j, ncnt, colindex, rowLeng, rowindex;
-    ML_Context *context = (ML_Context *) obj;
-    ML_Matrix  *Amat    = (ML_Matrix*) context->Amat;
+    MLMaxwell_Context *context = (MLMaxwell_Context *) obj;
+    HYPRE_ML_Matrix   *Amat    = (HYPRE_ML_Matrix*) context->Amat;
     int        nRows    = Amat->Nrows;
     int        *rowptr  = Amat->rowptr;
     int        *colInd  = Amat->colnum;
@@ -409,11 +403,11 @@ int HYPRE_LSI_MLMaxwellSetup(HYPRE_Solver solver, HYPRE_ParCSRMatrix A_ee,
    double      Ncoarse_edge, Ncoarse_node;
    double      edge_coarsening_rate, node_coarsening_rate,
    double      node_omega = ML_DDEFAULT, edge_omega = ML_DDEFAULT; 
-   ML_Context  *Aee_context, G_context, Ann_context;
    ML_Matrix   *mh_Aee, *mh_G, *mh_Ann;
    MLMaxwell   *link;
    ML          *ml_ee, *ml_nn;
    ML_Operator *Gmat, *GTmat;
+   MLMaxwell_Context *Aee_context, G_context, Ann_context;
 
    /* -------------------------------------------------------- */ 
    /* set up the parallel environment                          */
@@ -671,8 +665,9 @@ int HYPRE_LSI_MLSetStrengthThreshold(HYPRE_Solver solver,
 /* HYPRE_LSI_MLConstructMLMatrix                                            */
 /*--------------------------------------------------------------------------*/
 
-int HYPRE_LSI_MLConstructMLMatrix(HYPRE_ParCSRMatrix A, ML_Matrix *ml_mat,
-                             MPI_Comm comm, int *partition,MH_Context *obj) 
+int HYPRE_LSI_MLConstructMLMatrix(HYPRE_ParCSRMatrix A,HYPRE_ML_Matrix *ml_mat,
+                             MPI_Comm comm, int *partition,
+                             MLMaxwell_Context *obj) 
 {
     int         i, j, index, mypid, nprocs;
     int         rowLeng, *colInd, startRow, endRow, localEqns;
