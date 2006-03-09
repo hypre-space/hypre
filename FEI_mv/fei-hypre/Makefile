@@ -93,6 +93,8 @@ HEADERS =\
  HYPRE_LSI_schur.h\
  HYPRE_LSI_schwarz.h\
  HYPRE_MHMatrix.h\
+ HYPRE_MLMatrix.h\
+ HYPRE_MLMaxwell.h\
  HYPRE_SlideReduction.h\
  HYPRE_parcsr_TFQmr.h\
  HYPRE_parcsr_bicgs.h\
@@ -106,6 +108,7 @@ FILESC = \
  HYPRE_LSI_ddict.c\
  HYPRE_LSI_ddilut.c\
  HYPRE_LSI_ml.c\
+ HYPRE_LSI_mlmaxwell.c\
  HYPRE_LSI_poly.c\
  HYPRE_LSI_schwarz.c\
  HYPRE_parcsr_TFQmr.c\
