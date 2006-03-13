@@ -1,5 +1,9 @@
 % docxx980529.sty
 
+%
+% Rob Falgout made some hacks to get PDF bookmarks. (3/13/2006)
+% Search for 'RDF' to find changes.
+%
 
 % docxx.sty modified by Scott Kohn
 % one part of Kohn's modification changed back to original,
@@ -8,6 +12,18 @@
 %
 % Switch off special characters except {}\ for the rest of the text.
 %
+
+% RDF
+\usepackage[
+pdftex,
+linktocpage,       % make page numbers be the link on TOC, LOF and LOT
+pagebackref,       % adds backlink to the bibliography
+plainpages=false,  % page anchors are named by their formatted form
+pdfstartview=Fit,  % startup page view
+bookmarksopen,     % show bookmarks with all the subtrees expanded
+bookmarksnumbered, % include section numbers in bookmarks
+bookmarksopenlevel=2
+]{hyperref}
 
 \oddsidemargin=0in
 \evensidemargin=0in
@@ -749,6 +765,23 @@
 \setbox1\hbox{\strut\large #1 {\bf#2} }%
 \setbox3\hbox{\strut\large #1 {\bf#2} #3}%
 %
+% use \section*{} and \addcontentsline{} to get bookmarks - RDF
+%
+\ifcase\value{cxxDepth} % RDF
+\or
+   \mbox{}\vspace{-15ex} % RDF
+   \section*{} % RDF
+   \addcontentsline{toc}{section}{\protect\numberline{#5}{#2}} % RDF
+\or % RDF
+   \mbox{}\vspace{-15ex} % RDF
+   \subsection*{} % RDF
+   \addcontentsline{toc}{subsection}{\protect\numberline{#5}{#2}} % RDF
+\or % RDF
+   \mbox{}\vspace{-15ex} % RDF
+   \subsubsection*{} % RDF
+   \addcontentsline{toc}{subsubsection}{\protect\numberline{#5}{#2}} % RDF
+\fi % RDF
+%
 % box with id and name [optional width] over entire page width
 %
 \setlength{\cxxSideLen}{\hsize}%
@@ -946,6 +979,10 @@
 % environment for documentation
 %
 \newenvironment{cxxdocumentation}{
+%
+% subtract a bit of space for better formatting - RDF
+%
+\vspace{-5ex} % RDF
 %
 % switch on special characters for documentation section
 %
