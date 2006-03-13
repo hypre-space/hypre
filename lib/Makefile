@@ -50,7 +50,7 @@ UTILFILES = \
  ${HYPRE_SRC_TOP_DIR}/utilities/hypre_mpi_comm_f2c.o\
  ${HYPRE_SRC_TOP_DIR}/utilities/hypre_error.o
 
-FILES = \
+FILES1 = \
 $(SUPERLUFILES)\
 $(FEIHYPREFILES)\
 $(FEMLIFILES)\
@@ -60,7 +60,9 @@ $(PARASAILSFILES)\
 $(PILUTFILES)\
 $(DISTMATRIXFILES)\
 $(KRYLOVFILES)\
-$(MATMATFILES)\
+$(MATMATFILES)
+
+FILES2 = \
 $(MULTIVECFILES)\
 $(PARCSRLSFILES)\
 $(PARCSRMVFILES)\
@@ -99,7 +101,8 @@ $(UTILFILES)
 
 all:
 	@echo  "Building libHYPRE.a ... "
-	cp -fp ${FILES} .
+	cp -fp ${FILES1} .
+	cp -fp ${FILES2} .
 	${AR} libHYPRE.a *.o
 	${RANLIB} libHYPRE.a
 	@echo  "Building libHYPRE_LSI.a ... "
