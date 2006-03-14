@@ -870,11 +870,18 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
          }
          
+         else if (coarsen_type == 98) /* CR */
+         {
+             hypre_BoomerAMGCoarsenCR1(A_array[level], &CF_marker,
+                        &coarse_size,
+                        num_CR_relax_steps, IS_type, 0);
+         }
          else if (coarsen_type == 99) /* CR */
          {
              hypre_BoomerAMGCoarsenCR(A_array[level], &CF_marker,
-                        S, &coarse_size,
-                        num_CR_relax_steps, IS_type, 0);
+                        &coarse_size,
+                        num_CR_relax_steps, IS_type, grid_relax_type[0],
+			relax_weight[level], omega[level], 0.7, 0);
          }
 
          else if (coarsen_type) /* ruge, ruge1p, ruge2b, ruge3, ruge3c, ruge1x */

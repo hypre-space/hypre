@@ -498,7 +498,7 @@ int hypre_BoomerAMGCoarsenPMIS( hypre_ParCSRMatrix *S , hypre_ParCSRMatrix *A , 
 int hypre_BoomerAMGCoarseParms( MPI_Comm comm , int local_num_variables , int num_functions , int *dof_func , int *CF_marker , int **coarse_dof_func_ptr , int **coarse_pnts_global_ptr );
 
 /* par_cr.c */
-int hypre_BoomerAMGCoarsenCR( hypre_ParCSRMatrix *A , int **CF_marker_ptr , hypre_ParCSRMatrix *S , int *coarse_size_ptr , int num_CR_relax_steps , int IS_type , int CRaddCpoints );
+int hypre_BoomerAMGCoarsenCR1( hypre_ParCSRMatrix *A , int **CF_marker_ptr , int *coarse_size_ptr , int num_CR_relax_steps , int IS_type , int CRaddCpoints );
 int cr( int *A_i , int *A_j , double *A_data , int n , int *cf , int rlx , double omega , double tg , int mu );
 int GraphAdd( Link *list , int *head , int *tail , int index , int istack );
 int GraphRemove( Link *list , int *head , int *tail , int index );
@@ -506,6 +506,10 @@ int IndepSetGreedy( int *A_i , int *A_j , int n , int *cf );
 int fptjaccr( int *cf , int *A_i , int *A_j , double *A_data , int n , double *e0 , double omega , double *e1 );
 int fptgscr( int *cf , int *A_i , int *A_j , double *A_data , int n , double *e0 , double *e1 );
 int formu( int *cf , int n , double *e1 , int *A_i , double rho );
+int hypre_BoomerAMGIndepRS( hypre_ParCSRMatrix *S, int measure_type, int debug_flag, int *CF_marker);
+int hypre_BoomerAMGIndepHMIS( hypre_ParCSRMatrix *S, int measure_type, int debug_flag, int *CF_marker);
+int hypre_BoomerAMGIndepPMIS( hypre_ParCSRMatrix *S, int CF_init, int debug_flag, int *CF_marker);
+int hypre_BoomerAMGCoarsenCR( hypre_ParCSRMatrix *A , int **CF_marker_ptr , int *coarse_size_ptr , int num_CR_relax_steps , int IS_type , int rlx_type , double relax_weight , double omega , double theta , int CRaddCpoints );
 
 /* par_cycle.c */
 int hypre_BoomerAMGCycle( void *amg_vdata , hypre_ParVector **F_array , hypre_ParVector **U_array );

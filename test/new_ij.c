@@ -103,6 +103,7 @@ main( int   argc,
    int		       num_functions = 1;
    int		       num_paths = 1;
    int		       agg_num_levels = 0;
+   int		       ns_coarse = 4;
 
    int		       time_index;
    MPI_Comm            comm = MPI_COMM_WORLD;
@@ -125,6 +126,8 @@ main( int   argc,
    int      coarsen_type = 6;
    int      measure_type = 0;
    int      num_sweeps = 1;  
+   int      IS_type;   
+   int      num_CR_relax_steps;   
    int      relax_type;   
    int      relax_fine = -1;   
    int      relax_coarse = -1;   
@@ -187,6 +190,8 @@ main( int   argc,
    build_funcs_type = 0;
    build_funcs_arg_index = argc;
    relax_type = 3;
+   IS_type = 1;
+   num_CR_relax_steps = 5;
    debug_flag = 0;
 
    solver_id = 0;
@@ -386,6 +391,11 @@ main( int   argc,
          arg_index++;
          coarsen_type      = 9;
       }    
+      else if ( strcmp(argv[arg_index], "-cr1") == 0 )
+      {
+         arg_index++;
+         coarsen_type      = 98;
+      }    
       else if ( strcmp(argv[arg_index], "-cr") == 0 )
       {
          arg_index++;
@@ -436,6 +446,16 @@ main( int   argc,
          arg_index++;
          measure_type      = 1;
       }    
+      else if ( strcmp(argv[arg_index], "-is") == 0 )
+      {
+         arg_index++;
+         IS_type = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-ncr") == 0 )
+      {
+         arg_index++;
+         num_CR_relax_steps = atoi(argv[arg_index++]);
+      }
       else if ( strcmp(argv[arg_index], "-rlx") == 0 )
       {
          arg_index++;
@@ -500,6 +520,11 @@ main( int   argc,
       {
          arg_index++;
          num_sweeps = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-ns_coarse") == 0 )
+      {
+         arg_index++;
+         ns_coarse = atoi(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-sns") == 0 )
       {
@@ -1672,6 +1697,8 @@ main( int   argc,
       HYPRE_BoomerAMGSetPrintFileName(amg_solver, "driver.out.log"); 
       HYPRE_BoomerAMGSetCycleType(amg_solver, cycle_type);
       HYPRE_BoomerAMGSetNumSweeps(amg_solver, num_sweeps);
+      HYPRE_BoomerAMGSetISType(amg_solver, IS_type);
+      HYPRE_BoomerAMGSetNumCRRelaxSteps(amg_solver, num_CR_relax_steps);
       HYPRE_BoomerAMGSetRelaxType(amg_solver, relax_type);
       if (relax_fine > -1)
          HYPRE_BoomerAMGSetCycleRelaxType(amg_solver, relax_fine, 0);
@@ -1702,6 +1729,7 @@ main( int   argc,
       HYPRE_BoomerAMGSetAggNumLevels(amg_solver, agg_num_levels);
       HYPRE_BoomerAMGSetNumPaths(amg_solver, num_paths);
       HYPRE_BoomerAMGSetNodal(amg_solver, nodal);
+      HYPRE_BoomerAMGSetCycleNumSweeps(amg_solver, ns_coarse, 3);
       if (num_functions > 1)
 	 HYPRE_BoomerAMGSetDofFunc(amg_solver, dof_func);
 
@@ -1883,6 +1911,8 @@ main( int   argc,
          HYPRE_BoomerAMGSetMaxIter(pcg_precond, 1);
          HYPRE_BoomerAMGSetCycleType(pcg_precond, cycle_type);
          HYPRE_BoomerAMGSetNumSweeps(pcg_precond, num_sweeps);
+         HYPRE_BoomerAMGSetISType(pcg_precond, IS_type);
+         HYPRE_BoomerAMGSetNumCRRelaxSteps(pcg_precond, num_CR_relax_steps);
          HYPRE_BoomerAMGSetRelaxType(pcg_precond, relax_type);
          if (relax_fine > -1)
             HYPRE_BoomerAMGSetCycleRelaxType(pcg_precond, relax_fine, 0);
@@ -1912,6 +1942,7 @@ main( int   argc,
          HYPRE_BoomerAMGSetOverlap(pcg_precond, overlap);
          HYPRE_BoomerAMGSetDomainType(pcg_precond, domain_type);
          HYPRE_BoomerAMGSetSchwarzRlxWeight(pcg_precond, schwarz_rlx_weight);
+         HYPRE_BoomerAMGSetCycleNumSweeps(pcg_precond, ns_coarse, 3);
          if (num_functions > 1)
             HYPRE_BoomerAMGSetDofFunc(pcg_precond, dof_func);
          HYPRE_PCGSetPrecond(pcg_solver,
@@ -1987,6 +2018,8 @@ main( int   argc,
          HYPRE_BoomerAMGSetMaxIter(pcg_precond, 1);
          HYPRE_BoomerAMGSetCycleType(pcg_precond, cycle_type);
          HYPRE_BoomerAMGSetNumSweeps(pcg_precond, num_sweeps);
+         HYPRE_BoomerAMGSetISType(pcg_precond, IS_type);
+         HYPRE_BoomerAMGSetNumCRRelaxSteps(pcg_precond, num_CR_relax_steps);
          HYPRE_BoomerAMGSetRelaxType(pcg_precond, relax_type);
          if (relax_fine > -1)
             HYPRE_BoomerAMGSetCycleRelaxType(pcg_precond, relax_fine, 0);
@@ -2016,6 +2049,7 @@ main( int   argc,
          HYPRE_BoomerAMGSetAggNumLevels(pcg_precond, agg_num_levels);
          HYPRE_BoomerAMGSetNumPaths(pcg_precond, num_paths);
          HYPRE_BoomerAMGSetNodal(pcg_precond, nodal);
+         HYPRE_BoomerAMGSetCycleNumSweeps(pcg_precond, ns_coarse, 3);
          if (num_functions > 1)
             HYPRE_BoomerAMGSetDofFunc(pcg_precond, dof_func);
          HYPRE_PCGSetPrecond(pcg_solver,
@@ -2154,6 +2188,8 @@ main( int   argc,
          HYPRE_BoomerAMGSetMaxIter(pcg_precond, 1);
          HYPRE_BoomerAMGSetCycleType(pcg_precond, cycle_type);
          HYPRE_BoomerAMGSetNumSweeps(pcg_precond, num_sweeps);
+         HYPRE_BoomerAMGSetISType(pcg_precond, IS_type);
+         HYPRE_BoomerAMGSetNumCRRelaxSteps(pcg_precond, num_CR_relax_steps);
          HYPRE_BoomerAMGSetRelaxType(pcg_precond, relax_type);
          if (relax_fine > -1)
             HYPRE_BoomerAMGSetCycleRelaxType(pcg_precond, relax_fine, 0);
@@ -2183,6 +2219,7 @@ main( int   argc,
          HYPRE_BoomerAMGSetOverlap(pcg_precond, overlap);
          HYPRE_BoomerAMGSetDomainType(pcg_precond, domain_type);
          HYPRE_BoomerAMGSetSchwarzRlxWeight(pcg_precond, schwarz_rlx_weight);
+         HYPRE_BoomerAMGSetCycleNumSweeps(pcg_precond, ns_coarse, 3);
          if (num_functions > 1)
             HYPRE_BoomerAMGSetDofFunc(pcg_precond, dof_func);
          HYPRE_GMRESSetPrecond(pcg_solver,
@@ -2248,6 +2285,8 @@ main( int   argc,
          HYPRE_BoomerAMGSetMaxIter(pcg_precond, 1);
          HYPRE_BoomerAMGSetCycleType(pcg_precond, cycle_type);
          HYPRE_BoomerAMGSetNumSweeps(pcg_precond, num_sweeps);
+         HYPRE_BoomerAMGSetISType(pcg_precond, IS_type);
+         HYPRE_BoomerAMGSetNumCRRelaxSteps(pcg_precond, num_CR_relax_steps);
          HYPRE_BoomerAMGSetRelaxType(pcg_precond, relax_type);
          if (relax_fine > -1)
             HYPRE_BoomerAMGSetCycleRelaxType(pcg_precond, relax_fine, 0);
@@ -2277,6 +2316,7 @@ main( int   argc,
          HYPRE_BoomerAMGSetAggNumLevels(pcg_precond, agg_num_levels);
          HYPRE_BoomerAMGSetNumPaths(pcg_precond, num_paths);
          HYPRE_BoomerAMGSetNodal(pcg_precond, nodal);
+         HYPRE_BoomerAMGSetCycleNumSweeps(pcg_precond, ns_coarse, 3);
          if (num_functions > 1)
             HYPRE_BoomerAMGSetDofFunc(pcg_precond, dof_func);
          HYPRE_GMRESSetPrecond(pcg_solver,
@@ -2421,6 +2461,8 @@ main( int   argc,
          HYPRE_BoomerAMGSetMaxIter(pcg_precond, 1);
          HYPRE_BoomerAMGSetCycleType(pcg_precond, cycle_type);
          HYPRE_BoomerAMGSetNumSweeps(pcg_precond, num_sweeps);
+         HYPRE_BoomerAMGSetISType(pcg_precond, IS_type);
+         HYPRE_BoomerAMGSetNumCRRelaxSteps(pcg_precond, num_CR_relax_steps);
          HYPRE_BoomerAMGSetRelaxType(pcg_precond, relax_type);
          if (relax_fine > -1)
             HYPRE_BoomerAMGSetCycleRelaxType(pcg_precond, relax_fine, 0);
@@ -2450,6 +2492,7 @@ main( int   argc,
          HYPRE_BoomerAMGSetOverlap(pcg_precond, overlap);
          HYPRE_BoomerAMGSetDomainType(pcg_precond, domain_type);
          HYPRE_BoomerAMGSetSchwarzRlxWeight(pcg_precond, schwarz_rlx_weight);
+         HYPRE_BoomerAMGSetCycleNumSweeps(pcg_precond, ns_coarse, 3);
          if (num_functions > 1)
             HYPRE_BoomerAMGSetDofFunc(pcg_precond, dof_func);
          HYPRE_BiCGSTABSetPrecond(pcg_solver,
