@@ -383,23 +383,20 @@ hypre_BoomerAMGIndepRS( hypre_ParCSRMatrix    *S,
    int              num_variables = hypre_CSRMatrixNumRows(S_diag);
    int              num_cols_offd = hypre_CSRMatrixNumCols(S_offd);
                   
-   hypre_CSRMatrix *S_ext;
-   int             *S_ext_i;
-   int             *S_ext_j;
-                 
+   hypre_ParCSRCommHandle *comm_handle;
    hypre_CSRMatrix *ST;
    int             *ST_i;
    int             *ST_j;
                  
    int             *measure_array;
+   int             *CF_marker_offd;
+   int             *int_buf_data;
 
    int              i, j, k, jS;
    int		    index;
-   int		    num_nonzeros;
    int		    num_procs, my_id;
    int		    num_sends = 0;
-   int		    first_col;
-   int		    col_0, col_n;
+   int		    start, jrow;
 
    hypre_LinkList   LoL_head;
    hypre_LinkList   LoL_tail;
@@ -494,11 +491,8 @@ hypre_BoomerAMGIndepRS( hypre_ParCSRMatrix    *S,
       for (j=S_i[i]; j < S_i[i+1]; j++)
       {
 	 index = S_j[j];
-       	 if (CF_marker[index] < 1)
-         {
- 	    ST_j[ST_i[index]] = i;
-       	    ST_i[index]++;
-         }
+ 	 ST_j[ST_i[index]] = i;
+       	 ST_i[index]++;
       }
    }      
    for (i = num_variables; i > 0; i--)
@@ -517,7 +511,99 @@ hypre_BoomerAMGIndepRS( hypre_ParCSRMatrix    *S,
     * neighbor processors
     *----------------------------------------------------------*/
 
-   measure_array = hypre_CTAlloc(int, num_variables);
+   if (measure_type == 0)
+   {
+      measure_array = hypre_CTAlloc(int, num_variables);
+      for (i=0; i < num_variables; i++)
+         measure_array[i] = 0;
+      for (i=0; i < num_variables; i++)
+      {
+         if (CF_marker[i] < 1)
+         {
+            for (j = S_i[i]; j < S_i[i+1]; j++)
+            {
+               if (CF_marker[S_j[j]] < 1)
+                  measure_array[S_j[j]]++;
+            }
+         }
+      }
+ 
+   }
+   else
+   {
+
+      /* now the off-diagonal part of CF_marker */
+      if (num_cols_offd)
+         CF_marker_offd = hypre_CTAlloc(int, num_cols_offd);
+      else
+         CF_marker_offd = NULL;
+ 
+      for (i=0; i < num_cols_offd; i++)
+         CF_marker_offd[i] = 0;
+   
+      /*------------------------------------------------
+       * Communicate the CF_marker values to the external nodes
+       *------------------------------------------------*/
+      int_buf_data = hypre_CTAlloc(int, hypre_ParCSRCommPkgSendMapStart(comm_pkg,
+                                                num_sends));
+      index = 0;
+      for (i = 0; i < num_sends; i++)
+      {
+         start = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
+         for (j = start; j < hypre_ParCSRCommPkgSendMapStart(comm_pkg, i+1); j++)
+         {
+            jrow = hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j);
+            int_buf_data[index++] = CF_marker[jrow];
+         }
+      }
+    
+      if (num_procs > 1)
+      {
+         comm_handle = hypre_ParCSRCommHandleCreate(11, comm_pkg, int_buf_data,
+                                                  CF_marker_offd);
+         hypre_ParCSRCommHandleDestroy(comm_handle);
+      }
+
+      measure_array = hypre_CTAlloc(int, num_variables+num_cols_offd);
+      for (i=0; i < num_variables+num_cols_offd; i++)
+         measure_array[i] = 0;
+ 
+      for (i=0; i < num_variables; i++)
+      {
+         if (CF_marker[i] < 1)
+         {
+            for (j = S_i[i]; j < S_i[i+1]; j++)
+            {
+               if (CF_marker[S_j[j]] < 1)
+                  measure_array[S_j[j]]++;
+            }
+            for (j = S_offd_i[i]; j < S_offd_i[i+1]; j++)
+            {
+               if (CF_marker_offd[S_offd_j[j]] < 1)
+                  measure_array[num_variables + S_offd_j[j]]++;
+            }
+         }
+      }
+      /* now send those locally calculated values for the external nodes to the neighboring processors */
+      if (num_procs > 1)
+         comm_handle = hypre_ParCSRCommHandleCreate(12, comm_pkg,
+                        &measure_array[num_variables], int_buf_data);
+ 
+      /* finish the communication */
+      if (num_procs > 1)
+         hypre_ParCSRCommHandleDestroy(comm_handle);
+       
+      /* now add the externally calculated part of the local nodes to the local nodes */
+      index = 0;
+      for (i=0; i < num_sends; i++)
+      {
+         start = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
+         for (j=start; j < hypre_ParCSRCommPkgSendMapStart(comm_pkg, i+1); j++)
+            measure_array[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j)]
+                        += int_buf_data[index++];
+      }
+   }
+
 
    if (measure_type == 2 && num_procs > 1)
    {
@@ -525,9 +611,8 @@ hypre_BoomerAMGIndepRS( hypre_ParCSRMatrix    *S,
       {
          if (CF_marker[i] == 0)
          {
-            if (S_offd_i[i+1]-S_offd_i[i])
+            if ((S_offd_i[i+1]-S_offd_i[i]) == 0)
             {
-	       measure_array[i] = ST_i[i+1]-ST_i[i];
 	       num_left++;
             }
             else 
@@ -548,7 +633,6 @@ hypre_BoomerAMGIndepRS( hypre_ParCSRMatrix    *S,
       {
          if (CF_marker[i] == 0)
          {
-	    measure_array[i] = ST_i[i+1]-ST_i[i];
 	    num_left++;
          }
          else if (CF_marker[i] < 0)
@@ -556,26 +640,6 @@ hypre_BoomerAMGIndepRS( hypre_ParCSRMatrix    *S,
          else
 	    measure_array[i] = -1;
       }
-   }
-
-   if (measure_type == 1 && num_procs > 1)
-   {
-      S_ext      = hypre_ParCSRMatrixExtractBExt(S,S,0);
-      S_ext_i    = hypre_CSRMatrixI(S_ext);
-      S_ext_j    = hypre_CSRMatrixJ(S_ext);
-      num_nonzeros = S_ext_i[num_cols_offd];
-      first_col = hypre_ParCSRMatrixFirstColDiag(S);
-      col_0 = first_col-1;
-      col_n = col_0+num_variables;
-      if (measure_type)
-      {
-	 for (i=0; i < num_nonzeros; i++)
-         {
-	    index = S_ext_j[i] - first_col;
-	    if (index > -1 && index < num_variables && CF_marker[index] == 0)
-		measure_array[index]++;
-         } 
-      } 
    }
 
    /*---------------------------------------------------
@@ -674,7 +738,7 @@ hypre_BoomerAMGIndepRS( hypre_ParCSRMatrix    *S,
             remove_point(&LoL_head, &LoL_tail, measure, nabor, lists, where);
             --num_left;
 
-            for (k = S_i[nabor]; k < S_i[nabor+1]; k++)
+            for (k = S_i[nabor]+1; k < S_i[nabor+1]; k++)
             {
                nabor_two = S_j[k];
                if (CF_marker[nabor_two] == UNDECIDED)
@@ -710,7 +774,7 @@ hypre_BoomerAMGIndepRS( hypre_ParCSRMatrix    *S,
                CF_marker[nabor] = F_PT;
                --num_left;
 
-               for (k = S_i[nabor]; k < S_i[nabor+1]; k++)
+               for (k = S_i[nabor]+1; k < S_i[nabor+1]; k++)
                {
                   nabor_two = S_j[k];
                   if (CF_marker[nabor_two] == UNDECIDED)
@@ -950,23 +1014,28 @@ hypre_BoomerAMGIndepPMIS( hypre_ParCSRMatrix    *S,
    for (i=0; i < num_variables+num_cols_offd; i++)
       measure_array[i] = 0;
 
-   /* first calculate the local part of the sums for the external nodes */
-   for (i=0; i < S_offd_i[num_variables]; i++)
+   /* calculate the local part for the local nodes */
+   for (i=0; i < num_variables; i++)
    { 
-      if (CF_marker_offd[S_offd_j[i]] < 1) 
-	 measure_array[num_variables + S_offd_j[i]] += 1.0;
+      if (CF_marker[i] < 1) 
+      {
+         for (j = S_diag_i[i]; j < S_diag_i[i+1]; j++)
+         { 
+            if (CF_marker[S_diag_j[j]] < 1) 
+	       measure_array[S_diag_j[j]] += 1.0;
+         } 
+         for (j = S_offd_i[i]; j < S_offd_i[i+1]; j++)
+         { 
+            if (CF_marker_offd[S_offd_j[j]] < 1) 
+	       measure_array[num_variables + S_offd_j[j]] += 1.0;
+         } 
+      }
    }
 
    /* now send those locally calculated values for the external nodes to the neighboring processors */
    if (num_procs > 1)
    comm_handle = hypre_ParCSRCommHandleCreate(2, comm_pkg, 
                         &measure_array[num_variables], buf_data);
-
-   /* calculate the local part for the local nodes */
-   for (i=0; i < S_diag_i[num_variables]; i++)
-   { 
-      if (CF_marker[S_diag_j[i]] < 1) measure_array[S_diag_j[i]] += 1.0;
-   }
 
    /* finish the communication */
    if (num_procs > 1)
@@ -1049,13 +1118,7 @@ hypre_BoomerAMGIndepPMIS( hypre_ParCSRMatrix    *S,
       cnt = 0;
       for (i=0; i < num_variables; i++)
       {
-         if ( (S_diag_i[i+1]-S_diag_i[i]) == 0
-                && (S_offd_i[i+1]-S_offd_i[i]) == 0)
-         {
-            CF_marker[i] = SF_PT;
-            measure_array[i] = 0;
-         }
-         else if (CF_marker[i] == 0 && measure_array[i] >= 1.0 )
+         if (CF_marker[i] == 0 && measure_array[i] >= 1.0 )
          {
             graph_array[cnt++] = i;
          }
@@ -1131,7 +1194,7 @@ hypre_BoomerAMGIndepPMIS( hypre_ParCSRMatrix    *S,
         At the end, CF_marker is complete, but still needs to be
         communicated to CF_marker_offd
       *------------------------------------------------*/
-      if (iter)
+      if (1)
       {
           /* hypre_BoomerAMGIndepSet(S, measure_array, graph_array, 
 				graph_size, 
@@ -1307,7 +1370,7 @@ hypre_BoomerAMGIndepPMIS( hypre_ParCSRMatrix    *S,
        {
 
 	 /* first the local part */
-	 for (jS = S_diag_i[i]; jS < S_diag_i[i+1]; jS++) {
+	 for (jS = S_diag_i[i]+1; jS < S_diag_i[i+1]; jS++) {
 	   /* j is the column number, or the local number of the point influencing i */
 	   j = S_diag_j[jS];
            /*if(j<0) j=-j-1;*/
@@ -1603,7 +1666,6 @@ hypre_BoomerAMGCoarsenCR( hypre_ParCSRMatrix    *A,
       rho0 = hypre_ParVectorInnerProd(e0_vec,e0_vec);
       rho1 = hypre_ParVectorInnerProd(e1_vec,e1_vec);
       rho = sqrt(rho1)/sqrt(rho0);
-
       if (rho > theta)
       {
          /*formu(CF_marker,num_variables,e1,A_i,rho);*/
@@ -1622,7 +1684,9 @@ hypre_BoomerAMGCoarsenCR( hypre_ParCSRMatrix    *A,
 	       candmeas = pow(fabs(e1[i]),1.0)/global_max;
 	       if (candmeas > thresh && 
 		  	(A_i[i+1]-A_i[i]+A_offd_i[i+1]-A_offd_i[i]) > 1)
+               {
                   CF_marker[i] = cand; 
+               }
             }
          }
    	 if (IS_type == 1)
@@ -1632,11 +1696,7 @@ hypre_BoomerAMGCoarsenCR( hypre_ParCSRMatrix    *A,
    	 else if (IS_type == 3)
 	 {
             IndepSetGreedy(A_i,A_j,num_variables,CF_marker);
-            if (num_procs > 1)
-      		hypre_BoomerAMGIndepPMIS (A, 2, 0, CF_marker);
 	 }
-   	 else if (IS_type == 4)
-            IndepSetGreedy(A_i,A_j,num_variables,CF_marker);
    	 else 
 	    hypre_BoomerAMGIndepRS(A,0,0,CF_marker);
 

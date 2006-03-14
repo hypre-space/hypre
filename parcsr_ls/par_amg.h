@@ -28,6 +28,7 @@ typedef struct
    double   max_row_sum;
    double   trunc_factor;
    double   S_commpkg_switch;
+   double   CR_rate;
    int      measure_type;
    int      setup_type;
    int      coarsen_type;
@@ -147,6 +148,7 @@ typedef struct
 #define hypre_ParAMGDataNumPaths(amg_data) ((amg_data)->num_paths)
 #define hypre_ParAMGDataAggNumLevels(amg_data) ((amg_data)->agg_num_levels)
 #define hypre_ParAMGDataNumCRRelaxSteps(amg_data) ((amg_data)->num_CR_relax_steps)
+#define hypre_ParAMGDataCRRate(amg_data) ((amg_data)->CR_rate)
 #define hypre_ParAMGDataISType(amg_data) ((amg_data)->IS_type)
 
 /* solve params */

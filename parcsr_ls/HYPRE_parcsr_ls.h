@@ -574,6 +574,13 @@ int HYPRE_BoomerAMGSetNumCRRelaxSteps(HYPRE_Solver solver,
                                 int          num_CR_relax_steps);
 
 /**
+ * (Optional) Defines convergence rate for CR
+ * The default is 0.7.
+ **/
+int HYPRE_BoomerAMGSetCRRate(HYPRE_Solver solver,
+                             double  CR_rate);
+
+/**
  * (Optional) Defines the Type of independent set algorithm used for CR
  **/
 int HYPRE_BoomerAMGSetISType(HYPRE_Solver solver,

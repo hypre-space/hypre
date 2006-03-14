@@ -984,6 +984,17 @@ HYPRE_BoomerAMGSetNumCRRelaxSteps( HYPRE_Solver  solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetCRRate
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_BoomerAMGSetCRRate( HYPRE_Solver  solver,
+                          double        CR_rate  )
+{
+   return( hypre_BoomerAMGSetCRRate( (void *) solver, CR_rate ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_BoomerAMGSetISType
  *--------------------------------------------------------------------------*/
 

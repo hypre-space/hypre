@@ -32,6 +32,7 @@ hypre_BoomerAMGCreate()
    double   max_row_sum;
    double   trunc_factor;
    double   S_commpkg_switch;
+   double   CR_rate;
    int      interp_type;
    int      coarsen_type;
    int      measure_type;
@@ -100,6 +101,7 @@ hypre_BoomerAMGCreate()
    num_paths = 1;
    agg_num_levels = 0;
    num_CR_relax_steps = 2;
+   CR_rate = 0.7;
    IS_type = 1;
 
    variant = 0;
@@ -164,6 +166,7 @@ hypre_BoomerAMGCreate()
    hypre_BoomerAMGSetNumPaths(amg_data, num_paths);
    hypre_BoomerAMGSetAggNumLevels(amg_data, agg_num_levels);
    hypre_BoomerAMGSetNumCRRelaxSteps(amg_data, num_CR_relax_steps);
+   hypre_BoomerAMGSetCRRate(amg_data, CR_rate);
    hypre_BoomerAMGSetISType(amg_data, IS_type);
    hypre_BoomerAMGSetVariant(amg_data, variant);
    hypre_BoomerAMGSetOverlap(amg_data, overlap);
@@ -1475,6 +1478,22 @@ hypre_BoomerAMGSetNumCRRelaxSteps( void     *data,
    hypre_ParAMGData  *amg_data = data;
  
    hypre_ParAMGDataNumCRRelaxSteps(amg_data) = num_CR_relax_steps;
+
+   return (ierr);
+}
+
+/*--------------------------------------------------------------------------
+ * Indicates the desired convergence rate for Compatible relaxation
+ *--------------------------------------------------------------------------*/
+
+int
+hypre_BoomerAMGSetCRRate( void     *data,
+                          double    CR_rate )
+{
+   int ierr = 0;
+   hypre_ParAMGData  *amg_data = data;
+ 
+   hypre_ParAMGDataCRRate(amg_data) = CR_rate;
 
    return (ierr);
 }

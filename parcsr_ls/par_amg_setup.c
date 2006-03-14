@@ -58,6 +58,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    double               max_row_sum;
    double               trunc_factor;
    double               S_commpkg_switch;
+   double      		CR_rate;
 
    int      max_levels; 
    int      amg_logging;
@@ -150,6 +151,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    interp_type = hypre_ParAMGDataInterpType(amg_data);
    IS_type = hypre_ParAMGDataISType(amg_data);
    num_CR_relax_steps = hypre_ParAMGDataNumCRRelaxSteps(amg_data);
+   CR_rate = hypre_ParAMGDataCRRate(amg_data);
 
    hypre_ParCSRMatrixSetNumNonzeros(A);
    hypre_ParCSRMatrixSetDNumNonzeros(A);
@@ -881,7 +883,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
              hypre_BoomerAMGCoarsenCR(A_array[level], &CF_marker,
                         &coarse_size,
                         num_CR_relax_steps, IS_type, grid_relax_type[0],
-			relax_weight[level], omega[level], 0.7, 0);
+			relax_weight[level], omega[level], CR_rate, 0);
          }
 
          else if (coarsen_type) /* ruge, ruge1p, ruge2b, ruge3, ruge3c, ruge1x */
