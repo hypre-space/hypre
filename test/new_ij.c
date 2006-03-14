@@ -122,12 +122,13 @@ main( int   argc,
    double   strong_threshold;
    double   trunc_factor;
    double   S_commpkg_switch = 1.0;
+   double   CR_rate = 0.7;
    int      cycle_type;
    int      coarsen_type = 6;
    int      measure_type = 0;
    int      num_sweeps = 1;  
    int      IS_type;   
-   int      num_CR_relax_steps;   
+   int      num_CR_relax_steps = 2;   
    int      relax_type;   
    int      relax_fine = -1;   
    int      relax_coarse = -1;   
@@ -191,7 +192,6 @@ main( int   argc,
    build_funcs_arg_index = argc;
    relax_type = 3;
    IS_type = 1;
-   num_CR_relax_steps = 5;
    debug_flag = 0;
 
    solver_id = 0;
@@ -455,6 +455,11 @@ main( int   argc,
       {
          arg_index++;
          num_CR_relax_steps = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-crth") == 0 )
+      {
+         arg_index++;
+         CR_rate = atof(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-rlx") == 0 )
       {
@@ -1699,6 +1704,7 @@ main( int   argc,
       HYPRE_BoomerAMGSetNumSweeps(amg_solver, num_sweeps);
       HYPRE_BoomerAMGSetISType(amg_solver, IS_type);
       HYPRE_BoomerAMGSetNumCRRelaxSteps(amg_solver, num_CR_relax_steps);
+      HYPRE_BoomerAMGSetCRRate(amg_solver, CR_rate);
       HYPRE_BoomerAMGSetRelaxType(amg_solver, relax_type);
       if (relax_fine > -1)
          HYPRE_BoomerAMGSetCycleRelaxType(amg_solver, relax_fine, 0);
@@ -1913,6 +1919,7 @@ main( int   argc,
          HYPRE_BoomerAMGSetNumSweeps(pcg_precond, num_sweeps);
          HYPRE_BoomerAMGSetISType(pcg_precond, IS_type);
          HYPRE_BoomerAMGSetNumCRRelaxSteps(pcg_precond, num_CR_relax_steps);
+         HYPRE_BoomerAMGSetCRRate(pcg_precond, CR_rate);
          HYPRE_BoomerAMGSetRelaxType(pcg_precond, relax_type);
          if (relax_fine > -1)
             HYPRE_BoomerAMGSetCycleRelaxType(pcg_precond, relax_fine, 0);
@@ -2020,6 +2027,7 @@ main( int   argc,
          HYPRE_BoomerAMGSetNumSweeps(pcg_precond, num_sweeps);
          HYPRE_BoomerAMGSetISType(pcg_precond, IS_type);
          HYPRE_BoomerAMGSetNumCRRelaxSteps(pcg_precond, num_CR_relax_steps);
+         HYPRE_BoomerAMGSetCRRate(pcg_precond, CR_rate);
          HYPRE_BoomerAMGSetRelaxType(pcg_precond, relax_type);
          if (relax_fine > -1)
             HYPRE_BoomerAMGSetCycleRelaxType(pcg_precond, relax_fine, 0);
@@ -2190,6 +2198,7 @@ main( int   argc,
          HYPRE_BoomerAMGSetNumSweeps(pcg_precond, num_sweeps);
          HYPRE_BoomerAMGSetISType(pcg_precond, IS_type);
          HYPRE_BoomerAMGSetNumCRRelaxSteps(pcg_precond, num_CR_relax_steps);
+         HYPRE_BoomerAMGSetCRRate(pcg_precond, CR_rate);
          HYPRE_BoomerAMGSetRelaxType(pcg_precond, relax_type);
          if (relax_fine > -1)
             HYPRE_BoomerAMGSetCycleRelaxType(pcg_precond, relax_fine, 0);
@@ -2287,6 +2296,7 @@ main( int   argc,
          HYPRE_BoomerAMGSetNumSweeps(pcg_precond, num_sweeps);
          HYPRE_BoomerAMGSetISType(pcg_precond, IS_type);
          HYPRE_BoomerAMGSetNumCRRelaxSteps(pcg_precond, num_CR_relax_steps);
+         HYPRE_BoomerAMGSetCRRate(pcg_precond, CR_rate);
          HYPRE_BoomerAMGSetRelaxType(pcg_precond, relax_type);
          if (relax_fine > -1)
             HYPRE_BoomerAMGSetCycleRelaxType(pcg_precond, relax_fine, 0);
@@ -2463,6 +2473,7 @@ main( int   argc,
          HYPRE_BoomerAMGSetNumSweeps(pcg_precond, num_sweeps);
          HYPRE_BoomerAMGSetISType(pcg_precond, IS_type);
          HYPRE_BoomerAMGSetNumCRRelaxSteps(pcg_precond, num_CR_relax_steps);
+         HYPRE_BoomerAMGSetCRRate(pcg_precond, CR_rate);
          HYPRE_BoomerAMGSetRelaxType(pcg_precond, relax_type);
          if (relax_fine > -1)
             HYPRE_BoomerAMGSetCycleRelaxType(pcg_precond, relax_fine, 0);
