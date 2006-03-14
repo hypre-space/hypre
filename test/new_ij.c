@@ -103,7 +103,7 @@ main( int   argc,
    int		       num_functions = 1;
    int		       num_paths = 1;
    int		       agg_num_levels = 0;
-   int		       ns_coarse = 4;
+   int		       ns_coarse = 1;
 
    int		       time_index;
    MPI_Comm            comm = MPI_COMM_WORLD;
