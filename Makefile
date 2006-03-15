@@ -82,7 +82,7 @@ all:
 	mkdir -p ${HYPRE_BUILD_DIR}/lib; \
 	cp -fp HYPRE_config.h ${HYPRE_BUILD_DIR}/include/.; \
 	cp -fp $(srcdir)/HYPRE.h ${HYPRE_BUILD_DIR}/include/.; \
-	for i in ${HYPRE_DIRS} ${HYPRE_BABEL_DIRS}; \
+	for i in ${HYPRE_DIRS} ${HYPRE_BABEL_DIRS} ${HYPRE_EXAMPLE_DIRS}; \
 	do \
 	  echo "Making $$i ..."; \
 	  (cd $$i && $(MAKE) $@); \
@@ -144,8 +144,6 @@ install: all
 	${HYPRE_SRC_TOP_DIR}/config/mkinstalldirs ${HYPRE_LIB_INSTALL} ${HYPRE_INC_INSTALL}
 	cp -fr ${HYPRE_BUILD_DIR}/lib/* ${HYPRE_LIB_INSTALL}/.
 	cp -fr ${HYPRE_BUILD_DIR}/include/* ${HYPRE_INC_INSTALL}/.
-	chgrp -fR hypre ${HYPRE_LIB_INSTALL}
-	chgrp -fR hypre ${HYPRE_INC_INSTALL}
 	chmod -R a+rX,u+w,go-w ${HYPRE_LIB_INSTALL}
 	chmod -R a+rX,u+w,go-w ${HYPRE_INC_INSTALL}
 
@@ -156,7 +154,7 @@ uninstall:
 
 clean:
 	@ \
-	for i in ${HYPRE_DIRS} ${HYPRE_EXTRA_DIRS} ${HYPRE_BABEL_DIRS}; \
+	for i in ${HYPRE_DIRS} ${HYPRE_EXTRA_DIRS} ${HYPRE_BABEL_DIRS} ${HYPRE_EXAMPLE_DIRS}; \
 	do \
 	  if [ -d $$i ]; \
 	  then \
@@ -169,7 +167,7 @@ clean:
 distclean:
 	@ \
 	rm -Rf hypre; \
-	for i in ${HYPRE_DIRS} ${HYPRE_EXTRA_DIRS} ${HYPRE_BABEL_DIRS}; \
+	for i in ${HYPRE_DIRS} ${HYPRE_EXTRA_DIRS} ${HYPRE_BABEL_DIRS} ${HYPRE_EXAMPLE_DIRS}; \
 	do \
 	  if [ -d $$i ]; \
 	  then \
