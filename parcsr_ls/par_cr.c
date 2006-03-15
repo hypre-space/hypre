@@ -602,6 +602,7 @@ hypre_BoomerAMGIndepRS( hypre_ParCSRMatrix    *S,
             measure_array[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j)]
                         += int_buf_data[index++];
       }
+      hypre_TFree(int_buf_data);
    }
 
 
@@ -1128,14 +1129,6 @@ hypre_BoomerAMGIndepPMIS( hypre_ParCSRMatrix    *S,
    }
    graph_size = cnt;
 
-   /* eliminate connections to coarse points and other non-candidate points */
-
-   /*for (i=0; i < S_offd_i[num_variables]; i++)
-   {
-      j = S_offd_j[i];
-      if (CF_marker[j] == 1 || CF_marker[j] == SF_PT) S_offd_j[i] = -j-1;
-   } */
-
    /*------------------------------------------------
     * Communicate the local measures, which are complete,
       to the external nodes
@@ -1224,10 +1217,7 @@ hypre_BoomerAMGIndepPMIS( hypre_ParCSRMatrix    *S,
                for (jS = S_diag_i[i]; jS < S_diag_i[i+1]; jS++)
                {
                   j = S_diag_j[jS];
-                  /*if (j < 0) j = -j-1;*/
                                                                                               
-                  /* only consider valid graph edges */
-                  /* if ( (measure_array[j] > 1) && (S_diag_data[jS]) ) */
                   if (measure_array[j] > 1)
                   {
                      if (measure_array[i] > measure_array[j])
@@ -1239,11 +1229,8 @@ hypre_BoomerAMGIndepPMIS( hypre_ParCSRMatrix    *S,
                for (jS = S_offd_i[i]; jS < S_offd_i[i+1]; jS++)
                {
                   jj = S_offd_j[jS];
-                  /*if (jj < 0) jj = -jj-1;*/
                   j = num_variables+jj;
                                                                                               
-                  /* only consider valid graph edges */
-                  /* if ( (measure_array[j] > 1) && (S_offd_data[jS]) ) */
                   if (measure_array[j] > 1)
                   {
                      if (measure_array[i] > measure_array[j])
@@ -1305,56 +1292,14 @@ hypre_BoomerAMGIndepPMIS( hypre_ParCSRMatrix    *S,
        i = graph_array[ig];
 
        /*---------------------------------------------
-	* If the measure of i is smaller than 1, then
-        * make i and F point (because it does not influence
-        * any other point), and remove all edges of
-	* equation i.
-	*---------------------------------------------*/
-
-       /*if(measure_array[i]<1.){
-	 CF_marker[i]= F_PT;
-
-	 for (jS = S_diag_i[i]; jS < S_diag_i[i+1]; jS++) {
-	   j = S_diag_j[jS];
-	   if (j > -1){ 
-	     S_diag_j[jS]  = -S_diag_j[jS]-1;
-	   }
-	 }
-	 for (jS = S_offd_i[i]; jS < S_offd_i[i+1]; jS++) {
-	   j = S_offd_j[jS];
-	   if (j > -1){ 
-	     S_offd_j[jS]  = -S_offd_j[jS]-1;
-	   }
-	 }
-       }*/
-
-       /*---------------------------------------------
 	* First treat the case where point i is in the
 	* independent set: make i a C point, 
-        * take out all the graph edges for
-        * equation i.
 	*---------------------------------------------*/
        
        if (CF_marker[i] > 0) 
        {
 	 /* set to be a C-pt */
 	 CF_marker[i] = C_PT;
-
-         /* remove the edges in equation i */
-	 /* first the local part */
-	 /*for (jS = S_diag_i[i]; jS < S_diag_i[i+1]; jS++) {
-	   j = S_diag_j[jS];
-	   if (j > -1){ 
-	     S_diag_j[jS]  = -S_diag_j[jS]-1;
-	   }
-	 }*/
-	 /* now the external part */
-	 /*for (jS = S_offd_i[i]; jS < S_offd_i[i+1]; jS++) {
-	   j = S_offd_j[jS];
-	   if (j > -1){ 
-	     S_offd_j[jS]  = -S_offd_j[jS]-1;
-	   }
-	 }*/
        }  
 
        /*---------------------------------------------
@@ -1362,8 +1307,6 @@ hypre_BoomerAMGIndepPMIS( hypre_ParCSRMatrix    *S,
 	* independent set: loop over
 	* all the points j that influence equation i; if
 	* j is a C point, then make i an F point.
-	* If i is a new F point, then remove all the edges
-        * from the graph for equation i.
 	*---------------------------------------------*/
 
        else 
@@ -1373,8 +1316,6 @@ hypre_BoomerAMGIndepPMIS( hypre_ParCSRMatrix    *S,
 	 for (jS = S_diag_i[i]+1; jS < S_diag_i[i+1]; jS++) {
 	   /* j is the column number, or the local number of the point influencing i */
 	   j = S_diag_j[jS];
-           /*if(j<0) j=-j-1;*/
-
 	   if (CF_marker[j] > 0){ /* j is a C-point */
 	     CF_marker[i] = F_PT;
 	   }
@@ -1382,27 +1323,11 @@ hypre_BoomerAMGIndepPMIS( hypre_ParCSRMatrix    *S,
 	 /* now the external part */
 	 for (jS = S_offd_i[i]; jS < S_offd_i[i+1]; jS++) {
 	   j = S_offd_j[jS];
-           /*if(j<0) j=-j-1;*/
 	   if (CF_marker_offd[j] > 0){ /* j is a C-point */
 	     CF_marker[i] = F_PT;
 	   }
 	 }
 
-         /* remove all the edges for equation i if i is a new F point */
-	 /*if (CF_marker[i] == F_PT){
-	   for (jS = S_diag_i[i]; jS < S_diag_i[i+1]; jS++) {
-	     j = S_diag_j[jS];
-	     if (j > -1)
-	       S_diag_j[jS]  = -S_diag_j[jS]-1;
-	     }
-	   }
-	   for (jS = S_offd_i[i]; jS < S_offd_i[i+1]; jS++) {
-	     j = S_offd_j[jS];
-	     if (j > -1){
-	       S_offd_j[jS]  = -S_offd_j[jS]-1;
-	     }
-	   }
-	 }*/   
        } /* end else */
      } /* end first loop over graph */
 
@@ -1430,39 +1355,6 @@ hypre_BoomerAMGIndepPMIS( hypre_ParCSRMatrix    *S,
  
       hypre_ParCSRCommHandleDestroy(comm_handle);   
       }
-
-     /*---------------------------------------------
-      * Now loop over the points i in the unassigned
-      * graph again. For all points i that are no new C or
-      * F points, remove the edges in equation i that
-      * connect to C or F points.
-      * (We have removed the rows for the new C and F
-      * points above; now remove the columns.)
-      *---------------------------------------------*/
-
-     /*for (ig = 0; ig < graph_size; ig++) {
-       i = graph_array[ig];
-
-       if(CF_marker[i]==0) {
-
-	 for (jS = S_diag_i[i]; jS < S_diag_i[i+1]; jS++) {
-	   j = S_diag_j[jS];
-           if(j<0) j=-j-1;
-
-	   if (!CF_marker[j]==0 && S_diag_j[jS] > -1){ 
-	     S_diag_j[jS]  = -S_diag_j[jS]-1;
-	   }
-	 }
-	 for (jS = S_offd_i[i]; jS < S_offd_i[i+1]; jS++) {
-	   j = S_offd_j[jS];
-           if(j<0) j=-j-1;
-
-	   if (!CF_marker_offd[j]==0 && S_offd_j[jS] > -1){ 
-	     S_offd_j[jS]  = -S_offd_j[jS]-1;
-	   }
-	 }
-       }
-     }*/ /* end second loop over graph */
 
      /*------------------------------------------------
       * Update subgraph
@@ -1516,27 +1408,12 @@ hypre_BoomerAMGIndepPMIS( hypre_ParCSRMatrix    *S,
     * Clean up and return
     *---------------------------------------------------*/
 
-   /* Reset S_matrix */
-   /*for (i=0; i < S_diag_i[num_variables]; i++)
-   {
-      if (S_diag_j[i] < 0)
-         S_diag_j[i] = -S_diag_j[i]-1;
-   }
-   for (i=0; i < S_offd_i[num_variables]; i++)
-   {
-      if (S_offd_j[i] < 0)
-         S_offd_j[i] = -S_offd_j[i]-1;
-   }*/
-   /*for (i=0; i < num_variables; i++)
-      if (CF_marker[i] == SF_PT) CF_marker[i] = F_PT;*/
-
    hypre_TFree(measure_array);
    hypre_TFree(graph_array);
    if (num_cols_offd) hypre_TFree(graph_array_offd);
    hypre_TFree(buf_data);
    hypre_TFree(int_buf_data);
    hypre_TFree(CF_marker_offd);
-   /*if (num_procs > 1) hypre_CSRMatrixDestroy(S_ext);*/
 
    return (ierr);
 }
