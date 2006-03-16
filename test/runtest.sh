@@ -483,6 +483,14 @@ do
                DirPart=`dirname $InputString`
                CurDir=`pwd`
                TestDirNames="$TestDirNames $DirPart"
+               case $DirPart in
+                  TEST_examples)
+                     ExampleFiles="ex1 ex2 ex3 ex4 ex5 ex5b ex5b77 ex6 ex7 ex8 ex9"
+                     cd ../examples
+                     cp -f $ExampleFiles $CurDir
+                     cd $CurDir
+                     ;;
+               esac
                if [ "$BatchMode" -eq 0 ] ; then      # machine DCSP capable
                   CheckBatch
                   BatchMode=$?
