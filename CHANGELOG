@@ -14,6 +14,22 @@
 #
 #=============================================================================
 
+Version 1.11.0b released, 2006/??/??.
+
+- added configure options --with-test-alpha; --with-test-beta and 
+  --with-test-general to allow testing of publicly installed versions of hypre;
+  no checking is done to insure a specific release exists on the given platform.
+
+- added configure option --without-FEI to disable build of internal FEI routines.
+
+- modified configure to only depend on having a C compiler available.
+
+- updated all F90_HYPRE_* files to be consistent with HYPRE_* files.
+
+- added ex6_for.c and ex7_for.c to test directory to verify fortran implementations.
+
+********************************************************************
+
 Version 1.10.0b released, 2005/12/19.
 
 - configure updates
