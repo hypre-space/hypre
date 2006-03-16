@@ -28,6 +28,17 @@ Version 1.11.0b released, 2006/??/??.
 
 - added ex6_for.c and ex7_for.c to test directory to verify fortran implementations.
 
+- added configure option --with-examples that forces use of mpi and babel in 
+  order to build the example codes as they are currently defined.  When this
+  option is used the examples codes will be automatically built when make is 
+  run.  
+
+- created new sub-directory, TEST_examples, in linear_solver/test for regression
+  testing example codes.  It contains baseline output files, *.base, for each
+  example as well as scripts needed by runtest.sh.
+
+- modified runtest.sh to recognize TEST_examples as an input case to run.
+
 ********************************************************************
 
 Version 1.10.0b released, 2005/12/19.
