@@ -218,6 +218,7 @@ casc_using_fortran=yes
 casc_using_fei=yes
 
 casc_using_babel=no
+casc_using_examples=no
 casc_using_openmp=no
 casc_using_insure=no
 casc_using_purify=no
@@ -658,6 +659,19 @@ AC_ARG_WITH(babel,
 [casc_using_babel=no]
 )
 
+AC_ARG_WITH(examples,
+  AS_HELP_STRING([  --with-examples], [ Builds example codes.]),
+[case "${withval}" in
+   yes) casc_using_babel=yes 
+        casc_using_mpi=yes 
+        casc_using_examples=yes 
+        ;;
+   no)  casc_using_examples=no 
+        ;;
+ esac],
+[casc_using_examples=no]
+)
+
 AC_ARG_WITH(FEI,
   AS_HELP_STRING([  --with-FEI], [ Use internal FEI routines.]),
 [case "${withval}" in
@@ -820,6 +834,16 @@ then
  AC_CONFIG_SUBDIRS(babel-runtime)
 fi
 AC_SUBST(BABELDIR)
+
+dnl *********************************************************************
+dnl * For building example codes, set the following:
+dnl *********************************************************************
+EXAMPLEDIR=""
+if test "$casc_using_examples" = "yes"
+then
+   EXAMPLEDIR="HYPRE_TOP_SRC_DIR/examples"
+fi
+AC_SUBST(EXAMPLEDIR)
 
 dnl *********************************************************************
 dnl * For MLI, set the following:

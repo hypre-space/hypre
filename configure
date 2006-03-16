@@ -322,7 +322,7 @@ ac_includes_default="\
 #endif"
 
 ac_subdirs_all="$ac_subdirs_all babel-runtime"
-ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS HYPRE_PACKAGE_DATETIME HYPRE_TOP_SRCDIR HYPRE_RELEASEVERSION HYPRE_RELEASEDATE HYPRE_RELEASETIME HYPRE_RELEASEDATETIME build build_cpu build_vendor build_os host host_cpu host_vendor host_os CC CXX F77 RANLIB ac_ct_RANLIB INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA AWK LN_S SET_MAKE CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT CPP CXXFLAGS ac_ct_CXX CXXCPP FFLAGS ac_ct_F77 FLIBS FPP EGREP POW_LIB LIBOBJS MPILIBS subdirs BABELDIR HYPRE_ARCH HOSTNAME F77FLAGS LINK_CC LINK_CXX HYPRE_INSTALLDIR HYPRE_LIBINSTALL HYPRE_INCINSTALL INCLUDES LIBDIRS LDLIBS LDLIBDIRS HYPRE_LINKDIR HYPRE_LIBSUFFIX MPIINCLUDE MPILIBDIRS MPIFLAGS TIMERDEFS FEILIBS FEILIBDIRS FEIINCLUDE HYPRE_FEI_SRC_DIR HYPRE_FEI_BASE_DIR HYPRE_FEI_SUPERLU_FILES HYPRE_FEI_HYPRE_FILES HYPRE_FEI_FEMLI_FILES MLI_DIR MLILIBS MLILIBDIRS MLIINCLUDE HYPRE_BLAS_SRC_DIR BLASLIBDIRS BLASLIBS HYPRE_LAPACK_SRC_DIR LAPACKLIBDIRS LAPACKLIBS AR LTLIBOBJS'
+ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS HYPRE_PACKAGE_DATETIME HYPRE_TOP_SRCDIR HYPRE_RELEASEVERSION HYPRE_RELEASEDATE HYPRE_RELEASETIME HYPRE_RELEASEDATETIME build build_cpu build_vendor build_os host host_cpu host_vendor host_os CC CXX F77 RANLIB ac_ct_RANLIB INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA AWK LN_S SET_MAKE CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT CPP CXXFLAGS ac_ct_CXX CXXCPP FFLAGS ac_ct_F77 FLIBS FPP EGREP POW_LIB LIBOBJS MPILIBS subdirs BABELDIR EXAMPLEDIR HYPRE_ARCH HOSTNAME F77FLAGS LINK_CC LINK_CXX HYPRE_INSTALLDIR HYPRE_LIBINSTALL HYPRE_INCINSTALL INCLUDES LIBDIRS LDLIBS LDLIBDIRS HYPRE_LINKDIR HYPRE_LIBSUFFIX MPIINCLUDE MPILIBDIRS MPIFLAGS TIMERDEFS FEILIBS FEILIBDIRS FEIINCLUDE HYPRE_FEI_SRC_DIR HYPRE_FEI_BASE_DIR HYPRE_FEI_SUPERLU_FILES HYPRE_FEI_HYPRE_FILES HYPRE_FEI_FEMLI_FILES MLI_DIR MLILIBS MLILIBDIRS MLIINCLUDE HYPRE_BLAS_SRC_DIR BLASLIBDIRS BLASLIBS HYPRE_LAPACK_SRC_DIR LAPACKLIBDIRS LAPACKLIBS AR LTLIBOBJS'
 ac_subst_files=''
 
 # Initialize some variables set by options.
@@ -990,6 +990,7 @@ Optional Packages:
     --with-openmp         Use OpenMP--this may affect which compiler is
                           chosen. Supported on IBM and DECS, test on Linux.
     --with-babel          Use babel
+    --with-examples       Builds example codes.
     --with-FEI            Use internal FEI routines.
     --with-mli            Use MLI
     --with-MPI            DEFAULT: Compile with MPI. Selecting --without-MPI
@@ -1728,6 +1729,7 @@ casc_using_fortran=yes
 casc_using_fei=yes
 
 casc_using_babel=no
+casc_using_examples=no
 casc_using_openmp=no
 casc_using_insure=no
 casc_using_purify=no
@@ -2535,6 +2537,23 @@ if test "${with_babel+set}" = set; then
  esac
 else
   casc_using_babel=no
+
+fi;
+
+
+# Check whether --with-examples or --without-examples was given.
+if test "${with_examples+set}" = set; then
+  withval="$with_examples"
+  case "${withval}" in
+   yes) casc_using_babel=yes
+        casc_using_mpi=yes
+        casc_using_examples=yes
+        ;;
+   no)  casc_using_examples=no
+        ;;
+ esac
+else
+  casc_using_examples=no
 
 fi;
 
@@ -5815,7 +5834,7 @@ fi
 
 
 # Provide some information about the compiler.
-echo "$as_me:5818:" \
+echo "$as_me:5837:" \
      "checking for Fortran 77 compiler version" >&5
 ac_compiler=`set X $ac_compile; echo $2`
 { (eval echo "$as_me:$LINENO: \"$ac_compiler --version </dev/null >&5\"") >&5
@@ -6011,7 +6030,7 @@ _ACEOF
 # flags.
 ac_save_FFLAGS=$FFLAGS
 FFLAGS="$FFLAGS $ac_verb"
-(eval echo $as_me:6014: \"$ac_link\") >&5
+(eval echo $as_me:6033: \"$ac_link\") >&5
 ac_f77_v_output=`eval $ac_link 5>&1 2>&1 | grep -v 'Driving:'`
 echo "$ac_f77_v_output" >&5
 FFLAGS=$ac_save_FFLAGS
@@ -6089,7 +6108,7 @@ _ACEOF
 # flags.
 ac_save_FFLAGS=$FFLAGS
 FFLAGS="$FFLAGS $ac_cv_prog_f77_v"
-(eval echo $as_me:6092: \"$ac_link\") >&5
+(eval echo $as_me:6111: \"$ac_link\") >&5
 ac_f77_v_output=`eval $ac_link 5>&1 2>&1 | grep -v 'Driving:'`
 echo "$ac_f77_v_output" >&5
 FFLAGS=$ac_save_FFLAGS
@@ -8585,6 +8604,13 @@ subdirs="$subdirs babel-runtime"
 fi
 
 
+EXAMPLEDIR=""
+if test "$casc_using_examples" = "yes"
+then
+   EXAMPLEDIR="`pwd`/examples"
+fi
+
+
 if test "$casc_using_mli" = "yes"
 then
    MLI_DIR="`pwd`/mli/matrix"
@@ -10682,6 +10708,7 @@ s,@LIBOBJS@,$LIBOBJS,;t t
 s,@MPILIBS@,$MPILIBS,;t t
 s,@subdirs@,$subdirs,;t t
 s,@BABELDIR@,$BABELDIR,;t t
+s,@EXAMPLEDIR@,$EXAMPLEDIR,;t t
 s,@HYPRE_ARCH@,$HYPRE_ARCH,;t t
 s,@HOSTNAME@,$HOSTNAME,;t t
 s,@F77FLAGS@,$F77FLAGS,;t t
