@@ -1,0 +1,36 @@
+#!/bin/ksh 
+#BHEADER***********************************************************************
+# (c) 1998   The Regents of the University of California
+#
+# See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
+# notice, contact person, and disclaimer.
+#
+# $Revision$
+#EHEADER***********************************************************************
+
+#=============================================================================
+# Run each example 
+#=============================================================================
+
+
+mpirun -np 2 ./ex1 > ex1.out
+
+mpirun -np 2 ./ex2 > ex2.out
+
+mpirun -np 16 ./ex3 -n 33 -solver 0 -v 1 1 > ex3.out
+
+mpirun -np 16 ./ex4 -n 33 -solver 10 -K 3 -B 0 -C 1 -UO 2 -F 4 > ex4.out
+
+mpirun -np 4 ./ex5 > ex5.out
+
+mpirun -np 4 ./ex5b > ex5b.out
+
+mpirun -np 4 ./ex5b77 > ex5b77.out
+
+mpirun -np 2 ./ex6 > ex6.out
+
+mpirun -np 16 ./ex7 -n 33 -solver 10 -K 3 -B 0 -C 1 -UO 2 -F 4 > ex7.out
+
+mpirun -np 2 ./ex8 > ex8.out
+
+mpirun -np 16 ./ex9 -n 33 -solver 0 -v 1 1 > ex9.out
