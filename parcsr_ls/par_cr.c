@@ -111,7 +111,7 @@ int cr(int *A_i, int *A_j, double *A_data, int n, int *cf,
          formu(cf,n,e1,A_i,rho);
          IndepSetGreedy(A_i,A_j,n,cf);
 
-         fprintf(stdout,"  %d \t%2.3lf  \t%2.3lf \n",
+         fprintf(stdout,"  %d \t%2.3f  \t%2.3f \n",
                  nstages,rho,nc/n);
         /* update for next sweep */
          nc = 0.0e0;
@@ -125,7 +125,7 @@ int cr(int *A_i, int *A_j, double *A_data, int n, int *cf,
          }
          nstages += 1;
       } else {
-         fprintf(stdout,"  %d \t%2.3lf  \t%2.3lf \n",
+         fprintf(stdout,"  %d \t%2.3f  \t%2.3f \n",
                  nstages,rho,nc/n);
          break;
       }
@@ -1577,7 +1577,7 @@ hypre_BoomerAMGCoarsenCR( hypre_ParCSRMatrix    *A,
    	 else 
 	    hypre_BoomerAMGIndepRS(A,0,0,CF_marker);
 
-         if (my_id == 0) fprintf(stdout,"  %d \t%2.3lf  \t%2.3lf \n",
+         if (my_id == 0) fprintf(stdout,"  %d \t%2.3f  \t%2.3f \n",
                  nstages,rho,(double)global_nc/(double)global_num_variables);
         /* update for next sweep */
          num_coarse = 0;
@@ -1596,7 +1596,7 @@ hypre_BoomerAMGCoarsenCR( hypre_ParCSRMatrix    *A,
       } 
       else 
       {
-         if (my_id == 0) fprintf(stdout,"  %d \t%2.3lf  \t%2.3lf \n",
+         if (my_id == 0) fprintf(stdout,"  %d \t%2.3f  \t%2.3f \n",
                  nstages,rho,(double)global_nc/(double)global_num_variables);
          break;
       }
