@@ -186,14 +186,14 @@ HYPRE_EuclidDestroy( HYPRE_Solver solver )
      destroy all remaining Euclid library objects 
      (except the memory object)
    *------------------------------------------------------------------ */
-  //if (parser_dh != NULL) {
-  if (parser_dh != NULL && ref_counter == 0) {  //dah 3/16/06
+  /*if (parser_dh != NULL) { dah 3/16/06  */
+  if (parser_dh != NULL && ref_counter == 0) {
     Parser_dhDestroy(parser_dh); HYPRE_EUCLID_ERRCHKA;
     parser_dh = NULL;
   }
 
-  //if (tlog_dh != NULL) {
-  if (tlog_dh != NULL && ref_counter == 0) {  //dah 3/16/06
+  /*if (tlog_dh != NULL) {  dah 3/16/06  */
+  if (tlog_dh != NULL && ref_counter == 0) {
     TimeLog_dhDestroy(tlog_dh); HYPRE_EUCLID_ERRCHKA;
     tlog_dh = NULL;
   }
@@ -202,8 +202,8 @@ HYPRE_EuclidDestroy( HYPRE_Solver solver )
      optionally print Euclid's memory report, 
      then destroy the memory object.
    *------------------------------------------------------------------ */
-  //if (mem_dh != NULL) {
-  if (mem_dh != NULL && ref_counter == 0) {  //dah 3/16/06
+  /*if (mem_dh != NULL) {  dah 3/16/06  */
+  if (mem_dh != NULL && ref_counter == 0) {
     if (printMemReport) { 
       Mem_dhPrint(mem_dh, stdout, false); HYPRE_EUCLID_ERRCHKA; 
     }
